@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="탄성 로프 로그라이크 — 캔버스 런타임 마일스톤 0 스캐폴드" />
+        <meta name="description" content="절차 생성 월드를 탄성 로프로 횡단하는 2D 액션 프로토타입" />
         <title>Baeseongjin Rope Roguelike</title>
         <style>
             :root {
@@ -30,7 +30,7 @@
                     "Segoe UI",
                     sans-serif;
             }
-            #game {
+            #game-canvas {
                 display: block;
                 position: fixed;
                 inset: 0;
@@ -38,7 +38,7 @@
                 height: 100%;
                 touch-action: none;
             }
-            #game:focus-visible {
+            #game-canvas:focus-visible {
                 outline: 2px solid #93c5fd;
                 outline-offset: -2px;
             }
@@ -75,13 +75,14 @@
                 id="game-canvas"
                 tabindex="0"
                 role="img"
-                aria-label="로프 로그라이크 게임 화면. 마우스나 키보드로 하얀 플레이어 점을 이동합니다."
+                aria-label="로프 로그라이크 게임 화면. 지형을 조준해 마우스를 누르면 로프가 부착되고 놓으면 해제됩니다."
                 aria-describedby="controls-description"
             ></canvas>
             <p class="sr-only" id="controls-description">
-                이동: WASD 또는 방향키. 화면에 표시되지 않는 상황을 대신 설명해 주는 접근성 안내 텍스트입니다.
+                이동: A와 D 또는 방향키. 점프: W 또는 위쪽 방향키. 지형을 조준해 마우스를 누르면 로프를 부착하고 놓으면
+                해제합니다.
             </p>
-            <p class="controls-hint">이동: WASD / 방향키 · 화면 채우기</p>
+            <p class="controls-hint">이동 A/D · 점프 W · 지형 조준 후 마우스 홀드: 부착 · 마우스 해제: 관성 비행</p>
         </main>
         <noscript>
             <p>이 게임을 실행하려면 JavaScript가 필요합니다.</p>

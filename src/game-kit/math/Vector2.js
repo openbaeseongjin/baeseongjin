@@ -12,6 +12,11 @@ export class Vector2 {
         this.y += other.y;
         return this;
     }
+    subtract(other) {
+        this.x -= other.x;
+        this.y -= other.y;
+        return this;
+    }
     scale(value) {
         this.x *= value;
         this.y *= value;
@@ -19,6 +24,17 @@ export class Vector2 {
     }
     length() {
         return Math.hypot(this.x, this.y);
+    }
+    normalize() {
+        const magnitude = this.length();
+        if (magnitude > 0) this.scale(1 / magnitude);
+        return this;
+    }
+    dot(other) {
+        return this.x * other.x + this.y * other.y;
+    }
+    distanceTo(other) {
+        return Math.hypot(other.x - this.x, other.y - this.y);
     }
     isFinite() {
         return Number.isFinite(this.x) && Number.isFinite(this.y);

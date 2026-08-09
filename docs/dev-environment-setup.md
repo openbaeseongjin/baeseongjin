@@ -5,7 +5,7 @@
 - Node.js 20 이상
 - 최신 Chromium, Firefox 또는 Safari
 
-외부 npm 의존성은 없다.
+런타임 npm 의존성은 없으며 개발 도구로 Prettier만 사용한다.
 
 ## 실행
 
