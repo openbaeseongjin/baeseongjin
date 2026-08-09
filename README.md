@@ -41,4 +41,5 @@ npm run check
 - [결정 이력](docs/decision-history.md) — 반영 또는 대체된 제품·아키텍처 결정
 - [개발 환경](docs/dev-environment-setup.md) — 로컬 실행 명령과 문제 해결
 - [기술 스택](docs/tech-stack.md) — 언어, UI, 렌더링, 테스트, 배포 기반
+- [버전 관리](docs/version-management.md) — SemVer, 배포 버전 표시와 갱신 절차
 - [재사용 가능한 기반](docs/reusable-game-resources.md) — 공용 게임 기반과 재사용 정책

@@ -56,6 +56,23 @@
                 pointer-events: none;
                 user-select: none;
             }
+            .version-badge {
+                position: fixed;
+                right: 8px;
+                bottom: 8px;
+                margin: 0;
+                padding: 3px 7px;
+                border: 1px solid rgba(203, 213, 225, 0.22);
+                border-radius: 5px;
+                background: rgba(7, 11, 20, 0.58);
+                color: rgba(203, 213, 225, 0.72);
+                font:
+                    10px/1.2 ui-monospace,
+                    monospace;
+                letter-spacing: 0.04em;
+                pointer-events: none;
+                user-select: none;
+            }
             .sr-only {
                 position: absolute;
                 width: 1px;
@@ -83,6 +100,7 @@
                 해제합니다.
             </p>
             <p class="controls-hint">이동 A/D · 점프 W · 지형 조준 후 마우스 홀드: 부착 · 마우스 해제: 관성 비행</p>
+            <output class="version-badge" id="app-version" data-version="0.2.0" aria-label="배포 버전">v0.2.0</output>
         </main>
         <noscript>
             <p>이 게임을 실행하려면 JavaScript가 필요합니다.</p>
