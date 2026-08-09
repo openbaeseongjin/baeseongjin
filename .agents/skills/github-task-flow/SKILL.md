@@ -1,6 +1,6 @@
 ---
 name: github-task-flow
-description: "`$github-task-flow` 호출만으로 GitHub CLI 설치·웹 인증·쓰기 권한 점검을 자동 준비하고, 현재 작업을 GitHub Issue로 기록한 뒤 이슈 번호 기반 브랜치, 단일 Lore 커밋, push, pull request, 필수 검사 확인, squash merge와 이슈 종료까지 수행한다. GitHub 쓰기 환경이 아직 구성되지 않았거나 팀원이 별도 설명 없이 현재 작업을 안전하게 main에 병합하려 할 때 사용한다."
+description: "`$github-task-flow` 호출만으로 GitHub CLI 설치·웹 인증·쓰기 권한 점검을 자동 준비하고, 현재 작업을 GitHub Issue로 기록한 뒤 이슈 번호 기반 브랜치, 단일 Lore 커밋, push, pull request, 필수 검사 확인, 일반 merge commit과 이슈 종료까지 수행한다. GitHub 쓰기 환경이 아직 구성되지 않았거나 팀원이 별도 설명 없이 현재 작업의 커밋과 브랜치 계보를 보존해 main에 병합하려 할 때 사용한다."
 ---
 
 # GitHub Task Flow
@@ -23,7 +23,9 @@ GitHub Issue를 작업의 기준 이력으로 삼고 PR을 통해 단일 커밋�
 - 브랜치 이름은 `issue/<issue-number>-<short-slug>`를 사용한다.
 - 작업 브랜치는 `origin/main` 최신 상태에서 만든다.
 - 한 작업은 한 브랜치, 한 PR, 한 최종 커밋으로 유지한다.
+- PR은 일반 merge commit으로 병합해 Lore 커밋 SHA와 브랜치 계보를 `main`에 보존한다.
 - `main`에 직접 push하거나 로컬 merge하지 않는다.
+- 사용자가 명시적으로 요청하지 않는 한 squash merge와 rebase merge를 사용하지 않는다.
 - force push, 보호 규칙 우회, 필수 검사 우회를 하지 않는다.
 - 관련 없는 변경을 커밋에 포함하지 않는다.
 - 저장소의 `AGENTS.md`, CODEOWNERS, PR 템플릿, 커밋 규칙을 우선 적용한다.
@@ -163,7 +165,9 @@ Not-tested: <남은 검증 또는 None>
 
 ## 7. Merge와 정리
 
-- 모든 필수 검사와 승인이 통과한 뒤 squash merge한다.
+- 모든 필수 검사와 승인이 통과한 뒤 일반 merge commit으로 병합한다.
+- `gh pr merge <number> --merge --delete-branch`처럼 GitHub의 정상 PR 병합 경로를 사용한다.
+- 병합 뒤 `main` 그래프에 기존 Lore 커밋 SHA와 새 merge commit SHA가 모두 존재하는지 확인한다.
 - merge queue가 필요하면 queue에 등록하고 완료를 기다린다.
 - 자동 삭제되지 않은 원격 작업 브랜치를 삭제한다.
 - Issue가 닫혔는지 확인하고 필요하면 PR 연결 확인 후 닫는다.
@@ -178,5 +182,5 @@ Not-tested: <남은 검증 또는 None>
 - Commit: SHA와 제목
 - PR: 번호와 URL
 - Checks: 통과 항목 또는 blocker
-- Merge: 최종 SHA와 방식
+- Merge: Lore 커밋 SHA, merge commit SHA, 일반 merge 방식
 - Remaining: 남은 위험 또는 `없음`
