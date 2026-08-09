@@ -17,6 +17,7 @@ dist/
 build/
 .next/
 coverage/
+services/meeting-bot/.data/
 
 # Python
 __pycache__/

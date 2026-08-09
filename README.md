@@ -27,3 +27,9 @@ Repository-wide agent rules are in `AGENTS.md`. The Google Workspace logging des
 4. Open a pull request and wait for required checks.
 
 No license has been selected. Do not assume reuse rights until maintainers add one deliberately.
+
+## Discord meeting minutes bot
+
+The isolated service in `services/meeting-bot/` records slash-command-controlled Discord meetings, transcribes voice with speaker attribution, generates guarded structured minutes, posts them to Discord, and writes approved meeting artifacts back to this repository. It does not start meetings on a schedule and it never promotes ambiguous ideas into `DECISIONS.md` or `TASKS.md`.
+
+See `services/meeting-bot/README.md` for Discord Developer Portal setup, least-privilege OpenAI and GitHub configuration, local execution, Docker deployment, privacy requirements, and current DAVE voice-receive limitations.

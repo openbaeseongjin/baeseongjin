@@ -1,0 +1,140 @@
+import { resolve } from "node:path";
+import { z } from "zod";
+
+const snowflake = z.string().regex(/^\d{17,20}$/, "must be a Discord snowflake ID");
+const optionalSnowflake = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  snowflake.optional(),
+);
+
+const booleanFromEnv = z
+  .enum(["true", "false"])
+  .default("false")
+  .transform((value) => value === "true");
+
+const environmentSchema = z
+  .object({
+    DISCORD_BOT_TOKEN: z.string().min(1),
+    DISCORD_CLIENT_ID: snowflake,
+    DISCORD_GUILD_ID: snowflake,
+    DISCORD_MEETING_CHANNEL_ID: snowflake,
+    DISCORD_MINUTES_CHANNEL_ID: snowflake,
+    DISCORD_OPERATOR_ROLE_ID: optionalSnowflake,
+    OPENAI_API_KEY: z.string().min(1),
+    OPENAI_TRANSCRIPTION_MODEL: z.string().min(1).default("gpt-4o-transcribe-diarize"),
+    OPENAI_SUMMARY_MODEL: z.string().min(1).default("gpt-5.4-mini"),
+    GITHUB_REPOSITORY: z
+      .string()
+      .regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/)
+      .default("openbaeseongjin/baeseongjin"),
+    GITHUB_BRANCH: z.string().min(1).default("main"),
+    GITHUB_TOKEN: z.string().optional(),
+    GITHUB_APP_ID: z.string().optional(),
+    GITHUB_APP_INSTALLATION_ID: z.string().optional(),
+    GITHUB_APP_PRIVATE_KEY_BASE64: z.string().optional(),
+    ALLOW_PUBLIC_GITHUB_MINUTES: booleanFromEnv,
+    MEETING_DATA_DIR: z.string().min(1).default(".data"),
+    RETAIN_AUDIO: booleanFromEnv,
+    LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+  })
+  .superRefine((environment, context) => {
+    const appFields = [
+      environment.GITHUB_APP_ID,
+      environment.GITHUB_APP_INSTALLATION_ID,
+      environment.GITHUB_APP_PRIVATE_KEY_BASE64,
+    ];
+    const hasCompleteAppConfig = appFields.every(Boolean);
+    const hasPartialAppConfig = appFields.some(Boolean) && !hasCompleteAppConfig;
+
+    if (!environment.GITHUB_TOKEN && !hasCompleteAppConfig) {
+      context.addIssue({
+        code: "custom",
+        message: "provide GITHUB_TOKEN or the complete GitHub App configuration",
+        path: ["GITHUB_TOKEN"],
+      });
+    }
+
+    if (hasPartialAppConfig) {
+      context.addIssue({
+        code: "custom",
+        message: "GitHub App authentication requires app ID, installation ID, and private key",
+        path: ["GITHUB_APP_ID"],
+      });
+    }
+  });
+
+export interface AppConfig {
+  discord: {
+    botToken: string;
+    clientId: string;
+    guildId: string;
+    meetingChannelId: string;
+    minutesChannelId: string;
+    operatorRoleId?: string;
+  };
+  openai: {
+    apiKey: string;
+    transcriptionModel: string;
+    summaryModel: string;
+  };
+  github: {
+    repository: string;
+    branch: string;
+    token?: string;
+    app?: {
+      appId: string;
+      installationId: string;
+      privateKeyBase64: string;
+    };
+    allowPublicMinutes: boolean;
+  };
+  runtime: {
+    dataDir: string;
+    retainAudio: boolean;
+    logLevel: "debug" | "info" | "warn" | "error";
+  };
+}
+
+export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppConfig {
+  const parsed = environmentSchema.parse(environment);
+  const githubApp =
+    parsed.GITHUB_APP_ID &&
+    parsed.GITHUB_APP_INSTALLATION_ID &&
+    parsed.GITHUB_APP_PRIVATE_KEY_BASE64
+      ? {
+          appId: parsed.GITHUB_APP_ID,
+          installationId: parsed.GITHUB_APP_INSTALLATION_ID,
+          privateKeyBase64: parsed.GITHUB_APP_PRIVATE_KEY_BASE64,
+        }
+      : undefined;
+
+  return {
+    discord: {
+      botToken: parsed.DISCORD_BOT_TOKEN,
+      clientId: parsed.DISCORD_CLIENT_ID,
+      guildId: parsed.DISCORD_GUILD_ID,
+      meetingChannelId: parsed.DISCORD_MEETING_CHANNEL_ID,
+      minutesChannelId: parsed.DISCORD_MINUTES_CHANNEL_ID,
+      ...(parsed.DISCORD_OPERATOR_ROLE_ID
+        ? { operatorRoleId: parsed.DISCORD_OPERATOR_ROLE_ID }
+        : {}),
+    },
+    openai: {
+      apiKey: parsed.OPENAI_API_KEY,
+      transcriptionModel: parsed.OPENAI_TRANSCRIPTION_MODEL,
+      summaryModel: parsed.OPENAI_SUMMARY_MODEL,
+    },
+    github: {
+      repository: parsed.GITHUB_REPOSITORY,
+      branch: parsed.GITHUB_BRANCH,
+      ...(parsed.GITHUB_TOKEN ? { token: parsed.GITHUB_TOKEN } : {}),
+      ...(githubApp ? { app: githubApp } : {}),
+      allowPublicMinutes: parsed.ALLOW_PUBLIC_GITHUB_MINUTES,
+    },
+    runtime: {
+      dataDir: resolve(parsed.MEETING_DATA_DIR),
+      retainAudio: parsed.RETAIN_AUDIO,
+      logLevel: parsed.LOG_LEVEL,
+    },
+  };
+}

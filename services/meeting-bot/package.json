@@ -1,0 +1,35 @@
+{
+  "name": "@baeseongjin/discord-meeting-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "npm run build && npm test",
+    "dev": "tsx src/index.ts",
+    "diagnose:voice": "tsx src/voice-diagnostics.ts",
+    "register": "tsx src/register-commands.ts",
+    "start": "node dist/src/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@discordjs/voice": "0.19.2",
+    "@octokit/auth-app": "8.3.0",
+    "@octokit/rest": "22.0.1",
+    "discord.js": "14.27.0",
+    "dotenv": "17.4.2",
+    "openai": "7.4.0",
+    "opusscript": "0.0.8",
+    "prism-media": "1.3.5",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "tsx": "4.23.11",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
+}
