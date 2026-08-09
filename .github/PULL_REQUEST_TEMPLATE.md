@@ -4,7 +4,7 @@ Describe the user-visible or operational outcome.
 
 ## Changes
 
-- 
+-
 
 ## Verification
 
