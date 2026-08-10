@@ -1,4 +1,5 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
+import { WORLD_CONFIG } from "../config.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
@@ -32,6 +33,7 @@ export class AuthorityServerSession {
         this.resolvedHitClaims = new Map();
         this.resolvedImpactClaims = new Map();
         this.lastOwnerMotionTicks = new Map();
+        this.lastOwnerRopeTicks = new Map();
     }
 
     submitHitClaim(authenticatedPlayerId, claim) {
@@ -95,12 +97,36 @@ export class AuthorityServerSession {
         if (state.clientTick < minimumTick || state.clientTick > maximumTick) {
             return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "tick-window" });
         }
+        const previousRopeTick = this.lastOwnerRopeTicks.get(authenticatedPlayerId) ?? -1;
+        const ropeReleased = !state.rope.isAttached && state.clientTick > previousRopeTick && player.rope.isAttached;
+        if (!state.rope.isAttached && state.clientTick > previousRopeTick) {
+            player.rope.detach();
+            player.swingDrag = null;
+            this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
+        }
+        const reject = (reason) =>
+            Object.freeze({
+                clientTick: state.clientTick,
+                accepted: false,
+                reason,
+                ...(ropeReleased ? { ropeReleased: true } : {})
+            });
         if (player.lifeState !== "active") {
-            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "player-ineligible" });
+            return reject("player-ineligible");
+        }
+        if (state.position.y > WORLD_CONFIG.floorY + 780) {
+            this.simulation.resolvePlayerFall(authenticatedPlayerId);
+            this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
+            return Object.freeze({
+                clientTick: state.clientTick,
+                accepted: true,
+                resolution: "player-fell",
+                ...(ropeReleased ? { ropeReleased: true } : {})
+            });
         }
         const reportedSpeed = Math.hypot(state.velocity.x, state.velocity.y);
         if (reportedSpeed > MULTIPLAYER_TIMING.ownerMotionMaxSpeed) {
-            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "speed-envelope" });
+            return reject("speed-envelope");
         }
         const tickDelta = Math.max(1, state.clientTick - Math.max(previousTick, this.simulation.tick));
         const distance = Math.hypot(
@@ -110,14 +136,15 @@ export class AuthorityServerSession {
         const maximumDistance =
             MULTIPLAYER_TIMING.ownerMotionBaseTolerance + (Math.max(900, reportedSpeed) * tickDelta) / 120;
         if (distance > maximumDistance) {
-            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "movement-envelope" });
+            return reject("movement-envelope");
         }
         player.physics.position.set(state.position.x, state.position.y);
         player.physics.velocity.set(state.velocity.x, state.velocity.y);
         player.physics.isGrounded = state.isGrounded;
-        if (state.rope.isAttached && player.ropeDisabledRemaining <= 0) {
+        if (state.rope.isAttached && state.clientTick > previousRopeTick && player.ropeDisabledRemaining <= 0) {
             player.rope.attach(player.physics.position, state.rope.anchor);
-        } else {
+            this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
+        } else if (!state.rope.isAttached || player.ropeDisabledRemaining > 0) {
             player.rope.detach();
             player.swingDrag = null;
         }
@@ -191,6 +218,7 @@ export class AuthorityServerSession {
         this.inbox.removePlayer(playerId);
         this.inputState.removePlayer(playerId);
         this.lastOwnerMotionTicks.delete(playerId);
+        this.lastOwnerRopeTicks.delete(playerId);
         return this.simulation.removePlayer(playerId);
     }
 }
