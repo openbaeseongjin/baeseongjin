@@ -73,6 +73,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `GameSimulation`의 권위 틱과 실제 자동 발사·충돌·체크포인트 제거가 `PredictableObjectEvent`를 발행하며, 전송 계층은 사건을 한 번만 drain한다.
 - `AuthoritySnapshotBuilder`가 플레이어별 상태·적·진행·승인 번호·사건만 권위 봉투로 만들고, 지형은 시드와 `WORLD_GENERATION_REVISION`으로 재생성하며 투사체 배열은 제외한다.
 - `GameSimulation.addPlayer()`가 첫 플레이어와 협동 플레이어를 같은 팩토리·월드·`players` 배열에 등록하며, 기존 싱글 별칭은 첫 플레이어를 유지한다.
+- 로프 조준·부착 후보·포인터 전이·입력 버퍼·스윙 드래그·연계 강화 시간은 각 플레이어 엔티티가 독립 소유하고, 기존 GameSimulation 필드는 첫 플레이어 별칭이다.
 
 ### [L1] 공용 기반과 게임 규칙을 분리한다
 

@@ -42,6 +42,12 @@ export function run() {
     assert.notEqual(partner.rope, sharedWorld.rope);
     assert.notEqual(partner.artifacts, sharedWorld.artifacts);
     assert.equal(partner.physics.position.x, 180);
+    sharedWorld.aimWorld = { x: 40, y: 50 };
+    sharedWorld.swingDrag = { used: true };
+    assert.equal(sharedWorld.playerEntity.aimWorld.x, 40);
+    assert.equal(sharedWorld.playerEntity.swingDrag.used, true);
+    assert.deepEqual(partner.entity.aimWorld, { x: 0, y: 0 });
+    assert.equal(partner.entity.swingDrag, null);
     assert.equal(sharedWorld.world, sharedWorld.snapshot().world);
 
     const eventRun = new GameSimulation();
