@@ -8,27 +8,27 @@ This long-running Node.js service captures a meeting only between `/meeting star
 - Text capture from one configured Discord meeting channel.
 - Optional voice capture from the command user's current voice channel.
 - DAVE-enabled Discord voice connection and per-Discord-user audio segments.
-- OpenAI transcription with `gpt-4o-transcribe-diarize` and exact Discord user attribution.
+- Free local speech transcription with `faster-whisper`, CPU `int8`, and exact Discord user attribution.
 - Structured `DISCUSSED / DECIDED / REJECTED / HYPOTHESES / ACTION ITEMS / BLOCKERS / NEXT MEETING` minutes.
-- A deterministic promotion gate: a model result cannot enter `DECISIONS.md`, `TASKS.md`, or `NEXT MEETING` unless its cited raw transcript entry exists and contains an explicit confirmation, assignment, or schedule marker.
+- Deterministic local classification: only explicitly labelled statements can enter `DECISIONS.md`, `TASKS.md`, or `NEXT MEETING`.
 - Discord minutes-channel publication and one atomic Git commit covering the dated minutes plus any eligible decision/task ledger updates.
-- Local mock transcript tests. No live token or paid API call is required by the test suite.
+- Local mock transcript tests. No AI API key or paid API call is used by the service or test suite.
 
 GitHub Issue creation is intentionally not implemented.
 
 ## Data flow
 
-1. `/meeting start` begins text capture. If the caller is in voice, the bot joins with DAVE enabled and announces that audio will be sent to OpenAI.
+1. `/meeting start` begins text capture. If the caller is in voice, the bot joins with DAVE enabled and announces local recording and transcription.
 2. Discord voice packets are separated by Discord user ID, decoded from Opus, and written as short WAV speaking segments in `MEETING_DATA_DIR`.
-3. `/meeting end` closes the streams and sends each segment to the OpenAI Transcription API. Discord's user identity remains the authoritative speaker label.
-4. The transcript is summarized with strict JSON Schema output. A local gate re-checks the cited raw entries before anything is promoted as a decision, action, rejection, or next meeting.
+3. `/meeting end` closes the streams and runs each segment through `faster-whisper` on the bot host. Audio is not sent to an AI API. Discord's user identity remains the authoritative speaker label.
+4. Deterministic rules classify explicitly labelled statements. Ambiguous conversation remains in `DISCUSSED` and is never promoted automatically.
 5. Minutes are posted to the configured Discord channel and committed to GitHub. Audio is deleted after processing unless `RETAIN_AUDIO=true`.
 
 ## Prerequisites
 
 - Node.js 22.12 or newer and npm.
+- Python 3.11–3.13 for local transcription.
 - A Discord application installed in the target server.
-- An OpenAI API project key with access to the configured transcription and summary models.
 - A fine-grained GitHub token or GitHub App installation authorized only for this repository.
 - Participant consent and a team retention policy appropriate for voice recording, transcription, and public or private publication.
 
@@ -49,11 +49,22 @@ GitHub Issue creation is intentionally not implemented.
 
 The start command uses the caller's current voice channel. If the caller is not in voice, the meeting is text-only. If the caller is in voice and the DAVE connection fails, the service refuses to start instead of silently dropping audio.
 
-## OpenAI setup
+## Free local transcription and classification
 
-Create a project-scoped key and set `OPENAI_API_KEY`. The default transcription model is `gpt-4o-transcribe-diarize`, which supports speaker-annotated transcription responses. The default summary model is configurable through `OPENAI_SUMMARY_MODEL`. API requests use `store: false` for the meeting-summary response, but the team's OpenAI data controls and retention policy still apply.
+No OpenAI key is required. Voice transcription uses `faster-whisper` with the multilingual `tiny` model on CPU. The first voice transcription downloads the free model into `LOCAL_MODEL_CACHE_DIR`; subsequent meetings reuse that local cache. This has no per-use API fee, but it uses the host's CPU, memory, disk, and initial download bandwidth.
 
-No API key is needed for `npm run check`; all tests are local.
+For safe deterministic promotion, use these exact text forms in the meeting channel:
+
+```text
+결정: 2D 횡스크롤로 확정
+기각: AI 추리게임 방향은 제외
+아이디어: 자동 성장 시스템
+할 일: 용호 | 로프 프로토타입 구현 | 내일
+막힘: 로프 충돌 판정 불안정
+다음 회의: 내일 오후 10시
+```
+
+Ordinary text and unlabelled voice transcript remain in `DISCUSSED`. Voice recognition may omit punctuation, so text labels are the reliable way to update `DECISIONS.md` and `TASKS.md` without a language-model API.
 
 ## GitHub authentication and publication safety
 
@@ -73,13 +84,15 @@ From `services/meeting-bot`:
 ```powershell
 Copy-Item .env.example .env
 npm ci
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-local.txt
 npm run check
 npm run diagnose:voice
 npm run register
 npm run dev
 ```
 
-Fill `.env` before the registration/start commands. `.env` and runtime audio are ignored by Git; never copy secrets into `.env.example`.
+Use Python 3.11–3.13 when creating the virtual environment. On macOS/Linux, use `.venv/bin/python` instead of `.venv\Scripts\python.exe`. Fill `.env` before the registration/start commands. `.env`, `.venv`, downloaded models, and runtime audio are ignored by Git; never copy secrets into `.env.example`.
 
 `npm run register` creates guild-scoped commands, which normally update faster than global commands. Run it again only when the command schema changes.
 
@@ -92,16 +105,16 @@ docker build -t baeseongjin-meeting-bot .
 docker run --restart unless-stopped --env-file .env baeseongjin-meeting-bot
 ```
 
-The service has no inbound HTTP port. It needs outbound HTTPS/WebSocket access to Discord, OpenAI, and GitHub, plus outbound/return UDP for Discord voice. Keep only one instance active for this guild unless distributed session coordination is added.
+The service has no inbound HTTP port. It needs outbound HTTPS/WebSocket access to Discord and GitHub, initial outbound HTTPS access to Hugging Face for the free model download, plus outbound/return UDP for Discord voice. Keep only one instance active for this guild unless distributed session coordination is added.
 
 ## Operational behavior and recovery
 
 - Only one meeting can be active in this service instance.
 - A meeting is capped at 5,000 text messages and 500 voice segments; hitting either cap is recorded as a blocker instead of consuming resources without bound.
-- Continuous speech segments rotate at eight minutes to stay below typical transcription upload limits.
+- Continuous speech segments rotate at eight minutes to bound local processing and memory use.
 - A process restart ends the in-memory meeting; it cannot resume a voice stream. Restart the meeting explicitly.
 - GitHub writes retry once against a fresh branch head and never force-update history.
-- If model summarization fails, the fallback minute contains discussion text but promotes no decisions or action items.
+- If local classification fails, the fallback minute contains discussion text but promotes no decisions or action items.
 - If a voice segment cannot be transcribed, that segment is excluded from promotion and a blocker is recorded.
 - Secret-shaped values are redacted from compact service errors. Raw API responses are not logged.
 - Attachment names are captured, but signed Discord attachment URLs and file contents are not copied into minutes.
@@ -118,6 +131,7 @@ Useful checks:
 ```powershell
 npm run diagnose:voice
 npm audit --omit=dev --audit-level=high
+.\.venv\Scripts\python.exe -m pip check
 npm run check
 ```
 
@@ -125,4 +139,4 @@ Relevant primary documentation:
 
 - [Discord Voice and DAVE](https://docs.discord.com/developers/topics/voice-connections)
 - [discord.js voice package](https://www.npmjs.com/package/%40discordjs/voice)
-- [OpenAI GPT-4o Transcribe Diarize](https://developers.openai.com/api/docs/models/gpt-4o-transcribe-diarize)
+- [faster-whisper](https://github.com/SYSTRAN/faster-whisper)

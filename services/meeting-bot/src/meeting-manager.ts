@@ -4,6 +4,7 @@ import {
   VoiceConnectionStatus,
   type VoiceConnection,
 } from "@discordjs/voice";
+import { resolve } from "node:path";
 import {
   type ChatInputCommandInteraction,
   type Client,
@@ -16,8 +17,8 @@ import type { AppConfig } from "./config.js";
 import { DiscordPublisher } from "./discord-publisher.js";
 import { GitHubStore, type GitHubSyncResult } from "./github-store.js";
 import { checkpoint, safeErrorMessage } from "./logger.js";
+import { LocalMeetingService, LocalWhisperTranscriber } from "./local-meeting-service.js";
 import { renderDailyDocument } from "./markdown.js";
-import { OpenAIService } from "./openai-service.js";
 import { meetingId } from "./time.js";
 import type { MeetingMetadata, Minutes, TextMessageRecord, VoiceSegment } from "./types.js";
 import { VoiceRecorder } from "./voice-recorder.js";
@@ -37,7 +38,7 @@ const MAX_TEXT_MESSAGES = 5_000;
 
 export class MeetingManager {
   private active: ActiveMeeting | undefined;
-  private readonly openai: OpenAIService;
+  private readonly localProcessing: LocalMeetingService;
   private readonly publisher: DiscordPublisher;
 
   constructor(
@@ -45,10 +46,13 @@ export class MeetingManager {
     private readonly config: AppConfig,
     private readonly github: GitHubStore,
   ) {
-    this.openai = new OpenAIService(
-      config.openai.apiKey,
-      config.openai.transcriptionModel,
-      config.openai.summaryModel,
+    this.localProcessing = new LocalMeetingService(
+      new LocalWhisperTranscriber({
+        pythonExecutable: config.localProcessing.pythonExecutable,
+        scriptPath: resolve("scripts/local_whisper.py"),
+        model: config.localProcessing.transcriptionModel,
+        cacheDir: config.localProcessing.modelCacheDir,
+      }),
     );
     this.publisher = new DiscordPublisher(client, config.discord.minutesChannelId);
   }
@@ -179,7 +183,7 @@ export class MeetingManager {
         `Meeting **${id}** started.`,
         voiceStatus,
         "Messages in this channel are being captured until `/meeting end`.",
-        "Voice audio is sent to OpenAI for transcription. Confirm participant consent before continuing.",
+        "Voice audio is transcribed locally on this bot host and is not sent to an AI API. Confirm participant consent before continuing.",
       ].join("\n"),
     );
     checkpoint("SUCCESS", `Meeting ${id} started | Voice: ${voiceChannel ? "enabled" : "text-only"}`);
@@ -235,10 +239,10 @@ export class MeetingManager {
       meeting.connection?.destroy();
     }
 
-    const transcription = await this.openai.transcribe(meeting.messages, voiceSegments);
+    const transcription = await this.localProcessing.transcribe(meeting.messages, voiceSegments);
     let minutes: Minutes;
     try {
-      minutes = await this.openai.summarize(transcription.entries);
+      minutes = this.localProcessing.summarize(transcription.entries);
     } catch (error: unknown) {
       checkpoint("FAILED", `Meeting summary ${meeting.id} | ${safeErrorMessage(error)}`);
       minutes = this.safeFallbackMinutes(transcription.entries.map((entry) => `${entry.speaker}: ${entry.text}`));
@@ -294,7 +298,7 @@ export class MeetingManager {
         "Automated classification failed; no decisions or action items were promoted automatically.",
       ],
       actionItems: [],
-      blockers: ["OpenAI meeting-summary generation failed; manual review is required."],
+      blockers: ["Local meeting classification failed; manual review is required."],
       nextMeeting: null,
     };
   }

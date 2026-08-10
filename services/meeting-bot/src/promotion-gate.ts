@@ -4,7 +4,7 @@ const decisionPattern =
   /(확정|결정|정했|하기로\s*했|가기로\s*했|로\s*가자|그렇게\s*하자|채택|승인|confirmed|decided|agreed|approved|let(?:'s| us) go with)/iu;
 const rejectionPattern = /(기각|제외|안\s*하기로|하지\s*않기로|버리자|rejected|ruled out|will not|won't)/iu;
 const actionPattern =
-  /(내가.{0,40}(할게|하겠)|[가-힣A-Za-z0-9_-]+(?:이|가|은|는).{0,40}(담당|맡|해줘|할게|하겠)|담당자|까지.{0,40}(할|완료)|\bI(?:'ll| will)\b|\bassigned\b|\bowner\b|\bwill do\b)/iu;
+  /(할\s*일|액션|action item|todo|내가.{0,40}(할게|하겠)|[가-힣A-Za-z0-9_-]+(?:이|가|은|는).{0,40}(담당|맡|해줘|할게|하겠)|담당자|까지.{0,40}(할|완료)|\bI(?:'ll| will)\b|\bassigned\b|\bowner\b|\bwill do\b)/iu;
 const nextMeetingPattern =
   /(다음\s*회의|회의는.{0,30}(월|화|수|목|금|토|일|시|분)|next meeting|meet again)/iu;
 
@@ -76,4 +76,52 @@ export function enforceExplicitPromotions(
     blockers: unique(rawMinutes.blockers),
     nextMeeting,
   };
+}
+
+const decisionLabel = /^\s*(?:결정|확정|DECIDED)\s*[:：]\s*(.+)$/iu;
+const rejectionLabel = /^\s*(?:기각|제외|REJECTED)\s*[:：]\s*(.+)$/iu;
+const hypothesisLabel = /^\s*(?:아이디어|가설|후보|HYPOTHESIS|HYPOTHESES)\s*[:：]\s*(.+)$/iu;
+const blockerLabel = /^\s*(?:막힘|블로커|BLOCKER|BLOCKERS)\s*[:：]\s*(.+)$/iu;
+const nextMeetingLabel = /^\s*(?:다음\s*회의|NEXT\s*MEETING)\s*[:：]\s*(.+)$/iu;
+const actionLabel =
+  /^\s*(?:할\s*일|액션|TODO|ACTION\s*ITEM)\s*[:：]\s*([^|｜]+?)\s*[|｜]\s*([^|｜]+?)(?:\s*[|｜]\s*(.+?))?\s*$/iu;
+
+export function summarizeLocally(transcript: TranscriptEntry[]): Minutes {
+  const rawMinutes: RawMinutes = {
+    discussed: [],
+    decided: [],
+    rejected: [],
+    hypotheses: [],
+    actionItems: [],
+    blockers: [],
+    nextMeeting: null,
+  };
+
+  for (const entry of transcript) {
+    const text = entry.text.trim();
+    let match: RegExpMatchArray | null;
+
+    if ((match = text.match(decisionLabel))) {
+      rawMinutes.decided.push({ text: match[1]!, evidenceIds: [entry.id] });
+    } else if ((match = text.match(rejectionLabel))) {
+      rawMinutes.rejected.push({ text: match[1]!, evidenceIds: [entry.id] });
+    } else if ((match = text.match(hypothesisLabel))) {
+      rawMinutes.hypotheses.push(match[1]!);
+    } else if ((match = text.match(actionLabel))) {
+      rawMinutes.actionItems.push({
+        owner: match[1]!.trim(),
+        task: match[2]!.trim(),
+        due: match[3]?.trim() || null,
+        evidenceIds: [entry.id],
+      });
+    } else if ((match = text.match(blockerLabel))) {
+      rawMinutes.blockers.push(match[1]!);
+    } else if ((match = text.match(nextMeetingLabel))) {
+      rawMinutes.nextMeeting = { text: match[1]!, evidenceIds: [entry.id] };
+    } else {
+      rawMinutes.discussed.push(`${entry.speaker}: ${text}`);
+    }
+  }
+
+  return enforceExplicitPromotions(rawMinutes, transcript);
 }

@@ -6,6 +6,10 @@ const optionalSnowflake = z.preprocess(
   (value) => (value === "" ? undefined : value),
   snowflake.optional(),
 );
+const optionalNonEmptyString = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().min(1).optional(),
+);
 
 const booleanFromEnv = z
   .enum(["true", "false"])
@@ -20,9 +24,12 @@ const environmentSchema = z
     DISCORD_MEETING_CHANNEL_ID: snowflake,
     DISCORD_MINUTES_CHANNEL_ID: snowflake,
     DISCORD_OPERATOR_ROLE_ID: optionalSnowflake,
-    OPENAI_API_KEY: z.string().min(1),
-    OPENAI_TRANSCRIPTION_MODEL: z.string().min(1).default("gpt-4o-transcribe-diarize"),
-    OPENAI_SUMMARY_MODEL: z.string().min(1).default("gpt-5.4-mini"),
+    LOCAL_TRANSCRIPTION_MODEL: z
+      .string()
+      .min(1)
+      .default("tiny"),
+    LOCAL_WHISPER_PYTHON: optionalNonEmptyString,
+    LOCAL_MODEL_CACHE_DIR: z.string().min(1).default(".data/models"),
     GITHUB_REPOSITORY: z
       .string()
       .regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/)
@@ -72,10 +79,10 @@ export interface AppConfig {
     minutesChannelId: string;
     operatorRoleId?: string;
   };
-  openai: {
-    apiKey: string;
+  localProcessing: {
     transcriptionModel: string;
-    summaryModel: string;
+    pythonExecutable: string;
+    modelCacheDir: string;
   };
   github: {
     repository: string;
@@ -119,10 +126,13 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
         ? { operatorRoleId: parsed.DISCORD_OPERATOR_ROLE_ID }
         : {}),
     },
-    openai: {
-      apiKey: parsed.OPENAI_API_KEY,
-      transcriptionModel: parsed.OPENAI_TRANSCRIPTION_MODEL,
-      summaryModel: parsed.OPENAI_SUMMARY_MODEL,
+    localProcessing: {
+      transcriptionModel: parsed.LOCAL_TRANSCRIPTION_MODEL,
+      pythonExecutable: resolve(
+        parsed.LOCAL_WHISPER_PYTHON ??
+          (process.platform === "win32" ? ".venv/Scripts/python.exe" : ".venv/bin/python"),
+      ),
+      modelCacheDir: resolve(parsed.LOCAL_MODEL_CACHE_DIR),
     },
     github: {
       repository: parsed.GITHUB_REPOSITORY,
