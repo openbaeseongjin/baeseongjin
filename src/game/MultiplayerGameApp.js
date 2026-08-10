@@ -19,6 +19,17 @@ function renderPlayer(state, predicted = null) {
     };
 }
 
+export function commandForLocalSimulation(command, choosingArtifact) {
+    if (!choosingArtifact) return command;
+    return Object.freeze({
+        ...command,
+        horizontal: 0,
+        vertical: 0,
+        interact: false,
+        pointer: Object.freeze({ ...command.pointer, down: false })
+    });
+}
+
 export class MultiplayerGameApp {
     constructor({ canvas, authority, onDisconnect = () => {}, onDiagnostics = () => {} }) {
         this.renderer = new CanvasRenderer(canvas);
@@ -78,7 +89,8 @@ export class MultiplayerGameApp {
         this.combatFeedback.apply(authorityFeedback);
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
-        this.authority.advance(command);
+        const choosingArtifact = Boolean(current.state.artifactRewards?.[this.authority.playerId]);
+        this.authority.advance(commandForLocalSimulation(command, choosingArtifact));
         this.predictableProjectiles.predict(this.authority.drainPredictedEvents());
         const predictedPlayer = this.authority.predictor.state();
         const localAuthorityPlayer = current.state.players.find(({ id }) => id === this.authority.playerId);

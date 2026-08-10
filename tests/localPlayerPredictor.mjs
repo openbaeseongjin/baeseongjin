@@ -4,6 +4,7 @@ import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { LocalPlayerPredictor } from "../src/game/runtime/LocalPlayerPredictor.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
+import { commandForLocalSimulation } from "../src/game/MultiplayerGameApp.js";
 
 function close(actual, expected, label) {
     assert.ok(Math.abs(actual - expected) < 1e-9, `${label}: ${actual} != ${expected}`);
@@ -25,6 +26,23 @@ function withPlayerPosition(snapshot, x, serverTick) {
 }
 
 export function run() {
+    const rewardNavigation = commandForLocalSimulation(
+        createPlayerCommand(
+            {
+                horizontal: 1,
+                vertical: -1,
+                interact: true,
+                pointer: { x: 100, y: 100, down: true },
+                viewport: { width: 844, height: 390 }
+            },
+            { x: 100, y: 100 }
+        ),
+        true
+    );
+    assert.equal(rewardNavigation.horizontal, 0, "artifact navigation must not move local prediction");
+    assert.equal(rewardNavigation.vertical, 0, "artifact confirmation must not jump local prediction");
+    assert.equal(rewardNavigation.pointer.down, false, "artifact navigation must not attach the local rope");
+
     const server = new GameSimulation();
     server.enemies = [];
     server.tick = 6;
