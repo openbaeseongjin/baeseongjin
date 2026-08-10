@@ -20,6 +20,7 @@ async function waitFor(predicate, message) {
 export async function run() {
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer);
+    let gameServerClosed = false;
     const port = await listen(httpServer);
     try {
         assert.equal(multiplayerUrl({ protocol: "https:", host: "example.test" }), "wss://example.test/multiplayer");
@@ -54,9 +55,12 @@ export async function run() {
         );
         assert.equal(partner.snapshot().state.players.length, 2);
         partner.close();
-        authority.close();
-    } finally {
         await gameServer.close();
+        gameServerClosed = true;
+        await waitFor(() => authority.closed, "client should observe authority shutdown");
+        assert.match(authority.closeReason, /server shutdown|종료/);
+    } finally {
+        if (!gameServerClosed) await gameServer.close();
         await new Promise((resolve) => httpServer.close(resolve));
     }
 }

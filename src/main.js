@@ -11,6 +11,8 @@ if (!canvas) {
 }
 
 let app = null;
+let launching = false;
+let pageClosing = false;
 const modeMenu = new GameModeMenu(document.getElementById("game-mode-menu"));
 const releaseInstallPrompt = setupInstallPrompt({
     window: globalThis.window,
@@ -23,30 +25,45 @@ const releaseServiceWorkerUpdater = setupServiceWorkerUpdater({
     scriptUrl: new URL("../sw.js", import.meta.url)
 });
 async function launch() {
-    while (!app) {
+    if (launching || app || pageClosing) return;
+    launching = true;
+    while (!app && !pageClosing) {
         const mode = await modeMenu.choose();
         modeMenu.setBusy(true, mode);
+        let authority = null;
         try {
             if (mode === "single") {
                 app = new GameApp({ canvas });
             } else {
-                const authority = new RemoteGameAuthority();
+                authority = new RemoteGameAuthority();
                 await authority.connect();
-                app = new MultiplayerGameApp({ canvas, authority });
+                app = new MultiplayerGameApp({ canvas, authority, onDisconnect: returnToMenu });
             }
             modeMenu.hide();
             app.start();
         } catch (error) {
+            authority?.close();
             modeMenu.setStatus(error.message, true);
             modeMenu.setBusy(false);
         }
     }
+    launching = false;
+}
+
+function returnToMenu(message) {
+    if (pageClosing) return;
+    const stoppedApp = app;
+    app = null;
+    stoppedApp?.stop();
+    modeMenu.setStatus(message, true);
+    launch();
 }
 
 launch();
 globalThis.addEventListener(
     "pagehide",
     () => {
+        pageClosing = true;
         releaseInstallPrompt();
         releaseServiceWorkerUpdater();
         app?.stop();
