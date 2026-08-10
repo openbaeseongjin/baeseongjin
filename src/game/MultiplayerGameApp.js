@@ -20,7 +20,7 @@ function renderPlayer(state, predicted = null) {
 }
 
 export class MultiplayerGameApp {
-    constructor({ canvas, authority, onDisconnect = () => {} }) {
+    constructor({ canvas, authority, onDisconnect = () => {}, onDiagnostics = () => {} }) {
         this.renderer = new CanvasRenderer(canvas);
         this.input = new InputSampler(globalThis.window, canvas);
         this.authority = authority;
@@ -28,6 +28,7 @@ export class MultiplayerGameApp {
         this.disconnectHandled = false;
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
+        this.onDiagnostics = onDiagnostics;
         this.camera = { x: 0, y: 0, zoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom };
         this.latestInput = this.input.snapshot();
         this.frameId = null;
@@ -111,6 +112,8 @@ export class MultiplayerGameApp {
             .map((state) => renderPlayer(state));
         const activeCheckpoint =
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
+        const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
+        if (this.metricsVisible) this.onDiagnostics({ metrics: base.metrics, networkMetrics });
         this.renderer.draw({
             ...base,
             player,
@@ -137,7 +140,7 @@ export class MultiplayerGameApp {
             stats: this.stats,
             mobileView: this.mobileView,
             metricsVisible: this.metricsVisible,
-            networkMetrics: { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() },
+            networkMetrics,
             mobileControls: {
                 ...this.latestInput.mobileControls,
                 visible: this.mobileView || this.latestInput.mobileControls.visible
