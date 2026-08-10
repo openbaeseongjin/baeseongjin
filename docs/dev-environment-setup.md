@@ -16,6 +16,8 @@ npm start
 
 기본 주소는 `http://127.0.0.1:4173`이다. 다른 포트는 `npm start -- 5000`처럼 지정한다.
 
+정적 페이지와 멀티 서버를 함께 개발할 때는 `npm run start:multiplayer`를 사용한다. 실제 상시 서버와 같은 정적 파일 비노출 경계는 `npm run start:game-server`로 확인하며, 이 모드는 `/health`와 `/multiplayer` WebSocket만 제공한다.
+
 ## 검증
 
 ```powershell

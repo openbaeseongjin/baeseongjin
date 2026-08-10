@@ -39,6 +39,7 @@ import { run as remoteGameAuthority } from "./remoteGameAuthority.mjs";
 import { run as shareMultiplayer } from "./shareMultiplayer.mjs";
 import { run as predictableProjectileStore } from "./predictableProjectileStore.mjs";
 import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mjs";
+import { run as gameServerHandler } from "./gameServerHandler.mjs";
 
 const suites = {
     fixedStep,
@@ -81,7 +82,8 @@ const suites = {
     remoteGameAuthority,
     shareMultiplayer,
     predictableProjectileStore,
-    multiplayerServerEndpoint
+    multiplayerServerEndpoint,
+    gameServerHandler
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {

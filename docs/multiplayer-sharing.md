@@ -16,9 +16,22 @@ npm run share:multiplayer
 
 모바일 화면에는 이 서버 주소를 노출하거나 입력받지 않는다.
 
+## 상시 게임 서버 실행
+
+운영 호스트에서는 Pages Origin만 허용한 뒤 정적 파일을 제공하지 않는 게임 전용 모드로 실행한다.
+
+```powershell
+$env:BAESEONGJIN_ALLOWED_ORIGINS="https://openbaeseongjin.github.io"
+npm run start:game-server
+```
+
+기본 포트는 `4173`, 바인딩 주소는 `0.0.0.0`이다. 호스팅 환경에 맞춰 `BAESEONGJIN_PORT`와 `BAESEONGJIN_HOST`를 지정할 수 있다. 프로세스 상태 확인은 `GET /health`를 사용한다. 그 외 HTTP 경로는 404이며 게임 서버가 `index.html`이나 소스 파일을 제공하지 않는다. WebSocket 연결은 기존처럼 `/multiplayer?channel=...`만 사용한다.
+
+TLS는 리버스 프록시나 고정 Cloudflare Tunnel에서 종료하고, Pages의 `meta[name="multiplayer-server"]`에는 그 고정 HTTPS/WSS 주소를 넣는다. 서버 프로세스는 `SIGINT` 또는 `SIGTERM`을 받으면 채널 시뮬레이션과 HTTP/WebSocket 서버를 순서대로 닫는다.
+
 ## 안전 경계
 
-이 명령은 다음 두 자식 프로세스만 시작한다.
+개발용 공유 명령은 다음 두 자식 프로세스만 시작한다.
 
 - `node scripts/multiplayer-server.mjs`
 - `cloudflared tunnel --url http://127.0.0.1:4173 --no-autoupdate`
