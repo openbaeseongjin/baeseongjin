@@ -131,6 +131,8 @@ export function run() {
     continuous.reconcile(withPlayerPosition(movingSnapshot, movingSnapshot.state.players[0].position.x + 20, 7), []);
     close(continuous.presentationState().position.x, beforeSmallCorrection.position.x, "small correction continuity");
     assert.ok(continuous.metrics().correctionDistance > 0);
+    assert.ok(continuous.metrics().correctionP50 > 0);
+    assert.ok(continuous.metrics().correctionP95 >= continuous.metrics().correctionP50);
     assert.equal(continuous.metrics().hardSnaps, 0);
     for (let tick = 0; tick < 12; tick += 1) continuous.advance(move);
     close(continuous.presentationState().position.x, continuous.state().position.x, "small correction convergence");

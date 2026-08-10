@@ -22,6 +22,12 @@ function ropeTopologyChanged(left, right) {
     return Math.hypot(left.anchor.x - right.anchor.x, left.anchor.y - right.anchor.y) > 1;
 }
 
+function percentile(samples, ratio) {
+    if (samples.length === 0) return 0;
+    const sorted = [...samples].sort((left, right) => left - right);
+    return sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * ratio) - 1)];
+}
+
 export class LocalPlayerPredictor {
     constructor({
         playerId,
@@ -61,6 +67,7 @@ export class LocalPlayerPredictor {
         this.correctionRemaining = 0;
         this.lastCorrectionDistance = 0;
         this.hardSnapCount = 0;
+        this.correctionSamples = [];
         this.predictedEvents = [];
         this.emittedPredictionTicks = new Map();
         this.simulation.enemies = [];
@@ -138,6 +145,10 @@ export class LocalPlayerPredictor {
         };
         const distance = Math.hypot(offset.x, offset.y);
         this.lastCorrectionDistance = distance;
+        if (distance > 0) {
+            this.correctionSamples.push(distance);
+            if (this.correctionSamples.length > 256) this.correctionSamples.shift();
+        }
         const hardSnap =
             distance > this.hardSnapDistance ||
             ropeTopologyChanged(displayedBefore.rope, corrected.rope) ||
@@ -273,6 +284,8 @@ export class LocalPlayerPredictor {
     metrics() {
         return Object.freeze({
             correctionDistance: this.lastCorrectionDistance,
+            correctionP50: percentile(this.correctionSamples, 0.5),
+            correctionP95: percentile(this.correctionSamples, 0.95),
             correctionRemaining: this.correctionRemaining,
             hardSnaps: this.hardSnapCount
         });

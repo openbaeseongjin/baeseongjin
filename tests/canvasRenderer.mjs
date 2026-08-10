@@ -46,6 +46,37 @@ export function run() {
         "첫 보상 10.0초"
     ]);
     textCalls.length = 0;
+    renderer.drawMetricsPanel(
+        {
+            activeSeconds: 12.5,
+            checkpointsReached: 1,
+            enemyDefeats: 3,
+            damageTaken: 20,
+            ropeCuts: 2,
+            defeats: 1,
+            firstRewardSeconds: 10
+        },
+        {
+            roundTripMs: 104.4,
+            snapshotIntervalMs: 50.2,
+            pendingCommands: 2,
+            rejectionRate: 0.125,
+            correctionP50: 4.4,
+            correctionP95: 18.6,
+            hardSnaps: 1,
+            extrapolationMs: 12.2,
+            maxExtrapolationMs: 46.8,
+            predictionCancellations: 2
+        }
+    );
+    assert.deepEqual(textCalls.slice(-5), [
+        "NETWORK",
+        "RTT 104ms · 스냅샷 50ms",
+        "대기 2 · 거부 13%",
+        "보정 p50 4 · p95 19",
+        "스냅 1 · 외삽 12/47ms · 취소 2"
+    ]);
+    textCalls.length = 0;
     borderCalls.length = 0;
     renderer.drawArtifactHud([{ name: "로프 공명기" }], 1.5);
     assert.deepEqual(textCalls, ["아티팩트", "• 로프 공명기", "공명 1.5초"]);

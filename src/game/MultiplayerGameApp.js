@@ -137,6 +137,7 @@ export class MultiplayerGameApp {
             stats: this.stats,
             mobileView: this.mobileView,
             metricsVisible: this.metricsVisible,
+            networkMetrics: { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() },
             mobileControls: {
                 ...this.latestInput.mobileControls,
                 visible: this.mobileView || this.latestInput.mobileControls.visible

@@ -111,4 +111,29 @@ export function run() {
         [],
         "authority resolve must not replay predicted hit feedback"
     );
+
+    predictedStore.predict([{ ...predictedSpawn, predictionId: "player-1:30", tick: 30 }]);
+    const cancelledSpawn = createPredictableSpawnEvent({
+        ...confirmedSpawn,
+        eventId: "event-6",
+        objectId: "projectile-server-2",
+        spawnTick: 30,
+        parameters: { ...confirmedSpawn.parameters, predictionId: "player-1:30" }
+    });
+    predictedStore.apply([cancelledSpawn], 30, { enemies: [] });
+    predictedStore.apply(
+        [
+            createPredictableResolveEvent({
+                eventId: "event-7",
+                objectId: "projectile-server-2",
+                tick: 31,
+                resolution: "target-missing",
+                position: { x: 0, y: 0 },
+                parameters: {}
+            })
+        ],
+        31,
+        { enemies: [] }
+    );
+    assert.equal(predictedStore.metrics().predictionCancellations, 1);
 }

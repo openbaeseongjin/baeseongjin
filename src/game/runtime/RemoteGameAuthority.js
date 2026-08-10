@@ -7,6 +7,10 @@ import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
 
+function updateAverage(current, sample, weight = 0.2) {
+    return current === null ? sample : current + (sample - current) * weight;
+}
+
 export class RemoteGameAuthority {
     constructor({ url, WebSocketImpl = globalThis.WebSocket, now = () => performance.now() } = {}) {
         if (!WebSocketImpl) throw new Error("WebSocket is unavailable");
@@ -22,6 +26,16 @@ export class RemoteGameAuthority {
         this.buffer = new RemoteWorldStateBuffer();
         this.latestSnapshot = null;
         this.snapshotReceivedAt = 0;
+        this.previousSnapshotReceivedAt = null;
+        this.sentAtBySequence = new Map();
+        this.processedReceiptSequences = new Set();
+        this.processedReceiptOrder = [];
+        this.networkMetrics = {
+            roundTripMs: null,
+            snapshotIntervalMs: null,
+            acceptedCommands: 0,
+            rejectedCommands: 0
+        };
         this.closed = false;
         this.closeReason = null;
         this.intentionalClose = false;
@@ -70,7 +84,9 @@ export class RemoteGameAuthority {
                     } else if (message.type === "snapshot") {
                         this.acceptSnapshot(message.payload);
                     } else if (message.type === "receipt" && this.stream) {
-                        this.stream.acceptReceipt(deserializeCommandReceipt(message.payload));
+                        const receipt = deserializeCommandReceipt(message.payload);
+                        this.recordReceipt(receipt);
+                        this.stream.acceptReceipt(receipt);
                     }
                 } catch (error) {
                     fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
@@ -83,6 +99,13 @@ export class RemoteGameAuthority {
         const snapshot = deserializeWorldSnapshotEnvelope(serialized);
         if (!this.stream.acceptSnapshot(snapshot)) return;
         const receivedAt = this.now();
+        if (this.previousSnapshotReceivedAt !== null) {
+            this.networkMetrics.snapshotIntervalMs = updateAverage(
+                this.networkMetrics.snapshotIntervalMs,
+                receivedAt - this.previousSnapshotReceivedAt
+            );
+        }
+        this.previousSnapshotReceivedAt = receivedAt;
         this.latestSnapshot = snapshot;
         this.snapshotReceivedAt = receivedAt;
         this.buffer.push(snapshot, receivedAt);
@@ -99,6 +122,7 @@ export class RemoteGameAuthority {
         const predictedTick = this.predictor.state().tick;
         const batch = this.stream.createBatchAtTick(predictedTick, command);
         if (!batch) return false;
+        this.sentAtBySequence.set(batch.commands[0].sequence, this.now());
         this.socket.send(JSON.stringify({ type: "command", payload: serializePlayerCommandBatch(batch) }));
         return true;
     }
@@ -133,6 +157,41 @@ export class RemoteGameAuthority {
 
     drainPredictedEvents() {
         return this.predictor?.drainPredictedEvents() ?? Object.freeze([]);
+    }
+
+    recordReceipt(receipt) {
+        const receivedAt = this.now();
+        const accepted = receipt.accepted.filter(
+            ({ playerId, sequence }) => playerId === this.playerId && !this.processedReceiptSequences.has(sequence)
+        );
+        const rejected = receipt.rejected.filter(
+            ({ playerId, sequence }) => playerId === this.playerId && !this.processedReceiptSequences.has(sequence)
+        );
+        const references = [...accepted, ...rejected];
+        for (const reference of references) {
+            this.processedReceiptSequences.add(reference.sequence);
+            this.processedReceiptOrder.push(reference.sequence);
+            if (this.processedReceiptOrder.length > 2048) {
+                this.processedReceiptSequences.delete(this.processedReceiptOrder.shift());
+            }
+            const sentAt = this.sentAtBySequence.get(reference.sequence);
+            if (sentAt === undefined) continue;
+            this.networkMetrics.roundTripMs = updateAverage(this.networkMetrics.roundTripMs, receivedAt - sentAt);
+            this.sentAtBySequence.delete(reference.sequence);
+        }
+        this.networkMetrics.acceptedCommands += accepted.length;
+        this.networkMetrics.rejectedCommands += rejected.length;
+    }
+
+    metrics() {
+        const totalCommands = this.networkMetrics.acceptedCommands + this.networkMetrics.rejectedCommands;
+        return Object.freeze({
+            ...this.networkMetrics,
+            pendingCommands: this.stream?.pendingBatches().length ?? 0,
+            rejectionRate: totalCommands === 0 ? 0 : this.networkMetrics.rejectedCommands / totalCommands,
+            ...(this.predictor?.metrics() ?? {}),
+            ...(this.buffer.metrics() ?? {})
+        });
     }
 
     close() {
