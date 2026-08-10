@@ -113,7 +113,7 @@ export class MultiplayerGameApp {
             artifacts: localState.artifacts,
             ropeDamageBoostRemaining: localState.ropeDamageBoostRemaining,
             activeCheckpoint,
-            artifactReward: remote.state.artifactReward,
+            artifactReward: remote.state.artifactRewards?.[this.authority.playerId] ?? null,
             runState: remote.state.runState,
             defeatReason: remote.state.defeatReason,
             restartRemaining: remote.state.restartRemaining,
