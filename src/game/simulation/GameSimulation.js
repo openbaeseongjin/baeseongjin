@@ -1,0 +1,381 @@
+import { Vector2 } from "../../game-kit/index.js";
+import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
+import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
+import {
+    updateAutomaticWeapon,
+    updateEnemyProjectiles,
+    updateEnemyWeapons,
+    updatePlayerProjectiles
+} from "../combat/CombatSystems.js";
+import { appendCombatFeedback, createImpactState, updateCombatFeedback } from "../combat/CombatFeedback.js";
+import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
+import { RunMetrics } from "../metrics/RunMetrics.js";
+import { PlayerPhysics } from "../physics/PlayerPhysics.js";
+import { FixedLengthRope } from "../rope/FixedLengthRope.js";
+import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
+import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.js";
+import { EntityRegistry } from "./EntityRegistry.js";
+
+export class GameSimulation {
+    constructor() {
+        this.world = new WorldGenerator(WORLD_CONFIG).generate();
+        this.metrics = new RunMetrics();
+        this.artifacts = new ArtifactInventory(ARTIFACT_CONFIG);
+        this.player = new PlayerPhysics(PLAYER_CONFIG);
+        this.rope = new FixedLengthRope(ROPE_CONFIG);
+        this.registry = new EntityRegistry();
+        this.playerEntity = {
+            id: this.registry.createId("player"),
+            physics: this.player,
+            weapon: {
+                range: COMBAT_CONFIG.weaponRange,
+                baseDamage: COMBAT_CONFIG.weaponDamage,
+                damage: COMBAT_CONFIG.weaponDamage,
+                baseFireInterval: COMBAT_CONFIG.fireInterval,
+                fireInterval: COMBAT_CONFIG.fireInterval,
+                cooldown: 0
+            },
+            health: COMBAT_CONFIG.playerMaxHealth,
+            maxHealth: COMBAT_CONFIG.playerMaxHealth,
+            hitInvulnerabilityRemaining: 0,
+            ropeDisabledRemaining: 0,
+            lifeState: "active",
+            downedRemaining: 0,
+            reviveProgress: 0
+        };
+        this.players = [this.playerEntity];
+        this.enemies = this.createEnemies();
+        this.projectiles = [];
+        this.enemyProjectiles = [];
+        this.combatEffects = [];
+        this.impact = null;
+        this.aimWorld = { x: 0, y: 0 };
+        this.attachmentCandidate = null;
+        this.wasPointerDown = false;
+        this.attachBufferRemaining = 0;
+        this.eventFlash = { type: "ready", age: 10 };
+        this.swingDrag = null;
+        this.resets = 0;
+        this.runState = "playing";
+        this.defeatReason = null;
+        this.restartRemaining = 0;
+        this.activeCheckpoint = this.world.checkpoints[0] ?? null;
+        this.lastCheckpointLoss = [];
+        this.artifactReward = null;
+        this.rewardedCheckpointIds = new Set();
+        this.ropeDamageBoostRemaining = 0;
+    }
+
+    step(dt, command) {
+        if (this.runState !== "playing") {
+            this.eventFlash.age += dt;
+            if (this.runState === "defeated") {
+                this.restartRemaining = Math.max(0, this.restartRemaining - dt);
+                if (this.restartRemaining <= 0) this.respawnAtCheckpoint();
+            }
+            return;
+        }
+        if (this.player.position.distanceTo(this.world.summit) <= this.world.summit.radius) {
+            this.beginCompletion();
+            return;
+        }
+        this.updateCheckpointProgress();
+        if (this.artifactReward) {
+            this.updateArtifactReward(command);
+            this.eventFlash.age += dt;
+            return;
+        }
+        this.metrics.recordActiveTime(dt);
+        const canControl = this.playerEntity.lifeState === "active";
+        const effectiveCommand = canControl
+            ? command
+            : { horizontal: 0, vertical: 0, pointer: { x: 0, y: 0, down: false }, aimWorld: this.aimWorld };
+        this.playerEntity.ropeDisabledRemaining = Math.max(0, this.playerEntity.ropeDisabledRemaining - dt);
+        this.playerEntity.hitInvulnerabilityRemaining = Math.max(0, this.playerEntity.hitInvulnerabilityRemaining - dt);
+        this.ropeDamageBoostRemaining = Math.max(0, this.ropeDamageBoostRemaining - dt);
+        this.applyArtifactEffects();
+        this.aimWorld = effectiveCommand.aimWorld;
+        this.attachmentCandidate = canControl ? this.findAttachment(this.aimWorld) : null;
+        if (effectiveCommand.pointer.down && !this.wasPointerDown) {
+            this.attachBufferRemaining = ROPE_CONFIG.attachBufferSeconds;
+        }
+        if (
+            effectiveCommand.pointer.down &&
+            !this.rope.isAttached &&
+            this.playerEntity.ropeDisabledRemaining <= 0 &&
+            this.attachBufferRemaining > 0 &&
+            this.attachmentCandidate
+        ) {
+            if (this.rope.attach(this.player.position, this.attachmentCandidate)) {
+                this.eventFlash = { type: "attach", age: 0 };
+                this.swingDrag = {
+                    origin: { x: effectiveCommand.pointer.x, y: effectiveCommand.pointer.y },
+                    direction: null,
+                    progress: 0,
+                    age: 0,
+                    used: false
+                };
+                this.attachBufferRemaining = 0;
+            }
+        }
+        if (effectiveCommand.pointer.down && this.rope.isAttached) {
+            this.updateSwingDrag(effectiveCommand.pointer, effectiveCommand.viewport, dt);
+        }
+        if (!effectiveCommand.pointer.down && this.wasPointerDown && this.rope.isAttached) {
+            this.rope.detach();
+            this.eventFlash = { type: "release", age: 0 };
+            this.swingDrag = null;
+        }
+        this.attachBufferRemaining = Math.max(0, this.attachBufferRemaining - dt);
+        this.wasPointerDown = effectiveCommand.pointer.down;
+        this.player.step(dt, effectiveCommand, this.world.surfaces, this.rope);
+        updateAutomaticWeapon({
+            owner: this.playerEntity,
+            enemies: this.enemies,
+            projectiles: this.projectiles,
+            registry: this.registry,
+            config: COMBAT_CONFIG,
+            dt
+        });
+        const playerProjectileEvents = updatePlayerProjectiles({
+            projectiles: this.projectiles,
+            enemies: this.enemies,
+            config: COMBAT_CONFIG,
+            dt
+        });
+        updateEnemyWeapons({
+            enemies: this.enemies,
+            target: this.playerEntity,
+            projectiles: this.enemyProjectiles,
+            registry: this.registry,
+            config: COMBAT_CONFIG,
+            dt
+        });
+        const enemyProjectileEvents = updateEnemyProjectiles({
+            projectiles: this.enemyProjectiles,
+            target: this.playerEntity,
+            rope: this.rope,
+            config: COMBAT_CONFIG,
+            dt
+        });
+        this.metrics.recordCombat(playerProjectileEvents, enemyProjectileEvents);
+        if (enemyProjectileEvents.ropeCutAt) {
+            this.eventFlash = { type: "rope-cut", age: 0, position: enemyProjectileEvents.ropeCutAt };
+            this.swingDrag = null;
+        }
+        const combatEvents = [...playerProjectileEvents.hits, ...enemyProjectileEvents.hits];
+        for (const event of combatEvents) appendCombatFeedback(this.combatEffects, event);
+        const impact = createImpactState(combatEvents);
+        if (impact) this.impact = impact;
+        updateCombatFeedback(this.combatEffects, dt);
+        if (this.impact) {
+            this.impact.age += dt;
+            if (this.impact.age >= this.impact.lifetime) this.impact = null;
+        }
+        this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
+        if (this.playerEntity.health <= 0 && enterDowned(this.playerEntity, LIFE_CONFIG)) {
+            this.rope.detach();
+            this.swingDrag = null;
+            this.eventFlash = { type: "downed", age: 0 };
+        }
+        updateDownedPlayer(this.playerEntity, dt);
+        if (isTeamDefeated(this.players)) this.beginDefeat("health");
+        this.eventFlash.age += dt;
+        if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) {
+            this.beginDefeat("fall");
+        }
+    }
+
+    updateCheckpointProgress() {
+        for (const checkpoint of this.world.checkpoints) {
+            if (checkpoint.level <= (this.activeCheckpoint?.level ?? -1)) continue;
+            if (this.player.position.distanceTo(checkpoint) > checkpoint.radius) continue;
+            this.activeCheckpoint = checkpoint;
+            this.metrics.recordCheckpoint();
+            this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint };
+            if (checkpoint.level > 0 && !this.rewardedCheckpointIds.has(checkpoint.id)) {
+                this.beginArtifactReward(checkpoint);
+            }
+        }
+    }
+
+    beginArtifactReward(checkpoint) {
+        this.metrics.recordFirstReward();
+        this.artifactReward = {
+            checkpointId: checkpoint.id,
+            choices: ARTIFACT_CATALOG,
+            selectedIndex: 0,
+            inputReady: false,
+            previousHorizontal: 0,
+            previousConfirm: false
+        };
+        this.rope.detach();
+        this.swingDrag = null;
+    }
+
+    updateArtifactReward(command) {
+        const horizontal = Math.sign(command.horizontal);
+        const confirm = command.vertical < 0;
+        if (!this.artifactReward.inputReady) {
+            if (horizontal === 0 && !confirm) this.artifactReward.inputReady = true;
+            return;
+        }
+        if (horizontal !== 0 && this.artifactReward.previousHorizontal === 0) {
+            const count = this.artifactReward.choices.length;
+            this.artifactReward.selectedIndex = (this.artifactReward.selectedIndex + horizontal + count) % count;
+        }
+        if (confirm && !this.artifactReward.previousConfirm) {
+            const selected = this.artifactReward.choices[this.artifactReward.selectedIndex];
+            this.rewardedCheckpointIds.add(this.artifactReward.checkpointId);
+            this.artifacts.add(selected);
+            this.artifactReward = null;
+            this.applyArtifactEffects();
+            this.eventFlash = { type: "artifact", age: 0, artifact: selected, position: this.player.position.clone() };
+            return;
+        }
+        this.artifactReward.previousHorizontal = horizontal;
+        this.artifactReward.previousConfirm = confirm;
+    }
+
+    applyArtifactEffects() {
+        const effects = getArtifactEffects(this.artifacts.snapshot(), this.ropeDamageBoostRemaining);
+        this.playerEntity.weapon.damage = this.playerEntity.weapon.baseDamage * effects.damageMultiplier;
+        this.playerEntity.weapon.fireInterval =
+            this.playerEntity.weapon.baseFireInterval * effects.fireIntervalMultiplier;
+    }
+
+    updateSwingDrag(pointer, viewport, dt) {
+        if (!this.swingDrag || this.swingDrag.used || !this.rope.anchor) return;
+        this.swingDrag.age += dt;
+        const evaluation = evaluateSwingDrag({
+            anchor: this.rope.anchor,
+            playerPosition: this.player.position,
+            drag: { x: pointer.x - this.swingDrag.origin.x, y: pointer.y - this.swingDrag.origin.y },
+            threshold: getSwingDragThreshold(viewport, ROPE_CONFIG.swingDragThresholdViewportRatio)
+        });
+        if (!evaluation) return;
+        this.swingDrag.direction = evaluation.direction;
+        this.swingDrag.progress = evaluation.progress;
+        if (!evaluation.triggered || this.swingDrag.age < ROPE_CONFIG.swingDragMinHoldSeconds) return;
+        this.player.addImpulse(evaluation.direction, ROPE_CONFIG.swingImpulse);
+        const effects = getArtifactEffects(this.artifacts?.snapshot() ?? []);
+        this.ropeDamageBoostRemaining = effects.swingDamageDuration;
+        if (this.playerEntity?.weapon) this.applyArtifactEffects();
+        this.swingDrag.used = true;
+        this.eventFlash = { type: "swing", age: 0 };
+    }
+
+    createEnemies() {
+        return this.world.enemySpawns.map((spawn) => ({
+            id: this.registry.createId("enemy"),
+            position: new Vector2(spawn.x, spawn.y),
+            level: spawn.level,
+            radius: COMBAT_CONFIG.enemyRadius,
+            health: COMBAT_CONFIG.enemyHealth,
+            maxHealth: COMBAT_CONFIG.enemyHealth,
+            fireCooldown: COMBAT_CONFIG.enemyFireInterval
+        }));
+    }
+
+    findAttachment(aimPoint) {
+        let best = null;
+        let bestScore = Number.POSITIVE_INFINITY;
+        for (const surface of this.world.surfaces) {
+            const point = closestPointOnSurface(aimPoint, surface);
+            const playerDistance = this.player.position.distanceTo(point);
+            if (playerDistance > ROPE_CONFIG.maxAttachDistance) continue;
+            const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
+            const score = aimDistance * 2 + playerDistance * 0.05;
+            if (aimDistance <= 90 && score < bestScore) {
+                best = point;
+                bestScore = score;
+            }
+        }
+        return best;
+    }
+
+    respawnAtCheckpoint() {
+        const respawnPosition = this.activeCheckpoint ?? { x: 120, y: 500 };
+        this.player.reset(respawnPosition);
+        this.rope.detach();
+        this.attachBufferRemaining = 0;
+        this.eventFlash = { type: "reset", age: 0 };
+        this.swingDrag = null;
+        this.playerEntity.health = this.playerEntity.maxHealth;
+        this.playerEntity.weapon.cooldown = 0;
+        this.playerEntity.hitInvulnerabilityRemaining = 0;
+        this.playerEntity.ropeDisabledRemaining = 0;
+        this.playerEntity.lifeState = "active";
+        this.playerEntity.downedRemaining = 0;
+        this.playerEntity.reviveProgress = 0;
+        this.projectiles = [];
+        this.enemyProjectiles = [];
+        this.combatEffects = [];
+        this.impact = null;
+        this.runState = "playing";
+        this.defeatReason = null;
+        this.restartRemaining = 0;
+        this.lastCheckpointLoss = this.artifacts.applyCheckpointLoss();
+        this.ropeDamageBoostRemaining = 0;
+        this.applyArtifactEffects();
+        if (this.lastCheckpointLoss.length > 0) {
+            this.eventFlash = { type: "artifact-loss", age: 0, artifacts: [...this.lastCheckpointLoss] };
+        }
+        this.resets += 1;
+    }
+
+    beginDefeat(reason) {
+        if (this.runState !== "playing") return;
+        this.metrics.recordDefeat();
+        this.runState = "defeated";
+        this.defeatReason = reason;
+        this.restartRemaining = LIFE_CONFIG.defeatRestartDelay;
+        this.rope.detach();
+        this.swingDrag = null;
+        this.eventFlash = { type: "defeat", age: 0 };
+    }
+
+    beginCompletion() {
+        if (this.runState !== "playing") return;
+        this.runState = "completed";
+        this.defeatReason = null;
+        this.restartRemaining = 0;
+        this.rope.detach();
+        this.swingDrag = null;
+        this.eventFlash = { type: "completed", age: 0, position: this.world.summit };
+    }
+
+    snapshot() {
+        return {
+            world: this.world,
+            player: this.player,
+            rope: this.rope,
+            aimWorld: this.aimWorld,
+            attachmentCandidate: this.attachmentCandidate,
+            eventFlash: this.eventFlash,
+            swingDrag: this.swingDrag,
+            enemies: this.enemies,
+            projectiles: this.projectiles,
+            enemyProjectiles: this.enemyProjectiles,
+            combatEffects: this.combatEffects,
+            impact: this.impact,
+            playerHealth: this.playerEntity.health,
+            playerMaxHealth: this.playerEntity.maxHealth,
+            ropeDisabledRemaining: this.playerEntity.ropeDisabledRemaining,
+            playerLifeState: this.playerEntity.lifeState,
+            runState: this.runState,
+            defeatReason: this.defeatReason,
+            restartRemaining: this.restartRemaining,
+            activeCheckpoint: this.activeCheckpoint,
+            artifacts: this.artifacts.snapshot(),
+            lastCheckpointLoss: [...this.lastCheckpointLoss],
+            artifactReward: this.artifactReward,
+            rewardedCheckpointIds: [...this.rewardedCheckpointIds],
+            ropeDamageBoostRemaining: this.ropeDamageBoostRemaining,
+            metrics: this.metrics.snapshot(),
+            resets: this.resets,
+            maxAttachDistance: ROPE_CONFIG.maxAttachDistance
+        };
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "name": "Baeseongjin Rope Roguelike",
+    "short_name": "Rope Roguelike",
+    "description": "절차 생성 암석 지형을 로프로 등반하는 2D 액션 게임",
+    "lang": "ko",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "display_override": ["fullscreen", "standalone"],
+    "orientation": "landscape",
+    "background_color": "#080b10",
+    "theme_color": "#171d2a",
+    "icons": [
+        {
+            "src": "./assets/icons/app-icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "./assets/icons/app-icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
