@@ -159,11 +159,11 @@ GameApp
 
 `AuthorityWireAdapter`는 실제 WebSocket 앞의 유일한 게임 전송 경계다. 인증된 playerId와 직렬화된 command batch 문자열을 받아 receipt 문자열을 반환하고, 권위 세션의 120Hz 틱을 진행해 20Hz 예정 시점에만 snapshot 문자열을 반환한다. 소켓 런타임은 JSON 내부 게임 객체를 직접 읽거나 변경하지 않는다.
 
-`npm run start:multiplayer`는 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 초기 런타임은 최대 2명의 단일 임시 오픈월드이며 연결 순서로 공용 `GameSimulation` 플레이어를 배정한다. 한 명이 나가면 해당 플레이어의 명령·런타임만 제거하고 남은 유저는 같은 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간에만 월드를 폐기하고, 다음 최초 접속에서 새 절차 생성 월드를 만든다.
+`npm run start:multiplayer`는 개발 환경에서 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 서버 프로세스는 여러 4자리 채널을 동시에 소유하고 각 채널마다 독립된 `GameSimulation`, 명령 큐, 120Hz 시계와 최대 2명의 연결을 둔다. 한 명이 나가면 해당 플레이어만 제거하고 남은 유저는 같은 채널 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간 해당 채널과 월드를 폐기하며, 같은 번호로 다음 사용자가 접속하면 새 절차 생성 월드를 만든다.
 
-브라우저 첫 화면은 싱글과 멀티를 선택한다. 멀티는 현재 페이지가 HTTP면 `ws`, HTTPS면 `wss`를 사용해 같은 호스트의 `/multiplayer`에 연결하므로 별도 서버 주소 입력 UI가 필요 없다. GitHub Pages처럼 권위 서버가 없는 정적 호스트에서는 접속 오류를 표시하고, 멀티 서버나 Quick Tunnel 주소에서는 같은 화면이 실제 게임으로 진입한다.
+브라우저 첫 화면은 싱글과 멀티를 선택한다. GitHub Pages의 `index.html`에 있는 `meta[name="multiplayer-server"]`가 항상 실행 중인 게임 서버의 HTTPS/WSS 주소를 제공하고, 클라이언트는 이를 `/multiplayer?channel=...`로 정규화한다. 서버 주소는 배포 설정이며 플레이어가 입력하지 않는다. 방장은 **새 채널 만들기**로 4자리 번호를 받고, 참가자는 모바일 숫자 키패드로 그 번호만 입력한다.
 
-`npm run share:multiplayer`는 로컬 서버와 account-less Cloudflare Quick Tunnel을 자식 프로세스로 열어 임시 HTTPS 주소를 출력한다. DNS, WARP, 시스템 프록시, 네트워크 어댑터, 라우팅과 방화벽은 변경하지 않으며 기존 Cloudflare 설정 파일이 있으면 변경 없이 중단한다. 상세 실행 경계는 `multiplayer-sharing.md`를 따른다.
+`npm run share:multiplayer`는 상시 서버를 대신하는 운영 경로가 아니라 개발 중 외부 연결을 확인하는 임시 도구다. 운영 Pages는 고정 게임 서버를 사용하며 Quick Tunnel 주소를 플레이어에게 입력시키지 않는다. 상세 실행 경계는 `multiplayer-sharing.md`를 따른다.
 
 `RemoteCommandStream`은 로컬 플레이어 한 명의 목표 틱과 단조 증가 sequence를 만들고, 서버가 승인하기 전의 명령 배치를 보존한다. 새 스냅샷의 플레이어별 ACK까지만 대기열에서 제거하며, 이미 적용한 `serverTick` 이하의 중복·역순 스냅샷은 무시한다. 이 대기열은 이후 자기 플레이어 예측을 권위 상태 위에 재적용하는 입력 원본이며, 소켓과 물리 구현을 직접 소유하지 않는다.
 
@@ -179,7 +179,7 @@ GameApp
 - `snapshot()`은 화면이 읽을 최신 권위 또는 예측 상태를 반환한다.
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.
 
-실제 소켓은 `ws` 기반 Node 권위 서버와 브라우저 WebSocket 클라이언트로 연결됐다. GitHub Pages는 정적 호스팅이므로 협동 권위 서버가 없으며, 개발 중 원격 확인은 Quick Tunnel로 같은 정적 페이지와 WebSocket을 함께 공유한다.
+실제 소켓은 `ws` 기반 Node 권위 서버와 브라우저 WebSocket 클라이언트로 연결됐다. GitHub Pages는 정적 화면만 제공하고 별도로 항상 실행되는 게임 서버에 연결한다. 운영 서버는 `BAESEONGJIN_ALLOWED_ORIGINS=https://openbaeseongjin.github.io`처럼 허용 Origin을 제한하며, 4자리 채널 번호는 접속 편의 수단이지 인증 정보로 취급하지 않는다.
 
 ## 구현 순서와 검증 기준
 

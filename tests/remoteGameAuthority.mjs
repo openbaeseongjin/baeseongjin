@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
-import { RemoteGameAuthority, multiplayerUrl } from "../src/game/runtime/RemoteGameAuthority.js";
+import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
 
 function listen(server) {
@@ -23,9 +23,8 @@ export async function run() {
     let gameServerClosed = false;
     const port = await listen(httpServer);
     try {
-        assert.equal(multiplayerUrl({ protocol: "https:", host: "example.test" }), "wss://example.test/multiplayer");
         const authority = new RemoteGameAuthority({
-            url: `ws://127.0.0.1:${port}/multiplayer`,
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
             WebSocketImpl: WebSocket
         });
         await authority.connect();
@@ -45,7 +44,7 @@ export async function run() {
         );
         assert.equal(authority.stream.pendingBatches().length, 1);
         const partner = new RemoteGameAuthority({
-            url: `ws://127.0.0.1:${port}/multiplayer`,
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=${authority.channelId}`,
             WebSocketImpl: WebSocket
         });
         await partner.connect();

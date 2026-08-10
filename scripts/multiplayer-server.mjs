@@ -9,8 +9,16 @@ const positionalPort = process.argv.find((argument) => /^\d+$/.test(argument));
 const namedPort = process.argv.find((argument) => argument.startsWith("--port="))?.slice(7);
 const requestedPort = Number(namedPort ?? positionalPort ?? process.env.BAESEONGJIN_PORT ?? 4173);
 const port = Number.isInteger(requestedPort) && requestedPort > 0 ? requestedPort : 4173;
+const allowedOriginsArgument = process.argv
+    .find((argument) => argument.startsWith("--allowed-origins="))
+    ?.slice("--allowed-origins=".length);
 const server = createServer(createStaticRequestHandler(root));
-const multiplayer = new MultiplayerGameServer(server);
+const multiplayer = new MultiplayerGameServer(server, {
+    allowedOrigins: (allowedOriginsArgument ?? process.env.BAESEONGJIN_ALLOWED_ORIGINS ?? "")
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean)
+});
 
 server.listen(port, "127.0.0.1", () => {
     console.log(`Baeseongjin multiplayer: http://127.0.0.1:${port}`);
