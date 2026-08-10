@@ -56,7 +56,11 @@ async function waitFor(predicate, message) {
 export async function run() {
     const httpServer = createServer((_request, response) => response.end("ok"));
     const channelNumbers = [1234, 5678, 9012];
-    const multiplayer = new MultiplayerGameServer(httpServer, { channelNumber: () => channelNumbers.shift() });
+    const worldSeeds = [111, 222, 333];
+    const multiplayer = new MultiplayerGameServer(httpServer, {
+        channelNumber: () => channelNumbers.shift(),
+        worldSeed: () => worldSeeds.shift()
+    });
     await new Promise((resolve) => httpServer.listen(0, "127.0.0.1", resolve));
     const { port } = httpServer.address();
     const baseUrl = `ws://127.0.0.1:${port}/multiplayer`;
@@ -64,11 +68,14 @@ export async function run() {
     const url = `${baseUrl}?channel=${firstWelcome.channelId}`;
     const { socket: second, message: secondWelcome } = await connectFor(url, "welcome");
     assert.equal(firstWelcome.channelId, "1234");
+    assert.equal(deserializeWorldSnapshotEnvelope(firstWelcome.snapshot).worldSeed, 111);
     assert.notEqual(firstWelcome.playerId, secondWelcome.playerId);
+    assert.equal(deserializeWorldSnapshotEnvelope(secondWelcome.snapshot).worldSeed, 111);
     assert.equal(deserializeWorldSnapshotEnvelope(secondWelcome.snapshot).state.players.length, 2);
 
     const { socket: isolated, message: isolatedWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
     assert.equal(isolatedWelcome.channelId, "5678");
+    assert.equal(deserializeWorldSnapshotEnvelope(isolatedWelcome.snapshot).worldSeed, 222);
     assert.equal(
         deserializeWorldSnapshotEnvelope(isolatedWelcome.snapshot).state.players.length,
         1,
@@ -122,6 +129,7 @@ export async function run() {
 
     const { socket: fresh, message: freshWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
     const freshSnapshot = deserializeWorldSnapshotEnvelope(freshWelcome.snapshot);
+    assert.equal(freshSnapshot.worldSeed, 333, "a newly created room must receive a new world seed");
     assert.equal(freshSnapshot.state.players.length, 1);
     assert.ok(freshSnapshot.serverTick <= 1, "an empty room must be discarded before the next first player joins");
     fresh.close();

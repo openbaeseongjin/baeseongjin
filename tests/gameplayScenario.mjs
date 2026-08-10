@@ -7,9 +7,11 @@ import { run as gameSimulation } from "./gameSimulation.mjs";
 import { run as combatSystems } from "./combatSystems.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
+import { run as worldSeed } from "./worldSeed.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
 
 const steps = {
+    worldSeed,
     inputSampler,
     fixedLengthRope,
     worldGenerator,

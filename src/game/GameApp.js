@@ -7,13 +7,14 @@ import { GameSimulation } from "./simulation/GameSimulation.js";
 import { CAMERA_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { selectWorldSeed } from "./world/WorldSeed.js";
 
 export class GameApp {
-    constructor({ canvas, onDiagnostics = () => {} }) {
+    constructor({ canvas, onDiagnostics = () => {}, worldSeed = selectWorldSeed(globalThis.location?.search) }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = new CanvasRenderer(canvas);
         this.input = new InputSampler(globalThis.window, canvas);
-        this.authority = new LocalAuthority(new GameSimulation());
+        this.authority = new LocalAuthority(new GameSimulation({ worldSeed }));
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
         this.onDiagnostics = onDiagnostics;
