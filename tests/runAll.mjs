@@ -36,6 +36,7 @@ import { run as commandReceipt } from "./commandReceipt.mjs";
 import { run as authorityWireAdapter } from "./authorityWireAdapter.mjs";
 import { run as multiplayerGameServer } from "./multiplayerGameServer.mjs";
 import { run as remoteGameAuthority } from "./remoteGameAuthority.mjs";
+import { run as shareMultiplayer } from "./shareMultiplayer.mjs";
 
 const suites = {
     fixedStep,
@@ -75,7 +76,8 @@ const suites = {
     commandReceipt,
     authorityWireAdapter,
     multiplayerGameServer,
-    remoteGameAuthority
+    remoteGameAuthority,
+    shareMultiplayer
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
