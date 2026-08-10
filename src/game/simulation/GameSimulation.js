@@ -61,7 +61,7 @@ export class GameSimulation {
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
         this.lastCheckpointLoss = [];
         this.artifactReward = null;
-        this.firstArtifactRewardClaimed = false;
+        this.rewardedCheckpointIds = new Set();
         this.ropeDamageBoostRemaining = 0;
     }
 
@@ -189,12 +189,15 @@ export class GameSimulation {
             if (this.player.position.distanceTo(checkpoint) > checkpoint.radius) continue;
             this.activeCheckpoint = checkpoint;
             this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint };
-            if (!this.firstArtifactRewardClaimed && checkpoint.level > 0) this.beginArtifactReward();
+            if (checkpoint.level > 0 && !this.rewardedCheckpointIds.has(checkpoint.id)) {
+                this.beginArtifactReward(checkpoint);
+            }
         }
     }
 
-    beginArtifactReward() {
+    beginArtifactReward(checkpoint) {
         this.artifactReward = {
+            checkpointId: checkpoint.id,
             choices: ARTIFACT_CATALOG,
             selectedIndex: 0,
             inputReady: false,
@@ -218,8 +221,8 @@ export class GameSimulation {
         }
         if (confirm && !this.artifactReward.previousConfirm) {
             const selected = this.artifactReward.choices[this.artifactReward.selectedIndex];
+            this.rewardedCheckpointIds.add(this.artifactReward.checkpointId);
             this.artifacts.add(selected);
-            this.firstArtifactRewardClaimed = true;
             this.artifactReward = null;
             this.applyArtifactEffects();
             this.eventFlash = { type: "artifact", age: 0, artifact: selected, position: this.player.position.clone() };
@@ -361,6 +364,7 @@ export class GameSimulation {
             artifacts: this.artifacts.snapshot(),
             lastCheckpointLoss: [...this.lastCheckpointLoss],
             artifactReward: this.artifactReward,
+            rewardedCheckpointIds: [...this.rewardedCheckpointIds],
             ropeDamageBoostRemaining: this.ropeDamageBoostRemaining,
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance

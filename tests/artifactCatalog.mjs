@@ -12,4 +12,6 @@ export function run() {
     assert.equal(ropeIdle.damageMultiplier, 1);
     assert.equal(ropeActive.damageMultiplier, 1.6);
     assert.equal(ropeActive.swingDamageDuration, 3);
+    assert.equal(getArtifactEffects([ARTIFACT_CATALOG[0], ARTIFACT_CATALOG[0]]).damageMultiplier, 1.4 * 1.4);
+    assert.equal(getArtifactEffects([ARTIFACT_CATALOG[1], ARTIFACT_CATALOG[1]]).fireIntervalMultiplier, 0.75 * 0.75);
 }
