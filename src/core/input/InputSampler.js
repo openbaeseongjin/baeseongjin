@@ -1,20 +1,10 @@
 const movementKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS"]);
-const MOVE_ZONE_RATIO = 0.42;
-const JOYSTICK_RADIUS = 64;
-const JOYSTICK_DEAD_ZONE = 12;
-const ROPE_AIM_OFFSET_Y = 48;
-
-function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-}
-
 export class InputSampler {
     constructor(target = globalThis.window, surface = target) {
         this.target = target;
         this.surface = surface;
         this.keys = new Set();
         this.pointer = { x: 0, y: 0, down: false };
-        this.movePointer = null;
         this.ropePointerId = null;
         this.touchActive = false;
         this.attached = false;
@@ -37,20 +27,10 @@ export class InputSampler {
             }
             event.preventDefault?.();
             this.touchActive = true;
-            this.surface?.setPointerCapture?.(event.pointerId);
-            if (event.clientX <= this.viewportWidth() * MOVE_ZONE_RATIO && this.movePointer === null) {
-                this.movePointer = {
-                    id: event.pointerId,
-                    originX: event.clientX,
-                    originY: event.clientY,
-                    x: event.clientX,
-                    y: event.clientY
-                };
-                return;
-            }
             if (this.ropePointerId === null) {
+                this.surface?.setPointerCapture?.(event.pointerId);
                 this.ropePointerId = event.pointerId;
-                this.pointer = { x: event.clientX, y: event.clientY - ROPE_AIM_OFFSET_Y, down: true };
+                this.pointer = { x: event.clientX, y: event.clientY, down: true };
             }
         };
         this.onPointerUp = (event) => this.releasePointer(event.pointerId, event.pointerType);
@@ -67,13 +47,9 @@ export class InputSampler {
     }
 
     updateTouchPointer(event) {
-        if (this.movePointer?.id === event.pointerId) {
-            this.movePointer.x = event.clientX;
-            this.movePointer.y = event.clientY;
-        }
         if (this.ropePointerId === event.pointerId) {
             this.pointer.x = event.clientX;
-            this.pointer.y = event.clientY - ROPE_AIM_OFFSET_Y;
+            this.pointer.y = event.clientY;
         }
     }
 
@@ -82,7 +58,6 @@ export class InputSampler {
             this.pointer.down = false;
             return;
         }
-        if (this.movePointer?.id === pointerId) this.movePointer = null;
         if (this.ropePointerId === pointerId) {
             this.ropePointerId = null;
             this.pointer.down = false;
@@ -91,7 +66,6 @@ export class InputSampler {
 
     clearTransientInput() {
         this.keys.clear();
-        this.movePointer = null;
         this.ropePointerId = null;
         this.pointer.down = false;
     }
@@ -121,18 +95,7 @@ export class InputSampler {
         this.attached = false;
     }
 
-    touchMovement() {
-        if (!this.movePointer) return { horizontal: 0, vertical: 0 };
-        const dx = this.movePointer.x - this.movePointer.originX;
-        const dy = this.movePointer.y - this.movePointer.originY;
-        return {
-            horizontal: Math.abs(dx) <= JOYSTICK_DEAD_ZONE ? 0 : clamp(dx / JOYSTICK_RADIUS, -1, 1),
-            vertical: Math.abs(dy) <= JOYSTICK_DEAD_ZONE ? 0 : clamp(dy / JOYSTICK_RADIUS, -1, 1)
-        };
-    }
-
     snapshot() {
-        const touch = this.touchMovement();
         const keyboardHorizontal =
             Number(this.keys.has("ArrowRight") || this.keys.has("KeyD")) -
             Number(this.keys.has("ArrowLeft") || this.keys.has("KeyA"));
@@ -141,12 +104,11 @@ export class InputSampler {
             Number(this.keys.has("ArrowUp") || this.keys.has("KeyW"));
         const mobileControls = Object.freeze({
             visible: this.touchActive,
-            joystick: this.movePointer ? Object.freeze({ ...this.movePointer }) : null,
             ropePointerDown: this.ropePointerId !== null
         });
         return Object.freeze({
-            horizontal: touch.horizontal || keyboardHorizontal,
-            vertical: touch.vertical || keyboardVertical,
+            horizontal: keyboardHorizontal,
+            vertical: keyboardVertical,
             pointer: Object.freeze({ ...this.pointer }),
             viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),
             mobileControls

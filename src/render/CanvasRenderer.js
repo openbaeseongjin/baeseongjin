@@ -57,11 +57,13 @@ export class CanvasRenderer {
         this.drawEnemies(scene.enemies ?? []);
         this.drawProjectiles(scene.projectiles ?? []);
         this.drawEnemyProjectiles(scene.enemyProjectiles ?? []);
+        this.drawRopeCutMark(scene.eventFlash);
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
         if (!scene.mobileView) this.drawHud(scene);
         this.drawMobileControls(scene.mobileControls);
+        this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawDefeatOverlay(scene);
     }
 
@@ -224,7 +226,12 @@ export class CanvasRenderer {
         const ctx = this.context;
         if (eventFlash.age < 0.28) {
             const progress = eventFlash.age / 0.28;
-            ctx.strokeStyle = eventFlash.type === "release" || eventFlash.type === "swing" ? "#fde68a" : "#67e8f9";
+            ctx.strokeStyle =
+                eventFlash.type === "rope-cut"
+                    ? "#fb7185"
+                    : eventFlash.type === "release" || eventFlash.type === "swing"
+                      ? "#fde68a"
+                      : "#67e8f9";
             ctx.globalAlpha = 1 - progress;
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -251,6 +258,46 @@ export class CanvasRenderer {
         }
     }
 
+    drawRopeCutMark(eventFlash) {
+        if (eventFlash?.type !== "rope-cut" || !eventFlash.position || eventFlash.age >= 0.6) return;
+        const ctx = this.context;
+        const progress = eventFlash.age / 0.6;
+        const radius = 10 + progress * 28;
+        ctx.save();
+        ctx.globalAlpha = 1 - progress;
+        ctx.strokeStyle = "#fb7185";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(eventFlash.position.x - radius, eventFlash.position.y - radius);
+        ctx.lineTo(eventFlash.position.x + radius, eventFlash.position.y + radius);
+        ctx.moveTo(eventFlash.position.x + radius, eventFlash.position.y - radius);
+        ctx.lineTo(eventFlash.position.x - radius, eventFlash.position.y + radius);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    drawRopeCutFeedback(eventFlash, disabledRemaining) {
+        if (eventFlash?.type !== "rope-cut" || eventFlash.age >= 0.8) return;
+        const ctx = this.context;
+        const alpha = Math.max(0, 1 - eventFlash.age / 0.8);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = "#fb7185";
+        ctx.lineWidth = 8;
+        ctx.strokeRect(4, 4, this.cssWidth - 8, this.cssHeight - 8);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#fecdd3";
+        ctx.font = "800 24px system-ui, sans-serif";
+        ctx.fillText("로프 절단!", this.cssWidth * 0.5, this.cssHeight * 0.22);
+        ctx.font = "14px system-ui, sans-serif";
+        ctx.fillText(
+            `재연결까지 ${Math.max(0, disabledRemaining).toFixed(1)}초`,
+            this.cssWidth * 0.5,
+            this.cssHeight * 0.22 + 26
+        );
+        ctx.restore();
+    }
+
     drawDefeatOverlay({ runState, defeatReason, restartRemaining }) {
         if (runState !== "defeated") return;
         const ctx = this.context;
@@ -273,27 +320,9 @@ export class CanvasRenderer {
     drawMobileControls(controls) {
         if (!controls?.visible) return;
         const ctx = this.context;
-        const joystick = controls.joystick;
-        if (joystick) {
-            const dx = joystick.x - joystick.originX;
-            const dy = joystick.y - joystick.originY;
-            const distance = Math.hypot(dx, dy);
-            const scale = distance > 52 ? 52 / distance : 1;
-            ctx.fillStyle = "rgba(15, 23, 42, 0.52)";
-            ctx.strokeStyle = "rgba(226, 232, 240, 0.52)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(joystick.originX, joystick.originY, 58, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = "rgba(103, 232, 249, 0.72)";
-            ctx.beginPath();
-            ctx.arc(joystick.originX + dx * scale, joystick.originY + dy * scale, 24, 0, Math.PI * 2);
-            ctx.fill();
-        }
         if (controls.ropePointerDown) {
             ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
-            ctx.fillRect(this.cssWidth * 0.42, 0, this.cssWidth * 0.58, this.cssHeight);
+            ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         }
     }
 
