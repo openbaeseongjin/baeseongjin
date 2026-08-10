@@ -4,6 +4,7 @@ import { CanvasRenderer } from "../render/CanvasRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { GameSimulation } from "./simulation/GameSimulation.js";
+import { CAMERA_CONFIG } from "./config.js";
 
 export class GameApp {
     constructor({ canvas }) {
@@ -11,7 +12,8 @@ export class GameApp {
         this.renderer = new CanvasRenderer(canvas);
         this.input = new InputSampler(globalThis.window, canvas);
         this.authority = new LocalAuthority(new GameSimulation());
-        this.camera = { x: 0, y: 0 };
+        this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
+        this.camera = this.createCamera();
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
         this.latestInput = this.input.snapshot();
@@ -43,16 +45,20 @@ export class GameApp {
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
         const state = this.authority.snapshot();
-        if (state.resets !== before.resets) this.camera = { x: 0, y: 0 };
+        if (state.resets !== before.resets) this.camera = this.createCamera();
         this.updateCamera(dt, state.player);
     }
 
     updateCamera(dt, player) {
-        const targetX = player.position.x - this.renderer.cssWidth * 0.38;
-        const targetY = player.position.y - this.renderer.cssHeight * 0.58;
+        const targetX = player.position.x - (this.renderer.cssWidth / this.camera.zoom) * 0.38;
+        const targetY = player.position.y - (this.renderer.cssHeight / this.camera.zoom) * 0.58;
         const blend = 1 - Math.exp(-5 * dt);
         this.camera.x += (targetX - this.camera.x) * blend;
         this.camera.y += (targetY - this.camera.y) * blend;
+    }
+
+    createCamera() {
+        return { x: 0, y: 0, zoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom };
     }
 
     render() {
@@ -62,6 +68,7 @@ export class GameApp {
             ...state,
             camera: this.camera,
             stats: this.stats,
+            mobileView: this.mobileView,
             mobileControls: this.latestInput.mobileControls
         });
     }

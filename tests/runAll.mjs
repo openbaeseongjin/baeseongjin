@@ -12,6 +12,7 @@ import { run as combatSystems } from "./combatSystems.mjs";
 import { run as playerLifeCycle } from "./playerLifeCycle.mjs";
 import { run as pwaContract } from "./pwaContract.mjs";
 import { run as installPrompt } from "./installPrompt.mjs";
+import { run as canvasRenderer } from "./canvasRenderer.mjs";
 
 const suites = {
     fixedStep,
@@ -27,7 +28,8 @@ const suites = {
     combatSystems,
     playerLifeCycle,
     pwaContract,
-    installPrompt
+    installPrompt,
+    canvasRenderer
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {

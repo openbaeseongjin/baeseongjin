@@ -1,3 +1,7 @@
+export function getSwingDragThreshold(viewport, ratio) {
+    return Math.min(viewport.width, viewport.height) * ratio;
+}
+
 export function evaluateSwingDrag({ anchor, playerPosition, drag, threshold }) {
     const radialX = playerPosition.x - anchor.x;
     const radialY = playerPosition.y - anchor.y;

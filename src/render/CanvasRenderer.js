@@ -39,14 +39,17 @@ export class CanvasRenderer {
 
     screenToWorld(pointer, camera) {
         const rect = this.canvas.getBoundingClientRect();
-        return { x: pointer.x - rect.left + camera.x, y: pointer.y - rect.top + camera.y };
+        const zoom = camera.zoom ?? 1;
+        return { x: (pointer.x - rect.left) / zoom + camera.x, y: (pointer.y - rect.top) / zoom + camera.y };
     }
 
     draw(scene) {
         this.resize();
         this.drawBackground(scene.camera);
         this.context.save();
-        this.context.translate(-scene.camera.x, -scene.camera.y);
+        const zoom = scene.camera.zoom ?? 1;
+        this.context.translate(-scene.camera.x * zoom, -scene.camera.y * zoom);
+        this.context.scale(zoom, zoom);
         this.drawWorld(scene.world);
         this.drawAttachmentRange(scene);
         this.drawRope(scene.rope, scene.player.position);
@@ -57,7 +60,7 @@ export class CanvasRenderer {
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
-        this.drawHud(scene);
+        if (!scene.mobileView) this.drawHud(scene);
         this.drawMobileControls(scene.mobileControls);
         this.drawDefeatOverlay(scene);
     }

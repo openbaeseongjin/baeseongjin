@@ -6,9 +6,19 @@ import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 export function run() {
     const first = new LocalAuthority(new GameSimulation());
     const second = new LocalAuthority(new GameSimulation());
-    const input = { horizontal: 1, vertical: 0, pointer: { x: 0, y: 0, down: false } };
+    const input = {
+        horizontal: 1,
+        vertical: 0,
+        pointer: { x: 0, y: 0, down: false },
+        viewport: { width: 1280, height: 720 }
+    };
     const command = createPlayerCommand(input, { x: 0, y: 0 });
-    assert.ok(Object.isFrozen(command) && Object.isFrozen(command.pointer) && Object.isFrozen(command.aimWorld));
+    assert.ok(
+        Object.isFrozen(command) &&
+            Object.isFrozen(command.pointer) &&
+            Object.isFrozen(command.viewport) &&
+            Object.isFrozen(command.aimWorld)
+    );
 
     for (let step = 0; step < 240; step += 1) {
         first.step(1 / 120, command);

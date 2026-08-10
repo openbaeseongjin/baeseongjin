@@ -11,9 +11,14 @@ export const PLAYER_CONFIG = Object.freeze({
 export const ROPE_CONFIG = Object.freeze({
     maxAttachDistance: 440,
     attachBufferSeconds: 0.1,
-    swingDragThreshold: 80,
+    swingDragThresholdViewportRatio: 0.11,
     swingDragMinHoldSeconds: 0.08,
     swingImpulse: 780
+});
+
+export const CAMERA_CONFIG = Object.freeze({
+    desktopZoom: 1,
+    mobileZoom: 0.72
 });
 
 export const COMBAT_CONFIG = Object.freeze({
