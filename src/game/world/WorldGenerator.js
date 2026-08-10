@@ -32,12 +32,13 @@ export function closestPointOnSurface(point, surface) {
 }
 
 export class WorldGenerator {
-    constructor({ seed, levelCount, verticalStep, laneWidth, enemySpawnInterval, floorY }) {
+    constructor({ seed, levelCount, verticalStep, laneWidth, enemySpawnInterval, summitRadius, floorY }) {
         this.seed = seed;
         this.levelCount = levelCount;
         this.verticalStep = verticalStep;
         this.laneWidth = laneWidth;
         this.enemySpawnInterval = enemySpawnInterval;
+        this.summitRadius = summitRadius;
         this.floorY = floorY;
     }
 
@@ -71,11 +72,19 @@ export class WorldGenerator {
             }
         }
 
+        const summitPlatform = route.at(-1);
+        const summit = Object.freeze({
+            x: summitPlatform.x + summitPlatform.width * 0.5,
+            y: summitPlatform.topY - this.summitRadius,
+            radius: this.summitRadius
+        });
+
         return Object.freeze({
             seed: this.seed,
             surfaces: Object.freeze(surfaces),
             route: Object.freeze(route),
             enemySpawns: Object.freeze(enemySpawns),
+            summit,
             topY: route.at(-1).y
         });
     }
