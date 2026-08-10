@@ -98,7 +98,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `AuthorityServerSession`이 연결 소유권을 검사한 명령을 다음 120Hz 권위 틱에 적용하고 6틱마다 20Hz 스냅샷과 승인 sequence를 만든다. `MultiplayerGameServer`가 이 경계를 실제 WebSocket에 연결한다.
 - 현재 serverTick 이하의 늦은 명령은 `elapsed-tick`으로 거부하며 ACK를 올리지 않는다. 초기 서버는 과거 입력 롤백을 지원하지 않는다.
 - `RemoteCommandStream`이 로컬 플레이어의 목표 틱·sequence와 미승인 명령을 보존하고, 새 스냅샷 ACK만 반영하며 역순·중복 스냅샷을 거부한다. 물리 예측·재적용은 다음 단계다.
-- `RemoteWorldStateBuffer`가 원격 플레이어·적 위치만 최신 두 스냅샷 사이에서 보간하고 HP·다운·로프·진행 상태는 최신 권위 값을 즉시 사용하며 사건을 한 번만 전달한다.
+- `RemoteWorldStateBuffer`가 최대 8개 권위 스냅샷을 보관하고 동료·적 위치를 100ms 지연된 서버 tick의 두 표본 사이에서 보간한다. 미래 표본이 없을 때만 최대 120ms 외삽하며 HP·다운·로프·진행 상태는 최신 권위 값을 즉시 사용하고 사건을 한 번만 전달한다.
 - 권위 플레이어 스냅샷은 예측 재시작에 필요한 `isGrounded`와 로프 `length`·`currentLength`를 포함하며, 이 물리 값은 보간하지 않는다.
 - 원격 상태 버퍼는 최근 2,048개 `eventId`를 기억해 서로 다른 스냅샷에 재전송된 같은 사건도 한 번만 VFX·피드백 대기열에 전달한다.
 - 자기 로프 예측 재시작을 위해 승인 틱의 aim·pointer·viewport·누름 전이·부착 버퍼·스윙 드래그 진행을 `control` 스냅샷으로 보낸다. 부착 후보는 월드에서 다시 계산한다.

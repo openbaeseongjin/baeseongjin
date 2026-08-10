@@ -38,32 +38,36 @@ async function waitFor(predicate, message) {
 }
 
 export async function run() {
-    const deadReckoning = new RemoteWorldStateBuffer({
+    const interpolation = new RemoteWorldStateBuffer({
+        interpolationSeconds: 0.05,
         maxExtrapolationSeconds: 0.12,
-        correctionSeconds: 0.1
+        maxSnapshots: 3
     });
-    const snapshot = (serverTick, remoteX) => ({
+    const snapshot = (serverTick, remoteX, health = 100) => ({
         serverTick,
         state: {
             players: [
-                { id: "local", position: { x: 0, y: 0 }, velocity: { x: 100, y: 0 } },
-                { id: "remote", position: { x: remoteX, y: 0 }, velocity: { x: 100, y: 0 } }
-            ]
+                { id: "local", position: { x: remoteX, y: 0 }, velocity: { x: 100, y: 0 } },
+                { id: "remote", position: { x: remoteX, y: 0 }, velocity: { x: 100, y: 0 }, health }
+            ],
+            enemies: [{ id: "enemy", position: { x: remoteX * 2, y: 0 }, health }]
         },
         events: []
     });
-    deadReckoning.push(snapshot(6, 0), 0);
-    let projected = deadReckoning.sample({ elapsedSeconds: 0.05, localPlayerId: "local" });
-    assert.equal(projected.players[0].position.x, 0, "the local player must use input prediction instead");
-    assert.equal(projected.players[1].position.x, 5, "a remote player must advance with its latest velocity");
-    projected = deadReckoning.sample({ elapsedSeconds: 1, localPlayerId: "local" });
-    assert.equal(projected.players[1].position.x, 12, "dead reckoning must stop at its bounded horizon");
-
-    deadReckoning.push(snapshot(12, 4), 50);
-    projected = deadReckoning.sample({ elapsedSeconds: 0, localPlayerId: "local" });
-    assert.equal(projected.players[1].position.x, 5, "a new snapshot must preserve the prior displayed position");
-    projected = deadReckoning.sample({ elapsedSeconds: 0.1, localPlayerId: "local" });
-    assert.equal(projected.players[1].position.x, 14, "the correction must converge to the new authority path");
+    interpolation.push(snapshot(6, 0), 0);
+    interpolation.push(snapshot(12, 6, 80), 70);
+    let projected = interpolation.sample({ now: 75, localPlayerId: "local" });
+    assert.equal(projected.players[0].position.x, 6, "the local player must use owner prediction instead");
+    assert.equal(projected.players[1].position.x, 3, "remote players must interpolate between known snapshots");
+    assert.equal(projected.enemies[0].position.x, 6, "enemies must share the delayed interpolation timeline");
+    assert.equal(projected.players[1].health, 80, "non-position state must use the latest authority value");
+    projected = interpolation.sample({ now: 170, localPlayerId: "local" });
+    assert.ok(
+        Math.abs(projected.players[1].position.x - 13) < 1e-9,
+        "missing future samples may use bounded extrapolation"
+    );
+    projected = interpolation.sample({ now: 1000, localPlayerId: "local" });
+    assert.equal(projected.players[1].position.x, 18, "extrapolation must stop at its bounded horizon");
 
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer);
