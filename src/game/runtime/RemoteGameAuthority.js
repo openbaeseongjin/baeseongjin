@@ -1,4 +1,5 @@
 import { deserializeCommandReceipt } from "../network/CommandReceipt.js";
+import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
@@ -55,7 +56,10 @@ export class RemoteGameAuthority {
                     if (message.type === "welcome") {
                         this.playerId = message.playerId;
                         this.channelId = message.channelId;
-                        this.stream = new RemoteCommandStream({ playerId: this.playerId, inputLeadTicks: 4 });
+                        this.stream = new RemoteCommandStream({
+                            playerId: this.playerId,
+                            inputLeadTicks: MULTIPLAYER_TIMING.inputLeadTicks
+                        });
                         this.predictor = new LocalPlayerPredictor({ playerId: this.playerId });
                         this.acceptSnapshot(message.snapshot);
                         if (!settled) {

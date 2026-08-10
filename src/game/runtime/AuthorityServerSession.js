@@ -1,5 +1,6 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
+import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
 function assertPositive(value, label) {
@@ -13,7 +14,13 @@ function assertPositiveInteger(value, label) {
 }
 
 export class AuthorityServerSession {
-    constructor({ simulation, fixedDt = 1 / 120, snapshotIntervalTicks = 6, maxPastTicks = 2, maxFutureTicks = 12 }) {
+    constructor({
+        simulation,
+        fixedDt = 1 / 120,
+        snapshotIntervalTicks = 6,
+        maxPastTicks = 2,
+        maxFutureTicks = MULTIPLAYER_TIMING.maxFutureTicks
+    }) {
         if (!simulation) throw new Error("simulation is required");
         this.simulation = simulation;
         this.fixedDt = assertPositive(fixedDt, "fixedDt");
