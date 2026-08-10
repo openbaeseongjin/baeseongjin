@@ -29,6 +29,12 @@ export function run() {
 
     renderer.cssWidth = 844;
     renderer.cssHeight = 390;
+    renderer.drawPlayerHealthHud({ playerHealth: 35, playerMaxHealth: 100, playerLifeState: "active" });
+    assert.deepEqual(textCalls, ["HP", "35 / 100"]);
+    textCalls.length = 0;
+    renderer.drawPlayerHealthHud({ playerHealth: 0, playerMaxHealth: 100, playerLifeState: "downed" });
+    assert.deepEqual(textCalls, ["쓰러짐", "0 / 100"]);
+    textCalls.length = 0;
     renderer.drawMetricsPanel({
         activeSeconds: 12.5,
         checkpointsReached: 1,
