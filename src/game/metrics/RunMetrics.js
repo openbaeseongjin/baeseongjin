@@ -24,7 +24,7 @@ export class RunMetrics {
     recordCombat(playerEvents, enemyEvents) {
         this.enemyDefeats += playerEvents.hits.filter((event) => event.type === "enemy-defeated").length;
         this.damageTaken += enemyEvents.hits.reduce((total, event) => total + event.damage, 0);
-        if (enemyEvents.ropeCutAt) this.ropeCuts += 1;
+        this.ropeCuts += enemyEvents.ropeCuts?.length ?? (enemyEvents.ropeCutAt ? 1 : 0);
     }
 
     recordDefeat() {

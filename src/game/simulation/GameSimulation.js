@@ -155,7 +155,7 @@ export class GameSimulation {
         });
         const enemyProjectileSpawns = updateEnemyWeapons({
             enemies: this.enemies,
-            target: this.playerEntity,
+            targets: this.players,
             projectiles: this.enemyProjectiles,
             registry: this.registry,
             config: COMBAT_CONFIG,
@@ -164,8 +164,7 @@ export class GameSimulation {
         for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile, "enemy-projectile");
         const enemyProjectileEvents = updateEnemyProjectiles({
             projectiles: this.enemyProjectiles,
-            target: this.playerEntity,
-            rope: this.rope,
+            targets: this.players,
             config: COMBAT_CONFIG,
             dt
         });
@@ -173,9 +172,10 @@ export class GameSimulation {
             this.recordProjectileResolution(resolution);
         }
         this.metrics.recordCombat(playerProjectileEvents, enemyProjectileEvents);
-        if (enemyProjectileEvents.ropeCutAt) {
-            this.eventFlash = { type: "rope-cut", age: 0, position: enemyProjectileEvents.ropeCutAt };
-            this.swingDrag = null;
+        for (const ropeCut of enemyProjectileEvents.ropeCuts) {
+            const player = this.players.find(({ id }) => id === ropeCut.playerId);
+            if (player) player.swingDrag = null;
+            this.eventFlash = { type: "rope-cut", age: 0, position: ropeCut.position, playerId: ropeCut.playerId };
         }
         const combatEvents = [...playerProjectileEvents.hits, ...enemyProjectileEvents.hits];
         for (const event of combatEvents) appendCombatFeedback(this.combatEffects, event);
