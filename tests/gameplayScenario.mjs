@@ -10,6 +10,7 @@ import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
 import { run as worldSeed } from "./worldSeed.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
+import { run as artifactRewardSelection } from "./artifactRewardSelection.mjs";
 
 const steps = {
     worldSeed,
@@ -19,6 +20,7 @@ const steps = {
     playerPhysics,
     playerCollision,
     swingDrag,
+    artifactRewardSelection,
     gameSimulation,
     combatSystems,
     canvasRenderer,

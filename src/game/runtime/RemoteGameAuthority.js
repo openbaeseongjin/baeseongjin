@@ -1,4 +1,5 @@
 import { deserializeCommandReceipt } from "../network/CommandReceipt.js";
+import { createArtifactSelectionClaim, serializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
@@ -36,6 +37,7 @@ export class RemoteGameAuthority {
         this.sentSequenceOrder = [];
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
+        this.artifactSelectionReceipts = [];
         this.networkMetrics = {
             roundTripMs: null,
             snapshotIntervalMs: null,
@@ -92,6 +94,8 @@ export class RemoteGameAuthority {
                         const receipt = deserializeCommandReceipt(message.payload);
                         this.recordReceipt(receipt);
                         this.stream.acceptReceipt(receipt);
+                    } else if (message.type === "artifact-selection-receipt") {
+                        this.artifactSelectionReceipts.push(Object.freeze({ ...message.payload }));
                     }
                 } catch (error) {
                     fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
@@ -179,6 +183,25 @@ export class RemoteGameAuthority {
         this.socket.send(JSON.stringify({ type: "impact-claim", payload: serializePlayerImpactClaim(claim) }));
         this.submitOwnerMotion();
         return true;
+    }
+
+    submitArtifactSelection({ checkpointId, artifactId }) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.predictor) return false;
+        const claim = createArtifactSelectionClaim({
+            checkpointId,
+            artifactId,
+            clientTick: this.predictor.state().tick
+        });
+        this.socket.send(
+            JSON.stringify({ type: "artifact-selection", payload: serializeArtifactSelectionClaim(claim) })
+        );
+        return true;
+    }
+
+    drainArtifactSelectionReceipts() {
+        const receipts = Object.freeze(this.artifactSelectionReceipts);
+        this.artifactSelectionReceipts = [];
+        return receipts;
     }
 
     snapshot() {

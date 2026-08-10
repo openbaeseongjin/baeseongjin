@@ -12,6 +12,7 @@ import { enterDowned, isTeamDefeated, updateDownedPlayer, updateTeamRevives } fr
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
+import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "../rewards/ArtifactRewardSelection.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -397,14 +398,14 @@ export class GameSimulation {
     beginArtifactReward(checkpoint) {
         this.metrics.recordFirstReward();
         for (const player of this.players) {
-            this.artifactRewards.set(player.id, {
-                checkpointId: checkpoint.id,
-                choices: ARTIFACT_CATALOG,
-                selectedIndex: 0,
-                inputReady: false,
-                previousHorizontal: 0,
-                previousConfirm: false
-            });
+            this.artifactRewards.set(
+                player.id,
+                createArtifactRewardSelection({
+                    checkpointId: checkpoint.id,
+                    choices: ARTIFACT_CATALOG,
+                    selectedIndex: 0
+                })
+            );
             player.rope.detach();
             player.swingDrag = null;
         }
@@ -422,33 +423,39 @@ export class GameSimulation {
     }
 
     updateArtifactReward(player, reward, command) {
-        const horizontal = Math.sign(command.horizontal);
-        const confirm = command.vertical < 0;
-        if (!reward.inputReady) {
-            if (horizontal === 0 && !confirm) reward.inputReady = true;
-            return;
+        const outcome = advanceArtifactRewardSelection(reward, command);
+        this.artifactRewards.set(player.id, outcome.selection);
+        if (outcome.confirmedArtifactId) {
+            this.resolveArtifactSelection(player.id, {
+                checkpointId: reward.checkpointId,
+                artifactId: outcome.confirmedArtifactId
+            });
         }
-        if (horizontal !== 0 && reward.previousHorizontal === 0) {
-            const count = reward.choices.length;
-            reward.selectedIndex = (reward.selectedIndex + horizontal + count) % count;
+    }
+
+    resolveArtifactSelection(playerId, { checkpointId, artifactId }) {
+        const player = this.players.find(({ id }) => id === playerId);
+        if (!player) return Object.freeze({ accepted: false, reason: "player-not-found" });
+        const reward = this.artifactRewards.get(playerId);
+        if (!reward) return Object.freeze({ accepted: false, reason: "reward-unavailable" });
+        if (reward.checkpointId !== checkpointId) {
+            return Object.freeze({ accepted: false, reason: "checkpoint-mismatch" });
         }
-        if (confirm && !reward.previousConfirm) {
-            const selected = reward.choices[reward.selectedIndex];
-            player.artifacts.add(selected);
-            this.artifactRewards.delete(player.id);
-            this.applyArtifactEffects(player);
-            this.eventFlash = {
-                type: "artifact",
-                age: 0,
-                artifact: selected,
-                playerId: player.id,
-                position: player.physics.position.clone()
-            };
-            if (this.artifactRewards.size === 0) this.rewardedCheckpointIds.add(reward.checkpointId);
-            return;
-        }
-        reward.previousHorizontal = horizontal;
-        reward.previousConfirm = confirm;
+        const selected = reward.choices.find(({ id }) => id === artifactId);
+        if (!selected) return Object.freeze({ accepted: false, reason: "artifact-unavailable" });
+
+        player.artifacts.add(selected);
+        this.artifactRewards.delete(player.id);
+        this.applyArtifactEffects(player);
+        this.eventFlash = {
+            type: "artifact",
+            age: 0,
+            artifact: selected,
+            playerId: player.id,
+            position: player.physics.position.clone()
+        };
+        if (this.artifactRewards.size === 0) this.rewardedCheckpointIds.add(reward.checkpointId);
+        return Object.freeze({ accepted: true, checkpointId, artifactId });
     }
 
     applyArtifactEffects(player = this.playerEntity) {

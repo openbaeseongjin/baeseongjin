@@ -6,8 +6,10 @@ import { run as remoteGameAuthority } from "./remoteGameAuthority.mjs";
 import { run as predictableProjectileStore } from "./predictableProjectileStore.mjs";
 import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mjs";
 import { run as gameServerHandler } from "./gameServerHandler.mjs";
+import { run as artifactSelectionClaim } from "./artifactSelectionClaim.mjs";
 
 const steps = {
+    artifactSelectionClaim,
     playerCommandBatch,
     authorityServerSession,
     localPlayerPredictor,
