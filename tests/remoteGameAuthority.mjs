@@ -66,8 +66,11 @@ export async function run() {
         Math.abs(projected.players[1].position.x - 13) < 1e-9,
         "missing future samples may use bounded extrapolation"
     );
+    assert.ok(interpolation.metrics().extrapolationMs > 0);
     projected = interpolation.sample({ now: 1000, localPlayerId: "local" });
     assert.equal(projected.players[1].position.x, 18, "extrapolation must stop at its bounded horizon");
+    assert.equal(interpolation.metrics().extrapolationMs, 120);
+    assert.equal(interpolation.metrics().maxExtrapolationMs, 120);
 
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer);
@@ -89,6 +92,25 @@ export async function run() {
         assert.equal(authority.submit(movementCommand()), true);
         assert.equal(authority.stream.pendingBatches().length, 1);
         assert.equal(authority.stream.pendingBatches()[0].tick, locallyAdvanced.tick);
+        await waitFor(() => authority.metrics().acceptedCommands > 0, "command receipts must update network metrics");
+        assert.ok(authority.metrics().roundTripMs >= 0);
+        await waitFor(() => authority.metrics().snapshotIntervalMs > 0, "snapshot cadence must be measured");
+        assert.equal(authority.metrics().rejectedCommands, 0);
+        assert.equal(authority.metrics().rejectionRate, 0);
+        const acceptedBeforeDuplicate = authority.metrics().acceptedCommands;
+        authority.sentAtBySequence.set(999, authority.now() - 20);
+        authority.recordReceipt({
+            accepted: [],
+            rejected: [{ playerId: authority.playerId, sequence: 999, reason: "test-rejection" }]
+        });
+        assert.equal(authority.metrics().rejectedCommands, 1);
+        assert.ok(authority.metrics().rejectionRate > 0);
+        authority.recordReceipt({
+            accepted: [],
+            rejected: [{ playerId: authority.playerId, sequence: 999, reason: "test-rejection" }]
+        });
+        assert.equal(authority.metrics().acceptedCommands, acceptedBeforeDuplicate);
+        assert.equal(authority.metrics().rejectedCommands, 1, "duplicate receipts must not skew diagnostics");
         const partner = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=${authority.channelId}`,
             WebSocketImpl: WebSocket
@@ -127,6 +149,7 @@ export async function run() {
                 delayedStartX + 40,
             "mobile-latency commands must move the authoritative player"
         );
+        assert.ok(delayedAuthority.metrics().roundTripMs >= MOBILE_NETWORK_DELAY_MS * 0.8);
         delayedAuthority.close();
         await gameServer.close();
         gameServerClosed = true;

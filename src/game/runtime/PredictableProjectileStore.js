@@ -28,6 +28,7 @@ export class PredictableProjectileStore {
         this.objectIdByPredictionId = new Map();
         this.predictionIdByAuthorityId = new Map();
         this.locallyResolvedPredictionIds = new Set();
+        this.predictionCancellations = 0;
     }
 
     apply(events, serverTick, state) {
@@ -38,12 +39,14 @@ export class PredictableProjectileStore {
                 continue;
             }
             if (event.eventType === "resolve") {
+                const existingProjectile = this.objects.get(event.objectId);
                 this.objects.delete(event.objectId);
                 const predictionId = this.predictionIdByAuthorityId.get(event.objectId);
                 if (predictionId) {
                     this.predictionIdByAuthorityId.delete(event.objectId);
                     this.objectIdByPredictionId.delete(predictionId);
                     if (this.locallyResolvedPredictionIds.delete(predictionId)) continue;
+                    if (existingProjectile?.predictCollision) this.predictionCancellations += 1;
                 }
                 feedbackEvents.push(event);
                 continue;
@@ -144,5 +147,9 @@ export class PredictableProjectileStore {
             target.push({ ...projectile, position: { ...projectile.position }, velocity: { ...projectile.velocity } });
         }
         return { projectiles, enemyProjectiles };
+    }
+
+    metrics() {
+        return Object.freeze({ predictionCancellations: this.predictionCancellations });
     }
 }

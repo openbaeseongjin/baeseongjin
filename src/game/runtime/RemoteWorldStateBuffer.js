@@ -63,6 +63,8 @@ export class RemoteWorldStateBuffer {
         this.events = [];
         this.recentEventIds = new Set();
         this.eventIdOrder = [];
+        this.lastExtrapolationSeconds = 0;
+        this.maxExtrapolationSecondsObserved = 0;
     }
 
     push(snapshot, receivedAt = performance.now()) {
@@ -97,6 +99,14 @@ export class RemoteWorldStateBuffer {
         if (!Number.isFinite(now)) throw new Error("now must be finite");
         const elapsedTicks = (Math.max(0, now - this.clockAnchorAt) * TICKS_PER_SECOND) / 1000;
         const targetTick = this.clockAnchorTick + elapsedTicks - this.interpolationSeconds * TICKS_PER_SECOND;
+        this.lastExtrapolationSeconds = Math.min(
+            this.maxExtrapolationSeconds,
+            Math.max(0, (targetTick - this.latest.serverTick) / TICKS_PER_SECOND)
+        );
+        this.maxExtrapolationSecondsObserved = Math.max(
+            this.maxExtrapolationSecondsObserved,
+            this.lastExtrapolationSeconds
+        );
         const lowerEntry = [...this.history].reverse().find(({ snapshot }) => snapshot.serverTick <= targetTick);
         const upperEntry = this.history.find(({ snapshot }) => snapshot.serverTick >= targetTick);
         const latestState = this.latest.state;
@@ -136,5 +146,12 @@ export class RemoteWorldStateBuffer {
         const drained = Object.freeze([...this.events]);
         this.events.length = 0;
         return drained;
+    }
+
+    metrics() {
+        return Object.freeze({
+            extrapolationMs: this.lastExtrapolationSeconds * 1000,
+            maxExtrapolationMs: this.maxExtrapolationSecondsObserved * 1000
+        });
     }
 }
