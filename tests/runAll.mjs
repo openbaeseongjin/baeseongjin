@@ -7,6 +7,7 @@ import { run as worldGenerator } from "./worldGenerator.mjs";
 import { run as playerPhysics } from "./playerPhysics.mjs";
 import { run as versionContract } from "./versionContract.mjs";
 import { run as swingDrag } from "./swingDrag.mjs";
+import { run as gameSimulation } from "./gameSimulation.mjs";
 
 const suites = {
     fixedStep,
@@ -17,7 +18,8 @@ const suites = {
     worldGenerator,
     playerPhysics,
     versionContract,
-    swingDrag
+    swingDrag,
+    gameSimulation
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
