@@ -50,6 +50,7 @@ export class CanvasRenderer {
         this.drawWorld(scene.world);
         this.drawAttachmentRange(scene);
         this.drawRope(scene.rope, scene.player.position);
+        this.drawSwingDrag(scene.player, scene.swingDrag);
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash);
         this.context.restore();
@@ -185,11 +186,37 @@ export class CanvasRenderer {
         ctx.stroke();
     }
 
+    drawSwingDrag(player, swingDrag) {
+        if (!swingDrag || swingDrag.used || !swingDrag.direction || swingDrag.progress <= 0) return;
+        const ctx = this.context;
+        const length = 28 + swingDrag.progress * 34;
+        const endX = player.position.x + swingDrag.direction.x * length;
+        const endY = player.position.y + swingDrag.direction.y * length;
+        ctx.save();
+        ctx.globalAlpha = 0.35 + swingDrag.progress * 0.65;
+        ctx.strokeStyle = COLORS.ropeTense;
+        ctx.fillStyle = COLORS.ropeTense;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(player.position.x, player.position.y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        ctx.translate(endX, endY);
+        ctx.rotate(Math.atan2(swingDrag.direction.y, swingDrag.direction.x));
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-11, -6);
+        ctx.lineTo(-11, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
     drawPlayer(player, eventFlash) {
         const ctx = this.context;
         if (eventFlash.age < 0.28) {
             const progress = eventFlash.age / 0.28;
-            ctx.strokeStyle = eventFlash.type === "release" ? "#fde68a" : "#67e8f9";
+            ctx.strokeStyle = eventFlash.type === "release" || eventFlash.type === "swing" ? "#fde68a" : "#67e8f9";
             ctx.globalAlpha = 1 - progress;
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -216,7 +243,7 @@ export class CanvasRenderer {
         }
     }
 
-    drawHud({ player, rope, world, stats, attachmentCandidate }) {
+    drawHud({ player, rope, world, stats, attachmentCandidate, swingDrag }) {
         const ctx = this.context;
         ctx.fillStyle = "rgba(7, 11, 20, 0.76)";
         ctx.fillRect(18, 18, 290, 92);
@@ -229,7 +256,9 @@ export class CanvasRenderer {
         ctx.fillText(`height ${climbed}/${totalHeight} · speed ${Math.round(player.velocity.length())}`, 32, 42);
         ctx.fillText(
             rope.isAttached
-                ? `ROPE TENSION ${Math.round(rope.tension)} · release mouse`
+                ? swingDrag?.used
+                    ? `SWING USED · release mouse`
+                    : `DRAG TANGENT ${Math.round((swingDrag?.progress ?? 0) * 100)}%`
                 : attachmentCandidate
                   ? "TARGET LOCKED · hold mouse"
                   : "AIM AT ANY SURFACE",

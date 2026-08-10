@@ -16,7 +16,9 @@ export const ROPE_CONFIG = Object.freeze({
     minimumRestLength: 90,
     maximumStretchRatio: 1.35,
     retractSpeed: 70,
-    attachBufferSeconds: 0.1
+    attachBufferSeconds: 0.1,
+    swingDragThreshold: 44,
+    swingImpulse: 460
 });
 
 export const WORLD_CONFIG = Object.freeze({
