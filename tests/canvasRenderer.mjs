@@ -38,4 +38,8 @@ export function run() {
     textCalls.length = 0;
     renderer.drawMobileControls({ visible: true, ropePointerDown: false, left: true, jump: false, right: false });
     assert.deepEqual(textCalls, ["←", "점프", "→"]);
+
+    textCalls.length = 0;
+    renderer.drawRunEndOverlay({ runState: "completed", defeatReason: null, restartRemaining: 2.4 });
+    assert.deepEqual(textCalls, ["정상 도달", "전체 월드 등반 완료"]);
 }

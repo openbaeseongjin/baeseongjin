@@ -48,4 +48,26 @@ export function run() {
     assert.equal(defeated.snapshot().enemies.length, expectedEnemyCount);
     assert.equal(defeated.snapshot().projectiles.length, 0);
     assert.equal(defeated.snapshot().enemyProjectiles.length, 0);
+
+    const completed = new GameSimulation();
+    completed.rope.attach(completed.player.position, {
+        x: completed.player.position.x,
+        y: completed.player.position.y - 100
+    });
+    completed.player.position.x = completed.world.summit.x;
+    completed.player.position.y = completed.world.summit.y;
+    completed.step(1 / 120, command);
+    assert.equal(completed.snapshot().runState, "completed");
+    assert.equal(completed.snapshot().rope.isAttached, false);
+    assert.equal(completed.snapshot().restartRemaining, 0);
+    completed.playerEntity.health = 1;
+    completed.step(1, command);
+    assert.equal(completed.snapshot().playerHealth, 1, "combat and physics must pause after completion");
+    completed.step(20, command);
+    assert.equal(
+        completed.snapshot().runState,
+        "completed",
+        "the summit ends the single large world without a stage restart"
+    );
+    assert.equal(completed.snapshot().playerHealth, 1);
 }

@@ -56,10 +56,16 @@ export class GameSimulation {
     }
 
     step(dt, command) {
-        if (this.runState === "defeated") {
-            this.restartRemaining = Math.max(0, this.restartRemaining - dt);
+        if (this.runState !== "playing") {
             this.eventFlash.age += dt;
-            if (this.restartRemaining <= 0) this.resetRun();
+            if (this.runState === "defeated") {
+                this.restartRemaining = Math.max(0, this.restartRemaining - dt);
+                if (this.restartRemaining <= 0) this.resetRun();
+            }
+            return;
+        }
+        if (this.player.position.distanceTo(this.world.summit) <= this.world.summit.radius) {
+            this.beginCompletion();
             return;
         }
         const canControl = this.playerEntity.lifeState === "active";
@@ -231,13 +237,23 @@ export class GameSimulation {
     }
 
     beginDefeat(reason) {
-        if (this.runState === "defeated") return;
+        if (this.runState !== "playing") return;
         this.runState = "defeated";
         this.defeatReason = reason;
         this.restartRemaining = LIFE_CONFIG.defeatRestartDelay;
         this.rope.detach();
         this.swingDrag = null;
         this.eventFlash = { type: "defeat", age: 0 };
+    }
+
+    beginCompletion() {
+        if (this.runState !== "playing") return;
+        this.runState = "completed";
+        this.defeatReason = null;
+        this.restartRemaining = 0;
+        this.rope.detach();
+        this.swingDrag = null;
+        this.eventFlash = { type: "completed", age: 0, position: this.world.summit };
     }
 
     snapshot() {

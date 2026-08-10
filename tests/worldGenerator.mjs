@@ -24,6 +24,13 @@ export function run() {
         "one-way rocks must expose the exact highlighted top-edge chain"
     );
     assert.ok(first.topY < WORLD_CONFIG.floorY - WORLD_CONFIG.verticalStep * (WORLD_CONFIG.levelCount - 1));
+    const summitPlatform = first.route.at(-1);
+    assert.deepEqual(first.summit, {
+        x: summitPlatform.x + summitPlatform.width * 0.5,
+        y: summitPlatform.topY - WORLD_CONFIG.summitRadius,
+        radius: WORLD_CONFIG.summitRadius
+    });
+    assert.deepEqual(first.summit, second.summit, "the same seed must produce the same summit target");
 
     for (let index = 1; index < first.route.length; index += 1) {
         const previous = first.route[index - 1];
