@@ -222,7 +222,7 @@ export class GameSimulation {
             this.firstArtifactRewardClaimed = true;
             this.artifactReward = null;
             this.applyArtifactEffects();
-            this.eventFlash = { type: "artifact", age: 0, position: this.player.position.clone() };
+            this.eventFlash = { type: "artifact", age: 0, artifact: selected, position: this.player.position.clone() };
             return;
         }
         this.artifactReward.previousHorizontal = horizontal;
@@ -310,6 +310,9 @@ export class GameSimulation {
         this.lastCheckpointLoss = this.artifacts.applyCheckpointLoss();
         this.ropeDamageBoostRemaining = 0;
         this.applyArtifactEffects();
+        if (this.lastCheckpointLoss.length > 0) {
+            this.eventFlash = { type: "artifact-loss", age: 0, artifacts: [...this.lastCheckpointLoss] };
+        }
         this.resets += 1;
     }
 

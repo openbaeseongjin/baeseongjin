@@ -62,6 +62,7 @@ export function run() {
         defeated.snapshot().lastCheckpointLoss.map((artifact) => artifact.id),
         ["c"]
     );
+    assert.equal(defeated.snapshot().eventFlash.type, "artifact-loss");
 
     const completed = new GameSimulation();
     completed.rope.attach(completed.player.position, {
@@ -120,4 +121,5 @@ export function run() {
     assert.equal(rewardRun.snapshot().artifactReward, null);
     assert.equal(rewardRun.snapshot().artifacts[0].id, "rapid-gear");
     assert.equal(rewardRun.playerEntity.weapon.fireInterval, 0.65 * 0.75);
+    assert.equal(rewardRun.snapshot().eventFlash.artifact.id, "rapid-gear");
 }
