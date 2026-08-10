@@ -2,7 +2,7 @@
 
 ## 현재 범위
 
-브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 절차 생성 암석 지형, 자동 전투, 적 투사체, 생명 상태와 런 재시작을 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
+브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 절차 생성 암석 지형, 자동 전투, 적 투사체, 체크포인트 복귀와 아티팩트 런 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
 
 ## 주요 모듈
 
@@ -19,10 +19,16 @@ index.html
       ├─ game/simulation/GameSimulation.js
       ├─ game/combat/CombatSystems.js
       ├─ game/combat/CombatFeedback.js
+      ├─ game/artifacts/ArtifactCatalog.js
+      ├─ game/artifacts/ArtifactInventory.js
       ├─ game/life/PlayerLifeCycle.js
+      ├─ game/metrics/RunMetrics.js
+      ├─ game/network/PlayerCommandBatch.js
+      ├─ game/replay/CommandReplay.js
       ├─ game/physics/PlayerPhysics.js
       ├─ game/rope/FixedLengthRope.js
       ├─ game/world/WorldGenerator.js
+      ├─ game/world/WorldTraversalValidator.js
       └─ game-kit/math/Vector2.js
 ```
 
@@ -63,7 +69,7 @@ index.html
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
 - `PlayerCommandBatch`는 플레이어 ID 순으로 정규화된 틱 단위 전송 계약이며, 실제 네트워크 라이브러리와 GameSimulation 사이의 경계를 형성한다.
 - 마지막 암석 위의 정상 목표도 시드 결과에 포함되며, 도달하면 하나의 큰 월드를 끝내는 `completed` 터미널 상태에서 판정을 멈춘다.
-- `GameSimulation`이 플레이어·로프·적·투사체·체력·다운·패배·재시작을 소유한다.
+- `GameSimulation`이 플레이어·로프·적·투사체·체력·다운·패배·체크포인트 복귀를 소유한다.
 - 기본 무기는 사거리 안의 가장 가까운 적을 자동 조준하며, 적은 플레이어를 향해 투사체를 발사한다.
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.
