@@ -67,9 +67,13 @@ export class CanvasRenderer {
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
-        if (!scene.mobileView) this.drawCombatHud(scene);
+        if (!scene.mobileView) {
+            this.drawCombatHud(scene);
+            this.drawArtifactHud(scene.artifacts, scene.ropeDamageBoostRemaining);
+        }
         this.drawArtifactRewardOverlay(scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
+        this.drawArtifactFeedback(scene.eventFlash);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
     }
@@ -237,6 +241,67 @@ export class CanvasRenderer {
             ctx.font = "700 12px system-ui, sans-serif";
             ctx.fillText(choice.description, x + cardWidth * 0.5, startY + cardHeight * 0.65);
         });
+        ctx.restore();
+    }
+
+    drawArtifactHud(artifacts = [], ropeDamageBoostRemaining = 0) {
+        const ctx = this.context;
+        const height = 46 + Math.max(1, artifacts.length) * 20;
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 11, 20, 0.82)";
+        ctx.fillRect(18, 132, 300, height);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.38)";
+        ctx.strokeRect(18, 132, 300, height);
+        ctx.fillStyle = "#fde68a";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.fillText("아티팩트", 32, 154);
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "700 12px system-ui, sans-serif";
+        if (artifacts.length === 0) {
+            ctx.fillText("보유 없음", 32, 176);
+        } else {
+            artifacts.forEach((artifact, index) => ctx.fillText(`• ${artifact.name}`, 32, 176 + index * 20));
+        }
+        if (ropeDamageBoostRemaining > 0) {
+            ctx.fillStyle = "#67e8f9";
+            ctx.textAlign = "right";
+            ctx.fillText(`공명 ${ropeDamageBoostRemaining.toFixed(1)}초`, 302, 154);
+        }
+        ctx.restore();
+    }
+
+    drawArtifactFeedback(eventFlash) {
+        if (!eventFlash || eventFlash.age >= 2.2) return;
+        let title;
+        let detail;
+        let color;
+        if (eventFlash.type === "artifact" && eventFlash.artifact) {
+            title = "아티팩트 획득";
+            detail = eventFlash.artifact.name;
+            color = "#fbbf24";
+        } else if (eventFlash.type === "artifact-loss" && eventFlash.artifacts?.length) {
+            title = "체크포인트 복귀 · 아티팩트 손실";
+            detail = eventFlash.artifacts.map((artifact) => artifact.name).join(", ");
+            color = "#fb7185";
+        } else {
+            return;
+        }
+        const ctx = this.context;
+        const alpha = Math.min(1, eventFlash.age / 0.15, (2.2 - eventFlash.age) / 0.35);
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.fillStyle = "rgba(7, 11, 20, 0.92)";
+        ctx.fillRect(this.cssWidth * 0.5 - 180, 18, 360, 62);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(this.cssWidth * 0.5 - 180, 18, 360, 62);
+        ctx.textAlign = "center";
+        ctx.fillStyle = color;
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.fillText(title, this.cssWidth * 0.5, 42);
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(detail, this.cssWidth * 0.5, 62);
         ctx.restore();
     }
 

@@ -29,6 +29,16 @@ export function run() {
 
     renderer.cssWidth = 844;
     renderer.cssHeight = 390;
+    renderer.drawArtifactHud([{ name: "로프 공명기" }], 1.5);
+    assert.deepEqual(textCalls, ["아티팩트", "• 로프 공명기", "공명 1.5초"]);
+    textCalls.length = 0;
+    renderer.drawArtifactFeedback({ type: "artifact", age: 0.4, artifact: { name: "동력핵" } });
+    assert.deepEqual(textCalls, ["아티팩트 획득", "동력핵"]);
+    textCalls.length = 0;
+    renderer.drawArtifactFeedback({ type: "artifact-loss", age: 0.4, artifacts: [{ name: "연사 톱니" }] });
+    assert.deepEqual(textCalls, ["체크포인트 복귀 · 아티팩트 손실", "연사 톱니"]);
+    textCalls.length = 0;
+    borderCalls.length = 0;
     renderer.drawArtifactRewardOverlay({
         selectedIndex: 1,
         choices: [
