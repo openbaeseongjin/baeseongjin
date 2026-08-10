@@ -104,7 +104,7 @@ export class RemoteGameAuthority {
         const snapshot = deserializeWorldSnapshotEnvelope(serialized);
         this.predictor ??= new LocalPlayerPredictor({
             playerId: this.playerId,
-            simulation: new GameSimulation({ worldSeed: snapshot.worldSeed })
+            simulation: new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: this.playerId })
         });
         if (!this.stream.acceptSnapshot(snapshot)) return;
         this.pruneSentCommands(snapshot.acknowledgements?.[this.playerId]);

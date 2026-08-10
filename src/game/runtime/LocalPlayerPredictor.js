@@ -25,7 +25,7 @@ function percentile(samples, ratio) {
 export class LocalPlayerPredictor {
     constructor({
         playerId,
-        simulation = new GameSimulation(),
+        simulation = null,
         fixedDt = 1 / 120,
         inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks,
         predictionLeadTicks = MULTIPLAYER_TIMING.inputLeadTicks,
@@ -48,7 +48,12 @@ export class LocalPlayerPredictor {
             throw new Error("hardSnapDistance must be positive");
         }
         this.playerId = playerId;
-        this.simulation = simulation;
+        this.simulation = simulation ?? new GameSimulation({ playerId });
+        if (this.simulation.playerEntity.id !== playerId) {
+            throw new Error(
+                `prediction simulation playerId mismatch: expected ${playerId}, received ${this.simulation.playerEntity.id}`
+            );
+        }
         this.fixedDt = fixedDt;
         this.inputHoldTicks = inputHoldTicks;
         this.predictionLeadTicks = predictionLeadTicks;

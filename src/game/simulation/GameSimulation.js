@@ -17,12 +17,12 @@ import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.j
 import { EntityRegistry } from "./EntityRegistry.js";
 
 export class GameSimulation {
-    constructor({ worldSeed = WORLD_CONFIG.seed } = {}) {
+    constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null } = {}) {
         this.world = new WorldGenerator({ ...WORLD_CONFIG, seed: worldSeed }).generate();
         this.metrics = new RunMetrics();
         this.registry = new EntityRegistry();
         this.players = [];
-        const playerRuntime = this.addPlayer();
+        const playerRuntime = this.addPlayer(undefined, playerId);
         this.player = playerRuntime.physics;
         this.rope = playerRuntime.rope;
         this.artifacts = playerRuntime.artifacts;
@@ -43,14 +43,15 @@ export class GameSimulation {
         this.replicationEvents = [];
     }
 
-    addPlayer(spawn) {
+    addPlayer(spawn, playerId = null) {
         const runtime = createPlayerRuntime({
             registry: this.registry,
             playerConfig: PLAYER_CONFIG,
             ropeConfig: ROPE_CONFIG,
             combatConfig: COMBAT_CONFIG,
             artifactConfig: ARTIFACT_CONFIG,
-            spawn
+            spawn,
+            playerId
         });
         this.players.push(runtime.entity);
         return runtime;
