@@ -10,6 +10,7 @@ import { run as swingDrag } from "./swingDrag.mjs";
 import { run as gameSimulation } from "./gameSimulation.mjs";
 import { run as combatSystems } from "./combatSystems.mjs";
 import { run as playerLifeCycle } from "./playerLifeCycle.mjs";
+import { run as pwaContract } from "./pwaContract.mjs";
 
 const suites = {
     fixedStep,
@@ -23,7 +24,8 @@ const suites = {
     swingDrag,
     gameSimulation,
     combatSystems,
-    playerLifeCycle
+    playerLifeCycle,
+    pwaContract
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
