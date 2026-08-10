@@ -16,10 +16,11 @@ const gameOnly = process.argv.includes("--game-only") || process.env.BAESEONGJIN
 const allowedOriginsArgument = process.argv
     .find((argument) => argument.startsWith("--allowed-origins="))
     ?.slice("--allowed-origins=".length);
+const defaultAllowedOrigins = gameOnly ? "https://openbaeseongjin.github.io" : "";
 const requestHandler = gameOnly ? createGameServerRequestHandler() : createStaticRequestHandler(root);
 const server = createServer(requestHandler);
 const multiplayer = new MultiplayerGameServer(server, {
-    allowedOrigins: (allowedOriginsArgument ?? process.env.BAESEONGJIN_ALLOWED_ORIGINS ?? "")
+    allowedOrigins: (allowedOriginsArgument ?? process.env.BAESEONGJIN_ALLOWED_ORIGINS ?? defaultAllowedOrigins)
         .split(",")
         .map((origin) => origin.trim())
         .filter(Boolean)

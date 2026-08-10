@@ -16,7 +16,7 @@ npm start
 
 기본 주소는 `http://127.0.0.1:4173`이다. 다른 포트는 `npm start -- 5000`처럼 지정한다.
 
-정적 페이지와 멀티 서버를 함께 개발할 때는 `npm run start:multiplayer`를 사용한다. 실제 상시 서버와 같은 정적 파일 비노출 경계는 `npm run start:game-server`로 확인한다. 이 명령은 컨테이너 없이 로컬 `0.0.0.0:4175`에 직접 실행되며 `/health`와 `/multiplayer` WebSocket만 제공한다.
+정적 페이지와 멀티 서버를 함께 개발할 때는 `npm run start:multiplayer`를 사용한다. 실제 상시 서버와 같은 정적 파일 비노출 경계는 `npm run start:game-server`로 확인한다. 이 명령은 컨테이너 없이 로컬 `0.0.0.0:4175`에 직접 실행되며 `/health`와 `/multiplayer` WebSocket만 제공한다. game-only 모드는 기본적으로 `https://openbaeseongjin.github.io` Origin만 허용한다. 다른 공식 프런트엔드가 필요하면 `BAESEONGJIN_ALLOWED_ORIGINS` 또는 `--allowed-origins=`로 명시적으로 교체한다.
 
 ## 검증
 
