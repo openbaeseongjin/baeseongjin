@@ -13,11 +13,11 @@ export function selectNearestEnemy(position, enemies, range) {
 
 export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt }) {
     owner.weapon.cooldown = Math.max(0, owner.weapon.cooldown - dt);
-    if (owner.lifeState === "downed") return;
-    if (owner.weapon.cooldown > 0) return;
+    if (owner.lifeState === "downed") return null;
+    if (owner.weapon.cooldown > 0) return null;
     const target = selectNearestEnemy(owner.physics.position, enemies, owner.weapon.range);
-    if (!target) return;
-    projectiles.push({
+    if (!target) return null;
+    const projectile = {
         id: registry.createId("projectile"),
         ownerId: owner.id,
         targetId: target.id,
@@ -25,17 +25,29 @@ export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, c
         velocity: new Vector2(),
         damage: owner.weapon.damage,
         radius: config.projectileRadius
-    });
+    };
+    projectiles.push(projectile);
     owner.weapon.cooldown = owner.weapon.fireInterval;
+    return projectile;
 }
 
 export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
     const enemyById = new Map(enemies.map((enemy) => [enemy.id, enemy]));
     const survivors = [];
     const hits = [];
+    const resolutions = [];
     for (const projectile of projectiles) {
         const target = enemyById.get(projectile.targetId);
-        if (!target || target.health <= 0) continue;
+        if (!target || target.health <= 0) {
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: "target-missing",
+                    position: projectile.position.clone()
+                })
+            );
+            continue;
+        }
         const direction = target.position.clone().subtract(projectile.position);
         const distance = direction.length();
         if (distance > 0) direction.scale(1 / distance);
@@ -49,7 +61,15 @@ export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
                     type: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
                     position: target.position.clone(),
                     damage: projectile.damage,
-                    targetId: target.id
+                    targetId: target.id,
+                    projectileId: projectile.id
+                })
+            );
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
+                    position: target.position.clone()
                 })
             );
             continue;
@@ -57,10 +77,11 @@ export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
         survivors.push(projectile);
     }
     projectiles.splice(0, projectiles.length, ...survivors);
-    return Object.freeze({ hits });
+    return Object.freeze({ hits, resolutions: Object.freeze(resolutions) });
 }
 
 export function updateEnemyWeapons({ enemies, target, projectiles, registry, config, dt }) {
+    const spawned = [];
     for (const enemy of enemies) {
         enemy.fireCooldown = Math.max(0, (enemy.fireCooldown ?? 0) - dt);
         if (enemy.fireCooldown > 0 || target.health <= 0) continue;
@@ -68,16 +89,19 @@ export function updateEnemyWeapons({ enemies, target, projectiles, registry, con
         const distance = direction.length();
         if (distance <= 0 || distance > config.enemyAttackRange) continue;
         direction.scale(config.enemyProjectileSpeed / distance);
-        projectiles.push({
+        const projectile = {
             id: registry.createId("enemy-projectile"),
             ownerId: enemy.id,
             position: enemy.position.clone(),
             velocity: direction,
             radius: config.enemyProjectileRadius,
             damage: config.enemyProjectileDamage
-        });
+        };
+        projectiles.push(projectile);
+        spawned.push(projectile);
         enemy.fireCooldown = config.enemyFireInterval;
     }
+    return Object.freeze(spawned);
 }
 
 export function distancePointToSegment(point, start, end) {
@@ -96,6 +120,7 @@ export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }
     const survivors = [];
     let ropeCutAt = null;
     const hits = [];
+    const resolutions = [];
     for (const projectile of projectiles) {
         projectile.position.add(projectile.velocity.clone().scale(dt));
         if (
@@ -105,6 +130,13 @@ export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }
             rope.detach();
             target.ropeDisabledRemaining = config.ropeDisabledSeconds;
             ropeCutAt = projectile.position.clone();
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: "rope-cut",
+                    position: projectile.position.clone()
+                })
+            );
             continue;
         }
         if (
@@ -120,7 +152,15 @@ export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }
                 Object.freeze({
                     type: "player-hit",
                     position: target.physics.position.clone(),
-                    damage: projectile.damage
+                    damage: projectile.damage,
+                    projectileId: projectile.id
+                })
+            );
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: "player-hit",
+                    position: target.physics.position.clone()
                 })
             );
             continue;
@@ -128,5 +168,5 @@ export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }
         survivors.push(projectile);
     }
     projectiles.splice(0, projectiles.length, ...survivors);
-    return Object.freeze({ ropeCutAt, hits });
+    return Object.freeze({ ropeCutAt, hits, resolutions: Object.freeze(resolutions) });
 }
