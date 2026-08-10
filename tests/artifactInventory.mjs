@@ -16,4 +16,14 @@ export function run() {
         inventory.snapshot().map((artifact) => artifact.id),
         ["first", "second", "third", "fourth"]
     );
+
+    const authoritative = [{ id: "remote", modifiers: { damageMultiplier: 1.4 } }];
+    inventory.replace(authoritative);
+    authoritative[0].id = "mutated";
+    assert.deepEqual(
+        inventory.snapshot().map((artifact) => artifact.id),
+        ["remote"],
+        "restoring authority must replace local items without retaining caller objects"
+    );
+    assert.throws(() => inventory.replace(null), /artifacts must be an array/);
 }

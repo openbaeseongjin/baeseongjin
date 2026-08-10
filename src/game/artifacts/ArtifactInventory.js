@@ -9,6 +9,11 @@ export class ArtifactInventory {
         this.items.push(Object.freeze({ ...artifact }));
     }
 
+    replace(artifacts) {
+        if (!Array.isArray(artifacts)) throw new Error("artifacts must be an array");
+        this.items = artifacts.map((artifact) => Object.freeze({ ...artifact }));
+    }
+
     applyCheckpointLoss() {
         if (this.items.length < this.minimumOwnedForLoss) return [];
         const lossCount = Math.min(
