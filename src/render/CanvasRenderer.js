@@ -54,6 +54,7 @@ export class CanvasRenderer {
         this.context.translate(-scene.camera.x * zoom + shake.x, -scene.camera.y * zoom + shake.y);
         this.context.scale(zoom, zoom);
         this.drawWorld(scene.world);
+        this.drawSummitGoal(scene.world.summit, scene.runState);
         this.drawAttachmentRange(scene);
         this.drawRope(scene.rope, scene.player.position);
         this.drawSwingDrag(scene.player, scene.swingDrag);
@@ -68,7 +69,7 @@ export class CanvasRenderer {
         if (!scene.mobileView) this.drawCombatHud(scene);
         this.drawMobileControls(scene.mobileControls);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
-        this.drawDefeatOverlay(scene);
+        this.drawRunEndOverlay(scene);
     }
 
     getImpactOffset(impact) {
@@ -154,6 +155,26 @@ export class CanvasRenderer {
         for (const surface of world.surfaces) {
             this.drawRockSurface(surface);
         }
+    }
+
+    drawSummitGoal(summit, runState) {
+        if (!summit || runState === "completed") return;
+        const ctx = this.context;
+        ctx.save();
+        ctx.globalAlpha = 0.78;
+        ctx.strokeStyle = "#a7f3d0";
+        ctx.fillStyle = "rgba(167, 243, 208, 0.12)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(summit.x, summit.y, summit.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#d1fae5";
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("정상", summit.x, summit.y);
+        ctx.restore();
     }
 
     drawRockSurface(surface) {
@@ -342,19 +363,24 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawDefeatOverlay({ runState, defeatReason, restartRemaining }) {
-        if (runState !== "defeated") return;
+    drawRunEndOverlay({ runState, defeatReason, restartRemaining }) {
+        if (runState !== "defeated" && runState !== "completed") return;
         const ctx = this.context;
-        ctx.fillStyle = "rgba(3, 7, 18, 0.72)";
+        const completed = runState === "completed";
+        ctx.fillStyle = completed ? "rgba(3, 7, 18, 0.9)" : "rgba(3, 7, 18, 0.72)";
         ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         ctx.textAlign = "center";
-        ctx.fillStyle = "#fda4af";
+        ctx.fillStyle = completed ? "#fde68a" : "#fda4af";
         ctx.font = "700 38px system-ui, sans-serif";
-        ctx.fillText(defeatReason === "fall" ? "추락" : "전투 불능", this.cssWidth * 0.5, this.cssHeight * 0.46);
+        ctx.fillText(
+            completed ? "정상 도달" : defeatReason === "fall" ? "추락" : "전투 불능",
+            this.cssWidth * 0.5,
+            this.cssHeight * 0.46
+        );
         ctx.fillStyle = "#e2e8f0";
         ctx.font = "18px system-ui, sans-serif";
         ctx.fillText(
-            `${Math.max(0, restartRemaining).toFixed(1)}초 후 다시 시작`,
+            completed ? "전체 월드 등반 완료" : `${Math.max(0, restartRemaining).toFixed(1)}초 후 다시 시작`,
             this.cssWidth * 0.5,
             this.cssHeight * 0.53
         );
