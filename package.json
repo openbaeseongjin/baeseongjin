@@ -8,6 +8,7 @@
     "start:multiplayer": "node scripts/multiplayer-server.mjs",
     "start:game-server": "node scripts/multiplayer-server.mjs --game-only --host=0.0.0.0 --port=4175",
     "share:multiplayer": "node scripts/share-multiplayer.mjs",
+    "smoke:multiplayer": "node scripts/smokeMultiplayer.mjs",
     "test": "node tests/runAll.mjs",
     "check": "node scripts/checkSyntax.mjs",
     "validate:world": "node scripts/validateWorldSeeds.mjs",
