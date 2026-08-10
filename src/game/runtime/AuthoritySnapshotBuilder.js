@@ -30,7 +30,7 @@ function playerState(player, simulation) {
             cooldown: player.weapon.cooldown
         },
         artifacts: player.artifacts.snapshot(),
-        ropeDamageBoostRemaining: player === simulation.playerEntity ? simulation.ropeDamageBoostRemaining : 0,
+        ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
         lastCheckpointLoss: player === simulation.playerEntity ? simulation.lastCheckpointLoss : []
     };
 }

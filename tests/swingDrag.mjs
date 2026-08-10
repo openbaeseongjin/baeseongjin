@@ -32,7 +32,10 @@ export function run() {
             appliedMagnitude = magnitude;
         }
     };
-    app.swingDrag = { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false };
+    app.playerEntity = {
+        swingDrag: { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false },
+        ropeDamageBoostRemaining: 0
+    };
     app.eventFlash = { type: "attach", age: 0 };
     const viewport = { width: 1280, height: 720 };
     app.updateSwingDrag({ x: 20, y: 200 }, viewport, 0.04);

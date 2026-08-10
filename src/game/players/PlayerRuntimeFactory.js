@@ -12,6 +12,12 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         physics,
         rope,
         artifacts,
+        aimWorld: Object.freeze({ x: 0, y: 0 }),
+        attachmentCandidate: null,
+        wasPointerDown: false,
+        attachBufferRemaining: 0,
+        swingDrag: null,
+        ropeDamageBoostRemaining: 0,
         weapon: {
             range: combatConfig.weaponRange,
             baseDamage: combatConfig.weaponDamage,

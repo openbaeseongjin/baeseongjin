@@ -32,12 +32,7 @@ export class GameSimulation {
         this.enemyProjectiles = [];
         this.combatEffects = [];
         this.impact = null;
-        this.aimWorld = { x: 0, y: 0 };
-        this.attachmentCandidate = null;
-        this.wasPointerDown = false;
-        this.attachBufferRemaining = 0;
         this.eventFlash = { type: "ready", age: 10 };
-        this.swingDrag = null;
         this.resets = 0;
         this.runState = "playing";
         this.defeatReason = null;
@@ -46,7 +41,6 @@ export class GameSimulation {
         this.lastCheckpointLoss = [];
         this.artifactReward = null;
         this.rewardedCheckpointIds = new Set();
-        this.ropeDamageBoostRemaining = 0;
         this.tick = 0;
         this.replicationEvents = [];
     }
@@ -62,6 +56,54 @@ export class GameSimulation {
         });
         this.players.push(runtime.entity);
         return runtime;
+    }
+
+    get aimWorld() {
+        return this.playerEntity.aimWorld;
+    }
+
+    set aimWorld(value) {
+        this.playerEntity.aimWorld = value;
+    }
+
+    get attachmentCandidate() {
+        return this.playerEntity.attachmentCandidate;
+    }
+
+    set attachmentCandidate(value) {
+        this.playerEntity.attachmentCandidate = value;
+    }
+
+    get wasPointerDown() {
+        return this.playerEntity.wasPointerDown;
+    }
+
+    set wasPointerDown(value) {
+        this.playerEntity.wasPointerDown = value;
+    }
+
+    get attachBufferRemaining() {
+        return this.playerEntity.attachBufferRemaining;
+    }
+
+    set attachBufferRemaining(value) {
+        this.playerEntity.attachBufferRemaining = value;
+    }
+
+    get swingDrag() {
+        return this.playerEntity.swingDrag;
+    }
+
+    set swingDrag(value) {
+        this.playerEntity.swingDrag = value;
+    }
+
+    get ropeDamageBoostRemaining() {
+        return this.playerEntity.ropeDamageBoostRemaining;
+    }
+
+    set ropeDamageBoostRemaining(value) {
+        this.playerEntity.ropeDamageBoostRemaining = value;
     }
 
     step(dt, command) {

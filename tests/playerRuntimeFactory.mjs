@@ -25,6 +25,7 @@ export function run() {
     assert.notEqual(first.physics, second.physics);
     assert.notEqual(first.rope, second.rope);
     assert.notEqual(first.artifacts, second.artifacts);
+    assert.notEqual(first.entity.aimWorld, second.entity.aimWorld);
     assert.equal(first.entity.physics, first.physics);
     assert.equal(first.entity.rope, first.rope);
     assert.equal(first.entity.artifacts, first.artifacts);
@@ -34,6 +35,12 @@ export function run() {
         ["player-one-artifact"]
     );
     assert.deepEqual(second.artifacts.snapshot(), []);
+    first.entity.aimWorld = { x: 20, y: 30 };
+    first.entity.swingDrag = { used: true };
+    first.entity.ropeDamageBoostRemaining = 2;
+    assert.deepEqual(second.entity.aimWorld, { x: 0, y: 0 });
+    assert.equal(second.entity.swingDrag, null);
+    assert.equal(second.entity.ropeDamageBoostRemaining, 0);
     assert.deepEqual({ x: second.physics.position.x, y: second.physics.position.y }, { x: 160, y: 500 });
     assert.equal(first.entity.health, COMBAT_CONFIG.playerMaxHealth);
     assert.deepEqual(first.entity.weapon, {
