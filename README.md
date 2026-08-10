@@ -43,6 +43,7 @@ npm run validate:world
 
 - [게임 해커톤 기획](docs/game-hackathon-planning.md) — 현재 방향, 열린 결정, 역할, 일정, 첫 프로토타입 범위
 - [아키텍처](docs/architecture.md) — 초기 모듈 경계와 런타임 흐름
+- [싱글·협동 동기화 설계](docs/multiplayer-synchronization.md) — 권위 서버, 입력 예측, 스냅샷과 상태 소유권
 - [개발 규칙](docs/development-rules.md) — 객체 설계, 시뮬레이션, 의존성, 구현 및 검증 기준
 - [세션 핸드오프](SESSION-HANDOFF.md) — 현재 유효한 결정과 다음 작업
 - [결정 이력](docs/decision-history.md) — 반영 또는 대체된 제품·아키텍처 결정
