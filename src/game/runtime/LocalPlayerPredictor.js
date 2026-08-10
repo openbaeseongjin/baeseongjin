@@ -74,6 +74,7 @@ export class LocalPlayerPredictor {
         if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
         const authoritative = snapshot.state.players.find(({ id }) => id === this.playerId);
         if (!authoritative) throw new Error(`missing predicted playerId: ${this.playerId}`);
+        if (this.initialized) return this.acceptAuthorityOutcomes(snapshot, authoritative);
         const displayedBefore = this.initialized ? this.presentationState() : null;
         const pendingTicks = pendingBatches.map(({ tick }) => tick);
         const targetTick = Math.max(
@@ -118,6 +119,44 @@ export class LocalPlayerPredictor {
         const corrected = this.state();
         if (displayedBefore) this.startPresentationCorrection(displayedBefore, corrected);
         return corrected;
+    }
+
+    acceptAuthorityOutcomes(snapshot, authoritative) {
+        const player = this.simulation.playerEntity;
+        const lifeStateChanged = player.lifeState !== authoritative.lifeState;
+        this.restoreEnemies(snapshot.state.enemies ?? []);
+        for (const tick of this.inputHistory.keys()) {
+            if (tick <= snapshot.serverTick) this.inputHistory.delete(tick);
+        }
+        for (const [predictionId, tick] of this.emittedPredictionTicks) {
+            if (tick <= snapshot.serverTick) this.emittedPredictionTicks.delete(predictionId);
+        }
+        player.health = authoritative.health;
+        player.maxHealth = authoritative.maxHealth;
+        player.hitInvulnerabilityRemaining = Math.max(
+            player.hitInvulnerabilityRemaining,
+            authoritative.hitInvulnerabilityRemaining
+        );
+        player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, authoritative.ropeDisabledRemaining);
+        player.lifeState = authoritative.lifeState;
+        player.downedRemaining = authoritative.downedRemaining;
+        player.reviveProgress = authoritative.reviveProgress;
+        player.weapon.range = authoritative.weapon.range;
+        player.weapon.damage = authoritative.weapon.damage;
+        player.weapon.fireInterval = authoritative.weapon.fireInterval;
+        player.artifacts.replace(authoritative.artifacts);
+        player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
+        if (authoritative.ropeDisabledRemaining > 0) {
+            player.rope.detach();
+            player.swingDrag = null;
+        }
+        if (lifeStateChanged) {
+            const displayedBefore = this.presentationState();
+            this.restore(authoritative);
+            this.simulation.tick = Math.max(this.simulation.tick, snapshot.serverTick);
+            this.startPresentationCorrection(displayedBefore, this.state());
+        }
+        return this.state();
     }
 
     advance(command) {

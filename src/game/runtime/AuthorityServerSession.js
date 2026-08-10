@@ -31,6 +31,7 @@ export class AuthorityServerSession {
         this.inputState = new InputStateSimulator({ holdTicks: inputHoldTicks });
         this.resolvedHitClaims = new Map();
         this.resolvedImpactClaims = new Map();
+        this.lastOwnerMotionTicks = new Map();
     }
 
     submitHitClaim(authenticatedPlayerId, claim) {
@@ -80,6 +81,48 @@ export class AuthorityServerSession {
             });
         }
         return result;
+    }
+
+    submitOwnerMotion(authenticatedPlayerId, state) {
+        const player = this.simulation.players.find(({ id }) => id === authenticatedPlayerId);
+        if (!player) throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        const previousTick = this.lastOwnerMotionTicks.get(authenticatedPlayerId) ?? -1;
+        if (state.clientTick <= previousTick) {
+            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "stale-tick" });
+        }
+        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.maxFutureTicks;
+        if (state.clientTick < minimumTick || state.clientTick > maximumTick) {
+            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "tick-window" });
+        }
+        if (player.lifeState !== "active") {
+            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "player-ineligible" });
+        }
+        const reportedSpeed = Math.hypot(state.velocity.x, state.velocity.y);
+        if (reportedSpeed > MULTIPLAYER_TIMING.ownerMotionMaxSpeed) {
+            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "speed-envelope" });
+        }
+        const tickDelta = Math.max(1, state.clientTick - Math.max(previousTick, this.simulation.tick));
+        const distance = Math.hypot(
+            state.position.x - player.physics.position.x,
+            state.position.y - player.physics.position.y
+        );
+        const maximumDistance =
+            MULTIPLAYER_TIMING.ownerMotionBaseTolerance + (Math.max(900, reportedSpeed) * tickDelta) / 120;
+        if (distance > maximumDistance) {
+            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "movement-envelope" });
+        }
+        player.physics.position.set(state.position.x, state.position.y);
+        player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        player.physics.isGrounded = state.isGrounded;
+        if (state.rope.isAttached && player.ropeDisabledRemaining <= 0) {
+            player.rope.attach(player.physics.position, state.rope.anchor);
+        } else {
+            player.rope.detach();
+            player.swingDrag = null;
+        }
+        this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
+        return Object.freeze({ clientTick: state.clientTick, accepted: true });
     }
 
     submit(authenticatedPlayerId, batch) {
@@ -147,6 +190,7 @@ export class AuthorityServerSession {
     removePlayer(playerId) {
         this.inbox.removePlayer(playerId);
         this.inputState.removePlayer(playerId);
+        this.lastOwnerMotionTicks.delete(playerId);
         return this.simulation.removePlayer(playerId);
     }
 }

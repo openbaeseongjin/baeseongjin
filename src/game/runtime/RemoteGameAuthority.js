@@ -3,6 +3,7 @@ import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import { createPlayerImpactClaim, serializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
+import { createOwnerMotionState, serializeOwnerMotionState } from "../network/OwnerMotionState.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
@@ -133,6 +134,21 @@ export class RemoteGameAuthority {
         if (!batch) return false;
         this.trackSentCommand(batch.commands[0].sequence, this.now());
         this.socket.send(JSON.stringify({ type: "command", payload: serializePlayerCommandBatch(batch) }));
+        this.submitOwnerMotion();
+        return true;
+    }
+
+    submitOwnerMotion() {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.predictor) return false;
+        const predicted = this.predictor.state();
+        const motion = createOwnerMotionState({
+            clientTick: predicted.tick,
+            position: predicted.position,
+            velocity: predicted.velocity,
+            isGrounded: predicted.isGrounded,
+            rope: predicted.rope
+        });
+        this.socket.send(JSON.stringify({ type: "owner-motion", payload: serializeOwnerMotionState(motion) }));
         return true;
     }
 
@@ -161,6 +177,7 @@ export class RemoteGameAuthority {
             position: event.position
         });
         this.socket.send(JSON.stringify({ type: "impact-claim", payload: serializePlayerImpactClaim(claim) }));
+        this.submitOwnerMotion();
         return true;
     }
 

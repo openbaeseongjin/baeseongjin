@@ -3,6 +3,7 @@ import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
+import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
 import { Vector2 } from "../src/game-kit/index.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
@@ -23,6 +24,32 @@ function command(horizontal) {
 export function run() {
     const combatSimulation = new GameSimulation();
     const combatSession = new AuthorityServerSession({ simulation: combatSimulation });
+    const ownerMotion = createOwnerMotionState({
+        clientTick: combatSimulation.tick + 1,
+        position: { x: combatSimulation.player.position.x + 20, y: combatSimulation.player.position.y - 10 },
+        velocity: { x: 700, y: -240 },
+        isGrounded: false,
+        rope: { isAttached: false, anchor: null }
+    });
+    assert.equal(combatSession.submitOwnerMotion(combatSimulation.playerEntity.id, ownerMotion).accepted, true);
+    assert.equal(combatSimulation.player.velocity.x, 700, "server world must accept plausible owner motion");
+    assert.equal(
+        combatSession.submitOwnerMotion(combatSimulation.playerEntity.id, ownerMotion).reason,
+        "stale-tick",
+        "owner motion must be monotonic"
+    );
+    assert.equal(
+        combatSession.submitOwnerMotion(
+            combatSimulation.playerEntity.id,
+            createOwnerMotionState({
+                ...ownerMotion,
+                clientTick: ownerMotion.clientTick + 1,
+                velocity: { x: 9999, y: 0 }
+            })
+        ).reason,
+        "speed-envelope",
+        "client authority must remain inside the server movement envelope"
+    );
     combatSimulation.playerEntity.weapon.cooldown = 0;
     combatSession.advance();
     const projectile = combatSimulation.projectiles[0];
