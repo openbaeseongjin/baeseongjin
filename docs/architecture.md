@@ -76,6 +76,7 @@ index.html
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.
 - 싱글 플레이도 `PlayerCommand → LocalAuthority → GameSimulation` 경계를 사용한다. 실제 네트워크 전송과 다인 월드 동기화는 아직 구현하지 않았다.
+- 협동은 서버 권위형과 로컬 플레이어 예측을 사용한다. 시간 모델, 상태 소유권, 스냅샷과 보정 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 
 ## 의존 방향
 
