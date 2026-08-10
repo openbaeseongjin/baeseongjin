@@ -1,3 +1,5 @@
+import { normalizeNetworkJson } from "./NetworkJson.js";
+
 export const PREDICTABLE_OBJECT_EVENT_PROTOCOL_VERSION = 1;
 
 function assertId(value, label) {
@@ -15,29 +17,6 @@ function normalizeVector(value, label) {
         throw new Error(`${label} must contain finite x and y`);
     }
     return Object.freeze({ x: value.x, y: value.y });
-}
-
-function normalizeJsonValue(value, label, ancestors = new Set()) {
-    if (value === null || typeof value === "string" || typeof value === "boolean") return value;
-    if (typeof value === "number") {
-        if (!Number.isFinite(value)) throw new Error(`${label} numbers must be finite`);
-        return value;
-    }
-    if (typeof value !== "object") throw new Error(`${label} must be JSON-compatible`);
-    if (ancestors.has(value)) throw new Error(`${label} must not contain cycles`);
-
-    ancestors.add(value);
-    let normalized;
-    if (Array.isArray(value)) {
-        normalized = value.map((item, index) => normalizeJsonValue(item, `${label}[${index}]`, ancestors));
-    } else {
-        normalized = {};
-        for (const key of Object.keys(value).sort()) {
-            normalized[key] = normalizeJsonValue(value[key], `${label}.${key}`, ancestors);
-        }
-    }
-    ancestors.delete(value);
-    return Object.freeze(normalized);
 }
 
 export function createPredictableSpawnEvent({
@@ -58,7 +37,7 @@ export function createPredictableSpawnEvent({
         tick: assertTick(spawnTick, "spawnTick"),
         position: normalizeVector(position, "position"),
         velocity: normalizeVector(velocity, "velocity"),
-        parameters: normalizeJsonValue(parameters ?? {}, "parameters")
+        parameters: normalizeNetworkJson(parameters ?? {}, "parameters")
     });
 }
 

@@ -26,6 +26,7 @@ import { run as playerCommandBatch } from "./playerCommandBatch.mjs";
 import { run as playerRuntimeFactory } from "./playerRuntimeFactory.mjs";
 import { run as predictableObjectEvent } from "./predictableObjectEvent.mjs";
 import { run as authorityCommandInbox } from "./authorityCommandInbox.mjs";
+import { run as worldSnapshotEnvelope } from "./worldSnapshotEnvelope.mjs";
 
 const suites = {
     fixedStep,
@@ -55,7 +56,8 @@ const suites = {
     playerCommandBatch,
     playerRuntimeFactory,
     predictableObjectEvent,
-    authorityCommandInbox
+    authorityCommandInbox,
+    worldSnapshotEnvelope
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
