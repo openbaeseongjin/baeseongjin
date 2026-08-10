@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node scripts/serve.mjs",
     "start:multiplayer": "node scripts/multiplayer-server.mjs",
+    "share:multiplayer": "node scripts/share-multiplayer.mjs",
     "test": "node tests/runAll.mjs",
     "check": "node scripts/checkSyntax.mjs",
     "validate:world": "node scripts/validateWorldSeeds.mjs",
