@@ -26,6 +26,8 @@ export function run() {
     assert.notEqual(first.rope, second.rope);
     assert.notEqual(first.artifacts, second.artifacts);
     assert.notEqual(first.entity.aimWorld, second.entity.aimWorld);
+    assert.notEqual(first.entity.lastPointer, second.entity.lastPointer);
+    assert.notEqual(first.entity.lastViewport, second.entity.lastViewport);
     assert.equal(first.entity.physics, first.physics);
     assert.equal(first.entity.rope, first.rope);
     assert.equal(first.entity.artifacts, first.artifacts);

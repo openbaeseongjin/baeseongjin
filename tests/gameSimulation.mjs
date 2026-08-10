@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { LocalAuthority } from "../src/game/runtime/LocalAuthority.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -53,6 +54,32 @@ export function run() {
     assert.ok(partner.physics.velocity.x < 0);
     assert.deepEqual(sharedWorld.player.position, primaryPosition);
     assert.equal(sharedWorld.world, sharedWorld.snapshot().world);
+
+    const batchWorld = new GameSimulation();
+    const batchPartner = batchWorld.addPlayer({ x: 180, y: 500 });
+    const leftCommand = createPlayerCommand({ ...input, horizontal: -1 }, { x: 0, y: 0 });
+    batchWorld.stepCommandBatch(
+        1 / 120,
+        createPlayerCommandBatch(1, [
+            { playerId: batchWorld.playerEntity.id, sequence: 0, command },
+            { playerId: batchPartner.entity.id, sequence: 0, command: leftCommand }
+        ])
+    );
+    assert.ok(batchWorld.player.velocity.x > 0);
+    assert.ok(batchPartner.physics.velocity.x < 0);
+    batchPartner.rope.attach(batchPartner.physics.position, {
+        x: batchPartner.physics.position.x,
+        y: batchPartner.physics.position.y - 80
+    });
+    batchPartner.entity.wasPointerDown = true;
+    batchPartner.entity.lastPointer = { x: 200, y: 100, down: true };
+    batchPartner.entity.lastViewport = { width: 1280, height: 720 };
+    batchWorld.stepCommandBatch(
+        1 / 120,
+        createPlayerCommandBatch(2, [{ playerId: batchWorld.playerEntity.id, sequence: 1, command }])
+    );
+    assert.equal(batchPartner.rope.isAttached, true, "a missing command must not invent a rope release");
+    assert.throws(() => batchWorld.stepCommandBatch(1 / 120, createPlayerCommandBatch(4, [])), /must equal 3/);
 
     const eventRun = new GameSimulation();
     eventRun.playerEntity.weapon.cooldown = 0;

@@ -107,6 +107,22 @@ export class GameSimulation {
     }
 
     step(dt, command) {
+        return this.stepPlayers(dt, new Map([[this.playerEntity.id, command]]));
+    }
+
+    stepCommandBatch(dt, batch) {
+        const expectedTick = this.tick + 1;
+        if (batch.tick !== expectedTick) throw new Error(`command batch tick ${batch.tick} must equal ${expectedTick}`);
+        const playersById = new Map(this.players.map((player) => [player.id, player]));
+        const commandsByPlayerId = new Map();
+        for (const entry of batch.commands) {
+            if (!playersById.has(entry.playerId)) throw new Error(`unknown playerId: ${entry.playerId}`);
+            commandsByPlayerId.set(entry.playerId, entry.command);
+        }
+        return this.stepPlayers(dt, commandsByPlayerId);
+    }
+
+    stepPlayers(dt, commandsByPlayerId) {
         this.tick += 1;
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
@@ -122,13 +138,15 @@ export class GameSimulation {
         }
         this.updateCheckpointProgress();
         if (this.artifactReward) {
-            this.updateArtifactReward(command);
+            this.updateArtifactReward(this.commandForPlayer(this.playerEntity, commandsByPlayerId));
             this.eventFlash.age += dt;
             return;
         }
         this.metrics.recordActiveTime(dt);
-        const playerProjectile = this.updatePlayer(this.playerEntity, command, dt);
-        if (playerProjectile) this.recordProjectileSpawn(playerProjectile, "player-projectile");
+        for (const player of this.players) {
+            const projectile = this.updatePlayer(player, this.commandForPlayer(player, commandsByPlayerId), dt);
+            if (projectile) this.recordProjectileSpawn(projectile, "player-projectile");
+        }
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
             enemies: this.enemies,
@@ -169,17 +187,31 @@ export class GameSimulation {
             if (this.impact.age >= this.impact.lifetime) this.impact = null;
         }
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
-        if (this.playerEntity.health <= 0 && enterDowned(this.playerEntity, LIFE_CONFIG)) {
-            this.rope.detach();
-            this.swingDrag = null;
-            this.eventFlash = { type: "downed", age: 0 };
+        for (const player of this.players) {
+            if (player.health <= 0 && enterDowned(player, LIFE_CONFIG)) {
+                player.rope.detach();
+                player.swingDrag = null;
+                this.eventFlash = { type: "downed", age: 0, playerId: player.id };
+            }
+            updateDownedPlayer(player, dt);
         }
-        updateDownedPlayer(this.playerEntity, dt);
         if (isTeamDefeated(this.players)) this.beginDefeat("health");
         this.eventFlash.age += dt;
         if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) {
             this.beginDefeat("fall");
         }
+    }
+
+    commandForPlayer(player, commandsByPlayerId) {
+        return (
+            commandsByPlayerId.get(player.id) ?? {
+                horizontal: 0,
+                vertical: 0,
+                pointer: player.lastPointer,
+                viewport: player.lastViewport,
+                aimWorld: player.aimWorld
+            }
+        );
     }
 
     updatePlayer(player, command, dt) {
@@ -196,6 +228,8 @@ export class GameSimulation {
         player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
         player.ropeDamageBoostRemaining = Math.max(0, player.ropeDamageBoostRemaining - dt);
         this.applyArtifactEffects(player);
+        player.lastPointer = effectiveCommand.pointer;
+        player.lastViewport = effectiveCommand.viewport ?? player.lastViewport;
         player.aimWorld = effectiveCommand.aimWorld;
         player.attachmentCandidate = canControl ? this.findAttachment(player.aimWorld, player) : null;
         if (effectiveCommand.pointer.down && !player.wasPointerDown) {
