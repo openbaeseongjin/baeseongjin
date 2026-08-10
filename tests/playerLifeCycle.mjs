@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
+import { Vector2 } from "../src/game-kit/index.js";
 import { LIFE_CONFIG } from "../src/game/config.js";
 import {
     enterDowned,
     isTeamDefeated,
     revivePlayer,
     updateDownedPlayer,
-    updateReviveInteraction
+    updateReviveInteraction,
+    updateTeamRevives
 } from "../src/game/life/PlayerLifeCycle.js";
 
 export function run() {
@@ -56,4 +58,36 @@ export function run() {
     enterDowned(reviver, LIFE_CONFIG);
     enterDowned(teammate, LIFE_CONFIG);
     assert.equal(isTeamDefeated([reviver, teammate]), true, "two downed players defeat the team");
+
+    const teamReviver = {
+        id: "player-a",
+        health: 100,
+        lifeState: "active",
+        physics: { position: new Vector2(0, 0) }
+    };
+    const firstDowned = {
+        id: "player-b",
+        health: 0,
+        maxHealth: 100,
+        lifeState: "downed",
+        downedRemaining: 8,
+        reviveProgress: 0,
+        physics: { position: new Vector2(40, 0) }
+    };
+    const secondDowned = {
+        ...firstDowned,
+        id: "player-c",
+        physics: { position: new Vector2(50, 0) }
+    };
+    const teamUpdate = updateTeamRevives(
+        [teamReviver, firstDowned, secondDowned],
+        new Map([[teamReviver.id, { interact: true }]]),
+        1,
+        LIFE_CONFIG
+    );
+    assert.deepEqual(teamUpdate.reviverIds, ["player-a"]);
+    assert.equal(firstDowned.reviveProgress, 1, "stable target order must assign one reviver to one teammate");
+    assert.equal(secondDowned.reviveProgress, 0);
+    updateTeamRevives([teamReviver, firstDowned], new Map([[teamReviver.id, { interact: false }]]), 0.1, LIFE_CONFIG);
+    assert.equal(firstDowned.reviveProgress, 0, "releasing interact must reset revive progress");
 }

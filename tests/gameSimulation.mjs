@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { LIFE_CONFIG } from "../src/game/config.js";
+import { enterDowned } from "../src/game/life/PlayerLifeCycle.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { LocalAuthority } from "../src/game/runtime/LocalAuthority.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
@@ -80,6 +82,29 @@ export function run() {
     );
     assert.equal(batchPartner.rope.isAttached, true, "a missing command must not invent a rope release");
     assert.throws(() => batchWorld.stepCommandBatch(1 / 120, createPlayerCommandBatch(4, [])), /must equal 3/);
+
+    const reviveWorld = new GameSimulation();
+    const revivePartner = reviveWorld.addPlayer({ x: 150, y: 500 });
+    reviveWorld.enemies = [];
+    enterDowned(revivePartner.entity, LIFE_CONFIG);
+    const reviveCommand = createPlayerCommand(
+        { ...input, horizontal: 0, vertical: -1, interact: true },
+        { x: 0, y: 0 }
+    );
+    for (let tick = 1; tick <= 300; tick += 1) {
+        reviveWorld.stepCommandBatch(
+            1 / 120,
+            createPlayerCommandBatch(tick, [
+                { playerId: reviveWorld.playerEntity.id, sequence: tick - 1, command: reviveCommand }
+            ])
+        );
+    }
+    assert.equal(revivePartner.entity.lifeState, "active");
+    assert.equal(revivePartner.entity.health, 40);
+    assert.ok(reviveWorld.player.velocity.y >= 0, "contextual mobile interaction must consume the jump axis");
+    const revivedEvent = reviveWorld.drainReplicationEvents().find(({ eventType }) => eventType === "player-revived");
+    assert.equal(revivedEvent.playerId, revivePartner.entity.id);
+    assert.equal(revivedEvent.reviverId, reviveWorld.playerEntity.id);
 
     const eventRun = new GameSimulation();
     eventRun.playerEntity.weapon.cooldown = 0;

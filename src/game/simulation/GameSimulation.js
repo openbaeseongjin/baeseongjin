@@ -8,7 +8,7 @@ import {
 } from "../combat/CombatSystems.js";
 import { appendCombatFeedback, createImpactState, updateCombatFeedback } from "../combat/CombatFeedback.js";
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
-import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
+import { enterDowned, isTeamDefeated, updateDownedPlayer, updateTeamRevives } from "../life/PlayerLifeCycle.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
@@ -143,8 +143,31 @@ export class GameSimulation {
             return;
         }
         this.metrics.recordActiveTime(dt);
+        const reviveUpdate = updateTeamRevives(this.players, commandsByPlayerId, dt, LIFE_CONFIG);
+        const reviveReviverIds = new Set(reviveUpdate.reviverIds);
+        for (const result of reviveUpdate.results) {
+            if (result.status !== "revived") continue;
+            const revived = this.players.find(({ id }) => id === result.targetId);
+            this.eventFlash = {
+                type: "revived",
+                age: 0,
+                playerId: result.targetId,
+                reviverId: result.reviverId,
+                position: revived?.physics.position
+            };
+            this.recordReplicationEvent("player-revived", {
+                playerId: result.targetId,
+                reviverId: result.reviverId,
+                health: revived?.health,
+                position: revived ? { x: revived.physics.position.x, y: revived.physics.position.y } : null
+            });
+        }
         for (const player of this.players) {
-            const projectile = this.updatePlayer(player, this.commandForPlayer(player, commandsByPlayerId), dt);
+            let playerCommand = this.commandForPlayer(player, commandsByPlayerId);
+            if (reviveReviverIds.has(player.id) && playerCommand.vertical < 0) {
+                playerCommand = { ...playerCommand, vertical: 0 };
+            }
+            const projectile = this.updatePlayer(player, playerCommand, dt);
             if (projectile) this.recordProjectileSpawn(projectile, "player-projectile");
         }
         const playerProjectileEvents = updatePlayerProjectiles({
@@ -386,6 +409,17 @@ export class GameSimulation {
                     radius: projectile.radius,
                     damage: projectile.damage
                 }
+            })
+        );
+    }
+
+    recordReplicationEvent(eventType, payload) {
+        this.replicationEvents.push(
+            Object.freeze({
+                ...payload,
+                eventId: this.registry.createId("event"),
+                eventType,
+                tick: this.tick
             })
         );
     }
