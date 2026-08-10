@@ -124,7 +124,9 @@ events[]
 4. 남은 명령을 순서대로 다시 적용한다.
 5. 화면 위치는 작은 오차만 짧게 보간하고, 큰 오차나 상태 전이는 즉시 맞춘다.
 
-`LocalPlayerPredictor`는 별도 간이 물리를 만들지 않는다. 최신 스냅샷의 자기 플레이어 물리·로프·제어·생명·무기·아티팩트를 로컬 예측용 `GameSimulation`에 복원하고, `serverTick` 다음부터 `RemoteCommandStream.pendingBatches()`의 목표 틱까지 기존 `updatePlayer()`를 고정 1/120초로 다시 실행한다. 명령이 비어 있는 틱도 서버와 같은 마지막 pointer 유지·중립 이동 명령을 사용한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
+`LocalPlayerPredictor`는 별도 간이 물리를 만들지 않는다. 최신 스냅샷의 자기 플레이어 물리·로프·제어·생명·무기·아티팩트를 로컬 예측용 `GameSimulation`에 복원하고, `serverTick` 다음부터 `RemoteCommandStream.pendingBatches()`의 목표 틱까지 기존 `updatePlayer()`를 고정 1/120초로 다시 실행한다. 60Hz 명령 사이의 빈 120Hz 틱은 서버와 예측이 같은 `InputStateSimulator`로 마지막 입력을 최대 30틱(250ms) 유지한다. 새 중립 입력이 오면 즉시 교체하고 제한 시간이 끝나면 이동축을 중립화한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
+
+멀티 조작감은 **로컬 입력 시뮬레이션 + 원격 데드 레코닝**을 사용한다. 입력 시뮬레이션은 자기 캐릭터가 네트워크 프레임 사이에서 멈추지 않게 하며, 데드 레코닝은 동료 캐릭터를 최신 위치·속도로 짧게 외삽한 뒤 새 권위 상태와 오차를 보정한다. 두 기능 모두 별도 간이 게임 규칙을 만들지 않고 권위 `GameSimulation`과 스냅샷 물리 상태를 사용한다.
 
 HP 감소, 로프 절단, 다운, 부활, 체크포인트 활성화, 아티팩트 변경은 시각적 보간 대상이 아니다. 서버 상태를 즉시 적용하고 명확한 피드백을 표시한다.
 

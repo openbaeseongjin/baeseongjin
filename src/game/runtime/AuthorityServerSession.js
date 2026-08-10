@@ -1,5 +1,6 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
+import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
@@ -19,13 +20,15 @@ export class AuthorityServerSession {
         fixedDt = 1 / 120,
         snapshotIntervalTicks = 6,
         maxPastTicks = 2,
-        maxFutureTicks = MULTIPLAYER_TIMING.maxFutureTicks
+        maxFutureTicks = MULTIPLAYER_TIMING.maxFutureTicks,
+        inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks
     }) {
         if (!simulation) throw new Error("simulation is required");
         this.simulation = simulation;
         this.fixedDt = assertPositive(fixedDt, "fixedDt");
         this.snapshotIntervalTicks = assertPositiveInteger(snapshotIntervalTicks, "snapshotIntervalTicks");
         this.inbox = new AuthorityCommandInbox({ maxPastTicks, maxFutureTicks });
+        this.inputState = new InputStateSimulator({ holdTicks: inputHoldTicks });
     }
 
     submit(authenticatedPlayerId, batch) {
@@ -68,7 +71,11 @@ export class AuthorityServerSession {
 
     advance() {
         const nextTick = this.simulation.tick + 1;
-        this.simulation.stepCommandBatch(this.fixedDt, this.inbox.take(nextTick));
+        const commands = this.inputState.expand(
+            this.inbox.take(nextTick),
+            this.simulation.players.map(({ id }) => id)
+        );
+        this.simulation.stepCommandBatch(this.fixedDt, commands);
         return nextTick % this.snapshotIntervalTicks === 0 ? this.snapshot() : null;
     }
 
@@ -81,6 +88,7 @@ export class AuthorityServerSession {
 
     removePlayer(playerId) {
         this.inbox.removePlayer(playerId);
+        this.inputState.removePlayer(playerId);
         return this.simulation.removePlayer(playerId);
     }
 }
