@@ -1,6 +1,7 @@
 import { deserializeCommandReceipt } from "../network/CommandReceipt.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
+import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
@@ -106,6 +107,18 @@ export class RemoteGameAuthority {
         return this.predictor?.advance(command) ?? null;
     }
 
+    submitHitClaim(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
+        const claim = createProjectileHitClaim({
+            predictionId: event.predictionId,
+            targetId: event.targetId,
+            clientTick: event.clientTick,
+            position: event.position
+        });
+        this.socket.send(JSON.stringify({ type: "hit-claim", payload: serializeProjectileHitClaim(claim) }));
+        return true;
+    }
+
     snapshot() {
         return {
             state: this.buffer.sample({ now: this.now(), localPlayerId: this.playerId }),
@@ -116,6 +129,10 @@ export class RemoteGameAuthority {
 
     drainEvents() {
         return this.buffer.drainEvents();
+    }
+
+    drainPredictedEvents() {
+        return this.predictor?.drainPredictedEvents() ?? Object.freeze([]);
     }
 
     close() {

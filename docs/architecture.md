@@ -93,6 +93,7 @@ index.html
 - 첫 화면에서 싱글은 `PlayerCommand → LocalAuthority → GameSimulation`, 멀티는 `4자리 채널 → 고정 WebSocket 서버 → 채널별 AuthorityServerSession → GameSimulation` 경계를 선택한다. 두 경로는 입력 출처와 상태 전달만 다르고 게임 규칙을 공유한다.
 - 협동은 서버 권위형과 로컬 플레이어 예측을 사용한다. 시간 모델, 상태 소유권, 스냅샷과 보정 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 - 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 충돌과 제거만 `resolve` 이벤트로 확정한다.
+- 자기 탄환은 로컬 충돌 VFX를 먼저 재생하고 검증 가능한 hit claim을 보낸다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 대미지로 최종 결과를 확정한다.
 - `GameSimulation`은 권위 틱을 증가시키며 실제 자동 발사·피격·로프 절단·체크포인트 제거에서 복제 이벤트를 기록한다. 전송 계층이 사건을 drain한 뒤에도 로컬 렌더링용 투사체 배열은 유지된다.
 
 ## 의존 방향

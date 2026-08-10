@@ -69,13 +69,24 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
         const events = this.authority.drainEvents();
-        this.predictableProjectiles.apply(events, this.authority.latestSnapshot.serverTick, current.state);
-        this.combatFeedback.apply(events);
-        this.predictableProjectiles.update(dt, current.state);
-        this.combatFeedback.update(dt);
+        const authorityFeedback = this.predictableProjectiles.apply(
+            events,
+            this.authority.latestSnapshot.serverTick,
+            current.state
+        );
+        this.combatFeedback.apply(authorityFeedback);
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
         this.authority.advance(command);
+        this.predictableProjectiles.predict(this.authority.drainPredictedEvents());
+        const predictedResolutions = this.predictableProjectiles.update(
+            dt,
+            current.state,
+            this.authority.predictor.state().tick
+        );
+        for (const resolution of predictedResolutions) this.authority.submitHitClaim(resolution);
+        this.combatFeedback.apply(predictedResolutions);
+        this.combatFeedback.update(dt);
         if (this.stepCount % 2 === 0) {
             this.authority.submit(command);
         }

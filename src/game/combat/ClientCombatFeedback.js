@@ -10,7 +10,11 @@ export class ClientCombatFeedback {
 
     apply(events) {
         const combatEvents = events
-            .filter((event) => event.eventType === "resolve" && COMBAT_RESOLUTIONS.has(event.resolution))
+            .filter(
+                (event) =>
+                    (event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
+                    COMBAT_RESOLUTIONS.has(event.resolution)
+            )
             .map((event) => ({
                 type: event.resolution,
                 position: event.position,

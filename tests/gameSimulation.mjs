@@ -113,6 +113,7 @@ export function run() {
     assert.equal(spawnEvents[0].eventType, "spawn");
     assert.equal(spawnEvents[0].tick, 1);
     assert.equal(spawnEvents[0].objectId, eventRun.projectiles[0].id);
+    assert.equal(spawnEvents[0].parameters.predictionId, `${eventRun.playerEntity.id}:1`);
     assert.deepEqual(eventRun.drainReplicationEvents(), [], "replication events must drain exactly once");
 
     const target = eventRun.enemies.find((enemy) => enemy.id === eventRun.projectiles[0].targetId);
