@@ -74,6 +74,7 @@ export class CanvasRenderer {
         this.drawArtifactRewardOverlay(scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawArtifactFeedback(scene.eventFlash);
+        if (scene.metricsVisible) this.drawMetricsPanel(scene.metrics);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
     }
@@ -302,6 +303,28 @@ export class CanvasRenderer {
         ctx.fillStyle = "#f8fafc";
         ctx.font = "700 12px system-ui, sans-serif";
         ctx.fillText(detail, this.cssWidth * 0.5, 62);
+        ctx.restore();
+    }
+
+    drawMetricsPanel(metrics) {
+        if (!metrics) return;
+        const ctx = this.context;
+        const x = Math.max(8, this.cssWidth - 248);
+        const firstReward = metrics.firstRewardSeconds === null ? "-" : `${metrics.firstRewardSeconds.toFixed(1)}초`;
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
+        ctx.fillRect(x, 18, 230, 118);
+        ctx.strokeStyle = "rgba(103, 232, 249, 0.65)";
+        ctx.strokeRect(x, 18, 230, 118);
+        ctx.fillStyle = "#67e8f9";
+        ctx.font = "900 12px ui-monospace, monospace";
+        ctx.fillText("RUN METRICS", x + 12, 39);
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "700 11px ui-monospace, monospace";
+        ctx.fillText(`활성 ${metrics.activeSeconds.toFixed(1)}초 · 체크 ${metrics.checkpointsReached}`, x + 12, 60);
+        ctx.fillText(`처치 ${metrics.enemyDefeats} · 피해 ${metrics.damageTaken}`, x + 12, 79);
+        ctx.fillText(`절단 ${metrics.ropeCuts} · 패배 ${metrics.defeats}`, x + 12, 98);
+        ctx.fillText(`첫 보상 ${firstReward}`, x + 12, 117);
         ctx.restore();
     }
 

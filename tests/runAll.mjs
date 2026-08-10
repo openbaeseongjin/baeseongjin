@@ -20,6 +20,7 @@ import { run as artifactInventory } from "./artifactInventory.mjs";
 import { run as artifactCatalog } from "./artifactCatalog.mjs";
 import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
 import { run as runMetrics } from "./runMetrics.mjs";
+import { run as metricsDebugMode } from "./metricsDebugMode.mjs";
 
 const suites = {
     fixedStep,
@@ -43,7 +44,8 @@ const suites = {
     artifactInventory,
     artifactCatalog,
     worldTraversalValidator,
-    runMetrics
+    runMetrics,
+    metricsDebugMode
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {

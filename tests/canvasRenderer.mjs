@@ -29,6 +29,24 @@ export function run() {
 
     renderer.cssWidth = 844;
     renderer.cssHeight = 390;
+    renderer.drawMetricsPanel({
+        activeSeconds: 12.5,
+        checkpointsReached: 1,
+        enemyDefeats: 3,
+        damageTaken: 20,
+        ropeCuts: 2,
+        defeats: 1,
+        firstRewardSeconds: 10
+    });
+    assert.deepEqual(textCalls, [
+        "RUN METRICS",
+        "활성 12.5초 · 체크 1",
+        "처치 3 · 피해 20",
+        "절단 2 · 패배 1",
+        "첫 보상 10.0초"
+    ]);
+    textCalls.length = 0;
+    borderCalls.length = 0;
     renderer.drawArtifactHud([{ name: "로프 공명기" }], 1.5);
     assert.deepEqual(textCalls, ["아티팩트", "• 로프 공명기", "공명 1.5초"]);
     textCalls.length = 0;
