@@ -20,17 +20,20 @@ function command(horizontal) {
 
 export function run() {
     const reversed = createPlayerCommandBatch(7, [
-        { playerId: "player-b", command: command(-1) },
-        { playerId: "player-a", command: command(1) }
+        { playerId: "player-b", sequence: 12, command: command(-1) },
+        { playerId: "player-a", sequence: 4, command: command(1) }
     ]);
     const ordered = createPlayerCommandBatch(7, [
-        { playerId: "player-a", command: command(1) },
-        { playerId: "player-b", command: command(-1) }
+        { playerId: "player-a", sequence: 4, command: command(1) },
+        { playerId: "player-b", sequence: 12, command: command(-1) }
     ]);
     assert.equal(serializePlayerCommandBatch(reversed), serializePlayerCommandBatch(ordered));
     assert.deepEqual(
-        reversed.commands.map(({ playerId }) => playerId),
-        ["player-a", "player-b"]
+        reversed.commands.map(({ playerId, sequence }) => [playerId, sequence]),
+        [
+            ["player-a", 4],
+            ["player-b", 12]
+        ]
     );
     const restored = deserializePlayerCommandBatch(serializePlayerCommandBatch(reversed));
     assert.deepEqual(restored, reversed);
@@ -38,15 +41,23 @@ export function run() {
     assert.throws(
         () =>
             createPlayerCommandBatch(0, [
-                { playerId: "same", command: command(0) },
-                { playerId: "same", command: command(0) }
+                { playerId: "same", sequence: 0, command: command(0) },
+                { playerId: "same", sequence: 1, command: command(0) }
             ]),
         /duplicate playerId/
     );
     assert.throws(() => createPlayerCommandBatch(-1, []), /tick/);
-    assert.throws(() => deserializePlayerCommandBatch('{"protocolVersion":2,"tick":0,"commands":[]}'), /unsupported/);
+    assert.throws(() => deserializePlayerCommandBatch('{"protocolVersion":3,"tick":0,"commands":[]}'), /unsupported/);
     assert.throws(
-        () => createPlayerCommandBatch(0, [{ playerId: "player", command: { ...command(0), horizontal: 2 } }]),
+        () => createPlayerCommandBatch(0, [{ playerId: "player", sequence: -1, command: command(0) }]),
+        /sequence/
+    );
+    assert.throws(() => createPlayerCommandBatch(0, [{ playerId: "player", command: command(0) }]), /sequence/);
+    assert.throws(
+        () =>
+            createPlayerCommandBatch(0, [
+                { playerId: "player", sequence: 0, command: { ...command(0), horizontal: 2 } }
+            ]),
         /movement axes/
     );
 }
