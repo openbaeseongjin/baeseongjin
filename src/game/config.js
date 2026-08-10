@@ -24,6 +24,7 @@ export const COMBAT_CONFIG = Object.freeze({
     projectileRadius: 5,
     enemyRadius: 18,
     enemyHealth: 30,
+    enemyAttackRange: 520,
     enemyFireInterval: 1.4,
     enemyProjectileSpeed: 260,
     enemyProjectileRadius: 7,
@@ -32,6 +33,13 @@ export const COMBAT_CONFIG = Object.freeze({
     playerHitInvulnerability: 0.45,
     playerHitKnockback: 260,
     ropeDisabledSeconds: 0.6
+});
+
+export const LIFE_CONFIG = Object.freeze({
+    downedDuration: 10,
+    defeatRestartDelay: 2,
+    reviveDuration: 2.5,
+    reviveHealthFraction: 0.4
 });
 
 export const WORLD_CONFIG = Object.freeze({

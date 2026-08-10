@@ -5,7 +5,8 @@ import {
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
-import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 import { evaluateSwingDrag } from "../rope/SwingDrag.js";
@@ -30,17 +31,13 @@ export class GameSimulation {
             health: COMBAT_CONFIG.playerMaxHealth,
             maxHealth: COMBAT_CONFIG.playerMaxHealth,
             hitInvulnerabilityRemaining: 0,
-            ropeDisabledRemaining: 0
+            ropeDisabledRemaining: 0,
+            lifeState: "active",
+            downedRemaining: 0,
+            reviveProgress: 0
         };
-        this.enemies = this.world.enemySpawns.map((spawn) => ({
-            id: this.registry.createId("enemy"),
-            position: new Vector2(spawn.x, spawn.y),
-            level: spawn.level,
-            radius: COMBAT_CONFIG.enemyRadius,
-            health: COMBAT_CONFIG.enemyHealth,
-            maxHealth: COMBAT_CONFIG.enemyHealth,
-            fireCooldown: COMBAT_CONFIG.enemyFireInterval
-        }));
+        this.players = [this.playerEntity];
+        this.enemies = this.createEnemies();
         this.projectiles = [];
         this.enemyProjectiles = [];
         this.aimWorld = { x: 0, y: 0 };
@@ -50,16 +47,31 @@ export class GameSimulation {
         this.eventFlash = { type: "ready", age: 10 };
         this.swingDrag = null;
         this.resets = 0;
+        this.runState = "playing";
+        this.defeatReason = null;
+        this.restartRemaining = 0;
     }
 
     step(dt, command) {
+        if (this.runState === "defeated") {
+            this.restartRemaining = Math.max(0, this.restartRemaining - dt);
+            this.eventFlash.age += dt;
+            if (this.restartRemaining <= 0) this.resetRun();
+            return;
+        }
+        const canControl = this.playerEntity.lifeState === "active";
+        const effectiveCommand = canControl
+            ? command
+            : { horizontal: 0, vertical: 0, pointer: { x: 0, y: 0, down: false }, aimWorld: this.aimWorld };
         this.playerEntity.ropeDisabledRemaining = Math.max(0, this.playerEntity.ropeDisabledRemaining - dt);
         this.playerEntity.hitInvulnerabilityRemaining = Math.max(0, this.playerEntity.hitInvulnerabilityRemaining - dt);
-        this.aimWorld = command.aimWorld;
-        this.attachmentCandidate = this.findAttachment(this.aimWorld);
-        if (command.pointer.down && !this.wasPointerDown) this.attachBufferRemaining = ROPE_CONFIG.attachBufferSeconds;
+        this.aimWorld = effectiveCommand.aimWorld;
+        this.attachmentCandidate = canControl ? this.findAttachment(this.aimWorld) : null;
+        if (effectiveCommand.pointer.down && !this.wasPointerDown) {
+            this.attachBufferRemaining = ROPE_CONFIG.attachBufferSeconds;
+        }
         if (
-            command.pointer.down &&
+            effectiveCommand.pointer.down &&
             !this.rope.isAttached &&
             this.playerEntity.ropeDisabledRemaining <= 0 &&
             this.attachBufferRemaining > 0 &&
@@ -68,7 +80,7 @@ export class GameSimulation {
             if (this.rope.attach(this.player.position, this.attachmentCandidate)) {
                 this.eventFlash = { type: "attach", age: 0 };
                 this.swingDrag = {
-                    origin: { x: command.pointer.x, y: command.pointer.y },
+                    origin: { x: effectiveCommand.pointer.x, y: effectiveCommand.pointer.y },
                     direction: null,
                     progress: 0,
                     age: 0,
@@ -77,15 +89,15 @@ export class GameSimulation {
                 this.attachBufferRemaining = 0;
             }
         }
-        if (command.pointer.down && this.rope.isAttached) this.updateSwingDrag(command.pointer, dt);
-        if (!command.pointer.down && this.wasPointerDown && this.rope.isAttached) {
+        if (effectiveCommand.pointer.down && this.rope.isAttached) this.updateSwingDrag(effectiveCommand.pointer, dt);
+        if (!effectiveCommand.pointer.down && this.wasPointerDown && this.rope.isAttached) {
             this.rope.detach();
             this.eventFlash = { type: "release", age: 0 };
             this.swingDrag = null;
         }
         this.attachBufferRemaining = Math.max(0, this.attachBufferRemaining - dt);
-        this.wasPointerDown = command.pointer.down;
-        this.player.step(dt, command, this.world.surfaces, this.rope);
+        this.wasPointerDown = effectiveCommand.pointer.down;
+        this.player.step(dt, effectiveCommand, this.world.surfaces, this.rope);
         updateAutomaticWeapon({
             owner: this.playerEntity,
             enemies: this.enemies,
@@ -111,8 +123,17 @@ export class GameSimulation {
             dt
         });
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
+        if (this.playerEntity.health <= 0 && enterDowned(this.playerEntity, LIFE_CONFIG)) {
+            this.rope.detach();
+            this.swingDrag = null;
+            this.eventFlash = { type: "downed", age: 0 };
+        }
+        updateDownedPlayer(this.playerEntity, dt);
+        if (isTeamDefeated(this.players)) this.beginDefeat("health");
         this.eventFlash.age += dt;
-        if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) this.resetRun();
+        if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) {
+            this.beginDefeat("fall");
+        }
     }
 
     updateSwingDrag(pointer, dt) {
@@ -131,6 +152,18 @@ export class GameSimulation {
         this.player.addImpulse(evaluation.direction, ROPE_CONFIG.swingImpulse);
         this.swingDrag.used = true;
         this.eventFlash = { type: "swing", age: 0 };
+    }
+
+    createEnemies() {
+        return this.world.enemySpawns.map((spawn) => ({
+            id: this.registry.createId("enemy"),
+            position: new Vector2(spawn.x, spawn.y),
+            level: spawn.level,
+            radius: COMBAT_CONFIG.enemyRadius,
+            health: COMBAT_CONFIG.enemyHealth,
+            maxHealth: COMBAT_CONFIG.enemyHealth,
+            fireCooldown: COMBAT_CONFIG.enemyFireInterval
+        }));
     }
 
     findAttachment(aimPoint) {
@@ -157,10 +190,29 @@ export class GameSimulation {
         this.eventFlash = { type: "reset", age: 0 };
         this.swingDrag = null;
         this.playerEntity.health = this.playerEntity.maxHealth;
+        this.playerEntity.weapon.cooldown = 0;
         this.playerEntity.hitInvulnerabilityRemaining = 0;
         this.playerEntity.ropeDisabledRemaining = 0;
+        this.playerEntity.lifeState = "active";
+        this.playerEntity.downedRemaining = 0;
+        this.playerEntity.reviveProgress = 0;
+        this.enemies = this.createEnemies();
+        this.projectiles = [];
         this.enemyProjectiles = [];
+        this.runState = "playing";
+        this.defeatReason = null;
+        this.restartRemaining = 0;
         this.resets += 1;
+    }
+
+    beginDefeat(reason) {
+        if (this.runState === "defeated") return;
+        this.runState = "defeated";
+        this.defeatReason = reason;
+        this.restartRemaining = LIFE_CONFIG.defeatRestartDelay;
+        this.rope.detach();
+        this.swingDrag = null;
+        this.eventFlash = { type: "defeat", age: 0 };
     }
 
     snapshot() {
@@ -178,6 +230,10 @@ export class GameSimulation {
             playerHealth: this.playerEntity.health,
             playerMaxHealth: this.playerEntity.maxHealth,
             ropeDisabledRemaining: this.playerEntity.ropeDisabledRemaining,
+            playerLifeState: this.playerEntity.lifeState,
+            runState: this.runState,
+            defeatReason: this.defeatReason,
+            restartRemaining: this.restartRemaining,
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };

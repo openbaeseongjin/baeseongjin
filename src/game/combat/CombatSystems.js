@@ -13,6 +13,7 @@ export function selectNearestEnemy(position, enemies, range) {
 
 export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt }) {
     owner.weapon.cooldown = Math.max(0, owner.weapon.cooldown - dt);
+    if (owner.lifeState === "downed") return;
     if (owner.weapon.cooldown > 0) return;
     const target = selectNearestEnemy(owner.physics.position, enemies, owner.weapon.range);
     if (!target) return;
@@ -55,7 +56,7 @@ export function updateEnemyWeapons({ enemies, target, projectiles, registry, con
         if (enemy.fireCooldown > 0 || target.health <= 0) continue;
         const direction = target.physics.position.clone().subtract(enemy.position);
         const distance = direction.length();
-        if (distance <= 0) continue;
+        if (distance <= 0 || distance > config.enemyAttackRange) continue;
         direction.scale(config.enemyProjectileSpeed / distance);
         projectiles.push({
             id: registry.createId("enemy-projectile"),

@@ -55,9 +55,10 @@ export class CanvasRenderer {
         this.drawProjectiles(scene.projectiles ?? []);
         this.drawEnemyProjectiles(scene.enemyProjectiles ?? []);
         this.drawCandidate(scene.attachmentCandidate);
-        this.drawPlayer(scene.player, scene.eventFlash);
+        this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
         this.drawHud(scene);
+        this.drawDefeatOverlay(scene);
     }
 
     drawBackground(camera) {
@@ -215,7 +216,7 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawPlayer(player, eventFlash) {
+    drawPlayer(player, eventFlash, lifeState) {
         const ctx = this.context;
         if (eventFlash.age < 0.28) {
             const progress = eventFlash.age / 0.28;
@@ -227,7 +228,7 @@ export class CanvasRenderer {
             ctx.stroke();
             ctx.globalAlpha = 1;
         }
-        ctx.fillStyle = COLORS.player;
+        ctx.fillStyle = lifeState === "downed" ? "#64748b" : COLORS.player;
         ctx.beginPath();
         ctx.arc(player.position.x, player.position.y, player.config.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -244,6 +245,25 @@ export class CanvasRenderer {
             ctx.lineTo(player.position.x - player.velocity.x * 0.08, player.position.y - player.velocity.y * 0.08);
             ctx.stroke();
         }
+    }
+
+    drawDefeatOverlay({ runState, defeatReason, restartRemaining }) {
+        if (runState !== "defeated") return;
+        const ctx = this.context;
+        ctx.fillStyle = "rgba(3, 7, 18, 0.72)";
+        ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#fda4af";
+        ctx.font = "700 38px system-ui, sans-serif";
+        ctx.fillText(defeatReason === "fall" ? "추락" : "전투 불능", this.cssWidth * 0.5, this.cssHeight * 0.46);
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "18px system-ui, sans-serif";
+        ctx.fillText(
+            `${Math.max(0, restartRemaining).toFixed(1)}초 후 다시 시작`,
+            this.cssWidth * 0.5,
+            this.cssHeight * 0.53
+        );
+        ctx.textAlign = "start";
     }
 
     drawEnemies(enemies) {

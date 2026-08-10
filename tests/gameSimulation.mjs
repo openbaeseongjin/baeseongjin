@@ -21,4 +21,21 @@ export function run() {
         { position: secondState.player.position, velocity: secondState.player.velocity, resets: secondState.resets },
         "the same commands and world seed must produce the same authoritative state"
     );
+
+    const defeated = new GameSimulation();
+    defeated.playerEntity.health = 0;
+    defeated.enemies.pop();
+    const expectedEnemyCount = defeated.world.enemySpawns.length;
+    defeated.step(1 / 60, command);
+    assert.equal(defeated.snapshot().runState, "defeated");
+    assert.equal(defeated.snapshot().playerLifeState, "downed");
+    assert.equal(defeated.snapshot().defeatReason, "health");
+    defeated.projectiles.push({ id: "stale-player-shot" });
+    defeated.enemyProjectiles.push({ id: "stale-enemy-shot" });
+    defeated.step(2, command);
+    assert.equal(defeated.snapshot().runState, "playing");
+    assert.equal(defeated.snapshot().playerHealth, defeated.snapshot().playerMaxHealth);
+    assert.equal(defeated.snapshot().enemies.length, expectedEnemyCount);
+    assert.equal(defeated.snapshot().projectiles.length, 0);
+    assert.equal(defeated.snapshot().enemyProjectiles.length, 0);
 }
