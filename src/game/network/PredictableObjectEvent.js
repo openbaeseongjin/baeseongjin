@@ -41,7 +41,7 @@ export function createPredictableSpawnEvent({
     });
 }
 
-export function createPredictableResolveEvent({ eventId, objectId, tick, resolution, position }) {
+export function createPredictableResolveEvent({ eventId, objectId, tick, resolution, position, parameters }) {
     return Object.freeze({
         protocolVersion: PREDICTABLE_OBJECT_EVENT_PROTOCOL_VERSION,
         eventType: "resolve",
@@ -49,7 +49,8 @@ export function createPredictableResolveEvent({ eventId, objectId, tick, resolut
         objectId: assertId(objectId, "objectId"),
         tick: assertTick(tick, "tick"),
         resolution: assertId(resolution, "resolution"),
-        position: normalizeVector(position, "position")
+        position: normalizeVector(position, "position"),
+        parameters: normalizeNetworkJson(parameters ?? {}, "parameters")
     });
 }
 

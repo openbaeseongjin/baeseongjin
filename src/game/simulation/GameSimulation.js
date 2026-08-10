@@ -6,7 +6,6 @@ import {
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
-import { appendCombatFeedback, createImpactState, updateCombatFeedback } from "../combat/CombatFeedback.js";
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { enterDowned, isTeamDefeated, updateDownedPlayer, updateTeamRevives } from "../life/PlayerLifeCycle.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
@@ -30,8 +29,6 @@ export class GameSimulation {
         this.enemies = this.createEnemies();
         this.projectiles = [];
         this.enemyProjectiles = [];
-        this.combatEffects = [];
-        this.impact = null;
         this.eventFlash = { type: "ready", age: 10 };
         this.resets = 0;
         this.runState = "playing";
@@ -221,23 +218,16 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
+        const combatEvents = [...playerProjectileEvents.hits, ...enemyProjectileEvents.hits];
+        const hitByProjectileId = new Map(combatEvents.map((event) => [event.projectileId, event]));
         for (const resolution of [...playerProjectileEvents.resolutions, ...enemyProjectileEvents.resolutions]) {
-            this.recordProjectileResolution(resolution);
+            this.recordProjectileResolution(resolution, hitByProjectileId.get(resolution.projectileId));
         }
         this.metrics.recordCombat(playerProjectileEvents, enemyProjectileEvents);
         for (const ropeCut of enemyProjectileEvents.ropeCuts) {
             const player = this.players.find(({ id }) => id === ropeCut.playerId);
             if (player) player.swingDrag = null;
             this.eventFlash = { type: "rope-cut", age: 0, position: ropeCut.position, playerId: ropeCut.playerId };
-        }
-        const combatEvents = [...playerProjectileEvents.hits, ...enemyProjectileEvents.hits];
-        for (const event of combatEvents) appendCombatFeedback(this.combatEffects, event);
-        const impact = createImpactState(combatEvents);
-        if (impact) this.impact = impact;
-        updateCombatFeedback(this.combatEffects, dt);
-        if (this.impact) {
-            this.impact.age += dt;
-            if (this.impact.age >= this.impact.lifetime) this.impact = null;
         }
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
         for (const player of this.players) {
@@ -506,7 +496,7 @@ export class GameSimulation {
         );
     }
 
-    recordProjectileResolution({ projectileId, resolution, position }) {
+    recordProjectileResolution({ projectileId, resolution, position }, combatEvent = null) {
         if (!projectileId) return;
         this.replicationEvents.push(
             createPredictableResolveEvent({
@@ -514,7 +504,8 @@ export class GameSimulation {
                 objectId: projectileId,
                 tick: this.tick,
                 resolution,
-                position
+                position,
+                parameters: combatEvent ? { damage: combatEvent.damage } : {}
             })
         );
     }
@@ -579,8 +570,6 @@ export class GameSimulation {
         }
         this.projectiles = [];
         this.enemyProjectiles = [];
-        this.combatEffects = [];
-        this.impact = null;
         this.runState = "playing";
         this.defeatReason = null;
         this.restartRemaining = 0;
@@ -631,8 +620,6 @@ export class GameSimulation {
             enemies: this.enemies,
             projectiles: this.projectiles,
             enemyProjectiles: this.enemyProjectiles,
-            combatEffects: this.combatEffects,
-            impact: this.impact,
             playerHealth: this.playerEntity.health,
             playerMaxHealth: this.playerEntity.maxHealth,
             ropeDisabledRemaining: this.playerEntity.ropeDisabledRemaining,

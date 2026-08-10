@@ -94,6 +94,8 @@ export function run() {
     assert.ok(simulation.player.velocity.x > 0);
     assert.ok(partner.physics.velocity.x < 0);
     assert.equal(snapshot.serverTick, 6);
+    assert.equal(Object.hasOwn(snapshot.state, "combatEffects"), false, "server snapshots must not carry client VFX");
+    assert.equal(Object.hasOwn(snapshot.state, "impact"), false, "server snapshots must not carry camera feedback");
     assert.deepEqual(snapshot.acknowledgements, {
         [simulation.playerEntity.id]: 5,
         [partner.entity.id]: 5

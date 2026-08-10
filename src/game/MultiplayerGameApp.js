@@ -6,6 +6,7 @@ import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
+import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -33,6 +34,7 @@ export class MultiplayerGameApp {
         this.stepCount = 0;
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.predictableProjectiles = new PredictableProjectileStore();
+        this.combatFeedback = new ClientCombatFeedback();
         this.runner = new FixedStepRunner({ step: (dt, input) => this.update(dt, input), render: () => this.render() });
         this.tick = (time) => {
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
@@ -66,12 +68,11 @@ export class MultiplayerGameApp {
         this.stepCount += 1;
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
-        this.predictableProjectiles.apply(
-            this.authority.drainEvents(),
-            this.authority.latestSnapshot.serverTick,
-            current.state
-        );
+        const events = this.authority.drainEvents();
+        this.predictableProjectiles.apply(events, this.authority.latestSnapshot.serverTick, current.state);
+        this.combatFeedback.apply(events);
         this.predictableProjectiles.update(dt, current.state);
+        this.combatFeedback.update(dt);
         if (this.stepCount % 2 === 0) {
             const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
             this.authority.submit(createPlayerCommand(input, aimWorld));
@@ -105,6 +106,7 @@ export class MultiplayerGameApp {
             attachmentCandidate: this.authority.predictor.simulation.playerEntity.attachmentCandidate,
             enemies: remote.state.enemies,
             ...predictableProjectiles,
+            ...this.combatFeedback.snapshot(),
             otherPlayers,
             playerHealth: localState.health,
             playerMaxHealth: localState.maxHealth,
