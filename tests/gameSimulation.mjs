@@ -267,17 +267,17 @@ export function run() {
     rewardRun.player.position.y = firstRewardCheckpoint.y;
     rewardRun.step(1 / 60, command);
     assert.equal(rewardRun.snapshot().artifactReward.selectedIndex, 0);
-    const rewardPausedSeconds = rewardRun.snapshot().metrics.activeSeconds;
-    const pausedPosition = rewardRun.player.position.clone();
-    rewardRun.step(1, command);
-    assert.deepEqual(rewardRun.player.position, pausedPosition, "artifact selection must pause world physics");
-    assert.equal(
-        rewardRun.snapshot().metrics.activeSeconds,
-        rewardPausedSeconds,
-        "reward choice time must stay excluded"
+    const rewardStartedSeconds = rewardRun.snapshot().metrics.activeSeconds;
+    const firstRewardSeconds = rewardRun.snapshot().metrics.firstRewardSeconds;
+    const choosingVelocityX = rewardRun.player.velocity.x;
+    rewardRun.step(1 / 60, { ...command, horizontal: 1, vertical: -1 });
+    assert.ok(
+        rewardRun.snapshot().metrics.activeSeconds > rewardStartedSeconds,
+        "artifact choice time must remain part of the live world"
     );
+    assert.equal(rewardRun.player.velocity.x, choosingVelocityX, "reward navigation must not also move the player");
     assert.equal(rewardRun.snapshot().metrics.checkpointsReached, 1);
-    assert.equal(rewardRun.snapshot().metrics.firstRewardSeconds, rewardPausedSeconds);
+    assert.equal(rewardRun.snapshot().metrics.firstRewardSeconds, firstRewardSeconds);
     const neutralCommand = { ...command, horizontal: 0, vertical: 0 };
     rewardRun.step(1 / 60, neutralCommand);
     rewardRun.step(1 / 60, { ...neutralCommand, horizontal: 1 });
@@ -333,9 +333,10 @@ export function run() {
     coopRewardRun.stepPlayers(1 / 60, commands({ ...coopNeutral, vertical: -1 }, { ...coopNeutral, horizontal: 1 }));
     assert.equal(coopRewardRun.playerEntity.artifacts.snapshot()[0].id, "power-core");
     assert.equal(coopPartner.artifacts.snapshot().length, 0, "one choice must not change the partner inventory");
-    assert.equal(coopRewardRun.artifactRewards.size, 1, "the world remains paused until every player chooses");
-    assert.deepEqual(coopPartner.physics.position, pausedPartnerPosition);
-    coopRewardRun.stepPlayers(1 / 60, commands(coopNeutral, coopNeutral));
+    assert.equal(coopRewardRun.artifactRewards.size, 1);
+    assert.equal(coopPartner.physics.position.x, pausedPartnerPosition.x, "reward navigation must not move its owner");
+    coopRewardRun.stepPlayers(1 / 60, commands({ ...coopNeutral, horizontal: 1 }, coopNeutral));
+    assert.ok(coopRewardRun.player.velocity.x > 0, "a player who chose must keep moving while a partner decides");
     coopRewardRun.stepPlayers(1 / 60, commands(coopNeutral, { ...coopNeutral, vertical: -1 }));
     assert.equal(coopRewardRun.artifactRewards.size, 0);
     assert.equal(coopPartner.artifacts.snapshot()[0].id, "rapid-gear");
