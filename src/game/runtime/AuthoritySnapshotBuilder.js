@@ -27,8 +27,6 @@ function playerState(player, simulation) {
         hitInvulnerabilityRemaining: player.hitInvulnerabilityRemaining,
         ropeDisabledRemaining: player.ropeDisabledRemaining,
         lifeState: player.lifeState,
-        downedRemaining: player.downedRemaining,
-        reviveProgress: player.reviveProgress,
         rope: {
             isAttached: player.rope.isAttached,
             anchor: vectorState(player.rope.anchor),
@@ -82,8 +80,6 @@ export function buildAuthoritySnapshot({ simulation, acknowledgements = {} }) {
             artifactReward: simulation.artifactReward,
             artifactRewards: Object.fromEntries(simulation.artifactRewards),
             runState: simulation.runState,
-            defeatReason: simulation.defeatReason,
-            restartRemaining: simulation.restartRemaining,
             metrics: simulation.metrics.snapshot(),
             completed: simulation.runState === "completed"
         },

@@ -66,7 +66,7 @@ export class CanvasRenderer {
         this.drawCombatEffects(scene.combatEffects ?? []);
         this.drawRopeCutMark(scene.eventFlash);
         this.drawCandidate(scene.attachmentCandidate);
-        this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
+        this.drawPlayer(scene.player, scene.eventFlash);
         this.context.restore();
         if (scene.mobileView) this.drawPlayerHealthHud(scene);
         if (!scene.mobileView) {
@@ -290,9 +290,13 @@ export class CanvasRenderer {
             detail = eventFlash.artifact.name;
             color = "#fbbf24";
         } else if (eventFlash.type === "artifact-loss" && eventFlash.artifacts?.length) {
-            title = "체크포인트 복귀 · 아티팩트 손실";
+            title = "체크포인트 부활 · 아티팩트 손실";
             detail = eventFlash.artifacts.map((artifact) => artifact.name).join(", ");
             color = "#fb7185";
+        } else if (eventFlash.type === "checkpoint-respawn") {
+            title = "체크포인트 부활";
+            detail = eventFlash.reason === "fall" ? "낙사 · 최대 체력으로 복귀" : "사망 · 최대 체력으로 복귀";
+            color = "#67e8f9";
         } else {
             return;
         }
@@ -333,7 +337,7 @@ export class CanvasRenderer {
         ctx.font = "700 11px ui-monospace, monospace";
         ctx.fillText(`활성 ${metrics.activeSeconds.toFixed(1)}초 · 체크 ${metrics.checkpointsReached}`, x + 12, 60);
         ctx.fillText(`처치 ${metrics.enemyDefeats} · 피해 ${metrics.damageTaken}`, x + 12, 79);
-        ctx.fillText(`절단 ${metrics.ropeCuts} · 패배 ${metrics.defeats}`, x + 12, 98);
+        ctx.fillText(`절단 ${metrics.ropeCuts} · 사망 ${metrics.defeats}`, x + 12, 98);
         ctx.fillText(`첫 보상 ${firstReward}`, x + 12, 117);
         if (networkMetrics) {
             const rtt = networkMetrics.roundTripMs === null ? "-" : `${Math.round(networkMetrics.roundTripMs)}ms`;
@@ -469,7 +473,7 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawPlayer(player, eventFlash, lifeState) {
+    drawPlayer(player, eventFlash) {
         const ctx = this.context;
         if (eventFlash.age < 0.28) {
             const progress = eventFlash.age / 0.28;
@@ -486,7 +490,7 @@ export class CanvasRenderer {
             ctx.stroke();
             ctx.globalAlpha = 1;
         }
-        ctx.fillStyle = lifeState === "downed" ? "#64748b" : COLORS.player;
+        ctx.fillStyle = COLORS.player;
         ctx.beginPath();
         ctx.arc(player.position.x, player.position.y, player.config.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -510,7 +514,6 @@ export class CanvasRenderer {
         for (const player of players) {
             this.drawRope(player.rope, player.position);
             ctx.save();
-            ctx.globalAlpha = player.lifeState === "downed" ? 0.55 : 1;
             ctx.fillStyle = "#c084fc";
             ctx.strokeStyle = "#f3e8ff";
             ctx.lineWidth = 2;
@@ -562,27 +565,18 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawRunEndOverlay({ runState, defeatReason, restartRemaining }) {
-        if (runState !== "defeated" && runState !== "completed") return;
+    drawRunEndOverlay({ runState }) {
+        if (runState !== "completed") return;
         const ctx = this.context;
-        const completed = runState === "completed";
-        ctx.fillStyle = completed ? "rgba(3, 7, 18, 0.9)" : "rgba(3, 7, 18, 0.72)";
+        ctx.fillStyle = "rgba(3, 7, 18, 0.9)";
         ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         ctx.textAlign = "center";
-        ctx.fillStyle = completed ? "#fde68a" : "#fda4af";
+        ctx.fillStyle = "#fde68a";
         ctx.font = "700 38px system-ui, sans-serif";
-        ctx.fillText(
-            completed ? "정상 도달" : defeatReason === "fall" ? "추락" : "전투 불능",
-            this.cssWidth * 0.5,
-            this.cssHeight * 0.46
-        );
+        ctx.fillText("정상 도달", this.cssWidth * 0.5, this.cssHeight * 0.46);
         ctx.fillStyle = "#e2e8f0";
         ctx.font = "18px system-ui, sans-serif";
-        ctx.fillText(
-            completed ? "전체 월드 등반 완료" : `${Math.max(0, restartRemaining).toFixed(1)}초 후 다시 시작`,
-            this.cssWidth * 0.5,
-            this.cssHeight * 0.53
-        );
+        ctx.fillText("전체 월드 등반 완료", this.cssWidth * 0.5, this.cssHeight * 0.53);
         ctx.textAlign = "start";
     }
 
@@ -654,7 +648,7 @@ export class CanvasRenderer {
         }
     }
 
-    drawPlayerHealthHud({ playerHealth, playerMaxHealth, playerLifeState }) {
+    drawPlayerHealthHud({ playerHealth, playerMaxHealth }) {
         const ctx = this.context;
         const health = Math.max(0, Math.round(playerHealth ?? 0));
         const maxHealth = Math.max(1, Math.round(playerMaxHealth ?? 1));
@@ -670,7 +664,7 @@ export class CanvasRenderer {
         ctx.strokeRect(x, y, width, 50);
         ctx.fillStyle = "#f8fafc";
         ctx.font = "800 12px system-ui, sans-serif";
-        ctx.fillText(playerLifeState === "downed" ? "쓰러짐" : "HP", x + 14, y + 20);
+        ctx.fillText("HP", x + 14, y + 20);
         ctx.textAlign = "right";
         ctx.fillText(`${health} / ${maxHealth}`, x + width - 14, y + 20);
         ctx.textAlign = "left";

@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
-import { LIFE_CONFIG } from "../src/game/config.js";
-import { enterDowned } from "../src/game/life/PlayerLifeCycle.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { LocalAuthority } from "../src/game/runtime/LocalAuthority.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
@@ -83,29 +81,6 @@ export function run() {
     assert.equal(batchPartner.rope.isAttached, true, "a missing command must not invent a rope release");
     assert.throws(() => batchWorld.stepCommandBatch(1 / 120, createPlayerCommandBatch(4, [])), /must equal 3/);
 
-    const reviveWorld = new GameSimulation();
-    const revivePartner = reviveWorld.addPlayer({ x: 150, y: 500 });
-    reviveWorld.enemies = [];
-    enterDowned(revivePartner.entity, LIFE_CONFIG);
-    const reviveCommand = createPlayerCommand(
-        { ...input, horizontal: 0, vertical: -1, interact: true },
-        { x: 0, y: 0 }
-    );
-    for (let tick = 1; tick <= 300; tick += 1) {
-        reviveWorld.stepCommandBatch(
-            1 / 120,
-            createPlayerCommandBatch(tick, [
-                { playerId: reviveWorld.playerEntity.id, sequence: tick - 1, command: reviveCommand }
-            ])
-        );
-    }
-    assert.equal(revivePartner.entity.lifeState, "active");
-    assert.equal(revivePartner.entity.health, 40);
-    assert.ok(reviveWorld.player.velocity.y >= 0, "contextual mobile interaction must consume the jump axis");
-    const revivedEvent = reviveWorld.drainReplicationEvents().find(({ eventType }) => eventType === "player-revived");
-    assert.equal(revivedEvent.playerId, revivePartner.entity.id);
-    assert.equal(revivedEvent.reviverId, reviveWorld.playerEntity.id);
-
     const eventRun = new GameSimulation();
     eventRun.playerEntity.weapon.cooldown = 0;
     eventRun.step(1 / 120, command);
@@ -124,25 +99,15 @@ export function run() {
     assert.match(resolveEvents[0].resolution, /enemy-hit|enemy-defeated/);
 
     const defeated = new GameSimulation();
-    defeated.playerEntity.health = 0;
-    defeated.enemies.pop();
-    const expectedEnemyCount = defeated.enemies.length;
+    defeated.enemies = [];
     const respawnCheckpoint = defeated.world.checkpoints[2];
     defeated.activeCheckpoint = respawnCheckpoint;
     for (const id of ["a", "b", "c"]) defeated.artifacts.add({ id });
+    defeated.playerEntity.health = 0;
     defeated.step(1 / 60, command);
-    assert.equal(defeated.snapshot().runState, "defeated");
-    const defeatActiveSeconds = defeated.snapshot().metrics.activeSeconds;
-    assert.equal(defeated.snapshot().playerLifeState, "downed");
-    assert.equal(defeated.snapshot().defeatReason, "health");
-    defeated.projectiles.push({ id: "stale-player-shot" });
-    defeated.enemyProjectiles.push({ id: "stale-enemy-shot" });
-    defeated.step(2, command);
-    assert.equal(defeated.snapshot().runState, "playing");
+    assert.equal(defeated.snapshot().runState, "playing", "death must not pause the shared world");
+    assert.equal(defeated.snapshot().playerLifeState, "active");
     assert.equal(defeated.snapshot().playerHealth, defeated.snapshot().playerMaxHealth);
-    assert.equal(defeated.snapshot().enemies.length, expectedEnemyCount);
-    assert.equal(defeated.snapshot().projectiles.length, 0);
-    assert.equal(defeated.snapshot().enemyProjectiles.length, 0);
     assert.equal(defeated.snapshot().activeCheckpoint.id, respawnCheckpoint.id);
     assert.equal(defeated.snapshot().player.position.x, respawnCheckpoint.x);
     assert.equal(defeated.snapshot().player.position.y, respawnCheckpoint.y);
@@ -155,12 +120,13 @@ export function run() {
         ["c"]
     );
     assert.equal(defeated.snapshot().eventFlash.type, "artifact-loss");
-    assert.equal(
-        defeated.snapshot().metrics.activeSeconds,
-        defeatActiveSeconds,
-        "defeat delay must not count as active play"
-    );
+    assert.equal(defeated.snapshot().eventFlash.reason, "health");
     assert.equal(defeated.snapshot().metrics.defeats, 1);
+    assert.equal(defeated.snapshot().resets, 1);
+    const respawnEvent = defeated.drainReplicationEvents().find(({ eventType }) => eventType === "player-respawned");
+    assert.equal(respawnEvent.playerId, defeated.playerEntity.id);
+    assert.equal(respawnEvent.reason, "health");
+    assert.deepEqual(respawnEvent.artifactIds, ["c"]);
 
     const teamLoss = new GameSimulation();
     const lossPartner = teamLoss.addPlayer({ x: 150, y: 500 });
@@ -171,10 +137,7 @@ export function run() {
     teamLoss.playerEntity.health = 0;
     lossPartner.entity.health = 0;
     teamLoss.step(1 / 120, command);
-    assert.equal(teamLoss.runState, "defeated");
-    assert.equal(teamLoss.playerEntity.artifacts.snapshot().length, 3, "downing alone must not remove artifacts");
-    assert.equal(lossPartner.artifacts.snapshot().length, 3);
-    teamLoss.step(LIFE_CONFIG.defeatRestartDelay, command);
+    assert.equal(teamLoss.runState, "playing", "simultaneous deaths must not create a team-wipe delay");
     for (const player of teamLoss.players) {
         assert.equal(player.lifeState, "active");
         assert.equal(player.physics.position.x, teamCheckpoint.x);
@@ -192,35 +155,45 @@ export function run() {
     );
     const lossEvents = teamLoss.drainReplicationEvents().filter(({ eventType }) => eventType === "artifact-loss");
     assert.deepEqual(lossEvents.map(({ playerId }) => playerId).sort(), teamLoss.players.map(({ id }) => id).sort());
+    assert.equal(teamLoss.metrics.defeats, 2);
+    assert.equal(teamLoss.resets, 2);
 
     const fallWorld = new GameSimulation();
     const fallPartner = fallWorld.addPlayer({ x: 150, y: 500 });
     fallWorld.enemies = [];
     const fallCheckpoint = fallWorld.world.checkpoints[1];
     fallWorld.activeCheckpoint = fallCheckpoint;
+    fallPartner.entity.health = 12;
+    for (const id of ["f1", "f2", "f3"]) fallPartner.entity.artifacts.add({ id });
     fallPartner.physics.position.y = Number.POSITIVE_INFINITY;
     fallWorld.step(1 / 120, command);
-    assert.equal(fallWorld.runState, "playing", "one fallen teammate must not end a cooperative run");
-    assert.equal(fallPartner.entity.lifeState, "downed");
+    assert.equal(fallWorld.runState, "playing", "falling must not pause the cooperative world");
+    assert.equal(fallPartner.entity.lifeState, "active");
+    assert.equal(fallPartner.entity.health, fallPartner.entity.maxHealth);
     assert.equal(fallPartner.physics.position.x, fallCheckpoint.x);
     assert.equal(fallPartner.physics.position.y, fallCheckpoint.y);
-    assert.equal(fallPartner.entity.artifacts.snapshot().length, 0, "fall recovery must not apply checkpoint loss");
-    const fallEvent = fallWorld.drainReplicationEvents().find(({ eventType }) => eventType === "player-fell");
+    assert.deepEqual(
+        fallPartner.entity.artifacts.snapshot().map(({ id }) => id),
+        ["f1", "f2"]
+    );
+    const fallEvent = fallWorld.drainReplicationEvents().find(({ eventType }) => eventType === "player-respawned");
     assert.equal(fallEvent.playerId, fallPartner.entity.id);
-
-    fallWorld.player.position.x = fallCheckpoint.x;
-    fallWorld.player.position.y = fallCheckpoint.y;
-    for (let tick = 0; tick < 300; tick += 1) {
-        fallWorld.step(1 / 120, reviveCommand);
-    }
-    assert.equal(fallPartner.entity.lifeState, "active", "the existing interaction must revive a recovered teammate");
+    assert.equal(fallEvent.reason, "fall");
+    assert.deepEqual(fallEvent.artifactIds, ["f3"]);
 
     const soloFall = new GameSimulation();
+    soloFall.enemies = [];
+    soloFall.activeCheckpoint = soloFall.world.checkpoints[1];
+    soloFall.playerEntity.health = 25;
     soloFall.player.position.y = Number.POSITIVE_INFINITY;
     soloFall.step(1 / 120, command);
-    assert.equal(soloFall.runState, "defeated");
-    assert.equal(soloFall.defeatReason, "fall");
-    assert.equal(soloFall.playerEntity.lifeState, "downed");
+    assert.equal(soloFall.runState, "playing");
+    assert.equal(soloFall.playerEntity.lifeState, "active");
+    assert.equal(soloFall.playerEntity.health, soloFall.playerEntity.maxHealth);
+    assert.equal(soloFall.player.position.x, soloFall.activeCheckpoint.x);
+    assert.equal(soloFall.player.position.y, soloFall.activeCheckpoint.y);
+    assert.equal(soloFall.eventFlash.type, "checkpoint-respawn");
+    assert.equal(soloFall.eventFlash.reason, "fall");
 
     const completed = new GameSimulation();
     completed.rope.attach(completed.player.position, {
@@ -232,7 +205,6 @@ export function run() {
     completed.step(1 / 120, command);
     assert.equal(completed.snapshot().runState, "completed");
     assert.equal(completed.snapshot().rope.isAttached, false);
-    assert.equal(completed.snapshot().restartRemaining, 0);
     completed.playerEntity.health = 1;
     completed.step(1, command);
     assert.equal(completed.snapshot().playerHealth, 1, "combat and physics must pause after completion");
