@@ -10,6 +10,7 @@ import {
 import { appendCombatFeedback, createImpactState, updateCombatFeedback } from "../combat/CombatFeedback.js";
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
+import { RunMetrics } from "../metrics/RunMetrics.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
@@ -19,6 +20,7 @@ import { EntityRegistry } from "./EntityRegistry.js";
 export class GameSimulation {
     constructor() {
         this.world = new WorldGenerator(WORLD_CONFIG).generate();
+        this.metrics = new RunMetrics();
         this.artifacts = new ArtifactInventory(ARTIFACT_CONFIG);
         this.player = new PlayerPhysics(PLAYER_CONFIG);
         this.rope = new FixedLengthRope(ROPE_CONFIG);
@@ -84,6 +86,7 @@ export class GameSimulation {
             this.eventFlash.age += dt;
             return;
         }
+        this.metrics.recordActiveTime(dt);
         const canControl = this.playerEntity.lifeState === "active";
         const effectiveCommand = canControl
             ? command
@@ -156,6 +159,7 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
+        this.metrics.recordCombat(playerProjectileEvents, enemyProjectileEvents);
         if (enemyProjectileEvents.ropeCutAt) {
             this.eventFlash = { type: "rope-cut", age: 0, position: enemyProjectileEvents.ropeCutAt };
             this.swingDrag = null;
@@ -188,6 +192,7 @@ export class GameSimulation {
             if (checkpoint.level <= (this.activeCheckpoint?.level ?? -1)) continue;
             if (this.player.position.distanceTo(checkpoint) > checkpoint.radius) continue;
             this.activeCheckpoint = checkpoint;
+            this.metrics.recordCheckpoint();
             this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint };
             if (checkpoint.level > 0 && !this.rewardedCheckpointIds.has(checkpoint.id)) {
                 this.beginArtifactReward(checkpoint);
@@ -196,6 +201,7 @@ export class GameSimulation {
     }
 
     beginArtifactReward(checkpoint) {
+        this.metrics.recordFirstReward();
         this.artifactReward = {
             checkpointId: checkpoint.id,
             choices: ARTIFACT_CATALOG,
@@ -321,6 +327,7 @@ export class GameSimulation {
 
     beginDefeat(reason) {
         if (this.runState !== "playing") return;
+        this.metrics.recordDefeat();
         this.runState = "defeated";
         this.defeatReason = reason;
         this.restartRemaining = LIFE_CONFIG.defeatRestartDelay;
@@ -366,6 +373,7 @@ export class GameSimulation {
             artifactReward: this.artifactReward,
             rewardedCheckpointIds: [...this.rewardedCheckpointIds],
             ropeDamageBoostRemaining: this.ropeDamageBoostRemaining,
+            metrics: this.metrics.snapshot(),
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };

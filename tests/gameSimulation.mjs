@@ -41,6 +41,7 @@ export function run() {
     for (const id of ["a", "b", "c"]) defeated.artifacts.add({ id });
     defeated.step(1 / 60, command);
     assert.equal(defeated.snapshot().runState, "defeated");
+    const defeatActiveSeconds = defeated.snapshot().metrics.activeSeconds;
     assert.equal(defeated.snapshot().playerLifeState, "downed");
     assert.equal(defeated.snapshot().defeatReason, "health");
     defeated.projectiles.push({ id: "stale-player-shot" });
@@ -63,6 +64,12 @@ export function run() {
         ["c"]
     );
     assert.equal(defeated.snapshot().eventFlash.type, "artifact-loss");
+    assert.equal(
+        defeated.snapshot().metrics.activeSeconds,
+        defeatActiveSeconds,
+        "defeat delay must not count as active play"
+    );
+    assert.equal(defeated.snapshot().metrics.defeats, 1);
 
     const completed = new GameSimulation();
     completed.rope.attach(completed.player.position, {
@@ -109,9 +116,17 @@ export function run() {
     rewardRun.player.position.y = firstRewardCheckpoint.y;
     rewardRun.step(1 / 60, command);
     assert.equal(rewardRun.snapshot().artifactReward.selectedIndex, 0);
+    const rewardPausedSeconds = rewardRun.snapshot().metrics.activeSeconds;
     const pausedPosition = rewardRun.player.position.clone();
     rewardRun.step(1, command);
     assert.deepEqual(rewardRun.player.position, pausedPosition, "artifact selection must pause world physics");
+    assert.equal(
+        rewardRun.snapshot().metrics.activeSeconds,
+        rewardPausedSeconds,
+        "reward choice time must stay excluded"
+    );
+    assert.equal(rewardRun.snapshot().metrics.checkpointsReached, 1);
+    assert.equal(rewardRun.snapshot().metrics.firstRewardSeconds, rewardPausedSeconds);
     const neutralCommand = { ...command, horizontal: 0, vertical: 0 };
     rewardRun.step(1 / 60, neutralCommand);
     rewardRun.step(1 / 60, { ...neutralCommand, horizontal: 1 });
