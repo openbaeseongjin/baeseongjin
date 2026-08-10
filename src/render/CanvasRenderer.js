@@ -68,6 +68,7 @@ export class CanvasRenderer {
         this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
         if (!scene.mobileView) this.drawCombatHud(scene);
+        this.drawArtifactRewardOverlay(scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
@@ -199,6 +200,44 @@ export class CanvasRenderer {
             ctx.fillText(isActive ? "활성" : "체크", checkpoint.x, checkpoint.y);
             ctx.restore();
         }
+    }
+
+    drawArtifactRewardOverlay(reward) {
+        if (!reward) return;
+        const ctx = this.context;
+        const cardGap = 12;
+        const margin = Math.max(16, this.cssWidth * 0.04);
+        const availableWidth = Math.min(this.cssWidth - margin * 2, 840);
+        const cardWidth = (availableWidth - cardGap * 2) / 3;
+        const cardHeight = Math.min(180, this.cssHeight * 0.46);
+        const startX = (this.cssWidth - availableWidth) * 0.5;
+        const startY = (this.cssHeight - cardHeight) * 0.46;
+        ctx.save();
+        ctx.fillStyle = "rgba(8, 11, 16, 0.88)";
+        ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
+        ctx.fillStyle = "#f8fafc";
+        ctx.textAlign = "center";
+        ctx.font = "900 22px system-ui, sans-serif";
+        ctx.fillText("아티팩트 선택", this.cssWidth * 0.5, Math.max(30, startY - 50));
+        ctx.fillStyle = "#bfdbfe";
+        ctx.font = "700 13px system-ui, sans-serif";
+        ctx.fillText("좌우 이동으로 선택 · 점프로 획득", this.cssWidth * 0.5, Math.max(52, startY - 20));
+        reward.choices.forEach((choice, index) => {
+            const x = startX + index * (cardWidth + cardGap);
+            const selected = index === reward.selectedIndex;
+            ctx.fillStyle = selected ? "rgba(251, 191, 36, 0.2)" : "rgba(30, 41, 59, 0.94)";
+            ctx.strokeStyle = selected ? "#fbbf24" : "#64748b";
+            ctx.lineWidth = selected ? 5 : 2;
+            ctx.fillRect(x, startY, cardWidth, cardHeight);
+            ctx.strokeRect(x, startY, cardWidth, cardHeight);
+            ctx.fillStyle = selected ? "#fde68a" : "#e2e8f0";
+            ctx.font = "900 16px system-ui, sans-serif";
+            ctx.fillText(choice.name, x + cardWidth * 0.5, startY + cardHeight * 0.4);
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "700 12px system-ui, sans-serif";
+            ctx.fillText(choice.description, x + cardWidth * 0.5, startY + cardHeight * 0.65);
+        });
+        ctx.restore();
     }
 
     drawRockSurface(surface) {

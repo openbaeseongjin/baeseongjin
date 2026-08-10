@@ -1,5 +1,6 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
+import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
     updateAutomaticWeapon,
     updateEnemyProjectiles,
@@ -27,7 +28,9 @@ export class GameSimulation {
             physics: this.player,
             weapon: {
                 range: COMBAT_CONFIG.weaponRange,
+                baseDamage: COMBAT_CONFIG.weaponDamage,
                 damage: COMBAT_CONFIG.weaponDamage,
+                baseFireInterval: COMBAT_CONFIG.fireInterval,
                 fireInterval: COMBAT_CONFIG.fireInterval,
                 cooldown: 0
             },
@@ -57,6 +60,9 @@ export class GameSimulation {
         this.restartRemaining = 0;
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
         this.lastCheckpointLoss = [];
+        this.artifactReward = null;
+        this.firstArtifactRewardClaimed = false;
+        this.ropeDamageBoostRemaining = 0;
     }
 
     step(dt, command) {
@@ -73,12 +79,19 @@ export class GameSimulation {
             return;
         }
         this.updateCheckpointProgress();
+        if (this.artifactReward) {
+            this.updateArtifactReward(command);
+            this.eventFlash.age += dt;
+            return;
+        }
         const canControl = this.playerEntity.lifeState === "active";
         const effectiveCommand = canControl
             ? command
             : { horizontal: 0, vertical: 0, pointer: { x: 0, y: 0, down: false }, aimWorld: this.aimWorld };
         this.playerEntity.ropeDisabledRemaining = Math.max(0, this.playerEntity.ropeDisabledRemaining - dt);
         this.playerEntity.hitInvulnerabilityRemaining = Math.max(0, this.playerEntity.hitInvulnerabilityRemaining - dt);
+        this.ropeDamageBoostRemaining = Math.max(0, this.ropeDamageBoostRemaining - dt);
+        this.applyArtifactEffects();
         this.aimWorld = effectiveCommand.aimWorld;
         this.attachmentCandidate = canControl ? this.findAttachment(this.aimWorld) : null;
         if (effectiveCommand.pointer.down && !this.wasPointerDown) {
@@ -176,7 +189,51 @@ export class GameSimulation {
             if (this.player.position.distanceTo(checkpoint) > checkpoint.radius) continue;
             this.activeCheckpoint = checkpoint;
             this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint };
+            if (!this.firstArtifactRewardClaimed && checkpoint.level > 0) this.beginArtifactReward();
         }
+    }
+
+    beginArtifactReward() {
+        this.artifactReward = {
+            choices: ARTIFACT_CATALOG,
+            selectedIndex: 0,
+            inputReady: false,
+            previousHorizontal: 0,
+            previousConfirm: false
+        };
+        this.rope.detach();
+        this.swingDrag = null;
+    }
+
+    updateArtifactReward(command) {
+        const horizontal = Math.sign(command.horizontal);
+        const confirm = command.vertical < 0;
+        if (!this.artifactReward.inputReady) {
+            if (horizontal === 0 && !confirm) this.artifactReward.inputReady = true;
+            return;
+        }
+        if (horizontal !== 0 && this.artifactReward.previousHorizontal === 0) {
+            const count = this.artifactReward.choices.length;
+            this.artifactReward.selectedIndex = (this.artifactReward.selectedIndex + horizontal + count) % count;
+        }
+        if (confirm && !this.artifactReward.previousConfirm) {
+            const selected = this.artifactReward.choices[this.artifactReward.selectedIndex];
+            this.artifacts.add(selected);
+            this.firstArtifactRewardClaimed = true;
+            this.artifactReward = null;
+            this.applyArtifactEffects();
+            this.eventFlash = { type: "artifact", age: 0, position: this.player.position.clone() };
+            return;
+        }
+        this.artifactReward.previousHorizontal = horizontal;
+        this.artifactReward.previousConfirm = confirm;
+    }
+
+    applyArtifactEffects() {
+        const effects = getArtifactEffects(this.artifacts.snapshot(), this.ropeDamageBoostRemaining);
+        this.playerEntity.weapon.damage = this.playerEntity.weapon.baseDamage * effects.damageMultiplier;
+        this.playerEntity.weapon.fireInterval =
+            this.playerEntity.weapon.baseFireInterval * effects.fireIntervalMultiplier;
     }
 
     updateSwingDrag(pointer, viewport, dt) {
@@ -193,6 +250,9 @@ export class GameSimulation {
         this.swingDrag.progress = evaluation.progress;
         if (!evaluation.triggered || this.swingDrag.age < ROPE_CONFIG.swingDragMinHoldSeconds) return;
         this.player.addImpulse(evaluation.direction, ROPE_CONFIG.swingImpulse);
+        const effects = getArtifactEffects(this.artifacts?.snapshot() ?? []);
+        this.ropeDamageBoostRemaining = effects.swingDamageDuration;
+        if (this.playerEntity?.weapon) this.applyArtifactEffects();
         this.swingDrag.used = true;
         this.eventFlash = { type: "swing", age: 0 };
     }
@@ -248,6 +308,8 @@ export class GameSimulation {
         this.defeatReason = null;
         this.restartRemaining = 0;
         this.lastCheckpointLoss = this.artifacts.applyCheckpointLoss();
+        this.ropeDamageBoostRemaining = 0;
+        this.applyArtifactEffects();
         this.resets += 1;
     }
 
@@ -295,6 +357,8 @@ export class GameSimulation {
             activeCheckpoint: this.activeCheckpoint,
             artifacts: this.artifacts.snapshot(),
             lastCheckpointLoss: [...this.lastCheckpointLoss],
+            artifactReward: this.artifactReward,
+            ropeDamageBoostRemaining: this.ropeDamageBoostRemaining,
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };
