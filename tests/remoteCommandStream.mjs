@@ -6,6 +6,7 @@ import {
     serializeWorldSnapshotEnvelope
 } from "../src/game/network/WorldSnapshotEnvelope.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
+import { createCommandReceipt } from "../src/game/network/CommandReceipt.js";
 import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -65,4 +66,16 @@ export function run() {
         queued.pendingBatches().map(({ commands }) => commands[0].sequence),
         [0, 1]
     );
+    const rejection = createCommandReceipt({
+        serverTick: 10,
+        targetTick: 12,
+        rejected: [{ playerId: "queued-player", sequence: 0, reason: "elapsed-tick" }]
+    });
+    assert.equal(queued.acceptReceipt(rejection).length, 1);
+    assert.deepEqual(
+        queued.pendingBatches().map(({ commands }) => commands[0].sequence),
+        [1],
+        "a rejected command must leave the pending queue without waiting for snapshot ACK"
+    );
+    assert.deepEqual(queued.acceptReceipt(rejection), [], "a duplicate receipt must be idempotent");
 }

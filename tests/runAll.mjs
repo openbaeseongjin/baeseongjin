@@ -32,6 +32,7 @@ import { run as authorityServerSession } from "./authorityServerSession.mjs";
 import { run as remoteCommandStream } from "./remoteCommandStream.mjs";
 import { run as remoteWorldStateBuffer } from "./remoteWorldStateBuffer.mjs";
 import { run as localPlayerPredictor } from "./localPlayerPredictor.mjs";
+import { run as commandReceipt } from "./commandReceipt.mjs";
 
 const suites = {
     fixedStep,
@@ -67,7 +68,8 @@ const suites = {
     authorityServerSession,
     remoteCommandStream,
     remoteWorldStateBuffer,
-    localPlayerPredictor
+    localPlayerPredictor,
+    commandReceipt
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
