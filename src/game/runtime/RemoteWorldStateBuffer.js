@@ -15,10 +15,16 @@ function interpolateEntities(previousEntities, latestEntities, alpha) {
 }
 
 export class RemoteWorldStateBuffer {
-    constructor() {
+    constructor({ maxRecentEventIds = 2048 } = {}) {
+        if (!Number.isSafeInteger(maxRecentEventIds) || maxRecentEventIds < 1) {
+            throw new Error("maxRecentEventIds must be a positive safe integer");
+        }
+        this.maxRecentEventIds = maxRecentEventIds;
         this.previous = null;
         this.latest = null;
         this.events = [];
+        this.recentEventIds = new Set();
+        this.eventIdOrder = [];
     }
 
     push(snapshot) {
@@ -28,7 +34,15 @@ export class RemoteWorldStateBuffer {
         if (this.latest && snapshot.serverTick <= this.latest.serverTick) return false;
         this.previous = this.latest;
         this.latest = snapshot;
-        this.events.push(...snapshot.events);
+        for (const event of snapshot.events) {
+            if (this.recentEventIds.has(event.eventId)) continue;
+            this.recentEventIds.add(event.eventId);
+            this.eventIdOrder.push(event.eventId);
+            this.events.push(event);
+            while (this.eventIdOrder.length > this.maxRecentEventIds) {
+                this.recentEventIds.delete(this.eventIdOrder.shift());
+            }
+        }
         return true;
     }
 

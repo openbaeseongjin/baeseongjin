@@ -46,7 +46,6 @@ export function run() {
 
     assert.equal(buffer.push(first), true);
     assert.equal(buffer.push(second), true);
-    assert.equal(buffer.push(first), false, "a reordered snapshot must not replace newer state");
     const middle = buffer.sample(0.5);
     assert.deepEqual(middle.players[0].position, { x: 6, y: 16 });
     assert.equal(middle.players[0].health, 40, "health must use the latest authoritative value");
@@ -59,12 +58,32 @@ export function run() {
     assert.deepEqual(middle.players[1].position, { x: 100, y: 200 }, "a new entity must start at its latest position");
     assert.deepEqual(middle.enemies[0].position, { x: 26, y: 24 });
     assert.equal(middle.activeCheckpointId, "checkpoint-12");
+    assert.deepEqual(buffer.sample(-1).players[0].position, { x: 0, y: 10 });
+    assert.deepEqual(buffer.sample(2).players[0].position, { x: 12, y: 22 });
+    assert.equal(
+        buffer.push(
+            snapshot(18, {
+                players: second.state.players,
+                enemies: second.state.enemies,
+                eventId: "event-12"
+            })
+        ),
+        true
+    );
+    assert.equal(buffer.push(first), false, "a reordered snapshot must not replace newer state");
     assert.deepEqual(
         buffer.drainEvents().map(({ eventId }) => eventId),
         ["event-6", "event-12"]
     );
     assert.deepEqual(buffer.drainEvents(), []);
-    assert.deepEqual(buffer.sample(-1).players[0].position, { x: 0, y: 10 });
-    assert.deepEqual(buffer.sample(2).players[0].position, { x: 12, y: 22 });
     assert.throws(() => buffer.sample(Number.NaN), /alpha must be finite/);
+
+    const bounded = new RemoteWorldStateBuffer({ maxRecentEventIds: 2 });
+    bounded.push(snapshot(1, { players: [], enemies: [], eventId: "event-a" }));
+    bounded.push(snapshot(2, { players: [], enemies: [], eventId: "event-b" }));
+    bounded.push(snapshot(3, { players: [], enemies: [], eventId: "event-c" }));
+    assert.deepEqual([...bounded.recentEventIds], ["event-b", "event-c"]);
+    bounded.push(snapshot(4, { players: [], enemies: [], eventId: "event-a" }));
+    assert.deepEqual([...bounded.recentEventIds], ["event-c", "event-a"]);
+    assert.throws(() => new RemoteWorldStateBuffer({ maxRecentEventIds: 0 }), /positive safe integer/);
 }
