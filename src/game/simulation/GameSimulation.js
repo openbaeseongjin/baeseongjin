@@ -127,57 +127,7 @@ export class GameSimulation {
             return;
         }
         this.metrics.recordActiveTime(dt);
-        const canControl = this.playerEntity.lifeState === "active";
-        const effectiveCommand = canControl
-            ? command
-            : { horizontal: 0, vertical: 0, pointer: { x: 0, y: 0, down: false }, aimWorld: this.aimWorld };
-        this.playerEntity.ropeDisabledRemaining = Math.max(0, this.playerEntity.ropeDisabledRemaining - dt);
-        this.playerEntity.hitInvulnerabilityRemaining = Math.max(0, this.playerEntity.hitInvulnerabilityRemaining - dt);
-        this.ropeDamageBoostRemaining = Math.max(0, this.ropeDamageBoostRemaining - dt);
-        this.applyArtifactEffects();
-        this.aimWorld = effectiveCommand.aimWorld;
-        this.attachmentCandidate = canControl ? this.findAttachment(this.aimWorld) : null;
-        if (effectiveCommand.pointer.down && !this.wasPointerDown) {
-            this.attachBufferRemaining = ROPE_CONFIG.attachBufferSeconds;
-        }
-        if (
-            effectiveCommand.pointer.down &&
-            !this.rope.isAttached &&
-            this.playerEntity.ropeDisabledRemaining <= 0 &&
-            this.attachBufferRemaining > 0 &&
-            this.attachmentCandidate
-        ) {
-            if (this.rope.attach(this.player.position, this.attachmentCandidate)) {
-                this.eventFlash = { type: "attach", age: 0 };
-                this.swingDrag = {
-                    origin: { x: effectiveCommand.pointer.x, y: effectiveCommand.pointer.y },
-                    direction: null,
-                    progress: 0,
-                    age: 0,
-                    used: false
-                };
-                this.attachBufferRemaining = 0;
-            }
-        }
-        if (effectiveCommand.pointer.down && this.rope.isAttached) {
-            this.updateSwingDrag(effectiveCommand.pointer, effectiveCommand.viewport, dt);
-        }
-        if (!effectiveCommand.pointer.down && this.wasPointerDown && this.rope.isAttached) {
-            this.rope.detach();
-            this.eventFlash = { type: "release", age: 0 };
-            this.swingDrag = null;
-        }
-        this.attachBufferRemaining = Math.max(0, this.attachBufferRemaining - dt);
-        this.wasPointerDown = effectiveCommand.pointer.down;
-        this.player.step(dt, effectiveCommand, this.world.surfaces, this.rope);
-        const playerProjectile = updateAutomaticWeapon({
-            owner: this.playerEntity,
-            enemies: this.enemies,
-            projectiles: this.projectiles,
-            registry: this.registry,
-            config: COMBAT_CONFIG,
-            dt
-        });
+        const playerProjectile = this.updatePlayer(this.playerEntity, command, dt);
         if (playerProjectile) this.recordProjectileSpawn(playerProjectile, "player-projectile");
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
@@ -232,6 +182,65 @@ export class GameSimulation {
         }
     }
 
+    updatePlayer(player, command, dt) {
+        const canControl = player.lifeState === "active";
+        const effectiveCommand = canControl
+            ? command
+            : {
+                  horizontal: 0,
+                  vertical: 0,
+                  pointer: { x: 0, y: 0, down: false },
+                  aimWorld: player.aimWorld
+              };
+        player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
+        player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
+        player.ropeDamageBoostRemaining = Math.max(0, player.ropeDamageBoostRemaining - dt);
+        this.applyArtifactEffects(player);
+        player.aimWorld = effectiveCommand.aimWorld;
+        player.attachmentCandidate = canControl ? this.findAttachment(player.aimWorld, player) : null;
+        if (effectiveCommand.pointer.down && !player.wasPointerDown) {
+            player.attachBufferRemaining = ROPE_CONFIG.attachBufferSeconds;
+        }
+        if (
+            effectiveCommand.pointer.down &&
+            !player.rope.isAttached &&
+            player.ropeDisabledRemaining <= 0 &&
+            player.attachBufferRemaining > 0 &&
+            player.attachmentCandidate
+        ) {
+            if (player.rope.attach(player.physics.position, player.attachmentCandidate)) {
+                this.eventFlash = { type: "attach", age: 0 };
+                player.swingDrag = {
+                    origin: { x: effectiveCommand.pointer.x, y: effectiveCommand.pointer.y },
+                    direction: null,
+                    progress: 0,
+                    age: 0,
+                    used: false
+                };
+                player.attachBufferRemaining = 0;
+            }
+        }
+        if (effectiveCommand.pointer.down && player.rope.isAttached) {
+            this.updatePlayerSwingDrag(player, effectiveCommand.pointer, effectiveCommand.viewport, dt);
+        }
+        if (!effectiveCommand.pointer.down && player.wasPointerDown && player.rope.isAttached) {
+            player.rope.detach();
+            this.eventFlash = { type: "release", age: 0 };
+            player.swingDrag = null;
+        }
+        player.attachBufferRemaining = Math.max(0, player.attachBufferRemaining - dt);
+        player.wasPointerDown = effectiveCommand.pointer.down;
+        player.physics.step(dt, effectiveCommand, this.world.surfaces, player.rope);
+        return updateAutomaticWeapon({
+            owner: player,
+            enemies: this.enemies,
+            projectiles: this.projectiles,
+            registry: this.registry,
+            config: COMBAT_CONFIG,
+            dt
+        });
+    }
+
     updateCheckpointProgress() {
         for (const checkpoint of this.world.checkpoints) {
             if (checkpoint.level <= (this.activeCheckpoint?.level ?? -1)) continue;
@@ -283,31 +292,34 @@ export class GameSimulation {
         this.artifactReward.previousConfirm = confirm;
     }
 
-    applyArtifactEffects() {
-        const effects = getArtifactEffects(this.artifacts.snapshot(), this.ropeDamageBoostRemaining);
-        this.playerEntity.weapon.damage = this.playerEntity.weapon.baseDamage * effects.damageMultiplier;
-        this.playerEntity.weapon.fireInterval =
-            this.playerEntity.weapon.baseFireInterval * effects.fireIntervalMultiplier;
+    applyArtifactEffects(player = this.playerEntity) {
+        const effects = getArtifactEffects(player.artifacts.snapshot(), player.ropeDamageBoostRemaining);
+        player.weapon.damage = player.weapon.baseDamage * effects.damageMultiplier;
+        player.weapon.fireInterval = player.weapon.baseFireInterval * effects.fireIntervalMultiplier;
     }
 
     updateSwingDrag(pointer, viewport, dt) {
-        if (!this.swingDrag || this.swingDrag.used || !this.rope.anchor) return;
-        this.swingDrag.age += dt;
+        this.updatePlayerSwingDrag(this.playerEntity, pointer, viewport, dt);
+    }
+
+    updatePlayerSwingDrag(player, pointer, viewport, dt) {
+        if (!player.swingDrag || player.swingDrag.used || !player.rope.anchor) return;
+        player.swingDrag.age += dt;
         const evaluation = evaluateSwingDrag({
-            anchor: this.rope.anchor,
-            playerPosition: this.player.position,
-            drag: { x: pointer.x - this.swingDrag.origin.x, y: pointer.y - this.swingDrag.origin.y },
+            anchor: player.rope.anchor,
+            playerPosition: player.physics.position,
+            drag: { x: pointer.x - player.swingDrag.origin.x, y: pointer.y - player.swingDrag.origin.y },
             threshold: getSwingDragThreshold(viewport, ROPE_CONFIG.swingDragThresholdViewportRatio)
         });
         if (!evaluation) return;
-        this.swingDrag.direction = evaluation.direction;
-        this.swingDrag.progress = evaluation.progress;
-        if (!evaluation.triggered || this.swingDrag.age < ROPE_CONFIG.swingDragMinHoldSeconds) return;
-        this.player.addImpulse(evaluation.direction, ROPE_CONFIG.swingImpulse);
-        const effects = getArtifactEffects(this.artifacts?.snapshot() ?? []);
-        this.ropeDamageBoostRemaining = effects.swingDamageDuration;
-        if (this.playerEntity?.weapon) this.applyArtifactEffects();
-        this.swingDrag.used = true;
+        player.swingDrag.direction = evaluation.direction;
+        player.swingDrag.progress = evaluation.progress;
+        if (!evaluation.triggered || player.swingDrag.age < ROPE_CONFIG.swingDragMinHoldSeconds) return;
+        player.physics.addImpulse(evaluation.direction, ROPE_CONFIG.swingImpulse);
+        const effects = getArtifactEffects(player.artifacts?.snapshot() ?? []);
+        player.ropeDamageBoostRemaining = effects.swingDamageDuration;
+        if (player.weapon) this.applyArtifactEffects(player);
+        player.swingDrag.used = true;
         this.eventFlash = { type: "swing", age: 0 };
     }
 
@@ -361,12 +373,12 @@ export class GameSimulation {
         return events;
     }
 
-    findAttachment(aimPoint) {
+    findAttachment(aimPoint, player = this.playerEntity) {
         let best = null;
         let bestScore = Number.POSITIVE_INFINITY;
         for (const surface of this.world.surfaces) {
             const point = closestPointOnSurface(aimPoint, surface);
-            const playerDistance = this.player.position.distanceTo(point);
+            const playerDistance = player.physics.position.distanceTo(point);
             if (playerDistance > ROPE_CONFIG.maxAttachDistance) continue;
             const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
             const score = aimDistance * 2 + playerDistance * 0.05;

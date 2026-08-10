@@ -24,15 +24,20 @@ export function run() {
     let impulseCount = 0;
     let appliedMagnitude = 0;
     const app = Object.create(GameSimulation.prototype);
-    app.rope = { anchor: { x: 0, y: 0 } };
-    app.player = {
+    const rope = { anchor: { x: 0, y: 0 } };
+    const physics = {
         position: { x: 0, y: 100 },
         addImpulse(_direction, magnitude) {
             impulseCount += 1;
             appliedMagnitude = magnitude;
         }
     };
+    app.rope = rope;
+    app.player = physics;
     app.playerEntity = {
+        rope,
+        physics,
+        artifacts: null,
         swingDrag: { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false },
         ropeDamageBoostRemaining: 0
     };

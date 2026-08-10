@@ -48,6 +48,10 @@ export function run() {
     assert.equal(sharedWorld.playerEntity.swingDrag.used, true);
     assert.deepEqual(partner.entity.aimWorld, { x: 0, y: 0 });
     assert.equal(partner.entity.swingDrag, null);
+    const primaryPosition = sharedWorld.player.position.clone();
+    sharedWorld.updatePlayer(partner.entity, { ...command, horizontal: -1 }, 1 / 120);
+    assert.ok(partner.physics.velocity.x < 0);
+    assert.deepEqual(sharedWorld.player.position, primaryPosition);
     assert.equal(sharedWorld.world, sharedWorld.snapshot().world);
 
     const eventRun = new GameSimulation();
