@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
+import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
 
 const MOBILE_NETWORK_DELAY_MS = 100;
@@ -37,6 +38,33 @@ async function waitFor(predicate, message) {
 }
 
 export async function run() {
+    const deadReckoning = new RemoteWorldStateBuffer({
+        maxExtrapolationSeconds: 0.12,
+        correctionSeconds: 0.1
+    });
+    const snapshot = (serverTick, remoteX) => ({
+        serverTick,
+        state: {
+            players: [
+                { id: "local", position: { x: 0, y: 0 }, velocity: { x: 100, y: 0 } },
+                { id: "remote", position: { x: remoteX, y: 0 }, velocity: { x: 100, y: 0 } }
+            ]
+        },
+        events: []
+    });
+    deadReckoning.push(snapshot(6, 0), 0);
+    let projected = deadReckoning.sample({ elapsedSeconds: 0.05, localPlayerId: "local" });
+    assert.equal(projected.players[0].position.x, 0, "the local player must use input prediction instead");
+    assert.equal(projected.players[1].position.x, 5, "a remote player must advance with its latest velocity");
+    projected = deadReckoning.sample({ elapsedSeconds: 1, localPlayerId: "local" });
+    assert.equal(projected.players[1].position.x, 12, "dead reckoning must stop at its bounded horizon");
+
+    deadReckoning.push(snapshot(12, 4), 50);
+    projected = deadReckoning.sample({ elapsedSeconds: 0, localPlayerId: "local" });
+    assert.equal(projected.players[1].position.x, 5, "a new snapshot must preserve the prior displayed position");
+    projected = deadReckoning.sample({ elapsedSeconds: 0.1, localPlayerId: "local" });
+    assert.equal(projected.players[1].position.x, 14, "the correction must converge to the new authority path");
+
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer);
     let gameServerClosed = false;

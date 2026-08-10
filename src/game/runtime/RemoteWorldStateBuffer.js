@@ -1,39 +1,72 @@
-function interpolatePosition(previous, latest, alpha) {
-    if (!previous || !latest) return latest;
+import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
+
+function projectPosition(entity, elapsedSeconds, correction, maxSeconds, correctionSeconds) {
+    const velocity = entity.velocity ?? { x: 0, y: 0 };
+    const projectionSeconds = Math.max(0, Math.min(maxSeconds, elapsedSeconds));
+    const correctionRatio = Math.max(0, 1 - elapsedSeconds / correctionSeconds);
     return {
-        x: previous.x + (latest.x - previous.x) * alpha,
-        y: previous.y + (latest.y - previous.y) * alpha
+        x: entity.position.x + velocity.x * projectionSeconds + (correction?.x ?? 0) * correctionRatio,
+        y: entity.position.y + velocity.y * projectionSeconds + (correction?.y ?? 0) * correctionRatio
     };
 }
 
-function interpolateEntities(previousEntities, latestEntities, alpha) {
-    const previousById = new Map((previousEntities ?? []).map((entity) => [entity.id, entity]));
-    return (latestEntities ?? []).map((entity) => ({
-        ...entity,
-        position: interpolatePosition(previousById.get(entity.id)?.position, entity.position, alpha)
-    }));
-}
-
 export class RemoteWorldStateBuffer {
-    constructor({ maxRecentEventIds = 2048 } = {}) {
+    constructor({
+        maxRecentEventIds = 2048,
+        maxExtrapolationSeconds = MULTIPLAYER_TIMING.deadReckoningMaxSeconds,
+        correctionSeconds = MULTIPLAYER_TIMING.correctionSeconds
+    } = {}) {
         if (!Number.isSafeInteger(maxRecentEventIds) || maxRecentEventIds < 1) {
             throw new Error("maxRecentEventIds must be a positive safe integer");
         }
+        if (!Number.isFinite(maxExtrapolationSeconds) || maxExtrapolationSeconds <= 0) {
+            throw new Error("maxExtrapolationSeconds must be positive");
+        }
+        if (!Number.isFinite(correctionSeconds) || correctionSeconds <= 0) {
+            throw new Error("correctionSeconds must be positive");
+        }
         this.maxRecentEventIds = maxRecentEventIds;
-        this.previous = null;
+        this.maxExtrapolationSeconds = maxExtrapolationSeconds;
+        this.correctionSeconds = correctionSeconds;
         this.latest = null;
+        this.latestReceivedAt = 0;
+        this.corrections = new Map();
         this.events = [];
         this.recentEventIds = new Set();
         this.eventIdOrder = [];
     }
 
-    push(snapshot) {
+    push(snapshot, receivedAt = performance.now()) {
         if (!Number.isSafeInteger(snapshot?.serverTick) || snapshot.serverTick < 0) {
             throw new Error("snapshot.serverTick must be a non-negative safe integer");
         }
+        if (!Number.isFinite(receivedAt)) throw new Error("receivedAt must be finite");
         if (this.latest && snapshot.serverTick <= this.latest.serverTick) return false;
-        this.previous = this.latest;
+
+        const nextCorrections = new Map();
+        if (this.latest) {
+            const elapsedSeconds = Math.max(0, (receivedAt - this.latestReceivedAt) / 1000);
+            const previousPlayers = new Map(this.latest.state.players.map((player) => [player.id, player]));
+            for (const player of snapshot.state.players) {
+                const previous = previousPlayers.get(player.id);
+                if (!previous) continue;
+                const displayed = projectPosition(
+                    previous,
+                    elapsedSeconds,
+                    this.corrections.get(player.id),
+                    this.maxExtrapolationSeconds,
+                    this.correctionSeconds
+                );
+                nextCorrections.set(player.id, {
+                    x: displayed.x - player.position.x,
+                    y: displayed.y - player.position.y
+                });
+            }
+        }
+
         this.latest = snapshot;
+        this.latestReceivedAt = receivedAt;
+        this.corrections = nextCorrections;
         for (const event of snapshot.events) {
             if (this.recentEventIds.has(event.eventId)) continue;
             this.recentEventIds.add(event.eventId);
@@ -46,16 +79,25 @@ export class RemoteWorldStateBuffer {
         return true;
     }
 
-    sample(alpha = 1) {
+    sample({ elapsedSeconds = 0, localPlayerId = null } = {}) {
         if (!this.latest) return null;
-        if (!Number.isFinite(alpha)) throw new Error("alpha must be finite");
-        const amount = Math.max(0, Math.min(1, alpha));
-        const previousState = this.previous?.state;
+        if (!Number.isFinite(elapsedSeconds)) throw new Error("elapsedSeconds must be finite");
         const latestState = this.latest.state;
         return {
             ...latestState,
-            players: interpolateEntities(previousState?.players, latestState.players, amount),
-            enemies: interpolateEntities(previousState?.enemies, latestState.enemies, amount)
+            players: latestState.players.map((player) => ({
+                ...player,
+                position:
+                    player.id === localPlayerId
+                        ? player.position
+                        : projectPosition(
+                              player,
+                              elapsedSeconds,
+                              this.corrections.get(player.id),
+                              this.maxExtrapolationSeconds,
+                              this.correctionSeconds
+                          )
+            }))
         };
     }
 

@@ -82,9 +82,10 @@ export class RemoteGameAuthority {
     acceptSnapshot(serialized) {
         const snapshot = deserializeWorldSnapshotEnvelope(serialized);
         if (!this.stream.acceptSnapshot(snapshot)) return;
+        const receivedAt = this.now();
         this.latestSnapshot = snapshot;
-        this.snapshotReceivedAt = this.now();
-        this.buffer.push(snapshot);
+        this.snapshotReceivedAt = receivedAt;
+        this.buffer.push(snapshot, receivedAt);
         this.reconcile();
     }
 
@@ -102,9 +103,10 @@ export class RemoteGameAuthority {
         return true;
     }
 
-    snapshot(alpha = 1) {
+    snapshot() {
+        const elapsedSeconds = this.latestSnapshot ? Math.max(0, (this.now() - this.snapshotReceivedAt) / 1000) : 0;
         return {
-            state: this.buffer.sample(alpha),
+            state: this.buffer.sample({ elapsedSeconds, localPlayerId: this.playerId }),
             predicted: this.predictor?.state() ?? null,
             connected: !this.closed
         };
