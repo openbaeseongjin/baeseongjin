@@ -56,6 +56,7 @@ export const WORLD_CONFIG = Object.freeze({
     seed: 20260810,
     levelCount: 48,
     verticalStep: 185,
+    minimumVerticalGain: 150,
     laneWidth: 340,
     enemySpawnInterval: 1,
     checkpointInterval: 8,
