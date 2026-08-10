@@ -11,6 +11,7 @@ index.html
 └─ src/main.js
    └─ game/GameApp.js
       ├─ core/input/InputSampler.js
+      ├─ core/input/MobileControlLayout.js
       ├─ core/sim/FixedStepRunner.js
       ├─ render/CanvasRenderer.js
       ├─ game/commands/PlayerCommand.js
@@ -35,7 +36,9 @@ index.html
 ## 입력 규칙
 
 - PC: A/D 또는 방향키 이동, W 또는 위 방향키 점프, 마우스 누르기·드래그·해제로 로프 조작
-- 모바일 가로 화면: 화면 전체에서 한 손가락으로 로프 부착·드래그·해제만 조작한다. 터치 입력은 걷기나 점프 명령을 만들지 않는다.
+- 모바일 가로 화면: 하단 왼쪽과 오른쪽 끝의 정사각형 버튼으로 좌우 이동하고, 하단 중앙 버튼으로 점프한다. 세 버튼을 제외한 화면은 로프 부착·드래그·해제에 사용한다.
+- 모바일 이동·점프는 PC 키보드와 동일한 `horizontal`, `vertical` 명령을 만들며 별도 게임 규칙을 두지 않는다.
+- 버튼 판정과 Canvas 표시는 `MobileControlLayout`의 같은 사각형 정보를 사용한다.
 - 로프 손가락은 `pointerId`로 추적하며 다른 터치가 기존 로프 조작을 빼앗지 않는다.
 - 모바일 로프 조준점은 별도 위치 보정 없이 손가락이 닿은 실제 지점을 가리킨다.
 - 스윙 드래그 임계값은 고정 픽셀이 아니라 현재 Canvas의 짧은 변에 대한 비율로 계산한다. 화면 크기는 `PlayerCommand.viewport`에 포함되어 권한 주체에서도 같은 판정을 재현한다.

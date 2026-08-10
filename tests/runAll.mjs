@@ -1,5 +1,6 @@
 import { run as fixedStep } from "./fixedStepRunner.mjs";
 import { run as inputSampler } from "./inputSampler.mjs";
+import { run as mobileControlLayout } from "./mobileControlLayout.mjs";
 import { run as vector2 } from "./vector2.mjs";
 import { run as gameKitBoundary } from "./gameKitBoundary.mjs";
 import { run as fixedLengthRope } from "./fixedLengthRope.mjs";
@@ -19,6 +20,7 @@ import { run as canvasRenderer } from "./canvasRenderer.mjs";
 const suites = {
     fixedStep,
     inputSampler,
+    mobileControlLayout,
     vector2,
     gameKitBoundary,
     fixedLengthRope,

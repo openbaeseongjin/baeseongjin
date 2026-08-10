@@ -1,3 +1,5 @@
+import { getMobileControlLayout } from "../core/input/MobileControlLayout.js";
+
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
     backgroundBottom: "#080b10",
@@ -366,6 +368,26 @@ export class CanvasRenderer {
             ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
             ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         }
+        const layout = getMobileControlLayout(this.cssWidth, this.cssHeight);
+        this.drawMobileButton(layout.left, "←", controls.left);
+        this.drawMobileButton(layout.jump, "점프", controls.jump);
+        this.drawMobileButton(layout.right, "→", controls.right);
+    }
+
+    drawMobileButton(bounds, label, active) {
+        const ctx = this.context;
+        ctx.save();
+        ctx.fillStyle = active ? "rgba(251, 191, 36, 0.7)" : "rgba(15, 23, 42, 0.62)";
+        ctx.strokeStyle = active ? "#fde68a" : "rgba(226, 232, 240, 0.7)";
+        ctx.lineWidth = active ? 3 : 2;
+        ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        ctx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        ctx.fillStyle = active ? "#111827" : "#f8fafc";
+        ctx.font = `800 ${label === "점프" ? 16 : 30}px system-ui, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);
+        ctx.restore();
     }
 
     drawEnemies(enemies) {
