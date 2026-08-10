@@ -1,4 +1,5 @@
 import { Vector2 } from "../../game-kit/index.js";
+import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
 import {
     updateAutomaticWeapon,
     updateEnemyProjectiles,
@@ -6,7 +7,7 @@ import {
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
 import { appendCombatFeedback, createImpactState, updateCombatFeedback } from "../combat/CombatFeedback.js";
-import { COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
@@ -17,6 +18,7 @@ import { EntityRegistry } from "./EntityRegistry.js";
 export class GameSimulation {
     constructor() {
         this.world = new WorldGenerator(WORLD_CONFIG).generate();
+        this.artifacts = new ArtifactInventory(ARTIFACT_CONFIG);
         this.player = new PlayerPhysics(PLAYER_CONFIG);
         this.rope = new FixedLengthRope(ROPE_CONFIG);
         this.registry = new EntityRegistry();
@@ -54,6 +56,7 @@ export class GameSimulation {
         this.defeatReason = null;
         this.restartRemaining = 0;
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
+        this.lastCheckpointLoss = [];
     }
 
     step(dt, command) {
@@ -61,7 +64,7 @@ export class GameSimulation {
             this.eventFlash.age += dt;
             if (this.runState === "defeated") {
                 this.restartRemaining = Math.max(0, this.restartRemaining - dt);
-                if (this.restartRemaining <= 0) this.resetRun();
+                if (this.restartRemaining <= 0) this.respawnAtCheckpoint();
             }
             return;
         }
@@ -223,8 +226,9 @@ export class GameSimulation {
         return best;
     }
 
-    resetRun() {
-        this.player.reset();
+    respawnAtCheckpoint() {
+        const respawnPosition = this.activeCheckpoint ?? { x: 120, y: 500 };
+        this.player.reset(respawnPosition);
         this.rope.detach();
         this.attachBufferRemaining = 0;
         this.eventFlash = { type: "reset", age: 0 };
@@ -236,7 +240,6 @@ export class GameSimulation {
         this.playerEntity.lifeState = "active";
         this.playerEntity.downedRemaining = 0;
         this.playerEntity.reviveProgress = 0;
-        this.enemies = this.createEnemies();
         this.projectiles = [];
         this.enemyProjectiles = [];
         this.combatEffects = [];
@@ -244,6 +247,7 @@ export class GameSimulation {
         this.runState = "playing";
         this.defeatReason = null;
         this.restartRemaining = 0;
+        this.lastCheckpointLoss = this.artifacts.applyCheckpointLoss();
         this.resets += 1;
     }
 
@@ -289,6 +293,8 @@ export class GameSimulation {
             defeatReason: this.defeatReason,
             restartRemaining: this.restartRemaining,
             activeCheckpoint: this.activeCheckpoint,
+            artifacts: this.artifacts.snapshot(),
+            lastCheckpointLoss: [...this.lastCheckpointLoss],
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };

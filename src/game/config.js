@@ -47,6 +47,11 @@ export const LIFE_CONFIG = Object.freeze({
     reviveHealthFraction: 0.4
 });
 
+export const ARTIFACT_CONFIG = Object.freeze({
+    checkpointLossFraction: 1 / 3,
+    minimumOwnedForLoss: 2
+});
+
 export const WORLD_CONFIG = Object.freeze({
     seed: 20260810,
     levelCount: 48,
