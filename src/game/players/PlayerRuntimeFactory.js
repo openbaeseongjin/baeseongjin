@@ -1,13 +1,17 @@
+import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 
-export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combatConfig, spawn }) {
+export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combatConfig, artifactConfig, spawn }) {
     const physics = new PlayerPhysics(playerConfig);
     if (spawn) physics.reset(spawn);
     const rope = new FixedLengthRope(ropeConfig);
+    const artifacts = new ArtifactInventory(artifactConfig);
     const entity = {
         id: registry.createId("player"),
         physics,
+        rope,
+        artifacts,
         weapon: {
             range: combatConfig.weaponRange,
             baseDamage: combatConfig.weaponDamage,
@@ -24,5 +28,5 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         downedRemaining: 0,
         reviveProgress: 0
     };
-    return Object.freeze({ physics, rope, entity });
+    return Object.freeze({ physics, rope, artifacts, entity });
 }
