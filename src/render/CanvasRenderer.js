@@ -58,6 +58,7 @@ export class CanvasRenderer {
         this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
         this.drawHud(scene);
+        this.drawMobileControls(scene.mobileControls);
         this.drawDefeatOverlay(scene);
     }
 
@@ -264,6 +265,33 @@ export class CanvasRenderer {
             this.cssHeight * 0.53
         );
         ctx.textAlign = "start";
+    }
+
+    drawMobileControls(controls) {
+        if (!controls?.visible) return;
+        const ctx = this.context;
+        const joystick = controls.joystick;
+        if (joystick) {
+            const dx = joystick.x - joystick.originX;
+            const dy = joystick.y - joystick.originY;
+            const distance = Math.hypot(dx, dy);
+            const scale = distance > 52 ? 52 / distance : 1;
+            ctx.fillStyle = "rgba(15, 23, 42, 0.52)";
+            ctx.strokeStyle = "rgba(226, 232, 240, 0.52)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(joystick.originX, joystick.originY, 58, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "rgba(103, 232, 249, 0.72)";
+            ctx.beginPath();
+            ctx.arc(joystick.originX + dx * scale, joystick.originY + dy * scale, 24, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        if (controls.ropePointerDown) {
+            ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
+            ctx.fillRect(this.cssWidth * 0.42, 0, this.cssWidth * 0.58, this.cssHeight);
+        }
     }
 
     drawEnemies(enemies) {

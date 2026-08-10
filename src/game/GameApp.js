@@ -9,11 +9,12 @@ export class GameApp {
     constructor({ canvas }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = new CanvasRenderer(canvas);
-        this.input = new InputSampler();
+        this.input = new InputSampler(globalThis.window, canvas);
         this.authority = new LocalAuthority(new GameSimulation());
         this.camera = { x: 0, y: 0 };
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
+        this.latestInput = this.input.snapshot();
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: () => this.render()
@@ -37,6 +38,7 @@ export class GameApp {
     }
 
     update(dt, input) {
+        this.latestInput = input;
         const before = this.authority.snapshot();
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
@@ -56,6 +58,11 @@ export class GameApp {
     render() {
         const state = this.authority.snapshot();
         this.stats.resets = state.resets;
-        this.renderer.draw({ ...state, camera: this.camera, stats: this.stats });
+        this.renderer.draw({
+            ...state,
+            camera: this.camera,
+            stats: this.stats,
+            mobileControls: this.latestInput.mobileControls
+        });
     }
 }
