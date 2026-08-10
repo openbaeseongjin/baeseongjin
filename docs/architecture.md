@@ -2,9 +2,9 @@
 
 ## 현재 범위
 
-마일스톤 1은 브라우저에서 실행되는 Canvas 런타임에 탄성 로프 이동, 48단계 수직 시드 지형, 플레이어 충돌과 카메라 추적을 제공한다. DOM UI는 Alpine.js를 사용하며 적과 아티팩트는 다음 마일스톤에서 추가한다.
+브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 절차 생성 암석 지형, 자동 전투, 적 투사체, 생명 상태와 런 재시작을 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
 
-## 모듈 구조
+## 주요 모듈
 
 ```text
 index.html
@@ -16,25 +16,30 @@ index.html
       ├─ game/commands/PlayerCommand.js
       ├─ game/runtime/LocalAuthority.js
       ├─ game/simulation/GameSimulation.js
-      ├─ game/config.js
+      ├─ game/combat/CombatSystems.js
+      ├─ game/life/PlayerLifeCycle.js
       ├─ game/physics/PlayerPhysics.js
       ├─ game/rope/FixedLengthRope.js
       ├─ game/world/WorldGenerator.js
-      └─ game-kit/index.js
-         └─ math/Vector2.js
+      └─ game-kit/math/Vector2.js
 ```
 
-## 런타임 흐름
+## 실행 흐름
 
-1. `InputSampler`가 브라우저 입력을 수집하고 동결된 snapshot을 만든다.
-2. `FixedStepRunner`가 렌더 프레임과 무관하게 1/120초 단위로 게임 상태를 갱신한다.
-3. `GameApp`이 입력을 게임 상태 변화로 해석한다.
-4. `CanvasRenderer`가 현재 상태만 받아 화면에 그린다.
+1. `InputSampler`가 키보드·마우스 또는 멀티터치 입력을 하나의 불변 스냅샷으로 만든다.
+2. `GameApp`이 화면 좌표를 월드 좌표로 바꾸고 공용 `PlayerCommand`를 생성한다.
+3. `LocalAuthority`가 명령을 `GameSimulation`에 전달한다. 향후 네트워크 권한 구현도 같은 명령과 시뮬레이션 경계를 사용한다.
+4. `FixedStepRunner`가 렌더 프레임과 무관하게 1/120초 단위로 게임 상태를 갱신한다.
+5. `CanvasRenderer`는 시뮬레이션 스냅샷과 입력 표시 상태만 받아 화면을 그린다.
 
-`GameApp`은 화면 좌표를 월드 좌표로 바꿔 부착 표면을 고른다. `FixedLengthRope`는 고정 반경 구속, `PlayerPhysics`는 중력·이동·충돌, `WorldGenerator`는 동일 시드의 수직 지형 생성을 각각 소유한다. 생성기는 연속 경로가 매 단계 위로 진행하고 로프 사거리 안에 있도록 보장한다. 실제 조작을 포함한 장거리 통과 검증은 다음 단계에 추가한다.
+## 입력 규칙
 
-`PlayerPhysics`는 가로가 긴 지형을 단방향 발판으로 해석한다. 아래와 옆에서는 통과하고 위에서 떨어질 때만 착지한다. 이 충돌 분류는 로프 부착 가능 표면을 제한하지 않는다.
+- PC: A/D 또는 방향키 이동, W 또는 위 방향키 점프, 마우스 누르기·드래그·해제로 로프 조작
+- 모바일 가로 화면: 왼쪽 42%의 첫 터치는 가상 스틱, 나머지 터치는 로프 조작
+- 각 손가락은 `pointerId`로 독립 추적한다. 이동 손가락과 로프 손가락을 동시에 사용하거나 따로 해제할 수 있다.
+- 모바일 조준점은 손가락에 가리지 않도록 실제 터치보다 48px 위를 가리킨다.
+- `pointercancel`, 창 포커스 상실, 입력 계층 해제 시 눌린 상태를 정리한다.
 
 ## 의존 방향
 
-`game → core/render/game-kit` 방향만 허용한다. `game-kit`은 캐릭터, 로프, 월드, UI 같은 게임 규칙을 가져오지 않는다.
+`game → core/render/game-kit` 방향만 허용한다. `game-kit`은 캐릭터, 로프, 월드, UI 같은 프로젝트 게임 규칙을 가져오지 않는다. 데스크톱과 모바일, 향후 싱글과 멀티는 별도 게임 로직을 만들지 않고 입력 명령의 출처와 상태 전송 방식만 교체한다.
