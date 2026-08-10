@@ -27,7 +27,7 @@ npm run format:check
 git diff --check
 ```
 
-`npm test`는 고정 스텝, 입력 snapshot, 벡터 계산, `game-kit` 의존 경계를 확인한다. `npm run check`는 모든 JavaScript와 MJS 파일의 문법을 검사하고, `npm run format:check`는 Prettier 형식을 확인한다.
+`npm test`는 게임플레이, 멀티플레이, 클라이언트 배포의 3개 메인 시나리오를 실행하며 전체 3분 제한을 자체 검사한다. 세부 구현값보다 로프·전투·로그라이크 진행, 실제 WebSocket 채널, 모바일·PWA·상시 서버 계약을 우선 검증한다. `npm run check`는 모든 JavaScript와 MJS 파일의 문법을 검사하고, `npm run format:check`는 Prettier 형식을 확인한다.
 
 ## 문제 해결
 

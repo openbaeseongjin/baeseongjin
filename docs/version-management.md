@@ -19,7 +19,7 @@
 - 사용자에게 보이는 배포 버전의 기준값은 `index.html`의 `#app-version[data-version]`이다.
 - `package.json`과 루트 `package-lock.json`의 프로젝트 버전은 화면 버전과 항상 같아야 한다.
 - 배포 페이지 우하단의 `#app-version`은 `v{version}`을 작게 상시 표시한다.
-- `tests/versionContract.mjs`가 세 위치와 화면 문구의 일치를 검증한다.
+- 버전 문자열은 릴리스 작업에서 세 위치를 함께 갱신하고 배포 화면에서 확인한다. 자주 바뀌는 문자열 자체를 별도 단위 테스트로 고정하지 않는다.
 
 ## 캐시 정책
 
