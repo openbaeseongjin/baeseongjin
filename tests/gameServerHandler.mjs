@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
+import { readFileSync } from "node:fs";
 import { createGameServerRequestHandler } from "../scripts/gameServerHandler.mjs";
 
 async function listen(server) {
@@ -13,6 +14,11 @@ async function listen(server) {
 }
 
 export async function run() {
+    const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
+    assert.match(packageJson.scripts["start:game-server"], /--game-only/);
+    assert.match(packageJson.scripts["start:game-server"], /--host=0\.0\.0\.0/);
+    assert.match(packageJson.scripts["start:game-server"], /--port=4175/);
+
     const server = createServer(createGameServerRequestHandler());
     const origin = await listen(server);
 

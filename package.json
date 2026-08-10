@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node scripts/serve.mjs",
     "start:multiplayer": "node scripts/multiplayer-server.mjs",
-    "start:game-server": "node scripts/multiplayer-server.mjs --game-only --host=0.0.0.0",
+    "start:game-server": "node scripts/multiplayer-server.mjs --game-only --host=0.0.0.0 --port=4175",
     "share:multiplayer": "node scripts/share-multiplayer.mjs",
     "test": "node tests/runAll.mjs",
     "check": "node scripts/checkSyntax.mjs",

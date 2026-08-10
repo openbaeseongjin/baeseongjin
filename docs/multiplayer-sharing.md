@@ -25,7 +25,7 @@ $env:BAESEONGJIN_ALLOWED_ORIGINS="https://openbaeseongjin.github.io"
 npm run start:game-server
 ```
 
-기본 포트는 `4173`, 바인딩 주소는 `0.0.0.0`이다. 호스팅 환경에 맞춰 `BAESEONGJIN_PORT`와 `BAESEONGJIN_HOST`를 지정할 수 있다. 프로세스 상태 확인은 `GET /health`를 사용한다. 그 외 HTTP 경로는 404이며 게임 서버가 `index.html`이나 소스 파일을 제공하지 않는다. WebSocket 연결은 기존처럼 `/multiplayer?channel=...`만 사용한다.
+이 명령은 컨테이너 없이 로컬 PC의 `0.0.0.0:4175`에 직접 바인딩한다. `4173`과 `4174`는 정적 개발 서버가 사용할 수 있도록 분리했다. 다른 환경이 꼭 필요하면 명령행 `--port`, `--host`로 실행 값을 직접 지정한다. 프로세스 상태 확인은 `http://127.0.0.1:4175/health`를 사용한다. 그 외 HTTP 경로는 404이며 게임 서버가 `index.html`이나 소스 파일을 제공하지 않는다. WebSocket 연결은 기존처럼 `/multiplayer?channel=...`만 사용한다.
 
 TLS는 리버스 프록시나 고정 Cloudflare Tunnel에서 종료하고, Pages의 `meta[name="multiplayer-server"]`에는 그 고정 HTTPS/WSS 주소를 넣는다. 서버 프로세스는 `SIGINT` 또는 `SIGTERM`을 받으면 채널 시뮬레이션과 HTTP/WebSocket 서버를 순서대로 닫는다.
 

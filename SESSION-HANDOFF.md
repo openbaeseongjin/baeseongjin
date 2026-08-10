@@ -97,7 +97,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `AuthorityWireAdapter`가 인증 playerId와 command 문자열만 받아 receipt 문자열을 반환하고, 권위 틱에서 예정된 snapshot 문자열을 만든다. 실제 WebSocket은 이 경계만 호출한다.
 - `MultiplayerGameServer`는 여러 4자리 채널을 동시에 관리한다. 각 채널은 최대 2명의 독립된 `GameSimulation`과 권위 시계를 가지며, 마지막 참가자가 나갈 때만 해당 월드를 폐기한다.
 - Pages의 플레이어는 서버 주소를 입력하지 않는다. 배포된 `index.html`의 고정 서버 주소로 연결해 방장이 새 채널 번호를 만들고 참가자는 모바일 숫자 키패드로 번호만 입력한다.
-- `npm run start:game-server`는 `/health`와 `/multiplayer`만 제공하고 정적 파일은 노출하지 않는다. 개발용 `npm run start:multiplayer`와 Quick Tunnel은 로컬·임시 검증에만 사용한다.
+- `npm run start:game-server`는 컨테이너 없이 로컬 `0.0.0.0:4175`에서 `/health`와 `/multiplayer`만 제공하고 정적 파일은 노출하지 않는다. 개발용 `npm run start:multiplayer`와 Quick Tunnel은 로컬·임시 검증에만 사용한다.
 
 ### [L1] 공용 기반과 게임 규칙을 분리한다
 
