@@ -194,6 +194,7 @@ class Player extends RopeAttachable(GameObject) {}
 - `requestAnimationFrame`, 타이머, observer는 소유자가 종료 시 반드시 해제한다.
 - UI 입력을 게임 상태로 바로 쓰지 않고 정규화한 snapshot을 전달한다.
 - 키보드와 포인터가 같은 행동을 만들면 행동 intent 수준에서 합친다.
+- 포인터 드래그 중 `pointerleave`, `pointercancel`, 창 `blur`, 문서 숨김처럼 다음 렌더 프레임을 보장할 수 없는 종료 사건은 입력 상태만 지우지 않는다. 해제 snapshot을 만든 직후 같은 공용 게임 명령 경로에 동기 전달하고, 멀티에서는 일반 전송 주기 제한을 우회해 소유자 상태 전이까지 즉시 보낸다. 중복 종료 사건은 활성 포인터 ID와 눌림 상태로 한 번만 처리하며 다른 모바일 조작 버튼의 해제를 로프 종료로 취급하지 않는다.
 
 ## 10. Canvas와 UI
 

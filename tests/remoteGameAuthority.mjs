@@ -172,6 +172,46 @@ export async function run() {
             () => authority.artifactSelectionReceipts.some(({ accepted }) => accepted),
             "the selecting client must receive an artifact receipt"
         );
+        const predictedPlayer = authority.predictor.simulation.playerEntity;
+        const authorityPlayer = room.simulation.players.find(({ id }) => id === authority.playerId);
+        assert.equal(
+            predictedPlayer.rope.attach(predictedPlayer.physics.position, {
+                x: predictedPlayer.physics.position.x + 40,
+                y: predictedPlayer.physics.position.y - 40
+            }),
+            true
+        );
+        assert.equal(
+            authorityPlayer.rope.attach(authorityPlayer.physics.position, {
+                x: authorityPlayer.physics.position.x + 40,
+                y: authorityPlayer.physics.position.y - 40
+            }),
+            true
+        );
+        predictedPlayer.wasPointerDown = true;
+        authorityPlayer.wasPointerDown = true;
+        const releaseTickBefore = authority.predictor.state().tick;
+        const pendingCommandsBefore = authority.stream.pendingBatches().length;
+        const authorityRopeTickBefore = room.session.lastOwnerRopeTicks.get(authority.playerId) ?? -1;
+        app.input.onPointerDown({ pointerType: "mouse", pointerId: 91, clientX: 420, clientY: 120 });
+        app.input.onPointerLeave({ pointerType: "mouse", pointerId: 91, relatedTarget: null });
+        assert.equal(
+            authority.predictor.state().rope.isAttached,
+            false,
+            "leaving for browser chrome must release owner prediction without waiting for another frame"
+        );
+        assert.equal(authority.predictor.state().tick, releaseTickBefore + 1);
+        assert.equal(
+            authority.stream.pendingBatches().length,
+            pendingCommandsBefore + 1,
+            "the release transition must bypass the normal half-rate command gate"
+        );
+        assert.equal(authority.stream.pendingBatches().at(-1).commands[0].command.pointer.down, false);
+        await waitFor(
+            () => (room.session.lastOwnerRopeTicks.get(authority.playerId) ?? -1) > authorityRopeTickBefore,
+            "the server must receive the immediate owner rope release"
+        );
+        assert.equal(authorityPlayer.rope.isAttached, false);
         const acceptedBeforeDuplicate = authority.metrics().acceptedCommands;
         authority.sentAtBySequence.set(999, authority.now() - 20);
         authority.recordReceipt({
