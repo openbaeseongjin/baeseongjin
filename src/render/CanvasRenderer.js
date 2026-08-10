@@ -58,6 +58,7 @@ export class CanvasRenderer {
         this.drawSummitGoal(scene.world.summit, scene.runState);
         this.drawAttachmentRange(scene);
         this.drawRope(scene.rope, scene.player.position);
+        this.drawOtherPlayers(scene.otherPlayers ?? []);
         this.drawSwingDrag(scene.player, scene.swingDrag);
         this.drawEnemies(scene.enemies ?? []);
         this.drawProjectiles(scene.projectiles ?? []);
@@ -471,6 +472,23 @@ export class CanvasRenderer {
             ctx.moveTo(player.position.x, player.position.y);
             ctx.lineTo(player.position.x - player.velocity.x * 0.08, player.position.y - player.velocity.y * 0.08);
             ctx.stroke();
+        }
+    }
+
+    drawOtherPlayers(players) {
+        const ctx = this.context;
+        for (const player of players) {
+            this.drawRope(player.rope, player.position);
+            ctx.save();
+            ctx.globalAlpha = player.lifeState === "downed" ? 0.55 : 1;
+            ctx.fillStyle = "#c084fc";
+            ctx.strokeStyle = "#f3e8ff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(player.position.x, player.position.y, player.config.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
         }
     }
 
