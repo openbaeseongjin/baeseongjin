@@ -1,6 +1,6 @@
 import { createPlayerCommand } from "../commands/PlayerCommand.js";
 
-export const PLAYER_COMMAND_PROTOCOL_VERSION = 1;
+export const PLAYER_COMMAND_PROTOCOL_VERSION = 2;
 
 function assertFinite(value, label) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -27,11 +27,14 @@ export function createPlayerCommandBatch(tick, entries) {
     if (!Number.isSafeInteger(tick) || tick < 0) throw new Error("tick must be a non-negative safe integer");
     const playerIds = new Set();
     const commands = entries
-        .map(({ playerId, command }) => {
+        .map(({ playerId, sequence, command }) => {
             if (typeof playerId !== "string" || playerId.length === 0) throw new Error("playerId must be non-empty");
             if (playerIds.has(playerId)) throw new Error(`duplicate playerId: ${playerId}`);
+            if (!Number.isSafeInteger(sequence) || sequence < 0) {
+                throw new Error("sequence must be a non-negative safe integer");
+            }
             playerIds.add(playerId);
-            return Object.freeze({ playerId, command: normalizeCommand(command) });
+            return Object.freeze({ playerId, sequence, command: normalizeCommand(command) });
         })
         .sort((left, right) => left.playerId.localeCompare(right.playerId));
     return Object.freeze({
