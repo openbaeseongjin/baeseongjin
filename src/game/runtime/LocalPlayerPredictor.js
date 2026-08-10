@@ -1,4 +1,5 @@
 import { Vector2 } from "../../game-kit/index.js";
+import { COMBAT_CONFIG } from "../config.js";
 import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
@@ -60,6 +61,8 @@ export class LocalPlayerPredictor {
         this.correctionRemaining = 0;
         this.lastCorrectionDistance = 0;
         this.hardSnapCount = 0;
+        this.predictedEvents = [];
+        this.emittedPredictionTicks = new Map();
         this.simulation.enemies = [];
         this.simulation.projectiles = [];
         this.simulation.enemyProjectiles = [];
@@ -78,11 +81,15 @@ export class LocalPlayerPredictor {
             ...pendingTicks
         );
         this.restore(authoritative);
+        this.restoreEnemies(snapshot.state.enemies ?? []);
         this.simulation.tick = snapshot.serverTick;
         this.initialized = true;
 
         for (const tick of this.inputHistory.keys()) {
             if (tick <= snapshot.serverTick) this.inputHistory.delete(tick);
+        }
+        for (const [predictionId, tick] of this.emittedPredictionTicks) {
+            if (tick <= snapshot.serverTick) this.emittedPredictionTicks.delete(predictionId);
         }
 
         const batchesByTick = new Map();
@@ -102,7 +109,8 @@ export class LocalPlayerPredictor {
                 : (batchesByTick.get(tick) ?? { tick, commands: [] });
             const simulated = inputState.expand(batch, [this.playerId]);
             const command = simulated.commands[0]?.command ?? this.simulation.commandForPlayer(player, new Map());
-            this.simulation.updatePlayer(player, command, this.fixedDt);
+            const projectile = this.simulation.updatePlayer(player, command, this.fixedDt);
+            this.recordPredictedProjectile(projectile, tick);
             this.simulation.tick = tick;
         }
         this.simulation.projectiles.length = 0;
@@ -115,7 +123,8 @@ export class LocalPlayerPredictor {
         if (!this.initialized) return null;
         const tick = this.simulation.tick + 1;
         this.rememberInput(tick, command);
-        this.simulation.updatePlayer(this.simulation.playerEntity, command, this.fixedDt);
+        const projectile = this.simulation.updatePlayer(this.simulation.playerEntity, command, this.fixedDt);
+        this.recordPredictedProjectile(projectile, tick);
         this.simulation.projectiles.length = 0;
         this.simulation.tick = tick;
         this.updatePresentation(this.fixedDt);
@@ -157,6 +166,41 @@ export class LocalPlayerPredictor {
         while (this.inputHistory.size > this.maxInputHistory) {
             this.inputHistory.delete(this.inputHistory.keys().next().value);
         }
+    }
+
+    recordPredictedProjectile(projectile, tick) {
+        if (!projectile) return;
+        const predictionId = `${this.playerId}:${tick}`;
+        if (this.emittedPredictionTicks.has(predictionId)) return;
+        this.emittedPredictionTicks.set(predictionId, tick);
+        this.predictedEvents.push(
+            Object.freeze({
+                eventType: "predicted-spawn",
+                predictionId,
+                tick,
+                objectType: "player-projectile",
+                ownerId: projectile.ownerId,
+                targetId: projectile.targetId,
+                position: { x: projectile.position.x, y: projectile.position.y },
+                velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
+                radius: projectile.radius,
+                damage: projectile.damage,
+                speed: COMBAT_CONFIG.projectileSpeed
+            })
+        );
+    }
+
+    restoreEnemies(enemies) {
+        this.simulation.enemies = enemies.map((enemy) => ({
+            ...enemy,
+            position: new Vector2(enemy.position.x, enemy.position.y)
+        }));
+    }
+
+    drainPredictedEvents() {
+        const events = Object.freeze([...this.predictedEvents]);
+        this.predictedEvents.length = 0;
+        return events;
     }
 
     restore(state) {

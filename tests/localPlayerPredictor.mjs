@@ -141,6 +141,36 @@ export function run() {
     close(continuous.presentationState().position.x, continuous.state().position.x, "hard snap position");
     assert.equal(continuous.metrics().hardSnaps, 1);
 
+    const attackSnapshot = {
+        ...movingSnapshot,
+        state: {
+            ...movingSnapshot.state,
+            enemies: [
+                {
+                    id: "enemy-local-target",
+                    position: {
+                        x: movingSnapshot.state.players[0].position.x + 10,
+                        y: movingSnapshot.state.players[0].position.y
+                    },
+                    radius: 18,
+                    health: 40,
+                    maxHealth: 40,
+                    fireCooldown: 1
+                }
+            ]
+        }
+    };
+    const attackPredictor = new LocalPlayerPredictor({
+        playerId: movingServer.playerEntity.id,
+        predictionLeadTicks: 0
+    });
+    attackPredictor.reconcile(attackSnapshot, []);
+    const attackTick = attackPredictor.advance(move).tick;
+    const predictedAttacks = attackPredictor.drainPredictedEvents();
+    assert.equal(predictedAttacks.length, 1, "owner fire must emit a local predicted spawn");
+    assert.equal(predictedAttacks[0].predictionId, `${movingServer.playerEntity.id}:${attackTick}`);
+    assert.deepEqual(attackPredictor.drainPredictedEvents(), []);
+
     assert.throws(
         () => predictor.reconcile({ ...snapshot, worldSeed: snapshot.worldSeed + 1 }, []),
         /world seed mismatch/

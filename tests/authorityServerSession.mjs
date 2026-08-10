@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
+import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -18,6 +19,53 @@ function command(horizontal) {
 }
 
 export function run() {
+    const combatSimulation = new GameSimulation();
+    const combatSession = new AuthorityServerSession({ simulation: combatSimulation });
+    combatSimulation.playerEntity.weapon.cooldown = 0;
+    combatSession.advance();
+    const projectile = combatSimulation.projectiles[0];
+    const target = combatSimulation.enemies.find(({ id }) => id === projectile.targetId);
+    projectile.position = target.position.clone();
+    const healthBeforeClaim = target.health;
+    const claim = createProjectileHitClaim({
+        predictionId: projectile.predictionId,
+        targetId: target.id,
+        clientTick: combatSimulation.tick,
+        position: target.position
+    });
+    const acceptedClaim = combatSession.submitHitClaim(combatSimulation.playerEntity.id, claim);
+    assert.equal(acceptedClaim.accepted, true);
+    assert.equal(
+        target.health,
+        healthBeforeClaim - projectile.damage,
+        "the server must apply its own projectile damage"
+    );
+    assert.equal(combatSession.submitHitClaim(combatSimulation.playerEntity.id, claim), acceptedClaim);
+    assert.equal(
+        target.health,
+        healthBeforeClaim - projectile.damage,
+        "a duplicate claim must never deal damage twice"
+    );
+    const forgedSimulation = new GameSimulation();
+    const forgedPartner = forgedSimulation.addPlayer({ x: 180, y: 500 });
+    const forgedSession = new AuthorityServerSession({ simulation: forgedSimulation });
+    forgedSimulation.playerEntity.weapon.cooldown = 0;
+    forgedSession.advance();
+    const foreignProjectile = forgedSimulation.projectiles[0];
+    const foreignTarget = forgedSimulation.enemies.find(({ id }) => id === foreignProjectile.targetId);
+    assert.equal(
+        forgedSession.submitHitClaim(
+            forgedPartner.entity.id,
+            createProjectileHitClaim({
+                predictionId: foreignProjectile.predictionId,
+                targetId: foreignTarget.id,
+                clientTick: forgedSimulation.tick,
+                position: foreignTarget.position
+            })
+        ).reason,
+        "projectile-ownership"
+    );
+
     const lateSimulation = new GameSimulation();
     lateSimulation.enemies = [];
     const lateSession = new AuthorityServerSession({ simulation: lateSimulation });

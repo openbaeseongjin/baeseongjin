@@ -128,11 +128,18 @@ export class MultiplayerGameServer {
             const room = this.connections.get(socket);
             if (!room || binary) throw new Error("unsupported client message");
             const message = JSON.parse(data.toString());
-            if (message?.type !== "command" || typeof message.payload !== "string") {
-                throw new Error("unsupported client message");
+            const playerId = room.sockets.get(socket);
+            if (message?.type === "command" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveCommand(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "receipt", payload: receipt }));
+                return;
             }
-            const receipt = room.adapter.receiveCommand(room.sockets.get(socket), message.payload);
-            socket.send(JSON.stringify({ type: "receipt", payload: receipt }));
+            if (message?.type === "hit-claim" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveHitClaim(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "hit-claim-receipt", payload: receipt }));
+                return;
+            }
+            throw new Error("unsupported client message");
         } catch (error) {
             socket.send(JSON.stringify({ type: "error", code: "invalid-message", message: error.message }));
             socket.close(1008, "invalid message");

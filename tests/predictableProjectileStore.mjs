@@ -53,4 +53,62 @@ export function run() {
     feedback.update(1);
     assert.equal(feedback.snapshot().combatEffects.length, 0, "client effects must expire on the client clock");
     assert.equal(feedback.snapshot().impact, null);
+
+    const predictedStore = new PredictableProjectileStore();
+    const predictedSpawn = {
+        eventType: "predicted-spawn",
+        predictionId: "player-1:20",
+        tick: 20,
+        objectType: "player-projectile",
+        ownerId: "player-1",
+        targetId: "enemy-1",
+        radius: 5,
+        damage: 10,
+        speed: 520,
+        position: { x: 0, y: 0 },
+        velocity: { x: 0, y: 0 }
+    };
+    predictedStore.predict([predictedSpawn]);
+    assert.equal(predictedStore.snapshot().projectiles.length, 1, "local fire must appear before server spawn");
+    const confirmedSpawn = createPredictableSpawnEvent({
+        eventId: "event-4",
+        objectId: "projectile-server-1",
+        objectType: "player-projectile",
+        spawnTick: 20,
+        position: { x: 0, y: 0 },
+        velocity: { x: 0, y: 0 },
+        parameters: {
+            predictionId: "player-1:20",
+            radius: 5,
+            damage: 10,
+            speed: 520,
+            ownerId: "player-1",
+            targetId: "enemy-1"
+        }
+    });
+    predictedStore.apply([confirmedSpawn], 20, { enemies: [] });
+    assert.equal(
+        predictedStore.snapshot().projectiles.length,
+        1,
+        "server confirmation must not duplicate a prediction"
+    );
+    assert.equal(predictedStore.snapshot().projectiles[0].id, "projectile-server-1");
+    const predictedHit = predictedStore.update(0, {
+        enemies: [{ id: "enemy-1", position: { x: 0, y: 0 }, radius: 18, health: 40 }]
+    });
+    assert.equal(predictedHit.length, 1, "local collision must produce immediate feedback");
+    assert.equal(predictedStore.snapshot().projectiles.length, 0);
+    const confirmedHit = createPredictableResolveEvent({
+        eventId: "event-5",
+        objectId: "projectile-server-1",
+        tick: 21,
+        resolution: "enemy-hit",
+        position: { x: 0, y: 0 },
+        parameters: { damage: 10 }
+    });
+    assert.deepEqual(
+        predictedStore.apply([confirmedHit], 21, { enemies: [] }),
+        [],
+        "authority resolve must not replay predicted hit feedback"
+    );
 }

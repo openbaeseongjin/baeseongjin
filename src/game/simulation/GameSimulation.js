@@ -463,6 +463,7 @@ export class GameSimulation {
     }
 
     recordProjectileSpawn(projectile, objectType) {
+        if (objectType === "player-projectile") projectile.predictionId = `${projectile.ownerId}:${this.tick}`;
         this.replicationEvents.push(
             createPredictableSpawnEvent({
                 eventId: this.registry.createId("event"),
@@ -474,6 +475,7 @@ export class GameSimulation {
                 parameters: {
                     ownerId: projectile.ownerId,
                     targetId: projectile.targetId ?? null,
+                    predictionId: projectile.predictionId ?? null,
                     radius: projectile.radius,
                     damage: projectile.damage,
                     speed:
@@ -483,6 +485,42 @@ export class GameSimulation {
                 }
             })
         );
+    }
+
+    resolvePlayerProjectileClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+        const projectile = this.projectiles.find(({ predictionId }) => predictionId === claim.predictionId);
+        if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
+        if (projectile.ownerId !== authenticatedPlayerId) {
+            return Object.freeze({ accepted: false, reason: "projectile-ownership" });
+        }
+        if (projectile.targetId !== claim.targetId) {
+            return Object.freeze({ accepted: false, reason: "target-mismatch" });
+        }
+        const target = this.enemies.find((enemy) => enemy.id === claim.targetId && enemy.health > 0);
+        if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
+        const targetDistance = Math.hypot(claim.position.x - target.position.x, claim.position.y - target.position.y);
+        if (targetDistance > target.radius + projectile.radius + positionTolerance) {
+            return Object.freeze({ accepted: false, reason: "position-mismatch" });
+        }
+        const projectileDistance = Math.hypot(
+            claim.position.x - projectile.position.x,
+            claim.position.y - projectile.position.y
+        );
+        const predictedTravel =
+            (COMBAT_CONFIG.projectileSpeed * Math.max(0, claim.clientTick - this.tick)) / 120 + positionTolerance;
+        if (projectileDistance > predictedTravel + target.radius + projectile.radius) {
+            return Object.freeze({ accepted: false, reason: "trajectory-mismatch" });
+        }
+        this.projectiles = this.projectiles.filter(({ id }) => id !== projectile.id);
+        target.health = Math.max(0, target.health - projectile.damage);
+        const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
+        this.recordProjectileResolution(
+            { projectileId: projectile.id, resolution, position: target.position },
+            { damage: projectile.damage }
+        );
+        if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
+        this.enemies = this.enemies.filter(({ health }) => health > 0);
+        return Object.freeze({ accepted: true, resolution, damage: projectile.damage });
     }
 
     recordReplicationEvent(eventType, payload) {

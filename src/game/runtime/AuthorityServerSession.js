@@ -29,6 +29,30 @@ export class AuthorityServerSession {
         this.snapshotIntervalTicks = assertPositiveInteger(snapshotIntervalTicks, "snapshotIntervalTicks");
         this.inbox = new AuthorityCommandInbox({ maxPastTicks, maxFutureTicks });
         this.inputState = new InputStateSimulator({ holdTicks: inputHoldTicks });
+        this.resolvedHitClaims = new Map();
+    }
+
+    submitHitClaim(authenticatedPlayerId, claim) {
+        if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const existing = this.resolvedHitClaims.get(claim.predictionId);
+        if (existing) return existing.receipt;
+        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.inputLeadTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return Object.freeze({ predictionId: claim.predictionId, accepted: false, reason: "tick-window" });
+        }
+        const result = Object.freeze({
+            predictionId: claim.predictionId,
+            ...this.simulation.resolvePlayerProjectileClaim(authenticatedPlayerId, claim, {
+                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+            })
+        });
+        if (result.accepted) {
+            this.resolvedHitClaims.set(claim.predictionId, { receipt: result, resolvedAtTick: this.simulation.tick });
+        }
+        return result;
     }
 
     submit(authenticatedPlayerId, batch) {
@@ -76,6 +100,10 @@ export class AuthorityServerSession {
             this.simulation.players.map(({ id }) => id)
         );
         this.simulation.stepCommandBatch(this.fixedDt, commands);
+        const oldestRememberedTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        for (const [predictionId, entry] of this.resolvedHitClaims) {
+            if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedHitClaims.delete(predictionId);
+        }
         return nextTick % this.snapshotIntervalTicks === 0 ? this.snapshot() : null;
     }
 
