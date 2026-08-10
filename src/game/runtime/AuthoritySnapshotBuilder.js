@@ -10,6 +10,7 @@ function playerState(player, simulation) {
         id: player.id,
         position: vectorState(player.physics.position),
         velocity: vectorState(player.physics.velocity),
+        isGrounded: player.physics.isGrounded,
         health: player.health,
         maxHealth: player.maxHealth,
         hitInvulnerabilityRemaining: player.hitInvulnerabilityRemaining,
@@ -21,6 +22,7 @@ function playerState(player, simulation) {
             isAttached: player.rope.isAttached,
             anchor: vectorState(player.rope.anchor),
             length: player.rope.length,
+            currentLength: player.rope.currentLength,
             tension: player.rope.tension
         },
         weapon: {

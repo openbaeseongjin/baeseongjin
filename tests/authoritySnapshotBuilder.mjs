@@ -10,6 +10,10 @@ export function run() {
     partner.artifacts.add({ id: "rapid-gear", modifiers: { fireIntervalMultiplier: 0.75 } });
     simulation.playerEntity.artifacts.add({ id: "power-core", modifiers: { damageMultiplier: 1.4 } });
     simulation.playerEntity.weapon.cooldown = 0;
+    simulation.rope.attach(simulation.player.position, {
+        x: simulation.player.position.x,
+        y: simulation.player.position.y - 80
+    });
     const command = createPlayerCommand(
         {
             horizontal: 0,
@@ -20,6 +24,8 @@ export function run() {
         { x: 0, y: 0 }
     );
     simulation.step(1 / 120, command);
+    simulation.playerEntity.physics.isGrounded = true;
+    partner.physics.isGrounded = false;
 
     const first = buildAuthoritySnapshot({ simulation, acknowledgements: { "player-1": 7 } });
     assert.equal(first.serverTick, 1);
@@ -28,7 +34,11 @@ export function run() {
     assert.deepEqual(first.acknowledgements, { "player-1": 7 });
     assert.equal(first.state.players[0].id, simulation.playerEntity.id);
     assert.equal(first.state.players[1].id, partner.entity.id);
-    assert.equal(first.state.players[0].rope.isAttached, false);
+    assert.equal(first.state.players[0].isGrounded, true);
+    assert.equal(first.state.players[1].isGrounded, false);
+    assert.equal(first.state.players[0].rope.isAttached, true);
+    assert.equal(first.state.players[0].rope.length, 80);
+    assert.equal(first.state.players[0].rope.currentLength, 80);
     assert.deepEqual(
         first.state.players[0].artifacts.map(({ id }) => id),
         ["power-core"]
