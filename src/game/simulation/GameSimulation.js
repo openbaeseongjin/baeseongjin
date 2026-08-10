@@ -11,8 +11,7 @@ import { appendCombatFeedback, createImpactState, updateCombatFeedback } from ".
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
-import { PlayerPhysics } from "../physics/PlayerPhysics.js";
-import { FixedLengthRope } from "../rope/FixedLengthRope.js";
+import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -22,28 +21,16 @@ export class GameSimulation {
         this.world = new WorldGenerator(WORLD_CONFIG).generate();
         this.metrics = new RunMetrics();
         this.artifacts = new ArtifactInventory(ARTIFACT_CONFIG);
-        this.player = new PlayerPhysics(PLAYER_CONFIG);
-        this.rope = new FixedLengthRope(ROPE_CONFIG);
         this.registry = new EntityRegistry();
-        this.playerEntity = {
-            id: this.registry.createId("player"),
-            physics: this.player,
-            weapon: {
-                range: COMBAT_CONFIG.weaponRange,
-                baseDamage: COMBAT_CONFIG.weaponDamage,
-                damage: COMBAT_CONFIG.weaponDamage,
-                baseFireInterval: COMBAT_CONFIG.fireInterval,
-                fireInterval: COMBAT_CONFIG.fireInterval,
-                cooldown: 0
-            },
-            health: COMBAT_CONFIG.playerMaxHealth,
-            maxHealth: COMBAT_CONFIG.playerMaxHealth,
-            hitInvulnerabilityRemaining: 0,
-            ropeDisabledRemaining: 0,
-            lifeState: "active",
-            downedRemaining: 0,
-            reviveProgress: 0
-        };
+        const playerRuntime = createPlayerRuntime({
+            registry: this.registry,
+            playerConfig: PLAYER_CONFIG,
+            ropeConfig: ROPE_CONFIG,
+            combatConfig: COMBAT_CONFIG
+        });
+        this.player = playerRuntime.physics;
+        this.rope = playerRuntime.rope;
+        this.playerEntity = playerRuntime.entity;
         this.players = [this.playerEntity];
         this.enemies = this.createEnemies();
         this.projectiles = [];

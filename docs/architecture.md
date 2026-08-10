@@ -24,6 +24,7 @@ index.html
       ├─ game/life/PlayerLifeCycle.js
       ├─ game/metrics/RunMetrics.js
       ├─ game/network/PlayerCommandBatch.js
+      ├─ game/players/PlayerRuntimeFactory.js
       ├─ game/replay/CommandReplay.js
       ├─ game/physics/PlayerPhysics.js
       ├─ game/rope/FixedLengthRope.js
@@ -68,6 +69,7 @@ index.html
 - 협동 부활은 `PlayerLifeCycle.updateReviveInteraction`의 상태·거리·시간 규칙을 사용하며 싱글 패배 판정과 같은 플레이어 배열을 공유한다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
 - `PlayerCommandBatch`는 플레이어 ID 순으로 정규화된 틱 단위 전송 계약이며, 실제 네트워크 라이브러리와 GameSimulation 사이의 경계를 형성한다.
+- `PlayerRuntimeFactory`가 물리·로프·무기·생명 엔티티를 함께 조립하고 싱글 GameSimulation도 이 결과를 사용한다.
 - 마지막 암석 위의 정상 목표도 시드 결과에 포함되며, 도달하면 하나의 큰 월드를 끝내는 `completed` 터미널 상태에서 판정을 멈춘다.
 - `GameSimulation`이 플레이어·로프·적·투사체·체력·다운·패배·체크포인트 복귀를 소유한다.
 - 기본 무기는 사거리 안의 가장 가까운 적을 자동 조준하며, 적은 플레이어를 향해 투사체를 발사한다.

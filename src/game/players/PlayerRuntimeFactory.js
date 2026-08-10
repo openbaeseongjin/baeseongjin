@@ -1,0 +1,28 @@
+import { PlayerPhysics } from "../physics/PlayerPhysics.js";
+import { FixedLengthRope } from "../rope/FixedLengthRope.js";
+
+export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combatConfig, spawn }) {
+    const physics = new PlayerPhysics(playerConfig);
+    if (spawn) physics.reset(spawn);
+    const rope = new FixedLengthRope(ropeConfig);
+    const entity = {
+        id: registry.createId("player"),
+        physics,
+        weapon: {
+            range: combatConfig.weaponRange,
+            baseDamage: combatConfig.weaponDamage,
+            damage: combatConfig.weaponDamage,
+            baseFireInterval: combatConfig.fireInterval,
+            fireInterval: combatConfig.fireInterval,
+            cooldown: 0
+        },
+        health: combatConfig.playerMaxHealth,
+        maxHealth: combatConfig.playerMaxHealth,
+        hitInvulnerabilityRemaining: 0,
+        ropeDisabledRemaining: 0,
+        lifeState: "active",
+        downedRemaining: 0,
+        reviveProgress: 0
+    };
+    return Object.freeze({ physics, rope, entity });
+}
