@@ -86,6 +86,61 @@
             .orientation-notice {
                 display: none;
             }
+            .game-mode-menu {
+                position: fixed;
+                z-index: 30;
+                inset: 0;
+                display: grid;
+                place-items: center;
+                padding: 24px;
+                background: rgba(5, 9, 17, 0.84);
+                backdrop-filter: blur(8px);
+            }
+            .game-mode-menu[hidden] {
+                display: none;
+            }
+            .game-mode-card {
+                width: min(460px, 100%);
+                padding: 24px;
+                border: 1px solid rgba(103, 232, 249, 0.4);
+                border-radius: 18px;
+                background: rgba(15, 23, 42, 0.96);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                text-align: center;
+            }
+            .game-mode-card h1 {
+                margin: 0 0 8px;
+                font-size: 26px;
+            }
+            .game-mode-card p {
+                margin: 0 0 18px;
+                color: #cbd5e1;
+            }
+            .game-mode-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .game-mode-actions button {
+                min-height: 54px;
+                border: 1px solid rgba(148, 163, 184, 0.35);
+                border-radius: 12px;
+                color: #f8fafc;
+                background: #243047;
+                font-weight: 800;
+                cursor: pointer;
+            }
+            .game-mode-actions button:last-child {
+                color: #082f49;
+                background: #67e8f9;
+            }
+            .game-mode-actions button:disabled {
+                cursor: wait;
+                opacity: 0.5;
+            }
+            [data-mode-status][data-error="true"] {
+                color: #fda4af;
+            }
             .install-prompt {
                 position: fixed;
                 z-index: 20;
@@ -168,6 +223,16 @@
     </head>
     <body>
         <main>
+            <section class="game-mode-menu" id="game-mode-menu" aria-labelledby="game-mode-title">
+                <div class="game-mode-card">
+                    <h1 id="game-mode-title">로프 원정 시작</h1>
+                    <p data-mode-status aria-live="polite">플레이 방식을 선택하세요.</p>
+                    <div class="game-mode-actions">
+                        <button type="button" data-game-mode="single">싱글 플레이</button>
+                        <button type="button" data-game-mode="multiplayer">멀티 플레이</button>
+                    </div>
+                </div>
+            </section>
             <canvas
                 id="game-canvas"
                 tabindex="0"
