@@ -142,13 +142,14 @@ HP 감소, 로프 절단, 다운, 부활, 체크포인트 활성화, 아티팩�
 GameApp
   └─ Authority 인터페이스
       ├─ LocalAuthority ────────── GameSimulation
-      └─ RemoteAuthorityClient ── WebSocket ── AuthorityServer ── GameSimulation
+      └─ RemoteGameAuthority ──── WebSocket ── MultiplayerGameServer ── AuthorityServerSession ── GameSimulation
 ```
 
 두 권한 구현은 다음 의미를 공유한다.
 
-- `submit(command)`은 로컬 플레이어의 입력 의도를 제출한다.
-- `advance(elapsed)`는 로컬 권한에서만 시뮬레이션 시간을 전진시킨다.
+- 로컬 권한은 `step(dt, command)`으로 입력 제출과 인프로세스 시간 진행을 함께 수행한다.
+- 원격 권한은 `submit(command)`으로 입력 의도만 보내고 서버 시계를 직접 진행하지 않는다.
+- 두 권한의 `snapshot()`은 Canvas 실행 경로가 읽을 현재 상태를 제공한다.
 
 `AuthorityServerSession`은 실제 소켓과 분리된 서버 실행 경계다. 인증된 연결의 플레이어 ID와 제출 명령의 ID가 다르면 배치 전체를 거부하고, `AuthorityCommandInbox`에서 다음 틱 명령을 꺼내 같은 `GameSimulation.stepCommandBatch()`를 120Hz로 실행한다. 6틱마다 `AuthoritySnapshotBuilder`를 호출해 초기 20Hz 스냅샷과 플레이어별 승인 번호를 만들며, 소켓 구현은 이 세션의 `submit`, `advance`, `snapshot`만 호출한다.
 
@@ -160,6 +161,10 @@ GameApp
 
 `npm run start:multiplayer`는 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 초기 런타임은 최대 2명의 단일 임시 오픈월드이며 연결 순서로 공용 `GameSimulation` 플레이어를 배정한다. 한 명이 나가면 해당 플레이어의 명령·런타임만 제거하고 남은 유저는 같은 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간에만 월드를 폐기하고, 다음 최초 접속에서 새 절차 생성 월드를 만든다.
 
+브라우저 첫 화면은 싱글과 멀티를 선택한다. 멀티는 현재 페이지가 HTTP면 `ws`, HTTPS면 `wss`를 사용해 같은 호스트의 `/multiplayer`에 연결하므로 별도 서버 주소 입력 UI가 필요 없다. GitHub Pages처럼 권위 서버가 없는 정적 호스트에서는 접속 오류를 표시하고, 멀티 서버나 Quick Tunnel 주소에서는 같은 화면이 실제 게임으로 진입한다.
+
+`npm run share:multiplayer`는 로컬 서버와 account-less Cloudflare Quick Tunnel을 자식 프로세스로 열어 임시 HTTPS 주소를 출력한다. DNS, WARP, 시스템 프록시, 네트워크 어댑터, 라우팅과 방화벽은 변경하지 않으며 기존 Cloudflare 설정 파일이 있으면 변경 없이 중단한다. 상세 실행 경계는 `multiplayer-sharing.md`를 따른다.
+
 `RemoteCommandStream`은 로컬 플레이어 한 명의 목표 틱과 단조 증가 sequence를 만들고, 서버가 승인하기 전의 명령 배치를 보존한다. 새 스냅샷의 플레이어별 ACK까지만 대기열에서 제거하며, 이미 적용한 `serverTick` 이하의 중복·역순 스냅샷은 무시한다. 이 대기열은 이후 자기 플레이어 예측을 권위 상태 위에 재적용하는 입력 원본이며, 소켓과 물리 구현을 직접 소유하지 않는다.
 
 `RemoteWorldStateBuffer`는 단조 증가하는 최신 스냅샷 두 개를 보존해 같은 ID의 플레이어와 적 `position`만 렌더 시점 비율로 보간한다. HP, `lifeState`, 로프 부착, 체크포인트와 런 상태는 최신 권위 값을 그대로 사용하며, 새로 생성되거나 제거된 엔티티도 최신 목록을 따른다. 스냅샷 사건은 별도 대기열에서 정확히 한 번만 drain한다.
@@ -169,18 +174,20 @@ GameApp
 자기 플레이어 예측을 권위 상태에서 다시 시작할 때 점프 가능 여부와 로프 제약을 추측하지 않도록 플레이어별 `isGrounded`와 로프의 `length`, `currentLength`를 스냅샷에 포함한다. 이 값들은 시각 보간 대상이 아니라 승인 틱의 물리 초기 상태다.
 
 로프 입력은 누르는 순간과 해제 전이, 짧은 부착 버퍼, 부착당 한 번인 스윙 드래그 진행에 상태가 있다. 자기 플레이어 재적용은 승인 틱의 `aimWorld`, 마지막 pointer·viewport, `wasPointerDown`, `attachBufferRemaining`, `swingDrag`에서 시작한다. `attachmentCandidate`는 정적 월드와 aim으로 다시 계산하며 전송하지 않는다.
+
+`PredictableProjectileStore`는 최근 이벤트를 명시적으로 drain해 `spawn`에서 클라이언트 투사체를 만들고 `resolve`에서 제거한다. 늦게 받은 생성 이벤트는 현재 serverTick과 생성 tick의 차이만큼 먼저 진행한다. 적 투사체는 공유된 초기 속도로 직선 이동하고, 플레이어 투사체는 공유된 targetId와 speed로 최신 적 위치를 추적한다. 투사체 매 틱 좌표 배열은 스냅샷에 추가하지 않는다.
 - `snapshot()`은 화면이 읽을 최신 권위 또는 예측 상태를 반환한다.
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.
 
-실제 소켓 라이브러리는 이 계약을 검증한 뒤 선택한다. GitHub Pages는 정적 호스팅이므로 협동 권위 서버는 별도로 배포해야 한다.
+실제 소켓은 `ws` 기반 Node 권위 서버와 브라우저 WebSocket 클라이언트로 연결됐다. GitHub Pages는 정적 호스팅이므로 협동 권위 서버가 없으며, 개발 중 원격 확인은 Quick Tunnel로 같은 정적 페이지와 WebSocket을 함께 공유한다.
 
 ## 구현 순서와 검증 기준
 
-1. `GameSimulation.step`이 플레이어별 명령 배치를 받아 같은 틱에 적용하도록 일반화한다.
-2. `WorldSnapshot`과 승인 번호의 직렬화·역직렬화 계약을 만든다.
-3. 지연·중복·순서 뒤바뀜을 흉내 내는 메모리 전송 테스트를 추가한다.
-4. `RemoteAuthorityClient`의 예측·재적용·보정 동작을 테스트한다.
-5. Node 권위 서버와 브라우저 클라이언트 두 개를 로컬에서 연결한다.
-6. 로프 절단, 다운·부활, 체크포인트와 아티팩트 일부 손실을 두 화면에서 검증한다.
+1. [완료] `GameSimulation`이 플레이어별 명령 배치를 같은 권위 틱에 적용한다.
+2. [완료] `WorldSnapshot`과 승인 번호의 직렬화·역직렬화 계약을 검증한다.
+3. [완료] 지연·중복·순서 뒤바뀜을 흉내 내는 전송 테스트를 유지한다.
+4. [완료] 원격 클라이언트의 예측·재적용·보정과 투사체 이벤트 재생을 테스트한다.
+5. [완료] Node 권위 서버와 실제 WebSocket 클라이언트 두 개를 같은 오픈월드에 연결한다.
+6. [필요] 서로 다른 실제 기기 두 대에서 로프 절단, 다운·부활, 체크포인트와 아티팩트 일부 손실을 장시간 검증한다.
 
 완료 증거는 단순 접속 성공이 아니다. 같은 명령 기록에서 서버가 유일한 최종 상태를 만들고, 지연과 패킷 순서 변경 뒤에도 두 클라이언트가 그 상태로 수렴해야 한다.
