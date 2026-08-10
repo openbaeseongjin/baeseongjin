@@ -4,8 +4,8 @@ import { findMobileControl, getMobileControlLayout } from "../src/core/input/Mob
 export function run() {
     const layout = getMobileControlLayout(1000, 640);
     assert.equal(layout.left.width, layout.left.height);
-    assert.equal(layout.jump.width, layout.jump.height);
-    assert.ok(layout.jump.width > layout.left.width, "the jump target must be larger than movement buttons");
+    assert.equal(layout.jump.height, layout.left.height, "the jump target must not consume more vertical space");
+    assert.ok(layout.jump.width > layout.jump.height, "the jump target must be wide like a space bar");
     assert.equal(layout.jump.x + layout.jump.width * 0.5, 500, "the larger jump target must remain centered");
     assert.equal(
         layout.jump.y + layout.jump.height,
