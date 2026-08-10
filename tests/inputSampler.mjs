@@ -57,7 +57,7 @@ export function run() {
     touchListeners.get("pointercancel")({ pointerType: "touch", pointerId: 3 });
     assert.equal(touchSampler.snapshot().pointer.down, false);
 
-    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 4, clientX: 50, clientY: 590 });
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 4, clientX: 250, clientY: 590 });
     touchSnapshot = touchSampler.snapshot();
     assert.equal(touchSnapshot.horizontal, -1, "the bottom-left square must emit the same command as keyboard left");
     assert.equal(touchSnapshot.pointer.down, false, "movement buttons must not start a rope gesture");
@@ -76,7 +76,7 @@ export function run() {
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 4 });
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 5 });
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 6 });
-    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 7, clientX: 950, clientY: 590 });
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 7, clientX: 750, clientY: 590 });
     touchSnapshot = touchSampler.snapshot();
     assert.equal(touchSnapshot.horizontal, 1, "the bottom-right square must emit the same command as keyboard right");
     assert.equal(touchSnapshot.mobileControls.right, true);
