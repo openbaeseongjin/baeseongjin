@@ -21,18 +21,12 @@ export class GameSimulation {
         this.world = new WorldGenerator(WORLD_CONFIG).generate();
         this.metrics = new RunMetrics();
         this.registry = new EntityRegistry();
-        const playerRuntime = createPlayerRuntime({
-            registry: this.registry,
-            playerConfig: PLAYER_CONFIG,
-            ropeConfig: ROPE_CONFIG,
-            combatConfig: COMBAT_CONFIG,
-            artifactConfig: ARTIFACT_CONFIG
-        });
+        this.players = [];
+        const playerRuntime = this.addPlayer();
         this.player = playerRuntime.physics;
         this.rope = playerRuntime.rope;
         this.artifacts = playerRuntime.artifacts;
         this.playerEntity = playerRuntime.entity;
-        this.players = [this.playerEntity];
         this.enemies = this.createEnemies();
         this.projectiles = [];
         this.enemyProjectiles = [];
@@ -55,6 +49,19 @@ export class GameSimulation {
         this.ropeDamageBoostRemaining = 0;
         this.tick = 0;
         this.replicationEvents = [];
+    }
+
+    addPlayer(spawn) {
+        const runtime = createPlayerRuntime({
+            registry: this.registry,
+            playerConfig: PLAYER_CONFIG,
+            ropeConfig: ROPE_CONFIG,
+            combatConfig: COMBAT_CONFIG,
+            artifactConfig: ARTIFACT_CONFIG,
+            spawn
+        });
+        this.players.push(runtime.entity);
+        return runtime;
     }
 
     step(dt, command) {

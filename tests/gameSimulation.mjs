@@ -33,6 +33,17 @@ export function run() {
     );
     assert.equal(firstState.tick, 240);
 
+    const sharedWorld = new GameSimulation();
+    const partner = sharedWorld.addPlayer({ x: 180, y: 500 });
+    assert.equal(sharedWorld.players.length, 2);
+    assert.equal(sharedWorld.players[0], sharedWorld.playerEntity);
+    assert.equal(sharedWorld.players[1], partner.entity);
+    assert.notEqual(partner.physics, sharedWorld.player);
+    assert.notEqual(partner.rope, sharedWorld.rope);
+    assert.notEqual(partner.artifacts, sharedWorld.artifacts);
+    assert.equal(partner.physics.position.x, 180);
+    assert.equal(sharedWorld.world, sharedWorld.snapshot().world);
+
     const eventRun = new GameSimulation();
     eventRun.playerEntity.weapon.cooldown = 0;
     eventRun.step(1 / 120, command);
