@@ -59,8 +59,8 @@ index.html
 
 ## 현재 게임 시스템
 
-- `WorldGenerator`가 같은 시드에서 동일한 48단계 수직 암석 월드와 적 생성 위치를 만든다.
-- `WorldGenerator`가 경로 8레벨 간격으로 결정적 체크포인트를 만들고, `GameSimulation`이 가장 높은 도달 지점을 권위 상태로 보존한다.
+- 순수 함수 `generateWorld(config)`가 같은 시드에서 동일한 48단계 수직 암석 월드, 적 생성 위치와 8레벨 간격의 체크포인트를 만든다. 월드 생성은 객체 정체성이나 수명주기를 만들지 않는다.
+- `GameSimulation`이 생성된 월드와 가장 높은 도달 지점을 권위 상태로 보존한다.
 - 사망 재개는 월드와 체크포인트 진행도를 유지한 채 활성 지점으로 복귀하고, `ArtifactInventory`의 결정적 정책으로 최근 아티팩트 약 1/3만 제거한다.
 - 첫 체크포인트의 아티팩트 선택도 `PlayerCommand`의 좌우·점프 명령을 사용하며, 선택 중에는 `GameSimulation`이 물리와 전투를 일시 정지한다.
 - 아티팩트 획득·손실 정보는 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 보유 상태와 분리한다.
@@ -79,9 +79,10 @@ index.html
 - `AuthoritySnapshotBuilder`는 로컬 렌더 스냅샷과 별도로 플레이어·적·진행 상태만 추출한다. 지형은 월드 시드와 생성 revision으로 재구성하고 투사체는 drain한 이벤트로만 전달한다.
 - 멀티 연결 종료는 게임을 멈추고 모드 메뉴로 돌아가며 마지막 4자리 채널을 입력란에 보존한다. 자동 오프라인 진행이나 플레이어 런타임 복원은 하지 않는다.
 - `PlayerRuntimeFactory`가 물리·로프·무기·생명 상태와 플레이어별 아티팩트 인벤토리를 함께 조립하고 싱글 GameSimulation도 이 결과를 사용한다.
-- `GameSimulation.addPlayer()`는 같은 팩토리 결과를 공용 `players` 배열에 등록한다. 생성자의 첫 플레이어도 이 경로를 사용하며 기존 싱글 별칭은 첫 플레이어를 가리킨다.
-- 조준점, 부착 후보, 포인터 전이, 부착 버퍼, 스윙 드래그와 로프 연계 강화 시간은 플레이어 엔티티별 상태다. `GameSimulation`의 기존 필드는 첫 플레이어 호환 별칭이다.
-- 이동·로프·상태 타이머·아티팩트 무기 효과와 자동 발사는 `GameSimulation.updatePlayer(playerEntity, command, dt)`의 공용 경로를 사용한다. 싱글 `step`도 첫 플레이어를 이 경로에 전달한다.
+- `GameSimulation.addPlayer()`는 같은 팩토리 결과를 공용 `players` 배열에 등록한다. 생성자의 첫 플레이어도 이 경로를 사용하고 그 ID만 비공개 기본 플레이어 식별자로 보존한다.
+- 조준점, 부착 후보, 포인터 전이, 부착 버퍼, 스윙 드래그와 로프 연계 강화 시간은 플레이어 엔티티별 상태다. 첫 플레이어의 물리·로프·인벤토리를 중복 가리키던 싱글 호환 필드는 두지 않는다.
+- 외부 실행 계층은 `getPrimaryPlayerId()`, `playerState()`·`playerStates()`, `applyOwnerMotion()`, 예측 복원·진행·피격·충돌 명령을 사용한다. 서버 세션과 로컬 예측기는 `players` 배열이나 플레이어 컴포넌트를 직접 수정하지 않는다.
+- 이동·로프·상태 타이머·아티팩트 무기 효과와 자동 발사는 `GameSimulation.updatePlayer(playerEntity, command, dt)`의 내부 공용 경로를 사용한다. 싱글 `step`과 공개 예측 명령도 식별한 플레이어를 이 경로에 전달한다.
 - `stepCommandBatch`는 정확히 다음 권위 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 네트워크 권위와 로컬 예측은 `InputStateSimulator`로 마지막 수신 입력을 제한된 틱 동안 함께 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다.
 - `PlayerCommand.interact`는 향후 문맥 상호작용을 위한 예약 필드다. 현재 생명 주기에서는 소비하지 않으며 모바일 점프 입력의 동작을 가로채지 않는다.
 - `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력·손실 아티팩트를 `player-respawned` 사건으로 남긴다. 손실이 있으면 같은 playerId의 `artifact-loss` 사건도 발행한다.
@@ -94,6 +95,7 @@ index.html
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.
 - 첫 화면에서 싱글은 `PlayerCommand → LocalAuthority → GameSimulation`, 멀티는 `4자리 채널 → 고정 WebSocket 서버 → 채널별 AuthorityServerSession → GameSimulation` 경계를 선택한다. 두 경로는 입력 출처와 상태 전달만 다르고 게임 규칙을 공유한다.
 - 협동은 서버 권위형과 로컬 플레이어 예측을 사용한다. 시간 모델, 상태 소유권, 스냅샷과 보정 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
+- `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `LocalPlayerPredictor`도 로컬 `GameSimulation`의 공개 예측 계약만 사용하며, 앱·예측기·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
 - 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 충돌과 제거만 `resolve` 이벤트로 확정한다.
 - 자기 탄환은 로컬 충돌 VFX를 먼저 재생하고 검증 가능한 hit claim을 보낸다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 대미지로 최종 결과를 확정한다.
 - `GameSimulation`은 권위 틱을 증가시키며 실제 자동 발사·피격·로프 절단·체크포인트 제거에서 복제 이벤트를 기록한다. 전송 계층이 사건을 drain한 뒤에도 로컬 렌더링용 투사체 배열은 유지된다.

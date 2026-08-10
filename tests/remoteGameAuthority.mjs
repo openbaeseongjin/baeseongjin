@@ -4,6 +4,7 @@ import { WebSocket } from "ws";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
+import { closestPointOnSurface } from "../src/game/world/WorldGenerator.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
 
 function createImpairedWebSocket({ roundTripDelayMs, commandLossRate }) {
@@ -68,6 +69,17 @@ function fakeCanvas() {
     };
 }
 
+function nearestRopeAnchor(world, position) {
+    return world.surfaces
+        .map((surface) => closestPointOnSurface(position, surface))
+        .reduce((nearest, point) =>
+            Math.hypot(point.x - position.x, point.y - position.y) <
+            Math.hypot(nearest.x - position.x, nearest.y - position.y)
+                ? point
+                : nearest
+        );
+}
+
 function listen(server) {
     return new Promise((resolve) => server.listen(0, "127.0.0.1", () => resolve(server.address().port)));
 }
@@ -129,7 +141,8 @@ export async function run() {
         const initial = authority.snapshot();
         assert.equal(initial.state.players.length, 1);
         assert.equal(initial.predicted.position.x, initial.state.players[0].position.x);
-        const predictedTick = initial.predicted.tick;
+        const predictedTick = authority.snapshot().owner.tick;
+        assert.ok(Number.isSafeInteger(authority.renderSnapshot().world.seed));
         const locallyAdvanced = authority.advance(movementCommand());
         assert.equal(locallyAdvanced.tick, predictedTick + 1);
         assert.ok(locallyAdvanced.velocity.x > initial.predicted.velocity.x, "local input must react before submit");
@@ -172,35 +185,33 @@ export async function run() {
             () => authority.artifactSelectionReceipts.some(({ accepted }) => accepted),
             "the selecting client must receive an artifact receipt"
         );
-        const predictedPlayer = authority.predictor.simulation.playerEntity;
         const authorityPlayer = room.simulation.players.find(({ id }) => id === authority.playerId);
+        const ownerBeforeAttach = authority.snapshot().owner;
+        const anchor = nearestRopeAnchor(authority.renderSnapshot().world, ownerBeforeAttach.position);
+        const attachCommand = {
+            ...movementCommand(0),
+            pointer: { x: 420, y: 120, down: true, pressed: true, released: false },
+            aimWorld: { x: anchor.x, y: anchor.y }
+        };
+        authority.advance(attachCommand);
         assert.equal(
-            predictedPlayer.rope.attach(predictedPlayer.physics.position, {
-                x: predictedPlayer.physics.position.x + 40,
-                y: predictedPlayer.physics.position.y - 40
-            }),
-            true
+            authority.snapshot().owner.rope.isAttached,
+            true,
+            "the owner must attach through prediction input"
         );
-        assert.equal(
-            authorityPlayer.rope.attach(authorityPlayer.physics.position, {
-                x: authorityPlayer.physics.position.x + 40,
-                y: authorityPlayer.physics.position.y - 40
-            }),
-            true
-        );
-        predictedPlayer.wasPointerDown = true;
-        authorityPlayer.wasPointerDown = true;
-        const releaseTickBefore = authority.predictor.state().tick;
+        assert.equal(authority.submit(attachCommand), true);
+        await waitFor(() => authorityPlayer.rope.isAttached, "the server must receive the predicted rope attachment");
+        const releaseTickBefore = authority.snapshot().owner.tick;
         const pendingCommandsBefore = authority.stream.pendingBatches().length;
         const authorityRopeTickBefore = room.session.lastOwnerRopeTicks.get(authority.playerId) ?? -1;
         app.input.onPointerDown({ pointerType: "mouse", pointerId: 91, clientX: 420, clientY: 120 });
         app.input.onPointerLeave({ pointerType: "mouse", pointerId: 91, relatedTarget: null });
         assert.equal(
-            authority.predictor.state().rope.isAttached,
+            authority.snapshot().owner.rope.isAttached,
             false,
             "leaving for browser chrome must release owner prediction without waiting for another frame"
         );
-        assert.equal(authority.predictor.state().tick, releaseTickBefore + 1);
+        assert.equal(authority.snapshot().owner.tick, releaseTickBefore + 1);
         assert.equal(
             authority.stream.pendingBatches().length,
             pendingCommandsBefore + 1,
@@ -212,6 +223,17 @@ export async function run() {
             "the server must receive the immediate owner rope release"
         );
         assert.equal(authorityPlayer.rope.isAttached, false);
+        let renderedState = null;
+        app.renderer.draw = (state) => {
+            renderedState = state;
+        };
+        app.render();
+        assert.equal(
+            renderedState.world.seed,
+            authority.renderSnapshot().world.seed,
+            "the multiplayer renderer must receive its local world through the authority contract"
+        );
+        assert.deepEqual(renderedState.attachmentCandidate, authority.renderSnapshot().attachmentCandidate);
         const acceptedBeforeDuplicate = authority.metrics().acceptedCommands;
         authority.sentAtBySequence.set(999, authority.now() - 20);
         authority.recordReceipt({

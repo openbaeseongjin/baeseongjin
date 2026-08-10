@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
 import { closestPointOnPolygon } from "../src/game/world/PolygonGeometry.js";
-import { WorldGenerator } from "../src/game/world/WorldGenerator.js";
+import { generateWorld } from "../src/game/world/WorldGenerator.js";
 
 export function run() {
-    const first = new WorldGenerator(WORLD_CONFIG).generate();
-    const second = new WorldGenerator(WORLD_CONFIG).generate();
-    const different = new WorldGenerator({ ...WORLD_CONFIG, seed: WORLD_CONFIG.seed + 1 }).generate();
+    const first = generateWorld(WORLD_CONFIG);
+    const second = generateWorld(WORLD_CONFIG);
+    const different = generateWorld({ ...WORLD_CONFIG, seed: WORLD_CONFIG.seed + 1 });
 
     assert.deepEqual(first, second, "the same seed must generate the same world");
     assert.notDeepEqual(first, different, "different seeds must vary the world");

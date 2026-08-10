@@ -33,85 +33,71 @@ export function closestPointOnSurface(point, surface) {
     return closestPointOnPolygon(point, surface.vertices);
 }
 
-export class WorldGenerator {
-    constructor({
-        seed,
-        levelCount,
-        verticalStep,
-        laneWidth,
-        enemySpawnInterval,
-        checkpointInterval,
-        checkpointRadius,
-        summitRadius,
-        floorY
-    }) {
-        this.seed = seed;
-        this.levelCount = levelCount;
-        this.verticalStep = verticalStep;
-        this.laneWidth = laneWidth;
-        this.enemySpawnInterval = enemySpawnInterval;
-        this.checkpointInterval = checkpointInterval;
-        this.checkpointRadius = checkpointRadius;
-        this.summitRadius = summitRadius;
-        this.floorY = floorY;
-    }
+export function generateWorld({
+    seed,
+    levelCount,
+    verticalStep,
+    laneWidth,
+    enemySpawnInterval,
+    checkpointInterval,
+    checkpointRadius,
+    summitRadius,
+    floorY
+}) {
+    const random = createRandom(seed);
+    const start = createOutcrop(-320, floorY, 640, 150, { kind: "start", level: 0 });
+    const surfaces = [start];
+    const route = [start];
+    const enemySpawns = [];
+    const lanes = [-laneWidth, 0, laneWidth];
+    let laneIndex = 1;
 
-    generate() {
-        const random = createRandom(this.seed);
-        const start = createOutcrop(-320, this.floorY, 640, 150, { kind: "start", level: 0 });
-        const surfaces = [start];
-        const route = [start];
-        const enemySpawns = [];
-        const lanes = [-this.laneWidth, 0, this.laneWidth];
-        let laneIndex = 1;
+    for (let level = 1; level <= levelCount; level += 1) {
+        const direction = level % 4 < 2 ? 1 : -1;
+        laneIndex = Math.max(0, Math.min(lanes.length - 1, laneIndex + direction));
+        const width = 140 + random() * 55;
+        const x = lanes[laneIndex] - width * 0.5 + (random() - 0.5) * 50;
+        const y = floorY - level * verticalStep - random() * 12;
+        const platform = createOutcrop(x, y, width, 70 + random() * 45, { kind: "route-rock", level });
+        surfaces.push(platform);
+        route.push(platform);
 
-        for (let level = 1; level <= this.levelCount; level += 1) {
-            const direction = level % 4 < 2 ? 1 : -1;
-            laneIndex = Math.max(0, Math.min(lanes.length - 1, laneIndex + direction));
-            const width = 140 + random() * 55;
-            const x = lanes[laneIndex] - width * 0.5 + (random() - 0.5) * 50;
-            const y = this.floorY - level * this.verticalStep - random() * 12;
-            const platform = createOutcrop(x, y, width, 70 + random() * 45, { kind: "route-rock", level });
-            surfaces.push(platform);
-            route.push(platform);
-
-            if (level % this.enemySpawnInterval === 0) {
-                enemySpawns.push(
-                    Object.freeze({
-                        x: x + width * (0.35 + random() * 0.3),
-                        y: y - 24,
-                        level
-                    })
-                );
-            }
-        }
-
-        const summitPlatform = route.at(-1);
-        const checkpoints = route
-            .filter((platform) => platform.level % this.checkpointInterval === 0 && platform.level < this.levelCount)
-            .map((platform) =>
+        if (level % enemySpawnInterval === 0) {
+            enemySpawns.push(
                 Object.freeze({
-                    id: `checkpoint-${platform.level}`,
-                    level: platform.level,
-                    x: platform.x + platform.width * 0.5,
-                    y: platform.topY - 24,
-                    radius: this.checkpointRadius
+                    x: x + width * (0.35 + random() * 0.3),
+                    y: y - 24,
+                    level
                 })
             );
-        const summit = Object.freeze({
-            x: summitPlatform.x + summitPlatform.width * 0.5,
-            y: summitPlatform.topY - this.summitRadius,
-            radius: this.summitRadius
-        });
-
-        return Object.freeze({
-            seed: this.seed,
-            surfaces: Object.freeze(surfaces),
-            route: Object.freeze(route),
-            enemySpawns: Object.freeze(enemySpawns),
-            checkpoints: Object.freeze(checkpoints),
-            summit,
-            topY: route.at(-1).y
-        });
+        }
     }
+
+    const summitPlatform = route.at(-1);
+    const checkpoints = route
+        .filter((platform) => platform.level % checkpointInterval === 0 && platform.level < levelCount)
+        .map((platform) =>
+            Object.freeze({
+                id: `checkpoint-${platform.level}`,
+                level: platform.level,
+                x: platform.x + platform.width * 0.5,
+                y: platform.topY - 24,
+                radius: checkpointRadius
+            })
+        );
+    const summit = Object.freeze({
+        x: summitPlatform.x + summitPlatform.width * 0.5,
+        y: summitPlatform.topY - summitRadius,
+        radius: summitRadius
+    });
+
+    return Object.freeze({
+        seed,
+        surfaces: Object.freeze(surfaces),
+        route: Object.freeze(route),
+        enemySpawns: Object.freeze(enemySpawns),
+        checkpoints: Object.freeze(checkpoints),
+        summit,
+        topY: route.at(-1).y
+    });
 }

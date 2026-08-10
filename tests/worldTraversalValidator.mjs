@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
-import { WorldGenerator } from "../src/game/world/WorldGenerator.js";
+import { generateWorld } from "../src/game/world/WorldGenerator.js";
 import { validateWorldTraversal } from "../src/game/world/WorldTraversalValidator.js";
 import { WORLD_REGRESSION_SEEDS } from "../scripts/worldRegressionSeeds.mjs";
 
@@ -17,7 +17,7 @@ export function run() {
             "32비트 부호 없는 최대 시드 경계"
         ]
     );
-    const world = new WorldGenerator(WORLD_CONFIG).generate();
+    const world = generateWorld(WORLD_CONFIG);
     assert.deepEqual(
         validateWorldTraversal(world, {
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance,

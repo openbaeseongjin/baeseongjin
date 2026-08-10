@@ -1,5 +1,5 @@
 import { ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
-import { WorldGenerator } from "../src/game/world/WorldGenerator.js";
+import { generateWorld } from "../src/game/world/WorldGenerator.js";
 import { validateWorldTraversal } from "../src/game/world/WorldTraversalValidator.js";
 import { WORLD_REGRESSION_SEEDS } from "./worldRegressionSeeds.mjs";
 
@@ -12,7 +12,7 @@ const cases = [
 ];
 for (const testCase of cases) {
     const { seed } = testCase;
-    const world = new WorldGenerator({ ...WORLD_CONFIG, seed }).generate();
+    const world = generateWorld({ ...WORLD_CONFIG, seed });
     const result = validateWorldTraversal(world, {
         maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
         minimumVerticalGain: WORLD_CONFIG.minimumVerticalGain
