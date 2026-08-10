@@ -60,6 +60,7 @@ function returnToMenu(message) {
     if (pageClosing) return;
     const stoppedApp = app;
     app = null;
+    modeMenu.rememberChannel(stoppedApp?.authority?.channelId);
     stoppedApp?.stop();
     channelBadge.hidden = true;
     modeMenu.setStatus(message, true);

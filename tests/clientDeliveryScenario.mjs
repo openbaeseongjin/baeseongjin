@@ -2,8 +2,9 @@ import { run as mobileControlLayout } from "./mobileControlLayout.mjs";
 import { run as pwaContract } from "./pwaContract.mjs";
 import { run as installPrompt } from "./installPrompt.mjs";
 import { run as serviceWorkerUpdater } from "./serviceWorkerUpdater.mjs";
+import { run as gameModeMenu } from "./gameModeMenu.mjs";
 
-const steps = { mobileControlLayout, pwaContract, installPrompt, serviceWorkerUpdater };
+const steps = { mobileControlLayout, pwaContract, installPrompt, serviceWorkerUpdater, gameModeMenu };
 
 export async function run() {
     for (const [name, step] of Object.entries(steps)) {
