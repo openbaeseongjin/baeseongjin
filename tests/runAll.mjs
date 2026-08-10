@@ -25,6 +25,7 @@ import { run as commandReplay } from "./commandReplay.mjs";
 import { run as playerCommandBatch } from "./playerCommandBatch.mjs";
 import { run as playerRuntimeFactory } from "./playerRuntimeFactory.mjs";
 import { run as predictableObjectEvent } from "./predictableObjectEvent.mjs";
+import { run as authorityCommandInbox } from "./authorityCommandInbox.mjs";
 
 const suites = {
     fixedStep,
@@ -53,7 +54,8 @@ const suites = {
     commandReplay,
     playerCommandBatch,
     playerRuntimeFactory,
-    predictableObjectEvent
+    predictableObjectEvent,
+    authorityCommandInbox
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
