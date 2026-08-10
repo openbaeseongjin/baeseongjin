@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "../src/game/config.js";
+import { ARTIFACT_CONFIG, COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "../src/game/config.js";
 import { createPlayerRuntime } from "../src/game/players/PlayerRuntimeFactory.js";
 import { EntityRegistry } from "../src/game/simulation/EntityRegistry.js";
 
@@ -9,20 +9,31 @@ export function run() {
         registry,
         playerConfig: PLAYER_CONFIG,
         ropeConfig: ROPE_CONFIG,
-        combatConfig: COMBAT_CONFIG
+        combatConfig: COMBAT_CONFIG,
+        artifactConfig: ARTIFACT_CONFIG
     });
     const second = createPlayerRuntime({
         registry,
         playerConfig: PLAYER_CONFIG,
         ropeConfig: ROPE_CONFIG,
         combatConfig: COMBAT_CONFIG,
+        artifactConfig: ARTIFACT_CONFIG,
         spawn: { x: 160, y: 500 }
     });
     assert.equal(first.entity.id, "player-1");
     assert.equal(second.entity.id, "player-2");
     assert.notEqual(first.physics, second.physics);
     assert.notEqual(first.rope, second.rope);
+    assert.notEqual(first.artifacts, second.artifacts);
     assert.equal(first.entity.physics, first.physics);
+    assert.equal(first.entity.rope, first.rope);
+    assert.equal(first.entity.artifacts, first.artifacts);
+    first.artifacts.add({ id: "player-one-artifact" });
+    assert.deepEqual(
+        first.artifacts.snapshot().map(({ id }) => id),
+        ["player-one-artifact"]
+    );
+    assert.deepEqual(second.artifacts.snapshot(), []);
     assert.deepEqual({ x: second.physics.position.x, y: second.physics.position.y }, { x: 160, y: 500 });
     assert.equal(first.entity.health, COMBAT_CONFIG.playerMaxHealth);
     assert.deepEqual(first.entity.weapon, {

@@ -1,5 +1,4 @@
 import { Vector2 } from "../../game-kit/index.js";
-import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
 import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
     updateAutomaticWeapon,
@@ -21,16 +20,17 @@ export class GameSimulation {
     constructor() {
         this.world = new WorldGenerator(WORLD_CONFIG).generate();
         this.metrics = new RunMetrics();
-        this.artifacts = new ArtifactInventory(ARTIFACT_CONFIG);
         this.registry = new EntityRegistry();
         const playerRuntime = createPlayerRuntime({
             registry: this.registry,
             playerConfig: PLAYER_CONFIG,
             ropeConfig: ROPE_CONFIG,
-            combatConfig: COMBAT_CONFIG
+            combatConfig: COMBAT_CONFIG,
+            artifactConfig: ARTIFACT_CONFIG
         });
         this.player = playerRuntime.physics;
         this.rope = playerRuntime.rope;
+        this.artifacts = playerRuntime.artifacts;
         this.playerEntity = playerRuntime.entity;
         this.players = [this.playerEntity];
         this.enemies = this.createEnemies();
