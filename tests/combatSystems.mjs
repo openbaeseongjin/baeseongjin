@@ -24,8 +24,16 @@ export function run() {
         { id: "enemy-3", position: new Vector2(321, 0), radius: 18, health: 30 }
     ];
     const projectiles = [];
-    updateAutomaticWeapon({ owner, enemies, projectiles, registry, config: COMBAT_CONFIG, dt: 1 / 120 });
+    const spawnedPlayerProjectile = updateAutomaticWeapon({
+        owner,
+        enemies,
+        projectiles,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: 1 / 120
+    });
     assert.equal(projectiles.length, 1);
+    assert.equal(spawnedPlayerProjectile, projectiles[0]);
     assert.equal(projectiles[0].targetId, "enemy-1", "distance ties must resolve by stable entity id");
     assert.equal(owner.weapon.cooldown, 0.65);
 
@@ -46,6 +54,7 @@ export function run() {
     const hitEvents = updatePlayerProjectiles({ projectiles: directHit, enemies, config: COMBAT_CONFIG, dt: 0 });
     assert.equal(hitEvents.hits[0].type, "enemy-hit");
     assert.equal(hitEvents.hits[0].damage, 10);
+    assert.equal(hitEvents.resolutions[0].resolution, "enemy-hit");
 
     owner.weapon.cooldown = 0;
     owner.weapon.range = 50;
@@ -67,6 +76,7 @@ export function run() {
     assert.equal(target.ropeDisabledRemaining, 0.6);
     assert.equal(target.health, 100);
     assert.deepEqual(ropeEvents.ropeCutAt, new Vector2(0, 50));
+    assert.equal(ropeEvents.resolutions[0].resolution, "rope-cut");
 
     const bodyShot = [{ position: new Vector2(-10, 100), velocity: new Vector2(20, 0), radius: 7, damage: 20 }];
     const bodyEvents = updateEnemyProjectiles({ projectiles: bodyShot, target, rope, config: COMBAT_CONFIG, dt: 0.5 });
@@ -75,4 +85,5 @@ export function run() {
     assert.equal(bodyEvents.ropeCutAt, null);
     assert.equal(bodyEvents.hits[0].type, "player-hit");
     assert.equal(bodyEvents.hits[0].damage, 20);
+    assert.equal(bodyEvents.resolutions[0].resolution, "player-hit");
 }

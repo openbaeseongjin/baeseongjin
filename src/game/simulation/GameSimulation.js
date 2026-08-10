@@ -11,6 +11,7 @@ import { appendCombatFeedback, createImpactState, updateCombatFeedback } from ".
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
+import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.js";
@@ -52,9 +53,12 @@ export class GameSimulation {
         this.artifactReward = null;
         this.rewardedCheckpointIds = new Set();
         this.ropeDamageBoostRemaining = 0;
+        this.tick = 0;
+        this.replicationEvents = [];
     }
 
     step(dt, command) {
+        this.tick += 1;
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
             if (this.runState === "defeated") {
@@ -117,7 +121,7 @@ export class GameSimulation {
         this.attachBufferRemaining = Math.max(0, this.attachBufferRemaining - dt);
         this.wasPointerDown = effectiveCommand.pointer.down;
         this.player.step(dt, effectiveCommand, this.world.surfaces, this.rope);
-        updateAutomaticWeapon({
+        const playerProjectile = updateAutomaticWeapon({
             owner: this.playerEntity,
             enemies: this.enemies,
             projectiles: this.projectiles,
@@ -125,13 +129,14 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
+        if (playerProjectile) this.recordProjectileSpawn(playerProjectile, "player-projectile");
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
             enemies: this.enemies,
             config: COMBAT_CONFIG,
             dt
         });
-        updateEnemyWeapons({
+        const enemyProjectileSpawns = updateEnemyWeapons({
             enemies: this.enemies,
             target: this.playerEntity,
             projectiles: this.enemyProjectiles,
@@ -139,6 +144,7 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
+        for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile, "enemy-projectile");
         const enemyProjectileEvents = updateEnemyProjectiles({
             projectiles: this.enemyProjectiles,
             target: this.playerEntity,
@@ -146,6 +152,9 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
+        for (const resolution of [...playerProjectileEvents.resolutions, ...enemyProjectileEvents.resolutions]) {
+            this.recordProjectileResolution(resolution);
+        }
         this.metrics.recordCombat(playerProjectileEvents, enemyProjectileEvents);
         if (enemyProjectileEvents.ropeCutAt) {
             this.eventFlash = { type: "rope-cut", age: 0, position: enemyProjectileEvents.ropeCutAt };
@@ -265,6 +274,44 @@ export class GameSimulation {
         }));
     }
 
+    recordProjectileSpawn(projectile, objectType) {
+        this.replicationEvents.push(
+            createPredictableSpawnEvent({
+                eventId: this.registry.createId("event"),
+                objectId: projectile.id,
+                objectType,
+                spawnTick: this.tick,
+                position: projectile.position,
+                velocity: projectile.velocity,
+                parameters: {
+                    ownerId: projectile.ownerId,
+                    targetId: projectile.targetId ?? null,
+                    radius: projectile.radius,
+                    damage: projectile.damage
+                }
+            })
+        );
+    }
+
+    recordProjectileResolution({ projectileId, resolution, position }) {
+        if (!projectileId) return;
+        this.replicationEvents.push(
+            createPredictableResolveEvent({
+                eventId: this.registry.createId("event"),
+                objectId: projectileId,
+                tick: this.tick,
+                resolution,
+                position
+            })
+        );
+    }
+
+    drainReplicationEvents() {
+        const events = Object.freeze(this.replicationEvents);
+        this.replicationEvents = [];
+        return events;
+    }
+
     findAttachment(aimPoint) {
         let best = null;
         let bestScore = Number.POSITIVE_INFINITY;
@@ -296,6 +343,13 @@ export class GameSimulation {
         this.playerEntity.lifeState = "active";
         this.playerEntity.downedRemaining = 0;
         this.playerEntity.reviveProgress = 0;
+        for (const projectile of [...this.projectiles, ...this.enemyProjectiles]) {
+            this.recordProjectileResolution({
+                projectileId: projectile.id,
+                resolution: "checkpoint-reset",
+                position: projectile.position ?? this.player.position
+            });
+        }
         this.projectiles = [];
         this.enemyProjectiles = [];
         this.combatEffects = [];
@@ -335,6 +389,7 @@ export class GameSimulation {
 
     snapshot() {
         return {
+            tick: this.tick,
             world: this.world,
             player: this.player,
             rope: this.rope,

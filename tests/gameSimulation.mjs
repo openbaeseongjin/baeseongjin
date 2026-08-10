@@ -31,6 +31,23 @@ export function run() {
         { position: secondState.player.position, velocity: secondState.player.velocity, resets: secondState.resets },
         "the same commands and world seed must produce the same authoritative state"
     );
+    assert.equal(firstState.tick, 240);
+
+    const eventRun = new GameSimulation();
+    eventRun.playerEntity.weapon.cooldown = 0;
+    eventRun.step(1 / 120, command);
+    const spawnEvents = eventRun.drainReplicationEvents();
+    assert.equal(spawnEvents[0].eventType, "spawn");
+    assert.equal(spawnEvents[0].tick, 1);
+    assert.equal(spawnEvents[0].objectId, eventRun.projectiles[0].id);
+    assert.deepEqual(eventRun.drainReplicationEvents(), [], "replication events must drain exactly once");
+
+    const target = eventRun.enemies.find((enemy) => enemy.id === eventRun.projectiles[0].targetId);
+    eventRun.projectiles[0].position = target.position.clone();
+    eventRun.step(0, command);
+    const resolveEvents = eventRun.drainReplicationEvents().filter((event) => event.eventType === "resolve");
+    assert.equal(resolveEvents[0].objectId, spawnEvents[0].objectId);
+    assert.match(resolveEvents[0].resolution, /enemy-hit|enemy-defeated/);
 
     const defeated = new GameSimulation();
     defeated.playerEntity.health = 0;
