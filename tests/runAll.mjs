@@ -28,6 +28,7 @@ import { run as predictableObjectEvent } from "./predictableObjectEvent.mjs";
 import { run as authorityCommandInbox } from "./authorityCommandInbox.mjs";
 import { run as worldSnapshotEnvelope } from "./worldSnapshotEnvelope.mjs";
 import { run as authoritySnapshotBuilder } from "./authoritySnapshotBuilder.mjs";
+import { run as authorityServerSession } from "./authorityServerSession.mjs";
 
 const suites = {
     fixedStep,
@@ -59,7 +60,8 @@ const suites = {
     predictableObjectEvent,
     authorityCommandInbox,
     worldSnapshotEnvelope,
-    authoritySnapshotBuilder
+    authoritySnapshotBuilder,
+    authorityServerSession
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
