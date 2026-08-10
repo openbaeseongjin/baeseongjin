@@ -13,6 +13,9 @@ index.html
       ├─ core/input/InputSampler.js
       ├─ core/sim/FixedStepRunner.js
       ├─ render/CanvasRenderer.js
+      ├─ game/commands/PlayerCommand.js
+      ├─ game/runtime/LocalAuthority.js
+      ├─ game/simulation/GameSimulation.js
       ├─ game/config.js
       ├─ game/physics/PlayerPhysics.js
       ├─ game/rope/FixedLengthRope.js

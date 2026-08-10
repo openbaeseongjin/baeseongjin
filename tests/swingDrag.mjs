@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { GameApp } from "../src/game/GameApp.js";
 import { ROPE_CONFIG } from "../src/game/config.js";
 import { evaluateSwingDrag } from "../src/game/rope/SwingDrag.js";
+import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
 export function run() {
     const verticalRope = { anchor: { x: 0, y: 0 }, playerPosition: { x: 0, y: 100 }, threshold: 40 };
@@ -21,7 +21,7 @@ export function run() {
 
     let impulseCount = 0;
     let appliedMagnitude = 0;
-    const app = Object.create(GameApp.prototype);
+    const app = Object.create(GameSimulation.prototype);
     app.rope = { anchor: { x: 0, y: 0 } };
     app.player = {
         position: { x: 0, y: 100 },
