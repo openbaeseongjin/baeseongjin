@@ -2,8 +2,16 @@ import assert from "node:assert/strict";
 import { CanvasRenderer } from "../src/render/CanvasRenderer.js";
 
 export function run() {
+    const textCalls = [];
+    const borderCalls = [];
+    const context = {
+        save() {},
+        restore() {},
+        fillText: (text) => textCalls.push(text),
+        strokeRect: (...args) => borderCalls.push(args)
+    };
     const canvas = {
-        getContext: () => ({}),
+        getContext: () => context,
         getBoundingClientRect: () => ({ left: 10, top: 20 })
     };
     const renderer = new CanvasRenderer(canvas);
@@ -13,4 +21,10 @@ export function run() {
         "screen aiming must account for the wider zoomed-out mobile camera"
     );
     assert.deepEqual(renderer.screenToWorld({ x: 360, y: 180 }, { x: 100, y: 50 }), { x: 450, y: 210 });
+
+    renderer.cssWidth = 844;
+    renderer.cssHeight = 390;
+    renderer.drawRopeCutFeedback({ type: "rope-cut", age: 0.2 }, 0.4);
+    assert.deepEqual(textCalls, ["로프 절단!", "재연결까지 0.4초"]);
+    assert.deepEqual(borderCalls, [[4, 4, 836, 382]]);
 }

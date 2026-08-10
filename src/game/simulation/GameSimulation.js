@@ -117,13 +117,17 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
-        updateEnemyProjectiles({
+        const enemyProjectileEvents = updateEnemyProjectiles({
             projectiles: this.enemyProjectiles,
             target: this.playerEntity,
             rope: this.rope,
             config: COMBAT_CONFIG,
             dt
         });
+        if (enemyProjectileEvents.ropeCutAt) {
+            this.eventFlash = { type: "rope-cut", age: 0, position: enemyProjectileEvents.ropeCutAt };
+            this.swingDrag = null;
+        }
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
         if (this.playerEntity.health <= 0 && enterDowned(this.playerEntity, LIFE_CONFIG)) {
             this.rope.detach();

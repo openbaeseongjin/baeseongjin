@@ -84,6 +84,7 @@ export function distancePointToSegment(point, start, end) {
 
 export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }) {
     const survivors = [];
+    let ropeCutAt = null;
     for (const projectile of projectiles) {
         projectile.position.add(projectile.velocity.clone().scale(dt));
         if (
@@ -92,6 +93,7 @@ export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }
         ) {
             rope.detach();
             target.ropeDisabledRemaining = config.ropeDisabledSeconds;
+            ropeCutAt = projectile.position.clone();
             continue;
         }
         if (
@@ -108,4 +110,5 @@ export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }
         survivors.push(projectile);
     }
     projectiles.splice(0, projectiles.length, ...survivors);
+    return Object.freeze({ ropeCutAt });
 }

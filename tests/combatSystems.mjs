@@ -49,13 +49,15 @@ export function run() {
     };
     rope.attach(target.physics.position, { x: 0, y: 0 });
     const ropeShot = [{ position: new Vector2(-10, 50), velocity: new Vector2(20, 0), radius: 7, damage: 20 }];
-    updateEnemyProjectiles({ projectiles: ropeShot, target, rope, config: COMBAT_CONFIG, dt: 0.5 });
+    const ropeEvents = updateEnemyProjectiles({ projectiles: ropeShot, target, rope, config: COMBAT_CONFIG, dt: 0.5 });
     assert.equal(rope.isAttached, false, "enemy projectiles must sever the rope before checking body damage");
     assert.equal(target.ropeDisabledRemaining, 0.6);
     assert.equal(target.health, 100);
+    assert.deepEqual(ropeEvents.ropeCutAt, new Vector2(0, 50));
 
     const bodyShot = [{ position: new Vector2(-10, 100), velocity: new Vector2(20, 0), radius: 7, damage: 20 }];
-    updateEnemyProjectiles({ projectiles: bodyShot, target, rope, config: COMBAT_CONFIG, dt: 0.5 });
+    const bodyEvents = updateEnemyProjectiles({ projectiles: bodyShot, target, rope, config: COMBAT_CONFIG, dt: 0.5 });
     assert.equal(target.health, 80, "body hits must reduce HP exactly once");
     assert.equal(target.hitInvulnerabilityRemaining, COMBAT_CONFIG.playerHitInvulnerability);
+    assert.equal(bodyEvents.ropeCutAt, null);
 }

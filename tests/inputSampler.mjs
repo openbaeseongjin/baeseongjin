@@ -40,17 +40,19 @@ export function run() {
     touchSampler.attach();
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 1, clientX: 140, clientY: 600 });
     touchListeners.get("pointermove")({ pointerType: "touch", pointerId: 1, clientX: 204, clientY: 530 });
-    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 2, clientX: 760, clientY: 300 });
     let touchSnapshot = touchSampler.snapshot();
-    assert.equal(touchSnapshot.horizontal, 1);
-    assert.equal(touchSnapshot.vertical, -1);
-    assert.deepEqual(touchSnapshot.pointer, { x: 760, y: 252, down: true });
+    assert.equal(touchSnapshot.horizontal, 0, "touch input must not create mobile walking movement");
+    assert.equal(touchSnapshot.vertical, 0, "touch input must not create a mobile jump");
+    assert.deepEqual(touchSnapshot.pointer, { x: 204, y: 530, down: true });
     assert.deepEqual(touchSnapshot.viewport, { width: 1000, height: 640 });
-    assert.deepEqual(captured, [1, 2]);
-    touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 2 });
+    assert.deepEqual(captured, [1]);
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 2, clientX: 760, clientY: 300 });
+    assert.deepEqual(touchSampler.snapshot().pointer, { x: 204, y: 530, down: true });
+    assert.deepEqual(captured, [1], "a second finger must not steal or capture the active rope gesture");
+    touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 1 });
     touchSnapshot = touchSampler.snapshot();
-    assert.equal(touchSnapshot.horizontal, 1, "releasing the rope finger must not release movement");
     assert.equal(touchSnapshot.pointer.down, false);
-    touchListeners.get("pointercancel")({ pointerType: "touch", pointerId: 1 });
-    assert.equal(touchSampler.snapshot().horizontal, 0);
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 3, clientX: 400, clientY: 240 });
+    touchListeners.get("pointercancel")({ pointerType: "touch", pointerId: 3 });
+    assert.equal(touchSampler.snapshot().pointer.down, false);
 }
