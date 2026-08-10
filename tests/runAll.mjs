@@ -34,6 +34,7 @@ import { run as remoteWorldStateBuffer } from "./remoteWorldStateBuffer.mjs";
 import { run as localPlayerPredictor } from "./localPlayerPredictor.mjs";
 import { run as commandReceipt } from "./commandReceipt.mjs";
 import { run as authorityWireAdapter } from "./authorityWireAdapter.mjs";
+import { run as multiplayerGameServer } from "./multiplayerGameServer.mjs";
 
 const suites = {
     fixedStep,
@@ -71,7 +72,8 @@ const suites = {
     remoteWorldStateBuffer,
     localPlayerPredictor,
     commandReceipt,
-    authorityWireAdapter
+    authorityWireAdapter,
+    multiplayerGameServer
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {

@@ -57,4 +57,9 @@ export class AuthorityCommandInbox {
             )
         );
     }
+
+    removePlayer(playerId) {
+        this.lastAcceptedSequence.delete(playerId);
+        for (const commands of this.commandsByTick.values()) commands.delete(playerId);
+    }
 }

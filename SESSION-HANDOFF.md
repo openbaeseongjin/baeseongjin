@@ -91,6 +91,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `LocalPlayerPredictor`가 자기 플레이어를 최신 권위 물리·로프·control 상태로 복원하고 ACK되지 않은 목표 틱을 같은 `GameSimulation.updatePlayer()`로 재실행한다. 로프 스윙 임펄스 결과도 서버와 일치한다.
 - `CommandReceipt`가 명령 본문 없이 승인·거부 playerId·sequence를 전달한다. 승인 입력은 스냅샷 ACK까지 유지하고 거부 입력은 `RemoteCommandStream`에서 즉시 제거하며 중복 receipt는 멱등이다.
 - `AuthorityWireAdapter`가 인증 playerId와 command 문자열만 받아 receipt 문자열을 반환하고, 권위 틱에서 예정된 snapshot 문자열을 만든다. 실제 WebSocket은 이 경계만 호출한다.
+- `npm run start:multiplayer`가 정적 게임과 `/multiplayer` WebSocket을 localhost 한 포트에서 열며 최대 2명의 단일 임시 오픈월드를 실행한다. 이탈자는 제거하되 남은 유저의 월드는 유지하고, 접속자가 0명일 때만 폐기해 다음 최초 접속에서 새 월드를 만든다.
 
 ### [L1] 공용 기반과 게임 규칙을 분리한다
 

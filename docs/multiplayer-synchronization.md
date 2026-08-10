@@ -158,6 +158,8 @@ GameApp
 
 `AuthorityWireAdapter`는 실제 WebSocket 앞의 유일한 게임 전송 경계다. 인증된 playerId와 직렬화된 command batch 문자열을 받아 receipt 문자열을 반환하고, 권위 세션의 120Hz 틱을 진행해 20Hz 예정 시점에만 snapshot 문자열을 반환한다. 소켓 런타임은 JSON 내부 게임 객체를 직접 읽거나 변경하지 않는다.
 
+`npm run start:multiplayer`는 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 초기 런타임은 최대 2명의 단일 임시 오픈월드이며 연결 순서로 공용 `GameSimulation` 플레이어를 배정한다. 한 명이 나가면 해당 플레이어의 명령·런타임만 제거하고 남은 유저는 같은 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간에만 월드를 폐기하고, 다음 최초 접속에서 새 절차 생성 월드를 만든다.
+
 `RemoteCommandStream`은 로컬 플레이어 한 명의 목표 틱과 단조 증가 sequence를 만들고, 서버가 승인하기 전의 명령 배치를 보존한다. 새 스냅샷의 플레이어별 ACK까지만 대기열에서 제거하며, 이미 적용한 `serverTick` 이하의 중복·역순 스냅샷은 무시한다. 이 대기열은 이후 자기 플레이어 예측을 권위 상태 위에 재적용하는 입력 원본이며, 소켓과 물리 구현을 직접 소유하지 않는다.
 
 `RemoteWorldStateBuffer`는 단조 증가하는 최신 스냅샷 두 개를 보존해 같은 ID의 플레이어와 적 `position`만 렌더 시점 비율로 보간한다. HP, `lifeState`, 로프 부착, 체크포인트와 런 상태는 최신 권위 값을 그대로 사용하며, 새로 생성되거나 제거된 엔티티도 최신 목록을 따른다. 스냅샷 사건은 별도 대기열에서 정확히 한 번만 drain한다.

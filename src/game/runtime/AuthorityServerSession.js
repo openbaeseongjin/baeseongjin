@@ -71,4 +71,9 @@ export class AuthorityServerSession {
             acknowledgements: this.inbox.acknowledgements()
         });
     }
+
+    removePlayer(playerId) {
+        this.inbox.removePlayer(playerId);
+        return this.simulation.removePlayer(playerId);
+    }
 }
