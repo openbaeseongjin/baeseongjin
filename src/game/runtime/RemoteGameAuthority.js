@@ -99,9 +99,12 @@ export class RemoteGameAuthority {
         return {
             state: this.buffer.sample(alpha),
             predicted: this.predictor?.state() ?? null,
-            events: this.buffer.drainEvents(),
             connected: !this.closed
         };
+    }
+
+    drainEvents() {
+        return this.buffer.drainEvents();
     }
 
     close() {

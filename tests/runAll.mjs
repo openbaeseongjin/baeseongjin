@@ -37,6 +37,7 @@ import { run as authorityWireAdapter } from "./authorityWireAdapter.mjs";
 import { run as multiplayerGameServer } from "./multiplayerGameServer.mjs";
 import { run as remoteGameAuthority } from "./remoteGameAuthority.mjs";
 import { run as shareMultiplayer } from "./shareMultiplayer.mjs";
+import { run as predictableProjectileStore } from "./predictableProjectileStore.mjs";
 
 const suites = {
     fixedStep,
@@ -77,7 +78,8 @@ const suites = {
     authorityWireAdapter,
     multiplayerGameServer,
     remoteGameAuthority,
-    shareMultiplayer
+    shareMultiplayer,
+    predictableProjectileStore
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
