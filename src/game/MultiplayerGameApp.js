@@ -113,8 +113,9 @@ export class MultiplayerGameApp {
         const activeCheckpoint =
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
-        if (this.metricsVisible)
-            this.onDiagnostics({ metrics: base.metrics, networkMetrics, worldSeed: base.world.seed });
+        if (this.metricsVisible) {
+            this.onDiagnostics({ metrics: remote.state.metrics, networkMetrics, worldSeed: base.world.seed });
+        }
         this.renderer.draw({
             ...base,
             player,
@@ -141,6 +142,7 @@ export class MultiplayerGameApp {
             stats: this.stats,
             mobileView: this.mobileView,
             metricsVisible: this.metricsVisible,
+            metrics: remote.state.metrics,
             networkMetrics,
             mobileControls: {
                 ...this.latestInput.mobileControls,
