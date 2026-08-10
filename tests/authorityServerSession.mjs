@@ -112,6 +112,9 @@ export function run() {
     const partner = simulation.addPlayer({ x: 180, y: 500 });
     simulation.enemies = [];
     const session = new AuthorityServerSession({ simulation, snapshotIntervalTicks: 6 });
+    simulation.metrics.activeSeconds = 42.5;
+    simulation.metrics.enemyDefeats = 3;
+    simulation.metrics.damageTaken = 20;
 
     const forged = session.submit(
         simulation.playerEntity.id,
@@ -149,6 +152,10 @@ export function run() {
         [partner.entity.id]: 5
     });
     assert.equal(snapshot.state.players.length, 2);
+    assert.ok(Math.abs(snapshot.state.metrics.activeSeconds - 42.55) < 1e-9);
+    assert.equal(snapshot.state.metrics.enemyDefeats, 3);
+    assert.equal(snapshot.state.metrics.damageTaken, 20);
+    assert.deepEqual(JSON.parse(JSON.stringify(snapshot)).state.metrics, snapshot.state.metrics);
     assert.deepEqual(session.snapshot().events, [], "events must drain after their scheduled snapshot");
     assert.throws(() => session.submit("missing-player", createPlayerCommandBatch(7, [])), /unknown authenticated/);
 }

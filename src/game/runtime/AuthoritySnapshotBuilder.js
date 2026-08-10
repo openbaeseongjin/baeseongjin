@@ -84,6 +84,7 @@ export function buildAuthoritySnapshot({ simulation, acknowledgements = {} }) {
             runState: simulation.runState,
             defeatReason: simulation.defeatReason,
             restartRemaining: simulation.restartRemaining,
+            metrics: simulation.metrics.snapshot(),
             completed: simulation.runState === "completed"
         },
         events: simulation.drainReplicationEvents()
