@@ -13,7 +13,7 @@ export function selectNearestEnemy(position, enemies, range) {
 
 export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt }) {
     owner.weapon.cooldown = Math.max(0, owner.weapon.cooldown - dt);
-    if (owner.lifeState === "downed") return null;
+    if (owner.lifeState !== "active") return null;
     if (owner.weapon.cooldown > 0) return null;
     const target = selectNearestEnemy(owner.physics.position, enemies, owner.weapon.range);
     if (!target) return null;
@@ -86,7 +86,7 @@ function selectNearestPlayer(position, targets, range) {
             .filter(
                 (target) =>
                     target.health > 0 &&
-                    target.lifeState !== "downed" &&
+                    target.lifeState === "active" &&
                     position.distanceTo(target.physics.position) <= range
             )
             .sort((left, right) => {

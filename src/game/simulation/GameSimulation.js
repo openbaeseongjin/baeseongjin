@@ -7,8 +7,7 @@ import {
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
-import { ARTIFACT_CONFIG, COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
-import { enterDowned, isTeamDefeated, updateDownedPlayer, updateTeamRevives } from "../life/PlayerLifeCycle.js";
+import { ARTIFACT_CONFIG, COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
@@ -34,8 +33,6 @@ export class GameSimulation {
         this.eventFlash = { type: "ready", age: 10 };
         this.resets = 0;
         this.runState = "playing";
-        this.defeatReason = null;
-        this.restartRemaining = 0;
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
         this.lastCheckpointLoss = [];
         this.artifactRewards = new Map();
@@ -156,10 +153,6 @@ export class GameSimulation {
         this.tick += 1;
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
-            if (this.runState === "defeated") {
-                this.restartRemaining = Math.max(0, this.restartRemaining - dt);
-                if (this.restartRemaining <= 0) this.respawnAtCheckpoint();
-            }
             return;
         }
         if (this.player.position.distanceTo(this.world.summit) <= this.world.summit.radius) {
@@ -179,30 +172,8 @@ export class GameSimulation {
             );
         }
         this.metrics.recordActiveTime(dt);
-        const reviveUpdate = updateTeamRevives(this.players, gameplayCommands, dt, LIFE_CONFIG);
-        const reviveReviverIds = new Set(reviveUpdate.reviverIds);
-        for (const result of reviveUpdate.results) {
-            if (result.status !== "revived") continue;
-            const revived = this.players.find(({ id }) => id === result.targetId);
-            this.eventFlash = {
-                type: "revived",
-                age: 0,
-                playerId: result.targetId,
-                reviverId: result.reviverId,
-                position: revived?.physics.position
-            };
-            this.recordReplicationEvent("player-revived", {
-                playerId: result.targetId,
-                reviverId: result.reviverId,
-                health: revived?.health,
-                position: revived ? { x: revived.physics.position.x, y: revived.physics.position.y } : null
-            });
-        }
         for (const player of this.players) {
-            let playerCommand = this.commandForPlayer(player, gameplayCommands);
-            if (reviveReviverIds.has(player.id) && playerCommand.vertical < 0) {
-                playerCommand = { ...playerCommand, vertical: 0 };
-            }
+            const playerCommand = this.commandForPlayer(player, gameplayCommands);
             const projectile = this.updatePlayer(player, playerCommand, dt);
             if (projectile) this.recordProjectileSpawn(projectile, "player-projectile");
         }
@@ -240,15 +211,9 @@ export class GameSimulation {
         }
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
         for (const player of this.players) {
-            if (player.health <= 0 && enterDowned(player, LIFE_CONFIG)) {
-                player.rope.detach();
-                player.swingDrag = null;
-                this.eventFlash = { type: "downed", age: 0, playerId: player.id };
-            }
+            if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
         }
-        const fallenPlayerIds = this.recoverFallenPlayers();
-        for (const player of this.players) updateDownedPlayer(player, dt);
-        if (isTeamDefeated(this.players)) this.beginDefeat(fallenPlayerIds.length > 0 ? "fall" : "health");
+        this.recoverFallenPlayers();
         this.eventFlash.age += dt;
     }
 
@@ -258,7 +223,7 @@ export class GameSimulation {
             if (player.physics.position.isFinite() && player.physics.position.y <= WORLD_CONFIG.floorY + 780) {
                 continue;
             }
-            this.recoverPlayerFromFall(player);
+            this.respawnPlayerAtCheckpoint(player, "fall");
             fallenPlayerIds.push(player.id);
         }
         return fallenPlayerIds;
@@ -268,28 +233,7 @@ export class GameSimulation {
         if (this.runState !== "playing") return false;
         const player = this.players.find(({ id }) => id === playerId);
         if (!player) return false;
-        this.recoverPlayerFromFall(player);
-        if (isTeamDefeated(this.players)) this.beginDefeat("fall");
-        return true;
-    }
-
-    recoverPlayerFromFall(player) {
-        const checkpoint = this.activeCheckpoint ?? { x: 120, y: 500 };
-        const wasActive = player.lifeState === "active";
-        player.physics.reset(checkpoint);
-        player.rope.detach();
-        player.attachmentCandidate = null;
-        player.wasPointerDown = false;
-        player.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
-        player.attachBufferRemaining = 0;
-        player.swingDrag = null;
-        if (wasActive) enterDowned(player, LIFE_CONFIG);
-        this.eventFlash = { type: "fall-recovery", age: 0, playerId: player.id, position: player.physics.position };
-        this.recordReplicationEvent("player-fell", {
-            playerId: player.id,
-            lifeState: player.lifeState,
-            position: { x: player.physics.position.x, y: player.physics.position.y }
-        });
+        return this.respawnPlayerAtCheckpoint(player, "fall");
     }
 
     commandForPlayer(player, commandsByPlayerId) {
@@ -621,6 +565,9 @@ export class GameSimulation {
             },
             claim.impactType === "player-hit" ? { damage: projectile.damage } : null
         );
+        if (claim.impactType === "player-hit" && player.health <= 0) {
+            this.respawnPlayerAtCheckpoint(player, "health");
+        }
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage: projectile.damage });
     }
 
@@ -672,75 +619,64 @@ export class GameSimulation {
         return best;
     }
 
-    respawnAtCheckpoint() {
+    respawnPlayerAtCheckpoint(player, reason) {
+        if (!player || this.runState !== "playing") return false;
         const respawnPosition = this.activeCheckpoint ?? { x: 120, y: 500 };
-        this.eventFlash = { type: "reset", age: 0 };
-        for (const player of this.players) {
-            player.physics.reset(respawnPosition);
-            player.rope.detach();
-            player.attachmentCandidate = null;
-            player.wasPointerDown = false;
-            player.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
-            player.attachBufferRemaining = 0;
-            player.swingDrag = null;
-            player.health = player.maxHealth;
-            player.weapon.cooldown = 0;
-            player.hitInvulnerabilityRemaining = 0;
-            player.ropeDisabledRemaining = 0;
-            player.lifeState = "active";
-            player.downedRemaining = 0;
-            player.reviveProgress = 0;
-            player.lastCheckpointLoss = player.artifacts.applyCheckpointLoss();
-            player.ropeDamageBoostRemaining = 0;
-            this.applyArtifactEffects(player);
-            if (player.lastCheckpointLoss.length > 0) {
-                this.recordReplicationEvent("artifact-loss", {
-                    playerId: player.id,
-                    artifactIds: player.lastCheckpointLoss.map(({ id }) => id)
-                });
-            }
-        }
-        for (const projectile of [...this.projectiles, ...this.enemyProjectiles]) {
-            this.recordProjectileResolution({
-                projectileId: projectile.id,
-                resolution: "checkpoint-reset",
-                position: projectile.position ?? this.player.position
+        this.metrics.recordDefeat();
+        player.physics.reset(respawnPosition);
+        player.rope.detach();
+        player.attachmentCandidate = null;
+        player.wasPointerDown = false;
+        player.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
+        player.attachBufferRemaining = 0;
+        player.swingDrag = null;
+        player.health = player.maxHealth;
+        player.weapon.cooldown = 0;
+        player.hitInvulnerabilityRemaining = 0;
+        player.ropeDisabledRemaining = 0;
+        player.lifeState = "active";
+        player.lastCheckpointLoss = player.artifacts.applyCheckpointLoss();
+        player.ropeDamageBoostRemaining = 0;
+        this.applyArtifactEffects(player);
+        const artifactIds = player.lastCheckpointLoss.map(({ id }) => id);
+        if (artifactIds.length > 0) {
+            this.recordReplicationEvent("artifact-loss", {
+                playerId: player.id,
+                artifactIds
             });
         }
-        this.projectiles = [];
-        this.enemyProjectiles = [];
-        this.runState = "playing";
-        this.defeatReason = null;
-        this.restartRemaining = 0;
-        if (this.lastCheckpointLoss.length > 0) {
+        if (artifactIds.length > 0) {
             this.eventFlash = {
                 type: "artifact-loss",
                 age: 0,
-                playerId: this.playerEntity.id,
-                artifacts: [...this.lastCheckpointLoss]
+                playerId: player.id,
+                reason,
+                artifacts: [...player.lastCheckpointLoss],
+                position: player.physics.position.clone()
+            };
+        } else {
+            this.eventFlash = {
+                type: "checkpoint-respawn",
+                age: 0,
+                playerId: player.id,
+                reason,
+                position: player.physics.position.clone()
             };
         }
+        this.recordReplicationEvent("player-respawned", {
+            playerId: player.id,
+            reason,
+            health: player.health,
+            artifactIds,
+            position: { x: player.physics.position.x, y: player.physics.position.y }
+        });
         this.resets += 1;
-    }
-
-    beginDefeat(reason) {
-        if (this.runState !== "playing") return;
-        this.metrics.recordDefeat();
-        this.runState = "defeated";
-        this.defeatReason = reason;
-        this.restartRemaining = LIFE_CONFIG.defeatRestartDelay;
-        for (const player of this.players) {
-            player.rope.detach();
-            player.swingDrag = null;
-        }
-        this.eventFlash = { type: "defeat", age: 0 };
+        return true;
     }
 
     beginCompletion() {
         if (this.runState !== "playing") return;
         this.runState = "completed";
-        this.defeatReason = null;
-        this.restartRemaining = 0;
         this.rope.detach();
         this.swingDrag = null;
         this.eventFlash = { type: "completed", age: 0, position: this.world.summit };
@@ -764,8 +700,6 @@ export class GameSimulation {
             ropeDisabledRemaining: this.playerEntity.ropeDisabledRemaining,
             playerLifeState: this.playerEntity.lifeState,
             runState: this.runState,
-            defeatReason: this.defeatReason,
-            restartRemaining: this.restartRemaining,
             activeCheckpoint: this.activeCheckpoint,
             artifacts: this.artifacts.snapshot(),
             lastCheckpointLoss: [...this.lastCheckpointLoss],

@@ -17,7 +17,8 @@ export function run() {
     const owner = {
         id: registry.createId("player"),
         physics: { position: new Vector2(0, 0) },
-        weapon: { range: 320, damage: 10, fireInterval: 0.65, cooldown: 0 }
+        weapon: { range: 320, damage: 10, fireInterval: 0.65, cooldown: 0 },
+        lifeState: "active"
     };
     const enemies = [
         { id: "enemy-2", position: new Vector2(100, 0), radius: 18, health: 30 },
@@ -69,7 +70,8 @@ export function run() {
         physics: { position: new Vector2(0, 100), config: { radius: 15 }, addImpulse() {} },
         health: 100,
         hitInvulnerabilityRemaining: 0,
-        ropeDisabledRemaining: 0
+        ropeDisabledRemaining: 0,
+        lifeState: "active"
     };
     rope.attach(target.physics.position, { x: 0, y: 0 });
     target.rope = rope;

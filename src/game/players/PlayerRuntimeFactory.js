@@ -44,9 +44,7 @@ export function createPlayerRuntime({
         maxHealth: combatConfig.playerMaxHealth,
         hitInvulnerabilityRemaining: 0,
         ropeDisabledRemaining: 0,
-        lifeState: "active",
-        downedRemaining: 0,
-        reviveProgress: 0
+        lifeState: "active"
     };
     return Object.freeze({ physics, rope, artifacts, entity });
 }

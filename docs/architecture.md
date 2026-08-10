@@ -22,7 +22,6 @@ index.html
       ├─ game/combat/CombatFeedback.js
       ├─ game/artifacts/ArtifactCatalog.js
       ├─ game/artifacts/ArtifactInventory.js
-      ├─ game/life/PlayerLifeCycle.js
       ├─ game/metrics/RunMetrics.js
       ├─ game/network/PlayerCommandBatch.js
       ├─ game/network/AuthorityCommandInbox.js
@@ -68,9 +67,9 @@ index.html
 - `rewardedCheckpointIds`가 체크포인트별 보상 수령 여부를 권위 상태로 보존해 재방문과 사망 복귀의 중복 지급을 막는다.
 - `WorldTraversalValidator`는 생성과 분리된 순수 검사기로 연속 경로의 상승량과 로프 사거리 위반을 시드·레벨 단위로 진단한다.
 - 재현해야 할 시드는 `worldRegressionSeeds.mjs`에 이유와 함께 보존하며, 일반 1,000개 시드 탐색보다 우선 검증한다.
-- `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가하며, 보상 선택과 패배 대기 시간은 활성 시간에서 제외한다.
+- `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가한다. 사망 횟수는 호환 필드 `defeats`에 기록하며 사망·부활로 공용 월드 시간을 멈추지 않는다.
 - `?metrics=1`은 `GameApp`과 렌더러에만 전달되는 옵트인 개발 표시이며 `PlayerCommand`나 게임 규칙에 포함하지 않는다.
-- 협동 부활은 `PlayerLifeCycle.updateReviveInteraction`의 상태·거리·시간 규칙을 사용하며 싱글 패배 판정과 같은 플레이어 배열을 공유한다.
+- 사망·낙사는 `GameSimulation.respawnPlayerAtCheckpoint` 하나로 처리한다. 사망한 플레이어의 물리·입력·체력·아티팩트만 초기화하며 동료와 공용 월드는 계속 진행한다.
 - 체크포인트 보상은 플레이어별 선택 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - 보상 Canvas 오버레이는 반투명 배경과 실시간 전투 경고를 사용해 선택 카드와 진행 중인 위험을 동시에 보여준다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
@@ -84,12 +83,12 @@ index.html
 - 조준점, 부착 후보, 포인터 전이, 부착 버퍼, 스윙 드래그와 로프 연계 강화 시간은 플레이어 엔티티별 상태다. `GameSimulation`의 기존 필드는 첫 플레이어 호환 별칭이다.
 - 이동·로프·상태 타이머·아티팩트 무기 효과와 자동 발사는 `GameSimulation.updatePlayer(playerEntity, command, dt)`의 공용 경로를 사용한다. 싱글 `step`도 첫 플레이어를 이 경로에 전달한다.
 - `stepCommandBatch`는 정확히 다음 권위 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 네트워크 권위와 로컬 예측은 `InputStateSimulator`로 마지막 수신 입력을 제한된 틱 동안 함께 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다.
-- `PlayerCommand.interact`는 PC E키 또는 모바일 점프 버튼 홀드에서 만들어지는 공용 협동 상호작용 의도다. 이동·점프 축과 분리되어 권위 규칙이 상황에 따라 소비한다.
-- `updateTeamRevives`는 다운된 대상 ID 순으로 상호작용 중인 최근접 구조자를 배정하며 구조자 한 명을 한 대상에만 사용한다. 실제 부활에 사용된 모바일 명령은 그 틱의 점프 축만 소비하고 권위 부활 사건을 남긴다.
-- 팀 전멸 복귀는 모든 플레이어를 같은 활성 체크포인트에서 재개시키고 각자의 아티팩트 인벤토리에 일부 손실 정책을 독립 적용한다. 단순 다운과 성공한 부활에는 손실이 없다.
+- `PlayerCommand.interact`는 향후 문맥 상호작용을 위한 예약 필드다. 현재 생명 주기에서는 소비하지 않으며 모바일 점프 입력의 동작을 가로채지 않는다.
+- `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력·손실 아티팩트를 `player-respawned` 사건으로 남긴다. 손실이 있으면 같은 playerId의 `artifact-loss` 사건도 발행한다.
+- 여러 플레이어가 같은 틱에 사망해도 각자 독립 부활한다. 공용 적·투사체와 다른 플레이어의 위치·체력·아티팩트는 초기화하지 않는다.
 - 적은 사거리 안의 살아 있는 플레이어 중 최근접 대상을 선택하고 거리 동률은 ID로 결정한다. 적 투사체는 모든 플레이어의 로프 충돌을 먼저 판정한 뒤 몸체를 판정하며 사건에 대상 playerId를 남긴다.
 - 마지막 암석 위의 정상 목표도 시드 결과에 포함되며, 도달하면 하나의 큰 월드를 끝내는 `completed` 터미널 상태에서 판정을 멈춘다.
-- `GameSimulation`이 플레이어·로프·적·투사체·체력·다운·패배·체크포인트 복귀를 소유한다.
+- `GameSimulation`이 플레이어·로프·적·투사체·체력·사망·플레이어별 체크포인트 부활을 소유한다.
 - 기본 무기는 사거리 안의 가장 가까운 적을 자동 조준하며, 적은 플레이어를 향해 투사체를 발사한다.
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.

@@ -144,8 +144,6 @@ export class LocalPlayerPredictor {
         );
         player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, authoritative.ropeDisabledRemaining);
         player.lifeState = authoritative.lifeState;
-        player.downedRemaining = authoritative.downedRemaining;
-        player.reviveProgress = authoritative.reviveProgress;
         player.weapon.range = authoritative.weapon.range;
         player.weapon.damage = authoritative.weapon.damage;
         player.weapon.fireInterval = authoritative.weapon.fireInterval;
@@ -293,8 +291,6 @@ export class LocalPlayerPredictor {
         player.hitInvulnerabilityRemaining = state.hitInvulnerabilityRemaining;
         player.ropeDisabledRemaining = state.ropeDisabledRemaining;
         player.lifeState = state.lifeState;
-        player.downedRemaining = state.downedRemaining;
-        player.reviveProgress = state.reviveProgress;
         player.weapon.range = state.weapon.range;
         player.weapon.damage = state.weapon.damage;
         player.weapon.fireInterval = state.weapon.fireInterval;

@@ -40,14 +40,6 @@ export const COMBAT_CONFIG = Object.freeze({
     ropeDisabledSeconds: 0.6
 });
 
-export const LIFE_CONFIG = Object.freeze({
-    downedDuration: 10,
-    defeatRestartDelay: 2,
-    reviveDuration: 2.5,
-    reviveRange: 72,
-    reviveHealthFraction: 0.4
-});
-
 export const ARTIFACT_CONFIG = Object.freeze({
     checkpointLossFraction: 1 / 3,
     minimumOwnedForLoss: 2

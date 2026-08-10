@@ -136,7 +136,8 @@ export function run() {
     );
     assert.equal(fallReceipt.accepted, true);
     assert.equal(fallReceipt.resolution, "player-fell");
-    assert.equal(fallSimulation.playerEntity.lifeState, "downed");
+    assert.equal(fallSimulation.playerEntity.lifeState, "active");
+    assert.equal(fallSimulation.playerEntity.health, fallSimulation.playerEntity.maxHealth);
     assert.equal(fallSimulation.player.position.x, fallSimulation.activeCheckpoint.x);
     assert.equal(fallSimulation.player.position.y, fallSimulation.activeCheckpoint.y);
     assert.equal(fallSimulation.rope.isAttached, false);
@@ -193,6 +194,34 @@ export function run() {
         playerHealthBeforeImpact - impactProjectile.damage,
         "a duplicate victim impact claim must be idempotent"
     );
+    const lethalCheckpoint = combatSimulation.world.checkpoints[1];
+    combatSimulation.activeCheckpoint = lethalCheckpoint;
+    combatSimulation.playerEntity.health = 5;
+    combatSimulation.playerEntity.hitInvulnerabilityRemaining = 0;
+    const lethalProjectile = {
+        id: "enemy-impact-lethal",
+        ownerId: "enemy-1",
+        targetId: combatSimulation.playerEntity.id,
+        position: combatSimulation.player.position.clone(),
+        velocity: new Vector2(120, 0),
+        radius: 7,
+        damage: 20
+    };
+    combatSimulation.enemyProjectiles.push(lethalProjectile);
+    const lethalClaim = createPlayerImpactClaim({
+        projectileId: lethalProjectile.id,
+        clientTick: combatSimulation.tick,
+        impactType: "player-hit",
+        position: combatSimulation.player.position
+    });
+    const lethalReceipt = combatSession.submitImpactClaim(combatSimulation.playerEntity.id, lethalClaim);
+    assert.equal(lethalReceipt.accepted, true);
+    assert.equal(combatSimulation.playerEntity.health, combatSimulation.playerEntity.maxHealth);
+    assert.equal(combatSimulation.player.position.x, lethalCheckpoint.x);
+    assert.equal(combatSimulation.player.position.y, lethalCheckpoint.y);
+    assert.equal(combatSimulation.runState, "playing");
+    assert.equal(combatSession.submitImpactClaim(combatSimulation.playerEntity.id, lethalClaim), lethalReceipt);
+    assert.equal(combatSimulation.metrics.defeats, 1, "duplicate lethal claims must not respawn twice");
     const forgedSimulation = new GameSimulation();
     const forgedPartner = forgedSimulation.addPlayer({ x: 180, y: 500 });
     const forgedSession = new AuthorityServerSession({ simulation: forgedSimulation });

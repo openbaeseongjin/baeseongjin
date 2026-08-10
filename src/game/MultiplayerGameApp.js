@@ -210,8 +210,6 @@ export class MultiplayerGameApp {
             activeCheckpoint,
             artifactReward: this.localArtifactReward,
             runState: remote.state.runState,
-            defeatReason: remote.state.defeatReason,
-            restartRemaining: remote.state.restartRemaining,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
             camera: this.camera,
             stats: this.stats,
