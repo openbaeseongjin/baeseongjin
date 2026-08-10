@@ -103,6 +103,8 @@ events[]
 
 `GameSimulation`은 처리한 스텝마다 단조 증가하는 `tick`을 기록한다. 실제 자동 무기 발사와 투사체 종료는 이 틱의 `PredictableObjectEvent`를 발행하며, 권위 전송 계층은 `drainReplicationEvents()`로 각 사건을 한 번만 가져간다. 로컬 렌더링은 기존 투사체 배열을 계속 사용하지만 네트워크 상태에는 그 배열을 넣지 않는다.
 
+`AuthoritySnapshotBuilder`는 `GameSimulation`의 로컬 렌더 상태를 그대로 복제하지 않는다. 플레이어별 물리·로프·생명·무기·아티팩트, 적 상태와 월드 진행만 뽑고, 정적 지형 전체 대신 `worldSeed`와 `WORLD_GENERATION_REVISION`을 보낸다. 클라이언트는 두 값으로 월드를 재생성하며 revision이 다르면 세션 참가를 중단한다.
+
 ## 예측과 보정
 
 클라이언트는 아직 승인되지 않은 자기 명령을 짧은 큐에 보관한다.

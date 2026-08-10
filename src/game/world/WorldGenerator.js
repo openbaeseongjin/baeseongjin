@@ -1,5 +1,7 @@
 import { closestPointOnPolygon, polygonBounds } from "./PolygonGeometry.js";
 
+export const WORLD_GENERATION_REVISION = "procedural-rocks-v1";
+
 function createRandom(seed) {
     let state = seed >>> 0 || 1;
     return () => {
