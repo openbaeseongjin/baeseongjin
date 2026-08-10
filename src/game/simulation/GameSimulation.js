@@ -9,7 +9,7 @@ import { COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } 
 import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
-import { evaluateSwingDrag } from "../rope/SwingDrag.js";
+import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.js";
 import { EntityRegistry } from "./EntityRegistry.js";
 
@@ -89,7 +89,9 @@ export class GameSimulation {
                 this.attachBufferRemaining = 0;
             }
         }
-        if (effectiveCommand.pointer.down && this.rope.isAttached) this.updateSwingDrag(effectiveCommand.pointer, dt);
+        if (effectiveCommand.pointer.down && this.rope.isAttached) {
+            this.updateSwingDrag(effectiveCommand.pointer, effectiveCommand.viewport, dt);
+        }
         if (!effectiveCommand.pointer.down && this.wasPointerDown && this.rope.isAttached) {
             this.rope.detach();
             this.eventFlash = { type: "release", age: 0 };
@@ -136,14 +138,14 @@ export class GameSimulation {
         }
     }
 
-    updateSwingDrag(pointer, dt) {
+    updateSwingDrag(pointer, viewport, dt) {
         if (!this.swingDrag || this.swingDrag.used || !this.rope.anchor) return;
         this.swingDrag.age += dt;
         const evaluation = evaluateSwingDrag({
             anchor: this.rope.anchor,
             playerPosition: this.player.position,
             drag: { x: pointer.x - this.swingDrag.origin.x, y: pointer.y - this.swingDrag.origin.y },
-            threshold: ROPE_CONFIG.swingDragThreshold
+            threshold: getSwingDragThreshold(viewport, ROPE_CONFIG.swingDragThresholdViewportRatio)
         });
         if (!evaluation) return;
         this.swingDrag.direction = evaluation.direction;

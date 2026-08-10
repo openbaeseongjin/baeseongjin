@@ -62,6 +62,10 @@ export class InputSampler {
         return this.surface?.clientWidth || this.target?.innerWidth || 1;
     }
 
+    viewportHeight() {
+        return this.surface?.clientHeight || this.target?.innerHeight || 1;
+    }
+
     updateTouchPointer(event) {
         if (this.movePointer?.id === event.pointerId) {
             this.movePointer.x = event.clientX;
@@ -144,6 +148,7 @@ export class InputSampler {
             horizontal: touch.horizontal || keyboardHorizontal,
             vertical: touch.vertical || keyboardVertical,
             pointer: Object.freeze({ ...this.pointer }),
+            viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),
             mobileControls
         });
     }

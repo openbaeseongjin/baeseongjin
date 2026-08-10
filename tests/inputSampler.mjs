@@ -5,6 +5,7 @@ export function run() {
     const listeners = new Map();
     const target = {
         innerWidth: 1000,
+        innerHeight: 700,
         addEventListener: (name, fn) => listeners.set(name, fn),
         removeEventListener: (name) => listeners.delete(name)
     };
@@ -16,6 +17,7 @@ export function run() {
     const snapshot = sampler.snapshot();
     assert.equal(snapshot.horizontal, 1);
     assert.deepEqual(snapshot.pointer, { x: 12, y: 34, down: false });
+    assert.deepEqual(snapshot.viewport, { width: 1000, height: 700 });
     assert.ok(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.pointer));
     sampler.detach();
     assert.equal(listeners.size, 0);
@@ -24,6 +26,7 @@ export function run() {
     const captured = [];
     const surface = {
         clientWidth: 1000,
+        clientHeight: 640,
         addEventListener: (name, fn) => touchListeners.set(name, fn),
         removeEventListener: (name) => touchListeners.delete(name),
         setPointerCapture: (id) => captured.push(id)
@@ -42,6 +45,7 @@ export function run() {
     assert.equal(touchSnapshot.horizontal, 1);
     assert.equal(touchSnapshot.vertical, -1);
     assert.deepEqual(touchSnapshot.pointer, { x: 760, y: 252, down: true });
+    assert.deepEqual(touchSnapshot.viewport, { width: 1000, height: 640 });
     assert.deepEqual(captured, [1, 2]);
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 2 });
     touchSnapshot = touchSampler.snapshot();
