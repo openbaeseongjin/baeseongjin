@@ -33,6 +33,21 @@ function advanceProjectile(projectile, dt, state) {
     projectile.position.y += projectile.velocity.y * dt;
 }
 
+function findPendingPrediction(objects, event) {
+    if (event.objectType !== "player-projectile") return null;
+    for (const projectile of objects.values()) {
+        if (
+            projectile.id.startsWith("predicted:") &&
+            projectile.objectType === event.objectType &&
+            projectile.ownerId === event.parameters.ownerId &&
+            projectile.targetId === event.parameters.targetId
+        ) {
+            return projectile;
+        }
+    }
+    return null;
+}
+
 export class PredictableProjectileStore {
     constructor({ fixedDt = FIXED_DT } = {}) {
         this.fixedDt = fixedDt;
@@ -66,9 +81,14 @@ export class PredictableProjectileStore {
                 continue;
             }
             if (event.eventType !== "spawn") continue;
-            const predictionId = event.parameters.predictionId;
-            const predictedObjectId = predictionId ? this.objectIdByPredictionId.get(predictionId) : null;
-            const predicted = predictedObjectId ? this.objects.get(predictedObjectId) : null;
+            const authorityPredictionId = event.parameters.predictionId;
+            let predictedObjectId = authorityPredictionId
+                ? this.objectIdByPredictionId.get(authorityPredictionId)
+                : null;
+            let predicted = predictedObjectId ? this.objects.get(predictedObjectId) : null;
+            predicted ??= findPendingPrediction(this.objects, event);
+            predictedObjectId ??= predicted?.id ?? null;
+            const predictionId = predicted?.predictionId ?? authorityPredictionId;
             if (predictedObjectId) this.objects.delete(predictedObjectId);
             if (predictionId) {
                 this.objectIdByPredictionId.set(predictionId, event.objectId);

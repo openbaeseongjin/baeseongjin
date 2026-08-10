@@ -118,7 +118,7 @@ export function run() {
         position: { x: 0, y: 0 },
         velocity: { x: 0, y: 0 },
         parameters: {
-            predictionId: "player-1:20",
+            predictionId: "player-1:server-20",
             radius: 5,
             damage: 10,
             speed: 520,
@@ -130,7 +130,7 @@ export function run() {
     assert.equal(
         predictedStore.snapshot().projectiles.length,
         1,
-        "server confirmation must not duplicate a prediction"
+        "server confirmation must not duplicate a prediction when client and server ticks differ"
     );
     assert.equal(predictedStore.snapshot().projectiles[0].id, "projectile-server-1");
     const predictedHit = predictedStore.update(0, {
