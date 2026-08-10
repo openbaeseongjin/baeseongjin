@@ -73,9 +73,11 @@ export class MultiplayerGameApp {
         this.combatFeedback.apply(events);
         this.predictableProjectiles.update(dt, current.state);
         this.combatFeedback.update(dt);
+        const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
+        const command = createPlayerCommand(input, aimWorld);
+        this.authority.advance(command);
         if (this.stepCount % 2 === 0) {
-            const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
-            this.authority.submit(createPlayerCommand(input, aimWorld));
+            this.authority.submit(command);
         }
         const player = this.authority.snapshot(1).predicted;
         const targetX = player.position.x - (this.renderer.cssWidth / this.camera.zoom) * 0.38;

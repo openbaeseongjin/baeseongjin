@@ -43,7 +43,7 @@ export function run() {
         { playerId: server.playerEntity.id, sequence: 0, command: dragCommand }
     ]);
 
-    const predictor = new LocalPlayerPredictor({ playerId: server.playerEntity.id });
+    const predictor = new LocalPlayerPredictor({ playerId: server.playerEntity.id, predictionLeadTicks: 0 });
     const predicted = predictor.reconcile(snapshot, [pending]);
     server.stepCommandBatch(1 / 120, pending);
 
@@ -72,14 +72,30 @@ export function run() {
         },
         { x: 0, y: 0 }
     );
-    const movingPrediction = new LocalPlayerPredictor({ playerId: movingServer.playerEntity.id }).reconcile(
-        movingSnapshot,
-        [
-            createPlayerCommandBatch(7, [{ playerId: movingServer.playerEntity.id, sequence: 0, command: move }]),
-            createPlayerCommandBatch(9, [{ playerId: movingServer.playerEntity.id, sequence: 1, command: move }])
-        ]
-    );
+    const movingPredictor = new LocalPlayerPredictor({
+        playerId: movingServer.playerEntity.id,
+        predictionLeadTicks: 0
+    });
+    const movingPrediction = movingPredictor.reconcile(movingSnapshot, [
+        createPlayerCommandBatch(7, [{ playerId: movingServer.playerEntity.id, sequence: 0, command: move }]),
+        createPlayerCommandBatch(9, [{ playerId: movingServer.playerEntity.id, sequence: 1, command: move }])
+    ]);
     assert.ok(movingPrediction.velocity.x > 10, "local prediction must simulate held input on the missing tick");
+
+    const continuous = new LocalPlayerPredictor({
+        playerId: movingServer.playerEntity.id,
+        predictionLeadTicks: 0
+    });
+    continuous.reconcile(movingSnapshot, []);
+    const firstLocalTick = continuous.advance(move);
+    const secondLocalTick = continuous.advance(move);
+    assert.equal(firstLocalTick.tick, movingSnapshot.serverTick + 1);
+    assert.equal(secondLocalTick.tick, movingSnapshot.serverTick + 2);
+    assert.ok(secondLocalTick.position.x > firstLocalTick.position.x, "prediction must move between network sends");
+    const replayed = continuous.reconcile(movingSnapshot, []);
+    assert.equal(replayed.tick, secondLocalTick.tick, "reconciliation must replay to the current predicted tick");
+    close(replayed.position.x, secondLocalTick.position.x, "replayed position.x");
+    close(replayed.velocity.x, secondLocalTick.velocity.x, "replayed velocity.x");
 
     assert.throws(
         () => predictor.reconcile({ ...snapshot, worldSeed: snapshot.worldSeed + 1 }, []),

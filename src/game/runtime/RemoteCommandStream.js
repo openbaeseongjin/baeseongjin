@@ -23,6 +23,12 @@ export class RemoteCommandStream {
     createBatch(estimatedServerTick, command) {
         assertTick(estimatedServerTick, "estimatedServerTick");
         const targetTick = Math.max(estimatedServerTick + this.inputLeadTicks, this.lastTargetTick + 1);
+        return this.createBatchAtTick(targetTick, command);
+    }
+
+    createBatchAtTick(targetTick, command) {
+        assertTick(targetTick, "targetTick");
+        if (targetTick <= this.lastTargetTick) return null;
         const sequence = this.nextSequence;
         const batch = createPlayerCommandBatch(targetTick, [{ playerId: this.playerId, sequence, command }]);
         this.nextSequence += 1;
