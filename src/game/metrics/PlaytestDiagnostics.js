@@ -6,13 +6,22 @@ function rounded(value) {
     return String(Math.round(value));
 }
 
-export function formatPlaytestDiagnostics({ capturedAt, version, url, channelId, metrics, networkMetrics = null }) {
+export function formatPlaytestDiagnostics({
+    capturedAt,
+    version,
+    url,
+    channelId,
+    worldSeed,
+    metrics,
+    networkMetrics = null
+}) {
     const lines = [
         "[ROPE PLAYTEST DIAGNOSTICS]",
         `capturedAt: ${capturedAt}`,
         `version: ${version}`,
         `url: ${url}`,
         `channel: ${channelId ?? "single"}`,
+        `worldSeed: ${worldSeed}`,
         `activeSeconds: ${metrics.activeSeconds.toFixed(1)}`,
         `checkpointsReached: ${metrics.checkpointsReached}`,
         `enemyDefeats: ${metrics.enemyDefeats}`,

@@ -19,6 +19,7 @@ export async function run() {
         version: "0.7.0",
         url: "https://example.test/?metrics=1",
         channelId: "1234",
+        worldSeed: 481516,
         metrics: metrics(),
         networkMetrics: {
             roundTripMs: 103.8,
@@ -34,6 +35,7 @@ export async function run() {
         }
     });
     assert.match(text, /channel: 1234/);
+    assert.match(text, /worldSeed: 481516/);
     assert.match(text, /roundTripMs: 104/);
     assert.match(text, /rejectionRatePercent: 2/);
     assert.match(text, /firstRewardSeconds: 58.2/);
@@ -63,10 +65,11 @@ export async function run() {
         context: () => ({ version: "0.7.0", url: "https://example.test/?metrics=1", channelId: null }),
         now: () => new Date("2026-08-10T10:00:00.000Z")
     });
-    diagnostics.update({ metrics: metrics() });
+    diagnostics.update({ metrics: metrics(), worldSeed: 108 });
     await click();
     assert.equal(root.hidden, false);
     assert.match(copied, /channel: single/);
+    assert.match(copied, /worldSeed: 108/);
     assert.equal(root.textContent, "복사 완료");
     diagnostics.release();
     assert.equal(click, null);
