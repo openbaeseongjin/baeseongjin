@@ -27,29 +27,17 @@ function createOutcrop(x, y, width, depth, properties) {
     return createSurface(vertices, { ...properties, oneWay: true, oneWayEdgeEnd: 4, topY: y });
 }
 
-function createPillar(x, y, width, height, properties) {
-    const vertices = [
-        { x: x + width * 0.12, y },
-        { x: x + width * 0.88, y: y + 4 },
-        { x: x + width, y: y + height * 0.28 },
-        { x: x + width * 0.86, y: y + height * 0.7 },
-        { x: x + width * 0.95, y: y + height },
-        { x: x + width * 0.08, y: y + height * 0.94 },
-        { x, y: y + height * 0.58 }
-    ];
-    return createSurface(vertices, { ...properties, oneWay: false, topY: y });
-}
-
 export function closestPointOnSurface(point, surface) {
     return closestPointOnPolygon(point, surface.vertices);
 }
 
 export class WorldGenerator {
-    constructor({ seed, levelCount, verticalStep, laneWidth, floorY }) {
+    constructor({ seed, levelCount, verticalStep, laneWidth, enemySpawnInterval, floorY }) {
         this.seed = seed;
         this.levelCount = levelCount;
         this.verticalStep = verticalStep;
         this.laneWidth = laneWidth;
+        this.enemySpawnInterval = enemySpawnInterval;
         this.floorY = floorY;
     }
 
@@ -58,29 +46,28 @@ export class WorldGenerator {
         const start = createOutcrop(-320, this.floorY, 640, 150, { kind: "start", level: 0 });
         const surfaces = [start];
         const route = [start];
+        const enemySpawns = [];
         const lanes = [-this.laneWidth, 0, this.laneWidth];
         let laneIndex = 1;
 
         for (let level = 1; level <= this.levelCount; level += 1) {
             const direction = level % 4 < 2 ? 1 : -1;
             laneIndex = Math.max(0, Math.min(lanes.length - 1, laneIndex + direction));
-            const width = 175 + random() * 65;
-            const x = lanes[laneIndex] - width * 0.5 + (random() - 0.5) * 34;
+            const width = 140 + random() * 55;
+            const x = lanes[laneIndex] - width * 0.5 + (random() - 0.5) * 50;
             const y = this.floorY - level * this.verticalStep - random() * 12;
             const platform = createOutcrop(x, y, width, 70 + random() * 45, { kind: "route-rock", level });
             surfaces.push(platform);
             route.push(platform);
 
-            const wallOnRight = laneIndex < 2;
-            surfaces.push(
-                createPillar(wallOnRight ? x + width + 105 : x - 133, y + 34, 28, 145 + random() * 80, {
-                    kind: "swing-wall",
-                    level
-                })
-            );
-
-            if (level % 3 === 0) {
-                surfaces.push(createOutcrop(x + width * 0.5 - 72, y - 112, 144, 54, { kind: "ceiling-rock", level }));
+            if (level % this.enemySpawnInterval === 0) {
+                enemySpawns.push(
+                    Object.freeze({
+                        x: x + width * (0.35 + random() * 0.3),
+                        y: y - 24,
+                        level
+                    })
+                );
             }
         }
 
@@ -88,6 +75,7 @@ export class WorldGenerator {
             seed: this.seed,
             surfaces: Object.freeze(surfaces),
             route: Object.freeze(route),
+            enemySpawns: Object.freeze(enemySpawns),
             topY: route.at(-1).y
         });
     }

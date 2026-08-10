@@ -37,7 +37,8 @@ export const COMBAT_CONFIG = Object.freeze({
 export const WORLD_CONFIG = Object.freeze({
     seed: 20260810,
     levelCount: 48,
-    verticalStep: 160,
-    laneWidth: 220,
+    verticalStep: 185,
+    laneWidth: 340,
+    enemySpawnInterval: 1,
     floorY: 560
 });
