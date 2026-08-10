@@ -20,14 +20,26 @@ export class LocalPlayerPredictor {
         playerId,
         simulation = new GameSimulation(),
         fixedDt = 1 / 120,
-        inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks
+        inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks,
+        predictionLeadTicks = MULTIPLAYER_TIMING.inputLeadTicks,
+        maxInputHistory = 512
     }) {
         if (typeof playerId !== "string" || playerId.length === 0) throw new Error("playerId must be non-empty");
         if (!Number.isFinite(fixedDt) || fixedDt <= 0) throw new Error("fixedDt must be positive");
+        if (!Number.isSafeInteger(predictionLeadTicks) || predictionLeadTicks < 0) {
+            throw new Error("predictionLeadTicks must be a non-negative safe integer");
+        }
+        if (!Number.isSafeInteger(maxInputHistory) || maxInputHistory < 1) {
+            throw new Error("maxInputHistory must be a positive safe integer");
+        }
         this.playerId = playerId;
         this.simulation = simulation;
         this.fixedDt = fixedDt;
         this.inputHoldTicks = inputHoldTicks;
+        this.predictionLeadTicks = predictionLeadTicks;
+        this.maxInputHistory = maxInputHistory;
+        this.inputHistory = new Map();
+        this.initialized = false;
         this.simulation.enemies = [];
         this.simulation.projectiles = [];
         this.simulation.enemyProjectiles = [];
@@ -38,26 +50,59 @@ export class LocalPlayerPredictor {
         if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
         const authoritative = snapshot.state.players.find(({ id }) => id === this.playerId);
         if (!authoritative) throw new Error(`missing predicted playerId: ${this.playerId}`);
+        const pendingTicks = pendingBatches.map(({ tick }) => tick);
+        const targetTick = Math.max(
+            snapshot.serverTick + this.predictionLeadTicks,
+            this.initialized ? this.simulation.tick : snapshot.serverTick,
+            ...pendingTicks
+        );
         this.restore(authoritative);
         this.simulation.tick = snapshot.serverTick;
+        this.initialized = true;
+
+        for (const tick of this.inputHistory.keys()) {
+            if (tick <= snapshot.serverTick) this.inputHistory.delete(tick);
+        }
 
         const batchesByTick = new Map();
         for (const batch of pendingBatches) {
             if (batch.tick <= snapshot.serverTick) continue;
             if (batchesByTick.has(batch.tick)) throw new Error(`duplicate pending target tick: ${batch.tick}`);
             batchesByTick.set(batch.tick, batch);
+            const entry = batch.commands.find(({ playerId }) => playerId === this.playerId);
+            if (entry && !this.inputHistory.has(batch.tick)) this.rememberInput(batch.tick, entry.command);
         }
-        const finalTick = Math.max(snapshot.serverTick, ...batchesByTick.keys());
         const player = this.simulation.playerEntity;
         const inputState = new InputStateSimulator({ holdTicks: this.inputHoldTicks });
-        for (let tick = snapshot.serverTick + 1; tick <= finalTick; tick += 1) {
-            const batch = batchesByTick.get(tick) ?? { tick, commands: [] };
+        for (let tick = snapshot.serverTick + 1; tick <= targetTick; tick += 1) {
+            const remembered = this.inputHistory.get(tick);
+            const batch = remembered
+                ? { tick, commands: [{ playerId: this.playerId, sequence: tick, command: remembered }] }
+                : (batchesByTick.get(tick) ?? { tick, commands: [] });
             const simulated = inputState.expand(batch, [this.playerId]);
             const command = simulated.commands[0]?.command ?? this.simulation.commandForPlayer(player, new Map());
             this.simulation.updatePlayer(player, command, this.fixedDt);
             this.simulation.tick = tick;
         }
+        this.simulation.projectiles.length = 0;
         return this.state();
+    }
+
+    advance(command) {
+        if (!this.initialized) return null;
+        const tick = this.simulation.tick + 1;
+        this.rememberInput(tick, command);
+        this.simulation.updatePlayer(this.simulation.playerEntity, command, this.fixedDt);
+        this.simulation.projectiles.length = 0;
+        this.simulation.tick = tick;
+        return this.state();
+    }
+
+    rememberInput(tick, command) {
+        this.inputHistory.set(tick, command);
+        while (this.inputHistory.size > this.maxInputHistory) {
+            this.inputHistory.delete(this.inputHistory.keys().next().value);
+        }
     }
 
     restore(state) {

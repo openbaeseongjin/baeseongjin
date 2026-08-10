@@ -78,8 +78,13 @@ export async function run() {
         const initial = authority.snapshot();
         assert.equal(initial.state.players.length, 1);
         assert.equal(initial.predicted.position.x, initial.state.players[0].position.x);
+        const predictedTick = initial.predicted.tick;
+        const locallyAdvanced = authority.advance(movementCommand());
+        assert.equal(locallyAdvanced.tick, predictedTick + 1);
+        assert.ok(locallyAdvanced.velocity.x > initial.predicted.velocity.x, "local input must react before submit");
         assert.equal(authority.submit(movementCommand()), true);
         assert.equal(authority.stream.pendingBatches().length, 1);
+        assert.equal(authority.stream.pendingBatches()[0].tick, locallyAdvanced.tick);
         const partner = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=${authority.channelId}`,
             WebSocketImpl: WebSocket
@@ -98,7 +103,16 @@ export async function run() {
         });
         await delayedAuthority.connect();
         const delayedStartX = delayedAuthority.snapshot().state.players[0].position.x;
+        const delayedBeforeInput = delayedAuthority.snapshot().predicted;
+        const delayedImmediate = delayedAuthority.advance(movementCommand());
+        assert.equal(delayedImmediate.tick, delayedBeforeInput.tick + 1);
+        assert.ok(
+            delayedImmediate.velocity.x > delayedBeforeInput.velocity.x,
+            "100ms transport delay must not delay local movement response"
+        );
         for (let index = 0; index < 60; index += 1) {
+            delayedAuthority.advance(movementCommand());
+            delayedAuthority.advance(movementCommand());
             delayedAuthority.submit(movementCommand());
             await new Promise((resolve) => setTimeout(resolve, 16));
         }

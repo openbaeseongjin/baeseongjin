@@ -70,7 +70,6 @@ export class RemoteGameAuthority {
                         this.acceptSnapshot(message.payload);
                     } else if (message.type === "receipt" && this.stream) {
                         this.stream.acceptReceipt(deserializeCommandReceipt(message.payload));
-                        this.reconcile();
                     }
                 } catch (error) {
                     fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
@@ -96,11 +95,15 @@ export class RemoteGameAuthority {
 
     submit(command) {
         if (!this.latestSnapshot || this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
-        const elapsedTicks = Math.max(0, Math.floor(((this.now() - this.snapshotReceivedAt) * 120) / 1000));
-        const batch = this.stream.createBatch(this.latestSnapshot.serverTick + elapsedTicks, command);
+        const predictedTick = this.predictor.state().tick;
+        const batch = this.stream.createBatchAtTick(predictedTick, command);
+        if (!batch) return false;
         this.socket.send(JSON.stringify({ type: "command", payload: serializePlayerCommandBatch(batch) }));
-        this.reconcile();
         return true;
+    }
+
+    advance(command) {
+        return this.predictor?.advance(command) ?? null;
     }
 
     snapshot() {

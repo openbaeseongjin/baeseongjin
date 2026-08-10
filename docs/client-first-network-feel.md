@@ -25,9 +25,9 @@
 
 ### A. 지속되는 소유자 예측 시계
 
-- `LocalPlayerPredictor`가 현재 predicted tick, 입력 이력과 120Hz 고정 스텝 accumulator를 소유한다.
-- 앱은 매 렌더 프레임 예측을 진행하고 명령 전송 cadence는 별도 60Hz로 제한한다.
-- 100ms 편도 지연에서도 이동·점프·로프 반응을 입력 후 33ms 이내 표시한다.
+- [완료] `LocalPlayerPredictor`가 현재 predicted tick과 최대 512틱 입력 이력을 소유한다.
+- [완료] 앱의 기존 120Hz 고정 스텝마다 예측을 진행하고 명령 전송 cadence는 별도 60Hz로 제한한다.
+- [완료] submit과 receipt는 예측 상태를 되감지 않고 새 권위 스냅샷만 현재 predicted tick까지 입력을 재실행한다.
 
 ### B. 롤백·재실행과 표시 보정
 
