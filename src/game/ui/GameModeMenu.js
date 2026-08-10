@@ -27,7 +27,12 @@ export class GameModeMenu {
             const multiplayer = () => {
                 this.modeActions.hidden = true;
                 this.channelPanel.hidden = false;
-                this.setStatus("새 채널을 만들거나 전달받은 4자리 번호를 입력하세요.");
+                const rememberedChannel = this.channelInput.value.trim();
+                this.setStatus(
+                    CHANNEL_PATTERN.test(rememberedChannel)
+                        ? `채널 ${rememberedChannel}에 다시 참가하거나 새 채널을 만드세요.`
+                        : "새 채널을 만들거나 전달받은 4자리 번호를 입력하세요."
+                );
                 this.channelInput.focus();
             };
             const create = () => finish({ mode: "multiplayer", channelId: "new" });
@@ -68,6 +73,12 @@ export class GameModeMenu {
     setStatus(message, error = false) {
         this.status.textContent = message;
         this.status.dataset.error = error ? "true" : "false";
+    }
+
+    rememberChannel(channelId) {
+        if (!CHANNEL_PATTERN.test(channelId ?? "")) return false;
+        this.channelInput.value = channelId;
+        return true;
     }
 
     hide() {
