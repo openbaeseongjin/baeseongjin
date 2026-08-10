@@ -32,6 +32,7 @@ export class AuthorityServerSession {
         this.inputState = new InputStateSimulator({ holdTicks: inputHoldTicks });
         this.resolvedHitClaims = new Map();
         this.resolvedImpactClaims = new Map();
+        this.resolvedArtifactSelections = new Map();
         this.lastOwnerMotionTicks = new Map();
         this.lastOwnerRopeTicks = new Map();
     }
@@ -83,6 +84,40 @@ export class AuthorityServerSession {
             });
         }
         return result;
+    }
+
+    submitArtifactSelection(authenticatedPlayerId, claim) {
+        if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const selectionKey = `${authenticatedPlayerId}:${claim.checkpointId}`;
+        const existing = this.resolvedArtifactSelections.get(selectionKey);
+        if (existing) {
+            if (existing.artifactId === claim.artifactId) return existing;
+            return Object.freeze({
+                checkpointId: claim.checkpointId,
+                artifactId: claim.artifactId,
+                accepted: false,
+                reason: "selection-conflict"
+            });
+        }
+        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.maxFutureTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return Object.freeze({
+                checkpointId: claim.checkpointId,
+                artifactId: claim.artifactId,
+                accepted: false,
+                reason: "tick-window"
+            });
+        }
+        const receipt = Object.freeze({
+            checkpointId: claim.checkpointId,
+            artifactId: claim.artifactId,
+            ...this.simulation.resolveArtifactSelection(authenticatedPlayerId, claim)
+        });
+        if (receipt.accepted) this.resolvedArtifactSelections.set(selectionKey, receipt);
+        return receipt;
     }
 
     submitOwnerMotion(authenticatedPlayerId, state) {
@@ -219,6 +254,9 @@ export class AuthorityServerSession {
         this.inputState.removePlayer(playerId);
         this.lastOwnerMotionTicks.delete(playerId);
         this.lastOwnerRopeTicks.delete(playerId);
+        for (const selectionKey of this.resolvedArtifactSelections.keys()) {
+            if (selectionKey.startsWith(`${playerId}:`)) this.resolvedArtifactSelections.delete(selectionKey);
+        }
         return this.simulation.removePlayer(playerId);
     }
 }

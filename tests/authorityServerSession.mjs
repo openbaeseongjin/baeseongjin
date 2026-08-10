@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { createArtifactSelectionClaim } from "../src/game/network/ArtifactSelectionClaim.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
@@ -23,6 +24,36 @@ function command(horizontal) {
 }
 
 export function run() {
+    const rewardSimulation = new GameSimulation();
+    rewardSimulation.enemies = [];
+    const rewardSession = new AuthorityServerSession({ simulation: rewardSimulation });
+    const rewardCheckpoint = rewardSimulation.world.checkpoints[1];
+    rewardSimulation.beginArtifactReward(rewardCheckpoint);
+    const artifactClaim = createArtifactSelectionClaim({
+        checkpointId: rewardCheckpoint.id,
+        artifactId: "rapid-gear",
+        clientTick: rewardSimulation.tick
+    });
+    const artifactReceipt = rewardSession.submitArtifactSelection(rewardSimulation.playerEntity.id, artifactClaim);
+    assert.equal(
+        artifactReceipt.accepted,
+        true,
+        "artifact claims must resolve without waiting for a future input tick"
+    );
+    assert.equal(rewardSimulation.artifactRewards.size, 0);
+    assert.equal(rewardSimulation.artifacts.snapshot()[0].id, "rapid-gear");
+    assert.equal(
+        rewardSession.submitArtifactSelection(rewardSimulation.playerEntity.id, artifactClaim),
+        artifactReceipt,
+        "retrying the same client selection must be idempotent"
+    );
+    const conflictingArtifact = rewardSession.submitArtifactSelection(
+        rewardSimulation.playerEntity.id,
+        createArtifactSelectionClaim({ ...artifactClaim, artifactId: "power-core" })
+    );
+    assert.equal(conflictingArtifact.accepted, false);
+    assert.equal(conflictingArtifact.reason, "selection-conflict");
+
     const combatSimulation = new GameSimulation();
     const combatSession = new AuthorityServerSession({ simulation: combatSimulation });
     const ownerMotion = createOwnerMotionState({

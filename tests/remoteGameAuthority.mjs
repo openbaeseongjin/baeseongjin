@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
+import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
@@ -55,6 +56,15 @@ function movementCommand(horizontal = 1) {
         pointer: { x: 0, y: 0, down: false, pressed: false, released: false },
         viewport: { width: 844, height: 390 },
         aimWorld: { x: 100, y: 100 }
+    };
+}
+
+function fakeCanvas() {
+    return {
+        clientWidth: 844,
+        clientHeight: 390,
+        getContext: () => ({}),
+        getBoundingClientRect: () => ({ left: 0, top: 0, width: 844, height: 390 })
     };
 }
 
@@ -131,6 +141,37 @@ export async function run() {
         await waitFor(() => authority.metrics().snapshotIntervalMs > 0, "snapshot cadence must be measured");
         assert.equal(authority.metrics().rejectedCommands, 0);
         assert.equal(authority.metrics().rejectionRate, 0);
+        const room = gameServer.rooms.get(authority.channelId);
+        const rewardCheckpoint = room.simulation.world.checkpoints[1];
+        room.simulation.beginArtifactReward(rewardCheckpoint);
+        await waitFor(
+            () => authority.snapshot().state.artifactRewards?.[authority.playerId],
+            "the client must receive its checkpoint reward"
+        );
+        const app = new MultiplayerGameApp({ canvas: fakeCanvas(), authority });
+        app.update(1 / 120, movementCommand(0));
+        app.update(1 / 120, movementCommand(1));
+        assert.equal(app.localArtifactReward.selectedIndex, 1, "the selected card must move before server receipt");
+        assert.equal(
+            room.simulation.artifactRewards.get(authority.playerId).selectedIndex,
+            0,
+            "local card feedback must not wait for the authority input lead"
+        );
+        app.update(1 / 120, movementCommand(0));
+        app.update(1 / 120, { ...movementCommand(0), vertical: -1, interact: true });
+        assert.equal(app.localArtifactReward, null, "confirmation must close the local chooser immediately");
+        await waitFor(
+            () => !room.simulation.artifactRewards.has(authority.playerId),
+            "artifact selection must resolve without waiting for a scheduled movement command"
+        );
+        assert.equal(
+            room.simulation.players.find(({ id }) => id === authority.playerId).artifacts.snapshot()[0].id,
+            "rapid-gear"
+        );
+        await waitFor(
+            () => authority.artifactSelectionReceipts.some(({ accepted }) => accepted),
+            "the selecting client must receive an artifact receipt"
+        );
         const acceptedBeforeDuplicate = authority.metrics().acceptedCommands;
         authority.sentAtBySequence.set(999, authority.now() - 20);
         authority.recordReceipt({

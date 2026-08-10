@@ -1,4 +1,5 @@
 import { serializeCommandReceipt } from "../network/CommandReceipt.js";
+import { deserializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
 import { deserializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { deserializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import { deserializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
@@ -25,6 +26,14 @@ export class AuthorityWireAdapter {
     receiveImpactClaim(authenticatedPlayerId, serializedClaim) {
         if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
         return this.session.submitImpactClaim(authenticatedPlayerId, deserializePlayerImpactClaim(serializedClaim));
+    }
+
+    receiveArtifactSelection(authenticatedPlayerId, serializedClaim) {
+        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
+        return this.session.submitArtifactSelection(
+            authenticatedPlayerId,
+            deserializeArtifactSelectionClaim(serializedClaim)
+        );
     }
 
     receiveOwnerMotion(authenticatedPlayerId, serializedState) {
