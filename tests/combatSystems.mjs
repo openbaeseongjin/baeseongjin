@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
-import { updateAutomaticWeapon, updatePlayerProjectiles } from "../src/game/combat/CombatSystems.js";
+import {
+    distancePointToSegment,
+    updateAutomaticWeapon,
+    updateEnemyProjectiles,
+    updatePlayerProjectiles
+} from "../src/game/combat/CombatSystems.js";
 import { COMBAT_CONFIG } from "../src/game/config.js";
+import { FixedLengthRope } from "../src/game/rope/FixedLengthRope.js";
+import { ROPE_CONFIG } from "../src/game/config.js";
 import { EntityRegistry } from "../src/game/simulation/EntityRegistry.js";
 
 export function run() {
@@ -31,4 +38,24 @@ export function run() {
     owner.weapon.range = 50;
     updateAutomaticWeapon({ owner, enemies, projectiles, registry, config: COMBAT_CONFIG, dt: 1 });
     assert.equal(projectiles.length, 0, "weapons must not fire when every enemy is outside range");
+
+    assert.equal(distancePointToSegment({ x: 50, y: 5 }, { x: 0, y: 0 }, { x: 100, y: 0 }), 5);
+    const rope = new FixedLengthRope(ROPE_CONFIG);
+    const target = {
+        physics: { position: new Vector2(0, 100), config: { radius: 15 }, addImpulse() {} },
+        health: 100,
+        hitInvulnerabilityRemaining: 0,
+        ropeDisabledRemaining: 0
+    };
+    rope.attach(target.physics.position, { x: 0, y: 0 });
+    const ropeShot = [{ position: new Vector2(-10, 50), velocity: new Vector2(20, 0), radius: 7, damage: 20 }];
+    updateEnemyProjectiles({ projectiles: ropeShot, target, rope, config: COMBAT_CONFIG, dt: 0.5 });
+    assert.equal(rope.isAttached, false, "enemy projectiles must sever the rope before checking body damage");
+    assert.equal(target.ropeDisabledRemaining, 0.6);
+    assert.equal(target.health, 100);
+
+    const bodyShot = [{ position: new Vector2(-10, 100), velocity: new Vector2(20, 0), radius: 7, damage: 20 }];
+    updateEnemyProjectiles({ projectiles: bodyShot, target, rope, config: COMBAT_CONFIG, dt: 0.5 });
+    assert.equal(target.health, 80, "body hits must reduce HP exactly once");
+    assert.equal(target.hitInvulnerabilityRemaining, COMBAT_CONFIG.playerHitInvulnerability);
 }

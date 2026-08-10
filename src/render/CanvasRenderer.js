@@ -53,6 +53,7 @@ export class CanvasRenderer {
         this.drawSwingDrag(scene.player, scene.swingDrag);
         this.drawEnemies(scene.enemies ?? []);
         this.drawProjectiles(scene.projectiles ?? []);
+        this.drawEnemyProjectiles(scene.enemyProjectiles ?? []);
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash);
         this.context.restore();
@@ -274,7 +275,27 @@ export class CanvasRenderer {
         }
     }
 
-    drawHud({ player, rope, world, stats, attachmentCandidate, swingDrag }) {
+    drawEnemyProjectiles(projectiles) {
+        const ctx = this.context;
+        ctx.fillStyle = "#f43f5e";
+        for (const projectile of projectiles) {
+            ctx.beginPath();
+            ctx.arc(projectile.position.x, projectile.position.y, projectile.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    drawHud({
+        player,
+        rope,
+        world,
+        stats,
+        attachmentCandidate,
+        swingDrag,
+        playerHealth,
+        playerMaxHealth,
+        ropeDisabledRemaining
+    }) {
         const ctx = this.context;
         ctx.fillStyle = "rgba(7, 11, 20, 0.76)";
         ctx.fillRect(18, 18, 290, 92);
@@ -285,14 +306,17 @@ export class CanvasRenderer {
         const climbed = Math.max(0, Math.round(560 - player.position.y));
         const totalHeight = Math.round(560 - world.topY);
         ctx.fillText(`height ${climbed}/${totalHeight} · speed ${Math.round(player.velocity.length())}`, 32, 42);
+        ctx.fillText(`HP ${playerHealth ?? 100}/${playerMaxHealth ?? 100}`, 205, 42);
         ctx.fillText(
             rope.isAttached
                 ? swingDrag?.used
                     ? `SWING USED · release mouse`
                     : `DRAG TANGENT ${Math.round((swingDrag?.progress ?? 0) * 100)}%`
-                : attachmentCandidate
-                  ? "TARGET LOCKED · hold mouse"
-                  : "AIM AT ANY SURFACE",
+                : ropeDisabledRemaining > 0
+                  ? `ROPE DISABLED ${ropeDisabledRemaining.toFixed(1)}s`
+                  : attachmentCandidate
+                    ? "TARGET LOCKED · hold mouse"
+                    : "AIM AT ANY SURFACE",
             32,
             65
         );

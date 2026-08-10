@@ -1,5 +1,10 @@
 import { Vector2 } from "../../game-kit/index.js";
-import { updateAutomaticWeapon, updatePlayerProjectiles } from "../combat/CombatSystems.js";
+import {
+    updateAutomaticWeapon,
+    updateEnemyProjectiles,
+    updateEnemyWeapons,
+    updatePlayerProjectiles
+} from "../combat/CombatSystems.js";
 import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
@@ -21,7 +26,11 @@ export class GameSimulation {
                 damage: COMBAT_CONFIG.weaponDamage,
                 fireInterval: COMBAT_CONFIG.fireInterval,
                 cooldown: 0
-            }
+            },
+            health: COMBAT_CONFIG.playerMaxHealth,
+            maxHealth: COMBAT_CONFIG.playerMaxHealth,
+            hitInvulnerabilityRemaining: 0,
+            ropeDisabledRemaining: 0
         };
         this.enemies = [
             {
@@ -29,10 +38,12 @@ export class GameSimulation {
                 position: new Vector2(350, 400),
                 radius: COMBAT_CONFIG.enemyRadius,
                 health: COMBAT_CONFIG.enemyHealth,
-                maxHealth: COMBAT_CONFIG.enemyHealth
+                maxHealth: COMBAT_CONFIG.enemyHealth,
+                fireCooldown: COMBAT_CONFIG.enemyFireInterval
             }
         ];
         this.projectiles = [];
+        this.enemyProjectiles = [];
         this.aimWorld = { x: 0, y: 0 };
         this.attachmentCandidate = null;
         this.wasPointerDown = false;
@@ -43,12 +54,15 @@ export class GameSimulation {
     }
 
     step(dt, command) {
+        this.playerEntity.ropeDisabledRemaining = Math.max(0, this.playerEntity.ropeDisabledRemaining - dt);
+        this.playerEntity.hitInvulnerabilityRemaining = Math.max(0, this.playerEntity.hitInvulnerabilityRemaining - dt);
         this.aimWorld = command.aimWorld;
         this.attachmentCandidate = this.findAttachment(this.aimWorld);
         if (command.pointer.down && !this.wasPointerDown) this.attachBufferRemaining = ROPE_CONFIG.attachBufferSeconds;
         if (
             command.pointer.down &&
             !this.rope.isAttached &&
+            this.playerEntity.ropeDisabledRemaining <= 0 &&
             this.attachBufferRemaining > 0 &&
             this.attachmentCandidate
         ) {
@@ -82,6 +96,21 @@ export class GameSimulation {
             dt
         });
         updatePlayerProjectiles({ projectiles: this.projectiles, enemies: this.enemies, config: COMBAT_CONFIG, dt });
+        updateEnemyWeapons({
+            enemies: this.enemies,
+            target: this.playerEntity,
+            projectiles: this.enemyProjectiles,
+            registry: this.registry,
+            config: COMBAT_CONFIG,
+            dt
+        });
+        updateEnemyProjectiles({
+            projectiles: this.enemyProjectiles,
+            target: this.playerEntity,
+            rope: this.rope,
+            config: COMBAT_CONFIG,
+            dt
+        });
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
         this.eventFlash.age += dt;
         if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) this.resetRun();
@@ -128,6 +157,10 @@ export class GameSimulation {
         this.attachBufferRemaining = 0;
         this.eventFlash = { type: "reset", age: 0 };
         this.swingDrag = null;
+        this.playerEntity.health = this.playerEntity.maxHealth;
+        this.playerEntity.hitInvulnerabilityRemaining = 0;
+        this.playerEntity.ropeDisabledRemaining = 0;
+        this.enemyProjectiles = [];
         this.resets += 1;
     }
 
@@ -142,6 +175,10 @@ export class GameSimulation {
             swingDrag: this.swingDrag,
             enemies: this.enemies,
             projectiles: this.projectiles,
+            enemyProjectiles: this.enemyProjectiles,
+            playerHealth: this.playerEntity.health,
+            playerMaxHealth: this.playerEntity.maxHealth,
+            ropeDisabledRemaining: this.playerEntity.ropeDisabledRemaining,
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };
