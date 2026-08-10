@@ -6,6 +6,7 @@ import { run as elasticRope } from "./elasticRope.mjs";
 import { run as worldGenerator } from "./worldGenerator.mjs";
 import { run as playerPhysics } from "./playerPhysics.mjs";
 import { run as versionContract } from "./versionContract.mjs";
+import { run as swingDrag } from "./swingDrag.mjs";
 
 const suites = {
     fixedStep,
@@ -15,7 +16,8 @@ const suites = {
     elasticRope,
     worldGenerator,
     playerPhysics,
-    versionContract
+    versionContract,
+    swingDrag
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {

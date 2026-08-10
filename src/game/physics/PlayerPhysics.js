@@ -15,6 +15,11 @@ export class PlayerPhysics {
         this.isGrounded = false;
     }
 
+    addImpulse(direction, magnitude) {
+        this.velocity.x += direction.x * magnitude;
+        this.velocity.y += direction.y * magnitude;
+    }
+
     step(dt, input, surfaces, rope) {
         if (rope.isAttached) {
             this.velocity.x += input.horizontal * this.config.airAcceleration * dt;

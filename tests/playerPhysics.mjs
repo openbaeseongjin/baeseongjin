@@ -58,4 +58,12 @@ export function run() {
     controlledRope.attach(controlledSwing.position, { x: 0, y: 0 });
     controlledSwing.step(1 / 120, { horizontal: 1, vertical: 0 }, [], controlledRope);
     assert.ok(controlledSwing.velocity.x > 0, "horizontal input must add visible force while swinging");
+
+    controlledSwing.velocity.set(10, 20);
+    controlledSwing.addImpulse({ x: 0, y: -1 }, 460);
+    assert.deepEqual(
+        { x: controlledSwing.velocity.x, y: controlledSwing.velocity.y },
+        { x: 10, y: -440 },
+        "swing impulse must preserve the velocity component outside its chosen tangent"
+    );
 }
