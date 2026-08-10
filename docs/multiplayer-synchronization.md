@@ -90,6 +90,7 @@ worldRevision
 players[]
   id, position, velocity, isGrounded, health, lifeState
   rope(anchor, length, currentLength, tension), weaponCooldown, reviveProgress
+  control(aimWorld, lastPointer, lastViewport, wasPointerDown, attachBufferRemaining, swingDrag)
   artifacts[], artifactEffects
 enemies[]
 activeCheckpointId
@@ -158,6 +159,8 @@ GameApp
 사건 중복 제거는 한 스냅샷 안에만 한정하지 않는다. 클라이언트 버퍼가 최근 2,048개 `eventId`를 수신 순서로 기억하고, 재전송 스냅샷에 같은 ID가 포함되어도 효과 대기열에 다시 넣지 않는다. 한도를 넘긴 가장 오래된 ID부터 퇴출해 장기 세션의 메모리 사용을 제한한다.
 
 자기 플레이어 예측을 권위 상태에서 다시 시작할 때 점프 가능 여부와 로프 제약을 추측하지 않도록 플레이어별 `isGrounded`와 로프의 `length`, `currentLength`를 스냅샷에 포함한다. 이 값들은 시각 보간 대상이 아니라 승인 틱의 물리 초기 상태다.
+
+로프 입력은 누르는 순간과 해제 전이, 짧은 부착 버퍼, 부착당 한 번인 스윙 드래그 진행에 상태가 있다. 자기 플레이어 재적용은 승인 틱의 `aimWorld`, 마지막 pointer·viewport, `wasPointerDown`, `attachBufferRemaining`, `swingDrag`에서 시작한다. `attachmentCandidate`는 정적 월드와 aim으로 다시 계산하며 전송하지 않는다.
 - `snapshot()`은 화면이 읽을 최신 권위 또는 예측 상태를 반환한다.
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.
 

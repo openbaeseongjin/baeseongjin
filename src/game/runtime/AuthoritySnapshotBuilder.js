@@ -5,6 +5,17 @@ function vectorState(vector) {
     return vector ? { x: vector.x, y: vector.y } : null;
 }
 
+function swingDragState(swingDrag) {
+    if (!swingDrag) return null;
+    return {
+        origin: vectorState(swingDrag.origin),
+        direction: vectorState(swingDrag.direction),
+        progress: swingDrag.progress,
+        age: swingDrag.age,
+        used: swingDrag.used
+    };
+}
+
 function playerState(player, simulation) {
     return {
         id: player.id,
@@ -24,6 +35,14 @@ function playerState(player, simulation) {
             length: player.rope.length,
             currentLength: player.rope.currentLength,
             tension: player.rope.tension
+        },
+        control: {
+            aimWorld: vectorState(player.aimWorld),
+            lastPointer: { ...player.lastPointer },
+            lastViewport: { ...player.lastViewport },
+            wasPointerDown: player.wasPointerDown,
+            attachBufferRemaining: player.attachBufferRemaining,
+            swingDrag: swingDragState(player.swingDrag)
         },
         weapon: {
             range: player.weapon.range,
