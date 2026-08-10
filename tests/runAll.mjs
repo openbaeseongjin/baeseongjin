@@ -2,7 +2,7 @@ import { run as fixedStep } from "./fixedStepRunner.mjs";
 import { run as inputSampler } from "./inputSampler.mjs";
 import { run as vector2 } from "./vector2.mjs";
 import { run as gameKitBoundary } from "./gameKitBoundary.mjs";
-import { run as elasticRope } from "./elasticRope.mjs";
+import { run as fixedLengthRope } from "./fixedLengthRope.mjs";
 import { run as worldGenerator } from "./worldGenerator.mjs";
 import { run as playerPhysics } from "./playerPhysics.mjs";
 import { run as versionContract } from "./versionContract.mjs";
@@ -13,7 +13,7 @@ const suites = {
     inputSampler,
     vector2,
     gameKitBoundary,
-    elasticRope,
+    fixedLengthRope,
     worldGenerator,
     playerPhysics,
     versionContract,

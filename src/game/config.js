@@ -10,15 +10,9 @@ export const PLAYER_CONFIG = Object.freeze({
 
 export const ROPE_CONFIG = Object.freeze({
     maxAttachDistance: 440,
-    initialRestRatio: 1,
-    springStrength: 46,
-    radialDamping: 0,
-    minimumRestLength: 90,
-    maximumStretchRatio: 1.35,
-    retractSpeed: 0,
     attachBufferSeconds: 0.1,
     swingDragThreshold: 44,
-    swingImpulse: 460
+    swingImpulse: 620
 });
 
 export const WORLD_CONFIG = Object.freeze({

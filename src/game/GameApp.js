@@ -3,7 +3,7 @@ import { FixedStepRunner } from "../core/sim/FixedStepRunner.js";
 import { CanvasRenderer } from "../render/CanvasRenderer.js";
 import { PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "./config.js";
 import { PlayerPhysics } from "./physics/PlayerPhysics.js";
-import { ElasticRope } from "./rope/ElasticRope.js";
+import { FixedLengthRope } from "./rope/FixedLengthRope.js";
 import { evaluateSwingDrag } from "./rope/SwingDrag.js";
 import { WorldGenerator, closestPointOnSurface } from "./world/WorldGenerator.js";
 
@@ -14,7 +14,7 @@ export class GameApp {
         this.input = new InputSampler();
         this.world = new WorldGenerator(WORLD_CONFIG).generate();
         this.player = new PlayerPhysics(PLAYER_CONFIG);
-        this.rope = new ElasticRope(ROPE_CONFIG);
+        this.rope = new FixedLengthRope(ROPE_CONFIG);
         this.camera = { x: 0, y: 0 };
         this.aimWorld = { x: 0, y: 0 };
         this.attachmentCandidate = null;
