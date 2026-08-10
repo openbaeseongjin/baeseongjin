@@ -24,6 +24,7 @@ import { run as metricsDebugMode } from "./metricsDebugMode.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
 import { run as playerCommandBatch } from "./playerCommandBatch.mjs";
 import { run as playerRuntimeFactory } from "./playerRuntimeFactory.mjs";
+import { run as predictableObjectEvent } from "./predictableObjectEvent.mjs";
 
 const suites = {
     fixedStep,
@@ -51,7 +52,8 @@ const suites = {
     metricsDebugMode,
     commandReplay,
     playerCommandBatch,
-    playerRuntimeFactory
+    playerRuntimeFactory,
+    predictableObjectEvent
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
