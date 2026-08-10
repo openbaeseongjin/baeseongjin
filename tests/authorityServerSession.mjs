@@ -35,6 +35,30 @@ export function run() {
     assert.equal(next.accepted.length, 1, "a rejected high sequence must not poison the next executable command");
     lateSession.advance();
     assert.ok(lateSimulation.player.velocity.x > 0);
+    const velocityAfterCommand = lateSimulation.player.velocity.x;
+    lateSession.advance();
+    assert.ok(
+        lateSimulation.player.velocity.x > velocityAfterCommand,
+        "the latest input state must continue across an empty 120Hz authority tick"
+    );
+
+    const expiringSimulation = new GameSimulation();
+    expiringSimulation.enemies = [];
+    const expiringSession = new AuthorityServerSession({ simulation: expiringSimulation, inputHoldTicks: 2 });
+    expiringSession.submit(
+        expiringSimulation.playerEntity.id,
+        createPlayerCommandBatch(1, [
+            { playerId: expiringSimulation.playerEntity.id, sequence: 0, command: command(1) }
+        ])
+    );
+    expiringSession.advance();
+    expiringSession.advance();
+    const velocityBeforeExpiry = expiringSimulation.player.velocity.x;
+    expiringSession.advance();
+    assert.ok(
+        expiringSimulation.player.velocity.x <= velocityBeforeExpiry,
+        "stale movement must stop accelerating after the bounded hold window"
+    );
 
     const simulation = new GameSimulation();
     const partner = simulation.addPlayer({ x: 180, y: 500 });

@@ -58,6 +58,29 @@ export function run() {
     assert.equal(predicted.swingDrag.used, server.playerEntity.swingDrag.used);
     close(predicted.ropeDamageBoostRemaining, server.playerEntity.ropeDamageBoostRemaining, "rope boost");
 
+    const movingServer = new GameSimulation();
+    movingServer.enemies = [];
+    movingServer.tick = 6;
+    const movingSnapshot = buildAuthoritySnapshot({ simulation: movingServer, acknowledgements: {} });
+    const move = createPlayerCommand(
+        {
+            horizontal: 1,
+            vertical: 0,
+            interact: false,
+            pointer: { x: 0, y: 0, down: false },
+            viewport: { width: 844, height: 390 }
+        },
+        { x: 0, y: 0 }
+    );
+    const movingPrediction = new LocalPlayerPredictor({ playerId: movingServer.playerEntity.id }).reconcile(
+        movingSnapshot,
+        [
+            createPlayerCommandBatch(7, [{ playerId: movingServer.playerEntity.id, sequence: 0, command: move }]),
+            createPlayerCommandBatch(9, [{ playerId: movingServer.playerEntity.id, sequence: 1, command: move }])
+        ]
+    );
+    assert.ok(movingPrediction.velocity.x > 10, "local prediction must simulate held input on the missing tick");
+
     assert.throws(
         () => predictor.reconcile({ ...snapshot, worldSeed: snapshot.worldSeed + 1 }, []),
         /world seed mismatch/

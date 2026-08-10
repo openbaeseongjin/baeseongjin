@@ -1,4 +1,6 @@
 import { Vector2 } from "../../game-kit/index.js";
+import { InputStateSimulator } from "../network/InputStateSimulator.js";
+import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
 
@@ -14,12 +16,18 @@ function cloneSwingDrag(swingDrag) {
 }
 
 export class LocalPlayerPredictor {
-    constructor({ playerId, simulation = new GameSimulation(), fixedDt = 1 / 120 }) {
+    constructor({
+        playerId,
+        simulation = new GameSimulation(),
+        fixedDt = 1 / 120,
+        inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks
+    }) {
         if (typeof playerId !== "string" || playerId.length === 0) throw new Error("playerId must be non-empty");
         if (!Number.isFinite(fixedDt) || fixedDt <= 0) throw new Error("fixedDt must be positive");
         this.playerId = playerId;
         this.simulation = simulation;
         this.fixedDt = fixedDt;
+        this.inputHoldTicks = inputHoldTicks;
         this.simulation.enemies = [];
         this.simulation.projectiles = [];
         this.simulation.enemyProjectiles = [];
@@ -33,17 +41,19 @@ export class LocalPlayerPredictor {
         this.restore(authoritative);
         this.simulation.tick = snapshot.serverTick;
 
-        const commandsByTick = new Map();
+        const batchesByTick = new Map();
         for (const batch of pendingBatches) {
             if (batch.tick <= snapshot.serverTick) continue;
-            if (commandsByTick.has(batch.tick)) throw new Error(`duplicate pending target tick: ${batch.tick}`);
-            const entry = batch.commands.find(({ playerId }) => playerId === this.playerId);
-            if (entry) commandsByTick.set(batch.tick, entry.command);
+            if (batchesByTick.has(batch.tick)) throw new Error(`duplicate pending target tick: ${batch.tick}`);
+            batchesByTick.set(batch.tick, batch);
         }
-        const finalTick = Math.max(snapshot.serverTick, ...commandsByTick.keys());
+        const finalTick = Math.max(snapshot.serverTick, ...batchesByTick.keys());
         const player = this.simulation.playerEntity;
+        const inputState = new InputStateSimulator({ holdTicks: this.inputHoldTicks });
         for (let tick = snapshot.serverTick + 1; tick <= finalTick; tick += 1) {
-            const command = commandsByTick.get(tick) ?? this.simulation.commandForPlayer(player, new Map());
+            const batch = batchesByTick.get(tick) ?? { tick, commands: [] };
+            const simulated = inputState.expand(batch, [this.playerId]);
+            const command = simulated.commands[0]?.command ?? this.simulation.commandForPlayer(player, new Map());
             this.simulation.updatePlayer(player, command, this.fixedDt);
             this.simulation.tick = tick;
         }
