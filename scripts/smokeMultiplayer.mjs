@@ -33,17 +33,27 @@ async function closeAuthority(authority) {
     await closed;
 }
 
+function webSocketFromOrigin(origin) {
+    return class OriginWebSocket extends WebSocket {
+        constructor(url) {
+            super(url, { origin });
+        }
+    };
+}
+
 export async function smokeMultiplayer({ pageUrl = DEFAULT_PAGE_URL } = {}) {
     const response = await fetch(pageUrl, { cache: "no-store" });
     if (!response.ok) throw new Error(`페이지 응답 실패: HTTP ${response.status}`);
     const serverUrl = extractMultiplayerServer(await response.text());
-    const first = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, "new"), WebSocketImpl: WebSocket });
+    const origin = new URL(pageUrl).origin;
+    const WebSocketImpl = webSocketFromOrigin(origin);
+    const first = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, "new"), WebSocketImpl });
     let second = null;
 
     try {
         await first.connect();
         const channelId = first.channelId;
-        second = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, channelId), WebSocketImpl: WebSocket });
+        second = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, channelId), WebSocketImpl });
         await second.connect();
         await waitFor(
             () => first.latestSnapshot?.state.players.length === 2 && second.latestSnapshot?.state.players.length === 2,
@@ -61,7 +71,7 @@ export async function smokeMultiplayer({ pageUrl = DEFAULT_PAGE_URL } = {}) {
 
         const removedRoom = new RemoteGameAuthority({
             url: channelSocketUrl(serverUrl, channelId),
-            WebSocketImpl: WebSocket
+            WebSocketImpl
         });
         try {
             await removedRoom.connect();
@@ -71,7 +81,7 @@ export async function smokeMultiplayer({ pageUrl = DEFAULT_PAGE_URL } = {}) {
             if (!/찾을 수 없습니다|channel not found/i.test(error.message)) throw error;
         }
 
-        return { pageUrl, serverUrl, channelId, playersJoined: 2, emptyRoomRemoved: true };
+        return { pageUrl, serverUrl, origin, channelId, playersJoined: 2, emptyRoomRemoved: true };
     } finally {
         await closeAuthority(second);
         await closeAuthority(first);
