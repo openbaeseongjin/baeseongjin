@@ -185,6 +185,24 @@
                     800 12px/1.2 ui-monospace,
                     monospace;
             }
+            .copy-diagnostics {
+                position: fixed;
+                z-index: 9;
+                top: max(238px, env(safe-area-inset-top));
+                right: max(8px, env(safe-area-inset-right));
+                min-height: 38px;
+                padding: 0 12px;
+                border: 1px solid rgba(103, 232, 249, 0.65);
+                border-radius: 8px;
+                color: #e2e8f0;
+                background: rgba(7, 11, 20, 0.9);
+                font:
+                    800 11px/1 ui-monospace,
+                    monospace;
+            }
+            .copy-diagnostics[hidden] {
+                display: none;
+            }
             [data-mode-status][data-error="true"] {
                 color: #fda4af;
             }
@@ -313,6 +331,7 @@
             </p>
             <p class="controls-hint">PC: A/D 이동 · W 점프 · 마우스 로프 / 모바일: 하단 이동·점프 · 화면 로프</p>
             <output class="channel-badge" id="channel-badge" hidden></output>
+            <button class="copy-diagnostics" id="copy-diagnostics" type="button" hidden>진단 복사</button>
             <p class="orientation-notice" role="status">
                 로프 액션은 가로 화면에 맞춰져 있습니다.<br />기기를 가로로 돌려주세요.
             </p>

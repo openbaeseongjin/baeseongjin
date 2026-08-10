@@ -9,13 +9,14 @@ import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 
 export class GameApp {
-    constructor({ canvas }) {
+    constructor({ canvas, onDiagnostics = () => {} }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = new CanvasRenderer(canvas);
         this.input = new InputSampler(globalThis.window, canvas);
         this.authority = new LocalAuthority(new GameSimulation());
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
+        this.onDiagnostics = onDiagnostics;
         this.camera = this.createCamera();
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
@@ -69,6 +70,7 @@ export class GameApp {
 
     render() {
         const state = this.authority.snapshot();
+        if (this.metricsVisible) this.onDiagnostics({ metrics: state.metrics });
         this.stats.resets = state.resets;
         this.renderer.draw({
             ...state,
