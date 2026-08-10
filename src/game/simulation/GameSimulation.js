@@ -453,7 +453,11 @@ export class GameSimulation {
                     ownerId: projectile.ownerId,
                     targetId: projectile.targetId ?? null,
                     radius: projectile.radius,
-                    damage: projectile.damage
+                    damage: projectile.damage,
+                    speed:
+                        objectType === "player-projectile"
+                            ? COMBAT_CONFIG.projectileSpeed
+                            : COMBAT_CONFIG.enemyProjectileSpeed
                 }
             })
         );

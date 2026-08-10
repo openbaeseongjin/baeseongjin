@@ -5,6 +5,7 @@ import { CanvasRenderer } from "../render/CanvasRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
+import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -29,6 +30,7 @@ export class MultiplayerGameApp {
         this.frameId = null;
         this.stepCount = 0;
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
+        this.predictableProjectiles = new PredictableProjectileStore();
         this.runner = new FixedStepRunner({ step: (dt, input) => this.update(dt, input), render: () => this.render() });
         this.tick = (time) => {
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
@@ -53,6 +55,12 @@ export class MultiplayerGameApp {
         this.stepCount += 1;
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
+        this.predictableProjectiles.apply(
+            this.authority.drainEvents(),
+            this.authority.latestSnapshot.serverTick,
+            current.state
+        );
+        this.predictableProjectiles.update(dt, current.state);
         if (this.stepCount % 2 === 0) {
             const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
             this.authority.submit(createPlayerCommand(input, aimWorld));
@@ -71,6 +79,7 @@ export class MultiplayerGameApp {
         const localState = remote.state.players.find(({ id }) => id === this.authority.playerId);
         if (!localState) return;
         const base = this.authority.predictor.simulation.snapshot();
+        const predictableProjectiles = this.predictableProjectiles.snapshot();
         const player = renderPlayer(localState, remote.predicted);
         const otherPlayers = remote.state.players
             .filter(({ id }) => id !== this.authority.playerId)
@@ -84,6 +93,7 @@ export class MultiplayerGameApp {
             swingDrag: remote.predicted.swingDrag,
             attachmentCandidate: this.authority.predictor.simulation.playerEntity.attachmentCandidate,
             enemies: remote.state.enemies,
+            ...predictableProjectiles,
             otherPlayers,
             playerHealth: localState.health,
             playerMaxHealth: localState.maxHealth,
