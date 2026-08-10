@@ -5,12 +5,46 @@ import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js"
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
 
-const MOBILE_NETWORK_DELAY_MS = 100;
+function createImpairedWebSocket({ roundTripDelayMs, commandLossRate }) {
+    const oneWayDelayMs = roundTripDelayMs / 2;
+    return class ImpairedWebSocket extends WebSocket {
+        static sentCommands = 0;
+        static droppedCommands = 0;
 
-class DelayedWebSocket extends WebSocket {
-    send(data) {
-        setTimeout(() => super.send(data), MOBILE_NETWORK_DELAY_MS);
-    }
+        constructor(...args) {
+            super(...args);
+            this.lossAccumulator = 0;
+        }
+
+        addEventListener(type, listener, options) {
+            if (type !== "message" || oneWayDelayMs === 0) return super.addEventListener(type, listener, options);
+            return super.addEventListener(
+                type,
+                (event) => setTimeout(() => listener.call(this, event), oneWayDelayMs),
+                options
+            );
+        }
+
+        send(data) {
+            const message = JSON.parse(data.toString());
+            if (message.type === "command") {
+                ImpairedWebSocket.sentCommands += 1;
+                this.lossAccumulator += commandLossRate;
+                if (this.lossAccumulator >= 1) {
+                    this.lossAccumulator -= 1;
+                    ImpairedWebSocket.droppedCommands += 1;
+                    return;
+                }
+            }
+            if (oneWayDelayMs === 0) {
+                super.send(data);
+                return;
+            }
+            setTimeout(() => {
+                if (this.readyState === WebSocket.OPEN) super.send(data);
+            }, oneWayDelayMs);
+        }
+    };
 }
 
 function movementCommand(horizontal = 1) {
@@ -28,8 +62,8 @@ function listen(server) {
     return new Promise((resolve) => server.listen(0, "127.0.0.1", () => resolve(server.address().port)));
 }
 
-async function waitFor(predicate, message) {
-    const deadline = Date.now() + 1500;
+async function waitFor(predicate, message, timeoutMs = 1500) {
+    const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
         if (predicate()) return;
         await new Promise((resolve) => setTimeout(resolve, 10));
@@ -123,34 +157,54 @@ export async function run() {
         assert.equal(partner.snapshot().state.players.length, 2);
         partner.close();
 
-        const delayedAuthority = new RemoteGameAuthority({
-            url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
-            WebSocketImpl: DelayedWebSocket
-        });
-        await delayedAuthority.connect();
-        const delayedStartX = delayedAuthority.snapshot().state.players[0].position.x;
-        const delayedBeforeInput = delayedAuthority.snapshot().predicted;
-        const delayedImmediate = delayedAuthority.advance(movementCommand());
-        assert.equal(delayedImmediate.tick, delayedBeforeInput.tick + 1);
-        assert.ok(
-            delayedImmediate.velocity.x > delayedBeforeInput.velocity.x,
-            "100ms transport delay must not delay local movement response"
-        );
-        for (let index = 0; index < 60; index += 1) {
-            delayedAuthority.advance(movementCommand());
-            delayedAuthority.advance(movementCommand());
-            delayedAuthority.submit(movementCommand());
-            await new Promise((resolve) => setTimeout(resolve, 16));
+        for (const roundTripDelayMs of [0, 50, 100, 200]) {
+            for (const commandLossRate of [0, 0.02, 0.05]) {
+                const ProfileWebSocket = createImpairedWebSocket({ roundTripDelayMs, commandLossRate });
+                const impaired = new RemoteGameAuthority({
+                    url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
+                    WebSocketImpl: ProfileWebSocket
+                });
+                await impaired.connect();
+                const authoritativeStartX = impaired.snapshot().state.players[0].position.x;
+                const beforeInput = impaired.snapshot().predicted;
+                const immediate = impaired.advance(movementCommand());
+                assert.equal(immediate.tick, beforeInput.tick + 1);
+                assert.ok(
+                    immediate.velocity.x > beforeInput.velocity.x,
+                    `${roundTripDelayMs}ms RTT/${commandLossRate * 100}% must not delay local input`
+                );
+                for (let index = 0; index < 60; index += 1) {
+                    impaired.advance(movementCommand());
+                    impaired.submit(movementCommand());
+                    await new Promise((resolve) => setTimeout(resolve, 8));
+                }
+                try {
+                    await waitFor(
+                        () =>
+                            impaired.snapshot().state.players.find(({ id }) => id === impaired.playerId).position.x >
+                            authoritativeStartX + 0.1,
+                        `${roundTripDelayMs}ms RTT/${commandLossRate * 100}% must keep authority moving`,
+                        3000
+                    );
+                } catch (error) {
+                    const authorityX = impaired.snapshot().state.players.find(({ id }) => id === impaired.playerId)
+                        .position.x;
+                    throw new Error(
+                        `${error.message}; start=${authoritativeStartX}, authority=${authorityX}, metrics=${JSON.stringify(impaired.metrics())}`
+                    );
+                }
+                await waitFor(() => impaired.metrics().roundTripMs !== null, "the profile must produce RTT metrics");
+                assert.ok(Number.isFinite(impaired.metrics().snapshotIntervalMs));
+                assert.ok(Number.isFinite(impaired.metrics().correctionP95));
+                assert.equal(ProfileWebSocket.sentCommands, 60);
+                assert.equal(
+                    ProfileWebSocket.droppedCommands,
+                    Math.floor(ProfileWebSocket.sentCommands * commandLossRate)
+                );
+                if (roundTripDelayMs > 0) assert.ok(impaired.metrics().roundTripMs >= roundTripDelayMs * 0.75);
+                impaired.close();
+            }
         }
-        await waitFor(
-            () =>
-                delayedAuthority.snapshot().state.players.find(({ id }) => id === delayedAuthority.playerId).position
-                    .x >
-                delayedStartX + 40,
-            "mobile-latency commands must move the authoritative player"
-        );
-        assert.ok(delayedAuthority.metrics().roundTripMs >= MOBILE_NETWORK_DELAY_MS * 0.8);
-        delayedAuthority.close();
         await gameServer.close();
         gameServerClosed = true;
         await waitFor(() => authority.closed, "client should observe authority shutdown");
