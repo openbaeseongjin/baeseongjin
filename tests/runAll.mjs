@@ -18,6 +18,7 @@ import { run as serviceWorkerUpdater } from "./serviceWorkerUpdater.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as artifactInventory } from "./artifactInventory.mjs";
 import { run as artifactCatalog } from "./artifactCatalog.mjs";
+import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
 
 const suites = {
     fixedStep,
@@ -39,7 +40,8 @@ const suites = {
     serviceWorkerUpdater,
     canvasRenderer,
     artifactInventory,
-    artifactCatalog
+    artifactCatalog,
+    worldTraversalValidator
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
