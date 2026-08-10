@@ -13,6 +13,7 @@ import { run as combatFeedback } from "./combatFeedback.mjs";
 import { run as playerLifeCycle } from "./playerLifeCycle.mjs";
 import { run as pwaContract } from "./pwaContract.mjs";
 import { run as installPrompt } from "./installPrompt.mjs";
+import { run as serviceWorkerUpdater } from "./serviceWorkerUpdater.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
 
 const suites = {
@@ -31,6 +32,7 @@ const suites = {
     playerLifeCycle,
     pwaContract,
     installPrompt,
+    serviceWorkerUpdater,
     canvasRenderer
 };
 let failures = 0;

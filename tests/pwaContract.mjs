@@ -32,6 +32,7 @@ export function run() {
     assert.match(html, /rel="manifest" href="\.\/manifest\.webmanifest"/);
     assert.match(html, /rel="apple-touch-icon"/);
     const worker = readFileSync("sw.js", "utf8");
-    assert.doesNotMatch(worker, /caches\./, "the prototype service worker must not introduce cache versioning");
+    assert.doesNotMatch(worker, /caches\./, "automatic updates must not introduce manual cache versioning");
+    assert.match(worker, /cache:\s*"no-store"/, "same-origin game files must bypass the browser HTTP cache");
     assert.match(readFileSync("scripts/serve.mjs", "utf8"), /application\/manifest\+json/);
 }

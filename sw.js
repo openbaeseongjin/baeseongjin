@@ -1,4 +1,8 @@
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
-// 프로토타입은 항상 최신 GitHub Pages 리소스를 사용하며 별도 캐시를 만들지 않는다.
+self.addEventListener("fetch", (event) => {
+    const request = event.request;
+    if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+    event.respondWith(fetch(request, { cache: "no-store" }));
+});
