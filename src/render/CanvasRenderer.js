@@ -219,7 +219,7 @@ export class CanvasRenderer {
         const startX = (this.cssWidth - availableWidth) * 0.5;
         const startY = (this.cssHeight - cardHeight) * 0.46;
         ctx.save();
-        ctx.fillStyle = "rgba(8, 11, 16, 0.88)";
+        ctx.fillStyle = "rgba(8, 11, 16, 0.48)";
         ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         ctx.fillStyle = "#f8fafc";
         ctx.textAlign = "center";
@@ -243,6 +243,13 @@ export class CanvasRenderer {
             ctx.font = "700 12px system-ui, sans-serif";
             ctx.fillText(choice.description, x + cardWidth * 0.5, startY + cardHeight * 0.65);
         });
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.fillText(
+            "선택 중에도 전투 진행 · 빠르게 결정하세요",
+            this.cssWidth * 0.5,
+            Math.min(this.cssHeight - 18, startY + cardHeight + 28)
+        );
         ctx.restore();
     }
 
