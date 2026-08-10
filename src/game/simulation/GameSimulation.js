@@ -164,13 +164,19 @@ export class GameSimulation {
             return;
         }
         this.updateCheckpointProgress();
-        if (this.artifactRewards.size > 0) {
-            this.updateArtifactRewards(commandsByPlayerId);
-            this.eventFlash.age += dt;
-            return;
+        const choosingRewardPlayerIds = new Set(this.artifactRewards.keys());
+        this.updateArtifactRewards(commandsByPlayerId);
+        const gameplayCommands = new Map(commandsByPlayerId);
+        for (const playerId of choosingRewardPlayerIds) {
+            const player = this.players.find(({ id }) => id === playerId);
+            if (!player) continue;
+            gameplayCommands.set(
+                playerId,
+                this.commandWhileChoosingReward(player, this.commandForPlayer(player, commandsByPlayerId))
+            );
         }
         this.metrics.recordActiveTime(dt);
-        const reviveUpdate = updateTeamRevives(this.players, commandsByPlayerId, dt, LIFE_CONFIG);
+        const reviveUpdate = updateTeamRevives(this.players, gameplayCommands, dt, LIFE_CONFIG);
         const reviveReviverIds = new Set(reviveUpdate.reviverIds);
         for (const result of reviveUpdate.results) {
             if (result.status !== "revived") continue;
@@ -190,7 +196,7 @@ export class GameSimulation {
             });
         }
         for (const player of this.players) {
-            let playerCommand = this.commandForPlayer(player, commandsByPlayerId);
+            let playerCommand = this.commandForPlayer(player, gameplayCommands);
             if (reviveReviverIds.has(player.id) && playerCommand.vertical < 0) {
                 playerCommand = { ...playerCommand, vertical: 0 };
             }
@@ -281,6 +287,17 @@ export class GameSimulation {
                 aimWorld: player.aimWorld
             }
         );
+    }
+
+    commandWhileChoosingReward(player, command) {
+        return {
+            ...command,
+            horizontal: 0,
+            vertical: 0,
+            interact: false,
+            pointer: { ...command.pointer, down: false, pressed: false, released: false },
+            aimWorld: command.aimWorld ?? player.aimWorld
+        };
     }
 
     updatePlayer(player, command, dt) {

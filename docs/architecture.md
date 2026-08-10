@@ -71,6 +71,7 @@ index.html
 - `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가하며, 보상 선택과 패배 대기 시간은 활성 시간에서 제외한다.
 - `?metrics=1`은 `GameApp`과 렌더러에만 전달되는 옵트인 개발 표시이며 `PlayerCommand`나 게임 규칙에 포함하지 않는다.
 - 협동 부활은 `PlayerLifeCycle.updateReviveInteraction`의 상태·거리·시간 규칙을 사용하며 싱글 패배 판정과 같은 플레이어 배열을 공유한다.
+- 체크포인트 보상은 플레이어별 선택 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
 - `PlayerCommandBatch`는 목표 틱과 플레이어별 단조 증가 `sequence`를 보존하고 플레이어 ID 순으로 정규화하는 전송 계약이다. 권위 서버는 이 순서 번호로 중복·역순 입력을 거부한다.
 - `AuthorityCommandInbox`는 승인 순서와 허용 틱 범위를 검사하고, 승인된 명령을 목표 틱별로 한 번만 제공한다. 이 상태는 게임 규칙이 아니라 권위 전송 경계에 머문다.
