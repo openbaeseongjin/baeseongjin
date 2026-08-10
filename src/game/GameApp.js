@@ -70,7 +70,7 @@ export class GameApp {
 
     render() {
         const state = this.authority.snapshot();
-        if (this.metricsVisible) this.onDiagnostics({ metrics: state.metrics });
+        if (this.metricsVisible) this.onDiagnostics({ metrics: state.metrics, worldSeed: state.world.seed });
         this.stats.resets = state.resets;
         this.renderer.draw({
             ...state,
