@@ -1,6 +1,6 @@
 import { createPlayerCommand } from "../commands/PlayerCommand.js";
 
-export const PLAYER_COMMAND_PROTOCOL_VERSION = 2;
+export const PLAYER_COMMAND_PROTOCOL_VERSION = 3;
 
 function assertFinite(value, label) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);

@@ -207,6 +207,7 @@ export class GameSimulation {
             commandsByPlayerId.get(player.id) ?? {
                 horizontal: 0,
                 vertical: 0,
+                interact: false,
                 pointer: player.lastPointer,
                 viewport: player.lastViewport,
                 aimWorld: player.aimWorld
@@ -221,6 +222,7 @@ export class GameSimulation {
             : {
                   horizontal: 0,
                   vertical: 0,
+                  interact: false,
                   pointer: { x: 0, y: 0, down: false },
                   aimWorld: player.aimWorld
               };
