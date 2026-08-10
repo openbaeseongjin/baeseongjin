@@ -141,6 +141,11 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "hit-claim-receipt", payload: receipt }));
                 return;
             }
+            if (message?.type === "impact-claim" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveImpactClaim(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "impact-claim-receipt", payload: receipt }));
+                return;
+            }
             throw new Error("unsupported client message");
         } catch (error) {
             socket.send(JSON.stringify({ type: "error", code: "invalid-message", message: error.message }));

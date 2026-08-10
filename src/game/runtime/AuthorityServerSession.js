@@ -30,6 +30,7 @@ export class AuthorityServerSession {
         this.inbox = new AuthorityCommandInbox({ maxPastTicks, maxFutureTicks });
         this.inputState = new InputStateSimulator({ holdTicks: inputHoldTicks });
         this.resolvedHitClaims = new Map();
+        this.resolvedImpactClaims = new Map();
     }
 
     submitHitClaim(authenticatedPlayerId, claim) {
@@ -51,6 +52,32 @@ export class AuthorityServerSession {
         });
         if (result.accepted) {
             this.resolvedHitClaims.set(claim.predictionId, { receipt: result, resolvedAtTick: this.simulation.tick });
+        }
+        return result;
+    }
+
+    submitImpactClaim(authenticatedPlayerId, claim) {
+        if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const existing = this.resolvedImpactClaims.get(claim.projectileId);
+        if (existing) return existing.receipt;
+        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.inputLeadTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return Object.freeze({ projectileId: claim.projectileId, accepted: false, reason: "tick-window" });
+        }
+        const result = Object.freeze({
+            projectileId: claim.projectileId,
+            ...this.simulation.resolveEnemyProjectileClaim(authenticatedPlayerId, claim, {
+                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+            })
+        });
+        if (result.accepted) {
+            this.resolvedImpactClaims.set(claim.projectileId, {
+                receipt: result,
+                resolvedAtTick: this.simulation.tick
+            });
         }
         return result;
     }
@@ -103,6 +130,9 @@ export class AuthorityServerSession {
         const oldestRememberedTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedHitClaims.delete(predictionId);
+        }
+        for (const [projectileId, entry] of this.resolvedImpactClaims) {
+            if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedImpactClaims.delete(projectileId);
         }
         return nextTick % this.snapshotIntervalTicks === 0 ? this.snapshot() : null;
     }

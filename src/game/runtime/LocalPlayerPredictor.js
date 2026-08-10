@@ -16,12 +16,6 @@ function cloneSwingDrag(swingDrag) {
     };
 }
 
-function ropeTopologyChanged(left, right) {
-    if (left.isAttached !== right.isAttached) return true;
-    if (!left.isAttached) return false;
-    return Math.hypot(left.anchor.x - right.anchor.x, left.anchor.y - right.anchor.y) > 1;
-}
-
 function percentile(samples, ratio) {
     if (samples.length === 0) return 0;
     const sorted = [...samples].sort((left, right) => left - right);
@@ -149,10 +143,7 @@ export class LocalPlayerPredictor {
             this.correctionSamples.push(distance);
             if (this.correctionSamples.length > 256) this.correctionSamples.shift();
         }
-        const hardSnap =
-            distance > this.hardSnapDistance ||
-            ropeTopologyChanged(displayedBefore.rope, corrected.rope) ||
-            displayedBefore.lifeState !== corrected.lifeState;
+        const hardSnap = distance > this.hardSnapDistance || displayedBefore.lifeState !== corrected.lifeState;
         if (hardSnap) {
             this.presentationOffset = { x: 0, y: 0 };
             this.correctionRemaining = 0;
@@ -177,6 +168,26 @@ export class LocalPlayerPredictor {
         while (this.inputHistory.size > this.maxInputHistory) {
             this.inputHistory.delete(this.inputHistory.keys().next().value);
         }
+    }
+
+    applyPredictedImpact(event) {
+        if (!this.initialized) return;
+        const player = this.simulation.playerEntity;
+        if (event.resolution === "rope-cut") {
+            player.rope.detach();
+            player.swingDrag = null;
+            player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
+            return;
+        }
+        if (event.resolution !== "player-hit") return;
+        const speed = Math.hypot(event.velocity?.x ?? 0, event.velocity?.y ?? 0);
+        if (speed > 0) {
+            player.physics.addImpulse(
+                new Vector2(event.velocity.x / speed, event.velocity.y / speed),
+                COMBAT_CONFIG.playerHitKnockback
+            );
+        }
+        player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
     }
 
     recordPredictedProjectile(projectile, tick) {

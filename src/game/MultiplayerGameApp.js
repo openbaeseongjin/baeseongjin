@@ -80,12 +80,28 @@ export class MultiplayerGameApp {
         const command = createPlayerCommand(input, aimWorld);
         this.authority.advance(command);
         this.predictableProjectiles.predict(this.authority.drainPredictedEvents());
-        const predictedResolutions = this.predictableProjectiles.update(
-            dt,
-            current.state,
-            this.authority.predictor.state().tick
-        );
-        for (const resolution of predictedResolutions) this.authority.submitHitClaim(resolution);
+        const predictedPlayer = this.authority.predictor.state();
+        const localAuthorityPlayer = current.state.players.find(({ id }) => id === this.authority.playerId);
+        const collisionState = {
+            ...current.state,
+            localPlayer: localAuthorityPlayer
+                ? {
+                      ...localAuthorityPlayer,
+                      position: predictedPlayer.position,
+                      rope: predictedPlayer.rope,
+                      radius: PLAYER_CONFIG.radius
+                  }
+                : null
+        };
+        const predictedResolutions = this.predictableProjectiles.update(dt, collisionState, predictedPlayer.tick);
+        for (const resolution of predictedResolutions) {
+            if (resolution.projectileId) {
+                this.authority.predictor.applyPredictedImpact(resolution);
+                this.authority.submitImpactClaim(resolution);
+            } else {
+                this.authority.submitHitClaim(resolution);
+            }
+        }
         this.combatFeedback.apply(predictedResolutions);
         this.combatFeedback.update(dt);
         if (this.stepCount % 2 === 0) {

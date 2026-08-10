@@ -22,6 +22,46 @@ export function run() {
     store.update(1 / 120, { enemies: [] });
     assert.equal(store.snapshot().enemyProjectiles[0].position.x, 3);
 
+    const enemyHitStore = new PredictableProjectileStore();
+    enemyHitStore.apply([enemySpawn], 10, { enemies: [] });
+    const localPlayer = {
+        id: "player-1",
+        position: { x: 0, y: 0 },
+        radius: 18,
+        health: 100,
+        lifeState: "active",
+        hitInvulnerabilityRemaining: 0,
+        rope: { isAttached: false, anchor: null }
+    };
+    const predictedPlayerHit = enemyHitStore.update(0, { enemies: [], localPlayer }, 20);
+    assert.equal(predictedPlayerHit[0].resolution, "player-hit", "victim client must predict its own hit");
+    assert.equal(predictedPlayerHit[0].projectileId, "enemy-projectile-1");
+    assert.equal(enemyHitStore.snapshot().enemyProjectiles.length, 0);
+    const confirmedPlayerHit = createPredictableResolveEvent({
+        eventId: "event-player-hit",
+        objectId: "enemy-projectile-1",
+        tick: 20,
+        resolution: "player-hit",
+        position: { x: 0, y: 0 },
+        parameters: { damage: 20 }
+    });
+    assert.deepEqual(
+        enemyHitStore.apply([confirmedPlayerHit], 20, { enemies: [] }),
+        [],
+        "authority must not replay victim-predicted feedback"
+    );
+
+    const ropeCutStore = new PredictableProjectileStore();
+    ropeCutStore.apply([enemySpawn], 10, { enemies: [] });
+    const predictedRopeCut = ropeCutStore.update(0, {
+        enemies: [],
+        localPlayer: {
+            ...localPlayer,
+            rope: { isAttached: true, anchor: { x: 0, y: -100 } }
+        }
+    });
+    assert.equal(predictedRopeCut[0].resolution, "rope-cut", "rope collision must win over body collision");
+
     const playerSpawn = createPredictableSpawnEvent({
         eventId: "event-2",
         objectId: "projectile-1",

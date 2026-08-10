@@ -1,6 +1,7 @@
 import { serializeCommandReceipt } from "../network/CommandReceipt.js";
 import { deserializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { deserializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
+import { deserializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
 import { serializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 
 export class AuthorityWireAdapter {
@@ -18,6 +19,11 @@ export class AuthorityWireAdapter {
     receiveHitClaim(authenticatedPlayerId, serializedClaim) {
         if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
         return this.session.submitHitClaim(authenticatedPlayerId, deserializeProjectileHitClaim(serializedClaim));
+    }
+
+    receiveImpactClaim(authenticatedPlayerId, serializedClaim) {
+        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
+        return this.session.submitImpactClaim(authenticatedPlayerId, deserializePlayerImpactClaim(serializedClaim));
     }
 
     advance() {

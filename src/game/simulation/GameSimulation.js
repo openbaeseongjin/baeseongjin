@@ -1,6 +1,7 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
+    distancePointToSegment,
     updateAutomaticWeapon,
     updateEnemyProjectiles,
     updateEnemyWeapons,
@@ -538,6 +539,68 @@ export class GameSimulation {
         if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
         this.enemies = this.enemies.filter(({ health }) => health > 0);
         return Object.freeze({ accepted: true, resolution, damage: projectile.damage });
+    }
+
+    resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+        const player = this.players.find(({ id }) => id === authenticatedPlayerId);
+        if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
+        const projectile = this.enemyProjectiles.find(({ id }) => id === claim.projectileId);
+        if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
+        const futureTicks = Math.max(0, claim.clientTick - this.tick);
+        const travelAllowance = (COMBAT_CONFIG.enemyProjectileSpeed * futureTicks) / 120 + positionTolerance;
+        if (
+            Math.hypot(claim.position.x - projectile.position.x, claim.position.y - projectile.position.y) >
+            travelAllowance
+        ) {
+            return Object.freeze({ accepted: false, reason: "trajectory-mismatch" });
+        }
+        if (claim.impactType === "rope-cut") {
+            if (
+                !player.rope.isAttached ||
+                distancePointToSegment(claim.position, player.physics.position, player.rope.anchor) >
+                    projectile.radius + positionTolerance
+            ) {
+                return Object.freeze({ accepted: false, reason: "rope-mismatch" });
+            }
+            player.rope.detach();
+            player.swingDrag = null;
+            player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
+            this.eventFlash = {
+                type: "rope-cut",
+                age: 0,
+                position: new Vector2(claim.position.x, claim.position.y),
+                playerId: player.id
+            };
+        } else {
+            if (player.health <= 0 || player.hitInvulnerabilityRemaining > 0) {
+                return Object.freeze({ accepted: false, reason: "player-ineligible" });
+            }
+            if (
+                Math.hypot(claim.position.x - player.physics.position.x, claim.position.y - player.physics.position.y) >
+                player.physics.config.radius + projectile.radius + positionTolerance
+            ) {
+                return Object.freeze({ accepted: false, reason: "position-mismatch" });
+            }
+            player.health = Math.max(0, player.health - projectile.damage);
+            const speed = projectile.velocity.length();
+            if (speed > 0) {
+                player.physics.addImpulse(
+                    projectile.velocity.clone().scale(1 / speed),
+                    COMBAT_CONFIG.playerHitKnockback
+                );
+            }
+            player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+        }
+        this.enemyProjectiles = this.enemyProjectiles.filter(({ id }) => id !== projectile.id);
+        this.recordProjectileResolution(
+            {
+                projectileId: projectile.id,
+                resolution: claim.impactType,
+                position: new Vector2(claim.position.x, claim.position.y)
+            },
+            claim.impactType === "player-hit" ? { damage: projectile.damage } : null
+        );
+        return Object.freeze({ accepted: true, resolution: claim.impactType, damage: projectile.damage });
     }
 
     recordReplicationEvent(eventType, payload) {
