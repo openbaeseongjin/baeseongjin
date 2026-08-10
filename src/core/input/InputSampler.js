@@ -1,6 +1,16 @@
 import { findMobileControl } from "./MobileControlLayout.js";
 
-const movementKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS"]);
+const movementKeys = new Set([
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+    "KeyA",
+    "KeyD",
+    "KeyW",
+    "KeyS",
+    "KeyE"
+]);
 export class InputSampler {
     constructor(target = globalThis.window, surface = target) {
         this.target = target;
@@ -132,6 +142,7 @@ export class InputSampler {
         return Object.freeze({
             horizontal: Math.max(-1, Math.min(1, keyboardHorizontal + Number(mobileRight) - Number(mobileLeft))),
             vertical: Math.max(-1, Math.min(1, keyboardVertical - Number(mobileJump))),
+            interact: this.keys.has("KeyE") || mobileJump,
             pointer: Object.freeze({ ...this.pointer }),
             viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),
             mobileControls

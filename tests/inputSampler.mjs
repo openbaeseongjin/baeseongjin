@@ -16,9 +16,13 @@ export function run() {
     listeners.get("pointermove")({ clientX: 12, clientY: 34, pointerType: "mouse" });
     const snapshot = sampler.snapshot();
     assert.equal(snapshot.horizontal, 1);
+    assert.equal(snapshot.interact, false);
     assert.deepEqual(snapshot.pointer, { x: 12, y: 34, down: false });
     assert.deepEqual(snapshot.viewport, { width: 1000, height: 700 });
     assert.ok(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.pointer));
+    listeners.get("keydown")({ code: "KeyE" });
+    assert.equal(sampler.snapshot().interact, true);
+    listeners.get("keyup")({ code: "KeyE" });
     sampler.detach();
     assert.equal(listeners.size, 0);
 
@@ -67,6 +71,7 @@ export function run() {
     touchSnapshot = touchSampler.snapshot();
     assert.equal(touchSnapshot.vertical, -1, "the bottom-center square must emit the same command as keyboard jump");
     assert.equal(touchSnapshot.mobileControls.jump, true);
+    assert.equal(touchSnapshot.interact, true, "holding mobile jump must expose the contextual interaction intent");
 
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 6, clientX: 400, clientY: 240 });
     touchSnapshot = touchSampler.snapshot();
