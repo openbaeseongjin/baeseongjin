@@ -1,4 +1,5 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
+import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
 function assertPositive(value, label) {
@@ -25,7 +26,9 @@ export class AuthorityServerSession {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
         if (batch.tick <= this.simulation.tick) {
-            return Object.freeze({
+            return createCommandReceipt({
+                serverTick: this.simulation.tick,
+                targetTick: batch.tick,
                 accepted: Object.freeze([]),
                 rejected: Object.freeze(
                     batch.commands.map(({ playerId, sequence }) =>
@@ -36,7 +39,9 @@ export class AuthorityServerSession {
         }
         const foreignEntries = batch.commands.filter(({ playerId }) => playerId !== authenticatedPlayerId);
         if (foreignEntries.length > 0) {
-            return Object.freeze({
+            return createCommandReceipt({
+                serverTick: this.simulation.tick,
+                targetTick: batch.tick,
                 accepted: Object.freeze([]),
                 rejected: Object.freeze(
                     batch.commands.map(({ playerId, sequence }) =>
@@ -45,7 +50,13 @@ export class AuthorityServerSession {
                 )
             });
         }
-        return this.inbox.ingest(batch, this.simulation.tick);
+        const result = this.inbox.ingest(batch, this.simulation.tick);
+        return createCommandReceipt({
+            serverTick: this.simulation.tick,
+            targetTick: batch.tick,
+            accepted: result.accepted,
+            rejected: result.rejected
+        });
     }
 
     advance() {

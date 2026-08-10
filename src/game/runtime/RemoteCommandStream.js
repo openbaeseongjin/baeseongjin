@@ -46,6 +46,18 @@ export class RemoteCommandStream {
         return true;
     }
 
+    acceptReceipt(receipt) {
+        const removed = [];
+        for (const rejection of receipt.rejected) {
+            if (rejection.playerId !== this.playerId) continue;
+            const batch = this.pending.get(rejection.sequence);
+            if (!batch || batch.tick !== receipt.targetTick) continue;
+            this.pending.delete(rejection.sequence);
+            removed.push(rejection);
+        }
+        return Object.freeze(removed);
+    }
+
     pendingBatches() {
         return Object.freeze(
             [...this.pending.entries()].sort(([left], [right]) => left - right).map(([, batch]) => batch)
