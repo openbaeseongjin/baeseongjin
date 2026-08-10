@@ -1,14 +1,38 @@
-import { PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { Vector2 } from "../../game-kit/index.js";
+import { updateAutomaticWeapon, updatePlayerProjectiles } from "../combat/CombatSystems.js";
+import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 import { evaluateSwingDrag } from "../rope/SwingDrag.js";
 import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.js";
+import { EntityRegistry } from "./EntityRegistry.js";
 
 export class GameSimulation {
     constructor() {
         this.world = new WorldGenerator(WORLD_CONFIG).generate();
         this.player = new PlayerPhysics(PLAYER_CONFIG);
         this.rope = new FixedLengthRope(ROPE_CONFIG);
+        this.registry = new EntityRegistry();
+        this.playerEntity = {
+            id: this.registry.createId("player"),
+            physics: this.player,
+            weapon: {
+                range: COMBAT_CONFIG.weaponRange,
+                damage: COMBAT_CONFIG.weaponDamage,
+                fireInterval: COMBAT_CONFIG.fireInterval,
+                cooldown: 0
+            }
+        };
+        this.enemies = [
+            {
+                id: this.registry.createId("enemy"),
+                position: new Vector2(350, 400),
+                radius: COMBAT_CONFIG.enemyRadius,
+                health: COMBAT_CONFIG.enemyHealth,
+                maxHealth: COMBAT_CONFIG.enemyHealth
+            }
+        ];
+        this.projectiles = [];
         this.aimWorld = { x: 0, y: 0 };
         this.attachmentCandidate = null;
         this.wasPointerDown = false;
@@ -49,6 +73,16 @@ export class GameSimulation {
         this.attachBufferRemaining = Math.max(0, this.attachBufferRemaining - dt);
         this.wasPointerDown = command.pointer.down;
         this.player.step(dt, command, this.world.surfaces, this.rope);
+        updateAutomaticWeapon({
+            owner: this.playerEntity,
+            enemies: this.enemies,
+            projectiles: this.projectiles,
+            registry: this.registry,
+            config: COMBAT_CONFIG,
+            dt
+        });
+        updatePlayerProjectiles({ projectiles: this.projectiles, enemies: this.enemies, config: COMBAT_CONFIG, dt });
+        this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
         this.eventFlash.age += dt;
         if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) this.resetRun();
     }
@@ -106,6 +140,8 @@ export class GameSimulation {
             attachmentCandidate: this.attachmentCandidate,
             eventFlash: this.eventFlash,
             swingDrag: this.swingDrag,
+            enemies: this.enemies,
+            projectiles: this.projectiles,
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };

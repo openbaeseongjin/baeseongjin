@@ -16,6 +16,16 @@ export const ROPE_CONFIG = Object.freeze({
     swingImpulse: 780
 });
 
+export const COMBAT_CONFIG = Object.freeze({
+    weaponRange: 320,
+    weaponDamage: 10,
+    fireInterval: 0.65,
+    projectileSpeed: 520,
+    projectileRadius: 5,
+    enemyRadius: 18,
+    enemyHealth: 30
+});
+
 export const WORLD_CONFIG = Object.freeze({
     seed: 20260810,
     levelCount: 48,

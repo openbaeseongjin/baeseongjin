@@ -51,6 +51,8 @@ export class CanvasRenderer {
         this.drawAttachmentRange(scene);
         this.drawRope(scene.rope, scene.player.position);
         this.drawSwingDrag(scene.player, scene.swingDrag);
+        this.drawEnemies(scene.enemies ?? []);
+        this.drawProjectiles(scene.projectiles ?? []);
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash);
         this.context.restore();
@@ -240,6 +242,35 @@ export class CanvasRenderer {
             ctx.moveTo(player.position.x, player.position.y);
             ctx.lineTo(player.position.x - player.velocity.x * 0.08, player.position.y - player.velocity.y * 0.08);
             ctx.stroke();
+        }
+    }
+
+    drawEnemies(enemies) {
+        const ctx = this.context;
+        for (const enemy of enemies) {
+            ctx.fillStyle = "#fb7185";
+            ctx.beginPath();
+            ctx.arc(enemy.position.x, enemy.position.y, enemy.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#1f2937";
+            ctx.fillRect(enemy.position.x - 20, enemy.position.y - enemy.radius - 11, 40, 5);
+            ctx.fillStyle = "#fda4af";
+            ctx.fillRect(
+                enemy.position.x - 20,
+                enemy.position.y - enemy.radius - 11,
+                40 * (enemy.health / enemy.maxHealth),
+                5
+            );
+        }
+    }
+
+    drawProjectiles(projectiles) {
+        const ctx = this.context;
+        ctx.fillStyle = "#fef08a";
+        for (const projectile of projectiles) {
+            ctx.beginPath();
+            ctx.arc(projectile.position.x, projectile.position.y, projectile.radius, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 
