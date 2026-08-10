@@ -19,10 +19,12 @@ function renderPlayer(state, predicted = null) {
 }
 
 export class MultiplayerGameApp {
-    constructor({ canvas, authority }) {
+    constructor({ canvas, authority, onDisconnect = () => {} }) {
         this.renderer = new CanvasRenderer(canvas);
         this.input = new InputSampler(globalThis.window, canvas);
         this.authority = authority;
+        this.onDisconnect = onDisconnect;
+        this.disconnectHandled = false;
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
         this.camera = { x: 0, y: 0, zoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom };
@@ -51,6 +53,15 @@ export class MultiplayerGameApp {
     }
 
     update(dt, input) {
+        if (this.authority.closed) {
+            if (!this.disconnectHandled) {
+                this.disconnectHandled = true;
+                queueMicrotask(() =>
+                    this.onDisconnect(this.authority.closeReason ?? "멀티 서버 연결이 종료되었습니다.")
+                );
+            }
+            return;
+        }
         this.latestInput = input;
         this.stepCount += 1;
         const current = this.authority.snapshot(1);

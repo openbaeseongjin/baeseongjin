@@ -24,6 +24,8 @@ export class RemoteGameAuthority {
         this.latestSnapshot = null;
         this.snapshotReceivedAt = 0;
         this.closed = false;
+        this.closeReason = null;
+        this.intentionalClose = false;
     }
 
     connect() {
@@ -39,6 +41,7 @@ export class RemoteGameAuthority {
             socket.addEventListener("error", () => fail("멀티 서버에 연결할 수 없습니다."));
             socket.addEventListener("close", (event) => {
                 this.closed = true;
+                if (!this.intentionalClose) this.closeReason = event.reason || "멀티 서버 연결이 종료되었습니다.";
                 if (!settled) fail(event.reason || "멀티 서버 연결이 종료되었습니다.");
             });
             socket.addEventListener("message", (event) => {
@@ -108,7 +111,9 @@ export class RemoteGameAuthority {
     }
 
     close() {
+        this.intentionalClose = true;
         this.closed = true;
-        this.socket?.close(1000, "client shutdown");
+        this.closeReason = null;
+        if (this.socket?.readyState === this.WebSocketImpl.OPEN) this.socket.close(1000, "client shutdown");
     }
 }
