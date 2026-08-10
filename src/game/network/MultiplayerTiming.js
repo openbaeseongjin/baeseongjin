@@ -6,6 +6,8 @@ export const MULTIPLAYER_TIMING = Object.freeze({
     deadReckoningMaxSeconds: 0.12,
     ownerCorrectionSeconds: 0.1,
     ownerHardSnapDistance: 160,
+    ownerMotionBaseTolerance: 160,
+    ownerMotionMaxSpeed: 1800,
     maxHitClaimPastTicks: 36,
     hitClaimPositionTolerance: 40
 });

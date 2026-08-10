@@ -85,12 +85,12 @@ export function run() {
         }
     };
     predictor.reconcile(detachedSnapshot, []);
-    assert.equal(predictor.presentationState().rope.isAttached, false);
-    assert.equal(predictor.metrics().hardSnaps, 0, "rope topology correction must preserve visual continuity");
-    predictor.simulation.playerEntity.rope.attach(predictor.simulation.playerEntity.physics.position, {
-        x: predictor.state().position.x,
-        y: predictor.state().position.y - 80
-    });
+    assert.equal(
+        predictor.presentationState().rope.isAttached,
+        true,
+        "routine snapshots must not overwrite owner rope"
+    );
+    assert.equal(predictor.metrics().hardSnaps, 0);
     predictor.applyPredictedImpact({ resolution: "rope-cut" });
     assert.equal(predictor.state().rope.isAttached, false, "predicted rope cut must react before server round trip");
 
@@ -129,25 +129,34 @@ export function run() {
     assert.equal(secondLocalTick.tick, movingSnapshot.serverTick + 2);
     assert.ok(secondLocalTick.position.x > firstLocalTick.position.x, "prediction must move between network sends");
     const replayed = continuous.reconcile(movingSnapshot, []);
-    assert.equal(replayed.tick, secondLocalTick.tick, "reconciliation must replay to the current predicted tick");
-    close(replayed.position.x, secondLocalTick.position.x, "replayed position.x");
-    close(replayed.velocity.x, secondLocalTick.velocity.x, "replayed velocity.x");
+    assert.equal(replayed.tick, secondLocalTick.tick, "owner simulation must keep its current client tick");
+    close(replayed.position.x, secondLocalTick.position.x, "client-owned position.x");
+    close(replayed.velocity.x, secondLocalTick.velocity.x, "client-owned velocity.x");
 
     const beforeSmallCorrection = continuous.presentationState();
     continuous.reconcile(withPlayerPosition(movingSnapshot, movingSnapshot.state.players[0].position.x + 20, 7), []);
     close(continuous.presentationState().position.x, beforeSmallCorrection.position.x, "small correction continuity");
-    assert.ok(continuous.metrics().correctionDistance > 0);
-    assert.ok(continuous.metrics().correctionP50 > 0);
-    assert.ok(continuous.metrics().correctionP95 >= continuous.metrics().correctionP50);
+    assert.equal(
+        continuous.metrics().correctionDistance,
+        0,
+        "routine authority snapshots must not correct owner motion"
+    );
     assert.equal(continuous.metrics().hardSnaps, 0);
     for (let tick = 0; tick < 12; tick += 1) continuous.advance(move);
     close(continuous.presentationState().position.x, continuous.state().position.x, "small correction convergence");
     close(continuous.metrics().correctionRemaining, 0, "correction remaining");
 
-    const beforeHardSnap = continuous.state();
-    continuous.reconcile(withPlayerPosition(movingSnapshot, beforeHardSnap.position.x + 200, beforeHardSnap.tick), []);
-    close(continuous.presentationState().position.x, continuous.state().position.x, "hard snap position");
-    assert.equal(continuous.metrics().hardSnaps, 1);
+    const beforeAuthoritySnapshot = continuous.state();
+    continuous.reconcile(
+        withPlayerPosition(movingSnapshot, beforeAuthoritySnapshot.position.x + 200, beforeAuthoritySnapshot.tick),
+        []
+    );
+    close(
+        continuous.state().position.x,
+        beforeAuthoritySnapshot.position.x,
+        "authority must not rewind owner position"
+    );
+    assert.equal(continuous.metrics().hardSnaps, 0);
 
     const attackSnapshot = {
         ...movingSnapshot,
