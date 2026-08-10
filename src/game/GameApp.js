@@ -5,6 +5,7 @@ import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { GameSimulation } from "./simulation/GameSimulation.js";
 import { CAMERA_CONFIG } from "./config.js";
+import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 
 export class GameApp {
     constructor({ canvas }) {
@@ -13,6 +14,7 @@ export class GameApp {
         this.input = new InputSampler(globalThis.window, canvas);
         this.authority = new LocalAuthority(new GameSimulation());
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
+        this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
         this.camera = this.createCamera();
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
@@ -69,6 +71,7 @@ export class GameApp {
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,
+            metricsVisible: this.metricsVisible,
             mobileControls: {
                 ...this.latestInput.mobileControls,
                 visible: this.mobileView || this.latestInput.mobileControls.visible
