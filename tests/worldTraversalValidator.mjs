@@ -7,6 +7,16 @@ import { WORLD_REGRESSION_SEEDS } from "../scripts/worldRegressionSeeds.mjs";
 export function run() {
     assert.ok(WORLD_REGRESSION_SEEDS.some(({ seed }) => seed === WORLD_CONFIG.seed));
     assert.equal(new Set(WORLD_REGRESSION_SEEDS.map(({ seed }) => seed)).size, WORLD_REGRESSION_SEEDS.length);
+    assert.deepEqual(
+        WORLD_REGRESSION_SEEDS.map(({ reason }) => reason),
+        [
+            "최소 양의 시드 경계",
+            "소규모 재현 기준 시드",
+            "일반 분포 기준 시드",
+            "현재 프로토타입 기본 시드",
+            "32비트 부호 없는 최대 시드 경계"
+        ]
+    );
     const world = new WorldGenerator(WORLD_CONFIG).generate();
     assert.deepEqual(
         validateWorldTraversal(world, {
