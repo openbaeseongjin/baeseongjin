@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { GameApp } from "../src/game/GameApp.js";
+import { ROPE_CONFIG } from "../src/game/config.js";
 import { evaluateSwingDrag } from "../src/game/rope/SwingDrag.js";
 
 export function run() {
@@ -19,12 +20,14 @@ export function run() {
     assert.deepEqual(upward.direction, { x: 0, y: -1 });
 
     let impulseCount = 0;
+    let appliedMagnitude = 0;
     const app = Object.create(GameApp.prototype);
     app.rope = { anchor: { x: 0, y: 0 } };
     app.player = {
         position: { x: 0, y: 100 },
-        addImpulse() {
+        addImpulse(_direction, magnitude) {
             impulseCount += 1;
+            appliedMagnitude = magnitude;
         }
     };
     app.swingDrag = { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false };
@@ -34,6 +37,7 @@ export function run() {
     app.updateSwingDrag({ x: 20, y: 200 }, 0.04);
     app.updateSwingDrag({ x: 0, y: 200 }, 0.04);
     assert.equal(impulseCount, 1, "each attachment must grant exactly one swing impulse");
+    assert.equal(appliedMagnitude, ROPE_CONFIG.swingImpulse, "swing must use the configured impulse strength");
     assert.equal(app.swingDrag.used, true);
     assert.equal(app.eventFlash.type, "swing");
 }

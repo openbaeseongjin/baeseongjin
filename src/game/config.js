@@ -13,7 +13,7 @@ export const ROPE_CONFIG = Object.freeze({
     attachBufferSeconds: 0.1,
     swingDragThreshold: 80,
     swingDragMinHoldSeconds: 0.08,
-    swingImpulse: 620
+    swingImpulse: 780
 });
 
 export const WORLD_CONFIG = Object.freeze({
