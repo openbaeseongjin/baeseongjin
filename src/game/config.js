@@ -44,6 +44,7 @@ export const LIFE_CONFIG = Object.freeze({
     downedDuration: 10,
     defeatRestartDelay: 2,
     reviveDuration: 2.5,
+    reviveRange: 72,
     reviveHealthFraction: 0.4
 });
 
