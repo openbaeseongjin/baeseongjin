@@ -27,10 +27,12 @@ export function run() {
             impulseCount += 1;
         }
     };
-    app.swingDrag = { origin: { x: 100, y: 100 }, direction: null, progress: 0, used: false };
+    app.swingDrag = { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false };
     app.eventFlash = { type: "attach", age: 0 };
-    app.updateSwingDrag({ x: 50, y: 200 });
-    app.updateSwingDrag({ x: 20, y: 200 });
+    app.updateSwingDrag({ x: 20, y: 200 }, 0.04);
+    assert.equal(impulseCount, 0, "a fast pointer adjustment immediately after attachment must not trigger a swing");
+    app.updateSwingDrag({ x: 20, y: 200 }, 0.04);
+    app.updateSwingDrag({ x: 0, y: 200 }, 0.04);
     assert.equal(impulseCount, 1, "each attachment must grant exactly one swing impulse");
     assert.equal(app.swingDrag.used, true);
     assert.equal(app.eventFlash.type, "swing");
