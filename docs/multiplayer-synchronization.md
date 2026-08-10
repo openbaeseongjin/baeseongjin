@@ -150,6 +150,8 @@ GameApp
 `AuthorityServerSession`은 실제 소켓과 분리된 서버 실행 경계다. 인증된 연결의 플레이어 ID와 제출 명령의 ID가 다르면 배치 전체를 거부하고, `AuthorityCommandInbox`에서 다음 틱 명령을 꺼내 같은 `GameSimulation.stepCommandBatch()`를 120Hz로 실행한다. 6틱마다 `AuthoritySnapshotBuilder`를 호출해 초기 20Hz 스냅샷과 플레이어별 승인 번호를 만들며, 소켓 구현은 이 세션의 `submit`, `advance`, `snapshot`만 호출한다.
 
 서버는 현재 `serverTick` 이하를 목표로 한 늦은 명령을 `elapsed-tick`으로 거부하고 승인 sequence를 갱신하지 않는다. 초기 프로토타입은 서버 롤백을 하지 않으므로, 실행할 수 없는 입력을 ACK해 클라이언트가 재적용 목록에서 제거하는 거짓 수렴을 허용하지 않는다.
+
+`RemoteCommandStream`은 로컬 플레이어 한 명의 목표 틱과 단조 증가 sequence를 만들고, 서버가 승인하기 전의 명령 배치를 보존한다. 새 스냅샷의 플레이어별 ACK까지만 대기열에서 제거하며, 이미 적용한 `serverTick` 이하의 중복·역순 스냅샷은 무시한다. 이 대기열은 이후 자기 플레이어 예측을 권위 상태 위에 재적용하는 입력 원본이며, 소켓과 물리 구현을 직접 소유하지 않는다.
 - `snapshot()`은 화면이 읽을 최신 권위 또는 예측 상태를 반환한다.
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.
 
