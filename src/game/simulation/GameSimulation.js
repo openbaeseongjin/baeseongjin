@@ -252,30 +252,43 @@ export class GameSimulation {
     }
 
     recoverFallenPlayers() {
-        const checkpoint = this.activeCheckpoint ?? { x: 120, y: 500 };
         const fallenPlayerIds = [];
         for (const player of this.players) {
             if (player.physics.position.isFinite() && player.physics.position.y <= WORLD_CONFIG.floorY + 780) {
                 continue;
             }
-            const wasActive = player.lifeState === "active";
-            player.physics.reset(checkpoint);
-            player.rope.detach();
-            player.attachmentCandidate = null;
-            player.wasPointerDown = false;
-            player.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
-            player.attachBufferRemaining = 0;
-            player.swingDrag = null;
-            if (wasActive) enterDowned(player, LIFE_CONFIG);
+            this.recoverPlayerFromFall(player);
             fallenPlayerIds.push(player.id);
-            this.eventFlash = { type: "fall-recovery", age: 0, playerId: player.id, position: player.physics.position };
-            this.recordReplicationEvent("player-fell", {
-                playerId: player.id,
-                lifeState: player.lifeState,
-                position: { x: player.physics.position.x, y: player.physics.position.y }
-            });
         }
         return fallenPlayerIds;
+    }
+
+    resolvePlayerFall(playerId) {
+        if (this.runState !== "playing") return false;
+        const player = this.players.find(({ id }) => id === playerId);
+        if (!player) return false;
+        this.recoverPlayerFromFall(player);
+        if (isTeamDefeated(this.players)) this.beginDefeat("fall");
+        return true;
+    }
+
+    recoverPlayerFromFall(player) {
+        const checkpoint = this.activeCheckpoint ?? { x: 120, y: 500 };
+        const wasActive = player.lifeState === "active";
+        player.physics.reset(checkpoint);
+        player.rope.detach();
+        player.attachmentCandidate = null;
+        player.wasPointerDown = false;
+        player.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
+        player.attachBufferRemaining = 0;
+        player.swingDrag = null;
+        if (wasActive) enterDowned(player, LIFE_CONFIG);
+        this.eventFlash = { type: "fall-recovery", age: 0, playerId: player.id, position: player.physics.position };
+        this.recordReplicationEvent("player-fell", {
+            playerId: player.id,
+            lifeState: player.lifeState,
+            position: { x: player.physics.position.x, y: player.physics.position.y }
+        });
     }
 
     commandForPlayer(player, commandsByPlayerId) {

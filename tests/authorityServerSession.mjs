@@ -5,6 +5,7 @@ import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim
 import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
 import { Vector2 } from "../src/game-kit/index.js";
+import { WORLD_CONFIG } from "../src/game/config.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -50,6 +51,66 @@ export function run() {
         "speed-envelope",
         "client authority must remain inside the server movement envelope"
     );
+
+    combatSimulation.rope.attach(combatSimulation.player.position, {
+        x: combatSimulation.player.position.x,
+        y: combatSimulation.player.position.y - 80
+    });
+    const rejectedRelease = combatSession.submitOwnerMotion(
+        combatSimulation.playerEntity.id,
+        createOwnerMotionState({
+            ...ownerMotion,
+            clientTick: ownerMotion.clientTick + 2,
+            velocity: { x: 9999, y: 0 },
+            rope: { isAttached: false, anchor: null }
+        })
+    );
+    assert.equal(rejectedRelease.reason, "speed-envelope");
+    assert.equal(rejectedRelease.ropeReleased, true, "a newer rope release must survive rejected continuous motion");
+    assert.equal(combatSimulation.rope.isAttached, false, "rejected movement must not leave a released rope attached");
+    const delayedAttach = combatSession.submitOwnerMotion(
+        combatSimulation.playerEntity.id,
+        createOwnerMotionState({
+            ...ownerMotion,
+            clientTick: ownerMotion.clientTick + 1,
+            position: { x: combatSimulation.player.position.x, y: combatSimulation.player.position.y },
+            velocity: { x: 0, y: 0 },
+            rope: {
+                isAttached: true,
+                anchor: { x: combatSimulation.player.position.x, y: combatSimulation.player.position.y - 80 }
+            }
+        })
+    );
+    assert.equal(delayedAttach.accepted, true, "late continuous motion may still be usable");
+    assert.equal(combatSimulation.rope.isAttached, false, "an older rope state must not undo a newer release");
+
+    const fallSimulation = new GameSimulation();
+    fallSimulation.enemies = [];
+    fallSimulation.addPlayer({ x: 180, y: 500 });
+    fallSimulation.activeCheckpoint = fallSimulation.world.checkpoints[1];
+    fallSimulation.rope.attach(fallSimulation.player.position, {
+        x: fallSimulation.player.position.x,
+        y: fallSimulation.player.position.y - 80
+    });
+    const fallSession = new AuthorityServerSession({ simulation: fallSimulation });
+    const fallReceipt = fallSession.submitOwnerMotion(
+        fallSimulation.playerEntity.id,
+        createOwnerMotionState({
+            clientTick: 1,
+            position: { x: fallSimulation.player.position.x, y: WORLD_CONFIG.floorY + 781 },
+            velocity: { x: 0, y: 900 },
+            isGrounded: false,
+            rope: { isAttached: false, anchor: null }
+        })
+    );
+    assert.equal(fallReceipt.accepted, true);
+    assert.equal(fallReceipt.resolution, "player-fell");
+    assert.equal(fallSimulation.playerEntity.lifeState, "downed");
+    assert.equal(fallSimulation.player.position.x, fallSimulation.activeCheckpoint.x);
+    assert.equal(fallSimulation.player.position.y, fallSimulation.activeCheckpoint.y);
+    assert.equal(fallSimulation.rope.isAttached, false);
+    assert.equal(fallSimulation.runState, "playing", "one fallen player must not stop a cooperative world");
+
     combatSimulation.playerEntity.weapon.cooldown = 0;
     combatSession.advance();
     const projectile = combatSimulation.projectiles[0];
