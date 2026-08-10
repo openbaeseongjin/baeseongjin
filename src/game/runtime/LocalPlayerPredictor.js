@@ -15,6 +15,12 @@ function cloneSwingDrag(swingDrag) {
     };
 }
 
+function ropeTopologyChanged(left, right) {
+    if (left.isAttached !== right.isAttached) return true;
+    if (!left.isAttached) return false;
+    return Math.hypot(left.anchor.x - right.anchor.x, left.anchor.y - right.anchor.y) > 1;
+}
+
 export class LocalPlayerPredictor {
     constructor({
         playerId,
@@ -22,7 +28,9 @@ export class LocalPlayerPredictor {
         fixedDt = 1 / 120,
         inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks,
         predictionLeadTicks = MULTIPLAYER_TIMING.inputLeadTicks,
-        maxInputHistory = 512
+        maxInputHistory = 512,
+        correctionSeconds = MULTIPLAYER_TIMING.ownerCorrectionSeconds,
+        hardSnapDistance = MULTIPLAYER_TIMING.ownerHardSnapDistance
     }) {
         if (typeof playerId !== "string" || playerId.length === 0) throw new Error("playerId must be non-empty");
         if (!Number.isFinite(fixedDt) || fixedDt <= 0) throw new Error("fixedDt must be positive");
@@ -32,14 +40,26 @@ export class LocalPlayerPredictor {
         if (!Number.isSafeInteger(maxInputHistory) || maxInputHistory < 1) {
             throw new Error("maxInputHistory must be a positive safe integer");
         }
+        if (!Number.isFinite(correctionSeconds) || correctionSeconds <= 0) {
+            throw new Error("correctionSeconds must be positive");
+        }
+        if (!Number.isFinite(hardSnapDistance) || hardSnapDistance <= 0) {
+            throw new Error("hardSnapDistance must be positive");
+        }
         this.playerId = playerId;
         this.simulation = simulation;
         this.fixedDt = fixedDt;
         this.inputHoldTicks = inputHoldTicks;
         this.predictionLeadTicks = predictionLeadTicks;
         this.maxInputHistory = maxInputHistory;
+        this.correctionSeconds = correctionSeconds;
+        this.hardSnapDistance = hardSnapDistance;
         this.inputHistory = new Map();
         this.initialized = false;
+        this.presentationOffset = { x: 0, y: 0 };
+        this.correctionRemaining = 0;
+        this.lastCorrectionDistance = 0;
+        this.hardSnapCount = 0;
         this.simulation.enemies = [];
         this.simulation.projectiles = [];
         this.simulation.enemyProjectiles = [];
@@ -50,6 +70,7 @@ export class LocalPlayerPredictor {
         if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
         const authoritative = snapshot.state.players.find(({ id }) => id === this.playerId);
         if (!authoritative) throw new Error(`missing predicted playerId: ${this.playerId}`);
+        const displayedBefore = this.initialized ? this.presentationState() : null;
         const pendingTicks = pendingBatches.map(({ tick }) => tick);
         const targetTick = Math.max(
             snapshot.serverTick + this.predictionLeadTicks,
@@ -85,7 +106,9 @@ export class LocalPlayerPredictor {
             this.simulation.tick = tick;
         }
         this.simulation.projectiles.length = 0;
-        return this.state();
+        const corrected = this.state();
+        if (displayedBefore) this.startPresentationCorrection(displayedBefore, corrected);
+        return corrected;
     }
 
     advance(command) {
@@ -95,7 +118,38 @@ export class LocalPlayerPredictor {
         this.simulation.updatePlayer(this.simulation.playerEntity, command, this.fixedDt);
         this.simulation.projectiles.length = 0;
         this.simulation.tick = tick;
+        this.updatePresentation(this.fixedDt);
         return this.state();
+    }
+
+    startPresentationCorrection(displayedBefore, corrected) {
+        const offset = {
+            x: displayedBefore.position.x - corrected.position.x,
+            y: displayedBefore.position.y - corrected.position.y
+        };
+        const distance = Math.hypot(offset.x, offset.y);
+        this.lastCorrectionDistance = distance;
+        const hardSnap =
+            distance > this.hardSnapDistance ||
+            ropeTopologyChanged(displayedBefore.rope, corrected.rope) ||
+            displayedBefore.lifeState !== corrected.lifeState;
+        if (hardSnap) {
+            this.presentationOffset = { x: 0, y: 0 };
+            this.correctionRemaining = 0;
+            this.hardSnapCount += 1;
+            return;
+        }
+        this.presentationOffset = offset;
+        this.correctionRemaining = distance > 0 ? this.correctionSeconds : 0;
+    }
+
+    updatePresentation(dt) {
+        if (this.correctionRemaining <= 0) return;
+        const remaining = Math.max(0, this.correctionRemaining - dt);
+        const ratio = remaining / this.correctionRemaining;
+        this.presentationOffset.x *= ratio;
+        this.presentationOffset.y *= ratio;
+        this.correctionRemaining = remaining;
     }
 
     rememberInput(tick, command) {
@@ -148,6 +202,7 @@ export class LocalPlayerPredictor {
             position: { x: player.physics.position.x, y: player.physics.position.y },
             velocity: { x: player.physics.velocity.x, y: player.physics.velocity.y },
             isGrounded: player.physics.isGrounded,
+            lifeState: player.lifeState,
             rope: {
                 isAttached: player.rope.isAttached,
                 anchor: player.rope.anchor ? { x: player.rope.anchor.x, y: player.rope.anchor.y } : null,
@@ -158,5 +213,24 @@ export class LocalPlayerPredictor {
             swingDrag: cloneSwingDrag(player.swingDrag),
             ropeDamageBoostRemaining: player.ropeDamageBoostRemaining
         };
+    }
+
+    presentationState() {
+        const state = this.state();
+        return {
+            ...state,
+            position: {
+                x: state.position.x + this.presentationOffset.x,
+                y: state.position.y + this.presentationOffset.y
+            }
+        };
+    }
+
+    metrics() {
+        return Object.freeze({
+            correctionDistance: this.lastCorrectionDistance,
+            correctionRemaining: this.correctionRemaining,
+            hardSnaps: this.hardSnapCount
+        });
     }
 }
