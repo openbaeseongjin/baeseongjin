@@ -7,6 +7,10 @@ export function run() {
     const context = {
         save() {},
         restore() {},
+        fillRect() {},
+        beginPath() {},
+        arc() {},
+        fill() {},
         fillText: (text) => textCalls.push(text),
         strokeRect: (...args) => borderCalls.push(args)
     };
@@ -30,4 +34,8 @@ export function run() {
     assert.deepEqual(renderer.getImpactOffset(null), { x: 0, y: 0 });
     const impactOffset = renderer.getImpactOffset({ age: 0.05, lifetime: 0.2, strength: 6 });
     assert.notEqual(impactOffset.x, 0, "active impacts must offset the world layer");
+
+    textCalls.length = 0;
+    renderer.drawMobileControls({ visible: true, ropePointerDown: false, left: true, jump: false, right: false });
+    assert.deepEqual(textCalls, ["←", "점프", "→"]);
 }

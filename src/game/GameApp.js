@@ -69,7 +69,10 @@ export class GameApp {
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,
-            mobileControls: this.latestInput.mobileControls
+            mobileControls: {
+                ...this.latestInput.mobileControls,
+                visible: this.mobileView || this.latestInput.mobileControls.visible
+            }
         });
     }
 }

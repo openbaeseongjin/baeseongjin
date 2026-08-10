@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import { findMobileControl, getMobileControlLayout } from "../src/core/input/MobileControlLayout.js";
+
+export function run() {
+    const layout = getMobileControlLayout(1000, 640);
+    assert.equal(layout.left.width, layout.left.height);
+    assert.equal(layout.jump.width, layout.jump.height);
+    assert.equal(layout.right.x + layout.right.width, 984);
+    assert.equal(findMobileControl(50, 590, 1000, 640), "left");
+    assert.equal(findMobileControl(500, 590, 1000, 640), "jump");
+    assert.equal(findMobileControl(950, 590, 1000, 640), "right");
+    assert.equal(findMobileControl(500, 300, 1000, 640), null, "the rope area must exclude only the three buttons");
+}
