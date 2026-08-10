@@ -10,23 +10,49 @@ import {
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
+import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "../rewards/ArtifactRewardSelection.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
-import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.js";
+import { closestPointOnSurface, generateWorld } from "../world/WorldGenerator.js";
 import { EntityRegistry } from "./EntityRegistry.js";
 
+function vectorState(vector) {
+    return vector ? { x: vector.x, y: vector.y } : null;
+}
+
+function swingDragState(swingDrag) {
+    if (!swingDrag) return null;
+    return {
+        origin: vectorState(swingDrag.origin),
+        direction: vectorState(swingDrag.direction),
+        progress: swingDrag.progress,
+        age: swingDrag.age,
+        used: swingDrag.used
+    };
+}
+
+function cloneSwingDrag(swingDrag) {
+    if (!swingDrag) return null;
+    return {
+        origin: { ...swingDrag.origin },
+        direction: swingDrag.direction ? { ...swingDrag.direction } : null,
+        progress: swingDrag.progress,
+        age: swingDrag.age,
+        used: swingDrag.used
+    };
+}
+
 export class GameSimulation {
+    #primaryPlayerId;
+
     constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null } = {}) {
-        this.world = new WorldGenerator({ ...WORLD_CONFIG, seed: worldSeed }).generate();
+        this.world = generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
         this.metrics = new RunMetrics();
         this.registry = new EntityRegistry();
         this.players = [];
         const playerRuntime = this.addPlayer(undefined, playerId);
-        this.player = playerRuntime.physics;
-        this.rope = playerRuntime.rope;
-        this.artifacts = playerRuntime.artifacts;
-        this.playerEntity = playerRuntime.entity;
+        this.#primaryPlayerId = playerRuntime.entity.id;
         this.enemies = this.createEnemies();
         this.projectiles = [];
         this.enemyProjectiles = [];
@@ -34,7 +60,6 @@ export class GameSimulation {
         this.resets = 0;
         this.runState = "playing";
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
-        this.lastCheckpointLoss = [];
         this.artifactRewards = new Map();
         this.rewardedCheckpointIds = new Set();
         this.tick = 0;
@@ -64,77 +89,248 @@ export class GameSimulation {
         if (removedReward && this.artifactRewards.size === 0) {
             this.rewardedCheckpointIds.add(removedReward.checkpointId);
         }
-        if (removed === this.playerEntity && this.players.length > 0) {
-            this.playerEntity = this.players[0];
-            this.player = this.playerEntity.physics;
-            this.rope = this.playerEntity.rope;
-            this.artifacts = this.playerEntity.artifacts;
+        if (removed.id === this.#primaryPlayerId) this.#primaryPlayerId = this.players[0]?.id ?? null;
+        return true;
+    }
+
+    getPrimaryPlayerId() {
+        return this.#primaryPlayerId;
+    }
+
+    hasPlayer(playerId) {
+        return this.players.some(({ id }) => id === playerId);
+    }
+
+    playerIds() {
+        return this.players.map(({ id }) => id);
+    }
+
+    playerState(playerId) {
+        const player = this.#findPlayer(playerId);
+        if (!player) return null;
+        return {
+            id: player.id,
+            position: vectorState(player.physics.position),
+            velocity: vectorState(player.physics.velocity),
+            isGrounded: player.physics.isGrounded,
+            health: player.health,
+            maxHealth: player.maxHealth,
+            hitInvulnerabilityRemaining: player.hitInvulnerabilityRemaining,
+            ropeDisabledRemaining: player.ropeDisabledRemaining,
+            lifeState: player.lifeState,
+            rope: {
+                isAttached: player.rope.isAttached,
+                anchor: vectorState(player.rope.anchor),
+                length: player.rope.length,
+                currentLength: player.rope.currentLength,
+                tension: player.rope.tension
+            },
+            control: {
+                aimWorld: vectorState(player.aimWorld),
+                lastPointer: { ...player.lastPointer },
+                lastViewport: { ...player.lastViewport },
+                wasPointerDown: player.wasPointerDown,
+                attachBufferRemaining: player.attachBufferRemaining,
+                swingDrag: swingDragState(player.swingDrag)
+            },
+            weapon: {
+                range: player.weapon.range,
+                damage: player.weapon.damage,
+                fireInterval: player.weapon.fireInterval,
+                cooldown: player.weapon.cooldown
+            },
+            artifacts: player.artifacts.snapshot(),
+            ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
+            lastCheckpointLoss: [...player.lastCheckpointLoss]
+        };
+    }
+
+    playerStates() {
+        return this.players.map(({ id }) => this.playerState(id));
+    }
+
+    enemyStates() {
+        return this.enemies.map((enemy) => ({
+            id: enemy.id,
+            position: vectorState(enemy.position),
+            level: enemy.level,
+            radius: enemy.radius,
+            health: enemy.health,
+            maxHealth: enemy.maxHealth,
+            fireCooldown: enemy.fireCooldown
+        }));
+    }
+
+    getArtifactReward(playerId) {
+        return this.artifactRewards.get(playerId) ?? null;
+    }
+
+    getTick() {
+        return this.tick;
+    }
+
+    releasePlayerRope(playerId) {
+        const player = this.#requirePlayer(playerId);
+        const released = player.rope.isAttached;
+        player.rope.detach();
+        player.swingDrag = null;
+        return released;
+    }
+
+    applyOwnerMotion(playerId, state, { synchronizeRope = true } = {}) {
+        const player = this.#requirePlayer(playerId);
+        player.physics.position.set(state.position.x, state.position.y);
+        player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        player.physics.isGrounded = state.isGrounded;
+        if (player.ropeDisabledRemaining > 0) {
+            this.releasePlayerRope(playerId);
+        } else if (synchronizeRope && state.rope.isAttached) {
+            player.rope.attach(player.physics.position, state.rope.anchor);
+        } else if (synchronizeRope) {
+            this.releasePlayerRope(playerId);
         }
         return true;
     }
 
-    get aimWorld() {
-        return this.playerEntity.aimWorld;
+    preparePrediction(enemies = []) {
+        this.enemies = enemies.map((enemy) => ({
+            ...enemy,
+            position: new Vector2(enemy.position.x, enemy.position.y)
+        }));
+        this.projectiles = [];
+        this.enemyProjectiles = [];
     }
 
-    get artifactReward() {
-        return this.artifactRewards.get(this.playerEntity.id) ?? null;
+    restorePrediction(playerId, state, serverTick = this.tick) {
+        const player = this.#requirePlayer(playerId);
+        this.#restorePlayer(player, state);
+        this.tick = serverTick;
+        return this.predictionState(playerId);
     }
 
-    set aimWorld(value) {
-        this.playerEntity.aimWorld = value;
+    applyPredictionOutcomes(playerId, authoritative, serverTick) {
+        const player = this.#requirePlayer(playerId);
+        const lifeStateChanged = player.lifeState !== authoritative.lifeState;
+        player.health = authoritative.health;
+        player.maxHealth = authoritative.maxHealth;
+        player.hitInvulnerabilityRemaining = Math.max(
+            player.hitInvulnerabilityRemaining,
+            authoritative.hitInvulnerabilityRemaining
+        );
+        player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, authoritative.ropeDisabledRemaining);
+        player.lifeState = authoritative.lifeState;
+        player.weapon.range = authoritative.weapon.range;
+        player.weapon.damage = authoritative.weapon.damage;
+        player.weapon.fireInterval = authoritative.weapon.fireInterval;
+        player.artifacts.replace(authoritative.artifacts);
+        player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
+        if (authoritative.ropeDisabledRemaining > 0) this.releasePlayerRope(playerId);
+        if (lifeStateChanged) {
+            this.#restorePlayer(player, authoritative);
+            this.tick = Math.max(this.tick, serverTick);
+        }
+        return { lifeStateChanged, state: this.predictionState(playerId) };
     }
 
-    get attachmentCandidate() {
-        return this.playerEntity.attachmentCandidate;
+    advancePrediction(playerId, command, dt, tick) {
+        const player = this.#requirePlayer(playerId);
+        const projectile = this.updatePlayer(player, command, dt);
+        this.projectiles.length = 0;
+        this.tick = tick;
+        return projectile;
     }
 
-    set attachmentCandidate(value) {
-        this.playerEntity.attachmentCandidate = value;
+    idlePlayerCommand(playerId) {
+        return this.commandForPlayer(this.#requirePlayer(playerId), new Map());
     }
 
-    get wasPointerDown() {
-        return this.playerEntity.wasPointerDown;
+    applyPredictedImpact(playerId, event) {
+        const player = this.#requirePlayer(playerId);
+        if (event.resolution === "rope-cut") {
+            this.releasePlayerRope(playerId);
+            player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
+            return true;
+        }
+        if (event.resolution !== "player-hit") return false;
+        const speed = Math.hypot(event.velocity?.x ?? 0, event.velocity?.y ?? 0);
+        if (speed > 0) {
+            player.physics.addImpulse(
+                new Vector2(event.velocity.x / speed, event.velocity.y / speed),
+                COMBAT_CONFIG.playerHitKnockback
+            );
+        }
+        player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+        return true;
     }
 
-    set wasPointerDown(value) {
-        this.playerEntity.wasPointerDown = value;
+    resolvePlayerCollisions(playerId, otherPlayers, radius) {
+        return resolvePlayerCollisions(this.#requirePlayer(playerId), otherPlayers, radius);
     }
 
-    get attachBufferRemaining() {
-        return this.playerEntity.attachBufferRemaining;
+    predictionState(playerId) {
+        const state = this.playerState(playerId);
+        if (!state) return null;
+        return {
+            tick: this.tick,
+            position: state.position,
+            velocity: state.velocity,
+            isGrounded: state.isGrounded,
+            lifeState: state.lifeState,
+            rope: state.rope,
+            swingDrag: state.control.swingDrag,
+            ropeDamageBoostRemaining: state.ropeDamageBoostRemaining
+        };
     }
 
-    set attachBufferRemaining(value) {
-        this.playerEntity.attachBufferRemaining = value;
+    #findPlayer(playerId) {
+        return this.players.find(({ id }) => id === playerId) ?? null;
     }
 
-    get swingDrag() {
-        return this.playerEntity.swingDrag;
+    #requirePlayer(playerId) {
+        const player = this.#findPlayer(playerId);
+        if (!player) throw new Error(`unknown playerId: ${playerId}`);
+        return player;
     }
 
-    set swingDrag(value) {
-        this.playerEntity.swingDrag = value;
+    #primaryPlayer() {
+        return this.#requirePlayer(this.#primaryPlayerId);
     }
 
-    get ropeDamageBoostRemaining() {
-        return this.playerEntity.ropeDamageBoostRemaining;
-    }
-
-    set ropeDamageBoostRemaining(value) {
-        this.playerEntity.ropeDamageBoostRemaining = value;
-    }
-
-    get lastCheckpointLoss() {
-        return this.playerEntity.lastCheckpointLoss;
-    }
-
-    set lastCheckpointLoss(value) {
-        this.playerEntity.lastCheckpointLoss = value;
+    #restorePlayer(player, state) {
+        player.physics.position.set(state.position.x, state.position.y);
+        player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        player.physics.isGrounded = state.isGrounded;
+        if (state.rope.isAttached) {
+            player.rope.anchor = new Vector2(state.rope.anchor.x, state.rope.anchor.y);
+            player.rope.length = state.rope.length;
+            player.rope.currentLength = state.rope.currentLength;
+            player.rope.tension = state.rope.tension;
+        } else {
+            player.rope.detach();
+        }
+        player.aimWorld = { ...state.control.aimWorld };
+        player.lastPointer = { ...state.control.lastPointer };
+        player.lastViewport = { ...state.control.lastViewport };
+        player.wasPointerDown = state.control.wasPointerDown;
+        player.attachBufferRemaining = state.control.attachBufferRemaining;
+        player.swingDrag = cloneSwingDrag(state.control.swingDrag);
+        player.health = state.health;
+        player.maxHealth = state.maxHealth;
+        player.hitInvulnerabilityRemaining = state.hitInvulnerabilityRemaining;
+        player.ropeDisabledRemaining = state.ropeDisabledRemaining;
+        player.lifeState = state.lifeState;
+        player.weapon.range = state.weapon.range;
+        player.weapon.damage = state.weapon.damage;
+        player.weapon.fireInterval = state.weapon.fireInterval;
+        player.weapon.cooldown = state.weapon.cooldown;
+        player.artifacts.replace(state.artifacts);
+        player.ropeDamageBoostRemaining = state.ropeDamageBoostRemaining;
+        player.lastCheckpointLoss = [...state.lastCheckpointLoss];
+        player.attachmentCandidate = this.findAttachment(player.aimWorld, player);
     }
 
     step(dt, command) {
-        return this.stepPlayers(dt, new Map([[this.playerEntity.id, command]]));
+        return this.stepPlayers(dt, new Map([[this.#primaryPlayerId, command]]));
     }
 
     stepCommandBatch(dt, batch) {
@@ -155,7 +351,7 @@ export class GameSimulation {
             this.eventFlash.age += dt;
             return;
         }
-        if (this.player.position.distanceTo(this.world.summit) <= this.world.summit.radius) {
+        if (this.#primaryPlayer().physics.position.distanceTo(this.world.summit) <= this.world.summit.radius) {
             this.beginCompletion();
             return;
         }
@@ -402,14 +598,14 @@ export class GameSimulation {
         return Object.freeze({ accepted: true, checkpointId, artifactId });
     }
 
-    applyArtifactEffects(player = this.playerEntity) {
+    applyArtifactEffects(player = this.#primaryPlayer()) {
         const effects = getArtifactEffects(player.artifacts.snapshot(), player.ropeDamageBoostRemaining);
         player.weapon.damage = player.weapon.baseDamage * effects.damageMultiplier;
         player.weapon.fireInterval = player.weapon.baseFireInterval * effects.fireIntervalMultiplier;
     }
 
     updateSwingDrag(pointer, viewport, dt) {
-        this.updatePlayerSwingDrag(this.playerEntity, pointer, viewport, dt);
+        this.updatePlayerSwingDrag(this.#primaryPlayer(), pointer, viewport, dt);
     }
 
     updatePlayerSwingDrag(player, pointer, viewport, dt) {
@@ -602,7 +798,7 @@ export class GameSimulation {
         return events;
     }
 
-    findAttachment(aimPoint, player = this.playerEntity) {
+    findAttachment(aimPoint, player = this.#primaryPlayer()) {
         let best = null;
         let bestScore = Number.POSITIVE_INFINITY;
         for (const surface of this.world.surfaces) {
@@ -677,36 +873,38 @@ export class GameSimulation {
     beginCompletion() {
         if (this.runState !== "playing") return;
         this.runState = "completed";
-        this.rope.detach();
-        this.swingDrag = null;
+        const player = this.#primaryPlayer();
+        player.rope.detach();
+        player.swingDrag = null;
         this.eventFlash = { type: "completed", age: 0, position: this.world.summit };
     }
 
     snapshot() {
+        const player = this.#primaryPlayer();
         return {
             tick: this.tick,
             world: this.world,
-            player: this.player,
-            rope: this.rope,
-            aimWorld: this.aimWorld,
-            attachmentCandidate: this.attachmentCandidate,
+            player: player.physics,
+            rope: player.rope,
+            aimWorld: player.aimWorld,
+            attachmentCandidate: player.attachmentCandidate,
             eventFlash: this.eventFlash,
-            swingDrag: this.swingDrag,
+            swingDrag: player.swingDrag,
             enemies: this.enemies,
             projectiles: this.projectiles,
             enemyProjectiles: this.enemyProjectiles,
-            playerHealth: this.playerEntity.health,
-            playerMaxHealth: this.playerEntity.maxHealth,
-            ropeDisabledRemaining: this.playerEntity.ropeDisabledRemaining,
-            playerLifeState: this.playerEntity.lifeState,
+            playerHealth: player.health,
+            playerMaxHealth: player.maxHealth,
+            ropeDisabledRemaining: player.ropeDisabledRemaining,
+            playerLifeState: player.lifeState,
             runState: this.runState,
             activeCheckpoint: this.activeCheckpoint,
-            artifacts: this.artifacts.snapshot(),
-            lastCheckpointLoss: [...this.lastCheckpointLoss],
-            artifactReward: this.artifactReward,
+            artifacts: player.artifacts.snapshot(),
+            lastCheckpointLoss: [...player.lastCheckpointLoss],
+            artifactReward: this.artifactRewards.get(player.id) ?? null,
             artifactRewards: Object.fromEntries(this.artifactRewards),
             rewardedCheckpointIds: [...this.rewardedCheckpointIds],
-            ropeDamageBoostRemaining: this.ropeDamageBoostRemaining,
+            ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
             metrics: this.metrics.snapshot(),
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance

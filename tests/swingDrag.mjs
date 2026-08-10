@@ -23,24 +23,15 @@ export function run() {
 
     let impulseCount = 0;
     let appliedMagnitude = 0;
-    const app = Object.create(GameSimulation.prototype);
-    const rope = { anchor: { x: 0, y: 0 } };
-    const physics = {
-        position: { x: 0, y: 100 },
-        addImpulse(_direction, magnitude) {
-            impulseCount += 1;
-            appliedMagnitude = magnitude;
-        }
+    const app = new GameSimulation();
+    const player = app.players.find(({ id }) => id === app.getPrimaryPlayerId());
+    player.physics.position.set(0, 100);
+    player.physics.addImpulse = (_direction, magnitude) => {
+        impulseCount += 1;
+        appliedMagnitude = magnitude;
     };
-    app.rope = rope;
-    app.player = physics;
-    app.playerEntity = {
-        rope,
-        physics,
-        artifacts: null,
-        swingDrag: { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false },
-        ropeDamageBoostRemaining: 0
-    };
+    player.rope.attach(player.physics.position, { x: 0, y: 0 });
+    player.swingDrag = { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false };
     app.eventFlash = { type: "attach", age: 0 };
     const viewport = { width: 1280, height: 720 };
     app.updateSwingDrag({ x: 20, y: 200 }, viewport, 0.04);
@@ -49,6 +40,6 @@ export function run() {
     app.updateSwingDrag({ x: 0, y: 200 }, viewport, 0.04);
     assert.equal(impulseCount, 1, "each attachment must grant exactly one swing impulse");
     assert.equal(appliedMagnitude, ROPE_CONFIG.swingImpulse, "swing must use the configured impulse strength");
-    assert.equal(app.swingDrag.used, true);
+    assert.equal(player.swingDrag.used, true);
     assert.equal(app.eventFlash.type, "swing");
 }

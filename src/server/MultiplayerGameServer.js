@@ -104,11 +104,11 @@ export class MultiplayerGameServer {
             socket.close(1013, "channel full");
             return;
         }
-        const player =
+        const playerId =
             room.sockets.size === 0
-                ? room.simulation.playerEntity
-                : room.simulation.addPlayer({ x: 160 + room.sockets.size * 40, y: 500 }).entity;
-        room.sockets.set(socket, player.id);
+                ? room.simulation.getPrimaryPlayerId()
+                : room.simulation.addPlayer({ x: 160 + room.sockets.size * 40, y: 500 }).entity.id;
+        room.sockets.set(socket, playerId);
         this.connections.set(socket, room);
         socket.on("message", (data, binary) => this.receive(socket, data, binary));
         socket.on("close", () => this.leave(socket));
@@ -117,7 +117,7 @@ export class MultiplayerGameServer {
             JSON.stringify({
                 type: "welcome",
                 channelId,
-                playerId: player.id,
+                playerId,
                 snapshot: room.adapter.snapshot()
             })
         );

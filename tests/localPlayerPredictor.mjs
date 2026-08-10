@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { PLAYER_CONFIG } from "../src/game/config.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { LocalPlayerPredictor } from "../src/game/runtime/LocalPlayerPredictor.js";
@@ -8,6 +9,10 @@ import { commandForLocalSimulation } from "../src/game/MultiplayerGameApp.js";
 
 function close(actual, expected, label) {
     assert.ok(Math.abs(actual - expected) < 1e-9, `${label}: ${actual} != ${expected}`);
+}
+
+function primaryPlayer(simulation) {
+    return simulation.players.find(({ id }) => id === simulation.getPrimaryPlayerId());
 }
 
 function withPlayerPosition(snapshot, x, serverTick) {
@@ -44,17 +49,18 @@ export function run() {
     assert.equal(rewardNavigation.pointer.down, false, "artifact navigation must not attach the local rope");
 
     const server = new GameSimulation();
+    const serverPlayer = primaryPlayer(server);
     server.enemies = [];
     server.tick = 6;
-    server.rope.attach(server.player.position, {
-        x: server.player.position.x,
-        y: server.player.position.y - 80
+    serverPlayer.rope.attach(serverPlayer.physics.position, {
+        x: serverPlayer.physics.position.x,
+        y: serverPlayer.physics.position.y - 80
     });
-    server.playerEntity.aimWorld = { x: server.rope.anchor.x, y: server.rope.anchor.y };
-    server.playerEntity.lastPointer = { x: 400, y: 300, down: true };
-    server.playerEntity.lastViewport = { width: 1280, height: 720 };
-    server.playerEntity.wasPointerDown = true;
-    server.playerEntity.swingDrag = {
+    serverPlayer.aimWorld = { x: serverPlayer.rope.anchor.x, y: serverPlayer.rope.anchor.y };
+    serverPlayer.lastPointer = { x: 400, y: 300, down: true };
+    serverPlayer.lastViewport = { width: 1280, height: 720 };
+    serverPlayer.wasPointerDown = true;
+    serverPlayer.swingDrag = {
         origin: { x: 400, y: 300 },
         direction: null,
         progress: 0,
@@ -70,26 +76,24 @@ export function run() {
             pointer: { x: 300, y: 300, down: true },
             viewport: { width: 1280, height: 720 }
         },
-        server.playerEntity.aimWorld
+        serverPlayer.aimWorld
     );
-    const pending = createPlayerCommandBatch(7, [
-        { playerId: server.playerEntity.id, sequence: 0, command: dragCommand }
-    ]);
+    const pending = createPlayerCommandBatch(7, [{ playerId: serverPlayer.id, sequence: 0, command: dragCommand }]);
 
-    const predictor = new LocalPlayerPredictor({ playerId: server.playerEntity.id, predictionLeadTicks: 0 });
+    const predictor = new LocalPlayerPredictor({ playerId: serverPlayer.id, predictionLeadTicks: 0 });
     const predicted = predictor.reconcile(snapshot, [pending]);
     server.stepCommandBatch(1 / 120, pending);
 
     assert.equal(predicted.tick, server.tick);
-    close(predicted.position.x, server.player.position.x, "position.x");
-    close(predicted.position.y, server.player.position.y, "position.y");
-    close(predicted.velocity.x, server.player.velocity.x, "velocity.x");
-    close(predicted.velocity.y, server.player.velocity.y, "velocity.y");
-    assert.equal(predicted.rope.isAttached, server.rope.isAttached);
-    close(predicted.rope.length, server.rope.length, "rope.length");
+    close(predicted.position.x, serverPlayer.physics.position.x, "position.x");
+    close(predicted.position.y, serverPlayer.physics.position.y, "position.y");
+    close(predicted.velocity.x, serverPlayer.physics.velocity.x, "velocity.x");
+    close(predicted.velocity.y, serverPlayer.physics.velocity.y, "velocity.y");
+    assert.equal(predicted.rope.isAttached, serverPlayer.rope.isAttached);
+    close(predicted.rope.length, serverPlayer.rope.length, "rope.length");
     assert.equal(predicted.swingDrag.used, true);
-    assert.equal(predicted.swingDrag.used, server.playerEntity.swingDrag.used);
-    close(predicted.ropeDamageBoostRemaining, server.playerEntity.ropeDamageBoostRemaining, "rope boost");
+    assert.equal(predicted.swingDrag.used, serverPlayer.swingDrag.used);
+    close(predicted.ropeDamageBoostRemaining, serverPlayer.ropeDamageBoostRemaining, "rope boost");
 
     const detachedSnapshot = {
         ...snapshot,
@@ -109,10 +113,11 @@ export function run() {
         "routine snapshots must not overwrite owner rope"
     );
     assert.equal(predictor.metrics().hardSnaps, 0);
-    predictor.applyPredictedImpact({ resolution: "rope-cut" });
+    assert.equal(predictor.applyPredictedImpact({ resolution: "rope-cut" }), true);
     assert.equal(predictor.state().rope.isAttached, false, "predicted rope cut must react before server round trip");
 
     const movingServer = new GameSimulation();
+    const movingPlayer = primaryPlayer(movingServer);
     movingServer.enemies = [];
     movingServer.tick = 6;
     const movingSnapshot = buildAuthoritySnapshot({ simulation: movingServer, acknowledgements: {} });
@@ -127,17 +132,39 @@ export function run() {
         { x: 0, y: 0 }
     );
     const movingPredictor = new LocalPlayerPredictor({
-        playerId: movingServer.playerEntity.id,
+        playerId: movingPlayer.id,
         predictionLeadTicks: 0
     });
     const movingPrediction = movingPredictor.reconcile(movingSnapshot, [
-        createPlayerCommandBatch(7, [{ playerId: movingServer.playerEntity.id, sequence: 0, command: move }]),
-        createPlayerCommandBatch(9, [{ playerId: movingServer.playerEntity.id, sequence: 1, command: move }])
+        createPlayerCommandBatch(7, [{ playerId: movingPlayer.id, sequence: 0, command: move }]),
+        createPlayerCommandBatch(9, [{ playerId: movingPlayer.id, sequence: 1, command: move }])
     ]);
     assert.ok(movingPrediction.velocity.x > 10, "local prediction must simulate held input on the missing tick");
+    assert.equal(
+        movingPredictor.renderSnapshot().world.seed,
+        movingSnapshot.worldSeed,
+        "render consumers must receive local simulation state through the predictor contract"
+    );
+    const collisionStart = movingPredictor.state().position.x;
+    assert.equal(
+        movingPredictor.resolveCollisions(
+            [
+                {
+                    id: "overlapping-player",
+                    position: { ...movingPredictor.state().position },
+                    radius: PLAYER_CONFIG.radius,
+                    lifeState: "active"
+                }
+            ],
+            PLAYER_CONFIG.radius
+        ),
+        true,
+        "the predictor must own collision mutation of its composed player simulation"
+    );
+    assert.notEqual(movingPredictor.state().position.x, collisionStart);
 
     const continuous = new LocalPlayerPredictor({
-        playerId: movingServer.playerEntity.id,
+        playerId: movingPlayer.id,
         predictionLeadTicks: 0
     });
     continuous.reconcile(movingSnapshot, []);
@@ -196,14 +223,14 @@ export function run() {
         }
     };
     const attackPredictor = new LocalPlayerPredictor({
-        playerId: movingServer.playerEntity.id,
+        playerId: movingPlayer.id,
         predictionLeadTicks: 0
     });
     attackPredictor.reconcile(attackSnapshot, []);
     const attackTick = attackPredictor.advance(move).tick;
     const predictedAttacks = attackPredictor.drainPredictedEvents();
     assert.equal(predictedAttacks.length, 1, "owner fire must emit a local predicted spawn");
-    assert.equal(predictedAttacks[0].predictionId, `${movingServer.playerEntity.id}:${attackTick}`);
+    assert.equal(predictedAttacks[0].predictionId, `${movingPlayer.id}:${attackTick}`);
     assert.deepEqual(attackPredictor.drainPredictedEvents(), []);
 
     const secondPlayerId = "player-2";
@@ -215,11 +242,6 @@ export function run() {
         }
     };
     const secondPlayerPredictor = new LocalPlayerPredictor({ playerId: secondPlayerId, predictionLeadTicks: 0 });
-    assert.equal(
-        secondPlayerPredictor.simulation.playerEntity.id,
-        secondPlayerId,
-        "the prediction simulation itself must own the authenticated player id"
-    );
     secondPlayerPredictor.reconcile(secondPlayerSnapshot, []);
     secondPlayerPredictor.advance(move);
     const secondPlayerAttacks = secondPlayerPredictor.drainPredictedEvents();

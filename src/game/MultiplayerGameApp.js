@@ -6,7 +6,6 @@ import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
-import { resolvePlayerCollisions } from "./physics/PlayerCollision.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "./rewards/ArtifactRewardSelection.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 
@@ -61,7 +60,7 @@ export class MultiplayerGameApp {
     }
 
     flushInterruptedRopeRelease(input, reason) {
-        if (reason === "pointerup" || this.authority.closed || !this.authority.predictor) return false;
+        if (reason === "pointerup" || this.authority.closed || !this.authority.snapshot().owner) return false;
         this.update(this.runner.dt, input, true);
         return true;
     }
@@ -112,11 +111,7 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
         const events = this.authority.drainEvents();
-        const authorityFeedback = this.predictableProjectiles.apply(
-            events,
-            this.authority.latestSnapshot.serverTick,
-            current.state
-        );
+        const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
         this.combatFeedback.apply(authorityFeedback);
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
@@ -141,13 +136,12 @@ export class MultiplayerGameApp {
         }
         const gameplayCommand = commandForLocalSimulation(command, choosingArtifact);
         this.authority.advance(gameplayCommand);
-        resolvePlayerCollisions(
-            this.authority.predictor.simulation.playerEntity,
+        this.authority.resolveOwnerCollisions(
             current.state.players.filter(({ id }) => id !== this.authority.playerId),
             PLAYER_CONFIG.radius
         );
         this.predictableProjectiles.predict(this.authority.drainPredictedEvents());
-        const predictedPlayer = this.authority.predictor.state();
+        const predictedPlayer = this.authority.snapshot().owner;
         const localAuthorityPlayer = current.state.players.find(({ id }) => id === this.authority.playerId);
         const collisionState = {
             ...current.state,
@@ -163,7 +157,7 @@ export class MultiplayerGameApp {
         const predictedResolutions = this.predictableProjectiles.update(dt, collisionState, predictedPlayer.tick);
         for (const resolution of predictedResolutions) {
             if (resolution.projectileId) {
-                this.authority.predictor.applyPredictedImpact(resolution);
+                this.authority.applyPredictedImpact(resolution);
                 this.authority.submitImpactClaim(resolution);
             } else {
                 this.authority.submitHitClaim(resolution);
@@ -187,7 +181,8 @@ export class MultiplayerGameApp {
         if (!remote.state || !remote.predicted) return;
         const localState = remote.state.players.find(({ id }) => id === this.authority.playerId);
         if (!localState) return;
-        const base = this.authority.predictor.simulation.snapshot();
+        const base = this.authority.renderSnapshot();
+        if (!base) return;
         const predictableProjectiles = this.predictableProjectiles.snapshot();
         const player = renderPlayer(localState, remote.predicted);
         const otherPlayers = remote.state.players
@@ -204,7 +199,7 @@ export class MultiplayerGameApp {
             player,
             rope: remote.predicted.rope,
             swingDrag: remote.predicted.swingDrag,
-            attachmentCandidate: this.authority.predictor.simulation.playerEntity.attachmentCandidate,
+            attachmentCandidate: base.attachmentCandidate,
             enemies: remote.state.enemies,
             ...predictableProjectiles,
             ...this.combatFeedback.snapshot(),

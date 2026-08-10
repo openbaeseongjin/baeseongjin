@@ -160,6 +160,18 @@ export class RemoteGameAuthority {
         return this.predictor?.advance(command) ?? null;
     }
 
+    resolveOwnerCollisions(otherPlayers, radius) {
+        return this.predictor?.resolveCollisions(otherPlayers, radius) ?? false;
+    }
+
+    renderSnapshot() {
+        return this.predictor?.renderSnapshot() ?? null;
+    }
+
+    applyPredictedImpact(event) {
+        return this.predictor?.applyPredictedImpact(event) ?? false;
+    }
+
     submitHitClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createProjectileHitClaim({
@@ -208,6 +220,8 @@ export class RemoteGameAuthority {
         return {
             state: this.buffer.sample({ now: this.now(), localPlayerId: this.playerId }),
             predicted: this.predictor?.presentationState() ?? null,
+            owner: this.predictor?.state() ?? null,
+            serverTick: this.latestSnapshot?.serverTick ?? null,
             connected: !this.closed
         };
     }

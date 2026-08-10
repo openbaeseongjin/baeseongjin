@@ -38,13 +38,13 @@ export class AuthorityServerSession {
     }
 
     submitHitClaim(authenticatedPlayerId, claim) {
-        if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
         const existing = this.resolvedHitClaims.get(claim.predictionId);
         if (existing) return existing.receipt;
-        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
-        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.inputLeadTicks;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
         if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
             return Object.freeze({ predictionId: claim.predictionId, accepted: false, reason: "tick-window" });
         }
@@ -55,19 +55,22 @@ export class AuthorityServerSession {
             })
         });
         if (result.accepted) {
-            this.resolvedHitClaims.set(claim.predictionId, { receipt: result, resolvedAtTick: this.simulation.tick });
+            this.resolvedHitClaims.set(claim.predictionId, {
+                receipt: result,
+                resolvedAtTick: this.simulation.getTick()
+            });
         }
         return result;
     }
 
     submitImpactClaim(authenticatedPlayerId, claim) {
-        if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
         const existing = this.resolvedImpactClaims.get(claim.projectileId);
         if (existing) return existing.receipt;
-        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
-        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.inputLeadTicks;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
         if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
             return Object.freeze({ projectileId: claim.projectileId, accepted: false, reason: "tick-window" });
         }
@@ -80,14 +83,14 @@ export class AuthorityServerSession {
         if (result.accepted) {
             this.resolvedImpactClaims.set(claim.projectileId, {
                 receipt: result,
-                resolvedAtTick: this.simulation.tick
+                resolvedAtTick: this.simulation.getTick()
             });
         }
         return result;
     }
 
     submitArtifactSelection(authenticatedPlayerId, claim) {
-        if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
         const selectionKey = `${authenticatedPlayerId}:${claim.checkpointId}`;
@@ -101,8 +104,8 @@ export class AuthorityServerSession {
                 reason: "selection-conflict"
             });
         }
-        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
-        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.maxFutureTicks;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
         if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
             return Object.freeze({
                 checkpointId: claim.checkpointId,
@@ -121,22 +124,21 @@ export class AuthorityServerSession {
     }
 
     submitOwnerMotion(authenticatedPlayerId, state) {
-        const player = this.simulation.players.find(({ id }) => id === authenticatedPlayerId);
+        const player = this.simulation.playerState(authenticatedPlayerId);
         if (!player) throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         const previousTick = this.lastOwnerMotionTicks.get(authenticatedPlayerId) ?? -1;
         if (state.clientTick <= previousTick) {
             return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "stale-tick" });
         }
-        const minimumTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
-        const maximumTick = this.simulation.tick + MULTIPLAYER_TIMING.maxFutureTicks;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
         if (state.clientTick < minimumTick || state.clientTick > maximumTick) {
             return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "tick-window" });
         }
         const previousRopeTick = this.lastOwnerRopeTicks.get(authenticatedPlayerId) ?? -1;
         const ropeReleased = !state.rope.isAttached && state.clientTick > previousRopeTick && player.rope.isAttached;
         if (!state.rope.isAttached && state.clientTick > previousRopeTick) {
-            player.rope.detach();
-            player.swingDrag = null;
+            this.simulation.releasePlayerRope(authenticatedPlayerId);
             this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
         }
         const reject = (reason) =>
@@ -163,37 +165,27 @@ export class AuthorityServerSession {
         if (reportedSpeed > MULTIPLAYER_TIMING.ownerMotionMaxSpeed) {
             return reject("speed-envelope");
         }
-        const tickDelta = Math.max(1, state.clientTick - Math.max(previousTick, this.simulation.tick));
-        const distance = Math.hypot(
-            state.position.x - player.physics.position.x,
-            state.position.y - player.physics.position.y
-        );
+        const tickDelta = Math.max(1, state.clientTick - Math.max(previousTick, this.simulation.getTick()));
+        const distance = Math.hypot(state.position.x - player.position.x, state.position.y - player.position.y);
         const maximumDistance =
             MULTIPLAYER_TIMING.ownerMotionBaseTolerance + (Math.max(900, reportedSpeed) * tickDelta) / 120;
         if (distance > maximumDistance) {
             return reject("movement-envelope");
         }
-        player.physics.position.set(state.position.x, state.position.y);
-        player.physics.velocity.set(state.velocity.x, state.velocity.y);
-        player.physics.isGrounded = state.isGrounded;
-        if (state.rope.isAttached && state.clientTick > previousRopeTick && player.ropeDisabledRemaining <= 0) {
-            player.rope.attach(player.physics.position, state.rope.anchor);
-            this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
-        } else if (!state.rope.isAttached || player.ropeDisabledRemaining > 0) {
-            player.rope.detach();
-            player.swingDrag = null;
-        }
+        const synchronizeRope = state.clientTick > previousRopeTick;
+        this.simulation.applyOwnerMotion(authenticatedPlayerId, state, { synchronizeRope });
+        if (synchronizeRope) this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
         this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
         return Object.freeze({ clientTick: state.clientTick, accepted: true });
     }
 
     submit(authenticatedPlayerId, batch) {
-        if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
-        if (batch.tick <= this.simulation.tick) {
+        if (batch.tick <= this.simulation.getTick()) {
             return createCommandReceipt({
-                serverTick: this.simulation.tick,
+                serverTick: this.simulation.getTick(),
                 targetTick: batch.tick,
                 accepted: Object.freeze([]),
                 rejected: Object.freeze(
@@ -206,7 +198,7 @@ export class AuthorityServerSession {
         const foreignEntries = batch.commands.filter(({ playerId }) => playerId !== authenticatedPlayerId);
         if (foreignEntries.length > 0) {
             return createCommandReceipt({
-                serverTick: this.simulation.tick,
+                serverTick: this.simulation.getTick(),
                 targetTick: batch.tick,
                 accepted: Object.freeze([]),
                 rejected: Object.freeze(
@@ -216,9 +208,9 @@ export class AuthorityServerSession {
                 )
             });
         }
-        const result = this.inbox.ingest(batch, this.simulation.tick);
+        const result = this.inbox.ingest(batch, this.simulation.getTick());
         return createCommandReceipt({
-            serverTick: this.simulation.tick,
+            serverTick: this.simulation.getTick(),
             targetTick: batch.tick,
             accepted: result.accepted,
             rejected: result.rejected
@@ -226,13 +218,10 @@ export class AuthorityServerSession {
     }
 
     advance() {
-        const nextTick = this.simulation.tick + 1;
-        const commands = this.inputState.expand(
-            this.inbox.take(nextTick),
-            this.simulation.players.map(({ id }) => id)
-        );
+        const nextTick = this.simulation.getTick() + 1;
+        const commands = this.inputState.expand(this.inbox.take(nextTick), this.simulation.playerIds());
         this.simulation.stepCommandBatch(this.fixedDt, commands);
-        const oldestRememberedTick = this.simulation.tick - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedHitClaims.delete(predictionId);
         }
