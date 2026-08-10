@@ -32,12 +32,24 @@ export function closestPointOnSurface(point, surface) {
 }
 
 export class WorldGenerator {
-    constructor({ seed, levelCount, verticalStep, laneWidth, enemySpawnInterval, summitRadius, floorY }) {
+    constructor({
+        seed,
+        levelCount,
+        verticalStep,
+        laneWidth,
+        enemySpawnInterval,
+        checkpointInterval,
+        checkpointRadius,
+        summitRadius,
+        floorY
+    }) {
         this.seed = seed;
         this.levelCount = levelCount;
         this.verticalStep = verticalStep;
         this.laneWidth = laneWidth;
         this.enemySpawnInterval = enemySpawnInterval;
+        this.checkpointInterval = checkpointInterval;
+        this.checkpointRadius = checkpointRadius;
         this.summitRadius = summitRadius;
         this.floorY = floorY;
     }
@@ -73,6 +85,17 @@ export class WorldGenerator {
         }
 
         const summitPlatform = route.at(-1);
+        const checkpoints = route
+            .filter((platform) => platform.level % this.checkpointInterval === 0 && platform.level < this.levelCount)
+            .map((platform) =>
+                Object.freeze({
+                    id: `checkpoint-${platform.level}`,
+                    level: platform.level,
+                    x: platform.x + platform.width * 0.5,
+                    y: platform.topY - 24,
+                    radius: this.checkpointRadius
+                })
+            );
         const summit = Object.freeze({
             x: summitPlatform.x + summitPlatform.width * 0.5,
             y: summitPlatform.topY - this.summitRadius,
@@ -84,6 +107,7 @@ export class WorldGenerator {
             surfaces: Object.freeze(surfaces),
             route: Object.freeze(route),
             enemySpawns: Object.freeze(enemySpawns),
+            checkpoints: Object.freeze(checkpoints),
             summit,
             topY: route.at(-1).y
         });

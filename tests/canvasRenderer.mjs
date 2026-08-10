@@ -11,6 +11,7 @@ export function run() {
         beginPath() {},
         arc() {},
         fill() {},
+        stroke() {},
         fillText: (text) => textCalls.push(text),
         strokeRect: (...args) => borderCalls.push(args)
     };
@@ -42,4 +43,13 @@ export function run() {
     textCalls.length = 0;
     renderer.drawRunEndOverlay({ runState: "completed", defeatReason: null, restartRemaining: 2.4 });
     assert.deepEqual(textCalls, ["정상 도달", "전체 월드 등반 완료"]);
+    textCalls.length = 0;
+    renderer.drawCheckpoints(
+        [
+            { id: "checkpoint-0", level: 0, x: 0, y: 0, radius: 38 },
+            { id: "checkpoint-8", level: 8, x: 0, y: -100, radius: 38 }
+        ],
+        { id: "checkpoint-8", level: 8 }
+    );
+    assert.deepEqual(textCalls, ["체크", "활성"]);
 }

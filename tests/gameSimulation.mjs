@@ -70,4 +70,21 @@ export function run() {
         "the summit ends the single large world without a stage restart"
     );
     assert.equal(completed.snapshot().playerHealth, 1);
+
+    const checkpointRun = new GameSimulation();
+    const targetCheckpoint = checkpointRun.world.checkpoints[2];
+    checkpointRun.player.position.x = targetCheckpoint.x;
+    checkpointRun.player.position.y = targetCheckpoint.y;
+    checkpointRun.step(1 / 60, command);
+    assert.equal(checkpointRun.snapshot().activeCheckpoint.id, targetCheckpoint.id);
+    assert.equal(checkpointRun.snapshot().eventFlash.type, "checkpoint");
+    const earlierCheckpoint = checkpointRun.world.checkpoints[1];
+    checkpointRun.player.position.x = earlierCheckpoint.x;
+    checkpointRun.player.position.y = earlierCheckpoint.y;
+    checkpointRun.step(1 / 60, command);
+    assert.equal(
+        checkpointRun.snapshot().activeCheckpoint.id,
+        targetCheckpoint.id,
+        "checkpoint progress must not go backward"
+    );
 }

@@ -53,6 +53,7 @@ export class GameSimulation {
         this.runState = "playing";
         this.defeatReason = null;
         this.restartRemaining = 0;
+        this.activeCheckpoint = this.world.checkpoints[0] ?? null;
     }
 
     step(dt, command) {
@@ -68,6 +69,7 @@ export class GameSimulation {
             this.beginCompletion();
             return;
         }
+        this.updateCheckpointProgress();
         const canControl = this.playerEntity.lifeState === "active";
         const effectiveCommand = canControl
             ? command
@@ -162,6 +164,15 @@ export class GameSimulation {
         this.eventFlash.age += dt;
         if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) {
             this.beginDefeat("fall");
+        }
+    }
+
+    updateCheckpointProgress() {
+        for (const checkpoint of this.world.checkpoints) {
+            if (checkpoint.level <= (this.activeCheckpoint?.level ?? -1)) continue;
+            if (this.player.position.distanceTo(checkpoint) > checkpoint.radius) continue;
+            this.activeCheckpoint = checkpoint;
+            this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint };
         }
     }
 
@@ -277,6 +288,7 @@ export class GameSimulation {
             runState: this.runState,
             defeatReason: this.defeatReason,
             restartRemaining: this.restartRemaining,
+            activeCheckpoint: this.activeCheckpoint,
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };

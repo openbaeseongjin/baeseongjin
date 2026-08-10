@@ -31,6 +31,12 @@ export function run() {
         radius: WORLD_CONFIG.summitRadius
     });
     assert.deepEqual(first.summit, second.summit, "the same seed must produce the same summit target");
+    assert.equal(first.checkpoints.length, WORLD_CONFIG.levelCount / WORLD_CONFIG.checkpointInterval);
+    assert.deepEqual(first.checkpoints, second.checkpoints, "the same seed must produce the same checkpoints");
+    assert.deepEqual(
+        first.checkpoints.map((checkpoint) => checkpoint.level),
+        [0, 8, 16, 24, 32, 40]
+    );
 
     for (let index = 1; index < first.route.length; index += 1) {
         const previous = first.route[index - 1];
