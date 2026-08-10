@@ -161,6 +161,37 @@ export function run() {
     );
     assert.equal(defeated.snapshot().metrics.defeats, 1);
 
+    const teamLoss = new GameSimulation();
+    const lossPartner = teamLoss.addPlayer({ x: 150, y: 500 });
+    const teamCheckpoint = teamLoss.world.checkpoints[2];
+    teamLoss.activeCheckpoint = teamCheckpoint;
+    for (const id of ["a1", "a2", "a3"]) teamLoss.playerEntity.artifacts.add({ id });
+    for (const id of ["b1", "b2", "b3"]) lossPartner.artifacts.add({ id });
+    teamLoss.playerEntity.health = 0;
+    lossPartner.entity.health = 0;
+    teamLoss.step(1 / 120, command);
+    assert.equal(teamLoss.runState, "defeated");
+    assert.equal(teamLoss.playerEntity.artifacts.snapshot().length, 3, "downing alone must not remove artifacts");
+    assert.equal(lossPartner.artifacts.snapshot().length, 3);
+    teamLoss.step(LIFE_CONFIG.defeatRestartDelay, command);
+    for (const player of teamLoss.players) {
+        assert.equal(player.lifeState, "active");
+        assert.equal(player.physics.position.x, teamCheckpoint.x);
+        assert.equal(player.physics.position.y, teamCheckpoint.y);
+        assert.equal(player.artifacts.snapshot().length, 2);
+        assert.equal(player.lastCheckpointLoss.length, 1);
+    }
+    assert.deepEqual(
+        teamLoss.playerEntity.lastCheckpointLoss.map(({ id }) => id),
+        ["a3"]
+    );
+    assert.deepEqual(
+        lossPartner.entity.lastCheckpointLoss.map(({ id }) => id),
+        ["b3"]
+    );
+    const lossEvents = teamLoss.drainReplicationEvents().filter(({ eventType }) => eventType === "artifact-loss");
+    assert.deepEqual(lossEvents.map(({ playerId }) => playerId).sort(), teamLoss.players.map(({ id }) => id).sort());
+
     const completed = new GameSimulation();
     completed.rope.attach(completed.player.position, {
         x: completed.player.position.x,

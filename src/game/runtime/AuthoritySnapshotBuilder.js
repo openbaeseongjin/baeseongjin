@@ -31,7 +31,7 @@ function playerState(player, simulation) {
         },
         artifacts: player.artifacts.snapshot(),
         ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
-        lastCheckpointLoss: player === simulation.playerEntity ? simulation.lastCheckpointLoss : []
+        lastCheckpointLoss: player.lastCheckpointLoss
     };
 }
 

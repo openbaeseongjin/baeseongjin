@@ -12,6 +12,7 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         physics,
         rope,
         artifacts,
+        lastCheckpointLoss: [],
         aimWorld: Object.freeze({ x: 0, y: 0 }),
         attachmentCandidate: null,
         wasPointerDown: false,

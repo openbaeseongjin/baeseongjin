@@ -106,6 +106,14 @@ export class GameSimulation {
         this.playerEntity.ropeDamageBoostRemaining = value;
     }
 
+    get lastCheckpointLoss() {
+        return this.playerEntity.lastCheckpointLoss;
+    }
+
+    set lastCheckpointLoss(value) {
+        this.playerEntity.lastCheckpointLoss = value;
+    }
+
     step(dt, command) {
         return this.stepPlayers(dt, new Map([[this.playerEntity.id, command]]));
     }
@@ -462,18 +470,32 @@ export class GameSimulation {
 
     respawnAtCheckpoint() {
         const respawnPosition = this.activeCheckpoint ?? { x: 120, y: 500 };
-        this.player.reset(respawnPosition);
-        this.rope.detach();
-        this.attachBufferRemaining = 0;
         this.eventFlash = { type: "reset", age: 0 };
-        this.swingDrag = null;
-        this.playerEntity.health = this.playerEntity.maxHealth;
-        this.playerEntity.weapon.cooldown = 0;
-        this.playerEntity.hitInvulnerabilityRemaining = 0;
-        this.playerEntity.ropeDisabledRemaining = 0;
-        this.playerEntity.lifeState = "active";
-        this.playerEntity.downedRemaining = 0;
-        this.playerEntity.reviveProgress = 0;
+        for (const player of this.players) {
+            player.physics.reset(respawnPosition);
+            player.rope.detach();
+            player.attachmentCandidate = null;
+            player.wasPointerDown = false;
+            player.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
+            player.attachBufferRemaining = 0;
+            player.swingDrag = null;
+            player.health = player.maxHealth;
+            player.weapon.cooldown = 0;
+            player.hitInvulnerabilityRemaining = 0;
+            player.ropeDisabledRemaining = 0;
+            player.lifeState = "active";
+            player.downedRemaining = 0;
+            player.reviveProgress = 0;
+            player.lastCheckpointLoss = player.artifacts.applyCheckpointLoss();
+            player.ropeDamageBoostRemaining = 0;
+            this.applyArtifactEffects(player);
+            if (player.lastCheckpointLoss.length > 0) {
+                this.recordReplicationEvent("artifact-loss", {
+                    playerId: player.id,
+                    artifactIds: player.lastCheckpointLoss.map(({ id }) => id)
+                });
+            }
+        }
         for (const projectile of [...this.projectiles, ...this.enemyProjectiles]) {
             this.recordProjectileResolution({
                 projectileId: projectile.id,
@@ -488,11 +510,13 @@ export class GameSimulation {
         this.runState = "playing";
         this.defeatReason = null;
         this.restartRemaining = 0;
-        this.lastCheckpointLoss = this.artifacts.applyCheckpointLoss();
-        this.ropeDamageBoostRemaining = 0;
-        this.applyArtifactEffects();
         if (this.lastCheckpointLoss.length > 0) {
-            this.eventFlash = { type: "artifact-loss", age: 0, artifacts: [...this.lastCheckpointLoss] };
+            this.eventFlash = {
+                type: "artifact-loss",
+                age: 0,
+                playerId: this.playerEntity.id,
+                artifacts: [...this.lastCheckpointLoss]
+            };
         }
         this.resets += 1;
     }
@@ -503,8 +527,10 @@ export class GameSimulation {
         this.runState = "defeated";
         this.defeatReason = reason;
         this.restartRemaining = LIFE_CONFIG.defeatRestartDelay;
-        this.rope.detach();
-        this.swingDrag = null;
+        for (const player of this.players) {
+            player.rope.detach();
+            player.swingDrag = null;
+        }
         this.eventFlash = { type: "defeat", age: 0 };
     }
 
