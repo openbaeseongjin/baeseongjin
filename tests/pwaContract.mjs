@@ -34,5 +34,7 @@ export function run() {
     const worker = readFileSync("sw.js", "utf8");
     assert.doesNotMatch(worker, /caches\./, "automatic updates must not introduce manual cache versioning");
     assert.match(worker, /cache:\s*"no-store"/, "same-origin game files must bypass the browser HTTP cache");
-    assert.match(readFileSync("scripts/serve.mjs", "utf8"), /application\/manifest\+json/);
+    assert.match(readFileSync("scripts/staticHandler.mjs", "utf8"), /application\/manifest\+json/);
+    assert.match(readFileSync("scripts/serve.mjs", "utf8"), /createStaticRequestHandler/);
+    assert.match(readFileSync("scripts/multiplayer-server.mjs", "utf8"), /createStaticRequestHandler/);
 }

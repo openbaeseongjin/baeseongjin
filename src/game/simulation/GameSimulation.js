@@ -58,6 +58,19 @@ export class GameSimulation {
         return runtime;
     }
 
+    removePlayer(playerId) {
+        const index = this.players.findIndex(({ id }) => id === playerId);
+        if (index < 0) return false;
+        const [removed] = this.players.splice(index, 1);
+        if (removed === this.playerEntity && this.players.length > 0) {
+            this.playerEntity = this.players[0];
+            this.player = this.playerEntity.physics;
+            this.rope = this.playerEntity.rope;
+            this.artifacts = this.playerEntity.artifacts;
+        }
+        return true;
+    }
+
     get aimWorld() {
         return this.playerEntity.aimWorld;
     }
