@@ -11,7 +11,8 @@ export const PLAYER_CONFIG = Object.freeze({
 export const ROPE_CONFIG = Object.freeze({
     maxAttachDistance: 440,
     attachBufferSeconds: 0.1,
-    swingDragThreshold: 44,
+    swingDragThreshold: 80,
+    swingDragMinHoldSeconds: 0.08,
     swingImpulse: 620
 });
 

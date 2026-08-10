@@ -72,12 +72,13 @@ export class GameApp {
                     origin: { x: input.pointer.x, y: input.pointer.y },
                     direction: null,
                     progress: 0,
+                    age: 0,
                     used: false
                 };
                 this.attachBufferRemaining = 0;
             }
         }
-        if (input.pointer.down && this.rope.isAttached) this.updateSwingDrag(input.pointer);
+        if (input.pointer.down && this.rope.isAttached) this.updateSwingDrag(input.pointer, dt);
         if (!input.pointer.down && this.wasPointerDown && this.rope.isAttached) {
             this.rope.detach();
             this.eventFlash = { type: "release", age: 0 };
@@ -93,8 +94,9 @@ export class GameApp {
         if (!this.player.position.isFinite() || this.player.position.y > WORLD_CONFIG.floorY + 780) this.resetRun();
     }
 
-    updateSwingDrag(pointer) {
+    updateSwingDrag(pointer, dt) {
         if (!this.swingDrag || this.swingDrag.used || !this.rope.anchor) return;
+        this.swingDrag.age += dt;
         const evaluation = evaluateSwingDrag({
             anchor: this.rope.anchor,
             playerPosition: this.player.position,
@@ -108,7 +110,7 @@ export class GameApp {
 
         this.swingDrag.direction = evaluation.direction;
         this.swingDrag.progress = evaluation.progress;
-        if (!evaluation.triggered) return;
+        if (!evaluation.triggered || this.swingDrag.age < ROPE_CONFIG.swingDragMinHoldSeconds) return;
 
         this.player.addImpulse(evaluation.direction, ROPE_CONFIG.swingImpulse);
         this.swingDrag.used = true;
