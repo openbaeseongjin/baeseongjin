@@ -9,11 +9,18 @@ export function run() {
     const velocity = new Vector2(180, 0);
 
     assert.equal(rope.attach(position, { x: 0, y: 0 }), true);
-    assert.ok(rope.restLength < rope.currentLength, "attachment must begin in a stretched state");
-    assert.ok(rope.currentLength / rope.restLength > 1.2, "attachment must provide a noticeable initial pull");
+    assert.equal(rope.restLength, rope.currentLength, "attachment must not begin with hidden inward tension");
     const attachedRestLength = rope.restLength;
     rope.apply(position, velocity, 1 / 120);
-    assert.ok(rope.restLength < attachedRestLength, "an attached rope must reel in automatically");
+    assert.equal(rope.restLength, attachedRestLength, "an attached rope must not reel in without explicit input");
+    assert.deepEqual(
+        { x: velocity.x, y: velocity.y },
+        { x: 180, y: 0 },
+        "attachment by itself must preserve existing velocity"
+    );
+
+    position.y = 310;
+    rope.apply(position, velocity, 1 / 120);
     assert.ok(velocity.y < 0, "spring tension must pull the player toward the anchor");
     assert.ok(rope.tension > 0);
 
@@ -27,7 +34,7 @@ export function run() {
     const clampPosition = new Vector2(0, 300);
     const clampVelocity = new Vector2(0, 500);
     clampRope.attach(clampPosition, { x: 0, y: 0 });
-    clampPosition.y = 400;
+    clampPosition.y = 500;
     clampRope.apply(clampPosition, clampVelocity, 1 / 120);
     const maximumLength = clampRope.restLength * ROPE_CONFIG.maximumStretchRatio;
     assert.ok(clampPosition.isFinite(), "maximum-length correction must keep the player position finite");
