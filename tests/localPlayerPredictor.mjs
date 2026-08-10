@@ -9,6 +9,21 @@ function close(actual, expected, label) {
     assert.ok(Math.abs(actual - expected) < 1e-9, `${label}: ${actual} != ${expected}`);
 }
 
+function withPlayerPosition(snapshot, x, serverTick) {
+    return {
+        ...snapshot,
+        serverTick,
+        state: {
+            ...snapshot.state,
+            players: snapshot.state.players.map((player) =>
+                player.id === snapshot.state.players[0].id
+                    ? { ...player, position: { x, y: player.position.y } }
+                    : player
+            )
+        }
+    };
+}
+
 export function run() {
     const server = new GameSimulation();
     server.enemies = [];
@@ -58,6 +73,21 @@ export function run() {
     assert.equal(predicted.swingDrag.used, server.playerEntity.swingDrag.used);
     close(predicted.ropeDamageBoostRemaining, server.playerEntity.ropeDamageBoostRemaining, "rope boost");
 
+    const detachedSnapshot = {
+        ...snapshot,
+        serverTick: predicted.tick,
+        state: {
+            ...snapshot.state,
+            players: snapshot.state.players.map((player) => ({
+                ...player,
+                rope: { ...player.rope, isAttached: false, anchor: null }
+            }))
+        }
+    };
+    predictor.reconcile(detachedSnapshot, []);
+    assert.equal(predictor.presentationState().rope.isAttached, false);
+    assert.equal(predictor.metrics().hardSnaps, 1, "rope topology changes must bypass smoothing");
+
     const movingServer = new GameSimulation();
     movingServer.enemies = [];
     movingServer.tick = 6;
@@ -96,6 +126,20 @@ export function run() {
     assert.equal(replayed.tick, secondLocalTick.tick, "reconciliation must replay to the current predicted tick");
     close(replayed.position.x, secondLocalTick.position.x, "replayed position.x");
     close(replayed.velocity.x, secondLocalTick.velocity.x, "replayed velocity.x");
+
+    const beforeSmallCorrection = continuous.presentationState();
+    continuous.reconcile(withPlayerPosition(movingSnapshot, movingSnapshot.state.players[0].position.x + 20, 7), []);
+    close(continuous.presentationState().position.x, beforeSmallCorrection.position.x, "small correction continuity");
+    assert.ok(continuous.metrics().correctionDistance > 0);
+    assert.equal(continuous.metrics().hardSnaps, 0);
+    for (let tick = 0; tick < 12; tick += 1) continuous.advance(move);
+    close(continuous.presentationState().position.x, continuous.state().position.x, "small correction convergence");
+    close(continuous.metrics().correctionRemaining, 0, "correction remaining");
+
+    const beforeHardSnap = continuous.state();
+    continuous.reconcile(withPlayerPosition(movingSnapshot, beforeHardSnap.position.x + 200, beforeHardSnap.tick), []);
+    close(continuous.presentationState().position.x, continuous.state().position.x, "hard snap position");
+    assert.equal(continuous.metrics().hardSnaps, 1);
 
     assert.throws(
         () => predictor.reconcile({ ...snapshot, worldSeed: snapshot.worldSeed + 1 }, []),

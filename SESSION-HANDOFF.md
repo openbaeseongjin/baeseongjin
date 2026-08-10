@@ -104,6 +104,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 자기 로프 예측 재시작을 위해 승인 틱의 aim·pointer·viewport·누름 전이·부착 버퍼·스윙 드래그 진행을 `control` 스냅샷으로 보낸다. 부착 후보는 월드에서 다시 계산한다.
 - `LocalPlayerPredictor`가 자기 플레이어를 최신 권위 물리·로프·control 상태로 복원하고 ACK되지 않은 목표 틱을 같은 `GameSimulation.updatePlayer()`로 재실행한다. 로프 스윙 임펄스 결과도 서버와 일치한다.
 - 자기 플레이어 예측은 앱의 120Hz 고정 스텝마다 로컬 입력을 즉시 적용하고 최대 512틱 입력 이력을 보존한다. 60Hz submit과 receipt는 예측을 되감지 않으며 새 권위 스냅샷에서만 현재 predicted tick까지 재실행한다.
+- 자기 플레이어의 물리 예측과 Canvas 표시 상태를 분리한다. 160px 이하 위치 보정은 기존 표시 위치를 보존한 뒤 100ms 동안 감쇠하고, 더 큰 오차·로프 부착 불일치·생명 상태 변경은 즉시 권위 결과로 스냅한다.
 - `CommandReceipt`가 명령 본문 없이 승인·거부 playerId·sequence를 전달한다. 승인 입력은 스냅샷 ACK까지 유지하고 거부 입력은 `RemoteCommandStream`에서 즉시 제거하며 중복 receipt는 멱등이다.
 - `AuthorityWireAdapter`가 인증 playerId와 command 문자열만 받아 receipt 문자열을 반환하고, 권위 틱에서 예정된 snapshot 문자열을 만든다. 실제 WebSocket은 이 경계만 호출한다.
 - `MultiplayerGameServer`는 여러 4자리 채널을 동시에 관리한다. 각 채널은 최대 2명의 독립된 `GameSimulation`과 권위 시계를 가지며, 마지막 참가자가 나갈 때만 해당 월드를 폐기한다.

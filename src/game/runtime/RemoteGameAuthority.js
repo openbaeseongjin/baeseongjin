@@ -110,7 +110,7 @@ export class RemoteGameAuthority {
         const elapsedSeconds = this.latestSnapshot ? Math.max(0, (this.now() - this.snapshotReceivedAt) / 1000) : 0;
         return {
             state: this.buffer.sample({ elapsedSeconds, localPlayerId: this.playerId }),
-            predicted: this.predictor?.state() ?? null,
+            predicted: this.predictor?.presentationState() ?? null,
             connected: !this.closed
         };
     }
