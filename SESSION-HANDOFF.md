@@ -90,6 +90,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 자기 로프 예측 재시작을 위해 승인 틱의 aim·pointer·viewport·누름 전이·부착 버퍼·스윙 드래그 진행을 `control` 스냅샷으로 보낸다. 부착 후보는 월드에서 다시 계산한다.
 - `LocalPlayerPredictor`가 자기 플레이어를 최신 권위 물리·로프·control 상태로 복원하고 ACK되지 않은 목표 틱을 같은 `GameSimulation.updatePlayer()`로 재실행한다. 로프 스윙 임펄스 결과도 서버와 일치한다.
 - `CommandReceipt`가 명령 본문 없이 승인·거부 playerId·sequence를 전달한다. 승인 입력은 스냅샷 ACK까지 유지하고 거부 입력은 `RemoteCommandStream`에서 즉시 제거하며 중복 receipt는 멱등이다.
+- `AuthorityWireAdapter`가 인증 playerId와 command 문자열만 받아 receipt 문자열을 반환하고, 권위 틱에서 예정된 snapshot 문자열을 만든다. 실제 WebSocket은 이 경계만 호출한다.
 
 ### [L1] 공용 기반과 게임 규칙을 분리한다
 
