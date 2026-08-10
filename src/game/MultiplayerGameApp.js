@@ -7,6 +7,7 @@ import { CAMERA_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { resolvePlayerCollisions } from "./physics/PlayerCollision.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -91,6 +92,11 @@ export class MultiplayerGameApp {
         const command = createPlayerCommand(input, aimWorld);
         const choosingArtifact = Boolean(current.state.artifactRewards?.[this.authority.playerId]);
         this.authority.advance(commandForLocalSimulation(command, choosingArtifact));
+        resolvePlayerCollisions(
+            this.authority.predictor.simulation.playerEntity,
+            current.state.players.filter(({ id }) => id !== this.authority.playerId),
+            PLAYER_CONFIG.radius
+        );
         this.predictableProjectiles.predict(this.authority.drainPredictedEvents());
         const predictedPlayer = this.authority.predictor.state();
         const localAuthorityPlayer = current.state.players.find(({ id }) => id === this.authority.playerId);

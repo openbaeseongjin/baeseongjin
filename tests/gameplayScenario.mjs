@@ -2,6 +2,7 @@ import { run as inputSampler } from "./inputSampler.mjs";
 import { run as fixedLengthRope } from "./fixedLengthRope.mjs";
 import { run as worldGenerator } from "./worldGenerator.mjs";
 import { run as playerPhysics } from "./playerPhysics.mjs";
+import { run as playerCollision } from "./playerCollision.mjs";
 import { run as swingDrag } from "./swingDrag.mjs";
 import { run as gameSimulation } from "./gameSimulation.mjs";
 import { run as combatSystems } from "./combatSystems.mjs";
@@ -16,6 +17,7 @@ const steps = {
     fixedLengthRope,
     worldGenerator,
     playerPhysics,
+    playerCollision,
     swingDrag,
     gameSimulation,
     combatSystems,
