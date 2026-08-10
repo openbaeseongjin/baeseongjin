@@ -27,6 +27,8 @@
 
 ## 다음 작업
 
+실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
+
 `docs/implementation-roadmap.md`의 P1을 순서대로 진행한다.
 
 1. 초반 2분 지표 표본을 수집하고 비교
