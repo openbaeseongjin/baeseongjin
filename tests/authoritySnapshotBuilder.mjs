@@ -26,6 +26,18 @@ export function run() {
     simulation.step(1 / 120, command);
     simulation.playerEntity.physics.isGrounded = true;
     partner.physics.isGrounded = false;
+    simulation.playerEntity.aimWorld = { x: 120, y: 340 };
+    simulation.playerEntity.lastPointer = { x: 400, y: 220, down: true };
+    simulation.playerEntity.lastViewport = { width: 1280, height: 720 };
+    simulation.playerEntity.wasPointerDown = true;
+    simulation.playerEntity.attachBufferRemaining = 0.04;
+    simulation.playerEntity.swingDrag = {
+        origin: { x: 380, y: 220 },
+        direction: { x: 1, y: 0 },
+        progress: 0.5,
+        age: 0.1,
+        used: false
+    };
 
     const first = buildAuthoritySnapshot({ simulation, acknowledgements: { "player-1": 7 } });
     assert.equal(first.serverTick, 1);
@@ -39,6 +51,21 @@ export function run() {
     assert.equal(first.state.players[0].rope.isAttached, true);
     assert.equal(first.state.players[0].rope.length, 80);
     assert.equal(first.state.players[0].rope.currentLength, 80);
+    assert.deepEqual(first.state.players[0].control, {
+        aimWorld: { x: 120, y: 340 },
+        lastPointer: { x: 400, y: 220, down: true },
+        lastViewport: { width: 1280, height: 720 },
+        wasPointerDown: true,
+        attachBufferRemaining: 0.04,
+        swingDrag: {
+            origin: { x: 380, y: 220 },
+            direction: { x: 1, y: 0 },
+            progress: 0.5,
+            age: 0.1,
+            used: false
+        }
+    });
+    assert.equal(first.state.players[1].control.swingDrag, null);
     assert.deepEqual(
         first.state.players[0].artifacts.map(({ id }) => id),
         ["power-core"]
