@@ -21,6 +21,7 @@ import { run as artifactCatalog } from "./artifactCatalog.mjs";
 import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
 import { run as runMetrics } from "./runMetrics.mjs";
 import { run as metricsDebugMode } from "./metricsDebugMode.mjs";
+import { run as commandReplay } from "./commandReplay.mjs";
 
 const suites = {
     fixedStep,
@@ -45,7 +46,8 @@ const suites = {
     artifactCatalog,
     worldTraversalValidator,
     runMetrics,
-    metricsDebugMode
+    metricsDebugMode,
+    commandReplay
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
