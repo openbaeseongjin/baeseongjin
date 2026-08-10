@@ -1,5 +1,5 @@
 export const MULTIPLAYER_TIMING = Object.freeze({
-    inputLeadTicks: 18,
+    inputLeadTicks: 30,
     maxFutureTicks: 36,
     inputHoldTicks: 30,
     remoteInterpolationSeconds: 0.1,
