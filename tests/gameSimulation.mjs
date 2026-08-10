@@ -122,4 +122,26 @@ export function run() {
     assert.equal(rewardRun.snapshot().artifacts[0].id, "rapid-gear");
     assert.equal(rewardRun.playerEntity.weapon.fireInterval, 0.65 * 0.75);
     assert.equal(rewardRun.snapshot().eventFlash.artifact.id, "rapid-gear");
+    assert.deepEqual(rewardRun.snapshot().rewardedCheckpointIds, [firstRewardCheckpoint.id]);
+
+    const secondRewardCheckpoint = rewardRun.world.checkpoints[2];
+    rewardRun.player.position.x = secondRewardCheckpoint.x;
+    rewardRun.player.position.y = secondRewardCheckpoint.y;
+    rewardRun.step(1 / 60, neutralCommand);
+    rewardRun.step(1 / 60, { ...neutralCommand, horizontal: 1 });
+    rewardRun.step(1 / 60, neutralCommand);
+    rewardRun.step(1 / 60, { ...neutralCommand, vertical: -1 });
+    assert.deepEqual(
+        rewardRun.snapshot().artifacts.map((artifact) => artifact.id),
+        ["rapid-gear", "rapid-gear"]
+    );
+    assert.equal(rewardRun.playerEntity.weapon.fireInterval, 0.65 * 0.75 * 0.75);
+    rewardRun.player.position.x = firstRewardCheckpoint.x;
+    rewardRun.player.position.y = firstRewardCheckpoint.y;
+    rewardRun.step(1 / 60, neutralCommand);
+    assert.equal(
+        rewardRun.snapshot().artifactReward,
+        null,
+        "revisiting an earlier checkpoint must not duplicate rewards"
+    );
 }
