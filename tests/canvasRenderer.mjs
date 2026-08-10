@@ -29,6 +29,26 @@ export function run() {
 
     renderer.cssWidth = 844;
     renderer.cssHeight = 390;
+    renderer.drawArtifactRewardOverlay({
+        selectedIndex: 1,
+        choices: [
+            { name: "동력핵", description: "피해 증가" },
+            { name: "연사 톱니", description: "연사 증가" },
+            { name: "로프 공명기", description: "스윙 강화" }
+        ]
+    });
+    assert.deepEqual(textCalls, [
+        "아티팩트 선택",
+        "좌우 이동으로 선택 · 점프로 획득",
+        "동력핵",
+        "피해 증가",
+        "연사 톱니",
+        "연사 증가",
+        "로프 공명기",
+        "스윙 강화"
+    ]);
+    textCalls.length = 0;
+    borderCalls.length = 0;
     renderer.drawRopeCutFeedback({ type: "rope-cut", age: 0.2 }, 0.4);
     assert.deepEqual(textCalls, ["로프 절단!", "재연결까지 0.4초"]);
     assert.deepEqual(borderCalls, [[4, 4, 836, 382]]);

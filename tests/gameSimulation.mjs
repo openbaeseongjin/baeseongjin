@@ -101,4 +101,23 @@ export function run() {
         targetCheckpoint.id,
         "checkpoint progress must not go backward"
     );
+
+    const rewardRun = new GameSimulation();
+    const firstRewardCheckpoint = rewardRun.world.checkpoints[1];
+    rewardRun.player.position.x = firstRewardCheckpoint.x;
+    rewardRun.player.position.y = firstRewardCheckpoint.y;
+    rewardRun.step(1 / 60, command);
+    assert.equal(rewardRun.snapshot().artifactReward.selectedIndex, 0);
+    const pausedPosition = rewardRun.player.position.clone();
+    rewardRun.step(1, command);
+    assert.deepEqual(rewardRun.player.position, pausedPosition, "artifact selection must pause world physics");
+    const neutralCommand = { ...command, horizontal: 0, vertical: 0 };
+    rewardRun.step(1 / 60, neutralCommand);
+    rewardRun.step(1 / 60, { ...neutralCommand, horizontal: 1 });
+    assert.equal(rewardRun.snapshot().artifactReward.selectedIndex, 1);
+    rewardRun.step(1 / 60, neutralCommand);
+    rewardRun.step(1 / 60, { ...neutralCommand, vertical: -1 });
+    assert.equal(rewardRun.snapshot().artifactReward, null);
+    assert.equal(rewardRun.snapshot().artifacts[0].id, "rapid-gear");
+    assert.equal(rewardRun.playerEntity.weapon.fireInterval, 0.65 * 0.75);
 }
