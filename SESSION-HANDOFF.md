@@ -71,6 +71,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `AuthorityCommandInbox`가 플레이어별 승인 `sequence`와 허용 틱 범위를 검사하고, 승인된 명령을 목표 틱마다 한 번만 권위 시뮬레이션에 제공한다.
 - `WorldSnapshotEnvelope`가 서버 틱·월드 식별자·승인 번호·비예측 상태·이벤트를 묶으며, 투사체 같은 예측 객체 배열이 반복 상태로 들어가는 것을 거부한다.
 - `GameSimulation`의 권위 틱과 실제 자동 발사·충돌·체크포인트 제거가 `PredictableObjectEvent`를 발행하며, 전송 계층은 사건을 한 번만 drain한다.
+- `AuthoritySnapshotBuilder`가 플레이어별 상태·적·진행·승인 번호·사건만 권위 봉투로 만들고, 지형은 시드와 `WORLD_GENERATION_REVISION`으로 재생성하며 투사체 배열은 제외한다.
 
 ### [L1] 공용 기반과 게임 규칙을 분리한다
 

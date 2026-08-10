@@ -27,6 +27,7 @@ import { run as playerRuntimeFactory } from "./playerRuntimeFactory.mjs";
 import { run as predictableObjectEvent } from "./predictableObjectEvent.mjs";
 import { run as authorityCommandInbox } from "./authorityCommandInbox.mjs";
 import { run as worldSnapshotEnvelope } from "./worldSnapshotEnvelope.mjs";
+import { run as authoritySnapshotBuilder } from "./authoritySnapshotBuilder.mjs";
 
 const suites = {
     fixedStep,
@@ -57,7 +58,8 @@ const suites = {
     playerRuntimeFactory,
     predictableObjectEvent,
     authorityCommandInbox,
-    worldSnapshotEnvelope
+    worldSnapshotEnvelope,
+    authoritySnapshotBuilder
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
