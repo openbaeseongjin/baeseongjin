@@ -16,6 +16,7 @@ import { run as pwaContract } from "./pwaContract.mjs";
 import { run as installPrompt } from "./installPrompt.mjs";
 import { run as serviceWorkerUpdater } from "./serviceWorkerUpdater.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
+import { run as artifactInventory } from "./artifactInventory.mjs";
 
 const suites = {
     fixedStep,
@@ -35,7 +36,8 @@ const suites = {
     pwaContract,
     installPrompt,
     serviceWorkerUpdater,
-    canvasRenderer
+    canvasRenderer,
+    artifactInventory
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {

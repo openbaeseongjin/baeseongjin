@@ -35,7 +35,10 @@ export function run() {
     const defeated = new GameSimulation();
     defeated.playerEntity.health = 0;
     defeated.enemies.pop();
-    const expectedEnemyCount = defeated.world.enemySpawns.length;
+    const expectedEnemyCount = defeated.enemies.length;
+    const respawnCheckpoint = defeated.world.checkpoints[2];
+    defeated.activeCheckpoint = respawnCheckpoint;
+    for (const id of ["a", "b", "c"]) defeated.artifacts.add({ id });
     defeated.step(1 / 60, command);
     assert.equal(defeated.snapshot().runState, "defeated");
     assert.equal(defeated.snapshot().playerLifeState, "downed");
@@ -48,6 +51,17 @@ export function run() {
     assert.equal(defeated.snapshot().enemies.length, expectedEnemyCount);
     assert.equal(defeated.snapshot().projectiles.length, 0);
     assert.equal(defeated.snapshot().enemyProjectiles.length, 0);
+    assert.equal(defeated.snapshot().activeCheckpoint.id, respawnCheckpoint.id);
+    assert.equal(defeated.snapshot().player.position.x, respawnCheckpoint.x);
+    assert.equal(defeated.snapshot().player.position.y, respawnCheckpoint.y);
+    assert.deepEqual(
+        defeated.snapshot().artifacts.map((artifact) => artifact.id),
+        ["a", "b"]
+    );
+    assert.deepEqual(
+        defeated.snapshot().lastCheckpointLoss.map((artifact) => artifact.id),
+        ["c"]
+    );
 
     const completed = new GameSimulation();
     completed.rope.attach(completed.player.position, {
