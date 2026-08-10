@@ -32,6 +32,7 @@ export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, c
 export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
     const enemyById = new Map(enemies.map((enemy) => [enemy.id, enemy]));
     const survivors = [];
+    const hits = [];
     for (const projectile of projectiles) {
         const target = enemyById.get(projectile.targetId);
         if (!target || target.health <= 0) continue;
@@ -43,11 +44,20 @@ export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
         const hitDistance = projectile.position.distanceTo(target.position);
         if (hitDistance <= projectile.radius + target.radius) {
             target.health -= projectile.damage;
+            hits.push(
+                Object.freeze({
+                    type: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
+                    position: target.position.clone(),
+                    damage: projectile.damage,
+                    targetId: target.id
+                })
+            );
             continue;
         }
         survivors.push(projectile);
     }
     projectiles.splice(0, projectiles.length, ...survivors);
+    return Object.freeze({ hits });
 }
 
 export function updateEnemyWeapons({ enemies, target, projectiles, registry, config, dt }) {
@@ -85,6 +95,7 @@ export function distancePointToSegment(point, start, end) {
 export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }) {
     const survivors = [];
     let ropeCutAt = null;
+    const hits = [];
     for (const projectile of projectiles) {
         projectile.position.add(projectile.velocity.clone().scale(dt));
         if (
@@ -105,10 +116,17 @@ export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }
             const speed = knockback.length();
             if (speed > 0) target.physics.addImpulse(knockback.scale(1 / speed), config.playerHitKnockback);
             target.hitInvulnerabilityRemaining = config.playerHitInvulnerability;
+            hits.push(
+                Object.freeze({
+                    type: "player-hit",
+                    position: target.physics.position.clone(),
+                    damage: projectile.damage
+                })
+            );
             continue;
         }
         survivors.push(projectile);
     }
     projectiles.splice(0, projectiles.length, ...survivors);
-    return Object.freeze({ ropeCutAt });
+    return Object.freeze({ ropeCutAt, hits });
 }

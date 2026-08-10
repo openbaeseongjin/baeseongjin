@@ -9,6 +9,7 @@ import { run as versionContract } from "./versionContract.mjs";
 import { run as swingDrag } from "./swingDrag.mjs";
 import { run as gameSimulation } from "./gameSimulation.mjs";
 import { run as combatSystems } from "./combatSystems.mjs";
+import { run as combatFeedback } from "./combatFeedback.mjs";
 import { run as playerLifeCycle } from "./playerLifeCycle.mjs";
 import { run as pwaContract } from "./pwaContract.mjs";
 import { run as installPrompt } from "./installPrompt.mjs";
@@ -26,6 +27,7 @@ const suites = {
     swingDrag,
     gameSimulation,
     combatSystems,
+    combatFeedback,
     playerLifeCycle,
     pwaContract,
     installPrompt,

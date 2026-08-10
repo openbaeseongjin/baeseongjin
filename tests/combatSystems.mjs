@@ -34,6 +34,19 @@ export function run() {
     }
     assert.equal(enemies[1].health, 20, "a homing projectile must damage its authoritative target once");
 
+    const directHit = [
+        {
+            targetId: enemies[1].id,
+            position: enemies[1].position.clone(),
+            velocity: new Vector2(),
+            radius: 4,
+            damage: 10
+        }
+    ];
+    const hitEvents = updatePlayerProjectiles({ projectiles: directHit, enemies, config: COMBAT_CONFIG, dt: 0 });
+    assert.equal(hitEvents.hits[0].type, "enemy-hit");
+    assert.equal(hitEvents.hits[0].damage, 10);
+
     owner.weapon.cooldown = 0;
     owner.weapon.range = 50;
     updateAutomaticWeapon({ owner, enemies, projectiles, registry, config: COMBAT_CONFIG, dt: 1 });
@@ -60,4 +73,6 @@ export function run() {
     assert.equal(target.health, 80, "body hits must reduce HP exactly once");
     assert.equal(target.hitInvulnerabilityRemaining, COMBAT_CONFIG.playerHitInvulnerability);
     assert.equal(bodyEvents.ropeCutAt, null);
+    assert.equal(bodyEvents.hits[0].type, "player-hit");
+    assert.equal(bodyEvents.hits[0].damage, 20);
 }
