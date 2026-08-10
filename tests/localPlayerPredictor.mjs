@@ -86,7 +86,13 @@ export function run() {
     };
     predictor.reconcile(detachedSnapshot, []);
     assert.equal(predictor.presentationState().rope.isAttached, false);
-    assert.equal(predictor.metrics().hardSnaps, 1, "rope topology changes must bypass smoothing");
+    assert.equal(predictor.metrics().hardSnaps, 0, "rope topology correction must preserve visual continuity");
+    predictor.simulation.playerEntity.rope.attach(predictor.simulation.playerEntity.physics.position, {
+        x: predictor.state().position.x,
+        y: predictor.state().position.y - 80
+    });
+    predictor.applyPredictedImpact({ resolution: "rope-cut" });
+    assert.equal(predictor.state().rope.isAttached, false, "predicted rope cut must react before server round trip");
 
     const movingServer = new GameSimulation();
     movingServer.enemies = [];

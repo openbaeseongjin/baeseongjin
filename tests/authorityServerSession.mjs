@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
+import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
+import { Vector2 } from "../src/game-kit/index.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -45,6 +47,32 @@ export function run() {
         target.health,
         healthBeforeClaim - projectile.damage,
         "a duplicate claim must never deal damage twice"
+    );
+    const impactProjectile = {
+        id: "enemy-impact-1",
+        ownerId: "enemy-1",
+        targetId: combatSimulation.playerEntity.id,
+        position: combatSimulation.player.position.clone(),
+        velocity: new Vector2(120, 0),
+        radius: 7,
+        damage: 20
+    };
+    combatSimulation.enemyProjectiles.push(impactProjectile);
+    const playerHealthBeforeImpact = combatSimulation.playerEntity.health;
+    const impactClaim = createPlayerImpactClaim({
+        projectileId: impactProjectile.id,
+        clientTick: combatSimulation.tick,
+        impactType: "player-hit",
+        position: combatSimulation.player.position
+    });
+    const acceptedImpact = combatSession.submitImpactClaim(combatSimulation.playerEntity.id, impactClaim);
+    assert.equal(acceptedImpact.accepted, true, "the victim client may claim its own immediate impact");
+    assert.equal(combatSimulation.playerEntity.health, playerHealthBeforeImpact - impactProjectile.damage);
+    assert.equal(combatSession.submitImpactClaim(combatSimulation.playerEntity.id, impactClaim), acceptedImpact);
+    assert.equal(
+        combatSimulation.playerEntity.health,
+        playerHealthBeforeImpact - impactProjectile.damage,
+        "a duplicate victim impact claim must be idempotent"
     );
     const forgedSimulation = new GameSimulation();
     const forgedPartner = forgedSimulation.addPlayer({ x: 180, y: 500 });

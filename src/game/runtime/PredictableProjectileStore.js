@@ -1,5 +1,17 @@
 const FIXED_DT = 1 / 120;
 
+function distancePointToSegment(point, start, end) {
+    const segmentX = end.x - start.x;
+    const segmentY = end.y - start.y;
+    const lengthSquared = segmentX * segmentX + segmentY * segmentY;
+    if (lengthSquared === 0) return Math.hypot(point.x - start.x, point.y - start.y);
+    const projection = Math.max(
+        0,
+        Math.min(1, ((point.x - start.x) * segmentX + (point.y - start.y) * segmentY) / lengthSquared)
+    );
+    return Math.hypot(point.x - (start.x + segmentX * projection), point.y - (start.y + segmentY * projection));
+}
+
 function length(vector) {
     return Math.hypot(vector.x, vector.y);
 }
@@ -28,6 +40,7 @@ export class PredictableProjectileStore {
         this.objectIdByPredictionId = new Map();
         this.predictionIdByAuthorityId = new Map();
         this.locallyResolvedPredictionIds = new Set();
+        this.locallyResolvedObjectIds = new Set();
         this.predictionCancellations = 0;
     }
 
@@ -48,6 +61,7 @@ export class PredictableProjectileStore {
                     if (this.locallyResolvedPredictionIds.delete(predictionId)) continue;
                     if (existingProjectile?.predictCollision) this.predictionCancellations += 1;
                 }
+                if (this.locallyResolvedObjectIds.delete(event.objectId)) continue;
                 feedbackEvents.push(event);
                 continue;
             }
@@ -72,7 +86,7 @@ export class PredictableProjectileStore {
                 velocity: predicted ? { ...predicted.velocity } : { ...event.velocity },
                 speed: event.parameters.speed ?? length(event.velocity),
                 predictionId,
-                predictCollision: Boolean(predictionId && predicted)
+                predictCollision: event.objectType === "enemy-projectile" || Boolean(predictionId && predicted)
             };
             if (!predicted) {
                 const delayedTicks = Math.max(0, serverTick - event.tick);
@@ -114,7 +128,38 @@ export class PredictableProjectileStore {
         const resolutions = [];
         for (const projectile of [...this.objects.values()]) {
             advanceProjectile(projectile, dt, state);
-            if (!projectile.predictCollision || projectile.objectType !== "player-projectile") continue;
+            if (!projectile.predictCollision) continue;
+            if (projectile.objectType === "enemy-projectile") {
+                const player = state?.localPlayer;
+                if (!player || player.lifeState !== "active") continue;
+                const ropeHit =
+                    player.rope?.isAttached &&
+                    distancePointToSegment(projectile.position, player.position, player.rope.anchor) <=
+                        projectile.radius;
+                const bodyHit =
+                    !ropeHit &&
+                    player.health > 0 &&
+                    (player.hitInvulnerabilityRemaining ?? 0) <= 0 &&
+                    Math.hypot(projectile.position.x - player.position.x, projectile.position.y - player.position.y) <=
+                        projectile.radius + player.radius;
+                if (!ropeHit && !bodyHit) continue;
+                this.objects.delete(projectile.id);
+                this.locallyResolvedObjectIds.add(projectile.id);
+                resolutions.push(
+                    Object.freeze({
+                        eventType: "predicted-resolve",
+                        projectileId: projectile.id,
+                        targetId: player.id,
+                        clientTick,
+                        resolution: ropeHit ? "rope-cut" : "player-hit",
+                        position: ropeHit ? { ...projectile.position } : { ...player.position },
+                        velocity: { ...projectile.velocity },
+                        parameters: { damage: projectile.damage }
+                    })
+                );
+                continue;
+            }
+            if (projectile.objectType !== "player-projectile") continue;
             const target = state?.enemies?.find(({ id }) => id === projectile.targetId);
             if (!target) continue;
             const hitDistance = Math.hypot(
