@@ -68,6 +68,7 @@ export class CanvasRenderer {
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
+        if (scene.mobileView) this.drawPlayerHealthHud(scene);
         if (!scene.mobileView) {
             this.drawCombatHud(scene);
             this.drawArtifactHud(scene.artifacts, scene.ropeDamageBoostRemaining);
@@ -651,6 +652,33 @@ export class CanvasRenderer {
             ctx.arc(projectile.position.x, projectile.position.y, projectile.radius, 0, Math.PI * 2);
             ctx.fill();
         }
+    }
+
+    drawPlayerHealthHud({ playerHealth, playerMaxHealth, playerLifeState }) {
+        const ctx = this.context;
+        const health = Math.max(0, Math.round(playerHealth ?? 0));
+        const maxHealth = Math.max(1, Math.round(playerMaxHealth ?? 1));
+        const healthRatio = Math.max(0, Math.min(1, health / maxHealth));
+        const width = Math.min(220, Math.max(168, this.cssWidth * 0.34));
+        const x = 18;
+        const y = 18;
+
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 11, 20, 0.88)";
+        ctx.fillRect(x, y, width, 50);
+        ctx.strokeStyle = healthRatio <= 0.35 ? "rgba(251, 113, 133, 0.8)" : "rgba(148, 163, 184, 0.42)";
+        ctx.strokeRect(x, y, width, 50);
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "800 12px system-ui, sans-serif";
+        ctx.fillText(playerLifeState === "downed" ? "쓰러짐" : "HP", x + 14, y + 20);
+        ctx.textAlign = "right";
+        ctx.fillText(`${health} / ${maxHealth}`, x + width - 14, y + 20);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "rgba(71, 85, 105, 0.9)";
+        ctx.fillRect(x + 14, y + 29, width - 28, 9);
+        ctx.fillStyle = healthRatio > 0.35 ? "#22c55e" : "#fb7185";
+        ctx.fillRect(x + 14, y + 29, (width - 28) * healthRatio, 9);
+        ctx.restore();
     }
 
     drawCombatHud({
