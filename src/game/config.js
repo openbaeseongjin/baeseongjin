@@ -53,6 +53,8 @@ export const WORLD_CONFIG = Object.freeze({
     verticalStep: 185,
     laneWidth: 340,
     enemySpawnInterval: 1,
+    checkpointInterval: 8,
+    checkpointRadius: 38,
     summitRadius: 42,
     floorY: 560
 });

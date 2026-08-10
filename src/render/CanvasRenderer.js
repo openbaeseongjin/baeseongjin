@@ -54,6 +54,7 @@ export class CanvasRenderer {
         this.context.translate(-scene.camera.x * zoom + shake.x, -scene.camera.y * zoom + shake.y);
         this.context.scale(zoom, zoom);
         this.drawWorld(scene.world);
+        this.drawCheckpoints(scene.world.checkpoints, scene.activeCheckpoint);
         this.drawSummitGoal(scene.world.summit, scene.runState);
         this.drawAttachmentRange(scene);
         this.drawRope(scene.rope, scene.player.position);
@@ -175,6 +176,29 @@ export class CanvasRenderer {
         ctx.textBaseline = "middle";
         ctx.fillText("정상", summit.x, summit.y);
         ctx.restore();
+    }
+
+    drawCheckpoints(checkpoints = [], activeCheckpoint) {
+        const ctx = this.context;
+        for (const checkpoint of checkpoints) {
+            const isActive = checkpoint.id === activeCheckpoint?.id;
+            const isReached = checkpoint.level < (activeCheckpoint?.level ?? 0);
+            ctx.save();
+            ctx.globalAlpha = isReached ? 0.35 : 0.9;
+            ctx.strokeStyle = isActive ? "#fbbf24" : "#93c5fd";
+            ctx.fillStyle = isActive ? "rgba(251, 191, 36, 0.18)" : "rgba(147, 197, 253, 0.1)";
+            ctx.lineWidth = isActive ? 5 : 3;
+            ctx.beginPath();
+            ctx.arc(checkpoint.x, checkpoint.y, checkpoint.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = isActive ? "#fde68a" : "#dbeafe";
+            ctx.font = "800 12px system-ui, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(isActive ? "활성" : "체크", checkpoint.x, checkpoint.y);
+            ctx.restore();
+        }
     }
 
     drawRockSurface(surface) {
