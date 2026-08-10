@@ -80,6 +80,7 @@ export function buildAuthoritySnapshot({ simulation, acknowledgements = {} }) {
             activeCheckpointId: simulation.activeCheckpoint?.id ?? null,
             rewardedCheckpointIds: [...simulation.rewardedCheckpointIds],
             artifactReward: simulation.artifactReward,
+            artifactRewards: Object.fromEntries(simulation.artifactRewards),
             runState: simulation.runState,
             defeatReason: simulation.defeatReason,
             restartRemaining: simulation.restartRemaining,

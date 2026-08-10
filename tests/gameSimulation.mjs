@@ -309,4 +309,34 @@ export function run() {
         null,
         "revisiting an earlier checkpoint must not duplicate rewards"
     );
+
+    const coopRewardRun = new GameSimulation();
+    const coopPartner = coopRewardRun.addPlayer({ x: 160, y: 500 }).entity;
+    const coopCheckpoint = coopRewardRun.world.checkpoints[1];
+    coopRewardRun.player.position.set(120, 500);
+    coopPartner.physics.position.set(coopCheckpoint.x, coopCheckpoint.y);
+    const coopNeutral = { ...command, horizontal: 0, vertical: 0 };
+    const commands = (primary, partner) =>
+        new Map([
+            [coopRewardRun.playerEntity.id, primary],
+            [coopPartner.id, partner]
+        ]);
+    coopRewardRun.stepPlayers(1 / 60, commands(coopNeutral, coopNeutral));
+    assert.equal(
+        coopRewardRun.snapshot().activeCheckpoint.id,
+        coopCheckpoint.id,
+        "either active player must activate the shared checkpoint"
+    );
+    assert.equal(coopRewardRun.artifactRewards.size, 2);
+    const pausedPartnerPosition = coopPartner.physics.position.clone();
+    coopRewardRun.stepPlayers(1 / 60, commands({ ...coopNeutral, vertical: -1 }, { ...coopNeutral, horizontal: 1 }));
+    assert.equal(coopRewardRun.playerEntity.artifacts.snapshot()[0].id, "power-core");
+    assert.equal(coopPartner.artifacts.snapshot().length, 0, "one choice must not change the partner inventory");
+    assert.equal(coopRewardRun.artifactRewards.size, 1, "the world remains paused until every player chooses");
+    assert.deepEqual(coopPartner.physics.position, pausedPartnerPosition);
+    coopRewardRun.stepPlayers(1 / 60, commands(coopNeutral, coopNeutral));
+    coopRewardRun.stepPlayers(1 / 60, commands(coopNeutral, { ...coopNeutral, vertical: -1 }));
+    assert.equal(coopRewardRun.artifactRewards.size, 0);
+    assert.equal(coopPartner.artifacts.snapshot()[0].id, "rapid-gear");
+    assert.deepEqual([...coopRewardRun.rewardedCheckpointIds], [coopCheckpoint.id]);
 }

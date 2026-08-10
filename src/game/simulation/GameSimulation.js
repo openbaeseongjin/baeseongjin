@@ -39,7 +39,7 @@ export class GameSimulation {
         this.restartRemaining = 0;
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
         this.lastCheckpointLoss = [];
-        this.artifactReward = null;
+        this.artifactRewards = new Map();
         this.rewardedCheckpointIds = new Set();
         this.tick = 0;
         this.replicationEvents = [];
@@ -62,6 +62,11 @@ export class GameSimulation {
         const index = this.players.findIndex(({ id }) => id === playerId);
         if (index < 0) return false;
         const [removed] = this.players.splice(index, 1);
+        const removedReward = this.artifactRewards.get(playerId);
+        this.artifactRewards.delete(playerId);
+        if (removedReward && this.artifactRewards.size === 0) {
+            this.rewardedCheckpointIds.add(removedReward.checkpointId);
+        }
         if (removed === this.playerEntity && this.players.length > 0) {
             this.playerEntity = this.players[0];
             this.player = this.playerEntity.physics;
@@ -73,6 +78,10 @@ export class GameSimulation {
 
     get aimWorld() {
         return this.playerEntity.aimWorld;
+    }
+
+    get artifactReward() {
+        return this.artifactRewards.get(this.playerEntity.id) ?? null;
     }
 
     set aimWorld(value) {
@@ -158,8 +167,8 @@ export class GameSimulation {
             return;
         }
         this.updateCheckpointProgress();
-        if (this.artifactReward) {
-            this.updateArtifactReward(this.commandForPlayer(this.playerEntity, commandsByPlayerId));
+        if (this.artifactRewards.size > 0) {
+            this.updateArtifactRewards(commandsByPlayerId);
             this.eventFlash.age += dt;
             return;
         }
@@ -349,7 +358,11 @@ export class GameSimulation {
     updateCheckpointProgress() {
         for (const checkpoint of this.world.checkpoints) {
             if (checkpoint.level <= (this.activeCheckpoint?.level ?? -1)) continue;
-            if (this.player.position.distanceTo(checkpoint) > checkpoint.radius) continue;
+            const reached = this.players.some(
+                (player) =>
+                    player.lifeState === "active" && player.physics.position.distanceTo(checkpoint) <= checkpoint.radius
+            );
+            if (!reached) continue;
             this.activeCheckpoint = checkpoint;
             this.metrics.recordCheckpoint();
             this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint };
@@ -361,40 +374,59 @@ export class GameSimulation {
 
     beginArtifactReward(checkpoint) {
         this.metrics.recordFirstReward();
-        this.artifactReward = {
-            checkpointId: checkpoint.id,
-            choices: ARTIFACT_CATALOG,
-            selectedIndex: 0,
-            inputReady: false,
-            previousHorizontal: 0,
-            previousConfirm: false
-        };
-        this.rope.detach();
-        this.swingDrag = null;
+        for (const player of this.players) {
+            this.artifactRewards.set(player.id, {
+                checkpointId: checkpoint.id,
+                choices: ARTIFACT_CATALOG,
+                selectedIndex: 0,
+                inputReady: false,
+                previousHorizontal: 0,
+                previousConfirm: false
+            });
+            player.rope.detach();
+            player.swingDrag = null;
+        }
     }
 
-    updateArtifactReward(command) {
+    updateArtifactRewards(commandsByPlayerId) {
+        for (const [playerId, reward] of [...this.artifactRewards]) {
+            const player = this.players.find(({ id }) => id === playerId);
+            if (!player) {
+                this.artifactRewards.delete(playerId);
+                continue;
+            }
+            this.updateArtifactReward(player, reward, this.commandForPlayer(player, commandsByPlayerId));
+        }
+    }
+
+    updateArtifactReward(player, reward, command) {
         const horizontal = Math.sign(command.horizontal);
         const confirm = command.vertical < 0;
-        if (!this.artifactReward.inputReady) {
-            if (horizontal === 0 && !confirm) this.artifactReward.inputReady = true;
+        if (!reward.inputReady) {
+            if (horizontal === 0 && !confirm) reward.inputReady = true;
             return;
         }
-        if (horizontal !== 0 && this.artifactReward.previousHorizontal === 0) {
-            const count = this.artifactReward.choices.length;
-            this.artifactReward.selectedIndex = (this.artifactReward.selectedIndex + horizontal + count) % count;
+        if (horizontal !== 0 && reward.previousHorizontal === 0) {
+            const count = reward.choices.length;
+            reward.selectedIndex = (reward.selectedIndex + horizontal + count) % count;
         }
-        if (confirm && !this.artifactReward.previousConfirm) {
-            const selected = this.artifactReward.choices[this.artifactReward.selectedIndex];
-            this.rewardedCheckpointIds.add(this.artifactReward.checkpointId);
-            this.artifacts.add(selected);
-            this.artifactReward = null;
-            this.applyArtifactEffects();
-            this.eventFlash = { type: "artifact", age: 0, artifact: selected, position: this.player.position.clone() };
+        if (confirm && !reward.previousConfirm) {
+            const selected = reward.choices[reward.selectedIndex];
+            player.artifacts.add(selected);
+            this.artifactRewards.delete(player.id);
+            this.applyArtifactEffects(player);
+            this.eventFlash = {
+                type: "artifact",
+                age: 0,
+                artifact: selected,
+                playerId: player.id,
+                position: player.physics.position.clone()
+            };
+            if (this.artifactRewards.size === 0) this.rewardedCheckpointIds.add(reward.checkpointId);
             return;
         }
-        this.artifactReward.previousHorizontal = horizontal;
-        this.artifactReward.previousConfirm = confirm;
+        reward.previousHorizontal = horizontal;
+        reward.previousConfirm = confirm;
     }
 
     applyArtifactEffects(player = this.playerEntity) {
@@ -612,6 +644,7 @@ export class GameSimulation {
             artifacts: this.artifacts.snapshot(),
             lastCheckpointLoss: [...this.lastCheckpointLoss],
             artifactReward: this.artifactReward,
+            artifactRewards: Object.fromEntries(this.artifactRewards),
             rewardedCheckpointIds: [...this.rewardedCheckpointIds],
             ropeDamageBoostRemaining: this.ropeDamageBoostRemaining,
             metrics: this.metrics.snapshot(),
