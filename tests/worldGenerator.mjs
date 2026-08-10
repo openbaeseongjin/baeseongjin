@@ -11,7 +11,13 @@ export function run() {
     assert.deepEqual(first, second, "the same seed must generate the same world");
     assert.notDeepEqual(first, different, "different seeds must vary the world");
     assert.equal(first.route.length, WORLD_CONFIG.levelCount + 1);
-    assert.ok(first.surfaces.length > WORLD_CONFIG.levelCount * 2);
+    assert.equal(first.surfaces.length, WORLD_CONFIG.levelCount + 1);
+    assert.equal(first.enemySpawns.length, Math.floor(WORLD_CONFIG.levelCount / WORLD_CONFIG.enemySpawnInterval));
+    assert.ok(!first.surfaces.some((surface) => surface.kind === "ceiling-rock"), "the upward route must stay clear");
+    assert.ok(
+        !first.surfaces.some((surface) => surface.kind === "swing-wall"),
+        "vertical walls must not block traversal"
+    );
     assert.ok(first.surfaces.every((surface) => surface.vertices.length >= 7));
     assert.ok(
         first.surfaces.filter((surface) => surface.oneWay).every((surface) => surface.oneWayEdgeEnd === 4),
@@ -27,6 +33,11 @@ export function run() {
         const distance = Math.hypot(currentCenter.x - previousCenter.x, currentCenter.y - previousCenter.y);
         assert.ok(current.y < previous.y - 150, `level ${index} must progress upward`);
         assert.ok(distance < ROPE_CONFIG.maxAttachDistance, `level ${index} must stay within rope reach`);
+    }
+    for (const spawn of first.enemySpawns) {
+        const platform = first.route[spawn.level];
+        assert.ok(spawn.x >= platform.x && spawn.x <= platform.x + platform.width);
+        assert.ok(spawn.y < platform.topY, `enemy at level ${spawn.level} must spawn above its route rock`);
     }
     assert.deepEqual(
         closestPointOnPolygon({ x: -5, y: 5 }, [

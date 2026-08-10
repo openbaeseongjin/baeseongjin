@@ -32,16 +32,15 @@ export class GameSimulation {
             hitInvulnerabilityRemaining: 0,
             ropeDisabledRemaining: 0
         };
-        this.enemies = [
-            {
-                id: this.registry.createId("enemy"),
-                position: new Vector2(350, 400),
-                radius: COMBAT_CONFIG.enemyRadius,
-                health: COMBAT_CONFIG.enemyHealth,
-                maxHealth: COMBAT_CONFIG.enemyHealth,
-                fireCooldown: COMBAT_CONFIG.enemyFireInterval
-            }
-        ];
+        this.enemies = this.world.enemySpawns.map((spawn) => ({
+            id: this.registry.createId("enemy"),
+            position: new Vector2(spawn.x, spawn.y),
+            level: spawn.level,
+            radius: COMBAT_CONFIG.enemyRadius,
+            health: COMBAT_CONFIG.enemyHealth,
+            maxHealth: COMBAT_CONFIG.enemyHealth,
+            fireCooldown: COMBAT_CONFIG.enemyFireInterval
+        }));
         this.projectiles = [];
         this.enemyProjectiles = [];
         this.aimWorld = { x: 0, y: 0 };
