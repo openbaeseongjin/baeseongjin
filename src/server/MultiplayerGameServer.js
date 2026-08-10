@@ -14,7 +14,8 @@ export class MultiplayerGameServer {
             path = "/multiplayer",
             maxPlayers = 2,
             allowedOrigins = [],
-            channelNumber = () => randomInt(1000, 10000)
+            channelNumber = () => randomInt(1000, 10000),
+            worldSeed = () => randomInt(1, 0x100000000)
         } = {}
     ) {
         if (!httpServer) throw new Error("httpServer is required");
@@ -23,6 +24,7 @@ export class MultiplayerGameServer {
         this.maxPlayers = maxPlayers;
         this.allowedOrigins = new Set(allowedOrigins);
         this.channelNumber = channelNumber;
+        this.worldSeed = worldSeed;
         this.webSocketServer = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
         this.rooms = new Map();
         this.connections = new Map();
@@ -67,7 +69,7 @@ export class MultiplayerGameServer {
     }
 
     createRoom(channelId) {
-        const simulation = new GameSimulation();
+        const simulation = new GameSimulation({ worldSeed: this.worldSeed() });
         const session = new AuthorityServerSession({ simulation });
         const room = {
             channelId,

@@ -172,7 +172,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 `AuthorityWireAdapter`는 실제 WebSocket 앞의 유일한 게임 전송 경계다. 인증된 playerId와 직렬화된 command batch 문자열을 받아 receipt 문자열을 반환하고, 권위 세션의 120Hz 틱을 진행해 20Hz 예정 시점에만 snapshot 문자열을 반환한다. 소켓 런타임은 JSON 내부 게임 객체를 직접 읽거나 변경하지 않는다.
 
-`npm run start:multiplayer`는 개발 환경에서 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 서버 프로세스는 여러 4자리 채널을 동시에 소유하고 각 채널마다 독립된 `GameSimulation`, 명령 큐, 120Hz 시계와 최대 2명의 연결을 둔다. 한 명이 나가면 해당 플레이어만 제거하고 남은 유저는 같은 채널 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간 해당 채널과 월드를 폐기하며, 같은 번호로 다음 사용자가 접속하면 새 절차 생성 월드를 만든다.
+`npm run start:multiplayer`는 개발 환경에서 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 서버 프로세스는 여러 4자리 채널을 동시에 소유하고 각 채널마다 새 32비트 시드의 독립된 `GameSimulation`, 명령 큐, 120Hz 시계와 최대 2명의 연결을 둔다. 클라이언트 예측은 welcome snapshot의 서버 시드로 동일한 지형을 생성한다. 한 명이 나가면 해당 플레이어만 제거하고 남은 유저는 같은 채널 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간 해당 채널과 월드를 폐기하며, 다음 새 채널은 새 시드의 절차 생성 월드를 만든다.
 
 브라우저 첫 화면은 싱글과 멀티를 선택한다. GitHub Pages의 `index.html`에 있는 `meta[name="multiplayer-server"]`가 항상 실행 중인 게임 서버의 HTTPS/WSS 주소를 제공하고, 클라이언트는 이를 `/multiplayer?channel=...`로 정규화한다. 서버 주소는 배포 설정이며 플레이어가 입력하지 않는다. 방장은 **새 채널 만들기**로 4자리 번호를 받고, 참가자는 모바일 숫자 키패드로 그 번호만 입력한다.
 

@@ -6,6 +6,7 @@ import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelo
 import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
+import { GameSimulation } from "../simulation/GameSimulation.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
 
@@ -78,7 +79,6 @@ export class RemoteGameAuthority {
                             playerId: this.playerId,
                             inputLeadTicks: MULTIPLAYER_TIMING.inputLeadTicks
                         });
-                        this.predictor = new LocalPlayerPredictor({ playerId: this.playerId });
                         this.acceptSnapshot(message.snapshot);
                         if (!settled) {
                             settled = true;
@@ -100,6 +100,10 @@ export class RemoteGameAuthority {
 
     acceptSnapshot(serialized) {
         const snapshot = deserializeWorldSnapshotEnvelope(serialized);
+        this.predictor ??= new LocalPlayerPredictor({
+            playerId: this.playerId,
+            simulation: new GameSimulation({ worldSeed: snapshot.worldSeed })
+        });
         if (!this.stream.acceptSnapshot(snapshot)) return;
         this.pruneSentCommands(snapshot.acknowledgements?.[this.playerId]);
         const receivedAt = this.now();

@@ -16,8 +16,8 @@ import { WorldGenerator, closestPointOnSurface } from "../world/WorldGenerator.j
 import { EntityRegistry } from "./EntityRegistry.js";
 
 export class GameSimulation {
-    constructor() {
-        this.world = new WorldGenerator(WORLD_CONFIG).generate();
+    constructor({ worldSeed = WORLD_CONFIG.seed } = {}) {
+        this.world = new WorldGenerator({ ...WORLD_CONFIG, seed: worldSeed }).generate();
         this.metrics = new RunMetrics();
         this.registry = new EntityRegistry();
         this.players = [];
