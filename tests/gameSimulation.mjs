@@ -192,6 +192,35 @@ export function run() {
     const lossEvents = teamLoss.drainReplicationEvents().filter(({ eventType }) => eventType === "artifact-loss");
     assert.deepEqual(lossEvents.map(({ playerId }) => playerId).sort(), teamLoss.players.map(({ id }) => id).sort());
 
+    const fallWorld = new GameSimulation();
+    const fallPartner = fallWorld.addPlayer({ x: 150, y: 500 });
+    fallWorld.enemies = [];
+    const fallCheckpoint = fallWorld.world.checkpoints[1];
+    fallWorld.activeCheckpoint = fallCheckpoint;
+    fallPartner.physics.position.y = Number.POSITIVE_INFINITY;
+    fallWorld.step(1 / 120, command);
+    assert.equal(fallWorld.runState, "playing", "one fallen teammate must not end a cooperative run");
+    assert.equal(fallPartner.entity.lifeState, "downed");
+    assert.equal(fallPartner.physics.position.x, fallCheckpoint.x);
+    assert.equal(fallPartner.physics.position.y, fallCheckpoint.y);
+    assert.equal(fallPartner.entity.artifacts.snapshot().length, 0, "fall recovery must not apply checkpoint loss");
+    const fallEvent = fallWorld.drainReplicationEvents().find(({ eventType }) => eventType === "player-fell");
+    assert.equal(fallEvent.playerId, fallPartner.entity.id);
+
+    fallWorld.player.position.x = fallCheckpoint.x;
+    fallWorld.player.position.y = fallCheckpoint.y;
+    for (let tick = 0; tick < 300; tick += 1) {
+        fallWorld.step(1 / 120, reviveCommand);
+    }
+    assert.equal(fallPartner.entity.lifeState, "active", "the existing interaction must revive a recovered teammate");
+
+    const soloFall = new GameSimulation();
+    soloFall.player.position.y = Number.POSITIVE_INFINITY;
+    soloFall.step(1 / 120, command);
+    assert.equal(soloFall.runState, "defeated");
+    assert.equal(soloFall.defeatReason, "fall");
+    assert.equal(soloFall.playerEntity.lifeState, "downed");
+
     const completed = new GameSimulation();
     completed.rope.attach(completed.player.position, {
         x: completed.player.position.x,
