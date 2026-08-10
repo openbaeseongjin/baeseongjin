@@ -13,7 +13,9 @@ export class GameApp {
     constructor({ canvas, onDiagnostics = () => {}, worldSeed = selectWorldSeed(globalThis.location?.search) }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = new CanvasRenderer(canvas);
-        this.input = new InputSampler(globalThis.window, canvas);
+        this.input = new InputSampler(globalThis.window, canvas, {
+            onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
+        });
         this.authority = new LocalAuthority(new GameSimulation({ worldSeed }));
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
@@ -31,6 +33,12 @@ export class GameApp {
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
             this.frameId = requestAnimationFrame(this.tick);
         };
+    }
+
+    flushInterruptedRopeRelease(input, reason) {
+        if (reason === "pointerup") return false;
+        this.update(this.runner.dt, input);
+        return true;
     }
 
     start() {

@@ -3,13 +3,23 @@ import { InputSampler } from "../src/core/input/InputSampler.js";
 
 export function run() {
     const listeners = new Map();
+    const documentListeners = new Map();
+    const ropeReleases = [];
+    const documentTarget = {
+        hidden: false,
+        addEventListener: (name, fn) => documentListeners.set(name, fn),
+        removeEventListener: (name) => documentListeners.delete(name)
+    };
     const target = {
         innerWidth: 1000,
         innerHeight: 700,
+        document: documentTarget,
         addEventListener: (name, fn) => listeners.set(name, fn),
         removeEventListener: (name) => listeners.delete(name)
     };
-    const sampler = new InputSampler(target);
+    const sampler = new InputSampler(target, target, {
+        onRopeRelease: (input, reason) => ropeReleases.push({ input, reason })
+    });
     assert.equal(listeners.size, 0);
     sampler.attach();
     listeners.get("keydown")({ code: "KeyD" });
@@ -23,8 +33,32 @@ export function run() {
     listeners.get("keydown")({ code: "KeyE" });
     assert.equal(sampler.snapshot().interact, true);
     listeners.get("keyup")({ code: "KeyE" });
+    listeners.get("pointerdown")({ pointerType: "mouse", pointerId: 10, clientX: 80, clientY: 90 });
+    listeners.get("blur")();
+    assert.equal(ropeReleases.length, 1, "losing window focus must synchronously release an active rope gesture");
+    assert.equal(ropeReleases[0].reason, "blur");
+    assert.equal(ropeReleases[0].input.pointer.down, false, "the release callback must receive cleared input");
+    listeners.get("pointerup")({ pointerType: "mouse", pointerId: 10 });
+    assert.equal(ropeReleases.length, 1, "blur followed by pointerup must not emit a duplicate release");
+
+    listeners.get("pointerdown")({ pointerType: "mouse", pointerId: 11, clientX: 100, clientY: 110 });
+    listeners.get("pointerup")({ pointerType: "mouse", pointerId: 11 });
+    assert.equal(ropeReleases.length, 2, "a normal pointerup must flush the release before the next frame");
+    assert.equal(ropeReleases[1].reason, "pointerup");
+
+    listeners.get("pointerdown")({ pointerType: "mouse", pointerId: 12, clientX: 120, clientY: 130 });
+    listeners.get("pointerleave")({ pointerType: "mouse", pointerId: 12, relatedTarget: null });
+    assert.equal(ropeReleases.length, 3, "leaving the document for browser chrome must release the rope gesture");
+    assert.equal(ropeReleases[2].reason, "pointer-leave");
+
+    listeners.get("pointerdown")({ pointerType: "mouse", pointerId: 13, clientX: 140, clientY: 150 });
+    documentTarget.hidden = true;
+    documentListeners.get("visibilitychange")();
+    assert.equal(ropeReleases.length, 4, "a hidden document must release before animation frames pause");
+    assert.equal(ropeReleases[3].reason, "visibility-hidden");
     sampler.detach();
     assert.equal(listeners.size, 0);
+    assert.equal(documentListeners.size, 0);
 
     const touchListeners = new Map();
     const captured = [];
@@ -41,7 +75,10 @@ export function run() {
         addEventListener: () => {},
         removeEventListener: () => {}
     };
-    const touchSampler = new InputSampler(touchTarget, surface);
+    const touchRopeReleases = [];
+    const touchSampler = new InputSampler(touchTarget, surface, {
+        onRopeRelease: (input, reason) => touchRopeReleases.push({ input, reason })
+    });
     touchSampler.attach();
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 1, clientX: 140, clientY: 600 });
     touchListeners.get("pointermove")({ pointerType: "touch", pointerId: 1, clientX: 204, clientY: 530 });
@@ -57,9 +94,13 @@ export function run() {
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 1 });
     touchSnapshot = touchSampler.snapshot();
     assert.equal(touchSnapshot.pointer.down, false);
+    assert.equal(touchRopeReleases.length, 1);
+    assert.equal(touchRopeReleases[0].reason, "pointerup");
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 3, clientX: 400, clientY: 240 });
     touchListeners.get("pointercancel")({ pointerType: "touch", pointerId: 3 });
     assert.equal(touchSampler.snapshot().pointer.down, false);
+    assert.equal(touchRopeReleases.length, 2);
+    assert.equal(touchRopeReleases[1].reason, "pointercancel");
 
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 4, clientX: 250, clientY: 590 });
     touchSnapshot = touchSampler.snapshot();
@@ -80,7 +121,9 @@ export function run() {
 
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 4 });
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 5 });
+    assert.equal(touchRopeReleases.length, 2, "movement and jump releases must not terminate the rope gesture");
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 6 });
+    assert.equal(touchRopeReleases.length, 3, "the rope finger must remain the only release trigger");
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 7, clientX: 750, clientY: 590 });
     touchSnapshot = touchSampler.snapshot();
     assert.equal(touchSnapshot.horizontal, 1, "the bottom-right square must emit the same command as keyboard right");

@@ -35,7 +35,9 @@ export function commandForLocalSimulation(command, choosingArtifact) {
 export class MultiplayerGameApp {
     constructor({ canvas, authority, onDisconnect = () => {}, onDiagnostics = () => {} }) {
         this.renderer = new CanvasRenderer(canvas);
-        this.input = new InputSampler(globalThis.window, canvas);
+        this.input = new InputSampler(globalThis.window, canvas, {
+            onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
+        });
         this.authority = authority;
         this.onDisconnect = onDisconnect;
         this.disconnectHandled = false;
@@ -56,6 +58,12 @@ export class MultiplayerGameApp {
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
             this.frameId = requestAnimationFrame(this.tick);
         };
+    }
+
+    flushInterruptedRopeRelease(input, reason) {
+        if (reason === "pointerup" || this.authority.closed || !this.authority.predictor) return false;
+        this.update(this.runner.dt, input, true);
+        return true;
     }
 
     start() {
@@ -89,7 +97,7 @@ export class MultiplayerGameApp {
         }
     }
 
-    update(dt, input) {
+    update(dt, input, forceSubmit = false) {
         if (this.authority.closed) {
             if (!this.disconnectHandled) {
                 this.disconnectHandled = true;
@@ -163,7 +171,7 @@ export class MultiplayerGameApp {
         }
         this.combatFeedback.apply(predictedResolutions);
         this.combatFeedback.update(dt);
-        if (this.stepCount % 2 === 0) {
+        if (forceSubmit || this.stepCount % 2 === 0) {
             this.authority.submit(gameplayCommand);
         }
         const player = this.authority.snapshot(1).predicted;
