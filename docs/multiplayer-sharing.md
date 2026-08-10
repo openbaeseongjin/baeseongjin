@@ -1,12 +1,20 @@
 # 임시 멀티 서버 공유
 
-로컬 권위 서버와 정적 게임 페이지는 같은 포트에서 실행된다. 개발 중 외부 플레이어와 잠깐 확인할 때는 Cloudflare Quick Tunnel을 사용한다.
+운영 멀티는 GitHub Pages와 분리된 고정 게임 서버를 항상 실행하고, 플레이어는 4자리 채널 번호만 공유한다. 아래 Quick Tunnel 명령은 운영 서버를 대신하지 않으며 개발 중 외부 연결을 잠깐 확인할 때만 사용한다.
 
 ```powershell
 npm run share:multiplayer
 ```
 
-준비가 끝나면 터미널에 `https://...trycloudflare.com` 공유 주소가 표시된다. 참가자는 이 주소로 접속한 뒤 첫 화면에서 **멀티 플레이**를 선택한다. HTTPS 페이지는 같은 호스트의 `wss://.../multiplayer`에 자동 연결된다.
+준비가 끝나면 터미널에 `https://...trycloudflare.com` 개발 주소가 표시된다. 이 주소에서 **멀티 플레이 → 새 채널 만들기**를 누르면 4자리 번호가 표시되고 다른 참가자는 같은 주소에서 번호만 입력한다.
+
+운영 배포에서는 루트 `index.html`의 다음 값을 고정 게임 서버 주소로 설정한다.
+
+```html
+<meta name="multiplayer-server" content="https://game.example.com" />
+```
+
+모바일 화면에는 이 서버 주소를 노출하거나 입력받지 않는다.
 
 ## 안전 경계
 

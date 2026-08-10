@@ -5,19 +5,16 @@ import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
 
-export function multiplayerUrl(location = globalThis.location) {
-    const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-    return `${protocol}//${location.host}/multiplayer`;
-}
-
 export class RemoteGameAuthority {
-    constructor({ url = multiplayerUrl(), WebSocketImpl = globalThis.WebSocket, now = () => performance.now() } = {}) {
+    constructor({ url, WebSocketImpl = globalThis.WebSocket, now = () => performance.now() } = {}) {
         if (!WebSocketImpl) throw new Error("WebSocket is unavailable");
+        if (typeof url !== "string" || url.length === 0) throw new Error("멀티 초대 링크가 필요합니다.");
         this.url = url;
         this.WebSocketImpl = WebSocketImpl;
         this.now = now;
         this.socket = null;
         this.playerId = null;
+        this.channelId = null;
         this.stream = null;
         this.predictor = null;
         this.buffer = new RemoteWorldStateBuffer();
@@ -48,13 +45,16 @@ export class RemoteGameAuthority {
                 try {
                     const message = JSON.parse(event.data);
                     if (message.type === "error") {
-                        fail(
-                            message.code === "room-full" ? "멀티 방이 가득 찼습니다." : message.message || message.code
-                        );
+                        const errors = {
+                            "channel-full": `채널 ${message.channelId ?? ""}의 인원이 가득 찼습니다.`,
+                            "channel-not-found": `채널 ${message.channelId ?? ""}을 찾을 수 없습니다.`
+                        };
+                        fail(errors[message.code] ?? message.message ?? message.code);
                         return;
                     }
                     if (message.type === "welcome") {
                         this.playerId = message.playerId;
+                        this.channelId = message.channelId;
                         this.stream = new RemoteCommandStream({ playerId: this.playerId, inputLeadTicks: 4 });
                         this.predictor = new LocalPlayerPredictor({ playerId: this.playerId });
                         this.acceptSnapshot(message.snapshot);

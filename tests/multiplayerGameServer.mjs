@@ -22,9 +22,9 @@ function nextMessage(socket, type, timeoutMs = 2000) {
     });
 }
 
-function connectFor(url, type, timeoutMs = 2000) {
+function connectFor(url, type, timeoutMs = 2000, options = {}) {
     return new Promise((resolve, reject) => {
-        const socket = new WebSocket(url);
+        const socket = new WebSocket(url, options);
         const timeout = setTimeout(() => reject(new Error(`timed out connecting for ${type}`)), timeoutMs);
         socket.on("message", (data) => {
             const message = JSON.parse(data.toString());
@@ -32,7 +32,10 @@ function connectFor(url, type, timeoutMs = 2000) {
             clearTimeout(timeout);
             resolve({ socket, message });
         });
-        socket.once("error", reject);
+        socket.once("error", (error) => {
+            clearTimeout(timeout);
+            reject(error);
+        });
     });
 }
 
@@ -41,16 +44,38 @@ function closed(socket) {
     return new Promise((resolve) => socket.once("close", resolve));
 }
 
+async function waitFor(predicate, message) {
+    const deadline = Date.now() + 1000;
+    while (Date.now() < deadline) {
+        if (predicate()) return;
+        await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+    throw new Error(message);
+}
+
 export async function run() {
     const httpServer = createServer((_request, response) => response.end("ok"));
-    const multiplayer = new MultiplayerGameServer(httpServer);
+    const channelNumbers = [1234, 5678, 9012];
+    const multiplayer = new MultiplayerGameServer(httpServer, { channelNumber: () => channelNumbers.shift() });
     await new Promise((resolve) => httpServer.listen(0, "127.0.0.1", resolve));
     const { port } = httpServer.address();
-    const url = `ws://127.0.0.1:${port}/multiplayer`;
-    const { socket: first, message: firstWelcome } = await connectFor(url, "welcome");
+    const baseUrl = `ws://127.0.0.1:${port}/multiplayer`;
+    const { socket: first, message: firstWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
+    const url = `${baseUrl}?channel=${firstWelcome.channelId}`;
     const { socket: second, message: secondWelcome } = await connectFor(url, "welcome");
+    assert.equal(firstWelcome.channelId, "1234");
     assert.notEqual(firstWelcome.playerId, secondWelcome.playerId);
     assert.equal(deserializeWorldSnapshotEnvelope(secondWelcome.snapshot).state.players.length, 2);
+
+    const { socket: isolated, message: isolatedWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
+    assert.equal(isolatedWelcome.channelId, "5678");
+    assert.equal(
+        deserializeWorldSnapshotEnvelope(isolatedWelcome.snapshot).state.players.length,
+        1,
+        "different channels must own independent worlds"
+    );
+    isolated.close();
+    await closed(isolated);
 
     const stream = new RemoteCommandStream({ playerId: firstWelcome.playerId, inputLeadTicks: 6 });
     const initial = deserializeWorldSnapshotEnvelope(firstWelcome.snapshot);
@@ -71,7 +96,7 @@ export async function run() {
     assert.ok(snapshot.serverTick > initial.serverTick);
 
     const { socket: third, message: roomFull } = await connectFor(url, "error");
-    assert.equal(roomFull.code, "room-full");
+    assert.equal(roomFull.code, "channel-full");
     await closed(third);
 
     const tickBeforeLeave = snapshot.serverTick;
@@ -88,13 +113,41 @@ export async function run() {
     await closed(replacement);
     second.close();
     await closed(second);
+    await waitFor(() => !multiplayer.rooms.has("1234"), "an empty channel must delete its world");
 
-    const { socket: fresh, message: freshWelcome } = await connectFor(url, "welcome");
+    const { socket: missing, message: missingChannel } = await connectFor(url, "error");
+    assert.equal(missingChannel.code, "channel-not-found");
+    missing.close();
+    await closed(missing);
+
+    const { socket: fresh, message: freshWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
     const freshSnapshot = deserializeWorldSnapshotEnvelope(freshWelcome.snapshot);
     assert.equal(freshSnapshot.state.players.length, 1);
     assert.ok(freshSnapshot.serverTick <= 1, "an empty room must be discarded before the next first player joins");
     fresh.close();
     await closed(fresh);
+
     await multiplayer.close();
     await new Promise((resolve) => httpServer.close(resolve));
+
+    const securedHttpServer = createServer((_request, response) => response.end("ok"));
+    const secured = new MultiplayerGameServer(securedHttpServer, {
+        allowedOrigins: ["https://openbaeseongjin.github.io"]
+    });
+    await new Promise((resolve) => securedHttpServer.listen(0, "127.0.0.1", resolve));
+    const securedUrl = `ws://127.0.0.1:${securedHttpServer.address().port}/multiplayer?channel=new`;
+    await assert.rejects(connectFor(securedUrl, "welcome"), /403/);
+    await assert.rejects(
+        connectFor(securedUrl, "welcome", 2000, {
+            origin: "https://untrusted.example"
+        }),
+        /403/
+    );
+    const { socket: authorized } = await connectFor(securedUrl, "welcome", 2000, {
+        origin: "https://openbaeseongjin.github.io"
+    });
+    authorized.close();
+    await closed(authorized);
+    await secured.close();
+    await new Promise((resolve) => securedHttpServer.close(resolve));
 }
