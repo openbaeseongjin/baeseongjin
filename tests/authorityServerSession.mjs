@@ -18,6 +18,24 @@ function command(horizontal) {
 }
 
 export function run() {
+    const lateSimulation = new GameSimulation();
+    lateSimulation.enemies = [];
+    const lateSession = new AuthorityServerSession({ simulation: lateSimulation });
+    lateSession.advance();
+    const elapsed = lateSession.submit(
+        lateSimulation.playerEntity.id,
+        createPlayerCommandBatch(1, [{ playerId: lateSimulation.playerEntity.id, sequence: 99, command: command(1) }])
+    );
+    assert.equal(elapsed.rejected[0].reason, "elapsed-tick");
+    assert.deepEqual(lateSession.inbox.acknowledgements(), {}, "an unapplied command must never be acknowledged");
+    const next = lateSession.submit(
+        lateSimulation.playerEntity.id,
+        createPlayerCommandBatch(2, [{ playerId: lateSimulation.playerEntity.id, sequence: 0, command: command(1) }])
+    );
+    assert.equal(next.accepted.length, 1, "a rejected high sequence must not poison the next executable command");
+    lateSession.advance();
+    assert.ok(lateSimulation.player.velocity.x > 0);
+
     const simulation = new GameSimulation();
     const partner = simulation.addPlayer({ x: 180, y: 500 });
     simulation.enemies = [];

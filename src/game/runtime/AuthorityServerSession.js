@@ -24,6 +24,16 @@ export class AuthorityServerSession {
         if (!this.simulation.players.some(({ id }) => id === authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
+        if (batch.tick <= this.simulation.tick) {
+            return Object.freeze({
+                accepted: Object.freeze([]),
+                rejected: Object.freeze(
+                    batch.commands.map(({ playerId, sequence }) =>
+                        Object.freeze({ playerId, sequence, reason: "elapsed-tick" })
+                    )
+                )
+            });
+        }
         const foreignEntries = batch.commands.filter(({ playerId }) => playerId !== authenticatedPlayerId);
         if (foreignEntries.length > 0) {
             return Object.freeze({
