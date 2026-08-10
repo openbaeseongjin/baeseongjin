@@ -33,6 +33,7 @@ import { run as remoteCommandStream } from "./remoteCommandStream.mjs";
 import { run as remoteWorldStateBuffer } from "./remoteWorldStateBuffer.mjs";
 import { run as localPlayerPredictor } from "./localPlayerPredictor.mjs";
 import { run as commandReceipt } from "./commandReceipt.mjs";
+import { run as authorityWireAdapter } from "./authorityWireAdapter.mjs";
 
 const suites = {
     fixedStep,
@@ -69,7 +70,8 @@ const suites = {
     remoteCommandStream,
     remoteWorldStateBuffer,
     localPlayerPredictor,
-    commandReceipt
+    commandReceipt,
+    authorityWireAdapter
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
