@@ -22,6 +22,7 @@ import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
 import { run as runMetrics } from "./runMetrics.mjs";
 import { run as metricsDebugMode } from "./metricsDebugMode.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
+import { run as playerCommandBatch } from "./playerCommandBatch.mjs";
 
 const suites = {
     fixedStep,
@@ -47,7 +48,8 @@ const suites = {
     worldTraversalValidator,
     runMetrics,
     metricsDebugMode,
-    commandReplay
+    commandReplay,
+    playerCommandBatch
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
