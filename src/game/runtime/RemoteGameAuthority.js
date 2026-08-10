@@ -7,6 +7,8 @@ import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
 
+const MAX_TRACKED_COMMANDS = 2048;
+
 function updateAverage(current, sample, weight = 0.2) {
     return current === null ? sample : current + (sample - current) * weight;
 }
@@ -28,6 +30,7 @@ export class RemoteGameAuthority {
         this.snapshotReceivedAt = 0;
         this.previousSnapshotReceivedAt = null;
         this.sentAtBySequence = new Map();
+        this.sentSequenceOrder = [];
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
         this.networkMetrics = {
@@ -98,6 +101,7 @@ export class RemoteGameAuthority {
     acceptSnapshot(serialized) {
         const snapshot = deserializeWorldSnapshotEnvelope(serialized);
         if (!this.stream.acceptSnapshot(snapshot)) return;
+        this.pruneSentCommands(snapshot.acknowledgements?.[this.playerId]);
         const receivedAt = this.now();
         if (this.previousSnapshotReceivedAt !== null) {
             this.networkMetrics.snapshotIntervalMs = updateAverage(
@@ -122,7 +126,7 @@ export class RemoteGameAuthority {
         const predictedTick = this.predictor.state().tick;
         const batch = this.stream.createBatchAtTick(predictedTick, command);
         if (!batch) return false;
-        this.sentAtBySequence.set(batch.commands[0].sequence, this.now());
+        this.trackSentCommand(batch.commands[0].sequence, this.now());
         this.socket.send(JSON.stringify({ type: "command", payload: serializePlayerCommandBatch(batch) }));
         return true;
     }
@@ -183,11 +187,29 @@ export class RemoteGameAuthority {
         this.networkMetrics.rejectedCommands += rejected.length;
     }
 
+    trackSentCommand(sequence, sentAt) {
+        this.sentAtBySequence.set(sequence, sentAt);
+        this.sentSequenceOrder.push(sequence);
+        while (this.sentSequenceOrder.length > MAX_TRACKED_COMMANDS) {
+            this.sentAtBySequence.delete(this.sentSequenceOrder.shift());
+        }
+    }
+
+    pruneSentCommands(acknowledgedSequence) {
+        if (!Number.isSafeInteger(acknowledgedSequence) || acknowledgedSequence < 0) return;
+        this.sentSequenceOrder = this.sentSequenceOrder.filter((sequence) => {
+            if (sequence > acknowledgedSequence) return true;
+            this.sentAtBySequence.delete(sequence);
+            return false;
+        });
+    }
+
     metrics() {
         const totalCommands = this.networkMetrics.acceptedCommands + this.networkMetrics.rejectedCommands;
         return Object.freeze({
             ...this.networkMetrics,
             pendingCommands: this.stream?.pendingBatches().length ?? 0,
+            trackedCommands: this.sentAtBySequence.size,
             rejectionRate: totalCommands === 0 ? 0 : this.networkMetrics.rejectedCommands / totalCommands,
             ...(this.predictor?.metrics() ?? {}),
             ...(this.buffer.metrics() ?? {})

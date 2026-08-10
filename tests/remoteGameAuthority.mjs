@@ -145,6 +145,15 @@ export async function run() {
         });
         assert.equal(authority.metrics().acceptedCommands, acceptedBeforeDuplicate);
         assert.equal(authority.metrics().rejectedCommands, 1, "duplicate receipts must not skew diagnostics");
+        for (let sequence = 2000; sequence < 5000; sequence += 1) {
+            authority.trackSentCommand(sequence, authority.now());
+        }
+        assert.equal(authority.metrics().trackedCommands, 2048, "lost commands must keep a fixed tracking bound");
+        authority.pruneSentCommands(4500);
+        assert.ok(authority.metrics().trackedCommands < 500, "later authority ACKs must prune lost command timings");
+        authority.trackSentCommand(6000, authority.now() - 25);
+        authority.recordReceipt({ accepted: [{ playerId: authority.playerId, sequence: 6000 }], rejected: [] });
+        assert.ok(authority.metrics().roundTripMs > 0, "bounded tracking must preserve recent RTT samples");
         const partner = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=${authority.channelId}`,
             WebSocketImpl: WebSocket
