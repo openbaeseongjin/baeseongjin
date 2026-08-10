@@ -6,6 +6,8 @@ import { WORLD_GENERATION_REVISION } from "../src/game/world/WorldGenerator.js";
 
 export function run() {
     const simulation = new GameSimulation();
+    const partner = simulation.addPlayer({ x: 180, y: 500 });
+    partner.artifacts.add({ id: "rapid-gear", modifiers: { fireIntervalMultiplier: 0.75 } });
     simulation.playerEntity.artifacts.add({ id: "power-core", modifiers: { damageMultiplier: 1.4 } });
     simulation.playerEntity.weapon.cooldown = 0;
     const command = createPlayerCommand(
@@ -25,10 +27,15 @@ export function run() {
     assert.equal(first.worldRevision, WORLD_GENERATION_REVISION);
     assert.deepEqual(first.acknowledgements, { "player-1": 7 });
     assert.equal(first.state.players[0].id, simulation.playerEntity.id);
+    assert.equal(first.state.players[1].id, partner.entity.id);
     assert.equal(first.state.players[0].rope.isAttached, false);
     assert.deepEqual(
         first.state.players[0].artifacts.map(({ id }) => id),
         ["power-core"]
+    );
+    assert.deepEqual(
+        first.state.players[1].artifacts.map(({ id }) => id),
+        ["rapid-gear"]
     );
     assert.equal(first.events[0].eventType, "spawn");
     assert.equal(Object.hasOwn(first.state, "projectiles"), false);
