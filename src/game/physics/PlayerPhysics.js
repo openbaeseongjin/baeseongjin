@@ -21,9 +21,7 @@ export class PlayerPhysics {
     }
 
     step(dt, input, surfaces, rope) {
-        if (rope.isAttached) {
-            this.velocity.x += input.horizontal * this.config.airAcceleration * dt;
-        } else {
+        if (!rope.isAttached) {
             const acceleration = this.isGrounded ? this.config.groundAcceleration : this.config.airAcceleration;
             this.velocity.x += input.horizontal * acceleration * dt;
             if (input.horizontal === 0 && this.isGrounded) {
