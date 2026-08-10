@@ -2,13 +2,24 @@ import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 
-export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combatConfig, artifactConfig, spawn }) {
+export function createPlayerRuntime({
+    registry,
+    playerConfig,
+    ropeConfig,
+    combatConfig,
+    artifactConfig,
+    spawn,
+    playerId = null
+}) {
+    if (playerId !== null && (typeof playerId !== "string" || playerId.length === 0)) {
+        throw new Error("playerId must be a non-empty string");
+    }
     const physics = new PlayerPhysics(playerConfig);
     if (spawn) physics.reset(spawn);
     const rope = new FixedLengthRope(ropeConfig);
     const artifacts = new ArtifactInventory(artifactConfig);
     const entity = {
-        id: registry.createId("player"),
+        id: playerId ?? registry.createId("player"),
         physics,
         rope,
         artifacts,

@@ -206,6 +206,35 @@ export function run() {
     assert.equal(predictedAttacks[0].predictionId, `${movingServer.playerEntity.id}:${attackTick}`);
     assert.deepEqual(attackPredictor.drainPredictedEvents(), []);
 
+    const secondPlayerId = "player-2";
+    const secondPlayerSnapshot = {
+        ...attackSnapshot,
+        state: {
+            ...attackSnapshot.state,
+            players: attackSnapshot.state.players.map((player) => ({ ...player, id: secondPlayerId }))
+        }
+    };
+    const secondPlayerPredictor = new LocalPlayerPredictor({ playerId: secondPlayerId, predictionLeadTicks: 0 });
+    assert.equal(
+        secondPlayerPredictor.simulation.playerEntity.id,
+        secondPlayerId,
+        "the prediction simulation itself must own the authenticated player id"
+    );
+    secondPlayerPredictor.reconcile(secondPlayerSnapshot, []);
+    secondPlayerPredictor.advance(move);
+    const secondPlayerAttacks = secondPlayerPredictor.drainPredictedEvents();
+    assert.equal(secondPlayerAttacks.length, 1);
+    assert.equal(
+        secondPlayerAttacks[0].ownerId,
+        secondPlayerId,
+        "a second client's predicted shot must use its authority player id"
+    );
+    assert.throws(
+        () => new LocalPlayerPredictor({ playerId: secondPlayerId, simulation: new GameSimulation() }),
+        /prediction simulation playerId mismatch/,
+        "a mismatched injected simulation must fail before it can emit wrongly owned events"
+    );
+
     assert.throws(
         () => predictor.reconcile({ ...snapshot, worldSeed: snapshot.worldSeed + 1 }, []),
         /world seed mismatch/
