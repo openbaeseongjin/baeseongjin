@@ -6,6 +6,7 @@ import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { GameSimulation } from "./simulation/GameSimulation.js";
 import { CAMERA_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
+import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 
 export class GameApp {
     constructor({ canvas }) {
@@ -19,6 +20,7 @@ export class GameApp {
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
         this.latestInput = this.input.snapshot();
+        this.combatFeedback = new ClientCombatFeedback();
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: () => this.render()
@@ -46,6 +48,8 @@ export class GameApp {
         const before = this.authority.snapshot();
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
+        this.combatFeedback.apply(this.authority.drainEvents());
+        this.combatFeedback.update(dt);
         const state = this.authority.snapshot();
         if (state.resets !== before.resets) this.camera = this.createCamera();
         this.updateCamera(dt, state.player);
@@ -68,6 +72,7 @@ export class GameApp {
         this.stats.resets = state.resets;
         this.renderer.draw({
             ...state,
+            ...this.combatFeedback.snapshot(),
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,

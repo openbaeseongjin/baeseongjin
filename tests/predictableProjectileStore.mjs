@@ -4,6 +4,7 @@ import {
     createPredictableSpawnEvent
 } from "../src/game/network/PredictableObjectEvent.js";
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
+import { ClientCombatFeedback } from "../src/game/combat/ClientCombatFeedback.js";
 
 export function run() {
     const store = new PredictableProjectileStore();
@@ -34,18 +35,22 @@ export function run() {
     store.update(1 / 120, { enemies: [{ id: "enemy-1", position: { x: 100, y: 0 } }] });
     assert.ok(store.snapshot().projectiles[0].position.x > 4, "player projectile must home toward its target");
 
-    store.apply(
-        [
-            createPredictableResolveEvent({
-                eventId: "event-3",
-                objectId: "projectile-1",
-                tick: 13,
-                resolution: "enemy-hit",
-                position: { x: 5, y: 0 }
-            })
-        ],
-        13,
-        { enemies: [] }
-    );
+    const resolveEvent = createPredictableResolveEvent({
+        eventId: "event-3",
+        objectId: "projectile-1",
+        tick: 13,
+        resolution: "enemy-hit",
+        position: { x: 5, y: 0 },
+        parameters: { damage: 10 }
+    });
+    store.apply([resolveEvent], 13, { enemies: [] });
     assert.equal(store.snapshot().projectiles.length, 0);
+
+    const feedback = new ClientCombatFeedback();
+    feedback.apply([resolveEvent]);
+    assert.ok(feedback.snapshot().combatEffects.length > 0, "a resolve event must create local client effects");
+    assert.ok(feedback.snapshot().impact, "a resolve event must create local client impact feedback");
+    feedback.update(1);
+    assert.equal(feedback.snapshot().combatEffects.length, 0, "client effects must expire on the client clock");
+    assert.equal(feedback.snapshot().impact, null);
 }

@@ -10,4 +10,8 @@ export class LocalAuthority {
     snapshot() {
         return this.simulation.snapshot();
     }
+
+    drainEvents() {
+        return this.simulation.drainReplicationEvents();
+    }
 }
