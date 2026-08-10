@@ -1,5 +1,6 @@
 import { GameApp } from "./game/GameApp.js";
 import { setupInstallPrompt } from "./pwa/InstallPrompt.js";
+import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
 
 const canvas = document.getElementById("game-canvas");
 if (!canvas) {
@@ -12,16 +13,18 @@ const releaseInstallPrompt = setupInstallPrompt({
     navigator: globalThis.navigator,
     root: document.getElementById("install-prompt")
 });
+const releaseServiceWorkerUpdater = setupServiceWorkerUpdater({
+    window: globalThis.window,
+    navigator: globalThis.navigator,
+    scriptUrl: new URL("../sw.js", import.meta.url)
+});
 app.start();
 globalThis.addEventListener(
     "pagehide",
     () => {
         releaseInstallPrompt();
+        releaseServiceWorkerUpdater();
         app.stop();
     },
     { once: true }
 );
-
-if ("serviceWorker" in navigator) {
-    globalThis.addEventListener("load", () => navigator.serviceWorker.register(new URL("../sw.js", import.meta.url)));
-}
