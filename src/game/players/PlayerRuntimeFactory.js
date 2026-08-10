@@ -15,6 +15,8 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         aimWorld: Object.freeze({ x: 0, y: 0 }),
         attachmentCandidate: null,
         wasPointerDown: false,
+        lastPointer: Object.freeze({ x: 0, y: 0, down: false }),
+        lastViewport: Object.freeze({ width: 1, height: 1 }),
         attachBufferRemaining: 0,
         swingDrag: null,
         ropeDamageBoostRemaining: 0,

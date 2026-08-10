@@ -75,6 +75,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `GameSimulation.addPlayer()`가 첫 플레이어와 협동 플레이어를 같은 팩토리·월드·`players` 배열에 등록하며, 기존 싱글 별칭은 첫 플레이어를 유지한다.
 - 로프 조준·부착 후보·포인터 전이·입력 버퍼·스윙 드래그·연계 강화 시간은 각 플레이어 엔티티가 독립 소유하고, 기존 GameSimulation 필드는 첫 플레이어 별칭이다.
 - `GameSimulation.updatePlayer(playerEntity, command, dt)`가 플레이어별 이동·로프·타이머·아티팩트 무기 효과·자동 발사를 공통 처리하며 싱글도 이 경로를 사용한다.
+- `GameSimulation.stepCommandBatch()`가 다음 권위 틱의 플레이어별 명령을 한 월드에 적용하고, 누락 명령은 마지막 포인터·viewport·조준을 보존한 중립 이동으로 처리한다.
 
 ### [L1] 공용 기반과 게임 규칙을 분리한다
 
