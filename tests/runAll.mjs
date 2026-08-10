@@ -19,6 +19,7 @@ import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as artifactInventory } from "./artifactInventory.mjs";
 import { run as artifactCatalog } from "./artifactCatalog.mjs";
 import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
+import { run as runMetrics } from "./runMetrics.mjs";
 
 const suites = {
     fixedStep,
@@ -41,7 +42,8 @@ const suites = {
     canvasRenderer,
     artifactInventory,
     artifactCatalog,
-    worldTraversalValidator
+    worldTraversalValidator,
+    runMetrics
 };
 let failures = 0;
 for (const [name, run] of Object.entries(suites)) {
