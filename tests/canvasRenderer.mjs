@@ -104,7 +104,8 @@ export function run() {
         "연사 톱니",
         "연사 증가",
         "로프 공명기",
-        "스윙 강화"
+        "스윙 강화",
+        "선택 중에도 전투 진행 · 빠르게 결정하세요"
     ]);
     textCalls.length = 0;
     borderCalls.length = 0;
