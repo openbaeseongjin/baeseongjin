@@ -27,4 +27,7 @@ export function run() {
     renderer.drawRopeCutFeedback({ type: "rope-cut", age: 0.2 }, 0.4);
     assert.deepEqual(textCalls, ["로프 절단!", "재연결까지 0.4초"]);
     assert.deepEqual(borderCalls, [[4, 4, 836, 382]]);
+    assert.deepEqual(renderer.getImpactOffset(null), { x: 0, y: 0 });
+    const impactOffset = renderer.getImpactOffset({ age: 0.05, lifetime: 0.2, strength: 6 });
+    assert.notEqual(impactOffset.x, 0, "active impacts must offset the world layer");
 }

@@ -48,7 +48,8 @@ export class CanvasRenderer {
         this.drawBackground(scene.camera);
         this.context.save();
         const zoom = scene.camera.zoom ?? 1;
-        this.context.translate(-scene.camera.x * zoom, -scene.camera.y * zoom);
+        const shake = this.getImpactOffset(scene.impact);
+        this.context.translate(-scene.camera.x * zoom + shake.x, -scene.camera.y * zoom + shake.y);
         this.context.scale(zoom, zoom);
         this.drawWorld(scene.world);
         this.drawAttachmentRange(scene);
@@ -57,14 +58,55 @@ export class CanvasRenderer {
         this.drawEnemies(scene.enemies ?? []);
         this.drawProjectiles(scene.projectiles ?? []);
         this.drawEnemyProjectiles(scene.enemyProjectiles ?? []);
+        this.drawCombatEffects(scene.combatEffects ?? []);
         this.drawRopeCutMark(scene.eventFlash);
         this.drawCandidate(scene.attachmentCandidate);
         this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
         this.context.restore();
-        if (!scene.mobileView) this.drawHud(scene);
+        if (!scene.mobileView) this.drawCombatHud(scene);
         this.drawMobileControls(scene.mobileControls);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawDefeatOverlay(scene);
+    }
+
+    getImpactOffset(impact) {
+        if (!impact || impact.age >= impact.lifetime) return { x: 0, y: 0 };
+        const decay = 1 - impact.age / impact.lifetime;
+        return {
+            x: Math.sin(impact.age * 173) * impact.strength * decay,
+            y: Math.cos(impact.age * 137) * impact.strength * decay * 0.65
+        };
+    }
+
+    drawCombatEffects(effects) {
+        const ctx = this.context;
+        for (const effect of effects) {
+            const progress = Math.min(1, effect.age / effect.lifetime);
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, 1 - progress);
+            if (effect.type === "ring") {
+                ctx.strokeStyle = effect.color;
+                ctx.lineWidth = 5 * (1 - progress) + 1;
+                ctx.beginPath();
+                ctx.arc(effect.position.x, effect.position.y, 8 + progress * 34 * effect.strength, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (effect.type === "particle") {
+                ctx.fillStyle = effect.color;
+                ctx.translate(effect.position.x, effect.position.y);
+                ctx.rotate(Math.atan2(effect.velocity.y, effect.velocity.x));
+                ctx.fillRect(-effect.size, -effect.size * 0.45, effect.size * 2, effect.size * 0.9);
+            } else if (effect.type === "text") {
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.strokeStyle = "rgba(8, 11, 16, 0.9)";
+                ctx.lineWidth = 4;
+                ctx.fillStyle = effect.color;
+                ctx.font = `${effect.emphasis ? 900 : 800} ${effect.emphasis ? 22 : 17}px system-ui, sans-serif`;
+                ctx.strokeText(effect.text, effect.position.x, effect.position.y);
+                ctx.fillText(effect.text, effect.position.x, effect.position.y);
+            }
+            ctx.restore();
+        }
     }
 
     drawBackground(camera) {
@@ -363,6 +405,62 @@ export class CanvasRenderer {
             ctx.arc(projectile.position.x, projectile.position.y, projectile.radius, 0, Math.PI * 2);
             ctx.fill();
         }
+    }
+
+    drawCombatHud({
+        player,
+        rope,
+        world,
+        attachmentCandidate,
+        swingDrag,
+        playerHealth,
+        playerMaxHealth,
+        ropeDisabledRemaining
+    }) {
+        const ctx = this.context;
+        const healthRatio = Math.max(0, Math.min(1, (playerHealth ?? 0) / Math.max(1, playerMaxHealth ?? 1)));
+        const climbed = Math.max(0, Math.round(560 - player.position.y));
+        const totalHeight = Math.round(560 - world.topY);
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 11, 20, 0.82)";
+        ctx.fillRect(18, 18, 300, 104);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.38)";
+        ctx.strokeRect(18, 18, 300, 104);
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "800 12px system-ui, sans-serif";
+        ctx.fillText("생명력", 32, 40);
+        ctx.textAlign = "right";
+        ctx.fillText(`${playerHealth ?? 0} / ${playerMaxHealth ?? 0}`, 302, 40);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "rgba(71, 85, 105, 0.8)";
+        ctx.fillRect(32, 48, 270, 10);
+        ctx.fillStyle = healthRatio > 0.35 ? "#22c55e" : "#fb7185";
+        ctx.fillRect(32, 48, 270 * healthRatio, 10);
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(`고도 ${climbed} / ${totalHeight}m`, 32, 77);
+        ctx.textAlign = "right";
+        ctx.fillText(`속도 ${Math.round(player.velocity.length())}`, 302, 77);
+        ctx.textAlign = "left";
+        ctx.fillStyle = rope.isAttached ? COLORS.ropeTense : ropeDisabledRemaining > 0 ? "#fb7185" : COLORS.candidate;
+        ctx.beginPath();
+        ctx.arc(37, 101, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#e2e8f0";
+        ctx.fillText(
+            rope.isAttached
+                ? swingDrag?.used
+                    ? "스윙 완료 · 놓아서 이동"
+                    : `스윙 충전 ${Math.round((swingDrag?.progress ?? 0) * 100)}%`
+                : ropeDisabledRemaining > 0
+                  ? `로프 재연결 ${ropeDisabledRemaining.toFixed(1)}초`
+                  : attachmentCandidate
+                    ? "부착 가능 · 누르고 드래그"
+                    : "사거리 안쪽 암벽을 조준",
+            50,
+            105
+        );
+        ctx.restore();
     }
 
     drawHud({

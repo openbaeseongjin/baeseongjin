@@ -5,6 +5,7 @@ import {
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
+import { appendCombatFeedback, createImpactState, updateCombatFeedback } from "../combat/CombatFeedback.js";
 import { COMBAT_CONFIG, LIFE_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { enterDowned, isTeamDefeated, updateDownedPlayer } from "../life/PlayerLifeCycle.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
@@ -40,6 +41,8 @@ export class GameSimulation {
         this.enemies = this.createEnemies();
         this.projectiles = [];
         this.enemyProjectiles = [];
+        this.combatEffects = [];
+        this.impact = null;
         this.aimWorld = { x: 0, y: 0 };
         this.attachmentCandidate = null;
         this.wasPointerDown = false;
@@ -108,7 +111,12 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
-        updatePlayerProjectiles({ projectiles: this.projectiles, enemies: this.enemies, config: COMBAT_CONFIG, dt });
+        const playerProjectileEvents = updatePlayerProjectiles({
+            projectiles: this.projectiles,
+            enemies: this.enemies,
+            config: COMBAT_CONFIG,
+            dt
+        });
         updateEnemyWeapons({
             enemies: this.enemies,
             target: this.playerEntity,
@@ -127,6 +135,15 @@ export class GameSimulation {
         if (enemyProjectileEvents.ropeCutAt) {
             this.eventFlash = { type: "rope-cut", age: 0, position: enemyProjectileEvents.ropeCutAt };
             this.swingDrag = null;
+        }
+        const combatEvents = [...playerProjectileEvents.hits, ...enemyProjectileEvents.hits];
+        for (const event of combatEvents) appendCombatFeedback(this.combatEffects, event);
+        const impact = createImpactState(combatEvents);
+        if (impact) this.impact = impact;
+        updateCombatFeedback(this.combatEffects, dt);
+        if (this.impact) {
+            this.impact.age += dt;
+            if (this.impact.age >= this.impact.lifetime) this.impact = null;
         }
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
         if (this.playerEntity.health <= 0 && enterDowned(this.playerEntity, LIFE_CONFIG)) {
@@ -205,6 +222,8 @@ export class GameSimulation {
         this.enemies = this.createEnemies();
         this.projectiles = [];
         this.enemyProjectiles = [];
+        this.combatEffects = [];
+        this.impact = null;
         this.runState = "playing";
         this.defeatReason = null;
         this.restartRemaining = 0;
@@ -233,6 +252,8 @@ export class GameSimulation {
             enemies: this.enemies,
             projectiles: this.projectiles,
             enemyProjectiles: this.enemyProjectiles,
+            combatEffects: this.combatEffects,
+            impact: this.impact,
             playerHealth: this.playerEntity.health,
             playerMaxHealth: this.playerEntity.maxHealth,
             ropeDisabledRemaining: this.playerEntity.ropeDisabledRemaining,
