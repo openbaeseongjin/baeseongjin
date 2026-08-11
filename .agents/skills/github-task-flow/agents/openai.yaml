@@ -1,4 +1,4 @@
 interface:
   display_name: "GitHub Task Flow"
-  short_description: "GitHub 이슈부터 단일 커밋 병합까지 안전하게 자동화"
-  default_prompt: "Use $github-task-flow to initialize GitHub write access when needed and publish the current workspace changes through a verified merge commit that preserves the Lore commit history."
+  short_description: "최신 main rebase 후 GitHub 이슈부터 병합까지 자동화"
+  default_prompt: "Use $github-task-flow to initialize GitHub write access when needed, publish the current workspace changes, rebase the dedicated task branch onto the latest origin/main, rerun required checks, and finish through a normal merge commit that preserves the Lore commit history."
