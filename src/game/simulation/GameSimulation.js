@@ -228,7 +228,12 @@ export class GameSimulation {
         return this.ownerPredictionState(ownerId);
     }
 
-    applyOwnerPredictionOutcomes(ownerId, authoritative, predictionTick, { preserveRopeBoost = false } = {}) {
+    applyOwnerPredictionOutcomes(
+        ownerId,
+        authoritative,
+        predictionTick,
+        { preserveRopeBoost = false, preserveWeaponCooldown = false } = {}
+    ) {
         const player = this.#requirePlayer(ownerId);
         const lifeStateChanged = player.lifeState !== authoritative.lifeState;
         player.health = authoritative.health;
@@ -242,6 +247,7 @@ export class GameSimulation {
         player.weapon.range = authoritative.weapon.range;
         player.weapon.damage = authoritative.weapon.damage;
         player.weapon.fireInterval = authoritative.weapon.fireInterval;
+        if (!preserveWeaponCooldown) player.weapon.cooldown = authoritative.weapon.cooldown;
         player.artifacts.replace(authoritative.artifacts);
         if (!preserveRopeBoost) player.ropeDamageBoostRemaining = authoritative.ropeDamageBoostRemaining;
         player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
@@ -269,6 +275,13 @@ export class GameSimulation {
         const player = this.#requirePlayer(ownerId);
         player.ropeDamageBoostRemaining = remaining;
         this.applyArtifactEffects(player);
+        return this.ownerPredictionState(ownerId);
+    }
+
+    restorePredictedWeaponCooldown(ownerId, remaining) {
+        if (!Number.isFinite(remaining) || remaining < 0) throw new Error("remaining must be non-negative");
+        const player = this.#requirePlayer(ownerId);
+        player.weapon.cooldown = remaining;
         return this.ownerPredictionState(ownerId);
     }
 
@@ -313,7 +326,8 @@ export class GameSimulation {
             lifeState: state.lifeState,
             rope: state.rope,
             swingDrag: state.control.swingDrag,
-            ropeDamageBoostRemaining: state.ropeDamageBoostRemaining
+            ropeDamageBoostRemaining: state.ropeDamageBoostRemaining,
+            weaponCooldown: state.weapon.cooldown
         };
     }
 
