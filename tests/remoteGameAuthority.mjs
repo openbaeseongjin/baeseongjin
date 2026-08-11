@@ -690,24 +690,43 @@ export async function run() {
         assert.equal(authority.metrics().rejectionRate, 0);
         const room = gameServer.rooms.get(authority.channelId);
         const authorityPlayer = room.simulation.players.find(({ id }) => id === authority.playerId);
+        const ownerBeforeAcceptedImpact = authority.snapshot().owner;
         const receiptProjectile = new ProjectileObject({
             id: "impact-receipt-projectile",
             ownerId: "impact-receipt-enemy",
             targetId: authority.playerId,
-            position: authorityPlayer.physics.position.clone(),
+            position: new Vector2(ownerBeforeAcceptedImpact.position.x, ownerBeforeAcceptedImpact.position.y),
             velocity: new Vector2(0, 0),
             damage: 20,
             radius: 7
         });
         room.simulation.enemyProjectiles.push(receiptProjectile);
         assert.equal(
-            authority.submitImpactClaim({
+            authority.resolvePredictedImpact({
                 projectileId: receiptProjectile.id,
                 clientTick: authority.snapshot().owner.tick,
                 resolution: "player-hit",
-                position: authorityPlayer.physics.position
+                position: ownerBeforeAcceptedImpact.position,
+                velocity: { x: receiptProjectile.velocity.x, y: receiptProjectile.velocity.y },
+                parameters: { damage: receiptProjectile.damage }
             }),
             true
+        );
+        assert.equal(
+            authority.snapshot().owner.health,
+            ownerBeforeAcceptedImpact.health - receiptProjectile.damage,
+            "victim HP must change before the accepted impact receipt"
+        );
+        const impactApp = new MultiplayerGameApp({ canvas: fakeCanvas(), authority });
+        let predictedImpactRender = null;
+        impactApp.renderer.draw = (state) => {
+            predictedImpactRender = state;
+        };
+        impactApp.render();
+        assert.equal(
+            predictedImpactRender.playerHealth,
+            authority.snapshot().owner.health,
+            "the multiplayer HUD must render predicted owner HP instead of the stale server snapshot"
         );
         await waitFor(
             () => authority.impactClaimReceipts.length > 0,
@@ -716,6 +735,12 @@ export async function run() {
         const impactReceipt = authority.drainImpactClaimReceipts()[0];
         assert.equal(impactReceipt.projectileId, receiptProjectile.id);
         assert.equal(impactReceipt.accepted, true);
+        await waitFor(
+            () =>
+                authority.latestSnapshot.state.players.find(({ id }) => id === authority.playerId)?.health ===
+                authority.snapshot().owner.health,
+            "accepted predicted HP must converge through the authority snapshot"
+        );
 
         authorityPlayer.hitInvulnerabilityRemaining = 0;
         authorityPlayer.ropeDisabledRemaining = 0;
@@ -767,6 +792,11 @@ export async function run() {
             authority.snapshot().owner.hitInvulnerabilityRemaining > 0,
             "the victim must feel the predicted hit before its receipt"
         );
+        assert.equal(
+            authority.snapshot().owner.health,
+            beforeRejectedBody.health - rejectedBodyProjectile.damage,
+            "rejected victim HP must still react before its receipt"
+        );
         const replayedCommands = [movementCommand(1), movementCommand(-1)];
         for (const command of replayedCommands) {
             authority.advance(command);
@@ -800,6 +830,7 @@ export async function run() {
             `rejected impact velocity replay mismatch: ${JSON.stringify({ rolledBackBody, expectedBody })}`
         );
         assert.equal(rolledBackBody.hitInvulnerabilityRemaining, expectedBody.hitInvulnerabilityRemaining);
+        assert.equal(rolledBackBody.health, expectedBody.health);
 
         const ropeAnchor = {
             x: rolledBackBody.position.x,

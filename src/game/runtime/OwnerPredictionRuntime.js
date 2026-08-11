@@ -113,7 +113,10 @@ export class OwnerPredictionRuntime {
         }
 
         const batchesByTick = this.pendingBatchesByTick(ownerMotionTick, pendingBatches);
-        this.replayInputs(ownerMotionTick, targetTick, batchesByTick);
+        const pendingImpacts = [...this.pendingImpacts.values()]
+            .filter(({ tick }) => tick >= ownerMotionTick)
+            .sort((left, right) => left.tick - right.tick || left.order - right.order);
+        this.replayInputs(ownerMotionTick, targetTick, batchesByTick, pendingImpacts);
         const corrected = this.state();
         if (displayedBefore)
             this.startPresentationCorrection(displayedBefore, corrected, respawned || lifeStateChanged);
@@ -141,7 +144,8 @@ export class OwnerPredictionRuntime {
         }
         const outcome = this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
             preserveRopeBoost: this.pendingRopeSwings.size > 0,
-            preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0
+            preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0,
+            preserveImpactPrediction: this.pendingImpacts.size > 0
         });
         if (outcome.lifeStateChanged) this.startPresentationCorrection(displayedBefore, outcome.state);
         return this.state();
@@ -283,7 +287,8 @@ export class OwnerPredictionRuntime {
         if (authoritative) {
             this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
                 preserveRopeBoost: this.pendingRopeSwings.size > 0,
-                preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0
+                preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0,
+                preserveImpactPrediction: this.pendingImpacts.size > 0
             });
         }
         const corrected = this.state();

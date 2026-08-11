@@ -232,27 +232,29 @@ export class GameSimulation {
         ownerId,
         authoritative,
         predictionTick,
-        { preserveRopeBoost = false, preserveWeaponCooldown = false } = {}
+        { preserveRopeBoost = false, preserveWeaponCooldown = false, preserveImpactPrediction = false } = {}
     ) {
         const player = this.#requirePlayer(ownerId);
-        const lifeStateChanged = player.lifeState !== authoritative.lifeState;
-        player.health = authoritative.health;
-        player.maxHealth = authoritative.maxHealth;
-        player.hitInvulnerabilityRemaining = Math.max(
-            player.hitInvulnerabilityRemaining,
-            authoritative.hitInvulnerabilityRemaining
-        );
-        player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, authoritative.ropeDisabledRemaining);
-        player.lifeState = authoritative.lifeState;
-        player.weapon.range = authoritative.weapon.range;
-        player.weapon.damage = authoritative.weapon.damage;
-        player.weapon.fireInterval = authoritative.weapon.fireInterval;
-        if (!preserveWeaponCooldown) player.weapon.cooldown = authoritative.weapon.cooldown;
-        player.artifacts.replace(authoritative.artifacts);
-        if (!preserveRopeBoost) player.ropeDamageBoostRemaining = authoritative.ropeDamageBoostRemaining;
-        player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
-        this.applyArtifactEffects(player);
-        if (authoritative.ropeDisabledRemaining > 0) this.releasePlayerRope(ownerId);
+        const lifeStateChanged = !preserveImpactPrediction && player.lifeState !== authoritative.lifeState;
+        if (!preserveImpactPrediction) {
+            player.health = authoritative.health;
+            player.maxHealth = authoritative.maxHealth;
+            player.hitInvulnerabilityRemaining = Math.max(
+                player.hitInvulnerabilityRemaining,
+                authoritative.hitInvulnerabilityRemaining
+            );
+            player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, authoritative.ropeDisabledRemaining);
+            player.lifeState = authoritative.lifeState;
+            player.weapon.range = authoritative.weapon.range;
+            player.weapon.damage = authoritative.weapon.damage;
+            player.weapon.fireInterval = authoritative.weapon.fireInterval;
+            if (!preserveWeaponCooldown) player.weapon.cooldown = authoritative.weapon.cooldown;
+            player.artifacts.replace(authoritative.artifacts);
+            if (!preserveRopeBoost) player.ropeDamageBoostRemaining = authoritative.ropeDamageBoostRemaining;
+            player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
+            this.applyArtifactEffects(player);
+            if (authoritative.ropeDisabledRemaining > 0) this.releasePlayerRope(ownerId);
+        }
         if (lifeStateChanged) {
             this.#restorePlayer(player, authoritative);
         }
@@ -305,6 +307,9 @@ export class GameSimulation {
             );
         }
         player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+        const damage = Number.isFinite(event.parameters?.damage) ? Math.max(0, event.parameters.damage) : 0;
+        player.health = Math.max(0, player.health - damage);
+        if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
         return true;
     }
 
@@ -321,13 +326,16 @@ export class GameSimulation {
             velocity: state.velocity,
             isGrounded: state.isGrounded,
             health: state.health,
+            maxHealth: state.maxHealth,
             hitInvulnerabilityRemaining: state.hitInvulnerabilityRemaining,
             ropeDisabledRemaining: state.ropeDisabledRemaining,
             lifeState: state.lifeState,
             rope: state.rope,
             swingDrag: state.control.swingDrag,
             ropeDamageBoostRemaining: state.ropeDamageBoostRemaining,
-            weaponCooldown: state.weapon.cooldown
+            weaponCooldown: state.weapon.cooldown,
+            artifacts: state.artifacts,
+            lastCheckpointLoss: state.lastCheckpointLoss
         };
     }
 
