@@ -708,6 +708,111 @@ export async function run() {
         spawnOwner.close();
         await waitFor(() => !gameServer.rooms.has(spawnOwner.channelId), "the projectile spawn room must close");
 
+        const collisionOwner = new RemoteGameAuthority({
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
+            WebSocketImpl: WebSocket
+        });
+        await collisionOwner.connect();
+        const collisionRoom = gameServer.rooms.get(collisionOwner.channelId);
+        const collisionServerPlayer = collisionRoom.simulation.players.find(({ id }) => id === collisionOwner.playerId);
+        const collisionLocalPlayer = collisionOwner.ownerRuntime.simulation.players.find(
+            ({ id }) => id === collisionOwner.playerId
+        );
+        const collisionTarget = collisionRoom.simulation.enemies[0];
+        collisionTarget.position.set(
+            collisionServerPlayer.physics.position.x + 80,
+            collisionServerPlayer.physics.position.y
+        );
+        collisionTarget.fireCooldown = 999;
+        collisionRoom.simulation.enemies = [collisionTarget];
+        collisionServerPlayer.weapon.cooldown = 0;
+        collisionLocalPlayer.weapon.cooldown = 0;
+        gameServer.broadcast(collisionRoom, { type: "snapshot", payload: collisionRoom.adapter.snapshot() });
+        await waitFor(
+            () =>
+                collisionOwner.snapshot().state.enemies.length === 1 &&
+                distance(collisionOwner.snapshot().state.enemies[0].position, collisionTarget.position) < 1,
+            "the collision app must receive its nearby target"
+        );
+        const collisionApp = new MultiplayerGameApp({ canvas: fakeCanvas(), authority: collisionOwner });
+        const targetHealthBeforeCollision = collisionTarget.health;
+        for (let tick = 0; tick < 180 && collisionTarget.health === targetHealthBeforeCollision; tick += 1) {
+            collisionApp.update(1 / 120, movementCommand(0));
+            await new Promise((resolve) => setTimeout(resolve, 2));
+        }
+        assert.equal(
+            collisionTarget.health,
+            targetHealthBeforeCollision - collisionServerPlayer.weapon.damage,
+            "a projectile adopted from the server spawn must keep moving and resolve enemy damage"
+        );
+
+        collisionRoom.simulation.enemies = [];
+        collisionServerPlayer.hitInvulnerabilityRemaining = 0;
+        collisionLocalPlayer.hitInvulnerabilityRemaining = 0;
+        const healthBeforeCollision = collisionOwner.snapshot().owner.health;
+        const bodyProjectile = new BallisticProjectileObject({
+            id: "app-body-impact-projectile",
+            ownerId: "app-body-impact-enemy",
+            targetId: collisionOwner.playerId,
+            position: new Vector2(
+                collisionOwner.snapshot().owner.position.x,
+                collisionOwner.snapshot().owner.position.y
+            ),
+            velocity: new Vector2(0, 0),
+            damage: 20,
+            radius: 7
+        });
+        collisionRoom.simulation.enemyProjectiles.push(bodyProjectile);
+        collisionRoom.simulation.recordProjectileSpawn(bodyProjectile);
+        gameServer.broadcast(collisionRoom, { type: "snapshot", payload: collisionRoom.adapter.snapshot() });
+        await waitFor(
+            () => collisionOwner.buffer.events.some(({ objectId }) => objectId === bodyProjectile.id),
+            "the collision app must receive the body projectile"
+        );
+        for (let tick = 0; tick < 10; tick += 1) {
+            collisionApp.update(1 / 120, movementCommand(0));
+            await new Promise((resolve) => setTimeout(resolve, 2));
+        }
+        assert.equal(
+            collisionOwner.snapshot().owner.health,
+            healthBeforeCollision - bodyProjectile.damage,
+            "the victim app must apply body damage before rendering another server snapshot"
+        );
+
+        const ropeStart = collisionOwner.snapshot().owner.position;
+        const collisionRopeAnchor = { x: ropeStart.x, y: ropeStart.y - 100 };
+        collisionServerPlayer.ropeObject.rope.attach(collisionServerPlayer.physics.position, collisionRopeAnchor);
+        collisionLocalPlayer.ropeObject.rope.attach(collisionLocalPlayer.physics.position, collisionRopeAnchor);
+        collisionServerPlayer.ropeDisabledRemaining = 0;
+        collisionLocalPlayer.ropeDisabledRemaining = 0;
+        const ropeProjectile = new BallisticProjectileObject({
+            id: "app-rope-impact-projectile",
+            ownerId: "app-rope-impact-enemy",
+            targetId: collisionOwner.playerId,
+            position: new Vector2(ropeStart.x, ropeStart.y - 50),
+            velocity: new Vector2(0, 0),
+            damage: 20,
+            radius: 7
+        });
+        collisionRoom.simulation.enemyProjectiles.push(ropeProjectile);
+        collisionRoom.simulation.recordProjectileSpawn(ropeProjectile);
+        gameServer.broadcast(collisionRoom, { type: "snapshot", payload: collisionRoom.adapter.snapshot() });
+        await waitFor(
+            () => collisionOwner.buffer.events.some(({ objectId }) => objectId === ropeProjectile.id),
+            "the collision app must receive the rope projectile"
+        );
+        for (let tick = 0; tick < 10; tick += 1) {
+            collisionApp.update(1 / 120, movementCommand(0));
+            await new Promise((resolve) => setTimeout(resolve, 2));
+        }
+        assert.equal(collisionOwner.snapshot().owner.rope.isAttached, false, "the victim app must cut its rope");
+        assert.ok(
+            collisionOwner.snapshot().owner.ropeDisabledRemaining > 0,
+            "the victim app must keep rope reattachment disabled after the cut"
+        );
+        collisionOwner.close();
+        await waitFor(() => !gameServer.rooms.has(collisionOwner.channelId), "the collision app room must close");
+
         const authority = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
             WebSocketImpl: WebSocket

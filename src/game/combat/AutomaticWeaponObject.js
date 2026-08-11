@@ -19,6 +19,7 @@ const withAutomaticWeaponSimulation = createSimulationCapabilityMixin({
             targetId: target.id,
             position: owner.physics.position.clone(),
             velocity: new Vector2(),
+            speed: config.projectileSpeed,
             damage: this.damage,
             radius: config.projectileRadius
         });
