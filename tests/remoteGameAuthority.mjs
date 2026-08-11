@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
+import { WORLD_CONFIG } from "../src/game/config.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { closestPointOnSurface } from "../src/game/world/WorldGenerator.js";
@@ -128,6 +129,38 @@ export async function run() {
     assert.equal(interpolation.metrics().extrapolationMs, 120);
     assert.equal(interpolation.metrics().maxExtrapolationMs, 120);
 
+    const fallMessages = [];
+    const fallenState = {
+        tick: 42,
+        position: { x: 300, y: WORLD_CONFIG.floorY + 781 },
+        velocity: { x: 0, y: 900 },
+        isGrounded: false,
+        rope: { isAttached: false, anchor: null }
+    };
+    const locallyRespawnedState = {
+        ...fallenState,
+        position: { x: 120, y: 500 },
+        velocity: { x: 0, y: 0 }
+    };
+    const fallAuthority = new RemoteGameAuthority({
+        url: "ws://fall.test/multiplayer",
+        WebSocketImpl: { OPEN: 1 }
+    });
+    fallAuthority.socket = {
+        readyState: 1,
+        send: (serialized) => fallMessages.push(JSON.parse(serialized))
+    };
+    fallAuthority.ownerRuntime = {
+        advance: () => fallenState,
+        state: () => fallenState,
+        predictFall: () => {
+            assert.equal(fallMessages[0]?.type, "owner-motion", "the fall claim must precede prediction reset");
+            return locallyRespawnedState;
+        }
+    };
+    assert.equal(fallAuthority.advance(movementCommand()), locallyRespawnedState);
+    assert.equal(fallMessages[0].type, "owner-motion", "the fallen position must be claimed before local respawn");
+
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer);
     let gameServerClosed = false;
@@ -200,7 +233,10 @@ export async function run() {
             "the owner must attach through prediction input"
         );
         assert.equal(authority.submit(attachCommand), true);
-        await waitFor(() => authorityPlayer.rope.isAttached, "the server must receive the predicted rope attachment");
+        await waitFor(
+            () => authorityPlayer.ropeObject.rope.isAttached,
+            "the server must receive the predicted rope attachment"
+        );
         const releaseTickBefore = authority.snapshot().owner.tick;
         const pendingCommandsBefore = authority.stream.pendingBatches().length;
         const authorityRopeTickBefore = room.session.lastOwnerRopeTicks.get(authority.playerId) ?? -1;
@@ -222,7 +258,7 @@ export async function run() {
             () => (room.session.lastOwnerRopeTicks.get(authority.playerId) ?? -1) > authorityRopeTickBefore,
             "the server must receive the immediate owner rope release"
         );
-        assert.equal(authorityPlayer.rope.isAttached, false);
+        assert.equal(authorityPlayer.ropeObject.rope.isAttached, false);
         let renderedState = null;
         app.renderer.draw = (state) => {
             renderedState = state;
@@ -257,6 +293,7 @@ export async function run() {
         authority.trackSentCommand(6000, authority.now() - 25);
         authority.recordReceipt({ accepted: [{ playerId: authority.playerId, sequence: 6000 }], rejected: [] });
         assert.ok(authority.metrics().roundTripMs > 0, "bounded tracking must preserve recent RTT samples");
+        await new Promise((resolve) => setTimeout(resolve, 700));
         const partner = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=${authority.channelId}`,
             WebSocketImpl: WebSocket
@@ -267,6 +304,31 @@ export async function run() {
             "both clients should observe the shared open world"
         );
         assert.equal(partner.snapshot().state.players.length, 2);
+        const authorityStartX = room.simulation.playerState(authority.playerId).position.x;
+        const partnerStartX = room.simulation.playerState(partner.playerId).position.x;
+        for (let index = 0; index < 36; index += 1) {
+            authority.advance(movementCommand(1));
+            authority.submit(movementCommand(1));
+            partner.advance(movementCommand(1));
+            partner.submit(movementCommand(1));
+            await new Promise((resolve) => setTimeout(resolve, 8));
+        }
+        await waitFor(
+            () => room.simulation.playerState(authority.playerId).position.x > authorityStartX + 0.1,
+            "the first client must keep moving after a later client joins"
+        );
+        await waitFor(
+            () => room.simulation.playerState(partner.playerId).position.x > partnerStartX + 0.1,
+            "the later client must move in the same authority world"
+        );
+        await waitFor(
+            () =>
+                authority.snapshot().state.players.find(({ id }) => id === partner.playerId).position.x >
+                    partnerStartX + 0.1 &&
+                partner.snapshot().state.players.find(({ id }) => id === authority.playerId).position.x >
+                    authorityStartX + 0.1,
+            "both clients must observe each other's movement"
+        );
         partner.close();
 
         for (const roundTripDelayMs of [0, 50, 100, 200]) {

@@ -40,9 +40,43 @@ index.html
 
 1. `InputSampler`가 키보드·마우스 또는 멀티터치 입력을 하나의 불변 스냅샷으로 만든다.
 2. `GameApp`이 화면 좌표를 월드 좌표로 바꾸고 공용 `PlayerCommand`를 생성한다.
-3. `LocalAuthority`가 명령을 `GameSimulation`에 전달한다. 향후 네트워크 권한 구현도 같은 명령과 시뮬레이션 경계를 사용한다.
+3. `InputDispatcher`가 명령을 소유 사용자의 `InputDrivenObject`에 배포하고, 각 입력 capability 믹스인이 자신이 담당하는 intent만 반영한다.
 4. `FixedStepRunner`가 렌더 프레임과 무관하게 1/120초 단위로 게임 상태를 갱신한다.
 5. `CanvasRenderer`는 시뮬레이션 스냅샷과 입력 표시 상태만 받아 화면을 그린다.
+
+## 게임 객체 모델
+
+```text
+GameObject
+├─ InputDrivenObject ── 소유 사용자 입력에 즉시 반응
+│  ├─ PlayerObject + LocomotionInput
+│  └─ RopeObject   + RopePointerInput
+└─ SimulationDrivenObject ── 직접 입력 없이 서버 고정 스텝에서 진행
+   ├─ EnemyObject
+   ├─ AutomaticWeaponObject
+   └─ ProjectileObject
+
+InputSampler → 불변 입력 프레임 → InputDispatcher
+                                  └─ capability가 있는 소유 InputDrivenObject만 호출
+```
+
+- `InputDrivenObject`와 `SimulationDrivenObject`는 실행 위치가 아니라 상태 변화 원인의 Is-A 정체성이다. 서버는 입력 주도 객체 claim을 검증할 복제 상태를 가지며 클라이언트는 시뮬레이션 주도 객체를 표시·보간할 복제 상태를 가질 수 있다.
+- 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·아티팩트를 Has-A로 소유하고, 로프는 부착·장력·드래그 상태를 독립 소유한다. 소유 관계는 ID와 공개 계약으로 연결한다.
+- 적과 직접 조작하지 않는 자동 행동 객체는 `SimulationDrivenObject`다. 서버가 진행하되 플레이어 피격처럼 사용자 체감과 만나는 사건은 피해 클라이언트가 먼저 반응하고 서버가 권위 객체 상태로 검증한다.
+- 멀티는 권한 감각만 보면 P2P형이다. 플레이어별 `InputDrivenObject` 결과는 해당 소유자·피해자 클라이언트가 먼저 결정하고, 특정 클라이언트에 귀속할 수 없는 몹과 적 투사체 같은 `SimulationDrivenObject`의 생성·궤적은 서버가 중립적으로 진행한다. 서버는 지연된 플레이어 복제 위치로 충돌을 먼저 확정하지 않고 피해 클라이언트 claim을 중립 객체 상태로 검증한다.
+- 입력 capability는 `Base => class extends Base` 믹스인으로 구현한다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput` 계약을 가지며 `InputDispatcher`는 구체 클래스나 `instanceof` 분기 없이 capability 존재 여부로 전달한다.
+- 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
+- `GameSimulation`은 객체별 게임 규칙을 직접 모으는 거대 분기점이 아니라 월드 등록, 고정 tick, 객체 단계 실행과 사건 연결을 조정하는 월드 스케줄러로 축소한다.
+- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·권위 전이·표시 보정만 조정한다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
+
+### 적용된 마이그레이션 순서
+
+1. 기존 플레이어·로프·2인 동기화·부활 동작을 회귀 테스트로 고정한다.
+2. `GameObject`, `InputDrivenObject`, `SimulationDrivenObject`와 capability 기반 `InputDispatcher` 계약을 추가한다.
+3. 플레이어 이동·점프와 로프 입력을 별도 `InputDrivenObject`와 입력 믹스인으로 옮긴다.
+4. 적·자동 무기·투사체를 `SimulationDrivenObject` 실행 단계로 옮긴다.
+5. `OwnerPredictionRuntime`으로 입력 주도 객체 예측 경계를 통합하고 구체 플레이어 종류별 분기를 제거한다.
+6. 단일 `updatePlayer()` 경로를 제거하고 소유자 입력 디스패치, 소유자 상태 진행, 시뮬레이션 주도 자동 무기 단계를 분리한다.
 
 ## 입력 규칙
 
@@ -78,11 +112,11 @@ index.html
 - `WorldSnapshotEnvelope`는 승인 번호, 비예측 상태와 권위 이벤트를 묶고 예측 가능한 객체의 반복 위치 배열을 거부한다.
 - `AuthoritySnapshotBuilder`는 로컬 렌더 스냅샷과 별도로 플레이어·적·진행 상태만 추출한다. 지형은 월드 시드와 생성 revision으로 재구성하고 투사체는 drain한 이벤트로만 전달한다.
 - 멀티 연결 종료는 게임을 멈추고 모드 메뉴로 돌아가며 마지막 4자리 채널을 입력란에 보존한다. 자동 오프라인 진행이나 플레이어 런타임 복원은 하지 않는다.
-- `PlayerRuntimeFactory`가 물리·로프·무기·생명 상태와 플레이어별 아티팩트 인벤토리를 함께 조립하고 싱글 GameSimulation도 이 결과를 사용한다.
+- `PlayerRuntimeFactory`는 `PlayerObject`, 별도 `RopeObject`, `AutomaticWeaponObject`와 Has-A 컴포넌트를 조립하고 소유자별 `InputDrivenObject` 등록 목록을 반환한다. 객체 종류별 규칙을 팩토리에 넣지 않는다.
 - `GameSimulation.addPlayer()`는 같은 팩토리 결과를 공용 `players` 배열에 등록한다. 생성자의 첫 플레이어도 이 경로를 사용하고 그 ID만 비공개 기본 플레이어 식별자로 보존한다.
-- 조준점, 부착 후보, 포인터 전이, 부착 버퍼, 스윙 드래그와 로프 연계 강화 시간은 플레이어 엔티티별 상태다. 첫 플레이어의 물리·로프·인벤토리를 중복 가리키던 싱글 호환 필드는 두지 않는다.
+- 조준점, 부착 후보, 포인터 전이, 부착 버퍼와 스윙 드래그는 `RopeObject`가 소유한다. 로프 연계 강화 시간은 전투 효과를 받는 `PlayerObject`가 소유하며 첫 플레이어의 컴포넌트를 중복 가리키는 싱글 호환 필드는 두지 않는다.
 - 외부 실행 계층은 `getPrimaryPlayerId()`, `playerState()`·`playerStates()`, `applyOwnerMotion()`, 예측 복원·진행·피격·충돌 명령을 사용한다. 서버 세션과 로컬 예측기는 `players` 배열이나 플레이어 컴포넌트를 직접 수정하지 않는다.
-- 이동·로프·상태 타이머·아티팩트 무기 효과와 자동 발사는 `GameSimulation.updatePlayer(playerEntity, command, dt)`의 내부 공용 경로를 사용한다. 싱글 `step`과 공개 예측 명령도 식별한 플레이어를 이 경로에 전달한다.
+- 이동·점프와 로프 입력은 각각 `LocomotionInput`, `RopePointerInput` capability로 전달한다. 적·자동 무기·양측 투사체는 `SimulationDrivenObject`이며 `GameSimulation`은 소유자 입력 그룹과 시뮬레이션 단계를 일정 순서로 실행한다.
 - `stepCommandBatch`는 정확히 다음 권위 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 네트워크 권위와 로컬 예측은 `InputStateSimulator`로 마지막 수신 입력을 제한된 틱 동안 함께 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다.
 - `PlayerCommand.interact`는 향후 문맥 상호작용을 위한 예약 필드다. 현재 생명 주기에서는 소비하지 않으며 모바일 점프 입력의 동작을 가로채지 않는다.
 - `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력·손실 아티팩트를 `player-respawned` 사건으로 남긴다. 손실이 있으면 같은 playerId의 `artifact-loss` 사건도 발행한다.
@@ -95,10 +129,10 @@ index.html
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.
 - 첫 화면에서 싱글은 `PlayerCommand → LocalAuthority → GameSimulation`, 멀티는 `4자리 채널 → 고정 WebSocket 서버 → 채널별 AuthorityServerSession → GameSimulation` 경계를 선택한다. 두 경로는 입력 출처와 상태 전달만 다르고 게임 규칙을 공유한다.
 - 협동은 서버 권위형과 로컬 플레이어 예측을 사용한다. 시간 모델, 상태 소유권, 스냅샷과 보정 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
-- `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `LocalPlayerPredictor`도 로컬 `GameSimulation`의 공개 예측 계약만 사용하며, 앱·예측기·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
+- `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `OwnerPredictionRuntime`도 로컬 `GameSimulation`의 공개 소유자 예측 계약만 사용하며, 앱·예측 런타임·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
 - 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 충돌과 제거만 `resolve` 이벤트로 확정한다.
 - 자기 탄환은 로컬 충돌 VFX를 먼저 재생하고 검증 가능한 hit claim을 보낸다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 대미지로 최종 결과를 확정한다.
-- `GameSimulation`은 권위 틱을 증가시키며 실제 자동 발사·피격·로프 절단·체크포인트 제거에서 복제 이벤트를 기록한다. 전송 계층이 사건을 drain한 뒤에도 로컬 렌더링용 투사체 배열은 유지된다.
+- `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
 
 ## 의존 방향
 

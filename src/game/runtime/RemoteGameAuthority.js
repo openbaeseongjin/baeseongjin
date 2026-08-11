@@ -6,9 +6,10 @@ import { createProjectileHitClaim, serializeProjectileHitClaim } from "../networ
 import { createPlayerImpactClaim, serializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
 import { createOwnerMotionState, serializeOwnerMotionState } from "../network/OwnerMotionState.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
-import { LocalPlayerPredictor } from "./LocalPlayerPredictor.js";
+import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
+import { WORLD_CONFIG } from "../config.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
@@ -28,7 +29,7 @@ export class RemoteGameAuthority {
         this.playerId = null;
         this.channelId = null;
         this.stream = null;
-        this.predictor = null;
+        this.ownerRuntime = null;
         this.buffer = new RemoteWorldStateBuffer();
         this.latestSnapshot = null;
         this.snapshotReceivedAt = 0;
@@ -106,8 +107,8 @@ export class RemoteGameAuthority {
 
     acceptSnapshot(serialized) {
         const snapshot = deserializeWorldSnapshotEnvelope(serialized);
-        this.predictor ??= new LocalPlayerPredictor({
-            playerId: this.playerId,
+        this.ownerRuntime ??= new OwnerPredictionRuntime({
+            ownerId: this.playerId,
             simulation: new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: this.playerId })
         });
         if (!this.stream.acceptSnapshot(snapshot)) return;
@@ -128,12 +129,12 @@ export class RemoteGameAuthority {
 
     reconcile() {
         if (!this.latestSnapshot) return null;
-        return this.predictor.reconcile(this.latestSnapshot, this.stream.pendingBatches());
+        return this.ownerRuntime.reconcile(this.latestSnapshot, this.stream.pendingBatches());
     }
 
     submit(command) {
         if (!this.latestSnapshot || this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
-        const predictedTick = this.predictor.state().tick;
+        const predictedTick = this.ownerRuntime.state().tick;
         const batch = this.stream.createBatchAtTick(predictedTick, command);
         if (!batch) return false;
         this.trackSentCommand(batch.commands[0].sequence, this.now());
@@ -143,8 +144,8 @@ export class RemoteGameAuthority {
     }
 
     submitOwnerMotion() {
-        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.predictor) return false;
-        const predicted = this.predictor.state();
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        const predicted = this.ownerRuntime.state();
         const motion = createOwnerMotionState({
             clientTick: predicted.tick,
             position: predicted.position,
@@ -157,19 +158,22 @@ export class RemoteGameAuthority {
     }
 
     advance(command) {
-        return this.predictor?.advance(command) ?? null;
+        const predicted = this.ownerRuntime?.advance(command) ?? null;
+        if (!predicted || predicted.position.y <= WORLD_CONFIG.floorY + 780) return predicted;
+        this.submitOwnerMotion();
+        return this.ownerRuntime.predictFall();
     }
 
     resolveOwnerCollisions(otherPlayers, radius) {
-        return this.predictor?.resolveCollisions(otherPlayers, radius) ?? false;
+        return this.ownerRuntime?.resolveCollisions(otherPlayers, radius) ?? false;
     }
 
     renderSnapshot() {
-        return this.predictor?.renderSnapshot() ?? null;
+        return this.ownerRuntime?.renderSnapshot() ?? null;
     }
 
     applyPredictedImpact(event) {
-        return this.predictor?.applyPredictedImpact(event) ?? false;
+        return this.ownerRuntime?.applyPredictedImpact(event) ?? false;
     }
 
     submitHitClaim(event) {
@@ -198,11 +202,11 @@ export class RemoteGameAuthority {
     }
 
     submitArtifactSelection({ checkpointId, artifactId }) {
-        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.predictor) return false;
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         const claim = createArtifactSelectionClaim({
             checkpointId,
             artifactId,
-            clientTick: this.predictor.state().tick
+            clientTick: this.ownerRuntime.state().tick
         });
         this.socket.send(
             JSON.stringify({ type: "artifact-selection", payload: serializeArtifactSelectionClaim(claim) })
@@ -219,8 +223,8 @@ export class RemoteGameAuthority {
     snapshot() {
         return {
             state: this.buffer.sample({ now: this.now(), localPlayerId: this.playerId }),
-            predicted: this.predictor?.presentationState() ?? null,
-            owner: this.predictor?.state() ?? null,
+            predicted: this.ownerRuntime?.presentationState() ?? null,
+            owner: this.ownerRuntime?.state() ?? null,
             serverTick: this.latestSnapshot?.serverTick ?? null,
             connected: !this.closed
         };
@@ -231,7 +235,7 @@ export class RemoteGameAuthority {
     }
 
     drainPredictedEvents() {
-        return this.predictor?.drainPredictedEvents() ?? Object.freeze([]);
+        return this.ownerRuntime?.drainPredictedEvents() ?? Object.freeze([]);
     }
 
     recordReceipt(receipt) {
@@ -282,7 +286,7 @@ export class RemoteGameAuthority {
             pendingCommands: this.stream?.pendingBatches().length ?? 0,
             trackedCommands: this.sentAtBySequence.size,
             rejectionRate: totalCommands === 0 ? 0 : this.networkMetrics.rejectedCommands / totalCommands,
-            ...(this.predictor?.metrics() ?? {}),
+            ...(this.ownerRuntime?.metrics() ?? {}),
             ...(this.buffer.metrics() ?? {})
         });
     }

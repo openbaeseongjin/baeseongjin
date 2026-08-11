@@ -5,6 +5,7 @@ import {
 } from "../src/game/network/PredictableObjectEvent.js";
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
 import { ClientCombatFeedback } from "../src/game/combat/ClientCombatFeedback.js";
+import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
 
 export function run() {
     const store = new PredictableProjectileStore();
@@ -18,6 +19,7 @@ export function run() {
         parameters: { radius: 7, damage: 20, ownerId: "enemy-1", targetId: "player-1" }
     });
     store.apply([enemySpawn], 12, { enemies: [] });
+    assert.ok([...store.objects.values()][0] instanceof SimulationDrivenObject);
     assert.equal(store.snapshot().enemyProjectiles[0].position.x, 2, "late spawn must catch up by server ticks");
     store.update(1 / 120, { enemies: [] });
     assert.equal(store.snapshot().enemyProjectiles[0].position.x, 3);
@@ -49,6 +51,25 @@ export function run() {
         enemyHitStore.apply([confirmedPlayerHit], 20, { enemies: [] }),
         [],
         "authority must not replay victim-predicted feedback"
+    );
+
+    const burstStore = new PredictableProjectileStore();
+    const secondEnemySpawn = createPredictableSpawnEvent({
+        eventId: "event-burst-2",
+        objectId: "enemy-projectile-2",
+        objectType: "enemy-projectile",
+        spawnTick: 10,
+        position: { x: 0, y: 0 },
+        velocity: { x: 120, y: 0 },
+        parameters: { radius: 7, damage: 20, ownerId: "enemy-2", targetId: "player-1" }
+    });
+    burstStore.apply([enemySpawn, secondEnemySpawn], 10, { enemies: [] });
+    const burstHits = burstStore.update(0, { enemies: [], localPlayer }, 20);
+    assert.equal(burstHits.length, 1, "one client tick may claim only one local player impact");
+    assert.equal(
+        burstStore.snapshot().enemyProjectiles.length,
+        1,
+        "unclaimed projectiles must remain available after local invulnerability starts"
     );
 
     const ropeCutStore = new PredictableProjectileStore();

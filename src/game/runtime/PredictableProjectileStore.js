@@ -1,4 +1,14 @@
+import { ProjectileObject } from "../combat/ProjectileObject.js";
+
 const FIXED_DT = 1 / 120;
+
+function createReplicatedProjectile({ objectType, speed, predictCollision, ...state }) {
+    const projectile = new ProjectileObject(state);
+    projectile.objectType = objectType;
+    projectile.speed = speed;
+    projectile.predictCollision = predictCollision;
+    return projectile;
+}
 
 function distancePointToSegment(point, start, end) {
     const segmentX = end.x - start.x;
@@ -95,7 +105,7 @@ export class PredictableProjectileStore {
                 this.predictionIdByAuthorityId.set(event.objectId, predictionId);
             }
             if (predictionId && this.locallyResolvedPredictionIds.has(predictionId)) continue;
-            const projectile = {
+            const projectile = createReplicatedProjectile({
                 id: event.objectId,
                 objectType: event.objectType,
                 ownerId: event.parameters.ownerId,
@@ -107,7 +117,7 @@ export class PredictableProjectileStore {
                 speed: event.parameters.speed ?? length(event.velocity),
                 predictionId,
                 predictCollision: event.objectType === "enemy-projectile" || Boolean(predictionId && predicted)
-            };
+            });
             if (!predicted) {
                 const delayedTicks = Math.max(0, serverTick - event.tick);
                 for (let tick = 0; tick < delayedTicks; tick += 1) advanceProjectile(projectile, this.fixedDt, state);
@@ -128,28 +138,33 @@ export class PredictableProjectileStore {
             }
             const objectId = `predicted:${event.predictionId}`;
             this.objectIdByPredictionId.set(event.predictionId, objectId);
-            this.objects.set(objectId, {
-                id: objectId,
-                objectType: event.objectType,
-                ownerId: event.ownerId,
-                targetId: event.targetId,
-                radius: event.radius,
-                damage: event.damage,
-                position: { ...event.position },
-                velocity: { ...event.velocity },
-                speed: event.speed,
-                predictionId: event.predictionId,
-                predictCollision: true
-            });
+            this.objects.set(
+                objectId,
+                createReplicatedProjectile({
+                    id: objectId,
+                    objectType: event.objectType,
+                    ownerId: event.ownerId,
+                    targetId: event.targetId,
+                    radius: event.radius,
+                    damage: event.damage,
+                    position: { ...event.position },
+                    velocity: { ...event.velocity },
+                    speed: event.speed,
+                    predictionId: event.predictionId,
+                    predictCollision: true
+                })
+            );
         }
     }
 
     update(dt, state, clientTick = 0) {
         const resolutions = [];
+        let localPlayerImpactClaimed = false;
         for (const projectile of [...this.objects.values()]) {
             advanceProjectile(projectile, dt, state);
             if (!projectile.predictCollision) continue;
             if (projectile.objectType === "enemy-projectile") {
+                if (localPlayerImpactClaimed) continue;
                 const player = state?.localPlayer;
                 if (!player || player.lifeState !== "active") continue;
                 const ropeHit =
@@ -163,6 +178,7 @@ export class PredictableProjectileStore {
                     Math.hypot(projectile.position.x - player.position.x, projectile.position.y - player.position.y) <=
                         projectile.radius + player.radius;
                 if (!ropeHit && !bodyHit) continue;
+                localPlayerImpactClaimed = true;
                 this.objects.delete(projectile.id);
                 this.locallyResolvedObjectIds.add(projectile.id);
                 resolutions.push(

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
-import { PLAYER_CONFIG } from "../src/game/config.js";
+import { COMBAT_CONFIG, PLAYER_CONFIG } from "../src/game/config.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
-import { LocalPlayerPredictor } from "../src/game/runtime/LocalPlayerPredictor.js";
+import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { commandForLocalSimulation } from "../src/game/MultiplayerGameApp.js";
 
@@ -52,15 +52,18 @@ export function run() {
     const serverPlayer = primaryPlayer(server);
     server.enemies = [];
     server.tick = 6;
-    serverPlayer.rope.attach(serverPlayer.physics.position, {
+    serverPlayer.ropeObject.rope.attach(serverPlayer.physics.position, {
         x: serverPlayer.physics.position.x,
         y: serverPlayer.physics.position.y - 80
     });
-    serverPlayer.aimWorld = { x: serverPlayer.rope.anchor.x, y: serverPlayer.rope.anchor.y };
-    serverPlayer.lastPointer = { x: 400, y: 300, down: true };
-    serverPlayer.lastViewport = { width: 1280, height: 720 };
-    serverPlayer.wasPointerDown = true;
-    serverPlayer.swingDrag = {
+    serverPlayer.ropeObject.aimWorld = {
+        x: serverPlayer.ropeObject.rope.anchor.x,
+        y: serverPlayer.ropeObject.rope.anchor.y
+    };
+    serverPlayer.ropeObject.lastPointer = { x: 400, y: 300, down: true };
+    serverPlayer.ropeObject.lastViewport = { width: 1280, height: 720 };
+    serverPlayer.ropeObject.wasPointerDown = true;
+    serverPlayer.ropeObject.swingDrag = {
         origin: { x: 400, y: 300 },
         direction: null,
         progress: 0,
@@ -76,11 +79,11 @@ export function run() {
             pointer: { x: 300, y: 300, down: true },
             viewport: { width: 1280, height: 720 }
         },
-        serverPlayer.aimWorld
+        serverPlayer.ropeObject.aimWorld
     );
     const pending = createPlayerCommandBatch(7, [{ playerId: serverPlayer.id, sequence: 0, command: dragCommand }]);
 
-    const predictor = new LocalPlayerPredictor({ playerId: serverPlayer.id, predictionLeadTicks: 0 });
+    const predictor = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
     const predicted = predictor.reconcile(snapshot, [pending]);
     server.stepCommandBatch(1 / 120, pending);
 
@@ -89,10 +92,10 @@ export function run() {
     close(predicted.position.y, serverPlayer.physics.position.y, "position.y");
     close(predicted.velocity.x, serverPlayer.physics.velocity.x, "velocity.x");
     close(predicted.velocity.y, serverPlayer.physics.velocity.y, "velocity.y");
-    assert.equal(predicted.rope.isAttached, serverPlayer.rope.isAttached);
-    close(predicted.rope.length, serverPlayer.rope.length, "rope.length");
+    assert.equal(predicted.rope.isAttached, serverPlayer.ropeObject.rope.isAttached);
+    close(predicted.rope.length, serverPlayer.ropeObject.rope.length, "rope.length");
     assert.equal(predicted.swingDrag.used, true);
-    assert.equal(predicted.swingDrag.used, serverPlayer.swingDrag.used);
+    assert.equal(predicted.swingDrag.used, serverPlayer.ropeObject.swingDrag.used);
     close(predicted.ropeDamageBoostRemaining, serverPlayer.ropeDamageBoostRemaining, "rope boost");
 
     const detachedSnapshot = {
@@ -115,6 +118,12 @@ export function run() {
     assert.equal(predictor.metrics().hardSnaps, 0);
     assert.equal(predictor.applyPredictedImpact({ resolution: "rope-cut" }), true);
     assert.equal(predictor.state().rope.isAttached, false, "predicted rope cut must react before server round trip");
+    assert.equal(predictor.applyPredictedImpact({ resolution: "player-hit", velocity: { x: 120, y: 0 } }), true);
+    assert.equal(
+        predictor.state().hitInvulnerabilityRemaining,
+        COMBAT_CONFIG.playerHitInvulnerability,
+        "victim prediction must suppress repeated local hit claims before the next server snapshot"
+    );
 
     const movingServer = new GameSimulation();
     const movingPlayer = primaryPlayer(movingServer);
@@ -131,8 +140,8 @@ export function run() {
         },
         { x: 0, y: 0 }
     );
-    const movingPredictor = new LocalPlayerPredictor({
-        playerId: movingPlayer.id,
+    const movingPredictor = new OwnerPredictionRuntime({
+        ownerId: movingPlayer.id,
         predictionLeadTicks: 0
     });
     const movingPrediction = movingPredictor.reconcile(movingSnapshot, [
@@ -163,8 +172,8 @@ export function run() {
     );
     assert.notEqual(movingPredictor.state().position.x, collisionStart);
 
-    const continuous = new LocalPlayerPredictor({
-        playerId: movingPlayer.id,
+    const continuous = new OwnerPredictionRuntime({
+        ownerId: movingPlayer.id,
         predictionLeadTicks: 0
     });
     continuous.reconcile(movingSnapshot, []);
@@ -203,6 +212,73 @@ export function run() {
     );
     assert.equal(continuous.metrics().hardSnaps, 0);
 
+    const stalled = new OwnerPredictionRuntime({ ownerId: movingPlayer.id });
+    stalled.reconcile(movingSnapshot, []);
+    const stalledPosition = stalled.state().position;
+    const resumedServerTick = stalled.state().tick + 48;
+    stalled.reconcile({ ...movingSnapshot, serverTick: resumedServerTick }, []);
+    assert.equal(
+        stalled.state().tick,
+        resumedServerTick + stalled.predictionLeadTicks,
+        "a client that missed frames must rejoin the server input window"
+    );
+    assert.deepEqual(stalled.state().position, stalledPosition, "clock recovery must not rewind owner motion");
+
+    const respawnPredictor = new OwnerPredictionRuntime({ ownerId: movingPlayer.id, predictionLeadTicks: 0 });
+    respawnPredictor.reconcile(movingSnapshot, []);
+    for (let tick = 0; tick < 12; tick += 1) respawnPredictor.advance(move);
+    const respawnPosition = movingServer.world.checkpoints[0];
+    const respawnTick = respawnPredictor.state().tick + 1;
+    const respawnSnapshot = {
+        ...movingSnapshot,
+        serverTick: respawnTick,
+        state: {
+            ...movingSnapshot.state,
+            players: movingSnapshot.state.players.map((player) =>
+                player.id === movingPlayer.id
+                    ? {
+                          ...player,
+                          position: { x: respawnPosition.x, y: respawnPosition.y },
+                          velocity: { x: 0, y: 0 },
+                          isGrounded: false,
+                          rope: { ...player.rope, isAttached: false, anchor: null }
+                      }
+                    : player
+            )
+        },
+        events: [
+            {
+                eventId: "event-respawn-local",
+                eventType: "player-respawned",
+                tick: respawnTick,
+                playerId: movingPlayer.id,
+                reason: "fall",
+                health: movingPlayer.maxHealth,
+                artifactIds: [],
+                position: { x: respawnPosition.x, y: respawnPosition.y }
+            }
+        ]
+    };
+    const respawned = respawnPredictor.reconcile(respawnSnapshot, []);
+    assert.deepEqual(respawned.position, { x: respawnPosition.x, y: respawnPosition.y });
+    assert.deepEqual(respawned.velocity, { x: 0, y: 0 });
+    assert.equal(respawned.rope.isAttached, false, "a confirmed fall must restore the checkpoint transition");
+
+    const predictedCheckpoint = movingServer.world.checkpoints[1];
+    const predictedFall = new OwnerPredictionRuntime({ ownerId: movingPlayer.id, predictionLeadTicks: 0 });
+    predictedFall.reconcile(
+        {
+            ...movingSnapshot,
+            state: { ...movingSnapshot.state, activeCheckpointId: predictedCheckpoint.id }
+        },
+        []
+    );
+    predictedFall.advance(move);
+    const predictedRespawn = predictedFall.predictFall();
+    assert.deepEqual(predictedRespawn.position, { x: predictedCheckpoint.x, y: predictedCheckpoint.y });
+    assert.deepEqual(predictedRespawn.velocity, { x: 0, y: 0 });
+    assert.equal(predictedRespawn.rope.isAttached, false, "the owner must feel its fall before the server receipt");
+
     const attackSnapshot = {
         ...movingSnapshot,
         state: {
@@ -222,8 +298,8 @@ export function run() {
             ]
         }
     };
-    const attackPredictor = new LocalPlayerPredictor({
-        playerId: movingPlayer.id,
+    const attackPredictor = new OwnerPredictionRuntime({
+        ownerId: movingPlayer.id,
         predictionLeadTicks: 0
     });
     attackPredictor.reconcile(attackSnapshot, []);
@@ -241,7 +317,7 @@ export function run() {
             players: attackSnapshot.state.players.map((player) => ({ ...player, id: secondPlayerId }))
         }
     };
-    const secondPlayerPredictor = new LocalPlayerPredictor({ playerId: secondPlayerId, predictionLeadTicks: 0 });
+    const secondPlayerPredictor = new OwnerPredictionRuntime({ ownerId: secondPlayerId, predictionLeadTicks: 0 });
     secondPlayerPredictor.reconcile(secondPlayerSnapshot, []);
     secondPlayerPredictor.advance(move);
     const secondPlayerAttacks = secondPlayerPredictor.drainPredictedEvents();
@@ -252,8 +328,8 @@ export function run() {
         "a second client's predicted shot must use its authority player id"
     );
     assert.throws(
-        () => new LocalPlayerPredictor({ playerId: secondPlayerId, simulation: new GameSimulation() }),
-        /prediction simulation playerId mismatch/,
+        () => new OwnerPredictionRuntime({ ownerId: secondPlayerId, simulation: new GameSimulation() }),
+        /prediction simulation ownerId mismatch/,
         "a mismatched injected simulation must fail before it can emit wrongly owned events"
     );
 
@@ -261,6 +337,6 @@ export function run() {
         () => predictor.reconcile({ ...snapshot, worldSeed: snapshot.worldSeed + 1 }, []),
         /world seed mismatch/
     );
-    const missing = new LocalPlayerPredictor({ playerId: "missing-player" });
-    assert.throws(() => missing.reconcile(snapshot, []), /missing predicted playerId/);
+    const missing = new OwnerPredictionRuntime({ ownerId: "missing-player" });
+    assert.throws(() => missing.reconcile(snapshot, []), /missing predicted ownerId/);
 }
