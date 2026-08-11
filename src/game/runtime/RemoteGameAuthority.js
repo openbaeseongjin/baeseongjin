@@ -1,4 +1,9 @@
 import { deserializeCommandReceipt } from "../network/CommandReceipt.js";
+import {
+    createCheckpointClaim,
+    createCheckpointClaimReceipt,
+    serializeCheckpointClaim
+} from "../network/CheckpointClaim.js";
 import { createArtifactSelectionClaim, serializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
@@ -48,6 +53,8 @@ export class RemoteGameAuthority {
         this.processedReceiptOrder = [];
         this.artifactSelectionReceipts = [];
         this.impactClaimReceipts = [];
+        this.checkpointClaimReceipts = [];
+        this.pendingCheckpointId = null;
         this.latestOwnerMotionReceiptTick = -1;
         this.networkMetrics = {
             roundTripMs: null,
@@ -113,6 +120,8 @@ export class RemoteGameAuthority {
                         this.impactClaimReceipts.push(createPlayerImpactReceipt(message.payload));
                     } else if (message.type === "owner-motion-receipt") {
                         this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
+                    } else if (message.type === "checkpoint-claim-receipt") {
+                        this.recordCheckpointClaimReceipt(createCheckpointClaimReceipt(message.payload));
                     }
                 } catch (error) {
                     fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
@@ -138,6 +147,7 @@ export class RemoteGameAuthority {
         }
         this.previousSnapshotReceivedAt = receivedAt;
         this.latestSnapshot = snapshot;
+        if (snapshot.state.activeCheckpointId === this.pendingCheckpointId) this.pendingCheckpointId = null;
         this.snapshotReceivedAt = receivedAt;
         this.buffer.push(snapshot, receivedAt);
         this.reconcile();
@@ -230,6 +240,19 @@ export class RemoteGameAuthority {
         return true;
     }
 
+    submitReachedCheckpoint() {
+        if (this.pendingCheckpointId || this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) {
+            return null;
+        }
+        const candidate = this.ownerRuntime.checkpointClaimCandidate();
+        if (!candidate) return null;
+        this.submitOwnerMotion();
+        const claim = createCheckpointClaim(candidate);
+        this.pendingCheckpointId = claim.checkpointId;
+        this.socket.send(JSON.stringify({ type: "checkpoint-claim", payload: serializeCheckpointClaim(claim) }));
+        return candidate;
+    }
+
     drainArtifactSelectionReceipts() {
         const receipts = Object.freeze(this.artifactSelectionReceipts);
         this.artifactSelectionReceipts = [];
@@ -239,6 +262,17 @@ export class RemoteGameAuthority {
     drainImpactClaimReceipts() {
         const receipts = Object.freeze(this.impactClaimReceipts);
         this.impactClaimReceipts = [];
+        return receipts;
+    }
+
+    recordCheckpointClaimReceipt(receipt) {
+        this.checkpointClaimReceipts.push(receipt);
+        if (!receipt.accepted && receipt.checkpointId === this.pendingCheckpointId) this.pendingCheckpointId = null;
+    }
+
+    drainCheckpointClaimReceipts() {
+        const receipts = Object.freeze(this.checkpointClaimReceipts);
+        this.checkpointClaimReceipts = [];
         return receipts;
     }
 

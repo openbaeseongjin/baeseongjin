@@ -50,6 +50,7 @@ export class MultiplayerGameApp {
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback();
+        this.checkpointFeedback = null;
         this.localArtifactReward = null;
         this.pendingArtifactSelection = null;
         this.runner = new FixedStepRunner({ step: (dt, input) => this.update(dt, input), render: () => this.render() });
@@ -96,6 +97,31 @@ export class MultiplayerGameApp {
         }
     }
 
+    showCheckpointFeedback({ checkpointId, position }) {
+        if (this.checkpointFeedback?.checkpointId === checkpointId) return;
+        this.checkpointFeedback = { type: "checkpoint", checkpointId, position: { ...position }, age: 0 };
+    }
+
+    applyCheckpointEvents(events) {
+        for (const event of events) {
+            if (event.eventType !== "checkpoint-reached") continue;
+            this.showCheckpointFeedback({ checkpointId: event.checkpointId, position: event.position });
+        }
+    }
+
+    applyCheckpointClaimReceipts() {
+        for (const receipt of this.authority.drainCheckpointClaimReceipts()) {
+            if (receipt.accepted || receipt.checkpointId !== this.checkpointFeedback?.checkpointId) continue;
+            this.checkpointFeedback = null;
+        }
+    }
+
+    updateCheckpointFeedback(dt) {
+        if (!this.checkpointFeedback) return;
+        this.checkpointFeedback.age += dt;
+        if (this.checkpointFeedback.age >= 0.8) this.checkpointFeedback = null;
+    }
+
     update(dt, input, forceSubmit = false) {
         if (this.authority.closed) {
             if (!this.disconnectHandled) {
@@ -111,6 +137,8 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
         const events = this.authority.drainEvents();
+        this.applyCheckpointEvents(events);
+        this.applyCheckpointClaimReceipts();
         this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
         this.combatFeedback.apply(authorityFeedback);
@@ -137,6 +165,13 @@ export class MultiplayerGameApp {
         }
         const gameplayCommand = commandForLocalSimulation(command, choosingArtifact);
         this.authority.advance(gameplayCommand);
+        const checkpointClaim = this.authority.submitReachedCheckpoint();
+        if (checkpointClaim) {
+            this.showCheckpointFeedback({
+                checkpointId: checkpointClaim.checkpointId,
+                position: checkpointClaim.feedbackPosition
+            });
+        }
         this.authority.resolveOwnerCollisions(
             current.state.players.filter(({ id }) => id !== this.authority.playerId),
             PLAYER_CONFIG.radius
@@ -167,6 +202,7 @@ export class MultiplayerGameApp {
         }
         this.combatFeedback.apply(predictedResolutions);
         this.combatFeedback.update(dt);
+        this.updateCheckpointFeedback(dt);
         if (forceSubmit || this.stepCount % 2 === 0) {
             this.authority.submit(gameplayCommand);
         }
@@ -193,6 +229,7 @@ export class MultiplayerGameApp {
         const activeCheckpoint =
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
+        const combatFeedback = this.combatFeedback.snapshot();
         if (this.metricsVisible) {
             this.onDiagnostics({ metrics: remote.state.metrics, networkMetrics, worldSeed: base.world.seed });
         }
@@ -204,7 +241,8 @@ export class MultiplayerGameApp {
             attachmentCandidate: base.attachmentCandidate,
             enemies: remote.state.enemies,
             ...predictableProjectiles,
-            ...this.combatFeedback.snapshot(),
+            ...combatFeedback,
+            eventFlash: combatFeedback.eventFlash ?? this.checkpointFeedback ?? base.eventFlash,
             otherPlayers,
             playerHealth: localState.health,
             playerMaxHealth: localState.maxHealth,

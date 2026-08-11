@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createArtifactSelectionClaim } from "../src/game/network/ArtifactSelectionClaim.js";
+import { createCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
@@ -58,6 +59,47 @@ export function run() {
     );
     assert.equal(conflictingArtifact.accepted, false);
     assert.equal(conflictingArtifact.reason, "selection-conflict");
+
+    const checkpointSimulation = new GameSimulation();
+    const checkpointPlayer = primaryPlayer(checkpointSimulation);
+    checkpointSimulation.enemies = [];
+    const checkpointSession = new AuthorityServerSession({ simulation: checkpointSimulation });
+    const claimedCheckpoint = checkpointSimulation.world.checkpoints[1];
+    checkpointPlayer.physics.position.set(claimedCheckpoint.x, claimedCheckpoint.y);
+    checkpointSession.advance();
+    assert.notEqual(
+        checkpointSimulation.activeCheckpoint.id,
+        claimedCheckpoint.id,
+        "the server fixed tick must not initiate a client-owned checkpoint arrival"
+    );
+    assert.equal(
+        checkpointSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "checkpoint-reached")
+            .length,
+        0
+    );
+    const checkpointClaim = createCheckpointClaim({
+        checkpointId: claimedCheckpoint.id,
+        clientTick: checkpointSimulation.getTick() + 1,
+        position: checkpointPlayer.physics.position
+    });
+    const checkpointReceipt = checkpointSession.submitCheckpointClaim(checkpointPlayer.id, checkpointClaim);
+    assert.equal(checkpointReceipt.accepted, true);
+    assert.equal(checkpointReceipt.resolution, "checkpoint-reached");
+    assert.equal(checkpointSimulation.activeCheckpoint.id, claimedCheckpoint.id);
+    assert.equal(checkpointSimulation.artifactRewards.size, checkpointSimulation.players.length);
+    assert.equal(checkpointSimulation.metrics.snapshot().checkpointsReached, 1);
+    assert.equal(
+        checkpointSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "checkpoint-reached")
+            .length,
+        1
+    );
+    assert.equal(
+        checkpointSession.submitCheckpointClaim(checkpointPlayer.id, checkpointClaim),
+        checkpointReceipt,
+        "duplicate checkpoint claims must reuse the first receipt"
+    );
+    assert.equal(checkpointSimulation.metrics.snapshot().checkpointsReached, 1);
+    assert.equal(checkpointSimulation.drainReplicationEvents().length, 0);
 
     const combatSimulation = new GameSimulation();
     const combatPlayer = primaryPlayer(combatSimulation);

@@ -213,6 +213,19 @@ export class OwnerPredictionRuntime {
         return this.simulation.resolveOwnerCollisions(this.ownerId, otherPlayers, radius);
     }
 
+    checkpointClaimCandidate() {
+        if (!this.initialized) return null;
+        const checkpoint = this.simulation.checkpointClaimCandidate(this.ownerId);
+        if (!checkpoint) return null;
+        const state = this.state();
+        return Object.freeze({
+            checkpointId: checkpoint.id,
+            clientTick: state.tick,
+            position: { x: state.position.x, y: state.position.y },
+            feedbackPosition: { x: checkpoint.x, y: checkpoint.y }
+        });
+    }
+
     renderSnapshot() {
         return this.initialized ? this.simulation.snapshot() : null;
     }
