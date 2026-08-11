@@ -40,7 +40,9 @@ The gateway is disabled by default. When `CODEX_ENABLED=true`, a meeting operato
 
 Only `meeting-to-game-plan` and `repo-task-plan` are accepted. Discord content is delimited as untrusted data, bounded by message and character limits, and never interpreted as shell or permission instructions. Jobs are persisted under `.data/codex/jobs`, processed one at a time, and posted to the configured minutes channel with mentions disabled.
 
-The runner invokes the locally installed `codex exec` with `--ephemeral`, `--ignore-user-config`, `-s read-only`, and a strict JSON output schema. It passes a small operating-system environment allowlist and removes Discord, GitHub, OpenAI, and GitHub App secrets from the child process. It does not use `OPENAI_API_KEY`, but the authenticated Codex CLI provider may consume account quota. Keep `CODEX_ENABLED=false` if that is not acceptable.
+With `CODEX_PROVIDER=codex`, the runner invokes the locally installed `codex exec` with `--ephemeral`, `--ignore-user-config`, `-s read-only`, and a strict JSON output schema. It passes a small operating-system environment allowlist and removes Discord, GitHub, OpenAI, and GitHub App secrets from the child process. This provider may consume authenticated Codex account quota.
+
+With `CODEX_PROVIDER=ollama`, the runner loads the selected allowlisted repository `SKILL.md` itself and calls only the fixed loopback endpoint `http://127.0.0.1:11434/api/chat`. The response is required to be JSON and is validated against the same strict local schema. This path uses no OpenAI API key or Codex account quota, but requires a compatible model already installed in Ollama. Keep `CODEX_ENABLED=false` when neither provider's resource model is acceptable.
 
 V1 cannot edit the repository, install software, invoke `$github-task-flow`, publish a PR, or merge code. A completed plan is advisory and needs a separate human-approved implementation flow.
 
@@ -116,7 +118,7 @@ Use Python 3.11–3.13 when creating the virtual environment. On macOS/Linux, us
 
 `npm run register` creates guild-scoped commands, which normally update faster than global commands. Run it again only when the command schema changes.
 
-Before enabling the Codex gateway, also verify `codex --version` and run one local read-only fixture or low-risk plan. Set `CODEX_ENABLED=true`, rerun `npm run register`, and restart the service only after accepting the active Codex provider's quota or cost model.
+Before enabling the gateway, verify either `codex --version` or `ollama list`, then run one local read-only fixture or low-risk plan. Set `CODEX_ENABLED=true`, rerun `npm run register`, and restart the service only after accepting the selected provider's quota or local resource model.
 
 ## Docker deployment
 

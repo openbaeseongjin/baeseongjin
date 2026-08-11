@@ -90,7 +90,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 
 - `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
 - Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan` Skill만 선택할 수 있다.
-- Codex 자식 프로세스는 `read-only`, `ephemeral`, 구조화 출력으로 실행하며 애플리케이션 비밀을 전달하지 않는다.
+- Codex CLI는 `read-only`, `ephemeral`로 실행하고 로컬 Ollama는 고정 loopback API와 허용 Skill만 사용한다. 두 경로 모두 구조화 출력을 검증하고 애플리케이션 비밀을 전달하지 않는다.
 - 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.
 
 ## 갱신 규칙
