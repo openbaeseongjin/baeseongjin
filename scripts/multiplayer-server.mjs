@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -6,6 +7,7 @@ import { createGameServerRequestHandler } from "./gameServerHandler.mjs";
 import { createStaticRequestHandler } from "./staticHandler.mjs";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const packageJson = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 const positionalPort = process.argv.find((argument) => /^\d+$/.test(argument));
 const namedPort = process.argv.find((argument) => argument.startsWith("--port="))?.slice(7);
 const requestedPort = Number(namedPort ?? positionalPort ?? process.env.BAESEONGJIN_PORT ?? 4173);
@@ -17,7 +19,9 @@ const allowedOriginsArgument = process.argv
     .find((argument) => argument.startsWith("--allowed-origins="))
     ?.slice("--allowed-origins=".length);
 const defaultAllowedOrigins = gameOnly ? "https://openbaeseongjin.github.io" : "";
-const requestHandler = gameOnly ? createGameServerRequestHandler() : createStaticRequestHandler(root);
+const requestHandler = gameOnly
+    ? createGameServerRequestHandler({ version: packageJson.version })
+    : createStaticRequestHandler(root);
 const server = createServer(requestHandler);
 const multiplayer = new MultiplayerGameServer(server, {
     allowedOrigins: (allowedOriginsArgument ?? process.env.BAESEONGJIN_ALLOWED_ORIGINS ?? defaultAllowedOrigins)
