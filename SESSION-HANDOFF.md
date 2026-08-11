@@ -30,6 +30,7 @@
 - 투사체는 같은 `projectile-motion`·`client-projectile-collision` capability ID에 종류별 믹스인을 조합한다. 운동·충돌·claim 거부 뒤 수명 정책과 복제 상태는 객체가 소유하며 `PredictableProjectileStore`와 `GameSimulation`은 종류별 분기 없이 등록·식별자 대응·단계 실행·사건 연결만 담당한다. 상세 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - 정적 파일을 노출하지 않는 상시 게임 서버 실행 모드와 `/health` 상태 확인
 - game-only 서버는 기본적으로 공식 GitHub Pages Origin만 WebSocket에 허용하며 개발용 정적 통합 서버는 이 제한을 강제하지 않는다.
+- `npm run publish:multiplayer`는 컴퓨터 재시작 뒤 운영자가 한 명령으로 상시 게임 서버와 외부 공유 터널을 다시 열고, 새 공개 주소를 Pages 설정에 반영해 배포까지 이어가는 운영 경로를 제공한다. 실행 전 clean `main` 전제를 확인하고 `index.html` 메타 값만 교체한 단일 커밋을 `origin main`에 push한 뒤 Pages 노출·공개 smoke를 검증하며, push 후 실패는 서버/터널을 유지한 채 안내만 출력한다. 기존 `share:multiplayer`는 로컬 정적 화면까지 함께 공유하는 개발용 경로로 유지한다. 상세 절차는 `docs/multiplayer-sharing.md`를 따른다.
 
 실제 조작 기반 전체 등반 검사, 서로 다른 기기의 장시간 2인 플레이테스트와 고정 HTTPS/WSS 운영 주소 배포는 아직 완료하지 않았다.
 
