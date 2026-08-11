@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
+import { COMBAT_CONFIG } from "../src/game/config.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { LocalAuthority } from "../src/game/runtime/LocalAuthority.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
@@ -171,6 +174,30 @@ export function run() {
     assert.equal(localImpactReceipt.accepted, true);
     assert.equal(localImpactPlayer.health, localHealthBeforeImpact - localImpactProjectile.damage);
     assert.equal(localImpactSimulation.metrics.damageTaken, localImpactProjectile.damage);
+
+    const expirationSimulation = new GameSimulation();
+    expirationSimulation.enemies = [];
+    const expiringProjectile = new ProjectileObject({
+        id: "expiring-enemy-projectile",
+        ownerId: "expiration-enemy",
+        targetId: expirationSimulation.getPrimaryPlayerId(),
+        position: new Vector2(-500, -500),
+        velocity: new Vector2(10, 0),
+        damage: 20,
+        radius: 7
+    });
+    expiringProjectile.ageSeconds = COMBAT_CONFIG.enemyProjectileLifetimeSeconds - 1 / 120;
+    expirationSimulation.enemyProjectiles.push(expiringProjectile);
+    expirationSimulation.recordProjectileSpawn(expiringProjectile, "enemy-projectile");
+    expirationSimulation.drainReplicationEvents();
+    expirationSimulation.step(1 / 120, command);
+    assert.equal(expirationSimulation.enemyProjectiles.length, 0);
+    assert.equal(
+        expirationSimulation.drainReplicationEvents().find(({ objectId }) => objectId === expiringProjectile.id)
+            ?.resolution,
+        "expired",
+        "server projectile expiry must replicate as a deterministic resolve event"
+    );
 
     const defeated = new GameSimulation();
     const defeatedPlayer = primaryPlayer(defeated);

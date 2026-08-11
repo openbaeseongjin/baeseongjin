@@ -74,7 +74,9 @@ export class GameApp {
                 state.tick
             )
             .filter(({ projectileId }) => projectileId);
-        for (const impact of predictedImpacts) this.authority.submitImpactClaim(impact);
+        for (const impact of predictedImpacts) {
+            this.predictableProjectiles.applyImpactReceipts([this.authority.submitImpactClaim(impact)]);
+        }
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();

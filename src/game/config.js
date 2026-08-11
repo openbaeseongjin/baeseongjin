@@ -34,6 +34,7 @@ export const COMBAT_CONFIG = Object.freeze({
     enemyProjectileSpeed: 260,
     enemyProjectileRadius: 7,
     enemyProjectileDamage: 20,
+    enemyProjectileLifetimeSeconds: 8,
     playerMaxHealth: 100,
     playerHitInvulnerability: 0.45,
     playerHitKnockback: 260,

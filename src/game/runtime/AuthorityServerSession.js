@@ -3,6 +3,7 @@ import { WORLD_CONFIG } from "../config.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
+import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
 function assertPositive(value, label) {
@@ -72,9 +73,13 @@ export class AuthorityServerSession {
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
         if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
-            return Object.freeze({ projectileId: claim.projectileId, accepted: false, reason: "tick-window" });
+            return createPlayerImpactReceipt({
+                projectileId: claim.projectileId,
+                accepted: false,
+                reason: "tick-window"
+            });
         }
-        const result = Object.freeze({
+        const result = createPlayerImpactReceipt({
             projectileId: claim.projectileId,
             ...this.simulation.resolveEnemyProjectileClaim(authenticatedPlayerId, claim, {
                 positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
@@ -231,10 +236,11 @@ export class AuthorityServerSession {
         return nextTick % this.snapshotIntervalTicks === 0 ? this.snapshot() : null;
     }
 
-    snapshot() {
+    snapshot({ includeActivePredictableObjects = false } = {}) {
         return buildAuthoritySnapshot({
             simulation: this.simulation,
-            acknowledgements: this.inbox.acknowledgements()
+            acknowledgements: this.inbox.acknowledgements(),
+            includeActivePredictableObjects
         });
     }
 

@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
+import { Vector2 } from "../src/game-kit/index.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
+import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
@@ -188,6 +190,33 @@ export async function run() {
         assert.equal(authority.metrics().rejectedCommands, 0);
         assert.equal(authority.metrics().rejectionRate, 0);
         const room = gameServer.rooms.get(authority.channelId);
+        const authorityPlayer = room.simulation.players.find(({ id }) => id === authority.playerId);
+        const receiptProjectile = new ProjectileObject({
+            id: "impact-receipt-projectile",
+            ownerId: "impact-receipt-enemy",
+            targetId: authority.playerId,
+            position: authorityPlayer.physics.position.clone(),
+            velocity: new Vector2(0, 0),
+            damage: 20,
+            radius: 7
+        });
+        room.simulation.enemyProjectiles.push(receiptProjectile);
+        assert.equal(
+            authority.submitImpactClaim({
+                projectileId: receiptProjectile.id,
+                clientTick: authority.snapshot().owner.tick,
+                resolution: "player-hit",
+                position: authorityPlayer.physics.position
+            }),
+            true
+        );
+        await waitFor(
+            () => authority.impactClaimReceipts.length > 0,
+            "impact claim receipts must reach the client authority"
+        );
+        const impactReceipt = authority.drainImpactClaimReceipts()[0];
+        assert.equal(impactReceipt.projectileId, receiptProjectile.id);
+        assert.equal(impactReceipt.accepted, true);
         const rewardCheckpoint = room.simulation.world.checkpoints[1];
         room.simulation.beginArtifactReward(rewardCheckpoint);
         await waitFor(
@@ -218,7 +247,6 @@ export async function run() {
             () => authority.artifactSelectionReceipts.some(({ accepted }) => accepted),
             "the selecting client must receive an artifact receipt"
         );
-        const authorityPlayer = room.simulation.players.find(({ id }) => id === authority.playerId);
         const ownerBeforeAttach = authority.snapshot().owner;
         const anchor = nearestRopeAnchor(authority.renderSnapshot().world, ownerBeforeAttach.position);
         const attachCommand = {

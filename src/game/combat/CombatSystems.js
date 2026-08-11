@@ -137,9 +137,15 @@ export function distancePointToSegment(point, start, end) {
     return Math.hypot(point.x - (start.x + segmentX * projection), point.y - (start.y + segmentY * projection));
 }
 
-export function advanceEnemyProjectiles({ projectiles, dt }) {
+export function advanceEnemyProjectiles({ projectiles, dt, maxLifetimeSeconds = Number.POSITIVE_INFINITY }) {
+    const survivors = [];
+    const expired = [];
     for (const projectile of projectiles) {
         projectile.position.add(projectile.velocity.clone().scale(dt));
+        projectile.ageSeconds = (projectile.ageSeconds ?? 0) + dt;
+        if (projectile.ageSeconds >= maxLifetimeSeconds) expired.push(projectile);
+        else survivors.push(projectile);
     }
-    return projectiles;
+    projectiles.splice(0, projectiles.length, ...survivors);
+    return Object.freeze({ expired: Object.freeze(expired) });
 }

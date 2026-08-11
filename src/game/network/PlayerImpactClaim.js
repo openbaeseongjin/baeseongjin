@@ -34,3 +34,17 @@ export function deserializePlayerImpactClaim(serialized) {
     }
     return createPlayerImpactClaim(parsed);
 }
+
+export function createPlayerImpactReceipt({ projectileId, accepted, resolution = null, damage = 0, reason = null }) {
+    if (typeof projectileId !== "string" || projectileId.length === 0) {
+        throw new Error("projectileId must be non-empty");
+    }
+    if (typeof accepted !== "boolean") throw new Error("accepted must be boolean");
+    if (!accepted) {
+        if (typeof reason !== "string" || reason.length === 0) throw new Error("rejected receipt reason is required");
+        return Object.freeze({ projectileId, accepted, reason });
+    }
+    if (!IMPACT_TYPES.has(resolution)) throw new Error(`unsupported impact resolution: ${resolution}`);
+    if (!Number.isFinite(damage) || damage < 0) throw new Error("damage must be non-negative and finite");
+    return Object.freeze({ projectileId, accepted, resolution, damage });
+}

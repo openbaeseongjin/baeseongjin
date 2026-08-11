@@ -162,6 +162,7 @@ export class PredictableProjectileStore {
         let localPlayerImpactClaimed = false;
         for (const projectile of [...this.objects.values()]) {
             advanceProjectile(projectile, dt, state);
+            if (projectile.pendingImpactClaim) continue;
             if (!projectile.predictCollision) continue;
             if (projectile.objectType === "enemy-projectile") {
                 if (localPlayerImpactClaimed) continue;
@@ -179,7 +180,7 @@ export class PredictableProjectileStore {
                         projectile.radius + player.radius;
                 if (!ropeHit && !bodyHit) continue;
                 localPlayerImpactClaimed = true;
-                this.objects.delete(projectile.id);
+                projectile.pendingImpactClaim = true;
                 this.locallyResolvedObjectIds.add(projectile.id);
                 resolutions.push(
                     Object.freeze({
@@ -220,10 +221,21 @@ export class PredictableProjectileStore {
         return Object.freeze(resolutions);
     }
 
+    applyImpactReceipts(receipts) {
+        for (const receipt of receipts) {
+            const projectile = this.objects.get(receipt.projectileId);
+            if (!projectile?.pendingImpactClaim || receipt.accepted) continue;
+            projectile.pendingImpactClaim = false;
+            this.locallyResolvedObjectIds.delete(receipt.projectileId);
+            this.predictionCancellations += 1;
+        }
+    }
+
     snapshot() {
         const projectiles = [];
         const enemyProjectiles = [];
         for (const projectile of this.objects.values()) {
+            if (projectile.pendingImpactClaim) continue;
             const target = projectile.objectType === "enemy-projectile" ? enemyProjectiles : projectiles;
             target.push({ ...projectile, position: { ...projectile.position }, velocity: { ...projectile.velocity } });
         }

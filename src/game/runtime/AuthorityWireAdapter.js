@@ -46,7 +46,7 @@ export class AuthorityWireAdapter {
         return snapshot ? serializeWorldSnapshotEnvelope(snapshot) : null;
     }
 
-    snapshot() {
-        return serializeWorldSnapshotEnvelope(this.session.snapshot());
+    snapshot(options) {
+        return serializeWorldSnapshotEnvelope(this.session.snapshot(options));
     }
 }
