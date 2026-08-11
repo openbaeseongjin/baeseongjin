@@ -362,7 +362,7 @@ export class GameSimulation {
         return this.stepPlayers(dt, new Map([[this.#primaryPlayerId, command]]));
     }
 
-    stepCommandBatch(dt, batch) {
+    stepCommandBatch(dt, batch, { recoverPlayerFalls = true } = {}) {
         const expectedTick = this.tick + 1;
         if (batch.tick !== expectedTick) throw new Error(`command batch tick ${batch.tick} must equal ${expectedTick}`);
         const playersById = new Map(this.players.map((player) => [player.id, player]));
@@ -371,10 +371,10 @@ export class GameSimulation {
             if (!playersById.has(entry.playerId)) throw new Error(`unknown playerId: ${entry.playerId}`);
             commandsByPlayerId.set(entry.playerId, entry.command);
         }
-        return this.stepPlayers(dt, commandsByPlayerId);
+        return this.stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls });
     }
 
-    stepPlayers(dt, commandsByPlayerId) {
+    stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls = true } = {}) {
         this.tick += 1;
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
@@ -441,7 +441,7 @@ export class GameSimulation {
         for (const player of this.players) {
             if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
         }
-        this.recoverFallenPlayers();
+        if (recoverPlayerFalls) this.recoverFallenPlayers();
         this.eventFlash.age += dt;
     }
 

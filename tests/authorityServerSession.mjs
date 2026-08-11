@@ -130,15 +130,26 @@ export function run() {
     fallSimulation.enemies = [];
     fallSimulation.addPlayer({ x: 180, y: 500 });
     fallSimulation.activeCheckpoint = fallSimulation.world.checkpoints[1];
+    fallPlayer.physics.position.set(-10000, WORLD_CONFIG.floorY + 781);
     fallPlayer.ropeObject.rope.attach(fallPlayer.physics.position, {
         x: fallPlayer.physics.position.x,
         y: fallPlayer.physics.position.y - 80
     });
     const fallSession = new AuthorityServerSession({ simulation: fallSimulation });
+    fallSession.advance();
+    assert.ok(
+        fallPlayer.physics.position.y > WORLD_CONFIG.floorY + 780,
+        "the server fixed tick must not initiate a client-owned fall"
+    );
+    assert.equal(
+        fallSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "player-respawned").length,
+        0,
+        "fall replication must wait for the owner claim"
+    );
     const fallReceipt = fallSession.submitOwnerMotion(
         fallPlayer.id,
         createOwnerMotionState({
-            clientTick: 1,
+            clientTick: fallSimulation.getTick() + 1,
             position: { x: fallPlayer.physics.position.x, y: WORLD_CONFIG.floorY + 781 },
             velocity: { x: 0, y: 900 },
             isGrounded: false,
@@ -152,6 +163,11 @@ export function run() {
     assert.equal(fallPlayer.physics.position.x, fallSimulation.activeCheckpoint.x);
     assert.equal(fallPlayer.physics.position.y, fallSimulation.activeCheckpoint.y);
     assert.equal(fallPlayer.ropeObject.rope.isAttached, false);
+    assert.equal(
+        fallSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "player-respawned").length,
+        1,
+        "the owner fall claim must produce one shared respawn"
+    );
     assert.equal(fallSimulation.runState, "playing", "one fallen player must not stop a cooperative world");
 
     combatPlayer.weapon.cooldown = 0;
