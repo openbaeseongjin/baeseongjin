@@ -29,6 +29,7 @@ export const withEnemyHitPrediction = createSimulationCapabilityMixin({
         return Object.freeze({
             eventType: "predicted-resolve",
             predictionId: this.predictionId,
+            sourcePlayerId: this.ownerId,
             targetId: this.targetId,
             clientTick,
             resolution: target.health <= this.damage ? "enemy-defeated" : "enemy-hit",

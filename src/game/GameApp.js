@@ -9,6 +9,7 @@ import { GameSimulation } from "./simulation/GameSimulation.js";
 import { CAMERA_CONFIG, PLAYER_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
 
 export class GameApp {
@@ -34,7 +35,7 @@ export class GameApp {
         this.frameId = null;
         this.latestInput = this.input.snapshot();
         this.predictableProjectiles = new PredictableProjectileStore();
-        this.combatFeedback = new ClientCombatFeedback();
+        this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: () => this.render()
@@ -106,11 +107,14 @@ export class GameApp {
 
     render() {
         const state = this.authority.snapshot();
+        const combatFeedback = this.combatFeedback.snapshot();
         if (this.metricsVisible) this.onDiagnostics({ metrics: state.metrics, worldSeed: state.world.seed });
         this.stats.resets = state.resets;
         this.renderer.draw({
             ...state,
-            ...this.combatFeedback.snapshot(),
+            ...combatFeedback,
+            eventFlash:
+                combatFeedback.eventFlash ?? selectClientStatusFeedback(state.eventFlash, this.authority.playerId),
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,

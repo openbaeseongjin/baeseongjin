@@ -1,32 +1,52 @@
 import { appendCombatFeedback, createImpactState, updateCombatFeedback } from "./CombatFeedback.js";
+import {
+    createClientFeedbackEventObject,
+    PERSONAL_CLIENT_FEEDBACK_CAPABILITY,
+    SHARED_CLIENT_FEEDBACK_CAPABILITY
+} from "./ClientFeedbackEventObject.js";
+import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 
 const COMBAT_RESOLUTIONS = new Set(["enemy-hit", "enemy-defeated", "player-hit", "rope-cut"]);
 
 export class ClientCombatFeedback {
-    constructor() {
+    constructor({ viewerId }) {
+        if (typeof viewerId !== "string" || viewerId.length === 0) {
+            throw new Error("ClientCombatFeedback requires a viewerId");
+        }
+        this.viewerId = viewerId;
+        this.dispatcher = new SimulationDispatcher();
         this.effects = [];
         this.impact = null;
         this.ropeCutFeedback = null;
     }
 
     apply(events) {
-        const resolvedEvents = events
+        const feedbackEvents = events
             .filter(
                 (event) =>
                     (event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
                     COMBAT_RESOLUTIONS.has(event.resolution)
             )
-            .map((event) => ({
-                type: event.resolution,
-                position: event.position,
-                damage: event.parameters?.damage ?? 0
-            }));
-        const combatEvents = resolvedEvents.filter(({ type }) => type !== "rope-cut");
-        for (const event of combatEvents) appendCombatFeedback(this.effects, event);
-        const impact = createImpactState(combatEvents);
-        if (impact) this.impact = impact;
-        const ropeCut = [...resolvedEvents].reverse().find(({ type }) => type === "rope-cut");
-        if (ropeCut) this.ropeCutFeedback = { type: "rope-cut", position: ropeCut.position, age: 0 };
+            .map((event, index) => createClientFeedbackEventObject(event, index));
+        this.dispatcher.dispatch({
+            objects: feedbackEvents,
+            capabilityId: SHARED_CLIENT_FEEDBACK_CAPABILITY,
+            context: { appendShared: (event) => appendCombatFeedback(this.effects, event) }
+        });
+        this.dispatcher.dispatch({
+            objects: feedbackEvents,
+            capabilityId: PERSONAL_CLIENT_FEEDBACK_CAPABILITY,
+            context: {
+                viewerId: this.viewerId,
+                appendPersonal: (event) => {
+                    const impact = createImpactState([event]);
+                    if (impact) this.impact = impact;
+                    if (event.type === "rope-cut") {
+                        this.ropeCutFeedback = { type: "rope-cut", position: event.position, age: 0 };
+                    }
+                }
+            }
+        });
     }
 
     update(dt) {

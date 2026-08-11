@@ -70,6 +70,7 @@ export function updatePlayerProjectiles({
                     type: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
                     position: target.position.clone(),
                     damage: projectile.damage,
+                    sourcePlayerId: projectile.ownerId,
                     targetId: target.id,
                     projectileId: projectile.id
                 })

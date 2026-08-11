@@ -580,7 +580,7 @@ export class GameSimulation {
                 ropeConfig: ROPE_CONFIG,
                 surfaces: this.world.surfaces,
                 onFlash: (eventFlash) => {
-                    this.eventFlash = eventFlash;
+                    this.eventFlash = { ...eventFlash, playerId: player.id };
                 },
                 onSwing: () => {
                     const effects = getArtifactEffects(player.artifacts.snapshot());
@@ -913,7 +913,7 @@ export class GameSimulation {
         const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
         this.recordProjectileResolution(
             { projectileId: projectile.id, resolution, position: target.position },
-            { damage: projectile.damage }
+            { damage: projectile.damage, sourcePlayerId: projectile.ownerId, targetId: projectile.targetId }
         );
         if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
         this.enemies = this.enemies.filter(({ health }) => health > 0);
@@ -959,7 +959,10 @@ export class GameSimulation {
                 resolution: claim.impactType,
                 position: new Vector2(claim.position.x, claim.position.y)
             },
-            claim.impactType === "player-hit" ? { damage: projectile.damage } : null
+            {
+                damage: claim.impactType === "player-hit" ? projectile.damage : 0,
+                targetId: player.id
+            }
         );
         this.metrics.recordPlayerImpact(claim.impactType, projectile.damage);
         if (claim.impactType === "player-hit" && player.health <= 0) {
@@ -988,7 +991,13 @@ export class GameSimulation {
                 tick: this.tick,
                 resolution,
                 position,
-                parameters: combatEvent ? { damage: combatEvent.damage } : {}
+                parameters: combatEvent
+                    ? {
+                          damage: combatEvent.damage,
+                          ...(combatEvent.sourcePlayerId ? { sourcePlayerId: combatEvent.sourcePlayerId } : {}),
+                          ...(combatEvent.targetId ? { targetId: combatEvent.targetId } : {})
+                      }
+                    : {}
             })
         );
     }

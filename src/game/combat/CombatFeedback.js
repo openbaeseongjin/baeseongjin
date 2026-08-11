@@ -8,8 +8,9 @@ function particleVelocity(index, count, speed, phase = 0) {
 export function appendCombatFeedback(effects, event) {
     const defeated = event.type === "enemy-defeated";
     const playerHit = event.type === "player-hit";
-    const color = playerHit ? "#fb7185" : defeated ? "#fde68a" : "#67e8f9";
-    const count = defeated ? 12 : playerHit ? 9 : 7;
+    const ropeCut = event.type === "rope-cut";
+    const color = playerHit || ropeCut ? "#fb7185" : defeated ? "#fde68a" : "#67e8f9";
+    const count = defeated ? 12 : playerHit ? 9 : ropeCut ? 8 : 7;
     const speed = defeated ? 190 : 130;
 
     effects.push({
@@ -31,16 +32,18 @@ export function appendCombatFeedback(effects, event) {
             size: defeated ? 5 : 3.5
         });
     }
-    effects.push({
-        type: "text",
-        position: { x: event.position.x, y: event.position.y - 24 },
-        velocity: { x: 0, y: -34 },
-        color,
-        text: playerHit ? `-${Math.round(event.damage)}` : `${Math.round(event.damage)}`,
-        age: 0,
-        lifetime: EFFECT_LIFETIME.text,
-        emphasis: defeated
-    });
+    if (!ropeCut) {
+        effects.push({
+            type: "text",
+            position: { x: event.position.x, y: event.position.y - 24 },
+            velocity: { x: 0, y: -34 },
+            color,
+            text: playerHit ? `-${Math.round(event.damage)}` : `${Math.round(event.damage)}`,
+            age: 0,
+            lifetime: EFFECT_LIFETIME.text,
+            emphasis: defeated
+        });
+    }
 }
 
 export function updateCombatFeedback(effects, dt) {
