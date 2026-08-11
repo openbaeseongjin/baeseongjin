@@ -12,6 +12,34 @@ export function extractMultiplayerServer(html) {
     return serverUrl;
 }
 
+export function extractPageVersion(html) {
+    const tag = html.match(/<output\s+[^>]*id=["']app-version["'][^>]*>/i)?.[0];
+    const version = tag?.match(/data-version=["']([^"']+)["']/i)?.[1]?.trim();
+    if (!version) throw new Error("페이지에서 배포 버전을 찾을 수 없습니다.");
+    return version;
+}
+
+function healthUrlFromServer(serverUrl) {
+    const healthUrl = new URL(serverUrl);
+    if (healthUrl.protocol === "ws:") healthUrl.protocol = "http:";
+    if (healthUrl.protocol === "wss:") healthUrl.protocol = "https:";
+    healthUrl.pathname = "/health";
+    healthUrl.search = "";
+    healthUrl.hash = "";
+    return healthUrl;
+}
+
+export async function verifyServerVersion(serverUrl, pageVersion) {
+    const response = await fetch(healthUrlFromServer(serverUrl), { cache: "no-store" });
+    if (!response.ok) throw new Error(`게임 서버 상태 확인 실패: HTTP ${response.status}`);
+    const health = await response.json();
+    if (health.status !== "ok") throw new Error("게임 서버 상태가 정상이 아닙니다.");
+    if (health.version !== pageVersion) {
+        throw new Error(`배포 버전 불일치: Pages ${pageVersion}, game server ${health.version ?? "unknown"}`);
+    }
+    return health.version;
+}
+
 function argument(name) {
     return process.argv.find((value) => value.startsWith(`--${name}=`))?.slice(name.length + 3);
 }
@@ -44,7 +72,10 @@ function webSocketFromOrigin(origin) {
 export async function smokeMultiplayer({ pageUrl = DEFAULT_PAGE_URL } = {}) {
     const response = await fetch(pageUrl, { cache: "no-store" });
     if (!response.ok) throw new Error(`페이지 응답 실패: HTTP ${response.status}`);
-    const serverUrl = extractMultiplayerServer(await response.text());
+    const html = await response.text();
+    const serverUrl = extractMultiplayerServer(html);
+    const pageVersion = extractPageVersion(html);
+    const serverVersion = await verifyServerVersion(serverUrl, pageVersion);
     const origin = new URL(pageUrl).origin;
     const WebSocketImpl = webSocketFromOrigin(origin);
     const first = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, "new"), WebSocketImpl });
@@ -81,7 +112,16 @@ export async function smokeMultiplayer({ pageUrl = DEFAULT_PAGE_URL } = {}) {
             if (!/찾을 수 없습니다|channel not found/i.test(error.message)) throw error;
         }
 
-        return { pageUrl, serverUrl, origin, channelId, playersJoined: 2, emptyRoomRemoved: true };
+        return {
+            pageUrl,
+            serverUrl,
+            pageVersion,
+            serverVersion,
+            origin,
+            channelId,
+            playersJoined: 2,
+            emptyRoomRemoved: true
+        };
     } finally {
         await closeAuthority(second);
         await closeAuthority(first);

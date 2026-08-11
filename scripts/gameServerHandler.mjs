@@ -3,14 +3,20 @@ const JSON_HEADERS = {
     "content-type": "application/json; charset=utf-8"
 };
 
-export function createGameServerRequestHandler() {
+export function createGameServerRequestHandler({ version } = {}) {
+    if (typeof version !== "string" || version.trim() === "") {
+        throw new TypeError("game server version must be a non-empty string");
+    }
+
+    const health = JSON.stringify({ status: "ok", version: version.trim() });
+
     return (request, response) => {
         const method = request.method ?? "";
         const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
 
         if (pathname === "/health" && (method === "GET" || method === "HEAD")) {
             response.writeHead(200, JSON_HEADERS);
-            response.end(method === "HEAD" ? undefined : JSON.stringify({ status: "ok" }));
+            response.end(method === "HEAD" ? undefined : health);
             return;
         }
 
