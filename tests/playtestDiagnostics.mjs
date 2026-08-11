@@ -26,6 +26,8 @@ export async function run() {
             snapshotIntervalMs: 50.2,
             pendingCommands: 4,
             rejectionRate: 0.02,
+            acceptedOwnerMotions: 40,
+            rejectedOwnerMotions: 1,
             correctionP50: 3.4,
             correctionP95: 19.6,
             hardSnaps: 1,
@@ -38,6 +40,8 @@ export async function run() {
     assert.match(text, /worldSeed: 481516/);
     assert.match(text, /roundTripMs: 104/);
     assert.match(text, /rejectionRatePercent: 2/);
+    assert.match(text, /acceptedOwnerMotions: 40/);
+    assert.match(text, /rejectedOwnerMotions: 1/);
     assert.match(text, /firstRewardSeconds: 58.2/);
 
     let click = null;

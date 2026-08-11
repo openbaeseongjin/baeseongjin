@@ -3,6 +3,7 @@ import { WORLD_CONFIG } from "../config.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
+import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
@@ -133,12 +134,12 @@ export class AuthorityServerSession {
         if (!player) throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         const previousTick = this.lastOwnerMotionTicks.get(authenticatedPlayerId) ?? -1;
         if (state.clientTick <= previousTick) {
-            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "stale-tick" });
+            return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: false, reason: "stale-tick" });
         }
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
         if (state.clientTick < minimumTick || state.clientTick > maximumTick) {
-            return Object.freeze({ clientTick: state.clientTick, accepted: false, reason: "tick-window" });
+            return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: false, reason: "tick-window" });
         }
         const previousRopeTick = this.lastOwnerRopeTicks.get(authenticatedPlayerId) ?? -1;
         const ropeReleased = !state.rope.isAttached && state.clientTick > previousRopeTick && player.rope.isAttached;
@@ -147,7 +148,7 @@ export class AuthorityServerSession {
             this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
         }
         const reject = (reason) =>
-            Object.freeze({
+            createOwnerMotionReceipt({
                 clientTick: state.clientTick,
                 accepted: false,
                 reason,
@@ -159,7 +160,7 @@ export class AuthorityServerSession {
         if (state.position.y > WORLD_CONFIG.floorY + 780) {
             this.simulation.resolvePlayerFall(authenticatedPlayerId);
             this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
-            return Object.freeze({
+            return createOwnerMotionReceipt({
                 clientTick: state.clientTick,
                 accepted: true,
                 resolution: "player-fell",
@@ -181,7 +182,7 @@ export class AuthorityServerSession {
         this.simulation.applyOwnerMotion(authenticatedPlayerId, state, { synchronizeRope });
         if (synchronizeRope) this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
         this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
-        return Object.freeze({ clientTick: state.clientTick, accepted: true });
+        return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: true });
     }
 
     submit(authenticatedPlayerId, batch) {

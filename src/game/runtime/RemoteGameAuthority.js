@@ -8,7 +8,11 @@ import {
     createPlayerImpactReceipt,
     serializePlayerImpactClaim
 } from "../network/PlayerImpactClaim.js";
-import { createOwnerMotionState, serializeOwnerMotionState } from "../network/OwnerMotionState.js";
+import {
+    createOwnerMotionReceipt,
+    createOwnerMotionState,
+    serializeOwnerMotionState
+} from "../network/OwnerMotionState.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
@@ -44,11 +48,14 @@ export class RemoteGameAuthority {
         this.processedReceiptOrder = [];
         this.artifactSelectionReceipts = [];
         this.impactClaimReceipts = [];
+        this.latestOwnerMotionReceiptTick = -1;
         this.networkMetrics = {
             roundTripMs: null,
             snapshotIntervalMs: null,
             acceptedCommands: 0,
-            rejectedCommands: 0
+            rejectedCommands: 0,
+            acceptedOwnerMotions: 0,
+            rejectedOwnerMotions: 0
         };
         this.closed = false;
         this.closeReason = null;
@@ -104,6 +111,8 @@ export class RemoteGameAuthority {
                         this.artifactSelectionReceipts.push(Object.freeze({ ...message.payload }));
                     } else if (message.type === "impact-claim-receipt") {
                         this.impactClaimReceipts.push(createPlayerImpactReceipt(message.payload));
+                    } else if (message.type === "owner-motion-receipt") {
+                        this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
                     }
                 } catch (error) {
                     fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
@@ -231,6 +240,20 @@ export class RemoteGameAuthority {
         const receipts = Object.freeze(this.impactClaimReceipts);
         this.impactClaimReceipts = [];
         return receipts;
+    }
+
+    recordOwnerMotionReceipt(receipt) {
+        if (receipt.clientTick <= this.latestOwnerMotionReceiptTick) return false;
+        this.latestOwnerMotionReceiptTick = receipt.clientTick;
+        if (receipt.accepted) {
+            this.networkMetrics.acceptedOwnerMotions += 1;
+        } else {
+            this.networkMetrics.rejectedOwnerMotions += 1;
+            if (this.latestSnapshot) {
+                this.ownerRuntime.reconcile(this.latestSnapshot, this.stream.pendingBatches(), { rebaseMotion: true });
+            }
+        }
+        return true;
     }
 
     snapshot() {

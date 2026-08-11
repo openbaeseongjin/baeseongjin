@@ -113,7 +113,7 @@ export function run() {
     assert.equal(
         predictor.presentationState().rope.isAttached,
         true,
-        "routine snapshots must not overwrite owner rope"
+        "routine snapshots must not overwrite an accepted owner rope"
     );
     assert.equal(predictor.metrics().hardSnaps, 0);
     assert.equal(predictor.applyPredictedImpact({ resolution: "rope-cut" }), true);
@@ -184,17 +184,13 @@ export function run() {
     assert.ok(secondLocalTick.position.x > firstLocalTick.position.x, "prediction must move between network sends");
     const replayed = continuous.reconcile(movingSnapshot, []);
     assert.equal(replayed.tick, secondLocalTick.tick, "owner simulation must keep its current client tick");
-    close(replayed.position.x, secondLocalTick.position.x, "client-owned position.x");
-    close(replayed.velocity.x, secondLocalTick.velocity.x, "client-owned velocity.x");
+    close(replayed.position.x, secondLocalTick.position.x, "pending input replay position.x");
+    close(replayed.velocity.x, secondLocalTick.velocity.x, "pending input replay velocity.x");
 
     const beforeSmallCorrection = continuous.presentationState();
     continuous.reconcile(withPlayerPosition(movingSnapshot, movingSnapshot.state.players[0].position.x + 20, 7), []);
     close(continuous.presentationState().position.x, beforeSmallCorrection.position.x, "small correction continuity");
-    assert.equal(
-        continuous.metrics().correctionDistance,
-        0,
-        "routine authority snapshots must not correct owner motion"
-    );
+    assert.equal(continuous.metrics().correctionDistance, 0, "accepted owner motion must remain the movement source");
     assert.equal(continuous.metrics().hardSnaps, 0);
     for (let tick = 0; tick < 12; tick += 1) continuous.advance(move);
     close(continuous.presentationState().position.x, continuous.state().position.x, "small correction convergence");
@@ -205,12 +201,15 @@ export function run() {
         withPlayerPosition(movingSnapshot, beforeAuthoritySnapshot.position.x + 200, beforeAuthoritySnapshot.tick),
         []
     );
-    close(
-        continuous.state().position.x,
-        beforeAuthoritySnapshot.position.x,
-        "authority must not rewind owner position"
-    );
+    close(continuous.state().position.x, beforeAuthoritySnapshot.position.x, "routine snapshots must not rewind owner");
     assert.equal(continuous.metrics().hardSnaps, 0);
+    const rejectedMotionRebase = continuous.reconcile(
+        withPlayerPosition(movingSnapshot, beforeAuthoritySnapshot.position.x + 200, beforeAuthoritySnapshot.tick),
+        [],
+        { rebaseMotion: true }
+    );
+    assert.notEqual(rejectedMotionRebase.position.x, beforeAuthoritySnapshot.position.x);
+    assert.equal(continuous.metrics().hardSnaps, 1, "rejected owner motion must converge to shared state");
 
     const stalled = new OwnerPredictionRuntime({ ownerId: movingPlayer.id });
     stalled.reconcile(movingSnapshot, []);

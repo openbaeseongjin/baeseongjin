@@ -64,6 +64,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·아티팩트를 Has-A로 소유하고, 로프는 부착·장력·드래그 상태를 독립 소유한다. 소유 관계는 ID와 공개 계약으로 연결한다.
 - 적과 직접 조작하지 않는 자동 행동 객체는 `SimulationDrivenObject`다. 서버가 진행하되 플레이어 피격처럼 사용자 체감과 만나는 사건은 피해 클라이언트가 먼저 반응하고 서버가 권위 객체 상태로 검증한다.
 - 멀티는 권한 감각만 보면 P2P형이다. 플레이어별 `InputDrivenObject` 결과는 해당 소유자·피해자 클라이언트가 먼저 결정하고, 특정 클라이언트에 귀속할 수 없는 몹과 적 투사체 같은 `SimulationDrivenObject`의 생성·궤적은 서버가 중립적으로 진행한다. 서버는 지연된 플레이어 복제 위치로 충돌을 먼저 확정하지 않고 피해 클라이언트 claim을 중립 객체 상태로 검증한다.
+- 사건 전파와 지속 상태 수렴을 같은 것으로 취급하지 않는다. `InputDrivenObject`의 지속 상태는 서버가 검증한 최신 소유자 상태를 서버와 동료가 따라가고, `SimulationDrivenObject`는 서버 상태를 모든 클라이언트가 따라간다. 소유자는 정상 승인 중 서버 지연 위치로 되감기지 않으며 상태 전송 거부 때만 마지막 공유 상태에서 미확정 입력을 재실행한다.
 - 입력 capability는 `Base => class extends Base` 믹스인으로 구현한다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput` 계약을 가지며 `InputDispatcher`는 구체 클래스나 `instanceof` 분기 없이 capability 존재 여부로 전달한다.
 - 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
 - `GameSimulation`은 객체별 게임 규칙을 직접 모으는 거대 분기점이 아니라 월드 등록, 고정 tick, 객체 단계 실행과 사건 연결을 조정하는 월드 스케줄러로 축소한다.

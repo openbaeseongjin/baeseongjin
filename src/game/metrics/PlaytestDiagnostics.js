@@ -37,6 +37,8 @@ export function formatPlaytestDiagnostics({
             `snapshotIntervalMs: ${valueOrDash(networkMetrics.snapshotIntervalMs, rounded)}`,
             `pendingCommands: ${networkMetrics.pendingCommands}`,
             `rejectionRatePercent: ${Math.round(networkMetrics.rejectionRate * 100)}`,
+            `acceptedOwnerMotions: ${networkMetrics.acceptedOwnerMotions}`,
+            `rejectedOwnerMotions: ${networkMetrics.rejectedOwnerMotions}`,
             `correctionP50: ${rounded(networkMetrics.correctionP50)}`,
             `correctionP95: ${rounded(networkMetrics.correctionP95)}`,
             `hardSnaps: ${networkMetrics.hardSnaps}`,
