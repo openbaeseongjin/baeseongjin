@@ -19,6 +19,7 @@ GitHub Issue를 작업의 기준 이력으로 삼고 PR을 통해 단일 커밋�
 
 ## 필수 원칙
 
+- 커밋 제목과 본문의 자연어 문장은 반드시 한국어로 작성한다. `Related`, `Confidence`, `Scope-risk`, `Tested`, `Not-tested` 같은 Lore trailer 키와 `low`·`medium`·`high`, `narrow`·`moderate`·`broad` 같은 규약상 고정 값만 원문 표기를 유지하고, 검증 내용과 미검증 사유는 한국어로 작성한다.
 - GitHub Issue를 브랜치와 커밋보다 먼저 생성한다.
 - 브랜치 이름은 `issue/<issue-number>-<short-slug>`를 사용한다.
 - 작업 브랜치는 `origin/main` 최신 상태에서 만들고 병합 직전에 최신 `origin/main` 위로 다시 rebase한다.
@@ -140,6 +141,8 @@ slug는 영문 소문자, 숫자, 하이픈만 사용하고 40자 이내로 유�
 2. `git diff --cached`로 범위와 비밀 포함 여부를 재확인한다.
 3. Lore Commit Protocol에 맞춘 커밋 메시지를 작성한다.
 
+커밋 제목과 본문을 영어로 작성하지 않는다. 코드 식별자·명령어·파일 경로·테스트 이름처럼 번역하면 의미가 바뀌는 항목만 원문으로 유지한다.
+
 ```text
 <변경 이유를 설명하는 의도 문장>
 
@@ -151,6 +154,10 @@ Scope-risk: <narrow|moderate|broad>
 Tested: <실행한 검증>
 Not-tested: <남은 검증 또는 None>
 ```
+
+- 첫 줄의 의도 문장과 본문의 제약·접근 이유는 완전한 한국어 문장으로 작성한다.
+- `Tested`와 `Not-tested`의 설명도 한국어로 작성한다. 미검증 항목이 없으면 `Not-tested: 없음`으로 기록한다.
+- Lore trailer 키와 규약이 정한 열거 값은 저장소 파싱 호환성을 위해 번역하지 않는다.
 
 - push 전 `origin/main..HEAD` 커밋 수가 정확히 1인지 확인한다.
 - 둘 이상이면 아직 공유되지 않은 로컬 커밋만 기준 커밋 위로 합친다.

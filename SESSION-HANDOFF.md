@@ -12,6 +12,7 @@
 
 ## 현재 구현
 
+- `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.agents/skills/github-task-flow/SKILL.md`를 따른다.
 - 고정 길이 로프: 사거리 440px, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
 - 시드 기반 48단계 수직 암석 월드, 모든 표면 로프 부착, 수평 발판 아래→위 통과
 - 월드 생성은 객체 수명주기 없는 순수 `generateWorld(config)` 계산이다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
