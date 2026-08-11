@@ -60,7 +60,7 @@ export class OwnerPredictionRuntime {
         this.simulation.preparePrediction();
     }
 
-    reconcile(snapshot, pendingBatches) {
+    reconcile(snapshot, pendingBatches, { rebaseMotion = false } = {}) {
         if (snapshot.worldSeed !== this.simulation.world.seed) throw new Error("prediction world seed mismatch");
         if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
         const authoritative = snapshot.state.players.find(({ id }) => id === this.ownerId);
@@ -71,7 +71,14 @@ export class OwnerPredictionRuntime {
             this.initialized ? this.simulation.getTick() : snapshot.serverTick,
             ...pendingTicks
         );
-        if (this.initialized) return this.acceptAuthorityOutcomes(snapshot, authoritative, targetTick);
+        if (this.initialized && !rebaseMotion) {
+            return this.acceptAuthorityOutcomes(snapshot, authoritative, targetTick);
+        }
+        const displayedBefore = this.initialized ? this.presentationState() : null;
+        const lifeStateChanged = this.initialized && this.state().lifeState !== authoritative.lifeState;
+        const respawned = snapshot.events.some(
+            ({ eventType, playerId }) => eventType === "player-respawned" && playerId === this.ownerId
+        );
         this.simulation.preparePrediction(snapshot.state.enemies ?? [], snapshot.state.activeCheckpointId);
         this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, snapshot.serverTick);
         this.initialized = true;
@@ -83,26 +90,12 @@ export class OwnerPredictionRuntime {
             if (tick <= snapshot.serverTick) this.emittedPredictionTicks.delete(predictionId);
         }
 
-        const batchesByTick = new Map();
-        for (const batch of pendingBatches) {
-            if (batch.tick <= snapshot.serverTick) continue;
-            if (batchesByTick.has(batch.tick)) throw new Error(`duplicate pending target tick: ${batch.tick}`);
-            batchesByTick.set(batch.tick, batch);
-            const entry = batch.commands.find(({ playerId }) => playerId === this.ownerId);
-            if (entry && !this.inputHistory.has(batch.tick)) this.rememberInput(batch.tick, entry.command);
-        }
-        const inputState = new InputStateSimulator({ holdTicks: this.inputHoldTicks });
-        for (let tick = snapshot.serverTick + 1; tick <= targetTick; tick += 1) {
-            const remembered = this.inputHistory.get(tick);
-            const batch = remembered
-                ? { tick, commands: [{ playerId: this.ownerId, sequence: tick, command: remembered }] }
-                : (batchesByTick.get(tick) ?? { tick, commands: [] });
-            const simulated = inputState.expand(batch, [this.ownerId]);
-            const command = simulated.commands[0]?.command ?? this.simulation.idleOwnerCommand(this.ownerId);
-            const projectile = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
-            this.recordPredictedProjectile(projectile, tick);
-        }
-        return this.state();
+        const batchesByTick = this.pendingBatchesByTick(snapshot.serverTick, pendingBatches);
+        this.replayInputs(snapshot.serverTick, targetTick, batchesByTick);
+        const corrected = this.state();
+        if (displayedBefore)
+            this.startPresentationCorrection(displayedBefore, corrected, respawned || lifeStateChanged);
+        return corrected;
     }
 
     acceptAuthorityOutcomes(snapshot, authoritative, targetTick) {
@@ -127,6 +120,32 @@ export class OwnerPredictionRuntime {
         const outcome = this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick);
         if (outcome.lifeStateChanged) this.startPresentationCorrection(displayedBefore, outcome.state);
         return this.state();
+    }
+
+    pendingBatchesByTick(serverTick, pendingBatches) {
+        const batchesByTick = new Map();
+        for (const batch of pendingBatches) {
+            if (batch.tick <= serverTick) continue;
+            if (batchesByTick.has(batch.tick)) throw new Error(`duplicate pending target tick: ${batch.tick}`);
+            batchesByTick.set(batch.tick, batch);
+            const entry = batch.commands.find(({ playerId }) => playerId === this.ownerId);
+            if (entry && !this.inputHistory.has(batch.tick)) this.rememberInput(batch.tick, entry.command);
+        }
+        return batchesByTick;
+    }
+
+    replayInputs(serverTick, targetTick, batchesByTick) {
+        const inputState = new InputStateSimulator({ holdTicks: this.inputHoldTicks });
+        for (let tick = serverTick + 1; tick <= targetTick; tick += 1) {
+            const remembered = this.inputHistory.get(tick);
+            const batch = remembered
+                ? { tick, commands: [{ playerId: this.ownerId, sequence: tick, command: remembered }] }
+                : (batchesByTick.get(tick) ?? { tick, commands: [] });
+            const simulated = inputState.expand(batch, [this.ownerId]);
+            const command = simulated.commands[0]?.command ?? this.simulation.idleOwnerCommand(this.ownerId);
+            const projectile = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
+            this.recordPredictedProjectile(projectile, tick);
+        }
     }
 
     advance(command) {

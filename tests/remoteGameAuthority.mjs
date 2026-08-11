@@ -155,6 +155,8 @@ export async function run() {
     fallAuthority.ownerRuntime = {
         advance: () => fallenState,
         state: () => fallenState,
+        reconcile: () => locallyRespawnedState,
+        metrics: () => ({}),
         predictFall: () => {
             assert.equal(fallMessages[0]?.type, "owner-motion", "the fall claim must precede prediction reset");
             return locallyRespawnedState;
@@ -162,6 +164,24 @@ export async function run() {
     };
     assert.equal(fallAuthority.advance(movementCommand()), locallyRespawnedState);
     assert.equal(fallMessages[0].type, "owner-motion", "the fallen position must be claimed before local respawn");
+    fallAuthority.latestSnapshot = { serverTick: 42 };
+    fallAuthority.stream = { pendingBatches: () => [] };
+    let rejectedMotionReconciliations = 0;
+    fallAuthority.ownerRuntime.reconcile = (_snapshot, _pending, options) => {
+        rejectedMotionReconciliations += 1;
+        assert.equal(options.rebaseMotion, true);
+        return locallyRespawnedState;
+    };
+    assert.equal(fallAuthority.recordOwnerMotionReceipt({ clientTick: 42, accepted: true }), true);
+    assert.equal(fallAuthority.recordOwnerMotionReceipt({ clientTick: 43, accepted: false, reason: "test" }), true);
+    assert.equal(rejectedMotionReconciliations, 1, "a rejected owner state must rebase from the latest snapshot");
+    assert.equal(fallAuthority.metrics().acceptedOwnerMotions, 1);
+    assert.equal(fallAuthority.metrics().rejectedOwnerMotions, 1);
+    assert.equal(
+        fallAuthority.recordOwnerMotionReceipt({ clientTick: 43, accepted: false, reason: "duplicate" }),
+        false,
+        "duplicate owner receipts must not trigger another correction"
+    );
 
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer);
