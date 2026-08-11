@@ -369,7 +369,9 @@ export class GameSimulation {
             recoverPlayerFalls = true,
             resolveCheckpointProgress = true,
             resolveSummitProgress = true,
-            resolvePlayerProjectileHits = true
+            resolvePlayerProjectileHits = true,
+            recoverPlayerDeaths = true,
+            resolveArtifactSelections = true
         } = {}
     ) {
         const expectedTick = this.tick + 1;
@@ -384,7 +386,9 @@ export class GameSimulation {
             recoverPlayerFalls,
             resolveCheckpointProgress,
             resolveSummitProgress,
-            resolvePlayerProjectileHits
+            resolvePlayerProjectileHits,
+            recoverPlayerDeaths,
+            resolveArtifactSelections
         });
     }
 
@@ -395,7 +399,9 @@ export class GameSimulation {
             recoverPlayerFalls = true,
             resolveCheckpointProgress = true,
             resolveSummitProgress = true,
-            resolvePlayerProjectileHits = true
+            resolvePlayerProjectileHits = true,
+            recoverPlayerDeaths = true,
+            resolveArtifactSelections = true
         } = {}
     ) {
         this.tick += 1;
@@ -406,7 +412,7 @@ export class GameSimulation {
         if (resolveSummitProgress && this.updateSummitProgress()) return;
         if (resolveCheckpointProgress) this.updateCheckpointProgress();
         const choosingRewardPlayerIds = new Set(this.artifactRewards.keys());
-        this.updateArtifactRewards(commandsByPlayerId);
+        if (resolveArtifactSelections) this.updateArtifactRewards(commandsByPlayerId);
         const gameplayCommands = new Map(commandsByPlayerId);
         for (const playerId of choosingRewardPlayerIds) {
             const player = this.players.find(({ id }) => id === playerId);
@@ -460,8 +466,10 @@ export class GameSimulation {
         }
         this.metrics.recordEnemyOutcomes(playerProjectileEvents);
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
-        for (const player of this.players) {
-            if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
+        if (recoverPlayerDeaths) {
+            for (const player of this.players) {
+                if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
+            }
         }
         if (recoverPlayerFalls) this.recoverFallenPlayers();
         this.eventFlash.age += dt;
