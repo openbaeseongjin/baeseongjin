@@ -43,7 +43,7 @@ Only `meeting-to-game-plan`, `repo-task-plan`, and `discord-repo-cross-reference
 
 With `CODEX_PROVIDER=codex`, the runner invokes the locally installed `codex exec` with `--ephemeral`, `--ignore-user-config`, `-s read-only`, and a strict JSON output schema. It passes a small operating-system environment allowlist and removes Discord, GitHub, OpenAI, and GitHub App secrets from the child process. This provider may consume authenticated Codex account quota.
 
-With `CODEX_PROVIDER=ollama`, the runner loads the selected allowlisted repository `SKILL.md` itself and calls only the fixed loopback endpoint `http://127.0.0.1:11434/api/chat`. The response is required to be JSON and is validated against the same strict local schema. This path uses no OpenAI API key or Codex account quota, but requires both a compatible model and a running Ollama server. Start the Ollama desktop service or `ollama serve`, then verify `http://127.0.0.1:11434/api/tags` before relying on the gateway. An installed model alone is not sufficient. Keep `CODEX_ENABLED=false` when neither provider's resource model is acceptable.
+With `CODEX_PROVIDER=ollama`, the runner loads the selected allowlisted repository `SKILL.md` itself and calls only the fixed loopback endpoint `http://127.0.0.1:11434/api/chat`. The response is required to be JSON and is validated against the same strict local schema. This path uses no OpenAI API key or Codex account quota. When `/meeting start` is accepted, meeting capture becomes active first and Ollama preparation continues in the background. The bot probes `http://127.0.0.1:11434/api/tags`; if the service is down, it launches `<OLLAMA_BIN> serve` as a detached hidden process and waits up to `OLLAMA_STARTUP_TIMEOUT_MS` for the configured `CODEX_MODEL`. The child receives only a small operating-system environment allowlist, not Discord, GitHub, or OpenAI secrets. The bot does not install Ollama or pull a missing model automatically. A launch or model failure leaves the meeting running and updates the start response to report that `/codex` is unavailable; it never falls back to a paid API. The detached Ollama service remains running after `/meeting end`. Keep `CODEX_ENABLED=false` when the local resource model is not acceptable.
 
 V1 cannot edit the repository, install software, invoke `$github-task-flow`, publish a PR, or merge code. A completed plan is advisory and needs a separate human-approved implementation flow.
 
@@ -53,6 +53,7 @@ V1 cannot edit the repository, install software, invoke `$github-task-flow`, pub
 - Python 3.11–3.13 for local transcription.
 - A Discord application installed in the target server.
 - A fine-grained GitHub token or GitHub App installation authorized only for this repository.
+- Ollama plus the configured local model installed on the bot host when using `CODEX_PROVIDER=ollama`.
 - Participant consent and a team retention policy appropriate for voice recording, transcription, and public or private publication.
 
 ## Discord Developer Portal setup
@@ -119,7 +120,7 @@ Use Python 3.11–3.13 when creating the virtual environment. On macOS/Linux, us
 
 `npm run register` creates guild-scoped commands, which normally update faster than global commands. Run it again only when the command schema changes.
 
-Before enabling the gateway, verify either `codex --version` or `ollama list`, then run one local read-only fixture or low-risk plan. Set `CODEX_ENABLED=true`, rerun `npm run register`, and restart the service only after accepting the selected provider's quota or local resource model.
+Before enabling the gateway, verify either `codex --version` or `ollama list`, then run one local read-only fixture or low-risk plan. For local automatic startup, set `CODEX_ENABLED=true`, `CODEX_PROVIDER=ollama`, `CODEX_MODEL=<installed-model>`, and optionally `OLLAMA_BIN` or `OLLAMA_STARTUP_TIMEOUT_MS`, then restart the service. Command registration is unchanged, so `npm run register` is not required for these environment-only changes.
 
 ## Docker deployment
 

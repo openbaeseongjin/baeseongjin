@@ -21,6 +21,11 @@ import { renderDailyDocument } from "./markdown.js";
 import { meetingId } from "./time.js";
 import type { MeetingMetadata, Minutes, TextMessageRecord, VoiceSegment } from "./types.js";
 import { VoiceRecorder } from "./voice-recorder.js";
+import {
+  OllamaRuntime,
+  type OllamaReadiness,
+  type OllamaRuntimeLike,
+} from "./codex/ollama-runtime.js";
 
 interface ActiveMeeting {
   id: string;
@@ -37,13 +42,16 @@ const MAX_TEXT_MESSAGES = 5_000;
 
 export class MeetingManager {
   private active: ActiveMeeting | undefined;
+  private starting = false;
   private readonly localProcessing: LocalMeetingService;
   private readonly publisher: DiscordPublisher;
+  private readonly ollama: OllamaRuntimeLike;
 
   constructor(
     private readonly client: Client,
     private readonly config: AppConfig,
     private readonly github: GitHubStore,
+    ollama?: OllamaRuntimeLike,
   ) {
     this.localProcessing = new LocalMeetingService(
       new LocalWhisperTranscriber({
@@ -54,6 +62,14 @@ export class MeetingManager {
       }),
     );
     this.publisher = new DiscordPublisher(client, config.discord.minutesChannelId);
+    this.ollama =
+      ollama ??
+      new OllamaRuntime({
+        enabled: config.codex.enabled && config.codex.provider === "ollama",
+        ...(config.codex.model ? { model: config.codex.model } : {}),
+        binary: config.codex.ollamaBinary,
+        startupTimeoutMs: config.codex.ollamaStartupTimeoutMs,
+      });
   }
 
   async handleCommand(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -119,14 +135,25 @@ export class MeetingManager {
   }
 
   private async start(interaction: ChatInputCommandInteraction): Promise<void> {
-    if (this.active) {
+    if (this.active || this.starting) {
       await interaction.reply({
-        content: `A meeting is already active (${this.active.id}).`,
+        content: this.active
+          ? `A meeting is already active (${this.active.id}).`
+          : "A meeting is already starting.",
         flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
+    this.starting = true;
+    try {
+      await this.startReserved(interaction);
+    } finally {
+      this.starting = false;
+    }
+  }
+
+  private async startReserved(interaction: ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply();
     const guild = interaction.guild;
     if (!guild) {
@@ -163,15 +190,60 @@ export class MeetingManager {
     const voiceStatus = voiceChannel
       ? `Voice recording is active in **${voiceChannel.name}** with DAVE encryption.`
       : "No voice channel was detected; this meeting is text-only.";
-    await interaction.editReply(
-      [
-        `Meeting **${id}** started.`,
-        voiceStatus,
-        "Messages in this channel are being captured until `/meeting end`.",
-        "Voice audio is transcribed locally on this bot host and is not sent to an AI API. Confirm participant consent before continuing.",
-      ].join("\n"),
-    );
+    await interaction.editReply(this.startReply(id, voiceStatus, this.ollamaPreparingStatus()));
+    void this.finishOllamaPreparation(interaction, meeting, voiceStatus).catch((error: unknown) => {
+      checkpoint("FAILED", `Ollama status update | ${safeErrorMessage(error)}`);
+    });
     checkpoint("SUCCESS", `Meeting ${id} started | Voice: ${voiceChannel ? "enabled" : "text-only"}`);
+  }
+
+  private async finishOllamaPreparation(
+    interaction: ChatInputCommandInteraction,
+    meeting: ActiveMeeting,
+    voiceStatus: string,
+  ): Promise<void> {
+    const readiness = await this.ensureOllamaReady();
+    if (this.active !== meeting) {
+      return;
+    }
+    await interaction.editReply(this.startReply(meeting.id, voiceStatus, this.ollamaStatus(readiness)));
+  }
+
+  private startReply(id: string, voiceStatus: string, ollamaStatus?: string): string {
+    return [
+      `Meeting **${id}** started.`,
+      voiceStatus,
+      ...(ollamaStatus ? [ollamaStatus] : []),
+      "Messages in this channel are being captured until `/meeting end`.",
+      "Voice audio is transcribed locally on this bot host and is not sent to an AI API. Confirm participant consent before continuing.",
+    ].join("\n");
+  }
+
+  private ollamaPreparingStatus(): string | undefined {
+    return this.config.codex.enabled && this.config.codex.provider === "ollama"
+      ? "Ollama is being prepared in the background; meeting capture is already active."
+      : undefined;
+  }
+
+  private async ensureOllamaReady(): Promise<OllamaReadiness> {
+    try {
+      return await this.ollama.ensureReady();
+    } catch (error: unknown) {
+      checkpoint("FAILED", `Ollama preparation | ${safeErrorMessage(error)}`);
+      return { state: "unavailable" };
+    }
+  }
+
+  private ollamaStatus(readiness: OllamaReadiness): string | undefined {
+    if (readiness.state === "skipped") {
+      return undefined;
+    }
+    if (readiness.state === "ready") {
+      return readiness.started
+        ? "Ollama started automatically and is ready for `/codex`."
+        : "Local Ollama is ready for `/codex`.";
+    }
+    return "Ollama is unavailable. The meeting will continue, but `/codex` needs the local service to be fixed.";
   }
 
   private async connectVoice(meeting: ActiveMeeting, voiceChannel: VoiceBasedChannel): Promise<void> {

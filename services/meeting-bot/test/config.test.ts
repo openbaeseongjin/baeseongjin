@@ -53,6 +53,8 @@ describe("local meeting processing configuration", () => {
             enabled: false,
             binary: "codex",
             provider: "codex",
+            ollamaBinary: "ollama",
+            ollamaStartupTimeoutMs: 15_000,
             maxContextMessages: 30,
             maxContextCharacters: 20_000,
             timeoutMs: 600_000
@@ -70,13 +72,17 @@ describe("local meeting processing configuration", () => {
             GITHUB_TOKEN: "github-token",
             CODEX_ENABLED: "true",
             CODEX_PROVIDER: "ollama",
-            CODEX_MODEL: "qwen2.5:7b-instruct"
+            CODEX_MODEL: "qwen2.5:7b-instruct",
+            OLLAMA_BIN: "custom-ollama",
+            OLLAMA_STARTUP_TIMEOUT_MS: "25000"
         });
 
         expect(config.codex).toMatchObject({
             enabled: true,
             provider: "ollama",
-            model: "qwen2.5:7b-instruct"
+            model: "qwen2.5:7b-instruct",
+            ollamaBinary: "custom-ollama",
+            ollamaStartupTimeoutMs: 25_000
         });
     });
 });

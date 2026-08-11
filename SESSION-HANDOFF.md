@@ -196,7 +196,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Discord 자유 조회·공유는 브라우저 자동화가 아니라 기존 미팅봇 자격 증명을 재사용하는 인증된 Discord MCP를 우선한다. MCP는 `DISCORD_GUILD_ID` 하나로 서버 범위를 고정하고 `messages,channels`만 노출하며, 가져오기는 회의 채널, 공유는 회의록 채널을 기본 대상으로 삼고 명시한 채널이 우선한다. 운영·TLS 계약은 `services/meeting-bot/README.md`를 따른다.
 - Codex CLI는 `read-only`, `ephemeral`로 실행하고 로컬 Ollama는 고정 loopback API와 허용 Skill만 사용한다. 두 경로 모두 구조화 출력을 검증하고 애플리케이션 비밀을 전달하지 않는다.
-- Ollama 공급자는 모델 설치뿐 아니라 `127.0.0.1:11434` 서버 실행이 필요하다. 봇 시작·재시작 때 loopback API와 선택 모델을 확인하며, 서버가 꺼져 있으면 Job을 유료 API로 우회하지 않고 실패로 남긴다.
+- `CODEX_PROVIDER=ollama`인 상태에서 `/meeting start`가 승인되면 회의 캡처를 먼저 활성화하고 백그라운드에서 고정 loopback API와 선택 모델을 확인한다. 서버가 꺼져 있으면 비밀을 제외한 환경으로 `OLLAMA_BIN serve`를 숨김·분리 프로세스로 자동 실행한다. 실행 또는 모델 확인이 실패해도 회의 기록은 계속하고 `/codex`만 사용 불가로 알리며, 모델 자동 설치나 유료 API 우회는 하지 않는다. Ollama 프로세스는 `/meeting end` 뒤에도 유지한다.
 - 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.
 
 ## 갱신 규칙

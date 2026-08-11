@@ -43,6 +43,8 @@ const environmentSchema = z
         CODEX_BIN: z.string().min(1).default("codex"),
         CODEX_PROVIDER: z.enum(["codex", "ollama", "lmstudio"]).default("codex"),
         CODEX_MODEL: optionalNonEmptyString,
+        OLLAMA_BIN: z.string().min(1).default("ollama"),
+        OLLAMA_STARTUP_TIMEOUT_MS: positiveIntegerFromEnv(15_000),
         CODEX_REPOSITORY_ROOT: z.string().min(1).default("../.."),
         CODEX_MAX_CONTEXT_MESSAGES: positiveIntegerFromEnv(30),
         CODEX_MAX_CONTEXT_CHARACTERS: positiveIntegerFromEnv(20_000),
@@ -109,6 +111,8 @@ export interface AppConfig {
         binary: string;
         provider: "codex" | "ollama" | "lmstudio";
         model?: string;
+        ollamaBinary: string;
+        ollamaStartupTimeoutMs: number;
         repositoryRoot: string;
         maxContextMessages: number;
         maxContextCharacters: number;
@@ -161,6 +165,8 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
             binary: parsed.CODEX_BIN,
             provider: parsed.CODEX_PROVIDER,
             ...(parsed.CODEX_MODEL ? { model: parsed.CODEX_MODEL } : {}),
+            ollamaBinary: parsed.OLLAMA_BIN,
+            ollamaStartupTimeoutMs: parsed.OLLAMA_STARTUP_TIMEOUT_MS,
             repositoryRoot: resolve(parsed.CODEX_REPOSITORY_ROOT),
             maxContextMessages: parsed.CODEX_MAX_CONTEXT_MESSAGES,
             maxContextCharacters: parsed.CODEX_MAX_CONTEXT_CHARACTERS,
