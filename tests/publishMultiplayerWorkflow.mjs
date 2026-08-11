@@ -17,7 +17,7 @@ import {
     replaceMultiplayerServerEndpoint,
     waitForPagesEndpoint
 } from "../scripts/publish-multiplayer.mjs";
-import { quickTunnelArgs } from "../scripts/cloudflareTunnel.mjs";
+import { quickTunnelArgs, READY_PATTERN } from "../scripts/cloudflareTunnel.mjs";
 
 const NEW_URL = "https://ab-cd-ef-new.trycloudflare.com";
 const NEW_META = `<meta name="multiplayer-server" content="${NEW_URL}" />`;
@@ -97,6 +97,8 @@ export async function run() {
 
     const args = publishServerArgs();
     assert.deepEqual(args, ["scripts/multiplayer-server.mjs", "--game-only", "--host=0.0.0.0", "--port=4175"]);
+    assert.match("Baeseongjin multiplayer (game-only): http://0.0.0.0:4175", READY_PATTERN);
+    assert.match("Baeseongjin multiplayer (development): http://0.0.0.0:4173", READY_PATTERN);
     assert.deepEqual(quickTunnelArgs(4175), ["tunnel", "--url", "http://127.0.0.1:4175", "--no-autoupdate"]);
     const application = publishApplication();
     assert.deepEqual(application.serverCommand, [process.execPath, ...args]);
