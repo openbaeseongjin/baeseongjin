@@ -1,6 +1,12 @@
 import { safeErrorMessage } from "../logger.js";
 import type { CodexJobStore } from "./job-store.js";
-import type { CodexJob, CodexResult, CodexRunInput } from "./types.js";
+import {
+    codexResultSchema,
+    usesKoreanOrEnglishWritingSystems,
+    type CodexJob,
+    type CodexResult,
+    type CodexRunInput
+} from "./types.js";
 
 export interface CodexRunnerLike {
     run(input: CodexRunInput, signal?: AbortSignal): Promise<CodexResult>;
@@ -129,14 +135,16 @@ export class CodexJobWorker {
                 await this.markCancelled(id);
                 return;
             }
-            const result = await this.runner.run(
-                {
-                    id: current.id,
-                    skill: current.skill,
-                    instruction: current.instruction,
-                    context: current.context
-                },
-                controller.signal
+            const result = codexResultSchema.parse(
+                await this.runner.run(
+                    {
+                        id: current.id,
+                        skill: current.skill,
+                        instruction: current.instruction,
+                        context: current.context
+                    },
+                    controller.signal
+                )
             );
             if (controller.signal.aborted) {
                 await this.markCancelled(id);
@@ -157,9 +165,12 @@ export class CodexJobWorker {
             if (controller.signal.aborted) {
                 await this.markCancelled(id);
             } else if (latest?.status !== "cancelled") {
+                const message = safeErrorMessage(error);
                 await this.store.update(id, {
                     status: "failed",
-                    error: safeErrorMessage(error)
+                    error: usesKoreanOrEnglishWritingSystems(message)
+                        ? message
+                        : "Codex job failed; unsupported error details were withheld."
                 });
             }
         } finally {

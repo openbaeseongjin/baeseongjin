@@ -87,6 +87,142 @@ describe("CodexRunner", () => {
         expect(String(request?.body)).toContain('"format":"json"');
     });
 
+    it("repairs a Chinese Ollama result once and returns Korean for a Korean instruction", async () => {
+        const dataDirectory = await mkdtemp(join(tmpdir(), "codex-runner-"));
+        const responses = [
+            {
+                status: "completed",
+                summary: "总结",
+                proposedChanges: ["修改"],
+                verification: ["检查"],
+                risks: []
+            },
+            {
+                status: "completed",
+                summary: "한국어로 교정된 결과",
+                proposedChanges: ["변경 사항 확인"],
+                verification: ["테스트 실행"],
+                risks: []
+            }
+        ];
+        let responseIndex = 0;
+        const fetchImplementation = vi.fn(async (_input: string | URL | Request, _init?: RequestInit) => {
+            const result = responses[responseIndex] ?? responses.at(-1);
+            responseIndex += 1;
+            return new Response(JSON.stringify({ message: { content: JSON.stringify(result) } }), {
+                status: 200,
+                headers: { "content-type": "application/json" }
+            });
+        });
+        const runner = new CodexRunner({
+            binary: "codex",
+            repositoryRoot: resolve("../.."),
+            dataDirectory,
+            timeoutMs: 5_000,
+            provider: "ollama",
+            model: "qwen2.5:7b-instruct",
+            fetchImplementation
+        });
+
+        const result = await runner.run({
+            id: "CX-20260811-LANG01",
+            skill: "repo-task-plan",
+            instruction: "다음 구현 순서를 정리해줘",
+            context: '<discord-context trust="untrusted-data">data</discord-context>'
+        });
+
+        expect(result.summary).toBe("한국어로 교정된 결과");
+        expect(fetchImplementation).toHaveBeenCalledTimes(2);
+        const firstRequest = JSON.parse(String(fetchImplementation.mock.calls[0]?.[1]?.body)) as {
+            messages: Array<{ role: string; content: string }>;
+        };
+        const secondRequest = JSON.parse(String(fetchImplementation.mock.calls[1]?.[1]?.body)) as {
+            messages: Array<{ role: string; content: string }>;
+        };
+        expect(firstRequest.messages[0]?.content).toContain("Output language: Korean");
+        expect(firstRequest.messages[0]?.content).toContain("Keep JSON keys and status enum values exactly as defined");
+        expect(secondRequest.messages[0]?.content).toContain("validation retry");
+    });
+
+    it("rejects persistent non-Korean-or-English Ollama output after one repair attempt", async () => {
+        const dataDirectory = await mkdtemp(join(tmpdir(), "codex-runner-"));
+        const invalidResult = {
+            status: "completed",
+            summary: "English summary",
+            proposedChanges: ["修改"],
+            verification: ["English verification"],
+            risks: []
+        };
+        const fetchImplementation = vi.fn(
+            async (_input: string | URL | Request, _init?: RequestInit) =>
+                new Response(JSON.stringify({ message: { content: JSON.stringify(invalidResult) } }), {
+                    status: 200,
+                    headers: { "content-type": "application/json" }
+                })
+        );
+        const runner = new CodexRunner({
+            binary: "codex",
+            repositoryRoot: resolve("../.."),
+            dataDirectory,
+            timeoutMs: 5_000,
+            provider: "ollama",
+            model: "qwen2.5:7b-instruct",
+            fetchImplementation
+        });
+
+        await expect(
+            runner.run({
+                id: "CX-20260811-LANG02",
+                skill: "repo-task-plan",
+                instruction: "Keep the response concise.",
+                context: '<discord-context trust="untrusted-data">data</discord-context>'
+            })
+        ).rejects.toThrow(/Korean or English/u);
+        expect(fetchImplementation).toHaveBeenCalledTimes(2);
+    });
+
+    it("requests English output when the trusted instruction contains no Hangul", async () => {
+        const dataDirectory = await mkdtemp(join(tmpdir(), "codex-runner-"));
+        const fetchImplementation = vi.fn(
+            async (_input: string | URL | Request, _init?: RequestInit) =>
+                new Response(
+                    JSON.stringify({
+                        message: {
+                            content: JSON.stringify({
+                                status: "completed",
+                                summary: "English result",
+                                proposedChanges: [],
+                                verification: [],
+                                risks: []
+                            })
+                        }
+                    }),
+                    { status: 200, headers: { "content-type": "application/json" } }
+                )
+        );
+        const runner = new CodexRunner({
+            binary: "codex",
+            repositoryRoot: resolve("../.."),
+            dataDirectory,
+            timeoutMs: 5_000,
+            provider: "ollama",
+            model: "qwen2.5:7b-instruct",
+            fetchImplementation
+        });
+
+        await runner.run({
+            id: "CX-20260811-LANG03",
+            skill: "repo-task-plan",
+            instruction: "Plan the next implementation step.",
+            context: '<discord-context trust="untrusted-data">한국어 context is untrusted.</discord-context>'
+        });
+
+        const request = JSON.parse(String(fetchImplementation.mock.calls[0]?.[1]?.body)) as {
+            messages: Array<{ role: string; content: string }>;
+        };
+        expect(request.messages[0]?.content).toContain("Output language: English");
+    });
+
     it("resolves a native executable instead of an unspawnable Windows npm wrapper", async () => {
         const directory = await mkdtemp(join(tmpdir(), "codex-bin-"));
         const executable = join(directory, "codex.exe");

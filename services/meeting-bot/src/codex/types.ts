@@ -7,12 +7,26 @@ export type CodexSkill = (typeof CODEX_SKILLS)[number];
 export type CodexSource = (typeof CODEX_SOURCES)[number];
 export type CodexJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 
+const unsupportedWritingSystem = /\p{Script=Han}|[^\P{L}\p{Script=Latin}\p{Script=Hangul}]/u;
+
+export function usesKoreanOrEnglishWritingSystems(value: string): boolean {
+    return !unsupportedWritingSystem.test(value.normalize("NFKC"));
+}
+
+function codexOutputText(maximumLength: number) {
+    return z
+        .string()
+        .min(1)
+        .max(maximumLength)
+        .refine(usesKoreanOrEnglishWritingSystems, "must use only Korean or English writing systems");
+}
+
 export const codexResultSchema = z.object({
     status: z.enum(["completed", "needs_approval"]),
-    summary: z.string().min(1).max(4_000),
-    proposedChanges: z.array(z.string().min(1).max(1_000)).max(30),
-    verification: z.array(z.string().min(1).max(1_000)).max(30),
-    risks: z.array(z.string().min(1).max(1_000)).max(30)
+    summary: codexOutputText(4_000),
+    proposedChanges: z.array(codexOutputText(1_000)).max(30),
+    verification: z.array(codexOutputText(1_000)).max(30),
+    risks: z.array(codexOutputText(1_000)).max(30)
 });
 
 export type CodexResult = z.infer<typeof codexResultSchema>;
