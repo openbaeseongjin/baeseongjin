@@ -321,4 +321,65 @@ describe("CodexJobWorker", () => {
         expect((await store.get(job.id))?.status).toBe("cancelled");
         expect(publish).not.toHaveBeenCalled();
     });
+
+    it("does not persist or publish a runner result with an unsupported writing system", async () => {
+        const directory = await mkdtemp(join(tmpdir(), "codex-worker-"));
+        const store = new CodexJobStore(directory);
+        const runner = {
+            async run(): Promise<CodexResult> {
+                return {
+                    status: "completed",
+                    summary: "总结",
+                    proposedChanges: [],
+                    verification: [],
+                    risks: []
+                };
+            }
+        };
+        const publish = vi.fn(async () => undefined);
+        const worker = new CodexJobWorker(store, runner, publish);
+        const job = await store.create({
+            guildId: "12345678901234567",
+            channelId: "12345678901234568",
+            requesterId: "12345678901234569",
+            skill: "repo-task-plan",
+            source: "recent-messages",
+            instruction: "reject unsupported output",
+            context: "context"
+        });
+
+        await worker.enqueue(job.id);
+
+        const persisted = await store.get(job.id);
+        expect(persisted?.status).toBe("failed");
+        expect(persisted?.result).toBeUndefined();
+        expect(publish).not.toHaveBeenCalled();
+    });
+
+    it("does not persist an unsupported writing system from a runner error", async () => {
+        const directory = await mkdtemp(join(tmpdir(), "codex-worker-"));
+        const store = new CodexJobStore(directory);
+        const runner = {
+            async run(): Promise<CodexResult> {
+                throw new Error("处理失败");
+            }
+        };
+        const worker = new CodexJobWorker(store, runner, async () => undefined);
+        const job = await store.create({
+            guildId: "12345678901234567",
+            channelId: "12345678901234568",
+            requesterId: "12345678901234569",
+            skill: "repo-task-plan",
+            source: "recent-messages",
+            instruction: "reject unsupported errors",
+            context: "context"
+        });
+
+        await worker.enqueue(job.id);
+
+        const persisted = await store.get(job.id);
+        expect(persisted?.status).toBe("failed");
+        expect(persisted?.error).toContain("withheld");
+        expect(persisted?.error).not.toMatch(/\p{Script=Han}/u);
+    });
 });

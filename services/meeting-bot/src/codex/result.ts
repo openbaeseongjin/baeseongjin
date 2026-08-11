@@ -1,4 +1,4 @@
-import type { CodexJob } from "./types.js";
+import { codexResultSchema, usesKoreanOrEnglishWritingSystems, type CodexJob } from "./types.js";
 
 function safeDiscordText(value: string): string {
     return value
@@ -18,22 +18,31 @@ function list(title: string, values: string[]): string[] {
 
 export function renderCodexJob(job: CodexJob): string {
     if (!job.result) {
-        const error = job.error ? ` — ${safeDiscordText(job.error)}` : "";
+        const error = job.error
+            ? usesKoreanOrEnglishWritingSystems(job.error)
+                ? ` — ${safeDiscordText(job.error)}`
+                : " — Error details withheld: unsupported writing system."
+            : "";
         return `**Codex job ${job.id}** — ${job.status}${error}`;
     }
+    const validated = codexResultSchema.safeParse(job.result);
+    if (!validated.success) {
+        return `**Codex job ${job.id}** — Result withheld: output must use only Korean or English writing systems.`;
+    }
+    const result = validated.data;
     return [
         `## Codex plan — ${job.id}`,
         `- Skill: ${job.skill}`,
         `- Source: ${job.source}`,
-        `- Status: ${job.result.status}`,
+        `- Status: ${result.status}`,
         "",
-        safeDiscordText(job.result.summary),
+        safeDiscordText(result.summary),
         "",
-        ...list("Proposed changes", job.result.proposedChanges),
+        ...list("Proposed changes", result.proposedChanges),
         "",
-        ...list("Verification", job.result.verification),
+        ...list("Verification", result.verification),
         "",
-        ...list("Risks", job.result.risks),
+        ...list("Risks", result.risks),
         "",
         "This V1 result is read-only. No repository files or external systems were changed."
     ].join("\n");
