@@ -8,6 +8,8 @@ function pngDimensions(path) {
 }
 
 export function run() {
+    const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
+    const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8"));
     const manifest = JSON.parse(readFileSync("manifest.webmanifest", "utf8"));
     assert.equal(manifest.start_url, "./");
     assert.equal(manifest.scope, "./");
@@ -29,11 +31,22 @@ export function run() {
     assert.deepEqual(pngDimensions("assets/icons/apple-touch-icon.png"), { width: 180, height: 180 });
     assert.deepEqual(pngDimensions("assets/icons/favicon-64.png"), { width: 64, height: 64 });
     const html = readFileSync("index.html", "utf8");
+    const pageVersion = html.match(/id="app-version"[^>]*data-version="([^"]+)"/)?.[1];
+    assert.equal(pageVersion, packageJson.version, "the visible page version must match package.json");
+    assert.match(html, new RegExp(`>\\s*v${packageJson.version.replaceAll(".", "\\.")}\\s*</output\\s*>`));
+    assert.equal(packageLock.version, packageJson.version, "the lockfile version must match package.json");
+    assert.equal(
+        packageLock.packages[""].version,
+        packageJson.version,
+        "the root lock package must match package.json"
+    );
     assert.match(html, /rel="manifest" href="\.\/manifest\.webmanifest"/);
     assert.match(html, /rel="apple-touch-icon"/);
     const multiplayerServer = html.match(/<meta name="multiplayer-server" content="([^"]+)"/)?.[1];
     assert.match(multiplayerServer, /^https:\/\//, "the deployed client needs a secure game server endpoint");
     const worker = readFileSync("sw.js", "utf8");
+    const workerVersion = worker.match(/const RELEASE_VERSION = "([^"]+)"/)?.[1];
+    assert.equal(workerVersion, packageJson.version, "each release must update the worker and refresh open PWAs");
     assert.doesNotMatch(worker, /caches\./, "automatic updates must not introduce manual cache versioning");
     assert.match(worker, /cache:\s*"no-store"/, "same-origin game files must bypass the browser HTTP cache");
     assert.match(readFileSync("scripts/staticHandler.mjs", "utf8"), /application\/manifest\+json/);
