@@ -160,7 +160,9 @@ export class RemoteGameAuthority {
                         this.ropeSwingClaimReceipts.push(receipt);
                         this.ownerRuntime?.recordRopeSwingReceipt(receipt);
                     } else if (message.type === "impact-claim-receipt") {
-                        this.impactClaimReceipts.push(createPlayerImpactReceipt(message.payload));
+                        const receipt = createPlayerImpactReceipt(message.payload);
+                        this.impactClaimReceipts.push(receipt);
+                        this.ownerRuntime?.recordImpactReceipt(receipt, this.latestSnapshot);
                     } else if (message.type === "owner-motion-receipt") {
                         this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
                     } else if (message.type === "checkpoint-claim-receipt") {
