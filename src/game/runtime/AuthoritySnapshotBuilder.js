@@ -1,7 +1,12 @@
 import { createWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 
-export function buildAuthoritySnapshot({ simulation, acknowledgements = {}, includeActivePredictableObjects = false }) {
+export function buildAuthoritySnapshot({
+    simulation,
+    acknowledgements = {},
+    includeActivePredictableObjects = false,
+    snapshotSequence = simulation.getTick()
+}) {
     const drainedEvents = simulation.drainReplicationEvents();
     const events = includeActivePredictableObjects
         ? [
@@ -14,6 +19,7 @@ export function buildAuthoritySnapshot({ simulation, acknowledgements = {}, incl
           ]
         : drainedEvents;
     return createWorldSnapshotEnvelope({
+        snapshotSequence,
         serverTick: simulation.getTick(),
         worldSeed: simulation.world.seed,
         worldRevision: WORLD_GENERATION_REVISION,

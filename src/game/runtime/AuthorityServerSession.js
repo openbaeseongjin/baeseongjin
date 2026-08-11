@@ -42,6 +42,7 @@ export class AuthorityServerSession {
         this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
         this.lastOwnerRopeTicks = new Map();
+        this.nextSnapshotSequence = 0;
     }
 
     submitHitClaim(authenticatedPlayerId, claim) {
@@ -301,11 +302,14 @@ export class AuthorityServerSession {
     }
 
     snapshot({ includeActivePredictableObjects = false } = {}) {
-        return buildAuthoritySnapshot({
+        const snapshot = buildAuthoritySnapshot({
             simulation: this.simulation,
             acknowledgements: this.inbox.acknowledgements(),
-            includeActivePredictableObjects
+            includeActivePredictableObjects,
+            snapshotSequence: this.nextSnapshotSequence
         });
+        this.nextSnapshotSequence += 1;
+        return snapshot;
     }
 
     removePlayer(playerId) {

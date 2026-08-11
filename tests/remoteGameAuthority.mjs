@@ -5,6 +5,7 @@ import { Vector2 } from "../src/game-kit/index.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
+import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { closestPointOnSurface } from "../src/game/world/WorldGenerator.js";
@@ -107,7 +108,8 @@ export async function run() {
         maxExtrapolationSeconds: 0.12,
         maxSnapshots: 3
     });
-    const snapshot = (serverTick, remoteX, health = 100) => ({
+    const snapshot = (serverTick, remoteX, health = 100, snapshotSequence = serverTick) => ({
+        snapshotSequence,
         serverTick,
         state: {
             players: [
@@ -118,6 +120,23 @@ export async function run() {
         },
         events: []
     });
+    const sameTickBuffer = new RemoteWorldStateBuffer({ interpolationSeconds: 0, maxSnapshots: 3 });
+    assert.equal(sameTickBuffer.push(snapshot(12, 6, 80, 1), 0), true);
+    const sameTickUpdate = {
+        ...snapshot(12, 9, 70, 2),
+        events: [{ eventId: "same-tick-event", eventType: "test", tick: 12 }]
+    };
+    assert.equal(sameTickBuffer.push(sameTickUpdate, 1), true, "a newer same-tick snapshot must be accepted");
+    assert.equal(sameTickBuffer.history.length, 1, "same-tick state must replace rather than duplicate history");
+    assert.equal(sameTickBuffer.sample({ now: 1, localPlayerId: "local" }).players[0].position.x, 9);
+    assert.equal(sameTickBuffer.sample({ now: 1 }).players[1].health, 70);
+    assert.equal(sameTickBuffer.drainEvents()[0].eventId, "same-tick-event");
+    assert.equal(sameTickBuffer.push(snapshot(12, 10, 60, 2), 2), false, "duplicate sequence must be rejected");
+    assert.equal(sameTickBuffer.push(snapshot(11, 10, 60, 3), 3), false, "server tick must not regress");
+    const sameTickStream = new RemoteCommandStream({ playerId: "local" });
+    assert.equal(sameTickStream.acceptSnapshot(snapshot(12, 6, 80, 1)), true);
+    assert.equal(sameTickStream.acceptSnapshot(sameTickUpdate), true, "stream ordering must use snapshot sequence");
+    assert.equal(sameTickStream.acceptSnapshot(snapshot(12, 10, 60, 2)), false);
     interpolation.push(snapshot(6, 0), 0);
     interpolation.push(snapshot(12, 6, 80), 70);
     let projected = interpolation.sample({ now: 75, localPlayerId: "local" });
