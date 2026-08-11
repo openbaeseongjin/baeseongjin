@@ -19,6 +19,20 @@ function copyPredictedImpact(event) {
     });
 }
 
+function rebaseLaterTimerPredictions(entries, rejected, fixedDt, previousValueKey, appliedValueKey) {
+    const later = [...entries].filter(({ tick }) => tick > rejected.tick).sort((left, right) => left.tick - right.tick);
+    if (later.length === 0) return false;
+
+    let value = rejected[previousValueKey];
+    let valueTick = rejected.previousTick;
+    for (const entry of later) {
+        entry[previousValueKey] = Math.max(0, value - (entry.previousTick - valueTick) * fixedDt);
+        value = entry[appliedValueKey];
+        valueTick = entry.tick;
+    }
+    return true;
+}
+
 export class OwnerPredictionRuntime {
     constructor({
         ownerId,
@@ -414,7 +428,9 @@ export class OwnerPredictionRuntime {
         this.emittedPredictionTicks.set(eventKey, tick);
         this.pendingRopeSwings.set(predictionId, {
             previousBoost,
-            previousTick: tick - 1
+            previousTick: tick - 1,
+            appliedBoost: state.ropeDamageBoostRemaining,
+            tick
         });
         this.predictedEvents.push(
             Object.freeze({
@@ -433,6 +449,17 @@ export class OwnerPredictionRuntime {
         if (!pending) return false;
         this.pendingRopeSwings.delete(receipt.predictionId);
         if (receipt.accepted) return true;
+        if (
+            rebaseLaterTimerPredictions(
+                this.pendingRopeSwings.values(),
+                pending,
+                this.fixedDt,
+                "previousBoost",
+                "appliedBoost"
+            )
+        ) {
+            return true;
+        }
         const elapsedTicks = Math.max(0, this.simulation.getTick() - pending.previousTick);
         const remaining = Math.max(0, pending.previousBoost - elapsedTicks * this.fixedDt);
         this.simulation.restorePredictedRopeBoost(this.ownerId, remaining);
@@ -444,6 +471,17 @@ export class OwnerPredictionRuntime {
         if (!pending) return false;
         this.pendingProjectileSpawns.delete(receipt.predictionId);
         if (receipt.accepted) return true;
+        if (
+            rebaseLaterTimerPredictions(
+                this.pendingProjectileSpawns.values(),
+                pending,
+                this.fixedDt,
+                "previousCooldown",
+                "appliedCooldown"
+            )
+        ) {
+            return true;
+        }
         const elapsedTicks = Math.max(0, this.simulation.getTick() - pending.previousTick);
         const remaining = Math.max(0, pending.previousCooldown - elapsedTicks * this.fixedDt);
         this.simulation.restorePredictedWeaponCooldown(this.ownerId, remaining);
@@ -458,7 +496,9 @@ export class OwnerPredictionRuntime {
         this.emittedPredictionTicks.set(eventKey, tick);
         this.pendingProjectileSpawns.set(predictionId, {
             previousCooldown,
-            previousTick: tick - 1
+            previousTick: tick - 1,
+            appliedCooldown: this.state().weaponCooldown,
+            tick
         });
         this.predictedEvents.push(
             Object.freeze({
