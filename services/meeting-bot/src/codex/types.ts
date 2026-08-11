@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CODEX_SKILLS = ["meeting-to-game-plan", "repo-task-plan"] as const;
+export const CODEX_SKILLS = ["meeting-to-game-plan", "repo-task-plan", "discord-repo-cross-reference"] as const;
 export const CODEX_SOURCES = ["last-meeting", "recent-messages"] as const;
 
 export type CodexSkill = (typeof CODEX_SKILLS)[number];
