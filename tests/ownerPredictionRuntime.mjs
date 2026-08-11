@@ -198,6 +198,71 @@ export function run() {
         "the final rejected impact must use its rebased pre-impact state"
     );
 
+    const lethalServer = new GameSimulation();
+    const lethalServerPlayer = primaryPlayer(lethalServer);
+    lethalServer.enemies = [];
+    lethalServer.tick = 12;
+    lethalServer.activeCheckpoint = lethalServer.world.checkpoints[1];
+    lethalServerPlayer.health = 10;
+    for (const id of ["kept-a", "kept-b", "predicted-loss"]) {
+        lethalServerPlayer.artifacts.add({ id, name: id });
+    }
+    lethalServer.applyArtifactEffects(lethalServerPlayer);
+    const lethalSnapshot = buildAuthoritySnapshot({ simulation: lethalServer, acknowledgements: {} });
+    const lethalPrediction = new OwnerPredictionRuntime({
+        ownerId: lethalServerPlayer.id,
+        predictionLeadTicks: 0
+    });
+    lethalPrediction.reconcile(lethalSnapshot, []);
+    const lethalBefore = lethalPrediction.state();
+    const lethalImpact = {
+        projectileId: "predicted-lethal-impact",
+        resolution: "player-hit",
+        velocity: { x: 120, y: 0 },
+        parameters: { damage: 20 }
+    };
+    assert.equal(lethalPrediction.applyPredictedImpact(lethalImpact), true);
+    const lethalLocal = lethalPrediction.state();
+    assert.equal(lethalLocal.health, lethalLocal.maxHealth, "lethal damage must predict full checkpoint health");
+    assert.deepEqual(lethalLocal.position, {
+        x: lethalServer.activeCheckpoint.x,
+        y: lethalServer.activeCheckpoint.y
+    });
+    assert.deepEqual(
+        lethalLocal.artifacts.map(({ id }) => id),
+        ["kept-a", "kept-b"],
+        "lethal damage must predict deterministic checkpoint artifact loss"
+    );
+    lethalPrediction.reconcile(lethalSnapshot, []);
+    assert.equal(
+        lethalPrediction.state().health,
+        lethalLocal.health,
+        "a pre-impact snapshot must not erase pending predicted health"
+    );
+    assert.deepEqual(
+        lethalPrediction.state().artifacts,
+        lethalLocal.artifacts,
+        "a pre-impact snapshot must not restore pending predicted artifact loss"
+    );
+    lethalPrediction.reconcile(lethalSnapshot, [], { rebaseMotion: true });
+    assert.deepEqual(
+        lethalPrediction.state().position,
+        lethalLocal.position,
+        "owner motion rebase must replay an impact predicted at the shared motion tick"
+    );
+    assert.deepEqual(lethalPrediction.state().artifacts, lethalLocal.artifacts);
+    assert.equal(
+        lethalPrediction.recordImpactReceipt(
+            { projectileId: lethalImpact.projectileId, accepted: false },
+            lethalSnapshot
+        ),
+        true
+    );
+    const rejectedLethal = lethalPrediction.state();
+    assert.equal(rejectedLethal.health, lethalBefore.health);
+    assert.deepEqual(rejectedLethal.position, lethalBefore.position);
+    assert.deepEqual(rejectedLethal.artifacts, lethalBefore.artifacts);
+
     const movingServer = new GameSimulation();
     const movingPlayer = primaryPlayer(movingServer);
     movingServer.enemies = [];
