@@ -37,7 +37,9 @@ export class RemoteWorldStateBuffer {
         maxRecentEventIds = 2048,
         maxSnapshots = 8,
         interpolationSeconds = MULTIPLAYER_TIMING.remoteInterpolationSeconds,
-        maxExtrapolationSeconds = MULTIPLAYER_TIMING.deadReckoningMaxSeconds
+        maxExtrapolationSeconds = MULTIPLAYER_TIMING.deadReckoningMaxSeconds,
+        clockCorrectionRatio = MULTIPLAYER_TIMING.remoteClockCorrectionRatio,
+        maxClockCorrectionSeconds = MULTIPLAYER_TIMING.remoteClockMaxCorrectionSeconds
     } = {}) {
         if (!Number.isSafeInteger(maxRecentEventIds) || maxRecentEventIds < 1) {
             throw new Error("maxRecentEventIds must be a positive safe integer");
@@ -51,10 +53,18 @@ export class RemoteWorldStateBuffer {
         if (!Number.isFinite(maxExtrapolationSeconds) || maxExtrapolationSeconds <= 0) {
             throw new Error("maxExtrapolationSeconds must be positive");
         }
+        if (!Number.isFinite(clockCorrectionRatio) || clockCorrectionRatio <= 0 || clockCorrectionRatio > 1) {
+            throw new Error("clockCorrectionRatio must be in (0, 1]");
+        }
+        if (!Number.isFinite(maxClockCorrectionSeconds) || maxClockCorrectionSeconds <= 0) {
+            throw new Error("maxClockCorrectionSeconds must be positive");
+        }
         this.maxRecentEventIds = maxRecentEventIds;
         this.maxSnapshots = maxSnapshots;
         this.interpolationSeconds = interpolationSeconds;
         this.maxExtrapolationSeconds = maxExtrapolationSeconds;
+        this.clockCorrectionRatio = clockCorrectionRatio;
+        this.maxClockCorrectionTicks = maxClockCorrectionSeconds * TICKS_PER_SECOND;
         this.history = [];
         this.latest = null;
         this.latestReceivedAt = 0;
@@ -65,6 +75,8 @@ export class RemoteWorldStateBuffer {
         this.eventIdOrder = [];
         this.lastExtrapolationSeconds = 0;
         this.maxExtrapolationSecondsObserved = 0;
+        this.lastClockCorrectionTicks = 0;
+        this.maxClockCorrectionTicksObserved = 0;
     }
 
     push(snapshot, receivedAt = performance.now()) {
@@ -77,6 +89,18 @@ export class RemoteWorldStateBuffer {
         if (this.clockAnchorTick === null) {
             this.clockAnchorTick = snapshot.serverTick;
             this.clockAnchorAt = receivedAt;
+        } else {
+            const elapsedTicks = ((receivedAt - this.clockAnchorAt) * TICKS_PER_SECOND) / 1000;
+            const clockErrorTicks = snapshot.serverTick - (this.clockAnchorTick + elapsedTicks);
+            this.lastClockCorrectionTicks = Math.max(
+                -this.maxClockCorrectionTicks,
+                Math.min(this.maxClockCorrectionTicks, clockErrorTicks * this.clockCorrectionRatio)
+            );
+            this.clockAnchorTick += this.lastClockCorrectionTicks;
+            this.maxClockCorrectionTicksObserved = Math.max(
+                this.maxClockCorrectionTicksObserved,
+                Math.abs(this.lastClockCorrectionTicks)
+            );
         }
         this.latest = snapshot;
         this.latestReceivedAt = receivedAt;
@@ -151,7 +175,9 @@ export class RemoteWorldStateBuffer {
     metrics() {
         return Object.freeze({
             extrapolationMs: this.lastExtrapolationSeconds * 1000,
-            maxExtrapolationMs: this.maxExtrapolationSecondsObserved * 1000
+            maxExtrapolationMs: this.maxExtrapolationSecondsObserved * 1000,
+            clockCorrectionMs: (this.lastClockCorrectionTicks / TICKS_PER_SECOND) * 1000,
+            maxClockCorrectionMs: (this.maxClockCorrectionTicksObserved / TICKS_PER_SECOND) * 1000
         });
     }
 }

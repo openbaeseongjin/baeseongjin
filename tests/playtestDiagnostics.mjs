@@ -33,6 +33,8 @@ export async function run() {
             hardSnaps: 1,
             extrapolationMs: 12.2,
             maxExtrapolationMs: 80.1,
+            clockCorrectionMs: -1.8,
+            maxClockCorrectionMs: 16.7,
             predictionCancellations: 2
         }
     });
@@ -42,6 +44,8 @@ export async function run() {
     assert.match(text, /rejectionRatePercent: 2/);
     assert.match(text, /acceptedOwnerMotions: 40/);
     assert.match(text, /rejectedOwnerMotions: 1/);
+    assert.match(text, /clockCorrectionMs: -2/);
+    assert.match(text, /maxClockCorrectionMs: 17/);
     assert.match(text, /firstRewardSeconds: 58.2/);
 
     let click = null;

@@ -44,6 +44,8 @@ export function formatPlaytestDiagnostics({
             `hardSnaps: ${networkMetrics.hardSnaps}`,
             `extrapolationMs: ${rounded(networkMetrics.extrapolationMs)}`,
             `maxExtrapolationMs: ${rounded(networkMetrics.maxExtrapolationMs)}`,
+            `clockCorrectionMs: ${rounded(networkMetrics.clockCorrectionMs)}`,
+            `maxClockCorrectionMs: ${rounded(networkMetrics.maxClockCorrectionMs)}`,
             `predictionCancellations: ${networkMetrics.predictionCancellations}`
         );
     }
