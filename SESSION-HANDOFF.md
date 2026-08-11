@@ -19,6 +19,7 @@
 - 체력, 다운, 패배, 낙사와 활성 체크포인트 복귀
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용
+- 별도 Discord 서비스는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
 
 새 런 시드 전환, 실제 조작 기반 전체 등반 검사와 실제 멀티플레이는 아직 구현하지 않았다.
 
@@ -84,6 +85,13 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 
 - 루트 `index.html`을 진입점으로 사용하고 별도 빌드 workflow를 두지 않는다.
 - PWA는 게임 저장 데이터를 삭제하지 않으며, 현재는 오프라인 캐시보다 최신 리소스 적용을 우선한다.
+
+### [L2] Discord의 Codex 호출은 허용 목록 기반 읽기 전용 기획으로 시작한다
+
+- `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
+- Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan` Skill만 선택할 수 있다.
+- Codex 자식 프로세스는 `read-only`, `ephemeral`, 구조화 출력으로 실행하며 애플리케이션 비밀을 전달하지 않는다.
+- 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.
 
 ## 갱신 규칙
 
