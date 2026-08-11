@@ -181,12 +181,19 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 루트 `index.html`을 진입점으로 사용하고 별도 빌드 workflow를 두지 않는다.
 - PWA는 게임 저장 데이터를 삭제하지 않으며, 현재는 오프라인 캐시보다 최신 리소스 적용을 우선한다.
 
+### [L1] Discord 회의 명령과 Codex 실행 권한을 분리한다
+
+- 설정된 서버의 모든 멤버가 설정된 회의 텍스트 채널에서 `/meeting start/end`를 사용할 수 있다. 다른 서버·채널 차단과 단일 활성 회의 제한은 유지한다.
+- `/codex`는 `Manage Server` 권한 또는 `DISCORD_OPERATOR_ROLE_ID` 역할이 있는 운영자만 실행한다. 회의 참여 권한을 열었다는 이유로 Codex 실행 권한을 확대하지 않는다.
+- 세부 실행·권한 설정은 `services/meeting-bot/README.md`를 기준으로 한다.
+
 ### [L2] Discord의 Codex 호출은 허용 목록 기반 읽기 전용 기획으로 시작한다
 
 - `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
 - Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan`, `discord-repo-cross-reference` Skill만 선택할 수 있다.
 - `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Codex CLI는 `read-only`, `ephemeral`로 실행하고 로컬 Ollama는 고정 loopback API와 허용 Skill만 사용한다. 두 경로 모두 구조화 출력을 검증하고 애플리케이션 비밀을 전달하지 않는다.
+- Ollama 공급자는 모델 설치뿐 아니라 `127.0.0.1:11434` 서버 실행이 필요하다. 봇 시작·재시작 때 loopback API와 선택 모델을 확인하며, 서버가 꺼져 있으면 Job을 유료 API로 우회하지 않고 실패로 남긴다.
 - 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.
 
 ## 갱신 규칙

@@ -10,7 +10,6 @@ import {
   type Client,
   type Message,
   MessageFlags,
-  PermissionFlagsBits,
   type VoiceBasedChannel,
 } from "discord.js";
 import type { AppConfig } from "./config.js";
@@ -77,20 +76,6 @@ export class MeetingManager {
     if (!guild) {
       throw new Error("meeting command did not resolve a guild");
     }
-    const roleCollection = interaction.member?.roles;
-    const hasOperatorRole =
-      this.config.discord.operatorRoleId &&
-      (Array.isArray(roleCollection)
-        ? roleCollection.includes(this.config.discord.operatorRoleId)
-        : roleCollection?.cache.has(this.config.discord.operatorRoleId));
-    if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) && !hasOperatorRole) {
-      await interaction.reply({
-        content: "You need Manage Server or the configured meeting-operator role.",
-        flags: MessageFlags.Ephemeral,
-      });
-      return;
-    }
-
     const subcommand = interaction.options.getSubcommand();
     if (subcommand === "start") {
       await this.start(interaction);

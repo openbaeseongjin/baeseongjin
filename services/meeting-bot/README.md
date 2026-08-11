@@ -4,7 +4,7 @@ This long-running Node.js service captures a meeting only between `/meeting star
 
 ## Implemented scope
 
-- Guild slash commands: `/meeting start` and `/meeting end`.
+- Guild slash commands: `/meeting start` and `/meeting end`, available to every guild member in the configured meeting channel.
 - Text capture from one configured Discord meeting channel.
 - Optional voice capture from the command user's current voice channel.
 - DAVE-enabled Discord voice connection and per-Discord-user audio segments.
@@ -28,7 +28,7 @@ Codex code modification, approval, worktree, push, pull request, and merge opera
 
 ## Read-only Discord to Codex gateway
 
-The gateway is disabled by default. When `CODEX_ENABLED=true`, a meeting operator can run:
+The gateway is disabled by default. When `CODEX_ENABLED=true`, a Codex operator can run:
 
 ```text
 /codex plan skill:meeting-to-game-plan source:last-meeting instruction:다음 개발 순서를 정리해줘
@@ -43,7 +43,7 @@ Only `meeting-to-game-plan`, `repo-task-plan`, and `discord-repo-cross-reference
 
 With `CODEX_PROVIDER=codex`, the runner invokes the locally installed `codex exec` with `--ephemeral`, `--ignore-user-config`, `-s read-only`, and a strict JSON output schema. It passes a small operating-system environment allowlist and removes Discord, GitHub, OpenAI, and GitHub App secrets from the child process. This provider may consume authenticated Codex account quota.
 
-With `CODEX_PROVIDER=ollama`, the runner loads the selected allowlisted repository `SKILL.md` itself and calls only the fixed loopback endpoint `http://127.0.0.1:11434/api/chat`. The response is required to be JSON and is validated against the same strict local schema. This path uses no OpenAI API key or Codex account quota, but requires a compatible model already installed in Ollama. Keep `CODEX_ENABLED=false` when neither provider's resource model is acceptable.
+With `CODEX_PROVIDER=ollama`, the runner loads the selected allowlisted repository `SKILL.md` itself and calls only the fixed loopback endpoint `http://127.0.0.1:11434/api/chat`. The response is required to be JSON and is validated against the same strict local schema. This path uses no OpenAI API key or Codex account quota, but requires both a compatible model and a running Ollama server. Start the Ollama desktop service or `ollama serve`, then verify `http://127.0.0.1:11434/api/tags` before relying on the gateway. An installed model alone is not sufficient. Keep `CODEX_ENABLED=false` when neither provider's resource model is acceptable.
 
 V1 cannot edit the repository, install software, invoke `$github-task-flow`, publish a PR, or merge code. A completed plan is advisory and needs a separate human-approved implementation flow.
 
@@ -62,7 +62,7 @@ V1 cannot edit the repository, install software, invoke `$github-task-flow`, pub
 3. Reset/copy the bot token once and store it only in the deployment environment as `DISCORD_BOT_TOKEN`.
 4. Copy the application ID into `DISCORD_CLIENT_ID` and the server ID into `DISCORD_GUILD_ID`.
 5. With Discord Developer Mode enabled, copy the meeting text/channel-chat ID into `DISCORD_MEETING_CHANNEL_ID` and the `#회의록` channel ID into `DISCORD_MINUTES_CHANNEL_ID`.
-6. Create a meeting-operator role and copy it into `DISCORD_OPERATOR_ROLE_ID`, or leave it empty to require Discord's **Manage Server** permission.
+6. Every server member may use `/meeting` in the configured meeting text channel. To authorize `/codex`, create a Codex-operator role and copy it into `DISCORD_OPERATOR_ROLE_ID`, or leave it empty to require Discord's **Manage Server** permission.
 7. In **OAuth2 > URL Generator**, select `bot` and `applications.commands`. Grant only:
     - View Channels
     - Send Messages
@@ -135,6 +135,7 @@ The service has no inbound HTTP port. It needs outbound HTTPS/WebSocket access t
 ## Operational behavior and recovery
 
 - Only one meeting can be active in this service instance.
+- Any member of the configured guild may start or end that meeting, but only from `DISCORD_MEETING_CHANNEL_ID`; other guilds and channels remain rejected.
 - A meeting is capped at 5,000 text messages and 500 voice segments; hitting either cap is recorded as a blocker instead of consuming resources without bound.
 - Continuous speech segments rotate at eight minutes to bound local processing and memory use.
 - A process restart ends the in-memory meeting; it cannot resume a voice stream. Restart the meeting explicitly.
