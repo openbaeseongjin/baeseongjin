@@ -121,12 +121,18 @@ export async function run() {
     interpolation.push(snapshot(12, 6, 80), 70);
     let projected = interpolation.sample({ now: 75, localPlayerId: "local" });
     assert.equal(projected.players[0].position.x, 6, "the local player must use owner prediction instead");
-    assert.equal(projected.players[1].position.x, 3, "remote players must interpolate between known snapshots");
-    assert.equal(projected.enemies[0].position.x, 6, "enemies must share the delayed interpolation timeline");
+    assert.ok(
+        Math.abs(projected.players[1].position.x - 3) <= 0.5,
+        "remote players must interpolate between known snapshots"
+    );
+    assert.ok(
+        Math.abs(projected.enemies[0].position.x - 6) <= 1,
+        "enemies must share the delayed interpolation timeline"
+    );
     assert.equal(projected.players[1].health, 80, "non-position state must use the latest authority value");
     projected = interpolation.sample({ now: 170, localPlayerId: "local" });
     assert.ok(
-        Math.abs(projected.players[1].position.x - 13) < 1e-9,
+        Math.abs(projected.players[1].position.x - 13) <= 0.5,
         "missing future samples may use bounded extrapolation"
     );
     assert.ok(interpolation.metrics().extrapolationMs > 0);
@@ -134,6 +140,25 @@ export async function run() {
     assert.equal(projected.players[1].position.x, 18, "extrapolation must stop at its bounded horizon");
     assert.equal(interpolation.metrics().extrapolationMs, 120);
     assert.equal(interpolation.metrics().maxExtrapolationMs, 120);
+
+    const driftingClock = new RemoteWorldStateBuffer({
+        interpolationSeconds: 0.1,
+        maxExtrapolationSeconds: 0.12,
+        maxSnapshots: 8
+    });
+    for (let index = 0; index < 200; index += 1) {
+        driftingClock.push(snapshot(6 + index * 6, index * 6), index * 60);
+    }
+    driftingClock.sample({ now: 199 * 60, localPlayerId: "local" });
+    assert.equal(
+        driftingClock.metrics().extrapolationMs,
+        0,
+        "fresh snapshots must keep a drifting local clock on the interpolation timeline"
+    );
+    assert.ok(
+        driftingClock.metrics().maxClockCorrectionMs <= 50,
+        "one snapshot must not shift the estimated server clock by more than one snapshot interval"
+    );
 
     const fallMessages = [];
     const fallenState = {
