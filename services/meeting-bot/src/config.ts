@@ -2,7 +2,6 @@ import { resolve } from "node:path";
 import { z } from "zod";
 
 const snowflake = z.string().regex(/^\d{17,20}$/, "must be a Discord snowflake ID");
-const optionalSnowflake = z.preprocess((value) => (value === "" ? undefined : value), snowflake.optional());
 const optionalNonEmptyString = z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.string().min(1).optional()
@@ -22,7 +21,6 @@ const environmentSchema = z
         DISCORD_GUILD_ID: snowflake,
         DISCORD_MEETING_CHANNEL_ID: snowflake,
         DISCORD_MINUTES_CHANNEL_ID: snowflake,
-        DISCORD_OPERATOR_ROLE_ID: optionalSnowflake,
         LOCAL_TRANSCRIPTION_MODEL: z.string().min(1).default("tiny"),
         LOCAL_WHISPER_PYTHON: optionalNonEmptyString,
         LOCAL_MODEL_CACHE_DIR: z.string().min(1).default(".data/models"),
@@ -41,13 +39,14 @@ const environmentSchema = z
         LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
         CODEX_ENABLED: booleanFromEnv,
         CODEX_BIN: z.string().min(1).default("codex"),
-        CODEX_PROVIDER: z.enum(["codex", "ollama", "lmstudio"]).default("codex"),
+        CODEX_PROVIDER: z.enum(["codex", "ollama", "lmstudio"]).default("ollama"),
         CODEX_MODEL: optionalNonEmptyString,
         OLLAMA_BIN: z.string().min(1).default("ollama"),
         OLLAMA_STARTUP_TIMEOUT_MS: positiveIntegerFromEnv(15_000),
         CODEX_REPOSITORY_ROOT: z.string().min(1).default("../.."),
         CODEX_MAX_CONTEXT_MESSAGES: positiveIntegerFromEnv(30),
         CODEX_MAX_CONTEXT_CHARACTERS: positiveIntegerFromEnv(20_000),
+        CODEX_MAX_OUTSTANDING_JOBS: positiveIntegerFromEnv(5),
         CODEX_JOB_TIMEOUT_MS: positiveIntegerFromEnv(600_000)
     })
     .superRefine((environment, context) => {
@@ -83,7 +82,6 @@ export interface AppConfig {
         guildId: string;
         meetingChannelId: string;
         minutesChannelId: string;
-        operatorRoleId?: string;
     };
     localProcessing: {
         transcriptionModel: string;
@@ -116,6 +114,7 @@ export interface AppConfig {
         repositoryRoot: string;
         maxContextMessages: number;
         maxContextCharacters: number;
+        maxOutstandingJobs: number;
         timeoutMs: number;
     };
 }
@@ -137,8 +136,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
             clientId: parsed.DISCORD_CLIENT_ID,
             guildId: parsed.DISCORD_GUILD_ID,
             meetingChannelId: parsed.DISCORD_MEETING_CHANNEL_ID,
-            minutesChannelId: parsed.DISCORD_MINUTES_CHANNEL_ID,
-            ...(parsed.DISCORD_OPERATOR_ROLE_ID ? { operatorRoleId: parsed.DISCORD_OPERATOR_ROLE_ID } : {})
+            minutesChannelId: parsed.DISCORD_MINUTES_CHANNEL_ID
         },
         localProcessing: {
             transcriptionModel: parsed.LOCAL_TRANSCRIPTION_MODEL,
@@ -170,6 +168,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
             repositoryRoot: resolve(parsed.CODEX_REPOSITORY_ROOT),
             maxContextMessages: parsed.CODEX_MAX_CONTEXT_MESSAGES,
             maxContextCharacters: parsed.CODEX_MAX_CONTEXT_CHARACTERS,
+            maxOutstandingJobs: parsed.CODEX_MAX_OUTSTANDING_JOBS,
             timeoutMs: parsed.CODEX_JOB_TIMEOUT_MS
         }
     };

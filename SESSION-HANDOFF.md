@@ -187,10 +187,10 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 루트 `index.html`을 진입점으로 사용하고 별도 빌드 workflow를 두지 않는다.
 - PWA는 게임 저장 데이터를 삭제하지 않으며, 현재는 오프라인 캐시보다 최신 리소스 적용을 우선한다.
 
-### [L1] Discord 회의 명령과 Codex 실행 권한을 분리한다
+### [L1] Discord 명령은 설정된 서버와 회의 채널의 모든 멤버에게 연다
 
 - 설정된 서버의 모든 멤버가 설정된 회의 텍스트 채널에서 `/meeting start/end`를 사용할 수 있다. 다른 서버·채널 차단과 단일 활성 회의 제한은 유지한다.
-- `/codex`는 `Manage Server` 권한 또는 `DISCORD_OPERATOR_ROLE_ID` 역할이 있는 운영자만 실행한다. 회의 참여 권한을 열었다는 이유로 Codex 실행 권한을 확대하지 않는다.
+- 설정된 서버의 모든 멤버가 설정된 회의 텍스트 채널에서 `/codex plan/status/result/cancel`을 사용할 수 있다. 다른 서버·채널 차단과 읽기 전용 Skill·입력 상한·단일 로컬 작업 큐는 유지한다. 공개 게이트웨이는 고정 loopback Ollama만 허용하고, 멤버별 동시 1건과 `CODEX_MAX_OUTSTANDING_JOBS` 전체 상한을 적용한다.
 - 세부 실행·권한 설정은 `services/meeting-bot/README.md`를 기준으로 한다.
 
 ### [L2] Discord의 Codex 호출은 허용 목록 기반 읽기 전용 기획으로 시작한다
@@ -199,7 +199,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan`, `discord-repo-cross-reference` Skill만 선택할 수 있다.
 - `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Discord 자유 조회·공유는 브라우저 자동화가 아니라 기존 미팅봇 자격 증명을 재사용하는 인증된 Discord MCP를 우선한다. MCP는 `DISCORD_GUILD_ID` 하나로 서버 범위를 고정하고 `messages,channels`만 노출하며, 가져오기는 회의 채널, 공유는 회의록 채널을 기본 대상으로 삼고 명시한 채널이 우선한다. 운영·TLS 계약은 `services/meeting-bot/README.md`를 따른다.
-- Codex CLI는 `read-only`, `ephemeral`로 실행하고 로컬 Ollama는 고정 loopback API와 허용 Skill만 사용한다. 두 경로 모두 구조화 출력을 검증하고 애플리케이션 비밀을 전달하지 않는다.
+- Discord의 공개 `/codex` 게이트웨이는 고정 loopback Ollama와 허용 Skill만 사용하고 구조화 출력을 검증하며 애플리케이션 비밀을 전달하지 않는다. 인증된 Codex CLI와 LM Studio 공급자는 공개 게이트웨이에서 거부하여 서버 멤버가 Codex 계정 할당량이나 더 넓은 로컬 엔드포인트를 소비하지 못하게 한다.
 - `CODEX_PROVIDER=ollama`인 상태에서 `/meeting start`가 승인되면 회의 캡처를 먼저 활성화하고 백그라운드에서 고정 loopback API와 선택 모델을 확인한다. 서버가 꺼져 있으면 비밀을 제외한 환경으로 `OLLAMA_BIN serve`를 숨김·분리 프로세스로 자동 실행한다. 실행 또는 모델 확인이 실패해도 회의 기록은 계속하고 `/codex`만 사용 불가로 알리며, 모델 자동 설치나 유료 API 우회는 하지 않는다. Ollama 프로세스는 `/meeting end` 뒤에도 유지한다.
 - 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.
 

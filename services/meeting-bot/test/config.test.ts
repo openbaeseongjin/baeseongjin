@@ -52,9 +52,10 @@ describe("local meeting processing configuration", () => {
         expect(config.codex).toMatchObject({
             enabled: false,
             binary: "codex",
-            provider: "codex",
+            provider: "ollama",
             ollamaBinary: "ollama",
             ollamaStartupTimeoutMs: 15_000,
+            maxOutstandingJobs: 5,
             maxContextMessages: 30,
             maxContextCharacters: 20_000,
             timeoutMs: 600_000
@@ -74,7 +75,8 @@ describe("local meeting processing configuration", () => {
             CODEX_PROVIDER: "ollama",
             CODEX_MODEL: "qwen2.5:7b-instruct",
             OLLAMA_BIN: "custom-ollama",
-            OLLAMA_STARTUP_TIMEOUT_MS: "25000"
+            OLLAMA_STARTUP_TIMEOUT_MS: "25000",
+            CODEX_MAX_OUTSTANDING_JOBS: "3"
         });
 
         expect(config.codex).toMatchObject({
@@ -82,7 +84,8 @@ describe("local meeting processing configuration", () => {
             provider: "ollama",
             model: "qwen2.5:7b-instruct",
             ollamaBinary: "custom-ollama",
-            ollamaStartupTimeoutMs: 25_000
+            ollamaStartupTimeoutMs: 25_000,
+            maxOutstandingJobs: 3
         });
     });
 });

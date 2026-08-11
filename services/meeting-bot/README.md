@@ -28,7 +28,7 @@ Codex code modification, approval, worktree, push, pull request, and merge opera
 
 ## Read-only Discord to Codex gateway
 
-The gateway is disabled by default. When `CODEX_ENABLED=true`, a Codex operator can run:
+The gateway is disabled by default. When `CODEX_ENABLED=true`, any server member can run these commands in the configured meeting channel:
 
 ```text
 /codex plan skill:meeting-to-game-plan source:last-meeting instruction:다음 개발 순서를 정리해줘
@@ -39,9 +39,9 @@ The gateway is disabled by default. When `CODEX_ENABLED=true`, a Codex operator 
 /codex cancel job:CX-YYYYMMDD-ABC123
 ```
 
-Only `meeting-to-game-plan`, `repo-task-plan`, and `discord-repo-cross-reference` are accepted. The cross-reference skill maps Discord claims to repository evidence and repository evidence back to related Discord claims without modifying either side. Discord content is delimited as untrusted data, bounded by message and character limits, and never interpreted as shell or permission instructions. Jobs are persisted under `.data/codex/jobs`, processed one at a time, and posted to the configured minutes channel with mentions disabled.
+Only `meeting-to-game-plan`, `repo-task-plan`, and `discord-repo-cross-reference` are accepted. The cross-reference skill maps Discord claims to repository evidence and repository evidence back to related Discord claims without modifying either side. Discord content is delimited as untrusted data, bounded by message and character limits, and never interpreted as shell or permission instructions. Every member with access to the configured meeting channel may submit, inspect, and cancel jobs. Each member may have one outstanding plan at a time, and `CODEX_MAX_OUTSTANDING_JOBS` caps the total outstanding jobs (default `5`). Jobs are persisted under `.data/codex/jobs`, processed one at a time, and posted to the configured minutes channel with mentions disabled.
 
-With `CODEX_PROVIDER=codex`, the runner invokes the locally installed `codex exec` with `--ephemeral`, `--ignore-user-config`, `-s read-only`, and a strict JSON output schema. It passes a small operating-system environment allowlist and removes Discord, GitHub, OpenAI, and GitHub App secrets from the child process. This provider may consume authenticated Codex account quota.
+The public Discord gateway accepts only `CODEX_PROVIDER=ollama`. Authenticated Codex CLI and LM Studio providers are rejected so an unrestricted server member cannot consume Codex account quota or select a broader local endpoint through `/codex`.
 
 With `CODEX_PROVIDER=ollama`, the runner loads the selected allowlisted repository `SKILL.md` itself and calls only the fixed loopback endpoint `http://127.0.0.1:11434/api/chat`. The response is required to be JSON and is validated against the same strict local schema. This path uses no OpenAI API key or Codex account quota. When `/meeting start` is accepted, meeting capture becomes active first and Ollama preparation continues in the background. The bot probes `http://127.0.0.1:11434/api/tags`; if the service is down, it launches `<OLLAMA_BIN> serve` as a detached hidden process and waits up to `OLLAMA_STARTUP_TIMEOUT_MS` for the configured `CODEX_MODEL`. The child receives only a small operating-system environment allowlist, not Discord, GitHub, or OpenAI secrets. The bot does not install Ollama or pull a missing model automatically. A launch or model failure leaves the meeting running and updates the start response to report that `/codex` is unavailable; it never falls back to a paid API. The detached Ollama service remains running after `/meeting end`. Keep `CODEX_ENABLED=false` when the local resource model is not acceptable.
 
@@ -63,7 +63,7 @@ V1 cannot edit the repository, install software, invoke `$github-task-flow`, pub
 3. Reset/copy the bot token once and store it only in the deployment environment as `DISCORD_BOT_TOKEN`.
 4. Copy the application ID into `DISCORD_CLIENT_ID` and the server ID into `DISCORD_GUILD_ID`.
 5. With Discord Developer Mode enabled, copy the meeting text/channel-chat ID into `DISCORD_MEETING_CHANNEL_ID` and the `#회의록` channel ID into `DISCORD_MINUTES_CHANNEL_ID`.
-6. Every server member may use `/meeting` in the configured meeting text channel. To authorize `/codex`, create a Codex-operator role and copy it into `DISCORD_OPERATOR_ROLE_ID`, or leave it empty to require Discord's **Manage Server** permission.
+6. Every server member may use `/meeting` and `/codex` in the configured meeting text channel. Both commands reject requests from other servers or channels.
 7. In **OAuth2 > URL Generator**, select `bot` and `applications.commands`. Grant only:
     - View Channels
     - Send Messages
@@ -120,7 +120,7 @@ Use Python 3.11–3.13 when creating the virtual environment. On macOS/Linux, us
 
 `npm run register` creates guild-scoped commands, which normally update faster than global commands. Run it again only when the command schema changes.
 
-Before enabling the gateway, verify either `codex --version` or `ollama list`, then run one local read-only fixture or low-risk plan. For local automatic startup, set `CODEX_ENABLED=true`, `CODEX_PROVIDER=ollama`, `CODEX_MODEL=<installed-model>`, and optionally `OLLAMA_BIN` or `OLLAMA_STARTUP_TIMEOUT_MS`, then restart the service. Command registration is unchanged, so `npm run register` is not required for these environment-only changes.
+Before enabling the gateway, verify `ollama list`, then run one local read-only fixture or low-risk plan. Set `CODEX_ENABLED=true`, `CODEX_PROVIDER=ollama`, `CODEX_MODEL=<installed-model>`, and optionally `CODEX_MAX_OUTSTANDING_JOBS`, `OLLAMA_BIN`, or `OLLAMA_STARTUP_TIMEOUT_MS`, then restart the service. Command registration is unchanged, so `npm run register` is not required for these environment-only changes.
 
 ## Docker deployment
 
