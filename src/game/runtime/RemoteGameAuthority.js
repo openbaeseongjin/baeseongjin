@@ -82,16 +82,26 @@ export class RemoteGameAuthority {
             const socket = new this.WebSocketImpl(this.url);
             this.socket = socket;
             let settled = false;
-            const fail = (message) => {
+            const rejectConnection = (message) => {
                 if (settled) return;
                 settled = true;
                 reject(new Error(message));
             };
-            socket.addEventListener("error", () => fail("멀티 서버에 연결할 수 없습니다."));
+            const failSession = (message, closeCode = 1002, closeReason = "invalid server message") => {
+                this.closed = true;
+                this.closeReason ??= message;
+                rejectConnection(message);
+                if (socket.readyState === 0 || socket.readyState === 1) socket.close(closeCode, closeReason);
+            };
+            socket.addEventListener("error", () => {
+                if (!this.intentionalClose) failSession("멀티 서버에 연결할 수 없습니다.");
+            });
             socket.addEventListener("close", (event) => {
                 this.closed = true;
-                if (!this.intentionalClose) this.closeReason = event.reason || "멀티 서버 연결이 종료되었습니다.";
-                if (!settled) fail(event.reason || "멀티 서버 연결이 종료되었습니다.");
+                if (!this.intentionalClose) {
+                    this.closeReason ??= event.reason || "멀티 서버 연결이 종료되었습니다.";
+                }
+                rejectConnection(this.closeReason ?? (event.reason || "멀티 서버 연결이 종료되었습니다."));
             });
             socket.addEventListener("message", (event) => {
                 try {
@@ -101,7 +111,14 @@ export class RemoteGameAuthority {
                             "channel-full": `채널 ${message.channelId ?? ""}의 인원이 가득 찼습니다.`,
                             "channel-not-found": `채널 ${message.channelId ?? ""}을 찾을 수 없습니다.`
                         };
-                        fail(errors[message.code] ?? message.message ?? message.code);
+                        failSession(
+                            errors[message.code] ??
+                                message.message ??
+                                message.code ??
+                                "멀티 서버 요청이 거부되었습니다.",
+                            1008,
+                            "server rejected session"
+                        );
                         return;
                     }
                     if (message.type === "welcome") {
@@ -134,9 +151,11 @@ export class RemoteGameAuthority {
                         this.recordCheckpointClaimReceipt(createCheckpointClaimReceipt(message.payload));
                     } else if (message.type === "summit-claim-receipt") {
                         this.recordSummitClaimReceipt(createSummitClaimReceipt(message.payload));
+                    } else if (message.type !== "player-left") {
+                        throw new Error(`unsupported server message: ${message.type ?? "missing type"}`);
                     }
                 } catch (error) {
-                    fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
+                    failSession(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
                 }
             });
         });

@@ -314,6 +314,23 @@ export async function run() {
     let gameServerClosed = false;
     const port = await listen(httpServer);
     try {
+        const invalidAuthority = new RemoteGameAuthority({
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
+            WebSocketImpl: WebSocket
+        });
+        await invalidAuthority.connect();
+        const invalidRoom = gameServer.rooms.get(invalidAuthority.channelId);
+        const invalidServerSocket = [...invalidRoom.sockets.keys()][0];
+        invalidServerSocket.send(JSON.stringify({ type: "snapshot", payload: '{"protocolVersion":1}' }));
+        await waitFor(() => invalidAuthority.closed, "an invalid follow-up snapshot must close the stale session");
+        assert.match(invalidAuthority.closeReason, /서버 메시지를 처리하지 못했습니다.*unsupported world snapshot/);
+        assert.equal(
+            invalidAuthority.closeReason.includes("invalid server message"),
+            false,
+            "the socket close reason must not overwrite the actionable protocol error"
+        );
+        await waitFor(() => !gameServer.rooms.has(invalidAuthority.channelId), "the failed session room must close");
+
         const authority = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
             WebSocketImpl: WebSocket
