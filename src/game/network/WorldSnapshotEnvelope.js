@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 2;
+export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 3;
 
 function assertTick(value, label) {
     if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${label} must be a non-negative safe integer`);
@@ -47,7 +47,13 @@ function normalizeState(state) {
     for (const key of ["projectiles", "enemyProjectiles", "predictableObjects"]) {
         if (Object.hasOwn(state, key)) throw new Error(`${key} must be synchronized as spawn and resolve events`);
     }
-    return normalizeNetworkJson(state, "state");
+    const normalized = normalizeNetworkJson(state, "state");
+    if (!Array.isArray(normalized.players)) throw new Error("state.players must be an array");
+    for (const player of normalized.players) {
+        assertId(player?.id, "state.players[].id");
+        assertTick(player?.ownerMotionTick, "state.players[].ownerMotionTick");
+    }
+    return normalized;
 }
 
 export function createWorldSnapshotEnvelope({

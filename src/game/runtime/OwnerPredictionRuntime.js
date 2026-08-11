@@ -65,14 +65,23 @@ export class OwnerPredictionRuntime {
         if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
         const authoritative = snapshot.state.players.find(({ id }) => id === this.ownerId);
         if (!authoritative) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
+        const ownerMotionTick = authoritative.ownerMotionTick;
+        if (
+            !Number.isSafeInteger(ownerMotionTick) ||
+            ownerMotionTick < 0 ||
+            ownerMotionTick > snapshot.serverTick + MULTIPLAYER_TIMING.maxFutureTicks
+        ) {
+            throw new Error(`invalid ownerMotionTick: ${ownerMotionTick}`);
+        }
         const pendingTicks = pendingBatches.map(({ tick }) => tick);
         const targetTick = Math.max(
             snapshot.serverTick + this.predictionLeadTicks,
+            ownerMotionTick,
             this.initialized ? this.simulation.getTick() : snapshot.serverTick,
             ...pendingTicks
         );
         if (this.initialized && !rebaseMotion) {
-            return this.acceptAuthorityOutcomes(snapshot, authoritative, targetTick);
+            return this.acceptAuthorityOutcomes(snapshot, authoritative, targetTick, ownerMotionTick);
         }
         const displayedBefore = this.initialized ? this.presentationState() : null;
         const lifeStateChanged = this.initialized && this.state().lifeState !== authoritative.lifeState;
@@ -80,25 +89,25 @@ export class OwnerPredictionRuntime {
             ({ eventType, playerId }) => eventType === "player-respawned" && playerId === this.ownerId
         );
         this.simulation.preparePrediction(snapshot.state.enemies ?? [], snapshot.state.activeCheckpointId);
-        this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, snapshot.serverTick);
+        this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, ownerMotionTick);
         this.initialized = true;
 
         for (const tick of this.inputHistory.keys()) {
-            if (tick <= snapshot.serverTick) this.inputHistory.delete(tick);
+            if (tick <= ownerMotionTick) this.inputHistory.delete(tick);
         }
         for (const [predictionId, tick] of this.emittedPredictionTicks) {
-            if (tick <= snapshot.serverTick) this.emittedPredictionTicks.delete(predictionId);
+            if (tick <= ownerMotionTick) this.emittedPredictionTicks.delete(predictionId);
         }
 
-        const batchesByTick = this.pendingBatchesByTick(snapshot.serverTick, pendingBatches);
-        this.replayInputs(snapshot.serverTick, targetTick, batchesByTick);
+        const batchesByTick = this.pendingBatchesByTick(ownerMotionTick, pendingBatches);
+        this.replayInputs(ownerMotionTick, targetTick, batchesByTick);
         const corrected = this.state();
         if (displayedBefore)
             this.startPresentationCorrection(displayedBefore, corrected, respawned || lifeStateChanged);
         return corrected;
     }
 
-    acceptAuthorityOutcomes(snapshot, authoritative, targetTick) {
+    acceptAuthorityOutcomes(snapshot, authoritative, targetTick, ownerMotionTick) {
         const current = this.state();
         const respawned = snapshot.events.some(
             ({ eventType, playerId }) => eventType === "player-respawned" && playerId === this.ownerId
@@ -107,10 +116,10 @@ export class OwnerPredictionRuntime {
         const displayedBefore = authorityTransition ? this.presentationState() : null;
         this.simulation.preparePrediction(snapshot.state.enemies ?? [], snapshot.state.activeCheckpointId);
         for (const tick of this.inputHistory.keys()) {
-            if (tick <= snapshot.serverTick) this.inputHistory.delete(tick);
+            if (tick <= ownerMotionTick) this.inputHistory.delete(tick);
         }
         for (const [predictionId, tick] of this.emittedPredictionTicks) {
-            if (tick <= snapshot.serverTick) this.emittedPredictionTicks.delete(predictionId);
+            if (tick <= ownerMotionTick) this.emittedPredictionTicks.delete(predictionId);
         }
         if (respawned) {
             const restored = this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, targetTick);

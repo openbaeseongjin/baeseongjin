@@ -472,29 +472,29 @@ export function run() {
     );
     assert.equal(next.accepted.length, 1, "a rejected high sequence must not poison the next executable command");
     lateSession.advance();
-    assert.ok(latePlayer.physics.velocity.x > 0);
-    const velocityAfterCommand = latePlayer.physics.velocity.x;
+    assert.equal(
+        latePlayer.physics.velocity.x,
+        0,
+        "accepted commands must not make the multiplayer server re-integrate client-owned motion"
+    );
+    const acceptedOwnerMotion = lateSession.submitOwnerMotion(
+        latePlayer.id,
+        createOwnerMotionState({
+            clientTick: 3,
+            position: { x: latePlayer.physics.position.x + 12, y: latePlayer.physics.position.y },
+            velocity: { x: 120, y: 0 },
+            isGrounded: latePlayer.physics.isGrounded,
+            rope: { isAttached: false, anchor: null }
+        })
+    );
+    assert.equal(acceptedOwnerMotion.accepted, true);
+    assert.equal(latePlayer.physics.velocity.x, 120, "owner-motion must be the multiplayer motion source");
+    const positionAfterOwnerMotion = latePlayer.physics.position.x;
     lateSession.advance();
-    assert.ok(
-        latePlayer.physics.velocity.x > velocityAfterCommand,
-        "the latest input state must continue across an empty 120Hz authority tick"
-    );
-
-    const expiringSimulation = new GameSimulation();
-    const expiringPlayer = primaryPlayer(expiringSimulation);
-    expiringSimulation.enemies = [];
-    const expiringSession = new AuthorityServerSession({ simulation: expiringSimulation, inputHoldTicks: 2 });
-    expiringSession.submit(
-        expiringPlayer.id,
-        createPlayerCommandBatch(1, [{ playerId: expiringPlayer.id, sequence: 0, command: command(1) }])
-    );
-    expiringSession.advance();
-    expiringSession.advance();
-    const velocityBeforeExpiry = expiringPlayer.physics.velocity.x;
-    expiringSession.advance();
-    assert.ok(
-        expiringPlayer.physics.velocity.x <= velocityBeforeExpiry,
-        "stale movement must stop accelerating after the bounded hold window"
+    assert.equal(
+        latePlayer.physics.position.x,
+        positionAfterOwnerMotion,
+        "server fixed ticks must preserve the last accepted owner position"
     );
 
     const simulation = new GameSimulation();
@@ -526,6 +526,34 @@ export function run() {
         );
         assert.equal(primaryResult.accepted.length, 1);
         assert.equal(partnerResult.accepted.length, 1);
+        const primaryState = simulation.playerState(primary.id);
+        const partnerState = simulation.playerState(partner.entity.id);
+        assert.equal(
+            session.submitOwnerMotion(
+                primary.id,
+                createOwnerMotionState({
+                    clientTick: tick,
+                    position: { x: primaryState.position.x + 4, y: primaryState.position.y },
+                    velocity: { x: 240, y: 0 },
+                    isGrounded: primaryState.isGrounded,
+                    rope: { isAttached: false, anchor: null }
+                })
+            ).accepted,
+            true
+        );
+        assert.equal(
+            session.submitOwnerMotion(
+                partner.entity.id,
+                createOwnerMotionState({
+                    clientTick: tick,
+                    position: { x: partnerState.position.x - 4, y: partnerState.position.y },
+                    velocity: { x: -240, y: 0 },
+                    isGrounded: partnerState.isGrounded,
+                    rope: { isAttached: false, anchor: null }
+                })
+            ).accepted,
+            true
+        );
         snapshot = session.advance();
         if (tick < 6) assert.equal(snapshot, null);
     }
@@ -553,6 +581,11 @@ export function run() {
         [partner.entity.id]: 5
     });
     assert.equal(snapshot.state.players.length, 2);
+    assert.deepEqual(
+        Object.fromEntries(snapshot.state.players.map(({ id, ownerMotionTick }) => [id, ownerMotionTick])),
+        { [primary.id]: 6, [partner.entity.id]: 6 },
+        "each player state must expose the client tick that produced its motion"
+    );
     assert.ok(Math.abs(snapshot.state.metrics.activeSeconds - 42.55) < 1e-9);
     assert.equal(snapshot.state.metrics.enemyDefeats, 3);
     assert.equal(snapshot.state.metrics.damageTaken, 20);

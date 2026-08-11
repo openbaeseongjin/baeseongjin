@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { COMBAT_CONFIG, PLAYER_CONFIG } from "../src/game/config.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
+import { MULTIPLAYER_TIMING } from "../src/game/network/MultiplayerTiming.js";
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
@@ -23,7 +24,7 @@ function withPlayerPosition(snapshot, x, serverTick) {
             ...snapshot.state,
             players: snapshot.state.players.map((player) =>
                 player.id === snapshot.state.players[0].id
-                    ? { ...player, position: { x, y: player.position.y } }
+                    ? { ...player, position: { x, y: player.position.y }, ownerMotionTick: serverTick }
                     : player
             )
         }
@@ -187,6 +188,39 @@ export function run() {
     close(replayed.position.x, secondLocalTick.position.x, "pending input replay position.x");
     close(replayed.velocity.x, secondLocalTick.velocity.x, "pending input replay velocity.x");
 
+    const ownerTimeline = new OwnerPredictionRuntime({ ownerId: movingPlayer.id, predictionLeadTicks: 0 });
+    ownerTimeline.reconcile(movingSnapshot, []);
+    ownerTimeline.advance(move);
+    const acceptedAtOwnerTick = ownerTimeline.advance(move);
+    ownerTimeline.advance(move);
+    const beforeOwnerTickRebase = ownerTimeline.advance(move);
+    const ownerTickSnapshot = {
+        ...movingSnapshot,
+        serverTick: movingSnapshot.serverTick + 1,
+        state: {
+            ...movingSnapshot.state,
+            players: movingSnapshot.state.players.map((player) =>
+                player.id === movingPlayer.id
+                    ? {
+                          ...player,
+                          ownerMotionTick: acceptedAtOwnerTick.tick,
+                          position: acceptedAtOwnerTick.position,
+                          velocity: acceptedAtOwnerTick.velocity,
+                          isGrounded: acceptedAtOwnerTick.isGrounded,
+                          rope: acceptedAtOwnerTick.rope
+                      }
+                    : player
+            )
+        }
+    };
+    const ownerTickRebase = ownerTimeline.reconcile(ownerTickSnapshot, [], { rebaseMotion: true });
+    close(
+        ownerTickRebase.position.x,
+        beforeOwnerTickRebase.position.x,
+        "owner tick rebase must not replay accepted movement twice"
+    );
+    close(ownerTickRebase.velocity.x, beforeOwnerTickRebase.velocity.x, "owner tick rebase velocity");
+
     const beforeSmallCorrection = continuous.presentationState();
     continuous.reconcile(withPlayerPosition(movingSnapshot, movingSnapshot.state.players[0].position.x + 20, 7), []);
     close(continuous.presentationState().position.x, beforeSmallCorrection.position.x, "small correction continuity");
@@ -335,6 +369,23 @@ export function run() {
     assert.throws(
         () => predictor.reconcile({ ...snapshot, worldSeed: snapshot.worldSeed + 1 }, []),
         /world seed mismatch/
+    );
+    assert.throws(
+        () =>
+            predictor.reconcile(
+                {
+                    ...snapshot,
+                    state: {
+                        ...snapshot.state,
+                        players: snapshot.state.players.map((player) => ({
+                            ...player,
+                            ownerMotionTick: snapshot.serverTick + MULTIPLAYER_TIMING.maxFutureTicks + 1
+                        }))
+                    }
+                },
+                []
+            ),
+        /invalid ownerMotionTick/
     );
     const missing = new OwnerPredictionRuntime({ ownerId: "missing-player" });
     assert.throws(() => missing.reconcile(snapshot, []), /missing predicted ownerId/);

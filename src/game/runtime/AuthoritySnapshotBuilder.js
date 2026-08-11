@@ -4,6 +4,7 @@ import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 export function buildAuthoritySnapshot({
     simulation,
     acknowledgements = {},
+    ownerMotionTicks = {},
     includeActivePredictableObjects = false,
     snapshotSequence = simulation.getTick()
 }) {
@@ -25,7 +26,10 @@ export function buildAuthoritySnapshot({
         worldRevision: WORLD_GENERATION_REVISION,
         acknowledgements,
         state: {
-            players: simulation.playerStates(),
+            players: simulation.playerStates().map((player) => ({
+                ...player,
+                ownerMotionTick: ownerMotionTicks[player.id] ?? simulation.getTick()
+            })),
             enemies: simulation.enemyStates(),
             activeCheckpointId: simulation.activeCheckpoint?.id ?? null,
             rewardedCheckpointIds: [...simulation.rewardedCheckpointIds],

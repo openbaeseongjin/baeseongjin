@@ -2,7 +2,6 @@ import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
 import { WORLD_CONFIG } from "../config.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
-import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
@@ -27,15 +26,13 @@ export class AuthorityServerSession {
         fixedDt = 1 / 120,
         snapshotIntervalTicks = 6,
         maxPastTicks = 2,
-        maxFutureTicks = MULTIPLAYER_TIMING.maxFutureTicks,
-        inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks
+        maxFutureTicks = MULTIPLAYER_TIMING.maxFutureTicks
     }) {
         if (!simulation) throw new Error("simulation is required");
         this.simulation = simulation;
         this.fixedDt = assertPositive(fixedDt, "fixedDt");
         this.snapshotIntervalTicks = assertPositiveInteger(snapshotIntervalTicks, "snapshotIntervalTicks");
         this.inbox = new AuthorityCommandInbox({ maxPastTicks, maxFutureTicks });
-        this.inputState = new InputStateSimulator({ holdTicks: inputHoldTicks });
         this.resolvedHitClaims = new Map();
         this.resolvedProjectileSpawnClaims = new Map();
         this.resolvedImpactClaims = new Map();
@@ -314,7 +311,7 @@ export class AuthorityServerSession {
 
     advance() {
         const nextTick = this.simulation.getTick() + 1;
-        const commands = this.inputState.expand(this.inbox.take(nextTick), this.simulation.playerIds());
+        const commands = this.inbox.take(nextTick);
         this.simulation.stepCommandBatch(this.fixedDt, commands, {
             recoverPlayerFalls: false,
             resolveCheckpointProgress: false,
@@ -322,7 +319,8 @@ export class AuthorityServerSession {
             resolvePlayerProjectileHits: false,
             spawnPlayerProjectiles: false,
             recoverPlayerDeaths: false,
-            resolveArtifactSelections: false
+            resolveArtifactSelections: false,
+            advanceInputDrivenObjects: false
         });
         const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
@@ -343,6 +341,7 @@ export class AuthorityServerSession {
         const snapshot = buildAuthoritySnapshot({
             simulation: this.simulation,
             acknowledgements: this.inbox.acknowledgements(),
+            ownerMotionTicks: Object.fromEntries(this.lastOwnerMotionTicks),
             includeActivePredictableObjects,
             snapshotSequence: this.nextSnapshotSequence
         });
@@ -352,7 +351,6 @@ export class AuthorityServerSession {
 
     removePlayer(playerId) {
         this.inbox.removePlayer(playerId);
-        this.inputState.removePlayer(playerId);
         this.lastOwnerMotionTicks.delete(playerId);
         this.lastOwnerRopeTicks.delete(playerId);
         for (const selectionKey of this.resolvedArtifactSelections.keys()) {
