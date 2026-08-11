@@ -70,6 +70,31 @@ function distance(left, right) {
     return Math.hypot(left.x - right.x, left.y - right.y);
 }
 
+function persistentPlayerState(player) {
+    return {
+        health: player.health,
+        maxHealth: player.maxHealth,
+        lifeState: player.lifeState,
+        weapon: {
+            range: player.weapon.range,
+            damage: player.weapon.damage,
+            fireInterval: player.weapon.fireInterval
+        },
+        artifacts: player.artifacts,
+        lastCheckpointLoss: player.lastCheckpointLoss
+    };
+}
+
+function persistentWorldState(state) {
+    return {
+        activeCheckpointId: state.activeCheckpointId,
+        rewardedCheckpointIds: state.rewardedCheckpointIds,
+        artifactRewards: state.artifactRewards,
+        runState: state.runState,
+        completed: state.completed
+    };
+}
+
 function fakeCanvas() {
     return {
         clientWidth: 844,
@@ -808,11 +833,28 @@ export async function run() {
         for (const roundTripDelayMs of [0, 50, 100, 200]) {
             for (const commandLossRate of [0, 0.02, 0.05]) {
                 const ProfileWebSocket = createImpairedWebSocket({ roundTripDelayMs, commandLossRate });
+                const ObserverWebSocket = createImpairedWebSocket({ roundTripDelayMs, commandLossRate });
                 const impaired = new RemoteGameAuthority({
                     url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
                     WebSocketImpl: ProfileWebSocket
                 });
                 await impaired.connect();
+                const observer = new RemoteGameAuthority({
+                    url: `ws://127.0.0.1:${port}/multiplayer?channel=${impaired.channelId}`,
+                    WebSocketImpl: ObserverWebSocket
+                });
+                await observer.connect();
+                const profileRoom = gameServer.rooms.get(impaired.channelId);
+                profileRoom.simulation.enemies = [];
+                gameServer.broadcast(profileRoom, { type: "snapshot", payload: profileRoom.adapter.snapshot() });
+                await waitFor(
+                    () =>
+                        impaired.snapshot().state.players.length === 2 &&
+                        observer.snapshot().state.players.length === 2 &&
+                        impaired.snapshot().state.enemies.length === 0 &&
+                        observer.snapshot().state.enemies.length === 0,
+                    `${roundTripDelayMs}ms RTT/${commandLossRate * 100}% peers must share the profile world`
+                );
                 const authoritativeStartX = impaired.snapshot().state.players[0].position.x;
                 const beforeInput = impaired.snapshot().predicted;
                 const immediate = impaired.advance(movementCommand());
@@ -824,8 +866,15 @@ export async function run() {
                 for (let index = 0; index < 60; index += 1) {
                     impaired.advance(movementCommand());
                     impaired.submit(movementCommand());
+                    observer.advance(movementCommand(0));
+                    observer.submit(movementCommand(0));
                     await new Promise((resolve) => setTimeout(resolve, 8));
                 }
+                assert.equal(ProfileWebSocket.sentCommands, 60);
+                assert.equal(
+                    ProfileWebSocket.droppedCommands,
+                    Math.floor(ProfileWebSocket.sentCommands * commandLossRate)
+                );
                 try {
                     await waitFor(
                         () =>
@@ -844,13 +893,71 @@ export async function run() {
                 await waitFor(() => impaired.metrics().roundTripMs !== null, "the profile must produce RTT metrics");
                 assert.ok(Number.isFinite(impaired.metrics().snapshotIntervalMs));
                 assert.ok(Number.isFinite(impaired.metrics().correctionP95));
-                assert.equal(ProfileWebSocket.sentCommands, 60);
-                assert.equal(
-                    ProfileWebSocket.droppedCommands,
-                    Math.floor(ProfileWebSocket.sentCommands * commandLossRate)
-                );
                 if (roundTripDelayMs > 0) assert.ok(impaired.metrics().roundTripMs >= roundTripDelayMs * 0.75);
+                let profileConvergence = null;
+                for (let index = 0; index < 180; index += 1) {
+                    impaired.advance(movementCommand(0));
+                    impaired.submit(movementCommand(0));
+                    observer.advance(movementCommand(0));
+                    observer.submit(movementCommand(0));
+                    await new Promise((resolve) => setTimeout(resolve, 8));
+                    if (index < 60) continue;
+                    const ownerState = impaired.snapshot().owner;
+                    const serverState = profileRoom.simulation.playerState(impaired.playerId);
+                    const observerState = observer.snapshot().state.players.find(({ id }) => id === impaired.playerId);
+                    profileConvergence = {
+                        ownerServerPosition: distance(ownerState.position, serverState.position),
+                        observerServerPosition: distance(observerState.position, serverState.position),
+                        ownerServerVelocity: distance(ownerState.velocity, serverState.velocity),
+                        observerServerVelocity: distance(observerState.velocity, serverState.velocity),
+                        ropeMatches:
+                            ownerState.rope.isAttached === serverState.rope.isAttached &&
+                            observerState.rope.isAttached === serverState.rope.isAttached
+                    };
+                    if (
+                        profileConvergence.ownerServerPosition <= 4 &&
+                        profileConvergence.observerServerPosition <= 4 &&
+                        profileConvergence.ownerServerVelocity <= 20 &&
+                        profileConvergence.observerServerVelocity <= 20 &&
+                        profileConvergence.ropeMatches
+                    ) {
+                        break;
+                    }
+                }
+                const profileLabel = `${roundTripDelayMs}ms RTT/${commandLossRate * 100}%`;
+                assert.ok(
+                    profileConvergence?.ownerServerPosition <= 4 && profileConvergence?.observerServerPosition <= 4,
+                    `${profileLabel} positions must converge: ${JSON.stringify(profileConvergence)}`
+                );
+                assert.ok(
+                    profileConvergence.ownerServerVelocity <= 20 && profileConvergence.observerServerVelocity <= 20,
+                    `${profileLabel} velocities must converge: ${JSON.stringify(profileConvergence)}`
+                );
+                assert.equal(profileConvergence.ropeMatches, true, `${profileLabel} rope state must converge`);
+                const ownerAuthorityState = impaired.latestSnapshot.state;
+                const observerAuthorityState = observer.latestSnapshot.state;
+                const serverPlayerState = profileRoom.simulation.playerState(impaired.playerId);
+                assert.deepEqual(
+                    persistentPlayerState(ownerAuthorityState.players.find(({ id }) => id === impaired.playerId)),
+                    persistentPlayerState(serverPlayerState),
+                    `${profileLabel} owner persistent state must equal the server`
+                );
+                assert.deepEqual(
+                    persistentPlayerState(observerAuthorityState.players.find(({ id }) => id === impaired.playerId)),
+                    persistentPlayerState(serverPlayerState),
+                    `${profileLabel} observer persistent state must equal the server`
+                );
+                assert.deepEqual(
+                    persistentWorldState(ownerAuthorityState),
+                    persistentWorldState(observerAuthorityState),
+                    `${profileLabel} peers must share one persistent world state`
+                );
+                observer.close();
                 impaired.close();
+                await waitFor(
+                    () => !gameServer.rooms.has(impaired.channelId),
+                    `${profileLabel} empty profile room must close`
+                );
             }
         }
         await gameServer.close();
