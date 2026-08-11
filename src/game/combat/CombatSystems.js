@@ -32,7 +32,14 @@ export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, c
     return projectile;
 }
 
-export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
+export function updatePlayerProjectiles({
+    projectiles,
+    enemies,
+    config,
+    dt,
+    resolveHits = true,
+    maxLifetimeSeconds = Number.POSITIVE_INFINITY
+}) {
     const enemyById = new Map(enemies.map((enemy) => [enemy.id, enemy]));
     const survivors = [];
     const hits = [];
@@ -54,8 +61,19 @@ export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
         if (distance > 0) direction.scale(1 / distance);
         projectile.velocity = direction.scale(config.projectileSpeed);
         projectile.position.add(projectile.velocity.clone().scale(dt));
+        projectile.ageSeconds = (projectile.ageSeconds ?? 0) + dt;
+        if (projectile.ageSeconds >= maxLifetimeSeconds) {
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: "expired",
+                    position: projectile.position.clone()
+                })
+            );
+            continue;
+        }
         const hitDistance = projectile.position.distanceTo(target.position);
-        if (hitDistance <= projectile.radius + target.radius) {
+        if (resolveHits && hitDistance <= projectile.radius + target.radius) {
             target.health -= projectile.damage;
             hits.push(
                 Object.freeze({

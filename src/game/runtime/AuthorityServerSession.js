@@ -6,6 +6,7 @@ import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
+import { createProjectileHitReceipt } from "../network/ProjectileHitClaim.js";
 import { createSummitClaimReceipt } from "../network/SummitClaim.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
@@ -52,9 +53,13 @@ export class AuthorityServerSession {
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
         if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
-            return Object.freeze({ predictionId: claim.predictionId, accepted: false, reason: "tick-window" });
+            return createProjectileHitReceipt({
+                predictionId: claim.predictionId,
+                accepted: false,
+                reason: "tick-window"
+            });
         }
-        const result = Object.freeze({
+        const result = createProjectileHitReceipt({
             predictionId: claim.predictionId,
             ...this.simulation.resolvePlayerProjectileClaim(authenticatedPlayerId, claim, {
                 positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
@@ -280,7 +285,8 @@ export class AuthorityServerSession {
         this.simulation.stepCommandBatch(this.fixedDt, commands, {
             recoverPlayerFalls: false,
             resolveCheckpointProgress: false,
-            resolveSummitProgress: false
+            resolveSummitProgress: false,
+            resolvePlayerProjectileHits: false
         });
         const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {

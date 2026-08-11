@@ -365,7 +365,12 @@ export class GameSimulation {
     stepCommandBatch(
         dt,
         batch,
-        { recoverPlayerFalls = true, resolveCheckpointProgress = true, resolveSummitProgress = true } = {}
+        {
+            recoverPlayerFalls = true,
+            resolveCheckpointProgress = true,
+            resolveSummitProgress = true,
+            resolvePlayerProjectileHits = true
+        } = {}
     ) {
         const expectedTick = this.tick + 1;
         if (batch.tick !== expectedTick) throw new Error(`command batch tick ${batch.tick} must equal ${expectedTick}`);
@@ -378,14 +383,20 @@ export class GameSimulation {
         return this.stepPlayers(dt, commandsByPlayerId, {
             recoverPlayerFalls,
             resolveCheckpointProgress,
-            resolveSummitProgress
+            resolveSummitProgress,
+            resolvePlayerProjectileHits
         });
     }
 
     stepPlayers(
         dt,
         commandsByPlayerId,
-        { recoverPlayerFalls = true, resolveCheckpointProgress = true, resolveSummitProgress = true } = {}
+        {
+            recoverPlayerFalls = true,
+            resolveCheckpointProgress = true,
+            resolveSummitProgress = true,
+            resolvePlayerProjectileHits = true
+        } = {}
     ) {
         this.tick += 1;
         if (this.runState !== "playing") {
@@ -417,7 +428,9 @@ export class GameSimulation {
             projectiles: this.projectiles,
             enemies: this.enemies,
             config: COMBAT_CONFIG,
-            dt
+            dt,
+            resolveHits: resolvePlayerProjectileHits,
+            maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds
         });
         const enemyProjectileSpawns = updateEnemyWeapons({
             enemies: this.enemies,
@@ -786,7 +799,7 @@ export class GameSimulation {
             claim.position.y - projectile.position.y
         );
         const predictedTravel =
-            (COMBAT_CONFIG.projectileSpeed * Math.max(0, claim.clientTick - this.tick)) / 120 + positionTolerance;
+            (COMBAT_CONFIG.projectileSpeed * Math.abs(claim.clientTick - this.tick)) / 120 + positionTolerance;
         if (projectileDistance > predictedTravel + target.radius + projectile.radius) {
             return Object.freeze({ accepted: false, reason: "trajectory-mismatch" });
         }

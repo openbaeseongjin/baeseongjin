@@ -58,6 +58,40 @@ export function run() {
     assert.equal(hitEvents.hits[0].damage, 10);
     assert.equal(hitEvents.resolutions[0].resolution, "enemy-hit");
 
+    const claimDrivenProjectile = [
+        {
+            id: "claim-driven",
+            targetId: enemies[1].id,
+            position: enemies[1].position.clone(),
+            velocity: new Vector2(),
+            radius: 4,
+            damage: 10,
+            ageSeconds: 0
+        }
+    ];
+    const claimDrivenHealth = enemies[1].health;
+    const claimDrivenEvents = updatePlayerProjectiles({
+        projectiles: claimDrivenProjectile,
+        enemies,
+        config: COMBAT_CONFIG,
+        dt: 1 / 120,
+        resolveHits: false,
+        maxLifetimeSeconds: 1
+    });
+    assert.equal(enemies[1].health, claimDrivenHealth, "server trajectory steps must not preempt the attacker claim");
+    assert.equal(claimDrivenProjectile.length, 1);
+    assert.equal(claimDrivenEvents.hits.length, 0);
+    const expiredClaimDriven = updatePlayerProjectiles({
+        projectiles: claimDrivenProjectile,
+        enemies,
+        config: COMBAT_CONFIG,
+        dt: 1,
+        resolveHits: false,
+        maxLifetimeSeconds: 1
+    });
+    assert.equal(expiredClaimDriven.resolutions[0].resolution, "expired");
+    assert.equal(claimDrivenProjectile.length, 0, "unclaimed player projectiles must have a bounded lifetime");
+
     owner.weapon.cooldown = 0;
     owner.weapon.range = 50;
     updateAutomaticWeapon({ owner, enemies, projectiles, registry, config: COMBAT_CONFIG, dt: 1 });
