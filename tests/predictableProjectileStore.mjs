@@ -6,6 +6,9 @@ import {
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
 import { ClientCombatFeedback } from "../src/game/combat/ClientCombatFeedback.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
+import { updatePlayerProjectiles, advanceEnemyProjectiles } from "../src/game/combat/CombatSystems.js";
+import { COMBAT_CONFIG } from "../src/game/config.js";
+import { Vector2 } from "../src/game-kit/index.js";
 
 export function run() {
     const store = new PredictableProjectileStore();
@@ -114,6 +117,95 @@ export function run() {
     store.apply([playerSpawn], 12, { enemies: [{ id: "enemy-1", position: { x: 100, y: 0 } }] });
     store.update(1 / 120, { enemies: [{ id: "enemy-1", position: { x: 100, y: 0 } }] });
     assert.ok(store.snapshot().projectiles[0].position.x > 4, "player projectile must home toward its target");
+
+    const convergenceTarget = {
+        id: "convergence-enemy",
+        position: new Vector2(140, -65),
+        radius: 10,
+        health: 100
+    };
+    const serverHomingProjectile = {
+        id: "server-homing",
+        targetId: convergenceTarget.id,
+        position: new Vector2(-25, 30),
+        velocity: new Vector2(),
+        radius: 2,
+        damage: 1,
+        ageSeconds: 0
+    };
+    const convergenceStore = new PredictableProjectileStore();
+    convergenceStore.apply(
+        [
+            createPredictableSpawnEvent({
+                eventId: "convergence-homing-spawn",
+                objectId: "client-homing",
+                objectType: "player-projectile",
+                spawnTick: 0,
+                position: { x: -25, y: 30 },
+                velocity: { x: 0, y: 0 },
+                parameters: {
+                    radius: 2,
+                    damage: 1,
+                    speed: COMBAT_CONFIG.projectileSpeed,
+                    ownerId: "player-1",
+                    targetId: convergenceTarget.id
+                }
+            })
+        ],
+        0,
+        { enemies: [convergenceTarget] }
+    );
+    for (let tick = 0; tick < 24; tick += 1) {
+        updatePlayerProjectiles({
+            projectiles: [serverHomingProjectile],
+            enemies: [convergenceTarget],
+            config: COMBAT_CONFIG,
+            dt: 1 / 120,
+            resolveHits: false
+        });
+        convergenceStore.update(1 / 120, { enemies: [convergenceTarget] });
+    }
+    const clientHomingProjectile = convergenceStore.snapshot().projectiles[0];
+    assert.equal(clientHomingProjectile.position.x, serverHomingProjectile.position.x);
+    assert.equal(clientHomingProjectile.position.y, serverHomingProjectile.position.y);
+    assert.equal(clientHomingProjectile.velocity.x, serverHomingProjectile.velocity.x);
+    assert.equal(clientHomingProjectile.velocity.y, serverHomingProjectile.velocity.y);
+
+    const serverBallisticProjectile = {
+        position: new Vector2(5, -8),
+        velocity: new Vector2(-75, 210),
+        ageSeconds: 0
+    };
+    const ballisticStore = new PredictableProjectileStore();
+    ballisticStore.apply(
+        [
+            createPredictableSpawnEvent({
+                eventId: "convergence-ballistic-spawn",
+                objectId: "client-ballistic",
+                objectType: "enemy-projectile",
+                spawnTick: 0,
+                position: { x: 5, y: -8 },
+                velocity: { x: -75, y: 210 },
+                parameters: {
+                    radius: 2,
+                    damage: 1,
+                    ownerId: "enemy-1",
+                    targetId: "player-1"
+                }
+            })
+        ],
+        0,
+        { enemies: [] }
+    );
+    for (let tick = 0; tick < 24; tick += 1) {
+        advanceEnemyProjectiles({ projectiles: [serverBallisticProjectile], dt: 1 / 120 });
+        ballisticStore.update(1 / 120, { enemies: [] });
+    }
+    const clientBallisticProjectile = ballisticStore.snapshot().enemyProjectiles[0];
+    assert.equal(clientBallisticProjectile.position.x, serverBallisticProjectile.position.x);
+    assert.equal(clientBallisticProjectile.position.y, serverBallisticProjectile.position.y);
+    assert.equal(clientBallisticProjectile.velocity.x, serverBallisticProjectile.velocity.x);
+    assert.equal(clientBallisticProjectile.velocity.y, serverBallisticProjectile.velocity.y);
 
     const resolveEvent = createPredictableResolveEvent({
         eventId: "event-3",

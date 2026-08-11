@@ -136,7 +136,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 첫 화면에서 싱글은 `PlayerCommand → LocalAuthority → GameSimulation`, 멀티는 `4자리 채널 → 고정 WebSocket 서버 → 채널별 AuthorityServerSession → GameSimulation` 경계를 선택한다. 두 경로는 입력 출처와 상태 전달만 다르고 게임 규칙을 공유한다.
 - 협동은 서버 권위형과 로컬 플레이어 예측을 사용한다. 시간 모델, 상태 소유권, 스냅샷과 보정 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 - `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `OwnerPredictionRuntime`도 로컬 `GameSimulation`의 공개 소유자 예측 계약만 사용하며, 앱·예측 런타임·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
-- 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 충돌·claim 확정·수명 만료만 `resolve` 이벤트로 확정한다. 원래 spawn 이벤트는 활성 객체에 보존해 중간 입장 welcome에서만 같은 ID로 재전송한다.
+- 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 서버 `CombatSystems`와 클라이언트 `PredictableProjectileStore`는 `ProjectileMotion`의 동일한 유도·직선 적분식을 호출하며 별도 궤적 공식을 두지 않는다. 충돌·claim 확정·수명 만료만 `resolve` 이벤트로 확정한다. 원래 spawn 이벤트는 활성 객체에 보존해 중간 입장 welcome에서만 같은 ID로 재전송한다.
 - 자기 탄환은 로컬 충돌 VFX를 먼저 재생하고 검증 가능한 hit claim을 보낸다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 대미지로 최종 결과를 확정한다.
 - `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
 

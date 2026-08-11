@@ -1,5 +1,6 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { ProjectileObject } from "./ProjectileObject.js";
+import { advanceHomingProjectileMotion, advanceProjectileMotion } from "./ProjectileMotion.js";
 
 export function selectNearestEnemy(position, enemies, range) {
     return (
@@ -57,12 +58,7 @@ export function updatePlayerProjectiles({
             );
             continue;
         }
-        const direction = target.position.clone().subtract(projectile.position);
-        const distance = direction.length();
-        if (distance > 0) direction.scale(1 / distance);
-        projectile.velocity = direction.scale(config.projectileSpeed);
-        projectile.position.add(projectile.velocity.clone().scale(dt));
-        projectile.ageSeconds = (projectile.ageSeconds ?? 0) + dt;
+        advanceHomingProjectileMotion(projectile, target.position, config.projectileSpeed, dt);
         if (projectile.ageSeconds >= maxLifetimeSeconds) {
             resolutions.push(
                 Object.freeze({
@@ -160,8 +156,7 @@ export function advanceEnemyProjectiles({ projectiles, dt, maxLifetimeSeconds = 
     const survivors = [];
     const expired = [];
     for (const projectile of projectiles) {
-        projectile.position.add(projectile.velocity.clone().scale(dt));
-        projectile.ageSeconds = (projectile.ageSeconds ?? 0) + dt;
+        advanceProjectileMotion(projectile, dt);
         if (projectile.ageSeconds >= maxLifetimeSeconds) expired.push(projectile);
         else survivors.push(projectile);
     }
