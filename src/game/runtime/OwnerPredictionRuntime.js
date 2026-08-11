@@ -70,7 +70,30 @@ export class OwnerPredictionRuntime {
         this.pendingProjectileSpawns = new Map();
         this.pendingImpacts = new Map();
         this.nextImpactPredictionOrder = 0;
+        this.pendingCheckpoint = null;
         this.simulation.preparePrediction();
+    }
+
+    prepareSnapshot(snapshot, fallbackProgress = null) {
+        if (!snapshot) {
+            const progress = fallbackProgress ?? this.simulation.predictionProgressState(this.ownerId);
+            this.simulation.preparePrediction([], progress.activeCheckpointId);
+            this.simulation.synchronizePredictionProgress(this.ownerId, progress);
+            return;
+        }
+        if (this.pendingCheckpoint?.checkpointId === snapshot.state.activeCheckpointId) {
+            this.pendingCheckpoint = null;
+        }
+        const preserveCheckpoint = this.pendingCheckpoint !== null;
+        const progress = preserveCheckpoint
+            ? this.simulation.predictionProgressState(this.ownerId)
+            : {
+                  activeCheckpointId: snapshot.state.activeCheckpointId,
+                  artifactReward: snapshot.state.artifactRewards?.[this.ownerId] ?? null,
+                  rewardedCheckpointIds: snapshot.state.rewardedCheckpointIds ?? []
+              };
+        this.simulation.preparePrediction(snapshot.state.enemies ?? [], progress.activeCheckpointId);
+        if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
     }
 
     reconcile(snapshot, pendingBatches, { rebaseMotion = false } = {}) {
@@ -101,8 +124,9 @@ export class OwnerPredictionRuntime {
         const respawned = snapshot.events.some(
             ({ eventType, playerId }) => eventType === "player-respawned" && playerId === this.ownerId
         );
-        this.simulation.preparePrediction(snapshot.state.enemies ?? [], snapshot.state.activeCheckpointId);
+        this.prepareSnapshot(snapshot);
         this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, ownerMotionTick);
+        if (this.pendingCheckpoint) this.simulation.releasePlayerRope(this.ownerId);
         this.initialized = true;
 
         for (const tick of this.inputHistory.keys()) {
@@ -130,7 +154,7 @@ export class OwnerPredictionRuntime {
         );
         const authorityTransition = respawned || current.lifeState !== authoritative.lifeState;
         const displayedBefore = authorityTransition ? this.presentationState() : null;
-        this.simulation.preparePrediction(snapshot.state.enemies ?? [], snapshot.state.activeCheckpointId);
+        this.prepareSnapshot(snapshot);
         for (const tick of this.inputHistory.keys()) {
             if (tick <= ownerMotionTick) this.inputHistory.delete(tick);
         }
@@ -279,7 +303,7 @@ export class OwnerPredictionRuntime {
                 (entry) => entry.tick > pending.tick || (entry.tick === pending.tick && entry.order > pending.order)
             )
             .sort((left, right) => left.tick - right.tick || left.order - right.order);
-        this.simulation.preparePrediction(snapshot?.state.enemies ?? [], snapshot?.state.activeCheckpointId);
+        this.prepareSnapshot(snapshot);
         this.simulation.restoreOwnerPrediction(this.ownerId, pending.before, pending.tick);
         this.replayInputs(pending.tick, targetTick, new Map(), laterPendingImpacts);
 
@@ -312,6 +336,52 @@ export class OwnerPredictionRuntime {
             position: { x: state.position.x, y: state.position.y },
             feedbackPosition: { x: checkpoint.x, y: checkpoint.y }
         });
+    }
+
+    applyPredictedCheckpoint(candidate) {
+        if (!this.initialized || this.pendingCheckpoint) return false;
+        const before = this.simulation.playerState(this.ownerId);
+        const beforeProgress = this.simulation.predictionProgressState(this.ownerId);
+        const result = this.simulation.resolveCheckpointClaim(this.ownerId, candidate, { positionTolerance: 0 });
+        if (!result.accepted) return false;
+        this.pendingCheckpoint = {
+            checkpointId: candidate.checkpointId,
+            before,
+            beforeProgress,
+            tick: this.simulation.getTick()
+        };
+        return true;
+    }
+
+    recordCheckpointReceipt(receipt, snapshot = null) {
+        const pending = this.pendingCheckpoint;
+        if (!pending || pending.checkpointId !== receipt.checkpointId) return false;
+        if (receipt.accepted) return true;
+
+        this.pendingCheckpoint = null;
+        const displayedBefore = this.presentationState();
+        const targetTick = this.simulation.getTick();
+        this.prepareSnapshot(snapshot, pending.beforeProgress);
+        this.simulation.restoreOwnerPrediction(this.ownerId, pending.before, pending.tick);
+        const pendingImpacts = [...this.pendingImpacts.values()]
+            .filter(({ tick }) => tick >= pending.tick)
+            .sort((left, right) => left.tick - right.tick || left.order - right.order);
+        this.replayInputs(pending.tick, targetTick, new Map(), pendingImpacts);
+
+        const authoritative = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
+        if (authoritative) {
+            this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
+                preserveRopeBoost: this.pendingRopeSwings.size > 0,
+                preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0,
+                preserveImpactPrediction: this.pendingImpacts.size > 0
+            });
+        }
+        this.startPresentationCorrection(displayedBefore, this.state());
+        return true;
+    }
+
+    artifactReward() {
+        return this.simulation.getArtifactReward(this.ownerId);
     }
 
     summitClaimCandidate() {

@@ -113,6 +113,7 @@ class Player extends RopeAttachable(GameObject) {}
 - `SimulationDrivenObject`가 `InputDrivenObject`에 충돌·피격 같은 체감 사건을 만들면 피해 `InputDrivenObject`의 소유 클라이언트가 즉시 반응하고 claim을 보내며, 서버는 해당 `SimulationDrivenObject`의 권위 상태로 검증한다.
 - 피해 claim을 예측 적용할 때는 충돌 객체 ID별로 적용 직전 소유자 상태와 tick·발생 순서를 보존한다. 거부 receipt는 표현 객체만 복원하지 않고 소유자 상태를 그 tick으로 복원한 뒤 이후 입력과 아직 대기 중인 후속 피해 예측을 같은 공용 고정 스텝의 원래 순서로 재실행한다. 재적용한 후속 예측의 복구 기준도 새 시간축으로 갱신한다. 별도 역임펄스나 타이머 0 대입으로 증상만 상쇄하지 않는다.
 - 적 탄환 본체 피격 예측은 복제 객체의 대미지로 로컬 HP와 치명 시 체크포인트 부활·결정적 아티팩트 손실까지 같은 `GameSimulation` 명령에서 즉시 적용한다. 승인 전 snapshot은 pending impact가 만든 HP·부활·아티팩트·로프 상태를 덮지 않으며, 멀티 HUD는 예측 소유자 상태를 표시한다. 서버는 claim의 대미지 값을 최종값으로 사용하지 않고 서버 소유 탄환 데이터로 검증·확정한다.
+- 체크포인트 claim은 전이 직전 `owner-motion`을 먼저 보낸 뒤 로컬 `GameSimulation`의 활성 체크포인트·플레이어별 보상·로프 해제를 즉시 적용한다. pending checkpoint 뒤의 사망·낙사는 예측 활성 지점을 사용한다. 거부 receipt는 이전 공용 진행도와 소유자 상태를 복원하고 그 뒤 입력·pending impact를 원래 tick 순서로 재실행한다. 화면 피드백만 먼저 표시하고 실제 부활 기준은 서버 snapshot을 기다리는 분리 구현을 두지 않는다.
 
 ### 입력 capability 디스패치
 

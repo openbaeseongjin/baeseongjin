@@ -263,6 +263,62 @@ export function run() {
     assert.deepEqual(rejectedLethal.position, lethalBefore.position);
     assert.deepEqual(rejectedLethal.artifacts, lethalBefore.artifacts);
 
+    const checkpointServer = new GameSimulation();
+    const checkpointPlayer = primaryPlayer(checkpointServer);
+    checkpointServer.enemies = [];
+    checkpointServer.tick = 18;
+    const previousCheckpoint = checkpointServer.activeCheckpoint;
+    const reachedCheckpoint = checkpointServer.world.checkpoints[1];
+    checkpointPlayer.physics.position.set(reachedCheckpoint.x, reachedCheckpoint.y);
+    checkpointPlayer.health = 10;
+    checkpointPlayer.ropeObject.rope.attach(checkpointPlayer.physics.position, {
+        x: checkpointPlayer.physics.position.x,
+        y: checkpointPlayer.physics.position.y - 80
+    });
+    const checkpointSnapshot = buildAuthoritySnapshot({ simulation: checkpointServer, acknowledgements: {} });
+    const checkpointPrediction = new OwnerPredictionRuntime({
+        ownerId: checkpointPlayer.id,
+        predictionLeadTicks: 0
+    });
+    checkpointPrediction.reconcile(checkpointSnapshot, []);
+    const checkpointCandidate = checkpointPrediction.checkpointClaimCandidate();
+    assert.equal(checkpointCandidate.checkpointId, reachedCheckpoint.id);
+    assert.equal(checkpointPrediction.applyPredictedCheckpoint(checkpointCandidate), true);
+    assert.equal(
+        checkpointPrediction.renderSnapshot().activeCheckpoint.id,
+        reachedCheckpoint.id,
+        "checkpoint progress must change before the server receipt"
+    );
+    assert.equal(checkpointPrediction.state().rope.isAttached, false);
+    assert.equal(checkpointPrediction.artifactReward().checkpointId, reachedCheckpoint.id);
+
+    const afterCheckpointLethal = {
+        projectileId: "impact-after-predicted-checkpoint",
+        resolution: "player-hit",
+        velocity: { x: 0, y: 120 },
+        parameters: { damage: 20 }
+    };
+    assert.equal(checkpointPrediction.applyPredictedImpact(afterCheckpointLethal), true);
+    assert.deepEqual(
+        checkpointPrediction.state().position,
+        { x: reachedCheckpoint.x, y: reachedCheckpoint.y },
+        "a lethal impact after local checkpoint reach must respawn at the new checkpoint"
+    );
+    assert.equal(
+        checkpointPrediction.recordCheckpointReceipt(
+            { checkpointId: reachedCheckpoint.id, accepted: false },
+            checkpointSnapshot
+        ),
+        true
+    );
+    assert.equal(checkpointPrediction.renderSnapshot().activeCheckpoint.id, previousCheckpoint.id);
+    assert.equal(checkpointPrediction.artifactReward(), null);
+    assert.deepEqual(
+        checkpointPrediction.state().position,
+        { x: previousCheckpoint.x, y: previousCheckpoint.y },
+        "checkpoint rejection must replay the later lethal impact against the previous checkpoint"
+    );
+
     const movingServer = new GameSimulation();
     const movingPlayer = primaryPlayer(movingServer);
     movingServer.enemies = [];

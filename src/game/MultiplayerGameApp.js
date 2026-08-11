@@ -163,7 +163,7 @@ export class MultiplayerGameApp {
         const command = createPlayerCommand(input, aimWorld);
         const authoritativeReward = current.state.artifactRewards?.[this.authority.playerId] ?? null;
         this.applyArtifactSelectionReceipts(authoritativeReward);
-        this.syncArtifactReward(authoritativeReward);
+        this.syncArtifactReward(current.ownerArtifactReward ?? authoritativeReward);
         const choosingArtifact = Boolean(this.localArtifactReward || this.pendingArtifactSelection);
         if (this.localArtifactReward) {
             const outcome = advanceArtifactRewardSelection(this.localArtifactReward, command);
@@ -188,6 +188,7 @@ export class MultiplayerGameApp {
                 checkpointId: checkpointClaim.checkpointId,
                 position: checkpointClaim.feedbackPosition
             });
+            this.syncArtifactReward(this.authority.snapshot().ownerArtifactReward);
         }
         if (this.authority.submitReachedSummit()) {
             this.localRunCompleted = true;
