@@ -59,6 +59,7 @@ export class OwnerPredictionRuntime {
         this.emittedPredictionTicks = new Map();
         this.pendingRopeSwings = new Map();
         this.pendingProjectileSpawns = new Map();
+        this.pendingImpacts = new Map();
         this.simulation.preparePrediction();
     }
 
@@ -221,7 +222,36 @@ export class OwnerPredictionRuntime {
 
     applyPredictedImpact(event) {
         if (!this.initialized) return false;
-        return this.simulation.applyPredictedOwnerImpact(this.ownerId, event);
+        if (event.projectileId && this.pendingImpacts.has(event.projectileId)) return false;
+        const before = this.simulation.playerState(this.ownerId);
+        const tick = this.simulation.getTick();
+        const applied = this.simulation.applyPredictedOwnerImpact(this.ownerId, event);
+        if (applied && event.projectileId) this.pendingImpacts.set(event.projectileId, { before, tick });
+        return applied;
+    }
+
+    recordImpactReceipt(receipt, snapshot = null) {
+        const pending = this.pendingImpacts.get(receipt.projectileId);
+        if (!pending) return false;
+        this.pendingImpacts.delete(receipt.projectileId);
+        if (receipt.accepted) return true;
+
+        const displayedBefore = this.presentationState();
+        const targetTick = this.simulation.getTick();
+        this.simulation.preparePrediction(snapshot?.state.enemies ?? [], snapshot?.state.activeCheckpointId);
+        this.simulation.restoreOwnerPrediction(this.ownerId, pending.before, pending.tick);
+        this.replayInputs(pending.tick, targetTick, new Map());
+
+        const authoritative = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
+        if (authoritative) {
+            this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
+                preserveRopeBoost: this.pendingRopeSwings.size > 0,
+                preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0
+            });
+        }
+        const corrected = this.state();
+        this.startPresentationCorrection(displayedBefore, corrected);
+        return true;
     }
 
     resolveCollisions(otherPlayers, radius) {

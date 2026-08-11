@@ -10,6 +10,7 @@ import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js"
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
+import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { closestPointOnSurface } from "../src/game/world/WorldGenerator.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
 
@@ -715,6 +716,132 @@ export async function run() {
         const impactReceipt = authority.drainImpactClaimReceipts()[0];
         assert.equal(impactReceipt.projectileId, receiptProjectile.id);
         assert.equal(impactReceipt.accepted, true);
+
+        authorityPlayer.hitInvulnerabilityRemaining = 0;
+        authorityPlayer.ropeDisabledRemaining = 0;
+        const localImpactPlayer = authority.ownerRuntime.simulation.players.find(({ id }) => id === authority.playerId);
+        localImpactPlayer.hitInvulnerabilityRemaining = 0;
+        localImpactPlayer.ropeDisabledRemaining = 0;
+        gameServer.broadcast(room, { type: "snapshot", payload: room.adapter.snapshot() });
+        await waitFor(
+            () =>
+                authority.latestSnapshot.state.players.find(({ id }) => id === authority.playerId)
+                    ?.hitInvulnerabilityRemaining === 0,
+            "the rejection test must begin from a shared vulnerable state"
+        );
+        const beforeRejectedBody = authority.ownerRuntime.simulation.playerState(authority.playerId);
+        const beforeRejectedBodyTick = authority.snapshot().owner.tick;
+        const expectedAfterRejectedBody = new GameSimulation({
+            worldSeed: room.simulation.world.seed,
+            playerId: authority.playerId
+        });
+        expectedAfterRejectedBody.enemies = [];
+        expectedAfterRejectedBody.restoreOwnerPrediction(
+            authority.playerId,
+            beforeRejectedBody,
+            beforeRejectedBodyTick
+        );
+        const rejectedBodyProjectile = new ProjectileObject({
+            id: "rejected-body-impact-projectile",
+            ownerId: "rejected-body-impact-enemy",
+            targetId: authority.playerId,
+            position: authorityPlayer.physics.position.clone(),
+            velocity: new Vector2(120, 0),
+            damage: 20,
+            radius: 7
+        });
+        room.simulation.enemyProjectiles.push(rejectedBodyProjectile);
+        assert.equal(
+            authority.resolvePredictedImpact({
+                projectileId: rejectedBodyProjectile.id,
+                targetId: authority.playerId,
+                clientTick: beforeRejectedBodyTick,
+                resolution: "player-hit",
+                position: { x: authorityPlayer.physics.position.x + 1000, y: authorityPlayer.physics.position.y },
+                velocity: { x: rejectedBodyProjectile.velocity.x, y: rejectedBodyProjectile.velocity.y },
+                parameters: { damage: rejectedBodyProjectile.damage }
+            }),
+            true
+        );
+        assert.ok(
+            authority.snapshot().owner.hitInvulnerabilityRemaining > 0,
+            "the victim must feel the predicted hit before its receipt"
+        );
+        const replayedCommands = [movementCommand(1), movementCommand(-1)];
+        for (const command of replayedCommands) {
+            authority.advance(command);
+            const nextTick = expectedAfterRejectedBody.getTick() + 1;
+            expectedAfterRejectedBody.advanceOwnerPrediction(authority.playerId, command, 1 / 120, nextTick);
+        }
+        await waitFor(
+            () => authority.impactClaimReceipts.length > 0,
+            "the invalid body impact must return a rejection receipt"
+        );
+        const rejectedBodyReceipt = authority.drainImpactClaimReceipts()[0];
+        assert.equal(rejectedBodyReceipt.accepted, false);
+        assert.equal(rejectedBodyReceipt.reason, "trajectory-mismatch");
+        const rolledBackBody = authority.snapshot().owner;
+        while (expectedAfterRejectedBody.getTick() < rolledBackBody.tick) {
+            const nextTick = expectedAfterRejectedBody.getTick() + 1;
+            expectedAfterRejectedBody.advanceOwnerPrediction(
+                authority.playerId,
+                replayedCommands.at(-1),
+                1 / 120,
+                nextTick
+            );
+        }
+        const expectedBody = expectedAfterRejectedBody.ownerPredictionState(authority.playerId);
+        assert.ok(
+            distance(rolledBackBody.position, expectedBody.position) < 1e-9,
+            `rejected impact position replay mismatch: ${JSON.stringify({ rolledBackBody, expectedBody })}`
+        );
+        assert.ok(
+            distance(rolledBackBody.velocity, expectedBody.velocity) < 1e-9,
+            `rejected impact velocity replay mismatch: ${JSON.stringify({ rolledBackBody, expectedBody })}`
+        );
+        assert.equal(rolledBackBody.hitInvulnerabilityRemaining, expectedBody.hitInvulnerabilityRemaining);
+
+        const ropeAnchor = {
+            x: rolledBackBody.position.x,
+            y: rolledBackBody.position.y - 80
+        };
+        localImpactPlayer.ropeObject.rope.attach(localImpactPlayer.physics.position, ropeAnchor);
+        localImpactPlayer.ropeDisabledRemaining = 0;
+        authorityPlayer.ropeDisabledRemaining = 0;
+        const rejectedRopeProjectile = new ProjectileObject({
+            id: "rejected-rope-impact-projectile",
+            ownerId: "rejected-rope-impact-enemy",
+            targetId: authority.playerId,
+            position: authorityPlayer.physics.position.clone(),
+            velocity: new Vector2(0, -120),
+            damage: 0,
+            radius: 7
+        });
+        room.simulation.enemyProjectiles.push(rejectedRopeProjectile);
+        assert.equal(
+            authority.resolvePredictedImpact({
+                projectileId: rejectedRopeProjectile.id,
+                targetId: authority.playerId,
+                clientTick: authority.snapshot().owner.tick,
+                resolution: "rope-cut",
+                position: { x: authorityPlayer.physics.position.x + 1000, y: authorityPlayer.physics.position.y },
+                velocity: { x: rejectedRopeProjectile.velocity.x, y: rejectedRopeProjectile.velocity.y },
+                parameters: { damage: 0 }
+            }),
+            true
+        );
+        assert.equal(authority.snapshot().owner.rope.isAttached, false);
+        await waitFor(
+            () => authority.impactClaimReceipts.length > 0,
+            "the invalid rope impact must return a rejection receipt"
+        );
+        const rejectedRopeReceipt = authority.drainImpactClaimReceipts()[0];
+        assert.equal(rejectedRopeReceipt.accepted, false);
+        assert.equal(rejectedRopeReceipt.reason, "trajectory-mismatch");
+        assert.equal(authority.snapshot().owner.rope.isAttached, true);
+        assert.equal(authority.snapshot().owner.ropeDisabledRemaining, 0);
+        authority.ownerRuntime.simulation.releasePlayerRope(authority.playerId);
+        room.simulation.releasePlayerRope(authority.playerId);
         const hitTarget = room.simulation.enemies[0];
         const playerProjectile = new ProjectileObject({
             id: "player-hit-receipt-projectile",
