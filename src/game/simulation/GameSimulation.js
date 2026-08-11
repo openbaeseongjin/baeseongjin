@@ -362,7 +362,7 @@ export class GameSimulation {
         return this.stepPlayers(dt, new Map([[this.#primaryPlayerId, command]]));
     }
 
-    stepCommandBatch(dt, batch, { recoverPlayerFalls = true } = {}) {
+    stepCommandBatch(dt, batch, { recoverPlayerFalls = true, resolveCheckpointProgress = true } = {}) {
         const expectedTick = this.tick + 1;
         if (batch.tick !== expectedTick) throw new Error(`command batch tick ${batch.tick} must equal ${expectedTick}`);
         const playersById = new Map(this.players.map((player) => [player.id, player]));
@@ -371,10 +371,10 @@ export class GameSimulation {
             if (!playersById.has(entry.playerId)) throw new Error(`unknown playerId: ${entry.playerId}`);
             commandsByPlayerId.set(entry.playerId, entry.command);
         }
-        return this.stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls });
+        return this.stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls, resolveCheckpointProgress });
     }
 
-    stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls = true } = {}) {
+    stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls = true, resolveCheckpointProgress = true } = {}) {
         this.tick += 1;
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
@@ -384,7 +384,7 @@ export class GameSimulation {
             this.beginCompletion();
             return;
         }
-        this.updateCheckpointProgress();
+        if (resolveCheckpointProgress) this.updateCheckpointProgress();
         const choosingRewardPlayerIds = new Set(this.artifactRewards.keys());
         this.updateArtifactRewards(commandsByPlayerId);
         const gameplayCommands = new Map(commandsByPlayerId);
@@ -543,17 +543,59 @@ export class GameSimulation {
     updateCheckpointProgress() {
         for (const checkpoint of this.world.checkpoints) {
             if (checkpoint.level <= (this.activeCheckpoint?.level ?? -1)) continue;
-            const reached = this.players.some(
+            const player = this.players.find(
                 (player) =>
                     player.lifeState === "active" && player.physics.position.distanceTo(checkpoint) <= checkpoint.radius
             );
-            if (!reached) continue;
-            this.activeCheckpoint = checkpoint;
-            this.metrics.recordCheckpoint();
-            this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint };
-            if (checkpoint.level > 0 && !this.rewardedCheckpointIds.has(checkpoint.id)) {
-                this.beginArtifactReward(checkpoint);
-            }
+            if (!player) continue;
+            this.#activateCheckpoint(checkpoint, player.id);
+        }
+    }
+
+    checkpointClaimCandidate(playerId) {
+        const player = this.players.find(({ id }) => id === playerId);
+        if (!player || player.lifeState !== "active") return null;
+        return (
+            this.world.checkpoints.find(
+                (checkpoint) =>
+                    checkpoint.level > (this.activeCheckpoint?.level ?? -1) &&
+                    player.physics.position.distanceTo(checkpoint) <= checkpoint.radius
+            ) ?? null
+        );
+    }
+
+    resolveCheckpointClaim(playerId, claim, { positionTolerance = 40 } = {}) {
+        if (this.runState !== "playing") return Object.freeze({ accepted: false, reason: "run-inactive" });
+        const player = this.players.find(({ id }) => id === playerId);
+        if (!player || player.lifeState !== "active") {
+            return Object.freeze({ accepted: false, reason: "player-ineligible" });
+        }
+        const checkpoint = this.world.checkpoints.find(({ id }) => id === claim.checkpointId);
+        if (!checkpoint) return Object.freeze({ accepted: false, reason: "checkpoint-missing" });
+        if (checkpoint.level <= (this.activeCheckpoint?.level ?? -1)) {
+            return Object.freeze({ accepted: false, reason: "checkpoint-elapsed" });
+        }
+        if (Math.hypot(claim.position.x - checkpoint.x, claim.position.y - checkpoint.y) > checkpoint.radius) {
+            return Object.freeze({ accepted: false, reason: "checkpoint-out-of-range" });
+        }
+        if (player.physics.position.distanceTo(claim.position) > positionTolerance) {
+            return Object.freeze({ accepted: false, reason: "owner-state-mismatch" });
+        }
+        this.#activateCheckpoint(checkpoint, playerId);
+        return Object.freeze({ accepted: true, resolution: "checkpoint-reached" });
+    }
+
+    #activateCheckpoint(checkpoint, playerId) {
+        this.activeCheckpoint = checkpoint;
+        this.metrics.recordCheckpoint();
+        this.eventFlash = { type: "checkpoint", age: 0, position: checkpoint, checkpointId: checkpoint.id, playerId };
+        this.recordReplicationEvent("checkpoint-reached", {
+            checkpointId: checkpoint.id,
+            playerId,
+            position: { x: checkpoint.x, y: checkpoint.y }
+        });
+        if (checkpoint.level > 0 && !this.rewardedCheckpointIds.has(checkpoint.id)) {
+            this.beginArtifactReward(checkpoint);
         }
     }
 

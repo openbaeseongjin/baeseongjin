@@ -7,9 +7,11 @@ import { run as predictableProjectileStore } from "./predictableProjectileStore.
 import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mjs";
 import { run as gameServerHandler } from "./gameServerHandler.mjs";
 import { run as artifactSelectionClaim } from "./artifactSelectionClaim.mjs";
+import { run as checkpointClaim } from "./checkpointClaim.mjs";
 
 const steps = {
     artifactSelectionClaim,
+    checkpointClaim,
     playerCommandBatch,
     authorityServerSession,
     ownerPredictionRuntime,

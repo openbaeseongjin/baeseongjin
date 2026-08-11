@@ -1,5 +1,6 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
 import { WORLD_CONFIG } from "../config.js";
+import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
@@ -35,6 +36,7 @@ export class AuthorityServerSession {
         this.resolvedHitClaims = new Map();
         this.resolvedImpactClaims = new Map();
         this.resolvedArtifactSelections = new Map();
+        this.resolvedCheckpointClaims = new Map();
         this.lastOwnerMotionTicks = new Map();
         this.lastOwnerRopeTicks = new Map();
     }
@@ -126,6 +128,31 @@ export class AuthorityServerSession {
             ...this.simulation.resolveArtifactSelection(authenticatedPlayerId, claim)
         });
         if (receipt.accepted) this.resolvedArtifactSelections.set(selectionKey, receipt);
+        return receipt;
+    }
+
+    submitCheckpointClaim(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const existing = this.resolvedCheckpointClaims.get(claim.checkpointId);
+        if (existing) return existing;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return createCheckpointClaimReceipt({
+                checkpointId: claim.checkpointId,
+                accepted: false,
+                reason: "tick-window"
+            });
+        }
+        const receipt = createCheckpointClaimReceipt({
+            checkpointId: claim.checkpointId,
+            ...this.simulation.resolveCheckpointClaim(authenticatedPlayerId, claim, {
+                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+            })
+        });
+        if (receipt.accepted) this.resolvedCheckpointClaims.set(claim.checkpointId, receipt);
         return receipt;
     }
 
@@ -226,7 +253,10 @@ export class AuthorityServerSession {
     advance() {
         const nextTick = this.simulation.getTick() + 1;
         const commands = this.inputState.expand(this.inbox.take(nextTick), this.simulation.playerIds());
-        this.simulation.stepCommandBatch(this.fixedDt, commands, { recoverPlayerFalls: false });
+        this.simulation.stepCommandBatch(this.fixedDt, commands, {
+            recoverPlayerFalls: false,
+            resolveCheckpointProgress: false
+        });
         const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedHitClaims.delete(predictionId);

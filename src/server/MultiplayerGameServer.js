@@ -152,6 +152,11 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "artifact-selection-receipt", payload: receipt }));
                 return;
             }
+            if (message?.type === "checkpoint-claim" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveCheckpointClaim(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "checkpoint-claim-receipt", payload: receipt }));
+                return;
+            }
             if (message?.type === "owner-motion" && typeof message.payload === "string") {
                 const receipt = room.adapter.receiveOwnerMotion(playerId, message.payload);
                 socket.send(JSON.stringify({ type: "owner-motion-receipt", payload: receipt }));

@@ -212,6 +212,46 @@ export async function run() {
         "duplicate owner receipts must not trigger another correction"
     );
 
+    const checkpointMessages = [];
+    const checkpointAuthority = new RemoteGameAuthority({
+        url: "ws://checkpoint.test/multiplayer",
+        WebSocketImpl: { OPEN: 1 }
+    });
+    checkpointAuthority.socket = {
+        readyState: 1,
+        send: (serialized) => checkpointMessages.push(JSON.parse(serialized))
+    };
+    checkpointAuthority.ownerRuntime = {
+        state: () => ({
+            tick: 50,
+            position: { x: 240, y: 320 },
+            velocity: { x: 10, y: 0 },
+            isGrounded: true,
+            rope: { isAttached: false, anchor: null }
+        }),
+        checkpointClaimCandidate: () => ({
+            checkpointId: "checkpoint-test",
+            clientTick: 50,
+            position: { x: 240, y: 320 },
+            feedbackPosition: { x: 240, y: 320 }
+        })
+    };
+    const predictedCheckpoint = checkpointAuthority.submitReachedCheckpoint();
+    assert.equal(predictedCheckpoint.checkpointId, "checkpoint-test");
+    assert.deepEqual(
+        checkpointMessages.map(({ type }) => type),
+        ["owner-motion", "checkpoint-claim"],
+        "the latest owner state must precede its checkpoint claim"
+    );
+    assert.equal(checkpointAuthority.submitReachedCheckpoint(), null, "one checkpoint claim may be pending at a time");
+    checkpointAuthority.recordCheckpointClaimReceipt({
+        checkpointId: "checkpoint-test",
+        accepted: false,
+        reason: "test-rejection"
+    });
+    assert.equal(checkpointAuthority.pendingCheckpointId, null);
+    assert.equal(checkpointAuthority.drainCheckpointClaimReceipts().length, 1);
+
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer);
     let gameServerClosed = false;
@@ -296,6 +336,41 @@ export async function run() {
             () => authority.artifactSelectionReceipts.some(({ accepted }) => accepted),
             "the selecting client must receive an artifact receipt"
         );
+        const checkpointObserver = new RemoteGameAuthority({
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=${authority.channelId}`,
+            WebSocketImpl: WebSocket
+        });
+        await checkpointObserver.connect();
+        authorityPlayer.physics.position.set(rewardCheckpoint.x, rewardCheckpoint.y);
+        authorityPlayer.physics.velocity.set(0, 0);
+        authority.ownerRuntime.simulation.restoreOwnerPrediction(
+            authority.playerId,
+            room.simulation.playerState(authority.playerId),
+            authority.snapshot().owner.tick
+        );
+        app.update(1 / 120, movementCommand(0));
+        assert.equal(
+            app.checkpointFeedback?.checkpointId,
+            rewardCheckpoint.id,
+            "the owner must show checkpoint feedback before the server snapshot"
+        );
+        await waitFor(
+            () => room.simulation.activeCheckpoint.id === rewardCheckpoint.id,
+            "the checkpoint claim must advance the shared server world"
+        );
+        await waitFor(
+            () => authority.snapshot().state.activeCheckpointId === rewardCheckpoint.id,
+            "the accepted checkpoint must converge back through the shared snapshot"
+        );
+        const observedCheckpointEvents = [];
+        await waitFor(() => {
+            observedCheckpointEvents.push(...checkpointObserver.drainEvents());
+            return observedCheckpointEvents.some(
+                ({ eventType, checkpointId }) =>
+                    eventType === "checkpoint-reached" && checkpointId === rewardCheckpoint.id
+            );
+        }, "the other client must receive the shared checkpoint event");
+        checkpointObserver.close();
         const ownerBeforeAttach = authority.snapshot().owner;
         const anchor = nearestRopeAnchor(authority.renderSnapshot().world, ownerBeforeAttach.position);
         const attachCommand = {
