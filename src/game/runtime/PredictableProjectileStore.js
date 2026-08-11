@@ -1,4 +1,5 @@
 import { ProjectileObject } from "../combat/ProjectileObject.js";
+import { advanceHomingProjectileMotion, advanceProjectileMotion } from "../combat/ProjectileMotion.js";
 
 const FIXED_DT = 1 / 120;
 
@@ -30,17 +31,11 @@ function advanceProjectile(projectile, dt, state) {
     if (projectile.objectType === "player-projectile") {
         const target = state?.enemies?.find(({ id }) => id === projectile.targetId);
         if (target) {
-            const dx = target.position.x - projectile.position.x;
-            const dy = target.position.y - projectile.position.y;
-            const distance = Math.hypot(dx, dy);
-            if (distance > 0) {
-                projectile.velocity.x = (dx / distance) * projectile.speed;
-                projectile.velocity.y = (dy / distance) * projectile.speed;
-            }
+            advanceHomingProjectileMotion(projectile, target.position, projectile.speed, dt);
+            return;
         }
     }
-    projectile.position.x += projectile.velocity.x * dt;
-    projectile.position.y += projectile.velocity.y * dt;
+    advanceProjectileMotion(projectile, dt);
 }
 
 function findPendingPrediction(objects, event) {
