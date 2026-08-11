@@ -228,7 +228,7 @@ export class GameSimulation {
         return this.ownerPredictionState(ownerId);
     }
 
-    applyOwnerPredictionOutcomes(ownerId, authoritative, predictionTick) {
+    applyOwnerPredictionOutcomes(ownerId, authoritative, predictionTick, { preserveRopeBoost = false } = {}) {
         const player = this.#requirePlayer(ownerId);
         const lifeStateChanged = player.lifeState !== authoritative.lifeState;
         player.health = authoritative.health;
@@ -243,7 +243,9 @@ export class GameSimulation {
         player.weapon.damage = authoritative.weapon.damage;
         player.weapon.fireInterval = authoritative.weapon.fireInterval;
         player.artifacts.replace(authoritative.artifacts);
+        if (!preserveRopeBoost) player.ropeDamageBoostRemaining = authoritative.ropeDamageBoostRemaining;
         player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
+        this.applyArtifactEffects(player);
         if (authoritative.ropeDisabledRemaining > 0) this.releasePlayerRope(ownerId);
         if (lifeStateChanged) {
             this.#restorePlayer(player, authoritative);
@@ -255,11 +257,19 @@ export class GameSimulation {
     advanceOwnerPrediction(ownerId, command, dt, tick) {
         const player = this.#requirePlayer(ownerId);
         this.#prepareOwnerStep(player, dt);
-        this.dispatchOwnerInput(ownerId, command, dt);
+        const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt);
         const projectile = this.#advanceAutomaticWeapon(player, dt);
         this.projectiles.length = 0;
         this.tick = tick;
-        return projectile;
+        return Object.freeze({ projectile, swingTriggered: inputOutcome.swingTriggered });
+    }
+
+    restorePredictedRopeBoost(ownerId, remaining) {
+        if (!Number.isFinite(remaining) || remaining < 0) throw new Error("remaining must be non-negative");
+        const player = this.#requirePlayer(ownerId);
+        player.ropeDamageBoostRemaining = remaining;
+        this.applyArtifactEffects(player);
+        return this.ownerPredictionState(ownerId);
     }
 
     idleOwnerCommand(ownerId) {
@@ -527,6 +537,7 @@ export class GameSimulation {
 
     dispatchOwnerInput(ownerId, command, dt) {
         const player = this.#requirePlayer(ownerId);
+        let swingTriggered = false;
         const canControl = player.lifeState === "active";
         const effectiveCommand = canControl
             ? command
@@ -537,7 +548,7 @@ export class GameSimulation {
                   pointer: { x: 0, y: 0, down: false },
                   aimWorld: player.ropeObject.aimWorld
               };
-        return this.#inputDispatcher.dispatch({
+        this.#inputDispatcher.dispatch({
             objects: this.inputDrivenObjects(player.id),
             ownerId: player.id,
             input: effectiveCommand,
@@ -554,9 +565,11 @@ export class GameSimulation {
                     const effects = getArtifactEffects(player.artifacts.snapshot());
                     player.ropeDamageBoostRemaining = effects.swingDamageDuration;
                     this.applyArtifactEffects(player);
+                    swingTriggered = effects.swingDamageDuration > 0;
                 }
             }
         });
+        return Object.freeze({ swingTriggered });
     }
 
     #prepareOwnerStep(player, dt) {
@@ -818,6 +831,39 @@ export class GameSimulation {
         projectile.predictionId = claim.predictionId;
         this.recordProjectileSpawn(projectile, "player-projectile");
         return Object.freeze({ accepted: true, projectileId: projectile.id });
+    }
+
+    resolveRopeSwingClaim(authenticatedPlayerId, claim, { positionTolerance = 40, anchorTolerance = 16 } = {}) {
+        const player = this.players.find(({ id }) => id === authenticatedPlayerId);
+        if (!player || player.lifeState !== "active") {
+            return Object.freeze({ accepted: false, reason: "player-ineligible" });
+        }
+        if (claim.predictionId !== `${authenticatedPlayerId}:swing:${claim.clientTick}`) {
+            return Object.freeze({ accepted: false, reason: "prediction-ownership" });
+        }
+        const effects = getArtifactEffects(player.artifacts.snapshot());
+        if (effects.swingDamageDuration <= 0) {
+            return Object.freeze({ accepted: false, reason: "swing-effect-missing" });
+        }
+        if (!player.ropeObject.rope.isAttached || !player.ropeObject.rope.anchor) {
+            return Object.freeze({ accepted: false, reason: "rope-detached" });
+        }
+        if (player.physics.position.distanceTo(claim.position) > positionTolerance) {
+            return Object.freeze({ accepted: false, reason: "position-mismatch" });
+        }
+        if (player.ropeObject.rope.anchor.distanceTo(claim.anchor) > anchorTolerance) {
+            return Object.freeze({ accepted: false, reason: "anchor-mismatch" });
+        }
+        player.ropeDamageBoostRemaining = effects.swingDamageDuration;
+        this.applyArtifactEffects(player);
+        this.recordReplicationEvent("rope-swing", {
+            playerId: authenticatedPlayerId,
+            predictionId: claim.predictionId,
+            position: { x: claim.position.x, y: claim.position.y },
+            anchor: { x: claim.anchor.x, y: claim.anchor.y },
+            duration: effects.swingDamageDuration
+        });
+        return Object.freeze({ accepted: true, duration: effects.swingDamageDuration });
     }
 
     resolvePlayerProjectileClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {

@@ -28,6 +28,7 @@ import {
     createOwnerMotionState,
     serializeOwnerMotionState
 } from "../network/OwnerMotionState.js";
+import { createRopeSwingClaim, createRopeSwingReceipt, serializeRopeSwingClaim } from "../network/RopeSwingClaim.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
@@ -64,6 +65,7 @@ export class RemoteGameAuthority {
         this.artifactSelectionReceipts = [];
         this.hitClaimReceipts = [];
         this.projectileSpawnClaimReceipts = [];
+        this.ropeSwingClaimReceipts = [];
         this.impactClaimReceipts = [];
         this.checkpointClaimReceipts = [];
         this.pendingCheckpointId = null;
@@ -151,6 +153,10 @@ export class RemoteGameAuthority {
                         this.recordHitClaimReceipt(createProjectileHitReceipt(message.payload));
                     } else if (message.type === "projectile-spawn-claim-receipt") {
                         this.projectileSpawnClaimReceipts.push(createPlayerProjectileSpawnReceipt(message.payload));
+                    } else if (message.type === "rope-swing-claim-receipt") {
+                        const receipt = createRopeSwingReceipt(message.payload);
+                        this.ropeSwingClaimReceipts.push(receipt);
+                        this.ownerRuntime?.recordRopeSwingReceipt(receipt);
                     } else if (message.type === "impact-claim-receipt") {
                         this.impactClaimReceipts.push(createPlayerImpactReceipt(message.payload));
                     } else if (message.type === "owner-motion-receipt") {
@@ -289,6 +295,24 @@ export class RemoteGameAuthority {
         return true;
     }
 
+    submitRopeSwingClaim(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const claim = createRopeSwingClaim({
+            predictionId: event.predictionId,
+            clientTick: event.tick,
+            position: event.position,
+            anchor: event.anchor
+        });
+        this.socket.send(
+            JSON.stringify({
+                type: "rope-swing-claim",
+                payload: serializeRopeSwingClaim(claim)
+            })
+        );
+        return true;
+    }
+
     submitImpactClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createPlayerImpactClaim({
@@ -355,6 +379,12 @@ export class RemoteGameAuthority {
     drainProjectileSpawnClaimReceipts() {
         const receipts = Object.freeze(this.projectileSpawnClaimReceipts);
         this.projectileSpawnClaimReceipts = [];
+        return receipts;
+    }
+
+    drainRopeSwingClaimReceipts() {
+        const receipts = Object.freeze(this.ropeSwingClaimReceipts);
+        this.ropeSwingClaimReceipts = [];
         return receipts;
     }
 

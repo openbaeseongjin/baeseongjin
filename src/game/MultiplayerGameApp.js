@@ -148,6 +148,7 @@ export class MultiplayerGameApp {
         this.applyCheckpointClaimReceipts();
         this.applySummitClaimReceipts();
         this.predictableProjectiles.applySpawnClaimReceipts(this.authority.drainProjectileSpawnClaimReceipts());
+        this.authority.drainRopeSwingClaimReceipts();
         this.predictableProjectiles.applyHitClaimReceipts(this.authority.drainHitClaimReceipts());
         this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
@@ -196,7 +197,10 @@ export class MultiplayerGameApp {
             current.state.players.filter(({ id }) => id !== this.authority.playerId),
             PLAYER_CONFIG.radius
         );
-        const predictedSpawns = this.authority.drainPredictedEvents();
+        const predictedEvents = this.authority.drainPredictedEvents();
+        const predictedSwings = predictedEvents.filter(({ eventType }) => eventType === "predicted-rope-swing");
+        const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
+        for (const event of predictedSwings) this.authority.submitRopeSwingClaim(event);
         this.predictableProjectiles.predict(predictedSpawns);
         for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);
         const predictedPlayer = this.authority.snapshot().owner;

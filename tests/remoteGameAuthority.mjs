@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
 import { Vector2 } from "../src/game-kit/index.js";
+import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
@@ -113,6 +114,33 @@ function nearestRopeAnchor(world, position) {
                 ? point
                 : nearest
         );
+}
+
+function armPredictedRopeSwing(authority) {
+    const simulation = authority.ownerRuntime.simulation;
+    const player = simulation.players.find(({ id }) => id === authority.playerId);
+    const anchor = {
+        x: player.physics.position.x,
+        y: player.physics.position.y - 80
+    };
+    player.ropeObject.rope.attach(player.physics.position, anchor);
+    player.ropeObject.aimWorld = { ...anchor };
+    player.ropeObject.lastPointer = { x: 400, y: 300, down: true };
+    player.ropeObject.lastViewport = { width: 1280, height: 720 };
+    player.ropeObject.wasPointerDown = true;
+    player.ropeObject.swingDrag = {
+        origin: { x: 400, y: 300 },
+        direction: null,
+        progress: 0,
+        age: 0.1,
+        used: false
+    };
+    return {
+        ...movementCommand(0),
+        pointer: { x: 300, y: 300, down: true, pressed: false, released: false },
+        viewport: { width: 1280, height: 720 },
+        aimWorld: { ...anchor }
+    };
 }
 
 function listen(server) {
@@ -487,6 +515,109 @@ export async function run() {
             spawnRoom.simulation.projectiles.length,
             1,
             "a duplicate claim must not create another projectile"
+        );
+        spawnRoom.simulation.projectiles.length = 0;
+        spawnRoom.simulation.enemies = [];
+        const resonance = ARTIFACT_CATALOG.find(({ id }) => id === "rope-resonance");
+        spawnPlayer.artifacts.add(resonance);
+        spawnRoom.simulation.applyArtifactEffects(spawnPlayer);
+        gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
+        await waitFor(
+            () =>
+                spawnOwner
+                    .snapshot()
+                    .state.players.find(({ id }) => id === spawnOwner.playerId)
+                    ?.artifacts.some(({ id }) => id === resonance.id) &&
+                spawnOwner.ownerRuntime.simulation.players
+                    .find(({ id }) => id === spawnOwner.playerId)
+                    ?.artifacts.snapshot()
+                    .some(({ id }) => id === resonance.id),
+            "the owner prediction must receive the rope resonance artifact"
+        );
+        const swingCommand = armPredictedRopeSwing(spawnOwner);
+        spawnOwner.advance(swingCommand);
+        const swingEvents = spawnOwner.drainPredictedEvents();
+        const predictedSwing = swingEvents.find(({ eventType }) => eventType === "predicted-rope-swing");
+        assert.ok(
+            predictedSwing,
+            `the owner must emit the swing transition before its receipt: ${JSON.stringify({
+                swingEvents,
+                state: spawnOwner.snapshot().owner,
+                artifacts: spawnOwner.ownerRuntime.simulation.players
+                    .find(({ id }) => id === spawnOwner.playerId)
+                    .artifacts.snapshot()
+            })}`
+        );
+        assert.ok(spawnOwner.snapshot().owner.ropeDamageBoostRemaining > 0);
+        const preClaimSequence = spawnOwner.latestSnapshot.snapshotSequence;
+        gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
+        await waitFor(
+            () => spawnOwner.latestSnapshot.snapshotSequence > preClaimSequence,
+            "the owner must receive a pre-claim authority snapshot"
+        );
+        assert.ok(
+            spawnOwner.snapshot().owner.ropeDamageBoostRemaining > 0,
+            "an in-flight pre-claim snapshot must not erase immediate swing feedback"
+        );
+        assert.equal(spawnOwner.submitRopeSwingClaim(predictedSwing), true);
+        await waitFor(
+            () => spawnOwner.ropeSwingClaimReceipts.length > 0,
+            "the owner must receive its rope swing receipt"
+        );
+        const firstSwingReceipt = spawnOwner.drainRopeSwingClaimReceipts()[0];
+        assert.equal(firstSwingReceipt.accepted, true);
+        const observerSwingEvents = [];
+        await waitFor(() => {
+            observerSwingEvents.push(...spawnObserver.drainEvents());
+            const observerPlayer = spawnObserver.snapshot().state.players.find(({ id }) => id === spawnOwner.playerId);
+            return (
+                observerPlayer?.ropeDamageBoostRemaining > 0 &&
+                observerSwingEvents.some(({ predictionId }) => predictionId === predictedSwing.predictionId)
+            );
+        }, "the accepted swing state and event must converge to the observer");
+        assert.ok(spawnRoom.simulation.playerState(spawnOwner.playerId).ropeDamageBoostRemaining > 0);
+        assert.equal(spawnOwner.submitRopeSwingClaim(predictedSwing), true);
+        await waitFor(() => spawnOwner.ropeSwingClaimReceipts.length > 0, "a duplicate swing must return its receipt");
+        assert.equal(spawnOwner.drainRopeSwingClaimReceipts()[0].duration, firstSwingReceipt.duration);
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        observerSwingEvents.push(...spawnObserver.drainEvents());
+        assert.equal(
+            observerSwingEvents.filter(({ predictionId }) => predictionId === predictedSwing.predictionId).length,
+            1,
+            "a duplicate swing claim must not create a second shared event"
+        );
+
+        spawnPlayer.ropeDamageBoostRemaining = 0;
+        spawnRoom.simulation.applyArtifactEffects(spawnPlayer);
+        const localSwingPlayer = spawnOwner.ownerRuntime.simulation.players.find(
+            ({ id }) => id === spawnOwner.playerId
+        );
+        localSwingPlayer.ropeDamageBoostRemaining = 0;
+        spawnOwner.ownerRuntime.simulation.applyArtifactEffects(localSwingPlayer);
+        const rejectedSwingCommand = armPredictedRopeSwing(spawnOwner);
+        spawnOwner.advance(rejectedSwingCommand);
+        const rejectedSwing = spawnOwner
+            .drainPredictedEvents()
+            .find(({ eventType }) => eventType === "predicted-rope-swing");
+        assert.ok(rejectedSwing);
+        assert.equal(
+            spawnOwner.submitRopeSwingClaim({
+                ...rejectedSwing,
+                anchor: { x: rejectedSwing.anchor.x + 1000, y: rejectedSwing.anchor.y }
+            }),
+            true
+        );
+        await waitFor(
+            () => spawnOwner.ropeSwingClaimReceipts.length > 0,
+            "the invalid swing must return a rejection receipt"
+        );
+        const rejectedSwingReceipt = spawnOwner.drainRopeSwingClaimReceipts()[0];
+        assert.equal(rejectedSwingReceipt.accepted, false);
+        assert.equal(rejectedSwingReceipt.reason, "anchor-mismatch");
+        assert.equal(
+            spawnOwner.snapshot().owner.ropeDamageBoostRemaining,
+            0,
+            "a rejected swing must roll back the predicted boost"
         );
         spawnObserver.close();
         spawnOwner.close();
