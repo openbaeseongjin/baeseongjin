@@ -5,6 +5,7 @@ import { createCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
+import { createPlayerProjectileSpawnClaim } from "../src/game/network/PlayerProjectileSpawnClaim.js";
 import { createSummitClaim } from "../src/game/network/SummitClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
 import { Vector2 } from "../src/game-kit/index.js";
@@ -287,6 +288,29 @@ export function run() {
 
     combatPlayer.weapon.cooldown = 0;
     combatSession.advance();
+    assert.equal(
+        combatSimulation.projectiles.length,
+        0,
+        "the multiplayer server fixed tick must not initiate a player projectile"
+    );
+    const spawnTarget = combatSimulation.enemies
+        .filter((enemy) => combatPlayer.physics.position.distanceTo(enemy.position) <= combatPlayer.weapon.range)
+        .sort((left, right) => {
+            const distanceDifference =
+                combatPlayer.physics.position.distanceTo(left.position) -
+                combatPlayer.physics.position.distanceTo(right.position);
+            return distanceDifference || left.id.localeCompare(right.id);
+        })[0];
+    const spawnClaim = createPlayerProjectileSpawnClaim({
+        predictionId: `${combatPlayer.id}:${combatSimulation.tick}`,
+        clientTick: combatSimulation.tick,
+        targetId: spawnTarget.id,
+        position: combatPlayer.physics.position
+    });
+    const spawnReceipt = combatSession.submitProjectileSpawnClaim(combatPlayer.id, spawnClaim);
+    assert.equal(spawnReceipt.accepted, true);
+    assert.equal(combatSession.submitProjectileSpawnClaim(combatPlayer.id, spawnClaim), spawnReceipt);
+    assert.equal(combatSimulation.projectiles.length, 1, "a duplicate spawn claim must not create two bullets");
     const projectile = combatSimulation.projectiles[0];
     const target = combatSimulation.enemies.find(({ id }) => id === projectile.targetId);
     projectile.position = target.position.clone();
@@ -398,6 +422,24 @@ export function run() {
     const forgedSession = new AuthorityServerSession({ simulation: forgedSimulation });
     forgedPlayer.weapon.cooldown = 0;
     forgedSession.advance();
+    const forgedTarget = forgedSimulation.enemies
+        .filter((enemy) => forgedPlayer.physics.position.distanceTo(enemy.position) <= forgedPlayer.weapon.range)
+        .sort((left, right) => {
+            const distanceDifference =
+                forgedPlayer.physics.position.distanceTo(left.position) -
+                forgedPlayer.physics.position.distanceTo(right.position);
+            return distanceDifference || left.id.localeCompare(right.id);
+        })[0];
+    const foreignSpawn = forgedSession.submitProjectileSpawnClaim(
+        forgedPlayer.id,
+        createPlayerProjectileSpawnClaim({
+            predictionId: `${forgedPlayer.id}:${forgedSimulation.tick}`,
+            clientTick: forgedSimulation.tick,
+            targetId: forgedTarget.id,
+            position: forgedPlayer.physics.position
+        })
+    );
+    assert.equal(foreignSpawn.accepted, true);
     const foreignProjectile = forgedSimulation.projectiles[0];
     const foreignTarget = forgedSimulation.enemies.find(({ id }) => id === foreignProjectile.targetId);
     assert.equal(

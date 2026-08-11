@@ -10,12 +10,14 @@ import { run as artifactSelectionClaim } from "./artifactSelectionClaim.mjs";
 import { run as checkpointClaim } from "./checkpointClaim.mjs";
 import { run as summitClaim } from "./summitClaim.mjs";
 import { run as projectileHitClaim } from "./projectileHitClaim.mjs";
+import { run as playerProjectileSpawnClaim } from "./playerProjectileSpawnClaim.mjs";
 
 const steps = {
     artifactSelectionClaim,
     checkpointClaim,
     summitClaim,
     projectileHitClaim,
+    playerProjectileSpawnClaim,
     playerCommandBatch,
     authorityServerSession,
     ownerPredictionRuntime,

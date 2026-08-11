@@ -19,6 +19,11 @@ import {
     serializePlayerImpactClaim
 } from "../network/PlayerImpactClaim.js";
 import {
+    createPlayerProjectileSpawnClaim,
+    createPlayerProjectileSpawnReceipt,
+    serializePlayerProjectileSpawnClaim
+} from "../network/PlayerProjectileSpawnClaim.js";
+import {
     createOwnerMotionReceipt,
     createOwnerMotionState,
     serializeOwnerMotionState
@@ -58,6 +63,7 @@ export class RemoteGameAuthority {
         this.processedReceiptOrder = [];
         this.artifactSelectionReceipts = [];
         this.hitClaimReceipts = [];
+        this.projectileSpawnClaimReceipts = [];
         this.impactClaimReceipts = [];
         this.checkpointClaimReceipts = [];
         this.pendingCheckpointId = null;
@@ -143,6 +149,8 @@ export class RemoteGameAuthority {
                         this.artifactSelectionReceipts.push(Object.freeze({ ...message.payload }));
                     } else if (message.type === "hit-claim-receipt") {
                         this.recordHitClaimReceipt(createProjectileHitReceipt(message.payload));
+                    } else if (message.type === "projectile-spawn-claim-receipt") {
+                        this.projectileSpawnClaimReceipts.push(createPlayerProjectileSpawnReceipt(message.payload));
                     } else if (message.type === "impact-claim-receipt") {
                         this.impactClaimReceipts.push(createPlayerImpactReceipt(message.payload));
                     } else if (message.type === "owner-motion-receipt") {
@@ -264,6 +272,23 @@ export class RemoteGameAuthority {
         return true;
     }
 
+    submitProjectileSpawnClaim(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
+        const claim = createPlayerProjectileSpawnClaim({
+            predictionId: event.predictionId,
+            targetId: event.targetId,
+            clientTick: event.tick,
+            position: event.position
+        });
+        this.socket.send(
+            JSON.stringify({
+                type: "projectile-spawn-claim",
+                payload: serializePlayerProjectileSpawnClaim(claim)
+            })
+        );
+        return true;
+    }
+
     submitImpactClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createPlayerImpactClaim({
@@ -324,6 +349,12 @@ export class RemoteGameAuthority {
     drainHitClaimReceipts() {
         const receipts = Object.freeze(this.hitClaimReceipts);
         this.hitClaimReceipts = [];
+        return receipts;
+    }
+
+    drainProjectileSpawnClaimReceipts() {
+        const receipts = Object.freeze(this.projectileSpawnClaimReceipts);
+        this.projectileSpawnClaimReceipts = [];
         return receipts;
     }
 
