@@ -152,7 +152,9 @@ export class RemoteGameAuthority {
                     } else if (message.type === "hit-claim-receipt") {
                         this.recordHitClaimReceipt(createProjectileHitReceipt(message.payload));
                     } else if (message.type === "projectile-spawn-claim-receipt") {
-                        this.projectileSpawnClaimReceipts.push(createPlayerProjectileSpawnReceipt(message.payload));
+                        const receipt = createPlayerProjectileSpawnReceipt(message.payload);
+                        this.projectileSpawnClaimReceipts.push(receipt);
+                        this.ownerRuntime?.recordProjectileSpawnReceipt(receipt);
                     } else if (message.type === "rope-swing-claim-receipt") {
                         const receipt = createRopeSwingReceipt(message.payload);
                         this.ropeSwingClaimReceipts.push(receipt);

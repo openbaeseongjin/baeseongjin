@@ -58,6 +58,7 @@ export class OwnerPredictionRuntime {
         this.predictedEvents = [];
         this.emittedPredictionTicks = new Map();
         this.pendingRopeSwings = new Map();
+        this.pendingProjectileSpawns = new Map();
         this.simulation.preparePrediction();
     }
 
@@ -128,7 +129,8 @@ export class OwnerPredictionRuntime {
             return this.state();
         }
         const outcome = this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
-            preserveRopeBoost: this.pendingRopeSwings.size > 0
+            preserveRopeBoost: this.pendingRopeSwings.size > 0,
+            preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0
         });
         if (outcome.lifeStateChanged) this.startPresentationCorrection(displayedBefore, outcome.state);
         return this.state();
@@ -155,9 +157,9 @@ export class OwnerPredictionRuntime {
                 : (batchesByTick.get(tick) ?? { tick, commands: [] });
             const simulated = inputState.expand(batch, [this.ownerId]);
             const command = simulated.commands[0]?.command ?? this.simulation.idleOwnerCommand(this.ownerId);
-            const previousBoost = this.state().ropeDamageBoostRemaining;
+            const previous = this.state();
             const outcome = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
-            this.recordPredictedOutcome(outcome, tick, previousBoost);
+            this.recordPredictedOutcome(outcome, tick, previous);
         }
     }
 
@@ -165,9 +167,9 @@ export class OwnerPredictionRuntime {
         if (!this.initialized) return null;
         const tick = this.simulation.getTick() + 1;
         this.rememberInput(tick, command);
-        const previousBoost = this.state().ropeDamageBoostRemaining;
+        const previous = this.state();
         const outcome = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
-        this.recordPredictedOutcome(outcome, tick, previousBoost);
+        this.recordPredictedOutcome(outcome, tick, previous);
         this.updatePresentation(this.fixedDt);
         return this.state();
     }
@@ -256,9 +258,9 @@ export class OwnerPredictionRuntime {
         return this.initialized ? this.simulation.snapshot() : null;
     }
 
-    recordPredictedOutcome({ projectile, swingTriggered }, tick, previousBoost) {
-        if (swingTriggered) this.recordPredictedRopeSwing(tick, previousBoost);
-        this.recordPredictedProjectile(projectile, tick);
+    recordPredictedOutcome({ projectile, swingTriggered }, tick, previous) {
+        if (swingTriggered) this.recordPredictedRopeSwing(tick, previous.ropeDamageBoostRemaining);
+        this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);
     }
 
     recordPredictedRopeSwing(tick, previousBoost) {
@@ -295,12 +297,27 @@ export class OwnerPredictionRuntime {
         return true;
     }
 
-    recordPredictedProjectile(projectile, tick) {
+    recordProjectileSpawnReceipt(receipt) {
+        const pending = this.pendingProjectileSpawns.get(receipt.predictionId);
+        if (!pending) return false;
+        this.pendingProjectileSpawns.delete(receipt.predictionId);
+        if (receipt.accepted) return true;
+        const elapsedTicks = Math.max(0, this.simulation.getTick() - pending.previousTick);
+        const remaining = Math.max(0, pending.previousCooldown - elapsedTicks * this.fixedDt);
+        this.simulation.restorePredictedWeaponCooldown(this.ownerId, remaining);
+        return true;
+    }
+
+    recordPredictedProjectile(projectile, tick, previousCooldown) {
         if (!projectile) return;
         const predictionId = `${this.ownerId}:${tick}`;
         const eventKey = `projectile:${predictionId}`;
         if (this.emittedPredictionTicks.has(eventKey)) return;
         this.emittedPredictionTicks.set(eventKey, tick);
+        this.pendingProjectileSpawns.set(predictionId, {
+            previousCooldown,
+            previousTick: tick - 1
+        });
         this.predictedEvents.push(
             Object.freeze({
                 eventType: "predicted-spawn",

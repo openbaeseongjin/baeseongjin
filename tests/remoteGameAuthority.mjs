@@ -76,10 +76,14 @@ function persistentPlayerState(player) {
         health: player.health,
         maxHealth: player.maxHealth,
         lifeState: player.lifeState,
+        hitInvulnerabilityRemaining: player.hitInvulnerabilityRemaining,
+        ropeDisabledRemaining: player.ropeDisabledRemaining,
+        ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
         weapon: {
             range: player.weapon.range,
             damage: player.weapon.damage,
-            fireInterval: player.weapon.fireInterval
+            fireInterval: player.weapon.fireInterval,
+            cooldown: player.weapon.cooldown
         },
         artifacts: player.artifacts,
         lastCheckpointLoss: player.lastCheckpointLoss
@@ -517,6 +521,45 @@ export async function run() {
             "a duplicate claim must not create another projectile"
         );
         spawnRoom.simulation.projectiles.length = 0;
+        spawnPlayer.weapon.cooldown = 0;
+        const localSpawnPlayer = spawnOwner.ownerRuntime.simulation.players.find(
+            ({ id }) => id === spawnOwner.playerId
+        );
+        localSpawnPlayer.weapon.cooldown = 0;
+        spawnOwner.advance(movementCommand(0));
+        const rejectedSpawn = spawnOwner
+            .drainPredictedEvents()
+            .find(({ eventType }) => eventType === "predicted-spawn");
+        assert.ok(rejectedSpawn, "the owner must start a second predicted shot before its receipt");
+        assert.ok(spawnOwner.snapshot().owner.weaponCooldown > 0);
+        const rejectedSpawnStore = new PredictableProjectileStore();
+        rejectedSpawnStore.predict([rejectedSpawn]);
+        const preRejectedSpawnSequence = spawnOwner.latestSnapshot.snapshotSequence;
+        gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
+        await waitFor(
+            () => spawnOwner.latestSnapshot.snapshotSequence > preRejectedSpawnSequence,
+            "the owner must receive a pre-claim weapon snapshot"
+        );
+        assert.ok(
+            spawnOwner.snapshot().owner.weaponCooldown > 0,
+            "an in-flight pre-claim snapshot must not erase the immediate fire cooldown"
+        );
+        assert.equal(spawnOwner.submitProjectileSpawnClaim({ ...rejectedSpawn, targetId: "forged-target" }), true);
+        await waitFor(
+            () => spawnOwner.projectileSpawnClaimReceipts.length > 0,
+            "the invalid projectile spawn must return a rejection receipt"
+        );
+        const rejectedSpawnReceipt = spawnOwner.drainProjectileSpawnClaimReceipts()[0];
+        assert.equal(rejectedSpawnReceipt.accepted, false);
+        assert.equal(rejectedSpawnReceipt.reason, "target-mismatch");
+        rejectedSpawnStore.applySpawnClaimReceipts([rejectedSpawnReceipt]);
+        assert.equal(rejectedSpawnStore.snapshot().projectiles.length, 0);
+        assert.equal(
+            spawnOwner.snapshot().owner.weaponCooldown,
+            0,
+            "a rejected predicted shot must restore its previous local cooldown"
+        );
+        assert.equal(spawnPlayer.weapon.cooldown, 0, "a rejected claim must not start the server cooldown");
         spawnRoom.simulation.enemies = [];
         const resonance = ARTIFACT_CATALOG.find(({ id }) => id === "rope-resonance");
         spawnPlayer.artifacts.add(resonance);
