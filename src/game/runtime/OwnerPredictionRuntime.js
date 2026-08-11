@@ -57,6 +57,7 @@ export class OwnerPredictionRuntime {
         this.correctionSamples = [];
         this.predictedEvents = [];
         this.emittedPredictionTicks = new Map();
+        this.pendingRopeSwings = new Map();
         this.simulation.preparePrediction();
     }
 
@@ -126,7 +127,9 @@ export class OwnerPredictionRuntime {
             this.startPresentationCorrection(displayedBefore, restored, true);
             return this.state();
         }
-        const outcome = this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick);
+        const outcome = this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
+            preserveRopeBoost: this.pendingRopeSwings.size > 0
+        });
         if (outcome.lifeStateChanged) this.startPresentationCorrection(displayedBefore, outcome.state);
         return this.state();
     }
@@ -152,8 +155,9 @@ export class OwnerPredictionRuntime {
                 : (batchesByTick.get(tick) ?? { tick, commands: [] });
             const simulated = inputState.expand(batch, [this.ownerId]);
             const command = simulated.commands[0]?.command ?? this.simulation.idleOwnerCommand(this.ownerId);
-            const projectile = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
-            this.recordPredictedProjectile(projectile, tick);
+            const previousBoost = this.state().ropeDamageBoostRemaining;
+            const outcome = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
+            this.recordPredictedOutcome(outcome, tick, previousBoost);
         }
     }
 
@@ -161,8 +165,9 @@ export class OwnerPredictionRuntime {
         if (!this.initialized) return null;
         const tick = this.simulation.getTick() + 1;
         this.rememberInput(tick, command);
-        const projectile = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
-        this.recordPredictedProjectile(projectile, tick);
+        const previousBoost = this.state().ropeDamageBoostRemaining;
+        const outcome = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
+        this.recordPredictedOutcome(outcome, tick, previousBoost);
         this.updatePresentation(this.fixedDt);
         return this.state();
     }
@@ -251,11 +256,51 @@ export class OwnerPredictionRuntime {
         return this.initialized ? this.simulation.snapshot() : null;
     }
 
+    recordPredictedOutcome({ projectile, swingTriggered }, tick, previousBoost) {
+        if (swingTriggered) this.recordPredictedRopeSwing(tick, previousBoost);
+        this.recordPredictedProjectile(projectile, tick);
+    }
+
+    recordPredictedRopeSwing(tick, previousBoost) {
+        const predictionId = `${this.ownerId}:swing:${tick}`;
+        const eventKey = `rope-swing:${predictionId}`;
+        if (this.emittedPredictionTicks.has(eventKey)) return;
+        const state = this.state();
+        if (!state.rope.isAttached || !state.rope.anchor) return;
+        this.emittedPredictionTicks.set(eventKey, tick);
+        this.pendingRopeSwings.set(predictionId, {
+            previousBoost,
+            previousTick: tick - 1
+        });
+        this.predictedEvents.push(
+            Object.freeze({
+                eventType: "predicted-rope-swing",
+                predictionId,
+                tick,
+                ownerId: this.ownerId,
+                position: { x: state.position.x, y: state.position.y },
+                anchor: { x: state.rope.anchor.x, y: state.rope.anchor.y }
+            })
+        );
+    }
+
+    recordRopeSwingReceipt(receipt) {
+        const pending = this.pendingRopeSwings.get(receipt.predictionId);
+        if (!pending) return false;
+        this.pendingRopeSwings.delete(receipt.predictionId);
+        if (receipt.accepted) return true;
+        const elapsedTicks = Math.max(0, this.simulation.getTick() - pending.previousTick);
+        const remaining = Math.max(0, pending.previousBoost - elapsedTicks * this.fixedDt);
+        this.simulation.restorePredictedRopeBoost(this.ownerId, remaining);
+        return true;
+    }
+
     recordPredictedProjectile(projectile, tick) {
         if (!projectile) return;
         const predictionId = `${this.ownerId}:${tick}`;
-        if (this.emittedPredictionTicks.has(predictionId)) return;
-        this.emittedPredictionTicks.set(predictionId, tick);
+        const eventKey = `projectile:${predictionId}`;
+        if (this.emittedPredictionTicks.has(eventKey)) return;
+        this.emittedPredictionTicks.set(eventKey, tick);
         this.predictedEvents.push(
             Object.freeze({
                 eventType: "predicted-spawn",

@@ -6,6 +6,7 @@ import { deserializeProjectileHitClaim } from "../network/ProjectileHitClaim.js"
 import { deserializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
 import { deserializePlayerProjectileSpawnClaim } from "../network/PlayerProjectileSpawnClaim.js";
 import { deserializeOwnerMotionState } from "../network/OwnerMotionState.js";
+import { deserializeRopeSwingClaim } from "../network/RopeSwingClaim.js";
 import { deserializeSummitClaim } from "../network/SummitClaim.js";
 import { serializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 
@@ -32,6 +33,11 @@ export class AuthorityWireAdapter {
             authenticatedPlayerId,
             deserializePlayerProjectileSpawnClaim(serializedClaim)
         );
+    }
+
+    receiveRopeSwingClaim(authenticatedPlayerId, serializedClaim) {
+        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
+        return this.session.submitRopeSwingClaim(authenticatedPlayerId, deserializeRopeSwingClaim(serializedClaim));
     }
 
     receiveImpactClaim(authenticatedPlayerId, serializedClaim) {

@@ -7,6 +7,7 @@ import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
 import { createPlayerProjectileSpawnReceipt } from "../network/PlayerProjectileSpawnClaim.js";
 import { createProjectileHitReceipt } from "../network/ProjectileHitClaim.js";
+import { createRopeSwingReceipt } from "../network/RopeSwingClaim.js";
 import { createSummitClaimReceipt } from "../network/SummitClaim.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
@@ -35,6 +36,7 @@ export class AuthorityServerSession {
         this.inbox = new AuthorityCommandInbox({ maxPastTicks, maxFutureTicks });
         this.resolvedHitClaims = new Map();
         this.resolvedProjectileSpawnClaims = new Map();
+        this.resolvedRopeSwingClaims = new Map();
         this.resolvedImpactClaims = new Map();
         this.resolvedArtifactSelections = new Map();
         this.resolvedCheckpointClaims = new Map();
@@ -97,6 +99,36 @@ export class AuthorityServerSession {
         });
         if (receipt.accepted) {
             this.resolvedProjectileSpawnClaims.set(claim.predictionId, {
+                receipt,
+                resolvedAtTick: this.simulation.getTick()
+            });
+        }
+        return receipt;
+    }
+
+    submitRopeSwingClaim(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const existing = this.resolvedRopeSwingClaims.get(claim.predictionId);
+        if (existing) return existing.receipt;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return createRopeSwingReceipt({
+                predictionId: claim.predictionId,
+                accepted: false,
+                reason: "tick-window"
+            });
+        }
+        const receipt = createRopeSwingReceipt({
+            predictionId: claim.predictionId,
+            ...this.simulation.resolveRopeSwingClaim(authenticatedPlayerId, claim, {
+                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+            })
+        });
+        if (receipt.accepted) {
+            this.resolvedRopeSwingClaims.set(claim.predictionId, {
                 receipt,
                 resolvedAtTick: this.simulation.getTick()
             });
@@ -331,6 +363,9 @@ export class AuthorityServerSession {
                 this.resolvedProjectileSpawnClaims.delete(predictionId);
             }
         }
+        for (const [predictionId, entry] of this.resolvedRopeSwingClaims) {
+            if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedRopeSwingClaims.delete(predictionId);
+        }
         for (const [projectileId, entry] of this.resolvedImpactClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedImpactClaims.delete(projectileId);
         }
@@ -358,6 +393,9 @@ export class AuthorityServerSession {
         }
         for (const predictionId of this.resolvedProjectileSpawnClaims.keys()) {
             if (predictionId.startsWith(`${playerId}:`)) this.resolvedProjectileSpawnClaims.delete(predictionId);
+        }
+        for (const predictionId of this.resolvedRopeSwingClaims.keys()) {
+            if (predictionId.startsWith(`${playerId}:`)) this.resolvedRopeSwingClaims.delete(predictionId);
         }
         return this.simulation.removePlayer(playerId);
     }

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createArtifactSelectionClaim } from "../src/game/network/ArtifactSelectionClaim.js";
 import { createCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
@@ -8,6 +9,7 @@ import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.j
 import { createPlayerProjectileSpawnClaim } from "../src/game/network/PlayerProjectileSpawnClaim.js";
 import { createSummitClaim } from "../src/game/network/SummitClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
+import { createRopeSwingClaim } from "../src/game/network/RopeSwingClaim.js";
 import { Vector2 } from "../src/game-kit/index.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
@@ -293,6 +295,27 @@ export function run() {
         0,
         "the multiplayer server fixed tick must not initiate a player projectile"
     );
+    combatPlayer.artifacts.add(ARTIFACT_CATALOG.find(({ id }) => id === "rope-resonance"));
+    const swingAnchor = {
+        x: combatPlayer.physics.position.x,
+        y: combatPlayer.physics.position.y - 80
+    };
+    combatPlayer.ropeObject.rope.attach(combatPlayer.physics.position, swingAnchor);
+    const swingClaim = createRopeSwingClaim({
+        predictionId: `${combatPlayer.id}:swing:${combatSimulation.tick}`,
+        clientTick: combatSimulation.tick,
+        position: combatPlayer.physics.position,
+        anchor: swingAnchor
+    });
+    const swingReceipt = combatSession.submitRopeSwingClaim(combatPlayer.id, swingClaim);
+    assert.equal(swingReceipt.accepted, true);
+    assert.equal(combatSession.submitRopeSwingClaim(combatPlayer.id, swingClaim), swingReceipt);
+    assert.equal(combatPlayer.ropeDamageBoostRemaining, swingReceipt.duration);
+    assert.equal(
+        combatSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "rope-swing").length,
+        1,
+        "a duplicate swing claim must produce one shared transition"
+    );
     const spawnTarget = combatSimulation.enemies
         .filter((enemy) => combatPlayer.physics.position.distanceTo(enemy.position) <= combatPlayer.weapon.range)
         .sort((left, right) => {
@@ -312,6 +335,11 @@ export function run() {
     assert.equal(combatSession.submitProjectileSpawnClaim(combatPlayer.id, spawnClaim), spawnReceipt);
     assert.equal(combatSimulation.projectiles.length, 1, "a duplicate spawn claim must not create two bullets");
     const projectile = combatSimulation.projectiles[0];
+    assert.equal(projectile.damage, combatPlayer.weapon.damage);
+    assert.ok(
+        projectile.damage > combatPlayer.weapon.baseDamage,
+        "a same-tick projectile claim must use the preceding swing claim boost"
+    );
     const target = combatSimulation.enemies.find(({ id }) => id === projectile.targetId);
     projectile.position = target.position.clone();
     const healthBeforeClaim = target.health;
