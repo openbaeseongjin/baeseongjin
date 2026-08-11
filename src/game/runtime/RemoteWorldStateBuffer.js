@@ -29,7 +29,12 @@ function extrapolatePosition(entity, previous, tickDelta, maxSeconds) {
 
 function entityAt(snapshot, collection, id) {
     const entity = snapshot?.state?.[collection]?.find((candidate) => candidate.id === id);
-    return entity ? { ...entity, tick: snapshot.serverTick } : null;
+    if (!entity) return null;
+    const tick =
+        collection === "players" && Number.isSafeInteger(entity.ownerMotionTick)
+            ? entity.ownerMotionTick
+            : snapshot.serverTick;
+    return { ...entity, tick };
 }
 
 export class RemoteWorldStateBuffer {
@@ -139,46 +144,53 @@ export class RemoteWorldStateBuffer {
         if (!Number.isFinite(now)) throw new Error("now must be finite");
         const elapsedTicks = (Math.max(0, now - this.clockAnchorAt) * TICKS_PER_SECOND) / 1000;
         const targetTick = this.clockAnchorTick + elapsedTicks - this.interpolationSeconds * TICKS_PER_SECOND;
-        this.lastExtrapolationSeconds = Math.min(
-            this.maxExtrapolationSeconds,
-            Math.max(0, (targetTick - this.latest.serverTick) / TICKS_PER_SECOND)
-        );
-        this.maxExtrapolationSecondsObserved = Math.max(
-            this.maxExtrapolationSecondsObserved,
-            this.lastExtrapolationSeconds
-        );
-        const lowerEntry = [...this.history].reverse().find(({ snapshot }) => snapshot.serverTick <= targetTick);
-        const upperEntry = this.history.find(({ snapshot }) => snapshot.serverTick >= targetTick);
+        this.lastExtrapolationSeconds = 0;
         const latestState = this.latest.state;
-        return {
+        const sampled = {
             ...latestState,
             players: latestState.players.map((player) => ({
                 ...player,
                 position:
                     player.id === localPlayerId
                         ? player.position
-                        : this.samplePosition("players", player.id, targetTick, lowerEntry, upperEntry)
+                        : this.samplePosition("players", player.id, targetTick)
             })),
             enemies: (latestState.enemies ?? []).map((enemy) => ({
                 ...enemy,
-                position: this.samplePosition("enemies", enemy.id, targetTick, lowerEntry, upperEntry)
+                position: this.samplePosition("enemies", enemy.id, targetTick)
             }))
         };
+        this.maxExtrapolationSecondsObserved = Math.max(
+            this.maxExtrapolationSecondsObserved,
+            this.lastExtrapolationSeconds
+        );
+        return sampled;
     }
 
-    samplePosition(collection, id, targetTick, lowerEntry, upperEntry) {
-        const oldest = entityAt(this.history[0]?.snapshot, collection, id);
-        const latest = entityAt(this.latest, collection, id);
+    samplePosition(collection, id, serverTargetTick) {
+        const samples = this.history
+            .map(({ snapshot }) => entityAt(snapshot, collection, id))
+            .filter((entity) => entity !== null);
+        const oldest = samples[0];
+        const latest = samples.at(-1);
         if (!latest) return null;
-        const lower = entityAt(lowerEntry?.snapshot, collection, id);
-        const upper = entityAt(upperEntry?.snapshot, collection, id);
-        if (lower && upper && upper.tick > lower.tick) {
+        const targetTick =
+            collection === "players" && Number.isSafeInteger(latest.ownerMotionTick)
+                ? serverTargetTick + MULTIPLAYER_TIMING.inputLeadTicks
+                : serverTargetTick;
+        const lower = [...samples].reverse().find(({ tick }) => tick <= targetTick);
+        const upper = samples.find(({ tick }) => tick >= targetTick);
+        if (lower && upper && upper.tick === lower.tick) return lower.position;
+        if (lower && upper) {
             const alpha = (targetTick - lower.tick) / (upper.tick - lower.tick);
             return interpolatePosition(lower, upper, alpha);
         }
         if (targetTick <= (oldest?.tick ?? latest.tick)) return oldest?.position ?? latest.position;
-        const previousEntry = this.history.at(-2)?.snapshot;
-        const previous = entityAt(previousEntry, collection, id);
+        const previous = [...samples].reverse().find(({ tick }) => tick < latest.tick);
+        this.lastExtrapolationSeconds = Math.max(
+            this.lastExtrapolationSeconds,
+            Math.min(this.maxExtrapolationSeconds, Math.max(0, (targetTick - latest.tick) / TICKS_PER_SECOND))
+        );
         return extrapolatePosition(latest, previous, targetTick - latest.tick, this.maxExtrapolationSeconds);
     }
 
