@@ -18,21 +18,23 @@
 
 - 사용자에게 보이는 배포 버전의 기준값은 `index.html`의 `#app-version[data-version]`이다.
 - `package.json`과 루트 `package-lock.json`의 프로젝트 버전은 화면 버전과 항상 같아야 한다.
+- `sw.js`의 `RELEASE_VERSION`도 같은 값으로 갱신해 이미 열린 PWA가 새 서비스 워커를 감지하고 다시 불러오게 한다.
 - 상시 게임 서버의 `/health.version`도 서버가 시작될 때 읽은 `package.json` 버전으로 응답해야 한다.
 - 배포 페이지 우하단의 `#app-version`은 `v{version}`을 작게 상시 표시한다.
-- 버전 문자열은 릴리스 작업에서 세 위치를 함께 갱신하고 배포 화면에서 확인한다. 자주 바뀌는 문자열 자체를 별도 단위 테스트로 고정하지 않는다.
+- 버전 문자열은 릴리스 작업에서 네 위치를 함께 갱신하고 배포 화면에서 확인한다. 계약 테스트는 특정 버전 값을 고정하지 않고 네 위치가 서로 같은지만 검증한다.
 
 ## 캐시 정책
 
 - 버전 번호를 JavaScript 모듈 URL의 쿼리 파라미터로 사용하지 않는다.
 - 진입 모듈에만 캐시 버전을 붙여도 하위 import 전체의 갱신을 보장하지 못하므로 불완전한 수동 캐시 버스터를 두지 않는다.
 - `src/main.js`와 하위 모듈은 일반 정적 경로로 불러오며 브라우저와 GitHub Pages의 표준 캐시 재검증을 따른다.
+- `sw.js`의 `RELEASE_VERSION`은 캐시 저장소나 모듈 URL 버스터가 아니라 서비스 워커 파일 변경을 보장하는 릴리스 신호다. 버전 변경으로 새 워커가 활성화되면 기존 `controllerchange` 경로가 열린 PWA를 한 번 새로고침한다.
 - 향후 실제 캐시 문제가 확인되면 모든 산출물에 해시를 붙이는 빌드 파이프라인을 도입할지 별도로 결정한다.
 
 ## 변경 절차
 
 1. 변경이 major, minor, patch 중 어디에 해당하는지 결정한다.
-2. `index.html`의 `data-version`과 버전 배지 문구, `package.json`, `package-lock.json`을 같은 값으로 갱신한다.
+2. `index.html`의 `data-version`과 버전 배지 문구, `package.json`, `package-lock.json`, `sw.js`의 `RELEASE_VERSION`을 같은 값으로 갱신한다.
 3. 사용자에게 보이는 변화라면 관련 기획·시스템 문서도 함께 갱신한다.
 4. `npm test`, `npm run check`, `npm run format:check`, `git diff --check`를 실행한다.
 5. 멀티플레이 서버 코드나 버전이 바뀌었다면 게임 서버 프로세스를 재시작한다.
