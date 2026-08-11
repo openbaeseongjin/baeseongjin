@@ -5,6 +5,7 @@ import { channelSocketUrl, configuredMultiplayerServer } from "./game/runtime/Mu
 import { GameModeMenu } from "./game/ui/GameModeMenu.js";
 import { setupInstallPrompt } from "./pwa/InstallPrompt.js";
 import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
+import { StartupUpdateLoadingScreen } from "./pwa/StartupUpdateLoadingScreen.js";
 import { isMetricsPanelEnabled } from "./game/metrics/MetricsDebugMode.js";
 import { setupPlaytestDiagnostics } from "./game/metrics/PlaytestDiagnostics.js";
 
@@ -17,6 +18,7 @@ let app = null;
 let launching = false;
 let pageClosing = false;
 const modeMenu = new GameModeMenu(document.getElementById("game-mode-menu"));
+const startupLoadingScreen = new StartupUpdateLoadingScreen(document.getElementById("startup-update-loading"));
 const channelBadge = document.getElementById("channel-badge");
 let activeChannelId = null;
 const diagnostics = setupPlaytestDiagnostics({
@@ -34,7 +36,7 @@ const releaseInstallPrompt = setupInstallPrompt({
     navigator: globalThis.navigator,
     root: document.getElementById("install-prompt")
 });
-const releaseServiceWorkerUpdater = setupServiceWorkerUpdater({
+const serviceWorkerUpdater = setupServiceWorkerUpdater({
     window: globalThis.window,
     navigator: globalThis.navigator,
     scriptUrl: new URL("../sw.js", import.meta.url)
@@ -87,13 +89,21 @@ function returnToMenu(message) {
     launch();
 }
 
-launch();
+async function bootstrap() {
+    startupLoadingScreen.show();
+    await serviceWorkerUpdater.ready;
+    if (pageClosing) return;
+    startupLoadingScreen.hide();
+    launch();
+}
+
+bootstrap();
 globalThis.addEventListener(
     "pagehide",
     () => {
         pageClosing = true;
         releaseInstallPrompt();
-        releaseServiceWorkerUpdater();
+        serviceWorkerUpdater.release();
         diagnostics.release();
         app?.stop();
     },

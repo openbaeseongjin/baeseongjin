@@ -87,6 +87,51 @@
             .orientation-notice {
                 display: none;
             }
+            .startup-update-loading {
+                position: fixed;
+                z-index: 31;
+                inset: 0;
+                display: grid;
+                place-items: center;
+                padding: 24px;
+                background: rgba(5, 9, 17, 0.84);
+                backdrop-filter: blur(8px);
+            }
+            .startup-update-loading[hidden] {
+                display: none;
+            }
+            .startup-update-card {
+                width: min(460px, 100%);
+                padding: 28px 24px;
+                border: 1px solid rgba(103, 232, 249, 0.4);
+                border-radius: 18px;
+                background: rgba(15, 23, 42, 0.96);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                text-align: center;
+            }
+            .startup-update-spinner {
+                width: 32px;
+                height: 32px;
+                margin: 0 auto 16px;
+                border: 3px solid rgba(103, 232, 249, 0.2);
+                border-top-color: #67e8f9;
+                border-radius: 50%;
+                animation: startup-update-spin 0.9s linear infinite;
+            }
+            .startup-update-card h1 {
+                margin: 0 0 8px;
+                font-size: 26px;
+            }
+            .startup-update-card p {
+                margin: 0;
+                color: #cbd5e1;
+                line-height: 1.5;
+            }
+            @keyframes startup-update-spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
             .game-mode-menu {
                 position: fixed;
                 z-index: 30;
@@ -269,6 +314,11 @@
                 white-space: nowrap;
                 border: 0;
             }
+            @media (prefers-reduced-motion: reduce) {
+                .startup-update-spinner {
+                    animation: none;
+                }
+            }
             @media (orientation: portrait) and (pointer: coarse) {
                 .orientation-notice {
                     position: fixed;
@@ -288,7 +338,21 @@
     </head>
     <body>
         <main>
-            <section class="game-mode-menu" id="game-mode-menu" aria-labelledby="game-mode-title">
+            <section
+                class="startup-update-loading"
+                id="startup-update-loading"
+                role="status"
+                aria-live="polite"
+                aria-busy="true"
+                aria-labelledby="startup-update-title"
+            >
+                <div class="startup-update-card">
+                    <div class="startup-update-spinner" aria-hidden="true"></div>
+                    <h1 id="startup-update-title">최신 버전을 확인하는 중</h1>
+                    <p>업데이트가 있으면 자동으로 적용합니다.</p>
+                </div>
+            </section>
+            <section class="game-mode-menu" id="game-mode-menu" aria-labelledby="game-mode-title" hidden>
                 <div class="game-mode-card">
                     <h1 id="game-mode-title">로프 원정 시작</h1>
                     <p data-mode-status aria-live="polite">플레이 방식을 선택하세요.</p>
@@ -343,9 +407,7 @@
                     <button type="button" data-install-action>앱 설치</button>
                 </div>
             </section>
-            <output class="version-badge" id="app-version" data-version="0.12.23" aria-label="배포 버전"
-                >v0.12.23</output
-            >
+            <output class="version-badge" id="app-version" data-version="0.13.0" aria-label="배포 버전">v0.13.0</output>
         </main>
         <noscript><p>이 게임을 실행하려면 JavaScript가 필요합니다.</p></noscript>
         <script type="module" src="./src/main.js"></script>
