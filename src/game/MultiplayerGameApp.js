@@ -213,8 +213,7 @@ export class MultiplayerGameApp {
         const predictedResolutions = this.predictableProjectiles.update(dt, collisionState, predictedPlayer.tick);
         for (const resolution of predictedResolutions) {
             if (resolution.projectileId) {
-                this.authority.applyPredictedImpact(resolution);
-                this.authority.submitImpactClaim(resolution);
+                this.authority.resolvePredictedImpact(resolution);
             } else {
                 this.authority.submitHitClaim(resolution);
             }
