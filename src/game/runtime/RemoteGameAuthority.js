@@ -203,14 +203,24 @@ export class RemoteGameAuthority {
 
     submitOwnerMotion() {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        const motion = this.ownerMotionState();
+        return this.sendOwnerMotion(motion);
+    }
+
+    ownerMotionState() {
+        if (!this.ownerRuntime) return null;
         const predicted = this.ownerRuntime.state();
-        const motion = createOwnerMotionState({
+        return createOwnerMotionState({
             clientTick: predicted.tick,
             position: predicted.position,
             velocity: predicted.velocity,
             isGrounded: predicted.isGrounded,
             rope: predicted.rope
         });
+    }
+
+    sendOwnerMotion(motion) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !motion) return false;
         this.socket.send(JSON.stringify({ type: "owner-motion", payload: serializeOwnerMotionState(motion) }));
         return true;
     }
@@ -234,6 +244,14 @@ export class RemoteGameAuthority {
         return this.ownerRuntime?.applyPredictedImpact(event) ?? false;
     }
 
+    resolvePredictedImpact(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        const motionBeforeImpact = this.ownerMotionState();
+        if (!this.applyPredictedImpact(event)) return false;
+        if (!this.sendOwnerMotion(motionBeforeImpact)) return false;
+        return this.submitImpactClaim(event);
+    }
+
     submitHitClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createProjectileHitClaim({
@@ -255,7 +273,6 @@ export class RemoteGameAuthority {
             position: event.position
         });
         this.socket.send(JSON.stringify({ type: "impact-claim", payload: serializePlayerImpactClaim(claim) }));
-        this.submitOwnerMotion();
         return true;
     }
 

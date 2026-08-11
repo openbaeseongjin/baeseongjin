@@ -331,6 +331,68 @@ export async function run() {
         );
         await waitFor(() => !gameServer.rooms.has(invalidAuthority.channelId), "the failed session room must close");
 
+        const lethalOwner = new RemoteGameAuthority({
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
+            WebSocketImpl: WebSocket
+        });
+        await lethalOwner.connect();
+        const lethalObserver = new RemoteGameAuthority({
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=${lethalOwner.channelId}`,
+            WebSocketImpl: WebSocket
+        });
+        await lethalObserver.connect();
+        const lethalRoom = gameServer.rooms.get(lethalOwner.channelId);
+        const lethalPlayer = lethalRoom.simulation.players.find(({ id }) => id === lethalOwner.playerId);
+        const lethalCheckpoint = lethalRoom.simulation.activeCheckpoint;
+        lethalPlayer.physics.position.set(lethalCheckpoint.x + 80, lethalCheckpoint.y);
+        lethalPlayer.physics.velocity.set(0, 0);
+        lethalPlayer.health = 20;
+        lethalOwner.ownerRuntime.simulation.restoreOwnerPrediction(
+            lethalOwner.playerId,
+            lethalRoom.simulation.playerState(lethalOwner.playerId),
+            lethalOwner.snapshot().owner.tick
+        );
+        const lethalProjectile = new ProjectileObject({
+            id: "lethal-order-projectile",
+            ownerId: "lethal-order-enemy",
+            targetId: lethalOwner.playerId,
+            position: lethalPlayer.physics.position.clone(),
+            velocity: new Vector2(120, 0),
+            damage: 20,
+            radius: 7
+        });
+        lethalRoom.simulation.enemyProjectiles.push(lethalProjectile);
+        assert.equal(
+            lethalOwner.resolvePredictedImpact({
+                projectileId: lethalProjectile.id,
+                targetId: lethalOwner.playerId,
+                clientTick: lethalOwner.snapshot().owner.tick,
+                resolution: "player-hit",
+                position: { x: lethalPlayer.physics.position.x, y: lethalPlayer.physics.position.y },
+                velocity: { x: lethalProjectile.velocity.x, y: lethalProjectile.velocity.y },
+                parameters: { damage: lethalProjectile.damage }
+            }),
+            true
+        );
+        await waitFor(
+            () =>
+                lethalRoom.simulation.playerState(lethalOwner.playerId).health === lethalPlayer.maxHealth &&
+                distance(lethalRoom.simulation.playerState(lethalOwner.playerId).position, lethalCheckpoint) < 10,
+            "a lethal claim must remain at the checkpoint after the pre-impact owner motion"
+        );
+        await waitFor(
+            () =>
+                distance(lethalOwner.snapshot().owner.position, lethalCheckpoint) < 10 &&
+                distance(
+                    lethalObserver.snapshot().state.players.find(({ id }) => id === lethalOwner.playerId).position,
+                    lethalCheckpoint
+                ) < 10,
+            "owner and observer must converge on the lethal checkpoint respawn"
+        );
+        lethalObserver.close();
+        lethalOwner.close();
+        await waitFor(() => !gameServer.rooms.has(lethalOwner.channelId), "the lethal test room must close");
+
         const authority = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
             WebSocketImpl: WebSocket
