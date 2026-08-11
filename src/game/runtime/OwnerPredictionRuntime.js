@@ -305,26 +305,6 @@ export class OwnerPredictionRuntime {
             return true;
         }
         this.pendingImpacts.delete(receipt.projectileId);
-
-        const displayedBefore = this.presentationState();
-        const targetTick = this.simulation.getTick();
-        const laterPendingImpacts = [...this.pendingImpacts.values()]
-            .filter(
-                (entry) => entry.tick > pending.tick || (entry.tick === pending.tick && entry.order > pending.order)
-            )
-            .sort((left, right) => left.tick - right.tick || left.order - right.order);
-        this.prepareSnapshot(snapshot);
-        this.simulation.restoreOwnerPrediction(this.ownerId, pending.before, pending.tick);
-        this.replayInputs(pending.tick, targetTick, new Map(), laterPendingImpacts);
-
-        const sharedOwner = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
-        if (sharedOwner) {
-            this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
-                preservePendingImpact: this.pendingImpacts.size > 0
-            });
-        }
-        const corrected = this.state();
-        this.startPresentationCorrection(displayedBefore, corrected);
         return true;
     }
 

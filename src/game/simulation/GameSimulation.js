@@ -920,20 +920,13 @@ export class GameSimulation {
         return Object.freeze({ accepted: true, resolution, damage: projectile.damage });
     }
 
-    resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+    resolveEnemyProjectileClaim(authenticatedPlayerId, claim) {
         const player = this.players.find(({ id }) => id === authenticatedPlayerId);
         if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
         const projectile = this.enemyProjectiles.find(({ id }) => id === claim.projectileId);
         if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
-        const claimTickOffsetSeconds = (claim.clientTick - this.tick) / 120;
-        const projectilePositionAtClaim = projectile.position
-            .clone()
-            .add(projectile.velocity.clone().scale(claimTickOffsetSeconds));
-        if (
-            Math.hypot(claim.position.x - projectilePositionAtClaim.x, claim.position.y - projectilePositionAtClaim.y) >
-            positionTolerance
-        ) {
-            return Object.freeze({ accepted: false, reason: "trajectory-mismatch" });
+        if (projectile.targetId !== authenticatedPlayerId) {
+            return Object.freeze({ accepted: false, reason: "target-mismatch" });
         }
         if (claim.impactType === "rope-cut") {
             player.ropeObject.rope.detach();

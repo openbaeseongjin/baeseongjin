@@ -153,9 +153,7 @@ export class AuthorityServerSession {
         }
         const result = createPlayerImpactReceipt({
             projectileId: claim.projectileId,
-            ...this.simulation.resolveEnemyProjectileClaim(authenticatedPlayerId, claim, {
-                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
-            })
+            ...this.simulation.resolveEnemyProjectileClaim(authenticatedPlayerId, claim)
         });
         if (result.accepted) {
             this.resolvedImpactClaims.set(claim.projectileId, {

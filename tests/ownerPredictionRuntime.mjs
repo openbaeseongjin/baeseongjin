@@ -249,9 +249,53 @@ export function run() {
         "later shared snapshots must not overwrite the client-owned rope result"
     );
 
+    const clientFinalImpact = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
+    clientFinalImpact.reconcile(snapshot, []);
+    const rejectedClientBody = {
+        projectileId: "client-final-body-impact",
+        resolution: "player-hit",
+        velocity: { x: 120, y: 0 },
+        parameters: { damage: 17 }
+    };
+    assert.equal(clientFinalImpact.applyPredictedImpact(rejectedClientBody), true);
+    const clientFinalHealth = clientFinalImpact.state().health;
+    assert.equal(
+        clientFinalImpact.recordImpactReceipt({
+            projectileId: rejectedClientBody.projectileId,
+            accepted: false,
+            reason: "trajectory-mismatch"
+        }),
+        true
+    );
+    assert.equal(
+        clientFinalImpact.state().health,
+        clientFinalHealth,
+        "a server rejection must not heal damage already resolved by the victim client"
+    );
+    const rejectedClientRope = {
+        projectileId: "client-final-rope-impact",
+        resolution: "rope-cut",
+        velocity: { x: 0, y: -120 },
+        parameters: { damage: 0 }
+    };
+    assert.equal(clientFinalImpact.applyPredictedImpact(rejectedClientRope), true);
+    assert.equal(clientFinalImpact.state().rope.isAttached, false);
+    assert.equal(
+        clientFinalImpact.recordImpactReceipt({
+            projectileId: rejectedClientRope.projectileId,
+            accepted: false,
+            reason: "trajectory-mismatch"
+        }),
+        true
+    );
+    assert.equal(
+        clientFinalImpact.state().rope.isAttached,
+        false,
+        "a server rejection must not reattach a rope already cut by the victim client"
+    );
+
     const overlappingImpacts = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
     overlappingImpacts.reconcile(snapshot, []);
-    const overlapBaseline = overlappingImpacts.simulation.playerState(serverPlayer.id);
     const firstImpact = {
         projectileId: "impact-first-rejected",
         resolution: "player-hit",
@@ -276,49 +320,38 @@ export function run() {
     overlappingImpacts.advance(overlapIdle);
     assert.equal(overlappingImpacts.applyPredictedImpact(secondImpact), true);
     overlappingImpacts.advance(overlapIdle);
-
-    const secondImpactOnly = new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: serverPlayer.id });
-    secondImpactOnly.preparePrediction();
-    secondImpactOnly.restoreOwnerPrediction(serverPlayer.id, overlapBaseline, snapshot.serverTick);
-    secondImpactOnly.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 1);
-    secondImpactOnly.applyPredictedOwnerImpact(serverPlayer.id, secondImpact);
-    secondImpactOnly.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 2);
+    const beforeFirstRejection = overlappingImpacts.state();
 
     assert.equal(
         overlappingImpacts.recordImpactReceipt({ projectileId: firstImpact.projectileId, accepted: false }),
         true
     );
     const afterFirstRejection = overlappingImpacts.state();
-    const expectedSecondImpact = secondImpactOnly.ownerPredictionState(serverPlayer.id);
-    close(afterFirstRejection.position.x, expectedSecondImpact.position.x, "overlap first rejection position.x");
-    close(afterFirstRejection.position.y, expectedSecondImpact.position.y, "overlap first rejection position.y");
-    close(afterFirstRejection.velocity.x, expectedSecondImpact.velocity.x, "overlap first rejection velocity.x");
-    close(afterFirstRejection.velocity.y, expectedSecondImpact.velocity.y, "overlap first rejection velocity.y");
+    close(afterFirstRejection.position.x, beforeFirstRejection.position.x, "rejection must preserve position.x");
+    close(afterFirstRejection.position.y, beforeFirstRejection.position.y, "rejection must preserve position.y");
+    close(afterFirstRejection.velocity.x, beforeFirstRejection.velocity.x, "rejection must preserve velocity.x");
+    close(afterFirstRejection.velocity.y, beforeFirstRejection.velocity.y, "rejection must preserve velocity.y");
+    assert.equal(afterFirstRejection.health, beforeFirstRejection.health, "rejection must preserve client HP");
     close(
         afterFirstRejection.hitInvulnerabilityRemaining,
-        expectedSecondImpact.hitInvulnerabilityRemaining,
-        "the later pending impact must remain on the corrected timeline"
+        beforeFirstRejection.hitInvulnerabilityRemaining,
+        "rejection must preserve client hit invulnerability"
     );
-
-    const noImpacts = new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: serverPlayer.id });
-    noImpacts.preparePrediction();
-    noImpacts.restoreOwnerPrediction(serverPlayer.id, overlapBaseline, snapshot.serverTick);
-    noImpacts.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 1);
-    noImpacts.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 2);
+    const beforeSecondRejection = overlappingImpacts.state();
     assert.equal(
         overlappingImpacts.recordImpactReceipt({ projectileId: secondImpact.projectileId, accepted: false }),
         true
     );
     const afterBothRejections = overlappingImpacts.state();
-    const expectedNoImpacts = noImpacts.ownerPredictionState(serverPlayer.id);
-    close(afterBothRejections.position.x, expectedNoImpacts.position.x, "overlap final position.x");
-    close(afterBothRejections.position.y, expectedNoImpacts.position.y, "overlap final position.y");
-    close(afterBothRejections.velocity.x, expectedNoImpacts.velocity.x, "overlap final velocity.x");
-    close(afterBothRejections.velocity.y, expectedNoImpacts.velocity.y, "overlap final velocity.y");
+    close(afterBothRejections.position.x, beforeSecondRejection.position.x, "final rejection must preserve position.x");
+    close(afterBothRejections.position.y, beforeSecondRejection.position.y, "final rejection must preserve position.y");
+    close(afterBothRejections.velocity.x, beforeSecondRejection.velocity.x, "final rejection must preserve velocity.x");
+    close(afterBothRejections.velocity.y, beforeSecondRejection.velocity.y, "final rejection must preserve velocity.y");
+    assert.equal(afterBothRejections.health, beforeSecondRejection.health, "final rejection must preserve client HP");
     close(
         afterBothRejections.hitInvulnerabilityRemaining,
-        expectedNoImpacts.hitInvulnerabilityRemaining,
-        "the final rejected impact must use its rebased pre-impact state"
+        beforeSecondRejection.hitInvulnerabilityRemaining,
+        "final rejection must preserve client hit invulnerability"
     );
 
     const overlappingSwings = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
@@ -382,7 +415,6 @@ export function run() {
         predictionLeadTicks: 0
     });
     lethalPrediction.reconcile(lethalSnapshot, []);
-    const lethalBefore = lethalPrediction.state();
     const lethalImpact = {
         projectileId: "predicted-lethal-impact",
         resolution: "player-hit",
@@ -427,9 +459,13 @@ export function run() {
         true
     );
     const rejectedLethal = lethalPrediction.state();
-    assert.equal(rejectedLethal.health, lethalBefore.health);
-    assert.deepEqual(rejectedLethal.position, lethalBefore.position);
-    assert.deepEqual(rejectedLethal.artifacts, lethalBefore.artifacts);
+    assert.equal(rejectedLethal.health, lethalLocal.health, "rejection must not heal a lethal client impact");
+    assert.deepEqual(rejectedLethal.position, lethalLocal.position, "rejection must not undo client respawn");
+    assert.deepEqual(
+        rejectedLethal.artifacts,
+        lethalLocal.artifacts,
+        "rejection must not restore artifacts lost by the client"
+    );
 
     const checkpointServer = new GameSimulation();
     const checkpointPlayer = primaryPlayer(checkpointServer);
