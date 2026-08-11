@@ -89,7 +89,7 @@ export function run() {
         "client authority must remain inside the server movement envelope"
     );
 
-    combatPlayer.rope.attach(combatPlayer.physics.position, {
+    combatPlayer.ropeObject.rope.attach(combatPlayer.physics.position, {
         x: combatPlayer.physics.position.x,
         y: combatPlayer.physics.position.y - 80
     });
@@ -104,7 +104,11 @@ export function run() {
     );
     assert.equal(rejectedRelease.reason, "speed-envelope");
     assert.equal(rejectedRelease.ropeReleased, true, "a newer rope release must survive rejected continuous motion");
-    assert.equal(combatPlayer.rope.isAttached, false, "rejected movement must not leave a released rope attached");
+    assert.equal(
+        combatPlayer.ropeObject.rope.isAttached,
+        false,
+        "rejected movement must not leave a released rope attached"
+    );
     const delayedAttach = combatSession.submitOwnerMotion(
         combatPlayer.id,
         createOwnerMotionState({
@@ -119,14 +123,14 @@ export function run() {
         })
     );
     assert.equal(delayedAttach.accepted, true, "late continuous motion may still be usable");
-    assert.equal(combatPlayer.rope.isAttached, false, "an older rope state must not undo a newer release");
+    assert.equal(combatPlayer.ropeObject.rope.isAttached, false, "an older rope state must not undo a newer release");
 
     const fallSimulation = new GameSimulation();
     const fallPlayer = primaryPlayer(fallSimulation);
     fallSimulation.enemies = [];
     fallSimulation.addPlayer({ x: 180, y: 500 });
     fallSimulation.activeCheckpoint = fallSimulation.world.checkpoints[1];
-    fallPlayer.rope.attach(fallPlayer.physics.position, {
+    fallPlayer.ropeObject.rope.attach(fallPlayer.physics.position, {
         x: fallPlayer.physics.position.x,
         y: fallPlayer.physics.position.y - 80
     });
@@ -147,7 +151,7 @@ export function run() {
     assert.equal(fallPlayer.health, fallPlayer.maxHealth);
     assert.equal(fallPlayer.physics.position.x, fallSimulation.activeCheckpoint.x);
     assert.equal(fallPlayer.physics.position.y, fallSimulation.activeCheckpoint.y);
-    assert.equal(fallPlayer.rope.isAttached, false);
+    assert.equal(fallPlayer.ropeObject.rope.isAttached, false);
     assert.equal(fallSimulation.runState, "playing", "one fallen player must not stop a cooperative world");
 
     combatPlayer.weapon.cooldown = 0;
@@ -186,15 +190,36 @@ export function run() {
     };
     combatSimulation.enemyProjectiles.push(impactProjectile);
     const playerHealthBeforeImpact = combatPlayer.health;
+    combatPlayer.hitInvulnerabilityRemaining = 0;
+    combatSession.advance();
+    assert.equal(
+        combatPlayer.health,
+        playerHealthBeforeImpact,
+        "the server step must not hit an input-driven player before the victim claim"
+    );
+    assert.ok(
+        combatSimulation.enemyProjectiles.some(({ id }) => id === impactProjectile.id),
+        "the server must keep an unclaimed enemy projectile available for validation"
+    );
+    const victimClaimPosition = impactProjectile.position.clone();
+    const victimClaimTick = combatSimulation.tick;
+    impactProjectile.velocity.x = 1200;
+    for (let tick = 0; tick < 6; tick += 1) combatSession.advance();
+    combatPlayer.physics.position.x += 200;
     const impactClaim = createPlayerImpactClaim({
         projectileId: impactProjectile.id,
-        clientTick: combatSimulation.tick,
+        clientTick: victimClaimTick,
         impactType: "player-hit",
-        position: combatPlayer.physics.position
+        position: victimClaimPosition
     });
     const acceptedImpact = combatSession.submitImpactClaim(combatPlayer.id, impactClaim);
-    assert.equal(acceptedImpact.accepted, true, "the victim client may claim its own immediate impact");
+    assert.equal(
+        acceptedImpact.accepted,
+        true,
+        "a victim claim must use its own tick and impact instead of later server projectile/player positions"
+    );
     assert.equal(combatPlayer.health, playerHealthBeforeImpact - impactProjectile.damage);
+    assert.equal(combatSimulation.metrics.damageTaken, impactProjectile.damage);
     assert.equal(combatSession.submitImpactClaim(combatPlayer.id, impactClaim), acceptedImpact);
     assert.equal(
         combatPlayer.health,

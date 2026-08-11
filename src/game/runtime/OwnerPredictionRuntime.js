@@ -10,9 +10,9 @@ function percentile(samples, ratio) {
     return sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * ratio) - 1)];
 }
 
-export class LocalPlayerPredictor {
+export class OwnerPredictionRuntime {
     constructor({
-        playerId,
+        ownerId,
         simulation = null,
         fixedDt = 1 / 120,
         inputHoldTicks = MULTIPLAYER_TIMING.inputHoldTicks,
@@ -21,7 +21,7 @@ export class LocalPlayerPredictor {
         correctionSeconds = MULTIPLAYER_TIMING.ownerCorrectionSeconds,
         hardSnapDistance = MULTIPLAYER_TIMING.ownerHardSnapDistance
     }) {
-        if (typeof playerId !== "string" || playerId.length === 0) throw new Error("playerId must be non-empty");
+        if (typeof ownerId !== "string" || ownerId.length === 0) throw new Error("ownerId must be non-empty");
         if (!Number.isFinite(fixedDt) || fixedDt <= 0) throw new Error("fixedDt must be positive");
         if (!Number.isSafeInteger(predictionLeadTicks) || predictionLeadTicks < 0) {
             throw new Error("predictionLeadTicks must be a non-negative safe integer");
@@ -35,11 +35,11 @@ export class LocalPlayerPredictor {
         if (!Number.isFinite(hardSnapDistance) || hardSnapDistance <= 0) {
             throw new Error("hardSnapDistance must be positive");
         }
-        this.playerId = playerId;
-        this.simulation = simulation ?? new GameSimulation({ playerId });
-        if (this.simulation.getPrimaryPlayerId() !== playerId) {
+        this.ownerId = ownerId;
+        this.simulation = simulation ?? new GameSimulation({ playerId: ownerId });
+        if (this.simulation.getPrimaryPlayerId() !== ownerId) {
             throw new Error(
-                `prediction simulation playerId mismatch: expected ${playerId}, received ${this.simulation.getPrimaryPlayerId()}`
+                `prediction simulation ownerId mismatch: expected ${ownerId}, received ${this.simulation.getPrimaryPlayerId()}`
             );
         }
         this.fixedDt = fixedDt;
@@ -63,13 +63,17 @@ export class LocalPlayerPredictor {
     reconcile(snapshot, pendingBatches) {
         if (snapshot.worldSeed !== this.simulation.world.seed) throw new Error("prediction world seed mismatch");
         if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
-        const authoritative = snapshot.state.players.find(({ id }) => id === this.playerId);
-        if (!authoritative) throw new Error(`missing predicted playerId: ${this.playerId}`);
-        if (this.initialized) return this.acceptAuthorityOutcomes(snapshot, authoritative);
+        const authoritative = snapshot.state.players.find(({ id }) => id === this.ownerId);
+        if (!authoritative) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
         const pendingTicks = pendingBatches.map(({ tick }) => tick);
-        const targetTick = Math.max(snapshot.serverTick + this.predictionLeadTicks, ...pendingTicks);
-        this.simulation.preparePrediction(snapshot.state.enemies ?? []);
-        this.simulation.restorePrediction(this.playerId, authoritative, snapshot.serverTick);
+        const targetTick = Math.max(
+            snapshot.serverTick + this.predictionLeadTicks,
+            this.initialized ? this.simulation.getTick() : snapshot.serverTick,
+            ...pendingTicks
+        );
+        if (this.initialized) return this.acceptAuthorityOutcomes(snapshot, authoritative, targetTick);
+        this.simulation.preparePrediction(snapshot.state.enemies ?? [], snapshot.state.activeCheckpointId);
+        this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, snapshot.serverTick);
         this.initialized = true;
 
         for (const tick of this.inputHistory.keys()) {
@@ -84,34 +88,43 @@ export class LocalPlayerPredictor {
             if (batch.tick <= snapshot.serverTick) continue;
             if (batchesByTick.has(batch.tick)) throw new Error(`duplicate pending target tick: ${batch.tick}`);
             batchesByTick.set(batch.tick, batch);
-            const entry = batch.commands.find(({ playerId }) => playerId === this.playerId);
+            const entry = batch.commands.find(({ playerId }) => playerId === this.ownerId);
             if (entry && !this.inputHistory.has(batch.tick)) this.rememberInput(batch.tick, entry.command);
         }
         const inputState = new InputStateSimulator({ holdTicks: this.inputHoldTicks });
         for (let tick = snapshot.serverTick + 1; tick <= targetTick; tick += 1) {
             const remembered = this.inputHistory.get(tick);
             const batch = remembered
-                ? { tick, commands: [{ playerId: this.playerId, sequence: tick, command: remembered }] }
+                ? { tick, commands: [{ playerId: this.ownerId, sequence: tick, command: remembered }] }
                 : (batchesByTick.get(tick) ?? { tick, commands: [] });
-            const simulated = inputState.expand(batch, [this.playerId]);
-            const command = simulated.commands[0]?.command ?? this.simulation.idlePlayerCommand(this.playerId);
-            const projectile = this.simulation.advancePrediction(this.playerId, command, this.fixedDt, tick);
+            const simulated = inputState.expand(batch, [this.ownerId]);
+            const command = simulated.commands[0]?.command ?? this.simulation.idleOwnerCommand(this.ownerId);
+            const projectile = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
             this.recordPredictedProjectile(projectile, tick);
         }
         return this.state();
     }
 
-    acceptAuthorityOutcomes(snapshot, authoritative) {
-        const current = this.simulation.playerState(this.playerId);
-        const displayedBefore = current.lifeState !== authoritative.lifeState ? this.presentationState() : null;
-        this.simulation.preparePrediction(snapshot.state.enemies ?? []);
+    acceptAuthorityOutcomes(snapshot, authoritative, targetTick) {
+        const current = this.state();
+        const respawned = snapshot.events.some(
+            ({ eventType, playerId }) => eventType === "player-respawned" && playerId === this.ownerId
+        );
+        const authorityTransition = respawned || current.lifeState !== authoritative.lifeState;
+        const displayedBefore = authorityTransition ? this.presentationState() : null;
+        this.simulation.preparePrediction(snapshot.state.enemies ?? [], snapshot.state.activeCheckpointId);
         for (const tick of this.inputHistory.keys()) {
             if (tick <= snapshot.serverTick) this.inputHistory.delete(tick);
         }
         for (const [predictionId, tick] of this.emittedPredictionTicks) {
             if (tick <= snapshot.serverTick) this.emittedPredictionTicks.delete(predictionId);
         }
-        const outcome = this.simulation.applyPredictionOutcomes(this.playerId, authoritative, snapshot.serverTick);
+        if (respawned) {
+            const restored = this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, targetTick);
+            this.startPresentationCorrection(displayedBefore, restored, true);
+            return this.state();
+        }
+        const outcome = this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick);
         if (outcome.lifeStateChanged) this.startPresentationCorrection(displayedBefore, outcome.state);
         return this.state();
     }
@@ -120,13 +133,19 @@ export class LocalPlayerPredictor {
         if (!this.initialized) return null;
         const tick = this.simulation.getTick() + 1;
         this.rememberInput(tick, command);
-        const projectile = this.simulation.advancePrediction(this.playerId, command, this.fixedDt, tick);
+        const projectile = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
         this.recordPredictedProjectile(projectile, tick);
         this.updatePresentation(this.fixedDt);
         return this.state();
     }
 
-    startPresentationCorrection(displayedBefore, corrected) {
+    predictFall() {
+        if (!this.initialized) return null;
+        this.simulation.resolvePlayerFall(this.ownerId);
+        return this.state();
+    }
+
+    startPresentationCorrection(displayedBefore, corrected, forceHardSnap = false) {
         const offset = {
             x: displayedBefore.position.x - corrected.position.x,
             y: displayedBefore.position.y - corrected.position.y
@@ -137,7 +156,8 @@ export class LocalPlayerPredictor {
             this.correctionSamples.push(distance);
             if (this.correctionSamples.length > 256) this.correctionSamples.shift();
         }
-        const hardSnap = distance > this.hardSnapDistance || displayedBefore.lifeState !== corrected.lifeState;
+        const hardSnap =
+            forceHardSnap || distance > this.hardSnapDistance || displayedBefore.lifeState !== corrected.lifeState;
         if (hardSnap) {
             this.presentationOffset = { x: 0, y: 0 };
             this.correctionRemaining = 0;
@@ -166,12 +186,12 @@ export class LocalPlayerPredictor {
 
     applyPredictedImpact(event) {
         if (!this.initialized) return false;
-        return this.simulation.applyPredictedImpact(this.playerId, event);
+        return this.simulation.applyPredictedOwnerImpact(this.ownerId, event);
     }
 
     resolveCollisions(otherPlayers, radius) {
         if (!this.initialized) return false;
-        return this.simulation.resolvePlayerCollisions(this.playerId, otherPlayers, radius);
+        return this.simulation.resolveOwnerCollisions(this.ownerId, otherPlayers, radius);
     }
 
     renderSnapshot() {
@@ -180,7 +200,7 @@ export class LocalPlayerPredictor {
 
     recordPredictedProjectile(projectile, tick) {
         if (!projectile) return;
-        const predictionId = `${this.playerId}:${tick}`;
+        const predictionId = `${this.ownerId}:${tick}`;
         if (this.emittedPredictionTicks.has(predictionId)) return;
         this.emittedPredictionTicks.set(predictionId, tick);
         this.predictedEvents.push(
@@ -207,7 +227,7 @@ export class LocalPlayerPredictor {
     }
 
     state() {
-        return this.simulation.predictionState(this.playerId);
+        return this.simulation.ownerPredictionState(this.ownerId);
     }
 
     presentationState() {

@@ -1,15 +1,14 @@
 import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import {
+    advanceEnemyProjectiles,
     distancePointToSegment,
     updateAutomaticWeapon,
-    updateEnemyProjectiles,
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../src/game/combat/CombatSystems.js";
 import { COMBAT_CONFIG } from "../src/game/config.js";
-import { FixedLengthRope } from "../src/game/rope/FixedLengthRope.js";
-import { ROPE_CONFIG } from "../src/game/config.js";
+import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
 import { EntityRegistry } from "../src/game/simulation/EntityRegistry.js";
 
 export function run() {
@@ -35,6 +34,7 @@ export function run() {
         dt: 1 / 120
     });
     assert.equal(projectiles.length, 1);
+    assert.ok(projectiles[0] instanceof SimulationDrivenObject);
     assert.equal(spawnedPlayerProjectile, projectiles[0]);
     assert.equal(projectiles[0].targetId, "enemy-1", "distance ties must resolve by stable entity id");
     assert.equal(owner.weapon.cooldown, 0.65);
@@ -64,54 +64,24 @@ export function run() {
     assert.equal(projectiles.length, 0, "weapons must not fire when every enemy is outside range");
 
     assert.equal(distancePointToSegment({ x: 50, y: 5 }, { x: 0, y: 0 }, { x: 100, y: 0 }), 5);
-    const rope = new FixedLengthRope(ROPE_CONFIG);
+    const travelingShot = [{ position: new Vector2(-10, 50), velocity: new Vector2(20, 0) }];
+    advanceEnemyProjectiles({ projectiles: travelingShot, dt: 0.5 });
+    assert.deepEqual(
+        travelingShot[0].position,
+        new Vector2(0, 50),
+        "the neutral server simulation must advance projectile trajectories without choosing player impacts"
+    );
+
     const target = {
         id: "player-1",
         physics: { position: new Vector2(0, 100), config: { radius: 15 }, addImpulse() {} },
         health: 100,
-        hitInvulnerabilityRemaining: 0,
-        ropeDisabledRemaining: 0,
         lifeState: "active"
     };
-    rope.attach(target.physics.position, { x: 0, y: 0 });
-    target.rope = rope;
-    const ropeShot = [{ position: new Vector2(-10, 50), velocity: new Vector2(20, 0), radius: 7, damage: 20 }];
-    const ropeEvents = updateEnemyProjectiles({
-        projectiles: ropeShot,
-        targets: [target],
-        config: COMBAT_CONFIG,
-        dt: 0.5
-    });
-    assert.equal(rope.isAttached, false, "enemy projectiles must sever the rope before checking body damage");
-    assert.equal(target.ropeDisabledRemaining, 0.6);
-    assert.equal(target.health, 100);
-    assert.deepEqual(ropeEvents.ropeCutAt, new Vector2(0, 50));
-    assert.equal(ropeEvents.ropeCuts[0].playerId, "player-1");
-    assert.equal(ropeEvents.resolutions[0].resolution, "rope-cut");
-
-    const bodyShot = [{ position: new Vector2(-10, 100), velocity: new Vector2(20, 0), radius: 7, damage: 20 }];
-    const bodyEvents = updateEnemyProjectiles({
-        projectiles: bodyShot,
-        targets: [target],
-        config: COMBAT_CONFIG,
-        dt: 0.5
-    });
-    assert.equal(target.health, 80, "body hits must reduce HP exactly once");
-    assert.equal(target.hitInvulnerabilityRemaining, COMBAT_CONFIG.playerHitInvulnerability);
-    assert.equal(bodyEvents.ropeCutAt, null);
-    assert.equal(bodyEvents.hits[0].type, "player-hit");
-    assert.equal(bodyEvents.hits[0].damage, 20);
-    assert.equal(bodyEvents.hits[0].playerId, "player-1");
-    assert.equal(bodyEvents.resolutions[0].resolution, "player-hit");
-
-    const secondRope = new FixedLengthRope(ROPE_CONFIG);
     const secondTarget = {
         id: "player-2",
         physics: { position: new Vector2(60, 0), config: { radius: 15 }, addImpulse() {} },
-        rope: secondRope,
         health: 100,
-        hitInvulnerabilityRemaining: 0,
-        ropeDisabledRemaining: 0,
         lifeState: "active"
     };
     const firingEnemy = { id: "enemy-fire", position: new Vector2(100, 0), fireCooldown: 0 };
@@ -124,22 +94,6 @@ export function run() {
         config: COMBAT_CONFIG,
         dt: 0
     });
+    assert.ok(spawned[0] instanceof SimulationDrivenObject);
     assert.equal(spawned[0].targetId, "player-2", "the closest active player must be targeted");
-    const secondBodyShot = [
-        {
-            id: "enemy-projectile-second",
-            position: secondTarget.physics.position.clone(),
-            velocity: new Vector2(),
-            radius: 7,
-            damage: 20
-        }
-    ];
-    const secondBodyEvents = updateEnemyProjectiles({
-        projectiles: secondBodyShot,
-        targets: [target, secondTarget],
-        config: COMBAT_CONFIG,
-        dt: 0
-    });
-    assert.equal(secondTarget.health, 80);
-    assert.equal(secondBodyEvents.hits[0].playerId, "player-2");
 }

@@ -3,8 +3,9 @@ import { FixedStepRunner } from "../core/sim/FixedStepRunner.js";
 import { CanvasRenderer } from "../render/CanvasRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { LocalAuthority } from "./runtime/LocalAuthority.js";
+import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { GameSimulation } from "./simulation/GameSimulation.js";
-import { CAMERA_CONFIG } from "./config.js";
+import { CAMERA_CONFIG, PLAYER_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
@@ -24,6 +25,7 @@ export class GameApp {
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
         this.latestInput = this.input.snapshot();
+        this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback();
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
@@ -58,9 +60,24 @@ export class GameApp {
         const before = this.authority.snapshot();
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
-        this.combatFeedback.apply(this.authority.drainEvents());
+        let state = this.authority.snapshot();
+        const authorityEvents = this.authority.drainEvents();
+        const authorityFeedback = this.predictableProjectiles.apply(authorityEvents, state.tick, state);
+        const owner = this.authority.ownerState();
+        const predictedImpacts = this.predictableProjectiles
+            .update(
+                dt,
+                {
+                    enemies: state.enemies,
+                    localPlayer: { ...owner, radius: PLAYER_CONFIG.radius }
+                },
+                state.tick
+            )
+            .filter(({ projectileId }) => projectileId);
+        for (const impact of predictedImpacts) this.authority.submitImpactClaim(impact);
+        this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
-        const state = this.authority.snapshot();
+        state = this.authority.snapshot();
         if (state.resets !== before.resets) this.camera = this.createCamera();
         this.updateCamera(dt, state.player);
     }

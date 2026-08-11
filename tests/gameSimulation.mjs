@@ -81,17 +81,17 @@ export function run() {
     assert.equal(sharedWorld.players[0], sharedPrimary);
     assert.equal(sharedWorld.players[1], partner.entity);
     assert.notEqual(partner.physics, sharedPrimary.physics);
-    assert.notEqual(partner.rope, sharedPrimary.rope);
+    assert.notEqual(partner.rope, sharedPrimary.ropeObject.rope);
     assert.notEqual(partner.artifacts, sharedPrimary.artifacts);
     assert.equal(partner.physics.position.x, 180);
-    sharedPrimary.aimWorld = { x: 40, y: 50 };
-    sharedPrimary.swingDrag = { used: true };
-    assert.equal(sharedPrimary.aimWorld.x, 40);
-    assert.equal(sharedPrimary.swingDrag.used, true);
-    assert.deepEqual(partner.entity.aimWorld, { x: 0, y: 0 });
-    assert.equal(partner.entity.swingDrag, null);
+    sharedPrimary.ropeObject.aimWorld = { x: 40, y: 50 };
+    sharedPrimary.ropeObject.swingDrag = { used: true };
+    assert.equal(sharedPrimary.ropeObject.aimWorld.x, 40);
+    assert.equal(sharedPrimary.ropeObject.swingDrag.used, true);
+    assert.deepEqual(partner.entity.ropeObject.aimWorld, { x: 0, y: 0 });
+    assert.equal(partner.entity.ropeObject.swingDrag, null);
     const primaryPosition = sharedPrimary.physics.position.clone();
-    sharedWorld.updatePlayer(partner.entity, { ...command, horizontal: -1 }, 1 / 120);
+    sharedWorld.dispatchOwnerInput(partner.entity.id, { ...command, horizontal: -1 }, 1 / 120);
     assert.ok(partner.physics.velocity.x < 0);
     assert.deepEqual(sharedPrimary.physics.position, primaryPosition);
     assert.equal(sharedWorld.world, sharedWorld.snapshot().world);
@@ -113,9 +113,9 @@ export function run() {
         x: batchPartner.physics.position.x,
         y: batchPartner.physics.position.y - 80
     });
-    batchPartner.entity.wasPointerDown = true;
-    batchPartner.entity.lastPointer = { x: 200, y: 100, down: true };
-    batchPartner.entity.lastViewport = { width: 1280, height: 720 };
+    batchPartner.entity.ropeObject.wasPointerDown = true;
+    batchPartner.entity.ropeObject.lastPointer = { x: 200, y: 100, down: true };
+    batchPartner.entity.ropeObject.lastViewport = { width: 1280, height: 720 };
     batchWorld.stepCommandBatch(
         1 / 120,
         createPlayerCommandBatch(2, [{ playerId: batchPrimary.id, sequence: 1, command }])
@@ -140,6 +140,37 @@ export function run() {
     const resolveEvents = eventRun.drainReplicationEvents().filter((event) => event.eventType === "resolve");
     assert.equal(resolveEvents[0].objectId, spawnEvents[0].objectId);
     assert.match(resolveEvents[0].resolution, /enemy-hit|enemy-defeated/);
+
+    const localImpactSimulation = new GameSimulation();
+    localImpactSimulation.enemies = [];
+    const localImpactPlayer = primaryPlayer(localImpactSimulation);
+    const localImpactAuthority = new LocalAuthority(localImpactSimulation);
+    const localImpactProjectile = {
+        id: "local-enemy-impact",
+        ownerId: "local-enemy",
+        targetId: localImpactPlayer.id,
+        position: localImpactPlayer.physics.position.clone(),
+        velocity: localImpactPlayer.physics.velocity.clone(),
+        radius: 7,
+        damage: 20
+    };
+    localImpactSimulation.enemyProjectiles.push(localImpactProjectile);
+    const localHealthBeforeImpact = localImpactPlayer.health;
+    localImpactAuthority.step(0, command);
+    assert.equal(
+        localImpactPlayer.health,
+        localHealthBeforeImpact,
+        "the shared simulation must wait for a victim claim in single-player too"
+    );
+    const localImpactReceipt = localImpactAuthority.submitImpactClaim({
+        projectileId: localImpactProjectile.id,
+        clientTick: localImpactSimulation.tick,
+        resolution: "player-hit",
+        position: localImpactPlayer.physics.position
+    });
+    assert.equal(localImpactReceipt.accepted, true);
+    assert.equal(localImpactPlayer.health, localHealthBeforeImpact - localImpactProjectile.damage);
+    assert.equal(localImpactSimulation.metrics.damageTaken, localImpactProjectile.damage);
 
     const defeated = new GameSimulation();
     const defeatedPlayer = primaryPlayer(defeated);
@@ -243,7 +274,7 @@ export function run() {
 
     const completed = new GameSimulation();
     const completedPlayer = primaryPlayer(completed);
-    completedPlayer.rope.attach(completedPlayer.physics.position, {
+    completedPlayer.ropeObject.rope.attach(completedPlayer.physics.position, {
         x: completedPlayer.physics.position.x,
         y: completedPlayer.physics.position.y - 100
     });

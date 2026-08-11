@@ -150,6 +150,7 @@ export class MultiplayerGameApp {
                       ...localAuthorityPlayer,
                       position: predictedPlayer.position,
                       rope: predictedPlayer.rope,
+                      hitInvulnerabilityRemaining: predictedPlayer.hitInvulnerabilityRemaining,
                       radius: PLAYER_CONFIG.radius
                   }
                 : null

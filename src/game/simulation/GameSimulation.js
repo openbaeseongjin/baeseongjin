@@ -1,20 +1,21 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
-    distancePointToSegment,
+    advanceEnemyProjectiles,
     updateAutomaticWeapon,
-    updateEnemyProjectiles,
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
+import { EnemyObject } from "../combat/EnemyObject.js";
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { InputDispatcher } from "../input/InputDispatcher.js";
+import { findRopeAttachment } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "../rewards/ArtifactRewardSelection.js";
-import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
-import { closestPointOnSurface, generateWorld } from "../world/WorldGenerator.js";
+import { generateWorld } from "../world/WorldGenerator.js";
 import { EntityRegistry } from "./EntityRegistry.js";
 
 function vectorState(vector) {
@@ -45,11 +46,15 @@ function cloneSwingDrag(swingDrag) {
 
 export class GameSimulation {
     #primaryPlayerId;
+    #inputDispatcher;
+    #inputDrivenObjectsByOwner;
 
     constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null } = {}) {
         this.world = generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
         this.metrics = new RunMetrics();
         this.registry = new EntityRegistry();
+        this.#inputDispatcher = new InputDispatcher();
+        this.#inputDrivenObjectsByOwner = new Map();
         this.players = [];
         const playerRuntime = this.addPlayer(undefined, playerId);
         this.#primaryPlayerId = playerRuntime.entity.id;
@@ -77,6 +82,7 @@ export class GameSimulation {
             playerId
         });
         this.players.push(runtime.entity);
+        this.#inputDrivenObjectsByOwner.set(runtime.entity.id, runtime.inputDrivenObjects);
         return runtime;
     }
 
@@ -84,6 +90,7 @@ export class GameSimulation {
         const index = this.players.findIndex(({ id }) => id === playerId);
         if (index < 0) return false;
         const [removed] = this.players.splice(index, 1);
+        this.#inputDrivenObjectsByOwner.delete(playerId);
         const removedReward = this.artifactRewards.get(playerId);
         this.artifactRewards.delete(playerId);
         if (removedReward && this.artifactRewards.size === 0) {
@@ -105,6 +112,10 @@ export class GameSimulation {
         return this.players.map(({ id }) => id);
     }
 
+    inputDrivenObjects(ownerId) {
+        return this.#inputDrivenObjectsByOwner.get(ownerId) ?? Object.freeze([]);
+    }
+
     playerState(playerId) {
         const player = this.#findPlayer(playerId);
         if (!player) return null;
@@ -119,19 +130,19 @@ export class GameSimulation {
             ropeDisabledRemaining: player.ropeDisabledRemaining,
             lifeState: player.lifeState,
             rope: {
-                isAttached: player.rope.isAttached,
-                anchor: vectorState(player.rope.anchor),
-                length: player.rope.length,
-                currentLength: player.rope.currentLength,
-                tension: player.rope.tension
+                isAttached: player.ropeObject.rope.isAttached,
+                anchor: vectorState(player.ropeObject.rope.anchor),
+                length: player.ropeObject.rope.length,
+                currentLength: player.ropeObject.rope.currentLength,
+                tension: player.ropeObject.rope.tension
             },
             control: {
-                aimWorld: vectorState(player.aimWorld),
-                lastPointer: { ...player.lastPointer },
-                lastViewport: { ...player.lastViewport },
-                wasPointerDown: player.wasPointerDown,
-                attachBufferRemaining: player.attachBufferRemaining,
-                swingDrag: swingDragState(player.swingDrag)
+                aimWorld: vectorState(player.ropeObject.aimWorld),
+                lastPointer: { ...player.ropeObject.lastPointer },
+                lastViewport: { ...player.ropeObject.lastViewport },
+                wasPointerDown: player.ropeObject.wasPointerDown,
+                attachBufferRemaining: player.ropeObject.attachBufferRemaining,
+                swingDrag: swingDragState(player.ropeObject.swingDrag)
             },
             weapon: {
                 range: player.weapon.range,
@@ -171,9 +182,9 @@ export class GameSimulation {
 
     releasePlayerRope(playerId) {
         const player = this.#requirePlayer(playerId);
-        const released = player.rope.isAttached;
-        player.rope.detach();
-        player.swingDrag = null;
+        const released = player.ropeObject.rope.isAttached;
+        player.ropeObject.rope.detach();
+        player.ropeObject.swingDrag = null;
         return released;
     }
 
@@ -185,31 +196,39 @@ export class GameSimulation {
         if (player.ropeDisabledRemaining > 0) {
             this.releasePlayerRope(playerId);
         } else if (synchronizeRope && state.rope.isAttached) {
-            player.rope.attach(player.physics.position, state.rope.anchor);
+            player.ropeObject.rope.attach(player.physics.position, state.rope.anchor);
         } else if (synchronizeRope) {
             this.releasePlayerRope(playerId);
         }
         return true;
     }
 
-    preparePrediction(enemies = []) {
-        this.enemies = enemies.map((enemy) => ({
-            ...enemy,
-            position: new Vector2(enemy.position.x, enemy.position.y)
-        }));
+    preparePrediction(enemies = [], activeCheckpointId = this.activeCheckpoint?.id ?? null) {
+        if (activeCheckpointId !== null && activeCheckpointId !== undefined) {
+            const activeCheckpoint = this.world.checkpoints.find(({ id }) => id === activeCheckpointId);
+            if (!activeCheckpoint) throw new Error(`unknown active checkpoint: ${activeCheckpointId}`);
+            this.activeCheckpoint = activeCheckpoint;
+        }
+        this.enemies = enemies.map(
+            (enemy) =>
+                new EnemyObject({
+                    ...enemy,
+                    position: new Vector2(enemy.position.x, enemy.position.y)
+                })
+        );
         this.projectiles = [];
         this.enemyProjectiles = [];
     }
 
-    restorePrediction(playerId, state, serverTick = this.tick) {
-        const player = this.#requirePlayer(playerId);
+    restoreOwnerPrediction(ownerId, state, serverTick = this.tick) {
+        const player = this.#requirePlayer(ownerId);
         this.#restorePlayer(player, state);
         this.tick = serverTick;
-        return this.predictionState(playerId);
+        return this.ownerPredictionState(ownerId);
     }
 
-    applyPredictionOutcomes(playerId, authoritative, serverTick) {
-        const player = this.#requirePlayer(playerId);
+    applyOwnerPredictionOutcomes(ownerId, authoritative, predictionTick) {
+        const player = this.#requirePlayer(ownerId);
         const lifeStateChanged = player.lifeState !== authoritative.lifeState;
         player.health = authoritative.health;
         player.maxHealth = authoritative.maxHealth;
@@ -224,30 +243,32 @@ export class GameSimulation {
         player.weapon.fireInterval = authoritative.weapon.fireInterval;
         player.artifacts.replace(authoritative.artifacts);
         player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
-        if (authoritative.ropeDisabledRemaining > 0) this.releasePlayerRope(playerId);
+        if (authoritative.ropeDisabledRemaining > 0) this.releasePlayerRope(ownerId);
         if (lifeStateChanged) {
             this.#restorePlayer(player, authoritative);
-            this.tick = Math.max(this.tick, serverTick);
         }
-        return { lifeStateChanged, state: this.predictionState(playerId) };
+        this.tick = Math.max(this.tick, predictionTick);
+        return { lifeStateChanged, state: this.ownerPredictionState(ownerId) };
     }
 
-    advancePrediction(playerId, command, dt, tick) {
-        const player = this.#requirePlayer(playerId);
-        const projectile = this.updatePlayer(player, command, dt);
+    advanceOwnerPrediction(ownerId, command, dt, tick) {
+        const player = this.#requirePlayer(ownerId);
+        this.#prepareOwnerStep(player, dt);
+        this.dispatchOwnerInput(ownerId, command, dt);
+        const projectile = this.#advanceAutomaticWeapon(player, dt);
         this.projectiles.length = 0;
         this.tick = tick;
         return projectile;
     }
 
-    idlePlayerCommand(playerId) {
-        return this.commandForPlayer(this.#requirePlayer(playerId), new Map());
+    idleOwnerCommand(ownerId) {
+        return this.commandForPlayer(this.#requirePlayer(ownerId), new Map());
     }
 
-    applyPredictedImpact(playerId, event) {
-        const player = this.#requirePlayer(playerId);
+    applyPredictedOwnerImpact(ownerId, event) {
+        const player = this.#requirePlayer(ownerId);
         if (event.resolution === "rope-cut") {
-            this.releasePlayerRope(playerId);
+            this.releasePlayerRope(ownerId);
             player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
             return true;
         }
@@ -263,18 +284,21 @@ export class GameSimulation {
         return true;
     }
 
-    resolvePlayerCollisions(playerId, otherPlayers, radius) {
-        return resolvePlayerCollisions(this.#requirePlayer(playerId), otherPlayers, radius);
+    resolveOwnerCollisions(ownerId, otherPlayers, radius) {
+        return resolvePlayerCollisions(this.#requirePlayer(ownerId), otherPlayers, radius);
     }
 
-    predictionState(playerId) {
-        const state = this.playerState(playerId);
+    ownerPredictionState(ownerId) {
+        const state = this.playerState(ownerId);
         if (!state) return null;
         return {
             tick: this.tick,
             position: state.position,
             velocity: state.velocity,
             isGrounded: state.isGrounded,
+            health: state.health,
+            hitInvulnerabilityRemaining: state.hitInvulnerabilityRemaining,
+            ropeDisabledRemaining: state.ropeDisabledRemaining,
             lifeState: state.lifeState,
             rope: state.rope,
             swingDrag: state.control.swingDrag,
@@ -301,19 +325,19 @@ export class GameSimulation {
         player.physics.velocity.set(state.velocity.x, state.velocity.y);
         player.physics.isGrounded = state.isGrounded;
         if (state.rope.isAttached) {
-            player.rope.anchor = new Vector2(state.rope.anchor.x, state.rope.anchor.y);
-            player.rope.length = state.rope.length;
-            player.rope.currentLength = state.rope.currentLength;
-            player.rope.tension = state.rope.tension;
+            player.ropeObject.rope.anchor = new Vector2(state.rope.anchor.x, state.rope.anchor.y);
+            player.ropeObject.rope.length = state.rope.length;
+            player.ropeObject.rope.currentLength = state.rope.currentLength;
+            player.ropeObject.rope.tension = state.rope.tension;
         } else {
-            player.rope.detach();
+            player.ropeObject.rope.detach();
         }
-        player.aimWorld = { ...state.control.aimWorld };
-        player.lastPointer = { ...state.control.lastPointer };
-        player.lastViewport = { ...state.control.lastViewport };
-        player.wasPointerDown = state.control.wasPointerDown;
-        player.attachBufferRemaining = state.control.attachBufferRemaining;
-        player.swingDrag = cloneSwingDrag(state.control.swingDrag);
+        player.ropeObject.aimWorld = { ...state.control.aimWorld };
+        player.ropeObject.lastPointer = { ...state.control.lastPointer };
+        player.ropeObject.lastViewport = { ...state.control.lastViewport };
+        player.ropeObject.wasPointerDown = state.control.wasPointerDown;
+        player.ropeObject.attachBufferRemaining = state.control.attachBufferRemaining;
+        player.ropeObject.swingDrag = cloneSwingDrag(state.control.swingDrag);
         player.health = state.health;
         player.maxHealth = state.maxHealth;
         player.hitInvulnerabilityRemaining = state.hitInvulnerabilityRemaining;
@@ -326,7 +350,12 @@ export class GameSimulation {
         player.artifacts.replace(state.artifacts);
         player.ropeDamageBoostRemaining = state.ropeDamageBoostRemaining;
         player.lastCheckpointLoss = [...state.lastCheckpointLoss];
-        player.attachmentCandidate = this.findAttachment(player.aimWorld, player);
+        player.ropeObject.attachmentCandidate = findRopeAttachment({
+            aimPoint: player.ropeObject.aimWorld,
+            playerPosition: player.physics.position,
+            surfaces: this.world.surfaces,
+            maxAttachDistance: ROPE_CONFIG.maxAttachDistance
+        });
     }
 
     step(dt, command) {
@@ -370,7 +399,9 @@ export class GameSimulation {
         this.metrics.recordActiveTime(dt);
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
-            const projectile = this.updatePlayer(player, playerCommand, dt);
+            this.#prepareOwnerStep(player, dt);
+            this.dispatchOwnerInput(player.id, playerCommand, dt);
+            const projectile = this.#advanceAutomaticWeapon(player, dt);
             if (projectile) this.recordProjectileSpawn(projectile, "player-projectile");
         }
         const playerProjectileEvents = updatePlayerProjectiles({
@@ -388,23 +419,13 @@ export class GameSimulation {
             dt
         });
         for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile, "enemy-projectile");
-        const enemyProjectileEvents = updateEnemyProjectiles({
-            projectiles: this.enemyProjectiles,
-            targets: this.players,
-            config: COMBAT_CONFIG,
-            dt
-        });
-        const combatEvents = [...playerProjectileEvents.hits, ...enemyProjectileEvents.hits];
+        advanceEnemyProjectiles({ projectiles: this.enemyProjectiles, dt });
+        const combatEvents = playerProjectileEvents.hits;
         const hitByProjectileId = new Map(combatEvents.map((event) => [event.projectileId, event]));
-        for (const resolution of [...playerProjectileEvents.resolutions, ...enemyProjectileEvents.resolutions]) {
+        for (const resolution of playerProjectileEvents.resolutions) {
             this.recordProjectileResolution(resolution, hitByProjectileId.get(resolution.projectileId));
         }
-        this.metrics.recordCombat(playerProjectileEvents, enemyProjectileEvents);
-        for (const ropeCut of enemyProjectileEvents.ropeCuts) {
-            const player = this.players.find(({ id }) => id === ropeCut.playerId);
-            if (player) player.swingDrag = null;
-            this.eventFlash = { type: "rope-cut", age: 0, position: ropeCut.position, playerId: ropeCut.playerId };
-        }
+        this.metrics.recordEnemyOutcomes(playerProjectileEvents);
         this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
         for (const player of this.players) {
             if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
@@ -438,9 +459,9 @@ export class GameSimulation {
                 horizontal: 0,
                 vertical: 0,
                 interact: false,
-                pointer: player.lastPointer,
-                viewport: player.lastViewport,
-                aimWorld: player.aimWorld
+                pointer: player.ropeObject.lastPointer,
+                viewport: player.ropeObject.lastViewport,
+                aimWorld: player.ropeObject.aimWorld
             }
         );
     }
@@ -452,11 +473,12 @@ export class GameSimulation {
             vertical: 0,
             interact: false,
             pointer: { ...command.pointer, down: false, pressed: false, released: false },
-            aimWorld: command.aimWorld ?? player.aimWorld
+            aimWorld: command.aimWorld ?? player.ropeObject.aimWorld
         };
     }
 
-    updatePlayer(player, command, dt) {
+    dispatchOwnerInput(ownerId, command, dt) {
+        const player = this.#requirePlayer(ownerId);
         const canControl = player.lifeState === "active";
         const effectiveCommand = canControl
             ? command
@@ -465,49 +487,38 @@ export class GameSimulation {
                   vertical: 0,
                   interact: false,
                   pointer: { x: 0, y: 0, down: false },
-                  aimWorld: player.aimWorld
+                  aimWorld: player.ropeObject.aimWorld
               };
+        return this.#inputDispatcher.dispatch({
+            objects: this.inputDrivenObjects(player.id),
+            ownerId: player.id,
+            input: effectiveCommand,
+            context: {
+                canControl,
+                dt,
+                owner: player,
+                ropeConfig: ROPE_CONFIG,
+                surfaces: this.world.surfaces,
+                onFlash: (eventFlash) => {
+                    this.eventFlash = eventFlash;
+                },
+                onSwing: () => {
+                    const effects = getArtifactEffects(player.artifacts.snapshot());
+                    player.ropeDamageBoostRemaining = effects.swingDamageDuration;
+                    this.applyArtifactEffects(player);
+                }
+            }
+        });
+    }
+
+    #prepareOwnerStep(player, dt) {
         player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
         player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
         player.ropeDamageBoostRemaining = Math.max(0, player.ropeDamageBoostRemaining - dt);
         this.applyArtifactEffects(player);
-        player.lastPointer = effectiveCommand.pointer;
-        player.lastViewport = effectiveCommand.viewport ?? player.lastViewport;
-        player.aimWorld = effectiveCommand.aimWorld;
-        player.attachmentCandidate = canControl ? this.findAttachment(player.aimWorld, player) : null;
-        if (effectiveCommand.pointer.down && !player.wasPointerDown) {
-            player.attachBufferRemaining = ROPE_CONFIG.attachBufferSeconds;
-        }
-        if (
-            effectiveCommand.pointer.down &&
-            !player.rope.isAttached &&
-            player.ropeDisabledRemaining <= 0 &&
-            player.attachBufferRemaining > 0 &&
-            player.attachmentCandidate
-        ) {
-            if (player.rope.attach(player.physics.position, player.attachmentCandidate)) {
-                this.eventFlash = { type: "attach", age: 0 };
-                player.swingDrag = {
-                    origin: { x: effectiveCommand.pointer.x, y: effectiveCommand.pointer.y },
-                    direction: null,
-                    progress: 0,
-                    age: 0,
-                    used: false
-                };
-                player.attachBufferRemaining = 0;
-            }
-        }
-        if (effectiveCommand.pointer.down && player.rope.isAttached) {
-            this.updatePlayerSwingDrag(player, effectiveCommand.pointer, effectiveCommand.viewport, dt);
-        }
-        if (!effectiveCommand.pointer.down && player.wasPointerDown && player.rope.isAttached) {
-            player.rope.detach();
-            this.eventFlash = { type: "release", age: 0 };
-            player.swingDrag = null;
-        }
-        player.attachBufferRemaining = Math.max(0, player.attachBufferRemaining - dt);
-        player.wasPointerDown = effectiveCommand.pointer.down;
-        player.physics.step(dt, effectiveCommand, this.world.surfaces, player.rope);
+    }
+
+    #advanceAutomaticWeapon(player, dt) {
         return updateAutomaticWeapon({
             owner: player,
             enemies: this.enemies,
@@ -546,8 +557,8 @@ export class GameSimulation {
                     selectedIndex: 0
                 })
             );
-            player.rope.detach();
-            player.swingDrag = null;
+            player.ropeObject.rope.detach();
+            player.ropeObject.swingDrag = null;
         }
     }
 
@@ -604,41 +615,19 @@ export class GameSimulation {
         player.weapon.fireInterval = player.weapon.baseFireInterval * effects.fireIntervalMultiplier;
     }
 
-    updateSwingDrag(pointer, viewport, dt) {
-        this.updatePlayerSwingDrag(this.#primaryPlayer(), pointer, viewport, dt);
-    }
-
-    updatePlayerSwingDrag(player, pointer, viewport, dt) {
-        if (!player.swingDrag || player.swingDrag.used || !player.rope.anchor) return;
-        player.swingDrag.age += dt;
-        const evaluation = evaluateSwingDrag({
-            anchor: player.rope.anchor,
-            playerPosition: player.physics.position,
-            drag: { x: pointer.x - player.swingDrag.origin.x, y: pointer.y - player.swingDrag.origin.y },
-            threshold: getSwingDragThreshold(viewport, ROPE_CONFIG.swingDragThresholdViewportRatio)
-        });
-        if (!evaluation) return;
-        player.swingDrag.direction = evaluation.direction;
-        player.swingDrag.progress = evaluation.progress;
-        if (!evaluation.triggered || player.swingDrag.age < ROPE_CONFIG.swingDragMinHoldSeconds) return;
-        player.physics.addImpulse(evaluation.direction, ROPE_CONFIG.swingImpulse);
-        const effects = getArtifactEffects(player.artifacts?.snapshot() ?? []);
-        player.ropeDamageBoostRemaining = effects.swingDamageDuration;
-        if (player.weapon) this.applyArtifactEffects(player);
-        player.swingDrag.used = true;
-        this.eventFlash = { type: "swing", age: 0 };
-    }
-
     createEnemies() {
-        return this.world.enemySpawns.map((spawn) => ({
-            id: this.registry.createId("enemy"),
-            position: new Vector2(spawn.x, spawn.y),
-            level: spawn.level,
-            radius: COMBAT_CONFIG.enemyRadius,
-            health: COMBAT_CONFIG.enemyHealth,
-            maxHealth: COMBAT_CONFIG.enemyHealth,
-            fireCooldown: COMBAT_CONFIG.enemyFireInterval
-        }));
+        return this.world.enemySpawns.map(
+            (spawn) =>
+                new EnemyObject({
+                    id: this.registry.createId("enemy"),
+                    position: new Vector2(spawn.x, spawn.y),
+                    level: spawn.level,
+                    radius: COMBAT_CONFIG.enemyRadius,
+                    health: COMBAT_CONFIG.enemyHealth,
+                    maxHealth: COMBAT_CONFIG.enemyHealth,
+                    fireCooldown: COMBAT_CONFIG.enemyFireInterval
+                })
+        );
     }
 
     recordProjectileSpawn(projectile, objectType) {
@@ -707,24 +696,19 @@ export class GameSimulation {
         if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
         const projectile = this.enemyProjectiles.find(({ id }) => id === claim.projectileId);
         if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
-        const futureTicks = Math.max(0, claim.clientTick - this.tick);
-        const travelAllowance = (COMBAT_CONFIG.enemyProjectileSpeed * futureTicks) / 120 + positionTolerance;
+        const claimTickOffsetSeconds = (claim.clientTick - this.tick) / 120;
+        const projectilePositionAtClaim = projectile.position
+            .clone()
+            .add(projectile.velocity.clone().scale(claimTickOffsetSeconds));
         if (
-            Math.hypot(claim.position.x - projectile.position.x, claim.position.y - projectile.position.y) >
-            travelAllowance
+            Math.hypot(claim.position.x - projectilePositionAtClaim.x, claim.position.y - projectilePositionAtClaim.y) >
+            positionTolerance
         ) {
             return Object.freeze({ accepted: false, reason: "trajectory-mismatch" });
         }
         if (claim.impactType === "rope-cut") {
-            if (
-                !player.rope.isAttached ||
-                distancePointToSegment(claim.position, player.physics.position, player.rope.anchor) >
-                    projectile.radius + positionTolerance
-            ) {
-                return Object.freeze({ accepted: false, reason: "rope-mismatch" });
-            }
-            player.rope.detach();
-            player.swingDrag = null;
+            player.ropeObject.rope.detach();
+            player.ropeObject.swingDrag = null;
             player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
             this.eventFlash = {
                 type: "rope-cut",
@@ -735,12 +719,6 @@ export class GameSimulation {
         } else {
             if (player.health <= 0 || player.hitInvulnerabilityRemaining > 0) {
                 return Object.freeze({ accepted: false, reason: "player-ineligible" });
-            }
-            if (
-                Math.hypot(claim.position.x - player.physics.position.x, claim.position.y - player.physics.position.y) >
-                player.physics.config.radius + projectile.radius + positionTolerance
-            ) {
-                return Object.freeze({ accepted: false, reason: "position-mismatch" });
             }
             player.health = Math.max(0, player.health - projectile.damage);
             const speed = projectile.velocity.length();
@@ -761,6 +739,7 @@ export class GameSimulation {
             },
             claim.impactType === "player-hit" ? { damage: projectile.damage } : null
         );
+        this.metrics.recordPlayerImpact(claim.impactType, projectile.damage);
         if (claim.impactType === "player-hit" && player.health <= 0) {
             this.respawnPlayerAtCheckpoint(player, "health");
         }
@@ -798,34 +777,17 @@ export class GameSimulation {
         return events;
     }
 
-    findAttachment(aimPoint, player = this.#primaryPlayer()) {
-        let best = null;
-        let bestScore = Number.POSITIVE_INFINITY;
-        for (const surface of this.world.surfaces) {
-            const point = closestPointOnSurface(aimPoint, surface);
-            const playerDistance = player.physics.position.distanceTo(point);
-            if (playerDistance > ROPE_CONFIG.maxAttachDistance) continue;
-            const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
-            const score = aimDistance * 2 + playerDistance * 0.05;
-            if (aimDistance <= 90 && score < bestScore) {
-                best = point;
-                bestScore = score;
-            }
-        }
-        return best;
-    }
-
     respawnPlayerAtCheckpoint(player, reason) {
         if (!player || this.runState !== "playing") return false;
         const respawnPosition = this.activeCheckpoint ?? { x: 120, y: 500 };
         this.metrics.recordDefeat();
         player.physics.reset(respawnPosition);
-        player.rope.detach();
-        player.attachmentCandidate = null;
-        player.wasPointerDown = false;
-        player.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
-        player.attachBufferRemaining = 0;
-        player.swingDrag = null;
+        player.ropeObject.rope.detach();
+        player.ropeObject.attachmentCandidate = null;
+        player.ropeObject.wasPointerDown = false;
+        player.ropeObject.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
+        player.ropeObject.attachBufferRemaining = 0;
+        player.ropeObject.swingDrag = null;
         player.health = player.maxHealth;
         player.weapon.cooldown = 0;
         player.hitInvulnerabilityRemaining = 0;
@@ -874,8 +836,8 @@ export class GameSimulation {
         if (this.runState !== "playing") return;
         this.runState = "completed";
         const player = this.#primaryPlayer();
-        player.rope.detach();
-        player.swingDrag = null;
+        player.ropeObject.rope.detach();
+        player.ropeObject.swingDrag = null;
         this.eventFlash = { type: "completed", age: 0, position: this.world.summit };
     }
 
@@ -885,11 +847,11 @@ export class GameSimulation {
             tick: this.tick,
             world: this.world,
             player: player.physics,
-            rope: player.rope,
-            aimWorld: player.aimWorld,
-            attachmentCandidate: player.attachmentCandidate,
+            rope: player.ropeObject.rope,
+            aimWorld: player.ropeObject.aimWorld,
+            attachmentCandidate: player.ropeObject.attachmentCandidate,
             eventFlash: this.eventFlash,
-            swingDrag: player.swingDrag,
+            swingDrag: player.ropeObject.swingDrag,
             enemies: this.enemies,
             projectiles: this.projectiles,
             enemyProjectiles: this.enemyProjectiles,
