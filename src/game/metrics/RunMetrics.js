@@ -21,10 +21,13 @@ export class RunMetrics {
         if (this.firstRewardSeconds === null) this.firstRewardSeconds = this.activeSeconds;
     }
 
-    recordCombat(playerEvents, enemyEvents) {
+    recordEnemyOutcomes(playerEvents) {
         this.enemyDefeats += playerEvents.hits.filter((event) => event.type === "enemy-defeated").length;
-        this.damageTaken += enemyEvents.hits.reduce((total, event) => total + event.damage, 0);
-        if (enemyEvents.ropeCutAt) this.ropeCuts += 1;
+    }
+
+    recordPlayerImpact(impactType, damage = 0) {
+        if (impactType === "player-hit") this.damageTaken += damage;
+        if (impactType === "rope-cut") this.ropeCuts += 1;
     }
 
     recordDefeat() {

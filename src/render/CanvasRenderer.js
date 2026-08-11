@@ -58,6 +58,7 @@ export class CanvasRenderer {
         this.drawSummitGoal(scene.world.summit, scene.runState);
         this.drawAttachmentRange(scene);
         this.drawRope(scene.rope, scene.player.position);
+        this.drawOtherPlayers(scene.otherPlayers ?? []);
         this.drawSwingDrag(scene.player, scene.swingDrag);
         this.drawEnemies(scene.enemies ?? []);
         this.drawProjectiles(scene.projectiles ?? []);
@@ -65,8 +66,9 @@ export class CanvasRenderer {
         this.drawCombatEffects(scene.combatEffects ?? []);
         this.drawRopeCutMark(scene.eventFlash);
         this.drawCandidate(scene.attachmentCandidate);
-        this.drawPlayer(scene.player, scene.eventFlash, scene.playerLifeState);
+        this.drawPlayer(scene.player, scene.eventFlash);
         this.context.restore();
+        if (scene.mobileView) this.drawPlayerHealthHud(scene);
         if (!scene.mobileView) {
             this.drawCombatHud(scene);
             this.drawArtifactHud(scene.artifacts, scene.ropeDamageBoostRemaining);
@@ -74,7 +76,7 @@ export class CanvasRenderer {
         this.drawArtifactRewardOverlay(scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawArtifactFeedback(scene.eventFlash);
-        if (scene.metricsVisible) this.drawMetricsPanel(scene.metrics);
+        if (scene.metricsVisible) this.drawMetricsPanel(scene.metrics, scene.networkMetrics);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
     }
@@ -218,7 +220,7 @@ export class CanvasRenderer {
         const startX = (this.cssWidth - availableWidth) * 0.5;
         const startY = (this.cssHeight - cardHeight) * 0.46;
         ctx.save();
-        ctx.fillStyle = "rgba(8, 11, 16, 0.88)";
+        ctx.fillStyle = "rgba(8, 11, 16, 0.48)";
         ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         ctx.fillStyle = "#f8fafc";
         ctx.textAlign = "center";
@@ -242,6 +244,13 @@ export class CanvasRenderer {
             ctx.font = "700 12px system-ui, sans-serif";
             ctx.fillText(choice.description, x + cardWidth * 0.5, startY + cardHeight * 0.65);
         });
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.fillText(
+            "선택 중에도 전투 진행 · 빠르게 결정하세요",
+            this.cssWidth * 0.5,
+            Math.min(this.cssHeight - 18, startY + cardHeight + 28)
+        );
         ctx.restore();
     }
 
@@ -281,9 +290,13 @@ export class CanvasRenderer {
             detail = eventFlash.artifact.name;
             color = "#fbbf24";
         } else if (eventFlash.type === "artifact-loss" && eventFlash.artifacts?.length) {
-            title = "체크포인트 복귀 · 아티팩트 손실";
+            title = "체크포인트 부활 · 아티팩트 손실";
             detail = eventFlash.artifacts.map((artifact) => artifact.name).join(", ");
             color = "#fb7185";
+        } else if (eventFlash.type === "checkpoint-respawn") {
+            title = "체크포인트 부활";
+            detail = eventFlash.reason === "fall" ? "낙사 · 최대 체력으로 복귀" : "사망 · 최대 체력으로 복귀";
+            color = "#67e8f9";
         } else {
             return;
         }
@@ -306,16 +319,17 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawMetricsPanel(metrics) {
+    drawMetricsPanel(metrics, networkMetrics = null) {
         if (!metrics) return;
         const ctx = this.context;
         const x = Math.max(8, this.cssWidth - 248);
         const firstReward = metrics.firstRewardSeconds === null ? "-" : `${metrics.firstRewardSeconds.toFixed(1)}초`;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
-        ctx.fillRect(x, 18, 230, 118);
+        const height = networkMetrics ? 212 : 118;
+        ctx.fillRect(x, 18, 230, height);
         ctx.strokeStyle = "rgba(103, 232, 249, 0.65)";
-        ctx.strokeRect(x, 18, 230, 118);
+        ctx.strokeRect(x, 18, 230, height);
         ctx.fillStyle = "#67e8f9";
         ctx.font = "900 12px ui-monospace, monospace";
         ctx.fillText("RUN METRICS", x + 12, 39);
@@ -323,8 +337,29 @@ export class CanvasRenderer {
         ctx.font = "700 11px ui-monospace, monospace";
         ctx.fillText(`활성 ${metrics.activeSeconds.toFixed(1)}초 · 체크 ${metrics.checkpointsReached}`, x + 12, 60);
         ctx.fillText(`처치 ${metrics.enemyDefeats} · 피해 ${metrics.damageTaken}`, x + 12, 79);
-        ctx.fillText(`절단 ${metrics.ropeCuts} · 패배 ${metrics.defeats}`, x + 12, 98);
+        ctx.fillText(`절단 ${metrics.ropeCuts} · 사망 ${metrics.defeats}`, x + 12, 98);
         ctx.fillText(`첫 보상 ${firstReward}`, x + 12, 117);
+        if (networkMetrics) {
+            const rtt = networkMetrics.roundTripMs === null ? "-" : `${Math.round(networkMetrics.roundTripMs)}ms`;
+            const snapshots =
+                networkMetrics.snapshotIntervalMs === null ? "-" : `${Math.round(networkMetrics.snapshotIntervalMs)}ms`;
+            const rejected = `${Math.round(networkMetrics.rejectionRate * 100)}%`;
+            ctx.fillStyle = "#fbbf24";
+            ctx.fillText("NETWORK", x + 12, 140);
+            ctx.fillStyle = "#e2e8f0";
+            ctx.fillText(`RTT ${rtt} · 스냅샷 ${snapshots}`, x + 12, 158);
+            ctx.fillText(`대기 ${networkMetrics.pendingCommands} · 거부 ${rejected}`, x + 12, 177);
+            ctx.fillText(
+                `보정 p50 ${Math.round(networkMetrics.correctionP50)} · p95 ${Math.round(networkMetrics.correctionP95)}`,
+                x + 12,
+                196
+            );
+            ctx.fillText(
+                `스냅 ${networkMetrics.hardSnaps} · 외삽 ${Math.round(networkMetrics.extrapolationMs)}/${Math.round(networkMetrics.maxExtrapolationMs)}ms · 취소 ${networkMetrics.predictionCancellations}`,
+                x + 12,
+                215
+            );
+        }
         ctx.restore();
     }
 
@@ -438,7 +473,7 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawPlayer(player, eventFlash, lifeState) {
+    drawPlayer(player, eventFlash) {
         const ctx = this.context;
         if (eventFlash.age < 0.28) {
             const progress = eventFlash.age / 0.28;
@@ -455,7 +490,7 @@ export class CanvasRenderer {
             ctx.stroke();
             ctx.globalAlpha = 1;
         }
-        ctx.fillStyle = lifeState === "downed" ? "#64748b" : COLORS.player;
+        ctx.fillStyle = COLORS.player;
         ctx.beginPath();
         ctx.arc(player.position.x, player.position.y, player.config.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -471,6 +506,22 @@ export class CanvasRenderer {
             ctx.moveTo(player.position.x, player.position.y);
             ctx.lineTo(player.position.x - player.velocity.x * 0.08, player.position.y - player.velocity.y * 0.08);
             ctx.stroke();
+        }
+    }
+
+    drawOtherPlayers(players) {
+        const ctx = this.context;
+        for (const player of players) {
+            this.drawRope(player.rope, player.position);
+            ctx.save();
+            ctx.fillStyle = "#c084fc";
+            ctx.strokeStyle = "#f3e8ff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(player.position.x, player.position.y, player.config.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
         }
     }
 
@@ -514,27 +565,18 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawRunEndOverlay({ runState, defeatReason, restartRemaining }) {
-        if (runState !== "defeated" && runState !== "completed") return;
+    drawRunEndOverlay({ runState }) {
+        if (runState !== "completed") return;
         const ctx = this.context;
-        const completed = runState === "completed";
-        ctx.fillStyle = completed ? "rgba(3, 7, 18, 0.9)" : "rgba(3, 7, 18, 0.72)";
+        ctx.fillStyle = "rgba(3, 7, 18, 0.9)";
         ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         ctx.textAlign = "center";
-        ctx.fillStyle = completed ? "#fde68a" : "#fda4af";
+        ctx.fillStyle = "#fde68a";
         ctx.font = "700 38px system-ui, sans-serif";
-        ctx.fillText(
-            completed ? "정상 도달" : defeatReason === "fall" ? "추락" : "전투 불능",
-            this.cssWidth * 0.5,
-            this.cssHeight * 0.46
-        );
+        ctx.fillText("정상 도달", this.cssWidth * 0.5, this.cssHeight * 0.46);
         ctx.fillStyle = "#e2e8f0";
         ctx.font = "18px system-ui, sans-serif";
-        ctx.fillText(
-            completed ? "전체 월드 등반 완료" : `${Math.max(0, restartRemaining).toFixed(1)}초 후 다시 시작`,
-            this.cssWidth * 0.5,
-            this.cssHeight * 0.53
-        );
+        ctx.fillText("전체 월드 등반 완료", this.cssWidth * 0.5, this.cssHeight * 0.53);
         ctx.textAlign = "start";
     }
 
@@ -604,6 +646,33 @@ export class CanvasRenderer {
             ctx.arc(projectile.position.x, projectile.position.y, projectile.radius, 0, Math.PI * 2);
             ctx.fill();
         }
+    }
+
+    drawPlayerHealthHud({ playerHealth, playerMaxHealth }) {
+        const ctx = this.context;
+        const health = Math.max(0, Math.round(playerHealth ?? 0));
+        const maxHealth = Math.max(1, Math.round(playerMaxHealth ?? 1));
+        const healthRatio = Math.max(0, Math.min(1, health / maxHealth));
+        const width = Math.min(220, Math.max(168, this.cssWidth * 0.34));
+        const x = 18;
+        const y = 18;
+
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 11, 20, 0.88)";
+        ctx.fillRect(x, y, width, 50);
+        ctx.strokeStyle = healthRatio <= 0.35 ? "rgba(251, 113, 133, 0.8)" : "rgba(148, 163, 184, 0.42)";
+        ctx.strokeRect(x, y, width, 50);
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "800 12px system-ui, sans-serif";
+        ctx.fillText("HP", x + 14, y + 20);
+        ctx.textAlign = "right";
+        ctx.fillText(`${health} / ${maxHealth}`, x + width - 14, y + 20);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "rgba(71, 85, 105, 0.9)";
+        ctx.fillRect(x + 14, y + 29, width - 28, 9);
+        ctx.fillStyle = healthRatio > 0.35 ? "#22c55e" : "#fb7185";
+        ctx.fillRect(x + 14, y + 29, (width - 28) * healthRatio, 9);
+        ctx.restore();
     }
 
     drawCombatHud({

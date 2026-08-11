@@ -1,4 +1,5 @@
 import { Vector2 } from "../../game-kit/index.js";
+import { ProjectileObject } from "./ProjectileObject.js";
 
 export function selectNearestEnemy(position, enemies, range) {
     return (
@@ -11,13 +12,14 @@ export function selectNearestEnemy(position, enemies, range) {
     );
 }
 
-export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt }) {
+export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt, allowFire = true }) {
     owner.weapon.cooldown = Math.max(0, owner.weapon.cooldown - dt);
-    if (owner.lifeState === "downed") return;
-    if (owner.weapon.cooldown > 0) return;
+    if (owner.lifeState !== "active") return null;
+    if (!allowFire) return null;
+    if (owner.weapon.cooldown > 0) return null;
     const target = selectNearestEnemy(owner.physics.position, enemies, owner.weapon.range);
-    if (!target) return;
-    projectiles.push({
+    if (!target) return null;
+    const projectile = new ProjectileObject({
         id: registry.createId("projectile"),
         ownerId: owner.id,
         targetId: target.id,
@@ -26,30 +28,68 @@ export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, c
         damage: owner.weapon.damage,
         radius: config.projectileRadius
     });
+    projectiles.push(projectile);
     owner.weapon.cooldown = owner.weapon.fireInterval;
+    return projectile;
 }
 
-export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
+export function updatePlayerProjectiles({
+    projectiles,
+    enemies,
+    config,
+    dt,
+    resolveHits = true,
+    maxLifetimeSeconds = Number.POSITIVE_INFINITY
+}) {
     const enemyById = new Map(enemies.map((enemy) => [enemy.id, enemy]));
     const survivors = [];
     const hits = [];
+    const resolutions = [];
     for (const projectile of projectiles) {
         const target = enemyById.get(projectile.targetId);
-        if (!target || target.health <= 0) continue;
+        if (!target || target.health <= 0) {
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: "target-missing",
+                    position: projectile.position.clone()
+                })
+            );
+            continue;
+        }
         const direction = target.position.clone().subtract(projectile.position);
         const distance = direction.length();
         if (distance > 0) direction.scale(1 / distance);
         projectile.velocity = direction.scale(config.projectileSpeed);
         projectile.position.add(projectile.velocity.clone().scale(dt));
+        projectile.ageSeconds = (projectile.ageSeconds ?? 0) + dt;
+        if (projectile.ageSeconds >= maxLifetimeSeconds) {
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: "expired",
+                    position: projectile.position.clone()
+                })
+            );
+            continue;
+        }
         const hitDistance = projectile.position.distanceTo(target.position);
-        if (hitDistance <= projectile.radius + target.radius) {
+        if (resolveHits && hitDistance <= projectile.radius + target.radius) {
             target.health -= projectile.damage;
             hits.push(
                 Object.freeze({
                     type: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
                     position: target.position.clone(),
                     damage: projectile.damage,
-                    targetId: target.id
+                    targetId: target.id,
+                    projectileId: projectile.id
+                })
+            );
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
+                    position: target.position.clone()
                 })
             );
             continue;
@@ -57,27 +97,51 @@ export function updatePlayerProjectiles({ projectiles, enemies, config, dt }) {
         survivors.push(projectile);
     }
     projectiles.splice(0, projectiles.length, ...survivors);
-    return Object.freeze({ hits });
+    return Object.freeze({ hits, resolutions: Object.freeze(resolutions) });
 }
 
-export function updateEnemyWeapons({ enemies, target, projectiles, registry, config, dt }) {
+function selectNearestPlayer(position, targets, range) {
+    return (
+        targets
+            .filter(
+                (target) =>
+                    target.health > 0 &&
+                    target.lifeState === "active" &&
+                    position.distanceTo(target.physics.position) <= range
+            )
+            .sort((left, right) => {
+                const distanceDifference =
+                    position.distanceTo(left.physics.position) - position.distanceTo(right.physics.position);
+                return distanceDifference || left.id.localeCompare(right.id);
+            })[0] ?? null
+    );
+}
+
+export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, dt }) {
+    const spawned = [];
     for (const enemy of enemies) {
         enemy.fireCooldown = Math.max(0, (enemy.fireCooldown ?? 0) - dt);
-        if (enemy.fireCooldown > 0 || target.health <= 0) continue;
+        if (enemy.fireCooldown > 0) continue;
+        const target = selectNearestPlayer(enemy.position, targets, config.enemyAttackRange);
+        if (!target) continue;
         const direction = target.physics.position.clone().subtract(enemy.position);
         const distance = direction.length();
-        if (distance <= 0 || distance > config.enemyAttackRange) continue;
+        if (distance <= 0) continue;
         direction.scale(config.enemyProjectileSpeed / distance);
-        projectiles.push({
+        const projectile = new ProjectileObject({
             id: registry.createId("enemy-projectile"),
             ownerId: enemy.id,
+            targetId: target.id,
             position: enemy.position.clone(),
             velocity: direction,
             radius: config.enemyProjectileRadius,
             damage: config.enemyProjectileDamage
         });
+        projectiles.push(projectile);
+        spawned.push(projectile);
         enemy.fireCooldown = config.enemyFireInterval;
     }
+    return Object.freeze(spawned);
 }
 
 export function distancePointToSegment(point, start, end) {
@@ -92,41 +156,15 @@ export function distancePointToSegment(point, start, end) {
     return Math.hypot(point.x - (start.x + segmentX * projection), point.y - (start.y + segmentY * projection));
 }
 
-export function updateEnemyProjectiles({ projectiles, target, rope, config, dt }) {
+export function advanceEnemyProjectiles({ projectiles, dt, maxLifetimeSeconds = Number.POSITIVE_INFINITY }) {
     const survivors = [];
-    let ropeCutAt = null;
-    const hits = [];
+    const expired = [];
     for (const projectile of projectiles) {
         projectile.position.add(projectile.velocity.clone().scale(dt));
-        if (
-            rope.isAttached &&
-            distancePointToSegment(projectile.position, target.physics.position, rope.anchor) <= projectile.radius
-        ) {
-            rope.detach();
-            target.ropeDisabledRemaining = config.ropeDisabledSeconds;
-            ropeCutAt = projectile.position.clone();
-            continue;
-        }
-        if (
-            target.hitInvulnerabilityRemaining <= 0 &&
-            projectile.position.distanceTo(target.physics.position) <= projectile.radius + target.physics.config.radius
-        ) {
-            target.health = Math.max(0, target.health - projectile.damage);
-            const knockback = projectile.velocity.clone();
-            const speed = knockback.length();
-            if (speed > 0) target.physics.addImpulse(knockback.scale(1 / speed), config.playerHitKnockback);
-            target.hitInvulnerabilityRemaining = config.playerHitInvulnerability;
-            hits.push(
-                Object.freeze({
-                    type: "player-hit",
-                    position: target.physics.position.clone(),
-                    damage: projectile.damage
-                })
-            );
-            continue;
-        }
-        survivors.push(projectile);
+        projectile.ageSeconds = (projectile.ageSeconds ?? 0) + dt;
+        if (projectile.ageSeconds >= maxLifetimeSeconds) expired.push(projectile);
+        else survivors.push(projectile);
     }
     projectiles.splice(0, projectiles.length, ...survivors);
-    return Object.freeze({ ropeCutAt, hits });
+    return Object.freeze({ expired: Object.freeze(expired) });
 }

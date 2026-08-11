@@ -1,0 +1,44 @@
+import { createWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
+import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
+
+export function buildAuthoritySnapshot({
+    simulation,
+    acknowledgements = {},
+    ownerMotionTicks = {},
+    includeActivePredictableObjects = false,
+    snapshotSequence = simulation.getTick()
+}) {
+    const drainedEvents = simulation.drainReplicationEvents();
+    const events = includeActivePredictableObjects
+        ? [
+              ...new Map(
+                  [...drainedEvents, ...simulation.activePredictableSpawnEvents()].map((event) => [
+                      event.eventId,
+                      event
+                  ])
+              ).values()
+          ]
+        : drainedEvents;
+    return createWorldSnapshotEnvelope({
+        snapshotSequence,
+        serverTick: simulation.getTick(),
+        worldSeed: simulation.world.seed,
+        worldRevision: WORLD_GENERATION_REVISION,
+        acknowledgements,
+        state: {
+            players: simulation.playerStates().map((player) => ({
+                ...player,
+                ownerMotionTick: ownerMotionTicks[player.id] ?? simulation.getTick()
+            })),
+            enemies: simulation.enemyStates(),
+            activeCheckpointId: simulation.activeCheckpoint?.id ?? null,
+            rewardedCheckpointIds: [...simulation.rewardedCheckpointIds],
+            artifactReward: simulation.getArtifactReward(simulation.getPrimaryPlayerId()),
+            artifactRewards: Object.fromEntries(simulation.artifactRewards),
+            runState: simulation.runState,
+            metrics: simulation.metrics.snapshot(),
+            completed: simulation.runState === "completed"
+        },
+        events
+    });
+}

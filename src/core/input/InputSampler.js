@@ -1,10 +1,22 @@
 import { findMobileControl } from "./MobileControlLayout.js";
 
-const movementKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS"]);
+const movementKeys = new Set([
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+    "KeyA",
+    "KeyD",
+    "KeyW",
+    "KeyS",
+    "KeyE"
+]);
 export class InputSampler {
-    constructor(target = globalThis.window, surface = target) {
+    constructor(target = globalThis.window, surface = target, { onRopeRelease = () => {} } = {}) {
         this.target = target;
         this.surface = surface;
+        this.documentTarget = target?.document ?? globalThis.document;
+        this.onRopeRelease = onRopeRelease;
         this.keys = new Set();
         this.pointer = { x: 0, y: 0, down: false };
         this.ropePointerId = null;
@@ -43,9 +55,17 @@ export class InputSampler {
                 this.pointer = { x: event.clientX, y: event.clientY, down: true };
             }
         };
-        this.onPointerUp = (event) => this.releasePointer(event.pointerId, event.pointerType);
-        this.onPointerCancel = (event) => this.releasePointer(event.pointerId, event.pointerType);
-        this.onInterrupted = () => this.clearTransientInput();
+        this.onPointerUp = (event) => this.releasePointer(event.pointerId, event.pointerType, "pointerup");
+        this.onPointerCancel = (event) => this.releasePointer(event.pointerId, event.pointerType, "pointercancel");
+        this.onPointerLeave = (event) => {
+            if (event.pointerType !== "touch" && event.relatedTarget === null) {
+                this.releasePointer(event.pointerId, event.pointerType, "pointer-leave");
+            }
+        };
+        this.onInterrupted = () => this.clearTransientInput("blur");
+        this.onVisibilityChange = () => {
+            if (this.documentTarget?.hidden) this.clearTransientInput("visibility-hidden");
+        };
     }
 
     viewportWidth() {
@@ -68,23 +88,32 @@ export class InputSampler {
         }
     }
 
-    releasePointer(pointerId, pointerType) {
+    releasePointer(pointerId, pointerType, reason) {
         if (pointerType !== "touch") {
+            const releasedRope = this.pointer.down;
             this.pointer.down = false;
+            if (releasedRope) this.notifyRopeRelease(reason);
             return;
         }
         if (this.controlPointers.delete(pointerId)) return;
         if (this.ropePointerId === pointerId) {
             this.ropePointerId = null;
             this.pointer.down = false;
+            this.notifyRopeRelease(reason);
         }
     }
 
-    clearTransientInput() {
+    clearTransientInput(reason = null) {
+        const releasedRope = this.pointer.down || this.ropePointerId !== null;
         this.keys.clear();
         this.ropePointerId = null;
         this.controlPointers.clear();
         this.pointer.down = false;
+        if (releasedRope && reason) this.notifyRopeRelease(reason);
+    }
+
+    notifyRopeRelease(reason) {
+        this.onRopeRelease(this.snapshot(), reason);
     }
 
     attach() {
@@ -92,10 +121,12 @@ export class InputSampler {
         this.target.addEventListener("keydown", this.onKeyDown);
         this.target.addEventListener("keyup", this.onKeyUp);
         this.target.addEventListener("blur", this.onInterrupted);
+        this.documentTarget?.addEventListener?.("visibilitychange", this.onVisibilityChange);
         this.surface.addEventListener("pointermove", this.onPointerMove);
         this.surface.addEventListener("pointerdown", this.onPointerDown);
         this.surface.addEventListener("pointerup", this.onPointerUp);
         this.surface.addEventListener("pointercancel", this.onPointerCancel);
+        this.surface.addEventListener("pointerleave", this.onPointerLeave);
         this.attached = true;
     }
 
@@ -104,10 +135,12 @@ export class InputSampler {
         this.target.removeEventListener("keydown", this.onKeyDown);
         this.target.removeEventListener("keyup", this.onKeyUp);
         this.target.removeEventListener("blur", this.onInterrupted);
+        this.documentTarget?.removeEventListener?.("visibilitychange", this.onVisibilityChange);
         this.surface.removeEventListener("pointermove", this.onPointerMove);
         this.surface.removeEventListener("pointerdown", this.onPointerDown);
         this.surface.removeEventListener("pointerup", this.onPointerUp);
         this.surface.removeEventListener("pointercancel", this.onPointerCancel);
+        this.surface.removeEventListener("pointerleave", this.onPointerLeave);
         this.clearTransientInput();
         this.attached = false;
     }
@@ -132,6 +165,7 @@ export class InputSampler {
         return Object.freeze({
             horizontal: Math.max(-1, Math.min(1, keyboardHorizontal + Number(mobileRight) - Number(mobileLeft))),
             vertical: Math.max(-1, Math.min(1, keyboardVertical - Number(mobileJump))),
+            interact: this.keys.has("KeyE") || mobileJump,
             pointer: Object.freeze({ ...this.pointer }),
             viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),
             mobileControls

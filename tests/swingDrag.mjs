@@ -23,24 +23,38 @@ export function run() {
 
     let impulseCount = 0;
     let appliedMagnitude = 0;
-    const app = Object.create(GameSimulation.prototype);
-    app.rope = { anchor: { x: 0, y: 0 } };
-    app.player = {
-        position: { x: 0, y: 100 },
-        addImpulse(_direction, magnitude) {
-            impulseCount += 1;
-            appliedMagnitude = magnitude;
-        }
+    const app = new GameSimulation();
+    const player = app.players.find(({ id }) => id === app.getPrimaryPlayerId());
+    player.physics.position.set(0, 100);
+    player.physics.addImpulse = (_direction, magnitude) => {
+        impulseCount += 1;
+        appliedMagnitude = magnitude;
     };
-    app.swingDrag = { origin: { x: 100, y: 100 }, direction: null, progress: 0, age: 0, used: false };
+    player.ropeObject.rope.attach(player.physics.position, { x: 0, y: 0 });
+    player.ropeObject.swingDrag = {
+        origin: { x: 100, y: 100 },
+        direction: null,
+        progress: 0,
+        age: 0,
+        used: false
+    };
+    player.ropeObject.wasPointerDown = true;
     app.eventFlash = { type: "attach", age: 0 };
     const viewport = { width: 1280, height: 720 };
-    app.updateSwingDrag({ x: 20, y: 200 }, viewport, 0.04);
+    const swingCommand = (x) => ({
+        horizontal: 0,
+        vertical: 0,
+        interact: false,
+        pointer: { x, y: 200, down: true },
+        viewport,
+        aimWorld: { x: 0, y: 0 }
+    });
+    app.dispatchOwnerInput(player.id, swingCommand(20), 0.04);
     assert.equal(impulseCount, 0, "a fast pointer adjustment immediately after attachment must not trigger a swing");
-    app.updateSwingDrag({ x: 20, y: 200 }, viewport, 0.04);
-    app.updateSwingDrag({ x: 0, y: 200 }, viewport, 0.04);
+    app.dispatchOwnerInput(player.id, swingCommand(20), 0.04);
+    app.dispatchOwnerInput(player.id, swingCommand(0), 0.04);
     assert.equal(impulseCount, 1, "each attachment must grant exactly one swing impulse");
     assert.equal(appliedMagnitude, ROPE_CONFIG.swingImpulse, "swing must use the configured impulse strength");
-    assert.equal(app.swingDrag.used, true);
+    assert.equal(player.ropeObject.swingDrag.used, true);
     assert.equal(app.eventFlash.type, "swing");
 }

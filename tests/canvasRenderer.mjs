@@ -29,6 +29,12 @@ export function run() {
 
     renderer.cssWidth = 844;
     renderer.cssHeight = 390;
+    renderer.drawPlayerHealthHud({ playerHealth: 35, playerMaxHealth: 100 });
+    assert.deepEqual(textCalls, ["HP", "35 / 100"]);
+    textCalls.length = 0;
+    renderer.drawPlayerHealthHud({ playerHealth: 0, playerMaxHealth: 100 });
+    assert.deepEqual(textCalls, ["HP", "0 / 100"]);
+    textCalls.length = 0;
     renderer.drawMetricsPanel({
         activeSeconds: 12.5,
         checkpointsReached: 1,
@@ -42,8 +48,39 @@ export function run() {
         "RUN METRICS",
         "활성 12.5초 · 체크 1",
         "처치 3 · 피해 20",
-        "절단 2 · 패배 1",
+        "절단 2 · 사망 1",
         "첫 보상 10.0초"
+    ]);
+    textCalls.length = 0;
+    renderer.drawMetricsPanel(
+        {
+            activeSeconds: 12.5,
+            checkpointsReached: 1,
+            enemyDefeats: 3,
+            damageTaken: 20,
+            ropeCuts: 2,
+            defeats: 1,
+            firstRewardSeconds: 10
+        },
+        {
+            roundTripMs: 104.4,
+            snapshotIntervalMs: 50.2,
+            pendingCommands: 2,
+            rejectionRate: 0.125,
+            correctionP50: 4.4,
+            correctionP95: 18.6,
+            hardSnaps: 1,
+            extrapolationMs: 12.2,
+            maxExtrapolationMs: 46.8,
+            predictionCancellations: 2
+        }
+    );
+    assert.deepEqual(textCalls.slice(-5), [
+        "NETWORK",
+        "RTT 104ms · 스냅샷 50ms",
+        "대기 2 · 거부 13%",
+        "보정 p50 4 · p95 19",
+        "스냅 1 · 외삽 12/47ms · 취소 2"
     ]);
     textCalls.length = 0;
     borderCalls.length = 0;
@@ -54,7 +91,10 @@ export function run() {
     assert.deepEqual(textCalls, ["아티팩트 획득", "동력핵"]);
     textCalls.length = 0;
     renderer.drawArtifactFeedback({ type: "artifact-loss", age: 0.4, artifacts: [{ name: "연사 톱니" }] });
-    assert.deepEqual(textCalls, ["체크포인트 복귀 · 아티팩트 손실", "연사 톱니"]);
+    assert.deepEqual(textCalls, ["체크포인트 부활 · 아티팩트 손실", "연사 톱니"]);
+    textCalls.length = 0;
+    renderer.drawArtifactFeedback({ type: "checkpoint-respawn", reason: "fall", age: 0.4 });
+    assert.deepEqual(textCalls, ["체크포인트 부활", "낙사 · 최대 체력으로 복귀"]);
     textCalls.length = 0;
     borderCalls.length = 0;
     renderer.drawArtifactRewardOverlay({
@@ -73,7 +113,8 @@ export function run() {
         "연사 톱니",
         "연사 증가",
         "로프 공명기",
-        "스윙 강화"
+        "스윙 강화",
+        "선택 중에도 전투 진행 · 빠르게 결정하세요"
     ]);
     textCalls.length = 0;
     borderCalls.length = 0;
@@ -89,7 +130,7 @@ export function run() {
     assert.deepEqual(textCalls, ["←", "점프", "→"]);
 
     textCalls.length = 0;
-    renderer.drawRunEndOverlay({ runState: "completed", defeatReason: null, restartRemaining: 2.4 });
+    renderer.drawRunEndOverlay({ runState: "completed" });
     assert.deepEqual(textCalls, ["정상 도달", "전체 월드 등반 완료"]);
     textCalls.length = 0;
     renderer.drawCheckpoints(

@@ -11,6 +11,7 @@ service-account*.json
 # AI execution logs are operational data, not source
 .ai_execution_log.ndjson
 .omx/
+/.handoffs/
 
 # Repository skills stay local by default; share only the team workflow.
 .agents/skills/*

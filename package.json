@@ -1,15 +1,22 @@
 {
   "name": "baeseongjin-rope-roguelike",
-  "version": "0.6.0",
+  "version": "0.12.17",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
+    "start:multiplayer": "node scripts/multiplayer-server.mjs",
+    "start:game-server": "node scripts/multiplayer-server.mjs --game-only --host=0.0.0.0 --port=4175",
+    "share:multiplayer": "node scripts/share-multiplayer.mjs",
+    "smoke:multiplayer": "node scripts/smokeMultiplayer.mjs",
     "test": "node tests/runAll.mjs",
     "check": "node scripts/checkSyntax.mjs",
     "validate:world": "node scripts/validateWorldSeeds.mjs",
     "format": "prettier --write \"src/**/*.js\" \"tests/**/*.mjs\" \"scripts/**/*.mjs\" \"*.html\"",
     "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.mjs\" \"scripts/**/*.mjs\" \"*.html\""
+  },
+  "dependencies": {
+    "ws": "8.21.3"
   },
   "devDependencies": {
     "prettier": "^3.8.4"

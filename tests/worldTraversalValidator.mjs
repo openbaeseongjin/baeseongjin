@@ -1,13 +1,23 @@
 import assert from "node:assert/strict";
 import { ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
-import { WorldGenerator } from "../src/game/world/WorldGenerator.js";
+import { generateWorld } from "../src/game/world/WorldGenerator.js";
 import { validateWorldTraversal } from "../src/game/world/WorldTraversalValidator.js";
 import { WORLD_REGRESSION_SEEDS } from "../scripts/worldRegressionSeeds.mjs";
 
 export function run() {
     assert.ok(WORLD_REGRESSION_SEEDS.some(({ seed }) => seed === WORLD_CONFIG.seed));
     assert.equal(new Set(WORLD_REGRESSION_SEEDS.map(({ seed }) => seed)).size, WORLD_REGRESSION_SEEDS.length);
-    const world = new WorldGenerator(WORLD_CONFIG).generate();
+    assert.deepEqual(
+        WORLD_REGRESSION_SEEDS.map(({ reason }) => reason),
+        [
+            "최소 양의 시드 경계",
+            "소규모 재현 기준 시드",
+            "일반 분포 기준 시드",
+            "현재 프로토타입 기본 시드",
+            "32비트 부호 없는 최대 시드 경계"
+        ]
+    );
+    const world = generateWorld(WORLD_CONFIG);
     assert.deepEqual(
         validateWorldTraversal(world, {
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance,

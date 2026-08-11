@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#171d2a" />
+        <meta name="multiplayer-server" content="https://cultures-euros-underwear-presented.trycloudflare.com" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="manifest" href="./manifest.webmanifest" />
@@ -85,6 +86,125 @@
             }
             .orientation-notice {
                 display: none;
+            }
+            .game-mode-menu {
+                position: fixed;
+                z-index: 30;
+                inset: 0;
+                display: grid;
+                place-items: center;
+                padding: 24px;
+                background: rgba(5, 9, 17, 0.84);
+                backdrop-filter: blur(8px);
+            }
+            .game-mode-menu[hidden] {
+                display: none;
+            }
+            .game-mode-card [hidden] {
+                display: none !important;
+            }
+            .game-mode-card {
+                width: min(460px, 100%);
+                padding: 24px;
+                border: 1px solid rgba(103, 232, 249, 0.4);
+                border-radius: 18px;
+                background: rgba(15, 23, 42, 0.96);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                text-align: center;
+            }
+            .game-mode-card h1 {
+                margin: 0 0 8px;
+                font-size: 26px;
+            }
+            .game-mode-card p {
+                margin: 0 0 18px;
+                color: #cbd5e1;
+            }
+            .game-mode-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .game-mode-actions button {
+                min-height: 54px;
+                border: 1px solid rgba(148, 163, 184, 0.35);
+                border-radius: 12px;
+                color: #f8fafc;
+                background: #243047;
+                font-weight: 800;
+                cursor: pointer;
+            }
+            .game-mode-actions button:last-child {
+                color: #082f49;
+                background: #67e8f9;
+            }
+            .game-mode-actions button:disabled {
+                cursor: wait;
+                opacity: 0.5;
+            }
+            .channel-panel {
+                display: grid;
+                gap: 10px;
+            }
+            .channel-panel input {
+                width: 100%;
+                min-height: 52px;
+                border: 1px solid rgba(148, 163, 184, 0.5);
+                border-radius: 12px;
+                color: #f8fafc;
+                background: #0f172a;
+                font:
+                    800 22px/1 ui-monospace,
+                    monospace;
+                letter-spacing: 0.35em;
+                text-align: center;
+            }
+            .channel-panel-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .channel-panel button {
+                min-height: 48px;
+                border: 1px solid rgba(148, 163, 184, 0.35);
+                border-radius: 12px;
+                color: #f8fafc;
+                background: #243047;
+                font-weight: 800;
+            }
+            .channel-badge {
+                position: fixed;
+                z-index: 8;
+                top: max(8px, env(safe-area-inset-top));
+                right: max(8px, env(safe-area-inset-right));
+                padding: 5px 9px;
+                border-radius: 7px;
+                color: #082f49;
+                background: rgba(103, 232, 249, 0.9);
+                font:
+                    800 12px/1.2 ui-monospace,
+                    monospace;
+            }
+            .copy-diagnostics {
+                position: fixed;
+                z-index: 9;
+                top: max(238px, env(safe-area-inset-top));
+                right: max(8px, env(safe-area-inset-right));
+                min-height: 38px;
+                padding: 0 12px;
+                border: 1px solid rgba(103, 232, 249, 0.65);
+                border-radius: 8px;
+                color: #e2e8f0;
+                background: rgba(7, 11, 20, 0.9);
+                font:
+                    800 11px/1 ui-monospace,
+                    monospace;
+            }
+            .copy-diagnostics[hidden] {
+                display: none;
+            }
+            [data-mode-status][data-error="true"] {
+                color: #fda4af;
             }
             .install-prompt {
                 position: fixed;
@@ -168,6 +288,35 @@
     </head>
     <body>
         <main>
+            <section class="game-mode-menu" id="game-mode-menu" aria-labelledby="game-mode-title">
+                <div class="game-mode-card">
+                    <h1 id="game-mode-title">로프 원정 시작</h1>
+                    <p data-mode-status aria-live="polite">플레이 방식을 선택하세요.</p>
+                    <div class="game-mode-actions" data-mode-actions>
+                        <button type="button" data-game-mode="single">싱글 플레이</button>
+                        <button type="button" data-game-mode="multiplayer">멀티 플레이</button>
+                    </div>
+                    <div class="channel-panel" data-channel-panel hidden>
+                        <button type="button" data-channel-create>새 채널 만들기</button>
+                        <form data-channel-form>
+                            <label class="sr-only" for="channel-number">채널 번호</label>
+                            <input
+                                id="channel-number"
+                                data-channel-input
+                                inputmode="numeric"
+                                pattern="[0-9]{4}"
+                                maxlength="4"
+                                autocomplete="one-time-code"
+                                placeholder="0000"
+                            />
+                            <div class="channel-panel-actions">
+                                <button type="button" data-channel-back>뒤로</button>
+                                <button type="submit">채널 참가</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
             <canvas
                 id="game-canvas"
                 tabindex="0"
@@ -181,6 +330,8 @@
                 조작합니다.
             </p>
             <p class="controls-hint">PC: A/D 이동 · W 점프 · 마우스 로프 / 모바일: 하단 이동·점프 · 화면 로프</p>
+            <output class="channel-badge" id="channel-badge" hidden></output>
+            <button class="copy-diagnostics" id="copy-diagnostics" type="button" hidden>진단 복사</button>
             <p class="orientation-notice" role="status">
                 로프 액션은 가로 화면에 맞춰져 있습니다.<br />기기를 가로로 돌려주세요.
             </p>
@@ -192,7 +343,9 @@
                     <button type="button" data-install-action>앱 설치</button>
                 </div>
             </section>
-            <output class="version-badge" id="app-version" data-version="0.6.0" aria-label="배포 버전">v0.6.0</output>
+            <output class="version-badge" id="app-version" data-version="0.12.17" aria-label="배포 버전"
+                >v0.12.17</output
+            >
         </main>
         <noscript><p>이 게임을 실행하려면 JavaScript가 필요합니다.</p></noscript>
         <script type="module" src="./src/main.js"></script>

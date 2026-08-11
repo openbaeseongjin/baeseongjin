@@ -31,8 +31,12 @@ export function run() {
     const html = readFileSync("index.html", "utf8");
     assert.match(html, /rel="manifest" href="\.\/manifest\.webmanifest"/);
     assert.match(html, /rel="apple-touch-icon"/);
+    const multiplayerServer = html.match(/<meta name="multiplayer-server" content="([^"]+)"/)?.[1];
+    assert.match(multiplayerServer, /^https:\/\//, "the deployed client needs a secure game server endpoint");
     const worker = readFileSync("sw.js", "utf8");
     assert.doesNotMatch(worker, /caches\./, "automatic updates must not introduce manual cache versioning");
     assert.match(worker, /cache:\s*"no-store"/, "same-origin game files must bypass the browser HTTP cache");
-    assert.match(readFileSync("scripts/serve.mjs", "utf8"), /application\/manifest\+json/);
+    assert.match(readFileSync("scripts/staticHandler.mjs", "utf8"), /application\/manifest\+json/);
+    assert.match(readFileSync("scripts/serve.mjs", "utf8"), /createStaticRequestHandler/);
+    assert.match(readFileSync("scripts/multiplayer-server.mjs", "utf8"), /createStaticRequestHandler/);
 }
