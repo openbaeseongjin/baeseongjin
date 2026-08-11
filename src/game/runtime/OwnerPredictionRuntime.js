@@ -10,6 +10,15 @@ function percentile(samples, ratio) {
     return sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * ratio) - 1)];
 }
 
+function copyPredictedImpact(event) {
+    return Object.freeze({
+        ...event,
+        ...(event.position ? { position: Object.freeze({ ...event.position }) } : {}),
+        ...(event.velocity ? { velocity: Object.freeze({ ...event.velocity }) } : {}),
+        ...(event.parameters ? { parameters: Object.freeze({ ...event.parameters }) } : {})
+    });
+}
+
 export class OwnerPredictionRuntime {
     constructor({
         ownerId,
@@ -60,6 +69,7 @@ export class OwnerPredictionRuntime {
         this.pendingRopeSwings = new Map();
         this.pendingProjectileSpawns = new Map();
         this.pendingImpacts = new Map();
+        this.nextImpactPredictionOrder = 0;
         this.simulation.preparePrediction();
     }
 
@@ -149,8 +159,22 @@ export class OwnerPredictionRuntime {
         return batchesByTick;
     }
 
-    replayInputs(serverTick, targetTick, batchesByTick) {
+    replayInputs(serverTick, targetTick, batchesByTick, impactEntries = []) {
         const inputState = new InputStateSimulator({ holdTicks: this.inputHoldTicks });
+        const impactsByTick = new Map();
+        for (const entry of impactEntries) {
+            if (!impactsByTick.has(entry.tick)) impactsByTick.set(entry.tick, []);
+            impactsByTick.get(entry.tick).push(entry);
+        }
+        const replayImpactsAtTick = (tick) => {
+            for (const entry of impactsByTick.get(tick) ?? []) {
+                entry.before = this.simulation.playerState(this.ownerId);
+                if (!this.simulation.applyPredictedOwnerImpact(this.ownerId, entry.event)) {
+                    throw new Error(`failed to replay pending impact: ${entry.event.projectileId}`);
+                }
+            }
+        };
+        replayImpactsAtTick(serverTick);
         for (let tick = serverTick + 1; tick <= targetTick; tick += 1) {
             const remembered = this.inputHistory.get(tick);
             const batch = remembered
@@ -161,6 +185,7 @@ export class OwnerPredictionRuntime {
             const previous = this.state();
             const outcome = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
             this.recordPredictedOutcome(outcome, tick, previous);
+            replayImpactsAtTick(tick);
         }
     }
 
@@ -226,7 +251,14 @@ export class OwnerPredictionRuntime {
         const before = this.simulation.playerState(this.ownerId);
         const tick = this.simulation.getTick();
         const applied = this.simulation.applyPredictedOwnerImpact(this.ownerId, event);
-        if (applied && event.projectileId) this.pendingImpacts.set(event.projectileId, { before, tick });
+        if (applied && event.projectileId) {
+            this.pendingImpacts.set(event.projectileId, {
+                before,
+                tick,
+                order: this.nextImpactPredictionOrder++,
+                event: copyPredictedImpact(event)
+            });
+        }
         return applied;
     }
 
@@ -238,9 +270,14 @@ export class OwnerPredictionRuntime {
 
         const displayedBefore = this.presentationState();
         const targetTick = this.simulation.getTick();
+        const laterPendingImpacts = [...this.pendingImpacts.values()]
+            .filter(
+                (entry) => entry.tick > pending.tick || (entry.tick === pending.tick && entry.order > pending.order)
+            )
+            .sort((left, right) => left.tick - right.tick || left.order - right.order);
         this.simulation.preparePrediction(snapshot?.state.enemies ?? [], snapshot?.state.activeCheckpointId);
         this.simulation.restoreOwnerPrediction(this.ownerId, pending.before, pending.tick);
-        this.replayInputs(pending.tick, targetTick, new Map());
+        this.replayInputs(pending.tick, targetTick, new Map(), laterPendingImpacts);
 
         const authoritative = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
         if (authoritative) {

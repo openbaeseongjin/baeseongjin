@@ -126,6 +126,78 @@ export function run() {
         "victim prediction must suppress repeated local hit claims before the next server snapshot"
     );
 
+    const overlappingImpacts = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
+    overlappingImpacts.reconcile(snapshot, []);
+    const overlapBaseline = overlappingImpacts.simulation.playerState(serverPlayer.id);
+    const firstImpact = {
+        projectileId: "impact-first-rejected",
+        resolution: "player-hit",
+        velocity: { x: 120, y: 0 }
+    };
+    const secondImpact = {
+        projectileId: "impact-second-rejected",
+        resolution: "player-hit",
+        velocity: { x: 0, y: -120 }
+    };
+    const overlapIdle = createPlayerCommand(
+        {
+            horizontal: 0,
+            vertical: 0,
+            interact: false,
+            pointer: { x: 0, y: 0, down: false },
+            viewport: { width: 844, height: 390 }
+        },
+        { x: 0, y: 0 }
+    );
+    assert.equal(overlappingImpacts.applyPredictedImpact(firstImpact), true);
+    overlappingImpacts.advance(overlapIdle);
+    assert.equal(overlappingImpacts.applyPredictedImpact(secondImpact), true);
+    overlappingImpacts.advance(overlapIdle);
+
+    const secondImpactOnly = new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: serverPlayer.id });
+    secondImpactOnly.preparePrediction();
+    secondImpactOnly.restoreOwnerPrediction(serverPlayer.id, overlapBaseline, snapshot.serverTick);
+    secondImpactOnly.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 1);
+    secondImpactOnly.applyPredictedOwnerImpact(serverPlayer.id, secondImpact);
+    secondImpactOnly.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 2);
+
+    assert.equal(
+        overlappingImpacts.recordImpactReceipt({ projectileId: firstImpact.projectileId, accepted: false }),
+        true
+    );
+    const afterFirstRejection = overlappingImpacts.state();
+    const expectedSecondImpact = secondImpactOnly.ownerPredictionState(serverPlayer.id);
+    close(afterFirstRejection.position.x, expectedSecondImpact.position.x, "overlap first rejection position.x");
+    close(afterFirstRejection.position.y, expectedSecondImpact.position.y, "overlap first rejection position.y");
+    close(afterFirstRejection.velocity.x, expectedSecondImpact.velocity.x, "overlap first rejection velocity.x");
+    close(afterFirstRejection.velocity.y, expectedSecondImpact.velocity.y, "overlap first rejection velocity.y");
+    close(
+        afterFirstRejection.hitInvulnerabilityRemaining,
+        expectedSecondImpact.hitInvulnerabilityRemaining,
+        "the later pending impact must remain on the corrected timeline"
+    );
+
+    const noImpacts = new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: serverPlayer.id });
+    noImpacts.preparePrediction();
+    noImpacts.restoreOwnerPrediction(serverPlayer.id, overlapBaseline, snapshot.serverTick);
+    noImpacts.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 1);
+    noImpacts.advanceOwnerPrediction(serverPlayer.id, overlapIdle, 1 / 120, snapshot.serverTick + 2);
+    assert.equal(
+        overlappingImpacts.recordImpactReceipt({ projectileId: secondImpact.projectileId, accepted: false }),
+        true
+    );
+    const afterBothRejections = overlappingImpacts.state();
+    const expectedNoImpacts = noImpacts.ownerPredictionState(serverPlayer.id);
+    close(afterBothRejections.position.x, expectedNoImpacts.position.x, "overlap final position.x");
+    close(afterBothRejections.position.y, expectedNoImpacts.position.y, "overlap final position.y");
+    close(afterBothRejections.velocity.x, expectedNoImpacts.velocity.x, "overlap final velocity.x");
+    close(afterBothRejections.velocity.y, expectedNoImpacts.velocity.y, "overlap final velocity.y");
+    close(
+        afterBothRejections.hitInvulnerabilityRemaining,
+        expectedNoImpacts.hitInvulnerabilityRemaining,
+        "the final rejected impact must use its rebased pre-impact state"
+    );
+
     const movingServer = new GameSimulation();
     const movingPlayer = primaryPlayer(movingServer);
     movingServer.enemies = [];
