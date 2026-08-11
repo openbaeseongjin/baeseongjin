@@ -12,6 +12,11 @@ const metadata: MeetingMetadata = {
 };
 
 const minutes: Minutes = {
+  summary: [
+    "결정: 로프 액션 로그라이크로 진행한다.",
+    "할 일: 개발 — 로프 프로토타입",
+    "논의: 장르",
+  ],
   discussed: ["장르"],
   decided: ["로프 액션 로그라이크로 진행한다."],
   rejected: [],
@@ -33,6 +38,9 @@ describe("GitHub document updates", () => {
     expect(updates.find((update) => update.path === "DECISIONS.md")?.content).not.toContain(
       "수집 생물 후보",
     );
+    expect(
+      updates.find((update) => update.path === "docs/meetings/2026-08-09.md")?.content,
+    ).toContain("### SUMMARY");
   });
 
   it("is idempotent for an existing meeting marker", () => {
@@ -49,7 +57,12 @@ describe("GitHub document updates", () => {
   it("does not create decision or task ledgers when nothing was explicit", () => {
     const updates = buildDocumentUpdates(
       metadata,
-      { ...minutes, decided: [], actionItems: [] },
+      {
+        ...minutes,
+        summary: ["가설: 수집 생물 후보", "결정: 없음", "할 일: 없음"],
+        decided: [],
+        actionItems: [],
+      },
       {},
     );
 

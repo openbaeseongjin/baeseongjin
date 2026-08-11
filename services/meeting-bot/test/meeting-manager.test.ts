@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../src/config.js";
 import { MeetingManager } from "../src/meeting-manager.js";
+import type { Minutes } from "../src/types.js";
 
 function config() {
   return loadConfig({
@@ -144,11 +145,30 @@ describe("MeetingManager", () => {
       },
     };
     const github = {
-      syncMeeting: vi.fn(async () => ({ paths: [], commitSha: "1234567" })),
+      syncMeeting: vi.fn(async (_metadata: unknown, _minutes: Minutes) => ({
+        paths: [],
+        commitSha: "1234567",
+      })),
     };
     const manager = new MeetingManager(client as never, config(), github as never, {
       ensureReady: vi.fn(async () => readiness),
     });
+    const localProcessing = {
+      transcribe: vi.fn(async () => ({ entries: [], failures: ["segment failed"] })),
+      summarize: vi.fn(
+        (): Minutes => ({
+          summary: ["블로커: 기존 제품 블로커", "결정: 없음", "할 일: 없음"],
+          discussed: [],
+          decided: [],
+          rejected: [],
+          hypotheses: [],
+          actionItems: [],
+          blockers: ["기존 제품 블로커"],
+          nextMeeting: null,
+        }),
+      ),
+    };
+    (manager as unknown as { localProcessing: typeof localProcessing }).localProcessing = localProcessing;
     const guild = {
       members: {
         fetch: vi.fn(async () => ({
@@ -191,6 +211,9 @@ describe("MeetingManager", () => {
 
     expect(captureStartedBeforeOllama).toBe(true);
     expect(endEditReply).toHaveBeenCalledWith(expect.stringContaining("ended"));
+    expect(github.syncMeeting.mock.calls[0]?.[1].summary[0]).toBe(
+      "블로커: 1 voice segment(s) could not be transcribed; no content from them was promoted. 외 1건",
+    );
     expect((manager as unknown as { active?: unknown }).active).toBeUndefined();
   });
 

@@ -55,7 +55,7 @@ export interface ActionItem {
   due: string | null;
 }
 
-export interface Minutes {
+export interface MinutesDetails {
   discussed: string[];
   decided: string[];
   rejected: string[];
@@ -63,6 +63,10 @@ export interface Minutes {
   actionItems: ActionItem[];
   blockers: string[];
   nextMeeting: string | null;
+}
+
+export interface Minutes extends MinutesDetails {
+  summary: string[];
 }
 
 export interface MeetingMetadata {

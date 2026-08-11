@@ -18,8 +18,9 @@ import { GitHubStore, type GitHubSyncResult } from "./github-store.js";
 import { checkpoint, safeErrorMessage } from "./logger.js";
 import { LocalMeetingService, LocalWhisperTranscriber } from "./local-meeting-service.js";
 import { renderDailyDocument } from "./markdown.js";
+import { buildMeetingSummary } from "./meeting-summary.js";
 import { meetingId } from "./time.js";
-import type { MeetingMetadata, Minutes, TextMessageRecord, VoiceSegment } from "./types.js";
+import type { MeetingMetadata, Minutes, MinutesDetails, TextMessageRecord, VoiceSegment } from "./types.js";
 import { VoiceRecorder } from "./voice-recorder.js";
 import {
   OllamaRuntime,
@@ -304,8 +305,9 @@ export class MeetingManager {
       checkpoint("FAILED", `Meeting summary ${meeting.id} | ${safeErrorMessage(error)}`);
       minutes = this.safeFallbackMinutes(transcription.entries.map((entry) => `${entry.speaker}: ${entry.text}`));
     }
+    const operationalBlockers: string[] = [];
     if (transcription.failures.length > 0) {
-      minutes.blockers.push(
+      operationalBlockers.push(
         `${transcription.failures.length} voice segment(s) could not be transcribed; no content from them was promoted.`,
       );
       checkpoint(
@@ -313,7 +315,9 @@ export class MeetingManager {
         `Meeting ${meeting.id} transcription | ${transcription.failures.length} segment(s) failed`,
       );
     }
-    minutes.blockers.push(...meeting.voiceWarnings);
+    operationalBlockers.push(...meeting.voiceWarnings);
+    minutes.blockers.unshift(...operationalBlockers);
+    minutes.summary = buildMeetingSummary(minutes);
 
     const metadata: MeetingMetadata = {
       id: meeting.id,
@@ -347,7 +351,7 @@ export class MeetingManager {
   }
 
   private safeFallbackMinutes(discussed: string[]): Minutes {
-    return {
+    const details: MinutesDetails = {
       discussed: discussed.slice(0, 100),
       decided: [],
       rejected: [],
@@ -358,6 +362,7 @@ export class MeetingManager {
       blockers: ["Local meeting classification failed; manual review is required."],
       nextMeeting: null,
     };
+    return { summary: buildMeetingSummary(details), ...details };
   }
 
   private resultStatus(result: PromiseSettledResult<unknown>, label: string): string {

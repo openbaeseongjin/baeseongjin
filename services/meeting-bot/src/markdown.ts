@@ -1,19 +1,48 @@
 import type { MeetingMetadata, Minutes } from "./types.js";
 import { kstDate, kstTime } from "./time.js";
 
-export function markdownText(value: string): string {
-  return value
+export function markdownText(value: string, maxLength = 1_000): string {
+  const normalized = value
     .replace(/[\u0000-\u001f\u007f]/gu, " ")
-    .replace(/</gu, "&lt;")
-    .replace(/>/gu, "&gt;")
     .replace(/\s+/gu, " ")
-    .trim()
-    .slice(0, 1_000);
+    .trim();
+  let escaped = "";
+
+  for (const character of normalized) {
+    const token =
+      character === "<"
+        ? "&lt;"
+        : character === ">"
+          ? "&gt;"
+          : /[\\`*_\[\]{}()#+!|~]/u.test(character)
+            ? `\\${character}`
+            : character;
+    if (escaped.length + token.length > maxLength) {
+      break;
+    }
+    escaped += token;
+  }
+
+  return escaped;
 }
 
-function bulletList(items: string[]): string {
+function summaryText(value: string): string {
+  const countSuffix = value.match(/ 외 \d+건$/u)?.[0];
+  if (!countSuffix) {
+    return markdownText(value, 240);
+  }
+
+  const renderedSuffix = ` ${markdownText(countSuffix.trim())}`;
+  const body = value.slice(0, -countSuffix.length);
+  return `${markdownText(body, 240 - renderedSuffix.length)}${renderedSuffix}`;
+}
+
+function bulletList(
+  items: string[],
+  renderItem: (item: string) => string = markdownText,
+): string {
   return items.length > 0
-    ? items.map((item) => `- ${markdownText(item)}`).join("\n")
+    ? items.map((item) => `- ${renderItem(item)}`).join("\n")
     : "- None recorded";
 }
 
@@ -31,6 +60,10 @@ export function renderMeetingSection(metadata: MeetingMetadata, minutes: Minutes
     "",
     `- Started by: ${markdownText(metadata.startedBy)}`,
     `- Voice channel: ${markdownText(metadata.voiceChannelName ?? "Text only")}`,
+    "",
+    "### SUMMARY",
+    "",
+    bulletList(minutes.summary, summaryText),
     "",
     "### DISCUSSED",
     "",

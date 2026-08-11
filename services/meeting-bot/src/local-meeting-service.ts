@@ -1,9 +1,11 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { safeErrorMessage } from "./logger.js";
+import { buildMeetingSummary } from "./meeting-summary.js";
 import { summarizeLocally } from "./promotion-gate.js";
 import type {
   Minutes,
+  MinutesDetails,
   TextMessageRecord,
   TranscriptEntry,
   VoiceSegment,
@@ -146,7 +148,7 @@ export class LocalMeetingService {
 
   summarize(transcript: TranscriptEntry[]): Minutes {
     if (transcript.length === 0) {
-      return {
+      const details: MinutesDetails = {
         discussed: [],
         decided: [],
         rejected: [],
@@ -155,6 +157,7 @@ export class LocalMeetingService {
         blockers: ["No transcript content was captured."],
         nextMeeting: null,
       };
+      return { summary: buildMeetingSummary(details), ...details };
     }
     return summarizeLocally(transcript);
   }
