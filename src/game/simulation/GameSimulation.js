@@ -373,7 +373,8 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            resolveArtifactSelections = true
+            resolveArtifactSelections = true,
+            advanceInputDrivenObjects = true
         } = {}
     ) {
         const expectedTick = this.tick + 1;
@@ -391,7 +392,8 @@ export class GameSimulation {
             resolvePlayerProjectileHits,
             spawnPlayerProjectiles,
             recoverPlayerDeaths,
-            resolveArtifactSelections
+            resolveArtifactSelections,
+            advanceInputDrivenObjects
         });
     }
 
@@ -405,7 +407,8 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            resolveArtifactSelections = true
+            resolveArtifactSelections = true,
+            advanceInputDrivenObjects = true
         } = {}
     ) {
         this.tick += 1;
@@ -430,7 +433,7 @@ export class GameSimulation {
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
             this.#prepareOwnerStep(player, dt);
-            this.dispatchOwnerInput(player.id, playerCommand, dt);
+            if (advanceInputDrivenObjects) this.dispatchOwnerInput(player.id, playerCommand, dt);
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile, "player-projectile");
         }

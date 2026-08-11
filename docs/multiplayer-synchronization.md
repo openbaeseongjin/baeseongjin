@@ -53,10 +53,10 @@
   → 정규화된 입력 프레임 생성
   → InputDispatcher가 소유 InputDrivenObject capability에 적용
   → sequence와 targetTick 부여
-  → PlayerCommandBatch 전송
-  → 권위 서버가 플레이어 ID와 틱을 검증
-  → 같은 InputDispatcher로 검증용 InputDrivenObject에 적용
-  → WorldSnapshot + ackSequence 전송
+  → PlayerCommandBatch와 owner-motion 전송
+  → 권위 서버가 명령 소유권·순서와 운동 봉투를 검증
+  → owner-motion만 공용 InputDrivenObject 연속 상태에 적용
+  → WorldSnapshot + ackSequence + ownerMotionTick 전송
 ```
 
 서버는 다음 명령을 거부한다.
@@ -67,11 +67,11 @@
 - 지원하지 않는 프로토콜 버전
 - 유한수가 아니거나 축 범위를 벗어난 입력
 
-`AuthorityCommandInbox`가 플레이어별 마지막 승인 `sequence`와 허용 틱 범위를 소유한다. 승인된 입력은 목표 틱별로 보관하고 한 번만 소비하며, 같은 플레이어가 같은 틱에 더 높은 순서 번호를 보내면 최신 입력으로 교체한다. 최대 200ms 왕복 지연에 지터 여유를 두어 클라이언트는 명령을 30틱(250ms) 앞에 예약하고 서버는 최대 36틱(300ms) 미래 입력을 허용한다. 로컬 예측이 선행 시간을 화면에서 숨기며, 네트워크 행렬 회귀 시나리오가 권위 이동을 검증한다. 수치는 실제 왕복 지연 측정 후 같은 `MULTIPLAYER_TIMING` 계약에서 조정한다.
+`AuthorityCommandInbox`가 플레이어별 마지막 승인 `sequence`와 허용 틱 범위를 소유한다. 승인된 입력은 목표 틱별로 보관하고 한 번만 소비하며, 같은 플레이어가 같은 틱에 더 높은 순서 번호를 보내면 최신 입력으로 교체한다. 최대 200ms 왕복 지연에 지터 여유를 두어 클라이언트는 명령을 30틱(250ms) 앞에 예약하고 서버는 최대 36틱(300ms) 미래 입력을 허용한다. 이 배치는 소유 클라이언트의 재적용 원본과 순서·지연 진단 계약이며 멀티 서버가 플레이어 물리를 다시 실행하는 명령이 아니다. 수치는 실제 왕복 지연 측정 후 같은 `MULTIPLAYER_TIMING` 계약에서 조정한다.
 
-명령이 해당 틱까지 도착하지 않으면 마지막 이동 축을 무기한 유지하지 않는다. 중립 명령을 적용하되, 로프 해제처럼 상태 전이가 필요한 입력은 추측하지 않는다.
+소유 클라이언트 예측에서 명령이 비는 120Hz 틱은 마지막 입력을 최대 30틱만 유지한 뒤 이동 축을 중립화한다. 로프 해제처럼 상태 전이가 필요한 입력은 추측하지 않는다. 멀티 서버는 입력 공백을 보간하지 않고 마지막 승인 `owner-motion` 상태를 유지한다.
 
-`GameSimulation.stepCommandBatch()`는 배치 틱이 정확히 다음 권위 틱인지 확인하고 플레이어 ID로 명령을 연결한다. 해당 틱의 명령이 없는 플레이어는 이동 축과 상호작용 축만 중립화하며 마지막 포인터 눌림·좌표, viewport와 조준점을 유지한다. 따라서 패킷 하나가 빠졌다는 이유로 로프를 놓거나 0,0 방향의 드래그를 만들지 않는다.
+`GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 배치 틱이 정확히 다음 시뮬레이션 틱인지 확인하고 플레이어 ID로 명령을 연결한다. 멀티 서버는 같은 월드 스케줄러를 사용하되 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 capability를 중복 호출하지 않는다. 플레이어 타이머와 무기 쿨다운, 적·투사체 같은 `SimulationDrivenObject` 단계는 계속 진행한다.
 
 `PlayerCommand.interact` boolean은 향후 문맥 상호작용을 위한 예약 필드다. 현재 사망·부활 규칙은 동료 상호작용을 요구하지 않으며 점프 축이나 모바일 점프 버튼을 부활 입력으로 소비하지 않는다.
 
@@ -123,7 +123,7 @@ serverTick
 worldSeed
 worldRevision
 players[]
-  id, position, velocity, isGrounded, health, lifeState
+  id, ownerMotionTick, position, velocity, isGrounded, health, lifeState
   rope(anchor, length, currentLength, tension), weaponCooldown
   control(aimWorld, lastPointer, lastViewport, wasPointerDown, attachBufferRemaining, swingDrag)
   artifacts[], artifactEffects
@@ -147,7 +147,7 @@ events[]
 
 초기 버전은 전체 스냅샷을 전송한다. 실제 측정 없이 델타 압축과 관심 영역을 먼저 넣지 않는다. 메시지 크기나 대역폭이 문제가 된다는 측정 결과가 생기면 동일한 논리 계약을 유지한 채 전송 표현만 바꾼다.
 
-`WorldSnapshotEnvelope`가 스냅샷 순서, 서버 틱, 월드 식별자, 플레이어별 승인 번호, 비예측 상태와 권위 이벤트를 하나의 전송 단위로 묶는다. `serverTick`은 시뮬레이션 시간을 뜻하고 `snapshotSequence`는 같은 tick에 참가·퇴장·claim 확정으로 다시 만들어진 봉투까지 구분한다. 클라이언트는 sequence가 새롭고 serverTick이 같거나 증가한 봉투를 수용해야 한다. 투사체·낙하물처럼 예측 가능한 객체 배열을 `state`에 넣으면 계약 검증이 실패하며 반드시 생성·종료 이벤트를 사용해야 한다. 이벤트는 틱과 ID 순으로 정규화하고 한 봉투 안의 중복 ID를 거부한다.
+`WorldSnapshotEnvelope`가 스냅샷 순서, 서버 틱, 월드 식별자, 플레이어별 승인 번호, 비예측 상태와 권위 이벤트를 하나의 전송 단위로 묶는다. `serverTick`은 중립 월드 시뮬레이션 시간을 뜻하고 각 플레이어의 `ownerMotionTick`은 그 물리·로프 상태를 만든 마지막 승인 소유자 tick을 뜻한다. `snapshotSequence`는 같은 server tick에 참가·퇴장·claim 확정으로 다시 만들어진 봉투까지 구분한다. 클라이언트는 sequence가 새롭고 serverTick이 같거나 증가한 봉투를 수용해야 한다. 투사체·낙하물처럼 예측 가능한 객체 배열을 `state`에 넣으면 계약 검증이 실패하며 반드시 생성·종료 이벤트를 사용해야 한다. 이벤트는 틱과 ID 순으로 정규화하고 한 봉투 안의 중복 ID를 거부한다.
 
 `GameSimulation`은 처리한 스텝마다 단조 증가하는 `tick`을 기록한다. 싱글 자동 무기 발사, 멀티에서 승인된 플레이어 발사 claim, 서버 중립 발사와 투사체 종료는 이 틱의 `PredictableObjectEvent`를 발행하며, 권위 전송 계층은 `drainReplicationEvents()`로 각 사건을 한 번만 가져간다. 플레이어·적 투사체는 8초의 서버 수명이 끝나면 `expired` resolve로 제거한다. 활성 투사체는 원래 spawn 이벤트를 내부에 보존해 welcome 복원에만 재사용하며 일반 스냅샷마다 반복하지 않는다. 로컬 렌더링은 기존 투사체 배열을 계속 사용하지만 네트워크 상태에는 그 배열을 넣지 않는다.
 
@@ -159,7 +159,7 @@ events[]
 
 - 플레이어·로프 같은 `InputDrivenObject`는 소유 클라이언트의 즉시 시뮬레이션이 원점이다. 클라이언트가 `owner-motion`으로 현재 tick·위치·속도·접지·로프 상태를 보내면 서버가 소유권과 tick·속도·이동 거리 봉투를 검증해 공용 상태에 반영하고 receipt를 돌려준다. 서버와 다른 클라이언트는 이 검증된 소유자 상태를 따라간다.
 - 정상 승인 중인 소유 클라이언트는 20Hz 서버 지연 위치로 되감기지 않는다. 최신 스냅샷에서는 HP·생명 상태·무기·아티팩트 같은 확정 결과만 즉시 반영한다.
-- `owner-motion` 거부 receipt가 오면 마지막 공유 스냅샷의 소유자 물리·로프·제어 상태로 복원하고, 아직 남아 있는 입력을 `serverTick` 다음부터 현재 예측 tick까지 순서대로 다시 실행한다. 작은 표시 오차는 짧게 감쇠하고 160px 초과 오차·부활·생명 상태 전이는 즉시 맞춘다.
+- `owner-motion` 거부 receipt가 오면 마지막 공유 스냅샷의 소유자 물리·로프·제어 상태를 해당 플레이어의 `ownerMotionTick`에 복원하고, 그 다음 tick의 미확정 입력부터 현재 예측 tick까지 순서대로 다시 실행한다. 이미 owner-motion에 포함된 입력을 `serverTick` 기준으로 두 번 실행하지 않는다. 작은 표시 오차는 짧게 감쇠하고 160px 초과 오차·부활·생명 상태 전이는 즉시 맞춘다.
 - 적과 공용 월드 같은 `SimulationDrivenObject`는 서버 스냅샷이 원점이다. 동료와 적은 두 표본 사이를 보간하고 표본 공백만 최대 120ms 외삽한 뒤 다음 스냅샷에서 서버 궤도로 돌아온다.
 
 `OwnerPredictionRuntime`은 별도 간이 물리를 만들지 않는다. 최초 입장과 거부 복구 때 최신 공유 스냅샷을 로컬 예측용 `GameSimulation`의 공개 소유자 복원 명령에 전달하고, 남은 입력을 고정 1/120초로 재실행한다. 정상 승인 중에는 소유자의 이동·로프를 유지하면서 최신 확정 결과만 흡수한다. 런타임은 `GameSimulation`의 플레이어 객체·배열·tick을 직접 수정하지 않는다. 60Hz 명령 사이의 빈 120Hz 틱은 서버와 예측이 같은 `InputStateSimulator`로 마지막 입력을 최대 30틱(250ms) 유지한다. 새 중립 입력이 오면 즉시 교체하고 제한 시간이 끝나면 이동축을 중립화한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
@@ -192,7 +192,7 @@ GameApp
 - 원격 권한은 `submit(command)`으로 입력 의도만 보내고 서버 시계를 직접 진행하지 않는다.
 - 두 권한의 `snapshot()`은 Canvas 실행 경로가 읽을 현재 상태를 제공한다.
 
-`AuthorityServerSession`은 실제 소켓과 분리된 서버 실행 경계다. 인증된 연결의 플레이어 ID와 제출 명령의 ID가 다르면 배치 전체를 거부하고, `AuthorityCommandInbox`에서 다음 틱 명령을 꺼내 같은 `GameSimulation.stepCommandBatch()`를 120Hz로 실행한다. 6틱마다 `AuthoritySnapshotBuilder`를 호출해 초기 20Hz 스냅샷과 플레이어별 승인 번호를 만들며, 소켓 구현은 이 세션의 `submit`, `advance`, `snapshot`만 호출한다.
+`AuthorityServerSession`은 실제 소켓과 분리된 서버 실행 경계다. 인증된 연결의 플레이어 ID와 제출 명령의 ID가 다르면 배치 전체를 거부하고, `AuthorityCommandInbox`에서 다음 틱 명령을 소비해 승인 번호를 전진시킨다. 같은 `GameSimulation.stepCommandBatch()`를 120Hz로 실행하되 입력 주도 객체 단계는 끄고 중립 월드와 플레이어 타이머만 진행한다. 플레이어 물리·로프는 별도 `owner-motion` 검증 경계에서만 바뀐다. 6틱마다 `AuthoritySnapshotBuilder`를 호출해 20Hz 스냅샷, 플레이어별 명령 승인 번호와 `ownerMotionTick`을 만들며, 소켓 구현은 이 세션의 공개 경계만 호출한다.
 
 서버는 현재 `serverTick` 이하를 목표로 한 늦은 명령을 `elapsed-tick`으로 거부하고 승인 sequence를 갱신하지 않는다. 초기 프로토타입은 서버 롤백을 하지 않으므로, 실행할 수 없는 입력을 ACK해 클라이언트가 재적용 목록에서 제거하는 거짓 수렴을 허용하지 않는다.
 
