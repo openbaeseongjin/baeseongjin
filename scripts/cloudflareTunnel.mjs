@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createServer } from "node:net";
 
-export const READY_PATTERN = /Baeseongjin multiplayer:/;
+export const READY_PATTERN = /Baeseongjin multiplayer \((?:game-only|development)\):/;
 export const PUBLIC_URL_PATTERN = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/i;
 
 export function parseQuickTunnelUrl(output) {
