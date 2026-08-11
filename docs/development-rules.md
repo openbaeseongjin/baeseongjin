@@ -172,6 +172,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 멀티 서버 fixed tick은 `InputDrivenObject`의 이동·점프·로프 capability를 다시 실행하지 않는다. 각 플레이어 snapshot은 최신 승인 `owner-motion`의 `ownerMotionTick`을 함께 가지며, 거부 복구는 `serverTick`이 아니라 이 tick 다음의 미확정 입력부터 재실행한다. 서버 tick은 플레이어 타이머와 `SimulationDrivenObject` 월드 진행에 사용한다.
 - `SimulationDrivenObject`와 공용 월드 상태는 서버 스냅샷이 수렴 원점이다. 원격 표시는 보간하고 표본 공백만 제한 외삽하되 다음 스냅샷에서 반드시 서버 궤도로 돌아온다.
 - 원격 보간 시계를 첫 스냅샷에 영구 고정하지 않는다. 최신 `serverTick` 오차를 제한된 양으로 계속 흡수하고, 장시간 타이머 드리프트와 단일 수신 지연 모두에서 보간 시간축이 급변하거나 지속 외삽으로 밀리지 않는지 테스트한다.
+- 원격 위치 표본의 tick은 그 상태를 실제로 만든 시계를 사용한다. 적·공용 객체는 `serverTick`, 플레이어는 `ownerMotionTick`으로 보간하며 플레이어 목표 시각에는 공용 `inputLeadTicks`를 더해 서버 시계와 소유자 예측 시계를 맞춘다. 반복된 owner motion을 새 server tick의 새 위치처럼 취급하지 않는다.
 - 플레이어 당사자 사건에서 서버 역할은 claim 검증, 중복 제거, 최종 상태 확정과 다른 클라이언트로의 배포다. 서버는 별도로 중립 객체의 생성·궤적·수명주기를 진행하되, 지연된 플레이어 복제 위치로 피격이나 절단을 먼저 발생시켜 모바일 클라이언트 반응을 왕복 지연시키면 안 된다.
 - 공격 클라이언트가 적중을 claim하는 플레이어 투사체는 멀티 서버 fixed tick에서 적 충돌과 HP 감소를 다시 실행하지 않는다. 서버는 검증용 궤적·대상 소실·수명만 진행하고 승인된 claim에서 최종 대미지와 resolve 사건을 한 번 확정한다.
 - 플레이어 소유 예측 객체의 생성도 소유 클라이언트가 즉시 적용하고 spawn claim으로 확정한다. 멀티 서버 fixed tick은 같은 플레이어 객체를 별도로 생성하지 않으며, 서버는 claim의 소유권·tick·쿨다운·대상·초기 상태를 검증해 생성 ID와 사건을 멱등 확정한다. 예측 생성이 쿨다운·자원·충전량도 바꿨다면 prediction ID에 적용 직전·직후 값과 tick을 함께 보존한다. 여러 동종 prediction이 pending일 때 앞 거절은 후속 효과를 현재 상태에서 제거하지 않고 후속 항목의 rollback 기준만 거절된 원인이 없었던 시간축으로 갱신한다. 마지막 pending 거절에서 최초 상태로 복구한다.

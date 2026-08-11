@@ -7,6 +7,7 @@ import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
 import { createCheckpointClaim, serializeCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
+import { MULTIPLAYER_TIMING } from "../src/game/network/MultiplayerTiming.js";
 import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
@@ -168,13 +169,30 @@ export async function run() {
         maxExtrapolationSeconds: 0.12,
         maxSnapshots: 3
     });
-    const snapshot = (serverTick, remoteX, health = 100, snapshotSequence = serverTick) => ({
+    const snapshot = (
+        serverTick,
+        remoteX,
+        health = 100,
+        snapshotSequence = serverTick,
+        ownerMotionTick = serverTick + MULTIPLAYER_TIMING.inputLeadTicks
+    ) => ({
         snapshotSequence,
         serverTick,
         state: {
             players: [
-                { id: "local", position: { x: remoteX, y: 0 }, velocity: { x: 100, y: 0 } },
-                { id: "remote", position: { x: remoteX, y: 0 }, velocity: { x: 100, y: 0 }, health }
+                {
+                    id: "local",
+                    position: { x: remoteX, y: 0 },
+                    velocity: { x: 100, y: 0 },
+                    ownerMotionTick
+                },
+                {
+                    id: "remote",
+                    position: { x: remoteX, y: 0 },
+                    velocity: { x: 100, y: 0 },
+                    ownerMotionTick,
+                    health
+                }
             ],
             enemies: [{ id: "enemy", position: { x: remoteX * 2, y: 0 }, health }]
         },
@@ -220,6 +238,26 @@ export async function run() {
     assert.equal(projected.players[1].position.x, 18, "extrapolation must stop at its bounded horizon");
     assert.equal(interpolation.metrics().extrapolationMs, 120);
     assert.equal(interpolation.metrics().maxExtrapolationMs, 120);
+
+    const irregularOwnerMotion = new RemoteWorldStateBuffer({
+        interpolationSeconds: 0.1,
+        maxExtrapolationSeconds: 0.12,
+        maxSnapshots: 4
+    });
+    irregularOwnerMotion.push(snapshot(100, 0, 100, 100, 130), 0);
+    irregularOwnerMotion.push(snapshot(106, 0, 100, 106, 130), 50);
+    irregularOwnerMotion.push(snapshot(112, 12, 100, 112, 142), 100);
+    const irregularProjection = irregularOwnerMotion.sample({ now: 150, localPlayerId: "local" });
+    assert.equal(
+        irregularProjection.players[1].position.x,
+        6,
+        "remote players must interpolate on ownerMotionTick instead of repeated server snapshot ticks"
+    );
+    assert.equal(
+        irregularProjection.enemies[0].position.x,
+        0,
+        "server-driven enemies must remain on the server tick interpolation timeline"
+    );
 
     const driftingClock = new RemoteWorldStateBuffer({
         interpolationSeconds: 0.1,
