@@ -172,10 +172,8 @@ export class PredictableProjectileStore {
 
     applyImpactReceipts(receipts) {
         for (const receipt of receipts) {
-            const projectile = this.objects.get(receipt.projectileId);
-            if (!projectile || receipt.accepted || !projectile.rejectClientCollision()) continue;
-            this.locallyResolvedObjectIds.delete(receipt.projectileId);
-            this.predictionCancellations += 1;
+            if (receipt.accepted || !this.objects.has(receipt.projectileId)) continue;
+            this.objects.delete(receipt.projectileId);
         }
     }
 

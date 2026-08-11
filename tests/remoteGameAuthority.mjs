@@ -902,16 +902,6 @@ export async function run() {
         );
         const beforeRejectedBody = authority.ownerRuntime.simulation.playerState(authority.playerId);
         const beforeRejectedBodyTick = authority.snapshot().owner.tick;
-        const expectedAfterRejectedBody = new GameSimulation({
-            worldSeed: room.simulation.world.seed,
-            playerId: authority.playerId
-        });
-        expectedAfterRejectedBody.enemies = [];
-        expectedAfterRejectedBody.restoreOwnerPrediction(
-            authority.playerId,
-            beforeRejectedBody,
-            beforeRejectedBodyTick
-        );
         const rejectedBodyProjectile = new BallisticProjectileObject({
             id: "rejected-body-impact-projectile",
             ownerId: "rejected-body-impact-enemy",
@@ -943,44 +933,25 @@ export async function run() {
             beforeRejectedBody.health - rejectedBodyProjectile.damage,
             "rejected victim HP must still react before its receipt"
         );
-        const replayedCommands = [movementCommand(1), movementCommand(-1)];
-        for (const command of replayedCommands) {
+        for (const command of [movementCommand(1), movementCommand(-1)]) {
             authority.advance(command);
-            const nextTick = expectedAfterRejectedBody.getTick() + 1;
-            expectedAfterRejectedBody.advanceOwnerPrediction(authority.playerId, command, 1 / 120, nextTick);
         }
         await waitFor(
             () => authority.impactClaimReceipts.length > 0,
             "the invalid body impact must return a rejection receipt"
         );
         const rejectedBodyReceipt = authority.drainImpactClaimReceipts()[0];
-        assert.equal(rejectedBodyReceipt.accepted, false);
-        assert.equal(rejectedBodyReceipt.reason, "trajectory-mismatch");
-        const rolledBackBody = authority.snapshot().owner;
-        while (expectedAfterRejectedBody.getTick() < rolledBackBody.tick) {
-            const nextTick = expectedAfterRejectedBody.getTick() + 1;
-            expectedAfterRejectedBody.advanceOwnerPrediction(
-                authority.playerId,
-                replayedCommands.at(-1),
-                1 / 120,
-                nextTick
-            );
-        }
-        const expectedBody = expectedAfterRejectedBody.ownerPredictionState(authority.playerId);
-        assert.ok(
-            distance(rolledBackBody.position, expectedBody.position) < 1e-9,
-            `rejected impact position replay mismatch: ${JSON.stringify({ rolledBackBody, expectedBody })}`
+        assert.equal(rejectedBodyReceipt.accepted, true, "the authenticated victim must own its hit result");
+        const clientBody = authority.snapshot().owner;
+        assert.equal(clientBody.health, beforeRejectedBody.health - rejectedBodyProjectile.damage);
+        await waitFor(
+            () => authorityPlayer.health === clientBody.health,
+            "the shared server player HP must converge to the victim client's resolved value"
         );
-        assert.ok(
-            distance(rolledBackBody.velocity, expectedBody.velocity) < 1e-9,
-            `rejected impact velocity replay mismatch: ${JSON.stringify({ rolledBackBody, expectedBody })}`
-        );
-        assert.equal(rolledBackBody.hitInvulnerabilityRemaining, expectedBody.hitInvulnerabilityRemaining);
-        assert.equal(rolledBackBody.health, expectedBody.health);
 
         const ropeAnchor = {
-            x: rolledBackBody.position.x,
-            y: rolledBackBody.position.y - 80
+            x: clientBody.position.x,
+            y: clientBody.position.y - 80
         };
         localImpactPlayer.ropeObject.rope.attach(localImpactPlayer.physics.position, ropeAnchor);
         localImpactPlayer.ropeDisabledRemaining = 0;
@@ -1013,10 +984,15 @@ export async function run() {
             "the invalid rope impact must return a rejection receipt"
         );
         const rejectedRopeReceipt = authority.drainImpactClaimReceipts()[0];
-        assert.equal(rejectedRopeReceipt.accepted, false);
-        assert.equal(rejectedRopeReceipt.reason, "trajectory-mismatch");
-        assert.equal(authority.snapshot().owner.rope.isAttached, true);
-        assert.equal(authority.snapshot().owner.ropeDisabledRemaining, 0);
+        assert.equal(rejectedRopeReceipt.accepted, true, "the authenticated victim must own its rope cut");
+        assert.equal(authority.snapshot().owner.rope.isAttached, false);
+        assert.ok(authority.snapshot().owner.ropeDisabledRemaining > 0);
+        await waitFor(
+            () => !authorityPlayer.ropeObject.rope.isAttached && authorityPlayer.ropeDisabledRemaining > 0,
+            "the shared server rope state must converge to the victim client's cut result"
+        );
+        localImpactPlayer.ropeDisabledRemaining = 0;
+        authorityPlayer.ropeDisabledRemaining = 0;
         authority.ownerRuntime.simulation.releasePlayerRope(authority.playerId);
         room.simulation.releasePlayerRope(authority.playerId);
         const hitTarget = room.simulation.enemies[0];

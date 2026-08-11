@@ -70,21 +70,15 @@ export function run() {
     ]);
     assert.equal(
         rejectedImpactStore.snapshot().enemyProjectiles.length,
-        1,
-        "a rejected impact claim must restore the still-simulating projectile"
+        0,
+        "a victim-resolved projectile must stay consumed even when the server rejects its claim"
     );
-    assert.equal(rejectedImpactStore.locallyResolvedObjectIds.size, 0);
-    assert.equal(rejectedImpactStore.metrics().predictionCancellations, 1);
+    assert.equal(rejectedImpactStore.locallyResolvedObjectIds.size, 1);
+    assert.equal(rejectedImpactStore.metrics().predictionCancellations, 0);
     assert.equal(
         rejectedImpactStore.update(0, { enemies: [], localPlayer }, 21).length,
         0,
-        "a rejected impact must not retrigger while the same projectile remains overlapping"
-    );
-    rejectedImpactStore.update(0, { enemies: [], localPlayer: { ...localPlayer, position: { x: 200, y: 0 } } }, 22);
-    assert.equal(
-        rejectedImpactStore.update(0, { enemies: [], localPlayer }, 23)[0].resolution,
-        "player-hit",
-        "a rejected neutral projectile impact may retry only after separation and re-entry"
+        "a rejected victim impact must not restore or retrigger the consumed projectile"
     );
 
     const burstStore = new PredictableProjectileStore();
