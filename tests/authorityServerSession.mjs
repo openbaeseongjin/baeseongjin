@@ -491,6 +491,19 @@ export function run() {
     assert.ok(primary.physics.velocity.x > 0);
     assert.ok(partner.physics.velocity.x < 0);
     assert.equal(snapshot.serverTick, 6);
+    simulation.recordReplicationEvent("same-tick-test", { playerId: primary.id });
+    const nextSameTickSnapshot = session.snapshot();
+    assert.equal(nextSameTickSnapshot.serverTick, snapshot.serverTick);
+    assert.equal(
+        nextSameTickSnapshot.snapshotSequence,
+        snapshot.snapshotSequence + 1,
+        "every emitted snapshot needs an order independent from the simulation tick"
+    );
+    assert.equal(
+        nextSameTickSnapshot.events[0].eventType,
+        "same-tick-test",
+        "an event emitted without advancing simulation time must still receive a newer snapshot"
+    );
     assert.equal(Object.hasOwn(snapshot.state, "combatEffects"), false, "server snapshots must not carry client VFX");
     assert.equal(Object.hasOwn(snapshot.state, "impact"), false, "server snapshots must not carry camera feedback");
     assert.deepEqual(snapshot.acknowledgements, {

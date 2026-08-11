@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 1;
+export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 2;
 
 function assertTick(value, label) {
     if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${label} must be a non-negative safe integer`);
@@ -51,6 +51,7 @@ function normalizeState(state) {
 }
 
 export function createWorldSnapshotEnvelope({
+    snapshotSequence,
     serverTick,
     worldSeed,
     worldRevision,
@@ -60,6 +61,7 @@ export function createWorldSnapshotEnvelope({
 }) {
     return Object.freeze({
         protocolVersion: WORLD_SNAPSHOT_PROTOCOL_VERSION,
+        snapshotSequence: assertTick(snapshotSequence, "snapshotSequence"),
         serverTick: assertTick(serverTick, "serverTick"),
         worldSeed: assertTick(worldSeed, "worldSeed"),
         worldRevision: assertId(worldRevision, "worldRevision"),

@@ -67,6 +67,7 @@ export class RemoteWorldStateBuffer {
         this.maxClockCorrectionTicks = maxClockCorrectionSeconds * TICKS_PER_SECOND;
         this.history = [];
         this.latest = null;
+        this.latestSnapshotSequence = -1;
         this.latestReceivedAt = 0;
         this.clockAnchorTick = null;
         this.clockAnchorAt = null;
@@ -84,12 +85,22 @@ export class RemoteWorldStateBuffer {
             throw new Error("snapshot.serverTick must be a non-negative safe integer");
         }
         if (!Number.isFinite(receivedAt)) throw new Error("receivedAt must be finite");
-        if (this.latest && snapshot.serverTick <= this.latest.serverTick) return false;
+        const snapshotSequence = snapshot.snapshotSequence;
+        if (!Number.isSafeInteger(snapshotSequence) || snapshotSequence < 0) {
+            throw new Error("snapshot.snapshotSequence must be a non-negative safe integer");
+        }
+        if (
+            this.latest &&
+            (snapshotSequence <= this.latestSnapshotSequence || snapshot.serverTick < this.latest.serverTick)
+        ) {
+            return false;
+        }
 
+        const sameTick = this.latest?.serverTick === snapshot.serverTick;
         if (this.clockAnchorTick === null) {
             this.clockAnchorTick = snapshot.serverTick;
             this.clockAnchorAt = receivedAt;
-        } else {
+        } else if (!sameTick) {
             const elapsedTicks = ((receivedAt - this.clockAnchorAt) * TICKS_PER_SECOND) / 1000;
             const clockErrorTicks = snapshot.serverTick - (this.clockAnchorTick + elapsedTicks);
             this.lastClockCorrectionTicks = Math.max(
@@ -103,8 +114,13 @@ export class RemoteWorldStateBuffer {
             );
         }
         this.latest = snapshot;
+        this.latestSnapshotSequence = snapshotSequence;
         this.latestReceivedAt = receivedAt;
-        this.history.push({ snapshot, receivedAt });
+        if (sameTick) {
+            this.history[this.history.length - 1] = { snapshot, receivedAt };
+        } else {
+            this.history.push({ snapshot, receivedAt });
+        }
         if (this.history.length > this.maxSnapshots) this.history.splice(0, this.history.length - this.maxSnapshots);
         for (const event of snapshot.events) {
             if (this.recentEventIds.has(event.eventId)) continue;

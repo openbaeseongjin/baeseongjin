@@ -16,6 +16,7 @@ export class RemoteCommandStream {
         this.nextSequence = 0;
         this.lastTargetTick = -1;
         this.latestServerTick = -1;
+        this.latestSnapshotSequence = -1;
         this.latestSnapshot = null;
         this.pending = new Map();
     }
@@ -39,7 +40,8 @@ export class RemoteCommandStream {
 
     acceptSnapshot(snapshot) {
         const serverTick = assertTick(snapshot?.serverTick, "snapshot.serverTick");
-        if (serverTick <= this.latestServerTick) return false;
+        const snapshotSequence = assertTick(snapshot?.snapshotSequence, "snapshot.snapshotSequence");
+        if (snapshotSequence <= this.latestSnapshotSequence || serverTick < this.latestServerTick) return false;
         const acknowledgedSequence = snapshot.acknowledgements?.[this.playerId];
         if (acknowledgedSequence !== undefined) {
             assertTick(acknowledgedSequence, "acknowledgedSequence");
@@ -48,6 +50,7 @@ export class RemoteCommandStream {
             }
         }
         this.latestServerTick = serverTick;
+        this.latestSnapshotSequence = snapshotSequence;
         this.latestSnapshot = snapshot;
         return true;
     }
