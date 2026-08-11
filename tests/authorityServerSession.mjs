@@ -263,6 +263,13 @@ export function run() {
     const target = combatSimulation.enemies.find(({ id }) => id === projectile.targetId);
     projectile.position = target.position.clone();
     const healthBeforeClaim = target.health;
+    combatSession.advance();
+    assert.equal(
+        target.health,
+        healthBeforeClaim,
+        "the server fixed tick must not hit a simulation-driven enemy before the attacker claim"
+    );
+    assert.ok(combatSimulation.projectiles.includes(projectile));
     const claim = createProjectileHitClaim({
         predictionId: projectile.predictionId,
         targetId: target.id,

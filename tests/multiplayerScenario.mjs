@@ -9,11 +9,13 @@ import { run as gameServerHandler } from "./gameServerHandler.mjs";
 import { run as artifactSelectionClaim } from "./artifactSelectionClaim.mjs";
 import { run as checkpointClaim } from "./checkpointClaim.mjs";
 import { run as summitClaim } from "./summitClaim.mjs";
+import { run as projectileHitClaim } from "./projectileHitClaim.mjs";
 
 const steps = {
     artifactSelectionClaim,
     checkpointClaim,
     summitClaim,
+    projectileHitClaim,
     playerCommandBatch,
     authorityServerSession,
     ownerPredictionRuntime,

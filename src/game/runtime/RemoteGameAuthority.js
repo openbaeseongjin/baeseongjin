@@ -8,7 +8,11 @@ import { createArtifactSelectionClaim, serializeArtifactSelectionClaim } from ".
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createSummitClaim, createSummitClaimReceipt, serializeSummitClaim } from "../network/SummitClaim.js";
-import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
+import {
+    createProjectileHitClaim,
+    createProjectileHitReceipt,
+    serializeProjectileHitClaim
+} from "../network/ProjectileHitClaim.js";
 import {
     createPlayerImpactClaim,
     createPlayerImpactReceipt,
@@ -53,6 +57,7 @@ export class RemoteGameAuthority {
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
         this.artifactSelectionReceipts = [];
+        this.hitClaimReceipts = [];
         this.impactClaimReceipts = [];
         this.checkpointClaimReceipts = [];
         this.pendingCheckpointId = null;
@@ -119,6 +124,8 @@ export class RemoteGameAuthority {
                         this.stream.acceptReceipt(receipt);
                     } else if (message.type === "artifact-selection-receipt") {
                         this.artifactSelectionReceipts.push(Object.freeze({ ...message.payload }));
+                    } else if (message.type === "hit-claim-receipt") {
+                        this.recordHitClaimReceipt(createProjectileHitReceipt(message.payload));
                     } else if (message.type === "impact-claim-receipt") {
                         this.impactClaimReceipts.push(createPlayerImpactReceipt(message.payload));
                     } else if (message.type === "owner-motion-receipt") {
@@ -276,6 +283,16 @@ export class RemoteGameAuthority {
         const receipts = Object.freeze(this.artifactSelectionReceipts);
         this.artifactSelectionReceipts = [];
         return receipts;
+    }
+
+    drainHitClaimReceipts() {
+        const receipts = Object.freeze(this.hitClaimReceipts);
+        this.hitClaimReceipts = [];
+        return receipts;
+    }
+
+    recordHitClaimReceipt(receipt) {
+        this.hitClaimReceipts.push(receipt);
     }
 
     drainImpactClaimReceipts() {

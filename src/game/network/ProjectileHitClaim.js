@@ -25,6 +25,26 @@ export function createProjectileHitClaim({ predictionId, targetId, clientTick, p
     });
 }
 
+export function createProjectileHitReceipt({ predictionId, accepted, reason, resolution, damage }) {
+    if (typeof accepted !== "boolean") throw new Error("accepted must be boolean");
+    if (!accepted && (typeof reason !== "string" || reason.length === 0)) {
+        throw new Error("rejected projectile hit receipt requires a reason");
+    }
+    if (resolution !== undefined && (typeof resolution !== "string" || resolution.length === 0)) {
+        throw new Error("resolution must be non-empty when provided");
+    }
+    if (damage !== undefined && (!Number.isFinite(damage) || damage < 0)) {
+        throw new Error("damage must be non-negative and finite when provided");
+    }
+    return Object.freeze({
+        predictionId: assertId(predictionId, "predictionId"),
+        accepted,
+        ...(reason === undefined ? {} : { reason }),
+        ...(resolution === undefined ? {} : { resolution }),
+        ...(damage === undefined ? {} : { damage })
+    });
+}
+
 export function serializeProjectileHitClaim(claim) {
     return JSON.stringify(claim);
 }

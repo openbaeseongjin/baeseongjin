@@ -177,7 +177,16 @@ export function run() {
         enemies: [{ id: "enemy-1", position: { x: 0, y: 0 }, radius: 18, health: 40 }]
     });
     assert.equal(predictedHit.length, 1, "local collision must produce immediate feedback");
-    assert.equal(predictedStore.snapshot().projectiles.length, 0);
+    assert.equal(predictedStore.snapshot().projectiles.length, 0, "a pending hit claim must hide its projectile");
+    predictedStore.applyHitClaimReceipts([
+        { predictionId: predictedHit[0].predictionId, accepted: false, reason: "test-rejection" }
+    ]);
+    assert.equal(predictedStore.snapshot().projectiles.length, 1, "a rejected hit claim must restore the projectile");
+    assert.equal(predictedStore.metrics().predictionCancellations, 1);
+    const retriedHit = predictedStore.update(0, {
+        enemies: [{ id: "enemy-1", position: { x: 0, y: 0 }, radius: 18, health: 40 }]
+    });
+    assert.equal(retriedHit.length, 1);
     const confirmedHit = createPredictableResolveEvent({
         eventId: "event-5",
         objectId: "projectile-server-1",
@@ -215,5 +224,5 @@ export function run() {
         31,
         { enemies: [] }
     );
-    assert.equal(predictedStore.metrics().predictionCancellations, 1);
+    assert.equal(predictedStore.metrics().predictionCancellations, 2);
 }

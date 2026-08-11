@@ -147,6 +147,7 @@ export class MultiplayerGameApp {
         this.applyCheckpointEvents(events);
         this.applyCheckpointClaimReceipts();
         this.applySummitClaimReceipts();
+        this.predictableProjectiles.applyHitClaimReceipts(this.authority.drainHitClaimReceipts());
         this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
         this.combatFeedback.apply(authorityFeedback);

@@ -212,6 +212,8 @@ export async function run() {
         false,
         "duplicate owner receipts must not trigger another correction"
     );
+    fallAuthority.recordHitClaimReceipt({ predictionId: "player-1:42", accepted: false, reason: "test" });
+    assert.equal(fallAuthority.drainHitClaimReceipts()[0].predictionId, "player-1:42");
 
     const checkpointMessages = [];
     const checkpointAuthority = new RemoteGameAuthority({
@@ -342,6 +344,40 @@ export async function run() {
         const impactReceipt = authority.drainImpactClaimReceipts()[0];
         assert.equal(impactReceipt.projectileId, receiptProjectile.id);
         assert.equal(impactReceipt.accepted, true);
+        const hitTarget = room.simulation.enemies[0];
+        const playerProjectile = new ProjectileObject({
+            id: "player-hit-receipt-projectile",
+            ownerId: authority.playerId,
+            targetId: hitTarget.id,
+            predictionId: `${authority.playerId}:hit-receipt`,
+            position: hitTarget.position.clone(),
+            velocity: new Vector2(0, 0),
+            damage: 10,
+            radius: 5
+        });
+        room.simulation.projectiles.push(playerProjectile);
+        const hitTargetHealthBeforeClaim = hitTarget.health;
+        assert.equal(
+            authority.submitHitClaim({
+                predictionId: playerProjectile.predictionId,
+                targetId: hitTarget.id,
+                clientTick: authority.snapshot().owner.tick,
+                position: hitTarget.position
+            }),
+            true
+        );
+        await waitFor(() => authority.hitClaimReceipts.length > 0, "hit claim receipts must reach the attacker");
+        const hitReceipt = authority.drainHitClaimReceipts()[0];
+        assert.equal(hitReceipt.predictionId, playerProjectile.predictionId);
+        assert.equal(hitReceipt.accepted, true);
+        const expectedHitTargetHealth = hitTargetHealthBeforeClaim - playerProjectile.damage;
+        assert.equal(hitTarget.health, expectedHitTargetHealth);
+        await waitFor(
+            () =>
+                authority.snapshot().state.enemies.find(({ id }) => id === hitTarget.id)?.health ===
+                expectedHitTargetHealth,
+            "the attacker must converge on the server enemy health"
+        );
         const rewardCheckpoint = room.simulation.world.checkpoints[1];
         room.simulation.beginArtifactReward(rewardCheckpoint);
         await waitFor(
@@ -377,6 +413,11 @@ export async function run() {
             WebSocketImpl: WebSocket
         });
         await checkpointObserver.connect();
+        assert.equal(
+            checkpointObserver.snapshot().state.enemies.find(({ id }) => id === hitTarget.id)?.health,
+            expectedHitTargetHealth,
+            "a later peer must join with the same confirmed enemy health"
+        );
         authorityPlayer.physics.position.set(rewardCheckpoint.x, rewardCheckpoint.y);
         authorityPlayer.physics.velocity.set(0, 0);
         authority.ownerRuntime.simulation.restoreOwnerPrediction(
