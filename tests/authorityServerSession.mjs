@@ -36,6 +36,22 @@ export function run() {
     const rewardSession = new AuthorityServerSession({ simulation: rewardSimulation });
     const rewardCheckpoint = rewardSimulation.world.checkpoints[1];
     rewardSimulation.beginArtifactReward(rewardCheckpoint);
+    const forgedRewardCommand = {
+        ...command(0),
+        vertical: -1,
+        interact: true
+    };
+    const forgedRewardBatch = createPlayerCommandBatch(rewardSimulation.tick + 1, [
+        { playerId: rewardPlayer.id, sequence: 1, command: forgedRewardCommand }
+    ]);
+    assert.equal(rewardSession.submit(rewardPlayer.id, forgedRewardBatch).accepted.length, 1);
+    rewardSession.advance();
+    assert.equal(
+        rewardSimulation.artifactRewards.has(rewardPlayer.id),
+        true,
+        "scheduled gameplay input must not bypass the artifact selection claim"
+    );
+    assert.equal(rewardPlayer.artifacts.snapshot().length, 0);
     const artifactClaim = createArtifactSelectionClaim({
         checkpointId: rewardCheckpoint.id,
         artifactId: "rapid-gear",
@@ -60,6 +76,18 @@ export function run() {
     );
     assert.equal(conflictingArtifact.accepted, false);
     assert.equal(conflictingArtifact.reason, "selection-conflict");
+
+    const deathSimulation = new GameSimulation();
+    const deathPlayer = primaryPlayer(deathSimulation);
+    deathSimulation.enemies = [];
+    const deathSession = new AuthorityServerSession({ simulation: deathSimulation });
+    deathPlayer.health = 0;
+    deathSession.advance();
+    assert.equal(deathPlayer.health, 0, "the server fixed tick must not initiate a victim-owned death transition");
+    assert.equal(
+        deathSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "player-respawned").length,
+        0
+    );
 
     const checkpointSimulation = new GameSimulation();
     const checkpointPlayer = primaryPlayer(checkpointSimulation);

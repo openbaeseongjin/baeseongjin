@@ -286,7 +286,9 @@ export class AuthorityServerSession {
             recoverPlayerFalls: false,
             resolveCheckpointProgress: false,
             resolveSummitProgress: false,
-            resolvePlayerProjectileHits: false
+            resolvePlayerProjectileHits: false,
+            recoverPlayerDeaths: false,
+            resolveArtifactSelections: false
         });
         const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
