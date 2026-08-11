@@ -348,7 +348,7 @@ export class RemoteGameAuthority {
         }
         const candidate = this.ownerRuntime.checkpointClaimCandidate();
         if (!candidate) return null;
-        this.submitOwnerMotion();
+        if (!this.submitOwnerMotion() || !this.ownerRuntime.applyPredictedCheckpoint(candidate)) return null;
         const claim = createCheckpointClaim(candidate);
         this.pendingCheckpointId = claim.checkpointId;
         this.socket.send(JSON.stringify({ type: "checkpoint-claim", payload: serializeCheckpointClaim(claim) }));
@@ -404,6 +404,7 @@ export class RemoteGameAuthority {
 
     recordCheckpointClaimReceipt(receipt) {
         this.checkpointClaimReceipts.push(receipt);
+        this.ownerRuntime?.recordCheckpointReceipt(receipt, this.latestSnapshot);
         if (!receipt.accepted && receipt.checkpointId === this.pendingCheckpointId) this.pendingCheckpointId = null;
     }
 
@@ -443,6 +444,7 @@ export class RemoteGameAuthority {
             state: this.buffer.sample({ now: this.now(), localPlayerId: this.playerId }),
             predicted: this.ownerRuntime?.presentationState() ?? null,
             owner: this.ownerRuntime?.state() ?? null,
+            ownerArtifactReward: this.ownerRuntime?.artifactReward() ?? null,
             serverTick: this.latestSnapshot?.serverTick ?? null,
             connected: !this.closed
         };

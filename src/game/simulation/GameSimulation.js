@@ -221,6 +221,25 @@ export class GameSimulation {
         this.enemyProjectiles = [];
     }
 
+    synchronizePredictionProgress(playerId, { artifactReward = null, rewardedCheckpointIds = [] } = {}) {
+        this.#requirePlayer(playerId);
+        this.artifactRewards.clear();
+        if (artifactReward) {
+            this.artifactRewards.set(playerId, createArtifactRewardSelection(artifactReward));
+        }
+        this.rewardedCheckpointIds = new Set(rewardedCheckpointIds);
+        return this.getArtifactReward(playerId);
+    }
+
+    predictionProgressState(playerId) {
+        this.#requirePlayer(playerId);
+        return Object.freeze({
+            activeCheckpointId: this.activeCheckpoint?.id ?? null,
+            artifactReward: this.getArtifactReward(playerId),
+            rewardedCheckpointIds: Object.freeze([...this.rewardedCheckpointIds])
+        });
+    }
+
     restoreOwnerPrediction(ownerId, state, serverTick = this.tick) {
         const player = this.#requirePlayer(ownerId);
         this.#restorePlayer(player, state);

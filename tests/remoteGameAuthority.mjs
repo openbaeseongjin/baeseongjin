@@ -6,6 +6,7 @@ import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
+import { createCheckpointClaim, serializeCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
@@ -315,7 +316,9 @@ export async function run() {
             clientTick: 50,
             position: { x: 240, y: 320 },
             feedbackPosition: { x: 240, y: 320 }
-        })
+        }),
+        applyPredictedCheckpoint: () => true,
+        recordCheckpointReceipt: () => true
     };
     const predictedCheckpoint = checkpointAuthority.submitReachedCheckpoint();
     assert.equal(predictedCheckpoint.checkpointId, "checkpoint-test");
@@ -960,6 +963,11 @@ export async function run() {
             rewardCheckpoint.id,
             "the owner must show checkpoint feedback before the server snapshot"
         );
+        assert.equal(
+            authority.renderSnapshot().activeCheckpoint.id,
+            rewardCheckpoint.id,
+            "the owner simulation must use the reached checkpoint before the server snapshot"
+        );
         await waitFor(
             () => room.simulation.activeCheckpoint.id === rewardCheckpoint.id,
             "the checkpoint claim must advance the shared server world"
@@ -976,6 +984,51 @@ export async function run() {
                     eventType === "checkpoint-reached" && checkpointId === rewardCheckpoint.id
             );
         }, "the other client must receive the shared checkpoint event");
+        authority.drainCheckpointClaimReceipts();
+        const rejectedCheckpoint = room.simulation.world.checkpoints[2];
+        const beforeRejectedCheckpoint = authority.ownerRuntime.simulation.playerState(authority.playerId);
+        authority.ownerRuntime.simulation.restoreOwnerPrediction(
+            authority.playerId,
+            {
+                ...beforeRejectedCheckpoint,
+                position: { x: rejectedCheckpoint.x, y: rejectedCheckpoint.y },
+                velocity: { x: 0, y: 0 }
+            },
+            authority.snapshot().owner.tick
+        );
+        const rejectedCheckpointCandidate = authority.ownerRuntime.checkpointClaimCandidate();
+        assert.equal(rejectedCheckpointCandidate.checkpointId, rejectedCheckpoint.id);
+        assert.equal(authority.ownerRuntime.applyPredictedCheckpoint(rejectedCheckpointCandidate), true);
+        authority.pendingCheckpointId = rejectedCheckpoint.id;
+        authority.socket.send(
+            JSON.stringify({
+                type: "checkpoint-claim",
+                payload: serializeCheckpointClaim(
+                    createCheckpointClaim({
+                        ...rejectedCheckpointCandidate,
+                        clientTick: rejectedCheckpointCandidate.clientTick + 1000
+                    })
+                )
+            })
+        );
+        assert.equal(authority.renderSnapshot().activeCheckpoint.id, rejectedCheckpoint.id);
+        await waitFor(
+            () => authority.checkpointClaimReceipts.length > 0,
+            "the server must reject a checkpoint without matching owner motion"
+        );
+        const rejectedCheckpointReceipt = authority.drainCheckpointClaimReceipts()[0];
+        assert.equal(rejectedCheckpointReceipt.accepted, false);
+        assert.equal(rejectedCheckpointReceipt.reason, "tick-window");
+        assert.equal(
+            authority.renderSnapshot().activeCheckpoint.id,
+            rewardCheckpoint.id,
+            "a rejected checkpoint must restore the shared progress origin"
+        );
+        authority.ownerRuntime.simulation.restoreOwnerPrediction(
+            authority.playerId,
+            room.simulation.playerState(authority.playerId),
+            authority.snapshot().owner.tick
+        );
         checkpointObserver.close();
         const ownerBeforeAttach = authority.snapshot().owner;
         const anchor = nearestRopeAnchor(authority.renderSnapshot().world, ownerBeforeAttach.position);
