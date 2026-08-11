@@ -51,6 +51,7 @@ export class MultiplayerGameApp {
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback();
         this.checkpointFeedback = null;
+        this.localRunCompleted = false;
         this.localArtifactReward = null;
         this.pendingArtifactSelection = null;
         this.runner = new FixedStepRunner({ step: (dt, input) => this.update(dt, input), render: () => this.render() });
@@ -116,6 +117,12 @@ export class MultiplayerGameApp {
         }
     }
 
+    applySummitClaimReceipts() {
+        for (const receipt of this.authority.drainSummitClaimReceipts()) {
+            if (!receipt.accepted) this.localRunCompleted = false;
+        }
+    }
+
     updateCheckpointFeedback(dt) {
         if (!this.checkpointFeedback) return;
         this.checkpointFeedback.age += dt;
@@ -139,9 +146,16 @@ export class MultiplayerGameApp {
         const events = this.authority.drainEvents();
         this.applyCheckpointEvents(events);
         this.applyCheckpointClaimReceipts();
+        this.applySummitClaimReceipts();
         this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
         this.combatFeedback.apply(authorityFeedback);
+        if (current.state.runState === "completed") this.localRunCompleted = false;
+        if (this.localRunCompleted || current.state.runState === "completed") {
+            this.combatFeedback.update(dt);
+            this.updateCheckpointFeedback(dt);
+            return;
+        }
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
         const authoritativeReward = current.state.artifactRewards?.[this.authority.playerId] ?? null;
@@ -171,6 +185,10 @@ export class MultiplayerGameApp {
                 checkpointId: checkpointClaim.checkpointId,
                 position: checkpointClaim.feedbackPosition
             });
+        }
+        if (this.authority.submitReachedSummit()) {
+            this.localRunCompleted = true;
+            return;
         }
         this.authority.resolveOwnerCollisions(
             current.state.players.filter(({ id }) => id !== this.authority.playerId),
@@ -252,7 +270,7 @@ export class MultiplayerGameApp {
             ropeDamageBoostRemaining: localState.ropeDamageBoostRemaining,
             activeCheckpoint,
             artifactReward: this.localArtifactReward,
-            runState: remote.state.runState,
+            runState: this.localRunCompleted ? "completed" : remote.state.runState,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
             camera: this.camera,
             stats: this.stats,

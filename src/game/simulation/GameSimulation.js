@@ -362,7 +362,11 @@ export class GameSimulation {
         return this.stepPlayers(dt, new Map([[this.#primaryPlayerId, command]]));
     }
 
-    stepCommandBatch(dt, batch, { recoverPlayerFalls = true, resolveCheckpointProgress = true } = {}) {
+    stepCommandBatch(
+        dt,
+        batch,
+        { recoverPlayerFalls = true, resolveCheckpointProgress = true, resolveSummitProgress = true } = {}
+    ) {
         const expectedTick = this.tick + 1;
         if (batch.tick !== expectedTick) throw new Error(`command batch tick ${batch.tick} must equal ${expectedTick}`);
         const playersById = new Map(this.players.map((player) => [player.id, player]));
@@ -371,19 +375,24 @@ export class GameSimulation {
             if (!playersById.has(entry.playerId)) throw new Error(`unknown playerId: ${entry.playerId}`);
             commandsByPlayerId.set(entry.playerId, entry.command);
         }
-        return this.stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls, resolveCheckpointProgress });
+        return this.stepPlayers(dt, commandsByPlayerId, {
+            recoverPlayerFalls,
+            resolveCheckpointProgress,
+            resolveSummitProgress
+        });
     }
 
-    stepPlayers(dt, commandsByPlayerId, { recoverPlayerFalls = true, resolveCheckpointProgress = true } = {}) {
+    stepPlayers(
+        dt,
+        commandsByPlayerId,
+        { recoverPlayerFalls = true, resolveCheckpointProgress = true, resolveSummitProgress = true } = {}
+    ) {
         this.tick += 1;
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
             return;
         }
-        if (this.#primaryPlayer().physics.position.distanceTo(this.world.summit) <= this.world.summit.radius) {
-            this.beginCompletion();
-            return;
-        }
+        if (resolveSummitProgress && this.updateSummitProgress()) return;
         if (resolveCheckpointProgress) this.updateCheckpointProgress();
         const choosingRewardPlayerIds = new Set(this.artifactRewards.keys());
         this.updateArtifactRewards(commandsByPlayerId);
@@ -550,6 +559,43 @@ export class GameSimulation {
             if (!player) continue;
             this.#activateCheckpoint(checkpoint, player.id);
         }
+    }
+
+    updateSummitProgress() {
+        const player = this.players.find(
+            (candidate) =>
+                candidate.lifeState === "active" &&
+                candidate.physics.position.distanceTo(this.world.summit) <= this.world.summit.radius
+        );
+        return player ? this.beginCompletion(player.id) : false;
+    }
+
+    summitClaimCandidate(playerId) {
+        if (this.runState !== "playing") return null;
+        const player = this.players.find(({ id }) => id === playerId);
+        if (!player || player.lifeState !== "active") return null;
+        return player.physics.position.distanceTo(this.world.summit) <= this.world.summit.radius
+            ? this.world.summit
+            : null;
+    }
+
+    resolveSummitClaim(playerId, claim, { positionTolerance = 40 } = {}) {
+        if (this.runState !== "playing") return Object.freeze({ accepted: false, reason: "run-inactive" });
+        const player = this.players.find(({ id }) => id === playerId);
+        if (!player || player.lifeState !== "active") {
+            return Object.freeze({ accepted: false, reason: "player-ineligible" });
+        }
+        if (
+            Math.hypot(claim.position.x - this.world.summit.x, claim.position.y - this.world.summit.y) >
+            this.world.summit.radius
+        ) {
+            return Object.freeze({ accepted: false, reason: "summit-out-of-range" });
+        }
+        if (player.physics.position.distanceTo(claim.position) > positionTolerance) {
+            return Object.freeze({ accepted: false, reason: "owner-state-mismatch" });
+        }
+        this.beginCompletion(playerId);
+        return Object.freeze({ accepted: true, resolution: "run-completed" });
     }
 
     checkpointClaimCandidate(playerId) {
@@ -897,13 +943,21 @@ export class GameSimulation {
         return true;
     }
 
-    beginCompletion() {
-        if (this.runState !== "playing") return;
+    beginCompletion(playerId = this.#primaryPlayerId) {
+        if (this.runState !== "playing") return false;
+        const player = this.#findPlayer(playerId);
+        if (!player || player.lifeState !== "active") return false;
         this.runState = "completed";
-        const player = this.#primaryPlayer();
-        player.ropeObject.rope.detach();
-        player.ropeObject.swingDrag = null;
-        this.eventFlash = { type: "completed", age: 0, position: this.world.summit };
+        for (const current of this.players) {
+            current.ropeObject.rope.detach();
+            current.ropeObject.swingDrag = null;
+        }
+        this.eventFlash = { type: "completed", age: 0, playerId, position: this.world.summit };
+        this.recordReplicationEvent("run-completed", {
+            playerId,
+            position: { x: this.world.summit.x, y: this.world.summit.y }
+        });
+        return true;
     }
 
     snapshot() {

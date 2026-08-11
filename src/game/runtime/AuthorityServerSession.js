@@ -6,6 +6,7 @@ import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
+import { createSummitClaimReceipt } from "../network/SummitClaim.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
 function assertPositive(value, label) {
@@ -37,6 +38,7 @@ export class AuthorityServerSession {
         this.resolvedImpactClaims = new Map();
         this.resolvedArtifactSelections = new Map();
         this.resolvedCheckpointClaims = new Map();
+        this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
         this.lastOwnerRopeTicks = new Map();
     }
@@ -156,6 +158,25 @@ export class AuthorityServerSession {
         return receipt;
     }
 
+    submitSummitClaim(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        if (this.resolvedSummitClaim) return this.resolvedSummitClaim;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return createSummitClaimReceipt({ accepted: false, reason: "tick-window" });
+        }
+        const receipt = createSummitClaimReceipt(
+            this.simulation.resolveSummitClaim(authenticatedPlayerId, claim, {
+                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+            })
+        );
+        if (receipt.accepted) this.resolvedSummitClaim = receipt;
+        return receipt;
+    }
+
     submitOwnerMotion(authenticatedPlayerId, state) {
         const player = this.simulation.playerState(authenticatedPlayerId);
         if (!player) throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
@@ -167,6 +188,9 @@ export class AuthorityServerSession {
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
         if (state.clientTick < minimumTick || state.clientTick > maximumTick) {
             return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: false, reason: "tick-window" });
+        }
+        if (this.simulation.runState !== "playing") {
+            return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: false, reason: "run-inactive" });
         }
         const previousRopeTick = this.lastOwnerRopeTicks.get(authenticatedPlayerId) ?? -1;
         const ropeReleased = !state.rope.isAttached && state.clientTick > previousRopeTick && player.rope.isAttached;
@@ -255,7 +279,8 @@ export class AuthorityServerSession {
         const commands = this.inputState.expand(this.inbox.take(nextTick), this.simulation.playerIds());
         this.simulation.stepCommandBatch(this.fixedDt, commands, {
             recoverPlayerFalls: false,
-            resolveCheckpointProgress: false
+            resolveCheckpointProgress: false,
+            resolveSummitProgress: false
         });
         const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
