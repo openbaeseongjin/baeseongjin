@@ -126,6 +126,129 @@ export function run() {
         "victim prediction must suppress repeated local hit claims before the next server snapshot"
     );
 
+    const acceptedBodyImpact = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
+    acceptedBodyImpact.reconcile(snapshot, []);
+    const bodyImpact = {
+        projectileId: "accepted-body-impact",
+        resolution: "player-hit",
+        velocity: { x: 120, y: 0 },
+        parameters: { damage: 17 }
+    };
+    assert.equal(acceptedBodyImpact.applyPredictedImpact(bodyImpact), true);
+    const predictedBodyHealth = acceptedBodyImpact.state().health;
+    assert.equal(
+        acceptedBodyImpact.recordImpactReceipt({
+            projectileId: bodyImpact.projectileId,
+            accepted: true,
+            resolution: bodyImpact.resolution,
+            damage: bodyImpact.parameters.damage
+        }),
+        true
+    );
+    acceptedBodyImpact.reconcile(snapshot, []);
+    assert.equal(
+        acceptedBodyImpact.state().health,
+        predictedBodyHealth,
+        "an accepted receipt must not let a pre-impact snapshot heal predicted damage"
+    );
+    const confirmedBodySnapshot = {
+        ...snapshot,
+        serverTick: snapshot.serverTick + 1,
+        state: {
+            ...snapshot.state,
+            players: snapshot.state.players.map((player) =>
+                player.id === serverPlayer.id
+                    ? {
+                          ...player,
+                          health: predictedBodyHealth,
+                          hitInvulnerabilityRemaining: acceptedBodyImpact.state().hitInvulnerabilityRemaining
+                      }
+                    : player
+            )
+        },
+        events: [
+            {
+                eventId: "accepted-body-impact-resolution",
+                eventType: "resolve",
+                objectId: bodyImpact.projectileId,
+                tick: snapshot.serverTick + 1,
+                resolution: bodyImpact.resolution,
+                position: { x: 0, y: 0 },
+                parameters: { damage: bodyImpact.parameters.damage }
+            }
+        ]
+    };
+    acceptedBodyImpact.reconcile(confirmedBodySnapshot, []);
+    assert.equal(acceptedBodyImpact.pendingImpacts.size, 0, "the authority resolve event must settle the body impact");
+    assert.equal(acceptedBodyImpact.state().health, predictedBodyHealth);
+    acceptedBodyImpact.reconcile({ ...snapshot, serverTick: snapshot.serverTick + 2 }, []);
+    assert.equal(
+        acceptedBodyImpact.state().health,
+        predictedBodyHealth,
+        "later shared snapshots must not overwrite client-owned health"
+    );
+
+    const acceptedRopeImpact = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
+    acceptedRopeImpact.reconcile(snapshot, []);
+    const ropeImpact = {
+        projectileId: "accepted-rope-impact",
+        resolution: "rope-cut",
+        velocity: { x: 0, y: -120 },
+        parameters: { damage: 0 }
+    };
+    assert.equal(acceptedRopeImpact.applyPredictedImpact(ropeImpact), true);
+    assert.equal(
+        acceptedRopeImpact.recordImpactReceipt({
+            projectileId: ropeImpact.projectileId,
+            accepted: true,
+            resolution: ropeImpact.resolution,
+            damage: 0
+        }),
+        true
+    );
+    acceptedRopeImpact.reconcile(snapshot, [], { rebaseMotion: true });
+    assert.equal(
+        acceptedRopeImpact.state().rope.isAttached,
+        false,
+        "an accepted receipt must keep a predicted rope cut through a stale motion rebase"
+    );
+    const confirmedRopeSnapshot = {
+        ...snapshot,
+        serverTick: snapshot.serverTick + 1,
+        state: {
+            ...snapshot.state,
+            players: snapshot.state.players.map((player) =>
+                player.id === serverPlayer.id
+                    ? {
+                          ...player,
+                          rope: { ...player.rope, isAttached: false, anchor: null },
+                          ropeDisabledRemaining: acceptedRopeImpact.state().ropeDisabledRemaining
+                      }
+                    : player
+            )
+        },
+        events: [
+            {
+                eventId: "accepted-rope-impact-resolution",
+                eventType: "resolve",
+                objectId: ropeImpact.projectileId,
+                tick: snapshot.serverTick + 1,
+                resolution: ropeImpact.resolution,
+                position: { x: 0, y: 0 },
+                parameters: {}
+            }
+        ]
+    };
+    acceptedRopeImpact.reconcile(confirmedRopeSnapshot, []);
+    assert.equal(acceptedRopeImpact.pendingImpacts.size, 0, "the authority resolve event must settle the rope impact");
+    assert.equal(acceptedRopeImpact.state().rope.isAttached, false);
+    acceptedRopeImpact.reconcile({ ...snapshot, serverTick: snapshot.serverTick + 2 }, []);
+    assert.equal(
+        acceptedRopeImpact.state().rope.isAttached,
+        false,
+        "later shared snapshots must not overwrite the client-owned rope result"
+    );
+
     const overlappingImpacts = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
     overlappingImpacts.reconcile(snapshot, []);
     const overlapBaseline = overlappingImpacts.simulation.playerState(serverPlayer.id);
@@ -499,7 +622,9 @@ export function run() {
     respawnPredictor.reconcile(movingSnapshot, []);
     for (let tick = 0; tick < 12; tick += 1) respawnPredictor.advance(move);
     const respawnPosition = movingServer.world.checkpoints[0];
+    const locallyRespawned = respawnPredictor.predictFall();
     const respawnTick = respawnPredictor.state().tick + 1;
+    const sharedRespawnPosition = { x: respawnPosition.x + 24, y: respawnPosition.y };
     const respawnSnapshot = {
         ...movingSnapshot,
         serverTick: respawnTick,
@@ -509,7 +634,7 @@ export function run() {
                 player.id === movingPlayer.id
                     ? {
                           ...player,
-                          position: { x: respawnPosition.x, y: respawnPosition.y },
+                          position: sharedRespawnPosition,
                           velocity: { x: 0, y: 0 },
                           isGrounded: false,
                           rope: { ...player.rope, isAttached: false, anchor: null }
@@ -526,14 +651,14 @@ export function run() {
                 reason: "fall",
                 health: movingPlayer.maxHealth,
                 artifactIds: [],
-                position: { x: respawnPosition.x, y: respawnPosition.y }
+                position: sharedRespawnPosition
             }
         ]
     };
     const respawned = respawnPredictor.reconcile(respawnSnapshot, []);
-    assert.deepEqual(respawned.position, { x: respawnPosition.x, y: respawnPosition.y });
-    assert.deepEqual(respawned.velocity, { x: 0, y: 0 });
-    assert.equal(respawned.rope.isAttached, false, "a confirmed fall must restore the checkpoint transition");
+    assert.deepEqual(respawned.position, locallyRespawned.position, "shared fall confirmation must not move the owner");
+    assert.deepEqual(respawned.velocity, locallyRespawned.velocity);
+    assert.equal(respawned.rope.isAttached, false, "a confirmed fall must keep the local checkpoint transition");
 
     const predictedCheckpoint = movingServer.world.checkpoints[1];
     const predictedFall = new OwnerPredictionRuntime({ ownerId: movingPlayer.id, predictionLeadTicks: 0 });

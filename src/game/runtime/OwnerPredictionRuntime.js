@@ -113,9 +113,9 @@ export class OwnerPredictionRuntime {
     reconcile(snapshot, pendingBatches, { rebaseMotion = false } = {}) {
         if (snapshot.worldSeed !== this.simulation.world.seed) throw new Error("prediction world seed mismatch");
         if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
-        const authoritative = snapshot.state.players.find(({ id }) => id === this.ownerId);
-        if (!authoritative) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
-        const ownerMotionTick = authoritative.ownerMotionTick;
+        const sharedOwner = snapshot.state.players.find(({ id }) => id === this.ownerId);
+        if (!sharedOwner) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
+        const ownerMotionTick = sharedOwner.ownerMotionTick;
         if (
             !Number.isSafeInteger(ownerMotionTick) ||
             ownerMotionTick < 0 ||
@@ -123,6 +123,7 @@ export class OwnerPredictionRuntime {
         ) {
             throw new Error(`invalid ownerMotionTick: ${ownerMotionTick}`);
         }
+        this.confirmResolvedImpacts(snapshot.events);
         const pendingTicks = pendingBatches.map(({ tick }) => tick);
         const targetTick = Math.max(
             snapshot.serverTick + this.predictionLeadTicks,
@@ -131,15 +132,12 @@ export class OwnerPredictionRuntime {
             ...pendingTicks
         );
         if (this.initialized && !rebaseMotion) {
-            return this.acceptAuthorityOutcomes(snapshot, authoritative, targetTick, ownerMotionTick);
+            return this.acceptSharedOutcomes(snapshot, sharedOwner, targetTick, ownerMotionTick);
         }
         const displayedBefore = this.initialized ? this.presentationState() : null;
-        const lifeStateChanged = this.initialized && this.state().lifeState !== authoritative.lifeState;
-        const respawned = snapshot.events.some(
-            ({ eventType, playerId }) => eventType === "player-respawned" && playerId === this.ownerId
-        );
+        const lifeStateChanged = this.initialized && this.state().lifeState !== sharedOwner.lifeState;
         this.prepareSnapshot(snapshot);
-        this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, ownerMotionTick);
+        this.simulation.restoreOwnerPrediction(this.ownerId, sharedOwner, ownerMotionTick);
         if (this.pendingCheckpoint) this.simulation.releasePlayerRope(this.ownerId);
         this.initialized = true;
 
@@ -156,18 +154,11 @@ export class OwnerPredictionRuntime {
             .sort((left, right) => left.tick - right.tick || left.order - right.order);
         this.replayInputs(ownerMotionTick, targetTick, batchesByTick, pendingImpacts);
         const corrected = this.state();
-        if (displayedBefore)
-            this.startPresentationCorrection(displayedBefore, corrected, respawned || lifeStateChanged);
+        if (displayedBefore) this.startPresentationCorrection(displayedBefore, corrected, lifeStateChanged);
         return corrected;
     }
 
-    acceptAuthorityOutcomes(snapshot, authoritative, targetTick, ownerMotionTick) {
-        const current = this.state();
-        const respawned = snapshot.events.some(
-            ({ eventType, playerId }) => eventType === "player-respawned" && playerId === this.ownerId
-        );
-        const authorityTransition = respawned || current.lifeState !== authoritative.lifeState;
-        const displayedBefore = authorityTransition ? this.presentationState() : null;
+    acceptSharedOutcomes(snapshot, sharedOwner, targetTick, ownerMotionTick) {
         this.prepareSnapshot(snapshot);
         for (const tick of this.inputHistory.keys()) {
             if (tick <= ownerMotionTick) this.inputHistory.delete(tick);
@@ -175,17 +166,9 @@ export class OwnerPredictionRuntime {
         for (const [predictionId, tick] of this.emittedPredictionTicks) {
             if (tick <= ownerMotionTick) this.emittedPredictionTicks.delete(predictionId);
         }
-        if (respawned) {
-            const restored = this.simulation.restoreOwnerPrediction(this.ownerId, authoritative, targetTick);
-            this.startPresentationCorrection(displayedBefore, restored, true);
-            return this.state();
-        }
-        const outcome = this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
-            preserveRopeBoost: this.pendingRopeSwings.size > 0,
-            preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0,
-            preserveImpactPrediction: this.pendingImpacts.size > 0
+        this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
+            preservePendingImpact: this.pendingImpacts.size > 0
         });
-        if (outcome.lifeStateChanged) this.startPresentationCorrection(displayedBefore, outcome.state);
         return this.state();
     }
 
@@ -298,17 +281,30 @@ export class OwnerPredictionRuntime {
                 before,
                 tick,
                 order: this.nextImpactPredictionOrder++,
+                status: "pending",
                 event: copyPredictedImpact(event)
             });
         }
         return applied;
     }
 
+    confirmResolvedImpacts(events) {
+        for (const event of events ?? []) {
+            if (event.eventType !== "resolve") continue;
+            const pending = this.pendingImpacts.get(event.objectId);
+            if (!pending || pending.status !== "accepted" || pending.event.resolution !== event.resolution) continue;
+            this.pendingImpacts.delete(event.objectId);
+        }
+    }
+
     recordImpactReceipt(receipt, snapshot = null) {
         const pending = this.pendingImpacts.get(receipt.projectileId);
         if (!pending) return false;
+        if (receipt.accepted) {
+            pending.status = "accepted";
+            return true;
+        }
         this.pendingImpacts.delete(receipt.projectileId);
-        if (receipt.accepted) return true;
 
         const displayedBefore = this.presentationState();
         const targetTick = this.simulation.getTick();
@@ -321,12 +317,10 @@ export class OwnerPredictionRuntime {
         this.simulation.restoreOwnerPrediction(this.ownerId, pending.before, pending.tick);
         this.replayInputs(pending.tick, targetTick, new Map(), laterPendingImpacts);
 
-        const authoritative = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
-        if (authoritative) {
-            this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
-                preserveRopeBoost: this.pendingRopeSwings.size > 0,
-                preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0,
-                preserveImpactPrediction: this.pendingImpacts.size > 0
+        const sharedOwner = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
+        if (sharedOwner) {
+            this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
+                preservePendingImpact: this.pendingImpacts.size > 0
             });
         }
         const corrected = this.state();
@@ -382,12 +376,10 @@ export class OwnerPredictionRuntime {
             .sort((left, right) => left.tick - right.tick || left.order - right.order);
         this.replayInputs(pending.tick, targetTick, new Map(), pendingImpacts);
 
-        const authoritative = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
-        if (authoritative) {
-            this.simulation.applyOwnerPredictionOutcomes(this.ownerId, authoritative, targetTick, {
-                preserveRopeBoost: this.pendingRopeSwings.size > 0,
-                preserveWeaponCooldown: this.pendingProjectileSpawns.size > 0,
-                preserveImpactPrediction: this.pendingImpacts.size > 0
+        const sharedOwner = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
+        if (sharedOwner) {
+            this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
+                preservePendingImpact: this.pendingImpacts.size > 0
             });
         }
         this.startPresentationCorrection(displayedBefore, this.state());

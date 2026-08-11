@@ -247,38 +247,18 @@ export class GameSimulation {
         return this.ownerPredictionState(ownerId);
     }
 
-    applyOwnerPredictionOutcomes(
-        ownerId,
-        authoritative,
-        predictionTick,
-        { preserveRopeBoost = false, preserveWeaponCooldown = false, preserveImpactPrediction = false } = {}
-    ) {
+    applySharedOwnerProgress(ownerId, shared, predictionTick, { preservePendingImpact = false } = {}) {
         const player = this.#requirePlayer(ownerId);
-        const lifeStateChanged = !preserveImpactPrediction && player.lifeState !== authoritative.lifeState;
-        if (!preserveImpactPrediction) {
-            player.health = authoritative.health;
-            player.maxHealth = authoritative.maxHealth;
-            player.hitInvulnerabilityRemaining = Math.max(
-                player.hitInvulnerabilityRemaining,
-                authoritative.hitInvulnerabilityRemaining
-            );
-            player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, authoritative.ropeDisabledRemaining);
-            player.lifeState = authoritative.lifeState;
-            player.weapon.range = authoritative.weapon.range;
-            player.weapon.damage = authoritative.weapon.damage;
-            player.weapon.fireInterval = authoritative.weapon.fireInterval;
-            if (!preserveWeaponCooldown) player.weapon.cooldown = authoritative.weapon.cooldown;
-            player.artifacts.replace(authoritative.artifacts);
-            if (!preserveRopeBoost) player.ropeDamageBoostRemaining = authoritative.ropeDamageBoostRemaining;
-            player.lastCheckpointLoss = [...authoritative.lastCheckpointLoss];
+        if (!preservePendingImpact) {
+            player.maxHealth = shared.maxHealth;
+            player.weapon.range = shared.weapon.range;
+            player.weapon.damage = shared.weapon.damage;
+            player.weapon.fireInterval = shared.weapon.fireInterval;
+            player.artifacts.replace(shared.artifacts);
             this.applyArtifactEffects(player);
-            if (authoritative.ropeDisabledRemaining > 0) this.releasePlayerRope(ownerId);
-        }
-        if (lifeStateChanged) {
-            this.#restorePlayer(player, authoritative);
         }
         this.tick = Math.max(this.tick, predictionTick);
-        return { lifeStateChanged, state: this.ownerPredictionState(ownerId) };
+        return this.ownerPredictionState(ownerId);
     }
 
     advanceOwnerPrediction(ownerId, command, dt, tick) {
