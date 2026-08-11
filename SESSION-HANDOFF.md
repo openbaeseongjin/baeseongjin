@@ -21,6 +21,7 @@
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
 - 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용
+- 별도 Discord 서비스는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
 - 고정 게임 서버의 4자리 채널 생성·참가, 채널별 독립 월드와 2인 서버 권위 동기화
 - 120Hz 권위 틱, 20Hz 스냅샷, 자기 예측·동료 보간과 투사체 사건 재생
 - 플레이어 간 원형 몸체 충돌과 실제 접속자 ID를 소유하는 로컬 예측 시뮬레이션
@@ -173,6 +174,13 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 
 - 루트 `index.html`을 진입점으로 사용하고 별도 빌드 workflow를 두지 않는다.
 - PWA는 게임 저장 데이터를 삭제하지 않으며, 현재는 오프라인 캐시보다 최신 리소스 적용을 우선한다.
+
+### [L2] Discord의 Codex 호출은 허용 목록 기반 읽기 전용 기획으로 시작한다
+
+- `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
+- Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan` Skill만 선택할 수 있다.
+- Codex CLI는 `read-only`, `ephemeral`로 실행하고 로컬 Ollama는 고정 loopback API와 허용 Skill만 사용한다. 두 경로 모두 구조화 출력을 검증하고 애플리케이션 비밀을 전달하지 않는다.
+- 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.
 
 ## 갱신 규칙
 

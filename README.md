@@ -54,3 +54,9 @@ npm run validate:world
 - [재사용 가능한 기반](docs/reusable-game-resources.md) — 공용 게임 기반과 재사용 정책
 - [구현 로드맵](docs/implementation-roadmap.md) — 현재 구현 상태, 다음 게임성 우선순위와 완료 기준
 - [두 기기 협동 플레이테스트](docs/two-device-playtest-protocol.md) — 실제 기기 한 세션의 실행 순서, 기록 양식과 판정 기준
+
+## Discord 회의록 봇
+
+`services/meeting-bot/`은 `/meeting start`와 `/meeting end` 사이의 Discord 텍스트·음성 회의를 기록하고, 무료 로컬 Whisper로 음성을 전사해 구조화 회의록을 게시한다. 자동 예약 시작은 하지 않으며, 모호한 아이디어를 `DECISIONS.md`나 `TASKS.md`로 자동 승격하지 않는다.
+
+Discord 설정, 무료 로컬 전사, 최소 GitHub 권한, 실행·배포 절차와 DAVE 음성 수신 제약은 [회의록 봇 README](services/meeting-bot/README.md)를 참고한다.

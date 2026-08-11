@@ -17,6 +17,10 @@ service-account*.json
 .agents/skills/*
 !.agents/skills/github-task-flow/
 !.agents/skills/github-task-flow/**
+!.agents/skills/meeting-to-game-plan/
+!.agents/skills/meeting-to-game-plan/**
+!.agents/skills/repo-task-plan/
+!.agents/skills/repo-task-plan/**
 
 # JavaScript / TypeScript
 node_modules/
@@ -24,6 +28,7 @@ dist/
 build/
 .next/
 coverage/
+services/meeting-bot/.data/
 
 # Python
 __pycache__/
