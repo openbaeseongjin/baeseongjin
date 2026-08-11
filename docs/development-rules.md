@@ -275,9 +275,13 @@ git diff --check
 ## 13. Git 운영
 
 - `main` 변경은 짧은 브랜치와 PR을 기본으로 한다.
+- 모든 PR은 병합 직전에 `git fetch origin main`과 `git rebase origin/main`으로 전용 작업 브랜치를 최신 `main` 위에 올린다. 검증 뒤 `origin/main`이 다시 전진했으면 리베이스와 검증을 반복한다.
+- 최종 리베이스 뒤 필수 검사를 모두 다시 실행하고, `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다. 충돌은 작업 브랜치에서만 해결하며 PR이 mergeable인지 다시 확인한다.
+- 이미 push한 단일 소유 전용 작업 브랜치의 리베이스 결과만 `git push --force-with-lease`로 갱신할 수 있다. `--force`는 사용하지 않는다.
+- `main`을 rebase, reset 또는 force-push하지 않는다. 공유 브랜치이거나 단일 소유 여부를 증명할 수 없는 브랜치는 재작성하지 말고 소유자와 조정할 때까지 병합을 중단한다.
+- 브랜치 리베이스는 PR 병합 방식과 구분한다. 별도 결정이 없으면 최신 `main`에 리베이스한 브랜치를 일반 merge commit으로 병합하며 squash merge와 rebase merge를 사용하지 않는다.
 - 관련 없는 파일을 한 커밋에 섞지 않는다.
 - 커밋 전 staged diff와 포함 파일을 확인한다.
-- 공유 이력을 강제로 재작성하지 않는다.
 - 생성물, 로컬 로그, `.omx/`, 비밀 파일은 추적하지 않는다.
 - 커밋 메시지는 변경 내용보다 변경 이유를 먼저 설명하고 저장소의 Lore trailer 규칙을 따른다.
 

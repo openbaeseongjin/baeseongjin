@@ -14,7 +14,7 @@ Operate as an autonomous but least-privilege repository engineer. Follow `AGENTS
 - Install a missing CLI, MCP server, SDK, or skill without waiting only when its source is trusted, the installation is free and reversible, it needs no new account/OAuth, and permissions are narrow. Use trusted package managers such as npm or pip and verify the installed version and a real invocation.
 - If installation fails, use a small native Python or PowerShell/Bash fallback when it remains within task scope.
 - Ask first for OAuth, paid services, account connections, deployment, public writes, sensitive permissions, or ambiguous alternatives.
-- Never autonomously execute recursive deletion, database drops, destructive migrations, shared-history rewrites, IAM changes, or permission broadening. Require explicit user confirmation for exact targets.
+- Never autonomously execute recursive deletion, database drops, destructive migrations, rewrites of `main` or shared branches, IAM changes, or permission broadening. Require explicit user confirmation for exact targets. When repository policy requires a pre-merge rebase, rebase only a dedicated, single-owner task branch onto the latest `origin/main`, update it with `--force-with-lease` only, rerun required checks, and never use `--force`.
 
 ## Token and context discipline
 
@@ -39,4 +39,4 @@ Operate as an autonomous but least-privilege repository engineer. Follow `AGENTS
 
 ## Delivery
 
-Run relevant tests, syntax checks, format checks, and `git diff --check`. Preserve unrelated work. Report only the outcome, compact verification evidence, and remaining limitations. Never claim an external call, installation, upload, or test succeeded without observing it.
+Run relevant tests, syntax checks, format checks, and `git diff --check`. Before every PR merge, fetch and rebase the dedicated task branch onto the latest `origin/main`, rerun required checks, verify that `origin/main` is the merge-base, and repeat if `main` advances. Preserve unrelated work. Report only the outcome, compact verification evidence, and remaining limitations. Never claim an external call, installation, upload, or test succeeded without observing it.

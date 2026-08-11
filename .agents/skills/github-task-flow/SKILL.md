@@ -1,6 +1,6 @@
 ---
 name: github-task-flow
-description: "`$github-task-flow` 호출만으로 GitHub CLI 설치·웹 인증·쓰기 권한 점검을 자동 준비하고, 현재 작업을 GitHub Issue로 기록한 뒤 이슈 번호 기반 브랜치, 단일 Lore 커밋, push, pull request, 필수 검사 확인, 일반 merge commit과 이슈 종료까지 수행한다. GitHub 쓰기 환경이 아직 구성되지 않았거나 팀원이 별도 설명 없이 현재 작업의 커밋과 브랜치 계보를 보존해 main에 병합하려 할 때 사용한다."
+description: "`$github-task-flow` 호출만으로 GitHub CLI 설치·웹 인증·쓰기 권한 점검을 자동 준비하고, 현재 작업을 GitHub Issue로 기록한 뒤 이슈 번호 기반 브랜치, 단일 Lore 커밋, push, pull request, 최신 origin/main rebase와 재검증, 일반 merge commit과 이슈 종료까지 수행한다. GitHub 쓰기 환경이 아직 구성되지 않았거나 팀원이 별도 설명 없이 현재 작업의 커밋과 브랜치 계보를 보존해 main에 병합하려 할 때 사용한다."
 ---
 
 # GitHub Task Flow
@@ -21,12 +21,13 @@ GitHub Issue를 작업의 기준 이력으로 삼고 PR을 통해 단일 커밋�
 
 - GitHub Issue를 브랜치와 커밋보다 먼저 생성한다.
 - 브랜치 이름은 `issue/<issue-number>-<short-slug>`를 사용한다.
-- 작업 브랜치는 `origin/main` 최신 상태에서 만든다.
+- 작업 브랜치는 `origin/main` 최신 상태에서 만들고 병합 직전에 최신 `origin/main` 위로 다시 rebase한다.
 - 한 작업은 한 브랜치, 한 PR, 한 최종 커밋으로 유지한다.
 - PR은 일반 merge commit으로 병합해 Lore 커밋 SHA와 브랜치 계보를 `main`에 보존한다.
 - `main`에 직접 push하거나 로컬 merge하지 않는다.
 - 사용자가 명시적으로 요청하지 않는 한 squash merge와 rebase merge를 사용하지 않는다.
-- force push, 보호 규칙 우회, 필수 검사 우회를 하지 않는다.
+- `main`과 공유 브랜치의 이력을 재작성하지 않는다. 이미 push한 단일 소유 전용 작업 브랜치의 필수 rebase 결과만 `--force-with-lease`로 갱신하고 `--force`는 사용하지 않는다.
+- 보호 규칙과 필수 검사를 우회하지 않는다.
 - 관련 없는 변경을 커밋에 포함하지 않는다.
 - 저장소의 `AGENTS.md`, CODEOWNERS, PR 템플릿, 커밋 규칙을 우선 적용한다.
 
@@ -153,7 +154,7 @@ Not-tested: <남은 검증 또는 None>
 
 - push 전 `origin/main..HEAD` 커밋 수가 정확히 1인지 확인한다.
 - 둘 이상이면 아직 공유되지 않은 로컬 커밋만 기준 커밋 위로 합친다.
-- 이미 push됐거나 다른 사람이 사용하는 브랜치의 기록은 재작성하지 않고 blocker를 보고한다.
+- 이미 push한 브랜치의 기록은 7절의 필수 rebase를 제외하고 재작성하지 않는다. 다른 사람이 사용하는 브랜치는 예외 없이 blocker를 보고한다.
 
 ## 6. Push와 Pull Request
 
@@ -163,7 +164,20 @@ Not-tested: <남은 검증 또는 None>
 4. PR URL과 연결된 Issue 번호를 확인한다.
 5. CODEOWNERS 승인과 필수 검사 상태를 확인한다.
 
-## 7. Merge와 정리
+## 7. 최신 main rebase와 재검증
+
+1. PR 검사와 승인이 준비되면 `git fetch origin main`을 실행하고 현재 `origin/main` SHA를 기록한다.
+2. 현재 브랜치가 Issue 전용 단일 소유 브랜치인지 확인한다. 공유 브랜치이거나 소유 여부가 불명확하면 기록을 재작성하지 말고 blocker를 보고한다.
+3. `git rebase origin/main`을 실행한다. 충돌은 작업 범위 안에서 해결하고 관련 없는 변경을 버리지 않는다.
+4. 최종 rebase 뒤 4절의 필수 검사를 모두 다시 실행하고 `git diff --check`를 통과시킨다.
+5. `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다.
+6. 이미 push한 전용 브랜치의 SHA가 바뀌었으면 원격 tip을 확인한 뒤 `git push --force-with-lease`로만 갱신한다. `--force`를 사용하지 않는다.
+7. PR의 필수 검사, 승인과 mergeable 상태를 다시 확인한다.
+8. 실제 병합 직전에 `git fetch origin main`을 한 번 더 실행한다. `origin/main`이 기록한 SHA보다 전진했으면 3~7단계를 반복한다.
+
+rebase 충돌, 실패한 재검증 또는 최신 base 확인 실패를 우회해 stale 브랜치를 병합하지 않는다. 이 절의 브랜치 rebase는 GitHub의 rebase merge 방식과 다르며, 병합 자체는 8절의 일반 merge commit을 사용한다.
+
+## 8. Merge와 정리
 
 - 모든 필수 검사와 승인이 통과한 뒤 일반 merge commit으로 병합한다.
 - `gh pr merge <number> --merge --delete-branch`처럼 GitHub의 정상 PR 병합 경로를 사용한다.
@@ -182,5 +196,6 @@ Not-tested: <남은 검증 또는 None>
 - Commit: SHA와 제목
 - PR: 번호와 URL
 - Checks: 통과 항목 또는 blocker
+- Rebase: 최종 `origin/main` SHA와 `--force-with-lease` 사용 여부
 - Merge: Lore 커밋 SHA, merge commit SHA, 일반 merge 방식
 - Remaining: 남은 위험 또는 `없음`
