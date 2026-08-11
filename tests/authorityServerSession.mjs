@@ -5,6 +5,7 @@ import { createCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
+import { createSummitClaim } from "../src/game/network/SummitClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
 import { Vector2 } from "../src/game-kit/index.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
@@ -100,6 +101,50 @@ export function run() {
     );
     assert.equal(checkpointSimulation.metrics.snapshot().checkpointsReached, 1);
     assert.equal(checkpointSimulation.drainReplicationEvents().length, 0);
+
+    const summitSimulation = new GameSimulation();
+    const summitPlayer = primaryPlayer(summitSimulation);
+    summitSimulation.enemies = [];
+    const summitSession = new AuthorityServerSession({ simulation: summitSimulation });
+    summitPlayer.physics.position.set(summitSimulation.world.summit.x, summitSimulation.world.summit.y);
+    summitSession.advance();
+    assert.equal(
+        summitSimulation.runState,
+        "playing",
+        "the server fixed tick must not initiate a client-owned summit arrival"
+    );
+    const summitClaim = createSummitClaim({
+        clientTick: summitSimulation.getTick() + 1,
+        position: summitPlayer.physics.position
+    });
+    const summitReceipt = summitSession.submitSummitClaim(summitPlayer.id, summitClaim);
+    assert.equal(summitReceipt.accepted, true);
+    assert.equal(summitReceipt.resolution, "run-completed");
+    assert.equal(summitSimulation.runState, "completed");
+    assert.equal(
+        summitSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "run-completed").length,
+        1
+    );
+    assert.equal(
+        summitSession.submitSummitClaim(summitPlayer.id, summitClaim),
+        summitReceipt,
+        "duplicate summit claims must reuse the first receipt"
+    );
+    assert.equal(summitSimulation.drainReplicationEvents().length, 0);
+    const completedPosition = { ...summitSimulation.playerState(summitPlayer.id).position };
+    const postCompletionMotion = summitSession.submitOwnerMotion(
+        summitPlayer.id,
+        createOwnerMotionState({
+            clientTick: summitSimulation.getTick() + 2,
+            position: { x: completedPosition.x + 10, y: completedPosition.y },
+            velocity: { x: 100, y: 0 },
+            isGrounded: false,
+            rope: { isAttached: false, anchor: null }
+        })
+    );
+    assert.equal(postCompletionMotion.accepted, false);
+    assert.equal(postCompletionMotion.reason, "run-inactive");
+    assert.deepEqual(summitSimulation.playerState(summitPlayer.id).position, completedPosition);
 
     const combatSimulation = new GameSimulation();
     const combatPlayer = primaryPlayer(combatSimulation);

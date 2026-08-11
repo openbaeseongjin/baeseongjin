@@ -226,6 +226,18 @@ export class OwnerPredictionRuntime {
         });
     }
 
+    summitClaimCandidate() {
+        if (!this.initialized) return null;
+        const summit = this.simulation.summitClaimCandidate(this.ownerId);
+        if (!summit) return null;
+        const state = this.state();
+        return Object.freeze({
+            clientTick: state.tick,
+            position: { x: state.position.x, y: state.position.y },
+            feedbackPosition: { x: summit.x, y: summit.y }
+        });
+    }
+
     renderSnapshot() {
         return this.initialized ? this.simulation.snapshot() : null;
     }

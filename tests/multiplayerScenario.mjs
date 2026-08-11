@@ -8,10 +8,12 @@ import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mj
 import { run as gameServerHandler } from "./gameServerHandler.mjs";
 import { run as artifactSelectionClaim } from "./artifactSelectionClaim.mjs";
 import { run as checkpointClaim } from "./checkpointClaim.mjs";
+import { run as summitClaim } from "./summitClaim.mjs";
 
 const steps = {
     artifactSelectionClaim,
     checkpointClaim,
+    summitClaim,
     playerCommandBatch,
     authorityServerSession,
     ownerPredictionRuntime,

@@ -7,6 +7,7 @@ import {
 import { createArtifactSelectionClaim, serializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
+import { createSummitClaim, createSummitClaimReceipt, serializeSummitClaim } from "../network/SummitClaim.js";
 import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import {
     createPlayerImpactClaim,
@@ -55,6 +56,8 @@ export class RemoteGameAuthority {
         this.impactClaimReceipts = [];
         this.checkpointClaimReceipts = [];
         this.pendingCheckpointId = null;
+        this.summitClaimReceipts = [];
+        this.pendingSummitClaim = false;
         this.latestOwnerMotionReceiptTick = -1;
         this.networkMetrics = {
             roundTripMs: null,
@@ -122,6 +125,8 @@ export class RemoteGameAuthority {
                         this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
                     } else if (message.type === "checkpoint-claim-receipt") {
                         this.recordCheckpointClaimReceipt(createCheckpointClaimReceipt(message.payload));
+                    } else if (message.type === "summit-claim-receipt") {
+                        this.recordSummitClaimReceipt(createSummitClaimReceipt(message.payload));
                     }
                 } catch (error) {
                     fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
@@ -148,6 +153,7 @@ export class RemoteGameAuthority {
         this.previousSnapshotReceivedAt = receivedAt;
         this.latestSnapshot = snapshot;
         if (snapshot.state.activeCheckpointId === this.pendingCheckpointId) this.pendingCheckpointId = null;
+        if (snapshot.state.runState === "completed") this.pendingSummitClaim = false;
         this.snapshotReceivedAt = receivedAt;
         this.buffer.push(snapshot, receivedAt);
         this.reconcile();
@@ -253,6 +259,19 @@ export class RemoteGameAuthority {
         return candidate;
     }
 
+    submitReachedSummit() {
+        if (this.pendingSummitClaim || this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) {
+            return null;
+        }
+        const candidate = this.ownerRuntime.summitClaimCandidate();
+        if (!candidate) return null;
+        this.submitOwnerMotion();
+        const claim = createSummitClaim(candidate);
+        this.pendingSummitClaim = true;
+        this.socket.send(JSON.stringify({ type: "summit-claim", payload: serializeSummitClaim(claim) }));
+        return candidate;
+    }
+
     drainArtifactSelectionReceipts() {
         const receipts = Object.freeze(this.artifactSelectionReceipts);
         this.artifactSelectionReceipts = [];
@@ -273,6 +292,17 @@ export class RemoteGameAuthority {
     drainCheckpointClaimReceipts() {
         const receipts = Object.freeze(this.checkpointClaimReceipts);
         this.checkpointClaimReceipts = [];
+        return receipts;
+    }
+
+    recordSummitClaimReceipt(receipt) {
+        this.summitClaimReceipts.push(receipt);
+        if (!receipt.accepted) this.pendingSummitClaim = false;
+    }
+
+    drainSummitClaimReceipts() {
+        const receipts = Object.freeze(this.summitClaimReceipts);
+        this.summitClaimReceipts = [];
         return receipts;
     }
 
