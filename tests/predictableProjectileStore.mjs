@@ -5,6 +5,7 @@ import {
 } from "../src/game/network/PredictableObjectEvent.js";
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
 import { ClientCombatFeedback } from "../src/game/combat/ClientCombatFeedback.js";
+import { selectClientStatusFeedback } from "../src/game/combat/ClientFeedbackEventObject.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
 import { updatePlayerProjectiles, advanceEnemyProjectiles } from "../src/game/combat/CombatSystems.js";
@@ -223,18 +224,85 @@ export function run() {
         tick: 13,
         resolution: "enemy-hit",
         position: { x: 5, y: 0 },
-        parameters: { damage: 10 }
+        parameters: { damage: 10, sourcePlayerId: "player-1", targetId: "enemy-1" }
     });
     store.apply([resolveEvent], 13, { enemies: [] });
     assert.equal(store.snapshot().projectiles.length, 0);
 
-    const feedback = new ClientCombatFeedback();
+    const feedback = new ClientCombatFeedback({ viewerId: "player-1" });
     feedback.apply([resolveEvent]);
     assert.ok(feedback.snapshot().combatEffects.length > 0, "a resolve event must create local client effects");
     assert.ok(feedback.snapshot().impact, "a resolve event must create local client impact feedback");
+    const attackObserverFeedback = new ClientCombatFeedback({ viewerId: "player-2" });
+    attackObserverFeedback.apply([resolveEvent]);
+    assert.ok(attackObserverFeedback.snapshot().combatEffects.length > 0, "attack particles must be shared");
+    assert.equal(
+        attackObserverFeedback.snapshot().impact,
+        null,
+        "only the attacker may receive attack impact feedback"
+    );
     feedback.update(1);
     assert.equal(feedback.snapshot().combatEffects.length, 0, "client effects must expire on the client clock");
     assert.equal(feedback.snapshot().impact, null);
+
+    const ropeCutEvent = createPredictableResolveEvent({
+        eventId: "event-rope-cut",
+        objectId: "enemy-projectile-rope-cut",
+        tick: 14,
+        resolution: "rope-cut",
+        position: { x: 8, y: 12 },
+        parameters: { sourcePlayerId: "enemy-1", targetId: "player-1", damage: 0 }
+    });
+    const ropeVictimFeedback = new ClientCombatFeedback({ viewerId: "player-1" });
+    const ropeObserverFeedback = new ClientCombatFeedback({ viewerId: "player-2" });
+    ropeVictimFeedback.apply([ropeCutEvent]);
+    ropeObserverFeedback.apply([ropeCutEvent]);
+    assert.ok(ropeVictimFeedback.snapshot().combatEffects.length > 0, "rope cut must create shared world particles");
+    assert.equal(
+        ropeObserverFeedback.snapshot().combatEffects.length,
+        ropeVictimFeedback.snapshot().combatEffects.length,
+        "every client must create the same shared rope-cut particles"
+    );
+    assert.equal(ropeVictimFeedback.snapshot().eventFlash?.type, "rope-cut");
+    assert.equal(
+        Object.hasOwn(ropeObserverFeedback.snapshot(), "eventFlash"),
+        false,
+        "only the rope owner may receive the personal rope-cut warning"
+    );
+    assert.equal(ropeObserverFeedback.snapshot().impact, null, "rope cut must not shake an observer's screen");
+    const replicatedRopeStatus = { type: "rope-cut", playerId: "player-1", age: 0.1, position: { x: 8, y: 12 } };
+    assert.equal(selectClientStatusFeedback(replicatedRopeStatus, "player-1"), replicatedRopeStatus);
+    assert.equal(
+        selectClientStatusFeedback(replicatedRopeStatus, "player-2"),
+        null,
+        "replicated personal status must not leak through the scene snapshot fallback"
+    );
+    const sharedCheckpointStatus = { type: "checkpoint", playerId: "player-1", age: 0.1, position: { x: 0, y: 0 } };
+    assert.equal(
+        selectClientStatusFeedback(sharedCheckpointStatus, "player-2"),
+        sharedCheckpointStatus,
+        "shared world status must remain visible to other players"
+    );
+
+    const playerHitEvent = createPredictableResolveEvent({
+        eventId: "event-player-hit-personal",
+        objectId: "enemy-projectile-player-hit",
+        tick: 15,
+        resolution: "player-hit",
+        position: { x: 10, y: 14 },
+        parameters: { sourcePlayerId: "enemy-1", targetId: "player-1", damage: 20 }
+    });
+    const hitVictimFeedback = new ClientCombatFeedback({ viewerId: "player-1" });
+    const hitObserverFeedback = new ClientCombatFeedback({ viewerId: "player-2" });
+    hitVictimFeedback.apply([playerHitEvent]);
+    hitObserverFeedback.apply([playerHitEvent]);
+    assert.ok(hitVictimFeedback.snapshot().impact, "the victim must receive personal hit impact");
+    assert.equal(hitObserverFeedback.snapshot().impact, null, "an observer must not receive personal hit impact");
+    assert.equal(
+        hitObserverFeedback.snapshot().combatEffects.length,
+        hitVictimFeedback.snapshot().combatEffects.length,
+        "player-hit world particles must remain shared"
+    );
 
     const predictedStore = new PredictableProjectileStore();
     const predictedSpawn = {

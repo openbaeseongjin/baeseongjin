@@ -151,6 +151,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 기본 무기는 사거리 안의 가장 가까운 적을 자동 조준하며, 적은 플레이어를 향해 투사체를 발사한다.
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.
+- 클라이언트 피드백 사건은 공용 월드 효과 capability와 개인 상태 효과 capability를 함께 가진다. 공용 capability는 타격·로프 절단 위치의 링·파티클을 모든 참가자 화면에서 생성하고, 개인 capability는 `sourcePlayerId` 또는 `targetId`가 현재 로컬 플레이어와 일치할 때만 화면 흔들림·피해 강조·로프 절단 경고를 생성한다. 렌더러와 앱은 사건 종류별 참가자 분기를 소유하지 않는다.
 - 첫 화면에서 싱글은 `PlayerCommand → LocalAuthority → GameSimulation`, 멀티는 `4자리 채널 → 고정 WebSocket 서버 → 채널별 AuthorityServerSession → GameSimulation` 경계를 선택한다. 두 경로는 입력 출처와 상태 전달만 다르고 게임 규칙을 공유한다.
 - 협동은 소유 클라이언트 권한과 서버 중립 월드 권한을 분할한다. 서버의 주역할은 소유 상태·사건 검증과 복제 공유이며, 시간 모델·상태 소유권·스냅샷과 거부 복구 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 - `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `OwnerPredictionRuntime`도 로컬 `GameSimulation`의 공개 소유자 예측 계약만 사용하며, 앱·예측 런타임·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.

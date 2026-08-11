@@ -6,6 +6,7 @@ import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "./rewards/ArtifactRewardSelection.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
@@ -52,7 +53,7 @@ export class MultiplayerGameApp {
         this.stepCount = 0;
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.predictableProjectiles = new PredictableProjectileStore();
-        this.combatFeedback = new ClientCombatFeedback();
+        this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.checkpointFeedback = null;
         this.localRunCompleted = false;
         this.localArtifactReward = null;
@@ -271,7 +272,10 @@ export class MultiplayerGameApp {
             enemies: remote.state.enemies,
             ...predictableProjectiles,
             ...combatFeedback,
-            eventFlash: combatFeedback.eventFlash ?? this.checkpointFeedback ?? base.eventFlash,
+            eventFlash:
+                combatFeedback.eventFlash ??
+                this.checkpointFeedback ??
+                selectClientStatusFeedback(base.eventFlash, this.authority.playerId),
             otherPlayers,
             playerHealth: remote.predicted.health,
             playerMaxHealth: remote.predicted.maxHealth,
