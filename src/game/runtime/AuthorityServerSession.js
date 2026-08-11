@@ -226,7 +226,7 @@ export class AuthorityServerSession {
     advance() {
         const nextTick = this.simulation.getTick() + 1;
         const commands = this.inputState.expand(this.inbox.take(nextTick), this.simulation.playerIds());
-        this.simulation.stepCommandBatch(this.fixedDt, commands);
+        this.simulation.stepCommandBatch(this.fixedDt, commands, { recoverPlayerFalls: false });
         const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedHitClaims.delete(predictionId);
