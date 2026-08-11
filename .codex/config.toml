@@ -1,0 +1,13 @@
+[mcp_servers.discord]
+command = "npx"
+args = ["-y", "@discord-mcp/cli@0.18.1", "serve"]
+env_vars = ["DISCORD_TOKEN"]
+enabled = true
+startup_timeout_sec = 90
+required = false
+default_tools_approval_mode = "writes"
+
+[mcp_servers.discord.env]
+MCP_CATEGORIES = "users,messages,channels"
+MCP_TOOL_SURFACE = "progressive"
+MCP_WRITE_MODE = "allow"

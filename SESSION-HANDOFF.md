@@ -210,7 +210,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
 - Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan`, `discord-repo-cross-reference` Skill만 선택할 수 있다.
 - `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
-- Discord 자유 조회·공유는 브라우저 자동화가 아니라 기존 미팅봇 자격 증명을 재사용하는 인증된 Discord MCP를 우선한다. MCP는 `DISCORD_GUILD_ID` 하나로 서버 범위를 고정하고 `messages,channels`만 노출하며, 가져오기는 회의 채널, 공유는 회의록 채널을 기본 대상으로 삼고 명시한 채널이 우선한다. 운영·TLS 계약은 `services/meeting-bot/README.md`를 따른다.
+- Discord 자유 조회·공유는 브라우저 자동화나 meeting-bot 내부 구현이 아니라 저장소의 `.codex/config.toml`에서 범용 `@discord-mcp/cli` stdio MCP를 직접 실행한다. 자격 증명은 저장소에 두지 않고 로컬에서는 `DISCORD_TOKEN`, Codex Cloud에서는 별도 Secret으로 관리한다. 서버·채널은 봇이 볼 수 있는 목록에서 대화 중 선택을 재사용하되 복수이거나 모호하면 질문한다. MCP는 `users,messages,channels`만 노출하고, 쓰기는 사용자가 승인한 문구의 메시지 전송만 허용하며 편집·삭제·반응·관리 작업은 금지한다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Discord의 공개 `/codex` 게이트웨이는 고정 loopback Ollama와 허용 Skill만 사용하고 구조화 출력을 검증하며 애플리케이션 비밀을 전달하지 않는다. 인증된 Codex CLI와 LM Studio 공급자는 공개 게이트웨이에서 거부하여 서버 멤버가 Codex 계정 할당량이나 더 넓은 로컬 엔드포인트를 소비하지 못하게 한다.
 - `/codex` 출력은 신뢰된 instruction에 한글이 있으면 한국어, 없으면 영어를 요청한다. 결과의 모든 표시 필드는 Latin·Hangul 문자 체계만 허용하고 저장·게시 전에 재검증한다. 한자·가나 등 비허용 문자가 나오면 로컬 Ollama로 1회만 교정하며, 반복 실패와 기존 비호환 결과는 원문을 게시하지 않는다.
 - `CODEX_PROVIDER=ollama`인 상태에서 `/meeting start`가 승인되면 회의 캡처를 먼저 활성화하고 백그라운드에서 고정 loopback API와 선택 모델을 확인한다. 서버가 꺼져 있으면 비밀을 제외한 환경으로 `OLLAMA_BIN serve`를 숨김·분리 프로세스로 자동 실행한다. 실행 또는 모델 확인이 실패해도 회의 기록은 계속하고 `/codex`만 사용 불가로 알리며, 모델 자동 설치나 유료 API 우회는 하지 않는다. Ollama 프로세스는 `/meeting end` 뒤에도 유지한다.
