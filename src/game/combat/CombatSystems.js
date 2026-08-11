@@ -12,9 +12,10 @@ export function selectNearestEnemy(position, enemies, range) {
     );
 }
 
-export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt }) {
+export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt, allowFire = true }) {
     owner.weapon.cooldown = Math.max(0, owner.weapon.cooldown - dt);
     if (owner.lifeState !== "active") return null;
+    if (!allowFire) return null;
     if (owner.weapon.cooldown > 0) return null;
     const target = selectNearestEnemy(owner.physics.position, enemies, owner.weapon.range);
     if (!target) return null;

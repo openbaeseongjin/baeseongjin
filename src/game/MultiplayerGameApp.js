@@ -147,6 +147,7 @@ export class MultiplayerGameApp {
         this.applyCheckpointEvents(events);
         this.applyCheckpointClaimReceipts();
         this.applySummitClaimReceipts();
+        this.predictableProjectiles.applySpawnClaimReceipts(this.authority.drainProjectileSpawnClaimReceipts());
         this.predictableProjectiles.applyHitClaimReceipts(this.authority.drainHitClaimReceipts());
         this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
@@ -195,7 +196,9 @@ export class MultiplayerGameApp {
             current.state.players.filter(({ id }) => id !== this.authority.playerId),
             PLAYER_CONFIG.radius
         );
-        this.predictableProjectiles.predict(this.authority.drainPredictedEvents());
+        const predictedSpawns = this.authority.drainPredictedEvents();
+        this.predictableProjectiles.predict(predictedSpawns);
+        for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);
         const predictedPlayer = this.authority.snapshot().owner;
         const localAuthorityPlayer = current.state.players.find(({ id }) => id === this.authority.playerId);
         const collisionState = {

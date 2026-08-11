@@ -243,6 +243,19 @@ export class PredictableProjectileStore {
         }
     }
 
+    applySpawnClaimReceipts(receipts) {
+        for (const receipt of receipts) {
+            if (receipt.accepted) continue;
+            const objectId = this.objectIdByPredictionId.get(receipt.predictionId);
+            if (!objectId) continue;
+            this.objects.delete(objectId);
+            this.objectIdByPredictionId.delete(receipt.predictionId);
+            this.predictionIdByAuthorityId.delete(objectId);
+            this.locallyResolvedPredictionIds.delete(receipt.predictionId);
+            this.predictionCancellations += 1;
+        }
+    }
+
     snapshot() {
         const projectiles = [];
         const enemyProjectiles = [];

@@ -8,6 +8,7 @@ import { WORLD_CONFIG } from "../src/game/config.js";
 import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
+import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
 import { closestPointOnSurface } from "../src/game/world/WorldGenerator.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
 
@@ -392,6 +393,79 @@ export async function run() {
         lethalObserver.close();
         lethalOwner.close();
         await waitFor(() => !gameServer.rooms.has(lethalOwner.channelId), "the lethal test room must close");
+
+        const spawnOwner = new RemoteGameAuthority({
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
+            WebSocketImpl: WebSocket
+        });
+        await spawnOwner.connect();
+        const spawnObserver = new RemoteGameAuthority({
+            url: `ws://127.0.0.1:${port}/multiplayer?channel=${spawnOwner.channelId}`,
+            WebSocketImpl: WebSocket
+        });
+        await spawnObserver.connect();
+        const spawnRoom = gameServer.rooms.get(spawnOwner.channelId);
+        const spawnPlayer = spawnRoom.simulation.players.find(({ id }) => id === spawnOwner.playerId);
+        const spawnTarget = spawnRoom.simulation.enemies[0];
+        spawnTarget.position.set(spawnPlayer.physics.position.x + 120, spawnPlayer.physics.position.y);
+        spawnRoom.simulation.enemies = [spawnTarget];
+        spawnPlayer.weapon.cooldown = 0;
+        gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
+        await waitFor(
+            () =>
+                spawnOwner.snapshot().state.enemies.length === 1 &&
+                distance(spawnOwner.snapshot().state.enemies[0].position, spawnTarget.position) < 1,
+            "the firing owner must receive the deterministic target state"
+        );
+        const spawnStore = new PredictableProjectileStore();
+        spawnOwner.advance(movementCommand(0));
+        const predictedSpawns = spawnOwner.drainPredictedEvents();
+        assert.equal(predictedSpawns.length, 1, "the owner must predict one automatic shot immediately");
+        spawnStore.predict(predictedSpawns);
+        assert.equal(spawnStore.snapshot().projectiles.length, 1, "the local shot must exist before its receipt");
+        assert.equal(spawnRoom.simulation.projectiles.length, 0, "the server tick must not duplicate owner firing");
+        assert.equal(spawnOwner.submitProjectileSpawnClaim(predictedSpawns[0]), true);
+        await waitFor(
+            () => spawnOwner.projectileSpawnClaimReceipts.length > 0,
+            "the owner must receive its projectile spawn receipt"
+        );
+        const firstSpawnReceipt = spawnOwner.drainProjectileSpawnClaimReceipts()[0];
+        assert.equal(firstSpawnReceipt.accepted, true);
+        assert.equal(spawnRoom.simulation.projectiles.length, 1, "one owner claim must create one server projectile");
+        const ownerSpawnEvents = [];
+        const observerSpawnEvents = [];
+        await waitFor(() => {
+            ownerSpawnEvents.push(...spawnOwner.drainEvents());
+            observerSpawnEvents.push(...spawnObserver.drainEvents());
+            const predictionId = predictedSpawns[0].predictionId;
+            return (
+                ownerSpawnEvents.some((event) => event.parameters?.predictionId === predictionId) &&
+                observerSpawnEvents.some((event) => event.parameters?.predictionId === predictionId)
+            );
+        }, "the accepted spawn must converge to the owner and observer");
+        spawnStore.apply(ownerSpawnEvents, spawnOwner.snapshot().serverTick, spawnOwner.snapshot().state);
+        assert.equal(spawnStore.snapshot().projectiles.length, 1, "authority confirmation must adopt the prediction");
+        assert.equal(
+            observerSpawnEvents.filter((event) => event.parameters?.predictionId === predictedSpawns[0].predictionId)
+                .length,
+            1,
+            "the peer must receive one shared spawn event"
+        );
+        assert.equal(spawnOwner.submitProjectileSpawnClaim(predictedSpawns[0]), true);
+        await waitFor(
+            () => spawnOwner.projectileSpawnClaimReceipts.length > 0,
+            "a duplicate spawn claim must receive its cached receipt"
+        );
+        const duplicateSpawnReceipt = spawnOwner.drainProjectileSpawnClaimReceipts()[0];
+        assert.equal(duplicateSpawnReceipt.projectileId, firstSpawnReceipt.projectileId);
+        assert.equal(
+            spawnRoom.simulation.projectiles.length,
+            1,
+            "a duplicate claim must not create another projectile"
+        );
+        spawnObserver.close();
+        spawnOwner.close();
+        await waitFor(() => !gameServer.rooms.has(spawnOwner.channelId), "the projectile spawn room must close");
 
         const authority = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,

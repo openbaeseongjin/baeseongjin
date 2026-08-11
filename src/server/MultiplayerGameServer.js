@@ -142,6 +142,11 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "hit-claim-receipt", payload: receipt }));
                 return;
             }
+            if (message?.type === "projectile-spawn-claim" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveProjectileSpawnClaim(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "projectile-spawn-claim-receipt", payload: receipt }));
+                return;
+            }
             if (message?.type === "impact-claim" && typeof message.payload === "string") {
                 const receipt = room.adapter.receiveImpactClaim(playerId, message.payload);
                 socket.send(JSON.stringify({ type: "impact-claim-receipt", payload: receipt }));

@@ -150,6 +150,13 @@ export function run() {
     };
     predictedStore.predict([predictedSpawn]);
     assert.equal(predictedStore.snapshot().projectiles.length, 1, "local fire must appear before server spawn");
+    const rejectedSpawnStore = new PredictableProjectileStore();
+    rejectedSpawnStore.predict([{ ...predictedSpawn, predictionId: "player-1:rejected" }]);
+    rejectedSpawnStore.applySpawnClaimReceipts([
+        { predictionId: "player-1:rejected", accepted: false, reason: "weapon-cooldown" }
+    ]);
+    assert.equal(rejectedSpawnStore.snapshot().projectiles.length, 0, "a rejected spawn must cancel its prediction");
+    assert.equal(rejectedSpawnStore.metrics().predictionCancellations, 1);
     const confirmedSpawn = createPredictableSpawnEvent({
         eventId: "event-4",
         objectId: "projectile-server-1",

@@ -2,6 +2,7 @@ import { Vector2 } from "../../game-kit/index.js";
 import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
     advanceEnemyProjectiles,
+    selectNearestEnemy,
     updateAutomaticWeapon,
     updateEnemyWeapons,
     updatePlayerProjectiles
@@ -370,6 +371,7 @@ export class GameSimulation {
             resolveCheckpointProgress = true,
             resolveSummitProgress = true,
             resolvePlayerProjectileHits = true,
+            spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
             resolveArtifactSelections = true
         } = {}
@@ -387,6 +389,7 @@ export class GameSimulation {
             resolveCheckpointProgress,
             resolveSummitProgress,
             resolvePlayerProjectileHits,
+            spawnPlayerProjectiles,
             recoverPlayerDeaths,
             resolveArtifactSelections
         });
@@ -400,6 +403,7 @@ export class GameSimulation {
             resolveCheckpointProgress = true,
             resolveSummitProgress = true,
             resolvePlayerProjectileHits = true,
+            spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
             resolveArtifactSelections = true
         } = {}
@@ -427,7 +431,7 @@ export class GameSimulation {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
             this.#prepareOwnerStep(player, dt);
             this.dispatchOwnerInput(player.id, playerCommand, dt);
-            const projectile = this.#advanceAutomaticWeapon(player, dt);
+            const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile, "player-projectile");
         }
         const playerProjectileEvents = updatePlayerProjectiles({
@@ -559,14 +563,15 @@ export class GameSimulation {
         this.applyArtifactEffects(player);
     }
 
-    #advanceAutomaticWeapon(player, dt) {
+    #advanceAutomaticWeapon(player, dt, allowFire = true) {
         return updateAutomaticWeapon({
             owner: player,
             enemies: this.enemies,
             projectiles: this.projectiles,
             registry: this.registry,
             config: COMBAT_CONFIG,
-            dt
+            dt,
+            allowFire
         });
     }
 
@@ -751,7 +756,7 @@ export class GameSimulation {
     }
 
     recordProjectileSpawn(projectile, objectType) {
-        if (objectType === "player-projectile") projectile.predictionId = `${projectile.ownerId}:${this.tick}`;
+        if (objectType === "player-projectile") projectile.predictionId ??= `${projectile.ownerId}:${this.tick}`;
         const spawnEvent = createPredictableSpawnEvent({
             eventId: this.registry.createId("event"),
             objectId: projectile.id,
@@ -785,6 +790,31 @@ export class GameSimulation {
                 .map(({ replicationSpawnEvent }) => replicationSpawnEvent)
                 .filter(Boolean)
         );
+    }
+
+    resolvePlayerProjectileSpawnClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+        const player = this.players.find(({ id }) => id === authenticatedPlayerId);
+        if (!player || player.lifeState !== "active") {
+            return Object.freeze({ accepted: false, reason: "player-ineligible" });
+        }
+        if (claim.predictionId !== `${authenticatedPlayerId}:${claim.clientTick}`) {
+            return Object.freeze({ accepted: false, reason: "prediction-ownership" });
+        }
+        if (player.weapon.cooldown > 0) return Object.freeze({ accepted: false, reason: "weapon-cooldown" });
+        const target = selectNearestEnemy(player.physics.position, this.enemies, player.weapon.range);
+        if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
+        if (target.id !== claim.targetId) return Object.freeze({ accepted: false, reason: "target-mismatch" });
+        if (
+            Math.hypot(claim.position.x - player.physics.position.x, claim.position.y - player.physics.position.y) >
+            positionTolerance
+        ) {
+            return Object.freeze({ accepted: false, reason: "position-mismatch" });
+        }
+        const projectile = this.#advanceAutomaticWeapon(player, 0);
+        if (!projectile) return Object.freeze({ accepted: false, reason: "weapon-unavailable" });
+        projectile.predictionId = claim.predictionId;
+        this.recordProjectileSpawn(projectile, "player-projectile");
+        return Object.freeze({ accepted: true, projectileId: projectile.id });
     }
 
     resolvePlayerProjectileClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
