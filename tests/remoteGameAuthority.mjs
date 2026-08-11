@@ -63,6 +63,10 @@ function movementCommand(horizontal = 1) {
     };
 }
 
+function distance(left, right) {
+    return Math.hypot(left.x - right.x, left.y - right.y);
+}
+
 function fakeCanvas() {
     return {
         clientWidth: 844,
@@ -377,6 +381,49 @@ export async function run() {
                     authorityStartX + 0.1,
             "both clients must observe each other's movement"
         );
+        let convergence = null;
+        for (let index = 0; index < 180; index += 1) {
+            authority.advance(movementCommand(0));
+            authority.submit(movementCommand(0));
+            partner.advance(movementCommand(0));
+            partner.submit(movementCommand(0));
+            await new Promise((resolve) => setTimeout(resolve, 8));
+            if (index < 60) continue;
+            const ownerState = authority.snapshot().owner;
+            const serverState = room.simulation.playerState(authority.playerId);
+            const partnerView = partner.snapshot().state.players.find(({ id }) => id === authority.playerId);
+            convergence = {
+                ownerServerPosition: distance(ownerState.position, serverState.position),
+                partnerServerPosition: distance(partnerView.position, serverState.position),
+                ownerServerVelocity: distance(ownerState.velocity, serverState.velocity),
+                partnerServerVelocity: distance(partnerView.velocity, serverState.velocity),
+                ropeMatches:
+                    ownerState.rope.isAttached === serverState.rope.isAttached &&
+                    partnerView.rope.isAttached === serverState.rope.isAttached
+            };
+            if (
+                convergence.ownerServerPosition <= 4 &&
+                convergence.partnerServerPosition <= 4 &&
+                convergence.ownerServerVelocity <= 20 &&
+                convergence.partnerServerVelocity <= 20 &&
+                convergence.ropeMatches
+            ) {
+                break;
+            }
+        }
+        assert.ok(
+            convergence.ownerServerPosition <= 4,
+            `owner and server must converge after neutral input: ${JSON.stringify(convergence)}`
+        );
+        assert.ok(
+            convergence.partnerServerPosition <= 4,
+            `partner and server must converge after neutral input: ${JSON.stringify(convergence)}`
+        );
+        assert.ok(
+            convergence.ownerServerVelocity <= 20 && convergence.partnerServerVelocity <= 20,
+            `all player velocities must converge after neutral input: ${JSON.stringify(convergence)}`
+        );
+        assert.equal(convergence.ropeMatches, true, "owner, server, and partner must share rope attachment state");
         partner.close();
 
         for (const roundTripDelayMs of [0, 50, 100, 200]) {
