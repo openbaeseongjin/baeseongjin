@@ -113,15 +113,16 @@ export class MultiplayerGameServer {
         socket.on("message", (data, binary) => this.receive(socket, data, binary));
         socket.on("close", () => this.leave(socket));
         socket.on("error", () => this.leave(socket));
+        const welcomeSnapshot = room.adapter.snapshot({ includeActivePredictableObjects: true });
         socket.send(
             JSON.stringify({
                 type: "welcome",
                 channelId,
                 playerId,
-                snapshot: room.adapter.snapshot()
+                snapshot: welcomeSnapshot
             })
         );
-        this.broadcast(room, { type: "snapshot", payload: room.adapter.snapshot() });
+        this.broadcast(room, { type: "snapshot", payload: welcomeSnapshot });
         this.startClock(room);
     }
 

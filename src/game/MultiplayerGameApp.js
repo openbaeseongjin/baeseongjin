@@ -111,6 +111,7 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
         const events = this.authority.drainEvents();
+        this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
         this.combatFeedback.apply(authorityFeedback);
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);

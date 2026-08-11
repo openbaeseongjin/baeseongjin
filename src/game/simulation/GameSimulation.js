@@ -419,7 +419,18 @@ export class GameSimulation {
             dt
         });
         for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile, "enemy-projectile");
-        advanceEnemyProjectiles({ projectiles: this.enemyProjectiles, dt });
+        const enemyProjectileLifecycle = advanceEnemyProjectiles({
+            projectiles: this.enemyProjectiles,
+            dt,
+            maxLifetimeSeconds: COMBAT_CONFIG.enemyProjectileLifetimeSeconds
+        });
+        for (const projectile of enemyProjectileLifecycle.expired) {
+            this.recordProjectileResolution({
+                projectileId: projectile.id,
+                resolution: "expired",
+                position: projectile.position
+            });
+        }
         const combatEvents = playerProjectileEvents.hits;
         const hitByProjectileId = new Map(combatEvents.map((event) => [event.projectileId, event]));
         for (const resolution of playerProjectileEvents.resolutions) {
@@ -632,26 +643,38 @@ export class GameSimulation {
 
     recordProjectileSpawn(projectile, objectType) {
         if (objectType === "player-projectile") projectile.predictionId = `${projectile.ownerId}:${this.tick}`;
-        this.replicationEvents.push(
-            createPredictableSpawnEvent({
-                eventId: this.registry.createId("event"),
-                objectId: projectile.id,
-                objectType,
-                spawnTick: this.tick,
-                position: projectile.position,
-                velocity: projectile.velocity,
-                parameters: {
-                    ownerId: projectile.ownerId,
-                    targetId: projectile.targetId ?? null,
-                    predictionId: projectile.predictionId ?? null,
-                    radius: projectile.radius,
-                    damage: projectile.damage,
-                    speed:
-                        objectType === "player-projectile"
-                            ? COMBAT_CONFIG.projectileSpeed
-                            : COMBAT_CONFIG.enemyProjectileSpeed
-                }
-            })
+        const spawnEvent = createPredictableSpawnEvent({
+            eventId: this.registry.createId("event"),
+            objectId: projectile.id,
+            objectType,
+            spawnTick: this.tick,
+            position: projectile.position,
+            velocity: projectile.velocity,
+            parameters: {
+                ownerId: projectile.ownerId,
+                targetId: projectile.targetId ?? null,
+                predictionId: projectile.predictionId ?? null,
+                radius: projectile.radius,
+                damage: projectile.damage,
+                speed:
+                    objectType === "player-projectile"
+                        ? COMBAT_CONFIG.projectileSpeed
+                        : COMBAT_CONFIG.enemyProjectileSpeed
+            }
+        });
+        Object.defineProperty(projectile, "replicationSpawnEvent", {
+            value: spawnEvent,
+            configurable: true,
+            writable: true
+        });
+        this.replicationEvents.push(spawnEvent);
+    }
+
+    activePredictableSpawnEvents() {
+        return Object.freeze(
+            [...this.projectiles, ...this.enemyProjectiles]
+                .map(({ replicationSpawnEvent }) => replicationSpawnEvent)
+                .filter(Boolean)
         );
     }
 

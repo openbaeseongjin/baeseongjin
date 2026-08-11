@@ -3,7 +3,11 @@ import { createArtifactSelectionClaim, serializeArtifactSelectionClaim } from ".
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
-import { createPlayerImpactClaim, serializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
+import {
+    createPlayerImpactClaim,
+    createPlayerImpactReceipt,
+    serializePlayerImpactClaim
+} from "../network/PlayerImpactClaim.js";
 import { createOwnerMotionState, serializeOwnerMotionState } from "../network/OwnerMotionState.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
@@ -39,6 +43,7 @@ export class RemoteGameAuthority {
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
         this.artifactSelectionReceipts = [];
+        this.impactClaimReceipts = [];
         this.networkMetrics = {
             roundTripMs: null,
             snapshotIntervalMs: null,
@@ -97,6 +102,8 @@ export class RemoteGameAuthority {
                         this.stream.acceptReceipt(receipt);
                     } else if (message.type === "artifact-selection-receipt") {
                         this.artifactSelectionReceipts.push(Object.freeze({ ...message.payload }));
+                    } else if (message.type === "impact-claim-receipt") {
+                        this.impactClaimReceipts.push(createPlayerImpactReceipt(message.payload));
                     }
                 } catch (error) {
                     fail(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
@@ -217,6 +224,12 @@ export class RemoteGameAuthority {
     drainArtifactSelectionReceipts() {
         const receipts = Object.freeze(this.artifactSelectionReceipts);
         this.artifactSelectionReceipts = [];
+        return receipts;
+    }
+
+    drainImpactClaimReceipts() {
+        const receipts = Object.freeze(this.impactClaimReceipts);
+        this.impactClaimReceipts = [];
         return receipts;
     }
 

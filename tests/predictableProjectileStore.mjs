@@ -53,6 +53,25 @@ export function run() {
         "authority must not replay victim-predicted feedback"
     );
 
+    const rejectedImpactStore = new PredictableProjectileStore();
+    rejectedImpactStore.apply([enemySpawn], 10, { enemies: [] });
+    const rejectedImpact = rejectedImpactStore.update(0, { enemies: [], localPlayer }, 20)[0];
+    assert.equal(
+        rejectedImpactStore.snapshot().enemyProjectiles.length,
+        0,
+        "a locally claimed projectile must stay hidden while its receipt is pending"
+    );
+    rejectedImpactStore.applyImpactReceipts([
+        { projectileId: rejectedImpact.projectileId, accepted: false, reason: "trajectory-mismatch" }
+    ]);
+    assert.equal(
+        rejectedImpactStore.snapshot().enemyProjectiles.length,
+        1,
+        "a rejected impact claim must restore the still-simulating projectile"
+    );
+    assert.equal(rejectedImpactStore.locallyResolvedObjectIds.size, 0);
+    assert.equal(rejectedImpactStore.metrics().predictionCancellations, 1);
+
     const burstStore = new PredictableProjectileStore();
     const secondEnemySpawn = createPredictableSpawnEvent({
         eventId: "event-burst-2",

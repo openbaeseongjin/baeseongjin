@@ -65,12 +65,25 @@ export function run() {
 
     assert.equal(distancePointToSegment({ x: 50, y: 5 }, { x: 0, y: 0 }, { x: 100, y: 0 }), 5);
     const travelingShot = [{ position: new Vector2(-10, 50), velocity: new Vector2(20, 0) }];
-    advanceEnemyProjectiles({ projectiles: travelingShot, dt: 0.5 });
+    const activeProjectiles = advanceEnemyProjectiles({
+        projectiles: travelingShot,
+        dt: 0.5,
+        maxLifetimeSeconds: 1
+    });
+    assert.equal(activeProjectiles.expired.length, 0);
     assert.deepEqual(
         travelingShot[0].position,
         new Vector2(0, 50),
         "the neutral server simulation must advance projectile trajectories without choosing player impacts"
     );
+    const projectileBeforeExpiration = travelingShot[0];
+    const expiredProjectiles = advanceEnemyProjectiles({
+        projectiles: travelingShot,
+        dt: 0.5,
+        maxLifetimeSeconds: 1
+    });
+    assert.deepEqual(expiredProjectiles.expired, [projectileBeforeExpiration]);
+    assert.equal(travelingShot.length, 0, "neutral projectiles must leave server state when their lifetime ends");
 
     const target = {
         id: "player-1",

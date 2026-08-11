@@ -10,6 +10,7 @@ export class ProjectileObject extends SimulationDrivenObject {
         this.velocity = velocity;
         this.damage = damage;
         this.radius = radius;
+        this.ageSeconds = 0;
         if (predictionId !== null) this.predictionId = predictionId;
     }
 }

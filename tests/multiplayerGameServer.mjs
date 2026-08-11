@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
+import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { deserializeCommandReceipt } from "../src/game/network/CommandReceipt.js";
 import { serializePlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { deserializeWorldSnapshotEnvelope } from "../src/game/network/WorldSnapshotEnvelope.js";
@@ -66,12 +68,32 @@ export async function run() {
     const baseUrl = `ws://127.0.0.1:${port}/multiplayer`;
     const { socket: first, message: firstWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
     const url = `${baseUrl}?channel=${firstWelcome.channelId}`;
+    const sharedRoom = multiplayer.rooms.get(firstWelcome.channelId);
+    const activeEnemyProjectile = new ProjectileObject({
+        id: "mid-join-enemy-projectile",
+        ownerId: "enemy-mid-join",
+        targetId: firstWelcome.playerId,
+        position: new Vector2(-500, -500),
+        velocity: new Vector2(0, 0),
+        damage: 20,
+        radius: 7
+    });
+    sharedRoom.simulation.enemyProjectiles.push(activeEnemyProjectile);
+    sharedRoom.simulation.recordProjectileSpawn(activeEnemyProjectile, "enemy-projectile");
+    sharedRoom.adapter.snapshot();
     const { socket: second, message: secondWelcome } = await connectFor(url, "welcome");
     assert.equal(firstWelcome.channelId, "1234");
     assert.equal(deserializeWorldSnapshotEnvelope(firstWelcome.snapshot).worldSeed, 111);
     assert.notEqual(firstWelcome.playerId, secondWelcome.playerId);
-    assert.equal(deserializeWorldSnapshotEnvelope(secondWelcome.snapshot).worldSeed, 111);
-    assert.equal(deserializeWorldSnapshotEnvelope(secondWelcome.snapshot).state.players.length, 2);
+    const secondSnapshot = deserializeWorldSnapshotEnvelope(secondWelcome.snapshot);
+    assert.equal(secondSnapshot.worldSeed, 111);
+    assert.equal(secondSnapshot.state.players.length, 2);
+    assert.equal(
+        secondSnapshot.events.find(({ objectId }) => objectId === activeEnemyProjectile.id)?.eventType,
+        "spawn",
+        "a later joiner must receive the original spawn event for each active predictable object"
+    );
+    assert.equal(Object.hasOwn(secondSnapshot.state, "enemyProjectiles"), false);
 
     const { socket: isolated, message: isolatedWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
     assert.equal(isolatedWelcome.channelId, "5678");
@@ -84,7 +106,7 @@ export async function run() {
     isolated.close();
     await closed(isolated);
 
-    const stream = new RemoteCommandStream({ playerId: firstWelcome.playerId, inputLeadTicks: 6 });
+    const stream = new RemoteCommandStream({ playerId: firstWelcome.playerId, inputLeadTicks: 30 });
     const initial = deserializeWorldSnapshotEnvelope(firstWelcome.snapshot);
     const command = createPlayerCommand(
         {
@@ -95,7 +117,7 @@ export async function run() {
         },
         { x: 0, y: 0 }
     );
-    const batch = stream.createBatch(initial.serverTick, command);
+    const batch = stream.createBatch(sharedRoom.simulation.getTick(), command);
     first.send(JSON.stringify({ type: "command", payload: serializePlayerCommandBatch(batch) }));
     const receipt = deserializeCommandReceipt((await nextMessage(first, "receipt")).payload);
     assert.equal(receipt.accepted[0].playerId, firstWelcome.playerId);

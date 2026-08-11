@@ -1,7 +1,18 @@
 import { createWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 
-export function buildAuthoritySnapshot({ simulation, acknowledgements = {} }) {
+export function buildAuthoritySnapshot({ simulation, acknowledgements = {}, includeActivePredictableObjects = false }) {
+    const drainedEvents = simulation.drainReplicationEvents();
+    const events = includeActivePredictableObjects
+        ? [
+              ...new Map(
+                  [...drainedEvents, ...simulation.activePredictableSpawnEvents()].map((event) => [
+                      event.eventId,
+                      event
+                  ])
+              ).values()
+          ]
+        : drainedEvents;
     return createWorldSnapshotEnvelope({
         serverTick: simulation.getTick(),
         worldSeed: simulation.world.seed,
@@ -18,6 +29,6 @@ export function buildAuthoritySnapshot({ simulation, acknowledgements = {} }) {
             metrics: simulation.metrics.snapshot(),
             completed: simulation.runState === "completed"
         },
-        events: simulation.drainReplicationEvents()
+        events
     });
 }
