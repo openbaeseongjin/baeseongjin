@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { guildCommands } from "../src/commands.js";
 
 describe("Codex guild commands", () => {
+    it("does not reserve the command for administrators", () => {
+        const command = guildCommands.find((candidate) => candidate.name === "codex");
+
+        expect(command).toBeDefined();
+        expect(command?.default_member_permissions).toBeUndefined();
+    });
+
     it("registers only the bounded V1 operations", () => {
         const command = guildCommands.find((candidate) => candidate.name === "codex");
 
