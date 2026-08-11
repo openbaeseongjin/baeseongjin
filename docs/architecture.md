@@ -68,16 +68,16 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 적과 직접 조작하지 않는 자동 행동 객체는 `SimulationDrivenObject`다. 서버가 진행하되 플레이어 피격처럼 사용자 체감과 만나는 사건은 피해 클라이언트가 먼저 반응하고 서버가 권위 객체 상태로 검증한다.
 - 멀티는 권한 감각만 보면 P2P형이다. 플레이어별 `InputDrivenObject` 결과는 해당 소유자·피해자 클라이언트가 먼저 결정하고, 특정 클라이언트에 귀속할 수 없는 몹과 적 투사체 같은 `SimulationDrivenObject`의 생성·궤적은 서버가 중립적으로 진행한다. 서버는 지연된 플레이어 복제 위치로 충돌을 먼저 확정하지 않고 피해 클라이언트 claim을 중립 객체 상태로 검증한다.
 - 사건 전파와 지속 상태 수렴을 같은 것으로 취급하지 않는다. `InputDrivenObject`의 지속 상태는 서버가 검증한 최신 소유자 상태를 서버와 동료가 따라가고, `SimulationDrivenObject`는 서버 상태를 모든 클라이언트가 따라간다. 원격 플레이어 위치는 상태가 실제 생성된 `ownerMotionTick` 표본 사이를 보간하고 공용 입력 선행 tick으로 서버 표시 시계와 정렬하며, 적은 `serverTick` 표본을 사용한다. 소유자는 정상 승인 중 서버 지연 위치로 되감기지 않으며 상태 전송 거부 때만 마지막 공유 상태에서 미확정 입력을 재실행한다.
-- 로프 스윙처럼 입력 capability가 플레이어의 지속 전투 상태도 바꾸면 클라이언트 예측과 서버 확정이 같은 `GameSimulation` 도메인 메서드를 사용한다. 소유 클라이언트는 즉시 강화하고, 서버는 별도 swing claim 검증 뒤 강화 시간과 무기 파라미터를 스냅샷에 포함한다. 같은 틱 자동 발사는 swing claim 뒤에 확정해 양쪽 피해량 계산의 원인이 일치한다.
-- 예측 객체의 생성과 그 입력이 바꾸는 소유자 상태는 하나의 prediction ID 수명주기로 관리한다. 자동 발사는 탄환과 무기 쿨다운을 함께 예측하고 로프 스윙은 강화 직전·직후 타이머를 함께 보존한다. 여러 동종 claim이 pending이면 앞 거절은 후속 효과를 지우지 않고 후속 prediction의 이전 값만 거절된 원인이 없었던 시간축으로 재기준화한다. 마지막 거절에서 최초 준비 상태로 수렴한다. claim 대기 상태는 이전 권위 스냅샷이 덮지 않고 receipt 이후 최신 스냅샷에 수렴한다.
-- 피해 예측은 projectile ID를 수명주기 키로 사용한다. `OwnerPredictionRuntime`은 피격 직전 `GameSimulation.playerState()`와 tick·발생 순서를 예측 journal에 보존하고, `GameSimulation`의 공용 피해 전이로 넉백·HP·무적·치명 체크포인트 부활·아티팩트 손실 또는 로프 절단을 즉시 적용한다. 거부 receipt에서는 보존 상태를 공개 복원 명령으로 되돌린 뒤 입력 이력과 시간상 뒤에 남은 impact를 원래 tick 순서로 재실행한다. 재적용 직전에 각 후속 impact의 복구 기준도 갱신한다. 따라서 여러 피해 결과가 중첩돼도 같은 원인 단위로 복구되며, 전송 계층이 HP나 물리 역연산을 따로 구현하지 않는다.
+- 로프 스윙처럼 입력 capability가 플레이어의 지속 전투 상태도 바꾸면 소유 클라이언트와 서버 검증 복제본이 같은 `GameSimulation` 도메인 메서드를 사용한다. 소유 클라이언트는 강화 시간과 무기 파라미터를 즉시 작성하고, 서버는 별도 swing claim을 검증해 다른 복제본에 공유한다. 같은 틱 자동 발사는 swing claim 뒤에 공유해 양쪽 피해량 계산의 원인이 일치한다. 정상 스냅샷은 소유자의 강화 타이머를 다시 쓰지 않는다.
+- 예측 객체의 생성과 그 입력이 바꾸는 소유자 상태는 하나의 prediction ID 수명주기로 관리한다. 자동 발사는 탄환과 무기 쿨다운을 함께 적용하고 로프 스윙은 강화 직전·직후 타이머를 함께 보존한다. 여러 동종 claim이 pending이면 앞 거절은 후속 효과를 지우지 않고 후속 prediction의 이전 값만 거절된 원인이 없었던 시간축으로 재기준화한다. 마지막 거절에서 최초 준비 상태로 복구한다. 승인 receipt는 공유 확인일 뿐 소유자 상태를 서버 스냅샷으로 교체하는 전이가 아니다.
+- 피해 결과는 projectile ID를 수명주기 키로 사용한다. `OwnerPredictionRuntime`은 피격 직전 `GameSimulation.playerState()`와 tick·발생 순서를 journal에 보존하고, `GameSimulation`의 공용 피해 전이로 넉백·HP·무적·치명 체크포인트 부활·아티팩트 손실 또는 로프 절단을 즉시 적용한다. 승인 receipt 뒤에도 resolve 사건까지 journal을 보존해 이전 공유 스냅샷이 결과를 지우지 않게 하고, resolve는 journal만 정리한다. 거부 receipt에서만 보존 상태를 공개 복원 명령으로 되돌린 뒤 입력 이력과 시간상 뒤에 남은 impact를 원래 tick 순서로 재실행한다. 재적용 직전에 각 후속 impact의 복구 기준도 갱신한다. 따라서 여러 피해 결과가 중첩돼도 같은 원인 단위로 복구되며, 전송 계층이 HP나 물리 역연산을 따로 구현하지 않는다.
 - 체크포인트처럼 `InputDrivenObject`의 위치가 공용 월드 전이를 만나는 사건은 소유 클라이언트가 로컬 시뮬레이션의 진행도·보상·로프 상태를 먼저 전이하고 claim을 만들며 서버가 공용 상태를 멱등 확정한다. 체크포인트와 뒤따르는 피격은 같은 예측 시간축에 있어 치명 피격이 새 활성 지점을 즉시 사용한다. 거절 시 이전 진행도·소유자 상태에서 이후 입력과 pending impact를 재실행한다. 서버 복제 시뮬레이션은 같은 위치 조건으로 별도 사건을 시작하지 않으며 싱글 자동 감지와 클라이언트 예측·서버 claim은 하나의 도메인 활성화 메서드를 공유한다.
 - 정상 도달도 같은 경계를 따른다. 도달한 소유 클라이언트가 완료 화면과 summit claim을 먼저 만들고, 서버는 최신 검증 소유자 위치로 확인한 첫 claim만 공용 런 완료로 전이한다. 완료 상태는 스냅샷으로 모든 참가자에게 수렴하며 서버 복제 위치의 별도 자동 판정은 두지 않는다.
 - 입력과 시뮬레이션 capability는 `Base => class extends Base` 믹스인으로 구현한다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput`, 자동 무기·적 공격은 각자의 capability 계약을 가진다. 투사체 종류는 같은 `projectile-motion`과 `client-projectile-collision` ID 아래에 서로 다른 운동·충돌 믹스인을 조합한다. 두 디스패처는 구체 클래스나 `instanceof` 분기 없이 capability 존재 여부로 전달한다.
 - `SimulationDispatcher`는 월드 단계가 지정한 capability ID만 실행한다. 한 객체에 운동과 충돌처럼 여러 능력이 조합돼도 현재 단계와 무관한 능력을 실행하지 않으며, `GameSimulation`과 `CombatSystems`는 단계 순서와 context만 조정한다. `PredictableProjectileStore`는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 담당하고 투사체 종류별 충돌이나 거부 정책을 분기하지 않는다.
 - 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
 - `GameSimulation`은 객체별 게임 규칙을 직접 모으는 거대 분기점이 아니라 월드 등록, 고정 tick, 객체 단계 실행과 사건 연결을 조정하는 월드 스케줄러로 축소한다. 투사체 spawn 사건도 종류를 검사하지 않고 객체의 `replicationState(tick)` 계약을 사용한다.
-- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·권위 전이·표시 보정만 조정한다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
+- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명·명시적 거부 복구·표시 보정만 조정한다. 정상 공유 스냅샷은 `applySharedOwnerProgress()`로 검증된 아티팩트·무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
 
 ### 적용된 마이그레이션 순서
 
@@ -138,10 +138,10 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.
 - 첫 화면에서 싱글은 `PlayerCommand → LocalAuthority → GameSimulation`, 멀티는 `4자리 채널 → 고정 WebSocket 서버 → 채널별 AuthorityServerSession → GameSimulation` 경계를 선택한다. 두 경로는 입력 출처와 상태 전달만 다르고 게임 규칙을 공유한다.
-- 협동은 서버 권위형과 로컬 플레이어 예측을 사용한다. 시간 모델, 상태 소유권, 스냅샷과 보정 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
+- 협동은 소유 클라이언트 권한과 서버 중립 월드 권한을 분할한다. 서버의 주역할은 소유 상태·사건 검증과 복제 공유이며, 시간 모델·상태 소유권·스냅샷과 거부 복구 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 - `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `OwnerPredictionRuntime`도 로컬 `GameSimulation`의 공개 소유자 예측 계약만 사용하며, 앱·예측 런타임·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
 - 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 서버 `CombatSystems`와 클라이언트 `PredictableProjectileStore`는 투사체의 공통 `projectile-motion` capability를 실행해 `ProjectileMotion`의 동일한 유도·직선 적분식을 호출하며 별도 궤적 공식을 두지 않는다. 충돌·claim 확정·수명 만료만 `resolve` 이벤트로 확정한다. 원래 spawn 이벤트는 활성 객체에 보존해 중간 입장 welcome에서만 같은 ID로 재전송한다.
-- 자기 탄환은 `EnemyHitPrediction` 믹스인이 로컬 충돌 VFX와 검증 가능한 hit claim을 한 번 만든다. 첫 로컬 충돌에서 탄환 수명은 소비되며 claim 거부가 같은 탄환을 겹친 위치에 복구해 추가 피격을 만들지 않는다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 대미지로 최종 결과를 확정한다. 중립 적 탄환의 거부된 피해 claim은 객체를 다시 표시할 수 있지만 `PlayerImpactPrediction`이 같은 겹침에서는 재발화하지 않고 대상과 분리된 뒤 다시 진입할 때만 새 충돌을 허용한다.
+- 자기 탄환은 `EnemyHitPrediction` 믹스인이 로컬 충돌 VFX와 검증 가능한 hit claim을 한 번 만든다. 첫 로컬 충돌에서 탄환 수명은 소비되며 claim 거부가 같은 탄환을 겹친 위치에 복구해 추가 피격을 만들지 않는다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 소유 탄환 대미지로 검증된 결과를 다른 복제본에 공유한다. 중립 적 탄환의 거부된 피해 claim은 객체를 다시 표시할 수 있지만 `PlayerImpactPrediction`이 같은 겹침에서는 재발화하지 않고 대상과 분리된 뒤 다시 진입할 때만 새 충돌을 허용한다.
 - `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
 
 ## 의존 방향
