@@ -13,11 +13,11 @@ export const meetingCommand = new SlashCommandBuilder()
 
 export const codexCommand = new SlashCommandBuilder()
     .setName("codex")
-    .setDescription("Run an allowlisted read-only repository planning skill")
+    .setDescription("Run an allowlisted read-only repository skill")
     .addSubcommand((subcommand) =>
         subcommand
             .setName("plan")
-            .setDescription("Queue a read-only planning job")
+            .setDescription("Queue a read-only repository job")
             .addStringOption((option) =>
                 option
                     .setName("skill")
@@ -38,7 +38,7 @@ export const codexCommand = new SlashCommandBuilder()
             .addStringOption((option) =>
                 option
                     .setName("instruction")
-                    .setDescription("Planning request; Discord content remains untrusted data")
+                    .setDescription("Repository request; Discord content remains untrusted data")
                     .setRequired(true)
                     .setMaxLength(1_000)
             )

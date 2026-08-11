@@ -13,7 +13,7 @@ This long-running Node.js service captures a meeting only between `/meeting star
 - Deterministic local classification: only explicitly labelled statements can enter `DECISIONS.md`, `TASKS.md`, or `NEXT MEETING`.
 - Discord minutes-channel publication and one atomic Git commit covering the dated minutes plus any eligible decision/task ledger updates.
 - Local mock transcript tests. No AI API key or paid API call is used by the service or test suite.
-- Opt-in `/codex plan`, `/codex status`, `/codex result`, and `/codex cancel` commands that run only allowlisted repository planning skills in the Codex CLI read-only sandbox.
+- Opt-in `/codex plan`, `/codex status`, `/codex result`, and `/codex cancel` commands that run only allowlisted repository skills in the Codex CLI read-only sandbox.
 
 GitHub Issue creation is intentionally not implemented.
 Codex code modification, approval, worktree, push, pull request, and merge operations are intentionally not implemented in V1.
@@ -33,12 +33,13 @@ The gateway is disabled by default. When `CODEX_ENABLED=true`, a meeting operato
 ```text
 /codex plan skill:meeting-to-game-plan source:last-meeting instruction:다음 개발 순서를 정리해줘
 /codex plan skill:repo-task-plan source:recent-messages instruction:이 기능의 구현 범위를 계획해줘
+/codex plan skill:discord-repo-cross-reference source:recent-messages instruction:논의와 현재 코드·문서·테스트의 일치 여부를 양방향으로 연결해줘
 /codex status job:CX-YYYYMMDD-ABC123
 /codex result job:CX-YYYYMMDD-ABC123
 /codex cancel job:CX-YYYYMMDD-ABC123
 ```
 
-Only `meeting-to-game-plan` and `repo-task-plan` are accepted. Discord content is delimited as untrusted data, bounded by message and character limits, and never interpreted as shell or permission instructions. Jobs are persisted under `.data/codex/jobs`, processed one at a time, and posted to the configured minutes channel with mentions disabled.
+Only `meeting-to-game-plan`, `repo-task-plan`, and `discord-repo-cross-reference` are accepted. The cross-reference skill maps Discord claims to repository evidence and repository evidence back to related Discord claims without modifying either side. Discord content is delimited as untrusted data, bounded by message and character limits, and never interpreted as shell or permission instructions. Jobs are persisted under `.data/codex/jobs`, processed one at a time, and posted to the configured minutes channel with mentions disabled.
 
 With `CODEX_PROVIDER=codex`, the runner invokes the locally installed `codex exec` with `--ephemeral`, `--ignore-user-config`, `-s read-only`, and a strict JSON output schema. It passes a small operating-system environment allowlist and removes Discord, GitHub, OpenAI, and GitHub App secrets from the child process. This provider may consume authenticated Codex account quota.
 

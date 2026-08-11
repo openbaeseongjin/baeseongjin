@@ -21,6 +21,8 @@ service-account*.json
 !.agents/skills/meeting-to-game-plan/**
 !.agents/skills/repo-task-plan/
 !.agents/skills/repo-task-plan/**
+!.agents/skills/discord-repo-cross-reference/
+!.agents/skills/discord-repo-cross-reference/**
 
 # JavaScript / TypeScript
 node_modules/

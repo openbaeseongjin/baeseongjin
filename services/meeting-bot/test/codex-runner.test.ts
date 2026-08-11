@@ -74,7 +74,7 @@ describe("CodexRunner", () => {
 
         const result = await runner.run({
             id: "CX-20260811-TEST02",
-            skill: "repo-task-plan",
+            skill: "discord-repo-cross-reference",
             instruction: "local provider test",
             context: '<discord-context trust="untrusted-data">data</discord-context>'
         });
@@ -83,7 +83,7 @@ describe("CodexRunner", () => {
         expect(fetchImplementation).toHaveBeenCalledOnce();
         const [url, request] = fetchImplementation.mock.calls[0] ?? [];
         expect(url).toBe("http://127.0.0.1:11434/api/chat");
-        expect(String(request?.body)).toContain("# Repo Task Plan");
+        expect(String(request?.body)).toContain("# Discord Repo Cross Reference");
         expect(String(request?.body)).toContain('"format":"json"');
     });
 

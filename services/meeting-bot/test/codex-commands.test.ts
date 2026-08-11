@@ -9,12 +9,16 @@ describe("Codex guild commands", () => {
         expect(command?.options?.map((option) => option.name)).toEqual(["plan", "status", "result", "cancel"]);
     });
 
-    it("offers only allowlisted read-only planning skills", () => {
+    it("offers only allowlisted read-only repository skills", () => {
         const command = guildCommands.find((candidate) => candidate.name === "codex");
         const plan = command?.options?.find((option) => option.name === "plan") as
             { options?: Array<{ name: string; choices?: Array<{ value: string | number }> }> } | undefined;
         const skill = plan?.options?.find((option) => option.name === "skill");
 
-        expect(skill?.choices?.map((choice) => choice.value)).toEqual(["meeting-to-game-plan", "repo-task-plan"]);
+        expect(skill?.choices?.map((choice) => choice.value)).toEqual([
+            "meeting-to-game-plan",
+            "repo-task-plan",
+            "discord-repo-cross-reference"
+        ]);
     });
 });

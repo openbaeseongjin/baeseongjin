@@ -1,0 +1,4 @@
+interface:
+    display_name: "Discord Repo Cross Reference"
+    short_description: "Cross-reference Discord discussions with repository evidence"
+    default_prompt: "Use $discord-repo-cross-reference to connect Discord discussion with repository code, documents, tests, and decisions."
