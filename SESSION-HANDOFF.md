@@ -118,6 +118,8 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `AuthoritySnapshotBuilder`가 플레이어별 상태·적·진행·승인 번호·사건만 권위 봉투로 만들고, 지형은 시드와 `WORLD_GENERATION_REVISION`으로 재생성하며 투사체 배열은 제외한다.
 - 플레이어는 물리·체력·아티팩트를 Has-A로 소유하고 로프는 부착·장력·드래그 상태를 가진 별도 `InputDrivenObject`로 둔다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput` Can-Do 믹스인 한 곳에 구현한다.
 - `InputDispatcher`는 구체 클래스나 `instanceof` 분기 없이 capability 존재 여부로 입력을 전달한다. 싱글·클라이언트 예측·서버 검증은 같은 디스패처와 믹스인을 사용하며 전송 계층은 이를 재구현하지 않는다.
+- 적 공격·자동 무기·유도탄·직선탄 운동도 각 `SimulationDrivenObject`의 Can-Do capability 한 곳에 구현한다. 월드 단계는 `SimulationDispatcher`에 capability ID를 지정해 같은 객체의 무관한 능력을 실행하지 않으며, 구체 클래스 분기를 중앙 스케줄러에 추가하지 않는다.
+- 시뮬레이션 capability 디스패치는 실행 구조만 정리하며 분할 권한을 바꾸지 않는다. 중립 객체는 서버가 진행하고 플레이어 당사자 피격·적중은 소유자 또는 피해 클라이언트가 먼저 claim하는 기존 계약을 유지한다. 상세 구현 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - `PlayerRuntimeFactory`는 `PlayerObject`, 별도 `RopeObject`, `AutomaticWeaponObject`와 Has-A 컴포넌트를 조립하고 소유자 입력 객체 목록을 반환한다. `GameSimulation`은 객체 등록·고정 tick·단계 실행·사건 연결을 조정하는 월드 스케줄러로 유지한다.
 - `GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 다음 틱의 입력 capability를 실행한다. 멀티 서버 fixed tick은 같은 스케줄러의 입력 주도 객체 단계를 끄고 플레이어 타이머·무기 쿨다운과 중립 월드만 진행한다.
 - 이벤트의 즉시 체감과 지속 상태 수렴은 별도 경로다. 플레이어·로프의 수렴 원점은 서버 지연 위치가 아니라 서버가 검증한 최신 소유 클라이언트 `owner-motion`이며, 몹·공용 월드의 수렴 원점은 서버 스냅샷이다. 일상적인 스냅샷은 승인된 소유 플레이어의 위치·속도·로프를 되감지 않고 HP·사망·개별 체크포인트 부활 같은 확정 결과만 반영한다. 서버가 `owner-motion`을 거부하면 클라이언트는 마지막 공유 상태를 그 플레이어의 `ownerMotionTick`에 복원하고 이후 미확정 입력만 공용 1/120초 시뮬레이션으로 재실행한다. 동료와 적은 지연된 두 스냅샷 사이 보간과 제한 외삽으로 다음 공유 상태에 수렴한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
@@ -192,6 +194,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
 - Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan`, `discord-repo-cross-reference` Skill만 선택할 수 있다.
 - `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
+- Discord 자유 조회·공유는 브라우저 자동화가 아니라 기존 미팅봇 자격 증명을 재사용하는 인증된 Discord MCP를 우선한다. MCP는 `DISCORD_GUILD_ID` 하나로 서버 범위를 고정하고 `messages,channels`만 노출하며, 가져오기는 회의 채널, 공유는 회의록 채널을 기본 대상으로 삼고 명시한 채널이 우선한다. 운영·TLS 계약은 `services/meeting-bot/README.md`를 따른다.
 - Codex CLI는 `read-only`, `ephemeral`로 실행하고 로컬 Ollama는 고정 loopback API와 허용 Skill만 사용한다. 두 경로 모두 구조화 출력을 검증하고 애플리케이션 비밀을 전달하지 않는다.
 - Ollama 공급자는 모델 설치뿐 아니라 `127.0.0.1:11434` 서버 실행이 필요하다. 봇 시작·재시작 때 loopback API와 선택 모델을 확인하며, 서버가 꺼져 있으면 Job을 유료 API로 우회하지 않고 실패로 남긴다.
 - 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.

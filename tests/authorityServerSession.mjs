@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { createArtifactSelectionClaim } from "../src/game/network/ArtifactSelectionClaim.js";
 import { createCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
@@ -369,7 +370,7 @@ export function run() {
         healthBeforeClaim - projectile.damage,
         "a duplicate claim must never deal damage twice"
     );
-    const impactProjectile = {
+    const impactProjectile = new BallisticProjectileObject({
         id: "enemy-impact-1",
         ownerId: "enemy-1",
         targetId: combatPlayer.id,
@@ -377,7 +378,7 @@ export function run() {
         velocity: new Vector2(120, 0),
         radius: 7,
         damage: 20
-    };
+    });
     combatSimulation.enemyProjectiles.push(impactProjectile);
     const playerHealthBeforeImpact = combatPlayer.health;
     combatPlayer.hitInvulnerabilityRemaining = 0;
@@ -420,7 +421,7 @@ export function run() {
     combatSimulation.activeCheckpoint = lethalCheckpoint;
     combatPlayer.health = 5;
     combatPlayer.hitInvulnerabilityRemaining = 0;
-    const lethalProjectile = {
+    const lethalProjectile = new BallisticProjectileObject({
         id: "enemy-impact-lethal",
         ownerId: "enemy-1",
         targetId: combatPlayer.id,
@@ -428,7 +429,7 @@ export function run() {
         velocity: new Vector2(120, 0),
         radius: 7,
         damage: 20
-    };
+    });
     combatSimulation.enemyProjectiles.push(lethalProjectile);
     const lethalClaim = createPlayerImpactClaim({
         projectileId: lethalProjectile.id,

@@ -1,37 +1,25 @@
-import { Vector2 } from "../../game-kit/index.js";
-import { ProjectileObject } from "./ProjectileObject.js";
-import { advanceHomingProjectileMotion, advanceProjectileMotion } from "./ProjectileMotion.js";
+import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 
-export function selectNearestEnemy(position, enemies, range) {
-    return (
-        enemies
-            .filter((enemy) => enemy.health > 0 && position.distanceTo(enemy.position) <= range)
-            .sort((left, right) => {
-                const distanceDifference = position.distanceTo(left.position) - position.distanceTo(right.position);
-                return distanceDifference || left.id.localeCompare(right.id);
-            })[0] ?? null
-    );
+const simulationDispatcher = new SimulationDispatcher();
+
+function advanceSimulationObject(object, capabilityId, context) {
+    const outcomes = simulationDispatcher.dispatch({ objects: [object], capabilityId, context });
+    if (outcomes.length !== 1) {
+        throw new Error(`simulation object ${object.id} must expose capability ${capabilityId}`);
+    }
+    return outcomes[0].result;
 }
 
 export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt, allowFire = true }) {
-    owner.weapon.cooldown = Math.max(0, owner.weapon.cooldown - dt);
-    if (owner.lifeState !== "active") return null;
-    if (!allowFire) return null;
-    if (owner.weapon.cooldown > 0) return null;
-    const target = selectNearestEnemy(owner.physics.position, enemies, owner.weapon.range);
-    if (!target) return null;
-    const projectile = new ProjectileObject({
-        id: registry.createId("projectile"),
-        ownerId: owner.id,
-        targetId: target.id,
-        position: owner.physics.position.clone(),
-        velocity: new Vector2(),
-        damage: owner.weapon.damage,
-        radius: config.projectileRadius
+    return advanceSimulationObject(owner.weapon, "automatic-weapon", {
+        owner,
+        enemies,
+        projectiles,
+        registry,
+        config,
+        dt,
+        allowFire
     });
-    projectiles.push(projectile);
-    owner.weapon.cooldown = owner.weapon.fireInterval;
-    return projectile;
 }
 
 export function updatePlayerProjectiles({
@@ -58,7 +46,11 @@ export function updatePlayerProjectiles({
             );
             continue;
         }
-        advanceHomingProjectileMotion(projectile, target.position, config.projectileSpeed, dt);
+        advanceSimulationObject(projectile, "homing-projectile-motion", {
+            dt,
+            targetPosition: target.position,
+            speed: config.projectileSpeed
+        });
         if (projectile.ageSeconds >= maxLifetimeSeconds) {
             resolutions.push(
                 Object.freeze({
@@ -96,48 +88,13 @@ export function updatePlayerProjectiles({
     return Object.freeze({ hits, resolutions: Object.freeze(resolutions) });
 }
 
-function selectNearestPlayer(position, targets, range) {
-    return (
-        targets
-            .filter(
-                (target) =>
-                    target.health > 0 &&
-                    target.lifeState === "active" &&
-                    position.distanceTo(target.physics.position) <= range
-            )
-            .sort((left, right) => {
-                const distanceDifference =
-                    position.distanceTo(left.physics.position) - position.distanceTo(right.physics.position);
-                return distanceDifference || left.id.localeCompare(right.id);
-            })[0] ?? null
-    );
-}
-
 export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, dt }) {
-    const spawned = [];
-    for (const enemy of enemies) {
-        enemy.fireCooldown = Math.max(0, (enemy.fireCooldown ?? 0) - dt);
-        if (enemy.fireCooldown > 0) continue;
-        const target = selectNearestPlayer(enemy.position, targets, config.enemyAttackRange);
-        if (!target) continue;
-        const direction = target.physics.position.clone().subtract(enemy.position);
-        const distance = direction.length();
-        if (distance <= 0) continue;
-        direction.scale(config.enemyProjectileSpeed / distance);
-        const projectile = new ProjectileObject({
-            id: registry.createId("enemy-projectile"),
-            ownerId: enemy.id,
-            targetId: target.id,
-            position: enemy.position.clone(),
-            velocity: direction,
-            radius: config.enemyProjectileRadius,
-            damage: config.enemyProjectileDamage
-        });
-        projectiles.push(projectile);
-        spawned.push(projectile);
-        enemy.fireCooldown = config.enemyFireInterval;
-    }
-    return Object.freeze(spawned);
+    const context = { targets, projectiles, registry, config, dt };
+    return Object.freeze(
+        enemies
+            .map((enemy) => advanceSimulationObject(enemy, "enemy-weapon", context))
+            .filter((projectile) => projectile !== null)
+    );
 }
 
 export function distancePointToSegment(point, start, end) {
@@ -156,7 +113,7 @@ export function advanceEnemyProjectiles({ projectiles, dt, maxLifetimeSeconds = 
     const survivors = [];
     const expired = [];
     for (const projectile of projectiles) {
-        advanceProjectileMotion(projectile, dt);
+        advanceSimulationObject(projectile, "ballistic-projectile-motion", { dt });
         if (projectile.ageSeconds >= maxLifetimeSeconds) expired.push(projectile);
         else survivors.push(projectile);
     }

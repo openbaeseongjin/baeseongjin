@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
-import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
+import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { COMBAT_CONFIG } from "../src/game/config.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { LocalAuthority } from "../src/game/runtime/LocalAuthority.js";
@@ -148,7 +148,7 @@ export function run() {
     localImpactSimulation.enemies = [];
     const localImpactPlayer = primaryPlayer(localImpactSimulation);
     const localImpactAuthority = new LocalAuthority(localImpactSimulation);
-    const localImpactProjectile = {
+    const localImpactProjectile = new BallisticProjectileObject({
         id: "local-enemy-impact",
         ownerId: "local-enemy",
         targetId: localImpactPlayer.id,
@@ -156,7 +156,7 @@ export function run() {
         velocity: localImpactPlayer.physics.velocity.clone(),
         radius: 7,
         damage: 20
-    };
+    });
     localImpactSimulation.enemyProjectiles.push(localImpactProjectile);
     const localHealthBeforeImpact = localImpactPlayer.health;
     localImpactAuthority.step(0, command);
@@ -177,7 +177,7 @@ export function run() {
 
     const expirationSimulation = new GameSimulation();
     expirationSimulation.enemies = [];
-    const expiringProjectile = new ProjectileObject({
+    const expiringProjectile = new BallisticProjectileObject({
         id: "expiring-enemy-projectile",
         ownerId: "expiration-enemy",
         targetId: expirationSimulation.getPrimaryPlayerId(),

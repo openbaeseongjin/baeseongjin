@@ -2,11 +2,11 @@ import { Vector2 } from "../../game-kit/index.js";
 import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
     advanceEnemyProjectiles,
-    selectNearestEnemy,
     updateAutomaticWeapon,
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
+import { selectNearestEnemy } from "../combat/CombatTargeting.js";
 import { EnemyObject } from "../combat/EnemyObject.js";
 import { ARTIFACT_CONFIG, COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";

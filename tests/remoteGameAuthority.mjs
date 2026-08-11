@@ -4,7 +4,7 @@ import { WebSocket } from "ws";
 import { Vector2 } from "../src/game-kit/index.js";
 import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
-import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
+import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
 import { createCheckpointClaim, serializeCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { MULTIPLAYER_TIMING } from "../src/game/network/MultiplayerTiming.js";
@@ -452,7 +452,7 @@ export async function run() {
             lethalRoom.simulation.playerState(lethalOwner.playerId),
             lethalOwner.snapshot().owner.tick
         );
-        const lethalProjectile = new ProjectileObject({
+        const lethalProjectile = new BallisticProjectileObject({
             id: "lethal-order-projectile",
             ownerId: "lethal-order-enemy",
             targetId: lethalOwner.playerId,
@@ -732,7 +732,7 @@ export async function run() {
         const room = gameServer.rooms.get(authority.channelId);
         const authorityPlayer = room.simulation.players.find(({ id }) => id === authority.playerId);
         const ownerBeforeAcceptedImpact = authority.snapshot().owner;
-        const receiptProjectile = new ProjectileObject({
+        const receiptProjectile = new BallisticProjectileObject({
             id: "impact-receipt-projectile",
             ownerId: "impact-receipt-enemy",
             targetId: authority.playerId,
@@ -807,7 +807,7 @@ export async function run() {
             beforeRejectedBody,
             beforeRejectedBodyTick
         );
-        const rejectedBodyProjectile = new ProjectileObject({
+        const rejectedBodyProjectile = new BallisticProjectileObject({
             id: "rejected-body-impact-projectile",
             ownerId: "rejected-body-impact-enemy",
             targetId: authority.playerId,
@@ -880,7 +880,7 @@ export async function run() {
         localImpactPlayer.ropeObject.rope.attach(localImpactPlayer.physics.position, ropeAnchor);
         localImpactPlayer.ropeDisabledRemaining = 0;
         authorityPlayer.ropeDisabledRemaining = 0;
-        const rejectedRopeProjectile = new ProjectileObject({
+        const rejectedRopeProjectile = new BallisticProjectileObject({
             id: "rejected-rope-impact-projectile",
             ownerId: "rejected-rope-impact-enemy",
             targetId: authority.playerId,
@@ -915,7 +915,7 @@ export async function run() {
         authority.ownerRuntime.simulation.releasePlayerRope(authority.playerId);
         room.simulation.releasePlayerRope(authority.playerId);
         const hitTarget = room.simulation.enemies[0];
-        const playerProjectile = new ProjectileObject({
+        const playerProjectile = new HomingProjectileObject({
             id: "player-hit-receipt-projectile",
             ownerId: authority.playerId,
             targetId: hitTarget.id,
