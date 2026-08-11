@@ -75,6 +75,17 @@ export function run() {
     );
     assert.equal(rejectedImpactStore.locallyResolvedObjectIds.size, 0);
     assert.equal(rejectedImpactStore.metrics().predictionCancellations, 1);
+    assert.equal(
+        rejectedImpactStore.update(0, { enemies: [], localPlayer }, 21).length,
+        0,
+        "a rejected impact must not retrigger while the same projectile remains overlapping"
+    );
+    rejectedImpactStore.update(0, { enemies: [], localPlayer: { ...localPlayer, position: { x: 200, y: 0 } } }, 22);
+    assert.equal(
+        rejectedImpactStore.update(0, { enemies: [], localPlayer }, 23)[0].resolution,
+        "player-hit",
+        "a rejected neutral projectile impact may retry only after separation and re-entry"
+    );
 
     const burstStore = new PredictableProjectileStore();
     const secondEnemySpawn = createPredictableSpawnEvent({
@@ -285,12 +296,16 @@ export function run() {
     predictedStore.applyHitClaimReceipts([
         { predictionId: predictedHit[0].predictionId, accepted: false, reason: "test-rejection" }
     ]);
-    assert.equal(predictedStore.snapshot().projectiles.length, 1, "a rejected hit claim must restore the projectile");
+    assert.equal(
+        predictedStore.snapshot().projectiles.length,
+        0,
+        "a projectile that already produced local hit feedback must stay consumed after a rejected claim"
+    );
     assert.equal(predictedStore.metrics().predictionCancellations, 1);
     const retriedHit = predictedStore.update(0, {
         enemies: [{ id: "enemy-1", position: { x: 0, y: 0 }, radius: 18, health: 40 }]
     });
-    assert.equal(retriedHit.length, 1);
+    assert.equal(retriedHit.length, 0, "one projectile must not produce repeated hit feedback while overlapping");
     const confirmedHit = createPredictableResolveEvent({
         eventId: "event-5",
         objectId: "projectile-server-1",
@@ -304,6 +319,9 @@ export function run() {
         [],
         "authority resolve must not replay predicted hit feedback"
     );
+    assert.equal(predictedStore.locallyResolvedPredictionIds.has(predictedHit[0].predictionId), false);
+    assert.equal(predictedStore.objectIdByPredictionId.has(predictedHit[0].predictionId), false);
+    assert.equal(predictedStore.predictionIdByAuthorityId.has("projectile-server-1"), false);
 
     predictedStore.predict([{ ...predictedSpawn, predictionId: "player-1:30", tick: 30 }]);
     const cancelledSpawn = createPredictableSpawnEvent({

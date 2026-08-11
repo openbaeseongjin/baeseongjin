@@ -1,28 +1,12 @@
-import { BallisticProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
+import { CLIENT_PROJECTILE_COLLISION_CAPABILITY } from "../combat/ProjectileClientCollision.js";
+import { createProjectileObject, PROJECTILE_MOTION_CAPABILITY } from "../combat/ProjectileObject.js";
 import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 
 const FIXED_DT = 1 / 120;
 const simulationDispatcher = new SimulationDispatcher();
 
-function createReplicatedProjectile({ objectType, speed, predictCollision, ...state }) {
-    const ProjectileClass = objectType === "player-projectile" ? HomingProjectileObject : BallisticProjectileObject;
-    const projectile = new ProjectileClass(state);
-    projectile.objectType = objectType;
-    projectile.speed = speed;
-    projectile.predictCollision = predictCollision;
-    return projectile;
-}
-
-function distancePointToSegment(point, start, end) {
-    const segmentX = end.x - start.x;
-    const segmentY = end.y - start.y;
-    const lengthSquared = segmentX * segmentX + segmentY * segmentY;
-    if (lengthSquared === 0) return Math.hypot(point.x - start.x, point.y - start.y);
-    const projection = Math.max(
-        0,
-        Math.min(1, ((point.x - start.x) * segmentX + (point.y - start.y) * segmentY) / lengthSquared)
-    );
-    return Math.hypot(point.x - (start.x + segmentX * projection), point.y - (start.y + segmentY * projection));
+function createReplicatedProjectile({ objectType, speed, hadLocalPrediction, ...state }) {
+    return createProjectileObject({ objectType, speed, hadLocalPrediction, ...state });
 }
 
 function length(vector) {
@@ -30,25 +14,29 @@ function length(vector) {
 }
 
 function advanceProjectile(projectile, dt, state) {
-    let targetPosition = null;
-    let capabilityId = "ballistic-projectile-motion";
-    if (projectile.objectType === "player-projectile") {
-        const target = state?.enemies?.find(({ id }) => id === projectile.targetId);
-        targetPosition = target?.position ?? null;
-        capabilityId = "homing-projectile-motion";
-    }
     const outcomes = simulationDispatcher.dispatch({
         objects: [projectile],
-        capabilityId,
-        context: { dt, targetPosition, speed: projectile.speed }
+        capabilityId: PROJECTILE_MOTION_CAPABILITY,
+        context: { dt, state }
     });
     if (outcomes.length !== 1) {
-        throw new Error(`replicated projectile ${projectile.id} has no ${capabilityId} capability`);
+        throw new Error(`replicated projectile ${projectile.id} has no ${PROJECTILE_MOTION_CAPABILITY} capability`);
     }
 }
 
+function createImpactBudget() {
+    let claimed = false;
+    return Object.freeze({
+        tryClaim() {
+            if (claimed) return false;
+            claimed = true;
+            return true;
+        }
+    });
+}
+
 function findPendingPrediction(objects, event) {
-    if (event.objectType !== "player-projectile") return null;
+    if (!event.parameters?.predictionId) return null;
     for (const projectile of objects.values()) {
         if (
             projectile.id.startsWith("predicted:") &&
@@ -88,7 +76,7 @@ export class PredictableProjectileStore {
                     this.predictionIdByAuthorityId.delete(event.objectId);
                     this.objectIdByPredictionId.delete(predictionId);
                     if (this.locallyResolvedPredictionIds.delete(predictionId)) continue;
-                    if (existingProjectile?.predictCollision) this.predictionCancellations += 1;
+                    if (existingProjectile?.isClientCollisionPredictionEnabled()) this.predictionCancellations += 1;
                 }
                 if (this.locallyResolvedObjectIds.delete(event.objectId)) continue;
                 feedbackEvents.push(event);
@@ -120,7 +108,7 @@ export class PredictableProjectileStore {
                 velocity: predicted ? { ...predicted.velocity } : { ...event.velocity },
                 speed: event.parameters.speed ?? length(event.velocity),
                 predictionId,
-                predictCollision: event.objectType === "enemy-projectile" || Boolean(predictionId && predicted)
+                hadLocalPrediction: Boolean(predictionId && predicted)
             });
             if (!predicted) {
                 const delayedTicks = Math.max(0, serverTick - event.tick);
@@ -155,7 +143,7 @@ export class PredictableProjectileStore {
                     velocity: { ...event.velocity },
                     speed: event.speed,
                     predictionId: event.predictionId,
-                    predictCollision: true
+                    hadLocalPrediction: true
                 })
             );
         }
@@ -163,64 +151,21 @@ export class PredictableProjectileStore {
 
     update(dt, state, clientTick = 0) {
         const resolutions = [];
-        let localPlayerImpactClaimed = false;
-        for (const projectile of [...this.objects.values()]) {
-            advanceProjectile(projectile, dt, state);
-            if (projectile.pendingImpactClaim || projectile.pendingHitClaim) continue;
-            if (!projectile.predictCollision) continue;
-            if (projectile.objectType === "enemy-projectile") {
-                if (localPlayerImpactClaimed) continue;
-                const player = state?.localPlayer;
-                if (!player || player.lifeState !== "active") continue;
-                const ropeHit =
-                    player.rope?.isAttached &&
-                    distancePointToSegment(projectile.position, player.position, player.rope.anchor) <=
-                        projectile.radius;
-                const bodyHit =
-                    !ropeHit &&
-                    player.health > 0 &&
-                    (player.hitInvulnerabilityRemaining ?? 0) <= 0 &&
-                    Math.hypot(projectile.position.x - player.position.x, projectile.position.y - player.position.y) <=
-                        projectile.radius + player.radius;
-                if (!ropeHit && !bodyHit) continue;
-                localPlayerImpactClaimed = true;
-                projectile.pendingImpactClaim = true;
-                this.locallyResolvedObjectIds.add(projectile.id);
-                resolutions.push(
-                    Object.freeze({
-                        eventType: "predicted-resolve",
-                        projectileId: projectile.id,
-                        targetId: player.id,
-                        clientTick,
-                        resolution: ropeHit ? "rope-cut" : "player-hit",
-                        position: ropeHit ? { ...projectile.position } : { ...player.position },
-                        velocity: { ...projectile.velocity },
-                        parameters: { damage: projectile.damage }
-                    })
-                );
-                continue;
-            }
-            if (projectile.objectType !== "player-projectile") continue;
-            const target = state?.enemies?.find(({ id }) => id === projectile.targetId);
-            if (!target) continue;
-            const hitDistance = Math.hypot(
-                projectile.position.x - target.position.x,
-                projectile.position.y - target.position.y
-            );
-            if (hitDistance > projectile.radius + target.radius) continue;
-            projectile.pendingHitClaim = true;
-            this.locallyResolvedPredictionIds.add(projectile.predictionId);
-            resolutions.push(
-                Object.freeze({
-                    eventType: "predicted-resolve",
-                    predictionId: projectile.predictionId,
-                    targetId: projectile.targetId,
-                    clientTick,
-                    resolution: target.health <= projectile.damage ? "enemy-defeated" : "enemy-hit",
-                    position: { ...target.position },
-                    parameters: { damage: projectile.damage }
-                })
-            );
+        const projectiles = [...this.objects.values()];
+        for (const projectile of projectiles) advanceProjectile(projectile, dt, state);
+        const outcomes = simulationDispatcher.dispatch({
+            objects: projectiles,
+            capabilityId: CLIENT_PROJECTILE_COLLISION_CAPABILITY,
+            context: { state, clientTick, impactBudget: createImpactBudget() }
+        });
+        if (outcomes.length !== projectiles.length) {
+            throw new Error("every replicated projectile must expose client collision capability");
+        }
+        for (const { result } of outcomes) {
+            if (!result) continue;
+            if (result.predictionId) this.locallyResolvedPredictionIds.add(result.predictionId);
+            if (result.projectileId) this.locallyResolvedObjectIds.add(result.projectileId);
+            resolutions.push(result);
         }
         return Object.freeze(resolutions);
     }
@@ -228,8 +173,7 @@ export class PredictableProjectileStore {
     applyImpactReceipts(receipts) {
         for (const receipt of receipts) {
             const projectile = this.objects.get(receipt.projectileId);
-            if (!projectile?.pendingImpactClaim || receipt.accepted) continue;
-            projectile.pendingImpactClaim = false;
+            if (!projectile || receipt.accepted || !projectile.rejectClientCollision()) continue;
             this.locallyResolvedObjectIds.delete(receipt.projectileId);
             this.predictionCancellations += 1;
         }
@@ -240,9 +184,8 @@ export class PredictableProjectileStore {
             if (receipt.accepted) continue;
             const objectId = this.objectIdByPredictionId.get(receipt.predictionId);
             const projectile = objectId ? this.objects.get(objectId) : null;
-            if (!projectile?.pendingHitClaim) continue;
-            projectile.pendingHitClaim = false;
-            this.locallyResolvedPredictionIds.delete(receipt.predictionId);
+            if (!projectile || !projectile.rejectClientCollision()) continue;
+            if (!projectile.isClientVisible()) this.objects.delete(objectId);
             this.predictionCancellations += 1;
         }
     }
@@ -263,10 +206,14 @@ export class PredictableProjectileStore {
     snapshot() {
         const projectiles = [];
         const enemyProjectiles = [];
+        const collections = { projectiles, enemyProjectiles };
         for (const projectile of this.objects.values()) {
-            if (projectile.pendingImpactClaim || projectile.pendingHitClaim) continue;
-            const target = projectile.objectType === "enemy-projectile" ? enemyProjectiles : projectiles;
-            target.push({ ...projectile, position: { ...projectile.position }, velocity: { ...projectile.velocity } });
+            if (!projectile.isClientVisible()) continue;
+            collections[projectile.renderCollection].push({
+                ...projectile,
+                position: { ...projectile.position },
+                velocity: { ...projectile.velocity }
+            });
         }
         return { projectiles, enemyProjectiles };
     }
