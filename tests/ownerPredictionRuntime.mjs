@@ -198,6 +198,51 @@ export function run() {
         "the final rejected impact must use its rebased pre-impact state"
     );
 
+    const overlappingSwings = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
+    overlappingSwings.reconcile(snapshot, []);
+    const overlappingSwingPlayer = primaryPlayer(overlappingSwings.simulation);
+    overlappingSwingPlayer.ropeDamageBoostRemaining = 3;
+    overlappingSwings.simulation.applyArtifactEffects(overlappingSwingPlayer);
+    const firstSwingTick = overlappingSwings.state().tick;
+    overlappingSwings.recordPredictedRopeSwing(firstSwingTick, 0);
+    const firstSwingPrediction = overlappingSwings.drainPredictedEvents()[0];
+    overlappingSwings.advance(overlapIdle);
+    const secondSwingPreviousBoost = overlappingSwings.state().ropeDamageBoostRemaining;
+    overlappingSwingPlayer.ropeObject.rope.attach(overlappingSwingPlayer.physics.position, {
+        x: overlappingSwingPlayer.physics.position.x,
+        y: overlappingSwingPlayer.physics.position.y - 80
+    });
+    overlappingSwingPlayer.ropeDamageBoostRemaining = 3;
+    overlappingSwings.simulation.applyArtifactEffects(overlappingSwingPlayer);
+    const secondSwingTick = overlappingSwings.state().tick;
+    overlappingSwings.recordPredictedRopeSwing(secondSwingTick, secondSwingPreviousBoost);
+    const secondSwingPrediction = overlappingSwings.drainPredictedEvents()[0];
+    const secondSwingBoost = overlappingSwings.state().ropeDamageBoostRemaining;
+    assert.equal(
+        overlappingSwings.recordRopeSwingReceipt({
+            predictionId: firstSwingPrediction.predictionId,
+            accepted: false
+        }),
+        true
+    );
+    close(
+        overlappingSwings.state().ropeDamageBoostRemaining,
+        secondSwingBoost,
+        "rejecting an earlier swing must keep the later pending swing"
+    );
+    assert.equal(
+        overlappingSwings.recordRopeSwingReceipt({
+            predictionId: secondSwingPrediction.predictionId,
+            accepted: false
+        }),
+        true
+    );
+    close(
+        overlappingSwings.state().ropeDamageBoostRemaining,
+        0,
+        "rejecting the final swing must use the baseline corrected after the earlier rejection"
+    );
+
     const lethalServer = new GameSimulation();
     const lethalServerPlayer = primaryPlayer(lethalServer);
     lethalServer.enemies = [];
@@ -534,6 +579,36 @@ export function run() {
     assert.equal(predictedAttacks.length, 1, "owner fire must emit a local predicted spawn");
     assert.equal(predictedAttacks[0].predictionId, `${movingPlayer.id}:${attackTick}`);
     assert.deepEqual(attackPredictor.drainPredictedEvents(), []);
+
+    const overlappingShots = new OwnerPredictionRuntime({ ownerId: movingPlayer.id, predictionLeadTicks: 0 });
+    overlappingShots.reconcile(attackSnapshot, []);
+    overlappingShots.advance(move);
+    const firstShotPrediction = overlappingShots.drainPredictedEvents()[0];
+    const overlappingShotPlayer = primaryPlayer(overlappingShots.simulation);
+    overlappingShotPlayer.weapon.cooldown = 0;
+    overlappingShots.advance(move);
+    const secondShotPrediction = overlappingShots.drainPredictedEvents()[0];
+    const secondShotCooldown = overlappingShots.state().weaponCooldown;
+    assert.equal(
+        overlappingShots.recordProjectileSpawnReceipt({
+            predictionId: firstShotPrediction.predictionId,
+            accepted: false
+        }),
+        true
+    );
+    close(
+        overlappingShots.state().weaponCooldown,
+        secondShotCooldown,
+        "rejecting an earlier shot must keep the later pending shot cooldown"
+    );
+    assert.equal(
+        overlappingShots.recordProjectileSpawnReceipt({
+            predictionId: secondShotPrediction.predictionId,
+            accepted: false
+        }),
+        true
+    );
+    close(overlappingShots.state().weaponCooldown, 0, "the final rejected shot must restore its ready baseline");
 
     const secondPlayerId = "player-2";
     const secondPlayerSnapshot = {
