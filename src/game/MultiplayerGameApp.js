@@ -1,7 +1,8 @@
 import { InputSampler } from "../core/input/InputSampler.js";
 import { FixedStepRunner } from "../core/sim/FixedStepRunner.js";
 import { Vector2 } from "../game-kit/index.js";
-import { CanvasRenderer } from "../render/CanvasRenderer.js";
+import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../render/GameRendererFactory.js";
+import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
@@ -32,8 +33,10 @@ export function commandForLocalSimulation(command, choosingArtifact) {
 }
 
 export class MultiplayerGameApp {
-    constructor({ canvas, authority, onDisconnect = () => {}, onDiagnostics = () => {} }) {
-        this.renderer = new CanvasRenderer(canvas);
+    constructor({ canvas, renderer = null, authority, onDisconnect = () => {}, onDiagnostics = () => {} }) {
+        this.renderer = renderer
+            ? assertGameRenderer(renderer)
+            : createGameRenderer({ canvas, profile: DEFAULT_RENDERER_PROFILE });
         this.input = new InputSampler(globalThis.window, canvas, {
             onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
         });

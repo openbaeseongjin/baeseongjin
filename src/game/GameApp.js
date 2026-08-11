@@ -1,6 +1,7 @@
 import { InputSampler } from "../core/input/InputSampler.js";
 import { FixedStepRunner } from "../core/sim/FixedStepRunner.js";
-import { CanvasRenderer } from "../render/CanvasRenderer.js";
+import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../render/GameRendererFactory.js";
+import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
@@ -11,9 +12,16 @@ import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
 
 export class GameApp {
-    constructor({ canvas, onDiagnostics = () => {}, worldSeed = selectWorldSeed(globalThis.location?.search) }) {
+    constructor({
+        canvas,
+        renderer = null,
+        onDiagnostics = () => {},
+        worldSeed = selectWorldSeed(globalThis.location?.search)
+    }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
-        this.renderer = new CanvasRenderer(canvas);
+        this.renderer = renderer
+            ? assertGameRenderer(renderer)
+            : createGameRenderer({ canvas, profile: DEFAULT_RENDERER_PROFILE });
         this.input = new InputSampler(globalThis.window, canvas, {
             onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
         });

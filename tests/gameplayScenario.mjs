@@ -12,6 +12,7 @@ import { run as worldSeed } from "./worldSeed.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
 import { run as artifactRewardSelection } from "./artifactRewardSelection.mjs";
 import { run as gameObjectModel } from "./gameObjectModel.mjs";
+import { run as renderingSystem } from "./renderingSystem.mjs";
 
 const steps = {
     worldSeed,
@@ -26,6 +27,7 @@ const steps = {
     gameSimulation,
     combatSystems,
     canvasRenderer,
+    renderingSystem,
     worldTraversalValidator,
     commandReplay
 };
