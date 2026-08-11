@@ -34,6 +34,8 @@ npm start
 
 공개 배포가 실제 게임 서버와 연결되는지는 다음 smoke 검사로 확인한다. 기본값은 GitHub Pages이며 다른 배포는 `-- --page=https://example.test/game/`처럼 지정한다. 검사는 Pages의 표시 버전과 게임 서버 `/health.version` 일치 여부를 먼저 확인한 뒤, 대상 페이지의 Origin을 브라우저와 같이 WebSocket handshake에 포함하고 새 4자리 채널 생성, 두 번째 플레이어 참가, 퇴장 반영과 빈 방 제거까지 수행한다. 버전이 다르면 이전 코드로 실행 중인 서버이므로 서버 프로세스를 재시작한 후 다시 검사한다. 외부 네트워크에 의존하므로 기본 `npm test`에는 포함하지 않는다.
 
+이 smoke 검사는 Node WebSocket 클라이언트로 공개 연결·채널 수명주기·버전 정합을 확인하는 운영 검사다. 실제 모바일 브라우저의 터치 입력, 로컬 충돌 판정, HP·로프 반응이나 렌더링 경로를 실행하지 않으므로 모바일 게임플레이 회귀의 합격 근거로 사용하지 않는다. 해당 회귀는 브라우저 입력 경계를 포함한 자동 테스트와 `docs/two-device-playtest-protocol.md`의 실기기 검증을 별도로 수행한다.
+
 ```powershell
 npm run smoke:multiplayer
 ```
