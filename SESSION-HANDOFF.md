@@ -21,7 +21,7 @@
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
 - 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용
-- 별도 Discord 서비스는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
+- 별도 Discord 서비스는 상세 분류 앞에 결정적 3~5줄 `SUMMARY`가 있는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
 - 고정 게임 서버의 4자리 채널 생성·참가, 채널별 독립 월드와 2인 분할 권한 동기화
 - 120Hz 권위 틱, 20Hz 스냅샷, 자기 예측·동료 보간과 투사체 사건 재생
 - 플레이어 간 원형 몸체 충돌과 실제 접속자 ID를 소유하는 로컬 예측 시뮬레이션
@@ -198,6 +198,12 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 설정된 서버의 모든 멤버가 설정된 회의 텍스트 채널에서 `/meeting start/end`를 사용할 수 있다. 다른 서버·채널 차단과 단일 활성 회의 제한은 유지한다.
 - 설정된 서버의 모든 멤버가 설정된 회의 텍스트 채널에서 `/codex plan/status/result/cancel`을 사용할 수 있다. 다른 서버·채널 차단과 읽기 전용 Skill·입력 상한·단일 로컬 작업 큐는 유지한다. 공개 게이트웨이는 고정 loopback Ollama만 허용하고, 멤버별 동시 1건과 `CODEX_MAX_OUTSTANDING_JOBS` 전체 상한을 적용한다.
 - 세부 실행·권한 설정은 `services/meeting-bot/README.md`를 기준으로 한다.
+
+### [L2] 회의록은 상세 분류 앞에 안전한 요약을 제공한다
+
+- Discord와 GitHub 회의록은 승인된 최종 상세 필드에서만 만든 3~5줄 `SUMMARY`를 맨 위에 표시한다. 각 줄은 240자로 제한하고 결정·할 일·블로커·다음 회의·논의를 우선하며, 가설과 제외 항목은 해당 라벨을 유지한다.
+- `SUMMARY`는 표시용 파생 데이터이며 `DECISIONS.md`와 `TASKS.md` 승격 근거로 사용하지 않는다. 원본 `RawMinutes`와 명시적 증거 게이트는 그대로 유지하며 새 AI 또는 유료 API 호출을 추가하지 않는다.
+- 세부 형식과 검증 기준은 `services/meeting-bot/README.md`를 따른다.
 
 ### [L2] Discord의 Codex 호출은 허용 목록 기반 읽기 전용 기획으로 시작한다
 

@@ -9,7 +9,7 @@ This long-running Node.js service captures a meeting only between `/meeting star
 - Optional voice capture from the command user's current voice channel.
 - DAVE-enabled Discord voice connection and per-Discord-user audio segments.
 - Free local speech transcription with `faster-whisper`, CPU `int8`, and exact Discord user attribution.
-- Structured `DISCUSSED / DECIDED / REJECTED / HYPOTHESES / ACTION ITEMS / BLOCKERS / NEXT MEETING` minutes.
+- A deterministic 3–5 line `SUMMARY`, followed by structured `DISCUSSED / DECIDED / REJECTED / HYPOTHESES / ACTION ITEMS / BLOCKERS / NEXT MEETING` minutes.
 - Deterministic local classification: only explicitly labelled statements can enter `DECISIONS.md`, `TASKS.md`, or `NEXT MEETING`.
 - Discord minutes-channel publication and one atomic Git commit covering the dated minutes plus any eligible decision/task ledger updates.
 - Local mock transcript tests. No AI API key or paid API call is used by the service or test suite.
@@ -24,7 +24,8 @@ Codex code modification, approval, worktree, push, pull request, and merge opera
 2. Discord voice packets are separated by Discord user ID, decoded from Opus, and written as short WAV speaking segments in `MEETING_DATA_DIR`.
 3. `/meeting end` closes the streams and runs each segment through `faster-whisper` on the bot host. Audio is not sent to an AI API. Discord's user identity remains the authoritative speaker label.
 4. Deterministic rules classify explicitly labelled statements. Ambiguous conversation remains in `DISCUSSED` and is never promoted automatically.
-5. Minutes are posted to the configured Discord channel and committed to GitHub. Audio is deleted after processing unless `RETAIN_AUDIO=true`.
+5. A 3–5 line `SUMMARY` is derived only from the already-gated detail fields. It is display data, not evidence for `DECISIONS.md` or `TASKS.md`.
+6. Summary-first minutes are posted to the configured Discord channel and committed to GitHub. Audio is deleted after processing unless `RETAIN_AUDIO=true`.
 
 ## Read-only Discord to Codex gateway
 
@@ -91,6 +92,8 @@ For safe deterministic promotion, use these exact text forms in the meeting chan
 ```
 
 Ordinary text and unlabelled voice transcript remain in `DISCUSSED`. Voice recognition may omit punctuation, so text labels are the reliable way to update `DECISIONS.md` and `TASKS.md` without a language-model API.
+
+The summary prioritizes confirmed decisions, explicit action items, blockers, the next meeting, and discussion, while retaining `가설` or `제외` labels when those categories are shown. It contains 3–5 bounded lines and never reclassifies a hypothesis as a decision. No Ollama or paid API call is used to create it.
 
 ## GitHub authentication and publication safety
 

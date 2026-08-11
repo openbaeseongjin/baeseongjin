@@ -1,4 +1,5 @@
-import type { EvidencedItem, Minutes, RawMinutes, TranscriptEntry } from "./types.js";
+import { buildMeetingSummary } from "./meeting-summary.js";
+import type { EvidencedItem, Minutes, MinutesDetails, RawMinutes, TranscriptEntry } from "./types.js";
 
 const decisionPattern =
   /(확정|결정|정했|하기로\s*했|가기로\s*했|로\s*가자|그렇게\s*하자|채택|승인|confirmed|decided|agreed|approved|let(?:'s| us) go with)/iu;
@@ -67,7 +68,7 @@ export function enforceExplicitPromotions(
     }
   }
 
-  return {
+  const details: MinutesDetails = {
     discussed: unique(rawMinutes.discussed),
     decided: unique(decided),
     rejected: unique(rejected),
@@ -76,6 +77,7 @@ export function enforceExplicitPromotions(
     blockers: unique(rawMinutes.blockers),
     nextMeeting,
   };
+  return { summary: buildMeetingSummary(details), ...details };
 }
 
 const decisionLabel = /^\s*(?:결정|확정|DECIDED)\s*[:：]\s*(.+)$/iu;

@@ -23,6 +23,14 @@ describe("explicit promotion gate", () => {
     expect(minutes.hypotheses).toContain(
       "Unconfirmed action candidate: 모션 — 수집 시스템 구현",
     );
+    expect(minutes.summary).toEqual([
+      "결정: 도형 기반 그래픽을 사용한다.",
+      "할 일: 개발 — 로프 프로토타입 구현 (기한: 내일)",
+      "다음 회의: 내일 오후 10시",
+      "논의: 그래픽 스타일 외 1건",
+      "가설: Unconfirmed decision candidate: 팰월드식 수집을 사용한다. 외 1건",
+    ]);
+    expect(minutes.summary).not.toContain("결정: 팰월드식 수집을 사용한다.");
   });
 
   it("rejects invented evidence IDs", () => {
@@ -33,5 +41,6 @@ describe("explicit promotion gate", () => {
 
     expect(minutes.decided).toEqual([]);
     expect(minutes.hypotheses[0]).toMatch(/Unconfirmed decision candidate/u);
+    expect(minutes.summary.some((line) => line.startsWith("결정: 팰월드식"))).toBe(false);
   });
 });

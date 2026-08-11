@@ -72,6 +72,13 @@ describe("free local meeting summary", () => {
     const minutes = summarizeLocally(transcript);
 
     expect(minutes).toEqual({
+      summary: [
+        "결정: 2D 횡스크롤로 확정",
+        "할 일: 용호 — 로프 프로토타입 구현 (기한: 내일)",
+        "다음 회의: 내일 오후 10시",
+        "논의: 성현: 아이작과 산나비를 참고해보자. 외 1건",
+        "가설: 자동 성장 시스템",
+      ],
       discussed: ["성현: 아이작과 산나비를 참고해보자.", "성현: 로프 액션으로 결정할까?"],
       decided: ["2D 횡스크롤로 확정"],
       rejected: ["AI 추리게임 방향은 제외"],
@@ -80,5 +87,30 @@ describe("free local meeting summary", () => {
       blockers: [],
       nextMeeting: "내일 오후 10시",
     });
+  });
+
+  it("keeps sparse summaries between three and five bounded lines without promoting hypotheses", () => {
+    const summarizeLocally = (
+      promotionGate as unknown as {
+        summarizeLocally(entries: TranscriptEntry[]): Minutes;
+      }
+    ).summarizeLocally;
+    const longHypothesis = "가".repeat(400);
+
+    const minutes = summarizeLocally([
+      {
+        id: "only-hypothesis",
+        source: "text",
+        timestamp: "2026-08-10T13:00:00.000Z",
+        speakerId: "1",
+        speaker: "성현",
+        text: `아이디어: ${longHypothesis}`,
+      },
+    ]);
+
+    expect(minutes.summary).toHaveLength(3);
+    expect(minutes.summary[0]).toMatch(/^가설: /u);
+    expect(minutes.summary[0]).not.toMatch(/^결정: /u);
+    expect(minutes.summary.every((line) => line.length <= 240)).toBe(true);
   });
 });
