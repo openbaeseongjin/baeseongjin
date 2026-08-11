@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import { WebSocket } from "ws";
 import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
-import { ProjectileObject } from "../src/game/combat/ProjectileObject.js";
+import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { deserializeCommandReceipt } from "../src/game/network/CommandReceipt.js";
 import { serializePlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { deserializeWorldSnapshotEnvelope } from "../src/game/network/WorldSnapshotEnvelope.js";
@@ -69,7 +69,7 @@ export async function run() {
     const { socket: first, message: firstWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
     const url = `${baseUrl}?channel=${firstWelcome.channelId}`;
     const sharedRoom = multiplayer.rooms.get(firstWelcome.channelId);
-    const activeEnemyProjectile = new ProjectileObject({
+    const activeEnemyProjectile = new BallisticProjectileObject({
         id: "mid-join-enemy-projectile",
         ownerId: "enemy-mid-join",
         targetId: firstWelcome.playerId,

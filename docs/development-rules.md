@@ -124,6 +124,14 @@ class Player extends RopeAttachable(GameObject) {}
 - 객체 종류가 늘어날 때 디스패처의 구체 타입 분기를 추가하지 않는다. 새 객체는 필요한 입력 capability를 조합하고 capability 단독 계약 테스트와 실제 객체 조합 테스트를 추가한다.
 - 네트워크는 입력 프레임과 대상 소유자·tick·sequence를 운반할 뿐, 믹스인별 게임 규칙을 다시 구현하지 않는다. 싱글, 클라이언트 예측과 서버 검증은 같은 디스패처와 capability 구현을 사용한다.
 
+### 시뮬레이션 capability 디스패치
+
+- 적 공격, 자동 무기, 유도탄·직선탄 운동처럼 직접 입력 없이 진행되는 행동은 해당 `SimulationDrivenObject`의 Can-Do capability에 한 번만 구현한다.
+- `GameSimulation`과 도메인 시스템은 객체 종류를 분기하지 않고 현재 단계의 capability ID와 필요한 context를 `SimulationDispatcher`에 전달한다. 디스패처는 그 ID를 가진 객체만 안정적인 순서로 실행한다.
+- 한 객체에 이동·공격처럼 여러 capability가 붙을 수 있으므로 “객체당 capability 하나”를 가정하지 않는다. 각 단계는 무관한 capability를 실행하지 않는 회귀 테스트를 가진다.
+- capability는 객체 자신의 상태 전이와 행동을 소유하고, 월드 스케줄러는 단계 순서·대상 집합·공용 context와 사건 연결만 조정한다. 전송 계층이나 예측 저장소에 별도 운동 공식을 복제하지 않는다.
+- capability 디스패치는 네트워크 권한을 결정하지 않는다. `InputDrivenObject`와 `SimulationDrivenObject`의 상태 변화 원인, 클라이언트 claim과 서버 중립 시뮬레이션 경계는 기존 분할 권한 규칙을 그대로 따른다.
+
 ### 구현 계약과 테스트
 
 - 클래스는 생성 직후 유효한 상태여야 하며 별도 `init()` 호출을 전제로 하지 않는다. 비동기 준비가 필요하면 팩토리가 준비된 인스턴스를 반환한다.

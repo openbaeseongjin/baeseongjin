@@ -4,6 +4,8 @@ import { createInputCapabilityMixin } from "../src/game/input/InputCapability.js
 import { InputDrivenObject } from "../src/game/objects/InputDrivenObject.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { createSimulationCapabilityMixin } from "../src/game/simulation/SimulationCapability.js";
+import { SimulationDispatcher } from "../src/game/simulation/SimulationDispatcher.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
 const withCounterInput = createInputCapabilityMixin({
@@ -18,6 +20,31 @@ class CounterInputObject extends withCounterInput(InputDrivenObject) {
     constructor({ id, ownerId }) {
         super({ id, ownerId });
         this.total = 0;
+    }
+}
+
+const withCounterSimulation = createSimulationCapabilityMixin({
+    id: "counter",
+    order: 10,
+    apply({ amount }) {
+        this.total += amount;
+        return this.total;
+    }
+});
+
+const withUnrelatedSimulation = createSimulationCapabilityMixin({
+    id: "unrelated",
+    order: 20,
+    apply() {
+        this.unrelatedRuns += 1;
+    }
+});
+
+class CounterSimulationObject extends withUnrelatedSimulation(withCounterSimulation(SimulationDrivenObject)) {
+    constructor({ id }) {
+        super({ id });
+        this.total = 0;
+        this.unrelatedRuns = 0;
     }
 }
 
@@ -43,6 +70,27 @@ export function run() {
     assert.equal(owned.total, 3);
     assert.equal(other.total, 0);
 
+    const simulationDispatcher = new SimulationDispatcher();
+    const counterSimulation = new CounterSimulationObject({ id: "counter-simulation" });
+    assert.equal(counterSimulation.hasSimulationCapability("counter"), true);
+    assert.deepEqual(
+        simulationDispatcher.dispatch({
+            objects: [owned, counterSimulation],
+            capabilityId: "counter",
+            context: { amount: 4 }
+        }),
+        [
+            {
+                object: counterSimulation,
+                capabilityId: "counter",
+                result: 4
+            }
+        ],
+        "simulation must reach only SimulationDrivenObject capabilities"
+    );
+    assert.equal(counterSimulation.total, 4);
+    assert.equal(counterSimulation.unrelatedRuns, 0, "a simulation phase must not run unrelated capabilities");
+
     const simulation = new GameSimulation();
     const player = simulation.players[0];
     assert.ok(player instanceof InputDrivenObject, "the player must be an InputDrivenObject");
@@ -57,9 +105,15 @@ export function run() {
         "the simulation must expose one owner-scoped input dispatch group"
     );
     assert.ok(player.weapon instanceof SimulationDrivenObject, "the automatic weapon must be simulation-driven");
+    assert.equal(player.weapon.hasSimulationCapability("automatic-weapon"), true);
     assert.ok(
         simulation.enemies.every((enemy) => enemy instanceof SimulationDrivenObject),
         "enemies must be SimulationDrivenObjects"
+    );
+    assert.equal(
+        simulation.enemies.every((enemy) => enemy.hasSimulationCapability("enemy-weapon")),
+        true,
+        "enemy behavior must be exposed as a simulation capability"
     );
     const target = simulation.enemies[0];
     target.position.set(player.physics.position.x + 20, player.physics.position.y);
@@ -80,6 +134,11 @@ export function run() {
     assert.ok(
         simulation.projectiles.every((projectile) => projectile instanceof SimulationDrivenObject),
         "directly uncontrolled projectiles must be SimulationDrivenObjects"
+    );
+    assert.equal(
+        simulation.projectiles.every((projectile) => projectile.hasSimulationCapability("homing-projectile-motion")),
+        true,
+        "player projectiles must expose their concrete motion capability"
     );
     assert.throws(
         () => new CounterInputObject({ id: "broken", ownerId: "" }),

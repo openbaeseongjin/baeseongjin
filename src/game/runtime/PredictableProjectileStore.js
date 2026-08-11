@@ -1,10 +1,12 @@
-import { ProjectileObject } from "../combat/ProjectileObject.js";
-import { advanceHomingProjectileMotion, advanceProjectileMotion } from "../combat/ProjectileMotion.js";
+import { BallisticProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
+import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 
 const FIXED_DT = 1 / 120;
+const simulationDispatcher = new SimulationDispatcher();
 
 function createReplicatedProjectile({ objectType, speed, predictCollision, ...state }) {
-    const projectile = new ProjectileObject(state);
+    const ProjectileClass = objectType === "player-projectile" ? HomingProjectileObject : BallisticProjectileObject;
+    const projectile = new ProjectileClass(state);
     projectile.objectType = objectType;
     projectile.speed = speed;
     projectile.predictCollision = predictCollision;
@@ -28,14 +30,21 @@ function length(vector) {
 }
 
 function advanceProjectile(projectile, dt, state) {
+    let targetPosition = null;
+    let capabilityId = "ballistic-projectile-motion";
     if (projectile.objectType === "player-projectile") {
         const target = state?.enemies?.find(({ id }) => id === projectile.targetId);
-        if (target) {
-            advanceHomingProjectileMotion(projectile, target.position, projectile.speed, dt);
-            return;
-        }
+        targetPosition = target?.position ?? null;
+        capabilityId = "homing-projectile-motion";
     }
-    advanceProjectileMotion(projectile, dt);
+    const outcomes = simulationDispatcher.dispatch({
+        objects: [projectile],
+        capabilityId,
+        context: { dt, targetPosition, speed: projectile.speed }
+    });
+    if (outcomes.length !== 1) {
+        throw new Error(`replicated projectile ${projectile.id} has no ${capabilityId} capability`);
+    }
 }
 
 function findPendingPrediction(objects, event) {

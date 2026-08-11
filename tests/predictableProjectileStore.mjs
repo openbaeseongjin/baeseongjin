@@ -5,6 +5,7 @@ import {
 } from "../src/game/network/PredictableObjectEvent.js";
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
 import { ClientCombatFeedback } from "../src/game/combat/ClientCombatFeedback.js";
+import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
 import { updatePlayerProjectiles, advanceEnemyProjectiles } from "../src/game/combat/CombatSystems.js";
 import { COMBAT_CONFIG } from "../src/game/config.js";
@@ -124,15 +125,15 @@ export function run() {
         radius: 10,
         health: 100
     };
-    const serverHomingProjectile = {
+    const serverHomingProjectile = new HomingProjectileObject({
         id: "server-homing",
+        ownerId: "player-1",
         targetId: convergenceTarget.id,
         position: new Vector2(-25, 30),
         velocity: new Vector2(),
         radius: 2,
-        damage: 1,
-        ageSeconds: 0
-    };
+        damage: 1
+    });
     const convergenceStore = new PredictableProjectileStore();
     convergenceStore.apply(
         [
@@ -171,11 +172,15 @@ export function run() {
     assert.equal(clientHomingProjectile.velocity.x, serverHomingProjectile.velocity.x);
     assert.equal(clientHomingProjectile.velocity.y, serverHomingProjectile.velocity.y);
 
-    const serverBallisticProjectile = {
+    const serverBallisticProjectile = new BallisticProjectileObject({
+        id: "server-ballistic",
+        ownerId: "enemy-1",
+        targetId: "player-1",
         position: new Vector2(5, -8),
         velocity: new Vector2(-75, 210),
-        ageSeconds: 0
-    };
+        radius: 2,
+        damage: 1
+    });
     const ballisticStore = new PredictableProjectileStore();
     ballisticStore.apply(
         [

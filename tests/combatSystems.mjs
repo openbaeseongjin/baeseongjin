@@ -7,16 +7,24 @@ import {
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../src/game/combat/CombatSystems.js";
+import { AutomaticWeaponObject } from "../src/game/combat/AutomaticWeaponObject.js";
+import { EnemyObject } from "../src/game/combat/EnemyObject.js";
+import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { COMBAT_CONFIG } from "../src/game/config.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
 import { EntityRegistry } from "../src/game/simulation/EntityRegistry.js";
 
 export function run() {
     const registry = new EntityRegistry();
+    const ownerId = registry.createId("player");
     const owner = {
-        id: registry.createId("player"),
+        id: ownerId,
         physics: { position: new Vector2(0, 0) },
-        weapon: { range: 320, damage: 10, fireInterval: 0.65, cooldown: 0 },
+        weapon: new AutomaticWeaponObject({
+            id: registry.createId("weapon"),
+            ownerId,
+            config: COMBAT_CONFIG
+        }),
         lifeState: "active"
     };
     const enemies = [
@@ -45,13 +53,15 @@ export function run() {
     assert.equal(enemies[1].health, 20, "a homing projectile must damage its authoritative target once");
 
     const directHit = [
-        {
+        new HomingProjectileObject({
+            id: "direct-hit",
+            ownerId,
             targetId: enemies[1].id,
             position: enemies[1].position.clone(),
             velocity: new Vector2(),
             radius: 4,
             damage: 10
-        }
+        })
     ];
     const hitEvents = updatePlayerProjectiles({ projectiles: directHit, enemies, config: COMBAT_CONFIG, dt: 0 });
     assert.equal(hitEvents.hits[0].type, "enemy-hit");
@@ -59,15 +69,15 @@ export function run() {
     assert.equal(hitEvents.resolutions[0].resolution, "enemy-hit");
 
     const claimDrivenProjectile = [
-        {
+        new HomingProjectileObject({
             id: "claim-driven",
+            ownerId,
             targetId: enemies[1].id,
             position: enemies[1].position.clone(),
             velocity: new Vector2(),
             radius: 4,
-            damage: 10,
-            ageSeconds: 0
-        }
+            damage: 10
+        })
     ];
     const claimDrivenHealth = enemies[1].health;
     const claimDrivenEvents = updatePlayerProjectiles({
@@ -98,7 +108,17 @@ export function run() {
     assert.equal(projectiles.length, 0, "weapons must not fire when every enemy is outside range");
 
     assert.equal(distancePointToSegment({ x: 50, y: 5 }, { x: 0, y: 0 }, { x: 100, y: 0 }), 5);
-    const travelingShot = [{ position: new Vector2(-10, 50), velocity: new Vector2(20, 0) }];
+    const travelingShot = [
+        new BallisticProjectileObject({
+            id: "traveling-shot",
+            ownerId: "enemy-fire",
+            targetId: "player-1",
+            position: new Vector2(-10, 50),
+            velocity: new Vector2(20, 0),
+            radius: 7,
+            damage: 20
+        })
+    ];
     const activeProjectiles = advanceEnemyProjectiles({
         projectiles: travelingShot,
         dt: 0.5,
@@ -131,7 +151,15 @@ export function run() {
         health: 100,
         lifeState: "active"
     };
-    const firingEnemy = { id: "enemy-fire", position: new Vector2(100, 0), fireCooldown: 0 };
+    const firingEnemy = new EnemyObject({
+        id: "enemy-fire",
+        position: new Vector2(100, 0),
+        level: 1,
+        radius: 18,
+        health: 30,
+        maxHealth: 30,
+        fireCooldown: 0
+    });
     const enemyShots = [];
     const spawned = updateEnemyWeapons({
         enemies: [firingEnemy],
