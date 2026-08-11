@@ -486,7 +486,7 @@ export class GameSimulation {
             this.#prepareOwnerStep(player, dt);
             if (advanceInputDrivenObjects) this.dispatchOwnerInput(player.id, playerCommand, dt);
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
-            if (projectile) this.recordProjectileSpawn(projectile, "player-projectile");
+            if (projectile) this.recordProjectileSpawn(projectile);
         }
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
@@ -504,7 +504,7 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt
         });
-        for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile, "enemy-projectile");
+        for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile);
         const enemyProjectileLifecycle = advanceEnemyProjectiles({
             projectiles: this.enemyProjectiles,
             dt,
@@ -812,25 +812,22 @@ export class GameSimulation {
         );
     }
 
-    recordProjectileSpawn(projectile, objectType) {
-        if (objectType === "player-projectile") projectile.predictionId ??= `${projectile.ownerId}:${this.tick}`;
+    recordProjectileSpawn(projectile) {
+        const replication = projectile.replicationState(this.tick);
         const spawnEvent = createPredictableSpawnEvent({
             eventId: this.registry.createId("event"),
             objectId: projectile.id,
-            objectType,
+            objectType: replication.objectType,
             spawnTick: this.tick,
             position: projectile.position,
             velocity: projectile.velocity,
             parameters: {
-                ownerId: projectile.ownerId,
-                targetId: projectile.targetId ?? null,
-                predictionId: projectile.predictionId ?? null,
-                radius: projectile.radius,
-                damage: projectile.damage,
-                speed:
-                    objectType === "player-projectile"
-                        ? COMBAT_CONFIG.projectileSpeed
-                        : COMBAT_CONFIG.enemyProjectileSpeed
+                ownerId: replication.ownerId,
+                targetId: replication.targetId,
+                predictionId: replication.predictionId,
+                radius: replication.radius,
+                damage: replication.damage,
+                speed: replication.speed
             }
         });
         Object.defineProperty(projectile, "replicationSpawnEvent", {
@@ -870,7 +867,7 @@ export class GameSimulation {
         const projectile = this.#advanceAutomaticWeapon(player, 0);
         if (!projectile) return Object.freeze({ accepted: false, reason: "weapon-unavailable" });
         projectile.predictionId = claim.predictionId;
-        this.recordProjectileSpawn(projectile, "player-projectile");
+        this.recordProjectileSpawn(projectile);
         return Object.freeze({ accepted: true, projectileId: projectile.id });
     }
 

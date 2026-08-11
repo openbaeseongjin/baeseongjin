@@ -1,4 +1,5 @@
 import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
+import { PROJECTILE_MOTION_CAPABILITY } from "./ProjectileObject.js";
 
 const simulationDispatcher = new SimulationDispatcher();
 
@@ -46,7 +47,7 @@ export function updatePlayerProjectiles({
             );
             continue;
         }
-        advanceSimulationObject(projectile, "homing-projectile-motion", {
+        advanceSimulationObject(projectile, PROJECTILE_MOTION_CAPABILITY, {
             dt,
             targetPosition: target.position,
             speed: config.projectileSpeed
@@ -113,7 +114,7 @@ export function advanceEnemyProjectiles({ projectiles, dt, maxLifetimeSeconds = 
     const survivors = [];
     const expired = [];
     for (const projectile of projectiles) {
-        advanceSimulationObject(projectile, "ballistic-projectile-motion", { dt });
+        advanceSimulationObject(projectile, PROJECTILE_MOTION_CAPABILITY, { dt });
         if (projectile.ageSeconds >= maxLifetimeSeconds) expired.push(projectile);
         else survivors.push(projectile);
     }

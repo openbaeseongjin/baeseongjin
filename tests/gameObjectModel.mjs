@@ -3,6 +3,7 @@ import { InputDispatcher } from "../src/game/input/InputDispatcher.js";
 import { createInputCapabilityMixin } from "../src/game/input/InputCapability.js";
 import { InputDrivenObject } from "../src/game/objects/InputDrivenObject.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
+import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createSimulationCapabilityMixin } from "../src/game/simulation/SimulationCapability.js";
 import { SimulationDispatcher } from "../src/game/simulation/SimulationDispatcher.js";
@@ -131,15 +132,44 @@ export function run() {
             { x: 0, y: 0 }
         )
     );
+    const projectileKinds = [
+        new HomingProjectileObject({
+            id: "homing-capability-probe",
+            ownerId: player.id,
+            targetId: target.id,
+            position: { x: 0, y: 0 },
+            velocity: { x: 0, y: 0 },
+            damage: 1,
+            radius: 1
+        }),
+        new BallisticProjectileObject({
+            id: "ballistic-capability-probe",
+            ownerId: target.id,
+            targetId: player.id,
+            position: { x: 0, y: 0 },
+            velocity: { x: 0, y: 0 },
+            damage: 1,
+            radius: 1
+        })
+    ];
     assert.ok(
-        simulation.projectiles.every((projectile) => projectile instanceof SimulationDrivenObject),
+        projectileKinds.every((projectile) => projectile instanceof SimulationDrivenObject),
         "directly uncontrolled projectiles must be SimulationDrivenObjects"
     );
     assert.equal(
-        simulation.projectiles.every((projectile) => projectile.hasSimulationCapability("homing-projectile-motion")),
+        projectileKinds.every((projectile) => projectile.hasSimulationCapability("projectile-motion")),
         true,
-        "player projectiles must expose their concrete motion capability"
+        "projectiles must expose one polymorphic motion capability"
     );
+    assert.equal(
+        projectileKinds.every((projectile) => projectile.hasSimulationCapability("client-projectile-collision")),
+        true,
+        "projectiles must own client collision behavior instead of leaving type branches in the runtime store"
+    );
+    assert.equal(projectileKinds[0].replicationState(42).predictionId, `${player.id}:42`);
+    assert.equal(projectileKinds[0].replicationState(42).objectType, "player-projectile");
+    assert.equal(projectileKinds[1].replicationState(42).predictionId, null);
+    assert.equal(projectileKinds[1].replicationState(42).objectType, "enemy-projectile");
     assert.throws(
         () => new CounterInputObject({ id: "broken", ownerId: "" }),
         /ownerId/,
