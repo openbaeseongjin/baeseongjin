@@ -5,6 +5,7 @@ import { run as serviceWorkerUpdater } from "./serviceWorkerUpdater.mjs";
 import { run as startupUpdateLoadingScreen } from "./startupUpdateLoadingScreen.mjs";
 import { run as gameModeMenu } from "./gameModeMenu.mjs";
 import { run as playtestDiagnostics } from "./playtestDiagnostics.mjs";
+import { run as publishMultiplayerWorkflow } from "./publishMultiplayerWorkflow.mjs";
 
 const steps = {
     mobileControlLayout,
@@ -13,7 +14,8 @@ const steps = {
     serviceWorkerUpdater,
     startupUpdateLoadingScreen,
     gameModeMenu,
-    playtestDiagnostics
+    playtestDiagnostics,
+    publishMultiplayerWorkflow
 };
 
 export async function run() {
