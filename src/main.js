@@ -8,6 +8,7 @@ import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
 import { StartupUpdateLoadingScreen } from "./pwa/StartupUpdateLoadingScreen.js";
 import { isMetricsPanelEnabled } from "./game/metrics/MetricsDebugMode.js";
 import { setupPlaytestDiagnostics } from "./game/metrics/PlaytestDiagnostics.js";
+import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "./render/GameRendererFactory.js";
 
 const canvas = document.getElementById("game-canvas");
 if (!canvas) {
@@ -51,7 +52,11 @@ async function launch() {
         try {
             if (choice.mode === "single") {
                 activeChannelId = null;
-                app = new GameApp({ canvas, onDiagnostics: (snapshot) => diagnostics.update(snapshot) });
+                app = new GameApp({
+                    canvas,
+                    renderer: createGameRenderer({ canvas, profile: DEFAULT_RENDERER_PROFILE }),
+                    onDiagnostics: (snapshot) => diagnostics.update(snapshot)
+                });
             } else {
                 const serverUrl = configuredMultiplayerServer();
                 if (!serverUrl) throw new Error("고정 멀티 서버 주소가 아직 설정되지 않았습니다.");
@@ -60,6 +65,7 @@ async function launch() {
                 activeChannelId = authority.channelId;
                 app = new MultiplayerGameApp({
                     canvas,
+                    renderer: createGameRenderer({ canvas, profile: DEFAULT_RENDERER_PROFILE }),
                     authority,
                     onDisconnect: returnToMenu,
                     onDiagnostics: (snapshot) => diagnostics.update(snapshot)

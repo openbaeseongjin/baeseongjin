@@ -13,7 +13,12 @@ index.html
       ├─ core/input/InputSampler.js
       ├─ core/input/MobileControlLayout.js
       ├─ core/sim/FixedStepRunner.js
+      ├─ render/GameRendererFactory.js
       ├─ render/CanvasRenderer.js
+      ├─ render/SceneRenderer.js
+      ├─ render/PolygonSceneRenderer.js
+      ├─ render/sprites/SpriteAnimation.js
+      ├─ render/sprites/SpriteCanvasPainter.js
       ├─ game/commands/PlayerCommand.js
       ├─ game/runtime/LocalAuthority.js
       ├─ game/runtime/AuthoritySnapshotBuilder.js
@@ -42,7 +47,16 @@ index.html
 2. `GameApp`이 화면 좌표를 월드 좌표로 바꾸고 공용 `PlayerCommand`를 생성한다.
 3. `InputDispatcher`가 명령을 소유 사용자의 `InputDrivenObject`에 배포하고, 각 입력 capability 믹스인이 자신이 담당하는 intent만 반영한다.
 4. `FixedStepRunner`가 렌더 프레임과 무관하게 1/120초 단위로 게임 상태를 갱신하고, 각 월드 단계는 `SimulationDispatcher`로 해당 단계의 capability만 실행한다.
-5. `CanvasRenderer`는 시뮬레이션 스냅샷과 입력 표시 상태만 받아 화면을 그린다.
+5. `GameRendererFactory`가 선택한 장면 렌더 프로필을 `CanvasRenderer`에 조립하고, `CanvasRenderer`는 시뮬레이션 스냅샷과 입력 표시 상태만 받아 화면을 그린다.
+
+## 렌더링 프로필 경계
+
+- `CanvasRenderer`는 Canvas context, DPR·resize, 화면/월드 좌표 변환과 HUD·오버레이를 소유하는 공통 호스트다. 월드 장면의 표현은 주입된 scene renderer에 한 번 위임한다.
+- `GameRendererFactory`가 시작 시 렌더 프로필을 선택한다. 기본 프로필은 기존 화면을 보존하는 `polygon`이며 `PolygonSceneRenderer`가 지형·플레이어·로프·적·투사체·월드 VFX의 그리기 순서를 소유한다.
+- scene renderer는 동일한 읽기 전용 scene snapshot과 viewport 계약을 받는다. 앱·시뮬레이션·네트워크 계층은 선택된 프로필이나 스프라이트 자산 형식을 해석하지 않는다.
+- 향후 도트 프로필은 별도 scene renderer로 추가한다. 프로필별 분기를 `GameApp`, `MultiplayerGameApp`, 시뮬레이션 객체에 흩뜨리지 않고 factory 등록 경계에서만 선택한다.
+- `SpriteAnimation`은 프레임 사각형과 지속 시간을 불변 데이터로 보관하고 외부에서 받은 경과 시간으로 현재 프레임을 결정한다. `SpriteCanvasPainter`는 Canvas의 이미지 보간을 끄고 원본 프레임, anchor, 반전과 목적 크기만 그리며 자산 로딩이나 게임 시간을 소유하지 않는다.
+- 렌더 프로필 교체는 물리·전투·입력·권위 snapshot·네트워크 메시지 계약을 바꾸지 않는다.
 
 ## 게임 객체 모델
 
