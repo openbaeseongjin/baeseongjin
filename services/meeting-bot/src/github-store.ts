@@ -148,6 +148,9 @@ export class GitHubStore {
       if (Array.isArray(response.data) || response.data.type !== "file" || !("content" in response.data)) {
         throw new Error(`expected ${path} to be a file`);
       }
+      if (response.data.encoding !== "base64") {
+        throw new Error(`${path} is too large to read via the GitHub contents API`);
+      }
       return Buffer.from(response.data.content, "base64").toString("utf8");
     } catch (error: unknown) {
       if ((error as { status?: number }).status === 404) {
