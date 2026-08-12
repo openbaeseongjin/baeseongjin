@@ -467,6 +467,37 @@ export function run() {
             digest: createPlayerImpactStateDigest(victimState, { impactType: "player-hit", respawned: false })
         }
     });
+    const unrequestedRecovery = createPlayerImpactClaim({
+        ...divergentClaim,
+        outcome: {
+            ...divergentClaim.outcome,
+            recoveryId: "recovery-not-issued-by-server",
+            stateTick: combatSimulation.tick,
+            state: victimState
+        }
+    });
+    const unrequestedRecoveryReceipt = combatSession.submitImpactClaim(combatPlayer.id, unrequestedRecovery);
+    assert.equal(unrequestedRecoveryReceipt.accepted, false);
+    assert.equal(
+        unrequestedRecoveryReceipt.reason,
+        "recovery-not-requested",
+        "a full owner state must not bypass the compact impact probe without a server challenge"
+    );
+    assert.equal(combatPlayer.health, 99, "an unrequested recovery must not mutate the server player");
+    assert.throws(
+        () =>
+            createPlayerImpactClaim({
+                ...divergentClaim,
+                outcome: {
+                    ...divergentClaim.outcome,
+                    recoveryId: "invalid-recovery-state",
+                    stateTick: combatSimulation.tick,
+                    state: { ...victimState, health: -1 }
+                }
+            }),
+        /outcome\.state\.health/,
+        "every field restored by impact recovery must pass the wire schema"
+    );
     const divergentReceipt = combatSession.submitImpactClaim(combatPlayer.id, divergentClaim);
     assert.equal(
         divergentReceipt.accepted,
@@ -474,6 +505,7 @@ export function run() {
         "a mismatched compact impact must request state recovery instead of pretending to converge"
     );
     assert.equal(divergentReceipt.reason, "state-diverged");
+    assert.match(divergentReceipt.recoveryId, /^impact-recovery:/);
     assert.equal(combatPlayer.health, 99, "a digest probe must not leave its provisional transition on the server");
     assert.equal(
         combatPlayer.hitInvulnerabilityRemaining,
@@ -482,7 +514,12 @@ export function run() {
     );
     const divergentRecoveryClaim = createPlayerImpactClaim({
         ...divergentClaim,
-        outcome: { ...divergentClaim.outcome, state: victimState }
+        outcome: {
+            ...divergentClaim.outcome,
+            recoveryId: divergentReceipt.recoveryId,
+            stateTick: combatSimulation.tick,
+            state: victimState
+        }
     });
     assert.ok(divergentRecoveryClaim.outcome.state, "only the divergence recovery path must carry owner state");
     const divergentRecoveryReceipt = combatSession.submitImpactClaim(combatPlayer.id, divergentRecoveryClaim);
@@ -492,6 +529,11 @@ export function run() {
         combatPlayer.hitInvulnerabilityRemaining,
         victimState.hitInvulnerabilityRemaining,
         "server impact timers must converge to the victim client"
+    );
+    assert.equal(
+        combatSession.lastOwnerMotionTicks.get(combatPlayer.id),
+        divergentRecoveryClaim.outcome.stateTick,
+        "the recovered owner state and its interpolation tick must advance atomically"
     );
     assert.equal(
         combatSimulation.enemyProjectiles.some(({ id }) => id === divergentProjectile.id),
@@ -524,7 +566,12 @@ export function run() {
     assert.equal(missingProjectileReceipt.reason, "state-diverged");
     const missingProjectileRecovery = createPlayerImpactClaim({
         ...missingProjectileClaim,
-        outcome: { ...missingProjectileClaim.outcome, state: missingProjectileState }
+        outcome: {
+            ...missingProjectileClaim.outcome,
+            recoveryId: missingProjectileReceipt.recoveryId,
+            stateTick: combatSimulation.tick,
+            state: missingProjectileState
+        }
     });
     assert.equal(combatSession.submitImpactClaim(combatPlayer.id, missingProjectileRecovery).accepted, true);
     assert.equal(combatPlayer.health, missingProjectileState.health);

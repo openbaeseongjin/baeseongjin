@@ -922,12 +922,23 @@ export class GameSimulation {
     }
 
     resolveEnemyProjectileClaim(authenticatedPlayerId, claim) {
+        return this.#resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { allowRecoveryState: false });
+    }
+
+    resolveEnemyProjectileRecovery(authenticatedPlayerId, claim) {
+        return this.#resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { allowRecoveryState: true });
+    }
+
+    #resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { allowRecoveryState }) {
         const player = this.players.find(({ id }) => id === authenticatedPlayerId);
         if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
         const projectile = this.enemyProjectiles.find(({ id }) => id === claim.projectileId);
         if (claim.outcome) {
             const damage = projectile?.damage ?? claim.damage;
             if (claim.outcome.state) {
+                if (!allowRecoveryState) {
+                    return Object.freeze({ accepted: false, reason: "recovery-not-authorized" });
+                }
                 this.#restorePlayer(player, claim.outcome.state);
             } else {
                 const stateBeforeImpact = this.playerState(player.id);

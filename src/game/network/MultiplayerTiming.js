@@ -11,5 +11,6 @@ export const MULTIPLAYER_TIMING = Object.freeze({
     ownerMotionBaseTolerance: 160,
     ownerMotionMaxSpeed: 1800,
     maxHitClaimPastTicks: 36,
+    impactRecoveryRetentionTicks: 1200,
     hitClaimPositionTolerance: 40
 });

@@ -29,7 +29,7 @@
 - 플레이어 간 원형 몸체 충돌과 실제 접속자 ID를 소유하는 로컬 예측 시뮬레이션
 - 최신 로프 해제와 낙사 전이는 연속 운동 봉투가 거부돼도 별도 단조 tick과 도메인 전이로 확정한다. 멀티 서버 fixed tick은 복제 플레이어 위치만으로 낙사를 시작하지 않고 fallen `owner-motion` claim만 검증해 부활·아티팩트 손실·공유 사건을 한 번 확정한다.
 - 서버는 소유 클라이언트가 만든 플레이어 상태·사건을 검증해 다른 클라이언트에 공유하는 허브다. 소유자의 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 서버 snapshot이나 impact receipt로 다시 쓰지 않는다. 서버가 상태를 직접 진행하는 범위는 몹·중립 투사체·공용 월드·세션 수명주기이며, 서버 상태로 소유자 전체를 복원하는 경우는 최초 입장·재접속과 복구 가능한 계약의 명시적 거부로 제한한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
-- impact의 최종 체감 결과는 피해 클라이언트가 소유한다. 정상 claim은 사건 자료와 도메인 상태 지문만 보내며 서버가 같은 전이를 적용해 일치하면 바로 확정한다. `state-diverged`일 때만 피해 클라이언트가 응답 시점의 최신 소유자 상태를 한 번 보내 서버·동료를 자기 결과로 수렴시키고, 로컬 HP·로프·부활·아티팩트 손실은 복구하지 않는다. 기준은 `docs/multiplayer-synchronization.md`의 **impact claim과 최종 수렴**을 따른다.
+- impact의 최종 체감 결과는 피해 클라이언트가 소유한다. 정상 claim은 사건 자료와 도메인 상태 지문만 보내며 서버가 같은 전이를 적용해 일치하면 바로 확정한다. `state-diverged`일 때만 서버가 projectile·피해자 연결에 묶인 일회용 `recoveryId`를 발급하고, 피해 클라이언트가 응답 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보내 서버·동료를 자기 결과로 수렴시킨다. challenge 없는 전체 상태는 거부하고, 승인 복구는 상태와 `ownerMotionTick`을 원자적으로 갱신하며 로컬 HP·로프·부활·아티팩트 손실은 복구하지 않는다. 엔진 공식 레퍼런스 대비 핵심 충족표와 상세 기준은 `docs/multiplayer-synchronization.md`의 **다른 게임 엔진 기준 충족 점검**과 **impact claim과 최종 수렴**을 따른다.
 - 투사체는 같은 `projectile-motion`·`client-projectile-collision` capability ID에 종류별 믹스인을 조합한다. 운동·충돌·claim 거부 뒤 수명 정책과 복제 상태는 객체가 소유하며 `PredictableProjectileStore`와 `GameSimulation`은 종류별 분기 없이 등록·식별자 대응·단계 실행·사건 연결만 담당한다. 상세 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - 정적 파일을 노출하지 않는 상시 게임 서버 실행 모드와 `/health` 상태 확인
 - game-only 서버는 기본적으로 공식 GitHub Pages Origin만 WebSocket에 허용하며 개발용 정적 통합 서버는 이 제한을 강제하지 않는다.
