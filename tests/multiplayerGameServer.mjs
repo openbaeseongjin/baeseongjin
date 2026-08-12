@@ -149,11 +149,99 @@ export async function run() {
     missing.close();
     await closed(missing);
 
-    const { socket: fresh, message: freshWelcome } = await connectFor(`${baseUrl}?channel=new`, "welcome");
+    const { socket: fresh, message: freshWelcome } = await connectFor(
+        `${baseUrl}?channel=new&snapshotAck=1`,
+        "welcome"
+    );
     const freshSnapshot = deserializeWorldSnapshotEnvelope(freshWelcome.snapshot);
     assert.equal(freshSnapshot.worldSeed, 333, "a newly created room must receive a new world seed");
     assert.equal(freshSnapshot.state.players.length, 1);
     assert.ok(freshSnapshot.serverTick <= 1, "an empty room must be discarded before the next first player joins");
+    assert.equal(freshWelcome.snapshotFlowControl, true, "new clients must negotiate bounded snapshot delivery");
+
+    const freshRoom = multiplayer.rooms.get(freshWelcome.channelId);
+    multiplayer.stopClock(freshRoom);
+    const serverSocket = [...freshRoom.sockets.keys()][0];
+    const delivery = multiplayer.snapshotDeliveryBySocket.get(serverSocket);
+    assert.equal(delivery.flowControlled, true);
+    await waitFor(() => {
+        if (delivery.unacknowledgedSequences.length === 0 && delivery.pendingSnapshot === null) return true;
+        fresh.send(
+            JSON.stringify({
+                type: "snapshot-ack",
+                snapshotSequence: delivery.highestSentSequence
+            })
+        );
+        return false;
+    }, "the negotiated client must be able to clear its initial snapshot window");
+
+    const receivedSnapshots = [];
+    fresh.on("message", (data) => {
+        const message = JSON.parse(data.toString());
+        if (message.type === "snapshot") {
+            receivedSnapshots.push(deserializeWorldSnapshotEnvelope(message.payload));
+        }
+    });
+    let latestFlowSnapshot = null;
+    for (let index = 0; index < 10; index += 1) {
+        freshRoom.simulation.recordReplicationEvent("flow-control-probe", { marker: index });
+        if (index === 9) freshRoom.simulation.enemies[0].health = 17;
+        const payload = freshRoom.adapter.snapshot();
+        latestFlowSnapshot = deserializeWorldSnapshotEnvelope(payload);
+        multiplayer.broadcast(freshRoom, { type: "snapshot", payload });
+    }
+    assert.equal(
+        delivery.unacknowledgedSequences.length,
+        multiplayer.maxUnacknowledgedSnapshots,
+        "a stalled receiver must keep a fixed snapshot window"
+    );
+    assert.equal(
+        delivery.pendingSnapshot.snapshot.snapshotSequence,
+        latestFlowSnapshot.snapshotSequence,
+        "backpressure must retain only the newest unsent state"
+    );
+    assert.deepEqual(
+        delivery.pendingSnapshot.snapshot.events.map(({ marker }) => marker),
+        [4, 5, 6, 7, 8, 9],
+        "coalescing must preserve every unsent gameplay event"
+    );
+
+    fresh.send(
+        JSON.stringify({
+            type: "snapshot-ack",
+            snapshotSequence: delivery.unacknowledgedSequences[0]
+        })
+    );
+    await waitFor(
+        () =>
+            delivery.pendingSnapshot === null &&
+            delivery.unacknowledgedSequences.includes(latestFlowSnapshot.snapshotSequence),
+        "one acknowledgement must release the newest coalesced snapshot"
+    );
+    await waitFor(
+        () =>
+            receivedSnapshots.some(({ snapshotSequence }) => snapshotSequence === latestFlowSnapshot.snapshotSequence),
+        "the receiver must get the newest state instead of replaying every stale snapshot"
+    );
+    const receivedLatest = receivedSnapshots.find(
+        ({ snapshotSequence }) => snapshotSequence === latestFlowSnapshot.snapshotSequence
+    );
+    assert.equal(receivedLatest.state.enemies[0].health, 17, "the newest enemy health must cross the bounded window");
+    assert.deepEqual(
+        receivedLatest.events.map(({ marker }) => marker),
+        [4, 5, 6, 7, 8, 9],
+        "the newest snapshot must carry events accumulated while it was pending"
+    );
+    fresh.send(
+        JSON.stringify({
+            type: "snapshot-ack",
+            snapshotSequence: latestFlowSnapshot.snapshotSequence
+        })
+    );
+    await waitFor(
+        () => delivery.unacknowledgedSequences.length === 0,
+        "a cumulative acknowledgement must release the whole delivered window"
+    );
     fresh.close();
     await closed(fresh);
 
