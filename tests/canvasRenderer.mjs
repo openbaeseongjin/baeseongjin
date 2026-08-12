@@ -85,6 +85,18 @@ export function run() {
     ]);
     textCalls.length = 0;
     borderCalls.length = 0;
+    renderer.drawEnvironmentMetrics({
+        failedComponents: () => ["terrain", "decoration"],
+        failedAtlasIds: () => ["terrain-edge", "decoration"]
+    });
+    assert.deepEqual(textCalls, [
+        "ENV FALLBACK",
+        "Components: terrain, decoration",
+        "Atlases: terrain-edge, decoration"
+    ]);
+    textCalls.length = 0;
+    renderer.drawEnvironmentMetrics({ failedComponents: () => [], failedAtlasIds: () => [] });
+    assert.deepEqual(textCalls, []);
     renderer.drawArtifactHud([{ name: "로프 공명기" }], 1.5);
     assert.deepEqual(textCalls, ["아티팩트", "• 로프 공명기", "공명 1.5초"]);
     textCalls.length = 0;

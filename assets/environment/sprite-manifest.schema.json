@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sprite-manifest.schema.json",
+  "title": "Baeseongjin environment sprite manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["formatVersion", "id", "atlases", "zones", "backdrop", "terrain", "decoration"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "formatVersion": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "generator": { "$ref": "#/$defs/generator" },
+    "atlases": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "$ref": "#/$defs/atlas" }
+    },
+    "zones": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/zone" }
+    },
+    "backdrop": { "$ref": "#/$defs/backdrop" },
+    "terrain": { "$ref": "#/$defs/terrain" },
+    "decoration": { "$ref": "#/$defs/decoration" }
+  },
+  "$defs": {
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool"],
+      "properties": {
+        "tool": { "type": "string", "minLength": 1 },
+        "exportVersion": { "type": ["string", "null"] },
+        "sourceExport": { "type": "string" }
+      }
+    },
+    "integerSize": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "atlas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "size", "frameSize"],
+      "properties": {
+        "image": { "type": "string", "pattern": "\\.png$" },
+        "size": { "$ref": "#/$defs/integerSize" },
+        "frameSize": { "$ref": "#/$defs/integerSize" }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["column", "row"],
+      "properties": {
+        "column": { "type": "integer", "minimum": 0 },
+        "row": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["atlas", "cell"],
+      "properties": {
+        "atlas": { "type": "string", "minLength": 1 },
+        "cell": { "$ref": "#/$defs/cell" }
+      }
+    },
+    "zone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "minAltitude", "palette", "backdropVariant", "terrainMaterial", "decorationGroup"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": ["waste", "industrial-maintenance", "residential-commercial", "corporate-security", "landing-pad"]
+        },
+        "label": { "type": "string" },
+        "minAltitude": { "type": "number" },
+        "palette": { "$ref": "#/$defs/palette" },
+        "backdropVariant": { "type": "string", "minLength": 1 },
+        "terrainMaterial": { "type": "string", "minLength": 1 },
+        "decorationGroup": { "type": "string", "minLength": 1 }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skyTop", "skyBottom", "silhouetteFar", "silhouetteMid", "silhouetteNear"],
+      "properties": {
+        "skyTop": { "type": "string", "minLength": 1 },
+        "skyBottom": { "type": "string", "minLength": 1 },
+        "silhouetteFar": { "type": "string", "minLength": 1 },
+        "silhouetteMid": { "type": "string", "minLength": 1 },
+        "silhouetteNear": { "type": "string", "minLength": 1 },
+        "terrainFill": { "type": "string", "minLength": 1 },
+        "terrainEdge": { "type": "string", "minLength": 1 },
+        "oneWayEdge": { "type": "string", "minLength": 1 },
+        "accent": { "type": "string", "minLength": 1 }
+      }
+    },
+    "backdrop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layers"],
+      "properties": {
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/backdropLayer" }
+        }
+      }
+    },
+    "backdropLayer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "depth", "parallaxX", "parallaxY", "frames"],
+      "properties": {
+        "id": { "type": "string", "enum": ["far", "mid", "near"] },
+        "depth": { "type": "number" },
+        "parallaxX": { "type": "number" },
+        "parallaxY": { "type": "number" },
+        "frames": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/frame" }
+        },
+        "tileWidth": { "type": "integer", "minimum": 1 },
+        "baselineRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "peakHeight": { "type": "number", "minimum": 0 }
+      }
+    },
+    "terrain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["materials"],
+      "properties": {
+        "materials": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "type": "string", "minLength": 1 },
+          "additionalProperties": { "$ref": "#/$defs/terrainMaterial" }
+        }
+      }
+    },
+    "terrainMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fill", "edge"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "fill": { "$ref": "#/$defs/frame" },
+        "edge": { "$ref": "#/$defs/frame" },
+        "oneWayColor": { "type": "string", "minLength": 1 }
+      }
+    },
+    "decoration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["groups"],
+      "properties": {
+        "groups": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "type": "string", "minLength": 1 },
+          "additionalProperties": { "$ref": "#/$defs/decorationGroup" }
+        }
+      }
+    },
+    "decorationGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/decorationItem" }
+        }
+      }
+    },
+    "decorationItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["frame", "placement"],
+      "properties": {
+        "frame": { "$ref": "#/$defs/frame" },
+        "placement": { "$ref": "#/$defs/placement" },
+        "size": { "$ref": "#/$defs/integerSize" }
+      }
+    },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["depth"],
+      "properties": {
+        "depth": { "type": "string", "enum": ["far", "mid", "near", "foreground"] },
+        "surfaceLevelOffset": { "type": "number" },
+        "avoidPlayPath": { "const": true }
+      }
+    }
+  }
+}

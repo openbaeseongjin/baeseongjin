@@ -52,7 +52,10 @@ export class CanvasRenderer {
         this.drawArtifactRewardOverlay(scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawArtifactFeedback(scene.eventFlash);
-        if (scene.metricsVisible) this.drawMetricsPanel(scene.metrics, scene.networkMetrics);
+        if (scene.metricsVisible) {
+            this.drawMetricsPanel(scene.metrics, scene.networkMetrics);
+            this.drawEnvironmentMetrics(this.sceneRenderer.environmentDiagnostics);
+        }
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
     }
@@ -207,6 +210,36 @@ export class CanvasRenderer {
                 x + 12,
                 215
             );
+        }
+        ctx.restore();
+    }
+
+    drawEnvironmentMetrics(environmentDiagnostics) {
+        if (!environmentDiagnostics) return;
+        const failedComponents = environmentDiagnostics.failedComponents
+            ? environmentDiagnostics.failedComponents()
+            : [];
+        if (failedComponents.length === 0) return;
+
+        const ctx = this.context;
+        const x = Math.max(8, this.cssWidth - 248);
+        const baseY = 18 + 118 + 8;
+        const height = 60;
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 11, 20, 0.92)";
+        ctx.fillRect(x, baseY, 230, height);
+        ctx.strokeStyle = "#fb7185";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, baseY, 230, height);
+        ctx.fillStyle = "#fb7185";
+        ctx.font = "900 11px ui-monospace, monospace";
+        ctx.fillText("ENV FALLBACK", x + 12, baseY + 18);
+        ctx.fillStyle = "#fecdd3";
+        ctx.font = "700 10px ui-monospace, monospace";
+        ctx.fillText(`Components: ${failedComponents.join(", ")}`, x + 12, baseY + 34);
+        const atlasIds = environmentDiagnostics.failedAtlasIds ? environmentDiagnostics.failedAtlasIds() : [];
+        if (atlasIds.length) {
+            ctx.fillText(`Atlases: ${atlasIds.join(", ")}`, x + 12, baseY + 50);
         }
         ctx.restore();
     }

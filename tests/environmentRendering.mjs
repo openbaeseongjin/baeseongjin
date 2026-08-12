@@ -1,0 +1,211 @@
+import assert from "node:assert/strict";
+import { DEFAULT_ENVIRONMENT_DEFINITION } from "../src/render/environment/EnvironmentCatalog.js";
+import { EnvironmentAssetSet } from "../src/render/environment/EnvironmentAssetSet.js";
+import { EnvironmentRendererComposer } from "../src/render/environment/EnvironmentRendererComposer.js";
+import { PixelBackdropRenderer } from "../src/render/environment/renderers/PixelBackdropRenderer.js";
+import { PixelDecorationRenderer } from "../src/render/environment/renderers/PixelDecorationRenderer.js";
+import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelTerrainRenderer.js";
+
+function recordingContext() {
+    const calls = [];
+    const context = {
+        calls,
+        save: () => calls.push(["save"]),
+        restore: () => calls.push(["restore"]),
+        createLinearGradient: () => ({ addColorStop() {} }),
+        drawImage: (...args) => calls.push(["drawImage", ...args]),
+        translate: (...args) => calls.push(["translate", ...args]),
+        rotate: (...args) => calls.push(["rotate", ...args]),
+        scale: (...args) => calls.push(["scale", ...args]),
+        beginPath: () => calls.push(["beginPath"]),
+        moveTo: (...args) => calls.push(["moveTo", ...args]),
+        lineTo: (...args) => calls.push(["lineTo", ...args]),
+        closePath: () => calls.push(["closePath"]),
+        clip: () => calls.push(["clip"]),
+        fill: () => calls.push(["fill"]),
+        stroke: () => calls.push(["stroke"]),
+        fillRect: (...args) => calls.push(["fillRect", ...args]),
+        arc: () => {},
+        fillText: () => {}
+    };
+    return new Proxy(context, {
+        set(target, key, value) {
+            calls.push(["set", key, value]);
+            target[key] = value;
+            return true;
+        }
+    });
+}
+
+class MockImage {
+    static instances = [];
+    constructor() {
+        this.listeners = {};
+        MockImage.instances.push(this);
+    }
+    addEventListener(type, listener) {
+        this.listeners[type] = listener;
+    }
+}
+
+function scene() {
+    return {
+        camera: { x: 0, y: 0, zoom: 1 },
+        player: { position: { x: 160, y: -1800 } },
+        world: {
+            seed: 7,
+            surfaces: [
+                {
+                    level: 2,
+                    oneWay: true,
+                    oneWayEdgeEnd: 2,
+                    vertices: [
+                        { x: 0, y: 20 },
+                        { x: 80, y: 10 },
+                        { x: 120, y: 30 },
+                        { x: 0, y: 80 }
+                    ]
+                }
+            ],
+            checkpoints: [],
+            summit: null
+        }
+    };
+}
+
+function readyAssets({ fail = null } = {}) {
+    MockImage.instances = [];
+    const assets = new EnvironmentAssetSet({
+        atlases: DEFAULT_ENVIRONMENT_DEFINITION.atlases,
+        ImageClass: MockImage,
+        warn: () => {}
+    });
+    for (const [atlasId, atlas] of Object.entries(DEFAULT_ENVIRONMENT_DEFINITION.atlases)) {
+        const image = MockImage.instances.find((candidate) => candidate.src === atlas.source);
+        image.naturalWidth = atlas.size.width;
+        image.naturalHeight = atlas.size.height;
+        if (atlasId === fail) image.listeners.error();
+        else image.listeners.load();
+    }
+    return assets;
+}
+
+export function run() {
+    const definition = DEFAULT_ENVIRONMENT_DEFINITION;
+    const viewport = { cssWidth: 320, cssHeight: 180 };
+    const currentScene = scene();
+    const assets = readyAssets();
+    const terrainContext = recordingContext();
+    new PixelTerrainRenderer({ definition, assets }).draw({ context: terrainContext, scene: currentScene });
+    assert.ok(
+        terrainContext.calls.some(([name]) => name === "clip"),
+        "terrain tiles must be clipped to collision polygon"
+    );
+    const edgeImage = assets.imageFor("terrain-edge");
+    assert.ok(
+        terrainContext.calls.some(([name, image]) => name === "drawImage" && image === edgeImage),
+        "terrain edge atlas must be painted inside the collision polygon"
+    );
+    const oneWayStart = terrainContext.calls.findLastIndex(([name]) => name === "beginPath");
+    const oneWay = terrainContext.calls.slice(oneWayStart).filter(([name]) => name === "lineTo");
+    assert.deepEqual(
+        oneWay,
+        [
+            ["lineTo", 80, 10],
+            ["lineTo", 120, 30]
+        ],
+        "one-way edge uses exact vertex chain"
+    );
+
+    const backdrop = new PixelBackdropRenderer({ definition, assets });
+    const brightness = [];
+    for (const altitude of [0, 1800, 3600, 5400, 7200]) {
+        const context = recordingContext();
+        backdrop.draw({ context, scene: { ...currentScene, player: { position: { x: 0, y: -altitude } } }, viewport });
+        const overlay = context.calls.find(
+            ([name, key, value]) =>
+                name === "set" && key === "fillStyle" && String(value).startsWith("rgba(255, 244, 214")
+        );
+        brightness.push(Number(overlay[2].match(/([\d.]+)\)$/)[1]));
+    }
+    assert.ok(
+        brightness.every((value, index) => index === 0 || value > brightness[index - 1]),
+        "sunrise brightens monotonically across zones"
+    );
+
+    const decorationContext = recordingContext();
+    const decoration = new PixelDecorationRenderer({ definition, assets });
+    decoration.draw({ context: decorationContext, scene: currentScene });
+    const firstDecoration = decorationContext.calls.filter(([name]) => name === "drawImage");
+    const secondContext = recordingContext();
+    new PixelDecorationRenderer({ definition, assets }).draw({
+        context: secondContext,
+        scene: currentScene
+    });
+    assert.deepEqual(
+        secondContext.calls.filter(([name]) => name === "drawImage"),
+        firstDecoration,
+        "decoration placement is deterministic"
+    );
+    for (const [, , , , , , x] of firstDecoration)
+        assert.ok(x < -48 || x > 120, "decoration stays outside traversal surface");
+
+    const seedInputs = [];
+    class SeedRecordingDecorationRenderer extends PixelDecorationRenderer {
+        hashFor(value) {
+            seedInputs.push(value);
+            return 0.2;
+        }
+    }
+    const seededRenderer = new SeedRecordingDecorationRenderer({ definition, assets });
+    seededRenderer.draw({ context: recordingContext(), scene: currentScene });
+    const firstSeedInput = seedInputs[0];
+    seedInputs.length = 0;
+    seededRenderer.draw({
+        context: recordingContext(),
+        scene: { ...currentScene, world: { ...currentScene.world, seed: currentScene.world.seed + 1 } }
+    });
+    assert.equal(seedInputs[0], firstSeedInput + 1, "decoration selection consumes the scene world seed");
+
+    MockImage.instances = [];
+    const pending = new EnvironmentAssetSet({ atlases: definition.atlases, ImageClass: MockImage, warn: () => {} });
+    const fallbackCalls = [];
+    const composer = new EnvironmentRendererComposer({
+        definition,
+        assets: pending,
+        polygonBackdrop: { draw: () => fallbackCalls.push("backdrop") },
+        polygonTerrain: { draw: () => fallbackCalls.push("terrain") },
+        warn: () => {}
+    });
+    composer.draw({ context: recordingContext(), scene: currentScene, viewport });
+    assert.equal(composer.status.anyFailed(), false, "pending assets are not diagnostics failures");
+    assert.deepEqual(fallbackCalls, ["backdrop", "terrain"], "pending components render their local fallback");
+    for (const [atlasId, atlas] of Object.entries(definition.atlases)) {
+        const image = MockImage.instances.find((candidate) => candidate.src === atlas.source);
+        image.naturalWidth = atlas.size.width;
+        image.naturalHeight = atlas.size.height;
+        image.listeners.load();
+    }
+    composer.draw({ context: recordingContext(), scene: currentScene, viewport });
+    assert.equal(composer.status.backdrop.status, "ready", "composer rechecks async readiness");
+    assert.deepEqual(fallbackCalls, ["backdrop", "terrain"], "ready components stop using their fallback");
+
+    const failedAssets = readyAssets({ fail: "backdrop-far" });
+    const partialCalls = [];
+    const warnings = [];
+    const partial = new EnvironmentRendererComposer({
+        definition,
+        assets: failedAssets,
+        polygonBackdrop: { draw: () => partialCalls.push("backdrop") },
+        polygonTerrain: { draw: () => partialCalls.push("terrain") },
+        warn: (message) => warnings.push(message)
+    });
+    partial.draw({ context: recordingContext(), scene: currentScene, viewport });
+    partial.draw({ context: recordingContext(), scene: currentScene, viewport });
+    assert.equal(partial.status.backdrop.status, "failed");
+    assert.equal(partial.status.terrain.status, "ready");
+    assert.equal(partial.status.decoration.status, "ready");
+    assert.deepEqual(partialCalls, ["backdrop", "backdrop"], "one failed atlas falls back only its component");
+    assert.equal(warnings.length, 1, "a component failure warns only once");
+    assert.match(warnings[0], /backdrop atlas failed: backdrop-far/);
+}

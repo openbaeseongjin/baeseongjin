@@ -69,6 +69,10 @@ index.html
 - `PlayerRuntimeFactory`는 공개 `Collider` 계약의 구현을 플레이어 물리에 조립한다. 첫 구현은 `CircleCollider` 하나이며 이동·로프 capability와 지형·플레이어 충돌 계산은 구체 반지름 대신 조립된 collider 계약을 사용한다.
 - scene profile은 배경·지형·로프·actor·world VFX 레이어의 조합이다. 혼합 도트 프로필은 공용 폴리곤 레이어와 sprite actor 레이어를 조립하며 `PolygonSceneRenderer` 전체를 복사하거나 상속 override하지 않는다.
 - scene composer는 조립된 하위 renderer 목록을 안정된 순서로 순회해 호출할 뿐 profile 또는 actor kind 분기를 하지 않는다. player, enemy, player projectile, enemy projectile과 환경·로프·VFX renderer가 자기 collection의 실제 그리기를 소유하고 profile factory가 polygon/sprite 구현을 교체 조립한다.
+- 도트 환경도 `backdrop`, collision-aligned `terrain`, non-collision `decoration` 하위 renderer로 조립한다. 상위 composer는 profile·구역·atlas 종류를 분기하지 않으며 각 component가 고도 구역 해석과 실제 Canvas 그리기, 자기 asset 준비 상태와 fallback을 완결한다. 정식 리소스 교환 계약은 `environment-asset-format.md`를 따른다.
+- 도트 terrain은 `WorldGenerator`가 만든 surface vertices를 새 도형으로 근사하지 않고 같은 polygon clip과 외곽선에 사용한다. one-way 표현도 같은 vertices의 `0..oneWayEdgeEnd` chain만 그린다. decoration은 충돌 상태를 추가하지 않고 이동 경로 밖 또는 배경 깊이에 결정적으로 배치한다.
+- 환경 asset 실패는 scene 전체가 아니라 component별로 격리한다. backdrop 실패는 polygon backdrop, terrain 실패는 polygon world geometry로 각각 대체하고 decoration 실패는 장식만 생략한다. pending load를 실패로 고정하지 않으며 실제 실패 전이에 한 번만 경고하고 `?metrics=1`에 component와 atlas ID를 노출한다.
+- 싱글과 멀티 앱은 같은 scene snapshot과 renderer composition을 사용한다. 환경 상태나 진단을 전달하려고 `GameApp`과 `MultiplayerGameApp`에 같은 plumbing을 복제하지 않고 Canvas host 또는 환경 하위 renderer의 공용 계약에서 읽는다.
 - bootstrap 기본 프로필은 `sprite`이며 query의 `renderer=polygon`이 기존 표현을 명시적으로 선택한다. 알 수 없는 값은 경고 후 기본 프로필을 사용한다. sprite asset 준비 실패는 앱을 중단하지 않고 하위 fallback renderer가 전체 polygon scene을 그리며 진단 가능한 경고를 남긴다.
 - 렌더 프로필 교체는 물리·전투·입력·권위 snapshot·네트워크 메시지 계약을 바꾸지 않는다.
 
