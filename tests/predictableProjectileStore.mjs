@@ -102,12 +102,26 @@ export function run() {
     );
 
     const ropeCutStore = new PredictableProjectileStore();
-    ropeCutStore.apply([enemySpawn], 10, { enemies: [] });
+    const ropeCutSpawn = createPredictableSpawnEvent({
+        eventId: "event-rope-hand-segment",
+        objectId: "enemy-projectile-rope-hand-segment",
+        objectType: "enemy-projectile",
+        spawnTick: 10,
+        position: { x: 12, y: -40 },
+        velocity: { x: 0, y: 0 },
+        parameters: { radius: 7, damage: 20, ownerId: "enemy-1", targetId: "player-1" }
+    });
+    ropeCutStore.apply([ropeCutSpawn], 10, { enemies: [] });
     const predictedRopeCut = ropeCutStore.update(0, {
         enemies: [],
         localPlayer: {
             ...localPlayer,
-            rope: { isAttached: true, anchor: { x: 0, y: -100 } }
+            angle: 0,
+            rope: {
+                isAttached: true,
+                anchor: { x: 0, y: -100 },
+                attachmentOffset: { x: 12, y: -7 }
+            }
         }
     });
     assert.equal(predictedRopeCut[0].resolution, "rope-cut", "rope collision must win over body collision");

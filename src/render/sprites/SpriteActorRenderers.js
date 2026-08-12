@@ -49,7 +49,8 @@ class PlayerSpriteRendererBase {
                 offset: presentation.offset,
                 opacity: presentation.opacity,
                 pixelSnap: presentation.pixelSnap,
-                flipX: animation.flipX
+                flipX: animation.flipX,
+                rotation: player.angle ?? 0
             });
             args.context.fillStyle = this.markerColor;
             args.context.fillRect(Math.round(player.position.x) - 6, Math.round(player.position.y) + 18, 12, 2);

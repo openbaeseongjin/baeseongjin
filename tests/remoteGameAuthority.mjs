@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { WebSocket } from "ws";
 import { Vector2 } from "../src/game-kit/index.js";
+import { shortestAngleDelta } from "../src/game/physics/AngularMotion.js";
 import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
@@ -184,12 +185,16 @@ export async function run() {
                     id: "local",
                     position: { x: remoteX, y: 0 },
                     velocity: { x: 100, y: 0 },
+                    angle: remoteX / 10,
+                    angularVelocity: 2,
                     ownerMotionTick
                 },
                 {
                     id: "remote",
                     position: { x: remoteX, y: 0 },
                     velocity: { x: 100, y: 0 },
+                    angle: remoteX / 10,
+                    angularVelocity: 2,
                     ownerMotionTick,
                     health
                 }
@@ -223,11 +228,35 @@ export async function run() {
         Math.abs(projected.players[1].position.x - 3) <= 0.5,
         "remote players must interpolate between known snapshots"
     );
+    assert.equal(projected.players[0].angle, 0.6, "the local player angle must use owner prediction instead");
+    assert.ok(Math.abs(projected.players[1].angle - 0.3) <= 0.05, "remote player angle must interpolate");
     assert.ok(
         Math.abs(projected.enemies[0].position.x - 6) <= 1,
         "enemies must share the delayed interpolation timeline"
     );
     assert.equal(projected.players[1].health, 80, "non-position state must use the latest authority value");
+    const wrappingAngles = new RemoteWorldStateBuffer({
+        interpolationSeconds: 0.05,
+        maxExtrapolationSeconds: 0.12,
+        maxSnapshots: 3
+    });
+    const angleSnapshot = (tick, x, angle) => {
+        const state = snapshot(tick, x);
+        return {
+            ...state,
+            state: {
+                ...state.state,
+                players: state.state.players.map((player) => ({ ...player, angle }))
+            }
+        };
+    };
+    wrappingAngles.push(angleSnapshot(6, 0, 3.1), 0);
+    wrappingAngles.push(angleSnapshot(12, 6, -3.1), 70);
+    const wrappedAngle = wrappingAngles.sample({ now: 75, localPlayerId: "local" }).players[1].angle;
+    assert.ok(
+        Math.abs(Math.abs(wrappedAngle) - Math.PI) < 0.1,
+        "remote rotation must interpolate through the shortest wrapped angle"
+    );
     projected = interpolation.sample({ now: 170, localPlayerId: "local" });
     assert.ok(
         Math.abs(projected.players[1].position.x - 13) <= 0.5,
@@ -1288,6 +1317,10 @@ export async function run() {
                 partnerServerPosition: distance(partnerView.position, serverState.position),
                 ownerServerVelocity: distance(ownerState.velocity, serverState.velocity),
                 partnerServerVelocity: distance(partnerView.velocity, serverState.velocity),
+                ownerServerAngle: Math.abs(shortestAngleDelta(ownerState.angle, serverState.angle)),
+                partnerServerAngle: Math.abs(shortestAngleDelta(partnerView.angle, serverState.angle)),
+                ownerServerAngularVelocity: Math.abs(ownerState.angularVelocity - serverState.angularVelocity),
+                partnerServerAngularVelocity: Math.abs(partnerView.angularVelocity - serverState.angularVelocity),
                 ropeMatches:
                     ownerState.rope.isAttached === serverState.rope.isAttached &&
                     partnerView.rope.isAttached === serverState.rope.isAttached
@@ -1297,6 +1330,10 @@ export async function run() {
                 convergence.partnerServerPosition <= 4 &&
                 convergence.ownerServerVelocity <= 20 &&
                 convergence.partnerServerVelocity <= 20 &&
+                convergence.ownerServerAngle <= 0.05 &&
+                convergence.partnerServerAngle <= 0.05 &&
+                convergence.ownerServerAngularVelocity <= 0.5 &&
+                convergence.partnerServerAngularVelocity <= 0.5 &&
                 convergence.ropeMatches
             ) {
                 break;
@@ -1313,6 +1350,13 @@ export async function run() {
         assert.ok(
             convergence.ownerServerVelocity <= 20 && convergence.partnerServerVelocity <= 20,
             `all player velocities must converge after neutral input: ${JSON.stringify(convergence)}`
+        );
+        assert.ok(
+            convergence.ownerServerAngle <= 0.05 &&
+                convergence.partnerServerAngle <= 0.05 &&
+                convergence.ownerServerAngularVelocity <= 0.5 &&
+                convergence.partnerServerAngularVelocity <= 0.5,
+            `all player rotations must converge after neutral input: ${JSON.stringify(convergence)}`
         );
         assert.equal(convergence.ropeMatches, true, "owner, server, and partner must share rope attachment state");
 
@@ -1427,6 +1471,12 @@ export async function run() {
                         observerServerPosition: distance(observerState.position, serverState.position),
                         ownerServerVelocity: distance(ownerState.velocity, serverState.velocity),
                         observerServerVelocity: distance(observerState.velocity, serverState.velocity),
+                        ownerServerAngle: Math.abs(shortestAngleDelta(ownerState.angle, serverState.angle)),
+                        observerServerAngle: Math.abs(shortestAngleDelta(observerState.angle, serverState.angle)),
+                        ownerServerAngularVelocity: Math.abs(ownerState.angularVelocity - serverState.angularVelocity),
+                        observerServerAngularVelocity: Math.abs(
+                            observerState.angularVelocity - serverState.angularVelocity
+                        ),
                         ropeMatches:
                             ownerState.rope.isAttached === serverState.rope.isAttached &&
                             observerState.rope.isAttached === serverState.rope.isAttached
@@ -1436,6 +1486,10 @@ export async function run() {
                         profileConvergence.observerServerPosition <= 4 &&
                         profileConvergence.ownerServerVelocity <= 20 &&
                         profileConvergence.observerServerVelocity <= 20 &&
+                        profileConvergence.ownerServerAngle <= 0.05 &&
+                        profileConvergence.observerServerAngle <= 0.05 &&
+                        profileConvergence.ownerServerAngularVelocity <= 0.5 &&
+                        profileConvergence.observerServerAngularVelocity <= 0.5 &&
                         profileConvergence.ropeMatches
                     ) {
                         break;
@@ -1449,6 +1503,13 @@ export async function run() {
                 assert.ok(
                     profileConvergence.ownerServerVelocity <= 20 && profileConvergence.observerServerVelocity <= 20,
                     `${profileLabel} velocities must converge: ${JSON.stringify(profileConvergence)}`
+                );
+                assert.ok(
+                    profileConvergence.ownerServerAngle <= 0.05 &&
+                        profileConvergence.observerServerAngle <= 0.05 &&
+                        profileConvergence.ownerServerAngularVelocity <= 0.5 &&
+                        profileConvergence.observerServerAngularVelocity <= 0.5,
+                    `${profileLabel} rotations must converge: ${JSON.stringify(profileConvergence)}`
                 );
                 assert.equal(profileConvergence.ropeMatches, true, `${profileLabel} rope state must converge`);
                 const ownerAuthorityState = impaired.latestSnapshot.state;

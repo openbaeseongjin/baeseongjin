@@ -25,7 +25,7 @@ export function run() {
         position: { x: 10, y: 20 }
     });
     assert.equal(envelope.protocolVersion, WORLD_SNAPSHOT_PROTOCOL_VERSION);
-    assert.equal(envelope.protocolVersion, 3);
+    assert.equal(envelope.protocolVersion, 4);
     assert.equal(envelope.state.players[0].ownerMotionTick, 38);
     assert.deepEqual(deserializeWorldSnapshotEnvelope(serializeWorldSnapshotEnvelope(envelope)), envelope);
     assert.throws(() => envelopeWithPlayer({ id: "player-1", position: { x: 10, y: 20 } }), /ownerMotionTick/);
@@ -33,5 +33,5 @@ export function run() {
         () => envelopeWithPlayer({ id: "player-1", ownerMotionTick: -1, position: { x: 10, y: 20 } }),
         /ownerMotionTick/
     );
-    assert.throws(() => deserializeWorldSnapshotEnvelope('{"protocolVersion":2}'), /unsupported world snapshot/);
+    assert.throws(() => deserializeWorldSnapshotEnvelope('{"protocolVersion":3}'), /unsupported world snapshot/);
 }

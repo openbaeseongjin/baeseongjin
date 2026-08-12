@@ -17,6 +17,9 @@ function renderPlayer(state, predicted = null) {
     const velocity = predicted?.velocity ?? state.velocity;
     return {
         ...state,
+        angle: predicted?.angle ?? state.angle,
+        angularVelocity: predicted?.angularVelocity ?? state.angularVelocity,
+        rope: predicted?.rope ?? state.rope,
         position: new Vector2(position.x, position.y),
         velocity: new Vector2(velocity.x, velocity.y)
     };
@@ -215,6 +218,8 @@ export class MultiplayerGameApp {
                 ? {
                       ...localAuthorityPlayer,
                       position: predictedPlayer.position,
+                      angle: predictedPlayer.angle,
+                      angularVelocity: predictedPlayer.angularVelocity,
                       rope: predictedPlayer.rope,
                       hitInvulnerabilityRemaining: predictedPlayer.hitInvulnerabilityRemaining,
                       collider: predictedPlayer.collider

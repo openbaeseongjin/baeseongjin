@@ -8,6 +8,8 @@ import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createSimulationCapabilityMixin } from "../src/game/simulation/SimulationCapability.js";
 import { SimulationDispatcher } from "../src/game/simulation/SimulationDispatcher.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
+import { AngularMotion } from "../src/game/physics/AngularMotion.js";
+import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
 
 const withCounterInput = createInputCapabilityMixin({
     id: "counter",
@@ -98,6 +100,11 @@ export function run() {
     assert.ok(player.ropeObject instanceof InputDrivenObject, "the rope must be an independent InputDrivenObject");
     assert.equal(player.ownerId, player.id);
     assert.equal(player.ropeObject.ownerId, player.id);
+    assert.ok(player.physics.angularMotion instanceof AngularMotion, "angular motion must be a Has-A component");
+    assert.ok(
+        player.physics.collider instanceof CircleCollider,
+        "the replaceable collider must remain a Has-A component"
+    );
     assert.equal(player.hasInputCapability("locomotion"), true);
     assert.equal(player.ropeObject.hasInputCapability("rope-pointer"), true);
     assert.deepEqual(

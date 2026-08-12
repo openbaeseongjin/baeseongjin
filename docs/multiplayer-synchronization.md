@@ -55,7 +55,7 @@
 | 몹·적 투사체·공용 월드 | 서버 상태 | 서버 스냅샷과 생성·해결 사건을 적용하고 연속 위치만 보간·제한 외삽 |
 | 최초 입장·재접속 | 서버가 보존한 최신 공유 상태 | 전체 소유자 상태를 한 번 복원한 뒤 다시 클라이언트 우선 시뮬레이션 시작 |
 
-현재 impact claim 프로토콜 v3의 정상 메시지는 projectile ID, client tick, impact 종류, 충돌 위치·속도, 관측 대미지, 부활 여부와 64비트 상태 지문을 운반한다. 서버에 탄환이 있으면 서버 대미지로 같은 전이를 시도하고, 이미 만료됐으면 피해 클라이언트가 관측한 대미지로 시도한다. 결과 지문이 다를 때만 두 번째 메시지에 `recoveryId`, 최신 소유자 상태와 `stateTick`을 함께 싣는다. 복구 상태는 서버가 실제로 복원하는 ID·위치·속도·접지·HP·타이머·생명·로프·입력 제어·무기·아티팩트 필드 전체의 타입·유한값·기본 범위·내부 관계를 검증한다. 인증된 피해자 ID와 상태 ID가 다르거나, `stateTick`이 이전 승인 owner tick보다 오래됐거나 서버 허용 미래 tick을 넘으면 복구를 적용하지 않는다. 형식이 깨졌거나 인증된 플레이어가 없는 메시지는 정상 gameplay 거부 receipt가 아니라 프로토콜 오류로 연결을 종료한다.
+현재 impact claim 프로토콜 v4의 정상 메시지는 projectile ID, client tick, impact 종류, 충돌 위치·속도, 관측 대미지, 부활 여부와 64비트 상태 지문을 운반한다. 서버에 탄환이 있으면 서버 대미지로 같은 전이를 시도하고, 이미 만료됐으면 피해 클라이언트가 관측한 대미지로 시도한다. 결과 지문이 다를 때만 두 번째 메시지에 `recoveryId`, 최신 소유자 상태와 `stateTick`을 함께 싣는다. 복구 상태는 서버가 실제로 복원하는 ID·위치·속도·각도·각속도·접지·HP·타이머·생명·로프 손 offset·입력 제어·무기·아티팩트 필드 전체의 타입·유한값·기본 범위·내부 관계를 검증한다. 인증된 피해자 ID와 상태 ID가 다르거나, `stateTick`이 이전 승인 owner tick보다 오래됐거나 서버 허용 미래 tick을 넘으면 복구를 적용하지 않는다. 형식이 깨졌거나 인증된 플레이어가 없는 메시지는 정상 gameplay 거부 receipt가 아니라 프로토콜 오류로 연결을 종료한다.
 
 상태 지문은 raw 플레이어 객체 전체의 정확 일치 해시가 아니다. impact가 소유하는 지속 결과만 결정적 순서로 투영하고, 위치·속도·로프 기하는 0.1 단위, 타이머는 1/120초 tick, 체력·무기 수치는 0.001 단위로 양자화한 뒤 비암호학적 64비트 FNV-1a를 계산한다. 일반 본체 피격은 HP·속도·피격 무적, 로프 절단은 부착 여부·재부착 제한, 치명 피격은 여기에 체크포인트 위치·생명·로프·무기·아티팩트 손실 상태를 포함한다. 입력 포인터·렌더 상태와 다른 동기화 경계가 소유한 값은 제외한다. 이 지문은 불일치 감지용이며 인증이나 치트 방지 증거가 아니다.
 
@@ -182,6 +182,16 @@
 
 로프 드래그 중 포인터가 브라우저 상단 UI로 나가거나 `pointercancel`, 창 `blur`, 문서 숨김이 발생하면 소유 클라이언트는 이를 해제 의도로 확정한다. `requestAnimationFrame` 재개를 기다리지 않고 해제 snapshot을 로컬 예측에 적용한 뒤, 60Hz 일반 명령 전송 제한을 우회해 해당 명령과 `owner-motion`을 즉시 보낸다. 서버 receipt나 다음 권위 스냅샷을 기다려 로프를 유지해서는 안 된다.
 
+## 플레이어 강체 회전과 손 관절 동기화
+
+각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
+
+- `owner-motion` protocol v2는 `angle`, `angularVelocity`, 부착 중인 `rope.attachmentOffset`을 위치·속도·anchor와 함께 보낸다. 서버는 선속도 envelope와 별도로 각속도 상한 및 허용된 손 local offset을 검증하고 승인된 소유자 상태를 복제한다.
+- `WorldSnapshot` protocol v4의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`을 포함한다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
+- 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
+- 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 먼저 도착한 최신 detached `owner-motion`은 기존 단조 rope tick 규칙대로 연속 운동 거부와 별개로 해제를 확정한다.
+- `player-impact` protocol v4의 divergence recovery 전체 상태에는 angle·angularVelocity·attachmentOffset이 포함된다. 부활 결과 지문에도 회전 상태와 부착 손을 양자화해 포함하지만, 정상 비치명 impact마다 전체 회전 상태를 별도 전송하지 않는다.
+
 ## 스냅샷 계약
 
 최소 `WorldSnapshot`은 다음 정보를 가진다.
@@ -193,8 +203,8 @@ serverTick
 worldSeed
 worldRevision
 players[]
-  id, ownerMotionTick, position, velocity, isGrounded, health, lifeState
-  rope(anchor, length, currentLength, tension), weaponCooldown
+  id, ownerMotionTick, position, velocity, angle, angularVelocity, isGrounded, health, lifeState
+  rope(anchor, attachmentOffset, length, currentLength, tension), weaponCooldown
   control(aimWorld, lastPointer, lastViewport, wasPointerDown, attachBufferRemaining, swingDrag)
   artifacts[], artifactEffects
 enemies[]

@@ -49,13 +49,17 @@ export function run() {
         boundaryWorld.applyOwnerMotion("boundary-player", {
             position: { x: 160, y: 420 },
             velocity: { x: 320, y: -140 },
+            angle: 0.4,
+            angularVelocity: -1.5,
             isGrounded: false,
-            rope: { isAttached: false, anchor: null }
+            rope: { isAttached: false, anchor: null, attachmentOffset: null }
         }),
         true
     );
     assert.deepEqual(boundaryWorld.playerState("boundary-player").position, { x: 160, y: 420 });
     assert.deepEqual(boundaryWorld.playerState("boundary-player").velocity, { x: 320, y: -140 });
+    assert.ok(Math.abs(boundaryWorld.playerState("boundary-player").angle - 0.4) < Number.EPSILON * 4);
+    assert.equal(boundaryWorld.playerState("boundary-player").angularVelocity, -1.5);
     for (const alias of [
         "player",
         "rope",
