@@ -2,7 +2,7 @@
 
 이 문서는 PixelLab, SpriteCook 또는 수작업으로 만든 캐릭터를 게임에 넣을 때 사용하는 기준 형식이다. 도구의 원본 export는 입력 자료일 뿐이며, 런타임은 도구에 종속되지 않은 PNG atlas 묶음과 `sprite-manifest.json`을 소비한다.
 
-기본 mock은 SVG atlas 하나를 코드로 정의하지만 런타임은 `PlayerSpriteManifest.js`와 `SpriteImageAssetSet`을 통해 manifest 기반 multi-atlas 리소스도 읽는다. renderer는 현재 frame의 atlas ID로 이미지를 선택하며 생성 도구를 해석하지 않는다.
+기본 mock은 SVG atlas 하나를 코드로 정의하지만 런타임은 `PlayerSpriteManifest.js`와 `SpriteImageAssetSet`을 통해 manifest 기반 multi-atlas 리소스도 읽는다. renderer는 현재 frame의 atlas ID로 이미지를 선택하며 생성 도구를 해석하지 않는다. 그래픽 담당자는 [`assets/sprites/player-production-template/`](../assets/sprites/player-production-template/)을 복사해 작업하며, 현재 runtime이 starter나 그 복사본을 자동으로 선택하지는 않는다.
 
 ## AI 에이전트 작업 진입점
 
@@ -10,17 +10,25 @@
 
 1. 작업이 PixelLab·SpriteCook 원본을 만드는 단계인지, 저장소 표준 리소스로 정규화하는 단계인지 구분한다.
 2. 원본 생성 단계라면 아래 **도구별 원본 수령 형식**으로 export하고 원본을 임의로 재배열하지 않는다.
-3. 정규화 단계라면 `<character-id>/sprite-manifest.json`과 manifest가 참조하는 모든 PNG atlas를 함께 만든다.
+3. 정규화 단계라면 `assets/sprites/player-production-template/`을 `assets/sprites/<character-id>/` sibling으로 복사하고 `sprite-manifest.json`과 manifest가 참조하는 모든 PNG atlas를 함께 만든다.
 4. 실제 PNG 크기, atlas ID·cell 범위, 일곱 animation 상태, duration·fallback과 collider 분리를 확인한다.
 5. 결과 보고에 출력 경로, 생성 도구·버전, 원본에서 수행한 crop·padding·repacking, 검증 명령과 결과를 남긴다.
 
-구현 기준 파일은 다음 세 가지다.
+구현 기준 파일과 작업 시작점은 다음과 같다.
 
 - JSON Schema: [`assets/sprites/sprite-manifest.schema.json`](../assets/sprites/sprite-manifest.schema.json)
-- 복사 가능한 완전한 예제: [`assets/sprites/examples/player-multi-atlas/sprite-manifest.json`](../assets/sprites/examples/player-multi-atlas/sprite-manifest.json)
+- 그래픽 담당자용 production starter: [`assets/sprites/player-production-template/`](../assets/sprites/player-production-template/)
+- schema·validator 계약 fixture: [`assets/sprites/examples/player-multi-atlas/sprite-manifest.json`](../assets/sprites/examples/player-multi-atlas/sprite-manifest.json)
 - 런타임 loader: [`src/render/sprites/PlayerSpriteManifest.js`](../src/render/sprites/PlayerSpriteManifest.js)
 
-에이전트는 example 디렉터리를 복사해 PNG와 값만 교체하고 `npm run validate:sprite-assets -- <directory>`를 실행한다. JSON 파싱, 상대 PNG 경로, 실제 PNG 크기, atlas 격자·cell 범위, 일곱 상태 coverage, fallback 순환과 duration을 모두 통과해야 `runtime-ready`로 보고한다.
+에이전트는 production starter를 복사해 PNG와 값만 교체하고 `npm run validate:sprite-assets -- <directory>`를 실행한다. JSON 파싱, 상대 PNG 경로, 실제 PNG 크기, atlas 격자·cell 범위, 일곱 상태 coverage, fallback 순환과 duration을 모두 통과해야 `runtime-ready`로 보고한다. `examples/player-multi-atlas`는 공개 계약 회귀용 fixture로 유지하며 아트 품질이나 현재 13개 pose의 기준으로 사용하지 않는다.
+
+### 현재 mock, starter와 최종 결과물
+
+- 현재 게임은 `assets/sprites/player-action-mock.svg`를 직접 참조한다. 이 SVG는 일곱 동작 의미의 원본이다.
+- `assets/sprites/player-production-template/`은 그 mock의 13개 distinct frame, timing과 presentation cue를 정식 PNG multi-atlas 형식으로 옮긴 복사 가능한 starter다.
+- 그래픽 담당자의 결과물은 `assets/sprites/<character-id>/` sibling에 둔다. 폴더를 복사해도 manifest의 `$schema`는 `../sprite-manifest.schema.json`으로 유효하다.
+- starter와 생성 결과는 현재 runtime이 자동 참조하지 않는다. 최종 게임 연결은 별도 개발 작업에서 definition을 loader 경계에 주입한다.
 
 ### 작업 요청 템플릿
 

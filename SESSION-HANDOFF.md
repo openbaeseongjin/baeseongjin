@@ -219,6 +219,13 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - mock player asset은 저장소에서 직접 만든 `assets/sprites/player-action-mock.svg`이며 atlas layout과 출처 기록은 `assets/sprites/README.md`에 있다. `PlayerSpriteManifest`·`PlayerSpriteDefinition`·`SpriteImageAssetSet`이 PixelLab·SpriteCook 원본을 여러 PNG atlas와 도구 중립 animation manifest로 정규화해 frame별 atlas를 선택한다. 프레임 수·순서·속도는 manifest가 소유하고 collider는 별도 조합으로 유지한다. 다른 개발자와 AI 에이전트는 루트 `AGENTS.md`에서 `docs/sprite-asset-format.md`의 JSON Schema·example·`validate:sprite-assets` 명령으로 진입한다.
 - 렌더러 선택이 물리·전투·네트워크 snapshot 계약을 바꾸지 않으며, 교체 가능한 렌더 경계의 상세 기준은 `docs/architecture.md`를 따른다.
 
+### [L2] 그래픽 담당자는 실제 납품 형식의 player production starter에서 작업한다
+
+- 현재 런타임 mock인 `assets/sprites/player-action-mock.svg`는 동작 의미를 확인하는 자료이고, 정식 납품 형식은 여러 PNG atlas와 `sprite-manifest.json`이므로 그래픽 담당자에게 SVG mock이나 validator fixture를 직접 출발점으로 주지 않는다.
+- `assets/sprites/player-production-template/`은 현재 mock의 일곱 상태·프레임·재생 설정을 실제 납품 형식으로 옮긴 복사 가능한 starter를 제공한다. 담당자는 이를 sibling `assets/sprites/<character-id>/`로 복사해 PNG와 manifest 값을 교체하며, 상대 `$schema` 경로도 복사 후 유효해야 한다.
+- starter는 그래픽 생성·정규화·validator 통과를 위한 인계 자료일 뿐 현재 런타임이 자동 참조하지 않는다. 기본 player 연결과 최종 교체는 별도 개발 작업으로 남긴다.
+- starter의 위치, cell map, 수정 범위와 검증 절차는 `docs/sprite-asset-format.md`와 `assets/sprites/README.md`를 기준으로 유지한다.
+
 ### [L1] 환경 도트 표현은 독립 component와 전용 multi-atlas 계약으로 조립한다
 
 - 참고 이미지는 구체 디자인이 아니라 어두운 다층 실루엣·큰 여백·제한된 조명 같은 도트 화면 구성만 참고한다. 실제 mock은 기획 채널에서 확정한 폐쇄형 수직 기업도시의 폐기물·산업 정비·주거 상업·기업 보안·착륙장 5구역을 실제 약 8,880m 월드 범위 안에 나누고 고도 기반 일출 밝기 변화를 따른다.

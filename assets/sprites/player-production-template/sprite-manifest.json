@@ -1,0 +1,96 @@
+{
+    "$schema": "../sprite-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "player-production-template",
+    "generator": {
+        "tool": "repository-svg-repack",
+        "exportVersion": "1",
+        "sourceExport": "../player-action-mock.svg"
+    },
+    "render": {
+        "facing": "right",
+        "size": { "width": 48, "height": 48 },
+        "anchor": { "x": 0.5, "y": 0.625 },
+        "offset": { "x": 0, "y": 0 },
+        "pixelSnap": true
+    },
+    "atlases": {
+        "locomotion": {
+            "image": "locomotion.png",
+            "size": { "width": 96, "height": 48 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "actions": {
+            "image": "actions.png",
+            "size": { "width": 120, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        }
+    },
+    "animations": {
+        "idle": {
+            "loop": true,
+            "frames": [
+                { "atlas": "locomotion", "cell": { "column": 0, "row": 0 }, "durationMs": 360 },
+                { "atlas": "locomotion", "cell": { "column": 1, "row": 0 }, "durationMs": 360 }
+            ]
+        },
+        "run": {
+            "loop": true,
+            "frames": [
+                { "atlas": "locomotion", "cell": { "column": 2, "row": 0 }, "durationMs": 100 },
+                { "atlas": "locomotion", "cell": { "column": 3, "row": 0 }, "durationMs": 100 }
+            ]
+        },
+        "jump": {
+            "loop": false,
+            "frames": [{ "atlas": "locomotion", "cell": { "column": 0, "row": 1 }, "durationMs": 1000 }],
+            "cue": {
+                "offset": { "x": 0, "y": -3 }
+            }
+        },
+        "fall": {
+            "loop": false,
+            "frames": [{ "atlas": "locomotion", "cell": { "column": 1, "row": 1 }, "durationMs": 1000 }],
+            "cue": {
+                "scale": { "x": 1.08, "y": 0.96 },
+                "offset": { "x": 0, "y": -1 }
+            }
+        },
+        "rope": {
+            "loop": true,
+            "frames": [
+                { "atlas": "locomotion", "cell": { "column": 2, "row": 1 }, "durationMs": 180 },
+                { "atlas": "locomotion", "cell": { "column": 3, "row": 1 }, "durationMs": 180 }
+            ],
+            "cue": {
+                "scale": { "x": 0.96, "y": 1.08 },
+                "offset": { "x": 0, "y": -3 }
+            }
+        },
+        "hit": {
+            "loop": false,
+            "frames": [
+                { "atlas": "actions", "cell": { "column": 0, "row": 0 }, "durationMs": 80 },
+                { "atlas": "actions", "cell": { "column": 1, "row": 0 }, "durationMs": 160 }
+            ],
+            "cue": {
+                "scale": { "x": 1.12, "y": 0.9 },
+                "offset": { "x": -2, "y": 1 },
+                "opacity": 0.92
+            }
+        },
+        "respawn": {
+            "loop": false,
+            "frames": [
+                { "atlas": "actions", "cell": { "column": 2, "row": 0 }, "durationMs": 150 },
+                { "atlas": "actions", "cell": { "column": 3, "row": 0 }, "durationMs": 150 },
+                { "atlas": "actions", "cell": { "column": 4, "row": 0 }, "durationMs": 150 }
+            ],
+            "cue": {
+                "scale": { "x": 1.08, "y": 1.08 },
+                "offset": { "x": 0, "y": -2 },
+                "opacity": 0.96
+            }
+        }
+    }
+}
