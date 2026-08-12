@@ -39,6 +39,12 @@ import { GameSimulation } from "../simulation/GameSimulation.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
 
+function requestSnapshotFlowControl(url) {
+    const requested = new URL(url);
+    requested.searchParams.set("snapshotAck", "1");
+    return requested.toString();
+}
+
 function updateAverage(current, sample, weight = 0.2) {
     return current === null ? sample : current + (sample - current) * weight;
 }
@@ -85,11 +91,12 @@ export class RemoteGameAuthority {
         this.closed = false;
         this.closeReason = null;
         this.intentionalClose = false;
+        this.snapshotFlowControl = false;
     }
 
     connect() {
         return new Promise((resolve, reject) => {
-            const socket = new this.WebSocketImpl(this.url);
+            const socket = new this.WebSocketImpl(requestSnapshotFlowControl(this.url));
             this.socket = socket;
             let settled = false;
             const rejectConnection = (message) => {
@@ -134,6 +141,7 @@ export class RemoteGameAuthority {
                     if (message.type === "welcome") {
                         this.playerId = message.playerId;
                         this.channelId = message.channelId;
+                        this.snapshotFlowControl = message.snapshotFlowControl === true;
                         this.stream = new RemoteCommandStream({
                             playerId: this.playerId,
                             inputLeadTicks: MULTIPLAYER_TIMING.inputLeadTicks
@@ -205,7 +213,7 @@ export class RemoteGameAuthority {
             ownerId: this.playerId,
             simulation: new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: this.playerId })
         });
-        if (!this.stream.acceptSnapshot(snapshot)) return;
+        if (!this.stream.acceptSnapshot(snapshot)) return false;
         this.pruneSentCommands(snapshot.acknowledgements?.[this.playerId]);
         const receivedAt = this.now();
         if (this.previousSnapshotReceivedAt !== null) {
@@ -221,6 +229,14 @@ export class RemoteGameAuthority {
         this.snapshotReceivedAt = receivedAt;
         this.buffer.push(snapshot, receivedAt);
         this.reconcile();
+        this.acknowledgeSnapshot(snapshot.snapshotSequence);
+        return true;
+    }
+
+    acknowledgeSnapshot(snapshotSequence) {
+        if (!this.snapshotFlowControl || this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
+        this.socket.send(JSON.stringify({ type: "snapshot-ack", snapshotSequence }));
+        return true;
     }
 
     reconcile() {

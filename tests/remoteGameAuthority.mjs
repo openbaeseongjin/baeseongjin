@@ -914,6 +914,16 @@ export async function run() {
         assert.equal(authority.metrics().rejectedCommands, 0);
         assert.equal(authority.metrics().rejectionRate, 0);
         const room = gameServer.rooms.get(authority.channelId);
+        assert.equal(authority.snapshotFlowControl, true, "the client must negotiate snapshot acknowledgements");
+        const authorityServerSocket = [...room.sockets.entries()].find(
+            ([, playerId]) => playerId === authority.playerId
+        )[0];
+        const authorityDelivery = gameServer.snapshotDeliveryBySocket.get(authorityServerSocket);
+        assert.equal(authorityDelivery.flowControlled, true);
+        assert.ok(
+            authorityDelivery.unacknowledgedSequences.length <= gameServer.maxUnacknowledgedSnapshots,
+            "the live client must keep the server snapshot window bounded"
+        );
         const authorityPlayer = room.simulation.players.find(({ id }) => id === authority.playerId);
         const ownerBeforeAcceptedImpact = authority.snapshot().owner;
         const receiptProjectile = new BallisticProjectileObject({
