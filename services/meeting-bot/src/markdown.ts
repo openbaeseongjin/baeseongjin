@@ -46,6 +46,41 @@ function bulletList(
     : "- None recorded";
 }
 
+function referenceList(minutes: Minutes): string {
+  if (minutes.references.length === 0) {
+    return "- None recorded";
+  }
+  return minutes.references
+    .flatMap((reference) => {
+      const date = new Date(reference.timestamp);
+      const time = Number.isNaN(date.getTime()) ? "Unknown time" : `${kstTime(date)} KST`;
+      const lines = [
+        `- ${time} | Channel: ${markdownText(reference.channelName)} | By: ${markdownText(reference.authorName)}`,
+      ];
+      if (reference.note) {
+        lines.push(`  - Note: ${markdownText(reference.note)}`);
+      }
+      for (const value of reference.urls) {
+        try {
+          const url = new URL(value);
+          if (url.protocol === "http:" || url.protocol === "https:") {
+            lines.push(`  - URL: ${markdownText(value, 500)}`);
+          }
+        } catch {
+          // Invalid or non-HTTP URLs are not rendered.
+        }
+      }
+      for (const attachment of reference.attachments) {
+        const contentType = attachment.contentType ?? "unknown type";
+        lines.push(
+          `  - Attachment: ${markdownText(attachment.name)} | ${markdownText(contentType)} | ${attachment.sizeBytes} bytes`,
+        );
+      }
+      return lines;
+    })
+    .join("\n");
+}
+
 export function renderMeetingSection(metadata: MeetingMetadata, minutes: Minutes): string {
   const startedAt = new Date(metadata.startedAt);
   const endedAt = new Date(metadata.endedAt);
@@ -92,6 +127,10 @@ export function renderMeetingSection(metadata: MeetingMetadata, minutes: Minutes
     "### NEXT MEETING",
     "",
     minutes.nextMeeting ? `- ${markdownText(minutes.nextMeeting)}` : "- Not explicitly scheduled",
+    "",
+    "### REFERENCES",
+    "",
+    referenceList(minutes),
   ].join("\n");
 }
 

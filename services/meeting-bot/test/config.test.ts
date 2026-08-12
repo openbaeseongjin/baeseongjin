@@ -88,4 +88,97 @@ describe("local meeting processing configuration", () => {
             maxOutstandingJobs: 3
         });
     });
+
+    it("adds bounded reference channels to meeting text capture", () => {
+        const config = loadConfig({
+            DISCORD_BOT_TOKEN: "discord-token",
+            DISCORD_CLIENT_ID: "12345678901234567",
+            DISCORD_GUILD_ID: "12345678901234568",
+            DISCORD_MEETING_CHANNEL_ID: "12345678901234569",
+            DISCORD_MINUTES_CHANNEL_ID: "12345678901234570",
+            DISCORD_REFERENCE_CHANNEL_IDS: "12345678901234571, 12345678901234572,12345678901234571",
+            GITHUB_TOKEN: "github-token"
+        });
+
+        expect(config.discord.captureChannelIds).toEqual([
+            "12345678901234569",
+            "12345678901234571",
+            "12345678901234572"
+        ]);
+    });
+
+    it("rejects the minutes channel as a meeting reference source", () => {
+        expect(() =>
+            loadConfig({
+                DISCORD_BOT_TOKEN: "discord-token",
+                DISCORD_CLIENT_ID: "12345678901234567",
+                DISCORD_GUILD_ID: "12345678901234568",
+                DISCORD_MEETING_CHANNEL_ID: "12345678901234569",
+                DISCORD_MINUTES_CHANNEL_ID: "12345678901234570",
+                DISCORD_REFERENCE_CHANNEL_IDS: "12345678901234570",
+                GITHUB_TOKEN: "github-token"
+            })
+        ).toThrow(/minutes channel/iu);
+    });
+
+    it("enables meeting classification without opening the public Codex gateway", () => {
+        const config = loadConfig({
+            DISCORD_BOT_TOKEN: "discord-token",
+            DISCORD_CLIENT_ID: "12345678901234567",
+            DISCORD_GUILD_ID: "12345678901234568",
+            DISCORD_MEETING_CHANNEL_ID: "12345678901234569",
+            DISCORD_MINUTES_CHANNEL_ID: "12345678901234570",
+            GITHUB_TOKEN: "github-token",
+            CODEX_ENABLED: "false",
+            MEETING_CLASSIFIER_ENABLED: "true",
+            MEETING_CLASSIFIER_MODEL: "qwen2.5:7b-instruct",
+            MEETING_CLASSIFIER_TIMEOUT_MS: "90000",
+            MEETING_CLASSIFIER_MAX_TRANSCRIPT_CHARACTERS: "24000",
+            MEETING_OUTPUT_LANGUAGE: "ko"
+        });
+
+        expect(config.codex.enabled).toBe(false);
+        expect(config.meetingClassifier).toEqual({
+            enabled: true,
+            model: "qwen2.5:7b-instruct",
+            timeoutMs: 90_000,
+            maxTranscriptCharacters: 24_000,
+            outputLanguage: "ko"
+        });
+    });
+
+    it("rejects different Ollama models for meeting classification and /codex", () => {
+        expect(() =>
+            loadConfig({
+                DISCORD_BOT_TOKEN: "discord-token",
+                DISCORD_CLIENT_ID: "12345678901234567",
+                DISCORD_GUILD_ID: "12345678901234568",
+                DISCORD_MEETING_CHANNEL_ID: "12345678901234569",
+                DISCORD_MINUTES_CHANNEL_ID: "12345678901234570",
+                GITHUB_TOKEN: "github-token",
+                CODEX_ENABLED: "true",
+                CODEX_PROVIDER: "ollama",
+                CODEX_MODEL: "qwen2.5:7b-instruct",
+                MEETING_CLASSIFIER_ENABLED: "true",
+                MEETING_CLASSIFIER_MODEL: "another-local-model"
+            })
+        ).toThrow(/same Ollama model/iu);
+    });
+
+    it("does not inherit a non-Ollama Codex model for meeting classification", () => {
+        expect(() =>
+            loadConfig({
+                DISCORD_BOT_TOKEN: "discord-token",
+                DISCORD_CLIENT_ID: "12345678901234567",
+                DISCORD_GUILD_ID: "12345678901234568",
+                DISCORD_MEETING_CHANNEL_ID: "12345678901234569",
+                DISCORD_MINUTES_CHANNEL_ID: "12345678901234570",
+                GITHUB_TOKEN: "github-token",
+                CODEX_ENABLED: "true",
+                CODEX_PROVIDER: "codex",
+                CODEX_MODEL: "remote-model",
+                MEETING_CLASSIFIER_ENABLED: "true"
+            })
+        ).toThrow(/MEETING_CLASSIFIER_MODEL/iu);
+    });
 });

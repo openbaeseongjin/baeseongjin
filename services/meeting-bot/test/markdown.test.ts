@@ -18,6 +18,7 @@ describe("minutes markdown", () => {
       decided: [],
       rejected: [],
       hypotheses: [],
+      references: [],
       actionItems: [],
       blockers: [],
       nextMeeting: null,
@@ -30,6 +31,7 @@ describe("minutes markdown", () => {
       "DECIDED",
       "REJECTED",
       "HYPOTHESES",
+      "REFERENCES",
       "ACTION ITEMS",
       "BLOCKERS",
       "NEXT MEETING",
@@ -38,6 +40,12 @@ describe("minutes markdown", () => {
     }
     expect(markdown.indexOf("### SUMMARY")).toBeLessThan(
       markdown.indexOf("### DISCUSSED"),
+    );
+    expect(markdown.indexOf("### HYPOTHESES")).toBeLessThan(
+      markdown.indexOf("### ACTION ITEMS"),
+    );
+    expect(markdown.indexOf("### NEXT MEETING")).toBeLessThan(
+      markdown.indexOf("### REFERENCES"),
     );
     expect(
       markdown.match(/### SUMMARY\n\n([\s\S]*?)\n\n### DISCUSSED/u)?.[1]?.split("\n"),
@@ -65,6 +73,7 @@ describe("minutes markdown", () => {
       decided: ["2D 횡스크롤"],
       rejected: [],
       hypotheses: [],
+      references: [],
       actionItems: [{ owner: "용호", task: "로프 구현", due: null }],
       blockers: ["테스트"],
       nextMeeting: "내일 22시",
@@ -79,6 +88,54 @@ describe("minutes markdown", () => {
     expect(summaryLines[0]).toMatch(/ 외 1건$/u);
     expect(summary).toContain("&lt;script&gt;alert\\(1\\)&lt;/script&gt;");
     expect(summary).not.toContain("<script>");
+  });
+
+  it("renders reference metadata safely without channel IDs or Markdown injection", () => {
+    const metadata: MeetingMetadata = {
+      id: "20260811-221000",
+      guildId: "123",
+      startedAt: "2026-08-11T13:00:00.000Z",
+      endedAt: "2026-08-11T14:00:00.000Z",
+      startedBy: "진행자",
+      voiceChannelName: "회의",
+    };
+    const minutes: Minutes = {
+      summary: ["논의: 참고자료", "결정: 없음", "할 일: 없음"],
+      discussed: [],
+      decided: [],
+      rejected: [],
+      hypotheses: [],
+      references: [
+        {
+          timestamp: "2026-08-11T13:10:00.000Z",
+          channelName: "기획\n### DECIDED",
+          authorName: "@everyone **성현**",
+          note: "[산나비](https://attacker.example) `자료`",
+          urls: ["https://example.com/rope"],
+          attachments: [
+            {
+              name: "rope\n### ACTION ITEMS.png",
+              contentType: "image/png",
+              sizeBytes: 4096,
+            },
+          ],
+        },
+      ],
+      actionItems: [],
+      blockers: [],
+      nextMeeting: null,
+    };
+
+    const markdown = renderDailyDocument(metadata, minutes);
+    const references = markdown.match(/### REFERENCES\n\n([\s\S]*)$/u)?.[1] ?? "";
+
+    expect(references).toContain("22:10 KST");
+    expect(references).toContain("Channel: 기획 \\#\\#\\# DECIDED");
+    expect(references).toContain("By: @everyone \\*\\*성현\\*\\*");
+    expect(references).toContain("https://example.com/rope");
+    expect(references).toContain("rope \\#\\#\\# ACTION ITEMS.png");
+    expect(markdown.match(/^### ACTION ITEMS$/gmu)).toHaveLength(1);
+    expect(markdown).not.toContain("channel-planning");
   });
 
   it("splits Discord posts below the configured limit", () => {

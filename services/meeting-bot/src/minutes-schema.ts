@@ -1,29 +1,68 @@
 import { z } from "zod";
+import { usesKoreanOrEnglishWritingSystems } from "./writing-system.js";
 
-const minutesText = z.string().min(1).max(1_000);
-const evidenceIds = z.array(z.string().min(1).max(100)).min(1).max(10);
+const minutesText = z
+  .string()
+  .min(1)
+  .max(1_000)
+  .refine(usesKoreanOrEnglishWritingSystems, "must use only Korean or English writing systems");
+const evidenceQuote = z.string().min(1).max(1_000);
+const evidenceSchema = z
+  .array(
+    z.object({
+      id: z.string().min(1).max(100),
+      quote: evidenceQuote,
+    }).strict(),
+  )
+  .min(1)
+  .max(10);
 
 const evidencedItemSchema = z.object({
   text: minutesText,
-  evidenceIds,
-});
+  evidence: evidenceSchema,
+}).strict();
 
 export const rawMinutesSchema = z.object({
-  discussed: z.array(minutesText).max(200),
+  discussed: z.array(evidencedItemSchema).max(200),
   decided: z.array(evidencedItemSchema).max(100),
   rejected: z.array(evidencedItemSchema).max(100),
-  hypotheses: z.array(minutesText).max(200),
+  hypotheses: z.array(evidencedItemSchema).max(200),
   actionItems: z.array(
     z.object({
       owner: minutesText,
       task: minutesText,
       due: minutesText.nullable(),
-      evidenceIds,
-    }),
+      evidence: evidenceSchema,
+    }).strict(),
   ).max(100),
-  blockers: z.array(minutesText).max(100),
+  blockers: z.array(evidencedItemSchema).max(100),
   nextMeeting: evidencedItemSchema.nullable(),
-});
+}).strict();
+
+const evidenceJsonSchema = {
+  type: "array",
+  minItems: 1,
+  maxItems: 10,
+  items: {
+    type: "object",
+    additionalProperties: false,
+    required: ["id", "quote"],
+    properties: {
+      id: { type: "string", minLength: 1, maxLength: 100 },
+      quote: { type: "string", minLength: 1, maxLength: 1_000 },
+    },
+  },
+} as const;
+
+const evidencedItemJsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["text", "evidence"],
+  properties: {
+    text: { type: "string", minLength: 1, maxLength: 1_000 },
+    evidence: evidenceJsonSchema,
+  },
+} as const;
 
 export const meetingMinutesJsonSchema = {
   type: "object",
@@ -38,63 +77,36 @@ export const meetingMinutesJsonSchema = {
     "nextMeeting",
   ],
   properties: {
-    discussed: { type: "array", maxItems: 200, items: { type: "string", maxLength: 1_000 } },
+    discussed: { type: "array", maxItems: 200, items: evidencedItemJsonSchema },
     decided: {
       type: "array",
       maxItems: 100,
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["text", "evidenceIds"],
-        properties: {
-          text: { type: "string", maxLength: 1_000 },
-          evidenceIds: { type: "array", minItems: 1, maxItems: 10, items: { type: "string", maxLength: 100 } },
-        },
-      },
+      items: evidencedItemJsonSchema,
     },
     rejected: {
       type: "array",
       maxItems: 100,
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["text", "evidenceIds"],
-        properties: {
-          text: { type: "string", maxLength: 1_000 },
-          evidenceIds: { type: "array", minItems: 1, maxItems: 10, items: { type: "string", maxLength: 100 } },
-        },
-      },
+      items: evidencedItemJsonSchema,
     },
-    hypotheses: { type: "array", maxItems: 200, items: { type: "string", maxLength: 1_000 } },
+    hypotheses: { type: "array", maxItems: 200, items: evidencedItemJsonSchema },
     actionItems: {
       type: "array",
       maxItems: 100,
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["owner", "task", "due", "evidenceIds"],
+        required: ["owner", "task", "due", "evidence"],
         properties: {
-          owner: { type: "string", maxLength: 1_000 },
-          task: { type: "string", maxLength: 1_000 },
-          due: { type: ["string", "null"], maxLength: 1_000 },
-          evidenceIds: { type: "array", minItems: 1, maxItems: 10, items: { type: "string", maxLength: 100 } },
+          owner: { type: "string", minLength: 1, maxLength: 1_000 },
+          task: { type: "string", minLength: 1, maxLength: 1_000 },
+          due: { type: ["string", "null"], minLength: 1, maxLength: 1_000 },
+          evidence: evidenceJsonSchema,
         },
       },
     },
-    blockers: { type: "array", maxItems: 100, items: { type: "string", maxLength: 1_000 } },
+    blockers: { type: "array", maxItems: 100, items: evidencedItemJsonSchema },
     nextMeeting: {
-      anyOf: [
-        {
-          type: "object",
-          additionalProperties: false,
-          required: ["text", "evidenceIds"],
-          properties: {
-            text: { type: "string", maxLength: 1_000 },
-            evidenceIds: { type: "array", minItems: 1, maxItems: 10, items: { type: "string", maxLength: 100 } },
-          },
-        },
-        { type: "null" },
-      ],
+      anyOf: [evidencedItemJsonSchema, { type: "null" }],
     },
   },
 } as const;

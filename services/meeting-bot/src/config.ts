@@ -13,6 +13,16 @@ const booleanFromEnv = z
     .transform((value) => value === "true");
 
 const positiveIntegerFromEnv = (defaultValue: number) => z.coerce.number().int().positive().default(defaultValue);
+const snowflakeListFromEnv = z.preprocess(
+    (value) =>
+        typeof value === "string"
+            ? value
+                  .split(",")
+                  .map((item) => item.trim())
+                  .filter(Boolean)
+            : [],
+    z.array(snowflake).max(10)
+);
 
 const environmentSchema = z
     .object({
@@ -21,6 +31,7 @@ const environmentSchema = z
         DISCORD_GUILD_ID: snowflake,
         DISCORD_MEETING_CHANNEL_ID: snowflake,
         DISCORD_MINUTES_CHANNEL_ID: snowflake,
+        DISCORD_REFERENCE_CHANNEL_IDS: snowflakeListFromEnv,
         LOCAL_TRANSCRIPTION_MODEL: z.string().min(1).default("tiny"),
         LOCAL_WHISPER_PYTHON: optionalNonEmptyString,
         LOCAL_MODEL_CACHE_DIR: z.string().min(1).default(".data/models"),
@@ -43,6 +54,11 @@ const environmentSchema = z
         CODEX_MODEL: optionalNonEmptyString,
         OLLAMA_BIN: z.string().min(1).default("ollama"),
         OLLAMA_STARTUP_TIMEOUT_MS: positiveIntegerFromEnv(15_000),
+        MEETING_CLASSIFIER_ENABLED: booleanFromEnv,
+        MEETING_CLASSIFIER_MODEL: optionalNonEmptyString,
+        MEETING_CLASSIFIER_TIMEOUT_MS: positiveIntegerFromEnv(120_000),
+        MEETING_CLASSIFIER_MAX_TRANSCRIPT_CHARACTERS: positiveIntegerFromEnv(24_000),
+        MEETING_OUTPUT_LANGUAGE: z.enum(["ko", "en"]).default("ko"),
         CODEX_REPOSITORY_ROOT: z.string().min(1).default("../.."),
         CODEX_MAX_CONTEXT_MESSAGES: positiveIntegerFromEnv(30),
         CODEX_MAX_CONTEXT_CHARACTERS: positiveIntegerFromEnv(20_000),
@@ -73,6 +89,41 @@ const environmentSchema = z
                 path: ["GITHUB_APP_ID"]
             });
         }
+
+        if (environment.DISCORD_REFERENCE_CHANNEL_IDS.includes(environment.DISCORD_MINUTES_CHANNEL_ID)) {
+            context.addIssue({
+                code: "custom",
+                message: "the minutes channel cannot be used as a meeting reference channel",
+                path: ["DISCORD_REFERENCE_CHANNEL_IDS"]
+            });
+        }
+
+        if (
+            environment.MEETING_CLASSIFIER_ENABLED &&
+            !environment.MEETING_CLASSIFIER_MODEL &&
+            !(environment.CODEX_PROVIDER === "ollama" && environment.CODEX_MODEL)
+        ) {
+            context.addIssue({
+                code: "custom",
+                message: "meeting classification requires MEETING_CLASSIFIER_MODEL or CODEX_MODEL",
+                path: ["MEETING_CLASSIFIER_MODEL"]
+            });
+        }
+
+        if (
+            environment.MEETING_CLASSIFIER_ENABLED &&
+            environment.CODEX_ENABLED &&
+            environment.CODEX_PROVIDER === "ollama" &&
+            environment.MEETING_CLASSIFIER_MODEL &&
+            environment.CODEX_MODEL &&
+            environment.MEETING_CLASSIFIER_MODEL !== environment.CODEX_MODEL
+        ) {
+            context.addIssue({
+                code: "custom",
+                message: "meeting classification and /codex must use the same Ollama model",
+                path: ["MEETING_CLASSIFIER_MODEL"]
+            });
+        }
     });
 
 export interface AppConfig {
@@ -82,6 +133,7 @@ export interface AppConfig {
         guildId: string;
         meetingChannelId: string;
         minutesChannelId: string;
+        captureChannelIds: string[];
     };
     localProcessing: {
         transcriptionModel: string;
@@ -117,6 +169,13 @@ export interface AppConfig {
         maxOutstandingJobs: number;
         timeoutMs: number;
     };
+    meetingClassifier: {
+        enabled: boolean;
+        model?: string;
+        timeoutMs: number;
+        maxTranscriptCharacters: number;
+        outputLanguage: "ko" | "en";
+    };
 }
 
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -129,6 +188,9 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
                   privateKeyBase64: parsed.GITHUB_APP_PRIVATE_KEY_BASE64
               }
             : undefined;
+    const meetingClassifierModel =
+        parsed.MEETING_CLASSIFIER_MODEL ??
+        (parsed.CODEX_PROVIDER === "ollama" ? parsed.CODEX_MODEL : undefined);
 
     return {
         discord: {
@@ -136,7 +198,10 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
             clientId: parsed.DISCORD_CLIENT_ID,
             guildId: parsed.DISCORD_GUILD_ID,
             meetingChannelId: parsed.DISCORD_MEETING_CHANNEL_ID,
-            minutesChannelId: parsed.DISCORD_MINUTES_CHANNEL_ID
+            minutesChannelId: parsed.DISCORD_MINUTES_CHANNEL_ID,
+            captureChannelIds: [
+                ...new Set([parsed.DISCORD_MEETING_CHANNEL_ID, ...parsed.DISCORD_REFERENCE_CHANNEL_IDS])
+            ]
         },
         localProcessing: {
             transcriptionModel: parsed.LOCAL_TRANSCRIPTION_MODEL,
@@ -170,6 +235,13 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
             maxContextCharacters: parsed.CODEX_MAX_CONTEXT_CHARACTERS,
             maxOutstandingJobs: parsed.CODEX_MAX_OUTSTANDING_JOBS,
             timeoutMs: parsed.CODEX_JOB_TIMEOUT_MS
+        },
+        meetingClassifier: {
+            enabled: parsed.MEETING_CLASSIFIER_ENABLED,
+            ...(meetingClassifierModel ? { model: meetingClassifierModel } : {}),
+            timeoutMs: parsed.MEETING_CLASSIFIER_TIMEOUT_MS,
+            maxTranscriptCharacters: parsed.MEETING_CLASSIFIER_MAX_TRANSCRIPT_CHARACTERS,
+            outputLanguage: parsed.MEETING_OUTPUT_LANGUAGE
         }
     };
 }

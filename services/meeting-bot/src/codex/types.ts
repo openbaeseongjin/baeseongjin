@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { usesKoreanOrEnglishWritingSystems } from "../writing-system.js";
+
+export { usesKoreanOrEnglishWritingSystems } from "../writing-system.js";
 
 export const CODEX_SKILLS = ["meeting-to-game-plan", "repo-task-plan", "discord-repo-cross-reference"] as const;
 export const CODEX_SOURCES = ["last-meeting", "recent-messages"] as const;
@@ -6,12 +9,6 @@ export const CODEX_SOURCES = ["last-meeting", "recent-messages"] as const;
 export type CodexSkill = (typeof CODEX_SKILLS)[number];
 export type CodexSource = (typeof CODEX_SOURCES)[number];
 export type CodexJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
-
-const unsupportedWritingSystem = /\p{Script=Han}|[^\P{L}\p{Script=Latin}\p{Script=Hangul}]/u;
-
-export function usesKoreanOrEnglishWritingSystems(value: string): boolean {
-    return !unsupportedWritingSystem.test(value.normalize("NFKC"));
-}
 
 function codexOutputText(maximumLength: number) {
     return z

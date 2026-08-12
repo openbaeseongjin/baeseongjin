@@ -2,7 +2,12 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { safeErrorMessage } from "./logger.js";
 import { buildMeetingSummary } from "./meeting-summary.js";
-import { summarizeLocally } from "./promotion-gate.js";
+import type { MeetingClassifier } from "./ollama-meeting-classifier.js";
+import {
+  enforceExplicitPromotions,
+  mergeExplicitTranscriptSignals,
+  summarizeLocally,
+} from "./promotion-gate.js";
 import type {
   Minutes,
   MinutesDetails,
@@ -89,22 +94,33 @@ export class LocalWhisperTranscriber implements VoiceTranscriber {
 }
 
 export class LocalMeetingService {
-  constructor(private readonly voiceTranscriber: VoiceTranscriber) {}
+  constructor(
+    private readonly voiceTranscriber: VoiceTranscriber,
+    private readonly meetingClassifier?: MeetingClassifier,
+  ) {}
 
   async transcribe(
     messages: TextMessageRecord[],
     voiceSegments: VoiceSegment[],
   ): Promise<TranscriptionResult> {
-    const entries: TranscriptEntry[] = messages.map((message) => ({
-      id: `text:${message.id}`,
-      source: "text",
-      timestamp: message.timestamp,
-      speakerId: message.authorId,
-      speaker: message.authorName,
-      text: [message.content, ...message.attachments.map((name) => `[attachment] ${name}`)]
-        .filter(Boolean)
-        .join("\n"),
-    }));
+    const entries: TranscriptEntry[] = messages.flatMap((message) => {
+      const text = message.content.trim();
+      if (!text) {
+        return [];
+      }
+      return [
+        {
+          id: `text:${message.id}`,
+          source: "text" as const,
+          timestamp: message.timestamp,
+          speakerId: message.authorId,
+          speaker: message.authorName,
+          channelId: message.channelId,
+          channelName: message.channelName,
+          text,
+        },
+      ];
+    });
     const failures: string[] = [];
 
     let voiceResults: VoiceTranscription[] = [];
@@ -146,7 +162,7 @@ export class LocalMeetingService {
     return { entries, failures };
   }
 
-  summarize(transcript: TranscriptEntry[]): Minutes {
+  async summarize(transcript: TranscriptEntry[]): Promise<Minutes> {
     if (transcript.length === 0) {
       const details: MinutesDetails = {
         discussed: [],
@@ -157,8 +173,39 @@ export class LocalMeetingService {
         blockers: ["No transcript content was captured."],
         nextMeeting: null,
       };
-      return { summary: buildMeetingSummary(details), ...details };
+      return { summary: buildMeetingSummary(details), references: [], ...details };
     }
-    return summarizeLocally(transcript);
+    if (!this.meetingClassifier) {
+      return summarizeLocally(transcript);
+    }
+
+    try {
+      const classification = await this.meetingClassifier.classify(transcript);
+      const candidates = mergeExplicitTranscriptSignals(classification.rawMinutes, transcript);
+      const minutes = enforceExplicitPromotions(candidates, transcript);
+      if (!classification.transcriptTruncated) {
+        return minutes;
+      }
+      const blockers = [
+        ...minutes.blockers,
+        "The local classifier transcript was truncated; review the full transcript.",
+      ];
+      return {
+        ...minutes,
+        blockers,
+        summary: buildMeetingSummary({ ...minutes, blockers }),
+      };
+    } catch {
+      const minutes = summarizeLocally(transcript);
+      const blockers = [
+        ...minutes.blockers,
+        "Local Ollama classification failed; deterministic rules were used.",
+      ];
+      return {
+        ...minutes,
+        blockers,
+        summary: buildMeetingSummary({ ...minutes, blockers }),
+      };
+    }
   }
 }

@@ -57,6 +57,6 @@ npm run validate:world
 
 ## Discord 회의록 봇
 
-`services/meeting-bot/`은 `/meeting start`와 `/meeting end` 사이의 Discord 텍스트·음성 회의를 기록하고, 무료 로컬 Whisper로 음성을 전사해 3~5줄 `SUMMARY`와 구조화 상세 회의록을 게시한다. 자동 예약 시작은 하지 않으며, 요약이나 모호한 아이디어를 `DECISIONS.md`나 `TASKS.md`로 자동 승격하지 않는다.
+`services/meeting-bot/`은 `/meeting start`와 `/meeting end` 사이에 회의·기획·코딩 채널의 메시지와 음성 회의를 기록한다. 무료 로컬 Whisper와 선택형 로컬 Ollama를 사용해 `SUMMARY`, `DISCUSSED / DECIDED / REJECTED / HYPOTHESES / REFERENCES / ACTION ITEMS / BLOCKERS / NEXT MEETING` 회의록을 게시하며, 링크·첨부 메타데이터는 정리하되 파일을 다운로드하지 않는다. 자동 예약 시작은 하지 않고, 근거가 불명확한 아이디어나 참고자료를 `DECISIONS.md`나 `TASKS.md`로 승격하지 않는다.
 
 Discord 설정, 무료 로컬 전사, 최소 GitHub 권한, 실행·배포 절차와 DAVE 음성 수신 제약은 [회의록 봇 README](services/meeting-bot/README.md)를 참고한다.
