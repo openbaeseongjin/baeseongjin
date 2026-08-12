@@ -16,6 +16,7 @@ import {
 import {
     createPlayerImpactClaim,
     createPlayerImpactReceipt,
+    createPlayerImpactStateDigest,
     serializePlayerImpactClaim
 } from "../network/PlayerImpactClaim.js";
 import {
@@ -67,6 +68,7 @@ export class RemoteGameAuthority {
         this.projectileSpawnClaimReceipts = [];
         this.ropeSwingClaimReceipts = [];
         this.impactClaimReceipts = [];
+        this.pendingImpactClaims = new Map();
         this.checkpointClaimReceipts = [];
         this.pendingCheckpointId = null;
         this.summitClaimReceipts = [];
@@ -161,6 +163,22 @@ export class RemoteGameAuthority {
                         this.ownerRuntime?.recordRopeSwingReceipt(receipt);
                     } else if (message.type === "impact-claim-receipt") {
                         const receipt = createPlayerImpactReceipt(message.payload);
+                        const pending = this.pendingImpactClaims.get(receipt.projectileId);
+                        if (!receipt.accepted && receipt.reason === "state-diverged" && pending) {
+                            const state = this.ownerRuntime?.impactClaimState();
+                            if (!state) throw new Error("impact recovery requires an owner state");
+                            const outcome = {
+                                ...pending.outcome,
+                                digest: createPlayerImpactStateDigest(state, {
+                                    impactType: pending.event.resolution,
+                                    respawned: pending.outcome.respawned
+                                }),
+                                state
+                            };
+                            this.submitImpactClaim(pending.event, outcome);
+                            return;
+                        }
+                        this.pendingImpactClaims.delete(receipt.projectileId);
                         this.impactClaimReceipts.push(receipt);
                         this.ownerRuntime?.recordImpactReceipt(receipt, this.latestSnapshot);
                     } else if (message.type === "owner-motion-receipt") {
@@ -265,9 +283,18 @@ export class RemoteGameAuthority {
     resolvePredictedImpact(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         const motionBeforeImpact = this.ownerMotionState();
+        const healthBeforeImpact = this.ownerRuntime.state().health;
         if (!this.applyPredictedImpact(event)) return false;
         if (!this.sendOwnerMotion(motionBeforeImpact)) return false;
-        return this.submitImpactClaim(event);
+        const state = this.ownerRuntime.impactClaimState();
+        const damage = event.parameters?.damage ?? 0;
+        const respawned = event.resolution === "player-hit" && damage >= healthBeforeImpact;
+        const outcome = {
+            respawned,
+            digest: createPlayerImpactStateDigest(state, { impactType: event.resolution, respawned })
+        };
+        this.pendingImpactClaims.set(event.projectileId, { event, outcome });
+        return this.submitImpactClaim(event, outcome);
     }
 
     submitHitClaim(event) {
@@ -317,13 +344,16 @@ export class RemoteGameAuthority {
         return true;
     }
 
-    submitImpactClaim(event) {
+    submitImpactClaim(event, outcome) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createPlayerImpactClaim({
             projectileId: event.projectileId,
             clientTick: event.clientTick,
             impactType: event.resolution,
-            position: event.position
+            position: event.position,
+            velocity: event.velocity,
+            damage: event.parameters?.damage ?? 0,
+            outcome
         });
         this.socket.send(JSON.stringify({ type: "impact-claim", payload: serializePlayerImpactClaim(claim) }));
         return true;

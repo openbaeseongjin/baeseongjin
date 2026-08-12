@@ -140,17 +140,9 @@ export class AuthorityServerSession {
         if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
+        if (!claim.outcome) throw new Error("victim impact outcome is required");
         const existing = this.resolvedImpactClaims.get(claim.projectileId);
         if (existing) return existing.receipt;
-        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
-        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
-            return createPlayerImpactReceipt({
-                projectileId: claim.projectileId,
-                accepted: false,
-                reason: "tick-window"
-            });
-        }
         const result = createPlayerImpactReceipt({
             projectileId: claim.projectileId,
             ...this.simulation.resolveEnemyProjectileClaim(authenticatedPlayerId, claim)
