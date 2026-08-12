@@ -59,6 +59,7 @@ index.html
 - 도트 프로필은 별도 scene renderer로 제공한다. 프로필별 분기를 `GameApp`, `MultiplayerGameApp`, 시뮬레이션 객체에 흩뜨리지 않고 factory 등록 경계에서만 선택한다.
 - `SpriteAnimation`은 프레임 사각형과 지속 시간을 불변 데이터로 보관하고 외부에서 받은 경과 시간으로 현재 프레임을 결정한다. `SpriteCanvasPainter`는 Canvas의 이미지 보간을 끄고 원본 프레임, anchor, 반전과 목적 크기만 그리며 자산 로딩이나 게임 시간을 소유하지 않는다.
 - `PlayerSpriteManifest`는 도구 중립 manifest를 `PlayerSpriteDefinition`으로 정규화하고, definition은 atlas ID로 찾는 여러 source·atlas/frame·출력 크기, anchor·offset, 상태별 clip과 명시적 fallback을 하나의 불변 계약으로 검증한다. `SpriteImageAssetSet`은 모든 atlas의 준비·실패 상태와 ID별 이미지를 소유한다. player renderer는 frame에 기록된 atlas ID와 사각형만 소비하며 자산 배치나 생성 도구를 추측하지 않는다. 상세 교환 형식은 `sprite-asset-format.md`를 따른다.
+- 그래픽 제작 원본과 납품은 `assets/artwork/<category>/<asset-id>/`, 게임이 직접 읽는 검증 package는 `assets/runtime/<category>/<asset-id>/`에 둔다. `RuntimeAssetCatalog`가 `characters`, `environments`, `objects`, `effects`, `ui` category와 안정적인 kebab-case asset ID를 URL로 바꾸며 renderer가 제작 경로나 임의 상대 경로를 조합하지 않는다. category별 manifest 의미와 validator는 분리한다.
 - 애니메이션 전이는 재사용 가능한 순수 `StateMachine` 조합 컴포넌트가 현재 상태·상태 경과 시간·허용 전이를 소유하고, actor별 resolver가 읽기 전용 snapshot과 표현 사건을 상태 머신 입력으로 바꾼다. clip catalog와 painter는 확정된 상태를 소비할 뿐 gameplay 조건을 다시 해석하지 않는다.
 - `hit`·`respawn`처럼 순간적인 actor 표현은 기존 권위 사건의 대상 `playerId`를 보존한 renderer 전용 presentation event에서 시작한다. 로컬과 원격 actor가 각자 FSM으로 재생하며 animation state·phase를 네트워크 snapshot의 권위 상태로 만들지 않는다.
 - 피해 클라이언트의 즉시 impact와 뒤이은 서버 확정은 투사체·부활 원인의 같은 causal ID로 presentation event를 정규화해 한 번만 재생한다. 서버 확정이 로컬 `hit`·`respawn` 시간을 다시 시작하지 않는다.

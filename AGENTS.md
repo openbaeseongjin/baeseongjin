@@ -12,17 +12,17 @@
 
 ## Sprite asset work
 
-- 스프라이트 생성·교체·import·atlas·animation metadata 작업은 파일을 만들기 전에 `docs/sprite-asset-format.md`를 전부 읽고 `assets/sprites/README.md`에서 현재 구현 상태와 mock 범위를 확인한다.
+- 스프라이트 생성·교체·import·atlas·animation metadata 작업은 파일을 만들기 전에 `docs/graphics-asset-guide.md`와 `docs/sprite-asset-format.md`를 전부 읽고 `assets/runtime/characters/README.md`에서 현재 구현 상태와 mock 범위를 확인한다.
 - PixelLab·SpriteCook의 원본 export 형식을 런타임 계약으로 사용하지 않는다. 도구별 입력은 여러 PNG atlas와 `sprite-manifest.json`으로 정규화하고 renderer·gameplay에 도구별 분기를 추가하지 않는다.
-- 새 리소스는 `assets/sprites/examples/player-multi-atlas/sprite-manifest.json`을 복사해 시작하고 `npm run validate:sprite-assets -- <directory>`를 통과시킨다. 문서 예제를 기억으로 다시 쓰거나 별도 manifest 변형을 만들지 않는다.
+- 새 player runtime 리소스는 `assets/runtime/characters/fixtures/player-multi-atlas/sprite-manifest.json`을 공개 계약으로 사용하고 `assets/runtime/characters/player-production-template/`에서 시작해 `npm run validate:sprite-assets -- <directory>`를 통과시킨다. 문서 예제를 기억으로 다시 쓰거나 별도 manifest 변형을 만들지 않는다.
 - 스프라이트 작업 결과에는 생성·변환한 파일 경로, 사용 도구와 원본 형식, 실제 validator 결과를 기록한다. collider·hitbox·피해량·물리 설정은 스프라이트 manifest에 넣지 않는다.
-- `assets/sprites/sprite-manifest.schema.json`, example manifest, `PlayerSpriteManifest.js`와 validator는 하나의 공개 계약이다. 어느 하나를 변경하면 나머지와 `docs/sprite-asset-format.md`를 같은 변경에서 갱신하고 multi-atlas 회귀 테스트를 실행한다.
+- `assets/runtime/characters/sprite-manifest.schema.json`, fixture manifest, `PlayerSpriteManifest.js`와 validator는 하나의 공개 계약이다. 어느 하나를 변경하면 나머지와 `docs/sprite-asset-format.md`를 같은 변경에서 갱신하고 multi-atlas 회귀 테스트를 실행한다.
 
 ## Environment asset work
 
-- 배경·지형 표면·비충돌 장식의 생성·교체·import·atlas 작업은 파일을 만들기 전에 `docs/environment-asset-format.md`를 전부 읽고 `assets/environment/README.md`에서 현재 mock 범위를 확인한다.
+- 배경·지형 표면·비충돌 장식의 생성·교체·import·atlas 작업은 파일을 만들기 전에 `docs/graphics-asset-guide.md`와 `docs/environment-asset-format.md`를 전부 읽고 `assets/runtime/environments/README.md`에서 현재 mock 범위를 확인한다.
 - PixelLab·SpriteCook의 원본 배열과 metadata를 런타임 계약으로 사용하지 않는다. 도구별 입력은 여러 PNG atlas와 환경 전용 `sprite-manifest.json`으로 정규화하며 캐릭터 animation schema나 renderer에 도구별 분기를 추가하지 않는다.
-- 새 리소스는 `assets/environment/examples/default/sprite-manifest.json`을 복사해 시작하고 `npm run validate:environment-assets -- <directory>`를 통과시킨다. atlas 개수와 frame 배열은 바꿀 수 있지만 loader·schema·example·validator를 하나의 공개 계약으로 유지한다.
+- 새 environment runtime 리소스는 `assets/runtime/environments/default-mock/sprite-manifest.json`을 복사해 시작하고 `npm run validate:environment-assets -- <directory>`를 통과시킨다. atlas 개수와 frame 배열은 바꿀 수 있지만 loader·schema·example·validator를 하나의 공개 계약으로 유지한다.
 - terrain 표현은 기존 collision surface polygon과 one-way edge chain을 그대로 사용한다. decoration은 충돌을 추가하지 않고 이동 경로 밖 또는 배경에만 배치하며, asset 실패는 backdrop·terrain·decoration별 독립 fallback과 `?metrics=1` 진단으로 검증한다.
 
 ## Split-authority gameplay events

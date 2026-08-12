@@ -2,14 +2,16 @@
 
 이 문서는 배경·지형 표면·비충돌 장식을 정식 도트 리소스로 교체할 때 사용하는 현재 기준이다. 캐릭터 애니메이션 입력은 [`sprite-asset-format.md`](./sprite-asset-format.md)를 따르며 환경 manifest와 섞지 않는다.
 
+그래픽 담당자는 먼저 [`graphics-asset-guide.md`](./graphics-asset-guide.md)에서 공통 작업 위치와 가독성 기준을 확인하고 `assets/artwork/environments/<asset-id>/`에 납품한다. 담당 개발자는 환경 pack을 runtime 경로로 정규화할 때 이 문서의 전체 계약을 따른다.
+
 현재 이미지는 구조 검증용 mock이다. 폐쇄형 수직 기업도시와 고도별 구역이라는 기획은 유지하지만 구체 건물·장애물·색감은 후속 기획에서 확정한다. 참고 이미지에서는 어두운 실루엣, 큰 여백, 제한된 인공 조명, 다층 시차 같은 도트 표현 방식만 가져온다.
 
 ## 에이전트 작업 진입점
 
 환경 리소스를 만들거나 교체하는 개발자와 AI 에이전트는 다음 순서로 작업한다.
 
-1. 이 문서와 [`../assets/environment/sprite-manifest.schema.json`](../assets/environment/sprite-manifest.schema.json)을 읽는다.
-2. [`../assets/environment/examples/default/`](../assets/environment/examples/default/)를 복사해 PNG와 `sprite-manifest.json`을 교체한다.
+1. 이 문서와 [`../assets/runtime/environments/sprite-manifest.schema.json`](../assets/runtime/environments/sprite-manifest.schema.json)을 읽는다.
+2. [`../assets/runtime/environments/default-mock/`](../assets/runtime/environments/default-mock/)을 `assets/runtime/environments/<environment-id>/`로 복사해 PNG와 `sprite-manifest.json`을 교체한다.
 3. `npm run validate:environment-assets -- <asset-directory>`를 실행한다. 기본 mock을 검사할 때는 인자를 생략해도 된다.
 4. validator가 통과한 디렉터리만 renderer catalog에 연결한다.
 5. `?metrics=1`에서 fallback component와 atlas ID가 남지 않는지 확인하고 데스크톱·모바일 실제 화면을 검증한다.
@@ -54,7 +56,7 @@ environment-pack/
 
 ```json
 {
-  "$schema": "../../sprite-manifest.schema.json",
+  "$schema": "../sprite-manifest.schema.json",
   "formatVersion": 1,
   "id": "environment-default-mock",
   "generator": { "tool": "manual-mock", "exportVersion": null },

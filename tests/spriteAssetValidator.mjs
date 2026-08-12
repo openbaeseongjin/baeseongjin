@@ -8,8 +8,8 @@ import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../src/render/sprites/PlayerSp
 import { createPlayerSpriteDefinitionFromManifest } from "../src/render/sprites/PlayerSpriteManifest.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const EXAMPLE_DIRECTORY = resolve(ROOT, "assets/sprites/examples/player-multi-atlas");
-const PRODUCTION_TEMPLATE_DIRECTORY = resolve(ROOT, "assets/sprites/player-production-template");
+const EXAMPLE_DIRECTORY = resolve(ROOT, "assets/runtime/characters/fixtures/player-multi-atlas");
+const PRODUCTION_TEMPLATE_DIRECTORY = resolve(ROOT, "assets/runtime/characters/player-production-template");
 
 export function run() {
     const valid = validateSpriteAssetDirectory(EXAMPLE_DIRECTORY);
@@ -62,7 +62,9 @@ export function run() {
         assert.equal(actual.pixelSnap, expected.pixelSnap, `${state} pixel snap must match the runtime mock`);
     }
 
-    const schema = JSON.parse(readFileSync(resolve(ROOT, "assets/sprites/sprite-manifest.schema.json"), "utf8"));
+    const schema = JSON.parse(
+        readFileSync(resolve(ROOT, "assets/runtime/characters/sprite-manifest.schema.json"), "utf8")
+    );
     assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
     assert.deepEqual(schema.properties.formatVersion, { const: 1 });
     assert.deepEqual(schema.properties.animations.required, ["idle", "run", "jump", "fall", "rope", "hit", "respawn"]);

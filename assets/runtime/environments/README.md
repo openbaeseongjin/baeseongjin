@@ -2,13 +2,14 @@
 
 환경 표현을 위한 pixel sprite 리소스다. 캐릭터 sprite와 별도의 manifest v1 계약을 사용하며 backdrop, terrain, decoration 세 컴포넌트의 atlas를 정의한다.
 
+그래픽 담당자의 납품 경로는 `assets/artwork/environments/<asset-id>/`이며 공통 기준은 [`docs/graphics-asset-guide.md`](../../../docs/graphics-asset-guide.md)를 따른다. 이 폴더는 담당 개발자가 납품된 환경 PNG를 `<environment-id>/` runtime package로 정규화하는 경로이며 세부 계약은 [`docs/environment-asset-format.md`](../../../docs/environment-asset-format.md)를 따른다.
+
 ## 구조
 
 ```
-assets/environment/
+assets/runtime/environments/
 ├─ sprite-manifest.schema.json   # 환경 manifest JSON Schema
-├─ examples/
-│  └─ default/
+├─ default-mock/
 │     ├─ sprite-manifest.json    # 복사 가능한 예제
 │     ├─ backdrop-far.png        # 원경 silhouette atlas
 │     ├─ backdrop-mid.png        # 중경 silhouette atlas
@@ -23,7 +24,7 @@ assets/environment/
 
 ```bash
 npm run validate:environment-assets
-npm run validate:environment-assets -- assets/environment/examples/default
+npm run validate:environment-assets -- assets/runtime/environments/default-mock
 ```
 
 ## 계약

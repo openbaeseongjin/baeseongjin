@@ -4,8 +4,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { deflateSync } from "node:zlib";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCE_PATH = resolve(ROOT, "assets/sprites/player-action-mock.svg");
-const OUTPUT_DIRECTORY = resolve(ROOT, "assets/sprites/player-production-template");
+const SOURCE_PATH = resolve(ROOT, "assets/runtime/characters/player-mock/player-action-mock.svg");
+const OUTPUT_DIRECTORY = resolve(ROOT, "assets/runtime/characters/player-production-template");
 const FRAME_SIZE = 24;
 
 const LOCOMOTION_FRAMES = Object.freeze(["idle-0", "idle-1", "run-0", "run-1", "jump", "fall", "rope-0", "rope-1"]);

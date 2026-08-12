@@ -1,4 +1,5 @@
 import { PlayerSpriteDefinition } from "./PlayerSpriteDefinition.js";
+import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 
 const FRAME_SIZE = Object.freeze({ width: 24, height: 24 });
 const ATLAS_ID = "mock";
@@ -15,7 +16,7 @@ export const DEFAULT_PLAYER_SPRITE_DEFINITION = new PlayerSpriteDefinition({
     id: "side-view-action-mock-v1",
     atlases: {
         [ATLAS_ID]: {
-            source: new URL("../../../assets/sprites/player-action-mock.svg", import.meta.url).href,
+            source: runtimeAssetUrl("characters", "player-mock", "player-action-mock.svg"),
             size: { width: 96, height: 96 },
             frameSize: FRAME_SIZE
         }

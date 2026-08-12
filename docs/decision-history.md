@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-12 — 플레이어와 환경별 최상위 runtime 폴더를 사용한다
+
+- 맥락: 첫 player·environment manifest를 각각 도입하면서 `assets/sprites/`와 `assets/environment/`가 독립된 작업·runtime 경로를 함께 맡았다.
+- 결정: 그래픽 담당자와 개발자가 각 자산 종류의 최상위 폴더에서 직접 작업했다.
+- 영향: player와 environment 두 종류에서는 단순했지만 몹·장애물·효과·UI가 늘어날 때 납품 위치와 runtime 위치가 계속 달라질 구조였다.
+- 대체: `assets/artwork/<category>/<asset-id>/`에 모든 제작·납품을 모으고, 검증된 게임 입력만 `assets/runtime/<category>/<asset-id>/`에서 ID로 참조하는 구조로 대체했다.
+- 검증 상태: `RuntimeAssetCatalog` 경로 회귀 테스트, player·environment validator와 로컬 HTTP 자산 응답으로 새 구조를 확인한다.
+
 ## [L2] 2026-08-10 — 동료 구조와 팀 전멸 대기 대신 플레이어별 즉시 부활을 사용한다
 
 - 맥락: 사망 뒤 무엇을 해야 부활하는지 안내되지 않아 플레이어가 게임이 멈췄거나 부활하지 않는다고 받아들였다.

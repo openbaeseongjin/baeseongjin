@@ -211,6 +211,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 환경 renderer는 backdrop·terrain·decoration으로 분리하고 고도 zone, atlas frame, Canvas 호출과 component 상태를 각 하위 renderer가 소유한다. 싱글·멀티 앱에 같은 환경 분기나 진단 전달 코드를 복제하지 않는다.
 - 도트 terrain은 기존 collision surface polygon을 그대로 clip·stroke하고 one-way edge도 동일 vertex chain을 사용한다. 비충돌 decoration은 seed 기반 결정 배치로 만들며 traversal 경로 위에 충돌할 것처럼 보이는 전경을 만들지 않는다.
 - 여러 환경 atlas는 캐릭터와 분리된 `environment-asset-format.md` 계약으로 로드한다. atlas 실패는 backdrop·terrain·decoration 단위로만 fallback하고 pending을 실패로 고정하지 않으며, loader·schema·example·validator 중 하나를 바꾸면 나머지 계약과 component별 실패 테스트를 함께 갱신한다.
+- 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
 - collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
 - 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 테스트 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
 - 렌더러 변경에는 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 검증하는 테스트를 둔다.
