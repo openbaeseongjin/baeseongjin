@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../src/config.js";
 import { MeetingManager } from "../src/meeting-manager.js";
@@ -15,12 +16,43 @@ function config(overrides: NodeJS.ProcessEnv = {}) {
   });
 }
 
-function permissionChannel(parentId = "shared-category", canView = true) {
+interface ViewOverwriteSpec {
+  id: string;
+  type: number;
+  allow?: boolean;
+  deny?: boolean;
+}
+
+function overwriteCache(overwrites: ViewOverwriteSpec[]) {
+  return new Map(
+    overwrites.map((overwrite) => [
+      overwrite.id,
+      {
+        id: overwrite.id,
+        type: overwrite.type,
+        allow: { has: (permission: bigint) => Boolean(overwrite.allow) && permission === PermissionFlagsBits.ViewChannel },
+        deny: { has: (permission: bigint) => Boolean(overwrite.deny) && permission === PermissionFlagsBits.ViewChannel },
+      },
+    ]),
+  );
+}
+
+function permissionChannel(
+  parentId: string | null = "shared-category",
+  canView = true,
+  overwrites: ViewOverwriteSpec[] = [],
+) {
   return {
     parentId,
     isTextBased: (): boolean => true,
     permissionsFor: () => ({ has: () => canView }),
-    permissionOverwrites: { cache: new Map() },
+    permissionOverwrites: { cache: overwriteCache(overwrites) },
+  };
+}
+
+function categoryChannel(overwrites: ViewOverwriteSpec[] = []) {
+  return {
+    permissionOverwrites: { cache: overwriteCache(overwrites) },
   };
 }
 
@@ -171,11 +203,18 @@ describe("MeetingManager", () => {
       members: { fetch: vi.fn(async () => member) },
       channels: {
         cache: new Map(),
-        fetch: vi.fn(async (channelId: string) =>
-          channelId === "12345678901234572"
-            ? permissionChannel("private-category")
-            : permissionChannel("public-category"),
-        ),
+        fetch: vi.fn(async (id: string) => {
+          if (id === "12345678901234572") {
+            return permissionChannel("private-category");
+          }
+          if (id === "private-category") {
+            return categoryChannel([{ id: "private-team-role", type: 0, allow: true }]);
+          }
+          if (id === "public-category") {
+            return categoryChannel([{ id: "everyone-role", type: 0, allow: true }]);
+          }
+          return permissionChannel("public-category");
+        }),
       },
     };
     const manager = new MeetingManager(
@@ -202,6 +241,49 @@ describe("MeetingManager", () => {
     expect(reply).not.toHaveBeenCalled();
     expect(deferReply).toHaveBeenCalledOnce();
     expect((manager as unknown as { active?: unknown }).active).toBeUndefined();
+  });
+
+  it("allows multi-channel capture when channels sit under different categories with the same resolved audience", async () => {
+    const deferReply = vi.fn(async () => undefined);
+    const member = { displayName: "Regular Member", voice: { channel: null } };
+    const guild = {
+      members: { fetch: vi.fn(async () => member) },
+      channels: {
+        cache: new Map(),
+        fetch: vi.fn(async (id: string) => {
+          if (id === "12345678901234569") {
+            return permissionChannel("category-x");
+          }
+          if (id === "12345678901234570") {
+            return permissionChannel("category-y");
+          }
+          if (id === "category-x" || id === "category-y") {
+            return categoryChannel([{ id: "team-role", type: 0, allow: true }]);
+          }
+          return permissionChannel("category-x");
+        }),
+      },
+    };
+    const manager = new MeetingManager({} as never, config(), {} as never);
+
+    const editReply = vi.fn(async () => undefined);
+    await manager.handleCommand({
+      commandName: "meeting",
+      guildId: "12345678901234568",
+      channelId: "12345678901234569",
+      inGuild: () => true,
+      guild,
+      user: { id: "12345678901234571" },
+      options: { getSubcommand: () => "start" },
+      reply: vi.fn(async () => undefined),
+      deferReply,
+      editReply,
+    } as never);
+
+    expect(editReply).toHaveBeenCalledWith(expect.stringContaining("started"));
+    expect(
+      (manager as unknown as { active?: { startedAt: Date } }).active,
+    ).toBeDefined();
   });
 
   it("refuses multi-channel capture when the requester cannot view every source", async () => {

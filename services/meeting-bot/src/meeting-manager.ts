@@ -45,20 +45,25 @@ interface ActiveMeeting {
 
 const MAX_TEXT_MESSAGES = 5_000;
 
-interface PermissionAuditableChannel {
+interface ViewOverwriteEntry {
+  id: string;
+  type: number;
+  allow: { has(permission: bigint): boolean };
+  deny: { has(permission: bigint): boolean };
+}
+
+interface OverwriteHolder {
+  permissionOverwrites: {
+    cache: {
+      values(): IterableIterator<ViewOverwriteEntry>;
+    };
+  };
+}
+
+interface PermissionAuditableChannel extends OverwriteHolder {
   parentId: string | null;
   isTextBased(): boolean;
   permissionsFor(member: unknown): { has(permission: bigint): boolean } | null;
-  permissionOverwrites: {
-    cache: {
-      values(): IterableIterator<{
-        id: string;
-        type: number;
-        allow: { has(permission: bigint): boolean };
-        deny: { has(permission: bigint): boolean };
-      }>;
-    };
-  };
 }
 
 function auditableChannel(value: unknown): PermissionAuditableChannel | null {
@@ -76,15 +81,48 @@ function auditableChannel(value: unknown): PermissionAuditableChannel | null {
     : null;
 }
 
-function visibilityFingerprint(channel: PermissionAuditableChannel): string {
-  const overwrites = [...channel.permissionOverwrites.cache.values()]
-    .flatMap((overwrite) => {
-      const allow = overwrite.allow.has(PermissionFlagsBits.ViewChannel);
-      const deny = overwrite.deny.has(PermissionFlagsBits.ViewChannel);
-      return allow || deny ? [`${overwrite.type}:${overwrite.id}:${allow ? 1 : 0}:${deny ? 1 : 0}`] : [];
-    })
-    .sort();
-  return `${channel.parentId ?? "root"}|${overwrites.join("|")}`;
+function auditableOverwriteHolder(value: unknown): OverwriteHolder | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const holder = value as Partial<OverwriteHolder>;
+  return Boolean(holder.permissionOverwrites?.cache) ? (holder as OverwriteHolder) : null;
+}
+
+function viewOverwrites(holder: OverwriteHolder | null): Array<readonly [string, string]> {
+  if (!holder) {
+    return [];
+  }
+  return [...holder.permissionOverwrites.cache.values()].flatMap((overwrite) => {
+    const allow = overwrite.allow.has(PermissionFlagsBits.ViewChannel);
+    const deny = overwrite.deny.has(PermissionFlagsBits.ViewChannel);
+    return allow || deny
+      ? ([[`${overwrite.type}:${overwrite.id}`, `${allow ? 1 : 0}:${deny ? 1 : 0}`]] as const)
+      : [];
+  });
+}
+
+// A channel's effective "who can view this" audience comes from its own overwrites layered on
+// top of its category's overwrites (channel-level wins), not from sharing the same category ID.
+// Comparing the resolved audience instead of parentId lets capture/minutes channels live under
+// different categories as long as they still resolve to the same View Channel overwrite set.
+function visibilityFingerprint(
+  channel: PermissionAuditableChannel,
+  parentOverwritesById: Map<string, OverwriteHolder | null>,
+): string {
+  const merged = new Map<string, string>();
+  if (channel.parentId) {
+    for (const [key, value] of viewOverwrites(parentOverwritesById.get(channel.parentId) ?? null)) {
+      merged.set(key, value);
+    }
+  }
+  for (const [key, value] of viewOverwrites(channel)) {
+    merged.set(key, value);
+  }
+  return [...merged.entries()]
+    .map(([key, value]) => `${key}:${value}`)
+    .sort()
+    .join("|");
 }
 
 export class MeetingManager {
@@ -312,12 +350,29 @@ export class MeetingManager {
       ) {
         return "Meeting was not started because the requester cannot view every capture and minutes channel.";
       }
+      const parentIds = [
+        ...new Set(
+          verifiedChannels.flatMap((channel) => (channel.parentId ? [channel.parentId] : [])),
+        ),
+      ];
+      const parentEntries = await Promise.all(
+        parentIds.map(async (parentId) =>
+          [
+            parentId,
+            auditableOverwriteHolder(
+              guild.channels.cache.get(parentId) ?? (await guild.channels.fetch(parentId)),
+            ),
+          ] as const,
+        ),
+      );
+      const parentOverwritesById = new Map(parentEntries);
+
       const minutesChannel = verifiedChannels.at(-1)!;
-      const minutesAudience = visibilityFingerprint(minutesChannel);
+      const minutesAudience = visibilityFingerprint(minutesChannel, parentOverwritesById);
       if (
         verifiedChannels
           .slice(0, -1)
-          .some((channel) => visibilityFingerprint(channel) !== minutesAudience)
+          .some((channel) => visibilityFingerprint(channel, parentOverwritesById) !== minutesAudience)
       ) {
         return "Meeting was not started because capture/minutes channel visibility policies are not aligned.";
       }
