@@ -10,6 +10,7 @@ import {
   type Client,
   type Message,
   MessageFlags,
+  PermissionFlagsBits,
   type VoiceBasedChannel,
 } from "discord.js";
 import type { AppConfig } from "./config.js";
@@ -17,8 +18,11 @@ import { DiscordPublisher } from "./discord-publisher.js";
 import { GitHubStore, type GitHubSyncResult } from "./github-store.js";
 import { checkpoint, safeErrorMessage } from "./logger.js";
 import { LocalMeetingService, LocalWhisperTranscriber } from "./local-meeting-service.js";
-import { renderDailyDocument } from "./markdown.js";
+import { markdownText, renderDailyDocument } from "./markdown.js";
+import { discordMessageRecord, reconcileMeetingMessages } from "./message-history.js";
+import { extractReferenceMaterials } from "./message-references.js";
 import { buildMeetingSummary } from "./meeting-summary.js";
+import { OllamaMeetingClassifier } from "./ollama-meeting-classifier.js";
 import { meetingId } from "./time.js";
 import type { MeetingMetadata, Minutes, MinutesDetails, TextMessageRecord, VoiceSegment } from "./types.js";
 import { VoiceRecorder } from "./voice-recorder.js";
@@ -41,9 +45,52 @@ interface ActiveMeeting {
 
 const MAX_TEXT_MESSAGES = 5_000;
 
+interface PermissionAuditableChannel {
+  parentId: string | null;
+  isTextBased(): boolean;
+  permissionsFor(member: unknown): { has(permission: bigint): boolean } | null;
+  permissionOverwrites: {
+    cache: {
+      values(): IterableIterator<{
+        id: string;
+        type: number;
+        allow: { has(permission: bigint): boolean };
+        deny: { has(permission: bigint): boolean };
+      }>;
+    };
+  };
+}
+
+function auditableChannel(value: unknown): PermissionAuditableChannel | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const channel = value as Partial<PermissionAuditableChannel>;
+  return (
+    typeof channel.isTextBased === "function" &&
+    typeof channel.permissionsFor === "function" &&
+    Boolean(channel.permissionOverwrites?.cache) &&
+    "parentId" in channel
+  )
+    ? (channel as PermissionAuditableChannel)
+    : null;
+}
+
+function visibilityFingerprint(channel: PermissionAuditableChannel): string {
+  const overwrites = [...channel.permissionOverwrites.cache.values()]
+    .flatMap((overwrite) => {
+      const allow = overwrite.allow.has(PermissionFlagsBits.ViewChannel);
+      const deny = overwrite.deny.has(PermissionFlagsBits.ViewChannel);
+      return allow || deny ? [`${overwrite.type}:${overwrite.id}:${allow ? 1 : 0}:${deny ? 1 : 0}`] : [];
+    })
+    .sort();
+  return `${channel.parentId ?? "root"}|${overwrites.join("|")}`;
+}
+
 export class MeetingManager {
   private active: ActiveMeeting | undefined;
   private starting = false;
+  private ending = false;
   private readonly localProcessing: LocalMeetingService;
   private readonly publisher: DiscordPublisher;
   private readonly ollama: OllamaRuntimeLike;
@@ -54,6 +101,15 @@ export class MeetingManager {
     private readonly github: GitHubStore,
     ollama?: OllamaRuntimeLike,
   ) {
+    const meetingClassifier =
+      config.meetingClassifier.enabled && config.meetingClassifier.model
+        ? new OllamaMeetingClassifier({
+            model: config.meetingClassifier.model,
+            timeoutMs: config.meetingClassifier.timeoutMs,
+            maxTranscriptCharacters: config.meetingClassifier.maxTranscriptCharacters,
+            outputLanguage: config.meetingClassifier.outputLanguage,
+          })
+        : undefined;
     this.localProcessing = new LocalMeetingService(
       new LocalWhisperTranscriber({
         pythonExecutable: config.localProcessing.pythonExecutable,
@@ -61,13 +117,20 @@ export class MeetingManager {
         model: config.localProcessing.transcriptionModel,
         cacheDir: config.localProcessing.modelCacheDir,
       }),
+      meetingClassifier,
     );
     this.publisher = new DiscordPublisher(client, config.discord.minutesChannelId);
+    const codexUsesOllama = config.codex.enabled && config.codex.provider === "ollama";
+    const ollamaModel = config.meetingClassifier.enabled
+      ? config.meetingClassifier.model
+      : codexUsesOllama
+        ? config.codex.model
+        : undefined;
     this.ollama =
       ollama ??
       new OllamaRuntime({
-        enabled: config.codex.enabled && config.codex.provider === "ollama",
-        ...(config.codex.model ? { model: config.codex.model } : {}),
+        enabled: codexUsesOllama || config.meetingClassifier.enabled,
+        ...(ollamaModel ? { model: ollamaModel } : {}),
         binary: config.codex.ollamaBinary,
         startupTimeoutMs: config.codex.ollamaStartupTimeoutMs,
       });
@@ -106,17 +169,14 @@ export class MeetingManager {
       !this.active ||
       message.author.bot ||
       message.guildId !== this.config.discord.guildId ||
-      message.channelId !== this.config.discord.meetingChannelId ||
+      !this.config.discord.captureChannelIds.includes(message.channelId) ||
       message.createdAt < this.active.startedAt
     ) {
       return;
     }
 
-    const content = message.content.trim();
-    const attachments = [...message.attachments.values()].map(
-      (attachment) => attachment.name ?? "unnamed file",
-    );
-    if (!content && attachments.length === 0) {
+    const record = discordMessageRecord(message);
+    if (!record) {
       return;
     }
     if (this.active.messages.length >= MAX_TEXT_MESSAGES) {
@@ -125,22 +185,17 @@ export class MeetingManager {
       }
       return;
     }
-    this.active.messages.push({
-      id: message.id,
-      timestamp: message.createdAt.toISOString(),
-      authorId: message.author.id,
-      authorName: message.member?.displayName ?? message.author.displayName,
-      content,
-      attachments,
-    });
+    this.active.messages.push(record);
   }
 
   private async start(interaction: ChatInputCommandInteraction): Promise<void> {
-    if (this.active || this.starting) {
+    if (this.active || this.starting || this.ending) {
       await interaction.reply({
         content: this.active
           ? `A meeting is already active (${this.active.id}).`
-          : "A meeting is already starting.",
+          : this.ending
+            ? "A meeting is already ending. Wait for finalization to finish."
+            : "A meeting is already starting.",
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -155,14 +210,19 @@ export class MeetingManager {
   }
 
   private async startReserved(interaction: ChatInputCommandInteraction): Promise<void> {
+    const startedAt = interaction.createdAt ?? new Date();
     await interaction.deferReply();
     const guild = interaction.guild;
     if (!guild) {
       throw new Error("meeting command did not resolve a guild");
     }
     const member = await guild.members.fetch(interaction.user.id);
+    const accessError = await this.captureAccessError(guild, member);
+    if (accessError) {
+      await interaction.editReply(accessError);
+      return;
+    }
     const voiceChannel = member.voice.channel;
-    const startedAt = new Date();
     const id = meetingId(startedAt);
     const meeting: ActiveMeeting = {
       id,
@@ -188,8 +248,11 @@ export class MeetingManager {
     }
 
     this.active = meeting;
+    const safeVoiceChannelName = voiceChannel
+      ? markdownText(voiceChannel.name).replace(/@/gu, "@\u200b")
+      : null;
     const voiceStatus = voiceChannel
-      ? `Voice recording is active in **${voiceChannel.name}** with DAVE encryption.`
+      ? `Voice recording is active in **${safeVoiceChannelName}** with DAVE encryption.`
       : "No voice channel was detected; this meeting is text-only.";
     await interaction.editReply(this.startReply(id, voiceStatus, this.ollamaPreparingStatus()));
     void this.finishOllamaPreparation(interaction, meeting, voiceStatus).catch((error: unknown) => {
@@ -211,17 +274,63 @@ export class MeetingManager {
   }
 
   private startReply(id: string, voiceStatus: string, ollamaStatus?: string): string {
+    const capturedChannels = this.config.discord.captureChannelIds
+      .map((channelId) => `<#${channelId}>`)
+      .join(", ");
     return [
       `Meeting **${id}** started.`,
       voiceStatus,
       ...(ollamaStatus ? [ollamaStatus] : []),
-      "Messages in this channel are being captured until `/meeting end`.",
+      `Messages posted between start and end in ${capturedChannels} are being captured until \`/meeting end\`.`,
+      "Captured message text, display names, external links, and attachment filenames are republished to the configured minutes channel.",
       "Voice audio is transcribed locally on this bot host and is not sent to an AI API. Confirm participant consent before continuing.",
     ].join("\n");
   }
 
+  private async captureAccessError(
+    guild: NonNullable<ChatInputCommandInteraction["guild"]>,
+    member: unknown,
+  ): Promise<string | null> {
+    try {
+      const channelIds = [
+        ...this.config.discord.captureChannelIds,
+        this.config.discord.minutesChannelId,
+      ];
+      const channels = await Promise.all(
+        channelIds.map(async (channelId) =>
+          auditableChannel(guild.channels.cache.get(channelId) ?? (await guild.channels.fetch(channelId))),
+        ),
+      );
+      if (channels.some((channel) => !channel?.isTextBased())) {
+        return "Meeting was not started because a configured capture/minutes channel could not be verified.";
+      }
+      const verifiedChannels = channels as PermissionAuditableChannel[];
+      if (
+        verifiedChannels.some(
+          (channel) => !channel.permissionsFor(member)?.has(PermissionFlagsBits.ViewChannel),
+        )
+      ) {
+        return "Meeting was not started because the requester cannot view every capture and minutes channel.";
+      }
+      const minutesChannel = verifiedChannels.at(-1)!;
+      const minutesAudience = visibilityFingerprint(minutesChannel);
+      if (
+        verifiedChannels
+          .slice(0, -1)
+          .some((channel) => visibilityFingerprint(channel) !== minutesAudience)
+      ) {
+        return "Meeting was not started because capture/minutes channel visibility policies are not aligned.";
+      }
+      return null;
+    } catch (error: unknown) {
+      checkpoint("FAILED", `Meeting channel permission validation | ${safeErrorMessage(error)}`);
+      return "Meeting was not started because capture/minutes channel visibility could not be verified.";
+    }
+  }
+
   private ollamaPreparingStatus(): string | undefined {
-    return this.config.codex.enabled && this.config.codex.provider === "ollama"
+    return (this.config.codex.enabled && this.config.codex.provider === "ollama") ||
+      this.config.meetingClassifier.enabled
       ? "Ollama is being prepared in the background; meeting capture is already active."
       : undefined;
   }
@@ -240,11 +349,20 @@ export class MeetingManager {
       return undefined;
     }
     if (readiness.state === "ready") {
+      const purpose = this.ollamaPurpose();
       return readiness.started
-        ? "Ollama started automatically and is ready for `/codex`."
-        : "Local Ollama is ready for `/codex`.";
+        ? `Ollama started automatically and is ready for ${purpose}.`
+        : `Local Ollama is ready for ${purpose}.`;
     }
-    return "Ollama is unavailable. The meeting will continue, but `/codex` needs the local service to be fixed.";
+    return `Ollama is unavailable. The meeting will continue, but ${this.ollamaPurpose()} will use only available fallback behavior.`;
+  }
+
+  private ollamaPurpose(): string {
+    const purposes = [
+      ...(this.config.meetingClassifier.enabled ? ["meeting classification"] : []),
+      ...(this.config.codex.enabled && this.config.codex.provider === "ollama" ? ["`/codex`"] : []),
+    ];
+    return purposes.length > 0 ? purposes.join(" and ") : "local features";
   }
 
   private async connectVoice(meeting: ActiveMeeting, voiceChannel: VoiceBasedChannel): Promise<void> {
@@ -274,6 +392,13 @@ export class MeetingManager {
   }
 
   private async end(interaction: ChatInputCommandInteraction): Promise<void> {
+    if (this.ending) {
+      await interaction.reply({
+        content: "A meeting is already ending.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
     if (!this.active) {
       await interaction.reply({
         content: "No meeting is active.",
@@ -282,72 +407,112 @@ export class MeetingManager {
       return;
     }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const meeting = this.active;
     this.active = undefined;
-    const endedAt = new Date();
-    let voiceSegments: VoiceSegment[] = [];
-
+    this.ending = true;
+    const endedAt = interaction.createdAt ?? new Date();
     try {
-      voiceSegments = (await meeting.recorder?.stop()) ?? [];
-      if (meeting.recorder?.didReachSegmentLimit()) {
-        meeting.voiceWarnings.push("The voice segment capture limit was reached.");
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch((error: unknown) => {
+        checkpoint(
+          "FAILED",
+          `Meeting end acknowledgement ${meeting.id} | ${safeErrorMessage(error)}`,
+        );
+      });
+      let voiceSegments: VoiceSegment[] = [];
+
+      try {
+        voiceSegments = (await meeting.recorder?.stop()) ?? [];
+        if (meeting.recorder?.didReachSegmentLimit()) {
+          meeting.voiceWarnings.push("The voice segment capture limit was reached.");
+        }
+      } finally {
+        meeting.connection?.destroy();
       }
+
+      const reconciledMessages = await reconcileMeetingMessages(this.client, {
+        guildId: this.config.discord.guildId,
+        captureChannelIds: this.config.discord.captureChannelIds,
+        startedAt: meeting.startedAt,
+        endedAt,
+        liveMessages: meeting.messages,
+        maxMessages: MAX_TEXT_MESSAGES,
+      });
+      meeting.messages = reconciledMessages.messages;
+      meeting.voiceWarnings.push(...reconciledMessages.warnings);
+
+      const transcription = await this.localProcessing.transcribe(meeting.messages, voiceSegments);
+      let minutes: Minutes;
+      try {
+        minutes = await this.localProcessing.summarize(transcription.entries);
+      } catch (error: unknown) {
+        checkpoint("FAILED", `Meeting summary ${meeting.id} | ${safeErrorMessage(error)}`);
+        minutes = this.safeFallbackMinutes(
+          transcription.entries.map((entry) => `${entry.speaker}: ${entry.text}`),
+        );
+      }
+      const referenceMaterials = extractReferenceMaterials(meeting.messages);
+      minutes.references = referenceMaterials.items;
+      const operationalBlockers: string[] = [];
+      if (referenceMaterials.itemCapReached) {
+        operationalBlockers.push(
+          "Reference materials were truncated at 200 items; review the source channels.",
+        );
+      }
+      if (referenceMaterials.perMessageCapReached) {
+        operationalBlockers.push(
+          "One or more messages exceeded the per-message URL or attachment limit; review the source channels.",
+        );
+      }
+      if (referenceMaterials.sensitiveUrlOmitted) {
+        operationalBlockers.push(
+          "One or more reference URLs were withheld as credential-bearing, oversized, or over the per-message limit; review the source channels.",
+        );
+      }
+      if (transcription.failures.length > 0) {
+        operationalBlockers.push(
+          `${transcription.failures.length} voice segment(s) could not be transcribed; no content from them was promoted.`,
+        );
+        checkpoint(
+          "FAILED",
+          `Meeting ${meeting.id} transcription | ${transcription.failures.length} segment(s) failed`,
+        );
+      }
+      operationalBlockers.push(...meeting.voiceWarnings);
+      minutes.blockers.unshift(...operationalBlockers);
+      minutes.summary = buildMeetingSummary(minutes);
+
+      const metadata: MeetingMetadata = {
+        id: meeting.id,
+        guildId: interaction.guildId ?? this.config.discord.guildId,
+        startedAt: meeting.startedAt.toISOString(),
+        endedAt: endedAt.toISOString(),
+        startedBy: meeting.startedBy,
+        voiceChannelName: meeting.voiceChannelName,
+      };
+      const markdown = renderDailyDocument(metadata, minutes);
+      const results = await Promise.allSettled([
+        this.publisher.publish(markdown),
+        this.github.syncMeeting(metadata, minutes),
+      ]);
+
+      const discordStatus = this.resultStatus(results[0], "Discord");
+      const githubStatus = this.githubResultStatus(results[1]);
+      if (!this.config.runtime.retainAudio && meeting.recorder) {
+        await meeting.recorder.cleanup(voiceSegments);
+      }
+
+      await interaction.editReply(
+        [
+          `Meeting **${meeting.id}** ended.`,
+          `Captured ${meeting.messages.length} text message(s) and ${voiceSegments.length} voice segment(s).`,
+          discordStatus,
+          githubStatus,
+        ].join("\n"),
+      );
+      checkpoint("SUCCESS", `Meeting ${meeting.id} finalized | ${discordStatus} | ${githubStatus}`);
     } finally {
-      meeting.connection?.destroy();
+      this.ending = false;
     }
-
-    const transcription = await this.localProcessing.transcribe(meeting.messages, voiceSegments);
-    let minutes: Minutes;
-    try {
-      minutes = this.localProcessing.summarize(transcription.entries);
-    } catch (error: unknown) {
-      checkpoint("FAILED", `Meeting summary ${meeting.id} | ${safeErrorMessage(error)}`);
-      minutes = this.safeFallbackMinutes(transcription.entries.map((entry) => `${entry.speaker}: ${entry.text}`));
-    }
-    const operationalBlockers: string[] = [];
-    if (transcription.failures.length > 0) {
-      operationalBlockers.push(
-        `${transcription.failures.length} voice segment(s) could not be transcribed; no content from them was promoted.`,
-      );
-      checkpoint(
-        "FAILED",
-        `Meeting ${meeting.id} transcription | ${transcription.failures.length} segment(s) failed`,
-      );
-    }
-    operationalBlockers.push(...meeting.voiceWarnings);
-    minutes.blockers.unshift(...operationalBlockers);
-    minutes.summary = buildMeetingSummary(minutes);
-
-    const metadata: MeetingMetadata = {
-      id: meeting.id,
-      guildId: interaction.guildId ?? this.config.discord.guildId,
-      startedAt: meeting.startedAt.toISOString(),
-      endedAt: endedAt.toISOString(),
-      startedBy: meeting.startedBy,
-      voiceChannelName: meeting.voiceChannelName,
-    };
-    const markdown = renderDailyDocument(metadata, minutes);
-    const results = await Promise.allSettled([
-      this.publisher.publish(markdown),
-      this.github.syncMeeting(metadata, minutes),
-    ]);
-
-    const discordStatus = this.resultStatus(results[0], "Discord");
-    const githubStatus = this.githubResultStatus(results[1]);
-    if (!this.config.runtime.retainAudio && meeting.recorder) {
-      await meeting.recorder.cleanup(voiceSegments);
-    }
-
-    await interaction.editReply(
-      [
-        `Meeting **${meeting.id}** ended.`,
-        `Captured ${meeting.messages.length} text message(s) and ${voiceSegments.length} voice segment(s).`,
-        discordStatus,
-        githubStatus,
-      ].join("\n"),
-    );
-    checkpoint("SUCCESS", `Meeting ${meeting.id} finalized | ${discordStatus} | ${githubStatus}`);
   }
 
   private safeFallbackMinutes(discussed: string[]): Minutes {
@@ -362,7 +527,7 @@ export class MeetingManager {
       blockers: ["Local meeting classification failed; manual review is required."],
       nextMeeting: null,
     };
-    return { summary: buildMeetingSummary(details), ...details };
+    return { summary: buildMeetingSummary(details), references: [], ...details };
   }
 
   private resultStatus(result: PromiseSettledResult<unknown>, label: string): string {

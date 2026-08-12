@@ -14,7 +14,7 @@
       "timestamp": "2026-08-09T13:02:00.000Z",
       "speakerId": "102",
       "speaker": "개발",
-      "text": "내가 로프 프로토타입을 맡아서 내일까지 할게."
+      "text": "내가 로프 프로토타입 구현을 맡아서 내일까지 할게."
     },
     {
       "id": "text:2",
@@ -42,13 +42,31 @@
     }
   ],
   "rawMinutes": {
-    "discussed": ["그래픽 스타일", "수집 시스템"],
+    "discussed": [
+      {
+        "text": "그래픽 스타일",
+        "evidence": [{ "id": "text:1", "quote": "그래픽은 도형 기반으로 가자" }]
+      },
+      {
+        "text": "수집 시스템",
+        "evidence": [{ "id": "text:2", "quote": "팰월드처럼 수집을 넣으면 좋을까?" }]
+      }
+    ],
     "decided": [
-      { "text": "도형 기반 그래픽을 사용한다.", "evidenceIds": ["text:1"] },
-      { "text": "팰월드식 수집을 사용한다.", "evidenceIds": ["text:2"] }
+      {
+        "text": "도형 기반 그래픽을 사용한다.",
+        "evidence": [{ "id": "text:1", "quote": "그래픽은 도형 기반으로 가자. 이걸로 확정." }]
+      },
+      {
+        "text": "팰월드식 수집을 사용한다.",
+        "evidence": [{ "id": "text:2", "quote": "팰월드처럼 수집을 넣으면 좋을까?" }]
+      }
     ],
     "rejected": [
-      { "text": "AI 추리게임 방향은 제외한다.", "evidenceIds": ["text:3"] }
+      {
+        "text": "AI 추리게임은 안 하기로 했다.",
+        "evidence": [{ "id": "text:3", "quote": "AI 추리게임은 이번에는 안 하기로 했어." }]
+      }
     ],
     "hypotheses": [],
     "actionItems": [
@@ -56,19 +74,21 @@
         "owner": "개발",
         "task": "로프 프로토타입 구현",
         "due": "내일",
-        "evidenceIds": ["voice:1"]
+        "evidence": [
+          { "id": "voice:1", "quote": "내가 로프 프로토타입 구현을 맡아서 내일까지 할게." }
+        ]
       },
       {
         "owner": "모션",
         "task": "수집 시스템 구현",
         "due": null,
-        "evidenceIds": ["text:2"]
+        "evidence": [{ "id": "text:2", "quote": "팰월드처럼 수집을 넣으면 좋을까?" }]
       }
     ],
     "blockers": [],
     "nextMeeting": {
       "text": "내일 오후 10시",
-      "evidenceIds": ["text:4"]
+      "evidence": [{ "id": "text:4", "quote": "다음 회의는 내일 오후 10시에 하자." }]
     }
   }
 }

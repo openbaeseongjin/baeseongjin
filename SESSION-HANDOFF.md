@@ -233,8 +233,15 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 ### [L2] 회의록은 상세 분류 앞에 안전한 요약을 제공한다
 
 - Discord와 GitHub 회의록은 승인된 최종 상세 필드에서만 만든 3~5줄 `SUMMARY`를 맨 위에 표시한다. 각 줄은 240자로 제한하고 결정·할 일·블로커·다음 회의·논의를 우선하며, 가설과 제외 항목은 해당 라벨을 유지한다.
-- `SUMMARY`는 표시용 파생 데이터이며 `DECISIONS.md`와 `TASKS.md` 승격 근거로 사용하지 않는다. 원본 `RawMinutes`와 명시적 증거 게이트는 그대로 유지하며 새 AI 또는 유료 API 호출을 추가하지 않는다.
+- `SUMMARY`는 표시용 파생 데이터이며 `DECISIONS.md`와 `TASKS.md` 승격 근거로 사용하지 않는다. 요약 자체는 새 모델 호출을 하지 않고 최종 상세 필드에서 결정적으로 만든다. 상세 분류에는 아래 정책에 따라 선택형 무료 로컬 Ollama 후보 생성기를 사용할 수 있다.
 - 세부 형식과 검증 기준은 `services/meeting-bot/README.md`를 따른다.
+
+### [L1] 활성 회의의 자연 대화와 세 채널 참고자료를 근거 기반으로 정리한다
+
+- 기존 회의 채널은 `/meeting start/end` 명령과 캡처 대상에 유지하고, `DISCORD_REFERENCE_CHANNEL_IDS`로 기획·코딩 채널을 추가한다. 시작과 종료 사이의 메시지만 수집하며 종료 시 제한된 채널 기록을 다시 읽어 수정·삭제·Gateway 누락을 최종 상태로 맞춘다. 기록 조회가 실패한 채널은 실시간 캡처를 유지하고 블로커를 남긴다.
+- `MEETING_CLASSIFIER_ENABLED=true`이면 이미 설치된 로컬 Ollama 모델이 자연스러운 한국어/영어 대화에서 일곱 상세 분류 후보를 만든다. 모든 후보는 실제 발언 ID와 정확한 인용문을 가져야 하고, 질문·불확실성·주제 일치·화자·명시적 합의/거절/약속/일정을 결정적 게이트가 다시 검증한다. 실패하면 명시적 라벨 기반 규칙으로 폴백하며 OpenAI·Codex 계정·유료 API를 사용하지 않는다.
+- `REFERENCES`는 모델과 분리된 비승격 필드다. 채널명·작성자·시각·외부 URL·첨부파일명/형식/크기만 기록하고 링크나 파일을 열거나 내려받지 않는다. Discord 서명 첨부 URL은 저장하지 않으며 참고자료는 `DECISIONS.md`와 `TASKS.md`의 근거가 될 수 없다.
+- 회의록 채널의 열람 범위는 모든 캡처 채널보다 넓어서는 안 된다. 공개 GitHub 게시의 별도 `ALLOW_PUBLIC_GITHUB_MINUTES` 동의 게이트는 유지한다.
 
 ### [L2] Discord의 Codex 호출은 허용 목록 기반 읽기 전용 기획으로 시작한다
 
@@ -244,8 +251,8 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - Discord 자유 조회·공유는 브라우저 자동화나 meeting-bot 내부 구현이 아니라 저장소의 `.codex/config.toml`에서 범용 `@discord-mcp/cli` stdio MCP를 직접 실행한다. 자격 증명은 저장소에 두지 않고 로컬에서는 `DISCORD_TOKEN`, Codex Cloud에서는 별도 Secret으로 관리한다. 서버·채널은 봇이 볼 수 있는 목록에서 대화 중 선택을 재사용하되 복수이거나 모호하면 질문한다. MCP는 `users,messages,channels`만 노출하고, 쓰기는 사용자가 승인한 문구의 메시지 전송만 허용하며 편집·삭제·반응·관리 작업은 금지한다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Discord의 공개 `/codex` 게이트웨이는 고정 loopback Ollama와 허용 Skill만 사용하고 구조화 출력을 검증하며 애플리케이션 비밀을 전달하지 않는다. 인증된 Codex CLI와 LM Studio 공급자는 공개 게이트웨이에서 거부하여 서버 멤버가 Codex 계정 할당량이나 더 넓은 로컬 엔드포인트를 소비하지 못하게 한다.
 - `/codex` 출력은 신뢰된 instruction에 한글이 있으면 한국어, 없으면 영어를 요청한다. 결과의 모든 표시 필드는 Latin·Hangul 문자 체계만 허용하고 저장·게시 전에 재검증한다. 한자·가나 등 비허용 문자가 나오면 로컬 Ollama로 1회만 교정하며, 반복 실패와 기존 비호환 결과는 원문을 게시하지 않는다.
-- `CODEX_PROVIDER=ollama`인 상태에서 `/meeting start`가 승인되면 회의 캡처를 먼저 활성화하고 백그라운드에서 고정 loopback API와 선택 모델을 확인한다. 서버가 꺼져 있으면 비밀을 제외한 환경으로 `OLLAMA_BIN serve`를 숨김·분리 프로세스로 자동 실행한다. 실행 또는 모델 확인이 실패해도 회의 기록은 계속하고 `/codex`만 사용 불가로 알리며, 모델 자동 설치나 유료 API 우회는 하지 않는다. Ollama 프로세스는 `/meeting end` 뒤에도 유지한다.
-- 기능은 `CODEX_ENABLED=false`가 기본이며 로컬 공급자의 사용량·비용 정책을 확인한 뒤 명시적으로 활성화한다.
+- 로컬 회의 분류 또는 `CODEX_PROVIDER=ollama` 공개 게이트웨이가 켜진 상태에서 `/meeting start`가 승인되면 회의 캡처를 먼저 활성화하고 백그라운드에서 고정 loopback API와 선택 모델을 확인한다. 서버가 꺼져 있으면 비밀을 제외한 환경으로 `OLLAMA_BIN serve`를 숨김·분리 프로세스로 자동 실행한다. 실행 또는 모델 확인이 실패해도 회의 기록은 계속하고 분류는 안전한 규칙으로 폴백하며 `/codex`는 사용 불가로 알린다. 모델 자동 설치나 유료 API 우회는 하지 않고 Ollama 프로세스는 `/meeting end` 뒤에도 유지한다.
+- `CODEX_ENABLED=false`와 `MEETING_CLASSIFIER_ENABLED=false`가 각각 기본이며 서로 독립적으로 활성화한다.
 
 ## 갱신 규칙
 

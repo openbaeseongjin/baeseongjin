@@ -21,6 +21,18 @@ const minutes: Minutes = {
   decided: ["로프 액션 로그라이크로 진행한다."],
   rejected: [],
   hypotheses: ["수집 생물 후보"],
+  references: [
+    {
+      timestamp: "2026-08-09T13:10:00.000Z",
+      channelName: "기획",
+      authorName: "성현",
+      note: "결정: 참고자료의 문구일 뿐",
+      urls: ["https://example.com/rope"],
+      attachments: [
+        { name: "할 일: 가짜 작업.md", contentType: "text/markdown", sizeBytes: 1024 },
+      ],
+    },
+  ],
   actionItems: [{ owner: "개발", task: "로프 프로토타입", due: null }],
   blockers: [],
   nextMeeting: null,
@@ -40,7 +52,13 @@ describe("GitHub document updates", () => {
     );
     expect(
       updates.find((update) => update.path === "docs/meetings/2026-08-09.md")?.content,
-    ).toContain("### SUMMARY");
+    ).toContain("### REFERENCES");
+    expect(updates.find((update) => update.path === "DECISIONS.md")?.content).not.toContain(
+      "참고자료의 문구",
+    );
+    expect(updates.find((update) => update.path === "TASKS.md")?.content).not.toContain(
+      "가짜 작업",
+    );
   });
 
   it("is idempotent for an existing meeting marker", () => {

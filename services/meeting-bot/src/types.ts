@@ -2,11 +2,28 @@ export type TranscriptSource = "text" | "voice";
 
 export interface TextMessageRecord {
   id: string;
+  channelId: string;
+  channelName: string;
   timestamp: string;
   authorId: string;
   authorName: string;
   content: string;
-  attachments: string[];
+  attachments: TextAttachmentRecord[];
+}
+
+export interface TextAttachmentRecord {
+  name: string;
+  contentType: string | null;
+  sizeBytes: number;
+}
+
+export interface ReferenceMaterial {
+  timestamp: string;
+  channelName: string;
+  authorName: string;
+  note: string;
+  urls: string[];
+  attachments: TextAttachmentRecord[];
 }
 
 export interface VoiceSegment {
@@ -25,27 +42,34 @@ export interface TranscriptEntry {
   speakerId: string;
   speaker: string;
   text: string;
+  channelId?: string;
+  channelName?: string;
+}
+
+export interface EvidenceCitation {
+  id: string;
+  quote: string;
 }
 
 export interface EvidencedItem {
   text: string;
-  evidenceIds: string[];
+  evidence: EvidenceCitation[];
 }
 
 export interface RawActionItem {
   owner: string;
   task: string;
   due: string | null;
-  evidenceIds: string[];
+  evidence: EvidenceCitation[];
 }
 
 export interface RawMinutes {
-  discussed: string[];
+  discussed: EvidencedItem[];
   decided: EvidencedItem[];
   rejected: EvidencedItem[];
-  hypotheses: string[];
+  hypotheses: EvidencedItem[];
   actionItems: RawActionItem[];
-  blockers: string[];
+  blockers: EvidencedItem[];
   nextMeeting: EvidencedItem | null;
 }
 
@@ -67,6 +91,7 @@ export interface MinutesDetails {
 
 export interface Minutes extends MinutesDetails {
   summary: string[];
+  references: ReferenceMaterial[];
 }
 
 export interface MeetingMetadata {

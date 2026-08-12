@@ -60,11 +60,15 @@ describe("local meeting processing", () => {
     const messages: TextMessageRecord[] = [
       {
         id: "message-1",
+        channelId: "channel-planning",
+        channelName: "기획",
         timestamp: "2026-08-10T13:00:00.000Z",
         authorId: "user-1",
         authorName: "성현",
         content: "아이디어: 자동 성장",
-        attachments: [],
+        attachments: [
+          { name: "growth-reference.pdf", contentType: "application/pdf", sizeBytes: 1024 },
+        ],
       },
     ];
     const voiceSegments: VoiceSegment[] = [
@@ -89,6 +93,8 @@ describe("local meeting processing", () => {
         speakerId: "user-1",
         speaker: "성현",
         text: "아이디어: 자동 성장",
+        channelId: "channel-planning",
+        channelName: "기획",
       },
       {
         id: "voice-1",
