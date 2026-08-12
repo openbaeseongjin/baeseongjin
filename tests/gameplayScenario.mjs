@@ -14,6 +14,7 @@ import { run as artifactRewardSelection } from "./artifactRewardSelection.mjs";
 import { run as gameObjectModel } from "./gameObjectModel.mjs";
 import { run as renderingSystem } from "./renderingSystem.mjs";
 import { run as stateMachine } from "./stateMachine.mjs";
+import { run as spriteAssetValidator } from "./spriteAssetValidator.mjs";
 
 const steps = {
     worldSeed,
@@ -29,6 +30,7 @@ const steps = {
     combatSystems,
     canvasRenderer,
     renderingSystem,
+    spriteAssetValidator,
     stateMachine,
     worldTraversalValidator,
     commandReplay

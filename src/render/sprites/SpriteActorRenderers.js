@@ -13,8 +13,8 @@ function eventsForPlayer(scene, playerId) {
 }
 
 class PlayerSpriteRendererBase {
-    constructor({ asset, definition, selectPlayers, markerColor }) {
-        this.asset = asset;
+    constructor({ assets, definition, selectPlayers, markerColor }) {
+        this.assets = assets;
         this.definition = definition;
         this.selectPlayers = selectPlayers;
         this.markerColor = markerColor;
@@ -38,10 +38,11 @@ class PlayerSpriteRendererBase {
                 dt
             });
             const presentation = this.definition.presentationFor(animation.state);
+            const frame = presentation.clip.frameAt(animation.elapsedSeconds);
             paintSpriteFrame({
                 context: args.context,
-                image: this.asset.image,
-                frame: presentation.clip.frameAt(animation.elapsedSeconds),
+                image: this.assets.imageFor(frame.atlasId),
+                frame,
                 position: player.position,
                 size: presentation.size,
                 anchor: presentation.anchor,
@@ -61,7 +62,12 @@ class PlayerSpriteRendererBase {
     controllerFor(playerId) {
         let controller = this.controllers.get(playerId);
         if (!controller) {
-            controller = new PlayerAnimationController();
+            controller = new PlayerAnimationController({
+                transientDurations: {
+                    hit: this.definition.presentationFor("hit").clip.totalDurationSeconds,
+                    respawn: this.definition.presentationFor("respawn").clip.totalDurationSeconds
+                }
+            });
             this.controllers.set(playerId, controller);
         }
         return controller;
@@ -69,9 +75,9 @@ class PlayerSpriteRendererBase {
 }
 
 export class SpriteLocalPlayerRenderer extends PlayerSpriteRendererBase {
-    constructor({ asset, definition }) {
+    constructor({ assets, definition }) {
         super({
-            asset,
+            assets,
             definition,
             selectPlayers: (scene) => [{ ...scene.player, id: scene.player.id ?? scene.localPlayerId }],
             markerColor: "#67e8f9"
@@ -80,9 +86,9 @@ export class SpriteLocalPlayerRenderer extends PlayerSpriteRendererBase {
 }
 
 export class SpriteRemotePlayerRenderer extends PlayerSpriteRendererBase {
-    constructor({ asset, definition }) {
+    constructor({ assets, definition }) {
         super({
-            asset,
+            assets,
             definition,
             selectPlayers: (scene) => scene.otherPlayers ?? [],
             markerColor: "#c084fc"

@@ -290,7 +290,10 @@ class Player extends RopeAttachable(GameObject) {}
 - 사용자 입력, 성공, 실패, 쿨다운은 화면에서 구분 가능해야 한다.
 - Canvas 변경은 시작·동작 중·종료 또는 해제 상태를 실제 화면으로 검증한다.
 - 스프라이트 clip은 자산이 실제로 표현하는 행동 의미와 일치해야 한다. 지원하지 않는 행동을 방향 전환용 프레임 등 무관한 프레임에 임의 대응하지 않고, 불가피한 대체는 definition에 명시적 fallback으로 선언한다.
-- player sprite definition은 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 자산 로더도 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미를 자체 해석하지 않는다.
+- player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 자산 로더도 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다. 정식 입력은 `sprite-asset-format.md`의 PNG 묶음과 도구 중립 manifest로 정규화한다.
+- PixelLab·SpriteCook 같은 생성 도구의 ZIP·metadata·개별 frame은 import 입력으로만 다룬다. 도구별 adapter가 표준 manifest를 만들고 renderer와 gameplay에는 도구 이름 분기를 추가하지 않는다. GIF·WebP는 미리보기로만 사용한다.
+- sprite manifest는 frame 순서·duration·loop·fallback과 표현 cue만 소유한다. collider·hitbox·피해량·무적 시간·물리·네트워크 권위 상태를 넣지 않으며 생성 도구 keypoint를 collider로 자동 변환하지 않는다.
+- 스프라이트 관련 개발·에셋 작업은 루트 `AGENTS.md`에서 `sprite-asset-format.md`의 JSON Schema·example manifest·표준 validator 명령으로 진입하게 한다. loader, schema, example, validator 중 하나를 바꾸면 같은 계약 변경으로 함께 갱신하며 새 결과물은 validator 통과 전 완료로 보지 않는다.
 - 스프라이트 화면 변경은 데스크톱과 모바일 크기에서 상태의 자세·실루엣·동작을 비교한다. 색 변화만을 상태 구분의 유일한 근거로 사용하지 않는다.
 
 ## 11. 코드 스타일과 파일 관리
