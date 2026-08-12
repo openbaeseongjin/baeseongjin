@@ -1,5 +1,5 @@
 {
-  "$schema": "../../sprite-manifest.schema.json",
+  "$schema": "../sprite-manifest.schema.json",
   "formatVersion": 1,
   "id": "environment-default-mock",
   "generator": {

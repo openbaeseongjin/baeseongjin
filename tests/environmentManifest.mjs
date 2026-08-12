@@ -17,6 +17,7 @@ import { EnvironmentAssetSet } from "../src/render/environment/EnvironmentAssetS
 import { AltitudeZoneResolver, AltitudeSunrise } from "../src/render/environment/AltitudeZoneResolver.js";
 import { validateEnvironmentAssetDirectory } from "../scripts/validateEnvironmentAssets.mjs";
 import { WORLD_CONFIG } from "../src/game/config.js";
+import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 
@@ -25,6 +26,10 @@ export function run() {
     const def = DEFAULT_ENVIRONMENT_DEFINITION;
     assert.equal(def.id, "environment-default-mock");
     assert.ok(Object.keys(def.atlases).length >= 4, "atlases must exist");
+    assert.equal(
+        def.atlases["backdrop-far"].source,
+        runtimeAssetUrl("environments", "default-mock", "backdrop-far.png")
+    );
     assert.equal(def.zones.length, 5);
     assert.equal(def.zones[0].id, "waste");
     assert.equal(def.zones[4].id, "landing-pad");
@@ -88,7 +93,7 @@ export function run() {
     assert.ok(bTop > b0, "brightness increases");
 
     // Manifest roundtrip
-    const manifestPath = resolve(ROOT, "assets/environment/examples/default/sprite-manifest.json");
+    const manifestPath = resolve(ROOT, "assets/runtime/environments/default-mock/sprite-manifest.json");
     const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     const fromManifest = createEnvironmentDefinitionFromManifest(manifest);
     assert.equal(fromManifest.id, "environment-default-mock");
@@ -185,7 +190,7 @@ export function run() {
     const temporaryRoot = mkdtempSync(join(tmpdir(), "baeseongjin-env-"));
     const temporaryPack = join(temporaryRoot, "pack");
     try {
-        cpSync(resolve(ROOT, "assets/environment/examples/default"), temporaryPack, { recursive: true });
+        cpSync(resolve(ROOT, "assets/runtime/environments/default-mock"), temporaryPack, { recursive: true });
         const wrongSizeManifest = JSON.parse(readFileSync(resolve(temporaryPack, "sprite-manifest.json"), "utf8"));
         wrongSizeManifest.atlases["backdrop-far"].size.width = 72;
         writeFileSync(

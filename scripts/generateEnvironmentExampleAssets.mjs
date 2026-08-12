@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { deflateSync } from "node:zlib";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const OUTPUT_DIRECTORY = resolve(ROOT, "assets/environment/examples/default");
+const OUTPUT_DIRECTORY = resolve(ROOT, "assets/runtime/environments/default-mock");
 
 function crc32(buffer) {
     let crc = 0xffffffff;

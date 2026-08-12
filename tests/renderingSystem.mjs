@@ -16,6 +16,7 @@ import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPres
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
 import { localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
+import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
 
 function recordingContext() {
     const calls = [];
@@ -82,6 +83,14 @@ function playerDefinition(overrides = {}) {
 }
 
 export async function run() {
+    assert.match(
+        runtimeAssetUrl("characters", "player-mock", "player-action-mock.svg"),
+        /\/assets\/runtime\/characters\/player-mock\/player-action-mock\.svg$/
+    );
+    assert.throws(() => runtimeAssetUrl("sprites", "player-mock", "player.png"), /Unknown runtime asset category/);
+    assert.throws(() => runtimeAssetUrl("characters", "Player Mock", "player.png"), /lowercase kebab-case/);
+    assert.throws(() => runtimeAssetUrl("characters", "player-mock", "../player.png"), /cannot leave/);
+
     const context = recordingContext();
     const canvas = makeCanvas(context);
     assert.equal(createGameRenderer({ canvas }).sceneRenderer.profile, "sprite");
@@ -376,6 +385,10 @@ export async function run() {
     assert.ok(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle.frames.every(Object.isFrozen));
     assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.size, { width: 96, height: 96 });
     assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.frameSize, { width: 24, height: 24 });
+    assert.equal(
+        DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.source,
+        runtimeAssetUrl("characters", "player-mock", "player-action-mock.svg")
+    );
     assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.destinationSize, { width: 48, height: 48 });
     assert.deepEqual(Object.keys(DEFAULT_PLAYER_SPRITE_DEFINITION.presentations), PLAYER_SPRITE_STATES);
     for (const state of PLAYER_SPRITE_STATES) {

@@ -216,15 +216,18 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 이번 구조 정렬은 플레이어와 혼합 도트 프로필에 직접 필요한 범위로 제한한다. 적·투사체를 공통 collider로 전환하거나 저장소 전체 조합 구조를 일괄 리팩터링하지 않는다.
 - 애니메이션 상태를 renderer 내부 조건문으로 흩뜨리지 않는다. 현재 상태·경과 시간·허용 전이를 소유하는 재사용 가능한 순수 `StateMachine` 조합 컴포넌트와 플레이어 전용 상태 resolver를 분리하며, 기존 gameplay·투사체의 서로 다른 도메인 상태를 이번 작업에서 이 컴포넌트로 강제 이전하지 않는다.
 - `sprite`가 기본 렌더 프로필이고 기존 폴리곤 표현은 `?renderer=polygon`으로 선택한다. 알 수 없는 프로필은 경고 후 `sprite`로 복구하며 player sprite asset 준비 실패 시 조립된 polygon renderer가 전체 scene을 대신 그린다.
-- mock player asset은 저장소에서 직접 만든 `assets/sprites/player-action-mock.svg`이며 atlas layout과 출처 기록은 `assets/sprites/README.md`에 있다. `PlayerSpriteManifest`·`PlayerSpriteDefinition`·`SpriteImageAssetSet`이 PixelLab·SpriteCook 원본을 여러 PNG atlas와 도구 중립 animation manifest로 정규화해 frame별 atlas를 선택한다. 프레임 수·순서·속도는 manifest가 소유하고 collider는 별도 조합으로 유지한다. 다른 개발자와 AI 에이전트는 루트 `AGENTS.md`에서 `docs/sprite-asset-format.md`의 JSON Schema·example·`validate:sprite-assets` 명령으로 진입한다.
+- mock player asset은 저장소에서 직접 만든 `assets/runtime/characters/player-mock/player-action-mock.svg`이며 atlas layout과 출처 기록은 `assets/runtime/characters/README.md`에 있다. `PlayerSpriteManifest`·`PlayerSpriteDefinition`·`SpriteImageAssetSet`이 PixelLab·SpriteCook 원본을 여러 PNG atlas와 도구 중립 animation manifest로 정규화해 frame별 atlas를 선택한다. 프레임 수·순서·속도는 manifest가 소유하고 collider는 별도 조합으로 유지한다. 다른 개발자와 AI 에이전트는 루트 `AGENTS.md`에서 `docs/sprite-asset-format.md`의 JSON Schema·fixture·`validate:sprite-assets` 명령으로 진입한다.
 - 렌더러 선택이 물리·전투·네트워크 snapshot 계약을 바꾸지 않으며, 교체 가능한 렌더 경계의 상세 기준은 `docs/architecture.md`를 따른다.
 
-### [L2] 그래픽 담당자는 실제 납품 형식의 player production starter에서 작업한다
+### [L2] 그래픽 작업은 공통 가이드와 자산별 production template에서 시작한다
 
-- 현재 런타임 mock인 `assets/sprites/player-action-mock.svg`는 동작 의미를 확인하는 자료이고, 정식 납품 형식은 여러 PNG atlas와 `sprite-manifest.json`이므로 그래픽 담당자에게 SVG mock이나 validator fixture를 직접 출발점으로 주지 않는다.
-- `assets/sprites/player-production-template/`은 현재 mock의 일곱 상태·프레임·재생 설정을 실제 납품 형식으로 옮긴 복사 가능한 starter를 제공한다. 담당자는 이를 sibling `assets/sprites/<character-id>/`로 복사해 PNG와 manifest 값을 교체하며, 상대 `$schema` 경로도 복사 후 유효해야 한다.
+- 그래픽 담당자의 공통 진입점은 `docs/graphics-asset-guide.md`이며 모든 결과물은 종류와 무관하게 `assets/artwork/<category>/<asset-id>/`에 원본·PNG·미리보기를 인계한다. 담당 개발자는 검증된 export를 `assets/runtime/<category>/<asset-id>/` package로 연결하고 게임 코드는 `RuntimeAssetCatalog`에서 category와 안정적인 asset ID로 파일 URL을 만든다.
+- 전용 template이 없는 자산에 player나 environment manifest를 억지로 재사용하지 않는다. 담당 개발자가 자산 종류에 맞는 공개 계약을 만든 뒤 runtime 경로로 승격하며, 충돌·물리·전투·네트워크 값은 그래픽 리소스와 분리한다.
+- 기본 player의 일곱 상태는 48×48 출력과 모바일 화면에서 자세·실루엣만으로 구분할 수 있게 제작한다. 다른 actor의 상태 목록은 플레이어 계약을 복사하지 않고 작업 요청에서 별도로 정한다.
+- 현재 런타임 mock인 `assets/runtime/characters/player-mock/player-action-mock.svg`는 동작 의미를 확인하는 자료이고, 정식 납품 형식은 여러 PNG atlas와 `sprite-manifest.json`이므로 그래픽 담당자에게 SVG mock이나 validator fixture를 직접 출발점으로 주지 않는다.
+- `assets/runtime/characters/player-production-template/`은 현재 mock의 일곱 상태·프레임·재생 설정을 실제 납품 형식으로 옮긴 개발 연결용 starter다. 그래픽 담당자는 배치만 참고해 `assets/artwork/characters/player-main/`에 납품하고, 담당 개발자가 starter를 `assets/runtime/characters/player-main/`으로 복사해 PNG와 manifest를 정규화한다.
 - starter는 그래픽 생성·정규화·validator 통과를 위한 인계 자료일 뿐 현재 런타임이 자동 참조하지 않는다. 기본 player 연결과 최종 교체는 별도 개발 작업으로 남긴다.
-- starter의 위치, cell map, 수정 범위와 검증 절차는 `docs/sprite-asset-format.md`와 `assets/sprites/README.md`를 기준으로 유지한다.
+- starter의 위치, cell map, 수정 범위와 검증 절차는 `docs/sprite-asset-format.md`와 `assets/runtime/characters/README.md`를 기준으로 유지한다.
 
 ### [L1] 환경 도트 표현은 독립 component와 전용 multi-atlas 계약으로 조립한다
 

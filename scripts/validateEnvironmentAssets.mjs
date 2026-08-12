@@ -69,7 +69,7 @@ function runCli() {
     if (directories.length > 1) {
         throw new Error("Usage: npm run validate:environment-assets -- <directory>");
     }
-    const result = validateEnvironmentAssetDirectory(directories[0] ?? "assets/environment/examples/default");
+    const result = validateEnvironmentAssetDirectory(directories[0] ?? "assets/runtime/environments/default-mock");
     console.log(
         `Environment assets valid: ${result.id} (${result.atlasCount} atlases, ${result.zoneCount} zones, ${result.backdropLayerCount} backdrop layers)`
     );

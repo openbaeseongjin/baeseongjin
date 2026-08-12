@@ -5,7 +5,7 @@
     "generator": {
         "tool": "repository-svg-repack",
         "exportVersion": "1",
-        "sourceExport": "../player-action-mock.svg"
+        "sourceExport": "../player-mock/player-action-mock.svg"
     },
     "render": {
         "facing": "right",

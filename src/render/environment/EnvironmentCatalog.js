@@ -1,5 +1,6 @@
 import { EnvironmentDefinition } from "./EnvironmentDefinition.js";
 import { ENVIRONMENT_MAX_ALTITUDE, ENVIRONMENT_ZONE_STEP } from "./EnvironmentAltitude.js";
+import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 
 export { ENVIRONMENT_MAX_ALTITUDE, ENVIRONMENT_ZONE_STEP } from "./EnvironmentAltitude.js";
 
@@ -8,7 +9,7 @@ const FRAME_SIZE = Object.freeze({ width: 24, height: 24 });
 function atlasDef(id, image, columns, rows) {
     return {
         id,
-        source: new URL(`../../../assets/environment/examples/default/${image}`, import.meta.url).href,
+        source: runtimeAssetUrl("environments", "default-mock", image),
         size: { width: columns * FRAME_SIZE.width, height: rows * FRAME_SIZE.height },
         frameSize: FRAME_SIZE
     };
