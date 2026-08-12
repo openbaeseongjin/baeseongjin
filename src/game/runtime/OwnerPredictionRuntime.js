@@ -390,6 +390,14 @@ export class OwnerPredictionRuntime {
         return this.initialized ? this.simulation.playerState(this.ownerId) : null;
     }
 
+    impactRecoveryState() {
+        if (!this.initialized) return null;
+        return Object.freeze({
+            stateTick: this.simulation.getTick(),
+            state: this.simulation.playerState(this.ownerId)
+        });
+    }
+
     recordPredictedOutcome({ projectile, swingTriggered }, tick, previous) {
         if (swingTriggered) this.recordPredictedRopeSwing(tick, previous.ropeDamageBoostRemaining);
         this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);

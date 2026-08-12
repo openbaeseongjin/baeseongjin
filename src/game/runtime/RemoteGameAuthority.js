@@ -165,15 +165,17 @@ export class RemoteGameAuthority {
                         const receipt = createPlayerImpactReceipt(message.payload);
                         const pending = this.pendingImpactClaims.get(receipt.projectileId);
                         if (!receipt.accepted && receipt.reason === "state-diverged" && pending) {
-                            const state = this.ownerRuntime?.impactClaimState();
-                            if (!state) throw new Error("impact recovery requires an owner state");
+                            const recovery = this.ownerRuntime?.impactRecoveryState();
+                            if (!recovery) throw new Error("impact recovery requires an owner state");
                             const outcome = {
                                 ...pending.outcome,
-                                digest: createPlayerImpactStateDigest(state, {
+                                recoveryId: receipt.recoveryId,
+                                stateTick: recovery.stateTick,
+                                digest: createPlayerImpactStateDigest(recovery.state, {
                                     impactType: pending.event.resolution,
                                     respawned: pending.outcome.respawned
                                 }),
-                                state
+                                state: recovery.state
                             };
                             this.submitImpactClaim(pending.event, outcome);
                             return;

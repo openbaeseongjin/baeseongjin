@@ -950,6 +950,10 @@ export async function run() {
             () => authorityPlayer.health === clientBody.health,
             "the shared server player HP must converge to the victim client's resolved value"
         );
+        await waitFor(
+            () => room.session.lastOwnerMotionTicks.get(authority.playerId) === clientBody.tick,
+            "impact recovery must publish the tick that produced the victim's current state"
+        );
         assert.ok(
             Math.hypot(
                 authorityPlayer.physics.position.x - clientBody.position.x,

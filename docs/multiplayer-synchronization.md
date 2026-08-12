@@ -24,11 +24,27 @@
 - 로컬 반응만 빠른 것으로 끝내지 않고 서버와 동료 복제본이 같은 결과로 수렴해야 한다.
 - 게임 규칙과 물리는 120Hz, 입력 제출은 60Hz, 공유 스냅샷은 20Hz를 사용한다.
 
+### 다른 게임 엔진 기준 충족 점검
+
+현재 구조는 2인 협동 브라우저 프로토타입에 필요한 멀티플레이 핵심 축을 충족한다. 아래 표는 기능을 더 만들기 위한 목록이 아니라, 다른 엔진의 공식 네트워크 모델과 비교해 현재 구조에 핵심 공백이 없는지 바로 판단하기 위한 기준이다.
+
+| 엔진 기준 | 현재 구현 | 판정 |
+| --- | --- | --- |
+| 소유자는 예측하고 다른 참가자는 보간한다. Unity Netcode for Entities는 `Owner Predicted` ghost를 소유자에게 예측하고 다른 클라이언트에는 보간한다. ([Unity Ghost snapshots](https://docs.unity.cn/Packages/com.unity.netcode%401.0/manual/ghost-snapshots.html)) | `OwnerPredictionRuntime`이 자기 `GameSimulation`을 즉시 진행하고 `RemoteWorldStateBuffer`가 동료를 보간·제한 외삽한다. | 충족 |
+| 일회성 사건과 지속 상태를 분리한다. Unity는 RPC를 일회성 사건, ghost snapshot을 지속 상태와 eventual consistency 용도로 구분한다. ([Unity Ghost snapshots](https://docs.unity.cn/Packages/com.unity.netcode%401.0/manual/ghost-snapshots.html)) | 생성·해결·피격은 고유 ID 사건으로 보내고 플레이어·적·공용 진행은 snapshot으로 수렴한다. late join은 현재 지속 상태와 활성 객체의 원래 spawn 사건을 받는다. | 충족 |
+| 예측 현재·보간 과거·서버 현재의 시간축을 구분하고 외삽을 제한한다. ([Unity Interpolation](https://docs.unity.cn/Packages/com.unity.netcode%401.5/manual/interpolation.html)) | `serverTick`, 플레이어별 `ownerMotionTick`, 단조 `snapshotSequence`를 구분하고 100ms 보간·최대 120ms 외삽을 사용한다. | 충족 |
+| 입력/이동 표본은 tick 또는 timestamp, ACK, 보존된 입력과 결합한다. Unreal Character Movement는 saved move, timestamp, ACK와 correction을 같은 이동 계약으로 관리한다. ([Unreal Networked Movement](https://dev.epicgames.com/documentation/unreal-engine/understanding-networked-movement-in-the-character-movement-component-for-unreal-engine?lang=en-US)) | 명령 sequence·목표 tick·snapshot ACK를 보존하고 명시적 운동 거부에서만 기준 상태 이후 입력을 재실행한다. impact 예외 복구도 상태를 만든 `stateTick`을 함께 수용한다. | 충족 |
+| 메시지 순서를 암묵적으로 가정하지 않고 상태 묶음과 사건 ID로 인과관계를 보존한다. Unreal도 actor·RPC 종류를 넘는 실행 순서가 항상 보장되지 않음을 명시한다. ([Unreal Replicated Object Execution Order](https://dev.epicgames.com/documentation/unreal-engine/replicated-object-execution-order-in-unreal-engine?lang=en-US)) | snapshot envelope, 사건 ID 중복 제거, projectile/prediction ID와 impact 복구 challenge로 순서·중복을 명시한다. 현재 WebSocket의 FIFO는 보조 조건이지 게임 객체 식별자를 대신하지 않는다. | 충족 |
+| 원격 입력은 소유권·형식·범위와 호출 빈도를 검증한다. Godot도 RPC 인자를 적용 전에 검증하고 위치·타이머·쿨다운을 무검증 신뢰하지 말 것을 권고한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)) | 인증된 player ID, 프로토콜 버전, tick·속도·이동 거리·쿨다운·대상, 중복 ID를 검증한다. 피해자 소유 결과를 서버 상태로 되감지는 않지만 예외 전체 상태는 서버가 발급한 일회용 challenge와 전체 복구 스키마를 통과해야 한다. | 협동·클라이언트 우선 정책 안에서 충족 |
+| 상태 snapshot은 필요에 따라 unreliable/delta/relevancy를 사용한다. 브라우저 HTML5는 raw UDP를 사용할 수 없고 WebSocket 또는 WebRTC 경계를 사용한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)) | 현재는 2인·20Hz의 단일 reliable WebSocket과 전체 snapshot이다. 모바일 계측에서 head-of-line 지연이나 대역폭 문제가 확인될 때만 WebRTC 채널, delta 또는 관심 영역을 검토한다. | 현재 규모에서는 핵심 누락 아님 |
+
+서버 rewind·공격자 lag compensation은 움직이는 서버 소유 표적이나 경쟁 PvP가 추가될 때 필요한 조건부 항목이다. 현재처럼 피해자가 자기 피격을 판정하고 적중 대상 수가 작은 2인 PvE에서는 선행 구현하지 않는다. 상태 지문은 우연한 시뮬레이션 불일치를 찾는 도구이지 신뢰 증명이나 치트 방지 수단이 아니므로 암호학적 해시로 바꾸는 것도 현재 핵심 요구가 아니다.
+
 ### impact claim과 최종 수렴
 
 사용자 체감의 핵심은 **본체 피격과 로프 절단의 최종 판정 주체가 피해 클라이언트**라는 점이다. 피해 클라이언트는 서버 응답 전에 HP·넉백·로프 절단·치명 시 부활과 아티팩트 손실을 적용한다. 정상 impact claim은 사건 자료와 적용 결과의 작은 상태 지문만 보내며 전체 소유자 상태를 반복 전송하지 않는다. 서버 receipt나 이후 snapshot은 이 결과를 복구하거나 소비한 탄환을 되살리지 않는다.
 
-서버의 impact 검증은 피해 결과를 다시 판정하기 위한 권위 판정이 아니다. 인증된 연결, 메시지 형식과 projectile ID 중복 여부를 확인한 뒤 공용 `GameSimulation`으로 같은 피해 전이를 적용하고 상태 지문을 비교한다. 지문이 같으면 전체 상태 없이 사건을 확정한다. 지문이 다르면 서버의 임시 전이를 되돌리고 `state-diverged`를 보내며, 피해 클라이언트가 응답 시점의 최신 소유자 상태를 한 번 전송해 서버와 동료가 이를 흡수한다. 이 응답은 gameplay 거부가 아니라 피해자 기준 복구 자료 요청이며 피해 클라이언트를 서버 상태로 되감지 않는다.
+서버의 impact 검증은 피해 결과를 다시 판정하기 위한 권위 판정이 아니다. 인증된 연결, 메시지 형식과 projectile ID 중복 여부를 확인한 뒤 공용 `GameSimulation`으로 같은 피해 전이를 적용하고 상태 지문을 비교한다. 지문이 같으면 전체 상태 없이 사건을 확정한다. 지문이 다르면 서버의 임시 전이를 되돌리고 `state-diverged`와 해당 projectile·피해자 연결에 묶인 일회용 `recoveryId`를 보낸다. 피해 클라이언트는 응답 시점의 최신 소유자 상태, 그 상태를 만든 `stateTick`, 새 지문과 `recoveryId`를 한 번 전송한다. 서버는 실제로 발급해 보관 중인 challenge와 일치할 때만 전체 상태를 흡수하고, 상태와 플레이어별 `ownerMotionTick`·로프 tick을 같은 처리에서 갱신한다. challenge 없는 첫 claim이나 다른 projectile의 ID로 전체 상태를 보내면 `recovery-not-requested`로 거부한다. 이 응답은 gameplay 거부가 아니라 피해자 기준 복구 자료 요청이며 피해 클라이언트를 서버 상태로 되감지 않는다.
 
 상태가 크게 벌어졌을 때 수렴 기준은 상태 소유권에 따라 다르다.
 
@@ -39,7 +55,7 @@
 | 몹·적 투사체·공용 월드 | 서버 상태 | 서버 스냅샷과 생성·해결 사건을 적용하고 연속 위치만 보간·제한 외삽 |
 | 최초 입장·재접속 | 서버가 보존한 최신 공유 상태 | 전체 소유자 상태를 한 번 복원한 뒤 다시 클라이언트 우선 시뮬레이션 시작 |
 
-현재 impact claim 프로토콜 v2의 정상 메시지는 projectile ID, client tick, impact 종류, 충돌 위치·속도, 관측 대미지, 부활 여부와 64비트 상태 지문을 운반한다. 서버에 탄환이 있으면 서버 대미지로 같은 전이를 시도하고, 이미 만료됐으면 피해 클라이언트가 관측한 대미지로 시도한다. 결과 지문이 다를 때만 두 번째 메시지에 피해 클라이언트의 최신 소유자 상태를 싣는다. 형식이 깨졌거나 인증된 플레이어가 없는 메시지는 정상 gameplay 거부 receipt가 아니라 프로토콜 오류로 연결을 종료한다.
+현재 impact claim 프로토콜 v3의 정상 메시지는 projectile ID, client tick, impact 종류, 충돌 위치·속도, 관측 대미지, 부활 여부와 64비트 상태 지문을 운반한다. 서버에 탄환이 있으면 서버 대미지로 같은 전이를 시도하고, 이미 만료됐으면 피해 클라이언트가 관측한 대미지로 시도한다. 결과 지문이 다를 때만 두 번째 메시지에 `recoveryId`, 최신 소유자 상태와 `stateTick`을 함께 싣는다. 복구 상태는 서버가 실제로 복원하는 ID·위치·속도·접지·HP·타이머·생명·로프·입력 제어·무기·아티팩트 필드 전체의 타입·유한값·기본 범위·내부 관계를 검증한다. 인증된 피해자 ID와 상태 ID가 다르거나, `stateTick`이 이전 승인 owner tick보다 오래됐거나 서버 허용 미래 tick을 넘으면 복구를 적용하지 않는다. 형식이 깨졌거나 인증된 플레이어가 없는 메시지는 정상 gameplay 거부 receipt가 아니라 프로토콜 오류로 연결을 종료한다.
 
 상태 지문은 raw 플레이어 객체 전체의 정확 일치 해시가 아니다. impact가 소유하는 지속 결과만 결정적 순서로 투영하고, 위치·속도·로프 기하는 0.1 단위, 타이머는 1/120초 tick, 체력·무기 수치는 0.001 단위로 양자화한 뒤 비암호학적 64비트 FNV-1a를 계산한다. 일반 본체 피격은 HP·속도·피격 무적, 로프 절단은 부착 여부·재부착 제한, 치명 피격은 여기에 체크포인트 위치·생명·로프·무기·아티팩트 손실 상태를 포함한다. 입력 포인터·렌더 상태와 다른 동기화 경계가 소유한 값은 제외한다. 이 지문은 불일치 감지용이며 인증이나 치트 방지 증거가 아니다.
 
@@ -203,7 +219,7 @@ events[]
 
 자신과 교차한 적 탄환은 피해 클라이언트가 `PlayerImpactPrediction` capability로 로컬 몸체·로프에 먼저 충돌시켜 즉시 피드백과 이동 반응을 적용한다. 본체 피격은 복제 탄환 대미지로 로컬 HP와 치명 시 체크포인트 부활·결정적 아티팩트 손실까지 공용 `GameSimulation`에서 실행하고, 멀티 HUD는 이 소유 클라이언트 상태를 표시한다. 정상 impact claim은 `projectileId`, clientTick, `player-hit` 또는 `rope-cut`, 충돌 위치·속도, 관측 대미지, 부활 여부와 결과 상태 지문만 보낸다. 피격 직전 `owner-motion`을 캡처하고 로컬 반응을 적용한 뒤 전송선에서는 캡처한 motion 다음 impact claim 순서를 지킨다.
 
-서버는 인증된 연결과 결정적 projectile ID 중복을 검사하고 같은 `GameSimulation` impact 전이를 임시 적용한다. 결과 지문이 같으면 resolve 사건을 한 번 확정하고 동료에게 공유한다. 다르면 임시 전이를 되돌린 뒤 `state-diverged`를 보내며, 클라이언트는 그 응답을 받은 시점의 최신 소유자 상태와 새 지문을 한 번 보낸다. 서버는 이 상태를 흡수한 뒤 사건을 확정한다. 탄환이 아직 서버에 있으면 서버 탄환 대미지를 사건 기록에 사용하고 제거하며, 이미 만료됐으면 claim의 관측 대미지를 사용한다. 서버 위치·피격 무적·server tick·기존 target ID 차이는 피해자 결과를 취소하는 gameplay 거부 조건이 아니다. 소비한 적 탄환을 다시 표시하거나 같은 충돌을 반복하지 않는다. 중간 입장과 재연결 welcome에는 아직 살아 있는 예측 객체의 원래 생성 이벤트를 같은 이벤트 ID로 다시 제공해 생성 tick부터 복원한다.
+서버는 인증된 연결과 결정적 projectile ID 중복을 검사하고 같은 `GameSimulation` impact 전이를 임시 적용한다. 결과 지문이 같으면 resolve 사건을 한 번 확정하고 동료에게 공유한다. 다르면 임시 전이를 되돌린 뒤 일회용 `recoveryId`가 든 `state-diverged`를 보내며, 클라이언트는 그 응답을 받은 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보낸다. 서버는 발급 대기 중인 challenge, 피해자 ID, 단조 tick과 전체 복구 스키마가 모두 맞을 때만 이 상태를 흡수하고 challenge를 소비한 뒤 사건을 확정한다. 복구 대기는 유실된 응답이 세션 메모리에 무한히 남지 않도록 10초 뒤 정리한다. 탄환이 아직 서버에 있으면 서버 탄환 대미지를 사건 기록에 사용하고 제거하며, 이미 만료됐으면 claim의 관측 대미지를 사용한다. 서버 위치·피격 무적·server tick·기존 target ID 차이는 피해자 결과를 취소하는 gameplay 거부 조건이 아니다. 소비한 적 탄환을 다시 표시하거나 같은 충돌을 반복하지 않는다. 중간 입장과 재연결 welcome에는 아직 살아 있는 예측 객체의 원래 생성 이벤트를 같은 이벤트 ID로 다시 제공해 생성 tick부터 복원한다.
 
 초기 버전은 전체 스냅샷을 전송한다. 실제 측정 없이 델타 압축과 관심 영역을 먼저 넣지 않는다. 메시지 크기나 대역폭이 문제가 된다는 측정 결과가 생기면 동일한 논리 계약을 유지한 채 전송 표현만 바꾼다.
 
@@ -309,6 +325,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 5. [완료] 실제 2인 WebSocket에서 입력 종료 뒤 소유자·서버·동료의 위치·속도·로프 상태 수렴을 테스트한다.
 6. [완료] 장시간 로컬 수신 시계 드리프트에서도 최신 표본이 계속 오면 원격 시간축이 지속 외삽으로 밀리지 않는지 테스트한다.
 7. [완료] Node 권위 서버와 실제 WebSocket 클라이언트 두 개를 같은 오픈월드에 연결한다.
-8. [필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 체크포인트 부활과 아티팩트 일부 손실을 장시간 검증한다.
+8. [완료] impact 전체 상태는 서버가 먼저 발급한 일회용 challenge 뒤에만 받고, 복구 상태와 `stateTick`을 원자적으로 수용하며 실제 복원 필드 전체의 wire schema를 검증한다.
+9. [필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 체크포인트 부활과 아티팩트 일부 손실을 장시간 검증한다.
 
 완료 증거는 단순 접속 성공이 아니다. 플레이어 상태는 소유 클라이언트가 만든 승인 상태로 서버 복제본과 동료 클라이언트가 수렴하고, 중립 월드 상태는 서버가 만든 상태로 모든 클라이언트가 수렴해야 한다. 지연과 패킷 순서 변경 뒤에도 이 두 권한 원점이 뒤바뀌지 않아야 한다.
