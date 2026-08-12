@@ -16,6 +16,7 @@ import { createPlayerImpactStateDigest } from "../network/PlayerImpactClaim.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
+import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "../rewards/ArtifactRewardSelection.js";
 import { generateWorld } from "../world/WorldGenerator.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -125,6 +126,8 @@ export class GameSimulation {
             id: player.id,
             position: vectorState(player.physics.position),
             velocity: vectorState(player.physics.velocity),
+            angle: player.physics.angle,
+            angularVelocity: player.physics.angularVelocity,
             isGrounded: player.physics.isGrounded,
             collider: player.physics.collider.snapshot(),
             health: player.health,
@@ -135,6 +138,7 @@ export class GameSimulation {
             rope: {
                 isAttached: player.ropeObject.rope.isAttached,
                 anchor: vectorState(player.ropeObject.rope.anchor),
+                attachmentOffset: vectorState(player.ropeObject.rope.attachmentOffset),
                 length: player.ropeObject.rope.length,
                 currentLength: player.ropeObject.rope.currentLength,
                 tension: player.ropeObject.rope.tension
@@ -183,10 +187,11 @@ export class GameSimulation {
         return this.tick;
     }
 
-    releasePlayerRope(playerId) {
+    releasePlayerRope(playerId, { transferAngularMomentum = false } = {}) {
         const player = this.#requirePlayer(playerId);
         const released = player.ropeObject.rope.isAttached;
-        player.ropeObject.rope.detach();
+        if (transferAngularMomentum) releaseRopeFromBody(player.physics, player.ropeObject.rope);
+        else player.ropeObject.rope.detach();
         player.ropeObject.swingDrag = null;
         return released;
     }
@@ -195,11 +200,15 @@ export class GameSimulation {
         const player = this.#requirePlayer(playerId);
         player.physics.position.set(state.position.x, state.position.y);
         player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        player.physics.setAngularState(state.angle, state.angularVelocity);
         player.physics.isGrounded = state.isGrounded;
         if (player.ropeDisabledRemaining > 0) {
             this.releasePlayerRope(playerId);
         } else if (synchronizeRope && state.rope.isAttached) {
-            player.ropeObject.rope.attach(player.physics.position, state.rope.anchor);
+            player.ropeObject.rope.attach(player.physics.position, state.rope.anchor, {
+                angle: player.physics.angle,
+                attachmentOffset: state.rope.attachmentOffset
+            });
         } else if (synchronizeRope) {
             this.releasePlayerRope(playerId);
         }
@@ -295,7 +304,7 @@ export class GameSimulation {
     applyPredictedOwnerImpact(ownerId, event) {
         const player = this.#requirePlayer(ownerId);
         if (event.resolution === "rope-cut") {
-            this.releasePlayerRope(ownerId);
+            this.releasePlayerRope(ownerId, { transferAngularMomentum: true });
             player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
             return true;
         }
@@ -325,6 +334,8 @@ export class GameSimulation {
             tick: this.tick,
             position: state.position,
             velocity: state.velocity,
+            angle: state.angle,
+            angularVelocity: state.angularVelocity,
             isGrounded: state.isGrounded,
             collider: state.collider,
             health: state.health,
@@ -358,9 +369,14 @@ export class GameSimulation {
     #restorePlayer(player, state) {
         player.physics.position.set(state.position.x, state.position.y);
         player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        player.physics.setAngularState(state.angle, state.angularVelocity);
         player.physics.isGrounded = state.isGrounded;
         if (state.rope.isAttached) {
             player.ropeObject.rope.anchor = new Vector2(state.rope.anchor.x, state.rope.anchor.y);
+            player.ropeObject.rope.attachmentOffset = new Vector2(
+                state.rope.attachmentOffset.x,
+                state.rope.attachmentOffset.y
+            );
             player.ropeObject.rope.length = state.rope.length;
             player.ropeObject.rope.currentLength = state.rope.currentLength;
             player.ropeObject.rope.tension = state.rope.tension;
@@ -841,14 +857,16 @@ export class GameSimulation {
         const target = selectNearestEnemy(player.physics.position, this.enemies, player.weapon.range);
         if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
         if (target.id !== claim.targetId) return Object.freeze({ accepted: false, reason: "target-mismatch" });
+        const expectedSpawnPosition = player.weapon.projectileSpawnPosition(player, target);
         if (
-            Math.hypot(claim.position.x - player.physics.position.x, claim.position.y - player.physics.position.y) >
+            Math.hypot(claim.position.x - expectedSpawnPosition.x, claim.position.y - expectedSpawnPosition.y) >
             positionTolerance
         ) {
             return Object.freeze({ accepted: false, reason: "position-mismatch" });
         }
         const projectile = this.#advanceAutomaticWeapon(player, 0);
         if (!projectile) return Object.freeze({ accepted: false, reason: "weapon-unavailable" });
+        projectile.position.set(claim.position.x, claim.position.y);
         projectile.predictionId = claim.predictionId;
         this.recordProjectileSpawn(projectile);
         return Object.freeze({ accepted: true, projectileId: projectile.id });

@@ -1,4 +1,5 @@
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
+import { normalizeAngle, shortestAngleDelta } from "../physics/AngularMotion.js";
 
 const TICKS_PER_SECOND = 120;
 
@@ -25,6 +26,15 @@ function extrapolatePosition(entity, previous, tickDelta, maxSeconds) {
         x: entity.position.x + (velocity?.x ?? 0) * elapsedSeconds,
         y: entity.position.y + (velocity?.y ?? 0) * elapsedSeconds
     };
+}
+
+function interpolateAngle(left, right, alpha) {
+    return normalizeAngle((left.angle ?? 0) + shortestAngleDelta(left.angle ?? 0, right.angle ?? 0) * alpha);
+}
+
+function extrapolateAngle(entity, tickDelta, maxSeconds) {
+    const elapsedSeconds = Math.min(maxSeconds, Math.max(0, tickDelta / TICKS_PER_SECOND));
+    return normalizeAngle((entity.angle ?? 0) + (entity.angularVelocity ?? 0) * elapsedSeconds);
 }
 
 function entityAt(snapshot, collection, id) {
@@ -153,7 +163,8 @@ export class RemoteWorldStateBuffer {
                 position:
                     player.id === localPlayerId
                         ? player.position
-                        : this.samplePosition("players", player.id, targetTick)
+                        : this.samplePosition("players", player.id, targetTick),
+                angle: player.id === localPlayerId ? player.angle : this.samplePlayerAngle(player.id, targetTick)
             })),
             enemies: (latestState.enemies ?? []).map((enemy) => ({
                 ...enemy,
@@ -192,6 +203,27 @@ export class RemoteWorldStateBuffer {
             Math.min(this.maxExtrapolationSeconds, Math.max(0, (targetTick - latest.tick) / TICKS_PER_SECOND))
         );
         return extrapolatePosition(latest, previous, targetTick - latest.tick, this.maxExtrapolationSeconds);
+    }
+
+    samplePlayerAngle(id, serverTargetTick) {
+        const samples = this.history
+            .map(({ snapshot }) => entityAt(snapshot, "players", id))
+            .filter((entity) => entity !== null);
+        const oldest = samples[0];
+        const latest = samples.at(-1);
+        if (!latest) return 0;
+        const targetTick = Number.isSafeInteger(latest.ownerMotionTick)
+            ? serverTargetTick + MULTIPLAYER_TIMING.inputLeadTicks
+            : serverTargetTick;
+        const lower = [...samples].reverse().find(({ tick }) => tick <= targetTick);
+        const upper = samples.find(({ tick }) => tick >= targetTick);
+        if (lower && upper && upper.tick === lower.tick) return lower.angle ?? 0;
+        if (lower && upper) {
+            const alpha = (targetTick - lower.tick) / (upper.tick - lower.tick);
+            return interpolateAngle(lower, upper, alpha);
+        }
+        if (targetTick <= (oldest?.tick ?? latest.tick)) return oldest?.angle ?? latest.angle ?? 0;
+        return extrapolateAngle(latest, targetTick - latest.tick, this.maxExtrapolationSeconds);
     }
 
     drainEvents() {

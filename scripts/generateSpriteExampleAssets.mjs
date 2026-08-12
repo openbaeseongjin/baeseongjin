@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { deflateSync } from "node:zlib";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const OUTPUT_DIRECTORY = resolve(ROOT, "assets/sprites/examples/player-multi-atlas");
+const OUTPUT_DIRECTORY = resolve(ROOT, "assets/runtime/characters/fixtures/player-multi-atlas");
 
 function crc32(buffer) {
     let crc = 0xffffffff;

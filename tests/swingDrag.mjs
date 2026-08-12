@@ -26,9 +26,10 @@ export function run() {
     const app = new GameSimulation();
     const player = app.players.find(({ id }) => id === app.getPrimaryPlayerId());
     player.physics.position.set(0, 100);
-    player.physics.addImpulse = (_direction, magnitude) => {
+    player.physics.addImpulseAtLocalPoint = (_direction, magnitude, attachmentOffset) => {
         impulseCount += 1;
         appliedMagnitude = magnitude;
+        assert.equal(attachmentOffset, player.ropeObject.rope.attachmentOffset);
     };
     player.ropeObject.rope.attach(player.physics.position, { x: 0, y: 0 });
     player.ropeObject.swingDrag = {

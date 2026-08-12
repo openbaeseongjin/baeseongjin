@@ -15,6 +15,8 @@ import {
 import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
+import { localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
+import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
 
 function recordingContext() {
     const calls = [];
@@ -28,7 +30,10 @@ function recordingContext() {
             createLinearGradient: () => ({ addColorStop() {} }),
             drawImage: (...args) => calls.push(["drawImage", ...args]),
             translate: (...args) => calls.push(["translate", ...args]),
-            scale: (...args) => calls.push(["scale", ...args])
+            rotate: (...args) => calls.push(["rotate", ...args]),
+            scale: (...args) => calls.push(["scale", ...args]),
+            moveTo: (...args) => calls.push(["moveTo", ...args]),
+            lineTo: (...args) => calls.push(["lineTo", ...args])
         },
         { get: (target, key) => (key in target ? target[key] : () => {}) }
     );
@@ -78,6 +83,14 @@ function playerDefinition(overrides = {}) {
 }
 
 export async function run() {
+    assert.match(
+        runtimeAssetUrl("characters", "player-mock", "player-action-mock.svg"),
+        /\/assets\/runtime\/characters\/player-mock\/player-action-mock\.svg$/
+    );
+    assert.throws(() => runtimeAssetUrl("sprites", "player-mock", "player.png"), /Unknown runtime asset category/);
+    assert.throws(() => runtimeAssetUrl("characters", "Player Mock", "player.png"), /lowercase kebab-case/);
+    assert.throws(() => runtimeAssetUrl("characters", "player-mock", "../player.png"), /cannot leave/);
+
     const context = recordingContext();
     const canvas = makeCanvas(context);
     assert.equal(createGameRenderer({ canvas }).sceneRenderer.profile, "sprite");
@@ -309,6 +322,29 @@ export async function run() {
     const flippedDraw = flipped.calls.find(([name]) => name === "drawImage");
     assert.deepEqual(flippedDraw.slice(1, 6), [image, 3, 0, 8, 8]);
     assert.deepEqual([40 - flippedDraw[6] - 20, flippedDraw[7], 20, 10], [35, 55, 20, 10]);
+    const rotated = recordingContext();
+    paintSpriteFrame({
+        context: rotated,
+        image,
+        frame: sprite,
+        position,
+        size,
+        anchor,
+        offset: { x: 2, y: -1 },
+        rotation: 0.5
+    });
+    assert.deepEqual(
+        rotated.calls.filter(([name]) => name === "translate" || name === "rotate"),
+        [
+            ["translate", 40, 60],
+            ["rotate", 0.5],
+            ["translate", 2, -1]
+        ]
+    );
+    assert.deepEqual(
+        rotated.calls.find(([name]) => name === "drawImage"),
+        ["drawImage", image, 3, 0, 8, 8, -5, -5, 20, 10]
+    );
     const cued = recordingContext();
     paintSpriteFrame({
         context: cued,
@@ -335,7 +371,8 @@ export async function run() {
         { offset: { x: 0, y: Infinity } },
         { opacity: 0 },
         { pixelSnap: "yes" },
-        { flipX: "yes" }
+        { flipX: "yes" },
+        { rotation: Infinity }
     ]) {
         assert.throws(() =>
             paintSpriteFrame({ context: recordingContext(), image, frame: sprite, position, size, anchor, ...bad })
@@ -348,6 +385,10 @@ export async function run() {
     assert.ok(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle.frames.every(Object.isFrozen));
     assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.size, { width: 96, height: 96 });
     assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.frameSize, { width: 24, height: 24 });
+    assert.equal(
+        DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.source,
+        runtimeAssetUrl("characters", "player-mock", "player-action-mock.svg")
+    );
     assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.destinationSize, { width: 48, height: 48 });
     assert.deepEqual(Object.keys(DEFAULT_PLAYER_SPRITE_DEFINITION.presentations), PLAYER_SPRITE_STATES);
     for (const state of PLAYER_SPRITE_STATES) {
@@ -428,7 +469,6 @@ export async function run() {
         scene: {
             localPlayerId: "local-player",
             player: {
-                id: "local-player",
                 position: { x: 40, y: 60 },
                 velocity: { x: 0, y: 0 },
                 isGrounded: true,
@@ -443,6 +483,43 @@ export async function run() {
         playerContext.calls.find(([name]) => name === "drawImage"),
         ["drawImage", image, 24, 0, 24, 24, 21, 42, 40, 40],
         "player renderer must consume definition-owned frame, size, anchor, and offset"
+    );
+    const singlePlayerContext = recordingContext();
+    const singlePlayer = {
+        position: { x: 40, y: 60 },
+        velocity: { x: 0, y: 0 },
+        isGrounded: true,
+        lifeState: "active",
+        rope: { isAttached: false }
+    };
+    Object.defineProperty(singlePlayer, "angle", { get: () => 0.625 });
+    new SpriteLocalPlayerRenderer({ assets: { imageFor: () => image }, definition: customDefinition }).draw({
+        context: singlePlayerContext,
+        scene: { localPlayerId: "local-player", player: singlePlayer, playerPresentationEvents: [] },
+        presentationTimeSeconds: 0
+    });
+    assert.deepEqual(
+        singlePlayerContext.calls.find(([name]) => name === "rotate"),
+        ["rotate", 0.625],
+        "the single-player renderer must preserve prototype-backed physics rotation"
+    );
+    const ropeContext = recordingContext();
+    new RopeRenderer(localRopes).draw({
+        context: ropeContext,
+        scene: {
+            player: { position: { x: 40, y: 60 }, angle: 0 },
+            rope: {
+                isAttached: true,
+                anchor: { x: 40, y: 0 },
+                attachmentOffset: { x: 12, y: -7 },
+                tension: 0
+            }
+        }
+    });
+    assert.deepEqual(
+        ropeContext.calls.find(([name]) => name === "lineTo"),
+        ["lineTo", 52, 53],
+        "the shared rope renderer must end at the rotated hand attachment instead of the body centre"
     );
 
     const manifest = {

@@ -13,10 +13,11 @@ function eventsForPlayer(scene, playerId) {
 }
 
 class PlayerSpriteRendererBase {
-    constructor({ assets, definition, selectPlayers, markerColor }) {
+    constructor({ assets, definition, selectPlayers, selectPlayerId = (_scene, player) => player.id, markerColor }) {
         this.assets = assets;
         this.definition = definition;
         this.selectPlayers = selectPlayers;
+        this.selectPlayerId = selectPlayerId;
         this.markerColor = markerColor;
         this.controllers = new Map();
         this.previousTime = null;
@@ -29,12 +30,13 @@ class PlayerSpriteRendererBase {
         this.previousTime = currentTime;
         const activeIds = new Set();
         for (const player of this.selectPlayers(args.scene)) {
-            activeIds.add(player.id);
-            const controller = this.controllerFor(player.id);
+            const playerId = this.selectPlayerId(args.scene, player);
+            activeIds.add(playerId);
+            const controller = this.controllerFor(playerId);
             const animation = controller.update({
                 player,
                 rope: player.rope ?? args.scene.rope,
-                events: eventsForPlayer(args.scene, player.id),
+                events: eventsForPlayer(args.scene, playerId),
                 dt
             });
             const presentation = this.definition.presentationFor(animation.state);
@@ -49,7 +51,8 @@ class PlayerSpriteRendererBase {
                 offset: presentation.offset,
                 opacity: presentation.opacity,
                 pixelSnap: presentation.pixelSnap,
-                flipX: animation.flipX
+                flipX: animation.flipX,
+                rotation: player.angle ?? 0
             });
             args.context.fillStyle = this.markerColor;
             args.context.fillRect(Math.round(player.position.x) - 6, Math.round(player.position.y) + 18, 12, 2);
@@ -79,7 +82,8 @@ export class SpriteLocalPlayerRenderer extends PlayerSpriteRendererBase {
         super({
             assets,
             definition,
-            selectPlayers: (scene) => [{ ...scene.player, id: scene.player.id ?? scene.localPlayerId }],
+            selectPlayers: (scene) => [scene.player],
+            selectPlayerId: (scene, player) => player.id ?? scene.localPlayerId,
             markerColor: "#67e8f9"
         });
     }

@@ -59,17 +59,43 @@ index.html
 - 도트 프로필은 별도 scene renderer로 제공한다. 프로필별 분기를 `GameApp`, `MultiplayerGameApp`, 시뮬레이션 객체에 흩뜨리지 않고 factory 등록 경계에서만 선택한다.
 - `SpriteAnimation`은 프레임 사각형과 지속 시간을 불변 데이터로 보관하고 외부에서 받은 경과 시간으로 현재 프레임을 결정한다. `SpriteCanvasPainter`는 Canvas의 이미지 보간을 끄고 원본 프레임, anchor, 반전과 목적 크기만 그리며 자산 로딩이나 게임 시간을 소유하지 않는다.
 - `PlayerSpriteManifest`는 도구 중립 manifest를 `PlayerSpriteDefinition`으로 정규화하고, definition은 atlas ID로 찾는 여러 source·atlas/frame·출력 크기, anchor·offset, 상태별 clip과 명시적 fallback을 하나의 불변 계약으로 검증한다. `SpriteImageAssetSet`은 모든 atlas의 준비·실패 상태와 ID별 이미지를 소유한다. player renderer는 frame에 기록된 atlas ID와 사각형만 소비하며 자산 배치나 생성 도구를 추측하지 않는다. 상세 교환 형식은 `sprite-asset-format.md`를 따른다.
+- 그래픽 제작 원본과 납품은 `assets/artwork/<category>/<asset-id>/`, 게임이 직접 읽는 검증 package는 `assets/runtime/<category>/<asset-id>/`에 둔다. `RuntimeAssetCatalog`가 `characters`, `environments`, `objects`, `effects`, `ui` category와 안정적인 kebab-case asset ID를 URL로 바꾸며 renderer가 제작 경로나 임의 상대 경로를 조합하지 않는다. category별 manifest 의미와 validator는 분리한다.
 - 애니메이션 전이는 재사용 가능한 순수 `StateMachine` 조합 컴포넌트가 현재 상태·상태 경과 시간·허용 전이를 소유하고, actor별 resolver가 읽기 전용 snapshot과 표현 사건을 상태 머신 입력으로 바꾼다. clip catalog와 painter는 확정된 상태를 소비할 뿐 gameplay 조건을 다시 해석하지 않는다.
 - `hit`·`respawn`처럼 순간적인 actor 표현은 기존 권위 사건의 대상 `playerId`를 보존한 renderer 전용 presentation event에서 시작한다. 로컬과 원격 actor가 각자 FSM으로 재생하며 animation state·phase를 네트워크 snapshot의 권위 상태로 만들지 않는다.
 - 피해 클라이언트의 즉시 impact와 뒤이은 서버 확정은 투사체·부활 원인의 같은 causal ID로 presentation event를 정규화해 한 번만 재생한다. 서버 확정이 로컬 `hit`·`respawn` 시간을 다시 시작하지 않는다.
 - 순간 표현 상태는 지속 locomotion 상태보다 높은 우선순위로 제한된 시간 동안 재생하고 종료 시 최신 snapshot으로 지속 상태를 다시 계산한다. 이 전이는 physics·input clock을 정지하거나 되감지 않는다.
 - actor facing과 animation phase는 renderer가 actor ID별로 보관하는 표현 상태다. snapshot의 움직임으로 방향을 갱신하되 정지·순간 상태에서는 마지막 방향을 유지하고 네트워크에 frame·phase·facing을 전송하지 않는다.
+- 싱글의 로컬 플레이어는 `PlayerPhysics`의 prototype getter로 각도를 제공하고 멀티 플레이어는 직렬화 가능한 상태 필드로 각도를 제공할 수 있다. 하위 player renderer는 actor ID 선택과 상태 객체를 분리해 다루며 상태를 object spread로 복제하지 않는다. sprite와 polygon 구현은 모두 전달받은 `angle`을 몸체 중심 변환에 적용하고 `GameApp`·`MultiplayerGameApp`에 모드별 렌더 분기를 만들지 않는다.
 - sprite definition의 source·출력 크기·anchor는 표현 계약이고 collider의 크기·형태는 플레이어 런타임 조립이 선택하는 게임플레이 계약이다. 에셋이나 렌더 프로필 교체가 collider를 암묵적으로 바꾸지 않으며 scene snapshot은 필요할 때 두 계약의 결과를 읽기 전용으로 전달한다.
 - `PlayerRuntimeFactory`는 공개 `Collider` 계약의 구현을 플레이어 물리에 조립한다. 첫 구현은 `CircleCollider` 하나이며 이동·로프 capability와 지형·플레이어 충돌 계산은 구체 반지름 대신 조립된 collider 계약을 사용한다.
 - scene profile은 배경·지형·로프·actor·world VFX 레이어의 조합이다. 혼합 도트 프로필은 공용 폴리곤 레이어와 sprite actor 레이어를 조립하며 `PolygonSceneRenderer` 전체를 복사하거나 상속 override하지 않는다.
 - scene composer는 조립된 하위 renderer 목록을 안정된 순서로 순회해 호출할 뿐 profile 또는 actor kind 분기를 하지 않는다. player, enemy, player projectile, enemy projectile과 환경·로프·VFX renderer가 자기 collection의 실제 그리기를 소유하고 profile factory가 polygon/sprite 구현을 교체 조립한다.
+- 도트 환경도 `backdrop`, collision-aligned `terrain`, non-collision `decoration` 하위 renderer로 조립한다. 상위 composer는 profile·구역·atlas 종류를 분기하지 않으며 각 component가 고도 구역 해석과 실제 Canvas 그리기, 자기 asset 준비 상태와 fallback을 완결한다. 정식 리소스 교환 계약은 `environment-asset-format.md`를 따른다.
+- 도트 terrain은 `WorldGenerator`가 만든 surface vertices를 새 도형으로 근사하지 않고 같은 polygon clip과 외곽선에 사용한다. one-way 표현도 같은 vertices의 `0..oneWayEdgeEnd` chain만 그린다. decoration은 충돌 상태를 추가하지 않고 이동 경로 밖 또는 배경 깊이에 결정적으로 배치한다.
+- 환경 asset 실패는 scene 전체가 아니라 component별로 격리한다. backdrop 실패는 polygon backdrop, terrain 실패는 polygon world geometry로 각각 대체하고 decoration 실패는 장식만 생략한다. pending load를 실패로 고정하지 않으며 실제 실패 전이에 한 번만 경고하고 `?metrics=1`에 component와 atlas ID를 노출한다.
+- 싱글과 멀티 앱은 같은 scene snapshot과 renderer composition을 사용한다. 환경 상태나 진단을 전달하려고 `GameApp`과 `MultiplayerGameApp`에 같은 plumbing을 복제하지 않고 Canvas host 또는 환경 하위 renderer의 공용 계약에서 읽는다.
 - bootstrap 기본 프로필은 `sprite`이며 query의 `renderer=polygon`이 기존 표현을 명시적으로 선택한다. 알 수 없는 값은 경고 후 기본 프로필을 사용한다. sprite asset 준비 실패는 앱을 중단하지 않고 하위 fallback renderer가 전체 polygon scene을 그리며 진단 가능한 경고를 남긴다.
 - 렌더 프로필 교체는 물리·전투·입력·권위 snapshot·네트워크 메시지 계약을 바꾸지 않는다.
+
+## 플레이어 강체 회전과 손 로프 관절
+
+플레이어 물리는 상속 mixin이 아니라 강체에 필요한 요소를 조립하는 Has-A 구조를 사용한다.
+
+- `PlayerPhysics`는 선형 위치·속도를 소유하고 `AngularMotion`과 공개 `Collider`를 각각 조합한다. `AngularMotion`은 각도, 각속도, 관성, 각 감쇠, 점 속도와 점 충격 계산을 담당한다. collider 형상은 계속 `PlayerRuntimeFactory`에서 독립적으로 교체할 수 있으며 몸체 회전이 원형 collider를 암묵적으로 바꾸지 않는다.
+- `Collider`는 겹침·해결뿐 아니라 대상 방향의 형상 바깥 점을 구하는 `outsidePointToward(center, target, clearance)`도 제공한다. 자동 무기는 구체 원형 반경을 읽지 않고 이 계약으로 발사체 반경과 여유를 포함한 총구 위치를 구하므로, collider 형상을 교체해도 몸 중심 발사나 renderer별 보정이 생기지 않아야 한다.
+- `FixedLengthRope`는 플레이어 강체의 일부나 상속 mixin이 아니라 외부 joint다. world anchor, 몸체 local-space의 `attachmentOffset`, 고정 길이와 장력을 소유하고 손 관절점의 위치·속도 제약을 푼다. 제약 충격은 중심 선속도와 `r × impulse / inertia` 각속도에 함께 반영한다.
+- 손 관절점은 부착 순간 anchor 쪽 손을 선택해 local offset으로 고정한다. 이후 몸체 각도에 따라 world-space 손 위치가 회전하며 공용 rope renderer, 스윙 입력, 투사체-로프 충돌도 같은 `ropeAttachmentPoint()` 계산을 사용한다.
+- 로프 해제는 각속도를 제거하지 않는다. 게임 조작 체감을 위해 손끝 접선 속도의 `releaseAngularTransfer` 비율을 중심 선속도에 추가하는 명시적 게임플레이 보정만 적용한다. 이 비율은 joint solver나 collider에 숨기지 않는다.
+- 지면 접촉 중에는 `angle = 0`을 향한 복원 토크와 각 감쇠를 적용하고, 공중에서는 약한 각 감쇠만 적용한다. 따라서 지면에서는 오뚜기처럼 서고 매달린 동안에는 joint torque를 유지한다.
+
+이 구조는 다음 공식 물리 엔진 계약을 기준으로 삼는다.
+
+- [Box2D Body API](https://box2d.org/documentation/group__body.html): body가 선속도·각속도와 점 force/impulse를 소유하며 중심 밖 힘이 torque를 만든다.
+- [Rapier rigid-bodies](https://rapier.rs/docs/user_guides/javascript/rigid_bodies/): rigid body는 동역학·운동학을 소유하고 collider는 형상과 질량 특성을 제공하도록 별도 부착한다.
+- [Rapier joints](https://rapier.rs/docs/user_guides/javascript/joints/): joint는 각 body의 local anchor를 연결하는 독립 제약이다.
+- [Unity Rigidbody2D](https://docs.unity3d.com/ScriptReference/Rigidbody2D.html): 위치·회전·선속도·각속도·관성을 한 강체 운동 상태로 제공하고 collider를 별도 부착한다.
+
+따라서 각운동을 클래스 상속 mixin으로 주입하지 않는다. 새 강체 유형도 `AngularMotion`·`Collider`·joint를 필요한 조합으로 소유하고, input/simulation capability mixin은 기존처럼 실행 라우팅 책임에만 사용한다.
 
 ## 게임 객체 모델
 
@@ -169,6 +195,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 협동은 소유 클라이언트 권한과 서버 중립 월드 권한을 분할한다. 서버의 주역할은 소유 상태·사건 검증과 복제 공유이며, 시간 모델·상태 소유권·스냅샷과 거부 복구 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 - `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `OwnerPredictionRuntime`도 로컬 `GameSimulation`의 공개 소유자 예측 계약만 사용하며, 앱·예측 런타임·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
 - 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 서버 `CombatSystems`와 클라이언트 `PredictableProjectileStore`는 투사체의 공통 `projectile-motion` capability를 실행해 `ProjectileMotion`의 동일한 유도·직선 적분식을 호출하며 별도 궤적 공식을 두지 않는다. 충돌·claim 확정·수명 만료만 `resolve` 이벤트로 확정한다. 원래 spawn 이벤트는 활성 객체에 보존해 중간 입장 welcome에서만 같은 ID로 재전송한다.
+- 플레이어 자동 무기는 조합된 collider의 `outsidePointToward()`로 대상 방향 몸체 바깥 발사점을 계산한다. 이 위치는 소유자 예측, 서버 검증과 공유 spawn 사건이 함께 사용하며 renderer는 총구 위치나 collider 형상을 다시 해석하지 않는다.
 - 자기 탄환은 `EnemyHitPrediction` 믹스인이 로컬 충돌 VFX와 검증 가능한 hit claim을 한 번 만든다. 첫 로컬 충돌에서 탄환 수명은 소비되며 claim 거부가 같은 탄환을 겹친 위치에 복구해 추가 피격을 만들지 않는다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 소유 탄환 대미지로 검증된 결과를 다른 복제본에 공유한다. 중립 적 탄환도 피해 클라이언트가 충돌을 인식한 순간 소비하며, 거부 receipt가 객체를 다시 표시하거나 같은 겹침에서 재발화하게 하지 않는다.
 - `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
 

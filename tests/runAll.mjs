@@ -1,8 +1,10 @@
 import { run as gameplay } from "./gameplayScenario.mjs";
 import { run as multiplayer } from "./multiplayerScenario.mjs";
 import { run as clientDelivery } from "./clientDeliveryScenario.mjs";
+import { run as environmentManifest } from "./environmentManifest.mjs";
+import { run as environmentRendering } from "./environmentRendering.mjs";
 
-const scenarios = { gameplay, multiplayer, clientDelivery };
+const scenarios = { gameplay, multiplayer, clientDelivery, environmentManifest, environmentRendering };
 const startedAt = performance.now();
 let failures = 0;
 

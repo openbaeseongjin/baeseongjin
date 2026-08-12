@@ -22,7 +22,7 @@
 - 체력, 사망·낙사 시 플레이어별 활성 체크포인트 즉시 부활
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
-- 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용
+- 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용하며, 로컬 `PlayerPhysics`의 prototype getter를 복제하지 않고 하위 player renderer에 전달해 sprite·polygon 모두 같은 강체 각도를 그린다. ID 선택과 상태 보존 계약은 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
 - 별도 Discord 서비스는 상세 분류 앞에 결정적 3~5줄 `SUMMARY`가 있는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
 - 고정 게임 서버의 4자리 채널 생성·참가, 채널별 독립 월드와 2인 분할 권한 동기화
 - 120Hz 권위 틱, 20Hz 스냅샷, 자기 예측·동료 보간과 투사체 사건 재생. 현재 적용된 분할 권한 방식과 상세 프로토콜의 단일 기준은 `docs/multiplayer-synchronization.md`다.
@@ -127,7 +127,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 로프 공명 강화는 소유 클라이언트가 스윙 프레임에 즉시 적용하고 `owner-motion → rope-swing-claim → projectile-spawn-claim` 순서로 보낸다. 서버는 소유권·tick·위치·부착 anchor·아티팩트를 검증해 강화 타이머와 `rope-swing` 사건을 멱등 공유한다. 스윙마다 강화 직전·직후 값과 tick을 보존하며, 앞 스윙 거절 뒤 후속 스윙이 pending이면 후속 강화는 유지하고 후속 rollback 기준만 교정한다. 마지막 거절은 최초 스윙 이전 값으로 수렴한다. 승인 뒤 서버 복제본과 동료가 소유자의 강화 결과로 수렴하며 소유자는 스냅샷 타이머로 되감기지 않는다.
 - 파티클·타격 VFX·피해 숫자·화면 흔들림은 서버가 상태나 수명으로 시뮬레이션하지 않는다. 서버는 고유 ID가 있는 판정 이벤트만 확정하고, 싱글과 멀티의 각 클라이언트가 같은 피드백 컴포넌트로 효과를 생성·진행·소멸시킨다.
 - `AuthorityCommandInbox`가 플레이어별 승인 `sequence`와 허용 틱 범위를 검사해 재적용 원본·지연 진단 계약을 유지한다. 멀티 서버는 이 명령으로 `InputDrivenObject` 물리를 다시 실행하지 않으며 최신 승인 `owner-motion`만 플레이어·로프 연속 상태를 바꾼다.
-- `WorldSnapshotEnvelope` 프로토콜 v3가 단조 `snapshotSequence`·중립 월드 `serverTick`·플레이어별 `ownerMotionTick`·월드 식별자·승인 번호·비예측 상태·이벤트를 묶으며, 투사체 같은 예측 객체 배열이 반복 상태로 들어가는 것을 거부한다. sequence는 같은 server tick의 참가·퇴장·claim 확정 봉투 순서를 구분한다.
+- `WorldSnapshotEnvelope` 프로토콜 v4가 단조 `snapshotSequence`·중립 월드 `serverTick`·플레이어별 `ownerMotionTick`·월드 식별자·승인 번호·비예측 상태·이벤트를 묶으며, 투사체 같은 예측 객체 배열이 반복 상태로 들어가는 것을 거부한다. player 상태에는 소유자 각도·각속도와 로프 손 local offset도 포함하며, sequence는 같은 server tick의 참가·퇴장·claim 확정 봉투 순서를 구분한다.
 - `GameSimulation`의 권위 틱에서 승인된 플레이어 spawn claim·중립 자동 발사·수명 만료·승인된 충돌 claim이 `PredictableObjectEvent`를 발행하며, 전송 계층은 사건을 한 번만 drain한다.
 - `AuthoritySnapshotBuilder`가 플레이어별 상태·적·진행·승인 번호·사건만 권위 봉투로 만들고, 지형은 시드와 `WORLD_GENERATION_REVISION`으로 재생성하며 투사체 배열은 제외한다.
 - 플레이어는 물리·체력·아티팩트를 Has-A로 소유하고 로프는 부착·장력·드래그 상태를 가진 별도 `InputDrivenObject`로 둔다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput` Can-Do 믹스인 한 곳에 구현한다.
@@ -184,6 +184,12 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 
 ### [L2] 고정 길이 로프에서 접선 충격과 중력으로 회전한다
 
+- 로프는 몸 중심이 아니라 부착 순간 anchor 쪽으로 선택한 손의 local-space `attachmentOffset`에 연결한다. 몸체 각도에 따라 손끝 world 위치가 회전하며 joint 제약력은 선속도와 각속도에 함께 작용한다.
+- 플레이어 각운동은 physics mixin 상속이 아니라 `PlayerPhysics Has-A AngularMotion` 조합으로 확정했다. collider도 독립 Has-A 조합이고 `FixedLengthRope`는 local anchor를 참조하는 외부 joint다. Box2D·Rapier·Unity 공식 강체 구조를 따른 근거와 확장 규칙은 `docs/architecture.md`의 **플레이어 강체 회전과 손 로프 관절**을 따른다.
+- 로프 해제 시 각속도를 보존하고 손끝 접선 속도의 설정 비율을 중심 이동 속도에 전달한다. 지면 접촉 중에는 `angle = 0` 방향의 복원 토크와 감쇠를 적용해 오뚜기처럼 일어서며 공중에서는 약한 각 감쇠만 적용한다.
+- `owner-motion` v2, `WorldSnapshot` v4, `player-impact` v4가 angle·angularVelocity·attachmentOffset을 전달·검증·복구한다. 원격 각도는 ownerMotionTick 기준 최단 회전 보간과 제한 외삽을 사용하며 상세 계약은 `docs/multiplayer-synchronization.md`의 **플레이어 강체 회전과 손 관절 동기화**를 따른다.
+- 자동 무기 발사점은 몸 중심이 아니라 조합된 `Collider.outsidePointToward()`가 대상 방향으로 계산한 형상 바깥 점이다. 발사체 반경과 8px 여유를 포함하며 소유자는 최신 `owner-motion` 다음 총구 위치 claim을 보내고, 서버는 같은 collider 계약으로 계산한 위치 오차를 검증한 뒤 claim 위치를 동료에게 공유한다. 구현 경계는 `docs/architecture.md`, 전송·수치 검증 계약은 `docs/multiplayer-synchronization.md`를 따른다.
+
 - 부착 순간 거리를 고정 반경으로 유지하고 방사 속도를 제거한다.
 - 능동 운동량은 임계 접선 드래그가 부착당 한 번 만드는 임펄스로만 추가한다.
 - A/D 홀드나 저속 자동 보정은 부착 중 스윙 속도를 만들지 않는다.
@@ -210,8 +216,25 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 이번 구조 정렬은 플레이어와 혼합 도트 프로필에 직접 필요한 범위로 제한한다. 적·투사체를 공통 collider로 전환하거나 저장소 전체 조합 구조를 일괄 리팩터링하지 않는다.
 - 애니메이션 상태를 renderer 내부 조건문으로 흩뜨리지 않는다. 현재 상태·경과 시간·허용 전이를 소유하는 재사용 가능한 순수 `StateMachine` 조합 컴포넌트와 플레이어 전용 상태 resolver를 분리하며, 기존 gameplay·투사체의 서로 다른 도메인 상태를 이번 작업에서 이 컴포넌트로 강제 이전하지 않는다.
 - `sprite`가 기본 렌더 프로필이고 기존 폴리곤 표현은 `?renderer=polygon`으로 선택한다. 알 수 없는 프로필은 경고 후 `sprite`로 복구하며 player sprite asset 준비 실패 시 조립된 polygon renderer가 전체 scene을 대신 그린다.
-- mock player asset은 저장소에서 직접 만든 `assets/sprites/player-action-mock.svg`이며 atlas layout과 출처 기록은 `assets/sprites/README.md`에 있다. `PlayerSpriteManifest`·`PlayerSpriteDefinition`·`SpriteImageAssetSet`이 PixelLab·SpriteCook 원본을 여러 PNG atlas와 도구 중립 animation manifest로 정규화해 frame별 atlas를 선택한다. 프레임 수·순서·속도는 manifest가 소유하고 collider는 별도 조합으로 유지한다. 다른 개발자와 AI 에이전트는 루트 `AGENTS.md`에서 `docs/sprite-asset-format.md`의 JSON Schema·example·`validate:sprite-assets` 명령으로 진입한다.
+- mock player asset은 저장소에서 직접 만든 `assets/runtime/characters/player-mock/player-action-mock.svg`이며 atlas layout과 출처 기록은 `assets/runtime/characters/README.md`에 있다. `PlayerSpriteManifest`·`PlayerSpriteDefinition`·`SpriteImageAssetSet`이 PixelLab·SpriteCook 원본을 여러 PNG atlas와 도구 중립 animation manifest로 정규화해 frame별 atlas를 선택한다. 프레임 수·순서·속도는 manifest가 소유하고 collider는 별도 조합으로 유지한다. 다른 개발자와 AI 에이전트는 루트 `AGENTS.md`에서 `docs/sprite-asset-format.md`의 JSON Schema·fixture·`validate:sprite-assets` 명령으로 진입한다.
 - 렌더러 선택이 물리·전투·네트워크 snapshot 계약을 바꾸지 않으며, 교체 가능한 렌더 경계의 상세 기준은 `docs/architecture.md`를 따른다.
+
+### [L2] 그래픽 작업은 공통 가이드와 자산별 production template에서 시작한다
+
+- 그래픽 담당자의 공통 진입점은 `docs/graphics-asset-guide.md`이며 모든 결과물은 종류와 무관하게 `assets/artwork/<category>/<asset-id>/`에 원본·PNG·미리보기를 인계한다. 담당 개발자는 검증된 export를 `assets/runtime/<category>/<asset-id>/` package로 연결하고 게임 코드는 `RuntimeAssetCatalog`에서 category와 안정적인 asset ID로 파일 URL을 만든다.
+- 전용 template이 없는 자산에 player나 environment manifest를 억지로 재사용하지 않는다. 담당 개발자가 자산 종류에 맞는 공개 계약을 만든 뒤 runtime 경로로 승격하며, 충돌·물리·전투·네트워크 값은 그래픽 리소스와 분리한다.
+- 기본 player의 일곱 상태는 48×48 출력과 모바일 화면에서 자세·실루엣만으로 구분할 수 있게 제작한다. 다른 actor의 상태 목록은 플레이어 계약을 복사하지 않고 작업 요청에서 별도로 정한다.
+- 현재 런타임 mock인 `assets/runtime/characters/player-mock/player-action-mock.svg`는 동작 의미를 확인하는 자료이고, 정식 납품 형식은 여러 PNG atlas와 `sprite-manifest.json`이므로 그래픽 담당자에게 SVG mock이나 validator fixture를 직접 출발점으로 주지 않는다.
+- `assets/runtime/characters/player-production-template/`은 현재 mock의 일곱 상태·프레임·재생 설정을 실제 납품 형식으로 옮긴 개발 연결용 starter다. 그래픽 담당자는 배치만 참고해 `assets/artwork/characters/player-main/`에 납품하고, 담당 개발자가 starter를 `assets/runtime/characters/player-main/`으로 복사해 PNG와 manifest를 정규화한다.
+- starter는 그래픽 생성·정규화·validator 통과를 위한 인계 자료일 뿐 현재 런타임이 자동 참조하지 않는다. 기본 player 연결과 최종 교체는 별도 개발 작업으로 남긴다.
+- starter의 위치, cell map, 수정 범위와 검증 절차는 `docs/sprite-asset-format.md`와 `assets/runtime/characters/README.md`를 기준으로 유지한다.
+
+### [L1] 환경 도트 표현은 독립 component와 전용 multi-atlas 계약으로 조립한다
+
+- 참고 이미지는 구체 디자인이 아니라 어두운 다층 실루엣·큰 여백·제한된 조명 같은 도트 화면 구성만 참고한다. 실제 mock은 기획 채널에서 확정한 폐쇄형 수직 기업도시의 폐기물·산업 정비·주거 상업·기업 보안·착륙장 5구역을 실제 약 8,880m 월드 범위 안에 나누고 고도 기반 일출 밝기 변화를 따른다.
+- 기존 `WorldGenerator`와 collision은 바꾸지 않는다. backdrop, collision polygon과 정확히 맞는 terrain skin, 이동 경로 밖의 non-collision decoration을 독립 하위 renderer로 조립하며 상위 renderer나 싱글·멀티 앱이 구체 component 종류를 분기하지 않는다.
+- 환경 리소스는 캐릭터 animation manifest와 분리된 여러 PNG atlas·JSON Schema·example·validator 계약을 사용한다. PixelLab·SpriteCook의 배열·metadata·개별 frame은 표준 manifest로 정규화하며 atlas 분할 수와 frame 배열은 계약 안에서 바꿀 수 있다.
+- asset 실패는 backdrop·terrain·decoration별로만 fallback하고 `?metrics=1`에서 실패 component와 atlas ID를 확인한다. 상세 교환 형식과 AI 작업 진입점은 `docs/environment-asset-format.md`, 구조 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 
 ### [L1] 모든 PR은 최신 main에 rebase한 뒤 병합한다
 

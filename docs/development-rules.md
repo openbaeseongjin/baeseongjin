@@ -208,6 +208,10 @@ class Player extends RopeAttachable(GameObject) {}
 - 스프라이트 출력 크기·anchor와 collider 크기·형태를 하나의 에셋 설정으로 결합하지 않는다. collider는 플레이어 런타임 조립과 물리가 소유하고 렌더 프로필 또는 PNG 교체로 암묵적으로 변경하지 않는다.
 - 새 렌더 프로필이 기존 scene renderer의 일부만 바꿔야 하면 전체 클래스를 복사·상속 override하지 않는다. 안정된 그리기 순서를 유지하는 layer composer와 역할별 renderer를 조립한다.
 - 상위 renderer/composer에 `if (profile)`·`switch (actorType)` 분기를 두지 않는다. composer는 하위 renderer를 호출만 하고 각 하위 컴포넌트가 자기 collection의 draw 계약을 완결하며, 종류 선택은 immutable factory 조립에서 끝낸다.
+- 환경 renderer는 backdrop·terrain·decoration으로 분리하고 고도 zone, atlas frame, Canvas 호출과 component 상태를 각 하위 renderer가 소유한다. 싱글·멀티 앱에 같은 환경 분기나 진단 전달 코드를 복제하지 않는다.
+- 도트 terrain은 기존 collision surface polygon을 그대로 clip·stroke하고 one-way edge도 동일 vertex chain을 사용한다. 비충돌 decoration은 seed 기반 결정 배치로 만들며 traversal 경로 위에 충돌할 것처럼 보이는 전경을 만들지 않는다.
+- 여러 환경 atlas는 캐릭터와 분리된 `environment-asset-format.md` 계약으로 로드한다. atlas 실패는 backdrop·terrain·decoration 단위로만 fallback하고 pending을 실패로 고정하지 않으며, loader·schema·example·validator 중 하나를 바꾸면 나머지 계약과 component별 실패 테스트를 함께 갱신한다.
+- 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
 - collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
 - 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 테스트 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
 - 렌더러 변경에는 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 검증하는 테스트를 둔다.
@@ -294,6 +298,7 @@ class Player extends RopeAttachable(GameObject) {}
 - PixelLab·SpriteCook 같은 생성 도구의 ZIP·metadata·개별 frame은 import 입력으로만 다룬다. 도구별 adapter가 표준 manifest를 만들고 renderer와 gameplay에는 도구 이름 분기를 추가하지 않는다. GIF·WebP는 미리보기로만 사용한다.
 - sprite manifest는 frame 순서·duration·loop·fallback과 표현 cue만 소유한다. collider·hitbox·피해량·무적 시간·물리·네트워크 권위 상태를 넣지 않으며 생성 도구 keypoint를 collider로 자동 변환하지 않는다.
 - 스프라이트 관련 개발·에셋 작업은 루트 `AGENTS.md`에서 `sprite-asset-format.md`의 JSON Schema·example manifest·표준 validator 명령으로 진입하게 한다. loader, schema, example, validator 중 하나를 바꾸면 같은 계약 변경으로 함께 갱신하며 새 결과물은 validator 통과 전 완료로 보지 않는다.
+- 환경 리소스 작업은 `environment-asset-format.md`의 PNG 묶음·JSON Schema·example manifest와 `validate:environment-assets` 명령으로 진입한다. PixelLab·SpriteCook 원본 배열과 metadata는 import 입력일 뿐 renderer에 도구별 분기를 만들지 않는다.
 - 스프라이트 화면 변경은 데스크톱과 모바일 크기에서 상태의 자세·실루엣·동작을 비교한다. 색 변화만을 상태 구분의 유일한 근거로 사용하지 않는다.
 
 ## 11. 코드 스타일과 파일 관리

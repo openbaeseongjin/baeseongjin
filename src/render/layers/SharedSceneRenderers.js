@@ -1,3 +1,5 @@
+import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
+
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
     backgroundBottom: "#080b10",
@@ -12,14 +14,15 @@ const COLORS = Object.freeze({
     candidate: "#a7f3d0"
 });
 
-function drawRope(context, rope, position) {
+function drawRope(context, rope, player) {
     if (!rope?.anchor) return;
+    const attachment = ropeAttachmentPoint(player, rope);
     const tension = Math.min(1, rope.tension / 900);
     context.strokeStyle = tension > 0.42 ? COLORS.ropeTense : COLORS.ropeLoose;
     context.lineWidth = 2.5 + tension * 3;
     context.beginPath();
     context.moveTo(rope.anchor.x, rope.anchor.y);
-    context.lineTo(position.x, position.y);
+    context.lineTo(attachment.x, attachment.y);
     context.stroke();
     context.fillStyle = "#f8fafc";
     context.beginPath();
@@ -171,7 +174,7 @@ export class RopeRenderer {
     }
 
     draw({ context, scene }) {
-        for (const { rope, position } of this.selectRopes(scene)) drawRope(context, rope, position);
+        for (const { rope, player } of this.selectRopes(scene)) drawRope(context, rope, player);
     }
 }
 
@@ -274,6 +277,5 @@ export class AttachmentCandidateRenderer {
     }
 }
 
-export const localRopes = (scene) => [{ rope: scene.rope, position: scene.player.position }];
-export const remoteRopes = (scene) =>
-    (scene.otherPlayers ?? []).map((player) => ({ rope: player.rope, position: player.position }));
+export const localRopes = (scene) => [{ rope: scene.rope, player: scene.player }];
+export const remoteRopes = (scene) => (scene.otherPlayers ?? []).map((player) => ({ rope: player.rope, player }));

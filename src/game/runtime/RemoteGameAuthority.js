@@ -252,6 +252,8 @@ export class RemoteGameAuthority {
             clientTick: predicted.tick,
             position: predicted.position,
             velocity: predicted.velocity,
+            angle: predicted.angle,
+            angularVelocity: predicted.angularVelocity,
             isGrounded: predicted.isGrounded,
             rope: predicted.rope
         });
@@ -313,6 +315,7 @@ export class RemoteGameAuthority {
 
     submitProjectileSpawnClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
+        if (!this.submitOwnerMotion()) return false;
         const claim = createPlayerProjectileSpawnClaim({
             predictionId: event.predictionId,
             targetId: event.targetId,

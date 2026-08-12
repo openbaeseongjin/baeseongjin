@@ -1,5 +1,5 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
-import { WORLD_CONFIG } from "../config.js";
+import { PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
@@ -347,6 +347,16 @@ export class AuthorityServerSession {
         const reportedSpeed = Math.hypot(state.velocity.x, state.velocity.y);
         if (reportedSpeed > MULTIPLAYER_TIMING.ownerMotionMaxSpeed) {
             return reject("speed-envelope");
+        }
+        if (Math.abs(state.angularVelocity) > PLAYER_CONFIG.maxAngularSpeed) {
+            return reject("angular-speed-envelope");
+        }
+        if (
+            state.rope.isAttached &&
+            (Math.abs(Math.abs(state.rope.attachmentOffset.x) - Math.abs(ROPE_CONFIG.handOffset.x)) > 0.001 ||
+                Math.abs(state.rope.attachmentOffset.y - ROPE_CONFIG.handOffset.y) > 0.001)
+        ) {
+            return reject("rope-attachment-envelope");
         }
         const tickDelta = Math.max(1, state.clientTick - Math.max(previousTick, this.simulation.getTick()));
         const distance = Math.hypot(state.position.x - player.position.x, state.position.y - player.position.y);

@@ -1,0 +1,244 @@
+{
+  "$schema": "../sprite-manifest.schema.json",
+  "formatVersion": 1,
+  "id": "environment-default-mock",
+  "generator": {
+    "tool": "manual-mock",
+    "exportVersion": null
+  },
+  "atlases": {
+    "backdrop-far": {
+      "image": "backdrop-far.png",
+      "size": { "width": 48, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "backdrop-mid": {
+      "image": "backdrop-mid.png",
+      "size": { "width": 48, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "backdrop-near": {
+      "image": "backdrop-near.png",
+      "size": { "width": 48, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "terrain-fill": {
+      "image": "terrain-fill.png",
+      "size": { "width": 48, "height": 48 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "terrain-edge": {
+      "image": "terrain-edge.png",
+      "size": { "width": 48, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "decoration": {
+      "image": "decoration.png",
+      "size": { "width": 96, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    }
+  },
+  "zones": [
+    {
+      "id": "waste",
+      "label": "폐기물 처리구역",
+      "minAltitude": 0,
+      "palette": {
+        "skyTop": "#1a1a2e",
+        "skyBottom": "#0a0a14",
+        "silhouetteFar": "#1e2430",
+        "silhouetteMid": "#2a2f38",
+        "silhouetteNear": "#383d42",
+        "terrainFill": "#4a4540",
+        "terrainEdge": "#6e6860",
+        "oneWayEdge": "#a0d8c8",
+        "accent": "#f59e0b"
+      },
+      "backdropVariant": "waste",
+      "terrainMaterial": "waste-rock",
+      "decorationGroup": "waste"
+    },
+    {
+      "id": "industrial-maintenance",
+      "label": "산업 정비구역",
+      "minAltitude": 1800,
+      "palette": {
+        "skyTop": "#1e2433",
+        "skyBottom": "#0e121c",
+        "silhouetteFar": "#243040",
+        "silhouetteMid": "#303848",
+        "silhouetteNear": "#3e444a",
+        "terrainFill": "#505048",
+        "terrainEdge": "#787068",
+        "oneWayEdge": "#b8e8d8",
+        "accent": "#67e8f9"
+      },
+      "backdropVariant": "industrial",
+      "terrainMaterial": "industrial-rock",
+      "decorationGroup": "industrial"
+    },
+    {
+      "id": "residential-commercial",
+      "label": "주거·상업 구역",
+      "minAltitude": 3600,
+      "palette": {
+        "skyTop": "#2a2a3e",
+        "skyBottom": "#141420",
+        "silhouetteFar": "#2a3650",
+        "silhouetteMid": "#384058",
+        "silhouetteNear": "#444a52",
+        "terrainFill": "#585850",
+        "terrainEdge": "#807870",
+        "oneWayEdge": "#c8f8e8",
+        "accent": "#fbbf24"
+      },
+      "backdropVariant": "residential",
+      "terrainMaterial": "residential-rock",
+      "decorationGroup": "residential"
+    },
+    {
+      "id": "corporate-security",
+      "label": "기업 보안구역",
+      "minAltitude": 5400,
+      "palette": {
+        "skyTop": "#2e2e44",
+        "skyBottom": "#181828",
+        "silhouetteFar": "#303a58",
+        "silhouetteMid": "#404860",
+        "silhouetteNear": "#4a5058",
+        "terrainFill": "#5e5e56",
+        "terrainEdge": "#888078",
+        "oneWayEdge": "#d8fff0",
+        "accent": "#f87171"
+      },
+      "backdropVariant": "corporate",
+      "terrainMaterial": "corporate-rock",
+      "decorationGroup": "corporate"
+    },
+    {
+      "id": "landing-pad",
+      "label": "착륙장",
+      "minAltitude": 7200,
+      "palette": {
+        "skyTop": "#3a3050",
+        "skyBottom": "#1e1a30",
+        "silhouetteFar": "#384060",
+        "silhouetteMid": "#485068",
+        "silhouetteNear": "#505860",
+        "terrainFill": "#686858",
+        "terrainEdge": "#928a80",
+        "oneWayEdge": "#e8ffe8",
+        "accent": "#a7f3d0"
+      },
+      "backdropVariant": "landing",
+      "terrainMaterial": "landing-rock",
+      "decorationGroup": "landing"
+    }
+  ],
+  "backdrop": {
+    "layers": [
+      {
+        "id": "far",
+        "depth": 0,
+        "parallaxX": 0.06,
+        "parallaxY": 0.03,
+        "frames": [
+          { "atlas": "backdrop-far", "cell": { "column": 0, "row": 0 } },
+          { "atlas": "backdrop-far", "cell": { "column": 1, "row": 0 } }
+        ],
+        "tileWidth": 384,
+        "baselineRatio": 0.62,
+        "peakHeight": 180
+      },
+      {
+        "id": "mid",
+        "depth": 1,
+        "parallaxX": 0.12,
+        "parallaxY": 0.08,
+        "frames": [
+          { "atlas": "backdrop-mid", "cell": { "column": 0, "row": 0 } },
+          { "atlas": "backdrop-mid", "cell": { "column": 1, "row": 0 } }
+        ],
+        "tileWidth": 320,
+        "baselineRatio": 0.74,
+        "peakHeight": 240
+      },
+      {
+        "id": "near",
+        "depth": 2,
+        "parallaxX": 0.19,
+        "parallaxY": 0.14,
+        "frames": [
+          { "atlas": "backdrop-near", "cell": { "column": 0, "row": 0 } },
+          { "atlas": "backdrop-near", "cell": { "column": 1, "row": 0 } }
+        ],
+        "tileWidth": 264,
+        "baselineRatio": 0.88,
+        "peakHeight": 280
+      }
+    ]
+  },
+  "terrain": {
+    "materials": {
+      "waste-rock": {
+        "fill": { "atlas": "terrain-fill", "cell": { "column": 0, "row": 0 } },
+        "edge": { "atlas": "terrain-edge", "cell": { "column": 0, "row": 0 } },
+        "oneWayColor": "#a0d8c8"
+      },
+      "industrial-rock": {
+        "fill": { "atlas": "terrain-fill", "cell": { "column": 0, "row": 1 } },
+        "edge": { "atlas": "terrain-edge", "cell": { "column": 1, "row": 0 } },
+        "oneWayColor": "#b8e8d8"
+      },
+      "residential-rock": {
+        "fill": { "atlas": "terrain-fill", "cell": { "column": 1, "row": 0 } },
+        "edge": { "atlas": "terrain-edge", "cell": { "column": 0, "row": 0 } },
+        "oneWayColor": "#c8f8e8"
+      },
+      "corporate-rock": {
+        "fill": { "atlas": "terrain-fill", "cell": { "column": 1, "row": 1 } },
+        "edge": { "atlas": "terrain-edge", "cell": { "column": 1, "row": 0 } },
+        "oneWayColor": "#d8fff0"
+      },
+      "landing-rock": {
+        "fill": { "atlas": "terrain-fill", "cell": { "column": 0, "row": 0 } },
+        "edge": { "atlas": "terrain-edge", "cell": { "column": 0, "row": 0 } },
+        "oneWayColor": "#e8ffe8"
+      }
+    }
+  },
+  "decoration": {
+    "groups": {
+      "waste": {
+        "items": [
+          { "frame": { "atlas": "decoration", "cell": { "column": 0, "row": 0 } }, "placement": { "depth": "far", "surfaceLevelOffset": 0 }, "size": { "width": 16, "height": 16 } },
+          { "frame": { "atlas": "decoration", "cell": { "column": 1, "row": 0 } }, "placement": { "depth": "mid", "surfaceLevelOffset": -1 }, "size": { "width": 12, "height": 20 } }
+        ]
+      },
+      "industrial": {
+        "items": [
+          { "frame": { "atlas": "decoration", "cell": { "column": 0, "row": 0 } }, "placement": { "depth": "far", "surfaceLevelOffset": 0 }, "size": { "width": 20, "height": 16 } },
+          { "frame": { "atlas": "decoration", "cell": { "column": 2, "row": 0 } }, "placement": { "depth": "near", "surfaceLevelOffset": -2 }, "size": { "width": 10, "height": 18 } }
+        ]
+      },
+      "residential": {
+        "items": [
+          { "frame": { "atlas": "decoration", "cell": { "column": 1, "row": 0 } }, "placement": { "depth": "mid", "surfaceLevelOffset": 0 }, "size": { "width": 14, "height": 14 } },
+          { "frame": { "atlas": "decoration", "cell": { "column": 3, "row": 0 } }, "placement": { "depth": "near", "surfaceLevelOffset": -1 }, "size": { "width": 16, "height": 12 } }
+        ]
+      },
+      "corporate": {
+        "items": [
+          { "frame": { "atlas": "decoration", "cell": { "column": 2, "row": 0 } }, "placement": { "depth": "far", "surfaceLevelOffset": 0 }, "size": { "width": 18, "height": 10 } },
+          { "frame": { "atlas": "decoration", "cell": { "column": 0, "row": 0 } }, "placement": { "depth": "mid", "surfaceLevelOffset": -3 }, "size": { "width": 10, "height": 20 } }
+        ]
+      },
+      "landing": {
+        "items": [
+          { "frame": { "atlas": "decoration", "cell": { "column": 3, "row": 0 } }, "placement": { "depth": "near", "surfaceLevelOffset": -1 }, "size": { "width": 12, "height": 12 } },
+          { "frame": { "atlas": "decoration", "cell": { "column": 1, "row": 0 } }, "placement": { "depth": "mid", "surfaceLevelOffset": 0 }, "size": { "width": 16, "height": 14 } }
+        ]
+      }
+    }
+  }
+}
