@@ -456,7 +456,6 @@ export async function run() {
         scene: {
             localPlayerId: "local-player",
             player: {
-                id: "local-player",
                 position: { x: 40, y: 60 },
                 velocity: { x: 0, y: 0 },
                 isGrounded: true,
@@ -471,6 +470,25 @@ export async function run() {
         playerContext.calls.find(([name]) => name === "drawImage"),
         ["drawImage", image, 24, 0, 24, 24, 21, 42, 40, 40],
         "player renderer must consume definition-owned frame, size, anchor, and offset"
+    );
+    const singlePlayerContext = recordingContext();
+    const singlePlayer = {
+        position: { x: 40, y: 60 },
+        velocity: { x: 0, y: 0 },
+        isGrounded: true,
+        lifeState: "active",
+        rope: { isAttached: false }
+    };
+    Object.defineProperty(singlePlayer, "angle", { get: () => 0.625 });
+    new SpriteLocalPlayerRenderer({ assets: { imageFor: () => image }, definition: customDefinition }).draw({
+        context: singlePlayerContext,
+        scene: { localPlayerId: "local-player", player: singlePlayer, playerPresentationEvents: [] },
+        presentationTimeSeconds: 0
+    });
+    assert.deepEqual(
+        singlePlayerContext.calls.find(([name]) => name === "rotate"),
+        ["rotate", 0.625],
+        "the single-player renderer must preserve prototype-backed physics rotation"
     );
     const ropeContext = recordingContext();
     new RopeRenderer(localRopes).draw({

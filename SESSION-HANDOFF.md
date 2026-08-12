@@ -22,7 +22,7 @@
 - 체력, 사망·낙사 시 플레이어별 활성 체크포인트 즉시 부활
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
-- 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용
+- 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용하며, 로컬 `PlayerPhysics`의 prototype getter를 복제하지 않고 하위 player renderer에 전달해 sprite·polygon 모두 같은 강체 각도를 그린다. ID 선택과 상태 보존 계약은 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
 - 별도 Discord 서비스는 상세 분류 앞에 결정적 3~5줄 `SUMMARY`가 있는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
 - 고정 게임 서버의 4자리 채널 생성·참가, 채널별 독립 월드와 2인 분할 권한 동기화
 - 120Hz 권위 틱, 20Hz 스냅샷, 자기 예측·동료 보간과 투사체 사건 재생. 현재 적용된 분할 권한 방식과 상세 프로토콜의 단일 기준은 `docs/multiplayer-synchronization.md`다.
