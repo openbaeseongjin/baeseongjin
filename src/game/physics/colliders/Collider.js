@@ -1,4 +1,10 @@
-const REQUIRED_METHODS = Object.freeze(["snapshot", "resolveSurfaces", "resolveActor", "overlapsCircle"]);
+const REQUIRED_METHODS = Object.freeze([
+    "snapshot",
+    "resolveSurfaces",
+    "resolveActor",
+    "overlapsCircle",
+    "outsidePointToward"
+]);
 
 export function assertCollider(collider) {
     if (!collider) throw new Error("Collider component is required");

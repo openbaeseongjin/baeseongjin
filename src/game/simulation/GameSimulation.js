@@ -857,14 +857,16 @@ export class GameSimulation {
         const target = selectNearestEnemy(player.physics.position, this.enemies, player.weapon.range);
         if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
         if (target.id !== claim.targetId) return Object.freeze({ accepted: false, reason: "target-mismatch" });
+        const expectedSpawnPosition = player.weapon.projectileSpawnPosition(player, target);
         if (
-            Math.hypot(claim.position.x - player.physics.position.x, claim.position.y - player.physics.position.y) >
+            Math.hypot(claim.position.x - expectedSpawnPosition.x, claim.position.y - expectedSpawnPosition.y) >
             positionTolerance
         ) {
             return Object.freeze({ accepted: false, reason: "position-mismatch" });
         }
         const projectile = this.#advanceAutomaticWeapon(player, 0);
         if (!projectile) return Object.freeze({ accepted: false, reason: "weapon-unavailable" });
+        projectile.position.set(claim.position.x, claim.position.y);
         projectile.predictionId = claim.predictionId;
         this.recordProjectileSpawn(projectile);
         return Object.freeze({ accepted: true, projectileId: projectile.id });

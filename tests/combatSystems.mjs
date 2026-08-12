@@ -12,6 +12,7 @@ import { EnemyObject } from "../src/game/combat/EnemyObject.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { COMBAT_CONFIG } from "../src/game/config.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
+import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
 import { EntityRegistry } from "../src/game/simulation/EntityRegistry.js";
 
 export function run() {
@@ -19,7 +20,7 @@ export function run() {
     const ownerId = registry.createId("player");
     const owner = {
         id: ownerId,
-        physics: { position: new Vector2(0, 0) },
+        physics: { position: new Vector2(0, 0), collider: new CircleCollider({ radius: 15 }) },
         weapon: new AutomaticWeaponObject({
             id: registry.createId("weapon"),
             ownerId,
@@ -45,6 +46,12 @@ export function run() {
     assert.ok(projectiles[0] instanceof SimulationDrivenObject);
     assert.equal(spawnedPlayerProjectile, projectiles[0]);
     assert.equal(projectiles[0].targetId, "enemy-1", "distance ties must resolve by stable entity id");
+    assert.equal(
+        owner.physics.collider.overlapsCircle(owner.physics.position, projectiles[0].position, projectiles[0].radius),
+        false,
+        "a projectile must start outside its owner's body instead of blinking under the player sprite"
+    );
+    assert.ok(projectiles[0].position.x < owner.physics.position.x, "the muzzle must face the selected target");
     assert.equal(owner.weapon.cooldown, 0.65);
 
     for (let step = 0; step < 60 && projectiles.length > 0; step += 1) {

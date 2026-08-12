@@ -338,18 +338,47 @@ export function run() {
                 combatPlayer.physics.position.distanceTo(right.position);
             return distanceDifference || left.id.localeCompare(right.id);
         })[0];
+    const predictedOwnerPosition = combatPlayer.physics.position
+        .clone()
+        .add(spawnTarget.position.clone().subtract(combatPlayer.physics.position).normalize().scale(20));
+    const predictedSpawnPosition = combatPlayer.physics.collider.outsidePointToward(
+        predictedOwnerPosition,
+        spawnTarget.position,
+        combatPlayer.weapon.projectileRadius + combatPlayer.weapon.projectileSpawnClearance
+    );
+    const forgedSpawnReceipt = combatSession.submitProjectileSpawnClaim(
+        combatPlayer.id,
+        createPlayerProjectileSpawnClaim({
+            predictionId: `${combatPlayer.id}:${combatSimulation.tick}`,
+            clientTick: combatSimulation.tick,
+            targetId: spawnTarget.id,
+            position: { x: predictedSpawnPosition.x + 1000, y: predictedSpawnPosition.y }
+        })
+    );
+    assert.equal(forgedSpawnReceipt.accepted, false);
+    assert.equal(forgedSpawnReceipt.reason, "position-mismatch");
     const spawnClaim = createPlayerProjectileSpawnClaim({
         predictionId: `${combatPlayer.id}:${combatSimulation.tick}`,
         clientTick: combatSimulation.tick,
         targetId: spawnTarget.id,
-        position: combatPlayer.physics.position
+        position: predictedSpawnPosition
     });
     const spawnReceipt = combatSession.submitProjectileSpawnClaim(combatPlayer.id, spawnClaim);
     assert.equal(spawnReceipt.accepted, true);
     assert.equal(combatSession.submitProjectileSpawnClaim(combatPlayer.id, spawnClaim), spawnReceipt);
     assert.equal(combatSimulation.projectiles.length, 1, "a duplicate spawn claim must not create two bullets");
     const projectile = combatSimulation.projectiles[0];
+    assert.equal(
+        combatPlayer.physics.collider.overlapsCircle(
+            combatPlayer.physics.position,
+            projectile.position,
+            projectile.radius
+        ),
+        false,
+        "the server-confirmed shot must start outside the owner collider"
+    );
     assert.equal(projectile.damage, combatPlayer.weapon.damage);
+    assert.deepEqual(projectile.position, new Vector2(predictedSpawnPosition.x, predictedSpawnPosition.y));
     assert.ok(
         projectile.damage > combatPlayer.weapon.baseDamage,
         "a same-tick projectile claim must use the preceding swing claim boost"
