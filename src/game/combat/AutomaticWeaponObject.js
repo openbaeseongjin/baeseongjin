@@ -13,15 +13,16 @@ const withAutomaticWeaponSimulation = createSimulationCapabilityMixin({
         if (owner.lifeState !== "active" || !allowFire || this.cooldown > 0) return null;
         const target = selectNearestEnemy(owner.physics.position, enemies, this.range);
         if (!target) return null;
+        const spawnPosition = this.projectileSpawnPosition(owner, target);
         const projectile = new HomingProjectileObject({
             id: registry.createId("projectile"),
             ownerId: owner.id,
             targetId: target.id,
-            position: owner.physics.position.clone(),
+            position: new Vector2(spawnPosition.x, spawnPosition.y),
             velocity: new Vector2(),
             speed: config.projectileSpeed,
             damage: this.damage,
-            radius: config.projectileRadius
+            radius: this.projectileRadius
         });
         projectiles.push(projectile);
         this.cooldown = this.fireInterval;
@@ -38,6 +39,20 @@ export class AutomaticWeaponObject extends withAutomaticWeaponSimulation(Simulat
         this.damage = config.weaponDamage;
         this.baseFireInterval = config.fireInterval;
         this.fireInterval = config.fireInterval;
+        this.projectileRadius = config.projectileRadius;
+        this.projectileSpawnClearance = config.projectileSpawnClearance;
         this.cooldown = 0;
+    }
+
+    projectileSpawnPosition(owner, target) {
+        if (!owner?.physics?.position || !owner.physics.collider) {
+            throw new Error("automatic weapon requires owner physics and collider");
+        }
+        if (!target?.position) throw new Error("automatic weapon requires a target position");
+        return owner.physics.collider.outsidePointToward(
+            owner.physics.position,
+            target.position,
+            this.projectileRadius + this.projectileSpawnClearance
+        );
     }
 }

@@ -14,8 +14,14 @@ import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js"
 import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
+import { ropeAttachmentPoint } from "../src/game/rope/RopeAttachment.js";
 import { closestPointOnSurface } from "../src/game/world/WorldGenerator.js";
+import { PlayerAnimationController } from "../src/render/sprites/PlayerAnimationController.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
+
+const ROTATION_SYNC_TOLERANCE_RADIANS = 0.001;
+const ANGULAR_VELOCITY_SYNC_TOLERANCE = 0.001;
+const HAND_POINT_SYNC_TOLERANCE_PIXELS = 0.05;
 
 function createImpairedWebSocket({ roundTripDelayMs, commandLossRate }) {
     const oneWayDelayMs = roundTripDelayMs / 2;
@@ -261,6 +267,12 @@ export async function run() {
     assert.ok(
         Math.abs(projected.players[1].position.x - 13) <= 0.5,
         "missing future samples may use bounded extrapolation"
+    );
+    const extrapolatedAngleDelta = Math.abs(shortestAngleDelta(0.6, projected.players[1].angle));
+    assert.ok(extrapolatedAngleDelta > 0, "non-zero remote angular velocity must advance the rendered angle");
+    assert.ok(
+        extrapolatedAngleDelta <= 2 * 0.12 + ROTATION_SYNC_TOLERANCE_RADIANS,
+        "remote angular dead reckoning must remain inside its configured horizon"
     );
     assert.ok(interpolation.metrics().extrapolationMs > 0);
     projected = interpolation.sample({ now: 1000, localPlayerId: "local" });
@@ -534,6 +546,9 @@ export async function run() {
         await spawnObserver.connect();
         const spawnRoom = gameServer.rooms.get(spawnOwner.channelId);
         const spawnPlayer = spawnRoom.simulation.players.find(({ id }) => id === spawnOwner.playerId);
+        const spawnLocalPlayer = spawnOwner.ownerRuntime.simulation.players.find(
+            ({ id }) => id === spawnOwner.playerId
+        );
         const spawnTarget = spawnRoom.simulation.enemies[0];
         spawnTarget.position.set(spawnPlayer.physics.position.x + 120, spawnPlayer.physics.position.y);
         spawnRoom.simulation.enemies = [spawnTarget];
@@ -545,20 +560,48 @@ export async function run() {
                 distance(spawnOwner.snapshot().state.enemies[0].position, spawnTarget.position) < 1,
             "the firing owner must receive the deterministic target state"
         );
+        spawnOwner.ownerRuntime.simulation.restoreOwnerPrediction(
+            spawnOwner.playerId,
+            spawnRoom.simulation.playerState(spawnOwner.playerId),
+            spawnOwner.snapshot().owner.tick
+        );
+        spawnOwner.drainPredictedEvents();
         const spawnStore = new PredictableProjectileStore();
         spawnOwner.advance(movementCommand(0));
         const predictedSpawns = spawnOwner.drainPredictedEvents();
         assert.equal(predictedSpawns.length, 1, "the owner must predict one automatic shot immediately");
+        assert.equal(
+            spawnLocalPlayer.physics.collider.overlapsCircle(
+                spawnLocalPlayer.physics.position,
+                predictedSpawns[0].position,
+                predictedSpawns[0].radius
+            ),
+            false,
+            "the predicted multiplayer shot must begin outside the owner collider"
+        );
         spawnStore.predict(predictedSpawns);
         assert.equal(spawnStore.snapshot().projectiles.length, 1, "the local shot must exist before its receipt");
         assert.equal(spawnRoom.simulation.projectiles.length, 0, "the server tick must not duplicate owner firing");
         assert.equal(spawnOwner.submitProjectileSpawnClaim(predictedSpawns[0]), true);
         await waitFor(
-            () => spawnOwner.projectileSpawnClaimReceipts.length > 0,
+            () => spawnOwner.projectileSpawnClaimReceipts.length > 0 || spawnOwner.closed,
             "the owner must receive its projectile spawn receipt"
         );
+        assert.equal(spawnOwner.closed, false, spawnOwner.closeReason);
         const firstSpawnReceipt = spawnOwner.drainProjectileSpawnClaimReceipts()[0];
-        assert.equal(firstSpawnReceipt.accepted, true);
+        assert.equal(
+            firstSpawnReceipt.accepted,
+            true,
+            JSON.stringify({
+                receipt: firstSpawnReceipt,
+                predictedPosition: predictedSpawns[0].position,
+                predictedPlayerPosition: spawnLocalPlayer.physics.position,
+                predictedTargetPosition: spawnOwner.ownerRuntime.simulation.enemies[0]?.position,
+                serverPlayerPosition: spawnPlayer.physics.position,
+                serverTargetPosition: spawnTarget.position,
+                expectedPosition: spawnPlayer.weapon.projectileSpawnPosition(spawnPlayer, spawnTarget)
+            })
+        );
         assert.equal(spawnRoom.simulation.projectiles.length, 1, "one owner claim must create one server projectile");
         const ownerSpawnEvents = [];
         const observerSpawnEvents = [];
@@ -571,6 +614,13 @@ export async function run() {
                 observerSpawnEvents.some((event) => event.parameters?.predictionId === predictionId)
             );
         }, "the accepted spawn must converge to the owner and observer");
+        const confirmedSpawn = ownerSpawnEvents.find(
+            (event) => event.parameters?.predictionId === predictedSpawns[0].predictionId
+        );
+        assert.ok(
+            distance(confirmedSpawn.position, predictedSpawns[0].position) <= HAND_POINT_SYNC_TOLERANCE_PIXELS,
+            "prediction and server confirmation must share the same muzzle position"
+        );
         spawnStore.apply(ownerSpawnEvents, spawnOwner.snapshot().serverTick, spawnOwner.snapshot().state);
         assert.equal(spawnStore.snapshot().projectiles.length, 1, "authority confirmation must adopt the prediction");
         assert.equal(
@@ -1359,6 +1409,173 @@ export async function run() {
             `all player rotations must converge after neutral input: ${JSON.stringify(convergence)}`
         );
         assert.equal(convergence.ropeMatches, true, "owner, server, and partner must share rope attachment state");
+
+        room.simulation.enemies = [];
+        const rotatingOwner = authority.ownerRuntime.simulation.players.find(({ id }) => id === authority.playerId);
+        const rotationAnchor = {
+            x: rotatingOwner.physics.position.x + 120,
+            y: rotatingOwner.physics.position.y - 160
+        };
+        rotatingOwner.physics.setAngularState(0.7, 2.4);
+        rotatingOwner.ropeObject.rope.attach(rotatingOwner.physics.position, rotationAnchor, {
+            angle: rotatingOwner.physics.angle
+        });
+        authority.advance(movementCommand(0));
+        assert.equal(authority.submit(movementCommand(0)), true);
+        const submittedRotation = authority.snapshot().owner;
+        assert.ok(Math.abs(submittedRotation.angle) > 0.1);
+        assert.ok(Math.abs(submittedRotation.angularVelocity) > 0.1);
+        await waitFor(() => {
+            const serverState = room.simulation.playerState(authority.playerId);
+            const observerState = partner.latestSnapshot?.state.players.find(({ id }) => id === authority.playerId);
+            return (
+                observerState?.rope.isAttached &&
+                Math.abs(shortestAngleDelta(serverState.angle, submittedRotation.angle)) <=
+                    ROTATION_SYNC_TOLERANCE_RADIANS &&
+                Math.abs(shortestAngleDelta(observerState.angle, submittedRotation.angle)) <=
+                    ROTATION_SYNC_TOLERANCE_RADIANS
+            );
+        }, "a non-zero rope rotation must reach the server and observer snapshots");
+        const serverRotation = room.simulation.playerState(authority.playerId);
+        const observerRotation = partner.latestSnapshot.state.players.find(({ id }) => id === authority.playerId);
+        assert.ok(
+            Math.abs(shortestAngleDelta(serverRotation.angle, submittedRotation.angle)) <=
+                ROTATION_SYNC_TOLERANCE_RADIANS
+        );
+        assert.ok(
+            Math.abs(shortestAngleDelta(observerRotation.angle, submittedRotation.angle)) <=
+                ROTATION_SYNC_TOLERANCE_RADIANS
+        );
+        assert.ok(
+            Math.abs(serverRotation.angularVelocity - submittedRotation.angularVelocity) <=
+                ANGULAR_VELOCITY_SYNC_TOLERANCE
+        );
+        assert.ok(
+            Math.abs(observerRotation.angularVelocity - submittedRotation.angularVelocity) <=
+                ANGULAR_VELOCITY_SYNC_TOLERANCE
+        );
+        assert.deepEqual(serverRotation.rope.attachmentOffset, submittedRotation.rope.attachmentOffset);
+        assert.deepEqual(observerRotation.rope.attachmentOffset, submittedRotation.rope.attachmentOffset);
+        assert.ok(
+            distance(
+                ropeAttachmentPoint(serverRotation, serverRotation.rope),
+                ropeAttachmentPoint(observerRotation, observerRotation.rope)
+            ) <= HAND_POINT_SYNC_TOLERANCE_PIXELS,
+            "server and observer must derive the same rotating hand joint"
+        );
+
+        let ownerRotationRender = null;
+        let observerRotationRender = null;
+        app.renderer.draw = (state) => {
+            ownerRotationRender = state;
+        };
+        const partnerApp = new MultiplayerGameApp({ canvas: fakeCanvas(), authority: partner });
+        partnerApp.renderer.draw = (state) => {
+            observerRotationRender = state;
+        };
+        await waitFor(() => {
+            const sampledOwner = partner.snapshot().state.players.find(({ id }) => id === authority.playerId);
+            return sampledOwner?.rope.isAttached && Math.abs(sampledOwner.angle) > 0.1;
+        }, "the interpolation timeline must expose the synchronized non-zero rotation");
+        app.render();
+        partnerApp.render();
+        const renderedObserverPlayer = observerRotationRender.otherPlayers.find(({ id }) => id === authority.playerId);
+        const ownerRopeAnimation = new PlayerAnimationController().update({
+            player: ownerRotationRender.player,
+            rope: ownerRotationRender.rope,
+            events: ownerRotationRender.playerPresentationEvents,
+            dt: 0
+        });
+        const observerRopeAnimation = new PlayerAnimationController().update({
+            player: renderedObserverPlayer,
+            rope: renderedObserverPlayer.rope,
+            events: observerRotationRender.playerPresentationEvents,
+            dt: 0
+        });
+        assert.equal(ownerRopeAnimation.state, "rope");
+        assert.equal(observerRopeAnimation.state, "rope");
+        assert.ok(
+            Math.abs(renderedObserverPlayer.angle) > 0.1,
+            "the observer renderer must preserve non-zero rotation"
+        );
+
+        rotatingOwner.ropeObject.rope.detach();
+        authority.advance(movementCommand(0));
+        assert.equal(authority.submit(movementCommand(0)), true);
+        await waitFor(
+            () => !room.simulation.playerState(authority.playerId).rope.isAttached,
+            "the hit animation sync test must begin with a detached rope"
+        );
+        authorityPlayer.hitInvulnerabilityRemaining = 0;
+        rotatingOwner.hitInvulnerabilityRemaining = 0;
+        const syncedHitProjectile = new BallisticProjectileObject({
+            id: "synced-hit-animation-projectile",
+            ownerId: "synced-hit-animation-enemy",
+            targetId: authority.playerId,
+            position: authorityPlayer.physics.position.clone(),
+            velocity: new Vector2(0, 0),
+            damage: 10,
+            radius: 7
+        });
+        room.simulation.enemyProjectiles.push(syncedHitProjectile);
+        room.simulation.recordProjectileSpawn(syncedHitProjectile);
+        gameServer.broadcast(room, { type: "snapshot", payload: room.adapter.snapshot() });
+        const healthBeforeSyncedHit = authority.snapshot().owner.health;
+        for (let tick = 0; tick < 120; tick += 1) {
+            app.update(1 / 120, movementCommand(0));
+            partnerApp.update(1 / 120, movementCommand(0));
+            await new Promise((resolve) => setTimeout(resolve, 2));
+            if (
+                authority.snapshot().owner.health === healthBeforeSyncedHit - syncedHitProjectile.damage &&
+                partnerApp.playerPresentationEvents.some(
+                    ({ id, type }) => id === `hit:${syncedHitProjectile.id}` && type === "hit"
+                )
+            ) {
+                break;
+            }
+        }
+        let ownerHitRender = null;
+        let observerHitRender = null;
+        app.renderer.draw = (state) => {
+            ownerHitRender = state;
+        };
+        partnerApp.renderer.draw = (state) => {
+            observerHitRender = state;
+        };
+        app.render();
+        partnerApp.render();
+        const expectedHitEventId = `hit:${syncedHitProjectile.id}`;
+        const ownerHitEvents = ownerHitRender.playerPresentationEvents.filter(
+            ({ id, playerId, type }) => id === expectedHitEventId && playerId === authority.playerId && type === "hit"
+        );
+        const observerHitEvents = observerHitRender.playerPresentationEvents.filter(
+            ({ id, playerId, type }) => id === expectedHitEventId && playerId === authority.playerId && type === "hit"
+        );
+        assert.ok(ownerHitEvents.length >= 1, "the victim renderer must receive the immediate predicted hit event");
+        assert.equal(observerHitEvents.length, 1, "the observer renderer must receive one authoritative hit event");
+        assert.equal(
+            new Set(ownerHitEvents.map(({ id }) => id)).size,
+            1,
+            "prediction and receipt must share one hit id"
+        );
+        const ownerHitAnimation = new PlayerAnimationController().update({
+            player: ownerHitRender.player,
+            rope: ownerHitRender.rope,
+            events: ownerHitEvents,
+            dt: 0
+        });
+        const observedHitPlayer = observerHitRender.otherPlayers.find(({ id }) => id === authority.playerId);
+        const observerHitAnimation = new PlayerAnimationController().update({
+            player: observedHitPlayer,
+            rope: observedHitPlayer.rope,
+            events: observerHitEvents,
+            dt: 0
+        });
+        assert.equal(ownerHitAnimation.state, "hit");
+        assert.equal(observerHitAnimation.state, "hit");
+        app.renderer.draw = (state) => {
+            renderedState = state;
+        };
 
         const summit = room.simulation.world.summit;
         authorityPlayer.physics.position.set(summit.x, summit.y);

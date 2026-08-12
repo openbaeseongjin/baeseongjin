@@ -315,6 +315,7 @@ export class RemoteGameAuthority {
 
     submitProjectileSpawnClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
+        if (!this.submitOwnerMotion()) return false;
         const claim = createPlayerProjectileSpawnClaim({
             predictionId: event.predictionId,
             targetId: event.targetId,

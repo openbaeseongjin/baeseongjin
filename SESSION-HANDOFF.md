@@ -188,6 +188,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 플레이어 각운동은 physics mixin 상속이 아니라 `PlayerPhysics Has-A AngularMotion` 조합으로 확정했다. collider도 독립 Has-A 조합이고 `FixedLengthRope`는 local anchor를 참조하는 외부 joint다. Box2D·Rapier·Unity 공식 강체 구조를 따른 근거와 확장 규칙은 `docs/architecture.md`의 **플레이어 강체 회전과 손 로프 관절**을 따른다.
 - 로프 해제 시 각속도를 보존하고 손끝 접선 속도의 설정 비율을 중심 이동 속도에 전달한다. 지면 접촉 중에는 `angle = 0` 방향의 복원 토크와 감쇠를 적용해 오뚜기처럼 일어서며 공중에서는 약한 각 감쇠만 적용한다.
 - `owner-motion` v2, `WorldSnapshot` v4, `player-impact` v4가 angle·angularVelocity·attachmentOffset을 전달·검증·복구한다. 원격 각도는 ownerMotionTick 기준 최단 회전 보간과 제한 외삽을 사용하며 상세 계약은 `docs/multiplayer-synchronization.md`의 **플레이어 강체 회전과 손 관절 동기화**를 따른다.
+- 자동 무기 발사점은 몸 중심이 아니라 조합된 `Collider.outsidePointToward()`가 대상 방향으로 계산한 형상 바깥 점이다. 발사체 반경과 8px 여유를 포함하며 소유자는 최신 `owner-motion` 다음 총구 위치 claim을 보내고, 서버는 같은 collider 계약으로 계산한 위치 오차를 검증한 뒤 claim 위치를 동료에게 공유한다. 구현 경계는 `docs/architecture.md`, 전송·수치 검증 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 
 - 부착 순간 거리를 고정 반경으로 유지하고 방사 속도를 제거한다.
 - 능동 운동량은 임계 접선 드래그가 부착당 한 번 만드는 임펄스로만 추가한다.

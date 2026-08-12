@@ -23,6 +23,26 @@ export class CircleCollider {
         return Math.hypot(center.x - circlePosition.x, center.y - circlePosition.y) <= this.radius + circleRadius;
     }
 
+    outsidePointToward(center, target, clearance = 0) {
+        for (const [label, value] of Object.entries({
+            "center.x": center?.x,
+            "center.y": center?.y,
+            "target.x": target?.x,
+            "target.y": target?.y,
+            clearance
+        })) {
+            if (!Number.isFinite(value)) throw new Error(`outsidePointToward requires finite ${label}`);
+        }
+        if (clearance < 0) throw new Error("outsidePointToward clearance must be non-negative");
+        const deltaX = target.x - center.x;
+        const deltaY = target.y - center.y;
+        const distance = Math.hypot(deltaX, deltaY);
+        const directionX = distance > 0.000001 ? deltaX / distance : 1;
+        const directionY = distance > 0.000001 ? deltaY / distance : 0;
+        const offset = this.radius + clearance;
+        return { x: center.x + directionX * offset, y: center.y + directionY * offset };
+    }
+
     resolveSurfaces({ position, velocity, surfaces, previousPosition }) {
         let isGrounded = false;
         for (let pass = 0; pass < 3; pass += 1) {

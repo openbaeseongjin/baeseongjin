@@ -76,6 +76,7 @@ index.html
 플레이어 물리는 상속 mixin이 아니라 강체에 필요한 요소를 조립하는 Has-A 구조를 사용한다.
 
 - `PlayerPhysics`는 선형 위치·속도를 소유하고 `AngularMotion`과 공개 `Collider`를 각각 조합한다. `AngularMotion`은 각도, 각속도, 관성, 각 감쇠, 점 속도와 점 충격 계산을 담당한다. collider 형상은 계속 `PlayerRuntimeFactory`에서 독립적으로 교체할 수 있으며 몸체 회전이 원형 collider를 암묵적으로 바꾸지 않는다.
+- `Collider`는 겹침·해결뿐 아니라 대상 방향의 형상 바깥 점을 구하는 `outsidePointToward(center, target, clearance)`도 제공한다. 자동 무기는 구체 원형 반경을 읽지 않고 이 계약으로 발사체 반경과 여유를 포함한 총구 위치를 구하므로, collider 형상을 교체해도 몸 중심 발사나 renderer별 보정이 생기지 않아야 한다.
 - `FixedLengthRope`는 플레이어 강체의 일부나 상속 mixin이 아니라 외부 joint다. world anchor, 몸체 local-space의 `attachmentOffset`, 고정 길이와 장력을 소유하고 손 관절점의 위치·속도 제약을 푼다. 제약 충격은 중심 선속도와 `r × impulse / inertia` 각속도에 함께 반영한다.
 - 손 관절점은 부착 순간 anchor 쪽 손을 선택해 local offset으로 고정한다. 이후 몸체 각도에 따라 world-space 손 위치가 회전하며 공용 rope renderer, 스윙 입력, 투사체-로프 충돌도 같은 `ropeAttachmentPoint()` 계산을 사용한다.
 - 로프 해제는 각속도를 제거하지 않는다. 게임 조작 체감을 위해 손끝 접선 속도의 `releaseAngularTransfer` 비율을 중심 선속도에 추가하는 명시적 게임플레이 보정만 적용한다. 이 비율은 joint solver나 collider에 숨기지 않는다.
@@ -188,6 +189,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 협동은 소유 클라이언트 권한과 서버 중립 월드 권한을 분할한다. 서버의 주역할은 소유 상태·사건 검증과 복제 공유이며, 시간 모델·상태 소유권·스냅샷과 거부 복구 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 - `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `OwnerPredictionRuntime`도 로컬 `GameSimulation`의 공개 소유자 예측 계약만 사용하며, 앱·예측 런타임·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
 - 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 서버 `CombatSystems`와 클라이언트 `PredictableProjectileStore`는 투사체의 공통 `projectile-motion` capability를 실행해 `ProjectileMotion`의 동일한 유도·직선 적분식을 호출하며 별도 궤적 공식을 두지 않는다. 충돌·claim 확정·수명 만료만 `resolve` 이벤트로 확정한다. 원래 spawn 이벤트는 활성 객체에 보존해 중간 입장 welcome에서만 같은 ID로 재전송한다.
+- 플레이어 자동 무기는 조합된 collider의 `outsidePointToward()`로 대상 방향 몸체 바깥 발사점을 계산한다. 이 위치는 소유자 예측, 서버 검증과 공유 spawn 사건이 함께 사용하며 renderer는 총구 위치나 collider 형상을 다시 해석하지 않는다.
 - 자기 탄환은 `EnemyHitPrediction` 믹스인이 로컬 충돌 VFX와 검증 가능한 hit claim을 한 번 만든다. 첫 로컬 충돌에서 탄환 수명은 소비되며 claim 거부가 같은 탄환을 겹친 위치에 복구해 추가 피격을 만들지 않는다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 소유 탄환 대미지로 검증된 결과를 다른 복제본에 공유한다. 중립 적 탄환도 피해 클라이언트가 충돌을 인식한 순간 소비하며, 거부 receipt가 객체를 다시 표시하거나 같은 겹침에서 재발화하게 하지 않는다.
 - `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
 

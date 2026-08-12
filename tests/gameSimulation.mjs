@@ -132,13 +132,23 @@ export function run() {
 
     const eventRun = new GameSimulation();
     const eventPlayer = primaryPlayer(eventRun);
+    const eventAuthority = new LocalAuthority(eventRun);
     eventPlayer.weapon.cooldown = 0;
-    eventRun.step(1 / 120, command);
-    const spawnEvents = eventRun.drainReplicationEvents();
+    eventAuthority.step(1 / 120, command);
+    const spawnEvents = eventAuthority.drainEvents();
     assert.equal(spawnEvents[0].eventType, "spawn");
     assert.equal(spawnEvents[0].tick, 1);
     assert.equal(spawnEvents[0].objectId, eventRun.projectiles[0].id);
     assert.equal(spawnEvents[0].parameters.predictionId, `${eventPlayer.id}:1`);
+    assert.equal(
+        eventPlayer.physics.collider.overlapsCircle(
+            eventPlayer.physics.position,
+            spawnEvents[0].position,
+            spawnEvents[0].parameters.radius
+        ),
+        false,
+        "single-player LocalAuthority must publish a projectile spawn outside the player collider"
+    );
     assert.deepEqual(eventRun.drainReplicationEvents(), [], "replication events must drain exactly once");
 
     const target = eventRun.enemies.find((enemy) => enemy.id === eventRun.projectiles[0].targetId);
