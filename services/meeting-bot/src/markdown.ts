@@ -1,4 +1,4 @@
-import type { MeetingMetadata, Minutes } from "./types.js";
+import type { MeetingMetadata, Minutes, TranscriptEntry } from "./types.js";
 import { kstDate, kstTime } from "./time.js";
 
 export function markdownText(value: string, maxLength = 1_000): string {
@@ -131,6 +131,26 @@ export function renderMeetingSection(metadata: MeetingMetadata, minutes: Minutes
     "### REFERENCES",
     "",
     referenceList(minutes),
+  ].join("\n");
+}
+
+export function renderTranscriptSection(metadata: MeetingMetadata, entries: TranscriptEntry[]): string {
+  const startedAt = new Date(metadata.startedAt);
+  const endedAt = new Date(metadata.endedAt);
+  const lines = entries.map((entry) => {
+    const time = kstTime(new Date(entry.timestamp));
+    const channel =
+      entry.source === "text" && entry.channelName ? `, #${markdownText(entry.channelName)}` : "";
+    const speaker = markdownText(entry.speaker);
+    const text = markdownText(entry.text, Number.MAX_SAFE_INTEGER);
+    return `- ${time} KST — ${speaker} (${entry.source}${channel}): ${text}`;
+  });
+
+  return [
+    `<!-- meeting-id:${metadata.id} -->`,
+    `## Meeting ${kstTime(startedAt)}–${kstTime(endedAt)} KST`,
+    "",
+    ...lines,
   ].join("\n");
 }
 
