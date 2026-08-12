@@ -126,6 +126,7 @@ export class GameSimulation {
             position: vectorState(player.physics.position),
             velocity: vectorState(player.physics.velocity),
             isGrounded: player.physics.isGrounded,
+            collider: player.physics.collider.snapshot(),
             health: player.health,
             maxHealth: player.maxHealth,
             hitInvulnerabilityRemaining: player.hitInvulnerabilityRemaining,
@@ -309,12 +310,12 @@ export class GameSimulation {
         player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
         const damage = Number.isFinite(event.parameters?.damage) ? Math.max(0, event.parameters.damage) : 0;
         player.health = Math.max(0, player.health - damage);
-        if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
+        if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health", event.projectileId);
         return true;
     }
 
-    resolveOwnerCollisions(ownerId, otherPlayers, radius) {
-        return resolvePlayerCollisions(this.#requirePlayer(ownerId), otherPlayers, radius);
+    resolveOwnerCollisions(ownerId, otherPlayers) {
+        return resolvePlayerCollisions(this.#requirePlayer(ownerId), otherPlayers);
     }
 
     ownerPredictionState(ownerId) {
@@ -325,6 +326,7 @@ export class GameSimulation {
             position: state.position,
             velocity: state.velocity,
             isGrounded: state.isGrounded,
+            collider: state.collider,
             health: state.health,
             maxHealth: state.maxHealth,
             hitInvulnerabilityRemaining: state.hitInvulnerabilityRemaining,
@@ -996,7 +998,7 @@ export class GameSimulation {
         );
         this.metrics.recordPlayerImpact(claim.impactType, projectile.damage);
         if (claim.impactType === "player-hit" && player.health <= 0) {
-            this.respawnPlayerAtCheckpoint(player, "health");
+            this.respawnPlayerAtCheckpoint(player, "health", claim.projectileId);
         }
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage: projectile.damage });
     }
@@ -1042,7 +1044,7 @@ export class GameSimulation {
             }
         );
         this.metrics.recordPlayerImpact(claim.impactType, damage);
-        if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "health");
+        if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "health", claim.projectileId);
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage });
     }
 
@@ -1083,10 +1085,10 @@ export class GameSimulation {
         return events;
     }
 
-    respawnPlayerAtCheckpoint(player, reason) {
+    respawnPlayerAtCheckpoint(player, reason, causeId = `${reason}:${this.tick}`) {
         if (!player || this.runState !== "playing") return false;
         this.#resetPlayerAtCheckpoint(player);
-        this.#recordPlayerRespawn(player, reason);
+        this.#recordPlayerRespawn(player, reason, causeId);
         return true;
     }
 
@@ -1109,7 +1111,7 @@ export class GameSimulation {
         this.applyArtifactEffects(player);
     }
 
-    #recordPlayerRespawn(player, reason) {
+    #recordPlayerRespawn(player, reason, causeId) {
         this.metrics.recordDefeat();
         const artifactIds = player.lastCheckpointLoss.map(({ id }) => id);
         if (artifactIds.length > 0) {
@@ -1124,6 +1126,7 @@ export class GameSimulation {
                 age: 0,
                 playerId: player.id,
                 reason,
+                causeId,
                 artifacts: [...player.lastCheckpointLoss],
                 position: player.physics.position.clone()
             };
@@ -1133,12 +1136,14 @@ export class GameSimulation {
                 age: 0,
                 playerId: player.id,
                 reason,
+                causeId,
                 position: player.physics.position.clone()
             };
         }
         this.recordReplicationEvent("player-respawned", {
             playerId: player.id,
             reason,
+            causeId,
             health: player.health,
             artifactIds,
             position: { x: player.physics.position.x, y: player.physics.position.y }

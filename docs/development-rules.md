@@ -192,9 +192,17 @@ class Player extends RopeAttachable(GameObject) {}
 - 월드 객체별 그리기 함수는 좌표 변환이나 DPR 보정을 중복하지 않는다.
 - 공통 Canvas 호스트는 context, DPR·resize, 좌표 변환, HUD·오버레이를 소유하고 월드 표현은 선택된 scene renderer에 한 번 위임한다.
 - 렌더 프로필은 bootstrap factory 경계에서만 선택한다. 앱·시뮬레이션·네트워크 snapshot에 프로필별 타입 분기나 스프라이트 자산 계약을 추가하지 않는다.
-- 현재 기본 프로필은 `polygon`으로 유지한다. 도트 프로필은 같은 읽기 전용 scene snapshot을 소비하는 별도 renderer로 추가하며 기존 polygon renderer를 내부 모드 분기로 확장하지 않는다.
+- 현재 기본 프로필은 `sprite`다. 기존 표현은 `?renderer=polygon`으로 유지하며 두 프로필은 같은 읽기 전용 scene snapshot을 소비하고 polygon renderer를 내부 모드 분기로 확장하지 않는다.
 - 시각 효과에 시간 상태가 필요하면 렌더러가 임의로 게임 시간을 만들지 않고 명시적인 render clock 또는 snapshot 값을 받는다.
 - 스프라이트 애니메이션은 불변 clip 데이터와 외부 경과 시간을 분리한다. Canvas painter는 보간을 끈 그리기만 담당하고 이미지 로딩·캐시·게임 시간 진행을 함께 소유하지 않는다.
+- 상태 머신은 현재 상태·경과 시간·허용 전이만 아는 순수 조합 컴포넌트로 만들고, 도메인 snapshot·사건을 상태 전이 입력으로 바꾸는 resolver와 분리한다. 재사용성을 이유로 의미와 수명이 다른 기존 도메인 상태를 한 FSM으로 강제 이전하지 않는다.
+- 여러 actor의 순간 애니메이션은 사건 대상 ID로 각 표현 FSM에 전달한다. animation state나 frame index를 게임·네트워크 권위 snapshot에 저장해 동기화하지 않는다.
+- 로컬 예측 사건과 서버 확정 사건이 같은 화면 전이를 뜻하면 causal object ID를 같은 presentation ID로 정규화한다. 서버 receipt 때문에 이미 시작한 `hit`·`respawn`을 다시 재생하지 않는다.
+- 스프라이트 출력 크기·anchor와 collider 크기·형태를 하나의 에셋 설정으로 결합하지 않는다. collider는 플레이어 런타임 조립과 물리가 소유하고 렌더 프로필 또는 PNG 교체로 암묵적으로 변경하지 않는다.
+- 새 렌더 프로필이 기존 scene renderer의 일부만 바꿔야 하면 전체 클래스를 복사·상속 override하지 않는다. 안정된 그리기 순서를 유지하는 layer composer와 역할별 renderer를 조립한다.
+- 상위 renderer/composer에 `if (profile)`·`switch (actorType)` 분기를 두지 않는다. composer는 하위 renderer를 호출만 하고 각 하위 컴포넌트가 자기 collection의 draw 계약을 완결하며, 종류 선택은 immutable factory 조립에서 끝낸다.
+- collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
+- 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 테스트 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
 - 렌더러 변경에는 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 검증하는 테스트를 둔다.
 - 멀티플레이 파티클·VFX·화면 흔들림은 권위 판정 이벤트를 받아 각 클라이언트가 로컬로 생성·진행한다. 서버 시뮬레이션과 네트워크 스냅샷에 표현 객체나 효과 수명을 넣지 않는다.
 

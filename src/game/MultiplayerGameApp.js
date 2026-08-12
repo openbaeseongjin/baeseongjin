@@ -4,12 +4,13 @@ import { Vector2 } from "../game-kit/index.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../render/GameRendererFactory.js";
 import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
-import { CAMERA_CONFIG, PLAYER_CONFIG, ROPE_CONFIG } from "./config.js";
+import { CAMERA_CONFIG, ROPE_CONFIG } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "./rewards/ArtifactRewardSelection.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
+import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -17,8 +18,7 @@ function renderPlayer(state, predicted = null) {
     return {
         ...state,
         position: new Vector2(position.x, position.y),
-        velocity: new Vector2(velocity.x, velocity.y),
-        config: PLAYER_CONFIG
+        velocity: new Vector2(velocity.x, velocity.y)
     };
 }
 
@@ -55,6 +55,7 @@ export class MultiplayerGameApp {
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.checkpointFeedback = null;
+        this.playerPresentationEvents = [];
         this.localRunCompleted = false;
         this.localArtifactReward = null;
         this.pendingArtifactSelection = null;
@@ -148,6 +149,7 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
         const events = this.authority.drainEvents();
+        this.playerPresentationEvents.push(...createPlayerPresentationEvents(events));
         this.applyCheckpointEvents(events);
         this.applyCheckpointClaimReceipts();
         this.applySummitClaimReceipts();
@@ -198,10 +200,7 @@ export class MultiplayerGameApp {
             this.localRunCompleted = true;
             return;
         }
-        this.authority.resolveOwnerCollisions(
-            current.state.players.filter(({ id }) => id !== this.authority.playerId),
-            PLAYER_CONFIG.radius
-        );
+        this.authority.resolveOwnerCollisions(current.state.players.filter(({ id }) => id !== this.authority.playerId));
         const predictedEvents = this.authority.drainPredictedEvents();
         const predictedSwings = predictedEvents.filter(({ eventType }) => eventType === "predicted-rope-swing");
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
@@ -218,11 +217,12 @@ export class MultiplayerGameApp {
                       position: predictedPlayer.position,
                       rope: predictedPlayer.rope,
                       hitInvulnerabilityRemaining: predictedPlayer.hitInvulnerabilityRemaining,
-                      radius: PLAYER_CONFIG.radius
+                      collider: predictedPlayer.collider
                   }
                 : null
         };
         const predictedResolutions = this.predictableProjectiles.update(dt, collisionState, predictedPlayer.tick);
+        this.playerPresentationEvents.push(...createPlayerPresentationEvents(predictedResolutions));
         for (const resolution of predictedResolutions) {
             if (resolution.projectileId) {
                 this.authority.resolvePredictedImpact(resolution);
@@ -263,6 +263,8 @@ export class MultiplayerGameApp {
         if (this.metricsVisible) {
             this.onDiagnostics({ metrics: remote.state.metrics, networkMetrics, worldSeed: base.world.seed });
         }
+        this.playerPresentationEvents.push(...createPlayerPresentationEvents([base.eventFlash]));
+        const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         this.renderer.draw({
             ...base,
             player,
@@ -272,6 +274,8 @@ export class MultiplayerGameApp {
             enemies: remote.state.enemies,
             ...predictableProjectiles,
             ...combatFeedback,
+            localPlayerId: this.authority.playerId,
+            playerPresentationEvents,
             eventFlash:
                 combatFeedback.eventFlash ??
                 this.checkpointFeedback ??

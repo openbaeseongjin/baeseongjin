@@ -1,6 +1,7 @@
 import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
 import { AutomaticWeaponObject } from "../combat/AutomaticWeaponObject.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
+import { CircleCollider } from "../physics/colliders/CircleCollider.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 import { RopeObject } from "../rope/RopeObject.js";
 import { PlayerObject } from "./PlayerObject.js";
@@ -18,7 +19,8 @@ export function createPlayerRuntime({
         throw new Error("playerId must be a non-empty string");
     }
     const id = playerId ?? registry.createId("player");
-    const physics = new PlayerPhysics(playerConfig);
+    const collider = new CircleCollider({ radius: playerConfig.radius });
+    const physics = new PlayerPhysics(playerConfig, { collider });
     if (spawn) physics.reset(spawn);
     const rope = new FixedLengthRope(ropeConfig);
     const artifacts = new ArtifactInventory(artifactConfig);
@@ -33,5 +35,5 @@ export function createPlayerRuntime({
         combatConfig
     });
     const inputDrivenObjects = Object.freeze([entity, ropeObject]);
-    return Object.freeze({ physics, rope, ropeObject, artifacts, weapon, entity, inputDrivenObjects });
+    return Object.freeze({ collider, physics, rope, ropeObject, artifacts, weapon, entity, inputDrivenObjects });
 }

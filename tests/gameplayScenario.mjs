@@ -13,6 +13,7 @@ import { run as commandReplay } from "./commandReplay.mjs";
 import { run as artifactRewardSelection } from "./artifactRewardSelection.mjs";
 import { run as gameObjectModel } from "./gameObjectModel.mjs";
 import { run as renderingSystem } from "./renderingSystem.mjs";
+import { run as stateMachine } from "./stateMachine.mjs";
 
 const steps = {
     worldSeed,
@@ -28,6 +29,7 @@ const steps = {
     combatSystems,
     canvasRenderer,
     renderingSystem,
+    stateMachine,
     worldTraversalValidator,
     commandReplay
 };
