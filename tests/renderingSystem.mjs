@@ -5,6 +5,9 @@ import { CameraWorldRenderer, SceneRendererComposition } from "../src/render/Sce
 import { SpriteAnimation } from "../src/render/sprites/SpriteAnimation.js";
 import { paintSpriteFrame } from "../src/render/sprites/SpriteCanvasPainter.js";
 import { PlayerAnimationController } from "../src/render/sprites/PlayerAnimationController.js";
+import { SpriteLocalPlayerRenderer } from "../src/render/sprites/SpriteActorRenderers.js";
+import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../src/render/sprites/PlayerSpriteCatalog.js";
+import { PLAYER_SPRITE_STATES, PlayerSpriteDefinition } from "../src/render/sprites/PlayerSpriteDefinition.js";
 import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
 import { SpriteImageAsset } from "../src/render/sprites/SpriteImageAsset.js";
@@ -14,6 +17,7 @@ function recordingContext() {
     const context = new Proxy(
         {
             calls,
+            globalAlpha: 1,
             save: () => calls.push(["save"]),
             restore: () => calls.push(["restore"]),
             setTransform: (...args) => calls.push(["setTransform", ...args]),
@@ -36,6 +40,33 @@ function makeCanvas(context) {
 
 function frame(x = 0, durationSeconds = 0.1) {
     return { x, y: 0, width: 8, height: 8, durationSeconds };
+}
+
+function playerFrame(column = 0, row = 0, durationSeconds = 0.1) {
+    return { x: column * 24, y: row * 24, width: 24, height: 24, durationSeconds };
+}
+
+function playerStates(overrides = {}) {
+    return Object.fromEntries(
+        PLAYER_SPRITE_STATES.map((state, index) => [
+            state,
+            overrides[state] ?? { frames: [playerFrame(index % 4, Math.floor(index / 4))] }
+        ])
+    );
+}
+
+function playerDefinition(overrides = {}) {
+    return new PlayerSpriteDefinition({
+        id: "test-player",
+        source: "/test-player.png",
+        atlasSize: { width: 96, height: 96 },
+        frameSize: { width: 24, height: 24 },
+        destinationSize: { width: 40, height: 40 },
+        anchor: { x: 0.5, y: 0.5 },
+        offset: { x: 1, y: 2 },
+        states: playerStates(),
+        ...overrides
+    });
 }
 
 export function run() {
@@ -83,6 +114,33 @@ export function run() {
     mockImage.listeners.error();
     assert.equal(failedAsset.status, "failed");
     assert.match(assetWarnings[0], /polygon scene fallback/);
+
+    const wrongSizeAsset = new SpriteImageAsset({
+        source: "/wrong-size.png",
+        expectedSize: { width: 96, height: 96 },
+        ImageClass: MockImage,
+        warn: (message) => assetWarnings.push(message)
+    });
+    mockImage.naturalWidth = 24;
+    mockImage.naturalHeight = 48;
+    mockImage.listeners.load();
+    assert.equal(wrongSizeAsset.status, "failed");
+    assert.match(wrongSizeAsset.error.message, /24x48; expected 96x96/);
+
+    const readyAsset = new SpriteImageAsset({
+        source: "/right-size.png",
+        expectedSize: { width: 96, height: 96 },
+        ImageClass: MockImage
+    });
+    mockImage.naturalWidth = 96;
+    mockImage.naturalHeight = 96;
+    mockImage.listeners.load();
+    assert.equal(readyAsset.status, "ready");
+    assert.equal(readyAsset.image, mockImage);
+    assert.throws(
+        () => new SpriteImageAsset({ source: "/bad.png", expectedSize: { width: 0, height: 96 } }),
+        /positive integer/
+    );
 
     const worldOrder = [];
     const worldContext = recordingContext();
@@ -206,18 +264,139 @@ export function run() {
     const flippedDraw = flipped.calls.find(([name]) => name === "drawImage");
     assert.deepEqual(flippedDraw.slice(1, 6), [image, 3, 0, 8, 8]);
     assert.deepEqual([40 - flippedDraw[6] - 20, flippedDraw[7], 20, 10], [35, 55, 20, 10]);
+    const cued = recordingContext();
+    paintSpriteFrame({
+        context: cued,
+        image,
+        frame: sprite,
+        position: { x: 40.4, y: 60.4 },
+        size,
+        anchor,
+        offset: { x: 2.4, y: -1.4 },
+        opacity: 0.5,
+        pixelSnap: true
+    });
+    assert.equal(cued.globalAlpha, 0.5);
+    assert.deepEqual(
+        cued.calls.find(([name]) => name === "drawImage"),
+        ["drawImage", image, 3, 0, 8, 8, 38, 54, 20, 10]
+    );
     for (const bad of [
         { frame: { ...sprite, x: NaN } },
         { frame: { ...sprite, width: 0 } },
         { size: { ...size, width: -1 } },
         { position: { ...position, y: Infinity } },
         { anchor: { x: 0, y: NaN } },
+        { offset: { x: 0, y: Infinity } },
+        { opacity: 0 },
+        { pixelSnap: "yes" },
         { flipX: "yes" }
     ]) {
         assert.throws(() =>
             paintSpriteFrame({ context: recordingContext(), image, frame: sprite, position, size, anchor, ...bad })
         );
     }
+
+    assert.ok(Object.isFrozen(DEFAULT_PLAYER_SPRITE_DEFINITION));
+    assert.ok(Object.isFrozen(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle));
+    assert.ok(Object.isFrozen(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle.frames));
+    assert.ok(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle.frames.every(Object.isFrozen));
+    assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlasSize, { width: 96, height: 96 });
+    assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.frameSize, { width: 24, height: 24 });
+    assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.destinationSize, { width: 48, height: 48 });
+    assert.deepEqual(Object.keys(DEFAULT_PLAYER_SPRITE_DEFINITION.presentations), PLAYER_SPRITE_STATES);
+    for (const state of PLAYER_SPRITE_STATES) {
+        const presentation = DEFAULT_PLAYER_SPRITE_DEFINITION.presentationFor(state);
+        assert.equal(presentation.state, state);
+        assert.equal(presentation.clipState, state, `${state} must use action-specific frames instead of a fallback`);
+        for (const spriteFrame of presentation.clip.frames) {
+            assert.equal(spriteFrame.width, 24);
+            assert.equal(spriteFrame.height, 24);
+            assert.equal(spriteFrame.x % 24, 0);
+            assert.equal(spriteFrame.y % 24, 0);
+            assert.ok(spriteFrame.x + spriteFrame.width <= 96);
+            assert.ok(spriteFrame.y + spriteFrame.height <= 96);
+        }
+    }
+    const presentationSignature = (state) => {
+        const presentation = DEFAULT_PLAYER_SPRITE_DEFINITION.presentationFor(state);
+        const firstFrame = presentation.clip.frames[0];
+        return [
+            presentation.clipState,
+            firstFrame.x,
+            firstFrame.y,
+            presentation.size.width,
+            presentation.size.height,
+            presentation.offset.x,
+            presentation.offset.y,
+            presentation.opacity
+        ];
+    };
+    for (const [left, right] of [
+        ["idle", "run"],
+        ["jump", "fall"],
+        ["jump", "rope"],
+        ["idle", "hit"],
+        ["idle", "respawn"],
+        ["hit", "respawn"]
+    ]) {
+        assert.notDeepEqual(presentationSignature(left), presentationSignature(right), `${left}/${right} must differ`);
+    }
+
+    const fallbackDefinition = playerDefinition({
+        states: playerStates(
+            Object.fromEntries(
+                PLAYER_SPRITE_STATES.filter((state) => state !== "idle").map((state) => [state, { fallback: "idle" }])
+            )
+        )
+    });
+    assert.equal(fallbackDefinition.presentationFor("hit").clipState, "idle");
+    assert.throws(() => playerDefinition({ states: { idle: { frames: [playerFrame()] } } }), /state 'run'/);
+    assert.throws(
+        () => playerDefinition({ states: playerStates({ hit: { frames: [playerFrame(4, 0)] } }) }),
+        /outside the declared atlas grid/
+    );
+    assert.throws(
+        () => playerDefinition({ states: playerStates({ hit: { frames: [{ ...playerFrame(), x: 1 }] } }) }),
+        /outside the declared atlas grid/
+    );
+    assert.throws(
+        () => playerDefinition({ states: playerStates({ hit: { frames: [playerFrame()], cue: null } }) }),
+        /cue must be an object/
+    );
+    assert.throws(
+        () =>
+            playerDefinition({
+                states: playerStates({ idle: { fallback: "run" }, run: { fallback: "idle" } })
+            }),
+        /fallback cycle/
+    );
+
+    const customDefinition = playerDefinition({
+        states: playerStates({ idle: { frames: [playerFrame(1, 0)] } })
+    });
+    const playerContext = recordingContext();
+    new SpriteLocalPlayerRenderer({ asset: { image }, definition: customDefinition }).draw({
+        context: playerContext,
+        scene: {
+            localPlayerId: "local-player",
+            player: {
+                id: "local-player",
+                position: { x: 40, y: 60 },
+                velocity: { x: 0, y: 0 },
+                isGrounded: true,
+                lifeState: "active",
+                rope: { isAttached: false }
+            },
+            playerPresentationEvents: []
+        },
+        presentationTimeSeconds: 0
+    });
+    assert.deepEqual(
+        playerContext.calls.find(([name]) => name === "drawImage"),
+        ["drawImage", image, 24, 0, 24, 24, 21, 42, 40, 40],
+        "player renderer must consume definition-owned frame, size, anchor, and offset"
+    );
 
     const controller = new PlayerAnimationController();
     const grounded = { velocity: { x: 0, y: 0 }, isGrounded: true, lifeState: "active" };
