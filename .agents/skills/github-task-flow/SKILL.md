@@ -193,6 +193,7 @@ rebase 충돌, 실패한 재검증 또는 최신 base 확인 실패를 우회해
 - 자동 삭제되지 않은 원격 작업 브랜치를 삭제한다.
 - Issue가 닫혔는지 확인하고 필요하면 PR 연결 확인 후 닫는다.
 - `main`의 최종 커밋과 PR merge 상태를 확인한다.
+- 병합한 변경이 `AGENTS.md` 또는 관련 기준 문서에서 서버 재시작·배포·공개 smoke 같은 병합 후 운영 검증을 요구하면 해당 검증까지 완료한 뒤 종료한다. PR 병합만으로 작업을 완료 처리하지 않으며 구체적인 명령과 조건은 기준 문서를 단일 출처로 사용한다.
 
 보호 규칙, 실패한 검사, 승인 부족을 우회하지 않고 blocker와 필요한 다음 행동을 보고한다.
 
@@ -205,4 +206,5 @@ rebase 충돌, 실패한 재검증 또는 최신 base 확인 실패를 우회해
 - Checks: 통과 항목 또는 blocker
 - Rebase: 최종 `origin/main` SHA와 `--force-with-lease` 사용 여부
 - Merge: Lore 커밋 SHA, merge commit SHA, 일반 merge 방식
+- Post-merge: 기준 문서가 요구한 운영·배포 검증 결과 또는 해당 없음
 - Remaining: 남은 위험 또는 `없음`

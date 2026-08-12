@@ -44,7 +44,7 @@
 | 문서 | 역할 |
 | --- | --- |
 | [`dev-environment-setup.md`](./dev-environment-setup.md) | 요구 사항, 실행 명령, 검증과 문제 해결 절차 |
-| [`version-management.md`](./version-management.md) | 앱·서버 버전 원본, 화면 노출, 변경 절차와 캐시 정책 |
+| [`version-management.md`](./version-management.md) | 앱·서버 버전 원본, 화면 노출, 필수 변경·완료 절차와 캐시 정책 |
 | [`pwa-auto-update.md`](./pwa-auto-update.md) | 서비스 워커 기반 최신 버전 확인, 자동 업데이트와 데이터 보존 정책 |
 
 ## 회의 기록
