@@ -219,6 +219,13 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - mock player asset은 저장소에서 직접 만든 `assets/sprites/player-action-mock.svg`이며 atlas layout과 출처 기록은 `assets/sprites/README.md`에 있다. `PlayerSpriteManifest`·`PlayerSpriteDefinition`·`SpriteImageAssetSet`이 PixelLab·SpriteCook 원본을 여러 PNG atlas와 도구 중립 animation manifest로 정규화해 frame별 atlas를 선택한다. 프레임 수·순서·속도는 manifest가 소유하고 collider는 별도 조합으로 유지한다. 다른 개발자와 AI 에이전트는 루트 `AGENTS.md`에서 `docs/sprite-asset-format.md`의 JSON Schema·example·`validate:sprite-assets` 명령으로 진입한다.
 - 렌더러 선택이 물리·전투·네트워크 snapshot 계약을 바꾸지 않으며, 교체 가능한 렌더 경계의 상세 기준은 `docs/architecture.md`를 따른다.
 
+### [L1] 환경 도트 표현은 독립 component와 전용 multi-atlas 계약으로 조립한다
+
+- 참고 이미지는 구체 디자인이 아니라 어두운 다층 실루엣·큰 여백·제한된 조명 같은 도트 화면 구성만 참고한다. 실제 mock은 기획 채널에서 확정한 폐쇄형 수직 기업도시의 폐기물·산업 정비·주거 상업·기업 보안·착륙장 5구역을 실제 약 8,880m 월드 범위 안에 나누고 고도 기반 일출 밝기 변화를 따른다.
+- 기존 `WorldGenerator`와 collision은 바꾸지 않는다. backdrop, collision polygon과 정확히 맞는 terrain skin, 이동 경로 밖의 non-collision decoration을 독립 하위 renderer로 조립하며 상위 renderer나 싱글·멀티 앱이 구체 component 종류를 분기하지 않는다.
+- 환경 리소스는 캐릭터 animation manifest와 분리된 여러 PNG atlas·JSON Schema·example·validator 계약을 사용한다. PixelLab·SpriteCook의 배열·metadata·개별 frame은 표준 manifest로 정규화하며 atlas 분할 수와 frame 배열은 계약 안에서 바꿀 수 있다.
+- asset 실패는 backdrop·terrain·decoration별로만 fallback하고 `?metrics=1`에서 실패 component와 atlas ID를 확인한다. 상세 교환 형식과 AI 작업 진입점은 `docs/environment-asset-format.md`, 구조 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
+
 ### [L1] 모든 PR은 최신 main에 rebase한 뒤 병합한다
 
 - 병합 직전에 전용 작업 브랜치를 최신 `origin/main` 위로 rebase하고 필수 검사를 다시 실행한다. 검증 뒤 `main`이 전진하면 같은 절차를 반복한다.
