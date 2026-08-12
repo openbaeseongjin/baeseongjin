@@ -547,7 +547,7 @@ export class MeetingManager {
       const markdown = renderDailyDocument(metadata, minutes);
       const results = await Promise.allSettled([
         this.publisher.publish(markdown),
-        this.github.syncMeeting(metadata, minutes),
+        this.github.syncMeeting(metadata, minutes, transcription.entries),
       ]);
 
       const discordStatus = this.resultStatus(results[0], "Discord");
