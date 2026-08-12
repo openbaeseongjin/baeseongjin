@@ -1,9 +1,11 @@
 import { Vector2 } from "../../game-kit/index.js";
-import { closestPointOnPolygon, pointInPolygon } from "../world/PolygonGeometry.js";
+import { assertCollider } from "./colliders/Collider.js";
+import { CircleCollider } from "./colliders/CircleCollider.js";
 
 export class PlayerPhysics {
-    constructor(config) {
+    constructor(config, { collider = new CircleCollider({ radius: config.radius }) } = {}) {
         this.config = config;
+        this.collider = assertCollider(collider);
         this.position = new Vector2(120, 500);
         this.velocity = new Vector2();
         this.isGrounded = false;
@@ -47,50 +49,11 @@ export class PlayerPhysics {
     }
 
     resolveSurfaces(surfaces, previousPosition) {
-        const radius = this.config.radius;
-        this.isGrounded = false;
-        for (let pass = 0; pass < 3; pass += 1) {
-            let resolved = false;
-            for (const surface of surfaces) {
-                if (
-                    this.position.x + radius < surface.x ||
-                    this.position.x - radius > surface.x + surface.width ||
-                    this.position.y + radius < surface.y ||
-                    this.position.y - radius > surface.y + surface.height
-                ) {
-                    continue;
-                }
-                if (surface.oneWay && (this.velocity.y < 0 || previousPosition.y + radius > surface.topY + 10)) {
-                    continue;
-                }
-
-                const closest = closestPointOnPolygon(this.position, surface.vertices);
-                const inside = pointInPolygon(this.position, surface.vertices);
-                let normalX = this.position.x - closest.x;
-                let normalY = this.position.y - closest.y;
-                const distance = Math.hypot(normalX, normalY);
-                if (!inside && distance >= radius) continue;
-
-                if (distance > 0.0001) {
-                    const direction = inside ? -1 / distance : 1 / distance;
-                    normalX *= direction;
-                    normalY *= direction;
-                } else {
-                    normalX = 0;
-                    normalY = -1;
-                }
-                const penetration = inside ? radius + distance : radius - distance;
-                this.position.x += normalX * penetration;
-                this.position.y += normalY * penetration;
-                const inwardSpeed = this.velocity.x * normalX + this.velocity.y * normalY;
-                if (inwardSpeed < 0) {
-                    this.velocity.x -= normalX * inwardSpeed;
-                    this.velocity.y -= normalY * inwardSpeed;
-                }
-                if (normalY < -0.55) this.isGrounded = true;
-                resolved = true;
-            }
-            if (!resolved) break;
-        }
+        this.isGrounded = this.collider.resolveSurfaces({
+            position: this.position,
+            velocity: this.velocity,
+            surfaces,
+            previousPosition
+        }).isGrounded;
     }
 }

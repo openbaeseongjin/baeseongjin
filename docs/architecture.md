@@ -54,8 +54,18 @@ index.html
 - `CanvasRenderer`는 Canvas context, DPR·resize, 화면/월드 좌표 변환과 HUD·오버레이를 소유하는 공통 호스트다. 월드 장면의 표현은 주입된 scene renderer에 한 번 위임한다.
 - `GameRendererFactory`가 시작 시 렌더 프로필을 선택한다. 기본 프로필은 기존 화면을 보존하는 `polygon`이며 `PolygonSceneRenderer`가 지형·플레이어·로프·적·투사체·월드 VFX의 그리기 순서를 소유한다.
 - scene renderer는 동일한 읽기 전용 scene snapshot과 viewport 계약을 받는다. 앱·시뮬레이션·네트워크 계층은 선택된 프로필이나 스프라이트 자산 형식을 해석하지 않는다.
-- 향후 도트 프로필은 별도 scene renderer로 추가한다. 프로필별 분기를 `GameApp`, `MultiplayerGameApp`, 시뮬레이션 객체에 흩뜨리지 않고 factory 등록 경계에서만 선택한다.
+- 도트 프로필은 별도 scene renderer로 제공한다. 프로필별 분기를 `GameApp`, `MultiplayerGameApp`, 시뮬레이션 객체에 흩뜨리지 않고 factory 등록 경계에서만 선택한다.
 - `SpriteAnimation`은 프레임 사각형과 지속 시간을 불변 데이터로 보관하고 외부에서 받은 경과 시간으로 현재 프레임을 결정한다. `SpriteCanvasPainter`는 Canvas의 이미지 보간을 끄고 원본 프레임, anchor, 반전과 목적 크기만 그리며 자산 로딩이나 게임 시간을 소유하지 않는다.
+- 애니메이션 전이는 재사용 가능한 순수 `StateMachine` 조합 컴포넌트가 현재 상태·상태 경과 시간·허용 전이를 소유하고, actor별 resolver가 읽기 전용 snapshot과 표현 사건을 상태 머신 입력으로 바꾼다. clip catalog와 painter는 확정된 상태를 소비할 뿐 gameplay 조건을 다시 해석하지 않는다.
+- `hit`·`respawn`처럼 순간적인 actor 표현은 기존 권위 사건의 대상 `playerId`를 보존한 renderer 전용 presentation event에서 시작한다. 로컬과 원격 actor가 각자 FSM으로 재생하며 animation state·phase를 네트워크 snapshot의 권위 상태로 만들지 않는다.
+- 피해 클라이언트의 즉시 impact와 뒤이은 서버 확정은 투사체·부활 원인의 같은 causal ID로 presentation event를 정규화해 한 번만 재생한다. 서버 확정이 로컬 `hit`·`respawn` 시간을 다시 시작하지 않는다.
+- 순간 표현 상태는 지속 locomotion 상태보다 높은 우선순위로 제한된 시간 동안 재생하고 종료 시 최신 snapshot으로 지속 상태를 다시 계산한다. 이 전이는 physics·input clock을 정지하거나 되감지 않는다.
+- actor facing과 animation phase는 renderer가 actor ID별로 보관하는 표현 상태다. snapshot의 움직임으로 방향을 갱신하되 정지·순간 상태에서는 마지막 방향을 유지하고 네트워크에 frame·phase·facing을 전송하지 않는다.
+- sprite definition의 source·출력 크기·anchor는 표현 계약이고 collider의 크기·형태는 플레이어 런타임 조립이 선택하는 게임플레이 계약이다. 에셋이나 렌더 프로필 교체가 collider를 암묵적으로 바꾸지 않으며 scene snapshot은 필요할 때 두 계약의 결과를 읽기 전용으로 전달한다.
+- `PlayerRuntimeFactory`는 공개 `Collider` 계약의 구현을 플레이어 물리에 조립한다. 첫 구현은 `CircleCollider` 하나이며 이동·로프 capability와 지형·플레이어 충돌 계산은 구체 반지름 대신 조립된 collider 계약을 사용한다.
+- scene profile은 배경·지형·로프·actor·world VFX 레이어의 조합이다. 혼합 도트 프로필은 공용 폴리곤 레이어와 sprite actor 레이어를 조립하며 `PolygonSceneRenderer` 전체를 복사하거나 상속 override하지 않는다.
+- scene composer는 조립된 하위 renderer 목록을 안정된 순서로 순회해 호출할 뿐 profile 또는 actor kind 분기를 하지 않는다. player, enemy, player projectile, enemy projectile과 환경·로프·VFX renderer가 자기 collection의 실제 그리기를 소유하고 profile factory가 polygon/sprite 구현을 교체 조립한다.
+- bootstrap 기본 프로필은 `sprite`이며 query의 `renderer=polygon`이 기존 표현을 명시적으로 선택한다. 알 수 없는 값은 경고 후 기본 프로필을 사용한다. sprite asset 준비 실패는 앱을 중단하지 않고 하위 fallback renderer가 전체 polygon scene을 그리며 진단 가능한 경고를 남긴다.
 - 렌더 프로필 교체는 물리·전투·입력·권위 snapshot·네트워크 메시지 계약을 바꾸지 않는다.
 
 ## 게임 객체 모델

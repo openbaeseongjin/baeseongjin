@@ -34,7 +34,7 @@ export function run() {
     const localPlayer = {
         id: "player-1",
         position: { x: 0, y: 0 },
-        radius: 18,
+        collider: { type: "circle", radius: 18 },
         health: 100,
         lifeState: "active",
         hitInvulnerabilityRemaining: 0,

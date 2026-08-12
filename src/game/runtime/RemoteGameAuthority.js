@@ -270,8 +270,8 @@ export class RemoteGameAuthority {
         return this.ownerRuntime.predictFall();
     }
 
-    resolveOwnerCollisions(otherPlayers, radius) {
-        return this.ownerRuntime?.resolveCollisions(otherPlayers, radius) ?? false;
+    resolveOwnerCollisions(otherPlayers) {
+        return this.ownerRuntime?.resolveCollisions(otherPlayers) ?? false;
     }
 
     renderSnapshot() {

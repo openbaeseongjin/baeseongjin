@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
-import { createGameRenderer } from "../src/render/GameRendererFactory.js";
+import { createGameRenderer, resolveRendererProfile } from "../src/render/GameRendererFactory.js";
 import { assertGameRenderer } from "../src/render/SceneRenderer.js";
+import { CameraWorldRenderer, SceneRendererComposition } from "../src/render/SceneRendererComposition.js";
 import { SpriteAnimation } from "../src/render/sprites/SpriteAnimation.js";
 import { paintSpriteFrame } from "../src/render/sprites/SpriteCanvasPainter.js";
+import { PlayerAnimationController } from "../src/render/sprites/PlayerAnimationController.js";
+import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
+import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
+import { SpriteImageAsset } from "../src/render/sprites/SpriteImageAsset.js";
 
 function recordingContext() {
     const calls = [];
@@ -36,7 +41,70 @@ function frame(x = 0, durationSeconds = 0.1) {
 export function run() {
     const context = recordingContext();
     const canvas = makeCanvas(context);
-    assert.equal(createGameRenderer({ canvas }).sceneRenderer.profile, "polygon");
+    assert.equal(createGameRenderer({ canvas }).sceneRenderer.profile, "sprite");
+
+    const order = [];
+    const composition = new SceneRendererComposition({
+        profile: "ordered",
+        renderers: [{ draw: () => order.push("background") }, { draw: () => order.push("world") }]
+    });
+    composition.draw({ context, scene: {}, viewport: { cssWidth: 320, cssHeight: 180 } });
+    assert.deepEqual(order, ["background", "world"]);
+    assert.ok(Object.isFrozen(composition.renderers));
+
+    const fallbackCalls = [];
+    const assetFallback = new SpriteAssetFallbackRenderer({
+        asset: { status: "failed" },
+        spriteRenderer: { draw: () => fallbackCalls.push("sprite") },
+        polygonRenderer: { draw: () => fallbackCalls.push("polygon") }
+    });
+    assetFallback.draw({});
+    assert.deepEqual(fallbackCalls, ["polygon"]);
+    assetFallback.asset.status = "ready";
+    assetFallback.draw({});
+    assert.deepEqual(fallbackCalls, ["polygon", "sprite"]);
+
+    let mockImage;
+    class MockImage {
+        constructor() {
+            this.listeners = {};
+            mockImage = this;
+        }
+        addEventListener(type, listener) {
+            this.listeners[type] = listener;
+        }
+    }
+    const assetWarnings = [];
+    const failedAsset = new SpriteImageAsset({
+        source: "/missing.png",
+        ImageClass: MockImage,
+        warn: (message) => assetWarnings.push(message)
+    });
+    mockImage.listeners.error();
+    assert.equal(failedAsset.status, "failed");
+    assert.match(assetWarnings[0], /polygon scene fallback/);
+
+    const worldOrder = [];
+    const worldContext = recordingContext();
+    new CameraWorldRenderer([
+        { draw: () => worldOrder.push("terrain") },
+        { draw: () => worldOrder.push("actors") }
+    ]).draw({
+        context: worldContext,
+        scene: { camera: { x: 10, y: 20, zoom: 2 }, impact: null },
+        viewport: { cssWidth: 320, cssHeight: 180 }
+    });
+    assert.deepEqual(worldOrder, ["terrain", "actors"]);
+    assert.deepEqual(
+        worldContext.calls.filter(([name]) => ["save", "translate", "scale", "restore"].includes(name)),
+        [["save"], ["translate", -20, -40], ["scale", 2, 2], ["restore"]]
+    );
+
+    assert.equal(resolveRendererProfile(""), "sprite");
+    assert.equal(resolveRendererProfile("?renderer=polygon"), "polygon");
+    const warnings = [];
+    assert.equal(resolveRendererProfile("?renderer=unknown", { warn: (message) => warnings.push(message) }), "sprite");
+    assert.match(warnings[0], /unknown/i);
 
     const received = [];
     const custom = createGameRenderer({
@@ -150,4 +218,120 @@ export function run() {
             paintSpriteFrame({ context: recordingContext(), image, frame: sprite, position, size, anchor, ...bad })
         );
     }
+
+    const controller = new PlayerAnimationController();
+    const grounded = { velocity: { x: 0, y: 0 }, isGrounded: true, lifeState: "active" };
+    assert.equal(controller.update({ player: grounded, rope: { isAttached: false }, events: [], dt: 0 }).state, "idle");
+    assert.equal(
+        controller.update({
+            player: { ...grounded, velocity: { x: -80, y: 0 } },
+            rope: { isAttached: false },
+            events: [],
+            dt: 0.1
+        }).state,
+        "run"
+    );
+    assert.equal(controller.snapshot().flipX, true);
+    assert.equal(
+        controller.update({
+            player: { ...grounded, isGrounded: false, velocity: { x: 0, y: -10 } },
+            rope: { isAttached: false },
+            events: [],
+            dt: 0.1
+        }).state,
+        "jump"
+    );
+    assert.equal(controller.snapshot().flipX, true, "vertical motion must preserve facing");
+    assert.equal(
+        controller.update({ player: grounded, rope: { isAttached: true }, events: [], dt: 0.1 }).state,
+        "rope"
+    );
+    assert.equal(
+        controller.update({
+            player: grounded,
+            rope: { isAttached: false },
+            events: [{ id: "hit-1", type: "hit" }],
+            dt: 0
+        }).state,
+        "hit"
+    );
+    assert.equal(
+        controller.update({
+            player: grounded,
+            rope: { isAttached: false },
+            events: [{ id: "hit-2", type: "hit" }],
+            dt: 0.2
+        }).elapsedSeconds,
+        0,
+        "a new hit must restart the transient"
+    );
+    assert.equal(
+        controller.update({
+            player: grounded,
+            rope: { isAttached: false },
+            events: [{ id: "respawn-1", type: "respawn" }],
+            dt: 0
+        }).state,
+        "respawn"
+    );
+    assert.equal(
+        controller.update({
+            player: grounded,
+            rope: { isAttached: false },
+            events: [{ id: "hit-3", type: "hit" }],
+            dt: 0.1
+        }).state,
+        "respawn",
+        "hit must be ignored during respawn"
+    );
+    assert.equal(
+        controller.update({ player: grounded, rope: { isAttached: false }, events: [], dt: 0.35 }).state,
+        "idle",
+        "transient completion must resolve current locomotion"
+    );
+    assert.deepEqual(
+        createPlayerPresentationEvents([
+            {
+                eventId: "impact-1",
+                objectId: "enemy-projectile-1",
+                eventType: "resolve",
+                resolution: "player-hit",
+                parameters: { targetId: "remote-player" }
+            },
+            {
+                eventId: "respawn-1",
+                eventType: "player-respawned",
+                playerId: "local-player",
+                reason: "health",
+                causeId: "enemy-projectile-1",
+                position: { x: 120, y: 500 }
+            }
+        ]),
+        [
+            { id: "hit:enemy-projectile-1", playerId: "remote-player", type: "hit" },
+            { id: "respawn:local-player:enemy-projectile-1", playerId: "local-player", type: "respawn" }
+        ]
+    );
+    assert.deepEqual(
+        createPlayerPresentationEvents([
+            {
+                projectileId: "enemy-projectile-1",
+                eventType: "predicted-resolve",
+                resolution: "player-hit",
+                targetId: "remote-player"
+            },
+            {
+                type: "checkpoint-respawn",
+                playerId: "local-player",
+                reason: "health",
+                causeId: "enemy-projectile-1",
+                position: { x: 120, y: 500 }
+            }
+        ]),
+        [
+            { id: "hit:enemy-projectile-1", playerId: "remote-player", type: "hit" },
+            { id: "respawn:local-player:enemy-projectile-1", playerId: "local-player", type: "respawn" }
+        ],
+        "predicted and authoritative impact/status events must collapse to the same presentation ids"
+    );
 }

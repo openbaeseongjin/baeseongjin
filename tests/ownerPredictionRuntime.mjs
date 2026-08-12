@@ -554,17 +554,14 @@ export function run() {
     );
     const collisionStart = movingPredictor.state().position.x;
     assert.equal(
-        movingPredictor.resolveCollisions(
-            [
-                {
-                    id: "overlapping-player",
-                    position: { ...movingPredictor.state().position },
-                    radius: PLAYER_CONFIG.radius,
-                    lifeState: "active"
-                }
-            ],
-            PLAYER_CONFIG.radius
-        ),
+        movingPredictor.resolveCollisions([
+            {
+                id: "overlapping-player",
+                position: { ...movingPredictor.state().position },
+                collider: { type: "circle", radius: PLAYER_CONFIG.radius },
+                lifeState: "active"
+            }
+        ]),
         true,
         "the predictor must own collision mutation of its composed player simulation"
     );

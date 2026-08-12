@@ -308,9 +308,9 @@ export class OwnerPredictionRuntime {
         return true;
     }
 
-    resolveCollisions(otherPlayers, radius) {
+    resolveCollisions(otherPlayers) {
         if (!this.initialized) return false;
-        return this.simulation.resolveOwnerCollisions(this.ownerId, otherPlayers, radius);
+        return this.simulation.resolveOwnerCollisions(this.ownerId, otherPlayers);
     }
 
     checkpointClaimCandidate() {

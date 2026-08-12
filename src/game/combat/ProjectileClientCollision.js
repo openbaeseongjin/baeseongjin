@@ -1,4 +1,5 @@
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
+import { colliderSnapshotOverlapsCircle } from "../physics/colliders/Collider.js";
 
 export const CLIENT_PROJECTILE_COLLISION_CAPABILITY = "client-projectile-collision";
 
@@ -55,8 +56,7 @@ export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
             !ropeHit &&
             player.health > 0 &&
             (player.hitInvulnerabilityRemaining ?? 0) <= 0 &&
-            Math.hypot(this.position.x - player.position.x, this.position.y - player.position.y) <=
-                this.radius + player.radius
+            colliderSnapshotOverlapsCircle(player.collider, player.position, this.position, this.radius)
         );
         const isOverlapping = ropeHit || bodyHit;
         if (!this.observeClientCollision(isOverlapping) || !player) return null;

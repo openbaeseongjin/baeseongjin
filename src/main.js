@@ -8,12 +8,13 @@ import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
 import { StartupUpdateLoadingScreen } from "./pwa/StartupUpdateLoadingScreen.js";
 import { isMetricsPanelEnabled } from "./game/metrics/MetricsDebugMode.js";
 import { setupPlaytestDiagnostics } from "./game/metrics/PlaytestDiagnostics.js";
-import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "./render/GameRendererFactory.js";
+import { createGameRenderer, resolveRendererProfile } from "./render/GameRendererFactory.js";
 
 const canvas = document.getElementById("game-canvas");
 if (!canvas) {
     throw new Error("Bootstrap failed: canvas #game-canvas not found");
 }
+const rendererProfile = resolveRendererProfile(globalThis.location.search);
 
 let app = null;
 let launching = false;
@@ -54,7 +55,7 @@ async function launch() {
                 activeChannelId = null;
                 app = new GameApp({
                     canvas,
-                    renderer: createGameRenderer({ canvas, profile: DEFAULT_RENDERER_PROFILE }),
+                    renderer: createGameRenderer({ canvas, profile: rendererProfile }),
                     onDiagnostics: (snapshot) => diagnostics.update(snapshot)
                 });
             } else {
@@ -65,7 +66,7 @@ async function launch() {
                 activeChannelId = authority.channelId;
                 app = new MultiplayerGameApp({
                     canvas,
-                    renderer: createGameRenderer({ canvas, profile: DEFAULT_RENDERER_PROFILE }),
+                    renderer: createGameRenderer({ canvas, profile: rendererProfile }),
                     authority,
                     onDisconnect: returnToMenu,
                     onDiagnostics: (snapshot) => diagnostics.update(snapshot)

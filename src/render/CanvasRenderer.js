@@ -7,10 +7,11 @@ const HUD_COLORS = Object.freeze({
 });
 
 export class CanvasRenderer {
-    constructor(canvas, sceneRenderer) {
+    constructor(canvas, sceneRenderer, { now = () => performance.now() / 1000 } = {}) {
         this.canvas = canvas;
         this.context = canvas.getContext("2d");
         this.sceneRenderer = assertSceneRenderer(sceneRenderer);
+        this.now = now;
         this.cssWidth = 1;
         this.cssHeight = 1;
     }
@@ -40,7 +41,8 @@ export class CanvasRenderer {
         this.sceneRenderer.draw({
             context: this.context,
             scene,
-            viewport: { cssWidth: this.cssWidth, cssHeight: this.cssHeight }
+            viewport: { cssWidth: this.cssWidth, cssHeight: this.cssHeight },
+            presentationTimeSeconds: this.now()
         });
         if (scene.mobileView) this.drawPlayerHealthHud(scene);
         if (!scene.mobileView) {

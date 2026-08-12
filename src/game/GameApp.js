@@ -6,11 +6,12 @@ import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { GameSimulation } from "./simulation/GameSimulation.js";
-import { CAMERA_CONFIG, PLAYER_CONFIG } from "./config.js";
+import { CAMERA_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
+import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 
 export class GameApp {
     constructor({
@@ -36,6 +37,7 @@ export class GameApp {
         this.latestInput = this.input.snapshot();
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
+        this.playerPresentationEvents = [];
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: () => this.render()
@@ -71,6 +73,7 @@ export class GameApp {
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
+        this.playerPresentationEvents.push(...createPlayerPresentationEvents(authorityEvents));
         const authorityFeedback = this.predictableProjectiles.apply(authorityEvents, state.tick, state);
         const owner = this.authority.ownerState();
         const predictedImpacts = this.predictableProjectiles
@@ -78,7 +81,7 @@ export class GameApp {
                 dt,
                 {
                     enemies: state.enemies,
-                    localPlayer: { ...owner, radius: PLAYER_CONFIG.radius }
+                    localPlayer: owner
                 },
                 state.tick
             )
@@ -86,6 +89,7 @@ export class GameApp {
         for (const impact of predictedImpacts) {
             this.predictableProjectiles.applyImpactReceipts([this.authority.submitImpactClaim(impact)]);
         }
+        this.playerPresentationEvents.push(...createPlayerPresentationEvents(predictedImpacts));
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
@@ -110,9 +114,13 @@ export class GameApp {
         const combatFeedback = this.combatFeedback.snapshot();
         if (this.metricsVisible) this.onDiagnostics({ metrics: state.metrics, worldSeed: state.world.seed });
         this.stats.resets = state.resets;
+        this.playerPresentationEvents.push(...createPlayerPresentationEvents([state.eventFlash]));
+        const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         this.renderer.draw({
             ...state,
             ...combatFeedback,
+            localPlayerId: this.authority.playerId,
+            playerPresentationEvents,
             eventFlash:
                 combatFeedback.eventFlash ?? selectClientStatusFeedback(state.eventFlash, this.authority.playerId),
             camera: this.camera,

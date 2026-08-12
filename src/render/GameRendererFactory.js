@@ -1,9 +1,21 @@
 import { CanvasRenderer } from "./CanvasRenderer.js";
 import { PolygonSceneRenderer } from "./PolygonSceneRenderer.js";
+import { SpriteSceneRenderer } from "./SpriteSceneRenderer.js";
 import { assertSceneRenderer } from "./SceneRenderer.js";
 
-export const DEFAULT_RENDERER_PROFILE = "polygon";
-const DEFAULT_FACTORIES = Object.freeze({ polygon: () => new PolygonSceneRenderer() });
+export const DEFAULT_RENDERER_PROFILE = "sprite";
+const DEFAULT_FACTORIES = Object.freeze({
+    sprite: () => new SpriteSceneRenderer(),
+    polygon: () => new PolygonSceneRenderer()
+});
+
+export function resolveRendererProfile(search = globalThis.location?.search ?? "", { warn = console.warn } = {}) {
+    const requested = new URLSearchParams(search).get("renderer");
+    if (!requested) return DEFAULT_RENDERER_PROFILE;
+    if (Object.hasOwn(DEFAULT_FACTORIES, requested)) return requested;
+    warn(`[renderer] unknown profile '${requested}'; using '${DEFAULT_RENDERER_PROFILE}'`);
+    return DEFAULT_RENDERER_PROFILE;
+}
 
 export function createGameRenderer({
     canvas,
