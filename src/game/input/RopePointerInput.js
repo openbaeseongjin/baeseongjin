@@ -1,5 +1,6 @@
 import { closestPointOnSurface } from "../world/WorldGenerator.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
+import { releaseRopeFromBody, ropeAttachmentPoint } from "../rope/RopeAttachment.js";
 import { createInputCapabilityMixin } from "./InputCapability.js";
 
 export function findRopeAttachment({ aimPoint, playerPosition, surfaces, maxAttachDistance }) {
@@ -24,7 +25,7 @@ export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, 
     ropeObject.swingDrag.age += dt;
     const evaluation = evaluateSwingDrag({
         anchor: ropeObject.rope.anchor,
-        playerPosition: owner.physics.position,
+        playerPosition: ropeAttachmentPoint(owner.physics, ropeObject.rope),
         drag: {
             x: pointer.x - ropeObject.swingDrag.origin.x,
             y: pointer.y - ropeObject.swingDrag.origin.y
@@ -35,7 +36,7 @@ export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, 
     ropeObject.swingDrag.direction = evaluation.direction;
     ropeObject.swingDrag.progress = evaluation.progress;
     if (!evaluation.triggered || ropeObject.swingDrag.age < config.swingDragMinHoldSeconds) return;
-    owner.physics.addImpulse(evaluation.direction, config.swingImpulse);
+    owner.physics.addImpulseAtLocalPoint(evaluation.direction, config.swingImpulse, ropeObject.rope.attachmentOffset);
     onSwing();
     ropeObject.swingDrag.used = true;
     onFlash({ type: "swing", age: 0 });
@@ -66,7 +67,11 @@ export const withRopePointerInput = createInputCapabilityMixin({
             this.attachBufferRemaining > 0 &&
             this.attachmentCandidate
         ) {
-            if (this.rope.attach(owner.physics.position, this.attachmentCandidate)) {
+            if (
+                this.rope.attach(owner.physics.position, this.attachmentCandidate, {
+                    angle: owner.physics.angle
+                })
+            ) {
                 onFlash({ type: "attach", age: 0 });
                 this.swingDrag = {
                     origin: { x: command.pointer.x, y: command.pointer.y },
@@ -91,7 +96,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
             });
         }
         if (!command.pointer.down && this.wasPointerDown && this.rope.isAttached) {
-            this.rope.detach();
+            releaseRopeFromBody(owner.physics, this.rope);
             onFlash({ type: "release", age: 0 });
             this.swingDrag = null;
         }

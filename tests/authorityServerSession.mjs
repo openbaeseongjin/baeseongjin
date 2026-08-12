@@ -12,7 +12,7 @@ import { createSummitClaim } from "../src/game/network/SummitClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
 import { createRopeSwingClaim } from "../src/game/network/RopeSwingClaim.js";
 import { Vector2 } from "../src/game-kit/index.js";
-import { COMBAT_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
+import { COMBAT_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -207,6 +207,18 @@ export function run() {
         "speed-envelope",
         "client authority must remain inside the server movement envelope"
     );
+    assert.equal(
+        combatSession.submitOwnerMotion(
+            combatPlayer.id,
+            createOwnerMotionState({
+                ...ownerMotion,
+                clientTick: ownerMotion.clientTick + 1,
+                angularVelocity: 999
+            })
+        ).reason,
+        "angular-speed-envelope",
+        "client authority must keep angular motion inside the rigid-body envelope"
+    );
 
     combatPlayer.ropeObject.rope.attach(combatPlayer.physics.position, {
         x: combatPlayer.physics.position.x,
@@ -237,7 +249,8 @@ export function run() {
             velocity: { x: 0, y: 0 },
             rope: {
                 isAttached: true,
-                anchor: { x: combatPlayer.physics.position.x, y: combatPlayer.physics.position.y - 80 }
+                anchor: { x: combatPlayer.physics.position.x, y: combatPlayer.physics.position.y - 80 },
+                attachmentOffset: ROPE_CONFIG.handOffset
             }
         })
     );

@@ -5,7 +5,12 @@ export const PLAYER_CONFIG = Object.freeze({
     airAcceleration: 520,
     groundDrag: 10,
     maxHorizontalSpeed: 360,
-    jumpSpeed: 440
+    jumpSpeed: 440,
+    angularInertia: 112.5,
+    maxAngularSpeed: 12,
+    airAngularDamping: 0.35,
+    groundUprightStrength: 42,
+    groundUprightDamping: 11
 });
 
 export const ROPE_CONFIG = Object.freeze({
@@ -13,7 +18,9 @@ export const ROPE_CONFIG = Object.freeze({
     attachBufferSeconds: 0.1,
     swingDragThresholdViewportRatio: 0.11,
     swingDragMinHoldSeconds: 0.08,
-    swingImpulse: 780
+    swingImpulse: 780,
+    handOffset: Object.freeze({ x: 12, y: -7 }),
+    releaseAngularTransfer: 0.55
 });
 
 export const CAMERA_CONFIG = Object.freeze({

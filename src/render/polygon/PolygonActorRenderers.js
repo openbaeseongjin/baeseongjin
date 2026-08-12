@@ -1,3 +1,5 @@
+import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
+
 const PLAYER_COLORS = Object.freeze({
     local: "#67e8f9",
     localEdge: "#cffafe",
@@ -11,22 +13,42 @@ function colliderRadius(player) {
     return snapshot.radius;
 }
 
-function drawPlayerBody(context, player, fill, stroke) {
+function drawPlayerBody(context, player, rope, fill, stroke) {
+    const radius = colliderRadius(player);
     context.save();
     context.fillStyle = fill;
     context.strokeStyle = stroke;
     context.lineWidth = 2;
     context.beginPath();
-    context.arc(player.position.x, player.position.y, colliderRadius(player), 0, Math.PI * 2);
+    context.arc(player.position.x, player.position.y, radius, 0, Math.PI * 2);
     context.fill();
     context.stroke();
+    context.translate(player.position.x, player.position.y);
+    context.rotate(player.angle ?? 0);
+    context.strokeStyle = "rgba(8, 11, 16, 0.75)";
+    context.lineWidth = 3;
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(0, radius * 0.65);
+    context.lineTo(0, -radius * 0.65);
+    context.stroke();
+    context.lineCap = "butt";
     context.restore();
+    if (rope?.isAttached) {
+        const hand = ropeAttachmentPoint(player, rope);
+        context.strokeStyle = stroke;
+        context.lineWidth = 4;
+        context.beginPath();
+        context.moveTo(player.position.x, player.position.y);
+        context.lineTo(hand.x, hand.y);
+        context.stroke();
+    }
 }
 
 export class PolygonRemotePlayerRenderer {
     draw({ context, scene }) {
         for (const player of scene.otherPlayers ?? []) {
-            drawPlayerBody(context, player, PLAYER_COLORS.remote, PLAYER_COLORS.remoteEdge);
+            drawPlayerBody(context, player, player.rope, PLAYER_COLORS.remote, PLAYER_COLORS.remoteEdge);
         }
     }
 }
@@ -89,7 +111,7 @@ export class PolygonLocalPlayerRenderer {
             context.stroke();
             context.globalAlpha = 1;
         }
-        drawPlayerBody(context, player, PLAYER_COLORS.local, PLAYER_COLORS.localEdge);
+        drawPlayerBody(context, player, scene.rope, PLAYER_COLORS.local, PLAYER_COLORS.localEdge);
         const speed = player.velocity.length();
         if (speed <= 160) return;
         context.strokeStyle = "rgba(103, 232, 249, 0.45)";

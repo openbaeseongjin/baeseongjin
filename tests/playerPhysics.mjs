@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { PLAYER_CONFIG, ROPE_CONFIG } from "../src/game/config.js";
 import { PlayerPhysics } from "../src/game/physics/PlayerPhysics.js";
 import { FixedLengthRope } from "../src/game/rope/FixedLengthRope.js";
+import { releaseRopeFromBody } from "../src/game/rope/RopeAttachment.js";
 import { polygonBounds } from "../src/game/world/PolygonGeometry.js";
 
 const noInput = Object.freeze({ horizontal: 0, vertical: 0 });
@@ -46,7 +47,11 @@ export function run() {
     swingRope.attach(swinging.position, { x: 0, y: 0 });
     swinging.position.y = 400;
     swinging.step(1 / 120, noInput, [], swingRope);
-    assert.equal(swinging.velocity.x, 700, "movement speed limits must not reduce tangential swing velocity");
+    assert.ok(
+        swinging.velocity.x > PLAYER_CONFIG.maxHorizontalSpeed + 300,
+        "movement speed limits must not reduce tangential swing velocity"
+    );
+    assert.notEqual(swinging.angularVelocity, 0, "the off-centre hand joint must turn the player body");
 
     const controlledSwing = new PlayerPhysics({ ...swingConfig, airAcceleration: PLAYER_CONFIG.airAcceleration });
     const controlledRope = new FixedLengthRope(ROPE_CONFIG);
@@ -67,7 +72,40 @@ export function run() {
     bottomSwing.position.set(0, 300);
     bottomRope.attach(bottomSwing.position, { x: 0, y: 0 });
     bottomSwing.step(1 / 120, noInput, [], bottomRope);
-    assert.equal(bottomSwing.velocity.y, 0, "gravity must not stretch a fixed rope at the bottom of the arc");
+    const bottomOffset = bottomSwing.angularMotion.worldOffset(bottomRope.attachmentOffset);
+    const bottomHand = {
+        x: bottomSwing.position.x + bottomOffset.x,
+        y: bottomSwing.position.y + bottomOffset.y
+    };
+    assert.ok(
+        Math.abs(
+            Math.hypot(bottomHand.x - bottomRope.anchor.x, bottomHand.y - bottomRope.anchor.y) - bottomRope.length
+        ) < 0.001,
+        "gravity must not stretch the hand-jointed fixed rope at the bottom of the arc"
+    );
+
+    const releasing = new PlayerPhysics({ ...swingConfig, airAcceleration: 0 });
+    const releaseRope = new FixedLengthRope(ROPE_CONFIG);
+    releasing.position.set(0, 300);
+    releasing.setAngularState(0, 4);
+    releaseRope.attach(releasing.position, { x: 0, y: 0 }, { angle: releasing.angle });
+    const releaseTangent = releasing.angularMotion.tangentialVelocity(releaseRope.attachmentOffset);
+    assert.equal(releaseRopeFromBody(releasing, releaseRope), true);
+    assert.ok(
+        Math.abs(releasing.velocity.x - releaseTangent.x * ROPE_CONFIG.releaseAngularTransfer) < 0.001 &&
+            Math.abs(releasing.velocity.y - releaseTangent.y * ROPE_CONFIG.releaseAngularTransfer) < 0.001,
+        "release must transfer part of the hand's angular tangent into linear momentum"
+    );
+    assert.equal(releasing.angularVelocity, 4, "release must preserve angular velocity");
+
+    const upright = new PlayerPhysics({ ...swingConfig, airAcceleration: 0 });
+    upright.setAngularState(Math.PI / 2, 0);
+    for (let step = 0; step < 120; step += 1) {
+        upright.applyAngularForces(1 / 120, true);
+        upright.integrateAngularMotion(1 / 120);
+    }
+    assert.ok(Math.abs(upright.angle) < Math.PI / 4, "grounded upright torque must restore the body toward vertical");
+    assert.ok(Math.abs(upright.angularVelocity) < 1, "grounded upright damping must settle the rotation");
 
     controlledSwing.velocity.set(10, 20);
     controlledSwing.addImpulse({ x: 0, y: -1 }, 620);

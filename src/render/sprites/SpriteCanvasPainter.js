@@ -8,7 +8,8 @@ export function paintSpriteFrame({
     offset = { x: 0, y: 0 },
     opacity = 1,
     pixelSnap = false,
-    flipX = false
+    flipX = false,
+    rotation = 0
 }) {
     if (!context || !image || !frame || !position || !size)
         throw new Error("Sprite painter requires context, image, frame, position, and size");
@@ -25,7 +26,8 @@ export function paintSpriteFrame({
         "anchor.y": anchor?.y,
         "offset.x": offset?.x,
         "offset.y": offset?.y,
-        opacity
+        opacity,
+        rotation
     })) {
         if (!Number.isFinite(value)) throw new Error(`Sprite painter requires finite ${name}`);
     }
@@ -44,7 +46,21 @@ export function paintSpriteFrame({
     context.save();
     context.imageSmoothingEnabled = false;
     context.globalAlpha *= opacity;
-    if (flipX) {
+    if (rotation !== 0) {
+        const centerX = pixelSnap ? Math.round(position.x) : position.x;
+        const centerY = pixelSnap ? Math.round(position.y) : position.y;
+        const offsetX = pixelSnap ? pivot.x - centerX : offset.x;
+        const offsetY = pixelSnap ? pivot.y - centerY : offset.y;
+        const localX = pixelSnap
+            ? Math.round(-size.width * (flipX ? 1 - anchor.x : anchor.x))
+            : -size.width * (flipX ? 1 - anchor.x : anchor.x);
+        const localY = pixelSnap ? Math.round(-size.height * anchor.y) : -size.height * anchor.y;
+        context.translate(centerX, centerY);
+        context.rotate(rotation);
+        context.translate(offsetX, offsetY);
+        if (flipX) context.scale(-1, 1);
+        context.drawImage(image, frame.x, frame.y, frame.width, frame.height, localX, localY, size.width, size.height);
+    } else if (flipX) {
         context.translate(pivot.x, 0);
         context.scale(-1, 1);
         context.drawImage(

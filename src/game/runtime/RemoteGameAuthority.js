@@ -252,6 +252,8 @@ export class RemoteGameAuthority {
             clientTick: predicted.tick,
             position: predicted.position,
             velocity: predicted.velocity,
+            angle: predicted.angle,
+            angularVelocity: predicted.angularVelocity,
             isGrounded: predicted.isGrounded,
             rope: predicted.rope
         });

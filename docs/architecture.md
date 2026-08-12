@@ -71,6 +71,25 @@ index.html
 - bootstrap 기본 프로필은 `sprite`이며 query의 `renderer=polygon`이 기존 표현을 명시적으로 선택한다. 알 수 없는 값은 경고 후 기본 프로필을 사용한다. sprite asset 준비 실패는 앱을 중단하지 않고 하위 fallback renderer가 전체 polygon scene을 그리며 진단 가능한 경고를 남긴다.
 - 렌더 프로필 교체는 물리·전투·입력·권위 snapshot·네트워크 메시지 계약을 바꾸지 않는다.
 
+## 플레이어 강체 회전과 손 로프 관절
+
+플레이어 물리는 상속 mixin이 아니라 강체에 필요한 요소를 조립하는 Has-A 구조를 사용한다.
+
+- `PlayerPhysics`는 선형 위치·속도를 소유하고 `AngularMotion`과 공개 `Collider`를 각각 조합한다. `AngularMotion`은 각도, 각속도, 관성, 각 감쇠, 점 속도와 점 충격 계산을 담당한다. collider 형상은 계속 `PlayerRuntimeFactory`에서 독립적으로 교체할 수 있으며 몸체 회전이 원형 collider를 암묵적으로 바꾸지 않는다.
+- `FixedLengthRope`는 플레이어 강체의 일부나 상속 mixin이 아니라 외부 joint다. world anchor, 몸체 local-space의 `attachmentOffset`, 고정 길이와 장력을 소유하고 손 관절점의 위치·속도 제약을 푼다. 제약 충격은 중심 선속도와 `r × impulse / inertia` 각속도에 함께 반영한다.
+- 손 관절점은 부착 순간 anchor 쪽 손을 선택해 local offset으로 고정한다. 이후 몸체 각도에 따라 world-space 손 위치가 회전하며 공용 rope renderer, 스윙 입력, 투사체-로프 충돌도 같은 `ropeAttachmentPoint()` 계산을 사용한다.
+- 로프 해제는 각속도를 제거하지 않는다. 게임 조작 체감을 위해 손끝 접선 속도의 `releaseAngularTransfer` 비율을 중심 선속도에 추가하는 명시적 게임플레이 보정만 적용한다. 이 비율은 joint solver나 collider에 숨기지 않는다.
+- 지면 접촉 중에는 `angle = 0`을 향한 복원 토크와 각 감쇠를 적용하고, 공중에서는 약한 각 감쇠만 적용한다. 따라서 지면에서는 오뚜기처럼 서고 매달린 동안에는 joint torque를 유지한다.
+
+이 구조는 다음 공식 물리 엔진 계약을 기준으로 삼는다.
+
+- [Box2D Body API](https://box2d.org/documentation/group__body.html): body가 선속도·각속도와 점 force/impulse를 소유하며 중심 밖 힘이 torque를 만든다.
+- [Rapier rigid-bodies](https://rapier.rs/docs/user_guides/javascript/rigid_bodies/): rigid body는 동역학·운동학을 소유하고 collider는 형상과 질량 특성을 제공하도록 별도 부착한다.
+- [Rapier joints](https://rapier.rs/docs/user_guides/javascript/joints/): joint는 각 body의 local anchor를 연결하는 독립 제약이다.
+- [Unity Rigidbody2D](https://docs.unity3d.com/ScriptReference/Rigidbody2D.html): 위치·회전·선속도·각속도·관성을 한 강체 운동 상태로 제공하고 collider를 별도 부착한다.
+
+따라서 각운동을 클래스 상속 mixin으로 주입하지 않는다. 새 강체 유형도 `AngularMotion`·`Collider`·joint를 필요한 조합으로 소유하고, input/simulation capability mixin은 기존처럼 실행 라우팅 책임에만 사용한다.
+
 ## 게임 객체 모델
 
 ```text

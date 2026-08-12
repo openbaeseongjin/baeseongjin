@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 1;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 2;
 
 function assertTick(value, label) {
     if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${label} must be a non-negative safe integer`);
@@ -12,18 +12,31 @@ function finiteVector(value, label) {
     return normalizeNetworkJson(value, label);
 }
 
-export function createOwnerMotionState({ clientTick, position, velocity, isGrounded, rope }) {
+export function createOwnerMotionState({
+    clientTick,
+    position,
+    velocity,
+    angle = 0,
+    angularVelocity = 0,
+    isGrounded,
+    rope
+}) {
     if (typeof isGrounded !== "boolean") throw new Error("isGrounded must be boolean");
     if (typeof rope?.isAttached !== "boolean") throw new Error("rope.isAttached must be boolean");
+    if (!Number.isFinite(angle)) throw new Error("angle must be finite");
+    if (!Number.isFinite(angularVelocity)) throw new Error("angularVelocity must be finite");
     return Object.freeze({
         protocolVersion: OWNER_MOTION_STATE_PROTOCOL_VERSION,
         clientTick: assertTick(clientTick, "clientTick"),
         position: finiteVector(position, "position"),
         velocity: finiteVector(velocity, "velocity"),
+        angle,
+        angularVelocity,
         isGrounded,
         rope: Object.freeze({
             isAttached: rope.isAttached,
-            anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null
+            anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null,
+            attachmentOffset: rope.isAttached ? finiteVector(rope.attachmentOffset, "rope.attachmentOffset") : null
         })
     });
 }

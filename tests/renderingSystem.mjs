@@ -15,6 +15,7 @@ import {
 import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
+import { localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
 
 function recordingContext() {
     const calls = [];
@@ -28,7 +29,10 @@ function recordingContext() {
             createLinearGradient: () => ({ addColorStop() {} }),
             drawImage: (...args) => calls.push(["drawImage", ...args]),
             translate: (...args) => calls.push(["translate", ...args]),
-            scale: (...args) => calls.push(["scale", ...args])
+            rotate: (...args) => calls.push(["rotate", ...args]),
+            scale: (...args) => calls.push(["scale", ...args]),
+            moveTo: (...args) => calls.push(["moveTo", ...args]),
+            lineTo: (...args) => calls.push(["lineTo", ...args])
         },
         { get: (target, key) => (key in target ? target[key] : () => {}) }
     );
@@ -309,6 +313,29 @@ export async function run() {
     const flippedDraw = flipped.calls.find(([name]) => name === "drawImage");
     assert.deepEqual(flippedDraw.slice(1, 6), [image, 3, 0, 8, 8]);
     assert.deepEqual([40 - flippedDraw[6] - 20, flippedDraw[7], 20, 10], [35, 55, 20, 10]);
+    const rotated = recordingContext();
+    paintSpriteFrame({
+        context: rotated,
+        image,
+        frame: sprite,
+        position,
+        size,
+        anchor,
+        offset: { x: 2, y: -1 },
+        rotation: 0.5
+    });
+    assert.deepEqual(
+        rotated.calls.filter(([name]) => name === "translate" || name === "rotate"),
+        [
+            ["translate", 40, 60],
+            ["rotate", 0.5],
+            ["translate", 2, -1]
+        ]
+    );
+    assert.deepEqual(
+        rotated.calls.find(([name]) => name === "drawImage"),
+        ["drawImage", image, 3, 0, 8, 8, -5, -5, 20, 10]
+    );
     const cued = recordingContext();
     paintSpriteFrame({
         context: cued,
@@ -335,7 +362,8 @@ export async function run() {
         { offset: { x: 0, y: Infinity } },
         { opacity: 0 },
         { pixelSnap: "yes" },
-        { flipX: "yes" }
+        { flipX: "yes" },
+        { rotation: Infinity }
     ]) {
         assert.throws(() =>
             paintSpriteFrame({ context: recordingContext(), image, frame: sprite, position, size, anchor, ...bad })
@@ -443,6 +471,24 @@ export async function run() {
         playerContext.calls.find(([name]) => name === "drawImage"),
         ["drawImage", image, 24, 0, 24, 24, 21, 42, 40, 40],
         "player renderer must consume definition-owned frame, size, anchor, and offset"
+    );
+    const ropeContext = recordingContext();
+    new RopeRenderer(localRopes).draw({
+        context: ropeContext,
+        scene: {
+            player: { position: { x: 40, y: 60 }, angle: 0 },
+            rope: {
+                isAttached: true,
+                anchor: { x: 40, y: 0 },
+                attachmentOffset: { x: 12, y: -7 },
+                tension: 0
+            }
+        }
+    });
+    assert.deepEqual(
+        ropeContext.calls.find(([name]) => name === "lineTo"),
+        ["lineTo", 52, 53],
+        "the shared rope renderer must end at the rotated hand attachment instead of the body centre"
     );
 
     const manifest = {

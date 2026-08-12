@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 3;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 4;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit"]);
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
@@ -69,6 +69,8 @@ function normalizeImpactRecoveryState(state) {
     assertId(normalized.id, "outcome.state.id");
     assertFiniteVector(normalized.position, "outcome.state.position");
     assertFiniteVector(normalized.velocity, "outcome.state.velocity");
+    assertFinite(normalized.angle, "outcome.state.angle");
+    assertFinite(normalized.angularVelocity, "outcome.state.angularVelocity");
     assertBoolean(normalized.isGrounded, "outcome.state.isGrounded");
     assertFinite(normalized.maxHealth, "outcome.state.maxHealth", { minimum: 0, exclusiveMinimum: true });
     assertFinite(normalized.health, "outcome.state.health", { minimum: 0 });
@@ -84,6 +86,7 @@ function normalizeImpactRecoveryState(state) {
     assertBoolean(normalized.rope?.isAttached, "outcome.state.rope.isAttached");
     if (normalized.rope.isAttached) {
         assertFiniteVector(normalized.rope.anchor, "outcome.state.rope.anchor");
+        assertFiniteVector(normalized.rope.attachmentOffset, "outcome.state.rope.attachmentOffset");
         assertFinite(normalized.rope.length, "outcome.state.rope.length", { minimum: 0, exclusiveMinimum: true });
         assertFinite(normalized.rope.currentLength, "outcome.state.rope.currentLength", {
             minimum: 0,
@@ -91,6 +94,9 @@ function normalizeImpactRecoveryState(state) {
         });
     } else {
         if (normalized.rope.anchor !== null) throw new Error("outcome.state.rope.anchor must be null when detached");
+        if (normalized.rope.attachmentOffset !== null) {
+            throw new Error("outcome.state.rope.attachmentOffset must be null when detached");
+        }
         if (normalized.rope.length !== 0 || normalized.rope.currentLength !== 0) {
             throw new Error("outcome.state detached rope lengths must be zero");
         }
@@ -157,6 +163,8 @@ function impactStateProjection(state, { impactType, respawned }) {
     return {
         ...projection,
         position: quantizedVector(state.position, 0.1),
+        angle: quantized(state.angle, 0.001),
+        angularVelocity: quantized(state.angularVelocity, 0.001),
         isGrounded: state.isGrounded,
         maxHealth: quantized(state.maxHealth, 0.001),
         ropeDisabledTicks: quantized(state.ropeDisabledRemaining, 1 / 120),
@@ -164,6 +172,7 @@ function impactStateProjection(state, { impactType, respawned }) {
         rope: {
             isAttached: state.rope.isAttached,
             anchor: state.rope.isAttached ? quantizedVector(state.rope.anchor, 0.1) : null,
+            attachmentOffset: state.rope.isAttached ? quantizedVector(state.rope.attachmentOffset, 0.1) : null,
             length: quantized(state.rope.length, 0.1),
             currentLength: quantized(state.rope.currentLength, 0.1)
         },

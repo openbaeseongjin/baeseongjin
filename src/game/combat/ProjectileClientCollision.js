@@ -1,5 +1,6 @@
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
 import { colliderSnapshotOverlapsCircle } from "../physics/colliders/Collider.js";
+import { ropeAttachmentPoint } from "../rope/RopeAttachment.js";
 
 export const CLIENT_PROJECTILE_COLLISION_CAPABILITY = "client-projectile-collision";
 
@@ -49,7 +50,8 @@ export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
         const ropeHit = Boolean(
             canHitPlayer &&
             player.rope?.isAttached &&
-            distancePointToSegment(this.position, player.position, player.rope.anchor) <= this.radius
+            distancePointToSegment(this.position, ropeAttachmentPoint(player, player.rope), player.rope.anchor) <=
+                this.radius
         );
         const bodyHit = Boolean(
             canHitPlayer &&

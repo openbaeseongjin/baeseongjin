@@ -127,7 +127,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 로프 공명 강화는 소유 클라이언트가 스윙 프레임에 즉시 적용하고 `owner-motion → rope-swing-claim → projectile-spawn-claim` 순서로 보낸다. 서버는 소유권·tick·위치·부착 anchor·아티팩트를 검증해 강화 타이머와 `rope-swing` 사건을 멱등 공유한다. 스윙마다 강화 직전·직후 값과 tick을 보존하며, 앞 스윙 거절 뒤 후속 스윙이 pending이면 후속 강화는 유지하고 후속 rollback 기준만 교정한다. 마지막 거절은 최초 스윙 이전 값으로 수렴한다. 승인 뒤 서버 복제본과 동료가 소유자의 강화 결과로 수렴하며 소유자는 스냅샷 타이머로 되감기지 않는다.
 - 파티클·타격 VFX·피해 숫자·화면 흔들림은 서버가 상태나 수명으로 시뮬레이션하지 않는다. 서버는 고유 ID가 있는 판정 이벤트만 확정하고, 싱글과 멀티의 각 클라이언트가 같은 피드백 컴포넌트로 효과를 생성·진행·소멸시킨다.
 - `AuthorityCommandInbox`가 플레이어별 승인 `sequence`와 허용 틱 범위를 검사해 재적용 원본·지연 진단 계약을 유지한다. 멀티 서버는 이 명령으로 `InputDrivenObject` 물리를 다시 실행하지 않으며 최신 승인 `owner-motion`만 플레이어·로프 연속 상태를 바꾼다.
-- `WorldSnapshotEnvelope` 프로토콜 v3가 단조 `snapshotSequence`·중립 월드 `serverTick`·플레이어별 `ownerMotionTick`·월드 식별자·승인 번호·비예측 상태·이벤트를 묶으며, 투사체 같은 예측 객체 배열이 반복 상태로 들어가는 것을 거부한다. sequence는 같은 server tick의 참가·퇴장·claim 확정 봉투 순서를 구분한다.
+- `WorldSnapshotEnvelope` 프로토콜 v4가 단조 `snapshotSequence`·중립 월드 `serverTick`·플레이어별 `ownerMotionTick`·월드 식별자·승인 번호·비예측 상태·이벤트를 묶으며, 투사체 같은 예측 객체 배열이 반복 상태로 들어가는 것을 거부한다. player 상태에는 소유자 각도·각속도와 로프 손 local offset도 포함하며, sequence는 같은 server tick의 참가·퇴장·claim 확정 봉투 순서를 구분한다.
 - `GameSimulation`의 권위 틱에서 승인된 플레이어 spawn claim·중립 자동 발사·수명 만료·승인된 충돌 claim이 `PredictableObjectEvent`를 발행하며, 전송 계층은 사건을 한 번만 drain한다.
 - `AuthoritySnapshotBuilder`가 플레이어별 상태·적·진행·승인 번호·사건만 권위 봉투로 만들고, 지형은 시드와 `WORLD_GENERATION_REVISION`으로 재생성하며 투사체 배열은 제외한다.
 - 플레이어는 물리·체력·아티팩트를 Has-A로 소유하고 로프는 부착·장력·드래그 상태를 가진 별도 `InputDrivenObject`로 둔다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput` Can-Do 믹스인 한 곳에 구현한다.
@@ -183,6 +183,11 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - Vanilla JavaScript ES Module, Canvas 2D, CSS, Node.js, npm, Prettier와 무번들 구조를 유지한다. Alpine.js는 DOM 상태 UI가 실제로 필요할 때만 도입한다.
 
 ### [L2] 고정 길이 로프에서 접선 충격과 중력으로 회전한다
+
+- 로프는 몸 중심이 아니라 부착 순간 anchor 쪽으로 선택한 손의 local-space `attachmentOffset`에 연결한다. 몸체 각도에 따라 손끝 world 위치가 회전하며 joint 제약력은 선속도와 각속도에 함께 작용한다.
+- 플레이어 각운동은 physics mixin 상속이 아니라 `PlayerPhysics Has-A AngularMotion` 조합으로 확정했다. collider도 독립 Has-A 조합이고 `FixedLengthRope`는 local anchor를 참조하는 외부 joint다. Box2D·Rapier·Unity 공식 강체 구조를 따른 근거와 확장 규칙은 `docs/architecture.md`의 **플레이어 강체 회전과 손 로프 관절**을 따른다.
+- 로프 해제 시 각속도를 보존하고 손끝 접선 속도의 설정 비율을 중심 이동 속도에 전달한다. 지면 접촉 중에는 `angle = 0` 방향의 복원 토크와 감쇠를 적용해 오뚜기처럼 일어서며 공중에서는 약한 각 감쇠만 적용한다.
+- `owner-motion` v2, `WorldSnapshot` v4, `player-impact` v4가 angle·angularVelocity·attachmentOffset을 전달·검증·복구한다. 원격 각도는 ownerMotionTick 기준 최단 회전 보간과 제한 외삽을 사용하며 상세 계약은 `docs/multiplayer-synchronization.md`의 **플레이어 강체 회전과 손 관절 동기화**를 따른다.
 
 - 부착 순간 거리를 고정 반경으로 유지하고 방사 속도를 제거한다.
 - 능동 운동량은 임계 접선 드래그가 부착당 한 번 만드는 임펄스로만 추가한다.
