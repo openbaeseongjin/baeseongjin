@@ -12,6 +12,7 @@ import { ARTIFACT_CONFIG, COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFI
 import { InputDispatcher } from "../input/InputDispatcher.js";
 import { findRopeAttachment } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
+import { createPlayerImpactStateDigest } from "../network/PlayerImpactClaim.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
@@ -924,6 +925,24 @@ export class GameSimulation {
         const player = this.players.find(({ id }) => id === authenticatedPlayerId);
         if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
         const projectile = this.enemyProjectiles.find(({ id }) => id === claim.projectileId);
+        if (claim.outcome) {
+            const damage = projectile?.damage ?? claim.damage;
+            if (claim.outcome.state) {
+                this.#restorePlayer(player, claim.outcome.state);
+            } else {
+                const stateBeforeImpact = this.playerState(player.id);
+                this.#applyVictimImpactTransition(player, claim, damage);
+                const digest = createPlayerImpactStateDigest(this.playerState(player.id), {
+                    impactType: claim.impactType,
+                    respawned: claim.outcome.respawned
+                });
+                if (digest !== claim.outcome.digest) {
+                    this.#restorePlayer(player, stateBeforeImpact);
+                    return Object.freeze({ accepted: false, reason: "state-diverged" });
+                }
+            }
+            return this.#finalizeVictimImpact(player, claim, projectile, damage);
+        }
         if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
         if (projectile.targetId !== authenticatedPlayerId) {
             return Object.freeze({ accepted: false, reason: "target-mismatch" });
@@ -971,6 +990,51 @@ export class GameSimulation {
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage: projectile.damage });
     }
 
+    #applyVictimImpactTransition(player, claim, damage) {
+        if (claim.impactType === "rope-cut") {
+            player.ropeObject.rope.detach();
+            player.ropeObject.swingDrag = null;
+            player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
+            return;
+        }
+        player.health = Math.max(0, player.health - damage);
+        const speed = Math.hypot(claim.velocity.x, claim.velocity.y);
+        if (speed > 0) {
+            player.physics.addImpulse(
+                new Vector2(claim.velocity.x / speed, claim.velocity.y / speed),
+                COMBAT_CONFIG.playerHitKnockback
+            );
+        }
+        player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+        if (claim.outcome.respawned) this.#resetPlayerAtCheckpoint(player);
+    }
+
+    #finalizeVictimImpact(player, claim, projectile, damage) {
+        if (claim.impactType === "rope-cut") {
+            this.eventFlash = {
+                type: "rope-cut",
+                age: 0,
+                position: new Vector2(claim.position.x, claim.position.y),
+                playerId: player.id
+            };
+        }
+        if (projectile) this.enemyProjectiles = this.enemyProjectiles.filter(({ id }) => id !== projectile.id);
+        this.recordProjectileResolution(
+            {
+                projectileId: claim.projectileId,
+                resolution: claim.impactType,
+                position: new Vector2(claim.position.x, claim.position.y)
+            },
+            {
+                damage: claim.impactType === "player-hit" ? damage : 0,
+                targetId: player.id
+            }
+        );
+        this.metrics.recordPlayerImpact(claim.impactType, damage);
+        if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "health");
+        return Object.freeze({ accepted: true, resolution: claim.impactType, damage });
+    }
+
     recordReplicationEvent(eventType, payload) {
         this.replicationEvents.push(
             Object.freeze({
@@ -1010,8 +1074,13 @@ export class GameSimulation {
 
     respawnPlayerAtCheckpoint(player, reason) {
         if (!player || this.runState !== "playing") return false;
+        this.#resetPlayerAtCheckpoint(player);
+        this.#recordPlayerRespawn(player, reason);
+        return true;
+    }
+
+    #resetPlayerAtCheckpoint(player) {
         const respawnPosition = this.activeCheckpoint ?? { x: 120, y: 500 };
-        this.metrics.recordDefeat();
         player.physics.reset(respawnPosition);
         player.ropeObject.rope.detach();
         player.ropeObject.attachmentCandidate = null;
@@ -1027,6 +1096,10 @@ export class GameSimulation {
         player.lastCheckpointLoss = player.artifacts.applyCheckpointLoss();
         player.ropeDamageBoostRemaining = 0;
         this.applyArtifactEffects(player);
+    }
+
+    #recordPlayerRespawn(player, reason) {
+        this.metrics.recordDefeat();
         const artifactIds = player.lastCheckpointLoss.map(({ id }) => id);
         if (artifactIds.length > 0) {
             this.recordReplicationEvent("artifact-loss", {
@@ -1060,7 +1133,6 @@ export class GameSimulation {
             position: { x: player.physics.position.x, y: player.physics.position.y }
         });
         this.resets += 1;
-        return true;
     }
 
     beginCompletion(playerId = this.#primaryPlayerId) {

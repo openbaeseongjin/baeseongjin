@@ -912,6 +912,8 @@ export async function run() {
             radius: 7
         });
         room.simulation.enemyProjectiles.push(rejectedBodyProjectile);
+        authorityPlayer.health = Math.min(authorityPlayer.maxHealth, beforeRejectedBody.health + 15);
+        authorityPlayer.hitInvulnerabilityRemaining = 0.4;
         assert.equal(
             authority.resolvePredictedImpact({
                 projectileId: rejectedBodyProjectile.id,
@@ -938,7 +940,7 @@ export async function run() {
         }
         await waitFor(
             () => authority.impactClaimReceipts.length > 0,
-            "the invalid body impact must return a rejection receipt"
+            "the victim-owned body impact must return a receipt"
         );
         const rejectedBodyReceipt = authority.drainImpactClaimReceipts()[0];
         assert.equal(rejectedBodyReceipt.accepted, true, "the authenticated victim must own its hit result");
@@ -947,6 +949,13 @@ export async function run() {
         await waitFor(
             () => authorityPlayer.health === clientBody.health,
             "the shared server player HP must converge to the victim client's resolved value"
+        );
+        assert.ok(
+            Math.hypot(
+                authorityPlayer.physics.position.x - clientBody.position.x,
+                authorityPlayer.physics.position.y - clientBody.position.y
+            ) < 0.001,
+            "divergence recovery must use the victim's current state instead of rewinding to the impact frame"
         );
 
         const ropeAnchor = {

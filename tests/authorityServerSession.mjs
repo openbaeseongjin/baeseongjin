@@ -6,13 +6,13 @@ import { createArtifactSelectionClaim } from "../src/game/network/ArtifactSelect
 import { createCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
-import { createPlayerImpactClaim } from "../src/game/network/PlayerImpactClaim.js";
+import { createPlayerImpactClaim, createPlayerImpactStateDigest } from "../src/game/network/PlayerImpactClaim.js";
 import { createPlayerProjectileSpawnClaim } from "../src/game/network/PlayerProjectileSpawnClaim.js";
 import { createSummitClaim } from "../src/game/network/SummitClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
 import { createRopeSwingClaim } from "../src/game/network/RopeSwingClaim.js";
 import { Vector2 } from "../src/game-kit/index.js";
-import { WORLD_CONFIG } from "../src/game/config.js";
+import { COMBAT_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -397,12 +397,35 @@ export function run() {
     impactProjectile.velocity.x = 1200;
     for (let tick = 0; tick < 6; tick += 1) combatSession.advance();
     combatPlayer.physics.position.x += 200;
+    const acceptedImpactState = combatSimulation.playerState(combatPlayer.id);
+    acceptedImpactState.health = playerHealthBeforeImpact - impactProjectile.damage;
+    acceptedImpactState.velocity.x += COMBAT_CONFIG.playerHitKnockback;
+    acceptedImpactState.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
     const impactClaim = createPlayerImpactClaim({
         projectileId: impactProjectile.id,
         clientTick: victimClaimTick,
         impactType: "player-hit",
-        position: victimClaimPosition
+        position: victimClaimPosition,
+        velocity: impactProjectile.velocity,
+        damage: impactProjectile.damage,
+        outcome: {
+            respawned: false,
+            digest: createPlayerImpactStateDigest(acceptedImpactState, {
+                impactType: "player-hit",
+                respawned: false
+            })
+        }
     });
+    assert.equal(impactClaim.outcome.state, undefined, "the normal impact path must not send owner state");
+    assert.throws(
+        () =>
+            createPlayerImpactClaim({
+                ...impactClaim,
+                impactType: "rope-cut",
+                outcome: { ...impactClaim.outcome, respawned: true }
+            }),
+        /only player-hit/
+    );
     const acceptedImpact = combatSession.submitImpactClaim(combatPlayer.id, impactClaim);
     assert.equal(
         acceptedImpact.accepted,
@@ -417,6 +440,94 @@ export function run() {
         playerHealthBeforeImpact - impactProjectile.damage,
         "a duplicate victim impact claim must be idempotent"
     );
+    const divergentProjectile = new BallisticProjectileObject({
+        id: "enemy-impact-divergent",
+        ownerId: "enemy-1",
+        targetId: "stale-server-target",
+        position: combatPlayer.physics.position.clone(),
+        velocity: new Vector2(120, 0),
+        radius: 7,
+        damage: 20
+    });
+    combatSimulation.enemyProjectiles.push(divergentProjectile);
+    combatPlayer.health = 99;
+    combatPlayer.hitInvulnerabilityRemaining = 0.4;
+    const victimState = combatSimulation.playerState(combatPlayer.id);
+    victimState.health = 37;
+    victimState.hitInvulnerabilityRemaining = 0.2;
+    const divergentClaim = createPlayerImpactClaim({
+        projectileId: divergentProjectile.id,
+        clientTick: combatSimulation.tick + 1000,
+        impactType: "player-hit",
+        position: divergentProjectile.position,
+        velocity: divergentProjectile.velocity,
+        damage: divergentProjectile.damage,
+        outcome: {
+            respawned: false,
+            digest: createPlayerImpactStateDigest(victimState, { impactType: "player-hit", respawned: false })
+        }
+    });
+    const divergentReceipt = combatSession.submitImpactClaim(combatPlayer.id, divergentClaim);
+    assert.equal(
+        divergentReceipt.accepted,
+        false,
+        "a mismatched compact impact must request state recovery instead of pretending to converge"
+    );
+    assert.equal(divergentReceipt.reason, "state-diverged");
+    assert.equal(combatPlayer.health, 99, "a digest probe must not leave its provisional transition on the server");
+    assert.equal(
+        combatPlayer.hitInvulnerabilityRemaining,
+        0.4,
+        "a digest probe must preserve the pre-recovery server timer"
+    );
+    const divergentRecoveryClaim = createPlayerImpactClaim({
+        ...divergentClaim,
+        outcome: { ...divergentClaim.outcome, state: victimState }
+    });
+    assert.ok(divergentRecoveryClaim.outcome.state, "only the divergence recovery path must carry owner state");
+    const divergentRecoveryReceipt = combatSession.submitImpactClaim(combatPlayer.id, divergentRecoveryClaim);
+    assert.equal(divergentRecoveryReceipt.accepted, true);
+    assert.equal(combatPlayer.health, victimState.health, "server HP must converge to the victim client's final value");
+    assert.equal(
+        combatPlayer.hitInvulnerabilityRemaining,
+        victimState.hitInvulnerabilityRemaining,
+        "server impact timers must converge to the victim client"
+    );
+    assert.equal(
+        combatSimulation.enemyProjectiles.some(({ id }) => id === divergentProjectile.id),
+        false,
+        "the converged impact must consume the shared projectile"
+    );
+    const missingProjectileState = combatSimulation.playerState(combatPlayer.id);
+    missingProjectileState.health = 19;
+    const missingProjectileClaim = createPlayerImpactClaim({
+        projectileId: "expired-before-impact-arrived",
+        clientTick: combatSimulation.tick + 2000,
+        impactType: "player-hit",
+        position: combatPlayer.physics.position,
+        velocity: { x: 120, y: 0 },
+        damage: 18,
+        outcome: {
+            respawned: false,
+            digest: createPlayerImpactStateDigest(missingProjectileState, {
+                impactType: "player-hit",
+                respawned: false
+            })
+        }
+    });
+    const missingProjectileReceipt = combatSession.submitImpactClaim(combatPlayer.id, missingProjectileClaim);
+    assert.equal(
+        missingProjectileReceipt.accepted,
+        false,
+        "an expired projectile may request recovery but must not discard the victim result"
+    );
+    assert.equal(missingProjectileReceipt.reason, "state-diverged");
+    const missingProjectileRecovery = createPlayerImpactClaim({
+        ...missingProjectileClaim,
+        outcome: { ...missingProjectileClaim.outcome, state: missingProjectileState }
+    });
+    assert.equal(combatSession.submitImpactClaim(combatPlayer.id, missingProjectileRecovery).accepted, true);
+    assert.equal(combatPlayer.health, missingProjectileState.health);
     const lethalCheckpoint = combatSimulation.world.checkpoints[1];
     combatSimulation.activeCheckpoint = lethalCheckpoint;
     combatPlayer.health = 5;
@@ -431,11 +542,36 @@ export function run() {
         damage: 20
     });
     combatSimulation.enemyProjectiles.push(lethalProjectile);
+    const lethalVictimSimulation = new GameSimulation({
+        worldSeed: combatSimulation.world.seed,
+        playerId: combatPlayer.id
+    });
+    lethalVictimSimulation.preparePrediction([], lethalCheckpoint.id);
+    lethalVictimSimulation.restoreOwnerPrediction(
+        combatPlayer.id,
+        combatSimulation.playerState(combatPlayer.id),
+        combatSimulation.tick
+    );
+    lethalVictimSimulation.applyPredictedOwnerImpact(combatPlayer.id, {
+        resolution: "player-hit",
+        velocity: lethalProjectile.velocity,
+        parameters: { damage: lethalProjectile.damage }
+    });
+    const lethalOutcomeState = lethalVictimSimulation.playerState(combatPlayer.id);
     const lethalClaim = createPlayerImpactClaim({
         projectileId: lethalProjectile.id,
         clientTick: combatSimulation.tick,
         impactType: "player-hit",
-        position: combatPlayer.physics.position
+        position: combatPlayer.physics.position,
+        velocity: lethalProjectile.velocity,
+        damage: lethalProjectile.damage,
+        outcome: {
+            respawned: true,
+            digest: createPlayerImpactStateDigest(lethalOutcomeState, {
+                impactType: "player-hit",
+                respawned: true
+            })
+        }
     });
     const lethalReceipt = combatSession.submitImpactClaim(combatPlayer.id, lethalClaim);
     assert.equal(lethalReceipt.accepted, true);

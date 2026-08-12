@@ -1,5 +1,3 @@
-import { createPlayerImpactClaim } from "../network/PlayerImpactClaim.js";
-
 export class LocalAuthority {
     constructor(simulation) {
         this.simulation = simulation;
@@ -19,13 +17,14 @@ export class LocalAuthority {
     }
 
     submitImpactClaim(event) {
-        const claim = createPlayerImpactClaim({
+        return this.simulation.resolveEnemyProjectileClaim(this.playerId, {
             projectileId: event.projectileId,
             clientTick: event.clientTick,
             impactType: event.resolution,
-            position: event.position
+            position: event.position,
+            damage: event.parameters?.damage ?? 0,
+            outcome: null
         });
-        return this.simulation.resolveEnemyProjectileClaim(this.playerId, claim);
     }
 
     drainEvents() {
