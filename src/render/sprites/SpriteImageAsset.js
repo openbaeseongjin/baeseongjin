@@ -52,3 +52,42 @@ export class SpriteImageAsset {
         warn(`[renderer:sprite] ${message}; using polygon scene fallback`);
     }
 }
+
+export class SpriteImageAssetSet {
+    constructor({ atlases, ImageClass = globalThis.Image, warn = console.warn } = {}) {
+        if (!atlases || Array.isArray(atlases) || typeof atlases !== "object" || !Object.keys(atlases).length) {
+            throw new Error("SpriteImageAssetSet requires atlas definitions");
+        }
+        this.assets = Object.freeze(
+            Object.fromEntries(
+                Object.entries(atlases).map(([atlasId, atlas]) => [
+                    atlasId,
+                    new SpriteImageAsset({
+                        source: atlas.source,
+                        expectedSize: atlas.size,
+                        ImageClass,
+                        warn
+                    })
+                ])
+            )
+        );
+    }
+
+    get status() {
+        const assets = Object.values(this.assets);
+        if (assets.some((asset) => asset.status === "failed")) return "failed";
+        if (assets.every((asset) => asset.status === "ready")) return "ready";
+        return "pending";
+    }
+
+    get error() {
+        return Object.values(this.assets).find((asset) => asset.error)?.error ?? null;
+    }
+
+    imageFor(atlasId) {
+        if (!Object.hasOwn(this.assets, atlasId)) throw new Error(`Unknown sprite atlas '${atlasId}'`);
+        const asset = this.assets[atlasId];
+        if (asset.status !== "ready") throw new Error(`Sprite atlas '${atlasId}' is not ready`);
+        return asset.image;
+    }
+}

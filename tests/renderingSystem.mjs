@@ -8,9 +8,13 @@ import { PlayerAnimationController } from "../src/render/sprites/PlayerAnimation
 import { SpriteLocalPlayerRenderer } from "../src/render/sprites/SpriteActorRenderers.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../src/render/sprites/PlayerSpriteCatalog.js";
 import { PLAYER_SPRITE_STATES, PlayerSpriteDefinition } from "../src/render/sprites/PlayerSpriteDefinition.js";
+import {
+    createPlayerSpriteDefinitionFromManifest,
+    loadPlayerSpriteManifest
+} from "../src/render/sprites/PlayerSpriteManifest.js";
 import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
-import { SpriteImageAsset } from "../src/render/sprites/SpriteImageAsset.js";
+import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
 
 function recordingContext() {
     const calls = [];
@@ -42,15 +46,15 @@ function frame(x = 0, durationSeconds = 0.1) {
     return { x, y: 0, width: 8, height: 8, durationSeconds };
 }
 
-function playerFrame(column = 0, row = 0, durationSeconds = 0.1) {
-    return { x: column * 24, y: row * 24, width: 24, height: 24, durationSeconds };
+function playerFrame(column = 0, row = 0, durationSeconds = 0.1, atlasId = "main") {
+    return { atlasId, x: column * 24, y: row * 24, width: 24, height: 24, durationSeconds };
 }
 
-function playerStates(overrides = {}) {
+function playerStates(overrides = {}, atlasId = "main") {
     return Object.fromEntries(
         PLAYER_SPRITE_STATES.map((state, index) => [
             state,
-            overrides[state] ?? { frames: [playerFrame(index % 4, Math.floor(index / 4))] }
+            overrides[state] ?? { frames: [playerFrame(index % 4, Math.floor(index / 4), 0.1, atlasId)] }
         ])
     );
 }
@@ -58,9 +62,13 @@ function playerStates(overrides = {}) {
 function playerDefinition(overrides = {}) {
     return new PlayerSpriteDefinition({
         id: "test-player",
-        source: "/test-player.png",
-        atlasSize: { width: 96, height: 96 },
-        frameSize: { width: 24, height: 24 },
+        atlases: {
+            main: {
+                source: "/test-player.png",
+                size: { width: 96, height: 96 },
+                frameSize: { width: 24, height: 24 }
+            }
+        },
         destinationSize: { width: 40, height: 40 },
         anchor: { x: 0.5, y: 0.5 },
         offset: { x: 1, y: 2 },
@@ -69,7 +77,7 @@ function playerDefinition(overrides = {}) {
     });
 }
 
-export function run() {
+export async function run() {
     const context = recordingContext();
     const canvas = makeCanvas(context);
     assert.equal(createGameRenderer({ canvas }).sceneRenderer.profile, "sprite");
@@ -96,10 +104,12 @@ export function run() {
     assert.deepEqual(fallbackCalls, ["polygon", "sprite"]);
 
     let mockImage;
+    const mockImages = [];
     class MockImage {
         constructor() {
             this.listeners = {};
             mockImage = this;
+            mockImages.push(this);
         }
         addEventListener(type, listener) {
             this.listeners[type] = listener;
@@ -141,6 +151,41 @@ export function run() {
         () => new SpriteImageAsset({ source: "/bad.png", expectedSize: { width: 0, height: 96 } }),
         /positive integer/
     );
+
+    const imageSetStart = mockImages.length;
+    const assetSet = new SpriteImageAssetSet({
+        atlases: {
+            locomotion: { source: "/locomotion.png", size: { width: 96, height: 48 } },
+            actions: { source: "/actions.png", size: { width: 96, height: 24 } }
+        },
+        ImageClass: MockImage
+    });
+    const [locomotionImage, actionsImage] = mockImages.slice(imageSetStart);
+    assert.equal(assetSet.status, "pending");
+    locomotionImage.naturalWidth = 96;
+    locomotionImage.naturalHeight = 48;
+    locomotionImage.listeners.load();
+    assert.equal(assetSet.status, "pending");
+    actionsImage.naturalWidth = 96;
+    actionsImage.naturalHeight = 24;
+    actionsImage.listeners.load();
+    assert.equal(assetSet.status, "ready");
+    assert.equal(assetSet.imageFor("locomotion"), locomotionImage);
+    assert.equal(assetSet.imageFor("actions"), actionsImage);
+    assert.throws(() => assetSet.imageFor("missing"), /Unknown sprite atlas/);
+
+    const failedSetStart = mockImages.length;
+    const failedSet = new SpriteImageAssetSet({
+        atlases: {
+            locomotion: { source: "/locomotion.png", size: { width: 96, height: 48 } },
+            actions: { source: "/missing-actions.png", size: { width: 96, height: 24 } }
+        },
+        ImageClass: MockImage,
+        warn: (message) => assetWarnings.push(message)
+    });
+    mockImages[failedSetStart + 1].listeners.error();
+    assert.equal(failedSet.status, "failed");
+    assert.match(failedSet.error.message, /missing-actions/);
 
     const worldOrder = [];
     const worldContext = recordingContext();
@@ -301,8 +346,8 @@ export function run() {
     assert.ok(Object.isFrozen(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle));
     assert.ok(Object.isFrozen(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle.frames));
     assert.ok(DEFAULT_PLAYER_SPRITE_DEFINITION.states.idle.frames.every(Object.isFrozen));
-    assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlasSize, { width: 96, height: 96 });
-    assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.frameSize, { width: 24, height: 24 });
+    assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.size, { width: 96, height: 96 });
+    assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.atlases.mock.frameSize, { width: 24, height: 24 });
     assert.deepEqual(DEFAULT_PLAYER_SPRITE_DEFINITION.destinationSize, { width: 48, height: 48 });
     assert.deepEqual(Object.keys(DEFAULT_PLAYER_SPRITE_DEFINITION.presentations), PLAYER_SPRITE_STATES);
     for (const state of PLAYER_SPRITE_STATES) {
@@ -310,6 +355,7 @@ export function run() {
         assert.equal(presentation.state, state);
         assert.equal(presentation.clipState, state, `${state} must use action-specific frames instead of a fallback`);
         for (const spriteFrame of presentation.clip.frames) {
+            assert.equal(spriteFrame.atlasId, "mock");
             assert.equal(spriteFrame.width, 24);
             assert.equal(spriteFrame.height, 24);
             assert.equal(spriteFrame.x % 24, 0);
@@ -323,6 +369,7 @@ export function run() {
         const firstFrame = presentation.clip.frames[0];
         return [
             presentation.clipState,
+            firstFrame.atlasId,
             firstFrame.x,
             firstFrame.y,
             presentation.size.width,
@@ -376,7 +423,7 @@ export function run() {
         states: playerStates({ idle: { frames: [playerFrame(1, 0)] } })
     });
     const playerContext = recordingContext();
-    new SpriteLocalPlayerRenderer({ asset: { image }, definition: customDefinition }).draw({
+    new SpriteLocalPlayerRenderer({ assets: { imageFor: () => image }, definition: customDefinition }).draw({
         context: playerContext,
         scene: {
             localPlayerId: "local-player",
@@ -396,6 +443,112 @@ export function run() {
         playerContext.calls.find(([name]) => name === "drawImage"),
         ["drawImage", image, 24, 0, 24, 24, 21, 42, 40, 40],
         "player renderer must consume definition-owned frame, size, anchor, and offset"
+    );
+
+    const manifest = {
+        formatVersion: 1,
+        id: "manifest-player",
+        render: {
+            facing: "right",
+            size: { width: 48, height: 48 },
+            anchor: { x: 0.5, y: 0.625 },
+            offset: { x: 0, y: 0 },
+            pixelSnap: true
+        },
+        atlases: {
+            locomotion: {
+                image: "locomotion.png",
+                size: { width: 96, height: 48 },
+                frameSize: { width: 24, height: 24 }
+            },
+            actions: {
+                image: "actions.png",
+                size: { width: 96, height: 24 },
+                frameSize: { width: 24, height: 24 }
+            }
+        },
+        animations: Object.fromEntries(
+            PLAYER_SPRITE_STATES.map((state, index) => {
+                const action = state === "hit" || state === "respawn";
+                return [
+                    state,
+                    {
+                        loop: !action,
+                        frames: [
+                            {
+                                atlas: action ? "actions" : "locomotion",
+                                cell: {
+                                    column: action ? index - 5 : index % 4,
+                                    row: action ? 0 : Math.floor(index / 4)
+                                },
+                                durationMs: action ? (state === "hit" ? 300 : 450) : 100
+                            }
+                        ]
+                    }
+                ];
+            })
+        )
+    };
+    const manifestDefinition = createPlayerSpriteDefinitionFromManifest(manifest, {
+        baseUrl: "https://game.test/sprites/player/sprite-manifest.json"
+    });
+    assert.deepEqual(Object.keys(manifestDefinition.atlases), ["locomotion", "actions"]);
+    assert.equal(manifestDefinition.atlases.actions.source, "https://game.test/sprites/player/actions.png");
+    assert.equal(manifestDefinition.presentationFor("idle").clip.frames[0].atlasId, "locomotion");
+    assert.equal(manifestDefinition.presentationFor("hit").clip.frames[0].atlasId, "actions");
+
+    let fetchedManifestUrl;
+    const fetchedDefinition = await loadPlayerSpriteManifest("https://game.test/sprites/player/sprite-manifest.json", {
+        fetchFn: async (url) => {
+            fetchedManifestUrl = url;
+            return { ok: true, json: async () => manifest };
+        }
+    });
+    assert.equal(fetchedManifestUrl, "https://game.test/sprites/player/sprite-manifest.json");
+    assert.equal(fetchedDefinition.presentationFor("respawn").clip.frames[0].atlasId, "actions");
+    const unsafeManifest = structuredClone(manifest);
+    unsafeManifest.atlases.actions.image = "../actions.png";
+    assert.throws(() => createPlayerSpriteDefinitionFromManifest(unsafeManifest), /cannot leave/);
+    unsafeManifest.atlases.actions.image = "%2e%2e/actions.png";
+    assert.throws(() => createPlayerSpriteDefinitionFromManifest(unsafeManifest), /cannot leave/);
+    const unknownAtlasManifest = structuredClone(manifest);
+    unknownAtlasManifest.animations.hit.frames[0].atlas = "toString";
+    assert.throws(() => createPlayerSpriteDefinitionFromManifest(unknownAtlasManifest), /unknown atlas 'toString'/);
+    const unknownFieldManifest = structuredClone(manifest);
+    unknownFieldManifest.collider = { radius: 12 };
+    assert.throws(() => createPlayerSpriteDefinitionFromManifest(unknownFieldManifest), /unknown fields: collider/);
+
+    const atlasImages = { locomotion: {}, actions: {} };
+    const multiAtlasContext = recordingContext();
+    const multiAtlasRenderer = new SpriteLocalPlayerRenderer({
+        assets: { imageFor: (atlasId) => atlasImages[atlasId] },
+        definition: manifestDefinition
+    });
+    assert.equal(
+        multiAtlasRenderer.controllerFor("duration-check").transientDurations.hit,
+        0.3,
+        "transient presentation duration must come from manifest frame timing"
+    );
+    multiAtlasRenderer.draw({
+        context: multiAtlasContext,
+        scene: {
+            localPlayerId: "local-player",
+            player: {
+                id: "local-player",
+                position: { x: 40, y: 60 },
+                velocity: { x: 0, y: 0 },
+                isGrounded: true,
+                lifeState: "active",
+                rope: { isAttached: false }
+            },
+            playerPresentationEvents: [{ id: "hit:multi-atlas", playerId: "local-player", type: "hit" }]
+        },
+        presentationTimeSeconds: 0
+    });
+    assert.equal(
+        multiAtlasContext.calls.find(([name]) => name === "drawImage")[1],
+        atlasImages.actions,
+        "player renderer must select the frame-owned atlas without state-specific branching"
     );
 
     const controller = new PlayerAnimationController();

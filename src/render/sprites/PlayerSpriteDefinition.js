@@ -24,7 +24,7 @@ function finitePoint(value, label, fallback = { x: 0, y: 0 }) {
     return Object.freeze({ x: point.x, y: point.y });
 }
 
-function normalizeCue(cue = {}) {
+function normalizeCue(cue = {}, defaultPixelSnap = true) {
     if (!cue || Array.isArray(cue) || typeof cue !== "object") {
         throw new Error("player sprite cue must be an object");
     }
@@ -41,11 +41,43 @@ function normalizeCue(cue = {}) {
         scale,
         offset: finitePoint(cue.offset, "player sprite cue offset"),
         opacity,
-        pixelSnap: cue.pixelSnap ?? true
+        pixelSnap: cue.pixelSnap ?? defaultPixelSnap
     });
 }
 
-function validateFrameBounds(frame, atlasSize, frameSize, state) {
+function normalizeAtlases(atlases) {
+    if (!atlases || Array.isArray(atlases) || typeof atlases !== "object" || !Object.keys(atlases).length) {
+        throw new Error("PlayerSpriteDefinition requires atlas definitions");
+    }
+    return Object.freeze(
+        Object.fromEntries(
+            Object.entries(atlases).map(([atlasId, spec]) => {
+                if (!atlasId.trim()) throw new Error("player sprite atlas id must be non-empty");
+                if (!spec || Array.isArray(spec) || typeof spec !== "object") {
+                    throw new Error(`player sprite atlas '${atlasId}' must be an object`);
+                }
+                if (typeof spec.source !== "string" || !spec.source) {
+                    throw new Error(`player sprite atlas '${atlasId}' requires an asset source`);
+                }
+                const size = positiveSize(spec.size, `player sprite atlas '${atlasId}' size`, { integer: true });
+                const frameSize = positiveSize(spec.frameSize, `player sprite atlas '${atlasId}' frameSize`, {
+                    integer: true
+                });
+                if (size.width % frameSize.width || size.height % frameSize.height) {
+                    throw new Error(`player sprite atlas '${atlasId}' size must be divisible by frameSize`);
+                }
+                return [atlasId, Object.freeze({ id: atlasId, source: spec.source, size, frameSize })];
+            })
+        )
+    );
+}
+
+function validateFrameBounds(frame, atlases, state) {
+    if (!Object.hasOwn(atlases, frame.atlasId)) {
+        throw new Error(`player sprite state '${state}' references unknown atlas '${frame.atlasId}'`);
+    }
+    const atlas = atlases[frame.atlasId];
+    const { size: atlasSize, frameSize } = atlas;
     if (
         frame.x < 0 ||
         frame.y < 0 ||
@@ -72,25 +104,21 @@ function resolveClipState(state, stateSpecs, clips, visited = new Set()) {
 }
 
 export class PlayerSpriteDefinition {
-    constructor({ id, source, atlasSize, frameSize, destinationSize, anchor, offset, states } = {}) {
+    constructor({ id, atlases, destinationSize, anchor, offset, pixelSnap = true, states } = {}) {
         if (typeof id !== "string" || !id.trim()) throw new Error("PlayerSpriteDefinition requires a non-empty id");
-        if (typeof source !== "string" || !source) throw new Error("PlayerSpriteDefinition requires an asset source");
         if (!states || Array.isArray(states) || typeof states !== "object") {
             throw new Error("PlayerSpriteDefinition requires state definitions");
         }
+        if (typeof pixelSnap !== "boolean") throw new Error("player sprite pixelSnap must be a boolean");
         const unknownStates = Object.keys(states).filter((state) => !PLAYER_SPRITE_STATES.includes(state));
         if (unknownStates.length) throw new Error(`unknown player sprite states: ${unknownStates.join(", ")}`);
 
         this.id = id;
-        this.source = source;
-        this.atlasSize = positiveSize(atlasSize, "player sprite atlasSize", { integer: true });
-        this.frameSize = positiveSize(frameSize, "player sprite frameSize", { integer: true });
-        if (this.atlasSize.width % this.frameSize.width || this.atlasSize.height % this.frameSize.height) {
-            throw new Error("player sprite atlasSize must be divisible by frameSize");
-        }
+        this.atlases = normalizeAtlases(atlases);
         this.destinationSize = positiveSize(destinationSize, "player sprite destinationSize");
         this.anchor = finitePoint(anchor, "player sprite anchor");
         this.offset = finitePoint(offset, "player sprite offset");
+        this.pixelSnap = pixelSnap;
 
         const stateSpecs = Object.fromEntries(
             PLAYER_SPRITE_STATES.map((state) => {
@@ -101,7 +129,7 @@ export class PlayerSpriteDefinition {
                 if (spec.fallback !== undefined && spec.frames !== undefined) {
                     throw new Error(`player sprite state '${state}' cannot declare both frames and fallback`);
                 }
-                const normalized = { cue: normalizeCue(spec.cue) };
+                const normalized = { cue: normalizeCue(spec.cue, this.pixelSnap) };
                 if (spec.frames !== undefined) {
                     if (!Array.isArray(spec.frames)) {
                         throw new Error(`player sprite state '${state}' frames must be an array`);
@@ -119,7 +147,7 @@ export class PlayerSpriteDefinition {
             const spec = stateSpecs[state];
             if (spec.frames === undefined) continue;
             const clip = new SpriteAnimation({ id: state, loop: spec.loop ?? true, frames: spec.frames });
-            for (const frame of clip.frames) validateFrameBounds(frame, this.atlasSize, this.frameSize, state);
+            for (const frame of clip.frames) validateFrameBounds(frame, this.atlases, state);
             clips[state] = clip;
         }
 

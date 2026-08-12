@@ -27,6 +27,7 @@
 | --- | --- |
 | [`architecture.md`](./architecture.md) | 모듈 경계, 실행 흐름, 객체·capability/mixin 구조와 의존 방향의 현재 기준 |
 | [`development-rules.md`](./development-rules.md) | 작업 절차, 책임 설계, 테스트, 코드 스타일과 반복 버그 대응의 현재 기준 |
+| [`sprite-asset-format.md`](./sprite-asset-format.md) | PixelLab·SpriteCook 원본을 여러 PNG atlas와 animation manifest로 정규화하는 교환 형식과 AI 작업 진입점 |
 | [`tech-stack.md`](./tech-stack.md) | 언어, 런타임, 렌더링, 서버와 도구 선택 기준 |
 | [`reusable-game-resources.md`](./reusable-game-resources.md) | 다른 게임에서도 재사용할 수 있는 기반 모듈과 공개 진입점 |
 

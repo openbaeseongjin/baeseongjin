@@ -14,11 +14,24 @@ function locomotionState(player, rope, horizontalThreshold) {
 }
 
 export class PlayerAnimationController {
-    constructor({ horizontalThreshold = 8 } = {}) {
+    constructor({ horizontalThreshold = 8, transientDurations = PLAYER_ANIMATION_DURATIONS } = {}) {
         if (!Number.isFinite(horizontalThreshold) || horizontalThreshold < 0) {
             throw new Error("horizontalThreshold must be non-negative");
         }
+        if (
+            !transientDurations ||
+            !Number.isFinite(transientDurations.hit) ||
+            transientDurations.hit <= 0 ||
+            !Number.isFinite(transientDurations.respawn) ||
+            transientDurations.respawn <= 0
+        ) {
+            throw new Error("transientDurations requires positive hit and respawn durations");
+        }
         this.horizontalThreshold = horizontalThreshold;
+        this.transientDurations = Object.freeze({
+            hit: transientDurations.hit,
+            respawn: transientDurations.respawn
+        });
         this.machine = new StateMachine({ initialState: "idle", transitions: TRANSITIONS });
         this.flipX = false;
         this.processedEventIds = new Set();
@@ -37,7 +50,7 @@ export class PlayerAnimationController {
         }
         if (
             this.machine.state === "respawn" &&
-            this.machine.elapsedSeconds + Number.EPSILON < PLAYER_ANIMATION_DURATIONS.respawn
+            this.machine.elapsedSeconds + Number.EPSILON < this.transientDurations.respawn
         ) {
             return this.snapshot();
         }
@@ -48,7 +61,7 @@ export class PlayerAnimationController {
         }
         if (
             this.machine.state === "hit" &&
-            this.machine.elapsedSeconds + Number.EPSILON < PLAYER_ANIMATION_DURATIONS.hit
+            this.machine.elapsedSeconds + Number.EPSILON < this.transientDurations.hit
         ) {
             return this.snapshot();
         }

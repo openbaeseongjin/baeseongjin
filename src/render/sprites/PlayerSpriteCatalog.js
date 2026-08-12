@@ -1,8 +1,10 @@
 import { PlayerSpriteDefinition } from "./PlayerSpriteDefinition.js";
 
 const FRAME_SIZE = Object.freeze({ width: 24, height: 24 });
+const ATLAS_ID = "mock";
 const frame = (column, row, durationSeconds) =>
     Object.freeze({
+        atlasId: ATLAS_ID,
         x: column * FRAME_SIZE.width,
         y: row * FRAME_SIZE.height,
         ...FRAME_SIZE,
@@ -11,9 +13,13 @@ const frame = (column, row, durationSeconds) =>
 
 export const DEFAULT_PLAYER_SPRITE_DEFINITION = new PlayerSpriteDefinition({
     id: "side-view-action-mock-v1",
-    source: new URL("../../../assets/sprites/player-action-mock.svg", import.meta.url).href,
-    atlasSize: { width: 96, height: 96 },
-    frameSize: FRAME_SIZE,
+    atlases: {
+        [ATLAS_ID]: {
+            source: new URL("../../../assets/sprites/player-action-mock.svg", import.meta.url).href,
+            size: { width: 96, height: 96 },
+            frameSize: FRAME_SIZE
+        }
+    },
     destinationSize: { width: 48, height: 48 },
     anchor: { x: 0.5, y: 0.625 },
     offset: { x: 0, y: 0 },

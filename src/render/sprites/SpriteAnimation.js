@@ -11,7 +11,11 @@ function freezeFrame(frame) {
         frame.durationSeconds <= 0
     )
         throw new Error("Sprite frame requires a positive source rectangle and durationSeconds");
+    if (frame.atlasId !== undefined && (typeof frame.atlasId !== "string" || !frame.atlasId.trim())) {
+        throw new Error("Sprite frame atlasId must be a non-empty string when provided");
+    }
     return Object.freeze({
+        atlasId: frame.atlasId ?? null,
         x: frame.x,
         y: frame.y,
         width: frame.width,

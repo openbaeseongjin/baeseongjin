@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sprite-manifest.schema.json",
+  "title": "Baeseongjin player sprite manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["formatVersion", "id", "render", "atlases", "animations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "formatVersion": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "generator": { "$ref": "#/$defs/generator" },
+    "render": { "$ref": "#/$defs/render" },
+    "atlases": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "$ref": "#/$defs/atlas" }
+    },
+    "animations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idle", "run", "jump", "fall", "rope", "hit", "respawn"],
+      "properties": {
+        "idle": { "$ref": "#/$defs/animation" },
+        "run": { "$ref": "#/$defs/animation" },
+        "jump": { "$ref": "#/$defs/animation" },
+        "fall": { "$ref": "#/$defs/animation" },
+        "rope": { "$ref": "#/$defs/animation" },
+        "hit": { "$ref": "#/$defs/animation" },
+        "respawn": { "$ref": "#/$defs/animation" }
+      }
+    }
+  },
+  "$defs": {
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool"],
+      "properties": {
+        "tool": { "type": "string", "minLength": 1 },
+        "exportVersion": { "type": ["string", "null"] },
+        "sourceExport": { "type": "string" }
+      }
+    },
+    "integerSize": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "positiveSize": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "positivePoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "y": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "render": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["facing", "size", "anchor", "offset", "pixelSnap"],
+      "properties": {
+        "facing": { "const": "right" },
+        "size": { "$ref": "#/$defs/positiveSize" },
+        "anchor": { "$ref": "#/$defs/point" },
+        "offset": { "$ref": "#/$defs/point" },
+        "pixelSnap": { "type": "boolean" }
+      }
+    },
+    "atlas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "size", "frameSize"],
+      "properties": {
+        "image": { "type": "string", "pattern": "\\.png$" },
+        "size": { "$ref": "#/$defs/integerSize" },
+        "frameSize": { "$ref": "#/$defs/integerSize" }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["column", "row"],
+      "properties": {
+        "column": { "type": "integer", "minimum": 0 },
+        "row": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["atlas", "cell", "durationMs"],
+      "properties": {
+        "atlas": { "type": "string", "minLength": 1 },
+        "cell": { "$ref": "#/$defs/cell" },
+        "durationMs": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "cue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scale": { "$ref": "#/$defs/positivePoint" },
+        "offset": { "$ref": "#/$defs/point" },
+        "opacity": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "pixelSnap": { "type": "boolean" }
+      }
+    },
+    "animation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["frames"],
+          "properties": {
+            "loop": { "type": "boolean" },
+            "frames": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/frame" } },
+            "cue": { "$ref": "#/$defs/cue" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fallback"],
+          "properties": {
+            "fallback": {
+              "enum": ["idle", "run", "jump", "fall", "rope", "hit", "respawn"]
+            },
+            "cue": { "$ref": "#/$defs/cue" }
+          }
+        }
+      ]
+    }
+  }
+}
