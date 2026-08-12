@@ -1,4 +1,15 @@
-export function paintSpriteFrame({ context, image, frame, position, size, anchor = { x: 0, y: 0 }, flipX = false }) {
+export function paintSpriteFrame({
+    context,
+    image,
+    frame,
+    position,
+    size,
+    anchor = { x: 0, y: 0 },
+    offset = { x: 0, y: 0 },
+    opacity = 1,
+    pixelSnap = false,
+    flipX = false
+}) {
     if (!context || !image || !frame || !position || !size)
         throw new Error("Sprite painter requires context, image, frame, position, and size");
     for (const [name, value] of Object.entries({
@@ -11,19 +22,30 @@ export function paintSpriteFrame({ context, image, frame, position, size, anchor
         "size.width": size.width,
         "size.height": size.height,
         "anchor.x": anchor?.x,
-        "anchor.y": anchor?.y
+        "anchor.y": anchor?.y,
+        "offset.x": offset?.x,
+        "offset.y": offset?.y,
+        opacity
     })) {
         if (!Number.isFinite(value)) throw new Error(`Sprite painter requires finite ${name}`);
     }
     if (frame.width <= 0 || frame.height <= 0 || size.width <= 0 || size.height <= 0)
         throw new Error("Sprite painter requires positive frame and destination sizes");
+    if (opacity <= 0 || opacity > 1)
+        throw new Error("Sprite painter opacity must be greater than zero and at most one");
+    if (typeof pixelSnap !== "boolean") throw new Error("Sprite painter pixelSnap must be a boolean");
     if (typeof flipX !== "boolean") throw new Error("Sprite painter flipX must be a boolean");
-    const x = position.x - size.width * anchor.x,
-        y = position.y - size.height * anchor.y;
+    const pivot = {
+            x: pixelSnap ? Math.round(position.x + offset.x) : position.x + offset.x,
+            y: pixelSnap ? Math.round(position.y + offset.y) : position.y + offset.y
+        },
+        x = pixelSnap ? Math.round(pivot.x - size.width * anchor.x) : pivot.x - size.width * anchor.x,
+        y = pixelSnap ? Math.round(pivot.y - size.height * anchor.y) : pivot.y - size.height * anchor.y;
     context.save();
     context.imageSmoothingEnabled = false;
+    context.globalAlpha *= opacity;
     if (flipX) {
-        context.translate(position.x, 0);
+        context.translate(pivot.x, 0);
         context.scale(-1, 1);
         context.drawImage(
             image,
@@ -31,7 +53,7 @@ export function paintSpriteFrame({ context, image, frame, position, size, anchor
             frame.y,
             frame.width,
             frame.height,
-            position.x - x - size.width,
+            pivot.x - x - size.width,
             y,
             size.width,
             size.height

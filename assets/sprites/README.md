@@ -1,11 +1,12 @@
-# Mock sprite asset
+# Player action mock sprite
 
-`modern-rpg-guy.png` is the temporary 24×24-frame player sprite used to validate the renderer pipeline.
+`player-action-mock.svg` is a temporary side-view action atlas for validating the player sprite renderer. It was authored directly for this repository on 2026-08-12, uses no external source artwork, and is covered by the repository license.
 
-- Title: Modern RPG Guy
-- Author: OVFudj
-- Source: https://opengameart.org/content/modern-rpg-guy
-- License: CC0 1.0 Universal (public domain dedication)
-- Original sheet: 96×96 PNG arranged as sixteen 24×24 cells
+- Atlas: 96×96 SVG, arranged as a 4×4 grid of 24×24 cells
+- Row 0: `idle-0`, `idle-1`, `run-0`, `run-1`
+- Row 1: `jump`, `fall`, `rope-0`, `rope-1`
+- Row 2: `hit-0`, `hit-1`, `respawn-0`, `respawn-1`
+- Row 3: `respawn-2`; the remaining cells are intentionally transparent
+- Default world output: 48×48 with anchor `(0.5, 0.625)`
 
-This is intentionally a mock asset. Replace the profile manifest/clips when the final visual direction is decided; do not couple collider size to the source or destination sprite size.
+The asset is intentionally simple, but every supported state has action-specific frames. `PlayerSpriteCatalog.js` owns frame timing and state-specific presentation cues, while `PlayerSpriteDefinition.js` validates the atlas grid, state coverage, and explicit fallback rules. Replacing the visual asset must not change the independently assembled player collider.

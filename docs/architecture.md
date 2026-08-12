@@ -19,6 +19,8 @@ index.html
       ├─ render/PolygonSceneRenderer.js
       ├─ render/sprites/SpriteAnimation.js
       ├─ render/sprites/SpriteCanvasPainter.js
+      ├─ render/sprites/PlayerSpriteDefinition.js
+      ├─ render/sprites/PlayerSpriteCatalog.js
       ├─ game/commands/PlayerCommand.js
       ├─ game/runtime/LocalAuthority.js
       ├─ game/runtime/AuthoritySnapshotBuilder.js
@@ -52,10 +54,11 @@ index.html
 ## 렌더링 프로필 경계
 
 - `CanvasRenderer`는 Canvas context, DPR·resize, 화면/월드 좌표 변환과 HUD·오버레이를 소유하는 공통 호스트다. 월드 장면의 표현은 주입된 scene renderer에 한 번 위임한다.
-- `GameRendererFactory`가 시작 시 렌더 프로필을 선택한다. 기본 프로필은 기존 화면을 보존하는 `polygon`이며 `PolygonSceneRenderer`가 지형·플레이어·로프·적·투사체·월드 VFX의 그리기 순서를 소유한다.
+- `GameRendererFactory`가 시작 시 렌더 프로필을 선택한다. 기본 프로필은 혼합 도트 표현인 `sprite`이며, 기존 표현은 `?renderer=polygon`으로 명시해 선택한다.
 - scene renderer는 동일한 읽기 전용 scene snapshot과 viewport 계약을 받는다. 앱·시뮬레이션·네트워크 계층은 선택된 프로필이나 스프라이트 자산 형식을 해석하지 않는다.
 - 도트 프로필은 별도 scene renderer로 제공한다. 프로필별 분기를 `GameApp`, `MultiplayerGameApp`, 시뮬레이션 객체에 흩뜨리지 않고 factory 등록 경계에서만 선택한다.
 - `SpriteAnimation`은 프레임 사각형과 지속 시간을 불변 데이터로 보관하고 외부에서 받은 경과 시간으로 현재 프레임을 결정한다. `SpriteCanvasPainter`는 Canvas의 이미지 보간을 끄고 원본 프레임, anchor, 반전과 목적 크기만 그리며 자산 로딩이나 게임 시간을 소유하지 않는다.
+- `PlayerSpriteDefinition`은 player asset source, atlas·frame·출력 크기, anchor·offset, 상태별 clip과 명시적 fallback을 하나의 불변 계약으로 검증한다. `PlayerSpriteCatalog`만 특정 atlas의 행·열 의미를 알고, player renderer는 확정된 presentation을 소비할 뿐 자산 배치를 추측하지 않는다. 로더는 실제 이미지 크기가 선언된 atlas 크기와 같은지도 확인한다.
 - 애니메이션 전이는 재사용 가능한 순수 `StateMachine` 조합 컴포넌트가 현재 상태·상태 경과 시간·허용 전이를 소유하고, actor별 resolver가 읽기 전용 snapshot과 표현 사건을 상태 머신 입력으로 바꾼다. clip catalog와 painter는 확정된 상태를 소비할 뿐 gameplay 조건을 다시 해석하지 않는다.
 - `hit`·`respawn`처럼 순간적인 actor 표현은 기존 권위 사건의 대상 `playerId`를 보존한 renderer 전용 presentation event에서 시작한다. 로컬과 원격 actor가 각자 FSM으로 재생하며 animation state·phase를 네트워크 snapshot의 권위 상태로 만들지 않는다.
 - 피해 클라이언트의 즉시 impact와 뒤이은 서버 확정은 투사체·부활 원인의 같은 causal ID로 presentation event를 정규화해 한 번만 재생한다. 서버 확정이 로컬 `hit`·`respawn` 시간을 다시 시작하지 않는다.

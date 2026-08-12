@@ -20,9 +20,8 @@ import {
     playerProjectileSprite
 } from "./sprites/SpriteActorRenderers.js";
 import { SpriteImageAsset } from "./sprites/SpriteImageAsset.js";
+import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "./sprites/PlayerSpriteCatalog.js";
 import { PolygonSceneRenderer } from "./PolygonSceneRenderer.js";
-
-const DEFAULT_PLAYER_SPRITE_URL = new URL("../../assets/sprites/modern-rpg-guy.png", import.meta.url).href;
 
 export class SpriteAssetFallbackRenderer {
     constructor({ asset, spriteRenderer, polygonRenderer }) {
@@ -38,9 +37,12 @@ export class SpriteAssetFallbackRenderer {
 }
 
 export class SpriteSceneRenderer {
-    constructor({ playerAsset = new SpriteImageAsset({ source: DEFAULT_PLAYER_SPRITE_URL }) } = {}) {
+    constructor({ playerDefinition = DEFAULT_PLAYER_SPRITE_DEFINITION, playerAsset = null } = {}) {
         this.profile = "sprite";
-        this.playerAsset = playerAsset;
+        this.playerDefinition = playerDefinition;
+        this.playerAsset =
+            playerAsset ??
+            new SpriteImageAsset({ source: playerDefinition.source, expectedSize: playerDefinition.atlasSize });
         const spriteComposition = new SceneRendererComposition({
             profile: this.profile,
             renderers: [
@@ -50,7 +52,7 @@ export class SpriteSceneRenderer {
                     new AttachRangeRenderer(),
                     new RopeRenderer(localRopes),
                     new RopeRenderer(remoteRopes),
-                    new SpriteRemotePlayerRenderer({ asset: playerAsset }),
+                    new SpriteRemotePlayerRenderer({ asset: this.playerAsset, definition: playerDefinition }),
                     new SwingRenderer(),
                     new SpriteEnemyRenderer(),
                     new SpriteProjectileRenderer({
@@ -68,7 +70,7 @@ export class SpriteSceneRenderer {
                     new CombatEffectRenderer(),
                     new EventEffectRenderer(),
                     new AttachmentCandidateRenderer(),
-                    new SpriteLocalPlayerRenderer({ asset: playerAsset })
+                    new SpriteLocalPlayerRenderer({ asset: this.playerAsset, definition: playerDefinition })
                 ])
             ]
         });
@@ -76,7 +78,7 @@ export class SpriteSceneRenderer {
             profile: this.profile,
             renderers: [
                 new SpriteAssetFallbackRenderer({
-                    asset: playerAsset,
+                    asset: this.playerAsset,
                     spriteRenderer: spriteComposition,
                     polygonRenderer: new PolygonSceneRenderer()
                 })
