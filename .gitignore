@@ -23,6 +23,8 @@ service-account*.json
 !.agents/skills/repo-task-plan/**
 !.agents/skills/discord-repo-cross-reference/
 !.agents/skills/discord-repo-cross-reference/**
+!.agents/skills/coordinate-github-tasks/
+!.agents/skills/coordinate-github-tasks/**
 
 # JavaScript / TypeScript
 node_modules/
