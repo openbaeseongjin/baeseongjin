@@ -360,6 +360,16 @@ git diff --check
 - 생성물, 로컬 로그, `.omx/`, 비밀 파일은 추적하지 않는다.
 - 커밋 메시지는 변경 내용보다 변경 이유를 먼저 설명하고 저장소의 Lore trailer 규칙을 따른다.
 
+### 동시 Codex 작업과 GitHub 범위 조정
+
+- 같은 저장소를 여러 Codex 앱 작업이 동시에 개발하면 `.agents/skills/coordinate-github-tasks/SKILL.md`를 공용 조정 계약으로 사용한다. `$github-task-flow`는 Issue 생성 뒤 브랜치 생성 전, Lore 커밋 전, 최종 rebase·병합 전에 조정 상태를 확인한다.
+- Codex 작업 메시지는 즉시 조정 채널, 상호 링크된 GitHub Issue 댓글은 지속 기록으로 사용한다. 작업 제목·요약은 후보 탐색 자료일 뿐 소유권 근거가 아니며 checkout, 실제 diff·hunk, 선언한 심볼·예정 파일, 공개 계약 순으로 확인한다.
+- 같은 `cwd`의 shared checkout에서는 브랜치·작업 트리·stage를 모든 대화가 공유하므로 현재 Issue 브랜치 소유 작업만 편집과 Git 게시 단계를 진행한다. 후행 작업은 자기 hunk만 제거하고 선행 merge SHA·clean `main`을 확인한 뒤 새 Issue 브랜치에서 재개한다. 별도 Codex worktree에서만 합의된 범위 안의 병렬 편집을 유지한다.
+- 같은 파일이라도 심볼과 hunk가 분리되면 독립 소유할 수 있다. 같은 hunk, public API, schema, fixture, 공통 index와 기준 문서는 한 작업만 소유하고 다른 작업은 요구사항과 테스트 사례를 전달한 뒤 선행 병합을 기다린다.
+- 동일 결과를 구현하는 중복 Issue는 주 작업 하나가 완료 조건과 고유 증거를 흡수한다. 보조 작업은 고유 변경을 잃지 않았다는 확인 전 Issue를 닫지 않으며 다른 작업의 커밋을 복사해 별도 계보를 만들지 않는다.
+- 각 작업은 자기 worktree·브랜치·stage·커밋·PR만 변경한다. 상대 작업에는 구조화된 범위 카드와 조정 결정을 메시지로 보내며, 응답하지 않은 작업의 공유 경계를 임의로 가져오거나 병합하지 않는다. 작업의 worktree 이동이나 handoff는 사용자 승인 없이 수행하지 않는다.
+- 선행 PR 병합 뒤 의존 작업은 최신 `origin/main`에 rebase하고 자기 범위의 검증을 다시 수행한다. 범위가 넓어지거나 새 작업이 같은 경계에 들어오면 소유권과 병합 순서를 다시 합의한다.
+
 ## 14. 문서 관리
 
 - 루트 README는 실행과 진입점, `docs/README.md`는 문서 인덱스와 읽는 순서만 설명한다. 문서 작성 위치·파일 형식·이미지 첨부와 인덱스 운영의 상세 기준은 `docs/documentation-rules.md`를 따른다.

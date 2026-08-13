@@ -1,6 +1,6 @@
 ---
 name: github-task-flow
-description: "`$github-task-flow` 호출만으로 GitHub CLI 설치·웹 인증·쓰기 권한 점검을 자동 준비하고, 현재 작업을 GitHub Issue로 기록한 뒤 이슈 번호 기반 브랜치, 단일 Lore 커밋, push, pull request, 최신 origin/main rebase와 재검증, 일반 merge commit과 이슈 종료까지 수행한다. GitHub 쓰기 환경이 아직 구성되지 않았거나 팀원이 별도 설명 없이 현재 작업의 커밋과 브랜치 계보를 보존해 main에 병합하려 할 때 사용한다."
+description: "`$github-task-flow` 호출만으로 GitHub CLI 설치·웹 인증·쓰기 권한 점검을 자동 준비하고, 현재 작업을 GitHub Issue로 기록한 뒤 이슈 번호 기반 브랜치, 단일 Lore 커밋, push, pull request, 최신 origin/main rebase와 재검증, 일반 merge commit과 이슈 종료까지 수행한다. 같은 저장소의 다른 Codex 작업·Issue·PR과 checkout 또는 범위가 겹치면 `$coordinate-github-tasks` 계약으로 소유권과 병합 순서를 먼저 조정한다. GitHub 쓰기 환경이 아직 구성되지 않았거나 팀원이 별도 설명 없이 현재 작업의 커밋과 브랜치 계보를 보존해 main에 병합하려 할 때 사용한다."
 ---
 
 # GitHub Task Flow
@@ -16,6 +16,7 @@ GitHub Issue를 작업의 기준 이력으로 삼고 PR을 통해 단일 커밋�
 - 현재 대화와 작업 트리 모두에서 게시할 작업을 식별할 수 없을 때만 작업 부재를 보고하고 종료한다.
 - merge 권한, 필수 승인, 실패한 검사처럼 자동 해결할 수 없는 외부 blocker가 없으면 중간 확인 없이 끝까지 진행한다.
 - GitHub 쓰기 환경이 없으면 아래 초기화 절차까지 호출 의미에 포함하고, 설정 후 원래 흐름을 자동 재개한다.
+- 같은 저장소의 다른 활성 Codex 작업이나 열린 Issue·PR과 checkout 또는 범위가 겹칠 가능성이 있으면 `.agents/skills/coordinate-github-tasks/SKILL.md`를 읽고 작업 간 조정을 수행한다.
 
 ## 필수 원칙
 
@@ -88,7 +89,8 @@ gh api user
 2. 초기화된 GitHub 연결과 `gh auth status --hostname github.com`을 확인한다.
 3. 현재 변경사항에서 작업 범위를 요약하고 관련 없는 변경을 분리한다.
 4. 비밀 파일과 자격 증명 징후를 검사한다. 의심되는 비밀이 있으면 게시를 중단하고 위치와 유형만 보고한다.
-5. 같은 목적의 열린 Issue나 PR이 있는지 확인한다.
+5. 같은 목적 또는 같은 파일·심볼·공개 계약을 다루는 열린 Issue나 PR이 있는지 확인한다.
+6. Codex 앱 작업 목록을 사용할 수 있으면 같은 저장소의 활성 작업과 checkout을 확인한다. 다른 작업의 Issue 브랜치를 공유하고 있으면 branch·stash·stage 변경 전에 소유자와 병합 순서를 합의한다.
 
 인증, 권한 또는 작업 범위가 불명확하면 외부 변경 전에 필요한 정보만 요청한다.
 
@@ -117,6 +119,17 @@ gh api user
 - 생성 응답에서 Issue 번호와 URL을 확인한다.
 - Issue 번호를 이후 브랜치·PR·최종 보고의 기준으로 사용한다.
 
+### 동시 Codex 작업 조정
+
+Issue 생성 뒤 전용 브랜치를 만들기 전에 `.agents/skills/coordinate-github-tasks/SKILL.md`를 적용한다.
+
+- 같은 저장소의 다른 활성 작업과 범위 카드를 교환하고 checkout·실제 diff·예정 심볼·공개 계약을 대조한다.
+- 같은 checkout은 한 작업만 편집과 Git 게시 단계를 소유한다. 후행 작업은 선행 merge SHA와 clean `main`을 확인한 뒤 자기 Issue 브랜치를 만든다.
+- 별도 worktree에서 겹치는 공유 경계에는 단일 소유자, 의존 작업과 병합 순서를 정하고 양쪽 Issue 댓글에 기록한다.
+- 겹침이 없으면 조정 부재만 기록하고 독립 진행한다.
+- Lore 커밋 직전과 최종 rebase·병합 직전에 범위가 합의를 벗어나지 않았는지 다시 확인한다.
+- 다른 작업의 worktree·브랜치·stage·커밋을 이 작업에서 대신 변경하지 않는다.
+
 ## 3. 이슈 브랜치 생성
 
 1. 미커밋 변경은 미추적 파일까지 포함해 복구 가능한 임시 stash로 보관한다.
@@ -139,7 +152,8 @@ slug는 영문 소문자, 숫자, 하이픈만 사용하고 40자 이내로 유�
 
 1. 관련 파일만 명시적으로 stage한다.
 2. `git diff --cached`로 범위와 비밀 포함 여부를 재확인한다.
-3. Lore Commit Protocol에 맞춘 커밋 메시지를 작성한다.
+3. 동시 작업 조정 합의가 있으면 staged 경로·심볼이 소유 범위 안인지 재확인한다.
+4. Lore Commit Protocol에 맞춘 커밋 메시지를 작성한다.
 
 커밋 제목과 본문을 영어로 작성하지 않는다. 코드 식별자·명령어·파일 경로·테스트 이름처럼 번역하면 의미가 바뀌는 항목만 원문으로 유지한다.
 
@@ -174,13 +188,14 @@ Not-tested: <남은 검증 또는 None>
 ## 7. 최신 main rebase와 재검증
 
 1. PR 검사와 승인이 준비되면 `git fetch origin main`을 실행하고 현재 `origin/main` SHA를 기록한다.
-2. 현재 브랜치가 Issue 전용 단일 소유 브랜치인지 확인한다. 공유 브랜치이거나 소유 여부가 불명확하면 기록을 재작성하지 말고 blocker를 보고한다.
-3. `git rebase origin/main`을 실행한다. 충돌은 작업 범위 안에서 해결하고 관련 없는 변경을 버리지 않는다.
-4. 최종 rebase 뒤 4절의 필수 검사를 모두 다시 실행하고 `git diff --check`를 통과시킨다.
-5. `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다.
-6. 이미 push한 전용 브랜치의 SHA가 바뀌었으면 원격 tip을 확인한 뒤 `git push --force-with-lease`로만 갱신한다. `--force`를 사용하지 않는다.
-7. PR의 필수 검사, 승인과 mergeable 상태를 다시 확인한다.
-8. 실제 병합 직전에 `git fetch origin main`을 한 번 더 실행한다. `origin/main`이 기록한 SHA보다 전진했으면 3~7단계를 반복한다.
+2. 동시 작업 조정 합의와 연결된 Issue·PR을 다시 확인한다. 선행 작업이 남았거나 checkout·공유 경계 소유권이 바뀌었으면 먼저 재조정한다.
+3. 현재 브랜치가 Issue 전용 단일 소유 브랜치인지 확인한다. 공유 브랜치이거나 소유 여부가 불명확하면 기록을 재작성하지 말고 blocker를 보고한다.
+4. `git rebase origin/main`을 실행한다. 충돌은 작업 범위 안에서 해결하고 관련 없는 변경을 버리지 않는다.
+5. 최종 rebase 뒤 4절의 필수 검사를 모두 다시 실행하고 `git diff --check`를 통과시킨다.
+6. `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다.
+7. 이미 push한 전용 브랜치의 SHA가 바뀌었으면 원격 tip을 확인한 뒤 `git push --force-with-lease`로만 갱신한다. `--force`를 사용하지 않는다.
+8. PR의 필수 검사, 승인과 mergeable 상태를 다시 확인한다.
+9. 실제 병합 직전에 `git fetch origin main`을 한 번 더 실행한다. `origin/main`이 기록한 SHA보다 전진했으면 4~8단계를 반복한다.
 
 rebase 충돌, 실패한 재검증 또는 최신 base 확인 실패를 우회해 stale 브랜치를 병합하지 않는다. 이 절의 브랜치 rebase는 GitHub의 rebase merge 방식과 다르며, 병합 자체는 8절의 일반 merge commit을 사용한다.
 
@@ -207,4 +222,5 @@ rebase 충돌, 실패한 재검증 또는 최신 base 확인 실패를 우회해
 - Rebase: 최종 `origin/main` SHA와 `--force-with-lease` 사용 여부
 - Merge: Lore 커밋 SHA, merge commit SHA, 일반 merge 방식
 - Post-merge: 기준 문서가 요구한 운영·배포 검증 결과 또는 해당 없음
+- Coordination: 관련 작업·Issue, checkout, 중첩 등급, 소유권, 병합 순서와 합의 댓글 또는 해당 없음
 - Remaining: 남은 위험 또는 `없음`
