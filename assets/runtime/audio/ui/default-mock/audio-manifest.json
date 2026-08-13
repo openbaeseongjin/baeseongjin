@@ -1,0 +1,26 @@
+{
+    "$schema": "../../audio-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "default-mock",
+    "category": "ui",
+    "generator": { "tool": "scripts/generateAudioMockAssets.mjs", "sourceFormat": "procedural-pcm" },
+    "clips": {
+        "confirm": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.12,
+            "sources": [{ "path": "confirm.wav", "mimeType": "audio/wav" }]
+        }
+    },
+    "cues": {
+        "ui-confirm": {
+            "group": "ui",
+            "kind": "one-shot",
+            "clips": [{ "clip": "confirm" }],
+            "spatial": "none",
+            "maxVoices": 2,
+            "retriggerCooldownMs": 80,
+            "priority": 70
+        }
+    }
+}

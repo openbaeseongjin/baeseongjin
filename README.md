@@ -20,6 +20,7 @@ npm start
 npm test
 npm run check
 npm run validate:world
+npm run validate:audio-assets
 ```
 
 서버를 시작한 뒤 `http://127.0.0.1:4173`을 연다.
@@ -33,7 +34,7 @@ npm run validate:world
 - 로프 해제: 마우스 버튼을 놓아 현재 속도로 비행
 
 현재 프로토타입은 새 런·새 멀티 채널마다 시드가 달라지는 48단계의 큰 절차 생성 월드, 모든 지형 표면 부착, 고정 길이 진자 운동, 접선 드래그 충격, 해제 관성,
-자동 원거리 공격, 적의 로프 절단·본체 피해, 체크포인트 복귀, 아티팩트 선택·누적·일부 손실, 정상 도달 완료, 전투 VFX와 모바일 조작을 포함한다.
+자동 원거리 공격, 적의 로프 절단·본체 피해, 체크포인트 복귀, 아티팩트 선택·누적·일부 손실, 정상 도달 완료, 전투 VFX, 모바일 조작과 교체 가능한 mock 오디오·탭형 설정을 포함한다.
 각 신규 체크포인트에서 공격력·연사·로프 공명 중 하나를 선택해 빌드를 강화하며, 실패하면 최근 아티팩트 약 1/3을 잃고 활성 체크포인트에서 재개한다.
 
 절차 생성 안전성은 `npm run validate:world`로 고정 회귀 시드 5개와 연속 탐색 시드 1,000개를 검사한다. 원격 플레이테스트에서는
@@ -54,6 +55,8 @@ npm run validate:world
 - [재사용 가능한 기반](docs/reusable-game-resources.md) — 공용 게임 기반과 재사용 정책
 - [구현 로드맵](docs/implementation-roadmap.md) — 현재 구현 상태, 다음 게임성 우선순위와 완료 기준
 - [두 기기 협동 플레이테스트](docs/two-device-playtest-protocol.md) — 실제 기기 한 세션의 실행 순서, 기록 양식과 판정 기준
+- [오디오 작업 가이드](docs/audio-asset-guide.md) — 오디오 작업자의 제작·인계 경로와 체크리스트
+- [오디오 교환 형식](docs/audio-asset-format.md) — runtime package, manifest와 validator 계약
 
 ## Discord 회의록 봇
 

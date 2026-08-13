@@ -1,0 +1,26 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://openbaeseongjin.github.io/baeseongjin/assets/runtime/audio/audio-pack.schema.json",
+    "title": "Baeseongjin runtime audio pack",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["formatVersion", "id", "packages"],
+    "properties": {
+        "$schema": { "type": "string" },
+        "formatVersion": { "const": 1 },
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "packages": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["category", "assetId"],
+                "properties": {
+                    "category": { "enum": ["gameplay", "ui", "ambience", "bgm"] },
+                    "assetId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
+                }
+            }
+        }
+    }
+}

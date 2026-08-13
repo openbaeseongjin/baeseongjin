@@ -1,0 +1,87 @@
+{
+    "$schema": "../../audio-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "default-mock",
+    "category": "gameplay",
+    "generator": { "tool": "scripts/generateAudioMockAssets.mjs", "sourceFormat": "procedural-pcm" },
+    "clips": {
+        "rope-attach": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.18,
+            "sources": [{ "path": "rope-attach.wav", "mimeType": "audio/wav" }]
+        },
+        "weapon-fire-a": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.1,
+            "sources": [{ "path": "weapon-fire-a.wav", "mimeType": "audio/wav" }]
+        },
+        "weapon-fire-b": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.1,
+            "sources": [{ "path": "weapon-fire-b.wav", "mimeType": "audio/wav" }]
+        },
+        "player-hit": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.22,
+            "sources": [{ "path": "player-hit.wav", "mimeType": "audio/wav" }]
+        },
+        "checkpoint-reached": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.42,
+            "sources": [{ "path": "checkpoint-reached.wav", "mimeType": "audio/wav" }]
+        }
+    },
+    "cues": {
+        "gameplay-rope-attach": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "rope-attach" }],
+            "spatial": "world",
+            "maxVoices": 2,
+            "retriggerCooldownMs": 80,
+            "priority": 55
+        },
+        "gameplay-weapon-fire": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [
+                { "clip": "weapon-fire-a", "weight": 1 },
+                { "clip": "weapon-fire-b", "weight": 1 }
+            ],
+            "spatial": "world",
+            "maxVoices": 4,
+            "retriggerCooldownMs": 40,
+            "priority": 45,
+            "pitchRandomizationPercent": 2,
+            "gainRandomizationDb": 1
+        },
+        "gameplay-player-hit": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "player-hit" }],
+            "spatial": "world",
+            "maxVoices": 2,
+            "retriggerCooldownMs": 80,
+            "priority": 90,
+            "minGainDb": -18,
+            "ducking": [
+                { "group": "bgm", "gainDb": -6, "attackMs": 50, "releaseMs": 400 },
+                { "group": "ambience", "gainDb": -3, "attackMs": 50, "releaseMs": 400 }
+            ]
+        },
+        "gameplay-checkpoint-reached": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "checkpoint-reached" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 500,
+            "priority": 80
+        }
+    }
+}

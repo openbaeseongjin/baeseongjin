@@ -1,6 +1,6 @@
 {
   "name": "baeseongjin-rope-roguelike",
-  "version": "0.16.3",
+  "version": "0.17.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,6 +15,7 @@
     "validate:world": "node scripts/validateWorldSeeds.mjs",
     "validate:sprite-assets": "node scripts/validateSpriteAssets.mjs",
     "validate:environment-assets": "node scripts/validateEnvironmentAssets.mjs",
+    "validate:audio-assets": "node scripts/validateAudioAssets.mjs",
     "format": "prettier --write \"src/**/*.js\" \"tests/**/*.mjs\" \"scripts/**/*.mjs\" \"*.html\"",
     "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.mjs\" \"scripts/**/*.mjs\" \"*.html\""
   },

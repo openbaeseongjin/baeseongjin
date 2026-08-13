@@ -27,6 +27,7 @@ npm start
 | `npm run start:game-server` | 상시 게임 전용 서버 (`0.0.0.0:4175`, 정적 파일 비노출) |
 | `npm run share:multiplayer` | 개발용 임시 공유: 개발 서버 4173 앞에 Quick Tunnel을 열고 URL만 표시. Pages에 반영하지 않는다. |
 | `npm run publish:multiplayer` | 운영 배포: 게임 전용 서버 4175 + Quick Tunnel + `/health` 검증 + `index.html` 메타 교체 + `index.html`만 커밋·`origin main` push + Pages 노출 대기 후 smoke 검증 |
+| `npm run validate:audio-assets` | 기본 audio pack 또는 전달한 package/pack의 manifest·source·WAV 검증 |
 
 `share:multiplayer`는 로컬 정적 화면까지 함께 공유하는 개발 전용 경로다. `publish:multiplayer`는 상시 게임 서버만 공유하고 정적 화면은 노출하지 않는다. `publish:multiplayer`는 clean `main` 전제(완전히 깨끗한 작업 트리, `main` 브랜치, 존재하는 `origin`, fetch 직후 HEAD와 `origin/main` 일치)를 실행 전에 확인하며, 이 전제를 어기면 서버/터널을 시작하지 않는다. Pages의 `meta[name="multiplayer-server"]` 값만 교체한 단일 배포 커밋을 직접 `origin main`으로 push하고, push 전 터널 `/health` 검증을 마친 뒤 push 후 Pages 전파·공개 smoke를 검증한다. push가 성공적인 뒤의 Pages/smoke 실패는 서버와 터널을 종료하지 않고 안내만 출력한다. 새 Quick Tunnel 주소는 프로세스를 다시 실행할 때마다 달라지므로 고정된 운영 HTTPS/WSS 주소를 제공하지 않는다. 상세 운영 절차는 `docs/multiplayer-sharing.md`를 따른다.
 
@@ -47,7 +48,7 @@ npm run format:check
 git diff --check
 ```
 
-`npm test`는 게임플레이, 멀티플레이, 클라이언트 배포의 3개 메인 시나리오를 실행하며 전체 3분 제한을 자체 검사한다. 세부 구현값보다 로프·전투·로그라이크 진행, 실제 WebSocket 채널, 모바일·PWA·상시 서버 계약을 우선 검증한다. `npm run check`는 모든 JavaScript와 MJS 파일의 문법을 검사하고, `npm run format:check`는 Prettier 형식을 확인한다.
+`npm test`는 게임플레이, 멀티플레이, 클라이언트 배포, 환경 manifest·렌더링과 오디오의 6개 메인 시나리오를 실행하며 전체 3분 제한을 자체 검사한다. 세부 구현값보다 로프·전투·로그라이크 진행, 실제 WebSocket 채널, 모바일·PWA·오디오·상시 서버 계약을 우선 검증한다. `npm run check`는 모든 JavaScript와 MJS 파일의 문법을 검사하고, `npm run format:check`는 Prettier 형식을 확인한다.
 
 ## 문제 해결
 
