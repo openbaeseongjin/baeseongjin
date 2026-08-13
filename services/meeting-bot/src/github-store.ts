@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 import type { AppConfig } from "./config.js";
 import { buildDocumentUpdates } from "./github-documents.js";
 import { kstDate } from "./time.js";
-import type { MeetingMetadata, Minutes } from "./types.js";
+import type { MeetingMetadata, Minutes, TranscriptEntry } from "./types.js";
 
 export interface GitHubSyncResult {
   commitSha: string;
@@ -50,13 +50,17 @@ export class GitHubStore {
     );
   }
 
-  async syncMeeting(metadata: MeetingMetadata, minutes: Minutes): Promise<GitHubSyncResult> {
+  async syncMeeting(
+    metadata: MeetingMetadata,
+    minutes: Minutes,
+    transcript: TranscriptEntry[],
+  ): Promise<GitHubSyncResult> {
     await this.assertPublicationAllowed();
 
     let lastError: unknown;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
-        return await this.createAtomicCommit(metadata, minutes);
+        return await this.createAtomicCommit(metadata, minutes, transcript);
       } catch (error: unknown) {
         lastError = error;
       }
@@ -76,6 +80,7 @@ export class GitHubStore {
   private async createAtomicCommit(
     metadata: MeetingMetadata,
     minutes: Minutes,
+    transcript: TranscriptEntry[],
   ): Promise<GitHubSyncResult> {
     const reference = await this.octokit.rest.git.getRef({
       owner: this.owner,
@@ -90,11 +95,16 @@ export class GitHubStore {
     });
 
     const date = kstDate(new Date(metadata.startedAt));
-    const paths = [`docs/meetings/${date}.md`, "DECISIONS.md", "TASKS.md"];
+    const paths = [
+      `docs/meetings/${date}.md`,
+      `docs/meetings/transcripts/${date}.md`,
+      "DECISIONS.md",
+      "TASKS.md",
+    ];
     const existing = Object.fromEntries(
       await Promise.all(paths.map(async (path) => [path, await this.readFile(path, headSha)] as const)),
     );
-    const updates = buildDocumentUpdates(metadata, minutes, existing);
+    const updates = buildDocumentUpdates(metadata, minutes, transcript, existing);
     if (updates.length === 0) {
       return { commitSha: headSha, paths: [] };
     }
@@ -137,6 +147,9 @@ export class GitHubStore {
       });
       if (Array.isArray(response.data) || response.data.type !== "file" || !("content" in response.data)) {
         throw new Error(`expected ${path} to be a file`);
+      }
+      if (response.data.encoding !== "base64") {
+        throw new Error(`${path} is too large to read via the GitHub contents API`);
       }
       return Buffer.from(response.data.content, "base64").toString("utf8");
     } catch (error: unknown) {

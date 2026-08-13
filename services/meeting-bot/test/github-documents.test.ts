@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildDocumentUpdates } from "../src/github-documents.js";
-import type { MeetingMetadata, Minutes } from "../src/types.js";
+import type { MeetingMetadata, Minutes, TranscriptEntry } from "../src/types.js";
 
 const metadata: MeetingMetadata = {
   id: "20260809-220000",
@@ -40,7 +40,7 @@ const minutes: Minutes = {
 
 describe("GitHub document updates", () => {
   it("creates the daily minutes, decisions, and tasks from promoted fields", () => {
-    const updates = buildDocumentUpdates(metadata, minutes, {});
+    const updates = buildDocumentUpdates(metadata, minutes, [], {});
 
     expect(updates.map((update) => update.path)).toEqual([
       "docs/meetings/2026-08-09.md",
@@ -69,7 +69,7 @@ describe("GitHub document updates", () => {
       "TASKS.md": `# Tasks\n\n${marker}\n`,
     };
 
-    expect(buildDocumentUpdates(metadata, minutes, existing)).toEqual([]);
+    expect(buildDocumentUpdates(metadata, minutes, [], existing)).toEqual([]);
   });
 
   it("does not create decision or task ledgers when nothing was explicit", () => {
@@ -81,9 +81,70 @@ describe("GitHub document updates", () => {
         decided: [],
         actionItems: [],
       },
+      [],
       {},
     );
 
     expect(updates.map((update) => update.path)).toEqual(["docs/meetings/2026-08-09.md"]);
+  });
+
+  it("creates a transcripts file when the transcript is non-empty", () => {
+    const transcript: TranscriptEntry[] = [
+      {
+        id: "text:1",
+        source: "text",
+        timestamp: "2026-08-09T13:00:03.000Z",
+        speakerId: "u1",
+        speaker: "성진",
+        channelId: "c1",
+        channelName: "회의",
+        text: "오늘 시작할까요",
+      },
+    ];
+
+    const updates = buildDocumentUpdates(metadata, minutes, transcript, {});
+
+    expect(updates.map((update) => update.path)).toEqual([
+      "docs/meetings/2026-08-09.md",
+      "docs/meetings/transcripts/2026-08-09.md",
+      "DECISIONS.md",
+      "TASKS.md",
+    ]);
+    expect(
+      updates.find((update) => update.path === "docs/meetings/transcripts/2026-08-09.md")
+        ?.content,
+    ).toContain("성진");
+  });
+
+  it("omits the transcript file entirely when the transcript is empty", () => {
+    const updates = buildDocumentUpdates(metadata, minutes, [], {});
+
+    expect(updates.map((update) => update.path)).not.toContain(
+      "docs/meetings/transcripts/2026-08-09.md",
+    );
+  });
+
+  it("does not duplicate a transcript section for an existing meeting marker", () => {
+    const marker = "<!-- meeting-id:20260809-220000 -->";
+    const transcript: TranscriptEntry[] = [
+      {
+        id: "text:1",
+        source: "text",
+        timestamp: "2026-08-09T13:00:03.000Z",
+        speakerId: "u1",
+        speaker: "성진",
+        channelId: "c1",
+        channelName: "회의",
+        text: "오늘 시작할까요",
+      },
+    ];
+    const existing = {
+      "docs/meetings/2026-08-09.md": `# Meeting Minutes\n\n${marker}\n`,
+      "docs/meetings/transcripts/2026-08-09.md": `# Meeting Transcript\n\n${marker}\n`,
+      "DECISIONS.md": `# Decisions\n\n${marker}\n`,
+      "TASKS.md": `# Tasks\n\n${marker}\n`,
+    };
+
+    expect(buildDocumentUpdates(metadata, minutes, transcript, existing)).toEqual([]);
   });
 });

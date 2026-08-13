@@ -1,5 +1,5 @@
-import type { MeetingMetadata, Minutes } from "./types.js";
-import { markdownText, renderMeetingSection } from "./markdown.js";
+import type { MeetingMetadata, Minutes, TranscriptEntry } from "./types.js";
+import { markdownText, renderMeetingSection, renderTranscriptSection } from "./markdown.js";
 import { kstDate } from "./time.js";
 
 function appendSection(existing: string, section: string): string {
@@ -15,6 +15,7 @@ export interface DocumentUpdate {
 export function buildDocumentUpdates(
   metadata: MeetingMetadata,
   minutes: Minutes,
+  transcript: TranscriptEntry[],
   existing: Record<string, string>,
 ): DocumentUpdate[] {
   const date = kstDate(new Date(metadata.startedAt));
@@ -28,6 +29,17 @@ export function buildDocumentUpdates(
       path: dailyPath,
       content: appendSection(dailyExisting, renderMeetingSection(metadata, minutes)),
     });
+  }
+
+  if (transcript.length > 0) {
+    const transcriptPath = `docs/meetings/transcripts/${date}.md`;
+    const transcriptExisting = existing[transcriptPath] || `# Meeting Transcript — ${date}\n`;
+    if (!transcriptExisting.includes(marker)) {
+      updates.push({
+        path: transcriptPath,
+        content: appendSection(transcriptExisting, renderTranscriptSection(metadata, transcript)),
+      });
+    }
   }
 
   if (minutes.decided.length > 0) {

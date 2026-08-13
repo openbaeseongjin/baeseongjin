@@ -2,7 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../src/config.js";
 import { MeetingManager } from "../src/meeting-manager.js";
-import type { Minutes } from "../src/types.js";
+import type { Minutes, TranscriptEntry } from "../src/types.js";
 
 function config(overrides: NodeJS.ProcessEnv = {}) {
   return loadConfig({
@@ -699,5 +699,95 @@ describe("MeetingManager", () => {
     await endPromise;
     expect(localProcessing.transcribe.mock.calls[0]?.[0]).toEqual([]);
     expect((manager as unknown as { ending: boolean }).ending).toBe(false);
+  });
+
+  it("passes the raw transcript entries through to the GitHub sync", async () => {
+    const minutesSend = vi.fn(async () => undefined);
+    const client = {
+      channels: {
+        fetch: vi.fn(async (channelId: string) =>
+          channelId === "12345678901234570"
+            ? { isTextBased: (): boolean => true, send: minutesSend }
+            : {
+                isTextBased: (): boolean => true,
+                messages: { fetch: vi.fn(async () => new Map()) },
+              },
+        ),
+      },
+    };
+    const github = {
+      syncMeeting: vi.fn(async (_metadata: unknown, _minutes: Minutes, _transcript: TranscriptEntry[]) => ({
+        paths: [],
+        commitSha: "1234567",
+      })),
+    };
+    const manager = new MeetingManager(client as never, config(), github as never, {
+      ensureReady: vi.fn(async () => ({ state: "skipped" as const })),
+    });
+    const transcriptEntries = [
+      {
+        id: "text:1",
+        source: "text" as const,
+        timestamp: "2026-08-12T13:00:00.000Z",
+        speakerId: "u1",
+        speaker: "성진",
+        channelId: "12345678901234569",
+        channelName: "회의",
+        text: "오늘 시작할까요",
+      },
+    ];
+    const localProcessing = {
+      transcribe: vi.fn(async (_messages: unknown[]) => ({ entries: transcriptEntries, failures: [] })),
+      summarize: vi.fn(
+        async (): Promise<Minutes> => ({
+          summary: ["논의: 없음", "결정: 없음", "할 일: 없음"],
+          discussed: [],
+          decided: [],
+          rejected: [],
+          hypotheses: [],
+          references: [],
+          actionItems: [],
+          blockers: [],
+          nextMeeting: null,
+        }),
+      ),
+    };
+    (manager as unknown as { localProcessing: typeof localProcessing }).localProcessing = localProcessing;
+    const guild = {
+      members: {
+        fetch: vi.fn(async () => ({
+          displayName: "Regular Member",
+          voice: { channel: null },
+        })),
+      },
+      channels: {
+        cache: new Map(),
+        fetch: vi.fn(async () => permissionChannel()),
+      },
+    };
+    const baseInteraction = {
+      commandName: "meeting",
+      guildId: "12345678901234568",
+      channelId: "12345678901234569",
+      inGuild: () => true,
+      guild,
+      user: { id: "12345678901234571" },
+      reply: vi.fn(async () => undefined),
+      editReply: vi.fn(async () => undefined),
+    };
+
+    await manager.handleCommand({
+      ...baseInteraction,
+      options: { getSubcommand: () => "start" },
+      deferReply: vi.fn(async () => undefined),
+    } as never);
+    await manager.handleCommand({
+      ...baseInteraction,
+      createdAt: new Date(),
+      options: { getSubcommand: () => "end" },
+      deferReply: vi.fn(async () => undefined),
+    } as never);
+
+    expect(github.syncMeeting.mock.calls[0]?.[2]).toEqual(transcriptEntries);
   });
 });

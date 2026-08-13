@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { markdownText, renderDailyDocument, splitMarkdown } from "../src/markdown.js";
-import type { MeetingMetadata, Minutes } from "../src/types.js";
+import { markdownText, renderDailyDocument, renderTranscriptSection, splitMarkdown } from "../src/markdown.js";
+import type { MeetingMetadata, Minutes, TranscriptEntry } from "../src/types.js";
 
 describe("minutes markdown", () => {
   it("renders every required section", () => {
@@ -154,6 +154,88 @@ describe("minutes markdown", () => {
   it("renders untrusted Markdown links and formatting as literal text", () => {
     expect(markdownText("[공식](https://attacker.example) # **제목** `코드` ||숨김||")).toBe(
       "\\[공식\\]\\(https://attacker.example\\) \\# \\*\\*제목\\*\\* \\`코드\\` \\|\\|숨김\\|\\|",
+    );
+  });
+});
+
+describe("transcript markdown", () => {
+  const metadata: MeetingMetadata = {
+    id: "20260812-220000",
+    guildId: "123",
+    startedAt: "2026-08-12T13:00:00.000Z",
+    endedAt: "2026-08-12T14:00:00.000Z",
+    startedBy: "진행자",
+    voiceChannelName: "회의",
+  };
+
+  it("renders each entry with KST time, speaker, source, and channel", () => {
+    const entries: TranscriptEntry[] = [
+      {
+        id: "text:1",
+        source: "text",
+        timestamp: "2026-08-12T13:00:03.000Z",
+        speakerId: "u1",
+        speaker: "성진",
+        channelId: "c1",
+        channelName: "회의",
+        text: "오늘 시작할까요",
+      },
+      {
+        id: "voice:1",
+        source: "voice",
+        timestamp: "2026-08-12T13:01:00.000Z",
+        speakerId: "u2",
+        speaker: "용호",
+        text: "네 시작합시다",
+      },
+    ];
+
+    const markdown = renderTranscriptSection(metadata, entries);
+
+    expect(markdown).toContain("<!-- meeting-id:20260812-220000 -->");
+    expect(markdown).toContain("- 22:00 KST — 성진 (text, #회의): 오늘 시작할까요");
+    expect(markdown).toContain("- 22:01 KST — 용호 (voice): 네 시작합시다");
+    expect(markdown.indexOf("성진")).toBeLessThan(markdown.indexOf("용호"));
+  });
+
+  it("does not truncate a very long transcript entry", () => {
+    const longText = "가".repeat(5_000);
+    const entries: TranscriptEntry[] = [
+      {
+        id: "text:1",
+        source: "text",
+        timestamp: "2026-08-12T13:00:00.000Z",
+        speakerId: "u1",
+        speaker: "성진",
+        channelId: "c1",
+        channelName: "회의",
+        text: longText,
+      },
+    ];
+
+    const markdown = renderTranscriptSection(metadata, entries);
+
+    expect(markdown).toContain(longText);
+  });
+
+  it("escapes markdown control characters in transcript text", () => {
+    const entries: TranscriptEntry[] = [
+      {
+        id: "text:1",
+        source: "text",
+        timestamp: "2026-08-12T13:00:00.000Z",
+        speakerId: "u1",
+        speaker: "성진",
+        channelId: "c1",
+        channelName: "회의",
+        text: "[링크](https://attacker.example) **강조**",
+      },
+    ];
+
+    const markdown = renderTranscriptSection(metadata, entries);
+
+    expect(markdown).toContain(
+      "\\[링크\\]\\(https://attacker.example\\) \\*\\*강조\\*\\*",
     );
   });
 });
