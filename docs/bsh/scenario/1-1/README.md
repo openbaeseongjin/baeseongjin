@@ -6,8 +6,6 @@
 
 `TARGET 1:30–2:00` · `FLOW BOTTOM → TOP` · `ANCHORS 2` · `ENEMIES 1 × SENTRY TURRET` · `EXIT SERVICE SHAFT 02`
 
-> 스타일이 적용된 단일 파일 버전은 [`index.html`](index.html)에도 있습니다 (이미지 base64 내장, 로컬에서 바로 열리거나 GitHub Pages로 배포 가능). 이 README는 GitHub에서 바로 렌더링되는 동일 내용의 Markdown 버전입니다.
-
 ## Contents
 
 01. [이 구간의 목적](#01-이-구간의-목적)
@@ -32,7 +30,7 @@
 
 | FIG.01 — GAMEPLAY VISUAL REFERENCE | FIG.02 — LEVEL LAYOUT |
 |---|---|
-| ![SECTOR 01-1 gameplay visual reference](images/01_gameplay_reference.png) | ![SECTOR 01-1 annotated level layout](images/02_level_layout.png) |
+| ![SECTOR 01-1 gameplay visual reference](./images/01_gameplay_reference.png) | ![SECTOR 01-1 annotated level layout](./images/02_level_layout.png) |
 | 실제 플레이 화면 기준 | START → ANCHOR A → LANDING → ANCHOR B → TURRET → TERMINAL → SHAFT 02 |
 
 ## 01 · 이 구간의 목적
@@ -268,8 +266,7 @@ Sector 1-1 SERVICE SHAFT는 수직도시 최하부에서 시작하는 **약 1분
 
 ```
 .
-├── index.html                        # 레벨 디자인 문서 (완전 단일 파일, 이미지 내장)
-├── README.md                         # 이 문서 (Markdown 버전, GitHub에서 바로 렌더링)
+├── README.md                         # 이 문서 (Markdown, GitHub에서 바로 렌더링)
 └── images/                           # 원본 레퍼런스 (고해상도 PNG)
     ├── 01_gameplay_reference.png     # Gameplay Visual Reference
     └── 02_level_layout.png           # Annotated Level Layout

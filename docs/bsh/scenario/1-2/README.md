@@ -8,8 +8,6 @@
 
 `TARGET 1:00–2:00` · `FLOW BOTTOM → TOP` · `ANCHORS 3 (A / B / C)` · `ENEMIES 1 × TURRET (재사용)` · `NEW AIR RE-ATTACH` · `EXIT SERVICE SHAFT 03`
 
-> 스타일이 적용된 단일 파일 버전은 [`index.html`](index.html)에도 있습니다. 이 README는 GitHub에서 바로 렌더링되는 동일 내용의 Markdown 버전입니다.
-
 ## Contents
 
 00. [Visual Reference](#00--visual-reference)
@@ -35,7 +33,7 @@
 
 | FIG.01 — SWING LINE | FIG.02 — LEVEL LAYOUT |
 |---|---|
-| ![SECTOR 01-2 swing line reference](images/01_swing_line.png) | ![SECTOR 01-2 annotated level layout](images/02_level_layout.png) |
+| ![SECTOR 01-2 swing line reference](./images/01_swing_line.png) | ![SECTOR 01-2 annotated level layout](./images/02_level_layout.png) |
 | START → A → B → C → EXIT. 좌우 교차 Anchor로 한 호흡에 이어지는 이상적 라인 | ANCHOR A·B·C, LANDING, TURRET, SERVICE TERMINAL, SHAFT 03 |
 
 ## 01 · 역할 — 첫 연속 그래플 구간
@@ -240,8 +238,7 @@ Sector 1-2 `DOUBLE ANCHOR SHAFT`는 1-1에서 익힌 단일 Grapple을 연속 Gr
 
 ```
 .
-├── index.html                        # 레벨 디자인 문서 (스타일 적용 단일 파일)
-├── README.md                         # 이 문서 (Markdown 버전, GitHub에서 바로 렌더링)
+├── README.md                         # 이 문서 (Markdown, GitHub에서 바로 렌더링)
 └── images/                           # 원본 레퍼런스 (고해상도 PNG)
     ├── 01_swing_line.png             # Swing Line Reference
     └── 02_level_layout.png           # Annotated Level Layout
