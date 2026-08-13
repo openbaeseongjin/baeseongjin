@@ -103,6 +103,8 @@ pack은 category별 package 참조만 가진다. cue나 clip을 복제하지 않
 - world pan은 visible bounds 중심에서 좌우 가장자리를 `0→±1`로 clamp한다.
 - 거리는 160까지 0 dB, 1200에서 -36 dB이며 그 밖은 무음이다.
 - BGM·ambience loop는 lifecycle key별 하나이고 전환 중에만 이전·다음 source가 겹친다.
+- 같은 lifecycle key에 같은 cue·gain·pan을 다시 전달하면 기존 loop를 그대로 사용하고 Web Audio automation을 추가하지 않는다. world loop의 값이 실제로 변하면 기존 `AudioParam` 예약을 취소한 뒤 현재 gain·pan으로 교체해 고정 스텝 호출이 재생 시간에 비례하는 parameter timeline을 만들지 않게 한다.
+- 현재 runtime 안전 상한은 전체 논리 voice 32개, causal ID 256개, emitter cooldown key 512개, runtime failure 64개다. 이 값은 manifest 필드가 아니라 host·voice manager의 보유 한도이며 새 event handler도 무상한 emitter·causal 기록을 만들 수 없다.
 
 ## 시작·실패·수명주기
 
@@ -111,9 +113,11 @@ pack은 category별 package 참조만 가진다. cue나 clip을 복제하지 않
 - 선택 실패만 `degraded`로 시작하며 진단과 설정 탭에 남긴다.
 - 상태는 `loading|ready|degraded|suspended|failed`다.
 - 준비 뒤 media `play()`가 거부되면 해당 voice를 즉시 정리하고 runtime failure를 host snapshot과 `?metrics=1` 진단에 포함한다. 사용자 활성화 제약인 `NotAllowedError`는 `suspended`로 전이해 다음 입력에서 재개하고, 그 밖의 필수 clip 재생 실패는 `failed`, 선택 clip 재생 실패는 해당 clip을 제외한 `degraded`로 전이한다.
+- buffer source가 graph 연결 뒤 `start()`에서 예외를 내면 active handle과 source·gain·pan node를 즉시 정리하고 최초 시작 오류를 caller에 보존한다.
 - `document.hidden`과 `pagehide`는 one-shot을 폐기하고 context·stream을 suspend한다. `blur`만으로는 중지하지 않는다.
 - 복귀 시 과거 one-shot을 재생하지 않고 현재 BGM·ambience state만 재조정한다.
 - 메뉴 복귀와 release는 소유한 voice·loop·stream 연결을 명시적으로 정리한다.
+- `stop`·`suspend`·`release`는 종료 event 도착 시점에 의존하지 않고 one-shot voice와 ducking을 즉시 정리한다. release는 loop와 cooldown·variation·causal 추적 상태까지 비워 재사용되지 않는 host가 이전 package나 emitter를 보유하지 않게 한다.
 
 ## validator
 

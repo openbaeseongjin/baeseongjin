@@ -308,6 +308,8 @@ class Player extends RopeAttachable(GameObject) {}
 - 오디오 manifest는 clip source·load·loop와 cue 표현 정책만 소유한다. 게임 사건 연결은 package 밖 `AudioEventBindings`의 조합 가능한 handler가 소유하고 싱글·멀티 앱은 같은 `presentFrame` 경계만 호출한다. Web Audio graph와 voice 수명은 audio host가 소유하며 gameplay·simulation·network state는 음원 경로나 mixer를 import하지 않는다.
 - 오디오와 sprite 같은 표현 package는 stable ID·catalog·immutable definition 주입 경계를 유지한다. package 선택은 렌더·재생 결과만 바꾸며 물리·충돌·전투·명령·network snapshot을 변경하지 않는다. 실제 디버그 selector가 추가되기 전에도 공개 loader의 전체 pack·category override와 bootstrap 선택 주입을 회귀 테스트로 보호한다.
 - 오디오 media의 비동기 재생 거부는 준비 성공과 구분해 voice를 정리하고 host snapshot·개발 진단에 전파한다. 사용자 활성화 제약은 다음 사용자 동작에서 재시도 가능한 `suspended`, 복구 불가능한 필수·선택 실패는 각각 `failed`·`degraded`로 명시하며 실패를 adapter 내부 배열에만 남기지 않는다.
+- 오디오 scene·binding처럼 120Hz 고정 스텝에서 호출될 수 있는 경로는 같은 lifecycle key·cue·gain·pan 입력을 멱등 처리한다. 값이 같을 때 Web Audio automation을 추가하지 않고, 값이 변할 때는 해당 `AudioParam`의 기존 예약을 취소·교체한다. 앱별 호출 빈도 제한으로 우회하지 말고 공용 voice/adapter 경계의 장시간 반복 테스트로 증명한다.
+- emitter cooldown, causal ID, runtime failure처럼 사건 수에 따라 늘 수 있는 오디오 기록은 명시적 상한을 가진다. buffer source 시작 실패는 생성한 handle·node·voice를 즉시 정리한다. `stopAll`은 one-shot·loop를, `suspend`는 one-shot을, `release`는 남은 voice·loop와 cooldown·variation·causal 추적 Map까지 결정적으로 비워야 한다. 회귀 테스트는 동일 loop 수만 회, 고유 emitter가 상한을 넘는 경우와 graph 연결 뒤 `start()`가 실패하는 경우를 포함하고 각 수명주기 뒤 보유 수를 직접 단언한다.
 - 스프라이트 화면 변경은 데스크톱과 모바일 크기에서 상태의 자세·실루엣·동작을 비교한다. 색 변화만을 상태 구분의 유일한 근거로 사용하지 않는다.
 
 ## 11. 코드 스타일과 파일 관리
