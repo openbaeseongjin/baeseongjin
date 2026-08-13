@@ -351,7 +351,7 @@ git diff --check
 
 ## 14. 문서 관리
 
-- README는 실행과 진입점, 설계 문서는 구조와 결정 이유, 개발 규칙은 반복 적용할 계약을 설명한다.
+- 루트 README는 실행과 진입점, `docs/README.md`는 문서 인덱스와 읽는 순서만 설명한다. 문서 작성 위치·파일 형식·이미지 첨부와 인덱스 운영의 상세 기준은 `docs/documentation-rules.md`를 따른다.
 - 같은 내용을 여러 문서에 복제하지 않고 기준 문서를 링크한다.
 - 기능이 바뀌면 관련 기획·아키텍처·도움말을 같은 작업에서 현행화한다.
 - 완전히 대체된 결정은 삭제하지 않고 `docs/decision-history.md`로 이동한다.
@@ -374,7 +374,8 @@ git diff --check
 | 게임 방향, 플레이 흐름, 열린 기획 결정 | `docs/game-hackathon-planning.md`, `docs/implementation-roadmap.md` |
 | 모듈 책임, 상태 소유권, 의존 방향 | `docs/architecture.md` |
 | 멀티 권위, 전송, 채널과 세션 정책 | `docs/multiplayer-synchronization.md` |
-| 클래스·믹스인·컴포넌트·테스트·Git·문서 운영 규칙 | `docs/development-rules.md` |
+| 클래스·믹스인·컴포넌트·테스트·Git과 대화 결정 흡수 절차 | `docs/development-rules.md` |
+| 문서 인덱스, 작성 위치, 파일 형식과 이미지 첨부 | `docs/documentation-rules.md` |
 | Pages, PWA, 서버 실행, 버전 운영 | 해당 배포·버전 문서 |
 | 현재 유효한 결론과 다음 작업 요약 | `SESSION-HANDOFF.md` |
 | 대체되거나 종료된 결정과 이유 | `docs/decision-history.md` |
