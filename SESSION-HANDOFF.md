@@ -56,6 +56,8 @@ Sector 01-6의 현재 기준은 `docs/bsh/scenario/1-6/README.md`의 `COOLING SH
 
 Sector 01-7의 현재 기준은 `docs/bsh/scenario/1-7/README.md`의 `PRESSURE BYPASS` REV 3.0이다. 새 기믹 없이 Rope Chaining·선택 Augment·Sentry T1·Pulsed Wind·Cover/Wind Shadow·Recovery를 처음 조합한다. A→B 약풍과 C→D 무풍 Turret 복습 뒤 D→E에서만 Main Vent와 Turret LOS를 겹쳐 실패 원인을 단계적으로 읽게 한다. Safe Route는 Shot과 Vent LULL을 기다리고, Flow Route는 TRACK·WARNING을 읽어 ACTIVE Wind를 이용한다. Turret 파괴는 필수가 아니며 F 이후에는 LOS와 Wind를 모두 끝낸 뒤 Manual Bypass를 조작한다. Open Questions인 Bypass 의미·일반 Sentry Rope Cut·압력 안정화 영구성은 1-8 확정 전에 Lock해야 한다.
 
+Sector 01-8의 현재 기준은 `docs/bsh/scenario/1-8/README.md`의 `CONTAINMENT GATE` REV 3.0이다. 새 기믹이나 Boss 없이 Sector 1 학습을 회수한다. T1은 Wind 없는 Lower Security Phase, T2는 Final Pulsed Wind와 겹치는 Synthesis Phase를 맡으며 두 Turret은 절대 동시 Crossfire를 만들지 않는다. Mid Safe Deck과 H 이후 Complete Relief로 Phase를 분리하고, 모든 Foundation Build에 Safe Route와 해당 Phase Recovery를 제공한다. Gate Override 뒤 Lower Grid Shutdown을 아래부터 순차 연출하고 Worker District Preview 끝에서 Sector-end Checkpoint를 활성화한다. 1-7의 Lock 항목은 `Manual Bypass = 위쪽 탈출 경로 개방`, `Standard Sentry Projectile = Player Hit Only / Rope Cut 없음`, `압력은 잠깐 안정화되지만 Containment로 다시 악화`로 확정한다.
+
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태지만, 전체 48개 중 현재 문서가 있는 `1-1`~`1-3`을 제외한 45개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.
