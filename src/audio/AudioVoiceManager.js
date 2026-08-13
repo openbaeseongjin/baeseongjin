@@ -1,5 +1,7 @@
 import { calculateSpatialAudio, dbToLinearGain, neutralSpatialAudio } from "./AudioSpatializer.js";
 
+const MAX_TRACKED_COOLDOWN_KEYS = 512;
+
 function oldestLowestPriority(records) {
     return records.reduce((selected, record) => {
         if (!selected || record.priority < selected.priority) return record;
@@ -77,7 +79,7 @@ export class AudioVoiceManager {
             return false;
         }
         this.voices.push(record);
-        this.lastTriggerAt.set(cooldownKey, now);
+        this.#rememberCooldown(cooldownKey, now);
         if (request.causalId) this.#rememberCausalId(request.causalId, now);
         return true;
     }
@@ -88,8 +90,12 @@ export class AudioVoiceManager {
         const existing = this.loops.get(lifecycleKey);
         const spatial = this.#spatial(cue, request);
         if (!spatial) return false;
+        const gain = dbToLinearGain(cue.gainDb) * spatial.gain;
         if (existing?.cueId === cueId) {
-            existing.handle.setSpatial?.({ pan: spatial.pan, gain: dbToLinearGain(cue.gainDb) * spatial.gain });
+            if (existing.gain === gain && existing.pan === spatial.pan) return true;
+            existing.handle.setSpatial?.({ pan: spatial.pan, gain });
+            existing.gain = gain;
+            existing.pan = spatial.pan;
             return true;
         }
         const variation = this.#selectVariation(cue);
@@ -103,6 +109,8 @@ export class AudioVoiceManager {
             priority: cue.priority,
             startedAt: this.clock(),
             transitionMs: cue.transitionMs,
+            gain,
+            pan: spatial.pan,
             handle: null
         };
         try {
@@ -111,7 +119,7 @@ export class AudioVoiceManager {
                 cueId,
                 lifecycleKey,
                 group: cue.group,
-                gain: dbToLinearGain(cue.gainDb) * spatial.gain,
+                gain,
                 pan: spatial.pan,
                 fadeInMs: cue.transitionMs,
                 onEnded: () => this.#removeRecord(record)
@@ -128,7 +136,9 @@ export class AudioVoiceManager {
     disableClip(clipKey) {
         if (!this.availableClipKeys.delete(clipKey)) return false;
         for (const record of [...this.voices, ...this.loops.values()]) {
-            if (record.clipKey === clipKey) record.handle.stop(0);
+            if (record.clipKey !== clipKey) continue;
+            record.handle.stop(0);
+            this.#removeRecord(record);
         }
         return true;
     }
@@ -142,13 +152,19 @@ export class AudioVoiceManager {
     }
 
     stopAll() {
-        for (const record of [...this.voices]) record.handle.stop(0);
+        for (const record of [...this.voices]) {
+            record.handle.stop(0);
+            this.#removeRecord(record);
+        }
         for (const loop of [...this.loops.values()]) loop.handle.stop(0);
         this.loops.clear();
     }
 
     suspend() {
-        for (const record of [...this.voices]) record.handle.stop(0);
+        for (const record of [...this.voices]) {
+            record.handle.stop(0);
+            this.#removeRecord(record);
+        }
         this.adapter.suspend();
     }
 
@@ -159,6 +175,11 @@ export class AudioVoiceManager {
     release() {
         this.stopAll();
         this.adapter.release();
+        this.definition = null;
+        this.availableClipKeys.clear();
+        this.lastTriggerAt.clear();
+        this.lastVariation.clear();
+        this.causalIds.clear();
     }
 
     diagnostics() {
@@ -266,5 +287,13 @@ export class AudioVoiceManager {
     #rememberCausalId(causalId, now) {
         this.causalIds.set(causalId, now);
         while (this.causalIds.size > 256) this.causalIds.delete(this.causalIds.keys().next().value);
+    }
+
+    #rememberCooldown(cooldownKey, now) {
+        this.lastTriggerAt.delete(cooldownKey);
+        this.lastTriggerAt.set(cooldownKey, now);
+        while (this.lastTriggerAt.size > MAX_TRACKED_COOLDOWN_KEYS) {
+            this.lastTriggerAt.delete(this.lastTriggerAt.keys().next().value);
+        }
     }
 }

@@ -61,9 +61,12 @@ class MemoryStorage {
 class FakeParameter {
     constructor(value = 1) {
         this.value = value;
+        this.cancelled = 0;
     }
 
-    cancelScheduledValues() {}
+    cancelScheduledValues() {
+        this.cancelled += 1;
+    }
 
     setValueAtTime(value) {
         this.value = value;
@@ -132,6 +135,7 @@ class FakeAudioContext {
         this.currentTime = 0;
         this.destination = new FakeNode();
         this.bufferSources = [];
+        this.panners = [];
     }
 
     createGain() {
@@ -139,7 +143,9 @@ class FakeAudioContext {
     }
 
     createStereoPanner() {
-        return new FakePannerNode();
+        const panner = new FakePannerNode();
+        this.panners.push(panner);
+        return panner;
     }
 
     createBufferSource() {
@@ -258,8 +264,12 @@ class FakeRuntimeAdapter {
         const handle = {
             stopped: false,
             spatial: null,
+            spatialUpdates: 0,
             stop: () => (handle.stopped = true),
-            setSpatial: (spatial) => (handle.spatial = spatial)
+            setSpatial: (spatial) => {
+                handle.spatial = spatial;
+                handle.spatialUpdates += 1;
+            }
         };
         this.handles.push(handle);
         return handle;
@@ -577,10 +587,34 @@ function testMixerVoicePolicyAndBindings() {
     assert.equal(manager.startLoop("bgm-climb", "bgm:main", world), true);
     assert.equal(manager.startLoop("bgm-climb", "bgm:main", { ...world, position: { x: 10, y: 0 } }), true);
     assert.equal(adapter.loops.length, 1, "a lifecycle key must keep one logical loop");
+    assert.equal(
+        adapter.handles.at(-1).spatialUpdates,
+        0,
+        "an unchanged non-spatial loop must not schedule audio parameters every fixed step"
+    );
     assert.equal(manager.startLoop("bgm-run-complete", "bgm:main", world), true);
     assert.equal(adapter.loops.length, 2);
     assert.equal(adapter.handles.at(-2).stopped, true, "loop replacement must stop the outgoing source");
     assert.equal(manager.diagnostics().activeVoices, 1, "a crossfade remains one logical lifecycle voice");
+
+    const boundedAdapter = new FakeRuntimeAdapter();
+    const boundedManager = new AudioVoiceManager({
+        adapter: boundedAdapter,
+        mixer,
+        maxVoices: 1,
+        clock: () => now,
+        random: () => 0
+    });
+    boundedManager.setDefinition(definition, Object.keys(definition.clips));
+    for (let index = 0; index < 1024; index += 1) {
+        assert.equal(boundedManager.play("gameplay-weapon-fire", { ...world, emitterId: `transient-${index}` }), true);
+        boundedAdapter.handles.at(-1).stop();
+    }
+    assert.ok(
+        boundedManager.lastTriggerAt.size <= 512,
+        "cooldown history must stay bounded when extensible bindings use transient emitter IDs"
+    );
+    boundedManager.release();
 
     const calls = [];
     const bindings = new AudioEventBindings({
@@ -707,6 +741,54 @@ async function testBrowserAdapterAndHost() {
     });
     assert.equal(context.bufferSources.at(-1).started, true);
     oneShot.stop(0);
+    assert.equal(adapter.activeHandles.size, 0, "manually stopped buffer voices must release immediately");
+
+    const installFailingSource = () => {
+        const source = new FakeBufferSource();
+        source.start = () => {
+            throw new Error("context closed");
+        };
+        source.stop = () => {
+            throw new Error("source never started");
+        };
+        const createBufferSource = context.createBufferSource.bind(context);
+        context.createBufferSource = () => {
+            context.createBufferSource = createBufferSource;
+            context.bufferSources.push(source);
+            return source;
+        };
+        return source;
+    };
+    const failedOneShotSource = installFailingSource();
+    assert.throws(
+        () =>
+            adapter.playOneShot({
+                clipKey: "gameplay/mock:buffer",
+                group: "gameplay",
+                gain: 1,
+                pitchRatio: 1,
+                pan: 0,
+                onEnded() {}
+            }),
+        /context closed/
+    );
+    assert.equal(adapter.activeHandles.size, 0, "a failed buffer start must not retain an active handle");
+    assert.equal(failedOneShotSource.disconnected, true, "a failed buffer start must disconnect its source node");
+
+    const failedLoopSource = installFailingSource();
+    assert.throws(
+        () =>
+            adapter.playLoop({
+                clipKey: "gameplay/mock:buffer",
+                group: "gameplay",
+                gain: 1,
+                pan: 0,
+                fadeInMs: 0
+            }),
+        /context closed/
+    );
+    assert.equal(adapter.activeHandles.size, 0, "a failed buffer loop start must not retain an active handle");
+    assert.equal(failedLoopSource.disconnected, true, "a failed buffer loop start must disconnect its source node");
     const stream = adapter.playLoop({
         clipKey: "bgm/mock:stream",
         group: "bgm",
@@ -714,6 +796,14 @@ async function testBrowserAdapterAndHost() {
         pan: 0,
         fadeInMs: 0
     });
+    const streamPanner = context.panners.at(-1);
+    stream.setSpatial({ gain: 0.5, pan: 0.25 });
+    stream.setSpatial({ gain: 0.5, pan: 0.5 });
+    assert.equal(
+        streamPanner.pan.cancelled,
+        2,
+        "moving loop pan updates must replace pending automation instead of growing an unbounded timeline"
+    );
     await adapter.suspend();
     assert.equal(context.state, "suspended");
     await adapter.resume();

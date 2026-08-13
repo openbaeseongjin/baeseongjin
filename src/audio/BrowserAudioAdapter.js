@@ -10,6 +10,12 @@ function setGain(parameter, value, context, transitionMs = 0) {
     else parameter.setValueAtTime(value, time);
 }
 
+function setPan(parameter, value, context) {
+    const time = context.currentTime;
+    parameter.cancelScheduledValues(time);
+    parameter.setValueAtTime(value, time);
+}
+
 function errorCode(error) {
     if (error?.name === "AbortError") return "timeout";
     return String(error?.code ?? error?.name ?? "load-failed").toLowerCase();
@@ -135,7 +141,12 @@ export class BrowserAudioAdapter {
         source.buffer = prepared.buffer;
         source.playbackRate.value = pitchRatio;
         const handle = this.#connectVoice({ source, group, gain, pan, onEnded });
-        source.start();
+        try {
+            source.start();
+        } catch (error) {
+            handle.stop(0);
+            throw error;
+        }
         return handle;
     }
 
@@ -151,7 +162,12 @@ export class BrowserAudioAdapter {
                 source.loopEnd = prepared.clip.loop.endSeconds;
             }
             const handle = this.#connectVoice({ source, group, gain, pan, fadeInMs, onEnded });
-            source.start();
+            try {
+                source.start();
+            } catch (error) {
+                handle.stop(0);
+                throw error;
+            }
             return handle;
         }
         return this.#playStreamLoop(prepared, { cueId, lifecycleKey, group, gain, pan, fadeInMs, onEnded });
@@ -396,6 +412,8 @@ export class BrowserAudioAdapter {
                         try {
                             source.stop();
                         } catch {
+                            // Cleanup below owns the terminal state even when the source never started.
+                        } finally {
                             cleanup();
                         }
                     }, fadeMs);
@@ -403,13 +421,15 @@ export class BrowserAudioAdapter {
                     try {
                         source.stop();
                     } catch {
+                        // Preserve the original playback error while releasing the graph.
+                    } finally {
                         cleanup();
                     }
                 }
             },
             setSpatial: ({ gain: nextGain, pan: nextPan }) => {
                 setGain(gainNode.gain, nextGain, this.context, 30);
-                if (panNode) panNode.pan.setValueAtTime(nextPan, this.context.currentTime);
+                if (panNode) setPan(panNode.pan, nextPan, this.context);
             }
         });
         source.addEventListener?.("ended", cleanup, { once: true });
@@ -467,7 +487,7 @@ export class BrowserAudioAdapter {
             },
             setSpatial: ({ gain: nextGain, pan: nextPan }) => {
                 setGain(gainNode.gain, nextGain, this.context, 30);
-                if (panNode) panNode.pan.setValueAtTime(nextPan, this.context.currentTime);
+                if (panNode) setPan(panNode.pan, nextPan, this.context);
             }
         });
         prepared.activeHandle = handle;
