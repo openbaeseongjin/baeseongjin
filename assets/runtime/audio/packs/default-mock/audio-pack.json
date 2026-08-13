@@ -1,0 +1,11 @@
+{
+    "$schema": "../../audio-pack.schema.json",
+    "formatVersion": 1,
+    "id": "default-mock",
+    "packages": [
+        { "category": "gameplay", "assetId": "default-mock" },
+        { "category": "ui", "assetId": "default-mock" },
+        { "category": "ambience", "assetId": "default-mock" },
+        { "category": "bgm", "assetId": "default-mock" }
+    ]
+}

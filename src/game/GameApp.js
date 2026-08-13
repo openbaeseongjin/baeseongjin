@@ -12,12 +12,14 @@ import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
+import { createRenderViewport } from "../render/RenderViewport.js";
 
 export class GameApp {
     constructor({
         canvas,
         renderer = null,
         onDiagnostics = () => {},
+        audioBindings = null,
         worldSeed = selectWorldSeed(globalThis.location?.search)
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
@@ -31,6 +33,7 @@ export class GameApp {
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
         this.onDiagnostics = onDiagnostics;
+        this.audioBindings = audioBindings;
         this.camera = this.createCamera();
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
@@ -73,6 +76,9 @@ export class GameApp {
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
+        const eventAudioContext = this.createAudioContext(state.player.position, state.tick);
+        this.audioBindings?.handleEvents(authorityEvents, eventAudioContext);
+        this.audioBindings?.observeRope(before.rope, state.rope, eventAudioContext);
         this.playerPresentationEvents.push(...createPlayerPresentationEvents(authorityEvents));
         const authorityFeedback = this.predictableProjectiles.apply(authorityEvents, state.tick, state);
         const owner = this.authority.ownerState();
@@ -90,11 +96,27 @@ export class GameApp {
             this.predictableProjectiles.applyImpactReceipts([this.authority.submitImpactClaim(impact)]);
         }
         this.playerPresentationEvents.push(...createPlayerPresentationEvents(predictedImpacts));
+        this.audioBindings?.handleEvents(predictedImpacts, eventAudioContext);
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
         if (state.resets !== before.resets) this.camera = this.createCamera();
         this.updateCamera(dt, state.player);
+        this.audioBindings?.syncScene(this.createAudioContext(state.player.position, state.tick, state.runState));
+    }
+
+    createAudioContext(listener, tick, runState = "playing") {
+        return Object.freeze({
+            localPlayerId: this.authority.playerId,
+            tick,
+            listener,
+            visibleWorldBounds: createRenderViewport({
+                camera: this.camera,
+                cssWidth: this.renderer.cssWidth,
+                cssHeight: this.renderer.cssHeight
+            }).visibleWorldBounds,
+            runState
+        });
     }
 
     updateCamera(dt, player) {

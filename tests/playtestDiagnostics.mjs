@@ -54,6 +54,34 @@ export async function run() {
             devicePixelRatio: 3,
             effectivePixelRatio: 2,
             drawCounts: { enemies: { total: 48, drawn: 6 } }
+        },
+        audioDiagnostics: {
+            status: "degraded",
+            packId: "default-mock",
+            packages: { gameplay: "default-mock", ui: "default-mock" },
+            contextState: "running",
+            requiredReady: 7,
+            requiredTotal: 7,
+            optionalReady: 1,
+            optionalTotal: 2,
+            failures: [{ clipKey: "ui/default-mock:optional", failureCode: "fetch-failed" }],
+            clips: [
+                {
+                    clipKey: "gameplay/default-mock:hit",
+                    sourcePath: "hit.wav",
+                    mimeType: "audio/wav",
+                    status: "ready",
+                    failureCode: null
+                }
+            ],
+            voices: {
+                activeVoices: 2,
+                groups: { gameplay: 1, ui: 0, ambience: 1, bgm: 1 },
+                cooldownDrops: 3,
+                priorityDrops: 0,
+                voiceSteals: 1,
+                deduplicated: 2
+            }
         }
     });
     assert.match(text, /channel: 1234/);
@@ -68,6 +96,10 @@ export async function run() {
     assert.match(text, /renderFps: 59/);
     assert.match(text, /backingStore: 2048x1536/);
     assert.match(text, /drawCounts: enemies=6\/48/);
+    assert.match(text, /audioStatus: degraded/);
+    assert.match(text, /audioPackages: gameplay\/default-mock,ui\/default-mock/);
+    assert.match(text, /audioVoiceSteals: 1/);
+    assert.match(text, /audioClips: gameplay\/default-mock:hit=ready:hit.wav:audio\/wav:-/);
 
     let click = null;
     let copied = null;

@@ -31,6 +31,8 @@
 | [`graphics-asset-guide.md`](./graphics-asset-guide.md) | 그래픽 자산 공통 작업 안내 |
 | [`sprite-asset-format.md`](./sprite-asset-format.md) | 캐릭터 스프라이트 교환 형식 |
 | [`environment-asset-format.md`](./environment-asset-format.md) | 환경 자산 교환 형식 |
+| [`audio-asset-guide.md`](./audio-asset-guide.md) | 오디오 작업자의 제작·인계 안내 |
+| [`audio-asset-format.md`](./audio-asset-format.md) | 오디오 package·manifest 교환 형식 |
 | [`tech-stack.md`](./tech-stack.md) | 기술 스택 선택 기준 |
 | [`reusable-game-resources.md`](./reusable-game-resources.md) | 재사용 가능한 기반 모듈 인덱스 |
 

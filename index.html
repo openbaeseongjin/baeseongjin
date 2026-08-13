@@ -248,6 +248,129 @@
             .copy-diagnostics[hidden] {
                 display: none;
             }
+            .settings-trigger {
+                position: fixed;
+                z-index: 32;
+                top: max(8px, env(safe-area-inset-top));
+                left: max(8px, env(safe-area-inset-left));
+                min-height: 40px;
+                padding: 0 13px;
+                border: 1px solid rgba(148, 163, 184, 0.45);
+                border-radius: 9px;
+                color: #e2e8f0;
+                background: rgba(7, 11, 20, 0.88);
+                font-weight: 800;
+            }
+            .settings-dialog {
+                position: fixed;
+                z-index: 40;
+                inset: 0;
+                display: grid;
+                place-items: center;
+                padding: 20px;
+                background: rgba(5, 9, 17, 0.72);
+                backdrop-filter: blur(8px);
+            }
+            .settings-dialog[hidden],
+            .settings-panel[hidden],
+            .audio-resume-notice[hidden] {
+                display: none;
+            }
+            .settings-card {
+                width: min(560px, 100%);
+                max-height: min(720px, calc(100dvh - 40px));
+                overflow: auto;
+                padding: 20px;
+                border: 1px solid rgba(103, 232, 249, 0.4);
+                border-radius: 18px;
+                background: rgba(15, 23, 42, 0.98);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            }
+            .settings-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .settings-header h2 {
+                margin: 0;
+            }
+            .settings-close,
+            .audio-reset {
+                min-height: 40px;
+                padding: 0 13px;
+                border: 1px solid rgba(148, 163, 184, 0.4);
+                border-radius: 9px;
+                color: #e2e8f0;
+                background: #243047;
+                font-weight: 800;
+            }
+            .settings-tabs {
+                display: flex;
+                gap: 8px;
+                margin: 18px 0;
+                border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+            }
+            .settings-tabs button {
+                min-height: 42px;
+                padding: 0 16px;
+                border: 0;
+                border-bottom: 3px solid transparent;
+                color: #94a3b8;
+                background: transparent;
+                font-weight: 800;
+            }
+            .settings-tabs button[aria-selected="true"] {
+                border-bottom-color: #67e8f9;
+                color: #f8fafc;
+            }
+            .audio-master-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 46px;
+                margin-bottom: 10px;
+                font-weight: 800;
+            }
+            .audio-setting-row {
+                display: grid;
+                grid-template-columns: 88px 1fr 68px;
+                align-items: center;
+                gap: 12px;
+                min-height: 46px;
+            }
+            .audio-setting-row input {
+                width: 100%;
+                accent-color: #67e8f9;
+            }
+            .audio-setting-row output {
+                color: #cbd5e1;
+                font:
+                    700 12px/1 ui-monospace,
+                    monospace;
+                text-align: right;
+            }
+            .audio-settings-footer {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 16px;
+            }
+            .audio-reset:disabled {
+                opacity: 0.45;
+            }
+            .audio-resume-notice {
+                position: fixed;
+                z-index: 35;
+                top: max(58px, calc(env(safe-area-inset-top) + 58px));
+                left: 50%;
+                margin: 0;
+                padding: 9px 13px;
+                border-radius: 9px;
+                color: #082f49;
+                background: #67e8f9;
+                font-weight: 800;
+                transform: translateX(-50%);
+            }
             [data-mode-status][data-error="true"] {
                 color: #fda4af;
             }
@@ -388,6 +511,63 @@
                 aria-label="로프로 절차 생성 암석 지형을 등반하는 액션 게임 화면"
                 aria-describedby="controls-description"
             ></canvas>
+            <button class="settings-trigger" id="settings-trigger" type="button" aria-haspopup="dialog">설정</button>
+            <section
+                class="settings-dialog"
+                id="settings-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="settings-title"
+                hidden
+            >
+                <div class="settings-card">
+                    <header class="settings-header">
+                        <h2 id="settings-title">설정</h2>
+                        <button class="settings-close" type="button" data-settings-close aria-label="설정 닫기">
+                            닫기
+                        </button>
+                    </header>
+                    <div class="settings-tabs" role="tablist" aria-label="설정 분류" data-settings-tabs></div>
+                    <section class="settings-panel" id="settings-panel-audio" data-settings-panel="audio">
+                        <p data-audio-status aria-live="polite" hidden></p>
+                        <label class="audio-master-toggle">
+                            전체 오디오 끄기
+                            <input type="checkbox" data-audio-muted />
+                        </label>
+                        <label class="audio-setting-row">
+                            <span>전체</span>
+                            <input type="range" min="-60" max="0" step="1" data-audio-gain="master" />
+                            <output data-audio-gain-output="master"></output>
+                        </label>
+                        <label class="audio-setting-row">
+                            <span>게임</span>
+                            <input type="range" min="-60" max="0" step="1" data-audio-gain="gameplay" />
+                            <output data-audio-gain-output="gameplay"></output>
+                        </label>
+                        <label class="audio-setting-row">
+                            <span>UI</span>
+                            <input type="range" min="-60" max="0" step="1" data-audio-gain="ui" />
+                            <output data-audio-gain-output="ui"></output>
+                        </label>
+                        <label class="audio-setting-row">
+                            <span>환경</span>
+                            <input type="range" min="-60" max="0" step="1" data-audio-gain="ambience" />
+                            <output data-audio-gain-output="ambience"></output>
+                        </label>
+                        <label class="audio-setting-row">
+                            <span>음악</span>
+                            <input type="range" min="-60" max="0" step="1" data-audio-gain="bgm" />
+                            <output data-audio-gain-output="bgm"></output>
+                        </label>
+                        <div class="audio-settings-footer">
+                            <button class="audio-reset" type="button" data-audio-reset>기본값 복원</button>
+                        </div>
+                    </section>
+                </div>
+            </section>
+            <p class="audio-resume-notice" id="audio-resume-notice" role="status" hidden>
+                화면을 누르면 오디오가 다시 시작됩니다.
+            </p>
             <p class="sr-only" id="controls-description">
                 PC에서는 A와 D로 이동하고 W로 점프합니다. 마우스로 지형을 누르면 로프를 부착하고 드래그하면 스윙하며
                 놓으면 해제합니다. 모바일에서는 하단의 좌우 이동과 점프 버튼을 사용하고 나머지 화면에서 로프를
@@ -407,7 +587,7 @@
                     <button type="button" data-install-action>앱 설치</button>
                 </div>
             </section>
-            <output class="version-badge" id="app-version" data-version="0.16.3" aria-label="배포 버전">v0.16.3</output>
+            <output class="version-badge" id="app-version" data-version="0.17.0" aria-label="배포 버전">v0.17.0</output>
         </main>
         <noscript><p>이 게임을 실행하려면 JavaScript가 필요합니다.</p></noscript>
         <script type="module" src="./src/main.js"></script>

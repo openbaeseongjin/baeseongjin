@@ -1,0 +1,26 @@
+{
+    "$schema": "../../audio-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "default-mock",
+    "category": "ambience",
+    "generator": { "tool": "scripts/generateAudioMockAssets.mjs", "sourceFormat": "procedural-pcm" },
+    "clips": {
+        "altitude-wind": {
+            "playback": "stream",
+            "channels": "stereo",
+            "durationSeconds": 2,
+            "sources": [{ "path": "altitude-wind.wav", "mimeType": "audio/wav" }],
+            "loop": { "startSeconds": 0, "endSeconds": 2 }
+        }
+    },
+    "cues": {
+        "ambience-altitude-wind": {
+            "group": "ambience",
+            "kind": "loop",
+            "clips": [{ "clip": "altitude-wind" }],
+            "spatial": "none",
+            "priority": 20,
+            "transitionMs": 1000
+        }
+    }
+}

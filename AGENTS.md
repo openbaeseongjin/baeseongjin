@@ -25,6 +25,15 @@
 - 새 environment runtime 리소스는 `assets/runtime/environments/default-mock/sprite-manifest.json`을 복사해 시작하고 `npm run validate:environment-assets -- <directory>`를 통과시킨다. atlas 개수와 frame 배열은 바꿀 수 있지만 loader·schema·example·validator를 하나의 공개 계약으로 유지한다.
 - terrain 표현은 기존 collision surface polygon과 one-way edge chain을 그대로 사용한다. decoration은 충돌을 추가하지 않고 이동 경로 밖 또는 배경에만 배치하며, asset 실패는 backdrop·terrain·decoration별 독립 fallback과 `?metrics=1` 진단으로 검증한다.
 
+## Audio asset work
+
+- 오디오 생성·교체·import·codec·loop 작업은 파일을 만들기 전에 `docs/audio-asset-guide.md`와 `docs/audio-asset-format.md`를 전부 읽고 `assets/audio-authoring/README.md`와 `assets/runtime/audio/README.md`에서 인계·mock 범위를 확인한다.
+- Skill·MCP·DAW 원본을 런타임 계약으로 사용하지 않는다. 원본·48 kHz/24-bit PCM WAV master·preview는 `assets/audio-authoring/<category>/<asset-id>/`에 인계하고, 통합 개발자가 browser source 배열과 `audio-manifest.json`으로 정규화한다.
+- 새 runtime package는 같은 category의 `assets/runtime/audio/<category>/default-mock/audio-manifest.json`에서 시작한다. pack은 `assets/runtime/audio/packs/default-mock/audio-pack.json` 구조를 따르고 `npm run validate:audio-assets -- <pack-or-package-directory>`를 통과시킨다.
+- `audio-manifest.schema.json`, `audio-pack.schema.json`, parser, mock manifest와 validator는 하나의 공개 계약이다. 하나를 바꾸면 나머지와 `docs/audio-asset-format.md`를 같은 변경에서 갱신한다.
+- manifest에는 clip·source·loop와 cue 표현 정책만 둔다. 게임 trigger·collider·damage·physics·network authority는 넣지 않으며 `AudioEventBindings` 밖에서 게임 사건 이름을 오디오 engine에 추가하지 않는다.
+- package 교체는 stable ID·catalog·immutable definition 주입 경계를 사용한다. 향후 디버그 selector를 위해 특정 mock 경로를 gameplay나 mixer에 하드코딩하지 않는다.
+
 ## Split-authority gameplay events
 
 - 플레이어·로프처럼 특정 소유자가 있는 입력 주도 사건은 해당 소유 클라이언트가, 충돌·피격은 피해 클라이언트가 최초 트리거한다. 서버 응답을 기다린 뒤 모바일 움직임, 피격 반응, UI 또는 VFX를 시작하지 않는다.

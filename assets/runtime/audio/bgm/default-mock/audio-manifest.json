@@ -1,0 +1,41 @@
+{
+    "$schema": "../../audio-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "default-mock",
+    "category": "bgm",
+    "generator": { "tool": "scripts/generateAudioMockAssets.mjs", "sourceFormat": "procedural-pcm" },
+    "clips": {
+        "climb": {
+            "playback": "stream",
+            "channels": "stereo",
+            "durationSeconds": 3,
+            "sources": [{ "path": "climb.wav", "mimeType": "audio/wav" }],
+            "loop": { "startSeconds": 0, "endSeconds": 3 }
+        },
+        "run-complete": {
+            "playback": "stream",
+            "channels": "stereo",
+            "durationSeconds": 2,
+            "sources": [{ "path": "run-complete.wav", "mimeType": "audio/wav" }],
+            "loop": { "startSeconds": 0, "endSeconds": 2 }
+        }
+    },
+    "cues": {
+        "bgm-climb": {
+            "group": "bgm",
+            "kind": "loop",
+            "clips": [{ "clip": "climb" }],
+            "spatial": "none",
+            "priority": 10,
+            "transitionMs": 1500
+        },
+        "bgm-run-complete": {
+            "group": "bgm",
+            "kind": "loop",
+            "clips": [{ "clip": "run-complete" }],
+            "spatial": "none",
+            "priority": 10,
+            "transitionMs": 1500
+        }
+    }
+}

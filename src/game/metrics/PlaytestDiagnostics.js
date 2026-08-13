@@ -14,7 +14,8 @@ export function formatPlaytestDiagnostics({
     worldSeed,
     metrics,
     networkMetrics = null,
-    renderMetrics = null
+    renderMetrics = null,
+    audioDiagnostics = null
 }) {
     const lines = [
         "[ROPE PLAYTEST DIAGNOSTICS]",
@@ -70,6 +71,41 @@ export function formatPlaytestDiagnostics({
             `devicePixelRatio: ${renderMetrics.devicePixelRatio}`,
             `effectivePixelRatio: ${renderMetrics.effectivePixelRatio}`,
             `drawCounts: ${drawCounts || "-"}`
+        );
+    }
+
+    if (audioDiagnostics) {
+        const voices = audioDiagnostics.voices;
+        const packages = Object.entries(audioDiagnostics.packages ?? {})
+            .map(([category, id]) => `${category}/${id}`)
+            .join(",");
+        const clips = (audioDiagnostics.clips ?? [])
+            .map(
+                ({ clipKey, sourcePath, mimeType, status, failureCode }) =>
+                    `${clipKey}=${status}:${sourcePath ?? "-"}:${mimeType ?? "-"}:${failureCode ?? "-"}`
+            )
+            .join(",");
+        lines.push(
+            `audioStatus: ${audioDiagnostics.status}`,
+            `audioPack: ${audioDiagnostics.packId ?? "-"}`,
+            `audioPackages: ${packages || "-"}`,
+            `audioContext: ${audioDiagnostics.contextState}`,
+            `audioRequired: ${audioDiagnostics.requiredReady}/${audioDiagnostics.requiredTotal}`,
+            `audioOptional: ${audioDiagnostics.optionalReady}/${audioDiagnostics.optionalTotal}`,
+            `audioFailures: ${audioDiagnostics.failures.length}`,
+            `audioVoices: ${voices?.activeVoices ?? 0}`,
+            `audioCooldownDrops: ${voices?.cooldownDrops ?? 0}`,
+            `audioPriorityDrops: ${voices?.priorityDrops ?? 0}`,
+            `audioVoiceSteals: ${voices?.voiceSteals ?? 0}`,
+            `audioDeduplicated: ${voices?.deduplicated ?? 0}`,
+            `audioGroups: ${
+                voices
+                    ? Object.entries(voices.groups)
+                          .map(([group, count]) => `${group}=${count}`)
+                          .join(",")
+                    : "-"
+            }`,
+            `audioClips: ${clips || "-"}`
         );
     }
 
