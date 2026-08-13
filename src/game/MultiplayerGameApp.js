@@ -180,7 +180,7 @@ export class MultiplayerGameApp {
             current.predicted.tick,
             current.state.runState
         );
-        this.audioBindings?.handleEvents(events, initialAudioContext);
+        this.audioBindings?.presentFrame({ events, context: initialAudioContext });
         this.playerPresentationEvents.push(...createPlayerPresentationEvents(events));
         this.applyCheckpointEvents(events);
         this.applyCheckpointClaimReceipts();
@@ -195,7 +195,7 @@ export class MultiplayerGameApp {
         if (this.localRunCompleted || current.state.runState === "completed") {
             this.combatFeedback.update(dt);
             this.updateCheckpointFeedback(dt);
-            this.audioBindings?.syncScene({ ...initialAudioContext, runState: "completed" });
+            this.audioBindings?.presentFrame({ scene: { ...initialAudioContext, runState: "completed" } });
             return;
         }
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
@@ -228,19 +228,19 @@ export class MultiplayerGameApp {
                 position: checkpointClaim.feedbackPosition
             });
             this.syncArtifactReward(this.authority.snapshot().ownerArtifactReward);
-            this.audioBindings?.checkpointReached(
-                { checkpointId: checkpointClaim.checkpointId, position: checkpointClaim.feedbackPosition },
-                initialAudioContext
-            );
+            this.audioBindings?.presentFrame({
+                checkpoint: { checkpointId: checkpointClaim.checkpointId, position: checkpointClaim.feedbackPosition },
+                context: initialAudioContext
+            });
         }
         if (this.authority.submitReachedSummit()) {
             this.localRunCompleted = true;
-            this.audioBindings?.syncScene({ ...initialAudioContext, runState: "completed" });
+            this.audioBindings?.presentFrame({ scene: { ...initialAudioContext, runState: "completed" } });
             return;
         }
         this.authority.resolveOwnerCollisions(current.state.players.filter(({ id }) => id !== this.authority.playerId));
         const predictedEvents = this.authority.drainPredictedEvents();
-        this.audioBindings?.handleEvents(predictedEvents, initialAudioContext);
+        this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
         const predictedSwings = predictedEvents.filter(({ eventType }) => eventType === "predicted-rope-swing");
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
         for (const event of predictedSwings) this.authority.submitRopeSwingClaim(event);
@@ -248,7 +248,10 @@ export class MultiplayerGameApp {
         for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);
         const predictedPlayer = this.authority.snapshot().owner;
         const predictedAudioContext = this.createAudioContext(predictedPlayer.position, predictedPlayer.tick);
-        this.audioBindings?.observeRope(current.predicted.rope, predictedPlayer.rope, predictedAudioContext);
+        this.audioBindings?.presentFrame({
+            ropeTransition: { before: current.predicted.rope, after: predictedPlayer.rope },
+            context: predictedAudioContext
+        });
         const localAuthorityPlayer = current.state.players.find(({ id }) => id === this.authority.playerId);
         const collisionState = {
             ...current.state,
@@ -265,7 +268,7 @@ export class MultiplayerGameApp {
                 : null
         };
         const predictedResolutions = this.predictableProjectiles.update(dt, collisionState, predictedPlayer.tick);
-        this.audioBindings?.handleEvents(predictedResolutions, predictedAudioContext);
+        this.audioBindings?.presentFrame({ events: predictedResolutions, context: predictedAudioContext });
         this.playerPresentationEvents.push(...createPlayerPresentationEvents(predictedResolutions));
         for (const resolution of predictedResolutions) {
             if (resolution.projectileId) {
@@ -286,13 +289,13 @@ export class MultiplayerGameApp {
         const blend = 1 - Math.exp(-5 * dt);
         this.camera.x += (targetX - this.camera.x) * blend;
         this.camera.y += (targetY - this.camera.y) * blend;
-        this.audioBindings?.syncScene(
-            this.createAudioContext(
+        this.audioBindings?.presentFrame({
+            scene: this.createAudioContext(
                 player.position,
                 player.tick,
                 this.localRunCompleted ? "completed" : current.state.runState
             )
-        );
+        });
     }
 
     render() {

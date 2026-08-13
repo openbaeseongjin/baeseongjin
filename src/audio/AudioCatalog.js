@@ -102,3 +102,21 @@ export async function loadAudioPackDefinition(
     );
     return createAudioPackDefinition(pack, Object.fromEntries(loaded));
 }
+
+export function createAudioDefinitionLoader({ packId, packageOverrides = {}, loader = loadAudioPackDefinition } = {}) {
+    assertStableId(packId, "audio pack id");
+    if (!packageOverrides || Array.isArray(packageOverrides) || typeof packageOverrides !== "object") {
+        throw new Error("audio package overrides must be an object");
+    }
+    if (typeof loader !== "function") throw new Error("audio definition loader must be a function");
+    const selectedOverrides = Object.freeze(
+        Object.fromEntries(
+            Object.entries(packageOverrides).map(([category, assetId]) => {
+                if (!AUDIO_CATEGORY_SET.has(category)) throw new Error(`audio category '${category}' is unsupported`);
+                assertStableId(assetId, `audio package override '${category}'`);
+                return [category, assetId];
+            })
+        )
+    );
+    return () => loader(packId, { packageOverrides: selectedOverrides });
+}

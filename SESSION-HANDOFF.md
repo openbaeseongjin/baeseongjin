@@ -248,12 +248,12 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 첫 기반은 외부 오디오 미들웨어나 새 라이브러리 대신 브라우저가 제공하는 기본 오디오 API를 사용한다. 구체적인 API 조합과 재생 정책은 인터뷰에서 별도로 확정한다.
 - 기본 API 조합은 Web Audio 중심 혼합 방식이다. 짧은 효과음과 짧은 loop는 `AudioBufferSourceNode`, 긴 BGM·환경음은 `<audio>`를 `MediaElementAudioSourceNode`로 같은 Web Audio 믹서에 연결한다.
 - 생성 Skill·MCP의 고유 출력은 제작 입력으로만 취급한다. 그래픽처럼 도구 중립적인 오디오 작업자 인계 형식과 검증된 runtime package를 분리하며 구체 디렉터리·manifest 계약은 인터뷰에서 확정한다.
-- runtime `audio-manifest.json`은 파일·load 방식·loop 같은 `clips`와 볼륨 그룹·변형·동시발음 같은 `cues`를 소유한다. 게임 사건·상태에서 cue ID로 가는 연결은 별도 `AudioEventBindings`가 소유하며 manifest에 게임 trigger를 넣지 않는다.
+- runtime `audio-manifest.json`은 파일·load 방식·loop 같은 `clips`와 볼륨 그룹·변형·동시발음 같은 `cues`를 소유한다. 게임 사건·상태에서 cue ID로 가는 연결은 별도 `AudioEventBindings`의 조합 가능한 handler가 소유하고 싱글·멀티 앱은 같은 `presentFrame` 경계만 호출하며 manifest에 게임 trigger를 넣지 않는다.
 - cue의 공간 정책은 `none|world`다. BGM·UI는 비공간음이고 gameplay·ambience의 `world` cue는 로컬 플레이어 기준 좌우 pan과 거리 감쇠를 적용한다. 중요한 화면 밖 경고는 cue별 최소 음량을 가지며 첫 범위에 3D/HRTF를 넣지 않는다.
 - 모드 확정 사용자 동작에서 `AudioContext` 활성화를 시작하되 선택된 package의 필수 buffer decode와 긴 stream 재생 준비가 끝난 뒤에만 게임을 시작한다. 필수·선택 cue의 실패 경계는 진행 중인 인터뷰에서 별도로 확정한다.
 - manifest 항목은 기본적으로 필수다. 명시적으로 `required: false`인 보조 변형만 실패를 허용하며, 필수 SFX·ambience·BGM의 load·decode 실패는 게임 시작을 차단한다. 선택 항목 실패는 해당 항목만 제외하고 진단에 기록하며 validator와 runtime loader가 같은 계약을 사용한다.
 - 첫 mock 믹서는 게임플레이 우선·헤드룸 프리셋을 사용한다. 초기값은 master `-6 dB`, gameplay `0 dB`, UI `-4 dB`, ambience `-10 dB`, BGM `-8 dB`이고 master와 각 그룹의 사용자 조정 범위는 음소거부터 `0 dB`까지다. 설정·manifest에는 dB로 기록하고 Web Audio graph 경계에서 선형 gain으로 변환하며, 이 수치는 공개 구조를 바꾸지 않고 이후 청취 검증으로 조정할 수 있는 기본 프리셋이다.
-- 첫 마일스톤에 전체 오디오 설정 UI를 포함한다. 설정 화면은 오디오 전용 팝업이 아니라 모드 선택 화면과 플레이 중 모두 접근 가능한 공용 탭 메뉴로 만들고, 첫 `오디오` 탭에서 전체 음소거와 master·gameplay·UI·ambience·BGM 볼륨을 조절한다. 탭 등록 경계를 통해 이후 그래픽 등 다른 설정 영역을 독립적으로 추가할 수 있게 하되, 실제 그래픽 설정 구현은 이번 오디오 범위에 포함하지 않는다. 모든 오디오 값을 버전이 붙은 `localStorage` 항목에 저장하며 누락·손상·미지원 버전은 확정된 초기 프리셋으로 복구한다.
+- 첫 마일스톤에 전체 오디오 설정 UI를 포함한다. 설정 화면은 오디오 전용 팝업이 아니라 모드 선택 화면과 플레이 중 모두 접근 가능한 공용 탭 메뉴로 만들고, 첫 `오디오` 탭에서 전체 음소거와 master·gameplay·UI·ambience·BGM 볼륨을 조절한다. 탭은 명시적 `attach()` 뒤 등록하고 좌우·Home·End 키보드 이동을 공유하며 생성자는 DOM 탐색·listener·설정 구독을 시작하지 않는다. 이후 그래픽 등 다른 설정 영역을 독립적으로 추가할 수 있게 하되 실제 그래픽 설정 구현은 이번 오디오 범위에 포함하지 않는다. 모든 오디오 값을 버전이 붙은 `localStorage` 항목에 저장하며 누락·손상·미지원 버전은 확정된 초기 프리셋으로 복구한다.
 - 설정은 선택적인 보정 수단이며 첫 실행에서 사용자의 조정을 요구하지 않는다. 확정된 기본 프리셋만으로 주요 gameplay cue의 가청성, 그룹 간 우선순위와 master 헤드룸이 정상이어야 하며 기본 설정 상태를 대표 청취·회귀 검증의 기준으로 삼는다.
 - one-shot voice 정책은 cue별 설정과 전체 안전 상한을 함께 사용한다. 기본 `maxVoices`는 cue당 4개, 같은 emitter의 기본 `retriggerCooldownMs`는 40ms, 전체 활성 voice 상한은 32개다. cue는 제한·cooldown·priority를 덮어쓸 수 있고, 상한 초과 시 가장 낮은 priority에서 가장 오래된 voice부터 교체한다. BGM과 반복 loop는 lifecycle key별 하나만 유지한다.
 - 반복 one-shot은 제작된 여러 clip 변형을 우선 사용한다. 여러 변형이 있으면 cue의 가중치를 적용하되 가능한 경우 직전에 재생한 clip을 연속 선택하지 않는다. pitch·gain 무작위화는 기본적으로 꺼져 있고 cue가 명시한 buffer one-shot에만 적용한다. 권장 범위는 pitch `±2%`, gain `±1 dB`이며 validator는 각각 `±5%`, `±3 dB`를 넘는 선언을 거부한다. BGM과 loop에는 변형 무작위화를 적용하지 않는다.
@@ -263,6 +263,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - world cue의 Pan은 source의 수평 위치를 현재 visible world bounds의 중심→좌우 가장자리에서 `0→±1`로 정규화하고 clamp한다. 거리 gain은 로컬 플레이어와 source의 2D 월드 거리 `160`까지 `0 dB`, 이후 dB 선형으로 감소해 `1200`에서 `-36 dB`, 그 밖에서 무음이다. 필수 경고 cue의 기본 `minGainDb`는 `-18 dB`이며 거리 감쇠 뒤에 floor로 적용한다.
 - 첫 mock cue ID는 `ui-confirm`, `gameplay-rope-attach`, `gameplay-weapon-fire`, `gameplay-player-hit`, `gameplay-checkpoint-reached`, `ambience-altitude-wind`, `bgm-climb`, `bgm-run-complete`의 8개다. 현재 UI 확인, 로컬 로프 부착, 예측·공유 투사체 생성, 피해 클라이언트의 즉시 피격과 서버 공유, 체크포인트 진행, 실행 중 환경 loop, 등반 BGM과 완료 상태 전환에 각각 binding한다. causal ID가 있는 로컬 예측과 서버 확정은 한 번만 재생하며 이 mock ID 집합은 최종 시나리오 cue 목록이 아니다.
 - 각 clip은 `playback: buffer|stream`을 명시하고 MIME이 포함된 source 배열 순서대로 fallback한다. `buffer`는 fetch 성공과 길이가 0보다 큰 `AudioBuffer` decode 완료, `stream`은 지원 source 선택·metadata 로드·`canplay` 도달·`MediaElementAudioSourceNode` graph 연결 완료를 준비 상태로 본다. source 하나당 timeout은 15초이며 모든 source가 실패한 필수 clip은 시작을 차단하고 선택 clip은 제외한 뒤 진단한다.
+- 준비 뒤 media `play()` 거부도 adapter 내부에 숨기지 않고 실패 voice를 정리해 host snapshot과 진단 복사에 남긴다. 사용자 활성화 제약은 `suspended`로 전이해 다음 입력에서 재시도하고 그 밖의 필수·선택 runtime 실패는 각각 `failed`·`degraded`로 전이한다.
 - 오디오 resource package category 허용 목록은 `gameplay`, `ui`, `ambience`, `bgm`이다. 각 package는 `assets/runtime/audio/<category>/<asset-id>/audio-manifest.json`에 두고, `assets/runtime/audio/packs/<pack-id>/audio-pack.json`이 category와 stable asset ID로 하나 이상의 package를 조합한다. pack은 package 참조만 소유하고 cue·clip 또는 gameplay binding을 중복 소유하지 않는다. aggregate validator는 알 수 없는 category·package, 중복 참조와 pack 전체 cue ID 충돌을 거부한다. 향후 디버그 선택은 전체 pack 또는 특정 category package를 교체해 새 immutable definition을 조립한다.
 - 일반 UI와 개발 진단을 분리한다. 시작 화면에는 준비 진행률과 필수 실패의 원인·재시도·메뉴 복귀만 표시한다. 선택 자산 실패는 게임을 계속하되 오디오 설정 탭에 `일부 음원 사용 불가` 상태만 작게 표시한다. `?metrics=1`과 기존 진단 복사에는 pack/package ID, `loading|ready|degraded|suspended|failed`, AudioContext 상태, clip별 선택 source·MIME·실패 코드, 필수/선택 준비 수, 그룹별 활성 voice 수와 cooldown drop·voice stealing 누계를 포함한다.
 - 필수 stream이 모든 source fallback과 timeout 뒤에도 `canplay`에 도달하지 못하면 다른 gameplay 음원이 준비됐어도 자동 degraded 시작을 허용하지 않는다. `failed`로 시작을 차단하고 재시도·메뉴 복귀를 제공한다. 제작자가 해당 항목을 `required: false`로 명시한 경우에만 제외 후 시작할 수 있다.
@@ -272,7 +273,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 ### [L1] 오디오와 그래픽 runtime package는 디버그 선택 가능한 경계를 가진다
 
 - 오디오와 스프라이트가 어느 정도 갖춰지면 디버그 모드에서 여러 작업물을 바꿔가며 같은 게임 동작을 비교 검증할 수 있어야 한다.
-- 최초 오디오 기반과 이후 그래픽 연결은 안정적인 asset ID, catalog와 주입 가능한 definition 선택 경계를 두어 package가 기본 구현에 하드코딩되지 않게 한다.
+- 최초 오디오 기반과 이후 그래픽 연결은 안정적인 asset ID, catalog와 주입 가능한 definition 선택 경계를 두어 package가 기본 구현에 하드코딩되지 않게 한다. 오디오는 공개 pack/category override와 bootstrap definition loader를 회귀 테스트한다.
 - package 선택은 표현 자료만 바꾸며 물리·충돌·전투·네트워크 권위와 시뮬레이션 상태를 바꾸지 않는다.
 - 이번 오디오 작업은 실제 디버그 선택 UI·URL·hot-swap을 구현하지 않는다. stable ID·catalog·definition 주입과 서로 다른 가짜 package 교체 테스트까지 만들고, 실제 선택 UX는 작업물이 쌓인 뒤 추가한다.
 

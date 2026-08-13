@@ -9,12 +9,17 @@ export class GameAudioHost {
         this.status = "loading";
         this.definition = null;
         this.preparation = null;
+        this.runtimeFailures = [];
         this.mixer = new AudioMixer({ adapter, settings });
         this.voices = new AudioVoiceManager({ adapter, mixer: this.mixer, clock, random });
+        this.releaseRuntimeFailures = adapter.subscribeRuntimeFailures?.((failure) =>
+            this.#handleRuntimeFailure(failure)
+        );
     }
 
     async prepare(definition) {
         this.definition = definition;
+        this.runtimeFailures = [];
         this.#setStatus("loading", { completed: 0, total: Object.keys(definition.clips).length });
         await this.adapter.activate();
         const preparation = await this.adapter.prepare(definition, {
@@ -68,7 +73,11 @@ export class GameAudioHost {
         if (this.status !== "suspended") return true;
         try {
             await this.voices.resume();
-            this.#setStatus(this.preparation?.failures.length ? "degraded" : "ready", this.preparation);
+            this.runtimeFailures = this.runtimeFailures.filter(({ failureCode }) => failureCode !== "notallowederror");
+            this.#setStatus(
+                this.preparation?.failures.length || this.runtimeFailures.length ? "degraded" : "ready",
+                this.preparation
+            );
             return true;
         } catch {
             return false;
@@ -76,12 +85,15 @@ export class GameAudioHost {
     }
 
     release() {
+        this.releaseRuntimeFailures?.();
+        this.releaseRuntimeFailures = null;
         this.voices.release();
         this.mixer.release();
     }
 
     snapshot() {
         const preparation = this.preparation;
+        const runtimeFailures = Object.freeze([...this.runtimeFailures]);
         return Object.freeze({
             status: this.status,
             packId: this.definition?.id ?? null,
@@ -99,9 +111,22 @@ export class GameAudioHost {
             optionalReady: preparation?.optionalReady ?? 0,
             optionalTotal: preparation?.optionalTotal ?? 0,
             clips: preparation?.clips ?? Object.freeze([]),
-            failures: preparation?.failures ?? Object.freeze([]),
+            failures: Object.freeze([...(preparation?.failures ?? []), ...runtimeFailures]),
+            runtimeFailures,
             voices: this.definition ? this.voices.diagnostics() : null
         });
+    }
+
+    #handleRuntimeFailure(failure) {
+        const record = Object.freeze({ ...failure });
+        this.runtimeFailures.push(record);
+        if (this.runtimeFailures.length > 64) this.runtimeFailures.shift();
+        if (record.failureCode === "notallowederror") {
+            this.#setStatus("suspended", { runtimeFailure: record });
+            return;
+        }
+        this.voices.disableClip(record.clipKey);
+        this.#setStatus(record.required ? "failed" : "degraded", { runtimeFailure: record });
     }
 
     #setStatus(status, detail) {

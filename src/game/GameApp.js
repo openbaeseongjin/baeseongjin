@@ -76,9 +76,6 @@ export class GameApp {
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
-        const eventAudioContext = this.createAudioContext(state.player.position, state.tick);
-        this.audioBindings?.handleEvents(authorityEvents, eventAudioContext);
-        this.audioBindings?.observeRope(before.rope, state.rope, eventAudioContext);
         this.playerPresentationEvents.push(...createPlayerPresentationEvents(authorityEvents));
         const authorityFeedback = this.predictableProjectiles.apply(authorityEvents, state.tick, state);
         const owner = this.authority.ownerState();
@@ -96,13 +93,18 @@ export class GameApp {
             this.predictableProjectiles.applyImpactReceipts([this.authority.submitImpactClaim(impact)]);
         }
         this.playerPresentationEvents.push(...createPlayerPresentationEvents(predictedImpacts));
-        this.audioBindings?.handleEvents(predictedImpacts, eventAudioContext);
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
         if (state.resets !== before.resets) this.camera = this.createCamera();
         this.updateCamera(dt, state.player);
-        this.audioBindings?.syncScene(this.createAudioContext(state.player.position, state.tick, state.runState));
+        const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
+        this.audioBindings?.presentFrame({
+            events: [...authorityEvents, ...predictedImpacts],
+            context: audioScene,
+            ropeTransition: { before: before.rope, after: state.rope },
+            scene: audioScene
+        });
     }
 
     createAudioContext(listener, tick, runState = "playing") {

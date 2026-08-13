@@ -16,7 +16,7 @@
 
 - master를 브라우저용 파일로 변환하고 `audio-manifest.json`으로 정규화한다.
 - schema·loader·validator·catalog·binding을 함께 유지한다.
-- 새 cue를 게임에 연결할 때 `AudioEventBindings`를 수정하며 mixer에 사건 이름 분기를 추가하지 않는다.
+- 새 cue를 게임에 연결할 때 `AudioEventBindings`의 event handler 조합을 확장한다. 싱글·멀티 앱은 공용 `presentFrame` 경계만 호출하며 mixer에 사건 이름 분기를 추가하지 않는다.
 
 ## 제작·인계 경로
 
