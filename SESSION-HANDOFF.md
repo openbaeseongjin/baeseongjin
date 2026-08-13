@@ -50,6 +50,8 @@ Sector 01-3의 현재 기준은 `docs/bsh/scenario/1-3/README.md`의 `SECURITY C
 
 Sector 01-4의 현재 기준은 `docs/bsh/scenario/1-4/README.md`의 `MAINTENANCE NODE` REV 3.0이다. 1-3의 압박 뒤 첫 Build Choice를 제공하는 휴식·보상 Stage로, `IMPULSE COIL`·`RELAY LINK`·`SHEAR CURRENT` 세 Foundation Augment를 고정 제시한다. 선택 전후 Rope 차이가 즉시 읽혀야 하며, 짧은 Calibration 공간은 세 선택 모두 통과 가능해야 한다. 실제 Enemy와 본격적인 Build 검증은 1-5로 미루고, 기존 Artifact/Reward Selection과의 재사용 범위 및 `swingImpulse`의 기본 Rope 귀속 여부를 구현 전에 확정한다.
 
+Sector 01-5의 현재 기준은 `docs/bsh/scenario/1-5/README.md`의 `AUGMENT TEST BAY` REV 3.0이다. 새 기믹 없이 하나의 960px 폭 Maintenance Test Bay를 세 Build가 다르게 해석하도록 구성한다. `IMPULSE COIL`은 Zone A Long Arc, `RELAY LINK`는 Zone B C→D→E Chain, `SHEAR CURRENT`는 Zone C의 Rope Geometry와 재사용 Sentry T1 제어에서 강점을 보여야 한다. 어떤 Augment도 통과 필수 조건이 아니며 Base Safe Route와 Recovery를 항상 제공한다. Build별 선택률·경로·시간·Turret 상호작용을 기록하고, 다음 1-6에서 Wind를 새로 소개한다.
+
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태지만, 전체 48개 중 현재 문서가 있는 `1-1`~`1-3`을 제외한 45개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.
