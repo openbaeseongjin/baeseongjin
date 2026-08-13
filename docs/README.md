@@ -69,3 +69,4 @@
 | [`bsh/scenario/1-1/README.md`](./bsh/scenario/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격 |
 | [`bsh/scenario/1-2/README.md`](./bsh/scenario/1-2/README.md) | `bsh` Airborne Re-Attach Benchmark Stage(1-2) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1-3/README.md`](./bsh/scenario/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1-4/README.md`](./bsh/scenario/1-4/README.md) | `bsh` 첫 Rope Augment 3지선다·Calibration Stage(1-4) Blockout 후보·제작 규격 |

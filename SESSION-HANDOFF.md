@@ -48,6 +48,8 @@ Sector 01-2의 현재 기준은 `docs/bsh/scenario/1-2/README.md`의 `DOUBLE ANC
 
 Sector 01-3의 현재 기준은 `docs/bsh/scenario/1-3/README.md`의 `SECURITY CHECK` REV 3.0이다. 32px Grid·960×1152 Blockout에서 Scanner 인증 뒤 첫 Sentry T1의 `idle → acquire → track → lock → fire → cooldown` 공격 언어와 B→C Safe/Flow/Recovery 경로를 검증한다. Cover Wall C1 뒤에서는 LOS와 Encounter가 완전히 끝나야 하며, Turret 파괴는 Clear 조건이 아니다. 첫 Projectile은 Rope를 자르지 않고 one-shot·과도한 Knockback·전체 재등반을 만들지 않아야 한다. 상단 Service Panel의 `MAINTENANCE OVERRIDE → VIOLATION LOGGED`가 1-4 Maintenance Node로 연결된다.
 
+Sector 01-4의 현재 기준은 `docs/bsh/scenario/1-4/README.md`의 `MAINTENANCE NODE` REV 3.0이다. 1-3의 압박 뒤 첫 Build Choice를 제공하는 휴식·보상 Stage로, `IMPULSE COIL`·`RELAY LINK`·`SHEAR CURRENT` 세 Foundation Augment를 고정 제시한다. 선택 전후 Rope 차이가 즉시 읽혀야 하며, 짧은 Calibration 공간은 세 선택 모두 통과 가능해야 한다. 실제 Enemy와 본격적인 Build 검증은 1-5로 미루고, 기존 Artifact/Reward Selection과의 재사용 범위 및 `swingImpulse`의 기본 Rope 귀속 여부를 구현 전에 확정한다.
+
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태지만, 전체 48개 중 현재 문서가 있는 `1-1`~`1-3`을 제외한 45개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.
