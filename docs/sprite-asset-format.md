@@ -2,7 +2,7 @@
 
 이 문서는 PixelLab, SpriteCook 또는 수작업으로 만든 플레이어 캐릭터를 게임에 넣을 때 사용하는 현재 기준 형식이다. 도구의 원본 export는 입력 자료일 뿐이며, 런타임은 도구에 종속되지 않은 PNG atlas 묶음과 `sprite-manifest.json`을 소비한다. 상태 구성이 다른 몹·보스에는 이 player 계약을 재사용하지 않는다.
 
-그래픽 담당자는 먼저 [`graphics-asset-guide.md`](./graphics-asset-guide.md)에서 공통 작업 위치와 상태별 표현 기준을 확인하고, 캐릭터 프레임 수나 atlas 구조를 바꿀 때 이 문서의 전체 계약을 확인한다.
+그래픽 담당자는 먼저 [`graphics-asset-guide.md`](./graphics-asset-guide.md)에서 공통 작업 위치를, [`pixel-graphics-design-guide.md`](./pixel-graphics-design-guide.md)에서 캐릭터 제작 크기와 화면 위계를 확인하고, 캐릭터 프레임 수나 atlas 구조를 바꿀 때 이 문서의 전체 계약을 확인한다.
 
 기본 mock은 SVG atlas 하나를 코드로 정의하지만 런타임은 `PlayerSpriteManifest.js`와 `SpriteImageAssetSet`을 통해 manifest 기반 multi-atlas 리소스도 읽는다. renderer는 현재 frame의 atlas ID로 이미지를 선택하며 생성 도구를 해석하지 않는다. 그래픽 담당자는 [`assets/runtime/characters/player-production-template/`](../assets/runtime/characters/player-production-template/)의 배치를 참고해 `assets/artwork/characters/<asset-id>/`에 납품하고, 담당 개발자가 production template을 runtime package로 복사해 정규화한다.
 
@@ -40,7 +40,8 @@
 docs/sprite-asset-format.md를 전부 읽고 <character-id> 리소스를 준비한다.
 원본: <PixelLab character ZIP | SpriteCook PNG sheets/frames | manual PNG frames>
 필수 상태: idle, run, jump, fall, rope, hit, respawn
-논리 프레임: 24×24, 기본 방향: right, 기본 출력: 48×48
+정식 제작 프레임: 32×32~48×48, 액션 확장: 48×48~64×64
+현재 starter: 24×24 개발 mock 배치, 기본 방향: right, 기본 출력: 48×48
 출력: <target-directory>/sprite-manifest.json + manifest가 참조하는 모든 PNG atlas
 금지: collider/physics/network 설정 포함, GIF/WebP 런타임 사용, renderer의 도구별 분기
 완료 보고: 생성 파일, 사용 도구·버전, 정규화 내용, validator 결과
@@ -63,7 +64,7 @@ player-main/
 - 런타임 이미지는 투명 배경의 PNG로 받는다. GIF와 WebP는 미리보기로만 사용한다.
 - 캐릭터 하나가 여러 atlas PNG를 사용할 수 있다. atlas마다 이미지 크기와 격자가 달라도 된다.
 - 각 atlas는 여백과 셀 사이 간격이 없는 균일 격자로 정규화한다. 불규칙하게 packing된 도구 출력은 import 단계에서 다시 packing한다.
-- 현재 캐릭터의 논리 프레임은 24×24픽셀을 기준으로 한다. 도구가 다른 크기만 지원하면 원본을 임의로 비정수 배율 축소하지 않고 crop·padding 또는 기준 크기 변경을 먼저 결정한다.
+- 현재 개발 mock과 production starter는 24×24픽셀 논리 프레임을 사용한다. 정식 player 제작 크기는 `pixel-graphics-design-guide.md`의 32×32~48×48 기준을 따르며 액션 프레임은 48×48~64×64로 확장할 수 있다. starter와 다른 크기를 쓰면 PNG atlas와 manifest의 `size`·`frameSize`를 함께 바꾸고 원본을 비정수 배율로 축소하지 않는다.
 - 파일명, atlas 개수, 프레임 순서와 프레임 개수는 고정 계약이 아니다. manifest의 ID 참조만 계약으로 삼는다.
 
 ## manifest v1

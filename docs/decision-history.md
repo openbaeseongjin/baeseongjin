@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-13 — 초기 프로토타입은 Canvas 플랫 도형을 기본으로 사용한다
+
+- 맥락: 로프 궤적, 충돌과 전투 피드백을 먼저 검증해야 했고 정식 픽셀 자산과 애니메이션은 준비되지 않았다.
+- 결정: HTML Canvas의 단순한 실루엣과 색으로 플레이어, 적, 지형과 VFX를 표현했다.
+- 영향: 에셋 제작을 기다리지 않고 전체 게임 흐름을 구현했으며 현재도 `?renderer=polygon` fallback으로 사용할 수 있다.
+- 대체: 정식 표현은 `docs/pixel-graphics-design-guide.md`의 혼합 도트 방향과 제작 규격으로 대체했다. Canvas 플랫 도형은 기본 디자인이 아니라 개발·실패 복구용 fallback으로 유지한다.
+- 검증 상태: 기본 `sprite`와 `?renderer=polygon`이 같은 게임 상태를 그리는 렌더링 회귀 테스트로 두 경로를 유지한다.
+
 ## [L2] 2026-08-12 — 플레이어와 환경별 최상위 runtime 폴더를 사용한다
 
 - 맥락: 첫 player·environment manifest를 각각 도입하면서 `assets/sprites/`와 `assets/environment/`가 독립된 작업·runtime 경로를 함께 맡았다.

@@ -1,6 +1,6 @@
 # 그래픽 리소스 작업 가이드
 
-플레이어, 몹, 배경, 지형, 장애물, 투사체, VFX, UI 등 모든 그래픽 작업은 `assets/artwork/` 한 곳에 둔다. `assets/runtime/`은 개발자가 검증된 결과를 게임에 연결하는 경로이므로 그래픽 담당자가 직접 작업하지 않는다.
+플레이어, 몹, 배경, 지형, 장애물, 투사체, VFX, UI 등 모든 그래픽 작업은 `assets/artwork/` 한 곳에 둔다. `assets/runtime/`은 개발자가 검증된 결과를 게임에 연결하는 경로이므로 그래픽 담당자가 직접 작업하지 않는다. 픽셀 제작 캔버스, 타일 격자와 화면 위계는 [`pixel-graphics-design-guide.md`](./pixel-graphics-design-guide.md)를 현재 기준으로 사용한다.
 
 ## 작업 경로
 
@@ -27,6 +27,7 @@ category는 아래 이름을 사용한다.
 ## 공통 표현 기준
 
 - 실제 게임 크기와 모바일 화면에서 실루엣만으로 역할과 상태가 구분돼야 한다.
+- 픽셀 자산의 종류별 제작 크기와 `32×32` 기본 격자는 [`pixel-graphics-design-guide.md`](./pixel-graphics-design-guide.md)를 따른다.
 - 상태 차이를 색이나 작은 장식에만 의존하지 않는다. 자세, 외곽선, 무게중심과 움직임 방향을 먼저 다르게 만든다.
 - 플레이어·몹·위험 장애물·투사체·상호작용 오브젝트·배경 장식의 시각적 중요도를 구분한다.
 - 충돌하는 지형과 장애물은 경계가 분명해야 하고, 비충돌 장식은 발판이나 막힌 길로 오해되지 않게 한다.
@@ -41,7 +42,7 @@ category는 아래 이름을 사용한다.
 - `jump`와 `fall`, `hit`과 `respawn`은 첫 프레임 자세만으로도 구분한다.
 - 몹과 보스는 작업 요청에 적힌 이동·공격·피격·사망 상태만 제작한다. 플레이어 상태 목록을 그대로 적용하지 않는다.
 - 기본 방향, 좌우 반전 여부, 원본 셀 크기와 게임 출력 크기를 `README.md`에 기록한다.
-- 플레이어 atlas 배치는 [`player-production-template/frame-map.png`](../assets/runtime/characters/player-production-template/frame-map.png)를 참고한다. 기본 기준은 24×24 셀, 48×48 게임 출력, 오른쪽 방향이다.
+- 플레이어 atlas 배치는 [`player-production-template/frame-map.png`](../assets/runtime/characters/player-production-template/frame-map.png)를 참고한다. 현재 starter의 24×24 셀과 48×48 출력은 manifest 연결 예시이며 정식 디자인 크기가 아니다. 정식 player는 `32×32`~`48×48` 제작 셀을 사용하고 실제 PNG와 manifest의 `frameSize`를 함께 맞춘다.
 
 ### 배경과 지형
 
