@@ -23,6 +23,14 @@
 - 대체: 정식 표현은 `docs/pixel-graphics-design-guide.md`의 혼합 도트 방향과 제작 규격으로 대체했다. Canvas 플랫 도형은 기본 디자인이 아니라 개발·실패 복구용 fallback으로 유지한다.
 - 검증 상태: 기본 `sprite`와 `?renderer=polygon`이 같은 게임 상태를 그리는 렌더링 회귀 테스트로 두 경로를 유지한다.
 
+## [L1] 2026-08-13 — Sector 01-2를 Anchor A–C 중심의 연속 Grapple 구간으로 구성한다
+
+- 맥락: 초기 1-2 문서는 좌우 교차 Anchor A/B/C와 Landing을 통해 첫 연속 Grapple과 방향 전환을 설명했다.
+- 결정: 약 1~2분의 Vertical Utility Shaft에서 세 Anchor를 연결하고, Recovery Platform을 통해 초보 경로를 제공한다.
+- 영향: 기존 문서와 `01_swing_line.png`, `02_level_layout.png`가 Anchor A–C 기준으로 제작되었다.
+- 대체: `Sector 01-2 DOUBLE ANCHOR SHAFT` REV 3.0 — 960×1088 Blockout에서 A=복습·B=첫 Airborne Handoff·C=방향 반전·D=Flow Test, P1/P2/P3 Recovery와 Crossbeam X1을 사용하는 Rope Input/Momentum Benchmark Stage로 대체했다.
+- 검증 상태: 새 문서와 좌표는 Blockout Candidate이며, Anchor A–D Flow Route·`swingImpulse = 0`·Attach Forgiveness·Momentum 로그 플레이테스트는 아직 진행하지 않았다.
+
 ## [L1] 2026-08-13 — Sector 01-1에 첫 Sentry Turret과 Anchor 2개를 배치한다
 
 - 맥락: 첫 오프닝 문서에서 두 번의 Rope 성공 뒤 Sentry Turret을 보여주고 이동 압박까지 한 레벨에서 가르치려 했다.

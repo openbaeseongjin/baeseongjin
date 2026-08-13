@@ -44,6 +44,8 @@
 
 Sector 01-1의 현재 기준은 `docs/bsh/scenario/1-1/README.md`의 `SERVICE SHAFT` REV 3.0이다. 첫 Authored Stage를 32px Grid·960×960 Blockout으로 만들고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3의 5초 이내 재시도를 검증한다. Turret·Wind·Augment·필수 공중 ReAttach는 제외하며, `swingImpulse = 0`에서도 전 구간이 재미있고 안정적으로 통과되어야 한다. Terminal은 하부 봉쇄와 Rooftop Pad 03 Maintenance Shuttle 목표를 전달한다.
 
+Sector 01-2의 현재 기준은 `docs/bsh/scenario/1-2/README.md`의 `DOUBLE ANCHOR SHAFT` REV 3.0이다. 32px Grid·960×1088 Blockout에서 A=복습·B=첫 Airborne Handoff·C=방향 반전·D=설명 없는 Flow Test를 검증한다. 숙련자는 A→B→C→D를 무착지로 연결하고, 초보자는 P1/P2/P3 Recovery를 이용해 3~5초 안에 해당 Handoff를 재시도할 수 있어야 한다. Enemy·Damage Hazard·Wind·Augment는 제외하며, `swingImpulse = 0` Flow Route와 Momentum·Wrong/Ghost Attach 로그를 필수로 확인한다.
+
 Sector 01-3의 현재 기준은 `docs/bsh/scenario/1-3/README.md`의 `SECURITY CHECK` REV 2.0이다. 기존 `COOLING SHAFT` 기획을 대체하며, 첫 Sentry Turret의 `idle → acquire → telegraph → fire → cooldown` 공격 언어와 Safe/Flow/Recovery 세 경로를 검증한다. 구현 전에는 Scanner·LOS Cover·Recovery Deck·역할별 Anchor·Gate Trigger를 표현할 Authored Stage/Room 배치 경계가 필요하다. 정확한 배치 Schema와 수치는 구현 설계·플레이테스트에서 확정하고, 1-3에서는 Rope Cut을 핵심 학습으로 사용하지 않는다.
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
