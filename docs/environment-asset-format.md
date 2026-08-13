@@ -99,6 +99,7 @@ environment-pack/
 - decoration은 충돌을 만들지 않는다. 이동 경로 위에 단단한 발판이나 통과 가능한 벽처럼 오해할 전경을 두지 않고 배경 또는 traversal surface 바깥에만 배치한다.
 - 동일 world seed와 scene snapshot은 같은 장식 배치를 만든다. `draw()`에서 `Math.random()`을 호출하지 않는다.
 - 싱글과 멀티는 같은 scene renderer 경로를 사용한다. 앱에 모드별 환경 로직이나 renderer type 분기를 추가하지 않는다.
+- terrain은 collision surface bounds와 edge geometry를 world가 바뀔 때만 다시 만들고, decoration은 seed·zone별 배치를 캐시한다. camera 이동 때는 공통 viewport와 교차하는 surface·edge·decoration만 그리며 이 최적화가 collision polygon이나 결정 배치를 바꾸면 안 된다.
 
 ## 독립 fallback과 진단
 
@@ -119,6 +120,7 @@ atlas 준비와 실패는 backdrop, terrain, decoration이 각각 판단한다.
 - 5개 zone이 하단부터 정상까지 연결되고 밝기가 고도에 따라 감소하지 않는다.
 - terrain fill과 edge가 collision polygon·one-way edge chain을 정확히 따른다.
 - 같은 seed에서 decoration 배치가 같다.
+- camera 밖 surface·edge·decoration은 그리지 않고 다시 화면에 들어오면 같은 위치·frame으로 복원된다.
 - 각 component atlas를 따로 실패시켰을 때 해당 component만 fallback한다.
 - 기본 `sprite`와 `?renderer=polygon`, 싱글과 멀티가 같은 게임 상태·충돌·네트워크 계약을 유지한다.
 - 데스크톱과 모바일에서 하단·중단·정상 구역을 실제 화면으로 확인한다.

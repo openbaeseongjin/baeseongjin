@@ -210,6 +210,10 @@ class Player extends RopeAttachable(GameObject) {}
 - 상위 renderer/composer에 `if (profile)`·`switch (actorType)` 분기를 두지 않는다. composer는 하위 renderer를 호출만 하고 각 하위 컴포넌트가 자기 collection의 draw 계약을 완결하며, 종류 선택은 immutable factory 조립에서 끝낸다.
 - 환경 renderer는 backdrop·terrain·decoration으로 분리하고 고도 zone, atlas frame, Canvas 호출과 component 상태를 각 하위 renderer가 소유한다. 싱글·멀티 앱에 같은 환경 분기나 진단 전달 코드를 복제하지 않는다.
 - 도트 terrain은 기존 collision surface polygon을 그대로 clip·stroke하고 one-way edge도 동일 vertex chain을 사용한다. 비충돌 decoration은 seed 기반 결정 배치로 만들며 traversal 경로 위에 충돌할 것처럼 보이는 전경을 만들지 않는다.
+- 공통 Canvas host는 CSS viewport와 camera로 visible world bounds를 한 번 계산해 불변 viewport로 전달한다. composer나 앱은 객체 종류를 분기해 컬링하지 않으며 terrain·decoration·actor·projectile 하위 renderer가 자기 bounds와 안전 margin을 적용해 실제 draw 여부를 완결한다. sprite·polygon 또는 싱글·멀티별 별도 컬링 경로를 만들지 않는다.
+- collision surface bounds·edge 정보와 seed 기반 decoration placement처럼 정적인 계산은 소유 renderer가 world·zone 변화에 맞춰 무효화하는 캐시로 보관한다. camera 이동이나 매 draw마다 전체 월드 배치를 다시 만들지 않으며 캐시가 gameplay collision·권위 상태를 소유하게 하지 않는다.
+- backing store 배율은 기기 DPR, 명시적 최대 DPR과 최대 backing pixel 예산을 함께 적용한다. 기본 최대 DPR 2와 약 3 Mi-pixel 예산을 바꾸면 작은 화면의 픽셀 선명도, 큰 태블릿의 backing 크기와 `imageSmoothingEnabled=false`를 함께 검증한다. 기기별 user-agent 분기나 싱글·멀티별 해상도 정책을 두지 않는다.
+- 렌더 성능 진단은 프레임 간격·draw 시간·fixed-step drop·CSS/backing 크기·유효 DPR·하위 collection의 `drawn/total`을 관찰할 수 있어야 한다. 진단 값은 읽기 전용이며 물리 120Hz, 네트워크 전송률, gameplay state 또는 자동 품질 전환의 입력으로 사용하지 않는다.
 - 여러 환경 atlas는 캐릭터와 분리된 `environment-asset-format.md` 계약으로 로드한다. atlas 실패는 backdrop·terrain·decoration 단위로만 fallback하고 pending을 실패로 고정하지 않으며, loader·schema·example·validator 중 하나를 바꾸면 나머지 계약과 component별 실패 테스트를 함께 갱신한다.
 - 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
 - collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
@@ -293,6 +297,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 색만으로 상태를 전달하지 않고 형태, 굵기, 움직임, 문구를 함께 사용한다.
 - 사용자 입력, 성공, 실패, 쿨다운은 화면에서 구분 가능해야 한다.
 - Canvas 변경은 시작·동작 중·종료 또는 해제 상태를 실제 화면으로 검증한다.
+- 렌더 최적화는 보이는 결과가 같은지를 먼저 회귀 테스트하고, 화면 안/밖 객체를 함께 둔 수치 테스트로 draw 감소를 증명한다. 실제 브라우저에서는 `?metrics=1`로 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
 - 스프라이트 clip은 자산이 실제로 표현하는 행동 의미와 일치해야 한다. 지원하지 않는 행동을 방향 전환용 프레임 등 무관한 프레임에 임의 대응하지 않고, 불가피한 대체는 definition에 명시적 fallback으로 선언한다.
 - player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 자산 로더도 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다. 정식 입력은 `sprite-asset-format.md`의 PNG 묶음과 도구 중립 manifest로 정규화한다.
 - PixelLab·SpriteCook 같은 생성 도구의 ZIP·metadata·개별 frame은 import 입력으로만 다룬다. 도구별 adapter가 표준 manifest를 만들고 renderer와 gameplay에는 도구 이름 분기를 추가하지 않는다. GIF·WebP는 미리보기로만 사용한다.

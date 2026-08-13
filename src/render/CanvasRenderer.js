@@ -1,4 +1,11 @@
 import { getMobileControlLayout } from "../core/input/MobileControlLayout.js";
+import {
+    DEFAULT_CANVAS_PERFORMANCE_POLICY,
+    RenderFrameStats,
+    RenderPerformanceMetrics,
+    resolveCanvasBackingStore
+} from "./RenderPerformanceMetrics.js";
+import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewport.js";
 import { assertSceneRenderer } from "./SceneRenderer.js";
 
 const HUD_COLORS = Object.freeze({
@@ -7,27 +14,55 @@ const HUD_COLORS = Object.freeze({
 });
 
 export class CanvasRenderer {
-    constructor(canvas, sceneRenderer, { now = () => performance.now() / 1000 } = {}) {
+    constructor(
+        canvas,
+        sceneRenderer,
+        {
+            now = () => performance.now() / 1000,
+            performanceNow = () => performance.now(),
+            pixelRatio = () => globalThis.devicePixelRatio || 1,
+            performancePolicy = DEFAULT_CANVAS_PERFORMANCE_POLICY,
+            cullMargin = DEFAULT_RENDER_CULL_MARGIN
+        } = {}
+    ) {
         this.canvas = canvas;
         this.context = canvas.getContext("2d");
         this.sceneRenderer = assertSceneRenderer(sceneRenderer);
         this.now = now;
+        this.performanceNow = performanceNow;
+        this.pixelRatio = pixelRatio;
+        this.performancePolicy = Object.freeze({ ...DEFAULT_CANVAS_PERFORMANCE_POLICY, ...performancePolicy });
+        this.cullMargin = cullMargin;
+        this.performanceMetrics = new RenderPerformanceMetrics({ sampleSize: this.performancePolicy.sampleSize });
         this.cssWidth = 1;
         this.cssHeight = 1;
+        this.resolution = null;
+        this.viewport = null;
+        this.metricsPanelHeight = 118;
     }
 
     resize() {
         const rect = this.canvas.getBoundingClientRect();
-        const ratio = Math.max(1, globalThis.devicePixelRatio || 1);
         this.cssWidth = Math.max(1, rect.width);
         this.cssHeight = Math.max(1, rect.height);
-        const width = Math.round(this.cssWidth * ratio);
-        const height = Math.round(this.cssHeight * ratio);
-        if (this.canvas.width !== width || this.canvas.height !== height) {
-            this.canvas.width = width;
-            this.canvas.height = height;
+        this.resolution = resolveCanvasBackingStore({
+            cssWidth: this.cssWidth,
+            cssHeight: this.cssHeight,
+            devicePixelRatio: this.pixelRatio(),
+            maxPixelRatio: this.performancePolicy.maxPixelRatio,
+            maxBackingPixels: this.performancePolicy.maxBackingPixels
+        });
+        if (
+            this.canvas.width !== this.resolution.backingWidth ||
+            this.canvas.height !== this.resolution.backingHeight
+        ) {
+            this.canvas.width = this.resolution.backingWidth;
+            this.canvas.height = this.resolution.backingHeight;
         }
+        const ratio = this.resolution.effectivePixelRatio;
         this.context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        this.context.imageSmoothingEnabled = false;
+        return this.resolution;
     }
 
     screenToWorld(pointer, camera) {
@@ -37,11 +72,21 @@ export class CanvasRenderer {
     }
 
     draw(scene) {
-        this.resize();
+        const metricsEnabled = scene.metricsVisible === true;
+        const startedAtMs = metricsEnabled ? this.performanceNow() : null;
+        const resolution = this.resize();
+        this.viewport = createRenderViewport({
+            camera: scene.camera,
+            cssWidth: this.cssWidth,
+            cssHeight: this.cssHeight,
+            cullMargin: this.cullMargin
+        });
+        const renderStats = metricsEnabled ? new RenderFrameStats() : null;
         this.sceneRenderer.draw({
             context: this.context,
             scene,
-            viewport: { cssWidth: this.cssWidth, cssHeight: this.cssHeight },
+            viewport: this.viewport,
+            renderStats,
             presentationTimeSeconds: this.now()
         });
         if (scene.mobileView) this.drawPlayerHealthHud(scene);
@@ -52,12 +97,19 @@ export class CanvasRenderer {
         this.drawArtifactRewardOverlay(scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawArtifactFeedback(scene.eventFlash);
-        if (scene.metricsVisible) {
-            this.drawMetricsPanel(scene.metrics, scene.networkMetrics);
-            this.drawEnvironmentMetrics(this.sceneRenderer.environmentDiagnostics);
-        }
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
+        if (!metricsEnabled) return null;
+        const renderMetrics = this.performanceMetrics.record({
+            startedAtMs,
+            endedAtMs: this.performanceNow(),
+            resolution,
+            droppedSteps: scene.stats?.droppedSteps ?? 0,
+            drawCounts: renderStats.snapshot()
+        });
+        this.drawMetricsPanel(scene.metrics, scene.networkMetrics, renderMetrics);
+        this.drawEnvironmentMetrics(this.sceneRenderer.environmentDiagnostics);
+        return renderMetrics;
     }
 
     drawArtifactRewardOverlay(reward) {
@@ -170,14 +222,15 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawMetricsPanel(metrics, networkMetrics = null) {
+    drawMetricsPanel(metrics, networkMetrics = null, renderMetrics = null) {
         if (!metrics) return;
         const ctx = this.context;
         const x = Math.max(8, this.cssWidth - 248);
         const firstReward = metrics.firstRewardSeconds === null ? "-" : `${metrics.firstRewardSeconds.toFixed(1)}초`;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
-        const height = networkMetrics ? 212 : 118;
+        const height = 118 + (networkMetrics ? 94 : 0) + (renderMetrics ? 132 : 0);
+        this.metricsPanelHeight = height;
         ctx.fillRect(x, 18, 230, height);
         ctx.strokeStyle = "rgba(103, 232, 249, 0.65)";
         ctx.strokeRect(x, 18, 230, height);
@@ -211,6 +264,47 @@ export class CanvasRenderer {
                 215
             );
         }
+        if (renderMetrics) {
+            const startY = networkMetrics ? 238 : 140;
+            const number = (value) => (value === null ? "-" : String(Math.round(value)));
+            const count = (category) => {
+                const counts = renderMetrics.drawCounts[category];
+                return counts ? `${counts.drawn}/${counts.total}` : "-";
+            };
+            ctx.fillStyle = "#86efac";
+            ctx.fillText("RENDER", x + 12, startY);
+            ctx.fillStyle = "#e2e8f0";
+            ctx.fillText(
+                `FPS ${number(renderMetrics.framesPerSecond)} | frame ${number(renderMetrics.frameIntervalP50Ms)}/${number(renderMetrics.frameIntervalP95Ms)}ms`,
+                x + 12,
+                startY + 19
+            );
+            ctx.fillText(
+                `draw ${number(renderMetrics.renderDurationP50Ms)}/${number(renderMetrics.renderDurationP95Ms)}ms | max ${number(renderMetrics.maxRenderDurationMs)}ms`,
+                x + 12,
+                startY + 38
+            );
+            ctx.fillText(
+                `drop +${renderMetrics.recentDroppedSteps} | total ${renderMetrics.droppedSteps}`,
+                x + 12,
+                startY + 57
+            );
+            ctx.fillText(
+                `CSS ${Math.round(renderMetrics.cssWidth)}x${Math.round(renderMetrics.cssHeight)} | buffer ${renderMetrics.backingWidth}x${renderMetrics.backingHeight}`,
+                x + 12,
+                startY + 76
+            );
+            ctx.fillText(
+                `DPR ${renderMetrics.devicePixelRatio}->${renderMetrics.effectivePixelRatio}`,
+                x + 12,
+                startY + 95
+            );
+            ctx.fillText(
+                `S ${count("terrainSurfaces")} | D ${count("decorations")} | E ${count("enemies")}`,
+                x + 12,
+                startY + 114
+            );
+        }
         ctx.restore();
     }
 
@@ -223,7 +317,7 @@ export class CanvasRenderer {
 
         const ctx = this.context;
         const x = Math.max(8, this.cssWidth - 248);
-        const baseY = 18 + 118 + 8;
+        const baseY = 18 + this.metricsPanelHeight + 8;
         const height = 60;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.92)";

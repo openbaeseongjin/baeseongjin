@@ -1,4 +1,5 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
+import { circleBounds, isVisible } from "../RenderViewport.js";
 
 const PLAYER_COLORS = Object.freeze({
     local: "#67e8f9",
@@ -54,8 +55,12 @@ export class PolygonRemotePlayerRenderer {
 }
 
 export class PolygonEnemyRenderer {
-    draw({ context, scene }) {
-        for (const enemy of scene.enemies ?? []) {
+    draw({ context, scene, viewport, renderStats }) {
+        const enemies = scene.enemies ?? [];
+        let drawn = 0;
+        for (const enemy of enemies) {
+            if (!isVisible(viewport, circleBounds(enemy.position, (enemy.radius ?? 0) + 14))) continue;
+            drawn += 1;
             context.fillStyle = "#fb7185";
             context.beginPath();
             context.arc(enemy.position.x, enemy.position.y, enemy.radius, 0, Math.PI * 2);
@@ -70,25 +75,32 @@ export class PolygonEnemyRenderer {
                 5
             );
         }
+        renderStats?.recordCollection("enemies", enemies.length, drawn);
     }
 }
 
 export class PolygonProjectileRenderer {
-    constructor({ selectProjectiles, color }) {
+    constructor({ selectProjectiles, color, category = "projectiles" }) {
         if (typeof selectProjectiles !== "function" || typeof color !== "string") {
             throw new Error("PolygonProjectileRenderer requires selectProjectiles and color");
         }
         this.selectProjectiles = selectProjectiles;
         this.color = color;
+        this.category = category;
     }
 
-    draw({ context, scene }) {
+    draw({ context, scene, viewport, renderStats }) {
         context.fillStyle = this.color;
-        for (const projectile of this.selectProjectiles(scene)) {
+        const projectiles = this.selectProjectiles(scene);
+        let drawn = 0;
+        for (const projectile of projectiles) {
+            if (!isVisible(viewport, circleBounds(projectile.position, projectile.radius))) continue;
+            drawn += 1;
             context.beginPath();
             context.arc(projectile.position.x, projectile.position.y, projectile.radius, 0, Math.PI * 2);
             context.fill();
         }
+        renderStats?.recordCollection(this.category, projectiles.length, drawn);
     }
 }
 

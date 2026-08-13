@@ -15,6 +15,8 @@ index.html
       ├─ core/sim/FixedStepRunner.js
       ├─ render/GameRendererFactory.js
       ├─ render/CanvasRenderer.js
+      ├─ render/RenderViewport.js
+      ├─ render/RenderPerformanceMetrics.js
       ├─ render/SceneRenderer.js
       ├─ render/PolygonSceneRenderer.js
       ├─ render/sprites/SpriteAnimation.js
@@ -74,6 +76,10 @@ index.html
 - 도트 terrain은 `WorldGenerator`가 만든 surface vertices를 새 도형으로 근사하지 않고 같은 polygon clip과 외곽선에 사용한다. one-way 표현도 같은 vertices의 `0..oneWayEdgeEnd` chain만 그린다. decoration은 충돌 상태를 추가하지 않고 이동 경로 밖 또는 배경 깊이에 결정적으로 배치한다.
 - 환경 asset 실패는 scene 전체가 아니라 component별로 격리한다. backdrop 실패는 polygon backdrop, terrain 실패는 polygon world geometry로 각각 대체하고 decoration 실패는 장식만 생략한다. pending load를 실패로 고정하지 않으며 실제 실패 전이에 한 번만 경고하고 `?metrics=1`에 component와 atlas ID를 노출한다.
 - 싱글과 멀티 앱은 같은 scene snapshot과 renderer composition을 사용한다. 환경 상태나 진단을 전달하려고 `GameApp`과 `MultiplayerGameApp`에 같은 plumbing을 복제하지 않고 Canvas host 또는 환경 하위 renderer의 공용 계약에서 읽는다.
+- `CanvasRenderer`는 CSS viewport와 camera에서 한 프레임당 한 번 `visibleWorldBounds`를 만들고, 화면 가장자리 pop-in을 막는 96 world-unit margin을 더한 `worldBounds`를 불변 viewport로 전달한다. 상위 composer는 객체 종류를 판단하지 않으며 terrain·decoration·enemy·projectile 하위 renderer가 자기 객체의 bounds와 교차 여부를 계산해 draw를 생략한다. polygon과 sprite profile, 싱글과 멀티는 같은 viewport 계약을 사용한다.
+- collision surface의 bounds·edge geometry와 seed 기반 decoration placement처럼 월드가 유지되는 동안 변하지 않는 표현 계산은 해당 하위 renderer가 world와 zone을 캐시 키로 보관한다. camera 이동은 배치를 다시 만들지 않고 가시 객체만 다시 선택하며, world 또는 고도 zone이 바뀔 때만 관련 캐시를 갱신한다.
+- Canvas backing store는 기기 DPR을 그대로 곱하지 않는다. 기본 정책은 DPR 최대 `2`, backing pixel 최대 `3 * 1024 * 1024`이며 두 제한과 CSS 크기 중 가장 낮은 유효 배율을 사용한다. CSS 면적 자체가 예산보다 큰 경우 선명도를 더 낮추기 위해 DPR 1 아래로 내리지 않는다. 정책은 `GameRendererFactory`의 `canvasOptions.performancePolicy`로 주입할 수 있고 painter의 image smoothing 비활성 계약은 유지한다.
+- `RenderPerformanceMetrics`는 rAF 시작 간격 p50/p95와 최대값, Canvas draw 구간 p50/p95와 최대값, 최근·누적 dropped fixed steps, CSS/backing 크기, 실제·유효 DPR과 하위 renderer별 `drawn/total`을 읽기 전용 진단으로 집계한다. `?metrics=1` 패널과 진단 복사만 이 값을 소비하며 시뮬레이션 속도, 네트워크 권한 또는 렌더 품질을 자동 조정하지 않는다. 물리는 화면 주사율과 무관하게 기존 120Hz fixed step을 유지한다.
 - bootstrap 기본 프로필은 `sprite`이며 query의 `renderer=polygon`이 기존 표현을 명시적으로 선택한다. 알 수 없는 값은 경고 후 기본 프로필을 사용한다. sprite asset 준비 실패는 앱을 중단하지 않고 하위 fallback renderer가 전체 polygon scene을 그리며 진단 가능한 경고를 남긴다.
 - 렌더 프로필 교체는 물리·전투·입력·권위 snapshot·네트워크 메시지 계약을 바꾸지 않는다.
 

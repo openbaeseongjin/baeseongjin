@@ -5,6 +5,8 @@ import { EnvironmentRendererComposer } from "../src/render/environment/Environme
 import { PixelBackdropRenderer } from "../src/render/environment/renderers/PixelBackdropRenderer.js";
 import { PixelDecorationRenderer } from "../src/render/environment/renderers/PixelDecorationRenderer.js";
 import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelTerrainRenderer.js";
+import { RenderFrameStats } from "../src/render/RenderPerformanceMetrics.js";
+import { createRenderViewport } from "../src/render/RenderViewport.js";
 
 function recordingContext() {
     const calls = [];
@@ -116,6 +118,38 @@ export function run() {
         ],
         "one-way edge uses exact vertex chain"
     );
+    const culledWorld = {
+        ...currentScene.world,
+        surfaces: [
+            ...currentScene.world.surfaces,
+            {
+                level: 3,
+                vertices: [
+                    { x: 1600, y: 1600 },
+                    { x: 1680, y: 1600 },
+                    { x: 1680, y: 1680 },
+                    { x: 1600, y: 1680 }
+                ]
+            }
+        ]
+    };
+    const renderStats = new RenderFrameStats();
+    new PixelTerrainRenderer({ definition, assets }).draw({
+        context: recordingContext(),
+        scene: { ...currentScene, world: culledWorld },
+        viewport: createRenderViewport({
+            camera: { x: 0, y: 0, zoom: 1 },
+            cssWidth: 320,
+            cssHeight: 180,
+            cullMargin: 0
+        }),
+        renderStats
+    });
+    assert.deepEqual(
+        renderStats.snapshot().terrainSurfaces,
+        { total: 2, drawn: 1 },
+        "terrain renderer owns surface-level view culling"
+    );
 
     const backdrop = new PixelBackdropRenderer({ definition, assets });
     const brightness = [];
@@ -160,12 +194,32 @@ export function run() {
     const seededRenderer = new SeedRecordingDecorationRenderer({ definition, assets });
     seededRenderer.draw({ context: recordingContext(), scene: currentScene });
     const firstSeedInput = seedInputs[0];
+    const cachedHashCalls = seedInputs.length;
+    seededRenderer.draw({ context: recordingContext(), scene: currentScene });
+    assert.equal(
+        seedInputs.length,
+        cachedHashCalls,
+        "static decoration placement is reused for an unchanged world and zone"
+    );
     seedInputs.length = 0;
     seededRenderer.draw({
         context: recordingContext(),
         scene: { ...currentScene, world: { ...currentScene.world, seed: currentScene.world.seed + 1 } }
     });
     assert.equal(seedInputs[0], firstSeedInput + 1, "decoration selection consumes the scene world seed");
+    const decorationStats = new RenderFrameStats();
+    decoration.draw({
+        context: recordingContext(),
+        scene: currentScene,
+        viewport: createRenderViewport({
+            camera: { x: 1000, y: 1000, zoom: 1 },
+            cssWidth: 100,
+            cssHeight: 100,
+            cullMargin: 0
+        }),
+        renderStats: decorationStats
+    });
+    assert.equal(decorationStats.snapshot().decorations.drawn, 0, "off-screen decorations are not painted");
 
     MockImage.instances = [];
     const pending = new EnvironmentAssetSet({ atlases: definition.atlases, ImageClass: MockImage, warn: () => {} });

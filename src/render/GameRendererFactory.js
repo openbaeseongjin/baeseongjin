@@ -20,7 +20,8 @@ export function resolveRendererProfile(search = globalThis.location?.search ?? "
 export function createGameRenderer({
     canvas,
     profile = DEFAULT_RENDERER_PROFILE,
-    sceneRendererFactories = DEFAULT_FACTORIES
+    sceneRendererFactories = DEFAULT_FACTORIES,
+    canvasOptions = undefined
 }) {
     if (!canvas) throw new Error("createGameRenderer requires a canvas element");
     if (!sceneRendererFactories || typeof sceneRendererFactories !== "object")
@@ -31,5 +32,5 @@ export function createGameRenderer({
     const renderer = assertSceneRenderer(factory());
     if (renderer.profile !== profile)
         throw new Error(`Scene renderer profile '${renderer.profile}' does not match '${profile}'`);
-    return new CanvasRenderer(canvas, renderer);
+    return new CanvasRenderer(canvas, renderer, canvasOptions);
 }

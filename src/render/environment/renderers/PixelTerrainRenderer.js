@@ -1,52 +1,77 @@
 import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
+import { boundsForVertices, boundsIntersect, circleBounds, intersectBounds, isVisible } from "../../RenderViewport.js";
 
 export class PixelTerrainRenderer {
     constructor({ definition, assets }) {
         this.definition = definition;
         this.assets = assets;
         this.status = assets ? "ready" : "pending";
+        this.cachedWorld = null;
+        this.cachedSurfaces = Object.freeze([]);
     }
 
-    draw({ context, scene }) {
+    draw({ context, scene, viewport, renderStats }) {
         const playerAltitude = scene.player?.position?.y ?? 0;
         const zone = this.definition.zoneAt(-playerAltitude);
         const material = this.definition.materialFor(zone);
         const palette = zone.palette;
+        const surfaces = this.surfaceEntries(scene.world);
+        const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
 
-        for (const surface of scene.world.surfaces) {
-            this.drawSurface(context, surface, material, palette);
+        for (const entry of visibleSurfaces) {
+            this.drawSurface(context, entry, material, palette, viewport);
         }
-        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint);
-        this.drawSummit(context, scene.world.summit, scene.runState);
+        renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
+        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
+        this.drawSummit(context, scene.world.summit, scene.runState, viewport);
     }
 
-    drawSurface(context, surface, material, palette) {
+    surfaceEntries(world) {
+        if (this.cachedWorld === world) return this.cachedSurfaces;
+        this.cachedWorld = world;
+        this.cachedSurfaces = Object.freeze(
+            (world.surfaces ?? []).map((surface) =>
+                Object.freeze({
+                    surface,
+                    bounds: boundsForVertices(surface.vertices),
+                    edges: Object.freeze(
+                        surface.vertices.map((start, index) => {
+                            const end = surface.vertices[(index + 1) % surface.vertices.length];
+                            const dx = end.x - start.x;
+                            const dy = end.y - start.y;
+                            return Object.freeze({
+                                start,
+                                end,
+                                dx,
+                                dy,
+                                length: Math.hypot(dx, dy),
+                                bounds: boundsForVertices([start, end])
+                            });
+                        })
+                    )
+                })
+            )
+        );
+        return this.cachedSurfaces;
+    }
+
+    drawSurface(context, entry, material, palette, viewport) {
+        const { surface, bounds } = entry;
         const vertices = surface.vertices;
-        const bounds = this.computeBounds(vertices);
 
         if (this.assets && this.assets.isReady(material.fill.atlasId)) {
-            this.fillSurfaceWithTiles(context, vertices, bounds, material);
+            this.fillSurfaceWithTiles(context, vertices, bounds, material, viewport);
         } else {
             context.fillStyle = palette.terrainFill;
-            context.beginPath();
-            context.moveTo(vertices[0].x, vertices[0].y);
-            for (let i = 1; i < vertices.length; i += 1) {
-                context.lineTo(vertices[i].x, vertices[i].y);
-            }
-            context.closePath();
+            this.traceSurfacePath(context, vertices);
             context.fill();
         }
 
-        this.drawSurfaceEdgeTiles(context, vertices, material);
+        this.drawSurfaceEdgeTiles(context, entry, material, viewport);
 
         context.strokeStyle = palette.terrainEdge;
         context.lineWidth = 3;
-        context.beginPath();
-        context.moveTo(vertices[0].x, vertices[0].y);
-        for (let i = 1; i < vertices.length; i += 1) {
-            context.lineTo(vertices[i].x, vertices[i].y);
-        }
-        context.closePath();
+        this.traceSurfacePath(context, vertices);
         context.stroke();
 
         if (surface.oneWay) {
@@ -64,25 +89,22 @@ export class PixelTerrainRenderer {
         }
     }
 
-    fillSurfaceWithTiles(context, vertices, bounds, material) {
+    fillSurfaceWithTiles(context, vertices, bounds, material, viewport) {
         const tileW = material.fill.width;
         const tileH = material.fill.height;
         if (tileW <= 0 || tileH <= 0) return;
+        const paintBounds = viewport?.worldBounds ? intersectBounds(bounds, viewport.worldBounds) : bounds;
+        if (!paintBounds) return;
 
         const image = this.assets.imageFor(material.fill.atlasId);
         context.save();
-        context.beginPath();
-        context.moveTo(vertices[0].x, vertices[0].y);
-        for (let i = 1; i < vertices.length; i += 1) {
-            context.lineTo(vertices[i].x, vertices[i].y);
-        }
-        context.closePath();
+        this.traceSurfacePath(context, vertices);
         context.clip();
 
-        const startX = Math.floor(bounds.minX / tileW) * tileW;
-        const startY = Math.floor(bounds.minY / tileH) * tileH;
-        for (let tx = startX; tx <= bounds.maxX; tx += tileW) {
-            for (let ty = startY; ty <= bounds.maxY; ty += tileH) {
+        const startX = Math.floor(paintBounds.minX / tileW) * tileW;
+        const startY = Math.floor(paintBounds.minY / tileH) * tileH;
+        for (let tx = startX; tx <= paintBounds.maxX; tx += tileW) {
+            for (let ty = startY; ty <= paintBounds.maxY; ty += tileH) {
                 paintSpriteFrame({
                     context,
                     image,
@@ -101,40 +123,52 @@ export class PixelTerrainRenderer {
         context.restore();
     }
 
-    drawSurfaceEdgeTiles(context, vertices, material) {
+    drawSurfaceEdgeTiles(context, entry, material, viewport) {
         const frame = material.edge;
         const image = this.assets.imageFor(frame.atlasId);
         context.save();
-        this.traceSurfacePath(context, vertices);
+        this.traceSurfacePath(context, entry.surface.vertices);
         context.clip();
 
-        for (let index = 0; index < vertices.length; index += 1) {
-            const start = vertices[index];
-            const end = vertices[(index + 1) % vertices.length];
-            const dx = end.x - start.x;
-            const dy = end.y - start.y;
-            const length = Math.hypot(dx, dy);
-            if (length <= 0) continue;
-            const tileCount = Math.max(1, Math.ceil(length / frame.width));
+        for (const edge of entry.edges) {
+            if (edge.length <= 0 || !this.edgeIsVisible(viewport, edge.bounds, frame.width)) continue;
+            const tileCount = Math.max(1, Math.ceil(edge.length / frame.width));
             for (let tile = 0; tile < tileCount; tile += 1) {
-                const distance = Math.min(length, tile * frame.width + frame.width * 0.5);
-                const progress = distance / length;
+                const distance = Math.min(edge.length, tile * frame.width + frame.width * 0.5);
+                const progress = distance / edge.length;
                 paintSpriteFrame({
                     context,
                     image,
                     frame,
-                    position: { x: start.x + dx * progress, y: start.y + dy * progress },
+                    position: {
+                        x: edge.start.x + edge.dx * progress,
+                        y: edge.start.y + edge.dy * progress
+                    },
                     size: { width: frame.width, height: Math.min(8, frame.height) },
                     anchor: { x: 0.5, y: 0.5 },
                     offset: { x: 0, y: 0 },
                     opacity: 1,
                     pixelSnap: true,
                     flipX: false,
-                    rotation: Math.atan2(dy, dx)
+                    rotation: Math.atan2(edge.dy, edge.dx)
                 });
             }
         }
         context.restore();
+    }
+
+    edgeIsVisible(viewport, bounds, margin) {
+        const worldBounds = viewport?.worldBounds;
+        if (!worldBounds) return true;
+        return boundsIntersect(
+            {
+                minX: bounds.minX - margin,
+                minY: bounds.minY - margin,
+                maxX: bounds.maxX + margin,
+                maxY: bounds.maxY + margin
+            },
+            worldBounds
+        );
     }
 
     traceSurfacePath(context, vertices) {
@@ -146,22 +180,11 @@ export class PixelTerrainRenderer {
         context.closePath();
     }
 
-    computeBounds(vertices) {
-        let minX = Infinity,
-            minY = Infinity,
-            maxX = -Infinity,
-            maxY = -Infinity;
-        for (const v of vertices) {
-            if (v.x < minX) minX = v.x;
-            if (v.y < minY) minY = v.y;
-            if (v.x > maxX) maxX = v.x;
-            if (v.y > maxY) maxY = v.y;
-        }
-        return { minX, minY, maxX, maxY };
-    }
-
-    drawCheckpoints(context, checkpoints = [], activeCheckpoint) {
+    drawCheckpoints(context, checkpoints = [], activeCheckpoint, viewport, renderStats) {
+        let drawn = 0;
         for (const checkpoint of checkpoints) {
+            if (!isVisible(viewport, circleBounds(checkpoint, checkpoint.radius))) continue;
+            drawn += 1;
             const active = checkpoint.id === activeCheckpoint?.id;
             const reached = checkpoint.level < (activeCheckpoint?.level ?? 0);
             context.save();
@@ -180,10 +203,11 @@ export class PixelTerrainRenderer {
             context.fillText(active ? "활성" : "체크", checkpoint.x, checkpoint.y);
             context.restore();
         }
+        renderStats?.recordCollection("checkpoints", checkpoints.length, drawn);
     }
 
-    drawSummit(context, summit, runState) {
-        if (!summit || runState === "completed") return;
+    drawSummit(context, summit, runState, viewport) {
+        if (!summit || runState === "completed" || !isVisible(viewport, circleBounds(summit, summit.radius))) return;
         context.save();
         context.globalAlpha = 0.78;
         context.strokeStyle = "#a7f3d0";

@@ -232,7 +232,24 @@ export async function run() {
     custom.draw(scene);
     assert.equal(received.length, 1);
     assert.equal(received[0].scene, scene);
-    assert.deepEqual(received[0].viewport, { cssWidth: 320, cssHeight: 180 });
+    assert.deepEqual(received[0].viewport, {
+        cssWidth: 320,
+        cssHeight: 180,
+        zoom: 1,
+        cullMargin: 96,
+        visibleWorldBounds: { minX: 0, minY: 0, maxX: 320, maxY: 180 },
+        worldBounds: { minX: -96, minY: -96, maxX: 416, maxY: 276 }
+    });
+    assert.equal(received[0].renderStats, null, "draw-count instrumentation stays disabled outside metrics mode");
+
+    const capped = createGameRenderer({
+        canvas: makeCanvas(recordingContext()),
+        profile: "test",
+        sceneRendererFactories: { test: () => ({ profile: "test", draw() {} }) },
+        canvasOptions: { pixelRatio: () => 3, performancePolicy: { maxPixelRatio: 1.5 } }
+    });
+    capped.draw(scene);
+    assert.equal(capped.resolution.effectivePixelRatio, 1.5, "factory exposes the canvas performance policy");
 
     assert.throws(() => createGameRenderer({ canvas, profile: "missing" }), /Unknown renderer profile/);
     assert.throws(() => createGameRenderer({ canvas, sceneRendererFactories: null }), /must be an object/);

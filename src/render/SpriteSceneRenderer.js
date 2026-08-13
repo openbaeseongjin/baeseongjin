@@ -75,13 +75,15 @@ export class SpriteSceneRenderer {
                 selectProjectiles: (scene) => scene.projectiles ?? [],
                 sprite: playerProjectileSprite,
                 palette: { a: "#f59e0b", b: "#fef08a" },
-                size: { width: 10, height: 10 }
+                size: { width: 10, height: 10 },
+                category: "playerProjectiles"
             }),
             new SpriteProjectileRenderer({
                 selectProjectiles: (scene) => scene.enemyProjectiles ?? [],
                 sprite: enemyProjectileSprite,
                 palette: { a: "#881337", b: "#f43f5e", c: "#fecdd3" },
-                size: { width: 14, height: 14 }
+                size: { width: 14, height: 14 },
+                category: "enemyProjectiles"
             }),
             new CombatEffectRenderer(),
             new EventEffectRenderer(),

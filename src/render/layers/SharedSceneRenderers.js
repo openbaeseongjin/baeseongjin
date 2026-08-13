@@ -1,4 +1,5 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
+import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
@@ -70,10 +71,29 @@ export class BackdropRenderer {
 }
 
 export class WorldGeometryRenderer {
-    draw({ context, scene }) {
-        for (const surface of scene.world.surfaces) this.drawRock(context, surface);
-        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint);
-        this.drawSummit(context, scene.world.summit, scene.runState);
+    constructor() {
+        this.cachedWorld = null;
+        this.cachedSurfaces = Object.freeze([]);
+    }
+
+    draw({ context, scene, viewport, renderStats }) {
+        const surfaces = this.surfaceEntries(scene.world);
+        const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
+        for (const { surface } of visibleSurfaces) this.drawRock(context, surface);
+        renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
+        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
+        this.drawSummit(context, scene.world.summit, scene.runState, viewport);
+    }
+
+    surfaceEntries(world) {
+        if (this.cachedWorld === world) return this.cachedSurfaces;
+        this.cachedWorld = world;
+        this.cachedSurfaces = Object.freeze(
+            (world.surfaces ?? []).map((surface) =>
+                Object.freeze({ surface, bounds: boundsForVertices(surface.vertices) })
+            )
+        );
+        return this.cachedSurfaces;
     }
 
     drawRock(context, surface) {
@@ -111,8 +131,11 @@ export class WorldGeometryRenderer {
         context.stroke();
     }
 
-    drawCheckpoints(context, checkpoints = [], activeCheckpoint) {
+    drawCheckpoints(context, checkpoints = [], activeCheckpoint, viewport, renderStats) {
+        let drawn = 0;
         for (const checkpoint of checkpoints) {
+            if (!isVisible(viewport, circleBounds(checkpoint, checkpoint.radius))) continue;
+            drawn += 1;
             const active = checkpoint.id === activeCheckpoint?.id;
             const reached = checkpoint.level < (activeCheckpoint?.level ?? 0);
             context.save();
@@ -131,10 +154,11 @@ export class WorldGeometryRenderer {
             context.fillText(active ? "활성" : "체크", checkpoint.x, checkpoint.y);
             context.restore();
         }
+        renderStats?.recordCollection("checkpoints", checkpoints.length, drawn);
     }
 
-    drawSummit(context, summit, runState) {
-        if (!summit || runState === "completed") return;
+    drawSummit(context, summit, runState, viewport) {
+        if (!summit || runState === "completed" || !isVisible(viewport, circleBounds(summit, summit.radius))) return;
         context.save();
         context.globalAlpha = 0.78;
         context.strokeStyle = "#a7f3d0";
