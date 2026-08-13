@@ -18,6 +18,7 @@
 | 문서 | 역할 |
 | --- | --- |
 | [`game-hackathon-planning.md`](./game-hackathon-planning.md) | 제품 방향과 핵심 경험 |
+| [`development-schedule.md`](./development-schedule.md) | 역할별 병렬 작업, 필수 선행 관계와 제출 일정 |
 | [`implementation-roadmap.md`](./implementation-roadmap.md) | 구현 현황과 개발 우선순위 |
 | [`decision-history.md`](./decision-history.md) | 대체되거나 완료된 결정 이력 |
 
