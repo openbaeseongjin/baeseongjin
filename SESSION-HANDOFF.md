@@ -46,7 +46,7 @@ Sector 01-1의 현재 기준은 `docs/bsh/scenario/1-1/README.md`의 `SERVICE SH
 
 Sector 01-2의 현재 기준은 `docs/bsh/scenario/1-2/README.md`의 `DOUBLE ANCHOR SHAFT` REV 3.0이다. 32px Grid·960×1088 Blockout에서 A=복습·B=첫 Airborne Handoff·C=방향 반전·D=설명 없는 Flow Test를 검증한다. 숙련자는 A→B→C→D를 무착지로 연결하고, 초보자는 P1/P2/P3 Recovery를 이용해 3~5초 안에 해당 Handoff를 재시도할 수 있어야 한다. Enemy·Damage Hazard·Wind·Augment는 제외하며, `swingImpulse = 0` Flow Route와 Momentum·Wrong/Ghost Attach 로그를 필수로 확인한다.
 
-Sector 01-3의 현재 기준은 `docs/bsh/scenario/1-3/README.md`의 `SECURITY CHECK` REV 2.0이다. 기존 `COOLING SHAFT` 기획을 대체하며, 첫 Sentry Turret의 `idle → acquire → telegraph → fire → cooldown` 공격 언어와 Safe/Flow/Recovery 세 경로를 검증한다. 구현 전에는 Scanner·LOS Cover·Recovery Deck·역할별 Anchor·Gate Trigger를 표현할 Authored Stage/Room 배치 경계가 필요하다. 정확한 배치 Schema와 수치는 구현 설계·플레이테스트에서 확정하고, 1-3에서는 Rope Cut을 핵심 학습으로 사용하지 않는다.
+Sector 01-3의 현재 기준은 `docs/bsh/scenario/1-3/README.md`의 `SECURITY CHECK` REV 3.0이다. 32px Grid·960×1152 Blockout에서 Scanner 인증 뒤 첫 Sentry T1의 `idle → acquire → track → lock → fire → cooldown` 공격 언어와 B→C Safe/Flow/Recovery 경로를 검증한다. Cover Wall C1 뒤에서는 LOS와 Encounter가 완전히 끝나야 하며, Turret 파괴는 Clear 조건이 아니다. 첫 Projectile은 Rope를 자르지 않고 one-shot·과도한 Knockback·전체 재등반을 만들지 않아야 한다. 상단 Service Panel의 `MAINTENANCE OVERRIDE → VIOLATION LOGGED`가 1-4 Maintenance Node로 연결된다.
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
