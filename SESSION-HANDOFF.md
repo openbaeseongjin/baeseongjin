@@ -42,6 +42,8 @@
 
 ## 다음 작업
 
+Sector 01-3의 현재 기준은 `docs/bsh/scenario/1-3/README.md`의 `SECURITY CHECK` REV 2.0이다. 기존 `COOLING SHAFT` 기획을 대체하며, 첫 Sentry Turret의 `idle → acquire → telegraph → fire → cooldown` 공격 언어와 Safe/Flow/Recovery 세 경로를 검증한다. 구현 전에는 Scanner·LOS Cover·Recovery Deck·역할별 Anchor·Gate Trigger를 표현할 Authored Stage/Room 배치 경계가 필요하다. 정확한 배치 Schema와 수치는 구현 설계·플레이테스트에서 확정하고, 1-3에서는 Rope Cut을 핵심 학습으로 사용하지 않는다.
+
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태지만, 전체 48개 중 현재 문서가 있는 `1-1`~`1-3`을 제외한 45개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.

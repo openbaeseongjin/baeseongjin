@@ -68,4 +68,4 @@
 | [`bsh/scenario-skeleton-v0.1.html`](./bsh/scenario-skeleton-v0.1.html) | `bsh` 시나리오 발표 자료 |
 | [`bsh/scenario/1-1/README.md`](./bsh/scenario/1-1/README.md) | `bsh` 그래플 액션 오프닝 튜토리얼(1-1) 레벨 디자인 |
 | [`bsh/scenario/1-2/README.md`](./bsh/scenario/1-2/README.md) | `bsh` 연속 그래플 튜토리얼(1-2) 레벨 디자인 |
-| [`bsh/scenario/1-3/README.md`](./bsh/scenario/1-3/README.md) | `bsh` 환경 횡풍(Crosswind) 튜토리얼(1-3) 레벨 디자인 |
+| [`bsh/scenario/1-3/README.md`](./bsh/scenario/1-3/README.md) | `bsh` Sentry Telegraph와 Rope 회피 튜토리얼(1-3) 레벨 디자인 |

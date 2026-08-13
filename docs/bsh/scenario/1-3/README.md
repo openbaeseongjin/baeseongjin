@@ -1,252 +1,430 @@
-# SECTOR 01-3 — COOLING SHAFT
+# SECTOR 01-3 — SECURITY CHECK
 
-*Maintenance Sector / Level 3*
+*FIRST SENTRY TURRET / AUTHORED SECURITY ROOM — INTERNAL / LEVEL DESIGN DOC · REV 2.0*
 
 ◀ PREV — [SECTOR 01-2 / DOUBLE ANCHOR SHAFT](../1-2/README.md)
 
-1-1에서 Rope를 배웠고, 1-2에서 Rope를 연속으로 연결했다면, 1-3에서는 외부 힘 때문에 Swing 궤적이 변할 때 이를 읽고 이용하는 법을 배운다.
+정상 직원으로 확인된 플레이어가 허가된 경로를 벗어나면서 처음으로 보안 시스템의 공격 대상이 되는 레벨. 핵심 학습은 하나다.
 
-`핵심 학습 CROSSWIND + SWING TIMING` · `TARGET 1:30–2:00` · `NEW 냉각팬의 횡풍` · `ENEMIES 없음` · `AUGMENTS 없음`
+> **Red Telegraph → 움직여야 한다 → Rope를 타면 자연스럽게 피할 수 있다.**
+
+`TARGET PLAYTEST에서 확정` · `FLOW BOTTOM → TOP` · `ZONES 5 (A–E)` · `ANCHORS 4 (A–D)` · `ENEMIES 1 × SENTRY TURRET` · `NEW TELEGRAPH LANGUAGE` · `NO NEW MOVEMENT / ENVIRONMENT HAZARD / AUGMENT`
 
 ## Contents
 
-00. [Visual Reference](#00--visual-reference)
-01. [스토리 상황](#01--스토리-상황)
-02. [공간 콘셉트](#02--공간-콘셉트)
-03. [팬의 게임 규칙](#03--팬의-게임-규칙)
-04. [바람은 반드시 보기 전에 알 수 있어야 한다](#04--바람은-반드시-보기-전에-알-수-있어야-한다)
-05. [STEP 01 — 안전하게 팬을 보여준다](#05--step-01--안전하게-팬을-보여준다)
-06. [STEP 02 — FAN A / 약한 바람](#06--step-02--fan-a--약한-바람)
-07. [STEP 03 — 바람을 이용하는 구간](#07--step-03--바람을-이용하는-구간)
-08. [STEP 04 — FAN B / 첫 타이밍 판단](#08--step-04--fan-b--첫-타이밍-판단)
-09. [Anchor B → C가 레벨의 핵심](#09--anchor-b--c가-레벨의-핵심)
-10. [실패 경로](#10--실패-경로)
-11. [적은 아예 넣지 않는다](#11--적은-아예-넣지-않는다)
-12. [팬 날개도 아직 즉사 요소가 아니다](#12--팬-날개도-아직-즉사-요소가-아니다)
-13. [그래픽 방향](#13--그래픽-방향)
-14. [사운드도 게임플레이 정보로 활용](#14--사운드도-게임플레이-정보로-활용)
-15. [카메라](#15--카메라)
-16. [전체 플레이 흐름](#16--전체-플레이-흐름)
-17. [1-3에서 절대 추가하지 않을 것](#17--1-3에서-절대-추가하지-않을-것)
-18. [개발팀 전달용 요약](#18--개발팀-전달용-요약)
+00. [Level Overview](#00--level-overview)
+01. [이 구간의 목적](#01--이-구간의-목적)
+02. [ZONE A — Identification](#02--zone-a--identification)
+03. [ZONE B — Normal Ascent](#03--zone-b--normal-ascent)
+04. [ZONE C — Turret Reveal](#04--zone-c--turret-reveal)
+05. [Sentry Telegraph 규칙](#05--sentry-telegraph-규칙)
+06. [ZONE D — 첫 실제 선택 구간](#06--zone-d--첫-실제-선택-구간)
+07. [Safe / Flow / Recovery Route](#07--safe--flow--recovery-route)
+08. [ZONE E — Final Ascent](#08--zone-e--final-ascent)
+09. [Anchor별 역할](#09--anchor별-역할)
+10. [Blockout 거리 기준](#10--blockout-거리-기준)
+11. [카메라와 정보 가독성](#11--카메라와-정보-가독성)
+12. [Rope Cut 범위](#12--rope-cut-범위)
+13. [난이도와 감정 곡선](#13--난이도와-감정-곡선)
+14. [1-3에서 넣지 않는 시스템](#14--1-3에서-넣지-않는-시스템)
+15. [현재 구현과의 차이 — VERIFIED](#15--현재-구현과의-차이--verified)
+16. [Authored Stage 요구사항](#16--authored-stage-요구사항)
+17. [성공 기준](#17--성공-기준)
+18. [개발팀 전달용 핵심 요약](#18--개발팀-전달용-핵심-요약)
 
 ---
 
-## 00 · VISUAL REFERENCE
+## 00 · LEVEL OVERVIEW
 
-| FIG.01 — SWING LINE | FIG.02 — ANNOTATED LAYOUT |
-|---|---|
-| ![SECTOR 01-3 swing line reference](./images/01_swing_line.png) | ![SECTOR 01-3 annotated cooling shaft layout](./images/02_layout.png) |
-| START → A → B → C → EXIT. 팬 A/B의 횡풍을 타고 이어지는 이상적 라인 | START, ANCHOR A/B/C, FAN A/B (WIND ZONE), LANDING, RECOVERY, EXIT |
+새 `SECURITY CHECK`용 이미지가 아직 전달되지 않았으므로 기존 `COOLING SHAFT` 이미지는 이 문서에서 참조하지 않는다. 새 이미지는 아래 동선을 기준으로 제작하고 `./images/`에 추가한다.
 
-## 01 · 스토리 상황
+```text
+                [ SECURITY GATE ]
+                       ↑
+                      ● D
+                       ↑
+                  SAFE ZONE
+                ███████████
+                       ↑
 
-1-2의 상단 Service Gate를 통과하면 도시의 Cooling Distribution Shaft로 진입한다.
+              ● C  ← FLOW ROUTE
+             ╱
+            ╱
+         ● B                [TURRET]
+           ╲                 ↙
+            ╲           RED FIRE
+         SAFE LEDGE
+             │
+       RECOVERY DECK
+             ↑
+            ● A
+             ↑
+          SCANNER
+             ↑
+           START
+```
 
-Sector 01의 전력이 단계적으로 차단되면서 정상 냉각 시스템도 불안정해졌고, 중앙 시스템은 남은 열을 강제로 배출하기 위해 일부 대형 환기팬을 비상 운전한다.
+| ZONE | 역할 | 플레이 상태 |
+|---|---|---|
+| A — Identification | 플레이어를 정상 직원으로 확인 | 안전 |
+| B — Normal Ascent | 1-2 이동 복습과 마지막 경고 | 안전 |
+| C — Turret Reveal | 공격 언어를 순서대로 소개 | 안전한 위협 소개 |
+| D — Route Choice | Safe / Flow / Recovery 선택 | 압박과 숙련 보상 |
+| E — Final Ascent | 시야 차단과 Gate Override | 긴장 해소 |
 
-배경 시스템 표시: `COOLING PURGE ACTIVE` · `MANUAL ACCESS HAZARD`
+## 01 · 이 구간의 목적
 
-그리고 잠깐 후: `SECTOR 01 POWER REDUCTION — STAGE 3`
+1-3에는 새로운 이동 기술이나 환경 Hazard를 추가하지 않는다. 1-2에서 익힌 기본 Rope와 공중 재Attach를 그대로 사용하면서, 처음 등장하는 Sentry Turret의 공격을 읽고 피하는 법만 가르친다.
+
+> **CORE LOOP**
+> Turret 전개 → 시선 확인 → Red Telegraph 확인 → Rope 이동 → 이전 위치로 날아가는 탄환 확인
+
+첫 탄환을 피한 플레이어의 반응은 **“와, 피했다.”**여야 한다. **“뭐야, 왜 맞았어.”**가 되면 이 구간의 연출과 배치는 실패다.
+
+적 수를 늘리지 않는다. 하나의 Turret이 공간과 경로에 따라 공격 언어 소개, Safe Route 체류 압박, Flow Route 선택 이유라는 세 역할을 하게 만든다.
+
+## 02 · ZONE A — IDENTIFICATION
+
+플레이어는 가장 아래의 좁은 작업자 검문구역에서 시작한다.
+
+```text
+               위쪽 통로
+                  ↑
+
+────────────────────
+       SCANNER
+       │ │ │
+────────────────────
+
+          P
+        START
+```
+
+Scanner를 통과하면 다음 문구가 표시된다.
+
+> `EMPLOYEE VERIFIED`
+>
+> `ASSIGNED SECTOR : LOWER MAINTENANCE`
+
+이 구간에는 공격이 없다. 시스템이 플레이어를 정상 직원으로 인식했다는 사실부터 보여줘야 이후의 공격에 서사적 이유가 생긴다.
 
 > **WORLD RULE**
-> 1-2에서는 단순히 Lift가 죽었다면, 이제 도시 설비 자체가 불안정한 환경으로 변하기 시작하는 거야. 하지만 아직 도시가 플레이어를 적극적으로 죽이려고 하는 단계는 아니다. 팬도 보안장치가 아니라 고장 난 도시가 만들어내는 환경 위험이다.
+> 보안 시스템은 처음부터 플레이어를 적으로 취급하지 않는다. 허가된 하층 정비 구역을 벗어난 행동이 적대 전환의 원인이다.
 
-## 02 · 공간 콘셉트
+## 03 · ZONE B — NORMAL ASCENT
 
-1-2가 좁은 승강기 Shaft였다면 1-3은 조금 더 넓은 수직 Cooling Chamber다. 양쪽 벽에 플레이어보다 훨씬 큰 환기팬이 박혀 있다.
+Scanner 이후 첫 번째 작은 수직 Chamber다. Anchor A는 Start보다 대각선 오른쪽 위에 둔다.
 
-형태는 대략:
-
-```
-                   EXIT
-                    ↑
-             ● C
-        FAN B  >>>>>>>>>
-       ───────────
-            Landing
-                   ● B
- <<<<<<<<<< FAN A
-       ───────────
+```text
              ● A
-          START
+
+                    Landing A
+                   ─────────
+
+       P
+──────────────
 ```
+
+- 아무 위험 없이 1-2의 Swing을 한 번 복습한다.
+- 첫 Swing은 편하게 성공할 수 있어야 한다.
+- Landing A에 착지하면 자동 방송으로 `RETURN TO ASSIGNED SECTOR`가 나온다.
+- 아직 적은 없으며 플레이어는 경고를 무시하고 자연스럽게 위로 진행한다.
 
 > **DESIGN INTENT**
-> 핵심은 플랫폼 숫자를 늘리는 게 아니라 넓은 빈 공간 자체를 플레이 구간으로 사용하는 것이다. 그래야 Rope와 바람이 화면의 주인공이 된다.
+> 이 방송은 스토리상 마지막 경고 기회다. 다음 구간의 공격이 자의적인 함정이 아니라 플레이어 행동에 대한 시스템 반응으로 읽히게 한다.
 
-## 03 · 팬의 게임 규칙
+## 04 · ZONE C — TURRET REVEAL
 
-팬은 단순히 닿으면 죽는 장애물이 아니다. 1-3에서는 오직 **횡풍을 만드는 장치**로 사용한다.
+Landing A 위쪽에는 다음 Anchor B와 벽에 접혀 있는 Turret이 함께 보인다. Turret은 처음에는 비활성 상태다.
 
-팬이 작동하는 동안 특정 직사각형 공간에 일정 방향의 힘이 발생한다. 예를 들어:
+플레이어가 정해진 높이의 Trigger를 넘으면 다음 순서로 상태가 바뀐다.
 
-> `FAN → → → → PLAYER`
+> `ROUTE VIOLATION`
+>
+> `UNAUTHORIZED VERTICAL TRANSIT`
+>
+> Turret 전개
 
-이면 공중에 있는 플레이어의 궤적이 오른쪽으로 밀린다. Rope가 연결돼 있다면 Rope 길이나 Anchor 자체가 바뀌는 게 아니라 플레이어 몸에 외력이 들어가 Swing Arc가 변한다.
+```text
+                         [T]
+                          ↓
+                     RED SENSOR
+
+          ● B
+
+
+             P
+────────────────────
+```
+
+보이지 않던 적이 갑자기 총을 쏘면 안 된다. 플레이어가 **Turret 등장 → 나를 바라봄 → 빨간 선 → 발사**를 순서대로 확인할 수 있어야 한다.
+
+첫 번째 공격은 플레이어에게 맞히도록 최적화하지 않는다. Red Telegraph를 본 뒤 Anchor B를 잡고 Swing하기만 해도 탄환이 플레이어의 이전 위치를 통과하도록 배치한다.
+
+## 05 · SENTRY TELEGRAPH 규칙
+
+Sentry Turret은 다음 상태를 가져야 한다.
+
+```text
+idle → acquire → telegraph → fire → cooldown
+```
+
+| 상태 | 플레이어에게 보여야 하는 정보 |
+|---|---|
+| idle | 접힌 Turret 또는 비활성 Sensor |
+| acquire | Turret 전개와 플레이어 방향 회전 |
+| telegraph | 명확한 Red Aim Line과 발사 예고 |
+| fire | Telegraph가 가리킨 방향으로 Projectile 발사 |
+| cooldown | 다음 판단을 할 수 있는 짧은 여유 |
+
+초기 플레이테스트 값은 다음과 같다.
+
+> **HYPOTHESIS**
+> `Acquire ≈ 0.3s` → `Aim Warning ≈ 0.8–1.0s` → `Fire` → `Cooldown`
+
+정확한 시간은 플레이테스트 후 확정한다. 현재 공용 전투 설정의 적 탄환 속도 `260`, 피해 `20`, 발사 간격 `1.4초`는 첫 Blockout의 baseline으로만 사용한다.
+
+> **RULE**
+> Red Telegraph는 장식이 아니라 약속이다. 탄환은 예고한 방향과 타이밍을 배반하지 않아야 한다.
+
+## 06 · ZONE D — 첫 실제 선택 구간
+
+이 구간부터 레벨은 단순한 A → B → C 선형 구조가 아니다.
+
+```text
+                    ● C
+                 ╱
+      FLOW ROUTE
+             ╱
+
+      ● B
+
+                         [T]
+                       ↙ FIRE
+
+             ┌────────────
+             │ SAFE LEDGE
+             │
+─────────────┘
+
+
+        ░░ RECOVERY ░░
+```
+
+같은 Turret 하나가 플레이어의 경로 선택에 따라 다르게 작용해야 한다.
+
+- 첫 노출에서는 공격 언어를 학습시킨다.
+- Safe Route에서는 너무 오래 머무르는 것을 압박한다.
+- Flow Route에서는 Rope를 빠르게 이어갈 이유를 제공한다.
 
 > **CORE PRINCIPLE**
-> Rope 규칙은 그대로인데 환경 조건만 달라진다. 이게 중요해.
+> 적 수를 늘리는 대신 공간과 적의 관계를 늘린다.
 
-## 04 · 바람은 반드시 보기 전에 알 수 있어야 한다
+## 07 · SAFE / FLOW / RECOVERY ROUTE
 
-갑자기 캐릭터를 밀면 불쾌하다. 플레이어가 팬 상태를 시각적으로 예측할 수 있어야 한다.
+### Safe Route
 
-팬 작동 전에는 붉거나 주황색 Warning Lamp가 깜빡인다. 활성화되면 먼지 · 작은 증기 · 천 조각 파티클이 한 방향으로 이동한다.
+Anchor B를 잡고 중간의 Safe Ledge에 착지한다. 짧은 철골 차폐판이 Turret과 플레이어 사이의 사선을 막아 즉시 피격되지 않는다.
 
-그리고 주인공의 긴 빨간 스카프가 바람 방향으로 먼저 반응한다.
+초보자는 여기서 위치를 확인하고 Anchor C를 조준한 뒤 다시 이동할 수 있다. 다만 완전한 안전지대는 아니며 플랫폼 끝으로 나오면 다시 사선에 들어간다.
 
-> **DESIGN INTENT**
-> 이건 캐릭터 그래픽도 Gameplay 정보로 사용하는 좋은 방법이야. 스카프는 단순 장식이 아니라 **"지금 공기가 어느 방향으로 움직이는가?"**를 보여준다.
+### Flow Route
 
-## 05 · STEP 01 — 안전하게 팬을 보여준다
+1-2에서 연속 Grapple을 익힌 플레이어는 Anchor B에서 착지하지 않는다.
 
-Start는 하단 안전 플랫폼. 플레이어 바로 앞에서 Fan이 돌아가지만 아직 그 바람 속으로 들어갈 필요는 없다.
+> `B Swing → Release → C Attach`
 
-몇 초 동안: 팬이 느려짐 → Warning → 빠르게 회전 → 먼지가 옆으로 날림 → 다시 약해짐 을 볼 수 있다.
+Turret은 한 번 정도 조준할 수 있지만 발사 전에 플레이어가 사선 밖으로 빠질 수 있어야 한다. 숙련된 이동 자체가 방어 수단이 된다.
 
-별도 튜토리얼 문장을 띄우지 않아도 된다.
+### Recovery Route
 
-> **DESIGN GOAL**
-> 플레이어가 "저게 켜졌다 꺼지는구나."를 먼저 관찰하게 한다.
+Anchor C를 놓쳐도 최하단까지 떨어지지 않는다. 바로 아래의 넓은 Recovery Deck에 착지해 B 또는 C를 다시 잡을 수 있다.
 
-## 06 · STEP 02 — FAN A / 약한 바람
-
-첫 Anchor A는 익숙한 위치에 둔다. 여기서는 바람이 약하게 지속되는 구간을 통과한다. 즉 타이밍을 맞춰야만 통과할 수 있게 만들지 않는다.
-
-플레이어가 Rope를 걸면 평소보다 Swing 궤도가 한쪽으로 조금 밀린다.
-
-> **DESIGN GOAL**
-> 목표는 "어? 평소 Swing하고 조금 다르네."를 느끼게 하는 것.
-
-실패하더라도 바로 아래 안전 플랫폼으로 떨어진다.
-
-> **중요한 점**
-> 첫 팬은 죽이는 장애물이 아니다. 바람을 처음 느끼는 장치다.
-
-## 07 · STEP 03 — 바람을 이용하는 구간
-
-첫 착지 이후 다음 Anchor B가 바람이 부는 방향 쪽 위에 위치한다. 여기서는 바람을 방해물로만 보지 않게 한다.
-
-팬이 작동할 때 Swing하면 오히려 더 쉽게 Anchor B 방향으로 날아갈 수 있다.
-
-> **DESIGN GOAL**
-> 플레이어가 "바람을 기다려서 이용할 수도 있구나."를 경험한다. 환경 Hazard가 항상 플레이어에게 마이너스만 주면 결국 "피해야 할 빨간 물체"에 불과하다. 하지만 잘 이용하면 이동에 도움이 되면 Rope 시스템의 일부가 된다.
-
-## 08 · STEP 04 — FAN B / 첫 타이밍 판단
-
-이제 두 번째 팬에서만 조금 더 어렵게 만든다. Fan B는 강한 횡풍을 주기적으로 발생시킨다.
-
-초기 프로토타입 가설은:
-
-> Warning 약 0.75초 → Active 약 1.5초 → Lull 약 1초
-
-정도로 시작해볼 수 있다. **이 숫자는 LOCK이 아니라 HYPOTHESIS다. 실제 체감 후 수정한다.**
-
-여기서는 두 가지 방법으로 올라갈 수 있어야 한다. 팬이 멈추는 순간을 기다렸다가 안정적으로 Swing하거나, 충분한 운동량을 만들어 바람이 부는 중에도 그대로 돌파한다.
+계속 서 있으면 Turret 사선에 일부 노출된다.
 
 > **DESIGN PRINCIPLE**
-> 한 가지 정답 타이밍만 요구하지 않는다. Rusted Moss 개발진이 같은 플랫폼 문제를 서로 다른 이동 방식으로 해결할 수 있게 만든다고 설명한 원칙을 우리 게임에 맞춰 적용하는 부분이다.
+> 실패는 허용하지만 가만히 있는 것은 조금 불리하다. 초보자에게 재도전 경로를 주면서 숙련자의 빠른 Flow를 보상한다.
 
-## 09 · Anchor B → C가 레벨의 핵심
+이 구조는 [Celeste와 TowerFall의 관대한 물리 설계](https://maddythorson.medium.com/celeste-and-towerfall-physics-d24bd2ae0fc5)에서 설명한 forgiveness와 Rusted Moss식 자유로운 해법을 현재 Rope 게임에 맞게 적용한다.
 
-1-3의 가장 재미있는 순간은 여기다.
+## 08 · ZONE E — FINAL ASCENT
 
-플레이어가 Anchor B에 붙은 상태에서 Fan B가 작동한다. 바람 때문에 캐릭터가 평소보다 한쪽으로 크게 밀린다. 그 힘을 이용해 Swing Arc를 키운 뒤 Release. 상단 반대쪽의 Anchor C를 잡는다.
+Anchor C 직후에 출구를 두지 않는다. 짧은 수직 상승과 Anchor D를 추가한다.
 
-> **DESIGN GOAL**
-> 성공하면 "환경에 밀린 게 아니라 환경의 힘을 이동 에너지로 바꿨다"는 느낌이 나야 한다. 이게 1-3의 Skill Moment다.
+```text
+             SECURITY GATE
+             ════════════
 
-## 10 · 실패 경로
+                 PANEL ◈
 
-초보자가 Anchor C를 놓쳐도 바로 죽지 않는다. 중간 하단에 Recovery Platform 하나를 둔다. 떨어지면 여기서 C를 다시 잡을 수 있다.
+                ● D
 
-- 숙련자: `A → B → 바람 이용 → C → Exit`
-- 초보자: `A → Landing → B → 실패 → Recovery → C → Exit`
 
-둘 다 통과 가능하다. 1-2에서 정한 철학을 그대로 유지한다.
+     WALL ███
+          ███  ← TURRET LOS 차단
+          ███
 
-## 11 · 적은 아예 넣지 않는다
+       ● C
+```
 
-이 레벨에서 Turret을 제거한다. 이유는 명확하다.
+Anchor C까지 올라오면 큰 설비 벽이 Turret의 시야를 완전히 막는다. 여기서 처음 긴장이 풀린다. Anchor D는 전투가 끝났다는 감각을 주면서 Gate 앞까지 이동시키는 Relief Anchor다.
 
-플레이어가 새롭게 학습해야 하는 건 **"바람이 내 Swing을 어떻게 바꾸는가?"** 하나다.
+Gate 앞에 도착하면 다음 문구와 상호작용이 이어진다.
 
-> **CORE PRINCIPLE**
-> 여기에 Turret까지 넣으면 실패했을 때 바람 때문인지, 총알 때문인지, Anchor 때문인지 원인을 구분하기 어려워진다. 따라서 1-3은 환경 Hazard만 있는 첫 구간으로 만드는 게 좋다.
+> `ACCESS DENIED`
+>
+> `RETURN TO ASSIGNED SECTOR`
+>
+> Service Panel Interact
+>
+> `MAINTENANCE OVERRIDE`
+>
+> Gate Open
+>
+> `VIOLATION LOGGED`
 
-## 12 · 팬 날개도 아직 즉사 요소가 아니다
+Gate가 열리면 1-3이 끝나고 다음 1-4의 Maintenance Node 구간으로 이어진다.
 
-거대한 Cooling Fan은 벽 안쪽에 들어가 있고 Player가 실제 Blade까지 접근할 수 없게 한다.
+## 09 · ANCHOR별 역할
 
-즉 1-3에서는 `FAN = Wind` 라는 규칙만 학습한다.
-
-> **FUTURE**
-> 나중에 같은 팬이 노출된 구간에서 `Wind + Contact Hazard`로 확장하면 된다. 한 번에 하나씩 배운다.
-
-## 13 · 그래픽 방향
-
-이번 구간도 고정한 그래픽 기준 그대로 간다. 환경은 Dark Navy / Charcoal / Black. 대형 팬 실루엣이 가장 중요한 환경 랜드마크다.
-
-게임플레이 정보는: Rope / Anchor = Cyan, Warning Lamp = Orange/Red, Player = Dark silhouette + Red Scarf
-
-> **▲ RULE**
-> 바람 자체를 Cyan으로 표현하면 안 된다. Cyan은 Rope와 Anchor의 정보색이기 때문이다. 바람은 회색 먼지 · 희미한 증기 · 스카프 방향 · 팬 회전으로 보여준다. 이걸 앞으로 이미지에서도 반드시 지킨다.
-
-## 14 · 사운드도 게임플레이 정보로 활용
-
-- Fan이 멈춰 있을 때: 낮은 기계음
-- 활성화 직전: 삐— 혹은 모터가 올라가는 소리
-- 활성: 강한 공기음
-
-> **DESIGN INTENT**
-> 그러면 화면 밖 Fan이 있어도 상태를 어느 정도 예측할 수 있다. 게임플레이에서는 시각 + 소리 둘 다 Warning 역할을 한다.
-
-## 15 · 카메라
-
-1-3에서는 이전보다 넓은 Swing Arc가 나오므로 카메라가 캐릭터에 너무 가까우면 안 된다.
-
-특히 Fan B 구간에서는 한 화면에서 가능하면 **Player + Anchor B + 바람 방향 + Anchor C** 가 읽혀야 한다.
-
-> **GLOBAL**
-> Player가 위로 상승하면 카메라는 위쪽 공간을 먼저 보여준다. 이 규칙은 1-2에서 이어진다.
-
-## 16 · 전체 플레이 흐름
-
-| 단계 | 플레이 내용 | 학습 |
+| ANCHOR | 역할 | 플레이 경험 |
 |---|---|---|
-| START | Fan 동작 관찰 | 환경 읽기 |
-| Anchor A | 약한 횡풍 속 Swing | 바람에 의해 궤도 변화 |
-| Landing | 안전지대 | 다음 경로 확인 |
-| Anchor B | 바람을 이용해 상승 | 환경을 이동에 활용 |
-| Fan B | 주기적 강풍 | 타이밍 판단 |
-| Anchor C | 강풍 Swing → Release → 재Attach | 환경+Rope 결합 |
-| EXIT | Cooling Shaft 상단 도달 | 1-3 완료 |
+| A — Review Anchor | 위험 없는 복습 | 기존 Swing 감각 회복 |
+| B — Decision Anchor | Safe와 Flow Route 분기 | 경로 선택 |
+| C — Skill Anchor | 공중 재Attach로 빠른 탈출 | 숙련 보상 |
+| D — Relief Anchor | Turret 사선이 끝난 뒤 Gate 이동 | 긴장 해소 |
 
-## 17 · 1-3에서 절대 추가하지 않을 것
+Anchor A/B/C/D는 단순한 네 개의 갈고리 점이 아니다. 각 Anchor가 레벨의 감정과 선택 리듬에서 하나의 역할을 가져야 한다.
 
-이번 레벨에는 Turret, Drone, Augment, Maintenance Node, Moving Platform, Laser, Rope Cutter, 새로운 공격 시스템을 넣지 않는다.
+## 10 · BLOCKOUT 거리 기준
 
-오직 **기본 Rope + 바람**만 가지고 재미를 확인한다.
+정확한 좌표는 플레이테스트 전에 잠그지 않는다. 현재 최대 Attach 거리 `440px`과 lane 폭 `340px`을 기준으로 첫 Blockout의 실질 연결 거리를 다음 범위에서 시작한다.
 
-## 18 · 개발팀 전달용 요약
+| 연결 난이도 | 초기 거리 |
+|---|---:|
+| 안전 연결 | 220–280px |
+| 일반 연결 | 280–340px |
+| Skill 연결 | 340–390px |
 
-Sector 01-3 `COOLING SHAFT`는 1-2에서 익힌 연속 Grapple에 처음으로 환경 외력을 결합하는 약 1분 30초~2분 길이의 수직 레벨이다. 비상 냉각 시스템이 작동하면서 대형 Cooling Fan이 횡풍을 발생시키며, 플레이어는 바람 때문에 변하는 Swing Arc를 읽고 Release 및 다음 Attach 타이밍을 조절한다.
+> **HYPOTHESIS**
+> 위 거리는 모두 초기 Blockout 범위다. 실제 좌표와 난이도는 플레이테스트 후 조정한다.
 
-첫 Fan은 약한 바람으로 규칙을 안전하게 학습시키고, 두 번째 Fan은 Warning → Active → Lull 주기를 사용해 처음으로 타이밍 판단을 요구한다. 바람은 단순 방해물이 아니라 잘 이용하면 다음 Anchor까지 더 빠르게 상승할 수 있어야 한다.
+필수 Anchor를 최대 사거리 `440px` 가까이에 두지 않는다. Aim 오차와 진입 운동량에 따라 실패 폭이 지나치게 커질 수 있기 때문이다.
 
-적과 추가 시스템은 사용하지 않으며, 실패 시 Recovery Platform을 통해 재도전할 수 있다. 그래픽은 기존 Maintenance Sector의 어두운 실루엣 픽셀 스타일을 유지하며 Cyan은 Rope/Anchor에만 사용하고, 바람은 팬 회전·먼지·증기·빨간 스카프의 방향으로 전달한다.
+## 11 · 카메라와 정보 가독성
+
+카메라는 플레이어보다 다음 판단 정보를 우선한다.
+
+| 구간 | 한 화면에서 읽혀야 하는 정보 |
+|---|---|
+| Zone C | Player + Anchor B + 접힌 Turret + Trigger 이후 Red Telegraph |
+| Zone D | Anchor B + Safe Ledge + Anchor C + Turret 사선 |
+| Recovery | Player + 재시도 Anchor + 현재 Turret 사선 |
+| Zone E | Anchor C + LOS 차단 Wall + Anchor D + Security Gate |
+
+Turret의 Red Telegraph는 기존 색 규칙에 따라 위험 정보로 사용한다. Rope와 Anchor의 Cyan과 섞이지 않아야 하며, Cover는 사선 차단 여부가 실루엣만으로 읽혀야 한다.
+
+## 12 · ROPE CUT 범위
+
+현재 Projectile은 플레이어 몸뿐 아니라 Rope 선분과 충돌하면 Rope Cut을 일으킬 수 있고, 설정상 Rope 비활성 시간은 `0.6초`다. 그러나 1-3에서는 이를 적극적으로 가르치지 않는다.
+
+첫 Enemy에서 학습할 규칙은 하나다.
+
+> **Red Aim → Bullet → 움직여서 피한다.**
+
+첫 Blockout은 Turret 탄환과 Rope의 교차 가능성을 최소화한다. Rope Cut을 핵심으로 사용하는 적은 이후 Cutter 또는 Jammer 소개 구간에서 별도로 가르친다.
+
+## 13 · 난이도와 감정 곡선
+
+첫 플레이 기준 목표는 다음과 같다.
+
+| 구간 비중 | 목표 경험 |
+|---:|---|
+| 초반 30% | 거의 실패하지 않는 소개와 복습 |
+| 중간 40% | Turret 때문에 긴장하지만 Recovery 가능 |
+| 후반 20% | B → C 연속 Grapple 시 매우 빠른 돌파 |
+| 마지막 10% | 안전구간과 Gate Override로 긴장 해소 |
+
+전체 곡선은 계속 상승하지 않는다.
+
+> **소개 → 시험 → 선택 → 숙련 보상 → 해소**
+
+플레이 리듬은 `안전 → 위험 등장 → 압박 → 빠른 이동 → 안전`으로 구성한다.
+
+## 14 · 1-3에서 넣지 않는 시스템
+
+새로운 이동 기술 · 새로운 환경 Hazard · 복수 Turret · Drone · Cutter · Jammer · Augment 선택 · Maintenance Node · Moving Platform · Laser Grid · Rope Cut 중심 과제 · 강제 컷신
+
+1-3은 **기본 Rope + Sentry Turret 하나**만으로 재미와 가독성을 검증한다.
+
+## 15 · 현재 구현과의 차이 — VERIFIED
+
+2026-08-13 `main` 기준으로 다음 차이를 확인했다.
+
+### 현재 Enemy는 설계한 Sentry Turret이 아니다
+
+`EnemyObject`의 `enemy-weapon` 능력은 사거리 안의 가장 가까운 플레이어를 찾고 Cooldown이 끝나면 즉시 현재 방향으로 탄환을 생성한다. `scan → aim → warning → fire` 상태와 Telegraph가 없다.
+
+1-3을 구현하기 전에 최소한 Sentry 전용 `idle → acquire → telegraph → fire → cooldown` 상태가 필요하다. 이때부터 일반 Enemy와 Sentry Turret을 구분한다.
+
+### 현재 절차 생성 월드는 authored room을 표현할 수 없다
+
+`WorldGenerator`는 각 Level에 Route Platform 하나를 절차 생성하며, 기본 `enemySpawnInterval = 1`이므로 모든 Level에 Enemy Spawn이 생긴다.
+
+Scanner, Safe Ledge, Recovery Deck, Cover, 역할이 다른 Anchor, Trigger, Gate를 단일 랜덤 플랫폼으로 표현할 수 없다.
+
+## 16 · AUTHORED STAGE 요구사항
+
+현재 절차 생성 Level과 기획된 Authored Stage/Room의 책임을 분리해야 한다. 기존 물리와 Rope 시스템은 그대로 사용하고 배치 데이터만 명시적으로 구성하는 것이 첫 구현 방향이다.
+
+예시 구조:
+
+```text
+Sector 01-3
+├── platforms[]
+├── anchors[]
+├── hazards[]
+├── triggers[]
+└── recoveryZones[]
+```
+
+> **IMPLEMENTATION REQUIREMENT**
+> 1-3 Blockout은 Scanner Trigger, Safe Ledge, Recovery Deck, LOS Cover, Anchor A–D와 Security Gate를 재현할 수 있어야 한다.
+
+정확한 데이터 Schema와 런타임 소유권은 구현 설계에서 확정한다. 위 배열 이름은 요구되는 배치 능력을 설명하는 예시이며 공개 계약으로 잠그지 않는다.
+
+## 17 · 성공 기준
+
+플레이어가 레벨을 마친 뒤 다음을 이해하면 성공이다.
+
+1. Red Telegraph는 곧 탄환이 날아올 방향을 뜻한다.
+2. 멈춰서 피하는 것보다 Rope를 타고 계속 움직이는 편이 자연스럽고 안전하다.
+3. Safe Ledge에 착지해 경로를 다시 읽거나, B → C를 연속 연결해 빠르게 통과할 수 있다.
+4. 실패해도 Recovery Deck에서 다시 시도할 수 있다.
+5. Turret의 위협은 LOS 차단 Wall을 넘으면 끝난다.
+
+첫 탄환의 회피율, Zone D 체류 시간, Safe/Flow Route 선택 비율, Recovery 횟수와 피격 원인을 플레이테스트에서 기록한다.
+
+## 18 · 개발팀 전달용 핵심 요약
+
+Sector 01-3 `SECURITY CHECK`는 1-2에서 익힌 Rope 이동을 처음으로 전투 회피에 연결하는 5구역 수직 레벨이다. Scanner가 플레이어를 정상 직원으로 확인한 뒤, 허가 높이를 넘으면 `ROUTE VIOLATION`과 함께 Sentry Turret 하나가 전개된다.
+
+첫 공격은 `acquire → red telegraph → fire`를 안전하게 보여주고, 플레이어가 Anchor B를 잡아 Swing하기만 해도 이전 위치로 탄환이 지나가게 만든다. Zone D에서는 같은 Turret 하나가 Safe Ledge 체류를 압박하고, 숙련자의 B → C 연속 Grapple을 빠르고 안전한 해법으로 보상한다. 실패한 플레이어는 Recovery Deck에서 즉시 재도전할 수 있다.
+
+Anchor C 위의 설비 벽은 Turret LOS를 완전히 차단하고, Anchor D는 Security Gate까지 이어지는 Relief 구간을 만든다. Gate에서는 `MAINTENANCE OVERRIDE → VIOLATION LOGGED`로 레벨을 마무리한다.
+
+구현 전에는 Sentry 전용 Telegraph 상태와 Authored Stage/Room 배치 기반이 필요하다. Rope Cut은 이번 학습에서 제외하고, 새 이동 기술·환경 Hazard·복수 적·Augment도 추가하지 않는다.
 
 ---
 
 ## 폴더 구조
 
-```
+```text
 .
-├── README.md                # 이 문서 (Markdown, GitHub에서 바로 렌더링)
-└── images/                  # 원본 레퍼런스
-    ├── 01_swing_line.png    # Swing Line Reference
-    └── 02_layout.png        # Annotated Layout
+├── README.md            # 이 문서
+└── images/              # 새 SECURITY CHECK 이미지 추가 위치
 ```
 
-SECTOR 01-3 / COOLING SHAFT — LEVEL DESIGN DOC
+기존 `COOLING SHAFT` 이미지는 새 이미지가 전달되기 전까지 보존하지만 이 문서에서는 참조하지 않는다.
+
+SECTOR 01-3 / SECURITY CHECK — LEVEL DESIGN DOC · REV 2.0

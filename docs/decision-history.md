@@ -23,6 +23,14 @@
 - 대체: 정식 표현은 `docs/pixel-graphics-design-guide.md`의 혼합 도트 방향과 제작 규격으로 대체했다. Canvas 플랫 도형은 기본 디자인이 아니라 개발·실패 복구용 fallback으로 유지한다.
 - 검증 상태: 기본 `sprite`와 `?renderer=polygon`이 같은 게임 상태를 그리는 렌더링 회귀 테스트로 두 경로를 유지한다.
 
+## [L1] 2026-08-13 — Sector 01-3을 Cooling Shaft 횡풍 튜토리얼로 구성한다
+
+- 맥락: 1-2의 연속 Grapple 다음 단계로 환경 외력에 따라 달라지는 Swing 궤적과 타이밍을 가르치려 했다.
+- 결정: 대형 Cooling Fan 두 개의 약한 횡풍과 주기적 강풍을 사용하고 적은 배치하지 않는다.
+- 영향: Anchor A–C, Fan A/B, Recovery Platform과 Cooling Shaft 배경을 중심으로 1-3 문서와 레퍼런스 이미지를 구성했다.
+- 대체: `Sector 01-3 SECURITY CHECK` — 새로운 이동·환경 규칙 대신 첫 Sentry Turret의 Red Telegraph와 Rope 회피를 가르치고, Safe/Flow/Recovery 경로와 LOS 차단 해소 구간을 사용하는 Authored Stage로 대체했다.
+- 검증 상태: 새 기준은 `docs/bsh/scenario/1-3/README.md` REV 2.0이며 Blockout과 플레이테스트는 아직 진행하지 않았다.
+
 ## [L2] 2026-08-12 — 플레이어와 환경별 최상위 runtime 폴더를 사용한다
 
 - 맥락: 첫 player·environment manifest를 각각 도입하면서 `assets/sprites/`와 `assets/environment/`가 독립된 작업·runtime 경로를 함께 맡았다.

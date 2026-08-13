@@ -2,7 +2,7 @@
 
 *FIRST CHAIN GRAPPLE / VERTICAL UTILITY SHAFT — INTERNAL / LEVEL DESIGN DOC*
 
-◀ PREV — [SECTOR 01-1 / SERVICE SHAFT](../1-1/README.md) · NEXT — [SECTOR 01-3 / COOLING SHAFT](../1-3/README.md) ▶
+◀ PREV — [SECTOR 01-1 / SERVICE SHAFT](../1-1/README.md) · NEXT — [SECTOR 01-3 / SECURITY CHECK](../1-3/README.md) ▶
 
 1-1에서 익힌 **단일 Grapple**을 **연속 Grapple**로 확장하는 레벨. 이 구간의 핵심 질문은 딱 하나다 — *"첫 번째 Rope를 놓은 다음, 바로 다음 Anchor를 잡을 수 있는가?"*
 
