@@ -42,6 +42,18 @@
 
 ## 다음 작업
 
+Sector 01-1의 현재 기준은 `docs/bsh/scenario/1-1/README.md`의 `SERVICE SHAFT` REV 3.0이다. 첫 Authored Stage를 32px Grid·960×960 Blockout으로 만들고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3의 5초 이내 재시도를 검증한다. Turret·Wind·Augment·필수 공중 ReAttach는 제외하며, `swingImpulse = 0`에서도 전 구간이 재미있고 안정적으로 통과되어야 한다. Terminal은 하부 봉쇄와 Rooftop Pad 03 Maintenance Shuttle 목표를 전달한다.
+
+Sector 01-2의 현재 기준은 `docs/bsh/scenario/1-2/README.md`의 `DOUBLE ANCHOR SHAFT` REV 3.0이다. 32px Grid·960×1088 Blockout에서 A=복습·B=첫 Airborne Handoff·C=방향 반전·D=설명 없는 Flow Test를 검증한다. 숙련자는 A→B→C→D를 무착지로 연결하고, 초보자는 P1/P2/P3 Recovery를 이용해 3~5초 안에 해당 Handoff를 재시도할 수 있어야 한다. Enemy·Damage Hazard·Wind·Augment는 제외하며, `swingImpulse = 0` Flow Route와 Momentum·Wrong/Ghost Attach 로그를 필수로 확인한다.
+
+Sector 01-3의 현재 기준은 `docs/bsh/scenario/1-3/README.md`의 `SECURITY CHECK` REV 3.0이다. 32px Grid·960×1152 Blockout에서 Scanner 인증 뒤 첫 Sentry T1의 `idle → acquire → track → lock → fire → cooldown` 공격 언어와 B→C Safe/Flow/Recovery 경로를 검증한다. Cover Wall C1 뒤에서는 LOS와 Encounter가 완전히 끝나야 하며, Turret 파괴는 Clear 조건이 아니다. 첫 Projectile은 Rope를 자르지 않고 one-shot·과도한 Knockback·전체 재등반을 만들지 않아야 한다. 상단 Service Panel의 `MAINTENANCE OVERRIDE → VIOLATION LOGGED`가 1-4 Maintenance Node로 연결된다.
+
+Sector 01-4의 현재 기준은 `docs/bsh/scenario/1-4/README.md`의 `MAINTENANCE NODE` REV 3.0이다. 1-3의 압박 뒤 첫 Build Choice를 제공하는 휴식·보상 Stage로, `IMPULSE COIL`·`RELAY LINK`·`SHEAR CURRENT` 세 Foundation Augment를 고정 제시한다. 선택 전후 Rope 차이가 즉시 읽혀야 하며, 짧은 Calibration 공간은 세 선택 모두 통과 가능해야 한다. 실제 Enemy와 본격적인 Build 검증은 1-5로 미루고, 기존 Artifact/Reward Selection과의 재사용 범위 및 `swingImpulse`의 기본 Rope 귀속 여부를 구현 전에 확정한다.
+
+Sector 01-5의 현재 기준은 `docs/bsh/scenario/1-5/README.md`의 `AUGMENT TEST BAY` REV 3.0이다. 새 기믹 없이 하나의 960px 폭 Maintenance Test Bay를 세 Build가 다르게 해석하도록 구성한다. `IMPULSE COIL`은 Zone A Long Arc, `RELAY LINK`는 Zone B C→D→E Chain, `SHEAR CURRENT`는 Zone C의 Rope Geometry와 재사용 Sentry T1 제어에서 강점을 보여야 한다. 어떤 Augment도 통과 필수 조건이 아니며 Base Safe Route와 Recovery를 항상 제공한다. Build별 선택률·경로·시간·Turret 상호작용을 기록하고, 다음 1-6에서 Wind를 새로 소개한다.
+
+Sector 01-6의 현재 기준은 `docs/bsh/scenario/1-6/README.md`의 `COOLING SHAFT` REV 3.0이다. Enemy와 Damage Hazard 없이 Rope에 작용하는 첫 External Force인 Wind만 학습한다. Fan A는 약한 Continuous Wind로 B→C Wind-assisted Swing을 안전하게 소개하고, Fan B는 `LULL → WARNING → ACTIVE → LULL` 주기로 기다리는 Safe Route와 Active Wind를 이용하는 Flow Route를 함께 제공한다. Wind Visual·Fan Animation·실제 Force는 같은 State Source를 사용해야 하며, Recovery와 Wind Shadow에서 조작권을 회복할 수 있어야 한다. 세 Augment 모두 통과 가능해야 하고 다음 1-7 `PRESSURE BYPASS`에서 Wind·Turret·Build를 조합한다.
+
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태지만, 전체 48개 중 현재 문서가 있는 `1-1`~`1-3`을 제외한 45개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.

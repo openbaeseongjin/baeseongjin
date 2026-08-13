@@ -1,252 +1,2495 @@
-# SECTOR 01-3 — COOLING SHAFT
+# SECTOR 01-3 — SECURITY CHECK
 
-*Maintenance Sector / Level 3*
+*BLOCKOUT CANDIDATE · REV 3.0*
 
-◀ PREV — [SECTOR 01-2 / DOUBLE ANCHOR SHAFT](../1-2/README.md)
+◀ PREV — [SECTOR 01-2 / DOUBLE ANCHOR SHAFT](../1-2/README.md) · NEXT — [SECTOR 01-4 / MAINTENANCE NODE](../1-4/README.md) ▶
 
-1-1에서 Rope를 배웠고, 1-2에서 Rope를 연속으로 연결했다면, 1-3에서는 외부 힘 때문에 Swing 궤적이 변할 때 이를 읽고 이용하는 법을 배운다.
+Sector: 01 MAINTENANCE
+Stage: 03
+Theme: Automated Maintenance Security Check
+Difficulty: ★★
+Expected First Playtime: 100~150 sec
 
-`핵심 학습 CROSSWIND + SWING TIMING` · `TARGET 1:30–2:00` · `NEW 냉각팬의 횡풍` · `ENEMIES 없음` · `AUGMENTS 없음`
+Primary Mechanic:
+Movement Under Telegraph Pressure
 
-## Contents
+New Gameplay Element:
+Sentry Turret
 
-00. [Visual Reference](#00--visual-reference)
-01. [스토리 상황](#01--스토리-상황)
-02. [공간 콘셉트](#02--공간-콘셉트)
-03. [팬의 게임 규칙](#03--팬의-게임-규칙)
-04. [바람은 반드시 보기 전에 알 수 있어야 한다](#04--바람은-반드시-보기-전에-알-수-있어야-한다)
-05. [STEP 01 — 안전하게 팬을 보여준다](#05--step-01--안전하게-팬을-보여준다)
-06. [STEP 02 — FAN A / 약한 바람](#06--step-02--fan-a--약한-바람)
-07. [STEP 03 — 바람을 이용하는 구간](#07--step-03--바람을-이용하는-구간)
-08. [STEP 04 — FAN B / 첫 타이밍 판단](#08--step-04--fan-b--첫-타이밍-판단)
-09. [Anchor B → C가 레벨의 핵심](#09--anchor-b--c가-레벨의-핵심)
-10. [실패 경로](#10--실패-경로)
-11. [적은 아예 넣지 않는다](#11--적은-아예-넣지-않는다)
-12. [팬 날개도 아직 즉사 요소가 아니다](#12--팬-날개도-아직-즉사-요소가-아니다)
-13. [그래픽 방향](#13--그래픽-방향)
-14. [사운드도 게임플레이 정보로 활용](#14--사운드도-게임플레이-정보로-활용)
-15. [카메라](#15--카메라)
-16. [전체 플레이 흐름](#16--전체-플레이-흐름)
-17. [1-3에서 절대 추가하지 않을 것](#17--1-3에서-절대-추가하지-않을-것)
-18. [개발팀 전달용 요약](#18--개발팀-전달용-요약)
+Combat Requirement:
+NONE
+
+Damage Hazard:
+Sentry Projectile
+
+Augment:
+NONE
+
+Wind:
+NONE
+
+Required Previous Knowledge:
+- Attach
+- Swing
+- Release
+- Landing
+- Airborne Re-Attach
+- Grapple Chaining
 
 ---
 
-## 00 · VISUAL REFERENCE
-
-| FIG.01 — SWING LINE | FIG.02 — ANNOTATED LAYOUT |
-|---|---|
-| ![SECTOR 01-3 swing line reference](./images/01_swing_line.png) | ![SECTOR 01-3 annotated cooling shaft layout](./images/02_layout.png) |
-| START → A → B → C → EXIT. 팬 A/B의 횡풍을 타고 이어지는 이상적 라인 | START, ANCHOR A/B/C, FAN A/B (WIND ZONE), LANDING, RECOVERY, EXIT |
-
-## 01 · 스토리 상황
-
-1-2의 상단 Service Gate를 통과하면 도시의 Cooling Distribution Shaft로 진입한다.
-
-Sector 01의 전력이 단계적으로 차단되면서 정상 냉각 시스템도 불안정해졌고, 중앙 시스템은 남은 열을 강제로 배출하기 위해 일부 대형 환기팬을 비상 운전한다.
-
-배경 시스템 표시: `COOLING PURGE ACTIVE` · `MANUAL ACCESS HAZARD`
-
-그리고 잠깐 후: `SECTOR 01 POWER REDUCTION — STAGE 3`
-
-> **WORLD RULE**
-> 1-2에서는 단순히 Lift가 죽었다면, 이제 도시 설비 자체가 불안정한 환경으로 변하기 시작하는 거야. 하지만 아직 도시가 플레이어를 적극적으로 죽이려고 하는 단계는 아니다. 팬도 보안장치가 아니라 고장 난 도시가 만들어내는 환경 위험이다.
-
-## 02 · 공간 콘셉트
-
-1-2가 좁은 승강기 Shaft였다면 1-3은 조금 더 넓은 수직 Cooling Chamber다. 양쪽 벽에 플레이어보다 훨씬 큰 환기팬이 박혀 있다.
-
-형태는 대략:
-
-```
-                   EXIT
-                    ↑
-             ● C
-        FAN B  >>>>>>>>>
-       ───────────
-            Landing
-                   ● B
- <<<<<<<<<< FAN A
-       ───────────
-             ● A
-          START
-```
-
-> **DESIGN INTENT**
-> 핵심은 플랫폼 숫자를 늘리는 게 아니라 넓은 빈 공간 자체를 플레이 구간으로 사용하는 것이다. 그래야 Rope와 바람이 화면의 주인공이 된다.
-
-## 03 · 팬의 게임 규칙
-
-팬은 단순히 닿으면 죽는 장애물이 아니다. 1-3에서는 오직 **횡풍을 만드는 장치**로 사용한다.
-
-팬이 작동하는 동안 특정 직사각형 공간에 일정 방향의 힘이 발생한다. 예를 들어:
-
-> `FAN → → → → PLAYER`
-
-이면 공중에 있는 플레이어의 궤적이 오른쪽으로 밀린다. Rope가 연결돼 있다면 Rope 길이나 Anchor 자체가 바뀌는 게 아니라 플레이어 몸에 외력이 들어가 Swing Arc가 변한다.
-
-> **CORE PRINCIPLE**
-> Rope 규칙은 그대로인데 환경 조건만 달라진다. 이게 중요해.
-
-## 04 · 바람은 반드시 보기 전에 알 수 있어야 한다
-
-갑자기 캐릭터를 밀면 불쾌하다. 플레이어가 팬 상태를 시각적으로 예측할 수 있어야 한다.
-
-팬 작동 전에는 붉거나 주황색 Warning Lamp가 깜빡인다. 활성화되면 먼지 · 작은 증기 · 천 조각 파티클이 한 방향으로 이동한다.
-
-그리고 주인공의 긴 빨간 스카프가 바람 방향으로 먼저 반응한다.
-
-> **DESIGN INTENT**
-> 이건 캐릭터 그래픽도 Gameplay 정보로 사용하는 좋은 방법이야. 스카프는 단순 장식이 아니라 **"지금 공기가 어느 방향으로 움직이는가?"**를 보여준다.
-
-## 05 · STEP 01 — 안전하게 팬을 보여준다
-
-Start는 하단 안전 플랫폼. 플레이어 바로 앞에서 Fan이 돌아가지만 아직 그 바람 속으로 들어갈 필요는 없다.
-
-몇 초 동안: 팬이 느려짐 → Warning → 빠르게 회전 → 먼지가 옆으로 날림 → 다시 약해짐 을 볼 수 있다.
-
-별도 튜토리얼 문장을 띄우지 않아도 된다.
-
-> **DESIGN GOAL**
-> 플레이어가 "저게 켜졌다 꺼지는구나."를 먼저 관찰하게 한다.
-
-## 06 · STEP 02 — FAN A / 약한 바람
-
-첫 Anchor A는 익숙한 위치에 둔다. 여기서는 바람이 약하게 지속되는 구간을 통과한다. 즉 타이밍을 맞춰야만 통과할 수 있게 만들지 않는다.
-
-플레이어가 Rope를 걸면 평소보다 Swing 궤도가 한쪽으로 조금 밀린다.
-
-> **DESIGN GOAL**
-> 목표는 "어? 평소 Swing하고 조금 다르네."를 느끼게 하는 것.
-
-실패하더라도 바로 아래 안전 플랫폼으로 떨어진다.
-
-> **중요한 점**
-> 첫 팬은 죽이는 장애물이 아니다. 바람을 처음 느끼는 장치다.
-
-## 07 · STEP 03 — 바람을 이용하는 구간
-
-첫 착지 이후 다음 Anchor B가 바람이 부는 방향 쪽 위에 위치한다. 여기서는 바람을 방해물로만 보지 않게 한다.
-
-팬이 작동할 때 Swing하면 오히려 더 쉽게 Anchor B 방향으로 날아갈 수 있다.
-
-> **DESIGN GOAL**
-> 플레이어가 "바람을 기다려서 이용할 수도 있구나."를 경험한다. 환경 Hazard가 항상 플레이어에게 마이너스만 주면 결국 "피해야 할 빨간 물체"에 불과하다. 하지만 잘 이용하면 이동에 도움이 되면 Rope 시스템의 일부가 된다.
-
-## 08 · STEP 04 — FAN B / 첫 타이밍 판단
-
-이제 두 번째 팬에서만 조금 더 어렵게 만든다. Fan B는 강한 횡풍을 주기적으로 발생시킨다.
-
-초기 프로토타입 가설은:
-
-> Warning 약 0.75초 → Active 약 1.5초 → Lull 약 1초
-
-정도로 시작해볼 수 있다. **이 숫자는 LOCK이 아니라 HYPOTHESIS다. 실제 체감 후 수정한다.**
-
-여기서는 두 가지 방법으로 올라갈 수 있어야 한다. 팬이 멈추는 순간을 기다렸다가 안정적으로 Swing하거나, 충분한 운동량을 만들어 바람이 부는 중에도 그대로 돌파한다.
-
-> **DESIGN PRINCIPLE**
-> 한 가지 정답 타이밍만 요구하지 않는다. Rusted Moss 개발진이 같은 플랫폼 문제를 서로 다른 이동 방식으로 해결할 수 있게 만든다고 설명한 원칙을 우리 게임에 맞춰 적용하는 부분이다.
-
-## 09 · Anchor B → C가 레벨의 핵심
-
-1-3의 가장 재미있는 순간은 여기다.
-
-플레이어가 Anchor B에 붙은 상태에서 Fan B가 작동한다. 바람 때문에 캐릭터가 평소보다 한쪽으로 크게 밀린다. 그 힘을 이용해 Swing Arc를 키운 뒤 Release. 상단 반대쪽의 Anchor C를 잡는다.
-
-> **DESIGN GOAL**
-> 성공하면 "환경에 밀린 게 아니라 환경의 힘을 이동 에너지로 바꿨다"는 느낌이 나야 한다. 이게 1-3의 Skill Moment다.
-
-## 10 · 실패 경로
-
-초보자가 Anchor C를 놓쳐도 바로 죽지 않는다. 중간 하단에 Recovery Platform 하나를 둔다. 떨어지면 여기서 C를 다시 잡을 수 있다.
-
-- 숙련자: `A → B → 바람 이용 → C → Exit`
-- 초보자: `A → Landing → B → 실패 → Recovery → C → Exit`
-
-둘 다 통과 가능하다. 1-2에서 정한 철학을 그대로 유지한다.
-
-## 11 · 적은 아예 넣지 않는다
-
-이 레벨에서 Turret을 제거한다. 이유는 명확하다.
-
-플레이어가 새롭게 학습해야 하는 건 **"바람이 내 Swing을 어떻게 바꾸는가?"** 하나다.
-
-> **CORE PRINCIPLE**
-> 여기에 Turret까지 넣으면 실패했을 때 바람 때문인지, 총알 때문인지, Anchor 때문인지 원인을 구분하기 어려워진다. 따라서 1-3은 환경 Hazard만 있는 첫 구간으로 만드는 게 좋다.
-
-## 12 · 팬 날개도 아직 즉사 요소가 아니다
-
-거대한 Cooling Fan은 벽 안쪽에 들어가 있고 Player가 실제 Blade까지 접근할 수 없게 한다.
-
-즉 1-3에서는 `FAN = Wind` 라는 규칙만 학습한다.
-
-> **FUTURE**
-> 나중에 같은 팬이 노출된 구간에서 `Wind + Contact Hazard`로 확장하면 된다. 한 번에 하나씩 배운다.
-
-## 13 · 그래픽 방향
-
-이번 구간도 고정한 그래픽 기준 그대로 간다. 환경은 Dark Navy / Charcoal / Black. 대형 팬 실루엣이 가장 중요한 환경 랜드마크다.
-
-게임플레이 정보는: Rope / Anchor = Cyan, Warning Lamp = Orange/Red, Player = Dark silhouette + Red Scarf
-
-> **▲ RULE**
-> 바람 자체를 Cyan으로 표현하면 안 된다. Cyan은 Rope와 Anchor의 정보색이기 때문이다. 바람은 회색 먼지 · 희미한 증기 · 스카프 방향 · 팬 회전으로 보여준다. 이걸 앞으로 이미지에서도 반드시 지킨다.
-
-## 14 · 사운드도 게임플레이 정보로 활용
-
-- Fan이 멈춰 있을 때: 낮은 기계음
-- 활성화 직전: 삐— 혹은 모터가 올라가는 소리
-- 활성: 강한 공기음
-
-> **DESIGN INTENT**
-> 그러면 화면 밖 Fan이 있어도 상태를 어느 정도 예측할 수 있다. 게임플레이에서는 시각 + 소리 둘 다 Warning 역할을 한다.
-
-## 15 · 카메라
-
-1-3에서는 이전보다 넓은 Swing Arc가 나오므로 카메라가 캐릭터에 너무 가까우면 안 된다.
-
-특히 Fan B 구간에서는 한 화면에서 가능하면 **Player + Anchor B + 바람 방향 + Anchor C** 가 읽혀야 한다.
-
-> **GLOBAL**
-> Player가 위로 상승하면 카메라는 위쪽 공간을 먼저 보여준다. 이 규칙은 1-2에서 이어진다.
-
-## 16 · 전체 플레이 흐름
-
-| 단계 | 플레이 내용 | 학습 |
-|---|---|---|
-| START | Fan 동작 관찰 | 환경 읽기 |
-| Anchor A | 약한 횡풍 속 Swing | 바람에 의해 궤도 변화 |
-| Landing | 안전지대 | 다음 경로 확인 |
-| Anchor B | 바람을 이용해 상승 | 환경을 이동에 활용 |
-| Fan B | 주기적 강풍 | 타이밍 판단 |
-| Anchor C | 강풍 Swing → Release → 재Attach | 환경+Rope 결합 |
-| EXIT | Cooling Shaft 상단 도달 | 1-3 완료 |
-
-## 17 · 1-3에서 절대 추가하지 않을 것
-
-이번 레벨에는 Turret, Drone, Augment, Maintenance Node, Moving Platform, Laser, Rope Cutter, 새로운 공격 시스템을 넣지 않는다.
-
-오직 **기본 Rope + 바람**만 가지고 재미를 확인한다.
-
-## 18 · 개발팀 전달용 요약
-
-Sector 01-3 `COOLING SHAFT`는 1-2에서 익힌 연속 Grapple에 처음으로 환경 외력을 결합하는 약 1분 30초~2분 길이의 수직 레벨이다. 비상 냉각 시스템이 작동하면서 대형 Cooling Fan이 횡풍을 발생시키며, 플레이어는 바람 때문에 변하는 Swing Arc를 읽고 Release 및 다음 Attach 타이밍을 조절한다.
-
-첫 Fan은 약한 바람으로 규칙을 안전하게 학습시키고, 두 번째 Fan은 Warning → Active → Lull 주기를 사용해 처음으로 타이밍 판단을 요구한다. 바람은 단순 방해물이 아니라 잘 이용하면 다음 Anchor까지 더 빠르게 상승할 수 있어야 한다.
-
-적과 추가 시스템은 사용하지 않으며, 실패 시 Recovery Platform을 통해 재도전할 수 있다. 그래픽은 기존 Maintenance Sector의 어두운 실루엣 픽셀 스타일을 유지하며 Cyan은 Rope/Anchor에만 사용하고, 바람은 팬 회전·먼지·증기·빨간 스카프의 방향으로 전달한다.
+## 1. 한 줄 정의
+
+정상 직원으로 인증된 정비기사가 봉쇄 명령을 무시하고 위쪽으로 계속 이동하자,
+도시 보안 시스템이 처음으로 플레이어를
+`UNAUTHORIZED VERTICAL TRANSIT` 상태로 판정한다.
+
+플레이어는 처음 등장한 Sentry Turret의 명확한 공격 예고를 읽으며
+1-2에서 배운 연속 Grapple을 유지해 위험 구간을 돌파한다.
+
+핵심 플레이 문장:
+
+SEE WARNING
+→ KEEP MOVING
+→ ATTACH
+→ SWING
+→ DODGE SHOT
+→ RE-ATTACH
+→ LEAVE TURRET LOS
 
 ---
 
-## 폴더 구조
+## 2. 전체 게임에서의 역할
 
-```
-.
-├── README.md                # 이 문서 (Markdown, GitHub에서 바로 렌더링)
-└── images/                  # 원본 레퍼런스
-    ├── 01_swing_line.png    # Swing Line Reference
-    └── 02_layout.png        # Annotated Layout
-```
+### 1-1
 
-SECTOR 01-3 / COOLING SHAFT — LEVEL DESIGN DOC
+기본 Rope
+
+Attach
+→ Swing
+→ Release
+→ Landing
+
+### 1-2
+
+연속 Rope
+
+Release
+→ Airborne Re-Attach
+→ Grapple Chain
+
+### 1-3
+
+처음으로:
+
+"Rope를 사용하는 동안 나를 방해하는 존재"
+
+등장.
+
+새 학습:
+
+- Red Telegraph는 곧 공격이 온다는 의미
+- 계속 움직이면 공격을 피할 수 있음
+- Rope 이동 자체가 회피 행동이 됨
+- 적을 반드시 죽일 필요 없음
+- 멈추는 경로와 계속 이동하는 경로가 다른 위험을 가짐
+
+---
+
+## 3. 1-3에서 배우지 않는 것
+
+DO NOT INTRODUCE:
+
+- Wind
+- Moving Platform
+- Laser
+- Rope Cutter
+- Grapple Jammer
+- Drone
+- Multiple Enemy Types
+- Augment
+- Maintenance Node
+- Boss
+- Instant Death Hazard
+- Complex Combat Input
+
+1-3의 새 질문은 하나뿐이다.
+
+"위험을 읽으면서 Rope 흐름을 유지할 수 있는가?"
+
+---
+
+## 4. 레퍼런스에서 가져온 설계 원칙
+
+### SANABI → TRANSFER
+
+Chain-hook 이동과 적의 위협을 별개의 게임처럼 분리하지 않는다.
+
+우리 적용:
+
+Turret의 공격을 피하기 위해
+별도 Dodge Button을 추가하지 않는다.
+
+기존 Rope 이동 자체가 회피 수단이 된다.
+
+---
+
+### Rusted Moss → TRANSFER
+
+하나의 공간 문제에 하나의 정답만 강제하지 않는다.
+
+우리 적용:
+
+같은 Turret 구간에
+
+- SAFE ROUTE
+- FLOW ROUTE
+- RECOVERY ROUTE
+
+를 동시에 제공한다.
+
+---
+
+### Celeste → TRANSFER
+
+어려움은 유지하되
+플레이어가 이해하지 못한 실패를 줄인다.
+
+우리 적용:
+
+- 첫 shot은 피하기 쉬움
+- 첫 피격은 치명적이지 않음
+- 추락해도 가까운 Recovery에서 재시도
+- 다음 Anchor를 공격 전에 보여줌
+- Telegraph를 충분히 명확하게 제공
+
+---
+
+### N → TRANSFER
+
+Enemy behavior는 복잡한 AI보다
+예측 가능한 상태 변화로 이해할 수 있어야 한다.
+
+우리 적용:
+
+Sentry Turret을 명확한 FSM으로 구성.
+
+IDLE
+→ ACQUIRE
+→ TRACK
+→ LOCK
+→ FIRE
+→ COOLDOWN
+
+---
+
+## 5. 스토리 역할
+
+1-1:
+
+사고 발생
++
+Rooftop Maintenance Shuttle 확인.
+
+1-2:
+
+정상 Lift 사용 불가 확인.
+
+1-3:
+
+도시 시스템이 처음으로
+플레이어의 이동 자체를 문제 행동으로 판정.
+
+중요:
+
+아직 플레이어는
+
+HOSTILE
+CRIMINAL
+TARGET FOR TERMINATION
+
+이 아니다.
+
+시스템 관점에서는:
+
+NON-COMPLIANT EMPLOYEE
+
+정도다.
+
+따라서 초반 Security 행동도
+군사 작전이 아니라 시설 봉쇄 절차처럼 보여야 한다.
+
+---
+
+## 6. Story Sequence
+
+입구 Scanner:
+
+EMPLOYEE VERIFIED
+
+EMPLOYEE CLASS:
+VERTICAL MAINTENANCE
+
+ASSIGNED SECTOR:
+LOWER MAINTENANCE
+
+플레이어가 위로 이동.
+
+첫 경고:
+
+RETURN TO ASSIGNED SECTOR
+
+계속 상승.
+
+두 번째 Trigger:
+
+ROUTE VIOLATION DETECTED
+
+이후:
+
+UNAUTHORIZED VERTICAL TRANSIT
+
+Turret 활성.
+
+Level 최상단 Gate:
+
+ACCESS DENIED
+
+RETURN TO ASSIGNED SECTOR
+
+Player Service Panel Interaction:
+
+MAINTENANCE OVERRIDE
+
+Gate Open.
+
+마지막 System Message:
+
+VIOLATION LOGGED
+
+이 이벤트가 1-4 Maintenance Node로 연결된다.
+
+---
+
+## 7. 공간 콘셉트
+
+공간:
+
+AUTOMATED MAINTENANCE SECURITY CHECK SHAFT
+
+정비구역 사이에 존재하는
+작업자 ID / 이동권한 검사 시설.
+
+1-2의 Lift Shaft보다 조금 넓어진다.
+
+대표 구조물:
+
+- Security Scanner Frame
+- Automated Sentry Housing
+- Inspection Catwalk
+- Security Conduit
+- Vertical Blast Gate
+- Employee Access Signage
+
+1-2까지의 공간은:
+
+"기계 설비"
+
+였다면
+
+1-3부터 처음:
+
+"이 도시가 사람을 관리하는 시스템"
+
+이 보이기 시작한다.
+
+---
+
+## 8. Pixel / Grid 기준
+
+Base Grid:
+
+32×32 px
+
+Player Game Output:
+
+48×48 px
+
+Sentry Turret:
+
+32×32 px active body
+
+Folded State:
+
+32×16 ~ 32×24 px
+
+Grapple Anchor:
+
+24×24 px recommended
+
+Thin Platform:
+
+32×16 px
+
+Standard Platform:
+
+32×32 px
+
+Scanner Structure:
+
+96×128 또는
+128×128 px
+
+Security Gate:
+
+64×96 ~ 96×128 px
+
+Service Panel:
+
+32×64 px
+
+Stage Width:
+
+960 px
+= 30 tiles
+
+Stage Height:
+
+1152 px
+= 36 tiles
+
+Coordinate:
+
+X = -480 ~ +480
+Y = 0 ~ -1152
+
+---
+
+## 9. 전체 맵 구조
+
+SYMBOL
+
+●     = Recommended Grapple Anchor
+[T]   = Sentry Turret
+S     = Scanner
+██    = Solid Cover
+════  = Main Platform
+----  = Thin / Recovery Platform
+PANEL = Service Panel
+
+
+                         Y -1152
+
+        ┌────────────────────────────────────┐
+        │                      GATE 04 →     │
+        │                █████████████       │
+        │                SECURITY GATE       │
+        │                         PANEL      │
+        │                                    │
+        │                  P4 FINAL DECK     │
+        │            ═══════════════════     │
+        │                       ↑            │
+        │                    ● D             │
+        │                   ╱                │
+        │          █████████                 │
+        │          COVER WALL C1             │
+        │                                    │
+        │        ● C                         │
+        │          ╲                         │
+        │           ╲        FLOW ROUTE      │
+        │            ╲                       │
+        │                                    │
+        │    SAFE LEDGE S1      [ T1 ]       │
+        │  ═════════════██        ╲          │
+        │               ██         ╲ LOS     │
+        │                           ╲         │
+        │             ● B            ╲       │
+        │            ╱                       │
+        │                                   │
+        │       ---- RECOVERY R1 ----        │
+        │                                    │
+        │                P1                  │
+        │          ═════════════             │
+        │               ↑                    │
+        │             ● A                    │
+        │                                    │
+        │         [ SECURITY SCANNER ]       │
+        │                  S                 │
+        │                                    │
+        │ P0 START                           │
+        │ ═════════════════                  │
+        └────────────────────────────────────┘
+
+                          Y 0
+
+
+전체 이동 Spine:
+
+START
+→ SCANNER
+→ A
+→ P1
+→ B
+→ C
+→ COVER WALL
+→ D
+→ PANEL
+→ GATE
+
+---
+
+## 10. Stage Zone 구성
+
+ZONE A
+IDENTIFICATION
+
+Y:
+0 ~ -224
+
+목적:
+플레이어가 정상 직원임을 보여줌.
+
+---
+
+ZONE B
+FINAL WARNING
+
+Y:
+-224 ~ -416
+
+목적:
+기본 Grapple 복습.
+아직 공격 없음.
+
+---
+
+ZONE C
+TURRET INTRODUCTION
+
+Y:
+-416 ~ -672
+
+목적:
+Telegraph 언어 학습.
+
+---
+
+ZONE D
+ROUTE CHOICE
+
+Y:
+-672 ~ -928
+
+목적:
+Safe / Flow / Recovery 분기.
+
+---
+
+ZONE E
+LOS BREAK / OVERRIDE
+
+Y:
+-928 ~ -1152
+
+목적:
+위협 종료.
+스토리 진행.
+1-4 연결.
+
+---
+
+## 11. 주요 오브젝트 좌표 초안
+
+모든 수치는 BLOCKOUT HYPOTHESIS.
+
+플레이테스트 후 수정.
+
+---
+
+### PLAYER SPAWN
+
+position:
+(-320, -32)
+
+---
+
+### P0 — START PLATFORM
+
+bounds:
+
+x = -416 ~ +128
+y = 0
+
+size:
+
+544×32 px
+
+role:
+
+- 짧은 Walking 공간
+- Security Scanner 통과
+- Story Trigger
+- 위쪽 Anchor A 확인
+
+collision:
+true
+
+---
+
+### SCANNER S1
+
+position:
+
+(-96, -64)
+
+visual size:
+
+96×128 px
+
+role:
+
+직원 신원 인증.
+
+collision:
+
+frame only
+
+damage:
+
+false
+
+interactable:
+
+false
+
+automatic trigger:
+true
+
+display:
+
+EMPLOYEE VERIFIED
+
+ASSIGNED SECTOR:
+LOWER MAINTENANCE
+
+visual:
+
+- dark frame
+- thin scanning line
+- white / dim cyan system text
+
+IMPORTANT:
+
+Scanner beam은 Danger Red처럼 보이면 안 됨.
+
+Scanner와 Turret Telegraph의 색 언어를 구분.
+
+---
+
+## 12. ANCHOR A — SAFE REVIEW
+
+position:
+
+(+64, -224)
+
+visual:
+
+24×24 px
+
+role:
+
+1-2 기본기 짧은 복습.
+
+difficulty:
+
+VERY EASY
+
+required:
+true
+
+A에서 아직 Enemy Attack 없음.
+
+---
+
+## 13. P1 — WARNING PLATFORM
+
+bounds:
+
+x = +128 ~ +352
+y = -320
+
+size:
+
+224×32 px
+
+role:
+
+- Anchor A Landing
+- Turret 등장 전 마지막 완전 안전 플랫폼
+- 시스템 Warning 발생 위치
+
+Player가 P1에 착지하면:
+
+RETURN TO ASSIGNED SECTOR
+
+표시.
+
+P1에서는 Turret이 보이지만 아직 접혀 있음.
+
+---
+
+## 14. TURRET T1
+
+position:
+
+(+416, -640)
+
+mount:
+
+RIGHT WALL
+
+visual:
+
+32×32 px active
+
+folded:
+
+32×16~24 px
+
+role:
+
+첫 적.
+
+목적:
+
+플레이어를 죽이는 것보다
+계속 움직이게 만드는 것.
+
+---
+
+## 15. Turret이 P1 바로 옆에 없는 이유
+
+P1에서 Turret까지 충분한 거리를 둔다.
+
+목적:
+
+- 등장 전에 플레이어가 Turret 형태를 볼 수 있음
+- Player Auto Weapon이 즉시 Turret을 삭제하는 상황 감소
+- 첫 사격 전에 공간을 읽을 시간 제공
+- 첫 Encounter가 Combat DPS Check가 되는 것 방지
+
+P1은 관찰 공간.
+
+실제 공격 구간은 B 이후.
+
+---
+
+## 16. TURRET ACTIVATION TRIGGER
+
+trigger bounds:
+
+Y ≈ -384
+
+Player가 P1 위쪽으로 이동하면 발동.
+
+Sequence:
+
+ROUTE VIOLATION DETECTED
+
+0.3~0.5 sec
+
+UNAUTHORIZED VERTICAL TRANSIT
+
+Turret housing opens.
+
+기계 전개음.
+
+Red Sensor 활성.
+
+---
+
+## 17. Sentry Turret State Machine
+
+현재 일반 Enemy 즉발 시스템을
+그대로 첫 Turret에 사용하지 않는다.
+
+SENTRY FSM:
+
+IDLE
+
+↓
+
+ACQUIRE
+
+↓
+
+TRACK
+
+↓
+
+LOCK
+
+↓
+
+FIRE
+
+↓
+
+COOLDOWN
+
+↓
+
+TRACK
+
+---
+
+## 18. Turret Timing — Initial Hypothesis
+
+정확한 값은 플레이테스트 대상.
+
+ACQUIRE:
+
+0.25 sec
+
+내용:
+
+- Turret 전개
+- Sensor on
+- 아직 Aim Line 없음
+
+---
+
+TRACK:
+
+0.70~0.90 sec
+
+내용:
+
+- 얇은 Red Aim Line
+- Player를 따라 움직임
+
+---
+
+LOCK:
+
+0.15~0.25 sec
+
+내용:
+
+- Aim Line 밝아짐
+- Tracking 중지
+- 마지막 방향 고정
+
+이 짧은 순간이 Dodge Window.
+
+---
+
+FIRE:
+
+1 projectile
+
+현재 baseline projectile speed에서 시작.
+
+---
+
+COOLDOWN:
+
+1.2~1.5 sec 정도에서 시작.
+
+이후 다시 TRACK.
+
+---
+
+## 19. Telegraph Visual Language
+
+IDLE:
+
+- sensor off
+- folded silhouette
+
+ACQUIRE:
+
+- small red eye
+- mechanical unfold
+
+TRACK:
+
+- thin dark-red line
+
+LOCK:
+
+- bright red line
+- small muzzle charge
+
+FIRE:
+
+- orange/red muzzle flash
+- projectile
+
+COOLDOWN:
+
+- red eye dim
+- no aim line
+
+색깔만으로 구분하지 않는다.
+
+Turret:
+
+- 자세
+- barrel direction
+- line
+- sound
+
+까지 함께 사용.
+
+---
+
+## 20. Telegraph Sound
+
+ACQUIRE:
+
+mechanical unfold
+
+TRACK:
+
+low electronic tone
+
+LOCK:
+
+tone rises / short confirmation beep
+
+FIRE:
+
+sharp mechanical shot
+
+COOLDOWN:
+
+servo reset
+
+Player가 화면 밖 Turret도
+상태를 대략 판단할 수 있어야 함.
+
+---
+
+## 21. 첫 Shot 설계
+
+첫 Shot의 목적:
+
+플레이어를 맞히는 것
+
+이 아니라
+
+"Red Aim Line → 잠시 후 Projectile"
+
+이라는 언어를 학습시키는 것.
+
+따라서 첫 Shot은
+계속 위쪽으로 움직이는 플레이어가 거의 자연스럽게 피하도록 한다.
+
+이상적 플레이:
+
+Aim Line appears
+
+↓
+
+Player sees Anchor B
+
+↓
+
+Player attaches B
+
+↓
+
+Swing begins
+
+↓
+
+LOCK
+
+↓
+
+Projectile fires at old/locked trajectory
+
+↓
+
+Player already moved
+
+↓
+
+MISS
+
+첫 반응:
+
+"움직이니까 피했다."
+
+여야 한다.
+
+---
+
+## 22. ANCHOR B — MOVEMENT UNDER FIRE
+
+position:
+
+(+64, -480)
+
+visual:
+
+24×24 px
+
+role:
+
+첫 공격 상황에서 사용하는 Grapple.
+
+difficulty:
+
+EASY
+
+required:
+true
+
+Player는 P1에서 B를 쉽게 잡을 수 있어야 한다.
+
+B 자체를 찾는 데 어려움이 생기면
+Enemy Tutorial과 Rope Tutorial이 충돌한다.
+
+---
+
+## 23. B 주변 Clean Zone
+
+Anchor B 중심:
+
+약 128~160px
+
+내에는 불필요한 Collision Surface를 배치하지 않는다.
+
+이유:
+
+- Wrong Attach 방지
+- Enemy Pressure 상황에서 Aim 난도 증가 방지
+- 다음 행동 즉시 판독
+
+배경 Pipe는 가능하지만:
+
+NON-COLLISION
+LOW CONTRAST
+
+이어야 한다.
+
+---
+
+## 24. 첫 공격 구간의 실제 질문
+
+Player가 B에 붙으면 Turret이 다시 TRACK.
+
+이 구간에서 게임이 묻는 것:
+
+"멈출 것인가,
+계속 이동할 것인가?"
+
+Flow가 빠를수록 안전하다.
+
+하지만 빠른 플레이를 강제하지 않는다.
+
+---
+
+## 25. ANCHOR C — FLOW TARGET
+
+position:
+
+(-192, -736)
+
+visual:
+
+24×24 px
+
+role:
+
+B에서 공중 Re-Attach하는 숙련 Route Target.
+
+B→C:
+
+1-2에서 배운 연속 Grapple을
+처음으로 실제 위협 속에서 사용.
+
+difficulty:
+
+MEDIUM
+
+required for Flow:
+true
+
+Safe Route에서는 Platform을 거쳐 C 접근 가능.
+
+---
+
+## 26. SAFE LEDGE S1
+
+bounds:
+
+x = -352 ~ -128
+y = -640
+
+size:
+
+224×16 px
+
+right edge:
+
+Cover Wall 포함.
+
+role:
+
+- 초보자용 휴식
+- Turret 상태 관찰
+- C 재조준
+- Safe Route
+
+---
+
+## 27. SAFE LEDGE COVER WALL
+
+position:
+
+x = -128 ~ -96
+
+height:
+
+96~128 px
+
+width:
+
+32 px
+
+role:
+
+Turret LOS 차단.
+
+중요:
+
+Safe Ledge 전체가 완전히 안전한 bunker가 되면 안 됨.
+
+구조:
+
+왼쪽 2/3:
+
+SAFE
+
+오른쪽 1/3:
+
+EXPOSED TRANSITION
+
+즉 Player는:
+
+안전하게 숨음
+
+→ Turret Cycle 확인
+
+→ Cover 밖으로 나옴
+
+→ C Attach
+
+가능.
+
+---
+
+## 28. SAFE ROUTE
+
+P1
+→ B
+→ Safe Ledge
+→ Cover behind
+→ Wait for Turret Shot
+→ Move out
+→ C
+→ D
+→ Exit
+
+특징:
+
+- 쉬움
+- 느림
+- 안전함
+- Turret Cycle을 관찰하게 함
+
+---
+
+## 29. FLOW ROUTE
+
+P1
+→ B
+→ Swing
+→ Release
+→ Airborne Attach C
+→ D
+→ Exit
+
+특징:
+
+- 빠름
+- 1-2 숙련도를 보상
+- Turret 사선 안에 머무는 시간이 짧음
+- 공격을 피하기 위한 별도 행동 불필요
+
+핵심:
+
+"잘 움직이는 것이 곧 방어."
+
+---
+
+## 30. RECOVERY R1
+
+bounds:
+
+x = -32 ~ +224
+y = -576
+
+size:
+
+256×16 px
+
+role:
+
+B→C 또는 Safe Ledge 이동 실패 Catch.
+
+danger:
+
+PARTIAL
+
+R1은 Turret LOS에 일부 노출.
+
+즉:
+
+실패해도 죽지 않지만
+가만히 서 있을 수는 없음.
+
+Player 선택:
+
+R1
+→ B 재Attach
+
+또는
+
+R1
+→ C 직접 접근
+(거리 허용 시)
+
+Blockout에서 테스트 후 결정.
+
+---
+
+## 31. Recovery 설계 의도
+
+실패 비용은 낮게 유지.
+
+하지만 Recovery가 더 좋은 Shortcut이 되면 안 됨.
+
+목표:
+
+FAIL
+→ RECOVER
+→ RETRY
+
+약 3~6 sec.
+
+NOT:
+
+FAIL
+→ LEVEL RESET
+
+---
+
+## 32. Turret LOS
+
+Turret position:
+
+(+416, -640)
+
+기본 사격 영역:
+
+샤프트 중앙 및 왼쪽 방향.
+
+Turret은 360도 완전 자유조준하지 않는 것을 권장.
+
+Recommended Arc:
+
+약 120~150 degree
+
+이유:
+
+- 안전영역을 공간적으로 설계 가능
+- 플레이어가 Turret 방향을 보고 위험 영역 추론 가능
+- Cover 설계 의미 발생
+- 첫 적이 너무 전능하게 느껴지지 않음
+
+---
+
+## 33. LOS Design
+
+Turret이 공격 가능한 영역:
+
+- P1 상부
+- B Swing corridor
+- Recovery R1 일부
+- Safe Ledge 진입부
+- B→C Open Void
+
+공격하지 못하는 영역:
+
+- Safe Ledge Cover 뒤
+- C 상부 Cover Wall 이후
+- Final Deck
+
+즉 공간을 올라갈수록:
+
+DANGER
+→ DANGER
+→ TEMP SAFE
+→ DANGER
+→ SAFE
+
+의 리듬.
+
+---
+
+## 34. COVER WALL C1
+
+위치:
+
+C 이후 상단.
+
+recommended:
+
+x = -64 ~ +32
+y ≈ -832 ~ -960
+
+size:
+
+96×128 또는
+32×128 modular
+
+role:
+
+Turret LOS를 완전히 종료.
+
+Player가 C를 통과해 C1 뒤로 올라가면
+Turret Encounter 종료.
+
+중요:
+
+끝까지 계속 총을 쏘게 하지 않는다.
+
+위협을 끊는 순간이 있어야 함.
+
+---
+
+## 35. ANCHOR D — RELIEF ANCHOR
+
+position:
+
+(+96, -960)
+
+visual:
+
+24×24 px
+
+role:
+
+Turret LOS가 끊긴 뒤
+Final Deck까지 이동.
+
+difficulty:
+
+EASY / MEDIUM
+
+D의 목적은 난이도 상승이 아니다.
+
+Player가:
+
+"위험 구간을 통과했다."
+
+고 느끼면서
+Rope Flow를 한 번 더 이어가는 마무리 Anchor.
+
+---
+
+## 36. P4 — FINAL SAFE DECK
+
+bounds:
+
+x = +32 ~ +352
+y = -1056
+
+size:
+
+320×32 px
+
+role:
+
+- Encounter 종료
+- Story interaction
+- 1-4 진입
+
+Enemy LOS:
+NONE
+
+Hazard:
+NONE
+
+---
+
+## 37. SECURITY GATE
+
+position:
+
+(+320, -1088)
+
+visual:
+
+64×96 ~ 96×128 px
+
+initial state:
+
+LOCKED
+
+display:
+
+ACCESS DENIED
+
+RETURN TO ASSIGNED SECTOR
+
+---
+
+## 38. SERVICE PANEL
+
+position:
+
+(+208, -1088)
+
+visual:
+
+32×64 px
+
+interaction:
+
+MAINTENANCE OVERRIDE
+
+Player가 Panel 사용:
+
+Gate unlock animation
+
+↓
+
+VIOLATION LOGGED
+
+↓
+
+Gate opens.
+
+Exit Destination:
+
+SECTOR 01-4
+MAINTENANCE NODE
+
+---
+
+## 39. 전체 Route 요약
+
+### DEFAULT FIRST-TIME ROUTE
+
+START
+→ Scanner
+→ A
+→ P1
+→ Turret activates
+→ B
+→ Safe Ledge
+→ Wait / Observe
+→ C
+→ Cover Wall
+→ D
+→ Panel
+→ Gate
+
+---
+
+### FLOW ROUTE
+
+START
+→ Scanner
+→ A
+→ P1
+→ B
+→ C
+→ Cover Wall
+→ D
+→ Gate
+
+Turret 구간 Landing 최소화.
+
+---
+
+### RECOVERY ROUTE
+
+B/C miss
+→ R1
+→ Re-Attach
+→ Safe Ledge or C
+→ Continue
+
+---
+
+## 40. Turret를 반드시 죽이지 않아도 되는 이유
+
+1-3의 학습 목표는:
+
+COMBAT
+
+가 아니라:
+
+MOVEMENT UNDER THREAT
+
+이다.
+
+따라서 Clear Condition:
+
+TURRET DESTROYED
+
+금지.
+
+Clear Condition:
+
+REACH SECURITY GATE
+
+사용.
+
+향후 Stage에서 Turret을 Rope Build로 적극적으로 파괴하는 경험을 추가할 수 있음.
+
+---
+
+## 41. Player Auto Weapon 처리
+
+현재 Auto Weapon이 존재하더라도
+1-3 Blockout은 Turret을 죽여야만 통과하도록 설계하지 않는다.
+
+Turret 배치 시:
+
+초기 P1에서 너무 오랫동안
+Player Weapon Range 안에 들어오지 않게 조정.
+
+목적:
+
+Encounter가
+
+"가만히 기다리면 자동총이 적을 없애주는 방"
+
+으로 변하는 것 방지.
+
+필요 시 Stage-specific Turret 위치,
+Weapon LOS,
+Enemy Range를 조정.
+
+---
+
+## 42. Standard Turret Projectile 규칙
+
+권장:
+
+Standard Sentry Projectile은
+Player Damage만 담당.
+
+DO NOT CUT ROPE.
+
+이유:
+
+1-3에서 가르치는 규칙은:
+
+"공격을 읽고 움직인다."
+
+하나.
+
+동시에:
+
+"Projectile이 Rope도 끊는다."
+
+를 가르치지 않는다.
+
+Rope Cut은 추후 전용 Enemy / Projectile로 명시적으로 소개.
+
+---
+
+## 43. 현재 구현 차이
+
+현재 일반 Enemy는:
+
+Target 발견
+→ Cooldown 0
+→ 즉시 Projectile 생성
+
+구조.
+
+1-3용 Sentry에는 별도 behavior 필요.
+
+Required states:
+
+idle
+acquire
+track
+lock
+fire
+cooldown
+
+권장:
+
+Generic Enemy를 복잡하게 만들기보다
+Sentry-specific behavior/component부터 구현.
+
+---
+
+## 44. Initial Combat Numbers
+
+CURRENT PROJECT BASELINE에서 시작하되
+전부 TUNING 대상.
+
+첫 Turret에서는 특히:
+
+- Projectile Speed
+- Telegraph Duration
+- Lock Duration
+- Cooldown
+
+을 독립적으로 테스트.
+
+첫 Enemy이므로:
+
+Damage를 올리는 것으로 난도를 만들지 않는다.
+
+난이도는:
+
+Telegraph
++
+LOS
++
+Movement Route
+
+로 만든다.
+
+---
+
+## 45. First Hit Philosophy
+
+첫 피격이 발생해도
+Level flow가 완전히 끊기면 안 됨.
+
+목표:
+
+Player:
+
+"맞았네. 다음에는 움직여야겠다."
+
+NOT:
+
+"왜 죽었지?"
+
+따라서:
+
+- one-shot 금지
+- 과도한 knockback 금지
+- start reset 금지
+
+첫 피격 후에도 Recovery 또는 다음 Anchor 접근 가능해야 함.
+
+---
+
+## 46. Rope Disabled / Hit Interaction
+
+첫 Turret의 Player Hit가
+Rope를 즉시 강제로 끊어 큰 낙하를 만드는 경우
+튜토리얼 난도가 급격히 상승할 수 있음.
+
+Blockout에서 반드시 별도 확인.
+
+질문:
+
+Projectile Hit
+→ Rope Detached?
+→ Knockback?
+→ 0.6s Rope Disabled?
+→ Recovery까지 떨어지는가?
+
+첫 적의 한 발 때문에
+Stage 전체를 다시 올라가야 하는 결과는 금지.
+
+필요하면 Tutorial Sentry의 hit reaction을 별도 조정.
+
+---
+
+## 47. Gameplay Asset Spec
+
+### PLAYER
+
+48×48 px game output
+
+dark silhouette
+
+long red scarf
+
+---
+
+### ANCHOR
+
+24×24 px
+
+Cyan
+
+---
+
+### SENTRY TURRET
+
+active:
+32×32 px
+
+folded:
+32×16~24 px
+
+states required:
+
+- idle
+- acquire
+- track
+- lock
+- fire
+- cooldown
+- destroyed(optional future)
+
+silhouette:
+
+wall-mounted
+clear barrel direction
+single red sensor eye
+
+---
+
+### PROJECTILE
+
+16×8 ~ 16×16 px
+
+Red / Orange
+
+방향이 작은 화면에서도 읽혀야 함.
+
+---
+
+### AIM LINE
+
+1~2 logical pixel thickness
+
+TRACK:
+dark red
+
+LOCK:
+bright red
+
+레이저 Hazard처럼 두껍게 만들지 않는다.
+
+Aim Line 자체는 Damage 없음.
+
+---
+
+### SCANNER
+
+96×128 px
+
+thin industrial frame
+
+low-intensity scan effect
+
+---
+
+### COVER WALL
+
+32×96 / 32×128 modular
+
+solid collision
+
+---
+
+### SAFE LEDGE
+
+224×16 px
+
+7 × 32px tile width
+
+---
+
+### RECOVERY DECK
+
+256×16 px
+
+8 × 32px tile width
+
+---
+
+### SERVICE PANEL
+
+32×64 px
+
+interactable
+
+---
+
+### SECURITY GATE
+
+64×96 ~ 96×128 px
+
+---
+
+## 48. Background Layer — FAR
+
+Target:
+
+512×288
+또는
+960×540
+
+내용:
+
+- 깊게 이어지는 Maintenance Security Shaft
+- distant structural columns
+- distant catwalk silhouettes
+- small service lights
+- corporate vertical infrastructure
+
+Contrast:
+LOWEST
+
+Saturation:
+LOWEST
+
+---
+
+## 49. Background Layer — MID
+
+128×128 ~ 256×256 components.
+
+핵심:
+
+SECURITY CONDUIT ARRAY
+
+128×256
+
+SCANNER INFRASTRUCTURE
+
+128×128
+
+CABLE BUNDLES
+
+64×128 / 128×256
+
+SEALED SERVICE DOOR
+
+64×128
+
+VENT / SENSOR BANK
+
+128×128
+
+Turret 주변 Background는
+다른 곳보다 디테일을 줄여 Enemy silhouette 확보.
+
+---
+
+## 50. Background Layer — NEAR
+
+32×32 ~ 64×64.
+
+- Employee access marking
+- Sector number
+- warning lamp
+- conduit box
+- maintenance panel
+- camera sensor
+- small service hatch
+
+중요:
+
+Red warning lamp가 너무 많으면
+Turret Telegraph가 안 읽힘.
+
+따라서 1-3에서는
+Red Background Accent를 이전 레벨보다 더 제한.
+
+---
+
+## 51. Color Hierarchy
+
+1.
+PLAYER + RED SCARF
+
+2.
+CYAN ROPE / ANCHORS
+
+3.
+RED TURRET TELEGRAPH / PROJECTILE
+
+4.
+COLLISION PLATFORM
+
+5.
+INTERACTABLE PANEL
+
+6.
+BACKGROUND
+
+중요:
+
+Player Scarf Red와 Danger Red가 충돌할 수 있음.
+
+해결:
+
+Player:
+deep saturated scarf red
+
+Turret Telegraph:
+brighter laser red/orange-red
+
+색뿐 아니라
+형태와 움직임으로도 구분.
+
+---
+
+## 52. Camera — INTRO
+
+Scanner 시작:
+
+화면에:
+
+- Player
+- Scanner
+- Anchor A
+- P1 일부
+
+Turret은 아직 화면 상단/배경에 작게 보여도 됨.
+
+---
+
+## 53. Camera — TURRET REVEAL
+
+P1 도착:
+
+화면에:
+
+- Player
+- B
+- Turret Housing
+
+반드시 함께 보임.
+
+Turret이 화면 밖에서 갑자기 공격 금지.
+
+---
+
+## 54. Camera — B→C
+
+B Attach:
+
+화면에:
+
+- Player
+- Turret
+- C
+- Safe Ledge
+- Recovery 일부
+
+가 가능한 한 같이 보여야 함.
+
+이 순간이 Level의 핵심 Decision Frame.
+
+---
+
+## 55. Camera — EXIT
+
+C 이후 Cover Wall 통과:
+
+Camera가 위쪽을 Lead.
+
+Turret은 화면 아래로 밀려남.
+
+D
++
+Final Deck
++
+Security Gate
+
+가 보임.
+
+시각적으로도:
+
+"위협이 끝났다."
+
+느끼게 한다.
+
+---
+
+## 56. Camera 금지사항
+
+DO NOT:
+
+- Turret을 화면 밖에 두고 공격
+- Player만 중심 추적
+- Next Anchor 숨김
+- Recovery Deck 숨김
+- Aim Line이 UI에 가림
+- Background Machinery가 Turret을 가림
+
+---
+
+## 57. 난이도 리듬
+
+INTRO
+
+SAFE
+
+↓
+
+EMPLOYEE VERIFIED
+
+SAFE
+
+↓
+
+RETURN WARNING
+
+SLIGHT TENSION
+
+↓
+
+TURRET REVEAL
+
+TENSION UP
+
+↓
+
+FIRST SHOT
+
+LEARNING
+
+↓
+
+B→C
+
+MAIN CHALLENGE
+
+↓
+
+COVER
+
+RELIEF
+
+↓
+
+D
+
+FLOW
+
+↓
+
+GATE OVERRIDE
+
+STORY TENSION
+
+↓
+
+EXIT
+
+RELIEF / REWARD NEXT
+
+---
+
+## 58. 예상 First-Time Player
+
+Start
+
+→ Scanner
+
+→ A
+
+→ P1
+
+→ Turret reveal
+
+→ Aim Line 보고 잠깐 멈춤
+
+→ B
+
+→ First shot miss
+
+→ B→C 실패
+
+→ Recovery
+
+→ Safe Ledge
+
+→ Turret cycle 관찰
+
+→ C
+
+→ Cover Wall
+
+→ D
+
+→ Gate
+
+정상 플레이.
+
+---
+
+## 59. 예상 Skilled Player
+
+Start
+
+→ Scanner
+
+→ A
+
+→ P1
+
+→ Turret activates
+
+→ B
+
+→ B→C Airborne Re-Attach
+
+→ Projectile misses behind player
+
+→ Cover Wall
+
+→ D
+
+→ Gate
+
+Turret Encounter가 몇 초 만에 끝남.
+
+이것이 숙련 보상.
+
+---
+
+## 60. Playtest Metrics
+
+REQUIRED:
+
+- Turret noticed before first shot
+- First shot hit rate
+- Telegraph recognition rate
+- B→C success rate
+- Safe Route usage
+- Flow Route usage
+- Recovery usage
+- Hits per first clear
+- Deaths per first clear
+- Recovery-to-retry time
+- Turret encounter duration
+- Total stage clear time
+
+---
+
+## 61. Playtest Questions
+
+1.
+Turret이 총을 쏘기 전에
+공격이 온다는 걸 알 수 있었는가?
+
+2.
+처음 맞았을 때
+왜 맞았는지 이해됐는가?
+
+3.
+Rope를 타고 계속 이동하는 것이
+공격을 피하는 방법이라고 느꼈는가?
+
+4.
+Turret을 반드시 죽여야 한다고 생각했는가?
+
+5.
+Safe Ledge의 역할을 이해했는가?
+
+6.
+B→C를 바로 연결하면
+더 빠르고 안전하다고 느꼈는가?
+
+7.
+실패 후 다시 시도하기까지
+답답하게 오래 걸렸는가?
+
+8.
+Turret보다 Anchor를 찾는 것이 더 어려웠는가?
+
+마지막 질문이 YES면
+Visual / Camera / Targeting 실패.
+
+---
+
+## 62. PASS Criteria
+
+PASS 01
+
+Player가 첫 사격 전에 Turret 존재를 인지.
+
+PASS 02
+
+Telegraph를 보고 공격 타이밍을 대략 예측 가능.
+
+PASS 03
+
+첫 Shot은 대부분 회피하거나,
+맞더라도 Level 진행 가능.
+
+PASS 04
+
+B/C Anchor가 Enemy Visual보다 명확하게 읽힘.
+
+PASS 05
+
+Safe Route로 초보도 안정적으로 통과.
+
+PASS 06
+
+Flow Route로 숙련자는 빠르게 돌파.
+
+PASS 07
+
+B→C 실패 후 3~6초 내 재시도.
+
+PASS 08
+
+Turret 파괴가 Clear 필수 조건이 아님.
+
+PASS 09
+
+Player가 "계속 움직이는 것이 유리하다"고 느낌.
+
+PASS 10
+
+Turret Attack이 Random하게 느껴지지 않음.
+
+PASS 11
+
+Cover 통과 후 위협이 명확하게 종료.
+
+PASS 12
+
+Gate Override가 1-4로 자연스럽게 연결.
+
+PASS 13
+
+첫 플레이 약 100~150초.
+
+PASS 14
+
+적을 추가하지 않아도 Encounter가 충분히 풍부함.
+
+---
+
+## 63. FAIL Conditions
+
+FAIL if:
+
+- 첫 Shot이 화면 밖에서 날아옴
+- Turret이 즉발처럼 느껴짐
+- Aim Line과 실제 Shot 방향이 다름
+- Player가 Anchor보다 Turret만 보게 됨
+- 첫 Shot 한 번에 바닥까지 추락
+- Safe Ledge가 완전 무적 캠핑 장소가 됨
+- Recovery가 더 빠른 Shortcut이 됨
+- Auto Weapon이 P1에서 Turret을 자동 삭제
+- Player가 Turret 파괴가 필수라고 생각
+- B→C가 Enemy 없이도 지나치게 어려움
+- 여러 Background Red Light 때문에 Telegraph가 안 보임
+
+---
+
+## 64. 제외 요소
+
+DO NOT ADD:
+
+- Second Turret
+- Drone
+- Laser
+- Wind
+- Moving Platform
+- Fan Hazard
+- Rope Cutter
+- Rope Jammer
+- Melee Enemy
+- Boss
+- Maintenance Node
+- Augment
+- Timed Door
+- Timed Challenge
+- Instant Kill
+- Combo Score
+- Complex Combat Tutorial
+
+---
+
+## 65. 구현 우선순위
+
+PRIORITY 1
+
+Greybox Map
+
+P0
+Scanner
+A
+P1
+B
+Safe Ledge
+Recovery
+C
+Cover
+D
+P4
+Gate
+
+---
+
+PRIORITY 2
+
+Turret FSM
+
+IDLE
+ACQUIRE
+TRACK
+LOCK
+FIRE
+COOLDOWN
+
+---
+
+PRIORITY 3
+
+LOS / Cover
+
+Turret가 Cover 뒤 Player를 공격하지 않도록 처리.
+
+---
+
+PRIORITY 4
+
+Story Triggers
+
+Employee Verified
+Return Warning
+Unauthorized Transit
+Access Denied
+Maintenance Override
+Violation Logged
+
+---
+
+PRIORITY 5
+
+Camera Zones
+
+---
+
+PRIORITY 6
+
+Art / VFX / Sound
+
+그래픽보다 먼저 Greybox에서 재미 확인.
+
+---
+
+## 66. 개발용 Stage Data Concept
+
+stageId:
+sector-01-03
+
+name:
+SECURITY CHECK
+
+bounds:
+960×1152
+
+spawn:
+(-320,-32)
+
+grappleTargets:
+- A
+- B
+- C
+- D
+
+platforms:
+- P0 start
+- P1 warning-platform
+- S1 safe-ledge
+- R1 recovery
+- P4 final-safe-deck
+
+collisionObjects:
+- safe-cover
+- upper-cover-wall
+
+enemies:
+- sentry-turret-01
+
+enemyBehavior:
+sentry-telegraph
+
+triggers:
+- employee-scan
+- return-warning
+- unauthorized-transit
+- turret-activate
+- access-denied
+- maintenance-override
+- violation-logged
+
+interactables:
+- service-panel
+- exit-gate
+
+routes:
+- safe
+- flow
+- recovery
+
+cameraZones:
+- identification
+- warning
+- turret-reveal
+- route-choice
+- relief
+- exit
+
+damageHazards:
+- sentry-projectile
+
+NO:
+- wind
+- augment
+- moving-hazard
+
+---
+
+## 67. 아트 담당자 전달문
+
+32px Grid 기반의
+폐쇄형 Vertical Maintenance Security Shaft.
+
+플레이어는 48×48 출력의 작은 어두운 실루엣이며
+긴 Red Scarf가 Signature.
+
+Grapple Anchor와 Rope는 Cyan.
+
+Sentry Turret은 약 32×32의 작은 Wall-mounted Security Device이며,
+크기보다:
+
+- unfold silhouette
+- barrel direction
+- red sensor
+- thin aim line
+
+으로 공격 상태를 구분.
+
+Gameplay Geometry는 단순하게 유지하되,
+Background에는 128~256px 단위의:
+
+- Security Conduit
+- Scanner Infrastructure
+- Corporate Maintenance Machinery
+- Cables
+- Service Frames
+
+를 풍부하게 배치한다.
+
+다만 Turret과 Anchor 주변은
+Background Detail을 비워 판독성을 유지한다.
+
+Red/Orange는 Turret Warning과 Projectile에 집중하고
+Background Warning Light는 최소화한다.
+
+Far/Mid/Near Parallax 사용.
+
+화면은 High-bit Pixel Art의 풍부한 산업 밀도를 가지되
+Gameplay Layer가 항상 먼저 읽혀야 한다.
+
+---
+
+## 68. 개발자 최종 전달 요약
+
+SECTOR 01-3 `SECURITY CHECK`는
+1-1과 1-2에서 학습한 Rope 이동을
+처음으로 Enemy Pressure 아래에서 사용하는 Stage다.
+
+플레이어는 정상 직원으로 Scanner 인증을 받지만,
+봉쇄 명령을 무시하고 계속 위로 이동하면서
+`UNAUTHORIZED VERTICAL TRANSIT`으로 판정된다.
+
+그 결과 Wall-mounted Sentry Turret 한 기가 활성화된다.
+
+Turret은 즉발하지 않고:
+
+IDLE
+→ ACQUIRE
+→ TRACK
+→ LOCK
+→ FIRE
+→ COOLDOWN
+
+의 명확한 Telegraph State를 사용한다.
+
+첫 Shot은 공격 언어를 가르치는 목적이며,
+계속 Rope 이동하는 플레이어가 자연스럽게 피할 수 있게 설계한다.
+
+핵심 위험구간 B→C에는 세 가지 이동 방법이 존재한다.
+
+SAFE ROUTE:
+Cover가 있는 Safe Ledge를 사용해
+Turret Cycle을 보고 이동.
+
+FLOW ROUTE:
+1-2에서 익힌 공중 Re-Attach로
+B→C를 바로 연결해 위험구간 체류시간 최소화.
+
+RECOVERY ROUTE:
+실패 시 가까운 Recovery Deck에서
+3~6초 안에 재시도.
+
+Turret 파괴는 클리어 조건이 아니다.
+
+이 Stage가 가르쳐야 하는 핵심은:
+
+"Rope를 잘 쓰면 공격을 피하기 위해
+별도의 행동을 하지 않아도 된다."
+
+이다.
+
+C 이후 Cover Wall에서 Turret LOS가 완전히 끊기며
+Level의 긴장이 해소된다.
+
+상단 Security Gate는 플레이어 권한을 거부하지만,
+정비기사의 Service Panel Override로 강제로 개방된다.
+
+마지막:
+
+VIOLATION LOGGED
+
+메시지가 기록되고,
+다음 Stage 01-4의 첫 Maintenance Node / Augment 선택으로 연결한다.
+
+Stage 성공 기준:
+
+"Enemy가 Rope 플레이를 방해하는 것이 아니라
+Rope를 더 잘 쓰고 싶게 만드는가?"
+
+이다.
+
+---
+
+## 문서 이미지 상태
+
+기존 `01_swing_line.png`와 `02_layout.png`는 `COOLING SHAFT` 기준의 이전 Revision이므로 이력 보존을 위해 파일만 유지한다. REV 3.0의 Scanner, Sentry T1, Safe/Flow/Recovery Route와 Cover Wall C1을 반영한 새 이미지가 제작되기 전까지 구현 기준으로 참조하지 않는다.
+
+SECTOR 01-3 / SECURITY CHECK — BLOCKOUT CANDIDATE · REV 3.0
