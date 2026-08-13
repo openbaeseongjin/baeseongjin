@@ -36,6 +36,24 @@ export async function run() {
             clockCorrectionMs: -1.8,
             maxClockCorrectionMs: 16.7,
             predictionCancellations: 2
+        },
+        renderMetrics: {
+            framesPerSecond: 58.8,
+            frameIntervalP50Ms: 17,
+            frameIntervalP95Ms: 28,
+            maxFrameIntervalMs: 44,
+            renderDurationP50Ms: 4,
+            renderDurationP95Ms: 8,
+            maxRenderDurationMs: 12,
+            recentDroppedSteps: 1,
+            droppedSteps: 3,
+            cssWidth: 1024,
+            cssHeight: 768,
+            backingWidth: 2048,
+            backingHeight: 1536,
+            devicePixelRatio: 3,
+            effectivePixelRatio: 2,
+            drawCounts: { enemies: { total: 48, drawn: 6 } }
         }
     });
     assert.match(text, /channel: 1234/);
@@ -47,6 +65,9 @@ export async function run() {
     assert.match(text, /clockCorrectionMs: -2/);
     assert.match(text, /maxClockCorrectionMs: 17/);
     assert.match(text, /firstRewardSeconds: 58.2/);
+    assert.match(text, /renderFps: 59/);
+    assert.match(text, /backingStore: 2048x1536/);
+    assert.match(text, /drawCounts: enemies=6\/48/);
 
     let click = null;
     let copied = null;

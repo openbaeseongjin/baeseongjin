@@ -112,11 +112,10 @@ export class GameApp {
     render() {
         const state = this.authority.snapshot();
         const combatFeedback = this.combatFeedback.snapshot();
-        if (this.metricsVisible) this.onDiagnostics({ metrics: state.metrics, worldSeed: state.world.seed });
         this.stats.resets = state.resets;
         this.playerPresentationEvents.push(...createPlayerPresentationEvents([state.eventFlash]));
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
-        this.renderer.draw({
+        const renderMetrics = this.renderer.draw({
             ...state,
             ...combatFeedback,
             localPlayerId: this.authority.playerId,
@@ -132,5 +131,8 @@ export class GameApp {
                 visible: this.mobileView || this.latestInput.mobileControls.visible
             }
         });
+        if (this.metricsVisible) {
+            this.onDiagnostics({ metrics: state.metrics, renderMetrics, worldSeed: state.world.seed });
+        }
     }
 }

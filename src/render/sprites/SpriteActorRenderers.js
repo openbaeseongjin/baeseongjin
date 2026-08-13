@@ -1,6 +1,7 @@
 import { paintPixelSprite } from "./PixelSpritePainter.js";
 import { PlayerAnimationController } from "./PlayerAnimationController.js";
 import { paintSpriteFrame } from "./SpriteCanvasPainter.js";
+import { centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
 
 const ENEMY_SPRITE = Object.freeze({
     rows: Object.freeze(["..aa..", ".abbaa", "abbbba", "abccba", ".bbbb.", ".a..a."])
@@ -105,8 +106,13 @@ export class SpriteEnemyRenderer {
         this.size = Object.freeze({ ...size });
     }
 
-    draw({ context, scene }) {
-        for (const enemy of scene.enemies ?? []) {
+    draw({ context, scene, viewport, renderStats }) {
+        const enemies = scene.enemies ?? [];
+        let drawn = 0;
+        for (const enemy of enemies) {
+            const radius = Math.max(this.size.width, this.size.height, (enemy.radius ?? 0) * 2) * 0.5 + 14;
+            if (!isVisible(viewport, circleBounds(enemy.position, radius))) continue;
+            drawn += 1;
             paintPixelSprite({
                 context,
                 sprite: ENEMY_SPRITE,
@@ -124,19 +130,25 @@ export class SpriteEnemyRenderer {
                 5
             );
         }
+        renderStats?.recordCollection("enemies", enemies.length, drawn);
     }
 }
 
 export class SpriteProjectileRenderer {
-    constructor({ selectProjectiles, sprite, palette, size }) {
+    constructor({ selectProjectiles, sprite, palette, size, category = "projectiles" }) {
         this.selectProjectiles = selectProjectiles;
         this.sprite = sprite;
         this.palette = palette;
         this.size = Object.freeze({ ...size });
+        this.category = category;
     }
 
-    draw({ context, scene }) {
-        for (const projectile of this.selectProjectiles(scene)) {
+    draw({ context, scene, viewport, renderStats }) {
+        const projectiles = this.selectProjectiles(scene);
+        let drawn = 0;
+        for (const projectile of projectiles) {
+            if (!isVisible(viewport, centeredBounds(projectile.position, this.size))) continue;
+            drawn += 1;
             paintPixelSprite({
                 context,
                 sprite: this.sprite,
@@ -145,6 +157,7 @@ export class SpriteProjectileRenderer {
                 size: this.size
             });
         }
+        renderStats?.recordCollection(this.category, projectiles.length, drawn);
     }
 }
 

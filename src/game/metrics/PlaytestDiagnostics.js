@@ -13,7 +13,8 @@ export function formatPlaytestDiagnostics({
     channelId,
     worldSeed,
     metrics,
-    networkMetrics = null
+    networkMetrics = null,
+    renderMetrics = null
 }) {
     const lines = [
         "[ROPE PLAYTEST DIAGNOSTICS]",
@@ -47,6 +48,28 @@ export function formatPlaytestDiagnostics({
             `clockCorrectionMs: ${rounded(networkMetrics.clockCorrectionMs)}`,
             `maxClockCorrectionMs: ${rounded(networkMetrics.maxClockCorrectionMs)}`,
             `predictionCancellations: ${networkMetrics.predictionCancellations}`
+        );
+    }
+
+    if (renderMetrics) {
+        const drawCounts = Object.entries(renderMetrics.drawCounts)
+            .map(([category, counts]) => `${category}=${counts.drawn}/${counts.total}`)
+            .join(",");
+        lines.push(
+            `renderFps: ${valueOrDash(renderMetrics.framesPerSecond, rounded)}`,
+            `frameIntervalP50Ms: ${valueOrDash(renderMetrics.frameIntervalP50Ms, rounded)}`,
+            `frameIntervalP95Ms: ${valueOrDash(renderMetrics.frameIntervalP95Ms, rounded)}`,
+            `maxFrameIntervalMs: ${rounded(renderMetrics.maxFrameIntervalMs)}`,
+            `renderDurationP50Ms: ${rounded(renderMetrics.renderDurationP50Ms)}`,
+            `renderDurationP95Ms: ${rounded(renderMetrics.renderDurationP95Ms)}`,
+            `maxRenderDurationMs: ${rounded(renderMetrics.maxRenderDurationMs)}`,
+            `recentDroppedSteps: ${renderMetrics.recentDroppedSteps}`,
+            `droppedSteps: ${renderMetrics.droppedSteps}`,
+            `cssViewport: ${Math.round(renderMetrics.cssWidth)}x${Math.round(renderMetrics.cssHeight)}`,
+            `backingStore: ${renderMetrics.backingWidth}x${renderMetrics.backingHeight}`,
+            `devicePixelRatio: ${renderMetrics.devicePixelRatio}`,
+            `effectivePixelRatio: ${renderMetrics.effectivePixelRatio}`,
+            `drawCounts: ${drawCounts || "-"}`
         );
     }
 

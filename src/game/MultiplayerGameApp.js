@@ -265,12 +265,9 @@ export class MultiplayerGameApp {
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
-        if (this.metricsVisible) {
-            this.onDiagnostics({ metrics: remote.state.metrics, networkMetrics, worldSeed: base.world.seed });
-        }
         this.playerPresentationEvents.push(...createPlayerPresentationEvents([base.eventFlash]));
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
-        this.renderer.draw({
+        const renderMetrics = this.renderer.draw({
             ...base,
             player,
             rope: remote.predicted.rope,
@@ -307,5 +304,13 @@ export class MultiplayerGameApp {
                 visible: this.mobileView || this.latestInput.mobileControls.visible
             }
         });
+        if (this.metricsVisible) {
+            this.onDiagnostics({
+                metrics: remote.state.metrics,
+                networkMetrics,
+                renderMetrics,
+                worldSeed: base.world.seed
+            });
+        }
     }
 }

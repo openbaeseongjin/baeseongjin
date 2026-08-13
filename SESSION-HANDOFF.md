@@ -22,6 +22,7 @@
 - 체력, 사망·낙사 시 플레이어별 활성 체크포인트 즉시 부활
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
+- `CanvasRenderer`가 camera 기반 불변 world viewport를 프레임당 한 번 만들고 terrain·decoration·enemy·projectile 하위 renderer가 직접 컬링한다. 정적 surface geometry와 seed·zone 장식 배치는 renderer가 캐시하며 sprite·polygon, 싱글·멀티가 같은 경로를 사용한다. 기본 Canvas 정책은 DPR 최대 2와 backing store 최대 `3 * 1024 * 1024` pixel이고 `GameRendererFactory.canvasOptions`로 조정할 수 있다. 상세 경계는 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용하며, 로컬 `PlayerPhysics`의 prototype getter를 복제하지 않고 하위 player renderer에 전달해 sprite·polygon 모두 같은 강체 각도를 그린다. ID 선택과 상태 보존 계약은 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
 - 별도 Discord 서비스는 상세 분류 앞에 결정적 3~5줄 `SUMMARY`가 있는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
 - 고정 게임 서버의 4자리 채널 생성·참가, 채널별 독립 월드와 2인 분할 권한 동기화
@@ -53,7 +54,9 @@
 5. 서로 다른 실제 기기에서 로프 절단·사망·개별 체크포인트 부활·아티팩트 손실·정상 도달을 한 세션으로 검증
 6. 모바일망 지연과 장시간 세션에서 예측 오차, 보정 체감과 재접속 정책을 측정
 
-멀티 접속 중 `?metrics=1` 패널에서 RTT·스냅샷 간격·대기 명령 수·명령 거부율과 보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인할 수 있다. 화면의 **진단 복사**로 최신 런·네트워크 지표를 모바일에서도 복사할 수 있다. 이 값은 게임 규칙을 자동 조정하지 않으며 실제 기기 플레이테스트에서 체감 문제와 함께 기록한다.
+멀티 접속 중 `?metrics=1` 패널에서 RTT·스냅샷 간격·대기 명령 수·명령 거부율과 보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인할 수 있다. 같은 패널과 **진단 복사**는 frame interval·draw duration p50/p95/max, 최근·누적 dropped steps, CSS/backing 크기, 실제·유효 DPR과 collection별 `drawn/total`도 제공한다. 이 값은 게임 규칙이나 물리 120Hz를 자동 조정하지 않으며 실제 기기 플레이테스트에서 체감 문제와 함께 기록한다.
+
+태블릿 클라이언트 렉 최적화의 자동 회귀와 데스크톱 브라우저 확인은 완료했지만 실제 문제가 발생한 태블릿과 비교 휴대폰의 수치는 아직 수집하지 않았다. 다음 두 기기 테스트에서는 같은 채널·같은 시점의 네트워크 지표와 렌더 지표를 함께 복사해 RTT 문제와 로컬 draw/backing-store 문제를 분리한다.
 
 `npm run smoke:multiplayer`는 Pages 표시 버전과 게임 서버 `/health.version`이 같은지 먼저 확인한 뒤, Pages의 서버 설정을 읽어 공개 WSS에서 새 채널 생성, 2인 합류, 퇴장 반영, 빈 방 제거와 권위 RunMetrics 수신을 검증한다. 멀티플레이 코드나 버전 변경을 배포한 뒤에는 상시 게임 서버 프로세스를 재시작해야 하며, 버전 불일치는 이전 서버 코드가 실행 중인 배포 오류로 취급한다. PR 병합은 이 작업의 완료가 아니며 서버 재시작과 공개 smoke 통과까지가 완료 조건이다. 외부 네트워크 검사이므로 3분 제한의 기본 `npm test`와 분리하며, 기준 절차는 `docs/version-management.md`의 **필수 변경·완료 절차**를 따른다.
 자동 멀티 시나리오는 OS 네트워크 설정을 바꾸지 않고 테스트 WebSocket 경계에서 왕복 지연 0/50/100/200ms와 송신 명령 손실 0/2/5%의 모든 조합을 재현한다. 최대 프로필에서도 늦은 명령 거부 원칙을 유지하도록 입력은 30틱(250ms) 앞에 예약한다. 12개 프로필마다 실제 클라이언트 두 개가 같은 방에 참가하며, 자기 입력의 즉시 예측과 서버 공유 복제 지속뿐 아니라 입력 종료 뒤 서버 복제본·동료 표시 위치가 소유 클라이언트 상태에 4px, 속도 20px/s 이내로 수렴하는지 검증한다. 세 경로의 로프 부착 상태, 두 클라이언트가 받은 HP·생명·무기·아티팩트와 체크포인트·런 상태도 각 권한 원점의 승인 결과와 같아야 한다. 원격 보간 시계는 새 스냅샷마다 최신 `serverTick` 오차의 12.5%를 최대 50ms 범위에서 흡수해 브라우저·서버 타이머 드리프트가 장시간 지속 외삽으로 누적되지 않게 한다.

@@ -35,11 +35,13 @@ export class PolygonSceneRenderer {
                     new PolygonEnemyRenderer(),
                     new PolygonProjectileRenderer({
                         selectProjectiles: (scene) => scene.projectiles ?? [],
-                        color: "#fef08a"
+                        color: "#fef08a",
+                        category: "playerProjectiles"
                     }),
                     new PolygonProjectileRenderer({
                         selectProjectiles: (scene) => scene.enemyProjectiles ?? [],
-                        color: "#f43f5e"
+                        color: "#f43f5e",
+                        category: "enemyProjectiles"
                     }),
                     new CombatEffectRenderer(),
                     new EventEffectRenderer(),
