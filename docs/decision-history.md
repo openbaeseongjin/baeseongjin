@@ -23,6 +23,14 @@
 - 대체: 정식 표현은 `docs/pixel-graphics-design-guide.md`의 혼합 도트 방향과 제작 규격으로 대체했다. Canvas 플랫 도형은 기본 디자인이 아니라 개발·실패 복구용 fallback으로 유지한다.
 - 검증 상태: 기본 `sprite`와 `?renderer=polygon`이 같은 게임 상태를 그리는 렌더링 회귀 테스트로 두 경로를 유지한다.
 
+## [L1] 2026-08-13 — Sector 01-1에 첫 Sentry Turret과 Anchor 2개를 배치한다
+
+- 맥락: 첫 오프닝 문서에서 두 번의 Rope 성공 뒤 Sentry Turret을 보여주고 이동 압박까지 한 레벨에서 가르치려 했다.
+- 결정: Anchor A/B로 기본 상승을 학습한 뒤 첫 Turret을 통과하고 Service Terminal에서 Gate를 연다.
+- 영향: 기존 REV 1.0 문서와 레이아웃 이미지에 Anchor 2개, Turret 1개와 Cooling Fan 배경을 포함했다.
+- 대체: `Sector 01-1 SERVICE SHAFT` REV 3.0 — 첫 Enemy를 1-3으로 미루고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3 Recovery를 가진 32px Grid Authored Stage로 대체했다.
+- 검증 상태: 새 문서와 제작 규격은 확정 후보이며 Blockout·No-Impulse 테스트와 플레이테스트는 아직 진행하지 않았다.
+
 ## [L1] 2026-08-13 — Sector 01-3을 Cooling Shaft 횡풍 튜토리얼로 구성한다
 
 - 맥락: 1-2의 연속 Grapple 다음 단계로 환경 외력에 따라 달라지는 Swing 궤적과 타이밍을 가르치려 했다.

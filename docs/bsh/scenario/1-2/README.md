@@ -6,7 +6,7 @@
 
 1-1에서 익힌 **단일 Grapple**을 **연속 Grapple**로 확장하는 레벨. 이 구간의 핵심 질문은 딱 하나다 — *"첫 번째 Rope를 놓은 다음, 바로 다음 Anchor를 잡을 수 있는가?"*
 
-`TARGET 1:00–2:00` · `FLOW BOTTOM → TOP` · `ANCHORS 3 (A / B / C)` · `ENEMIES 1 × TURRET (재사용)` · `NEW AIR RE-ATTACH` · `EXIT SERVICE SHAFT 03`
+`TARGET 1:00–2:00` · `FLOW BOTTOM → TOP` · `ANCHORS 3 (A / B / C)` · `ENEMIES NONE` · `NEW AIR RE-ATTACH` · `EXIT SERVICE SHAFT 03`
 
 ## Contents
 
@@ -19,7 +19,7 @@
 06. [실패해도 진행이 끊기지 않아야 함](#06--실패해도-진행이-끊기지-않아야-함)
 07. [카메라가 여기서 처음 중요해짐](#07--카메라가-여기서-처음-중요해짐)
 08. [ANCHOR C — 방향 전환](#08--anchor-c--방향-전환)
-09. [TURRET은 어떻게 넣을까](#09--turret은-어떻게-넣을까)
+09. [전투 없이 이동만 검증](#09--전투-없이-이동만-검증)
 10. [새로운 적은 아직 없음](#10--새로운-적은-아직-없음)
 11. [환경 랜드마크](#11--환경-랜드마크)
 12. [그래픽](#12--그래픽)
@@ -31,10 +31,12 @@
 
 ## 00 · VISUAL REFERENCE
 
-| FIG.01 — SWING LINE | FIG.02 — LEVEL LAYOUT |
-|---|---|
-| ![SECTOR 01-2 swing line reference](./images/01_swing_line.png) | ![SECTOR 01-2 annotated level layout](./images/02_level_layout.png) |
-| START → A → B → C → EXIT. 좌우 교차 Anchor로 한 호흡에 이어지는 이상적 라인 | ANCHOR A·B·C, LANDING, TURRET, SERVICE TERMINAL, SHAFT 03 |
+| FIG.01 — SWING LINE |
+|---|
+| ![SECTOR 01-2 swing line reference](./images/01_swing_line.png) |
+| START → A → B → C → EXIT. 좌우 교차 Anchor로 한 호흡에 이어지는 이상적 라인 |
+
+기존 `02_level_layout.png`에는 Turret이 포함되어 있어 현재의 Enemy-free 규칙과 충돌한다. 파일은 이력 보존을 위해 남겨 두되, 새 레이아웃 이미지가 제작되기 전까지 구현 기준으로 참조하지 않는다.
 
 ## 01 · 역할 — 첫 연속 그래플 구간
 
@@ -167,18 +169,16 @@ B에서 한쪽으로 Swing하다가 Release해서 반대편 Anchor C를 잡는�
 > **DESIGN GOAL**
 > 여기서 플레이어는 처음 **Rope는 위로만 당기는 장치가 아니라 방향을 바꾸는 장치**라는 걸 경험한다. 이게 이후 레벨 디자인에 굉장히 중요해.
 
-## 09 · TURRET은 어떻게 넣을까
+## 09 · 전투 없이 이동만 검증
 
-1-2에는 터렛 하나를 넣어도 되지만 전투용으로 사용하지 않는다. 예를 들어 Anchor B 부근의 측면 플랫폼에 하나 배치한다.
-
-그런데 위치를 이렇게 잡는다. 가만히 Recovery Platform에 오래 서 있으면 터렛 사선에 들어온다. 반대로 `A → B` 연속 그래플을 성공하면 거의 공격받지 않는다.
+1-2에는 적을 넣지 않는다. Safe Landing과 Recovery Platform의 차이는 피격 위험이 아니라 이동 리듬과 재시도 비용으로만 만든다.
 
 > **CORE PRINCIPLE**
-> 터렛이 말하는 것은 "연속해서 움직이면 더 안전하다." 야. 좋은 플레이를 공격력으로 보상하는 게 아니라 위험을 줄이는 방식으로 먼저 보상한다.
+> 공중 ReAttach의 첫 성공 원인을 흐리지 않는다. 멈추지 않고 Rope를 잇는 행동 자체가 충분히 재미있는지 먼저 검증한다.
 
 ## 10 · 새로운 적은 아직 없음
 
-1-2에서도 Drone, Runner, Cutter 같은 새 적은 넣지 않는다. 1-1에서 본 Turret을 조금 더 복잡한 공간에 재사용하는 게 맞다.
+1-2에서는 Turret, Drone, Runner, Cutter 같은 적을 넣지 않는다. 첫 Enemy와 Red Telegraph는 1-3 `SECURITY CHECK`에서 소개한다.
 
 플레이어가 시스템 하나를 충분히 이해하기 전에 새 적을 계속 넣으면 학습이 흐려져.
 
@@ -200,7 +200,7 @@ B에서 한쪽으로 Swing하다가 Release해서 반대편 Anchor C를 잡는�
 | 1-1 | 큰 Fan / 넓은 산업공간 / 첫 그래플 |
 | 1-2 | 좁고 높은 Shaft / Elevator Rail / Vertical Cable / 좌우 교차 플랫폼 |
 
-배경은 여전히 Dark Navy / Charcoal. 플레이 정보는 Anchor/Rope = Cyan, Turret = Red, Player Scarf = Red 색을 유지한다.
+배경은 여전히 Dark Navy / Charcoal. 플레이 정보는 Anchor/Rope = Cyan, Player Scarf = Red 색을 유지한다. Red 위험 Telegraph는 1-3에서 처음 전면에 사용한다.
 
 > **DESIGN INTENT**
 > 그러면 같은 Sector라는 통일성은 있으면서도 방의 실루엣이 완전히 달라져.
@@ -230,7 +230,7 @@ B에서 한쪽으로 Swing하다가 Release해서 반대편 Anchor C를 잡는�
 
 ## 15 · 개발자 전달용 핵심 요약
 
-Sector 1-2 `DOUBLE ANCHOR SHAFT`는 1-1에서 익힌 단일 Grapple을 연속 Grapple로 확장하는 약 1~2분짜리 수직 레벨이다. 좌우에 교차 배치된 Anchor A/B/C를 이용해 플레이어가 Release 직후 공중에서 다음 Anchor를 잡는 경험을 제공한다. 숙련자는 바닥을 거의 밟지 않고 한 호흡에 상승할 수 있고, 초보자는 중간 Recovery Platform을 이용해 단계적으로 통과할 수 있어야 한다. Turret은 플레이어를 죽이는 목적이 아니라 오래 멈춰 있는 것을 불리하게 만들어 연속 이동을 유도한다. 공간의 대표 랜드마크는 정지된 Maintenance Lift와 거대한 수직 케이블이며, 전체 그래픽은 1-1의 어두운 산업 픽셀 스타일과 Cyan Rope/Anchor, Red 위험 신호, Red Scarf 규칙을 그대로 유지한다.
+Sector 1-2 `DOUBLE ANCHOR SHAFT`는 1-1에서 익힌 독립 Grapple을 연속 Grapple로 확장하는 약 1~2분짜리 수직 레벨이다. 좌우에 교차 배치된 Anchor A/B/C를 이용해 플레이어가 Release 직후 공중에서 다음 Anchor를 잡는 경험을 제공한다. 숙련자는 바닥을 거의 밟지 않고 한 호흡에 상승할 수 있고, 초보자는 중간 Recovery Platform을 이용해 단계적으로 통과할 수 있어야 한다. 적은 사용하지 않으며 공중 ReAttach의 첫 성공 원인을 흐리지 않는다. 공간의 대표 랜드마크는 정지된 Maintenance Lift와 거대한 수직 케이블이며, 전체 그래픽은 1-1의 어두운 산업 픽셀 스타일과 Cyan Rope/Anchor, Red Scarf 규칙을 유지한다.
 
 ---
 
