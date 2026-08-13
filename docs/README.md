@@ -71,3 +71,4 @@
 | [`bsh/scenario/1-3/README.md`](./bsh/scenario/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1-4/README.md`](./bsh/scenario/1-4/README.md) | `bsh` 첫 Rope Augment 3지선다·Calibration Stage(1-4) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1-5/README.md`](./bsh/scenario/1-5/README.md) | `bsh` 첫 Build Expression·Augment별 경로 Stage(1-5) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1-6/README.md`](./bsh/scenario/1-6/README.md) | `bsh` 첫 Wind·지속풍과 주기풍 Stage(1-6) Blockout 후보·제작 규격 |

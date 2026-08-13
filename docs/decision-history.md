@@ -52,7 +52,7 @@
 - 맥락: 1-2의 연속 Grapple 다음 단계로 환경 외력에 따라 달라지는 Swing 궤적과 타이밍을 가르치려 했다.
 - 결정: 대형 Cooling Fan 두 개의 약한 횡풍과 주기적 강풍을 사용하고 적은 배치하지 않는다.
 - 영향: Anchor A–C, Fan A/B, Recovery Platform과 Cooling Shaft 배경을 중심으로 1-3 문서와 레퍼런스 이미지를 구성했다.
-- 대체: `Sector 01-3 SECURITY CHECK` — 새로운 이동·환경 규칙 대신 첫 Sentry Turret의 Red Telegraph와 Rope 회피를 가르치고, Safe/Flow/Recovery 경로와 LOS 차단 해소 구간을 사용하는 Authored Stage로 대체했다.
+- 대체: `Sector 01-3 SECURITY CHECK` — 새로운 이동·환경 규칙 대신 첫 Sentry Turret의 Red Telegraph와 Rope 회피를 가르친다. Cooling Shaft와 Wind 학습은 Build Expression 뒤의 `Sector 01-6 COOLING SHAFT` REV 3.0으로 이동했다.
 - 검증 상태: 대체 방향은 유지되며 현재 상세 기준은 `docs/bsh/scenario/1-3/README.md` REV 3.0이다. Blockout과 플레이테스트는 아직 진행하지 않았다.
 
 ## [L2] 2026-08-12 — 플레이어와 환경별 최상위 runtime 폴더를 사용한다
