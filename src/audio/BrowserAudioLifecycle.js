@@ -34,7 +34,7 @@ export class BrowserAudioLifecycle {
     }
 
     async #retryResume() {
-        if (!this.pendingResume) return;
+        if (!this.pendingResume && this.host.status !== "suspended") return;
         const resumed = await this.host.resume();
         this.pendingResume = !resumed;
         this.onResumeRequired(this.pendingResume);

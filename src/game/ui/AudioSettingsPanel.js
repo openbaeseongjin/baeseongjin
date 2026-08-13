@@ -11,27 +11,41 @@ export class AudioSettingsPanel {
         if (!root || !settings) throw new Error("AudioSettingsPanel requires root and settings");
         this.root = root;
         this.settings = settings;
-        this.mute = root.querySelector("[data-audio-muted]");
-        this.reset = root.querySelector("[data-audio-reset]");
-        this.status = root.querySelector("[data-audio-status]");
-        this.rows = new Map(
+        this.mute = null;
+        this.reset = null;
+        this.status = null;
+        this.rows = new Map();
+        this.unsubscribe = null;
+        this.attached = false;
+        this.onMute = () => settings.setMuted(this.mute.checked);
+        this.onReset = () => settings.reset();
+    }
+
+    attach() {
+        if (this.attached) return false;
+        this.mute = this.root.querySelector("[data-audio-muted]");
+        this.reset = this.root.querySelector("[data-audio-reset]");
+        this.status = this.root.querySelector("[data-audio-status]");
+        if (!this.mute || !this.reset) throw new Error("AudioSettingsPanel is missing master controls");
+        const rows = new Map(
             AUDIO_GAIN_KEYS.map((key) => {
-                const input = root.querySelector(`[data-audio-gain="${key}"]`);
-                const output = root.querySelector(`[data-audio-gain-output="${key}"]`);
+                const input = this.root.querySelector(`[data-audio-gain="${key}"]`);
+                const output = this.root.querySelector(`[data-audio-gain-output="${key}"]`);
                 if (!input || !output) throw new Error(`AudioSettingsPanel is missing '${key}' controls`);
                 const onInput = () => {
                     const value = Number(input.value);
-                    settings.setGainDb(key, value <= MUTED_SLIDER_VALUE ? null : value);
+                    this.settings.setGainDb(key, value <= MUTED_SLIDER_VALUE ? null : value);
                 };
-                input.addEventListener("input", onInput);
                 return [key, { input, output, onInput }];
             })
         );
-        this.onMute = () => settings.setMuted(this.mute.checked);
-        this.onReset = () => settings.reset();
+        this.rows = rows;
+        for (const { input, onInput } of this.rows.values()) input.addEventListener("input", onInput);
         this.mute.addEventListener("change", this.onMute);
         this.reset.addEventListener("click", this.onReset);
-        this.unsubscribe = settings.subscribe((value) => this.render(value));
+        this.unsubscribe = this.settings.subscribe((value) => this.render(value));
+        this.attached = true;
+        return true;
     }
 
     render(value) {
@@ -58,10 +72,19 @@ export class AudioSettingsPanel {
                   : "";
     }
 
-    release() {
-        this.unsubscribe();
+    detach() {
+        if (!this.attached) return false;
+        this.unsubscribe?.();
+        this.unsubscribe = null;
         this.mute.removeEventListener("change", this.onMute);
         this.reset.removeEventListener("click", this.onReset);
         for (const { input, onInput } of this.rows.values()) input.removeEventListener("input", onInput);
+        this.rows.clear();
+        this.attached = false;
+        return true;
+    }
+
+    release() {
+        this.detach();
     }
 }

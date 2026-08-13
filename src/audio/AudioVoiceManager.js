@@ -55,6 +55,7 @@ export class AudioVoiceManager {
         const record = {
             kind: "one-shot",
             cueId,
+            clipKey: variation.clipKey,
             priority: cue.priority,
             startedAt: now,
             handle: null,
@@ -94,29 +95,41 @@ export class AudioVoiceManager {
         const variation = this.#selectVariation(cue);
         if (!variation) return false;
         if (!existing && !this.#reserveGlobal(cue.priority)) return false;
-        let handle;
+        const record = {
+            kind: "loop",
+            lifecycleKey,
+            cueId,
+            clipKey: variation.clipKey,
+            priority: cue.priority,
+            startedAt: this.clock(),
+            transitionMs: cue.transitionMs,
+            handle: null
+        };
         try {
-            handle = this.adapter.playLoop({
+            record.handle = this.adapter.playLoop({
                 clipKey: variation.clipKey,
+                cueId,
+                lifecycleKey,
                 group: cue.group,
                 gain: dbToLinearGain(cue.gainDb) * spatial.gain,
                 pan: spatial.pan,
-                fadeInMs: cue.transitionMs
+                fadeInMs: cue.transitionMs,
+                onEnded: () => this.#removeRecord(record)
             });
         } catch {
             this.counters.invalidRequests += 1;
             return false;
         }
         if (existing) existing.handle.stop(existing.transitionMs);
-        this.loops.set(lifecycleKey, {
-            kind: "loop",
-            lifecycleKey,
-            cueId,
-            priority: cue.priority,
-            startedAt: this.clock(),
-            transitionMs: cue.transitionMs,
-            handle
-        });
+        this.loops.set(lifecycleKey, record);
+        return true;
+    }
+
+    disableClip(clipKey) {
+        if (!this.availableClipKeys.delete(clipKey)) return false;
+        for (const record of [...this.voices, ...this.loops.values()]) {
+            if (record.clipKey === clipKey) record.handle.stop(0);
+        }
         return true;
     }
 
@@ -130,7 +143,7 @@ export class AudioVoiceManager {
 
     stopAll() {
         for (const record of [...this.voices]) record.handle.stop(0);
-        for (const loop of this.loops.values()) loop.handle.stop(0);
+        for (const loop of [...this.loops.values()]) loop.handle.stop(0);
         this.loops.clear();
     }
 

@@ -10,7 +10,7 @@ import { isMetricsPanelEnabled } from "./game/metrics/MetricsDebugMode.js";
 import { setupPlaytestDiagnostics } from "./game/metrics/PlaytestDiagnostics.js";
 import { createGameRenderer, resolveRendererProfile } from "./render/GameRendererFactory.js";
 import { AudioSettings } from "./audio/AudioSettings.js";
-import { loadAudioPackDefinition } from "./audio/AudioCatalog.js";
+import { createAudioDefinitionLoader } from "./audio/AudioCatalog.js";
 import { BrowserAudioAdapter } from "./audio/BrowserAudioAdapter.js";
 import { GameAudioHost } from "./audio/GameAudioHost.js";
 import { AudioEventBindings } from "./audio/AudioEventBindings.js";
@@ -31,6 +31,7 @@ let audioHost = null;
 let audioBindings = null;
 let audioLifecycle = null;
 let audioLifecycleAttached = false;
+const DEFAULT_GAME_AUDIO_SELECTION = Object.freeze({ packId: "default-mock", packageOverrides: Object.freeze({}) });
 const modeMenu = new GameModeMenu(document.getElementById("game-mode-menu"));
 const startupLoadingScreen = new StartupUpdateLoadingScreen(document.getElementById("startup-update-loading"));
 const channelBadge = document.getElementById("channel-badge");
@@ -51,12 +52,14 @@ const audioSettingsPanel = new AudioSettingsPanel({
     root: document.getElementById("settings-panel-audio"),
     settings: audioSettings
 });
+settingsMenu.attach();
 settingsMenu.registerTab({
     id: "audio",
     label: "오디오",
     panel: document.getElementById("settings-panel-audio")
 });
-settingsMenu.attach();
+audioSettingsPanel.attach();
+const loadSelectedAudioDefinition = createAudioDefinitionLoader(DEFAULT_GAME_AUDIO_SELECTION);
 const diagnostics = setupPlaytestDiagnostics({
     root: document.getElementById("copy-diagnostics"),
     navigator: globalThis.navigator,
@@ -96,6 +99,7 @@ async function prepareGameAudio() {
                     const progress = detail.total ? ` (${detail.completed}/${detail.total})` : "";
                     modeMenu.setStatus(`오디오를 준비하는 중입니다${progress}`);
                 }
+                audioResumeNotice.hidden = status !== "suspended" || globalThis.document.hidden;
                 audioSettingsPanel.setRuntimeStatus(status, audioHost?.snapshot());
             }
         });
@@ -108,7 +112,7 @@ async function prepareGameAudio() {
             onResumeRequired: (required) => (audioResumeNotice.hidden = !required)
         });
     }
-    const definition = await loadAudioPackDefinition("default-mock");
+    const definition = await loadSelectedAudioDefinition();
     await audioHost.prepare(definition);
     if (!audioLifecycleAttached) {
         audioLifecycle.attach();
@@ -195,8 +199,8 @@ globalThis.addEventListener(
         if (audioLifecycleAttached) audioLifecycle.release();
         audioBindings?.stopScene();
         audioHost?.suspend();
-        audioSettingsPanel.release();
-        settingsMenu.release();
+        audioSettingsPanel.detach();
+        settingsMenu.detach();
         app?.stop();
     },
     { once: true }

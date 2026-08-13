@@ -305,8 +305,9 @@ class Player extends RopeAttachable(GameObject) {}
 - 스프라이트 관련 개발·에셋 작업은 루트 `AGENTS.md`에서 `sprite-asset-format.md`의 JSON Schema·example manifest·표준 validator 명령으로 진입하게 한다. loader, schema, example, validator 중 하나를 바꾸면 같은 계약 변경으로 함께 갱신하며 새 결과물은 validator 통과 전 완료로 보지 않는다.
 - 환경 리소스 작업은 `environment-asset-format.md`의 PNG 묶음·JSON Schema·example manifest와 `validate:environment-assets` 명령으로 진입한다. PixelLab·SpriteCook 원본 배열과 metadata는 import 입력일 뿐 renderer에 도구별 분기를 만들지 않는다.
 - 오디오 리소스 작업은 `audio-asset-guide.md`의 authoring 인계와 `audio-asset-format.md`의 runtime package를 분리한다. 생성 Skill·MCP·DAW 원본은 입력 자료이며 schema·parser·mock·validator가 공유하는 도구 중립 manifest로 정규화한다.
-- 오디오 manifest는 clip source·load·loop와 cue 표현 정책만 소유한다. 게임 사건 연결은 package 밖 `AudioEventBindings`, Web Audio graph와 voice 수명은 audio host가 소유하며 gameplay·simulation·network state는 음원 경로나 mixer를 import하지 않는다.
-- 오디오와 sprite 같은 표현 package는 stable ID·catalog·immutable definition 주입 경계를 유지한다. package 선택은 렌더·재생 결과만 바꾸며 물리·충돌·전투·명령·network snapshot을 변경하지 않는다. 실제 디버그 selector가 추가되기 전에도 가짜 definition 주입 테스트로 이 경계를 보호한다.
+- 오디오 manifest는 clip source·load·loop와 cue 표현 정책만 소유한다. 게임 사건 연결은 package 밖 `AudioEventBindings`의 조합 가능한 handler가 소유하고 싱글·멀티 앱은 같은 `presentFrame` 경계만 호출한다. Web Audio graph와 voice 수명은 audio host가 소유하며 gameplay·simulation·network state는 음원 경로나 mixer를 import하지 않는다.
+- 오디오와 sprite 같은 표현 package는 stable ID·catalog·immutable definition 주입 경계를 유지한다. package 선택은 렌더·재생 결과만 바꾸며 물리·충돌·전투·명령·network snapshot을 변경하지 않는다. 실제 디버그 selector가 추가되기 전에도 공개 loader의 전체 pack·category override와 bootstrap 선택 주입을 회귀 테스트로 보호한다.
+- 오디오 media의 비동기 재생 거부는 준비 성공과 구분해 voice를 정리하고 host snapshot·개발 진단에 전파한다. 사용자 활성화 제약은 다음 사용자 동작에서 재시도 가능한 `suspended`, 복구 불가능한 필수·선택 실패는 각각 `failed`·`degraded`로 명시하며 실패를 adapter 내부 배열에만 남기지 않는다.
 - 스프라이트 화면 변경은 데스크톱과 모바일 크기에서 상태의 자세·실루엣·동작을 비교한다. 색 변화만을 상태 구분의 유일한 근거로 사용하지 않는다.
 
 ## 11. 코드 스타일과 파일 관리

@@ -77,7 +77,7 @@ category는 `gameplay`, `ui`, `ambience`, `bgm`이다. ID는 소문자 kebab-cas
 - `ducking`: 대상 group의 `gainDb`, `attackMs`, `releaseMs`를 선언한다. 기본은 off다.
 - `minGainDb`: `world` 경고음의 거리 감쇠 floor다. 사용자와 group 음소거를 우회하지 않는다.
 
-manifest는 게임 trigger, collider, damage, physics, network authority와 최종 시나리오 의미를 소유하지 않는다. 이들은 package 밖 `AudioEventBindings`가 읽기 전용 사건과 scene state를 cue ID로 연결한다.
+manifest는 게임 trigger, collider, damage, physics, network authority와 최종 시나리오 의미를 소유하지 않는다. 이들은 package 밖 `AudioEventBindings`의 조합 가능한 event handler가 읽기 전용 사건과 scene state를 cue ID로 연결한다. 싱글·멀티 앱은 개별 cue나 handler를 호출하지 않고 공용 `presentFrame` 입력만 전달한다.
 
 ## pack manifest v1
 
@@ -92,7 +92,7 @@ manifest는 게임 trigger, collider, damage, physics, network authority와 최�
 }
 ```
 
-pack은 category별 package 참조만 가진다. cue나 clip을 복제하지 않는다. 같은 category 중복과 pack 전체 cue ID 충돌은 거부한다. `loadAudioPackDefinition(packId, { packageOverrides })`는 전체 pack 또는 category 하나를 교체한 새 immutable definition을 만들 수 있다. 이 경계가 향후 디버그 선택과 작업물 비교의 기반이며 현재 selector UI와 실행 중 hot-swap은 범위 밖이다.
+pack은 category별 package 참조만 가진다. cue나 clip을 복제하지 않는다. 같은 category 중복과 pack 전체 cue ID 충돌은 거부한다. `loadAudioPackDefinition(packId, { packageOverrides })`는 전체 pack 또는 category 하나를 교체한 새 immutable definition을 만들 수 있고 `createAudioDefinitionLoader()`가 bootstrap에서 선택을 고정해 주입한다. 이 공개 loader 경계가 향후 디버그 선택과 작업물 비교의 기반이며 현재 selector UI와 실행 중 hot-swap은 범위 밖이다.
 
 ## 믹서와 공간 정책
 
@@ -110,6 +110,7 @@ pack은 category별 package 참조만 가진다. cue나 clip을 복제하지 않
 - 모든 필수 clip과 필수 cue가 준비되기 전에는 게임 loop를 시작하지 않는다.
 - 선택 실패만 `degraded`로 시작하며 진단과 설정 탭에 남긴다.
 - 상태는 `loading|ready|degraded|suspended|failed`다.
+- 준비 뒤 media `play()`가 거부되면 해당 voice를 즉시 정리하고 runtime failure를 host snapshot과 `?metrics=1` 진단에 포함한다. 사용자 활성화 제약인 `NotAllowedError`는 `suspended`로 전이해 다음 입력에서 재개하고, 그 밖의 필수 clip 재생 실패는 `failed`, 선택 clip 재생 실패는 해당 clip을 제외한 `degraded`로 전이한다.
 - `document.hidden`과 `pagehide`는 one-shot을 폐기하고 context·stream을 suspend한다. `blur`만으로는 중지하지 않는다.
 - 복귀 시 과거 one-shot을 재생하지 않고 현재 BGM·ambience state만 재조정한다.
 - 메뉴 복귀와 release는 소유한 voice·loop·stream 연결을 명시적으로 정리한다.

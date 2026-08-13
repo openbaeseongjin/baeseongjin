@@ -6,11 +6,12 @@ export class SettingsMenu {
         this.root = root;
         this.trigger = trigger;
         this.documentTarget = documentTarget;
-        this.tabList = root.querySelector("[data-settings-tabs]");
-        this.closeButton = root.querySelector("[data-settings-close]");
+        this.tabList = null;
+        this.closeButton = null;
         this.tabs = new Map();
         this.activeTabId = null;
         this.previouslyFocused = null;
+        this.attached = false;
         this.onTrigger = () => this.show();
         this.onClose = () => this.hide();
         this.onBackdrop = (event) => {
@@ -21,9 +22,24 @@ export class SettingsMenu {
             event.preventDefault();
             this.hide();
         };
+        this.onTabKeyDown = (event) => {
+            const currentId = event.target?.dataset?.settingsTab;
+            if (!currentId || !this.tabs.has(currentId)) return;
+            const ids = [...this.tabs.keys()];
+            const currentIndex = ids.indexOf(currentId);
+            let nextIndex = null;
+            if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % ids.length;
+            if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + ids.length) % ids.length;
+            if (event.key === "Home") nextIndex = 0;
+            if (event.key === "End") nextIndex = ids.length - 1;
+            if (nextIndex === null) return;
+            event.preventDefault();
+            this.activate(ids[nextIndex], { focus: true });
+        };
     }
 
     registerTab({ id, label, panel }) {
+        if (!this.attached) throw new Error("SettingsMenu must be attached before tabs are registered");
         if (!TAB_ID_PATTERN.test(id)) throw new Error(`settings tab id '${id}' is invalid`);
         if (typeof label !== "string" || !label.trim()) throw new Error("settings tab label is required");
         if (!panel) throw new Error(`settings tab '${id}' requires a panel`);
@@ -40,7 +56,7 @@ export class SettingsMenu {
         panel.setAttribute("role", "tabpanel");
         panel.setAttribute("aria-labelledby", button.id);
         this.tabList.append(button);
-        this.tabs.set(id, { button, panel, release: () => button.removeEventListener("click", activate) });
+        this.tabs.set(id, { button, panel, activate });
         if (this.activeTabId === null) this.activate(id);
         return () => this.unregisterTab(id);
     }
@@ -48,7 +64,7 @@ export class SettingsMenu {
     unregisterTab(id) {
         const tab = this.tabs.get(id);
         if (!tab) return false;
-        tab.release();
+        tab.button.removeEventListener("click", tab.activate);
         tab.button.remove();
         tab.panel.hidden = true;
         this.tabs.delete(id);
@@ -60,7 +76,7 @@ export class SettingsMenu {
         return true;
     }
 
-    activate(id) {
+    activate(id, { focus = false } = {}) {
         if (!this.tabs.has(id)) return false;
         this.activeTabId = id;
         for (const [tabId, { button, panel }] of this.tabs) {
@@ -69,20 +85,30 @@ export class SettingsMenu {
             button.tabIndex = selected ? 0 : -1;
             panel.hidden = !selected;
         }
+        if (focus) this.tabs.get(id).button.focus();
         return true;
     }
 
     attach() {
+        if (this.attached) return false;
+        this.tabList = this.root.querySelector("[data-settings-tabs]");
+        this.closeButton = this.root.querySelector("[data-settings-close]");
+        if (!this.tabList || !this.closeButton) throw new Error("SettingsMenu is missing dialog controls");
         this.trigger.addEventListener("click", this.onTrigger);
         this.closeButton.addEventListener("click", this.onClose);
         this.root.addEventListener("pointerdown", this.onBackdrop);
         this.documentTarget.addEventListener("keydown", this.onKeyDown, true);
+        this.tabList.addEventListener("keydown", this.onTabKeyDown);
+        for (const { button, activate } of this.tabs.values()) button.addEventListener("click", activate);
+        this.attached = true;
+        return true;
     }
 
     show() {
         this.previouslyFocused = this.documentTarget.activeElement;
         this.root.hidden = false;
-        this.closeButton.focus();
+        const activeTab = this.tabs.get(this.activeTabId)?.button;
+        (activeTab ?? this.closeButton).focus();
     }
 
     hide() {
@@ -92,12 +118,21 @@ export class SettingsMenu {
         this.previouslyFocused = null;
     }
 
-    release() {
+    detach() {
+        if (!this.attached) return false;
         this.hide();
         this.trigger.removeEventListener("click", this.onTrigger);
         this.closeButton.removeEventListener("click", this.onClose);
         this.root.removeEventListener("pointerdown", this.onBackdrop);
         this.documentTarget.removeEventListener("keydown", this.onKeyDown, true);
+        this.tabList.removeEventListener("keydown", this.onTabKeyDown);
+        for (const { button, activate } of this.tabs.values()) button.removeEventListener("click", activate);
+        this.attached = false;
+        return true;
+    }
+
+    release() {
+        this.detach();
         for (const id of [...this.tabs.keys()]) this.unregisterTab(id);
     }
 }

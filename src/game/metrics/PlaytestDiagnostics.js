@@ -85,6 +85,12 @@ export function formatPlaytestDiagnostics({
                     `${clipKey}=${status}:${sourcePath ?? "-"}:${mimeType ?? "-"}:${failureCode ?? "-"}`
             )
             .join(",");
+        const runtimeFailures = (audioDiagnostics.runtimeFailures ?? [])
+            .map(
+                ({ clipKey, cueId, lifecycleKey, failureCode }) =>
+                    `${clipKey}:${cueId ?? "-"}:${lifecycleKey ?? "-"}:${failureCode}`
+            )
+            .join(",");
         lines.push(
             `audioStatus: ${audioDiagnostics.status}`,
             `audioPack: ${audioDiagnostics.packId ?? "-"}`,
@@ -93,6 +99,7 @@ export function formatPlaytestDiagnostics({
             `audioRequired: ${audioDiagnostics.requiredReady}/${audioDiagnostics.requiredTotal}`,
             `audioOptional: ${audioDiagnostics.optionalReady}/${audioDiagnostics.optionalTotal}`,
             `audioFailures: ${audioDiagnostics.failures.length}`,
+            `audioRuntimeFailures: ${runtimeFailures || "-"}`,
             `audioVoices: ${voices?.activeVoices ?? 0}`,
             `audioCooldownDrops: ${voices?.cooldownDrops ?? 0}`,
             `audioPriorityDrops: ${voices?.priorityDrops ?? 0}`,

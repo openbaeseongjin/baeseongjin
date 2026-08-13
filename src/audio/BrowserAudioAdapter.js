@@ -45,7 +45,7 @@ export class BrowserAudioAdapter {
         );
         this.prepared = new Map();
         this.activeHandles = new Set();
-        this.runtimeFailures = [];
+        this.runtimeFailureListeners = new Set();
     }
 
     contextState() {
@@ -64,6 +64,12 @@ export class BrowserAudioAdapter {
         const node = this.groups[group];
         if (!node) throw new Error(`unknown audio group '${group}'`);
         setGain(node.gain, gain, this.context, transitionMs);
+    }
+
+    subscribeRuntimeFailures(listener) {
+        if (typeof listener !== "function") throw new Error("runtime audio failure listener must be a function");
+        this.runtimeFailureListeners.add(listener);
+        return () => this.runtimeFailureListeners.delete(listener);
     }
 
     async prepare(definition, { onProgress = () => {} } = {}) {
@@ -133,7 +139,7 @@ export class BrowserAudioAdapter {
         return handle;
     }
 
-    playLoop({ clipKey, group, gain, pan, fadeInMs }) {
+    playLoop({ clipKey, cueId, lifecycleKey, group, gain, pan, fadeInMs, onEnded = () => {} }) {
         const prepared = this.prepared.get(clipKey);
         if (!prepared) throw new Error(`audio clip '${clipKey}' is not prepared`);
         if (prepared.kind === "buffer") {
@@ -144,11 +150,11 @@ export class BrowserAudioAdapter {
                 source.loopStart = prepared.clip.loop.startSeconds;
                 source.loopEnd = prepared.clip.loop.endSeconds;
             }
-            const handle = this.#connectVoice({ source, group, gain, pan, fadeInMs });
+            const handle = this.#connectVoice({ source, group, gain, pan, fadeInMs, onEnded });
             source.start();
             return handle;
         }
-        return this.#playStreamLoop(prepared, { group, gain, pan, fadeInMs });
+        return this.#playStreamLoop(prepared, { cueId, lifecycleKey, group, gain, pan, fadeInMs, onEnded });
     }
 
     async suspend() {
@@ -174,6 +180,7 @@ export class BrowserAudioAdapter {
 
     release() {
         this.#clearPrepared();
+        this.runtimeFailureListeners.clear();
         for (const group of Object.values(this.groups)) group.disconnect();
         this.master.disconnect();
         this.context.close?.();
@@ -411,7 +418,7 @@ export class BrowserAudioAdapter {
         return handle;
     }
 
-    #playStreamLoop(prepared, { group, gain, pan, fadeInMs }) {
+    #playStreamLoop(prepared, { cueId, lifecycleKey, group, gain, pan, fadeInMs, onEnded }) {
         if (prepared.activeHandle) prepared.activeHandle.stop(0);
         const groupNode = this.groups[group];
         if (!groupNode) throw new Error(`unknown audio group '${group}'`);
@@ -448,6 +455,7 @@ export class BrowserAudioAdapter {
             panNode?.disconnect();
             prepared.activeHandle = null;
             this.activeHandles.delete(handle);
+            onEnded();
         };
         const handle = Object.freeze({
             stop: (fadeMs = 0) => {
@@ -464,9 +472,27 @@ export class BrowserAudioAdapter {
         });
         prepared.activeHandle = handle;
         this.activeHandles.add(handle);
-        prepared.element.play().catch((error) => {
-            this.runtimeFailures.push(Object.freeze({ clipKey: prepared.clip.key, failureCode: errorCode(error) }));
-        });
+        const reportPlaybackFailure = (error) => {
+            handle.stop(0);
+            this.#reportRuntimeFailure({
+                clipKey: prepared.clip.key,
+                cueId,
+                lifecycleKey,
+                required: prepared.clip.required,
+                failureCode: errorCode(error)
+            });
+        };
+        try {
+            Promise.resolve(prepared.element.play()).catch(reportPlaybackFailure);
+        } catch (error) {
+            reportPlaybackFailure(error);
+            throw error;
+        }
         return handle;
+    }
+
+    #reportRuntimeFailure(failure) {
+        const record = Object.freeze(failure);
+        for (const listener of this.runtimeFailureListeners) listener(record);
     }
 }

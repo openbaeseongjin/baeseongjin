@@ -9,9 +9,64 @@ function eventCausalId(prefix, event) {
     return id ? `${prefix}:${id}` : null;
 }
 
+function projectileSpawnBinding(event, context) {
+    if (event.eventType !== "spawn" && event.eventType !== "predicted-spawn") return null;
+    return Object.freeze({
+        cueId: "gameplay-weapon-fire",
+        request: Object.freeze({
+            ...context,
+            emitterId: event.parameters?.ownerId ?? event.ownerId ?? "projectile",
+            causalId: eventCausalId("weapon-fire", event),
+            position: eventPosition(event) ?? context.listener
+        })
+    });
+}
+
+function playerHitBinding(event, context) {
+    if (
+        (event.eventType !== "resolve" && event.eventType !== "predicted-resolve") ||
+        event.resolution !== "player-hit"
+    ) {
+        return null;
+    }
+    return Object.freeze({
+        cueId: "gameplay-player-hit",
+        request: Object.freeze({
+            ...context,
+            emitterId: event.targetId ?? event.parameters?.targetId ?? "player",
+            causalId: eventCausalId("player-hit", event),
+            position: eventPosition(event) ?? context.listener
+        })
+    });
+}
+
+function checkpointBinding(event, context) {
+    if (event.eventType !== "checkpoint-reached") return null;
+    return Object.freeze({
+        cueId: "gameplay-checkpoint-reached",
+        request: Object.freeze({
+            ...context,
+            emitterId: event.checkpointId,
+            causalId: `checkpoint:${event.checkpointId}`,
+            position: event.position
+        })
+    });
+}
+
+export const DEFAULT_AUDIO_EVENT_HANDLERS = Object.freeze([
+    projectileSpawnBinding,
+    playerHitBinding,
+    checkpointBinding
+]);
+
 export class AudioEventBindings {
-    constructor(host) {
+    constructor(host, { eventHandlers = DEFAULT_AUDIO_EVENT_HANDLERS } = {}) {
+        if (!host?.play) throw new Error("AudioEventBindings requires an audio host");
+        if (!Array.isArray(eventHandlers) || eventHandlers.some((handler) => typeof handler !== "function")) {
+            throw new Error("audio event handlers must be functions");
+        }
         this.host = host;
+        this.eventHandlers = Object.freeze([...eventHandlers]);
         this.scene = null;
     }
 
@@ -40,31 +95,30 @@ export class AudioEventBindings {
 
     handleEvents(events, context) {
         for (const event of events) {
-            if (event.eventType === "spawn" || event.eventType === "predicted-spawn") {
-                this.host.play("gameplay-weapon-fire", {
-                    ...context,
-                    emitterId: event.parameters?.ownerId ?? event.ownerId ?? "projectile",
-                    causalId: eventCausalId("weapon-fire", event),
-                    position: eventPosition(event) ?? context.listener
-                });
-                continue;
-            }
-            if (
-                (event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
-                event.resolution === "player-hit"
-            ) {
-                this.host.play("gameplay-player-hit", {
-                    ...context,
-                    emitterId: event.targetId ?? event.parameters?.targetId ?? "player",
-                    causalId: eventCausalId("player-hit", event),
-                    position: eventPosition(event) ?? context.listener
-                });
-                continue;
-            }
-            if (event.eventType === "checkpoint-reached") {
-                this.checkpointReached(event, context);
+            for (const handler of this.eventHandlers) {
+                const binding = handler(event, context);
+                if (!binding) continue;
+                if (
+                    typeof binding.cueId !== "string" ||
+                    !binding.cueId ||
+                    !binding.request ||
+                    typeof binding.request !== "object"
+                ) {
+                    throw new Error("audio event handlers must return a cueId and request");
+                }
+                this.host.play(binding.cueId, binding.request);
             }
         }
+    }
+
+    presentFrame({ events = [], context = null, ropeTransition = null, checkpoint = null, scene = null } = {}) {
+        const presentationContext = context ?? scene;
+        if (events.length > 0) this.handleEvents(events, presentationContext);
+        if (ropeTransition) {
+            this.observeRope(ropeTransition.before, ropeTransition.after, presentationContext);
+        }
+        if (checkpoint) this.checkpointReached(checkpoint, presentationContext);
+        if (scene) this.syncScene(scene);
     }
 
     syncScene(scene) {

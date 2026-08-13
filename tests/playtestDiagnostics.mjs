@@ -65,6 +65,14 @@ export async function run() {
             optionalReady: 1,
             optionalTotal: 2,
             failures: [{ clipKey: "ui/default-mock:optional", failureCode: "fetch-failed" }],
+            runtimeFailures: [
+                {
+                    clipKey: "bgm/default-mock:climb",
+                    cueId: "bgm-climb",
+                    lifecycleKey: "bgm:main",
+                    failureCode: "notallowederror"
+                }
+            ],
             clips: [
                 {
                     clipKey: "gameplay/default-mock:hit",
@@ -99,6 +107,7 @@ export async function run() {
     assert.match(text, /audioStatus: degraded/);
     assert.match(text, /audioPackages: gameplay\/default-mock,ui\/default-mock/);
     assert.match(text, /audioVoiceSteals: 1/);
+    assert.match(text, /audioRuntimeFailures: bgm\/default-mock:climb:bgm-climb:bgm:main:notallowederror/);
     assert.match(text, /audioClips: gameplay\/default-mock:hit=ready:hit.wav:audio\/wav:-/);
 
     let click = null;
