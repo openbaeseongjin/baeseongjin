@@ -68,6 +68,7 @@
 | 문서 | 역할 |
 | --- | --- |
 | [`bsh/scenario-skeleton-v0.1.html`](./bsh/scenario-skeleton-v0.1.html) | `bsh` 시나리오 발표 자료 |
+| [`bsh/scenario/README.md`](./bsh/scenario/README.md) | `bsh` Sector 01 공용 배경 아트 레퍼런스와 Stage 인덱스 |
 | [`bsh/scenario/1-1/README.md`](./bsh/scenario/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격 |
 | [`bsh/scenario/1-2/README.md`](./bsh/scenario/1-2/README.md) | `bsh` Airborne Re-Attach Benchmark Stage(1-2) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1-3/README.md`](./bsh/scenario/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout 후보·제작 규격 |

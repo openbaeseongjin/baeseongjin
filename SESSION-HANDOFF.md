@@ -42,6 +42,8 @@
 
 ## 다음 작업
 
+Sector 01 공용 배경 아트 기준은 `docs/bsh/scenario/README.md`다. `1-1`~`1-8`은 Navy·Charcoal 기반의 거대한 산업 정비 시설로 연결하고, 전경의 어두운 구조물·중경의 플레이 공간·원경의 푸른 안개로 깊이를 분리한다. 중앙의 큰 여백, 제한된 Cyan 설비등, 드문 Orange 경고등을 유지하되 Player·Rope·Anchor·Collision·Sentry Telegraph의 가독성을 항상 우선한다. 이미지의 구조물을 실제 지형으로 복제하지 않고 각 Stage README의 Geometry·Mechanic 규격을 따른다. 제공 이미지는 출처·사용권과 런타임 제작 규격을 확인하기 전까지 문서용 레퍼런스로만 사용한다.
+
 섹터 1 맵 구조는 `docs/sector-01-world-structure-plan.md`를 현재 기준으로 구현한다. 실제 월드는 하나이며 `1-1`~`1-8`은 별도 월드가 아니라 같은 붕괴 도시 안의 진행 영역이다. 각 영역이 정의한 처치·무력화·우회·상호작용·이동 달성 조건을 만족하면 명시적 출구가 열리고, 플레이어가 출구를 통과해야 다음 영역으로 진행한다. 전환 때 월드·런·플레이어·아티팩트·체크포인트를 재생성하지 않는다. 일반 타이머는 섹터 전체에서 유지되고 Gate 통과 때 보충되며, 0초부터 하층 붕괴가 상승한다. 붕괴 탈락자는 최소 관전 뒤 다음 Gate에서 합류하고 전원 탈락 때만 해당 섹터 일반 구간을 재시작한다. 기획자 지정 보스 진입에서는 일반 시간과 붕괴를 끝내고 잔여 시간을 폐기한 뒤 별도 보스 타이머를 시작하며, 0초부터 Arena가 붕괴하고 전원 탈락은 보스 시도만 재시작한다. 메인 개발자는 수치를 mock으로 먼저 연결하고 팀·기획자가 공동 플레이로 최종 조정한다. 기준은 `docs/sector-timer-and-boss-flow.md`다. 보스 위치·전투 시나리오는 기획자 확정 전 추정 구현하지 않는다.
 
 Sector 01-1의 현재 기준은 `docs/bsh/scenario/1-1/README.md`의 `SERVICE SHAFT` REV 3.0이다. 첫 Authored Stage를 32px Grid·960×960 Blockout으로 만들고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3의 5초 이내 재시도를 검증한다. Turret·Wind·Augment·필수 공중 ReAttach는 제외하며, `swingImpulse = 0`에서도 전 구간이 재미있고 안정적으로 통과되어야 한다. Terminal은 하부 봉쇄와 Rooftop Pad 03 Maintenance Shuttle 목표를 전달한다.
