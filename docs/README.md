@@ -87,3 +87,4 @@
 | [`bsh/scenario/2/2-7/README.md`](./bsh/scenario/2/2-7/README.md) | `bsh` 2 Patrol Drone 순차·Build Synthesis·TRANSFER SUSPENDED 공개 Stage(2-7) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-8/README.md`](./bsh/scenario/2/2-8/README.md) | `bsh` Sector 02 Finale·Group A/B/C Transfer 결과 공개 Stage(2-8) Blockout 후보·제작 규격 |
 | [`bsh/scenario/3/README.md`](./bsh/scenario/3/README.md) | `bsh` Sector 03 Commercial District 마스터플랜(3-1~3-8 개요, HYPOTHESIS) |
+| [`bsh/scenario/3/3-1/README.md`](./bsh/scenario/3/3-1/README.md) | `bsh` Worker→Commercial District 저압 전환 Stage(3-1) Blockout 후보·제작 규격 |
