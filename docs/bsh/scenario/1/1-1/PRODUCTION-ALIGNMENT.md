@@ -14,7 +14,7 @@
 | 기존 `01_gameplay_reference.png` | `RETIRED` | Turret이 있어 1-1 Gameplay·배치 기준으로 사용 금지 |
 | 기존 `02_level_layout.png` | `RETIRED` | Turret과 Anchor 2개 구성이 REV 3.1과 충돌하므로 사용 금지 |
 | Sector 01 배경 이미지 | `MOOD ONLY` | 색·조명·산업 밀도만 참고하고 지형 위치는 복제하지 않음 |
-| 신규 Scenario Art Reference | `PENDING REGENERATION` | 공통 생성 규격과 현재 Camera Zone을 적용한 대표 Gameplay Shot 필요 |
+| `04_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C04 Open Swing의 Player 크기·한 줄 live Rope·C/P3/R3 정보 위계 기준 |
 | Camera Shot 수치 | `PROTOTYPE` | 아래 후보로 구현한 뒤 데스크톱·모바일 플레이테스트로 조정 |
 | 정식 Sprite·배경 Package | `PENDING` | 현재 Mock Shape와 절차형 배경을 교체할 제작 자산 필요 |
 
@@ -25,9 +25,19 @@
 3. 두 자료가 다르면 어느 한쪽을 임의로 따라가지 않고 같은 변경에서 함께 수정한다.
 4. [Sector 01 배경 레퍼런스](../README.md)는 분위기만 결정한다.
 5. `RETIRED` 이미지는 아이디어 기록이며 구현·아트 검수 근거로 사용하지 않는다.
-6. 신규 Art Reference는 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 현재 Runtime과 Camera Zone을 다시 확인한 뒤 만든다.
+6. [Scenario Art Reference](./images/04_scenario_art_reference.png)는 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 C04 `open-swing` Runtime을 확인해 만든 대표 Gameplay Shot이다.
 
-## 3. 승인 Blockout
+## 3. 문서 이미지
+
+### Scenario Art Reference
+
+![1-1 Scenario Art Reference](./images/04_scenario_art_reference.png)
+
+`APPROVED ART REFERENCE`: C04 `open-swing`, local Player Y `-832~-608`, Desktop Zoom `1.0`을 사용한다. 약 48px Player, Anchor C 한 개, Player의 Grapple Arm에서 C로 이어지는 live Cyan Rope 한 줄, P3 Landing, R3 Recovery와 비활성 Fan의 화면 위계를 정한다. Enemy·Wind·Augment·Terminal·Gate와 전체 Route 선은 포함하지 않는다.
+
+이 이미지는 조명·상대 크기·Gameplay 가독성 기준이며 Platform 위치를 Runtime Collision으로 복제하지 않는다. 생성 기록과 사후 검수 결과는 [`images/README.md`](./images/README.md)에 보존한다.
+
+### Approved Blockout
 
 ![1-1 승인 Blockout](./images/03_approved_blockout.svg)
 
@@ -137,6 +147,7 @@
 - 배경 이미지 위치를 Collision 지형으로 그대로 복제한다.
 - 전체 Stage 조감도와 실제 카메라 Shot을 같은 것으로 취급한다.
 - 문서와 Runtime 좌표 중 하나만 수정해 둘이 어긋난다.
+- `04_scenario_art_reference.png`를 전체 Stage 지도나 통이미지 Runtime 배경으로 사용한다.
 
 ## 8. 현재 구현과 다음 작업
 
@@ -148,6 +159,7 @@
 | 첫 클리어 시간 | `RunMetrics.areaTiming`으로 영역별 실제 시간 기록 | 첫 플레이 표본이 90~120초를 벗어나면 강제 대기 없이 Geometry·Camera·Recovery를 조정 |
 | 오브젝트 그래픽 | Mock Shape | 공용 Sector 01 Atlas로 교체 |
 | 배경 | 저비용 절차형 산업 배경 | 재사용 Atlas가 준비되면 같은 Layer 경계에서 교체 |
+| Scenario Art | C04 Open Swing 대표 Shot 승인 | Player Character Master 승인 시 실루엣만 재검수 |
 | 데스크톱·모바일 캡처 | 데스크톱 C01 진입 화면 확인 완료 | C02~C05와 모바일 Acceptance Capture 생성 |
 
 다음 Stage 문서는 이 형식을 복제하되, 1-1의 좌표나 Camera 수치를 복사하지 않는다. `자료 판정 → 승인 Blockout → Camera Shot → Story/System Trigger → 저비용 자산 → Acceptance Capture` 순서만 공통으로 사용한다.

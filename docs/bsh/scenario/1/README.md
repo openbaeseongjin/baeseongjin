@@ -34,7 +34,7 @@
 
 | Stage | 이름 | 핵심 역할 |
 | --- | --- | --- |
-| [1-1](./1-1/README.md) · [제작 정렬](./1-1/PRODUCTION-ALIGNMENT.md) | SERVICE SHAFT | 기본 Rope 오프닝 · 승인 Blockout 기준 확정 |
+| [1-1](./1-1/README.md) · [제작 정렬](./1-1/PRODUCTION-ALIGNMENT.md) | SERVICE SHAFT | 기본 Rope 오프닝 · C04 Art Reference · 승인 Blockout |
 | [1-2](./1-2/README.md) · [제작 정렬](./1-2/PRODUCTION-ALIGNMENT.md) | DOUBLE ANCHOR SHAFT | Airborne Re-Attach · Art 재생성 대기 · 승인 Blockout |
 | [1-3](./1-3/README.md) · [제작 정렬](./1-3/PRODUCTION-ALIGNMENT.md) | SECURITY CHECK | Sentry Telegraph·LOS · Art 재생성 대기 · 승인 Blockout |
 | [1-4](./1-4/README.md) · [제작 정렬](./1-4/PRODUCTION-ALIGNMENT.md) | MAINTENANCE NODE | 첫 Foundation 선택 · Art 재생성 대기 · 구현 Gap 명시 |

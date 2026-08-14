@@ -183,18 +183,19 @@ FORBIDDEN
   - `APPROVED BLOCKOUT`: 좌표·Geometry 기준이며 Art Reference가 아님
 - Stage README 또는 `images/README.md`에 생성 목적, 사용한 Camera Zone, 허용 범위, 알려진 불일치를 기록한다.
 - 프롬프트와 검수 결과는 같은 Stage 문서 변경에 남긴다. 생성 도구의 대화 기록만을 유일한 근거로 삼지 않는다.
+- 프로젝트용으로 승인한 이미지는 생성 도구의 기본 폴더나 대화 미리보기에만 남기지 않는다. Stage `images/`의 PNG, 생성 기록과 상태 변경을 같은 Git 커밋과 Pull Request로 올리고 `main` 병합까지 완료한다.
 
 ## 11. 현재 이미지 전환 판정
 
 | 자료 | 현재 판정 | 다음 조치 |
 | --- | --- | --- |
 | Sector 01 공용 배경 | `APPROVED MOOD REFERENCE` | 환경 분위기에만 계속 사용 |
-| 1-1 Scenario Art | `PENDING REGENERATION` | 첫 대표 Camera Shot 신규 생성 필요 |
+| 1-1 `04_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C04 Open Swing의 Player 크기·한 줄 live Rope·C/P3/R3 위계 기준 |
 | 1-2 `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | 전체 경로 선을 제거하고 대표 Camera Shot으로 재생성 |
 | 1-3 `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | live Rope와 경로 도식을 분리해 재생성 |
 | 1-4 `01_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | Player 크기·실루엣과 Anchor 연결 의미를 통일해 재생성 |
 
-재생성 순서는 Player 크기 편차가 가장 큰 `1-4 → 1-1 → 1-2 → 1-3`을 권장한다. 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다.
+남은 재생성 순서는 Player 크기 편차가 가장 큰 `1-4 → 1-2 → 1-3`을 권장한다. 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다.
 
 ## 12. 리소스 절약 원칙
 
