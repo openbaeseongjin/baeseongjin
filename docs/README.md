@@ -80,3 +80,4 @@
 | [`bsh/scenario/2/README.md`](./bsh/scenario/2/README.md) | `bsh` Sector 02 Worker District 마스터플랜(2-1~2-8 개요) |
 | [`bsh/scenario/2/2-1/README.md`](./bsh/scenario/2/2-1/README.md) | `bsh` Worker District 첫 저압 전환 Stage(2-1) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-3/README.md`](./bsh/scenario/2/2-3/README.md) | `bsh` 첫 Rope Specialization 선택 Rest/Reward Stage(2-3) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-4/README.md`](./bsh/scenario/2/2-4/README.md) | `bsh` Sector 02 첫 본격 Multi-Route·Patrol Drone Stage(2-4) Blockout 후보·제작 규격 |
