@@ -36,6 +36,7 @@
 25. [Sector 02에서 피해야 할 것](#25--sector-02에서-피해야-할-것)
 26. [구현 순서](#26--구현-순서)
 27. [Sector 02 Final Summary](#27--sector-02-final-summary)
+28. [Sector 02 배경 아트 레퍼런스](#28--sector-02-배경-아트-레퍼런스)
 
 ---
 
@@ -634,6 +635,33 @@ FOUNDATION      → SPECIALIZATION
 ```
 
 Sector 마지막에 Player가 가져야 할 질문은 **"왜 이 구역 사람들만 위로 올라가지 못한 거지?"** — 이 질문을 들고 SECTOR 03 COMMERCIAL로 진입한다.
+
+---
+
+## 28 · SECTOR 02 배경 아트 레퍼런스
+
+![Sector 02 Worker District 배경 레퍼런스](./images/sector-02-background-reference.png)
+
+### 적용 범위
+
+이 이미지는 `2-1`부터 `2-8`까지 이어지는 Sector 02 Worker District 전체의 공용 배경 아트 레퍼런스다. 노동자 주거 구역이 수직으로 겹겹이 쌓인 인상, 색과 조명, Community Notice·Shelter Access·Evacuation Walkway·Transfer Platform 같은 반복 표지판의 정보 밀도, 공간의 깊이를 정하는 기준으로 사용한다.
+
+이미지 속 다리·발판·표지판 배치를 그대로 레벨 지형으로 복제하지 않는다. 실제 이동 경로, 충돌, Anchor, Patrol Drone, Recovery 배치는 각 Stage README의 Blockout 규격을 우선한다.
+
+### 핵심 시각 방향
+
+- Dark Navy·Charcoal을 바탕으로 반복되는 Housing Module, 다리, 배관, 체인이 겹친 노동자 주거 구조물을 만든다.
+- 중앙에 크고 밝은 Vertical Void(폭포/역광)를 두어 Rope 이동 궤적을 위한 여백과 수직 깊이를 동시에 확보한다.
+- Community Notice, Shelter Capacity, Evacuation Walkway, Upper Transit, Priority Access 같은 표지판·배너는 Sector 02 Story Beat(2-1 Community Notice → 2-5/2-7 Evacuation·Shelter 상태 → 2-8 Priority Access)를 한 이미지 안에 압축해서 보여주는 참고 자료다. 개별 Stage에서 정확히 같은 문구·순서로 재현할 필요는 없다.
+- Cyan은 Rope·Anchor 언어로 보호하고, 배경 표지판·배너의 정보색(White/Red/Warm)이 Cyan과 경쟁하지 않게 배치한다.
+- 창문 조명 같은 작은 온기(Warm Yellow)를 낮은 밀도로 남겨 "사람이 살았던 공간"이라는 인상을 유지한다.
+
+### 자산 상태
+
+- 제공 이미지 크기: `1536 × 1024 px`
+- 저장 위치: `docs/bsh/scenario/2/images/sector-02-background-reference.png`
+- 현재 용도: 기획·아트 방향을 맞추기 위한 문서용 레퍼런스
+- 런타임 적용: 원본 출처, 사용권, 최종 제작 규격을 확인한 뒤 별도 환경 자산으로 전환한다.
 
 ---
 
