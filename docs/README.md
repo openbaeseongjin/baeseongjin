@@ -88,13 +88,21 @@
 | [`bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md) | 1-8 Runtime 좌표 대조·두 Turret Crossfire 금지 구현 확인·Camera/Story 미구현 명시 계약 |
 | [`bsh/scenario/2/README.md`](./bsh/scenario/2/README.md) | `bsh` Sector 02 Worker District 마스터플랜(2-1~2-8 개요) |
 | [`bsh/scenario/2/2-1/README.md`](./bsh/scenario/2/2-1/README.md) | `bsh` Worker District 첫 저압 전환 Stage(2-1) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md) | 2-1 Runtime 좌표 대조·Anchor Object 설계-구현 불일치 명시 계약 |
 | [`bsh/scenario/2/2-2/README.md`](./bsh/scenario/2/2-2/README.md) | `bsh` 첫 Patrol Drone·Moving Threat Stage(2-2) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-2/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-2/PRODUCTION-ALIGNMENT.md) | 2-2 Runtime 좌표 대조·Patrol Drone AI 구현 확인·P4 누락 명시 계약 |
 | [`bsh/scenario/2/2-3/README.md`](./bsh/scenario/2/2-3/README.md) | `bsh` 첫 Rope Specialization 선택 Rest/Reward Stage(2-3) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-3/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-3/PRODUCTION-ALIGNMENT.md) | 2-3 Runtime 좌표 대조·interact-choice 완료 Gap 계약 |
 | [`bsh/scenario/2/2-4/README.md`](./bsh/scenario/2/2-4/README.md) | `bsh` Sector 02 첫 본격 Multi-Route·Patrol Drone Stage(2-4) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-4/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-4/PRODUCTION-ALIGNMENT.md) | 2-4 Runtime 좌표 대조·Patrol Drone AI 구현 확인 계약 |
 | [`bsh/scenario/2/2-5/README.md`](./bsh/scenario/2/2-5/README.md) | `bsh` Evacuation Story Pressure·Multi-Route Stage(2-5) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-5/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-5/PRODUCTION-ALIGNMENT.md) | 2-5 Runtime 좌표 대조·Upper Transit Gate 봉쇄 구현 확인 계약 |
 | [`bsh/scenario/2/2-6/README.md`](./bsh/scenario/2/2-6/README.md) | `bsh` Enemy 없는 Relief·주거 규모 Reveal Stage(2-6) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-6/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-6/PRODUCTION-ALIGNMENT.md) | 2-6 Runtime 좌표 대조 계약 |
 | [`bsh/scenario/2/2-7/README.md`](./bsh/scenario/2/2-7/README.md) | `bsh` 2 Patrol Drone 순차·Build Synthesis·TRANSFER SUSPENDED 공개 Stage(2-7) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-7/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-7/PRODUCTION-ALIGNMENT.md) | 2-7 Runtime 좌표 대조·두 Drone Crossfire 비겹침 구현 확인 계약 |
 | [`bsh/scenario/2/2-8/README.md`](./bsh/scenario/2/2-8/README.md) | `bsh` Sector 02 Finale·Group A/B/C Transfer 결과 공개 Stage(2-8) Blockout 후보·제작 규격 |
+| [`bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md) | 2-8 Runtime 좌표 대조·Story Reveal cueId 순서 확인·Post-Sector 전환 미확정 명시 계약 |
 | [`bsh/scenario/3/README.md`](./bsh/scenario/3/README.md) | `bsh` Sector 03 Commercial District 마스터플랜(3-1~3-8 개요, HYPOTHESIS) |
 | [`bsh/scenario/3/3-1/README.md`](./bsh/scenario/3/3-1/README.md) | `bsh` Worker→Commercial District 저압 전환 Stage(3-1) Blockout 후보·제작 규격 |
 | [`bsh/scenario/3/3-2/README.md`](./bsh/scenario/3/3-2/README.md) | `bsh` 첫 Access Scan Field(Scanner) Stage(3-2) Blockout 후보·제작 규격, 구현 의존성 명세 포함 |
