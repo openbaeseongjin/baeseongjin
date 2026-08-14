@@ -2,6 +2,7 @@ import { CameraWorldRenderer, SceneRendererComposition } from "./SceneRendererCo
 import {
     AttachRangeRenderer,
     AttachmentCandidateRenderer,
+    AuthoredWorldObjectRenderer,
     BackdropRenderer,
     CombatEffectRenderer,
     EventEffectRenderer,
@@ -27,6 +28,7 @@ export class PolygonSceneRenderer {
                 new BackdropRenderer(),
                 new CameraWorldRenderer([
                     new WorldGeometryRenderer(),
+                    new AuthoredWorldObjectRenderer(),
                     new AttachRangeRenderer(),
                     new RopeRenderer(localRopes),
                     new RopeRenderer(remoteRopes),

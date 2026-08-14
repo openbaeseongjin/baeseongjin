@@ -1,5 +1,9 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
-import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
+import { boundsForVertices, centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
+import {
+    DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
+    worldObjectPresentation
+} from "../assets/WorldObjectPresentationCatalog.js";
 
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
@@ -89,9 +93,9 @@ export class WorldGeometryRenderer {
         if (this.cachedWorld === world) return this.cachedSurfaces;
         this.cachedWorld = world;
         this.cachedSurfaces = Object.freeze(
-            (world.surfaces ?? []).map((surface) =>
-                Object.freeze({ surface, bounds: boundsForVertices(surface.vertices) })
-            )
+            (world.surfaces ?? [])
+                .filter(({ renderable }) => renderable !== false)
+                .map((surface) => Object.freeze({ surface, bounds: boundsForVertices(surface.vertices) }))
         );
         return this.cachedSurfaces;
     }
@@ -173,6 +177,95 @@ export class WorldGeometryRenderer {
         context.textAlign = "center";
         context.textBaseline = "middle";
         context.fillText("정상", summit.x, summit.y);
+        context.restore();
+    }
+}
+
+export class AuthoredWorldObjectRenderer {
+    constructor({ presentationCatalog = DEFAULT_WORLD_OBJECT_MOCK_CATALOG } = {}) {
+        this.presentationCatalog = presentationCatalog;
+    }
+
+    draw({ context, scene, viewport, renderStats }) {
+        const objects = (scene.world.objects ?? []).filter(
+            (object) => this.presentationFor(object)?.renderMode === "mock-shape"
+        );
+        const visible = objects.filter((object) => {
+            const style = this.presentationFor(object);
+            return isVisible(
+                viewport,
+                centeredBounds(object.position, { width: style.radius * 2, height: style.radius * 2 })
+            );
+        });
+        for (const object of visible) this.drawObject(context, object, scene.worldProgress);
+        const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
+        const visibleRecoveryPoints = recoveryPoints.filter((point) =>
+            isVisible(viewport, centeredBounds(point, { width: 24, height: 24 }))
+        );
+        for (const point of visibleRecoveryPoints) this.drawRecoveryPoint(context, point);
+        renderStats?.recordCollection("worldObjects", objects.length, visible.length);
+        renderStats?.recordCollection("recoveryPoints", recoveryPoints.length, visibleRecoveryPoints.length);
+    }
+
+    presentationFor(object) {
+        return worldObjectPresentation(this.presentationCatalog, object.presentationId);
+    }
+
+    drawRecoveryPoint(context, point) {
+        context.save();
+        context.strokeStyle = "#86efac";
+        context.fillStyle = "rgba(134, 239, 172, 0.16)";
+        context.lineWidth = 2;
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.arc(point.x, point.y, 11, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.restore();
+    }
+
+    drawObject(context, object, progress = null) {
+        const style = this.presentationFor(object);
+        const objectiveComplete = object.objectiveId
+            ? progress?.completedObjectiveIds?.includes(object.objectiveId)
+            : false;
+        const gateUnlocked = object.gateId ? progress?.unlockedGateIds?.includes(object.gateId) : false;
+        context.save();
+        context.translate(object.position.x, object.position.y);
+        context.strokeStyle = style.color;
+        context.fillStyle = `${style.color}${objectiveComplete || gateUnlocked ? "66" : "22"}`;
+        context.lineWidth = objectiveComplete || gateUnlocked ? 5 : 3;
+
+        if (object.kind === "terminal" || object.kind === "augment-node") {
+            const width = style.radius * 1.7;
+            const height = style.radius * 1.25;
+            context.fillRect(-width, -height, width * 2, height * 2);
+            context.strokeRect(-width, -height, width * 2, height * 2);
+        } else if (object.kind === "gate") {
+            context.setLineDash(gateUnlocked ? [10, 9] : []);
+            context.strokeRect(-style.radius, -style.radius * 2.2, style.radius * 2, style.radius * 4.4);
+        } else {
+            context.beginPath();
+            context.arc(0, 0, style.radius, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+        }
+
+        if (object.kind === "wind-source") {
+            for (let angle = 0; angle < Math.PI * 2; angle += Math.PI * 0.5) {
+                context.beginPath();
+                context.moveTo(Math.cos(angle) * 5, Math.sin(angle) * 5);
+                context.lineTo(Math.cos(angle + 0.45) * style.radius, Math.sin(angle + 0.45) * style.radius);
+                context.stroke();
+            }
+        }
+        if (object.label) {
+            context.fillStyle = "#ecfeff";
+            context.font = "900 12px ui-monospace, monospace";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillText(object.label, 0, 0);
+        }
         context.restore();
     }
 }

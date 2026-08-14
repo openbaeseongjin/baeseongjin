@@ -43,7 +43,7 @@ export class PixelDecorationRenderer {
         if (this.cachedWorld === world && this.cachedGroup === group) return this.cachedPlacements;
         this.cachedWorld = world;
         this.cachedGroup = group;
-        const surfaces = world.surfaces ?? [];
+        const surfaces = (world.surfaces ?? []).filter(({ renderable }) => renderable !== false);
         const surfaceBounds = surfaces.map((surface) => boundsForVertices(surface.vertices)).filter(Boolean);
         const placements = [];
 

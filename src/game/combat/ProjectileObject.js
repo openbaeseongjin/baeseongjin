@@ -41,6 +41,7 @@ class ProjectileObject extends SimulationDrivenObject {
         predictionId = null,
         speed = Math.hypot(velocity.x, velocity.y),
         predictCollision = false,
+        canCutRope = true,
         objectType,
         renderCollection,
         collisionRejectionPolicy,
@@ -56,6 +57,7 @@ class ProjectileObject extends SimulationDrivenObject {
         this.ageSeconds = 0;
         this.speed = speed;
         this.objectType = objectType;
+        this.canCutRope = canCutRope;
         if (predictionId !== null) this.predictionId = predictionId;
         this.#renderCollection = renderCollection;
         this.#collisionRejectionPolicy = collisionRejectionPolicy;
@@ -105,7 +107,8 @@ class ProjectileObject extends SimulationDrivenObject {
             predictionId: this.predictionId ?? null,
             radius: this.radius,
             damage: this.damage,
-            speed: this.speed
+            speed: this.speed,
+            canCutRope: this.canCutRope
         });
     }
 }

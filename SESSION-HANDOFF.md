@@ -64,13 +64,17 @@ Sector 01-8의 현재 기준은 `docs/bsh/scenario/1/1-8/README.md`의 `CONTAINM
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태이며 `SECTOR 01`의 `1-1`~`1-8` 시나리오가 모두 작성됐다. 전체 48개 중 나머지 40개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.
+장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태다. 2026-08-14 최신 `origin/main` 기준 현재 상세 시나리오는 `SECTOR 01`의 `1-1`~`1-8`, `SECTOR 02`의 `2-1`~`2-8`, `SECTOR 03`의 `3-1`~`3-2`, 총 18개다. 메인 개발은 날짜별 예정 수량이 아니라 현재 실제 시나리오가 나온 영역까지 섹터·번호 순서대로 mock 연결하고, 새 문서가 추가되면 Git 변경을 확인해 이어 붙인다. 현재 runtime은 먼저 확정된 `1-1 → 2-8` 16개 영역을 한 월드로 연결했다. 새 `3-1 POWERED PROMENADE`는 Enemy·새 기믹이 없는 blockout이고 `3-2 SCANNER GALLERY`는 새 Access Scan Field를 도입한다. 앞단의 Sector 02 Boss/전환과 새 Scanner system은 큰 방향 변경이므로 사용자 검토 전 구현·연결 방식을 고정하지 않는다.
 
-현재 `docs/bsh/scenario/`에 실제로 등록된 맵 문서는 `1-1`~`1-8`의 8개다. `SECTOR 01`은 전체 mock 연결을 시작할 수 있으며, 전체 48개 중 나머지 40개 맵 명세는 8월 19일까지 새로 작성한다. 그래픽·오디오 정식 리소스는 비차단이지만, 메인 개발자가 이후 섹터의 전체 연결을 완료하려면 해당 섹터의 8개 맵 흐름과 오브젝트 요구가 먼저 정리되어 있어야 한다.
+`2-3 RESIDENTIAL SERVICE NODE`의 Specialization은 1-4에서 고른 Foundation Augment를 유지한 채 그 방향을 한 단계 심화하는 성장으로 시나리오에 명시됐다. Artifact 선택의 입력·UI 흐름은 재사용 후보지만 Artifact와 Rope Augment의 ID·의미 체계는 합치지 않는다. 실제 Specialization 이름·효과·수치·선택 pool은 아직 미정이므로 geometry와 node flow만 먼저 구현하고 성장 규칙을 임의 확정하지 않는다. `2-5 EVACUATION WALKWAY`의 잠긴 Upper Transit Gate는 서사적 장애물이며 실제 다음 진행 경로는 Maintenance Service Frame이다. `2-8 EVACUATION PLATFORM`은 Boss가 없는 Sector 02 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 그 뒤 Boss/`3-1` 전환 순서는 공통 Boss Flow가 확정되기 전 연결하지 않는다. 새 시나리오의 좌표·문구·cue 조정은 기존 계약 안에서 흡수하지만 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계 변경은 사용자 검토를 먼저 받는다.
+
+Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않는다. 기존 `EnemyObject`에 맵이 제공하는 순찰 corridor/route와 activation band를 소비하는 선택적 Patrol capability를 조합하고 기존 acquire·track·lock·fire·cooldown과 투사체 규칙을 재사용한다. Patrol 자료가 없는 기존 Sentry는 정지 동작을 그대로 유지한다. Drone은 자기 activation band를 벗어나지 않고 한 공격 cycle 동안 선택한 target을 유지하며, 다른 band의 플레이어 진입으로 cross-zone 재조준하거나 두 Drone이 지속 crossfire를 만들지 않게 한다. 영역별 stable ID와 미확정 경계는 `docs/sector-02-game-object-catalog.md`를 기준으로 한다.
 
 맵 외에도 개발을 막는 세 기획 게이트가 있다. 증강 내용·현재 아티팩트와 Module의 관계·관련 UI와 게임 요소는 8월 14일까지, NPC 역할·대사·대화 시스템·관련 UI와 게임 요소는 8월 15일까지, 엔딩·진입 조건·최종 흐름·관련 UI와 게임 요소는 8월 19일까지 확정한다. 각각 첫 Maintenance Node, 첫 NPC 섹터, `SECTOR 06` 구현의 선행 조건이다. 역할별 병렬 일정과 마감은 `docs/development-schedule.md`, 상세 구현 완료 기준은 `docs/implementation-roadmap.md`의 **제출 전 시나리오 구현 트랙**을 따른다.
 
-메인 개발자는 `docs/bsh/scenario/`의 전체 48개 맵을 `SECTOR 01 → 02 → 03 → 04 → 05 → 06` 순서로 구현하며, 각 섹터 안에서는 8개 맵을 번호순으로 진행한다. 각 맵을 시작할 때 등장 오브젝트·상태·표현 cue를 먼저 정리하고 gameplay와 레벨 흐름을 mock 이미지·사운드로 플레이 가능하게 만든다. 그래픽·오디오 담당자는 이 목록과 mock 배치를 이어받아 앞 섹터부터 정식 리소스를 병행 제작한다. 6개 섹터 mock 연결은 8월 21일까지, 전체 최종 스퍼트는 8월 22~23일에 진행한다. 상세 순서는 `docs/implementation-roadmap.md`의 **제출 전 시나리오 구현 트랙**을 따른다.
+메인 개발자는 현재 작성된 맵을 `SECTOR 01 → 02 → 03 → 04 → 05 → 06` 및 섹터 내 번호 순서로 구현한다. 각 맵을 시작할 때 등장 오브젝트·상태·표현 cue를 먼저 정리하고 gameplay와 레벨 흐름을 mock으로 플레이 가능하게 만든다. 맵 definition에는 이미지·atlas·음원 파일 경로를 넣지 않고 stable object/state/event/presentation/cue ID만 둔다. 환경·오디오는 검증된 runtime catalog의 package를 사용하고 준비되지 않았으면 `default-mock`을 선택한다. authored object는 교체 가능한 world-object mock presentation catalog를 거쳐 표시한다. 그래픽·오디오 담당자는 같은 ID와 mock 배치를 이어받아 정식 package·binding만 교체하며 지형·물리·완료 조건·Gate·네트워크 권위를 바꾸지 않는다.
+
+로컬 실행과 네트워크 실행은 별도의 맵·게임플레이 구현이 아니다. 둘 다 `GameSimulationFactory`에서 같은 현재 authored catalog로 만든 하나의 `GameSimulation`을 사용한다. 네트워크 경로는 서버 스냅샷의 동일 world revision과 공용 진행 상태를 검증·복원할 뿐 별도 맵을 만들지 않는다. 실행 방식마다 월드 catalog를 따로 선택하는 코드를 추가하지 않는다.
 
 시나리오 mock 연결 뒤 최근 멀티 변경을 실제 두 기기에서 확인한다. 두 플레이어가 겹치지 않고 서로를 지지하는지, 모바일 HP가 항상 보이는지, 각 플레이어의 자동 공격 한 발이 예측본과 서버 확정본으로 중복 표시되지 않는지를 한 채널에서 함께 검증한다. 실패 시 채널 번호·월드 시드·`?metrics=1` 진단 복사 결과와 재현 순서를 남긴다.
 

@@ -91,10 +91,26 @@ export function updatePlayerProjectiles({
 }
 
 export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, dt }) {
-    const context = { targets, projectiles, registry, config, dt };
     return Object.freeze(
         enemies
-            .map((enemy) => advanceSimulationObject(enemy, "enemy-weapon", context))
+            .map((enemy) => {
+                const eligibleTargets = enemy.activation
+                    ? targets.filter(
+                          ({ physics }) =>
+                              physics.position.x >= enemy.activation.x &&
+                              physics.position.x <= enemy.activation.x + enemy.activation.width &&
+                              physics.position.y >= enemy.activation.y &&
+                              physics.position.y <= enemy.activation.y + enemy.activation.height
+                      )
+                    : targets;
+                return advanceSimulationObject(enemy, "enemy-weapon", {
+                    targets: eligibleTargets,
+                    projectiles,
+                    registry,
+                    config,
+                    dt
+                });
+            })
             .filter((projectile) => projectile !== null)
     );
 }

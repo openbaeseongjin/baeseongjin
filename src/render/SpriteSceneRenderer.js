@@ -2,6 +2,7 @@ import { CameraWorldRenderer, SceneRendererComposition } from "./SceneRendererCo
 import {
     AttachRangeRenderer,
     AttachmentCandidateRenderer,
+    AuthoredWorldObjectRenderer,
     BackdropRenderer,
     CombatEffectRenderer,
     EventEffectRenderer,
@@ -65,6 +66,7 @@ export class SpriteSceneRenderer {
         });
 
         const actorRenderers = new CameraWorldRenderer([
+            new AuthoredWorldObjectRenderer(),
             new AttachRangeRenderer(),
             new RopeRenderer(localRopes),
             new RopeRenderer(remoteRopes),

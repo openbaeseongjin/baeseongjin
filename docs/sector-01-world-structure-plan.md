@@ -2,11 +2,19 @@
 
 작성일: 2026-08-14
 
-상태: 기획 결정 반영 완료, 구현 전 계획
+상태: 기획 결정 반영 완료, authored mock 구현 진행 중
 
 제품 기준: [`game-hackathon-planning.md`](./game-hackathon-planning.md)
 
 영역별 기준: [`bsh/scenario/`](./bsh/scenario/)
+
+게임 오브젝트 인계 기준: [`sector-01-game-object-catalog.md`](./sector-01-game-object-catalog.md)
+
+구현 범위는 날짜별 부분 착수가 아니라 현재 시나리오가 확정된 `1-1`~`1-8` 전체 mock 연결이다. 각 영역을 구현할 때 지형·회복 지점·오브젝트·상태·완료 목표·Gate·그래픽/오디오 cue를 게임 오브젝트 카탈로그와 runtime area definition에 동시에 정리한다. 구현 중 `git status`와 최신 `origin/main`의 시나리오 변경을 확인하고, 좌표·cue 조정은 계속 흡수하되 맵 순서·핵심 기믹·완료 조건·Gate 연결이 바뀌는 큰 방향 전환은 사용자 검토 뒤 반영한다.
+
+맵 definition은 이미지·음원 파일 경로, atlas frame, WAV clip을 소유하지 않는다. 지형은 선택된 environment runtime package가 기존 collision surface 위에 표현하고, 오브젝트와 사건은 stable object/state/event ID만 공개한다. bootstrap에서 검증된 production package를 주입하며 준비되지 않았으면 `default-mock` environment/audio package를 사용한다. 정식 리소스 교체가 맵 좌표·물리·완료 조건·네트워크 상태를 바꾸면 안 된다.
+
+로컬 실행과 네트워크 실행은 서로 다른 맵·게임플레이 구현이 아니다. 둘 다 `GameSimulationFactory`가 만든 같은 `GameSimulation`과 현재 authored catalog를 사용한다. 네트워크 경로는 새 맵을 만들지 않고 서버 스냅샷의 동일 world revision과 공용 진행 상태를 검증·복원한다. 실행 방식에 따라 월드 catalog를 따로 선택하지 않는다.
 
 ## 목적
 
@@ -15,6 +23,7 @@
 ## 확정된 기획 결정
 
 - 실제 월드는 하나다. `1-1`, `1-2` 같은 맵 번호는 별도로 로드되는 월드나 독립 게임 세션이 아니라 같은 월드 안의 진행 영역이다.
+- 로컬·네트워크 실행은 같은 월드 정의·진행 규칙·오브젝트 상태를 사용한다. 차이는 입력 전달과 권위 상태 복제뿐이며 맵을 별도로 구현하지 않는다.
 - 각 영역은 현재 영역의 문제를 처리한 뒤 명시적 출구를 통과해야 다음 영역으로 넘어간다.
 - 문제 처리는 적 처치만 뜻하지 않는다. 시나리오에 따라 처치·무력화·우회·상호작용·이동 달성·증강 선택이 완료 조건이 될 수 있다.
 - 출구는 붕괴 도시 탈출의 방향, 현재 영역 완료, 다음 영역 진입을 플레이어에게 명확히 보여주는 장치다.
@@ -25,6 +34,7 @@
 - 각 섹터에는 보스가 1개씩 있다. 기획자가 정한 보스 진입 지점에서 일반 타이머와 붕괴를 종료하고 잔여 시간을 폐기한 뒤 별도의 보스 전투 타이머를 시작한다.
 - 보스 타이머 0초부터 Arena가 붕괴하고 전원 탈락 시 보스 시도만 재시작한다. 보스 처치 뒤 다음 섹터에 진입하면 새 일반 타이머를 시작한다.
 - 정확한 시간·Gate 보충량·붕괴 속도는 mock으로 구현한 뒤 공동 플레이로 조정한다. 상세 흐름은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
+- 다음 Sector의 Patrol Drone은 별도 맵 전용 적이 아니라 기존 `EnemyObject`의 선택적 Patrol capability다. 맵은 corridor/route와 activation band만 소유하고 공격 FSM·투사체는 재사용한다. Patrol이 없는 Sentry는 기존 정지 동작을 유지한다.
 
 ## 아직 정해야 하는 기획
 
@@ -104,7 +114,7 @@
 - `src/game/simulation/GameSimulation.js`: 하나의 월드 수명주기와 진행 상태를 조립하되 영역별 오브젝트 종류를 직접 분기하지 않는다.
 - 영역 완료·Gate 상태를 맡는 공용 진행 객체: 구체 Terminal·Sentry·Wind 구현 대신 안정적인 목표 ID와 완료 사건을 집계한다.
 - renderer·audio binding: gameplay 상태가 공개한 영역·Gate·오브젝트 사건을 cue로 표현하며 규칙을 소유하지 않는다.
-- 멀티플레이 snapshot: 공용 월드 진행·Gate·타이머·붕괴·탈락 상태를 공유하되 구체 권위와 재접속 규칙은 구현 설계에서 확정하고, 영역 전환을 새 월드 seed 발급으로 표현하지 않는다.
+- 네트워크 snapshot: 같은 simulation의 공용 월드 진행·Gate·타이머·붕괴·탈락 상태를 공유하되 구체 권위와 재접속 규칙은 구현 설계에서 확정하고, 별도 네트워크용 맵이나 영역 전환용 새 world seed를 만들지 않는다.
 
 ## 테스트 가능한 완료 기준
 

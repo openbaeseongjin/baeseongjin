@@ -7,6 +7,7 @@ export function findRopeAttachment({ aimPoint, playerPosition, surfaces, maxAtta
     let best = null;
     let bestScore = Number.POSITIVE_INFINITY;
     for (const surface of surfaces) {
+        if (surface.grappleable === false) continue;
         const point = closestPointOnSurface(aimPoint, surface);
         const playerDistance = playerPosition.distanceTo(point);
         if (playerDistance > maxAttachDistance) continue;

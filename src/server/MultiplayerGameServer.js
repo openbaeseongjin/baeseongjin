@@ -3,7 +3,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { FixedStepRunner } from "../core/sim/FixedStepRunner.js";
 import { AuthorityServerSession } from "../game/runtime/AuthorityServerSession.js";
 import { AuthorityWireAdapter } from "../game/runtime/AuthorityWireAdapter.js";
-import { GameSimulation } from "../game/simulation/GameSimulation.js";
+import { createCurrentGameSimulation } from "../game/simulation/GameSimulationFactory.js";
 import {
     createWorldSnapshotEnvelope,
     deserializeWorldSnapshotEnvelope,
@@ -49,6 +49,7 @@ export class MultiplayerGameServer {
             allowedOrigins = [],
             channelNumber = () => randomInt(1000, 10000),
             worldSeed = () => randomInt(1, 0x100000000),
+            createSimulation = createCurrentGameSimulation,
             maxUnacknowledgedSnapshots = DEFAULT_MAX_UNACKNOWLEDGED_SNAPSHOTS,
             maxPendingSnapshotBytes = DEFAULT_MAX_PENDING_SNAPSHOT_BYTES
         } = {}
@@ -60,12 +61,14 @@ export class MultiplayerGameServer {
         if (!Number.isSafeInteger(maxPendingSnapshotBytes) || maxPendingSnapshotBytes < 1) {
             throw new Error("maxPendingSnapshotBytes must be a positive safe integer");
         }
+        if (typeof createSimulation !== "function") throw new Error("createSimulation must be a function");
         this.httpServer = httpServer;
         this.path = path;
         this.maxPlayers = maxPlayers;
         this.allowedOrigins = new Set(allowedOrigins);
         this.channelNumber = channelNumber;
         this.worldSeed = worldSeed;
+        this.createSimulation = createSimulation;
         this.maxUnacknowledgedSnapshots = maxUnacknowledgedSnapshots;
         this.maxPendingSnapshotBytes = maxPendingSnapshotBytes;
         this.webSocketServer = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
@@ -114,7 +117,7 @@ export class MultiplayerGameServer {
     }
 
     createRoom(channelId) {
-        const simulation = new GameSimulation({ worldSeed: this.worldSeed() });
+        const simulation = this.createSimulation({ worldSeed: this.worldSeed() });
         const session = new AuthorityServerSession({ simulation });
         const room = {
             channelId,
@@ -152,7 +155,10 @@ export class MultiplayerGameServer {
         const playerId =
             room.sockets.size === 0
                 ? room.simulation.getPrimaryPlayerId()
-                : room.simulation.addPlayer({ x: 160 + room.sockets.size * 40, y: 500 }).entity.id;
+                : room.simulation.addPlayer({
+                      x: (room.simulation.world.areas?.[0]?.entry.x ?? 160) + room.sockets.size * 40,
+                      y: room.simulation.world.areas?.[0]?.entry.y ?? 500
+                  }).entity.id;
         room.sockets.set(socket, playerId);
         this.connections.set(socket, room);
         const delivery = {

@@ -48,6 +48,7 @@ export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
         const player = state?.localPlayer;
         const canHitPlayer = player?.lifeState === "active";
         const ropeHit = Boolean(
+            this.canCutRope &&
             canHitPlayer &&
             player.rope?.isAttached &&
             distancePointToSegment(this.position, ropeAttachmentPoint(player, player.rope), player.rope.anchor) <=

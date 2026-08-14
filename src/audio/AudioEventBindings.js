@@ -53,10 +53,34 @@ function checkpointBinding(event, context) {
     });
 }
 
+function authoredProgressBinding(event, context) {
+    if (event.eventType === "gate-unlocked") {
+        return Object.freeze({
+            cueId: "ui-confirm",
+            request: Object.freeze({
+                ...context,
+                emitterId: event.gateId,
+                causalId: `gate-unlocked:${event.gateId}`
+            })
+        });
+    }
+    if (event.eventType !== "gate-crossed") return null;
+    return Object.freeze({
+        cueId: "gameplay-checkpoint-reached",
+        request: Object.freeze({
+            ...context,
+            emitterId: event.gateId,
+            causalId: `gate-crossed:${event.gateId}`,
+            position: event.position ?? context.listener
+        })
+    });
+}
+
 export const DEFAULT_AUDIO_EVENT_HANDLERS = Object.freeze([
     projectileSpawnBinding,
     playerHitBinding,
-    checkpointBinding
+    checkpointBinding,
+    authoredProgressBinding
 ]);
 
 export class AudioEventBindings {

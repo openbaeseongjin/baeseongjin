@@ -126,6 +126,41 @@ export function run() {
     });
     assert.equal(predictedRopeCut[0].resolution, "rope-cut", "rope collision must win over body collision");
 
+    const noRopeCutStore = new PredictableProjectileStore();
+    const noRopeCutSpawn = createPredictableSpawnEvent({
+        eventId: "event-standard-sentry-rope-segment",
+        objectId: "enemy-projectile-standard-sentry",
+        objectType: "enemy-projectile",
+        spawnTick: 10,
+        position: { x: 12, y: -40 },
+        velocity: { x: 0, y: 0 },
+        parameters: {
+            radius: 7,
+            damage: 20,
+            ownerId: "enemy-standard-sentry",
+            targetId: "player-1",
+            canCutRope: false
+        }
+    });
+    noRopeCutStore.apply([noRopeCutSpawn], 10, { enemies: [] });
+    const standardSentryImpact = noRopeCutStore.update(0, {
+        enemies: [],
+        localPlayer: {
+            ...localPlayer,
+            angle: 0,
+            rope: {
+                isAttached: true,
+                anchor: { x: 0, y: -100 },
+                attachmentOffset: { x: 12, y: -7 }
+            }
+        }
+    });
+    assert.deepEqual(
+        standardSentryImpact,
+        [],
+        "standard authored Sentry projectiles must pass the Rope without producing a rope-cut claim"
+    );
+
     const playerSpawn = createPredictableSpawnEvent({
         eventId: "event-2",
         objectId: "projectile-1",

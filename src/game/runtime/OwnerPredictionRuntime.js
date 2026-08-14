@@ -107,12 +107,20 @@ export class OwnerPredictionRuntime {
                   rewardedCheckpointIds: snapshot.state.rewardedCheckpointIds ?? []
               };
         this.simulation.preparePrediction(snapshot.state.enemies ?? [], progress.activeCheckpointId);
+        if (this.simulation.worldProgress && snapshot.state.worldProgress) {
+            this.simulation.restoreWorldProgress(
+                snapshot.state.worldProgress,
+                snapshot.state.worldElapsedSeconds ?? snapshot.serverTick * this.fixedDt
+            );
+        }
         if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
     }
 
     reconcile(snapshot, pendingBatches, { rebaseMotion = false } = {}) {
         if (snapshot.worldSeed !== this.simulation.world.seed) throw new Error("prediction world seed mismatch");
-        if (snapshot.worldRevision !== WORLD_GENERATION_REVISION) throw new Error("prediction world revision mismatch");
+        if (snapshot.worldRevision !== (this.simulation.world.definitionRevision ?? WORLD_GENERATION_REVISION)) {
+            throw new Error("prediction world revision mismatch");
+        }
         const sharedOwner = snapshot.state.players.find(({ id }) => id === this.ownerId);
         if (!sharedOwner) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
         const ownerMotionTick = sharedOwner.ownerMotionTick;
