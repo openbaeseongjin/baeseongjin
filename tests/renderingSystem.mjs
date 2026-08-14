@@ -15,7 +15,7 @@ import {
 import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
-import { localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
+import { AuthoredWorldObjectRenderer, localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
 import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
 
 function recordingContext() {
@@ -32,8 +32,17 @@ function recordingContext() {
             translate: (...args) => calls.push(["translate", ...args]),
             rotate: (...args) => calls.push(["rotate", ...args]),
             scale: (...args) => calls.push(["scale", ...args]),
+            beginPath: (...args) => calls.push(["beginPath", ...args]),
+            closePath: (...args) => calls.push(["closePath", ...args]),
             moveTo: (...args) => calls.push(["moveTo", ...args]),
-            lineTo: (...args) => calls.push(["lineTo", ...args])
+            lineTo: (...args) => calls.push(["lineTo", ...args]),
+            fill: (...args) => calls.push(["fill", ...args]),
+            stroke: (...args) => calls.push(["stroke", ...args]),
+            fillRect: (...args) => calls.push(["fillRect", ...args]),
+            strokeRect: (...args) => calls.push(["strokeRect", ...args]),
+            fillText: (...args) => calls.push(["fillText", ...args]),
+            arc: (...args) => calls.push(["arc", ...args]),
+            setLineDash: (...args) => calls.push(["setLineDash", ...args])
         },
         { get: (target, key) => (key in target ? target[key] : () => {}) }
     );
@@ -537,6 +546,39 @@ export async function run() {
         ropeContext.calls.find(([name]) => name === "lineTo"),
         ["lineTo", 52, 53],
         "the shared rope renderer must end at the rotated hand attachment instead of the body centre"
+    );
+    const authoredObjectContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: authoredObjectContext,
+        scene: {
+            worldProgress: { completedObjectiveIds: [], unlockedGateIds: [] },
+            world: {
+                objects: [
+                    {
+                        id: "sector-01-01:anchor-a",
+                        kind: "grapple-landmark",
+                        presentationId: "world-object:grapple-landmark",
+                        position: { x: 40, y: 60 },
+                        label: "A"
+                    }
+                ],
+                areas: [{ recoveryPoints: [{ x: 80, y: 100 }] }]
+            }
+        }
+    });
+    assert.ok(
+        authoredObjectContext.calls.some(([name]) => name === "strokeRect"),
+        "grapple landmarks use a mechanical bracket silhouette"
+    );
+    assert.equal(
+        authoredObjectContext.calls.some(([name]) => name === "arc"),
+        false,
+        "grapple and recovery points are not exposed as circular debug markers"
+    );
+    assert.deepEqual(
+        authoredObjectContext.calls.find(([name]) => name === "fillText")?.slice(1),
+        ["A", 0, -25],
+        "route landmark labels sit outside the grapple fixture instead of inside a circle"
     );
 
     const manifest = {

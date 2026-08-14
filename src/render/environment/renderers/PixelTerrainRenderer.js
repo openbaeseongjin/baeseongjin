@@ -1,5 +1,7 @@
 import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
 import { boundsForVertices, boundsIntersect, circleBounds, intersectBounds, isVisible } from "../../RenderViewport.js";
+import { currentAuthoredArea, sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
+import { drawCheckpointBeacon, drawExitBeacon } from "../../world/WorldMarkerPrimitives.js";
 
 export class PixelTerrainRenderer {
     constructor({ definition, assets }) {
@@ -11,15 +13,15 @@ export class PixelTerrainRenderer {
     }
 
     draw({ context, scene, viewport, renderStats }) {
-        const playerAltitude = scene.player?.position?.y ?? 0;
-        const zone = this.definition.zoneAt(-playerAltitude);
+        const zone = sceneEnvironmentZone(this.definition, scene);
         const material = this.definition.materialFor(zone);
         const palette = zone.palette;
+        const authoredArea = currentAuthoredArea(scene);
         const surfaces = this.surfaceEntries(scene.world);
         const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
 
         for (const entry of visibleSurfaces) {
-            this.drawSurface(context, entry, material, palette, viewport);
+            this.drawSurface(context, entry, material, palette, viewport, authoredArea?.sectorId);
         }
         renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
         this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
@@ -57,7 +59,7 @@ export class PixelTerrainRenderer {
         return this.cachedSurfaces;
     }
 
-    drawSurface(context, entry, material, palette, viewport) {
+    drawSurface(context, entry, material, palette, viewport, sectorId = null) {
         const { surface, bounds } = entry;
         const vertices = surface.vertices;
 
@@ -89,6 +91,57 @@ export class PixelTerrainRenderer {
             context.stroke();
             context.lineCap = "butt";
         }
+        if (sectorId === "sector-01" || sectorId === "sector-02") {
+            this.drawAuthoredStructure(context, vertices, bounds, sectorId, surface);
+        }
+    }
+
+    drawAuthoredStructure(context, vertices, bounds, sectorId, surface) {
+        const width = bounds.maxX - bounds.minX;
+        const height = bounds.maxY - bounds.minY;
+        if (width <= 0 || height <= 0) return;
+        context.save();
+        this.traceSurfacePath(context, vertices);
+        context.clip();
+        context.fillStyle = sectorId === "sector-01" ? "rgba(8, 15, 26, 0.62)" : "rgba(34, 28, 22, 0.48)";
+        context.fillRect(bounds.minX, bounds.minY + Math.min(4, height * 0.2), width, height);
+        context.strokeStyle = sectorId === "sector-01" ? "rgba(103, 232, 249, 0.13)" : "rgba(253, 230, 138, 0.12)";
+        context.lineWidth = 1;
+        context.beginPath();
+        const step = sectorId === "sector-01" ? 32 : 40;
+        for (let x = bounds.minX + step; x < bounds.maxX; x += step) {
+            context.moveTo(x, bounds.minY);
+            context.lineTo(x, bounds.maxY);
+        }
+        context.stroke();
+        if (surface.kind === "sealed-door") {
+            context.strokeStyle = "rgba(148, 163, 184, 0.26)";
+            context.beginPath();
+            for (let y = bounds.minY + 14; y < bounds.maxY; y += 16) {
+                context.moveTo(bounds.minX, y);
+                context.lineTo(bounds.maxX, y);
+            }
+            context.stroke();
+            context.fillStyle = "rgba(245, 158, 11, 0.5)";
+            for (let x = bounds.minX + 8; x < bounds.maxX; x += 24) {
+                context.fillRect(x, bounds.minY + 5, 12, 3);
+            }
+        } else if (surface.kind === "overhang") {
+            context.strokeStyle = "rgba(100, 116, 139, 0.38)";
+            context.beginPath();
+            for (let x = bounds.minX; x < bounds.maxX; x += 48) {
+                context.moveTo(x, bounds.minY);
+                context.lineTo(Math.min(bounds.maxX, x + 48), bounds.maxY);
+                context.moveTo(Math.min(bounds.maxX, x + 48), bounds.minY);
+                context.lineTo(x, bounds.maxY);
+            }
+            context.stroke();
+        }
+        context.fillStyle = sectorId === "sector-01" ? "rgba(165, 243, 252, 0.28)" : "rgba(253, 230, 138, 0.24)";
+        for (let x = bounds.minX + 12; x < bounds.maxX; x += 28) {
+            context.fillRect(x, bounds.minY + 3, 2, 2);
+        }
+        context.restore();
     }
 
     fillSurfaceWithTiles(context, vertices, bounds, material, viewport) {
@@ -189,41 +242,13 @@ export class PixelTerrainRenderer {
             drawn += 1;
             const active = checkpoint.id === activeCheckpoint?.id;
             const reached = checkpoint.level < (activeCheckpoint?.level ?? 0);
-            context.save();
-            context.globalAlpha = reached ? 0.35 : 0.9;
-            context.strokeStyle = active ? "#fbbf24" : "#93c5fd";
-            context.fillStyle = active ? "rgba(251, 191, 36, 0.18)" : "rgba(147, 197, 253, 0.1)";
-            context.lineWidth = active ? 5 : 3;
-            context.beginPath();
-            context.arc(checkpoint.x, checkpoint.y, checkpoint.radius, 0, Math.PI * 2);
-            context.fill();
-            context.stroke();
-            context.fillStyle = active ? "#fde68a" : "#dbeafe";
-            context.font = "800 12px system-ui, sans-serif";
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-            context.fillText(active ? "활성" : "체크", checkpoint.x, checkpoint.y);
-            context.restore();
+            drawCheckpointBeacon(context, checkpoint, { active, reached });
         }
         renderStats?.recordCollection("checkpoints", checkpoints.length, drawn);
     }
 
     drawSummit(context, summit, runState, viewport) {
         if (!summit || runState === "completed" || !isVisible(viewport, circleBounds(summit, summit.radius))) return;
-        context.save();
-        context.globalAlpha = 0.78;
-        context.strokeStyle = "#a7f3d0";
-        context.fillStyle = "rgba(167, 243, 208, 0.12)";
-        context.lineWidth = 4;
-        context.beginPath();
-        context.arc(summit.x, summit.y, summit.radius, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
-        context.fillStyle = "#d1fae5";
-        context.font = "900 13px system-ui, sans-serif";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText("정상", summit.x, summit.y);
-        context.restore();
+        drawExitBeacon(context, summit);
     }
 }
