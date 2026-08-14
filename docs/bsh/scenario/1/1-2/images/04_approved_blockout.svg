@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1088" role="img" aria-labelledby="title desc">
+  <title id="title">Sector 01-2 Double Anchor Shaft approved blockout</title>
+  <desc id="desc">Runtime-aligned 960 by 1088 blockout with four alternating grapple landmarks, three recovery platforms, a non-grapple crossbeam, and an exit gate. No enemy, wind, or damage hazard.</desc>
+  <defs>
+    <style>
+      .bg { fill: #07111e; }
+      .zone { fill: #0f2234; opacity: .38; }
+      .wall { fill: #17283a; stroke: #49647b; stroke-width: 3; }
+      .platform { fill: #526779; stroke: #c1d1dc; stroke-width: 2; }
+      .recovery { fill: #385766; stroke: #79c7d5; stroke-width: 2; stroke-dasharray: 6 4; }
+      .solid { fill: #303946; stroke: #a3afba; stroke-width: 3; }
+      .anchor { fill: #07111e; stroke: #22d3ee; stroke-width: 5; }
+      .route { fill: none; stroke: #22d3ee; stroke-width: 3; stroke-dasharray: 8 7; opacity: .86; }
+      .safe { fill: none; stroke: #7dd3a7; stroke-width: 2; stroke-dasharray: 4 7; opacity: .72; }
+      .panel { fill: #132b34; stroke: #fbbf24; stroke-width: 4; }
+      .gate { fill: #3c2530; stroke: #fb7185; stroke-width: 4; }
+      .player { fill: #f8fafc; stroke: #fb4b5a; stroke-width: 3; }
+      .label { fill: #d9f4ff; font: 700 17px ui-monospace, monospace; }
+      .small { fill: #9fb7c7; font: 700 13px ui-monospace, monospace; }
+      .zone-label { fill: #58768d; font: 700 14px ui-monospace, monospace; letter-spacing: 1px; }
+    </style>
+  </defs>
+  <rect class="bg" width="960" height="1088"/>
+  <rect class="zone" x="0" y="0" width="960" height="144"/>
+  <rect class="zone" x="0" y="352" width="960" height="224"/>
+  <rect class="zone" x="0" y="864" width="960" height="224"/>
+  <rect class="wall" x="0" y="0" width="32" height="1088"/>
+  <rect class="wall" x="928" y="0" width="32" height="1088"/>
+  <text class="zone-label" x="48" y="28">E · SECURITY ACCESS</text>
+  <text class="zone-label" x="48" y="172">D · FLOW TEST</text>
+  <text class="zone-label" x="48" y="380">C · DIRECTION REVERSAL</text>
+  <text class="zone-label" x="48" y="604">B · FIRST HANDOFF</text>
+  <text class="zone-label" x="48" y="892">A · LIFT FAILURE</text>
+
+  <g opacity=".28">
+    <rect x="432" y="64" width="96" height="960" fill="#23384a" stroke="#567086" stroke-width="5"/>
+    <line x1="448" y1="64" x2="448" y2="1024" stroke="#7890a4" stroke-width="5"/>
+    <line x1="512" y1="64" x2="512" y2="1024" stroke="#7890a4" stroke-width="5"/>
+    <rect x="444" y="480" width="72" height="128" fill="#31485a"/>
+    <text class="small" x="400" y="634">INACTIVE LIFT · BACKGROUND ONLY</text>
+  </g>
+
+  <polyline class="route" points="160,1056 352,896 640,672 320,448 608,224 768,64"/>
+  <polyline class="safe" points="160,1056 352,896 640,800 640,672 288,512 320,448 640,288 608,224 688,128"/>
+
+  <rect class="platform" x="64" y="1074" width="256" height="14"/>
+  <text class="small" x="70" y="1068">P0 START</text>
+  <rect class="recovery" x="544" y="800" width="192" height="16"/>
+  <text class="small" x="548" y="794">P1 RECOVERY</text>
+  <rect class="solid" x="416" y="544" width="128" height="32"/>
+  <text class="small" x="402" y="594">X1 NO GRAPPLE</text>
+  <rect class="recovery" x="192" y="512" width="192" height="16"/>
+  <text class="small" x="196" y="506">P2 RECOVERY</text>
+  <rect class="recovery" x="544" y="288" width="192" height="16"/>
+  <text class="small" x="548" y="282">P3 RECOVERY</text>
+  <rect class="platform" x="544" y="128" width="288" height="32"/>
+  <text class="small" x="548" y="122">P4 SAFE DECK</text>
+
+  <circle class="anchor" cx="352" cy="896" r="12"/>
+  <text class="label" x="372" y="902">A</text>
+  <circle class="anchor" cx="640" cy="672" r="12"/>
+  <text class="label" x="660" y="678">B</text>
+  <circle class="anchor" cx="320" cy="448" r="12"/>
+  <text class="label" x="340" y="454">C</text>
+  <circle class="anchor" cx="608" cy="224" r="12"/>
+  <text class="label" x="628" y="230">D</text>
+
+  <circle class="player" cx="160" cy="1056" r="10"/>
+  <text class="small" x="176" y="1062">SPAWN</text>
+  <rect class="panel" x="672" y="48" width="32" height="48" rx="4"/>
+  <text class="small" x="626" y="42">EXIT PANEL</text>
+  <rect class="gate" x="768" y="0" width="64" height="96"/>
+  <text class="small" x="744" y="116">GATE 03</text>
+</svg>

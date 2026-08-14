@@ -33,7 +33,7 @@
 | Stage | 이름 | 핵심 역할 |
 | --- | --- | --- |
 | [1-1](./1-1/README.md) · [제작 정렬](./1-1/PRODUCTION-ALIGNMENT.md) | SERVICE SHAFT | 기본 Rope 오프닝 · 승인 Blockout 기준 확정 |
-| [1-2](./1-2/README.md) | DOUBLE ANCHOR SHAFT | Airborne Re-Attach |
+| [1-2](./1-2/README.md) · [제작 정렬](./1-2/PRODUCTION-ALIGNMENT.md) | DOUBLE ANCHOR SHAFT | Airborne Re-Attach · 신규 Art Reference와 승인 Blockout |
 | [1-3](./1-3/README.md) | SECURITY CHECK | Sentry Telegraph·LOS |
 | [1-4](./1-4/README.md) | MAINTENANCE NODE | 첫 Rope Augment 선택 |
 | [1-5](./1-5/README.md) | AUGMENT TEST BAY | Build Expression |
