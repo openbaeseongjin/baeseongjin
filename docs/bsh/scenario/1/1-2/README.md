@@ -801,9 +801,10 @@ Stage 성공 기준은 **“Release가 Rope 이동의 끝이 아니라 다음 At
 └── images/
     ├── README.md                   # 이미지별 사용 가능 상태
     ├── 03_scenario_art_reference.png
-    └── 04_approved_blockout.svg
+    ├── 04_approved_blockout.svg
+    └── 05_scenario_art_reference.png
 ```
 
-기존 PNG 두 장은 결정 이력을 위해 보존하지만 현재 배치 기준으로 사용하지 않는다.
+기존 `01`, `02`, `03` PNG는 결정 이력을 위해 보존하지만 현재 배치·Camera·Rope 표현 기준으로 사용하지 않는다. 현재 Gameplay 화면의 분위기와 상대 크기는 C02 First Handoff를 사용한 [승인 Scenario Art Reference](./images/05_scenario_art_reference.png)를 따른다.
 
 SECTOR 01-2 / DOUBLE ANCHOR SHAFT — BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.1

@@ -191,11 +191,11 @@ FORBIDDEN
 | --- | --- | --- |
 | Sector 01 공용 배경 | `APPROVED MOOD REFERENCE` | 환경 분위기에만 계속 사용 |
 | 1-1 `04_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C04 Open Swing의 Player 크기·한 줄 live Rope·C/P3/R3 위계 기준 |
-| 1-2 `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | 전체 경로 선을 제거하고 대표 Camera Shot으로 재생성 |
+| 1-2 `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C02 First Handoff의 Player 크기·A/B·B live Rope·P1·정지 Lift 위계 기준 |
 | 1-3 `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | live Rope와 경로 도식을 분리해 재생성 |
 | 1-4 `01_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | Player 크기·실루엣과 Anchor 연결 의미를 통일해 재생성 |
 
-남은 재생성 순서는 Player 크기 편차가 가장 큰 `1-4 → 1-2 → 1-3`을 권장한다. 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다.
+남은 재생성 순서는 Player 크기 편차가 가장 큰 `1-4 → 1-3`을 권장한다. 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다.
 
 ## 12. 리소스 절약 원칙
 
