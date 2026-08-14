@@ -1,6 +1,6 @@
 # SECTOR 03-2 — SCANNER GALLERY
 
-*BLOCKOUT CANDIDATE · REV 1.1 — RUNTIME NOTE / GATE CONTRACT SYNC*
+*BLOCKOUT CANDIDATE · REV 1.1 — RUNTIME ALIGNMENT + GATE CONTRACT SYNC*
 
 ◀ PREV — [SECTOR 03-1 / POWERED PROMENADE](../3-1/README.md) · NEXT — [SECTOR 03-3 / RETAIL SECURITY WALK](../3-3/README.md) ▶
 
@@ -9,6 +9,7 @@
 | 항목 | 기준 |
 |---|---|
 | Status | HYPOTHESIS — BLOCKOUT CANDIDATE |
+| Runtime Alignment | 2026-08-15 KST / main `08db2906db9bc56d8a3f86c7bb030e99e6d27344` |
 | Difficulty | ★★☆ |
 | Expected First Playtime | 110–170 sec |
 | Expected Skilled Clear | 45–70 sec |
@@ -107,35 +108,116 @@ SEE STATE
 
 ---
 
-## 0-1. 최신 GitHub / 구현 상태 교차검증
+## 0-1. GitHub / 구현 상태 교차검증 — RUNTIME ALIGNMENT PATCH
 
-### VERIFIED — CURRENT MAIN
+### VERIFIED — AUTHORING SNAPSHOT
 
-작성 시점 확인한 최신 `main` HEAD는
-`ead7a356d8884a8d8f607fc9ab90afc5a8fe2212`
-(PR #420 merge)이며,
-Sector 03 Master Plan과 3-1 POWERED PROMENADE가 반영된 상태다.
-
-최근 HEAD 변경은 시나리오 문서 병합이며,
-확인한 Rope / World / Simulation 핵심 코드 SHA는 이전 Runtime 기준과 동일하다.
-
-3-1은:
+이 Stage를 처음 작성할 당시 확인한 `main` HEAD:
 
 ```text
-Scanner active = NONE
-Scanner Housing = optional inactive foreshadow
+ead7a356d8884a8d8f607fc9ab90afc5a8fe2212
 ```
 
-로 종료한다.
+PR #420 merge 시점이다.
 
-따라서 3-2가 첫 실제 Scanner Gameplay가 된다.
+이 값은 역사적 작성 기준으로 보존한다.
+
+즉 앞으로 이 SHA를:
+
+```text
+CURRENT MAIN
+```
+
+이라고 해석하지 않고:
+
+```text
+AUTHORING SNAPSHOT
+```
+
+으로 해석한다.
+
+### VERIFIED — CURRENT MAIN AT RUNTIME ALIGNMENT
+
+2026-08-15 KST 통합 정리 시점 최신 `main`:
+
+```text
+08db2906db9bc56d8a3f86c7bb030e99e6d27344
+```
+
+최근 주요 문서 변경:
+
+```text
+PR #467
+3-8 REV 1.1 FREE-WEAVE merge
+
+PR #468
+Sector 02 PRODUCTION-ALIGNMENT docs merge
+```
+
+현재 GitHub Scenario Tree에는:
+
+```text
+3-1
+3-2
+3-3
+3-4
+3-5
+3-6
+3-7
+3-8
+```
+
+이 모두 존재한다.
+
+3-8은 현재:
+
+```text
+REV 1.1
+FREE-WEAVE SECURITY FIELD
+```
+
+로 이미 교체된 상태다.
+
+### VERIFIED — CURRENT AUTHORED RUNTIME BOUNDARY
+
+현재 `CurrentAuthoredAreaCatalog.js`는:
+
+```text
+SECTOR 01
++
+SECTOR 02
+```
+
+만 실제 World에 assemble한다.
+
+따라서:
+
+```text
+SECTOR 03 AUTHORED RUNTIME
+= NOT YET CONNECTED
+```
+
+이고 3-2는 여전히:
+
+```text
+SPEC — PLANNED
+```
+
+다.
 
 ### VERIFIED — Scanner 구현 여부
 
-현재 저장소 코드 검색에서
-Gameplay Scanner 구현은 확인되지 않았다.
+현재 저장소 코드 검색에서:
 
-`scanner` 관련 결과는 기존 Scenario / Decision 문서 중심이다.
+```text
+grappleAccessGroup
+dynamic scanner phase attach eligibility
+```
+
+Runtime 구현은 확인되지 않는다.
+
+검색 결과는 Scenario 문서 중심이며
+Scanner용 Gameplay object / capability / phase controller는 아직 확인되지 않았다.
 
 따라서:
 
@@ -144,48 +226,108 @@ ACCESS SCAN FIELD
 = IMPLEMENTATION DEPENDENCY
 ```
 
-다.
+상태를 유지한다.
 
 ### VERIFIED — Current Surface Model
 
 현재 `WorldGenerator.createSurface(vertices, properties)`는
-Surface에 추가 property를 실을 수 있는 구조다.
+Surface property를 실을 수 있는 구조를 유지한다.
 
-현재 Rope Targeting은 `findRopeAttachment()`에서:
+그리고 현재 `RopePointerInput.findRopeAttachment()`에는 이미:
 
-```text
-for every surface
-→ closest point
-→ distance / aim score
-→ candidate
+```js
+if (surface.grappleable === false) continue;
 ```
 
-순서로 모든 Surface를 검사한다.
+가 구현돼 있다.
+
+따라서 기존 문서의 과거 주장:
 
 ```text
-STATIC GRAPPLEABLE FILTER
+OLD CLAIM:
+STATIC GRAPPLEABLE GATE WAS NOT IMPLEMENTED
+```
+
+은 **STALE / SUPERSEDED**다.
+
+현재 정확한 상태:
+
+```text
+STATIC SURFACE GRAPPLEABLE FILTER
 = IMPLEMENTED
 
-surface.grappleable === false → skip
-
-DYNAMIC ACCESS SCAN FIELD FILTER
+DYNAMIC ACCESS-SCAN ELIGIBILITY
 = NOT IMPLEMENTED
 ```
 
-기존 3-2 초안의 "static grappleable filter도 없음" 서술은 stale하여 Sector 03 Integration Cross-Validation Audit(PATCH 02)에 따라 갱신했다. Gameplay Rule은 변경하지 않는다.
+### IMPLEMENTATION DEPENDENCY — Dynamic Scanner Filter
+
+3-2에 필요한 것은
+Static Filter를 새로 만드는 것이 아니다.
+
+필요한 확장:
+
+```text
+AUTHORED CONTROLLED-SURFACE GROUP
++
+SIMULATION-TICK SCANNER PHASE
++
+EFFECTIVE ATTACH ELIGIBILITY
+```
+
+예시 개념:
+
+```text
+surface.grappleable === false
+→ always unavailable
+
+controlled group + scanner LOCKED / RESET
+→ temporarily unavailable
+
+controlled group + AVAILABLE / WARNING
+→ available
+```
+
+### IMPORTANT — Frozen Surface Mutation 금지
+
+Scanner Phase마다:
+
+```text
+surface.grappleable = true / false
+```
+
+를 직접 바꾸는 방식은 우선하지 않는다.
+
+대신:
+
+```text
+STATIC SURFACE DATA
++
+DYNAMIC SIMULATION STATE
+```
+
+를 분리한다.
+
+권장 개념:
+
+```js
+isSurfaceEffectivelyGrappleable(surface, scannerState)
+```
+
+또는 동일 역할의 deterministic filter layer.
 
 ### VERIFIED — Current Simulation Model
 
-현재 GameSimulation은:
+현재 GameSimulation 계열은:
 
 - simulation tick 보유
 - InputDispatcher 사용
 - Rope input context에 `surfaces` 전달
-- SimulationDrivenObject / SimulationDispatcher capability 구조 보유
-- owner prediction / multiplayer authoritative tick 경계 보유
+- simulation-driven capability 구조 사용
+- multiplayer authoritative / prediction 경계 보유
 
 따라서 Scanner는
-고주파 mutable network object로 만들기보다:
+고주파 독립 network transform object보다:
 
 ```text
 AUTHORED SCANNER CONFIG
@@ -195,39 +337,86 @@ SIMULATION TICK
 DETERMINISTIC PHASE
 ```
 
-로 계산하는 방향을 우선한다.
+로 계산하는 방향을 유지한다.
 
-### VERIFIED — Current Renderer
+### MULTIPLAYER CONTRACT
 
-현재 Renderer는:
+두 Player가 같은 Scanner를 볼 때:
 
-- World Surface
-- Rope
-- Attach Candidate
-- Combat Effect
+```text
+SAME SCANNER PHASE
+```
 
-등을 별도 Layer로 그린다.
+여야 한다.
 
-Scanner State Cue / Controlled Surface Cue는
-현재 별도 구현이 없다.
+금지:
+
+```text
+PLAYER A = AVAILABLE
+PLAYER B = LOCKED
+```
+
+처럼 client-local timer에 의해
+Attach Eligibility가 갈리는 상태.
+
+### VERIFIED — Current Renderer Gap
+
+현재 Runtime에는 Scanner Gameplay State를 위한:
+
+```text
+AVAILABLE
+WARNING
+LOCKED
+RESET
+```
+
+전용 Presentation이 아직 확인되지 않는다.
+
+따라서 Runtime Spike에는:
+
+```text
+state cue
+controlled-surface cue
+warning readability
+```
+
+도 포함해야 한다.
+
+단 Beam은:
+
+```text
+DAMAGE LASER
+```
+
+처럼 보이면 안 된다.
 
 ### DEPLOYED GAME CHECK LIMIT
 
-제공된 GitHub Pages 게임은 계속 구현 기준에 포함하지만,
-현재 이 작업 환경에서는 해당 Pages URL을 직접 인터랙티브하게 플레이할 수 없다.
+GitHub Pages 공개 게임은 구현 기준에 포함하지만
+현재 이 작업 환경에서는 직접 인터랙티브 플레이 검증을 수행하지 못했다.
 
-따라서 3-2의 구현 적합성은:
+따라서 이 Runtime Alignment는:
 
 ```text
-latest main runtime code
+latest main code
 +
-deployment entry structure
+current authored catalog
 +
 scenario docs
 ```
 
-를 기준으로 판단하며,
-실제 Scanner Prototype이 배포되면 이후 Stage 전에 다시 라이브 체감 검증이 필요하다.
+를 기준으로 한다.
+
+Scanner Prototype이 실제 Runtime / 배포에 들어간 뒤에는
+3-2를 다시 플레이테스트하여:
+
+- phase 가독성
+- input forgiveness
+- 2-player phase 일치
+- attach candidate cue
+- already-attached rope 유지
+
+를 재검증한다.
 
 ---
 
@@ -310,7 +499,7 @@ objective
 
 별도 `E` Key를 추가하지 않고 현재 contextual interaction 문법을 유지한다.
 
-3-2 최초 작성 시점에는 이 계약이 확정되기 전이라 Exit가 단순 `EXIT → next stage`로만 표현돼 있었다. Sector 03 Integration Cross-Validation Audit(PATCH 03)에 따라 Gameplay / Geometry 변경 없이 Exit 표현만 동기화한다.
+3-2 최초 작성 시점에는 이 계약이 확정되기 전이라 Exit가 단순 `EXIT → next stage`로만 표현돼 있었다. Sector 03 Integration Cross-Validation Audit(PATCH 03)에 따라 PR #469에서 Gameplay / Geometry 변경 없이 Exit 표현만 동기화했다.
 
 ---
 
@@ -1259,7 +1448,7 @@ controlled child surface
 ### 19-3. Rope Target Filter
 
 현재 `findRopeAttachment()`는 모든 Surface를 검사하되
-`surface.grappleable === false`인 Surface는 candidate에서 제외한다(STATIC FILTER IMPLEMENTED).
+`surface.grappleable === false`인 Surface는 candidate에서 제외한다(§0-1 STATIC SURFACE GRAPPLEABLE FILTER 참고).
 
 Dynamic Access Scan Field 기반 filter는 아직 없다.
 
@@ -2017,6 +2206,8 @@ ACCESS SCAN FIELD — LOCKED
 Prototype이 FAIL하면
 Master Plan은 후보 상태로 되돌리고
 Security Shutter 또는 다른 Route-Control System을 재검토한다.
+
+**RESOLVED (spec 단계):** Sector 03 Master Plan REV 1.1(PR #469)에서 Primary New Security Mechanic을 `ACCESS SCAN FIELD — DESIGN SELECTED / RUNTIME PROTOTYPE GATE`로 이미 확정했다. 단 이는 spec-level 결정이며, 실제 Runtime Prototype Playtest PASS는 여전히 별도 Gate다.
 
 ---
 
