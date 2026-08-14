@@ -21,7 +21,7 @@ import { advanceArtifactRewardSelection, createArtifactRewardSelection } from ".
 import { generateWorld } from "../world/WorldGenerator.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
 import { collisionSurfacesForProgress } from "../world/WorldGateGeometry.js";
-import { sampleWorldForce, snapshotWindStates } from "../world/WorldForceField.js";
+import { pointInsideBounds, sampleWorldForce, snapshotWindStates } from "../world/WorldForceField.js";
 import { advanceWorldProgress } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -52,6 +52,15 @@ function cloneSwingDrag(swingDrag) {
     };
 }
 
+const PORTAL_ARRIVAL_SPACING = PLAYER_CONFIG.radius * 2 + 10;
+
+function portalArrivalPosition(entry, index, playerCount) {
+    return Object.freeze({
+        x: entry.x + (index - (playerCount - 1) * 0.5) * PORTAL_ARRIVAL_SPACING,
+        y: entry.y
+    });
+}
+
 export class GameSimulation {
     #primaryPlayerId;
     #inputDispatcher;
@@ -74,6 +83,7 @@ export class GameSimulation {
         this.registry = new EntityRegistry();
         this.#inputDispatcher = new InputDispatcher();
         this.#inputDrivenObjectsByOwner = new Map();
+        this.portalTransitions = new Map();
         this.players = [];
         const playerRuntime = this.addPlayer(this.world.areas?.[0]?.entry, playerId);
         this.#primaryPlayerId = playerRuntime.entity.id;
@@ -110,6 +120,7 @@ export class GameSimulation {
         if (index < 0) return false;
         const [removed] = this.players.splice(index, 1);
         this.#inputDrivenObjectsByOwner.delete(playerId);
+        this.portalTransitions.delete(playerId);
         const removedReward = this.artifactRewards.get(playerId);
         this.artifactRewards.delete(playerId);
         if (removedReward && this.artifactRewards.size === 0) {
@@ -129,6 +140,10 @@ export class GameSimulation {
 
     playerIds() {
         return this.players.map(({ id }) => id);
+    }
+
+    portalTransitionTick(playerId) {
+        return this.portalTransitions.get(playerId)?.tick ?? null;
     }
 
     inputDrivenObjects(ownerId) {
@@ -217,6 +232,43 @@ export class GameSimulation {
         else player.ropeObject.rope.detach();
         player.ropeObject.swingDrag = null;
         return released;
+    }
+
+    confirmPortalTransition(playerId, gateId, position, tick) {
+        const previous = this.portalTransitions.get(playerId);
+        if (!previous || previous.gateId !== gateId) return false;
+        const player = this.#requirePlayer(playerId);
+        const stillAtPredictedArrival =
+            Math.hypot(
+                player.physics.position.x - previous.position.x,
+                player.physics.position.y - previous.position.y
+            ) < 1e-6;
+        if (stillAtPredictedArrival) {
+            player.physics.position.set(position.x, position.y);
+            player.ropeObject.aimWorld = Object.freeze({ x: position.x, y: position.y });
+        }
+        this.portalTransitions.set(playerId, Object.freeze({ gateId, position, tick }));
+        return true;
+    }
+
+    applyPortalTransition(playerId, position, tick = this.tick, gateId = null) {
+        const player = this.#requirePlayer(playerId);
+        player.physics.reset(position);
+        player.ropeObject.rope.detach();
+        player.ropeObject.aimWorld = Object.freeze({ x: position.x, y: position.y });
+        player.ropeObject.attachmentCandidate = null;
+        player.ropeObject.wasPointerDown = false;
+        player.ropeObject.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
+        player.ropeObject.lastViewport = Object.freeze({ width: 1, height: 1 });
+        player.ropeObject.attachBufferRemaining = 0;
+        player.ropeObject.swingDrag = null;
+        player.weapon.cooldown = 0;
+        player.hitInvulnerabilityRemaining = 0;
+        player.ropeDisabledRemaining = 0;
+        player.ropeDamageBoostRemaining = 0;
+        this.applyArtifactEffects(player);
+        this.portalTransitions.set(player.id, Object.freeze({ gateId, position, tick }));
+        return this.ownerPredictionState(player.id);
     }
 
     applyOwnerMotion(playerId, state, { synchronizeRope = true } = {}) {
@@ -694,7 +746,33 @@ export class GameSimulation {
                 }
             }
         }
+        this.#transferPlayersThroughOpenPortals({ replicate });
         if (this.worldProgress.snapshot().completed) this.beginCompletion(events.at(-1)?.playerId);
+    }
+
+    #transferPlayersThroughOpenPortals({ replicate }) {
+        const activePlayers = this.players.filter(({ lifeState }) => lifeState === "active");
+        for (const gate of this.world.gates) {
+            if (!gate.nextAreaId || !this.worldProgress.isGateCrossed(gate.id)) continue;
+            const nextArea = this.world.areas.find(({ id }) => id === gate.nextAreaId);
+            if (!nextArea) throw new Error(`Missing portal destination area '${gate.nextAreaId}'`);
+            for (const [index, player] of activePlayers.entries()) {
+                if (!pointInsideBounds(player.physics.position, gate.trigger)) continue;
+                const departure = Object.freeze({ x: player.physics.position.x, y: player.physics.position.y });
+                const position = portalArrivalPosition(nextArea.entry, index, activePlayers.length);
+                this.applyPortalTransition(player.id, position, this.tick, gate.id);
+                const payload = Object.freeze({
+                    gateId: gate.id,
+                    areaId: gate.areaId,
+                    nextAreaId: gate.nextAreaId,
+                    playerId: player.id,
+                    departure,
+                    position
+                });
+                if (replicate) this.recordReplicationEvent("gate-portal-entered", payload);
+                this.eventFlash = { type: "gate-portal-entered", age: 0, ...payload };
+            }
+        }
     }
 
     #advanceAutomaticWeapon(player, dt, allowFire = true) {

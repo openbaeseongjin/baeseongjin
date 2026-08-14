@@ -44,7 +44,30 @@ function entityAt(snapshot, collection, id) {
         collection === "players" && Number.isSafeInteger(entity.ownerMotionTick)
             ? entity.ownerMotionTick
             : snapshot.serverTick;
-    return { ...entity, tick };
+    return { ...entity, tick, snapshotTick: snapshot.serverTick };
+}
+
+function portalTicks(history, playerId) {
+    return [
+        ...new Set(
+            history.flatMap(({ snapshot }) =>
+                (snapshot.events ?? [])
+                    .filter((event) => event.eventType === "gate-portal-entered" && event.playerId === playerId)
+                    .map(({ tick }) => tick)
+            )
+        )
+    ].sort((left, right) => left - right);
+}
+
+function samplesOnPortalSide(history, playerId, samples, targetTick) {
+    const ticks = portalTicks(history, playerId);
+    if (ticks.length === 0) return samples;
+    const previousPortalTick = [...ticks].reverse().find((tick) => tick <= targetTick) ?? -Infinity;
+    const nextPortalTick = ticks.find((tick) => tick > targetTick) ?? Infinity;
+    const selected = samples.filter(
+        ({ snapshotTick }) => snapshotTick >= previousPortalTick && snapshotTick < nextPortalTick
+    );
+    return selected.length > 0 ? selected : samples;
 }
 
 export class RemoteWorldStateBuffer {
@@ -179,16 +202,18 @@ export class RemoteWorldStateBuffer {
     }
 
     samplePosition(collection, id, serverTargetTick) {
-        const samples = this.history
+        let samples = this.history
             .map(({ snapshot }) => entityAt(snapshot, collection, id))
             .filter((entity) => entity !== null);
-        const oldest = samples[0];
-        const latest = samples.at(-1);
+        let latest = samples.at(-1);
         if (!latest) return null;
         const targetTick =
             collection === "players" && Number.isSafeInteger(latest.ownerMotionTick)
                 ? serverTargetTick + MULTIPLAYER_TIMING.inputLeadTicks
                 : serverTargetTick;
+        if (collection === "players") samples = samplesOnPortalSide(this.history, id, samples, targetTick);
+        const oldest = samples[0];
+        latest = samples.at(-1);
         const lower = [...samples].reverse().find(({ tick }) => tick <= targetTick);
         const upper = samples.find(({ tick }) => tick >= targetTick);
         if (lower && upper && upper.tick === lower.tick) return lower.position;
@@ -206,15 +231,17 @@ export class RemoteWorldStateBuffer {
     }
 
     samplePlayerAngle(id, serverTargetTick) {
-        const samples = this.history
+        let samples = this.history
             .map(({ snapshot }) => entityAt(snapshot, "players", id))
             .filter((entity) => entity !== null);
-        const oldest = samples[0];
-        const latest = samples.at(-1);
+        let latest = samples.at(-1);
         if (!latest) return 0;
         const targetTick = Number.isSafeInteger(latest.ownerMotionTick)
             ? serverTargetTick + MULTIPLAYER_TIMING.inputLeadTicks
             : serverTargetTick;
+        samples = samplesOnPortalSide(this.history, id, samples, targetTick);
+        const oldest = samples[0];
+        latest = samples.at(-1);
         const lower = [...samples].reverse().find(({ tick }) => tick <= targetTick);
         const upper = samples.find(({ tick }) => tick >= targetTick);
         if (lower && upper && upper.tick === lower.tick) return lower.angle ?? 0;
