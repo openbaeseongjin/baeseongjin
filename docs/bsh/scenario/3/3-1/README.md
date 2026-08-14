@@ -1,6 +1,6 @@
 # SECTOR 03-1 — POWERED PROMENADE
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — GATE CONTRACT SYNC*
 
 ◀ PREV — POST-SECTOR 02 BOSS / TRANSITION TBD · NEXT — [SECTOR 03-2 / SCANNER GALLERY](../3-2/README.md) ▶
 
@@ -131,6 +131,25 @@ VISUAL COMPLEXITY
 ≠
 PHYSICAL COMPLEXITY
 ```
+
+---
+
+## 0-2. VERIFIED — Gate / Exit Contract Sync
+
+현재 authored Stage Exit는:
+
+```text
+objective
+→ Gate Panel interaction
+→ Gate open
+→ Player physically crosses
+```
+
+구조다.
+
+별도 `E` Key를 추가하지 않고 현재 contextual interaction 문법을 유지한다.
+
+3-1 최초 작성 시점에는 이 계약이 확정되기 전이라 Exit가 단순 `EXIT → next stage`로만 표현돼 있었다. Sector 03 Integration Cross-Validation Audit(PATCH 03)에 따라 Gameplay / Geometry 변경 없이 Exit 표현만 동기화한다.
 
 ---
 
@@ -360,7 +379,7 @@ Max Range 440을
 Y -1088
 
 ┌──────────────────────────────────────────────────────────┐
-│                                  EXIT → 3-2              │
+│                                  GATE → 3-2              │
 │                            P5 ███████████                 │
 │                                   ▲                      │
 │                              G5 ●                        │
@@ -475,7 +494,7 @@ Scanner Beam은 아직 작동하지 않는다.
 | R2 | +224~+480 | -864 | 256 | Upper Recovery |
 | G5 | +64~+192 | -960 | 128 | Final Pivot |
 | P5 | +192~+480 | -1024 | 288 | Exit / 3-2 Approach |
-| Exit | +288~+544 | -1056 | 256 | To 3-2 |
+| Exit / Gate Panel | +288~+544 | -1056 | 256 | Objective → Gate Panel → Gate open → physical crossing → 3-2 |
 
 ### Scanner Preview
 
@@ -520,7 +539,9 @@ P0
 → P4
 → G5
 → P5
-→ EXIT
+→ Gate Panel
+→ Gate open
+→ EXIT (3-2)
 ```
 
 ### 특징
@@ -1308,7 +1329,9 @@ Gameplay / Visual Contrast PASS 후.
     },
 
     completion: {
-        type: "reach-exit"
+        type: "gate-panel-objective",
+        gatePanel: "contextual-interaction",
+        physicalCrossing: true
     },
 
     exit: {
@@ -1476,4 +1499,4 @@ World tone을 풍부하게 할 수 있지만
 
 ---
 
-SECTOR 03-1 / POWERED PROMENADE — REV 1.0
+SECTOR 03-1 / POWERED PROMENADE — REV 1.1

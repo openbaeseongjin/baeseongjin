@@ -1,320 +1,1506 @@
 # SECTOR 03 — COMMERCIAL DISTRICT MASTER PLAN
 
-*MASTER PLAN CANDIDATE · REV 1.0*
+*MASTER PLAN CANDIDATE · REV 1.1 — INTEGRATION ALIGNED*
 
-`SECTOR 03 COMMERCIAL DISTRICT` · `POWERED UPPER CITY` · `ACTIVE SECURITY` · `VISIBILITY / ROUTE CONTROL`
+`SECTOR 03 COMMERCIAL DISTRICT` · `POWERED UPPER CITY` · `ACCESS SCAN FIELD` · `ACTIVE ROUTE CONTROL` · `FREE-WEAVE FINALE`
 
-| 항목 | 기준 |
+| 항목 | REV 1.1 기준 |
 |---|---|
-| Status | HYPOTHESIS — MASTER PLAN CANDIDATE |
+| Status | HYPOTHESIS — MASTER PLAN CANDIDATE / DETAIL-ALIGNED |
 | Sector Role | Worker District 이후 첫 Powered Upper-City Contrast |
-| Core Gameplay Shift | Moving Threat → Active Route Control |
+| Core Gameplay Shift | Moving Threat → Active Route Control → Free-Weave Synthesis |
 | Core Story Shift | “왜 C만 멈췄지?” → “누가 위쪽 이동 우선권을 가지고 있었지?” |
-| Carry Build | Foundation + Specialization KEEP |
+| Carry Build | Foundation + first Specialization KEEP |
 | New Rope Mode | NONE |
 | New Input | NONE |
-| Planned New Augment | TBD — 이 문서에서 확정하지 않음 |
-| Planned New Security Mechanic | Scanner / Security Shutter 후보 — HYPOTHESIS |
-| Boss | Sector 공통 계약상 별도 존재, 위치·정체·전투 시나리오 TBD |
+| New Augment in Sector 03 General Stages | NONE — Growth HOLD |
+| Primary New Security Mechanic | ACCESS SCAN FIELD — DESIGN SELECTED / RUNTIME GATE |
+| Security Shutter | NOT USED in Sector 03 General Stages |
+| New Enemy Type | NONE |
+| Reused Enemy | Patrol Drone T1 |
+| Boss | 3-8 내부에는 NONE; Post-Sector 03 Boss / Transition 위치·정체·전투·진입 순서 TBD |
 | General Stages | 8 authored progression regions |
-| Sector 03 → 04 | Transit / Infrastructure 방향으로 연결, 정확한 Boss/전환 순서 TBD |
+| Stage 03-8 Canonical | REV 1.1 FREE-WEAVE — current GitHub REV 1.0 is superseded |
+| Sector 03 → 04 | Transit / Infrastructure 방향, 정확한 Boss / Transition 순서 TBD |
+| Current Runtime | Sector 01 + Sector 02 only; Sector 03 not connected |
+| Approved Gameplay Art | HOLD until Sector 03 Runtime Area / Camera Zone / Stable IDs exist |
 
 ---
 
-## 0. Source-of-Truth / Cross-Check
+## 0. Source-of-Truth / Integration Status
 
-### VERIFIED — Project Structure
+### CURRENT MAIN AT INTEGRATION
 
-현재 상위 세계 구조에서 Sector는 다음 순서다.
-
-```text
-01 MAINTENANCE
-02 WORKER DISTRICT
-03 COMMERCIAL
-04 TRANSIT / INFRASTRUCTURE
-05 CORPORATE
-06 ROOFTOP
-```
-
-Sector 03은 Worker District 바로 위에 있는 Commercial District다.
-
-### VERIFIED — Sector 02 Ending Information
-
-Sector 02 Master Plan의 Finale에서 Player는 다음 정보를 처음 확인한다.
+통합 정리 시점 최신 `main` HEAD:
 
 ```text
-EVACUATION GROUP A — TRANSFER COMPLETE
-EVACUATION GROUP B — TRANSFER COMPLETE
-EVACUATION GROUP C — TRANSFER SUSPENDED
-
-UPPER TRANSIT ROUTE
-PRIORITY ACCESS: ACTIVE
+12f3cd7b9a9ef2e4fa7af39382c88d373e775d0a
 ```
 
-그러나 아직:
+PR #465에서:
 
 ```text
-GROUP A = 누구
-GROUP B = 누구
-PRIORITY 대상 = 누구
-왜 C가 중단됐는가
+3-6 PREMIUM ATRIUM
+3-7 PRIORITY CONCOURSE
+3-8 UPPER MARKET GATE
 ```
 
-는 모른다.
+문서가 GitHub에 병합됐다.
 
-### VERIFIED — Build State
-
-Sector 02 종료 후:
+따라서 현재 `docs/bsh/scenario/3/`에는:
 
 ```text
-Foundation KEEP
-Specialization KEEP
+3-1
+3-2
+3-3
+3-4
+3-5
+3-6
+3-7
+3-8
+README.md
 ```
 
-새 Augment는 2-8에서 지급하지 않는다.
+가 모두 존재한다.
 
-### VERIFIED — Boss / Sector Flow
-
-공통 Boss Flow에 따르면 각 Sector에는 Boss가 1개 존재하지만,
-Stage 08 내부에 Boss를 임의로 넣지 않는다.
-
-기획자가 지정한 Boss 진입에서:
+### IMPORTANT — BOSS / TRANSITION BOUNDARY
 
 ```text
-General Timer 종료
-→ Remaining Time 폐기
-→ Boss Timer 시작
+3-8 INTERNAL BOSS
+= NONE
+
+POST-SECTOR 03 BOSS / TRANSITION
+= TBD
 ```
 
-보스 처치 뒤 다음 Sector에 진입하며 새 General Timer가 시작된다.
+따라서 3-8의 마지막 Control Deck을:
 
-따라서 Sector 03의 정확한 시작 전환은
-Sector 02 Boss 위치가 확정된 뒤 최종 고정한다.
+```text
+sector-04-01
+```
+
+로 직접 연결하지 않는다.
 
 ---
 
-## 1. Sector 03 한 줄 정의
+### IMPORTANT — 3-8 VERSION DRIFT
 
-**꺼지고 낡은 Worker District를 벗어나 전력과 광고, 상점 자동화, 보안 시스템이 여전히 살아 있는 밝고 깨끗한 Commercial District에 도달한 Player가, Rope로 거대한 Atrium과 쇼핑·서비스 구조를 가로지르며 “위쪽 공간은 왜 정상적으로 유지됐고 누가 이 경로의 Priority를 가졌는가?”를 추적하는 Sector.**
+현재 GitHub `3-8/README.md`:
+
+```text
+REV 1.0
+WEST / CENTRAL / EAST
+parallel three-route structure
+```
+
+는 Sector 전체 교차검증에서:
+
+```text
+3-7의 static three-cost-route choice와
+decision pattern이 지나치게 반복됨
+```
+
+문제를 발견했다.
+
+따라서 통합 기준 Canonical은:
+
+```text
+SECTOR 03-8
+UPPER MARKET GATE
+REV 1.1
+FREE-WEAVE SECURITY FIELD
+```
+
+다.
+
+현재 GitHub 3-8 REV 1.0은:
+
+```text
+STALE / SUPERSEDED
+```
+
+로 취급하고
+REV 1.1로 교체해야 한다.
+
+### Document Priority
+
+Sector 03 내부에서 충돌 시:
+
+```text
+1. Latest explicit user LOCKED decision
+2. Latest reviewed individual Stage detail
+3. This REV 1.1 Master Plan
+4. Older Master / general docs
+5. Current code = implementation fact, not intended design
+6. Reference research
+7. New hypothesis
+```
 
 ---
 
-## 2. Sector 03의 핵심 차별화
+## 1. Current Runtime Boundary
 
-Sector별 대표 질문:
+### VERIFIED — CURRENT AUTHORED RUNTIME
+
+현재 `CurrentAuthoredAreaCatalog.js`는:
 
 ```text
 SECTOR 01
-“Rope를 사용할 수 있는가?”
-
++
 SECTOR 02
-“움직이는 Threat 속에서 어떤 Route를 선택할 것인가?”
-
-SECTOR 03
-“공간 자체가 Route를 허용하거나 차단하면
-언제, 어디로 Rope를 걸 것인가?”
 ```
 
-### Sector 02
+만 assemble한다.
+
+현재 Revision:
 
 ```text
-Enemy Position
-changes Route Choice
-```
-
-### Sector 03 후보
-
-```text
-Security State
-changes Route Availability / Exposure
+sector-01-rev3-sector-02-rev1-v2
 ```
 
 즉:
 
 ```text
+SECTOR 03 DOCUMENT SET
+= authored design spec
+
+SECTOR 03 RUNTIME
+= NOT YET CONNECTED
+```
+
+### Current Implemented Foundations
+
+이미 재사용 가능한 것:
+
+```text
+Rope physics
+static surface.grappleable filter
+Patrol Drone capability
+activation bounds
+Enemy target / fire cycle
+no-rope-cut rule
+Gate / Gate Panel authored progression framework
+generic optional cover LOS capability
+multiplayer authored-world foundation
+```
+
+### Missing Core Dependency
+
+아직 구현 확인되지 않음:
+
+```text
+ACCESS SCAN FIELD dynamic state
+grappleAccessGroup
+phase-based effective attach eligibility
+Sector 03 authored area catalog
+Sector 03 camera zones / stable runtime IDs
+```
+
+따라서 Sector 03의 핵심 Production Gate:
+
+```text
+ACCESS SCAN FIELD PROTOTYPE
+```
+
+다.
+
+---
+
+## 2. Sector 03 한 줄 정의
+
+**꺼지고 낡은 Worker District를 벗어나 전력·광고·상점 자동화·접근 통제가 훨씬 더 오래 살아 있는 밝고 깨끗한 Commercial District에 도달한 Player가, 같은 Rope를 사용해 거대한 Atrium과 Public / Service 구조를 오가며 보안 상태가 Rope 부착 가능 시점을 바꾸는 공간을 돌파하고, 마지막에는 대피 Transfer 기록과 Access-Control 기록이 같은 상부 이동환경에 병치되어 있었음을 발견하는 Sector.**
+
+---
+
+## 3. Sector 03 핵심 질문
+
+### Gameplay
+
+Sector 01:
+
+> **“Rope를 사용할 수 있는가?”**
+
+Sector 02:
+
+> **“움직이는 Threat 속에서 어떤 Route를 선택할 것인가?”**
+
+Sector 03:
+
+> **“공간의 Security State가 달라질 때 언제 붙고, 어디로 계속 움직일 것인가?”**
+
+### Story
+
+Sector 02 종료:
+
+> **“왜 C만 멈췄지?”**
+
+Sector 03 시작:
+
+> **“그렇다면 A/B와 Priority Access는 누구를 위한 것이었지?”**
+
+Sector 03 종료:
+
+> **“이 Access 구조와 대피 결과는 어떤 관계였고, 누가 그 규칙을 만들었지?”**
+
+---
+
+## 4. Core Gameplay Shift
+
+### Sector 02
+
+```text
+ENEMY POSITION
+→ route pressure
+```
+
+### Sector 03
+
+```text
+SECURITY STATE
+→ attach availability / route timing
+
++
+
+ENEMY POSITION
+→ exposure / commit pressure
+```
+
+따라서:
+
+```text
 STATIC ARCHITECTURE
 ↓
-POWERED / REACTIVE ARCHITECTURE
+POWERED / REACTIVE ACCESS ARCHITECTURE
 ```
 
 로 진화한다.
 
----
+### 중요한 원칙
 
-## 3. Reference Scan
-
-### SANABI — VERIFIED / TRANSFER
-
-SANABI의 공식 소개는 Chain Hook을
-빠른 이동과 적 처치 모두에 사용하는 핵심 도구로 설명하며,
-총알과 Trap 사이를 이동하는 전투·이동 결합을 강조한다.
-
-### TRANSFER
-
-Sector 03에서 새 보안 요소가 생기더라도:
+Sector 03의 Security는:
 
 ```text
-Rope Traversal
+Scanner disable minigame
+→ platforming
+→ combat
+```
+
+처럼 분리하지 않는다.
+
+항상:
+
+```text
+ROPE TRAVERSAL
 +
-Threat Reading
+THREAT / STATE READING
 ```
 
 이 하나의 판단이어야 한다.
 
-Scanner를 끄고 나서 Platforming,
-Platforming 후 Combat처럼 분리하지 않는다.
+---
+
+## 5. Primary New Mechanic — ACCESS SCAN FIELD
+
+### STATUS
+
+```text
+DESIGN SELECTED
+RUNTIME PROTOTYPE GATE
+```
+
+이제 Scanner / Security Shutter 중 후보를 고르는 단계가 아니다.
+
+Sector 03 General Stage의 Primary New System:
+
+```text
+ACCESS SCAN FIELD
+```
+
+로 선택한다.
+
+### Canonical State
+
+```text
+AVAILABLE
+→ WARNING
+→ LOCKED
+→ RESET
+```
+
+### New Rope Attach
+
+```text
+AVAILABLE / WARNING
+= ALLOWED
+
+LOCKED / RESET
+= DENIED
+```
+
+### Existing Rope
+
+이미 붙은 Rope:
+
+```text
+STAYS ATTACHED
+```
+
+Scanner 상태가 바뀌어도:
+
+```text
+NO FORCED DETACH
+```
+
+### Scanner Is Not Damage Laser
+
+```text
+Damage
+= 0
+
+Knockback
+= 0
+
+Rope Disable
+= 0
+
+Rope Cut
+= 0
+```
+
+핵심 질문:
+
+> **“언제 붙을 것인가?”**
+
+이지:
+
+> “Beam을 피하라.”
+
+가 아니다.
 
 ---
 
-### Rusted Moss — VERIFIED / TRANSFER
+## 6. Why Scanner, Not Security Shutter
 
-개발진은 게임 전체를 하나의 Grapple Core 중심으로 만들고,
-후속 능력 역시 Grapple Traversal과 시너지를 내도록 설계했다.
-같은 Challenge가 여러 방식으로 해결되는 것을 적극 허용했다.
+Security Shutter는 Sector 03 General Stage에서 사용하지 않는다.
 
-### TRANSFER
+### 이유 1 — Current Architecture
 
-Commercial Security는:
+물리 Shutter는:
+
+- moving collision
+- player trapping
+- rope-anchor / collision state synchronization
+- multiplayer prediction
+- dynamic surface ownership
+
+을 동시에 요구한다.
+
+### 이유 2 — Sector Identity
+
+Sector 04는:
 
 ```text
-특정 Build Key
+TRANSIT / INFRASTRUCTURE
+```
+
+가 핵심이다.
+
+Sector 03에서 움직이는 거대한 물리 구조를
+대표 Gameplay로 소비하면
+Sector 04 정체성과 겹칠 위험이 있다.
+
+### 이유 3 — Rope Coupling
+
+Scanner는:
+
+```text
+STATIC GEOMETRY
++
+DYNAMIC ATTACH ELIGIBILITY
+```
+
+만으로 Rope Timing 질문을 직접 만든다.
+
+### 결론
+
+```text
+SECURITY SHUTTER
+= RESERVED / NOT USED
+
+ACCESS SCAN FIELD
+= SECTOR 03 PRIMARY SYSTEM
+```
+
+---
+
+## 7. Scanner Implementation Contract
+
+### Required Runtime Model
+
+권장:
+
+```text
+AUTHORED CONTROLLED SURFACE GROUP
++
+SIMULATION TICK
++
+DETERMINISTIC PHASE
++
+EFFECTIVE ATTACH ELIGIBILITY
+```
+
+### Current Static Support
+
+현재 Rope Targeting:
+
+```text
+surface.grappleable === false
+→ skip
+```
+
+지원.
+
+따라서:
+
+```text
+STATIC FILTER
+= IMPLEMENTED
+```
+
+### Missing
+
+```text
+dynamic access group
+phase evaluation
+scanner renderer cue
+network-consistent phase
+```
+
+### 금지 구현
+
+```text
+surface.grappleable
+```
+
+을 Scanner phase마다 직접 mutate하는 구조는 피한다.
+
+대신:
+
+```text
+isSurfaceEffectivelyGrappleable(surface, simulationState)
+```
+
+같은 계산 계층 권장.
+
+### Multiplayer
+
+Scanner State는:
+
+```text
+PLAYER A
+PLAYER B
+```
+
+에게 같은 simulation phase여야 한다.
+
+Client별 다른 Scanner phase 금지.
+
+---
+
+## 8. Controlled Surface Invariant
+
+Scanner-controlled mount:
+
+```text
+DEDICATED GAMEPLAY SURFACE SEGMENT
+```
+
+이어야 한다.
+
+금지:
+
+```text
+large always-grappleable wall
+
++
+
+visual controlled strip
+```
+
+같은 위치에 둘이 겹치는 구조.
+
+이유:
+
+LOCKED Surface 대신
+바로 옆 permanent parent에 붙어
+Mechanic을 무료 우회할 수 있다.
+
+### 유효한 Scanner Avoidance
+
+다음은 Bug가 아니다.
+
+```text
+Service Route
+Side Detour
+Permanent Grapple Structure
+```
+
+를 더 많은 Rope 입력 / Enemy exposure 같은 비용을 내고 사용하는 것.
+
+구분:
+
+```text
+ACCIDENTAL SAME-SPOT BYPASS
+= FAIL
+
+DESIGNED ALTERNATIVE ROUTE
+= VALID
+```
+
+---
+
+## 9. Rope / Physics Design Contract
+
+### CURRENT MAIN BASELINE
+
+```text
+Rope Max Attach Distance 440
+Attach Buffer            0.1 sec
+Swing Impulse            780
+Release Angular Transfer 0.55
+```
+
+### Mandatory Geometry
+
+Sector 03 모든 필수 진행:
+
+```text
+≤ 440 px
+```
+
+이어야 한다.
+
+### Max Range Challenge 금지
+
+Scanner / Drone / Route Choice와 동시에:
+
+```text
+near-440 exact range test
+```
+
+를 필수로 요구하지 않는다.
+
+권장:
+
+```text
+180–390 px
+```
+
+### `swingImpulse = 0` Validation
+
+실제 Current Runtime:
+
+```text
+780
+```
+
+하지만 Blockout validation:
+
+```text
+swingImpulse = 0
+→ mandatory route clearable
+```
+
+유지.
+
+의도:
+
+```text
+780
+= expression
+
+0
+= geometry safety contract
+```
+
+---
+
+## 10. Enemy Progression
+
+Sector 03에서는 새로운 Enemy Type을 만들지 않는다.
+
+### Reuse
+
+```text
+PATROL DRONE T1
+```
+
+### Stage Count
+
+```text
+3-1  0
+3-2  0
+3-3  1
+3-4  1
+3-5  0
+3-6  1
+3-7  1
+3-8  2
+```
+
+### Baseline
+
+```text
+Patrol Speed 48
+Wait         0.45 sec
+Mode         pingpong
+```
+
+### Target Family
+
+```text
+NO VALID TARGET
+→ PATROL
+
+VALID TARGET
+→ target lock
+→ patrol pause
+→ ACQUIRE
+→ TRACK
+→ LOCK
+→ FIRE
+→ COOLDOWN
+
+TARGET INVALID
+→ reset
+→ patrol resume
+```
+
+### Rope Cut
+
+```text
+NONE
+```
+
+Patrol T1 projectile:
+
+```text
+no-rope-cut
+```
+
+유지.
+
+### 금지
+
+- Drone T2
+- Fast Drone
+- Armored Drone
+- Laser Drone
+- Chase Drone
+- Burst Drone
+
+---
+
+## 11. LOS / Safe-Space Contract
+
+Generic Enemy Runtime에는:
+
+```text
+cover-ends-los
+```
+
+capability가 있다.
+
+그러나 Patrol Drone T1 baseline에는
+해당 rule이 기본 적용되지 않는다.
+
+따라서 Sector 03 Safe Deck의 근거:
+
+```text
+COVER
 ```
 
 가 아니라:
 
 ```text
-Safe Solution
-Flow Solution
-Build-Expressive Solution
+ACTIVATION BOUNDS
 ```
 
-을 만드는 압력이어야 한다.
+이다.
 
----
+### Common Rule
 
-### Celeste — VERIFIED / TRANSFER
-
-Celeste는 Coyote Time, Input Buffer, Corner Correction 등
-Player 의도를 유리하게 해석하는 보정을 사용한다.
-
-### TRANSFER
-
-Sector 03에서 움직이는 Shutter / Scanner처럼
-Timing 요소가 추가되더라도
-프레임 단위 정확도를 요구하지 않는다.
-
-권장:
+Safe observation / recovery / story deck은:
 
 ```text
-clear warning
-+
-forgiving transition window
-+
-nearby recovery
+new target acquire
 ```
 
----
+가 불가능한 activation outside로 설계.
 
-### Metanet N — VERIFIED / TRANSFER
-
-Metanet은 더 현실적인 물리 반응보다
-단순한 모델이 실제 플레이에서는 더 재미있었다고 설명한다.
-
-### TRANSFER
-
-Commercial District의 자동문, 광고판, 에스컬레이터, 보안 장치가
-시각적으로 복잡하더라도 실제 Gameplay State는 단순하게 유지한다.
-
-예:
+단:
 
 ```text
-OPEN
-WARNING
-CLOSED
+already-fired projectile
 ```
 
-정도의 명확한 상태.
+은 즉시 삭제되지 않을 수 있다.
+
+따라서 Safe Deck은
+단순 activation outside뿐 아니라
+실제 projectile trajectory도 Playtest한다.
 
 ---
 
-## 4. Sector 03 Story Question
+## 12. Growth Progression — HOLD
 
-Sector 02 종료 질문:
-
-> **“왜 C만 멈췄지?”**
-
-Sector 03 시작 질문:
-
-> **“그렇다면 A/B와 Priority Access는 누구를 위한 것이었지?”**
-
-Sector 03 전체에서 답을 완전히 주지 않는다.
-
-### Sector 03이 밝혀야 할 것
-
-1. Commercial District는 Worker District보다 전력 유지 상태가 훨씬 좋다.
-2. 이 구역의 대피 / Transit 시스템에는 Priority Tier 또는 Access Tier가 실제로 존재했다.
-3. 일부 Commercial Transfer / Service가 Incident 후에도 더 오래 유지됐다.
-4. 자동화 시스템은 사람이 사라진 뒤에도 정상 고객 / 권한 사용자처럼 행동한다.
-5. 상부 Resource Allocation이 균등하지 않았다는 정황이 강해진다.
-
-### 아직 밝히지 않을 것
-
-- Executive 개인 명령
-- Group A/B의 정확한 계급 정의
-- 고의적 Worker 희생
-- 사고 자체가 회사의 계획이었다는 주장
-- Corporate Sector의 최종 진실
-- Rooftop Escape 결말
-
----
-
-## 5. Sector 03 Story Tone
-
-Worker District:
+Sector 03 시작 Design State:
 
 ```text
-사람의 흔적
+FOUNDATION
 +
-전력 부족
-+
-기다림
-+
-중단
+FIRST SPECIALIZATION
 ```
 
-Commercial District:
+### Sector 03 General Stages
 
 ```text
-상품은 남아 있음
-+
-전력은 살아 있음
-+
-광고는 계속 재생
-+
-사람은 없음
+NEW AUGMENT
+NONE
+
+SECOND SPECIALIZATION
+HOLD
+
+SECONDARY AUGMENT
+HOLD
+
+HYBRID
+HOLD
+
+ARTIFACT REWARD AS ROPE GROWTH
+NONE
 ```
 
-핵심 불안:
+### 3-5 Decision
 
-> **“사람은 사라졌는데 소비 시스템은 정상 작동한다.”**
+3-5 `COMMERCIAL SERVICE NODE`:
 
-악당 방송이나 직접적인 풍자 문구보다
-정상적인 자동 시스템이 공허하게 작동하는 느낌을 우선한다.
+```text
+REST
++
+BUILD DIAGNOSTIC
+```
+
+새 Growth를 주지 않는다.
+
+### 이유
+
+Current production:
+
+```text
+Foundation design
+= authored
+
+Foundation runtime
+= pending
+
+First Specialization stage
+= authored
+
+Specialization names / values / pool
+= system gate
+```
+
+첫 성장 계층이 실제 Runtime / Playtest를 통과하기 전에
+더 높은 Tier를 Stage 때문에 먼저 만들지 않는다.
+
+### Artifact 분리
+
+현재 구현된 Artifact:
+
+```text
+POWER CORE
+RAPID GEAR
+ROPE RESONANCE
+```
+
+는 별도 Combat modifier layer.
+
+```text
+ARTIFACT
+≠
+ROPE AUGMENT
+```
 
 ---
 
-## 6. Visual Direction
+## 13. Sector Rhythm
 
-### Sector 02
+```text
+3-1
+REVEAL
+
+↓
+
+3-2
+TEACH
+
+↓
+
+3-3
+COMBINE
+
+↓
+
+3-4
+ROUTE IDENTITY
+
+↓
+
+3-5
+REST / DIAGNOSTIC
+
+↓
+
+3-6
+LARGE MOVEMENT EXPRESSION
+
+↓
+
+3-7
+STORY PRESSURE + STATIC COST CHOICE
+
+↓
+
+3-8
+DYNAMIC FREE-WEAVE FINALE
+```
+
+### Difficulty
+
+```text
+3-1  ★★
+3-2  ★★☆
+3-3  ★★★
+3-4  ★★★
+3-5  REST
+3-6  ★★★☆
+3-7  ★★★☆
+3-8  ★★★★
+```
+
+---
+
+## 14. Stage Master Table — REV 1.1
+
+| Stage | Name | Gameplay Role | Enemy | Scanner | Growth | Story |
+|---|---|---|---:|---|---|---|
+| 3-1 | POWERED PROMENADE | Powered Commercial reveal / low-pressure Rope flow | 0 | OFF | none | 상부 Commercial 유지 상태 첫 관찰 |
+| 3-2 | SCANNER GALLERY | First Access Scan Field tutorial | 0 | first active | none | Player route authorization invalid 강화 |
+| 3-3 | RETAIL SECURITY WALK | Scanner + Patrol first synthesis | 1 T1 | 1 group | none | 사람이 없어도 Security active |
+| 3-4 | SERVICE ARCADE | Public vs Service first Commercial route identity | 1 T1 | Public route | none | Maintenance access = local only |
+| 3-5 | COMMERCIAL SERVICE NODE | Rest / Build Diagnostic | 0 | none | **HOLD / none** | 권한 범위 재확인 |
+| 3-6 | PREMIUM ATRIUM | Large Rope Flow + known Security timing | 1 T1 | 1 shared group | none | Local power/service 유지 정황 |
+| 3-7 | PRIORITY CONCOURSE | Static cost-profile route choice + Story pressure | **1 T1** | 1 shared group | none | Service Class / Access Tier 구조 확인 |
+| 3-8 | UPPER MARKET GATE **REV 1.1** | **Dynamic Free-Weave Finale** | **2 T1 separated** | 1 shared group | none | Evacuation + Access archive 병치 |
+
+---
+
+## 15. 3-1 — POWERED PROMENADE
+
+### Role
+
+Sector 03 첫 authored region.
+
+### Gameplay
+
+```text
+ONE CLEAR ASCENT
++
+OPTIONAL FLOW SKIPS
+```
+
+Enemy 없음.
+Scanner active 없음.
+Scanner Housing inactive preview 가능.
+
+### Key Question
+
+> **“왜 이곳은 아직 이렇게 잘 켜져 있지?”**
+
+### Story
+
+보여줌:
+
+- powered lights
+- ad display
+- kiosk
+- cleaner commercial surfaces
+- products
+- no people
+
+공개 금지:
+
+- Priority identity
+- A/B identity
+- Group mapping
+
+### Important
+
+3-1은 Sector Intro.
+
+Scanner Tutorial을 침범하지 않는다.
+
+---
+
+## 16. 3-2 — SCANNER GALLERY
+
+### Role
+
+First Active Security State Tutorial.
+
+### Rule
+
+```text
+SEE
+→ WAIT IF NEEDED
+→ ATTACH
+→ STAY ATTACHED THROUGH LOCK
+→ RELEASE
+→ RE-ATTACH NEXT WINDOW
+```
+
+### Enemy
+
+```text
+NONE
+```
+
+### Important Runtime Note
+
+Canonical current state:
+
+```text
+STATIC GRAPPLEABLE FILTER
+= IMPLEMENTED
+
+DYNAMIC ACCESS SCAN FIELD
+= NOT IMPLEMENTED
+```
+
+기존 3-2 문서의
+“static grappleable filter도 없음” 서술은 stale하므로
+별도 patch 필요.
+
+---
+
+## 17. 3-3 — RETAIL SECURITY WALK
+
+### Role
+
+처음:
+
+```text
+SCANNER
++
+PATROL DRONE
+```
+
+결합.
+
+### Core
+
+```text
+OBSERVE TWO SIGNALS
+→
+ONE COMMIT WINDOW
+```
+
+### Enemy
+
+```text
+Patrol Drone T1 × 1
+```
+
+### Difficulty
+
+Scanner / Drone을 강화하지 않고
+기존 두 규칙을 한 판단 안에 겹친다.
+
+---
+
+## 18. 3-4 — SERVICE ARCADE
+
+### Role
+
+첫 Commercial Route Identity.
+
+### Public
+
+```text
+wide
+fewer attaches
+scanner
+patrol exposure
+```
+
+### Service
+
+```text
+narrower
+more chaining
+permanent mounts
+lower security exposure
+```
+
+### Story
+
+```text
+MAINTENANCE CLEARANCE
+RECOGNIZED
+
+LOCAL SERVICE ROUTE
+AVAILABLE
+```
+
+하지만:
+
+```text
+LOCAL SERVICE ACCESS
+≠
+VERTICAL TRANSIT AUTHORIZATION
+```
+
+### Important
+
+Service가 정답이 아니다.
+Public도 함정이 아니다.
+
+---
+
+## 19. 3-5 — COMMERCIAL SERVICE NODE
+
+### Role
+
+```text
+REST
++
+CURRENT BUILD RE-READ
+```
+
+### Growth
+
+```text
+NO NEW TIER
+```
+
+### Optional Node
+
+Read-only Diagnostic 가능.
+
+단 Foundation / Specialization Runtime이 실제 존재한 뒤에만.
+
+금지:
+
+- fake build value
+- reroll
+- respec
+- upgrade
+- reward pedestal
+
+---
+
+## 20. 3-6 — PREMIUM ATRIUM
+
+### Role
+
+3-5의 작은 Rest 공간 직후:
+
+```text
+LARGE OPEN COMMERCIAL VOID
+```
+
+에서 Movement Joy 회복.
+
+### Gameplay
+
+```text
+known Scanner
++
+1 Patrol
++
+large Rope arc
+```
+
+### Structure
+
+```text
+First Scanner Arc
+→
+Safe Mid Recombination
+→
+Scanner + Drone Commit
+→
+Upper Free Flow
+```
+
+### Growth
+
+새 Power 없음.
+
+Foundation + first Specialization Design State만 유지.
+
+Mandatory progression은 Build effect 없이도 성립.
+
+---
+
+## 21. 3-7 — PRIORITY CONCOURSE
+
+### Role
+
+Sector 03 첫 본격 Story Pressure.
+
+### Enemy
+
+```text
+Patrol Drone T1 × 1
+```
+
+Master REV 1.0의:
+
+```text
+1–2
+```
+
+는 superseded.
+
+### Gameplay
+
+한 Concourse의 세 static cost profile:
+
+```text
+OUTER GALLERY
+Scanner + longer + low Drone exposure
+
+PRIORITY SPINE
+Scanner + Drone + shortest
+
+SERVICE LATTICE
+No Scanner + Drone + more Rope chaining
+```
+
+### Story Reveal
+
+처음 확정:
+
+```text
+SERVICE CLASS CONTROL
+exists
+
+ACCESS TIER CONTROL
+exists
+
+PRIORITY ROUTE
+active
+```
+
+### Important
+
+다음은 아직 금지:
+
+```text
+Group A = Priority
+Group B = Premium
+Group C = Standard
+```
+
+---
+
+## 22. 3-8 — UPPER MARKET GATE REV 1.1
+
+### CANONICAL STATUS
+
+```text
+REV 1.1
+FREE-WEAVE
+```
+
+현재 GitHub REV 1.0은 superseded.
+
+### Why REV 1.0 Failed
+
+3-7:
+
+```text
+Outer / Priority / Service
+→ choose one cost profile
+```
+
+REV 1.0 3-8:
+
+```text
+West / Central / East
+→ choose one cost profile
+```
+
+결국:
+
+```text
+LEFT / CENTER / RIGHT
+→ choose
+→ merge
+```
+
+판단 패턴 반복.
+
+### REV 1.1 Core
+
+```text
+M0 SAFE HUB
+
+Central Scanner C2
+or
+West Drone Pocket W1
+or
+East Drone Pocket E1
+
+↓
+
+MX SAFE CROSSOVER
+
+↓
+
+Central Scanner C3
+or
+West Drone Pocket W2
+or
+East Drone Pocket E2
+
+↓
+
+M1 SAFE MERGE
+```
+
+### New Finale Question
+
+Scanner가 AVAILABLE:
+
+```text
+CENTRAL FLOW
+```
+
+Scanner가 LOCKED:
+
+```text
+WAIT
+or
+MOVE SIDEWAYS INTO DRONE POCKET
+```
+
+Lower 선택은 Upper 선택을 고정하지 않는다.
+
+### Enemy
+
+```text
+D1 WEST ONLY
+D2 EAST ONLY
+```
+
+두 activation:
+
+```text
+NO OVERLAP
+```
+
+Central / M0 / MX / M1:
+
+```text
+outside both
+```
+
+### Story Climax
+
+A1 Mandatory Story Deck:
+
+```text
+EVACUATION TRANSFER ARCHIVE
+
++
+
+UPPER COMMERCIAL ACCESS ARCHIVE
+```
+
+같은 facility에 존재.
+
+하지만:
+
+```text
+NO GROUP ↔ TIER MAPPING
+NO DIRECT CAUSALITY
+```
+
+---
+
+## 23. Story Disclosure Chain — Canonical
+
+### 2-8
+
+```text
+GROUP A
+TRANSFER COMPLETE
+
+GROUP B
+TRANSFER COMPLETE
+
+GROUP C
+TRANSFER SUSPENDED
+
+UPPER TRANSIT ROUTE
+PRIORITY ACCESS ACTIVE
+```
+
+### 3-1
+
+```text
+Commercial District
+better maintained / powered / automated
+```
+
+### 3-2
+
+```text
+EMPLOYEE VERIFIED
+ROUTE AUTHORIZATION INVALID
+```
+
+### 3-3
+
+```text
+AUTOMATED SECURITY
+still active
+```
+
+### 3-4
+
+```text
+MAINTENANCE CLEARANCE
+→ LOCAL SERVICE
+
+NOT
+→ UPPER VERTICAL AUTHORIZATION
+```
+
+### 3-5
+
+새 Story Reveal 최소화.
+
+### 3-6
+
+```text
+LOCAL POWER BUS
+ACTIVE
+
+COMMERCIAL SERVICE NETWORK
+LIMITED / ONLINE
+```
+
+Commercial이 더 잘 유지되지만:
+
+```text
+citywide cascade가 없었다
+```
+
+는 뜻은 아님.
+
+### 3-7
+
+```text
+Service Class Control exists
+Access Tier Control exists
+Priority Route active
+```
+
+### 3-8
+
+```text
+Evacuation Transfer Archive
+
+and
+
+Access-Control Archive
+
+coexisted in same Upper Commercial Gate
+```
+
+### Still Unknown
+
+- Group A 정체
+- Group B 정체
+- Priority 대상
+- Group ↔ Tier mapping
+- Group C suspension 원인
+- Priority와 C suspension 직접 인과
+- Resource allocation 결정자
+- Corporate final truth
+
+---
+
+## 24. Commercial Power-State Canon
+
+Sector 03은:
+
+```text
+TOTALLY NORMAL UPPER CITY
+```
+
+가 아니다.
+
+정확한 Contrast:
+
+```text
+WORKER DISTRICT
+reduced / damaged / dim
+
+COMMERCIAL DISTRICT
+better maintained
+local power active
+service automation partially online
+```
+
+### 금지 표현
+
+```text
+POWER STATUS: PERFECT
+INCIDENT IMPACT: NONE
+```
+
+같은 의미.
+
+### 권장
+
+```text
+LOCAL POWER BUS
+ACTIVE
+
+COMMERCIAL SERVICE NETWORK
+LIMITED / ONLINE
+```
+
+---
+
+## 25. Architecture / Visual Direction
+
+### Worker District
 
 ```text
 WARM BUT DIM
 WORN
+DENSE
 LIVED-IN
 RESIDENTIAL
 ```
 
-### Sector 03
+### Commercial
 
 ```text
 BRIGHTER
@@ -324,64 +1510,7 @@ EMPTY
 COMMERCIAL
 ```
 
-### Palette
-
-Base:
-
-```text
-Deep Navy
-Graphite
-Polished Dark Gray
-Cool Concrete
-```
-
-Commercial Light:
-
-```text
-Muted Magenta
-Warm White
-Gold / Amber
-Desaturated Teal
-```
-
-Gameplay:
-
-```text
-Rope / Grapple = CYAN
-Danger / Security = RED / ORANGE
-Player Scarf = RED
-```
-
-### 중요
-
-Commercial이라고 해서 화면 전체를 Neon으로 만들지 않는다.
-
-```text
-Gameplay Cyan
-Security Red/Orange
-```
-
-의 가독성을 유지하기 위해
-광고의 Cyan 사용은 강하게 제한한다.
-
----
-
-## 7. Architecture Direction
-
-Sector 03 대표 공간:
-
-- vertical shopping atrium
-- retail balcony
-- service corridor
-- automated storefront
-- food court terrace
-- advertisement bridge
-- premium transit lobby
-- customer service spine
-- maintenance duct behind polished facade
-- luxury / high-service commercial terrace
-
-### 형태
+### Core Architecture
 
 ```text
 VERTICAL ATRIUM
@@ -395,907 +1524,728 @@ ACTIVE DISPLAY
 BACK-OF-HOUSE SERVICE FRAME
 ```
 
-### 금지
+### Representative Spaces
 
-- 현대식 평평한 Mall Floor만 반복
-- Sector 02와 동일한 주거 Balcony 반복
-- Sector 04의 Transit Infrastructure를 미리 전부 소비
-- Sector 05 Corporate Office처럼 보이는 보안 시설 중심 구성
+- shopping atrium
+- retail balcony
+- storefront
+- service corridor
+- commercial service node
+- premium atrium
+- upper concourse
+- market gate
+- maintenance frame behind facade
 
----
+### Avoid
 
-## 8. Gameplay Core Candidate — ACTIVE SECURITY STATE
-
-### HYPOTHESIS
-
-Sector 03의 새 Gameplay 축 후보:
-
-```text
-SCANNER / SECURITY SHUTTER
-```
-
-### 핵심
-
-Player에게 새 버튼을 요구하지 않는다.
-
-Security State가:
-
-```text
-OPEN
-→ WARNING
-→ ACTIVE / CLOSED
-→ RESET
-```
-
-처럼 변하며
-Rope Route의 타이밍을 바꾼다.
-
-### 왜 Commercial에 맞는가
-
-이 구역은 전력이 살아 있고
-고객·상품·접근등급을 관리하는 자동 보안이 계속 작동한다.
-
-따라서:
-
-```text
-POWERED ARCHITECTURE
-```
-
-가 Gameplay로 느껴진다.
-
-### 아직 LOCK하지 않는 것
-
-- Scanner가 Damage를 주는지
-- Scanner가 Alarm만 발생시키는지
-- Shutter가 물리적으로 Route를 막는지
-- Scanner와 Shutter를 둘 다 쓰는지
-- 정확한 Timing
-- 정확한 시각 효과
-
-3-1~3-2 상세 설계 전에 하나로 축소해야 한다.
+- flat modern mall floor repetition
+- Worker residential balcony repetition
+- Sector 04 moving transit identity
+- Sector 05 corporate office identity
 
 ---
 
-## 9. New Mechanic Budget
+## 26. Palette / Gameplay Readability
 
-Sector 03에서 새로운 Gameplay 요소를 많이 넣지 않는다.
-
-권장:
+### Base
 
 ```text
-ONE PRIMARY NEW SYSTEM
+Deep Navy
+Graphite
+Polished Dark Gray
+Cool Concrete
 ```
 
-만 도입.
-
-후보 우선순위:
-
-### OPTION A — SCANNER SWEEP
+### Commercial Light
 
 ```text
-Scanner Beam이 공간을 Sweep
-→ Player가 Timing / Route 변경
+Warm White
+Muted Gold / Amber
+Muted Magenta
+Desaturated Teal
 ```
 
-장점:
-
-- Commercial Security Theme 명확
-- Rope Movement와 결합 쉬움
-- 기존 Drone과 조합 가능
-
-위험:
-
-- 단순 Laser Hazard처럼 보일 수 있음
-- Damage Beam이면 Bullet/Trap 과밀 가능
-
-### OPTION B — SECURITY SHUTTER
+### Gameplay Priority
 
 ```text
-OPEN
-→ WARNING
-→ CLOSED
-→ OPEN
+Rope / Grapple
+CYAN
+
+Scanner Warning / Security
+AMBER / RED / ORANGE
+
+Player Scarf
+RED
 ```
 
-장점:
+### Important
 
-- Route Availability를 직접 바꿈
-- 환경 자체가 움직이는 느낌
-
-위험:
-
-- Moving Platform / Transit Mechanic과 경계가 흐려질 수 있음
-- Player 끼임 문제
-
-### 초기 권장
+Commercial 광고에 Cyan을 과도하게 사용하지 않는다.
 
 ```text
-SCANNER STATE
-+
-STATIC GEOMETRY
+Rope Cyan
 ```
 
-부터 검증.
+의 우선순위가 가장 높다.
 
-즉 처음에는 실제 Collision Shutter보다
-**보이는 보안 상태가 Route Timing을 바꾸는 구조**가 안전하다.
+Scanner는 Damage Laser가 아니므로
+두껍고 공격적인 Red Laser Beam처럼 만들지 않는다.
 
 ---
 
-## 10. Enemy Progression 원칙
+## 27. Collision / Decoration Contract
 
-### Sector 02에서 이미 가진 것
+Sector 03는 Visual Detail이 많기 때문에
+Collision 오독 위험이 크다.
 
-```text
-Patrol Drone T1
-```
-
-Sector 03에서 곧바로:
+### Always Separate
 
 ```text
-Drone T2
-Armored Drone
-Fast Drone
-Laser Drone
+COLLISION GEOMETRY
+≠
+NONCOLLISION DECORATION
 ```
 
-를 추가하지 않는다.
+특히:
 
-### 권장
+- pipe
+- cable
+- railing
+- ad frame
+- storefront trim
+- hanging sign
 
-3-1~3-2:
+이 Grapple Target이나 Terrain처럼 보여서는 안 된다.
+
+### Terrain
+
+Gameplay collision skin은:
 
 ```text
-Patrol Drone T1 재사용 또는 Enemy NONE
+actual authored geometry
 ```
 
-3-3 이후 필요성이 확인되면
-새 Security Enemy를 별도 기획.
+를 따른다.
 
-### 새로운 적을 추가할 조건
-
-새 적이 반드시 새로운 질문을 만들어야 한다.
-
-나쁜 이유:
-
-```text
-Sector가 바뀌었으니 새 몹 필요
-```
-
-좋은 이유:
-
-```text
-Commercial Security State와 Rope Geometry를
-기존 Drone으로는 만들 수 없는 새로운 판단이 필요
-```
-
-현재는 미확정.
+Graphics가 Collision을 새로 정의하지 않는다.
 
 ---
 
-## 11. Build Progression 원칙
+## 28. Multiplayer Contract
 
-Sector 03 시작 상태:
+### Scanner
 
-```text
-FOUNDATION
-+
-SPECIALIZATION
-```
-
-### 중요한 질문
-
-Sector 03에서 다음 성장 Node를 줄 것인가?
-
-현재는 **OPEN**.
-
-가능한 장기 로드맵:
+두 Player:
 
 ```text
-FOUNDATION
-→ SPECIALIZATION
-→ SECONDARY / DEEP SPECIALIZATION
-→ HYBRID
-→ CAPSTONE
+same scanner phase
 ```
 
-### 권장
-
-Sector 03 Master Plan 단계에서는
-새 Augment Tier의 정확한 위치를 LOCK하지 않는다.
-
-먼저:
-
-1. Sector 02 Specialization이 충분히 표현되는가
-2. Run이 성장 부족으로 느껴지는가
-3. 3-1~3-3 Gameplay가 현재 Build만으로 충분히 다양한가
-
-를 Playtest 후 결정.
-
----
-
-## 12. Sector 03 Stage Progression — REV 1.0 후보
-
-| Stage | Working Name | Role | Difficulty | Enemy | New Mechanic |
-|---|---|---|---|---|---|
-| 3-1 | POWERED PROMENADE | Sector Transition / Commercial Reveal | ★★ | NONE | NONE |
-| 3-2 | SCANNER GALLERY | First Active Security State | ★★☆ | NONE | Scanner 후보 |
-| 3-3 | RETAIL SECURITY WALK | Scanner + Patrol Drone | ★★★ | 1 Patrol Drone | NONE |
-| 3-4 | SERVICE ARCADE | Multi-Route / Front-of-House vs Service Route | ★★★ | 1 Patrol Drone | NONE |
-| 3-5 | COMMERCIAL SERVICE NODE | Rest / Growth Decision | REST | NONE | Growth Tier TBD |
-| 3-6 | PREMIUM ATRIUM | Large Open Flow + Security Timing | ★★★☆ | 1 Patrol Drone | NONE |
-| 3-7 | PRIORITY CONCOURSE | Story Pressure + Security Synthesis | ★★★☆ | 1–2 Patrol Drone | NONE |
-| 3-8 | UPPER MARKET GATE | Sector General Finale / Story Climax | ★★★★ | 2 max, separated | NONE |
-
-### 주의
-
-이 표는 **HYPOTHESIS**다.
-
-3-1 상세 작성 전:
-- Scanner 필요성
-- Growth Node 위치
-- 3-8 Story Climax 정보량
-
-을 다시 검토한다.
-
----
-
-## 13. 3-1 — POWERED PROMENADE
-
-### Role
-
-Sector 02의 어둡고 worn한 Worker District와
-Commercial District의 전력 상태를 비교.
-
-### Gameplay
-
-Enemy 없음.
-
-새 Mechanic 없음.
-
-기존 Rope로:
-
-- polished balcony
-- atrium bridge
-- advertisement frame
-- service beam
-
-을 이동.
-
-### 핵심 Story
-
-Player가 처음 느끼는 것:
-
-> **“여긴 불이 들어와 있다.”**
-
-광고 Display가 정상적으로 재생되지만
-사람은 없다.
-
-### 금지
-
-- Priority Tier 상세 공개
-- Scanner Tutorial
-- 새 적
-- 새 Augment
-
----
-
-## 14. 3-2 — SCANNER GALLERY
-
-### Role
-
-Sector 03의 새 시스템 후보를 한 가지씩 소개.
-
-### HYPOTHESIS
-
-첫 Scanner는:
-
-```text
-SEE
-→ WARNING
-→ SWEEP
-→ CLEAR
-```
-
-가 명확해야 한다.
-
-Enemy 없음.
-
-Scanner가 실제 Damage를 주기보다
-초기에는:
-
-```text
-Detection / Route Timing Pressure
-```
-
-로 시작하는 방향을 우선 검토.
-
-### 핵심 질문
-
-> “빛의 움직임을 보고 Rope Commit Timing을 바꿀 수 있는가?”
-
----
-
-## 15. 3-3 — RETAIL SECURITY WALK
-
-### Role
-
-Scanner 후보 + 기존 Patrol Drone T1 결합.
+를 본다.
 
 ### Enemy
 
+각 Drone은:
+
 ```text
-Patrol Drone T1 × 1
+activation bounds
 ```
 
-### 원칙
+안 Player만 eligible.
 
-Scanner와 Drone이 동시에 Player를 처벌하는
-Bullet Chaos를 만들지 않는다.
+다른 Route / Pocket / Safe Hub의 Player를
+cross-zone target으로 잡지 않는다.
 
-Scanner State를 읽으면
-어느 Route가 안전한지 바뀌는 구조.
+### Safe Hubs
+
+2인 착지 폭 확보.
+
+### UI
+
+Story / Diagnostic UI:
+
+```text
+NO GLOBAL PAUSE
+```
+
+### Gate
+
+현재 일반 Stage Gate:
+
+```text
+shared open
+individual physical crossing
+```
+
+원칙.
+
+3-8 Final Gate만
+Post-Sector contract 확정 전 HOLD.
 
 ---
 
-## 16. 3-4 — SERVICE ARCADE
+## 29. Recovery Contract
 
-### Role
+Sector 03은 Timing Layer가 추가되므로
+실패 비용을 짧게 유지한다.
 
-Commercial District의 핵심 공간 선택.
+### Target
+
+대부분:
 
 ```text
-FRONT-OF-HOUSE
-vs
-BACK-OF-HOUSE
+3–5 sec
 ```
 
-### Route
+내 재진입 가능.
 
-#### PUBLIC ROUTE
-
-- 밝음
-- 넓음
-- Security Exposure 높음
-- 이동은 직관적
-
-#### SERVICE ROUTE
-
-- 좁지만 Gameplay Choke 금지
-- Maintenance Frame
-- Rope Geometry 풍부
-- Security Exposure 낮거나 다름
-
-### 중요한 Story 의미
-
-주인공이 Technician이기 때문에
-화려한 Commercial facade 뒤의
-Service Infrastructure를 읽을 수 있다.
-
-하지만:
+### Avoid
 
 ```text
-Maintenance Access = 모든 권한 해제
+full-stage fall
+start reset
+damage floor
+recovery under sustained new fire
+```
+
+### Safe Deck
+
+Safe 의미:
+
+```text
+NO NEW ACQUIRE
+```
+
+이지:
+
+```text
+all existing projectiles disappear
 ```
 
 가 아니다.
 
 ---
 
-## 17. 3-5 — COMMERCIAL SERVICE NODE
+## 30. Boss / Timer / Sector Transition
 
-### Role
-
-Rest / possible Growth.
-
-### 현재 OPEN
-
-다음 중 하나:
+### Sector 03 General Stage
 
 ```text
-A. Second Specialization
-B. Secondary Augment
-C. Hybrid Eligibility
-D. No Augment — Rest / Story only
+3-1 ~ 3-8
 ```
 
-현재는 확정하지 않는다.
+### Boss
 
-### 결정 기준
-
-Growth가:
+각 Sector에 1 Boss가 존재하지만:
 
 ```text
-새 버튼
+BOSS LOCATION
+IDENTITY
+ENTRY
+COMBAT
+REWARD
 ```
 
-이 아니라 기존 Rope Behavior를 깊게 만드는지 확인.
+현재 OPEN.
+
+### 3-8
+
+```text
+BOSS
+NONE IN THIS STAGE
+```
+
+### Stage-local Completion
+
+3-8 REV 1.1:
+
+```text
+A1 mandatory story trigger
+→
+Reach P6
+```
+
+### HOLD
+
+P6 이후:
+
+```text
+Gate Panel objective
+physical crossing
+nextAreaId
+boss entry
+general timer end
+checkpoint
+```
+
+모두 TBD.
+
+### 금지
+
+```text
+P6
+→ sector-04-01
+```
+
+직접 연결.
 
 ---
 
-## 18. 3-6 — PREMIUM ATRIUM
+## 31. Sector 04 Reservation
 
-### Role
-
-Sector 03의 Movement Enjoyment + Visual Scale.
-
-2-6처럼 완전 Relief은 아니지만,
-넓은 Commercial Void에서:
+Sector 04:
 
 ```text
-large arc
-+
-scanner timing
-+
-route choice
+TRANSIT / INFRASTRUCTURE
 ```
 
-를 즐긴다.
+### Sector 03에서 금지
 
-### Story
+- moving train gameplay
+- moving rail route
+- conveyor identity
+- moving platform as primary mechanic
+- transit signal puzzle
+- large infrastructure motion
 
-Worker District보다:
+### 3-8 Preview
 
-- 전력
-- 조명
-- 청결
-- 서비스 자동화
-
-가 훨씬 잘 유지돼 있음을 강화.
-
-직접적인 계급 설명 없음.
-
----
-
-## 19. 3-7 — PRIORITY CONCOURSE
-
-### Role
-
-Sector 03 Story Build-up.
-
-### Story 후보
-
-처음으로:
+허용:
 
 ```text
-ACCESS TIER
-PRIORITY ROUTE
-SERVICE CLASS
-```
-
-같은 시스템 언어를 더 구체적으로 보여줄 수 있다.
-
-그러나:
-
-```text
-GROUP A = 특정 계층
-```
-
-을 직접 확정하지 않는다.
-
-### Gameplay
-
-Scanner / Drone / Multi-Route 종합.
-
-2-7과 동일한 두-Encounter 구조를 그대로 반복하지 않는다.
-
----
-
-## 20. 3-8 — UPPER MARKET GATE
-
-### Role
-
-Sector 03 일반 진행 Finale.
-
-### Gameplay
-
-```text
-Commercial Atrium
-+
-Active Security State
-+
-Patrol Drone
-+
-Multi-Route
-+
-Build Expression
-```
-
-종합.
-
-Boss는 이 Stage 내부에 넣지 않는다.
-
-### Story Climax 후보
-
-Sector 03이 끝날 때 Player가 알아야 할 것은:
-
-> **Priority Access가 일회성 경고문 하나가 아니라,
-> 상부 Commercial 공간의 여러 접근 제어 기록과 반복해서 함께 나타난다.**
-
-이 단계에서는 이것이 Group C의 중단 원인이라고 확정하지 않는다.
-
-정도.
-
-### 아직 공개하지 않음
-
-- Corporate 책임자의 이름
-- 구체적 희생 명령
-- 사고 조작
-- 최종 음모
-
----
-
-## 21. Sector 03 Gameplay Progression
-
-```text
-3-1
-POWERED SPACE
-“여긴 살아 있다.”
-
-↓
-
-3-2
-ACTIVE SECURITY
-“공간에도 상태가 있다.”
-
-↓
-
-3-3
-SECURITY + MOVING THREAT
-“State와 Enemy를 같이 읽는다.”
-
-↓
-
-3-4
-FRONT / SERVICE ROUTE
-“화려한 길과 설비 길의 조건이 다르다.”
-
-↓
-
-3-5
-REST / GROWTH
-“현재 Build를 다시 정리한다.”
-
-↓
-
-3-6
-LARGE ATRIUM EXPRESSION
-“큰 공간을 Timing과 Rope로 가로지른다.”
-
-↓
-
-3-7
-PRIORITY ROUTE PRESSURE
-“보안 시스템의 Access Tier가 보인다.”
-
-↓
-
-3-8
-SECTOR SYNTHESIS
-“Commercial Security 전체를 내 Build로 돌파한다.”
-```
-
----
-
-## 22. Sector 03 Story Progression
-
-```text
-3-1
-Worker District와 달리
-Commercial District는 전력이 살아 있다.
-
-↓
-
-3-2
-상업시설 Security도 정상 작동한다.
-
-↓
-
-3-3
-사람은 없지만
-고객 / 접근 권한을 전제로 시스템은 계속 작동.
-
-↓
-
-3-4
-공공 공간 뒤에
-Maintenance / Service Infrastructure가 존재.
-
-↓
-
-3-5
-Rest / Growth 구간.
-새 Story 정보는 최소화하고,
-필요할 경우 기존 Access 표시가 상업공간 전반에 반복된다는 정도만 강화.
-
-↓
-
-3-6
-상부 공간의 Resource 상태가
-Worker District와 현저히 다름.
-
-↓
-
-3-7
-Priority / Access Tier가
-Commercial 이동 체계에 구조적으로 존재함을 확인.
-
-↓
-
-3-8
-Group A/B/C의 서로 다른 Transfer 결과와
-Access Tier 기록이 같은 상부 이동 환경에 병치되어 있었음을 확인.
-
-둘 사이의 직접적인 인과관계는 아직 확정하지 않는다.
-```
-
-Sector 종료 질문 후보:
-
-> **“Priority는 누구에게 주어졌고, 누가 그 규칙을 만들었지?”**
-
----
-
-## 23. Graphics / Asset Direction
-
-### Player / Gameplay
-
-기존 규칙 유지.
-
-```text
-Player Human Scale 32×32–48×48
-Patrol Drone 24×24–32×32
-Gameplay Tile 32×32
-Anchor Cue 24×24 권장
-```
-
-### Commercial Near Props
-
-- display panel
-- storefront frame
-- escalator shell decoration
-- vending / kiosk
-- table / chair cluster
-- premium sign
-- service hatch
-- advertisement lightbox
-- access scanner housing
-
-### Mid
-
-```text
-128×128–256×256
-```
-
-- retail modules
-- atrium bridge
-- food court block
-- service spine
-- large billboard structure
-
-### Far
-
-```text
-512×288
-or
-960×540
-```
-
-- bright commercial vertical atrium
-- repeating retail terraces
-- distant upper-city glow
-
----
-
-## 24. Background / Collision Rule
-
-Commercial District는
-Sector 02보다 훨씬 시각적으로 복잡할 가능성이 높다.
-
-따라서:
-
-```text
-VISUAL COMPLEXITY
-≠
-COLLISION COMPLEXITY
-```
-
-를 더 엄격히 적용한다.
-
-기본 Non-Collision:
-
-- advertisement screen
-- table
-- chair
-- storefront trim
-- hanging sign
-- decorative glass frame
-- cable
-- escalator shell
-- mannequin / display prop
-- light fixture
-
-### 중요
-
-광고 Frame과 Neon Strip이
-Grapple Anchor처럼 보이면 실패.
-
-Cyan Commercial Advertising는 제한.
-
----
-
-## 25. Major Design Risks
-
-### RISK 1 — Sector 02와 차별화 실패
-
-Patrol Drone + Multi-Route만 반복하면
-Sector 02의 밝은 버전이 된다.
-
-**대응:**
-
-Active Security State를 검증하되
-하나의 단순한 시스템만 도입.
-
-### RISK 2 — Sector 04 영역 침범
-
-Moving Platform / Train / Rail / Transit Timing을
-Sector 03에서 너무 많이 쓰면
-Sector 04 Transit / Infrastructure의 정체성을 소비한다.
-
-**대응:**
-
-Sector 03은:
-
-```text
-SECURITY STATE
-```
-
-중심.
-
-Sector 04는:
-
-```text
-INFRASTRUCTURE MOTION / TRANSIT
-```
-
-로 남긴다.
-
-### RISK 3 — Sector 05 Corporate Story 침범
-
-Commercial에서 기업의 최종 책임과
-명령 체계를 너무 많이 공개하면
-Sector 05가 약해진다.
-
-**대응:**
-
-Sector 03은:
-
-```text
-ACCESS SYSTEM EXISTS
+static heavy frame
+large conduit
+distant infrastructure silhouette
 ```
 
 까지만.
 
+---
+
+## 32. Scenario Art Generation Contract
+
+최신 공통 규격:
+
 ```text
-WHO ORDERED IT
+docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md
 ```
 
-는 나중.
+이 Sector 03의 오래된 개별 Art 지시보다 우선한다.
 
-### RISK 4 — Neon Readability
+### Approved Gameplay Reference Before Generation
 
-광고가 Rope / Danger Telegraph를 덮을 수 있다.
+필수:
 
-**대응:**
+1. Runtime Area exists.
+2. Camera Zone is stable.
+3. Stable IDs exist.
+4. Blockout geometry approved.
+5. Exact visible object count fixed.
 
-Gameplay Color Ownership 유지.
+### Output
 
-### RISK 5 — New Mechanic Overload
+대표:
 
-Scanner + Shutter + Drone T2 + New Augment를
-한 Sector에 동시에 넣으면 핵심이 흐려진다.
+```text
+ONE GAMEPLAY CAMERA SHOT
+```
 
-**대응:**
+기본.
 
-3-2 전까지 Primary New System 하나만 확정.
+### Rules
+
+- Player exactly 1
+- live Rope exactly 1 line
+- Anchor network / triangle 금지
+- 전체 레벨맵을 Gameplay shot으로 위장 금지
+- exact objects only
+- current camera scale 따라야 함
+
+### Current Sector 03 Status
+
+```text
+RUNTIME AREA
+NONE
+
+CAMERA ZONE
+NONE
+```
+
+따라서:
+
+```text
+APPROVED GAMEPLAY ART
+HOLD
+```
 
 ---
 
-## 26. Sector 03 PASS Criteria
+## 33. Runtime Implementation Order
+
+### P0 — Scanner Spike
+
+```text
+ACCESS SCAN FIELD
+```
+
+단독 prototype.
+
+검증:
+
+- deterministic phase
+- dynamic attach eligibility
+- current rope stays attached
+- multiplayer same phase
+- clear warning/readability
+
+### P1 — Sector 03 Authored Geometry
+
+Scanner OFF / Drone OFF.
+
+```text
+3-1 → 3-8
+```
+
+base geometry.
+
+### P2 — Patrol Reuse
+
+3-3 / 3-4 / 3-6 / 3-7 / 3-8.
+
+### P3 — Scanner Integration
+
+3-2 onward.
+
+### P4 — Multiplayer
+
+- split routes
+- safe hub
+- scanner phase
+- drone ownership
+- projectile overlap
+- Gate
+
+### P5 — Story
+
+Runtime stable ID / triggers.
+
+### P6 — Art / Audio
+
+Gameplay contract PASS 후.
+
+---
+
+## 34. Required Document Patches After REV 1.1 Master
+
+### PATCH A — 3-8
+
+현재 GitHub:
+
+```text
+REV 1.0
+```
+
+을:
+
+```text
+REV 1.1 FREE-WEAVE
+```
+
+로 교체.
+
+**Priority: P0**
+
+### PATCH B — 3-2 Runtime Note
+
+현재 오래된 부분:
+
+```text
+static grappleable filter missing
+```
+
+을 수정.
+
+Canonical:
+
+```text
+STATIC FILTER IMPLEMENTED
+DYNAMIC SCANNER FILTER NOT IMPLEMENTED
+```
+
+### PATCH C — 3-1 / 3-2 Exit Contract
+
+최신 일반 Gate contract:
+
+```text
+reach objective
+→ Gate Panel
+→ contextual interaction
+→ Gate open
+→ physical crossing
+```
+
+으로 문서 동기화.
+
+Gameplay geometry / story는 변경하지 않는다.
+
+### PATCH D — Stage Snapshot Label
+
+장기적으로 각 Stage의:
+
+```text
+VERIFIED — CURRENT MAIN
+```
+
+은 작성 후 곧 stale해진다.
+
+권장:
+
+```text
+VERIFIED — AUTHORING SNAPSHOT
+SHA ...
+```
+
+통합 문서만:
+
+```text
+CURRENT MAIN AT INTEGRATION
+```
+
+사용.
+
+---
+
+## 35. Playtest Questions — Sector Level
 
 ### Gameplay
 
-- Sector 02와 다른 공간 판단을 요구
-- Rope가 여전히 모든 이동의 중심
-- 새 버튼 없음
+1. Scanner가 Damage Hazard가 아니라 **Attach Timing Rule**로 이해되는가?
+2. 3-4의 Public / Service가 실제 비용 차이로 느껴지는가?
+3. 3-5가 필요 없는 공백이 아니라 Rhythm Rest로 느껴지는가?
+4. 3-6에서 새 Upgrade 없이도 Rope 이동이 충분히 재미있는가?
+5. 3-7의 세 Cost Profile이 명확한가?
+6. 3-8 REV 1.1이 3-7과 다르게 **계속 경로를 엮는 Stage**로 기억되는가?
+
+### Story
+
+1. Commercial이 Worker보다 더 잘 유지된 것은 이해되는가?
+2. 하지만 Commercial도 Incident 영향이 있다는 점은 남는가?
+3. 3-7에서 Access Tier 구조가 실제 존재했다는 점을 이해하는가?
+4. 3-8에서 두 Archive의 병치를 알아차리는가?
+5. A/B/C와 Tier가 **아직 확정되지 않았음**을 이해하는가?
+
+### Multiplayer
+
+1. Scanner phase가 두 Player에게 동일하게 보이는가?
+2. 한 Player의 Drone encounter가 다른 Route Player를 잘못 공격하는가?
+3. Safe Hub가 실제로 2인에게 충분한가?
+4. 3-8 좌우 Drone projectile이 중앙 Player에게 우발적 cross-lane hit를 만드는가?
+
+---
+
+## 36. PASS Criteria — Sector 03
+
+### Gameplay
+
+- Scanner가 Sector의 한 가지 Primary New System으로 읽힘
+- 새 Input 없음
 - 새 Rope Mode 없음
-- Security State가 Route Choice를 바꿈
-- 특정 Build Key 없음
-- Safe / Flow / Build Expression 유지
-- Recovery 빠름
-- Mobile 화면에서도 Security State가 읽힘
+- New Enemy 없음
+- 3-1~3-8 모두 Base Rope mandatory clear 가능
+- Scanner / Drone 강화 대신 공간 조합으로 난이도 상승
+- 3-5 Rest 리듬 유효
+- 3-7 / 3-8 decision pattern이 구분됨
+- 3-8은 Free-Weave로 기억됨
+
+### Growth
+
+- Foundation + first Specialization 유지
+- Sector 03 신규 Tier 없음
+- Artifact와 Augment 혼동 없음
 
 ### Story
 
 - Powered Commercial Contrast 전달
-- Priority / Access Tier 정황 강화
-- A/B/C 계급 정체 직접 설명 없음
-- Worker 희생 고의성 확정 없음
-- Corporate 최종 진실 공개 없음
-- Sector 04 / 05의 질문을 남김
+- Access Tier 구조 공개
+- Archive 병치 공개
+- Group ↔ Tier mapping 미확정
+- Group C suspension 직접 원인 미확정
+- Corporate final truth 미공개
 
-### Visual
+### Runtime Discipline
 
-- Worker District와 즉시 구분
-- 밝지만 Gameplay 가독성 유지
-- Commercial = Neon Spam이 아님
-- Architecture가 Vertical Megastructure로 유지
+- Scanner dependency 명시
+- Sector 03 Runtime 미연결 사실 명시
+- Boss / post-sector transition 미추정
+- Art generation premature approval 금지
+
+---
+
+## 37. FAIL Conditions — Sector 03
+
+### Gameplay
+
+- Scanner를 Damage Laser로 변환
+- Scanner Locked 시 current Rope 강제 detach
+- Shutter를 별도 주요 시스템으로 추가
+- Drone T2 추가
+- 3-5에서 Hybrid / second specialization 지급
+- 특정 Build만 통과 가능한 Mandatory Route
+- 3-7과 3-8이 사실상 같은 3-Route choice
+- 3-8 D1/D2 activation overlap
+- Sector 04 moving-transit identity 선행 소비
+
+### Story
+
+- A = Priority 확정
+- B = Premium 확정
+- C = Standard 확정
+- Priority 때문에 C가 중단됐다고 확정
+- 고의적 Worker 희생 확정
+- 사고 자체가 회사 계획이라고 확정
+- Corporate 최종 책임자 공개
+
+### Production
+
+- Sector 03 Runtime도 없는데 Approved Gameplay Art 생성
+- Scanner fake local timer만 renderer에 구현
+- Stage마다 Scanner timing을 임의로 다르게 강화
+- Boss 위치를 3-8 문서에서 추정
+- P6를 Sector04-01로 바로 wiring
+
+---
+
+## 38. Canonical Sector 03 After REV 1.1
+
+```text
+3-1 POWERED PROMENADE
+Commercial Contrast
+No Threat
+
+↓
+
+3-2 SCANNER GALLERY
+Teach ACCESS SCAN FIELD
+
+↓
+
+3-3 RETAIL SECURITY WALK
+Scanner + 1 Patrol
+
+↓
+
+3-4 SERVICE ARCADE
+Public vs Service
+
+↓
+
+3-5 COMMERCIAL SERVICE NODE
+REST
+Growth HOLD
+
+↓
+
+3-6 PREMIUM ATRIUM
+Large Rope Flow
++ known Security
+
+↓
+
+3-7 PRIORITY CONCOURSE
+Static Cost-Profile Choice
++ Access Tier Reveal
+
+↓
+
+3-8 UPPER MARKET GATE REV 1.1
+Dynamic FREE-WEAVE
+Central Scanner Spine
++ West/East Drone Pockets
++ Evacuation/Access Archive Juxtaposition
+
+↓
+
+POST-SECTOR 03
+BOSS / TRANSITION
+TBD
+```
 
 ---
 
 ## OPEN QUESTIONS
 
-### 1. Sector 03 Primary New Mechanic
+### 1. ACCESS SCAN FIELD Exact Timing
 
-현재 후보:
-
-```text
-Scanner Sweep
-vs
-Security Shutter
-```
-
-초기 권장:
+Design state machine은 정해졌지만:
 
 ```text
-Scanner / Detection State 우선
+AVAILABLE duration
+WARNING duration
+LOCKED duration
+RESET duration
 ```
 
-3-2 상세 설계 전 레퍼런스와 Prototype 비용을 다시 검토한다.
+정확한 수치는 Runtime Prototype / Playtest 전까지 HYPOTHESIS.
 
-### 2. Scanner Penalty
+### 2. Scanner Visual
 
-미확정.
-
-후보:
+필수:
 
 ```text
-A. Direct Damage
-B. Alarm / Drone Acquire
-C. Temporary Route Lock
-D. Pure Timing Hazard
+AVAILABLE
+WARNING
+LOCKED
+RESET
 ```
 
-처음부터 Damage Laser로 단순화하지 않는 것을 권장한다.
+가 Mobile에서도 즉시 구분.
 
-### 3. Sector 03 Growth Node
+하지만 exact beam / housing animation은 Graphics implementation과 함께 확정.
 
-3-5를 Rest / Growth로 잡았지만
-실제 Augment Tier는 미확정.
+### 3. Foundation / Specialization Runtime
 
-Sector 02 Specialization Playtest 결과가 필요하다.
+현재 Sector 03의 Build Expression은 Design assumption.
 
-### 4. New Enemy
+실제 효과가 구현된 뒤:
 
-현재 필요성 미확정.
+```text
+3-4
+3-6
+3-7
+3-8
+```
 
-Patrol Drone T1 + Active Security만으로
-충분한 변화가 생기면 새 Enemy를 추가하지 않는다.
+을 Build matrix로 다시 검증.
 
-### 5. Sector 02 Boss → Sector 03 Entry
+### 4. 3-8 Free-Weave Value
 
-공통 Boss Flow에 따라
-Sector 02 Boss의 위치·정체·전환 순서가 아직 미확정이다.
+핵심:
 
-따라서 3-1의 정확한 Entry Narrative는
-Boss 기획 확정 뒤 최종 연결한다.
+```text
+Scanner AVAILABLE
+→ Central
 
-### 6. Sector 03 Ending → Sector 04
+Scanner LOCKED
+→ Wait or Side Detour
+```
 
-Sector 04는 Transit / Infrastructure다.
+Side Detour가 항상 나쁘거나
+Central이 항상 정답이면 geometry/timing 조정.
 
-3-8에서 Transit을 본격 Gameplay Mechanic으로 소비하지 않고
-방향 / 구조 Preview 정도만 보여주는 것을 우선한다.
+### 5. Sector 03 Boss
+
+여전히 OPEN.
+
+3-8은 일반 진행 Finale일 뿐 Boss Stage가 아니다.
+
+### 6. Sector-end Checkpoint
+
+Boss Entry / retry flow가 확정된 뒤 결정.
+
+### 7. Sector 04 Master Plan
+
+Sector 03 문서 patch와 최종 GitHub 재검증 후 시작.
 
 ---
 
-SECTOR 03 / COMMERCIAL DISTRICT MASTER PLAN — REV 1.0
+SECTOR 03 / COMMERCIAL DISTRICT MASTER PLAN — REV 1.1
