@@ -17,6 +17,7 @@ import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.j
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
 import { AuthoredWorldObjectRenderer, localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
 import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
+import { AuthoredAreaStructureRenderer } from "../src/render/world/AuthoredAreaStructureRenderer.js";
 
 function recordingContext() {
     const calls = [];
@@ -579,6 +580,116 @@ export async function run() {
         authoredObjectContext.calls.find(([name]) => name === "fillText")?.slice(1),
         ["A", 0, -25],
         "route landmark labels sit outside the grapple fixture instead of inside a circle"
+    );
+
+    const areaStructureContext = recordingContext();
+    new AuthoredAreaStructureRenderer().draw({
+        context: areaStructureContext,
+        scene: {
+            world: {
+                areas: [
+                    {
+                        id: "sector-01-01",
+                        sectorId: "sector-01",
+                        order: 1,
+                        name: "SERVICE SHAFT",
+                        subtitle: "VERTICAL GRID CASCADE FAILURE",
+                        bounds: { x: -480, y: -960, width: 960, height: 960 },
+                        exit: { x: 320, y: -928 },
+                        gateId: "sector-01-01:gate"
+                    }
+                ],
+                gates: [
+                    {
+                        id: "sector-01-01:gate",
+                        barrier: { x: 288, y: -1024, width: 64, height: 128 }
+                    }
+                ]
+            }
+        }
+    });
+    assert.ok(
+        areaStructureContext.calls.some(
+            ([name, x, y, width, height]) =>
+                name === "fillRect" && x === -480 && y === -960 && width === 44 && height === 960
+        ),
+        "authored areas render a world-space left wall from their actual bounds"
+    );
+    assert.ok(
+        areaStructureContext.calls.some(
+            ([name, x, y, width, height]) =>
+                name === "fillRect" && x === 436 && y === -960 && width === 44 && height === 960
+        ),
+        "authored areas render a matching right wall instead of one screen-space shaft"
+    );
+    assert.ok(
+        areaStructureContext.calls.some(([name, label]) => name === "fillText" && label === "01 · SERVICE SHAFT"),
+        "each room shell carries its authored area identity"
+    );
+    const proceduralStructureContext = recordingContext();
+    new AuthoredAreaStructureRenderer().draw({
+        context: proceduralStructureContext,
+        scene: { world: { surfaces: [], areas: [] } }
+    });
+    assert.equal(
+        proceduralStructureContext.calls.some(([name]) => name === "fillRect"),
+        false,
+        "procedural worlds do not inherit authored room shells"
+    );
+
+    const gateContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: gateContext,
+        scene: {
+            worldProgress: { completedObjectiveIds: [], unlockedGateIds: [] },
+            world: {
+                objects: [
+                    {
+                        id: "sector-01-01:service-gate",
+                        kind: "gate",
+                        gateId: "sector-01-01:gate",
+                        presentationId: "world-object:gate",
+                        position: { x: 320, y: -928 }
+                    }
+                ],
+                areas: []
+            }
+        }
+    });
+    assert.ok(
+        gateContext.calls.some(([name]) => name === "fillRect"),
+        "locked Gates render solid door panels"
+    );
+    assert.equal(
+        gateContext.calls.some(([name]) => name === "lineTo"),
+        false,
+        "Gate presentation no longer uses a floating diagonal X debug symbol"
+    );
+    const unlockedGateContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: unlockedGateContext,
+        scene: {
+            worldProgress: { completedObjectiveIds: [], unlockedGateIds: ["sector-01-01:gate"] },
+            world: {
+                objects: [
+                    {
+                        id: "sector-01-01:service-gate",
+                        kind: "gate",
+                        gateId: "sector-01-01:gate",
+                        presentationId: "world-object:gate",
+                        position: { x: 320, y: -928 }
+                    }
+                ],
+                areas: []
+            }
+        }
+    });
+    assert.equal(
+        unlockedGateContext.calls.some(
+            ([name, , , width, height]) => name === "fillRect" && width > 70 && height > 130
+        ),
+        false,
+        "an unlocked Gate leaves its central passage visually open"
     );
 
     const manifest = {
