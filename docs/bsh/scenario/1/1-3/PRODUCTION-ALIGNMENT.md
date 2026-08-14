@@ -1,6 +1,6 @@
 # SECTOR 01-3 — PRODUCTION ALIGNMENT
 
-*IMPLEMENTATION · CAMERA · COMBAT HANDOFF · REV 1.0*
+*IMPLEMENTATION · CAMERA · COMBAT HANDOFF · REV 1.1*
 
 본 문서는 [1-3 시나리오](./README.md) REV 3.0을 현재 런타임으로 옮기는 제작 계약이다. 원문 수치는 플레이테스트 전 `BLOCKOUT HYPOTHESIS`이며, 아래 stable ID·상태·좌표 기준을 그래픽·오디오 담당자가 이어받는다.
 
@@ -16,9 +16,29 @@
 | Story Presentation | `IMPLEMENTED` | 개인 화면에 1회 표시, 이동 입력을 막지 않음 |
 | Camera Zones | `IMPLEMENTED PROTOTYPE` | 로컬 플레이어 위치로 Shot 선택, desktop/mobile 공용 데이터 사용 |
 | 기존 PNG 2개 | `RETIRED` | 이전 `COOLING SHAFT` 이미지라 1-3 구현·외주·검수 기준으로 사용 금지 |
+| `03_scenario_art_reference.png` | `APPROVED ART REFERENCE` | Security Shaft의 분위기, 1-Sentry 정보 위계, Cyan/Red 역할 기준 |
+| `04_approved_blockout.svg` | `APPROVED BLOCKOUT` | 현재 Runtime Geometry·Route·LOS·Scanner·Gate의 좌표 기준 |
 | 정식 그래픽·오디오 | `PENDING` | stable state/cue ID를 유지한 채 runtime package와 binding만 교체 |
 
-## 2. Runtime Geometry
+## 2. 승인 이미지와 자료 우선순위
+
+### Scenario Art Reference
+
+![1-3 Scenario Art Reference](./images/03_scenario_art_reference.png)
+
+한 기의 오른쪽 벽 Sentry, 얇은 Red Telegraph, 작은 Player와 Red Scarf, 네 개의 Cyan Anchor, Safe Cover, Recovery, 상단 Gate가 배경보다 먼저 읽히는지를 정한다. 이미지 속 Rope 선과 Platform 위치는 구도 표현이며 물리 좌표가 아니다.
+
+### Approved Blockout
+
+![1-3 Approved Blockout](./images/04_approved_blockout.svg)
+
+1. 학습 목표·금지 요소·Story 의미는 [시나리오 README](./README.md)가 결정한다.
+2. 좌표·Stable ID·Sentry 상태는 현재 `Sector01AreaCatalog.js`와 이 Blockout이 함께 결정한다.
+3. Art Reference는 색, 조명, 실루엣, Gameplay 정보 위계를 결정하지만 좌표를 복제하지 않는다.
+4. `01_swing_line.png`, `02_layout.png`는 이력용이며 제작·외주·검수 자료로 전달하지 않는다.
+5. Blockout과 Runtime이 다르면 같은 변경에서 둘을 함께 수정한다.
+
+## 3. Runtime Geometry
 
 좌표는 Stage Local World Unit이며 `X=-480~480`, `Y=0~-1152`다. Platform 좌표는 `top-center`, 바닥 설치 Panel·Gate는 `bottom-center`를 사용한다.
 
@@ -39,7 +59,7 @@
 
 Sentry activation band는 `x=-480~480`, `y=-928~-384`다. P1에서는 접힌 Turret을 먼저 보고, 위로 출발한 뒤에만 Acquire가 시작된다. Turret 파괴는 Gate 요구 조건이 아니다.
 
-## 3. Sentry 상태·표현 계약
+## 4. Sentry 상태·표현 계약
 
 | 상태 | 초기 시간 | Gameplay | Mock 표현·교체 cue |
 | --- | ---: | --- | --- |
@@ -52,7 +72,7 @@ Sentry activation band는 `x=-480~480`, `y=-928~-384`다. P1에서는 접힌 Tur
 
 Cover가 LOS를 끊거나 타깃이 activation band를 나가면 즉시 `idle`로 돌아간다. 상태·조준 방향은 서버가 진행하고 snapshot으로 공유한다. renderer는 이 값을 읽어 mock을 그릴 뿐 상태를 변경하지 않는다.
 
-## 4. Camera Shot 계약
+## 5. Camera Shot 계약
 
 | SHOT | Player local Y | 반드시 읽힐 대상 | Desktop | Mobile | Player screen Y ratio |
 | --- | --- | --- | ---: | ---: | ---: |
@@ -65,7 +85,7 @@ Cover가 LOS를 끊거나 타깃이 activation band를 나가면 즉시 `idle`�
 
 수치보다 `Turret이 첫 Shot 전 화면에 보임`, `B→C에서 Safe/Flow/Recovery를 한 화면에 비교`, `Exit에서 위협이 화면 아래로 사라짐`이 우선한다.
 
-## 5. Story Trigger 계약
+## 6. Story Trigger 계약
 
 | EVENT | 조건 | 개인 화면 표시 |
 | --- | --- | --- |
@@ -78,15 +98,17 @@ Cover가 LOS를 끊거나 타깃이 activation band를 나가면 즉시 `idle`�
 
 모든 문구는 Run당 한 번만 표시하고 입력을 차단하지 않는다. Objective·Gate는 공용 진행이 소유하고 Presentation은 사건을 읽기만 한다.
 
-## 6. Asset·Mock 인계
+## 7. Asset·Mock 인계
 
 - 맵 definition에는 이미지·atlas·음원 경로를 넣지 않는다.
 - 그래픽은 `world-object:sentry`, Scanner, Panel, Gate stable presentation을 정식 environment package로 교체한다.
 - 오디오는 `sentry-acquire/track/lock/fire/cooldown`, `security-scanner`, `maintenance-override`, `violation-logged` cue binding을 교체한다.
 - 교체 작업은 지형·activation·damage·LOS·완료 조건·네트워크 권위를 변경하지 않는다.
 - 현재 mock의 붉은 sensor와 aim line은 상태 판독용이며 최종 미술 기준이 아니다.
+- `03_scenario_art_reference.png`를 통이미지 Runtime 배경으로 사용하지 않는다. 1-1·1-2와 같은 공용 Tile/Module Atlas를 조합한다.
+- Sentry 주변의 배경 Red와 Cyan 장식은 줄이고 Scanner Frame, Cover, Panel, Gate는 기존 산업 모듈을 상태별로 재사용한다.
 
-## 7. Acceptance
+## 8. Acceptance
 
 - 첫 Shot 전 `acquire → track → lock`이 색뿐 아니라 조준선 유무·밝기로 구분된다.
 - Lock 뒤 계속 움직이면 Projectile이 이전 방향으로 지나간다.
@@ -94,3 +116,17 @@ Cover가 LOS를 끊거나 타깃이 activation band를 나가면 즉시 `idle`�
 - 첫 피격은 one-shot이 아니고 Rope Cut·Stage 시작 reset을 만들지 않는다.
 - Turret을 파괴하지 않아도 Panel 조작과 Gate 통과가 가능하다.
 - Desktop·Mobile에서 Scanner, Turret, 다음 Anchor, Recovery, Gate가 해당 Shot에 보인다.
+- Runtime 좌표와 `04_approved_blockout.svg`의 P0·P1·R1·Safe Ledge·Cover·A/B/C/D·P4·Panel·Gate가 일치한다.
+- `03_scenario_art_reference.png`의 Platform 구도를 물리 지형으로 복제하지 않는다.
+
+## 9. 증강·Story 연결
+
+[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-3은 증강을 제공하지 않고, 1-4의 Firmware 선택이 필요한 Story 원인을 확정하는 Stage다.
+
+- `foundationAugment = none`을 유지하며 Augment 효과, 선택 UI, 전용 VFX를 노출하지 않는다.
+- 1-2의 Manual Grapple 이동은 `unauthorized-transit`에서 시설 규정 위반으로 해석된다.
+- `maintenance-override`는 Gate를 열고, `violation-logged`는 Player의 Rope 운용과 보안 대응 기록이 1-4 Maintenance Node로 전달됐음을 의미한다.
+- Impulse·Relay·Shear 중 어느 하나를 미리 추천하거나 Profile Icon을 배경에 배치하지 않는다. 세 선택지는 1-4에서 처음 동등하게 제시한다.
+- Telegraph 인지율, Lock 뒤 회피율, B→C 연결 성공률, Safe/Flow/Recovery 사용률을 증강 전 기준값으로 저장한다.
+- 이후 증강을 구현하더라도 1-3은 기본 Rope와 표준 Projectile만으로 완전히 통과 가능해야 한다.
+- Sentry는 Shear Current의 선행 Tutorial이 아니다. 현재 Stage에서 Rope Segment 피해, 적 절단, Artifact Synergy를 암시하면 FAIL이다.
