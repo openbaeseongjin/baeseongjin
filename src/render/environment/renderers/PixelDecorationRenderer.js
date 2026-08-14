@@ -1,5 +1,6 @@
 import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
 import { boundsForVertices, centeredBounds, isVisible } from "../../RenderViewport.js";
+import { sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
 
 export class PixelDecorationRenderer {
     constructor({ definition, assets }) {
@@ -12,8 +13,7 @@ export class PixelDecorationRenderer {
     }
 
     draw({ context, scene, viewport, renderStats }) {
-        const playerAltitude = scene.player?.position?.y ?? 0;
-        const zone = this.definition.zoneAt(-playerAltitude);
+        const zone = sceneEnvironmentZone(this.definition, scene);
         const group = this.definition.decorationGroupFor(zone);
 
         if (!group || !this.assets) return;

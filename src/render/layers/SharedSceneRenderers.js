@@ -4,6 +4,7 @@ import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
     worldObjectPresentation
 } from "../assets/WorldObjectPresentationCatalog.js";
+import { drawCheckpointBeacon, drawExitBeacon } from "../world/WorldMarkerPrimitives.js";
 
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
@@ -142,42 +143,14 @@ export class WorldGeometryRenderer {
             drawn += 1;
             const active = checkpoint.id === activeCheckpoint?.id;
             const reached = checkpoint.level < (activeCheckpoint?.level ?? 0);
-            context.save();
-            context.globalAlpha = reached ? 0.35 : 0.9;
-            context.strokeStyle = active ? "#fbbf24" : "#93c5fd";
-            context.fillStyle = active ? "rgba(251, 191, 36, 0.18)" : "rgba(147, 197, 253, 0.1)";
-            context.lineWidth = active ? 5 : 3;
-            context.beginPath();
-            context.arc(checkpoint.x, checkpoint.y, checkpoint.radius, 0, Math.PI * 2);
-            context.fill();
-            context.stroke();
-            context.fillStyle = active ? "#fde68a" : "#dbeafe";
-            context.font = "800 12px system-ui, sans-serif";
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-            context.fillText(active ? "활성" : "체크", checkpoint.x, checkpoint.y);
-            context.restore();
+            drawCheckpointBeacon(context, checkpoint, { active, reached });
         }
         renderStats?.recordCollection("checkpoints", checkpoints.length, drawn);
     }
 
     drawSummit(context, summit, runState, viewport) {
         if (!summit || runState === "completed" || !isVisible(viewport, circleBounds(summit, summit.radius))) return;
-        context.save();
-        context.globalAlpha = 0.78;
-        context.strokeStyle = "#a7f3d0";
-        context.fillStyle = "rgba(167, 243, 208, 0.12)";
-        context.lineWidth = 4;
-        context.beginPath();
-        context.arc(summit.x, summit.y, summit.radius, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
-        context.fillStyle = "#d1fae5";
-        context.font = "900 13px system-ui, sans-serif";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText("정상", summit.x, summit.y);
-        context.restore();
+        drawExitBeacon(context, summit);
     }
 }
 
@@ -199,29 +172,12 @@ export class AuthoredWorldObjectRenderer {
         });
         for (const object of visible) this.drawObject(context, object, scene.worldProgress);
         const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
-        const visibleRecoveryPoints = recoveryPoints.filter((point) =>
-            isVisible(viewport, centeredBounds(point, { width: 24, height: 24 }))
-        );
-        for (const point of visibleRecoveryPoints) this.drawRecoveryPoint(context, point);
         renderStats?.recordCollection("worldObjects", objects.length, visible.length);
-        renderStats?.recordCollection("recoveryPoints", recoveryPoints.length, visibleRecoveryPoints.length);
+        renderStats?.recordCollection("recoveryPoints", recoveryPoints.length, 0);
     }
 
     presentationFor(object) {
         return worldObjectPresentation(this.presentationCatalog, object.presentationId);
-    }
-
-    drawRecoveryPoint(context, point) {
-        context.save();
-        context.strokeStyle = "#86efac";
-        context.fillStyle = "rgba(134, 239, 172, 0.16)";
-        context.lineWidth = 2;
-        context.setLineDash([4, 4]);
-        context.beginPath();
-        context.arc(point.x, point.y, 11, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
-        context.restore();
     }
 
     drawObject(context, object, progress = null) {
@@ -241,32 +197,124 @@ export class AuthoredWorldObjectRenderer {
             const height = style.radius * 1.25;
             context.fillRect(-width, -height, width * 2, height * 2);
             context.strokeRect(-width, -height, width * 2, height * 2);
+            context.fillStyle = objectiveComplete ? style.color : `${style.color}99`;
+            context.fillRect(-width + 7, -height + 7, width * 2 - 14, 5);
+            context.fillRect(-width + 7, -height + 17, width - 3, 4);
         } else if (object.kind === "gate") {
             context.setLineDash(gateUnlocked ? [10, 9] : []);
             context.strokeRect(-style.radius, -style.radius * 2.2, style.radius * 2, style.radius * 4.4);
+            context.beginPath();
+            context.moveTo(-style.radius, -style.radius * 2.2);
+            context.lineTo(style.radius, style.radius * 2.2);
+            context.moveTo(style.radius, -style.radius * 2.2);
+            context.lineTo(-style.radius, style.radius * 2.2);
+            context.stroke();
+        } else if (object.kind === "grapple-landmark") {
+            this.drawGrappleLandmark(context, style);
+        } else if (object.kind === "wind-source") {
+            this.drawWindSource(context, style);
+        } else if (object.kind === "test-target") {
+            this.drawTestTarget(context, style);
+        } else if (object.kind === "story-display") {
+            this.drawStoryDisplay(context, style);
+        } else if (object.kind === "maintenance-frame") {
+            this.drawMaintenanceFrame(context, style);
         } else {
             context.beginPath();
-            context.arc(0, 0, style.radius, 0, Math.PI * 2);
+            context.moveTo(0, -style.radius);
+            context.lineTo(style.radius, 0);
+            context.lineTo(0, style.radius);
+            context.lineTo(-style.radius, 0);
+            context.closePath();
             context.fill();
             context.stroke();
         }
 
-        if (object.kind === "wind-source") {
-            for (let angle = 0; angle < Math.PI * 2; angle += Math.PI * 0.5) {
-                context.beginPath();
-                context.moveTo(Math.cos(angle) * 5, Math.sin(angle) * 5);
-                context.lineTo(Math.cos(angle + 0.45) * style.radius, Math.sin(angle + 0.45) * style.radius);
-                context.stroke();
-            }
-        }
         if (object.label) {
             context.fillStyle = "#ecfeff";
-            context.font = "900 12px ui-monospace, monospace";
+            context.font = "900 11px ui-monospace, monospace";
             context.textAlign = "center";
             context.textBaseline = "middle";
-            context.fillText(object.label, 0, 0);
+            context.fillText(object.label, 0, -style.radius - 10);
         }
         context.restore();
+    }
+
+    drawGrappleLandmark(context, style) {
+        const radius = style.radius;
+        context.strokeStyle = "rgba(71, 85, 105, 0.85)";
+        context.lineWidth = 5;
+        context.beginPath();
+        context.moveTo(0, -radius * 2.6);
+        context.lineTo(0, -radius * 0.7);
+        context.stroke();
+        context.fillStyle = "#334155";
+        context.fillRect(-7, -radius * 2.75, 14, 7);
+        context.strokeStyle = "rgba(34, 211, 238, 0.72)";
+        context.fillStyle = "#0f172a";
+        context.fillRect(-radius * 0.52, -radius * 0.52, radius * 1.04, radius * 1.04);
+        context.strokeRect(-radius * 0.52, -radius * 0.52, radius * 1.04, radius * 1.04);
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(-radius, -radius * 0.72);
+        context.lineTo(-radius, radius * 0.72);
+        context.lineTo(-radius * 0.46, radius * 0.72);
+        context.moveTo(radius, -radius * 0.72);
+        context.lineTo(radius, radius * 0.72);
+        context.lineTo(radius * 0.46, radius * 0.72);
+        context.stroke();
+        context.fillStyle = "#67e8f9";
+        context.fillRect(-4, -4, 8, 8);
+    }
+
+    drawWindSource(context, style) {
+        const radius = style.radius;
+        context.fillStyle = "#111827";
+        context.fillRect(-radius, -radius, radius * 2, radius * 2);
+        context.strokeRect(-radius, -radius, radius * 2, radius * 2);
+        for (const [x, y, width, height] of [
+            [-3, -radius + 5, 6, radius - 7],
+            [3, 2, radius - 7, 6],
+            [-3, 3, 6, radius - 7],
+            [-radius + 5, -3, radius - 7, 6]
+        ]) {
+            context.fillStyle = style.color;
+            context.fillRect(x, y, width, height);
+        }
+        context.fillStyle = "#e0f2fe";
+        context.fillRect(-4, -4, 8, 8);
+    }
+
+    drawTestTarget(context, style) {
+        const radius = style.radius;
+        context.fillRect(-radius * 0.7, -radius, radius * 1.4, radius * 1.75);
+        context.strokeRect(-radius * 0.7, -radius, radius * 1.4, radius * 1.75);
+        context.beginPath();
+        context.moveTo(-radius * 0.55, -radius * 0.45);
+        context.lineTo(radius * 0.55, radius * 0.45);
+        context.moveTo(radius * 0.55, -radius * 0.45);
+        context.lineTo(-radius * 0.55, radius * 0.45);
+        context.stroke();
+    }
+
+    drawStoryDisplay(context, style) {
+        const width = style.radius * 1.8;
+        const height = style.radius * 1.15;
+        context.fillStyle = "#111827";
+        context.fillRect(-width, -height, width * 2, height * 2);
+        context.strokeRect(-width, -height, width * 2, height * 2);
+        context.fillStyle = style.color;
+        context.fillRect(-width + 7, -height + 7, width * 1.15, 4);
+        context.fillRect(-width + 7, -height + 16, width * 0.75, 3);
+    }
+
+    drawMaintenanceFrame(context, style) {
+        const radius = style.radius;
+        context.fillStyle = "#111827";
+        context.fillRect(-radius, -radius * 1.35, radius * 0.35, radius * 2.7);
+        context.fillRect(radius * 0.65, -radius * 1.35, radius * 0.35, radius * 2.7);
+        context.fillRect(-radius, -radius * 1.35, radius * 2, radius * 0.35);
+        context.strokeRect(-radius, -radius * 1.35, radius * 2, radius * 2.7);
     }
 }
 

@@ -1,5 +1,6 @@
 import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
-import { AltitudeSunrise } from "../AltitudeZoneResolver.js";
+import { drawAuthoredSectorBackdrop } from "../AuthoredSectorBackdrop.js";
+import { AltitudeSunrise, currentAuthoredArea, sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
 
 export class PixelBackdropRenderer {
     constructor({ definition, assets }) {
@@ -13,7 +14,7 @@ export class PixelBackdropRenderer {
         const { cssWidth, cssHeight } = viewport;
         const camera = scene.camera;
         const playerAltitude = scene.player?.position?.y ?? 0;
-        const zone = this.definition.zoneAt(-playerAltitude);
+        const zone = sceneEnvironmentZone(this.definition, scene);
         const palette = zone.palette;
 
         const gradient = context.createLinearGradient(0, 0, 0, cssHeight);
@@ -25,15 +26,19 @@ export class PixelBackdropRenderer {
         context.fillStyle = `rgba(255, 244, 214, ${0.04 + brightness * 0.16})`;
         context.fillRect(0, 0, cssWidth, cssHeight);
 
-        const layers = this.definition.backdrop.layers;
-        for (const layer of layers) {
-            const offsetX = ((-camera.x * layer.parallaxX) % layer.tileWidth) - layer.tileWidth;
-            const verticalSpan = cssHeight * 0.22;
-            const verticalTravel = -camera.y * layer.parallaxY;
-            const offsetY = (((verticalTravel % verticalSpan) + verticalSpan) % verticalSpan) - verticalSpan * 0.5;
-            const peakHeight = layer.peakHeight;
-            const baseline = cssHeight * layer.baselineRatio + offsetY;
-            this.drawLayerSprites(context, layer, zone, offsetX, cssWidth, baseline, peakHeight);
+        const area = currentAuthoredArea(scene);
+        const authoredBackdropDrawn = drawAuthoredSectorBackdrop(context, { scene, viewport, palette, area });
+        if (!authoredBackdropDrawn) {
+            const layers = this.definition.backdrop.layers;
+            for (const layer of layers) {
+                const offsetX = ((-camera.x * layer.parallaxX) % layer.tileWidth) - layer.tileWidth;
+                const verticalSpan = cssHeight * 0.22;
+                const verticalTravel = -camera.y * layer.parallaxY;
+                const offsetY = (((verticalTravel % verticalSpan) + verticalSpan) % verticalSpan) - verticalSpan * 0.5;
+                const peakHeight = layer.peakHeight;
+                const baseline = cssHeight * layer.baselineRatio + offsetY;
+                this.drawLayerSprites(context, layer, zone, offsetX, cssWidth, baseline, peakHeight);
+            }
         }
 
         const haze = context.createLinearGradient(0, cssHeight * 0.35, 0, cssHeight);

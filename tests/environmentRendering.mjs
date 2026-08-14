@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { DEFAULT_ENVIRONMENT_DEFINITION } from "../src/render/environment/EnvironmentCatalog.js";
 import { EnvironmentAssetSet } from "../src/render/environment/EnvironmentAssetSet.js";
 import { EnvironmentRendererComposer } from "../src/render/environment/EnvironmentRendererComposer.js";
+import { currentAuthoredArea, sceneEnvironmentZone } from "../src/render/environment/AltitudeZoneResolver.js";
 import { PixelBackdropRenderer } from "../src/render/environment/renderers/PixelBackdropRenderer.js";
 import { PixelDecorationRenderer } from "../src/render/environment/renderers/PixelDecorationRenderer.js";
 import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelTerrainRenderer.js";
@@ -27,8 +28,8 @@ function recordingContext() {
         fill: () => calls.push(["fill"]),
         stroke: () => calls.push(["stroke"]),
         fillRect: (...args) => calls.push(["fillRect", ...args]),
-        arc: () => {},
-        fillText: () => {}
+        arc: (...args) => calls.push(["arc", ...args]),
+        fillText: (...args) => calls.push(["fillText", ...args])
     };
     return new Proxy(context, {
         set(target, key, value) {
@@ -97,6 +98,40 @@ export function run() {
     const viewport = { cssWidth: 320, cssHeight: 180 };
     const currentScene = scene();
     const assets = readyAssets();
+    const authoredScene = (sectorId, areaId, position) => ({
+        ...currentScene,
+        player: { position },
+        worldProgress: { currentAreaId: areaId },
+        world: {
+            ...currentScene.world,
+            areas: [
+                {
+                    id: areaId,
+                    sectorId,
+                    bounds: { x: -480, y: -1080, width: 960, height: 1080 },
+                    recoveryPoints: []
+                }
+            ]
+        }
+    });
+    const sector01Scene = authoredScene("sector-01", "sector-01-01", { x: 0, y: -100 });
+    const sector02Scene = authoredScene("sector-02", "sector-02-01", { x: 0, y: -100 });
+    assert.equal(currentAuthoredArea(sector01Scene)?.id, "sector-01-01");
+    assert.equal(
+        sceneEnvironmentZone(definition, sector01Scene).id,
+        "industrial-maintenance",
+        "authored Sector 01 keeps its industrial shaft theme instead of using low-altitude waste"
+    );
+    assert.equal(
+        sceneEnvironmentZone(definition, sector02Scene).id,
+        "residential-commercial",
+        "authored Sector 02 keeps its residential city theme instead of inheriting procedural altitude zones"
+    );
+    assert.equal(
+        sceneEnvironmentZone(definition, currentScene).id,
+        "industrial-maintenance",
+        "procedural worlds continue to resolve their environment from altitude"
+    );
     const terrainContext = recordingContext();
     new PixelTerrainRenderer({ definition, assets }).draw({ context: terrainContext, scene: currentScene });
     assert.ok(
@@ -117,6 +152,46 @@ export function run() {
             ["lineTo", 120, 30]
         ],
         "one-way edge uses exact vertex chain"
+    );
+    const sector01TerrainContext = recordingContext();
+    new PixelTerrainRenderer({ definition, assets }).draw({ context: sector01TerrainContext, scene: sector01Scene });
+    const terrainFillImage = assets.imageFor("terrain-fill");
+    assert.deepEqual(
+        sector01TerrainContext.calls
+            .find(([name, image]) => name === "drawImage" && image === terrainFillImage)
+            .slice(2, 4),
+        [0, 24],
+        "Sector 01 paints the industrial terrain material"
+    );
+    const sector02TerrainContext = recordingContext();
+    new PixelTerrainRenderer({ definition, assets }).draw({ context: sector02TerrainContext, scene: sector02Scene });
+    assert.deepEqual(
+        sector02TerrainContext.calls
+            .find(([name, image]) => name === "drawImage" && image === terrainFillImage)
+            .slice(2, 4),
+        [24, 0],
+        "Sector 02 paints the residential terrain material"
+    );
+    const checkpointContext = recordingContext();
+    new PixelTerrainRenderer({ definition, assets }).draw({
+        context: checkpointContext,
+        scene: {
+            ...sector01Scene,
+            activeCheckpoint: { id: "checkpoint:sector-01-01", level: 0 },
+            world: {
+                ...sector01Scene.world,
+                checkpoints: [{ id: "checkpoint:sector-01-01", x: 0, y: 0, level: 0, radius: 38 }]
+            }
+        }
+    });
+    assert.equal(
+        checkpointContext.calls.some(([name]) => name === "arc" || name === "fillText"),
+        false,
+        "checkpoint presentation uses an in-world beacon instead of a labelled debug circle"
+    );
+    assert.ok(
+        checkpointContext.calls.some(([name]) => name === "fillRect"),
+        "checkpoint beacon has a structural silhouette"
     );
     const culledWorld = {
         ...currentScene.world,
