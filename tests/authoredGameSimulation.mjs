@@ -123,6 +123,47 @@ export function run() {
     );
     assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 6);
 
+    const secondGate = simulation.world.gates.find(({ id }) => id === "sector-01-02:gate");
+    player.physics.position.set(
+        secondGate.trigger.x + secondGate.trigger.width * 0.5,
+        secondGate.trigger.y + secondGate.trigger.height * 0.5
+    );
+    simulation.step(1 / 120, command());
+    assert.equal(simulation.snapshot().worldProgress.currentAreaId, "sector-01-03");
+
+    const thirdPanel = simulation.world.objects.find(({ id }) => id === "sector-01-03:service-panel");
+    player.physics.position.set(thirdPanel.position.x, thirdPanel.position.y - player.physics.collider.radius);
+    player.physics.velocity.set(0, 0);
+    simulation.step(1 / 120, command({ interact: true, jump: true }));
+    assert.equal(simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-03:gate"), true);
+
+    const thirdGate = simulation.world.gates.find(({ id }) => id === "sector-01-03:gate");
+    const thirdDoor = simulation.world.objects.find(({ id }) => id === "sector-01-03:security-gate");
+    player.physics.position.set(thirdDoor.position.x, thirdGate.trigger.y - 8);
+    player.physics.velocity.set(0, 0);
+    assert.equal(
+        player.ropeObject.rope.attach(player.physics.position, {
+            x: player.physics.position.x,
+            y: player.physics.position.y - 48
+        }),
+        true
+    );
+    simulation.step(1 / 120, command());
+    assert.equal(
+        simulation.snapshot().worldProgress.currentAreaId,
+        "sector-01-03",
+        "rope movement above the 1-3 door must not enter or reset the portal"
+    );
+    assert.equal(player.ropeObject.rope.isAttached, true);
+
+    player.physics.position.set(
+        thirdGate.trigger.x + thirdGate.trigger.width * 0.5,
+        thirdGate.trigger.y + thirdGate.trigger.height * 0.5
+    );
+    simulation.step(1 / 120, command());
+    assert.equal(simulation.snapshot().worldProgress.currentAreaId, "sector-01-04");
+    assert.equal(player.ropeObject.rope.isAttached, false, "entering the visible door must keep the portal reset");
+
     const replicationEvents = simulation.drainReplicationEvents();
     const eventTypes = replicationEvents.map(({ eventType }) => eventType);
     assert.ok(eventTypes.includes("objective-completed"));

@@ -2,6 +2,7 @@ import {
     cameraZone,
     defineArea,
     defineAreaCatalog,
+    gatePortalBounds,
     grappleTarget,
     point,
     rectangle,
@@ -19,12 +20,12 @@ function groundedSurface(id, x, y, width, height, properties = {}) {
     return rectangle(id, x, y, width, height, { ...properties, coordinateAnchor: "bottom-center" });
 }
 
-function gate(id, x, y, nextAreaId, requiredObjectiveIds) {
+function gate(id, x, y, nextAreaId, requiredObjectiveIds, { portalBottomY = y } = {}) {
     return Object.freeze({
         id,
         nextAreaId,
         requiredObjectiveIds: Object.freeze(requiredObjectiveIds),
-        trigger: triggerBounds(x - 48, y - 96, 96, 160),
+        trigger: nextAreaId === null ? triggerBounds(x - 48, y - 96, 96, 160) : gatePortalBounds(x, portalBottomY),
         barrier: triggerBounds(x - 32, y - 96, 64, 128)
     });
 }
@@ -101,7 +102,9 @@ const area01 = defineArea({
             storySequenceId: "sector-01-01:terminal-read"
         }
     ],
-    gate: gate("sector-01-01:gate", 320, -928, "sector-01-02", ["sector-01-01:terminal-read"]),
+    gate: gate("sector-01-01:gate", 320, -928, "sector-01-02", ["sector-01-01:terminal-read"], {
+        portalBottomY: -864
+    }),
     storyTriggers: ["lockdown", "terminal-read", "gate-open"],
     cameraZones: [
         cameraZone("intro", -176, 0, 1.25, 0.82, { verticalPlayerRatio: 0.46 }),
@@ -192,7 +195,9 @@ const area02 = defineArea({
             requiredObjectiveIds: ["sector-01-02:final-deck-reached"]
         }
     ],
-    gate: gate("sector-01-02:gate", 320, -1056, "sector-01-03", ["sector-01-02:exit-panel-engaged"]),
+    gate: gate("sector-01-02:gate", 320, -1056, "sector-01-03", ["sector-01-02:exit-panel-engaged"], {
+        portalBottomY: -960
+    }),
     storyTriggers: ["lift-offline", "manual-access-only", "power-reduction-stage-2", "security-access-check"],
     cameraZones: ["intro", "first-handoff", "direction-reversal", "flow-test", "exit"],
     cueIds: ["maintenance-lift", "airborne-handoff", "security-access-check"]
@@ -259,7 +264,9 @@ const area03 = defineArea({
             sourceObjectId: "sector-01-03:service-panel"
         }
     ],
-    gate: gate("sector-01-03:gate", 320, -1088, "sector-01-04", ["sector-01-03:maintenance-override"]),
+    gate: gate("sector-01-03:gate", 320, -1088, "sector-01-04", ["sector-01-03:maintenance-override"], {
+        portalBottomY: -1056
+    }),
     storyTriggers: [
         "employee-scan",
         "return-warning",
@@ -338,7 +345,9 @@ const area04 = defineArea({
             requiredObjectiveIds: ["sector-01-04:augment-selected"]
         }
     ],
-    gate: gate("sector-01-04:gate", 288, -608, "sector-01-05", ["sector-01-04:exit-panel-engaged"]),
+    gate: gate("sector-01-04:gate", 288, -608, "sector-01-05", ["sector-01-04:exit-panel-engaged"], {
+        portalBottomY: -576
+    }),
     storyTriggers: [
         "grapple-detected",
         "telemetry-analyzed",
@@ -444,7 +453,9 @@ const area05 = defineArea({
             requiredObjectiveIds: ["sector-01-05:final-deck-reached"]
         }
     ],
-    gate: gate("sector-01-05:gate", 288, -1248, "sector-01-06", ["sector-01-05:exit-panel-engaged"]),
+    gate: gate("sector-01-05:gate", 288, -1248, "sector-01-06", ["sector-01-05:exit-panel-engaged"], {
+        portalBottomY: -1216
+    }),
     routes: ["base-safe", "impulse-express", "relay-express", "shear-control", "recovery"],
     storyTriggers: ["active-augment-display", "live-calibration", "cooling-access-preview"],
     cameraZones: ["load-gap", "relay-spine", "live-security", "exit"],
@@ -548,7 +559,9 @@ const area06 = defineArea({
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
-    gate: gate("sector-01-06:gate", 288, -1376, "sector-01-07", ["sector-01-06:exit-panel-engaged"]),
+    gate: gate("sector-01-06:gate", 288, -1376, "sector-01-07", ["sector-01-06:exit-panel-engaged"], {
+        portalBottomY: -1344
+    }),
     storyTriggers: ["airflow-unstable", "cooling-pressure-critical", "bypass-required"],
     cameraZones: ["airflow-preview", "fan-a", "neutral-deck", "fan-b", "exit"],
     cueIds: ["wind-direction", "fan-a-continuous", "fan-b-lull-warning-active-decay", "bypass-required"]
@@ -647,7 +660,9 @@ const area07 = defineArea({
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
-    gate: gate("sector-01-07:gate", 320, -1504, "sector-01-08", ["sector-01-07:bypass-open"]),
+    gate: gate("sector-01-07:gate", 320, -1504, "sector-01-08", ["sector-01-07:bypass-open"], {
+        portalBottomY: -1472
+    }),
     storyTriggers: [
         "pressure-unstable",
         "containment-violation",

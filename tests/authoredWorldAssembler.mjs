@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
-import { worldObject } from "../src/game/world/areas/AreaDefinition.js";
+import { gatePortalBounds, worldObject } from "../src/game/world/areas/AreaDefinition.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../src/game/world/areas/sector02/Sector02AreaCatalog.js";
@@ -49,6 +49,17 @@ export function run() {
         "authored objects must reject unknown coordinate anchor names before assembly"
     );
     for (const catalog of [SECTOR_01_AREA_CATALOG, SECTOR_02_AREA_CATALOG]) {
+        for (const area of catalog.areas.filter(({ gate }) => gate.nextAreaId !== null)) {
+            const portalObject = area.objects.find(
+                ({ gateId, kind }) => gateId === area.gate.id && kind !== "gate-panel"
+            );
+            assert.ok(portalObject, `${area.id} must expose one visible object for its progression portal`);
+            assert.deepEqual(
+                area.gate.trigger,
+                gatePortalBounds(portalObject.position.x, portalObject.position.y),
+                `${area.id} progression trigger must match its bottom-centred door aperture`
+            );
+        }
         for (const surface of catalog.areas.flatMap(({ surfaces }) => surfaces)) {
             const width =
                 Math.max(...surface.vertices.map(({ x }) => x)) - Math.min(...surface.vertices.map(({ x }) => x));

@@ -58,6 +58,12 @@ export function triggerBounds(x, y, width, height) {
     return freezeValue({ x, y, width, height });
 }
 
+export const GATE_PORTAL_APERTURE_SIZE = Object.freeze({ width: 52, height: 62 });
+
+export function gatePortalBounds(x, bottomY) {
+    return anchoredRectangleBounds({ x, y: bottomY }, GATE_PORTAL_APERTURE_SIZE, "bottom-center");
+}
+
 export function cameraZone(id, minY, maxY, desktopZoom, mobileZoom, properties = {}) {
     return freezeValue({ id, minY, maxY, desktopZoom, mobileZoom, ...properties });
 }
