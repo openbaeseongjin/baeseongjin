@@ -1,6 +1,7 @@
 import {
     defineArea,
     defineAreaCatalog,
+    gatePortalBounds,
     grappleTarget,
     point,
     rectangle,
@@ -36,7 +37,7 @@ function progressionGate(areaId, x, y, nextAreaId, requiredObjectiveIds, propert
         id: `${areaId}:gate`,
         nextAreaId,
         requiredObjectiveIds: Object.freeze(requiredObjectiveIds),
-        trigger: triggerBounds(x - 48, y - 96, 96, 160),
+        trigger: nextAreaId === null ? triggerBounds(x - 48, y - 96, 96, 160) : gatePortalBounds(x, y),
         barrier: triggerBounds(x - 32, y - 96, 64, 128),
         ...properties
     });

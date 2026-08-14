@@ -86,4 +86,69 @@ export function run() {
         panelEvents.map(({ type }) => type),
         ["objective-completed", "gate-unlocked"]
     );
+
+    const secondGate = world.gates.find(({ id }) => id === "sector-01-02:gate");
+    player.physics.position.set(
+        secondGate.trigger.x + secondGate.trigger.width * 0.5,
+        secondGate.trigger.y + secondGate.trigger.height * 0.5
+    );
+    const secondGateEvents = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands
+    });
+    assert.deepEqual(
+        secondGateEvents.map(({ type }) => type),
+        ["gate-crossed"]
+    );
+    assert.equal(progress.currentAreaId, "sector-01-03");
+
+    const area03Panel = world.objects.find(({ id }) => id === "sector-01-03:service-panel");
+    player.physics.position.set(area03Panel.position.x, area03Panel.position.y);
+    const area03PanelEvents = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands
+    });
+    assert.deepEqual(
+        area03PanelEvents.map(({ type }) => type),
+        ["objective-completed", "gate-unlocked"]
+    );
+
+    const area03Gate = world.gates.find(({ id }) => id === "sector-01-03:gate");
+    const area03Door = world.objects.find(({ id }) => id === "sector-01-03:security-gate");
+    assert.deepEqual(area03Gate.trigger, {
+        x: area03Door.position.x - 26,
+        y: area03Door.position.y - 62,
+        width: 52,
+        height: 62
+    });
+
+    player.physics.position.set(area03Door.position.x, area03Gate.trigger.y - 1);
+    const aboveDoorEvents = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands
+    });
+    assert.deepEqual(aboveDoorEvents, [], "moving above the 1-3 door must not enter its portal");
+    assert.equal(progress.currentAreaId, "sector-01-03");
+
+    player.physics.position.set(
+        area03Gate.trigger.x + area03Gate.trigger.width * 0.5,
+        area03Gate.trigger.y + area03Gate.trigger.height * 0.5
+    );
+    const insideDoorEvents = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands
+    });
+    assert.deepEqual(
+        insideDoorEvents.map(({ type }) => type),
+        ["gate-crossed"]
+    );
+    assert.equal(progress.currentAreaId, "sector-01-04");
 }
