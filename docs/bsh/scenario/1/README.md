@@ -44,7 +44,7 @@
 ## 자산 상태
 
 - 제공 이미지 크기: `1672 × 941 px`
-- 저장 위치: `docs/bsh/scenario/images/sector-01-background-reference.png`
+- 저장 위치: `docs/bsh/scenario/1/images/sector-01-background-reference.png`
 - 현재 용도: 기획·아트 방향을 맞추기 위한 문서용 레퍼런스
 - 런타임 적용: 원본 출처, 사용권, 최종 제작 규격을 확인한 뒤 별도 환경 자산으로 전환한다.
 
