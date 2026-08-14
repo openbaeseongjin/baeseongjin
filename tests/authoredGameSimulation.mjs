@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
@@ -40,16 +41,75 @@ export function run() {
     assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 7);
 
     const gate = simulation.world.gates[0];
+    const worldBeforePortal = simulation.world;
+    player.health = 73;
+    player.artifacts.add(ARTIFACT_CATALOG[0]);
+    player.physics.velocity.set(180, -240);
+    player.physics.setAngularState(0.8, 3.5);
+    player.physics.isGrounded = true;
     player.physics.position.set(gate.trigger.x + gate.trigger.width * 0.5, gate.trigger.y + gate.trigger.height * 0.5);
+    assert.equal(
+        player.ropeObject.rope.attach(player.physics.position, {
+            x: player.physics.position.x + 40,
+            y: player.physics.position.y - 60
+        }),
+        true
+    );
+    player.ropeObject.attachmentCandidate = { x: player.physics.position.x + 20, y: player.physics.position.y - 30 };
+    player.ropeObject.wasPointerDown = true;
+    player.ropeObject.lastPointer = { x: 400, y: 300, down: true };
+    player.ropeObject.lastViewport = { width: 1280, height: 720 };
+    player.ropeObject.attachBufferRemaining = 0.1;
+    player.ropeObject.swingDrag = {
+        origin: { x: 400, y: 300 },
+        direction: { x: 1, y: 0 },
+        progress: 0.5,
+        age: 0.1,
+        used: false
+    };
+    player.weapon.cooldown = 0.4;
+    player.hitInvulnerabilityRemaining = 0.3;
+    player.ropeDisabledRemaining = 0.2;
+    player.ropeDamageBoostRemaining = 1.5;
     simulation.step(1 / 120, command());
     assert.equal(simulation.snapshot().worldProgress.currentAreaId, "sector-01-02");
     assert.equal(simulation.activeCheckpoint.areaId, "sector-01-02");
     assert.equal(simulation.artifactRewards.size, 0, "area Gate checkpoints must not grant artifact rewards");
+    assert.equal(simulation.world, worldBeforePortal, "a Gate portal must keep the same assembled world");
+    assert.deepEqual(
+        { x: player.physics.position.x, y: player.physics.position.y },
+        { x: simulation.world.areas[1].entry.x, y: simulation.world.areas[1].entry.y }
+    );
+    assert.deepEqual({ x: player.physics.velocity.x, y: player.physics.velocity.y }, { x: 0, y: 0 });
+    assert.equal(player.physics.angle, 0);
+    assert.equal(player.physics.angularVelocity, 0);
+    assert.equal(player.physics.isGrounded, false);
+    assert.equal(player.ropeObject.rope.isAttached, false);
+    assert.equal(player.ropeObject.attachmentCandidate, null);
+    assert.equal(player.ropeObject.wasPointerDown, false);
+    assert.deepEqual(player.ropeObject.lastPointer, { x: 0, y: 0, down: false });
+    assert.equal(player.ropeObject.attachBufferRemaining, 0);
+    assert.equal(player.ropeObject.swingDrag, null);
+    assert.equal(player.weapon.cooldown, 0);
+    assert.equal(player.hitInvulnerabilityRemaining, 0);
+    assert.equal(player.ropeDisabledRemaining, 0);
+    assert.equal(player.ropeDamageBoostRemaining, 0);
+    assert.equal(player.health, 73, "portal reset must not heal or damage the player");
+    assert.deepEqual(player.artifacts.snapshot(), [ARTIFACT_CATALOG[0]], "portal reset must preserve artifacts");
 
-    const eventTypes = simulation.drainReplicationEvents().map(({ eventType }) => eventType);
+    const replicationEvents = simulation.drainReplicationEvents();
+    const eventTypes = replicationEvents.map(({ eventType }) => eventType);
     assert.ok(eventTypes.includes("objective-completed"));
     assert.ok(eventTypes.includes("gate-unlocked"));
     assert.ok(eventTypes.includes("gate-crossed"));
+    assert.ok(eventTypes.includes("gate-portal-entered"));
+    const portalEvent = replicationEvents.find(({ eventType }) => eventType === "gate-portal-entered");
+    assert.equal(portalEvent.gateId, "sector-01-01:gate");
+    assert.equal(portalEvent.playerId, player.id);
+    assert.deepEqual(portalEvent.position, {
+        x: simulation.world.areas[1].entry.x,
+        y: simulation.world.areas[1].entry.y
+    });
 
     const standardSentry = simulation.enemies.find(({ areaId }) => areaId === "sector-01-03");
     player.physics.position.set(standardSentry.position.x - 100, standardSentry.position.y);

@@ -241,6 +241,39 @@ export async function run() {
         "enemies must share the delayed interpolation timeline"
     );
     assert.equal(projected.players[1].health, 80, "non-position state must use the latest authority value");
+    const portalBuffer = new RemoteWorldStateBuffer({
+        interpolationSeconds: 0,
+        maxExtrapolationSeconds: 0.12,
+        maxSnapshots: 3
+    });
+    portalBuffer.push(snapshot(36, 0, 100, 1, 36), 0);
+    const afterPortal = snapshot(42, 40, 100, 2, 42);
+    afterPortal.state.players[1].position.y = -900;
+    afterPortal.state.players[1].velocity = { x: 0, y: 0 };
+    afterPortal.events.push({
+        eventId: "gate-portal-event",
+        eventType: "gate-portal-entered",
+        tick: 42,
+        gateId: "sector-01-01:gate",
+        playerId: "remote",
+        position: { x: 40, y: -900 }
+    });
+    portalBuffer.push(afterPortal, 50);
+    assert.equal(
+        portalBuffer.samplePosition("players", "remote", 11).y,
+        0,
+        "remote interpolation must stay on the departure side before the portal tick"
+    );
+    assert.deepEqual(
+        portalBuffer.samplePosition("players", "remote", 12),
+        { x: 40, y: -900 },
+        "remote interpolation must hard-snap to the arrival side at the portal tick"
+    );
+    assert.equal(
+        portalBuffer.samplePlayerAngle("remote", 12),
+        4,
+        "remote rotation must not interpolate across a portal transition"
+    );
     const wrappingAngles = new RemoteWorldStateBuffer({
         interpolationSeconds: 0.05,
         maxExtrapolationSeconds: 0.12,

@@ -400,6 +400,13 @@ export class AuthorityServerSession {
             resolveArtifactSelections: false,
             advanceInputDrivenObjects: false
         });
+        for (const playerId of this.simulation.playerIds()) {
+            const portalTick = this.simulation.portalTransitionTick(playerId);
+            const previousTick = this.lastOwnerMotionTicks.get(playerId) ?? -1;
+            if (portalTick !== null && portalTick > previousTick) {
+                this.lastOwnerMotionTicks.set(playerId, portalTick);
+            }
+        }
         const oldestRememberedTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         for (const [predictionId, entry] of this.resolvedHitClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedHitClaims.delete(predictionId);

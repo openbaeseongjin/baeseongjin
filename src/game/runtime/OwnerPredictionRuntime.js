@@ -33,6 +33,11 @@ function rebaseLaterTimerPredictions(entries, rejected, fixedDt, previousValueKe
     return true;
 }
 
+function ownerPortalTransition(event, ownerId) {
+    if (event?.eventType !== "gate-portal-entered" || event.playerId !== ownerId) return null;
+    return event;
+}
+
 export class OwnerPredictionRuntime {
     constructor({
         ownerId,
@@ -85,7 +90,37 @@ export class OwnerPredictionRuntime {
         this.pendingImpacts = new Map();
         this.nextImpactPredictionOrder = 0;
         this.pendingCheckpoint = null;
+        this.appliedPortalEventIds = new Set();
+        this.appliedPortalEventIdOrder = [];
         this.simulation.preparePrediction();
+    }
+
+    applyPortalEvents(events) {
+        for (const event of events) {
+            if (this.appliedPortalEventIds.has(event.eventId)) continue;
+            const transition = ownerPortalTransition(event, this.ownerId);
+            if (!transition) continue;
+            this.appliedPortalEventIds.add(event.eventId);
+            this.appliedPortalEventIdOrder.push(event.eventId);
+            while (this.appliedPortalEventIdOrder.length > 64) {
+                this.appliedPortalEventIds.delete(this.appliedPortalEventIdOrder.shift());
+            }
+            if (
+                !this.simulation.confirmPortalTransition(
+                    this.ownerId,
+                    transition.gateId,
+                    transition.position,
+                    event.tick
+                )
+            ) {
+                this.simulation.applyPortalTransition(this.ownerId, transition.position, event.tick, transition.gateId);
+            }
+            for (const tick of this.inputHistory.keys()) {
+                if (tick <= event.tick) this.inputHistory.delete(tick);
+            }
+            this.presentationOffset = { x: 0, y: 0 };
+            this.correctionRemaining = 0;
+        }
     }
 
     prepareSnapshot(snapshot, fallbackProgress = null) {
@@ -131,6 +166,7 @@ export class OwnerPredictionRuntime {
         ) {
             throw new Error(`invalid ownerMotionTick: ${ownerMotionTick}`);
         }
+        this.applyPortalEvents(snapshot.events);
         this.confirmResolvedImpacts(snapshot.events);
         const pendingTicks = pendingBatches.map(({ tick }) => tick);
         const targetTick = Math.max(
