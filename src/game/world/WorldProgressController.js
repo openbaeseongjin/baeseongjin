@@ -25,7 +25,30 @@ function completingPlayer(objective, world, progress, players, commandsByPlayerI
     );
 }
 
-export function advanceWorldProgress({ world, progress, players, commandsByPlayerId }) {
+function appendCompletionEvents(events, { result, objectiveId, areaId, playerId, position }) {
+    if (!result.changed) return;
+    events.push(
+        Object.freeze({
+            type: "objective-completed",
+            objectiveId,
+            areaId,
+            playerId,
+            position: Object.freeze({ x: position.x, y: position.y })
+        })
+    );
+    if (!result.gateUnlocked) return;
+    events.push(
+        Object.freeze({
+            type: "gate-unlocked",
+            gateId: result.gateId,
+            areaId,
+            playerId,
+            position: Object.freeze({ x: position.x, y: position.y })
+        })
+    );
+}
+
+export function advanceWorldProgress({ world, progress, players, commandsByPlayerId, dt = 0 }) {
     const progressSnapshot = progress?.snapshot();
     if (!progress || progressSnapshot.completed || progressSnapshot.contentBoundaryReached) return Object.freeze([]);
     const events = [];
@@ -35,30 +58,49 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
     for (const objectiveId of currentArea.objectiveIds) {
         if (progress.isObjectiveComplete(objectiveId)) continue;
         const objective = world.objectives.find(({ id }) => id === objectiveId);
-        const player = completingPlayer(objective, world, progress, players, commandsByPlayerId);
-        if (!player) continue;
-        const result = progress.completeObjective(objectiveId);
-        if (!result.changed) continue;
-        events.push(
-            Object.freeze({
-                type: "objective-completed",
+        const sequence = progress.objectiveSequence(objectiveId);
+        if (sequence) {
+            const result = progress.advanceObjectiveSequence(objectiveId, dt);
+            if (!result.sequenceCompleted) continue;
+            appendCompletionEvents(events, {
+                result,
                 objectiveId,
                 areaId: currentArea.id,
-                playerId: player.id,
-                position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-            })
-        );
-        if (result.gateUnlocked) {
-            events.push(
-                Object.freeze({
-                    type: "gate-unlocked",
-                    gateId: result.gateId,
-                    areaId: currentArea.id,
-                    playerId: player.id,
-                    position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-                })
-            );
+                playerId: result.playerId,
+                position: players.find(({ id }) => id === result.playerId)?.physics.position ?? currentArea.exit
+            });
+            continue;
         }
+        const player = completingPlayer(objective, world, progress, players, commandsByPlayerId);
+        if (!player) continue;
+        if (objective.completionDelaySeconds) {
+            const result = progress.startObjectiveSequence(objectiveId, {
+                playerId: player.id,
+                durationSeconds: objective.completionDelaySeconds
+            });
+            if (result.changed) {
+                events.push(
+                    Object.freeze({
+                        type: "objective-sequence-started",
+                        objectiveId,
+                        areaId: currentArea.id,
+                        playerId: player.id,
+                        durationSeconds: objective.completionDelaySeconds,
+                        storySequenceId: objective.storySequenceId ?? null,
+                        position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+                    })
+                );
+            }
+            continue;
+        }
+        const result = progress.completeObjective(objectiveId);
+        appendCompletionEvents(events, {
+            result,
+            objectiveId,
+            areaId: currentArea.id,
+            playerId: player.id,
+            position: player.physics.position
+        });
     }
 
     const gate = world.gates.find(({ id }) => id === currentArea.gateId);

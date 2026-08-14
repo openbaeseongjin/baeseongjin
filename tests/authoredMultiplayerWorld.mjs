@@ -24,6 +24,16 @@ function command({ interact = false } = {}) {
     );
 }
 
+const TERMINAL_SEQUENCE_STEPS = 325;
+
+function completeTerminalSequence(simulation) {
+    for (let step = 0; step < TERMINAL_SEQUENCE_STEPS; step += 1) {
+        simulation.stepCommandBatch(1 / 120, createPlayerCommandBatch(simulation.tick + 1, []), {
+            advanceInputDrivenObjects: false
+        });
+    }
+}
+
 export function run() {
     assert.equal(authoredCatalogForRevision(DEFAULT_AUTHORED_AREA_CATALOG.revision), DEFAULT_AUTHORED_AREA_CATALOG);
     assert.equal(authoredCatalogForRevision("unknown-world-revision"), null);
@@ -69,6 +79,8 @@ export function run() {
         createPlayerCommandBatch(1, [{ playerId: ownerId, sequence: 0, command: command({ interact: true }) }]),
         { advanceInputDrivenObjects: false }
     );
+    assert.equal(server.worldProgress.isGateUnlocked("sector-01-01:gate"), false);
+    completeTerminalSequence(server);
     const progressedSnapshot = buildAuthoritySnapshot({ simulation: server });
     predictor.reconcile(progressedSnapshot, []);
     partnerPredictor.reconcile(progressedSnapshot, []);
@@ -103,7 +115,7 @@ export function run() {
     };
     server.stepCommandBatch(
         1 / 120,
-        createPlayerCommandBatch(2, [{ playerId: ownerId, sequence: 1, command: command() }]),
+        createPlayerCommandBatch(327, [{ playerId: ownerId, sequence: 1, command: command() }]),
         { advanceInputDrivenObjects: false }
     );
 
@@ -166,7 +178,7 @@ export function run() {
     partner.physics.position.set(gate.trigger.x + gate.trigger.width * 0.5, gate.trigger.y + gate.trigger.height * 0.5);
     server.stepCommandBatch(
         1 / 120,
-        createPlayerCommandBatch(3, [{ playerId: partner.id, sequence: 0, command: command() }]),
+        createPlayerCommandBatch(328, [{ playerId: partner.id, sequence: 0, command: command() }]),
         { advanceInputDrivenObjects: false }
     );
     assert.deepEqual(
@@ -211,6 +223,7 @@ export function run() {
         createPlayerCommandBatch(1, [{ playerId: delayedOwner.id, sequence: 0, command: command({ interact: true }) }])
     );
     delayedSession.advance();
+    for (let step = 0; step < TERMINAL_SEQUENCE_STEPS; step += 1) delayedSession.advance();
     const delayedGate = delayedServer.world.gates[0];
     const delayedGatePosition = {
         x: delayedGate.trigger.x + delayedGate.trigger.width * 0.5,
@@ -223,10 +236,11 @@ export function run() {
         { x: delayedPartner.physics.position.x, y: delayedPartner.physics.position.y },
         { x: delayedServer.world.areas[0].entry.x + 40, y: delayedServer.world.areas[0].entry.y }
     );
+    const delayedClientTick = delayedServer.tick + 1;
     const delayedMotionReceipt = delayedSession.submitOwnerMotion(
         delayedPartner.id,
         createOwnerMotionState({
-            clientTick: 3,
+            clientTick: delayedClientTick,
             position: delayedGatePosition,
             velocity: { x: 0, y: 0 },
             angle: 0,
@@ -235,7 +249,7 @@ export function run() {
             rope: { isAttached: false, anchor: null }
         })
     );
-    assert.deepEqual(delayedMotionReceipt, { clientTick: 3, accepted: true });
+    assert.deepEqual(delayedMotionReceipt, { clientTick: delayedClientTick, accepted: true });
     const delayedPortalSnapshot = delayedSession.advance();
     assert.deepEqual(
         { x: delayedPartner.physics.position.x, y: delayedPartner.physics.position.y },
@@ -259,15 +273,17 @@ export function run() {
         createPlayerCommandBatch(1, [{ playerId: guardedOwner.id, sequence: 0, command: command({ interact: true }) }])
     );
     guardedSession.advance();
+    for (let step = 0; step < TERMINAL_SEQUENCE_STEPS; step += 1) guardedSession.advance();
     const guardedGate = guardedServer.world.gates[0];
     const stalePosition = {
         x: guardedGate.trigger.x + guardedGate.trigger.width * 0.5,
         y: guardedGate.trigger.y + guardedGate.trigger.height * 0.5
     };
+    const guardedClientTick = guardedServer.tick + 1;
     const gateMotionReceipt = guardedSession.submitOwnerMotion(
         guardedOwner.id,
         createOwnerMotionState({
-            clientTick: 2,
+            clientTick: guardedClientTick,
             position: stalePosition,
             velocity: { x: 0, y: 0 },
             angle: 0,
@@ -276,14 +292,14 @@ export function run() {
             rope: { isAttached: false, anchor: null }
         })
     );
-    assert.deepEqual(gateMotionReceipt, { clientTick: 2, accepted: true });
+    assert.deepEqual(gateMotionReceipt, { clientTick: guardedClientTick, accepted: true });
     const guardedPortalSnapshot = guardedSession.advance();
-    assert.equal(guardedPortalSnapshot.state.players[0].ownerMotionTick, 2);
+    assert.equal(guardedPortalSnapshot.state.players[0].ownerMotionTick, guardedClientTick);
     const guardedArrival = { x: guardedOwner.physics.position.x, y: guardedOwner.physics.position.y };
     const staleMotionReceipt = guardedSession.submitOwnerMotion(
         guardedOwner.id,
         createOwnerMotionState({
-            clientTick: 2,
+            clientTick: guardedClientTick,
             position: stalePosition,
             velocity: { x: 0, y: 0 },
             angle: 0,

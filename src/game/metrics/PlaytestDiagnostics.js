@@ -30,7 +30,14 @@ export function formatPlaytestDiagnostics({
         `damageTaken: ${metrics.damageTaken}`,
         `ropeCuts: ${metrics.ropeCuts}`,
         `defeats: ${metrics.defeats}`,
-        `firstRewardSeconds: ${valueOrDash(metrics.firstRewardSeconds, (value) => value.toFixed(1))}`
+        `firstRewardSeconds: ${valueOrDash(metrics.firstRewardSeconds, (value) => value.toFixed(1))}`,
+        `currentArea: ${metrics.areaTiming?.currentAreaId ?? "-"}`,
+        `currentAreaSeconds: ${valueOrDash(metrics.areaTiming?.currentAreaSeconds, (value) => value.toFixed(1))}`,
+        `areaClearSeconds: ${
+            Object.entries(metrics.areaTiming?.clearSeconds ?? {})
+                .map(([areaId, seconds]) => `${areaId}=${seconds.toFixed(1)}`)
+                .join(",") || "-"
+        }`
     ];
 
     if (networkMetrics) {

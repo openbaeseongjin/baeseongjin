@@ -85,7 +85,7 @@
 
 | 순서 | 영역 | 필수 완료 흐름 | 출구 | 필수가 아닌 것 | 상태 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `1-1 SERVICE SHAFT` | Rope 기초 구간 통과 → Service Terminal 확인 | `SERVICE SHAFT 02` Gate | Turret·Wind·Augment | 시나리오 있음 |
+| 1 | `1-1 SERVICE SHAFT` | Rope 기초 구간 통과 → Service Terminal 2.7초 Sequence 확인 | `SERVICE SHAFT 02` Gate | Turret·Wind·Augment | REV 3.1 시나리오·제작 정렬 있음 |
 | 2 | `1-2 DOUBLE ANCHOR SHAFT` | 연속 Rope 구간을 통과해 Final Deck 도달 | `SECURITY ACCESS CHECK` Gate | Enemy·Damage·Wind·Augment | 시나리오 있음 |
 | 3 | `1-3 SECURITY CHECK` | Sentry 압박을 이동·엄폐로 통과 → 상단 Service Panel/Gate 도달 | Maintenance Node 연결 Gate | Turret 파괴 | 시나리오 있음 |
 | 4 | `1-4 MAINTENANCE NODE` | Foundation Augment 선택 → Calibration 통과 | `1-5` Gate | 실제 Enemy 처치 | 시나리오 있음, 증강 계약 선행 |
@@ -101,7 +101,7 @@
 | 0. 계약 잠금 | 이 문서의 확정 결정 | 월드·영역·완료 조건·출구의 최소 데이터 경계를 정한다 | 기획자는 타이머 최종 수치, 보스 위치와 `2-1` 연결의 열린 항목을 계속 확정한다 | 별도 월드 로드 없이 48개 영역을 표현할 수 있는 계약이 문서·테스트 이름으로 합의됨 |
 | 1. 호환 조립 경계 | 0 | 현재 월드 소비 형식을 유지하면서 저작 영역을 한 월드 정의로 조립한다 | `1-1`~`1-8` 좌표·오브젝트 요구 정리 | 기존 프로토타입과 저작 월드가 같은 simulation·renderer 경계를 사용할 수 있음 |
 | 2. 공용 진행 흐름 | 1 | 완료 조건 집계 → Gate 패널 활성화·조작 → Gate 개방 → 첫 진입의 공용 영역 변경 → 열린 단방향 포탈의 플레이어별 이동 흐름을 만든다 | 영역별 필수/선택 조건 확인 | 각 Gate 진입자만 이동·초기화되고 뒤의 플레이어는 직접 들어올 때까지 이전 방에 남음 |
-| 3. `1-1` 수직 절편 | 2 | Blockout·Terminal·Gate·`1-2` 진입을 mock으로 연결한다 | 첫 화면·Terminal·Gate cue 인계 | Terminal 전/후 Gate 상태와 연속 전이가 플레이 가능함 |
+| 3. `1-1` 수직 절편 | 2 | Blockout·C01~C05 Camera·Terminal Sequence·Gate·`1-2` 진입을 mock으로 연결한다 | 최종 그래픽·오디오 cue 인계 | 2.7초 Terminal Sequence 전/후 Gate 상태와 연속 전이가 플레이 가능하고 영역 시간이 계측됨 |
 | 4. 이동·위협 변형 | 3 | `1-2`와 `1-3`을 연결해 이동 달성형과 우회·상호작용형 목표를 검증한다 | 1차 그래픽·오디오 리소스 병행 | Turret 파괴 없이도 `1-3` 완료 가능함 |
 | 5. 시스템 조합 | 4, 증강 계약 | `1-4`~`1-7`을 순차 연결하고 기존 시스템을 영역 오브젝트로 조합한다 | 증강·Wind·Sentry·Bypass 세부 조정 | 각 영역의 Safe Route와 명시적 출구가 한 월드에서 이어짐 |
 | 6. 일반 구간 종합 | 5 | `1-8`의 두 Security Phase, Gate Override, Lower Grid Shutdown, Worker District Preview와 일반 구간 종료 Checkpoint를 연결한다 | Worker District 표현 cue와 보스 전환 경계 확정 | `1-1 → 1-8` 연속 플레이와 Sector 01 일반 구간 검증 완료 |
@@ -124,7 +124,7 @@
 
 ## 테스트 가능한 완료 기준
 
-1. `1-1` Gate는 Service Terminal 완료 전에는 다음 영역으로 진행시키지 않고, 완료 후 플레이어가 직접 통과해야 `1-2`가 활성화된다.
+1. `1-1` Gate는 Service Terminal 상호작용 뒤 이동을 허용하는 0.9초 문구 세 개의 공용 Sequence가 끝나기 전에는 열리지 않고, 완료 후 플레이어가 직접 통과해야 `1-2`가 활성화된다. 최초 플레이 90~120초 목표는 실제 영역 시간 표본으로 검증하고 강제 대기시간으로 만들지 않는다.
 2. 첫 Gate 진입자는 자기만 다음 영역 입구의 지정 위치로 이동하며, 뒤의 플레이어는 열린 문 안에 직접 들어온 시점에 각각 이동한다. 각 진입자의 로프·속도·회전·접지·입력 버퍼·일시 전투 상태는 초기화한다. 같은 월드 정의와 런을 사용하며 체력·생명·아티팩트·무기 수치·체크포인트·공용 오브젝트 상태는 새로 만들지 않는다.
 3. 동일한 월드 정의와 revision을 사용하는 싱글·멀티가 같은 영역 순서·지형·오브젝트·Gate 연결을 만든다.
 4. `1-3`·`1-5`·`1-7`은 Turret을 파괴하지 않아도 각 시나리오의 우회·도달·상호작용 조건으로 완료할 수 있다.

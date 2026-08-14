@@ -96,6 +96,7 @@ export class CanvasRenderer {
         }
         this.drawArtifactRewardOverlay(scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
+        this.drawStoryPresentation(scene.storyPresentation);
         this.drawArtifactFeedback(scene.eventFlash);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
@@ -154,6 +155,33 @@ export class CanvasRenderer {
             this.cssWidth * 0.5,
             Math.min(this.cssHeight - 18, startY + cardHeight + 28)
         );
+        ctx.restore();
+    }
+
+    drawStoryPresentation(presentation) {
+        if (!presentation) return;
+        const ctx = this.context;
+        const margin = 12;
+        const width = Math.min(440, this.cssWidth - margin * 2);
+        const height = 64;
+        const x = (this.cssWidth - width) * 0.5;
+        const y = 18;
+        const fadeIn = Math.min(1, presentation.age / 0.12);
+        const fadeOut = Math.min(1, (presentation.durationSeconds - presentation.age) / 0.16);
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(fadeIn, fadeOut));
+        ctx.fillStyle = "rgba(7, 17, 30, 0.9)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = "rgba(103, 232, 249, 0.72)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#d9f4ff";
+        ctx.font = "900 13px ui-monospace, monospace";
+        ctx.fillText(presentation.title, this.cssWidth * 0.5, y + 25);
+        ctx.fillStyle = "#9fb7c7";
+        ctx.font = "700 12px ui-monospace, monospace";
+        ctx.fillText(presentation.detail, this.cssWidth * 0.5, y + 47);
         ctx.restore();
     }
 
@@ -227,9 +255,10 @@ export class CanvasRenderer {
         const ctx = this.context;
         const x = Math.max(8, this.cssWidth - 248);
         const firstReward = metrics.firstRewardSeconds === null ? "-" : `${metrics.firstRewardSeconds.toFixed(1)}초`;
+        const areaOffset = metrics.areaTiming ? 19 : 0;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
-        const height = 118 + (networkMetrics ? 94 : 0) + (renderMetrics ? 132 : 0);
+        const height = 118 + areaOffset + (networkMetrics ? 94 : 0) + (renderMetrics ? 132 : 0);
         this.metricsPanelHeight = height;
         ctx.fillRect(x, 18, 230, height);
         ctx.strokeStyle = "rgba(103, 232, 249, 0.65)";
@@ -243,29 +272,33 @@ export class CanvasRenderer {
         ctx.fillText(`처치 ${metrics.enemyDefeats} · 피해 ${metrics.damageTaken}`, x + 12, 79);
         ctx.fillText(`절단 ${metrics.ropeCuts} · 사망 ${metrics.defeats}`, x + 12, 98);
         ctx.fillText(`첫 보상 ${firstReward}`, x + 12, 117);
+        if (metrics.areaTiming) {
+            const areaLabel = metrics.areaTiming.currentAreaId?.replace("sector-", "") ?? "-";
+            ctx.fillText(`구간 ${areaLabel} · ${metrics.areaTiming.currentAreaSeconds.toFixed(1)}초`, x + 12, 136);
+        }
         if (networkMetrics) {
             const rtt = networkMetrics.roundTripMs === null ? "-" : `${Math.round(networkMetrics.roundTripMs)}ms`;
             const snapshots =
                 networkMetrics.snapshotIntervalMs === null ? "-" : `${Math.round(networkMetrics.snapshotIntervalMs)}ms`;
             const rejected = `${Math.round(networkMetrics.rejectionRate * 100)}%`;
             ctx.fillStyle = "#fbbf24";
-            ctx.fillText("NETWORK", x + 12, 140);
+            ctx.fillText("NETWORK", x + 12, 140 + areaOffset);
             ctx.fillStyle = "#e2e8f0";
-            ctx.fillText(`RTT ${rtt} · 스냅샷 ${snapshots}`, x + 12, 158);
-            ctx.fillText(`대기 ${networkMetrics.pendingCommands} · 거부 ${rejected}`, x + 12, 177);
+            ctx.fillText(`RTT ${rtt} · 스냅샷 ${snapshots}`, x + 12, 158 + areaOffset);
+            ctx.fillText(`대기 ${networkMetrics.pendingCommands} · 거부 ${rejected}`, x + 12, 177 + areaOffset);
             ctx.fillText(
                 `보정 p50 ${Math.round(networkMetrics.correctionP50)} · p95 ${Math.round(networkMetrics.correctionP95)}`,
                 x + 12,
-                196
+                196 + areaOffset
             );
             ctx.fillText(
                 `스냅 ${networkMetrics.hardSnaps} · 외삽 ${Math.round(networkMetrics.extrapolationMs)}/${Math.round(networkMetrics.maxExtrapolationMs)}ms · 취소 ${networkMetrics.predictionCancellations}`,
                 x + 12,
-                215
+                215 + areaOffset
             );
         }
         if (renderMetrics) {
-            const startY = networkMetrics ? 238 : 140;
+            const startY = (networkMetrics ? 238 : 140) + areaOffset;
             const number = (value) => (value === null ? "-" : String(Math.round(value)));
             const count = (category) => {
                 const counts = renderMetrics.drawCounts[category];

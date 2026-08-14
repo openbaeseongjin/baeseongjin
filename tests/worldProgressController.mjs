@@ -18,7 +18,35 @@ export function run() {
     const terminal = world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
     player.physics.position.set(terminal.position.x, terminal.position.y);
 
-    const objectiveEvents = advanceWorldProgress({ world, progress, players: [player], commandsByPlayerId: commands });
+    const sequenceStarted = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands,
+        dt: 1 / 120
+    });
+    assert.deepEqual(
+        sequenceStarted.map(({ type }) => type),
+        ["objective-sequence-started"]
+    );
+    assert.equal(progress.isGateUnlocked("sector-01-01:gate"), false);
+    assert.ok(progress.objectiveSequence("sector-01-01:terminal-read"));
+
+    const sequencePending = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands,
+        dt: 2.69
+    });
+    assert.deepEqual(sequencePending, []);
+    const objectiveEvents = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands,
+        dt: 0.02
+    });
     assert.deepEqual(
         objectiveEvents.map(({ type }) => type),
         ["objective-completed", "gate-unlocked"]

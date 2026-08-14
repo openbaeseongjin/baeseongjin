@@ -37,6 +37,9 @@ export function run() {
     const terminal = simulation.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
     player.physics.position.set(terminal.position.x, terminal.position.y);
     simulation.step(1 / 120, command({ interact: true }));
+    assert.equal(simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-01:gate"), false);
+    assert.ok(simulation.snapshot().worldProgress.activeObjectiveSequences.length === 1);
+    for (let step = 0; step < 325; step += 1) simulation.step(1 / 120, command());
     assert.equal(simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-01:gate"), true);
     assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 7);
 
@@ -73,6 +76,10 @@ export function run() {
     player.ropeDamageBoostRemaining = 1.5;
     simulation.step(1 / 120, command());
     assert.equal(simulation.snapshot().worldProgress.currentAreaId, "sector-01-02");
+    assert.ok(
+        simulation.snapshot().metrics.areaTiming.clearSeconds["sector-01-01"] >= 2.7,
+        "the shared playtest metrics must retain the measured 1-1 clear time"
+    );
     assert.equal(simulation.activeCheckpoint.areaId, "sector-01-02");
     assert.equal(simulation.artifactRewards.size, 0, "area Gate checkpoints must not grant artifact rewards");
     assert.equal(simulation.world, worldBeforePortal, "a Gate portal must keep the same assembled world");
@@ -119,6 +126,7 @@ export function run() {
     const replicationEvents = simulation.drainReplicationEvents();
     const eventTypes = replicationEvents.map(({ eventType }) => eventType);
     assert.ok(eventTypes.includes("objective-completed"));
+    assert.ok(eventTypes.includes("objective-sequence-started"));
     assert.ok(eventTypes.includes("gate-unlocked"));
     assert.ok(eventTypes.includes("gate-crossed"));
     assert.ok(eventTypes.includes("gate-portal-entered"));

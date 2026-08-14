@@ -7,6 +7,9 @@ export class RunMetrics {
         this.ropeCuts = 0;
         this.defeats = 0;
         this.firstRewardSeconds = null;
+        this.currentAreaId = null;
+        this.areaActiveSeconds = new Map();
+        this.areaClearSeconds = new Map();
     }
 
     recordActiveTime(dt) {
@@ -15,6 +18,17 @@ export class RunMetrics {
 
     recordCheckpoint() {
         this.checkpointsReached += 1;
+    }
+
+    recordAreaTime(areaId, dt) {
+        if (typeof areaId !== "string" || !Number.isFinite(dt) || dt < 0) return;
+        this.currentAreaId = areaId;
+        this.areaActiveSeconds.set(areaId, (this.areaActiveSeconds.get(areaId) ?? 0) + dt);
+    }
+
+    recordAreaClear(areaId) {
+        if (typeof areaId !== "string" || this.areaClearSeconds.has(areaId)) return;
+        this.areaClearSeconds.set(areaId, this.areaActiveSeconds.get(areaId) ?? 0);
     }
 
     recordFirstReward() {
@@ -35,6 +49,7 @@ export class RunMetrics {
     }
 
     snapshot() {
+        const currentAreaSeconds = this.currentAreaId ? (this.areaActiveSeconds.get(this.currentAreaId) ?? 0) : 0;
         return Object.freeze({
             activeSeconds: this.activeSeconds,
             checkpointsReached: this.checkpointsReached,
@@ -42,7 +57,12 @@ export class RunMetrics {
             damageTaken: this.damageTaken,
             ropeCuts: this.ropeCuts,
             defeats: this.defeats,
-            firstRewardSeconds: this.firstRewardSeconds
+            firstRewardSeconds: this.firstRewardSeconds,
+            areaTiming: Object.freeze({
+                currentAreaId: this.currentAreaId,
+                currentAreaSeconds,
+                clearSeconds: Object.freeze(Object.fromEntries(this.areaClearSeconds))
+            })
         });
     }
 }

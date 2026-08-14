@@ -49,7 +49,7 @@ Sector 01 공용 배경 아트 기준은 `docs/bsh/scenario/README.md`다. `1-1`
 
 섹터 1 맵 구조는 `docs/sector-01-world-structure-plan.md`를 현재 기준으로 구현한다. 실제 월드는 하나이며 `1-1`~`1-8`은 별도 월드가 아니라 같은 붕괴 도시 안의 진행 영역이다. 각 영역이 정의한 처치·무력화·우회·상호작용·이동 달성 조건을 만족하면 문 옆 Gate 패널이 활성화되고, 플레이어가 패널을 조작해야 명시적 출구가 열린다. 첫 활성 플레이어가 열린 문 안으로 들어가면 공용 진행을 다음 영역으로 한 번 전진시키고 그 플레이어만 이동한다. 문은 지속 단방향 포탈로 남아 뒤의 플레이어도 직접 들어온 시점에 각각 이동하며 공용 진행을 다시 올리지 않는다. 포탈은 별도 world/scene을 만들지 않고 월드·런·체력·생명·아티팩트·무기 수치·체크포인트·공용 오브젝트 진행을 유지한다. 각 진입자에게만 로프·속도·회전·접지·포인터 버퍼·일시 전투 타이머·무기 재사용 대기를 초기화하고 도착 인원을 겹치지 않게 배치한다. 일반 타이머는 섹터 전체에서 유지되고 Gate 통과 때 보충되며, 0초부터 하층 붕괴가 상승한다. 붕괴 탈락자는 최소 관전 뒤 다음 Gate에서 합류하고 전원 탈락 때만 해당 섹터 일반 구간을 재시작한다. 기획자 지정 보스 진입에서는 일반 시간과 붕괴를 끝내고 잔여 시간을 폐기한 뒤 별도 보스 타이머를 시작하며, 0초부터 Arena가 붕괴하고 전원 탈락은 보스 시도만 재시작한다. 메인 개발자는 수치를 mock으로 먼저 연결하고 팀·기획자가 공동 플레이로 최종 조정한다. 기준은 `docs/sector-timer-and-boss-flow.md`다. 보스 위치·전투 시나리오는 기획자 확정 전 추정 구현하지 않는다.
 
-Sector 01-1의 현재 기준은 `docs/bsh/scenario/1/1-1/README.md`의 `SERVICE SHAFT` REV 3.0이다. 첫 Authored Stage를 32px Grid·960×960 Blockout으로 만들고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3의 5초 이내 재시도를 검증한다. Turret·Wind·Augment·필수 공중 ReAttach는 제외하며, `swingImpulse = 0`에서도 전 구간이 재미있고 안정적으로 통과되어야 한다. Terminal은 하부 봉쇄와 Rooftop Pad 03 Maintenance Shuttle 목표를 전달한다.
+Sector 01-1의 현재 기준은 `docs/bsh/scenario/1/1-1/README.md`의 `SERVICE SHAFT` REV 3.1과 `PRODUCTION-ALIGNMENT.md`다. 첫 Authored Stage를 32px Grid·960×960 Blockout으로 만들고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3의 5초 이내 재시도를 검증한다. 최초 플레이의 목표 클리어 시간은 90~120초지만 이를 강제 대기시간이나 전용 속도 제한으로 만들지 않는다. C01~C05의 local Y Camera Zone과 desktop/mobile zoom을 싱글·멀티 공용 카메라에 적용하고, 실제 `RunMetrics.areaTiming` 표본이 목표를 벗어나면 Geometry·Camera·Recovery를 조정한다. Turret·Wind·Augment·필수 공중 ReAttach는 제외하며, `swingImpulse = 0`에서도 전 구간이 재미있고 안정적으로 통과되어야 한다. Terminal은 이동을 막지 않는 0.9초 문구 세 개를 공용 진행 상태로 2.7초 처리한 뒤 Gate를 열며, 하부 봉쇄와 Rooftop Pad 03 Maintenance Shuttle 목표를 전달한다.
 
 Sector 01-2의 현재 기준은 `docs/bsh/scenario/1/1-2/README.md`의 `DOUBLE ANCHOR SHAFT` REV 3.0이다. 32px Grid·960×1088 Blockout에서 A=복습·B=첫 Airborne Handoff·C=방향 반전·D=설명 없는 Flow Test를 검증한다. 숙련자는 A→B→C→D를 무착지로 연결하고, 초보자는 P1/P2/P3 Recovery를 이용해 3~5초 안에 해당 Handoff를 재시도할 수 있어야 한다. Enemy·Damage Hazard·Wind·Augment는 제외하며, `swingImpulse = 0` Flow Route와 Momentum·Wrong/Ghost Attach 로그를 필수로 확인한다.
 
@@ -155,7 +155,7 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 데스크톱은 보유 아티팩트와 로프 공명 시간을 HUD에서 확인한다. 모바일은 플레이 공간을 위해 기타 상태 HUD를 숨기되 HP 전용 패널은 항상 표시하고, 아티팩트 획득·손실은 토스트로 알린다.
 - 시작점을 제외한 각 신규 체크포인트가 보상을 한 번씩 제공하며, 같은 아티팩트의 중복 효과는 곱연산으로 누적된다.
 - 기본 `npm test`는 현재 저작 영역 연결·Gate 진행·content boundary와 싱글·멀티 공용 시스템만 제품 시나리오로 검증한다. 48단계 절차 월드 생성·1,000시드 sweep·summit claim 테스트는 기본 suite에서 실행하지 않는다. 상세 기준은 `docs/development-rules.md`의 테스트와 회귀 방지 절을 따른다.
-- `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 보상 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다.
+- `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 보상 시간과 현재 저작 영역 체류 시간·영역별 클리어 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다.
 - 배포 URL에 `?metrics=1`을 붙이면 일반 게임 규칙을 바꾸지 않고 현재 RunMetrics 개발 패널을 표시한다.
 - 메트로배니아식 자유 역주행과 능력 잠금은 초기 범위에서 제외한다. 현재 기준의 상세 구현 흐름은 `docs/sector-01-world-structure-plan.md`를 따른다.
 

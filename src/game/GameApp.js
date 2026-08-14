@@ -13,6 +13,12 @@ import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.j
 import { selectWorldSeed } from "./world/WorldSeed.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
+import {
+    advanceAuthoredCamera,
+    authoredAreaForPosition,
+    resolveAuthoredCameraShot
+} from "./camera/AuthoredCameraDirector.js";
+import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 
 export class GameApp {
     constructor({
@@ -41,6 +47,7 @@ export class GameApp {
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.playerPresentationEvents = [];
+        this.storyPresentation = new AuthoredStoryPresentation();
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: () => this.render()
@@ -96,8 +103,12 @@ export class GameApp {
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
+        this.storyPresentation.update(dt, {
+            currentAreaId: authoredAreaForPosition(state.world, state.player.position)?.id ?? null,
+            events: authorityEvents
+        });
         if (state.resets !== before.resets) this.camera = this.createCamera();
-        this.updateCamera(dt, state.player);
+        this.updateCamera(dt, state.player, state.world);
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
         this.audioBindings?.presentFrame({
             events: [...authorityEvents, ...predictedImpacts],
@@ -121,16 +132,29 @@ export class GameApp {
         });
     }
 
-    updateCamera(dt, player) {
-        const targetX = player.position.x - (this.renderer.cssWidth / this.camera.zoom) * 0.38;
-        const targetY = player.position.y - (this.renderer.cssHeight / this.camera.zoom) * 0.58;
-        const blend = 1 - Math.exp(-5 * dt);
-        this.camera.x += (targetX - this.camera.x) * blend;
-        this.camera.y += (targetY - this.camera.y) * blend;
+    updateCamera(dt, player, world) {
+        advanceAuthoredCamera({
+            camera: this.camera,
+            world,
+            player,
+            mobileView: this.mobileView,
+            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight,
+            dt
+        });
     }
 
     createCamera() {
-        return { x: 0, y: 0, zoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom };
+        const defaultZoom = this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom;
+        const state = this.authority.snapshot();
+        const zoom = resolveAuthoredCameraShot({
+            world: state.world,
+            player: state.player,
+            mobileView: this.mobileView,
+            defaultZoom
+        }).zoom;
+        return { x: 0, y: 0, zoom, initialized: false };
     }
 
     render() {
@@ -144,6 +168,7 @@ export class GameApp {
             ...combatFeedback,
             localPlayerId: this.authority.playerId,
             playerPresentationEvents,
+            storyPresentation: this.storyPresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ?? selectClientStatusFeedback(state.eventFlash, this.authority.playerId),
             camera: this.camera,
