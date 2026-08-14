@@ -33,9 +33,9 @@
 | 소유자는 예측하고 다른 참가자는 보간한다. Unity Netcode for Entities는 `Owner Predicted` ghost를 소유자에게 예측하고 다른 클라이언트에는 보간한다. ([Unity Ghost snapshots](https://docs.unity.cn/Packages/com.unity.netcode%401.0/manual/ghost-snapshots.html)) | `OwnerPredictionRuntime`이 자기 `GameSimulation`을 즉시 진행하고 `RemoteWorldStateBuffer`가 동료를 보간·제한 외삽한다. | 충족 |
 | 일회성 사건과 지속 상태를 분리한다. Unity는 RPC를 일회성 사건, ghost snapshot을 지속 상태와 eventual consistency 용도로 구분한다. ([Unity Ghost snapshots](https://docs.unity.cn/Packages/com.unity.netcode%401.0/manual/ghost-snapshots.html)) | 생성·해결·피격은 고유 ID 사건으로 보내고 플레이어·적·공용 진행은 snapshot으로 수렴한다. late join은 현재 지속 상태와 활성 객체의 원래 spawn 사건을 받는다. | 충족 |
 | 예측 현재·보간 과거·서버 현재의 시간축을 구분하고 외삽을 제한한다. ([Unity Interpolation](https://docs.unity.cn/Packages/com.unity.netcode%401.5/manual/interpolation.html)) | `serverTick`, 플레이어별 `ownerMotionTick`, 단조 `snapshotSequence`를 구분하고 100ms 보간·최대 120ms 외삽을 사용한다. | 충족 |
-| 입력/이동 표본은 tick 또는 timestamp, ACK, 보존된 입력과 결합한다. Unreal Character Movement는 saved move, timestamp, ACK와 correction을 같은 이동 계약으로 관리한다. ([Unreal Networked Movement](https://dev.epicgames.com/documentation/unreal-engine/understanding-networked-movement-in-the-character-movement-component-for-unreal-engine?lang=en-US)) | 명령 sequence·목표 tick·snapshot ACK를 보존하고 명시적 운동 거부에서만 기준 상태 이후 입력을 재실행한다. impact 예외 복구도 상태를 만든 `stateTick`을 함께 수용한다. | 충족 |
+| 입력/이동 표본은 tick 또는 timestamp, ACK, 보존된 입력과 결합한다. Unreal Character Movement는 saved move, timestamp, ACK와 correction을 같은 이동 계약으로 관리한다. ([Unreal Networked Movement](https://dev.epicgames.com/documentation/unreal-engine/understanding-networked-movement-in-the-character-movement-component-for-unreal-engine?lang=en-US)) | 명령 sequence·목표 tick·snapshot ACK를 보존하고 `owner-motion`은 최신 tick만 적용한다. 소유 클라이언트 최종 수렴 정책상 운동 correction은 하지 않으며, 체크포인트 같은 별도 사건 rollback과 impact 예외 복구만 상태 tick을 사용한다. | 협동·클라이언트 우선 정책 안에서 충족 |
 | 메시지 순서를 암묵적으로 가정하지 않고 상태 묶음과 사건 ID로 인과관계를 보존한다. Unreal도 actor·RPC 종류를 넘는 실행 순서가 항상 보장되지 않음을 명시한다. ([Unreal Replicated Object Execution Order](https://dev.epicgames.com/documentation/unreal-engine/replicated-object-execution-order-in-unreal-engine?lang=en-US)) | snapshot envelope, 사건 ID 중복 제거, projectile/prediction ID와 impact 복구 challenge로 순서·중복을 명시한다. 현재 WebSocket의 FIFO는 보조 조건이지 게임 객체 식별자를 대신하지 않는다. | 충족 |
-| 원격 입력은 소유권·형식·범위와 호출 빈도를 검증한다. Godot도 RPC 인자를 적용 전에 검증하고 위치·타이머·쿨다운을 무검증 신뢰하지 말 것을 권고한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)) | 인증된 player ID, 프로토콜 버전, tick·속도·이동 거리·쿨다운·대상, 중복 ID를 검증한다. 피해자 소유 결과를 서버 상태로 되감지는 않지만 예외 전체 상태는 서버가 발급한 일회용 challenge와 전체 복구 스키마를 통과해야 한다. | 협동·클라이언트 우선 정책 안에서 충족 |
+| 원격 입력은 소유권·형식·범위와 호출 빈도를 검증한다. Godot도 RPC 인자를 적용 전에 검증하고 위치·타이머·쿨다운을 무검증 신뢰하지 말 것을 권고한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)) | 인증된 player ID, 프로토콜 버전, 유한값·tick 순서와 사건 claim별 tick·쿨다운·대상·중복 ID를 검증한다. `owner-motion`은 협동 최종 수렴 정책상 물리량 봉투로 거부하지 않고, 예외 전체 상태는 서버가 발급한 일회용 challenge와 전체 복구 스키마를 통과해야 한다. | 협동·클라이언트 우선 정책 안에서 충족 |
 | 상태 snapshot은 필요에 따라 unreliable/delta/relevancy를 사용한다. 브라우저 HTML5는 raw UDP를 사용할 수 없고 WebSocket 또는 WebRTC 경계를 사용한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)) | 현재는 2인·20Hz의 단일 reliable WebSocket과 전체 snapshot이다. 모바일 계측에서 head-of-line 지연이나 대역폭 문제가 확인될 때만 WebRTC 채널, delta 또는 관심 영역을 검토한다. | 현재 규모에서는 핵심 누락 아님 |
 
 서버 rewind·공격자 lag compensation은 움직이는 서버 소유 표적이나 경쟁 PvP가 추가될 때 필요한 조건부 항목이다. 현재처럼 피해자가 자기 피격을 판정하고 적중 대상 수가 작은 2인 PvE에서는 선행 구현하지 않는다. 상태 지문은 우연한 시뮬레이션 불일치를 찾는 도구이지 신뢰 증명이나 치트 방지 수단이 아니므로 암호학적 해시로 바꾸는 것도 현재 핵심 요구가 아니다.
@@ -50,7 +50,7 @@
 
 | 불일치 범위 | 최종 기준 | 수렴 방식 |
 | --- | --- | --- |
-| 소유 플레이어의 연속 이동·속도 | 검증된 최신 `owner-motion` | 명시적 운동 거부 때만 공유 상태에서 미확정 입력을 재실행하고, 작은 표시 오차는 감쇠하며 큰 오차는 즉시 맞춤 |
+| 소유 플레이어의 연속 이동·속도 | 인증·형식 검사를 통과한 최신 `owner-motion` | 서버와 동료가 최신 tick 상태를 그대로 적용하며, 값의 크기나 receipt를 이유로 소유자를 복원·재실행하지 않음 |
 | 피해자의 HP·로프·부활·아티팩트 손실 | 피해 클라이언트의 impact 결과 | 정상은 사건과 상태 지문으로 확정하고, 지문 불일치 때만 피해자의 최신 상태를 한 번 받아 따라감. 서버 상태를 피해 클라이언트에 덮어써서 맞추지 않음 |
 | 몹·적 투사체·공용 월드 | 서버 상태 | 서버 스냅샷과 생성·해결 사건을 적용하고 연속 위치만 보간·제한 외삽 |
 | 최초 입장·재접속 | 서버가 보존한 최신 공유 상태 | 전체 소유자 상태를 한 번 복원한 뒤 다시 클라이언트 우선 시뮬레이션 시작 |
@@ -65,7 +65,7 @@
 
 플레이어·로프처럼 특정 소유자가 있는 입력 주도 사건은 소유 클라이언트가, 충돌·피격은 피해 클라이언트가 최초 트리거한다. 서버는 이 사건을 플레이어 체감 경로에서 먼저 시작하지 않는다. 일반 claim은 계약별 소유권·tick·중립 객체 상태·중복을 검증한다. impact claim은 인증·형식·중복을 확인하고 같은 전이의 상태 지문을 비교하며, 불일치 때만 피해 클라이언트 상태를 요청해 복제·배포한다. 서버 왕복을 기다린 뒤 모바일 반응을 시작하는 구현은 허용하지 않는다.
 
-서버의 주역할은 소유 클라이언트가 만든 상태와 사건을 검증해 다른 클라이언트에 공유하고 전체 복제본을 수렴시키는 것이다. 정상 승인 중인 소유 클라이언트의 직접 체감 상태를 서버 스냅샷으로 다시 작성하지 않는다. 검증된 아티팩트·무기 파라미터 같은 협동 진행 정보만 별도 공유 진행 경계에서 흡수한다. 소유자 전체 상태 복원은 최초 입장·재접속과 `owner-motion`처럼 복구 가능한 claim의 명시적 거부에만 사용한다. impact는 반대 방향이며 상태 지문이 어긋난 경우에만 피해 클라이언트의 최신 적용 결과를 서버가 흡수한다. 서버가 스스로 진행하고 최종 상태를 작성하는 범위는 몹·중립 투사체·공용 월드와 세션 수명주기다.
+서버의 주역할은 소유 클라이언트가 만든 상태와 사건을 검증해 다른 클라이언트에 공유하고 전체 복제본을 수렴시키는 것이다. 소유 클라이언트의 직접 체감 상태를 서버 스냅샷으로 다시 작성하지 않는다. 검증된 아티팩트·무기 파라미터 같은 협동 진행 정보만 별도 공유 진행 경계에서 흡수한다. `owner-motion`은 인증·프로토콜 형식·유한값을 통과한 최신 tick을 서버 복제본과 동료의 수렴 원점으로 적용하며 속도·각속도·이동 거리·로프 offset 봉투로 거부하지 않는다. 소유자 전체 상태 복원은 최초 입장·재접속과 체크포인트처럼 별도 복구 계약이 있는 사건 전이에만 사용한다. impact는 반대 방향이며 상태 지문이 어긋난 경우에만 피해 클라이언트의 최신 적용 결과를 서버가 흡수한다. 서버가 스스로 진행하고 최종 상태를 작성하는 범위는 몹·중립 투사체·공용 월드와 세션 수명주기다.
 
 몹·적 투사체 생성과 궤적처럼 특정 클라이언트에 귀속할 수 없는 중립 시뮬레이션 사건은 서버가 진행한다. 중립 사건을 안정적인 플레이어 ID의 대표 클라이언트에게 위임하지 않으며, 참가자 퇴장과 무관하게 같은 월드 상태를 유지한다.
 
@@ -76,7 +76,7 @@
 - 싱글에서는 `LocalAuthority`가 브라우저 안에서 `GameSimulation`을 직접 실행한다.
 - 협동에서는 각 클라이언트가 같은 `GameSimulation` 규칙으로 담당 사건을 트리거하고 별도 서버 프로세스가 claim을 검증·공유한다.
 - 클라이언트는 `PlayerCommand`, 사건 claim과 소유자 운동 상태를 제출하고 검증된 공유 스냅샷을 받는다.
-- 로컬 플레이어는 즉시 시뮬레이션하며 일반 서버 스냅샷으로 위치·속도·로프를 보정하지 않는다. 서버는 허용 봉투를 벗어난 claim을 거부한다.
+- 로컬 플레이어는 즉시 시뮬레이션하며 일반 서버 스냅샷으로 위치·속도·로프를 보정하지 않는다. 사건 claim은 각 계약의 허용 범위를 검증하지만 `owner-motion` 연속 상태는 물리량 봉투로 거부하지 않는다.
 - 다른 플레이어와 적의 연속 위치는 수신한 스냅샷 사이를 보간한다. 원격 플레이어는 `ownerMotionTick`, 적은 `serverTick`을 위치 표본 시각으로 사용하며 플레이어 표시 목표 tick에는 공용 입력 선행값을 더해 두 시계를 정렬한다. 투사체는 위치 스냅샷이 아니라 생성·해결 이벤트로 각 클라이언트에서 재생한다.
 
 게임 규칙을 싱글용과 멀티용으로 나누지 않는다. 권한의 위치와 전송 방식만 바꾼다.
@@ -87,9 +87,9 @@
 
 - 플레이어·로프처럼 사용자가 직접 조작하는 객체는 `InputDrivenObject`다. 입력은 소유 클라이언트의 `InputDispatcher`를 거쳐 capability 믹스인에 즉시 적용되고 같은 입력 프레임·tick·sequence가 서버 검증 경계로 전달된다.
 - 적·자동 행동 객체·직접 조작하지 않는 투사체는 `SimulationDrivenObject`다. 서버 고정 스텝이 최종 상태를 진행하고 클라이언트는 스냅샷 또는 생성·해결 사건으로 재생한다.
-- 객체 분류는 프로세스 배치가 아니다. 서버는 입력 주도 객체의 허용 운동과 claim을 검사할 상태를 유지하고, 클라이언트는 시뮬레이션 주도 객체의 표시·충돌 예측용 복제본을 유지할 수 있다.
+- 객체 분류는 프로세스 배치가 아니다. 서버는 입력 주도 객체의 최신 연속 상태와 사건 claim을 검사할 상태를 유지하고, 클라이언트는 시뮬레이션 주도 객체의 표시·충돌 예측용 복제본을 유지할 수 있다.
 - 두 객체 종류가 만나는 피격·절단·충돌은 피해 `InputDrivenObject`가 체감 결과를 먼저 적용하고 사건 결과 지문을 claim한다. 서버는 인증·형식·중복을 확인하고 같은 전이의 지문을 비교하며, 다를 때만 피해자의 최신 상태를 요청해 자기 복제 상태를 맞춘다.
-- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합 전체의 입력 이력, 예측 tick, claim 수명, 복구 가능한 명령의 명시적 거부와 표시 보정만 담당한다. impact receipt는 로컬 피해 상태를 복구하지 않는다. 플레이어·로프 종류별 게임 로직은 capability 믹스인에 둔다.
+- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합 전체의 입력 이력, 예측 tick, claim 수명, 별도 복구 계약이 있는 사건 전이와 표시 보정만 담당한다. `owner-motion` receipt와 impact receipt는 로컬 상태를 복구하지 않는다. 플레이어·로프 종류별 게임 로직은 capability 믹스인에 둔다.
 
 ## 선택 이유
 
@@ -127,8 +127,8 @@
   → InputDispatcher가 소유 InputDrivenObject capability에 적용
   → sequence와 targetTick 부여
   → PlayerCommandBatch와 owner-motion 전송
-  → 권위 서버가 명령 소유권·순서와 운동 봉투를 검증
-  → owner-motion만 공용 InputDrivenObject 연속 상태에 적용
+  → 권위 서버가 명령 소유권·순서와 owner-motion 형식·최신 tick을 확인
+  → 최신 owner-motion을 공용 InputDrivenObject 연속 상태에 적용
   → WorldSnapshot + ackSequence + ownerMotionTick 전송
 ```
 
@@ -142,7 +142,7 @@
 
 `AuthorityCommandInbox`가 플레이어별 마지막 승인 `sequence`와 허용 틱 범위를 소유한다. 승인된 입력은 목표 틱별로 보관하고 한 번만 소비하며, 같은 플레이어가 같은 틱에 더 높은 순서 번호를 보내면 최신 입력으로 교체한다. 최대 200ms 왕복 지연에 지터 여유를 두어 클라이언트는 명령을 30틱(250ms) 앞에 예약하고 서버는 최대 36틱(300ms) 미래 입력을 허용한다. 이 배치는 소유 클라이언트의 재적용 원본과 순서·지연 진단 계약이며 멀티 서버가 플레이어 물리를 다시 실행하는 명령이 아니다. 수치는 실제 왕복 지연 측정 후 같은 `MULTIPLAYER_TIMING` 계약에서 조정한다.
 
-소유 클라이언트 예측에서 명령이 비는 120Hz 틱은 마지막 입력을 최대 30틱만 유지한 뒤 이동 축을 중립화한다. 로프 해제처럼 상태 전이가 필요한 입력은 추측하지 않는다. 멀티 서버는 입력 공백을 보간하지 않고 마지막 승인 `owner-motion` 상태를 유지한다.
+소유 클라이언트 예측에서 명령이 비는 120Hz 틱은 마지막 입력을 최대 30틱만 유지한 뒤 이동 축을 중립화한다. 로프 해제처럼 상태 전이가 필요한 입력은 추측하지 않는다. 멀티 서버는 입력 공백을 보간하지 않고 마지막 적용 `owner-motion` 상태를 유지한다.
 
 `GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 배치 틱이 정확히 다음 시뮬레이션 틱인지 확인하고 플레이어 ID로 명령을 연결한다. 멀티 서버는 같은 월드 스케줄러를 사용하되 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 capability를 중복 호출하지 않는다. 플레이어 타이머와 무기 쿨다운, 적·투사체 같은 `SimulationDrivenObject` 단계는 계속 진행한다.
 
@@ -152,9 +152,9 @@
 
 | 상태 | 최종 소유자 | 클라이언트 처리 |
 | --- | --- | --- |
-| 자기 이동·속도·로프 | 입력한 클라이언트 | 로컬 시뮬레이션 후 운동 봉투 전송 |
-| 플레이어 간 바디 충돌 | 각 소유 클라이언트, 서버 검증 | 겹침 절반씩 즉시 해소 후 운동 봉투 전송 |
-| 플레이어 위치·속도 | 소유 클라이언트, 서버 검증 | 즉시 적용 후 운동 봉투 전송 |
+| 자기 이동·속도·로프 | 입력한 클라이언트 | 로컬 시뮬레이션 후 최신 상태 전송 |
+| 플레이어 간 바디 충돌 | 각 소유 클라이언트, 서버 공유 | 겹침 절반씩 즉시 해소 후 최신 상태 전송 |
+| 플레이어 위치·속도 | 소유 클라이언트, 서버 공유 | 즉시 적용 후 최신 상태 전송 |
 | 로프 부착점·길이·절단 | 소유·피해 클라이언트, 서버 검증 | 즉시 적용 후 claim 전송 |
 | 적 상태·HP 최종값 | 서버 | 권위 스냅샷 적용 |
 | 자기 피격·로프 절단 | 피해 클라이언트, 서버 검증·공유 | 즉시 로컬 적용 후 검증 claim |
@@ -181,7 +181,7 @@
 
 낙사 경계는 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 판정한다. 한 플레이어가 경계를 통과하면 fallen `owner-motion`을 즉시 보내고 같은 프레임에 로컬 체크포인트 부활을 예측한다. 멀티 서버 fixed tick은 지연된 복제 위치만으로 낙사를 시작하지 않으며 claim을 받은 뒤 체력 소진과 같은 `respawnPlayerAtCheckpoint` 경로로 최대 체력·개인 아티팩트 손실·공유 사건을 한 번 확정한다. 소유자 운동 receipt는 `player-fell`, 공유 사건은 원인 `fall`이 포함된 `player-respawned`를 사용한다. 싱글은 같은 프로세스의 `GameSimulation`이 자동 경계 판정과 복구를 계속 수행한다.
 
-소유자 운동 봉투는 위치·속도 같은 연속 운동과 로프 해제·낙사 같은 불연속 상태 전이를 함께 운반하지만 승인 단위는 분리한다. 최신 로프 해제는 연속 운동이 속도·거리 허용 범위를 벗어나 거부되더라도 먼저 적용하며, 별도 단조 rope tick으로 과거 부착 상태가 최신 해제를 되돌리지 못하게 한다. 낙사 경계 보고도 이동 거리 보정보다 먼저 `GameSimulation`의 공용 낙사 복구 전이로 처리한다. 연속 운동 검증 실패가 사용자 입력으로 이미 발생한 종료 상태를 취소해서는 안 된다.
+`owner-motion`은 위치·속도 같은 연속 운동과 로프 상태·낙사 경계 보고를 하나의 최신 소유자 상태로 운반한다. 서버는 최신 tick의 물리·로프 상태를 원자적으로 적용하므로 과거 부착 상태가 최신 해제를 되돌리지 못한다. 낙사 경계를 넘은 최신 상태는 위치를 그대로 복제하는 대신 `GameSimulation`의 공용 낙사 복구 전이로 처리하고 `player-fell` receipt를 보낸다. 중복·역순 tick은 성공한 no-op으로 끝나며 별도 rope tick이나 부분 승인 경로를 두지 않는다.
 
 로프 드래그 중 포인터가 브라우저 상단 UI로 나가거나 `pointercancel`, 창 `blur`, 문서 숨김이 발생하면 소유 클라이언트는 이를 해제 의도로 확정한다. `requestAnimationFrame` 재개를 기다리지 않고 해제 snapshot을 로컬 예측에 적용한 뒤, 60Hz 일반 명령 전송 제한을 우회해 해당 명령과 `owner-motion`을 즉시 보낸다. 서버 receipt나 다음 권위 스냅샷을 기다려 로프를 유지해서는 안 된다.
 
@@ -189,10 +189,10 @@
 
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
-- `owner-motion` protocol v2는 `angle`, `angularVelocity`, 부착 중인 `rope.attachmentOffset`을 위치·속도·anchor와 함께 보낸다. 서버는 선속도 envelope와 별도로 각속도 상한 및 허용된 손 local offset을 검증하고 승인된 소유자 상태를 복제한다.
+- `owner-motion` protocol v2는 `angle`, `angularVelocity`, 부착 중인 `rope.attachmentOffset`을 위치·속도·anchor와 함께 보낸다. 서버는 인증·프로토콜 형식·유한값과 최신 tick만 확인하고 선속도·각속도·손 local offset의 크기로 거부하지 않으며, 최신 소유자 상태를 원자적으로 복제한다.
 - `WorldSnapshot` protocol v4의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`을 포함한다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
-- 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 먼저 도착한 최신 detached `owner-motion`은 기존 단조 rope tick 규칙대로 연속 운동 거부와 별개로 해제를 확정한다.
+- 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
 - `player-impact` protocol v4의 divergence recovery 전체 상태에는 angle·angularVelocity·attachmentOffset이 포함된다. 부활 결과 지문에도 회전 상태와 부착 손을 양자화해 포함하지만, 정상 비치명 impact마다 전체 회전 상태를 별도 전송하지 않는다.
 - 실제 두 WebSocket 클라이언트 검증은 0이 아닌 각도·각속도를 소유자에서 서버와 동료 raw snapshot까지 각각 0.001rad·0.001rad/s 이내로 비교하고, 회전된 손 관절점은 0.05px 이내로 비교한다. 지연 표현 계층은 별도 연속 표본에서 각도 보간과 120ms 제한 외삽을 검증하며, 순간적으로 만든 불연속 각도를 최신 raw snapshot과 직접 비교하지 않는다.
 
@@ -247,21 +247,21 @@ events[]
 
 이벤트의 즉시 체감과 지속 상태 수렴은 서로 다른 전송 계약이다. `spawn`·`resolve`·피격 claim 같은 사건은 한 번 발생한 사실을 공유하고, 플레이어·로프·적·월드 진행 같은 지속 상태는 객체의 권한 원점으로 계속 수렴한다.
 
-| 상태군 | 지속 상태 수렴 원점 | 소유 클라이언트 | 다른 클라이언트 표시 | 거부 복구 |
+| 상태군 | 지속 상태 수렴 원점 | 소유 클라이언트 | 다른 클라이언트 표시 | 복구 정책 |
 | --- | --- | --- | --- | --- |
-| 위치·속도·접지·로프 | 승인된 최신 `owner-motion` | 즉시 예측하며 정상 snapshot 위치로 되감지 않음 | 위치는 보간·제한 외삽, 로프는 최신값 | `ownerMotionTick` 상태 복원 후 미확정 입력 재실행 |
+| 위치·속도·접지·로프 | 인증·형식 검사를 통과한 최신 `owner-motion` | 즉시 예측하며 snapshot·receipt로 되감지 않음 | 위치는 보간·제한 외삽, 로프는 최신값 | 운동 상태 복원 없음; 중복·역순 tick은 성공한 no-op |
 | HP·생명·부활·로프 절단 | 피해 클라이언트의 impact 결과 | 피해 HP·치명 부활·절단을 즉시 적용하고 snapshot·receipt로 다시 쓰지 않음 | 정상은 사건을 적용하고, 지문 불일치 때만 받은 피해자 상태를 즉시 적용 | `state-diverged` 뒤 피해자의 최신 상태를 서버가 흡수 |
 | 아티팩트·무기 파라미터·보상 | 검증된 협동 공유 진행 | 선택 UI와 치명 손실은 즉시 반영하고 pending 동안 이전 진행으로 덮지 않음 | 최신 검증 공유값 즉시 적용 | 거부 claim의 로컬 전이만 복구 |
 | 스윙 강화 시간 | 행동 클라이언트의 로컬 결과와 승인된 claim | 스윙과 강화 시간을 즉시 진행하고 정상 snapshot으로 타이머를 다시 쓰지 않음 | 검증된 최신 공유값 즉시 적용 | 후속 pending 강화 유지·baseline 교정, 마지막 거절은 최초 값 복구 |
 | 자동 무기 쿨다운 | 소유 클라이언트의 발사 시뮬레이션 | 발사와 동시에 진행하고 정상 snapshot으로 쿨다운을 다시 쓰지 않음 | 검증된 발사 사건을 각 클라이언트에서 재생 | 후속 pending 쿨다운 유지·baseline 교정, 마지막 거절은 최초 준비값 복구 |
 | 적·적 HP·공용 진행 | 서버 fixed tick·claim 확정 snapshot | 권위 결과 사용 | 위치 보간·제한 외삽, 비위치 상태 최신값 | 클라이언트 예측을 권위 결과로 취소·복구 |
 
-- 플레이어·로프 같은 `InputDrivenObject`는 소유 클라이언트의 즉시 시뮬레이션이 원점이다. 클라이언트가 `owner-motion`으로 현재 tick·위치·속도·접지·로프 상태를 보내면 서버가 소유권과 tick·속도·이동 거리 봉투를 검증해 공용 상태에 반영하고 receipt를 돌려준다. 서버와 다른 클라이언트는 이 검증된 소유자 상태를 따라간다.
+- 플레이어·로프 같은 `InputDrivenObject`는 소유 클라이언트의 즉시 시뮬레이션이 원점이다. 클라이언트가 `owner-motion`으로 현재 tick·위치·속도·각도·접지·로프 상태를 보내면 서버는 인증·프로토콜 형식·유한값과 세션 tick 범위를 통과한 최신 상태를 공용 `GameSimulation` 명령에 적용하고 receipt를 돌려준다. 속도·각속도·이동 거리·로프 offset의 크기는 네트워크 거부 조건이 아니다. 양쪽이 같은 공용 규칙으로 수행하는 각도 정규화·각속도 clamp 같은 도메인 물리 처리는 유지한다. 중복·역순·세션 범위 밖 tick과 완료된 런의 후속 상태는 성공한 no-op이며 `ownerMotionTick`이나 새 위치 표본을 만들지 않는다. 서버와 다른 클라이언트는 이 최신 소유자 상태를 따라간다.
 - 정상 승인 중인 소유 클라이언트는 20Hz 서버 지연 위치뿐 아니라 HP·피격 무적·생명 상태·로프 절단·무기 쿨다운·시간 제한 강화도 서버 스냅샷 값으로 다시 쓰지 않는다. 아티팩트처럼 협동 전체가 알아야 하는 공유 진행 결과만 흡수하며, 소유자의 직접 체감 상태는 로컬 `GameSimulation`이 계속 작성한다.
-- `owner-motion` 거부 receipt가 오면 마지막 공유 스냅샷의 소유자 물리·로프·제어 상태를 해당 플레이어의 `ownerMotionTick`에 복원하고, 그 다음 tick의 미확정 입력부터 현재 예측 tick까지 순서대로 다시 실행한다. 이미 owner-motion에 포함된 입력을 `serverTick` 기준으로 두 번 실행하지 않는다. 이 명시적 거부 복구와 최초 입장·재접속 외에는 서버 상태로 소유자를 통째로 복원하지 않는다. impact `state-diverged`는 반대 방향 복구로, 피해 클라이언트가 자기 최신 상태를 서버에 보내며 로컬 예측은 복원·재실행하지 않는다.
+- `owner-motion` receipt는 소유자의 물리·로프·제어 상태를 복원하거나 미확정 입력 재실행을 시작하지 않는다. 최신 상태는 서버 복제본과 동료가 흡수하고, 중복·역순 또는 런 완료 뒤 상태는 성공한 no-op으로 끝낸다. 최초 입장·재접속과 체크포인트처럼 별도 rollback 계약이 있는 사건 전이 외에는 서버 상태로 소유자를 통째로 복원하지 않는다. impact `state-diverged`는 반대 방향 복구로, 피해 클라이언트가 자기 최신 상태를 서버에 보내며 로컬 예측은 복원·재실행하지 않는다.
 - 적과 공용 월드 같은 `SimulationDrivenObject`는 서버 스냅샷이 원점이다. 동료와 적은 두 표본 사이를 보간하고 표본 공백만 최대 120ms 외삽한 뒤 다음 스냅샷에서 서버 궤도로 돌아온다.
 
-`OwnerPredictionRuntime`은 별도 간이 물리를 만들지 않는다. 최초 입장과 명시적 거부 복구 때만 최신 공유 스냅샷을 로컬 예측용 `GameSimulation`의 공개 소유자 복원 명령에 전달하고, 남은 입력을 고정 1/120초로 재실행한다. 정상 승인 중에는 서버 스냅샷을 소유자 복구 명령으로 사용하지 않고, 검증된 아티팩트·무기 파라미터 같은 공유 진행 정보만 `applySharedOwnerProgress()`로 흡수한다. 런타임은 `GameSimulation`의 플레이어 객체·배열·tick을 직접 수정하지 않는다. 60Hz 명령 사이의 빈 120Hz 틱은 서버와 예측이 같은 `InputStateSimulator`로 마지막 입력을 최대 30틱(250ms) 유지한다. 새 중립 입력이 오면 즉시 교체하고 제한 시간이 끝나면 이동축을 중립화한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
+`OwnerPredictionRuntime`은 별도 간이 물리를 만들지 않는다. 최초 입장 때 최신 공유 스냅샷을 로컬 예측용 `GameSimulation`의 공개 소유자 복원 명령에 전달하고 남은 입력을 고정 1/120초로 재실행한다. 이후 정상 스냅샷과 `owner-motion` receipt는 서버 상태를 소유자 복구 명령으로 사용하지 않고, 검증된 아티팩트·무기 파라미터 같은 공유 진행 정보만 `applySharedOwnerProgress()`로 흡수한다. 체크포인트처럼 별도 rollback 계약이 있는 사건 전이는 그 전용 기록과 복구 경계를 사용한다. 런타임은 `GameSimulation`의 플레이어 객체·배열·tick을 직접 수정하지 않는다. 60Hz 명령 사이의 빈 120Hz 틱은 서버와 예측이 같은 `InputStateSimulator`로 마지막 입력을 최대 30틱(250ms) 유지한다. 새 중립 입력이 오면 즉시 교체하고 제한 시간이 끝나면 이동축을 중립화한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
 
 멀티 조작감은 **로컬 입력 시뮬레이션 + 원격 데드 레코닝**을 사용한다. 입력 시뮬레이션은 자기 캐릭터가 네트워크 프레임 사이에서 멈추지 않게 하며, 데드 레코닝은 동료 캐릭터를 최신 위치·속도로 짧게 외삽한 뒤 새 검증 공유 상태와 오차를 보정한다. 두 기능 모두 별도 간이 게임 규칙을 만들지 않고 공용 `GameSimulation`과 스냅샷 물리 상태를 사용한다.
 
@@ -291,13 +291,13 @@ GameApp
 - 원격 권한은 `submit(command)`으로 입력 의도만 보내고 서버 시계를 직접 진행하지 않는다.
 - 두 권한의 `snapshot()`은 Canvas 실행 경로가 읽을 현재 상태를 제공한다.
 
-`AuthorityServerSession`은 실제 소켓과 분리된 서버 실행 경계다. 인증된 연결의 플레이어 ID와 제출 명령의 ID가 다르면 배치 전체를 거부하고, `AuthorityCommandInbox`에서 다음 틱 명령을 소비해 승인 번호를 전진시킨다. 같은 `GameSimulation.stepCommandBatch()`를 120Hz로 실행하되 입력 주도 객체 단계는 끄고 중립 월드와 플레이어 타이머만 진행한다. 플레이어 물리·로프는 별도 `owner-motion` 검증 경계에서만 바뀐다. 6틱마다 `AuthoritySnapshotBuilder`를 호출해 20Hz 스냅샷, 플레이어별 명령 승인 번호와 `ownerMotionTick`을 만들며, 소켓 구현은 이 세션의 공개 경계만 호출한다.
+`AuthorityServerSession`은 실제 소켓과 분리된 서버 실행 경계다. 인증된 연결의 플레이어 ID와 제출 명령의 ID가 다르면 배치 전체를 거부하고, `AuthorityCommandInbox`에서 다음 틱 명령을 소비해 승인 번호를 전진시킨다. 같은 `GameSimulation.stepCommandBatch()`를 120Hz로 실행하되 입력 주도 객체 단계는 끄고 중립 월드와 플레이어 타이머만 진행한다. 플레이어 물리·로프는 별도 `owner-motion` 복제 경계에서 최신 소유자 상태로만 바뀐다. 6틱마다 `AuthoritySnapshotBuilder`를 호출해 20Hz 스냅샷, 플레이어별 명령 승인 번호와 `ownerMotionTick`을 만들며, 소켓 구현은 이 세션의 공개 경계만 호출한다.
 
 서버는 현재 `serverTick` 이하를 목표로 한 늦은 명령을 `elapsed-tick`으로 거부하고 승인 sequence를 갱신하지 않는다. 초기 프로토타입은 서버 롤백을 하지 않으므로, 실행할 수 없는 입력을 ACK해 클라이언트가 재적용 목록에서 제거하는 거짓 수렴을 허용하지 않는다.
 
 각 명령 제출 응답은 `CommandReceipt`로 serverTick·targetTick과 승인·거부된 playerId·sequence만 돌려준다. 명령 본문은 반사하지 않는다. 승인된 입력은 권위 스냅샷 ACK까지 예측 큐에 남고, 명시적으로 거부된 자기 입력만 receipt 수신 즉시 제거한다. 같은 receipt를 다시 받아도 이미 제거된 sequence에는 영향이 없다.
 
-원격 클라이언트는 명령 sequence별 전송 시각과 receipt 수신 시각으로 왕복 시간을 측정하고, 연속 스냅샷의 수신 간격과 명령·`owner-motion` 승인·거부 누계를 함께 보관한다. 소유자 예측기는 최근 256개 비영점 보정 거리의 p50/p95와 하드 스냅 누계를, 원격 상태 버퍼는 현재·최대 외삽 시간을, 예측 투사체 저장소는 권위 해결 선행이나 claim 거부로 로컬 예측을 취소하거나 재무장한 횟수를 제공한다. 활성 시간·체크포인트·처치·피해·로프 절단·패배·첫 보상 같은 런 지표는 예측 시뮬레이션에서 추정하지 않고 권위 서버의 `RunMetrics`를 전체 스냅샷에 포함한다. 이 값은 게임 규칙이나 보정값을 자동 변경하지 않으며 `?metrics=1` 진단 패널에서만 확인한다.
+원격 클라이언트는 명령 sequence별 전송 시각과 receipt 수신 시각으로 왕복 시간을 측정하고, 연속 스냅샷의 수신 간격과 명령·`owner-motion` 승인 누계를 함께 보관한다. 구버전·프로토콜 이상 진단을 위한 `owner-motion` 거부 누계는 호환 지표로 남기되 receipt가 소유자 복원이나 재시뮬레이션을 시작하지 않는다. 소유자 예측기는 최근 256개 비영점 보정 거리의 p50/p95와 하드 스냅 누계를, 원격 상태 버퍼는 현재·최대 외삽 시간을, 예측 투사체 저장소는 권위 해결 선행이나 claim 거부로 로컬 예측을 취소하거나 재무장한 횟수를 제공한다. 활성 시간·체크포인트·처치·피해·로프 절단·패배·첫 보상 같은 런 지표는 예측 시뮬레이션에서 추정하지 않고 권위 서버의 `RunMetrics`를 전체 스냅샷에 포함한다. 이 값은 게임 규칙이나 보정값을 자동 변경하지 않으며 `?metrics=1` 진단 패널에서만 확인한다.
 
 RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 제거하고, receipt가 손실된 기록은 이후 권위 snapshot의 승인 sequence 이하를 정리한다. ACK도 장시간 도착하지 않는 경우를 위해 송신 순서 기준 최근 2,048개만 유지한다. 이 상한은 계측 메모리만 제한하며 명령 재적용 큐나 서버 승인 규칙을 바꾸지 않는다.
 
@@ -311,7 +311,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 `npm run share:multiplayer`는 상시 서버를 대신하는 운영 경로가 아니라 개발 중 외부 연결을 확인하는 임시 도구다. 운영 Pages는 고정 게임 서버를 사용하며 Quick Tunnel 주소를 플레이어에게 입력시키지 않는다. 상세 실행 경계는 `multiplayer-sharing.md`를 따른다.
 
-`RemoteCommandStream`은 로컬 플레이어 한 명의 목표 틱과 단조 증가 sequence를 만들고, 서버가 승인하기 전의 명령 배치를 보존한다. 새 스냅샷의 플레이어별 ACK까지만 대기열에서 제거하며, 이미 적용한 `snapshotSequence` 이하의 중복 봉투와 `serverTick`이 후퇴한 봉투를 무시한다. 같은 serverTick이라도 sequence가 새로우면 참가·퇴장·claim 공유 상태와 사건을 반영한다. 이 대기열은 최초 입장·재접속 또는 명시적 거부 복구에서 공유 기준 상태 뒤의 미확정 입력을 재실행하는 원본이며, 정상 승인 중에는 스냅샷으로 소유자 예측을 다시 시작하지 않는다. 소켓과 물리 구현도 직접 소유하지 않는다.
+`RemoteCommandStream`은 로컬 플레이어 한 명의 목표 틱과 단조 증가 sequence를 만들고, 서버가 승인하기 전의 명령 배치를 보존한다. 새 스냅샷의 플레이어별 ACK까지만 대기열에서 제거하며, 이미 적용한 `snapshotSequence` 이하의 중복 봉투와 `serverTick`이 후퇴한 봉투를 무시한다. 같은 serverTick이라도 sequence가 새로우면 참가·퇴장·claim 공유 상태와 사건을 반영한다. 이 대기열은 최초 입장·재접속과 체크포인트처럼 별도 rollback 계약이 있는 사건 전이에서 미확정 입력을 재실행하는 원본이며, `owner-motion` receipt나 정상 스냅샷으로 소유자 예측을 다시 시작하지 않는다. 소켓과 물리 구현도 직접 소유하지 않는다.
 
 `MultiplayerGameServer`의 snapshot 전송 창은 위 수렴 규칙 앞단의 흐름 제어다. 몹 HP처럼 서버가 소유하는 최신 지속 상태는 ACK 창이 열릴 때 가장 최근 값으로 건너뛰고, 탄환 생성·적중·해결 사건은 합쳐진 봉투에서도 빠지지 않는다. 따라서 느린 수신자가 과거 위치와 HP snapshot을 계속 재생해 겉보기 되감김을 만들지 않으며, 기존 `RemoteWorldStateBuffer`와 `OwnerPredictionRuntime`의 권한별 수렴 원점은 바꾸지 않는다.
 
@@ -321,7 +321,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 사건 중복 제거는 한 스냅샷 안에만 한정하지 않는다. 클라이언트 버퍼가 최근 2,048개 `eventId`를 수신 순서로 기억하고, 재전송 스냅샷에 같은 ID가 포함되어도 효과 대기열에 다시 넣지 않는다. 한도를 넘긴 가장 오래된 ID부터 퇴출해 장기 세션의 메모리 사용을 제한한다.
 
-최초 입장·재접속 또는 명시적 거부 복구에서 자기 플레이어를 공유 상태로 다시 시작할 때 점프 가능 여부와 로프 제약을 추측하지 않도록 플레이어별 `isGrounded`와 로프의 `length`, `currentLength`를 스냅샷에 포함한다. 정상 승인 스냅샷은 이 값으로 소유자 물리를 다시 쓰지 않는다.
+최초 입장·재접속 또는 체크포인트처럼 별도 rollback 계약이 있는 사건 전이에서 자기 플레이어를 공유 상태로 다시 시작할 때 점프 가능 여부와 로프 제약을 추측하지 않도록 플레이어별 `isGrounded`와 로프의 `length`, `currentLength`를 스냅샷에 포함한다. 정상 스냅샷과 `owner-motion` receipt는 이 값으로 소유자 물리를 다시 쓰지 않는다.
 
 로프 입력은 누르는 순간과 해제 전이, 짧은 부착 버퍼, 부착당 한 번인 스윙 드래그 진행에 상태가 있다. 자기 플레이어 재적용은 승인 틱의 `aimWorld`, 마지막 pointer·viewport, `wasPointerDown`, `attachBufferRemaining`, `swingDrag`에서 시작한다. `attachmentCandidate`는 정적 월드와 aim으로 다시 계산하며 전송하지 않는다.
 

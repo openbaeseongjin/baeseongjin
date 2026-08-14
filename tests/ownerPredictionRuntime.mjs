@@ -206,11 +206,11 @@ export function run() {
         }),
         true
     );
-    acceptedRopeImpact.reconcile(snapshot, [], { rebaseMotion: true });
+    acceptedRopeImpact.reconcile(snapshot, []);
     assert.equal(
         acceptedRopeImpact.state().rope.isAttached,
         false,
-        "an accepted receipt must keep a predicted rope cut through a stale motion rebase"
+        "an accepted receipt must keep a predicted rope cut through a stale shared snapshot"
     );
     const confirmedRopeSnapshot = {
         ...snapshot,
@@ -444,11 +444,11 @@ export function run() {
         lethalLocal.artifacts,
         "a pre-impact snapshot must not restore pending predicted artifact loss"
     );
-    lethalPrediction.reconcile(lethalSnapshot, [], { rebaseMotion: true });
+    lethalPrediction.reconcile(lethalSnapshot, []);
     assert.deepEqual(
         lethalPrediction.state().position,
         lethalLocal.position,
-        "owner motion rebase must replay an impact predicted at the shared motion tick"
+        "a shared motion snapshot must not undo an impact predicted at the shared motion tick"
     );
     assert.deepEqual(lethalPrediction.state().artifacts, lethalLocal.artifacts);
     assert.equal(
@@ -587,7 +587,7 @@ export function run() {
     ownerTimeline.advance(move);
     const acceptedAtOwnerTick = ownerTimeline.advance(move);
     ownerTimeline.advance(move);
-    const beforeOwnerTickRebase = ownerTimeline.advance(move);
+    const beforeOwnerTickSnapshot = ownerTimeline.advance(move);
     const ownerTickSnapshot = {
         ...movingSnapshot,
         serverTick: movingSnapshot.serverTick + 1,
@@ -607,13 +607,13 @@ export function run() {
             )
         }
     };
-    const ownerTickRebase = ownerTimeline.reconcile(ownerTickSnapshot, [], { rebaseMotion: true });
+    const afterOwnerTickSnapshot = ownerTimeline.reconcile(ownerTickSnapshot, []);
     close(
-        ownerTickRebase.position.x,
-        beforeOwnerTickRebase.position.x,
-        "owner tick rebase must not replay accepted movement twice"
+        afterOwnerTickSnapshot.position.x,
+        beforeOwnerTickSnapshot.position.x,
+        "owner tick snapshots must not replay accepted movement twice"
     );
-    close(ownerTickRebase.velocity.x, beforeOwnerTickRebase.velocity.x, "owner tick rebase velocity");
+    close(afterOwnerTickSnapshot.velocity.x, beforeOwnerTickSnapshot.velocity.x, "owner tick snapshot velocity");
 
     const beforeSmallCorrection = continuous.presentationState();
     continuous.reconcile(withPlayerPosition(movingSnapshot, movingSnapshot.state.players[0].position.x + 20, 7), []);
@@ -631,14 +631,6 @@ export function run() {
     );
     close(continuous.state().position.x, beforeAuthoritySnapshot.position.x, "routine snapshots must not rewind owner");
     assert.equal(continuous.metrics().hardSnaps, 0);
-    const rejectedMotionRebase = continuous.reconcile(
-        withPlayerPosition(movingSnapshot, beforeAuthoritySnapshot.position.x + 200, beforeAuthoritySnapshot.tick),
-        [],
-        { rebaseMotion: true }
-    );
-    assert.notEqual(rejectedMotionRebase.position.x, beforeAuthoritySnapshot.position.x);
-    assert.equal(continuous.metrics().hardSnaps, 1, "rejected owner motion must converge to shared state");
-
     const stalled = new OwnerPredictionRuntime({ ownerId: movingPlayer.id });
     stalled.reconcile(movingSnapshot, []);
     const stalledPosition = stalled.state().position;
