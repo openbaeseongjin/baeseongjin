@@ -2,7 +2,7 @@
 
 *BLOCKOUT CANDIDATE · REV 3.0*
 
-◀ PREV — [SECTOR 01-7 / PRESSURE BYPASS](../1-7/README.md) · NEXT — SECTOR 02 / WORKER DISTRICT ▶
+◀ PREV — [SECTOR 01-7 / PRESSURE BYPASS](../1-7/README.md) · NEXT — SECTOR 01 BOSS TRANSITION / 위치 미정 ▶
 
 Sector: 01 MAINTENANCE
 Stage: 08
@@ -12,7 +12,7 @@ Expected First Playtime: 180~260 sec
 Expected Skilled Clear: 75~120 sec
 
 Primary Goal:
-SECTOR 01 FINAL SYNTHESIS
+SECTOR 01 GENERAL-FLOOR FINAL SYNTHESIS
 
 Combined Mechanics:
 - Basic Grapple
@@ -43,10 +43,13 @@ Instant Kill:
 NONE
 
 Boss:
-NONE
+NONE IN THIS STAGE
+
+Sector 01 Boss:
+별도 전투로 존재하며 위치·전환 순서·시나리오는 추후 확정. 보스 전투 Timer 흐름은 [`../../../sector-timer-and-boss-flow.md`](../../../sector-timer-and-boss-flow.md)를 따른다.
 
 Checkpoint:
-SECTOR-END CHECKPOINT
+SECTOR GENERAL-FLOOR END CHECKPOINT
 
 ---
 
@@ -77,7 +80,7 @@ Gate가 열리는 순간
 
 핵심 감정:
 
-"Sector 1을 클리어했다."
+"Sector 1 일반 구간을 돌파했다."
 
 +
 
@@ -152,9 +155,9 @@ DO NOT ADD:
 
 ---
 
-## 4. 보스전을 사용하지 않는 이유
+## 4. 1-8에서 보스전을 사용하지 않는 이유
 
-Sector 1의 최종 시험은:
+Sector 1 일반 구간의 최종 시험은:
 
 "강한 적을 죽일 수 있는가?"
 
@@ -180,6 +183,8 @@ Player는:
 움직임으로 Security를 돌파하고
 
 마지막에 Maintenance Override를 실행한다.
+
+이 결정은 Sector 1에 Boss가 없다는 뜻이 아니다. 프로젝트 공통 기획에 따라 Sector 1에도 Boss 1개와 별도의 Boss Battle Timer가 존재한다. 다만 `1-8 CONTAINMENT GATE`는 일반 구간의 최종 종합 Stage로 유지하며, Boss 전투의 위치·전환 순서·시나리오는 이 문서에서 임의로 정하지 않는다. 일반·보스 Timer 전환 규칙은 [`../../../sector-timer-and-boss-flow.md`](../../../sector-timer-and-boss-flow.md)를 따른다.
 
 ---
 
@@ -1891,7 +1896,7 @@ Safe Room 형태.
 
 Checkpoint:
 
-SECTOR 01 COMPLETE
+SECTOR 01 GENERAL AREA COMPLETE
 
 또는 UI를 세계관식으로:
 
@@ -1903,7 +1908,9 @@ SERVICE ACCESS NODE
 
 이 위치에서:
 
-1-8 Respawn / Sector transition 기준점 설정.
+1-8 Respawn / Boss transition 후보 기준점 설정.
+
+이 Checkpoint만으로 Sector 01 전체 완료를 확정하지 않는다. Sector 01 전체 완료는 별도 Boss 처치 뒤 확정한다.
 
 ---
 
@@ -1926,7 +1933,7 @@ Player가 Story 공간을
 
 ---
 
-## 68. Sector 1 완료 감정
+## 68. Sector 1 일반 구간 완료 감정
 
 Player가 느껴야 할 세 단계:
 
@@ -2803,7 +2810,7 @@ Final Vent:
 
 Containment Gate:
 128×160 ~ 192×192 이상으로
-Sector 1의 최종 Foreground Landmark.
+Sector 1 일반 구간의 최종 Foreground Landmark.
 
 Maintenance 쪽 Background는:
 
@@ -2856,10 +2863,10 @@ Gameplay 판독을 위해 Negative Space를 크게 확보.
 ## 94. 개발자 최종 전달 요약
 
 SECTOR 01-8 `CONTAINMENT GATE`는
-Maintenance Sector의 최종 Stage이자
-첫 Sector Checkpoint 구간이다.
+Maintenance Sector 일반 구간의 최종 Stage이자
+Boss 전환 후보 Checkpoint 구간이다.
 
-새 시스템이나 Boss는 추가하지 않는다.
+이 Stage에는 새 시스템이나 Boss를 추가하지 않는다. Sector 01 Boss는 별도 전투로 존재하며 위치와 시나리오는 공용 기획에서 확정한다.
 
 Stage는 크게:
 
@@ -2972,8 +2979,10 @@ Player는 이 시점에서:
 아직 공개하지 않는다.
 
 Worker District Preview 끝에서
-Sector 01 Checkpoint를 활성화하고
-SECTOR 02로 연결한다.
+Sector 01 일반 구간 Checkpoint를 활성화한다.
+
+이후 Sector 01 Boss 전환과
+SECTOR 02 연결 순서는 별도 기획에서 확정한다.
 
 Stage의 최종 성공 기준은:
 

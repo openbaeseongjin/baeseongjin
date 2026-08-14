@@ -327,7 +327,7 @@ P3에 도착하면 Rope Challenge가 끝난다. P4 Safe Deck은 폭 256–320px,
 
 ### Exit
 
-Service Gate는 64×96–64×128px로 Grid에 맞춘다. `SERVICE SHAFT 02`를 표시하고 뒤쪽에 1-2의 Maintenance Lift Rail을 조금 보여준다. Gate를 통과하면 짧은 전환 뒤 바로 1-2로 이어지며 Cutscene은 없다.
+Service Gate는 64×96–64×128px로 Grid에 맞춘다. `SERVICE SHAFT 02`를 표시하고 뒤쪽에 1-2의 Maintenance Lift Rail을 조금 보여준다. Gate를 통과하면 월드나 런을 다시 만들지 않고 카메라·연출상 짧은 전환만 거쳐 바로 1-2로 이어지며 Cutscene은 없다.
 
 ## 08 · 전체 이동 ROUTE
 
@@ -365,7 +365,7 @@ SERVICE GATE 02
 | 90–110초 | Terminal | Rooftop Shuttle 목표 |
 | 110초 이후 | Gate | 1-2 진입 |
 
-정확한 시간을 강제하는 Timer는 없다.
+1-1만 따로 실패시키는 구간 Timer는 두지 않는다. Sector 01 공용 Timer는 `1-1` 진입부터 영역 사이에서 계속 감소하고 명시적 Gate 통과 때 시간을 보충하며, 0초부터 하층 붕괴가 상승한다. 정확한 시간·보충량·붕괴 속도는 mock으로 시작해 공동 플레이로 조정한다. 상세 기준은 [`../../../sector-timer-and-boss-flow.md`](../../../sector-timer-and-boss-flow.md)를 따른다.
 
 ## 09 · GAMEPLAY와 BACKGROUND LAYER
 

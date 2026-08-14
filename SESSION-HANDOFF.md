@@ -42,6 +42,8 @@
 
 ## 다음 작업
 
+섹터 1 맵 구조는 `docs/sector-01-world-structure-plan.md`를 현재 기준으로 구현한다. 실제 월드는 하나이며 `1-1`~`1-8`은 별도 월드가 아니라 같은 붕괴 도시 안의 진행 영역이다. 각 영역이 정의한 처치·무력화·우회·상호작용·이동 달성 조건을 만족하면 명시적 출구가 열리고, 플레이어가 출구를 통과해야 다음 영역으로 진행한다. 전환 때 월드·런·플레이어·아티팩트·체크포인트를 재생성하지 않는다. 일반 타이머는 섹터 전체에서 유지되고 Gate 통과 때 보충되며, 0초부터 하층 붕괴가 상승한다. 붕괴 탈락자는 최소 관전 뒤 다음 Gate에서 합류하고 전원 탈락 때만 해당 섹터 일반 구간을 재시작한다. 기획자 지정 보스 진입에서는 일반 시간과 붕괴를 끝내고 잔여 시간을 폐기한 뒤 별도 보스 타이머를 시작하며, 0초부터 Arena가 붕괴하고 전원 탈락은 보스 시도만 재시작한다. 메인 개발자는 수치를 mock으로 먼저 연결하고 팀·기획자가 공동 플레이로 최종 조정한다. 기준은 `docs/sector-timer-and-boss-flow.md`다. 보스 위치·전투 시나리오는 기획자 확정 전 추정 구현하지 않는다.
+
 Sector 01-1의 현재 기준은 `docs/bsh/scenario/1-1/README.md`의 `SERVICE SHAFT` REV 3.0이다. 첫 Authored Stage를 32px Grid·960×960 Blockout으로 만들고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3의 5초 이내 재시도를 검증한다. Turret·Wind·Augment·필수 공중 ReAttach는 제외하며, `swingImpulse = 0`에서도 전 구간이 재미있고 안정적으로 통과되어야 한다. Terminal은 하부 봉쇄와 Rooftop Pad 03 Maintenance Shuttle 목표를 전달한다.
 
 Sector 01-2의 현재 기준은 `docs/bsh/scenario/1-2/README.md`의 `DOUBLE ANCHOR SHAFT` REV 3.0이다. 32px Grid·960×1088 Blockout에서 A=복습·B=첫 Airborne Handoff·C=방향 반전·D=설명 없는 Flow Test를 검증한다. 숙련자는 A→B→C→D를 무착지로 연결하고, 초보자는 P1/P2/P3 Recovery를 이용해 3~5초 안에 해당 Handoff를 재시도할 수 있어야 한다. Enemy·Damage Hazard·Wind·Augment는 제외하며, `swingImpulse = 0` Flow Route와 Momentum·Wrong/Ghost Attach 로그를 필수로 확인한다.
@@ -54,15 +56,15 @@ Sector 01-5의 현재 기준은 `docs/bsh/scenario/1-5/README.md`의 `AUGMENT TE
 
 Sector 01-6의 현재 기준은 `docs/bsh/scenario/1-6/README.md`의 `COOLING SHAFT` REV 3.0이다. Enemy와 Damage Hazard 없이 Rope에 작용하는 첫 External Force인 Wind만 학습한다. Fan A는 약한 Continuous Wind로 B→C Wind-assisted Swing을 안전하게 소개하고, Fan B는 `LULL → WARNING → ACTIVE → LULL` 주기로 기다리는 Safe Route와 Active Wind를 이용하는 Flow Route를 함께 제공한다. Wind Visual·Fan Animation·실제 Force는 같은 State Source를 사용해야 하며, Recovery와 Wind Shadow에서 조작권을 회복할 수 있어야 한다. 세 Augment 모두 통과 가능해야 하고 다음 1-7 `PRESSURE BYPASS`에서 Wind·Turret·Build를 조합한다.
 
-Sector 01-7의 현재 기준은 `docs/bsh/scenario/1-7/README.md`의 `PRESSURE BYPASS` REV 3.0이다. 새 기믹 없이 Rope Chaining·선택 Augment·Sentry T1·Pulsed Wind·Cover/Wind Shadow·Recovery를 처음 조합한다. A→B 약풍과 C→D 무풍 Turret 복습 뒤 D→E에서만 Main Vent와 Turret LOS를 겹쳐 실패 원인을 단계적으로 읽게 한다. Safe Route는 Shot과 Vent LULL을 기다리고, Flow Route는 TRACK·WARNING을 읽어 ACTIVE Wind를 이용한다. Turret 파괴는 필수가 아니며 F 이후에는 LOS와 Wind를 모두 끝낸 뒤 Manual Bypass를 조작한다. Open Questions인 Bypass 의미·일반 Sentry Rope Cut·압력 안정화 영구성은 1-8 확정 전에 Lock해야 한다.
+Sector 01-7의 현재 기준은 `docs/bsh/scenario/1-7/README.md`의 `PRESSURE BYPASS` REV 3.0이다. 새 기믹 없이 Rope Chaining·선택 Augment·Sentry T1·Pulsed Wind·Cover/Wind Shadow·Recovery를 처음 조합한다. A→B 약풍과 C→D 무풍 Turret 복습 뒤 D→E에서만 Main Vent와 Turret LOS를 겹쳐 실패 원인을 단계적으로 읽게 한다. Safe Route는 Shot과 Vent LULL을 기다리고, Flow Route는 TRACK·WARNING을 읽어 ACTIVE Wind를 이용한다. Turret 파괴는 필수가 아니며 F 이후에는 LOS와 Wind를 모두 끝낸 뒤 Manual Bypass를 조작한다. `1-8` 기준으로 Manual Bypass는 위쪽 탈출 경로를 열고, 일반 Sentry Projectile은 Rope를 자르지 않으며, 압력은 잠시 안정화됐다가 Containment로 다시 악화되는 방향으로 확정됐다.
 
-Sector 01-8의 현재 기준은 `docs/bsh/scenario/1-8/README.md`의 `CONTAINMENT GATE` REV 3.0이다. 새 기믹이나 Boss 없이 Sector 1 학습을 회수한다. T1은 Wind 없는 Lower Security Phase, T2는 Final Pulsed Wind와 겹치는 Synthesis Phase를 맡으며 두 Turret은 절대 동시 Crossfire를 만들지 않는다. Mid Safe Deck과 H 이후 Complete Relief로 Phase를 분리하고, 모든 Foundation Build에 Safe Route와 해당 Phase Recovery를 제공한다. Gate Override 뒤 Lower Grid Shutdown을 아래부터 순차 연출하고 Worker District Preview 끝에서 Sector-end Checkpoint를 활성화한다. 1-7의 Lock 항목은 `Manual Bypass = 위쪽 탈출 경로 개방`, `Standard Sentry Projectile = Player Hit Only / Rope Cut 없음`, `압력은 잠깐 안정화되지만 Containment로 다시 악화`로 확정한다.
+Sector 01-8의 현재 기준은 `docs/bsh/scenario/1-8/README.md`의 `CONTAINMENT GATE` REV 3.0이다. 새 기믹이나 Boss 없이 Sector 1 **일반 구간** 학습을 회수한다. T1은 Wind 없는 Lower Security Phase, T2는 Final Pulsed Wind와 겹치는 Synthesis Phase를 맡으며 두 Turret은 절대 동시 Crossfire를 만들지 않는다. Mid Safe Deck과 H 이후 Complete Relief로 Phase를 분리하고, 모든 Foundation Build에 Safe Route와 해당 Phase Recovery를 제공한다. Gate Override 뒤 Lower Grid Shutdown을 아래부터 순차 연출하고 Worker District Preview 끝에서 일반 구간 종료 Checkpoint를 활성화한다. 이 Stage에는 보스를 넣지 않으며, Sector 01 보스 전환 위치와 전투 시나리오는 별도로 확정한다. 1-7의 Lock 항목은 `Manual Bypass = 위쪽 탈출 경로 개방`, `Standard Sentry Projectile = Player Hit Only / Rope Cut 없음`, `압력은 잠깐 안정화되지만 Containment로 다시 악화`로 확정한다.
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태지만, 전체 48개 중 현재 문서가 있는 `1-1`~`1-3`을 제외한 45개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.
+장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태이며 `SECTOR 01`의 `1-1`~`1-8` 시나리오가 모두 작성됐다. 전체 48개 중 나머지 40개 맵의 시나리오·레벨 디자인은 아직 없고 새로 만들어야 한다. 이를 섹터 순서대로 작성해 2026년 8월 19일까지 확정한다. 그래픽·오디오도 같은 날 정식 리소스 1차 생산분을 인계한다. 일정 기준은 `docs/game-hackathon-planning.md`의 **일정과 목표**를 따른다.
 
-현재 `docs/bsh/scenario/`에 실제로 등록된 맵 문서는 `1-1`, `1-2`, `1-3`의 3개다. 전체 48개 중 나머지 45개 맵 명세는 아직 없으며 8월 19일까지 새로 작성한다. 그래픽·오디오 정식 리소스는 비차단이지만, 메인 개발자가 특정 섹터를 구현하려면 해당 섹터의 8개 맵 흐름과 오브젝트 요구가 먼저 정리되어 있어야 한다.
+현재 `docs/bsh/scenario/`에 실제로 등록된 맵 문서는 `1-1`~`1-8`의 8개다. `SECTOR 01`은 전체 mock 연결을 시작할 수 있으며, 전체 48개 중 나머지 40개 맵 명세는 8월 19일까지 새로 작성한다. 그래픽·오디오 정식 리소스는 비차단이지만, 메인 개발자가 이후 섹터의 전체 연결을 완료하려면 해당 섹터의 8개 맵 흐름과 오브젝트 요구가 먼저 정리되어 있어야 한다.
 
 맵 외에도 개발을 막는 세 기획 게이트가 있다. 증강 내용·현재 아티팩트와 Module의 관계·관련 UI와 게임 요소는 8월 14일까지, NPC 역할·대사·대화 시스템·관련 UI와 게임 요소는 8월 15일까지, 엔딩·진입 조건·최종 흐름·관련 UI와 게임 요소는 8월 19일까지 확정한다. 각각 첫 Maintenance Node, 첫 NPC 섹터, `SECTOR 06` 구현의 선행 조건이다. 역할별 병렬 일정과 마감은 `docs/development-schedule.md`, 상세 구현 완료 기준은 `docs/implementation-roadmap.md`의 **제출 전 시나리오 구현 트랙**을 따른다.
 
@@ -124,26 +126,31 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 순간 플레이는 로프 숙련이 주도하고 아티팩트는 공격 방식과 성장 폭을 만든다.
 - 자동 공격 빌드도 이동과 생존에서 로프를 대체할 수 없다.
 
-### [L1] 한 런은 하나의 큰 절차 생성 월드를 아래에서 위로 진행한다
+### [L1] 한 런은 하나의 붕괴 도시 월드를 48개 진행 영역으로 연결한다
 
-- 새 싱글 실행과 새 멀티 채널은 각각 새 32비트 월드 시드를 사용한다. 멀티 시드는 서버가 확정하며 모든 클라이언트 예측이 welcome snapshot의 같은 시드로 월드를 생성한다.
-- 싱글은 `?seed=<1..4294967295>`로 기록된 실패 월드를 재현한다. 잘못된 시드는 새 랜덤 시드로 대체한다.
-
-- 같은 시드는 같은 48단계 수직 경로와 적 배치를 만든다.
-- 월드는 여러 스테이지로 분리하지 않고 체크포인트가 있는 하나의 연속 공간으로 진행한다.
-- 절차 생성 경로에는 8레벨 간격으로 체크포인트가 놓이며, 도달한 가장 높은 지점이 활성 상태로 유지된다.
-- 정상은 전체 월드의 최종 목표이며 도달 후 자동으로 다음 스테이지를 시작하지 않는다.
+- 실제 월드는 하나이며 여러 스테이지나 scene으로 나눠 다시 생성하지 않는다. `6개 섹터 × 8개 맵`은 같은 월드 안의 저작된 진행 영역 순서다.
+- 각 영역은 입구·이동 경로·필수 완료 조건·명시적 출구를 가진다. 완료 조건은 적 처치로 고정하지 않고 처치·무력화·우회·상호작용·이동 달성·증강 선택 중 시나리오가 요구하는 것을 사용한다.
+- 완료 조건을 만족하면 출구가 열리고 플레이어가 직접 통과해야 다음 영역이 활성화된다. 전환 때 월드·런·플레이어·아티팩트·체크포인트·공용 오브젝트 상태를 새로 만들지 않는다.
+- 출구는 붕괴 도시 탈출에서 현재 영역의 문제를 해결했고 다음 구역으로 넘어간다는 사실을 명확히 전달한다.
+- 각 섹터의 일반 진행 영역은 섹터 전체 총 타이머를 공유한다. 타이머는 영역 사이에서 초기화하지 않고 명시적 Gate 통과 때 보충하며, 0초부터 하층 붕괴가 상승한다.
+- 붕괴에 잡힌 플레이어는 입력이 차단되고 생존 동료를 자동 추적하며 다음 Gate에서 합류한다. 일반 구간 전원 탈락은 해당 섹터 일반 구간을 재시작한다.
+- 기획자가 정한 보스 진입 지점에서는 일반 타이머·붕괴를 종료하고 잔여 시간을 폐기한 뒤 별도 보스 타이머를 시작한다. 보스 타이머 0초부터 Arena가 붕괴하고 전원 탈락은 보스 시도만 재시작하며, 보스 처치 뒤 다음 섹터 진입에서 새 일반 타이머를 시작한다.
+- 시간·Gate 보충량·붕괴 속도는 메인 개발자가 mock으로 구현하고 팀·기획자가 공동 플레이로 최종 조정한다. `1-8`에는 보스를 넣거나 기존 Shutdown·Worker District Reveal·일반 구간 종료 Checkpoint를 이동하지 않는다. 보스 위치·정체·전투 시나리오와 네트워크 권위·재접속·최종 cue는 아직 열려 있다. 상세 기준은 `docs/sector-timer-and-boss-flow.md`다.
+- 현재 시드 기반 48단계 수직 월드와 `?seed=` 재현은 코어 조작·결정성을 검증한 구현 기준선이다. 목표 시나리오 구조로 옮기는 동안 호환 경계를 유지하며, 영역 내부 시드 변형 범위는 저작 경로·완료 조건·출구를 훼손하지 않는 별도 기획으로 확정한다.
+- 새 싱글 실행과 새 멀티 채널의 seed·revision은 모든 클라이언트가 같은 월드 정의를 재현하는 결정성 계약으로 유지한다.
+- 체크포인트 위치는 저작 영역과 섹터 흐름에 맞춰 다시 배치하되, 한번 활성화한 진행 지점은 아래로 내려가도 후퇴하지 않는다.
+- 최종 영역의 출구는 전체 월드 완료 목표이며 완료 후 자동으로 새 월드나 다음 스테이지를 시작하지 않는다.
 - 실패해 최근 체크포인트로 복귀하면 현재 런의 아티팩트 일부를 잃는다. 전부 유지하거나 전부 초기화하지 않는다.
 - 현재 기본 손실은 2개 이상 보유 시 최근 획득 순서부터 약 1/3이며, 최소 1개는 유지한다.
 - 첫 비시작 체크포인트에서 동력핵·연사 톱니·로프 공명기 중 하나를 고르며, 좌우 이동과 점프 입력을 PC·모바일이 공유한다.
 - 데스크톱은 보유 아티팩트와 로프 공명 시간을 HUD에서 확인한다. 모바일은 플레이 공간을 위해 기타 상태 HUD를 숨기되 HP 전용 패널은 항상 표시하고, 아티팩트 획득·손실은 토스트로 알린다.
 - 시작점을 제외한 각 신규 체크포인트가 보상을 한 번씩 제공하며, 같은 아티팩트의 중복 효과는 곱연산으로 누적된다.
-- `npm run validate:world`가 연속 1,000개 시드의 상승량과 로프 사거리 연결성을 검사한다.
+- `npm run validate:world`는 저작 영역의 연결·출구 참조·상승량·로프 사거리 연결성을 검사하도록 확장한다.
 - 경계값·기본값·발견된 문제 시드는 `scripts/worldRegressionSeeds.mjs`에 고정해 순차 탐색보다 먼저 검사한다.
 - 현재 고정 목록은 정상 한글 사유를 가진 경계·기본 시드 5개이며, 실제 플레이에서 새 실패 시드가 발견되면 원인과 함께 같은 목록에 추가한다.
 - `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 보상 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다.
 - 배포 URL에 `?metrics=1`을 붙이면 일반 게임 규칙을 바꾸지 않고 현재 RunMetrics 개발 패널을 표시한다.
-- 고정 월드와 메트로배니아식 능력 잠금은 초기 범위에서 제외한다.
+- 메트로배니아식 자유 역주행과 능력 잠금은 초기 범위에서 제외한다. 현재 기준의 상세 구현 흐름은 `docs/sector-01-world-structure-plan.md`를 따른다.
 
 ### [L1] 싱글과 멀티는 공용 권한 시뮬레이션을 사용한다
 
