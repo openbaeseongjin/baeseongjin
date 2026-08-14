@@ -26,6 +26,31 @@ import { advanceWorldProgress } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
 
+function segmentBoundsEntryPoint(start, end, bounds) {
+    if (pointInsideBounds(start, bounds)) return Object.freeze({ x: start.x, y: start.y });
+    const delta = { x: end.x - start.x, y: end.y - start.y };
+    let entryRatio = 0;
+    let exitRatio = 1;
+    for (const axis of ["x", "y"]) {
+        const lower = bounds[axis];
+        const upper = lower + bounds[axis === "x" ? "width" : "height"];
+        if (Math.abs(delta[axis]) < 1e-9) {
+            if (start[axis] < lower || start[axis] > upper) return null;
+            continue;
+        }
+        const first = (lower - start[axis]) / delta[axis];
+        const second = (upper - start[axis]) / delta[axis];
+        entryRatio = Math.max(entryRatio, Math.min(first, second));
+        exitRatio = Math.min(exitRatio, Math.max(first, second));
+        if (entryRatio > exitRatio) return null;
+    }
+    if (entryRatio < 0 || entryRatio > 1) return null;
+    return Object.freeze({
+        x: start.x + delta.x * entryRatio,
+        y: start.y + delta.y * entryRatio
+    });
+}
+
 function vectorState(vector) {
     return vector ? { x: vector.x, y: vector.y } : null;
 }
@@ -274,8 +299,27 @@ export class GameSimulation {
         return this.ownerPredictionState(player.id);
     }
 
+    #advanceSweptOwnerGate(player, destination) {
+        if (!this.worldProgress || player.lifeState !== "active") return false;
+        const currentArea = this.world.areas.find(({ id }) => id === this.worldProgress.currentAreaId);
+        const gate = this.world.gates.find(({ id }) => id === currentArea?.gateId);
+        if (
+            !gate?.nextAreaId ||
+            !this.worldProgress.isGateUnlocked(gate.id) ||
+            this.worldProgress.isGateCrossed(gate.id)
+        ) {
+            return false;
+        }
+        const entry = segmentBoundsEntryPoint(player.physics.position, destination, gate.trigger);
+        if (!entry) return false;
+        player.physics.position.set(entry.x, entry.y);
+        this.#advanceAuthoredWorldProgress(new Map(), { dt: 0 });
+        return this.worldProgress.isGateCrossed(gate.id);
+    }
+
     applyOwnerMotion(playerId, state, { synchronizeRope = true } = {}) {
         const player = this.#requirePlayer(playerId);
+        this.#advanceSweptOwnerGate(player, state.position);
         player.physics.position.set(state.position.x, state.position.y);
         player.physics.velocity.set(state.velocity.x, state.velocity.y);
         player.physics.setAngularState(state.angle, state.angularVelocity);

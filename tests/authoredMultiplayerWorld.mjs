@@ -314,4 +314,75 @@ export function run() {
         guardedArrival,
         "pre-portal owner motion must not move the authority player back into the previous room"
     );
+
+    const sweptServer = createCurrentGameSimulation({ worldSeed: 1414 });
+    const sweptOwner = sweptServer.players[0];
+    const sweptSession = new AuthorityServerSession({ simulation: sweptServer, snapshotIntervalTicks: 1 });
+    sweptServer.worldProgress.completeObjective("sector-01-01:terminal-read");
+    const sweptGate = sweptServer.world.gates[0];
+    const sweptNextArea = sweptServer.world.areas[1];
+    sweptOwner.physics.position.set(
+        sweptGate.trigger.x + sweptGate.trigger.width * 0.5,
+        sweptGate.trigger.y + sweptGate.trigger.height + 1
+    );
+    const sweptClientTick = sweptServer.tick + 1;
+    const sweptArrival = {
+        x: sweptNextArea.entry.x - 20,
+        y: sweptNextArea.entry.y
+    };
+    const sweptReceipt = sweptSession.submitOwnerMotion(
+        sweptOwner.id,
+        createOwnerMotionState({
+            clientTick: sweptClientTick,
+            position: sweptArrival,
+            velocity: { x: 0, y: 0 },
+            angle: 0,
+            angularVelocity: 0,
+            isGrounded: false,
+            rope: { isAttached: false, anchor: null }
+        })
+    );
+    assert.deepEqual(sweptReceipt, { clientTick: sweptClientTick, accepted: true });
+    assert.equal(
+        sweptServer.worldProgress.currentAreaId,
+        "sector-01-02",
+        "post-portal owner motion must preserve the swept Gate entry on the authority server"
+    );
+    assert.equal(sweptServer.worldProgress.isGateCrossed(sweptGate.id), true);
+    assert.deepEqual(
+        { x: sweptOwner.physics.position.x, y: sweptOwner.physics.position.y },
+        sweptArrival,
+        "authority convergence must keep the owner's locally predicted portal arrival"
+    );
+    const sweptPanel = sweptServer.world.objects.find(({ id }) => id === "sector-01-02:exit-panel");
+    const sweptFinalDeck = sweptServer.world.surfaces.find(({ id }) => id === "sector-01-02:p4");
+    sweptSession.submitOwnerMotion(
+        sweptOwner.id,
+        createOwnerMotionState({
+            clientTick: sweptClientTick + 1,
+            position: { x: sweptPanel.position.x, y: sweptFinalDeck.topY - 24 },
+            velocity: { x: 0, y: 0 },
+            angle: 0,
+            angularVelocity: 0,
+            isGrounded: true,
+            rope: { isAttached: false, anchor: null }
+        })
+    );
+    const sweptSnapshot = sweptSession.advance();
+    assert.equal(
+        sweptServer.worldProgress.isObjectiveComplete("sector-01-02:final-deck-reached"),
+        true,
+        "the authority server must activate the 1-2 panel prerequisite after the swept Gate transition"
+    );
+    assert.equal(
+        sweptSnapshot.events.some(({ eventType, gateId }) => eventType === "gate-crossed" && gateId === sweptGate.id),
+        true
+    );
+    assert.equal(
+        sweptSnapshot.events.some(
+            ({ eventType, objectiveId }) =>
+                eventType === "objective-completed" && objectiveId === "sector-01-02:final-deck-reached"
+        ),
+        true
+    );
 }
