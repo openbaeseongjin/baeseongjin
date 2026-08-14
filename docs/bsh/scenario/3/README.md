@@ -1,10 +1,10 @@
 # SECTOR 03 — COMMERCIAL DISTRICT MASTER PLAN
 
-*MASTER PLAN CANDIDATE · REV 1.1 — INTEGRATION ALIGNED*
+*MASTER PLAN CANDIDATE · REV 1.2 — DOCUMENT INTEGRATION RESOLVED*
 
 `SECTOR 03 COMMERCIAL DISTRICT` · `POWERED UPPER CITY` · `ACCESS SCAN FIELD` · `ACTIVE ROUTE CONTROL` · `FREE-WEAVE FINALE`
 
-| 항목 | REV 1.1 기준 |
+| 항목 | REV 1.2 기준 |
 |---|---|
 | Status | HYPOTHESIS — MASTER PLAN CANDIDATE / DETAIL-ALIGNED |
 | Sector Role | Worker District 이후 첫 Powered Upper-City Contrast |
@@ -20,7 +20,7 @@
 | Reused Enemy | Patrol Drone T1 |
 | Boss | 3-8 내부에는 NONE; Post-Sector 03 Boss / Transition 위치·정체·전투·진입 순서 TBD |
 | General Stages | 8 authored progression regions |
-| Stage 03-8 Canonical | REV 1.1 FREE-WEAVE — current GitHub REV 1.0 is superseded |
+| Stage 03-8 Canonical | REV 1.1 FREE-WEAVE — merged to current GitHub main via PR #467 |
 | Sector 03 → 04 | Transit / Infrastructure 방향, 정확한 Boss / Transition 순서 TBD |
 | Current Runtime | Sector 01 + Sector 02 only; Sector 03 not connected |
 | Approved Gameplay Art | HOLD until Sector 03 Runtime Area / Camera Zone / Stable IDs exist |
@@ -31,21 +31,27 @@
 
 ### CURRENT MAIN AT INTEGRATION
 
-통합 정리 시점 최신 `main` HEAD:
+REV 1.2 통합 정리 시점 최신 `main` HEAD:
 
 ```text
-12f3cd7b9a9ef2e4fa7af39382c88d373e775d0a
+08db2906db9bc56d8a3f86c7bb030e99e6d27344
 ```
 
-PR #465에서:
+현재까지 확인된 관련 병합:
 
 ```text
-3-6 PREMIUM ATRIUM
-3-7 PRIORITY CONCOURSE
-3-8 UPPER MARKET GATE
+PR #465
+3-6 / 3-7 / initial 3-8 docs
+
+PR #467
+3-8 REV 1.1 FREE-WEAVE replacement
+
+subsequent integration patches
+3-1 Gate Contract Sync
+3-2 Runtime Note / Gate Contract Sync
 ```
 
-문서가 GitHub에 병합됐다.
+까지 GitHub `main`에 반영돼 있다.
 
 따라서 현재 `docs/bsh/scenario/3/`에는:
 
@@ -83,44 +89,40 @@ sector-04-01
 
 ---
 
-### IMPORTANT — 3-8 VERSION DRIFT
+### RESOLVED — 3-8 VERSION DRIFT
 
-현재 GitHub `3-8/README.md`:
+이전 통합 감사에서:
 
 ```text
-REV 1.0
-WEST / CENTRAL / EAST
-parallel three-route structure
+3-7
+static three-cost-profile choice
+
+3-8 REV 1.0
+parallel three-route choice
 ```
 
-는 Sector 전체 교차검증에서:
+의 Decision Pattern 반복을 발견했다.
+
+수정안:
 
 ```text
-3-7의 static three-cost-route choice와
-decision pattern이 지나치게 반복됨
-```
-
-문제를 발견했다.
-
-따라서 통합 기준 Canonical은:
-
-```text
-SECTOR 03-8
-UPPER MARKET GATE
-REV 1.1
+3-8 REV 1.1
 FREE-WEAVE SECURITY FIELD
 ```
 
-다.
+은 PR #467로 이미 GitHub `main`에 병합됐다.
 
-현재 GitHub 3-8 REV 1.0은:
+따라서 현재 상태:
 
 ```text
-STALE / SUPERSEDED
+CURRENT GITHUB 3-8
+= REV 1.1 FREE-WEAVE
+
+REV 1.0
+= HISTORICAL / SUPERSEDED
 ```
 
-로 취급하고
-REV 1.1로 교체해야 한다.
+별도 3-8 replacement patch는 더 이상 필요하지 않는다.
 
 ### Document Priority
 
@@ -891,7 +893,7 @@ DYNAMIC FREE-WEAVE FINALE
 
 ---
 
-## 14. Stage Master Table — REV 1.1
+## 14. Stage Master Table — REV 1.2
 
 | Stage | Name | Gameplay Role | Enemy | Scanner | Growth | Story |
 |---|---|---|---:|---|---|---|
@@ -989,8 +991,18 @@ DYNAMIC ACCESS SCAN FIELD
 ```
 
 기존 3-2 문서의
-“static grappleable filter도 없음” 서술은 stale하므로
-별도 patch 필요.
+“static grappleable filter도 없음” 서술은 stale했지만,
+현재 GitHub 3-2 REV 1.1에서:
+
+```text
+STATIC GRAPPLEABLE FILTER
+= IMPLEMENTED
+
+DYNAMIC ACCESS SCAN FIELD FILTER
+= NOT IMPLEMENTED
+```
+
+로 교정 완료됐다.
 
 ---
 
@@ -1935,85 +1947,112 @@ Gameplay contract PASS 후.
 
 ---
 
-## 34. Required Document Patches After REV 1.1 Master
+## 34. Document Integration Status — REV 1.2
 
-### PATCH A — 3-8
+### RESOLVED A — 3-8 REV 1.1
+
+```text
+PR #467
+3-8 REV 1.1 FREE-WEAVE
+```
+
+GitHub `main` 반영 완료.
+
+### RESOLVED B — 3-2 Runtime Note
+
+현재 GitHub 3-2:
+
+```text
+REV 1.1
+RUNTIME NOTE / GATE CONTRACT SYNC
+```
+
+상태.
+
+Static Filter 구현 여부와
+Dynamic Scanner 미구현 상태가 구분돼 있다.
+
+### RESOLVED C — 3-1 / 3-2 Exit Contract
 
 현재 GitHub:
 
 ```text
-REV 1.0
+3-1
+REV 1.1 — GATE CONTRACT SYNC
+
+3-2
+REV 1.1 — RUNTIME NOTE / GATE CONTRACT SYNC
 ```
 
-을:
+모두 현재 일반 Gate 계약:
 
 ```text
-REV 1.1 FREE-WEAVE
-```
-
-로 교체.
-
-**Priority: P0**
-
-### PATCH B — 3-2 Runtime Note
-
-현재 오래된 부분:
-
-```text
-static grappleable filter missing
-```
-
-을 수정.
-
-Canonical:
-
-```text
-STATIC FILTER IMPLEMENTED
-DYNAMIC SCANNER FILTER NOT IMPLEMENTED
-```
-
-### PATCH C — 3-1 / 3-2 Exit Contract
-
-최신 일반 Gate contract:
-
-```text
-reach objective
-→ Gate Panel
-→ contextual interaction
+objective
+→ Gate Panel interaction
 → Gate open
 → physical crossing
 ```
 
-으로 문서 동기화.
+으로 동기화됐다.
 
-Gameplay geometry / story는 변경하지 않는다.
+### RESOLVED D — Sector 03 Master Integration
 
-### PATCH D — Stage Snapshot Label
+REV 1.2에서:
 
-장기적으로 각 Stage의:
+- ACCESS SCAN FIELD design selection
+- Growth HOLD
+- 3-7 exactly 1 Patrol Drone
+- 3-8 Free-Weave canonical status
+- Boss / Post-Sector HOLD
+- Runtime / Art dependency
 
-```text
-VERIFIED — CURRENT MAIN
-```
+를 현재 GitHub 상태에 맞춰 다시 정렬한다.
 
-은 작성 후 곧 stale해진다.
+### REMAINING P0 — Runtime Prototype
 
-권장:
-
-```text
-VERIFIED — AUTHORING SNAPSHOT
-SHA ...
-```
-
-통합 문서만:
+문서 문제가 아니라 실제 구현 문제:
 
 ```text
-CURRENT MAIN AT INTEGRATION
+ACCESS SCAN FIELD
 ```
 
-사용.
+Runtime Spike.
 
----
+### REMAINING P1 — Sector 03 Authored Runtime
+
+```text
+Sector 03 Area Catalog
+3-1 → 3-8 integration
+Camera Zones
+Stable IDs
+Story triggers
+```
+
+### REMAINING P2 — Production Alignment
+
+Sector 03 Runtime이 생긴 뒤:
+
+```text
+README vs Runtime coordinates
+enemy activation
+scanner groups
+camera zones
+story cue IDs
+Gate progression
+```
+
+을 Stage별 `PRODUCTION-ALIGNMENT.md`로 검증.
+
+### REMAINING P3 — Approved Gameplay Art
+
+Runtime / Camera Zone / Stable ID가 안정된 이후만 진행.
+
+현재는:
+
+```text
+HOLD
+```
+
 
 ## 35. Playtest Questions — Sector Level
 
@@ -2115,7 +2154,7 @@ CURRENT MAIN AT INTEGRATION
 
 ---
 
-## 38. Canonical Sector 03 After REV 1.1
+## 38. Canonical Sector 03 After REV 1.2
 
 ```text
 3-1 POWERED PROMENADE
@@ -2244,8 +2283,25 @@ Boss Entry / retry flow가 확정된 뒤 결정.
 
 ### 7. Sector 04 Master Plan
 
-Sector 03 문서 patch와 최종 GitHub 재검증 후 시작.
+Sector 03 **문서 통합 패치는 완료**됐다.
+
+다만 다음으로 바로 Sector 04 상세 Stage에 들어가기보다:
+
+```text
+ACCESS SCAN FIELD Runtime Spike
+```
+
+를 먼저 할지,
+
+```text
+Sector 04 Master Plan
+```
+
+을 병행할지는 일정 우선순위 결정이 필요하다.
+
+Sector 04를 먼저 기획하더라도
+Sector 03 Scanner가 실제 구현 완료됐다고 가정해서는 안 된다.
 
 ---
 
-SECTOR 03 / COMMERCIAL DISTRICT MASTER PLAN — REV 1.1
+SECTOR 03 / COMMERCIAL DISTRICT MASTER PLAN — REV 1.2
