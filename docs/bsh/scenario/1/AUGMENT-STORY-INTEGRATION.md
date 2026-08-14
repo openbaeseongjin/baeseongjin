@@ -115,7 +115,9 @@
 
 문구와 VFX는 개인 화면에 표시할 수 있지만 Gate, Objective, Sector 전환은 공용 상태로 한 번만 처리한다. Foundation 선택은 Player별 상태이므로 멀티플레이에서 Host 한 명의 선택을 다른 Player에게 복사하면 안 된다.
 
-## 8. Runtime 구조와 저비용 원칙
+## 8. 목표 Runtime 구조와 저비용 원칙
+
+아래는 목표 구조이며 현재 구현 완료 판정이 아니다. 1-4의 실제 선택·저장·효과 상태는 [1-4 제작 정렬 문서](./1-4/PRODUCTION-ALIGNMENT.md)의 `IMPLEMENTED / AUTHORED ONLY / PENDING / BLOCKED` 판정을 우선한다.
 
 - Player별 `foundationAugment`는 `none | impulse-coil | relay-link | shear-current` 중 하나만 가진다.
 - 순간 상태는 `augmentRuntimeState`에 분리하고 Release·Attach 같은 기존 Rope Event에서만 갱신한다.

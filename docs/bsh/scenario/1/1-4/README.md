@@ -1,8 +1,10 @@
 # SECTOR 01-4 — MAINTENANCE NODE
 
-*BLOCKOUT CANDIDATE · REV 3.0*
+*BLOCKOUT CANDIDATE · REV 3.1*
 
 ◀ PREV — [SECTOR 01-3 / SECURITY CHECK](../1-3/README.md) · NEXT — [SECTOR 01-5 / AUGMENT TEST BAY](../1-5/README.md) ▶
+
+> 실제 Runtime 구현 상태·승인 이미지·Camera·첫 선택 계약은 [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md)를 함께 따른다.
 
 Sector: 01 MAINTENANCE
 Stage: 04
@@ -496,6 +498,14 @@ Reward Stage다.
 
 position:
 
+(0, -160)
+
+coordinate anchor:
+
+BOTTOM-CENTER
+
+Player interaction route point:
+
 (0, -128)
 
 recommended visual size:
@@ -709,13 +719,26 @@ swingImpulse = 780
 
 기능이 기본 Rope에 존재.
 
-따라서 Production 방향:
+REV 3.1 Production 판정:
 
 기본 Rope에서
 현재 780 impulse를 그대로 유지하면서
 IMPULSE를 단순 +20% 강화로 만드는 것은 권장하지 않는다.
 
-권장:
+하지만 현재 780을 바로 제거해
+Impulse 전용으로 옮기는 안도 아직 확정하지 않는다.
+
+`swingImpulse = 780` 소유권 이전은 `HYPOTHESIS`다.
+
+먼저 1-1과 1-2에서:
+
+- A: 현재값 780
+- B: 중간 후보값
+- C: 0
+
+을 비교해 기본 Rope의 재미와 통과 가능성을 검증한다.
+
+장기 목표 후보:
 
 BASE ROPE
 
@@ -739,7 +762,7 @@ IMPULSE AUGMENT
 
 로 이동.
 
-정확한 strength는 Playtest 대상.
+정확한 ownership과 strength는 Playtest 대상.
 
 ---
 
@@ -2393,4 +2416,18 @@ Stage 성공 기준은:
 
 ---
 
-SECTOR 01-4 / MAINTENANCE NODE — BLOCKOUT CANDIDATE · REV 3.0
+## 문서 이미지 상태
+
+### Scenario Art Reference
+
+![1-4 Scenario Art Reference](./images/01_scenario_art_reference.png)
+
+`APPROVED ART REFERENCE`: 산업용 Maintenance Node, 동등한 세 Firmware Profile, 조용한 Reward Room, Anchor 3개와 비공격 Dummy의 시각 위계를 정한다. Platform 위치는 물리 좌표가 아니다.
+
+### Approved Blockout
+
+![1-4 Approved Blockout](./images/02_approved_blockout.svg)
+
+`APPROVED BLOCKOUT`: 현재 768×640 Geometry, Node Deck, A/B/C, Recovery, Dummy, Panel, Gate 좌표와 구현 누락 상태를 정한다.
+
+SECTOR 01-4 / MAINTENANCE NODE — BLOCKOUT CANDIDATE · REV 3.1
