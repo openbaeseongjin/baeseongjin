@@ -6,6 +6,31 @@ const ENTRY_PRESENTATIONS = Object.freeze({
             detail: "LOCKDOWN",
             durationSeconds: 1.8
         })
+    ]),
+    "sector-01-02": Object.freeze([
+        Object.freeze({
+            id: "sector-01-02:lift-offline",
+            title: "LIFT CONTROL",
+            detail: "OFFLINE",
+            durationSeconds: 1.6
+        })
+    ])
+});
+
+const POSITION_PRESENTATIONS = Object.freeze({
+    "sector-01-02": Object.freeze([
+        Object.freeze({
+            token: "manual-access-only",
+            maxLocalY: -96,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-02:manual-access-only",
+                    title: "AUTOMATIC LIFT SERVICE",
+                    detail: "SUSPENDED · MANUAL ACCESS ONLY",
+                    durationSeconds: 1.8
+                })
+            ])
+        })
     ])
 });
 
@@ -28,6 +53,20 @@ const OBJECTIVE_PRESENTATIONS = Object.freeze({
             title: "ROOFTOP PAD 03",
             detail: "MAINTENANCE SHUTTLE · STANDBY",
             durationSeconds: 0.9
+        })
+    ]),
+    "sector-01-02:final-deck-reached": Object.freeze([
+        Object.freeze({
+            id: "sector-01-02:power-reduction-stage-2",
+            title: "POWER REDUCTION",
+            detail: "STAGE 2",
+            durationSeconds: 1.2
+        }),
+        Object.freeze({
+            id: "sector-01-02:security-access-check",
+            title: "SECURITY ACCESS",
+            detail: "CHECK",
+            durationSeconds: 1.2
         })
     ])
 });
@@ -73,13 +112,21 @@ export class AuthoredStoryPresentation {
         }
     }
 
-    update(dt, { currentAreaId = null, events = [] } = {}) {
+    update(dt, { currentAreaId = null, currentAreaLocalY = null, events = [] } = {}) {
         if (currentAreaId !== this.currentAreaId) {
             this.currentAreaId = currentAreaId;
             this.#enqueue(`area:${currentAreaId}`, ENTRY_PRESENTATIONS[currentAreaId]);
         }
+        for (const trigger of POSITION_PRESENTATIONS[currentAreaId] ?? []) {
+            if (Number.isFinite(currentAreaLocalY) && currentAreaLocalY <= trigger.maxLocalY) {
+                this.#enqueue(`position:${currentAreaId}:${trigger.token}`, trigger.presentations);
+            }
+        }
         for (const event of events) {
             if (event.eventType === "objective-sequence-started") {
+                this.#enqueue(`objective:${event.objectiveId}`, OBJECTIVE_PRESENTATIONS[event.objectiveId]);
+            }
+            if (event.eventType === "objective-completed") {
                 this.#enqueue(`objective:${event.objectiveId}`, OBJECTIVE_PRESENTATIONS[event.objectiveId]);
             }
             if (event.eventType === "gate-unlocked") {

@@ -13,11 +13,7 @@ import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.j
 import { selectWorldSeed } from "./world/WorldSeed.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
-import {
-    advanceAuthoredCamera,
-    authoredAreaForPosition,
-    resolveAuthoredCameraShot
-} from "./camera/AuthoredCameraDirector.js";
+import { advanceAuthoredCamera, resolveAuthoredCameraShot } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 
 export class GameApp {
@@ -103,12 +99,13 @@ export class GameApp {
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
+        if (state.resets !== before.resets) this.camera = this.createCamera();
+        const cameraShot = this.updateCamera(dt, state.player, state.world);
         this.storyPresentation.update(dt, {
-            currentAreaId: authoredAreaForPosition(state.world, state.player.position)?.id ?? null,
+            currentAreaId: cameraShot.areaId,
+            currentAreaLocalY: cameraShot.localY,
             events: authorityEvents
         });
-        if (state.resets !== before.resets) this.camera = this.createCamera();
-        this.updateCamera(dt, state.player, state.world);
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
         this.audioBindings?.presentFrame({
             events: [...authorityEvents, ...predictedImpacts],
@@ -133,7 +130,7 @@ export class GameApp {
     }
 
     updateCamera(dt, player, world) {
-        advanceAuthoredCamera({
+        return advanceAuthoredCamera({
             camera: this.camera,
             world,
             player,

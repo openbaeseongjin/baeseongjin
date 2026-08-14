@@ -61,10 +61,12 @@
 | Anchor C | `(-160, -640)` | 방향 반전 |
 | Anchor D | `(128, -864)` | Flow 확인 |
 | Maintenance Lift | `(0, -544)` | 배경 전용, 이동·충돌 없음 |
-| Exit Panel | `(208, -1024)` | P4 도달 뒤 활성화, 반경 72 |
-| Security Access Gate | `(320, -1056)` | Panel 조작 뒤 열리고 1-3으로 연결 |
+| Exit Panel | `(208, -960)` `bottom-center` | P4 바닥에 세우고 도달 뒤 활성화, 반경 72 |
+| Security Access Gate | `(320, -960)` `bottom-center` | P4 바닥에 세우고 Panel 조작 뒤 열어 1-3으로 연결 |
 
 Recovery 중심은 P1 `(160, -312)`, P2 `(-192, -600)`, P3 `(160, -824)`다. 실패한 Handoff만 3~5초 안에 다시 시도하게 하고 Stage 시작으로 떨어뜨리지 않는다.
+
+`route-exit (288, -1024)`와 논리 `area.exit (320, -1056)`은 진행·카메라 기준점이며 바닥 설치 오브젝트의 좌표가 아니다. Gate 포탈 판정은 `(320, -960)`을 하단 중앙으로 삼은 실제 문 개구부만 사용한다.
 
 ### Anchor 해석 규칙
 

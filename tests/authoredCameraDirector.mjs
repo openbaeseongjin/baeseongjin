@@ -56,13 +56,27 @@ export function run() {
     assert.ok(Math.abs(camera.y - (introPlayer.position.y - (720 / 1.25) * 0.46)) < 1e-9);
     assert.equal(camera.initialized, true);
 
-    const area02Player = playerAt(world.areas[1], -32, -320);
-    assert.deepEqual(resolveAuthoredCameraShot({ world, player: area02Player, defaultZoom: 1 }), {
-        areaId: "sector-01-02",
-        zoneId: null,
-        zoom: 1,
-        localY: -32,
-        horizontalPlayerRatio: 0.38,
-        verticalPlayerRatio: 0.58
-    });
+    const area02 = world.areas[1];
+    const area02Cases = [
+        [-32, "lift-failure", 1.2, 0.8],
+        [-300, "first-handoff", 1, 0.72],
+        [-600, "direction-reversal", 0.95, 0.7],
+        [-800, "flow-test", 1, 0.72],
+        [-1000, "exit", 1.15, 0.78]
+    ];
+    for (const [localY, zoneId, desktopZoom, mobileZoom] of area02Cases) {
+        const player = playerAt(area02, localY, -320);
+        assert.deepEqual(resolveAuthoredCameraShot({ world, player, defaultZoom: 1 }), {
+            areaId: "sector-01-02",
+            zoneId,
+            zoom: desktopZoom,
+            localY,
+            horizontalPlayerRatio: 0.38,
+            verticalPlayerRatio: 0.58
+        });
+        assert.equal(
+            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 0.72 }).zoom,
+            mobileZoom
+        );
+    }
 }
