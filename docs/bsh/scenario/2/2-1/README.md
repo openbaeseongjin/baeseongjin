@@ -600,7 +600,7 @@ P4에 배치.
 >
 > `ASSEMBLY: BLOCK 12 CENTRAL WALKWAY`
 >
-> `STATUS: WAIT FOR INSTRUCTION`
+> `STATUS: WAIT FOR FURTHER INSTRUCTION`
 
 ### Multiplayer Trigger
 
@@ -612,22 +612,118 @@ Notice는 `PUZZLE KEY`가 아니다. `ENVIRONMENTAL STORY BEAT`다.
 
 ## 16. Pixel Art Asset Spec
 
-| ASSET | 규격 | 비고 |
-|---|---:|---|
-| Environment Base | 32×32 | Tile 중심 |
-| Apartment Wall | 32×32 | tile |
-| Balcony Floor | 96×32 / 128×32 | Module 조합 |
-| Balcony Rail | 32×16 | Decoration, Collision 금지 권장 |
-| Housing Door | 32×64 | |
-| Exterior Stair | 32×16 | step module |
-| Canteen Window | 96×64 / 128×64 | |
-| Laundry Line | 64×16 / 96×16 | |
-| Laundry Cloth | 16×16 / 16×24 | |
-| Plant | 16×24 / 16×32 | |
-| Chair | 24×24 / 32×32 | |
-| Utility Pipe | 32×32 junction / 64×16 straight | |
-| Grapple Readability Cue | 24×24 | Cyan structural eyelet / maintenance marking, 실제 Anchor Object 아님 |
-| Community Notice | 64×48 / 96×64 | Readable text는 근거리에서 별도 표시 |
+### Environment Base
+
+```text
+32×32
+```
+
+Tile 중심.
+
+### Apartment Wall
+
+```text
+32×32 tile
+```
+
+### Balcony Floor
+
+```text
+96×32
+128×32
+```
+
+Module 조합.
+
+### Balcony Rail
+
+```text
+32×16
+```
+
+Decoration. Collision 금지 권장.
+
+### Housing Door
+
+```text
+32×64
+```
+
+### Exterior Stair
+
+```text
+32×16
+```
+
+step module.
+
+### Canteen Window
+
+```text
+96×64
+or
+128×64
+```
+
+### Laundry
+
+Line:
+
+```text
+64×16
+96×16
+```
+
+Cloth:
+
+```text
+16×16
+16×24
+```
+
+### Plant
+
+```text
+16×24
+16×32
+```
+
+### Chair
+
+```text
+24×24
+or
+32×32
+```
+
+### Utility Pipe
+
+```text
+32×32 junction
+64×16 straight
+```
+
+### Grapple Readability Cue
+
+권장:
+
+```text
+24×24
+```
+
+Cyan structural eyelet / maintenance marking. 실제 Anchor Object가 아니다.
+
+### Community Notice
+
+World sprite:
+
+```text
+64×48
+or
+96×64
+```
+
+Readable text는 근거리에서 별도 표시.
 
 ## 17. Background
 
@@ -669,22 +765,58 @@ PLAYER / ROPE > GAMEPLAY SURFACE > NEAR DECORATION > MID WORLD > FAR WORLD
 
 Maintenance에서 기계음을 없애지는 않는다. 그러나 종류를 바꾼다.
 
-| Maintenance | Worker District |
-|---|---|
-| Heavy machinery | Ventilation hum |
-| Fan | Old fluorescent buzz |
-| Pressure | Distant relay |
-| Metal | Loose fabric / Housing structure creak / Canteen refrigeration |
+#### Maintenance
+
+```text
+Heavy machinery
+Fan
+Pressure
+Metal
+```
+
+#### Worker District
+
+```text
+Ventilation hum
+Old fluorescent buzz
+Distant relay
+Loose fabric
+Housing structure creak
+Canteen refrigeration
+```
 
 ### 중요한 부재
 
-사용하지 않는다: Human voice, Conversation, Children, Scream, Cry, Evacuation announcement voice.
+사용하지 않는다.
 
-Player가 "사람이 없다는 것을 소리로 강요받는 것"보다 **"원래 사람이 있어야 할 공간이 조용한 것"**을 느끼게 한다.
+```text
+Human voice
+Conversation
+Children
+Scream
+Cry
+Evacuation announcement voice
+```
+
+Player가:
+
+> 사람이 없다는 것을 소리로 강요받는 것
+
+보다
+
+> 원래 사람이 있어야 할 공간이 조용한 것
+
+을 느끼게 한다.
 
 ### VFX
 
-subtle fluorescent flicker, laundry sway, tiny dust, occasional status LED, distant lower-grid light loss. 과도한 VFX 금지.
+- subtle fluorescent flicker
+- laundry sway
+- tiny dust
+- occasional status LED
+- distant lower-grid light loss
+
+과도한 VFX 금지.
 
 ## 19. Implementation Notes
 
@@ -731,15 +863,73 @@ Main Platform / Exit / Recovery에 Player 2명이 함께 존재할 수 있어야
 
 ## 20. Playtest Metrics
 
-| METRIC | 목표 |
-|---|---|
-| First-Time Clear Time | 70–110 sec (HYPOTHESIS) |
-| Skilled Clear | 30–50 sec (HYPOTHESIS) |
-| Falls / Recovery (First Run Median) | 0–2 recovery events |
-| Retry Time (Main failure 후 재진입) | ≤ 5 sec |
-| Navigation Pause | 8 sec 이상 정지하면 조사 |
-| Wrong Attach | 평균 1회 미만 / first clear |
-| Flow Discovery | 숙련 플레이에서 P2 Skip 등 Landing Skip이 자연스럽게 발견되는지 기록 |
+### First-Time Clear Time
+
+Target:
+
+```text
+70–110 sec
+```
+
+HYPOTHESIS.
+
+### Skilled Clear
+
+Target:
+
+```text
+30–50 sec
+```
+
+HYPOTHESIS.
+
+### Falls / Recovery
+
+First Run Median:
+
+```text
+0–2 recovery events
+```
+
+목표.
+
+### Retry Time
+
+Main failure 후 원래 Challenge 재진입:
+
+```text
+≤ 5 sec
+```
+
+### Navigation Pause
+
+Player가:
+
+```text
+8 sec 이상
+```
+
+진행 방향을 못 찾고 정지하면 조사.
+
+### Wrong Attach
+
+의도한 Grapple Landmark 대신 주변 Decoration / Surface에 잘못 붙는 사건:
+
+```text
+평균 1회 미만 / first clear
+```
+
+목표.
+
+### Flow Discovery
+
+숙련 플레이에서:
+
+```text
+P2 Skip
+```
+
+또는 동등한 Landing Skip이 자연스럽게 발견되는지 기록.
 
 ### Multiplayer 기록 항목
 
@@ -825,15 +1015,67 @@ Player가 2-1 종료 시 **"Group C는 회사가 버린 노동자 계급이다."
 
 ## 23. 개발 구현 우선순위
 
-| 단계 | 내용 |
-|---|---|
-| P0 — GRAYBOX | `P0–P4`, `G1–G4`, `R1–R4`, `Exit`만 구현. 아트 없음 |
-| P1 — ZERO-IMPULSE TEST | `780 / Reduced / 0` 세 Profile에서 플레이. 먼저 Geometry 수정 |
-| P2 — TWO-PLAYER TEST | 두 Player가 동시 상승 / 동시 착지 / Recovery / 추월 가능한지 확인 |
-| P3 — STORY BLOCKOUT | Block 12 Sign, Community Notice, Exit Transition |
-| P4 — RESIDENTIAL DECORATION | Balcony, Laundry, Canteen, Door, Plant, Chair, Pipe — Collision 없이 추가 |
-| P5 — FINAL PIXEL ART | 기존 Sector 02 Background Direction 사용. Near Residential Assets 교체 |
-| P6 — AUDIO / VFX | Gameplay PASS 후 적용 |
+### P0 — GRAYBOX
+
+오직:
+
+```text
+P0–P4
+G1–G4
+R1–R4
+Exit
+```
+
+구현. 아트 없음.
+
+### P1 — ZERO-IMPULSE TEST
+
+```text
+780
+Reduced
+0
+```
+
+세 Profile에서 플레이. 먼저 Geometry 수정.
+
+### P2 — TWO-PLAYER TEST
+
+두 Player가:
+
+```text
+동시 상승
+동시 착지
+Recovery
+추월
+```
+
+가능한지 확인.
+
+### P3 — STORY BLOCKOUT
+
+- Block 12 Sign
+- Community Notice
+- Exit Transition
+
+### P4 — RESIDENTIAL DECORATION
+
+- Balcony
+- Laundry
+- Canteen
+- Door
+- Plant
+- Chair
+- Pipe
+
+Collision 없이 추가.
+
+### P5 — FINAL PIXEL ART
+
+기존 Sector 02 Background Direction을 사용. Near Residential Assets 교체.
+
+### P6 — AUDIO / VFX
+
+Gameplay PASS 후 적용.
 
 ## 24. Stage Data Concept
 

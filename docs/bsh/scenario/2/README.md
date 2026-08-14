@@ -249,7 +249,7 @@ Drone을 죽이는 것이 목표가 아니다. Drone이 만드는 질문은 **"�
 >
 > `ASSEMBLY: BLOCK 12 CENTRAL WALKWAY`
 >
-> `STATUS: WAIT FOR INSTRUCTION`
+> `STATUS: WAIT FOR FURTHER INSTRUCTION`
 
 Player는 "대피하려고 모였구나." 정도만 이해.
 
