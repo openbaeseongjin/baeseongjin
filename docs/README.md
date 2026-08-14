@@ -101,3 +101,6 @@
 | [`bsh/scenario/3/3-3/README.md`](./bsh/scenario/3/3-3/README.md) | `bsh` Scanner+Patrol Drone 첫 결합 Stage(3-3) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
 | [`bsh/scenario/3/3-4/README.md`](./bsh/scenario/3/3-4/README.md) | `bsh` Public/Service 첫 Multi-Route 분기 Stage(3-4) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
 | [`bsh/scenario/3/3-5/README.md`](./bsh/scenario/3/3-5/README.md) | `bsh` Rest·Build Diagnostic Stage(3-5) Blockout 후보·제작 규격, Growth Gate HOLD 근거와 Runtime 교차검증 포함 |
+| [`bsh/scenario/3/3-6/README.md`](./bsh/scenario/3/3-6/README.md) | `bsh` 첫 대형 Atrium Rope 표현·Security Timing Stage(3-6) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
+| [`bsh/scenario/3/3-7/README.md`](./bsh/scenario/3/3-7/README.md) | `bsh` Access Tier·Priority Route Story Pressure·3-Route 종합 Stage(3-7) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
+| [`bsh/scenario/3/3-8/README.md`](./bsh/scenario/3/3-8/README.md) | `bsh` Sector 03 일반 구간 Finale·2-Drone 병렬 Route·Evacuation/Access Archive 병치 Stage(3-8) Blockout 후보·제작 규격, Boss 전환 미확정 명시 포함 |
