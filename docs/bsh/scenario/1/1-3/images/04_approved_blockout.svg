@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1152" role="img" aria-labelledby="title desc">
+  <title id="title">Sector 01-3 Security Check approved blockout</title>
+  <desc id="desc">Runtime-aligned 960 by 1152 blockout with four grapple landmarks, one wall sentry, safe, flow, and recovery routes, two line-of-sight covers, a scanner, service panel, and security gate. No wind or augment.</desc>
+  <defs>
+    <style>
+      .bg { fill: #07111e; }
+      .zone { fill: #0f2234; opacity: .38; }
+      .danger-zone { fill: #3b1420; opacity: .18; }
+      .wall { fill: #17283a; stroke: #49647b; stroke-width: 3; }
+      .platform { fill: #526779; stroke: #c1d1dc; stroke-width: 2; }
+      .recovery { fill: #385766; stroke: #79c7d5; stroke-width: 2; stroke-dasharray: 6 4; }
+      .safe-deck { fill: #35584c; stroke: #7dd3a7; stroke-width: 2; }
+      .cover { fill: #3a4652; stroke: #c0ccd5; stroke-width: 3; }
+      .anchor { fill: #07111e; stroke: #22d3ee; stroke-width: 5; }
+      .flow-route { fill: none; stroke: #22d3ee; stroke-width: 3; stroke-dasharray: 8 7; opacity: .88; }
+      .safe-route { fill: none; stroke: #7dd3a7; stroke-width: 3; stroke-dasharray: 5 7; opacity: .82; }
+      .recovery-route { fill: none; stroke: #fbbf24; stroke-width: 2; stroke-dasharray: 4 7; opacity: .78; }
+      .los { fill: none; stroke: #ff5a36; stroke-width: 2; stroke-dasharray: 10 8; opacity: .72; }
+      .scanner { fill: none; stroke: #7dd3fc; stroke-width: 4; }
+      .sentry { fill: #361923; stroke: #ff5a36; stroke-width: 4; }
+      .sensor { fill: #ffb347; }
+      .panel { fill: #132b34; stroke: #fbbf24; stroke-width: 4; }
+      .gate { fill: #3c2530; stroke: #fb7185; stroke-width: 4; }
+      .player { fill: #f8fafc; stroke: #fb4b5a; stroke-width: 3; }
+      .label { fill: #d9f4ff; font: 700 17px ui-monospace, monospace; }
+      .small { fill: #9fb7c7; font: 700 13px ui-monospace, monospace; }
+      .zone-label { fill: #58768d; font: 700 14px ui-monospace, monospace; letter-spacing: 1px; }
+      .danger-label { fill: #d17a84; font: 700 13px ui-monospace, monospace; letter-spacing: 1px; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="960" height="1152"/>
+  <rect class="zone" x="0" y="0" width="960" height="208"/>
+  <rect class="zone" x="0" y="608" width="960" height="320"/>
+  <rect class="zone" x="0" y="928" width="960" height="224"/>
+  <rect class="danger-zone" x="32" y="224" width="896" height="544"/>
+  <rect class="wall" x="0" y="0" width="32" height="1152"/>
+  <rect class="wall" x="928" y="0" width="32" height="1152"/>
+
+  <text class="zone-label" x="48" y="28">F · EXIT / RELIEF</text>
+  <text class="zone-label" x="48" y="236">E · UPPER COVER</text>
+  <text class="zone-label" x="48" y="372">D · ROUTE CHOICE</text>
+  <text class="zone-label" x="48" y="636">C · TURRET REVEAL</text>
+  <text class="zone-label" x="48" y="764">B · RETURN WARNING</text>
+  <text class="zone-label" x="48" y="956">A · EMPLOYEE SCAN</text>
+  <text class="danger-label" x="706" y="246">SENTRY ACTIVATION BAND</text>
+
+  <polyline class="flow-route" points="160,1120 544,928 720,800 544,672 288,416 576,192 768,64"/>
+  <polyline class="safe-route" points="720,800 544,672 240,496 240,464 288,416 576,192 768,64"/>
+  <polyline class="recovery-route" points="544,672 576,576 544,672"/>
+
+  <rect class="platform" x="64" y="1138" width="544" height="14"/>
+  <text class="small" x="70" y="1132">P0 START</text>
+  <rect class="platform" x="608" y="832" width="224" height="32"/>
+  <text class="small" x="612" y="826">P1 WARNING DECK</text>
+  <rect class="recovery" x="448" y="576" width="256" height="16"/>
+  <text class="small" x="452" y="570">R1 PARTIAL-LOS RECOVERY</text>
+  <rect class="safe-deck" x="128" y="512" width="224" height="16"/>
+  <text class="small" x="132" y="548">SAFE LEDGE</text>
+  <rect class="cover" x="352" y="384" width="32" height="128"/>
+  <text class="small" x="120" y="378">SAFE COVER · LOS BLOCK</text>
+  <rect class="cover" x="416" y="192" width="96" height="128"/>
+  <text class="small" x="384" y="342">UPPER COVER · ENCOUNTER END</text>
+  <rect class="safe-deck" x="512" y="96" width="320" height="32"/>
+  <text class="small" x="516" y="90">P4 FINAL SAFE DECK</text>
+
+  <circle class="anchor" cx="544" cy="928" r="12"/>
+  <text class="label" x="564" y="934">A</text>
+  <circle class="anchor" cx="544" cy="672" r="12"/>
+  <text class="label" x="564" y="678">B</text>
+  <circle class="anchor" cx="288" cy="416" r="12"/>
+  <text class="label" x="308" y="422">C</text>
+  <circle class="anchor" cx="576" cy="192" r="12"/>
+  <text class="label" x="596" y="198">D</text>
+
+  <rect class="scanner" x="336" y="1024" width="96" height="128" rx="8"/>
+  <text class="small" x="322" y="1016">EMPLOYEE SCANNER</text>
+  <circle class="player" cx="160" cy="1120" r="10"/>
+  <text class="small" x="176" y="1126">SPAWN</text>
+
+  <line class="los" x1="896" y1="512" x2="446" y2="610"/>
+  <rect class="sentry" x="880" y="496" width="32" height="32" rx="4"/>
+  <circle class="sensor" cx="888" cy="512" r="5"/>
+  <text class="small" x="756" y="488">SENTRY T1 · RIGHT WALL</text>
+  <text class="danger-label" x="682" y="532">THIN TELEGRAPH · NO ROPE CUT</text>
+
+  <rect class="panel" x="672" y="32" width="32" height="64" rx="4"/>
+  <text class="small" x="616" y="26">SERVICE PANEL</text>
+  <rect class="gate" x="768" y="0" width="64" height="96"/>
+  <text class="small" x="748" y="148">GATE 04</text>
+</svg>

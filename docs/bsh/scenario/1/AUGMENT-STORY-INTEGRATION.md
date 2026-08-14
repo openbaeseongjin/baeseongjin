@@ -95,16 +95,23 @@
 
 ## 7. Story·System Event 계약
 
-권장 Stable Event 흐름은 다음과 같다.
+1-2에서는 별도 Story Event를 새로 만들지 않고 기존 이동 Metric으로 공중 Re-Attach Telemetry를 축적한다. 이후 연결에는 현재 Area Catalog의 Stable ID를 우선한다.
 
-1. `rope-telemetry-start` — 1-2 첫 공중 Re-Attach 시 기록 시작
-2. `route-violation-detected` — 1-3 첫 Security 판정
-3. `maintenance-override-logged` — 1-3 출구 Override 완료
-4. `augment-profiles-ready` — 1-4 Node 진단 완료
-5. `foundation-augment-selected` — 개인별 선택 확정
-6. `augment-calibration-complete` — 짧은 Calibration 통과
-7. `containment-denied` — 1-8 진입 시 누적 위반 판정
-8. `lower-grid-shutdown` — 공용 Override 완료
+| Stage | Stable Event | 의미 |
+| --- | --- | --- |
+| 1-3 | `employee-scan` | Player가 정상 정비 직원임을 먼저 확정 |
+| 1-3 | `return-warning` | 승인 구역으로 돌아가라는 마지막 경고 |
+| 1-3 | `unauthorized-transit` | Rope 이동이 규정 위반으로 전환되는 Story 분기점 |
+| 1-3 | `turret-activate` | 보안 대응 시작. 별도 처형 명령은 아님 |
+| 1-3 | `maintenance-override` | 정비 권한으로 Gate를 수동 개방 |
+| 1-3 | `violation-logged` | 이동·보안 대응 기록을 남겨 1-4 진단의 근거 생성 |
+| 1-4 | `grapple-detected` | Maintenance Node가 비정상 Rope 기록을 인식 |
+| 1-4 | `telemetry-analyzed` | 동일한 기록에서 세 Profile을 계산 |
+| 1-4 | `override-available` | 비상 Firmware 적용 권한 제시 |
+| 1-4 | `augment-selected` | 개인별 Foundation 선택 확정 |
+| 1-4 | `firmware-applied` | Calibration과 이후 Stage 적용 시작 |
+
+1-8의 `containment-denied`, `lower-grid-shutdown`은 해당 Stage Runtime 정렬 때 Stable ID와 실제 Trigger를 함께 확정한다. 구현되지 않은 이름을 먼저 Runtime 계약으로 고정하지 않는다.
 
 문구와 VFX는 개인 화면에 표시할 수 있지만 Gate, Objective, Sector 전환은 공용 상태로 한 번만 처리한다. Foundation 선택은 Player별 상태이므로 멀티플레이에서 Host 한 명의 선택을 다른 Player에게 복사하면 안 된다.
 

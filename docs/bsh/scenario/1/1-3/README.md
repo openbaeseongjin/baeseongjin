@@ -2492,6 +2492,18 @@ Rope를 더 잘 쓰고 싶게 만드는가?"
 
 ## 문서 이미지 상태
 
-기존 `01_swing_line.png`와 `02_layout.png`는 `COOLING SHAFT` 기준의 이전 Revision이므로 이력 보존을 위해 파일만 유지한다. REV 3.0의 Scanner, Sentry T1, Safe/Flow/Recovery Route와 Cover Wall C1을 반영한 새 이미지가 제작되기 전까지 구현 기준으로 참조하지 않는다.
+### Scenario Art Reference
+
+![1-3 Scenario Art Reference](./images/03_scenario_art_reference.png)
+
+`APPROVED ART REFERENCE`: Security Shaft의 분위기와 Gameplay 정보 위계를 정한다. 이미지 속 Platform·Rope 선은 물리 좌표가 아니며, Sentry 한 기와 얇은 Telegraph, Cyan Anchor, Cover, Recovery, Gate의 가독성을 참고한다.
+
+### Approved Blockout
+
+![1-3 Approved Blockout](./images/04_approved_blockout.svg)
+
+`APPROVED BLOCKOUT`: 현재 Runtime의 960×1152 Geometry, Safe/Flow/Recovery Route, Scanner, Sentry T1, Cover LOS, Service Panel, Security Gate 좌표를 정한다.
+
+기존 `01_swing_line.png`와 `02_layout.png`는 `COOLING SHAFT` 기준의 이전 Revision이므로 `RETIRED`다. 이력 보존을 위해 파일만 유지하며 구현·외주·검수 기준으로 참조하지 않는다.
 
 SECTOR 01-3 / SECURITY CHECK — BLOCKOUT CANDIDATE · REV 3.0
