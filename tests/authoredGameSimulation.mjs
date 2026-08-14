@@ -4,11 +4,11 @@ import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 
-function command({ interact = false } = {}) {
+function command({ interact = false, jump = false } = {}) {
     return createPlayerCommand(
         {
             horizontal: 0,
-            vertical: 0,
+            vertical: jump ? -1 : 0,
             interact,
             pointer: { x: 0, y: 0, down: false },
             viewport: { width: 1280, height: 720 }
@@ -96,6 +96,25 @@ export function run() {
     assert.equal(player.ropeDamageBoostRemaining, 0);
     assert.equal(player.health, 73, "portal reset must not heal or damage the player");
     assert.deepEqual(player.artifacts.snapshot(), [ARTIFACT_CATALOG[0]], "portal reset must preserve artifacts");
+
+    const secondPanel = simulation.world.objects.find(({ id }) => id === "sector-01-02:exit-panel");
+    const secondDeck = simulation.world.surfaces.find(({ id }) => id === "sector-01-02:p4");
+    player.physics.position.set(secondPanel.position.x, secondDeck.topY - player.physics.collider.radius);
+    player.physics.velocity.set(0, 0);
+    player.physics.isGrounded = true;
+    simulation.step(1 / 120, command());
+    assert.equal(
+        simulation.snapshot().worldProgress.completedObjectiveIds.includes("sector-01-02:final-deck-reached"),
+        true
+    );
+    assert.equal(simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-02:gate"), false);
+    simulation.step(1 / 120, command({ interact: true, jump: true }));
+    assert.equal(
+        simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-02:gate"),
+        true,
+        "the shared jump and interaction command must open the ready 1-2 Gate panel"
+    );
+    assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 6);
 
     const replicationEvents = simulation.drainReplicationEvents();
     const eventTypes = replicationEvents.map(({ eventType }) => eventType);

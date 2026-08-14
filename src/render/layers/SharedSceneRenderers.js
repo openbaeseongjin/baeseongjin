@@ -20,6 +20,21 @@ const COLORS = Object.freeze({
     candidate: "#a7f3d0"
 });
 
+const GATE_DRAW_BOUNDS = Object.freeze({ x: -26, y: 34, width: 52, height: 62 });
+const GATE_PANEL_DRAW_BOUNDS = Object.freeze({ x: -14, y: 19, width: 72, height: 45 });
+
+function worldObjectBounds(object, style) {
+    const bounds =
+        object.kind === "gate" ? GATE_DRAW_BOUNDS : object.kind === "gate-panel" ? GATE_PANEL_DRAW_BOUNDS : null;
+    if (!bounds) return centeredBounds(object.position, { width: style.radius * 2, height: style.radius * 2 });
+    return {
+        x: object.position.x + bounds.x,
+        y: object.position.y + bounds.y,
+        width: bounds.width,
+        height: bounds.height
+    };
+}
+
 function drawRope(context, rope, player) {
     if (!rope?.anchor) return;
     const attachment = ropeAttachmentPoint(player, rope);
@@ -165,10 +180,7 @@ export class AuthoredWorldObjectRenderer {
         );
         const visible = objects.filter((object) => {
             const style = this.presentationFor(object);
-            return isVisible(
-                viewport,
-                centeredBounds(object.position, { width: style.radius * 2, height: style.radius * 2 })
-            );
+            return isVisible(viewport, worldObjectBounds(object, style));
         });
         for (const object of visible) this.drawObject(context, object, scene.worldProgress);
         const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
@@ -243,71 +255,71 @@ export class AuthoredWorldObjectRenderer {
     }
 
     drawGate(context, style, unlocked) {
-        const width = style.radius * 2.3;
-        const height = style.radius * 4.6;
-        const left = -width * 0.5;
-        const top = -height * 0.5;
-        const railWidth = 9;
+        const { x: left, y: top, width, height } = GATE_DRAW_BOUNDS;
+        const railWidth = 6;
 
         context.fillStyle = "#0b1220";
         if (unlocked) {
-            context.fillRect(left - 7, top - 7, 7, height + 14);
-            context.fillRect(width * 0.5, top - 7, 7, height + 14);
-            context.fillRect(left, top - 7, width, 7);
-            context.fillRect(left, height * 0.5, width, 7);
+            context.fillRect(left, top, 5, height);
+            context.fillRect(left + width - 5, top, 5, height);
+            context.fillRect(left, top, width, 5);
+            context.fillRect(left, top + height - 5, width, 5);
         } else {
-            context.fillRect(left - 7, top - 7, width + 14, height + 14);
+            context.fillRect(left, top, width, height);
         }
         context.strokeStyle = unlocked ? "#67e8f9" : style.color;
         context.lineWidth = unlocked ? 4 : 3;
-        context.strokeRect(left - 7, top - 7, width + 14, height + 14);
+        context.strokeRect(left, top, width, height);
 
         context.fillStyle = unlocked ? "rgba(103, 232, 249, 0.24)" : `${style.color}44`;
-        context.fillRect(left, top, railWidth, height);
-        context.fillRect(width * 0.5 - railWidth, top, railWidth, height);
-        context.fillRect(left, top, width, 10);
+        context.fillRect(left + 5, top + 5, railWidth, height - 10);
+        context.fillRect(left + width - railWidth - 5, top + 5, railWidth, height - 10);
+        context.fillRect(left + 5, top + 5, width - 10, 7);
 
         if (!unlocked) {
             context.fillStyle = "rgba(15, 23, 42, 0.96)";
-            context.fillRect(left + railWidth, top + 10, width - railWidth * 2, height - 10);
+            context.fillRect(left + railWidth + 5, top + 12, width - railWidth * 2 - 10, height - 17);
             context.fillStyle = `${style.color}55`;
-            context.fillRect(-3, top + 14, 6, height - 22);
-            for (let panelY = top + 28; panelY < top + height - 12; panelY += 28) {
-                context.fillRect(left + railWidth + 5, panelY, width - railWidth * 2 - 10, 4);
+            context.fillRect(-2, top + 15, 4, height - 22);
+            for (let panelY = top + 24; panelY < top + height - 8; panelY += 15) {
+                context.fillRect(left + railWidth + 8, panelY, width - railWidth * 2 - 16, 3);
             }
         }
 
         context.fillStyle = unlocked ? "#67e8f9" : style.color;
-        context.fillRect(width * 0.5 + 11, -5, 8, 10);
+        context.fillRect(left + width - 10, top + 8, 5, 7);
     }
 
     drawGatePanel(context, style, { blocked, ready, opened }) {
-        const width = style.radius * 1.5;
-        const height = style.radius * 1.9;
+        const bodyWidth = 28;
+        const bodyHeight = 26;
+        const left = -bodyWidth * 0.5;
+        const top = GATE_PANEL_DRAW_BOUNDS.y;
+        const bottom = top + bodyHeight;
         const statusColor = opened ? "#67e8f9" : ready ? style.color : "#fb7185";
 
         context.strokeStyle = "#475569";
-        context.lineWidth = 6;
+        context.lineWidth = 4;
         context.beginPath();
-        context.moveTo(width, 0);
-        context.lineTo(style.radius * 3.1, 0);
-        context.lineTo(style.radius * 3.1, -12);
+        context.moveTo(bodyWidth * 0.5, top + 8);
+        context.lineTo(GATE_PANEL_DRAW_BOUNDS.x + GATE_PANEL_DRAW_BOUNDS.width, top + 8);
+        context.lineTo(GATE_PANEL_DRAW_BOUNDS.x + GATE_PANEL_DRAW_BOUNDS.width, top + 2);
         context.stroke();
         context.fillStyle = "#334155";
-        context.fillRect(-5, height, 10, style.radius * 1.55);
-        context.fillRect(-width * 0.55, height + style.radius * 1.45, width * 1.1, 7);
+        context.fillRect(-2.5, bottom, 5, 16);
+        context.fillRect(-8, bottom + 16, 16, 3);
 
         context.fillStyle = "#0b1220";
-        context.fillRect(-width, -height, width * 2, height * 2);
+        context.fillRect(left, top, bodyWidth, bodyHeight);
         context.strokeStyle = statusColor;
         context.lineWidth = opened ? 4 : 3;
-        context.strokeRect(-width, -height, width * 2, height * 2);
+        context.strokeRect(left, top, bodyWidth, bodyHeight);
 
         context.fillStyle = statusColor;
-        context.fillRect(-width + 7, -height + 7, width * 2 - 14, 8);
-        context.fillRect(-width + 7, -height + 21, blocked ? width * 0.7 : width * 1.25, 5);
-        context.fillRect(-width + 7, -height + 31, opened ? width * 1.25 : width * 0.9, 4);
-        context.fillRect(width - 12, height - 13, 6, 6);
+        context.fillRect(left + 5, top + 5, bodyWidth - 10, 4);
+        context.fillRect(left + 5, top + 12, blocked ? 10 : 16, 3);
+        context.fillRect(left + 5, top + 18, opened ? 16 : 12, 2);
+        context.fillRect(left + bodyWidth - 7, top + bodyHeight - 7, 3, 3);
     }
 
     drawGrappleLandmark(context, style) {

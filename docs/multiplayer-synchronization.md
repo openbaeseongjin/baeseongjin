@@ -148,7 +148,7 @@
 
 `GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 배치 틱이 정확히 다음 시뮬레이션 틱인지 확인하고 플레이어 ID로 명령을 연결한다. 멀티 서버는 같은 월드 스케줄러를 사용하되 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 capability를 중복 호출하지 않는다. 플레이어 타이머와 무기 쿨다운, 적·투사체 같은 `SimulationDrivenObject` 단계는 계속 진행한다.
 
-`PlayerCommand.interact` boolean은 향후 문맥 상호작용을 위한 예약 필드다. 현재 사망·부활 규칙은 동료 상호작용을 요구하지 않으며 점프 축이나 모바일 점프 버튼을 부활 입력으로 소비하지 않는다.
+`PlayerCommand.interact` boolean은 Gate 패널 같은 근접 문맥 상호작용 의도다. PC `W/↑`와 모바일 점프 버튼은 점프 축과 이 의도를 함께 보내며, 권위 simulation은 준비된 패널의 반경 안에서만 objective 완료에 사용한다. 사망·부활 규칙은 여전히 동료 상호작용을 요구하지 않고 이 입력을 부활 입력으로 소비하지 않는다.
 
 ## 상태 소유권
 

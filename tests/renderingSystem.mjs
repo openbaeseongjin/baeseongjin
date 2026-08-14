@@ -64,6 +64,15 @@ function makeCanvas(context) {
     };
 }
 
+function rectangleSpan(context, axis) {
+    const offsetIndex = axis === "x" ? 1 : 2;
+    const sizeIndex = axis === "x" ? 3 : 4;
+    const rectangles = context.calls.filter(([name]) => name === "fillRect" || name === "strokeRect");
+    const start = Math.min(...rectangles.map((call) => call[offsetIndex]));
+    const end = Math.max(...rectangles.map((call) => call[offsetIndex] + call[sizeIndex]));
+    return end - start;
+}
+
 function frame(x = 0, durationSeconds = 0.1) {
     return { x, y: 0, width: 8, height: 8, durationSeconds };
 }
@@ -672,6 +681,12 @@ export async function run() {
         false,
         "Gate presentation no longer uses a floating diagonal X debug symbol"
     );
+    assert.ok(rectangleSpan(gateContext, "y") > 48, "a Gate door must remain taller than the 48px player");
+    assert.ok(rectangleSpan(gateContext, "y") <= 64, "a Gate door must stay only slightly taller than the 48px player");
+    const gateFrame = gateContext.calls.find(
+        ([name, , , width, height]) => name === "strokeRect" && width === 52 && height === 62
+    );
+    assert.equal(gateFrame[2] + gateFrame[4], 96, "the Gate door bottom must sit on the authored exit deck");
     const unlockedGateContext = recordingContext();
     new AuthoredWorldObjectRenderer().draw({
         context: unlockedGateContext,
@@ -725,6 +740,10 @@ export async function run() {
             ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#fb7185"
         ),
         "a blocked Gate panel shows a locked status light"
+    );
+    assert.ok(
+        rectangleSpan(lockedPanelContext, "y") < 48,
+        "a Gate control panel silhouette must stay smaller than the 48px player"
     );
     const readyPanelContext = recordingContext();
     new AuthoredWorldObjectRenderer().draw({

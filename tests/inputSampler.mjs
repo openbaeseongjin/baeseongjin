@@ -30,8 +30,15 @@ export function run() {
     assert.deepEqual(snapshot.pointer, { x: 12, y: 34, down: false });
     assert.deepEqual(snapshot.viewport, { width: 1000, height: 700 });
     assert.ok(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.pointer));
+    listeners.get("keydown")({ code: "KeyW" });
+    assert.equal(sampler.snapshot().vertical, -1);
+    assert.equal(sampler.snapshot().interact, true, "keyboard jump must keep the contextual interaction intent");
+    listeners.get("keyup")({ code: "KeyW" });
+    listeners.get("keydown")({ code: "ArrowUp" });
+    assert.equal(sampler.snapshot().interact, true, "the alternate keyboard jump must share the same interaction");
+    listeners.get("keyup")({ code: "ArrowUp" });
     listeners.get("keydown")({ code: "KeyE" });
-    assert.equal(sampler.snapshot().interact, true);
+    assert.equal(sampler.snapshot().interact, false, "Gate panels must not introduce a separate PC interaction key");
     listeners.get("keyup")({ code: "KeyE" });
     listeners.get("pointerdown")({ pointerType: "mouse", pointerId: 10, clientX: 80, clientY: 90 });
     listeners.get("blur")();
