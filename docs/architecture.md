@@ -147,7 +147,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·아티팩트를 Has-A로 소유하고, 로프는 부착·장력·드래그 상태를 독립 소유한다. 소유 관계는 ID와 공개 계약으로 연결한다.
 - 적과 직접 조작하지 않는 자동 행동 객체는 `SimulationDrivenObject`다. 서버가 진행하되 플레이어 피격처럼 사용자 체감과 만나는 사건은 피해 클라이언트가 먼저 반응하고 서버가 권위 객체 상태로 검증한다.
 - 멀티는 권한 감각만 보면 P2P형이다. 플레이어별 `InputDrivenObject` 결과는 해당 소유자·피해자 클라이언트가 먼저 결정하고, 특정 클라이언트에 귀속할 수 없는 몹과 적 투사체 같은 `SimulationDrivenObject`의 생성·궤적은 서버가 중립적으로 진행한다. 서버는 지연된 플레이어 복제 위치로 충돌을 먼저 확정하지 않고 피해 클라이언트 claim을 중립 객체 상태로 검증한다.
-- 사건 전파와 지속 상태 수렴을 같은 것으로 취급하지 않는다. `InputDrivenObject`의 지속 상태는 서버가 검증한 최신 소유자 상태를 서버와 동료가 따라가고, `SimulationDrivenObject`는 서버 상태를 모든 클라이언트가 따라간다. 원격 플레이어 위치는 상태가 실제 생성된 `ownerMotionTick` 표본 사이를 보간하고 공용 입력 선행 tick으로 서버 표시 시계와 정렬하며, 적은 `serverTick` 표본을 사용한다. 소유자는 정상 승인 중 서버 지연 위치로 되감기지 않으며 상태 전송 거부 때만 마지막 공유 상태에서 미확정 입력을 재실행한다.
+- 사건 전파와 지속 상태 수렴을 같은 것으로 취급하지 않는다. `InputDrivenObject`의 지속 상태는 인증·형식·세션 tick 검사를 통과한 최신 `owner-motion`을 값의 크기와 무관하게 서버와 동료가 따라가고, `SimulationDrivenObject`는 서버 상태를 모든 클라이언트가 따라간다. 원격 플레이어 위치는 상태가 실제 생성된 `ownerMotionTick` 표본 사이를 보간하고 공용 입력 선행 tick으로 서버 표시 시계와 정렬하며, 적은 `serverTick` 표본을 사용한다. 중복·역순·세션 범위 밖 owner tick은 성공한 no-op으로 무시하고 소유자는 어떤 `owner-motion` receipt에도 서버 지연 위치로 되감기거나 미확정 입력을 재실행하지 않는다.
 - 로프 스윙처럼 입력 capability가 플레이어의 지속 전투 상태도 바꾸면 소유 클라이언트와 서버 검증 복제본이 같은 `GameSimulation` 도메인 메서드를 사용한다. 소유 클라이언트는 강화 시간과 무기 파라미터를 즉시 작성하고, 서버는 별도 swing claim을 검증해 다른 복제본에 공유한다. 같은 틱 자동 발사는 swing claim 뒤에 공유해 양쪽 피해량 계산의 원인이 일치한다. 정상 스냅샷은 소유자의 강화 타이머를 다시 쓰지 않는다.
 - 예측 객체의 생성과 그 입력이 바꾸는 소유자 상태는 하나의 prediction ID 수명주기로 관리한다. 자동 발사는 탄환과 무기 쿨다운을 함께 적용하고 로프 스윙은 강화 직전·직후 타이머를 함께 보존한다. 여러 동종 claim이 pending이면 앞 거절은 후속 효과를 지우지 않고 후속 prediction의 이전 값만 거절된 원인이 없었던 시간축으로 재기준화한다. 마지막 거절에서 최초 준비 상태로 복구한다. 승인 receipt는 공유 확인일 뿐 소유자 상태를 서버 스냅샷으로 교체하는 전이가 아니다.
 - 피해 결과는 projectile ID를 수명주기 키로 사용한다. `OwnerPredictionRuntime`은 `GameSimulation`의 공용 피해 전이로 넉백·HP·무적·치명 체크포인트 부활·아티팩트 손실 또는 로프 절단을 즉시 적용하고, pending 기록은 중복 억제와 승인 resolve 대응에 사용한다. 승인 receipt는 resolve 사건까지 기록을 유지하고, 거부 receipt는 pending 기록만 정리하며 이미 인식한 피해 상태를 복원하지 않는다. 피격 전 상태와 tick·발생 순서는 체크포인트처럼 별도의 복구 가능한 전이를 되돌릴 때 이후 pending impact를 재실행하는 기준으로만 사용한다. 전송 계층은 HP나 물리 역연산을 구현하지 않는다.
@@ -157,7 +157,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `SimulationDispatcher`는 월드 단계가 지정한 capability ID만 실행한다. 한 객체에 운동과 충돌처럼 여러 능력이 조합돼도 현재 단계와 무관한 능력을 실행하지 않으며, `GameSimulation`과 `CombatSystems`는 단계 순서와 context만 조정한다. `PredictableProjectileStore`는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 담당하고 투사체 종류별 충돌이나 거부 정책을 분기하지 않는다.
 - 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
 - `GameSimulation`은 객체별 게임 규칙을 직접 모으는 거대 분기점이 아니라 월드 등록, 고정 tick, 객체 단계 실행과 사건 연결을 조정하는 월드 스케줄러로 축소한다. 투사체 spawn 사건도 종류를 검사하지 않고 객체의 `replicationState(tick)` 계약을 사용한다.
-- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명·명시적 거부 복구·표시 보정만 조정한다. 정상 공유 스냅샷은 `applySharedOwnerProgress()`로 검증된 아티팩트·무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
+- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명·별도 rollback 계약이 있는 사건 전이·표시 보정만 조정한다. `owner-motion` receipt는 소유 상태 복원·입력 재실행을 시작하지 않는다. 정상 공유 스냅샷은 `applySharedOwnerProgress()`로 검증된 아티팩트·무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
 
 ### 적용된 마이그레이션 순서
 
@@ -207,7 +207,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 조준점, 부착 후보, 포인터 전이, 부착 버퍼와 스윙 드래그는 `RopeObject`가 소유한다. 로프 연계 강화 시간은 전투 효과를 받는 `PlayerObject`가 소유하며 첫 플레이어의 컴포넌트를 중복 가리키는 싱글 호환 필드는 두지 않는다.
 - 외부 실행 계층은 `getPrimaryPlayerId()`, `playerState()`·`playerStates()`, `applyOwnerMotion()`, 예측 복원·진행·피격·충돌 명령을 사용한다. 서버 세션과 로컬 예측기는 `players` 배열이나 플레이어 컴포넌트를 직접 수정하지 않는다.
 - 이동·점프와 로프 입력은 각각 `LocomotionInput`, `RopePointerInput` capability로 전달한다. 적 공격·자동 무기·양측 투사체 운동과 클라이언트 충돌도 각 `SimulationDrivenObject`의 capability로 한 번만 구현하며, `GameSimulation`은 소유자 입력 그룹과 이름 있는 시뮬레이션 단계를 일정 순서로 실행한다. 실행 위치는 Is-A 정체성과 별개이므로 서버가 궤적을 진행하는 투사체도 피해·공격 클라이언트에서 `client-projectile-collision` capability를 실행할 수 있다.
-- `stepCommandBatch`는 싱글과 소유 클라이언트 예측에서 정확히 다음 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 로컬 예측은 `InputStateSimulator`로 마지막 입력을 제한된 틱 동안 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다. 멀티 서버는 같은 스케줄러를 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 입력 물리를 다시 적분하지 않고 최신 승인 `owner-motion`을 연속 상태 원점으로 유지한다.
+- `stepCommandBatch`는 싱글과 소유 클라이언트 예측에서 정확히 다음 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 로컬 예측은 `InputStateSimulator`로 마지막 입력을 제한된 틱 동안 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다. 멀티 서버는 같은 스케줄러를 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 입력 물리를 다시 적분하지 않고 최신 적용 `owner-motion`을 연속 상태 원점으로 유지한다.
 - `PlayerCommand.interact`는 향후 문맥 상호작용을 위한 예약 필드다. 현재 생명 주기에서는 소비하지 않으며 모바일 점프 입력의 동작을 가로채지 않는다.
 - `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력·손실 아티팩트를 `player-respawned` 사건으로 남긴다. 손실이 있으면 같은 playerId의 `artifact-loss` 사건도 발행한다.
 - 여러 플레이어가 같은 틱에 사망해도 각자 독립 부활한다. 공용 적·투사체와 다른 플레이어의 위치·체력·아티팩트는 초기화하지 않는다.

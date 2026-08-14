@@ -116,7 +116,7 @@ export class OwnerPredictionRuntime {
         if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
     }
 
-    reconcile(snapshot, pendingBatches, { rebaseMotion = false } = {}) {
+    reconcile(snapshot, pendingBatches) {
         if (snapshot.worldSeed !== this.simulation.world.seed) throw new Error("prediction world seed mismatch");
         if (snapshot.worldRevision !== (this.simulation.world.definitionRevision ?? WORLD_GENERATION_REVISION)) {
             throw new Error("prediction world revision mismatch");
@@ -139,11 +139,9 @@ export class OwnerPredictionRuntime {
             this.initialized ? this.simulation.getTick() : snapshot.serverTick,
             ...pendingTicks
         );
-        if (this.initialized && !rebaseMotion) {
+        if (this.initialized) {
             return this.acceptSharedOutcomes(snapshot, sharedOwner, targetTick, ownerMotionTick);
         }
-        const displayedBefore = this.initialized ? this.presentationState() : null;
-        const lifeStateChanged = this.initialized && this.state().lifeState !== sharedOwner.lifeState;
         this.prepareSnapshot(snapshot);
         this.simulation.restoreOwnerPrediction(this.ownerId, sharedOwner, ownerMotionTick);
         if (this.pendingCheckpoint) this.simulation.releasePlayerRope(this.ownerId);
@@ -161,9 +159,7 @@ export class OwnerPredictionRuntime {
             .filter(({ tick }) => tick >= ownerMotionTick)
             .sort((left, right) => left.tick - right.tick || left.order - right.order);
         this.replayInputs(ownerMotionTick, targetTick, batchesByTick, pendingImpacts);
-        const corrected = this.state();
-        if (displayedBefore) this.startPresentationCorrection(displayedBefore, corrected, lifeStateChanged);
-        return corrected;
+        return this.state();
     }
 
     acceptSharedOutcomes(snapshot, sharedOwner, targetTick, ownerMotionTick) {

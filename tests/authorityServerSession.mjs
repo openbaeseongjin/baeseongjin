@@ -12,7 +12,7 @@ import { createSummitClaim } from "../src/game/network/SummitClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
 import { createRopeSwingClaim } from "../src/game/network/RopeSwingClaim.js";
 import { Vector2 } from "../src/game-kit/index.js";
-import { COMBAT_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
+import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 
@@ -174,9 +174,28 @@ export function run() {
             rope: { isAttached: false, anchor: null }
         })
     );
-    assert.equal(postCompletionMotion.accepted, false);
-    assert.equal(postCompletionMotion.reason, "run-inactive");
+    assert.equal(postCompletionMotion.accepted, true);
+    assert.equal(postCompletionMotion.resolution, "ignored-run-inactive");
     assert.deepEqual(summitSimulation.playerState(summitPlayer.id).position, completedPosition);
+
+    const timeSkewSimulation = new GameSimulation();
+    const timeSkewPlayer = primaryPlayer(timeSkewSimulation);
+    const timeSkewSession = new AuthorityServerSession({ simulation: timeSkewSimulation });
+    const farFutureMotion = createOwnerMotionState({
+        clientTick: 10000,
+        position: { x: timeSkewPlayer.physics.position.x + 12, y: timeSkewPlayer.physics.position.y },
+        velocity: { x: 120, y: 0 },
+        isGrounded: false,
+        rope: { isAttached: false, anchor: null }
+    });
+    const farFutureReceipt = timeSkewSession.submitOwnerMotion(timeSkewPlayer.id, farFutureMotion);
+    assert.equal(farFutureReceipt.accepted, true, "an out-of-window owner state must not produce a rejection");
+    assert.equal(farFutureReceipt.resolution, "ignored-tick-window");
+    assert.equal(
+        timeSkewSession.lastOwnerMotionTicks.has(timeSkewPlayer.id),
+        false,
+        "an ignored future tick must not poison the monotonic owner timeline"
+    );
 
     const combatSimulation = new GameSimulation();
     const combatPlayer = primaryPlayer(combatSimulation);
@@ -189,56 +208,59 @@ export function run() {
         rope: { isAttached: false, anchor: null }
     });
     assert.equal(combatSession.submitOwnerMotion(combatPlayer.id, ownerMotion).accepted, true);
-    assert.equal(combatPlayer.physics.velocity.x, 700, "server world must accept plausible owner motion");
+    assert.equal(combatPlayer.physics.velocity.x, 700, "server world must accept owner motion");
+    const duplicateMotion = combatSession.submitOwnerMotion(combatPlayer.id, ownerMotion);
+    assert.equal(duplicateMotion.accepted, true);
+    assert.equal(duplicateMotion.resolution, "ignored-stale");
+    assert.equal(combatPlayer.physics.velocity.x, 700, "duplicate owner motion must be an accepted no-op");
+
+    const largeMotion = createOwnerMotionState({
+        ...ownerMotion,
+        clientTick: ownerMotion.clientTick + 1,
+        position: { x: ownerMotion.position.x + 5000, y: ownerMotion.position.y - 4000 },
+        velocity: { x: 9999, y: -7777 },
+        angle: Math.PI,
+        angularVelocity: 999,
+        rope: {
+            isAttached: true,
+            anchor: { x: ownerMotion.position.x + 5000, y: ownerMotion.position.y - 4080 },
+            attachmentOffset: { x: ROPE_CONFIG.handOffset.x * 3, y: ROPE_CONFIG.handOffset.y + 12 }
+        }
+    });
+    const largeMotionReceipt = combatSession.submitOwnerMotion(combatPlayer.id, largeMotion);
     assert.equal(
-        combatSession.submitOwnerMotion(combatPlayer.id, ownerMotion).reason,
-        "stale-tick",
-        "owner motion must be monotonic"
+        largeMotionReceipt.accepted,
+        true,
+        "finite owner motion must not be rejected by speed, angular, distance, or rope envelopes"
     );
+    assert.deepEqual({ x: combatPlayer.physics.position.x, y: combatPlayer.physics.position.y }, largeMotion.position);
+    assert.deepEqual({ x: combatPlayer.physics.velocity.x, y: combatPlayer.physics.velocity.y }, largeMotion.velocity);
     assert.equal(
-        combatSession.submitOwnerMotion(
-            combatPlayer.id,
-            createOwnerMotionState({
-                ...ownerMotion,
-                clientTick: ownerMotion.clientTick + 1,
-                velocity: { x: 9999, y: 0 }
-            })
-        ).reason,
-        "speed-envelope",
-        "client authority must remain inside the server movement envelope"
+        combatPlayer.physics.angularVelocity,
+        PLAYER_CONFIG.maxAngularSpeed,
+        "the domain physics may clamp angular speed without rejecting the owner state"
     );
-    assert.equal(
-        combatSession.submitOwnerMotion(
-            combatPlayer.id,
-            createOwnerMotionState({
-                ...ownerMotion,
-                clientTick: ownerMotion.clientTick + 1,
-                angularVelocity: 999
-            })
-        ).reason,
-        "angular-speed-envelope",
-        "client authority must keep angular motion inside the rigid-body envelope"
+    assert.deepEqual(
+        {
+            x: combatPlayer.ropeObject.rope.attachmentOffset.x,
+            y: combatPlayer.ropeObject.rope.attachmentOffset.y
+        },
+        largeMotion.rope.attachmentOffset
     );
 
-    combatPlayer.ropeObject.rope.attach(combatPlayer.physics.position, {
-        x: combatPlayer.physics.position.x,
-        y: combatPlayer.physics.position.y - 80
-    });
-    const rejectedRelease = combatSession.submitOwnerMotion(
+    const acceptedRelease = combatSession.submitOwnerMotion(
         combatPlayer.id,
         createOwnerMotionState({
             ...ownerMotion,
             clientTick: ownerMotion.clientTick + 2,
-            velocity: { x: 9999, y: 0 },
             rope: { isAttached: false, anchor: null }
         })
     );
-    assert.equal(rejectedRelease.reason, "speed-envelope");
-    assert.equal(rejectedRelease.ropeReleased, true, "a newer rope release must survive rejected continuous motion");
+    assert.equal(acceptedRelease.accepted, true);
     assert.equal(
         combatPlayer.ropeObject.rope.isAttached,
         false,
-        "rejected movement must not leave a released rope attached"
+        "the latest owner state must release the rope atomically with continuous motion"
     );
     const delayedAttach = combatSession.submitOwnerMotion(
         combatPlayer.id,
@@ -254,7 +276,8 @@ export function run() {
             }
         })
     );
-    assert.equal(delayedAttach.accepted, true, "late continuous motion may still be usable");
+    assert.equal(delayedAttach.accepted, true, "late continuous motion must be an accepted no-op");
+    assert.equal(delayedAttach.resolution, "ignored-stale");
     assert.equal(combatPlayer.ropeObject.rope.isAttached, false, "an older rope state must not undo a newer release");
 
     const fallSimulation = new GameSimulation();
@@ -283,7 +306,7 @@ export function run() {
         createOwnerMotionState({
             clientTick: fallSimulation.getTick() + 1,
             position: { x: fallPlayer.physics.position.x, y: WORLD_CONFIG.floorY + 781 },
-            velocity: { x: 0, y: 900 },
+            velocity: { x: 0, y: 5000 },
             isGrounded: false,
             rope: { isAttached: false, anchor: null }
         })

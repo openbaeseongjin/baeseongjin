@@ -48,6 +48,7 @@ export class CircleCollider {
         for (let pass = 0; pass < 3; pass += 1) {
             let resolved = false;
             for (const surface of surfaces) {
+                if (surface.collision === false) continue;
                 if (
                     position.x + this.radius < surface.x ||
                     position.x - this.radius > surface.x + surface.width ||

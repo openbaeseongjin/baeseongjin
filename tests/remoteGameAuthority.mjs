@@ -354,15 +354,18 @@ export async function run() {
     assert.equal(fallMessages[0].type, "owner-motion", "the fallen position must be claimed before local respawn");
     fallAuthority.latestSnapshot = { serverTick: 42 };
     fallAuthority.stream = { pendingBatches: () => [] };
-    let rejectedMotionReconciliations = 0;
-    fallAuthority.ownerRuntime.reconcile = (_snapshot, _pending, options) => {
-        rejectedMotionReconciliations += 1;
-        assert.equal(options.rebaseMotion, true);
+    let ownerMotionReceiptReconciliations = 0;
+    fallAuthority.ownerRuntime.reconcile = () => {
+        ownerMotionReceiptReconciliations += 1;
         return locallyRespawnedState;
     };
     assert.equal(fallAuthority.recordOwnerMotionReceipt({ clientTick: 42, accepted: true }), true);
     assert.equal(fallAuthority.recordOwnerMotionReceipt({ clientTick: 43, accepted: false, reason: "test" }), true);
-    assert.equal(rejectedMotionReconciliations, 1, "a rejected owner state must rebase from the latest snapshot");
+    assert.equal(
+        ownerMotionReceiptReconciliations,
+        0,
+        "owner motion receipts must never rebase client-final movement from a server snapshot"
+    );
     assert.equal(fallAuthority.metrics().acceptedOwnerMotions, 1);
     assert.equal(fallAuthority.metrics().rejectedOwnerMotions, 1);
     assert.equal(
@@ -553,6 +556,7 @@ export async function run() {
         );
         const spawnTarget = spawnRoom.simulation.enemies[0];
         spawnTarget.position.set(spawnPlayer.physics.position.x + 120, spawnPlayer.physics.position.y);
+        spawnTarget.activation = null;
         spawnRoom.simulation.enemies = [spawnTarget];
         spawnPlayer.weapon.cooldown = 0;
         gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
@@ -805,6 +809,7 @@ export async function run() {
             collisionServerPlayer.physics.position.x + 80,
             collisionServerPlayer.physics.position.y
         );
+        collisionTarget.activation = null;
         collisionTarget.fireCooldown = 999;
         collisionRoom.simulation.enemies = [collisionTarget];
         collisionServerPlayer.weapon.cooldown = 0;
@@ -1044,8 +1049,8 @@ export async function run() {
             "the shared server player HP must converge to the victim client's resolved value"
         );
         await waitFor(
-            () => room.session.lastOwnerMotionTicks.get(authority.playerId) === clientBody.tick,
-            "impact recovery must publish the tick that produced the victim's current state"
+            () => (room.session.lastOwnerMotionTicks.get(authority.playerId) ?? -1) >= clientBody.tick,
+            "impact recovery must publish at least the tick that produced the victim's current state"
         );
         assert.ok(
             Math.hypot(
@@ -1275,7 +1280,7 @@ export async function run() {
         );
         const releaseTickBefore = authority.snapshot().owner.tick;
         const pendingCommandsBefore = authority.stream.pendingBatches().length;
-        const authorityRopeTickBefore = room.session.lastOwnerRopeTicks.get(authority.playerId) ?? -1;
+        const authorityMotionTickBefore = room.session.lastOwnerMotionTicks.get(authority.playerId) ?? -1;
         app.input.onPointerDown({ pointerType: "mouse", pointerId: 91, clientX: 420, clientY: 120 });
         app.input.onPointerLeave({ pointerType: "mouse", pointerId: 91, relatedTarget: null });
         assert.equal(
@@ -1291,7 +1296,7 @@ export async function run() {
         );
         assert.equal(authority.stream.pendingBatches().at(-1).commands[0].command.pointer.down, false);
         await waitFor(
-            () => (room.session.lastOwnerRopeTicks.get(authority.playerId) ?? -1) > authorityRopeTickBefore,
+            () => (room.session.lastOwnerMotionTicks.get(authority.playerId) ?? -1) > authorityMotionTickBefore,
             "the server must receive the immediate owner rope release"
         );
         assert.equal(authorityPlayer.ropeObject.rope.isAttached, false);

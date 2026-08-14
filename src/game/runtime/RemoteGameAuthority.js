@@ -487,9 +487,6 @@ export class RemoteGameAuthority {
             this.networkMetrics.acceptedOwnerMotions += 1;
         } else {
             this.networkMetrics.rejectedOwnerMotions += 1;
-            if (this.latestSnapshot) {
-                this.ownerRuntime.reconcile(this.latestSnapshot, this.stream.pendingBatches(), { rebaseMotion: true });
-            }
         }
         return true;
     }

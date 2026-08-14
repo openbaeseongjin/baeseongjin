@@ -1,5 +1,5 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
-import { PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { WORLD_CONFIG } from "../config.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
@@ -47,7 +47,6 @@ export class AuthorityServerSession {
         this.resolvedCheckpointClaims = new Map();
         this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
-        this.lastOwnerRopeTicks = new Map();
         this.nextImpactRecoverySequence = 0;
         this.nextSnapshotSequence = 0;
     }
@@ -187,7 +186,6 @@ export class AuthorityServerSession {
             });
             if (recoveryResult.accepted) {
                 this.lastOwnerMotionTicks.set(authenticatedPlayerId, claim.outcome.stateTick);
-                this.lastOwnerRopeTicks.set(authenticatedPlayerId, claim.outcome.stateTick);
                 this.pendingImpactRecoveries.delete(recoveryKey);
                 this.resolvedImpactClaims.set(claim.projectileId, {
                     receipt: recoveryResult,
@@ -308,31 +306,34 @@ export class AuthorityServerSession {
         if (!player) throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         const previousTick = this.lastOwnerMotionTicks.get(authenticatedPlayerId) ?? -1;
         if (state.clientTick <= previousTick) {
-            return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: false, reason: "stale-tick" });
+            return createOwnerMotionReceipt({
+                clientTick: state.clientTick,
+                accepted: true,
+                resolution: "ignored-stale"
+            });
         }
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
         if (state.clientTick < minimumTick || state.clientTick > maximumTick) {
-            return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: false, reason: "tick-window" });
+            return createOwnerMotionReceipt({
+                clientTick: state.clientTick,
+                accepted: true,
+                resolution: "ignored-tick-window"
+            });
         }
         if (this.simulation.runState !== "playing") {
-            return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: false, reason: "run-inactive" });
-        }
-        const previousRopeTick = this.lastOwnerRopeTicks.get(authenticatedPlayerId) ?? -1;
-        const ropeReleased = !state.rope.isAttached && state.clientTick > previousRopeTick && player.rope.isAttached;
-        if (!state.rope.isAttached && state.clientTick > previousRopeTick) {
-            this.simulation.releasePlayerRope(authenticatedPlayerId);
-            this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
-        }
-        const reject = (reason) =>
-            createOwnerMotionReceipt({
+            return createOwnerMotionReceipt({
                 clientTick: state.clientTick,
-                accepted: false,
-                reason,
-                ...(ropeReleased ? { ropeReleased: true } : {})
+                accepted: true,
+                resolution: "ignored-run-inactive"
             });
+        }
         if (player.lifeState !== "active") {
-            return reject("player-ineligible");
+            return createOwnerMotionReceipt({
+                clientTick: state.clientTick,
+                accepted: true,
+                resolution: "ignored-player-ineligible"
+            });
         }
         if (state.position.y > WORLD_CONFIG.floorY + 780) {
             this.simulation.resolvePlayerFall(authenticatedPlayerId);
@@ -340,34 +341,10 @@ export class AuthorityServerSession {
             return createOwnerMotionReceipt({
                 clientTick: state.clientTick,
                 accepted: true,
-                resolution: "player-fell",
-                ...(ropeReleased ? { ropeReleased: true } : {})
+                resolution: "player-fell"
             });
         }
-        const reportedSpeed = Math.hypot(state.velocity.x, state.velocity.y);
-        if (reportedSpeed > MULTIPLAYER_TIMING.ownerMotionMaxSpeed) {
-            return reject("speed-envelope");
-        }
-        if (Math.abs(state.angularVelocity) > PLAYER_CONFIG.maxAngularSpeed) {
-            return reject("angular-speed-envelope");
-        }
-        if (
-            state.rope.isAttached &&
-            (Math.abs(Math.abs(state.rope.attachmentOffset.x) - Math.abs(ROPE_CONFIG.handOffset.x)) > 0.001 ||
-                Math.abs(state.rope.attachmentOffset.y - ROPE_CONFIG.handOffset.y) > 0.001)
-        ) {
-            return reject("rope-attachment-envelope");
-        }
-        const tickDelta = Math.max(1, state.clientTick - Math.max(previousTick, this.simulation.getTick()));
-        const distance = Math.hypot(state.position.x - player.position.x, state.position.y - player.position.y);
-        const maximumDistance =
-            MULTIPLAYER_TIMING.ownerMotionBaseTolerance + (Math.max(900, reportedSpeed) * tickDelta) / 120;
-        if (distance > maximumDistance) {
-            return reject("movement-envelope");
-        }
-        const synchronizeRope = state.clientTick > previousRopeTick;
-        this.simulation.applyOwnerMotion(authenticatedPlayerId, state, { synchronizeRope });
-        if (synchronizeRope) this.lastOwnerRopeTicks.set(authenticatedPlayerId, state.clientTick);
+        this.simulation.applyOwnerMotion(authenticatedPlayerId, state);
         this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
         return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: true });
     }
@@ -460,7 +437,6 @@ export class AuthorityServerSession {
     removePlayer(playerId) {
         this.inbox.removePlayer(playerId);
         this.lastOwnerMotionTicks.delete(playerId);
-        this.lastOwnerRopeTicks.delete(playerId);
         for (const key of this.pendingImpactRecoveries.keys()) {
             if (key.startsWith(`${playerId}\u0000`)) this.pendingImpactRecoveries.delete(key);
         }
