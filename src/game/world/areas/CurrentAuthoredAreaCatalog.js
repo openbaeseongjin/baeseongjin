@@ -31,6 +31,6 @@ const sector02Areas = SECTOR_02_AREA_CATALOG.areas.map((area, index) =>
 
 export const CURRENT_AUTHORED_AREA_CATALOG = defineAreaCatalog({
     id: "current-authored-city-mock",
-    revision: "sector-01-rev3-sector-02-rev1-v1",
+    revision: "sector-01-rev3-sector-02-rev1-v2",
     areas: [...sector01Areas, ...sector02Areas]
 });

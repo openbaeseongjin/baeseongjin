@@ -18,6 +18,7 @@ Sector 01과 Sector 02는 별도 게임 모드가 아니다. `CurrentAuthoredAre
 | `story-display` | stable story/cue ID | 대사·서사 자료의 위치만 제공. 충돌·완료 조건 없음 | 표시 문구·환경 cue |
 | `maintenance-frame` | Gate ID 참조 | 실제 진행 출구. 2-5의 잠긴 Upper Transit Gate와 구분 | 우회 경로 가독성 |
 | `augment-node` | `interact-choice`, Foundation 필요 | 2-3 Specialization 선택 흐름만 정의. 실제 pool·효과는 기획 확정 전 차단 | 선택 UI와 node 상태 |
+| `gate-panel` | `blocked → ready → opened` | 영역별 선행 목표 뒤 활성화되고 공통 interaction으로 실제 진행 Gate 개방 | 문 옆 장착 패널과 상태색·cue |
 | `checkpoint` | `inactive → active` | Sector 일반 진행 종료 복구 지점. 새 증강 보상과 별도 | 활성화 연출·cue |
 | `gate` | `locked → unlocked → crossed` | 요구 objective 집계와 명시적 영역 통과 | 잠금·해제·통과 표현 |
 
@@ -25,14 +26,14 @@ Sector 01과 Sector 02는 별도 게임 모드가 아니다. `CurrentAuthoredAre
 
 | 영역 | 핵심 mock 오브젝트 | 진행 계약 | 그래픽·오디오 cue |
 | --- | --- | --- | --- |
-| `2-1 WORKER BLOCK 12` | `g1~g4`, `community-notice`, `exit-frame` | 적 없이 Worker District의 주거 흔적과 기본 Rope 이동 소개 | residential courtyard, Group C 대기 공지 |
-| `2-2 PATROL WALKWAY` | `g1~g5`, `drone-1`, cover/recovery, `exit-frame` | 첫 `Patrol Drone T1`; 이동 band 하나와 선택적 교전 | patrol cycle, active security |
-| `2-3 RESIDENTIAL SERVICE NODE` | `g1~g2`, `specialization-node`, `exit-frame` | 기존 Foundation을 심화하는 `interact-choice`; pool은 `TBD`라 선택 완료 전 Gate 차단 | foundation detected, specialization available |
-| `2-4 RESIDENTIAL STACK` | `g1~g9`, `drone-1`, 다중 safe/flow/pressure route | 한 Drone band 안에서 주거 수직 다중 경로 검증 | residential scale, multi-route |
-| `2-5 EVACUATION WALKWAY` | `drone-1`, `upper-transit-gate`, `evacuation-status`, `maintenance-frame` | Upper Transit Gate는 서사상 잠금. 실제 진행 Gate는 Maintenance Service Frame | assembly complete, transit restricted, maintenance bypass |
-| `2-6 QUIET RESIDENTIAL VOID` | `g1~g7`, courtyard background prop, `exit-frame` | 적·새 기믹 없는 이동/서사 relief | quiet residential void |
-| `2-7 SHELTER ACCESS` | `drone-1~2`, `shelter-status`, safe deck, `exit-frame` | 수직으로 분리된 두 activation band와 중간 relief; 지속 crossfire 금지 | shelter status, separated patrol bands |
-| `2-8 EVACUATION PLATFORM` | `drone-1~2`, `transfer-control`, `sector-end-checkpoint`, `content-boundary` | 두 band 종합 뒤 전송 기록 확인. Boss 없이 일반 진행 종료; full run 완료가 아닌 content boundary | A/B complete, C suspended, priority access active |
+| `2-1 WORKER BLOCK 12` | `g1~g4`, `community-notice`, `exit-panel`, `exit-frame` | 기본 Rope 이동 뒤 Exit Panel 조작 | residential courtyard, Group C 대기 공지 |
+| `2-2 PATROL WALKWAY` | `g1~g5`, `drone-1`, cover/recovery, `exit-panel`, `exit-frame` | 첫 Patrol band 통과 뒤 Exit Panel 조작 | patrol cycle, active security |
+| `2-3 RESIDENTIAL SERVICE NODE` | `specialization-node`, `exit-panel`, `exit-frame` | Specialization 선택 뒤 Exit Panel 활성화; pool은 `TBD` | foundation detected, specialization available |
+| `2-4 RESIDENTIAL STACK` | `g1~g9`, `drone-1`, 다중 route, `exit-panel` | 주거 수직 다중 경로 통과 뒤 Exit Panel 조작 | residential scale, multi-route |
+| `2-5 EVACUATION WALKWAY` | `drone-1`, `upper-transit-gate`, `evacuation-status`, `exit-panel`, `maintenance-frame` | Upper Transit Gate는 서사상 잠금. 실제 진행은 Maintenance Frame 옆 Exit Panel | assembly complete, transit restricted, maintenance bypass |
+| `2-6 QUIET RESIDENTIAL VOID` | `g1~g7`, courtyard background prop, `exit-panel`, `exit-frame` | 적·새 기믹 없는 이동 뒤 Exit Panel 조작 | quiet residential void |
+| `2-7 SHELTER ACCESS` | `drone-1~2`, `shelter-status`, safe deck, `exit-panel`, `exit-frame` | 분리된 두 band 통과 뒤 Exit Panel 조작; 지속 crossfire 금지 | shelter status, separated patrol bands |
+| `2-8 EVACUATION PLATFORM` | `drone-1~2`, `transfer-control`, `sector-end-checkpoint`, `content-boundary` | `transfer-control`이 공통 Gate Panel 역할을 하며 content boundary 개방 | A/B complete, C suspended, priority access active |
 
 ## 확정하지 않은 경계
 
@@ -48,3 +49,4 @@ Sector 01과 Sector 02는 별도 게임 모드가 아니다. `CurrentAuthoredAre
 3. Patrol route는 월드 조립 때 area offset만큼 함께 이동해야 한다.
 4. 같은 catalog revision으로 만든 로컬 실행과 권위 서버 snapshot은 같은 16개 영역과 진행 상태를 복원해야 한다.
 5. 정식 그래픽·오디오는 stable ID를 보존한 채 mock catalog/package만 교체한다.
+6. 모든 영역은 선행 목표만으로 Gate를 자동 개방하지 않고 문 옆 Gate Panel 조작을 거치며, 층간 격벽은 Gate 개구부 외 경계를 항상 충돌로 막는다.

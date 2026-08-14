@@ -45,7 +45,14 @@ function recordingContext() {
             arc: (...args) => calls.push(["arc", ...args]),
             setLineDash: (...args) => calls.push(["setLineDash", ...args])
         },
-        { get: (target, key) => (key in target ? target[key] : () => {}) }
+        {
+            get: (target, key) => (key in target ? target[key] : () => {}),
+            set: (target, key, value) => {
+                target[key] = value;
+                calls.push(["set", key, value]);
+                return true;
+            }
+        }
     );
     return context;
 }
@@ -690,6 +697,68 @@ export async function run() {
         ),
         false,
         "an unlocked Gate leaves its central passage visually open"
+    );
+
+    const gatePanel = {
+        id: "sector-01-02:exit-panel",
+        kind: "gate-panel",
+        gateId: "sector-01-02:gate",
+        objectiveId: "sector-01-02:exit-panel-engaged",
+        requiredObjectiveIds: ["sector-01-02:final-deck-reached"],
+        presentationId: "world-object:gate-panel",
+        position: { x: 208, y: -1024 }
+    };
+    const lockedPanelContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: lockedPanelContext,
+        scene: {
+            worldProgress: { completedObjectiveIds: [], unlockedGateIds: [] },
+            world: { objects: [gatePanel], areas: [] }
+        }
+    });
+    assert.ok(
+        lockedPanelContext.calls.some(([name]) => name === "fillRect"),
+        "the Gate panel is always visible"
+    );
+    assert.ok(
+        lockedPanelContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#fb7185"
+        ),
+        "a blocked Gate panel shows a locked status light"
+    );
+    const readyPanelContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: readyPanelContext,
+        scene: {
+            worldProgress: {
+                completedObjectiveIds: ["sector-01-02:final-deck-reached"],
+                unlockedGateIds: []
+            },
+            world: { objects: [gatePanel], areas: [] }
+        }
+    });
+    assert.ok(
+        readyPanelContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#fbbf24"
+        ),
+        "a ready Gate panel uses the shared interaction color"
+    );
+    const openedPanelContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: openedPanelContext,
+        scene: {
+            worldProgress: {
+                completedObjectiveIds: ["sector-01-02:final-deck-reached", "sector-01-02:exit-panel-engaged"],
+                unlockedGateIds: ["sector-01-02:gate"]
+            },
+            world: { objects: [gatePanel], areas: [] }
+        }
+    });
+    assert.ok(
+        openedPanelContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#67e8f9"
+        ),
+        "an opened Gate panel matches the Gate's open-state color"
     );
 
     const manifest = {

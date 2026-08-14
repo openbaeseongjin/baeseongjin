@@ -20,6 +20,14 @@ export function run() {
         validateAreaCatalog(missingObjectiveSource).issues.some(({ code }) => code === "objective-source-missing")
     );
 
+    const missingObjectiveRequirement = mutableCatalog();
+    missingObjectiveRequirement.areas[1].objectives[1].requiredObjectiveIds = ["sector-01-02:missing-ready"];
+    assert.ok(
+        validateAreaCatalog(missingObjectiveRequirement).issues.some(
+            ({ code }) => code === "objective-requirement-missing"
+        )
+    );
+
     const embeddedImage = mutableCatalog();
     embeddedImage.areas[0].objects[0].image = "assets/runtime/objects/service-terminal.png";
     assert.ok(

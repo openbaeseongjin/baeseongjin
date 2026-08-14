@@ -1,4 +1,5 @@
 import { polygonBounds } from "./PolygonGeometry.js";
+import { authoredAreaBoundarySurfaces } from "./AuthoredAreaBoundary.js";
 
 function translatePoint(value, offsetY) {
     return Object.freeze({ ...value, x: value.x, y: value.y + offsetY });
@@ -90,7 +91,18 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
     let originY = floorY;
 
     for (const [index, definition] of catalog.areas.entries()) {
+        const areaBounds = Object.freeze({
+            x: -definition.bounds.width * 0.5,
+            y: originY - definition.bounds.height,
+            width: definition.bounds.width,
+            height: definition.bounds.height
+        });
+        const entry = translatePoint(definition.entry, originY);
+        const exit = translatePoint(definition.exit, originY);
+        const gate = translateGate(definition.id, definition.gate, originY);
+        const areaBoundary = Object.freeze({ id: definition.id, bounds: areaBounds, exit });
         const areaSurfaces = definition.surfaces.map((surface) => translateSurface(definition.id, surface, originY));
+        const boundarySurfaces = authoredAreaBoundarySurfaces(areaBoundary, gate);
         const areaRoute = definition.routePoints.map((routePoint) => {
             const translated = translatePoint(routePoint, originY);
             return Object.freeze({
@@ -108,17 +120,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
         const areaObjectives = definition.objectives.map((objective) =>
             translateObjective(definition.id, objective, originY)
         );
-        const entry = translatePoint(definition.entry, originY);
-        const exit = translatePoint(definition.exit, originY);
-        const gate = translateGate(definition.id, definition.gate, originY);
-        const areaBounds = Object.freeze({
-            x: -definition.bounds.width * 0.5,
-            y: originY - definition.bounds.height,
-            width: definition.bounds.width,
-            height: definition.bounds.height
-        });
-
-        surfaces.push(...areaSurfaces);
+        surfaces.push(...areaSurfaces, ...boundarySurfaces);
         route.push(...areaRoute);
         objects.push(...areaObjects);
         objectives.push(...areaObjectives);
@@ -175,7 +177,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
                 entry,
                 exit,
                 nextAreaId: definition.nextAreaId,
-                surfaceIds: Object.freeze(areaSurfaces.map(({ id }) => id)),
+                surfaceIds: Object.freeze([...areaSurfaces, ...boundarySurfaces].map(({ id }) => id)),
                 objectIds: Object.freeze(areaObjects.map(({ id }) => id)),
                 objectiveIds: Object.freeze(areaObjectives.map(({ id }) => id)),
                 gateId: gate.id,

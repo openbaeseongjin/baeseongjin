@@ -186,13 +186,22 @@ export class AuthoredWorldObjectRenderer {
             ? progress?.completedObjectiveIds?.includes(object.objectiveId)
             : false;
         const gateUnlocked = object.gateId ? progress?.unlockedGateIds?.includes(object.gateId) : false;
+        const requirementsComplete = (object.requiredObjectiveIds ?? []).every((objectiveId) =>
+            progress?.completedObjectiveIds?.includes(objectiveId)
+        );
         context.save();
         context.translate(object.position.x, object.position.y);
         context.strokeStyle = style.color;
         context.fillStyle = `${style.color}${objectiveComplete || gateUnlocked ? "66" : "22"}`;
         context.lineWidth = objectiveComplete || gateUnlocked ? 5 : 3;
 
-        if (object.kind === "terminal" || object.kind === "augment-node") {
+        if (object.kind === "gate-panel") {
+            this.drawGatePanel(context, style, {
+                blocked: !requirementsComplete,
+                ready: requirementsComplete && !objectiveComplete,
+                opened: gateUnlocked || objectiveComplete
+            });
+        } else if (object.kind === "terminal" || object.kind === "augment-node") {
             const width = style.radius * 1.7;
             const height = style.radius * 1.25;
             context.fillRect(-width, -height, width * 2, height * 2);
@@ -270,6 +279,35 @@ export class AuthoredWorldObjectRenderer {
 
         context.fillStyle = unlocked ? "#67e8f9" : style.color;
         context.fillRect(width * 0.5 + 11, -5, 8, 10);
+    }
+
+    drawGatePanel(context, style, { blocked, ready, opened }) {
+        const width = style.radius * 1.5;
+        const height = style.radius * 1.9;
+        const statusColor = opened ? "#67e8f9" : ready ? style.color : "#fb7185";
+
+        context.strokeStyle = "#475569";
+        context.lineWidth = 6;
+        context.beginPath();
+        context.moveTo(width, 0);
+        context.lineTo(style.radius * 3.1, 0);
+        context.lineTo(style.radius * 3.1, -12);
+        context.stroke();
+        context.fillStyle = "#334155";
+        context.fillRect(-5, height, 10, style.radius * 1.55);
+        context.fillRect(-width * 0.55, height + style.radius * 1.45, width * 1.1, 7);
+
+        context.fillStyle = "#0b1220";
+        context.fillRect(-width, -height, width * 2, height * 2);
+        context.strokeStyle = statusColor;
+        context.lineWidth = opened ? 4 : 3;
+        context.strokeRect(-width, -height, width * 2, height * 2);
+
+        context.fillStyle = statusColor;
+        context.fillRect(-width + 7, -height + 7, width * 2 - 14, 8);
+        context.fillRect(-width + 7, -height + 21, blocked ? width * 0.7 : width * 1.25, 5);
+        context.fillRect(-width + 7, -height + 31, opened ? width * 1.25 : width * 0.9, 4);
+        context.fillRect(width - 12, height - 13, 6, 6);
     }
 
     drawGrappleLandmark(context, style) {

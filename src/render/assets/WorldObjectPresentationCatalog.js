@@ -1,6 +1,7 @@
 const DEFAULT_DEFINITIONS = {
     "world-object:grapple-landmark": { renderMode: "mock-shape", color: "#22d3ee", radius: 15 },
     "world-object:terminal": { renderMode: "mock-shape", color: "#fbbf24", radius: 20 },
+    "world-object:gate-panel": { renderMode: "mock-shape", color: "#fbbf24", radius: 18 },
     "world-object:augment-node": { renderMode: "mock-shape", color: "#c084fc", radius: 24 },
     "world-object:gate": { renderMode: "mock-shape", color: "#fb7185", radius: 28 },
     "world-object:wind-source": { renderMode: "mock-shape", color: "#67e8f9", radius: 24 },

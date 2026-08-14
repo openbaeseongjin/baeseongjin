@@ -47,6 +47,24 @@ function reachExitObjective(areaId, x, y) {
     });
 }
 
+function exitPanelObjective(areaId, requiredObjectiveIds) {
+    return Object.freeze({
+        id: `${areaId}:exit-panel-engaged`,
+        type: "interact",
+        sourceObjectId: `${areaId}:exit-panel`,
+        requiredObjectiveIds: Object.freeze(requiredObjectiveIds)
+    });
+}
+
+function exitPanel(areaId, exit, objective) {
+    return worldObject(`${areaId}:exit-panel`, "gate-panel", exit.x - 112, exit.y + 32, {
+        interactionRadius,
+        objectiveId: objective.id,
+        gateId: `${areaId}:gate`,
+        requiredObjectiveIds: objective.requiredObjectiveIds
+    });
+}
+
 function patrolDrone(areaId, id, x, y, activation, patrolPoints) {
     return worldObject(`${areaId}:${id}`, "patrol-drone", x, y, {
         enemyType: "patrol-drone-t1",
@@ -70,6 +88,7 @@ const area01Landmarks = [
 ];
 const area01Exit = point(`${area01Id}:exit`, 416, -992);
 const area01Objective = reachExitObjective(area01Id, area01Exit.x, area01Exit.y);
+const area01PanelObjective = exitPanelObjective(area01Id, [area01Objective.id]);
 const area01 = defineArea({
     id: area01Id,
     sectorId: "sector-02",
@@ -116,12 +135,13 @@ const area01 = defineArea({
         worldObject(`${area01Id}:community-notice`, "story-display", 160, -952, {
             cueIds: ["evacuation-group-c", "wait-for-further-instruction"]
         }),
+        exitPanel(area01Id, area01Exit, area01PanelObjective),
         worldObject(`${area01Id}:exit-frame`, "gate", area01Exit.x, area01Exit.y, {
             gateId: `${area01Id}:gate`
         })
     ],
-    objectives: [area01Objective],
-    gate: progressionGate(area01Id, area01Exit.x, area01Exit.y, "sector-02-02", [area01Objective.id]),
+    objectives: [area01Objective, area01PanelObjective],
+    gate: progressionGate(area01Id, area01Exit.x, area01Exit.y, "sector-02-02", [area01PanelObjective.id]),
     storyTriggers: ["block-12-entry", "lived-in-trace", "community-notice"],
     routes: ["safe", "flow", "recovery"],
     cueIds: ["worker-block-12", "residential-courtyard", "quiet-housing", "community-notice"]
@@ -137,6 +157,7 @@ const area02Landmarks = [
 ];
 const area02Exit = point(`${area02Id}:exit`, 224, -1024);
 const area02Objective = reachExitObjective(area02Id, area02Exit.x, area02Exit.y);
+const area02PanelObjective = exitPanelObjective(area02Id, [area02Objective.id]);
 const area02 = defineArea({
     id: area02Id,
     sectorId: "sector-02",
@@ -176,12 +197,13 @@ const area02 = defineArea({
             { x: -320, y: -416 },
             { x: 320, y: -416 }
         ]),
+        exitPanel(area02Id, area02Exit, area02PanelObjective),
         worldObject(`${area02Id}:exit-frame`, "gate", area02Exit.x, area02Exit.y, {
             gateId: `${area02Id}:gate`
         })
     ],
-    objectives: [area02Objective],
-    gate: progressionGate(area02Id, area02Exit.x, area02Exit.y, "sector-02-03", [area02Objective.id]),
+    objectives: [area02Objective, area02PanelObjective],
+    gate: progressionGate(area02Id, area02Exit.x, area02Exit.y, "sector-02-03", [area02PanelObjective.id]),
     storyTriggers: ["patrol-cycle-reveal", "security-still-active"],
     routes: ["safe", "flow", "pressure", "recovery"],
     cueIds: ["patrol-walkway", "patrol-drone-t1", "security-still-active"]
@@ -195,6 +217,7 @@ const area03Objective = Object.freeze({
     type: "interact-choice",
     sourceObjectId: `${area03Id}:specialization-node`
 });
+const area03PanelObjective = exitPanelObjective(area03Id, [area03Objective.id]);
 const area03 = defineArea({
     id: area03Id,
     sectorId: "sector-02",
@@ -235,12 +258,13 @@ const area03 = defineArea({
             perPlayerSelection: true,
             cueIds: ["foundation-detected", "specialization-available"]
         }),
+        exitPanel(area03Id, area03Exit, area03PanelObjective),
         worldObject(`${area03Id}:exit-frame`, "gate", area03Exit.x, area03Exit.y, {
             gateId: `${area03Id}:gate`
         })
     ],
-    objectives: [area03Objective],
-    gate: progressionGate(area03Id, area03Exit.x, area03Exit.y, "sector-02-04", [area03Objective.id]),
+    objectives: [area03Objective, area03PanelObjective],
+    gate: progressionGate(area03Id, area03Exit.x, area03Exit.y, "sector-02-04", [area03PanelObjective.id]),
     storyTriggers: ["residential-service", "foundation-detected", "specialization-available"],
     routes: ["calibration", "recovery"],
     cueIds: ["residential-service-node", "foundation-detected", "specialization-placeholder"]
@@ -261,6 +285,7 @@ const area04Landmarks = [
 ];
 const area04Exit = point(`${area04Id}:exit`, 496, -1248);
 const area04Objective = reachExitObjective(area04Id, area04Exit.x, area04Exit.y);
+const area04PanelObjective = exitPanelObjective(area04Id, [area04Objective.id]);
 const area04 = defineArea({
     id: area04Id,
     sectorId: "sector-02",
@@ -315,12 +340,13 @@ const area04 = defineArea({
             { x: -416, y: -768 },
             { x: 416, y: -768 }
         ]),
+        exitPanel(area04Id, area04Exit, area04PanelObjective),
         worldObject(`${area04Id}:exit-frame`, "gate", area04Exit.x, area04Exit.y, {
             gateId: `${area04Id}:gate`
         })
     ],
-    objectives: [area04Objective],
-    gate: progressionGate(area04Id, area04Exit.x, area04Exit.y, "sector-02-05", [area04Objective.id]),
+    objectives: [area04Objective, area04PanelObjective],
+    gate: progressionGate(area04Id, area04Exit.x, area04Exit.y, "sector-02-05", [area04PanelObjective.id]),
     storyTriggers: ["housing-density", "route-choice", "residential-scale"],
     routes: ["safe-left", "flow-centre", "pressure-right", "recovery"],
     cueIds: ["residential-stack", "multi-route", "patrol-drone-t1", "no-build-lock"]
@@ -338,6 +364,7 @@ const area05Landmarks = [
 ];
 const area05Exit = point(`${area05Id}:exit`, 464, -1120);
 const area05Objective = reachExitObjective(area05Id, area05Exit.x, area05Exit.y);
+const area05PanelObjective = exitPanelObjective(area05Id, [area05Objective.id]);
 const area05 = defineArea({
     id: area05Id,
     sectorId: "sector-02",
@@ -394,12 +421,13 @@ const area05 = defineArea({
         worldObject(`${area05Id}:evacuation-status`, "story-display", 352, -704, {
             cueIds: ["assembly-complete", "transfer-authorization-pending", "upper-transit-restricted"]
         }),
+        exitPanel(area05Id, area05Exit, area05PanelObjective),
         worldObject(`${area05Id}:maintenance-frame`, "maintenance-frame", area05Exit.x, area05Exit.y, {
             gateId: `${area05Id}:gate`
         })
     ],
-    objectives: [area05Objective],
-    gate: progressionGate(area05Id, area05Exit.x, area05Exit.y, "sector-02-06", [area05Objective.id]),
+    objectives: [area05Objective, area05PanelObjective],
+    gate: progressionGate(area05Id, area05Exit.x, area05Exit.y, "sector-02-06", [area05PanelObjective.id]),
     storyTriggers: ["assembly-complete", "upper-transit-restricted", "maintenance-bypass"],
     routes: ["safe", "flow", "pressure", "maintenance-bypass", "recovery"],
     cueIds: ["evacuation-walkway", "assembly-complete", "upper-transit-restricted", "maintenance-bypass"]
@@ -417,6 +445,7 @@ const area06Landmarks = [
 ];
 const area06Exit = point(`${area06Id}:exit`, 544, -1184);
 const area06Objective = reachExitObjective(area06Id, area06Exit.x, area06Exit.y);
+const area06PanelObjective = exitPanelObjective(area06Id, [area06Objective.id]);
 const area06 = defineArea({
     id: area06Id,
     sectorId: "sector-02",
@@ -464,12 +493,13 @@ const area06 = defineArea({
         worldObject(`${area06Id}:courtyard-void`, "background-prop", 0, -608, {
             cueIds: ["residential-scale", "quiet-void"]
         }),
+        exitPanel(area06Id, area06Exit, area06PanelObjective),
         worldObject(`${area06Id}:exit-frame`, "gate", area06Exit.x, area06Exit.y, {
             gateId: `${area06Id}:gate`
         })
     ],
-    objectives: [area06Objective],
-    gate: progressionGate(area06Id, area06Exit.x, area06Exit.y, "sector-02-07", [area06Objective.id]),
+    objectives: [area06Objective, area06PanelObjective],
+    gate: progressionGate(area06Id, area06Exit.x, area06Exit.y, "sector-02-07", [area06PanelObjective.id]),
     storyTriggers: ["quiet-courtyard", "residential-scale", "upper-route-preview"],
     routes: ["safe", "flow", "recovery"],
     cueIds: ["quiet-residential-void", "residential-scale", "no-enemy", "visual-relief"]
@@ -491,6 +521,7 @@ const area07Landmarks = [
 ];
 const area07Exit = point(`${area07Id}:exit`, 544, -1408);
 const area07Objective = reachExitObjective(area07Id, area07Exit.x, area07Exit.y);
+const area07PanelObjective = exitPanelObjective(area07Id, [area07Objective.id]);
 const area07 = defineArea({
     id: area07Id,
     sectorId: "sector-02",
@@ -554,12 +585,13 @@ const area07 = defineArea({
         worldObject(`${area07Id}:shelter-status`, "story-display", 0, -824, {
             cueIds: ["shelter-capacity-full", "evacuation-transfer-suspended", "remain-designated-area"]
         }),
+        exitPanel(area07Id, area07Exit, area07PanelObjective),
         worldObject(`${area07Id}:exit-frame`, "gate", area07Exit.x, area07Exit.y, {
             gateId: `${area07Id}:gate`
         })
     ],
-    objectives: [area07Objective],
-    gate: progressionGate(area07Id, area07Exit.x, area07Exit.y, "sector-02-08", [area07Objective.id]),
+    objectives: [area07Objective, area07PanelObjective],
+    gate: progressionGate(area07Id, area07Exit.x, area07Exit.y, "sector-02-08", [area07PanelObjective.id]),
     storyTriggers: ["shelter-capacity-full", "transfer-suspended", "evacuation-platform-preview"],
     routes: ["safe", "flow", "pressure", "recovery"],
     cueIds: ["shelter-access", "two-patrol-bands", "no-crossfire", "transfer-suspended"]
@@ -651,9 +683,10 @@ const area08 = defineArea({
             { x: -384, y: -1088 },
             { x: 480, y: -1088 }
         ]),
-        worldObject(`${area08Id}:transfer-control`, "terminal", 448, -1472, {
+        worldObject(`${area08Id}:transfer-control`, "gate-panel", 448, -1472, {
             interactionRadius,
             objectiveId: area08Objective.id,
+            gateId: `${area08Id}:gate`,
             cueIds: ["group-a-complete", "group-b-complete", "group-c-suspended", "priority-access-active"]
         }),
         worldObject(`${area08Id}:sector-end-checkpoint-object`, "checkpoint", 576, -1440, {
@@ -682,6 +715,6 @@ const area08 = defineArea({
 
 export const SECTOR_02_AREA_CATALOG = defineAreaCatalog({
     id: "sector-02-authored-mock",
-    revision: "sector-02-scenarios-rev1-v1",
+    revision: "sector-02-scenarios-rev1-v2",
     areas: [area01, area02, area03, area04, area05, area06, area07, area08]
 });

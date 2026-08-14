@@ -35,10 +35,27 @@ export function run() {
     assert.equal(progress.currentAreaId, "sector-01-02");
 
     const area02Objective = world.objectives.find(({ id }) => id === "sector-01-02:final-deck-reached");
-    player.physics.position.set(area02Objective.bounds.x + 10, area02Objective.bounds.y + 10);
-    const reachEvents = advanceWorldProgress({ world, progress, players: [player], commandsByPlayerId: commands });
+    const area02Panel = world.objects.find(({ id }) => id === "sector-01-02:exit-panel");
+    player.physics.position.set(area02Panel.position.x, area02Panel.position.y);
+    commands.set(player.id, { interact: false });
+    const reachEvents = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands
+    });
     assert.deepEqual(
         reachEvents.map(({ type }) => type),
+        ["objective-completed"]
+    );
+    assert.equal(reachEvents[0].objectiveId, area02Objective.id);
+    assert.equal(progress.isGateUnlocked("sector-01-02:gate"), false);
+
+    commands.set(player.id, { interact: true });
+    player.physics.position.set(area02Panel.position.x, area02Panel.position.y);
+    const panelEvents = advanceWorldProgress({ world, progress, players: [player], commandsByPlayerId: commands });
+    assert.deepEqual(
+        panelEvents.map(({ type }) => type),
         ["objective-completed", "gate-unlocked"]
     );
 }

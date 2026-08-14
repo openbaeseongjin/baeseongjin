@@ -35,6 +35,15 @@ export function run() {
         changed: false,
         reason: "objective-not-current"
     });
+    assert.deepEqual(progress.completeObjective("sector-01-02:exit-panel-engaged"), {
+        accepted: false,
+        changed: false,
+        reason: "objective-blocked",
+        requiredObjectiveIds: ["sector-01-02:final-deck-reached"]
+    });
+    assert.equal(progress.completeObjective("sector-01-02:final-deck-reached").changed, true);
+    assert.equal(progress.isGateUnlocked("sector-01-02:gate"), false);
+    assert.equal(progress.completeObjective("sector-01-02:exit-panel-engaged").gateUnlocked, true);
 
     const restored = new WorldProgressState(SECTOR_01_AREA_CATALOG, progress.snapshot());
     assert.deepEqual(restored.snapshot(), progress.snapshot());
@@ -45,6 +54,18 @@ export function run() {
                 unlockedGateIds: []
             }),
         /unlocked|unlock state/
+    );
+
+    const invalidDependencySnapshot = progress.snapshot();
+    assert.throws(
+        () =>
+            new WorldProgressState(SECTOR_01_AREA_CATALOG, {
+                ...invalidDependencySnapshot,
+                completedObjectiveIds: invalidDependencySnapshot.completedObjectiveIds.filter(
+                    (id) => id !== "sector-01-02:final-deck-reached"
+                )
+            }),
+        /prerequisite|requires/
     );
 
     const completeRun = new WorldProgressState(SECTOR_01_AREA_CATALOG);

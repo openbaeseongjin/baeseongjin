@@ -1,4 +1,5 @@
 import { isVisible } from "../RenderViewport.js";
+import { authoredGateOpening } from "../../game/world/AuthoredAreaBoundary.js";
 
 const SECTOR_STYLES = Object.freeze({
     "sector-01": Object.freeze({
@@ -28,15 +29,6 @@ function renderBounds(area) {
     return Object.freeze({ minX: x, minY: y, maxX: x + width, maxY: y + height });
 }
 
-function gateOpening(area, gate) {
-    const barrier = gate?.barrier;
-    const centerX = barrier
-        ? barrier.x + barrier.width * 0.5
-        : (area.exit?.x ?? area.bounds.x + area.bounds.width * 0.5);
-    const halfWidth = Math.max(52, (barrier?.width ?? 64) * 0.5 + 20);
-    return Object.freeze({ centerX, left: centerX - halfWidth, right: centerX + halfWidth });
-}
-
 export class AuthoredAreaStructureRenderer {
     draw({ context, scene, viewport, renderStats }) {
         const areas = (scene.world.areas ?? []).filter(({ bounds }) => bounds);
@@ -55,7 +47,7 @@ export class AuthoredAreaStructureRenderer {
         const style = SECTOR_STYLES[area.sectorId] ?? DEFAULT_STYLE;
         const { x, y, width, height } = area.bounds;
         const right = x + width;
-        const opening = gateOpening(area, gate);
+        const opening = authoredGateOpening(area, gate);
         const wallWidth = style.wallWidth;
         const bulkheadHeight = style.bulkheadHeight;
 

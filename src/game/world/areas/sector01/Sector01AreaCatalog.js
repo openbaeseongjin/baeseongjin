@@ -71,9 +71,10 @@ const area01 = defineArea({
             gameplay: false,
             cueIds: ["sector-01-01:fan-inactive"]
         }),
-        worldObject("sector-01-01:service-terminal", "terminal", 208, -896, {
+        worldObject("sector-01-01:service-terminal", "gate-panel", 208, -896, {
             interactionRadius,
             objectiveId: "sector-01-01:terminal-read",
+            gateId: "sector-01-01:gate",
             cueIds: ["sector-01-01:terminal-cascade", "sector-01-01:rooftop-pad-03"]
         }),
         worldObject("sector-01-01:service-gate", "gate", 320, -928, {
@@ -149,6 +150,12 @@ const area02 = defineArea({
         ),
         worldObject("sector-01-02:security-access-gate", "gate", 320, -1056, {
             gateId: "sector-01-02:gate"
+        }),
+        worldObject("sector-01-02:exit-panel", "gate-panel", 208, -1024, {
+            interactionRadius,
+            objectiveId: "sector-01-02:exit-panel-engaged",
+            gateId: "sector-01-02:gate",
+            requiredObjectiveIds: ["sector-01-02:final-deck-reached"]
         })
     ],
     objectives: [
@@ -156,9 +163,15 @@ const area02 = defineArea({
             id: "sector-01-02:final-deck-reached",
             type: "reach",
             bounds: triggerBounds(64, -1024, 288, 96)
+        },
+        {
+            id: "sector-01-02:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-01-02:exit-panel",
+            requiredObjectiveIds: ["sector-01-02:final-deck-reached"]
         }
     ],
-    gate: gate("sector-01-02:gate", 320, -1056, "sector-01-03", ["sector-01-02:final-deck-reached"]),
+    gate: gate("sector-01-02:gate", 320, -1056, "sector-01-03", ["sector-01-02:exit-panel-engaged"]),
     storyTriggers: ["lift-offline", "manual-access-only", "power-reduction-stage-2", "security-access-check"],
     cameraZones: ["intro", "first-handoff", "direction-reversal", "flow-test", "exit"],
     cueIds: ["maintenance-lift", "airborne-handoff", "security-access-check"]
@@ -207,9 +220,10 @@ const area03 = defineArea({
             activation: triggerBounds(-32, -736, 448, 512),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
         }),
-        worldObject("sector-01-03:service-panel", "terminal", 208, -1088, {
+        worldObject("sector-01-03:service-panel", "gate-panel", 208, -1088, {
             interactionRadius,
-            objectiveId: "sector-01-03:maintenance-override"
+            objectiveId: "sector-01-03:maintenance-override",
+            gateId: "sector-01-03:gate"
         }),
         worldObject("sector-01-03:security-gate", "gate", 320, -1088, { gateId: "sector-01-03:gate" })
     ],
@@ -274,6 +288,12 @@ const area04 = defineArea({
             hostile: false,
             damage: false
         }),
+        worldObject("sector-01-04:exit-panel", "gate-panel", 176, -576, {
+            interactionRadius,
+            objectiveId: "sector-01-04:exit-panel-engaged",
+            gateId: "sector-01-04:gate",
+            requiredObjectiveIds: ["sector-01-04:augment-selected"]
+        }),
         worldObject("sector-01-04:test-bay-gate", "gate", 288, -608, { gateId: "sector-01-04:gate" })
     ],
     objectives: [
@@ -281,9 +301,15 @@ const area04 = defineArea({
             id: "sector-01-04:augment-selected",
             type: "interact-choice",
             sourceObjectId: "sector-01-04:maintenance-node"
+        },
+        {
+            id: "sector-01-04:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-01-04:exit-panel",
+            requiredObjectiveIds: ["sector-01-04:augment-selected"]
         }
     ],
-    gate: gate("sector-01-04:gate", 288, -608, "sector-01-05", ["sector-01-04:augment-selected"]),
+    gate: gate("sector-01-04:gate", 288, -608, "sector-01-05", ["sector-01-04:exit-panel-engaged"]),
     storyTriggers: [
         "grapple-detected",
         "telemetry-analyzed",
@@ -364,6 +390,12 @@ const area05 = defineArea({
             activation: triggerBounds(-192, -1184, 576, 448),
             rules: ["standard-projectile", "no-rope-cut"]
         }),
+        worldObject("sector-01-05:exit-panel", "gate-panel", 176, -1216, {
+            interactionRadius,
+            objectiveId: "sector-01-05:exit-panel-engaged",
+            gateId: "sector-01-05:gate",
+            requiredObjectiveIds: ["sector-01-05:final-deck-reached"]
+        }),
         worldObject("sector-01-05:cooling-access-gate", "gate", 288, -1248, { gateId: "sector-01-05:gate" })
     ],
     objectives: [
@@ -371,9 +403,15 @@ const area05 = defineArea({
             id: "sector-01-05:final-deck-reached",
             type: "reach",
             bounds: triggerBounds(-32, -1280, 320, 96)
+        },
+        {
+            id: "sector-01-05:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-01-05:exit-panel",
+            requiredObjectiveIds: ["sector-01-05:final-deck-reached"]
         }
     ],
-    gate: gate("sector-01-05:gate", 288, -1248, "sector-01-06", ["sector-01-05:final-deck-reached"]),
+    gate: gate("sector-01-05:gate", 288, -1248, "sector-01-06", ["sector-01-05:exit-panel-engaged"]),
     routes: ["base-safe", "impulse-express", "relay-express", "shear-control", "recovery"],
     storyTriggers: ["active-augment-display", "live-calibration", "cooling-access-preview"],
     cameraZones: ["load-gap", "relay-spine", "live-security", "exit"],
@@ -435,6 +473,12 @@ const area06 = defineArea({
             windZoneId: "sector-01-06:fan-b-wind"
         }),
         worldObject("sector-01-06:central-cooling-core", "background-prop", 0, -800, { gameplay: false }),
+        worldObject("sector-01-06:exit-panel", "gate-panel", 176, -1344, {
+            interactionRadius,
+            objectiveId: "sector-01-06:exit-panel-engaged",
+            gateId: "sector-01-06:gate",
+            requiredObjectiveIds: ["sector-01-06:final-deck-reached"]
+        }),
         worldObject("sector-01-06:pressure-bypass-gate", "gate", 288, -1376, { gateId: "sector-01-06:gate" })
     ],
     objectives: [
@@ -442,6 +486,12 @@ const area06 = defineArea({
             id: "sector-01-06:final-deck-reached",
             type: "reach",
             bounds: triggerBounds(-96, -1408, 416, 96)
+        },
+        {
+            id: "sector-01-06:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-01-06:exit-panel",
+            requiredObjectiveIds: ["sector-01-06:final-deck-reached"]
         }
     ],
     windZones: [
@@ -461,7 +511,7 @@ const area06 = defineArea({
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
-    gate: gate("sector-01-06:gate", 288, -1376, "sector-01-07", ["sector-01-06:final-deck-reached"]),
+    gate: gate("sector-01-06:gate", 288, -1376, "sector-01-07", ["sector-01-06:exit-panel-engaged"]),
     storyTriggers: ["airflow-unstable", "cooling-pressure-critical", "bypass-required"],
     cameraZones: ["airflow-preview", "fan-a", "neutral-deck", "fan-b", "exit"],
     cueIds: ["wind-direction", "fan-a-continuous", "fan-b-lull-warning-active-decay", "bypass-required"]
@@ -525,9 +575,10 @@ const area07 = defineArea({
             damage: false,
             windZoneId: "sector-01-07:main-pressure-vent-wind"
         }),
-        worldObject("sector-01-07:manual-bypass-control", "terminal", 256, -1440, {
+        worldObject("sector-01-07:manual-bypass-control", "gate-panel", 256, -1440, {
             interactionRadius,
-            objectiveId: "sector-01-07:bypass-open"
+            objectiveId: "sector-01-07:bypass-open",
+            gateId: "sector-01-07:gate"
         }),
         worldObject("sector-01-07:containment-route-gate", "gate", 320, -1504, { gateId: "sector-01-07:gate" })
     ],
@@ -647,9 +698,10 @@ const area08 = defineArea({
             gateId: "sector-01-08:gate",
             cueIds: ["sector-01-08:final-warning", "sector-01-08:locked"]
         }),
-        worldObject("sector-01-08:maintenance-override-panel", "terminal", 208, -1584, {
+        worldObject("sector-01-08:maintenance-override-panel", "gate-panel", 208, -1584, {
             interactionRadius,
-            objectiveId: "sector-01-08:maintenance-override"
+            objectiveId: "sector-01-08:maintenance-override",
+            gateId: "sector-01-08:gate"
         }),
         worldObject("sector-01-08:sector-checkpoint", "checkpoint", 0, -1696, {
             cueIds: ["sector-01-08:worker-district-reveal", "sector-01-08:sector-checkpoint"]
@@ -709,6 +761,6 @@ const area08 = defineArea({
 
 export const SECTOR_01_AREA_CATALOG = defineAreaCatalog({
     id: "sector-01-authored-mock",
-    revision: "sector-01-scenarios-rev3-v1",
+    revision: "sector-01-scenarios-rev3-v2",
     areas: [area01, area02, area03, area04, area05, area06, area07, area08]
 });
