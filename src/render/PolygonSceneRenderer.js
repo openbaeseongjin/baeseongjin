@@ -18,6 +18,7 @@ import {
     PolygonProjectileRenderer,
     PolygonRemotePlayerRenderer
 } from "./polygon/PolygonActorRenderers.js";
+import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
 
 export class PolygonSceneRenderer {
     constructor() {
@@ -28,6 +29,7 @@ export class PolygonSceneRenderer {
                 new BackdropRenderer(),
                 new CameraWorldRenderer([
                     new WorldGeometryRenderer(),
+                    new AuthoredAreaStructureRenderer(),
                     new AuthoredWorldObjectRenderer(),
                     new AttachRangeRenderer(),
                     new RopeRenderer(localRopes),

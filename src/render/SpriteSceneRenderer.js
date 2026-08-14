@@ -26,6 +26,7 @@ import { PolygonSceneRenderer } from "./PolygonSceneRenderer.js";
 import { DEFAULT_ENVIRONMENT_DEFINITION } from "./environment/EnvironmentCatalog.js";
 import { EnvironmentAssetSet } from "./environment/EnvironmentAssetSet.js";
 import { EnvironmentRendererComposer } from "./environment/EnvironmentRendererComposer.js";
+import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
 
 export class SpriteAssetFallbackRenderer {
     constructor({ asset, spriteRenderer, polygonRenderer }) {
@@ -66,6 +67,7 @@ export class SpriteSceneRenderer {
         });
 
         const actorRenderers = new CameraWorldRenderer([
+            new AuthoredAreaStructureRenderer(),
             new AuthoredWorldObjectRenderer(),
             new AttachRangeRenderer(),
             new RopeRenderer(localRopes),

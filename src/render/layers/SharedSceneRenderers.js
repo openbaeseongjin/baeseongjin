@@ -201,14 +201,7 @@ export class AuthoredWorldObjectRenderer {
             context.fillRect(-width + 7, -height + 7, width * 2 - 14, 5);
             context.fillRect(-width + 7, -height + 17, width - 3, 4);
         } else if (object.kind === "gate") {
-            context.setLineDash(gateUnlocked ? [10, 9] : []);
-            context.strokeRect(-style.radius, -style.radius * 2.2, style.radius * 2, style.radius * 4.4);
-            context.beginPath();
-            context.moveTo(-style.radius, -style.radius * 2.2);
-            context.lineTo(style.radius, style.radius * 2.2);
-            context.moveTo(style.radius, -style.radius * 2.2);
-            context.lineTo(-style.radius, style.radius * 2.2);
-            context.stroke();
+            this.drawGate(context, style, gateUnlocked);
         } else if (object.kind === "grapple-landmark") {
             this.drawGrappleLandmark(context, style);
         } else if (object.kind === "wind-source") {
@@ -238,6 +231,45 @@ export class AuthoredWorldObjectRenderer {
             context.fillText(object.label, 0, -style.radius - 10);
         }
         context.restore();
+    }
+
+    drawGate(context, style, unlocked) {
+        const width = style.radius * 2.3;
+        const height = style.radius * 4.6;
+        const left = -width * 0.5;
+        const top = -height * 0.5;
+        const railWidth = 9;
+
+        context.fillStyle = "#0b1220";
+        if (unlocked) {
+            context.fillRect(left - 7, top - 7, 7, height + 14);
+            context.fillRect(width * 0.5, top - 7, 7, height + 14);
+            context.fillRect(left, top - 7, width, 7);
+            context.fillRect(left, height * 0.5, width, 7);
+        } else {
+            context.fillRect(left - 7, top - 7, width + 14, height + 14);
+        }
+        context.strokeStyle = unlocked ? "#67e8f9" : style.color;
+        context.lineWidth = unlocked ? 4 : 3;
+        context.strokeRect(left - 7, top - 7, width + 14, height + 14);
+
+        context.fillStyle = unlocked ? "rgba(103, 232, 249, 0.24)" : `${style.color}44`;
+        context.fillRect(left, top, railWidth, height);
+        context.fillRect(width * 0.5 - railWidth, top, railWidth, height);
+        context.fillRect(left, top, width, 10);
+
+        if (!unlocked) {
+            context.fillStyle = "rgba(15, 23, 42, 0.96)";
+            context.fillRect(left + railWidth, top + 10, width - railWidth * 2, height - 10);
+            context.fillStyle = `${style.color}55`;
+            context.fillRect(-3, top + 14, 6, height - 22);
+            for (let panelY = top + 28; panelY < top + height - 12; panelY += 28) {
+                context.fillRect(left + railWidth + 5, panelY, width - railWidth * 2 - 10, 4);
+            }
+        }
+
+        context.fillStyle = unlocked ? "#67e8f9" : style.color;
+        context.fillRect(width * 0.5 + 11, -5, 8, 10);
     }
 
     drawGrappleLandmark(context, style) {
