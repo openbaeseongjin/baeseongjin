@@ -51,7 +51,7 @@ Vertical Grid 사고 직후 하층에 갇힌 정비기사가 폐쇄된 Service S
 | B — Release Corridor | Release Timing | Rope를 놓는 법 |
 | C — Open Swing | Swing Enjoyment | 운동량과 큰 진자운동을 즐기는 법 |
 
-기존 `1-1` 이미지에는 Anchor 2개와 Turret이 포함되어 있어 REV 3.0과 충돌한다. 새 제작 이미지가 전달되기 전까지 기존 이미지는 보존하되 이 문서에서는 참조하지 않는다.
+기존 `1-1` 이미지에는 Anchor 2개와 Turret이 포함되어 있어 REV 3.0과 충돌하므로 계속 `RETIRED`로 보존한다. 현재 Gameplay 화면의 분위기와 상대 크기는 C04 Open Swing을 사용한 [승인 Scenario Art Reference](./images/04_scenario_art_reference.png)를 따른다.
 
 ## 01 · 절대 목표와 SECTOR 학습 순서
 
@@ -649,7 +649,8 @@ Stage는 32px Grid의 960×960 Blockout으로 시작한다. Ground Service Acces
 ├── PRODUCTION-ALIGNMENT.md    # 구현·카메라·아트 검수 계약
 └── images/
     ├── README.md              # 이미지별 사용 가능 상태
-    └── 03_approved_blockout.svg
+    ├── 03_approved_blockout.svg
+    └── 04_scenario_art_reference.png
 ```
 
 기존 REV 1.0 PNG는 결정 이력을 위해 보존하지만 `RETIRED`이며 구현과 아트 제작에는 사용하지 않는다.
