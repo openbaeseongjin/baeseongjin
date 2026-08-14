@@ -305,6 +305,7 @@ export class MultiplayerGameApp {
         });
         this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
+            currentAreaLocalX: cameraShot.localX,
             currentAreaLocalY: cameraShot.localY,
             events
         });

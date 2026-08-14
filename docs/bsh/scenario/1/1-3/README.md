@@ -4,6 +4,8 @@
 
 ◀ PREV — [SECTOR 01-2 / DOUBLE ANCHOR SHAFT](../1-2/README.md) · NEXT — [SECTOR 01-4 / MAINTENANCE NODE](../1-4/README.md) ▶
 
+> 실제 Runtime 좌표·Camera·Sentry 상태·Asset 인계 기준은 [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md)를 함께 따른다.
+
 Sector: 01 MAINTENANCE
 Stage: 03
 Theme: Automated Maintenance Security Check

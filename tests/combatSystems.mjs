@@ -168,7 +168,7 @@ export function run() {
         fireCooldown: 0
     });
     const enemyShots = [];
-    const spawned = updateEnemyWeapons({
+    let spawned = updateEnemyWeapons({
         enemies: [firingEnemy],
         targets: [target, secondTarget],
         projectiles: enemyShots,
@@ -176,6 +176,78 @@ export function run() {
         config: COMBAT_CONFIG,
         dt: 0
     });
+    assert.equal(spawned.length, 0, "a Sentry must acquire before it can fire");
+    assert.equal(firingEnemy.attackState, "acquire");
+    updateEnemyWeapons({
+        enemies: [firingEnemy],
+        targets: [target, secondTarget],
+        projectiles: enemyShots,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyAcquireSeconds
+    });
+    assert.equal(firingEnemy.attackState, "track");
+    updateEnemyWeapons({
+        enemies: [firingEnemy],
+        targets: [target, secondTarget],
+        projectiles: enemyShots,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyTrackSeconds
+    });
+    assert.equal(firingEnemy.attackState, "lock");
+    secondTarget.physics.position.set(60, 100);
+    spawned = updateEnemyWeapons({
+        enemies: [firingEnemy],
+        targets: [target, secondTarget],
+        projectiles: enemyShots,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyLockSeconds
+    });
     assert.ok(spawned[0] instanceof SimulationDrivenObject);
     assert.equal(spawned[0].targetId, "player-2", "the closest active player must be targeted");
+    assert.equal(spawned[0].velocity.y, 0, "LOCK must preserve the last tracked direction while the target dodges");
+
+    const coveredEnemy = new EnemyObject({
+        id: "enemy-covered",
+        position: new Vector2(100, 0),
+        level: 1,
+        areaId: "test-area",
+        activation: { x: -200, y: -200, width: 400, height: 400 },
+        rules: ["cover-ends-los"],
+        radius: 18,
+        health: 30,
+        maxHealth: 30,
+        fireCooldown: 0
+    });
+    const coveredTarget = {
+        ...target,
+        id: "covered-player",
+        physics: { ...target.physics, position: new Vector2(-100, 0) }
+    };
+    const cover = {
+        areaId: "test-area",
+        kind: "cover",
+        collision: true,
+        vertices: [
+            { x: -8, y: -48 },
+            { x: 8, y: -48 },
+            { x: 8, y: 48 },
+            { x: -8, y: 48 }
+        ]
+    };
+    assert.equal(
+        updateEnemyWeapons({
+            enemies: [coveredEnemy],
+            targets: [coveredTarget],
+            projectiles: [],
+            registry,
+            config: COMBAT_CONFIG,
+            surfaces: [cover],
+            dt: COMBAT_CONFIG.enemyAcquireSeconds + COMBAT_CONFIG.enemyTrackSeconds
+        }).length,
+        0
+    );
+    assert.equal(coveredEnemy.attackState, "idle", "authored cover must end Sentry line of sight");
 }

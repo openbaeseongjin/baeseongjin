@@ -31,6 +31,77 @@ const POSITION_PRESENTATIONS = Object.freeze({
                 })
             ])
         })
+    ]),
+    "sector-01-03": Object.freeze([
+        Object.freeze({
+            token: "employee-scan",
+            minLocalX: -144,
+            maxLocalX: -48,
+            minLocalY: -160,
+            maxLocalY: 0,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-03:employee-verified",
+                    title: "EMPLOYEE VERIFIED",
+                    detail: "VERTICAL MAINTENANCE",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-01-03:assigned-sector",
+                    title: "ASSIGNED SECTOR",
+                    detail: "LOWER MAINTENANCE",
+                    durationSeconds: 1.1
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "return-warning",
+            minLocalX: 112,
+            maxLocalX: 384,
+            minLocalY: -384,
+            maxLocalY: -288,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-03:return-warning",
+                    title: "RETURN TO ASSIGNED SECTOR",
+                    detail: "FINAL WARNING",
+                    durationSeconds: 1.4
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "unauthorized-transit",
+            minLocalY: -928,
+            maxLocalY: -384,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-03:route-violation",
+                    title: "ROUTE VIOLATION",
+                    detail: "DETECTED",
+                    durationSeconds: 0.45
+                }),
+                Object.freeze({
+                    id: "sector-01-03:unauthorized-transit",
+                    title: "UNAUTHORIZED",
+                    detail: "VERTICAL TRANSIT",
+                    durationSeconds: 1.2
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "access-denied",
+            minLocalX: 32,
+            minLocalY: -1152,
+            maxLocalY: -944,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-03:access-denied",
+                    title: "ACCESS DENIED",
+                    detail: "RETURN TO ASSIGNED SECTOR",
+                    durationSeconds: 1.2
+                })
+            ])
+        })
     ])
 });
 
@@ -68,6 +139,14 @@ const OBJECTIVE_PRESENTATIONS = Object.freeze({
             detail: "CHECK",
             durationSeconds: 1.2
         })
+    ]),
+    "sector-01-03:maintenance-override": Object.freeze([
+        Object.freeze({
+            id: "sector-01-03:maintenance-override",
+            title: "MAINTENANCE",
+            detail: "OVERRIDE",
+            durationSeconds: 0.9
+        })
     ])
 });
 
@@ -79,8 +158,28 @@ const GATE_PRESENTATIONS = Object.freeze({
             detail: "ACCESS OPEN",
             durationSeconds: 1.2
         })
+    ]),
+    "sector-01-03:gate": Object.freeze([
+        Object.freeze({
+            id: "sector-01-03:violation-logged",
+            title: "VIOLATION",
+            detail: "LOGGED",
+            durationSeconds: 1.2
+        })
     ])
 });
+
+function insideOptionalRange(value, minimum, maximum) {
+    if (!Number.isFinite(value)) return minimum === undefined && maximum === undefined;
+    return (minimum === undefined || value >= minimum) && (maximum === undefined || value <= maximum);
+}
+
+function positionMatches(trigger, localX, localY) {
+    return (
+        insideOptionalRange(localX, trigger.minLocalX, trigger.maxLocalX) &&
+        insideOptionalRange(localY, trigger.minLocalY, trigger.maxLocalY)
+    );
+}
 
 export class AuthoredStoryPresentation {
     constructor() {
@@ -112,13 +211,13 @@ export class AuthoredStoryPresentation {
         }
     }
 
-    update(dt, { currentAreaId = null, currentAreaLocalY = null, events = [] } = {}) {
+    update(dt, { currentAreaId = null, currentAreaLocalX = null, currentAreaLocalY = null, events = [] } = {}) {
         if (currentAreaId !== this.currentAreaId) {
             this.currentAreaId = currentAreaId;
             this.#enqueue(`area:${currentAreaId}`, ENTRY_PRESENTATIONS[currentAreaId]);
         }
         for (const trigger of POSITION_PRESENTATIONS[currentAreaId] ?? []) {
-            if (Number.isFinite(currentAreaLocalY) && currentAreaLocalY <= trigger.maxLocalY) {
+            if (positionMatches(trigger, currentAreaLocalX, currentAreaLocalY)) {
                 this.#enqueue(`position:${currentAreaId}:${trigger.token}`, trigger.presentations);
             }
         }

@@ -209,6 +209,9 @@ export class GameSimulation {
             activation: enemy.activation,
             patrol: enemy.patrol,
             lockedTargetId: enemy.lockedTargetId,
+            attackState: enemy.attackState,
+            attackStateRemaining: enemy.attackStateRemaining,
+            aimDirection: enemy.aimDirection,
             rules: enemy.rules,
             radius: enemy.radius,
             health: enemy.health,
@@ -601,6 +604,7 @@ export class GameSimulation {
             projectiles: this.enemyProjectiles,
             registry: this.registry,
             config: COMBAT_CONFIG,
+            surfaces: this.activeCollisionSurfaces,
             dt
         });
         for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile);

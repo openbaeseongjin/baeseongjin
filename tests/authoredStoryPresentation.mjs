@@ -111,4 +111,110 @@ export function run() {
         null,
         "replayed final-deck events must not repeat either 1-2 story cue"
     );
+
+    const securityCheck = new AuthoredStoryPresentation();
+    assert.equal(
+        securityCheck.update(0, {
+            currentAreaId: "sector-01-03",
+            currentAreaLocalX: -320,
+            currentAreaLocalY: -32
+        }),
+        null,
+        "employee verification must wait until the local player crosses the scanner"
+    );
+    assert.deepEqual(
+        [
+            securityCheck.update(0, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: -96,
+                currentAreaLocalY: -32
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["EMPLOYEE VERIFIED", "VERTICAL MAINTENANCE"]
+    );
+    assert.deepEqual(
+        [
+            securityCheck.update(1.1, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: -96,
+                currentAreaLocalY: -32
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["ASSIGNED SECTOR", "LOWER MAINTENANCE"]
+    );
+    assert.deepEqual(
+        [
+            securityCheck.update(1.1, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: 240,
+                currentAreaLocalY: -320
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["RETURN TO ASSIGNED SECTOR", "FINAL WARNING"]
+    );
+    assert.deepEqual(
+        [
+            securityCheck.update(1.4, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: 64,
+                currentAreaLocalY: -384
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["ROUTE VIOLATION", "DETECTED"]
+    );
+    assert.deepEqual(
+        [
+            securityCheck.update(0.45, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: 64,
+                currentAreaLocalY: -480
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["UNAUTHORIZED", "VERTICAL TRANSIT"]
+    );
+    assert.deepEqual(
+        [
+            securityCheck.update(1.2, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: 208,
+                currentAreaLocalY: -1000
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["ACCESS DENIED", "RETURN TO ASSIGNED SECTOR"]
+    );
+
+    const maintenanceOverride = {
+        eventType: "objective-completed",
+        objectiveId: "sector-01-03:maintenance-override"
+    };
+    assert.deepEqual(
+        [
+            securityCheck.update(1.2, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: 208,
+                currentAreaLocalY: -1000,
+                events: [maintenanceOverride]
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["MAINTENANCE", "OVERRIDE"]
+    );
+    assert.deepEqual(
+        [
+            securityCheck.update(0.9, {
+                currentAreaId: "sector-01-03",
+                currentAreaLocalX: 208,
+                currentAreaLocalY: -1000,
+                events: [{ eventType: "gate-unlocked", gateId: "sector-01-03:gate" }]
+            }).title,
+            securityCheck.snapshot().detail
+        ],
+        ["VIOLATION", "LOGGED"]
+    );
 }

@@ -137,6 +137,22 @@ export function run() {
         ],
         "1-2 landmarks and floor-mounted exit objects must use the approved anchors"
     );
+    const thirdAreaDefinition = SECTOR_01_AREA_CATALOG.areas.find(({ id }) => id === "sector-01-03");
+    const thirdRecovery = thirdAreaDefinition.surfaces.find(({ id }) => id === "sector-01-03:r1");
+    assert.deepEqual(authoredSurfaceBounds(thirdRecovery), {
+        x: -32,
+        y: -576,
+        width: 256,
+        height: 16
+    });
+    assert.deepEqual(
+        thirdAreaDefinition.recoveryPoints.find(({ id }) => id === "sector-01-03:recovery-r1"),
+        { id: "sector-01-03:recovery-r1", x: 96, y: -600 },
+        "1-3 R1 must match the documented B handoff recovery deck"
+    );
+    const thirdSentry = thirdAreaDefinition.objects.find(({ id }) => id === "sector-01-03:sentry-turret-01");
+    assert.deepEqual(thirdSentry.activation, { x: -480, y: -928, width: 960, height: 544 });
+    assert.deepEqual(thirdSentry.rules, ["standard-projectile", "no-rope-cut", "cover-ends-los"]);
     for (const object of currentWorld.objects.filter(
         ({ kind, gateId }) => gateId && (kind === "gate" || kind === "gate-panel")
     )) {

@@ -221,7 +221,7 @@ const area03 = defineArea({
     surfaces: [
         horizontalSurface("sector-01-03:p0", -144, 0, 544),
         horizontalSurface("sector-01-03:p1", 240, -320, 224),
-        horizontalSurface("sector-01-03:r1", -192, -512, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-03:r1", 96, -576, 256, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-03:safe-ledge", -240, -640, 224, 16, { kind: "safe-deck" }),
         groundedSurface("sector-01-03:safe-cover", -112, -640, 32, 128, { kind: "cover", oneWay: false }),
         groundedSurface("sector-01-03:upper-cover", -16, -832, 96, 128, { kind: "cover", oneWay: false }),
@@ -240,7 +240,7 @@ const area03 = defineArea({
         point("sector-01-03:route-exit", 288, -1088)
     ],
     recoveryPoints: [
-        point("sector-01-03:recovery-r1", -192, -536),
+        point("sector-01-03:recovery-r1", 96, -600),
         point("sector-01-03:recovery-safe-ledge", -240, -664)
     ],
     objects: [
@@ -249,7 +249,8 @@ const area03 = defineArea({
             cueIds: ["sector-01-03:employee-verified"]
         }),
         worldObject("sector-01-03:sentry-turret-01", "sentry", 416, -640, {
-            activation: triggerBounds(-32, -736, 448, 512),
+            enemyType: "sentry-t1",
+            activation: triggerBounds(-480, -928, 960, 544),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
         }),
         worldObject("sector-01-03:service-panel", "gate-panel", 208, -1056, {
@@ -283,7 +284,14 @@ const area03 = defineArea({
         "violation-logged"
     ],
     routes: ["safe", "flow", "recovery"],
-    cameraZones: ["identification", "warning", "turret-reveal", "route-choice", "relief", "exit"],
+    cameraZones: [
+        cameraZone("identification", -224, 0, 1.15, 0.78, { verticalPlayerRatio: 0.5 }),
+        cameraZone("warning", -416, -224, 1, 0.72, { verticalPlayerRatio: 0.6 }),
+        cameraZone("turret-reveal", -544, -416, 0.95, 0.7, { verticalPlayerRatio: 0.68 }),
+        cameraZone("route-choice", -800, -544, 0.88, 0.66, { verticalPlayerRatio: 0.62 }),
+        cameraZone("relief", -944, -800, 1, 0.72, { verticalPlayerRatio: 0.6 }),
+        cameraZone("exit", -1152, -944, 1.15, 0.78, { verticalPlayerRatio: 0.68 })
+    ],
     cueIds: ["security-scanner", "sentry-telegraph", "maintenance-override", "violation-logged"]
 });
 
@@ -825,6 +833,6 @@ const area08 = defineArea({
 
 export const SECTOR_01_AREA_CATALOG = defineAreaCatalog({
     id: "sector-01-authored-mock",
-    revision: "sector-01-scenarios-rev3-v2",
+    revision: "sector-01-scenarios-rev3-v3",
     areas: [area01, area02, area03, area04, area05, area06, area07, area08]
 });

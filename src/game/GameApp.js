@@ -103,6 +103,7 @@ export class GameApp {
         const cameraShot = this.updateCamera(dt, state.player, state.world);
         this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
+            currentAreaLocalX: cameraShot.localX,
             currentAreaLocalY: cameraShot.localY,
             events: authorityEvents
         });

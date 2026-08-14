@@ -5,6 +5,7 @@ import {
     resolveCanvasBackingStore
 } from "../src/render/RenderPerformanceMetrics.js";
 import { createRenderViewport, isVisible } from "../src/render/RenderViewport.js";
+import { enemyAimLine, enemySensorColor } from "../src/render/EnemyTelegraphPresentation.js";
 import { SpriteEnemyRenderer, SpriteProjectileRenderer } from "../src/render/sprites/SpriteActorRenderers.js";
 import { PolygonEnemyRenderer, PolygonProjectileRenderer } from "../src/render/polygon/PolygonActorRenderers.js";
 
@@ -60,6 +61,19 @@ export function run() {
     assert.equal(isVisible(viewport, { minX: 500, minY: 0, maxX: 520, maxY: 20 }), false);
     assert.ok(Object.isFrozen(viewport));
     assert.ok(Object.isFrozen(viewport.worldBounds));
+
+    const trackedAim = enemyAimLine({
+        position: { x: 10, y: 20 },
+        attackState: "track",
+        aimDirection: { x: 0, y: -1 }
+    });
+    assert.deepEqual(trackedAim.end, { x: 10, y: -500 });
+    assert.equal(trackedAim.width, 1.5);
+    assert.equal(
+        enemyAimLine({ position: { x: 0, y: 0 }, attackState: "cooldown", aimDirection: { x: 1, y: 0 } }),
+        null
+    );
+    assert.equal(enemySensorColor({ attackState: "lock" }), "#ff5a36");
 
     const metrics = new RenderPerformanceMetrics({ sampleSize: 4 });
     const resolution = {
