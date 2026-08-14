@@ -1,6 +1,6 @@
 # SECTOR 03-2 — SCANNER GALLERY
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — RUNTIME NOTE / GATE CONTRACT SYNC*
 
 ◀ PREV — [SECTOR 03-1 / POWERED PROMENADE](../3-1/README.md) · NEXT — [SECTOR 03-3 / RETAIL SECURITY WALK](../3-3/README.md) ▶
 
@@ -160,8 +160,19 @@ for every surface
 → candidate
 ```
 
-순서로 모든 Surface를 검사하며
-`grappleable` 또는 Security State Filter는 아직 없다.
+순서로 모든 Surface를 검사한다.
+
+```text
+STATIC GRAPPLEABLE FILTER
+= IMPLEMENTED
+
+surface.grappleable === false → skip
+
+DYNAMIC ACCESS SCAN FIELD FILTER
+= NOT IMPLEMENTED
+```
+
+기존 3-2 초안의 "static grappleable filter도 없음" 서술은 stale하여 Sector 03 Integration Cross-Validation Audit(PATCH 02)에 따라 갱신했다. Gameplay Rule은 변경하지 않는다.
 
 ### VERIFIED — Current Simulation Model
 
@@ -281,6 +292,25 @@ NEW MOVING COLLIDER = 0
 
 이면서
 새로운 Rope Timing 판단을 만든다.
+
+---
+
+## 0-3. VERIFIED — Gate / Exit Contract Sync
+
+현재 authored Stage Exit는:
+
+```text
+objective
+→ Gate Panel interaction
+→ Gate open
+→ Player physically crosses
+```
+
+구조다.
+
+별도 `E` Key를 추가하지 않고 현재 contextual interaction 문법을 유지한다.
+
+3-2 최초 작성 시점에는 이 계약이 확정되기 전이라 Exit가 단순 `EXIT → next stage`로만 표현돼 있었다. Sector 03 Integration Cross-Validation Audit(PATCH 03)에 따라 Gameplay / Geometry 변경 없이 Exit 표현만 동기화한다.
 
 ---
 
@@ -548,7 +578,7 @@ PASS REQUIRED
 Y -1184
 
 ┌──────────────────────────────────────────────────────────────┐
-│                                      EXIT → 3-3              │
+│                                      GATE → 3-3              │
 │                                P5 ███████████                │
 │                                      ▲                       │
 │                                 G5 ●                         │
@@ -702,7 +732,7 @@ Drone 자체를 미리 공격시키지 않는다.
 | P4 | -256~+64 | -928 | 320 | Confirmation Deck |
 | G5 | +64~+192 | -1024 | 128 | Final Permanent Pivot |
 | P5 | +224~+512 | -1120 | 288 | Exit Deck |
-| Exit | +320~+576 | -1152 | 256 | To 3-3 |
+| Exit / Gate Panel | +320~+576 | -1152 | 256 | Objective → Gate Panel → Gate open → physical crossing → 3-3 |
 
 ### Scanner H1
 
@@ -742,7 +772,9 @@ P0
 → P4
 → G5
 → P5
-→ EXIT
+→ Gate Panel
+→ Gate open
+→ EXIT (3-3)
 ```
 
 ### 특징
@@ -1226,7 +1258,10 @@ controlled child surface
 
 ### 19-3. Rope Target Filter
 
-현재 `findRopeAttachment()`는 모든 Surface를 검사한다.
+현재 `findRopeAttachment()`는 모든 Surface를 검사하되
+`surface.grappleable === false`인 Surface는 candidate에서 제외한다(STATIC FILTER IMPLEMENTED).
+
+Dynamic Access Scan Field 기반 filter는 아직 없다.
 
 권장 확장:
 
@@ -1745,7 +1780,9 @@ Scanner + Patrol Drone
     ],
 
     completion: {
-        type: "reach-exit"
+        type: "gate-panel-objective",
+        gatePanel: "contextual-interaction",
+        physicalCrossing: true
     },
 
     exit: {
@@ -1983,4 +2020,4 @@ Security Shutter 또는 다른 Route-Control System을 재검토한다.
 
 ---
 
-SECTOR 03-2 / SCANNER GALLERY — REV 1.0
+SECTOR 03-2 / SCANNER GALLERY — REV 1.1
