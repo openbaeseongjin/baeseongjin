@@ -11,6 +11,17 @@ import {
     worldObjectPresentation
 } from "../src/render/assets/WorldObjectPresentationCatalog.js";
 
+function authoredSurfaceBounds(surface) {
+    const xs = surface.vertices.map(({ x }) => x);
+    const ys = surface.vertices.map(({ y }) => y);
+    return {
+        x: Math.min(...xs),
+        y: Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs),
+        height: Math.max(...ys) - Math.min(...ys)
+    };
+}
+
 export function run() {
     const before = JSON.stringify(SECTOR_01_AREA_CATALOG);
     const first = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 9182, floorY: 320 });
@@ -86,6 +97,45 @@ export function run() {
         first.surfaces.find(({ id }) => id === firstPlatform.id).position.y,
         firstPlatform.position.y + 320,
         "assembly must translate the authored platform anchor together with its vertices"
+    );
+    const secondAreaDefinition = SECTOR_01_AREA_CATALOG.areas.find(({ id }) => id === "sector-01-02");
+    assert.deepEqual(
+        Object.fromEntries(
+            secondAreaDefinition.surfaces
+                .filter(({ id }) => /:(p[0-4]|crossbeam-x1)$/.test(id))
+                .map((surface) => [
+                    surface.id.split(":").at(-1),
+                    { ...authoredSurfaceBounds(surface), grappleable: surface.grappleable }
+                ])
+        ),
+        {
+            p0: { x: -416, y: 0, width: 256, height: 32, grappleable: true },
+            p1: { x: 64, y: -288, width: 192, height: 16, grappleable: true },
+            "crossbeam-x1": { x: -64, y: -544, width: 128, height: 32, grappleable: false },
+            p2: { x: -288, y: -576, width: 192, height: 16, grappleable: true },
+            p3: { x: 64, y: -800, width: 192, height: 16, grappleable: true },
+            p4: { x: 64, y: -960, width: 288, height: 32, grappleable: true }
+        },
+        "1-2 gameplay surfaces must stay aligned with the REV 3.1 approved blockout"
+    );
+    assert.deepEqual(
+        secondAreaDefinition.objects
+            .filter(({ id }) => /:(maintenance-lift|anchor-[a-d]|security-access-gate|exit-panel)$/.test(id))
+            .map(({ id, position, coordinateAnchor }) => ({
+                id: id.split(":").at(-1),
+                position,
+                coordinateAnchor
+            })),
+        [
+            { id: "maintenance-lift", position: { x: 0, y: -544 }, coordinateAnchor: "center" },
+            { id: "anchor-a", position: { x: -128, y: -192 }, coordinateAnchor: "center" },
+            { id: "anchor-b", position: { x: 160, y: -416 }, coordinateAnchor: "center" },
+            { id: "anchor-c", position: { x: -160, y: -640 }, coordinateAnchor: "center" },
+            { id: "anchor-d", position: { x: 128, y: -864 }, coordinateAnchor: "center" },
+            { id: "security-access-gate", position: { x: 320, y: -960 }, coordinateAnchor: "bottom-center" },
+            { id: "exit-panel", position: { x: 208, y: -960 }, coordinateAnchor: "bottom-center" }
+        ],
+        "1-2 landmarks and floor-mounted exit objects must use the approved anchors"
     );
     for (const object of currentWorld.objects.filter(
         ({ kind, gateId }) => gateId && (kind === "gate" || kind === "gate-panel")

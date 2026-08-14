@@ -12,7 +12,7 @@ import { advanceArtifactRewardSelection, createArtifactRewardSelection } from ".
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
-import { advanceAuthoredCamera, authoredAreaForPosition } from "./camera/AuthoredCameraDirector.js";
+import { advanceAuthoredCamera } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 
 function renderPlayer(state, predicted = null) {
@@ -293,7 +293,7 @@ export class MultiplayerGameApp {
         }
         const player = this.authority.snapshot(1).predicted;
         const authoredWorld = this.authority.renderSnapshot()?.world;
-        advanceAuthoredCamera({
+        const cameraShot = advanceAuthoredCamera({
             camera: this.camera,
             world: authoredWorld,
             player,
@@ -304,7 +304,8 @@ export class MultiplayerGameApp {
             dt
         });
         this.storyPresentation.update(dt, {
-            currentAreaId: authoredAreaForPosition(authoredWorld, player.position)?.id ?? null,
+            currentAreaId: cameraShot.areaId,
+            currentAreaLocalY: cameraShot.localY,
             events
         });
         this.audioBindings?.presentFrame({

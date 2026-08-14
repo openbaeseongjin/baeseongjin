@@ -199,7 +199,13 @@ const area02 = defineArea({
         portalBottomY: -960
     }),
     storyTriggers: ["lift-offline", "manual-access-only", "power-reduction-stage-2", "security-access-check"],
-    cameraZones: ["intro", "first-handoff", "direction-reversal", "flow-test", "exit"],
+    cameraZones: [
+        cameraZone("lift-failure", -224, 0, 1.2, 0.8),
+        cameraZone("first-handoff", -512, -224, 1, 0.72),
+        cameraZone("direction-reversal", -736, -512, 0.95, 0.7),
+        cameraZone("flow-test", -944, -736, 1, 0.72),
+        cameraZone("exit", -1088, -944, 1.15, 0.78)
+    ],
     cueIds: ["maintenance-lift", "airborne-handoff", "security-access-check"]
 });
 

@@ -36,4 +36,79 @@ export function run() {
         events: [{ eventType: "gate-unlocked", gateId: "sector-01-01:gate" }]
     });
     assert.equal(presentation.snapshot(), null, "replayed network events must not repeat a story cue");
+
+    const secondAreaPresentation = new AuthoredStoryPresentation();
+    assert.deepEqual(
+        [
+            secondAreaPresentation.update(0, {
+                currentAreaId: "sector-01-02",
+                currentAreaLocalY: -32
+            }).title,
+            secondAreaPresentation.snapshot().detail
+        ],
+        ["LIFT CONTROL", "OFFLINE"]
+    );
+    const waitingAtEntry = new AuthoredStoryPresentation();
+    waitingAtEntry.update(0, { currentAreaId: "sector-01-02", currentAreaLocalY: -32 });
+    assert.equal(
+        waitingAtEntry.update(1.6, { currentAreaId: "sector-01-02", currentAreaLocalY: -32 }),
+        null,
+        "manual access guidance must wait for the player's first ascent"
+    );
+    secondAreaPresentation.update(0, {
+        currentAreaId: "sector-01-02",
+        currentAreaLocalY: -96
+    });
+    assert.deepEqual(
+        [
+            secondAreaPresentation.update(1.6, {
+                currentAreaId: "sector-01-02",
+                currentAreaLocalY: -96
+            }).title,
+            secondAreaPresentation.snapshot().detail
+        ],
+        ["AUTOMATIC LIFT SERVICE", "SUSPENDED · MANUAL ACCESS ONLY"]
+    );
+    assert.equal(
+        secondAreaPresentation.update(1.8, {
+            currentAreaId: "sector-01-02",
+            currentAreaLocalY: -300
+        }),
+        null
+    );
+
+    const finalDeckReached = {
+        eventType: "objective-completed",
+        objectiveId: "sector-01-02:final-deck-reached"
+    };
+    assert.deepEqual(
+        [
+            secondAreaPresentation.update(0, {
+                currentAreaId: "sector-01-02",
+                currentAreaLocalY: -960,
+                events: [finalDeckReached]
+            }).title,
+            secondAreaPresentation.snapshot().detail
+        ],
+        ["POWER REDUCTION", "STAGE 2"]
+    );
+    assert.deepEqual(
+        [
+            secondAreaPresentation.update(1.2, {
+                currentAreaId: "sector-01-02",
+                currentAreaLocalY: -960
+            }).title,
+            secondAreaPresentation.snapshot().detail
+        ],
+        ["SECURITY ACCESS", "CHECK"]
+    );
+    assert.equal(
+        secondAreaPresentation.update(1.2, {
+            currentAreaId: "sector-01-02",
+            currentAreaLocalY: -960,
+            events: [finalDeckReached]
+        }),
+        null,
+        "replayed final-deck events must not repeat either 1-2 story cue"
+    );
 }
