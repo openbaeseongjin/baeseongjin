@@ -2496,7 +2496,7 @@ Rope를 더 잘 쓰고 싶게 만드는가?"
 
 ![1-3 Scenario Art Reference](./images/03_scenario_art_reference.png)
 
-`APPROVED ART REFERENCE`: Security Shaft의 분위기와 Gameplay 정보 위계를 정한다. 이미지 속 Platform·Rope 선은 물리 좌표가 아니며, Sentry 한 기와 얇은 Telegraph, Cyan Anchor, Cover, Recovery, Gate의 가독성을 참고한다.
+`TEMPORARY / PENDING REGENERATION`: Security Shaft의 분위기, Sentry 한 기와 얇은 Telegraph, Cyan Anchor, Cover, Recovery, Gate의 가독성만 참고한다. Player 크기와 Rope 선은 생성 기준이 아니며 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 대표 Gameplay Shot으로 교체한다.
 
 ### Approved Blockout
 

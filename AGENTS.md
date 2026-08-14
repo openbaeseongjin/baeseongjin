@@ -25,6 +25,14 @@
 - 새 environment runtime 리소스는 `assets/runtime/environments/default-mock/sprite-manifest.json`을 복사해 시작하고 `npm run validate:environment-assets -- <directory>`를 통과시킨다. atlas 개수와 frame 배열은 바꿀 수 있지만 loader·schema·example·validator를 하나의 공개 계약으로 유지한다.
 - terrain 표현은 기존 collision surface polygon과 one-way edge chain을 그대로 사용한다. decoration은 충돌을 추가하지 않고 이동 경로 밖 또는 배경에만 배치하며, asset 실패는 backdrop·terrain·decoration별 독립 fallback과 `?metrics=1` 진단으로 검증한다.
 
+## Scenario art reference work
+
+- 시나리오 이미지를 생성·편집하기 전에 `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`, 해당 Sector README, Stage README와 `PRODUCTION-ALIGNMENT.md`를 전부 읽고 현재 Area Catalog의 Area ID·Camera Zone·Stable ID·오브젝트 수와 구현 상태를 확인한다.
+- 문서와 Runtime이 다르면 이미지 생성을 멈추고 먼저 둘을 정렬한다. `RETIRED`, `RETIRED PARTIAL`, `PENDING REGENERATION` 이미지는 생성 입력이나 구현·외주·검수 근거로 사용하지 않는다.
+- `Scenario Art Reference`는 대표 Gameplay Camera Shot 한 장으로 만들고, 정확한 좌표·전체 경로·LOS·Wind Zone은 `Approved Blockout`이 소유한다. 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시하며 다른 Anchor를 Polyline·삼각형·네트워크로 연결하지 않는다.
+- 생성 전후에는 기준 문서의 확인표를 수행한다. 사용한 Stage·Camera Zone·정확한 오브젝트 수·금지 요소·출력 경로·이미지 상태를 Stage 문서에 기록하고, 생성된 PNG를 통이미지 Runtime 배경이나 Collision으로 사용하지 않는다.
+- 직전 Stage 생성물을 연쇄 Style Anchor로 추가하지 않는다. 공용 Sector 환경 기준과 고정 Player 규격을 재사용하고, Player Character Master가 승인되면 기준 문서를 같은 변경에서 갱신한다.
+
 ## Audio asset work
 
 - 오디오 생성·교체·import·codec·loop 작업은 파일을 만들기 전에 `docs/audio-asset-guide.md`와 `docs/audio-asset-format.md`를 전부 읽고 `assets/audio-authoring/README.md`와 `assets/runtime/audio/README.md`에서 인계·mock 범위를 확인한다.

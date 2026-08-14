@@ -11,7 +11,7 @@
 | A→B→C→D 공중 Grapple 연결 | `DECIDED` | 중간 착지 없는 Flow Route와 Recovery를 쓰는 Safe Route 모두 제공 |
 | Enemy·Damage Hazard·Wind·Augment 없음 | `DECIDED` | 첫 Enemy는 1-3에서 소개 |
 | 960×1088 Authored Geometry | `DECIDED` | Runtime Catalog와 승인 Blockout이 같은 좌표 사용 |
-| `03_scenario_art_reference.png` | `APPROVED ART REFERENCE` | 적 없는 Lift Shaft, 4-Anchor 지그재그, 색·조명·깊이 기준 |
+| `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | 환경 분위기와 4-Anchor 위계만 참고; 전체 경로 선을 제거한 대표 Gameplay Shot으로 교체 |
 | `04_approved_blockout.svg` | `APPROVED BLOCKOUT` | 플랫폼·Anchor·Recovery·Crossbeam·Gate의 배치 기준 |
 | 기존 `01_swing_line.png` | `RETIRED PARTIAL` | Anchor 3개만 보여 현재 A→B→C→D 구조와 불일치 |
 | 기존 `02_level_layout.png` | `RETIRED` | Turret·Terminal이 있어 1-2 금지 요소와 충돌 |
@@ -21,16 +21,17 @@
 
 1. 핵심 학습, 금지 요소, Story 의미는 [시나리오 README](./README.md)가 결정한다.
 2. 실제 좌표와 충돌은 [`Sector01AreaCatalog.js`](../../../../../src/game/world/areas/sector01/Sector01AreaCatalog.js)의 `sector-01-02` 정의와 [승인 Blockout](./images/04_approved_blockout.svg)이 항상 일치해야 한다.
-3. [Scenario Art Reference](./images/03_scenario_art_reference.png)는 분위기와 Gameplay 정보 위계를 결정하지만 좌표를 복제하지 않는다.
+3. [Scenario Art Reference](./images/03_scenario_art_reference.png)는 환경 분위기와 일부 오브젝트 위계만 임시 참고하며, Player 크기·Rope 연결·Camera 구도 기준으로 사용하지 않는다.
 4. 기존 두 PNG는 기록용이며 구현·외주·검수 자료에 첨부하지 않는다.
+5. 재생성은 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)과 현재 Runtime Camera Zone을 적용한다.
 
-## 3. 승인 이미지
+## 3. 문서 이미지
 
 ### Scenario Art Reference
 
 ![1-2 Scenario Art Reference](./images/03_scenario_art_reference.png)
 
-적이나 위험요소 없이 고장 난 중앙 Lift, 네 개의 Cyan Anchor, 작은 Player와 Red Scarf, 어두운 산업시설 깊이를 보여준다. 이미지의 Platform 위치는 분위기 구성이고 물리 좌표가 아니다.
+`TEMPORARY / PENDING REGENERATION`: 적 없는 Lift Shaft, 네 개의 Cyan Anchor, 어두운 산업시설 깊이만 참고한다. 전체 Anchor를 잇는 선은 live Rope가 아니며 새 이미지에 복제하지 않는다. 이미지의 Platform 위치는 분위기 구성이고 물리 좌표가 아니다.
 
 ### Approved Blockout
 
@@ -159,7 +160,7 @@ Recovery 중심은 P1 `(160, -312)`, P2 `(-192, -600)`, P3 `(160, -824)`다. 실
 | 지형·Anchor·Gate | Runtime Mock 연결 완료 | 승인 Blockout과 좌표 동기화 유지 |
 | Camera | 전 구간 공통 추적 | C01~C05 Zone Preset 연결 |
 | Story | Trigger 이름 보존 | 조건·문구·표시 시간을 Presentation에 연결 |
-| 그래픽 | Scenario Art Reference 승인 | 공용 Atlas용 Lift·Rail·Cable 모듈 제작 |
+| 그래픽 | 기존 Art Reference 임시 사용 | 규격에 맞는 대표 Camera Shot 재생성 후 공용 Atlas용 Lift·Rail·Cable 모듈 제작 |
 | 플레이테스트 | 자동 월드 검증 완료 | Safe/Flow Route와 공중 Attach 성공률 측정 |
 
-다음 1-3에서도 `Scenario Art Reference + Approved Blockout` 두 이미지를 새로 만들되, Security Check의 Sentry·LOS·Telegraph 계약을 포함한다.
+다음 Stage의 이미지도 `Scenario Art Reference + Approved Blockout` 역할을 분리하고, 생성 직전 해당 Runtime의 Camera·오브젝트·구현 상태를 확인한다.

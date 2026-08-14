@@ -28,3 +28,4 @@
 - Markdown에서는 `![이미지 설명](./images/file-name.png)`처럼 상대 경로로 연결한다.
 - HTML 자료에서는 `<img src="./images/file-name.png" alt="이미지 설명">`처럼 같은 상대 경로를 사용한다.
 - 로컬 컴퓨터의 절대 경로나 임시 첨부 URL을 문서에 연결하지 않는다.
+- 시나리오용 `Scenario Art Reference`의 생성·상태·검수는 [`bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`](./bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md)를 따른다. 생성 전에 현재 Stage 문서와 Runtime을 확인하고 `RETIRED`·`PENDING REGENERATION` 이미지를 새 생성 입력으로 사용하지 않는다.

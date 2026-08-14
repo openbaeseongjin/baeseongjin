@@ -14,6 +14,7 @@
 | 기존 `01_gameplay_reference.png` | `RETIRED` | Turret이 있어 1-1 Gameplay·배치 기준으로 사용 금지 |
 | 기존 `02_level_layout.png` | `RETIRED` | Turret과 Anchor 2개 구성이 REV 3.1과 충돌하므로 사용 금지 |
 | Sector 01 배경 이미지 | `MOOD ONLY` | 색·조명·산업 밀도만 참고하고 지형 위치는 복제하지 않음 |
+| 신규 Scenario Art Reference | `PENDING REGENERATION` | 공통 생성 규격과 현재 Camera Zone을 적용한 대표 Gameplay Shot 필요 |
 | Camera Shot 수치 | `PROTOTYPE` | 아래 후보로 구현한 뒤 데스크톱·모바일 플레이테스트로 조정 |
 | 정식 Sprite·배경 Package | `PENDING` | 현재 Mock Shape와 절차형 배경을 교체할 제작 자산 필요 |
 
@@ -24,6 +25,7 @@
 3. 두 자료가 다르면 어느 한쪽을 임의로 따라가지 않고 같은 변경에서 함께 수정한다.
 4. [Sector 01 배경 레퍼런스](../README.md)는 분위기만 결정한다.
 5. `RETIRED` 이미지는 아이디어 기록이며 구현·아트 검수 근거로 사용하지 않는다.
+6. 신규 Art Reference는 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 현재 Runtime과 Camera Zone을 다시 확인한 뒤 만든다.
 
 ## 3. 승인 Blockout
 

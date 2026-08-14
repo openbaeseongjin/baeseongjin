@@ -4,7 +4,7 @@
 
 ◀ PREV — [SECTOR 01-3 / SECURITY CHECK](../1-3/README.md) · NEXT — [SECTOR 01-5 / AUGMENT TEST BAY](../1-5/README.md) ▶
 
-> 실제 Runtime 구현 상태·승인 이미지·Camera·첫 선택 계약은 [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md)를 함께 따른다.
+> 실제 Runtime 구현 상태·문서 이미지·Camera·첫 선택 계약은 [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md)를 함께 따른다.
 
 Sector: 01 MAINTENANCE
 Stage: 04
@@ -2422,7 +2422,7 @@ Stage 성공 기준은:
 
 ![1-4 Scenario Art Reference](./images/01_scenario_art_reference.png)
 
-`APPROVED ART REFERENCE`: 산업용 Maintenance Node, 동등한 세 Firmware Profile, 조용한 Reward Room, Anchor 3개와 비공격 Dummy의 시각 위계를 정한다. Platform 위치는 물리 좌표가 아니다.
+`TEMPORARY / PENDING REGENERATION`: 산업용 Maintenance Node, 동등한 세 Firmware Profile, 조용한 Reward Room과 비공격 Dummy의 위계만 참고한다. Player 크기와 삼각 Anchor 연결은 생성 기준이 아니며 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 대표 Gameplay Shot으로 교체한다.
 
 ### Approved Blockout
 
