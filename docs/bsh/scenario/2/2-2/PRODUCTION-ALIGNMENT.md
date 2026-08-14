@@ -2,7 +2,7 @@
 
 *IMPLEMENTATION · CAMERA · PATROL DRONE HANDOFF · REV 1.0*
 
-본 문서는 [2-2 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-2는 Sector 02에서 Patrol Drone T1이 처음 등장하는 Stage다. README는 "PatrolDrone 전용 구현이 확인되지 않는다"(§19-1, OPEN QUESTIONS #4)고 적었지만, 이는 이제 사실이 아니다 — Patrol 이동은 `EnemyObject`에 통합된 범용 기능으로 실제 구현되어 있다.
+본 문서는 [2-2 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-2는 Sector 02에서 Patrol Drone T1이 처음 등장하는 Stage다. README는 REV 1.0에서 "PatrolDrone 전용 구현이 확인되지 않는다"(§19-1, OPEN QUESTIONS #4)고 적었으나, 이는 사실이 아니었다 — Patrol 이동은 `EnemyObject`에 통합된 범용 기능으로 실제 구현되어 있다. README §19-1·OPEN QUESTIONS #4는 REV 1.1에서 이 문서 기준으로 갱신됐다.
 
 ## 1. 현재 판정
 
@@ -88,7 +88,7 @@ Patrol Drone T1 1대, Kill Optional, Rope Cut 없음 — 코드와 README 규칙
 | 범위 | 현재 | 다음 작업 |
 | --- | --- | --- |
 | 지형 | P4만 누락, 나머지 일치 | P4를 추가할지, README에서 제거할지 결정 |
-| Patrol Drone AI | 구현 완료(README 서술은 구식) | README §19-1·OPEN QUESTIONS #4를 현재 구현 기준으로 갱신 필요(이 PRODUCTION-ALIGNMENT 문서가 그 역할 대신 수행) |
+| Patrol Drone AI | 구현 완료, README REV 1.1에서 갱신 완료 | 없음 |
 | Drone 범위 | 구현됨, README와 수치 다름 | 실제 값(-320~320) 기준으로 Encounter 밸런스 재검토 |
 | Camera / Story | 없음 | Zone 객체·Trigger 연결 |
 

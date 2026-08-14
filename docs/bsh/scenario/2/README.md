@@ -231,8 +231,8 @@ Drone을 죽이는 것이 목표가 아니다. Drone이 만드는 질문은 **"�
 | 2-2 | PATROL WALKWAY | First Moving Enemy | ★★ | 1 Patrol Drone | Patrol Drone |
 | 2-3 | RESIDENTIAL SERVICE NODE | Rest / Reward | REST | NONE | First Specialization |
 | 2-4 | RESIDENTIAL STACK | First Major Multi-Route Room | ★★☆ | 1 Patrol Drone | NONE |
-| 2-5 | EVACUATION WALKWAY | Story Pressure + Gameplay Pressure | ★★★ | 1~2 Patrol Drone (동시 난전 금지) | NONE (재사용 airflow만 가능) |
-| 2-6 | QUIET RESIDENTIAL VOID (working title: EMPTY COURTYARD) | Breath / Environmental Story | ★★☆ | NONE 또는 0~1 distant non-engaging Drone | NONE |
+| 2-5 | EVACUATION WALKWAY | Story Pressure + Gameplay Pressure | ★★★ | 1 Patrol Drone(상세 설계에서 확정 — 2-7의 2-Drone 순차 구조와 역할 중복을 피하기 위해 1대로 LOCK) | NONE |
+| 2-6 | QUIET RESIDENTIAL VOID (working title: EMPTY COURTYARD) | Breath / Environmental Story | ★★☆ | NONE(상세 설계에서 확정 — Enemy 완전 배제로 LOCK) | NONE |
 | 2-7 | SHELTER ACCESS | Sector Final Build-up | ★★★☆ | 2 Patrol Drone (순차/구역 분리) | NONE |
 | 2-8 | EVACUATION PLATFORM | Sector 02 Finale | ★★★★ | 2 Patrol Drone (max) | NONE / Boss 없음 |
 
