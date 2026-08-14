@@ -14,6 +14,21 @@ function activeTarget(id, x, y) {
     };
 }
 
+function advanceToFire({ enemy, targets, projectiles, registry }) {
+    const steps = [0, COMBAT_CONFIG.enemyAcquireSeconds, COMBAT_CONFIG.enemyTrackSeconds];
+    for (const dt of steps) {
+        updateEnemyWeapons({ enemies: [enemy], targets, projectiles, registry, config: COMBAT_CONFIG, dt });
+    }
+    return updateEnemyWeapons({
+        enemies: [enemy],
+        targets,
+        projectiles,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyLockSeconds
+    });
+}
+
 export function run() {
     const registry = new EntityRegistry();
     const patroller = new EnemyObject({
@@ -124,14 +139,7 @@ export function run() {
     const targetA = activeTarget("player-a", 82, 0);
     const targetB = activeTarget("player-b", 60, 0);
     const projectiles = [];
-    const firstSpawn = updateEnemyWeapons({
-        enemies: [lockedEnemy],
-        targets: [targetA],
-        projectiles,
-        registry,
-        config: COMBAT_CONFIG,
-        dt: 0
-    });
+    const firstSpawn = advanceToFire({ enemy: lockedEnemy, targets: [targetA], projectiles, registry });
     assert.equal(firstSpawn[0].targetId, "player-a");
     assert.equal(lockedEnemy.lockedTargetId, "player-a");
 
@@ -142,7 +150,7 @@ export function run() {
         projectiles,
         registry,
         config: COMBAT_CONFIG,
-        dt: COMBAT_CONFIG.enemyFireInterval * 0.5
+        dt: COMBAT_CONFIG.enemyFireFlashSeconds + COMBAT_CONFIG.enemyFireInterval * 0.5
     });
     assert.deepEqual(
         lockedEnemy.position,
@@ -151,13 +159,30 @@ export function run() {
     );
     assert.equal(lockedEnemy.lockedTargetId, "player-a");
 
-    const secondSpawn = updateEnemyWeapons({
+    updateEnemyWeapons({
         enemies: [lockedEnemy],
         targets: [targetA, targetB],
         projectiles,
         registry,
         config: COMBAT_CONFIG,
         dt: COMBAT_CONFIG.enemyFireInterval * 0.5
+    });
+    assert.equal(lockedEnemy.attackState, "track");
+    updateEnemyWeapons({
+        enemies: [lockedEnemy],
+        targets: [targetA, targetB],
+        projectiles,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyTrackSeconds
+    });
+    const secondSpawn = updateEnemyWeapons({
+        enemies: [lockedEnemy],
+        targets: [targetA, targetB],
+        projectiles,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyLockSeconds
     });
     assert.equal(
         secondSpawn[0].targetId,
@@ -193,5 +218,7 @@ export function run() {
         config: COMBAT_CONFIG,
         dt: 0
     });
-    assert.equal(bandProjectiles[0].targetId, "inside-band");
+    assert.equal(bandProjectiles.length, 0);
+    assert.equal(bandLimitedEnemy.lockedTargetId, "inside-band");
+    assert.equal(bandLimitedEnemy.attackState, "acquire");
 }

@@ -28,6 +28,7 @@ export function resolveAuthoredCameraShot({ world, player, mobileView = false, d
             areaId: null,
             zoneId: null,
             zoom: defaultZoom,
+            localX: null,
             localY: null,
             horizontalPlayerRatio: HORIZONTAL_PLAYER_RATIO,
             verticalPlayerRatio: VERTICAL_PLAYER_RATIO
@@ -40,6 +41,7 @@ export function resolveAuthoredCameraShot({ world, player, mobileView = false, d
         areaId: area.id,
         zoneId: zone?.id ?? null,
         zoom: zone ? (mobileView ? zone.mobileZoom : zone.desktopZoom) : defaultZoom,
+        localX: player.position.x - area.bounds.x - area.bounds.width * 0.5,
         localY,
         horizontalPlayerRatio: zone?.horizontalPlayerRatio ?? HORIZONTAL_PLAYER_RATIO,
         verticalPlayerRatio: zone?.verticalPlayerRatio ?? VERTICAL_PLAYER_RATIO

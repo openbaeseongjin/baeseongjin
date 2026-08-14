@@ -2,9 +2,10 @@ import { paintPixelSprite } from "./PixelSpritePainter.js";
 import { PlayerAnimationController } from "./PlayerAnimationController.js";
 import { paintSpriteFrame } from "./SpriteCanvasPainter.js";
 import { centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
+import { enemyAimLine, enemySensorColor } from "../EnemyTelegraphPresentation.js";
 
 const ENEMY_SPRITE = Object.freeze({
-    rows: Object.freeze(["..aa..", ".abbaa", "abbbba", "abccba", ".bbbb.", ".a..a."])
+    rows: Object.freeze(["......aa", "..aaaaaa", "abbbccca", "abccccba", "..aaaaaa", "......aa"])
 });
 const PLAYER_PROJECTILE_SPRITE = Object.freeze({ rows: Object.freeze([".a.", "aba", ".a."]) });
 const ENEMY_PROJECTILE_SPRITE = Object.freeze({ rows: Object.freeze(["..a..", ".aba.", "abcba", ".aba.", "..a.."]) });
@@ -113,6 +114,17 @@ export class SpriteEnemyRenderer {
             const radius = Math.max(this.size.width, this.size.height, (enemy.radius ?? 0) * 2) * 0.5 + 14;
             if (!isVisible(viewport, circleBounds(enemy.position, radius))) continue;
             drawn += 1;
+            const aimLine = enemyAimLine(enemy);
+            if (aimLine) {
+                context.save();
+                context.strokeStyle = aimLine.color;
+                context.lineWidth = aimLine.width;
+                context.beginPath();
+                context.moveTo(enemy.position.x, enemy.position.y);
+                context.lineTo(aimLine.end.x, aimLine.end.y);
+                context.stroke();
+                context.restore();
+            }
             paintPixelSprite({
                 context,
                 sprite: ENEMY_SPRITE,
@@ -120,6 +132,8 @@ export class SpriteEnemyRenderer {
                 position: enemy.position,
                 size: this.size
             });
+            context.fillStyle = enemySensorColor(enemy);
+            context.fillRect(enemy.position.x - 11, enemy.position.y - 3, 6, 6);
             context.fillStyle = "#1f2937";
             context.fillRect(enemy.position.x - 20, enemy.position.y - enemy.radius - 11, 40, 5);
             context.fillStyle = "#fda4af";

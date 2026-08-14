@@ -90,7 +90,7 @@ export function updatePlayerProjectiles({
     return Object.freeze({ hits, resolutions: Object.freeze(resolutions) });
 }
 
-export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, dt }) {
+export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, surfaces = [], dt }) {
     return Object.freeze(
         enemies
             .map((enemy) => {
@@ -108,6 +108,7 @@ export function updateEnemyWeapons({ enemies, targets, projectiles, registry, co
                     projectiles,
                     registry,
                     config,
+                    surfaces,
                     dt
                 });
             })

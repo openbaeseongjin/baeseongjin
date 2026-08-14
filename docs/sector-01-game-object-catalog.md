@@ -168,6 +168,6 @@ T1과 T2는 동시에 사격하지 않는다. 새 Enemy·Boss·Rope Cut·Instant
 | ID·참조·bounds·Rope 경로 validator | 완료 |
 | 기존 physics/renderer에 authored world 주입 | 완료 |
 | objective·Gate runtime | 완료 |
-| Wind force·Sentry activation/no-crossfire | 완료 |
+| Wind force·Sentry FSM/activation/LOS/no-crossfire | 완료 |
 | 공용 simulation의 로컬·네트워크 snapshot/claim 수렴 | 완료 |
 | 데스크톱·모바일 연속 플레이 | 대기 |

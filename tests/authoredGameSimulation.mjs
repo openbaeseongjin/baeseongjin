@@ -181,9 +181,20 @@ export function run() {
 
     const standardSentry = simulation.enemies.find(({ areaId }) => areaId === "sector-01-03");
     player.physics.position.set(standardSentry.position.x - 100, standardSentry.position.y);
-    standardSentry.fireCooldown = 0;
-    simulation.step(1 / 120, command());
+    player.weapon.range = 0;
+    const attackStates = new Set();
+    for (let step = 0; step < 180 && simulation.enemyProjectiles.length === 0; step += 1) {
+        player.physics.position.set(standardSentry.position.x - 100, standardSentry.position.y);
+        player.physics.velocity.set(0, 0);
+        simulation.step(1 / 120, command());
+        attackStates.add(standardSentry.attackState);
+    }
     const standardProjectile = simulation.enemyProjectiles.find(({ ownerId }) => ownerId === standardSentry.id);
+    assert.deepEqual(
+        [...attackStates].filter((state) => ["acquire", "track", "lock", "fire"].includes(state)),
+        ["acquire", "track", "lock", "fire"],
+        "the authored Sentry must telegraph before its first projectile"
+    );
     assert.equal(standardProjectile.canCutRope, false);
     assert.deepEqual(
         simulation.resolveEnemyProjectileClaim(player.id, {

@@ -29,6 +29,7 @@ export function run() {
             areaId: area.id,
             zoneId,
             zoom: desktopZoom,
+            localX: player.position.x,
             localY,
             horizontalPlayerRatio: 0.38,
             verticalPlayerRatio
@@ -70,9 +71,36 @@ export function run() {
             areaId: "sector-01-02",
             zoneId,
             zoom: desktopZoom,
+            localX: player.position.x,
             localY,
             horizontalPlayerRatio: 0.38,
             verticalPlayerRatio: 0.58
+        });
+        assert.equal(
+            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 0.72 }).zoom,
+            mobileZoom
+        );
+    }
+
+    const area03 = world.areas[2];
+    const area03Cases = [
+        [-32, "identification", 1.15, 0.78, 0.5],
+        [-320, "warning", 1, 0.72, 0.6],
+        [-480, "turret-reveal", 0.95, 0.7, 0.68],
+        [-700, "route-choice", 0.88, 0.66, 0.62],
+        [-880, "relief", 1, 0.72, 0.6],
+        [-1000, "exit", 1.15, 0.78, 0.68]
+    ];
+    for (const [localY, zoneId, desktopZoom, mobileZoom, verticalPlayerRatio] of area03Cases) {
+        const player = playerAt(area03, localY, -192);
+        assert.deepEqual(resolveAuthoredCameraShot({ world, player, defaultZoom: 1 }), {
+            areaId: "sector-01-03",
+            zoneId,
+            zoom: desktopZoom,
+            localX: player.position.x,
+            localY,
+            horizontalPlayerRatio: 0.38,
+            verticalPlayerRatio
         });
         assert.equal(
             resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 0.72 }).zoom,
