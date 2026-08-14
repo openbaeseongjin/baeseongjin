@@ -325,7 +325,8 @@ const area04 = defineArea({
     ],
     recoveryPoints: [point("sector-01-04:recovery-p1", 160, -408), point("sector-01-04:recovery-p2", -96, -536)],
     objects: [
-        worldObject("sector-01-04:maintenance-node", "augment-node", 0, -128, {
+        worldObject("sector-01-04:maintenance-node", "augment-node", 0, -160, {
+            coordinateAnchor: "bottom-center",
             interactionRadius: 80,
             objectiveId: "sector-01-04:augment-selected",
             choices: ["impulse-coil", "relay-link", "shear-current"]
@@ -369,7 +370,12 @@ const area04 = defineArea({
         "augment-selected",
         "firmware-applied"
     ],
-    cameraZones: ["entry", "node", "calibration", "exit"],
+    cameraZones: [
+        cameraZone("entry", -160, 0, 1.15, 0.78, { verticalPlayerRatio: 0.55 }),
+        cameraZone("node", -320, -160, 1.1, 0.76, { verticalPlayerRatio: 0.58 }),
+        cameraZone("calibration", -576, -320, 0.95, 0.7, { verticalPlayerRatio: 0.62 }),
+        cameraZone("exit", -640, -576, 1.15, 0.78, { verticalPlayerRatio: 0.68 })
+    ],
     cueIds: ["maintenance-node", "foundation-augment-choice", "calibration-dummy", "test-bay-05"]
 });
 

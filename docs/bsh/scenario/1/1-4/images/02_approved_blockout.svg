@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 640" role="img" aria-labelledby="title desc">
+  <title id="title">Sector 01-4 Maintenance Node approved blockout</title>
+  <desc id="desc">Runtime-aligned 768 by 640 reward room with one industrial augment node, three fixed Foundation choices, three grapple landmarks, two recovery platforms, one non-hostile calibration dummy, and a Test Bay exit. No enemy, wind, or damage hazard.</desc>
+  <defs>
+    <style>
+      .bg { fill: #07111e; }
+      .zone { fill: #0f2234; opacity: .42; }
+      .reward-zone { fill: #221d35; opacity: .32; }
+      .wall { fill: #17283a; stroke: #49647b; stroke-width: 3; }
+      .platform { fill: #526779; stroke: #c1d1dc; stroke-width: 2; }
+      .recovery { fill: #385766; stroke: #79c7d5; stroke-width: 2; stroke-dasharray: 6 4; }
+      .safe { fill: #35584c; stroke: #7dd3a7; stroke-width: 2; }
+      .anchor { fill: #07111e; stroke: #22d3ee; stroke-width: 5; }
+      .route { fill: none; stroke: #22d3ee; stroke-width: 3; stroke-dasharray: 8 7; opacity: .86; }
+      .interaction { fill: none; stroke: #c084fc; stroke-width: 2; stroke-dasharray: 5 6; opacity: .7; }
+      .node { fill: #17283a; stroke: #c084fc; stroke-width: 4; }
+      .screen { fill: #102936; stroke: #b9efff; stroke-width: 2; }
+      .profile { fill: none; stroke: #e5f7ff; stroke-width: 2.5; }
+      .dummy { fill: #3d4650; stroke: #fbbf24; stroke-width: 3; }
+      .panel { fill: #132b34; stroke: #fbbf24; stroke-width: 4; }
+      .gate { fill: #3c2530; stroke: #fb7185; stroke-width: 4; }
+      .player { fill: #f8fafc; stroke: #fb4b5a; stroke-width: 3; }
+      .label { fill: #d9f4ff; font: 700 16px ui-monospace, monospace; }
+      .small { fill: #9fb7c7; font: 700 12px ui-monospace, monospace; }
+      .zone-label { fill: #58768d; font: 700 13px ui-monospace, monospace; letter-spacing: 1px; }
+      .pending { fill: #fbbf24; font: 700 11px ui-monospace, monospace; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="768" height="640"/>
+  <rect class="zone" x="0" y="0" width="768" height="64"/>
+  <rect class="zone" x="0" y="64" width="768" height="256"/>
+  <rect class="reward-zone" x="0" y="320" width="768" height="192"/>
+  <rect class="zone" x="0" y="512" width="768" height="128"/>
+  <rect class="wall" x="0" y="0" width="24" height="640"/>
+  <rect class="wall" x="744" y="0" width="24" height="640"/>
+
+  <text class="zone-label" x="36" y="24">D · EXIT TO TEST BAY 05</text>
+  <text class="zone-label" x="36" y="88">C · SHORT CALIBRATION</text>
+  <text class="zone-label" x="36" y="344">B · FOUNDATION CHOICE</text>
+  <text class="zone-label" x="36" y="536">A · DECOMPRESSION</text>
+
+  <polyline class="route" points="96,608 384,512 576,320 288,192 544,80 672,32"/>
+
+  <rect class="platform" x="32" y="626" width="320" height="14"/>
+  <text class="small" x="38" y="620">P0 ENTRY</text>
+  <rect class="safe" x="224" y="480" width="320" height="32"/>
+  <text class="small" x="444" y="474">NODE SAFE DECK</text>
+  <rect class="recovery" x="448" y="256" width="192" height="16"/>
+  <text class="small" x="452" y="250">P1 RECOVERY</text>
+  <rect class="recovery" x="192" y="128" width="192" height="16"/>
+  <text class="small" x="196" y="122">P2 RECOVERY</text>
+  <rect class="safe" x="448" y="64" width="288" height="32"/>
+  <text class="small" x="452" y="58">FINAL SAFE DECK</text>
+
+  <circle class="interaction" cx="384" cy="480" r="80"/>
+  <rect class="node" x="336" y="352" width="96" height="128" rx="6"/>
+  <rect class="screen" x="346" y="374" width="76" height="44" rx="3"/>
+  <circle class="profile" cx="360" cy="396" r="8"/>
+  <line class="profile" x1="366" y1="390" x2="374" y2="384"/>
+  <circle class="profile" cx="384" cy="396" r="7"/>
+  <circle class="profile" cx="400" cy="396" r="7"/>
+  <line class="profile" x1="391" y1="396" x2="393" y2="396"/>
+  <line class="profile" x1="410" y1="386" x2="418" y2="406"/>
+  <line class="profile" x1="418" y1="386" x2="410" y2="406"/>
+  <text class="label" x="444" y="398">MAINTENANCE NODE N1</text>
+  <text class="small" x="444" y="414">FIXED: IMPULSE · RELAY · SHEAR</text>
+
+  <circle class="anchor" cx="576" cy="320" r="12"/>
+  <text class="label" x="596" y="326">A</text>
+  <circle class="anchor" cx="288" cy="192" r="12"/>
+  <text class="label" x="308" y="198">B</text>
+  <circle class="anchor" cx="544" cy="80" r="12"/>
+  <text class="label" x="564" y="86">C</text>
+
+  <rect class="dummy" x="448" y="160" width="32" height="64" rx="5"/>
+  <circle fill="#fbbf24" cx="464" cy="190" r="5"/>
+  <text class="small" x="486" y="188">NON-HOSTILE</text>
+  <text class="small" x="486" y="204">CALIBRATION DUMMY</text>
+
+  <circle class="player" cx="96" cy="608" r="10"/>
+  <text class="small" x="112" y="614">SPAWN</text>
+  <rect class="panel" x="544" y="0" width="32" height="64" rx="4"/>
+  <text class="small" x="500" y="108">EXIT PANEL</text>
+  <rect class="gate" x="640" y="0" width="64" height="64"/>
+  <text class="small" x="630" y="108">GATE 05</text>
+
+  <text class="pending" x="36" y="570">NO ENEMY · NO WIND · NO DAMAGE · NO BUILD-LOCKED ROUTE</text>
+  <text class="pending" x="36" y="588">CHOICE RUNTIME / FOUNDATION EFFECTS: IMPLEMENTATION PENDING</text>
+</svg>
