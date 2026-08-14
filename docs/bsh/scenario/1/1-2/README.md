@@ -1,6 +1,9 @@
 # SECTOR 01-2 — DOUBLE ANCHOR SHAFT
 
-*BLOCKOUT CANDIDATE · REV 3.0*
+*BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.1*
+
+> **PRODUCTION SOURCE**
+> 구현·카메라·그래픽 검수 때는 먼저 [1-2 Production Alignment](./PRODUCTION-ALIGNMENT.md)를 확인한다. 실제 Runtime 좌표를 따르는 승인 Blockout과 현재 시나리오에 맞게 새로 제작한 Art Reference를 분리해 관리한다.
 
 ◀ PREV — [SECTOR 01-1 / SERVICE SHAFT](../1-1/README.md) · NEXT — [SECTOR 01-3 / SECURITY CHECK](../1-3/README.md) ▶
 
@@ -789,8 +792,18 @@ Stage 성공 기준은 **“Release가 Rope 이동의 끝이 아니라 다음 At
 
 ---
 
-## 문서 이미지 상태
+## 폴더 구조
 
-기존 `01_swing_line.png`와 `02_level_layout.png`는 Anchor A–C 기준의 이전 Revision이므로 이력 보존을 위해 파일만 유지한다. REV 3.0의 Anchor A–D와 Crossbeam X1을 반영한 새 이미지가 제작되기 전까지 구현 기준으로 참조하지 않는다.
+```text
+.
+├── README.md                       # 시나리오와 레벨 설계 의도
+├── PRODUCTION-ALIGNMENT.md         # 구현·카메라·아트 검수 계약
+└── images/
+    ├── README.md                   # 이미지별 사용 가능 상태
+    ├── 03_scenario_art_reference.png
+    └── 04_approved_blockout.svg
+```
 
-SECTOR 01-2 / DOUBLE ANCHOR SHAFT — BLOCKOUT CANDIDATE · REV 3.0
+기존 PNG 두 장은 결정 이력을 위해 보존하지만 현재 배치 기준으로 사용하지 않는다.
+
+SECTOR 01-2 / DOUBLE ANCHOR SHAFT — BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.1

@@ -1,0 +1,152 @@
+# SECTOR 01-2 — PRODUCTION ALIGNMENT
+
+*IMPLEMENTATION · CAMERA · ART HANDOFF · REV 1.0*
+
+본 문서는 [1-2 시나리오](./README.md)를 실제 화면으로 옮기는 제작 계약이다. `APPROVED BLOCKOUT`은 좌표를, `SCENARIO ART REFERENCE`는 최종 화면의 분위기와 정보 위계를 담당한다.
+
+## 1. 현재 판정
+
+| 항목 | 상태 | 판정 |
+| --- | --- | --- |
+| A→B→C→D 공중 Grapple 연결 | `DECIDED` | 중간 착지 없는 Flow Route와 Recovery를 쓰는 Safe Route 모두 제공 |
+| Enemy·Damage Hazard·Wind·Augment 없음 | `DECIDED` | 첫 Enemy는 1-3에서 소개 |
+| 960×1088 Authored Geometry | `DECIDED` | Runtime Catalog와 승인 Blockout이 같은 좌표 사용 |
+| `03_scenario_art_reference.png` | `APPROVED ART REFERENCE` | 적 없는 Lift Shaft, 4-Anchor 지그재그, 색·조명·깊이 기준 |
+| `04_approved_blockout.svg` | `APPROVED BLOCKOUT` | 플랫폼·Anchor·Recovery·Crossbeam·Gate의 배치 기준 |
+| 기존 `01_swing_line.png` | `RETIRED PARTIAL` | Anchor 3개만 보여 현재 A→B→C→D 구조와 불일치 |
+| 기존 `02_level_layout.png` | `RETIRED` | Turret·Terminal이 있어 1-2 금지 요소와 충돌 |
+| Camera Shot 수치 | `PROTOTYPE` | 데스크톱·모바일 실기 테스트 후 수치만 조정 |
+
+## 2. 자료 우선순위
+
+1. 핵심 학습, 금지 요소, Story 의미는 [시나리오 README](./README.md)가 결정한다.
+2. 실제 좌표와 충돌은 [`Sector01AreaCatalog.js`](../../../../../src/game/world/areas/sector01/Sector01AreaCatalog.js)의 `sector-01-02` 정의와 [승인 Blockout](./images/04_approved_blockout.svg)이 항상 일치해야 한다.
+3. [Scenario Art Reference](./images/03_scenario_art_reference.png)는 분위기와 Gameplay 정보 위계를 결정하지만 좌표를 복제하지 않는다.
+4. 기존 두 PNG는 기록용이며 구현·외주·검수 자료에 첨부하지 않는다.
+
+## 3. 승인 이미지
+
+### Scenario Art Reference
+
+![1-2 Scenario Art Reference](./images/03_scenario_art_reference.png)
+
+적이나 위험요소 없이 고장 난 중앙 Lift, 네 개의 Cyan Anchor, 작은 Player와 Red Scarf, 어두운 산업시설 깊이를 보여준다. 이미지의 Platform 위치는 분위기 구성이고 물리 좌표가 아니다.
+
+### Approved Blockout
+
+![1-2 Approved Blockout](./images/04_approved_blockout.svg)
+
+좌표는 Stage Local World Unit이다. `X = -480~480`, `Y = 0~-1088`이며 위로 갈수록 Y가 작아진다.
+
+## 4. Runtime Geometry
+
+### Collision Surface
+
+| ID | X | Y | W×H | 속성 |
+| --- | ---: | ---: | ---: | --- |
+| P0 | -416 | 0 | 256×32 | 시작 발판, one-way |
+| P1 | 64 | -288 | 192×16 | 첫 Recovery, one-way |
+| Crossbeam X1 | -64 | -544 | 128×32 | Solid, Rope 부착 불가 |
+| P2 | -288 | -576 | 192×16 | 방향 전환 Recovery, one-way |
+| P3 | 64 | -800 | 192×16 | Flow Recovery, one-way |
+| P4 | 64 | -960 | 288×32 | Exit Safe Deck, one-way |
+
+### Landmark와 진행
+
+| ID | 위치 | 의미 |
+| --- | --- | --- |
+| Spawn | `(-320, -32)` | 즉시 조작 가능 |
+| Anchor A | `(-128, -192)` | 1-1 복습 |
+| Anchor B | `(160, -416)` | 첫 Airborne Handoff |
+| Anchor C | `(-160, -640)` | 방향 반전 |
+| Anchor D | `(128, -864)` | Flow 확인 |
+| Maintenance Lift | `(0, -544)` | 배경 전용, 이동·충돌 없음 |
+| Exit Panel | `(208, -1024)` | P4 도달 뒤 활성화, 반경 72 |
+| Security Access Gate | `(320, -1056)` | Panel 조작 뒤 열리고 1-3으로 연결 |
+
+Recovery 중심은 P1 `(160, -312)`, P2 `(-192, -600)`, P3 `(160, -824)`다. 실패한 Handoff만 3~5초 안에 다시 시도하게 하고 Stage 시작으로 떨어뜨리지 않는다.
+
+### Anchor 해석 규칙
+
+- A/B/C/D는 전용 Rope Mode가 아니라 추천 연결 지점을 보여주는 Cyan Landmark다.
+- Landmark 중심의 24×24 Target은 비충돌이며 기존 Surface 부착 규칙을 막지 않는다.
+- 각 중심 반경 64px에는 다른 Cyan 장식, 충돌 Pipe, 경쟁 조준 후보를 두지 않는다.
+- 정식 Sprite 중심과 실제 부착 위치의 오차는 12px 이하로 유지한다.
+- Crossbeam X1은 충돌하지만 Rope 후보가 아니며, 이 차이가 외형으로 읽혀야 한다.
+
+## 5. Camera Shot 계약
+
+| SHOT | Player Y 구간 | 반드시 한 화면에 보일 것 | Desktop Zoom | Mobile Zoom |
+| --- | --- | --- | ---: | ---: |
+| C01 Lift Failure | `0~-224` | Player, 고장 난 Lift 하부, A, P1 일부 | 1.20 | 0.80 |
+| C02 First Handoff | `-224~-512` | A, B, Player, P1 | 1.00 | 0.72 |
+| C03 Direction Reversal | `-512~-736` | B, C, P2, Crossbeam X1 | 0.95 | 0.70 |
+| C04 Flow Test | `-736~-944` | C, D, P3, 위쪽 P4 일부 | 1.00 | 0.72 |
+| C05 Exit | `-944~-1088` | D, P4, Exit Panel, Gate | 1.15 | 0.78 |
+
+수치는 `PROTOTYPE`이며 표시 대상이 우선한다. 별도 Cinematic Camera나 Stage 전체 Zoom-out을 추가하지 않고 현재 추적과 보간을 유지한다.
+
+- First Handoff Shot에서는 B가 Release 이전에 보여야 한다.
+- Direction Reversal Shot에서는 B→C 궤적과 Crossbeam의 관계가 동시에 읽혀야 한다.
+- Flow Test Shot에서 Exit Panel은 아직 강조하지 않고 D를 마지막 Rope 목표로 읽히게 한다.
+- Exit Shot에서는 Anchor Cyan보다 Panel의 준비 상태와 Gate가 먼저 읽힌다.
+
+## 6. Story Trigger 계약
+
+| EVENT | 조건 | 화면 문구 | 표시·반복 |
+| --- | --- | --- | --- |
+| `lift-offline` | 1-2 최초 진입 | `LIFT CONTROL / OFFLINE` | 1.6초, Run당 1회, 조작 유지 |
+| `manual-access-only` | A가 처음 화면에 들어옴 | `AUTOMATIC LIFT SERVICE / SUSPENDED / MANUAL ACCESS ONLY` | 1.8초, Run당 1회 |
+| `power-reduction-stage-2` | P4 최초 도달 | `POWER REDUCTION / STAGE 2` | 1.2초, Run당 1회 |
+| `security-access-check` | Exit Panel 준비 | `SECURITY ACCESS / CHECK` | Panel 상태와 동기화 |
+
+강제 Cutscene과 입력 차단은 사용하지 않는다. 멀티플레이에서 문구는 개인 표시가 가능하지만 P4 Objective와 Gate 상태는 공용으로 한 번만 처리한다.
+
+## 7. 저비용 Art Package
+
+새 Art Reference를 통이미지 Runtime 배경으로 사용하지 않는다. 다음 모듈을 Sector 01 공용 Atlas에서 재사용한다.
+
+| LAYER | 최소 자산 | 배치 규칙 |
+| --- | --- | --- |
+| Far | 수직 Shaft Silhouette 2종, 원거리 작업등 | 느린 Parallax, Collision 없음 |
+| Mid | Lift Cage 1종, Rail 1종, Counterweight 1종, Cable 2종 | 중앙 세로 Landmark로 반복 조합 |
+| Near | 32px Wall/Trim, Brace, 작은 Panel | 화면 가장자리만 프레이밍 |
+| Gameplay | Platform Edge, Recovery Edge, Anchor, Crossbeam, Panel, Gate | Stable ID와 상태를 유지하며 Mock 교체 |
+
+1-1과 같은 `1024×1024` 이하 공용 Tile Atlas와 `512×512` 이하 배경 모듈 Atlas를 사용한다. Lift는 정지 상태이므로 애니메이션을 만들지 않는다. 화면 밖 Cable, Lamp, 배경 Layer는 갱신하지 않는다.
+
+## 8. Acceptance Capture
+
+- Desktop 1280×720과 Mobile 390×844에서 C01~C05 캡처
+- HUD on, Debug Collider off
+- 같은 World Definition과 같은 1-2 좌표 사용
+- Safe Route와 무착지 Flow Route를 각각 1회 기록
+
+### PASS
+
+- A→B→C→D 순서를 Tutorial 문장 없이 찾을 수 있다.
+- Safe Route는 각 실패 뒤 5초 안에 같은 Handoff를 재시도한다.
+- Flow Route는 중간 Landing 없이 완주 가능하다.
+- Enemy, Turret, Projectile, Wind, Damage Telegraph가 한 프레임도 나타나지 않는다.
+- Crossbeam은 Anchor로 오인되지 않는다.
+- Art Reference의 Player/Rope/Anchor 정보 위계가 실제 화면에서도 유지된다.
+
+### FAIL
+
+- 기존 3-Anchor 이미지를 따라 D가 누락된다.
+- 기존 Turret 이미지를 따라 적이나 Terminal을 배치한다.
+- Art Reference의 Platform 위치를 Runtime Collision으로 복제한다.
+- B가 Release 전에 보이지 않아 첫 Handoff가 추측 입력이 된다.
+- 문서와 Runtime 좌표 중 하나만 변경한다.
+
+## 9. 다음 작업
+
+| 범위 | 현재 | 다음 작업 |
+| --- | --- | --- |
+| 지형·Anchor·Gate | Runtime Mock 연결 완료 | 승인 Blockout과 좌표 동기화 유지 |
+| Camera | 전 구간 공통 추적 | C01~C05 Zone Preset 연결 |
+| Story | Trigger 이름 보존 | 조건·문구·표시 시간을 Presentation에 연결 |
+| 그래픽 | Scenario Art Reference 승인 | 공용 Atlas용 Lift·Rail·Cable 모듈 제작 |
+| 플레이테스트 | 자동 월드 검증 완료 | Safe/Flow Route와 공중 Attach 성공률 측정 |
+
+다음 1-3에서도 `Scenario Art Reference + Approved Blockout` 두 이미지를 새로 만들되, Security Check의 Sentry·LOS·Telegraph 계약을 포함한다.
