@@ -1,6 +1,6 @@
 # SECTOR 03-8 — UPPER MARKET GATE
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — SECTOR INTEGRATION FIX*
 
 ◀ PREV — [SECTOR 03-7 / PRIORITY CONCOURSE](../3-7/README.md) · NEXT — POST-SECTOR 03 TRANSITION / BOSS FLOW TBD ▶
 
@@ -27,7 +27,7 @@
 | Sector-end Checkpoint | OPEN — Boss transition contract must be locked first |
 | Exit Destination | POST-SECTOR 03 TRANSITION / BOSS FLOW TBD |
 | Design Carry Build | Foundation + first Specialization KEEP — current runtime pending |
-| Primary Role | Sector 03 Gameplay Synthesis + Access / Evacuation Story Juxtaposition |
+| Primary Role | Sector 03 Free-Weave Gameplay Synthesis + Access / Evacuation Story Juxtaposition |
 | Primary Space | One continuous Upper Market Gate Atrium with parallel security routes |
 
 ---
@@ -76,7 +76,7 @@ KNOWN SCANNER
 +
 KNOWN PATROL DRONE
 +
-KNOWN ROUTE CHOICE
+KNOWN ROUTE LITERACY
 +
 KNOWN ROPE EXPRESSION
 +
@@ -149,10 +149,10 @@ Group C Suspension
 작성 중 재확인한 최신 `main` HEAD:
 
 ```text
-6fa3a44a0efdfd8b51bc8056bf6baeef173a390d
+7c57bf7b91575b96eb5bff125ba896b4e5e94505
 ```
 
-PR #461에서 Scenario Art Reference의 공통 Runtime-alignment 규격이 병합됐다.
+통합 검토 시점 최신 HEAD는 PR #462 merge다. Sector 03 Gameplay Runtime 변경은 없으며, 직전 PR #461의 Scenario Art Runtime-alignment 규격도 계속 유효하다.
 
 이 변경은 Gameplay Runtime 자체를 바꾸는 것이 아니라
 Stage Art Reference가 현재 Runtime의 Camera Zone / Stable ID / 정확한 오브젝트 수를 따라야 한다는 제작 계약을 강화한다.
@@ -453,17 +453,17 @@ Commercial 이동체계의 구조적 일부
 
 3-7 Priority Concourse를 통과한 Player가
 거대한 **Upper Market Gate Atrium**에 진입해,
-좌측 `MARKET RING`의 넓은 Landing과 Patrol Drone,
-중앙 `PRIORITY FLOW SPINE`의 연속 Access-Controlled Mount,
-우측 `SERVICE FRAME`의 Rope Chaining과 별도 Patrol Drone 중
-자신에게 맞는 비용을 선택해 하나의 상부 Merge로 올라가고,
+중앙 Access-Controlled Spine의 Scanner 상태를 읽고
+잠긴 순간에는 좌·우 Patrol Drone Pocket으로 Rope Flow를 이어가며
+M0 → MX → M1의 Safe Hub 사이에서 경로를 계속 다시 엮고,
 마지막 Scanner Commit 뒤 안전한 Archive Deck에서
 **Group A/B/C Transfer 기록과 Commercial Access-Control 기록이 같은 상부 이동환경에 병치되어 있었음**을 확인한 뒤
-미확정 Post-Sector 03 Gate에 도달하는 Sector 03 일반 진행 Finale.
+미확정 Post-Sector 03 Control Deck에 도달하는 Sector 03 일반 진행 Finale.
 
 ---
 
 ## 2. 전체 게임에서의 역할
+
 
 Sector 03 회수:
 
@@ -487,48 +487,90 @@ REST / BUILD DIAGNOSTIC
 LARGE ATRIUM FLOW
 
 3-7
-ACCESS-TIER STORY PRESSURE
+STATIC COST-PROFILE ROUTE CHOICE
 
 3-8
-FULL COMMERCIAL SYNTHESIS
+DYNAMIC FREE-WEAVE SYNTHESIS
 +
 STORY JUXTAPOSITION
 ```
 
-### 2-8과 다른 Finale
+### 3-7과의 핵심 차이
 
-2-8:
+3-7은 M1에서:
 
 ```text
-LOWER PATROL BAND
-→
-UPPER PATROL BAND
+OUTER
+PRIORITY
+SERVICE
 ```
 
-이라는 Vertical Security Pressure가 강했다.
+세 Cost Profile을 **한 번 비교하고 선택**하는 Stage다.
 
-3-8:
+3-8은 그 구조를 반복하지 않는다.
+
+3-8의 Market Field는:
 
 ```text
-WEST DRONE TERRITORY
-│
 CENTRAL SCANNER SPINE
-│
-EAST DRONE TERRITORY
++
+WEST DRONE POCKET
++
+EAST DRONE POCKET
++
+MULTIPLE REJOIN POINTS
 ```
 
-를 **평행하게 선택**한다.
+가 하나의 열린 Lattice 안에 있다.
 
-즉 Drone 2대를 쓰지만:
+Player는:
 
 ```text
-DRONE 1
-→ DRONE 2
+Scanner가 열리면 중앙으로 Flow
+
+Scanner가 잠기면:
+WAIT
+or
+WEST / EAST로 계속 움직임
+
+다음 Safe Hub에서 다시 중앙/측면 선택
 ```
 
-순차 Encounter가 아니다.
+을 반복한다.
 
----
+즉 3-8의 질문은:
+
+> **“어느 Route를 처음 고를까?”**
+
+가 아니라:
+
+> **“보안 상태가 바뀔 때 멈출까, 계속 움직이며 다른 공간으로 엮어 갈까?”**
+
+다.
+
+### 2-8과도 다름
+
+2-8은:
+
+```text
+LOWER DRONE
+→
+UPPER DRONE
+```
+
+의 수직 Sequential Pressure가 강했다.
+
+3-8은 두 Drone이 같은 Market Field의 좌·우 Security Pocket을 담당하고,
+중앙 Safe Spine과 Rejoin Hub가 항상 남는다.
+
+따라서:
+
+```text
+DRONE 1 ENCOUNTER
+→ DRONE 2 ENCOUNTER
+```
+
+를 강제하지 않는다.
 
 ## 3. Story 역할
 
@@ -624,7 +666,8 @@ PRIORITY ACTIVE
 
 ## 4. 공간 콘셉트
 
-**UPPER MARKET GATE ATRIUM**
+
+**UPPER MARKET GATE — FREE-WEAVE SECURITY FIELD**
 
 Sector 03의 Commercial architecture를 한 번에 회수한다.
 
@@ -640,49 +683,65 @@ LARGE OPEN VOID
 TRANSFER / ACCESS ARCHIVE
 ```
 
-### 전체 형태
+### 공간의 핵심
+
+3-7처럼 세 개의 완성된 Route를 나란히 제시하지 않는다.
+
+대신:
 
 ```text
-                  FINAL CONTROL / POST-SECTOR GATE
-                              ▲
-                         P6 ███████
-                              ▲
-                         G6 ●
-                              ▲
-                   A1 █████████████
-                      ARCHIVE DECK
-                              ▲
-                         C4 ●
-                              ▲
-                         G4 ●
-                              ▲
-                   M1 █████████████
-                       UPPER MERGE
-                 ▲         ▲         ▲
-                 │         │         │
-              W3 ●       C3 ●       S3 ●
-              ▲            ▲          ▲
-          WEST D1       CENTRAL      EAST D2
-              ▲         SCANNER        ▲
-              W2           C2          S2
-              ▲            ▲          ▲
-              W1           ▲           S1
-                 ╲         │         ╱
-                  M0 █████████████
-                    ROUTE CHOICE
-                         ▲
-                       P2
-                         ▲
-                       C1
-                         ▲
-                       G1
-                         ▲
-                       P1
-                         ▲
-                       P0
+SAFE HUB M0
+
+      WEST POCKET
+          ╲
+CENTRAL C2 ─ MX ─ EAST POCKET
+          ╱
+      WEST / EAST UPPER POCKET
+
+CENTRAL C3
+     ↓
+SAFE MERGE M1
 ```
 
----
+처럼 중앙 Spine과 양쪽 Security Pocket이 계속 다시 연결된다.
+
+### CENTRAL
+
+```text
+C2 / C3
+```
+
+Scanner-controlled.
+
+가장 직접적이지만 Scanner State를 읽어야 한다.
+
+### WEST / EAST
+
+각각 Patrol Drone T1 하나의 Territory.
+
+Scanner가 잠긴 동안:
+
+```text
+WAIT 대신
+MOVEMENT / COMBAT / BUILD EXPRESSION
+```
+
+을 선택하게 한다.
+
+### 중요한 차이
+
+West / Central / East는:
+
+```text
+THREE LOCKED ROUTES
+```
+
+가 아니다.
+
+Player는 M0 / MX / M1에서 계속 다시 섞을 수 있다.
+
+한쪽만 끝까지 타는 것도 허용하지만
+그것이 Stage가 제시하는 “정답 Route 3종”처럼 보이면 실패다.
 
 ## 5. Pixel / Grid 기준
 
@@ -731,12 +790,13 @@ Y                0 ~ -1568
 
 ## 6. 전체 맵 구조
 
+
 ```text
-Y -1568
+Y -1728
 
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                        POST-SECTOR 03 GATE / TBD                         │
-│                              P6 ████████ [PANEL]                         │
+│                              P6 ████████ [HOLD]                          │
 │                                   ▲                                      │
 │                               G6 ●                                       │
 │                                 ╱                                        │
@@ -748,20 +808,20 @@ Y -1568
 │                           G4 ●                                           │
 │                              ▲                                           │
 │                    M1 █████████████████                                  │
-│                       UPPER MERGE                                        │
-│                ▲             ▲             ▲                             │
-│              W3 ●       C3A ● [CTRL]       S3 ●                         │
-│                ▲            ╱╲             ▲                             │
-│      ← DRONE D1 →     C3 ● [CTRL]      ← DRONE D2 →                    │
-│                ▲          ╱                 ▲                             │
-│              W2 ●     C2 ● [CTRL]          S2 ●                          │
-│                ▲             ▲             ▲                             │
-│              W2 ●            │             S2 ●                          │
-│                ▲             │             ▲                             │
-│              W1 ●            │             S1 ●                          │
-│                 ╲            │            ╱                              │
+│                       SAFE UPPER MERGE                                   │
+│                    ╱       ▲       ╲                                     │
+│                 W2 ●      C3 ●      E2 ●                                │
+│                  ▲       [CTRL]       ▲                                  │
+│            ← D1 PATROL →   │    ← D2 PATROL →                           │
+│                  ╲         │         ╱                                   │
+│                    MX ███████████                                        │
+│                    SAFE CROSSOVER HUB                                    │
+│                  ╱         ▲         ╲                                   │
+│               W1 ●       C2 ●       E1 ●                                │
+│                         [CTRL]                                            │
+│                    ╲       │       ╱                                     │
 │                    M0 █████████████                                      │
-│                       ROUTE CHOICE                                       │
+│                       SAFE LOWER HUB                                     │
 │                              ▲                                           │
 │                         P2 ███████                                       │
 │                              ▲                                           │
@@ -777,9 +837,8 @@ Y -1568
 Y 0
 ```
 
----
-
 ## 7. Zone 구성
+
 
 ### ZONE A — MARKET GATE REVEAL
 
@@ -793,120 +852,187 @@ Enemy 없음.
 
 C1은 Scanner Reminder.
 
-Player가 위쪽의:
+Player가 위쪽에서:
 
-- Market Gate volume
-- 좌/중/우 Route
-- 두 Drone의 먼 Silhouette
+- central controlled spine
+- 좌/우 Market / Service structure
+- 두 Drone의 먼 patrol silhouette
 
-를 순차적으로 인지.
+를 순차적으로 인지한다.
 
-### ZONE B — M0 FINAL ROUTE CHOICE
+### ZONE B — M0 SAFE LOWER HUB
 
 ```text
 Y -608
 ```
 
-M0는 완전 Safe.
+M0는 두 Drone activation 밖.
 
-보여야 할 것:
-
-```text
-WEST MARKET RING
-CENTRAL PRIORITY SPINE
-EAST FACILITY SERVICE
-```
-
-두 Drone의 patrol도 보이되
-M0는 둘의 activation 밖.
-
-### ZONE C — PARALLEL SECURITY TERRITORIES
+여기서 Player는:
 
 ```text
-Y -640 ~ -960
+C2 Scanner State
+D1 position
+D2 position
+MX
 ```
 
-세 Route가 **동시에 존재**.
+를 볼 수 있다.
 
-#### WEST — MARKET RING
+중요:
 
 ```text
-M0
-→ W1
-→ W2
-→ W3
-→ M1
+WEST / CENTRAL / EAST
 ```
 
-- Scanner 없음
-- D1 activation 있음
-- wide / readable
-- long lateral route
-- Kill Optional
+라는 “Route 선택 메뉴” Sign을 주지 않는다.
 
-#### CENTRAL — PRIORITY FLOW SPINE
+공간 자체를 보고 이동한다.
+
+### ZONE C — LOWER FREE-WEAVE
+
+```text
+Y -640 ~ -928
+```
+
+#### Central
 
 ```text
 M0
 → C2
-→ C3
-→ C3A
-→ M1
+→ MX
 ```
 
-- D1/D2 activation 모두 없음
-- Scanner Timing
-- shortest
-- fewer landings
-- missed window = wait / drop recovery
+Scanner Timing.
 
-#### EAST — FACILITY SERVICE FRAME
+#### West
 
 ```text
 M0
-→ S1
-→ S2
-→ S3
+→ W1
+→ MX
+```
+
+D1 Territory.
+
+#### East
+
+```text
+M0
+→ E1
+→ MX
+```
+
+D2 Territory.
+
+Scanner가 열려 있으면 Central이 자연스럽고,
+잠겨 있으면:
+
+```text
+WAIT
+or
+MOVE SIDEWAYS
+```
+
+둘 다 유효.
+
+### ZONE D — MX SAFE CROSSOVER HUB
+
+```text
+Y -896
+```
+
+MX는:
+
+```text
+NO DRONE NEW ACQUIRE
+NO SCANNER CONTROL
+```
+
+Safe Hub.
+
+Player는 여기서 다시 선택한다.
+
+즉 Lower에서 West를 탔다고
+Upper에서도 West에 묶이지 않는다.
+
+### ZONE E — UPPER FREE-WEAVE
+
+```text
+Y -928 ~ -1184
+```
+
+#### Central
+
+```text
+MX
+→ C3
 → M1
 ```
 
-- Scanner 없음
-- D2 activation 있음
-- more rope chaining
-- narrower landings
-- Kill Optional
+Scanner Timing.
 
-### ZONE D — M1 UPPER MERGE
+#### West
 
 ```text
-Y -1024
+MX
+→ W2
+→ M1
 ```
 
-세 Route 완전 합류.
+D1 Territory.
 
-Scanner 없음.
-Drone new acquire 없음.
-
-M1은 잠깐 숨을 돌리는 Deck이지만
-Story Deck은 아니다.
-
-### ZONE E — FINAL SCANNER COMMIT
+#### East
 
 ```text
-Y -1024 ~ -1248
+MX
+→ E2
+→ M1
+```
+
+D2 Territory.
+
+Lower / Upper 선택을 섞을 수 있다.
+
+예:
+
+```text
+Central → West
+East → Central
+West → East
+```
+
+모두 허용.
+
+### ZONE F — M1 SAFE UPPER MERGE
+
+```text
+Y -1184
+```
+
+두 Drone new acquire 없음.
+
+Scanner 없음.
+
+3-8의 Free-Weave Field 종료.
+
+### ZONE G — FINAL SCANNER COMMIT
+
+```text
+Y -1184 ~ -1440
 ```
 
 M1 → G4 → C4 → A1.
 
 Enemy 없음.
 
-Sector 03의 대표 Mechanic을
-마지막으로 단순하게 회수.
+복잡한 Field 뒤에
+Sector 대표 Mechanic을 단순하게 한 번 회수한다.
 
-### ZONE F — ARCHIVE STORY DECK
+### ZONE H — ARCHIVE STORY DECK
 
 ```text
-Y -1280
+Y -1440
 ```
 
 A1.
@@ -919,47 +1045,35 @@ NO WIND
 NO ENVIRONMENTAL HAZARD
 ```
 
-A1은 P6로 가는 Mandatory Traversal Deck이다.
+A1은 Mandatory Traversal Deck.
 
-Player가 A1 bounds에 진입하면
-두 Archive가 존재한다는 Story Beat 자체는 자동 Trigger되어
-Story Climax를 이동 Skill로 완전히 Skip할 수 없게 한다.
+A1 bounds 진입 시
+두 Archive가 같은 시설에 존재한다는 Story Beat 자체는 자동 Trigger.
 
-개별 Terminal을 가까이서 읽는 것은 추가 확인 행동으로 남겨도 된다.
+개별 Terminal Close Read는 추가 행동으로 남겨도 된다.
 
-현재 Runtime 특성상 이미 발사된 Projectile은
-activation을 벗어났다고 즉시 삭제되지는 않으므로,
-A1은 Security Territory에서 충분히 멀리 떨어뜨린다.
-
-### ZONE G — FINAL CONTROL APPROACH
+### ZONE I — FINAL CONTROL APPROACH
 
 ```text
-Y -1280 ~ -1568
+Y -1440 ~ -1728
 ```
 
 A1 → G6 → P6.
 
 Gameplay Pressure 없음.
 
-Beyond-Gate에는
-더 무겁고 infrastructure-like한 구조 Silhouette를
-멀리 보여줄 수 있다.
-
-하지만:
+Gate / Panel은:
 
 ```text
-TRAIN
-MOVING PLATFORM
-RAIL MOTION
+VISUAL HOLD
 ```
 
-을 작동시키지 않는다.
+이며 Post-Sector 03 destination 확정 전 progression에 연결하지 않는다.
 
-또 Gate가 Sector 04로 바로 연결된다고 표시하지 않는다.
-
----
+Sector 04의 움직이는 Transit Gameplay를 미리 사용하지 않는다.
 
 ## 8. 좌표 / 오브젝트
+
 
 ### HYPOTHESIS — BLOCKOUT CANDIDATE
 
@@ -970,24 +1084,22 @@ RAIL MOTION
 | G1 | -512~-384 | -288 | 128 | Permanent Lower Pivot |
 | C1 | -224~-96 | -384 | 128 | Controlled Mount — reminder |
 | P2 | -224~+96 | -480 | 320 | Lower Landing |
-| M0 | -192~+192 | -608 | 384 | Final Route Choice Deck |
-| W1 | -416~-288 | -704 | 128 | West Pivot 1 |
-| W2 | -448~-320 | -864 | 128 | West Pivot 2 |
-| W3 | -320~-192 | -960 | 128 | West Exit Pivot |
-| C2 | -192~-64 | -704 | 128 | Central Controlled Mount 1 |
-| C3 | +64~+192 | -832 | 128 | Central Controlled Mount 2 |
-| C3A | -192~-64 | -960 | 128 | Central Controlled Mount 3 |
-| S1 | +256~+384 | -704 | 128 | Service Pivot 1 |
-| S2 | +320~+448 | -864 | 128 | Service Pivot 2 |
-| S3 | +160~+288 | -960 | 128 | Service Exit Pivot |
-| M1 | -192~+192 | -1024 | 384 | Upper Merge Deck |
-| G4 | +160~+288 | -1120 | 128 | Upper Permanent Pivot |
-| C4 | -64~+64 | -1184 | 128 | Final Controlled Mount |
-| A1 | -256~+256 | -1280 | 512 | Safe Archive Story Deck |
-| G6 | +192~+320 | -1376 | 128 | Final Control Pivot |
-| P6 | +256~+576 | -1472 | 320 | Final Control / Gate Deck |
-| Gate Panel | +512 | -1440 | — | contextual gate-style panel |
-| Final Gate | +608 | -1472 | — | destination / timer semantics TBD |
+| M0 | -192~+192 | -608 | 384 | Safe Lower Hub |
+| C2 | -64~+64 | -736 | 128 | Lower Central Controlled Mount |
+| W1 | -416~-288 | -800 | 128 | West Lower Drone Pocket Pivot |
+| E1 | +288~+416 | -800 | 128 | East Lower Drone Pocket Pivot |
+| MX | -192~+192 | -896 | 384 | Safe Crossover Hub |
+| C3 | -64~+64 | -1024 | 128 | Upper Central Controlled Mount |
+| W2 | -384~-256 | -1088 | 128 | West Upper Drone Pocket Pivot |
+| E2 | +256~+384 | -1088 | 128 | East Upper Drone Pocket Pivot |
+| M1 | -192~+192 | -1184 | 384 | Safe Upper Merge |
+| G4 | +160~+288 | -1280 | 128 | Upper Permanent Pivot |
+| C4 | -64~+64 | -1344 | 128 | Final Controlled Mount |
+| A1 | -256~+256 | -1440 | 512 | Safe Archive Story Deck |
+| G6 | +192~+320 | -1536 | 128 | Final Control Pivot |
+| P6 | +256~+576 | -1632 | 320 | Stage-local Completion Deck |
+| Gate Panel | +512 | -1600 | — | VISUAL HOLD until post-sector contract |
+| Final Gate | +608 | -1632 | — | destination / timer semantics TBD |
 
 ### SCANNER GROUP — HYPOTHESIS
 
@@ -999,7 +1111,6 @@ Controls:
 C1
 C2
 C3
-C3A
 C4
 
 Timing:
@@ -1009,27 +1120,16 @@ Phase:
 shared
 ```
 
-### 이유
-
-Finale에서 Scanner 수를 늘리는 것이 아니라
-공간적 맥락을 바꾼다.
-
-```text
-ONE READABLE SECURITY CLOCK
-```
-
-유지.
-
 ### DRONE D1 — WEST
 
 ```text
 Start:
 X -512
-Y -800
+Y -944
 
 End:
 X -192
-Y -800
+Y -944
 
 Speed:
 48
@@ -1045,7 +1145,7 @@ Activation:
 
 ```text
 X -640 ~ -160
-Y -928 ~ -640
+Y -1120 ~ -704
 ```
 
 ### DRONE D2 — EAST
@@ -1053,11 +1153,11 @@ Y -928 ~ -640
 ```text
 Start:
 X +192
-Y -800
+Y -944
 
 End:
 X +512
-Y -800
+Y -944
 
 Speed:
 48
@@ -1073,313 +1173,288 @@ Activation:
 
 ```text
 X +160 ~ +640
-Y -928 ~ -640
+Y -1120 ~ -704
 ```
 
-### 핵심
-
-두 Activation은:
+### Activation Contract
 
 ```text
-NO OVERLAP
+M0 = outside both
+MX = outside both
+C2/C3 = outside both
+M1 = outside both
+
+W1/W2 = D1 only
+E1/E2 = D2 only
 ```
 
-한다.
+두 Activation은 겹치지 않는다.
 
-Central Spine:
+## 9. CENTRAL SCANNER SPINE — Direct Flow
 
-```text
-X around 0
-```
 
-은 두 Drone activation 모두 밖이다.
-
----
-
-## 9. WEST MARKET RING — Safe / Combat Route
-
-### Route
+### Direct Pattern
 
 ```text
-P0
-→ P1
-→ G1
-→ C1
-→ P2
-→ M0
-→ W1
-→ W2
-→ W3
-→ M1
-→ G4
-→ C4
-→ A1
-→ G6
-→ P6
-```
-
-### 비용
-
-```text
-D1 EXPOSURE
-+
-LONGER ROUTE
-```
-
-### 보상
-
-- Scanner wait 없음 in main security territory
-- wide / readable geometry
-- predictable landings
-
-### Safe Route 의미
-
-3-8의 가장 안정적인 traversal route 후보.
-
-`Safe`는:
-
-```text
-NO ENEMY
-```
-
-가 아니라:
-
-```text
-MOVEMENT ERROR TOLERANCE HIGH
-```
-
-라는 뜻.
-
-M0에서 Drone 위치를 읽고 진입.
-
-### Kill
-
-Optional.
-
----
-
-## 10. CENTRAL PRIORITY FLOW SPINE — Timing Route
-
-### Route
-
-```text
-P0
-→ P1
-→ G1
-→ C1
-→ P2
-→ M0
+M0
 → C2
+→ MX
 → C3
-→ C3A
 → M1
-→ G4
-→ C4
-→ A1
-→ G6
-→ P6
 ```
 
 ### 비용
 
 ```text
 SCANNER TIMING
-+
-FEWER RECOVERY LANDINGS
 ```
 
 ### 보상
 
-```text
-SLIGHTLY SHORTEST TOTAL LINE
-NO DRONE NEW ACQUIRE
-NO STABLE MID-LANDING
-```
+- Drone new acquire 없음
+- 가장 직접적인 vertical flow
+- Safe Hub MX로 중간 분해 가능
 
 ### 중요한 균형
 
-Scanner는 Damage가 없으므로
-Central이 자동 최적해가 되지 않게:
-
-- C2 → C3 → C3A를 좌우 Zig-Zag로 배치
-- C2 / C3 / C3A 사이 Stable Landing 없음
-- 총 이동선 길이를 West / East와 크게 벌어지지 않게 조정
-- missed attach는 M0/lower catch로 복귀
-- Window를 기다릴 수는 있음
-- Exact frame timing은 금지
-
-### `swingImpulse = 0`
-
-Landing / Wait를 사용하면
-Mandatory Clear 가능해야 한다.
-
-### Build Lock 금지
-
-Relay가 유리할 수 있지만
-Relay 없이는 못 가는 Route가 아니다.
-
----
-
-## 11. EAST FACILITY SERVICE FRAME — Build Route
-
-### Route
+Central은:
 
 ```text
-P0
-→ P1
-→ G1
-→ C1
-→ P2
-→ M0
-→ S1
-→ S2
-→ S3
-→ M1
-→ G4
-→ C4
-→ A1
-→ G6
-→ P6
-```
-
-### 비용
-
-```text
-D2 EXPOSURE
-+
-MORE ATTACH / RELEASE
-+
-NARROWER LANDINGS
-```
-
-### 보상
-
-```text
-NO SCANNER WAIT
-+
-BUILD EXPRESSION
-```
-
-### IMPULSE
-
-M0 → S1 및
-S2 → S3 구간에서
-Arc / Landing 압축.
-
-### RELAY
-
-가장 자연스럽게 빛남.
-
-```text
-S1
-→ S2
-→ S3
-→ M1
-```
-
-### SHEAR
-
-S1 → S2 Rope가
-D2 patrol y=-800을 가로지른다.
-
-위치가 맞으면:
-
-```text
-attach S2
-→ rope crosses D2
-→ release
-```
-
-공격적 선택.
-
-Kill Optional.
-
----
-
-## 12. Route Recovery / Switching
-
-### Route Selection
-
-M0에서
-West / Central / East를 모두 고를 수 있다.
-
-### Mid-Route Switching
-
-3-8에서는
-security territory 중간의 free crossover를
-강제로 제공하지 않는다.
-
-이유:
-
-3-7에서 이미
-Route Cost를 읽고 선택하는 학습을 완료했다.
-
-3-8에서는:
-
-```text
-COMMIT TO A COST PROFILE
-→
-EXECUTE
-→
-MERGE AT M1
-```
-
-을 Final Expression으로 본다.
-
-### 하지만 Build Lock은 아님
-
-Route 선택은:
-
-```text
-KEY LOCK
+AUTO BEST ROUTE
 ```
 
 가 아니다.
 
-실패해서 M0로 떨어지면
-다른 Route로 바꿀 수 있다.
-
-### WEST Recovery
-
-W1 실패:
+Scanner가 LOCKED면 Player는:
 
 ```text
-M0 / west lower catch
+WAIT
 ```
 
-W2 실패:
+해야 한다.
+
+그 시간 동안 West / East Pocket으로 움직이는 것이
+실제 대안이 된다.
+
+### `swingImpulse = 0`
+
+Safe Hub와 Wait를 사용하면 Mandatory Clear 가능.
+
+### 금지
+
+- Relay required
+- exact one-window chain required
+- Scanner timing 가속
+
+## 10. WEST / EAST DRONE POCKETS — Active Detour
+
+
+### LOWER POCKET
 
 ```text
-W1 / west catch
+M0
+→ W1 / E1
+→ MX
 ```
 
-W3 실패:
+### UPPER POCKET
 
 ```text
-W2 / M1 lower edge
+MX
+→ W2 / E2
+→ M1
 ```
 
-### CENTRAL Recovery
+### 역할
 
-C2/C3 실패:
+Scanner Lock 동안:
 
 ```text
-M0 / central lower catch
+아무것도 하지 않고 기다릴지
+
+vs
+
+Drone Territory에서
+Movement / Combat / Build Expression을 하며
+위쪽 Safe Hub로 전진할지
 ```
 
-### EAST Recovery
+를 선택하게 한다.
 
-S1 실패:
+### D1 / D2
 
 ```text
-M0 / east lower catch
+D1 = WEST ONLY
+D2 = EAST ONLY
 ```
 
-S2/S3 실패:
+### 장점
+
+- Scanner Wait 없음
+- Momentum 유지
+- 공격적 Rope Geometry 가능
+
+### 비용
+
+- Drone activation
+- 더 큰 lateral arc
+- Projectile pressure
+
+### Route Lock 없음
+
+Lower에서 West를 사용해도
+MX에서:
 
 ```text
-previous service pivot / service catch
+Central
+West
+East
 ```
+
+중 다시 선택 가능.
+
+3-7처럼 첫 선택이 Stage 전체의 Cost Profile이 되지 않는다.
+
+## 11. Build Expression
+
+
+### NO BUILD LOCK
+
+모든 필수 진행은 Base Rope compatible.
+
+### IMPULSE
+
+- M0 → W1 / E1 lateral arc
+- MX → W2 / E2 upper detour
+- side pocket 체류시간 압축
+
+### RELAY
+
+Free-Weave에서 가장 자연스럽게 표현.
+
+예:
+
+```text
+M0
+→ W1
+→ MX
+→ C3
+→ M1
+```
+
+또는:
+
+```text
+M0
+→ C2
+→ MX
+→ E2
+→ M1
+```
+
+처럼 Security State에 따라 chaining path를 바꿀 수 있다.
+
+### SHEAR
+
+West:
+
+```text
+W1
+→ W2
+```
+
+East:
+
+```text
+E1
+→ E2
+```
+
+Rope가 각 Drone patrol y=-944를 가로지르는 공격각을 만든다.
+
+Kill Optional.
+
+### 핵심
+
+Build Expression은:
+
+```text
+THREE BUILD ROUTES
+```
+
+가 아니라:
+
+```text
+SAME OPEN FIELD
++
+DIFFERENT MOMENT-TO-MOMENT CHOICES
+```
+
+에서 발생한다.
+
+## 12. Recovery / Weave Switching
+
+
+### M0
+
+완전 Safe.
+
+첫 선택 전 관찰.
+
+### Lower Failure
+
+C2 실패:
+
+```text
+M0 / lower central catch
+```
+
+W1/E1 실패:
+
+```text
+M0 / side catch
+```
+
+### MX
+
+완전 Safe.
+
+Lower 선택을 취소하고
+Upper 선택을 새로 할 수 있다.
+
+### Upper Failure
+
+C3 실패:
+
+```text
+MX / central catch
+```
+
+W2/E2 실패:
+
+```text
+MX / side catch
+```
+
+### M1
+
+Free-Weave Field 종료.
+
+두 Drone new acquire 없음.
+
+### 이미 발사된 Projectile
+
+Activation 밖으로 나가면:
+
+```text
+NEW ACQUIRE / NEW FIRE
+```
+
+는 중단되지만
+기발사 Projectile은 즉시 삭제되지 않는다.
+
+MX / M1은 충분한 폭과 중앙 위치로
+기발사 탄을 회피할 수 있어야 한다.
 
 ### 목표
 
@@ -1387,9 +1462,16 @@ previous service pivot / service catch
 ≤ 5 sec
 ```
 
-내 다시 진입.
+내 다음 선택 준비.
 
----
+### 금지
+
+```text
+NO FULL-STAGE FALL
+NO START RESET
+NO DAMAGE FLOOR
+NO FORCED ROUTE COMMIT
+```
 
 ## 13. Enemy / Hazard
 
@@ -1401,11 +1483,11 @@ previous service pivot / service catch
 
 ### D1
 
-West Market Ring 담당.
+West Drone Pocket 담당.
 
 ### D2
 
-East Service Frame 담당.
+East Drone Pocket 담당.
 
 ### Activation Territory
 
@@ -1421,14 +1503,14 @@ No overlap.
 
 ### Multiplayer 의미
 
-두 Player가:
+두 Player가 같은 Free-Weave Field에서:
 
 ```text
-A → WEST
-B → EAST
+A → WEST POCKET
+B → EAST POCKET
 ```
 
-를 선택하면
+으로 갈라지면
 각자 다른 Drone에 노출될 수 있다.
 
 한 Drone이 반대편 Route Player를
@@ -1491,25 +1573,34 @@ TRAIN MOTION    NONE
 두 Drone을 처음부터
 모두 전투 대상으로 크게 강조하지 않는다.
 
-### M0 — FINAL ROUTE CHOICE SHOT
+### M0 — FREE-WEAVE READ SHOT
 
 가장 중요.
 
 M0에서:
 
 ```text
-WEST route shape + D1
-CENTRAL C2/C3/C3A + Scanner state
-EAST route shape + D2
-M1 general direction
+C2 + Scanner state
+W1 + D1
+E1 + D2
+MX safe hub
 ```
 
-이 읽혀야 한다.
+가 읽혀야 한다.
+
+“세 Route 중 하나를 고른다”가 아니라:
+
+```text
+중앙이 잠기면
+좌/우로 계속 움직일 수 있다
+```
+
+는 공간 가능성이 보여야 한다.
 
 ### Camera Constraint
 
 Mobile `0.72`에서도
-세 Route의 공간적 차이가 읽혀야 한다.
+중앙 Safe Spine과 좌·우 Drone Pocket의 공간적 차이가 읽혀야 한다.
 
 필요하다면 Map width를 줄이되
 Stage-specific zoom 변경을 필수로 만들지 않는다.
@@ -1541,14 +1632,16 @@ UPPER MARKET GATE
 ACCESS CONTROL ACTIVE
 ```
 
-### TRIGGER B — ROUTE DIRECTORY
+### TRIGGER B — MARKET CONTROL DIRECTORY
 
 M0:
 
 ```text
-MARKET RING
-PRIORITY SPINE
+UPPER MARKET
+ACCESS CONTROL ACTIVE
+
 FACILITY SERVICE
+AVAILABLE
 ```
 
 ### TRIGGER C — TRANSFER ARCHIVE
@@ -1870,7 +1963,7 @@ shared phase.
 
 ### 19-3. Controlled Surface Invariant
 
-C1/C2/C3/C3A/C4는:
+C1/C2/C3/C4는:
 
 ```text
 DEDICATED CONTROLLED SURFACE SEGMENT
@@ -1878,7 +1971,7 @@ DEDICATED CONTROLLED SURFACE SEGMENT
 
 동일 위치에 Always-Grappleable Parent Surface 겹침 금지.
 
-### 19-4. Parallel Drone Territories
+### 19-4. Parallel Drone Pockets
 
 D1 / D2 activation:
 
@@ -1888,12 +1981,14 @@ NO OVERLAP
 
 필수.
 
+둘은 같은 Free-Weave Field 안의 좌·우 Pocket을 담당한다.
+
 두 Drone을 하나의 큰 activation으로 두고
 nearest player를 서로 바꿔가며 쏘게 만들지 않는다.
 
-### 19-5. Central Spine Safety
+### 19-5. Central Hub / Spine Safety
 
-Central x≈0은
+M0 / MX / C2 / C3 / M1의 중앙 x≈0은
 D1/D2 activation 밖.
 
 안전 근거:
@@ -1915,7 +2010,7 @@ W1 → W2
 East:
 
 ```text
-S1 → S2
+E1 → E2
 ```
 
 가 각각 Drone patrol line을 가로지르도록 배치.
@@ -2013,11 +2108,13 @@ Base Rope clearable.
 
 ### 19-12. Multiplayer
 
-#### Route Split
+#### Free-Weave Split
+
+같은 Field에서:
 
 ```text
-Player A → West
-Player B → East
+Player A → West Pocket
+Player B → East Pocket
 ```
 
 허용.
@@ -2025,11 +2122,13 @@ Player B → East
 또:
 
 ```text
-A → Central
-B → West/East
+A → Central Spine
+B → Side Pocket
 ```
 
 허용.
+
+MX에서 다시 합류하거나 서로 반대쪽으로 바꿀 수 있다.
 
 #### Targeting
 
@@ -2072,15 +2171,23 @@ Sector 04의 디자인 공간으로 남긴다.
 
 ## 20. Playtest Metrics
 
-### Route Selection
+
+### Weave Choice
 
 ```text
-west chosen
-central chosen
-east chosen
+lower central chosen
+lower west chosen
+lower east chosen
 
-route changed after failure
-route changed after clear attempt
+upper central chosen
+upper west chosen
+upper east chosen
+
+choice changed at MX
+same-side full chain
+cross-side weave
+wait instead of detour
+detour instead of wait
 ```
 
 ### Clear
@@ -2088,47 +2195,53 @@ route changed after clear attempt
 ```text
 first clear
 skilled clear
-
-west clear time
-central clear time
-east clear time
 ```
 
-### West
-
-```text
-D1 shots
-D1 hits
-D1 kill / bypass
-W1/W2 falls
-```
-
-### Central
+### Scanner
 
 ```text
 C2 wait
 C3 wait
+C4 wait
 locked attach attempts
-scanner cycles
-central falls
+scanner cycles observed
 ```
 
-### East
+### Drones
 
 ```text
-D2 shots
-D2 hits
-D2 kill / bypass
+D1 shots / hits / kill / bypass
+D2 shots / hits / kill / bypass
+
+unexpected cross-pocket target
+unexpected cross-lane projectile hit
+```
+
+### Movement
+
+```text
 attach count
 re-attach count
-service falls
+landing count
+side-detour dwell
+MX dwell
+fall count
+wrong attach
 ```
 
-### Final Scanner
+### Build Expression
+
+Runtime 가능 시:
 
 ```text
-C4 wait
-C4 locked attach attempt
+IMPULSE:
+lateral detour arc compression
+
+RELAY:
+weave chain length / side-switch frequency
+
+SHEAR:
+W1→W2 / E1→E2 rope-line attack opportunities
 ```
 
 ### Story Comprehension
@@ -2161,19 +2274,18 @@ C4 locked attach attempt
 
 질문:
 
-> “2-8과 3-8의 전투 구조가 같게 느껴졌나요?”
+> “3-7과 3-8의 이동 구조가 어떻게 달랐나요?”
 
-목표:
+기대:
 
-```text
-NO
-```
+> 3-7은 Route 비용을 고르는 느낌, 3-8은 Scanner 상태에 따라 중앙과 좌우를 계속 엮는 느낌.
 
-3-8은 Parallel Route Territory로 기억돼야 한다.
+FAIL:
 
----
+> 둘 다 왼쪽/가운데/오른쪽 Route 중 하나를 고르는 같은 Stage였다.
 
 ## 21. PASS Criteria
+
 
 ### Gameplay
 
@@ -2184,16 +2296,17 @@ NO
 - no cross-target territory
 - New Mechanic 없음
 - Scanner shared group 1
-- 3 distinct Route identities
-- all routes Base Rope clearable
+- M0 / MX / M1 safe hubs
+- Central Scanner Spine + side Drone Pockets가 하나의 open field로 읽힘
+- Lower / Upper 선택을 MX에서 다시 바꿀 수 있음
+- all mandatory progress Base Rope clearable
 - no Build Lock
 - Kill Optional
 - no Wind / Turret / Shutter
-- Central avoids Drone but pays Scanner / zig-zag commitment / recovery cost
-- West wide + D1
-- East chaining + D2
+- Scanner Lock 때 `WAIT`와 `SIDE DETOUR` 둘 다 유효
+- 3-7의 static 3-route cost selection 반복 아님
+- 2-8의 vertical sequential 2-Drone structure 반복 아님
 - M1 / A1 Safe Merge
-- 2-8 vertical sequential Drone structure 반복 아님
 
 ### Story
 
@@ -2222,21 +2335,24 @@ decision maker
 - Scanner dependency 정확히 표기
 - Sector 03 runtime 미연결 사실 유지
 - Final nextArea / boss semantics 미확정 유지
+- current Scenario Art generation contract 반영
 
 ### Multiplayer
 
-- parallel routes split 가능
-- D1/D2 cross-route target 없음
-- safe merge supports two players
+- Free-Weave split 가능
+- D1/D2 cross-pocket target 없음
+- MX / M1 / A1 support two players
 - Story Deck no forced teleport
 - no global pause
 
----
-
 ## 22. FAIL Conditions
+
 
 ### Gameplay
 
+- M0에서 `WEST / CENTRAL / EAST` 세 정답 Route를 메뉴처럼 고르게 됨
+- Lower 선택이 Upper 선택을 사실상 고정
+- 3-7과 동일한 3 Cost Profile 반복
 - D1 → D2 순차 Encounter 강제
 - Drone activation overlap
 - 두 Drone이 같은 Player를 장거리 Crossfire
@@ -2245,8 +2361,8 @@ decision maker
 - Scanner independent phase puzzle
 - Scanner Damage
 - Scanner Forced Detach
-- central route가 모든 면에서 최적
-- west/east가 사실상 같은 Route
+- Central Scanner가 항상 열려 Side Pocket이 무의미
+- Side Pocket이 모든 면에서 Central보다 우수
 - specific Build required
 - full-stage fall reset
 - Sector04 moving mechanics 선행 추가
@@ -2274,15 +2390,14 @@ decision maker
 
 - Scanner fake local timer
 - frozen surface phase mutation
-- 3 Route를 별도 network rooms로 분리
+- Free-Weave Field를 3개 network room으로 분리
 - new interaction key
 - Gate 자동 teleport
 
----
-
 ## 23. 개발 구현 우선순위
 
-### P0 — ONE-ATRIUM THREE-ROUTE GRAYBOX
+
+### P0 — FREE-WEAVE GRAYBOX
 
 Scanner / Drone OFF.
 
@@ -2294,16 +2409,14 @@ C1 placeholder
 P2
 M0
 
-West:
-W1 W2 W3
+C2
+W1 / E1
+MX
 
-Central:
-C2 C3 C3A
-
-East:
-S1 S2 S3
-
+C3
+W2 / E2
 M1
+
 G4
 C4 placeholder
 A1
@@ -2319,36 +2432,47 @@ reduced
 0
 ```
 
-모든 Mandatory Route 검증.
+모든 Mandatory 연결 검증.
 
-### P2 — ROUTE IDENTITY
+### P2 — WEAVE IDENTITY
 
 Security OFF 상태에서도:
 
 ```text
-West = wide / long
-Central = short / low landing
-East = chain-heavy
+central = direct
+side = lateral motion
+MX = free re-choice
 ```
 
-가 느껴지는지 확인.
+가 공간적으로 읽히는지 확인.
 
 ### P3 — SCANNER
 
-C1 / C2 / C3 / C3A / C4 shared group.
+C1 / C2 / C3 / C4 shared group.
+
+Scanner LOCK 때:
+
+```text
+WAIT
+or
+SIDE MOVEMENT
+```
+
+두 선택이 실제로 의미 있는지 확인.
 
 ### P4 — D1 ONLY
 
-West activation / recovery.
+West Pocket activation / recovery / SHEAR geometry.
 
 ### P5 — D2 ONLY
 
-East activation / recovery.
+East Pocket activation / recovery / SHEAR geometry.
 
-### P6 — TWO DRONE PARALLEL
+### P6 — TWO DRONE FREE-WEAVE
 
 - activation no-overlap
 - 2-player split
+- MX rejoin
 - no cross-target
 - projectile trajectory overlap
 
@@ -2362,9 +2486,9 @@ Runtime 가능 시:
 IMPULSE
 RELAY
 SHEAR
-×
-3 routes
 ```
+
+이 같은 Field에서 서로 다른 moment-to-moment choices를 만드는지 확인.
 
 ### P8 — STORY DECK
 
@@ -2379,11 +2503,10 @@ nextArea 연결하지 않는다.
 
 ### P10 — ART / AUDIO
 
-Gameplay + Story PASS 후.
-
----
+Gameplay + Story + Runtime Camera Zone PASS 후.
 
 ## 24. Stage Data Concept
+
 
 **HYPOTHESIS — Runtime code 아님**
 
@@ -2394,15 +2517,18 @@ Gameplay + Story PASS 후.
     order: 8,
 
     name: "UPPER MARKET GATE",
-    subtitle: "COMMERCIAL SECTOR FINALE",
+    subtitle: "FREE-WEAVE COMMERCIAL SECTOR FINALE",
 
     boss: null,
 
-    routes: [
-        "west-market-ring",
-        "central-priority-spine",
-        "east-service-frame"
-    ],
+    fieldTopology: {
+        type: "free-weave-security-field",
+        safeHubs: ["M0", "MX", "M1"],
+        centralScannerSpine: ["C2", "C3"],
+        westDronePocket: ["W1", "W2"],
+        eastDronePocket: ["E1", "E2"],
+        routeLock: false
+    },
 
     gameplay: {
         newMechanic: null,
@@ -2415,7 +2541,7 @@ Gameplay + Story PASS 후.
     scannerGroups: [
         {
             id: "scanner-upper-market-A",
-            controlledSurfaceIds: ["C1", "C2", "C3", "C3A", "C4"],
+            controlledSurfaceIds: ["C1", "C2", "C3", "C4"],
             timingProfile: "scanner-gallery-baseline",
             phaseMode: "shared",
             damagePlayer: false,
@@ -2429,14 +2555,14 @@ Gameplay + Story PASS 후.
             enemyType: "patrol-drone-t1",
             activation: {
                 x: -640,
-                y: -928,
+                y: -1120,
                 width: 480,
-                height: 288
+                height: 416
             },
             patrol: {
                 points: [
-                    { x: -512, y: -800 },
-                    { x: -192, y: -800 }
+                    { x: -512, y: -944 },
+                    { x: -192, y: -944 }
                 ],
                 speed: 48,
                 waitSeconds: 0.45,
@@ -2449,20 +2575,19 @@ Gameplay + Story PASS 후.
                 "activation-band-only"
             ]
         },
-
         {
             id: "drone-east",
             enemyType: "patrol-drone-t1",
             activation: {
                 x: 160,
-                y: -928,
+                y: -1120,
                 width: 480,
-                height: 288
+                height: 416
             },
             patrol: {
                 points: [
-                    { x: 192, y: -800 },
-                    { x: 512, y: -800 }
+                    { x: 192, y: -944 },
+                    { x: 512, y: -944 }
                 ],
                 speed: 48,
                 waitSeconds: 0.45,
@@ -2479,6 +2604,7 @@ Gameplay + Story PASS 후.
 
     story: {
         deck: "A1",
+        archiveStoryTrigger: "mandatory-on-enter",
 
         evacuationArchive: [
             "group-a-transfer-complete",
@@ -2510,8 +2636,6 @@ Gameplay + Story PASS 후.
     }
 }
 ```
-
----
 
 ## 25. 아트 담당자 전달문
 
@@ -2561,19 +2685,19 @@ Stage README
 
 핵심 이미지:
 
-> **Sector 03에서 가장 큰 상부 Market Atrium. 아래 M0에서 왼쪽에는 넓은 Market Ring과 작은 Drone, 중앙에는 Cyan Grapple Cue가 반복되는 Priority Spine, 오른쪽에는 얇은 Service Frame과 또 다른 Drone이 보인다. 세 Route는 위의 하나의 Merge Deck으로 합쳐지고, 그 위의 조용한 Archive Deck에는 Evacuation Terminal과 Access-Control Terminal 두 개가 서로 떨어져 서 있다.**
+> **Sector 03에서 가장 큰 상부 Market Atrium. 아래 M0에서 중앙의 Scanner Spine과 좌우 Drone Pocket이 한 공간 안에 동시에 보이고, 중간 MX에서 다시 어느 쪽으로든 엮어 갈 수 있다. 고정된 세 Route가 아니라 중앙과 좌우를 계속 섞는 Market Field가 위의 하나의 Merge Deck으로 정리되고, 그 위의 조용한 Archive Deck에는 Evacuation Terminal과 Access-Control Terminal 두 개가 서로 떨어져 서 있다.**
 
 ### 핵심 Composition
 
 ```text
-LEFT
-MARKET / D1
-
 CENTER
-SCANNER FLOW
+SAFE SCANNER SPINE / HUBS
+
+LEFT
+D1 DRONE POCKET
 
 RIGHT
-SERVICE / D2
+D2 DRONE POCKET
 
 TOP
 ARCHIVE JUXTAPOSITION
@@ -2610,7 +2734,8 @@ STATIC
 
 ## 26. 개발자 최종 전달 요약
 
-### SECTOR 03-8 — UPPER MARKET GATE
+
+### SECTOR 03-8 — UPPER MARKET GATE REV 1.1
 
 Sector 03 General Finale.
 
@@ -2619,27 +2744,37 @@ BOSS
 NONE IN THIS STAGE
 ```
 
-### Gameplay
+### Gameplay Identity
+
+3-7처럼:
 
 ```text
-WEST
-D1 + wide market traversal
-
-CENTRAL
-shared Scanner + shortest flow
-
-EAST
-D2 + rope chaining
-
-→
-M1 MERGE
-→
-C4 FINAL SCANNER
-→
-A1 STORY
-→
-P6 FINAL CONTROL
+OUTER / PRIORITY / SERVICE
 ```
+
+세 Route를 한 번 고르는 구조를 반복하지 않는다.
+
+3-8:
+
+```text
+CENTRAL SCANNER SPINE
++
+WEST DRONE POCKET
++
+EAST DRONE POCKET
++
+SAFE HUB M0 / MX / M1
+```
+
+Player는 Scanner 상태에 따라:
+
+```text
+WAIT
+or
+KEEP MOVING SIDEWAYS
+```
+
+를 계속 선택한다.
 
 ### Enemy
 
@@ -2654,7 +2789,31 @@ HORIZONTAL
 NON-OVERLAPPING ACTIVATION
 ```
 
-2-8의 Vertical sequential 2-Drone 구조를 반복하지 않는다.
+두 Drone은 좌·우 Pocket만 담당한다.
+
+Central / M0 / MX / M1은 new acquire 밖.
+
+### Scanner
+
+```text
+C1 / C2 / C3 / C4
+one shared phase
+```
+
+### Build Expression
+
+```text
+IMPULSE
+= side detour arc / exposure compression
+
+RELAY
+= central↔side free-weave chaining
+
+SHEAR
+= W1→W2 / E1→E2 drone-crossing geometry
+```
+
+No Build Lock.
 
 ### Story
 
@@ -2699,6 +2858,16 @@ Sector 03 authored runtime
 3-1~3-8 integration
 ```
 
+### Current Completion
+
+```text
+A1 mandatory Story Trigger
+→
+reach P6
+```
+
+P6 Gate / Panel은 destination이 정해지기 전까지 HOLD.
+
 ### Final Transition
 
 ```text
@@ -2707,24 +2876,10 @@ BOSS FLOW
 TBD
 ```
 
-현재 3-8 completion은:
-
-```text
-A1 mandatory Story Trigger
-→
-reach P6
-```
-
-까지.
-
-P6 Gate / Panel은 destination이 정해지기 전까지 HOLD.
-
 P6를 Sector 04로 직접 연결하지 않는다.
 
 Checkpoint / Timer / physical crossing semantics도
 Boss transition과 함께 확정.
-
----
 
 ## OPEN QUESTIONS
 
@@ -2770,28 +2925,31 @@ C=Standard
 
 순으로 수정.
 
-### 5. Central Route Dominance
+### 5. Central-vs-Detour Value
 
-Central은 Drone이 없어
-Scanner를 이해한 Player에게 자동 최적해가 될 위험이 있다.
+REV 1.1에서는 고정 3-Route 구조를 폐기하고
+Central Scanner Spine + Side Drone Pocket Free-Weave로 바꿨다.
 
-REV 1.0 검토에서 이미:
+핵심 검증:
 
 ```text
-C2 → C3 → C3A
+Scanner AVAILABLE
+→ Central이 자연스럽다.
+
+Scanner LOCKED
+→ Wait와 Side Detour가 둘 다 가치 있다.
 ```
 
-좌우 Zig-Zag로 수정해
-직선 2-Anchor Route보다 이동선과 실패비용을 늘렸다.
+Central이 항상 우월하면:
 
-추가 조정 순서:
+1. Scanner baseline duration
+2. side-pocket travel distance
+3. MX / M1 geometry
+4. recovery value
 
-1. recovery landing density
-2. lateral offset
-3. controlled mount placement
-4. route length
+순으로 조정.
 
-Scanner Timing 자체를 더 빠르게 만드는 것은 후순위.
+Scanner를 더 빠르고 가혹하게 만드는 것은 후순위.
 
 ### 6. Two-Drone Projectile Overlap
 
@@ -2820,4 +2978,4 @@ Sector 04 Master Plan 작성 전
 
 ---
 
-SECTOR 03-8 / UPPER MARKET GATE — REV 1.0
+SECTOR 03-8 / UPPER MARKET GATE — REV 1.1
