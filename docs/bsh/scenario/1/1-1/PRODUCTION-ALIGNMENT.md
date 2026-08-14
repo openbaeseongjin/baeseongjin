@@ -148,3 +148,14 @@
 | 데스크톱·모바일 캡처 | 대기 | C01~C05 Acceptance Capture 생성 |
 
 다음 Stage 문서는 이 형식을 복제하되, 1-1의 좌표나 Camera 수치를 복사하지 않는다. `자료 판정 → 승인 Blockout → Camera Shot → Story/System Trigger → 저비용 자산 → Acceptance Capture` 순서만 공통으로 사용한다.
+
+## 9. 증강·Story 연결
+
+[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-1은 모든 Foundation Augment의 기준선이다.
+
+- Augment 효과, 선택 UI, 관련 Tutorial을 노출하지 않는다.
+- Player는 Rope를 아직 특수 능력이 아니라 사고 후 남은 Maintenance Tool로 이해한다.
+- 첫 Attach 성공률, Release Landing률, Recovery 사용률을 기록해 증강 전 기본 조작 품질을 확인한다.
+- 이후 증강이 추가되어도 현재 지형은 `foundationAugment = none`으로 완전히 통과 가능해야 한다.
+- 1-1에서 Telemetry나 Profile 명칭을 먼저 설명하지 않는다. Story는 Lockdown, Grid Failure, 수직 탈출 목표만 전달한다.
+- 기본 Rope 수치를 증강으로 옮기는 변경은 이 Stage와 1-2의 A/B/C 비교를 통과하기 전까지 `HYPOTHESIS`로 유지한다.
