@@ -38,10 +38,10 @@
 | [1-2](./1-2/README.md) · [제작 정렬](./1-2/PRODUCTION-ALIGNMENT.md) | DOUBLE ANCHOR SHAFT | Airborne Re-Attach · Art 재생성 대기 · 승인 Blockout |
 | [1-3](./1-3/README.md) · [제작 정렬](./1-3/PRODUCTION-ALIGNMENT.md) | SECURITY CHECK | Sentry Telegraph·LOS · Art 재생성 대기 · 승인 Blockout |
 | [1-4](./1-4/README.md) · [제작 정렬](./1-4/PRODUCTION-ALIGNMENT.md) | MAINTENANCE NODE | 첫 Foundation 선택 · Art 재생성 대기 · 구현 Gap 명시 |
-| [1-5](./1-5/README.md) | AUGMENT TEST BAY | Build Expression |
-| [1-6](./1-6/README.md) | COOLING SHAFT | Wind 학습 |
-| [1-7](./1-7/README.md) | PRESSURE BYPASS | Rope·Build·Wind·Sentry 조합 |
-| [1-8](./1-8/README.md) | CONTAINMENT GATE | 일반 구간 최종 종합·전환 |
+| [1-5](./1-5/README.md) · [제작 정렬](./1-5/PRODUCTION-ALIGNMENT.md) | AUGMENT TEST BAY | Build Expression · Camera/Story 미구현 명시 |
+| [1-6](./1-6/README.md) · [제작 정렬](./1-6/PRODUCTION-ALIGNMENT.md) | COOLING SHAFT | Wind 학습 · Wind 물리 구현 확인, Camera/Story 미구현 명시 |
+| [1-7](./1-7/README.md) · [제작 정렬](./1-7/PRODUCTION-ALIGNMENT.md) | PRESSURE BYPASS | Rope·Build·Wind·Sentry 조합 · Camera/Story 미구현 명시 |
+| [1-8](./1-8/README.md) · [제작 정렬](./1-8/PRODUCTION-ALIGNMENT.md) | CONTAINMENT GATE | 일반 구간 최종 종합·전환 · Camera/Story 미구현 명시 |
 
 1-1~1-3은 증강 없는 기본 Rope와 Telemetry 축적 구간, 1-4는 첫 Foundation Augment 선택, 1-5~1-8은 같은 공간을 선택한 증강에 따라 다르게 해석하는 검증 구간이다. Foundation Augment와 Checkpoint Artifact는 서로 다른 보상 계층으로 유지한다.
 
