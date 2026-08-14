@@ -248,6 +248,45 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = 440 } = {}) {
                     issues.push(issue("objective-requirement-self", area.id, { objectiveId: objective.id }));
                 }
             }
+            if (
+                objective.completionDelaySeconds !== undefined &&
+                (!Number.isFinite(objective.completionDelaySeconds) || objective.completionDelaySeconds <= 0)
+            ) {
+                issues.push(
+                    issue("objective-completion-delay", area.id, {
+                        objectiveId: objective.id,
+                        completionDelaySeconds: objective.completionDelaySeconds
+                    })
+                );
+            }
+            if (objective.completionDelaySeconds !== undefined && objective.type !== "interact") {
+                issues.push(issue("objective-completion-delay-type", area.id, { objectiveId: objective.id }));
+            }
+        }
+        const authoredCameraZones = area.cameraZones.filter((zone) => zone && typeof zone === "object");
+        for (const zone of authoredCameraZones) {
+            if (
+                typeof zone.id !== "string" ||
+                !Number.isFinite(zone.minY) ||
+                !Number.isFinite(zone.maxY) ||
+                zone.minY >= zone.maxY ||
+                zone.minY < -area.bounds.height ||
+                zone.maxY > 0 ||
+                !Number.isFinite(zone.desktopZoom) ||
+                zone.desktopZoom <= 0 ||
+                !Number.isFinite(zone.mobileZoom) ||
+                zone.mobileZoom <= 0 ||
+                (zone.horizontalPlayerRatio !== undefined &&
+                    (!Number.isFinite(zone.horizontalPlayerRatio) ||
+                        zone.horizontalPlayerRatio <= 0 ||
+                        zone.horizontalPlayerRatio >= 1)) ||
+                (zone.verticalPlayerRatio !== undefined &&
+                    (!Number.isFinite(zone.verticalPlayerRatio) ||
+                        zone.verticalPlayerRatio <= 0 ||
+                        zone.verticalPlayerRatio >= 1))
+            ) {
+                issues.push(issue("camera-zone", area.id, { cameraZoneId: zone.id ?? null }));
+            }
         }
         for (const windZone of area.windZones) {
             if (!boundsInside(area.bounds, windZone.bounds)) {

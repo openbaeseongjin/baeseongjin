@@ -7,6 +7,22 @@ export function run() {
     assert.equal(progress.snapshot().currentAreaId, "sector-01-01");
     assert.equal(progress.isGateUnlocked("sector-01-01:gate"), false);
 
+    const sequenced = new WorldProgressState(SECTOR_01_AREA_CATALOG);
+    assert.equal(
+        sequenced.startObjectiveSequence("sector-01-01:terminal-read", {
+            playerId: "player:tutorial",
+            durationSeconds: 2.7
+        }).changed,
+        true
+    );
+    assert.equal(sequenced.isGateUnlocked("sector-01-01:gate"), false);
+    assert.equal(sequenced.advanceObjectiveSequence("sector-01-01:terminal-read", 2.69).sequenceCompleted, false);
+    const restoredSequence = new WorldProgressState(SECTOR_01_AREA_CATALOG, sequenced.snapshot());
+    assert.equal(restoredSequence.objectiveSequence("sector-01-01:terminal-read").playerId, "player:tutorial");
+    const sequenceCompleted = restoredSequence.advanceObjectiveSequence("sector-01-01:terminal-read", 0.02);
+    assert.equal(sequenceCompleted.sequenceCompleted, true);
+    assert.equal(restoredSequence.isGateUnlocked("sector-01-01:gate"), true);
+
     assert.deepEqual(progress.crossGate("sector-01-01:gate"), {
         accepted: false,
         changed: false,

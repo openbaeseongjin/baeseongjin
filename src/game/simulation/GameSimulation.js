@@ -369,7 +369,7 @@ export class GameSimulation {
         const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt);
         const projectile = this.#advanceAutomaticWeapon(player, dt);
         if (this.worldProgress) {
-            this.#advanceAuthoredWorldProgress(new Map([[ownerId, command]]), { replicate: false });
+            this.#advanceAuthoredWorldProgress(new Map([[ownerId, command]]), { replicate: false, dt });
         }
         this.projectiles.length = 0;
         this.tick = tick;
@@ -574,6 +574,7 @@ export class GameSimulation {
             );
         }
         this.metrics.recordActiveTime(dt);
+        if (this.worldProgress) this.metrics.recordAreaTime(this.worldProgress.currentAreaId, dt);
         this.elapsedSeconds += dt;
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
@@ -585,7 +586,7 @@ export class GameSimulation {
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile);
         }
-        if (this.worldProgress) this.#advanceAuthoredWorldProgress(gameplayCommands);
+        if (this.worldProgress) this.#advanceAuthoredWorldProgress(gameplayCommands, { dt });
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
             enemies: this.enemies,
@@ -725,12 +726,13 @@ export class GameSimulation {
         player.physics.velocity.y += force.y * dt;
     }
 
-    #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true } = {}) {
+    #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0 } = {}) {
         const events = advanceWorldProgress({
             world: this.world,
             progress: this.worldProgress,
             players: this.players,
-            commandsByPlayerId
+            commandsByPlayerId,
+            dt
         });
         for (const event of events) {
             const { type, ...payload } = event;
@@ -740,6 +742,7 @@ export class GameSimulation {
                 this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
             }
             if (type === "gate-crossed" && event.nextAreaId) {
+                this.metrics.recordAreaClear(event.areaId);
                 const checkpoint = this.world.checkpoints.find(({ areaId }) => areaId === event.nextAreaId);
                 if (checkpoint && checkpoint.level > (this.activeCheckpoint?.level ?? -1)) {
                     this.#activateCheckpoint(checkpoint, event.playerId);

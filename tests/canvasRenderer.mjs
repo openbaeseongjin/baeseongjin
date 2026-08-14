@@ -43,14 +43,16 @@ export function run() {
         damageTaken: 20,
         ropeCuts: 2,
         defeats: 1,
-        firstRewardSeconds: 10
+        firstRewardSeconds: 10,
+        areaTiming: { currentAreaId: "sector-01-01", currentAreaSeconds: 42.75, clearSeconds: {} }
     });
     assert.deepEqual(textCalls, [
         "RUN METRICS",
         "활성 12.5초 · 체크 1",
         "처치 3 · 피해 20",
         "절단 2 · 사망 1",
-        "첫 보상 10.0초"
+        "첫 보상 10.0초",
+        "구간 01-01 · 42.8초"
     ]);
     textCalls.length = 0;
     renderer.drawMetricsPanel(
@@ -108,6 +110,14 @@ export function run() {
     textCalls.length = 0;
     renderer.drawArtifactFeedback({ type: "checkpoint-respawn", reason: "fall", age: 0.4 });
     assert.deepEqual(textCalls, ["체크포인트 부활", "낙사 · 최대 체력으로 복귀"]);
+    textCalls.length = 0;
+    renderer.drawStoryPresentation({
+        title: "VERTICAL GRID",
+        detail: "CASCADE FAILURE",
+        age: 0.3,
+        durationSeconds: 0.9
+    });
+    assert.deepEqual(textCalls, ["VERTICAL GRID", "CASCADE FAILURE"]);
     textCalls.length = 0;
     borderCalls.length = 0;
     renderer.drawArtifactRewardOverlay({

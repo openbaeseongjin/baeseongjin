@@ -12,6 +12,8 @@ import { advanceArtifactRewardSelection, createArtifactRewardSelection } from ".
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
+import { advanceAuthoredCamera, authoredAreaForPosition } from "./camera/AuthoredCameraDirector.js";
+import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -59,7 +61,12 @@ export class MultiplayerGameApp {
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
-        this.camera = { x: 0, y: 0, zoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom };
+        this.camera = {
+            x: 0,
+            y: 0,
+            zoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
+            initialized: false
+        };
         this.latestInput = this.input.snapshot();
         this.frameId = null;
         this.stepCount = 0;
@@ -68,6 +75,7 @@ export class MultiplayerGameApp {
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.checkpointFeedback = null;
         this.playerPresentationEvents = [];
+        this.storyPresentation = new AuthoredStoryPresentation();
         this.localRunCompleted = false;
         this.localArtifactReward = null;
         this.pendingArtifactSelection = null;
@@ -284,11 +292,21 @@ export class MultiplayerGameApp {
             this.authority.submit(gameplayCommand);
         }
         const player = this.authority.snapshot(1).predicted;
-        const targetX = player.position.x - (this.renderer.cssWidth / this.camera.zoom) * 0.38;
-        const targetY = player.position.y - (this.renderer.cssHeight / this.camera.zoom) * 0.58;
-        const blend = 1 - Math.exp(-5 * dt);
-        this.camera.x += (targetX - this.camera.x) * blend;
-        this.camera.y += (targetY - this.camera.y) * blend;
+        const authoredWorld = this.authority.renderSnapshot()?.world;
+        advanceAuthoredCamera({
+            camera: this.camera,
+            world: authoredWorld,
+            player,
+            mobileView: this.mobileView,
+            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight,
+            dt
+        });
+        this.storyPresentation.update(dt, {
+            currentAreaId: authoredAreaForPosition(authoredWorld, player.position)?.id ?? null,
+            events
+        });
         this.audioBindings?.presentFrame({
             scene: this.createAudioContext(
                 player.position,
@@ -327,6 +345,7 @@ export class MultiplayerGameApp {
             ...combatFeedback,
             localPlayerId: this.authority.playerId,
             playerPresentationEvents,
+            storyPresentation: this.storyPresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ??
                 this.checkpointFeedback ??

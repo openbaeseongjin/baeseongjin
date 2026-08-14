@@ -54,4 +54,14 @@ export function run() {
     };
     assert.ok(validateAreaCatalog(invalidPatrol).issues.some(({ code }) => code === "patrol-activation-missing"));
     assert.ok(validateAreaCatalog(invalidPatrol).issues.some(({ code }) => code === "patrol-point-bounds"));
+
+    const invalidCameraZone = mutableCatalog();
+    invalidCameraZone.areas[0].cameraZones[0].desktopZoom = 0;
+    assert.ok(validateAreaCatalog(invalidCameraZone).issues.some(({ code }) => code === "camera-zone"));
+
+    const invalidObjectiveDelay = mutableCatalog();
+    invalidObjectiveDelay.areas[0].objectives[0].completionDelaySeconds = -1;
+    assert.ok(
+        validateAreaCatalog(invalidObjectiveDelay).issues.some(({ code }) => code === "objective-completion-delay")
+    );
 }

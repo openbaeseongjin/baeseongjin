@@ -30,6 +30,7 @@ export class WorldProgressState {
         this.completedObjectiveIds = new Set();
         this.unlockedGateIds = new Set();
         this.crossedGateIds = new Set();
+        this.activeObjectiveSequences = new Map();
         this.completed = false;
         this.contentBoundaryReached = false;
 
@@ -70,6 +71,7 @@ export class WorldProgressState {
         }
 
         this.completedObjectiveIds.add(objectiveId);
+        this.activeObjectiveSequences.delete(objectiveId);
         const gateUnlocked = this.#unlockSatisfiedGate(record.areaId);
         const area = this.#area(record.areaId);
         return freezeResult({
@@ -79,6 +81,70 @@ export class WorldProgressState {
             gateId: gateUnlocked ? area.gate.id : null,
             gateUnlocked
         });
+    }
+
+    startObjectiveSequence(objectiveId, { playerId, durationSeconds }) {
+        const record = this.objectivesById.get(objectiveId);
+        if (!record) return freezeResult({ accepted: false, changed: false, reason: "objective-unknown" });
+        if (record.areaId !== this.currentAreaId) {
+            return freezeResult({ accepted: false, changed: false, reason: "objective-not-current" });
+        }
+        if (this.completedObjectiveIds.has(objectiveId)) {
+            return freezeResult({ accepted: true, changed: false, reason: "objective-already-complete" });
+        }
+        const existing = this.activeObjectiveSequences.get(objectiveId);
+        if (existing) {
+            return freezeResult({
+                accepted: true,
+                changed: false,
+                reason: "objective-sequence-active",
+                sequence: existing
+            });
+        }
+        const requiredObjectiveIds = record.objective.requiredObjectiveIds ?? [];
+        if (requiredObjectiveIds.some((id) => !this.completedObjectiveIds.has(id))) {
+            return freezeResult({
+                accepted: false,
+                changed: false,
+                reason: "objective-blocked",
+                requiredObjectiveIds
+            });
+        }
+        if (typeof playerId !== "string" || !Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+            return freezeResult({ accepted: false, changed: false, reason: "objective-sequence-invalid" });
+        }
+        const sequence = Object.freeze({ objectiveId, playerId, durationSeconds, remainingSeconds: durationSeconds });
+        this.activeObjectiveSequences.set(objectiveId, sequence);
+        return freezeResult({ accepted: true, changed: true, sequence });
+    }
+
+    advanceObjectiveSequence(objectiveId, dt) {
+        const sequence = this.activeObjectiveSequences.get(objectiveId);
+        if (!sequence) {
+            return freezeResult({ accepted: false, changed: false, reason: "objective-sequence-missing" });
+        }
+        if (!Number.isFinite(dt) || dt < 0) {
+            return freezeResult({ accepted: false, changed: false, reason: "objective-sequence-dt" });
+        }
+        const remainingSeconds = Math.max(0, sequence.remainingSeconds - dt);
+        if (remainingSeconds > 0) {
+            const updated = Object.freeze({ ...sequence, remainingSeconds });
+            this.activeObjectiveSequences.set(objectiveId, updated);
+            return freezeResult({ accepted: true, changed: dt > 0, sequenceCompleted: false, sequence: updated });
+        }
+        this.activeObjectiveSequences.delete(objectiveId);
+        const completion = this.completeObjective(objectiveId);
+        return freezeResult({
+            ...completion,
+            sequenceCompleted: completion.changed,
+            playerId: sequence.playerId,
+            durationSeconds: sequence.durationSeconds,
+            remainingSeconds: 0
+        });
+    }
+
+    objectiveSequence(objectiveId) {
+        return this.activeObjectiveSequences.get(objectiveId) ?? null;
     }
 
     crossGate(gateId) {
@@ -131,6 +197,11 @@ export class WorldProgressState {
             completedObjectiveIds: sortedIds(this.completedObjectiveIds, this.idOrder),
             unlockedGateIds: sortedIds(this.unlockedGateIds, this.idOrder),
             crossedGateIds: sortedIds(this.crossedGateIds, this.idOrder),
+            activeObjectiveSequences: Object.freeze(
+                [...this.activeObjectiveSequences.values()]
+                    .sort((left, right) => this.idOrder.get(left.objectiveId) - this.idOrder.get(right.objectiveId))
+                    .map((sequence) => Object.freeze({ ...sequence }))
+            ),
             completed: this.completed,
             contentBoundaryReached: this.contentBoundaryReached
         });
@@ -141,6 +212,7 @@ export class WorldProgressState {
         const completedObjectiveIds = new Set(snapshot.completedObjectiveIds ?? []);
         const unlockedGateIds = new Set(snapshot.unlockedGateIds ?? []);
         const crossedGateIds = new Set(snapshot.crossedGateIds ?? []);
+        const activeObjectiveSequences = new Map();
 
         for (const id of completedObjectiveIds) {
             if (!this.objectivesById.has(id)) throw new Error(`Unknown objective '${id}' in progress snapshot`);
@@ -157,6 +229,31 @@ export class WorldProgressState {
         for (const id of crossedGateIds) {
             if (!this.gatesById.has(id)) throw new Error(`Unknown crossed gate '${id}' in progress snapshot`);
             if (!unlockedGateIds.has(id)) throw new Error(`Crossed gate '${id}' must also be unlocked`);
+        }
+        for (const sequence of snapshot.activeObjectiveSequences ?? []) {
+            const record = this.objectivesById.get(sequence?.objectiveId);
+            if (!record) throw new Error(`Unknown objective sequence '${sequence?.objectiveId}' in progress snapshot`);
+            if (activeObjectiveSequences.has(sequence.objectiveId)) {
+                throw new Error(`Duplicate objective sequence '${sequence.objectiveId}' in progress snapshot`);
+            }
+            if (record.areaId !== snapshot.currentAreaId || completedObjectiveIds.has(sequence.objectiveId)) {
+                throw new Error(`Objective sequence '${sequence.objectiveId}' must be active in the current area`);
+            }
+            const requiredObjectiveIds = record.objective.requiredObjectiveIds ?? [];
+            if (requiredObjectiveIds.some((requiredId) => !completedObjectiveIds.has(requiredId))) {
+                throw new Error(`Objective sequence '${sequence.objectiveId}' requires its prerequisite objectives`);
+            }
+            if (
+                typeof sequence.playerId !== "string" ||
+                !Number.isFinite(sequence.durationSeconds) ||
+                sequence.durationSeconds <= 0 ||
+                !Number.isFinite(sequence.remainingSeconds) ||
+                sequence.remainingSeconds <= 0 ||
+                sequence.remainingSeconds > sequence.durationSeconds
+            ) {
+                throw new Error(`Objective sequence '${sequence.objectiveId}' has invalid timing state`);
+            }
+            activeObjectiveSequences.set(sequence.objectiveId, Object.freeze({ ...sequence }));
         }
 
         for (const [gateId, { areaId, gate }] of this.gatesById.entries()) {
@@ -193,6 +290,7 @@ export class WorldProgressState {
         this.completedObjectiveIds = completedObjectiveIds;
         this.unlockedGateIds = unlockedGateIds;
         this.crossedGateIds = crossedGateIds;
+        this.activeObjectiveSequences = activeObjectiveSequences;
         this.completed = Boolean(snapshot.completed);
         this.contentBoundaryReached = contentBoundaryReached;
         return this.snapshot();

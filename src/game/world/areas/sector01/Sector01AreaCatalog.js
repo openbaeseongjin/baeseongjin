@@ -1,4 +1,5 @@
 import {
+    cameraZone,
     defineArea,
     defineAreaCatalog,
     grappleTarget,
@@ -95,12 +96,20 @@ const area01 = defineArea({
         {
             id: "sector-01-01:terminal-read",
             type: "interact",
-            sourceObjectId: "sector-01-01:service-terminal"
+            sourceObjectId: "sector-01-01:service-terminal",
+            completionDelaySeconds: 2.7,
+            storySequenceId: "sector-01-01:terminal-read"
         }
     ],
     gate: gate("sector-01-01:gate", 320, -928, "sector-01-02", ["sector-01-01:terminal-read"]),
     storyTriggers: ["lockdown", "terminal-read", "gate-open"],
-    cameraZones: ["intro", "first-hook", "release-corridor", "open-swing", "terminal"],
+    cameraZones: [
+        cameraZone("intro", -176, 0, 1.25, 0.82, { verticalPlayerRatio: 0.46 }),
+        cameraZone("first-hook", -352, -176, 1.2, 0.8),
+        cameraZone("release-corridor", -608, -352, 1.1, 0.76),
+        cameraZone("open-swing", -832, -608, 1, 0.72),
+        cameraZone("terminal", -960, -832, 1.15, 0.78)
+    ],
     cueIds: ["service-shaft", "sealed-ground-access", "cyan-grapple", "service-gate-02"]
 });
 

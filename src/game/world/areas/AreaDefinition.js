@@ -58,6 +58,10 @@ export function triggerBounds(x, y, width, height) {
     return freezeValue({ x, y, width, height });
 }
 
+export function cameraZone(id, minY, maxY, desktopZoom, mobileZoom, properties = {}) {
+    return freezeValue({ id, minY, maxY, desktopZoom, mobileZoom, ...properties });
+}
+
 export function defineArea(definition) {
     return freezeValue({
         subtitle: "",

@@ -141,11 +141,12 @@
 | 범위 | 현재 | 다음 작업 |
 | --- | --- | --- |
 | 지형·Anchor·Terminal·Gate | Runtime Mock 연결 완료 | 승인 Blockout과 자동 비교 유지 |
-| Camera | 전 구간 공통 추적 | C01~C05 Zone Preset 연결 |
-| Story | Stable Trigger 이름 보존 | 조건·문구·표시 시간을 Presentation에 연결 |
+| Camera | C01~C05 Zone Preset을 싱글·멀티 공용 추적에 연결 | 데스크톱·모바일 공동 플레이로 구간별 구도 미세 조정 |
+| Story | 진입 1.8초, Terminal 0.9초×3, Gate 개방 1.2초 Presentation 연결 | 최종 문구·오디오 cue 인계 뒤 같은 Trigger에 교체 |
+| 첫 클리어 시간 | `RunMetrics.areaTiming`으로 영역별 실제 시간 기록 | 첫 플레이 표본이 90~120초를 벗어나면 강제 대기 없이 Geometry·Camera·Recovery를 조정 |
 | 오브젝트 그래픽 | Mock Shape | 공용 Sector 01 Atlas로 교체 |
 | 배경 | 저비용 절차형 산업 배경 | 재사용 Atlas가 준비되면 같은 Layer 경계에서 교체 |
-| 데스크톱·모바일 캡처 | 대기 | C01~C05 Acceptance Capture 생성 |
+| 데스크톱·모바일 캡처 | 데스크톱 C01 진입 화면 확인 완료 | C02~C05와 모바일 Acceptance Capture 생성 |
 
 다음 Stage 문서는 이 형식을 복제하되, 1-1의 좌표나 Camera 수치를 복사하지 않는다. `자료 판정 → 승인 Blockout → Camera Shot → Story/System Trigger → 저비용 자산 → Acceptance Capture` 순서만 공통으로 사용한다.
 

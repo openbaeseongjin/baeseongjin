@@ -9,7 +9,12 @@ function metrics() {
         damageTaken: 3,
         ropeCuts: 1,
         defeats: 1,
-        firstRewardSeconds: 58.24
+        firstRewardSeconds: 58.24,
+        areaTiming: {
+            currentAreaId: "sector-01-02",
+            currentAreaSeconds: 12.34,
+            clearSeconds: { "sector-01-01": 103.27 }
+        }
     };
 }
 
@@ -101,6 +106,9 @@ export async function run() {
     assert.match(text, /clockCorrectionMs: -2/);
     assert.match(text, /maxClockCorrectionMs: 17/);
     assert.match(text, /firstRewardSeconds: 58.2/);
+    assert.match(text, /currentArea: sector-01-02/);
+    assert.match(text, /currentAreaSeconds: 12.3/);
+    assert.match(text, /areaClearSeconds: sector-01-01=103.3/);
     assert.match(text, /renderFps: 59/);
     assert.match(text, /backingStore: 2048x1536/);
     assert.match(text, /drawCounts: enemies=6\/48/);

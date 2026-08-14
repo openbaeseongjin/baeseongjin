@@ -23,6 +23,8 @@ import { run as worldForceField } from "./worldForceField.mjs";
 import { run as authoredGameSimulation } from "./authoredGameSimulation.mjs";
 import { run as sector02AreaCatalog } from "./sector02AreaCatalog.mjs";
 import { run as currentAuthoredWorld } from "./currentAuthoredWorld.mjs";
+import { run as authoredCameraDirector } from "./authoredCameraDirector.mjs";
+import { run as authoredStoryPresentation } from "./authoredStoryPresentation.mjs";
 
 const steps = {
     worldSeed,
@@ -47,6 +49,8 @@ const steps = {
     authoredGameSimulation,
     sector02AreaCatalog,
     currentAuthoredWorld,
+    authoredCameraDirector,
+    authoredStoryPresentation,
     spriteAssetValidator,
     stateMachine,
     commandReplay
