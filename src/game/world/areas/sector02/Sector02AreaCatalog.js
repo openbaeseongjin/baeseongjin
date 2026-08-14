@@ -15,7 +15,10 @@ function middle(left, right) {
 }
 
 function platform(areaId, id, left, right, y, kind = "platform") {
-    return rectangle(`${areaId}:${id}`, left, y, right - left, kind === "platform" ? 24 : 20, { kind });
+    return rectangle(`${areaId}:${id}`, middle(left, right), y, right - left, kind === "platform" ? 24 : 20, {
+        kind,
+        coordinateAnchor: "top-center"
+    });
 }
 
 function landmark(areaId, id, left, right, y) {
@@ -56,8 +59,9 @@ function exitPanelObjective(areaId, requiredObjectiveIds) {
     });
 }
 
-function exitPanel(areaId, exit, objective) {
-    return worldObject(`${areaId}:exit-panel`, "gate-panel", exit.x - 112, exit.y + 32, {
+function exitPanel(areaId, exit, objective, floorY = exit.y) {
+    return worldObject(`${areaId}:exit-panel`, "gate-panel", exit.x - 112, floorY, {
+        coordinateAnchor: "bottom-center",
         interactionRadius,
         objectiveId: objective.id,
         gateId: `${areaId}:gate`,
@@ -135,8 +139,9 @@ const area01 = defineArea({
         worldObject(`${area01Id}:community-notice`, "story-display", 160, -952, {
             cueIds: ["evacuation-group-c", "wait-for-further-instruction"]
         }),
-        exitPanel(area01Id, area01Exit, area01PanelObjective),
+        exitPanel(area01Id, area01Exit, area01PanelObjective, -928),
         worldObject(`${area01Id}:exit-frame`, "gate", area01Exit.x, area01Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area01Id}:gate`
         })
     ],
@@ -199,6 +204,7 @@ const area02 = defineArea({
         ]),
         exitPanel(area02Id, area02Exit, area02PanelObjective),
         worldObject(`${area02Id}:exit-frame`, "gate", area02Exit.x, area02Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area02Id}:gate`
         })
     ],
@@ -258,8 +264,9 @@ const area03 = defineArea({
             perPlayerSelection: true,
             cueIds: ["foundation-detected", "specialization-available"]
         }),
-        exitPanel(area03Id, area03Exit, area03PanelObjective),
+        exitPanel(area03Id, area03Exit, area03PanelObjective, -672),
         worldObject(`${area03Id}:exit-frame`, "gate", area03Exit.x, area03Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area03Id}:gate`
         })
     ],
@@ -340,8 +347,9 @@ const area04 = defineArea({
             { x: -416, y: -768 },
             { x: 416, y: -768 }
         ]),
-        exitPanel(area04Id, area04Exit, area04PanelObjective),
+        exitPanel(area04Id, area04Exit, area04PanelObjective, -1216),
         worldObject(`${area04Id}:exit-frame`, "gate", area04Exit.x, area04Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area04Id}:gate`
         })
     ],
@@ -381,10 +389,11 @@ const area05 = defineArea({
         platform(area05Id, "s1", -512, -192, -352, "safe-deck"),
         platform(area05Id, "p2", -256, 448, -448),
         platform(area05Id, "p3", 224, 512, -672),
-        rectangle(`${area05Id}:upper-transit-blockade`, 512, -736, 64, 320, {
+        rectangle(`${area05Id}:upper-transit-blockade`, 544, -416, 64, 320, {
             kind: "sealed-door",
             oneWay: false,
-            grappleable: false
+            grappleable: false,
+            coordinateAnchor: "bottom-center"
         }),
         platform(area05Id, "r1", 64, 320, -832, "recovery"),
         platform(area05Id, "p4", 32, 320, -1024),
@@ -415,6 +424,7 @@ const area05 = defineArea({
             { x: 352, y: -512 }
         ]),
         worldObject(`${area05Id}:upper-transit-gate`, "gate", 544, -576, {
+            coordinateAnchor: "center",
             narrativeLock: true,
             cueIds: ["upper-transit-restricted", "transfer-authorization-pending"]
         }),
@@ -423,6 +433,7 @@ const area05 = defineArea({
         }),
         exitPanel(area05Id, area05Exit, area05PanelObjective),
         worldObject(`${area05Id}:maintenance-frame`, "maintenance-frame", area05Exit.x, area05Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area05Id}:gate`
         })
     ],
@@ -493,8 +504,9 @@ const area06 = defineArea({
         worldObject(`${area06Id}:courtyard-void`, "background-prop", 0, -608, {
             cueIds: ["residential-scale", "quiet-void"]
         }),
-        exitPanel(area06Id, area06Exit, area06PanelObjective),
+        exitPanel(area06Id, area06Exit, area06PanelObjective, -1152),
         worldObject(`${area06Id}:exit-frame`, "gate", area06Exit.x, area06Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area06Id}:gate`
         })
     ],
@@ -585,8 +597,9 @@ const area07 = defineArea({
         worldObject(`${area07Id}:shelter-status`, "story-display", 0, -824, {
             cueIds: ["shelter-capacity-full", "evacuation-transfer-suspended", "remain-designated-area"]
         }),
-        exitPanel(area07Id, area07Exit, area07PanelObjective),
+        exitPanel(area07Id, area07Exit, area07PanelObjective, -1376),
         worldObject(`${area07Id}:exit-frame`, "gate", area07Exit.x, area07Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area07Id}:gate`
         })
     ],
@@ -683,7 +696,8 @@ const area08 = defineArea({
             { x: -384, y: -1088 },
             { x: 480, y: -1088 }
         ]),
-        worldObject(`${area08Id}:transfer-control`, "gate-panel", 448, -1472, {
+        worldObject(`${area08Id}:transfer-control`, "gate-panel", 448, -1440, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: area08Objective.id,
             gateId: `${area08Id}:gate`,
@@ -693,6 +707,7 @@ const area08 = defineArea({
             checkpointId: `${area08Id}:sector-end-checkpoint`
         }),
         worldObject(`${area08Id}:content-boundary`, "gate", area08Exit.x, area08Exit.y, {
+            coordinateAnchor: "bottom-center",
             gateId: `${area08Id}:gate`,
             cueIds: ["post-sector-transition-tbd"]
         })

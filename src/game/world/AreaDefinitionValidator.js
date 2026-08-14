@@ -1,3 +1,5 @@
+import { assertAuthoredCoordinateAnchor } from "./AuthoredCoordinateAnchor.js";
+
 function issue(code, areaId, details = {}) {
     return Object.freeze({ code, areaId, ...details });
 }
@@ -133,6 +135,16 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = 440 } = {}) {
         globalIds.add(area.gate.id);
 
         for (const surface of area.surfaces) {
+            try {
+                assertAuthoredCoordinateAnchor(surface.coordinateAnchor, `${surface.id}.coordinateAnchor`);
+            } catch {
+                issues.push(
+                    issue("surface-coordinate-anchor", area.id, {
+                        id: surface.id,
+                        coordinateAnchor: surface.coordinateAnchor
+                    })
+                );
+            }
             for (const vertex of surface.vertices) {
                 if (!surfacePointInside(area.bounds, vertex)) {
                     issues.push(issue("surface-bounds", area.id, { id: surface.id }));
@@ -160,6 +172,16 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = 440 } = {}) {
         for (const object of area.objects) {
             if (!pointInside(area.bounds, object.position))
                 issues.push(issue("object-bounds", area.id, { id: object.id }));
+            try {
+                assertAuthoredCoordinateAnchor(object.coordinateAnchor, `${object.id}.coordinateAnchor`);
+            } catch {
+                issues.push(
+                    issue("object-coordinate-anchor", area.id, {
+                        id: object.id,
+                        coordinateAnchor: object.coordinateAnchor
+                    })
+                );
+            }
             if (object.bounds && !boundsInside(area.bounds, object.bounds)) {
                 issues.push(issue("object-trigger-bounds", area.id, { id: object.id }));
             }

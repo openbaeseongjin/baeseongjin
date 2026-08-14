@@ -1,3 +1,5 @@
+import { anchoredRectangleBounds, assertAuthoredCoordinateAnchor } from "../AuthoredCoordinateAnchor.js";
+
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
     if (!value || typeof value !== "object") return value;
@@ -9,33 +11,47 @@ export function point(id, x, y, properties = {}) {
 }
 
 export function rectangle(id, x, y, width, height = 32, properties = {}) {
+    const coordinateAnchor = assertAuthoredCoordinateAnchor(properties.coordinateAnchor ?? "top-left");
+    const position = Object.freeze({ x, y });
+    const bounds = anchoredRectangleBounds(position, { width, height }, coordinateAnchor);
     return freezeValue({
         id,
         kind: "platform",
         oneWay: true,
         grappleable: true,
         ...properties,
+        coordinateAnchor,
+        position,
         vertices: [
-            { x, y },
-            { x: x + width, y },
-            { x: x + width, y: y + height },
-            { x, y: y + height }
+            { x: bounds.x, y: bounds.y },
+            { x: bounds.x + bounds.width, y: bounds.y },
+            { x: bounds.x + bounds.width, y: bounds.y + bounds.height },
+            { x: bounds.x, y: bounds.y + bounds.height }
         ]
     });
 }
 
 export function grappleTarget(id, x, y, properties = {}) {
-    return rectangle(id, x - 12, y - 12, 24, 24, {
+    return rectangle(id, x, y, 24, 24, {
         kind: "grapple-target",
         oneWay: false,
         collision: false,
         renderable: false,
+        coordinateAnchor: "center",
         ...properties
     });
 }
 
 export function worldObject(id, kind, x, y, properties = {}) {
-    return freezeValue({ id, kind, presentationId: `world-object:${kind}`, position: { x, y }, ...properties });
+    const coordinateAnchor = assertAuthoredCoordinateAnchor(properties.coordinateAnchor ?? "center");
+    return freezeValue({
+        id,
+        kind,
+        presentationId: `world-object:${kind}`,
+        position: { x, y },
+        ...properties,
+        coordinateAnchor
+    });
 }
 
 export function triggerBounds(x, y, width, height) {

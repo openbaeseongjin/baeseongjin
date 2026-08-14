@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
+import { worldObject } from "../src/game/world/areas/AreaDefinition.js";
+import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
+import { SECTOR_02_AREA_CATALOG } from "../src/game/world/areas/sector02/Sector02AreaCatalog.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
     worldObjectPresentation
@@ -12,6 +15,7 @@ export function run() {
     const before = JSON.stringify(SECTOR_01_AREA_CATALOG);
     const first = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 9182, floorY: 320 });
     const second = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 9182, floorY: 320 });
+    const currentWorld = assembleAuthoredWorld(CURRENT_AUTHORED_AREA_CATALOG, { seed: 9182, floorY: 320 });
 
     assert.deepEqual(first, second, "the same catalog and composition options must produce the same world");
     assert.equal(JSON.stringify(SECTOR_01_AREA_CATALOG), before, "assembly must not mutate authored definitions");
@@ -39,6 +43,55 @@ export function run() {
             .every((object) => worldObjectPresentation(DEFAULT_WORLD_OBJECT_MOCK_CATALOG, object.presentationId)),
         "each rendered authored object must resolve through the replaceable mock presentation catalog"
     );
+    assert.throws(
+        () => worldObject("invalid-anchor", "gate", 0, 0, { coordinateAnchor: "floor" }),
+        /coordinateAnchor/,
+        "authored objects must reject unknown coordinate anchor names before assembly"
+    );
+    for (const catalog of [SECTOR_01_AREA_CATALOG, SECTOR_02_AREA_CATALOG]) {
+        for (const surface of catalog.areas.flatMap(({ surfaces }) => surfaces)) {
+            const width =
+                Math.max(...surface.vertices.map(({ x }) => x)) - Math.min(...surface.vertices.map(({ x }) => x));
+            const height =
+                Math.max(...surface.vertices.map(({ y }) => y)) - Math.min(...surface.vertices.map(({ y }) => y));
+            const expectedAnchor =
+                surface.kind === "grapple-target"
+                    ? "center"
+                    : surface.kind === "sealed-door" || (surface.kind === "cover" && height > width)
+                      ? "bottom-center"
+                      : "top-center";
+            assert.equal(
+                surface.coordinateAnchor,
+                expectedAnchor,
+                `${surface.id} must use the coordinate anchor that matches how the surface is mounted`
+            );
+        }
+    }
+    const firstPlatform = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id.endsWith(":p4"));
+    assert.deepEqual(firstPlatform.position, { x: 192, y: -864 });
+    assert.deepEqual(firstPlatform.vertices[0], { x: 32, y: -864 });
+    assert.deepEqual(firstPlatform.vertices[1], { x: 352, y: -864 });
+    assert.equal(
+        first.surfaces.find(({ id }) => id === firstPlatform.id).position.y,
+        firstPlatform.position.y + 320,
+        "assembly must translate the authored platform anchor together with its vertices"
+    );
+    for (const object of currentWorld.objects.filter(
+        ({ kind, gateId }) => gateId && (kind === "gate" || kind === "gate-panel")
+    )) {
+        assert.equal(object.coordinateAnchor, "bottom-center");
+        assert.ok(
+            currentWorld.surfaces.some(
+                (surface) =>
+                    surface.areaId === object.areaId &&
+                    surface.renderable !== false &&
+                    object.position.x >= surface.x &&
+                    object.position.x <= surface.x + surface.width &&
+                    object.position.y === surface.topY
+            ),
+            `${object.id} must mount its bottom-center coordinate on a visible floor top`
+        );
+    }
 
     for (let index = 1; index < first.areas.length; index += 1) {
         const previous = first.areas[index - 1];
@@ -59,6 +112,27 @@ export function run() {
             ({ areaId, kind }) => areaId === area.id && kind === "area-boundary-wall"
         );
         assert.ok(gatePanel, `${area.id} must expose one visible control panel beside its Gate`);
+        const floorMountedObjects = first.objects.filter(
+            ({ areaId, kind }) => areaId === area.id && (kind === "gate" || kind === "gate-panel")
+        );
+        for (const object of floorMountedObjects) {
+            assert.equal(
+                object.coordinateAnchor,
+                "bottom-center",
+                `${object.id} must declare its authored coordinate as the floor contact point`
+            );
+            assert.ok(
+                first.surfaces.some(
+                    (surface) =>
+                        surface.areaId === area.id &&
+                        surface.renderable !== false &&
+                        object.position.x >= surface.x &&
+                        object.position.x <= surface.x + surface.width &&
+                        object.position.y === surface.topY
+                ),
+                `${object.id} bottom-center coordinate must touch a visible authored floor top`
+            );
+        }
         assert.ok(
             Math.abs(gatePanel.position.x - (gate.barrier.x + gate.barrier.width * 0.5)) <= 160,
             `${area.id} Gate panel must remain visibly adjacent to the door`

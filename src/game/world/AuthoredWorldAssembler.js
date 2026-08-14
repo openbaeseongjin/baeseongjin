@@ -16,6 +16,7 @@ function translateSurface(areaId, surface, offsetY) {
         ...surface,
         ...bounds,
         areaId,
+        ...(surface.position ? { position: translatePoint(surface.position, offsetY) } : {}),
         vertices,
         topY: surface.topY === undefined ? bounds.y : surface.topY + offsetY,
         ...(surface.oneWay ? { oneWayEdgeEnd: surface.oneWayEdgeEnd ?? 1 } : {})
