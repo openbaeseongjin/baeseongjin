@@ -16,19 +16,19 @@
 | Foundation 저장·효과 | `PENDING` | Player 상태, 네트워크 복제, Impulse/Relay/Shear 효과 코드 없음 |
 | Node Story Presentation | `PENDING` | Story Trigger 이름은 있으나 1-4 화면 문구·Objective Event binding 없음 |
 | Calibration Dummy Feedback | `PENDING` | 비공격 Mock Object만 있고 Shear 판정·Spark·Diagnostic Feedback 없음 |
-| `01_scenario_art_reference.png` | `APPROVED ART REFERENCE` | 조용한 Reward Room, 산업용 Node, 동등한 세 Profile의 시각 기준 |
+| `01_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | Reward Room·Node·세 Profile 위계만 참고; Player 크기와 Anchor 연결 의미를 통일해 교체 |
 | `02_approved_blockout.svg` | `APPROVED BLOCKOUT` | 현재 좌표, 통과 경로, Node, Dummy, Gate의 제작 기준 |
 | 기본 `swingImpulse = 780` 이동 | `HYPOTHESIS` | 1-1·1-2 A/B/C 검증 전 Impulse 전용으로 이전 금지 |
 
 현재 가장 중요한 사실은 선택 목록이 데이터에 있다는 이유만으로 증강이 구현됐다고 판정하면 안 된다는 것이다. 선택 Runtime이 연결되기 전에는 Gate 요구 조건도 완료되지 않아 정상적인 1-5 진입이 불가능하다.
 
-## 2. 승인 이미지와 자료 우선순위
+## 2. 문서 이미지와 자료 우선순위
 
 ### Scenario Art Reference
 
 ![1-4 Scenario Art Reference](./images/01_scenario_art_reference.png)
 
-Node가 판타지 Shrine이 아니라 기업용 진단·수리 장비로 보이는지, 세 Profile이 색이 아닌 형태로 동등하게 읽히는지, 1-3보다 긴장이 낮은지를 정한다. 이미지 속 Platform과 Rope 선은 물리 좌표가 아니다.
+`TEMPORARY / PENDING REGENERATION`: Node가 판타지 Shrine이 아니라 기업용 진단·수리 장비로 보이는지, 세 Profile이 색이 아닌 형태로 동등하게 읽히는지, 1-3보다 긴장이 낮은지만 참고한다. 큰 Player와 삼각 Anchor 연결은 새 이미지에 복제하지 않는다. Platform 위치는 물리 좌표가 아니다.
 
 ### Approved Blockout
 
@@ -37,8 +37,9 @@ Node가 판타지 Shrine이 아니라 기업용 진단·수리 장비로 보이�
 1. Story 의미·Augment 철학·금지 요소는 [시나리오 README](./README.md)가 결정한다.
 2. Foundation 공통 규칙은 [증강·Story 통합 기준](../AUGMENT-STORY-INTEGRATION.md)이 결정한다.
 3. 좌표·Stable ID·Camera Shot은 `Sector01AreaCatalog.js`와 Approved Blockout이 함께 결정한다.
-4. Art Reference는 조명·실루엣·정보 위계만 결정하고 Collision을 복제하지 않는다.
+4. 현재 Art Reference는 조명과 일부 정보 위계만 임시 참고하며 Player 크기·Rope 연결·Camera 구도 기준으로 사용하지 않는다.
 5. 선택 Runtime이 추가되면 이 문서의 `PENDING/BLOCKED`를 같은 변경에서 갱신한다.
+6. 재생성은 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)과 그 시점의 선택 Runtime 구현 상태를 적용한다.
 
 ## 3. Runtime Geometry
 

@@ -16,17 +16,17 @@
 | Story Presentation | `IMPLEMENTED` | 개인 화면에 1회 표시, 이동 입력을 막지 않음 |
 | Camera Zones | `IMPLEMENTED PROTOTYPE` | 로컬 플레이어 위치로 Shot 선택, desktop/mobile 공용 데이터 사용 |
 | 기존 PNG 2개 | `RETIRED` | 이전 `COOLING SHAFT` 이미지라 1-3 구현·외주·검수 기준으로 사용 금지 |
-| `03_scenario_art_reference.png` | `APPROVED ART REFERENCE` | Security Shaft의 분위기, 1-Sentry 정보 위계, Cyan/Red 역할 기준 |
+| `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | 분위기와 1-Sentry 위계만 참고; live Rope와 경로 도식을 분리한 대표 Shot으로 교체 |
 | `04_approved_blockout.svg` | `APPROVED BLOCKOUT` | 현재 Runtime Geometry·Route·LOS·Scanner·Gate의 좌표 기준 |
 | 정식 그래픽·오디오 | `PENDING` | stable state/cue ID를 유지한 채 runtime package와 binding만 교체 |
 
-## 2. 승인 이미지와 자료 우선순위
+## 2. 문서 이미지와 자료 우선순위
 
 ### Scenario Art Reference
 
 ![1-3 Scenario Art Reference](./images/03_scenario_art_reference.png)
 
-한 기의 오른쪽 벽 Sentry, 얇은 Red Telegraph, 작은 Player와 Red Scarf, 네 개의 Cyan Anchor, Safe Cover, Recovery, 상단 Gate가 배경보다 먼저 읽히는지를 정한다. 이미지 속 Rope 선과 Platform 위치는 구도 표현이며 물리 좌표가 아니다.
+`TEMPORARY / PENDING REGENERATION`: 한 기의 오른쪽 벽 Sentry, 얇은 Red Telegraph, 작은 Player와 Red Scarf, Cyan Anchor, Safe Cover, Recovery, 상단 Gate의 위계만 참고한다. live Rope와 전체 경로처럼 보이는 선을 새 이미지에 함께 복제하지 않는다. Platform 위치는 구도 표현이며 물리 좌표가 아니다.
 
 ### Approved Blockout
 
@@ -34,9 +34,10 @@
 
 1. 학습 목표·금지 요소·Story 의미는 [시나리오 README](./README.md)가 결정한다.
 2. 좌표·Stable ID·Sentry 상태는 현재 `Sector01AreaCatalog.js`와 이 Blockout이 함께 결정한다.
-3. Art Reference는 색, 조명, 실루엣, Gameplay 정보 위계를 결정하지만 좌표를 복제하지 않는다.
+3. 현재 Art Reference는 색, 조명과 일부 Gameplay 위계만 임시 참고하며 Player 크기·Rope 연결·Camera 구도 기준으로 사용하지 않는다.
 4. `01_swing_line.png`, `02_layout.png`는 이력용이며 제작·외주·검수 자료로 전달하지 않는다.
 5. Blockout과 Runtime이 다르면 같은 변경에서 둘을 함께 수정한다.
+6. 재생성은 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)과 현재 Runtime Camera Zone을 적용한다.
 
 ## 3. Runtime Geometry
 
