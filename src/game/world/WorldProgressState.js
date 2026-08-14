@@ -59,6 +59,15 @@ export class WorldProgressState {
         if (this.completedObjectiveIds.has(objectiveId)) {
             return freezeResult({ accepted: true, changed: false, reason: "objective-already-complete" });
         }
+        const requiredObjectiveIds = record.objective.requiredObjectiveIds ?? [];
+        if (requiredObjectiveIds.some((id) => !this.completedObjectiveIds.has(id))) {
+            return freezeResult({
+                accepted: false,
+                changed: false,
+                reason: "objective-blocked",
+                requiredObjectiveIds
+            });
+        }
 
         this.completedObjectiveIds.add(objectiveId);
         const gateUnlocked = this.#unlockSatisfiedGate(record.areaId);
@@ -135,6 +144,12 @@ export class WorldProgressState {
 
         for (const id of completedObjectiveIds) {
             if (!this.objectivesById.has(id)) throw new Error(`Unknown objective '${id}' in progress snapshot`);
+        }
+        for (const id of completedObjectiveIds) {
+            const requiredObjectiveIds = this.objectivesById.get(id).objective.requiredObjectiveIds ?? [];
+            if (requiredObjectiveIds.some((requiredId) => !completedObjectiveIds.has(requiredId))) {
+                throw new Error(`Completed objective '${id}' requires its prerequisite objectives`);
+            }
         }
         for (const id of unlockedGateIds) {
             if (!this.gatesById.has(id)) throw new Error(`Unknown gate '${id}' in progress snapshot`);

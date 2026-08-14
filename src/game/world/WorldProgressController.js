@@ -4,7 +4,8 @@ function activePlayers(players) {
     return players.filter(({ lifeState }) => lifeState === "active");
 }
 
-function completingPlayer(objective, world, players, commandsByPlayerId) {
+function completingPlayer(objective, world, progress, players, commandsByPlayerId) {
+    if (objective.requiredObjectiveIds?.some((id) => !progress.isObjectiveComplete(id))) return null;
     if (objective.type === "reach") {
         return (
             activePlayers(players).find(({ physics }) => pointInsideBounds(physics.position, objective.bounds)) ?? null
@@ -34,7 +35,7 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
     for (const objectiveId of currentArea.objectiveIds) {
         if (progress.isObjectiveComplete(objectiveId)) continue;
         const objective = world.objectives.find(({ id }) => id === objectiveId);
-        const player = completingPlayer(objective, world, players, commandsByPlayerId);
+        const player = completingPlayer(objective, world, progress, players, commandsByPlayerId);
         if (!player) continue;
         const result = progress.completeObjective(objectiveId);
         if (!result.changed) continue;

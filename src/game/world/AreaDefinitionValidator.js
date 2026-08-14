@@ -213,6 +213,19 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = 440 } = {}) {
             if (objective.bounds && !boundsInside(area.bounds, objective.bounds, { allowFloorOverlap: true })) {
                 issues.push(issue("objective-bounds", area.id, { objectiveId: objective.id }));
             }
+            for (const requiredObjectiveId of objective.requiredObjectiveIds ?? []) {
+                if (!area.objectives.some(({ id }) => id === requiredObjectiveId)) {
+                    issues.push(
+                        issue("objective-requirement-missing", area.id, {
+                            objectiveId: objective.id,
+                            requiredObjectiveId
+                        })
+                    );
+                }
+                if (requiredObjectiveId === objective.id) {
+                    issues.push(issue("objective-requirement-self", area.id, { objectiveId: objective.id }));
+                }
+            }
         }
         for (const windZone of area.windZones) {
             if (!boundsInside(area.bounds, windZone.bounds)) {
