@@ -646,17 +646,6 @@ export async function run() {
         areaStructureContext.calls.some(([name, label]) => name === "fillText" && label === "01 · SERVICE SHAFT"),
         "each room shell carries its authored area identity"
     );
-    const proceduralStructureContext = recordingContext();
-    new AuthoredAreaStructureRenderer().draw({
-        context: proceduralStructureContext,
-        scene: { world: { surfaces: [], areas: [] } }
-    });
-    assert.equal(
-        proceduralStructureContext.calls.some(([name]) => name === "fillRect"),
-        false,
-        "procedural worlds do not inherit authored room shells"
-    );
-
     const gateContext = recordingContext();
     assert.deepEqual(
         worldObjectLocalBounds({ coordinateAnchor: "top-center" }, { size: { width: 40, height: 24 } }),

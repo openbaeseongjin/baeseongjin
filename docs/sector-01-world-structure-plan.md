@@ -148,7 +148,7 @@
 3. `1-1`~현재 구현 영역을 처음부터 연속 플레이하고 영역 전환 전후 상태 digest를 비교한다.
 4. 데스크톱·모바일에서 Gate 잠금/해제, 다음 목표 표시, mock cue 판독성을 확인한다.
 5. 두 클라이언트가 같은 영역 완료·Gate 상태를 보고 공용 진행은 한 번만 다음 영역으로 전진하되, 각 캐릭터는 열린 문에 직접 진입한 자기 포탈 사건에서만 지정 도착 좌표와 초기화 상태로 수렴하고 원격 캐릭터가 두 영역 사이를 보간하지 않는지 확인한다.
-6. 구현 작업의 병합 전 `npm test`, `npm run check`, `npm run format:check`와 갱신된 `npm run validate:world`를 실행한다.
+6. 구현 작업의 병합 전 `npm test`, `npm run check`, `npm run format:check`를 실행한다. `npm test`의 current authored world 단계가 영역 연결·Gate·content boundary를 검증한다.
 
 ## 주요 위험과 대응
 

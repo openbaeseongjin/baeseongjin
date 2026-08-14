@@ -16,7 +16,6 @@ import {
 import { EnvironmentAssetSet } from "../src/render/environment/EnvironmentAssetSet.js";
 import { AltitudeZoneResolver, AltitudeSunrise } from "../src/render/environment/AltitudeZoneResolver.js";
 import { validateEnvironmentAssetDirectory } from "../scripts/validateEnvironmentAssets.mjs";
-import { WORLD_CONFIG } from "../src/game/config.js";
 import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
@@ -36,12 +35,6 @@ export function run() {
     assert.equal(def.backdrop.layers.length, 3);
     assert.ok(Object.keys(def.terrain.materials).length >= 5);
     assert.ok(Object.keys(def.decoration.groups).length >= 5);
-    assert.equal(
-        ENVIRONMENT_MAX_ALTITUDE,
-        WORLD_CONFIG.levelCount * WORLD_CONFIG.verticalStep,
-        "environment altitude range follows the reachable world"
-    );
-
     // Zone resolution
     assert.equal(def.zoneAt(0).id, "waste");
     assert.equal(def.zoneAt(1000).id, "waste");

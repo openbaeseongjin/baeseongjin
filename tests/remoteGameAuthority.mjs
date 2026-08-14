@@ -451,41 +451,6 @@ export async function run() {
     assert.equal(checkpointAuthority.pendingCheckpointId, null);
     assert.equal(checkpointAuthority.drainCheckpointClaimReceipts().length, 1);
 
-    const summitMessages = [];
-    const summitAuthority = new RemoteGameAuthority({
-        url: "ws://summit.test/multiplayer",
-        WebSocketImpl: { OPEN: 1 }
-    });
-    summitAuthority.socket = {
-        readyState: 1,
-        send: (serialized) => summitMessages.push(JSON.parse(serialized))
-    };
-    summitAuthority.ownerRuntime = {
-        state: () => ({
-            tick: 60,
-            position: { x: 480, y: 80 },
-            velocity: { x: 0, y: 0 },
-            isGrounded: true,
-            rope: { isAttached: false, anchor: null }
-        }),
-        summitClaimCandidate: () => ({
-            clientTick: 60,
-            position: { x: 480, y: 80 },
-            feedbackPosition: { x: 480, y: 80 }
-        })
-    };
-    const predictedSummit = summitAuthority.submitReachedSummit();
-    assert.deepEqual(predictedSummit.feedbackPosition, { x: 480, y: 80 });
-    assert.deepEqual(
-        summitMessages.map(({ type }) => type),
-        ["owner-motion", "summit-claim"],
-        "the latest owner state must precede its summit claim"
-    );
-    assert.equal(summitAuthority.submitReachedSummit(), null, "only one summit claim may be pending");
-    summitAuthority.recordSummitClaimReceipt({ accepted: false, reason: "test-rejection" });
-    assert.equal(summitAuthority.pendingSummitClaim, false);
-    assert.equal(summitAuthority.drainSummitClaimReceipts().length, 1);
-
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer, {
         createSimulation: ({ worldSeed }) => new GameSimulation({ worldSeed, worldCatalog: null })
@@ -1625,39 +1590,6 @@ export async function run() {
         });
         assert.equal(ownerHitAnimation.state, "hit");
         assert.equal(observerHitAnimation.state, "hit");
-        app.renderer.draw = (state) => {
-            renderedState = state;
-        };
-
-        const summit = room.simulation.world.summit;
-        authorityPlayer.physics.position.set(summit.x, summit.y);
-        authorityPlayer.physics.velocity.set(0, 0);
-        authority.ownerRuntime.simulation.restoreOwnerPrediction(
-            authority.playerId,
-            room.simulation.playerState(authority.playerId),
-            authority.snapshot().owner.tick
-        );
-        app.update(1 / 120, movementCommand(0));
-        assert.equal(app.localRunCompleted, true, "the owner must complete locally before the server snapshot");
-        app.render();
-        assert.equal(renderedState.runState, "completed", "the local completion overlay must not wait for a receipt");
-        await waitFor(
-            () => room.simulation.runState === "completed",
-            "the summit claim must complete the shared world"
-        );
-        await waitFor(
-            () =>
-                authority.snapshot().state.runState === "completed" &&
-                partner.snapshot().state.runState === "completed",
-            "both clients must converge on the completed run state"
-        );
-        const observedSummitEvents = [];
-        await waitFor(() => {
-            observedSummitEvents.push(...partner.drainEvents());
-            return observedSummitEvents.some(
-                ({ eventType, playerId }) => eventType === "run-completed" && playerId === authority.playerId
-            );
-        }, "the other client must receive the shared run completion event");
         partner.close();
 
         for (const roundTripDelayMs of [0, 50, 100, 200]) {

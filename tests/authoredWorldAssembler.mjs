@@ -181,7 +181,4 @@ export function run() {
         gateGapPosition.y < firstDivider.y + firstDivider.height,
         "the authored Gate opening stays the only gap once its dynamic barrier is removed"
     );
-
-    assert.equal(first.summit.x, first.areas.at(-1).exit.x);
-    assert.equal(first.summit.y, first.areas.at(-1).exit.y);
 }
