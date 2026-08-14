@@ -259,6 +259,24 @@ export function run() {
     for (const [, , , , , , x] of firstDecoration)
         assert.ok(x < -48 || x > 120, "decoration stays outside traversal surface");
 
+    const authoredDecorationContext = recordingContext();
+    const authoredDecorationStats = new RenderFrameStats();
+    new PixelDecorationRenderer({ definition, assets }).draw({
+        context: authoredDecorationContext,
+        scene: sector01Scene,
+        renderStats: authoredDecorationStats
+    });
+    assert.equal(
+        authoredDecorationContext.calls.some(([name]) => name === "drawImage"),
+        false,
+        "authored worlds must not inherit procedural default-mock decoration sprites"
+    );
+    assert.deepEqual(
+        authoredDecorationStats.snapshot().decorations,
+        { total: 0, drawn: 0 },
+        "authored worlds report the legacy decoration layer as intentionally empty"
+    );
+
     const seedInputs = [];
     class SeedRecordingDecorationRenderer extends PixelDecorationRenderer {
         hashFor(value) {

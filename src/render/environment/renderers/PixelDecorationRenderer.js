@@ -1,6 +1,6 @@
 import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
 import { boundsForVertices, centeredBounds, isVisible } from "../../RenderViewport.js";
-import { sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
+import { currentAuthoredArea, sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
 
 export class PixelDecorationRenderer {
     constructor({ definition, assets }) {
@@ -13,6 +13,11 @@ export class PixelDecorationRenderer {
     }
 
     draw({ context, scene, viewport, renderStats }) {
+        if (currentAuthoredArea(scene)) {
+            renderStats?.recordCollection("decorations", 0, 0);
+            return;
+        }
+
         const zone = sceneEnvironmentZone(this.definition, scene);
         const group = this.definition.decorationGroupFor(zone);
 
