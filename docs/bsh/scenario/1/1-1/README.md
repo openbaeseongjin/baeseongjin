@@ -365,7 +365,7 @@ SERVICE GATE 02
 | 90–110초 | Terminal | Rooftop Shuttle 목표 |
 | 110초 이후 | Gate | 1-2 진입 |
 
-1-1만 따로 실패시키는 구간 Timer는 두지 않는다. Sector 01 공용 Timer는 `1-1` 진입부터 영역 사이에서 계속 감소하고 명시적 Gate 통과 때 시간을 보충하며, 0초부터 하층 붕괴가 상승한다. 정확한 시간·보충량·붕괴 속도는 mock으로 시작해 공동 플레이로 조정한다. 상세 기준은 [`../../../sector-timer-and-boss-flow.md`](../../../sector-timer-and-boss-flow.md)를 따른다.
+1-1만 따로 실패시키는 구간 Timer는 두지 않는다. Sector 01 공용 Timer는 `1-1` 진입부터 영역 사이에서 계속 감소하고 명시적 Gate 통과 때 시간을 보충하며, 0초부터 하층 붕괴가 상승한다. 정확한 시간·보충량·붕괴 속도는 mock으로 시작해 공동 플레이로 조정한다. 상세 기준은 [`../../../../sector-timer-and-boss-flow.md`](../../../../sector-timer-and-boss-flow.md)를 따른다.
 
 ## 09 · GAMEPLAY와 BACKGROUND LAYER
 

@@ -46,7 +46,7 @@ Boss:
 NONE IN THIS STAGE
 
 Sector 01 Boss:
-별도 전투로 존재하며 위치·전환 순서·시나리오는 추후 확정. 보스 전투 Timer 흐름은 [`../../../sector-timer-and-boss-flow.md`](../../../sector-timer-and-boss-flow.md)를 따른다.
+별도 전투로 존재하며 위치·전환 순서·시나리오는 추후 확정. 보스 전투 Timer 흐름은 [`../../../../sector-timer-and-boss-flow.md`](../../../../sector-timer-and-boss-flow.md)를 따른다.
 
 Checkpoint:
 SECTOR GENERAL-FLOOR END CHECKPOINT
@@ -184,7 +184,7 @@ Player는:
 
 마지막에 Maintenance Override를 실행한다.
 
-이 결정은 Sector 1에 Boss가 없다는 뜻이 아니다. 프로젝트 공통 기획에 따라 Sector 1에도 Boss 1개와 별도의 Boss Battle Timer가 존재한다. 다만 `1-8 CONTAINMENT GATE`는 일반 구간의 최종 종합 Stage로 유지하며, Boss 전투의 위치·전환 순서·시나리오는 이 문서에서 임의로 정하지 않는다. 일반·보스 Timer 전환 규칙은 [`../../../sector-timer-and-boss-flow.md`](../../../sector-timer-and-boss-flow.md)를 따른다.
+이 결정은 Sector 1에 Boss가 없다는 뜻이 아니다. 프로젝트 공통 기획에 따라 Sector 1에도 Boss 1개와 별도의 Boss Battle Timer가 존재한다. 다만 `1-8 CONTAINMENT GATE`는 일반 구간의 최종 종합 Stage로 유지하며, Boss 전투의 위치·전환 순서·시나리오는 이 문서에서 임의로 정하지 않는다. 일반·보스 Timer 전환 규칙은 [`../../../../sector-timer-and-boss-flow.md`](../../../../sector-timer-and-boss-flow.md)를 따른다.
 
 ---
 
