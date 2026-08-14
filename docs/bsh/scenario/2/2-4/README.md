@@ -1,6 +1,6 @@
 # SECTOR 02-4 — RESIDENTIAL STACK
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1*
 
 ◀ PREV — [SECTOR 02-3 / RESIDENTIAL SERVICE NODE](../2-3/README.md) · NEXT — [SECTOR 02-5 / EVACUATION WALKWAY](../2-5/README.md) ▶
 
@@ -1164,18 +1164,11 @@ Collision을 같이 늘리지 않는다.
 
 ### 19-1. Current Enemy Architecture
 
-**VERIFIED — current `main`**
+**UPDATED — [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md) 기준 최신 상태**
 
-현재 Generic `EnemyObject`는
-고정 `position`에서 가장 가까운 Player를 선택해
-Projectile을 발사하는 구조를 가지고 있다.
+Generic `EnemyObject`는 타겟이 없으면 `EnemyPatrol.js`(`advanceEnemyPatrol`)로 patrol 이동을, 타겟이 있으면 기존 `idle→acquire→track→lock→fire→cooldown` FSM으로 Projectile 공격을 수행한다. Patrol 이동은 더 이상 "Generic Enemy 기본 동작이 아님"이 아니다 — 2-2에서 도입된 것과 같은 합성 기능이 `Sector02AreaCatalog.js`의 `patrolDrone()` 헬퍼를 통해 이미 재사용되고 있다.
 
-Patrol 이동은 현재 Generic Enemy 기본 동작이 아니다.
-
-따라서 2-4의 Patrol Drone은
-2-2에서 추가되는 이동 capability / enemy type을 재사용해야 한다.
-
-2-4에서 별도의 두 번째 Drone 구현을 만들지 않는다.
+2-4는 2-2와 동일한 `patrolDrone()` 헬퍼를 그대로 재사용하며, 별도의 두 번째 Drone 구현을 만들지 않는다는 원칙은 그대로 유지된다.
 
 ### 19-2. Dense Visual Geometry
 
@@ -1746,13 +1739,9 @@ surface.grappleable
 
 Catalog 확정 후 Route Efficiency를 다시 검증한다.
 
-### 2. Patrol Drone T1 구현 완료 여부
+### 2. Patrol Drone T1 구현 완료 여부 — RESOLVED
 
-현재 Generic Enemy에는 Patrol 이동이 없다.
-
-2-4는 2-2에서 Patrol Drone T1 구현이 먼저 완료된다는 의존성이 있다.
-
-2-4에서 별도 Drone 로직을 중복 구현하지 않는다.
+**UPDATED**: 이 질문은 더 이상 OPEN이 아니다. Patrol 이동은 `EnemyObject`+`EnemyPatrol.js` 합성 기능으로 이미 구현되어 있고, 2-2와 2-4 모두 `Sector02AreaCatalog.js`의 같은 `patrolDrone()` 헬퍼를 재사용한다. 자세한 내용은 [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md)를 참고한다. 2-4에서 별도 Drone 로직을 중복 구현하지 않는다는 원칙은 그대로 유지된다.
 
 ### 3. `surface.grappleable`
 
@@ -1791,4 +1780,4 @@ Region Gate 권위 규칙은
 
 ---
 
-SECTOR 02-4 / RESIDENTIAL STACK — REV 1.0
+SECTOR 02-4 / RESIDENTIAL STACK — REV 1.1

@@ -9,7 +9,7 @@
 | 항목 | 상태 | 판정 |
 | --- | --- | --- |
 | 1408×1280 Geometry(23개 Surface) | `IMPLEMENTED — README와 완전 일치` | P0/P1, S1~S4, C1, R2/R3, P4, M3, P7, Exit Deck, G1~G9/G8A 전부 좌표 일치(21개 전수 대조) |
-| Patrol Drone T1 이동/전투 AI | `IMPLEMENTED` | [2-2 판정](../2-2/PRODUCTION-ALIGNMENT.md)과 동일 — `EnemyObject`+`EnemyPatrol.js` 합성 기능으로 실제 구현됨. README §19-1·OPEN QUESTIONS #2("Generic Enemy에는 Patrol 이동이 없다")는 더 이상 사실이 아니다 |
+| Patrol Drone T1 이동/전투 AI | `IMPLEMENTED` | [2-2 판정](../2-2/PRODUCTION-ALIGNMENT.md)과 동일 — `EnemyObject`+`EnemyPatrol.js` 합성 기능으로 실제 구현됨. README §19-1·OPEN QUESTIONS #2의 "Generic Enemy에는 Patrol 이동이 없다"는 REV 1.0 시점 서술이었으며 REV 1.1에서 갱신됐다 |
 | Drone 1 Patrol 범위 | `IMPLEMENTED — README와 불일치` | 코드: `(-416,-768)~(416,-768)`. README §8: `(+64,-624)~(+480,-624)`. X 범위·Y 모두 다름 |
 | Safe Outer Climb(S2→S3) | `README가 스스로 HYPOTHESIS로 명시` | README §8 "별도 전용 Anchor Object를 추가하지 않는다"와 일치 — 코드에도 S2/S3 사이 전용 Anchor 없음 |
 | Camera Zones | `NOT IMPLEMENTED` | 필드 없음 |
@@ -60,7 +60,7 @@ Camera Zone 없음. Story Trigger 3개 모두 미연결. README §15 제안 문�
 | 범위 | 현재 | 다음 작업 |
 | --- | --- | --- |
 | 지형(21개 Surface) | Runtime Mock 연결 완료, README와 완전 일치 | 없음 |
-| Patrol Drone AI | 구현 완료(README 서술은 구식) | README §19-1·OPEN QUESTIONS #2 갱신 필요(이 문서가 대신 기록) |
+| Patrol Drone AI | 구현 완료, README REV 1.1에서 갱신 완료 | 없음 |
 | Drone 배치 | 구현됨, README와 위치 다름 | 실제 Y(-768) 기준으로 세 Route Exposure 밸런스 재검토 |
 | `surface.grappleable` | 미구현(README §19-3이 이미 조건부 도입 원칙 명시) | Wrong Attach 데이터 확보 후 결정 — 이 문서 범위 밖 |
 | Camera / Story | 없음 | Zone·Trigger 연결 |

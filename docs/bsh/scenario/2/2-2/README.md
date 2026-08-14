@@ -1,6 +1,6 @@
 # SECTOR 02-2 — PATROL WALKWAY
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1*
 
 ◀ PREV — [SECTOR 02-1 / WORKER BLOCK 12](../2-1/README.md) · NEXT — [SECTOR 02-3 / RESIDENTIAL SERVICE NODE](../2-3/README.md) ▶
 
@@ -1062,11 +1062,11 @@ Player가:
 
 ### 19-1. Current Code State
 
-현재 저장소에는 일반 `EnemyObject`, `CombatSystems`, Projectile 관련 구현이 존재한다.
+**UPDATED — [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md) 기준 최신 상태**
 
-반면 현재 코드 검색에서 `PatrolDrone` 전용 구현은 확인되지 않았다.
+현재 저장소에는 일반 `EnemyObject`, `CombatSystems`, Projectile 관련 구현이 있고, Patrol 이동은 별도 `PatrolDrone` 클래스가 아니라 `EnemyObject`가 `EnemyPatrol.js`(`advanceEnemyPatrol`/`createEnemyPatrolState`)를 합성해 제공한다. 타겟이 없으면 patrol, 있으면 기존 `idle→acquire→track→lock→fire→cooldown` FSM으로 전환하는 구조이며 `Sector02AreaCatalog.js`의 `patrolDrone()` 헬퍼가 이미 이 기능으로 8개 Stage 중 다수에 Drone을 배치하고 있다.
 
-따라서 Patrol Drone은 **현재 구현 완료 기능이 아니라 신규 Gameplay Object**로 취급한다.
+따라서 Patrol Drone은 **신규 Gameplay Object가 아니라 기존 `EnemyObject`의 합성 기능**으로 이미 구현되어 있다. 아래 P0(구현 우선순위)는 이 사실을 반영해 재해석한다 — 새 클래스를 만드는 것이 아니라 기존 `patrolDrone()` 헬퍼 재사용이 우선순위다.
 
 ### 19-2. 구현 우선순위
 
@@ -1566,12 +1566,10 @@ Geometry와 함께 Playtest해서 결정.
 
 두 플레이어가 있을 때 실시간 Nearest Target으로 계속 바꾸는 방식은 Telegraph 가독성을 깨뜨릴 가능성이 있으므로 실제 2인 Test 후 확정한다.
 
-### 4. Patrol Drone 구현 구조
+### 4. Patrol Drone 구현 구조 — RESOLVED
 
-현재 `PatrolDrone` 전용 코드가 확인되지 않으므로 기존 `EnemyObject`를 무리하게 조건문으로 확장할지, 별도 이동 capability를 조합할지는 **개발 구조 검토 후 결정**한다.
-
-현재 저장소에는 Generic Enemy 구현과 Combat System이 이미 존재한다.
+**UPDATED**: 이 질문은 더 이상 OPEN이 아니다. `EnemyObject`가 `EnemyPatrol.js`의 이동 capability를 합성하는 방식으로 이미 구현되어 있으며(별도 `PatrolDrone` 클래스가 아님), `Sector02AreaCatalog.js`의 `patrolDrone()` 헬퍼가 이 구조를 재사용해 여러 Stage에 Drone을 배치한다. 자세한 내용은 [PRODUCTION-ALIGNMENT.md](./PRODUCTION-ALIGNMENT.md)를 참고한다.
 
 ---
 
-SECTOR 02-2 / PATROL WALKWAY — REV 1.0
+SECTOR 02-2 / PATROL WALKWAY — REV 1.1
