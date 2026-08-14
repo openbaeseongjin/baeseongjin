@@ -50,9 +50,13 @@
 
 ### 제출 전 시나리오 구현 트랙
 
-메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)의 전체 48개 맵을 6개 섹터 단위로 아래 순서대로 구현한다. 각 맵은 별도 월드가 아니라 하나의 연속 월드 안에 놓이는 진행 영역이다. 각 섹터는 8개 영역을 가지며 내부에서는 `n-1 → n-8` 순서를 지킨다. 각 단계는 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 이미지·사운드 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 목록과 mock 배치를 기준으로 앞 섹터부터 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
+메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)에 현재 작성된 맵을 섹터·번호 순서대로 즉시 구현하고, 새 시나리오가 추가될 때 같은 흐름에 이어 붙인다. 각 맵은 별도 월드가 아니라 하나의 연속 월드 안에 놓이는 진행 영역이다. 각 단계는 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 목록과 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
 
-현재 저장소에는 `SECTOR 01`의 `1-1`~`1-8` 시나리오 문서가 모두 있다. 나머지 40개 맵의 시나리오·레벨 디자인은 아직 없으므로 2026년 8월 19일까지 섹터 순서대로 새로 작성하고 최소 오브젝트 요구를 함께 문서화한다. 메인 개발은 `SECTOR 01` 전체 mock 연결을 진행할 수 있으며, 정식 표현 리소스는 구현을 막지 않는다. 이후 각 섹터의 8개 맵 명세는 해당 섹터 mock 연결 완료의 선행 입력이다.
+2026-08-14 최신 `origin/main`에는 `SECTOR 01`의 `1-1`~`1-8`, `SECTOR 02`의 `2-1`~`2-8`, `SECTOR 03`의 `3-1`~`3-2`, 총 18개 상세 시나리오가 있다. 현재 runtime은 확정된 `1-1 → 2-8` 16개 영역을 한 월드로 연결한다. `3-1 POWERED PROMENADE`는 Enemy·새 기믹이 없는 blockout이고 `3-2 SCANNER GALLERY`는 일부 Service-Mount의 새 Rope 부착만 `AVAILABLE → WARNING → LOCKED → RESET` 상태로 제한하는 Access Scan Field를 도입한다. `2-8` 이후 Sector 02 Boss/전환과 새 Scanner system은 큰 방향 변경이므로 사용자 검토 뒤 구현·연결 방식을 정한다. `2-3` Specialization은 1-4에서 고른 Foundation Augment를 유지한 채 그 방향을 한 단계 심화하는 성장으로 시나리오에 명시됐다. Artifact 선택의 입력·UI 흐름은 재사용 후보지만 Artifact ID와 Rope Augment ID의 의미 체계는 합치지 않는다. 실제 Specialization 이름·효과·수치·선택 pool은 미정이므로 geometry와 node flow만 먼저 구현하고 성장 규칙은 임의 확정하지 않는다. `2-5`의 잠긴 Upper Transit Gate는 서사적 장애물이고 실제 다음 진행 출구는 Maintenance Service Frame이다. `2-8`은 Boss가 없는 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 이후 Boss/`3-1` 전환 순서는 공통 Boss Flow가 확정되기 전 연결하지 않는다.
+
+Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합한다. 맵은 결정적인 corridor/route·activation band만 제공하고 공격 acquire·track·lock·fire·cooldown과 투사체 규칙은 재사용한다. Patrol 자료가 없는 Sentry는 정지 동작을 유지한다. 각 Drone은 자기 band 안에서만 이동·획득하고 공격 cycle 중 target을 유지해 다른 band 플레이어 때문에 재조준하거나 지속 crossfire를 만들지 않는다.
+
+월드 선택도 실행 방식별로 나누지 않는다. 로컬 실행과 네트워크 서버·예측은 하나의 `GameSimulationFactory`와 현재 authored catalog를 공유한다. 네트워크는 같은 world revision과 진행 상태를 복제할 뿐 별도 맵을 생성하지 않는다. 맵 definition은 stable object/state/event/presentation/cue ID만 소유하고 이미지·atlas·음원 경로는 소유하지 않는다. 현재 표현은 environment/audio runtime catalog와 world-object mock presentation catalog를 통해 연결하며 정식 package가 준비되면 같은 ID의 표현만 교체한다.
 
 섹터 구현에는 다음 기획 게이트도 적용한다. 각 결과는 아이디어 목록이 아니라 개발자가 상태·사건·화면 흐름을 구현할 수 있는 계약이어야 한다.
 
@@ -81,7 +85,7 @@
 5. `SECTOR 05`: `5-1 → 5-8`
 6. `SECTOR 06`: `6-1 → 6-8`
 
-각 섹터의 오브젝트 목록은 다음 섹터 구현과 전문 리소스 제작의 입력이지만, 정식 리소스 납품은 다음 섹터 구현의 선행 조건이 아니다. 맵·세부 기획과 그래픽·오디오 1차 생산은 2026년 8월 19일을 중간 마감으로 하고, 메인 개발의 mock 기반 6개 섹터 연결은 8월 21일까지 완료해 8월 22~23일 최종 스퍼트에 들어간다.
+각 섹터의 오브젝트 목록은 다음 영역 구현과 전문 리소스 제작의 입력이지만, 정식 리소스 납품은 다음 영역 구현의 선행 조건이 아니다. 메인 개발은 달력상 예정 수량을 채우기보다 현재 실제 시나리오가 있는 영역을 끝까지 mock으로 연결하고, 새 시나리오는 Git 변경을 확인해 이어서 흡수한다. 맵 순서·핵심 기믹·완료 조건·Gate 연결·공개 asset 경계가 바뀌는 변경은 구현 전에 사용자 검토를 받는다.
 
 ### P0. 로그라이크 한 판의 순환 완성
 

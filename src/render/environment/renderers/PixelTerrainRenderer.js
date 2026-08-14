@@ -30,27 +30,29 @@ export class PixelTerrainRenderer {
         if (this.cachedWorld === world) return this.cachedSurfaces;
         this.cachedWorld = world;
         this.cachedSurfaces = Object.freeze(
-            (world.surfaces ?? []).map((surface) =>
-                Object.freeze({
-                    surface,
-                    bounds: boundsForVertices(surface.vertices),
-                    edges: Object.freeze(
-                        surface.vertices.map((start, index) => {
-                            const end = surface.vertices[(index + 1) % surface.vertices.length];
-                            const dx = end.x - start.x;
-                            const dy = end.y - start.y;
-                            return Object.freeze({
-                                start,
-                                end,
-                                dx,
-                                dy,
-                                length: Math.hypot(dx, dy),
-                                bounds: boundsForVertices([start, end])
-                            });
-                        })
-                    )
-                })
-            )
+            (world.surfaces ?? [])
+                .filter(({ renderable }) => renderable !== false)
+                .map((surface) =>
+                    Object.freeze({
+                        surface,
+                        bounds: boundsForVertices(surface.vertices),
+                        edges: Object.freeze(
+                            surface.vertices.map((start, index) => {
+                                const end = surface.vertices[(index + 1) % surface.vertices.length];
+                                const dx = end.x - start.x;
+                                const dy = end.y - start.y;
+                                return Object.freeze({
+                                    start,
+                                    end,
+                                    dx,
+                                    dy,
+                                    length: Math.hypot(dx, dy),
+                                    bounds: boundsForVertices([start, end])
+                                });
+                            })
+                        )
+                    })
+                )
         );
         return this.cachedSurfaces;
     }

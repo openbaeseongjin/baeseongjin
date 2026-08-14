@@ -5,7 +5,7 @@ import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
-import { GameSimulation } from "./simulation/GameSimulation.js";
+import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.js";
 import { CAMERA_CONFIG } from "./config.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
@@ -29,7 +29,7 @@ export class GameApp {
         this.input = new InputSampler(globalThis.window, canvas, {
             onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
         });
-        this.authority = new LocalAuthority(new GameSimulation({ worldSeed }));
+        this.authority = new LocalAuthority(createCurrentGameSimulation({ worldSeed }));
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
         this.onDiagnostics = onDiagnostics;

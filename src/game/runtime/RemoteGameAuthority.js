@@ -35,7 +35,7 @@ import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
 import { WORLD_CONFIG } from "../config.js";
-import { GameSimulation } from "../simulation/GameSimulation.js";
+import { createGameSimulationForWorldRevision } from "../simulation/GameSimulationFactory.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
 
@@ -211,7 +211,11 @@ export class RemoteGameAuthority {
         const snapshot = deserializeWorldSnapshotEnvelope(serialized);
         this.ownerRuntime ??= new OwnerPredictionRuntime({
             ownerId: this.playerId,
-            simulation: new GameSimulation({ worldSeed: snapshot.worldSeed, playerId: this.playerId })
+            simulation: createGameSimulationForWorldRevision({
+                worldSeed: snapshot.worldSeed,
+                playerId: this.playerId,
+                worldRevision: snapshot.worldRevision
+            })
         });
         if (!this.stream.acceptSnapshot(snapshot)) return false;
         this.pruneSentCommands(snapshot.acknowledgements?.[this.playerId]);

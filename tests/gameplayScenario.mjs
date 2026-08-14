@@ -6,6 +6,7 @@ import { run as playerCollision } from "./playerCollision.mjs";
 import { run as swingDrag } from "./swingDrag.mjs";
 import { run as gameSimulation } from "./gameSimulation.mjs";
 import { run as combatSystems } from "./combatSystems.mjs";
+import { run as enemyPatrol } from "./enemyPatrol.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as worldTraversalValidator } from "./worldTraversalValidator.mjs";
 import { run as worldSeed } from "./worldSeed.mjs";
@@ -16,6 +17,14 @@ import { run as renderingSystem } from "./renderingSystem.mjs";
 import { run as stateMachine } from "./stateMachine.mjs";
 import { run as spriteAssetValidator } from "./spriteAssetValidator.mjs";
 import { run as renderPerformance } from "./renderPerformance.mjs";
+import { run as areaDefinitionValidator } from "./areaDefinitionValidator.mjs";
+import { run as authoredWorldAssembler } from "./authoredWorldAssembler.mjs";
+import { run as worldProgressState } from "./worldProgressState.mjs";
+import { run as worldProgressController } from "./worldProgressController.mjs";
+import { run as worldForceField } from "./worldForceField.mjs";
+import { run as authoredGameSimulation } from "./authoredGameSimulation.mjs";
+import { run as sector02AreaCatalog } from "./sector02AreaCatalog.mjs";
+import { run as currentAuthoredWorld } from "./currentAuthoredWorld.mjs";
 
 const steps = {
     worldSeed,
@@ -29,9 +38,18 @@ const steps = {
     gameObjectModel,
     gameSimulation,
     combatSystems,
+    enemyPatrol,
     canvasRenderer,
     renderingSystem,
     renderPerformance,
+    areaDefinitionValidator,
+    authoredWorldAssembler,
+    worldProgressState,
+    worldProgressController,
+    worldForceField,
+    authoredGameSimulation,
+    sector02AreaCatalog,
+    currentAuthoredWorld,
     spriteAssetValidator,
     stateMachine,
     worldTraversalValidator,

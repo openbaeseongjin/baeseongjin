@@ -13,6 +13,7 @@ import { run as projectileHitClaim } from "./projectileHitClaim.mjs";
 import { run as playerProjectileSpawnClaim } from "./playerProjectileSpawnClaim.mjs";
 import { run as worldSnapshotEnvelope } from "./worldSnapshotEnvelope.mjs";
 import { run as ownerMotionState } from "./ownerMotionState.mjs";
+import { run as authoredMultiplayerWorld } from "./authoredMultiplayerWorld.mjs";
 
 const steps = {
     artifactSelectionClaim,
@@ -22,6 +23,7 @@ const steps = {
     playerProjectileSpawnClaim,
     worldSnapshotEnvelope,
     ownerMotionState,
+    authoredMultiplayerWorld,
     playerCommandBatch,
     authorityServerSession,
     ownerPredictionRuntime,

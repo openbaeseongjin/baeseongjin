@@ -1,0 +1,250 @@
+function issue(code, areaId, details = {}) {
+    return Object.freeze({ code, areaId, ...details });
+}
+
+function pointInside(bounds, point) {
+    return (
+        Number.isFinite(point?.x) &&
+        Number.isFinite(point?.y) &&
+        point.x >= -bounds.width * 0.5 &&
+        point.x <= bounds.width * 0.5 &&
+        point.y >= -bounds.height &&
+        point.y <= 0
+    );
+}
+
+function surfacePointInside(bounds, point) {
+    return (
+        Number.isFinite(point?.x) &&
+        Number.isFinite(point?.y) &&
+        point.x >= -bounds.width * 0.5 &&
+        point.x <= bounds.width * 0.5 &&
+        point.y >= -bounds.height &&
+        point.y <= 160
+    );
+}
+
+function boundsInside(areaBounds, bounds, { allowFloorOverlap = false, allowConnectorOverlap = false } = {}) {
+    if (
+        !Number.isFinite(bounds?.x) ||
+        !Number.isFinite(bounds?.y) ||
+        !Number.isFinite(bounds?.width) ||
+        !Number.isFinite(bounds?.height) ||
+        bounds.width <= 0 ||
+        bounds.height <= 0
+    ) {
+        return false;
+    }
+    const maximumY = allowFloorOverlap ? 160 : 0;
+    const minimumY = allowConnectorOverlap ? -areaBounds.height - 160 : -areaBounds.height;
+    return (
+        bounds.x >= -areaBounds.width * 0.5 &&
+        bounds.x + bounds.width <= areaBounds.width * 0.5 &&
+        bounds.y >= minimumY &&
+        bounds.y + bounds.height <= maximumY
+    );
+}
+
+function pointInsideBounds(bounds, point) {
+    return (
+        Number.isFinite(point?.x) &&
+        Number.isFinite(point?.y) &&
+        point.x >= bounds.x &&
+        point.x <= bounds.x + bounds.width &&
+        point.y >= bounds.y &&
+        point.y <= bounds.y + bounds.height
+    );
+}
+
+function patrolPoints(patrol) {
+    if (Array.isArray(patrol?.points)) return patrol.points;
+    if (Array.isArray(patrol?.route)) return patrol.route;
+    if (patrol?.corridor) return [patrol.corridor.start, patrol.corridor.end];
+    return [];
+}
+
+const PRESENTATION_FILE_PATTERN = /(?:^|[\\/])assets[\\/]|\.(?:png|jpe?g|webp|gif|wav|mp3|ogg|m4a|aac)(?:$|[?#])/i;
+
+function validateNoEmbeddedPresentationPaths(area, issues) {
+    const stack = [{ value: area, path: area.id }];
+    while (stack.length > 0) {
+        const { value, path } = stack.pop();
+        if (typeof value === "string") {
+            if (PRESENTATION_FILE_PATTERN.test(value)) {
+                issues.push(issue("presentation-path-embedded", area.id, { path, value }));
+            }
+            continue;
+        }
+        if (!value || typeof value !== "object") continue;
+        for (const [key, entry] of Object.entries(value)) {
+            stack.push({ value: entry, path: `${path}.${key}` });
+        }
+    }
+}
+
+function validateUniqueIds(area, collection, label, issues, globalIds) {
+    const localIds = new Set();
+    for (const entry of collection) {
+        if (typeof entry?.id !== "string" || entry.id.length === 0) {
+            issues.push(issue(`${label}-id-missing`, area.id));
+            continue;
+        }
+        if (localIds.has(entry.id)) issues.push(issue(`${label}-id-duplicate`, area.id, { id: entry.id }));
+        if (globalIds.has(entry.id)) issues.push(issue("catalog-id-duplicate", area.id, { id: entry.id }));
+        localIds.add(entry.id);
+        globalIds.add(entry.id);
+    }
+}
+
+export function validateAreaCatalog(catalog, { maxAttachDistance = 440 } = {}) {
+    const issues = [];
+    const areaIds = new Set(catalog.areas.map(({ id }) => id));
+    const globalIds = new Set();
+
+    for (const [index, area] of catalog.areas.entries()) {
+        validateNoEmbeddedPresentationPaths(area, issues);
+        if (area.order !== index + 1) issues.push(issue("area-order", area.id, { expected: index + 1 }));
+        if (!Number.isFinite(area.bounds?.width) || area.bounds.width <= 0) {
+            issues.push(issue("area-bounds-width", area.id));
+        }
+        if (!Number.isFinite(area.bounds?.height) || area.bounds.height <= 0) {
+            issues.push(issue("area-bounds-height", area.id));
+        }
+        if (!pointInside(area.bounds, area.entry)) issues.push(issue("area-entry-bounds", area.id));
+        if (!pointInside(area.bounds, area.exit)) issues.push(issue("area-exit-bounds", area.id));
+        if (area.nextAreaId !== null && !areaIds.has(area.nextAreaId)) {
+            issues.push(issue("area-next-missing", area.id, { nextAreaId: area.nextAreaId }));
+        }
+        if (index < catalog.areas.length - 1 && area.nextAreaId !== catalog.areas[index + 1].id) {
+            issues.push(issue("area-next-order", area.id, { nextAreaId: area.nextAreaId }));
+        }
+        if (index === catalog.areas.length - 1 && area.nextAreaId !== null) {
+            issues.push(issue("area-final-next", area.id, { nextAreaId: area.nextAreaId }));
+        }
+
+        validateUniqueIds(area, area.surfaces, "surface", issues, globalIds);
+        validateUniqueIds(area, area.routePoints, "route", issues, globalIds);
+        validateUniqueIds(area, area.recoveryPoints, "recovery", issues, globalIds);
+        validateUniqueIds(area, area.checkpoints, "checkpoint", issues, globalIds);
+        validateUniqueIds(area, area.objects, "object", issues, globalIds);
+        validateUniqueIds(area, area.objectives, "objective", issues, globalIds);
+        validateUniqueIds(area, area.windZones, "wind", issues, globalIds);
+        if (globalIds.has(area.gate.id)) issues.push(issue("catalog-id-duplicate", area.id, { id: area.gate.id }));
+        globalIds.add(area.gate.id);
+
+        for (const surface of area.surfaces) {
+            for (const vertex of surface.vertices) {
+                if (!surfacePointInside(area.bounds, vertex)) {
+                    issues.push(issue("surface-bounds", area.id, { id: surface.id }));
+                    break;
+                }
+            }
+        }
+        for (const [routeIndex, routePoint] of area.routePoints.entries()) {
+            if (!pointInside(area.bounds, routePoint))
+                issues.push(issue("route-bounds", area.id, { id: routePoint.id }));
+            if (routeIndex === 0) continue;
+            const previous = area.routePoints[routeIndex - 1];
+            const distance = Math.hypot(routePoint.x - previous.x, routePoint.y - previous.y);
+            if (distance > maxAttachDistance) {
+                issues.push(
+                    issue("route-rope-range", area.id, {
+                        from: previous.id,
+                        to: routePoint.id,
+                        distance,
+                        limit: maxAttachDistance
+                    })
+                );
+            }
+        }
+        for (const object of area.objects) {
+            if (!pointInside(area.bounds, object.position))
+                issues.push(issue("object-bounds", area.id, { id: object.id }));
+            if (object.bounds && !boundsInside(area.bounds, object.bounds)) {
+                issues.push(issue("object-trigger-bounds", area.id, { id: object.id }));
+            }
+            if (object.activation && !boundsInside(area.bounds, object.activation)) {
+                issues.push(issue("object-activation-bounds", area.id, { id: object.id }));
+            }
+            if (object.patrol) {
+                const points = patrolPoints(object.patrol);
+                if (!object.activation) issues.push(issue("patrol-activation-missing", area.id, { id: object.id }));
+                if (!Number.isFinite(object.patrol.speed) || object.patrol.speed <= 0) {
+                    issues.push(issue("patrol-speed", area.id, { id: object.id }));
+                }
+                if (points.length < 2) issues.push(issue("patrol-route", area.id, { id: object.id }));
+                for (const [pointIndex, patrolPoint] of points.entries()) {
+                    if (!pointInside(area.bounds, patrolPoint)) {
+                        issues.push(issue("patrol-point-bounds", area.id, { id: object.id, pointIndex }));
+                    }
+                    if (object.activation && !pointInsideBounds(object.activation, patrolPoint)) {
+                        issues.push(issue("patrol-point-activation", area.id, { id: object.id, pointIndex }));
+                    }
+                }
+            }
+        }
+        for (const recovery of area.recoveryPoints) {
+            if (!pointInside(area.bounds, recovery)) {
+                issues.push(issue("recovery-bounds", area.id, { id: recovery.id }));
+            }
+        }
+        for (const checkpoint of area.checkpoints) {
+            if (!pointInside(area.bounds, checkpoint)) {
+                issues.push(issue("checkpoint-bounds", area.id, { id: checkpoint.id }));
+            }
+            if (checkpoint.sourceObjectId && !area.objects.some(({ id }) => id === checkpoint.sourceObjectId)) {
+                issues.push(
+                    issue("checkpoint-source-missing", area.id, {
+                        checkpointId: checkpoint.id,
+                        sourceObjectId: checkpoint.sourceObjectId
+                    })
+                );
+            }
+        }
+        for (const objective of area.objectives) {
+            if (objective.sourceObjectId && !area.objects.some(({ id }) => id === objective.sourceObjectId)) {
+                issues.push(
+                    issue("objective-source-missing", area.id, {
+                        objectiveId: objective.id,
+                        sourceObjectId: objective.sourceObjectId
+                    })
+                );
+            }
+            if (objective.bounds && !boundsInside(area.bounds, objective.bounds, { allowFloorOverlap: true })) {
+                issues.push(issue("objective-bounds", area.id, { objectiveId: objective.id }));
+            }
+        }
+        for (const windZone of area.windZones) {
+            if (!boundsInside(area.bounds, windZone.bounds)) {
+                issues.push(issue("wind-bounds", area.id, { id: windZone.id }));
+            }
+        }
+        if (
+            !boundsInside(area.bounds, area.gate.trigger, {
+                allowFloorOverlap: true,
+                allowConnectorOverlap: true
+            })
+        ) {
+            issues.push(issue("gate-trigger-bounds", area.id, { gateId: area.gate.id }));
+        }
+        if (
+            area.gate.barrier &&
+            !boundsInside(area.bounds, area.gate.barrier, {
+                allowFloorOverlap: true,
+                allowConnectorOverlap: true
+            })
+        ) {
+            issues.push(issue("gate-barrier-bounds", area.id, { gateId: area.gate.id }));
+        }
+        for (const objectiveId of area.gate.requiredObjectiveIds) {
+            if (!area.objectives.some(({ id }) => id === objectiveId)) {
+                issues.push(issue("gate-objective-missing", area.id, { gateId: area.gate.id, objectiveId }));
+            }
+        }
+        if (area.gate.nextAreaId !== area.nextAreaId) {
+            issues.push(issue("gate-next-mismatch", area.id, { gateId: area.gate.id }));
+        }
+    }
+
+    return Object.freeze({ valid: issues.length === 0, issues: Object.freeze(issues) });
+}

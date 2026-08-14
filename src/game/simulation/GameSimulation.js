@@ -19,6 +19,11 @@ import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "../rewards/ArtifactRewardSelection.js";
 import { generateWorld } from "../world/WorldGenerator.js";
+import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
+import { collisionSurfacesForProgress } from "../world/WorldGateGeometry.js";
+import { sampleWorldForce, snapshotWindStates } from "../world/WorldForceField.js";
+import { advanceWorldProgress } from "../world/WorldProgressController.js";
+import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
 
 function vectorState(vector) {
@@ -52,14 +57,25 @@ export class GameSimulation {
     #inputDispatcher;
     #inputDrivenObjectsByOwner;
 
-    constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null } = {}) {
-        this.world = generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
+    constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null, worldCatalog = null } = {}) {
+        this.worldCatalog = worldCatalog;
+        this.world = worldCatalog
+            ? assembleAuthoredWorld(worldCatalog, {
+                  seed: worldSeed,
+                  floorY: WORLD_CONFIG.floorY,
+                  checkpointRadius: WORLD_CONFIG.checkpointRadius,
+                  summitRadius: WORLD_CONFIG.summitRadius
+              })
+            : generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
+        this.worldProgress = worldCatalog ? new WorldProgressState(worldCatalog) : null;
+        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.elapsedSeconds = 0;
         this.metrics = new RunMetrics();
         this.registry = new EntityRegistry();
         this.#inputDispatcher = new InputDispatcher();
         this.#inputDrivenObjectsByOwner = new Map();
         this.players = [];
-        const playerRuntime = this.addPlayer(undefined, playerId);
+        const playerRuntime = this.addPlayer(this.world.areas?.[0]?.entry, playerId);
         this.#primaryPlayerId = playerRuntime.entity.id;
         this.enemies = this.createEnemies();
         this.projectiles = [];
@@ -172,6 +188,13 @@ export class GameSimulation {
             id: enemy.id,
             position: vectorState(enemy.position),
             level: enemy.level,
+            areaId: enemy.areaId,
+            objectId: enemy.objectId,
+            enemyType: enemy.enemyType,
+            activation: enemy.activation,
+            patrol: enemy.patrol,
+            lockedTargetId: enemy.lockedTargetId,
+            rules: enemy.rules,
             radius: enemy.radius,
             health: enemy.health,
             maxHealth: enemy.maxHealth,
@@ -232,6 +255,20 @@ export class GameSimulation {
         this.enemyProjectiles = [];
     }
 
+    restoreWorldProgress(snapshot, elapsedSeconds = this.elapsedSeconds) {
+        if (!this.worldProgress) {
+            if (snapshot) throw new Error("cannot restore authored progress in a procedural world");
+            return null;
+        }
+        if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < 0) {
+            throw new Error("world elapsed seconds must be non-negative");
+        }
+        if (snapshot) this.worldProgress.restore(snapshot);
+        this.elapsedSeconds = elapsedSeconds;
+        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+        return this.worldProgress.snapshot();
+    }
+
     synchronizePredictionProgress(playerId, { artifactReward = null, rewardedCheckpointIds = [] } = {}) {
         this.#requirePlayer(playerId);
         this.artifactRewards.clear();
@@ -274,9 +311,14 @@ export class GameSimulation {
 
     advanceOwnerPrediction(ownerId, command, dt, tick) {
         const player = this.#requirePlayer(ownerId);
+        this.elapsedSeconds += dt;
         this.#prepareOwnerStep(player, dt);
+        this.#applyWorldForce(player, dt);
         const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt);
         const projectile = this.#advanceAutomaticWeapon(player, dt);
+        if (this.worldProgress) {
+            this.#advanceAuthoredWorldProgress(new Map([[ownerId, command]]), { replicate: false });
+        }
         this.projectiles.length = 0;
         this.tick = tick;
         return Object.freeze({ projectile, swingTriggered: inputOutcome.swingTriggered });
@@ -480,13 +522,18 @@ export class GameSimulation {
             );
         }
         this.metrics.recordActiveTime(dt);
+        this.elapsedSeconds += dt;
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
             this.#prepareOwnerStep(player, dt);
-            if (advanceInputDrivenObjects) this.dispatchOwnerInput(player.id, playerCommand, dt);
+            if (advanceInputDrivenObjects) {
+                this.#applyWorldForce(player, dt);
+                this.dispatchOwnerInput(player.id, playerCommand, dt);
+            }
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile);
         }
+        if (this.worldProgress) this.#advanceAuthoredWorldProgress(gameplayCommands);
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
             enemies: this.enemies,
@@ -597,7 +644,7 @@ export class GameSimulation {
                 dt,
                 owner: player,
                 ropeConfig: ROPE_CONFIG,
-                surfaces: this.world.surfaces,
+                surfaces: this.activeCollisionSurfaces,
                 onFlash: (eventFlash) => {
                     this.eventFlash = { ...eventFlash, playerId: player.id };
                 },
@@ -619,10 +666,49 @@ export class GameSimulation {
         this.applyArtifactEffects(player);
     }
 
+    #applyWorldForce(player, dt) {
+        if (player.lifeState !== "active" || !this.world.windZones?.length) return;
+        const force = sampleWorldForce(this.world.windZones, player.physics.position, this.elapsedSeconds);
+        player.physics.velocity.x += force.x * dt;
+        player.physics.velocity.y += force.y * dt;
+    }
+
+    #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true } = {}) {
+        const events = advanceWorldProgress({
+            world: this.world,
+            progress: this.worldProgress,
+            players: this.players,
+            commandsByPlayerId
+        });
+        for (const event of events) {
+            const { type, ...payload } = event;
+            if (replicate) this.recordReplicationEvent(type, payload);
+            this.eventFlash = { type, age: 0, ...payload };
+            if (type === "gate-unlocked") {
+                this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+            }
+            if (type === "gate-crossed" && event.nextAreaId) {
+                const checkpoint = this.world.checkpoints.find(({ areaId }) => areaId === event.nextAreaId);
+                if (checkpoint && checkpoint.level > (this.activeCheckpoint?.level ?? -1)) {
+                    this.#activateCheckpoint(checkpoint, event.playerId);
+                }
+            }
+        }
+        if (this.worldProgress.snapshot().completed) this.beginCompletion(events.at(-1)?.playerId);
+    }
+
     #advanceAutomaticWeapon(player, dt, allowFire = true) {
+        const enemies = this.enemies.filter(
+            (enemy) =>
+                !enemy.activation ||
+                (player.physics.position.x >= enemy.activation.x &&
+                    player.physics.position.x <= enemy.activation.x + enemy.activation.width &&
+                    player.physics.position.y >= enemy.activation.y &&
+                    player.physics.position.y <= enemy.activation.y + enemy.activation.height)
+        );
         return updateAutomaticWeapon({
             owner: player,
-            enemies: this.enemies,
+            enemies,
             projectiles: this.projectiles,
             registry: this.registry,
             config: COMBAT_CONFIG,
@@ -644,6 +730,7 @@ export class GameSimulation {
     }
 
     updateSummitProgress() {
+        if (this.worldProgress) return false;
         const player = this.players.find(
             (candidate) =>
                 candidate.lifeState === "active" &&
@@ -653,6 +740,7 @@ export class GameSimulation {
     }
 
     summitClaimCandidate(playerId) {
+        if (this.worldProgress) return null;
         if (this.runState !== "playing") return null;
         const player = this.players.find(({ id }) => id === playerId);
         if (!player || player.lifeState !== "active") return null;
@@ -662,6 +750,7 @@ export class GameSimulation {
     }
 
     resolveSummitClaim(playerId, claim, { positionTolerance = 40 } = {}) {
+        if (this.worldProgress) return Object.freeze({ accepted: false, reason: "authored-gate-required" });
         if (this.runState !== "playing") return Object.freeze({ accepted: false, reason: "run-inactive" });
         const player = this.players.find(({ id }) => id === playerId);
         if (!player || player.lifeState !== "active") {
@@ -722,7 +811,8 @@ export class GameSimulation {
             playerId,
             position: { x: checkpoint.x, y: checkpoint.y }
         });
-        if (checkpoint.level > 0 && !this.rewardedCheckpointIds.has(checkpoint.id)) {
+        const rewardsArtifact = checkpoint.reward ?? checkpoint.level > 0;
+        if (rewardsArtifact && !this.rewardedCheckpointIds.has(checkpoint.id)) {
             this.beginArtifactReward(checkpoint);
         }
     }
@@ -803,6 +893,12 @@ export class GameSimulation {
                     id: this.registry.createId("enemy"),
                     position: new Vector2(spawn.x, spawn.y),
                     level: spawn.level,
+                    areaId: spawn.areaId,
+                    objectId: spawn.objectId,
+                    enemyType: spawn.enemyType,
+                    activation: spawn.activation,
+                    patrol: spawn.patrol,
+                    rules: spawn.rules,
                     radius: COMBAT_CONFIG.enemyRadius,
                     health: COMBAT_CONFIG.enemyHealth,
                     maxHealth: COMBAT_CONFIG.enemyHealth,
@@ -826,7 +922,8 @@ export class GameSimulation {
                 predictionId: replication.predictionId,
                 radius: replication.radius,
                 damage: replication.damage,
-                speed: replication.speed
+                speed: replication.speed,
+                canCutRope: replication.canCutRope
             }
         });
         Object.defineProperty(projectile, "replicationSpawnEvent", {
@@ -953,6 +1050,9 @@ export class GameSimulation {
         const player = this.players.find(({ id }) => id === authenticatedPlayerId);
         if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
         const projectile = this.enemyProjectiles.find(({ id }) => id === claim.projectileId);
+        if (projectile && claim.impactType === "rope-cut" && !projectile.canCutRope) {
+            return Object.freeze({ accepted: false, reason: "rope-cut-disallowed" });
+        }
         if (claim.outcome) {
             const damage = projectile?.damage ?? claim.damage;
             if (claim.outcome.state) {
@@ -1213,6 +1313,10 @@ export class GameSimulation {
             rewardedCheckpointIds: [...this.rewardedCheckpointIds],
             ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
             metrics: this.metrics.snapshot(),
+            worldProgress: this.worldProgress?.snapshot() ?? null,
+            windStates: this.world.windZones
+                ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
+                : Object.freeze([]),
             resets: this.resets,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance
         };

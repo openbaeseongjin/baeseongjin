@@ -451,7 +451,9 @@ export async function run() {
     assert.equal(summitAuthority.drainSummitClaimReceipts().length, 1);
 
     const httpServer = createServer();
-    const gameServer = new MultiplayerGameServer(httpServer);
+    const gameServer = new MultiplayerGameServer(httpServer, {
+        createSimulation: ({ worldSeed }) => new GameSimulation({ worldSeed, worldCatalog: null })
+    });
     let gameServerClosed = false;
     const port = await listen(httpServer);
     try {
@@ -554,6 +556,7 @@ export async function run() {
         spawnRoom.simulation.enemies = [spawnTarget];
         spawnPlayer.weapon.cooldown = 0;
         gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
+        spawnTarget.activation = null;
         await waitFor(
             () =>
                 spawnOwner.snapshot().state.enemies.length === 1 &&
@@ -805,6 +808,7 @@ export async function run() {
         collisionTarget.fireCooldown = 999;
         collisionRoom.simulation.enemies = [collisionTarget];
         collisionServerPlayer.weapon.cooldown = 0;
+        collisionTarget.activation = null;
         collisionLocalPlayer.weapon.cooldown = 0;
         gameServer.broadcast(collisionRoom, { type: "snapshot", payload: collisionRoom.adapter.snapshot() });
         await waitFor(

@@ -23,7 +23,7 @@ export function buildAuthoritySnapshot({
         snapshotSequence,
         serverTick: simulation.getTick(),
         worldSeed: simulation.world.seed,
-        worldRevision: WORLD_GENERATION_REVISION,
+        worldRevision: simulation.world.definitionRevision ?? WORLD_GENERATION_REVISION,
         acknowledgements,
         state: {
             players: simulation.playerStates().map((player) => ({
@@ -37,6 +37,9 @@ export function buildAuthoritySnapshot({
             artifactRewards: Object.fromEntries(simulation.artifactRewards),
             runState: simulation.runState,
             metrics: simulation.metrics.snapshot(),
+            worldProgress: simulation.worldProgress?.snapshot() ?? null,
+            worldElapsedSeconds: simulation.elapsedSeconds,
+            windStates: simulation.snapshot().windStates,
             completed: simulation.runState === "completed"
         },
         events
