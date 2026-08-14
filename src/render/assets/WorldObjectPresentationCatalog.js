@@ -1,9 +1,21 @@
+import { anchoredRectangleBounds } from "../../game/world/AuthoredCoordinateAnchor.js";
+
 const DEFAULT_DEFINITIONS = {
     "world-object:grapple-landmark": { renderMode: "mock-shape", color: "#22d3ee", radius: 15 },
     "world-object:terminal": { renderMode: "mock-shape", color: "#fbbf24", radius: 20 },
-    "world-object:gate-panel": { renderMode: "mock-shape", color: "#fbbf24", radius: 18 },
+    "world-object:gate-panel": {
+        renderMode: "mock-shape",
+        color: "#fbbf24",
+        radius: 18,
+        size: { width: 44, height: 45 }
+    },
     "world-object:augment-node": { renderMode: "mock-shape", color: "#c084fc", radius: 24 },
-    "world-object:gate": { renderMode: "mock-shape", color: "#fb7185", radius: 28 },
+    "world-object:gate": {
+        renderMode: "mock-shape",
+        color: "#fb7185",
+        radius: 28,
+        size: { width: 52, height: 62 }
+    },
     "world-object:wind-source": { renderMode: "mock-shape", color: "#67e8f9", radius: 24 },
     "world-object:test-target": { renderMode: "mock-shape", color: "#a3e635", radius: 18 },
     "world-object:background-prop": { renderMode: "environment-decoration" },
@@ -23,4 +35,28 @@ export const DEFAULT_WORLD_OBJECT_MOCK_CATALOG = Object.freeze(
 
 export function worldObjectPresentation(catalog, presentationId) {
     return catalog[presentationId] ?? null;
+}
+
+function presentationSize(presentation) {
+    const width = presentation?.size?.width ?? presentation?.radius * 2;
+    const height = presentation?.size?.height ?? presentation?.radius * 2;
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+        throw new Error("world object presentation must define a positive size or radius");
+    }
+    return { width, height };
+}
+
+export function worldObjectLocalBounds(object, presentation) {
+    const { width, height } = presentationSize(presentation);
+    return anchoredRectangleBounds({ x: 0, y: 0 }, { width, height }, object.coordinateAnchor ?? "center");
+}
+
+export function worldObjectWorldBounds(object, presentation) {
+    const local = worldObjectLocalBounds(object, presentation);
+    return Object.freeze({
+        x: object.position.x + local.x,
+        y: object.position.y + local.y,
+        width: local.width,
+        height: local.height
+    });
 }

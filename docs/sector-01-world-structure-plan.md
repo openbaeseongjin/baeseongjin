@@ -14,6 +14,8 @@
 
 맵 definition은 이미지·음원 파일 경로, atlas frame, WAV clip을 소유하지 않는다. 지형은 선택된 environment runtime package가 기존 collision surface 위에 표현하고, 오브젝트와 사건은 stable object/state/event ID만 공개한다. bootstrap에서 검증된 production package를 주입하며 준비되지 않았으면 `default-mock` environment/audio package를 사용한다. 정식 리소스 교체가 맵 좌표·물리·완료 조건·네트워크 상태를 바꾸면 안 된다.
 
+수동 좌표 수정은 사각형의 암묵적 좌상단이 아니라 `coordinateAnchor`가 가리키는 부착점을 기준으로 한다. 수평 발판은 보행면 `top-center`, 바닥에 선 Gate·패널은 `bottom-center`, 천장 부착 구조는 `top-center`, 자유 배치 표식은 `center`를 사용한다. Gate·패널의 바닥 기준점은 실제 발판 `topY`와 일치해야 하며 층별 렌더 오프셋으로 맞추지 않는다.
+
 로컬 실행과 네트워크 실행은 서로 다른 맵·게임플레이 구현이 아니다. 둘 다 `GameSimulationFactory`가 만든 같은 `GameSimulation`과 현재 authored catalog를 사용한다. 네트워크 경로는 새 맵을 만들지 않고 서버 스냅샷의 동일 world revision과 공용 진행 상태를 검증·복원한다. 실행 방식에 따라 월드 catalog를 따로 선택하지 않는다.
 
 ## 목적

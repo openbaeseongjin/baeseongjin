@@ -10,6 +10,14 @@ import {
 
 const interactionRadius = 72;
 
+function horizontalSurface(id, x, y, width, height = 32, properties = {}) {
+    return rectangle(id, x, y, width, height, { ...properties, coordinateAnchor: "top-center" });
+}
+
+function groundedSurface(id, x, y, width, height, properties = {}) {
+    return rectangle(id, x, y, width, height, { ...properties, coordinateAnchor: "bottom-center" });
+}
+
 function gate(id, x, y, nextAreaId, requiredObjectiveIds) {
     return Object.freeze({
         id,
@@ -31,19 +39,19 @@ const area01 = defineArea({
     exit: point("sector-01-01:exit", 320, -928),
     nextAreaId: "sector-01-02",
     surfaces: [
-        rectangle("sector-01-01:p0", -416, 0, 256),
-        rectangle("sector-01-01:r1", -256, -224, 160, 16, { kind: "recovery" }),
-        rectangle("sector-01-01:p1", 64, -288, 192, 16),
-        rectangle("sector-01-01:r2", -288, -480, 192, 16, { kind: "recovery" }),
-        rectangle("sector-01-01:p2", -256, -544, 192, 16),
-        rectangle("sector-01-01:cable-overhang", 64, -608, 224, 32, {
+        horizontalSurface("sector-01-01:p0", -288, 0, 256),
+        horizontalSurface("sector-01-01:r1", -176, -224, 160, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-01:p1", 160, -288, 192, 16),
+        horizontalSurface("sector-01-01:r2", -192, -480, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-01:p2", -160, -544, 192, 16),
+        horizontalSurface("sector-01-01:cable-overhang", 176, -608, 224, 32, {
             kind: "overhang",
             oneWay: false
         }),
-        rectangle("sector-01-01:r3", -224, -736, 160, 16, { kind: "recovery" }),
-        rectangle("sector-01-01:p3", -96, -800, 224, 16),
-        rectangle("sector-01-01:p4", 32, -864, 320, 32, { kind: "safe-deck" }),
-        rectangle("sector-01-01:ground-shutter", -448, -128, 128, 128, {
+        horizontalSurface("sector-01-01:r3", -144, -736, 160, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-01:p3", 16, -800, 224, 16),
+        horizontalSurface("sector-01-01:p4", 192, -864, 320, 32, { kind: "safe-deck" }),
+        groundedSurface("sector-01-01:ground-shutter", -384, 0, 128, 128, {
             kind: "sealed-door",
             oneWay: false
         }),
@@ -71,13 +79,15 @@ const area01 = defineArea({
             gameplay: false,
             cueIds: ["sector-01-01:fan-inactive"]
         }),
-        worldObject("sector-01-01:service-terminal", "gate-panel", 208, -896, {
+        worldObject("sector-01-01:service-terminal", "gate-panel", 208, -864, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-01:terminal-read",
             gateId: "sector-01-01:gate",
             cueIds: ["sector-01-01:terminal-cascade", "sector-01-01:rooftop-pad-03"]
         }),
-        worldObject("sector-01-01:service-gate", "gate", 320, -928, {
+        worldObject("sector-01-01:service-gate", "gate", 320, -864, {
+            coordinateAnchor: "bottom-center",
             gateId: "sector-01-01:gate"
         })
     ],
@@ -105,16 +115,16 @@ const area02 = defineArea({
     exit: point("sector-01-02:exit", 320, -1056),
     nextAreaId: "sector-01-03",
     surfaces: [
-        rectangle("sector-01-02:p0", -416, 0, 256),
-        rectangle("sector-01-02:p1", 64, -288, 192, 16, { kind: "recovery" }),
-        rectangle("sector-01-02:crossbeam-x1", -64, -544, 128, 32, {
+        horizontalSurface("sector-01-02:p0", -288, 0, 256),
+        horizontalSurface("sector-01-02:p1", 160, -288, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-02:crossbeam-x1", 0, -544, 128, 32, {
             kind: "overhang",
             oneWay: false,
             grappleable: false
         }),
-        rectangle("sector-01-02:p2", -288, -576, 192, 16, { kind: "recovery" }),
-        rectangle("sector-01-02:p3", 64, -800, 192, 16, { kind: "recovery" }),
-        rectangle("sector-01-02:p4", 64, -960, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-02:p2", -192, -576, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-02:p3", 160, -800, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-02:p4", 208, -960, 288, 32, { kind: "safe-deck" }),
         grappleTarget("sector-01-02:anchor-a-surface", -128, -192),
         grappleTarget("sector-01-02:anchor-b-surface", 160, -416),
         grappleTarget("sector-01-02:anchor-c-surface", -160, -640),
@@ -148,10 +158,12 @@ const area02 = defineArea({
                 label: "ABCD"[index]
             })
         ),
-        worldObject("sector-01-02:security-access-gate", "gate", 320, -1056, {
+        worldObject("sector-01-02:security-access-gate", "gate", 320, -960, {
+            coordinateAnchor: "bottom-center",
             gateId: "sector-01-02:gate"
         }),
-        worldObject("sector-01-02:exit-panel", "gate-panel", 208, -1024, {
+        worldObject("sector-01-02:exit-panel", "gate-panel", 208, -960, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-02:exit-panel-engaged",
             gateId: "sector-01-02:gate",
@@ -187,13 +199,13 @@ const area03 = defineArea({
     exit: point("sector-01-03:exit", 320, -1120),
     nextAreaId: "sector-01-04",
     surfaces: [
-        rectangle("sector-01-03:p0", -416, 0, 544),
-        rectangle("sector-01-03:p1", 128, -320, 224),
-        rectangle("sector-01-03:r1", -288, -512, 192, 16, { kind: "recovery" }),
-        rectangle("sector-01-03:safe-ledge", -352, -640, 224, 16, { kind: "safe-deck" }),
-        rectangle("sector-01-03:safe-cover", -128, -768, 32, 128, { kind: "cover", oneWay: false }),
-        rectangle("sector-01-03:upper-cover", -64, -960, 96, 128, { kind: "cover", oneWay: false }),
-        rectangle("sector-01-03:p4", 32, -1056, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-03:p0", -144, 0, 544),
+        horizontalSurface("sector-01-03:p1", 240, -320, 224),
+        horizontalSurface("sector-01-03:r1", -192, -512, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-03:safe-ledge", -240, -640, 224, 16, { kind: "safe-deck" }),
+        groundedSurface("sector-01-03:safe-cover", -112, -640, 32, 128, { kind: "cover", oneWay: false }),
+        groundedSurface("sector-01-03:upper-cover", -16, -832, 96, 128, { kind: "cover", oneWay: false }),
+        horizontalSurface("sector-01-03:p4", 192, -1056, 320, 32, { kind: "safe-deck" }),
         grappleTarget("sector-01-03:anchor-a-surface", 64, -224),
         grappleTarget("sector-01-03:anchor-b-surface", 64, -480),
         grappleTarget("sector-01-03:anchor-c-surface", -192, -736),
@@ -220,12 +232,16 @@ const area03 = defineArea({
             activation: triggerBounds(-32, -736, 448, 512),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
         }),
-        worldObject("sector-01-03:service-panel", "gate-panel", 208, -1088, {
+        worldObject("sector-01-03:service-panel", "gate-panel", 208, -1056, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-03:maintenance-override",
             gateId: "sector-01-03:gate"
         }),
-        worldObject("sector-01-03:security-gate", "gate", 320, -1088, { gateId: "sector-01-03:gate" })
+        worldObject("sector-01-03:security-gate", "gate", 320, -1056, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-01-03:gate"
+        })
     ],
     objectives: [
         {
@@ -260,11 +276,11 @@ const area04 = defineArea({
     exit: point("sector-01-04:exit", 288, -608),
     nextAreaId: "sector-01-05",
     surfaces: [
-        rectangle("sector-01-04:p0", -352, 0, 320),
-        rectangle("sector-01-04:node-deck", -160, -160, 320, 32, { kind: "safe-deck" }),
-        rectangle("sector-01-04:p1", 64, -384, 192, 16, { kind: "recovery" }),
-        rectangle("sector-01-04:p2", -192, -512, 192, 16, { kind: "recovery" }),
-        rectangle("sector-01-04:final-deck", 64, -576, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-04:p0", -192, 0, 320),
+        horizontalSurface("sector-01-04:node-deck", 0, -160, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-04:p1", 160, -384, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-04:p2", -96, -512, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-04:final-deck", 208, -576, 288, 32, { kind: "safe-deck" }),
         grappleTarget("sector-01-04:anchor-a-surface", 192, -320),
         grappleTarget("sector-01-04:anchor-b-surface", -96, -448),
         grappleTarget("sector-01-04:anchor-c-surface", 160, -560)
@@ -289,12 +305,16 @@ const area04 = defineArea({
             damage: false
         }),
         worldObject("sector-01-04:exit-panel", "gate-panel", 176, -576, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-04:exit-panel-engaged",
             gateId: "sector-01-04:gate",
             requiredObjectiveIds: ["sector-01-04:augment-selected"]
         }),
-        worldObject("sector-01-04:test-bay-gate", "gate", 288, -608, { gateId: "sector-01-04:gate" })
+        worldObject("sector-01-04:test-bay-gate", "gate", 288, -576, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-01-04:gate"
+        })
     ],
     objectives: [
         {
@@ -332,13 +352,13 @@ const area05 = defineArea({
     exit: point("sector-01-05:exit", 288, -1248),
     nextAreaId: "sector-01-06",
     surfaces: [
-        rectangle("sector-01-05:p0", -416, 0, 288),
-        rectangle("sector-01-05:r1", -288, -448, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-05:r2", -64, -768, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-05:safe-ledge", -352, -928, 192, 16, { kind: "safe-deck" }),
-        rectangle("sector-01-05:safe-cover", -160, -1024, 32, 96, { kind: "cover", oneWay: false }),
-        rectangle("sector-01-05:r3", 64, -1088, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-05:final-deck", -32, -1216, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-05:p0", -272, 0, 288),
+        horizontalSurface("sector-01-05:r1", -176, -448, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-05:r2", 48, -768, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-05:safe-ledge", -256, -928, 192, 16, { kind: "safe-deck" }),
+        groundedSurface("sector-01-05:safe-cover", -144, -928, 32, 96, { kind: "cover", oneWay: false }),
+        horizontalSurface("sector-01-05:r3", 176, -1088, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-05:final-deck", 128, -1216, 320, 32, { kind: "safe-deck" }),
         ...[
             [-160, -224],
             [224, -384],
@@ -391,12 +411,16 @@ const area05 = defineArea({
             rules: ["standard-projectile", "no-rope-cut"]
         }),
         worldObject("sector-01-05:exit-panel", "gate-panel", 176, -1216, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-05:exit-panel-engaged",
             gateId: "sector-01-05:gate",
             requiredObjectiveIds: ["sector-01-05:final-deck-reached"]
         }),
-        worldObject("sector-01-05:cooling-access-gate", "gate", 288, -1248, { gateId: "sector-01-05:gate" })
+        worldObject("sector-01-05:cooling-access-gate", "gate", 288, -1216, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-01-05:gate"
+        })
     ],
     objectives: [
         {
@@ -429,13 +453,13 @@ const area06 = defineArea({
     exit: point("sector-01-06:exit", 288, -1376),
     nextAreaId: "sector-01-07",
     surfaces: [
-        rectangle("sector-01-06:p0", -416, 0, 320),
-        rectangle("sector-01-06:r1", -256, -192, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-06:r2", 32, -544, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-06:r3", -128, -800, 256, 16, { kind: "recovery" }),
-        rectangle("sector-01-06:neutral-deck", -288, -832, 352, 32, { kind: "safe-deck" }),
-        rectangle("sector-01-06:r4", 32, -1120, 256, 16, { kind: "recovery" }),
-        rectangle("sector-01-06:final-deck", -96, -1344, 416, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-06:p0", -256, 0, 320),
+        horizontalSurface("sector-01-06:r1", -144, -192, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-06:r2", 144, -544, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-06:r3", 0, -800, 256, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-06:neutral-deck", -112, -832, 352, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-06:r4", 160, -1120, 256, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-06:final-deck", 112, -1344, 416, 32, { kind: "safe-deck" }),
         ...[
             [-128, -224],
             [96, -416],
@@ -474,12 +498,16 @@ const area06 = defineArea({
         }),
         worldObject("sector-01-06:central-cooling-core", "background-prop", 0, -800, { gameplay: false }),
         worldObject("sector-01-06:exit-panel", "gate-panel", 176, -1344, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-06:exit-panel-engaged",
             gateId: "sector-01-06:gate",
             requiredObjectiveIds: ["sector-01-06:final-deck-reached"]
         }),
-        worldObject("sector-01-06:pressure-bypass-gate", "gate", 288, -1376, { gateId: "sector-01-06:gate" })
+        worldObject("sector-01-06:pressure-bypass-gate", "gate", 288, -1344, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-01-06:gate"
+        })
     ],
     objectives: [
         {
@@ -528,14 +556,14 @@ const area07 = defineArea({
     exit: point("sector-01-07:exit", 320, -1504),
     nextAreaId: "sector-01-08",
     surfaces: [
-        rectangle("sector-01-07:p0", -416, 0, 320),
-        rectangle("sector-01-07:r1", -256, -192, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-07:r2", 32, -512, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-07:safe-shadow", -352, -864, 192, 16, { kind: "safe-deck" }),
-        rectangle("sector-01-07:safe-shadow-cover", -160, -960, 64, 96, { kind: "cover", oneWay: false }),
-        rectangle("sector-01-07:r3", -64, -944, 256, 16, { kind: "recovery" }),
-        rectangle("sector-01-07:upper-catch", -192, -1264, 256, 16, { kind: "recovery" }),
-        rectangle("sector-01-07:final-deck", 64, -1472, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-07:p0", -256, 0, 320),
+        horizontalSurface("sector-01-07:r1", -144, -192, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-07:r2", 144, -512, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-07:safe-shadow", -256, -864, 192, 16, { kind: "safe-deck" }),
+        groundedSurface("sector-01-07:safe-shadow-cover", -128, -864, 64, 96, { kind: "cover", oneWay: false }),
+        horizontalSurface("sector-01-07:r3", 64, -944, 256, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-07:upper-catch", -64, -1264, 256, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-07:final-deck", 224, -1472, 320, 32, { kind: "safe-deck" }),
         ...[
             [-128, -224],
             [160, -416],
@@ -575,12 +603,16 @@ const area07 = defineArea({
             damage: false,
             windZoneId: "sector-01-07:main-pressure-vent-wind"
         }),
-        worldObject("sector-01-07:manual-bypass-control", "gate-panel", 256, -1440, {
+        worldObject("sector-01-07:manual-bypass-control", "gate-panel", 256, -1472, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-07:bypass-open",
             gateId: "sector-01-07:gate"
         }),
-        worldObject("sector-01-07:containment-route-gate", "gate", 320, -1504, { gateId: "sector-01-07:gate" })
+        worldObject("sector-01-07:containment-route-gate", "gate", 320, -1472, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-01-07:gate"
+        })
     ],
     objectives: [
         {
@@ -631,15 +663,15 @@ const area08 = defineArea({
     exit: point("sector-01-08:exit", 320, -1760),
     nextAreaId: null,
     surfaces: [
-        rectangle("sector-01-08:p0", -448, 0, 320),
-        rectangle("sector-01-08:r1", -288, -288, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-08:r2", 32, -544, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-08:r3", -288, -832, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-08:mid-safe-deck", -256, -1024, 512, 32, { kind: "safe-deck" }),
-        rectangle("sector-01-08:r4", 32, -1376, 256, 16, { kind: "recovery" }),
-        rectangle("sector-01-08:upper-catch", -224, -1504, 224, 16, { kind: "recovery" }),
-        rectangle("sector-01-08:p8", -256, -1584, 608, 32, { kind: "safe-deck" }),
-        rectangle("sector-01-08:worker-transition-floor", -320, -1728, 640, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-08:p0", -288, 0, 320),
+        horizontalSurface("sector-01-08:r1", -176, -288, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:r2", 144, -544, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:r3", -176, -832, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:mid-safe-deck", 0, -1024, 512, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-08:r4", 160, -1376, 256, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:upper-catch", -112, -1504, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:p8", 48, -1584, 608, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-08:worker-transition-floor", 0, -1728, 640, 32, { kind: "safe-deck" }),
         ...[
             [-160, -224],
             [192, -416],
@@ -694,11 +726,13 @@ const area08 = defineArea({
             damage: false,
             windZoneId: "sector-01-08:final-pulsed-vent"
         }),
-        worldObject("sector-01-08:containment-gate", "gate", 256, -1600, {
+        worldObject("sector-01-08:containment-gate", "gate", 256, -1584, {
+            coordinateAnchor: "bottom-center",
             gateId: "sector-01-08:gate",
             cueIds: ["sector-01-08:final-warning", "sector-01-08:locked"]
         }),
         worldObject("sector-01-08:maintenance-override-panel", "gate-panel", 208, -1584, {
+            coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-08:maintenance-override",
             gateId: "sector-01-08:gate"

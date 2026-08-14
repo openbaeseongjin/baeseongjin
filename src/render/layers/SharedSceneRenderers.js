@@ -1,8 +1,10 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
-import { boundsForVertices, centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
+import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
-    worldObjectPresentation
+    worldObjectLocalBounds,
+    worldObjectPresentation,
+    worldObjectWorldBounds
 } from "../assets/WorldObjectPresentationCatalog.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../world/WorldMarkerPrimitives.js";
 
@@ -19,21 +21,6 @@ const COLORS = Object.freeze({
     ropeTense: "#fbbf24",
     candidate: "#a7f3d0"
 });
-
-const GATE_DRAW_BOUNDS = Object.freeze({ x: -26, y: 34, width: 52, height: 62 });
-const GATE_PANEL_DRAW_BOUNDS = Object.freeze({ x: -14, y: 19, width: 72, height: 45 });
-
-function worldObjectBounds(object, style) {
-    const bounds =
-        object.kind === "gate" ? GATE_DRAW_BOUNDS : object.kind === "gate-panel" ? GATE_PANEL_DRAW_BOUNDS : null;
-    if (!bounds) return centeredBounds(object.position, { width: style.radius * 2, height: style.radius * 2 });
-    return {
-        x: object.position.x + bounds.x,
-        y: object.position.y + bounds.y,
-        width: bounds.width,
-        height: bounds.height
-    };
-}
 
 function drawRope(context, rope, player) {
     if (!rope?.anchor) return;
@@ -180,7 +167,7 @@ export class AuthoredWorldObjectRenderer {
         );
         const visible = objects.filter((object) => {
             const style = this.presentationFor(object);
-            return isVisible(viewport, worldObjectBounds(object, style));
+            return isVisible(viewport, worldObjectWorldBounds(object, style));
         });
         for (const object of visible) this.drawObject(context, object, scene.worldProgress);
         const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
@@ -201,6 +188,7 @@ export class AuthoredWorldObjectRenderer {
         const requirementsComplete = (object.requiredObjectiveIds ?? []).every((objectiveId) =>
             progress?.completedObjectiveIds?.includes(objectiveId)
         );
+        const bounds = worldObjectLocalBounds(object, style);
         context.save();
         context.translate(object.position.x, object.position.y);
         context.strokeStyle = style.color;
@@ -208,54 +196,57 @@ export class AuthoredWorldObjectRenderer {
         context.lineWidth = objectiveComplete || gateUnlocked ? 5 : 3;
 
         if (object.kind === "gate-panel") {
-            this.drawGatePanel(context, style, {
+            this.drawGatePanel(context, style, bounds, {
                 blocked: !requirementsComplete,
                 ready: requirementsComplete && !objectiveComplete,
                 opened: gateUnlocked || objectiveComplete
             });
-        } else if (object.kind === "terminal" || object.kind === "augment-node") {
-            const width = style.radius * 1.7;
-            const height = style.radius * 1.25;
-            context.fillRect(-width, -height, width * 2, height * 2);
-            context.strokeRect(-width, -height, width * 2, height * 2);
-            context.fillStyle = objectiveComplete ? style.color : `${style.color}99`;
-            context.fillRect(-width + 7, -height + 7, width * 2 - 14, 5);
-            context.fillRect(-width + 7, -height + 17, width - 3, 4);
         } else if (object.kind === "gate") {
-            this.drawGate(context, style, gateUnlocked);
-        } else if (object.kind === "grapple-landmark") {
-            this.drawGrappleLandmark(context, style);
-        } else if (object.kind === "wind-source") {
-            this.drawWindSource(context, style);
-        } else if (object.kind === "test-target") {
-            this.drawTestTarget(context, style);
-        } else if (object.kind === "story-display") {
-            this.drawStoryDisplay(context, style);
-        } else if (object.kind === "maintenance-frame") {
-            this.drawMaintenanceFrame(context, style);
+            this.drawGate(context, style, bounds, gateUnlocked);
         } else {
-            context.beginPath();
-            context.moveTo(0, -style.radius);
-            context.lineTo(style.radius, 0);
-            context.lineTo(0, style.radius);
-            context.lineTo(-style.radius, 0);
-            context.closePath();
-            context.fill();
-            context.stroke();
-        }
+            context.translate(bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);
+            if (object.kind === "terminal" || object.kind === "augment-node") {
+                const width = style.radius * 1.7;
+                const height = style.radius * 1.25;
+                context.fillRect(-width, -height, width * 2, height * 2);
+                context.strokeRect(-width, -height, width * 2, height * 2);
+                context.fillStyle = objectiveComplete ? style.color : `${style.color}99`;
+                context.fillRect(-width + 7, -height + 7, width * 2 - 14, 5);
+                context.fillRect(-width + 7, -height + 17, width - 3, 4);
+            } else if (object.kind === "grapple-landmark") {
+                this.drawGrappleLandmark(context, style);
+            } else if (object.kind === "wind-source") {
+                this.drawWindSource(context, style);
+            } else if (object.kind === "test-target") {
+                this.drawTestTarget(context, style);
+            } else if (object.kind === "story-display") {
+                this.drawStoryDisplay(context, style);
+            } else if (object.kind === "maintenance-frame") {
+                this.drawMaintenanceFrame(context, style);
+            } else {
+                context.beginPath();
+                context.moveTo(0, -style.radius);
+                context.lineTo(style.radius, 0);
+                context.lineTo(0, style.radius);
+                context.lineTo(-style.radius, 0);
+                context.closePath();
+                context.fill();
+                context.stroke();
+            }
 
-        if (object.label) {
-            context.fillStyle = "#ecfeff";
-            context.font = "900 11px ui-monospace, monospace";
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-            context.fillText(object.label, 0, -style.radius - 10);
+            if (object.label) {
+                context.fillStyle = "#ecfeff";
+                context.font = "900 11px ui-monospace, monospace";
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillText(object.label, 0, -style.radius - 10);
+            }
         }
         context.restore();
     }
 
-    drawGate(context, style, unlocked) {
-        const { x: left, y: top, width, height } = GATE_DRAW_BOUNDS;
+    drawGate(context, style, bounds, unlocked) {
+        const { x: left, y: top, width, height } = bounds;
         const railWidth = 6;
 
         context.fillStyle = "#0b1220";
@@ -290,11 +281,11 @@ export class AuthoredWorldObjectRenderer {
         context.fillRect(left + width - 10, top + 8, 5, 7);
     }
 
-    drawGatePanel(context, style, { blocked, ready, opened }) {
+    drawGatePanel(context, style, bounds, { blocked, ready, opened }) {
         const bodyWidth = 28;
         const bodyHeight = 26;
-        const left = -bodyWidth * 0.5;
-        const top = GATE_PANEL_DRAW_BOUNDS.y;
+        const left = bounds.x + (bounds.width - bodyWidth) * 0.5;
+        const top = bounds.y;
         const bottom = top + bodyHeight;
         const statusColor = opened ? "#67e8f9" : ready ? style.color : "#fb7185";
 
@@ -302,8 +293,8 @@ export class AuthoredWorldObjectRenderer {
         context.lineWidth = 4;
         context.beginPath();
         context.moveTo(bodyWidth * 0.5, top + 8);
-        context.lineTo(GATE_PANEL_DRAW_BOUNDS.x + GATE_PANEL_DRAW_BOUNDS.width, top + 8);
-        context.lineTo(GATE_PANEL_DRAW_BOUNDS.x + GATE_PANEL_DRAW_BOUNDS.width, top + 2);
+        context.lineTo(bounds.x + bounds.width, top + 8);
+        context.lineTo(bounds.x + bounds.width, top + 2);
         context.stroke();
         context.fillStyle = "#334155";
         context.fillRect(-2.5, bottom, 5, 16);

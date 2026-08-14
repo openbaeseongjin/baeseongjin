@@ -17,6 +17,10 @@ import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.j
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
 import { AuthoredWorldObjectRenderer, localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
 import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
+import {
+    DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
+    worldObjectLocalBounds
+} from "../src/render/assets/WorldObjectPresentationCatalog.js";
 import { AuthoredAreaStructureRenderer } from "../src/render/world/AuthoredAreaStructureRenderer.js";
 
 function recordingContext() {
@@ -654,6 +658,16 @@ export async function run() {
     );
 
     const gateContext = recordingContext();
+    assert.deepEqual(
+        worldObjectLocalBounds({ coordinateAnchor: "top-center" }, { size: { width: 40, height: 24 } }),
+        { x: -20, y: 0, width: 40, height: 24 },
+        "top-center coordinates must place the whole object below a ceiling attachment point"
+    );
+    assert.deepEqual(
+        worldObjectLocalBounds({ coordinateAnchor: "bottom-center" }, { size: { width: 40, height: 24 } }),
+        { x: -20, y: -24, width: 40, height: 24 },
+        "bottom-center coordinates must place the whole object above a floor contact point"
+    );
     new AuthoredWorldObjectRenderer().draw({
         context: gateContext,
         scene: {
@@ -665,7 +679,8 @@ export async function run() {
                         kind: "gate",
                         gateId: "sector-01-01:gate",
                         presentationId: "world-object:gate",
-                        position: { x: 320, y: -928 }
+                        position: { x: 320, y: -864 },
+                        coordinateAnchor: "bottom-center"
                     }
                 ],
                 areas: []
@@ -686,7 +701,7 @@ export async function run() {
     const gateFrame = gateContext.calls.find(
         ([name, , , width, height]) => name === "strokeRect" && width === 52 && height === 62
     );
-    assert.equal(gateFrame[2] + gateFrame[4], 96, "the Gate door bottom must sit on the authored exit deck");
+    assert.equal(gateFrame[2] + gateFrame[4], 0, "the Gate door bottom must equal its authored floor coordinate");
     const unlockedGateContext = recordingContext();
     new AuthoredWorldObjectRenderer().draw({
         context: unlockedGateContext,
@@ -699,7 +714,8 @@ export async function run() {
                         kind: "gate",
                         gateId: "sector-01-01:gate",
                         presentationId: "world-object:gate",
-                        position: { x: 320, y: -928 }
+                        position: { x: 320, y: -864 },
+                        coordinateAnchor: "bottom-center"
                     }
                 ],
                 areas: []
@@ -721,8 +737,14 @@ export async function run() {
         objectiveId: "sector-01-02:exit-panel-engaged",
         requiredObjectiveIds: ["sector-01-02:final-deck-reached"],
         presentationId: "world-object:gate-panel",
-        position: { x: 208, y: -1024 }
+        position: { x: 208, y: -960 },
+        coordinateAnchor: "bottom-center"
     };
+    assert.deepEqual(
+        worldObjectLocalBounds(gatePanel, DEFAULT_WORLD_OBJECT_MOCK_CATALOG[gatePanel.presentationId]),
+        { x: -22, y: -45, width: 44, height: 45 },
+        "the Gate panel silhouette must derive from its presentation size and floor anchor"
+    );
     const lockedPanelContext = recordingContext();
     new AuthoredWorldObjectRenderer().draw({
         context: lockedPanelContext,
