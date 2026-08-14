@@ -2,7 +2,7 @@
 
 ## 현재 범위
 
-브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 절차 생성 암석 지형, 자동 전투, 적 투사체, 체크포인트 복귀와 아티팩트 런 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
+브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 하나의 연속 월드에 조립된 저작 진행 영역, 자동 전투, 적 투사체, 체크포인트 복귀와 아티팩트 런 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
 
 ## 주요 모듈
 
@@ -155,7 +155,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 저작 영역의 `areaId`는 UI·게임 진행을 위한 논리 상태이며 물리 월드나 멀티플레이 권한 구역을 분할하지 않는다. 열린 Gate는 이 공용 월드 좌표계 안의 지속 단방향 포탈이다. 첫 진입자의 문 내부 진입으로 `gate-crossed`가 공용 진행을 한 번 확정하지만 그 플레이어만 이동하고, 뒤의 플레이어는 같은 열린 문에 직접 들어올 때 각각 `gate-portal-entered` 사건으로 이동한다. 각 플레이어는 자기 사건의 결정적 도착 좌표와 tick을 `GameSimulation.applyPortalTransition()`에 한 번 적용해 위치·속도·회전·접지·로프·포인터 버퍼·일시 전투 타이머와 무기 재사용 대기를 초기화하되 체력·생명·아티팩트·무기 수치·체크포인트·월드 객체 상태는 유지한다. 이미 같은 Gate를 로컬 예측한 클라이언트는 서버 확정에서 초기화를 반복하지 않는다. 서버는 전이를 일으킨 owner-motion tick 이하의 중복·역순 상태만 성공한 no-op으로 무시하고, 원격 상태 버퍼는 해당 플레이어의 포탈 tick 전후 표본을 서로 보간하지 않는다.
 - 저작 영역의 출구는 `선행 objective 집계 → gate-panel interaction objective → Gate unlock`의 공통 계약을 사용한다. 시나리오별 선행 objective는 이동·상호작용·증강 선택 등으로 달라도 문을 여는 마지막 입력은 Gate 옆 `gate-panel` 조작으로 통일한다. `WorldProgressState`는 패널 objective의 `requiredObjectiveIds`를 직접 검증하고 snapshot 복원에서도 선행 목표 없는 완료 상태를 거부한다. `AuthoredWorldAssembler`는 각 `area.bounds`의 좌우에 비부착 `area-boundary-wall`, 상단 Gate 개구부 좌우에 `inter-floor-divider` 충돌면을 항상 만들며, `WorldGateGeometry`는 잠긴 Gate의 중앙 barrier만 추가한다. 따라서 방 바깥이나 층 경계로 돌아갈 수 없고 문 안 포탈만 다음 영역 진입로가 된다.
 - 저작 사각 surface와 world object의 `position`은 `coordinateAnchor`가 가리키는 부착점이다. `AuthoredCoordinateAnchor`는 `top|center|bottom × left|center|right`의 아홉 이름을 정규화하고 사각형 bounds를 계산한다. 수평 보행 발판과 위에서 아래로 뻗는 천장 구조는 `top-center`, 바닥에서 위로 서는 Gate·패널과 수직 고정 구조는 `bottom-center`, 그래플 표식처럼 자유 배치되는 정사각형은 `center`를 사용한다. `rectangle()`은 기준점·크기로 collision vertices를 만들고 `AuthoredWorldAssembler`는 vertices와 기준점을 같은 Y offset으로 이동한다. world-object presentation은 같은 기준점·표현 크기로 컬링 bounds와 실제 draw bounds를 계산한다. 개별 영역이나 renderer에 층별 Y 오프셋을 추가하지 않으며, 바닥 고정 오브젝트는 그 기준점이 실제 renderable surface의 `topY`와 일치하는지 회귀 검증한다.
-- 정상 도달도 같은 경계를 따른다. 도달한 소유 클라이언트가 완료 화면과 summit claim을 먼저 만들고, 서버는 최신 검증 소유자 위치로 확인한 첫 claim만 공용 런 완료로 전이한다. 완료 상태는 스냅샷으로 모든 참가자에게 수렴하며 서버 복제 위치의 별도 자동 판정은 두지 않는다.
+- 현재 저작 시나리오의 영역 도달은 objective·Gate 패널·포탈 사건으로 진행하고 `sector-02-08`에서는 content boundary에 머문다. 과거 절차 월드용 summit claim은 호환 코드로만 남아 있으며 최종 시나리오의 엔딩 진입 조건이 확정되기 전까지 기본 제품 테스트 계약으로 사용하지 않는다.
 - 입력과 시뮬레이션 capability는 `Base => class extends Base` 믹스인으로 구현한다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput`, 자동 무기·적 공격은 각자의 capability 계약을 가진다. 투사체 종류는 같은 `projectile-motion`과 `client-projectile-collision` ID 아래에 서로 다른 운동·충돌 믹스인을 조합한다. 두 디스패처는 구체 클래스나 `instanceof` 분기 없이 capability 존재 여부로 전달한다.
 - `SimulationDispatcher`는 월드 단계가 지정한 capability ID만 실행한다. 한 객체에 운동과 충돌처럼 여러 능력이 조합돼도 현재 단계와 무관한 능력을 실행하지 않으며, `GameSimulation`과 `CombatSystems`는 단계 순서와 context만 조정한다. `PredictableProjectileStore`는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 담당하고 투사체 종류별 충돌이나 거부 정책을 분기하지 않는다.
 - 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
@@ -186,14 +186,13 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 ## 현재 게임 시스템
 
-- 순수 함수 `generateWorld(config)`가 같은 시드에서 동일한 48단계 수직 암석 월드, 적 생성 위치와 8레벨 간격의 체크포인트를 만든다. 월드 생성은 객체 정체성이나 수명주기를 만들지 않는다.
-- `GameSimulation`이 생성된 월드와 가장 높은 도달 지점을 권위 상태로 보존한다.
+- `CURRENT_AUTHORED_AREA_CATALOG`와 `assembleAuthoredWorld()`가 Sector 01·02의 저작 영역을 하나의 연속 좌표계로 조립한다. `GameSimulationFactory`는 seed와 world revision으로 같은 catalog를 선택해 싱글·멀티가 동일한 정의를 재현하게 한다.
+- `GameSimulation`이 저작 영역의 목표·Gate·content boundary와 플레이어별 진행 상태를 권위 상태로 보존한다.
 - 사망 재개는 월드와 체크포인트 진행도를 유지한 채 활성 지점으로 복귀하고, `ArtifactInventory`의 결정적 정책으로 최근 아티팩트 약 1/3만 제거한다.
 - 첫 체크포인트의 아티팩트 선택도 `PlayerCommand`의 좌우·점프 명령을 사용하며, 선택 중에는 `GameSimulation`이 물리와 전투를 일시 정지한다.
 - 아티팩트 획득·손실 정보는 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 보유 상태와 분리한다.
 - `rewardedCheckpointIds`가 체크포인트별 보상 수령 여부를 권위 상태로 보존해 재방문과 사망 복귀의 중복 지급을 막는다.
-- `WorldTraversalValidator`는 생성과 분리된 순수 검사기로 연속 경로의 상승량과 로프 사거리 위반을 시드·레벨 단위로 진단한다.
-- 재현해야 할 시드는 `worldRegressionSeeds.mjs`에 이유와 함께 보존하며, 일반 1,000개 시드 탐색보다 우선 검증한다.
+- `npm test`의 current authored world 검증은 area catalog의 연결·출구 참조·Gate 진행과 마지막 content boundary를 확인한다. 절차형 48단계 경로의 시드 sweep은 현재 제품 검증에 포함하지 않는다.
 - `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가한다. 사망 횟수는 호환 필드 `defeats`에 기록하며 사망·부활로 공용 월드 시간을 멈추지 않는다.
 - `?metrics=1`은 `GameApp`과 렌더러에만 전달되는 옵트인 개발 표시이며 `PlayerCommand`나 게임 규칙에 포함하지 않는다.
 - 사망·낙사는 `GameSimulation.respawnPlayerAtCheckpoint` 하나로 처리한다. 사망한 플레이어의 물리·입력·체력·아티팩트만 초기화하며 동료와 공용 월드는 계속 진행한다.
@@ -215,7 +214,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력·손실 아티팩트를 `player-respawned` 사건으로 남긴다. 손실이 있으면 같은 playerId의 `artifact-loss` 사건도 발행한다.
 - 여러 플레이어가 같은 틱에 사망해도 각자 독립 부활한다. 공용 적·투사체와 다른 플레이어의 위치·체력·아티팩트는 초기화하지 않는다.
 - 적은 사거리 안의 살아 있는 플레이어 중 최근접 대상을 선택하고 거리 동률은 ID로 결정한다. 적 투사체의 생성·직선 궤적·8초 수명은 서버가 진행한다. 각 피해 클라이언트가 자기 예측 위치에서 로프를 몸체보다 먼저 판정해 playerId가 있는 claim을 보내며, 서버 고정 스텝은 지연된 플레이어 위치로 충돌을 먼저 만들지 않는다.
-- 마지막 암석 위의 정상 목표도 시드 결과에 포함되며, 도달하면 하나의 큰 월드를 끝내는 `completed` 터미널 상태에서 판정을 멈춘다.
+- 현재 구현된 마지막 영역 `sector-02-08`은 다음 시나리오가 아직 연결되지 않은 content boundary이며 `completed` 전체 게임 종료로 판정하지 않는다.
 - `GameSimulation`이 플레이어·로프·적·투사체·체력·사망·플레이어별 체크포인트 부활을 소유한다.
 - 기본 무기는 사거리 안의 가장 가까운 적을 자동 조준하며, 적은 플레이어를 향해 투사체를 발사한다.
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.

@@ -3,7 +3,6 @@ import { DEFAULT_ENVIRONMENT_DEFINITION } from "../src/render/environment/Enviro
 import { EnvironmentAssetSet } from "../src/render/environment/EnvironmentAssetSet.js";
 import { EnvironmentRendererComposer } from "../src/render/environment/EnvironmentRendererComposer.js";
 import { currentAuthoredArea, sceneEnvironmentZone } from "../src/render/environment/AltitudeZoneResolver.js";
-import { PixelBackdropRenderer } from "../src/render/environment/renderers/PixelBackdropRenderer.js";
 import { PixelDecorationRenderer } from "../src/render/environment/renderers/PixelDecorationRenderer.js";
 import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelTerrainRenderer.js";
 import { RenderFrameStats } from "../src/render/RenderPerformanceMetrics.js";
@@ -70,8 +69,7 @@ function scene() {
                     ]
                 }
             ],
-            checkpoints: [],
-            summit: null
+            checkpoints: []
         }
     };
 }
@@ -126,11 +124,6 @@ export function run() {
         sceneEnvironmentZone(definition, sector02Scene).id,
         "residential-commercial",
         "authored Sector 02 keeps its residential city theme instead of inheriting procedural altitude zones"
-    );
-    assert.equal(
-        sceneEnvironmentZone(definition, currentScene).id,
-        "industrial-maintenance",
-        "procedural worlds continue to resolve their environment from altitude"
     );
     const terrainContext = recordingContext();
     new PixelTerrainRenderer({ definition, assets }).draw({ context: terrainContext, scene: currentScene });
@@ -226,39 +219,6 @@ export function run() {
         "terrain renderer owns surface-level view culling"
     );
 
-    const backdrop = new PixelBackdropRenderer({ definition, assets });
-    const brightness = [];
-    for (const altitude of [0, 1800, 3600, 5400, 7200]) {
-        const context = recordingContext();
-        backdrop.draw({ context, scene: { ...currentScene, player: { position: { x: 0, y: -altitude } } }, viewport });
-        const overlay = context.calls.find(
-            ([name, key, value]) =>
-                name === "set" && key === "fillStyle" && String(value).startsWith("rgba(255, 244, 214")
-        );
-        brightness.push(Number(overlay[2].match(/([\d.]+)\)$/)[1]));
-    }
-    assert.ok(
-        brightness.every((value, index) => index === 0 || value > brightness[index - 1]),
-        "sunrise brightens monotonically across zones"
-    );
-
-    const decorationContext = recordingContext();
-    const decoration = new PixelDecorationRenderer({ definition, assets });
-    decoration.draw({ context: decorationContext, scene: currentScene });
-    const firstDecoration = decorationContext.calls.filter(([name]) => name === "drawImage");
-    const secondContext = recordingContext();
-    new PixelDecorationRenderer({ definition, assets }).draw({
-        context: secondContext,
-        scene: currentScene
-    });
-    assert.deepEqual(
-        secondContext.calls.filter(([name]) => name === "drawImage"),
-        firstDecoration,
-        "decoration placement is deterministic"
-    );
-    for (const [, , , , , , x] of firstDecoration)
-        assert.ok(x < -48 || x > 120, "decoration stays outside traversal surface");
-
     const authoredDecorationContext = recordingContext();
     const authoredDecorationStats = new RenderFrameStats();
     new PixelDecorationRenderer({ definition, assets }).draw({
@@ -276,43 +236,6 @@ export function run() {
         { total: 0, drawn: 0 },
         "authored worlds report the legacy decoration layer as intentionally empty"
     );
-
-    const seedInputs = [];
-    class SeedRecordingDecorationRenderer extends PixelDecorationRenderer {
-        hashFor(value) {
-            seedInputs.push(value);
-            return 0.2;
-        }
-    }
-    const seededRenderer = new SeedRecordingDecorationRenderer({ definition, assets });
-    seededRenderer.draw({ context: recordingContext(), scene: currentScene });
-    const firstSeedInput = seedInputs[0];
-    const cachedHashCalls = seedInputs.length;
-    seededRenderer.draw({ context: recordingContext(), scene: currentScene });
-    assert.equal(
-        seedInputs.length,
-        cachedHashCalls,
-        "static decoration placement is reused for an unchanged world and zone"
-    );
-    seedInputs.length = 0;
-    seededRenderer.draw({
-        context: recordingContext(),
-        scene: { ...currentScene, world: { ...currentScene.world, seed: currentScene.world.seed + 1 } }
-    });
-    assert.equal(seedInputs[0], firstSeedInput + 1, "decoration selection consumes the scene world seed");
-    const decorationStats = new RenderFrameStats();
-    decoration.draw({
-        context: recordingContext(),
-        scene: currentScene,
-        viewport: createRenderViewport({
-            camera: { x: 1000, y: 1000, zoom: 1 },
-            cssWidth: 100,
-            cssHeight: 100,
-            cullMargin: 0
-        }),
-        renderStats: decorationStats
-    });
-    assert.equal(decorationStats.snapshot().decorations.drawn, 0, "off-screen decorations are not painted");
 
     MockImage.instances = [];
     const pending = new EnvironmentAssetSet({ atlases: definition.atlases, ImageClass: MockImage, warn: () => {} });

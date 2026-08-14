@@ -313,28 +313,6 @@ export function run() {
     assert.equal(soloFall.eventFlash.type, "checkpoint-respawn");
     assert.equal(soloFall.eventFlash.reason, "fall");
 
-    const completed = new GameSimulation();
-    const completedPlayer = primaryPlayer(completed);
-    completedPlayer.ropeObject.rope.attach(completedPlayer.physics.position, {
-        x: completedPlayer.physics.position.x,
-        y: completedPlayer.physics.position.y - 100
-    });
-    completedPlayer.physics.position.x = completed.world.summit.x;
-    completedPlayer.physics.position.y = completed.world.summit.y;
-    completed.step(1 / 120, command);
-    assert.equal(completed.snapshot().runState, "completed");
-    assert.equal(completed.snapshot().rope.isAttached, false);
-    completedPlayer.health = 1;
-    completed.step(1, command);
-    assert.equal(completed.snapshot().playerHealth, 1, "combat and physics must pause after completion");
-    completed.step(20, command);
-    assert.equal(
-        completed.snapshot().runState,
-        "completed",
-        "the summit ends the single large world without a stage restart"
-    );
-    assert.equal(completed.snapshot().playerHealth, 1);
-
     const checkpointRun = new GameSimulation();
     const checkpointPlayer = primaryPlayer(checkpointRun);
     const targetCheckpoint = checkpointRun.world.checkpoints[2];
