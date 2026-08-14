@@ -71,14 +71,21 @@
 | [`bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`](./bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md) | 현재 Runtime을 확인한 뒤 일관된 Scenario Art Reference를 생성·검수하는 공통 규격 |
 | [`bsh/scenario/1/README.md`](./bsh/scenario/1/README.md) | `bsh` Sector 01 공용 배경 아트 레퍼런스와 Stage 인덱스 |
 | [`bsh/scenario/1/1-1/README.md`](./bsh/scenario/1/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격 |
+| [`bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md) | 1-1 Runtime 좌표·Camera·Story·Asset 인계 계약 |
 | [`bsh/scenario/1/1-2/README.md`](./bsh/scenario/1/1-2/README.md) | `bsh` Airborne Re-Attach Benchmark Stage(1-2) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md) | 1-2 Runtime 좌표·Camera·Story·Asset 인계 계약 |
 | [`bsh/scenario/1/1-3/README.md`](./bsh/scenario/1/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md) | 1-3 Runtime 좌표·Camera·Sentry FSM·Story·Asset 인계 계약 |
 | [`bsh/scenario/1/1-4/README.md`](./bsh/scenario/1/1-4/README.md) | `bsh` 첫 Rope Augment 3지선다·Calibration Stage(1-4) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md) | 1-4 Runtime 좌표·Camera·Foundation 선택 구현 Gap 계약 |
 | [`bsh/scenario/1/1-5/README.md`](./bsh/scenario/1/1-5/README.md) | `bsh` 첫 Build Expression·Augment별 경로 Stage(1-5) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md) | 1-5 Runtime 좌표 대조·Camera/Story 미구현 명시 계약 |
 | [`bsh/scenario/1/1-6/README.md`](./bsh/scenario/1/1-6/README.md) | `bsh` 첫 Wind·지속풍과 주기풍 Stage(1-6) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-6/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-6/PRODUCTION-ALIGNMENT.md) | 1-6 Wind 물리 구현 확인·Runtime 좌표 대조·Camera/Story 미구현 명시 계약 |
 | [`bsh/scenario/1/1-7/README.md`](./bsh/scenario/1/1-7/README.md) | `bsh` Rope·Augment·Wind·Sentry 첫 복합 Stage(1-7) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md) | 1-7 Runtime 좌표 대조·Wind/Sentry 중첩 구현 확인·Camera/Story 미구현 명시 계약 |
 | [`bsh/scenario/1/1-8/README.md`](./bsh/scenario/1/1-8/README.md) | `bsh` Sector 1 일반 구간 최종 종합·Containment Gate·Boss 전환 후보 Stage(1-8) Blockout 제작 규격 |
+| [`bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md) | 1-8 Runtime 좌표 대조·두 Turret Crossfire 금지 구현 확인·Camera/Story 미구현 명시 계약 |
 | [`bsh/scenario/2/README.md`](./bsh/scenario/2/README.md) | `bsh` Sector 02 Worker District 마스터플랜(2-1~2-8 개요) |
 | [`bsh/scenario/2/2-1/README.md`](./bsh/scenario/2/2-1/README.md) | `bsh` Worker District 첫 저압 전환 Stage(2-1) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-2/README.md`](./bsh/scenario/2/2-2/README.md) | `bsh` 첫 Patrol Drone·Moving Threat Stage(2-2) Blockout 후보·제작 규격 |
