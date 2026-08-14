@@ -139,7 +139,18 @@ Recovery 중심은 P1 `(160, -312)`, P2 `(-192, -600)`, P3 `(160, -824)`다. 실
 - B가 Release 전에 보이지 않아 첫 Handoff가 추측 입력이 된다.
 - 문서와 Runtime 좌표 중 하나만 변경한다.
 
-## 9. 다음 작업
+## 9. 증강·Story 연결
+
+[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-2는 증강을 제공하는 Stage가 아니라, 이후 증강의 이유가 되는 Rope Telemetry를 만드는 Stage다.
+
+- Foundation Augment는 아직 `none`이며 효과·선택 UI·보정 VFX를 노출하지 않는다.
+- A→B→C→D의 Attach 간격, Release 뒤 다음 Attach 성공률, Recovery 사용률을 기록한다.
+- 이 기록은 1-4에서 `Relay Link`만 정답으로 추천하기 위한 점수가 아니라 세 가지 Firmware Profile을 생성하는 공통 진단 자료다.
+- `rope-telemetry-start`는 첫 공중 Re-Attach에서 조용히 기록할 수 있지만 Player에게 능력 선택을 예고하는 설명창은 띄우지 않는다.
+- 1-3 Security는 이 비정상적인 Manual Route를 `route-violation`으로 해석하며, 그 결과가 1-4 Maintenance Node 진단으로 이어진다.
+- Relay 후보 수치는 증강 없는 전환 성공률을 측정한 뒤에만 적용한다. 현재 1-2 지형 자체를 Relay 전용으로 만들면 FAIL이다.
+
+## 10. 다음 작업
 
 | 범위 | 현재 | 다음 작업 |
 | --- | --- | --- |

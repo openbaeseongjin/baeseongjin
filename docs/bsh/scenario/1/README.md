@@ -1,8 +1,10 @@
 # SECTOR 01 — MAINTENANCE
 
-*SHARED BACKGROUND ART REFERENCE · REV 1.0*
+*SHARED BACKGROUND ART REFERENCE · REV 1.1*
 
 ![Sector 01 Maintenance 배경 레퍼런스](./images/sector-01-background-reference.png)
+
+> 맵·시나리오·이미지·Runtime 수정 시 [Sector 01 증강·스토리 통합 기준](./AUGMENT-STORY-INTEGRATION.md)을 함께 적용한다.
 
 ## 적용 범위
 
@@ -40,6 +42,8 @@
 | [1-6](./1-6/README.md) | COOLING SHAFT | Wind 학습 |
 | [1-7](./1-7/README.md) | PRESSURE BYPASS | Rope·Build·Wind·Sentry 조합 |
 | [1-8](./1-8/README.md) | CONTAINMENT GATE | 일반 구간 최종 종합·전환 |
+
+1-1~1-3은 증강 없는 기본 Rope와 Telemetry 축적 구간, 1-4는 첫 Foundation Augment 선택, 1-5~1-8은 같은 공간을 선택한 증강에 따라 다르게 해석하는 검증 구간이다. Foundation Augment와 Checkpoint Artifact는 서로 다른 보상 계층으로 유지한다.
 
 ## 자산 상태
 
