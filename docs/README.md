@@ -103,7 +103,7 @@
 | [`bsh/scenario/2/2-7/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-7/PRODUCTION-ALIGNMENT.md) | 2-7 Runtime 좌표 대조·두 Drone Crossfire 비겹침 구현 확인 계약 |
 | [`bsh/scenario/2/2-8/README.md`](./bsh/scenario/2/2-8/README.md) | `bsh` Sector 02 Finale·Group A/B/C Transfer 결과 공개 Stage(2-8) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md) | 2-8 Runtime 좌표 대조·Story Reveal cueId 순서 확인·Post-Sector 전환 미확정 명시 계약 |
-| [`bsh/scenario/3/README.md`](./bsh/scenario/3/README.md) | `bsh` Sector 03 Commercial District 마스터플랜 REV 1.1(3-1~3-8 개요, Access Scan Field 확정·Growth HOLD·3-8 Free-Weave 통합 정렬) |
+| [`bsh/scenario/3/README.md`](./bsh/scenario/3/README.md) | `bsh` Sector 03 Commercial District 마스터플랜 REV 1.2(3-1~3-8 개요, Document Integration Patch 전부 GitHub main 반영 확인·Runtime Prototype Gate만 남음) |
 | [`bsh/scenario/3/3-1/README.md`](./bsh/scenario/3/3-1/README.md) | `bsh` Worker→Commercial District 저압 전환 Stage(3-1) Blockout 후보·제작 규격 |
 | [`bsh/scenario/3/3-2/README.md`](./bsh/scenario/3/3-2/README.md) | `bsh` 첫 Access Scan Field(Scanner) Stage(3-2) Blockout 후보·제작 규격, 구현 의존성 명세 포함 |
 | [`bsh/scenario/3/3-3/README.md`](./bsh/scenario/3/3-3/README.md) | `bsh` Scanner+Patrol Drone 첫 결합 Stage(3-3) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
