@@ -20,6 +20,8 @@
 | [`game-hackathon-planning.md`](./game-hackathon-planning.md) | 제품 방향과 핵심 경험 |
 | [`development-schedule.md`](./development-schedule.md) | 역할별 병렬 작업, 필수 선행 관계와 제출 일정 |
 | [`implementation-roadmap.md`](./implementation-roadmap.md) | 구현 현황과 개발 우선순위 |
+| [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md) | 하나의 연속 월드 안에서 Sector 01 진행 영역을 연결하는 기획·구현 계획 |
+| [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 일반 타이머·상승 붕괴·최소 관전·보스 타이머 전환 기준 |
 | [`decision-history.md`](./decision-history.md) | 대체되거나 완료된 결정 이력 |
 
 ## 아키텍처와 개발 규칙
@@ -73,4 +75,4 @@
 | [`bsh/scenario/1-5/README.md`](./bsh/scenario/1-5/README.md) | `bsh` 첫 Build Expression·Augment별 경로 Stage(1-5) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1-6/README.md`](./bsh/scenario/1-6/README.md) | `bsh` 첫 Wind·지속풍과 주기풍 Stage(1-6) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1-7/README.md`](./bsh/scenario/1-7/README.md) | `bsh` Rope·Augment·Wind·Sentry 첫 복합 Stage(1-7) Blockout 후보·제작 규격 |
-| [`bsh/scenario/1-8/README.md`](./bsh/scenario/1-8/README.md) | `bsh` Sector 1 최종 종합·Containment Gate·Worker District 전환 Stage(1-8) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1-8/README.md`](./bsh/scenario/1-8/README.md) | `bsh` Sector 1 일반 구간 최종 종합·Containment Gate·Boss 전환 후보 Stage(1-8) Blockout 제작 규격 |

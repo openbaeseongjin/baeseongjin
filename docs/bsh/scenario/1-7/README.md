@@ -2268,7 +2268,15 @@ Stage 성공 기준:
 
 ---
 
-## 72. OPEN QUESTIONS / LOCK 필요
+## 72. LOCKED DECISIONS — 1-8 확정 반영
+
+`SECTOR 01-8 CONTAINMENT GATE` 기준으로 다음 권장안 A를 확정한다.
+
+- Manual Pressure Bypass는 도시 복구가 아니라 위쪽 탈출 경로 개방을 위한 조작이다.
+- 일반 Sentry Projectile은 Player에게만 피해를 주며 Rope를 자르지 않는다.
+- 압력은 잠시 안정화되지만 1-8의 Lower Grid Containment로 다시 악화된다.
+
+아래 A/B 기록은 대안을 다시 선택하기 위한 열린 질문이 아니라 확정 배경으로 보존한다.
 
 ### Q1. Manual Pressure Bypass의 의미
 
