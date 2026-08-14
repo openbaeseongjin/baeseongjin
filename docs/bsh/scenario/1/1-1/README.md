@@ -1,6 +1,9 @@
 # SECTOR 01-1 — SERVICE SHAFT
 
-*BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.0*
+*BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.1*
+
+> **PRODUCTION SOURCE**
+> 구현·카메라·그래픽 검수 때는 먼저 [1-1 Production Alignment](./PRODUCTION-ALIGNMENT.md)를 확인한다. 이 문서의 설계 의도와 Runtime 좌표, 승인 Blockout, 기존 이미지의 사용 가능 범위를 한곳에서 연결한다.
 
 NEXT — [SECTOR 01-2 / DOUBLE ANCHOR SHAFT](../1-2/README.md) ▶
 
@@ -642,10 +645,13 @@ Stage는 32px Grid의 960×960 Blockout으로 시작한다. Ground Service Acces
 
 ```text
 .
-├── README.md            # 이 문서
-└── images/              # 새 REV 3.0 이미지 추가 위치
+├── README.md                  # 시나리오와 레벨 설계 의도
+├── PRODUCTION-ALIGNMENT.md    # 구현·카메라·아트 검수 계약
+└── images/
+    ├── README.md              # 이미지별 사용 가능 상태
+    └── 03_approved_blockout.svg
 ```
 
-기존 REV 1.0 이미지는 새 이미지가 전달되기 전까지 보존하지만 이 문서에서는 참조하지 않는다.
+기존 REV 1.0 PNG는 결정 이력을 위해 보존하지만 `RETIRED`이며 구현과 아트 제작에는 사용하지 않는다.
 
-SECTOR 01-1 / SERVICE SHAFT — BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.0
+SECTOR 01-1 / SERVICE SHAFT — BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.1
