@@ -3,7 +3,7 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 53b15f5e3c85fab3a27ec5d2f636a64892945c9455e39e8d2104d906912952ca
+scenario-source-sha256: b8760f29764e14b229ebe982e602ecefc040bd5c5edb2fed99e06587d296158d
 authored-area-sha256: 91d877421c2be171b28b8b3f1b0f322294ad1be92edd734b11806a071fa2d1eb
 stage-count: 32
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8
@@ -70,6 +70,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 23. Sector 01·02 Camera/Story 구현 인계 문서를 코드에 반영했다. 1-5~1-8 `cameraZones` placeholder 문자열 배열을 실제 `cameraZone` 객체로 교체(`CAMERA-STORY-IMPLEMENTATION-HANDOFF.md` Part 1)하고, #507이 다루지 않은 `POSITION_PRESENTATIONS`(1-5 `load-test-context`, 1-7 `pressure-limit`·`containment-violation`, 1-8 `lockdown-warning`·`mid-safe-story`·`worker-district-preview`)와 Sector 02 공백(`2-2 security-status`, `2-3 node-detection`, 2-6 ENTRY는 README의 Optional Minimal Sign 허용 범위에서 위치 정보만)을 추가했다. Sector 02 Camera Zone은 8개 Stage가 의도적 미설계임을 확인한 상태라 변경하지 않았다.
 24. Sector 04 standalone catalog에 4-5 `EXPRESS SHAFT`(적 없음·상승 Wake), 4-6 `POWER RELAY SPAN`(Cutter Sentry+Patrol Drone 분리 band), 4-7 `ISOLATION JUNCTION`(Cutter+Wake 합성, `LOWER ASCENT FEEDER ISOLATED` 상태 디스플레이), 4-8 `TRANSIT CONTROL TRUNK`(Cutter+Drone+Wake 연속, Upper Trunk/Lower Feeder 병치, Post-Sector Visual Hold)를 추가하고 4-4 Gate를 4-5로 재배선했다. 4-8은 Sector 05 미배선(content-boundary)이다. 문서 대비 정렬 1건: 4-8 D1 activation X폭을 문서 patrol corridor(±208)를 포함하도록 ±192→±208로 넓혔다(문서 자체가 patrol corridor 폭을 open question으로 남김). 메인 월드에는 연결하지 않는다.
 25. Sector 03 Camera·Story를 정리했다. 8개 Stage README의 `## 14. Camera` 절을 전수 대조한 결과 전부 `Custom Pan 없음`(기본 Camera로 Geometry·Lighting 해결)을 명시해 `cameraZones` 미저작이 의도된 상태임을 확인했고([인계 문서](./bsh/scenario/3/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)), Story는 위치 기반 Signage 계약대로 데크별 `story-display` 28개와 `TRIGGER_CUE_PRESENTATIONS` 바인딩으로 구현했다. 3-7 M2 Access Directory와 3-8 A1 Evacuation/Access Archive 병치는 문서의 금지 해석(Group↔Tier 대응, 원인 확정, 연결 화살표)을 포함하지 않는다.
+26. Sector 04 Master의 stale 상태 문구를 정리했다. `4-2 ~ 4-8 Master outline only`를 8개 상세 Stage README 목록으로 바꾸고, Current Runtime Boundary를 `1-1 → 3-8 연결 + Sector 04 4-1~4-8 standalone` 현실에 맞췄다.
 
 ## 열린 기획·구현 게이트
 
@@ -77,10 +78,9 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 2. Post-Sector 03 Boss와 `3-8 → 4-1` 전환
 3. Sector 04 Camera Zone과 Story trigger 코드 반영
 4. 2-3 Specialization의 실제 이름·효과·수치·선택 pool
-5. Sector 04 Master의 `4-2~4-8 outline only` 상태 문구를 현재 4-1~4-8 상세 문서 범위와 재정렬
-6. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
-7. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
-8. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
+5. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
+6. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
+7. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
 
 개발이 준비됐고 기획 결정만 기다리는 항목의 우선순위 요청과 답변 작성란은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다.
 
