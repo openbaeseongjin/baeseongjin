@@ -16,13 +16,20 @@
 - 메인 개발자가 아닌 작업자는 별도 공용 경로가 정해진 경우를 제외하고 `docs/<이름>/` 아래에서 작업한다. 예를 들어 `bsh` 작업자의 문서는 `docs/bsh/`에 둔다.
 - 작업자별 문서를 공유 기준 문서로 승격하거나 `docs/` 바로 아래로 옮길 때는 메인 개발자의 명시적인 결정에 따른다.
 
-## 3. 파일 형식
+## 3. 시나리오 문서와 현재 상태
+
+- `docs/bsh/scenario/`의 Sector·Stage 문서는 해당 기획과 제작 기준을 소유한다.
+- [`scenario-development-integration.md`](./scenario-development-integration.md)는 여러 Sector에 걸친 상세 Stage 목록, 현재 authored Runtime 연결 상태, 열린 차단 요소와 마지막 확인 근거를 소유한다.
+- `SESSION-HANDOFF.md`와 `implementation-roadmap.md`에는 현재 요약과 통합 현황 링크만 남긴다. 날짜별 Stage 개수나 Runtime 상태를 별도 기준처럼 복제하지 않는다.
+- Stage 문서의 고정 Git SHA는 작성 당시 근거인 `AUTHORING SNAPSHOT`으로 표시하고 현재 상태는 통합 현황에서 확인한다.
+
+## 4. 파일 형식
 
 - 일반 문서는 Markdown(`.md`)으로 작성한다.
 - 발표를 목적으로 만든 자료는 예외적으로 HTML(`.html`), PowerPoint(`.ppt`, `.pptx`) 등 발표에 적합한 형식을 사용할 수 있다.
 - 발표 자료가 아닌 기획, 설계, 개발 규칙, 운영 절차와 기록은 Markdown 형식을 유지한다.
 
-## 4. 이미지 첨부
+## 5. 이미지 첨부
 
 - 이미지는 문서가 있는 작업 폴더의 `images/` 하위에 저장한다. `docs/` 문서의 이미지는 `docs/images/`, `docs/bsh/` 문서의 이미지는 `docs/bsh/images/`에 둔다.
 - Markdown에서는 `![이미지 설명](./images/file-name.png)`처럼 상대 경로로 연결한다.
