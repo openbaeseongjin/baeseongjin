@@ -2494,9 +2494,9 @@ Rope를 더 잘 쓰고 싶게 만드는가?"
 
 ### Scenario Art Reference
 
-![1-3 Scenario Art Reference](./images/03_scenario_art_reference.png)
+![1-3 Scenario Art Reference](./images/05_scenario_art_reference.png)
 
-`TEMPORARY / PENDING REGENERATION`: Security Shaft의 분위기, Sentry 한 기와 얇은 Telegraph, Cyan Anchor, Cover, Recovery, Gate의 가독성만 참고한다. Player 크기와 Rope 선은 생성 기준이 아니며 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 대표 Gameplay Shot으로 교체한다.
+`APPROVED ART REFERENCE`: Route Choice Camera에서 D 위·C 왼쪽 중단·B 아래, Safe Ledge 왼쪽·R1 아래 중단·두 Cover·오른쪽 벽 Sentry의 구조를 고정한다. 약 48px Player는 C 오른쪽 아래에서 C에만 live Cyan Rope 한 줄을 연결하고, Sentry의 얇은 Red TRACK Telegraph 한 줄과 분리된다. P0·P1·P4·A·Scanner·Panel·Gate·Projectile·경로 도식은 포함하지 않는다. 정확한 생성·검수 기록은 [`images/README.md`](./images/README.md)를 따른다.
 
 ### Approved Blockout
 
@@ -2504,6 +2504,6 @@ Rope를 더 잘 쓰고 싶게 만드는가?"
 
 `APPROVED BLOCKOUT`: 현재 Runtime의 960×1152 Geometry, Safe/Flow/Recovery Route, Scanner, Sentry T1, Cover LOS, Service Panel, Security Gate 좌표를 정한다.
 
-기존 `01_swing_line.png`와 `02_layout.png`는 `COOLING SHAFT` 기준의 이전 Revision이므로 `RETIRED`다. 이력 보존을 위해 파일만 유지하며 구현·외주·검수 기준으로 참조하지 않는다.
+기존 `01_swing_line.png`와 `02_layout.png`는 `COOLING SHAFT` 기준의 이전 Revision이므로 `RETIRED`다. 기존 `03_scenario_art_reference.png`도 live Rope와 전체 경로처럼 보이는 선이 함께 있어 `RETIRED / ROPE-ROUTE MISMATCH`다. 세 파일 모두 이력 보존만 하며 구현·외주·검수 기준으로 참조하지 않는다.
 
 SECTOR 01-3 / SECURITY CHECK — BLOCKOUT CANDIDATE · REV 3.0
