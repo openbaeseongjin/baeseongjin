@@ -129,7 +129,7 @@ const area02 = defineArea({
     bounds: { width: 1280, height: 1312 },
     entry: point("sector-04-02:entry", -480, -32),
     exit: point("sector-04-02:exit", 576, -1280),
-    nextAreaId: null,
+    nextAreaId: "sector-04-03",
     surfaces: [
         horizontalSurface("sector-04-02:p0", -480, 0, 320, 32, { kind: "safe-deck" }),
         horizontalSurface("sector-04-02:p1", -256, -192, 320, 32, { kind: "safe-deck" }),
@@ -189,9 +189,8 @@ const area02 = defineArea({
             requiredObjectiveIds: ["sector-04-02:final-deck-reached"]
         }
     ],
-    gate: gate("sector-04-02:gate", 576, -1280, null, ["sector-04-02:exit-panel-engaged"], {
-        portalBottomY: -1248,
-        completionMode: "content-boundary"
+    gate: gate("sector-04-02:gate", 576, -1280, "sector-04-03", ["sector-04-02:exit-panel-engaged"], {
+        portalBottomY: -1248
     }),
     storyTriggers: ["cutter-line-entry", "cutter-read", "cutter-recovery"],
     routes: ["safe", "flow", "recovery"],
@@ -205,8 +204,109 @@ const area02 = defineArea({
     cueIds: ["cutter-line", "cutter-fire", "first-rope-interruption"]
 });
 
+const area03 = defineArea({
+    id: "sector-04-03",
+    sectorId: "sector-04",
+    order: 3,
+    name: "FREIGHT BYPASS",
+    subtitle: "CUTTER + TRANSIT WAKE",
+    bounds: { width: 1472, height: 1472 },
+    entry: point("sector-04-03:entry", -560, -32),
+    exit: point("sector-04-03:exit", 16, -1408),
+    nextAreaId: null,
+    surfaces: [
+        horizontalSurface("sector-04-03:p0", -560, 0, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-03:p1", -336, -224, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-03:r1", -240, -640, 256, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-03:p2", 320, -864, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-03:r2", 64, -1088, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-04-03:p4", -288, -1376, 416, 32, { kind: "safe-deck" }),
+        grappleTarget("sector-04-03:a0-surface", -432, -128),
+        grappleTarget("sector-04-03:w1-surface", -176, -384),
+        grappleTarget("sector-04-03:w2-surface", 96, -544),
+        grappleTarget("sector-04-03:w3-surface", 256, -736),
+        grappleTarget("sector-04-03:a4-surface", 96, -992),
+        grappleTarget("sector-04-03:a5-surface", -160, -1184),
+        grappleTarget("sector-04-03:a6-surface", -320, -1312)
+    ],
+    routePoints: [
+        point("sector-04-03:route-entry", -560, -32),
+        point("sector-04-03:route-a0", -432, -128, { landmark: "A0" }),
+        point("sector-04-03:route-w1", -176, -384, { landmark: "W1" }),
+        point("sector-04-03:route-w2", 96, -544, { landmark: "W2" }),
+        point("sector-04-03:route-w3", 256, -736, { landmark: "W3" }),
+        point("sector-04-03:route-a4", 96, -992, { landmark: "A4" }),
+        point("sector-04-03:route-a5", -160, -1184, { landmark: "A5" }),
+        point("sector-04-03:route-a6", -320, -1312, { landmark: "A6" }),
+        point("sector-04-03:route-exit", 16, -1408)
+    ],
+    recoveryPoints: [point("sector-04-03:recovery-r1", -240, -664), point("sector-04-03:recovery-r2", 64, -1112)],
+    objects: [
+        worldObject("sector-04-03:a0", "grapple-landmark", -432, -128, { label: "A0" }),
+        worldObject("sector-04-03:w1", "grapple-landmark", -176, -384, { label: "W1" }),
+        worldObject("sector-04-03:w2", "grapple-landmark", 96, -544, { label: "W2" }),
+        worldObject("sector-04-03:w3", "grapple-landmark", 256, -736, { label: "W3" }),
+        worldObject("sector-04-03:a4", "grapple-landmark", 96, -992, { label: "A4" }),
+        worldObject("sector-04-03:a5", "grapple-landmark", -160, -1184, { label: "A5" }),
+        worldObject("sector-04-03:a6", "grapple-landmark", -320, -1312, { label: "A6" }),
+        worldObject("sector-04-03:cutter-sentry-01", "sentry", 448, -640, {
+            enemyType: "sentry-t1",
+            activation: triggerBounds(-128, -832, 704, 480),
+            rules: ["cutter-fire", "target-lock-cycle", "activation-band-only"]
+        }),
+        worldObject("sector-04-03:exit-panel", "gate-panel", -112, -1376, {
+            coordinateAnchor: "bottom-center",
+            interactionRadius,
+            objectiveId: "sector-04-03:exit-panel-engaged",
+            gateId: "sector-04-03:gate",
+            requiredObjectiveIds: ["sector-04-03:final-deck-reached"]
+        }),
+        worldObject("sector-04-03:service-gate", "gate", 16, -1376, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-04-03:gate"
+        })
+    ],
+    objectives: [
+        {
+            id: "sector-04-03:final-deck-reached",
+            type: "reach",
+            bounds: triggerBounds(-496, -1408, 416, 96)
+        },
+        {
+            id: "sector-04-03:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-04-03:exit-panel",
+            requiredObjectiveIds: ["sector-04-03:final-deck-reached"]
+        }
+    ],
+    windZones: [
+        {
+            id: "sector-04-03:freight-wake",
+            bounds: triggerBounds(-208, -832, 560, 544),
+            direction: { x: 1, y: 0 },
+            mode: "pulsed",
+            strength: 360,
+            cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
+        }
+    ],
+    gate: gate("sector-04-03:gate", 16, -1408, null, ["sector-04-03:exit-panel-engaged"], {
+        portalBottomY: -1376,
+        completionMode: "content-boundary"
+    }),
+    storyTriggers: ["freight-entry", "wake-warning", "combined-commit", "decompression"],
+    routes: ["safe", "flow", "recovery"],
+    cameraZones: [
+        cameraZone("entry-wake-read", -352, 0, 0.95, 0.72),
+        cameraZone("combined-freight", -736, -352, 0.88, 0.7),
+        cameraZone("cutter-exit", -992, -736, 0.9, 0.7),
+        cameraZone("upper-decompression", -1184, -992, 0.95, 0.72),
+        cameraZone("gate", -1472, -1184, 1, 0.72)
+    ],
+    cueIds: ["freight-bypass", "transit-wake", "cutter-fire"]
+});
+
 export const SECTOR_04_AREA_CATALOG = defineAreaCatalog({
     id: "sector-04-authored-mock",
     revision: "sector-04-scenarios-rev1-v1",
-    areas: [area01, area02]
+    areas: [area01, area02, area03]
 });
