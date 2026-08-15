@@ -118,4 +118,7 @@
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md) | `bsh` Sector 03 핵심 의존성 Access Scan Field Runtime Prototype 구현 스펙 — Prediction Clock Parity 위험(delayed owner-motion) 포함 실제 코드 대조 완료 |
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md) | `bsh` 위 스펙을 Codex/개발 담당에게 바로 전달할 실행 지시서 — 우선순위(P0A~P6)·완료 조건·보고 형식·복붙용 지시문 포함 |
 | [`bsh/scenario/4/README.md`](./bsh/scenario/4/README.md) | `bsh` Sector 04 Transit/Infrastructure 마스터플랜(첫 Canonical 후보) — Cutter Fire·Transit Wake(기존 Wind 재사용)·Moving Platform Tech-Spike-Only |
-| [`bsh/scenario/4/4-1/README.md`](./bsh/scenario/4/4-1/README.md) | `bsh` Sector 04 첫 Stage(4-1) Blockout 후보·제작 규격 — Enemy/Threat 없는 순수 Speed Space Reveal, Post-Sector 03 Entry 연결 미확정 명시 |
+| [`bsh/scenario/4/4-1/README.md`](./bsh/scenario/4/4-1/README.md) | `bsh` Sector 04 첫 Stage(4-1) Blockout 후보·제작 규격 — Enemy/Threat 없는 순수 Speed Space Reveal, Post-Sector 03 Entry 연결 미확정 명시. **Rope Max 440→400 Runtime 변경 후 재검증 필요(Flow Route 408.9px가 새 한계 초과)** |
+| [`bsh/scenario/4/4-2/README.md`](./bsh/scenario/4/4-2/README.md) | `bsh` 첫 Rope-Cut(Cutter Fire) Tutorial Stage(4-2) Blockout 후보·제작 규격, REV 1.1 — Hook Flight/Combat Rebalance Runtime 재정렬 반영 |
+| [`bsh/scenario/4/4-3/README.md`](./bsh/scenario/4/4-3/README.md) | `bsh` 첫 Cutter+Transit Wake 결합 Stage(4-3) Blockout 후보·제작 규격, Hook Flight/Foundation Runtime 기준 작성·좌표 검증 완료 |
+| [`bsh/scenario/4/4-4/README.md`](./bsh/scenario/4/4-4/README.md) | `bsh` Sector 04 Rest Stage(4-4) Blockout 후보·제작 규격 — Enemy/Threat 없음, Lower Ascent Feeder 이상징후 첫 Setup(SEGMENTED, ISOLATED 아님), 좌표 검증 완료 |
