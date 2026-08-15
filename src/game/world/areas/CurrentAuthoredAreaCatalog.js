@@ -3,12 +3,13 @@ import { SECTOR_01_AREA_CATALOG } from "./sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "./sector02/Sector02AreaCatalog.js";
 
 function connectArea(area, { order, nextAreaId, gate = {} }) {
+    const baseGate = nextAreaId === null ? area.gate : { ...area.gate, completionMode: undefined };
     return defineArea({
         ...area,
         order,
         nextAreaId,
         gate: {
-            ...area.gate,
+            ...baseGate,
             ...gate,
             nextAreaId
         }

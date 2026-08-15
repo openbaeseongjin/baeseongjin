@@ -4,7 +4,7 @@
 
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 2bfaadcfe2e9be1e22a2b363fd52e7aea7928bfb5d3dda26a7e4dadbdb1cba8e
-authored-area-sha256: d593092329def505145d9ae2d1822a59323fe2fdc6f1eef2a6630e33a737500d
+authored-area-sha256: a1a1e088ef15f129beb60e1cd1879daf733c074dd1ecab718f349e31c0c23836
 stage-count: 32
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8
 reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
@@ -64,6 +64,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 17. #514는 4-2 `CUTTER LINE`을 같은 standalone catalog에 추가했다. A0/C1/C2/A3/A4 grapple target, P0/P1/R1/P2/P3/P4 발판, `cutter-fire` 규칙의 정지 Sentry S1(activation band), camera zone과 content-boundary gate를 저작했다. 4-1 Gate는 4-2로 연결되도록 재배선했다.
 18. #516은 4-3 `FREIGHT BYPASS`를 추가했다. A0/W1/W2/W3/A4/A5/A6 grapple target과 P0/P1/R1/P2/R2/P4 발판, `cutter-fire` Sentry S1과 첫 Pulsed Transit Wake(`sector-04-03:freight-wake`, strength 360, falloff 미지정=default 0)를 저작했다. 4-2 Gate는 4-3으로 재배선했고 4-3은 content-boundary다.
 19. #519는 4-4 `INFRASTRUCTURE SERVICE NODE`(REST)를 추가했다. A1~A5 grapple target과 P0/P1/P2/R1/P3/P4 발판, `routing-status-display`(story-display, 상호작용 없음)를 저작했다. Enemy·Wind·Cutter 없음. 4-3 Gate는 4-4로 재배선했고 4-4는 content-boundary다.
+20. Sector 04 catalog(4-1~4-4)를 메인 월드에 잇기 전에 먼저 Sector 03(Access Scan Field → 3-1~3-8)을 구현하기로 했다. 이 과정에서 4-2·4-3 Gate/패널의 문서 좌표가 최종 데크를 벗어나던 것을 데크 위(`bottom-center`가 visible floor top에 닿도록)로 보정했다. 개발용 디버그 모드(`?start=<areaId>` 맵 선택 + 기존 `?metrics=1`)를 추가했다.
 
 ## 열린 기획·구현 게이트
 

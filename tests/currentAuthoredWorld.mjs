@@ -4,6 +4,7 @@ import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulati
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
 import { WorldProgressState } from "../src/game/world/WorldProgressState.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
+import { parseStartAreaId } from "../src/game/metrics/MetricsDebugMode.js";
 
 export function run() {
     const catalog = CURRENT_AUTHORED_AREA_CATALOG;
@@ -54,4 +55,19 @@ export function run() {
         () => new WorldProgressState(catalog, { ...progress.snapshot(), completed: true }),
         /content-boundary/i
     );
+
+    assert.equal(parseStartAreaId("?start=sector-02-05"), "sector-02-05");
+    assert.equal(parseStartAreaId("?metrics=1&start=sector-01-03"), "sector-01-03");
+    assert.equal(parseStartAreaId("?start="), null);
+
+    const debugStart = createCurrentGameSimulation({ worldSeed: 9182, startAreaId: "sector-02-05" });
+    assert.equal(debugStart.worldProgress.snapshot().currentAreaId, "sector-02-05");
+    assert.equal(debugStart.activeCheckpoint.id, "checkpoint:sector-02-05");
+    const sector02Entry = debugStart.world.areas.find(({ id }) => id === "sector-02-05").entry;
+    assert.equal(debugStart.players[0].physics.position.x, sector02Entry.x);
+    assert.equal(debugStart.players[0].physics.position.y, sector02Entry.y);
+
+    const invalidStart = createCurrentGameSimulation({ worldSeed: 9182, startAreaId: "missing-area" });
+    assert.equal(invalidStart.worldProgress.snapshot().currentAreaId, "sector-01-01");
+    assert.equal(invalidStart.players[0].physics.position.y, invalidStart.world.areas[0].entry.y);
 }
