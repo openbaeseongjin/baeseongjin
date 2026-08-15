@@ -66,7 +66,13 @@ docs/bsh/scenario/4/
 ```text
 README.md          Sector 04 Master
 4-1/README.md      TRANSIT INTAKE 상세 Stage
-4-2 ~ 4-8          Master outline only
+4-2/README.md      CUTTER LINE 상세 Stage
+4-3/README.md      FREIGHT BYPASS 상세 Stage
+4-4/README.md      INFRASTRUCTURE SERVICE NODE 상세 Stage
+4-5/README.md      EXPRESS SHAFT 상세 Stage
+4-6/README.md      POWER RELAY SPAN 상세 Stage
+4-7/README.md      ISOLATION JUNCTION 상세 Stage
+4-8/README.md      TRANSIT CONTROL TRUNK 상세 Stage
 ```
 
 현재 전체 Stage·Runtime 대조 상태는 [`scenario-development-integration.md`](../../../scenario-development-integration.md)를 따른다.
@@ -76,21 +82,11 @@ README.md          Sector 04 Master
 현재 authored Runtime은:
 
 ```text
-SECTOR 01
-+
-SECTOR 02
-```
-
-까지 연결된 상태다.
-
-따라서:
-
-```text
-SECTOR 03
-= docs ahead of runtime
+SECTOR 01 + SECTOR 02 + SECTOR 03
+= 1-1 → 3-8 연결
 
 SECTOR 04
-= master-planning stage
+= 4-1 → 4-8 standalone catalog (메인 월드 미연결)
 ```
 
 다.
