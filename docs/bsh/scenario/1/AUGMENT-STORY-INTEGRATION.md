@@ -1,6 +1,6 @@
 # SECTOR 01 — AUGMENT & STORY INTEGRATION
 
-*FOUNDATION AUGMENT · STORY PROGRESSION · PRODUCTION CONTRACT · REV 1.0*
+*FOUNDATION AUGMENT · STORY PROGRESSION · PRODUCTION CONTRACT · REV 1.1*
 
 이 문서는 Sector 01의 맵, 시나리오, 이미지, Runtime을 수정할 때 증강이 기존 Rope와 충돌하지 않고 Story 진행 안에서 자연스럽게 등장하도록 만드는 공통 계약이다. 각 Stage README가 개별 공간을 정의하고, 이 문서는 Stage 사이의 누적 의미와 증강 호환성을 정의한다.
 
@@ -8,12 +8,12 @@
 
 | 항목 | 상태 | 판정 |
 | --- | --- | --- |
-| Foundation Augment 최초 선택 | `DECIDED` | 1-4 Maintenance Node에서 `Impulse Coil`, `Relay Link`, `Shear Current` 중 1개를 고정 목록으로 선택 |
+| Foundation Augment 최초 선택 | `IMPLEMENTED PROTOTYPE` | 1-4 Maintenance Node에서 `Impulse Coil`, `Relay Link`, `Shear Current` 중 1개를 고정 목록으로 개인별 선택 |
 | 1-1~1-3 증강 사용 | `REJECTED` | 기본 Rope 학습과 기준 측정을 위해 증강 효과·선택 UI를 노출하지 않음 |
 | 새 전용 버튼·Rope Mode 전환 | `REJECTED` | 기존 Attach·Hold·Release 입력 안에서 효과가 발생해야 함 |
 | 무증강 기본 경로 | `DECIDED` | 1-5~1-8도 기본 Rope로 통과할 수 있어야 하며 증강은 더 유리한 해석을 제공 |
 | Foundation과 Artifact | `DECIDED` | 서로 다른 보상 계층으로 분리. Foundation은 Rope 정체성, Artifact는 Run 중 전투·빌드 변화 |
-| 선택 지속성 | `DECIDED` | 1-4 이후 Sector 01 종료까지 개인별 선택 유지. 사망·Checkpoint로 임의 변경하지 않음 |
+| 선택 지속성 | `IMPLEMENTED` | 개인별 snapshot 상태로 유지하며 사망·Checkpoint로 임의 변경하지 않음 |
 | Story 결과 분기 | `REJECTED` | 증강마다 결말을 갈라 콘텐츠를 3배로 만들지 않음. 경로·피드백만 달라지고 핵심 사건은 동일 |
 | 세부 수치 | `PROTOTYPE` | 현재 코드값과 플레이테스트를 기준으로 후보를 만들고 Stage 통과율·조작 성공률로 조정 |
 
@@ -117,12 +117,12 @@
 
 ## 8. 목표 Runtime 구조와 저비용 원칙
 
-아래는 목표 구조이며 현재 구현 완료 판정이 아니다. 1-4의 실제 선택·저장·효과 상태는 [1-4 제작 정렬 문서](./1-4/PRODUCTION-ALIGNMENT.md)의 `IMPLEMENTED / AUTHORED ONLY / PENDING / BLOCKED` 판정을 우선한다.
+아래 구조는 1-4 Runtime에 구현됐다. 세부 수치와 정식 표현 자산의 완료 판정은 [1-4 제작 정렬 문서](./1-4/PRODUCTION-ALIGNMENT.md)의 `IMPLEMENTED / IMPLEMENTED PROTOTYPE` 판정을 우선한다.
 
 - Player별 `foundationAugment`는 `none | impulse-coil | relay-link | shear-current` 중 하나만 가진다.
 - 순간 상태는 `augmentRuntimeState`에 분리하고 Release·Attach 같은 기존 Rope Event에서만 갱신한다.
 - Maintenance Node와 Checkpoint를 별도 특수 UI로 계속 복제하지 않고 `RewardSource`가 `augment` 또는 `artifact` 선택을 열도록 공통화한다.
-- Foundation 선택, Calibration 완료, Gate 진행 상태를 네트워크에서 명시적으로 동기화한다.
+- Foundation 선택과 Gate 진행 상태를 네트워크에서 명시적으로 동기화한다. Calibration 접촉은 피드백 사건이며 진행 Key로 저장하지 않는다.
 - 화면 밖 Enemy, Lamp, Fan, 배경 Layer는 갱신하지 않는다.
 - 증강 때문에 Physics Engine을 교체하거나 Rope Segment를 매 Frame 전수 충돌 검사하지 않는다.
 - 기존 Rope 수학, Projectile, Sentry Telegraph, 공용 VFX Atlas를 재사용한다.

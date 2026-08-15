@@ -228,6 +228,16 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "artifact-selection-receipt", payload: receipt }));
                 return;
             }
+            if (message?.type === "foundation-selection" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveFoundationSelection(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "foundation-selection-receipt", payload: receipt }));
+                return;
+            }
+            if (message?.type === "foundation-shear" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveFoundationShear(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "foundation-shear-receipt", payload: receipt }));
+                return;
+            }
             if (message?.type === "checkpoint-claim" && typeof message.payload === "string") {
                 const receipt = room.adapter.receiveCheckpointClaim(playerId, message.payload);
                 socket.send(JSON.stringify({ type: "checkpoint-claim-receipt", payload: receipt }));

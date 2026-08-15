@@ -9,7 +9,12 @@ const DEFAULT_DEFINITIONS = {
         radius: 18,
         size: { width: 44, height: 45 }
     },
-    "world-object:augment-node": { renderMode: "mock-shape", color: "#c084fc", radius: 24 },
+    "world-object:augment-node": {
+        renderMode: "mock-shape",
+        color: "#c084fc",
+        radius: 36,
+        size: { width: 168, height: 120 }
+    },
     "world-object:gate": {
         renderMode: "mock-shape",
         color: "#fb7185",
@@ -17,7 +22,12 @@ const DEFAULT_DEFINITIONS = {
         size: { width: 52, height: 62 }
     },
     "world-object:wind-source": { renderMode: "mock-shape", color: "#67e8f9", radius: 24 },
-    "world-object:test-target": { renderMode: "mock-shape", color: "#a3e635", radius: 18 },
+    "world-object:test-target": {
+        renderMode: "mock-shape",
+        color: "#a3e635",
+        radius: 28,
+        size: { width: 58, height: 94 }
+    },
     "world-object:background-prop": { renderMode: "environment-decoration" },
     "world-object:checkpoint": { renderMode: "checkpoint" },
     "world-object:sentry": { renderMode: "combat-entity" },

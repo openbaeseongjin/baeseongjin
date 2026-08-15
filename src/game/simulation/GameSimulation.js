@@ -1,7 +1,13 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
+    FOUNDATION_AUGMENT_CATALOG,
+    FOUNDATION_AUGMENT_CONFIG,
+    foundationAugmentById
+} from "../augments/FoundationAugmentCatalog.js";
+import {
     advanceEnemyProjectiles,
+    distancePointToSegment,
     updateAutomaticWeapon,
     updateEnemyWeapons,
     updatePlayerProjectiles
@@ -18,11 +24,15 @@ import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "../rewards/ArtifactRewardSelection.js";
+import {
+    advanceFoundationRewardSelection,
+    createFoundationRewardSelection
+} from "../rewards/FoundationRewardSelection.js";
 import { generateWorld } from "../world/WorldGenerator.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
 import { collisionSurfacesForProgress } from "../world/WorldGateGeometry.js";
 import { pointInsideBounds, sampleWorldForce, snapshotWindStates } from "../world/WorldForceField.js";
-import { advanceWorldProgress } from "../world/WorldProgressController.js";
+import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
 
@@ -120,6 +130,7 @@ export class GameSimulation {
         this.runState = "playing";
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
         this.artifactRewards = new Map();
+        this.foundationRewards = new Map();
         this.rewardedCheckpointIds = new Set();
         this.tick = 0;
         this.replicationEvents = [];
@@ -148,6 +159,7 @@ export class GameSimulation {
         this.portalTransitions.delete(playerId);
         const removedReward = this.artifactRewards.get(playerId);
         this.artifactRewards.delete(playerId);
+        this.foundationRewards.delete(playerId);
         if (removedReward && this.artifactRewards.size === 0) {
             this.rewardedCheckpointIds.add(removedReward.checkpointId);
         }
@@ -214,6 +226,8 @@ export class GameSimulation {
                 cooldown: player.weapon.cooldown
             },
             artifacts: player.artifacts.snapshot(),
+            foundationAugment: player.foundation.selectedId,
+            augmentRuntimeState: player.foundation.snapshot(),
             ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
             lastCheckpointLoss: [...player.lastCheckpointLoss]
         };
@@ -247,6 +261,10 @@ export class GameSimulation {
 
     getArtifactReward(playerId) {
         return this.artifactRewards.get(playerId) ?? null;
+    }
+
+    getFoundationReward(playerId) {
+        return this.foundationRewards.get(playerId) ?? null;
     }
 
     getTick() {
@@ -294,6 +312,7 @@ export class GameSimulation {
         player.hitInvulnerabilityRemaining = 0;
         player.ropeDisabledRemaining = 0;
         player.ropeDamageBoostRemaining = 0;
+        player.foundation.resetRuntime();
         this.applyArtifactEffects(player);
         this.portalTransitions.set(player.id, Object.freeze({ gateId, position, tick }));
         return this.ownerPredictionState(player.id);
@@ -368,11 +387,18 @@ export class GameSimulation {
         return this.worldProgress.snapshot();
     }
 
-    synchronizePredictionProgress(playerId, { artifactReward = null, rewardedCheckpointIds = [] } = {}) {
+    synchronizePredictionProgress(
+        playerId,
+        { artifactReward = null, foundationReward = null, rewardedCheckpointIds = [] } = {}
+    ) {
         this.#requirePlayer(playerId);
         this.artifactRewards.clear();
+        this.foundationRewards.clear();
         if (artifactReward) {
             this.artifactRewards.set(playerId, createArtifactRewardSelection(artifactReward));
+        }
+        if (foundationReward) {
+            this.foundationRewards.set(playerId, createFoundationRewardSelection(foundationReward));
         }
         this.rewardedCheckpointIds = new Set(rewardedCheckpointIds);
         return this.getArtifactReward(playerId);
@@ -383,6 +409,7 @@ export class GameSimulation {
         return Object.freeze({
             activeCheckpointId: this.activeCheckpoint?.id ?? null,
             artifactReward: this.getArtifactReward(playerId),
+            foundationReward: this.getFoundationReward(playerId),
             rewardedCheckpointIds: Object.freeze([...this.rewardedCheckpointIds])
         });
     }
@@ -394,7 +421,12 @@ export class GameSimulation {
         return this.ownerPredictionState(ownerId);
     }
 
-    applySharedOwnerProgress(ownerId, shared, predictionTick, { preservePendingImpact = false } = {}) {
+    applySharedOwnerProgress(
+        ownerId,
+        shared,
+        predictionTick,
+        { preservePendingImpact = false, preservePendingFoundation = false } = {}
+    ) {
         const player = this.#requirePlayer(ownerId);
         if (!preservePendingImpact) {
             player.maxHealth = shared.maxHealth;
@@ -403,6 +435,13 @@ export class GameSimulation {
             player.weapon.fireInterval = shared.weapon.fireInterval;
             player.artifacts.replace(shared.artifacts);
             this.applyArtifactEffects(player);
+        }
+        if (
+            !preservePendingFoundation &&
+            shared.foundationAugment !== undefined &&
+            shared.foundationAugment !== player.foundation.selectedId
+        ) {
+            player.foundation.restore(shared.foundationAugment, shared.augmentRuntimeState);
         }
         this.tick = Math.max(this.tick, predictionTick);
         return this.ownerPredictionState(ownerId);
@@ -420,7 +459,11 @@ export class GameSimulation {
         }
         this.projectiles.length = 0;
         this.tick = tick;
-        return Object.freeze({ projectile, swingTriggered: inputOutcome.swingTriggered });
+        return Object.freeze({
+            projectile,
+            swingTriggered: inputOutcome.swingTriggered,
+            foundationEvents: inputOutcome.foundationEvents
+        });
     }
 
     restorePredictedRopeBoost(ownerId, remaining) {
@@ -489,6 +532,8 @@ export class GameSimulation {
             ropeDamageBoostRemaining: state.ropeDamageBoostRemaining,
             weaponCooldown: state.weapon.cooldown,
             artifacts: state.artifacts,
+            foundationAugment: state.foundationAugment,
+            augmentRuntimeState: state.augmentRuntimeState,
             lastCheckpointLoss: state.lastCheckpointLoss
         };
     }
@@ -540,13 +585,15 @@ export class GameSimulation {
         player.weapon.fireInterval = state.weapon.fireInterval;
         player.weapon.cooldown = state.weapon.cooldown;
         player.artifacts.replace(state.artifacts);
+        player.foundation.restore(state.foundationAugment ?? null, state.augmentRuntimeState);
         player.ropeDamageBoostRemaining = state.ropeDamageBoostRemaining;
         player.lastCheckpointLoss = [...state.lastCheckpointLoss];
         player.ropeObject.attachmentCandidate = findRopeAttachment({
             aimPoint: player.ropeObject.aimWorld,
             playerPosition: player.physics.position,
             surfaces: this.world.surfaces,
-            maxAttachDistance: ROPE_CONFIG.maxAttachDistance
+            maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
+            aimTolerance: player.foundation.ropeInputModifiers(ROPE_CONFIG).aimTolerance
         });
     }
 
@@ -609,8 +656,11 @@ export class GameSimulation {
         }
         if (resolveSummitProgress && this.updateSummitProgress()) return;
         if (resolveCheckpointProgress) this.updateCheckpointProgress();
-        const choosingRewardPlayerIds = new Set(this.artifactRewards.keys());
-        if (resolveArtifactSelections) this.updateArtifactRewards(commandsByPlayerId);
+        const choosingRewardPlayerIds = new Set([...this.artifactRewards.keys(), ...this.foundationRewards.keys()]);
+        if (resolveArtifactSelections) {
+            this.updateArtifactRewards(commandsByPlayerId);
+            this.updateFoundationRewards(commandsByPlayerId);
+        }
         const gameplayCommands = new Map(commandsByPlayerId);
         for (const playerId of choosingRewardPlayerIds) {
             const player = this.players.find(({ id }) => id === playerId);
@@ -628,7 +678,8 @@ export class GameSimulation {
             this.#prepareOwnerStep(player, dt);
             if (advanceInputDrivenObjects) {
                 this.#applyWorldForce(player, dt);
-                this.dispatchOwnerInput(player.id, playerCommand, dt);
+                const inputOutcome = this.dispatchOwnerInput(player.id, playerCommand, dt);
+                this.commitFoundationEvents(inputOutcome.foundationEvents);
             }
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile);
@@ -726,6 +777,7 @@ export class GameSimulation {
     dispatchOwnerInput(ownerId, command, dt) {
         const player = this.#requirePlayer(ownerId);
         let swingTriggered = false;
+        const foundationEvents = [];
         const canControl = player.lifeState === "active";
         const effectiveCommand = canControl
             ? command
@@ -746,6 +798,92 @@ export class GameSimulation {
                 owner: player,
                 ropeConfig: ROPE_CONFIG,
                 surfaces: this.activeCollisionSurfaces,
+                getRopeInputModifiers: () => player.foundation.ropeInputModifiers(ROPE_CONFIG),
+                onAttach: ({ relayAssisted }) => {
+                    if (!relayAssisted || !player.foundation.consumeRelayAttach()) return;
+                    foundationEvents.push(
+                        Object.freeze({
+                            eventType: "foundation-relay-linked",
+                            playerId: player.id,
+                            foundationId: player.foundation.selectedId,
+                            position: vectorState(player.physics.position)
+                        })
+                    );
+                },
+                onRelease: ({ anchor, playerPosition, swingDrag }) => {
+                    if (player.foundation.selectedId === "impulse-coil" && swingDrag?.used && swingDrag.direction) {
+                        player.physics.addImpulse(
+                            swingDrag.direction,
+                            FOUNDATION_AUGMENT_CONFIG.impulseReleaseMagnitude
+                        );
+                        foundationEvents.push(
+                            Object.freeze({
+                                eventType: "foundation-impulse",
+                                playerId: player.id,
+                                foundationId: player.foundation.selectedId,
+                                position: vectorState(player.physics.position),
+                                direction: Object.freeze({ ...swingDrag.direction }),
+                                magnitude: FOUNDATION_AUGMENT_CONFIG.impulseReleaseMagnitude
+                            })
+                        );
+                    }
+                    if (player.foundation.onRopeReleased()) {
+                        foundationEvents.push(
+                            Object.freeze({
+                                eventType: "foundation-relay-ready",
+                                playerId: player.id,
+                                foundationId: player.foundation.selectedId,
+                                position: vectorState(player.physics.position),
+                                duration: FOUNDATION_AUGMENT_CONFIG.relayWindowSeconds
+                            })
+                        );
+                    }
+                    if (player.foundation.selectedId !== "shear-current") return;
+                    for (const enemy of this.enemies) {
+                        if (
+                            enemy.health <= 0 ||
+                            distancePointToSegment(enemy.position, anchor, playerPosition) >
+                                enemy.radius + FOUNDATION_AUGMENT_CONFIG.shearSegmentTolerance
+                        ) {
+                            continue;
+                        }
+                        foundationEvents.push(
+                            Object.freeze({
+                                eventType: "foundation-shear-hit",
+                                playerId: player.id,
+                                foundationId: player.foundation.selectedId,
+                                targetId: enemy.id,
+                                targetKind: "enemy",
+                                anchor: Object.freeze({ ...anchor }),
+                                playerPosition: Object.freeze({ ...playerPosition }),
+                                position: vectorState(enemy.position),
+                                damage: FOUNDATION_AUGMENT_CONFIG.shearDamage
+                            })
+                        );
+                    }
+                    for (const object of this.world.objects ?? []) {
+                        if (
+                            object.kind !== "test-target" ||
+                            distancePointToSegment(object.position, anchor, playerPosition) >
+                                22 + FOUNDATION_AUGMENT_CONFIG.shearSegmentTolerance
+                        ) {
+                            continue;
+                        }
+                        foundationEvents.push(
+                            Object.freeze({
+                                eventType: "foundation-shear-hit",
+                                playerId: player.id,
+                                foundationId: player.foundation.selectedId,
+                                targetId: object.id,
+                                targetKind: "calibration-dummy",
+                                anchor: Object.freeze({ ...anchor }),
+                                playerPosition: Object.freeze({ ...playerPosition }),
+                                position: vectorState(object.position),
+                                damage: 0
+                            })
+                        );
+                    }
+                },
                 onFlash: (eventFlash) => {
                     this.eventFlash = { ...eventFlash, playerId: player.id };
                 },
@@ -757,13 +895,30 @@ export class GameSimulation {
                 }
             }
         });
-        return Object.freeze({ swingTriggered });
+        return Object.freeze({ swingTriggered, foundationEvents: Object.freeze(foundationEvents) });
+    }
+
+    commitFoundationEvents(events, { replicate = true } = {}) {
+        for (const event of events) {
+            if (event.eventType === "foundation-shear-hit" && event.targetKind === "enemy") {
+                const target = this.enemies.find(({ id, health }) => id === event.targetId && health > 0);
+                if (!target) continue;
+                target.health = Math.max(0, target.health - event.damage);
+                if (target.health <= 0) this.metrics.enemyDefeats += 1;
+            }
+            const { eventType, ...payload } = event;
+            if (replicate) this.recordReplicationEvent(eventType, payload);
+            this.eventFlash = { type: eventType, age: 0, ...payload };
+        }
+        this.enemies = this.enemies.filter(({ health }) => health > 0);
+        return events.length;
     }
 
     #prepareOwnerStep(player, dt) {
         player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
         player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
         player.ropeDamageBoostRemaining = Math.max(0, player.ropeDamageBoostRemaining - dt);
+        player.foundation.advance(dt);
         this.applyArtifactEffects(player);
     }
 
@@ -784,6 +939,11 @@ export class GameSimulation {
         });
         for (const event of events) {
             const { type, ...payload } = event;
+            if (type === "objective-choice-requested") {
+                if (!this.beginFoundationReward(event.playerId, event.sourceObjectId, event.objectiveId)) continue;
+                this.eventFlash = { type: "foundation-choice-opened", age: 0, ...payload };
+                continue;
+            }
             if (replicate) this.recordReplicationEvent(type, payload);
             this.eventFlash = { type, age: 0, ...payload };
             if (type === "gate-unlocked") {
@@ -799,6 +959,34 @@ export class GameSimulation {
         }
         this.#transferPlayersThroughOpenPortals({ replicate });
         if (this.worldProgress.snapshot().completed) this.beginCompletion(events.at(-1)?.playerId);
+    }
+
+    beginFoundationReward(playerId, sourceId, objectiveId = null) {
+        const player = this.#findPlayer(playerId);
+        const source = this.world.objects?.find(({ id }) => id === sourceId);
+        if (
+            !player ||
+            player.foundation.selectedId !== null ||
+            this.foundationRewards.has(playerId) ||
+            this.artifactRewards.has(playerId) ||
+            source?.kind !== "augment-node"
+        ) {
+            return false;
+        }
+        const choices = (source.choices ?? []).map((id) => foundationAugmentById(id));
+        if (choices.length === 0 || choices.some((choice) => choice === null)) return false;
+        this.foundationRewards.set(
+            playerId,
+            createFoundationRewardSelection({
+                sourceId,
+                objectiveId: objectiveId ?? source.objectiveId,
+                choices,
+                selectedIndex: 0
+            })
+        );
+        player.ropeObject.rope.detach();
+        player.ropeObject.swingDrag = null;
+        return true;
     }
 
     #transferPlayersThroughOpenPortals({ replicate }) {
@@ -1009,6 +1197,100 @@ export class GameSimulation {
         return Object.freeze({ accepted: true, checkpointId, artifactId });
     }
 
+    updateFoundationRewards(commandsByPlayerId) {
+        for (const [playerId, reward] of [...this.foundationRewards]) {
+            const player = this.#findPlayer(playerId);
+            if (!player) {
+                this.foundationRewards.delete(playerId);
+                continue;
+            }
+            const outcome = advanceFoundationRewardSelection(reward, this.commandForPlayer(player, commandsByPlayerId));
+            this.foundationRewards.set(playerId, outcome.selection);
+            if (!outcome.confirmedFoundationId) continue;
+            this.resolveFoundationSelection(playerId, {
+                sourceId: reward.sourceId,
+                foundationId: outcome.confirmedFoundationId
+            });
+        }
+    }
+
+    resolveFoundationSelection(
+        playerId,
+        { sourceId, foundationId },
+        { requireOpenReward = true, positionTolerance = 40, replicate = true } = {}
+    ) {
+        const player = this.#findPlayer(playerId);
+        if (!player || player.lifeState !== "active") {
+            return Object.freeze({ accepted: false, reason: "player-ineligible" });
+        }
+        const source = this.world.objects?.find(({ id }) => id === sourceId);
+        if (source?.kind !== "augment-node") {
+            return Object.freeze({ accepted: false, reason: "source-unavailable" });
+        }
+        const foundation = foundationAugmentById(foundationId);
+        if (!foundation || !source.choices?.includes(foundationId)) {
+            return Object.freeze({ accepted: false, reason: "foundation-unavailable" });
+        }
+        if (player.foundation.selectedId !== null) {
+            return player.foundation.selectedId === foundationId
+                ? Object.freeze({ accepted: true, sourceId, foundationId, changed: false })
+                : Object.freeze({ accepted: false, reason: "selection-conflict" });
+        }
+        const reward = this.foundationRewards.get(playerId);
+        if (requireOpenReward && reward?.sourceId !== sourceId) {
+            return Object.freeze({ accepted: false, reason: "reward-unavailable" });
+        }
+        if (
+            !reward &&
+            player.physics.position.distanceTo(source.position) > source.interactionRadius + positionTolerance
+        ) {
+            return Object.freeze({ accepted: false, reason: "source-out-of-range" });
+        }
+        if (!player.foundation.select(foundationId)) {
+            return Object.freeze({ accepted: false, reason: "selection-conflict" });
+        }
+        this.foundationRewards.delete(playerId);
+
+        const objectiveId = reward?.objectiveId ?? source.objectiveId;
+        const selectionPayload = Object.freeze({
+            playerId,
+            sourceId,
+            objectiveId,
+            foundationId,
+            foundation,
+            position: vectorState(player.physics.position)
+        });
+        if (replicate) this.recordReplicationEvent("foundation-selected", selectionPayload);
+        this.eventFlash = { type: "foundation-selected", age: 0, ...selectionPayload };
+
+        if (this.worldProgress && !this.worldProgress.isObjectiveComplete(objectiveId)) {
+            const areaId = source.areaId ?? this.worldProgress.currentAreaId;
+            for (const event of completeWorldProgressObjective({
+                progress: this.worldProgress,
+                objectiveId,
+                areaId,
+                player
+            })) {
+                const { type, ...payload } = event;
+                if (replicate) this.recordReplicationEvent(type, payload);
+                if (type === "gate-unlocked") {
+                    this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+                }
+            }
+        }
+        return Object.freeze({ accepted: true, sourceId, foundationId, changed: true });
+    }
+
+    clearFoundationSelection(playerId, sourceId = null) {
+        const player = this.#requirePlayer(playerId);
+        player.foundation.clear();
+        if (sourceId) {
+            const source = this.world.objects?.find(({ id }) => id === sourceId);
+            if (source) this.beginFoundationReward(playerId, sourceId, source.objectiveId);
+        }
+        return this.playerState(playerId);
+    }
+
     applyArtifactEffects(player = this.#primaryPlayer()) {
         const effects = getArtifactEffects(player.artifacts.snapshot(), player.ropeDamageBoostRemaining);
         player.weapon.damage = player.weapon.baseDamage * effects.damageMultiplier;
@@ -1129,6 +1411,64 @@ export class GameSimulation {
             duration: effects.swingDamageDuration
         });
         return Object.freeze({ accepted: true, duration: effects.swingDamageDuration });
+    }
+
+    resolveFoundationShearClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+        const player = this.#findPlayer(authenticatedPlayerId);
+        if (!player || player.lifeState !== "active") {
+            return Object.freeze({ accepted: false, reason: "player-ineligible" });
+        }
+        if (player.foundation.selectedId !== "shear-current") {
+            return Object.freeze({ accepted: false, reason: "foundation-missing" });
+        }
+        if (!claim.predictionId.startsWith(`${authenticatedPlayerId}:foundation-shear:${claim.clientTick}:`)) {
+            return Object.freeze({ accepted: false, reason: "prediction-ownership" });
+        }
+        if (player.physics.position.distanceTo(claim.playerPosition) > positionTolerance) {
+            return Object.freeze({ accepted: false, reason: "position-mismatch" });
+        }
+        if (
+            Math.hypot(claim.anchor.x - claim.playerPosition.x, claim.anchor.y - claim.playerPosition.y) >
+            ROPE_CONFIG.maxAttachDistance + positionTolerance
+        ) {
+            return Object.freeze({ accepted: false, reason: "segment-out-of-range" });
+        }
+
+        const target =
+            claim.targetKind === "enemy"
+                ? this.enemies.find(({ id, health }) => id === claim.targetId && health > 0)
+                : this.world.objects?.find(({ id, kind }) => id === claim.targetId && kind === "test-target");
+        if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
+        const targetRadius = claim.targetKind === "enemy" ? target.radius : 22;
+        if (
+            distancePointToSegment(target.position, claim.anchor, claim.playerPosition) >
+            targetRadius + FOUNDATION_AUGMENT_CONFIG.shearSegmentTolerance
+        ) {
+            return Object.freeze({ accepted: false, reason: "segment-mismatch" });
+        }
+        const damage = claim.targetKind === "enemy" ? FOUNDATION_AUGMENT_CONFIG.shearDamage : 0;
+        const previousHealth = claim.targetKind === "enemy" ? target.health : null;
+        this.commitFoundationEvents([
+            Object.freeze({
+                eventType: "foundation-shear-hit",
+                playerId: authenticatedPlayerId,
+                foundationId: "shear-current",
+                predictionId: claim.predictionId,
+                targetId: claim.targetId,
+                targetKind: claim.targetKind,
+                anchor: Object.freeze({ ...claim.anchor }),
+                playerPosition: Object.freeze({ ...claim.playerPosition }),
+                position: vectorState(target.position),
+                damage
+            })
+        ]);
+        const resolution =
+            claim.targetKind === "calibration-dummy"
+                ? "contact-registered"
+                : previousHealth <= damage
+                  ? "enemy-defeated"
+                  : "enemy-hit";
+        return Object.freeze({ accepted: true, resolution, damage });
     }
 
     resolvePlayerProjectileClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
@@ -1355,6 +1695,7 @@ export class GameSimulation {
         player.lifeState = "active";
         player.lastCheckpointLoss = player.artifacts.applyCheckpointLoss();
         player.ropeDamageBoostRemaining = 0;
+        player.foundation.resetRuntime();
         this.applyArtifactEffects(player);
     }
 
@@ -1436,9 +1777,13 @@ export class GameSimulation {
             runState: this.runState,
             activeCheckpoint: this.activeCheckpoint,
             artifacts: player.artifacts.snapshot(),
+            foundationAugment: player.foundation.selectedId,
+            augmentRuntimeState: player.foundation.snapshot(),
             lastCheckpointLoss: [...player.lastCheckpointLoss],
             artifactReward: this.artifactRewards.get(player.id) ?? null,
             artifactRewards: Object.fromEntries(this.artifactRewards),
+            foundationReward: this.foundationRewards.get(player.id) ?? null,
+            foundationRewards: Object.fromEntries(this.foundationRewards),
             rewardedCheckpointIds: [...this.rewardedCheckpointIds],
             ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
             metrics: this.metrics.snapshot(),

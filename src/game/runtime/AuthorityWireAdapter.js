@@ -1,6 +1,8 @@
 import { serializeCommandReceipt } from "../network/CommandReceipt.js";
 import { deserializeCheckpointClaim } from "../network/CheckpointClaim.js";
 import { deserializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
+import { deserializeFoundationSelectionClaim } from "../network/FoundationSelectionClaim.js";
+import { deserializeFoundationShearClaim } from "../network/FoundationShearClaim.js";
 import { deserializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { deserializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import { deserializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
@@ -50,6 +52,22 @@ export class AuthorityWireAdapter {
         return this.session.submitArtifactSelection(
             authenticatedPlayerId,
             deserializeArtifactSelectionClaim(serializedClaim)
+        );
+    }
+
+    receiveFoundationSelection(authenticatedPlayerId, serializedClaim) {
+        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
+        return this.session.submitFoundationSelection(
+            authenticatedPlayerId,
+            deserializeFoundationSelectionClaim(serializedClaim)
+        );
+    }
+
+    receiveFoundationShear(authenticatedPlayerId, serializedClaim) {
+        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
+        return this.session.submitFoundationShear(
+            authenticatedPlayerId,
+            deserializeFoundationShearClaim(serializedClaim)
         );
     }
 

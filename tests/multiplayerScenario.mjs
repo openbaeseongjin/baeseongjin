@@ -7,6 +7,8 @@ import { run as predictableProjectileStore } from "./predictableProjectileStore.
 import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mjs";
 import { run as gameServerHandler } from "./gameServerHandler.mjs";
 import { run as artifactSelectionClaim } from "./artifactSelectionClaim.mjs";
+import { run as foundationSelectionClaim } from "./foundationSelectionClaim.mjs";
+import { run as authoredFoundationMultiplayer } from "./authoredFoundationMultiplayer.mjs";
 import { run as checkpointClaim } from "./checkpointClaim.mjs";
 import { run as projectileHitClaim } from "./projectileHitClaim.mjs";
 import { run as playerProjectileSpawnClaim } from "./playerProjectileSpawnClaim.mjs";
@@ -16,6 +18,8 @@ import { run as authoredMultiplayerWorld } from "./authoredMultiplayerWorld.mjs"
 
 const steps = {
     artifactSelectionClaim,
+    foundationSelectionClaim,
+    authoredFoundationMultiplayer,
     checkpointClaim,
     projectileHitClaim,
     playerProjectileSpawnClaim,

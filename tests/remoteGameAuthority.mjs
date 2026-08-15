@@ -451,6 +451,56 @@ export async function run() {
     assert.equal(checkpointAuthority.pendingCheckpointId, null);
     assert.equal(checkpointAuthority.drainCheckpointClaimReceipts().length, 1);
 
+    const foundationMessages = [];
+    const foundationAuthority = new RemoteGameAuthority({
+        url: "ws://foundation.test/multiplayer",
+        WebSocketImpl: { OPEN: 1 }
+    });
+    foundationAuthority.socket = {
+        readyState: 1,
+        send: (serialized) => foundationMessages.push(JSON.parse(serialized))
+    };
+    foundationAuthority.ownerRuntime = {
+        state: () => ({
+            tick: 64,
+            position: { x: 0, y: -160 },
+            velocity: { x: 0, y: 0 },
+            angle: 0,
+            angularVelocity: 0,
+            isGrounded: true,
+            rope: { isAttached: false, anchor: null }
+        })
+    };
+    assert.equal(
+        foundationAuthority.submitFoundationSelection({
+            sourceId: "sector-01-04:maintenance-node",
+            foundationId: "relay-link"
+        }),
+        true
+    );
+    assert.deepEqual(
+        foundationMessages.map(({ type }) => type),
+        ["owner-motion", "foundation-selection"],
+        "the latest owner position must precede a Foundation selection claim"
+    );
+    foundationMessages.length = 0;
+    assert.equal(
+        foundationAuthority.submitFoundationShear({
+            predictionId: "player-1:foundation-shear:64:0",
+            targetId: "sector-01-04:calibration-dummy",
+            targetKind: "calibration-dummy",
+            tick: 64,
+            anchor: { x: -50, y: -448 },
+            playerPosition: { x: 50, y: -448 }
+        }),
+        true
+    );
+    assert.deepEqual(
+        foundationMessages.map(({ type }) => type),
+        ["owner-motion", "foundation-shear"],
+        "the latest owner position must precede a Shear claim"
+    );
+
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer, {
         createSimulation: ({ worldSeed }) => new GameSimulation({ worldSeed, worldCatalog: null })

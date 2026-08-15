@@ -1,4 +1,5 @@
 import { getMobileControlLayout } from "../core/input/MobileControlLayout.js";
+import { foundationAugmentById } from "../game/augments/FoundationAugmentCatalog.js";
 import {
     DEFAULT_CANVAS_PERFORMANCE_POLICY,
     RenderFrameStats,
@@ -93,8 +94,9 @@ export class CanvasRenderer {
         if (!scene.mobileView) {
             this.drawCombatHud(scene);
             this.drawArtifactHud(scene.artifacts, scene.ropeDamageBoostRemaining);
+            this.drawFoundationHud(scene.foundationAugment);
         }
-        this.drawArtifactRewardOverlay(scene.artifactReward);
+        this.drawRewardSelectionOverlay(scene.foundationReward ?? scene.artifactReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawStoryPresentation(scene.storyPresentation);
         this.drawArtifactFeedback(scene.eventFlash);
@@ -114,13 +116,18 @@ export class CanvasRenderer {
     }
 
     drawArtifactRewardOverlay(reward) {
+        this.drawRewardSelectionOverlay(reward);
+    }
+
+    drawRewardSelectionOverlay(reward) {
         if (!reward) return;
         const ctx = this.context;
+        const foundationReward = reward.rewardType === "foundation";
         const cardGap = 12;
         const margin = Math.max(16, this.cssWidth * 0.04);
         const availableWidth = Math.min(this.cssWidth - margin * 2, 840);
         const cardWidth = (availableWidth - cardGap * 2) / 3;
-        const cardHeight = Math.min(180, this.cssHeight * 0.46);
+        const cardHeight = Math.min(foundationReward ? 226 : 180, this.cssHeight * 0.52);
         const startX = (this.cssWidth - availableWidth) * 0.5;
         const startY = (this.cssHeight - cardHeight) * 0.46;
         ctx.save();
@@ -128,8 +135,12 @@ export class CanvasRenderer {
         ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         ctx.fillStyle = "#f8fafc";
         ctx.textAlign = "center";
-        ctx.font = "900 22px system-ui, sans-serif";
-        ctx.fillText("아티팩트 선택", this.cssWidth * 0.5, Math.max(30, startY - 50));
+        ctx.font = `900 ${foundationReward && this.cssWidth < 620 ? 14 : 22}px system-ui, sans-serif`;
+        ctx.fillText(
+            foundationReward ? "EMERGENCY GRAPPLE RECONFIGURATION" : "아티팩트 선택",
+            this.cssWidth * 0.5,
+            Math.max(30, startY - 50)
+        );
         ctx.fillStyle = "#bfdbfe";
         ctx.font = "700 13px system-ui, sans-serif";
         ctx.fillText("좌우 이동으로 선택 · 점프로 획득", this.cssWidth * 0.5, Math.max(52, startY - 20));
@@ -142,19 +153,128 @@ export class CanvasRenderer {
             ctx.fillRect(x, startY, cardWidth, cardHeight);
             ctx.strokeRect(x, startY, cardWidth, cardHeight);
             ctx.fillStyle = selected ? "#fde68a" : "#e2e8f0";
-            ctx.font = "900 16px system-ui, sans-serif";
-            ctx.fillText(choice.name, x + cardWidth * 0.5, startY + cardHeight * 0.4);
+            ctx.font = `900 ${foundationReward && cardWidth < 150 ? 11 : 16}px system-ui, sans-serif`;
+            if (foundationReward) this.drawFoundationChoiceIcon(choice.id, x + cardWidth * 0.5, startY + 48, selected);
+            ctx.fillText(choice.name, x + cardWidth * 0.5, startY + (foundationReward ? 92 : cardHeight * 0.4));
+            if (foundationReward) {
+                ctx.fillStyle = selected ? "#67e8f9" : "#94a3b8";
+                ctx.font = `900 ${cardWidth < 150 ? 8 : 11}px ui-monospace, monospace`;
+                this.drawCenteredWrappedText(
+                    `${choice.family} · ${choice.tagline}`,
+                    x + cardWidth * 0.5,
+                    startY + 116,
+                    cardWidth - 16,
+                    12,
+                    2
+                );
+            }
             ctx.fillStyle = "#cbd5e1";
-            ctx.font = "700 12px system-ui, sans-serif";
-            ctx.fillText(choice.description, x + cardWidth * 0.5, startY + cardHeight * 0.65);
+            ctx.font = `700 ${foundationReward && cardWidth < 150 ? 9 : 12}px system-ui, sans-serif`;
+            if (foundationReward) {
+                this.drawCenteredWrappedText(
+                    choice.description,
+                    x + cardWidth * 0.5,
+                    startY + 151,
+                    cardWidth - 18,
+                    15,
+                    2
+                );
+            } else {
+                ctx.fillText(choice.description, x + cardWidth * 0.5, startY + cardHeight * 0.65);
+            }
+            if (foundationReward) {
+                ctx.fillStyle = "#64748b";
+                ctx.font = "800 10px ui-monospace, monospace";
+                ctx.fillText("FOUNDATION / FIRMWARE PROFILE", x + cardWidth * 0.5, startY + 190);
+            }
         });
         ctx.fillStyle = "#fbbf24";
         ctx.font = "900 13px system-ui, sans-serif";
         ctx.fillText(
-            "선택 중에도 전투 진행 · 빠르게 결정하세요",
+            foundationReward
+                ? "개인 장비만 정지 · 다른 플레이어와 월드는 계속 진행"
+                : "선택 중에도 전투 진행 · 빠르게 결정하세요",
             this.cssWidth * 0.5,
             Math.min(this.cssHeight - 18, startY + cardHeight + 28)
         );
+        ctx.restore();
+    }
+
+    drawCenteredWrappedText(text, x, y, maxWidth, lineHeight, maxLines) {
+        const ctx = this.context;
+        const words = [...String(text)];
+        const lines = [];
+        let line = "";
+        for (const word of words) {
+            if (ctx.measureText(line + word).width <= maxWidth || line.length === 0) {
+                line += word;
+                continue;
+            }
+            if (lines.length === maxLines - 1) {
+                while (line.length > 1 && ctx.measureText(`${line}…`).width > maxWidth) line = line.slice(0, -1);
+                lines.push(`${line.trim()}…`);
+                line = "";
+                break;
+            }
+            lines.push(line.trim());
+            line = word;
+        }
+        if (line && lines.length < maxLines) lines.push(line.trim());
+        lines.forEach((value, index) => ctx.fillText(value, x, y + index * lineHeight));
+    }
+
+    drawFoundationChoiceIcon(id, x, y, selected) {
+        const ctx = this.context;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = selected ? "#67e8f9" : "#94a3b8";
+        ctx.fillStyle = selected ? "rgba(103, 232, 249, 0.22)" : "rgba(148, 163, 184, 0.14)";
+        ctx.lineWidth = 3;
+        if (id === "impulse-coil") {
+            ctx.strokeRect(-18, -12, 22, 24);
+            ctx.beginPath();
+            ctx.moveTo(-13, -7);
+            ctx.lineTo(-2, 0);
+            ctx.lineTo(-13, 7);
+            ctx.moveTo(7, 0);
+            ctx.lineTo(21, 0);
+            ctx.lineTo(15, -6);
+            ctx.moveTo(21, 0);
+            ctx.lineTo(15, 6);
+            ctx.stroke();
+        } else if (id === "relay-link") {
+            ctx.strokeRect(-21, -9, 16, 18);
+            ctx.strokeRect(5, -9, 16, 18);
+            ctx.beginPath();
+            ctx.moveTo(-5, 0);
+            ctx.lineTo(5, 0);
+            ctx.stroke();
+        } else {
+            ctx.beginPath();
+            ctx.arc(0, 0, 10, 0, Math.PI * 2);
+            ctx.moveTo(-22, 16);
+            ctx.lineTo(22, -16);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    drawFoundationHud(foundationId) {
+        if (!foundationId) return;
+        const foundation = foundationAugmentById(foundationId);
+        if (!foundation) return;
+        const ctx = this.context;
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 17, 30, 0.88)";
+        ctx.fillRect(18, 92, 300, 34);
+        ctx.strokeStyle = "rgba(103, 232, 249, 0.58)";
+        ctx.strokeRect(18, 92, 300, 34);
+        ctx.fillStyle = "#67e8f9";
+        ctx.font = "900 11px ui-monospace, monospace";
+        ctx.fillText("FOUNDATION", 32, 113);
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "800 11px ui-monospace, monospace";
+        ctx.fillText(`${foundation.name} · ${foundation.family}`, 116, 113);
         ctx.restore();
     }
 
@@ -216,6 +336,7 @@ export class CanvasRenderer {
         let title;
         let detail;
         let color;
+        let foundationFeedback = false;
         if (eventFlash.type === "artifact" && eventFlash.artifact) {
             title = "아티팩트 획득";
             detail = eventFlash.artifact.name;
@@ -228,25 +349,52 @@ export class CanvasRenderer {
             title = "체크포인트 부활";
             detail = eventFlash.reason === "fall" ? "낙사 · 최대 체력으로 복귀" : "사망 · 최대 체력으로 복귀";
             color = "#67e8f9";
+        } else if (eventFlash.type === "foundation-selected") {
+            const foundation = foundationAugmentById(eventFlash.foundationId);
+            title = "FOUNDATION ONLINE";
+            detail = foundation?.name ?? eventFlash.foundationId;
+            color = "#67e8f9";
+            foundationFeedback = true;
+        } else if (eventFlash.type === "foundation-impulse") {
+            title = "IMPULSE COIL";
+            detail = "RELEASE BURST";
+            color = "#fbbf24";
+            foundationFeedback = true;
+        } else if (eventFlash.type === "foundation-relay-ready") {
+            title = "RELAY LINK";
+            detail = "NEXT ATTACH BUFFERED";
+            color = "#67e8f9";
+            foundationFeedback = true;
+        } else if (eventFlash.type === "foundation-relay-linked") {
+            title = "RELAY LINK";
+            detail = "CHAIN RESTORED";
+            color = "#67e8f9";
+            foundationFeedback = true;
+        } else if (eventFlash.type === "foundation-shear-hit") {
+            title = eventFlash.targetKind === "calibration-dummy" ? "CONTACT REGISTERED" : "SHEAR CURRENT";
+            detail = eventFlash.targetKind === "calibration-dummy" ? "CALIBRATION TRACE VALID" : "ROPE SEGMENT HIT";
+            color = "#a3e635";
+            foundationFeedback = true;
         } else {
             return;
         }
         const ctx = this.context;
         const alpha = Math.min(1, eventFlash.age / 0.15, (2.2 - eventFlash.age) / 0.35);
+        const top = foundationFeedback ? 92 : 18;
         ctx.save();
         ctx.globalAlpha = Math.max(0, alpha);
         ctx.fillStyle = "rgba(7, 11, 20, 0.92)";
-        ctx.fillRect(this.cssWidth * 0.5 - 180, 18, 360, 62);
+        ctx.fillRect(this.cssWidth * 0.5 - 180, top, 360, 62);
         ctx.strokeStyle = color;
         ctx.lineWidth = 3;
-        ctx.strokeRect(this.cssWidth * 0.5 - 180, 18, 360, 62);
+        ctx.strokeRect(this.cssWidth * 0.5 - 180, top, 360, 62);
         ctx.textAlign = "center";
         ctx.fillStyle = color;
         ctx.font = "900 13px system-ui, sans-serif";
-        ctx.fillText(title, this.cssWidth * 0.5, 42);
+        ctx.fillText(title, this.cssWidth * 0.5, top + 24);
         ctx.fillStyle = "#f8fafc";
         ctx.font = "700 12px system-ui, sans-serif";
-        ctx.fillText(detail, this.cssWidth * 0.5, 62);
+        ctx.fillText(detail, this.cssWidth * 0.5, top + 44);
         ctx.restore();
     }
 

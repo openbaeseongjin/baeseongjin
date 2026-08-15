@@ -35,6 +35,7 @@ export function buildAuthoritySnapshot({
             rewardedCheckpointIds: [...simulation.rewardedCheckpointIds],
             artifactReward: simulation.getArtifactReward(simulation.getPrimaryPlayerId()),
             artifactRewards: Object.fromEntries(simulation.artifactRewards),
+            foundationRewards: Object.fromEntries(simulation.foundationRewards),
             runState: simulation.runState,
             metrics: simulation.metrics.snapshot(),
             worldProgress: simulation.worldProgress?.snapshot() ?? null,

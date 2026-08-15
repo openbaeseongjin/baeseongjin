@@ -67,7 +67,7 @@ Camera Zone 없음. Story Trigger 3개 모두 미연결. README §15 제안 문�
 
 ## 7. 증강·Story 연결
 
-Specialization 실제 효과 확정 전이므로 Route Efficiency 검증은 보류 상태 — [2-3 판정](../2-3/PRODUCTION-ALIGNMENT.md)의 `interact-choice` BLOCKED 상태와 연동된다. Story 관련 cueId는 코드에 없으며(순수 환경 밀도로만 전달) README의 "2-5 Evacuation Text 선행 금지" 원칙과 일치한다.
+Specialization 실제 효과 확정 전이므로 Route Efficiency 검증은 보류 상태다. 공용 `interact-choice` 요청은 구현됐지만 [2-3 판정](../2-3/PRODUCTION-ALIGNMENT.md)의 Specialization Catalog·효과·저장 계약이 미확정인 상태와 연동된다. Story 관련 cueId는 코드에 없으며(순수 환경 밀도로만 전달) README의 "2-5 Evacuation Text 선행 금지" 원칙과 일치한다.
 
 ---
 

@@ -1,6 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
+import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 4;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 5;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit"]);
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
@@ -46,6 +47,18 @@ function assertArtifactList(value, label) {
         assertId(artifact.id, `${label}[${index}].id`);
     }
     return value;
+}
+
+function assertFoundationState(foundationId, runtimeState, label) {
+    if (foundationId !== null && !foundationAugmentById(foundationId)) {
+        throw new Error(`${label}.foundationAugment must be null or a known Foundation Augment`);
+    }
+    if (!runtimeState || Array.isArray(runtimeState) || typeof runtimeState !== "object") {
+        throw new Error(`${label}.augmentRuntimeState must be an object`);
+    }
+    assertFinite(runtimeState.relayWindowRemaining, `${label}.augmentRuntimeState.relayWindowRemaining`, {
+        minimum: 0
+    });
 }
 
 function assertSwingDrag(value, label) {
@@ -134,6 +147,7 @@ function normalizeImpactRecoveryState(state) {
     });
     assertFinite(normalized.weapon?.cooldown, "outcome.state.weapon.cooldown", { minimum: 0 });
     assertArtifactList(normalized.artifacts, "outcome.state.artifacts");
+    assertFoundationState(normalized.foundationAugment, normalized.augmentRuntimeState, "outcome.state");
     assertFinite(normalized.ropeDamageBoostRemaining, "outcome.state.ropeDamageBoostRemaining", { minimum: 0 });
     assertArtifactList(normalized.lastCheckpointLoss, "outcome.state.lastCheckpointLoss");
     return normalized;
@@ -183,6 +197,8 @@ function impactStateProjection(state, { impactType, respawned }) {
             cooldownTicks: quantized(state.weapon.cooldown, 1 / 120)
         },
         artifacts: state.artifacts.map(({ id }) => id),
+        foundationAugment: state.foundationAugment,
+        relayWindowTicks: quantized(state.augmentRuntimeState.relayWindowRemaining, 1 / 120),
         ropeDamageBoostTicks: quantized(state.ropeDamageBoostRemaining, 1 / 120),
         lastCheckpointLoss: state.lastCheckpointLoss.map(({ id }) => id)
     };

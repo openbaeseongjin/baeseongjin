@@ -90,6 +90,7 @@ export class OwnerPredictionRuntime {
         this.pendingImpacts = new Map();
         this.nextImpactPredictionOrder = 0;
         this.pendingCheckpoint = null;
+        this.pendingFoundationSelection = null;
         this.appliedPortalEventIds = new Set();
         this.appliedPortalEventIdOrder = [];
         this.simulation.preparePrediction();
@@ -139,6 +140,7 @@ export class OwnerPredictionRuntime {
             : {
                   activeCheckpointId: snapshot.state.activeCheckpointId,
                   artifactReward: snapshot.state.artifactRewards?.[this.ownerId] ?? null,
+                  foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null,
                   rewardedCheckpointIds: snapshot.state.rewardedCheckpointIds ?? []
               };
         this.simulation.preparePrediction(snapshot.state.enemies ?? [], progress.activeCheckpointId);
@@ -158,6 +160,9 @@ export class OwnerPredictionRuntime {
         }
         const sharedOwner = snapshot.state.players.find(({ id }) => id === this.ownerId);
         if (!sharedOwner) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
+        if (sharedOwner.foundationAugment === this.pendingFoundationSelection?.foundationId) {
+            this.pendingFoundationSelection = null;
+        }
         const ownerMotionTick = sharedOwner.ownerMotionTick;
         if (
             !Number.isSafeInteger(ownerMotionTick) ||
@@ -207,7 +212,8 @@ export class OwnerPredictionRuntime {
             if (tick <= ownerMotionTick) this.emittedPredictionTicks.delete(predictionId);
         }
         this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
-            preservePendingImpact: this.pendingImpacts.size > 0
+            preservePendingImpact: this.pendingImpacts.size > 0,
+            preservePendingFoundation: this.pendingFoundationSelection !== null
         });
         return this.state();
     }
@@ -399,7 +405,8 @@ export class OwnerPredictionRuntime {
         const sharedOwner = snapshot?.state?.players?.find(({ id }) => id === this.ownerId);
         if (sharedOwner) {
             this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
-                preservePendingImpact: this.pendingImpacts.size > 0
+                preservePendingImpact: this.pendingImpacts.size > 0,
+                preservePendingFoundation: this.pendingFoundationSelection !== null
             });
         }
         this.startPresentationCorrection(displayedBefore, this.state());
@@ -408,6 +415,44 @@ export class OwnerPredictionRuntime {
 
     artifactReward() {
         return this.simulation.getArtifactReward(this.ownerId);
+    }
+
+    foundationReward() {
+        return this.simulation.getFoundationReward(this.ownerId);
+    }
+
+    applyPredictedFoundationSelection(selection) {
+        if (!this.initialized || this.pendingFoundationSelection) return false;
+        const result = this.simulation.resolveFoundationSelection(this.ownerId, selection, { replicate: false });
+        if (!result.accepted) return false;
+        this.pendingFoundationSelection = Object.freeze({ ...selection });
+        const state = this.state();
+        this.predictedEvents.push(
+            Object.freeze({
+                eventType: "predicted-foundation-selected",
+                predictionId: `${this.ownerId}:foundation-selection:${state.tick}`,
+                tick: state.tick,
+                playerId: this.ownerId,
+                ownerId: this.ownerId,
+                sourceId: selection.sourceId,
+                foundationId: selection.foundationId
+            })
+        );
+        return true;
+    }
+
+    rejectPredictedFoundationSelection(sourceId, snapshot = null) {
+        if (!this.initialized) return false;
+        this.pendingFoundationSelection = null;
+        this.simulation.clearFoundationSelection(this.ownerId);
+        if (snapshot?.state?.worldProgress && this.simulation.worldProgress) {
+            this.simulation.restoreWorldProgress(
+                snapshot.state.worldProgress,
+                snapshot.state.worldElapsedSeconds ?? snapshot.serverTick * this.fixedDt
+            );
+        }
+        const source = this.simulation.world.objects?.find(({ id }) => id === sourceId);
+        return source ? this.simulation.beginFoundationReward(this.ownerId, sourceId, source.objectiveId) : false;
     }
 
     summitClaimCandidate() {
@@ -438,9 +483,26 @@ export class OwnerPredictionRuntime {
         });
     }
 
-    recordPredictedOutcome({ projectile, swingTriggered }, tick, previous) {
+    recordPredictedOutcome({ projectile, swingTriggered, foundationEvents = [] }, tick, previous) {
         if (swingTriggered) this.recordPredictedRopeSwing(tick, previous.ropeDamageBoostRemaining);
+        this.recordPredictedFoundationEvents(foundationEvents, tick);
         this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);
+    }
+
+    recordPredictedFoundationEvents(events, tick) {
+        events.forEach((event, index) => {
+            const suffix = event.eventType.replace(/^foundation-/, "");
+            const predictionKind = suffix === "shear-hit" ? "foundation-shear" : "foundation-effect";
+            this.predictedEvents.push(
+                Object.freeze({
+                    ...event,
+                    eventType: `predicted-foundation-${suffix}`,
+                    predictionId: `${this.ownerId}:${predictionKind}:${tick}:${index}`,
+                    tick,
+                    ownerId: this.ownerId
+                })
+            );
+        });
     }
 
     recordPredictedRopeSwing(tick, previousBoost) {

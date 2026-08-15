@@ -9,6 +9,10 @@ import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "./rewards/ArtifactRewardSelection.js";
+import {
+    advanceFoundationRewardSelection,
+    createFoundationRewardSelection
+} from "./rewards/FoundationRewardSelection.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
@@ -79,6 +83,9 @@ export class MultiplayerGameApp {
         this.localRunCompleted = false;
         this.localArtifactReward = null;
         this.pendingArtifactSelection = null;
+        this.localFoundationReward = null;
+        this.pendingFoundationSelection = null;
+        this.foundationFeedback = null;
         this.runner = new FixedStepRunner({ step: (dt, input) => this.update(dt, input), render: () => this.render() });
         this.tick = (time) => {
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
@@ -120,6 +127,50 @@ export class MultiplayerGameApp {
             if (receipt.accepted || receipt.checkpointId !== this.pendingArtifactSelection?.checkpointId) continue;
             this.pendingArtifactSelection = null;
             this.localArtifactReward = authoritativeReward ? createArtifactRewardSelection(authoritativeReward) : null;
+        }
+    }
+
+    syncFoundationReward(authoritativeReward, selectedFoundationId = null) {
+        if (selectedFoundationId) {
+            this.localFoundationReward = null;
+            this.pendingFoundationSelection = null;
+            return;
+        }
+        if (this.pendingFoundationSelection) return;
+        if (!authoritativeReward) {
+            this.localFoundationReward = null;
+            return;
+        }
+        if (this.localFoundationReward?.sourceId === authoritativeReward.sourceId) return;
+        this.localFoundationReward = createFoundationRewardSelection(authoritativeReward);
+    }
+
+    applyFoundationSelectionReceipts(authoritativeReward) {
+        for (const receipt of this.authority.drainFoundationSelectionReceipts()) {
+            if (receipt.sourceId !== this.pendingFoundationSelection?.sourceId) continue;
+            const pending = this.pendingFoundationSelection;
+            this.pendingFoundationSelection = null;
+            if (receipt.accepted) continue;
+            this.authority.rejectPredictedFoundationSelection(pending.sourceId);
+            this.localFoundationReward = authoritativeReward
+                ? createFoundationRewardSelection(authoritativeReward)
+                : null;
+        }
+    }
+
+    applyFoundationFeedback(events, dt) {
+        const latest = [...events]
+            .reverse()
+            .find(({ eventType }) => eventType?.includes("foundation-") || eventType === "foundation-selected");
+        if (latest) {
+            this.foundationFeedback = {
+                ...latest,
+                type: latest.eventType.replace(/^predicted-/, ""),
+                age: 0
+            };
+        } else if (this.foundationFeedback) {
+            this.foundationFeedback.age += dt;
+            if (this.foundationFeedback.age >= 2.2) this.foundationFeedback = null;
         }
     }
 
@@ -211,7 +262,12 @@ export class MultiplayerGameApp {
         const authoritativeReward = current.state.artifactRewards?.[this.authority.playerId] ?? null;
         this.applyArtifactSelectionReceipts(authoritativeReward);
         this.syncArtifactReward(current.ownerArtifactReward ?? authoritativeReward);
+        const authoritativeFoundationReward =
+            current.ownerFoundationReward ?? current.state.foundationRewards?.[this.authority.playerId] ?? null;
+        this.applyFoundationSelectionReceipts(authoritativeFoundationReward);
+        this.syncFoundationReward(authoritativeFoundationReward, current.owner.foundationAugment);
         const choosingArtifact = Boolean(this.localArtifactReward || this.pendingArtifactSelection);
+        const choosingFoundation = Boolean(this.localFoundationReward || this.pendingFoundationSelection);
         if (this.localArtifactReward) {
             const outcome = advanceArtifactRewardSelection(this.localArtifactReward, command);
             this.localArtifactReward = outcome.selection;
@@ -227,7 +283,29 @@ export class MultiplayerGameApp {
                 }
             }
         }
-        const gameplayCommand = commandForLocalSimulation(command, choosingArtifact);
+        if (this.localFoundationReward) {
+            const outcome = advanceFoundationRewardSelection(this.localFoundationReward, command);
+            this.localFoundationReward = outcome.selection;
+            if (outcome.confirmedFoundationId) {
+                this.pendingFoundationSelection = Object.freeze({
+                    sourceId: this.localFoundationReward.sourceId,
+                    foundationId: outcome.confirmedFoundationId
+                });
+                this.localFoundationReward = null;
+                if (
+                    !this.authority.applyPredictedFoundationSelection(this.pendingFoundationSelection) ||
+                    !this.authority.submitFoundationSelection(this.pendingFoundationSelection)
+                ) {
+                    const sourceId = this.pendingFoundationSelection.sourceId;
+                    this.pendingFoundationSelection = null;
+                    this.authority.rejectPredictedFoundationSelection(sourceId);
+                    this.localFoundationReward = authoritativeFoundationReward
+                        ? createFoundationRewardSelection(authoritativeFoundationReward)
+                        : null;
+                }
+            }
+        }
+        const gameplayCommand = commandForLocalSimulation(command, choosingArtifact || choosingFoundation);
         this.authority.advance(gameplayCommand);
         const checkpointClaim = this.authority.submitReachedCheckpoint();
         if (checkpointClaim) {
@@ -248,10 +326,15 @@ export class MultiplayerGameApp {
         }
         this.authority.resolveOwnerCollisions(current.state.players.filter(({ id }) => id !== this.authority.playerId));
         const predictedEvents = this.authority.drainPredictedEvents();
+        this.applyFoundationFeedback([...events, ...predictedEvents], dt);
+        this.authority.drainFoundationShearReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
         const predictedSwings = predictedEvents.filter(({ eventType }) => eventType === "predicted-rope-swing");
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
         for (const event of predictedSwings) this.authority.submitRopeSwingClaim(event);
+        for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-foundation-shear-hit")) {
+            this.authority.submitFoundationShear(event);
+        }
         this.predictableProjectiles.predict(predictedSpawns);
         for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);
         const predictedPlayer = this.authority.snapshot().owner;
@@ -307,7 +390,7 @@ export class MultiplayerGameApp {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
             currentAreaLocalY: cameraShot.localY,
-            events
+            events: [...events, ...predictedEvents]
         });
         this.audioBindings?.presentFrame({
             scene: this.createAudioContext(
@@ -350,6 +433,7 @@ export class MultiplayerGameApp {
             storyPresentation: this.storyPresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ??
+                this.foundationFeedback ??
                 this.checkpointFeedback ??
                 selectClientStatusFeedback(base.eventFlash, this.authority.playerId),
             otherPlayers,
@@ -361,6 +445,7 @@ export class MultiplayerGameApp {
             ropeDamageBoostRemaining: remote.predicted.ropeDamageBoostRemaining,
             activeCheckpoint,
             artifactReward: this.localArtifactReward,
+            foundationReward: this.localFoundationReward,
             runState: this.localRunCompleted ? "completed" : remote.state.runState,
             maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
             camera: this.camera,

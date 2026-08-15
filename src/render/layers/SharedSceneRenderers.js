@@ -169,7 +169,7 @@ export class AuthoredWorldObjectRenderer {
             const style = this.presentationFor(object);
             return isVisible(viewport, worldObjectWorldBounds(object, style));
         });
-        for (const object of visible) this.drawObject(context, object, scene.worldProgress);
+        for (const object of visible) this.drawObject(context, object, scene);
         const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
         renderStats?.recordCollection("worldObjects", objects.length, visible.length);
         renderStats?.recordCollection("recoveryPoints", recoveryPoints.length, 0);
@@ -179,8 +179,9 @@ export class AuthoredWorldObjectRenderer {
         return worldObjectPresentation(this.presentationCatalog, object.presentationId);
     }
 
-    drawObject(context, object, progress = null) {
+    drawObject(context, object, scene) {
         const style = this.presentationFor(object);
+        const progress = scene.worldProgress;
         const objectiveComplete = object.objectiveId
             ? progress?.completedObjectiveIds?.includes(object.objectiveId)
             : false;
@@ -205,7 +206,9 @@ export class AuthoredWorldObjectRenderer {
             this.drawGate(context, style, bounds, gateUnlocked);
         } else {
             context.translate(bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);
-            if (object.kind === "terminal" || object.kind === "augment-node") {
+            if (object.kind === "augment-node") {
+                this.drawAugmentNode(context, style, bounds, objectiveComplete);
+            } else if (object.kind === "terminal") {
                 const width = style.radius * 1.7;
                 const height = style.radius * 1.25;
                 context.fillRect(-width, -height, width * 2, height * 2);
@@ -218,7 +221,11 @@ export class AuthoredWorldObjectRenderer {
             } else if (object.kind === "wind-source") {
                 this.drawWindSource(context, style);
             } else if (object.kind === "test-target") {
-                this.drawTestTarget(context, style);
+                this.drawTestTarget(context, style, {
+                    contactRegistered:
+                        scene.eventFlash?.type === "foundation-shear-hit" && scene.eventFlash.targetId === object.id,
+                    age: scene.eventFlash?.age ?? 0
+                });
             } else if (object.kind === "story-display") {
                 this.drawStoryDisplay(context, style);
             } else if (object.kind === "maintenance-frame") {
@@ -358,16 +365,100 @@ export class AuthoredWorldObjectRenderer {
         context.fillRect(-4, -4, 8, 8);
     }
 
-    drawTestTarget(context, style) {
-        const radius = style.radius;
-        context.fillRect(-radius * 0.7, -radius, radius * 1.4, radius * 1.75);
-        context.strokeRect(-radius * 0.7, -radius, radius * 1.4, radius * 1.75);
+    drawAugmentNode(context, style, bounds, objectiveComplete) {
+        const width = bounds.width;
+        const height = bounds.height;
+        const left = -width * 0.5;
+        const top = -height * 0.5;
+
+        context.fillStyle = "#111827";
+        context.strokeStyle = objectiveComplete ? "#67e8f9" : style.color;
+        context.lineWidth = objectiveComplete ? 5 : 3;
+        context.fillRect(left, top, width, height);
+        context.strokeRect(left, top, width, height);
+
+        context.fillStyle = "#0b1220";
+        context.fillRect(left + 14, top + 13, width - 28, 39);
+        context.strokeStyle = "rgba(103, 232, 249, 0.72)";
+        context.lineWidth = 2;
+        context.strokeRect(left + 14, top + 13, width - 28, 39);
+        context.fillStyle = objectiveComplete ? "#67e8f9" : "#e9d5ff";
+        context.font = "900 10px ui-monospace, monospace";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(objectiveComplete ? "PROFILE COMMITTED" : "EMERGENCY PROFILES", 0, top + 27);
+        context.fillStyle = "#94a3b8";
+        context.font = "800 8px ui-monospace, monospace";
+        context.fillText("GRAPPLE TELEMETRY LINK", 0, top + 42);
+
+        const slots = [
+            { label: "IMPULSE", color: "#fbbf24" },
+            { label: "RELAY", color: "#67e8f9" },
+            { label: "SHEAR", color: "#a3e635" }
+        ];
+        for (const [index, slot] of slots.entries()) {
+            const slotWidth = 42;
+            const x = -slotWidth * 1.5 - 5 + index * (slotWidth + 5);
+            context.fillStyle = `${slot.color}22`;
+            context.fillRect(x, top + 62, slotWidth, 30);
+            context.strokeStyle = slot.color;
+            context.lineWidth = 2;
+            context.strokeRect(x, top + 62, slotWidth, 30);
+            context.fillStyle = slot.color;
+            context.font = "900 7px ui-monospace, monospace";
+            context.fillText(slot.label, x + slotWidth * 0.5, top + 78);
+        }
+
+        context.strokeStyle = "#475569";
+        context.lineWidth = 5;
         context.beginPath();
-        context.moveTo(-radius * 0.55, -radius * 0.45);
-        context.lineTo(radius * 0.55, radius * 0.45);
-        context.moveTo(radius * 0.55, -radius * 0.45);
-        context.lineTo(-radius * 0.55, radius * 0.45);
+        context.moveTo(left + 18, height * 0.5);
+        context.lineTo(left + 8, height * 0.72);
+        context.moveTo(-left - 18, height * 0.5);
+        context.lineTo(-left - 8, height * 0.72);
         context.stroke();
+        context.fillStyle = objectiveComplete ? "#67e8f9" : "#fbbf24";
+        context.fillRect(-5, top + 101, 10, 7);
+    }
+
+    drawTestTarget(context, style, { contactRegistered = false, age = 0 } = {}) {
+        const radius = style.radius;
+        context.fillStyle = contactRegistered ? "rgba(163, 230, 53, 0.42)" : "#111827";
+        context.strokeStyle = contactRegistered ? "#f8fafc" : style.color;
+        context.lineWidth = contactRegistered ? 5 : 3;
+        context.beginPath();
+        context.arc(0, -radius * 0.65, radius * 0.28, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.fillRect(-radius * 0.48, -radius * 0.3, radius * 0.96, radius * 1.2);
+        context.strokeRect(-radius * 0.48, -radius * 0.3, radius * 0.96, radius * 1.2);
+        context.beginPath();
+        context.moveTo(-radius * 0.95, 0);
+        context.lineTo(-radius * 0.48, radius * 0.15);
+        context.moveTo(radius * 0.95, 0);
+        context.lineTo(radius * 0.48, radius * 0.15);
+        context.moveTo(-radius * 0.3, radius * 0.9);
+        context.lineTo(-radius * 0.42, radius * 1.35);
+        context.moveTo(radius * 0.3, radius * 0.9);
+        context.lineTo(radius * 0.42, radius * 1.35);
+        context.stroke();
+        context.fillStyle = style.color;
+        context.font = "900 7px ui-monospace, monospace";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText("CAL", 0, radius * 0.27);
+
+        if (!contactRegistered) return;
+        const sparkRadius = radius * (1.15 + Math.min(0.6, age * 2));
+        context.strokeStyle = "#fef08a";
+        context.lineWidth = 3;
+        for (let index = 0; index < 8; index += 1) {
+            const angle = (Math.PI * 2 * index) / 8;
+            context.beginPath();
+            context.moveTo(Math.cos(angle) * sparkRadius * 0.62, Math.sin(angle) * sparkRadius * 0.62);
+            context.lineTo(Math.cos(angle) * sparkRadius, Math.sin(angle) * sparkRadius);
+            context.stroke();
+        }
     }
 
     drawStoryDisplay(context, style) {

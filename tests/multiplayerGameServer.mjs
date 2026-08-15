@@ -5,6 +5,10 @@ import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { deserializeCommandReceipt } from "../src/game/network/CommandReceipt.js";
+import {
+    createFoundationSelectionClaim,
+    serializeFoundationSelectionClaim
+} from "../src/game/network/FoundationSelectionClaim.js";
 import { serializePlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { deserializeWorldSnapshotEnvelope } from "../src/game/network/WorldSnapshotEnvelope.js";
 import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
@@ -123,6 +127,33 @@ export async function run() {
     assert.equal(receipt.accepted[0].playerId, firstWelcome.playerId);
     const snapshot = deserializeWorldSnapshotEnvelope((await nextMessage(first, "snapshot")).payload);
     assert.ok(snapshot.serverTick > initial.serverTick);
+
+    multiplayer.stopClock(sharedRoom);
+    for (const area of sharedRoom.simulation.world.areas.slice(0, 3)) {
+        for (const objectiveId of area.objectiveIds) sharedRoom.simulation.worldProgress.completeObjective(objectiveId);
+        sharedRoom.simulation.worldProgress.crossGate(area.gateId);
+    }
+    sharedRoom.simulation.restoreWorldProgress(sharedRoom.simulation.worldProgress.snapshot());
+    const foundationPlayer = sharedRoom.simulation.players.find(({ id }) => id === firstWelcome.playerId);
+    const foundationNode = sharedRoom.simulation.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    foundationPlayer.physics.position.set(foundationNode.position.x, foundationNode.position.y);
+    sharedRoom.simulation.beginFoundationReward(foundationPlayer.id, foundationNode.id, foundationNode.objectiveId);
+    first.send(
+        JSON.stringify({
+            type: "foundation-selection",
+            payload: serializeFoundationSelectionClaim(
+                createFoundationSelectionClaim({
+                    sourceId: foundationNode.id,
+                    foundationId: "impulse-coil",
+                    clientTick: sharedRoom.simulation.getTick()
+                })
+            )
+        })
+    );
+    const foundationReceipt = (await nextMessage(first, "foundation-selection-receipt")).payload;
+    assert.equal(foundationReceipt.accepted, true);
+    assert.equal(sharedRoom.simulation.playerState(firstWelcome.playerId).foundationAugment, "impulse-coil");
+    multiplayer.startClock(sharedRoom);
 
     const { socket: third, message: roomFull } = await connectFor(url, "error");
     assert.equal(roomFull.code, "channel-full");

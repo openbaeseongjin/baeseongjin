@@ -1,8 +1,8 @@
 # SECTOR 01-4 — PRODUCTION ALIGNMENT
 
-*FOUNDATION CHOICE · CALIBRATION · STORY HANDOFF · REV 1.0*
+*FOUNDATION CHOICE · CALIBRATION · STORY HANDOFF · REV 1.1*
 
-본 문서는 [1-4 시나리오](./README.md) REV 3.1을 현재 Runtime과 연결하는 제작 계약이다. 1-4는 첫 Foundation Augment의 설계 기준은 확정됐지만 선택·저장·효과 Runtime은 아직 완성되지 않았다. 문서에 존재하는 것과 실제 플레이 가능한 것을 구분한다.
+본 문서는 [1-4 시나리오](./README.md) REV 3.1을 현재 Runtime과 연결하는 제작 계약이다. 1-4의 첫 Foundation Augment 선택·저장·효과·개인별 멀티 동기화는 구현됐으며, 수치와 정식 표현 자산은 플레이테스트로 조정할 Prototype이다.
 
 ## 1. 현재 판정
 
@@ -11,16 +11,16 @@
 | 768×640 Geometry | `IMPLEMENTED` | Node Deck, A→B→C, P1/P2 Recovery, Final Deck, Gate가 Area Catalog에 존재 |
 | Maintenance Node 위치 | `IMPLEMENTED ALIGNMENT` | `(0,-160)` bottom-center로 Node Deck에 정렬, Interaction Radius 80 |
 | Camera Zones | `IMPLEMENTED PROTOTYPE` | 문자열 Placeholder를 실제 Entry/Node/Calibration/Exit Shot 데이터로 교체 |
-| 3개 고정 Choice 데이터 | `AUTHORED ONLY` | `impulse-coil`, `relay-link`, `shear-current` 목록은 있으나 선택 UI로 연결되지 않음 |
-| `interact-choice` 진행 | `BLOCKED` | 현재 `WorldProgressController`는 `reach`, `interact`만 처리하므로 `augment-selected` 완료 불가 |
-| Foundation 저장·효과 | `PENDING` | Player 상태, 네트워크 복제, Impulse/Relay/Shear 효과 코드 없음 |
-| Node Story Presentation | `PENDING` | Story Trigger 이름은 있으나 1-4 화면 문구·Objective Event binding 없음 |
-| Calibration Dummy Feedback | `PENDING` | 비공격 Mock Object만 있고 Shear 판정·Spark·Diagnostic Feedback 없음 |
+| 3개 고정 Choice 데이터 | `IMPLEMENTED` | 세 카드를 동시에 표시하고 좌우·기존 점프 Confirm·진입 Input Gate를 공용 Reward Selection으로 처리 |
+| `interact-choice` 진행 | `IMPLEMENTED` | Node 상호작용은 개인 chooser를 열고 첫 확정이 공유 `augment-selected`를 완료해 Exit Panel을 활성화 |
+| Foundation 저장·효과 | `IMPLEMENTED PROTOTYPE` | Player별 상태·snapshot·claim과 Release/Attach 기반 Impulse·Relay·Shear 효과 구현 |
+| Node Story Presentation | `IMPLEMENTED` | 진입·Node Scan·선택 확정 사건을 계약 문구에 연결 |
+| Calibration Dummy Feedback | `IMPLEMENTED PROTOTYPE` | Shear Release 교차를 한 번 판정하고 Spark·`CONTACT REGISTERED`를 표시 |
 | `01_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | Reward Room·Node·세 Profile 위계만 참고; Player 크기와 Anchor 연결 의미를 통일해 교체 |
 | `02_approved_blockout.svg` | `APPROVED BLOCKOUT` | 현재 좌표, 통과 경로, Node, Dummy, Gate의 제작 기준 |
 | 기본 `swingImpulse = 780` 이동 | `HYPOTHESIS` | 1-1·1-2 A/B/C 검증 전 Impulse 전용으로 이전 금지 |
 
-현재 가장 중요한 사실은 선택 목록이 데이터에 있다는 이유만으로 증강이 구현됐다고 판정하면 안 된다는 것이다. 선택 Runtime이 연결되기 전에는 Gate 요구 조건도 완료되지 않아 정상적인 1-5 진입이 불가능하다.
+Foundation 확정은 Calibration 성공 여부와 분리된다. 첫 개인 선택이 공용 Objective를 완료한 뒤 Exit Panel을 조작할 수 있고, Calibration Dummy는 효과 확인용일 뿐 Gate Key가 아니다. 두 번째 플레이어도 같은 Node에서 자기 선택을 별도로 확정하며 먼저 선택한 값을 복사하지 않는다.
 
 ## 2. 문서 이미지와 자료 우선순위
 
@@ -83,7 +83,7 @@ Artifact Overlay의 카드 배치와 Input Gate는 재사용할 수 있지만 `c
 | Relay Link | Chaining / Rhythm | Release 뒤 짧은 Window, 다음 Attach 한 번의 Buffer·Aim 허용도만 확대 | 상시 Auto Aim, 자동 Anchor 선택, 과도한 Rope 거리 증가 |
 | Shear Current | Geometry / Offense | Release 순간 Anchor–Player Segment와 Enemy Body 교차를 한 번 판정 | 매 Frame 전수 충돌, Projectile/Wall/Prop 절단, 자동 Swing Damage |
 
-첫 Prototype 후보는 Relay Window `0.50/0.65/0.80초`, Attach Buffer `100ms → 160ms`, Aim Tolerance `90 → 108`이다. 이는 `PROTOTYPE`이며 1-2 기준 성공률을 측정한 뒤 조정한다.
+현재 Prototype은 Impulse 추가 Release 추진력 `180`, Relay Window `0.65초`, Attach Buffer `100ms → 160ms`, Aim Tolerance `90 → 108`, Shear Damage `20`을 사용한다. 이는 `PROTOTYPE`이며 1-2·1-5 기준 성공률과 전투 시간을 측정한 뒤 조정한다.
 
 Impulse의 현재 `swingImpulse = 780` 소유권은 `HYPOTHESIS`다. 현재값·중간값·0의 A/B/C에서 1-1과 1-2의 기본 Rope가 재미와 통과 가능성을 유지한다는 증거 없이 Foundation으로 이전하지 않는다.
 

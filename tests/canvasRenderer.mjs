@@ -9,12 +9,16 @@ export function run() {
         save() {},
         restore() {},
         fillRect() {},
+        translate() {},
+        moveTo() {},
+        lineTo() {},
         beginPath() {},
         arc() {},
         fill() {},
         stroke() {},
         fillText: (text) => textCalls.push(text),
-        strokeRect: (...args) => borderCalls.push(args)
+        strokeRect: (...args) => borderCalls.push(args),
+        measureText: (text) => ({ width: String(text).length * 6 })
     };
     const canvas = {
         getContext: () => context,
@@ -111,6 +115,13 @@ export function run() {
     renderer.drawArtifactFeedback({ type: "checkpoint-respawn", reason: "fall", age: 0.4 });
     assert.deepEqual(textCalls, ["체크포인트 부활", "낙사 · 최대 체력으로 복귀"]);
     textCalls.length = 0;
+    renderer.drawArtifactFeedback({
+        type: "foundation-shear-hit",
+        targetKind: "calibration-dummy",
+        age: 0.4
+    });
+    assert.deepEqual(textCalls, ["CONTACT REGISTERED", "CALIBRATION TRACE VALID"]);
+    textCalls.length = 0;
     renderer.drawStoryPresentation({
         title: "VERTICAL GRID",
         detail: "CASCADE FAILURE",
@@ -139,6 +150,39 @@ export function run() {
         "스윙 강화",
         "선택 중에도 전투 진행 · 빠르게 결정하세요"
     ]);
+    textCalls.length = 0;
+    renderer.drawRewardSelectionOverlay({
+        rewardType: "foundation",
+        selectedIndex: 1,
+        choices: [
+            {
+                id: "impulse-coil",
+                name: "IMPULSE COIL",
+                family: "MOMENTUM",
+                tagline: "POWER THE SWING",
+                description: "스윙 타이밍으로 강한 해제 추진력을 얻습니다."
+            },
+            {
+                id: "relay-link",
+                name: "RELAY LINK",
+                family: "CHAINING",
+                tagline: "KEEP THE CHAIN ALIVE",
+                description: "해제 직후 다음 로프 연결을 한 번 보조합니다."
+            },
+            {
+                id: "shear-current",
+                name: "SHEAR CURRENT",
+                family: "OFFENSE",
+                tagline: "TURN THE ROPE INTO A BLADE",
+                description: "적을 가로지른 로프를 놓아 절단 피해를 줍니다."
+            }
+        ]
+    });
+    assert.ok(textCalls.includes("EMERGENCY GRAPPLE RECONFIGURATION"));
+    assert.ok(textCalls.includes("IMPULSE COIL"));
+    assert.ok(textCalls.includes("RELAY LINK"));
+    assert.ok(textCalls.includes("SHEAR CURRENT"));
+    assert.ok(textCalls.includes("개인 장비만 정지 · 다른 플레이어와 월드는 계속 진행"));
     textCalls.length = 0;
     borderCalls.length = 0;
     renderer.drawRopeCutFeedback({ type: "rope-cut", age: 0.2 }, 0.4);

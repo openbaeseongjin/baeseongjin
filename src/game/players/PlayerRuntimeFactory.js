@@ -1,4 +1,5 @@
 import { ArtifactInventory } from "../artifacts/ArtifactInventory.js";
+import { FoundationAugmentState } from "../augments/FoundationAugmentState.js";
 import { AutomaticWeaponObject } from "../combat/AutomaticWeaponObject.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { CircleCollider } from "../physics/colliders/CircleCollider.js";
@@ -24,6 +25,7 @@ export function createPlayerRuntime({
     if (spawn) physics.reset(spawn);
     const rope = new FixedLengthRope(ropeConfig);
     const artifacts = new ArtifactInventory(artifactConfig);
+    const foundation = new FoundationAugmentState();
     const ropeObject = new RopeObject({ id: `${id}:rope`, ownerId: id, rope });
     const weapon = new AutomaticWeaponObject({ id: `${id}:weapon`, ownerId: id, config: combatConfig });
     const entity = new PlayerObject({
@@ -31,9 +33,20 @@ export function createPlayerRuntime({
         physics,
         ropeObject,
         artifacts,
+        foundation,
         weapon,
         combatConfig
     });
     const inputDrivenObjects = Object.freeze([entity, ropeObject]);
-    return Object.freeze({ collider, physics, rope, ropeObject, artifacts, weapon, entity, inputDrivenObjects });
+    return Object.freeze({
+        collider,
+        physics,
+        rope,
+        ropeObject,
+        artifacts,
+        foundation,
+        weapon,
+        entity,
+        inputDrivenObjects
+    });
 }

@@ -39,6 +39,8 @@ export function createDeterminismDigest(state) {
         runState: state.runState,
         activeCheckpointId: state.activeCheckpoint?.id ?? null,
         artifacts: Object.freeze(state.artifacts.map((artifact) => artifact.id)),
+        foundationAugment: state.foundationAugment,
+        augmentRuntimeState: Object.freeze({ ...state.augmentRuntimeState }),
         rewardedCheckpointIds: Object.freeze([...state.rewardedCheckpointIds]),
         enemies: Object.freeze(
             state.enemies
