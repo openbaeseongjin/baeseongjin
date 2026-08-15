@@ -156,7 +156,7 @@ export function windBladePhase(zone, elapsedSeconds) {
 export function windOccludingSurfaces(surfaces) {
     return Object.freeze(
         (surfaces ?? []).filter(
-            (surface) => surface.windOcclusion === true || (surface.collision !== false && surface.oneWay === false)
+            (surface) => surface.windOcclusion === true || (surface.collision !== false && surface.oneWay !== true)
         )
     );
 }

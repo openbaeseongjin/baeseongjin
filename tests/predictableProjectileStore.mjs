@@ -109,7 +109,7 @@ export function run() {
         spawnTick: 10,
         position: { x: 12, y: -40 },
         velocity: { x: 0, y: 0 },
-        parameters: { radius: 7, damage: 20, ownerId: "enemy-1", targetId: "player-1" }
+        parameters: { radius: 7, damage: 20, ownerId: "enemy-1", targetId: "player-1", canCutRope: true }
     });
     ropeCutStore.apply([ropeCutSpawn], 10, { enemies: [] });
     const predictedRopeCut = ropeCutStore.update(0, {

@@ -17,6 +17,7 @@ import {
     remoteShots
 } from "./layers/SharedSceneRenderers.js";
 import {
+    SpriteCutterProjectileRenderer,
     SpriteEnemyRenderer,
     SpriteLocalPlayerRenderer,
     SpriteProjectileRenderer,
@@ -90,11 +91,17 @@ export class SpriteSceneRenderer {
                 category: "playerProjectiles"
             }),
             new SpriteProjectileRenderer({
-                selectProjectiles: (scene) => scene.enemyProjectiles ?? [],
+                selectProjectiles: (scene) =>
+                    (scene.enemyProjectiles ?? []).filter((projectile) => !projectile.canCutRope),
                 sprite: enemyProjectileSprite,
-                palette: { a: "#881337", b: "#f43f5e", c: "#fecdd3" },
+                palette: { a: "#881337", b: "#fb7185", c: "#fecdd3" },
                 size: { width: 14, height: 14 },
                 category: "enemyProjectiles"
+            }),
+            new SpriteCutterProjectileRenderer({
+                selectProjectiles: (scene) =>
+                    (scene.enemyProjectiles ?? []).filter((projectile) => projectile.canCutRope),
+                category: "cutterProjectiles"
             }),
             new CombatEffectRenderer(),
             new EventEffectRenderer(),

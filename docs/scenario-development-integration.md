@@ -4,7 +4,7 @@
 
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 2bfaadcfe2e9be1e22a2b363fd52e7aea7928bfb5d3dda26a7e4dadbdb1cba8e
-authored-area-sha256: 0c0931383de9d586a56c577f93f48b975a6b20d7c532e2d41ebc59ca9ea168fc
+authored-area-sha256: e217dda1b1d4f8d383b4e57643416eabd623bbddab71176f65b251b3d9858f2a
 stage-count: 32
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8
 reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
@@ -40,7 +40,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 | Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증; #507이 Wind·Story·2-3 진행을 보강 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요; Camera Zone·남은 Position Story Trigger는 [구현 준비 문서](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) 작성 완료, 코드 반영 대기 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 남은 Story Presentation 공백 3건은 [구현 준비 문서](./bsh/scenario/2/STORY-IMPLEMENTATION-HANDOFF.md) 작성 완료, 코드 반영 대기; 2-3 Specialization 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 전부 `NOT CONNECTED`; 3-1 순수 geometry는 `GRAYBOX READY` | Access Scan Field, Sector 03 catalog·Camera Zone·Stable ID·Story trigger, Sector 종료 전환 필요 |
-| Sector 04 / 4-1~4-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | 전부 `NOT CONNECTED`; 4-1 순수 geometry만 `GRAYBOX READY` | Post-Sector 03 Boss→4-1 전환, Sector 04 catalog·Camera·Stable ID가 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증; Master의 상세 문서 범위 문구 재정렬 필요 |
+| Sector 04 / 4-1~4-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | 4-1은 standalone catalog로 `GRAYBOX READY`(#513); 4-2~4-8은 `NOT CONNECTED` | Post-Sector 03 Boss→4-1 전환, Sector 04 catalog·Camera·Stable ID가 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증; Master의 상세 문서 범위 문구 재정렬 필요 |
 | Sector 05~06 | 상세 Stage 없음 | `NOT CONNECTED` | NPC 역할·대화 계약과 엔딩·최종 전환 계약 필요 |
 
 ## 최근 반영된 시나리오 변화
@@ -60,6 +60,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 13. #509는 1-5~1-8의 문자열 Camera Zone placeholder와 #507이 다루지 않은 Position Story Trigger를 실제 좌표·문구로 구현하기 위한 [인계 문서](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)를 추가했다. 코드 반영은 별도 작업이며 Sector 02 Camera는 이름 목록도 없어 범위에서 제외했다.
 14. #510은 4-3·4-5·4-7·4-8의 Transit Wake 설명을 현재 Wind Shadow·Grounded Attenuation 기준에 맞췄다. Sector 04 Runtime은 아직 연결되지 않았으므로 문서 계약 정렬로만 기록한다.
 15. #511은 Sector 02의 빈 Camera Zone이 의도된 Geometry 해결임을 확인하고, 실제 Story Presentation 공백 3건을 [구현 준비 문서](./bsh/scenario/2/STORY-IMPLEMENTATION-HANDOFF.md)에 정리했다. 코드 반영은 별도 작업이다.
+16. #513은 Sector 04 Runtime을 시작했다. Cutter Fire를 `cutter-fire` opt-in 규칙으로 강화(기본은 rope-cut 없음)하고 조준선·투사체를 일반 Sentry와 구분했으며, 4-1 `TRANSIT INTAKE`를 standalone `Sector04AreaCatalog`(A1~A6·P0/R1/R2/M1/R3/P4/P5·camera zone·content-boundary gate)로 구현해 validator·조립 테스트를 통과시켰다. 현재 1-1→2-8 월드에는 연결하지 않는다.
 
 ## 열린 기획·구현 게이트
 

@@ -162,7 +162,7 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
                     velocity: direction,
                     radius: config.enemyProjectileRadius,
                     damage: config.enemyProjectileDamage,
-                    canCutRope: !this.rules.includes("no-rope-cut")
+                    canCutRope: this.rules.includes("cutter-fire")
                 });
                 projectiles.push(spawnedProjectile);
                 this.fireCooldown = config.enemyFireInterval;
