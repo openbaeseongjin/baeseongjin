@@ -120,3 +120,4 @@
 | [`bsh/scenario/4/README.md`](./bsh/scenario/4/README.md) | `bsh` Sector 04 Transit/Infrastructure 마스터플랜(첫 Canonical 후보) — Cutter Fire·Transit Wake(기존 Wind 재사용)·Moving Platform Tech-Spike-Only |
 | [`bsh/scenario/4/4-1/README.md`](./bsh/scenario/4/4-1/README.md) | `bsh` Sector 04 첫 Stage(4-1) Blockout 후보·제작 규격 — Enemy/Threat 없는 순수 Speed Space Reveal, Post-Sector 03 Entry 연결 미확정 명시. **Rope Max 440→400 Runtime 변경 후 재검증 필요(Flow Route 408.9px가 새 한계 초과)** |
 | [`bsh/scenario/4/4-2/README.md`](./bsh/scenario/4/4-2/README.md) | `bsh` 첫 Rope-Cut(Cutter Fire) Tutorial Stage(4-2) Blockout 후보·제작 규격, REV 1.1 — Hook Flight/Combat Rebalance Runtime 재정렬 반영 |
+| [`bsh/scenario/4/4-3/README.md`](./bsh/scenario/4/4-3/README.md) | `bsh` 첫 Cutter+Transit Wake 결합 Stage(4-3) Blockout 후보·제작 규격, Hook Flight/Foundation Runtime 기준 작성·좌표 검증 완료 |
