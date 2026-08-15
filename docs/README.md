@@ -24,6 +24,7 @@
 | [`scenario-development-integration.md`](./scenario-development-integration.md) | 상세 Stage 목록, authored Runtime 연결 상태, 차단 요소와 마지막 확인 근거 |
 | [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md) | 하나의 연속 월드 안에서 Sector 01 진행 영역을 연결하는 기획·구현 계획 |
 | [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 일반 타이머·상승 붕괴·최소 관전·보스 타이머 전환 기준 |
+| [`design-decision-requests.md`](./design-decision-requests.md) | 개발이 준비됐고 기획 결정만 기다리는 항목의 우선순위 요청·답변 추적 |
 | [`decision-history.md`](./decision-history.md) | 대체되거나 완료된 결정 이력 |
 
 ## 아키텍처와 개발 규칙

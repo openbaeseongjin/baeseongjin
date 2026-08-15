@@ -30,10 +30,10 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 
 - 확인 기준 upstream: `6af1a4306012c2646327bc87247dd996e8df2362` (`origin/main`, Sector 04 Wind 정렬과 Sector 02 Story 구현 인계 문서 병합 뒤 clean base)
 - 상세 Stage 문서: **32개**, `1-1`부터 `4-8`까지
-- 현재 authored Runtime: **16개**, `1-1 → 2-8`
+- 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-4` standalone)
 - 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1~4-8·#510 Wind 문구 정렬, `CurrentAuthoredAreaCatalog.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
-- 확인하지 못한 항목: Sector 03·04 Runtime과 실제 플레이테스트. 두 Sector는 현재 catalog에 없으므로 완료로 표시하지 않는다.
+- 확인하지 못한 항목: 실제 브라우저·기기 플레이테스트. 모든 영역은 `MOCK INTEGRATED`이며 `PLAYTEST VERIFIED`는 아직 없다.
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
@@ -70,15 +70,16 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 
 ## 열린 기획·구현 게이트
 
-1. Sector 02 Boss와 `2-8 → 3-1` 전환 위치·흐름
-2. Sector 03 authored catalog, Camera Zone, Stable ID, Story trigger와 3-1~3-8 연결 (Access Scan Field 런타임은 구현됨)
-3. Sector 03 authored catalog, Camera Zone, Stable ID, Story trigger와 3-1~3-8 연결
-4. Post-Sector 03 Boss와 `3-8 → 4-1` 전환
-5. 2-3 Specialization의 실제 이름·효과·수치·선택 pool
-6. Sector 04 Master의 `4-2~4-8 outline only` 상태 문구를 현재 4-1~4-8 상세 문서 범위와 재정렬
-7. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
-8. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
-9. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
+1. Sector 02 Boss 위치·전투 시나리오와 `2-8 → 3-1` 전환 흐름
+2. Post-Sector 03 Boss와 `3-8 → 4-1` 전환
+3. Sector 03·04 Camera Zone과 Story trigger 코드 반영
+4. 2-3 Specialization의 실제 이름·효과·수치·선택 pool
+5. Sector 04 Master의 `4-2~4-8 outline only` 상태 문구를 현재 4-1~4-8 상세 문서 범위와 재정렬
+6. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
+7. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
+8. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
+
+개발이 준비됐고 기획 결정만 기다리는 항목의 우선순위 요청과 답변 작성란은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다.
 
 이 항목은 문서가 추가됐다는 이유만으로 닫지 않는다. 사용자 결정, 구현 diff와 검증 증거 중 해당 게이트를 실제로 해소한 근거가 있어야 한다.
 
