@@ -43,6 +43,8 @@
 | [1-7](./1-7/README.md) · [제작 정렬](./1-7/PRODUCTION-ALIGNMENT.md) | PRESSURE BYPASS | Rope·Build·Wind·Sentry 조합 · Camera/Story 미구현 명시 |
 | [1-8](./1-8/README.md) · [제작 정렬](./1-8/PRODUCTION-ALIGNMENT.md) | CONTAINMENT GATE | 일반 구간 최종 종합·전환 · Camera/Story 미구현 명시 |
 
+1-5~1-8의 Camera Zone·Story Trigger는 [Camera/Story Implementation Handoff](./CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)에 붙여넣기 가능한 형태로 정리되어 있다(코드 반영은 별도 구현 담당).
+
 1-1~1-3은 증강 없는 기본 Rope와 Telemetry 축적 구간, 1-4는 첫 Foundation Augment 선택, 1-5~1-8은 같은 공간을 선택한 증강에 따라 다르게 해석하는 검증 구간이다. Checkpoint는 진행 저장과 개인 부활만 소유하며 Foundation 선택은 authored Node에서 연다.
 
 ## 자산 상태

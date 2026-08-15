@@ -37,7 +37,7 @@ reviewed-upstream: c19a372571a68d438ac959651d1f4d670a0c0b3b
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
-| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증 | 1-1 C04·1-2 C02·1-4 Node Scenario Art 구조 정합 완료; 1-3 재생성과 실제 Build 플레이 수치 검증 필요 |
+| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증 | 1-1 C04·1-2 C02·1-4 Node Scenario Art 구조 정합 완료; 1-3 재생성과 실제 Build 플레이 수치 검증 필요; 1-5~1-8 Camera Zone·(#507 미커버) Story Trigger는 [구현 준비 문서](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) 작성 완료, 코드 반영 대기 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED` | 2-3 Specialization의 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 전부 `NOT CONNECTED`; 3-1 순수 geometry는 `GRAYBOX READY` | Access Scan Field, Sector 03 catalog·Camera Zone·Stable ID·Story trigger, Sector 종료 전환 필요 |
 | Sector 04 / 4-1~4-7 | Master와 7개 상세 Stage, `CROSS-REVIEWED` | 전부 `NOT CONNECTED`; 4-1 순수 geometry만 `GRAYBOX READY` | Post-Sector 03 Boss→4-1 전환, Sector 04 catalog·Camera·Stable ID가 먼저이며 4-2 Cutter·4-3/4-5 Wake는 Runtime prototype 뒤 검증 |
@@ -56,6 +56,8 @@ reviewed-upstream: c19a372571a68d438ac959651d1f4d670a0c0b3b
 8. `2/2-2`·`2/2-4`·`2/2-5`·`2/2-7`·`2/2-8`·`3/3-3`·`3/3-4`·`3/3-6`·`3/3-7`·`3/3-8`의 `README.md`가 #489 이전 Sentry 수치(Health 30·Attack Range 520·Fire Interval 1.4 sec·Projectile Speed 260)를 그대로 인용하고 있어 `src/game/config.js`의 `COMBAT_CONFIG`(Health 100·Attack Range 760·Fire Interval 1.0 sec·Projectile Speed 520) 기준으로 정정했다(2-8과 3-6은 각각 두 곳씩 중복 인용돼 있었음). Rope 부착 440→400 표현은 이번 정밀 재검색에서 corpus 전체에 stale citation이 없음을 확인했다.
 9. 1-6의 Wind 구현 누락을 정리하면서 authored area를 갱신했다. 1-6·1-7·1-8 wind zone에 경계 falloff 80px를 추가하고, 1-6에 Fan B 풍향을 가리는 `sector-01-06:cooling-core-column`(solid, windOcclusion, grappleable false)을 추가해 Wind Shadow 개념을 연결했다. 바람 강도를 체감이 유의미하도록 Fan A 500·Fan B 800·1-7 residual 220·주 Vent 800으로 상향했고, 지형·완료 조건·Gate·Anchor 좌표는 변경하지 않았다.
 10. 2-3 `specialization-node`가 `interact-choice`+TBD pool이라 아무 반응 없이 Exit Panel이 영원히 잠겨 진행이 막혔다. pool이 미정인 동안 node flow만 유지하도록 objective를 `interact` placeholder로 바꿔 상호작용 시 `specialization-selected`가 완료되고 진행이 열리게 했다. `selectionPool: "TBD"`·`requiresFoundation` 데이터는 유지하며 실제 Specialization 성장 규칙은 확정하지 않는다.
+11. (#500) `2/2-2`~`3/3-8`의 남은 Sentry 수치 인용을 정정한 뒤, 1-3의 Sentry만 `rules`에 `cover-ends-los`를 가진 이유를 `EnemyObject.js`·`Sector01AreaCatalog.js` 직접 대조로 확인했다 — 버그가 아니라, 실제로 작동하는 Cover-LOS raycast 기능(`hasLineOfSight`)을 1-3만 opt-in으로 쓰는 것이며 1-5·1-7의 `kind: "cover"` 표면은 애초에 그 area에 적이 없어 LOS 차단과 무관하다. 다른 Sector의 "Sentry는 activation band만 쓴다"는 서술과 모순이 없다.
+12. 1-5~1-8의 `cameraZones`(문자열 placeholder)와 `AuthoredStoryPresentation.js`의 Story Trigger(작성 시점 0건 연결)를 실제 좌표·문구로 옮겨 붙일 수 있는 형태로 정리해 [1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)에 작성했다. 코드 반영은 아직 하지 않았다(문서만 준비, 구현은 별도 진행). 작성 도중 #507이 먼저 머지되어 1-5~1-8의 `ENTRY`/`OBJECTIVE`/`GATE_PRESENTATIONS`를 이미 구현한 것을 확인해 문서 Part 2는 그와 겹치지 않는 `POSITION_PRESENTATIONS`만 남겼다(`cameraZones`는 #507도 다루지 않아 Part 1은 그대로 유효). Sector 02(2-1~2-8)는 `cameraZones` 이름 목록조차 없어 Camera는 범위에서 제외했고, Story도 #507이 일부(`2-1·2-2·2-3·2-4·2-5·2-7·2-8`) 구현했으니 다음 단계에서 재확인이 필요하다.
 
 ## 열린 기획·구현 게이트
 

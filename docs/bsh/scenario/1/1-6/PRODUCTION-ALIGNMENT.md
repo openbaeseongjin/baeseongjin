@@ -117,8 +117,8 @@ README는 Wind Shadow(§28)와 Grounded 감쇠(§59)를 명시적으로 요구�
 | 지형·Anchor·Gate | Runtime Mock 연결 완료 | R2·Neutral Deck 좌표를 README와 같은 변경에서 정리 |
 | Wind 핵심 물리 | 구현 완료, 설계 범위 안 수치로 확정 | Wind Shadow·Grounded 감쇠 추가 여부 결정 |
 | Approved Blockout | 없음 | 이 문서 §3 기준 SVG 제작 필요 |
-| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체(§4 제안값 기준) |
-| Story | 문자열 placeholder만 존재 | `AuthoredStoryPresentation.js`에 3개 트리거 연결. `bypass-required`는 1-7 Entry 문구와 함께 검토 |
+| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 1 참고(§4 제안값은 그 문서로 대체됨) |
+| Story | 문자열 placeholder만 존재 | `AuthoredStoryPresentation.js`에 3개 트리거 연결 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 2 참고. `bypass-required`는 1-7 Entry 문구와 함께 검토 |
 | 오브젝트 그래픽 | Mock Shape(Fan은 `background-prop`/`wind-source` kind) | 공용 Sector 01 Atlas로 교체 |
 
 ## 10. 증강·Story 연결

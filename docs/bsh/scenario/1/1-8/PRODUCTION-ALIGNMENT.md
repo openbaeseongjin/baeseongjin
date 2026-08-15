@@ -140,8 +140,8 @@
 | --- | --- | --- |
 | 지형·Anchor·Sentry·Wind | Runtime Mock 연결 완료 | R3·Mid Safe Deck·R4 좌표를 README와 같은 변경에서 정리 |
 | Approved Blockout | 없음 | 이 문서 §3 기준 SVG 제작 필요 |
-| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체(§4 제안값 기준) |
-| Story | 문자열 placeholder만 존재 | 10개 트리거 연결. Tone 제약(§57)과 Group A/B/C reveal 순서 준수 필수 |
+| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 1 참고(§4 제안값은 그 문서로 대체됨) |
+| Story | 문자열 placeholder만 존재 | 10개 트리거 연결 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 2 참고(핵심 비트만 우선 연결, 나머지는 확장 필요). Tone 제약(§57)과 Group A/B/C reveal 순서 준수 필수 |
 | Lower Grid Shutdown 연출 | 미구현 | Story Presentation과 별개의 World State/조명 시스템 필요 |
 | Worker District Preview | 지형만 존재 | Apartment/Locker/Canteen 등 생활 Prop, Evacuation Notice 오브젝트 추가 |
 | Build 분기 | 미구현 | [1-4 §1](../1-4/PRODUCTION-ALIGNMENT.md) Foundation Runtime 선행 필요 |

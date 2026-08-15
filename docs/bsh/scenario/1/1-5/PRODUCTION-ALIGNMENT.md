@@ -121,8 +121,8 @@
 | --- | --- | --- |
 | 지형·Anchor·Gate | Runtime Mock 연결 완료 | R1/R2/R3/Safe Ledge 좌표를 README와 같은 변경에서 정리하거나, README를 Runtime에 맞춰 갱신 |
 | Approved Blockout | 없음 | 이 문서 §3을 기준으로 SVG 제작 필요 |
-| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체(§4 제안값 기준) |
-| Story | 문자열 placeholder만 존재 | `AuthoredStoryPresentation.js`에 3개 트리거 연결. `active-augment-display`는 Foundation Runtime 선행 필요 |
+| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 1 참고(§4 제안값은 그 문서로 대체됨) |
+| Story | 문자열 placeholder만 존재 | `AuthoredStoryPresentation.js`에 3개 트리거 연결 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 2 참고. `active-augment-display`는 Foundation Runtime 선행 필요 |
 | Build 분기(Impulse/Relay/Shear Route) | 미구현 | [1-4 §1](../1-4/PRODUCTION-ALIGNMENT.md)의 Foundation 저장·효과 구현 이후에만 의미 있음 |
 | 오브젝트 그래픽 | Mock Shape | 공용 Sector 01 Atlas로 교체 |
 
