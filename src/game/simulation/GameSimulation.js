@@ -36,6 +36,7 @@ import {
     snapshotWindStates,
     windOccludingSurfaces
 } from "../world/WorldForceField.js";
+import { accessScanStateMap, isSurfaceAccessAllowed } from "../world/AccessScanField.js";
 import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -399,6 +400,17 @@ export class GameSimulation {
         return this.worldProgress.snapshot();
     }
 
+    rebaseElapsedSeconds(tick, serverTick, worldElapsedSeconds, fixedDt = 1 / 120) {
+        if (!Number.isSafeInteger(tick) || !Number.isSafeInteger(serverTick) || tick < 0 || serverTick < 0) {
+            throw new Error("elapsed rebase requires non-negative integer ticks");
+        }
+        if (!Number.isFinite(worldElapsedSeconds) || !Number.isFinite(fixedDt) || fixedDt <= 0) {
+            throw new Error("elapsed rebase requires finite world elapsed seconds and positive fixed dt");
+        }
+        this.elapsedSeconds = worldElapsedSeconds + (tick - serverTick) * fixedDt;
+        return this.elapsedSeconds;
+    }
+
     synchronizePredictionProgress(playerId, { foundationReward = null } = {}) {
         this.#requirePlayer(playerId);
         this.foundationRewards.clear();
@@ -587,7 +599,8 @@ export class GameSimulation {
             origin: launchOrigin,
             surfaces: this.world.surfaces,
             maxAttachDistance: hookReach(ROPE_CONFIG),
-            aimTolerance: player.foundation.ropeInputModifiers(ROPE_CONFIG).aimTolerance
+            aimTolerance: player.foundation.ropeInputModifiers(ROPE_CONFIG).aimTolerance,
+            canAttachToSurface: this.#accessScanPredicate()
         });
     }
 
@@ -785,6 +798,7 @@ export class GameSimulation {
                 owner: player,
                 ropeConfig: ROPE_CONFIG,
                 surfaces: this.activeCollisionSurfaces,
+                canAttachToSurface: this.#accessScanPredicate(),
                 getRopeInputModifiers: () => player.foundation.ropeInputModifiers(ROPE_CONFIG),
                 onAttach: ({ relayAssisted }) => {
                     if (!relayAssisted || !player.foundation.consumeRelayAttach()) return;
@@ -909,6 +923,12 @@ export class GameSimulation {
         const groundedFactor = player.physics.isGrounded ? WIND_CONFIG.groundedFactor : 1;
         player.physics.velocity.x += force.x * groundedFactor * dt;
         player.physics.velocity.y += force.y * groundedFactor * dt;
+    }
+
+    #accessScanPredicate() {
+        if (!this.world.scannerGroups?.length) return null;
+        const stateMap = accessScanStateMap(this.world.scannerGroups, this.elapsedSeconds);
+        return (surface) => isSurfaceAccessAllowed(surface, stateMap);
     }
 
     #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0 } = {}) {

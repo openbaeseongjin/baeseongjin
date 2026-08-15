@@ -182,6 +182,12 @@ export class OwnerPredictionRuntime {
         }
         this.prepareSnapshot(snapshot);
         this.simulation.restoreOwnerPrediction(this.ownerId, sharedOwner, ownerMotionTick);
+        this.simulation.rebaseElapsedSeconds(
+            ownerMotionTick,
+            snapshot.serverTick,
+            snapshot.state.worldElapsedSeconds ?? snapshot.serverTick * this.fixedDt,
+            this.fixedDt
+        );
         if (this.pendingCheckpoint) this.simulation.releasePlayerRope(this.ownerId);
         this.initialized = true;
 
@@ -212,6 +218,12 @@ export class OwnerPredictionRuntime {
             preservePendingImpact: this.pendingImpacts.size > 0,
             preservePendingFoundation: this.pendingFoundationSelection !== null
         });
+        this.simulation.rebaseElapsedSeconds(
+            this.simulation.getTick(),
+            snapshot.serverTick,
+            snapshot.state.worldElapsedSeconds ?? snapshot.serverTick * this.fixedDt,
+            this.fixedDt
+        );
         return this.state();
     }
 

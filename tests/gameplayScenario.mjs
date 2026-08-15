@@ -24,6 +24,7 @@ import { run as worldForceField } from "./worldForceField.mjs";
 import { run as authoredGameSimulation } from "./authoredGameSimulation.mjs";
 import { run as sector02AreaCatalog } from "./sector02AreaCatalog.mjs";
 import { run as sector04AreaCatalog } from "./sector04AreaCatalog.mjs";
+import { run as accessScanField } from "./accessScanField.mjs";
 import { run as currentAuthoredWorld } from "./currentAuthoredWorld.mjs";
 import { run as authoredCameraDirector } from "./authoredCameraDirector.mjs";
 import { run as authoredStoryPresentation } from "./authoredStoryPresentation.mjs";
@@ -52,6 +53,7 @@ const steps = {
     authoredGameSimulation,
     sector02AreaCatalog,
     sector04AreaCatalog,
+    accessScanField,
     currentAuthoredWorld,
     authoredCameraDirector,
     authoredStoryPresentation,
