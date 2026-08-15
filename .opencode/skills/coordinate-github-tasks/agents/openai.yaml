@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coordinate GitHub Tasks"
+  short_description: "여러 Codex 작업의 GitHub 범위 충돌을 감지하고 조정"
+  default_prompt: "Use $coordinate-github-tasks to detect overlapping Codex tasks, coordinate ownership and merge order, and record the agreement in GitHub."

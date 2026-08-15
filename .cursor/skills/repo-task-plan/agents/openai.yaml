@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repository Task Plan"
+  short_description: "Plan a bounded repository task without changing files"
+  default_prompt: "Use $repo-task-plan to inspect the repository and produce a verified read-only implementation plan."

@@ -385,7 +385,7 @@ git diff --check
 
 ### 동시 Codex 작업과 GitHub 범위 조정
 
-- 같은 저장소를 여러 Codex 앱 작업이 동시에 개발하면 `.agents/skills/coordinate-github-tasks/SKILL.md`를 공용 조정 계약으로 사용한다. `$github-task-flow`는 Issue 생성 뒤 브랜치 생성 전, Lore 커밋 전, 최종 rebase·병합 전에 조정 상태를 확인한다.
+- 같은 저장소를 여러 Codex 앱 작업이 동시에 개발하면 `.codex/skills/coordinate-github-tasks/SKILL.md`를 공용 조정 계약으로 사용한다. `$github-task-flow`는 Issue 생성 뒤 브랜치 생성 전, Lore 커밋 전, 최종 rebase·병합 전에 조정 상태를 확인한다.
 - Codex 작업 메시지는 즉시 조정 채널, 상호 링크된 GitHub Issue 댓글은 지속 기록으로 사용한다. 작업 제목·요약은 후보 탐색 자료일 뿐 소유권 근거가 아니며 checkout, 실제 diff·hunk, 선언한 심볼·예정 파일, 공개 계약 순으로 확인한다.
 - 독립 경로·심볼·계약을 소유한 새 작업은 별도 Git worktree와 branch를 기본으로 사용한다. 기존 Git object database를 공유하므로 별도 clone은 만들지 않는다. 같은 저장소라는 이유만으로 선행 merge를 기다리지 않는다.
 - 같은 `cwd`의 shared checkout에서는 브랜치·작업 트리·stage를 모든 대화가 공유하므로 현재 Issue 브랜치 소유 작업만 편집과 Git 게시 단계를 진행한다. shared checkout은 환경상 worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 사용하고, 후행 작업은 그 구체 대기 이유와 선행 merge SHA를 기록한다.
@@ -393,6 +393,13 @@ git diff --check
 - 동일 결과를 구현하는 중복 Issue는 주 작업 하나가 완료 조건과 고유 증거를 흡수한다. 보조 작업은 고유 변경을 잃지 않았다는 확인 전 Issue를 닫지 않으며 다른 작업의 커밋을 복사해 별도 계보를 만들지 않는다.
 - 각 작업은 자기 worktree·브랜치·stage·커밋·PR만 변경한다. 상대 작업에는 구조화된 범위 카드와 조정 결정을 메시지로 보내며, 응답하지 않은 작업의 공유 경계를 임의로 가져오거나 병합하지 않는다. 이미 실행 중인 작업의 worktree 이동이나 handoff는 사용자 승인 없이 수행하지 않지만, 아직 편집 전인 독립 새 작업의 전용 worktree 생성은 추가 승인을 요구하지 않는다.
 - 선행 PR 병합 뒤 실제 의존 작업은 최신 `origin/main`에 rebase하고 선행 변경으로 영향받은 verification ledger 항목만 다시 수행한다. 범위가 넓어지거나 새 작업이 같은 경계에 들어오면 소유권과 병합 순서를 다시 합의한다.
+
+### AI 도구 설정 동기화(vsync)
+
+- AI 코딩 도구(Codex·OpenCode·Cursor·Claude Code)의 스킬·MCP 설정의 단일 소스는 `.codex/`다. 스킬은 `.codex/skills/`, MCP는 `.codex/config.toml`에서만 편집한다.
+- 다른 도구의 스킬 사본(`.opencode/skills/`, `.cursor/skills/` 등)과 MCP 설정(`opencode.json`, `.cursor/mcp.json` 등)은 `vsync sync`가 포맷 변환(JSON↔TOML↔JSONC와 환경 변수 문법 포함)으로 생성한다. 대상 도구 파일을 직접 편집하지 않으며 손으로 다시 쓴 변경은 다음 sync에서 덮어쓴다.
+- `.vsync.json`은 프로젝트 수준 공개 설정이고 비밀을 포함하지 않는다. MCP 자격 증명은 환경 변수 참조(`{env:DISCORD_TOKEN}` 등)로만 남긴다.
+- 소스를 편집한 작업은 같은 변경에서 `vsync sync`로 대상 도구를 갱신하고 생성·갱신된 대상 파일도 함께 커밋한다.
 
 ## 14. 문서 관리
 

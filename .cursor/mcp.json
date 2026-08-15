@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "discord": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@discord-mcp/cli@0.18.1",
+        "serve"
+      ],
+      "env": {
+        "DISCORD_TOKEN": "${env:DISCORD_TOKEN}",
+        "MCP_CATEGORIES": "users,messages,channels",
+        "MCP_TOOL_SURFACE": "progressive",
+        "MCP_WRITE_MODE": "allow"
+      }
+    }
+  }
+}

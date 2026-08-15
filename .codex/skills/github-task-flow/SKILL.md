@@ -16,7 +16,7 @@ GitHub Issue를 작업의 기준 이력으로 삼고 PR을 통해 단일 커밋�
 - 현재 대화와 작업 트리 모두에서 게시할 작업을 식별할 수 없을 때만 작업 부재를 보고하고 종료한다.
 - merge 권한, 필수 승인, 실패한 검사처럼 자동 해결할 수 없는 외부 blocker가 없으면 중간 확인 없이 끝까지 진행한다.
 - GitHub 쓰기 환경이 없으면 아래 초기화 절차까지 호출 의미에 포함하고, 설정 후 원래 흐름을 자동 재개한다.
-- 같은 저장소의 다른 활성 Codex 작업이나 열린 Issue·PR과 checkout 또는 범위가 겹칠 가능성이 있으면 `.agents/skills/coordinate-github-tasks/SKILL.md`를 읽고 작업 간 조정을 수행한다.
+- 같은 저장소의 다른 활성 Codex 작업이나 열린 Issue·PR과 checkout 또는 범위가 겹칠 가능성이 있으면 `.codex/skills/coordinate-github-tasks/SKILL.md`를 읽고 작업 간 조정을 수행한다.
 
 ## 필수 원칙
 
@@ -127,7 +127,7 @@ gh api user
 
 ### 동시 Codex 작업 조정
 
-Issue 생성 뒤 전용 브랜치를 만들기 전에 `.agents/skills/coordinate-github-tasks/SKILL.md`를 적용한다.
+Issue 생성 뒤 전용 브랜치를 만들기 전에 `.codex/skills/coordinate-github-tasks/SKILL.md`를 적용한다.
 
 - 같은 저장소의 다른 활성 작업과 범위 카드를 교환하고 checkout·실제 diff·예정 심볼·공개 계약을 대조한다.
 - 같은 checkout에 다른 작업이 있으면 실제 hunk·contract dependency를 먼저 확인한다. 독립 범위면 기다리지 않고 별도 worktree와 Issue 브랜치를 만든다.

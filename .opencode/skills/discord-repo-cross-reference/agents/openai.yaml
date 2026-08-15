@@ -1,0 +1,4 @@
+interface:
+    display_name: "Discord Repo Cross Reference"
+    short_description: "Read, share, and cross-reference Discord material through MCP"
+    default_prompt: "Use $discord-repo-cross-reference to read or share Discord material through MCP and connect it with repository evidence."

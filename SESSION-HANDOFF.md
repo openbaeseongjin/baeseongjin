@@ -14,7 +14,7 @@
 
 ## 현재 구현
 
-- `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.agents/skills/github-task-flow/SKILL.md`를 따른다. 개발 효율 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 검증은 base SHA·diff fingerprint ledger의 단일 소유자가 수행하고 같은 candidate의 fresh PASS를 역할별로 반복하지 않는다. 같은 저장소의 독립 작업은 별도 Git worktree를 기본으로 즉시 병렬 진행하며, 실제 같은 hunk·public contract dependency가 있을 때만 직렬화한다. 범위·검증·worktree 반복 기준은 `docs/development-rules.md`의 **효율 우선 실행과 검증 예산**, **동시 Codex 작업과 GitHub 범위 조정** 및 관련 Skill을 따른다.
+- `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.codex/skills/github-task-flow/SKILL.md`를 따른다. 개발 효율 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 검증은 base SHA·diff fingerprint ledger의 단일 소유자가 수행하고 같은 candidate의 fresh PASS를 역할별로 반복하지 않는다. 같은 저장소의 독립 작업은 별도 Git worktree를 기본으로 즉시 병렬 진행하며, 실제 같은 hunk·public contract dependency가 있을 때만 직렬화한다. 범위·검증·worktree 반복 기준은 `docs/development-rules.md`의 **효율 우선 실행과 검증 예산**, **동시 Codex 작업과 GitHub 범위 조정** 및 관련 Skill을 따른다.
 - 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(속도 1400px/s × 수명 2/7초 = 400px 도달), 재발사 0.20초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
 - 현재 기본 런은 하나의 연속 월드에 Sector 01·02·03의 저작 영역 24개(`1-1 → 3-8`)를 순서대로 조립하며, 모든 표면 로프 부착과 수평 발판 아래→위 통과를 유지한다.
 - seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
@@ -40,6 +40,7 @@
 - 정적 파일을 노출하지 않는 상시 게임 서버 실행 모드와 `/health` 상태 확인
 - game-only 서버는 기본적으로 공식 GitHub Pages Origin만 WebSocket에 허용하며 개발용 정적 통합 서버는 이 제한을 강제하지 않는다.
 - `npm run publish:multiplayer`는 컴퓨터 재시작 뒤 운영자가 한 명령으로 상시 게임 서버와 외부 공유 터널을 다시 열고, 새 공개 주소를 Pages 설정에 반영해 배포까지 이어가는 운영 경로를 제공한다. 실행 전 clean `main` 전제를 확인하고 `index.html` 메타 값만 교체한 단일 커밋을 `origin main`에 push한 뒤 Pages 노출·공개 smoke를 검증하며, push 후 실패는 서버/터널을 유지한 채 안내만 출력한다. 기존 `share:multiplayer`는 로컬 정적 화면까지 함께 공유하는 개발용 경로로 유지한다. 상세 절차는 `docs/multiplayer-sharing.md`를 따른다.
+- AI 도구 설정 동기화는 `vsync`(`@nicepkg/vsync`)를 사용한다. 스킬·MCP의 단일 소스는 `.codex/skills/`와 `.codex/config.toml`이며 `vsync sync`가 `.opencode/skills/`, `.cursor/skills/`, `opencode.json`, `.cursor/mcp.json`을 포맷 변환과 함께 생성·갱신한다. 대상 도구 파일은 직접 편집하지 않는다. 반복 규칙은 `docs/development-rules.md`의 **AI 도구 설정 동기화(vsync)**를 따른다. opencode는 재시작하면 `opencode.json`의 Discord MCP와 `.opencode/skills/`를 읽는다.
 
 실제 조작 기반 전체 등반 검사, 서로 다른 기기의 장시간 2인 플레이테스트와 고정 HTTPS/WSS 운영 주소 배포는 아직 완료하지 않았다.
 
@@ -377,8 +378,8 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 - `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
 - Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan`, `discord-repo-cross-reference` Skill만 선택할 수 있다.
-- `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
-- Discord 자유 조회·공유는 브라우저 자동화나 meeting-bot 내부 구현이 아니라 저장소의 `.codex/config.toml`에서 범용 `@discord-mcp/cli` stdio MCP를 직접 실행한다. 자격 증명은 저장소에 두지 않고 로컬에서는 `DISCORD_TOKEN`, Codex Cloud에서는 별도 Secret으로 관리한다. 서버·채널은 봇이 볼 수 있는 목록에서 대화 중 선택을 재사용하되 복수이거나 모호하면 질문한다. MCP는 `users,messages,channels`만 노출하고, 쓰기는 사용자가 승인한 문구의 메시지 전송만 허용하며 편집·삭제·반응·관리 작업은 금지한다. 실행 계약은 `.agents/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
+- `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.codex/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
+- Discord 자유 조회·공유는 브라우저 자동화나 meeting-bot 내부 구현이 아니라 저장소의 `.codex/config.toml`에서 범용 `@discord-mcp/cli` stdio MCP를 직접 실행한다. 자격 증명은 저장소에 두지 않고 로컬에서는 `DISCORD_TOKEN`, Codex Cloud에서는 별도 Secret으로 관리한다. 서버·채널은 봇이 볼 수 있는 목록에서 대화 중 선택을 재사용하되 복수이거나 모호하면 질문한다. MCP는 `users,messages,channels`만 노출하고, 쓰기는 사용자가 승인한 문구의 메시지 전송만 허용하며 편집·삭제·반응·관리 작업은 금지한다. 실행 계약은 `.codex/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Discord의 공개 `/codex` 게이트웨이는 고정 loopback Ollama와 허용 Skill만 사용하고 구조화 출력을 검증하며 애플리케이션 비밀을 전달하지 않는다. 인증된 Codex CLI와 LM Studio 공급자는 공개 게이트웨이에서 거부하여 서버 멤버가 Codex 계정 할당량이나 더 넓은 로컬 엔드포인트를 소비하지 못하게 한다.
 - `/codex` 출력은 신뢰된 instruction에 한글이 있으면 한국어, 없으면 영어를 요청한다. 결과의 모든 표시 필드는 Latin·Hangul 문자 체계만 허용하고 저장·게시 전에 재검증한다. 한자·가나 등 비허용 문자가 나오면 로컬 Ollama로 1회만 교정하며, 반복 실패와 기존 비호환 결과는 원문을 게시하지 않는다.
 - 로컬 회의 분류 또는 `CODEX_PROVIDER=ollama` 공개 게이트웨이가 켜진 상태에서 `/meeting start`가 승인되면 회의 캡처를 먼저 활성화하고 백그라운드에서 고정 loopback API와 선택 모델을 확인한다. 서버가 꺼져 있으면 비밀을 제외한 환경으로 `OLLAMA_BIN serve`를 숨김·분리 프로세스로 자동 실행한다. 실행 또는 모델 확인이 실패해도 회의 기록은 계속하고 분류는 안전한 규칙으로 폴백하며 `/codex`는 사용 불가로 알린다. 모델 자동 설치나 유료 API 우회는 하지 않고 Ollama 프로세스는 `/meeting end` 뒤에도 유지한다.

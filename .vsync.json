@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "level": "project",
+  "source_tool": "codex",
+  "target_tools": ["opencode", "cursor"],
+  "sync_config": {
+    "skills": true,
+    "mcp": true,
+    "agents": false,
+    "commands": false
+  },
+  "use_symlinks_for_skills": false
+}

@@ -13,18 +13,8 @@ service-account*.json
 .omx/
 /.handoffs/
 
-# Repository skills stay local by default; share only the team workflow.
-.agents/skills/*
-!.agents/skills/github-task-flow/
-!.agents/skills/github-task-flow/**
-!.agents/skills/meeting-to-game-plan/
-!.agents/skills/meeting-to-game-plan/**
-!.agents/skills/repo-task-plan/
-!.agents/skills/repo-task-plan/**
-!.agents/skills/discord-repo-cross-reference/
-!.agents/skills/discord-repo-cross-reference/**
-!.agents/skills/coordinate-github-tasks/
-!.agents/skills/coordinate-github-tasks/**
+# AI tool settings sync (vsync) project cache artifacts
+.vsync/
 
 # JavaScript / TypeScript
 node_modules/
