@@ -279,6 +279,19 @@ Camera Zone 경계와 맞물리는 핵심 비트만 우선 연결했다.
 
 ## 범위에서 제외한 것 — Sector 02 (2-1~2-8)
 
+**정정(후속 확인 결과)**: 아래 문단은 이 문서를 처음 작성할 때 세운 가정이었으나,
+[`2/STORY-IMPLEMENTATION-HANDOFF.md`](../2/STORY-IMPLEMENTATION-HANDOFF.md)에서
+2-1~2-8 README의 `## 14. Camera` 절을 8개 전부 직접 확인한 결과 **틀린
+가정으로 확인됐다**. Sector 02는 8개 Stage 전부가 README에 "Custom Camera
+Pan 없음 / 새 Camera Mechanic 추가하지 않는다"고 스스로 명시하며, 원하는
+구도는 Camera Zone이 아니라 Level Geometry 배치로 해결한다고 밝힌다. 즉
+`cameraZones`가 비어 있는 것은 미구현 gap이 아니라 의도된 상태이며, 별도
+설계 작업이 필요 없다. Sector 02의 실제로 남은 작업(Story Presentation
+공백 3건)은 위 문서를 참고할 것.
+
+<details>
+<summary>원래 작성했던 문단(부정확, 기록용으로만 보존)</summary>
+
 `Sector02AreaCatalog.js`는 `cameraZones` 필드 자체가 8개 area 전부에 없다
 (placeholder 문자열조차 없음, #507 병합 후에도 변화 없음 확인). Story 쪽은
 #507이 `sector-02-01/02/03/04/05/07/08`의 Story Presentation 일부를 이미
@@ -286,3 +299,5 @@ Camera Zone 경계와 맞물리는 핵심 비트만 우선 연결했다.
 목록조차 없는 상태라 1-5~1-8과 달리 "옮겨 붙이기"가 아니라 처음부터 zone
 이름·수·경계를 새로 설계해야 한다. 작업량이 이 문서의 배 이상이라 별도
 문서로 이어서 진행하는 것을 권장한다.
+
+</details>
