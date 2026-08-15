@@ -10,20 +10,19 @@ placeholder 문자열 배열이고, Story Trigger는 `AuthoredStoryPresentation.
 별도 구현 담당(코드 작업 프로세스)이 진행하고, 이 문서는 그대로 옮겨 붙일 수
 있는 수준의 좌표·문구·연결 지점을 제공한다.
 
-**작성 시점 기준 진행 중인 병렬 작업과의 관계 (중요)**: 이 문서 작성 중
-오픈된 PR #507("환풍 팬·바람 시각과 스토리·드론·2-3 진행을 정비한다")이
+**병렬 작업과의 관계 (중요)**: 이 문서 작성 도중 PR #507("환풍 팬·바람
+시각과 스토리·드론·2-3 진행을 정비한다")이 머지됐다. #507은
 `AuthoredStoryPresentation.js`에 `sector-01-05`~`sector-01-08`의
 `ENTRY_PRESENTATIONS`·`OBJECTIVE_PRESENTATIONS`·`GATE_PRESENTATIONS`를 이미
-구현하고 있는 것을 확인했다(문구는 이 문서 초안과 유사하지만 정확히 같지는
-않음). **`cameraZones`는 #507도 건드리지 않는다.** 그래서 이 문서는:
+구현했다(문구는 이 문서 초안과 유사하지만 정확히 같지는 않음). **`cameraZones`는
+#507도 건드리지 않았다.** 그래서 이 문서는:
 
-- **Part 1 (Camera Zone)**: 여전히 완전히 열려 있는 gap. 이 문서가 유일한
-  구현 준비 자료다.
-- **Part 2 (Story Presentation)**: #507이 이미 다루는 ENTRY/OBJECTIVE/GATE는
-  이 문서에서 제외했다(중복·충돌 방지). #507이 다루지 않는
-  `POSITION_PRESENTATIONS`(Stage 중간 위치 기반 연출)만 남겼다. #507이 먼저
-  머지되면 그 실제 문구를 기준으로 삼고, 이 문서의 POSITION 항목만 추가하면
-  된다.
+- **Part 1 (Camera Zone)**: #507 병합 이후에도 여전히 완전히 열려 있는 gap.
+  이 문서가 유일한 구현 준비 자료다.
+- **Part 2 (Story Presentation)**: #507이 이미 구현한 ENTRY/OBJECTIVE/GATE는
+  이 문서에서 제외했다(중복·충돌 방지). #507이 다루지 않은
+  `POSITION_PRESENTATIONS`(Stage 중간 위치 기반 연출)만 남겼다 — 이 부분은
+  #507 병합 후 기준으로도 그대로 열려 있다.
 
 ## 검증 방법
 
@@ -31,13 +30,13 @@ placeholder 문자열 배열이고, Story Trigger는 `AuthoredStoryPresentation.
   `area.cameraZones`를 객체로만 필터링하므로(`typeof zone === "object"`),
   지금처럼 문자열 배열이 들어있으면 **매치되는 zone이 항상 없고 항상
   `defaultZoom`으로 폴백한다.** 즉 현재 1-5~1-8은 이름은 있지만 카메라 연출이
-  전혀 동작하지 않는 상태다. PR #507 diff에도 `cameraZones` 변경은 없다
-  (직접 확인).
-- Story Presentation: 이 문서 작성 시점 `main`(#500 병합 직후) 기준
+  전혀 동작하지 않는 상태다. #507 병합 후 `main`에도 `cameraZones` 변경은
+  없다(직접 확인).
+- Story Presentation: #500 병합 직후(#507 병합 전) 기준
   `ENTRY_PRESENTATIONS`/`POSITION_PRESENTATIONS`/`OBJECTIVE_PRESENTATIONS`/
   `GATE_PRESENTATIONS` 네 딕셔너리 모두 `sector-01-05`~`sector-01-08` 키가
-  전혀 없었다. PR #507(오픈, 미병합)이 이 중 ENTRY/OBJECTIVE/GATE 세 개를
-  구현 중이므로, 아래 Part 2는 `POSITION_PRESENTATIONS`만 남겼다.
+  전혀 없었다. #507이 이 중 ENTRY/OBJECTIVE/GATE 세 개를 구현했으므로, 아래
+  Part 2는 `POSITION_PRESENTATIONS`만 남겼다.
 - 좌표 근거: 각 Stage의 `routePoints`/`surfaces`/`objects` 실제 좌표
   (`Sector01AreaCatalog.js`)와 README의 `## Camera —` / `## Story` 절 서술을
   대조해서 도출했다. `localY`는 `AuthoredCameraDirector.js`의
@@ -265,16 +264,14 @@ Camera Zone 경계와 맞물리는 핵심 비트만 우선 연결했다.
 
 ## 다음 단계
 
-1. PR #507이 먼저 머지되면 그 실제 `ENTRY`/`OBJECTIVE`/`GATE`
-   `_PRESENTATIONS` 문구를 기준으로 삼고, 이 문서 Part 2의
-   `POSITION_PRESENTATIONS` 스니펫만 추가한다. #507이 머지되기 전이라면
-   Part 2 전체(POSITION 포함)를 그대로 옮겨도 되지만 이후 #507과 병합 시
-   문구 차이를 조율해야 한다.
-2. Part 1(Camera Zone)은 #507과 무관하게 그대로 `cameraZones:` 필드에
-   옮긴다.
-3. `tests/authoredStoryPresentation.mjs`(기존 테스트, 1-1~1-4 대상으로 이미
-   존재하며 #507이 1-5~1-8·2-x 일부를 추가하는 중)에 이 문서가 추가하는
-   `POSITION_PRESENTATIONS` 케이스를 보강한다.
+1. Part 2(`POSITION_PRESENTATIONS`)를 `AuthoredStoryPresentation.js`의
+   `POSITION_PRESENTATIONS` 딕셔너리에 옮긴다. #507이 이미 구현한
+   ENTRY/OBJECTIVE/GATE 키는 그대로 두고 건드리지 않는다.
+2. Part 1(Camera Zone)을 `Sector01AreaCatalog.js`의 해당 `cameraZones:`
+   필드에 옮긴다(#507과 무관, 여전히 완전히 열려 있음).
+3. `tests/authoredStoryPresentation.mjs`(#507이 1-1~1-8 일부·2-x 일부
+   케이스를 이미 추가함)에 이 문서가 추가하는 `POSITION_PRESENTATIONS`
+   케이스를 보강한다.
 4. `docs/scenario-development-integration.md`의 "열린 기획·구현 게이트"
    3번 문항과 이번 항목은 별개(그건 Sector 03)이므로, 이 작업이 끝나면
    "최근 반영된 시나리오 변화"에 새 항목을 추가하고 `stage-coverage`/해시
@@ -282,12 +279,10 @@ Camera Zone 경계와 맞물리는 핵심 비트만 우선 연결했다.
 
 ## 범위에서 제외한 것 — Sector 02 (2-1~2-8)
 
-이 문서 작성 시점 `main` 기준 `Sector02AreaCatalog.js`는 `cameraZones` 필드
-자체가 8개 area 전부에 없고(placeholder 문자열조차 없음),
-`AuthoredStoryPresentation.js`에도 `sector-02-*` 키가 전혀 없었다. **단,
-오픈 PR #507이 `sector-02-01/02/03/04/05/07/08`의 Story Presentation 일부를
-이미 추가하는 중이다(`cameraZones`는 여전히 미포함).** 즉 Story 쪽은 #507
-머지 이후 상황을 다시 확인해야 하고, Camera Zone은 Sector 02 전체가 여전히
-이름 목록조차 없는 상태라 1-5~1-8과 달리 "옮겨 붙이기"가 아니라 처음부터
-zone 이름·수·경계를 새로 설계해야 한다. 작업량이 이 문서의 배 이상이라
-별도 문서로 이어서 진행하는 것을 권장한다.
+`Sector02AreaCatalog.js`는 `cameraZones` 필드 자체가 8개 area 전부에 없다
+(placeholder 문자열조차 없음, #507 병합 후에도 변화 없음 확인). Story 쪽은
+#507이 `sector-02-01/02/03/04/05/07/08`의 Story Presentation 일부를 이미
+추가했다(`2-6`은 아직 없음). 즉 Camera Zone은 Sector 02 전체가 여전히 이름
+목록조차 없는 상태라 1-5~1-8과 달리 "옮겨 붙이기"가 아니라 처음부터 zone
+이름·수·경계를 새로 설계해야 한다. 작업량이 이 문서의 배 이상이라 별도
+문서로 이어서 진행하는 것을 권장한다.

@@ -13,7 +13,11 @@ import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.j
 import { selectWorldSeed } from "./world/WorldSeed.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
-import { advanceAuthoredCamera, resolveAuthoredCameraShot } from "./camera/AuthoredCameraDirector.js";
+import {
+    advanceAuthoredCamera,
+    localTriggerObjects,
+    resolveAuthoredCameraShot
+} from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 
 export class GameApp {
@@ -105,7 +109,8 @@ export class GameApp {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
             currentAreaLocalY: cameraShot.localY,
-            events: authorityEvents
+            events: authorityEvents,
+            triggers: localTriggerObjects(state.world, cameraShot.areaId)
         });
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
         this.audioBindings?.presentFrame({

@@ -1,6 +1,6 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
 import { circleBounds, isVisible } from "../RenderViewport.js";
-import { enemyAimLine, enemySensorColor } from "../EnemyTelegraphPresentation.js";
+import { enemyAimLine, enemySensorColor, isPatrolDrone } from "../EnemyTelegraphPresentation.js";
 
 const PLAYER_COLORS = Object.freeze({
     local: "#67e8f9",
@@ -73,12 +73,11 @@ export class PolygonEnemyRenderer {
                 context.stroke();
                 context.restore();
             }
-            context.fillStyle = "#fb7185";
-            context.fillRect(enemy.position.x - 24, enemy.position.y - 12, 30, 24);
-            context.fillStyle = "#881337";
-            context.fillRect(enemy.position.x + 6, enemy.position.y - 16, 8, 32);
-            context.fillStyle = enemySensorColor(enemy);
-            context.fillRect(enemy.position.x - 18, enemy.position.y - 3, 6, 6);
+            if (isPatrolDrone(enemy)) {
+                this.drawDroneBody(context, enemy);
+            } else {
+                this.drawSentryBody(context, enemy);
+            }
             context.fillStyle = "#1f2937";
             context.fillRect(enemy.position.x - 20, enemy.position.y - enemy.radius - 11, 40, 5);
             context.fillStyle = "#fda4af";
@@ -90,6 +89,35 @@ export class PolygonEnemyRenderer {
             );
         }
         renderStats?.recordCollection("enemies", enemies.length, drawn);
+    }
+
+    drawSentryBody(context, enemy) {
+        context.fillStyle = "#fb7185";
+        context.fillRect(enemy.position.x - 24, enemy.position.y - 12, 30, 24);
+        context.fillStyle = "#881337";
+        context.fillRect(enemy.position.x + 6, enemy.position.y - 16, 8, 32);
+        context.fillStyle = enemySensorColor(enemy);
+        context.fillRect(enemy.position.x - 18, enemy.position.y - 3, 6, 6);
+    }
+
+    drawDroneBody(context, enemy) {
+        context.strokeStyle = "#94a3b8";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(enemy.position.x - 20, enemy.position.y - 6);
+        context.lineTo(enemy.position.x + 20, enemy.position.y - 6);
+        context.stroke();
+        context.fillStyle = "#334155";
+        context.strokeStyle = "#fbbf24";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.arc(enemy.position.x, enemy.position.y, 12, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.fillStyle = enemySensorColor(enemy);
+        context.beginPath();
+        context.arc(enemy.position.x, enemy.position.y, 4, 0, Math.PI * 2);
+        context.fill();
     }
 }
 

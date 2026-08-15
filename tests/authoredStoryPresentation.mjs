@@ -113,11 +113,16 @@ export function run() {
     );
 
     const securityCheck = new AuthoredStoryPresentation();
+    const employeeScanner = Object.freeze({
+        cueIds: Object.freeze(["sector-01-03:employee-verified"]),
+        bounds: Object.freeze({ x: -144, y: -128, width: 96, height: 128 })
+    });
     assert.equal(
         securityCheck.update(0, {
             currentAreaId: "sector-01-03",
             currentAreaLocalX: -320,
-            currentAreaLocalY: -32
+            currentAreaLocalY: -32,
+            triggers: [employeeScanner]
         }),
         null,
         "employee verification must wait until the local player crosses the scanner"
@@ -127,7 +132,8 @@ export function run() {
             securityCheck.update(0, {
                 currentAreaId: "sector-01-03",
                 currentAreaLocalX: -96,
-                currentAreaLocalY: -32
+                currentAreaLocalY: -32,
+                triggers: [employeeScanner]
             }).title,
             securityCheck.snapshot().detail
         ],
