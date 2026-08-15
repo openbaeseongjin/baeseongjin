@@ -20,7 +20,11 @@ const COLORS = Object.freeze({
     oneWayEdge: "#a8d8cf",
     ropeLoose: "#7dd3fc",
     ropeTense: "#fbbf24",
-    candidate: "#a7f3d0"
+    candidate: "#a7f3d0",
+    hookEye: "#e2e8f0",
+    hookShank: "#94a3b8",
+    hookClaw: "#cbd5e1",
+    hookTip: "#f8fafc"
 });
 
 function drawRope(context, rope, player) {
@@ -608,6 +612,99 @@ export class AttachmentCandidateRenderer {
     }
 }
 
+const ROPE_SHOT_LINE_WIDTH = 2;
+const ROPE_SHOT_TRAIL_WIDTH = 4;
+const HOOK_LENGTH = 15;
+const HOOK_SPIN_PER_PIXEL = 0.02;
+
+function drawRopeShotLine(context, start, tip) {
+    const gradient = context.createLinearGradient(start.x, start.y, tip.x, tip.y);
+    gradient.addColorStop(0, "rgba(125, 211, 252, 0.6)");
+    gradient.addColorStop(0.5, "rgba(125, 211, 252, 0.85)");
+    gradient.addColorStop(1, "#bae6fd");
+    context.strokeStyle = gradient;
+    context.lineWidth = ROPE_SHOT_LINE_WIDTH;
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(start.x, start.y);
+    context.lineTo(tip.x, tip.y);
+    context.stroke();
+    context.lineCap = "butt";
+}
+
+function drawRopeShotTrail(context, tip, direction, distance) {
+    const progress = Math.min(1, distance / ropeHookReach());
+    const trailLength = 14 + progress * 14;
+    const tail = {
+        x: tip.x - direction.x * trailLength,
+        y: tip.y - direction.y * trailLength
+    };
+    const gradient = context.createLinearGradient(tail.x, tail.y, tip.x, tip.y);
+    gradient.addColorStop(0, "rgba(125, 211, 252, 0)");
+    gradient.addColorStop(1, "rgba(224, 242, 254, 0.32)");
+    context.strokeStyle = gradient;
+    context.lineWidth = ROPE_SHOT_TRAIL_WIDTH;
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(tail.x, tail.y);
+    context.lineTo(tip.x, tip.y);
+    context.stroke();
+    context.lineCap = "butt";
+}
+
+function drawGrapplingHook(context, tip, angle, distance) {
+    context.translate(tip.x, tip.y);
+    context.rotate(angle + distance * HOOK_SPIN_PER_PIXEL);
+
+    context.strokeStyle = COLORS.hookEye;
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(-HOOK_LENGTH * 0.5, 0, 3.4, 0, Math.PI * 2);
+    context.stroke();
+
+    context.fillStyle = COLORS.hookShank;
+    context.beginPath();
+    context.moveTo(HOOK_LENGTH, -2);
+    context.lineTo(-HOOK_LENGTH * 0.18, -2.4);
+    context.lineTo(-HOOK_LENGTH * 0.18, 2.4);
+    context.lineTo(HOOK_LENGTH, 2);
+    context.closePath();
+    context.fill();
+
+    context.strokeStyle = COLORS.hookClaw;
+    context.lineWidth = 2.4;
+    context.lineCap = "round";
+    for (const spread of [-1, 1]) {
+        context.beginPath();
+        context.moveTo(HOOK_LENGTH * 0.42, spread * 1.6);
+        context.quadraticCurveTo(
+            -HOOK_LENGTH * 0.5,
+            spread * HOOK_LENGTH * 0.6,
+            -HOOK_LENGTH * 0.12,
+            spread * HOOK_LENGTH * 0.42
+        );
+        context.stroke();
+    }
+    context.lineCap = "butt";
+
+    context.fillStyle = COLORS.hookTip;
+    context.beginPath();
+    context.arc(HOOK_LENGTH, 0, 1.8, 0, Math.PI * 2);
+    context.fill();
+}
+
+function drawRopeShotSparks(context, tip, distance) {
+    const flicker = 0.5 + 0.5 * Math.sin(distance * 0.11);
+    context.fillStyle = `rgba(224, 242, 254, ${0.32 + flicker * 0.38})`;
+    for (let index = 0; index < 3; index += 1) {
+        const sparkAngle = distance * 0.09 + (index * Math.PI * 2) / 3;
+        const radius = 6 + (index % 2) * 2.5;
+        context.beginPath();
+        context.arc(tip.x + Math.cos(sparkAngle) * radius, tip.y + Math.sin(sparkAngle) * radius, 1.2, 0, Math.PI * 2);
+        context.fill();
+    }
+}
+
 export class RopeShotRenderer {
     constructor(selectShots) {
         if (typeof selectShots !== "function") throw new Error("RopeShotRenderer requires selectShots");
@@ -615,34 +712,31 @@ export class RopeShotRenderer {
     }
 
     draw({ context, scene }) {
-        for (const shot of this.selectShots(scene)) this.drawShot(context, shot);
+        for (const entry of this.selectShots(scene)) this.drawShot(context, entry.shot, entry.player);
     }
 
-    drawShot(context, shot) {
+    drawShot(context, shot, player = null) {
         const distance = Math.min(shot.traveled, ropeHookReach());
         const tip = {
             x: shot.origin.x + shot.direction.x * distance,
             y: shot.origin.y + shot.direction.y * distance
         };
+        const angle = Math.atan2(shot.direction.y, shot.direction.x);
+        const body = player?.position ?? shot.origin;
         context.save();
-        context.strokeStyle = "#7dd3fc";
-        context.lineWidth = 2;
-        context.beginPath();
-        context.moveTo(shot.origin.x, shot.origin.y);
-        context.lineTo(tip.x, tip.y);
-        context.stroke();
-        context.fillStyle = "#f8fafc";
-        context.beginPath();
-        context.arc(tip.x, tip.y, 5, 0, Math.PI * 2);
-        context.fill();
+        drawRopeShotLine(context, body, tip);
+        drawRopeShotTrail(context, tip, shot.direction, distance);
+        drawGrapplingHook(context, tip, angle, distance);
+        drawRopeShotSparks(context, tip, distance);
         context.restore();
     }
 }
 
 export const localRopes = (scene) => [{ rope: scene.rope, player: scene.player }];
 export const remoteRopes = (scene) => (scene.otherPlayers ?? []).map((player) => ({ rope: player.rope, player }));
-export const localShots = (scene) => (scene.ropeShot?.shot ? [scene.ropeShot.shot] : []);
+export const localShots = (scene) =>
+    scene.ropeShot?.shot ? [{ shot: scene.ropeShot.shot, player: scene.player }] : [];
 export const remoteShots = (scene) =>
     (scene.otherPlayers ?? [])
-        .map((player) => player.launcher?.shot)
-        .filter((shot) => shot !== null && shot !== undefined);
+        .map((player) => ({ shot: player.launcher?.shot, player }))
+        .filter(({ shot }) => shot !== null && shot !== undefined);

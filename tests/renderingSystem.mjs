@@ -622,6 +622,28 @@ export async function run() {
         ["lineTo", ropeHookReach(), 0],
         "the rendered hook tip must be clamped to the derived 400px reach"
     );
+    const tetheredShotContext = recordingContext();
+    new RopeShotRenderer(localShots).draw({
+        context: tetheredShotContext,
+        scene: {
+            player: { position: { x: 30, y: 80 } },
+            ropeShot: {
+                shot: {
+                    origin: { x: 0, y: 0 },
+                    direction: { x: 1, y: 0 },
+                    target: null,
+                    traveled: 40,
+                    elapsed: 0.05
+                },
+                cooldownRemaining: 0
+            }
+        }
+    });
+    assert.deepEqual(
+        tetheredShotContext.calls.find(([name]) => name === "moveTo"),
+        ["moveTo", 30, 80],
+        "the flying rope line must stay tethered to the player's current body instead of the fixed launch origin"
+    );
     const authoredObjectContext = recordingContext();
     new AuthoredWorldObjectRenderer().draw({
         context: authoredObjectContext,
