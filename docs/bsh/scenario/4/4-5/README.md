@@ -1,6 +1,6 @@
 # SECTOR 04-5 — EXPRESS SHAFT
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
 
 ◀ PREV — [SECTOR 04-4 / INFRASTRUCTURE SERVICE NODE](../4-4/README.md) · NEXT — [SECTOR 04-6 / POWER RELAY SPAN](../4-6/README.md) ▶
 
@@ -117,8 +117,8 @@ PURE MOVEMENT OPPORTUNITY
 - Moving Train collision
 - Moving Grapple Surface
 - Damage Wind
-- Wind Shadow 가정
-- Grounded Wind Attenuation 가정
+- Wind Shadow(현재 구현됨, §0-1 참고)를 Mandatory Route 성립 조건으로 설계
+- Grounded Wind Attenuation(현재 구현됨, §0-1 참고)를 Mandatory Route 성립 조건으로 설계
 - New Input
 - New Rope Mode
 - Build Lock
@@ -224,6 +224,37 @@ multiplier 1 → 0 linear
 
 Force는 Player point가
 static rectangular zone 안에 있을 때 적용된다.
+
+### RUNTIME UPDATE — WIND SHADOW / GROUNDED ATTENUATION 구현됨
+
+4-5 최초 작성 이후 병합된 Runtime 변경(`WorldForceField.js`, `GameSimulation.js`)에서
+다음이 실제로 구현되고 **기본 활성화**됐다.
+
+```text
+WIND_CONFIG (config.js)
+groundedFactor  0.35
+shadowFactor    0.15
+defaultFalloff  0
+```
+
+```text
+GROUNDED ATTENUATION
+player.physics.isGrounded === true
+→ wind force × 0.35
+
+WIND SHADOW
+windOrigin(zone)와 player point 사이 segment가
+solid occluding surface(기본: collision !== false && oneWay !== true)와 교차
+→ wind force × 0.15 (추가 배율)
+```
+
+이 Stage 초안의 §0 금지 목록과 §13 Recovery "Why", §24 FAIL 목록에 있는
+"grounded attenuation이 없다"는 서술은 **작성 당시 기준**이며 이제 STALE이다.
+해당 섹션을 참고해 갱신된 내용을 확인한다.
+
+Falloff는 `defaultFalloff: 0`이므로 Zone이 명시적으로 `falloff` 값을 지정하지 않는 한
+spatial falloff는 비활성 상태로 남는다. 4-5 Wake Zone은 falloff를 지정하지 않으므로
+falloff 관련 설계는 변경 없음.
 
 ### 4-5 BASELINE
 
@@ -1168,19 +1199,30 @@ WAKE OUTSIDE
 
 ### Why
 
-Current Wind에는:
+Current Wind는 이제:
 
 ```text
-grounded attenuation
+GROUNDED ATTENUATION
+= player.physics.isGrounded일 때 force × 0.35
 ```
 
-이 없다.
+를 지원한다(§0-1 RUNTIME UPDATE 참고).
 
-Recovery Deck을 Wake 안에 두면
-착지 중에도 계속 밀릴 수 있다.
+하지만 0.35는 **감쇠**이지 **차단**이 아니다.
+Strength 360 기준 착지 중에도 약 126의 잔여 force가 남고,
+착지 실패로 다시 airborne이 되는 순간 즉시 감쇠 없는 전체 force로 복귀한다.
 
-따라서 안전 Recovery는
-Wake bounds 밖에 둔다.
+따라서 Recovery Deck을 Wake 안에 두는 것은
+여전히 "약하게 계속 밀리다가 실패 시 다시 강하게 밀리는" 불안정한 설계다.
+
+안전 Recovery는 계속:
+
+```text
+Wake bounds 밖
+```
+
+에 둔다. 이 결정은 Grounded Attenuation의 존재 여부와 무관하게
+가장 단순하고 예측 가능한 선택이다.
 
 ### Miss Examples
 
@@ -1910,8 +1952,7 @@ Group C causal mapping
 
 ### Runtime
 
-- Wind Shadow 가정
-- Grounded attenuation 가정
+- Wind Shadow(0.15 배율) / Grounded Attenuation(0.35 배율) 존재를 모르고 옛 무보정 물리로만 Mandatory Route graybox 검증
 - moving force volume 가정
 - client-local Wind phase
 - legacy fixed Rope-range assumption 재사용
@@ -2137,4 +2178,4 @@ Sector 04 전체 geometry audit에서 반드시 닫는다.
 
 ---
 
-SECTOR 04-5 / EXPRESS SHAFT — BLOCKOUT CANDIDATE · REV 1.0
+SECTOR 04-5 / EXPRESS SHAFT — BLOCKOUT CANDIDATE · REV 1.1
