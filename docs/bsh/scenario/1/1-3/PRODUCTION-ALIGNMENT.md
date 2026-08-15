@@ -130,4 +130,4 @@ Cover가 LOS를 끊거나 타깃이 activation band를 나가면 즉시 `idle`�
 - Impulse·Relay·Shear 중 어느 하나를 미리 추천하거나 Profile Icon을 배경에 배치하지 않는다. 세 선택지는 1-4에서 처음 동등하게 제시한다.
 - Telegraph 인지율, Lock 뒤 회피율, B→C 연결 성공률, Safe/Flow/Recovery 사용률을 증강 전 기준값으로 저장한다.
 - 이후 증강을 구현하더라도 1-3은 기본 Rope와 표준 Projectile만으로 완전히 통과 가능해야 한다.
-- Sentry는 Shear Current의 선행 Tutorial이 아니다. 현재 Stage에서 Rope Segment 피해, 적 절단, Artifact Synergy를 암시하면 FAIL이다.
+- Sentry는 Shear Current의 선행 Tutorial이 아니다. 현재 Stage에서 Rope Segment 피해, 적 절단, Foundation Synergy를 암시하면 FAIL이다.

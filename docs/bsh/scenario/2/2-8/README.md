@@ -367,7 +367,7 @@ Player Radius            15
 Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 Camera Desktop Zoom      1
@@ -413,7 +413,7 @@ Sector 02에서 가장 큰 단일 authored Stage 후보.
 ```
 
 Flow Shortcut은 더 공격적일 수 있지만
-`440 px` Max Range를 반복적인 필수 조건으로 사용하지 않는다.
+`400 px` Max Range를 반복적인 필수 조건으로 사용하지 않는다.
 
 ---
 
@@ -1214,7 +1214,7 @@ Drone 2 Audio 복귀.
 현재 `main` Config 기준:
 
 ```text
-Rope Max Attach Distance = 440
+Rope Max Attach Distance = 400
 Swing Impulse = 780
 Enemy Attack Range = 520
 Enemy Fire Interval = 1.4

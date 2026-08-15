@@ -34,7 +34,7 @@ export function createPlayerPresentationEvents(events = []) {
             );
             return;
         }
-        if ((event.type === "checkpoint-respawn" || event.type === "artifact-loss") && event.playerId) {
+        if (event.type === "checkpoint-respawn" && event.playerId) {
             presentationEvents.push(
                 Object.freeze({ id: respawnEventId(event), playerId: event.playerId, type: "respawn" })
             );

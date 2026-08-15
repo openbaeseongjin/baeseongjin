@@ -22,7 +22,7 @@
 | New Input | NONE |
 | New Rope Mode | NONE |
 | New Augment | NONE |
-| Artifact Reward | NONE |
+| Checkpoint reward | 없음 |
 | Required Kill | NONE |
 | Design Checkpoint / Reward | NONE |
 | Boss | NONE |
@@ -171,7 +171,7 @@ Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
 
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer             0.10 sec
 Swing Drag Min Hold       0.08 sec
 Swing Impulse             780
@@ -723,7 +723,7 @@ Y -864 ~ -1184
 R3 → A5 → P4.
 
 Safe Route에서 가장 긴 연결도
-440보다 충분히 작게 유지.
+400보다 충분히 작게 유지.
 
 ### Z4 — Exit Trunk
 
@@ -859,7 +859,7 @@ MAX SAFE LINK
 = 374.5 px
 
 ROPE MAX
-= 440 px
+= 400 px
 ```
 
 Range margin:
@@ -926,7 +926,7 @@ MAX FLOW LINK
 = 408.9 px
 ```
 
-440px보다 작다.
+400px보다 작다.
 
 하지만 이 Route는:
 
@@ -1586,7 +1586,7 @@ Grounded 상태가 얼마나 줄어드는지.
 - 숙련자는 Recovery Deck 대부분 생략 가능
 - Safe Route mandatory link ≤ 374.5px
 - Flow Route max link ≤ 408.9px
-- exact 440px test 없음
+- exact 400px test 없음
 - Runtime blockout에서 `swingImpulse=0` Safe Route clear
 - no new input
 - no new Rope mode
@@ -1629,7 +1629,7 @@ direct causality
 - 4-1이 또 하나의 3-6 Atrium처럼 느껴짐
 - Recovery Deck을 전부 밟아야만 진행
 - 숙련 Route가 단순 max-range 시험
-- long gap이 440px를 넘음
+- long gap이 400px를 넘음
 - swingImpulse 780 없이는 사실상 진행 불가
 - fall 하나가 P0 reset으로 이어짐
 - background moving object가 실제 anchor처럼 오해됨
@@ -1641,7 +1641,6 @@ direct causality
 - Moving Train을 mandatory로 사용
 - Scanner를 다시 사용
 - Growth reward 추가
-- Artifact reward 추가
 
 ### Story
 
@@ -1671,7 +1670,7 @@ direct causality
 검증:
 
 ```text
-440 range
+400 range
 Safe Route
 Flow Route
 ```
@@ -1866,7 +1865,7 @@ Max:
 
 ```text
 ROPE MAX
-440
+400
 
 SAFE ROUTE
 swingImpulse = 0 PASS
@@ -1888,7 +1887,6 @@ Reach → Panel → Open → Physical Crossing
 - new Input
 - new Rope Mode
 - Growth
-- Artifact
 - Boss
 
 ### Stage Feeling

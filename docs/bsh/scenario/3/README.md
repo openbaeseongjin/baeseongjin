@@ -572,7 +572,7 @@ DESIGNED ALTERNATIVE ROUTE
 ### CURRENT MAIN BASELINE
 
 ```text
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 Release Angular Transfer 0.55
@@ -583,7 +583,7 @@ Release Angular Transfer 0.55
 Sector 03 모든 필수 진행:
 
 ```text
-≤ 440 px
+≤ 400 px
 ```
 
 이어야 한다.
@@ -593,7 +593,7 @@ Sector 03 모든 필수 진행:
 Scanner / Drone / Route Choice와 동시에:
 
 ```text
-near-440 exact range test
+near-400 exact range test
 ```
 
 를 필수로 요구하지 않는다.
@@ -785,7 +785,7 @@ HOLD
 HYBRID
 HOLD
 
-ARTIFACT REWARD AS ROPE GROWTH
+CHECKPOINT REWARD
 NONE
 ```
 
@@ -821,24 +821,6 @@ Specialization names / values / pool
 
 첫 성장 계층이 실제 Runtime / Playtest를 통과하기 전에
 더 높은 Tier를 Stage 때문에 먼저 만들지 않는다.
-
-### Artifact 분리
-
-현재 구현된 Artifact:
-
-```text
-POWER CORE
-RAPID GEAR
-ROPE RESONANCE
-```
-
-는 별도 Combat modifier layer.
-
-```text
-ARTIFACT
-≠
-ROPE AUGMENT
-```
 
 ---
 
@@ -2106,7 +2088,7 @@ HOLD
 
 - Foundation + first Specialization 유지
 - Sector 03 신규 Tier 없음
-- Artifact와 Augment 혼동 없음
+- Foundation과 Specialization 혼동 없음
 
 ### Story
 

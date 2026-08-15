@@ -3,7 +3,6 @@ import { createServer } from "node:http";
 import { WebSocket } from "ws";
 import { Vector2 } from "../src/game-kit/index.js";
 import { shortestAngleDelta } from "../src/game/physics/AngularMotion.js";
-import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
@@ -65,6 +64,19 @@ function createImpairedWebSocket({ roundTripDelayMs, commandLossRate }) {
     };
 }
 
+function createRecordingWebSocket() {
+    return class RecordingWebSocket extends WebSocket {
+        static sentMessages = [];
+
+        send(data) {
+            const message = JSON.parse(data.toString());
+            if (message.type === "impact-claim") message.payload = JSON.parse(message.payload);
+            RecordingWebSocket.sentMessages.push(message);
+            return super.send(data);
+        }
+    };
+}
+
 function movementCommand(horizontal = 1) {
     return {
         horizontal,
@@ -88,23 +100,18 @@ function persistentPlayerState(player) {
         lifeState: player.lifeState,
         hitInvulnerabilityRemaining: player.hitInvulnerabilityRemaining,
         ropeDisabledRemaining: player.ropeDisabledRemaining,
-        ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
         weapon: {
             range: player.weapon.range,
             damage: player.weapon.damage,
             fireInterval: player.weapon.fireInterval,
             cooldown: player.weapon.cooldown
-        },
-        artifacts: player.artifacts,
-        lastCheckpointLoss: player.lastCheckpointLoss
+        }
     };
 }
 
 function persistentWorldState(state) {
     return {
         activeCheckpointId: state.activeCheckpointId,
-        rewardedCheckpointIds: state.rewardedCheckpointIds,
-        artifactRewards: state.artifactRewards,
         runState: state.runState,
         completed: state.completed
     };
@@ -128,33 +135,6 @@ function nearestRopeAnchor(world, position) {
                 ? point
                 : nearest
         );
-}
-
-function armPredictedRopeSwing(authority) {
-    const simulation = authority.ownerRuntime.simulation;
-    const player = simulation.players.find(({ id }) => id === authority.playerId);
-    const anchor = {
-        x: player.physics.position.x,
-        y: player.physics.position.y - 80
-    };
-    player.ropeObject.rope.attach(player.physics.position, anchor);
-    player.ropeObject.aimWorld = { ...anchor };
-    player.ropeObject.lastPointer = { x: 400, y: 300, down: true };
-    player.ropeObject.lastViewport = { width: 1280, height: 720 };
-    player.ropeObject.wasPointerDown = true;
-    player.ropeObject.swingDrag = {
-        origin: { x: 400, y: 300 },
-        direction: null,
-        progress: 0,
-        age: 0.1,
-        used: false
-    };
-    return {
-        ...movementCommand(0),
-        pointer: { x: 300, y: 300, down: true, pressed: false, released: false },
-        viewport: { width: 1280, height: 720 },
-        aimWorld: { ...anchor }
-    };
 }
 
 function listen(server) {
@@ -736,108 +716,6 @@ export async function run() {
             "a rejected predicted shot must restore its previous local cooldown"
         );
         assert.equal(spawnPlayer.weapon.cooldown, 0, "a rejected claim must not start the server cooldown");
-        spawnRoom.simulation.enemies = [];
-        const resonance = ARTIFACT_CATALOG.find(({ id }) => id === "rope-resonance");
-        spawnPlayer.artifacts.add(resonance);
-        spawnRoom.simulation.applyArtifactEffects(spawnPlayer);
-        gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
-        await waitFor(
-            () =>
-                spawnOwner
-                    .snapshot()
-                    .state.players.find(({ id }) => id === spawnOwner.playerId)
-                    ?.artifacts.some(({ id }) => id === resonance.id) &&
-                spawnOwner.ownerRuntime.simulation.players
-                    .find(({ id }) => id === spawnOwner.playerId)
-                    ?.artifacts.snapshot()
-                    .some(({ id }) => id === resonance.id),
-            "the owner prediction must receive the rope resonance artifact"
-        );
-        const swingCommand = armPredictedRopeSwing(spawnOwner);
-        spawnOwner.advance(swingCommand);
-        const swingEvents = spawnOwner.drainPredictedEvents();
-        const predictedSwing = swingEvents.find(({ eventType }) => eventType === "predicted-rope-swing");
-        assert.ok(
-            predictedSwing,
-            `the owner must emit the swing transition before its receipt: ${JSON.stringify({
-                swingEvents,
-                state: spawnOwner.snapshot().owner,
-                artifacts: spawnOwner.ownerRuntime.simulation.players
-                    .find(({ id }) => id === spawnOwner.playerId)
-                    .artifacts.snapshot()
-            })}`
-        );
-        assert.ok(spawnOwner.snapshot().owner.ropeDamageBoostRemaining > 0);
-        const preClaimSequence = spawnOwner.latestSnapshot.snapshotSequence;
-        gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
-        await waitFor(
-            () => spawnOwner.latestSnapshot.snapshotSequence > preClaimSequence,
-            "the owner must receive a pre-claim authority snapshot"
-        );
-        assert.ok(
-            spawnOwner.snapshot().owner.ropeDamageBoostRemaining > 0,
-            "an in-flight pre-claim snapshot must not erase immediate swing feedback"
-        );
-        assert.equal(spawnOwner.submitRopeSwingClaim(predictedSwing), true);
-        await waitFor(
-            () => spawnOwner.ropeSwingClaimReceipts.length > 0,
-            "the owner must receive its rope swing receipt"
-        );
-        const firstSwingReceipt = spawnOwner.drainRopeSwingClaimReceipts()[0];
-        assert.equal(firstSwingReceipt.accepted, true);
-        const observerSwingEvents = [];
-        await waitFor(() => {
-            observerSwingEvents.push(...spawnObserver.drainEvents());
-            const observerPlayer = spawnObserver.snapshot().state.players.find(({ id }) => id === spawnOwner.playerId);
-            return (
-                observerPlayer?.ropeDamageBoostRemaining > 0 &&
-                observerSwingEvents.some(({ predictionId }) => predictionId === predictedSwing.predictionId)
-            );
-        }, "the accepted swing state and event must converge to the observer");
-        assert.ok(spawnRoom.simulation.playerState(spawnOwner.playerId).ropeDamageBoostRemaining > 0);
-        assert.equal(spawnOwner.submitRopeSwingClaim(predictedSwing), true);
-        await waitFor(() => spawnOwner.ropeSwingClaimReceipts.length > 0, "a duplicate swing must return its receipt");
-        assert.equal(spawnOwner.drainRopeSwingClaimReceipts()[0].duration, firstSwingReceipt.duration);
-        await new Promise((resolve) => setTimeout(resolve, 80));
-        observerSwingEvents.push(...spawnObserver.drainEvents());
-        assert.equal(
-            observerSwingEvents.filter(({ predictionId }) => predictionId === predictedSwing.predictionId).length,
-            1,
-            "a duplicate swing claim must not create a second shared event"
-        );
-
-        spawnPlayer.ropeDamageBoostRemaining = 0;
-        spawnRoom.simulation.applyArtifactEffects(spawnPlayer);
-        const localSwingPlayer = spawnOwner.ownerRuntime.simulation.players.find(
-            ({ id }) => id === spawnOwner.playerId
-        );
-        localSwingPlayer.ropeDamageBoostRemaining = 0;
-        spawnOwner.ownerRuntime.simulation.applyArtifactEffects(localSwingPlayer);
-        const rejectedSwingCommand = armPredictedRopeSwing(spawnOwner);
-        spawnOwner.advance(rejectedSwingCommand);
-        const rejectedSwing = spawnOwner
-            .drainPredictedEvents()
-            .find(({ eventType }) => eventType === "predicted-rope-swing");
-        assert.ok(rejectedSwing);
-        assert.equal(
-            spawnOwner.submitRopeSwingClaim({
-                ...rejectedSwing,
-                anchor: { x: rejectedSwing.anchor.x + 1000, y: rejectedSwing.anchor.y }
-            }),
-            true
-        );
-        await waitFor(
-            () => spawnOwner.ropeSwingClaimReceipts.length > 0,
-            "the invalid swing must return a rejection receipt"
-        );
-        const rejectedSwingReceipt = spawnOwner.drainRopeSwingClaimReceipts()[0];
-        assert.equal(rejectedSwingReceipt.accepted, false);
-        assert.equal(rejectedSwingReceipt.reason, "anchor-mismatch");
-        assert.equal(
-            spawnOwner.snapshot().owner.ropeDamageBoostRemaining,
-            0,
-            "a rejected swing must roll back the predicted boost"
-        );
         spawnObserver.close();
         spawnOwner.close();
         await waitFor(() => !gameServer.rooms.has(spawnOwner.channelId), "the projectile spawn room must close");
@@ -949,9 +827,10 @@ export async function run() {
         collisionOwner.close();
         await waitFor(() => !gameServer.rooms.has(collisionOwner.channelId), "the collision app room must close");
 
+        const RecordingWebSocket = createRecordingWebSocket();
         const authority = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=new`,
-            WebSocketImpl: WebSocket
+            WebSocketImpl: RecordingWebSocket
         });
         await authority.connect();
         const initial = authority.snapshot();
@@ -1084,6 +963,26 @@ export async function run() {
         for (const command of [movementCommand(1), movementCommand(-1)]) {
             authority.advance(command);
         }
+        let recoveryClaim = null;
+        await waitFor(() => {
+            recoveryClaim = RecordingWebSocket.sentMessages.find(
+                ({ type, payload }) =>
+                    type === "impact-claim" &&
+                    payload.projectileId === rejectedBodyProjectile.id &&
+                    payload.outcome.state
+            );
+            return recoveryClaim !== undefined;
+        }, "state divergence must produce one recovery claim with the captured owner state");
+        assert.equal(
+            RecordingWebSocket.sentMessages.filter(
+                ({ type, payload }) =>
+                    type === "impact-claim" &&
+                    payload.projectileId === rejectedBodyProjectile.id &&
+                    payload.outcome.state
+            ).length,
+            1,
+            "state divergence must send exactly one recovery claim"
+        );
         await waitFor(
             () => authority.impactClaimReceipts.length > 0,
             "the victim-owned body impact must return a receipt"
@@ -1096,16 +995,18 @@ export async function run() {
             () => authorityPlayer.health === clientBody.health,
             "the shared server player HP must converge to the victim client's resolved value"
         );
-        await waitFor(
-            () => (room.session.lastOwnerMotionTicks.get(authority.playerId) ?? -1) >= clientBody.tick,
-            "impact recovery must publish at least the tick that produced the victim's current state"
+        assert.ok(
+            (room.session.lastOwnerMotionTicks.get(authority.playerId) ?? -1) >=
+                recoveryClaim.payload.outcome.stateTick,
+            "impact recovery must publish at least the captured recovery state tick"
         );
+        assert.equal(authorityPlayer.health, recoveryClaim.payload.outcome.state.health);
         assert.ok(
             Math.hypot(
-                authorityPlayer.physics.position.x - clientBody.position.x,
-                authorityPlayer.physics.position.y - clientBody.position.y
+                authorityPlayer.physics.position.x - recoveryClaim.payload.outcome.state.position.x,
+                authorityPlayer.physics.position.y - recoveryClaim.payload.outcome.state.position.y
             ) < 0.001,
-            "divergence recovery must use the victim's current state instead of rewinding to the impact frame"
+            "divergence recovery must use the captured owner state instead of rewinding to the impact frame"
         );
 
         const ropeAnchor = {
@@ -1189,35 +1090,7 @@ export async function run() {
             "the attacker must converge on the server enemy health"
         );
         const rewardCheckpoint = room.simulation.world.checkpoints[1];
-        room.simulation.beginArtifactReward(rewardCheckpoint);
-        await waitFor(
-            () => authority.snapshot().state.artifactRewards?.[authority.playerId],
-            "the client must receive its checkpoint reward"
-        );
         const app = new MultiplayerGameApp({ canvas: fakeCanvas(), authority });
-        app.update(1 / 120, movementCommand(0));
-        app.update(1 / 120, movementCommand(1));
-        assert.equal(app.localArtifactReward.selectedIndex, 1, "the selected card must move before server receipt");
-        assert.equal(
-            room.simulation.artifactRewards.get(authority.playerId).selectedIndex,
-            0,
-            "local card feedback must not wait for the authority input lead"
-        );
-        app.update(1 / 120, movementCommand(0));
-        app.update(1 / 120, { ...movementCommand(0), vertical: -1, interact: true });
-        assert.equal(app.localArtifactReward, null, "confirmation must close the local chooser immediately");
-        await waitFor(
-            () => !room.simulation.artifactRewards.has(authority.playerId),
-            "artifact selection must resolve without waiting for a scheduled movement command"
-        );
-        assert.equal(
-            room.simulation.players.find(({ id }) => id === authority.playerId).artifacts.snapshot()[0].id,
-            "rapid-gear"
-        );
-        await waitFor(
-            () => authority.artifactSelectionReceipts.some(({ accepted }) => accepted),
-            "the selecting client must receive an artifact receipt"
-        );
         const checkpointObserver = new RemoteGameAuthority({
             url: `ws://127.0.0.1:${port}/multiplayer?channel=${authority.channelId}`,
             WebSocketImpl: WebSocket
@@ -1315,7 +1188,9 @@ export async function run() {
             pointer: { x: 420, y: 120, down: true, pressed: true, released: false },
             aimWorld: { x: anchor.x, y: anchor.y }
         };
-        authority.advance(attachCommand);
+        for (let tick = 0; tick < 48 && !authority.snapshot().owner.rope.isAttached; tick += 1) {
+            authority.advance(attachCommand);
+        }
         assert.equal(
             authority.snapshot().owner.rope.isAttached,
             true,

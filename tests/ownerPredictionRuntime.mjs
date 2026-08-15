@@ -45,9 +45,9 @@ export function run() {
         ),
         true
     );
-    assert.equal(rewardNavigation.horizontal, 0, "artifact navigation must not move local prediction");
-    assert.equal(rewardNavigation.vertical, 0, "artifact confirmation must not jump local prediction");
-    assert.equal(rewardNavigation.pointer.down, false, "artifact navigation must not attach the local rope");
+    assert.equal(rewardNavigation.horizontal, 0, "choice navigation must not move local prediction");
+    assert.equal(rewardNavigation.vertical, 0, "choice confirmation must not jump local prediction");
+    assert.equal(rewardNavigation.pointer.down, false, "choice navigation must not attach the local rope");
 
     const server = new GameSimulation();
     const serverPlayer = primaryPlayer(server);
@@ -97,7 +97,6 @@ export function run() {
     close(predicted.rope.length, serverPlayer.ropeObject.rope.length, "rope.length");
     assert.equal(predicted.swingDrag.used, true);
     assert.equal(predicted.swingDrag.used, serverPlayer.ropeObject.swingDrag.used);
-    close(predicted.ropeDamageBoostRemaining, serverPlayer.ropeDamageBoostRemaining, "rope boost");
 
     const detachedSnapshot = {
         ...snapshot,
@@ -354,61 +353,12 @@ export function run() {
         "final rejection must preserve client hit invulnerability"
     );
 
-    const overlappingSwings = new OwnerPredictionRuntime({ ownerId: serverPlayer.id, predictionLeadTicks: 0 });
-    overlappingSwings.reconcile(snapshot, []);
-    const overlappingSwingPlayer = primaryPlayer(overlappingSwings.simulation);
-    overlappingSwingPlayer.ropeDamageBoostRemaining = 3;
-    overlappingSwings.simulation.applyArtifactEffects(overlappingSwingPlayer);
-    const firstSwingTick = overlappingSwings.state().tick;
-    overlappingSwings.recordPredictedRopeSwing(firstSwingTick, 0);
-    const firstSwingPrediction = overlappingSwings.drainPredictedEvents()[0];
-    overlappingSwings.advance(overlapIdle);
-    const secondSwingPreviousBoost = overlappingSwings.state().ropeDamageBoostRemaining;
-    overlappingSwingPlayer.ropeObject.rope.attach(overlappingSwingPlayer.physics.position, {
-        x: overlappingSwingPlayer.physics.position.x,
-        y: overlappingSwingPlayer.physics.position.y - 80
-    });
-    overlappingSwingPlayer.ropeDamageBoostRemaining = 3;
-    overlappingSwings.simulation.applyArtifactEffects(overlappingSwingPlayer);
-    const secondSwingTick = overlappingSwings.state().tick;
-    overlappingSwings.recordPredictedRopeSwing(secondSwingTick, secondSwingPreviousBoost);
-    const secondSwingPrediction = overlappingSwings.drainPredictedEvents()[0];
-    const secondSwingBoost = overlappingSwings.state().ropeDamageBoostRemaining;
-    assert.equal(
-        overlappingSwings.recordRopeSwingReceipt({
-            predictionId: firstSwingPrediction.predictionId,
-            accepted: false
-        }),
-        true
-    );
-    close(
-        overlappingSwings.state().ropeDamageBoostRemaining,
-        secondSwingBoost,
-        "rejecting an earlier swing must keep the later pending swing"
-    );
-    assert.equal(
-        overlappingSwings.recordRopeSwingReceipt({
-            predictionId: secondSwingPrediction.predictionId,
-            accepted: false
-        }),
-        true
-    );
-    close(
-        overlappingSwings.state().ropeDamageBoostRemaining,
-        0,
-        "rejecting the final swing must use the baseline corrected after the earlier rejection"
-    );
-
     const lethalServer = new GameSimulation();
     const lethalServerPlayer = primaryPlayer(lethalServer);
     lethalServer.enemies = [];
     lethalServer.tick = 12;
     lethalServer.activeCheckpoint = lethalServer.world.checkpoints[1];
     lethalServerPlayer.health = 10;
-    for (const id of ["kept-a", "kept-b", "predicted-loss"]) {
-        lethalServerPlayer.artifacts.add({ id, name: id });
-    }
-    lethalServer.applyArtifactEffects(lethalServerPlayer);
     const lethalSnapshot = buildAuthoritySnapshot({ simulation: lethalServer, acknowledgements: {} });
     const lethalPrediction = new OwnerPredictionRuntime({
         ownerId: lethalServerPlayer.id,
@@ -428,21 +378,11 @@ export function run() {
         x: lethalServer.activeCheckpoint.x,
         y: lethalServer.activeCheckpoint.y
     });
-    assert.deepEqual(
-        lethalLocal.artifacts.map(({ id }) => id),
-        ["kept-a", "kept-b"],
-        "lethal damage must predict deterministic checkpoint artifact loss"
-    );
     lethalPrediction.reconcile(lethalSnapshot, []);
     assert.equal(
         lethalPrediction.state().health,
         lethalLocal.health,
         "a pre-impact snapshot must not erase pending predicted health"
-    );
-    assert.deepEqual(
-        lethalPrediction.state().artifacts,
-        lethalLocal.artifacts,
-        "a pre-impact snapshot must not restore pending predicted artifact loss"
     );
     lethalPrediction.reconcile(lethalSnapshot, []);
     assert.deepEqual(
@@ -450,7 +390,6 @@ export function run() {
         lethalLocal.position,
         "a shared motion snapshot must not undo an impact predicted at the shared motion tick"
     );
-    assert.deepEqual(lethalPrediction.state().artifacts, lethalLocal.artifacts);
     assert.equal(
         lethalPrediction.recordImpactReceipt(
             { projectileId: lethalImpact.projectileId, accepted: false },
@@ -461,11 +400,6 @@ export function run() {
     const rejectedLethal = lethalPrediction.state();
     assert.equal(rejectedLethal.health, lethalLocal.health, "rejection must not heal a lethal client impact");
     assert.deepEqual(rejectedLethal.position, lethalLocal.position, "rejection must not undo client respawn");
-    assert.deepEqual(
-        rejectedLethal.artifacts,
-        lethalLocal.artifacts,
-        "rejection must not restore artifacts lost by the client"
-    );
 
     const checkpointServer = new GameSimulation();
     const checkpointPlayer = primaryPlayer(checkpointServer);
@@ -493,8 +427,8 @@ export function run() {
         reachedCheckpoint.id,
         "checkpoint progress must change before the server receipt"
     );
-    assert.equal(checkpointPrediction.state().rope.isAttached, false);
-    assert.equal(checkpointPrediction.artifactReward().checkpointId, reachedCheckpoint.id);
+    assert.equal(checkpointPrediction.state().rope.isAttached, true, "reaching a checkpoint must preserve the rope");
+    assert.equal(checkpointPrediction.foundationReward(), null, "a checkpoint must not open a Foundation chooser");
 
     const afterCheckpointLethal = {
         projectileId: "impact-after-predicted-checkpoint",
@@ -516,7 +450,6 @@ export function run() {
         true
     );
     assert.equal(checkpointPrediction.renderSnapshot().activeCheckpoint.id, previousCheckpoint.id);
-    assert.equal(checkpointPrediction.artifactReward(), null);
     assert.deepEqual(
         checkpointPrediction.state().position,
         { x: previousCheckpoint.x, y: previousCheckpoint.y },
@@ -675,7 +608,6 @@ export function run() {
                 playerId: movingPlayer.id,
                 reason: "fall",
                 health: movingPlayer.maxHealth,
-                artifactIds: [],
                 position: sharedRespawnPosition
             }
         ]

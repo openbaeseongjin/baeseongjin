@@ -141,17 +141,13 @@ export function run() {
         ]
     };
     relaySimulation.activeCollisionSurfaces = [relayTarget];
-    relaySimulation.dispatchOwnerInput(
-        relayPlayer.id,
-        command({
-            pointerDown: true,
-            aimWorld: {
-                x: relayPlayer.physics.position.x + 105,
-                y: relayPlayer.physics.position.y + 110
-            }
-        }),
-        1 / 120
-    );
+    const relayAim = {
+        x: relayPlayer.physics.position.x + 105,
+        y: relayPlayer.physics.position.y + 110
+    };
+    for (let tick = 0; tick < 48 && !relayPlayer.ropeObject.rope.isAttached; tick += 1) {
+        relaySimulation.dispatchOwnerInput(relayPlayer.id, command({ pointerDown: true, aimWorld: relayAim }), 1 / 120);
+    }
     assert.equal(relayPlayer.ropeObject.rope.isAttached, true, "Relay Link must allow the one assisted re-attach");
     assert.equal(relaySimulation.playerState(relayPlayer.id).augmentRuntimeState.relayWindowRemaining, 0);
 

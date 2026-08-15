@@ -1,18 +1,21 @@
 import { closestPointOnSurface } from "../world/WorldGenerator.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { releaseRopeFromBody, ropeAttachmentPoint } from "../rope/RopeAttachment.js";
+import { rotateVector } from "../physics/AngularMotion.js";
+import { hookReach } from "../rope/RopeLauncher.js";
 import { createInputCapabilityMixin } from "./InputCapability.js";
 
-export function findRopeAttachment({ aimPoint, playerPosition, surfaces, maxAttachDistance, aimTolerance = 90 }) {
+export function findRopeAttachment({ aimPoint, origin, surfaces, maxAttachDistance, aimTolerance = 90 }) {
+    if (!Number.isFinite(origin?.x) || !Number.isFinite(origin?.y)) return null;
     let best = null;
     let bestScore = Number.POSITIVE_INFINITY;
     for (const surface of surfaces) {
         if (surface.grappleable === false) continue;
         const point = closestPointOnSurface(aimPoint, surface);
-        const playerDistance = playerPosition.distanceTo(point);
-        if (playerDistance > maxAttachDistance) continue;
+        const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
+        if (launchDistance > maxAttachDistance) continue;
         const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
-        const score = aimDistance * 2 + playerDistance * 0.05;
+        const score = aimDistance * 2 + launchDistance * 0.05;
         if (aimDistance <= aimTolerance && score < bestScore) {
             best = point;
             bestScore = score;
@@ -21,7 +24,7 @@ export function findRopeAttachment({ aimPoint, playerPosition, surfaces, maxAtta
     return best;
 }
 
-export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, config, onSwing, onFlash }) {
+export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, config, onFlash }) {
     if (!ropeObject.swingDrag || ropeObject.swingDrag.used || !ropeObject.rope.anchor) return;
     ropeObject.swingDrag.age += dt;
     const evaluation = evaluateSwingDrag({
@@ -38,9 +41,26 @@ export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, 
     ropeObject.swingDrag.progress = evaluation.progress;
     if (!evaluation.triggered || ropeObject.swingDrag.age < config.swingDragMinHoldSeconds) return;
     owner.physics.addImpulseAtLocalPoint(evaluation.direction, config.swingImpulse, ropeObject.rope.attachmentOffset);
-    onSwing();
     ropeObject.swingDrag.used = true;
     onFlash({ type: "swing", age: 0 });
+}
+
+export function launchHandPosition(owner, ropeConfig, aimWorld) {
+    const sign = aimWorld.x < owner.physics.position.x ? -1 : 1;
+    const offset = rotateVector(
+        { x: Math.abs(ropeConfig.handOffset.x) * sign, y: ropeConfig.handOffset.y },
+        owner.physics.angle
+    );
+    return { x: owner.physics.position.x + offset.x, y: owner.physics.position.y + offset.y };
+}
+
+function launchAimDirection(owner, ropeConfig, aimWorld, candidate = null) {
+    const origin = launchHandPosition(owner, ropeConfig, aimWorld);
+    const target = candidate ?? aimWorld;
+    return {
+        origin,
+        direction: { x: target.x - origin.x, y: target.y - origin.y }
+    };
 }
 
 export const withRopePointerInput = createInputCapabilityMixin({
@@ -61,50 +81,76 @@ export const withRopePointerInput = createInputCapabilityMixin({
             }),
             onAttach = () => {},
             onRelease = () => {},
-            onFlash,
-            onSwing
+            onFlash
         }
     ) {
         const inputModifiers = getRopeInputModifiers();
         this.lastPointer = command.pointer;
         this.lastViewport = command.viewport ?? this.lastViewport;
         this.aimWorld = command.aimWorld;
-        this.attachmentCandidate = canControl
-            ? findRopeAttachment({
-                  aimPoint: this.aimWorld,
-                  playerPosition: owner.physics.position,
-                  surfaces,
-                  maxAttachDistance: ropeConfig.maxAttachDistance,
-                  aimTolerance: inputModifiers.aimTolerance
-              })
-            : null;
+        if (owner.ropeDisabledRemaining > 0 && this.launcher.inFlight) {
+            this.launcher.clear();
+        }
+        const reach = hookReach(ropeConfig);
+        const launchOrigin = launchHandPosition(owner, ropeConfig, this.aimWorld);
+        this.attachmentCandidate =
+            canControl && owner.ropeDisabledRemaining <= 0 && !this.launcher.inFlight
+                ? findRopeAttachment({
+                      aimPoint: this.aimWorld,
+                      origin: launchOrigin,
+                      surfaces,
+                      maxAttachDistance: reach,
+                      aimTolerance: inputModifiers.aimTolerance
+                  })
+                : null;
+
         if (command.pointer.down && !this.wasPointerDown) {
             this.attachBufferRemaining = inputModifiers.attachBufferSeconds;
         }
+
+        if (this.launcher.inFlight) {
+            const outcome = this.launcher.advance(dt);
+            if (outcome?.status === "hit") {
+                if (this.rope.attach(owner.physics.position, outcome.target, { angle: owner.physics.angle })) {
+                    onFlash({ type: "attach", age: 0 });
+                    this.swingDrag = {
+                        origin: { x: command.pointer.x, y: command.pointer.y },
+                        direction: null,
+                        progress: 0,
+                        age: 0,
+                        used: false
+                    };
+                    this.attachBufferRemaining = 0;
+                    onAttach({ relayAssisted: inputModifiers.relayActive });
+                } else {
+                    this.launcher.startReload();
+                }
+            }
+        }
+
         if (
             command.pointer.down &&
             !this.rope.isAttached &&
             owner.ropeDisabledRemaining <= 0 &&
+            this.launcher.cooldownRemaining <= 0 &&
             this.attachBufferRemaining > 0 &&
-            this.attachmentCandidate
+            !this.launcher.inFlight
         ) {
-            if (
-                this.rope.attach(owner.physics.position, this.attachmentCandidate, {
-                    angle: owner.physics.angle
-                })
-            ) {
-                onFlash({ type: "attach", age: 0 });
-                this.swingDrag = {
-                    origin: { x: command.pointer.x, y: command.pointer.y },
-                    direction: null,
-                    progress: 0,
-                    age: 0,
-                    used: false
-                };
+            const { origin, direction } = launchAimDirection(
+                owner,
+                ropeConfig,
+                this.aimWorld,
+                this.attachmentCandidate
+            );
+            if (this.launcher.launch(origin, direction, this.attachmentCandidate)) {
                 this.attachBufferRemaining = 0;
-                onAttach({ relayAssisted: inputModifiers.relayActive });
             }
         }
+
+        if (!command.pointer.down && this.wasPointerDown && this.launcher.inFlight) {
+            this.launcher.cancel();
+        }
+
         if (command.pointer.down && this.rope.isAttached) {
             updateRopeSwingDrag({
                 ropeObject: this,
@@ -113,7 +159,6 @@ export const withRopePointerInput = createInputCapabilityMixin({
                 viewport: command.viewport,
                 dt,
                 config: ropeConfig,
-                onSwing,
                 onFlash
             });
         }
@@ -132,8 +177,12 @@ export const withRopePointerInput = createInputCapabilityMixin({
             onRelease(release);
             onFlash({ type: "release", age: 0 });
             this.swingDrag = null;
+            this.launcher.startReload();
         }
-        this.attachBufferRemaining = Math.max(0, this.attachBufferRemaining - dt);
+        this.launcher.update(dt);
+        if (this.launcher.cooldownRemaining <= 0) {
+            this.attachBufferRemaining = Math.max(0, this.attachBufferRemaining - dt);
+        }
         this.wasPointerDown = command.pointer.down;
     }
 });

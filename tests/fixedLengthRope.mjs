@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
-import { PLAYER_CONFIG, ROPE_CONFIG } from "../src/game/config.js";
+import { PLAYER_CONFIG, ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
 import { AngularMotion } from "../src/game/physics/AngularMotion.js";
 import { FixedLengthRope } from "../src/game/rope/FixedLengthRope.js";
 import { ropeAttachmentPoint } from "../src/game/rope/RopeAttachment.js";
@@ -75,7 +75,35 @@ export function run() {
     rope.detach();
     rope.apply(position, velocity, angular, 1 / 120);
     assert.deepEqual(velocity, releaseVelocity, "release must preserve momentum");
-    assert.equal(rope.attach(position, { x: ROPE_CONFIG.maxAttachDistance + 1000, y: 300 }), false);
+
+    const boundary = new FixedLengthRope(ROPE_CONFIG);
+    const boundaryPosition = new Vector2(0, 0);
+    assert.equal(
+        boundary.attach(boundaryPosition, {
+            x: ROPE_CONFIG.handOffset.x + ropeHookReach() - 1,
+            y: ROPE_CONFIG.handOffset.y
+        }),
+        true,
+        "a 399px hand-to-anchor reach must attach"
+    );
+    boundary.detach();
+    assert.equal(
+        boundary.attach(boundaryPosition, {
+            x: ROPE_CONFIG.handOffset.x + ropeHookReach(),
+            y: ROPE_CONFIG.handOffset.y
+        }),
+        true,
+        "an exact 400px hand-to-anchor reach must attach"
+    );
+    boundary.detach();
+    assert.equal(
+        boundary.attach(boundaryPosition, {
+            x: ROPE_CONFIG.handOffset.x + ropeHookReach() + 1,
+            y: ROPE_CONFIG.handOffset.y
+        }),
+        false,
+        "a 401px hand-to-anchor reach must be rejected"
+    );
 
     const orbitRope = new FixedLengthRope(ROPE_CONFIG);
     const orbitPosition = new Vector2(0, 300);

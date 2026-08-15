@@ -221,4 +221,91 @@ export function run() {
     assert.equal(bandProjectiles.length, 0);
     assert.equal(bandLimitedEnemy.lockedTargetId, "inside-band");
     assert.equal(bandLimitedEnemy.attackState, "acquire");
+
+    assert.equal(COMBAT_CONFIG.enemyHealth, 100, "the Sentry first-pass health must stay 100");
+    assert.equal(COMBAT_CONFIG.enemyAttackRange, 760, "the Sentry recognition range must stay 760");
+    assert.equal(COMBAT_CONFIG.enemyProjectileSpeed, 520, "the Sentry projectile speed must stay 520");
+    assert.equal(COMBAT_CONFIG.enemyFireInterval, 1.0, "the Sentry repeat cadence must stay 1.0 second");
+
+    const sentry = new EnemyObject({
+        id: "enemy-sentry-range",
+        position: new Vector2(100, 0),
+        level: 2,
+        activation: { x: 100, y: -40, width: 760, height: 80 },
+        radius: 18,
+        health: COMBAT_CONFIG.enemyHealth,
+        maxHealth: COMBAT_CONFIG.enemyHealth,
+        fireCooldown: 0
+    });
+    const sentryProjectiles = [];
+    const sentrySpawn = advanceToFire({
+        enemy: sentry,
+        targets: [activeTarget("sentry-range-600", 700, 0)],
+        projectiles: sentryProjectiles,
+        registry
+    });
+    assert.equal(
+        sentrySpawn[0].targetId,
+        "sentry-range-600",
+        "a target farther than the old 520 range but within 760 must be acquired"
+    );
+    assert.equal(
+        Math.round(sentrySpawn[0].velocity.length()),
+        COMBAT_CONFIG.enemyProjectileSpeed,
+        "the Sentry projectile must travel at the tuned speed"
+    );
+    assert.equal(sentry.fireCooldown, COMBAT_CONFIG.enemyFireInterval, "the fired shot must start a 1.0s cadence");
+
+    const farSentry = new EnemyObject({
+        id: "enemy-sentry-far",
+        position: new Vector2(100, 0),
+        level: 2,
+        activation: { x: -800, y: -40, width: 1600, height: 80 },
+        radius: 18,
+        health: COMBAT_CONFIG.enemyHealth,
+        maxHealth: COMBAT_CONFIG.enemyHealth,
+        fireCooldown: 0
+    });
+    updateEnemyWeapons({
+        enemies: [farSentry],
+        targets: [activeTarget("sentry-out-of-range", 901, 0)],
+        projectiles: [],
+        registry,
+        config: COMBAT_CONFIG,
+        dt: 0
+    });
+    assert.equal(farSentry.lockedTargetId, null, "a target beyond 760 must not be acquired");
+
+    const losSentry = new EnemyObject({
+        id: "enemy-sentry-los",
+        position: new Vector2(100, 0),
+        level: 2,
+        activation: { x: -800, y: -40, width: 1600, height: 80 },
+        rules: ["cover-ends-los"],
+        radius: 18,
+        health: COMBAT_CONFIG.enemyHealth,
+        maxHealth: COMBAT_CONFIG.enemyHealth,
+        fireCooldown: 0
+    });
+    updateEnemyWeapons({
+        enemies: [losSentry],
+        targets: [activeTarget("sentry-behind-cover", 200, 0)],
+        projectiles: [],
+        registry,
+        config: COMBAT_CONFIG,
+        surfaces: [
+            {
+                id: "cover-wall",
+                kind: "cover",
+                collision: true,
+                areaId: null,
+                vertices: [
+                    { x: 150, y: -50 },
+                    { x: 150, y: 50 }
+                ]
+            }
+        ],
+        dt: 0
+    });
+    assert.equal(losSentry.lockedTargetId, null, "cover LOS must still gate acquisition within 760");
 }

@@ -1,5 +1,4 @@
 import { Vector2 } from "../../game-kit/index.js";
-import { ARTIFACT_CATALOG, getArtifactEffects } from "../artifacts/ArtifactCatalog.js";
 import {
     FOUNDATION_AUGMENT_CATALOG,
     FOUNDATION_AUGMENT_CONFIG,
@@ -14,16 +13,16 @@ import {
 } from "../combat/CombatSystems.js";
 import { selectNearestEnemy } from "../combat/CombatTargeting.js";
 import { EnemyObject } from "../combat/EnemyObject.js";
-import { ARTIFACT_CONFIG, COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";
-import { findRopeAttachment } from "../input/RopePointerInput.js";
+import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPlayerImpactStateDigest } from "../network/PlayerImpactClaim.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
-import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "../rewards/ArtifactRewardSelection.js";
+import { hookReach } from "../rope/RopeLauncher.js";
 import {
     advanceFoundationRewardSelection,
     createFoundationRewardSelection
@@ -129,9 +128,7 @@ export class GameSimulation {
         this.resets = 0;
         this.runState = "playing";
         this.activeCheckpoint = this.world.checkpoints[0] ?? null;
-        this.artifactRewards = new Map();
         this.foundationRewards = new Map();
-        this.rewardedCheckpointIds = new Set();
         this.tick = 0;
         this.replicationEvents = [];
     }
@@ -142,7 +139,6 @@ export class GameSimulation {
             playerConfig: PLAYER_CONFIG,
             ropeConfig: ROPE_CONFIG,
             combatConfig: COMBAT_CONFIG,
-            artifactConfig: ARTIFACT_CONFIG,
             spawn,
             playerId
         });
@@ -157,12 +153,7 @@ export class GameSimulation {
         const [removed] = this.players.splice(index, 1);
         this.#inputDrivenObjectsByOwner.delete(playerId);
         this.portalTransitions.delete(playerId);
-        const removedReward = this.artifactRewards.get(playerId);
-        this.artifactRewards.delete(playerId);
         this.foundationRewards.delete(playerId);
-        if (removedReward && this.artifactRewards.size === 0) {
-            this.rewardedCheckpointIds.add(removedReward.checkpointId);
-        }
         if (removed.id === this.#primaryPlayerId) this.#primaryPlayerId = this.players[0]?.id ?? null;
         return true;
     }
@@ -219,17 +210,15 @@ export class GameSimulation {
                 attachBufferRemaining: player.ropeObject.attachBufferRemaining,
                 swingDrag: swingDragState(player.ropeObject.swingDrag)
             },
+            launcher: player.ropeObject.launcher.snapshot(),
             weapon: {
                 range: player.weapon.range,
                 damage: player.weapon.damage,
                 fireInterval: player.weapon.fireInterval,
                 cooldown: player.weapon.cooldown
             },
-            artifacts: player.artifacts.snapshot(),
             foundationAugment: player.foundation.selectedId,
-            augmentRuntimeState: player.foundation.snapshot(),
-            ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
-            lastCheckpointLoss: [...player.lastCheckpointLoss]
+            augmentRuntimeState: player.foundation.snapshot()
         };
     }
 
@@ -257,10 +246,6 @@ export class GameSimulation {
             maxHealth: enemy.maxHealth,
             fireCooldown: enemy.fireCooldown
         }));
-    }
-
-    getArtifactReward(playerId) {
-        return this.artifactRewards.get(playerId) ?? null;
     }
 
     getFoundationReward(playerId) {
@@ -308,12 +293,11 @@ export class GameSimulation {
         player.ropeObject.lastViewport = Object.freeze({ width: 1, height: 1 });
         player.ropeObject.attachBufferRemaining = 0;
         player.ropeObject.swingDrag = null;
+        player.ropeObject.launcher.clear();
         player.weapon.cooldown = 0;
         player.hitInvulnerabilityRemaining = 0;
         player.ropeDisabledRemaining = 0;
-        player.ropeDamageBoostRemaining = 0;
         player.foundation.resetRuntime();
-        this.applyArtifactEffects(player);
         this.portalTransitions.set(player.id, Object.freeze({ gateId, position, tick }));
         return this.ownerPredictionState(player.id);
     }
@@ -357,6 +341,7 @@ export class GameSimulation {
         player.physics.isGrounded = state.isGrounded;
         if (player.ropeDisabledRemaining > 0) {
             this.releasePlayerRope(playerId);
+            player.ropeObject.launcher.clear();
         } else if (synchronizeRope && state.rope.isAttached) {
             player.ropeObject.rope.attach(player.physics.position, state.rope.anchor, {
                 angle: player.physics.angle,
@@ -364,6 +349,9 @@ export class GameSimulation {
             });
         } else if (synchronizeRope) {
             this.releasePlayerRope(playerId);
+        }
+        if (player.ropeDisabledRemaining <= 0) {
+            player.ropeObject.launcher.restore(state.launcher);
         }
         return true;
     }
@@ -399,30 +387,20 @@ export class GameSimulation {
         return this.worldProgress.snapshot();
     }
 
-    synchronizePredictionProgress(
-        playerId,
-        { artifactReward = null, foundationReward = null, rewardedCheckpointIds = [] } = {}
-    ) {
+    synchronizePredictionProgress(playerId, { foundationReward = null } = {}) {
         this.#requirePlayer(playerId);
-        this.artifactRewards.clear();
         this.foundationRewards.clear();
-        if (artifactReward) {
-            this.artifactRewards.set(playerId, createArtifactRewardSelection(artifactReward));
-        }
         if (foundationReward) {
             this.foundationRewards.set(playerId, createFoundationRewardSelection(foundationReward));
         }
-        this.rewardedCheckpointIds = new Set(rewardedCheckpointIds);
-        return this.getArtifactReward(playerId);
+        return this.getFoundationReward(playerId);
     }
 
     predictionProgressState(playerId) {
         this.#requirePlayer(playerId);
         return Object.freeze({
             activeCheckpointId: this.activeCheckpoint?.id ?? null,
-            artifactReward: this.getArtifactReward(playerId),
-            foundationReward: this.getFoundationReward(playerId),
-            rewardedCheckpointIds: Object.freeze([...this.rewardedCheckpointIds])
+            foundationReward: this.getFoundationReward(playerId)
         });
     }
 
@@ -445,8 +423,6 @@ export class GameSimulation {
             player.weapon.range = shared.weapon.range;
             player.weapon.damage = shared.weapon.damage;
             player.weapon.fireInterval = shared.weapon.fireInterval;
-            player.artifacts.replace(shared.artifacts);
-            this.applyArtifactEffects(player);
         }
         if (
             !preservePendingFoundation &&
@@ -473,17 +449,8 @@ export class GameSimulation {
         this.tick = tick;
         return Object.freeze({
             projectile,
-            swingTriggered: inputOutcome.swingTriggered,
             foundationEvents: inputOutcome.foundationEvents
         });
-    }
-
-    restorePredictedRopeBoost(ownerId, remaining) {
-        if (!Number.isFinite(remaining) || remaining < 0) throw new Error("remaining must be non-negative");
-        const player = this.#requirePlayer(ownerId);
-        player.ropeDamageBoostRemaining = remaining;
-        this.applyArtifactEffects(player);
-        return this.ownerPredictionState(ownerId);
     }
 
     restorePredictedWeaponCooldown(ownerId, remaining) {
@@ -501,6 +468,8 @@ export class GameSimulation {
         const player = this.#requirePlayer(ownerId);
         if (event.resolution === "rope-cut") {
             this.releasePlayerRope(ownerId, { transferAngularMomentum: true });
+            player.ropeObject.attachBufferRemaining = 0;
+            player.ropeObject.launcher.clear();
             player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
             return true;
         }
@@ -541,12 +510,10 @@ export class GameSimulation {
             lifeState: state.lifeState,
             rope: state.rope,
             swingDrag: state.control.swingDrag,
-            ropeDamageBoostRemaining: state.ropeDamageBoostRemaining,
+            launcher: state.launcher,
             weaponCooldown: state.weapon.cooldown,
-            artifacts: state.artifacts,
             foundationAugment: state.foundationAugment,
-            augmentRuntimeState: state.augmentRuntimeState,
-            lastCheckpointLoss: state.lastCheckpointLoss
+            augmentRuntimeState: state.augmentRuntimeState
         };
     }
 
@@ -596,15 +563,18 @@ export class GameSimulation {
         player.weapon.damage = state.weapon.damage;
         player.weapon.fireInterval = state.weapon.fireInterval;
         player.weapon.cooldown = state.weapon.cooldown;
-        player.artifacts.replace(state.artifacts);
         player.foundation.restore(state.foundationAugment ?? null, state.augmentRuntimeState);
-        player.ropeDamageBoostRemaining = state.ropeDamageBoostRemaining;
-        player.lastCheckpointLoss = [...state.lastCheckpointLoss];
+        if (player.ropeDisabledRemaining > 0) {
+            player.ropeObject.launcher.clear();
+        } else {
+            player.ropeObject.launcher.restore(state.launcher);
+        }
+        const launchOrigin = launchHandPosition(player, ROPE_CONFIG, player.ropeObject.aimWorld);
         player.ropeObject.attachmentCandidate = findRopeAttachment({
             aimPoint: player.ropeObject.aimWorld,
-            playerPosition: player.physics.position,
+            origin: launchOrigin,
             surfaces: this.world.surfaces,
-            maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
+            maxAttachDistance: hookReach(ROPE_CONFIG),
             aimTolerance: player.foundation.ropeInputModifiers(ROPE_CONFIG).aimTolerance
         });
     }
@@ -623,7 +593,6 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            resolveArtifactSelections = true,
             advanceInputDrivenObjects = true
         } = {}
     ) {
@@ -642,7 +611,6 @@ export class GameSimulation {
             resolvePlayerProjectileHits,
             spawnPlayerProjectiles,
             recoverPlayerDeaths,
-            resolveArtifactSelections,
             advanceInputDrivenObjects
         });
     }
@@ -657,7 +625,6 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            resolveArtifactSelections = true,
             advanceInputDrivenObjects = true
         } = {}
     ) {
@@ -668,11 +635,8 @@ export class GameSimulation {
         }
         if (resolveSummitProgress && this.updateSummitProgress()) return;
         if (resolveCheckpointProgress) this.updateCheckpointProgress();
-        const choosingRewardPlayerIds = new Set([...this.artifactRewards.keys(), ...this.foundationRewards.keys()]);
-        if (resolveArtifactSelections) {
-            this.updateArtifactRewards(commandsByPlayerId);
-            this.updateFoundationRewards(commandsByPlayerId);
-        }
+        const choosingRewardPlayerIds = new Set([...this.foundationRewards.keys()]);
+        this.updateFoundationRewards(commandsByPlayerId);
         const gameplayCommands = new Map(commandsByPlayerId);
         for (const playerId of choosingRewardPlayerIds) {
             const player = this.players.find(({ id }) => id === playerId);
@@ -788,7 +752,6 @@ export class GameSimulation {
 
     dispatchOwnerInput(ownerId, command, dt) {
         const player = this.#requirePlayer(ownerId);
-        let swingTriggered = false;
         const foundationEvents = [];
         const canControl = player.lifeState === "active";
         const effectiveCommand = canControl
@@ -898,16 +861,10 @@ export class GameSimulation {
                 },
                 onFlash: (eventFlash) => {
                     this.eventFlash = { ...eventFlash, playerId: player.id };
-                },
-                onSwing: () => {
-                    const effects = getArtifactEffects(player.artifacts.snapshot());
-                    player.ropeDamageBoostRemaining = effects.swingDamageDuration;
-                    this.applyArtifactEffects(player);
-                    swingTriggered = effects.swingDamageDuration > 0;
                 }
             }
         });
-        return Object.freeze({ swingTriggered, foundationEvents: Object.freeze(foundationEvents) });
+        return Object.freeze({ foundationEvents: Object.freeze(foundationEvents) });
     }
 
     commitFoundationEvents(events, { replicate = true } = {}) {
@@ -929,9 +886,7 @@ export class GameSimulation {
     #prepareOwnerStep(player, dt) {
         player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
         player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
-        player.ropeDamageBoostRemaining = Math.max(0, player.ropeDamageBoostRemaining - dt);
         player.foundation.advance(dt);
-        this.applyArtifactEffects(player);
     }
 
     #applyWorldForce(player, dt) {
@@ -980,7 +935,6 @@ export class GameSimulation {
             !player ||
             player.foundation.selectedId !== null ||
             this.foundationRewards.has(playerId) ||
-            this.artifactRewards.has(playerId) ||
             source?.kind !== "augment-node"
         ) {
             return false;
@@ -1140,73 +1094,6 @@ export class GameSimulation {
             playerId,
             position: { x: checkpoint.x, y: checkpoint.y }
         });
-        const rewardsArtifact = checkpoint.reward ?? checkpoint.level > 0;
-        if (rewardsArtifact && !this.rewardedCheckpointIds.has(checkpoint.id)) {
-            this.beginArtifactReward(checkpoint);
-        }
-    }
-
-    beginArtifactReward(checkpoint) {
-        this.metrics.recordFirstReward();
-        for (const player of this.players) {
-            this.artifactRewards.set(
-                player.id,
-                createArtifactRewardSelection({
-                    checkpointId: checkpoint.id,
-                    choices: ARTIFACT_CATALOG,
-                    selectedIndex: 0
-                })
-            );
-            player.ropeObject.rope.detach();
-            player.ropeObject.swingDrag = null;
-        }
-    }
-
-    updateArtifactRewards(commandsByPlayerId) {
-        for (const [playerId, reward] of [...this.artifactRewards]) {
-            const player = this.players.find(({ id }) => id === playerId);
-            if (!player) {
-                this.artifactRewards.delete(playerId);
-                continue;
-            }
-            this.updateArtifactReward(player, reward, this.commandForPlayer(player, commandsByPlayerId));
-        }
-    }
-
-    updateArtifactReward(player, reward, command) {
-        const outcome = advanceArtifactRewardSelection(reward, command);
-        this.artifactRewards.set(player.id, outcome.selection);
-        if (outcome.confirmedArtifactId) {
-            this.resolveArtifactSelection(player.id, {
-                checkpointId: reward.checkpointId,
-                artifactId: outcome.confirmedArtifactId
-            });
-        }
-    }
-
-    resolveArtifactSelection(playerId, { checkpointId, artifactId }) {
-        const player = this.players.find(({ id }) => id === playerId);
-        if (!player) return Object.freeze({ accepted: false, reason: "player-not-found" });
-        const reward = this.artifactRewards.get(playerId);
-        if (!reward) return Object.freeze({ accepted: false, reason: "reward-unavailable" });
-        if (reward.checkpointId !== checkpointId) {
-            return Object.freeze({ accepted: false, reason: "checkpoint-mismatch" });
-        }
-        const selected = reward.choices.find(({ id }) => id === artifactId);
-        if (!selected) return Object.freeze({ accepted: false, reason: "artifact-unavailable" });
-
-        player.artifacts.add(selected);
-        this.artifactRewards.delete(player.id);
-        this.applyArtifactEffects(player);
-        this.eventFlash = {
-            type: "artifact",
-            age: 0,
-            artifact: selected,
-            playerId: player.id,
-            position: player.physics.position.clone()
-        };
-        if (this.artifactRewards.size === 0) this.rewardedCheckpointIds.add(reward.checkpointId);
-        return Object.freeze({ accepted: true, checkpointId, artifactId });
     }
 
     updateFoundationRewards(commandsByPlayerId) {
@@ -1262,6 +1149,7 @@ export class GameSimulation {
             return Object.freeze({ accepted: false, reason: "selection-conflict" });
         }
         this.foundationRewards.delete(playerId);
+        this.metrics.recordFirstFoundation();
 
         const objectiveId = reward?.objectiveId ?? source.objectiveId;
         const selectionPayload = Object.freeze({
@@ -1301,12 +1189,6 @@ export class GameSimulation {
             if (source) this.beginFoundationReward(playerId, sourceId, source.objectiveId);
         }
         return this.playerState(playerId);
-    }
-
-    applyArtifactEffects(player = this.#primaryPlayer()) {
-        const effects = getArtifactEffects(player.artifacts.snapshot(), player.ropeDamageBoostRemaining);
-        player.weapon.damage = player.weapon.baseDamage * effects.damageMultiplier;
-        player.weapon.fireInterval = player.weapon.baseFireInterval * effects.fireIntervalMultiplier;
     }
 
     createEnemies() {
@@ -1392,39 +1274,6 @@ export class GameSimulation {
         return Object.freeze({ accepted: true, projectileId: projectile.id });
     }
 
-    resolveRopeSwingClaim(authenticatedPlayerId, claim, { positionTolerance = 40, anchorTolerance = 16 } = {}) {
-        const player = this.players.find(({ id }) => id === authenticatedPlayerId);
-        if (!player || player.lifeState !== "active") {
-            return Object.freeze({ accepted: false, reason: "player-ineligible" });
-        }
-        if (claim.predictionId !== `${authenticatedPlayerId}:swing:${claim.clientTick}`) {
-            return Object.freeze({ accepted: false, reason: "prediction-ownership" });
-        }
-        const effects = getArtifactEffects(player.artifacts.snapshot());
-        if (effects.swingDamageDuration <= 0) {
-            return Object.freeze({ accepted: false, reason: "swing-effect-missing" });
-        }
-        if (!player.ropeObject.rope.isAttached || !player.ropeObject.rope.anchor) {
-            return Object.freeze({ accepted: false, reason: "rope-detached" });
-        }
-        if (player.physics.position.distanceTo(claim.position) > positionTolerance) {
-            return Object.freeze({ accepted: false, reason: "position-mismatch" });
-        }
-        if (player.ropeObject.rope.anchor.distanceTo(claim.anchor) > anchorTolerance) {
-            return Object.freeze({ accepted: false, reason: "anchor-mismatch" });
-        }
-        player.ropeDamageBoostRemaining = effects.swingDamageDuration;
-        this.applyArtifactEffects(player);
-        this.recordReplicationEvent("rope-swing", {
-            playerId: authenticatedPlayerId,
-            predictionId: claim.predictionId,
-            position: { x: claim.position.x, y: claim.position.y },
-            anchor: { x: claim.anchor.x, y: claim.anchor.y },
-            duration: effects.swingDamageDuration
-        });
-        return Object.freeze({ accepted: true, duration: effects.swingDamageDuration });
-    }
-
     resolveFoundationShearClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
         const player = this.#findPlayer(authenticatedPlayerId);
         if (!player || player.lifeState !== "active") {
@@ -1441,7 +1290,7 @@ export class GameSimulation {
         }
         if (
             Math.hypot(claim.anchor.x - claim.playerPosition.x, claim.anchor.y - claim.playerPosition.y) >
-            ROPE_CONFIG.maxAttachDistance + positionTolerance
+            hookReach(ROPE_CONFIG) + positionTolerance
         ) {
             return Object.freeze({ accepted: false, reason: "segment-out-of-range" });
         }
@@ -1562,6 +1411,8 @@ export class GameSimulation {
         if (claim.impactType === "rope-cut") {
             player.ropeObject.rope.detach();
             player.ropeObject.swingDrag = null;
+            player.ropeObject.attachBufferRemaining = 0;
+            player.ropeObject.launcher.clear();
             player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
             this.eventFlash = {
                 type: "rope-cut",
@@ -1606,6 +1457,8 @@ export class GameSimulation {
         if (claim.impactType === "rope-cut") {
             player.ropeObject.rope.detach();
             player.ropeObject.swingDrag = null;
+            player.ropeObject.attachBufferRemaining = 0;
+            player.ropeObject.launcher.clear();
             player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
             return;
         }
@@ -1700,52 +1553,30 @@ export class GameSimulation {
         player.ropeObject.lastPointer = Object.freeze({ x: 0, y: 0, down: false });
         player.ropeObject.attachBufferRemaining = 0;
         player.ropeObject.swingDrag = null;
+        player.ropeObject.launcher.clear();
         player.health = player.maxHealth;
         player.weapon.cooldown = 0;
         player.hitInvulnerabilityRemaining = 0;
         player.ropeDisabledRemaining = 0;
         player.lifeState = "active";
-        player.lastCheckpointLoss = player.artifacts.applyCheckpointLoss();
-        player.ropeDamageBoostRemaining = 0;
         player.foundation.resetRuntime();
-        this.applyArtifactEffects(player);
     }
 
     #recordPlayerRespawn(player, reason, causeId) {
         this.metrics.recordDefeat();
-        const artifactIds = player.lastCheckpointLoss.map(({ id }) => id);
-        if (artifactIds.length > 0) {
-            this.recordReplicationEvent("artifact-loss", {
-                playerId: player.id,
-                artifactIds
-            });
-        }
-        if (artifactIds.length > 0) {
-            this.eventFlash = {
-                type: "artifact-loss",
-                age: 0,
-                playerId: player.id,
-                reason,
-                causeId,
-                artifacts: [...player.lastCheckpointLoss],
-                position: player.physics.position.clone()
-            };
-        } else {
-            this.eventFlash = {
-                type: "checkpoint-respawn",
-                age: 0,
-                playerId: player.id,
-                reason,
-                causeId,
-                position: player.physics.position.clone()
-            };
-        }
+        this.eventFlash = {
+            type: "checkpoint-respawn",
+            age: 0,
+            playerId: player.id,
+            reason,
+            causeId,
+            position: player.physics.position.clone()
+        };
         this.recordReplicationEvent("player-respawned", {
             playerId: player.id,
             reason,
             causeId,
             health: player.health,
-            artifactIds,
             position: { x: player.physics.position.x, y: player.physics.position.y }
         });
         this.resets += 1;
@@ -1788,23 +1619,18 @@ export class GameSimulation {
             playerLifeState: player.lifeState,
             runState: this.runState,
             activeCheckpoint: this.activeCheckpoint,
-            artifacts: player.artifacts.snapshot(),
             foundationAugment: player.foundation.selectedId,
             augmentRuntimeState: player.foundation.snapshot(),
-            lastCheckpointLoss: [...player.lastCheckpointLoss],
-            artifactReward: this.artifactRewards.get(player.id) ?? null,
-            artifactRewards: Object.fromEntries(this.artifactRewards),
+            ropeShot: player.ropeObject.launcher.snapshot(),
             foundationReward: this.foundationRewards.get(player.id) ?? null,
             foundationRewards: Object.fromEntries(this.foundationRewards),
-            rewardedCheckpointIds: [...this.rewardedCheckpointIds],
-            ropeDamageBoostRemaining: player.ropeDamageBoostRemaining,
             metrics: this.metrics.snapshot(),
             worldProgress: this.worldProgress?.snapshot() ?? null,
             windStates: this.world.windZones
                 ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
                 : Object.freeze([]),
             resets: this.resets,
-            maxAttachDistance: ROPE_CONFIG.maxAttachDistance
+            maxAttachDistance: hookReach(ROPE_CONFIG)
         };
     }
 }

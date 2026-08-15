@@ -7,10 +7,13 @@ import {
     CombatEffectRenderer,
     EventEffectRenderer,
     RopeRenderer,
+    RopeShotRenderer,
     SwingRenderer,
     WorldGeometryRenderer,
     localRopes,
-    remoteRopes
+    localShots,
+    remoteRopes,
+    remoteShots
 } from "./layers/SharedSceneRenderers.js";
 import {
     SpriteEnemyRenderer,
@@ -72,6 +75,8 @@ export class SpriteSceneRenderer {
             new AttachRangeRenderer(),
             new RopeRenderer(localRopes),
             new RopeRenderer(remoteRopes),
+            new RopeShotRenderer(localShots),
+            new RopeShotRenderer(remoteShots),
             new SpriteRemotePlayerRenderer({ assets: this.playerAssets, definition: playerDefinition }),
             new SwingRenderer(),
             new SpriteEnemyRenderer(),

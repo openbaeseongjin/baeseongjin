@@ -6,7 +6,7 @@ export class RunMetrics {
         this.damageTaken = 0;
         this.ropeCuts = 0;
         this.defeats = 0;
-        this.firstRewardSeconds = null;
+        this.firstFoundationSeconds = null;
         this.currentAreaId = null;
         this.areaActiveSeconds = new Map();
         this.areaClearSeconds = new Map();
@@ -31,8 +31,8 @@ export class RunMetrics {
         this.areaClearSeconds.set(areaId, this.areaActiveSeconds.get(areaId) ?? 0);
     }
 
-    recordFirstReward() {
-        if (this.firstRewardSeconds === null) this.firstRewardSeconds = this.activeSeconds;
+    recordFirstFoundation() {
+        if (this.firstFoundationSeconds === null) this.firstFoundationSeconds = this.activeSeconds;
     }
 
     recordEnemyOutcomes(playerEvents) {
@@ -57,7 +57,7 @@ export class RunMetrics {
             damageTaken: this.damageTaken,
             ropeCuts: this.ropeCuts,
             defeats: this.defeats,
-            firstRewardSeconds: this.firstRewardSeconds,
+            firstFoundationSeconds: this.firstFoundationSeconds,
             areaTiming: Object.freeze({
                 currentAreaId: this.currentAreaId,
                 currentAreaSeconds,

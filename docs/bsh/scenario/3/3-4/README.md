@@ -420,7 +420,7 @@ Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
 
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 
@@ -457,7 +457,7 @@ Mandatory Grapple 목표:
 180–380 px
 ```
 
-두 Route 모두 Max Range 440 Challenge를 추가하지 않는다.
+두 Route 모두 Max Range 400 Challenge를 추가하지 않는다.
 
 ---
 
@@ -1487,7 +1487,7 @@ Story 질문:
 - PUBLIC이 모든 면에서 더 쉬움
 - 특정 Augment만 SERVICE 통과
 - Route 선택 후 변경 불가
-- Crossover가 Rope Max 440 밖
+- Crossover가 Rope Max 400 밖
 - Public Scanner를 같은 Route의 옆 Permanent Anchor로 무료 우회
 
 ### System

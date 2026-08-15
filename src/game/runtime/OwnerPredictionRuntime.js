@@ -85,7 +85,6 @@ export class OwnerPredictionRuntime {
         this.correctionSamples = [];
         this.predictedEvents = [];
         this.emittedPredictionTicks = new Map();
-        this.pendingRopeSwings = new Map();
         this.pendingProjectileSpawns = new Map();
         this.pendingImpacts = new Map();
         this.nextImpactPredictionOrder = 0;
@@ -139,9 +138,7 @@ export class OwnerPredictionRuntime {
             ? this.simulation.predictionProgressState(this.ownerId)
             : {
                   activeCheckpointId: snapshot.state.activeCheckpointId,
-                  artifactReward: snapshot.state.artifactRewards?.[this.ownerId] ?? null,
-                  foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null,
-                  rewardedCheckpointIds: snapshot.state.rewardedCheckpointIds ?? []
+                  foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null
               };
         this.simulation.preparePrediction(snapshot.state.enemies ?? [], progress.activeCheckpointId);
         if (this.simulation.worldProgress && snapshot.state.worldProgress) {
@@ -413,10 +410,6 @@ export class OwnerPredictionRuntime {
         return true;
     }
 
-    artifactReward() {
-        return this.simulation.getArtifactReward(this.ownerId);
-    }
-
     foundationReward() {
         return this.simulation.getFoundationReward(this.ownerId);
     }
@@ -483,8 +476,7 @@ export class OwnerPredictionRuntime {
         });
     }
 
-    recordPredictedOutcome({ projectile, swingTriggered, foundationEvents = [] }, tick, previous) {
-        if (swingTriggered) this.recordPredictedRopeSwing(tick, previous.ropeDamageBoostRemaining);
+    recordPredictedOutcome({ projectile, foundationEvents = [] }, tick, previous) {
         this.recordPredictedFoundationEvents(foundationEvents, tick);
         this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);
     }
@@ -503,53 +495,6 @@ export class OwnerPredictionRuntime {
                 })
             );
         });
-    }
-
-    recordPredictedRopeSwing(tick, previousBoost) {
-        const predictionId = `${this.ownerId}:swing:${tick}`;
-        const eventKey = `rope-swing:${predictionId}`;
-        if (this.emittedPredictionTicks.has(eventKey)) return;
-        const state = this.state();
-        if (!state.rope.isAttached || !state.rope.anchor) return;
-        this.emittedPredictionTicks.set(eventKey, tick);
-        this.pendingRopeSwings.set(predictionId, {
-            previousBoost,
-            previousTick: tick - 1,
-            appliedBoost: state.ropeDamageBoostRemaining,
-            tick
-        });
-        this.predictedEvents.push(
-            Object.freeze({
-                eventType: "predicted-rope-swing",
-                predictionId,
-                tick,
-                ownerId: this.ownerId,
-                position: { x: state.position.x, y: state.position.y },
-                anchor: { x: state.rope.anchor.x, y: state.rope.anchor.y }
-            })
-        );
-    }
-
-    recordRopeSwingReceipt(receipt) {
-        const pending = this.pendingRopeSwings.get(receipt.predictionId);
-        if (!pending) return false;
-        this.pendingRopeSwings.delete(receipt.predictionId);
-        if (receipt.accepted) return true;
-        if (
-            rebaseLaterTimerPredictions(
-                this.pendingRopeSwings.values(),
-                pending,
-                this.fixedDt,
-                "previousBoost",
-                "appliedBoost"
-            )
-        ) {
-            return true;
-        }
-        const elapsedTicks = Math.max(0, this.simulation.getTick() - pending.previousTick);
-        const remaining = Math.max(0, pending.previousBoost - elapsedTicks * this.fixedDt);
-        this.simulation.restorePredictedRopeBoost(this.ownerId, remaining);
-        return true;
     }
 
     recordProjectileSpawnReceipt(receipt) {

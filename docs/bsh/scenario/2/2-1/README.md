@@ -281,7 +281,7 @@ Player Radius             15
 Gravity                   1250
 Max Horizontal Speed      360
 Jump Speed                440
-Rope Max Attach Distance  440
+Rope Max Attach Distance  400
 Attach Buffer             0.1 sec
 Swing Impulse             780
 ```
@@ -290,7 +290,7 @@ Swing Impulse             780
 
 ### Mandatory Grapple Range
 
-권장: `220–320 px` 목표. 필수 Grapple에서 `400–440 px` 사거리 끝을 시험하지 않는다.
+권장: `220–320 px` 목표. 필수 Grapple에서 `400 px` 사거리 끝을 시험하지 않는다.
 
 ## 6. 전체 맵 구조
 
@@ -397,7 +397,7 @@ Role: Story Question 확정. 2-2 연결.
 
 ### Grapple Distance Intent
 
-대표 접근거리는 대략 다음 범위로 시작한다. 모두 440px Max Range를 시험하지 않는다.
+대표 접근거리는 대략 다음 범위로 시작한다. 모두 400px Max Range를 시험하지 않는다.
 
 ```text
 P0 → G1   ~250 px
@@ -986,7 +986,7 @@ Player collision blockage count, simultaneous landing failure, recovery interfer
 ### FAIL — Gameplay
 
 - 780 Impulse가 없으면 필수 구간 불가능
-- 400–440px Attach가 반복적으로 필수
+- 400px Attach가 반복적으로 필수
 - Safe Route가 사실상 Airborne Chain을 강제
 - Recovery가 Start Return과 비슷한 비용
 - 2-1에서 새 Tutorial Text가 필요

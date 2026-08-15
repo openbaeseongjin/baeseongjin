@@ -11,7 +11,7 @@
 | 960×768 Geometry | `IMPLEMENTED — README와 완전 일치` | P0~P3, R1, Exit Deck, G1/G2, Specialization Node 전부 좌표 일치 |
 | Specialization Node | `IMPLEMENTED(뼈대) / PENDING(실제 효과)` | `worldObject(..., "augment-node", 0, -416, {interactionRadius, objectiveId, selectionPool:"TBD", requiresFoundation:true, perPlayerSelection:true, cueIds:["foundation-detected","specialization-available"]})`. `selectionPool:"TBD"`가 README §0 "SYSTEM GATE — 아직 LOCKED가 아니다"와 정확히 일치 |
 | Objective 타입 | `IMPLEMENTED / CONTENT BLOCKED` | 공용 `interact-choice` 요청은 구현됐지만 `selectionPool:"TBD"`라 Specialization chooser와 결과 적용은 아직 열 수 없음 |
-| Selection Input 재사용(`ArtifactRewardSelection`) | `README 서술만 존재, 직접 확인 필요` | README §19-1이 "VERIFIED"로 표기하지만 이 Area 정의 자체는 Selection UI 로직을 포함하지 않는다(UI는 별도 시스템) |
+| Selection Input 재사용(`FoundationRewardSelection`) | `README 서술만 존재, 직접 확인 필요` | README §19-1이 "VERIFIED"로 표기하지만 이 Area 정의 자체는 Selection UI 로직을 포함하지 않는다(UI는 별도 시스템) |
 | Camera Zones | `NOT IMPLEMENTED` | 필드 없음 |
 | Story Trigger Presentation | `NOT IMPLEMENTED` | `storyTriggers: ["residential-service","foundation-detected","specialization-available"]` 3개 모두 미연결 |
 | Approved Blockout / Art Reference | `NEEDED` | `images/` 폴더 없음 |

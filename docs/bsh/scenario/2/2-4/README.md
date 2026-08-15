@@ -363,7 +363,7 @@ Player Radius            15
 Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 Camera Desktop Zoom      1

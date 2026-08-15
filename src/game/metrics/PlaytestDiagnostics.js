@@ -30,7 +30,7 @@ export function formatPlaytestDiagnostics({
         `damageTaken: ${metrics.damageTaken}`,
         `ropeCuts: ${metrics.ropeCuts}`,
         `defeats: ${metrics.defeats}`,
-        `firstRewardSeconds: ${valueOrDash(metrics.firstRewardSeconds, (value) => value.toFixed(1))}`,
+        `firstFoundationSeconds: ${valueOrDash(metrics.firstFoundationSeconds, (value) => value.toFixed(1))}`,
         `currentArea: ${metrics.areaTiming?.currentAreaId ?? "-"}`,
         `currentAreaSeconds: ${valueOrDash(metrics.areaTiming?.currentAreaSeconds, (value) => value.toFixed(1))}`,
         `areaClearSeconds: ${

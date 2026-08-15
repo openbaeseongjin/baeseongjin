@@ -60,19 +60,60 @@ export function run() {
     assert.deepEqual(boundaryWorld.playerState("boundary-player").velocity, { x: 320, y: -140 });
     assert.ok(Math.abs(boundaryWorld.playerState("boundary-player").angle - 0.4) < Number.EPSILON * 4);
     assert.equal(boundaryWorld.playerState("boundary-player").angularVelocity, -1.5);
+    const restoredPlayer = primaryPlayer(boundaryWorld);
+    assert.equal(
+        restoredPlayer.ropeObject.launcher.launch(
+            restoredPlayer.physics.position,
+            { x: 1, y: 0 },
+            { x: restoredPlayer.physics.position.x + 80, y: restoredPlayer.physics.position.y }
+        ),
+        true
+    );
+    assert.equal(restoredPlayer.ropeObject.launcher.inFlight, true);
+    boundaryWorld.applyOwnerMotion("boundary-player", {
+        position: { x: 160, y: 420 },
+        velocity: { x: 320, y: -140 },
+        angle: 0.4,
+        angularVelocity: -1.5,
+        isGrounded: false,
+        rope: { isAttached: false, anchor: null, attachmentOffset: null },
+        launcher: null
+    });
+    assert.equal(
+        restoredPlayer.ropeObject.launcher.inFlight,
+        false,
+        "an owner-motion restore with a null launcher must clear an already flying hook"
+    );
+    assert.equal(
+        restoredPlayer.ropeObject.launcher.launch(
+            restoredPlayer.physics.position,
+            { x: 1, y: 0 },
+            { x: restoredPlayer.physics.position.x + 80, y: restoredPlayer.physics.position.y }
+        ),
+        true
+    );
+    boundaryWorld.applyOwnerMotion("boundary-player", {
+        position: { x: 160, y: 420 },
+        velocity: { x: 320, y: -140 },
+        angle: 0.4,
+        angularVelocity: -1.5,
+        isGrounded: false,
+        rope: { isAttached: false, anchor: null, attachmentOffset: null }
+    });
+    assert.equal(
+        restoredPlayer.ropeObject.launcher.inFlight,
+        false,
+        "an owner-motion restore without launcher state must clear an already flying hook"
+    );
     for (const alias of [
         "player",
         "rope",
-        "artifacts",
         "playerEntity",
         "aimWorld",
         "attachmentCandidate",
         "wasPointerDown",
         "attachBufferRemaining",
-        "swingDrag",
-        "ropeDamageBoostRemaining",
-        "lastCheckpointLoss",
-        "artifactReward"
+        "swingDrag"
     ]) {
         assert.equal(
             Object.hasOwn(boundaryWorld, alias) || alias in boundaryWorld,
@@ -89,7 +130,7 @@ export function run() {
     assert.equal(sharedWorld.players[1], partner.entity);
     assert.notEqual(partner.physics, sharedPrimary.physics);
     assert.notEqual(partner.rope, sharedPrimary.ropeObject.rope);
-    assert.notEqual(partner.artifacts, sharedPrimary.artifacts);
+    assert.notEqual(partner.foundation, sharedPrimary.foundation);
     assert.equal(partner.physics.position.x, 180);
     sharedPrimary.ropeObject.aimWorld = { x: 40, y: 50 };
     sharedPrimary.ropeObject.swingDrag = { used: true };
@@ -218,7 +259,6 @@ export function run() {
     defeated.enemies = [];
     const respawnCheckpoint = defeated.world.checkpoints[2];
     defeated.activeCheckpoint = respawnCheckpoint;
-    for (const id of ["a", "b", "c"]) defeatedPlayer.artifacts.add({ id });
     defeatedPlayer.health = 0;
     defeated.step(1 / 60, command);
     assert.equal(defeated.snapshot().runState, "playing", "death must not pause the shared world");
@@ -227,30 +267,20 @@ export function run() {
     assert.equal(defeated.snapshot().activeCheckpoint.id, respawnCheckpoint.id);
     assert.equal(defeated.snapshot().player.position.x, respawnCheckpoint.x);
     assert.equal(defeated.snapshot().player.position.y, respawnCheckpoint.y);
-    assert.deepEqual(
-        defeated.snapshot().artifacts.map((artifact) => artifact.id),
-        ["a", "b"]
-    );
-    assert.deepEqual(
-        defeated.snapshot().lastCheckpointLoss.map((artifact) => artifact.id),
-        ["c"]
-    );
-    assert.equal(defeated.snapshot().eventFlash.type, "artifact-loss");
+    assert.equal(defeated.snapshot().eventFlash.type, "checkpoint-respawn");
     assert.equal(defeated.snapshot().eventFlash.reason, "health");
     assert.equal(defeated.snapshot().metrics.defeats, 1);
     assert.equal(defeated.snapshot().resets, 1);
     const respawnEvent = defeated.drainReplicationEvents().find(({ eventType }) => eventType === "player-respawned");
     assert.equal(respawnEvent.playerId, defeatedPlayer.id);
     assert.equal(respawnEvent.reason, "health");
-    assert.deepEqual(respawnEvent.artifactIds, ["c"]);
+    assert.equal(respawnEvent.artifactIds, undefined);
 
     const teamLoss = new GameSimulation();
     const teamPrimary = primaryPlayer(teamLoss);
     const lossPartner = teamLoss.addPlayer({ x: 150, y: 500 });
     const teamCheckpoint = teamLoss.world.checkpoints[2];
     teamLoss.activeCheckpoint = teamCheckpoint;
-    for (const id of ["a1", "a2", "a3"]) teamPrimary.artifacts.add({ id });
-    for (const id of ["b1", "b2", "b3"]) lossPartner.artifacts.add({ id });
     teamPrimary.health = 0;
     lossPartner.entity.health = 0;
     teamLoss.step(1 / 120, command);
@@ -259,19 +289,7 @@ export function run() {
         assert.equal(player.lifeState, "active");
         assert.equal(player.physics.position.x, teamCheckpoint.x);
         assert.equal(player.physics.position.y, teamCheckpoint.y);
-        assert.equal(player.artifacts.snapshot().length, 2);
-        assert.equal(player.lastCheckpointLoss.length, 1);
     }
-    assert.deepEqual(
-        teamPrimary.lastCheckpointLoss.map(({ id }) => id),
-        ["a3"]
-    );
-    assert.deepEqual(
-        lossPartner.entity.lastCheckpointLoss.map(({ id }) => id),
-        ["b3"]
-    );
-    const lossEvents = teamLoss.drainReplicationEvents().filter(({ eventType }) => eventType === "artifact-loss");
-    assert.deepEqual(lossEvents.map(({ playerId }) => playerId).sort(), teamLoss.players.map(({ id }) => id).sort());
     assert.equal(teamLoss.metrics.defeats, 2);
     assert.equal(teamLoss.resets, 2);
 
@@ -281,7 +299,6 @@ export function run() {
     const fallCheckpoint = fallWorld.world.checkpoints[1];
     fallWorld.activeCheckpoint = fallCheckpoint;
     fallPartner.entity.health = 12;
-    for (const id of ["f1", "f2", "f3"]) fallPartner.entity.artifacts.add({ id });
     fallPartner.physics.position.y = Number.POSITIVE_INFINITY;
     fallWorld.step(1 / 120, command);
     assert.equal(fallWorld.runState, "playing", "falling must not pause the cooperative world");
@@ -289,14 +306,10 @@ export function run() {
     assert.equal(fallPartner.entity.health, fallPartner.entity.maxHealth);
     assert.equal(fallPartner.physics.position.x, fallCheckpoint.x);
     assert.equal(fallPartner.physics.position.y, fallCheckpoint.y);
-    assert.deepEqual(
-        fallPartner.entity.artifacts.snapshot().map(({ id }) => id),
-        ["f1", "f2"]
-    );
     const fallEvent = fallWorld.drainReplicationEvents().find(({ eventType }) => eventType === "player-respawned");
     assert.equal(fallEvent.playerId, fallPartner.entity.id);
     assert.equal(fallEvent.reason, "fall");
-    assert.deepEqual(fallEvent.artifactIds, ["f3"]);
+    assert.equal(fallEvent.artifactIds, undefined);
 
     const soloFall = new GameSimulation();
     const soloPlayer = primaryPlayer(soloFall);
@@ -331,61 +344,30 @@ export function run() {
         "checkpoint progress must not go backward"
     );
 
-    const rewardRun = new GameSimulation();
-    const rewardPlayer = primaryPlayer(rewardRun);
-    const firstRewardCheckpoint = rewardRun.world.checkpoints[1];
-    rewardPlayer.physics.position.x = firstRewardCheckpoint.x;
-    rewardPlayer.physics.position.y = firstRewardCheckpoint.y;
-    rewardRun.step(1 / 60, command);
-    assert.equal(rewardRun.snapshot().artifactReward.selectedIndex, 0);
-    const rewardStartedSeconds = rewardRun.snapshot().metrics.activeSeconds;
-    const firstRewardSeconds = rewardRun.snapshot().metrics.firstRewardSeconds;
-    const choosingVelocityX = rewardPlayer.physics.velocity.x;
-    rewardRun.step(1 / 60, { ...command, horizontal: 1, vertical: -1 });
-    assert.ok(
-        rewardRun.snapshot().metrics.activeSeconds > rewardStartedSeconds,
-        "artifact choice time must remain part of the live world"
-    );
-    assert.equal(rewardPlayer.physics.velocity.x, choosingVelocityX, "reward navigation must not also move the player");
-    assert.equal(rewardRun.snapshot().metrics.checkpointsReached, 1);
-    assert.equal(rewardRun.snapshot().metrics.firstRewardSeconds, firstRewardSeconds);
-    const neutralCommand = { ...command, horizontal: 0, vertical: 0 };
-    rewardRun.step(1 / 60, neutralCommand);
-    rewardRun.step(1 / 60, { ...neutralCommand, horizontal: 1 });
-    assert.equal(rewardRun.snapshot().artifactReward.selectedIndex, 1);
-    rewardRun.step(1 / 60, neutralCommand);
-    rewardRun.step(1 / 60, { ...neutralCommand, vertical: -1 });
-    assert.equal(rewardRun.snapshot().artifactReward, null);
-    assert.equal(rewardRun.snapshot().artifacts[0].id, "rapid-gear");
-    assert.equal(rewardPlayer.weapon.fireInterval, 0.65 * 0.75);
-    assert.equal(rewardRun.snapshot().eventFlash.artifact.id, "rapid-gear");
-    assert.deepEqual(rewardRun.snapshot().rewardedCheckpointIds, [firstRewardCheckpoint.id]);
-
-    const secondRewardCheckpoint = rewardRun.world.checkpoints[2];
-    rewardPlayer.physics.position.x = secondRewardCheckpoint.x;
-    rewardPlayer.physics.position.y = secondRewardCheckpoint.y;
-    rewardRun.step(1 / 60, neutralCommand);
-    rewardRun.step(1 / 60, { ...neutralCommand, horizontal: 1 });
-    rewardRun.step(1 / 60, neutralCommand);
-    rewardRun.step(1 / 60, { ...neutralCommand, vertical: -1 });
-    assert.deepEqual(
-        rewardRun.snapshot().artifacts.map((artifact) => artifact.id),
-        ["rapid-gear", "rapid-gear"]
-    );
-    assert.equal(rewardPlayer.weapon.fireInterval, 0.65 * 0.75 * 0.75);
-    rewardPlayer.physics.position.x = firstRewardCheckpoint.x;
-    rewardPlayer.physics.position.y = firstRewardCheckpoint.y;
-    rewardRun.step(1 / 60, neutralCommand);
+    const checkpointNoReward = new GameSimulation();
+    const checkpointNoRewardPlayer = primaryPlayer(checkpointNoReward);
+    const noRewardCheckpoint = checkpointNoReward.world.checkpoints[2];
+    checkpointNoRewardPlayer.physics.position.x = noRewardCheckpoint.x;
+    checkpointNoRewardPlayer.physics.position.y = noRewardCheckpoint.y;
+    checkpointNoReward.step(1 / 60, command);
+    assert.equal(checkpointNoReward.snapshot().activeCheckpoint.id, noRewardCheckpoint.id);
     assert.equal(
-        rewardRun.snapshot().artifactReward,
+        checkpointNoReward.snapshot().foundationReward,
         null,
-        "revisiting an earlier checkpoint must not duplicate rewards"
+        "reaching a checkpoint must not open an artifact or reward chooser"
     );
+    assert.equal(
+        checkpointNoReward.snapshot().metrics.firstFoundationSeconds,
+        null,
+        "first Foundation time must remain unset until an actual Foundation selection"
+    );
+    assert.equal(checkpointNoRewardPlayer.weapon.fireInterval, COMBAT_CONFIG.fireInterval);
+    assert.equal(checkpointNoRewardPlayer.weapon.damage, COMBAT_CONFIG.weaponDamage);
 
-    const coopRewardRun = new GameSimulation();
-    const coopPrimary = primaryPlayer(coopRewardRun);
-    const coopPartner = coopRewardRun.addPlayer({ x: 160, y: 500 }).entity;
-    const coopCheckpoint = coopRewardRun.world.checkpoints[1];
+    const coopCheckpointRun = new GameSimulation();
+    const coopPrimary = primaryPlayer(coopCheckpointRun);
+    const coopPartner = coopCheckpointRun.addPlayer({ x: 160, y: 500 }).entity;
+    const coopCheckpoint = coopCheckpointRun.world.checkpoints[1];
     coopPrimary.physics.position.set(120, 500);
     coopPartner.physics.position.set(coopCheckpoint.x, coopCheckpoint.y);
     const coopNeutral = { ...command, horizontal: 0, vertical: 0 };
@@ -394,23 +376,13 @@ export function run() {
             [coopPrimary.id, primary],
             [coopPartner.id, partner]
         ]);
-    coopRewardRun.stepPlayers(1 / 60, commands(coopNeutral, coopNeutral));
+    coopCheckpointRun.stepPlayers(1 / 60, commands(coopNeutral, coopNeutral));
     assert.equal(
-        coopRewardRun.snapshot().activeCheckpoint.id,
+        coopCheckpointRun.snapshot().activeCheckpoint.id,
         coopCheckpoint.id,
         "either active player must activate the shared checkpoint"
     );
-    assert.equal(coopRewardRun.artifactRewards.size, 2);
-    const pausedPartnerPosition = coopPartner.physics.position.clone();
-    coopRewardRun.stepPlayers(1 / 60, commands({ ...coopNeutral, vertical: -1 }, { ...coopNeutral, horizontal: 1 }));
-    assert.equal(coopPrimary.artifacts.snapshot()[0].id, "power-core");
-    assert.equal(coopPartner.artifacts.snapshot().length, 0, "one choice must not change the partner inventory");
-    assert.equal(coopRewardRun.artifactRewards.size, 1);
-    assert.equal(coopPartner.physics.position.x, pausedPartnerPosition.x, "reward navigation must not move its owner");
-    coopRewardRun.stepPlayers(1 / 60, commands({ ...coopNeutral, horizontal: 1 }, coopNeutral));
-    assert.ok(coopPrimary.physics.velocity.x > 0, "a player who chose must keep moving while a partner decides");
-    coopRewardRun.stepPlayers(1 / 60, commands(coopNeutral, { ...coopNeutral, vertical: -1 }));
-    assert.equal(coopRewardRun.artifactRewards.size, 0);
-    assert.equal(coopPartner.artifacts.snapshot()[0].id, "rapid-gear");
-    assert.deepEqual([...coopRewardRun.rewardedCheckpointIds], [coopCheckpoint.id]);
+    assert.equal(coopCheckpointRun.foundationRewards.size, 0, "a shared checkpoint must not open a reward chooser");
+    coopCheckpointRun.stepPlayers(1 / 60, commands({ ...coopNeutral, horizontal: 1 }, coopNeutral));
+    assert.ok(coopPrimary.physics.velocity.x > 0, "movement must continue when no chooser is open");
 }

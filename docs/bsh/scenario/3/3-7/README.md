@@ -19,7 +19,7 @@
 | New Input | NONE |
 | New Rope Mode | NONE |
 | New Augment | NONE |
-| Artifact Reward | NONE |
+| Checkpoint reward | 없음 |
 | Wind | NONE |
 | Rope Cut | NONE for Patrol Drone |
 | Required Kill | NONE |
@@ -175,7 +175,7 @@ Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
 
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 Release Angular Transfer 0.55
@@ -567,7 +567,7 @@ ONE FINAL STORY MERGE
 ### VERIFIED
 
 ```text
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 ```
 
 ### HYPOTHESIS — BLOCKOUT
@@ -2005,7 +2005,7 @@ A/B/C = Tier mapping
 
 ### Runtime Alignment
 
-- current max rope 440 반영
+- current max rope 400 반영
 - current Patrol behavior 반영
 - generic cover LOS 존재 / Patrol baseline 미사용 차이 반영
 - Scanner Runtime dependency 명시
@@ -2179,7 +2179,7 @@ IMPULSE / RELAY / SHEAR
     gameplay: {
         newMechanic: null,
         newAugment: null,
-        artifactReward: null,
+        globalReward: null,
         wind: false,
         requiredKill: false
     },

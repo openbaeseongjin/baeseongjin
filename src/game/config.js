@@ -14,7 +14,9 @@ export const PLAYER_CONFIG = Object.freeze({
 });
 
 export const ROPE_CONFIG = Object.freeze({
-    maxAttachDistance: 440,
+    hookSpeed: 1400,
+    hookFlightRatio: Object.freeze({ numerator: 2, denominator: 7 }),
+    hookReloadSeconds: 0.2,
     attachBufferSeconds: 0.1,
     swingDragThresholdViewportRatio: 0.11,
     swingDragMinHoldSeconds: 0.08,
@@ -22,6 +24,14 @@ export const ROPE_CONFIG = Object.freeze({
     handOffset: Object.freeze({ x: 12, y: -7 }),
     releaseAngularTransfer: 0.55
 });
+
+export function ropeHookFlightSeconds(ropeConfig = ROPE_CONFIG) {
+    return ropeConfig.hookFlightRatio.numerator / ropeConfig.hookFlightRatio.denominator;
+}
+
+export function ropeHookReach(ropeConfig = ROPE_CONFIG) {
+    return (ropeConfig.hookSpeed * ropeConfig.hookFlightRatio.numerator) / ropeConfig.hookFlightRatio.denominator;
+}
 
 export const CAMERA_CONFIG = Object.freeze({
     desktopZoom: 1,
@@ -37,14 +47,14 @@ export const COMBAT_CONFIG = Object.freeze({
     projectileSpawnClearance: 8,
     playerProjectileLifetimeSeconds: 8,
     enemyRadius: 18,
-    enemyHealth: 30,
-    enemyAttackRange: 520,
+    enemyHealth: 100,
+    enemyAttackRange: 760,
     enemyAcquireSeconds: 0.25,
     enemyTrackSeconds: 0.8,
     enemyLockSeconds: 0.2,
     enemyFireFlashSeconds: 0.08,
-    enemyFireInterval: 1.4,
-    enemyProjectileSpeed: 260,
+    enemyFireInterval: 1.0,
+    enemyProjectileSpeed: 520,
     enemyProjectileRadius: 7,
     enemyProjectileDamage: 20,
     enemyProjectileLifetimeSeconds: 8,
@@ -52,11 +62,6 @@ export const COMBAT_CONFIG = Object.freeze({
     playerHitInvulnerability: 0.45,
     playerHitKnockback: 260,
     ropeDisabledSeconds: 0.6
-});
-
-export const ARTIFACT_CONFIG = Object.freeze({
-    checkpointLossFraction: 1 / 3,
-    minimumOwnedForLoss: 2
 });
 
 export const WORLD_CONFIG = Object.freeze({

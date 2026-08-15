@@ -15,7 +15,15 @@ import {
 import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
-import { AuthoredWorldObjectRenderer, localRopes, RopeRenderer } from "../src/render/layers/SharedSceneRenderers.js";
+import {
+    AuthoredWorldObjectRenderer,
+    localRopes,
+    localShots,
+    remoteShots,
+    RopeRenderer,
+    RopeShotRenderer
+} from "../src/render/layers/SharedSceneRenderers.js";
+import { ropeHookReach } from "../src/game/config.js";
 import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
@@ -567,6 +575,52 @@ export async function run() {
         ropeContext.calls.find(([name]) => name === "lineTo"),
         ["lineTo", 52, 53],
         "the shared rope renderer must end at the rotated hand attachment instead of the body centre"
+    );
+    const remoteShotContext = recordingContext();
+    new RopeShotRenderer(remoteShots).draw({
+        context: remoteShotContext,
+        scene: {
+            otherPlayers: [
+                {
+                    launcher: {
+                        shot: {
+                            origin: { x: 10, y: 20 },
+                            direction: { x: 1, y: 0 },
+                            target: null,
+                            traveled: 40,
+                            elapsed: 0.05
+                        },
+                        cooldownRemaining: 0
+                    }
+                }
+            ]
+        }
+    });
+    assert.deepEqual(
+        remoteShotContext.calls.find(([name]) => name === "lineTo"),
+        ["lineTo", 50, 20],
+        "the shared rope shot renderer must draw a remote player's in-flight hook"
+    );
+    const clampedShotContext = recordingContext();
+    new RopeShotRenderer(localShots).draw({
+        context: clampedShotContext,
+        scene: {
+            ropeShot: {
+                shot: {
+                    origin: { x: 0, y: 0 },
+                    direction: { x: 1, y: 0 },
+                    target: null,
+                    traveled: 500,
+                    elapsed: 0.3
+                },
+                cooldownRemaining: 0
+            }
+        }
+    });
+    assert.deepEqual(
+        clampedShotContext.calls.find(([name]) => name === "lineTo"),
+        ["lineTo", ropeHookReach(), 0],
+        "the rendered hook tip must be clamped to the derived 400px reach"
     );
     const authoredObjectContext = recordingContext();
     new AuthoredWorldObjectRenderer().draw({

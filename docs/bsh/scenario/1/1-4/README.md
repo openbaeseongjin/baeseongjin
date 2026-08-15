@@ -1528,35 +1528,7 @@ Run Variation
 
 ---
 
-## 53. 현재 Artifact 시스템과의 관계
-
-현재 구현에는 기존 Artifact가 존재.
-
-현재 Artifact:
-
-POWER CORE
-→ Auto Fire Damage 증가
-
-RAPID GEAR
-→ Fire Interval 감소
-
-ROPE RESONANCE
-→ Swing 후 일정 시간 Damage 증가
-
-이 시스템은
-새 Augment 철학과 완전히 같지 않음.
-
-권장:
-
-Artifact
-≠
-Rope Augment
-
-개념 분리.
-
----
-
-## 54. 권장 데이터 구조
+## 53. 권장 데이터 구조
 
 새:
 
@@ -2146,7 +2118,7 @@ FAIL IF:
 - Dummy가 실제 Enemy처럼 공격
 - 1-4가 또 하나의 Combat Room처럼 느껴짐
 - Node가 판타지 Shrine처럼 보임
-- Augment가 기존 Artifact와 구분되지 않음
+- Augment가 Rope 성장이 아닌 자동사격 Stat처럼 읽힘
 
 ---
 
@@ -2196,7 +2168,7 @@ PRIORITY 3
 
 3-Choice Selection UI
 
-기존 Artifact Reward Selection 로직
+기존 Foundation Reward Selection 로직
 재사용 가능한 부분 우선 검토.
 
 ---
@@ -2395,16 +2367,8 @@ SHEAR 사용자를 위해
 하지만 본격적인 Build 활용 시험은
 다음 1-5에서 진행한다.
 
-현재 기존 Artifact 시스템의
-3-choice selection UI/입력 구조는 재사용 가능하지만,
-
-기존 Artifact가
-자동사격 Stat 중심이고
-checkpointId 중심으로 설계되어 있으므로
-
-Rope Augment는
-별도의 AUGMENT_CATALOG와
-Node 기반 Reward Source로 분리하는 것을 권장한다.
+현재 Foundation 선택의 3-choice selection UI/입력 구조는 재사용하며,
+Rope Augment는 별도의 AUGMENT_CATALOG와 Node 기반 선택 흐름으로 유지한다.
 
 Stage 성공 기준은:
 

@@ -4,11 +4,10 @@ import { Vector2 } from "../game-kit/index.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../render/GameRendererFactory.js";
 import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
-import { CAMERA_CONFIG, ROPE_CONFIG } from "./config.js";
+import { CAMERA_CONFIG, ropeHookReach } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
-import { advanceArtifactRewardSelection, createArtifactRewardSelection } from "./rewards/ArtifactRewardSelection.js";
 import {
     advanceFoundationRewardSelection,
     createFoundationRewardSelection
@@ -32,8 +31,8 @@ function renderPlayer(state, predicted = null) {
     };
 }
 
-export function commandForLocalSimulation(command, choosingArtifact) {
-    if (!choosingArtifact) return command;
+export function commandForLocalSimulation(command, choosingChoice) {
+    if (!choosingChoice) return command;
     return Object.freeze({
         ...command,
         horizontal: 0,
@@ -81,8 +80,6 @@ export class MultiplayerGameApp {
         this.playerPresentationEvents = [];
         this.storyPresentation = new AuthoredStoryPresentation();
         this.localRunCompleted = false;
-        this.localArtifactReward = null;
-        this.pendingArtifactSelection = null;
         this.localFoundationReward = null;
         this.pendingFoundationSelection = null;
         this.foundationFeedback = null;
@@ -109,25 +106,6 @@ export class MultiplayerGameApp {
         this.input.detach();
         this.authority.close();
         this.frameId = null;
-    }
-
-    syncArtifactReward(authoritativeReward) {
-        if (!authoritativeReward) {
-            this.localArtifactReward = null;
-            this.pendingArtifactSelection = null;
-            return;
-        }
-        if (this.pendingArtifactSelection?.checkpointId === authoritativeReward.checkpointId) return;
-        if (this.localArtifactReward?.checkpointId === authoritativeReward.checkpointId) return;
-        this.localArtifactReward = createArtifactRewardSelection(authoritativeReward);
-    }
-
-    applyArtifactSelectionReceipts(authoritativeReward) {
-        for (const receipt of this.authority.drainArtifactSelectionReceipts()) {
-            if (receipt.accepted || receipt.checkpointId !== this.pendingArtifactSelection?.checkpointId) continue;
-            this.pendingArtifactSelection = null;
-            this.localArtifactReward = authoritativeReward ? createArtifactRewardSelection(authoritativeReward) : null;
-        }
     }
 
     syncFoundationReward(authoritativeReward, selectedFoundationId = null) {
@@ -245,7 +223,6 @@ export class MultiplayerGameApp {
         this.applyCheckpointClaimReceipts();
         this.applySummitClaimReceipts();
         this.predictableProjectiles.applySpawnClaimReceipts(this.authority.drainProjectileSpawnClaimReceipts());
-        this.authority.drainRopeSwingClaimReceipts();
         this.predictableProjectiles.applyHitClaimReceipts(this.authority.drainHitClaimReceipts());
         this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
@@ -259,30 +236,11 @@ export class MultiplayerGameApp {
         }
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
-        const authoritativeReward = current.state.artifactRewards?.[this.authority.playerId] ?? null;
-        this.applyArtifactSelectionReceipts(authoritativeReward);
-        this.syncArtifactReward(current.ownerArtifactReward ?? authoritativeReward);
         const authoritativeFoundationReward =
             current.ownerFoundationReward ?? current.state.foundationRewards?.[this.authority.playerId] ?? null;
         this.applyFoundationSelectionReceipts(authoritativeFoundationReward);
         this.syncFoundationReward(authoritativeFoundationReward, current.owner.foundationAugment);
-        const choosingArtifact = Boolean(this.localArtifactReward || this.pendingArtifactSelection);
         const choosingFoundation = Boolean(this.localFoundationReward || this.pendingFoundationSelection);
-        if (this.localArtifactReward) {
-            const outcome = advanceArtifactRewardSelection(this.localArtifactReward, command);
-            this.localArtifactReward = outcome.selection;
-            if (outcome.confirmedArtifactId) {
-                this.pendingArtifactSelection = Object.freeze({
-                    checkpointId: this.localArtifactReward.checkpointId,
-                    artifactId: outcome.confirmedArtifactId
-                });
-                this.localArtifactReward = null;
-                if (!this.authority.submitArtifactSelection(this.pendingArtifactSelection)) {
-                    this.pendingArtifactSelection = null;
-                    this.localArtifactReward = createArtifactRewardSelection(authoritativeReward);
-                }
-            }
-        }
         if (this.localFoundationReward) {
             const outcome = advanceFoundationRewardSelection(this.localFoundationReward, command);
             this.localFoundationReward = outcome.selection;
@@ -305,7 +263,7 @@ export class MultiplayerGameApp {
                 }
             }
         }
-        const gameplayCommand = commandForLocalSimulation(command, choosingArtifact || choosingFoundation);
+        const gameplayCommand = commandForLocalSimulation(command, choosingFoundation);
         this.authority.advance(gameplayCommand);
         const checkpointClaim = this.authority.submitReachedCheckpoint();
         if (checkpointClaim) {
@@ -313,7 +271,6 @@ export class MultiplayerGameApp {
                 checkpointId: checkpointClaim.checkpointId,
                 position: checkpointClaim.feedbackPosition
             });
-            this.syncArtifactReward(this.authority.snapshot().ownerArtifactReward);
             this.audioBindings?.presentFrame({
                 checkpoint: { checkpointId: checkpointClaim.checkpointId, position: checkpointClaim.feedbackPosition },
                 context: initialAudioContext
@@ -329,9 +286,7 @@ export class MultiplayerGameApp {
         this.applyFoundationFeedback([...events, ...predictedEvents], dt);
         this.authority.drainFoundationShearReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
-        const predictedSwings = predictedEvents.filter(({ eventType }) => eventType === "predicted-rope-swing");
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
-        for (const event of predictedSwings) this.authority.submitRopeSwingClaim(event);
         for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-foundation-shear-hit")) {
             this.authority.submitFoundationShear(event);
         }
@@ -441,13 +396,11 @@ export class MultiplayerGameApp {
             playerMaxHealth: remote.predicted.maxHealth,
             ropeDisabledRemaining: remote.predicted.ropeDisabledRemaining,
             playerLifeState: remote.predicted.lifeState,
-            artifacts: remote.predicted.artifacts,
-            ropeDamageBoostRemaining: remote.predicted.ropeDamageBoostRemaining,
+            ropeShot: remote.predicted.launcher,
             activeCheckpoint,
-            artifactReward: this.localArtifactReward,
             foundationReward: this.localFoundationReward,
             runState: this.localRunCompleted ? "completed" : remote.state.runState,
-            maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
+            maxAttachDistance: ropeHookReach(),
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,

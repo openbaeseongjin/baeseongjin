@@ -73,7 +73,7 @@ Foundation 확정은 Calibration 성공 여부와 분리된다. 첫 개인 선�
 7. 해당 Player만 조작을 잠시 잠그며 멀티플레이 전체 Simulation을 Pause하지 않는다.
 8. Input Gate로 Overlay 진입에 사용한 방향·확정 입력이 선택까지 중복 소비되지 않게 한다.
 
-Artifact Overlay의 카드 배치와 Input Gate는 재사용할 수 있지만 `checkpointId`, Artifact Catalog, 자동사격 효과에 Foundation을 억지로 넣지 않는다. 공통 `RewardSource`가 `artifact` 또는 `augment`를 열도록 분리한다.
+Foundation Overlay의 카드 배치와 Input Gate는 공용 `FoundationRewardSelection`으로 소유한다. `checkpointId`와 자동사격 효과에 Foundation을 억지로 넣지 않는다. Checkpoint는 보상 선택을 열지 않는다.
 
 ## 5. Foundation 행동 계약
 
@@ -123,7 +123,7 @@ Choice Overlay 중에는 선택한 Player의 Camera만 Node 중심으로 고정�
 ## 9. 저비용 구현 순서
 
 1. `FOUNDATION_AUGMENT_CATALOG`과 Player별 `foundationAugment` 상태를 만든다.
-2. Artifact 카드·Input Gate를 재사용하는 범용 `RewardSource`를 만들되 Catalog와 결과 적용은 분리한다.
+2. 1-4 Foundation 선택의 카드·Input Gate를 재사용하는 범용 `RewardSelection`을 만들되 Catalog와 결과 적용은 분리한다.
 3. `interact-choice`가 개인 선택 완료 뒤 공용 Objective를 완료하도록 World Progress Event를 연결한다.
 4. Foundation 상태와 선택 완료를 Snapshot·Checkpoint 정책에 명시적으로 포함한다.
 5. Impulse·Relay·Shear를 기존 Attach/Release Event에만 연결한다.
@@ -139,7 +139,7 @@ Physics Engine 교체, 새 Mode 버튼, 매 Frame Rope 충돌, Stage 전용 대�
 - 선택 결과가 개인별로 저장·복제되고 같은 Player에게 Overlay가 중복 개방되지 않는다.
 - 모든 Foundation과 기본 Rope로 A→B→C→Exit 통과가 가능하다.
 - 선택 후 10초 안에 효과 Feedback을 확인하지만 Calibration 실패로 진행이 막히지 않는다.
-- Foundation과 Artifact가 서로 다른 Catalog·획득 시점·효과 계층으로 읽힌다.
+- Foundation이 독립된 Catalog·획득 시점·효과 계층으로 읽힌다.
 - `swingImpulse = 780` 변경은 별도 A/B/C 근거 없이는 포함하지 않는다.
 - `01_scenario_art_reference.png`의 Platform 위치를 Runtime Collision으로 복제하지 않는다.
 - Approved Blockout, Area Catalog, Camera Zone 중 하나만 단독으로 변경하지 않는다.

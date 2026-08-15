@@ -1,4 +1,5 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
+import { ropeHookReach } from "../../game/config.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
@@ -486,6 +487,7 @@ export class AttachRangeRenderer {
     draw({ context, scene }) {
         const { player, maxAttachDistance, attachmentCandidate, rope } = scene;
         if (rope.isAttached || !attachmentCandidate) return;
+        if (scene.ropeShot?.shot) return;
         context.save();
         context.setLineDash([7, 10]);
         context.strokeStyle = "rgba(167, 243, 208, 0.2)";
@@ -591,7 +593,7 @@ export class EventEffectRenderer {
 export class AttachmentCandidateRenderer {
     draw({ context, scene }) {
         const candidate = scene.attachmentCandidate;
-        if (!candidate) return;
+        if (!candidate || scene.ropeShot?.shot) return;
         context.strokeStyle = COLORS.candidate;
         context.lineWidth = 2;
         context.beginPath();
@@ -606,5 +608,41 @@ export class AttachmentCandidateRenderer {
     }
 }
 
+export class RopeShotRenderer {
+    constructor(selectShots) {
+        if (typeof selectShots !== "function") throw new Error("RopeShotRenderer requires selectShots");
+        this.selectShots = selectShots;
+    }
+
+    draw({ context, scene }) {
+        for (const shot of this.selectShots(scene)) this.drawShot(context, shot);
+    }
+
+    drawShot(context, shot) {
+        const distance = Math.min(shot.traveled, ropeHookReach());
+        const tip = {
+            x: shot.origin.x + shot.direction.x * distance,
+            y: shot.origin.y + shot.direction.y * distance
+        };
+        context.save();
+        context.strokeStyle = "#7dd3fc";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(shot.origin.x, shot.origin.y);
+        context.lineTo(tip.x, tip.y);
+        context.stroke();
+        context.fillStyle = "#f8fafc";
+        context.beginPath();
+        context.arc(tip.x, tip.y, 5, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+    }
+}
+
 export const localRopes = (scene) => [{ rope: scene.rope, player: scene.player }];
 export const remoteRopes = (scene) => (scene.otherPlayers ?? []).map((player) => ({ rope: player.rope, player }));
+export const localShots = (scene) => (scene.ropeShot?.shot ? [scene.ropeShot.shot] : []);
+export const remoteShots = (scene) =>
+    (scene.otherPlayers ?? [])
+        .map((player) => player.launcher?.shot)
+        .filter((shot) => shot !== null && shot !== undefined);

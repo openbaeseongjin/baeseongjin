@@ -1,15 +1,12 @@
 import assert from "node:assert/strict";
-import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
-import { createArtifactSelectionClaim } from "../src/game/network/ArtifactSelectionClaim.js";
 import { createCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { createPlayerImpactClaim, createPlayerImpactStateDigest } from "../src/game/network/PlayerImpactClaim.js";
 import { createPlayerProjectileSpawnClaim } from "../src/game/network/PlayerProjectileSpawnClaim.js";
 import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js";
-import { createRopeSwingClaim } from "../src/game/network/RopeSwingClaim.js";
 import { Vector2 } from "../src/game-kit/index.js";
 import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
@@ -33,53 +30,6 @@ function primaryPlayer(simulation) {
 }
 
 export function run() {
-    const rewardSimulation = new GameSimulation();
-    const rewardPlayer = primaryPlayer(rewardSimulation);
-    rewardSimulation.enemies = [];
-    const rewardSession = new AuthorityServerSession({ simulation: rewardSimulation });
-    const rewardCheckpoint = rewardSimulation.world.checkpoints[1];
-    rewardSimulation.beginArtifactReward(rewardCheckpoint);
-    const forgedRewardCommand = {
-        ...command(0),
-        vertical: -1,
-        interact: true
-    };
-    const forgedRewardBatch = createPlayerCommandBatch(rewardSimulation.tick + 1, [
-        { playerId: rewardPlayer.id, sequence: 1, command: forgedRewardCommand }
-    ]);
-    assert.equal(rewardSession.submit(rewardPlayer.id, forgedRewardBatch).accepted.length, 1);
-    rewardSession.advance();
-    assert.equal(
-        rewardSimulation.artifactRewards.has(rewardPlayer.id),
-        true,
-        "scheduled gameplay input must not bypass the artifact selection claim"
-    );
-    assert.equal(rewardPlayer.artifacts.snapshot().length, 0);
-    const artifactClaim = createArtifactSelectionClaim({
-        checkpointId: rewardCheckpoint.id,
-        artifactId: "rapid-gear",
-        clientTick: rewardSimulation.tick
-    });
-    const artifactReceipt = rewardSession.submitArtifactSelection(rewardPlayer.id, artifactClaim);
-    assert.equal(
-        artifactReceipt.accepted,
-        true,
-        "artifact claims must resolve without waiting for a future input tick"
-    );
-    assert.equal(rewardSimulation.artifactRewards.size, 0);
-    assert.equal(rewardPlayer.artifacts.snapshot()[0].id, "rapid-gear");
-    assert.equal(
-        rewardSession.submitArtifactSelection(rewardPlayer.id, artifactClaim),
-        artifactReceipt,
-        "retrying the same client selection must be idempotent"
-    );
-    const conflictingArtifact = rewardSession.submitArtifactSelection(
-        rewardPlayer.id,
-        createArtifactSelectionClaim({ ...artifactClaim, artifactId: "power-core" })
-    );
-    assert.equal(conflictingArtifact.accepted, false);
-    assert.equal(conflictingArtifact.reason, "selection-conflict");
-
     const deathSimulation = new GameSimulation();
     const deathPlayer = primaryPlayer(deathSimulation);
     deathSimulation.enemies = [];
@@ -118,7 +68,7 @@ export function run() {
     assert.equal(checkpointReceipt.accepted, true);
     assert.equal(checkpointReceipt.resolution, "checkpoint-reached");
     assert.equal(checkpointSimulation.activeCheckpoint.id, claimedCheckpoint.id);
-    assert.equal(checkpointSimulation.artifactRewards.size, checkpointSimulation.players.length);
+    assert.equal(checkpointSimulation.foundationRewards.size, 0, "a checkpoint must not open a reward chooser");
     assert.equal(checkpointSimulation.metrics.snapshot().checkpointsReached, 1);
     assert.equal(
         checkpointSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "checkpoint-reached")
@@ -287,27 +237,6 @@ export function run() {
         0,
         "the multiplayer server fixed tick must not initiate a player projectile"
     );
-    combatPlayer.artifacts.add(ARTIFACT_CATALOG.find(({ id }) => id === "rope-resonance"));
-    const swingAnchor = {
-        x: combatPlayer.physics.position.x,
-        y: combatPlayer.physics.position.y - 80
-    };
-    combatPlayer.ropeObject.rope.attach(combatPlayer.physics.position, swingAnchor);
-    const swingClaim = createRopeSwingClaim({
-        predictionId: `${combatPlayer.id}:swing:${combatSimulation.tick}`,
-        clientTick: combatSimulation.tick,
-        position: combatPlayer.physics.position,
-        anchor: swingAnchor
-    });
-    const swingReceipt = combatSession.submitRopeSwingClaim(combatPlayer.id, swingClaim);
-    assert.equal(swingReceipt.accepted, true);
-    assert.equal(combatSession.submitRopeSwingClaim(combatPlayer.id, swingClaim), swingReceipt);
-    assert.equal(combatPlayer.ropeDamageBoostRemaining, swingReceipt.duration);
-    assert.equal(
-        combatSimulation.drainReplicationEvents().filter(({ eventType }) => eventType === "rope-swing").length,
-        1,
-        "a duplicate swing claim must produce one shared transition"
-    );
     const spawnTarget = combatSimulation.enemies
         .filter((enemy) => combatPlayer.physics.position.distanceTo(enemy.position) <= combatPlayer.weapon.range)
         .sort((left, right) => {
@@ -357,10 +286,6 @@ export function run() {
     );
     assert.equal(projectile.damage, combatPlayer.weapon.damage);
     assert.deepEqual(projectile.position, new Vector2(predictedSpawnPosition.x, predictedSpawnPosition.y));
-    assert.ok(
-        projectile.damage > combatPlayer.weapon.baseDamage,
-        "a same-tick projectile claim must use the preceding swing claim boost"
-    );
     const target = combatSimulation.enemies.find(({ id }) => id === projectile.targetId);
     projectile.position = target.position.clone();
     const healthBeforeClaim = target.health;
@@ -446,6 +371,40 @@ export function run() {
             }),
         /only player-hit/
     );
+    const ropeCutLauncherState = {
+        cooldownRemaining: 0.2,
+        shot: {
+            origin: { x: 10, y: 20 },
+            direction: { x: 1, y: 0 },
+            target: { x: 120, y: 20 },
+            traveled: 30,
+            elapsed: 1 / 120
+        }
+    };
+    const ropeCutDigestState = {
+        ...acceptedImpactState,
+        ropeDisabledRemaining: COMBAT_CONFIG.ropeDisabledSeconds,
+        rope: { ...acceptedImpactState.rope, isAttached: false, anchor: null, attachmentOffset: null },
+        launcher: ropeCutLauncherState
+    };
+    const ropeCutDigest = createPlayerImpactStateDigest(ropeCutDigestState, {
+        impactType: "rope-cut",
+        respawned: false
+    });
+    for (const launcher of [
+        { ...ropeCutLauncherState, shot: { ...ropeCutLauncherState.shot, origin: { x: 11, y: 20 } } },
+        { ...ropeCutLauncherState, shot: { ...ropeCutLauncherState.shot, direction: { x: 0, y: 1 } } },
+        { ...ropeCutLauncherState, shot: { ...ropeCutLauncherState.shot, target: { x: 120, y: 21 } } }
+    ]) {
+        assert.notEqual(
+            createPlayerImpactStateDigest(
+                { ...ropeCutDigestState, launcher },
+                { impactType: "rope-cut", respawned: false }
+            ),
+            ropeCutDigest,
+            "a rope-cut digest must retain launcher origin, direction, and target when its progress and timers match"
+        );
+    }
     const acceptedImpact = combatSession.submitImpactClaim(combatPlayer.id, impactClaim);
     assert.equal(
         acceptedImpact.accepted,
