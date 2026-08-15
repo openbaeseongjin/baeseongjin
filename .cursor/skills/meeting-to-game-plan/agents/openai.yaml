@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meeting to Game Plan"
+  short_description: "Turn approved meeting evidence into a safe game plan"
+  default_prompt: "Use $meeting-to-game-plan to turn the supplied meeting evidence into a read-only game development plan."
