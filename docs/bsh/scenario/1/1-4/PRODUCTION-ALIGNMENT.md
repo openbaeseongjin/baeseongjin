@@ -16,8 +16,9 @@
 | Foundation 저장·효과 | `IMPLEMENTED PROTOTYPE` | Player별 상태·snapshot·claim과 Release/Attach 기반 Impulse·Relay·Shear 효과 구현 |
 | Node Story Presentation | `IMPLEMENTED` | 진입·Node Scan·선택 확정 사건을 계약 문구에 연결 |
 | Calibration Dummy Feedback | `IMPLEMENTED PROTOTYPE` | Shear Release 교차를 한 번 판정하고 Spark·`CONTACT REGISTERED`를 표시 |
-| `01_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | Reward Room·Node·세 Profile 위계만 참고; Player 크기와 Anchor 연결 의미를 통일해 교체 |
+| `01_scenario_art_reference.png` | `RETIRED / PLAYER-ROPE MISMATCH` | 큰 Player와 삼각 Anchor 연결이 현재 Gameplay Camera·Rope 의미와 달라 사용 금지 |
 | `02_approved_blockout.svg` | `APPROVED BLOCKOUT` | 현재 좌표, 통과 경로, Node, Dummy, Gate의 제작 기준 |
+| `03_scenario_art_reference.png` | `APPROVED ART REFERENCE` | Node Camera의 Node Deck·N1·A 구조, 약 48px Player와 A live Rope 한 줄 기준 |
 | 기본 `swingImpulse = 780` 이동 | `HYPOTHESIS` | 1-1·1-2 A/B/C 검증 전 Impulse 전용으로 이전 금지 |
 
 Foundation 확정은 Calibration 성공 여부와 분리된다. 첫 개인 선택이 공용 Objective를 완료한 뒤 Exit Panel을 조작할 수 있고, Calibration Dummy는 효과 확인용일 뿐 Gate Key가 아니다. 두 번째 플레이어도 같은 Node에서 자기 선택을 별도로 확정하며 먼저 선택한 값을 복사하지 않는다.
@@ -26,9 +27,17 @@ Foundation 확정은 Calibration 성공 여부와 분리된다. 첫 개인 선�
 
 ### Scenario Art Reference
 
-![1-4 Scenario Art Reference](./images/01_scenario_art_reference.png)
+![1-4 Scenario Art Reference](./images/03_scenario_art_reference.png)
 
-`TEMPORARY / PENDING REGENERATION`: Node가 판타지 Shrine이 아니라 기업용 진단·수리 장비로 보이는지, 세 Profile이 색이 아닌 형태로 동등하게 읽히는지, 1-3보다 긴장이 낮은지만 참고한다. 큰 Player와 삼각 Anchor 연결은 새 이미지에 복제하지 않는다. Platform 위치는 물리 좌표가 아니다.
+`APPROVED ART REFERENCE`: Node Camera, local Player Y `-320~-160`, Desktop Zoom `1.10`을 사용한다. 긴 Node Safe Deck은 화면 아래, 산업용 Maintenance Node N1은 Deck 중앙, Anchor A는 오른쪽 위에 둔다. 약 48px Player는 Node와 A 사이·A의 왼쪽 아래에 있으며 Grapple Arm에서 A로 live Cyan Rope 한 줄만 이어진다. Node Screen의 세 Profile은 낮은 밝기의 서로 다른 기호로 동등하게 보이지만 Choice UI는 표시하지 않는다. P1/P2·Dummy·B/C·Panel·Gate·Enemy·Wind·Hazard는 Camera 밖으로 제외한다.
+
+이 이미지는 World 좌표나 Collision의 권위 자료는 아니지만 선택한 Node Shot에서 보이는 Node Deck·N1·A의 좌우·상하 관계와 상대 폭은 Runtime과 일치해야 한다. 생성 기록과 사후 검수 결과는 [`images/README.md`](./images/README.md)에 보존한다.
+
+### 이전 Art Reference
+
+![1-4 Retired Scenario Art Reference](./images/01_scenario_art_reference.png)
+
+`RETIRED / PLAYER-ROPE MISMATCH`: 환경 분위기와 Node Profile의 초기 결정 이력으로만 보존한다. 큰 Player와 A/B/C를 연결한 삼각형 Cyan 선이 한 시점의 실제 Rope 의미와 달라 새 생성·구현·외주·검수 기준으로 사용하지 않는다.
 
 ### Approved Blockout
 
@@ -37,7 +46,7 @@ Foundation 확정은 Calibration 성공 여부와 분리된다. 첫 개인 선�
 1. Story 의미·Augment 철학·금지 요소는 [시나리오 README](./README.md)가 결정한다.
 2. Foundation 공통 규칙은 [증강·Story 통합 기준](../AUGMENT-STORY-INTEGRATION.md)이 결정한다.
 3. 좌표·Stable ID·Camera Shot은 `Sector01AreaCatalog.js`와 Approved Blockout이 함께 결정한다.
-4. 현재 Art Reference는 조명과 일부 정보 위계만 임시 참고하며 Player 크기·Rope 연결·Camera 구도 기준으로 사용하지 않는다.
+4. 현재 `03` Art Reference는 Node Camera의 구조·Player 크기·Rope 의미와 정보 위계를 정하며, 정확한 World 좌표와 전체 통과 경로는 Approved Blockout이 소유한다.
 5. 선택 Runtime이 추가되면 이 문서의 `PENDING/BLOCKED`를 같은 변경에서 갱신한다.
 6. 재생성은 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)과 그 시점의 선택 Runtime 구현 상태를 적용한다.
 
@@ -141,5 +150,5 @@ Physics Engine 교체, 새 Mode 버튼, 매 Frame Rope 충돌, Stage 전용 대�
 - 선택 후 10초 안에 효과 Feedback을 확인하지만 Calibration 실패로 진행이 막히지 않는다.
 - Foundation이 독립된 Catalog·획득 시점·효과 계층으로 읽힌다.
 - `swingImpulse = 780` 변경은 별도 A/B/C 근거 없이는 포함하지 않는다.
-- `01_scenario_art_reference.png`의 Platform 위치를 Runtime Collision으로 복제하지 않는다.
+- `03_scenario_art_reference.png`를 통이미지 Runtime 배경이나 Collision으로 복제하지 않는다.
 - Approved Blockout, Area Catalog, Camera Zone 중 하나만 단독으로 변경하지 않는다.

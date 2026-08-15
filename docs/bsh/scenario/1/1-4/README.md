@@ -2384,9 +2384,9 @@ Stage 성공 기준은:
 
 ### Scenario Art Reference
 
-![1-4 Scenario Art Reference](./images/01_scenario_art_reference.png)
+![1-4 Scenario Art Reference](./images/03_scenario_art_reference.png)
 
-`TEMPORARY / PENDING REGENERATION`: 산업용 Maintenance Node, 동등한 세 Firmware Profile, 조용한 Reward Room과 비공격 Dummy의 위계만 참고한다. Player 크기와 삼각 Anchor 연결은 생성 기준이 아니며 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 대표 Gameplay Shot으로 교체한다.
+`APPROVED ART REFERENCE`: Node Camera에서 긴 Node Safe Deck 아래쪽, 산업용 Maintenance Node 중앙, Anchor A 오른쪽 위의 구조를 고정한다. 약 48px Player는 Node와 A 사이에서 A에만 live Rope 한 줄을 연결하며, 선택 UI·P1/P2·Dummy·B/C·Panel·Gate는 이 Shot에 포함하지 않는다. 정확한 생성·검수 기록은 [`images/README.md`](./images/README.md)를 따른다. 기존 `01`은 큰 Player와 삼각 Anchor 연결 때문에 `RETIRED / PLAYER-ROPE MISMATCH`로 보존한다.
 
 ### Approved Blockout
 
