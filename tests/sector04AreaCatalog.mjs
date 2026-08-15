@@ -5,7 +5,7 @@ import { SECTOR_04_AREA_CATALOG } from "../src/game/world/areas/sector04/Sector0
 
 export function run() {
     assert.deepEqual(validateAreaCatalog(SECTOR_04_AREA_CATALOG), { valid: true, issues: [] });
-    assert.equal(SECTOR_04_AREA_CATALOG.areas.length, 3);
+    assert.equal(SECTOR_04_AREA_CATALOG.areas.length, 4);
 
     const area = SECTOR_04_AREA_CATALOG.areas[0];
     assert.equal(area.id, "sector-04-01");
@@ -50,8 +50,9 @@ export function run() {
     assert.equal(freightArea.id, "sector-04-03");
     assert.equal(freightArea.name, "FREIGHT BYPASS");
     assert.deepEqual(freightArea.bounds, { width: 1472, height: 1472 });
-    assert.equal(freightArea.nextAreaId, null, "4-3 must stay a content boundary until 4-4 is authored");
-    assert.equal(freightArea.gate.completionMode, "content-boundary");
+    assert.equal(freightArea.nextAreaId, "sector-04-04");
+    assert.equal(freightArea.gate.nextAreaId, "sector-04-04");
+    assert.equal(freightArea.gate.completionMode, undefined);
     assert.equal(freightArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 7);
 
     const wakeZone = freightArea.windZones[0];
@@ -64,14 +65,26 @@ export function run() {
     const freightSentry = freightArea.objects.find(({ id }) => id.endsWith(":cutter-sentry-01"));
     assert.ok(freightSentry.rules.includes("cutter-fire"));
 
+    const restArea = SECTOR_04_AREA_CATALOG.areas[3];
+    assert.equal(restArea.id, "sector-04-04");
+    assert.equal(restArea.name, "INFRASTRUCTURE SERVICE NODE");
+    assert.deepEqual(restArea.bounds, { width: 1152, height: 896 });
+    assert.equal(restArea.nextAreaId, null, "4-4 must stay a content boundary until 4-5 is authored");
+    assert.equal(restArea.gate.completionMode, "content-boundary");
+    assert.deepEqual(restArea.windZones, []);
+    assert.equal(restArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 5);
+    assert.equal(restArea.objects.filter(({ kind }) => kind === "sentry" || kind === "patrol-drone").length, 0);
+    assert.ok(restArea.objects.find(({ id }) => id.endsWith(":routing-status-display")));
+
     const world = assembleAuthoredWorld(SECTOR_04_AREA_CATALOG, { seed: 1, floorY: 560 });
-    assert.equal(world.areas.length, 3);
-    assert.equal(world.gates.length, 3);
+    assert.equal(world.areas.length, 4);
+    assert.equal(world.gates.length, 4);
     assert.equal(world.windZones.length, 1);
     assert.equal(world.gates[0].nextAreaId, "sector-04-02");
     assert.equal(world.gates[1].nextAreaId, "sector-04-03");
-    assert.equal(world.gates[2].nextAreaId, null);
-    assert.equal(world.gates[2].completionMode, "content-boundary");
+    assert.equal(world.gates[2].nextAreaId, "sector-04-04");
+    assert.equal(world.gates[3].nextAreaId, null);
+    assert.equal(world.gates[3].completionMode, "content-boundary");
     assert.deepEqual(world.areas[0].entry, { id: "sector-04-01:entry", x: -640, y: 528 });
     assert.deepEqual(world.areas[0].exit, { id: "sector-04-01:exit", x: 672, y: -784 });
     assert.equal(
@@ -84,4 +97,5 @@ export function run() {
         "activation-band-only"
     ]);
     assert.equal(world.enemySpawns.filter(({ areaId }) => areaId === "sector-04-03").length, 1);
+    assert.equal(world.enemySpawns.filter(({ areaId }) => areaId === "sector-04-04").length, 0);
 }
