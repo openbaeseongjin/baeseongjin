@@ -10,6 +10,12 @@
 6. 코드·설정 변경을 끝내기 전에 이번 대화의 명시적 결정이 핸드오프와 기준 문서에 반영됐는지 검색하고, 누락된 문서를 같은 Issue와 커밋에 포함한다.
 7. 자동 CI를 전제로 하지 않는다. 각 개발자는 병합 전에 `npm test`, `npm run check`, `npm run format:check`를 실행하고, 화면 변경은 브라우저에서 직접 검증한 뒤 Pull Request에 결과를 기록한다. 버전 또는 멀티플레이 서버 코드가 바뀐 작업은 PR 병합만으로 완료 처리하지 않고 `docs/version-management.md`의 기존 필수 변경·완료 절차까지 수행한다.
 
+## Scenario planning and integration
+
+- 시나리오 기획·authored area·관련 gameplay를 수정하기 전에 `docs/scenario-development-integration.md`, 해당 Sector·Stage README와 구현 중인 Stage의 `PRODUCTION-ALIGNMENT.md`를 읽는다.
+- 작업 시작과 종료에 `npm run check:scenario-integration`을 실행한다. 시나리오 문서 또는 `src/game/world/areas/` 변경으로 fingerprint가 달라지면 최근 변경·Runtime 상태·차단 요소·확인 근거를 통합 현황에서 실제로 재검토한 뒤 marker를 갱신한다. hash만 새 값으로 바꿔 검사를 우회하지 않는다.
+- Stage 문서의 고정 Git SHA는 `AUTHORING SNAPSHOT`으로 표시한다. 현재 main과 Runtime 통합 상태는 Stage 문서가 아니라 `docs/scenario-development-integration.md`가 소유한다.
+
 ## Sprite asset work
 
 - 스프라이트 생성·교체·import·atlas·animation metadata 작업은 파일을 만들기 전에 `docs/graphics-asset-guide.md`와 `docs/sprite-asset-format.md`를 전부 읽고 `assets/runtime/characters/README.md`에서 현재 구현 상태와 mock 범위를 확인한다.

@@ -384,6 +384,14 @@ git diff --check
 - 완전히 대체된 결정은 삭제하지 않고 `docs/decision-history.md`로 이동한다.
 - 아직 영향을 주는 결정과 열린 위험은 `SESSION-HANDOFF.md`에 유지한다.
 
+### 시나리오 기획·개발 통합 체크포인트
+
+- `docs/bsh/scenario/`는 Sector·Stage의 기획·제작 계약을 소유하고, `docs/scenario-development-integration.md`는 전체 Stage 목록과 현재 authored Runtime 연결 상태·차단 요소·마지막 확인 근거를 소유한다.
+- 상세 Stage README의 존재, 기획 교차검토, Runtime 연결과 실제 플레이테스트를 서로 다른 상태로 기록한다. 문서가 추가됐다는 이유만으로 구현 또는 검증 완료로 표시하지 않는다.
+- 시나리오 문서와 `src/game/world/areas/`를 바꾼 작업은 `npm run check:scenario-integration`의 fingerprint 경보를 해소해야 한다. 실제 변경 영향과 검증 근거를 통합 현황에 기록한 뒤 marker를 갱신하며 hash만 맞추지 않는다.
+- 좌표·문구·cue처럼 기존 계약 안에서 흡수할 변경과 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계처럼 사용자 검토가 필요한 변경을 분리한다.
+- Stage 문서에 고정 SHA를 남길 때는 `AUTHORING SNAPSHOT`으로 표시한다. 현재 main·Runtime 상태를 뜻하는 `CURRENT MAIN` 표기로 고정 SHA를 남기지 않는다.
+
 ### 대화 결정 흡수 절차
 
 사용자가 대화에서 향후 구현에 영향을 주는 결정을 명시하면 문서 작업도 해당 구현의 완료 조건으로 본다. 다음 순서를 같은 Issue와 커밋에서 수행한다.
@@ -399,6 +407,7 @@ git diff --check
 | 결정 종류 | 기준 문서 |
 | --- | --- |
 | 게임 방향, 플레이 흐름, 열린 기획 결정 | `docs/game-hackathon-planning.md`, `docs/implementation-roadmap.md` |
+| 시나리오 Stage 목록, Runtime 연결 상태, 차단 요소와 마지막 확인 근거 | `docs/scenario-development-integration.md` |
 | 모듈 책임, 상태 소유권, 의존 방향 | `docs/architecture.md` |
 | 멀티 권위, 전송, 채널과 세션 정책 | `docs/multiplayer-synchronization.md` |
 | 클래스·믹스인·컴포넌트·테스트·Git과 대화 결정 흡수 절차 | `docs/development-rules.md` |

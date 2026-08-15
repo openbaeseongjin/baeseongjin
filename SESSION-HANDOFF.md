@@ -67,7 +67,7 @@ Sector 01-8의 현재 기준은 `docs/bsh/scenario/1/1-8/README.md`의 `CONTAINM
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태다. 2026-08-14 최신 `origin/main` 기준 현재 상세 시나리오는 `SECTOR 01`의 `1-1`~`1-8`, `SECTOR 02`의 `2-1`~`2-8`, `SECTOR 03`의 `3-1`~`3-2`, 총 18개다. 메인 개발은 날짜별 예정 수량이 아니라 현재 실제 시나리오가 나온 영역까지 섹터·번호 순서대로 mock 연결하고, 새 문서가 추가되면 Git 변경을 확인해 이어 붙인다. 현재 runtime은 먼저 확정된 `1-1 → 2-8` 16개 영역을 한 월드로 연결했다. 새 `3-1 POWERED PROMENADE`는 Enemy·새 기믹이 없는 blockout이고 `3-2 SCANNER GALLERY`는 새 Access Scan Field를 도입한다. 앞단의 Sector 02 Boss/전환과 새 Scanner system은 큰 방향 변경이므로 사용자 검토 전 구현·연결 방식을 고정하지 않는다.
+시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 2026-08-15 체크포인트는 상세 Stage 25개(`1-1`~`3-8`, `4-1`)와 authored Runtime 16개(`1-1 → 2-8`)를 별도 상태로 기록한다. Sector 03의 Access Scan Field·authored catalog와 `2-8 → 3-1`, `3-8 → 4-1` Boss/전환은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
 
 `2-3 RESIDENTIAL SERVICE NODE`의 Specialization은 1-4에서 고른 Foundation Augment를 유지한 채 그 방향을 한 단계 심화하는 성장으로 시나리오에 명시됐다. Artifact 선택의 입력·UI 흐름은 재사용 후보지만 Artifact와 Rope Augment의 ID·의미 체계는 합치지 않는다. 실제 Specialization 이름·효과·수치·선택 pool은 아직 미정이므로 geometry와 node flow만 먼저 구현하고 성장 규칙을 임의 확정하지 않는다. `2-5 EVACUATION WALKWAY`의 잠긴 Upper Transit Gate는 서사적 장애물이며 실제 다음 진행 경로는 Maintenance Service Frame이다. `2-8 EVACUATION PLATFORM`은 Boss가 없는 Sector 02 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 그 뒤 Boss/`3-1` 전환 순서는 공통 Boss Flow가 확정되기 전 연결하지 않는다. 새 시나리오의 좌표·문구·cue 조정은 기존 계약 안에서 흡수하지만 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계 변경은 사용자 검토를 먼저 받는다.
 
@@ -110,6 +110,12 @@ P0 정책은 최근 아티팩트 약 1/3 손실, 체크포인트 보상, 3개 �
 - 최신 명시적 결정이 이전 결정보다 우선한다. 충돌하는 이전 결정은 활성 상태로 남기지 않고 대체 이유와 함께 `docs/decision-history.md`로 이동한다.
 - 일회성 명령, 임시 URL·PID·디버깅 값, 에이전트의 미확정 추정은 영구 결정으로 승격하지 않는다.
 - 에이전트의 필수 실행 순서는 `AGENTS.md`, 상세 기록·승격·검증 절차는 `docs/development-rules.md`의 **대화 결정 흡수 절차**를 따른다.
+
+### [L1] 시나리오 기획과 Runtime 진행 상태를 같은 체크포인트에서 검토한다
+
+- 상세 Stage 문서의 존재, 기획 교차검토, authored Runtime 연결과 실제 플레이테스트를 서로 다른 상태로 기록한다.
+- 전체 범위·차단 요소·마지막 확인 근거의 기준은 `docs/scenario-development-integration.md`, 반복 절차는 `docs/development-rules.md`의 **시나리오 기획·개발 통합 체크포인트**를 따른다.
+- 시나리오 문서 또는 authored area 변경은 fingerprint 경보를 통해 현황 재검토를 요구한다. hash만 갱신하거나 Stage의 고정 SHA를 현재 main으로 표현하지 않는다.
 
 ### [L2] 문서 인덱스와 주제별 기준 문서를 분리한다
 

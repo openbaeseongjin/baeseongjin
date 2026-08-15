@@ -7,7 +7,7 @@
 | 항목 | REV 1.0 기준 |
 |---|---|
 | Status | HYPOTHESIS — MASTER PLAN CANDIDATE |
-| Current Main Snapshot | `37ebeb90a2f2197af0420c0a0b00970eab41dea7` |
+| Authoring Snapshot | `37ebeb90a2f2197af0420c0a0b00970eab41dea7` |
 | Sector Role | Commercial District 이후 도시의 대형 이동·전력·환기 Backbone 진입 |
 | Core Gameplay Shift | Active Route Control → Momentum Under Interruption |
 | Core Story Shift | “누가 위쪽 이동 우선권을 가졌지?” → “왜 Lower Ascent Feeder만 격리됐지?” |
@@ -29,7 +29,7 @@
 
 ## 0. Source-of-Truth / 현재 상태
 
-### CURRENT MAIN AT AUTHORING
+### AUTHORING SNAPSHOT
 
 Sector 04 Master Plan 작성 시작 시점 최신 `main`:
 
@@ -61,15 +61,15 @@ Sector 01~03 status audit merged
 docs/bsh/scenario/4/
 ```
 
-상세 Master / Stage 문서는 아직 확인되지 않는다.
-
-즉 본 문서는:
+현재 상세 문서 범위:
 
 ```text
-SECTOR 04 FIRST CANONICAL MASTER CANDIDATE
+README.md          Sector 04 Master
+4-1/README.md      TRANSIT INTAKE 상세 Stage
+4-2 ~ 4-8          Master outline only
 ```
 
-다.
+현재 전체 Stage·Runtime 대조 상태는 [`scenario-development-integration.md`](../../../scenario-development-integration.md)를 따른다.
 
 ### Current Runtime Boundary
 

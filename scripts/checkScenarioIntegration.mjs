@@ -1,0 +1,186 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFileSync, readdirSync } from "node:fs";
+import { extname, relative, resolve, sep } from "node:path";
+
+const projectRoot = resolve(process.cwd());
+const statusPath = "docs/scenario-development-integration.md";
+const scenarioRoot = "docs/bsh/scenario";
+const authoredAreaRoot = "src/game/world/areas";
+
+function normalizePath(path) {
+    return path.split(sep).join("/");
+}
+
+function normalizeContent(content) {
+    return content.replace(/\r\n?/g, "\n");
+}
+
+function collectFiles(root, extensions) {
+    const files = [];
+
+    function visit(directory) {
+        for (const entry of readdirSync(directory, { withFileTypes: true })) {
+            const path = resolve(directory, entry.name);
+            if (entry.isDirectory()) {
+                visit(path);
+            } else if (extensions.has(extname(entry.name))) {
+                files.push(normalizePath(relative(projectRoot, path)));
+            }
+        }
+    }
+
+    visit(resolve(projectRoot, root));
+    return files.sort((left, right) => left.localeCompare(right, "en"));
+}
+
+function fingerprint(files) {
+    const hash = createHash("sha256");
+    for (const file of files) {
+        const content = normalizeContent(readFileSync(resolve(projectRoot, file), "utf8"));
+        hash.update(file);
+        hash.update("\0");
+        hash.update(content);
+        hash.update("\0");
+    }
+    return hash.digest("hex");
+}
+
+function collectStageCoverage(scenarioFiles) {
+    return scenarioFiles
+        .map((file) => file.match(/^docs\/bsh\/scenario\/(\d+)\/(\d+)-(\d+)\/README\.md$/))
+        .filter((match) => match && match[1] === match[2])
+        .map((match) => ({ sector: Number(match[1]), stage: Number(match[3]) }))
+        .sort((left, right) => left.sector - right.sector || left.stage - right.stage)
+        .map(({ sector, stage }) => `${sector}-${stage}`);
+}
+
+function readExpectedCheckpoint() {
+    const content = normalizeContent(readFileSync(resolve(projectRoot, statusPath), "utf8"));
+    const marker = content.match(/<!-- scenario-integration-checkpoint:v1\n([\s\S]*?)\n-->/);
+    if (!marker) {
+        throw new Error(`${statusPath}에 scenario-integration-checkpoint:v1 marker가 없습니다.`);
+    }
+
+    const checkpoint = Object.fromEntries(
+        marker[1]
+            .split("\n")
+            .filter(Boolean)
+            .map((line) => {
+                const separatorIndex = line.indexOf(":");
+                if (separatorIndex < 1) {
+                    throw new Error(`잘못된 checkpoint 항목: ${line}`);
+                }
+                return [line.slice(0, separatorIndex).trim(), line.slice(separatorIndex + 1).trim()];
+            })
+    );
+
+    for (const key of [
+        "scenario-source-sha256",
+        "authored-area-sha256",
+        "stage-count",
+        "stage-coverage",
+        "reviewed-upstream"
+    ]) {
+        if (!checkpoint[key]) {
+            throw new Error(`${statusPath} checkpoint에 ${key}가 없습니다.`);
+        }
+    }
+
+    for (const key of ["scenario-source-sha256", "authored-area-sha256"]) {
+        if (!/^[0-9a-f]{64}$/.test(checkpoint[key])) {
+            throw new Error(`${statusPath} checkpoint의 ${key}가 SHA-256 형식이 아닙니다.`);
+        }
+    }
+    if (!/^\d+$/.test(checkpoint["stage-count"])) {
+        throw new Error(`${statusPath} checkpoint의 stage-count가 정수가 아닙니다.`);
+    }
+    if (!/^[0-9a-f]{40}$/.test(checkpoint["reviewed-upstream"])) {
+        throw new Error(`${statusPath} checkpoint의 reviewed-upstream이 Git SHA 형식이 아닙니다.`);
+    }
+
+    return checkpoint;
+}
+
+function collectActualCheckpoint() {
+    const scenarioFiles = collectFiles(scenarioRoot, new Set([".md"]));
+    const authoredAreaFiles = collectFiles(authoredAreaRoot, new Set([".js"]));
+    const stages = collectStageCoverage(scenarioFiles);
+
+    return {
+        "scenario-source-sha256": fingerprint(scenarioFiles),
+        "authored-area-sha256": fingerprint(authoredAreaFiles),
+        "stage-count": String(stages.length),
+        "stage-coverage": stages.join(","),
+        scenarioFiles,
+        authoredAreaFiles
+    };
+}
+
+function collectDifferences(expected, actual) {
+    const fields = ["scenario-source-sha256", "authored-area-sha256", "stage-count", "stage-coverage"];
+    return fields
+        .filter((field) => expected[field] !== actual[field])
+        .map((field) => `${field}: recorded=${expected[field]} actual=${actual[field]}`);
+}
+
+function printActualCheckpoint(actual) {
+    console.log(`scenario-source-sha256: ${actual["scenario-source-sha256"]}`);
+    console.log(`authored-area-sha256: ${actual["authored-area-sha256"]}`);
+    console.log(`stage-count: ${actual["stage-count"]}`);
+    console.log(`stage-coverage: ${actual["stage-coverage"]}`);
+    console.log(`scenario-files: ${actual.scenarioFiles.length}`);
+    console.log(`authored-area-files: ${actual.authoredAreaFiles.length}`);
+}
+
+function runSelfTest() {
+    const actual = {
+        "scenario-source-sha256": "a".repeat(64),
+        "authored-area-sha256": "b".repeat(64),
+        "stage-count": "25",
+        "stage-coverage": "1-1,4-1"
+    };
+    const expected = {
+        ...actual,
+        "scenario-source-sha256": "0".repeat(64),
+        "authored-area-sha256": "1".repeat(64)
+    };
+    const differences = collectDifferences(expected, actual);
+    assert.equal(differences.length, 2);
+    assert.ok(differences.some((difference) => difference.startsWith("scenario-source-sha256:")));
+    assert.ok(differences.some((difference) => difference.startsWith("authored-area-sha256:")));
+    assert.equal(normalizeContent("a\r\nb\r"), "a\nb\n");
+    console.log("Scenario integration stale-check self-test passed.");
+}
+
+if (process.argv.includes("--self-test")) {
+    runSelfTest();
+    process.exit(0);
+}
+
+const actual = collectActualCheckpoint();
+if (process.argv.includes("--print")) {
+    printActualCheckpoint(actual);
+    process.exit(0);
+}
+
+try {
+    const expected = readExpectedCheckpoint();
+    const differences = collectDifferences(expected, actual);
+    if (differences.length > 0) {
+        console.error("Scenario integration checkpoint가 현재 source와 다릅니다.");
+        for (const difference of differences) console.error(`- ${difference}`);
+        console.error(
+            `변경 내용을 Runtime 상태·차단 요소·확인 근거와 함께 ${statusPath}에서 재검토한 뒤 marker를 갱신하세요.`
+        );
+        process.exit(1);
+    }
+} catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+}
+
+console.log(
+    `Scenario integration checkpoint passed: ${actual["stage-count"]} stages, ` +
+        `${actual.scenarioFiles.length} scenario files, ${actual.authoredAreaFiles.length} authored-area files`
+);
