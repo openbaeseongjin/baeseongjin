@@ -12,7 +12,7 @@
 | 1-1~1-3 증강 사용 | `REJECTED` | 기본 Rope 학습과 기준 측정을 위해 증강 효과·선택 UI를 노출하지 않음 |
 | 새 전용 버튼·Rope Mode 전환 | `REJECTED` | 기존 Attach·Hold·Release 입력 안에서 효과가 발생해야 함 |
 | 무증강 기본 경로 | `DECIDED` | 1-5~1-8도 기본 Rope로 통과할 수 있어야 하며 증강은 더 유리한 해석을 제공 |
-| Foundation과 Artifact | `DECIDED` | 서로 다른 보상 계층으로 분리. Foundation은 Rope 정체성, Artifact는 Run 중 전투·빌드 변화 |
+| Foundation 선택 | `DECIDED` | Foundation은 authored Node에서 선택하는 유일한 특화 방향 |
 | 선택 지속성 | `IMPLEMENTED` | 개인별 snapshot 상태로 유지하며 사망·Checkpoint로 임의 변경하지 않음 |
 | Story 결과 분기 | `REJECTED` | 증강마다 결말을 갈라 콘텐츠를 3배로 만들지 않음. 경로·피드백만 달라지고 핵심 사건은 동일 |
 | 세부 수치 | `PROTOTYPE` | 현재 코드값과 플레이테스트를 기준으로 후보를 만들고 Stage 통과율·조작 성공률로 조정 |
@@ -81,19 +81,7 @@
 
 각 Stage는 세 증강을 위한 별도 방 세 개를 만들지 않는다. 하나의 공간에서 Anchor 배치, Timing, Enemy 위치가 서로 다른 장점을 만들게 한다. 특정 증강이 한 Stage에서 중립이어도 실패가 아니다. 모든 Stage에서 모든 선택지를 같은 강도로 보상하려 하면 공간이 인위적으로 보이고 제작량이 증가한다.
 
-## 6. Artifact와의 분리·호환
-
-| 계층 | 획득 시점 | 역할 | 초기 호환 규칙 |
-| --- | --- | --- | --- |
-| Foundation Augment | 1-4 Maintenance Node | Rope 행동의 장기 정체성 | 개인 상태로 저장·동기화, Sector 중 교체 없음 |
-| Artifact | Checkpoint 또는 Run Reward | 자동 공격·전투 수치·조건부 Build 변화 | Foundation의 판정 Window와 Geometry를 직접 변경하지 않음 |
-
-- `Power Core`, `Rapid Gear`는 초기에는 Shear 피해나 Relay Window를 증폭하지 않는다.
-- `Rope Resonance`는 공통 `swing-complete` 또는 그에 준하는 단일 Event만 구독한다. Foundation 때문에 같은 Swing이 두 번 발동하면 FAIL이다.
-- Shear 피해는 첫 Prototype에서 Artifact Damage 배율과 분리한다. 의도적인 Synergy는 기본 밸런스가 확보된 뒤 별도 결정한다.
-- 1-4에서 Foundation을 선택한 직후 Artifact 선택을 연속으로 띄우지 않는다. 두 시스템의 의미를 한 화면에서 섞지 않는다.
-
-## 7. Story·System Event 계약
+## 6. Story·System Event 계약
 
 1-2에서는 별도 Story Event를 새로 만들지 않고 기존 이동 Metric으로 공중 Re-Attach Telemetry를 축적한다. 이후 연결에는 현재 Area Catalog의 Stable ID를 우선한다.
 
@@ -121,7 +109,7 @@
 
 - Player별 `foundationAugment`는 `none | impulse-coil | relay-link | shear-current` 중 하나만 가진다.
 - 순간 상태는 `augmentRuntimeState`에 분리하고 Release·Attach 같은 기존 Rope Event에서만 갱신한다.
-- Maintenance Node와 Checkpoint를 별도 특수 UI로 계속 복제하지 않고 `RewardSource`가 `augment` 또는 `artifact` 선택을 열도록 공통화한다.
+- Maintenance Node와 Checkpoint를 별도 특수 UI로 계속 복제하지 않고 authored Foundation Node에서 `FoundationRewardSelection`을 연다. Checkpoint는 보상 선택을 열지 않는다.
 - Foundation 선택과 Gate 진행 상태를 네트워크에서 명시적으로 동기화한다. Calibration 접촉은 피드백 사건이며 진행 Key로 저장하지 않는다.
 - 화면 밖 Enemy, Lamp, Fan, 배경 Layer는 갱신하지 않는다.
 - 증강 때문에 Physics Engine을 교체하거나 Rope Segment를 매 Frame 전수 충돌 검사하지 않는다.
@@ -137,7 +125,7 @@
 | 1-5 | 증강별 경로 선택률, 완주 시간, 피해량, 기본 경로 사용률 | 선택지가 실제 플레이 방식을 바꾸는지 확인 |
 | 1-6~1-8 | 증강별 사망 원인·완주 시간·Recovery 의존도 | 한 선택만 정답이 되는 Dominant Build 방지 |
 
-수치는 레퍼런스 게임에서 그대로 복사하지 않는다. SANABI, Rusted Moss, Flinthook, Hades 등에서는 입력–결과 연결, Momentum 보존, 선택지의 행동 변화 같은 설계 원리를 추출하고, 실제 값은 현재 게임의 Rope 거리 `440px`, 중력 `1250`, 최대 수평 속도 `360`, 점프 속도 `440`, 공격 범위와 카메라 안에서 다시 측정한다.
+수치는 레퍼런스 게임에서 그대로 복사하지 않는다. SANABI, Rusted Moss, Flinthook, Hades 등에서는 입력–결과 연결, Momentum 보존, 선택지의 행동 변화 같은 설계 원리를 추출하고, 실제 값은 현재 게임의 Rope 거리 `400px`, 중력 `1250`, 최대 수평 속도 `360`, 점프 속도 `440`, 공격 범위와 카메라 안에서 다시 측정한다.
 
 ## 10. 앞으로의 Stage 수정 체크리스트
 
@@ -147,7 +135,7 @@
 - Approved Blockout과 Runtime 좌표
 - Scenario Art Reference의 Gameplay 정보 위계
 - 기본 Rope 통과 경로와 증강별 선택적 이점
-- Foundation과 Artifact의 중복·이중 발동 여부
+- Foundation 효과의 중복·이중 발동 여부
 - Desktop·Mobile Camera에서 Telegraph, Anchor, Recovery 가독성
 - 저비용 자산 재사용과 화면 밖 Update 제한
 - `DECIDED / PROTOTYPE / HYPOTHESIS / REJECTED` 상태 표시

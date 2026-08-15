@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { ARTIFACT_CATALOG } from "../src/game/artifacts/ArtifactCatalog.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { COMBAT_CONFIG } from "../src/game/config.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 
@@ -46,7 +46,14 @@ export function run() {
     const gate = simulation.world.gates[0];
     const worldBeforePortal = simulation.world;
     player.health = 73;
-    player.artifacts.add(ARTIFACT_CATALOG[0]);
+    player.ropeObject.launcher.shot = {
+        origin: { x: player.physics.position.x, y: player.physics.position.y },
+        direction: { x: 1, y: 0 },
+        target: null,
+        traveled: 40,
+        elapsed: 0.1
+    };
+    player.ropeObject.launcher.cooldownRemaining = 0.3;
     player.physics.velocity.set(180, -240);
     player.physics.setAngularState(0.8, 3.5);
     player.physics.isGrounded = true;
@@ -73,7 +80,6 @@ export function run() {
     player.weapon.cooldown = 0.4;
     player.hitInvulnerabilityRemaining = 0.3;
     player.ropeDisabledRemaining = 0.2;
-    player.ropeDamageBoostRemaining = 1.5;
     simulation.step(1 / 120, command());
     assert.equal(simulation.snapshot().worldProgress.currentAreaId, "sector-01-02");
     assert.ok(
@@ -81,7 +87,7 @@ export function run() {
         "the shared playtest metrics must retain the measured 1-1 clear time"
     );
     assert.equal(simulation.activeCheckpoint.areaId, "sector-01-02");
-    assert.equal(simulation.artifactRewards.size, 0, "area Gate checkpoints must not grant artifact rewards");
+    assert.equal(simulation.foundationRewards.size, 0, "area Gate checkpoints must not grant rewards");
     assert.equal(simulation.world, worldBeforePortal, "a Gate portal must keep the same assembled world");
     assert.deepEqual(
         { x: player.physics.position.x, y: player.physics.position.y },
@@ -100,9 +106,9 @@ export function run() {
     assert.equal(player.weapon.cooldown, 0);
     assert.equal(player.hitInvulnerabilityRemaining, 0);
     assert.equal(player.ropeDisabledRemaining, 0);
-    assert.equal(player.ropeDamageBoostRemaining, 0);
+    assert.equal(player.ropeObject.launcher.shot, null);
+    assert.equal(player.ropeObject.launcher.cooldownRemaining, 0);
     assert.equal(player.health, 73, "portal reset must not heal or damage the player");
-    assert.deepEqual(player.artifacts.snapshot(), [ARTIFACT_CATALOG[0]], "portal reset must preserve artifacts");
 
     const secondPanel = simulation.world.objects.find(({ id }) => id === "sector-01-02:exit-panel");
     const secondDeck = simulation.world.surfaces.find(({ id }) => id === "sector-01-02:p4");
@@ -196,6 +202,12 @@ export function run() {
         "the authored Sentry must telegraph before its first projectile"
     );
     assert.equal(standardProjectile.canCutRope, false);
+    assert.equal(standardSentry.maxHealth, COMBAT_CONFIG.enemyHealth, "assembled Sentry must use the tuned max health");
+    assert.equal(
+        Math.round(standardProjectile.velocity.length()),
+        COMBAT_CONFIG.enemyProjectileSpeed,
+        "Sentry projectile speed must match the tuned value"
+    );
     assert.deepEqual(
         simulation.resolveEnemyProjectileClaim(player.id, {
             projectileId: standardProjectile.id,

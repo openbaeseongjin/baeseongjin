@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-15 — Checkpoint Artifact 시스템을 제거하고 Foundation을 유일한 런 성장으로 둔다
+
+- 맥락: Checkpoint 기반 Artifact(동력핵·연사 톱니·로프 공명기)는 Sector 1-4 Foundation 선택과 개념·획득 흐름이 겹쳐 하나의 런이 두 보상 계층을 동시에 설명했다. Artifact의 런타임·네트워크 claim·HUD·문서·테스트가 Foundation과 역할을 중복해 유지 비용이 컸다.
+- 결정: Artifact Catalog·Inventory·선택·사망 손실·HUD·`artifact-selection` claim·`rope-swing` 강화 claim을 제거한다. Checkpoint는 진행 저장과 개인 부활만 소유하며 보상 선택을 열지 않는다. 1-4 Foundation 선택·개인별 상태·효과·네트워크 동기화·HUD는 유지하고, 2-3 Specialization은 Artifact가 아니라 Foundation choice primitive를 재사용한다. `RunMetrics.firstRewardSeconds`는 `firstFoundationSeconds`로 대체한다.
+- 영향: 런 성장 경로가 Foundation 한 갈래로 정리되고, Grapple은 즉시 부착 대신 발사 후 비행해 부착하는 프로토타입(속도 1400px/s × 수명 2/7초 = 400px, 재발사 0.20초)으로 바뀐다. Sentry 계열은 HP 100·인식 760px·탄속 520px/s·재사격 1.0초로 조정한다.
+- 대체: 이전 Artifact 유지·손실·Checkpoint 보상·로프 공명 강화 결정 전체를 대체한다.
+- 검증 상태: #489에서 Artifact 제거, Grapple 발사, Sentry 조정과 함께 반영했다.
+
 ## [L2] 2026-08-14 — 절차 월드 시드 sweep을 기본 제품 검증으로 사용한다
 
 - 맥락: 첫 로프 프로토타입은 완전 절차 생성된 48단계 경로였으므로 고정 회귀 시드와 1,000개 연속 시드의 상승·로프 사거리 통과성을 배포 전에 검사했다.

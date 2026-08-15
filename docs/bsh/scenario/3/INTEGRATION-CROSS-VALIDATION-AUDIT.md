@@ -496,13 +496,13 @@ PASS
 
 ---
 
-## 8. Rope Geometry / 440 px Contract
+## 8. Rope Geometry / 400 px Contract
 
 Current:
 
 ```text
 Rope Max Attach Distance
-= 440 px
+= 400 px
 ```
 
 모든 Stage는:
@@ -520,7 +520,7 @@ mandatory progression
 
 ```text
 mandatory / representative route links
-≤ 440 px
+≤ 400 px
 ```
 
 개별 Stage 작성 직후 검산 완료.
@@ -626,7 +626,7 @@ HOLD
 HYBRID
 HOLD
 
-ARTIFACT REWARD
+CHECKPOINT REWARD
 NONE
 ```
 
@@ -655,20 +655,8 @@ First Specialization stage
 Specialization catalog / values / pool
 = system gate
 
-Artifact runtime
-= implemented but separate layer
-```
-
-### Artifact 분리
-
-```text
-ARTIFACT
-≠
-ROPE AUGMENT
-```
-
-현재 Artifact가 구현되어 있다는 이유로
-Sector 03 Rope Growth를 대체하지 않는다.
+Checkpoint reward
+= 없음
 
 판정:
 

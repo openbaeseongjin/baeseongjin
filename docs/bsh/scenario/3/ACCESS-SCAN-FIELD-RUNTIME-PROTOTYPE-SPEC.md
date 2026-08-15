@@ -2241,7 +2241,6 @@ Existing:
 - Patrol
 - Wind
 - Prediction
-- Artifact
 
 tests PASS.
 

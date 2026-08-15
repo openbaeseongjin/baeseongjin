@@ -19,7 +19,7 @@
 | New Input | NONE |
 | New Rope Mode | NONE |
 | New Augment | NONE |
-| Artifact Reward | NONE |
+| Checkpoint reward | 없음 |
 | Wind | NONE |
 | Rope Cut | NONE for Patrol Drone |
 | Required Kill | NONE |
@@ -179,7 +179,7 @@ Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
 
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 Release Angular Transfer 0.55
@@ -260,7 +260,7 @@ GitHub Pages 공개 게임 URL은
 NO SECOND SPECIALIZATION
 NO SECONDARY AUGMENT
 NO HYBRID
-NO ARTIFACT REWARD
+NO CHECKPOINT REWARD
 ```
 
 따라서 3-6의 Mandatory Route는:
@@ -496,7 +496,7 @@ Commercial 공간의 Scale을 가장 강하게 보여주는 첫 Stage다.
 
 ```text
 BASE PHYSICS
-Rope Max = 440
+Rope Max = 400
 ```
 
 ### HYPOTHESIS — BLOCKOUT
@@ -531,7 +531,7 @@ Stage는 이미:
 
 를 사용한다.
 
-440px 근처의 극단적 Max-Range를
+400px 근처의 극단적 Max-Range를
 Mandatory Skill Check로 추가하지 않는다.
 
 ---
@@ -1847,7 +1847,7 @@ Power-status 환경 정보.
     gameplay: {
         newMechanic: null,
         newAugment: null,
-        artifactReward: null,
+        globalReward: null,
         wind: false,
         requiredKill: false
     },

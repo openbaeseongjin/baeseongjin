@@ -4,7 +4,6 @@ import {
     createCheckpointClaimReceipt,
     serializeCheckpointClaim
 } from "../network/CheckpointClaim.js";
-import { createArtifactSelectionClaim, serializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
 import {
     createFoundationSelectionClaim,
     serializeFoundationSelectionClaim
@@ -38,7 +37,6 @@ import {
     createOwnerMotionState,
     serializeOwnerMotionState
 } from "../network/OwnerMotionState.js";
-import { createRopeSwingClaim, createRopeSwingReceipt, serializeRopeSwingClaim } from "../network/RopeSwingClaim.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
 import { RemoteCommandStream } from "./RemoteCommandStream.js";
@@ -78,12 +76,10 @@ export class RemoteGameAuthority {
         this.sentSequenceOrder = [];
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
-        this.artifactSelectionReceipts = [];
         this.foundationSelectionReceipts = [];
         this.foundationShearReceipts = [];
         this.hitClaimReceipts = [];
         this.projectileSpawnClaimReceipts = [];
-        this.ropeSwingClaimReceipts = [];
         this.impactClaimReceipts = [];
         this.pendingImpactClaims = new Map();
         this.checkpointClaimReceipts = [];
@@ -168,8 +164,6 @@ export class RemoteGameAuthority {
                         const receipt = deserializeCommandReceipt(message.payload);
                         this.recordReceipt(receipt);
                         this.stream.acceptReceipt(receipt);
-                    } else if (message.type === "artifact-selection-receipt") {
-                        this.artifactSelectionReceipts.push(Object.freeze({ ...message.payload }));
                     } else if (message.type === "foundation-selection-receipt") {
                         this.foundationSelectionReceipts.push(Object.freeze({ ...message.payload }));
                     } else if (message.type === "foundation-shear-receipt") {
@@ -180,10 +174,6 @@ export class RemoteGameAuthority {
                         const receipt = createPlayerProjectileSpawnReceipt(message.payload);
                         this.projectileSpawnClaimReceipts.push(receipt);
                         this.ownerRuntime?.recordProjectileSpawnReceipt(receipt);
-                    } else if (message.type === "rope-swing-claim-receipt") {
-                        const receipt = createRopeSwingReceipt(message.payload);
-                        this.ropeSwingClaimReceipts.push(receipt);
-                        this.ownerRuntime?.recordRopeSwingReceipt(receipt);
                     } else if (message.type === "impact-claim-receipt") {
                         const receipt = createPlayerImpactReceipt(message.payload);
                         const pending = this.pendingImpactClaims.get(receipt.projectileId);
@@ -290,7 +280,8 @@ export class RemoteGameAuthority {
             angle: predicted.angle,
             angularVelocity: predicted.angularVelocity,
             isGrounded: predicted.isGrounded,
-            rope: predicted.rope
+            rope: predicted.rope,
+            launcher: predicted.launcher
         });
     }
 
@@ -366,24 +357,6 @@ export class RemoteGameAuthority {
         return true;
     }
 
-    submitRopeSwingClaim(event) {
-        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
-        if (!this.submitOwnerMotion()) return false;
-        const claim = createRopeSwingClaim({
-            predictionId: event.predictionId,
-            clientTick: event.tick,
-            position: event.position,
-            anchor: event.anchor
-        });
-        this.socket.send(
-            JSON.stringify({
-                type: "rope-swing-claim",
-                payload: serializeRopeSwingClaim(claim)
-            })
-        );
-        return true;
-    }
-
     submitImpactClaim(event, outcome) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createPlayerImpactClaim({
@@ -396,19 +369,6 @@ export class RemoteGameAuthority {
             outcome
         });
         this.socket.send(JSON.stringify({ type: "impact-claim", payload: serializePlayerImpactClaim(claim) }));
-        return true;
-    }
-
-    submitArtifactSelection({ checkpointId, artifactId }) {
-        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
-        const claim = createArtifactSelectionClaim({
-            checkpointId,
-            artifactId,
-            clientTick: this.ownerRuntime.state().tick
-        });
-        this.socket.send(
-            JSON.stringify({ type: "artifact-selection", payload: serializeArtifactSelectionClaim(claim) })
-        );
         return true;
     }
 
@@ -478,12 +438,6 @@ export class RemoteGameAuthority {
         return candidate;
     }
 
-    drainArtifactSelectionReceipts() {
-        const receipts = Object.freeze(this.artifactSelectionReceipts);
-        this.artifactSelectionReceipts = [];
-        return receipts;
-    }
-
     drainFoundationSelectionReceipts() {
         const receipts = Object.freeze(this.foundationSelectionReceipts);
         this.foundationSelectionReceipts = [];
@@ -505,12 +459,6 @@ export class RemoteGameAuthority {
     drainProjectileSpawnClaimReceipts() {
         const receipts = Object.freeze(this.projectileSpawnClaimReceipts);
         this.projectileSpawnClaimReceipts = [];
-        return receipts;
-    }
-
-    drainRopeSwingClaimReceipts() {
-        const receipts = Object.freeze(this.ropeSwingClaimReceipts);
-        this.ropeSwingClaimReceipts = [];
         return receipts;
     }
 
@@ -563,7 +511,6 @@ export class RemoteGameAuthority {
             state: this.buffer.sample({ now: this.now(), localPlayerId: this.playerId }),
             predicted: this.ownerRuntime?.presentationState() ?? null,
             owner: this.ownerRuntime?.state() ?? null,
-            ownerArtifactReward: this.ownerRuntime?.artifactReward() ?? null,
             ownerFoundationReward: this.ownerRuntime?.foundationReward() ?? null,
             serverTick: this.latestSnapshot?.serverTick ?? null,
             connected: !this.closed

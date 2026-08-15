@@ -1816,7 +1816,7 @@ ONLY POSSIBLE ROUTE
 Current:
 
 ```text
-maxAttachDistance = 440
+maxAttachDistance = 400
 ```
 
 ### Sector 04
@@ -1825,7 +1825,7 @@ maxAttachDistance = 440
 
 ```text
 MANDATORY ATTACH
-≤ 440
+≤ 400
 ```
 
 ### Speed Illusion
@@ -2154,7 +2154,7 @@ HOLD
 | 시스템 | 현재 Runtime | Sector 04 판정 |
 |---|---|---|
 | Static Grapple Surface | IMPLEMENTED | CORE |
-| Rope Max 440 | IMPLEMENTED | CORE |
+| Rope Max 400 | IMPLEMENTED | CORE |
 | Rope Cut Projectile | IMPLEMENTED | PRIMARY NEW PLAYER-FACING THREAT |
 | Sentry T1 | IMPLEMENTED | REUSE |
 | Patrol Drone T1 | IMPLEMENTED | REUSE |
@@ -2359,7 +2359,7 @@ FAIL:
 - no new enemy AI required
 - Wake가 기존 physics로 동작
 - Moving Platform 없이 Sector 전체 성립
-- all mandatory geometry ≤ 440
+- all mandatory geometry ≤ 400
 - `swingImpulse=0` safe clear 가능
 - Kill Optional
 - 4-8 ≠ 3-8 decision pattern
@@ -2368,7 +2368,7 @@ FAIL:
 
 - no new tier
 - Foundation + first Specialization carry
-- Artifact와 Rope Growth 분리
+- Foundation과 Rope Growth 분리
 
 ### Story
 
@@ -2408,7 +2408,7 @@ direct causal link to Group C
 - every stage = Cutter gauntlet
 - Wind LULL 기다리기만 정답
 - moving train tech가 실패하면 Sector가 붕괴
-- exact 440px max-range mandatory
+- exact 400px max-range mandatory
 - specific Build required
 - 3-8처럼 left/center/right route choice Finale 반복
 

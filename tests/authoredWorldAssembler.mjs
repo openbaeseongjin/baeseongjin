@@ -102,7 +102,6 @@ export function run() {
     assert.equal(first.areas.length, 8);
     assert.equal(first.gates.length, 8);
     assert.equal(first.checkpoints.length, 9);
-    assert.equal(first.checkpoints.filter(({ reward }) => reward).length, 1);
     assert.ok(first.surfaces.length > first.route.length);
     assert.ok(first.surfaces.every((surface) => Object.isFrozen(surface)));
     assert.ok(first.objects.every((object) => first.areas.some(({ id }) => id === object.areaId)));

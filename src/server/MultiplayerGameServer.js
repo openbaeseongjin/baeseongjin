@@ -213,19 +213,9 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "projectile-spawn-claim-receipt", payload: receipt }));
                 return;
             }
-            if (message?.type === "rope-swing-claim" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveRopeSwingClaim(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "rope-swing-claim-receipt", payload: receipt }));
-                return;
-            }
             if (message?.type === "impact-claim" && typeof message.payload === "string") {
                 const receipt = room.adapter.receiveImpactClaim(playerId, message.payload);
                 socket.send(JSON.stringify({ type: "impact-claim-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "artifact-selection" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveArtifactSelection(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "artifact-selection-receipt", payload: receipt }));
                 return;
             }
             if (message?.type === "foundation-selection" && typeof message.payload === "string") {

@@ -6,7 +6,6 @@ import { run as remoteGameAuthority } from "./remoteGameAuthority.mjs";
 import { run as predictableProjectileStore } from "./predictableProjectileStore.mjs";
 import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mjs";
 import { run as gameServerHandler } from "./gameServerHandler.mjs";
-import { run as artifactSelectionClaim } from "./artifactSelectionClaim.mjs";
 import { run as foundationSelectionClaim } from "./foundationSelectionClaim.mjs";
 import { run as authoredFoundationMultiplayer } from "./authoredFoundationMultiplayer.mjs";
 import { run as checkpointClaim } from "./checkpointClaim.mjs";
@@ -17,7 +16,6 @@ import { run as ownerMotionState } from "./ownerMotionState.mjs";
 import { run as authoredMultiplayerWorld } from "./authoredMultiplayerWorld.mjs";
 
 const steps = {
-    artifactSelectionClaim,
     foundationSelectionClaim,
     authoredFoundationMultiplayer,
     checkpointClaim,

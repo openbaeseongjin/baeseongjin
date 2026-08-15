@@ -93,13 +93,12 @@ export class CanvasRenderer {
         if (scene.mobileView) this.drawPlayerHealthHud(scene);
         if (!scene.mobileView) {
             this.drawCombatHud(scene);
-            this.drawArtifactHud(scene.artifacts, scene.ropeDamageBoostRemaining);
             this.drawFoundationHud(scene.foundationAugment);
         }
-        this.drawRewardSelectionOverlay(scene.foundationReward ?? scene.artifactReward);
+        this.drawRewardSelectionOverlay(scene.foundationReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawStoryPresentation(scene.storyPresentation);
-        this.drawArtifactFeedback(scene.eventFlash);
+        this.drawStatusFeedback(scene.eventFlash);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
         if (!metricsEnabled) return null;
@@ -115,19 +114,14 @@ export class CanvasRenderer {
         return renderMetrics;
     }
 
-    drawArtifactRewardOverlay(reward) {
-        this.drawRewardSelectionOverlay(reward);
-    }
-
     drawRewardSelectionOverlay(reward) {
         if (!reward) return;
         const ctx = this.context;
-        const foundationReward = reward.rewardType === "foundation";
         const cardGap = 12;
         const margin = Math.max(16, this.cssWidth * 0.04);
         const availableWidth = Math.min(this.cssWidth - margin * 2, 840);
         const cardWidth = (availableWidth - cardGap * 2) / 3;
-        const cardHeight = Math.min(foundationReward ? 226 : 180, this.cssHeight * 0.52);
+        const cardHeight = Math.min(226, this.cssHeight * 0.52);
         const startX = (this.cssWidth - availableWidth) * 0.5;
         const startY = (this.cssHeight - cardHeight) * 0.46;
         ctx.save();
@@ -135,12 +129,8 @@ export class CanvasRenderer {
         ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         ctx.fillStyle = "#f8fafc";
         ctx.textAlign = "center";
-        ctx.font = `900 ${foundationReward && this.cssWidth < 620 ? 14 : 22}px system-ui, sans-serif`;
-        ctx.fillText(
-            foundationReward ? "EMERGENCY GRAPPLE RECONFIGURATION" : "아티팩트 선택",
-            this.cssWidth * 0.5,
-            Math.max(30, startY - 50)
-        );
+        ctx.font = `900 ${this.cssWidth < 620 ? 14 : 22}px system-ui, sans-serif`;
+        ctx.fillText("EMERGENCY GRAPPLE RECONFIGURATION", this.cssWidth * 0.5, Math.max(30, startY - 50));
         ctx.fillStyle = "#bfdbfe";
         ctx.font = "700 13px system-ui, sans-serif";
         ctx.fillText("좌우 이동으로 선택 · 점프로 획득", this.cssWidth * 0.5, Math.max(52, startY - 20));
@@ -153,47 +143,30 @@ export class CanvasRenderer {
             ctx.fillRect(x, startY, cardWidth, cardHeight);
             ctx.strokeRect(x, startY, cardWidth, cardHeight);
             ctx.fillStyle = selected ? "#fde68a" : "#e2e8f0";
-            ctx.font = `900 ${foundationReward && cardWidth < 150 ? 11 : 16}px system-ui, sans-serif`;
-            if (foundationReward) this.drawFoundationChoiceIcon(choice.id, x + cardWidth * 0.5, startY + 48, selected);
-            ctx.fillText(choice.name, x + cardWidth * 0.5, startY + (foundationReward ? 92 : cardHeight * 0.4));
-            if (foundationReward) {
-                ctx.fillStyle = selected ? "#67e8f9" : "#94a3b8";
-                ctx.font = `900 ${cardWidth < 150 ? 8 : 11}px ui-monospace, monospace`;
-                this.drawCenteredWrappedText(
-                    `${choice.family} · ${choice.tagline}`,
-                    x + cardWidth * 0.5,
-                    startY + 116,
-                    cardWidth - 16,
-                    12,
-                    2
-                );
-            }
+            ctx.font = `900 ${cardWidth < 150 ? 11 : 16}px system-ui, sans-serif`;
+            this.drawFoundationChoiceIcon(choice.id, x + cardWidth * 0.5, startY + 48, selected);
+            ctx.fillText(choice.name, x + cardWidth * 0.5, startY + 92);
+            ctx.fillStyle = selected ? "#67e8f9" : "#94a3b8";
+            ctx.font = `900 ${cardWidth < 150 ? 8 : 11}px ui-monospace, monospace`;
+            this.drawCenteredWrappedText(
+                `${choice.family} · ${choice.tagline}`,
+                x + cardWidth * 0.5,
+                startY + 116,
+                cardWidth - 16,
+                12,
+                2
+            );
             ctx.fillStyle = "#cbd5e1";
-            ctx.font = `700 ${foundationReward && cardWidth < 150 ? 9 : 12}px system-ui, sans-serif`;
-            if (foundationReward) {
-                this.drawCenteredWrappedText(
-                    choice.description,
-                    x + cardWidth * 0.5,
-                    startY + 151,
-                    cardWidth - 18,
-                    15,
-                    2
-                );
-            } else {
-                ctx.fillText(choice.description, x + cardWidth * 0.5, startY + cardHeight * 0.65);
-            }
-            if (foundationReward) {
-                ctx.fillStyle = "#64748b";
-                ctx.font = "800 10px ui-monospace, monospace";
-                ctx.fillText("FOUNDATION / FIRMWARE PROFILE", x + cardWidth * 0.5, startY + 190);
-            }
+            ctx.font = `700 ${cardWidth < 150 ? 9 : 12}px system-ui, sans-serif`;
+            this.drawCenteredWrappedText(choice.description, x + cardWidth * 0.5, startY + 151, cardWidth - 18, 15, 2);
+            ctx.fillStyle = "#64748b";
+            ctx.font = "800 10px ui-monospace, monospace";
+            ctx.fillText("FOUNDATION / FIRMWARE PROFILE", x + cardWidth * 0.5, startY + 190);
         });
         ctx.fillStyle = "#fbbf24";
         ctx.font = "900 13px system-ui, sans-serif";
         ctx.fillText(
-            foundationReward
-                ? "개인 장비만 정지 · 다른 플레이어와 월드는 계속 진행"
-                : "선택 중에도 전투 진행 · 빠르게 결정하세요",
+            "개인 장비만 정지 · 다른 플레이어와 월드는 계속 진행",
             this.cssWidth * 0.5,
             Math.min(this.cssHeight - 18, startY + cardHeight + 28)
         );
@@ -305,47 +278,13 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawArtifactHud(artifacts = [], ropeDamageBoostRemaining = 0) {
-        const ctx = this.context;
-        const height = 46 + Math.max(1, artifacts.length) * 20;
-        ctx.save();
-        ctx.fillStyle = "rgba(7, 11, 20, 0.82)";
-        ctx.fillRect(18, 132, 300, height);
-        ctx.strokeStyle = "rgba(148, 163, 184, 0.38)";
-        ctx.strokeRect(18, 132, 300, height);
-        ctx.fillStyle = "#fde68a";
-        ctx.font = "900 12px system-ui, sans-serif";
-        ctx.fillText("아티팩트", 32, 154);
-        ctx.fillStyle = "#e2e8f0";
-        ctx.font = "700 12px system-ui, sans-serif";
-        if (artifacts.length === 0) {
-            ctx.fillText("보유 없음", 32, 176);
-        } else {
-            artifacts.forEach((artifact, index) => ctx.fillText(`• ${artifact.name}`, 32, 176 + index * 20));
-        }
-        if (ropeDamageBoostRemaining > 0) {
-            ctx.fillStyle = "#67e8f9";
-            ctx.textAlign = "right";
-            ctx.fillText(`공명 ${ropeDamageBoostRemaining.toFixed(1)}초`, 302, 154);
-        }
-        ctx.restore();
-    }
-
-    drawArtifactFeedback(eventFlash) {
+    drawStatusFeedback(eventFlash) {
         if (!eventFlash || eventFlash.age >= 2.2) return;
         let title;
         let detail;
         let color;
         let foundationFeedback = false;
-        if (eventFlash.type === "artifact" && eventFlash.artifact) {
-            title = "아티팩트 획득";
-            detail = eventFlash.artifact.name;
-            color = "#fbbf24";
-        } else if (eventFlash.type === "artifact-loss" && eventFlash.artifacts?.length) {
-            title = "체크포인트 부활 · 아티팩트 손실";
-            detail = eventFlash.artifacts.map((artifact) => artifact.name).join(", ");
-            color = "#fb7185";
-        } else if (eventFlash.type === "checkpoint-respawn") {
+        if (eventFlash.type === "checkpoint-respawn") {
             title = "체크포인트 부활";
             detail = eventFlash.reason === "fall" ? "낙사 · 최대 체력으로 복귀" : "사망 · 최대 체력으로 복귀";
             color = "#67e8f9";
@@ -402,7 +341,8 @@ export class CanvasRenderer {
         if (!metrics) return;
         const ctx = this.context;
         const x = Math.max(8, this.cssWidth - 248);
-        const firstReward = metrics.firstRewardSeconds === null ? "-" : `${metrics.firstRewardSeconds.toFixed(1)}초`;
+        const firstFoundation =
+            metrics.firstFoundationSeconds === null ? "-" : `${metrics.firstFoundationSeconds.toFixed(1)}초`;
         const areaOffset = metrics.areaTiming ? 19 : 0;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
@@ -419,7 +359,7 @@ export class CanvasRenderer {
         ctx.fillText(`활성 ${metrics.activeSeconds.toFixed(1)}초 · 체크 ${metrics.checkpointsReached}`, x + 12, 60);
         ctx.fillText(`처치 ${metrics.enemyDefeats} · 피해 ${metrics.damageTaken}`, x + 12, 79);
         ctx.fillText(`절단 ${metrics.ropeCuts} · 사망 ${metrics.defeats}`, x + 12, 98);
-        ctx.fillText(`첫 보상 ${firstReward}`, x + 12, 117);
+        ctx.fillText(`첫 Foundation ${firstFoundation}`, x + 12, 117);
         if (metrics.areaTiming) {
             const areaLabel = metrics.areaTiming.currentAreaId?.replace("sector-", "") ?? "-";
             ctx.fillText(`구간 ${areaLabel} · ${metrics.areaTiming.currentAreaSeconds.toFixed(1)}초`, x + 12, 136);

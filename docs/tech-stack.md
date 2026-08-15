@@ -8,7 +8,7 @@
 |---|---|---|
 | 언어 | Vanilla JavaScript | TypeScript 변환이나 번들 과정 없이 ES Module로 작성한다. |
 | 게임 화면 | Canvas 2D API | 월드, 플레이어, 로프, 적, VFX를 렌더링한다. |
-| UI | DOM API, 필요 시 Alpine.js 3.x | 현재 설치되지 않았다. 아티팩트 선택처럼 상태를 가진 DOM UI가 복잡해질 때 도입한다. |
+| UI | DOM API, 필요 시 Alpine.js 3.x | 현재 설치되지 않았다. Foundation 선택처럼 상태를 가진 DOM UI가 복잡해질 때 도입한다. |
 | 스타일 | CSS | 현재는 `index.html`의 정적 앱 셸 스타일을 사용하며 규모가 커질 때 파일을 분리한다. |
 | 로컬 실행 | Node.js 20 이상 | 정적 서버, 테스트, 검사 스크립트를 실행한다. |
 | 패키지 관리 | npm | 개발 도구와 명령을 관리한다. |

@@ -10,6 +10,47 @@ export function run() {
     const valid = validateAreaCatalog(SECTOR_01_AREA_CATALOG);
     assert.deepEqual(valid, { valid: true, issues: [] });
 
+    const tightIsolation = validateAreaCatalog(SECTOR_01_AREA_CATALOG, { maxAttachDistance: 300 });
+    assert.ok(
+        tightIsolation.issues.some(({ code }) => code === "grapple-surface-isolated"),
+        "the grapple connectivity check must reject surfaces outside the hook-reach graph"
+    );
+
+    const disconnectedClusters = mutableCatalog();
+    const disconnectedArea = disconnectedClusters.areas[0];
+    for (const surface of disconnectedArea.surfaces) surface.grappleable = false;
+    const surfacesById = new Map(disconnectedArea.surfaces.map((surface) => [surface.id, surface]));
+    const landmarksById = new Map(disconnectedArea.objects.map((object) => [object.id, object]));
+    for (const [id, position] of [
+        ["sector-01-01:anchor-a-surface", { x: -384, y: -864 }],
+        ["sector-01-01:anchor-b-surface", { x: -320, y: -864 }],
+        ["sector-01-01:anchor-c-surface", { x: 320, y: -96 }]
+    ]) {
+        surfacesById.get(id).grappleable = true;
+        surfacesById.get(id).position = position;
+        landmarksById.get(id.slice(0, -"-surface".length)).position = position;
+    }
+    const pairedSurface = surfacesById.get("sector-01-01:p0");
+    pairedSurface.grappleable = true;
+    pairedSurface.position = { x: 384, y: -96 };
+    pairedSurface.vertices = [
+        { x: 352, y: -112 },
+        { x: 416, y: -112 },
+        { x: 416, y: -80 },
+        { x: 352, y: -80 }
+    ];
+    const disconnectedIssues = validateAreaCatalog(disconnectedClusters, { maxAttachDistance: 100 }).issues;
+    assert.ok(
+        disconnectedIssues.some(
+            ({ code, areaId, id, limit }) =>
+                code === "grapple-surface-isolated" &&
+                areaId === "sector-01-01" &&
+                id === "sector-01-01:anchor-a-surface" &&
+                limit === 100
+        ),
+        "two separated pairs of otherwise reachable surfaces must fail the connectivity check"
+    );
+
     const missingNext = mutableCatalog();
     missingNext.areas[0].nextAreaId = "sector-99-99";
     assert.ok(validateAreaCatalog(missingNext).issues.some(({ code }) => code === "area-next-missing"));

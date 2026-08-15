@@ -334,7 +334,7 @@ Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
 
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 
@@ -368,7 +368,7 @@ Y                0 ~ -1088
 200–350 px
 ```
 
-Max Range 440을
+Max Range 400을
 필수 Challenge로 사용하지 않는다.
 
 ---
@@ -992,7 +992,7 @@ Commercial System은 살아 있는데
 현재 `main` 기준:
 
 ```text
-Rope Max Attach Distance = 440
+Rope Max Attach Distance = 400
 Swing Impulse = 780
 ```
 

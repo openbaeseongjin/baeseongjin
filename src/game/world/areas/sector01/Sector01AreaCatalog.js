@@ -797,7 +797,6 @@ const area08 = defineArea({
     checkpoints: [
         point("checkpoint:sector-01-08:end", 0, -1696, {
             radius: 38,
-            reward: true,
             sourceObjectId: "sector-01-08:sector-checkpoint"
         })
     ],

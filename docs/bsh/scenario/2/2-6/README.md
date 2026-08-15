@@ -351,7 +351,7 @@ Player Radius            15
 Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 
@@ -385,7 +385,7 @@ Y                0 ~ -1216
 220–360 px
 ```
 
-Max Range `440 px`를 반복적으로 시험하지 않는다.
+Max Range `400 px`를 반복적으로 시험하지 않는다.
 
 ---
 

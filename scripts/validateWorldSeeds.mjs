@@ -1,4 +1,4 @@
-import { ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
+import { ropeHookReach, WORLD_CONFIG } from "../src/game/config.js";
 import { generateWorld } from "../src/game/world/WorldGenerator.js";
 import { validateWorldTraversal } from "../src/game/world/WorldTraversalValidator.js";
 import { validateAreaCatalog } from "../src/game/world/AreaDefinitionValidator.js";
@@ -8,7 +8,7 @@ import { WORLD_REGRESSION_SEEDS } from "./worldRegressionSeeds.mjs";
 const seedCount = 1000;
 const failures = [];
 const authoredResult = validateAreaCatalog(CURRENT_AUTHORED_AREA_CATALOG, {
-    maxAttachDistance: ROPE_CONFIG.maxAttachDistance
+    maxAttachDistance: ropeHookReach()
 });
 if (!authoredResult.valid) {
     failures.push({
@@ -26,7 +26,7 @@ for (const testCase of cases) {
     const { seed } = testCase;
     const world = generateWorld({ ...WORLD_CONFIG, seed });
     const result = validateWorldTraversal(world, {
-        maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
+        maxAttachDistance: ropeHookReach(),
         minimumVerticalGain: WORLD_CONFIG.minimumVerticalGain
     });
     if (!result.valid) failures.push({ ...testCase, issues: result.issues });

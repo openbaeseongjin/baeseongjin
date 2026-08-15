@@ -2,7 +2,7 @@
 
 ## 현재 범위
 
-브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 하나의 연속 월드에 조립된 저작 진행 영역, 자동 전투, 적 투사체, 체크포인트 복귀와 아티팩트 런 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
+브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 하나의 연속 월드에 조립된 저작 진행 영역, 자동 전투, 적 투사체, 체크포인트 복귀와 Foundation 런 성장 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
 
 ## 주요 모듈
 
@@ -29,8 +29,6 @@ index.html
       ├─ game/simulation/GameSimulation.js
       ├─ game/combat/CombatSystems.js
       ├─ game/combat/CombatFeedback.js
-      ├─ game/artifacts/ArtifactCatalog.js
-      ├─ game/artifacts/ArtifactInventory.js
       ├─ game/augments/FoundationAugmentCatalog.js
       ├─ game/augments/FoundationAugmentState.js
       ├─ game/rewards/RewardSelection.js
@@ -147,15 +145,15 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 ```
 
 - `InputDrivenObject`와 `SimulationDrivenObject`는 실행 위치가 아니라 상태 변화 원인의 Is-A 정체성이다. 서버는 입력 주도 객체 claim을 검증할 복제 상태를 가지며 클라이언트는 시뮬레이션 주도 객체를 표시·보간할 복제 상태를 가질 수 있다.
-- 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·아티팩트를 Has-A로 소유하고, 로프는 부착·장력·드래그 상태를 독립 소유한다. 소유 관계는 ID와 공개 계약으로 연결한다.
+- 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·Foundation을 Has-A로 소유하고, 로프는 부착·장력·드래그·발사 shot 상태를 독립 소유한다. 소유 관계는 ID와 공개 계약으로 연결한다.
 - 적과 직접 조작하지 않는 자동 행동 객체는 `SimulationDrivenObject`다. 서버가 진행하되 플레이어 피격처럼 사용자 체감과 만나는 사건은 피해 클라이언트가 먼저 반응하고 서버가 권위 객체 상태로 검증한다.
 - 멀티는 권한 감각만 보면 P2P형이다. 플레이어별 `InputDrivenObject` 결과는 해당 소유자·피해자 클라이언트가 먼저 결정하고, 특정 클라이언트에 귀속할 수 없는 몹과 적 투사체 같은 `SimulationDrivenObject`의 생성·궤적은 서버가 중립적으로 진행한다. 서버는 지연된 플레이어 복제 위치로 충돌을 먼저 확정하지 않고 피해 클라이언트 claim을 중립 객체 상태로 검증한다.
 - 사건 전파와 지속 상태 수렴을 같은 것으로 취급하지 않는다. `InputDrivenObject`의 지속 상태는 인증·형식·세션 tick 검사를 통과한 최신 `owner-motion`을 값의 크기와 무관하게 서버와 동료가 따라가고, `SimulationDrivenObject`는 서버 상태를 모든 클라이언트가 따라간다. 원격 플레이어 위치는 상태가 실제 생성된 `ownerMotionTick` 표본 사이를 보간하고 공용 입력 선행 tick으로 서버 표시 시계와 정렬하며, 적은 `serverTick` 표본을 사용한다. 중복·역순·세션 범위 밖 owner tick은 성공한 no-op으로 무시하고 소유자는 어떤 `owner-motion` receipt에도 서버 지연 위치로 되감기거나 미확정 입력을 재실행하지 않는다.
-- 로프 스윙처럼 입력 capability가 플레이어의 지속 전투 상태도 바꾸면 소유 클라이언트와 서버 검증 복제본이 같은 `GameSimulation` 도메인 메서드를 사용한다. 소유 클라이언트는 강화 시간과 무기 파라미터를 즉시 작성하고, 서버는 별도 swing claim을 검증해 다른 복제본에 공유한다. 같은 틱 자동 발사는 swing claim 뒤에 공유해 양쪽 피해량 계산의 원인이 일치한다. 정상 스냅샷은 소유자의 강화 타이머를 다시 쓰지 않는다.
-- 예측 객체의 생성과 그 입력이 바꾸는 소유자 상태는 하나의 prediction ID 수명주기로 관리한다. 자동 발사는 탄환과 무기 쿨다운을 함께 적용하고 로프 스윙은 강화 직전·직후 타이머를 함께 보존한다. 여러 동종 claim이 pending이면 앞 거절은 후속 효과를 지우지 않고 후속 prediction의 이전 값만 거절된 원인이 없었던 시간축으로 재기준화한다. 마지막 거절에서 최초 준비 상태로 복구한다. 승인 receipt는 공유 확인일 뿐 소유자 상태를 서버 스냅샷으로 교체하는 전이가 아니다.
-- 피해 결과는 projectile ID를 수명주기 키로 사용한다. `OwnerPredictionRuntime`은 `GameSimulation`의 공용 피해 전이로 넉백·HP·무적·치명 체크포인트 부활·아티팩트 손실 또는 로프 절단을 즉시 적용하고, pending 기록은 중복 억제와 승인 resolve 대응에 사용한다. 승인 receipt는 resolve 사건까지 기록을 유지하고, 거부 receipt는 pending 기록만 정리하며 이미 인식한 피해 상태를 복원하지 않는다. 피격 전 상태와 tick·발생 순서는 체크포인트처럼 별도의 복구 가능한 전이를 되돌릴 때 이후 pending impact를 재실행하는 기준으로만 사용한다. 전송 계층은 HP나 물리 역연산을 구현하지 않는다.
+- 로프 스윙처럼 입력 capability가 플레이어의 지속 상태도 바꾸면 소유 클라이언트와 서버 검증 복제본이 같은 `GameSimulation` 도메인 메서드를 사용한다. 정상 스냅샷은 소유자의 강화 타이머를 다시 쓰지 않는다.
+- 예측 객체의 생성과 그 입력이 바꾸는 소유자 상태는 하나의 prediction ID 수명주기로 관리한다. 자동 발사는 탄환과 무기 쿨다운을 함께 적용한다. 여러 동종 claim이 pending이면 앞 거절은 후속 효과를 지우지 않고 후속 prediction의 이전 값만 거절된 원인이 없었던 시간축으로 재기준화한다. 마지막 거절에서 최초 준비 상태로 복구한다. 승인 receipt는 공유 확인일 뿐 소유자 상태를 서버 스냅샷으로 교체하는 전이가 아니다.
+- 피해 결과는 projectile ID를 수명주기 키로 사용한다. `OwnerPredictionRuntime`은 `GameSimulation`의 공용 피해 전이로 넉백·HP·무적·치명 체크포인트 부활 또는 로프 절단을 즉시 적용하고, pending 기록은 중복 억제와 승인 resolve 대응에 사용한다. 승인 receipt는 resolve 사건까지 기록을 유지하고, 거부 receipt는 pending 기록만 정리하며 이미 인식한 피해 상태를 복원하지 않는다. 피격 전 상태와 tick·발생 순서는 체크포인트처럼 별도의 복구 가능한 전이를 되돌릴 때 이후 pending impact를 재실행하는 기준으로만 사용한다. 전송 계층은 HP나 물리 역연산을 구현하지 않는다.
 - 체크포인트처럼 `InputDrivenObject`의 위치가 공용 월드 전이를 만나는 사건은 소유 클라이언트가 로컬 시뮬레이션의 진행도·보상·로프 상태를 먼저 전이하고 claim을 만들며 서버가 공용 상태를 멱등 확정한다. 체크포인트와 뒤따르는 피격은 같은 예측 시간축에 있어 치명 피격이 새 활성 지점을 즉시 사용한다. 거절 시 이전 진행도·소유자 상태에서 이후 입력과 pending impact를 재실행한다. 서버 복제 시뮬레이션은 같은 위치 조건으로 별도 사건을 시작하지 않으며 싱글 자동 감지와 클라이언트 예측·서버 claim은 하나의 도메인 활성화 메서드를 공유한다.
-- 저작 영역의 `areaId`는 UI·게임 진행을 위한 논리 상태이며 물리 월드나 멀티플레이 권한 구역을 분할하지 않는다. 열린 Gate는 이 공용 월드 좌표계 안의 지속 단방향 포탈이다. 포탈 trigger는 Gate 오브젝트의 `bottom-center`를 기준으로 `gatePortalBounds()`가 만드는 `52×62` 저작 문 내부 aperture이며, Gate barrier나 넓은 출구·연결 bounds를 재사용하지 않는다. 플레이어 중심이 이 aperture 안에 들어온 경우만 진입으로 본다. 따라서 문 위나 좌우로 로프 이동하는 플레이어는 `gate-crossed`·`gate-portal-entered`와 전이 초기화를 일으키지 않는다. 이 gameplay aperture는 교체 가능한 mock·정식 이미지 파일에서 역산하지 않으며, 그래픽 리소스가 저작 문 좌표와 aperture에 맞춰 표현된다. 첫 진입자의 문 내부 진입으로 `gate-crossed`가 공용 진행을 한 번 확정하지만 그 플레이어만 이동하고, 뒤의 플레이어는 같은 열린 문에 직접 들어올 때 각각 `gate-portal-entered` 사건으로 이동한다. 각 플레이어는 자기 사건의 결정적 도착 좌표와 tick을 `GameSimulation.applyPortalTransition()`에 한 번 적용해 위치·속도·회전·접지·로프·포인터 버퍼·일시 전투 타이머와 무기 재사용 대기를 초기화하되 체력·생명·아티팩트·무기 수치·체크포인트·월드 객체 상태는 유지한다. 이미 같은 Gate를 로컬 예측한 클라이언트는 서버 확정에서 초기화를 반복하지 않는다. 서버는 전이를 일으킨 owner-motion tick 이하의 중복·역순 상태만 성공한 no-op으로 무시하고, 원격 상태 버퍼는 해당 플레이어의 포탈 tick 전후 표본을 서로 보간하지 않는다.
+- 저작 영역의 `areaId`는 UI·게임 진행을 위한 논리 상태이며 물리 월드나 멀티플레이 권한 구역을 분할하지 않는다. 열린 Gate는 이 공용 월드 좌표계 안의 지속 단방향 포탈이다. 포탈 trigger는 Gate 오브젝트의 `bottom-center`를 기준으로 `gatePortalBounds()`가 만드는 `52×62` 저작 문 내부 aperture이며, Gate barrier나 넓은 출구·연결 bounds를 재사용하지 않는다. 플레이어 중심이 이 aperture 안에 들어온 경우만 진입으로 본다. 따라서 문 위나 좌우로 로프 이동하는 플레이어는 `gate-crossed`·`gate-portal-entered`와 전이 초기화를 일으키지 않는다. 이 gameplay aperture는 교체 가능한 mock·정식 이미지 파일에서 역산하지 않으며, 그래픽 리소스가 저작 문 좌표와 aperture에 맞춰 표현된다. 첫 진입자의 문 내부 진입으로 `gate-crossed`가 공용 진행을 한 번 확정하지만 그 플레이어만 이동하고, 뒤의 플레이어는 같은 열린 문에 직접 들어올 때 각각 `gate-portal-entered` 사건으로 이동한다. 각 플레이어는 자기 사건의 결정적 도착 좌표와 tick을 `GameSimulation.applyPortalTransition()`에 한 번 적용해 위치·속도·회전·접지·로프·포인터 버퍼·일시 전투 타이머·로프 발사 shot/cooldown과 무기 재사용 대기를 초기화하되 체력·생명·무기 수치·Foundation·체크포인트·월드 객체 상태는 유지한다. 이미 같은 Gate를 로컬 예측한 클라이언트는 서버 확정에서 초기화를 반복하지 않는다. 서버는 전이를 일으킨 owner-motion tick 이하의 중복·역순 상태만 성공한 no-op으로 무시하고, 원격 상태 버퍼는 해당 플레이어의 포탈 tick 전후 표본을 서로 보간하지 않는다.
 - 저작 영역의 출구는 `선행 objective 집계 → gate-panel interaction objective → Gate unlock`의 공통 계약을 사용한다. 시나리오별 선행 objective는 이동·상호작용·증강 선택 등으로 달라도 문을 여는 마지막 입력은 Gate 옆 `gate-panel` 조작으로 통일한다. `WorldProgressState`는 패널 objective의 `requiredObjectiveIds`를 직접 검증하고 snapshot 복원에서도 선행 목표 없는 완료 상태를 거부한다. `AuthoredWorldAssembler`는 각 `area.bounds`의 좌우에 비부착 `area-boundary-wall`, 상단 Gate 개구부 좌우에 `inter-floor-divider` 충돌면을 항상 만들며, `WorldGateGeometry`는 잠긴 Gate의 중앙 barrier만 추가한다. 따라서 방 바깥이나 층 경계로 돌아갈 수 없고 문 안 포탈만 다음 영역 진입로가 된다.
 - 저작 영역은 local Y 범위와 desktop/mobile zoom, 선택적 player screen ratio를 `cameraZones`로 선언한다. 싱글·멀티의 `AuthoredCameraDirector`는 같은 정의를 소비하되, 열린 포탈 뒤에도 플레이어가 서로 다른 방에 남을 수 있으므로 공용 `currentAreaId`가 아니라 각 로컬 플레이어의 물리 좌표로 현재 영역과 Shot을 고른다. renderer는 계산된 카메라만 받고 Camera Zone 규칙을 다시 해석하지 않는다.
 - 표시 시간이 있는 objective는 `WorldProgressState.activeObjectiveSequences`의 공용 진행으로 시작·진행·완료한다. 1-1 Terminal은 2.7초 Sequence가 끝난 뒤 objective와 Gate를 확정하고, 각 클라이언트의 `AuthoredStoryPresentation`은 같은 사건을 짧은 문구로 표현할 뿐 Gate 상태를 쓰지 않는다. Story 문구 중에도 이동 입력은 허용한다.
@@ -165,7 +163,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `SimulationDispatcher`는 월드 단계가 지정한 capability ID만 실행한다. 한 객체에 운동과 충돌처럼 여러 능력이 조합돼도 현재 단계와 무관한 능력을 실행하지 않으며, `GameSimulation`과 `CombatSystems`는 단계 순서와 context만 조정한다. `PredictableProjectileStore`는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 담당하고 투사체 종류별 충돌이나 거부 정책을 분기하지 않는다.
 - 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
 - `GameSimulation`은 객체별 게임 규칙을 직접 모으는 거대 분기점이 아니라 월드 등록, 고정 tick, 객체 단계 실행과 사건 연결을 조정하는 월드 스케줄러로 축소한다. 투사체 spawn 사건도 종류를 검사하지 않고 객체의 `replicationState(tick)` 계약을 사용한다.
-- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명·별도 rollback 계약이 있는 사건 전이·표시 보정만 조정한다. `owner-motion` receipt는 소유 상태 복원·입력 재실행을 시작하지 않는다. 정상 공유 스냅샷은 `applySharedOwnerProgress()`로 검증된 아티팩트·무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
+- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명·별도 rollback 계약이 있는 사건 전이·표시 보정만 조정한다. `owner-motion` receipt는 소유 상태 복원·입력 재실행을 시작하지 않는다. 정상 공유 스냅샷은 `applySharedOwnerProgress()`로 검증된 무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
 
 ### 적용된 마이그레이션 순서
 
@@ -193,17 +191,16 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 - `CURRENT_AUTHORED_AREA_CATALOG`와 `assembleAuthoredWorld()`가 Sector 01·02의 저작 영역을 하나의 연속 좌표계로 조립한다. `GameSimulationFactory`는 seed와 world revision으로 같은 catalog를 선택해 싱글·멀티가 동일한 정의를 재현하게 한다.
 - `GameSimulation`이 저작 영역의 목표·Gate·content boundary와 플레이어별 진행 상태를 권위 상태로 보존한다.
-- 사망 재개는 월드와 체크포인트 진행도를 유지한 채 활성 지점으로 복귀하고, `ArtifactInventory`의 결정적 정책으로 최근 아티팩트 약 1/3만 제거한다.
-- 첫 체크포인트의 아티팩트와 1-4 Foundation 선택은 `PlayerCommand`의 좌우·점프 명령을 사용한다. 선택 중인 플레이어의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
-- 아티팩트 획득·손실 정보는 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 보유 상태와 분리한다.
-- `rewardedCheckpointIds`가 체크포인트별 보상 수령 여부를 권위 상태로 보존해 재방문과 사망 복귀의 중복 지급을 막는다.
+- 사망 재개는 월드와 체크포인트 진행도를 유지한 채 활성 지점으로 복귀한다. Checkpoint는 진행 저장과 개인 부활만 소유하며 보상 선택을 열지 않는다.
+- 1-4 Foundation 선택은 `PlayerCommand`의 좌우·점프 명령을 사용한다. 선택 중인 플레이어의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
+- Foundation 선택 피드백은 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 선택 상태와 분리한다.
 - `npm test`의 current authored world 검증은 area catalog의 연결·출구 참조·Gate 진행과 마지막 content boundary를 확인한다. 절차형 48단계 경로의 시드 sweep은 현재 제품 검증에 포함하지 않는다.
 - `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가한다. 사망 횟수는 호환 필드 `defeats`에 기록하며 사망·부활로 공용 월드 시간을 멈추지 않는다. `areaTiming`은 공용 `WorldProgressState.currentAreaId`를 기준으로 현재 저작 영역 체류 시간과 첫 Gate 통과 때 확정된 영역별 클리어 시간을 기록해 1-1 같은 첫 진행 시간 목표를 인위적인 타이머 없이 검증한다.
 - `?metrics=1`은 `GameApp`과 렌더러에만 전달되는 옵트인 개발 표시이며 `PlayerCommand`나 게임 규칙에 포함하지 않는다.
-- 사망·낙사는 `GameSimulation.respawnPlayerAtCheckpoint` 하나로 처리한다. 사망한 플레이어의 물리·입력·체력·아티팩트만 초기화하며 동료와 공용 월드는 계속 진행한다.
-- 체크포인트 보상은 플레이어별 선택 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
+- 사망·낙사는 `GameSimulation.respawnPlayerAtCheckpoint` 하나로 처리한다. 사망한 플레이어의 물리·입력·체력·로프 발사 shot만 초기화하며 동료와 공용 월드는 계속 진행한다.
+- Foundation 보상은 플레이어별 선택 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - 보상 Canvas 오버레이는 반투명 배경과 실시간 전투 경고를 사용해 선택 카드와 진행 중인 위험을 동시에 보여준다.
-- `RewardSelection`은 Artifact와 Foundation의 카드 이동·Confirm·진입 Input Gate만 공유한다. Artifact의 `checkpointId`·전투 빌드와 Foundation의 `sourceId`·Rope 정체성 Catalog·효과 상태는 분리한다.
+- `RewardSelection`은 Foundation 선택의 카드 이동·Confirm·진입 Input Gate만 공유한다. 2-3 Specialization은 별도 선택 시스템이 아니라 1-4 Foundation과 같은 authored choice primitive를 재사용한다.
 - `FoundationAugmentState`는 Player별 고정 선택과 Relay의 짧은 runtime window만 소유한다. Impulse·Relay·Shear는 기존 Rope Release/Attach 사건에서 한 번만 판정하며 Shear를 매 frame 충돌 시스템으로 확장하지 않는다.
 - `interact-choice`는 개인 chooser 요청을 만들고 첫 Foundation 확정이 공유 objective를 완료한다. 이미 공용 objective가 끝났어도 아직 선택하지 않은 동료는 같은 Node에서 자기 chooser를 열 수 있으며 Calibration 결과는 Gate 요구 조건이 아니다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
@@ -214,13 +211,13 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 멀티 연결 종료는 게임을 멈추고 모드 메뉴로 돌아가며 마지막 4자리 채널을 입력란에 보존한다. 자동 오프라인 진행이나 플레이어 런타임 복원은 하지 않는다.
 - `PlayerRuntimeFactory`는 `PlayerObject`, 별도 `RopeObject`, `AutomaticWeaponObject`와 Has-A 컴포넌트를 조립하고 소유자별 `InputDrivenObject` 등록 목록을 반환한다. 객체 종류별 규칙을 팩토리에 넣지 않는다.
 - `GameSimulation.addPlayer()`는 같은 팩토리 결과를 공용 `players` 배열에 등록한다. 생성자의 첫 플레이어도 이 경로를 사용하고 그 ID만 비공개 기본 플레이어 식별자로 보존한다.
-- 조준점, 부착 후보, 포인터 전이, 부착 버퍼와 스윙 드래그는 `RopeObject`가 소유한다. 로프 연계 강화 시간은 전투 효과를 받는 `PlayerObject`가 소유하며 첫 플레이어의 컴포넌트를 중복 가리키는 싱글 호환 필드는 두지 않는다.
+- 조준점, 부착 후보, 포인터 전이, 부착 버퍼, 로프 발사 shot/cooldown과 스윙 드래그는 `RopeObject`가 소유한다. 첫 플레이어의 컴포넌트를 중복 가리키는 싱글 호환 필드는 두지 않는다.
 - 외부 실행 계층은 `getPrimaryPlayerId()`, `playerState()`·`playerStates()`, `applyOwnerMotion()`, 예측 복원·진행·피격·충돌 명령을 사용한다. 서버 세션과 로컬 예측기는 `players` 배열이나 플레이어 컴포넌트를 직접 수정하지 않는다.
 - 이동·점프와 로프 입력은 각각 `LocomotionInput`, `RopePointerInput` capability로 전달한다. 적 공격·자동 무기·양측 투사체 운동과 클라이언트 충돌도 각 `SimulationDrivenObject`의 capability로 한 번만 구현하며, `GameSimulation`은 소유자 입력 그룹과 이름 있는 시뮬레이션 단계를 일정 순서로 실행한다. 실행 위치는 Is-A 정체성과 별개이므로 서버가 궤적을 진행하는 투사체도 피해·공격 클라이언트에서 `client-projectile-collision` capability를 실행할 수 있다.
 - `stepCommandBatch`는 싱글과 소유 클라이언트 예측에서 정확히 다음 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 로컬 예측은 `InputStateSimulator`로 마지막 입력을 제한된 틱 동안 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다. 멀티 서버는 같은 스케줄러를 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 입력 물리를 다시 적분하지 않고 최신 적용 `owner-motion`을 연속 상태 원점으로 유지한다.
 - `PlayerCommand.interact`는 Gate 패널 같은 근접 문맥 상호작용 의도다. `InputSampler`는 PC `W/↑`와 모바일 점프 버튼을 점프 축과 `interact`에 함께 매핑하며, 진행 시스템은 준비된 패널의 반경 안에서만 이를 소비한다. 따라서 별도 PC 상호작용 키를 추가하지 않고 패널 밖에서는 기존 점프 동작을 그대로 유지한다.
-- `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력·손실 아티팩트를 `player-respawned` 사건으로 남긴다. 손실이 있으면 같은 playerId의 `artifact-loss` 사건도 발행한다.
-- 여러 플레이어가 같은 틱에 사망해도 각자 독립 부활한다. 공용 적·투사체와 다른 플레이어의 위치·체력·아티팩트는 초기화하지 않는다.
+- `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력을 `player-respawned` 사건으로 남긴다.
+- 여러 플레이어가 같은 틱에 사망해도 각자 독립 부활한다. 공용 적·투사체와 다른 플레이어의 위치·체력·Foundation은 초기화하지 않는다.
 - 적은 사거리 안의 살아 있는 플레이어 중 최근접 대상을 선택하고 거리 동률은 ID로 결정한다. 적 투사체의 생성·직선 궤적·8초 수명은 서버가 진행한다. 각 피해 클라이언트가 자기 예측 위치에서 로프를 몸체보다 먼저 판정해 playerId가 있는 claim을 보내며, 서버 고정 스텝은 지연된 플레이어 위치로 충돌을 먼저 만들지 않는다.
 - 현재 구현된 마지막 영역 `sector-02-08`은 다음 시나리오가 아직 연결되지 않은 content boundary이며 `completed` 전체 게임 종료로 판정하지 않는다.
 - `GameSimulation`이 플레이어·로프·적·투사체·체력·사망·플레이어별 체크포인트 부활을 소유한다.

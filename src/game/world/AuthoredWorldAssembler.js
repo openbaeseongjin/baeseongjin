@@ -151,8 +151,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
                 level: index,
                 x: entry.x,
                 y: entry.y,
-                radius: checkpointRadius,
-                reward: false
+                radius: checkpointRadius
             })
         );
         checkpoints.push(
@@ -162,8 +161,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
                     ...translated,
                     areaId: definition.id,
                     level: index + (checkpointIndex + 1) / (definition.checkpoints.length + 1),
-                    radius: checkpoint.radius ?? checkpointRadius,
-                    reward: Boolean(checkpoint.reward)
+                    radius: checkpoint.radius ?? checkpointRadius
                 });
             })
         );

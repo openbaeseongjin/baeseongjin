@@ -47,7 +47,7 @@ export function run() {
         damageTaken: 20,
         ropeCuts: 2,
         defeats: 1,
-        firstRewardSeconds: 10,
+        firstFoundationSeconds: 10,
         areaTiming: { currentAreaId: "sector-01-01", currentAreaSeconds: 42.75, clearSeconds: {} }
     });
     assert.deepEqual(textCalls, [
@@ -55,7 +55,7 @@ export function run() {
         "활성 12.5초 · 체크 1",
         "처치 3 · 피해 20",
         "절단 2 · 사망 1",
-        "첫 보상 10.0초",
+        "첫 Foundation 10.0초",
         "구간 01-01 · 42.8초"
     ]);
     textCalls.length = 0;
@@ -67,7 +67,7 @@ export function run() {
             damageTaken: 20,
             ropeCuts: 2,
             defeats: 1,
-            firstRewardSeconds: 10
+            firstFoundationSeconds: 10
         },
         {
             roundTripMs: 104.4,
@@ -103,24 +103,18 @@ export function run() {
     textCalls.length = 0;
     renderer.drawEnvironmentMetrics({ failedComponents: () => [], failedAtlasIds: () => [] });
     assert.deepEqual(textCalls, []);
-    renderer.drawArtifactHud([{ name: "로프 공명기" }], 1.5);
-    assert.deepEqual(textCalls, ["아티팩트", "• 로프 공명기", "공명 1.5초"]);
-    textCalls.length = 0;
-    renderer.drawArtifactFeedback({ type: "artifact", age: 0.4, artifact: { name: "동력핵" } });
-    assert.deepEqual(textCalls, ["아티팩트 획득", "동력핵"]);
-    textCalls.length = 0;
-    renderer.drawArtifactFeedback({ type: "artifact-loss", age: 0.4, artifacts: [{ name: "연사 톱니" }] });
-    assert.deepEqual(textCalls, ["체크포인트 부활 · 아티팩트 손실", "연사 톱니"]);
-    textCalls.length = 0;
-    renderer.drawArtifactFeedback({ type: "checkpoint-respawn", reason: "fall", age: 0.4 });
+    renderer.drawStatusFeedback({ type: "checkpoint-respawn", reason: "fall", age: 0.4 });
     assert.deepEqual(textCalls, ["체크포인트 부활", "낙사 · 최대 체력으로 복귀"]);
     textCalls.length = 0;
-    renderer.drawArtifactFeedback({
+    renderer.drawStatusFeedback({
         type: "foundation-shear-hit",
         targetKind: "calibration-dummy",
         age: 0.4
     });
     assert.deepEqual(textCalls, ["CONTACT REGISTERED", "CALIBRATION TRACE VALID"]);
+    textCalls.length = 0;
+    renderer.drawStatusFeedback({ type: "foundation-selected", foundationId: "impulse-coil", age: 0.4 });
+    assert.deepEqual(textCalls, ["FOUNDATION ONLINE", "IMPULSE COIL"]);
     textCalls.length = 0;
     renderer.drawStoryPresentation({
         title: "VERTICAL GRID",
@@ -131,26 +125,6 @@ export function run() {
     assert.deepEqual(textCalls, ["VERTICAL GRID", "CASCADE FAILURE"]);
     textCalls.length = 0;
     borderCalls.length = 0;
-    renderer.drawArtifactRewardOverlay({
-        selectedIndex: 1,
-        choices: [
-            { name: "동력핵", description: "피해 증가" },
-            { name: "연사 톱니", description: "연사 증가" },
-            { name: "로프 공명기", description: "스윙 강화" }
-        ]
-    });
-    assert.deepEqual(textCalls, [
-        "아티팩트 선택",
-        "좌우 이동으로 선택 · 점프로 획득",
-        "동력핵",
-        "피해 증가",
-        "연사 톱니",
-        "연사 증가",
-        "로프 공명기",
-        "스윙 강화",
-        "선택 중에도 전투 진행 · 빠르게 결정하세요"
-    ]);
-    textCalls.length = 0;
     renderer.drawRewardSelectionOverlay({
         rewardType: "foundation",
         selectedIndex: 1,

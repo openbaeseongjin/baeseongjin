@@ -36,7 +36,7 @@
 | Player 기본 월드 출력 | `48×48` | `assets/runtime/characters/README.md`, Player manifest |
 | Player 제작 범위 | 기본 `32×32~48×48`, 동작 확장 `48×48~64×64` | `docs/pixel-graphics-design-guide.md` |
 | Grapple Landmark | Cyan `#22d3ee`, 현재 mock radius `15` | `WorldObjectPresentationCatalog.js` |
-| Rope 최대 부착 거리 | `440` world unit | `src/game/config.js` |
+| Rope 최대 부착 거리 | `400` world unit | `src/game/config.js` |
 | 기본 Swing Impulse | `780` | `src/game/config.js` |
 | Player 강조색 | 긴 Red Scarf `#fb4b5a` 계열 | Stage 문서와 현재 Player 방향 |
 | Gate Panel·Terminal | Amber `#fbbf24` 계열 | `WorldObjectPresentationCatalog.js` |

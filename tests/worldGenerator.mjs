@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
+import { WORLD_CONFIG, ropeHookReach } from "../src/game/config.js";
 import { closestPointOnPolygon } from "../src/game/world/PolygonGeometry.js";
 import { generateWorld } from "../src/game/world/WorldGenerator.js";
 
@@ -45,7 +45,7 @@ export function run() {
         const currentCenter = { x: current.x + current.width * 0.5, y: current.y };
         const distance = Math.hypot(currentCenter.x - previousCenter.x, currentCenter.y - previousCenter.y);
         assert.ok(current.y < previous.y - 150, `level ${index} must progress upward`);
-        assert.ok(distance < ROPE_CONFIG.maxAttachDistance, `level ${index} must stay within rope reach`);
+        assert.ok(distance < ropeHookReach(), `level ${index} must stay within rope reach`);
     }
     for (const spawn of first.enemySpawns) {
         const platform = first.route[spawn.level];

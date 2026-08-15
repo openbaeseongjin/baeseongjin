@@ -296,7 +296,7 @@ Drone의 이동 자체를 Player가 읽어야 하기 때문이다.
 - Gravity: `1250`
 - Max Horizontal Speed: `360`
 - Jump Speed: `440`
-- Rope Max Attach Distance: `440`
+- Rope Max Attach Distance: `400`
 - Attach Buffer: `0.1 sec`
 - Swing Impulse: `780`
 - Camera Zoom: Desktop `1`, Mobile `0.72`
@@ -1273,7 +1273,7 @@ split encounter
 - Drone 앞에서 멈춰 서서 자동공격 기다리는 것이 최적
 - Cover 뒤 대기만 하면 모든 문제가 해결됨
 - Flow Route가 특정 Augment 필수
-- 440px Max Range Grapple이 필수
+- 400px Max Range Grapple이 필수
 
 ### FAIL — Story
 

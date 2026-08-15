@@ -562,7 +562,7 @@ Cyan Neon Background를 남발하지 않는다. Cyan은 Rope 언어로 보호한
 
 | CURRENT BASELINE | 값 |
 |---|---:|
-| `maxAttachDistance` | 440px |
+| `maxAttachDistance` | 400px |
 | `attachBuffer` | 100ms |
 | Aim-to-surface Threshold | 90px |
 | `swingImpulse` | 780 |
@@ -779,7 +779,7 @@ SECTOR 01-2 `DOUBLE ANCHOR SHAFT`는 1-1의 `Attach → Swing → Release → La
 
 숙련자는 Start 이후 A→B→C→D를 중간 착지 없이 한 호흡으로 통과할 수 있어야 한다. 초보자는 P1/P2/P3 Recovery Platform을 사용해 각 Handoff를 독립적으로 재시도할 수 있어야 하며 실패 비용은 3–5초 안으로 유지한다.
 
-1-2에는 Enemy, Wind, Moving Hazard, Augment를 넣지 않는다. 현재 Rope 구현의 `maxAttachDistance = 440px`, `attachBuffer = 100ms`, `aim threshold = 90px`를 Baseline으로 사용하지만 최종값으로 고정하지 않는다.
+1-2에는 Enemy, Wind, Moving Hazard, Augment를 넣지 않는다. 현재 Rope 구현의 `maxAttachDistance = 400px`, `attachBuffer = 100ms`, `aim threshold = 90px`를 Baseline으로 사용하지만 최종값으로 고정하지 않는다.
 
 이 Stage를 Rope Input / Momentum Benchmark Room으로 사용하며 다음을 검증한다.
 

@@ -20,7 +20,7 @@ export function run() {
             attachmentOffset: { x: 12, y: -7 }
         }
     });
-    assert.equal(OWNER_MOTION_STATE_PROTOCOL_VERSION, 2);
+    assert.equal(OWNER_MOTION_STATE_PROTOCOL_VERSION, 3);
     assert.equal(motion.angle, 0.75);
     assert.equal(motion.angularVelocity, -2.5);
     assert.deepEqual(motion.rope.attachmentOffset, { x: 12, y: -7 });
@@ -31,4 +31,62 @@ export function run() {
     );
     assert.throws(() => createOwnerMotionState({ ...motion, angularVelocity: Infinity }), /angularVelocity/);
     assert.throws(() => deserializeOwnerMotionState('{"protocolVersion":1}'), /unsupported owner motion/);
+
+    const launcherMotion = createOwnerMotionState({
+        ...motion,
+        launcher: {
+            cooldownRemaining: 0,
+            shot: {
+                origin: { x: 0, y: 0 },
+                direction: { x: 1, y: 0 },
+                target: null,
+                traveled: 40,
+                elapsed: 0.05
+            }
+        }
+    });
+    assert.equal(launcherMotion.launcher.shot.traveled, 40);
+    assert.deepEqual(deserializeOwnerMotionState(serializeOwnerMotionState(launcherMotion)), launcherMotion);
+    assert.throws(
+        () =>
+            createOwnerMotionState({
+                ...motion,
+                launcher: {
+                    cooldownRemaining: 0,
+                    shot: {
+                        origin: { x: 0, y: 0 },
+                        direction: { x: 1, y: 0 },
+                        target: null,
+                        traveled: 401,
+                        elapsed: 0.1
+                    }
+                }
+            }),
+        /hook reach/,
+        "owner motion must reject a launcher shot past the derived 400px reach"
+    );
+    assert.throws(
+        () =>
+            createOwnerMotionState({
+                ...motion,
+                launcher: {
+                    cooldownRemaining: 0,
+                    shot: { origin: { x: 0, y: 0 }, direction: { x: 5, y: 0 }, target: null, traveled: 0, elapsed: 0 }
+                }
+            }),
+        /normalized/,
+        "owner motion must reject a non-normalized launcher direction"
+    );
+    assert.throws(
+        () =>
+            createOwnerMotionState({
+                ...motion,
+                launcher: {
+                    cooldownRemaining: 0,
+                    shot: { origin: { x: 0, y: 0 }, direction: { x: 1, y: 0 }, target: null, traveled: 0, elapsed: 1 }
+                }
+            }),
+        /flight lifetime/,
+        "owner motion must reject a launcher shot past the derived flight lifetime"
+    );
 }

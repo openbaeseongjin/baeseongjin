@@ -19,7 +19,7 @@
 | New Input | NONE |
 | New Rope Mode | NONE |
 | New Augment | NONE |
-| Artifact Reward | NONE |
+| Checkpoint reward | 없음 |
 | Growth Decision | HOLD — no new tier in 3-5 |
 | Wind | NONE |
 | Damage Hazard | NONE |
@@ -56,7 +56,7 @@ NO
 HYBRID
 NO
 
-ARTIFACT REWARD
+CHECKPOINT REWARD
 NO
 ```
 
@@ -104,7 +104,6 @@ Rest Stage라고 해서:
 
 - Hybrid 조기 지급
 - Second Specialization 조기 지급
-- Artifact를 Rope Augment 대신 지급
 - Foundation / Specialization Reset
 - Build Reroll
 - Scanner Tutorial 재등장
@@ -210,46 +209,6 @@ Stage 구조를 정의한다.
 - Random / Weighted / Fixed Pool 규칙
 
 은 확정되지 않았다.
-
-### VERIFIED — CURRENT ARTIFACT SYSTEM
-
-현재 실제 Runtime에는 별도 Artifact Catalog가 존재한다.
-
-현재 3개:
-
-```text
-POWER CORE
-automatic-fire damage
-
-RAPID GEAR
-automatic-fire interval
-
-ROPE RESONANCE
-post-swing temporary weapon damage
-```
-
-Artifact 선택 UI도 실제 구현돼 있다.
-
-하지만 최신 Foundation 제작 계약은:
-
-```text
-Artifact Catalog
-≠
-Foundation / Augment Catalog
-```
-
-로 분리하도록 명시한다.
-
-따라서:
-
-```text
-“Augment가 아직 없으니
-3-5에서 Artifact를 대신 준다.”
-```
-
-는 금지한다.
-
----
 
 ## 0-2. Growth Decision — 왜 HOLD인가
 
@@ -548,7 +507,7 @@ Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
 
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 
@@ -1167,23 +1126,6 @@ NEW TIER
 
 이다.
 
-### 19-2. Artifact는 대체재가 아니다
-
-현재 Artifact Reward UI가 구현돼 있어도
-3-5에서 이를 Rope Growth 대신 지급하지 않는다.
-
-이유:
-
-```text
-ARTIFACT
-= separate combat modifier layer
-
-ROPE AUGMENT
-= core movement/combat expression layer
-```
-
-Catalog / 효과 / 획득 시점을 분리한다.
-
 ### 19-3. Optional Diagnostic UI
 
 향후 Foundation + Specialization 상태가 Runtime에 들어오면
@@ -1373,7 +1315,6 @@ YES
 - Scanner 없음
 - 새 Mechanic 없음
 - 새 Augment 없음
-- Artifact reward 없음
 - Build Reset 없음
 - Safe Route `swingImpulse = 0` 통과
 - 실패 후 3초 내 재시도
@@ -1386,7 +1327,7 @@ YES
 - Hybrid 미확정 유지
 - Second Specialization 미확정 유지
 - Secondary Augment 미확정 유지
-- Artifact와 Rope Augment 분리 유지
+- Foundation과 Specialization 분리 유지
 
 ### Story
 
@@ -1400,7 +1341,6 @@ YES
 
 - 현재 Foundation Runtime PENDING 사실 반영
 - 현재 Specialization Catalog SYSTEM GATE 반영
-- Artifact UI 존재를 Rope Upgrade로 오용하지 않음
 - N1 Optional
 - Current Gate contract 유지
 
@@ -1418,7 +1358,6 @@ YES
 
 - 3-5에서 Hybrid 확정
 - 실제 첫 Specialization이 없는데 Second Specialization 설계
-- Artifact를 Rope Upgrade처럼 지급
 - Foundation / Specialization Reroll
 - Build Reset
 - Upgrade를 받지 않으면 Gate가 안 열림
@@ -1444,7 +1383,6 @@ YES
 ### FAIL — Runtime
 
 - Foundation 상태가 아직 없는데 fake Runtime 값 하드코딩
-- Artifact Catalog에 Foundation/Specialization ID 삽입
 - Optional Diagnostic 때문에 전체 Simulation Pause
 - P4 도달 즉시 Gate 자동 통과
 
@@ -1524,7 +1462,7 @@ Premium Atrium visual hint.
         hazards: [],
         newMechanic: null,
         newAugment: null,
-        artifactReward: null
+        globalReward: null
     },
 
     growth: {
@@ -1587,7 +1525,6 @@ THIS IS NOT A REWARD SHRINE
 - 3 Choice Card
 - Rare Reward Glow
 - Hybrid Icon
-- Artifact Pedestal
 - Giant Cyan Machine
 
 ---
@@ -1623,8 +1560,6 @@ Foundation runtime = pending
 First Specialization stage = defined
 Specialization catalog/runtime = open
 
-Artifact runtime = implemented
-but separate system
 ```
 
 따라서 3-5에서 새 Tier를 추가하면

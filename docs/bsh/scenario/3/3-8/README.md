@@ -19,7 +19,7 @@
 | New Input | NONE |
 | New Rope Mode | NONE |
 | New Augment | NONE |
-| Artifact Reward | NONE |
+| Checkpoint reward | 없음 |
 | Wind | NONE |
 | Rope Cut | NONE for Patrol Drone |
 | Required Kill | NONE |
@@ -212,7 +212,7 @@ Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
 
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 Release Angular Transfer 0.55
@@ -748,7 +748,7 @@ Player는 M0 / MX / M1에서 계속 다시 섞을 수 있다.
 ### VERIFIED
 
 ```text
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 ```
 
 ### HYPOTHESIS — BLOCKOUT
@@ -783,7 +783,7 @@ Y                0 ~ -1568
 
 를 담는다.
 
-440px Max Range 자체를
+400px Max Range 자체를
 추가 시험으로 사용하지 않는다.
 
 ---
@@ -2329,7 +2329,7 @@ decision maker
 
 ### Runtime
 
-- current Rope 440 반영
+- current Rope 400 반영
 - current Enemy FSM 반영
 - cover LOS를 Patrol safety에 잘못 사용하지 않음
 - Scanner dependency 정확히 표기
@@ -2533,7 +2533,7 @@ Gameplay + Story + Runtime Camera Zone PASS 후.
     gameplay: {
         newMechanic: null,
         newAugment: null,
-        artifactReward: null,
+        globalReward: null,
         wind: false,
         requiredKill: false
     },

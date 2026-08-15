@@ -3,11 +3,11 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 2cbdd7b128ee906554c1581a28f2e2ba5e760679fe5c507baf1c1bafbaa59cde
-authored-area-sha256: ac81fdee77c7c83f62e1b065c799c63bbce454c81a4df891bdde0eb2c45841ee
+scenario-source-sha256: 3459410153f9992cd1b6e460faea13830491424cac3b071b6f44c1b392f19e9d
+authored-area-sha256: 020acd7ebf190ab63958c9c3ae17a32a0328caff6697c6b5805b9d992d5d8d2c
 stage-count: 25
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1
-reviewed-upstream: d906d3246307aac8a492191d3653655ba0b9bf80
+reviewed-upstream: 0b179134a680ed70620c17b4eabdb7744d2e2f1c
 -->
 
 ## 상태를 읽는 법
@@ -28,7 +28,7 @@ reviewed-upstream: d906d3246307aac8a492191d3653655ba0b9bf80
 
 ## 2026-08-15 확인 체크포인트
 
-- 확인 기준 upstream: `d906d3246307aac8a492191d3653655ba0b9bf80` (`main == origin/main`, #485 운영 반영 뒤 clean main)
+- 확인 기준 upstream: `0b179134a680ed70620c17b4eabdb7744d2e2f1c` (`main == origin/main`, #489 artifact-rope-sentry 정리 전 clean base)
 - 상세 Stage 문서: **25개**, `1-1`부터 `3-8`까지와 `4-1`
 - 현재 authored Runtime: **16개**, `1-1 → 2-8`
 - 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1, `CurrentAuthoredAreaCatalog.js`, Sector 01 그래플 표면·랜드마크 1:1 계약, 구현 로드맵과 세션 핸드오프
@@ -48,9 +48,10 @@ reviewed-upstream: d906d3246307aac8a492191d3653655ba0b9bf80
 
 1. Sector 03은 3-1~3-8 상세 문서와 통합 Master까지 확장됐다. 3-2 이후 핵심은 Access Scan Field에 의존하지만 Runtime prototype과 Sector 03 authored catalog는 아직 없다.
 2. Sector 04는 Transit / Infrastructure Master와 4-1 `TRANSIT INTAKE`가 추가됐다. 4-1은 Enemy·Scanner·Wind·Cutter·Moving Platform 없이 Rope momentum만 검증하므로 geometry 후보는 준비됐지만, Sector 03 종료 전환은 미정이다.
-3. #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Artifact ID와 Rope Augment ID는 계속 분리한다.
+3. #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Foundation ID와 Specialization ID의 의미 체계는 계속 분리한다.
 4. #478 Scenario Art 정렬 작업은 아직 열린 작업이다. 병합될 때 시나리오 source fingerprint와 이 문서의 아트·검증 상태를 다시 확인한다.
 5. #487은 1-3·1-4·1-6·1-7·1-8에서 누락된 그래플 랜드마크 28개를 기존 target 좌표에 연결했다. 현재 102개 비렌더 그래플 표면은 모두 같은 ID·좌표 anchor의 보이는 object와 1:1이며, 누락·고아·좌표 불일치는 catalog validator와 authored world 회귀가 거부한다. Rope 후보 사거리·점수 계약은 변경하지 않았다.
+6. #489는 기존 글로벌 Artifact 시스템(ArtifactCatalog·Inventory·선택·network claim)을 은퇴하고 authored Foundation 선택을 유일한 특화 방향으로 확정했다. Checkpoint는 보상 선택을 열지 않는다. Rope 부착은 속도 1400px/s × 수명 2/7초에서 파생한 400px 도달의 보이는 Hook 투사체로 바뀌었고 `swingImpulse = 780`은 유지한다. Sentry 첫 수치는 체력 100·인식 거리 760·적 탄속 520·재사격 1.0초이며 authored activation/LOS가 인식을 계속 가린다. 시나리오 문서의 Rope 최대 부착/사거리 표현은 440에서 400으로 정렬했다.
 
 ## 열린 기획·구현 게이트
 
@@ -61,6 +62,8 @@ reviewed-upstream: d906d3246307aac8a492191d3653655ba0b9bf80
 5. 2-3 Specialization의 실제 이름·효과·수치·선택 pool
 6. Sector 04의 4-2~4-8 상세 Stage 계약
 7. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
+8. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
+9. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
 
 이 항목은 문서가 추가됐다는 이유만으로 닫지 않는다. 사용자 결정, 구현 diff와 검증 증거 중 해당 게이트를 실제로 해소한 근거가 있어야 한다.
 

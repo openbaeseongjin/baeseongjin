@@ -102,7 +102,7 @@ Y             0 ~ -960
 
 물리 Grapple 위치까지 반드시 32px 배수일 필요는 없지만 플랫폼, 벽, 문과 배경 구조물은 가능한 한 Grid에 맞춘다.
 
-현재 Rope 최대 Attach 거리는 `440px`이다. 첫 방의 필수 연결은 최대거리를 시험하지 않고 약 `210–300px`에서 시작한다.
+현재 Rope 최대 Attach 거리는 `400px`이다. 첫 방의 필수 연결은 최대거리를 시험하지 않고 약 `210–300px`에서 시작한다.
 
 ### 전체 단면
 
@@ -466,11 +466,11 @@ Story Warning은 작은 Red / Orange로 사용하되 Player Scarf보다 강하�
 
 2026-08-13 `main` 기준:
 
-- `maxAttachDistance = 440`
+- `maxAttachDistance = 400`
 - `attachBufferSeconds = 0.1`
 - `swingImpulse = 780`
 - `player radius = 15`
-- Aim Point에서 Surface 최근접점까지 `90px` 이내이며 플레이어로부터 `440px` 이내인 Surface가 Attachment Candidate가 된다.
+- Aim Point에서 Surface 최근접점까지 `90px` 이내이며 플레이어로부터 `400px` 이내인 Surface가 Attachment Candidate가 된다.
 
 현재 Rope는 별도 Anchor Object만 잡는 방식이 아니다. 따라서 Cyan Anchor 주변에는 다른 Collision Pipe, 장식 Collision과 복잡한 돌출부를 두지 않는다. 시각과 Collision 모두 Clean Zone으로 만든다.
 

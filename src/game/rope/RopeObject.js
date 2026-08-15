@@ -1,5 +1,6 @@
 import { withRopePointerInput } from "../input/RopePointerInput.js";
 import { InputDrivenObject } from "../objects/InputDrivenObject.js";
+import { RopeLauncher } from "./RopeLauncher.js";
 
 export class RopeObject extends withRopePointerInput(InputDrivenObject) {
     constructor({ id, ownerId, rope }) {
@@ -12,5 +13,6 @@ export class RopeObject extends withRopePointerInput(InputDrivenObject) {
         this.lastViewport = Object.freeze({ width: 1, height: 1 });
         this.attachBufferRemaining = 0;
         this.swingDrag = null;
+        this.launcher = new RopeLauncher(rope.config);
     }
 }

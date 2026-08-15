@@ -656,20 +656,24 @@ function testMixerVoicePolicyAndBindings() {
         {
             eventHandlers: [
                 (event, context) =>
-                    event.eventType === "artifact-selected"
+                    event.eventType === "foundation-selected"
                         ? {
-                              cueId: "ui-artifact-selected",
-                              request: { ...context, causalId: `artifact:${event.eventId}` }
+                              cueId: "ui-foundation-selected",
+                              request: { ...context, causalId: `foundation:${event.eventId}` }
                           }
                         : null
             ]
         }
     );
     extensibleBindings.presentFrame({
-        events: [{ eventType: "artifact-selected", eventId: "selection-1" }],
+        events: [{ eventType: "foundation-selected", eventId: "selection-1" }],
         context: world
     });
-    assert.equal(calls.at(-1).cueId, "ui-artifact-selected", "new event bindings must compose without engine branches");
+    assert.equal(
+        calls.at(-1).cueId,
+        "ui-foundation-selected",
+        "new event bindings must compose without engine branches"
+    );
     bindings.syncScene({ ...world, runState: "playing" });
     bindings.syncScene({ ...world, runState: "completed" });
     assert.deepEqual(

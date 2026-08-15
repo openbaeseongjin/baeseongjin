@@ -1,10 +1,12 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
+import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 5;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 6;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit"]);
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
+const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
     if (!Number.isSafeInteger(value) || value < 0) {
@@ -23,29 +25,19 @@ function assertBoolean(value, label) {
     return value;
 }
 
-function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
+function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false, maximum = Infinity } = {}) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
     if (exclusiveMinimum ? value <= minimum : value < minimum) {
         const comparison = exclusiveMinimum ? "greater than" : "at least";
         throw new Error(`${label} must be ${comparison} ${minimum}`);
     }
+    if (value > maximum) throw new Error(`${label} must not exceed ${maximum}`);
     return value;
 }
 
 function assertFiniteVector(value, label) {
     assertFinite(value?.x, `${label}.x`);
     assertFinite(value?.y, `${label}.y`);
-    return value;
-}
-
-function assertArtifactList(value, label) {
-    if (!Array.isArray(value)) throw new Error(`${label} must be an array`);
-    for (const [index, artifact] of value.entries()) {
-        if (!artifact || Array.isArray(artifact) || typeof artifact !== "object") {
-            throw new Error(`${label}[${index}] must be an object`);
-        }
-        assertId(artifact.id, `${label}[${index}].id`);
-    }
     return value;
 }
 
@@ -71,6 +63,36 @@ function assertSwingDrag(value, label) {
     assertFinite(value.progress, `${label}.progress`, { minimum: 0 });
     assertFinite(value.age, `${label}.age`, { minimum: 0 });
     assertBoolean(value.used, `${label}.used`);
+    return value;
+}
+
+function assertLauncher(value, label) {
+    if (value === undefined || value === null) return value;
+    if (Array.isArray(value) || typeof value !== "object") {
+        throw new Error(`${label} must be an object or null`);
+    }
+    assertFinite(value.cooldownRemaining, `${label}.cooldownRemaining`, { minimum: 0 });
+    if (value.shot === null || value.shot === undefined) return value;
+    if (Array.isArray(value.shot) || typeof value.shot !== "object") {
+        throw new Error(`${label}.shot must be an object or null`);
+    }
+    assertFiniteVector(value.shot.origin, `${label}.shot.origin`);
+    assertFiniteVector(value.shot.direction, `${label}.shot.direction`);
+    const directionMagnitude = Math.hypot(value.shot.direction.x, value.shot.direction.y);
+    if (directionMagnitude <= 0 || Math.abs(directionMagnitude - 1) > LAUNCHER_NUMERIC_TOLERANCE) {
+        throw new Error(`${label}.shot.direction must be approximately normalized`);
+    }
+    if (value.shot.target !== null && value.shot.target !== undefined) {
+        assertFiniteVector(value.shot.target, `${label}.shot.target`);
+    }
+    assertFinite(value.shot.traveled, `${label}.shot.traveled`, {
+        minimum: 0,
+        maximum: ropeHookReach() + LAUNCHER_NUMERIC_TOLERANCE
+    });
+    assertFinite(value.shot.elapsed, `${label}.shot.elapsed`, {
+        minimum: 0,
+        maximum: ropeHookFlightSeconds() + LAUNCHER_NUMERIC_TOLERANCE
+    });
     return value;
 }
 
@@ -146,10 +168,8 @@ function normalizeImpactRecoveryState(state) {
         exclusiveMinimum: true
     });
     assertFinite(normalized.weapon?.cooldown, "outcome.state.weapon.cooldown", { minimum: 0 });
-    assertArtifactList(normalized.artifacts, "outcome.state.artifacts");
     assertFoundationState(normalized.foundationAugment, normalized.augmentRuntimeState, "outcome.state");
-    assertFinite(normalized.ropeDamageBoostRemaining, "outcome.state.ropeDamageBoostRemaining", { minimum: 0 });
-    assertArtifactList(normalized.lastCheckpointLoss, "outcome.state.lastCheckpointLoss");
+    assertLauncher(normalized.launcher, "outcome.state.launcher");
     return normalized;
 }
 
@@ -161,11 +181,29 @@ function quantizedVector(value, step) {
     return { x: quantized(value.x, step), y: quantized(value.y, step) };
 }
 
+function launcherProjection(state) {
+    const launcher = state.launcher ?? { shot: null, cooldownRemaining: 0 };
+    const cooldownTicks = quantized(launcher.cooldownRemaining ?? 0, 1 / 120);
+    const shot = launcher.shot;
+    if (!shot) return { cooldownTicks, shot: null };
+    return {
+        cooldownTicks,
+        shot: {
+            origin: quantizedVector(shot.origin, 0.1),
+            direction: quantizedVector(shot.direction, 0.000001),
+            target: shot.target ? quantizedVector(shot.target, 0.1) : null,
+            traveled: quantized(shot.traveled, 0.001),
+            elapsed: quantized(shot.elapsed, 1 / 120)
+        }
+    };
+}
+
 function impactStateProjection(state, { impactType, respawned }) {
     if (impactType === "rope-cut") {
         return {
             ropeDisabledTicks: quantized(state.ropeDisabledRemaining, 1 / 120),
-            ropeAttached: state.rope.isAttached
+            ropeAttached: state.rope.isAttached,
+            launcher: launcherProjection(state)
         };
     }
     const projection = {
@@ -196,11 +234,9 @@ function impactStateProjection(state, { impactType, respawned }) {
             fireInterval: quantized(state.weapon.fireInterval, 0.001),
             cooldownTicks: quantized(state.weapon.cooldown, 1 / 120)
         },
-        artifacts: state.artifacts.map(({ id }) => id),
         foundationAugment: state.foundationAugment,
         relayWindowTicks: quantized(state.augmentRuntimeState.relayWindowRemaining, 1 / 120),
-        ropeDamageBoostTicks: quantized(state.ropeDamageBoostRemaining, 1 / 120),
-        lastCheckpointLoss: state.lastCheckpointLoss.map(({ id }) => id)
+        launcher: launcherProjection(state)
     };
 }
 

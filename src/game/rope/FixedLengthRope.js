@@ -1,5 +1,6 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { rotateVector } from "../physics/AngularMotion.js";
+import { hookReach } from "./RopeLauncher.js";
 
 const POSITION_ITERATIONS = 12;
 
@@ -39,9 +40,8 @@ export class FixedLengthRope {
             x: playerPosition.x + worldOffset.x,
             y: playerPosition.y + worldOffset.y
         };
-        const centerDistance = Math.hypot(playerPosition.x - anchor.x, playerPosition.y - anchor.y);
         const distance = Math.hypot(handPosition.x - anchor.x, handPosition.y - anchor.y);
-        if (centerDistance > this.config.maxAttachDistance || distance <= 0) return false;
+        if (distance <= 0 || distance > hookReach(this.config)) return false;
         this.anchor = new Vector2(anchor.x, anchor.y);
         this.attachmentOffset = new Vector2(selectedOffset.x, selectedOffset.y);
         this.length = distance;

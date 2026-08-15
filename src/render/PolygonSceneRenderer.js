@@ -7,10 +7,13 @@ import {
     CombatEffectRenderer,
     EventEffectRenderer,
     RopeRenderer,
+    RopeShotRenderer,
     SwingRenderer,
     WorldGeometryRenderer,
     localRopes,
-    remoteRopes
+    localShots,
+    remoteRopes,
+    remoteShots
 } from "./layers/SharedSceneRenderers.js";
 import {
     PolygonEnemyRenderer,
@@ -34,6 +37,8 @@ export class PolygonSceneRenderer {
                     new AttachRangeRenderer(),
                     new RopeRenderer(localRopes),
                     new RopeRenderer(remoteRopes),
+                    new RopeShotRenderer(localShots),
+                    new RopeShotRenderer(remoteShots),
                     new PolygonRemotePlayerRenderer(),
                     new SwingRenderer(),
                     new PolygonEnemyRenderer(),

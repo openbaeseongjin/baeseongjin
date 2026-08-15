@@ -1171,7 +1171,6 @@ NONE
 - new Drone
 - Growth
 - Augment Runtime
-- Artifact redesign
 - Rope physics refactor
 
 ### Networking

@@ -353,7 +353,7 @@ Player Radius            15
 Gravity                  1250
 Max Horizontal Speed     360
 Jump Speed               440
-Rope Max Attach Distance 440
+Rope Max Attach Distance 400
 Attach Buffer            0.1 sec
 Swing Impulse            780
 Camera Desktop Zoom      1
@@ -362,7 +362,7 @@ Camera Mobile Zoom       0.72
 
 ### VERIFIED — Current Reward Selection Input
 
-현재 `ArtifactRewardSelection` 구현은:
+현재 `FoundationRewardSelection` 구현은:
 
 ```text
 Horizontal Input
@@ -977,7 +977,7 @@ Foundation 선택 때보다
 
 **VERIFIED — current `main`**
 
-현재 `src/game/rewards/ArtifactRewardSelection.js`는:
+현재 `src/game/rewards/FoundationRewardSelection.js`는:
 
 ```text
 Horizontal
@@ -993,11 +993,12 @@ Interaction을 이미 제공한다.
 새 Input System을 만들지 말고
 이 선택 흐름을 재사용한다.
 
-### 19-2. Artifact와 Rope Augment를 같은 시스템으로 취급하지 않는다
+### 19-2. Foundation과 Specialization을 같은 시스템으로 취급하지 않는다
 
-현재 Runtime에는 Artifact Reward가 존재한다.
+1-4 Foundation 선택은 authored Node에서만 열리며
+2-3 Specialization은 그 방향을 한 단계 심화한다.
 
-그러나 기획상 Rope Augment는:
+기획상 Rope Augment는:
 
 ```text
 ONE ROPE
@@ -1009,9 +1010,9 @@ ONE ROPE
 따라서 구현에서 UI 입력 흐름이나 Choice Navigation은 재사용할 수 있어도:
 
 ```text
-Artifact ID
+Foundation ID
 =
-Rope Augment ID
+Specialization ID
 ```
 
 처럼 의미 체계를 합쳐버리는 것은 별도 설계 결정 없이 하지 않는다.
@@ -1139,7 +1140,7 @@ HYPOTHESIS:
 - 1-4 Foundation Node와 역할이 구분됨
 - Specialization이 새 Rope Mode가 아님
 - 기존 Choice Input 재사용 가능
-- Artifact와 Rope Augment의 의미 체계가 임의로 합쳐지지 않음
+- Foundation과 Specialization의 의미 체계가 임의로 합쳐지지 않음
 
 ### Multiplayer
 
@@ -1447,12 +1448,12 @@ IMPULSE / RELAY / SHEAR 각각에 대해
 
 그러나 2-3 Stage 문서에서 임의로 이름과 수치를 LOCK하지 않는다.
 
-### 3. Artifact와 Augment UI 관계
+### 3. Foundation과 Specialization UI 관계
 
-현재 Runtime에는 Artifact Reward Selection이 구현되어 있다.
+1-4 Foundation Reward Selection이 구현되어 있다.
 
 입력·Choice Navigation은 재사용 후보지만,
-Artifact와 Rope Augment를 하나의 동일 성장 시스템으로 합칠지는
+Foundation과 Specialization을 하나의 동일 성장 시스템으로 합칠지는
 별도 시스템 결정이 필요하다.
 
 ### 4. Multiplayer Gate

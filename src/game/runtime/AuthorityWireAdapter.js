@@ -1,6 +1,5 @@
 import { serializeCommandReceipt } from "../network/CommandReceipt.js";
 import { deserializeCheckpointClaim } from "../network/CheckpointClaim.js";
-import { deserializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
 import { deserializeFoundationSelectionClaim } from "../network/FoundationSelectionClaim.js";
 import { deserializeFoundationShearClaim } from "../network/FoundationShearClaim.js";
 import { deserializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
@@ -8,7 +7,6 @@ import { deserializeProjectileHitClaim } from "../network/ProjectileHitClaim.js"
 import { deserializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
 import { deserializePlayerProjectileSpawnClaim } from "../network/PlayerProjectileSpawnClaim.js";
 import { deserializeOwnerMotionState } from "../network/OwnerMotionState.js";
-import { deserializeRopeSwingClaim } from "../network/RopeSwingClaim.js";
 import { deserializeSummitClaim } from "../network/SummitClaim.js";
 import { serializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
 
@@ -37,22 +35,9 @@ export class AuthorityWireAdapter {
         );
     }
 
-    receiveRopeSwingClaim(authenticatedPlayerId, serializedClaim) {
-        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
-        return this.session.submitRopeSwingClaim(authenticatedPlayerId, deserializeRopeSwingClaim(serializedClaim));
-    }
-
     receiveImpactClaim(authenticatedPlayerId, serializedClaim) {
         if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
         return this.session.submitImpactClaim(authenticatedPlayerId, deserializePlayerImpactClaim(serializedClaim));
-    }
-
-    receiveArtifactSelection(authenticatedPlayerId, serializedClaim) {
-        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
-        return this.session.submitArtifactSelection(
-            authenticatedPlayerId,
-            deserializeArtifactSelectionClaim(serializedClaim)
-        );
     }
 
     receiveFoundationSelection(authenticatedPlayerId, serializedClaim) {

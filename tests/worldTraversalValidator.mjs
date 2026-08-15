@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { ROPE_CONFIG, WORLD_CONFIG } from "../src/game/config.js";
+import { WORLD_CONFIG, ropeHookReach } from "../src/game/config.js";
 import { generateWorld } from "../src/game/world/WorldGenerator.js";
 import { validateWorldTraversal } from "../src/game/world/WorldTraversalValidator.js";
 import { WORLD_REGRESSION_SEEDS } from "../scripts/worldRegressionSeeds.mjs";
@@ -20,7 +20,7 @@ export function run() {
     const world = generateWorld(WORLD_CONFIG);
     assert.deepEqual(
         validateWorldTraversal(world, {
-            maxAttachDistance: ROPE_CONFIG.maxAttachDistance,
+            maxAttachDistance: ropeHookReach(),
             minimumVerticalGain: WORLD_CONFIG.minimumVerticalGain
         }),
         { valid: true, issues: [] }
@@ -33,7 +33,7 @@ export function run() {
             { x: 500, width: 100, topY: 450 }
         ]
     };
-    const result = validateWorldTraversal(invalid, { maxAttachDistance: 440, minimumVerticalGain: 150 });
+    const result = validateWorldTraversal(invalid, { maxAttachDistance: ropeHookReach(), minimumVerticalGain: 150 });
     assert.equal(result.valid, false);
     assert.deepEqual(
         result.issues.map((issue) => [issue.type, issue.level]),

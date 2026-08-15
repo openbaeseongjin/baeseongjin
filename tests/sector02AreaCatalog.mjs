@@ -62,5 +62,4 @@ export function run() {
     const finale = SECTOR_02_AREA_CATALOG.areas.at(-1);
     assert.equal(finale.gate.completionMode, "content-boundary");
     assert.equal(finale.nextAreaId, null);
-    assert.equal(finale.checkpoints[0].reward, false, "Sector 02 finale must not invent an Augment reward");
 }
