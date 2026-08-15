@@ -454,6 +454,326 @@ const TRIGGER_CUE_PRESENTATIONS = Object.freeze({
             detail: "LOWER MAINTENANCE",
             durationSeconds: 1.1
         })
+    ]),
+    "sector-03-01:district-sign": Object.freeze([
+        Object.freeze({
+            id: "sector-03-01:commercial-district",
+            title: "COMMERCIAL DISTRICT",
+            detail: "PROMENADE 06",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-03-01:welcome-kiosk": Object.freeze([
+        Object.freeze({
+            id: "sector-03-01:public-service-online",
+            title: "WELCOME",
+            detail: "PUBLIC SERVICE ONLINE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-02:access-control": Object.freeze([
+        Object.freeze({
+            id: "sector-03-02:employee-verified",
+            title: "COMMERCIAL ACCESS CONTROL",
+            detail: "EMPLOYEE VERIFIED",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-02:route-invalid",
+            title: "ROUTE AUTHORIZATION",
+            detail: "INVALID",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-02:service-mount": Object.freeze([
+        Object.freeze({
+            id: "sector-03-02:mount-cycling",
+            title: "SERVICE MOUNT ACCESS",
+            detail: "CYCLING",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-02:retail-security-ahead": Object.freeze([
+        Object.freeze({
+            id: "sector-03-02:retail-active",
+            title: "RETAIL SECURITY",
+            detail: "ACTIVE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-03:retail-security": Object.freeze([
+        Object.freeze({
+            id: "sector-03-03:retail-active",
+            title: "RETAIL SECURITY",
+            detail: "ACTIVE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-03:route-state": Object.freeze([
+        Object.freeze({
+            id: "sector-03-03:route-invalid",
+            title: "VERTICAL SERVICE ROUTE",
+            detail: "AUTHORIZATION INVALID",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-03-03:patrol-status": Object.freeze([
+        Object.freeze({
+            id: "sector-03-03:patrol-online",
+            title: "AUTOMATED PATROL",
+            detail: "ONLINE",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-03:service-arcade-next": Object.freeze([
+        Object.freeze({
+            id: "sector-03-03:service-arcade",
+            title: "SERVICE ARCADE",
+            detail: "NEXT",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-04:route-split": Object.freeze([
+        Object.freeze({
+            id: "sector-03-04:public-left",
+            title: "PUBLIC PROMENADE",
+            detail: "←",
+            durationSeconds: 1.0
+        }),
+        Object.freeze({
+            id: "sector-03-04:service-right",
+            title: "FACILITY SERVICE",
+            detail: "→",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-04:public-route": Object.freeze([
+        Object.freeze({
+            id: "sector-03-04:public-invalid",
+            title: "PUBLIC ROUTE",
+            detail: "AUTHORIZATION INVALID",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-04:security-active",
+            title: "SECURITY CONTROL",
+            detail: "ACTIVE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-04:service-route": Object.freeze([
+        Object.freeze({
+            id: "sector-03-04:maintenance-recognized",
+            title: "FACILITY SERVICE ACCESS",
+            detail: "MAINTENANCE CLEARANCE RECOGNIZED",
+            durationSeconds: 1.3
+        }),
+        Object.freeze({
+            id: "sector-03-04:local-route-available",
+            title: "LOCAL SERVICE ROUTE",
+            detail: "AVAILABLE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-04:service-node-upper": Object.freeze([
+        Object.freeze({
+            id: "sector-03-04:node-upper",
+            title: "COMMERCIAL SERVICE NODE",
+            detail: "UPPER LEVEL",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-05:node-id": Object.freeze([
+        Object.freeze({
+            id: "sector-03-05:node-sign",
+            title: "COMMERCIAL FACILITY SERVICE NODE",
+            detail: "",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-03-05:access-summary": Object.freeze([
+        Object.freeze({
+            id: "sector-03-05:employee-class",
+            title: "EMPLOYEE CLASS",
+            detail: "VERTICAL MAINTENANCE",
+            durationSeconds: 1.0
+        }),
+        Object.freeze({
+            id: "sector-03-05:local-channel",
+            title: "LOCAL SERVICE CHANNEL",
+            detail: "AVAILABLE",
+            durationSeconds: 1.0
+        }),
+        Object.freeze({
+            id: "sector-03-05:vertical-invalid",
+            title: "VERTICAL ROUTE AUTHORIZATION",
+            detail: "INVALID",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-05:premium-atrium-ahead": Object.freeze([
+        Object.freeze({
+            id: "sector-03-05:atrium-preview",
+            title: "PREMIUM ATRIUM",
+            detail: "UPPER PROMENADE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-06:atrium-id": Object.freeze([
+        Object.freeze({
+            id: "sector-03-06:atrium-sign",
+            title: "PREMIUM ATRIUM",
+            detail: "",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-06:power-state": Object.freeze([
+        Object.freeze({
+            id: "sector-03-06:power-bus",
+            title: "LOCAL POWER BUS",
+            detail: "ACTIVE",
+            durationSeconds: 1.0
+        }),
+        Object.freeze({
+            id: "sector-03-06:network-online",
+            title: "COMMERCIAL SERVICE NETWORK",
+            detail: "ONLINE",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-06:upper-concourse": Object.freeze([
+        Object.freeze({
+            id: "sector-03-06:upper-sign",
+            title: "UPPER CONCOURSE",
+            detail: "",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-06:access-control-ahead": Object.freeze([
+        Object.freeze({
+            id: "sector-03-06:access-ahead",
+            title: "ACCESS CONTROL AHEAD",
+            detail: "",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-07:concourse-sign": Object.freeze([
+        Object.freeze({
+            id: "sector-03-07:outer-gallery",
+            title: "UPPER CONCOURSE",
+            detail: "OUTER GALLERY",
+            durationSeconds: 1.0
+        }),
+        Object.freeze({
+            id: "sector-03-07:route-names",
+            title: "PRIORITY SPINE",
+            detail: "FACILITY SERVICE",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-07:access-directory": Object.freeze([
+        Object.freeze({
+            id: "sector-03-07:service-class",
+            title: "UPPER CONCOURSE ACCESS CONTROL",
+            detail: "SERVICE CLASS CONTROL",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-07:standard-premium",
+            title: "STANDARD / PREMIUM PROFILES",
+            detail: "ENABLED",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-07:access-tier",
+            title: "ACCESS TIER CONTROL",
+            detail: "ENABLED",
+            durationSeconds: 1.0
+        }),
+        Object.freeze({
+            id: "sector-03-07:priority-route",
+            title: "PRIORITY ROUTE",
+            detail: "ACTIVE",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-07:upper-market-gate-ahead": Object.freeze([
+        Object.freeze({
+            id: "sector-03-07:gate-preview",
+            title: "UPPER MARKET GATE",
+            detail: "TRANSFER CONTROL",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-08:market-gate": Object.freeze([
+        Object.freeze({
+            id: "sector-03-08:gate-active",
+            title: "UPPER MARKET GATE",
+            detail: "ACCESS CONTROL ACTIVE",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-03-08:market-directory": Object.freeze([
+        Object.freeze({
+            id: "sector-03-08:market-active",
+            title: "UPPER MARKET",
+            detail: "ACCESS CONTROL ACTIVE",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-08:service-available",
+            title: "FACILITY SERVICE",
+            detail: "AVAILABLE",
+            durationSeconds: 1.0
+        })
+    ]),
+    "sector-03-08:evacuation-archive": Object.freeze([
+        Object.freeze({
+            id: "sector-03-08:archive-a",
+            title: "EVACUATION TRANSFER ARCHIVE",
+            detail: "GROUP A · TRANSFER COMPLETE",
+            durationSeconds: 1.3
+        }),
+        Object.freeze({
+            id: "sector-03-08:group-b",
+            title: "GROUP B",
+            detail: "TRANSFER COMPLETE",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-08:group-c",
+            title: "GROUP C",
+            detail: "TRANSFER SUSPENDED",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-03-08:access-archive": Object.freeze([
+        Object.freeze({
+            id: "sector-03-08:archive-b",
+            title: "UPPER COMMERCIAL ACCESS ARCHIVE",
+            detail: "SERVICE CLASS CONTROL ENABLED",
+            durationSeconds: 1.3
+        }),
+        Object.freeze({
+            id: "sector-03-08:access-tier",
+            title: "ACCESS TIER CONTROL",
+            detail: "ENABLED",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-08:priority-active",
+            title: "PRIORITY ROUTE",
+            detail: "ACTIVE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-03-08:final-control": Object.freeze([
+        Object.freeze({
+            id: "sector-03-08:route-pending",
+            title: "UPPER CONTROL",
+            detail: "ROUTE STATUS PENDING",
+            durationSeconds: 1.2
+        })
     ])
 });
 

@@ -86,6 +86,12 @@ const area01 = defineArea({
             ["g4", -96, -800, "G4"],
             ["g5", 128, -960, "G5"]
         ].map(([id, x, y, label]) => worldObject(`sector-03-01:${id}`, "grapple-landmark", x, y, { label })),
+        worldObject("sector-03-01:district-sign", "story-display", -320, -184, {
+            cueIds: ["sector-03-01:district-sign"]
+        }),
+        worldObject("sector-03-01:welcome-kiosk", "story-display", -416, -184, {
+            cueIds: ["sector-03-01:welcome-kiosk"]
+        }),
         worldObject("sector-03-01:exit-panel", "gate-panel", 272, -1024, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
@@ -161,6 +167,15 @@ const area02 = defineArea({
             ["g5", 128, -1024, "G5"]
         ].map(([id, x, y, label]) => worldObject(`sector-03-02:${id}`, "grapple-landmark", x, y, { label })),
         worldObject("sector-03-02:scanner-housing-h1", "background-prop", 480, -624, { gameplay: false }),
+        worldObject("sector-03-02:access-control", "story-display", -304, -184, {
+            cueIds: ["sector-03-02:access-control"]
+        }),
+        worldObject("sector-03-02:service-mount", "story-display", 64, -440, {
+            cueIds: ["sector-03-02:service-mount"]
+        }),
+        worldObject("sector-03-02:retail-security-ahead", "story-display", 368, -1144, {
+            cueIds: ["sector-03-02:retail-security-ahead"]
+        }),
         worldObject("sector-03-02:exit-panel", "gate-panel", 304, -1120, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
@@ -247,6 +262,18 @@ const area03 = defineArea({
             { x: 256, y: -560 },
             { x: -512, y: -768, width: 1024, height: 320 }
         ),
+        worldObject("sector-03-03:retail-security", "story-display", -320, -184, {
+            cueIds: ["sector-03-03:retail-security"]
+        }),
+        worldObject("sector-03-03:route-state", "story-display", -48, -440, {
+            cueIds: ["sector-03-03:route-state"]
+        }),
+        worldObject("sector-03-03:patrol-status", "story-display", 48, -440, {
+            cueIds: ["sector-03-03:patrol-status"]
+        }),
+        worldObject("sector-03-03:service-arcade-next", "story-display", 368, -1176, {
+            cueIds: ["sector-03-03:service-arcade-next"]
+        }),
         worldObject("sector-03-03:exit-panel", "gate-panel", 304, -1152, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
@@ -338,6 +365,18 @@ const area04 = defineArea({
             { x: -64, y: -576 },
             { x: -608, y: -704, width: 624, height: 224 }
         ),
+        worldObject("sector-03-04:route-split", "story-display", -272, -184, {
+            cueIds: ["sector-03-04:route-split"]
+        }),
+        worldObject("sector-03-04:public-route", "story-display", -320, -472, {
+            cueIds: ["sector-03-04:public-route"]
+        }),
+        worldObject("sector-03-04:service-route", "story-display", 432, -536, {
+            cueIds: ["sector-03-04:service-route"]
+        }),
+        worldObject("sector-03-04:service-node-upper", "story-display", 96, -856, {
+            cueIds: ["sector-03-04:service-node-upper"]
+        }),
         worldObject("sector-03-04:exit-panel", "gate-panel", 320, -1184, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
@@ -411,6 +450,15 @@ const area05 = defineArea({
         worldObject("sector-03-05:service-calibration-frame", "maintenance-frame", 240, -288, {
             coordinateAnchor: "bottom-center",
             gateId: "sector-03-05:gate"
+        }),
+        worldObject("sector-03-05:node-id", "story-display", 0, -312, {
+            cueIds: ["sector-03-05:node-id"]
+        }),
+        worldObject("sector-03-05:access-summary", "story-display", 240, -312, {
+            cueIds: ["sector-03-05:access-summary"]
+        }),
+        worldObject("sector-03-05:premium-atrium-ahead", "story-display", 288, -680, {
+            cueIds: ["sector-03-05:premium-atrium-ahead"]
         }),
         worldObject("sector-03-05:exit-panel", "gate-panel", 224, -656, {
             coordinateAnchor: "bottom-center",
@@ -495,6 +543,18 @@ const area06 = defineArea({
             { x: 320, y: -736 },
             { x: -384, y: -896, width: 832, height: 224 }
         ),
+        worldObject("sector-03-06:atrium-id", "story-display", -384, -184, {
+            cueIds: ["sector-03-06:atrium-id"]
+        }),
+        worldObject("sector-03-06:power-state", "story-display", -64, -504, {
+            cueIds: ["sector-03-06:power-state"]
+        }),
+        worldObject("sector-03-06:upper-concourse", "story-display", 416, -1208, {
+            cueIds: ["sector-03-06:upper-concourse"]
+        }),
+        worldObject("sector-03-06:access-control-ahead", "story-display", 384, -1432, {
+            cueIds: ["sector-03-06:access-control-ahead"]
+        }),
         worldObject("sector-03-06:exit-panel", "gate-panel", 320, -1408, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
@@ -589,6 +649,15 @@ const area07 = defineArea({
             { x: 416, y: -800 },
             { x: -160, y: -976, width: 704, height: 336 }
         ),
+        worldObject("sector-03-07:concourse-sign", "story-display", -352, -184, {
+            cueIds: ["sector-03-07:concourse-sign"]
+        }),
+        worldObject("sector-03-07:access-directory", "story-display", 0, -1080, {
+            cueIds: ["sector-03-07:access-directory"]
+        }),
+        worldObject("sector-03-07:upper-market-gate-ahead", "story-display", 384, -1336, {
+            cueIds: ["sector-03-07:upper-market-gate-ahead"]
+        }),
         worldObject("sector-03-07:exit-panel", "gate-panel", 320, -1312, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
@@ -702,6 +771,21 @@ const area08 = defineArea({
             { x: 512, y: -944 },
             { x: 160, y: -1120, width: 480, height: 416 }
         ),
+        worldObject("sector-03-08:market-gate", "story-display", -416, -184, {
+            cueIds: ["sector-03-08:market-gate"]
+        }),
+        worldObject("sector-03-08:market-directory", "story-display", 0, -632, {
+            cueIds: ["sector-03-08:market-directory"]
+        }),
+        worldObject("sector-03-08:evacuation-archive", "story-display", -128, -1464, {
+            cueIds: ["sector-03-08:evacuation-archive"]
+        }),
+        worldObject("sector-03-08:access-archive", "story-display", 128, -1464, {
+            cueIds: ["sector-03-08:access-archive"]
+        }),
+        worldObject("sector-03-08:final-control", "story-display", 416, -1656, {
+            cueIds: ["sector-03-08:final-control"]
+        }),
         worldObject("sector-03-08:exit-panel", "gate-panel", 352, -1632, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
