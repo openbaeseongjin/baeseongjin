@@ -213,7 +213,7 @@ const area03 = defineArea({
     bounds: { width: 1472, height: 1472 },
     entry: point("sector-04-03:entry", -560, -32),
     exit: point("sector-04-03:exit", 16, -1408),
-    nextAreaId: null,
+    nextAreaId: "sector-04-04",
     surfaces: [
         horizontalSurface("sector-04-03:p0", -560, 0, 320, 32, { kind: "safe-deck" }),
         horizontalSurface("sector-04-03:p1", -336, -224, 288, 32, { kind: "safe-deck" }),
@@ -289,9 +289,8 @@ const area03 = defineArea({
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
-    gate: gate("sector-04-03:gate", 16, -1408, null, ["sector-04-03:exit-panel-engaged"], {
-        portalBottomY: -1376,
-        completionMode: "content-boundary"
+    gate: gate("sector-04-03:gate", 16, -1408, "sector-04-04", ["sector-04-03:exit-panel-engaged"], {
+        portalBottomY: -1376
     }),
     storyTriggers: ["freight-entry", "wake-warning", "combined-commit", "decompression"],
     routes: ["safe", "flow", "recovery"],
@@ -305,8 +304,90 @@ const area03 = defineArea({
     cueIds: ["freight-bypass", "transit-wake", "cutter-fire"]
 });
 
+const area04 = defineArea({
+    id: "sector-04-04",
+    sectorId: "sector-04",
+    order: 4,
+    name: "INFRASTRUCTURE SERVICE NODE",
+    subtitle: "REST / ROUTING PREVIEW",
+    bounds: { width: 1152, height: 896 },
+    entry: point("sector-04-04:entry", -352, -32),
+    exit: point("sector-04-04:exit", 512, -864),
+    nextAreaId: null,
+    surfaces: [
+        horizontalSurface("sector-04-04:p0", -352, 0, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-04:p1", -160, -192, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-04:p2", 0, -384, 448, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-04:r1", 192, -608, 256, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-04:p3", -96, -736, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-04:p4", 320, -832, 384, 32, { kind: "safe-deck" }),
+        grappleTarget("sector-04-04:a1-surface", -256, -128),
+        grappleTarget("sector-04-04:a2-surface", 128, -320),
+        grappleTarget("sector-04-04:a3-surface", 224, -512),
+        grappleTarget("sector-04-04:a4-surface", -32, -672),
+        grappleTarget("sector-04-04:a5-surface", 160, -800)
+    ],
+    routePoints: [
+        point("sector-04-04:route-entry", -352, -32),
+        point("sector-04-04:route-a1", -256, -128, { landmark: "A1" }),
+        point("sector-04-04:route-a2", 128, -320, { landmark: "A2" }),
+        point("sector-04-04:route-a3", 224, -512, { landmark: "A3" }),
+        point("sector-04-04:route-a4", -32, -672, { landmark: "A4" }),
+        point("sector-04-04:route-a5", 160, -800, { landmark: "A5" }),
+        point("sector-04-04:route-exit", 512, -864)
+    ],
+    recoveryPoints: [point("sector-04-04:recovery-r1", 192, -632)],
+    objects: [
+        worldObject("sector-04-04:a1", "grapple-landmark", -256, -128, { label: "A1" }),
+        worldObject("sector-04-04:a2", "grapple-landmark", 128, -320, { label: "A2" }),
+        worldObject("sector-04-04:a3", "grapple-landmark", 224, -512, { label: "A3" }),
+        worldObject("sector-04-04:a4", "grapple-landmark", -32, -672, { label: "A4" }),
+        worldObject("sector-04-04:a5", "grapple-landmark", 160, -800, { label: "A5" }),
+        worldObject("sector-04-04:routing-status-display", "story-display", 176, -384, {
+            cueIds: ["sector-04-04:service-node-online", "sector-04-04:lower-feeder-segmented"]
+        }),
+        worldObject("sector-04-04:exit-panel", "gate-panel", 400, -832, {
+            coordinateAnchor: "bottom-center",
+            interactionRadius,
+            objectiveId: "sector-04-04:exit-panel-engaged",
+            gateId: "sector-04-04:gate",
+            requiredObjectiveIds: ["sector-04-04:final-deck-reached"]
+        }),
+        worldObject("sector-04-04:service-gate", "gate", 512, -832, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-04-04:gate"
+        })
+    ],
+    objectives: [
+        {
+            id: "sector-04-04:final-deck-reached",
+            type: "reach",
+            bounds: triggerBounds(128, -864, 384, 96)
+        },
+        {
+            id: "sector-04-04:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-04-04:exit-panel",
+            requiredObjectiveIds: ["sector-04-04:final-deck-reached"]
+        }
+    ],
+    gate: gate("sector-04-04:gate", 512, -864, null, ["sector-04-04:exit-panel-engaged"], {
+        portalBottomY: -832,
+        completionMode: "content-boundary"
+    }),
+    storyTriggers: ["service-node-online", "lower-feeder-segmented", "express-shaft-open"],
+    routes: ["safe", "flow", "recovery"],
+    cameraZones: [
+        cameraZone("decompression", -224, 0, 1, 0.72),
+        cameraZone("routing-overview", -512, -224, 0.95, 0.72),
+        cameraZone("upper-service-spine", -800, -512, 0.95, 0.72),
+        cameraZone("express-preview", -896, -800, 0.92, 0.7)
+    ],
+    cueIds: ["service-node-online", "lower-feeder-segmented", "express-shaft-open"]
+});
+
 export const SECTOR_04_AREA_CATALOG = defineAreaCatalog({
     id: "sector-04-authored-mock",
     revision: "sector-04-scenarios-rev1-v1",
-    areas: [area01, area02, area03]
+    areas: [area01, area02, area03, area04]
 });
