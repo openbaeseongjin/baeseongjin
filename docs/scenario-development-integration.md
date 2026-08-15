@@ -38,7 +38,7 @@ reviewed-upstream: decc0f6edfb9cf9dd8c22718115385de7e67668d
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
-| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증 | 1-1 C04·1-2 C02 Scenario Art 구조 정합 완료; 1-4·1-3 재생성과 실제 Build 플레이 수치 검증 필요 |
+| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증 | 1-1 C04·1-2 C02 Scenario Art 구조 정합 완료; 1-4·1-3 재생성과 실제 Build 플레이 수치 검증 필요; 1-5~1-8 Camera Zone·Story Trigger는 [구현 준비 문서](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) 작성 완료, 코드 반영 대기 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED` | 2-3 Specialization의 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 전부 `NOT CONNECTED`; 3-1 순수 geometry는 `GRAYBOX READY` | Access Scan Field, Sector 03 catalog·Camera Zone·Stable ID·Story trigger, Sector 종료 전환 필요 |
 | Sector 04 / 4-1 | Master와 4-1 상세 Stage, `CROSS-REVIEWED` | `NOT CONNECTED`; 4-1 순수 geometry는 `GRAYBOX READY` | Post-Sector 03 Boss→4-1 진입을 확정하기 전 global order·entry wiring 금지 |
@@ -54,6 +54,8 @@ reviewed-upstream: decc0f6edfb9cf9dd8c22718115385de7e67668d
 5. #487은 1-3·1-4·1-6·1-7·1-8에서 누락된 그래플 랜드마크 28개를 기존 target 좌표에 연결했다. 현재 102개 비렌더 그래플 표면은 모두 같은 ID·좌표 anchor의 보이는 object와 1:1이며, 누락·고아·좌표 불일치는 catalog validator와 authored world 회귀가 거부한다. Rope 후보 사거리·점수 계약은 변경하지 않았다.
 6. #489는 기존 글로벌 Artifact 시스템(ArtifactCatalog·Inventory·선택·network claim)을 은퇴하고 authored Foundation 선택을 유일한 특화 방향으로 확정했다. Checkpoint는 보상 선택을 열지 않는다. Rope 부착은 속도 1400px/s × 수명 2/7초에서 파생한 400px 도달의 보이는 Hook 투사체로 바뀌었고 `swingImpulse = 780`은 유지한다. Sentry 첫 수치는 체력 100·인식 거리 760·적 탄속 520·재사격 1.0초이며 authored activation/LOS가 인식을 계속 가린다. 시나리오 문서의 Rope 최대 부착/사거리 표현은 440에서 400으로 정렬했다.
 7. `2/2-2`·`2/2-4`·`2/2-5`·`2/2-7`·`2/2-8`·`3/3-3`·`3/3-4`·`3/3-6`·`3/3-7`·`3/3-8`의 `README.md`가 #489 이전 Sentry 수치(Health 30·Attack Range 520·Fire Interval 1.4 sec·Projectile Speed 260)를 그대로 인용하고 있어 `src/game/config.js`의 `COMBAT_CONFIG`(Health 100·Attack Range 760·Fire Interval 1.0 sec·Projectile Speed 520) 기준으로 정정했다(2-8과 3-6은 각각 두 곳씩 중복 인용돼 있었음). Rope 부착 440→400 표현은 이번 정밀 재검색에서 corpus 전체에 stale citation이 없음을 확인했다.
+8. 1-3의 Sentry만 `rules`에 `cover-ends-los`를 가진 이유를 `EnemyObject.js`·`Sector01AreaCatalog.js` 직접 대조로 확인했다 — 버그가 아니라, 실제로 작동하는 Cover-LOS raycast 기능(`hasLineOfSight`)을 1-3만 opt-in으로 쓰는 것이며 1-5·1-7의 `kind: "cover"` 표면은 애초에 그 area에 적이 없어 LOS 차단과 무관하다. 다른 Sector의 "Sentry는 activation band만 쓴다"는 서술과 모순이 없다.
+9. 1-5~1-8의 `cameraZones`(문자열 placeholder)와 `AuthoredStoryPresentation.js`의 Story Trigger(작성 시점 0건 연결)를 실제 좌표·문구로 옮겨 붙일 수 있는 형태로 정리해 [1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)에 작성했다. 코드 반영은 아직 하지 않았다(문서만 준비, 구현은 별도 진행). 작성 도중 오픈된 PR #507이 1-5~1-8의 `ENTRY`/`OBJECTIVE`/`GATE_PRESENTATIONS`를 이미 구현 중인 것을 확인해 문서 Part 2는 그와 겹치지 않는 `POSITION_PRESENTATIONS`만 남겼다(`cameraZones`는 #507도 다루지 않아 Part 1은 그대로 유효). Sector 02(2-1~2-8)는 `cameraZones` 이름 목록조차 없어 Camera는 범위에서 제외했고, Story도 #507이 일부(`2-1·2-2·2-3·2-4·2-5·2-7·2-8`) 진행 중이라 다음 단계에서 재확인이 필요하다.
 
 ## 열린 기획·구현 게이트
 

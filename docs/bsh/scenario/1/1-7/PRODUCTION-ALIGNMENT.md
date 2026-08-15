@@ -125,8 +125,8 @@
 | --- | --- | --- |
 | 지형·Anchor·Sentry·Wind | Runtime Mock 연결 완료, README와 좌표 정합성 높음 | Manual Bypass Control Y 32px 오차만 정리 |
 | Approved Blockout | 없음 | 이 문서 §3 기준 SVG 제작 필요 |
-| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체(§4 제안값 기준), 특히 Decision Frame(D 위치) 구도 우선 |
-| Story | 문자열 placeholder만 존재 | 6개 트리거 연결. Bypass 이후 환경 상태 변화는 별도 검토 |
+| Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 1 참고(§4 제안값은 그 문서로 대체됨), 특히 Decision Frame(D 위치) 구도 우선 |
+| Story | 문자열 placeholder만 존재 | 6개 트리거 연결 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 2 참고. Bypass 이후 환경 상태 변화는 별도 검토 |
 | Build 분기 | 미구현 | [1-4 §1](../1-4/PRODUCTION-ALIGNMENT.md) Foundation Runtime 선행 필요 |
 | Knockback+Wind 상호작용 | 미검증 | Acceptance Capture 전 필수 테스트 항목 |
 
