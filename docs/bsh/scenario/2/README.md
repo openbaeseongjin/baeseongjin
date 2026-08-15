@@ -6,6 +6,8 @@
 
 > 이 문서는 `2-1`~`2-8` 개별 스테이지 시나리오 문서가 아니라, Sector 02 전체를 관통하는 기획 요약본이다. 개별 스테이지 상세 스펙(좌표, Grid, Camera 등)은 각 `2-N/README.md`에서 다룬다.
 
+Camera Zone은 8개 Stage README가 스스로 불필요하다고 명시하며(Level Geometry로 구도 해결), Story Presentation의 남은 공백 3건은 [Story Implementation Handoff](./STORY-IMPLEMENTATION-HANDOFF.md)에 붙여넣기 가능한 형태로 정리되어 있다(코드 반영은 별도 구현 담당).
+
 ## Contents
 
 00. [Overview](#00--overview)

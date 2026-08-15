@@ -88,6 +88,7 @@
 | [`bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md) | 1-7 Runtime 좌표 대조·Wind/Sentry 중첩 구현 확인·Camera/Story 미구현 명시 계약 |
 | [`bsh/scenario/1/1-8/README.md`](./bsh/scenario/1/1-8/README.md) | `bsh` Sector 1 일반 구간 최종 종합·Containment Gate·Boss 전환 후보 Stage(1-8) Blockout 제작 규격 |
 | [`bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md) | 1-8 Runtime 좌표 대조·두 Turret Crossfire 금지 구현 확인·Camera/Story 미구현 명시 계약 |
+| [`bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) | `bsh` 1-5~1-8 Camera Zone·Story Trigger 붙여넣기용 구현 준비 자료(코드 반영은 별도 진행) |
 | [`bsh/scenario/2/README.md`](./bsh/scenario/2/README.md) | `bsh` Sector 02 Worker District 마스터플랜(2-1~2-8 개요) |
 | [`bsh/scenario/2/2-1/README.md`](./bsh/scenario/2/2-1/README.md) | `bsh` Worker District 첫 저압 전환 Stage(2-1) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md) | 2-1 Runtime 좌표 대조·Anchor Object 설계-구현 불일치 명시 계약 |
@@ -105,6 +106,7 @@
 | [`bsh/scenario/2/2-7/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-7/PRODUCTION-ALIGNMENT.md) | 2-7 Runtime 좌표 대조·두 Drone Crossfire 비겹침 구현 확인 계약 |
 | [`bsh/scenario/2/2-8/README.md`](./bsh/scenario/2/2-8/README.md) | `bsh` Sector 02 Finale·Group A/B/C Transfer 결과 공개 Stage(2-8) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md) | 2-8 Runtime 좌표 대조·Story Reveal cueId 순서 확인·Post-Sector 전환 미확정 명시 계약 |
+| [`bsh/scenario/2/STORY-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/2/STORY-IMPLEMENTATION-HANDOFF.md) | `bsh` Sector 02 Camera Zone 불필요 확인·Story Presentation 공백 3건 붙여넣기용 구현 준비 자료(코드 반영은 별도 진행) |
 | [`bsh/scenario/3/README.md`](./bsh/scenario/3/README.md) | `bsh` Sector 03 Commercial District 마스터플랜 REV 1.2(3-1~3-8 개요, Document Integration Patch 전부 GitHub main 반영 확인·Runtime Prototype Gate만 남음) |
 | [`bsh/scenario/3/3-1/README.md`](./bsh/scenario/3/3-1/README.md) | `bsh` Worker→Commercial District 저압 전환 Stage(3-1) Blockout 후보·제작 규격 |
 | [`bsh/scenario/3/3-2/README.md`](./bsh/scenario/3/3-2/README.md) | `bsh` 첫 Access Scan Field(Scanner) Stage(3-2) Blockout 후보·제작 규격, 구현 의존성 명세 포함 |
