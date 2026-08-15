@@ -29,6 +29,7 @@ import { run as accessScanField } from "./accessScanField.mjs";
 import { run as currentAuthoredWorld } from "./currentAuthoredWorld.mjs";
 import { run as authoredCameraDirector } from "./authoredCameraDirector.mjs";
 import { run as authoredStoryPresentation } from "./authoredStoryPresentation.mjs";
+import { run as interpolateRenderSnapshot } from "./interpolateRenderSnapshot.mjs";
 
 const steps = {
     worldSeed,
@@ -59,6 +60,7 @@ const steps = {
     currentAuthoredWorld,
     authoredCameraDirector,
     authoredStoryPresentation,
+    interpolateRenderSnapshot,
     spriteAssetValidator,
     stateMachine,
     commandReplay

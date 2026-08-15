@@ -19,6 +19,7 @@ import {
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
+import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
 
 export class GameApp {
     constructor({
@@ -51,9 +52,11 @@ export class GameApp {
         this.storyPresentation = new AuthoredStoryPresentation();
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
-            render: () => this.render()
+            render: (alpha) => this.render(alpha)
         });
+        this.previousRenderSnapshot = null;
         this.tick = (time) => {
+            this.previousRenderSnapshot = this.authority.snapshot();
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
             this.frameId = requestAnimationFrame(this.tick);
         };
@@ -161,8 +164,8 @@ export class GameApp {
         return { x: 0, y: 0, zoom, initialized: false };
     }
 
-    render() {
-        const state = this.authority.snapshot();
+    render(alpha = 0) {
+        const state = interpolateRenderSnapshot(this.previousRenderSnapshot, this.authority.snapshot(), alpha);
         const combatFeedback = this.combatFeedback.snapshot();
         this.stats.resets = state.resets;
         this.playerPresentationEvents.push(...createPlayerPresentationEvents([state.eventFlash]));
