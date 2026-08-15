@@ -321,15 +321,16 @@ export function run() {
     sweptServer.worldProgress.completeObjective("sector-01-01:terminal-read");
     const sweptGate = sweptServer.world.gates[0];
     const sweptNextArea = sweptServer.world.areas[1];
-    sweptOwner.physics.position.set(
-        sweptGate.trigger.x + sweptGate.trigger.width * 0.5,
-        sweptGate.trigger.y + sweptGate.trigger.height + 1
-    );
+    sweptOwner.physics.position.set(sweptGate.trigger.x - 180, sweptGate.trigger.y + sweptGate.trigger.height + 1);
     const sweptClientTick = sweptServer.tick + 1;
     const sweptArrival = {
         x: sweptNextArea.entry.x - 20,
         y: sweptNextArea.entry.y
     };
+    assert.ok(
+        sweptOwner.physics.position.x < sweptGate.trigger.x && sweptArrival.x < sweptGate.trigger.x,
+        "the sampled owner-motion chord must miss the narrow Gate trigger after a locally curved portal entry"
+    );
     const sweptReceipt = sweptSession.submitOwnerMotion(
         sweptOwner.id,
         createOwnerMotionState({
@@ -346,7 +347,7 @@ export function run() {
     assert.equal(
         sweptServer.worldProgress.currentAreaId,
         "sector-01-02",
-        "post-portal owner motion must preserve the swept Gate entry on the authority server"
+        "post-portal owner motion inside the next area must recover authority progress even when its chord misses the Gate"
     );
     assert.equal(sweptServer.worldProgress.isGateCrossed(sweptGate.id), true);
     assert.deepEqual(
