@@ -244,6 +244,16 @@ const area03 = defineArea({
         point("sector-01-03:recovery-safe-ledge", -240, -664)
     ],
     objects: [
+        ...[
+            [64, -224],
+            [64, -480],
+            [-192, -736],
+            [96, -960]
+        ].map(([x, y], index) =>
+            worldObject(`sector-01-03:anchor-${"abcd"[index]}`, "grapple-landmark", x, y, {
+                label: "ABCD"[index]
+            })
+        ),
         worldObject("sector-01-03:employee-scanner", "trigger", -96, -64, {
             bounds: triggerBounds(-144, -128, 96, 128),
             cueIds: ["sector-01-03:employee-verified"]
@@ -325,6 +335,15 @@ const area04 = defineArea({
     ],
     recoveryPoints: [point("sector-01-04:recovery-p1", 160, -408), point("sector-01-04:recovery-p2", -96, -536)],
     objects: [
+        ...[
+            [192, -320],
+            [-96, -448],
+            [160, -560]
+        ].map(([x, y], index) =>
+            worldObject(`sector-01-04:anchor-${"abc"[index]}`, "grapple-landmark", x, y, {
+                label: "ABC"[index]
+            })
+        ),
         worldObject("sector-01-04:maintenance-node", "augment-node", 0, -160, {
             coordinateAnchor: "bottom-center",
             interactionRadius: 80,
@@ -528,6 +547,18 @@ const area06 = defineArea({
         point("sector-01-06:recovery-r4", 160, -1144)
     ],
     objects: [
+        ...[
+            [-128, -224],
+            [96, -416],
+            [-224, -640],
+            [-160, -896],
+            [192, -1088],
+            [-32, -1280]
+        ].map(([x, y], index) =>
+            worldObject(`sector-01-06:anchor-${"abcdef"[index]}`, "grapple-landmark", x, y, {
+                label: "ABCDEF"[index]
+            })
+        ),
         worldObject("sector-01-06:fan-a", "wind-source", 416, -480, {
             damage: false,
             windZoneId: "sector-01-06:fan-a-wind"
@@ -636,6 +667,19 @@ const area07 = defineArea({
         point("sector-01-07:recovery-upper", -64, -1288)
     ],
     objects: [
+        ...[
+            [-128, -224],
+            [160, -416],
+            [224, -608],
+            [-192, -832],
+            [224, -1056],
+            [-32, -1216],
+            [128, -1376]
+        ].map(([x, y], index) =>
+            worldObject(`sector-01-07:anchor-${"abcdefg"[index]}`, "grapple-landmark", x, y, {
+                label: "ABCDEFG"[index]
+            })
+        ),
         worldObject("sector-01-07:pressure-valve-core", "background-prop", 0, -896, { gameplay: false }),
         worldObject("sector-01-07:sentry-turret-01", "sentry", 64, -864, {
             activation: triggerBounds(-320, -1184, 640, 640),
@@ -758,6 +802,20 @@ const area08 = defineArea({
         })
     ],
     objects: [
+        ...[
+            [-160, -224],
+            [192, -416],
+            [-192, -608],
+            [-96, -768],
+            [128, -944],
+            [-160, -1152],
+            [224, -1344],
+            [-32, -1504]
+        ].map(([x, y], index) =>
+            worldObject(`sector-01-08:anchor-${"abcdefgh"[index]}`, "grapple-landmark", x, y, {
+                label: "ABCDEFGH"[index]
+            })
+        ),
         worldObject("sector-01-08:sentry-turret-lower", "sentry", 384, -768, {
             activation: triggerBounds(-256, -1024, 640, 384),
             rules: ["sequential-activation", "no-crossfire", "standard-projectile", "no-rope-cut"]

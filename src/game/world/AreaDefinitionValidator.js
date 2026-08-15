@@ -98,6 +98,42 @@ function validateUniqueIds(area, collection, label, issues, globalIds) {
     }
 }
 
+function validateGrappleLandmarks(area, issues) {
+    const grappleTargets = area.surfaces.filter(({ kind }) => kind === "grapple-target");
+    const grappleLandmarks = area.objects.filter(({ kind }) => kind === "grapple-landmark");
+
+    for (const surface of grappleTargets) {
+        const landmarkId = surface.id.endsWith("-surface") ? surface.id.slice(0, -"-surface".length) : null;
+        if (!landmarkId) {
+            issues.push(issue("grapple-target-id", area.id, { id: surface.id }));
+            continue;
+        }
+        const landmark = grappleLandmarks.find(({ id }) => id === landmarkId);
+        if (!landmark) {
+            issues.push(issue("grapple-landmark-missing", area.id, { id: surface.id, landmarkId }));
+            continue;
+        }
+        if (landmark.position.x !== surface.position.x || landmark.position.y !== surface.position.y) {
+            issues.push(issue("grapple-landmark-position", area.id, { id: landmark.id, surfaceId: surface.id }));
+        }
+        if (landmark.coordinateAnchor !== surface.coordinateAnchor) {
+            issues.push(
+                issue("grapple-landmark-coordinate-anchor", area.id, {
+                    id: landmark.id,
+                    surfaceId: surface.id
+                })
+            );
+        }
+    }
+
+    for (const landmark of grappleLandmarks) {
+        const surfaceId = `${landmark.id}-surface`;
+        if (!grappleTargets.some(({ id }) => id === surfaceId)) {
+            issues.push(issue("grapple-target-missing", area.id, { id: landmark.id, surfaceId }));
+        }
+    }
+}
+
 export function validateAreaCatalog(catalog, { maxAttachDistance = 440 } = {}) {
     const issues = [];
     const areaIds = new Set(catalog.areas.map(({ id }) => id));
@@ -131,6 +167,7 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = 440 } = {}) {
         validateUniqueIds(area, area.objects, "object", issues, globalIds);
         validateUniqueIds(area, area.objectives, "objective", issues, globalIds);
         validateUniqueIds(area, area.windZones, "wind", issues, globalIds);
+        validateGrappleLandmarks(area, issues);
         if (globalIds.has(area.gate.id)) issues.push(issue("catalog-id-duplicate", area.id, { id: area.gate.id }));
         globalIds.add(area.gate.id);
 

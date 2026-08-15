@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
+import { validateAreaCatalog } from "../src/game/world/AreaDefinitionValidator.js";
 import { gatePortalBounds, worldObject } from "../src/game/world/areas/AreaDefinition.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
@@ -27,6 +28,73 @@ export function run() {
     const first = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 9182, floorY: 320 });
     const second = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 9182, floorY: 320 });
     const currentWorld = assembleAuthoredWorld(CURRENT_AUTHORED_AREA_CATALOG, { seed: 9182, floorY: 320 });
+
+    for (const area of SECTOR_01_AREA_CATALOG.areas) {
+        const grappleTargets = area.surfaces.filter(({ kind }) => kind === "grapple-target");
+        const grappleLandmarks = area.objects.filter(({ kind }) => kind === "grapple-landmark");
+        assert.equal(
+            grappleLandmarks.length,
+            grappleTargets.length,
+            `${area.id} must render one landmark for every hidden grapple target`
+        );
+        for (const surface of grappleTargets) {
+            const expectedLandmarkId = surface.id.replace(/-surface$/, "");
+            const landmark = grappleLandmarks.find(({ id }) => id === expectedLandmarkId);
+            assert.ok(landmark, `${surface.id} must expose ${expectedLandmarkId} as a visible landmark`);
+            assert.deepEqual(
+                landmark.position,
+                surface.position,
+                `${surface.id} and ${expectedLandmarkId} must share the same authored anchor point`
+            );
+            assert.equal(landmark.coordinateAnchor, "center");
+        }
+    }
+
+    const missingLandmarkCatalog = structuredClone(SECTOR_01_AREA_CATALOG);
+    missingLandmarkCatalog.areas[0].objects = missingLandmarkCatalog.areas[0].objects.filter(
+        ({ id }) => id !== "sector-01-01:anchor-a"
+    );
+    assert.ok(
+        validateAreaCatalog(missingLandmarkCatalog).issues.some(
+            ({ areaId, code, id, landmarkId }) =>
+                areaId === "sector-01-01" &&
+                code === "grapple-landmark-missing" &&
+                id === "sector-01-01:anchor-a-surface" &&
+                landmarkId === "sector-01-01:anchor-a"
+        ),
+        "catalog validation must reject hidden grapple targets without a visible landmark"
+    );
+
+    const misplacedLandmarkCatalog = structuredClone(SECTOR_01_AREA_CATALOG);
+    const misplacedLandmark = misplacedLandmarkCatalog.areas[0].objects.find(
+        ({ id }) => id === "sector-01-01:anchor-a"
+    );
+    misplacedLandmark.position.x += 1;
+    assert.ok(
+        validateAreaCatalog(misplacedLandmarkCatalog).issues.some(
+            ({ areaId, code, id, surfaceId }) =>
+                areaId === "sector-01-01" &&
+                code === "grapple-landmark-position" &&
+                id === "sector-01-01:anchor-a" &&
+                surfaceId === "sector-01-01:anchor-a-surface"
+        ),
+        "catalog validation must reject landmarks that do not cover their grapple target"
+    );
+
+    const missingTargetCatalog = structuredClone(SECTOR_01_AREA_CATALOG);
+    missingTargetCatalog.areas[0].surfaces = missingTargetCatalog.areas[0].surfaces.filter(
+        ({ id }) => id !== "sector-01-01:anchor-a-surface"
+    );
+    assert.ok(
+        validateAreaCatalog(missingTargetCatalog).issues.some(
+            ({ areaId, code, id, surfaceId }) =>
+                areaId === "sector-01-01" &&
+                code === "grapple-target-missing" &&
+                id === "sector-01-01:anchor-a" &&
+                surfaceId === "sector-01-01:anchor-a-surface"
+        ),
+        "catalog validation must reject visible grapple landmarks without a target surface"
+    );
 
     assert.deepEqual(first, second, "the same catalog and composition options must produce the same world");
     assert.equal(JSON.stringify(SECTOR_01_AREA_CATALOG), before, "assembly must not mutate authored definitions");

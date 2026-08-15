@@ -42,7 +42,8 @@ export function run() {
     );
     assert.match(html, /rel="manifest" href="\.\/manifest\.webmanifest"/);
     assert.match(html, /rel="apple-touch-icon"/);
-    const multiplayerServer = html.match(/<meta name="multiplayer-server" content="([^"]+)"/)?.[1];
+    const multiplayerServerTag = html.match(/<meta\b[^>]*\bname="multiplayer-server"[^>]*>/)?.[0];
+    const multiplayerServer = multiplayerServerTag?.match(/\bcontent="([^"]+)"/)?.[1];
     assert.match(multiplayerServer, /^https:\/\//, "the deployed client needs a secure game server endpoint");
     const worker = readFileSync("sw.js", "utf8");
     const workerVersion = worker.match(/const RELEASE_VERSION = "([^"]+)"/)?.[1];
