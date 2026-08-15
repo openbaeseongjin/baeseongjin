@@ -4,10 +4,10 @@
 
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 2cbdd7b128ee906554c1581a28f2e2ba5e760679fe5c507baf1c1bafbaa59cde
-authored-area-sha256: 5c27ce94fafbdfeadfcfa3718c33740a5b926b93bc752a6cf8d124b501769883
+authored-area-sha256: ac81fdee77c7c83f62e1b065c799c63bbce454c81a4df891bdde0eb2c45841ee
 stage-count: 25
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1
-reviewed-upstream: 3f85827f560d9c28b5f4474e9700b859b6604777
+reviewed-upstream: d906d3246307aac8a492191d3653655ba0b9bf80
 -->
 
 ## 상태를 읽는 법
@@ -28,16 +28,16 @@ reviewed-upstream: 3f85827f560d9c28b5f4474e9700b859b6604777
 
 ## 2026-08-15 확인 체크포인트
 
-- 확인 기준 upstream: `3f85827f560d9c28b5f4474e9700b859b6604777` (`main == origin/main`, #480 운영 반영 뒤 clean main)
+- 확인 기준 upstream: `d906d3246307aac8a492191d3653655ba0b9bf80` (`main == origin/main`, #485 운영 반영 뒤 clean main)
 - 상세 Stage 문서: **25개**, `1-1`부터 `3-8`까지와 `4-1`
 - 현재 authored Runtime: **16개**, `1-1 → 2-8`
-- 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1, `CurrentAuthoredAreaCatalog.js`, 구현 로드맵과 세션 핸드오프
+- 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1, `CurrentAuthoredAreaCatalog.js`, Sector 01 그래플 표면·랜드마크 1:1 계약, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03·04 Runtime과 실제 플레이테스트. 두 Sector는 현재 catalog에 없으므로 완료로 표시하지 않는다.
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
-| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증 | 실제 Build 플레이 수치와 Scenario Art 정렬은 별도 검증 |
+| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증 | 실제 Build 플레이 수치와 Scenario Art 정렬은 별도 검증 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED` | 2-3 Specialization의 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 전부 `NOT CONNECTED`; 3-1 순수 geometry는 `GRAYBOX READY` | Access Scan Field, Sector 03 catalog·Camera Zone·Stable ID·Story trigger, Sector 종료 전환 필요 |
 | Sector 04 / 4-1 | Master와 4-1 상세 Stage, `CROSS-REVIEWED` | `NOT CONNECTED`; 4-1 순수 geometry는 `GRAYBOX READY` | Post-Sector 03 Boss→4-1 진입을 확정하기 전 global order·entry wiring 금지 |
@@ -50,6 +50,7 @@ reviewed-upstream: 3f85827f560d9c28b5f4474e9700b859b6604777
 2. Sector 04는 Transit / Infrastructure Master와 4-1 `TRANSIT INTAKE`가 추가됐다. 4-1은 Enemy·Scanner·Wind·Cutter·Moving Platform 없이 Rope momentum만 검증하므로 geometry 후보는 준비됐지만, Sector 03 종료 전환은 미정이다.
 3. #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Artifact ID와 Rope Augment ID는 계속 분리한다.
 4. #478 Scenario Art 정렬 작업은 아직 열린 작업이다. 병합될 때 시나리오 source fingerprint와 이 문서의 아트·검증 상태를 다시 확인한다.
+5. #487은 1-3·1-4·1-6·1-7·1-8에서 누락된 그래플 랜드마크 28개를 기존 target 좌표에 연결했다. 현재 102개 비렌더 그래플 표면은 모두 같은 ID·좌표 anchor의 보이는 object와 1:1이며, 누락·고아·좌표 불일치는 catalog validator와 authored world 회귀가 거부한다. Rope 후보 사거리·점수 계약은 변경하지 않았다.
 
 ## 열린 기획·구현 게이트
 
