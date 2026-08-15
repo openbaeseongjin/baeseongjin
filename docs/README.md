@@ -124,3 +124,4 @@
 | [`bsh/scenario/4/4-4/README.md`](./bsh/scenario/4/4-4/README.md) | `bsh` Sector 04 Rest Stage(4-4) Blockout 후보·제작 규격 — Enemy/Threat 없음, Lower Ascent Feeder 이상징후 첫 Setup(SEGMENTED, ISOLATED 아님), 좌표 검증 완료 |
 | [`bsh/scenario/4/4-5/README.md`](./bsh/scenario/4/4-5/README.md) | `bsh` Sector 04 순수 Movement Joy Stage(4-5) Blockout 후보·제작 규격 — Enemy 없음, Wake-assisted 상승, 좌표 검증 완료 |
 | [`bsh/scenario/4/4-6/README.md`](./bsh/scenario/4/4-6/README.md) | `bsh` Rope Line Geometry Combat Stage(4-6) Blockout 후보·제작 규격 — Cutter Sentry+Patrol Drone 분리 배치, Shear 공격선 활용, 좌표 검증 완료 |
+| [`bsh/scenario/4/4-7/README.md`](./bsh/scenario/4/4-7/README.md) | `bsh` Sector 04 Story Pressure Stage(4-7) Blockout 후보·제작 규격 — Cutter+Wake Synthesis, `LOWER ASCENT FEEDER ISOLATED` 확정 Reveal(인과관계는 미확정 유지), 좌표 검증 완료 |
