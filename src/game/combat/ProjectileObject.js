@@ -41,7 +41,7 @@ class ProjectileObject extends SimulationDrivenObject {
         predictionId = null,
         speed = Math.hypot(velocity.x, velocity.y),
         predictCollision = false,
-        canCutRope = true,
+        canCutRope = false,
         objectType,
         renderCollection,
         collisionRejectionPolicy,

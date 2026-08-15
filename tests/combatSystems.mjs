@@ -208,6 +208,52 @@ export function run() {
     assert.ok(spawned[0] instanceof SimulationDrivenObject);
     assert.equal(spawned[0].targetId, "player-2", "the closest active player must be targeted");
     assert.equal(spawned[0].velocity.y, 0, "LOCK must preserve the last tracked direction while the target dodges");
+    assert.equal(spawned[0].canCutRope, false, "a standard Sentry must not cut ropes by default");
+
+    const cutterEnemy = new EnemyObject({
+        id: "enemy-cutter",
+        position: new Vector2(100, 0),
+        level: 1,
+        radius: 18,
+        health: 30,
+        maxHealth: 30,
+        fireCooldown: 0,
+        rules: ["cutter-fire"]
+    });
+    const cutterShots = [];
+    updateEnemyWeapons({
+        enemies: [cutterEnemy],
+        targets: [target],
+        projectiles: cutterShots,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: 0
+    });
+    updateEnemyWeapons({
+        enemies: [cutterEnemy],
+        targets: [target],
+        projectiles: cutterShots,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyAcquireSeconds
+    });
+    updateEnemyWeapons({
+        enemies: [cutterEnemy],
+        targets: [target],
+        projectiles: cutterShots,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyTrackSeconds
+    });
+    const cutterSpawned = updateEnemyWeapons({
+        enemies: [cutterEnemy],
+        targets: [target],
+        projectiles: cutterShots,
+        registry,
+        config: COMBAT_CONFIG,
+        dt: COMBAT_CONFIG.enemyLockSeconds
+    });
+    assert.equal(cutterSpawned[0].canCutRope, true, "a cutter-fire enemy must opt in to rope-cutting projectiles");
 
     const coveredEnemy = new EnemyObject({
         id: "enemy-covered",

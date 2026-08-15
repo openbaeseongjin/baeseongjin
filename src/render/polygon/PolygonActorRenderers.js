@@ -146,6 +146,52 @@ export class PolygonProjectileRenderer {
     }
 }
 
+export class PolygonCutterProjectileRenderer {
+    constructor({ selectProjectiles, category = "cutterProjectiles" } = {}) {
+        if (typeof selectProjectiles !== "function") {
+            throw new Error("PolygonCutterProjectileRenderer requires selectProjectiles");
+        }
+        this.selectProjectiles = selectProjectiles;
+        this.category = category;
+    }
+
+    draw({ context, scene, viewport, renderStats }) {
+        const projectiles = this.selectProjectiles(scene);
+        let drawn = 0;
+        for (const projectile of projectiles) {
+            if (!isVisible(viewport, circleBounds(projectile.position, projectile.radius + 16))) continue;
+            drawn += 1;
+            const speed = Math.hypot(projectile.velocity.x, projectile.velocity.y) || 1;
+            const tail = {
+                x: projectile.position.x - (projectile.velocity.x / speed) * 20,
+                y: projectile.position.y - (projectile.velocity.y / speed) * 20
+            };
+            context.strokeStyle = "rgba(255, 140, 26, 0.65)";
+            context.lineWidth = 3;
+            context.lineCap = "round";
+            context.beginPath();
+            context.moveTo(tail.x, tail.y);
+            context.lineTo(projectile.position.x, projectile.position.y);
+            context.stroke();
+            context.lineCap = "butt";
+
+            const radius = projectile.radius + 2;
+            context.fillStyle = "#ff8c1a";
+            context.strokeStyle = "#fff7ed";
+            context.lineWidth = 1.5;
+            context.beginPath();
+            context.moveTo(projectile.position.x, projectile.position.y - radius);
+            context.lineTo(projectile.position.x + radius, projectile.position.y);
+            context.lineTo(projectile.position.x, projectile.position.y + radius);
+            context.lineTo(projectile.position.x - radius, projectile.position.y);
+            context.closePath();
+            context.fill();
+            context.stroke();
+        }
+        renderStats?.recordCollection(this.category, projectiles.length, drawn);
+    }
+}
+
 export class PolygonLocalPlayerRenderer {
     draw({ context, scene }) {
         const player = scene.player;

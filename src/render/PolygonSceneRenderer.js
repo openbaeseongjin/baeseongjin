@@ -17,6 +17,7 @@ import {
     remoteShots
 } from "./layers/SharedSceneRenderers.js";
 import {
+    PolygonCutterProjectileRenderer,
     PolygonEnemyRenderer,
     PolygonLocalPlayerRenderer,
     PolygonProjectileRenderer,
@@ -50,9 +51,15 @@ export class PolygonSceneRenderer {
                         category: "playerProjectiles"
                     }),
                     new PolygonProjectileRenderer({
-                        selectProjectiles: (scene) => scene.enemyProjectiles ?? [],
+                        selectProjectiles: (scene) =>
+                            (scene.enemyProjectiles ?? []).filter((projectile) => !projectile.canCutRope),
                         color: "#f43f5e",
                         category: "enemyProjectiles"
+                    }),
+                    new PolygonCutterProjectileRenderer({
+                        selectProjectiles: (scene) =>
+                            (scene.enemyProjectiles ?? []).filter((projectile) => projectile.canCutRope),
+                        category: "cutterProjectiles"
                     }),
                     new CombatEffectRenderer(),
                     new EventEffectRenderer(),

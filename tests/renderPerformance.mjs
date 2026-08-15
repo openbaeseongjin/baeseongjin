@@ -74,6 +74,17 @@ export function run() {
         null
     );
     assert.equal(enemySensorColor({ attackState: "lock" }), "#ff5a36");
+    assert.equal(enemySensorColor({ attackState: "lock", rules: ["cutter-fire"] }), "#ff7a00");
+    assert.equal(
+        enemyAimLine({
+            position: { x: 0, y: 0 },
+            attackState: "lock",
+            aimDirection: { x: 1, y: 0 },
+            rules: ["cutter-fire"]
+        }).color,
+        "#ff8c1a",
+        "a cutter-fire enemy must telegraph a distinct hot-orange aim line"
+    );
 
     const metrics = new RenderPerformanceMetrics({ sampleSize: 4 });
     const resolution = {

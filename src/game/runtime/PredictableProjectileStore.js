@@ -104,7 +104,7 @@ export class PredictableProjectileStore {
                 targetId: event.parameters.targetId,
                 radius: event.parameters.radius,
                 damage: event.parameters.damage,
-                canCutRope: event.parameters.canCutRope ?? true,
+                canCutRope: event.parameters.canCutRope ?? false,
                 position: predicted ? { ...predicted.position } : { ...event.position },
                 velocity: predicted ? { ...predicted.velocity } : { ...event.velocity },
                 speed: event.parameters.speed ?? length(event.velocity),

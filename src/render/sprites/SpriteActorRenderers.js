@@ -185,5 +185,47 @@ export class SpriteProjectileRenderer {
     }
 }
 
+export class SpriteCutterProjectileRenderer {
+    constructor({ selectProjectiles, size = { width: 14, height: 14 }, category = "cutterProjectiles" } = {}) {
+        if (typeof selectProjectiles !== "function") {
+            throw new Error("SpriteCutterProjectileRenderer requires selectProjectiles");
+        }
+        this.selectProjectiles = selectProjectiles;
+        this.size = Object.freeze({ ...size });
+        this.category = category;
+        this.palette = Object.freeze({ a: "#7c2d12", b: "#ff8c1a", c: "#fff7ed" });
+    }
+
+    draw({ context, scene, viewport, renderStats }) {
+        const projectiles = this.selectProjectiles(scene);
+        let drawn = 0;
+        for (const projectile of projectiles) {
+            if (!isVisible(viewport, centeredBounds(projectile.position, this.size))) continue;
+            drawn += 1;
+            const speed = Math.hypot(projectile.velocity.x, projectile.velocity.y) || 1;
+            const tail = {
+                x: projectile.position.x - (projectile.velocity.x / speed) * 18,
+                y: projectile.position.y - (projectile.velocity.y / speed) * 18
+            };
+            context.strokeStyle = "rgba(255, 140, 26, 0.6)";
+            context.lineWidth = 2;
+            context.lineCap = "round";
+            context.beginPath();
+            context.moveTo(tail.x, tail.y);
+            context.lineTo(projectile.position.x, projectile.position.y);
+            context.stroke();
+            context.lineCap = "butt";
+            paintPixelSprite({
+                context,
+                sprite: ENEMY_PROJECTILE_SPRITE,
+                palette: this.palette,
+                position: projectile.position,
+                size: this.size
+            });
+        }
+        renderStats?.recordCollection(this.category, projectiles.length, drawn);
+    }
+}
+
 export const playerProjectileSprite = PLAYER_PROJECTILE_SPRITE;
 export const enemyProjectileSprite = ENEMY_PROJECTILE_SPRITE;

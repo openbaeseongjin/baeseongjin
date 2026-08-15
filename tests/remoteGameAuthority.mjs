@@ -806,7 +806,8 @@ export async function run() {
             position: new Vector2(ropeStart.x, ropeStart.y - 50),
             velocity: new Vector2(0, 0),
             damage: 20,
-            radius: 7
+            radius: 7,
+            canCutRope: true
         });
         collisionRoom.simulation.enemyProjectiles.push(ropeProjectile);
         collisionRoom.simulation.recordProjectileSpawn(ropeProjectile);
@@ -1023,7 +1024,8 @@ export async function run() {
             position: authorityPlayer.physics.position.clone(),
             velocity: new Vector2(0, -120),
             damage: 0,
-            radius: 7
+            radius: 7,
+            canCutRope: true
         });
         room.simulation.enemyProjectiles.push(rejectedRopeProjectile);
         assert.equal(
