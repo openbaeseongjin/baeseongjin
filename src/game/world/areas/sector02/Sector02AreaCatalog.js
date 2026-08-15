@@ -221,7 +221,7 @@ const area03Landmarks = [landmark(area03Id, "g1", 128, 256, -512), landmark(area
 const area03Exit = point(`${area03Id}:exit`, 304, -736);
 const area03Objective = Object.freeze({
     id: `${area03Id}:specialization-selected`,
-    type: "interact-choice",
+    type: "interact",
     sourceObjectId: `${area03Id}:specialization-node`
 });
 const area03PanelObjective = exitPanelObjective(area03Id, [area03Objective.id]);

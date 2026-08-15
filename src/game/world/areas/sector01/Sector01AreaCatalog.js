@@ -519,6 +519,12 @@ const area06 = defineArea({
         horizontalSurface("sector-01-06:neutral-deck", -112, -832, 352, 32, { kind: "safe-deck" }),
         horizontalSurface("sector-01-06:r4", 160, -1120, 256, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-06:final-deck", 112, -1344, 416, 32, { kind: "safe-deck" }),
+        groundedSurface("sector-01-06:cooling-core-column", -304, -896, 64, 128, {
+            kind: "solid",
+            oneWay: false,
+            grappleable: false,
+            windOcclusion: true
+        }),
         ...[
             [-128, -224],
             [96, -416],
@@ -599,14 +605,16 @@ const area06 = defineArea({
             bounds: triggerBounds(-320, -640, 672, 320),
             direction: { x: -1, y: 0 },
             mode: "continuous",
-            strength: 220
+            strength: 500,
+            falloff: 80
         },
         {
             id: "sector-01-06:fan-b-wind",
             bounds: triggerBounds(-352, -1280, 704, 384),
             direction: { x: 1, y: 0 },
             mode: "pulsed",
-            strength: 360,
+            strength: 800,
+            falloff: 80,
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
@@ -713,14 +721,16 @@ const area07 = defineArea({
             bounds: triggerBounds(-320, -640, 672, 384),
             direction: { x: 1, y: 0 },
             mode: "continuous",
-            strength: 90
+            strength: 220,
+            falloff: 80
         },
         {
             id: "sector-01-07:main-pressure-vent-wind",
             bounds: triggerBounds(-352, -1184, 704, 384),
             direction: { x: 1, y: 0 },
             mode: "pulsed",
-            strength: 360,
+            strength: 800,
+            falloff: 80,
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
@@ -855,7 +865,8 @@ const area08 = defineArea({
             bounds: triggerBounds(-384, -1504, 768, 448),
             direction: { x: 1, y: 0 },
             mode: "pulsed",
-            strength: 360,
+            strength: 800,
+            falloff: 80,
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],

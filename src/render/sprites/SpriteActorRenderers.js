@@ -2,7 +2,7 @@ import { paintPixelSprite } from "./PixelSpritePainter.js";
 import { PlayerAnimationController } from "./PlayerAnimationController.js";
 import { paintSpriteFrame } from "./SpriteCanvasPainter.js";
 import { centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
-import { enemyAimLine, enemySensorColor } from "../EnemyTelegraphPresentation.js";
+import { enemyAimLine, enemySensorColor, isPatrolDrone } from "../EnemyTelegraphPresentation.js";
 
 const ENEMY_SPRITE = Object.freeze({
     rows: Object.freeze(["......aa", "..aaaaaa", "abbbccca", "abccccba", "..aaaaaa", "......aa"])
@@ -128,10 +128,20 @@ export class SpriteEnemyRenderer {
             paintPixelSprite({
                 context,
                 sprite: ENEMY_SPRITE,
-                palette: { a: "#881337", b: "#fb7185", c: "#fecdd3" },
+                palette: isPatrolDrone(enemy)
+                    ? { a: "#78350f", b: "#fbbf24", c: "#fef3c7" }
+                    : { a: "#881337", b: "#fb7185", c: "#fecdd3" },
                 position: enemy.position,
                 size: this.size
             });
+            if (isPatrolDrone(enemy)) {
+                context.strokeStyle = "#94a3b8";
+                context.lineWidth = 2;
+                context.beginPath();
+                context.moveTo(enemy.position.x - 20, enemy.position.y - 12);
+                context.lineTo(enemy.position.x + 20, enemy.position.y - 12);
+                context.stroke();
+            }
             context.fillStyle = enemySensorColor(enemy);
             context.fillRect(enemy.position.x - 11, enemy.position.y - 3, 6, 6);
             context.fillStyle = "#1f2937";

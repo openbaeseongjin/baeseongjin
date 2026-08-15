@@ -21,6 +21,28 @@ export function authoredAreaForPosition(world, position) {
     return world?.areas?.find((area) => pointInsideArea(area, position)) ?? null;
 }
 
+export function localTriggerObjects(world, areaId) {
+    const area = world?.areas?.find(({ id }) => id === areaId);
+    if (!area) return Object.freeze([]);
+    const originX = area.bounds.x + area.bounds.width * 0.5;
+    const originY = area.bounds.y + area.bounds.height;
+    return Object.freeze(
+        (world.objects ?? [])
+            .filter((object) => object.kind === "trigger" && object.areaId === areaId && object.bounds)
+            .map((object) =>
+                Object.freeze({
+                    cueIds: object.cueIds ?? Object.freeze([]),
+                    bounds: Object.freeze({
+                        x: object.bounds.x - originX,
+                        y: object.bounds.y - originY,
+                        width: object.bounds.width,
+                        height: object.bounds.height
+                    })
+                })
+            )
+    );
+}
+
 export function resolveAuthoredCameraShot({ world, player, mobileView = false, defaultZoom = 1 }) {
     const area = authoredAreaForPosition(world, player.position);
     if (!area) {

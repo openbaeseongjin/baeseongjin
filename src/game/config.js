@@ -64,6 +64,12 @@ export const COMBAT_CONFIG = Object.freeze({
     ropeDisabledSeconds: 0.6
 });
 
+export const WIND_CONFIG = Object.freeze({
+    groundedFactor: 0.35,
+    shadowFactor: 0.15,
+    defaultFalloff: 0
+});
+
 export const WORLD_CONFIG = Object.freeze({
     seed: 20260810,
     levelCount: 48,

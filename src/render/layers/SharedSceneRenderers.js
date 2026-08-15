@@ -1,5 +1,6 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
 import { ropeHookReach } from "../../game/config.js";
+import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
@@ -161,12 +162,82 @@ export class WorldGeometryRenderer {
     }
 }
 
+const FAN_BLADE_SPEED = Math.PI * 2 * 3;
+const WIND_PARTICLE_SPEED_FACTOR = 0.2;
+const WIND_PARTICLE_BASE_SPEED = 30;
+
+function windVisualIntensity(zone, state) {
+    if (!zone) return 0;
+    if (zone.mode === "continuous") return state ? 1 : 0;
+    if (!state) return 0;
+    const cycle = zone.cycle;
+    switch (state.phase) {
+        case "lull":
+            return 0;
+        case "warning":
+            return 0.3 + 0.2 * Math.min(1, state.phaseTime / Math.max(cycle.warning, 0.001));
+        case "active":
+            return 1;
+        case "decay":
+            return Math.max(0, 1 - state.phaseTime / Math.max(cycle.decay, 0.001));
+        default:
+            return 0;
+    }
+}
+
+function drawWindStreaks(context, zone, intensity, timeSeconds) {
+    if (!zone || intensity <= 0) return;
+    const { bounds, direction } = zone;
+    const horizontal = Math.abs(direction.x) >= Math.abs(direction.y);
+    const sign = horizontal ? Math.sign(direction.x) || 1 : Math.sign(direction.y) || 1;
+    const span = horizontal ? bounds.width : bounds.height;
+    const crossSpan = horizontal ? bounds.height : bounds.width;
+    const alongEdge = horizontal ? bounds.x : bounds.y;
+    const crossEdge = horizontal ? bounds.y : bounds.x;
+    if (span <= 0) return;
+    const speed = WIND_PARTICLE_BASE_SPEED + zone.strength * intensity * WIND_PARTICLE_SPEED_FACTOR;
+    const count = Math.round(3 + intensity * 6);
+    const length = 10 + intensity * 14 + Math.min(1, zone.strength / 800) * 6;
+    context.save();
+    context.lineCap = "round";
+    for (let index = 0; index < count; index += 1) {
+        const seed = (((index * 0.37 + 0.13) % 1) + 1) % 1;
+        const progress = (((seed + (timeSeconds * speed) / span) % 1) + 1) % 1;
+        const alongPos = alongEdge + (sign > 0 ? progress * span : (1 - progress) * span);
+        const crossPos = crossEdge + ((index * 0.61 + 0.29) % 1) * crossSpan;
+        const alpha = (0.1 + 0.26 * intensity) * (0.5 + 0.5 * ((index % 3) / 3));
+        const x = horizontal ? alongPos : crossPos;
+        const y = horizontal ? crossPos : alongPos;
+        const dx = horizontal ? sign * length : 0;
+        const dy = horizontal ? 0 : sign * length;
+        context.strokeStyle = `rgba(226, 232, 240, ${alpha})`;
+        context.lineWidth = 1.5;
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(x + dx, y + dy);
+        context.stroke();
+    }
+    context.restore();
+}
+
+export class WindParticleRenderer {
+    draw({ context, scene, presentationTimeSeconds = 0 }) {
+        const windZones = scene.world.windZones ?? [];
+        const windStates = scene.windStates ?? [];
+        const stateById = new Map(windStates.map((state) => [state.id, state]));
+        for (const zone of windZones) {
+            const intensity = windVisualIntensity(zone, stateById.get(zone.id) ?? null);
+            drawWindStreaks(context, zone, intensity, presentationTimeSeconds);
+        }
+    }
+}
+
 export class AuthoredWorldObjectRenderer {
     constructor({ presentationCatalog = DEFAULT_WORLD_OBJECT_MOCK_CATALOG } = {}) {
         this.presentationCatalog = presentationCatalog;
     }
 
-    draw({ context, scene, viewport, renderStats }) {
+    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
         const objects = (scene.world.objects ?? []).filter(
             (object) => this.presentationFor(object)?.renderMode === "mock-shape"
         );
@@ -174,7 +245,16 @@ export class AuthoredWorldObjectRenderer {
             const style = this.presentationFor(object);
             return isVisible(viewport, worldObjectWorldBounds(object, style));
         });
-        for (const object of visible) this.drawObject(context, object, scene);
+        const elapsedSeconds = Number.isFinite(scene.tick) ? scene.tick / 120 : presentationTimeSeconds;
+        const windZones = scene.world.windZones ?? [];
+        const windStates = scene.windStates ?? [];
+        const renderArgs = {
+            presentationTimeSeconds,
+            elapsedSeconds,
+            windZoneById: new Map(windZones.map((zone) => [zone.id, zone])),
+            windStateById: new Map(windStates.map((state) => [state.id, state]))
+        };
+        for (const object of visible) this.drawObject(context, object, scene, renderArgs);
         const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
         renderStats?.recordCollection("worldObjects", objects.length, visible.length);
         renderStats?.recordCollection("recoveryPoints", recoveryPoints.length, 0);
@@ -184,7 +264,7 @@ export class AuthoredWorldObjectRenderer {
         return worldObjectPresentation(this.presentationCatalog, object.presentationId);
     }
 
-    drawObject(context, object, scene) {
+    drawObject(context, object, scene, renderArgs = {}) {
         const style = this.presentationFor(object);
         const progress = scene.worldProgress;
         const objectiveComplete = object.objectiveId
@@ -224,7 +304,11 @@ export class AuthoredWorldObjectRenderer {
             } else if (object.kind === "grapple-landmark") {
                 this.drawGrappleLandmark(context, style);
             } else if (object.kind === "wind-source") {
-                this.drawWindSource(context, style);
+                this.drawWindSource(context, style, {
+                    zone: renderArgs.windZoneById?.get(object.windZoneId) ?? null,
+                    state: renderArgs.windStateById?.get(object.windZoneId) ?? null,
+                    elapsedSeconds: renderArgs.elapsedSeconds ?? 0
+                });
             } else if (object.kind === "test-target") {
                 this.drawTestTarget(context, style, {
                     contactRegistered:
@@ -352,22 +436,63 @@ export class AuthoredWorldObjectRenderer {
         context.fillRect(-4, -4, 8, 8);
     }
 
-    drawWindSource(context, style) {
+    drawWindSource(context, style, { zone = null, state = null, elapsedSeconds = 0 } = {}) {
         const radius = style.radius;
-        context.fillStyle = "#111827";
-        context.fillRect(-radius, -radius, radius * 2, radius * 2);
-        context.strokeRect(-radius, -radius, radius * 2, radius * 2);
-        for (const [x, y, width, height] of [
-            [-3, -radius + 5, 6, radius - 7],
-            [3, 2, radius - 7, 6],
-            [-3, 3, 6, radius - 7],
-            [-radius + 5, -3, radius - 7, 6]
-        ]) {
-            context.fillStyle = style.color;
-            context.fillRect(x, y, width, height);
+        const intensity = windVisualIntensity(zone, state);
+        const bladeAngle = windBladePhase(zone, elapsedSeconds) * FAN_BLADE_SPEED;
+
+        context.fillStyle = "#0f172a";
+        context.strokeStyle = "#334155";
+        context.lineWidth = 6;
+        context.beginPath();
+        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+
+        context.strokeStyle = "rgba(251, 146, 60, 0.55)";
+        context.lineWidth = 3;
+        for (let index = 0; index < 8; index += 1) {
+            const angle = (index * Math.PI * 2) / 8;
+            context.beginPath();
+            context.moveTo(Math.cos(angle) * (radius - 3), Math.sin(angle) * (radius - 3));
+            context.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+            context.stroke();
         }
-        context.fillStyle = "#e0f2fe";
-        context.fillRect(-4, -4, 8, 8);
+
+        context.save();
+        context.rotate(bladeAngle);
+        context.fillStyle = `rgba(148, 163, 184, ${0.55 + intensity * 0.4})`;
+        for (let index = 0; index < 4; index += 1) {
+            context.rotate(Math.PI / 2);
+            context.beginPath();
+            context.moveTo(0, -radius * 0.12);
+            context.lineTo(radius * 0.8, -radius * 0.05);
+            context.lineTo(radius * 0.8, radius * 0.05);
+            context.lineTo(0, radius * 0.12);
+            context.closePath();
+            context.fill();
+        }
+        context.restore();
+
+        if (intensity > 0) {
+            context.strokeStyle = `rgba(125, 211, 252, ${0.16 + intensity * 0.3})`;
+            context.lineWidth = 2;
+            context.beginPath();
+            context.arc(0, 0, radius * 0.62, 0, Math.PI * 2);
+            context.stroke();
+        }
+
+        context.fillStyle = "#1f2937";
+        context.strokeStyle = "#475569";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.arc(0, 0, radius * 0.2, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.fillStyle = intensity > 0 ? "#67e8f9" : "#64748b";
+        context.beginPath();
+        context.arc(0, 0, radius * 0.08, 0, Math.PI * 2);
+        context.fill();
     }
 
     drawAugmentNode(context, style, bounds, objectiveComplete) {

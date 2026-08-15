@@ -1,5 +1,9 @@
 const AIM_LINE_LENGTH = 520;
 
+export function isPatrolDrone(enemy) {
+    return enemy?.enemyType === "patrol-drone-t1";
+}
+
 export function enemyAimLine(enemy) {
     if ((enemy.attackState !== "track" && enemy.attackState !== "lock") || !enemy.aimDirection) return null;
     const locked = enemy.attackState === "lock";

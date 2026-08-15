@@ -15,7 +15,7 @@ import {
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
-import { advanceAuthoredCamera } from "./camera/AuthoredCameraDirector.js";
+import { advanceAuthoredCamera, localTriggerObjects } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 
 function renderPlayer(state, predicted = null) {
@@ -345,7 +345,8 @@ export class MultiplayerGameApp {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
             currentAreaLocalY: cameraShot.localY,
-            events: [...events, ...predictedEvents]
+            events: [...events, ...predictedEvents],
+            triggers: localTriggerObjects(authoredWorld, cameraShot.areaId)
         });
         this.audioBindings?.presentFrame({
             scene: this.createAudioContext(

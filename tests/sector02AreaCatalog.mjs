@@ -48,7 +48,7 @@ export function run() {
 
     const specializationArea = SECTOR_02_AREA_CATALOG.areas[2];
     const specializationNode = specializationArea.objects.find(({ id }) => id.endsWith(":specialization-node"));
-    assert.equal(specializationArea.objectives[0].type, "interact-choice");
+    assert.equal(specializationArea.objectives[0].type, "interact");
     assert.equal(specializationNode.selectionPool, "TBD");
     assert.equal(specializationNode.requiresFoundation, true);
 
