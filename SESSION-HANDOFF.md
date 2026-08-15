@@ -41,6 +41,7 @@
 - game-only 서버는 기본적으로 공식 GitHub Pages Origin만 WebSocket에 허용하며 개발용 정적 통합 서버는 이 제한을 강제하지 않는다.
 - `npm run publish:multiplayer`는 컴퓨터 재시작 뒤 운영자가 한 명령으로 상시 게임 서버와 외부 공유 터널을 다시 열고, 새 공개 주소를 Pages 설정에 반영해 배포까지 이어가는 운영 경로를 제공한다. 실행 전 clean `main` 전제를 확인하고 `index.html` 메타 값만 교체한 단일 커밋을 `origin main`에 push한 뒤 Pages 노출·공개 smoke를 검증하며, push 후 실패는 서버/터널을 유지한 채 안내만 출력한다. 기존 `share:multiplayer`는 로컬 정적 화면까지 함께 공유하는 개발용 경로로 유지한다. 상세 절차는 `docs/multiplayer-sharing.md`를 따른다.
 - AI 도구 설정 동기화는 `vsync`(`@nicepkg/vsync`)를 사용한다. 스킬·MCP의 단일 소스는 `.codex/skills/`와 `.codex/config.toml`이며 `vsync sync`가 `.opencode/skills/`, `.cursor/skills/`, `opencode.json`, `.cursor/mcp.json`을 포맷 변환과 함께 생성·갱신한다. 대상 도구 파일은 직접 편집하지 않는다. 반복 규칙은 `docs/development-rules.md`의 **AI 도구 설정 동기화(vsync)**를 따른다. opencode는 재시작하면 `opencode.json`의 Discord MCP와 `.opencode/skills/`를 읽는다.
+- 싱글 `GameApp` 렌더는 `FixedStepRunner`가 계산한 alpha로 이전·현재 권위 스냅샷을 보간해 표시한다(`src/render/interpolateRenderSnapshot.js`). 디스플레이 재생률과 120Hz 시뮬레이션 단계가 어긋나도 미세 저더 없이 표시되며, 리셋·런 상태 전이·96px 초과 순간이동(포탈·체크포인트 부활)은 보간하지 않고 최신 상태를 그린다. 멀티 로컬 플레이어는 소유자 예측·보정 계약이 있으므로 이 보간을 적용하지 않는다.
 
 실제 조작 기반 전체 등반 검사, 서로 다른 기기의 장시간 2인 플레이테스트와 고정 HTTPS/WSS 운영 주소 배포는 아직 완료하지 않았다.
 
