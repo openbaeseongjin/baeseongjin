@@ -229,7 +229,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 렌더 성능 진단은 프레임 간격·draw 시간·fixed-step drop·CSS/backing 크기·유효 DPR·하위 collection의 `drawn/total`을 관찰할 수 있어야 한다. 진단 값은 읽기 전용이며 물리 120Hz, 네트워크 전송률, gameplay state 또는 자동 품질 전환의 입력으로 사용하지 않는다.
 - 여러 환경 atlas는 캐릭터와 분리된 `environment-asset-format.md` 계약으로 로드한다. atlas 실패는 backdrop·terrain·decoration 단위로만 fallback하고 pending을 실패로 고정하지 않으며, loader·schema·example·validator 중 하나를 바꾸면 나머지 계약과 component별 실패 테스트를 함께 갱신한다.
 - 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
-- 시나리오 문서용 이미지는 `bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`의 생성 전 Runtime 확인, 대표 Camera Shot, Player 상대 크기, 한 줄 live Rope, 정확한 오브젝트 수와 상태 검수를 통과해야 한다. 전체 경로·좌표는 Approved Blockout이 소유하며 `RETIRED`·`PENDING REGENERATION` 이미지를 다음 생성의 Style Anchor로 연쇄 사용하지 않는다.
+- 시나리오 문서용 이미지는 `bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`의 생성 전 Runtime 확인, 대표 Camera Shot, Player 상대 크기, 한 줄 live Rope, 정확한 오브젝트 수와 상태 검수를 통과해야 한다. 전체 경로·좌표의 권위는 Approved Blockout이 소유하지만 선택한 Camera Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 이미지에서도 보존한다. 생성 구도를 위해 Gameplay Geometry를 이동·확대·병합하지 않으며 `RETIRED`·`PENDING REGENERATION` 이미지를 다음 생성의 Style Anchor로 연쇄 사용하지 않는다.
 - collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
 - 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 테스트 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
 - 렌더러 변경에는 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 검증하는 테스트를 둔다.

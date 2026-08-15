@@ -1,18 +1,18 @@
 # 시나리오 아트 생성 규격
 
-*CURRENT RUNTIME ALIGNMENT · REV 1.0*
+*CURRENT RUNTIME ALIGNMENT · REV 1.1*
 
-이 문서는 시나리오용 `Scenario Art Reference`를 같은 게임의 실제 플레이 화면처럼 일관되게 만들기 위한 공통 기준이다. 생성 이미지는 레벨 좌표를 결정하는 설계도가 아니며, 현재 개발 상태에 맞춘 카메라 한 장면에서 분위기와 Gameplay 정보 위계를 검증하는 문서 자료다.
+이 문서는 시나리오용 `Scenario Art Reference`를 같은 게임의 실제 플레이 화면처럼 일관되게 만들기 위한 공통 기준이다. 생성 이미지는 레벨 좌표를 결정하는 설계도가 아니지만, 선택한 카메라 한 장면에 보이는 발판·장애물의 구조 관계를 현재 Runtime과 다르게 재배치해서도 안 된다. 이미지의 역할은 고정된 Gameplay 구조 위에서 분위기와 정보 위계를 검증하는 것이다.
 
 ## 1. 적용 범위와 산출물 구분
 
 | 산출물 | 결정하는 것 | 결정하지 않는 것 |
 | --- | --- | --- |
-| `Scenario Art Reference` | 실제 플레이 카메라 한 장면의 분위기, 크기 관계, 명도·색·정보 위계 | Collision, 전체 경로, 정확한 좌표, Runtime 자산 |
+| `Scenario Art Reference` | 실제 플레이 카메라 한 장면의 분위기, 크기 관계, 명도·색·정보 위계, 보이는 Gameplay Geometry의 좌우·상하 관계와 상대 폭 | Collision 권위, 전체 경로, World 좌표 원본, Runtime 자산 |
 | `Approved Blockout` | 전체 Stage Geometry, 좌표, 경로, LOS·Wind·Recovery·목표 배치 | 최종 조명, 재질, 캐릭터 디자인 |
 | Runtime asset | 검증된 Sprite·Atlas·Manifest와 교체 가능한 표현 package | 시나리오의 진행·물리·완료 조건 |
 
-`Scenario Art Reference`에 전체 경로 선과 좌표 도식을 섞지 않는다. 전체 맵을 설명해야 하면 별도의 `Approved Blockout`을 수정한다. 생성된 PNG를 통이미지 배경이나 충돌 지형으로 사용하지 않는다.
+`Scenario Art Reference`에 전체 경로 선과 좌표 도식을 섞지 않는다. 전체 맵을 설명해야 하면 별도의 `Approved Blockout`을 수정한다. 생성된 PNG를 통이미지 배경이나 충돌 지형으로 사용하지 않지만, 화면에 보이는 Collision Surface와 장애물의 구조 관계는 Approved Blockout을 따라야 한다.
 
 ## 2. 생성 전 자료 우선순위
 
@@ -84,6 +84,15 @@ Purple·Amber·Red를 장식용으로 넓게 퍼뜨리지 않는다. 각 색은 
 - 전경 구조물이 Player, 현재 Anchor, 다음 의사결정 지점을 가리지 않아야 한다.
 - 모바일 화면 검수는 별도 Runtime 캡처에서 수행한다. 문서용 가로 이미지를 세로 모바일 화면인 것처럼 압축하지 않는다.
 
+### Camera-space Geometry 고정 계약
+
+- 생성 전에 선택한 Camera Zone에서 보이는 Gameplay Surface와 장애물만 추린 구조 가이드를 만든다.
+- 구조 가이드는 Area Catalog와 Approved Blockout의 좌우·상하 순서, 상대 폭, 겹침과 빈 공간을 그대로 투영한다. 새 좌표의 권위 자료가 아니라 기존 좌표를 화면으로 옮긴 검수 입력이다.
+- Platform, Recovery, Safe Deck, Wall, Cover, Overhang, Crossbeam과 Gate 바닥은 구도를 위해 이동·확대·축소·병합·분할하지 않는다.
+- Player와 움직이는 위협의 순간 위치만 선택한 Gameplay 상태 안에서 달라질 수 있다.
+- 비충돌 배경 Catwalk·Pipe·Frame은 Gameplay Surface와 같은 밝은 Edge나 착지 가능한 상면을 갖지 않게 한다.
+- 생성 후에는 픽셀 단위 World 좌표 복원이 아니라 `좌우 순서`, `상하 순서`, `상대 폭`, `개수`, `기능 실루엣` 다섯 항목을 승인 Blockout과 대조한다.
+
 ## 6. Rope와 Anchor 의미 계약
 
 - 한 프레임에는 **현재 Player와 현재 Attach Anchor를 잇는 살아 있는 Rope 한 줄만** 표시한다.
@@ -113,7 +122,7 @@ Stage role: <one sentence>
 
 REFERENCE ROLES
 - Sector shared image: environment mood, palette and depth only
-- Approved Blockout: layout semantics only, not visual style
+- Approved Blockout or camera-space structure guide: immutable left/right and up/down placement, relative width and visible geometry count; not visual style
 - Runtime/Production Alignment: exact object count, state and forbidden elements
 - Do not use retired or pending-regeneration images as references
 
@@ -132,6 +141,7 @@ EXACT GAMEPLAY CONTENT
 - exactly one live cyan rope segment from player hand/device to <current anchor ID>
 - next decision point: <anchor, recovery, cover, gate, panel, node>
 - exact Stage objects and states: <list with counts>
+- visible Gameplay Geometry: <surface/obstacle IDs, left/right and up/down relation, relative width>
 - implemented/pending distinction: <what may appear and what must not appear>
 
 FORBIDDEN
@@ -140,7 +150,9 @@ FORBIDDEN
 - no extra player, enemy, anchor, weapon, hazard or story object
 - no invented costume, oversized player or changed body proportions
 - no retired Stage elements
-- no geometry copied as authoritative collision data
+- do not move, enlarge, merge or split visible Gameplay Geometry for composition
+- no invented platform, cover, wall or obstacle
+- final art is not authoritative collision data
 ```
 
 ## 8. 생성 전 확인표
@@ -149,6 +161,8 @@ FORBIDDEN
 - [ ] 현재 Area Catalog의 Area ID·Camera Zone·Stable ID를 확인했다.
 - [ ] Runtime과 문서의 구현·미구현 상태가 일치한다.
 - [ ] 대표 Camera Zone 하나를 선택했다.
+- [ ] Camera Zone에 보이는 발판·장애물의 구조 가이드를 Runtime과 Approved Blockout에서 만들었다.
+- [ ] 구조 가이드의 좌우·상하 순서, 상대 폭과 개수를 프롬프트에 적었다.
 - [ ] 화면에 보일 Player·Anchor·Enemy·Node·Gate·Panel의 정확한 수를 적었다.
 - [ ] 현재 Rope 상태와 연결 대상 Anchor를 하나 정했다.
 - [ ] Stage 금지 요소를 프롬프트에 명시했다.
@@ -165,6 +179,8 @@ FORBIDDEN
 - [ ] 살아 있는 Rope가 정확히 한 줄이며 Player와 현재 Anchor만 잇는다.
 - [ ] Anchor·Enemy·Node 등 오브젝트 수와 상태가 프롬프트와 같다.
 - [ ] 다음 행동 지점이 배경보다 먼저 읽힌다.
+- [ ] 발판·장애물의 좌우·상하 순서, 상대 폭과 개수가 구조 가이드와 같다.
+- [ ] 충돌 Geometry와 비충돌 배경 구조가 외형과 명도로 구분된다.
 - [ ] Sector의 팔레트·구조·깊이가 공용 환경 기준과 같다.
 - [ ] 전체 경로 선·라벨·좌표·편집기 표식이 없다.
 - [ ] 미구현 기능이 이미 완성된 것처럼 보이지 않는다.
@@ -194,13 +210,15 @@ REV 1.0 작성 시점에는 이 표가 Sector 01의 1-1~1-4만 다뤘다. Sector
 | 자료 | 현재 판정 | 다음 조치 |
 | --- | --- | --- |
 | Sector 01 공용 배경 | `APPROVED MOOD REFERENCE` | 환경 분위기에만 계속 사용 |
-| 1-1 `04_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C04 Open Swing의 Player 크기·한 줄 live Rope·C/P3/R3 위계 기준 |
-| 1-2 `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C02 First Handoff의 Player 크기·A/B·B live Rope·P1·정지 Lift 위계 기준 |
+| 1-1 `04_scenario_art_reference.png` | `RETIRED / STRUCTURE MISMATCH` | R3 상대 폭과 P3 배치가 Blockout과 달라 새 구조 정합 이미지로 교체 |
+| 1-1 `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C04의 P3 위·짧은 R3 왼쪽 아래·C 오른쪽 아래 구조 기준 |
+| 1-2 `05_scenario_art_reference.png` | `RETIRED / STRUCTURE MISMATCH` | P1이 A보다 아래에 보여 C02 Blockout의 수직 관계와 달라 교체 |
+| 1-2 `06_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C02의 B 위·P1 중간·A 아래 구조와 한 줄 B live Rope 기준 |
 | 1-3 `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | live Rope와 경로 도식을 분리해 재생성 |
 | 1-4 `01_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | Player 크기·실루엣과 Anchor 연결 의미를 통일해 재생성 |
 | 1-5 ~ 1-8 | `NEEDED` | `images/` 폴더 자체가 없음. Approved Blockout도 아직 없어([1-5](./1/1-5/PRODUCTION-ALIGNMENT.md)~[1-8](./1/1-8/PRODUCTION-ALIGNMENT.md) 판정 참고) Art Reference보다 Blockout 제작이 선행 과제다 |
 
-남은 재생성 순서는 Player 크기 편차가 가장 큰 `1-4 → 1-3`을 권장하며, 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다. 1-5~1-8은 Approved Blockout 확정이 먼저다.
+1-1과 1-2의 구조 정합 이미지 교체를 완료했다. 다음은 1-4, 1-3 순서로 같은 절차를 적용하되, 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다. 1-5~1-8은 Approved Blockout 확정이 먼저다.
 
 ### Sector 02
 
@@ -226,4 +244,4 @@ Blockout·Runtime이 이미 있는 Sector 01의 재생성 대상(`1-3`, `1-4`)�
 - 먼저 저해상도 또는 1장 생성으로 구도·수·Rope 의미를 확인하고, 통과한 경우에만 최종 해상도를 만든다.
 - 실패 원인을 한 번에 하나씩 수정한다. 전체 프롬프트를 매번 새로 쓰지 않는다.
 - 공용 환경 레퍼런스와 고정 Player 설명만 유지하고, 직전 생성 이미지를 계속 추가해 입력을 비대하게 만들지 않는다.
-- 구도 검증은 Approved Blockout과 Runtime 캡처로 먼저 끝내고 이미지 생성으로 좌표 문제를 해결하려 하지 않는다.
+- Approved Blockout과 Runtime에서 구조 가이드를 한 번 만든 뒤 생성 입력으로 재사용한다. ImageGen에는 발판·장애물 재배치가 아니라 고정 구조 위 재질·조명·배경 표현만 맡긴다.

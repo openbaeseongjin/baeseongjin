@@ -36,7 +36,7 @@
 
 - 시나리오 이미지를 생성·편집하기 전에 `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`, 해당 Sector README, Stage README와 `PRODUCTION-ALIGNMENT.md`를 전부 읽고 현재 Area Catalog의 Area ID·Camera Zone·Stable ID·오브젝트 수와 구현 상태를 확인한다.
 - 문서와 Runtime이 다르면 이미지 생성을 멈추고 먼저 둘을 정렬한다. `RETIRED`, `RETIRED PARTIAL`, `PENDING REGENERATION` 이미지는 생성 입력이나 구현·외주·검수 근거로 사용하지 않는다.
-- `Scenario Art Reference`는 대표 Gameplay Camera Shot 한 장으로 만들고, 정확한 좌표·전체 경로·LOS·Wind Zone은 `Approved Blockout`이 소유한다. 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시하며 다른 Anchor를 Polyline·삼각형·네트워크로 연결하지 않는다.
+- `Scenario Art Reference`는 대표 Gameplay Camera Shot 한 장으로 만들고, 정확한 좌표·전체 경로·LOS·Wind Zone의 권위는 `Approved Blockout`이 소유한다. 다만 선택한 Shot에 보이는 발판·벽·Cover·Overhang·Crossbeam은 Blockout과 Runtime의 좌우·상하 관계, 상대 폭과 개수를 그대로 유지하며 구도를 위해 이동·확대·병합하지 않는다. 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시하며 다른 Anchor를 Polyline·삼각형·네트워크로 연결하지 않는다.
 - 생성 전후에는 기준 문서의 확인표를 수행한다. 사용한 Stage·Camera Zone·정확한 오브젝트 수·금지 요소·출력 경로·이미지 상태를 Stage 문서에 기록하고, 생성된 PNG를 통이미지 Runtime 배경이나 Collision으로 사용하지 않는다.
 - 사용자가 프로젝트용으로 승인한 생성 이미지는 `$CODEX_HOME`의 생성 폴더나 대화 미리보기에만 남기지 않는다. 해당 Stage `images/`에 복사하고 생성 기록·상태 문서를 같은 커밋과 Pull Request에 포함해 `main`에 병합한다.
 - 직전 Stage 생성물을 연쇄 Style Anchor로 추가하지 않는다. 공용 Sector 환경 기준과 고정 Player 규격을 재사용하고, Player Character Master가 승인되면 기준 문서를 같은 변경에서 갱신한다.
