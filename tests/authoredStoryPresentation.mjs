@@ -430,4 +430,132 @@ export function run() {
         ],
         ["RESIDENTIAL BLOCKS", "12–18"]
     );
+
+    const scannerGallery = new AuthoredStoryPresentation();
+    const accessControlPanel = Object.freeze({
+        cueIds: Object.freeze(["sector-03-02:access-control"]),
+        bounds: Object.freeze({ x: -400, y: -208, width: 192, height: 64 })
+    });
+    scannerGallery.update(0, { currentAreaId: "sector-03-02", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            scannerGallery.update(0, {
+                currentAreaId: "sector-03-02",
+                currentAreaLocalX: -304,
+                currentAreaLocalY: -184,
+                triggers: [accessControlPanel]
+            }).title,
+            scannerGallery.snapshot().detail
+        ],
+        ["COMMERCIAL ACCESS CONTROL", "EMPLOYEE VERIFIED"]
+    );
+    assert.deepEqual(
+        [
+            scannerGallery.update(1.1, {
+                currentAreaId: "sector-03-02",
+                currentAreaLocalX: -304,
+                currentAreaLocalY: -184
+            }).title,
+            scannerGallery.snapshot().detail
+        ],
+        ["ROUTE AUTHORIZATION", "INVALID"]
+    );
+
+    const priorityConcourse = new AuthoredStoryPresentation();
+    const accessDirectory = Object.freeze({
+        cueIds: Object.freeze(["sector-03-07:access-directory"]),
+        bounds: Object.freeze({ x: -96, y: -1104, width: 192, height: 64 })
+    });
+    priorityConcourse.update(0, { currentAreaId: "sector-03-07", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            priorityConcourse.update(0, {
+                currentAreaId: "sector-03-07",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -1080,
+                triggers: [accessDirectory]
+            }).title,
+            priorityConcourse.snapshot().detail
+        ],
+        ["UPPER CONCOURSE ACCESS CONTROL", "SERVICE CLASS CONTROL"]
+    );
+    assert.deepEqual(
+        [
+            priorityConcourse.update(1.1, {
+                currentAreaId: "sector-03-07",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -1080
+            }).title,
+            priorityConcourse.snapshot().detail
+        ],
+        ["STANDARD / PREMIUM PROFILES", "ENABLED"]
+    );
+
+    const upperMarket = new AuthoredStoryPresentation();
+    const evacuationArchive = Object.freeze({
+        cueIds: Object.freeze(["sector-03-08:evacuation-archive"]),
+        bounds: Object.freeze({ x: -224, y: -1488, width: 192, height: 64 })
+    });
+    const accessArchive = Object.freeze({
+        cueIds: Object.freeze(["sector-03-08:access-archive"]),
+        bounds: Object.freeze({ x: 32, y: -1488, width: 192, height: 64 })
+    });
+    upperMarket.update(0, { currentAreaId: "sector-03-08", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            upperMarket.update(0, {
+                currentAreaId: "sector-03-08",
+                currentAreaLocalX: -128,
+                currentAreaLocalY: -1464,
+                triggers: [evacuationArchive, accessArchive]
+            }).title,
+            upperMarket.snapshot().detail
+        ],
+        ["EVACUATION TRANSFER ARCHIVE", "GROUP A · TRANSFER COMPLETE"]
+    );
+    assert.deepEqual(
+        [
+            upperMarket.update(1.3, {
+                currentAreaId: "sector-03-08",
+                currentAreaLocalX: -128,
+                currentAreaLocalY: -1464
+            }).title,
+            upperMarket.snapshot().detail
+        ],
+        ["GROUP B", "TRANSFER COMPLETE"]
+    );
+    assert.deepEqual(
+        [
+            upperMarket.update(1.1, {
+                currentAreaId: "sector-03-08",
+                currentAreaLocalX: -128,
+                currentAreaLocalY: -1464
+            }).title,
+            upperMarket.snapshot().detail
+        ],
+        ["GROUP C", "TRANSFER SUSPENDED"]
+    );
+    assert.deepEqual(
+        [
+            upperMarket.update(1.2, {
+                currentAreaId: "sector-03-08",
+                currentAreaLocalX: 128,
+                currentAreaLocalY: -1464,
+                triggers: [evacuationArchive, accessArchive]
+            }).title,
+            upperMarket.snapshot().detail
+        ],
+        ["UPPER COMMERCIAL ACCESS ARCHIVE", "SERVICE CLASS CONTROL ENABLED"]
+    );
+    assert.deepEqual(
+        [
+            upperMarket.update(1.3, {
+                currentAreaId: "sector-03-08",
+                currentAreaLocalX: 128,
+                currentAreaLocalY: -1464
+            }).title,
+            upperMarket.snapshot().detail
+        ],
+        ["ACCESS TIER CONTROL", "ENABLED"]
+    );
 }
