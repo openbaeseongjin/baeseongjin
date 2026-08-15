@@ -5,7 +5,7 @@ import { SECTOR_04_AREA_CATALOG } from "../src/game/world/areas/sector04/Sector0
 
 export function run() {
     assert.deepEqual(validateAreaCatalog(SECTOR_04_AREA_CATALOG), { valid: true, issues: [] });
-    assert.equal(SECTOR_04_AREA_CATALOG.areas.length, 2);
+    assert.equal(SECTOR_04_AREA_CATALOG.areas.length, 3);
 
     const area = SECTOR_04_AREA_CATALOG.areas[0];
     assert.equal(area.id, "sector-04-01");
@@ -34,8 +34,9 @@ export function run() {
     assert.equal(cutterArea.id, "sector-04-02");
     assert.equal(cutterArea.name, "CUTTER LINE");
     assert.deepEqual(cutterArea.bounds, { width: 1280, height: 1312 });
-    assert.equal(cutterArea.nextAreaId, null, "4-2 must stay a content boundary until 4-3 is authored");
-    assert.equal(cutterArea.gate.completionMode, "content-boundary");
+    assert.equal(cutterArea.nextAreaId, "sector-04-03");
+    assert.equal(cutterArea.gate.nextAreaId, "sector-04-03");
+    assert.equal(cutterArea.gate.completionMode, undefined);
     assert.deepEqual(cutterArea.windZones, []);
     assert.equal(cutterArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 5);
 
@@ -45,13 +46,32 @@ export function run() {
     assert.deepEqual(cutterSentry.rules, ["cutter-fire", "target-lock-cycle", "activation-band-only"]);
     assert.ok(cutterSentry.rules.includes("cutter-fire"), "the Cutter Sentry must opt in to rope cutting");
 
+    const freightArea = SECTOR_04_AREA_CATALOG.areas[2];
+    assert.equal(freightArea.id, "sector-04-03");
+    assert.equal(freightArea.name, "FREIGHT BYPASS");
+    assert.deepEqual(freightArea.bounds, { width: 1472, height: 1472 });
+    assert.equal(freightArea.nextAreaId, null, "4-3 must stay a content boundary until 4-4 is authored");
+    assert.equal(freightArea.gate.completionMode, "content-boundary");
+    assert.equal(freightArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 7);
+
+    const wakeZone = freightArea.windZones[0];
+    assert.equal(wakeZone.id, "sector-04-03:freight-wake");
+    assert.equal(wakeZone.mode, "pulsed");
+    assert.equal(wakeZone.strength, 360);
+    assert.deepEqual(wakeZone.cycle, { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 });
+    assert.equal(wakeZone.falloff, undefined, "Sector 04 Transit Wake must rely on defaultFalloff 0");
+
+    const freightSentry = freightArea.objects.find(({ id }) => id.endsWith(":cutter-sentry-01"));
+    assert.ok(freightSentry.rules.includes("cutter-fire"));
+
     const world = assembleAuthoredWorld(SECTOR_04_AREA_CATALOG, { seed: 1, floorY: 560 });
-    assert.equal(world.areas.length, 2);
-    assert.equal(world.gates.length, 2);
-    assert.equal(world.windZones.length, 0);
+    assert.equal(world.areas.length, 3);
+    assert.equal(world.gates.length, 3);
+    assert.equal(world.windZones.length, 1);
     assert.equal(world.gates[0].nextAreaId, "sector-04-02");
-    assert.equal(world.gates[1].nextAreaId, null);
-    assert.equal(world.gates[1].completionMode, "content-boundary");
+    assert.equal(world.gates[1].nextAreaId, "sector-04-03");
+    assert.equal(world.gates[2].nextAreaId, null);
+    assert.equal(world.gates[2].completionMode, "content-boundary");
     assert.deepEqual(world.areas[0].entry, { id: "sector-04-01:entry", x: -640, y: 528 });
     assert.deepEqual(world.areas[0].exit, { id: "sector-04-01:exit", x: 672, y: -784 });
     assert.equal(
@@ -63,4 +83,5 @@ export function run() {
         "target-lock-cycle",
         "activation-band-only"
     ]);
+    assert.equal(world.enemySpawns.filter(({ areaId }) => areaId === "sector-04-03").length, 1);
 }
