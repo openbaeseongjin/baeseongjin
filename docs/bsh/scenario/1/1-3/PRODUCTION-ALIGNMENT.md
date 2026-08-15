@@ -1,6 +1,6 @@
 # SECTOR 01-3 — PRODUCTION ALIGNMENT
 
-*IMPLEMENTATION · CAMERA · COMBAT HANDOFF · REV 1.1*
+*IMPLEMENTATION · CAMERA · COMBAT HANDOFF · REV 1.2*
 
 본 문서는 [1-3 시나리오](./README.md) REV 3.0을 현재 런타임으로 옮기는 제작 계약이다. 원문 수치는 플레이테스트 전 `BLOCKOUT HYPOTHESIS`이며, 아래 stable ID·상태·좌표 기준을 그래픽·오디오 담당자가 이어받는다.
 
@@ -16,17 +16,18 @@
 | Story Presentation | `IMPLEMENTED` | 개인 화면에 1회 표시, 이동 입력을 막지 않음 |
 | Camera Zones | `IMPLEMENTED PROTOTYPE` | 로컬 플레이어 위치로 Shot 선택, desktop/mobile 공용 데이터 사용 |
 | 기존 PNG 2개 | `RETIRED` | 이전 `COOLING SHAFT` 이미지라 1-3 구현·외주·검수 기준으로 사용 금지 |
-| `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | 분위기와 1-Sentry 위계만 참고; live Rope와 경로 도식을 분리한 대표 Shot으로 교체 |
+| `03_scenario_art_reference.png` | `RETIRED / ROPE-ROUTE MISMATCH` | live Rope와 전체 경로처럼 보이는 선이 함께 있어 이력 보존만 하고 제작 입력으로 사용 금지 |
 | `04_approved_blockout.svg` | `APPROVED BLOCKOUT` | 현재 Runtime Geometry·Route·LOS·Scanner·Gate의 좌표 기준 |
+| `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | Route Choice Camera의 B/C/D·Safe/Recovery·두 Cover·1-Sentry 구조와 Player→C live Rope 한 줄 기준 |
 | 정식 그래픽·오디오 | `PENDING` | stable state/cue ID를 유지한 채 runtime package와 binding만 교체 |
 
 ## 2. 문서 이미지와 자료 우선순위
 
 ### Scenario Art Reference
 
-![1-3 Scenario Art Reference](./images/03_scenario_art_reference.png)
+![1-3 Scenario Art Reference](./images/05_scenario_art_reference.png)
 
-`TEMPORARY / PENDING REGENERATION`: 한 기의 오른쪽 벽 Sentry, 얇은 Red Telegraph, 작은 Player와 Red Scarf, Cyan Anchor, Safe Cover, Recovery, 상단 Gate의 위계만 참고한다. live Rope와 전체 경로처럼 보이는 선을 새 이미지에 함께 복제하지 않는다. Platform 위치는 구도 표현이며 물리 좌표가 아니다.
+`APPROVED ART REFERENCE`: Route Choice Camera, local Player Y `-800~-544`, Desktop Zoom `0.88`, Player screen Y ratio `0.62`를 사용한다. D는 위, C는 왼쪽 중단, B는 아래에 있고 Safe Ledge 오른쪽 끝에서 Safe Cover가 상승한다. R1은 아래 중단·오른쪽, Upper Cover는 위 중앙, Sentry T1은 오른쪽 벽에 있다. 약 48px Player는 C 오른쪽 아래에서 C에만 live Cyan Rope 한 줄을 연결하며, Sentry의 얇은 Red TRACK Telegraph 한 줄과 색·방향으로 분리된다. P0·P1·P4·A·Scanner·Panel·Gate·Projectile·경로선은 Camera 밖 또는 Shot 상태 밖으로 제외한다.
 
 ### Approved Blockout
 
@@ -34,10 +35,10 @@
 
 1. 학습 목표·금지 요소·Story 의미는 [시나리오 README](./README.md)가 결정한다.
 2. 좌표·Stable ID·Sentry 상태는 현재 `Sector01AreaCatalog.js`와 이 Blockout이 함께 결정한다.
-3. 현재 Art Reference는 색, 조명과 일부 Gameplay 위계만 임시 참고하며 Player 크기·Rope 연결·Camera 구도 기준으로 사용하지 않는다.
-4. `01_swing_line.png`, `02_layout.png`는 이력용이며 제작·외주·검수 자료로 전달하지 않는다.
+3. `05_scenario_art_reference.png`는 대표 Camera의 재질·조명·가독성 기준이며 전체 좌표와 Collision은 Blockout을 우선한다.
+4. `01_swing_line.png`, `02_layout.png`, `03_scenario_art_reference.png`는 이력용이며 제작·외주·검수 자료로 전달하지 않는다.
 5. Blockout과 Runtime이 다르면 같은 변경에서 둘을 함께 수정한다.
-6. 재생성은 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)과 현재 Runtime Camera Zone을 적용한다.
+6. 정확한 생성 프롬프트·오브젝트 수·사후 검수는 [`images/README.md`](./images/README.md)를 따른다.
 
 ## 3. Runtime Geometry
 
@@ -106,7 +107,7 @@ Cover가 LOS를 끊거나 타깃이 activation band를 나가면 즉시 `idle`�
 - 오디오는 `sentry-acquire/track/lock/fire/cooldown`, `security-scanner`, `maintenance-override`, `violation-logged` cue binding을 교체한다.
 - 교체 작업은 지형·activation·damage·LOS·완료 조건·네트워크 권위를 변경하지 않는다.
 - 현재 mock의 붉은 sensor와 aim line은 상태 판독용이며 최종 미술 기준이 아니다.
-- `03_scenario_art_reference.png`를 통이미지 Runtime 배경으로 사용하지 않는다. 1-1·1-2와 같은 공용 Tile/Module Atlas를 조합한다.
+- `05_scenario_art_reference.png`를 통이미지 Runtime 배경으로 사용하지 않는다. 1-1·1-2와 같은 공용 Tile/Module Atlas를 조합한다.
 - Sentry 주변의 배경 Red와 Cyan 장식은 줄이고 Scanner Frame, Cover, Panel, Gate는 기존 산업 모듈을 상태별로 재사용한다.
 
 ## 8. Acceptance
@@ -118,7 +119,8 @@ Cover가 LOS를 끊거나 타깃이 activation band를 나가면 즉시 `idle`�
 - Turret을 파괴하지 않아도 Panel 조작과 Gate 통과가 가능하다.
 - Desktop·Mobile에서 Scanner, Turret, 다음 Anchor, Recovery, Gate가 해당 Shot에 보인다.
 - Runtime 좌표와 `04_approved_blockout.svg`의 P0·P1·R1·Safe Ledge·Cover·A/B/C/D·P4·Panel·Gate가 일치한다.
-- `03_scenario_art_reference.png`의 Platform 구도를 물리 지형으로 복제하지 않는다.
+- Route Choice Shot에서 보이는 B/C/D·Safe Ledge·R1·Safe Cover·Upper Cover·Sentry의 수와 좌우·상하 관계가 `05_scenario_art_reference.png`와 일치한다.
+- `03_scenario_art_reference.png`는 `RETIRED / ROPE-ROUTE MISMATCH` 이력으로만 보존하고 새 제작 입력으로 사용하지 않는다.
 
 ## 9. 증강·Story 연결
 

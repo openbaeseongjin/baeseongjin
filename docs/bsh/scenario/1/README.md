@@ -36,7 +36,7 @@
 | --- | --- | --- |
 | [1-1](./1-1/README.md) · [제작 정렬](./1-1/PRODUCTION-ALIGNMENT.md) | SERVICE SHAFT | 기본 Rope 오프닝 · 구조 정합 C04 Art Reference · 승인 Blockout |
 | [1-2](./1-2/README.md) · [제작 정렬](./1-2/PRODUCTION-ALIGNMENT.md) | DOUBLE ANCHOR SHAFT | Airborne Re-Attach · 구조 정합 C02 Art Reference · 승인 Blockout |
-| [1-3](./1-3/README.md) · [제작 정렬](./1-3/PRODUCTION-ALIGNMENT.md) | SECURITY CHECK | Sentry Telegraph·LOS · Art 재생성 대기 · 승인 Blockout |
+| [1-3](./1-3/README.md) · [제작 정렬](./1-3/PRODUCTION-ALIGNMENT.md) | SECURITY CHECK | Sentry Telegraph·LOS · 구조 정합 Route Choice Art Reference · 승인 Blockout |
 | [1-4](./1-4/README.md) · [제작 정렬](./1-4/PRODUCTION-ALIGNMENT.md) | MAINTENANCE NODE | 첫 Foundation 선택 · 구조 정합 Node Art Reference · 구현 정렬 |
 | [1-5](./1-5/README.md) · [제작 정렬](./1-5/PRODUCTION-ALIGNMENT.md) | AUGMENT TEST BAY | Build Expression · Camera/Story 미구현 명시 |
 | [1-6](./1-6/README.md) · [제작 정렬](./1-6/PRODUCTION-ALIGNMENT.md) | COOLING SHAFT | Wind 학습 · Wind 물리 구현 확인, Camera/Story 미구현 명시 |
@@ -54,5 +54,5 @@
 - 현재 용도: 기획·아트 방향을 맞추기 위한 문서용 레퍼런스
 - 런타임 적용: 원본 출처, 사용권, 최종 제작 규격을 확인한 뒤 별도 환경 자산으로 전환한다.
 
-Stage별 Scenario Art는 생성 직전에 해당 Stage Runtime과 Camera Zone을 다시 확인하고 보이는 발판·장애물의 구조 가이드를 먼저 만든다. 현재 1-1 C04 `05`, 1-2 C02 `06`, 1-4 Node `03` 이미지는 구조 관계까지 검수한 `APPROVED ART REFERENCE`다. 1-3 `03`만 환경 분위기와 일부 오브젝트 위계만 참고할 수 있는 `TEMPORARY / PENDING REGENERATION` 상태다.
+Stage별 Scenario Art는 생성 직전에 해당 Stage Runtime과 Camera Zone을 다시 확인하고 보이는 발판·장애물의 구조 가이드를 먼저 만든다. 현재 1-1 C04 `05`, 1-2 C02 `06`, 1-3 Route Choice `05`, 1-4 Node `03` 이미지는 구조 관계까지 검수한 `APPROVED ART REFERENCE`다. 1-3의 이전 `03`은 `RETIRED / ROPE-ROUTE MISMATCH`로 이력만 보존한다. 1-5~1-8은 Approved Blockout 확정이 먼저다.
 

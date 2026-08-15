@@ -214,12 +214,13 @@ REV 1.0 작성 시점에는 이 표가 Sector 01의 1-1~1-4만 다뤘다. Sector
 | 1-1 `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C04의 P3 위·짧은 R3 왼쪽 아래·C 오른쪽 아래 구조 기준 |
 | 1-2 `05_scenario_art_reference.png` | `RETIRED / STRUCTURE MISMATCH` | P1이 A보다 아래에 보여 C02 Blockout의 수직 관계와 달라 교체 |
 | 1-2 `06_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C02의 B 위·P1 중간·A 아래 구조와 한 줄 B live Rope 기준 |
-| 1-3 `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | live Rope와 경로 도식을 분리해 재생성 |
+| 1-3 `03_scenario_art_reference.png` | `RETIRED / ROPE-ROUTE MISMATCH` | live Rope와 전체 경로처럼 보이는 선이 함께 있어 새 제작 입력으로 사용 금지 |
+| 1-3 `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | Route Choice의 D 위·C 왼쪽 중단·B 아래, Safe Ledge·R1·두 Cover·오른쪽 벽 Sentry와 한 줄 C live Rope 기준 |
 | 1-4 `01_scenario_art_reference.png` | `RETIRED / PLAYER-ROPE MISMATCH` | 큰 Player와 A/B/C 삼각 연결이 실제 Gameplay Camera·Rope 의미와 달라 교체 |
 | 1-4 `03_scenario_art_reference.png` | `APPROVED ART REFERENCE` | Node Camera의 Node Deck 아래·N1 중앙·A 오른쪽 위와 한 줄 A live Rope 기준 |
 | 1-5 ~ 1-8 | `NEEDED` | `images/` 폴더 자체가 없음. Approved Blockout도 아직 없어([1-5](./1/1-5/PRODUCTION-ALIGNMENT.md)~[1-8](./1/1-8/PRODUCTION-ALIGNMENT.md) 판정 참고) Art Reference보다 Blockout 제작이 선행 과제다 |
 
-1-1·1-2·1-4의 구조 정합 이미지 교체를 완료했다. 다음은 1-3에 같은 절차를 적용하되, 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다. 1-5~1-8은 Approved Blockout 확정이 먼저다.
+1-1~1-4의 구조 정합 이미지 교체를 완료했다. 다음은 1-5~1-8의 Approved Blockout 제작이며, 각 Stage Art Reference는 Runtime·Camera와 Blockout 확정 뒤 만든다.
 
 ### Sector 02
 
@@ -237,7 +238,7 @@ REV 1.0 작성 시점에는 이 표가 Sector 01의 1-1~1-4만 다뤘다. Sector
 
 ### 우선순위 요약
 
-Blockout·Runtime이 이미 있는 Sector 01의 재생성 대상(`1-3`, `1-4`)이 가장 먼저다. 다음은 Sector 01 1-5~1-8과 Sector 02 전체의 Approved Blockout 제작이며, Art Reference는 그 이후다. Sector 03은 Runtime 통합 전까지 규격상 생성 대상이 아니다.
+Blockout·Runtime이 있는 Sector 01 1-1~1-4의 구조 정합 재생성은 완료됐다. 다음은 Sector 01 1-5~1-8과 Sector 02 전체의 Approved Blockout 제작이며, Art Reference는 그 이후다. Sector 03은 Runtime 통합 전까지 규격상 생성 대상이 아니다.
 
 ## 12. 리소스 절약 원칙
 
