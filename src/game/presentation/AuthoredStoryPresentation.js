@@ -97,6 +97,14 @@ const ENTRY_PRESENTATIONS = Object.freeze({
             durationSeconds: 1.5
         })
     ]),
+    "sector-02-06": Object.freeze([
+        Object.freeze({
+            id: "sector-02-06:residential-blocks",
+            title: "RESIDENTIAL BLOCKS",
+            detail: "12–18",
+            durationSeconds: 1.3
+        })
+    ]),
     "sector-02-07": Object.freeze([
         Object.freeze({
             id: "sector-02-07:shelter-access",
@@ -201,6 +209,108 @@ const POSITION_PRESENTATIONS = Object.freeze({
             ])
         })
     ]),
+    "sector-01-05": Object.freeze([
+        Object.freeze({
+            token: "load-test-context",
+            minLocalY: -900,
+            maxLocalY: -600,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-05:vertical-load-test",
+                    title: "VERTICAL LOAD TEST",
+                    detail: "IN PROGRESS",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-01-05:security-response-test",
+                    title: "SECURITY RESPONSE TEST",
+                    detail: "IN PROGRESS",
+                    durationSeconds: 1.1
+                })
+            ])
+        })
+    ]),
+    "sector-01-07": Object.freeze([
+        Object.freeze({
+            token: "pressure-limit",
+            minLocalY: -832,
+            maxLocalY: -608,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-07:pressure-limit",
+                    title: "PRESSURE LIMIT",
+                    detail: "EXCEEDED",
+                    durationSeconds: 1.1
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "containment-violation",
+            minLocalY: -960,
+            maxLocalY: -736,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-07:containment-violation",
+                    title: "CONTAINMENT VIOLATION",
+                    detail: "ACTIVE",
+                    durationSeconds: 1.2
+                })
+            ])
+        })
+    ]),
+    "sector-01-08": Object.freeze([
+        Object.freeze({
+            token: "lockdown-warning",
+            minLocalY: -608,
+            maxLocalY: -384,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-08:final-warning",
+                    title: "FINAL WARNING",
+                    detail: "",
+                    durationSeconds: 1.0
+                }),
+                Object.freeze({
+                    id: "sector-01-08:return-to-lower-maintenance",
+                    title: "RETURN TO LOWER MAINTENANCE",
+                    detail: "",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-01-08:closure-in-progress",
+                    title: "CONTAINMENT GATE",
+                    detail: "CLOSURE IN PROGRESS",
+                    durationSeconds: 1.3
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "mid-safe-story",
+            minLocalY: -1088,
+            maxLocalY: -960,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-08:lockdown-87",
+                    title: "CONTAINMENT GATE",
+                    detail: "LOCKDOWN · 87%",
+                    durationSeconds: 1.1
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "worker-district-preview",
+            minLocalY: -1792,
+            maxLocalY: -1696,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-08:worker-district-sign",
+                    title: "WORKER DISTRICT",
+                    detail: "BLOCK 12",
+                    durationSeconds: 1.3
+                })
+            ])
+        })
+    ]),
     "sector-02-01": Object.freeze([
         Object.freeze({
             token: "community-notice",
@@ -220,6 +330,52 @@ const POSITION_PRESENTATIONS = Object.freeze({
                     title: "ASSEMBLY: BLOCK 12",
                     detail: "WAIT FOR FURTHER INSTRUCTION",
                     durationSeconds: 1.3
+                })
+            ])
+        })
+    ]),
+    "sector-02-02": Object.freeze([
+        Object.freeze({
+            token: "security-status",
+            minLocalX: -320,
+            maxLocalX: 96,
+            minLocalY: -320,
+            maxLocalY: -192,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-02-02:security-patrol-active",
+                    title: "SECURITY PATROL",
+                    detail: "ACTIVE",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-02-02:residential-transit-restricted",
+                    title: "RESIDENTIAL TRANSIT",
+                    detail: "RESTRICTED",
+                    durationSeconds: 1.1
+                })
+            ])
+        })
+    ]),
+    "sector-02-03": Object.freeze([
+        Object.freeze({
+            token: "node-detection",
+            minLocalX: -96,
+            maxLocalX: 96,
+            minLocalY: -480,
+            maxLocalY: -320,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-02-03:grapple-device-detected",
+                    title: "GRAPPLE DEVICE",
+                    detail: "DETECTED",
+                    durationSeconds: 0.9
+                }),
+                Object.freeze({
+                    id: "sector-02-03:emergency-configuration-active",
+                    title: "EMERGENCY CONFIGURATION",
+                    detail: "ACTIVE",
+                    durationSeconds: 1.1
                 })
             ])
         })
