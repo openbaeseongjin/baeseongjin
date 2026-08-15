@@ -16,7 +16,7 @@
 
 - `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.agents/skills/github-task-flow/SKILL.md`를 따른다. 개발 효율 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 검증은 base SHA·diff fingerprint ledger의 단일 소유자가 수행하고 같은 candidate의 fresh PASS를 역할별로 반복하지 않는다. 같은 저장소의 독립 작업은 별도 Git worktree를 기본으로 즉시 병렬 진행하며, 실제 같은 hunk·public contract dependency가 있을 때만 직렬화한다. 범위·검증·worktree 반복 기준은 `docs/development-rules.md`의 **효율 우선 실행과 검증 예산**, **동시 Codex 작업과 GitHub 범위 조정** 및 관련 Skill을 따른다.
 - 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(속도 1400px/s × 수명 2/7초 = 400px 도달), 재발사 0.20초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
-- 현재 기본 런은 하나의 연속 월드에 Sector 01·02의 저작 영역 16개를 순서대로 조립하며, 모든 표면 로프 부착과 수평 발판 아래→위 통과를 유지한다.
+- 현재 기본 런은 하나의 연속 월드에 Sector 01·02·03의 저작 영역 24개(`1-1 → 3-8`)를 순서대로 조립하며, 모든 표면 로프 부착과 수평 발판 아래→위 통과를 유지한다.
 - seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
 - PC와 모바일 공용 이동·점프·로프 명령, 모바일 중앙 `좌 · 점프 · 우` 조작 바와 멀티터치
 - 사거리 기반 자동 공격, 원거리 적, 로프 절단, 본체 피해·넉백·무적 시간
@@ -67,7 +67,9 @@ Sector 01-8의 현재 기준은 `docs/bsh/scenario/1/1-8/README.md`의 `CONTAINM
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 2026-08-15 체크포인트는 상세 Stage 25개(`1-1`~`3-8`, `4-1`)와 authored Runtime 16개(`1-1 → 2-8`)를 별도 상태로 기록한다. Sector 03의 Access Scan Field·authored catalog와 `2-8 → 3-1`, `3-8 → 4-1` Boss/전환은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
+시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 32개(`1-1`~`4-8`)와 authored Runtime 24개(`1-1 → 3-8`, Sector 04 4-1~4-4는 standalone)를 별도 상태로 기록한다. `2-8 → 3-1`, `3-8 → 4-1` Boss/전환과 Specialization·NPC·엔딩은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
+
+개발은 준비됐고 기획 결정만 기다리는 항목은 `docs/design-decision-requests.md`에 우선순위 순으로 정리하고 기획자가 같은 문서에 답변을 남긴다. 우선순위는 P1 Specialization 성장 규칙(2-3), P2 첫 보스 시나리오·전환, P3 일반 타이머·붕괴 수치, P4 NPC·대화, P5 엔딩이다. 답변이 붙은 항목부터 구현한다.
 
 `2-3 RESIDENTIAL SERVICE NODE`의 Specialization은 1-4에서 고른 Foundation Augment를 유지한 채 그 방향을 한 단계 심화하는 성장으로 시나리오에 명시됐다. Specialization의 입력·UI 흐름은 1-4 Foundation 선택 primitive를 재사용하되 Foundation과 Specialization의 ID·의미 체계는 합치지 않는다. 실제 Specialization 이름·효과·수치·선택 pool은 아직 미정이므로 geometry와 node flow만 먼저 구현하고 성장 규칙을 임의 확정하지 않는다. `2-5 EVACUATION WALKWAY`의 잠긴 Upper Transit Gate는 서사적 장애물이며 실제 다음 진행 경로는 Maintenance Service Frame이다. `2-8 EVACUATION PLATFORM`은 Boss가 없는 Sector 02 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 그 뒤 Boss/`3-1` 전환 순서는 공통 Boss Flow가 확정되기 전 연결하지 않는다. 새 시나리오의 좌표·문구·cue 조정은 기존 계약 안에서 흡수하지만 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계 변경은 사용자 검토를 먼저 받는다.
 

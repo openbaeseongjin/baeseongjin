@@ -51,9 +51,9 @@
 
 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)에 현재 작성된 맵을 섹터·번호 순서대로 즉시 구현하고, 새 시나리오가 추가될 때 같은 흐름에 이어 붙인다. 각 맵은 별도 월드가 아니라 하나의 연속 월드 안에 놓이는 진행 영역이다. 각 단계는 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 목록과 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
 
-상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. 2026-08-15 체크포인트에는 `SECTOR 01`의 `1-1`~`1-8`, `SECTOR 02`의 `2-1`~`2-8`, `SECTOR 03`의 `3-1`~`3-8`, `SECTOR 04`의 `4-1`, 총 25개 상세 Stage 문서가 있다. 현재 Runtime은 `1-1 → 2-8` 16개 authored area만 한 월드로 연결한다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
+상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~`04`의 `1-1`~`4-8` 총 32개 상세 Stage 문서가 있다. 현재 Runtime은 `1-1 → 3-8` 24개 authored area를 한 월드로 연결하고 Sector 04 `4-1 → 4-4`는 standalone으로 저작했다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
 
-Sector 03은 3-1 순수 geometry를 먼저 graybox할 수 있지만 3-2 이후 핵심 흐름은 Access Scan Field Runtime과 Sector 03 authored catalog·Camera Zone·Stable ID·Story trigger를 기다린다. Sector 04는 Master와 4-1 상세 Stage까지 작성됐고 4-1도 순수 geometry 후보지만, `2-8 → 3-1`과 `3-8 → 4-1`의 Boss·전환을 사용자 검토로 확정하기 전 global catalog order와 entry wiring을 고정하지 않는다.
+Sector 03은 Access Scan Field Runtime(#523)과 3-1~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. 남은 것은 Camera Zone·Story trigger 코드 반영과 Post-Sector 03 Boss→`3-8`/`4-1` 전환 사용자 검토다. Sector 04는 4-1~4-4 standalone catalog(#513·#514·#516·#519)를 저작했고 4-5~4-8과 Boss 전환은 기획 결정을 기다린다.
 
 `2-3` Specialization은 1-4에서 고른 Foundation Augment를 유지한 채 그 방향을 한 단계 심화하는 성장으로 시나리오에 명시됐다. 1-4 Foundation 선택·효과·개인별 멀티 흐름은 구현됐지만 실제 Specialization 이름·효과·수치·선택 pool은 미정이다. Foundation 선택의 입력·UI 흐름은 재사용 후보지만 Foundation ID와 Specialization ID의 의미 체계는 합치지 않는다. `2-5`의 잠긴 Upper Transit Gate는 서사적 장애물이고 실제 다음 진행 출구는 Maintenance Service Frame이다. `2-8`은 Boss가 없는 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 이후 전환은 공통 Boss Flow가 확정되기 전 연결하지 않는다.
 
@@ -66,6 +66,8 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 1. 8월 14일까지 증강 내용, Foundation과 Specialization Module의 관계, 획득·선택·손실 규칙과 관련 UI·게임 요소를 확정한다. 첫 Maintenance Node와 증강 구현은 이 결과를 기다린다.
 2. 8월 15일까지 NPC 역할·배치·대사, 대화 trigger·진행·종료 규칙과 관련 UI·게임 요소를 확정한다. 첫 NPC 섹터와 공용 대화 시스템 구현은 이 결과를 기다린다.
 3. 8월 19일까지 엔딩 내용, 진입 조건, 최종 Encounter 이후 전이와 관련 UI·게임 요소를 확정한다. `SECTOR 06`과 최종 완료 흐름 구현은 이 결과를 기다린다.
+
+기획 결정 요청은 우선순위와 기획자 답변 작성란을 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다.
 
 ### 섹터 1 월드 구조 우선 트랙
 
