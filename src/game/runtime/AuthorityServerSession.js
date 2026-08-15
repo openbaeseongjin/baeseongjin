@@ -2,6 +2,7 @@ import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
 import { WORLD_CONFIG } from "../config.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
+import { createFoundationShearReceipt } from "../network/FoundationShearClaim.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
@@ -44,6 +45,8 @@ export class AuthorityServerSession {
         this.resolvedImpactClaims = new Map();
         this.pendingImpactRecoveries = new Map();
         this.resolvedArtifactSelections = new Map();
+        this.resolvedFoundationSelections = new Map();
+        this.resolvedFoundationShearClaims = new Map();
         this.resolvedCheckpointClaims = new Map();
         this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
@@ -257,6 +260,72 @@ export class AuthorityServerSession {
         return receipt;
     }
 
+    submitFoundationSelection(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const selectionKey = `${authenticatedPlayerId}:${claim.sourceId}`;
+        const existing = this.resolvedFoundationSelections.get(selectionKey);
+        if (existing) {
+            if (existing.foundationId === claim.foundationId) return existing;
+            return Object.freeze({
+                sourceId: claim.sourceId,
+                foundationId: claim.foundationId,
+                accepted: false,
+                reason: "selection-conflict"
+            });
+        }
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return Object.freeze({
+                sourceId: claim.sourceId,
+                foundationId: claim.foundationId,
+                accepted: false,
+                reason: "tick-window"
+            });
+        }
+        const receipt = Object.freeze({
+            sourceId: claim.sourceId,
+            foundationId: claim.foundationId,
+            ...this.simulation.resolveFoundationSelection(authenticatedPlayerId, claim, {
+                requireOpenReward: false
+            })
+        });
+        if (receipt.accepted) this.resolvedFoundationSelections.set(selectionKey, receipt);
+        return receipt;
+    }
+
+    submitFoundationShear(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const existing = this.resolvedFoundationShearClaims.get(claim.predictionId);
+        if (existing) return existing.receipt;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return createFoundationShearReceipt({
+                predictionId: claim.predictionId,
+                accepted: false,
+                reason: "tick-window"
+            });
+        }
+        const receipt = createFoundationShearReceipt({
+            predictionId: claim.predictionId,
+            ...this.simulation.resolveFoundationShearClaim(authenticatedPlayerId, claim, {
+                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+            })
+        });
+        if (receipt.accepted) {
+            this.resolvedFoundationShearClaims.set(claim.predictionId, {
+                receipt,
+                resolvedAtTick: this.simulation.getTick()
+            });
+        }
+        return receipt;
+    }
+
     submitCheckpointClaim(authenticatedPlayerId, claim) {
         if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
@@ -419,6 +488,11 @@ export class AuthorityServerSession {
         for (const [predictionId, entry] of this.resolvedRopeSwingClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedRopeSwingClaims.delete(predictionId);
         }
+        for (const [predictionId, entry] of this.resolvedFoundationShearClaims) {
+            if (entry.resolvedAtTick < oldestRememberedTick) {
+                this.resolvedFoundationShearClaims.delete(predictionId);
+            }
+        }
         for (const [projectileId, entry] of this.resolvedImpactClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedImpactClaims.delete(projectileId);
         }
@@ -449,6 +523,12 @@ export class AuthorityServerSession {
         }
         for (const selectionKey of this.resolvedArtifactSelections.keys()) {
             if (selectionKey.startsWith(`${playerId}:`)) this.resolvedArtifactSelections.delete(selectionKey);
+        }
+        for (const selectionKey of this.resolvedFoundationSelections.keys()) {
+            if (selectionKey.startsWith(`${playerId}:`)) this.resolvedFoundationSelections.delete(selectionKey);
+        }
+        for (const predictionId of this.resolvedFoundationShearClaims.keys()) {
+            if (predictionId.startsWith(`${playerId}:`)) this.resolvedFoundationShearClaims.delete(predictionId);
         }
         for (const predictionId of this.resolvedProjectileSpawnClaims.keys()) {
             if (predictionId.startsWith(`${playerId}:`)) this.resolvedProjectileSpawnClaims.delete(predictionId);

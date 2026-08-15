@@ -602,6 +602,51 @@ export async function run() {
         "route landmark labels sit outside the grapple fixture instead of inside a circle"
     );
 
+    const foundationRoomContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: foundationRoomContext,
+        scene: {
+            eventFlash: {
+                type: "foundation-shear-hit",
+                targetId: "sector-01-04:calibration-dummy",
+                age: 0.2
+            },
+            worldProgress: { completedObjectiveIds: [], unlockedGateIds: [] },
+            world: {
+                objects: [
+                    {
+                        id: "sector-01-04:maintenance-node",
+                        kind: "augment-node",
+                        objectiveId: "sector-01-04:augment-selected",
+                        presentationId: "world-object:augment-node",
+                        position: { x: 0, y: -160 },
+                        coordinateAnchor: "bottom-center"
+                    },
+                    {
+                        id: "sector-01-04:calibration-dummy",
+                        kind: "test-target",
+                        presentationId: "world-object:test-target",
+                        position: { x: 80, y: -448 }
+                    }
+                ],
+                areas: []
+            }
+        }
+    });
+    const foundationRoomLabels = foundationRoomContext.calls
+        .filter(([name]) => name === "fillText")
+        .map(([, label]) => label);
+    assert.ok(foundationRoomLabels.includes("EMERGENCY PROFILES"));
+    assert.deepEqual(
+        foundationRoomLabels.filter((label) => ["IMPULSE", "RELAY", "SHEAR"].includes(label)),
+        ["IMPULSE", "RELAY", "SHEAR"],
+        "the Maintenance Node must expose all three Foundation profiles in-world"
+    );
+    assert.ok(
+        foundationRoomContext.calls.filter(([name]) => name === "stroke").length >= 9,
+        "a registered dummy contact must add an eight-ray calibration spark"
+    );
+
     const areaStructureContext = recordingContext();
     new AuthoredAreaStructureRenderer().draw({
         context: areaStructureContext,

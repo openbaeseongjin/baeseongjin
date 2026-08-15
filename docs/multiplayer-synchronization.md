@@ -166,6 +166,7 @@
 | 체크포인트 도달·보상 시작 | 도달한 소유 클라이언트, 서버 공용 진행 검증·공유 | 로컬 진행도·보상·로프 전이 후 위치 claim 전송 |
 | 영역 도달·진행 | 진입한 소유 클라이언트, 서버 공용 objective·Gate·포탈 검증·공유 | 로컬 포탈 전이 후 Gate 사건 전송, 현재 마지막 영역은 content boundary 유지 |
 | 플레이어별 아티팩트 선택·보유·효과 | 행동 클라이언트 선행, 서버 공유 진행 검증 | 선택 UI를 즉시 진행하고 claim 뒤 검증된 빌드 진행 흡수 |
+| 플레이어별 Foundation 선택·효과 | 행동 클라이언트 선행, 서버 검증·공유 | 개인 chooser와 효과를 즉시 적용하고 선택·Shear claim 뒤 개인 상태와 공용 objective를 수렴 |
 | 사망 플레이어의 아티팩트 일부 손실 | 피해 클라이언트 선행, 서버 검증·공유 | 결정적 로컬 손실 적용 후 resolve 공유 진행으로 확인 |
 | 카메라·HUD·파티클 | 클라이언트 | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용 |
 
@@ -176,6 +177,10 @@
 현재 저작 시나리오는 정상 도달을 summit claim으로 처리하지 않는다. 각 영역은 objective 완료와 Gate 패널 조작 뒤 플레이어별 포탈 진입을 예측하고 서버가 공용 진행과 개별 도착 사건을 검증·공유한다. 현재 구현된 마지막 `sector-02-08`은 content boundary이므로 `completed` 상태나 `run-completed` 사건을 만들지 않는다. 과거 절차 월드용 summit 프로토콜은 호환 코드로만 남아 있으며 엔딩 진입 조건이 확정되기 전까지 기본 제품 검증에서 제외한다.
 
 체크포인트 보상 선택은 공용 서버 시계를 정지시키지 않는다. 클라이언트는 권위 보상 상태를 받은 뒤 좌우 선택을 로컬에서 즉시 갱신하고, 확정한 체크포인트 ID와 아티팩트 ID를 별도 `artifact-selection` claim으로 보낸다. 이 claim은 이동 명령의 30틱 입력 선행 예약을 거치지 않는다. 서버는 연결 소유권, tick 범위, 활성 보상과 선택지 일치 여부를 검증하고 플레이어·체크포인트별 첫 확정만 적용한다. 같은 선택 재전송은 같은 receipt를 반환하며 다른 선택으로 덮어쓰지 않는다. 선택 중인 플레이어의 좌우·확정·포인터 입력은 중립 게임 명령으로 바꿔 이동·점프·로프나 지연된 서버 선택에 중복 적용하지 않는다. 물리·적·투사체·자동 공격·사망 판정과 이미 선택을 마친 동료의 입력은 계속 진행한다.
+
+1-4 Foundation 선택도 같은 개인 입력 중립화와 공용 시계 지속 원칙을 사용하되 Artifact 계약에 합치지 않는다. Node에서 chooser를 연 클라이언트는 선택을 로컬 예측 상태에 먼저 적용하고 최신 `owner-motion` 다음 `foundation-selection` claim을 보낸다. 서버는 연결 소유권·tick·Node·반경·고정 선택지를 검증하고 플레이어·Node별 첫 선택만 멱등 확정한다. 첫 선택은 공유 `augment-selected` objective만 한 번 완료하며, 이후 동료도 자기 `foundationAugment`를 독립 확정할 수 있다. 사망·Checkpoint·포탈은 선택을 보존하고 Relay 같은 순간 window만 초기화한다.
+
+Impulse·Relay는 소유 클라이언트가 Rope Release/Attach에 즉시 적용한 상태를 `owner-motion`과 snapshot으로 공유한다. Shear는 Release 순간 Anchor–Player segment 교차를 공격 클라이언트가 먼저 판정하고 `foundation-shear` claim으로 보낸다. 서버는 소유 Foundation·tick·위치·segment 범위·대상 교차를 검증해 적 피해 또는 Calibration Dummy 접촉 사건을 한 번 확정하며, 같은 prediction ID 재전송은 중복 피해·Spark를 만들지 않는다.
 
 멀티 서버 fixed tick은 원시 게임 명령에 선택 입력이 포함돼도 보상 선택을 처리하지 않는다. 아티팩트 획득의 유일한 서버 전이는 `artifact-selection` claim이며, 체력 0을 스캔해 사망·부활을 보조 발생시키지도 않는다. 피해와 사망·부활은 피해 클라이언트의 `player-impact` claim 안에서 함께 확정한다. 싱글은 네트워크 claim 왕복이 없으므로 같은 `GameSimulation` 옵션의 기본값으로 로컬 보상 입력과 체력 복구를 직접 수행한다.
 
@@ -192,10 +197,10 @@
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
 - `owner-motion` protocol v2는 `angle`, `angularVelocity`, 부착 중인 `rope.attachmentOffset`을 위치·속도·anchor와 함께 보낸다. 서버는 인증·프로토콜 형식·유한값과 최신 tick만 확인하고 선속도·각속도·손 local offset의 크기로 거부하지 않으며, 최신 소유자 상태를 원자적으로 복제한다.
-- `WorldSnapshot` protocol v4의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`을 포함한다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
+- `WorldSnapshot` protocol v5의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`, `foundationAugment`, `augmentRuntimeState`를 포함한다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
 - 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
-- `player-impact` protocol v4의 divergence recovery 전체 상태에는 angle·angularVelocity·attachmentOffset이 포함된다. 부활 결과 지문에도 회전 상태와 부착 손을 양자화해 포함하지만, 정상 비치명 impact마다 전체 회전 상태를 별도 전송하지 않는다.
+- `player-impact` protocol v5의 divergence recovery 전체 상태에는 angle·angularVelocity·attachmentOffset과 Foundation 선택·순간 상태가 포함된다. 부활 결과 지문에도 회전·부착 손·Foundation 상태를 양자화해 포함하지만, 정상 비치명 impact마다 전체 상태를 별도 전송하지 않는다.
 - 실제 두 WebSocket 클라이언트 검증은 0이 아닌 각도·각속도를 소유자에서 서버와 동료 raw snapshot까지 각각 0.001rad·0.001rad/s 이내로 비교하고, 회전된 손 관절점은 0.05px 이내로 비교한다. 지연 표현 계층은 별도 연속 표본에서 각도 보간과 120ms 제한 외삽을 검증하며, 순간적으로 만든 불연속 각도를 최신 raw snapshot과 직접 비교하지 않는다.
 
 ## 스냅샷 계약

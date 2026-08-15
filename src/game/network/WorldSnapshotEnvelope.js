@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 4;
+export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 5;
 
 function assertTick(value, label) {
     if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${label} must be a non-negative safe integer`);

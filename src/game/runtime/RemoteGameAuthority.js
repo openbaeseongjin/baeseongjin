@@ -5,6 +5,15 @@ import {
     serializeCheckpointClaim
 } from "../network/CheckpointClaim.js";
 import { createArtifactSelectionClaim, serializeArtifactSelectionClaim } from "../network/ArtifactSelectionClaim.js";
+import {
+    createFoundationSelectionClaim,
+    serializeFoundationSelectionClaim
+} from "../network/FoundationSelectionClaim.js";
+import {
+    createFoundationShearClaim,
+    createFoundationShearReceipt,
+    serializeFoundationShearClaim
+} from "../network/FoundationShearClaim.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createSummitClaim, createSummitClaimReceipt, serializeSummitClaim } from "../network/SummitClaim.js";
@@ -70,6 +79,8 @@ export class RemoteGameAuthority {
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
         this.artifactSelectionReceipts = [];
+        this.foundationSelectionReceipts = [];
+        this.foundationShearReceipts = [];
         this.hitClaimReceipts = [];
         this.projectileSpawnClaimReceipts = [];
         this.ropeSwingClaimReceipts = [];
@@ -159,6 +170,10 @@ export class RemoteGameAuthority {
                         this.stream.acceptReceipt(receipt);
                     } else if (message.type === "artifact-selection-receipt") {
                         this.artifactSelectionReceipts.push(Object.freeze({ ...message.payload }));
+                    } else if (message.type === "foundation-selection-receipt") {
+                        this.foundationSelectionReceipts.push(Object.freeze({ ...message.payload }));
+                    } else if (message.type === "foundation-shear-receipt") {
+                        this.foundationShearReceipts.push(createFoundationShearReceipt(message.payload));
                     } else if (message.type === "hit-claim-receipt") {
                         this.recordHitClaimReceipt(createProjectileHitReceipt(message.payload));
                     } else if (message.type === "projectile-spawn-claim-receipt") {
@@ -397,6 +412,46 @@ export class RemoteGameAuthority {
         return true;
     }
 
+    applyPredictedFoundationSelection(selection) {
+        return this.ownerRuntime?.applyPredictedFoundationSelection(selection) ?? false;
+    }
+
+    rejectPredictedFoundationSelection(sourceId) {
+        return this.ownerRuntime?.rejectPredictedFoundationSelection(sourceId, this.latestSnapshot) ?? false;
+    }
+
+    submitFoundationSelection({ sourceId, foundationId }) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const claim = createFoundationSelectionClaim({
+            sourceId,
+            foundationId,
+            clientTick: this.ownerRuntime.state().tick
+        });
+        this.socket.send(
+            JSON.stringify({
+                type: "foundation-selection",
+                payload: serializeFoundationSelectionClaim(claim)
+            })
+        );
+        return true;
+    }
+
+    submitFoundationShear(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const claim = createFoundationShearClaim({
+            predictionId: event.predictionId,
+            targetId: event.targetId,
+            targetKind: event.targetKind,
+            clientTick: event.tick,
+            anchor: event.anchor,
+            playerPosition: event.playerPosition
+        });
+        this.socket.send(JSON.stringify({ type: "foundation-shear", payload: serializeFoundationShearClaim(claim) }));
+        return true;
+    }
+
     submitReachedCheckpoint() {
         if (this.pendingCheckpointId || this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) {
             return null;
@@ -426,6 +481,18 @@ export class RemoteGameAuthority {
     drainArtifactSelectionReceipts() {
         const receipts = Object.freeze(this.artifactSelectionReceipts);
         this.artifactSelectionReceipts = [];
+        return receipts;
+    }
+
+    drainFoundationSelectionReceipts() {
+        const receipts = Object.freeze(this.foundationSelectionReceipts);
+        this.foundationSelectionReceipts = [];
+        return receipts;
+    }
+
+    drainFoundationShearReceipts() {
+        const receipts = Object.freeze(this.foundationShearReceipts);
+        this.foundationShearReceipts = [];
         return receipts;
     }
 
@@ -497,6 +564,7 @@ export class RemoteGameAuthority {
             predicted: this.ownerRuntime?.presentationState() ?? null,
             owner: this.ownerRuntime?.state() ?? null,
             ownerArtifactReward: this.ownerRuntime?.artifactReward() ?? null,
+            ownerFoundationReward: this.ownerRuntime?.foundationReward() ?? null,
             serverTick: this.latestSnapshot?.serverTick ?? null,
             connected: !this.closed
         };

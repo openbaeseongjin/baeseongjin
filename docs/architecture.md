@@ -31,6 +31,9 @@ index.html
       ├─ game/combat/CombatFeedback.js
       ├─ game/artifacts/ArtifactCatalog.js
       ├─ game/artifacts/ArtifactInventory.js
+      ├─ game/augments/FoundationAugmentCatalog.js
+      ├─ game/augments/FoundationAugmentState.js
+      ├─ game/rewards/RewardSelection.js
       ├─ game/metrics/RunMetrics.js
       ├─ game/network/PlayerCommandBatch.js
       ├─ game/network/AuthorityCommandInbox.js
@@ -191,7 +194,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `CURRENT_AUTHORED_AREA_CATALOG`와 `assembleAuthoredWorld()`가 Sector 01·02의 저작 영역을 하나의 연속 좌표계로 조립한다. `GameSimulationFactory`는 seed와 world revision으로 같은 catalog를 선택해 싱글·멀티가 동일한 정의를 재현하게 한다.
 - `GameSimulation`이 저작 영역의 목표·Gate·content boundary와 플레이어별 진행 상태를 권위 상태로 보존한다.
 - 사망 재개는 월드와 체크포인트 진행도를 유지한 채 활성 지점으로 복귀하고, `ArtifactInventory`의 결정적 정책으로 최근 아티팩트 약 1/3만 제거한다.
-- 첫 체크포인트의 아티팩트 선택도 `PlayerCommand`의 좌우·점프 명령을 사용하며, 선택 중에는 `GameSimulation`이 물리와 전투를 일시 정지한다.
+- 첫 체크포인트의 아티팩트와 1-4 Foundation 선택은 `PlayerCommand`의 좌우·점프 명령을 사용한다. 선택 중인 플레이어의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
 - 아티팩트 획득·손실 정보는 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 보유 상태와 분리한다.
 - `rewardedCheckpointIds`가 체크포인트별 보상 수령 여부를 권위 상태로 보존해 재방문과 사망 복귀의 중복 지급을 막는다.
 - `npm test`의 current authored world 검증은 area catalog의 연결·출구 참조·Gate 진행과 마지막 content boundary를 확인한다. 절차형 48단계 경로의 시드 sweep은 현재 제품 검증에 포함하지 않는다.
@@ -200,6 +203,9 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 사망·낙사는 `GameSimulation.respawnPlayerAtCheckpoint` 하나로 처리한다. 사망한 플레이어의 물리·입력·체력·아티팩트만 초기화하며 동료와 공용 월드는 계속 진행한다.
 - 체크포인트 보상은 플레이어별 선택 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - 보상 Canvas 오버레이는 반투명 배경과 실시간 전투 경고를 사용해 선택 카드와 진행 중인 위험을 동시에 보여준다.
+- `RewardSelection`은 Artifact와 Foundation의 카드 이동·Confirm·진입 Input Gate만 공유한다. Artifact의 `checkpointId`·전투 빌드와 Foundation의 `sourceId`·Rope 정체성 Catalog·효과 상태는 분리한다.
+- `FoundationAugmentState`는 Player별 고정 선택과 Relay의 짧은 runtime window만 소유한다. Impulse·Relay·Shear는 기존 Rope Release/Attach 사건에서 한 번만 판정하며 Shear를 매 frame 충돌 시스템으로 확장하지 않는다.
+- `interact-choice`는 개인 chooser 요청을 만들고 첫 Foundation 확정이 공유 objective를 완료한다. 이미 공용 objective가 끝났어도 아직 선택하지 않은 동료는 같은 Node에서 자기 chooser를 열 수 있으며 Calibration 결과는 Gate 요구 조건이 아니다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
 - `PlayerCommandBatch`는 목표 틱과 플레이어별 단조 증가 `sequence`를 보존하고 플레이어 ID 순으로 정규화하는 전송 계약이다. 권위 서버는 이 순서 번호로 중복·역순 입력을 거부한다.
 - `AuthorityCommandInbox`는 승인 순서와 허용 틱 범위를 검사하고, 승인된 명령을 목표 틱별로 한 번만 제공한다. 이 상태는 게임 규칙이 아니라 권위 전송 경계에 머문다.

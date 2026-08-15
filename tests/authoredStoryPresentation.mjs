@@ -217,4 +217,69 @@ export function run() {
         ],
         ["VIOLATION", "LOGGED"]
     );
+
+    const foundationStory = new AuthoredStoryPresentation();
+    assert.deepEqual(
+        [
+            foundationStory.update(0, {
+                currentAreaId: "sector-01-04",
+                currentAreaLocalX: -288,
+                currentAreaLocalY: -32
+            }).title,
+            foundationStory.snapshot().detail
+        ],
+        ["GRAPPLE DEVICE", "DETECTED"]
+    );
+    assert.deepEqual(
+        [
+            foundationStory.update(1.1, {
+                currentAreaId: "sector-01-04",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -160
+            }).title,
+            foundationStory.snapshot().detail
+        ],
+        ["GRAPPLE TELEMETRY", "ANALYZED"]
+    );
+    assert.deepEqual(
+        [
+            foundationStory.update(0.9, {
+                currentAreaId: "sector-01-04",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -160
+            }).title,
+            foundationStory.snapshot().detail
+        ],
+        ["SAFETY LIMIT OVERRIDE", "AVAILABLE"]
+    );
+    assert.deepEqual(
+        [
+            foundationStory.update(1.1, {
+                currentAreaId: "sector-01-04",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -160,
+                events: [
+                    {
+                        eventType: "predicted-foundation-selected",
+                        ownerId: "player:1",
+                        sourceId: "sector-01-04:maintenance-node",
+                        foundationId: "relay-link"
+                    }
+                ]
+            }).title,
+            foundationStory.snapshot().detail
+        ],
+        ["AUGMENT PROTOCOL", "ACCEPTED"]
+    );
+    assert.deepEqual(
+        [
+            foundationStory.update(0.9, {
+                currentAreaId: "sector-01-04",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -160
+            }).title,
+            foundationStory.snapshot().detail
+        ],
+        ["RELAY LINK", "ONLINE"]
+    );
 }

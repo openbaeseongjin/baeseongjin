@@ -4,6 +4,19 @@ function activePlayers(players) {
     return players.filter(({ lifeState }) => lifeState === "active");
 }
 
+function interactingPlayers(objective, world, progress, players, commandsByPlayerId) {
+    if (objective.requiredObjectiveIds?.some((id) => !progress.isObjectiveComplete(id))) return [];
+    const object = world.objects.find(({ id }) => id === objective.sourceObjectId);
+    if (!object) return [];
+    return activePlayers(players).filter((player) => {
+        const command = commandsByPlayerId.get(player.id);
+        return (
+            command?.interact === true &&
+            player.physics.position.distanceTo(object.position) <= object.interactionRadius
+        );
+    });
+}
+
 function completingPlayer(objective, world, progress, players, commandsByPlayerId) {
     if (objective.requiredObjectiveIds?.some((id) => !progress.isObjectiveComplete(id))) return null;
     if (objective.type === "reach") {
@@ -11,18 +24,8 @@ function completingPlayer(objective, world, progress, players, commandsByPlayerI
             activePlayers(players).find(({ physics }) => pointInsideBounds(physics.position, objective.bounds)) ?? null
         );
     }
-    if (objective.type !== "interact") return null;
-    const object = world.objects.find(({ id }) => id === objective.sourceObjectId);
-    if (!object) return null;
-    return (
-        activePlayers(players).find((player) => {
-            const command = commandsByPlayerId.get(player.id);
-            return (
-                command?.interact === true &&
-                player.physics.position.distanceTo(object.position) <= object.interactionRadius
-            );
-        }) ?? null
-    );
+    if (objective.type !== "interact" && objective.type !== "interact-choice") return null;
+    return interactingPlayers(objective, world, progress, players, commandsByPlayerId)[0] ?? null;
 }
 
 function appendCompletionEvents(events, { result, objectiveId, areaId, playerId, position }) {
@@ -48,6 +51,19 @@ function appendCompletionEvents(events, { result, objectiveId, areaId, playerId,
     );
 }
 
+export function completeWorldProgressObjective({ progress, objectiveId, areaId, player }) {
+    const events = [];
+    const result = progress.completeObjective(objectiveId);
+    appendCompletionEvents(events, {
+        result,
+        objectiveId,
+        areaId,
+        playerId: player.id,
+        position: player.physics.position
+    });
+    return Object.freeze(events);
+}
+
 export function advanceWorldProgress({ world, progress, players, commandsByPlayerId, dt = 0 }) {
     const progressSnapshot = progress?.snapshot();
     if (!progress || progressSnapshot.completed || progressSnapshot.contentBoundaryReached) return Object.freeze([]);
@@ -56,8 +72,23 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
     if (!currentArea) throw new Error(`Missing assembled area '${progress.currentAreaId}'`);
 
     for (const objectiveId of currentArea.objectiveIds) {
-        if (progress.isObjectiveComplete(objectiveId)) continue;
         const objective = world.objectives.find(({ id }) => id === objectiveId);
+        if (objective.type === "interact-choice") {
+            for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
+                events.push(
+                    Object.freeze({
+                        type: "objective-choice-requested",
+                        objectiveId,
+                        sourceObjectId: objective.sourceObjectId,
+                        areaId: currentArea.id,
+                        playerId: player.id,
+                        position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+                    })
+                );
+            }
+            continue;
+        }
+        if (progress.isObjectiveComplete(objectiveId)) continue;
         const sequence = progress.objectiveSequence(objectiveId);
         if (sequence) {
             const result = progress.advanceObjectiveSequence(objectiveId, dt);

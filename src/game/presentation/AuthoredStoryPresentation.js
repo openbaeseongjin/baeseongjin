@@ -1,3 +1,5 @@
+import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
+
 const ENTRY_PRESENTATIONS = Object.freeze({
     "sector-01-01": Object.freeze([
         Object.freeze({
@@ -13,6 +15,14 @@ const ENTRY_PRESENTATIONS = Object.freeze({
             title: "LIFT CONTROL",
             detail: "OFFLINE",
             durationSeconds: 1.6
+        })
+    ]),
+    "sector-01-04": Object.freeze([
+        Object.freeze({
+            id: "sector-01-04:grapple-detected",
+            title: "GRAPPLE DEVICE",
+            detail: "DETECTED",
+            durationSeconds: 1.1
         })
     ])
 });
@@ -102,6 +112,27 @@ const POSITION_PRESENTATIONS = Object.freeze({
                 })
             ])
         })
+    ]),
+    "sector-01-04": Object.freeze([
+        Object.freeze({
+            token: "node-scan",
+            minLocalY: -288,
+            maxLocalY: -96,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-01-04:telemetry-analyzed",
+                    title: "GRAPPLE TELEMETRY",
+                    detail: "ANALYZED",
+                    durationSeconds: 0.9
+                }),
+                Object.freeze({
+                    id: "sector-01-04:override-available",
+                    title: "SAFETY LIMIT OVERRIDE",
+                    detail: "AVAILABLE",
+                    durationSeconds: 1.1
+                })
+            ])
+        })
     ])
 });
 
@@ -181,6 +212,25 @@ function positionMatches(trigger, localX, localY) {
     );
 }
 
+function foundationSelectionPresentations(foundationId) {
+    const foundation = foundationAugmentById(foundationId);
+    if (!foundation) return Object.freeze([]);
+    return Object.freeze([
+        Object.freeze({
+            id: `sector-01-04:augment-selected:${foundationId}`,
+            title: "AUGMENT PROTOCOL",
+            detail: "ACCEPTED",
+            durationSeconds: 0.9
+        }),
+        Object.freeze({
+            id: `sector-01-04:firmware-applied:${foundationId}`,
+            title: foundation.name,
+            detail: "ONLINE",
+            durationSeconds: 1.2
+        })
+    ]);
+}
+
 export class AuthoredStoryPresentation {
     constructor() {
         this.currentAreaId = null;
@@ -230,6 +280,12 @@ export class AuthoredStoryPresentation {
             }
             if (event.eventType === "gate-unlocked") {
                 this.#enqueue(`gate:${event.gateId}`, GATE_PRESENTATIONS[event.gateId]);
+            }
+            if (event.eventType === "foundation-selected" || event.eventType === "predicted-foundation-selected") {
+                this.#enqueue(
+                    `foundation:${event.playerId ?? event.ownerId}:${event.sourceId}`,
+                    foundationSelectionPresentations(event.foundationId)
+                );
             }
         }
         this.#advance(dt);

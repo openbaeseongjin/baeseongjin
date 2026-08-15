@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
 import { collisionSurfacesForProgress } from "../src/game/world/WorldGateGeometry.js";
-import { advanceWorldProgress } from "../src/game/world/WorldProgressController.js";
+import { advanceWorldProgress, completeWorldProgressObjective } from "../src/game/world/WorldProgressController.js";
 import { WorldProgressState } from "../src/game/world/WorldProgressState.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 
@@ -151,4 +151,48 @@ export function run() {
         ["gate-crossed"]
     );
     assert.equal(progress.currentAreaId, "sector-01-04");
+
+    const maintenanceNode = world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    player.physics.position.set(maintenanceNode.position.x, maintenanceNode.position.y);
+    const choiceRequested = advanceWorldProgress({
+        world,
+        progress,
+        players: [player],
+        commandsByPlayerId: commands
+    });
+    assert.deepEqual(
+        choiceRequested.map(({ type }) => type),
+        ["objective-choice-requested"]
+    );
+    assert.equal(progress.isObjectiveComplete("sector-01-04:augment-selected"), false);
+
+    const choiceCompleted = completeWorldProgressObjective({
+        progress,
+        objectiveId: "sector-01-04:augment-selected",
+        areaId: "sector-01-04",
+        player
+    });
+    assert.deepEqual(
+        choiceCompleted.map(({ type }) => type),
+        ["objective-completed"]
+    );
+    assert.equal(progress.isGateUnlocked("sector-01-04:gate"), false);
+
+    const partner = {
+        id: "player:partner",
+        lifeState: "active",
+        physics: { position: new Vector2(maintenanceNode.position.x, maintenanceNode.position.y) }
+    };
+    commands.set(partner.id, { interact: true });
+    const repeatedChoiceRequest = advanceWorldProgress({
+        world,
+        progress,
+        players: [player, partner],
+        commandsByPlayerId: commands
+    });
+    assert.deepEqual(
+        repeatedChoiceRequest.map(({ playerId }) => playerId),
+        [player.id, partner.id],
+        "every nearby player must receive a personal chooser request even after shared completion"
+    );
 }
