@@ -313,7 +313,7 @@ const area04 = defineArea({
     bounds: { width: 1152, height: 896 },
     entry: point("sector-04-04:entry", -352, -32),
     exit: point("sector-04-04:exit", 512, -864),
-    nextAreaId: null,
+    nextAreaId: "sector-04-05",
     surfaces: [
         horizontalSurface("sector-04-04:p0", -352, 0, 320, 32, { kind: "safe-deck" }),
         horizontalSurface("sector-04-04:p1", -160, -192, 320, 32, { kind: "safe-deck" }),
@@ -371,9 +371,8 @@ const area04 = defineArea({
             requiredObjectiveIds: ["sector-04-04:final-deck-reached"]
         }
     ],
-    gate: gate("sector-04-04:gate", 512, -864, null, ["sector-04-04:exit-panel-engaged"], {
-        portalBottomY: -832,
-        completionMode: "content-boundary"
+    gate: gate("sector-04-04:gate", 512, -864, "sector-04-05", ["sector-04-04:exit-panel-engaged"], {
+        portalBottomY: -832
     }),
     storyTriggers: ["service-node-online", "lower-feeder-segmented", "express-shaft-open"],
     routes: ["safe", "flow", "recovery"],
@@ -386,8 +385,442 @@ const area04 = defineArea({
     cueIds: ["service-node-online", "lower-feeder-segmented", "express-shaft-open"]
 });
 
+const area05 = defineArea({
+    id: "sector-04-05",
+    sectorId: "sector-04",
+    order: 5,
+    name: "EXPRESS SHAFT",
+    subtitle: "PURE MOVEMENT JOY",
+    bounds: { width: 1216, height: 1536 },
+    entry: point("sector-04-05:entry", -448, -32),
+    exit: point("sector-04-05:exit", 528, -1504),
+    nextAreaId: "sector-04-06",
+    surfaces: [
+        horizontalSurface("sector-04-05:p0", -448, 0, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-05:p1", -288, -256, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-05:r1", -256, -544, 224, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-05:r2", 256, -768, 224, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-05:r3", -256, -1024, 224, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-05:r4", 256, -1280, 224, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-05:p5", 320, -1472, 416, 32, { kind: "safe-deck" }),
+        grappleTarget("sector-04-05:a0-surface", -320, -160),
+        grappleTarget("sector-04-05:w1-surface", -96, -416),
+        grappleTarget("sector-04-05:w2-surface", 96, -640),
+        grappleTarget("sector-04-05:w3-surface", 96, -896),
+        grappleTarget("sector-04-05:w4-surface", -96, -1152),
+        grappleTarget("sector-04-05:w5-surface", 96, -1376)
+    ],
+    routePoints: [
+        point("sector-04-05:route-entry", -448, -32),
+        point("sector-04-05:route-a0", -320, -160, { landmark: "A0" }),
+        point("sector-04-05:route-w1", -96, -416, { landmark: "W1" }),
+        point("sector-04-05:route-w2", 96, -640, { landmark: "W2" }),
+        point("sector-04-05:route-w3", 96, -896, { landmark: "W3" }),
+        point("sector-04-05:route-w4", -96, -1152, { landmark: "W4" }),
+        point("sector-04-05:route-w5", 96, -1376, { landmark: "W5" }),
+        point("sector-04-05:route-exit", 528, -1504)
+    ],
+    recoveryPoints: [
+        point("sector-04-05:recovery-r1", -256, -568),
+        point("sector-04-05:recovery-r2", 256, -792),
+        point("sector-04-05:recovery-r3", -256, -1048),
+        point("sector-04-05:recovery-r4", 256, -1304)
+    ],
+    objects: [
+        worldObject("sector-04-05:a0", "grapple-landmark", -320, -160, { label: "A0" }),
+        worldObject("sector-04-05:w1", "grapple-landmark", -96, -416, { label: "W1" }),
+        worldObject("sector-04-05:w2", "grapple-landmark", 96, -640, { label: "W2" }),
+        worldObject("sector-04-05:w3", "grapple-landmark", 96, -896, { label: "W3" }),
+        worldObject("sector-04-05:w4", "grapple-landmark", -96, -1152, { label: "W4" }),
+        worldObject("sector-04-05:w5", "grapple-landmark", 96, -1376, { label: "W5" }),
+        worldObject("sector-04-05:exit-panel", "gate-panel", 432, -1472, {
+            coordinateAnchor: "bottom-center",
+            interactionRadius,
+            objectiveId: "sector-04-05:exit-panel-engaged",
+            gateId: "sector-04-05:gate",
+            requiredObjectiveIds: ["sector-04-05:final-deck-reached"]
+        }),
+        worldObject("sector-04-05:service-gate", "gate", 528, -1472, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-04-05:gate"
+        })
+    ],
+    objectives: [
+        {
+            id: "sector-04-05:final-deck-reached",
+            type: "reach",
+            bounds: triggerBounds(112, -1504, 416, 96)
+        },
+        {
+            id: "sector-04-05:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-04-05:exit-panel",
+            requiredObjectiveIds: ["sector-04-05:final-deck-reached"]
+        }
+    ],
+    windZones: [
+        {
+            id: "sector-04-05:express-wake",
+            bounds: triggerBounds(-192, -1408, 384, 1088),
+            direction: { x: 0, y: -1 },
+            mode: "pulsed",
+            strength: 360,
+            cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
+        }
+    ],
+    gate: gate("sector-04-05:gate", 528, -1504, "sector-04-06", ["sector-04-05:exit-panel-engaged"], {
+        portalBottomY: -1472
+    }),
+    storyTriggers: ["express-shaft-entry", "pressure-assist-cycling", "upper-express-limited"],
+    routes: ["safe", "flow", "recovery"],
+    cameraZones: [
+        cameraZone("shaft-reveal", -288, 0, 0.94, 0.7),
+        cameraZone("lower-express", -544, -288, 0.88, 0.68),
+        cameraZone("mid-express", -1056, -544, 0.86, 0.68),
+        cameraZone("upper-express", -1408, -1056, 0.86, 0.68),
+        cameraZone("exit", -1536, -1408, 0.96, 0.72)
+    ],
+    cueIds: ["express-shaft", "pressure-assist", "upper-express-limited"]
+});
+
+const area06 = defineArea({
+    id: "sector-04-06",
+    sectorId: "sector-04",
+    order: 6,
+    name: "POWER RELAY SPAN",
+    subtitle: "ROPE LINE GEOMETRY COMBAT",
+    bounds: { width: 1536, height: 1568 },
+    entry: point("sector-04-06:entry", -480, -32),
+    exit: point("sector-04-06:exit", -48, -1504),
+    nextAreaId: "sector-04-07",
+    surfaces: [
+        horizontalSurface("sector-04-06:p0", -480, 0, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-06:p1", -288, -256, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-06:m0", 160, -768, 448, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-06:p3", 352, -1024, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-06:r2", -320, -1312, 256, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-06:p4", -256, -1472, 416, 32, { kind: "safe-deck" }),
+        grappleTarget("sector-04-06:a0-surface", -352, -128),
+        grappleTarget("sector-04-06:c1-surface", -96, -416),
+        grappleTarget("sector-04-06:c2-surface", 256, -576),
+        grappleTarget("sector-04-06:a3-surface", 320, -928),
+        grappleTarget("sector-04-06:a4-surface", 160, -1120),
+        grappleTarget("sector-04-06:a5-surface", -192, -1248)
+    ],
+    routePoints: [
+        point("sector-04-06:route-entry", -480, -32),
+        point("sector-04-06:route-a0", -352, -128, { landmark: "A0" }),
+        point("sector-04-06:route-c1", -96, -416, { landmark: "C1" }),
+        point("sector-04-06:route-c2", 256, -576, { landmark: "C2" }),
+        point("sector-04-06:route-a3", 320, -928, { landmark: "A3" }),
+        point("sector-04-06:route-a4", 160, -1120, { landmark: "A4" }),
+        point("sector-04-06:route-a5", -192, -1248, { landmark: "A5" }),
+        point("sector-04-06:route-exit", -48, -1504)
+    ],
+    recoveryPoints: [point("sector-04-06:recovery-r2", -320, -1336)],
+    objects: [
+        worldObject("sector-04-06:a0", "grapple-landmark", -352, -128, { label: "A0" }),
+        worldObject("sector-04-06:c1", "grapple-landmark", -96, -416, { label: "C1" }),
+        worldObject("sector-04-06:c2", "grapple-landmark", 256, -576, { label: "C2" }),
+        worldObject("sector-04-06:a3", "grapple-landmark", 320, -928, { label: "A3" }),
+        worldObject("sector-04-06:a4", "grapple-landmark", 160, -1120, { label: "A4" }),
+        worldObject("sector-04-06:a5", "grapple-landmark", -192, -1248, { label: "A5" }),
+        worldObject("sector-04-06:cutter-sentry-01", "sentry", 80, -496, {
+            enemyType: "sentry-t1",
+            activation: triggerBounds(-160, -704, 512, 352),
+            rules: ["cutter-fire", "kill-optional", "target-lock-cycle", "activation-band-only"]
+        }),
+        worldObject("sector-04-06:patrol-drone-01", "patrol-drone", 208, -1184, {
+            enemyType: "patrol-drone-t1",
+            activation: triggerBounds(-448, -1280, 896, 224),
+            patrol: {
+                points: [
+                    { x: -240, y: -1184 },
+                    { x: 208, y: -1184 }
+                ],
+                speed: 48,
+                waitSeconds: 0.45,
+                mode: "pingpong"
+            },
+            rules: ["kill-optional", "no-rope-cut", "target-lock-cycle", "activation-band-only"]
+        }),
+        worldObject("sector-04-06:exit-panel", "gate-panel", -80, -1472, {
+            coordinateAnchor: "bottom-center",
+            interactionRadius,
+            objectiveId: "sector-04-06:exit-panel-engaged",
+            gateId: "sector-04-06:gate",
+            requiredObjectiveIds: ["sector-04-06:final-deck-reached"]
+        }),
+        worldObject("sector-04-06:service-gate", "gate", -48, -1472, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-04-06:gate"
+        })
+    ],
+    objectives: [
+        {
+            id: "sector-04-06:final-deck-reached",
+            type: "reach",
+            bounds: triggerBounds(-464, -1504, 416, 96)
+        },
+        {
+            id: "sector-04-06:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-04-06:exit-panel",
+            requiredObjectiveIds: ["sector-04-06:final-deck-reached"]
+        }
+    ],
+    gate: gate("sector-04-06:gate", -48, -1504, "sector-04-07", ["sector-04-06:exit-panel-engaged"], {
+        portalBottomY: -1472
+    }),
+    storyTriggers: ["relay-entry", "redundant-channel-online", "junction-security-ahead"],
+    routes: ["safe", "flow", "recovery"],
+    cameraZones: [
+        cameraZone("entry-cutter-read", -352, 0, 0.94, 0.7),
+        cameraZone("lower-cutter-span", -704, -352, 0.9, 0.68),
+        cameraZone("mid-reset", -1056, -704, 0.94, 0.7),
+        cameraZone("patrol-span", -1280, -1056, 0.88, 0.68),
+        cameraZone("exit", -1568, -1280, 1, 0.72)
+    ],
+    cueIds: ["power-relay-span", "redundant-channel", "routing-security-ahead"]
+});
+
+const area07 = defineArea({
+    id: "sector-04-07",
+    sectorId: "sector-04",
+    order: 7,
+    name: "ISOLATION JUNCTION",
+    subtitle: "CUTTER + WAKE SYNTHESIS",
+    bounds: { width: 1472, height: 1536 },
+    entry: point("sector-04-07:entry", -480, -32),
+    exit: point("sector-04-07:exit", 544, -1472),
+    nextAreaId: "sector-04-08",
+    surfaces: [
+        horizontalSurface("sector-04-07:p0", -480, 0, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-07:p1", -320, -256, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-07:r1", 320, -512, 256, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-07:r2", -320, -896, 256, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-07:p3", -32, -1248, 512, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-07:p4", 352, -1440, 416, 32, { kind: "safe-deck" }),
+        grappleTarget("sector-04-07:a0-surface", -352, -128),
+        grappleTarget("sector-04-07:w1-surface", -160, -416),
+        grappleTarget("sector-04-07:w2-surface", 160, -576),
+        grappleTarget("sector-04-07:w3-surface", 160, -800),
+        grappleTarget("sector-04-07:w4-surface", -160, -960),
+        grappleTarget("sector-04-07:a5-surface", -96, -1152),
+        grappleTarget("sector-04-07:a6-surface", 224, -1344)
+    ],
+    routePoints: [
+        point("sector-04-07:route-entry", -480, -32),
+        point("sector-04-07:route-a0", -352, -128, { landmark: "A0" }),
+        point("sector-04-07:route-w1", -160, -416, { landmark: "W1" }),
+        point("sector-04-07:route-w2", 160, -576, { landmark: "W2" }),
+        point("sector-04-07:route-w3", 160, -800, { landmark: "W3" }),
+        point("sector-04-07:route-w4", -160, -960, { landmark: "W4" }),
+        point("sector-04-07:route-a5", -96, -1152, { landmark: "A5" }),
+        point("sector-04-07:route-a6", 224, -1344, { landmark: "A6" }),
+        point("sector-04-07:route-exit", 544, -1472)
+    ],
+    recoveryPoints: [point("sector-04-07:recovery-r1", 320, -536), point("sector-04-07:recovery-r2", -320, -920)],
+    objects: [
+        worldObject("sector-04-07:a0", "grapple-landmark", -352, -128, { label: "A0" }),
+        worldObject("sector-04-07:w1", "grapple-landmark", -160, -416, { label: "W1" }),
+        worldObject("sector-04-07:w2", "grapple-landmark", 160, -576, { label: "W2" }),
+        worldObject("sector-04-07:w3", "grapple-landmark", 160, -800, { label: "W3" }),
+        worldObject("sector-04-07:w4", "grapple-landmark", -160, -960, { label: "W4" }),
+        worldObject("sector-04-07:a5", "grapple-landmark", -96, -1152, { label: "A5" }),
+        worldObject("sector-04-07:a6", "grapple-landmark", 224, -1344, { label: "A6" }),
+        worldObject("sector-04-07:cutter-sentry-01", "sentry", 480, -640, {
+            enemyType: "sentry-t1",
+            activation: triggerBounds(-240, -1008, 480, 624),
+            rules: ["cutter-fire", "kill-optional", "target-lock-cycle", "activation-band-only"]
+        }),
+        worldObject("sector-04-07:routing-status-display", "story-display", -128, -256, {
+            cueIds: ["sector-04-07:containment-routing-active"]
+        }),
+        worldObject("sector-04-07:feeder-status-display", "story-display", 96, -1248, {
+            cueIds: ["sector-04-07:lower-feeder-isolated", "sector-04-07:route-telemetry-offline"]
+        }),
+        worldObject("sector-04-07:exit-panel", "gate-panel", 432, -1440, {
+            coordinateAnchor: "bottom-center",
+            interactionRadius,
+            objectiveId: "sector-04-07:exit-panel-engaged",
+            gateId: "sector-04-07:gate",
+            requiredObjectiveIds: ["sector-04-07:final-deck-reached"]
+        }),
+        worldObject("sector-04-07:service-gate", "gate", 544, -1440, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-04-07:gate"
+        })
+    ],
+    objectives: [
+        {
+            id: "sector-04-07:final-deck-reached",
+            type: "reach",
+            bounds: triggerBounds(144, -1472, 416, 96)
+        },
+        {
+            id: "sector-04-07:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-04-07:exit-panel",
+            requiredObjectiveIds: ["sector-04-07:final-deck-reached"]
+        }
+    ],
+    windZones: [
+        {
+            id: "sector-04-07:junction-wake",
+            bounds: triggerBounds(-224, -1008, 448, 688),
+            direction: { x: 1, y: 0 },
+            mode: "pulsed",
+            strength: 360,
+            cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
+        }
+    ],
+    gate: gate("sector-04-07:gate", 544, -1472, "sector-04-08", ["sector-04-07:exit-panel-engaged"], {
+        portalBottomY: -1440
+    }),
+    storyTriggers: ["junction-entry", "feeder-isolated", "trunk-access-ahead"],
+    routes: ["safe", "flow", "recovery"],
+    cameraZones: [
+        cameraZone("junction-read", -320, 0, 0.96, 0.72),
+        cameraZone("lower-assist", -704, -320, 0.89, 0.68),
+        cameraZone("center-turn", -928, -704, 0.9, 0.68),
+        cameraZone("upper-opposed-return", -1248, -928, 0.87, 0.68),
+        cameraZone("story-deck", -1408, -1248, 1, 0.72),
+        cameraZone("exit", -1536, -1408, 0.96, 0.72)
+    ],
+    cueIds: ["containment-routing", "lower-feeder-isolated", "route-telemetry-offline"]
+});
+
+const area08 = defineArea({
+    id: "sector-04-08",
+    sectorId: "sector-04",
+    order: 8,
+    name: "TRANSIT CONTROL TRUNK",
+    subtitle: "GENERAL FINALE",
+    bounds: { width: 1536, height: 1856 },
+    entry: point("sector-04-08:entry", -448, -32),
+    exit: point("sector-04-08:exit", 560, -1792),
+    nextAreaId: null,
+    surfaces: [
+        horizontalSurface("sector-04-08:p0", -448, 0, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-08:p1", -288, -288, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-08:r1", -256, -832, 288, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-08:p3", 320, -1088, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-04-08:r2", -320, -1408, 288, 24, { kind: "recovery" }),
+        horizontalSurface("sector-04-08:p6", 352, -1760, 544, 32, { kind: "safe-deck" }),
+        grappleTarget("sector-04-08:a0-surface", -320, -160),
+        grappleTarget("sector-04-08:c1-surface", -96, -448),
+        grappleTarget("sector-04-08:c2-surface", 96, -736),
+        grappleTarget("sector-04-08:w3-surface", -96, -960),
+        grappleTarget("sector-04-08:a3-surface", 96, -1024),
+        grappleTarget("sector-04-08:a4-surface", 96, -1216),
+        grappleTarget("sector-04-08:a5-surface", -160, -1344),
+        grappleTarget("sector-04-08:w6-surface", -96, -1536),
+        grappleTarget("sector-04-08:a6-surface", 128, -1640)
+    ],
+    routePoints: [
+        point("sector-04-08:route-entry", -448, -32),
+        point("sector-04-08:route-a0", -320, -160, { landmark: "A0" }),
+        point("sector-04-08:route-c1", -96, -448, { landmark: "C1" }),
+        point("sector-04-08:route-c2", 96, -736, { landmark: "C2" }),
+        point("sector-04-08:route-w3", -96, -960, { landmark: "W3" }),
+        point("sector-04-08:route-a3", 96, -1024, { landmark: "A3" }),
+        point("sector-04-08:route-a4", 96, -1216, { landmark: "A4" }),
+        point("sector-04-08:route-a5", -160, -1344, { landmark: "A5" }),
+        point("sector-04-08:route-w6", -96, -1536, { landmark: "W6" }),
+        point("sector-04-08:route-a6", 128, -1640, { landmark: "A6" }),
+        point("sector-04-08:route-exit", 560, -1792)
+    ],
+    recoveryPoints: [point("sector-04-08:recovery-r1", -256, -856), point("sector-04-08:recovery-r2", -320, -1432)],
+    objects: [
+        worldObject("sector-04-08:a0", "grapple-landmark", -320, -160, { label: "A0" }),
+        worldObject("sector-04-08:c1", "grapple-landmark", -96, -448, { label: "C1" }),
+        worldObject("sector-04-08:c2", "grapple-landmark", 96, -736, { label: "C2" }),
+        worldObject("sector-04-08:w3", "grapple-landmark", -96, -960, { label: "W3" }),
+        worldObject("sector-04-08:a3", "grapple-landmark", 96, -1024, { label: "A3" }),
+        worldObject("sector-04-08:a4", "grapple-landmark", 96, -1216, { label: "A4" }),
+        worldObject("sector-04-08:a5", "grapple-landmark", -160, -1344, { label: "A5" }),
+        worldObject("sector-04-08:w6", "grapple-landmark", -96, -1536, { label: "W6" }),
+        worldObject("sector-04-08:a6", "grapple-landmark", 128, -1640, { label: "A6" }),
+        worldObject("sector-04-08:cutter-sentry-01", "sentry", 448, -640, {
+            enemyType: "sentry-t1",
+            activation: triggerBounds(-192, -800, 384, 400),
+            rules: ["cutter-fire", "kill-optional", "target-lock-cycle", "activation-band-only"]
+        }),
+        worldObject("sector-04-08:patrol-drone-01", "patrol-drone", 176, -1280, {
+            enemyType: "patrol-drone-t1",
+            activation: triggerBounds(-208, -1392, 416, 240),
+            patrol: {
+                points: [
+                    { x: -208, y: -1280 },
+                    { x: 208, y: -1280 }
+                ],
+                speed: 48,
+                waitSeconds: 0.45,
+                mode: "pingpong"
+            },
+            rules: ["kill-optional", "no-rope-cut", "target-lock-cycle", "activation-band-only"]
+        }),
+        worldObject("sector-04-08:final-status-display", "story-display", 64, -1760, {
+            cueIds: ["sector-04-08:upper-trunk-limited", "sector-04-08:lower-feeder-isolated"]
+        }),
+        worldObject("sector-04-08:post-sector-access", "story-display", 352, -1728, {
+            cueIds: ["sector-04-08:transit-core-access-pending"]
+        }),
+        worldObject("sector-04-08:exit-panel", "gate-panel", 432, -1760, {
+            coordinateAnchor: "bottom-center",
+            interactionRadius,
+            objectiveId: "sector-04-08:exit-panel-engaged",
+            gateId: "sector-04-08:gate",
+            requiredObjectiveIds: ["sector-04-08:final-deck-reached"]
+        }),
+        worldObject("sector-04-08:service-gate", "gate", 560, -1760, {
+            coordinateAnchor: "bottom-center",
+            gateId: "sector-04-08:gate"
+        })
+    ],
+    objectives: [
+        {
+            id: "sector-04-08:final-deck-reached",
+            type: "reach",
+            bounds: triggerBounds(80, -1792, 544, 96)
+        },
+        {
+            id: "sector-04-08:exit-panel-engaged",
+            type: "interact",
+            sourceObjectId: "sector-04-08:exit-panel",
+            requiredObjectiveIds: ["sector-04-08:final-deck-reached"]
+        }
+    ],
+    windZones: [
+        {
+            id: "sector-04-08:control-trunk-wake",
+            bounds: triggerBounds(-192, -1664, 384, 1264),
+            direction: { x: 0, y: -1 },
+            mode: "pulsed",
+            strength: 360,
+            cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
+        }
+    ],
+    gate: gate("sector-04-08:gate", 560, -1792, null, ["sector-04-08:exit-panel-engaged"], {
+        portalBottomY: -1760,
+        completionMode: "content-boundary"
+    }),
+    storyTriggers: ["trunk-entry", "upper-trunk-limited", "final-status-juxtaposition"],
+    routes: ["safe", "flow", "recovery"],
+    cameraZones: [
+        cameraZone("entry-scale", -384, 0, 0.93, 0.7),
+        cameraZone("cutter-band", -800, -384, 0.88, 0.68),
+        cameraZone("re-acceleration", -1152, -800, 0.9, 0.68),
+        cameraZone("patrol-band", -1408, -1152, 0.87, 0.68),
+        cameraZone("final-flow", -1664, -1408, 0.9, 0.7),
+        cameraZone("final-deck", -1856, -1664, 1, 0.72)
+    ],
+    cueIds: ["control-trunk", "upper-trunk-limited", "lower-feeder-isolated", "transit-core-pending"]
+});
+
 export const SECTOR_04_AREA_CATALOG = defineAreaCatalog({
     id: "sector-04-authored-mock",
-    revision: "sector-04-scenarios-rev1-v1",
-    areas: [area01, area02, area03, area04]
+    revision: "sector-04-scenarios-rev1-v2",
+    areas: [area01, area02, area03, area04, area05, area06, area07, area08]
 });
