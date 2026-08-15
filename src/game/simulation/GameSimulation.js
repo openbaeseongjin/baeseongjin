@@ -329,7 +329,19 @@ export class GameSimulation {
         ) {
             return false;
         }
-        const entry = segmentBoundsEntryPoint(player.physics.position, destination, gate.trigger);
+        const nextArea = this.world.areas.find(({ id }) => id === gate.nextAreaId);
+        const sweptEntry = segmentBoundsEntryPoint(player.physics.position, destination, gate.trigger);
+        // Owner prediction teleports before the next motion sample. After a curved Gate entry,
+        // the chord from the last server sample can miss the trigger even though the owner is
+        // already inside the authored destination area.
+        const entry =
+            sweptEntry ??
+            (nextArea && pointInsideBounds(destination, nextArea.bounds)
+                ? {
+                      x: gate.trigger.x + gate.trigger.width * 0.5,
+                      y: gate.trigger.y + gate.trigger.height * 0.5
+                  }
+                : null);
         if (!entry) return false;
         player.physics.position.set(entry.x, entry.y);
         this.#advanceAuthoredWorldProgress(new Map(), { dt: 0 });
