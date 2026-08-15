@@ -79,6 +79,40 @@ function translateGate(areaId, gate, offsetY) {
     });
 }
 
+const SCANNER_CYCLE_KEYS = ["available", "warning", "locked", "reset"];
+
+function validateScannerGroup(definition, group, surfacesById, groupBySurfaceId) {
+    const groupId = group?.id;
+    if (typeof groupId !== "string" || !groupId.trim()) {
+        throw new Error(`scanner group in '${definition.id}' requires a non-empty id`);
+    }
+    if (!groupId.startsWith(`${definition.id}:`)) {
+        throw new Error(`scanner group '${groupId}' must use the '${definition.id}' area prefix`);
+    }
+    const cycle = group.cycle ?? {};
+    for (const key of SCANNER_CYCLE_KEYS) {
+        if (!Number.isFinite(cycle[key]) || cycle[key] <= 0) {
+            throw new Error(`scanner group '${groupId}' cycle.${key} must be finite and positive`);
+        }
+    }
+    if (!Number.isFinite(group.phaseOffsetSeconds ?? 0)) {
+        throw new Error(`scanner group '${groupId}' phaseOffsetSeconds must be finite`);
+    }
+    for (const surfaceId of group.controlledSurfaceIds ?? []) {
+        if (groupBySurfaceId.has(surfaceId)) {
+            throw new Error(`surface '${surfaceId}' is controlled by multiple scanner groups`);
+        }
+        const surface = surfacesById.get(surfaceId);
+        if (!surface) {
+            throw new Error(`scanner group '${groupId}' controls unknown surface '${surfaceId}'`);
+        }
+        if (surface.grappleable === false) {
+            throw new Error(`scanner group '${groupId}' cannot control non-grappleable surface '${surfaceId}'`);
+        }
+        groupBySurfaceId.set(surfaceId, groupId);
+    }
+}
+
 export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius = 38, summitRadius = 42 } = {}) {
     const surfaces = [];
     const route = [];
@@ -89,6 +123,8 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
     const gates = [];
     const windZones = [];
     const objectives = [];
+    const scannerGroups = [];
+    const scannerGroupIds = new Set();
     let originY = floorY;
 
     for (const [index, definition] of catalog.areas.entries()) {
@@ -102,7 +138,22 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
         const exit = translatePoint(definition.exit, originY);
         const gate = translateGate(definition.id, definition.gate, originY);
         const areaBoundary = Object.freeze({ id: definition.id, bounds: areaBounds, exit });
-        const areaSurfaces = definition.surfaces.map((surface) => translateSurface(definition.id, surface, originY));
+        const surfacesById = new Map(definition.surfaces.map((surface) => [surface.id, surface]));
+        const groupBySurfaceId = new Map();
+        const areaScannerGroups = [];
+        for (const group of definition.scannerGroups ?? []) {
+            if (scannerGroupIds.has(group.id)) throw new Error(`duplicate scanner group '${group.id}'`);
+            validateScannerGroup(definition, group, surfacesById, groupBySurfaceId);
+            scannerGroupIds.add(group.id);
+            const translated = Object.freeze({ ...group, areaId: definition.id });
+            areaScannerGroups.push(translated);
+            scannerGroups.push(translated);
+        }
+        const areaSurfaces = definition.surfaces.map((surface) => {
+            const translated = translateSurface(definition.id, surface, originY);
+            const groupId = groupBySurfaceId.get(surface.id);
+            return groupId ? Object.freeze({ ...translated, grappleAccessGroup: groupId }) : translated;
+        });
         const boundarySurfaces = authoredAreaBoundarySurfaces(areaBoundary, gate);
         const areaRoute = definition.routePoints.map((routePoint) => {
             const translated = translatePoint(routePoint, originY);
@@ -188,6 +239,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
                     ...definition.checkpoints.map(({ id }) => id)
                 ]),
                 storyTriggers: definition.storyTriggers,
+                scannerGroupIds: Object.freeze(areaScannerGroups.map(({ id }) => id)),
                 routes: definition.routes,
                 cameraZones: definition.cameraZones,
                 cueIds: definition.cueIds
@@ -217,6 +269,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
         objects: Object.freeze(objects),
         objectives: Object.freeze(objectives),
         gates: Object.freeze(gates),
-        windZones: Object.freeze(windZones)
+        windZones: Object.freeze(windZones),
+        scannerGroups: Object.freeze(scannerGroups)
     });
 }

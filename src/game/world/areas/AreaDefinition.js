@@ -78,6 +78,7 @@ export function defineArea(definition) {
         objects: [],
         objectives: [],
         windZones: [],
+        scannerGroups: [],
         storyTriggers: [],
         routes: ["safe", "flow", "recovery"],
         cameraZones: [],

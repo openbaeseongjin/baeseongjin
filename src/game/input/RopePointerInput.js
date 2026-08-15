@@ -5,12 +5,20 @@ import { rotateVector } from "../physics/AngularMotion.js";
 import { hookReach } from "../rope/RopeLauncher.js";
 import { createInputCapabilityMixin } from "./InputCapability.js";
 
-export function findRopeAttachment({ aimPoint, origin, surfaces, maxAttachDistance, aimTolerance = 90 }) {
+export function findRopeAttachment({
+    aimPoint,
+    origin,
+    surfaces,
+    maxAttachDistance,
+    aimTolerance = 90,
+    canAttachToSurface = null
+}) {
     if (!Number.isFinite(origin?.x) || !Number.isFinite(origin?.y)) return null;
     let best = null;
     let bestScore = Number.POSITIVE_INFINITY;
     for (const surface of surfaces) {
         if (surface.grappleable === false) continue;
+        if (canAttachToSurface && canAttachToSurface(surface) === false) continue;
         const point = closestPointOnSurface(aimPoint, surface);
         const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
         if (launchDistance > maxAttachDistance) continue;
@@ -79,6 +87,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
                 aimTolerance: 90,
                 relayActive: false
             }),
+            canAttachToSurface = null,
             onAttach = () => {},
             onRelease = () => {},
             onFlash
@@ -100,7 +109,8 @@ export const withRopePointerInput = createInputCapabilityMixin({
                       origin: launchOrigin,
                       surfaces,
                       maxAttachDistance: reach,
-                      aimTolerance: inputModifiers.aimTolerance
+                      aimTolerance: inputModifiers.aimTolerance,
+                      canAttachToSurface
                   })
                 : null;
 
