@@ -304,10 +304,10 @@ Drone의 이동 자체를 Player가 읽어야 하기 때문이다.
 현재 일반 Enemy 설정에는:
 
 - Enemy Radius `18`
-- Health `30`
-- Attack Range `520`
-- Fire Interval `1.4 sec`
-- Projectile Speed `260`
+- Health `100`
+- Attack Range `760`
+- Fire Interval `1.0 sec`
+- Projectile Speed `520`
 - Projectile Radius `7`
 - Projectile Damage `20`
 

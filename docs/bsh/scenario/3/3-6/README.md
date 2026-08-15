@@ -192,15 +192,15 @@ Camera Mobile Zoom       0.72
 
 ```text
 Enemy Radius             18
-Enemy Health             30
-Enemy Attack Range       520
+Enemy Health             100
+Enemy Attack Range       760
 
 Acquire                  0.25 sec
 Track                    0.80 sec
 Lock                     0.20 sec
 
-Enemy Fire Interval      1.40 sec
-Projectile Speed         260
+Enemy Fire Interval      1.00 sec
+Projectile Speed         520
 Projectile Damage        20
 
 Rope Disabled On Hit     0.60 sec
@@ -1076,8 +1076,8 @@ TARGET INVALID / LEFT BAND
 Acquire        0.25
 Track          0.80
 Lock           0.20
-Fire Interval  1.40
-Projectile     260
+Fire Interval  1.00
+Projectile     520
 Damage         20
 Rope Cut       NONE
 ```
