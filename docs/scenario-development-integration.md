@@ -34,6 +34,7 @@ reviewed-upstream: decc0f6edfb9cf9dd8c22718115385de7e67668d
 - 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1, `CurrentAuthoredAreaCatalog.js`, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02 Approved Blockout·Area Catalog·Scenario Art 구조 관계, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03·04 Runtime과 실제 플레이테스트. 두 Sector는 현재 catalog에 없으므로 완료로 표시하지 않는다.
+- **checkpoint marker 갱신 대기**: 위 "최근 반영된 시나리오 변화" 7번 수정으로 `docs/bsh/scenario/**/*.md`의 실제 source가 checkpoint 기록 시점과 달라졌다. 이 세션 환경에는 Node.js가 없어 `npm run check:scenario-integration -- --print`로 새 `scenario-source-sha256`를 직접 계산하지 못했다. Node가 있는 환경에서 위 명령으로 실제 값을 확인한 뒤 marker의 `scenario-source-sha256`을 갱신할 것 — 손으로 값을 지어내지 않는다.
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
@@ -52,6 +53,7 @@ reviewed-upstream: decc0f6edfb9cf9dd8c22718115385de7e67668d
 4. #478은 1-1 C04와 1-2 C02에서 보이는 발판·Anchor의 좌우·상하 관계와 상대 폭을 Approved Blockout·Area Catalog에 맞춘 구조 가이드로 다시 생성했다. 이전 구조 불일치 이미지는 `RETIRED / STRUCTURE MISMATCH`로 보존하고 새 이미지를 현재 승인 기준으로 전환했다. Runtime Geometry와 Collision은 변경하지 않았으며, 남은 Scenario Art 권장 순서는 1-4 → 1-3이다.
 5. #487은 1-3·1-4·1-6·1-7·1-8에서 누락된 그래플 랜드마크 28개를 기존 target 좌표에 연결했다. 현재 102개 비렌더 그래플 표면은 모두 같은 ID·좌표 anchor의 보이는 object와 1:1이며, 누락·고아·좌표 불일치는 catalog validator와 authored world 회귀가 거부한다. Rope 후보 사거리·점수 계약은 변경하지 않았다.
 6. #489는 기존 글로벌 Artifact 시스템(ArtifactCatalog·Inventory·선택·network claim)을 은퇴하고 authored Foundation 선택을 유일한 특화 방향으로 확정했다. Checkpoint는 보상 선택을 열지 않는다. Rope 부착은 속도 1400px/s × 수명 2/7초에서 파생한 400px 도달의 보이는 Hook 투사체로 바뀌었고 `swingImpulse = 780`은 유지한다. Sentry 첫 수치는 체력 100·인식 거리 760·적 탄속 520·재사격 1.0초이며 authored activation/LOS가 인식을 계속 가린다. 시나리오 문서의 Rope 최대 부착/사거리 표현은 440에서 400으로 정렬했다.
+7. `2/2-2`·`2/2-4`·`2/2-5`·`2/2-7`·`2/2-8`·`3/3-3`·`3/3-4`·`3/3-6`·`3/3-7`·`3/3-8`의 `README.md`가 #489 이전 Sentry 수치(Health 30·Attack Range 520·Fire Interval 1.4 sec·Projectile Speed 260)를 그대로 인용하고 있어 `src/game/config.js`의 `COMBAT_CONFIG`(Health 100·Attack Range 760·Fire Interval 1.0 sec·Projectile Speed 520) 기준으로 정정했다(2-8과 3-6은 각각 두 곳씩 중복 인용돼 있었음). Rope 부착 440→400 표현은 이번 정밀 재검색에서 corpus 전체에 stale citation이 없음을 확인했다.
 
 ## 열린 기획·구현 게이트
 

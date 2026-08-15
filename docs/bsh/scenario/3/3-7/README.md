@@ -187,15 +187,15 @@ Camera Mobile Zoom       0.72
 ### VERIFIED — CURRENT ENEMY TIMING
 
 ```text
-Enemy Attack Range       520
+Enemy Attack Range       760
 
 Acquire                  0.25 sec
 Track                    0.80 sec
 Lock                     0.20 sec
 Fire Flash               0.08 sec
-Fire Interval            1.40 sec
+Fire Interval            1.00 sec
 
-Projectile Speed         260
+Projectile Speed         520
 Projectile Damage        20
 Rope Disabled On Hit     0.60 sec
 ```

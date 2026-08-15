@@ -432,10 +432,10 @@ Enemy baseline:
 
 ```text
 Enemy Radius             18
-Enemy Health             30
-Enemy Attack Range       520
-Enemy Fire Interval      1.4 sec
-Enemy Projectile Speed   260
+Enemy Health             100
+Enemy Attack Range       760
+Enemy Fire Interval      1.0 sec
+Enemy Projectile Speed   520
 Enemy Projectile Radius  7
 Enemy Projectile Damage  20
 ```
