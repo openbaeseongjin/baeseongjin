@@ -122,3 +122,4 @@
 | [`bsh/scenario/4/4-2/README.md`](./bsh/scenario/4/4-2/README.md) | `bsh` 첫 Rope-Cut(Cutter Fire) Tutorial Stage(4-2) Blockout 후보·제작 규격, REV 1.1 — Hook Flight/Combat Rebalance Runtime 재정렬 반영 |
 | [`bsh/scenario/4/4-3/README.md`](./bsh/scenario/4/4-3/README.md) | `bsh` 첫 Cutter+Transit Wake 결합 Stage(4-3) Blockout 후보·제작 규격, Hook Flight/Foundation Runtime 기준 작성·좌표 검증 완료 |
 | [`bsh/scenario/4/4-4/README.md`](./bsh/scenario/4/4-4/README.md) | `bsh` Sector 04 Rest Stage(4-4) Blockout 후보·제작 규격 — Enemy/Threat 없음, Lower Ascent Feeder 이상징후 첫 Setup(SEGMENTED, ISOLATED 아님), 좌표 검증 완료 |
+| [`bsh/scenario/4/4-5/README.md`](./bsh/scenario/4/4-5/README.md) | `bsh` Sector 04 순수 Movement Joy Stage(4-5) Blockout 후보·제작 규격 — Enemy 없음, Wake-assisted 상승, 좌표 검증 완료 |
