@@ -7,7 +7,7 @@ function sortedIds(values, order) {
 }
 
 export class WorldProgressState {
-    constructor(catalog, snapshot = null) {
+    constructor(catalog, snapshot = null, { startAreaId = null } = {}) {
         if (!catalog?.areas?.length) throw new Error("WorldProgressState requires at least one authored area");
 
         this.catalog = catalog;
@@ -26,7 +26,7 @@ export class WorldProgressState {
             this.idOrder.set(area.gate.id, order++);
         }
 
-        this.currentAreaId = catalog.areas[0].id;
+        this.currentAreaId = startAreaId && this.areasById.has(startAreaId) ? startAreaId : catalog.areas[0].id;
         this.completedObjectiveIds = new Set();
         this.unlockedGateIds = new Set();
         this.crossedGateIds = new Set();

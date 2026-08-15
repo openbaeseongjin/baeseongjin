@@ -128,7 +128,7 @@ const area02 = defineArea({
     subtitle: "FIRST ROPE INTERRUPTION",
     bounds: { width: 1280, height: 1312 },
     entry: point("sector-04-02:entry", -480, -32),
-    exit: point("sector-04-02:exit", 576, -1280),
+    exit: point("sector-04-02:exit", 464, -1280),
     nextAreaId: "sector-04-03",
     surfaces: [
         horizontalSurface("sector-04-02:p0", -480, 0, 320, 32, { kind: "safe-deck" }),
@@ -150,7 +150,7 @@ const area02 = defineArea({
         point("sector-04-02:route-c2", -32, -621, { landmark: "C2" }),
         point("sector-04-02:route-a3", 64, -992, { landmark: "A3" }),
         point("sector-04-02:route-a4", 64, -1168, { landmark: "A4" }),
-        point("sector-04-02:route-exit", 576, -1280)
+        point("sector-04-02:route-exit", 464, -1280)
     ],
     recoveryPoints: [point("sector-04-02:recovery-r1", -288, -600), point("sector-04-02:recovery-p2", -224, -824)],
     objects: [
@@ -164,14 +164,14 @@ const area02 = defineArea({
             activation: triggerBounds(-96, -880, 352, 640),
             rules: ["cutter-fire", "target-lock-cycle", "activation-band-only"]
         }),
-        worldObject("sector-04-02:exit-panel", "gate-panel", 448, -1248, {
+        worldObject("sector-04-02:exit-panel", "gate-panel", 352, -1248, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-04-02:exit-panel-engaged",
             gateId: "sector-04-02:gate",
             requiredObjectiveIds: ["sector-04-02:final-deck-reached"]
         }),
-        worldObject("sector-04-02:service-gate", "gate", 576, -1248, {
+        worldObject("sector-04-02:service-gate", "gate", 464, -1248, {
             coordinateAnchor: "bottom-center",
             gateId: "sector-04-02:gate"
         })
@@ -189,7 +189,7 @@ const area02 = defineArea({
             requiredObjectiveIds: ["sector-04-02:final-deck-reached"]
         }
     ],
-    gate: gate("sector-04-02:gate", 576, -1280, "sector-04-03", ["sector-04-02:exit-panel-engaged"], {
+    gate: gate("sector-04-02:gate", 464, -1280, "sector-04-03", ["sector-04-02:exit-panel-engaged"], {
         portalBottomY: -1248
     }),
     storyTriggers: ["cutter-line-entry", "cutter-read", "cutter-recovery"],
@@ -212,7 +212,7 @@ const area03 = defineArea({
     subtitle: "CUTTER + TRANSIT WAKE",
     bounds: { width: 1472, height: 1472 },
     entry: point("sector-04-03:entry", -560, -32),
-    exit: point("sector-04-03:exit", 16, -1408),
+    exit: point("sector-04-03:exit", -80, -1408),
     nextAreaId: "sector-04-04",
     surfaces: [
         horizontalSurface("sector-04-03:p0", -560, 0, 320, 32, { kind: "safe-deck" }),
@@ -238,7 +238,7 @@ const area03 = defineArea({
         point("sector-04-03:route-a4", 96, -992, { landmark: "A4" }),
         point("sector-04-03:route-a5", -160, -1184, { landmark: "A5" }),
         point("sector-04-03:route-a6", -320, -1312, { landmark: "A6" }),
-        point("sector-04-03:route-exit", 16, -1408)
+        point("sector-04-03:route-exit", -80, -1408)
     ],
     recoveryPoints: [point("sector-04-03:recovery-r1", -240, -664), point("sector-04-03:recovery-r2", 64, -1112)],
     objects: [
@@ -254,14 +254,14 @@ const area03 = defineArea({
             activation: triggerBounds(-128, -832, 704, 480),
             rules: ["cutter-fire", "target-lock-cycle", "activation-band-only"]
         }),
-        worldObject("sector-04-03:exit-panel", "gate-panel", -112, -1376, {
+        worldObject("sector-04-03:exit-panel", "gate-panel", -208, -1376, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-04-03:exit-panel-engaged",
             gateId: "sector-04-03:gate",
             requiredObjectiveIds: ["sector-04-03:final-deck-reached"]
         }),
-        worldObject("sector-04-03:service-gate", "gate", 16, -1376, {
+        worldObject("sector-04-03:service-gate", "gate", -80, -1376, {
             coordinateAnchor: "bottom-center",
             gateId: "sector-04-03:gate"
         })
@@ -289,7 +289,7 @@ const area03 = defineArea({
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
-    gate: gate("sector-04-03:gate", 16, -1408, "sector-04-04", ["sector-04-03:exit-panel-engaged"], {
+    gate: gate("sector-04-03:gate", -80, -1408, "sector-04-04", ["sector-04-03:exit-panel-engaged"], {
         portalBottomY: -1376
     }),
     storyTriggers: ["freight-entry", "wake-warning", "combined-commit", "decompression"],

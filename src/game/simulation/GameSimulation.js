@@ -105,7 +105,7 @@ export class GameSimulation {
     #inputDispatcher;
     #inputDrivenObjectsByOwner;
 
-    constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null, worldCatalog = null } = {}) {
+    constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null, worldCatalog = null, startAreaId = null } = {}) {
         this.worldCatalog = worldCatalog;
         this.world = worldCatalog
             ? assembleAuthoredWorld(worldCatalog, {
@@ -115,7 +115,7 @@ export class GameSimulation {
                   summitRadius: WORLD_CONFIG.summitRadius
               })
             : generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
-        this.worldProgress = worldCatalog ? new WorldProgressState(worldCatalog) : null;
+        this.worldProgress = worldCatalog ? new WorldProgressState(worldCatalog, null, { startAreaId }) : null;
         this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
         this.windOccluders = windOccludingSurfaces(this.world.surfaces);
         this.elapsedSeconds = 0;
@@ -125,7 +125,8 @@ export class GameSimulation {
         this.#inputDrivenObjectsByOwner = new Map();
         this.portalTransitions = new Map();
         this.players = [];
-        const playerRuntime = this.addPlayer(this.world.areas?.[0]?.entry, playerId);
+        const startArea = this.world.areas?.find(({ id }) => id === startAreaId) ?? this.world.areas?.[0];
+        const playerRuntime = this.addPlayer(startArea?.entry, playerId);
         this.#primaryPlayerId = playerRuntime.entity.id;
         this.enemies = this.createEnemies();
         this.projectiles = [];
@@ -133,7 +134,12 @@ export class GameSimulation {
         this.eventFlash = { type: "ready", age: 10 };
         this.resets = 0;
         this.runState = "playing";
-        this.activeCheckpoint = this.world.checkpoints[0] ?? null;
+        this.activeCheckpoint =
+            (startAreaId
+                ? (this.world.checkpoints.find(({ id }) => id === `checkpoint:${startAreaId}`) ?? null)
+                : null) ??
+            this.world.checkpoints[0] ??
+            null;
         this.foundationRewards = new Map();
         this.tick = 0;
         this.replicationEvents = [];

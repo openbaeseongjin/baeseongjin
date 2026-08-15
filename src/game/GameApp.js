@@ -7,7 +7,7 @@ import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.js";
 import { CAMERA_CONFIG } from "./config.js";
-import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
+import { isMetricsPanelEnabled, parseStartAreaId } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
@@ -26,7 +26,8 @@ export class GameApp {
         renderer = null,
         onDiagnostics = () => {},
         audioBindings = null,
-        worldSeed = selectWorldSeed(globalThis.location?.search)
+        worldSeed = selectWorldSeed(globalThis.location?.search),
+        startAreaId = parseStartAreaId(globalThis.location?.search)
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = renderer
@@ -35,7 +36,7 @@ export class GameApp {
         this.input = new InputSampler(globalThis.window, canvas, {
             onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
         });
-        this.authority = new LocalAuthority(createCurrentGameSimulation({ worldSeed }));
+        this.authority = new LocalAuthority(createCurrentGameSimulation({ worldSeed, startAreaId }));
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
         this.onDiagnostics = onDiagnostics;
