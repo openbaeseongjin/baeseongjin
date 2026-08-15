@@ -13,7 +13,8 @@
 | 960×1088 Authored Geometry | `DECIDED` | Runtime Catalog와 승인 Blockout이 같은 좌표 사용 |
 | `03_scenario_art_reference.png` | `RETIRED` | 전체 Anchor 경로선과 Stage 전체 구도로 live Rope·Camera Shot 의미가 불일치 |
 | `04_approved_blockout.svg` | `APPROVED BLOCKOUT` | 플랫폼·Anchor·Recovery·Crossbeam·Gate의 배치 기준 |
-| `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C02 First Handoff의 Player 크기·A/B·한 줄 live Rope·P1·정지 Lift 위계 기준 |
+| `05_scenario_art_reference.png` | `RETIRED / STRUCTURE MISMATCH` | P1이 A보다 아래에 보여 Runtime·Blockout의 수직 관계와 불일치 |
+| `06_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C02의 B 위·P1 중간·A 아래 구조, Player·B live Rope·정지 Lift 기준 |
 | 기존 `01_swing_line.png` | `RETIRED PARTIAL` | Anchor 3개만 보여 현재 A→B→C→D 구조와 불일치 |
 | 기존 `02_level_layout.png` | `RETIRED` | Turret·Terminal이 있어 1-2 금지 요소와 충돌 |
 | Camera Shot 수치 | `PROTOTYPE` | 데스크톱·모바일 실기 테스트 후 수치만 조정 |
@@ -22,7 +23,7 @@
 
 1. 핵심 학습, 금지 요소, Story 의미는 [시나리오 README](./README.md)가 결정한다.
 2. 실제 좌표와 충돌은 [`Sector01AreaCatalog.js`](../../../../../src/game/world/areas/sector01/Sector01AreaCatalog.js)의 `sector-01-02` 정의와 [승인 Blockout](./images/04_approved_blockout.svg)이 항상 일치해야 한다.
-3. [Scenario Art Reference](./images/05_scenario_art_reference.png)는 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 C02 `first-handoff` Runtime을 확인해 만든 대표 Gameplay Shot이다.
+3. [Scenario Art Reference](./images/06_scenario_art_reference.png)는 [Scenario Art 생성 규격](../../SCENARIO-ART-GENERATION-STANDARD.md)에 따라 C02 `first-handoff` Runtime과 승인 Blockout에서 구조 가이드를 만든 대표 Gameplay Shot이다.
 4. 기존 `01`, `02`, `03` PNG는 기록용이며 구현·외주·새 생성 입력에 첨부하지 않는다.
 5. 새 이미지와 Runtime의 오브젝트 수·Camera 정보가 다르면 이미지를 따라가지 않고 같은 변경에서 문서를 정렬한다.
 
@@ -30,13 +31,17 @@
 
 ### Scenario Art Reference
 
-![1-2 Scenario Art Reference](./images/05_scenario_art_reference.png)
+![1-2 Scenario Art Reference](./images/06_scenario_art_reference.png)
 
-`APPROVED ART REFERENCE`: C02 `first-handoff`, local Player Y `-512~-224`, Desktop Zoom `1.0`을 사용한다. 약 48px Player, inactive Anchor A와 current Anchor B 두 개, Player의 Grapple Arm에서 B로 이어지는 live Cyan Rope 한 줄, P1 Recovery와 정지한 Maintenance Lift의 정보 위계를 정한다. Anchor C/D·Crossbeam·Enemy·Wind·Augment·Panel·Gate와 전체 Route 선은 포함하지 않는다.
+`APPROVED ART REFERENCE`: C02 `first-handoff`, local Player Y `-512~-224`, Desktop Zoom `1.0`을 사용한다. B는 오른쪽 위, P1은 B 아래·A 위의 오른쪽 Recovery, A는 왼쪽 아래라는 Camera-space 구조를 고정한다. 약 48px Player, inactive Anchor A와 current Anchor B 두 개, Player의 Grapple Arm에서 B로 이어지는 live Cyan Rope 한 줄과 정지한 Maintenance Lift를 포함한다. Anchor C/D·Crossbeam·Enemy·Wind·Augment·Panel·Gate와 전체 Route 선은 포함하지 않는다.
 
-이 이미지는 조명·상대 크기·첫 Airborne Re-Attach의 Gameplay 가독성 기준이며 Platform 위치를 Runtime Collision으로 복제하지 않는다. 생성 기록과 사후 검수 결과는 [`images/README.md`](./images/README.md)에 보존한다.
+이 이미지는 World 좌표나 Collision의 권위 자료는 아니지만 선택한 C02 Shot에서 보이는 B·P1·A의 좌우·상하 관계와 P1 상대 폭은 Runtime과 일치해야 한다. 생성 기록과 사후 검수 결과는 [`images/README.md`](./images/README.md)에 보존한다.
 
 ### 이전 Art Reference
+
+![1-2 Retired Structure-Mismatch Art Reference](./images/05_scenario_art_reference.png)
+
+`RETIRED / STRUCTURE MISMATCH`: P1이 A보다 아래에 보여 실패 Recovery의 위치를 잘못 전달한다. 환경 분위기 기록으로만 보존하고 새 생성·구현·외주·검수 기준으로 사용하지 않는다.
 
 ![1-2 Retired Scenario Art Reference](./images/03_scenario_art_reference.png)
 
@@ -170,7 +175,7 @@ Recovery 중심은 P1 `(160, -312)`, P2 `(-192, -600)`, P3 `(160, -824)`다. 실
 | 지형·Anchor·Gate | Runtime Mock 연결 완료 | 승인 Blockout과 좌표 동기화 유지 |
 | Camera | 전 구간 공통 추적 | C01~C05 Zone Preset 연결 |
 | Story | Trigger 이름 보존 | 조건·문구·표시 시간을 Presentation에 연결 |
-| 그래픽 | C02 First Handoff 대표 Shot 승인 | 공용 Atlas용 Lift·Rail·Cable 모듈 제작, Player Character Master 승인 시 실루엣 재검수 |
+| 그래픽 | 구조 정합 C02 First Handoff 대표 Shot 승인 | 공용 Atlas용 Lift·Rail·Cable 모듈 제작, Player Character Master 승인 시 실루엣 재검수 |
 | 플레이테스트 | 자동 월드 검증 완료 | Safe/Flow Route와 공중 Attach 성공률 측정 |
 
 다음 Stage의 이미지도 `Scenario Art Reference + Approved Blockout` 역할을 분리하고, 생성 직전 해당 Runtime의 Camera·오브젝트·구현 상태를 확인한다.

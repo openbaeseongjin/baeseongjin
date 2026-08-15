@@ -3,11 +3,11 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 3459410153f9992cd1b6e460faea13830491424cac3b071b6f44c1b392f19e9d
+scenario-source-sha256: 30dced6a8298cc387a2cd8779c9a5319021ef315ff8c8f98338eae38529ec130
 authored-area-sha256: 020acd7ebf190ab63958c9c3ae17a32a0328caff6697c6b5805b9d992d5d8d2c
 stage-count: 25
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1
-reviewed-upstream: 0b179134a680ed70620c17b4eabdb7744d2e2f1c
+reviewed-upstream: decc0f6edfb9cf9dd8c22718115385de7e67668d
 -->
 
 ## 상태를 읽는 법
@@ -28,16 +28,16 @@ reviewed-upstream: 0b179134a680ed70620c17b4eabdb7744d2e2f1c
 
 ## 2026-08-15 확인 체크포인트
 
-- 확인 기준 upstream: `0b179134a680ed70620c17b4eabdb7744d2e2f1c` (`main == origin/main`, #489 artifact-rope-sentry 정리 전 clean base)
+- 확인 기준 upstream: `decc0f6edfb9cf9dd8c22718115385de7e67668d` (`origin/main`, #493 Rope Shot 비행·연결 표현 병합 뒤 clean base)
 - 상세 Stage 문서: **25개**, `1-1`부터 `3-8`까지와 `4-1`
 - 현재 authored Runtime: **16개**, `1-1 → 2-8`
-- 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1, `CurrentAuthoredAreaCatalog.js`, Sector 01 그래플 표면·랜드마크 1:1 계약, 구현 로드맵과 세션 핸드오프
+- 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1, `CurrentAuthoredAreaCatalog.js`, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02 Approved Blockout·Area Catalog·Scenario Art 구조 관계, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03·04 Runtime과 실제 플레이테스트. 두 Sector는 현재 catalog에 없으므로 완료로 표시하지 않는다.
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
-| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증 | 실제 Build 플레이 수치와 Scenario Art 정렬은 별도 검증 |
+| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증 | 1-1 C04·1-2 C02 Scenario Art 구조 정합 완료; 1-4·1-3 재생성과 실제 Build 플레이 수치 검증 필요 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED` | 2-3 Specialization의 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 전부 `NOT CONNECTED`; 3-1 순수 geometry는 `GRAYBOX READY` | Access Scan Field, Sector 03 catalog·Camera Zone·Stable ID·Story trigger, Sector 종료 전환 필요 |
 | Sector 04 / 4-1 | Master와 4-1 상세 Stage, `CROSS-REVIEWED` | `NOT CONNECTED`; 4-1 순수 geometry는 `GRAYBOX READY` | Post-Sector 03 Boss→4-1 진입을 확정하기 전 global order·entry wiring 금지 |
@@ -49,7 +49,7 @@ reviewed-upstream: 0b179134a680ed70620c17b4eabdb7744d2e2f1c
 1. Sector 03은 3-1~3-8 상세 문서와 통합 Master까지 확장됐다. 3-2 이후 핵심은 Access Scan Field에 의존하지만 Runtime prototype과 Sector 03 authored catalog는 아직 없다.
 2. Sector 04는 Transit / Infrastructure Master와 4-1 `TRANSIT INTAKE`가 추가됐다. 4-1은 Enemy·Scanner·Wind·Cutter·Moving Platform 없이 Rope momentum만 검증하므로 geometry 후보는 준비됐지만, Sector 03 종료 전환은 미정이다.
 3. #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Foundation ID와 Specialization ID의 의미 체계는 계속 분리한다.
-4. #478 Scenario Art 정렬 작업은 아직 열린 작업이다. 병합될 때 시나리오 source fingerprint와 이 문서의 아트·검증 상태를 다시 확인한다.
+4. #478은 1-1 C04와 1-2 C02에서 보이는 발판·Anchor의 좌우·상하 관계와 상대 폭을 Approved Blockout·Area Catalog에 맞춘 구조 가이드로 다시 생성했다. 이전 구조 불일치 이미지는 `RETIRED / STRUCTURE MISMATCH`로 보존하고 새 이미지를 현재 승인 기준으로 전환했다. Runtime Geometry와 Collision은 변경하지 않았으며, 남은 Scenario Art 권장 순서는 1-4 → 1-3이다.
 5. #487은 1-3·1-4·1-6·1-7·1-8에서 누락된 그래플 랜드마크 28개를 기존 target 좌표에 연결했다. 현재 102개 비렌더 그래플 표면은 모두 같은 ID·좌표 anchor의 보이는 object와 1:1이며, 누락·고아·좌표 불일치는 catalog validator와 authored world 회귀가 거부한다. Rope 후보 사거리·점수 계약은 변경하지 않았다.
 6. #489는 기존 글로벌 Artifact 시스템(ArtifactCatalog·Inventory·선택·network claim)을 은퇴하고 authored Foundation 선택을 유일한 특화 방향으로 확정했다. Checkpoint는 보상 선택을 열지 않는다. Rope 부착은 속도 1400px/s × 수명 2/7초에서 파생한 400px 도달의 보이는 Hook 투사체로 바뀌었고 `swingImpulse = 780`은 유지한다. Sentry 첫 수치는 체력 100·인식 거리 760·적 탄속 520·재사격 1.0초이며 authored activation/LOS가 인식을 계속 가린다. 시나리오 문서의 Rope 최대 부착/사거리 표현은 440에서 400으로 정렬했다.
 
