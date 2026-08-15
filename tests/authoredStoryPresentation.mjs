@@ -288,4 +288,146 @@ export function run() {
         ],
         ["RELAY LINK", "ONLINE"]
     );
+
+    const augmentTestBay = new AuthoredStoryPresentation();
+    assert.deepEqual(
+        [
+            augmentTestBay.update(0, { currentAreaId: "sector-01-05", currentAreaLocalY: -32 }).title,
+            augmentTestBay.snapshot().detail
+        ],
+        ["AUGMENT TEST BAY", "LIVE CALIBRATION"]
+    );
+    augmentTestBay.update(1.4, { currentAreaId: "sector-01-05", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            augmentTestBay.update(0, { currentAreaId: "sector-01-05", currentAreaLocalY: -700 }).title,
+            augmentTestBay.snapshot().detail
+        ],
+        ["VERTICAL LOAD TEST", "IN PROGRESS"]
+    );
+    assert.deepEqual(
+        [
+            augmentTestBay.update(1.1, { currentAreaId: "sector-01-05", currentAreaLocalY: -700 }).title,
+            augmentTestBay.snapshot().detail
+        ],
+        ["SECURITY RESPONSE TEST", "IN PROGRESS"]
+    );
+
+    const pressureBypass = new AuthoredStoryPresentation();
+    pressureBypass.update(0, { currentAreaId: "sector-01-07", currentAreaLocalY: -32 });
+    pressureBypass.update(1.4, { currentAreaId: "sector-01-07", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            pressureBypass.update(0, { currentAreaId: "sector-01-07", currentAreaLocalY: -700 }).title,
+            pressureBypass.snapshot().detail
+        ],
+        ["PRESSURE LIMIT", "EXCEEDED"]
+    );
+    pressureBypass.update(1.1, { currentAreaId: "sector-01-07", currentAreaLocalY: -700 });
+    assert.deepEqual(
+        [
+            pressureBypass.update(0, { currentAreaId: "sector-01-07", currentAreaLocalY: -800 }).title,
+            pressureBypass.snapshot().detail
+        ],
+        ["CONTAINMENT VIOLATION", "ACTIVE"]
+    );
+
+    const containmentGate = new AuthoredStoryPresentation();
+    containmentGate.update(0, { currentAreaId: "sector-01-08", currentAreaLocalY: -32 });
+    containmentGate.update(1.4, { currentAreaId: "sector-01-08", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            containmentGate.update(0, { currentAreaId: "sector-01-08", currentAreaLocalY: -500 }).title,
+            containmentGate.snapshot().detail
+        ],
+        ["FINAL WARNING", ""]
+    );
+    assert.deepEqual(
+        [
+            containmentGate.update(1.0, { currentAreaId: "sector-01-08", currentAreaLocalY: -500 }).title,
+            containmentGate.snapshot().detail
+        ],
+        ["RETURN TO LOWER MAINTENANCE", ""]
+    );
+    assert.deepEqual(
+        [
+            containmentGate.update(1.1, { currentAreaId: "sector-01-08", currentAreaLocalY: -500 }).title,
+            containmentGate.snapshot().detail
+        ],
+        ["CONTAINMENT GATE", "CLOSURE IN PROGRESS"]
+    );
+    containmentGate.update(1.3, { currentAreaId: "sector-01-08", currentAreaLocalY: -500 });
+    assert.deepEqual(
+        [
+            containmentGate.update(0, { currentAreaId: "sector-01-08", currentAreaLocalY: -1000 }).title,
+            containmentGate.snapshot().detail
+        ],
+        ["CONTAINMENT GATE", "LOCKDOWN · 87%"]
+    );
+    containmentGate.update(1.1, { currentAreaId: "sector-01-08", currentAreaLocalY: -1000 });
+    assert.deepEqual(
+        [
+            containmentGate.update(0, { currentAreaId: "sector-01-08", currentAreaLocalY: -1720 }).title,
+            containmentGate.snapshot().detail
+        ],
+        ["WORKER DISTRICT", "BLOCK 12"]
+    );
+
+    const patrolWalkway = new AuthoredStoryPresentation();
+    patrolWalkway.update(0, { currentAreaId: "sector-02-02", currentAreaLocalX: -320, currentAreaLocalY: -32 });
+    patrolWalkway.update(1.4, { currentAreaId: "sector-02-02", currentAreaLocalX: -320, currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            patrolWalkway.update(0, {
+                currentAreaId: "sector-02-02",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -256
+            }).title,
+            patrolWalkway.snapshot().detail
+        ],
+        ["SECURITY PATROL", "ACTIVE"]
+    );
+    assert.deepEqual(
+        [
+            patrolWalkway.update(1.1, {
+                currentAreaId: "sector-02-02",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -256
+            }).title,
+            patrolWalkway.snapshot().detail
+        ],
+        ["RESIDENTIAL TRANSIT", "RESTRICTED"]
+    );
+
+    const serviceNode = new AuthoredStoryPresentation();
+    serviceNode.update(0, { currentAreaId: "sector-02-03", currentAreaLocalX: 0, currentAreaLocalY: -32 });
+    serviceNode.update(1.4, { currentAreaId: "sector-02-03", currentAreaLocalX: 0, currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            serviceNode.update(0, { currentAreaId: "sector-02-03", currentAreaLocalX: 0, currentAreaLocalY: -384 })
+                .title,
+            serviceNode.snapshot().detail
+        ],
+        ["GRAPPLE DEVICE", "DETECTED"]
+    );
+    assert.deepEqual(
+        [
+            serviceNode.update(0.9, {
+                currentAreaId: "sector-02-03",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -384
+            }).title,
+            serviceNode.snapshot().detail
+        ],
+        ["EMERGENCY CONFIGURATION", "ACTIVE"]
+    );
+
+    const quietResidential = new AuthoredStoryPresentation();
+    assert.deepEqual(
+        [
+            quietResidential.update(0, { currentAreaId: "sector-02-06", currentAreaLocalY: -32 }).title,
+            quietResidential.snapshot().detail
+        ],
+        ["RESIDENTIAL BLOCKS", "12–18"]
+    );
 }

@@ -497,7 +497,12 @@ const area05 = defineArea({
     }),
     routes: ["base-safe", "impulse-express", "relay-express", "shear-control", "recovery"],
     storyTriggers: ["active-augment-display", "live-calibration", "cooling-access-preview"],
-    cameraZones: ["load-gap", "relay-spine", "live-security", "exit"],
+    cameraZones: [
+        cameraZone("load-gap", -544, 0, 1, 0.72),
+        cameraZone("relay-spine", -768, -544, 1.05, 0.74),
+        cameraZone("live-security", -1216, -768, 0.85, 0.66, { verticalPlayerRatio: 0.64 }),
+        cameraZone("exit", -1280, -1216, 1.15, 0.78)
+    ],
     cueIds: ["active-augment", "load-gap", "relay-spine", "live-sentry-geometry"]
 });
 
@@ -622,7 +627,13 @@ const area06 = defineArea({
         portalBottomY: -1344
     }),
     storyTriggers: ["airflow-unstable", "cooling-pressure-critical", "bypass-required"],
-    cameraZones: ["airflow-preview", "fan-a", "neutral-deck", "fan-b", "exit"],
+    cameraZones: [
+        cameraZone("airflow-preview", -320, 0, 1.15, 0.78),
+        cameraZone("fan-a", -640, -320, 0.9, 0.68, { verticalPlayerRatio: 0.6 }),
+        cameraZone("neutral-deck", -896, -640, 1.05, 0.74, { verticalPlayerRatio: 0.62 }),
+        cameraZone("fan-b", -1344, -896, 0.85, 0.64, { verticalPlayerRatio: 0.62 }),
+        cameraZone("exit", -1408, -1344, 1.15, 0.78)
+    ],
     cueIds: ["wind-direction", "fan-a-continuous", "fan-b-lull-warning-active-decay", "bypass-required"]
 });
 
@@ -746,7 +757,14 @@ const area07 = defineArea({
         "service-route-available"
     ],
     routes: ["safe", "flow", "recovery", "impulse", "relay", "shear"],
-    cameraZones: ["approach", "security-entry", "decision-frame", "pressure-crossing", "relief", "bypass"],
+    cameraZones: [
+        cameraZone("approach", -416, 0, 1.1, 0.76),
+        cameraZone("security-entry", -608, -416, 1, 0.74),
+        cameraZone("decision-frame", -832, -608, 0.8, 0.62, { verticalPlayerRatio: 0.66 }),
+        cameraZone("pressure-crossing", -1216, -832, 0.85, 0.64, { verticalPlayerRatio: 0.62 }),
+        cameraZone("relief", -1376, -1216, 1.05, 0.74),
+        cameraZone("bypass", -1536, -1376, 1.15, 0.78)
+    ],
     cueIds: ["pressure-valve-core", "vent-cycle", "sentry-pressure-overlap", "manual-bypass", "service-route-available"]
 });
 
@@ -885,15 +903,15 @@ const area08 = defineArea({
     ],
     routes: ["safe", "flow", "recovery", "impulse", "relay", "shear"],
     cameraZones: [
-        "intro",
-        "chain-ascent",
-        "turret-one",
-        "mid-relief",
-        "final-preview",
-        "final-crossing",
-        "gate",
-        "shutdown",
-        "worker-reveal"
+        cameraZone("intro", -288, 0, 1.15, 0.78),
+        cameraZone("chain-ascent", -640, -288, 1.05, 0.75),
+        cameraZone("turret-one", -1024, -640, 0.85, 0.64, { verticalPlayerRatio: 0.64 }),
+        cameraZone("mid-relief", -1088, -1024, 1.1, 0.76),
+        cameraZone("final-preview", -1344, -1088, 0.9, 0.66, { verticalPlayerRatio: 0.6 }),
+        cameraZone("final-crossing", -1504, -1344, 0.8, 0.6, { verticalPlayerRatio: 0.68 }),
+        cameraZone("gate", -1584, -1504, 1, 0.72),
+        cameraZone("shutdown", -1696, -1584, 0.95, 0.7),
+        cameraZone("worker-reveal", -1792, -1696, 1.15, 0.8)
     ],
     cueIds: [
         "containment-gate",
