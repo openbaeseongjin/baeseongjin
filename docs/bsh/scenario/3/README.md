@@ -478,6 +478,12 @@ scanner renderer cue
 network-consistent phase
 ```
 
+### Implementation Spec — READY, NOT YET BUILT
+
+이 Missing 목록을 해결하는 구체적인 구현 계획은 [`ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md)(설계 전체)와 [`ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md)(실행 지시서)에 이미 존재한다. 두 문서는 실제 코드(Rope Targeting, Owner Prediction, Authority Snapshot)를 대조해 작성됐으며, Scanner 구현 전에 먼저 고쳐야 하는 기존 Prediction Clock 경계조건(`ownerMotionTick < serverTick`)까지 식별했다.
+
+**중요**: 스펙이 존재한다는 것이 구현 완료를 의미하지 않는다. 두 문서 모두 현재 상태를 `NOT IMPLEMENTED — PROTOTYPE READY`로 명시한다. `STATIC FILTER = IMPLEMENTED` 판정은 그대로 유지되고, `DYNAMIC SCANNER = NOT IMPLEMENTED`도 실제 구현·테스트 PASS 전까지 그대로 유지된다.
+
 ### 금지 구현
 
 ```text

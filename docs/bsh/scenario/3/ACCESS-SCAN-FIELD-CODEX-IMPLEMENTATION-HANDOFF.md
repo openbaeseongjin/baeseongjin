@@ -15,6 +15,8 @@ Important:
 이 SHA 이후 `main`이 바뀌었다면 작업 시작 전에 최신 HEAD를 다시 확인하고,
 아래 Runtime 관련 파일에 변경이 있으면 먼저 diff를 읽고 지시서를 현재 코드에 맞게 재해석한다.
 
+> 이 문서는 실행 담당(Codex 등)에게 바로 전달하는 압축 지시서다. 설계 배경·대안 검토·전체 Architecture Decision은 [`ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md)를 참고한다. Sector 03 Master Plan의 구현 상태 판정은 [`README.md`](./README.md) §7을 참고한다.
+
 ---
 
 ## 0. 목표

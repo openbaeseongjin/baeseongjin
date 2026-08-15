@@ -327,6 +327,10 @@ frozen surface.grappleable 값을
 phase마다 mutation
 ```
 
+### UPDATE — Required Prototype Contract에 대한 실제 구현 스펙 존재
+
+이 감사 이후 위 Required Prototype Contract를 그대로 구체화한 [`ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md)와 실행 지시서 [`ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md)가 추가됐다. 이 감사가 "금지"로 명시한 `frozen surface.grappleable mutation`도 두 문서에서 동일하게 금지 항목으로 유지된다. §22 P2의 "Implement / prototype Access Scan Field" 항목은 이제 구체적인 실행 문서를 갖췄지만, **아직 실행되지 않았다** — 상태는 여전히 `IMPLEMENTATION DEPENDENCY`다.
+
 ---
 
 ## 5. Scanner Surface Invariant
@@ -1548,8 +1552,8 @@ adjacent NEXT / PREV references
 
 ### P2 — REQUIRED BEFORE RUNTIME INTEGRATION
 
-1. Implement / prototype Access Scan Field.
-2. Verify deterministic multiplayer Scanner Phase.
+1. Implement / prototype Access Scan Field. **Spec ready**: [`ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md) + [`ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md). Not yet executed.
+2. Verify deterministic multiplayer Scanner Phase. (spec covers this — see prediction clock parity requirement above)
 3. Verify current Rope attachment filter extension.
 4. Create Sector 03 authored area catalog.
 5. Integrate 3-1 → 3-8.
