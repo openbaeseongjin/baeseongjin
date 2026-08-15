@@ -187,6 +187,10 @@ FORBIDDEN
 
 ## 11. 현재 이미지 전환 판정
 
+REV 1.0 작성 시점에는 이 표가 Sector 01의 1-1~1-4만 다뤘다. Sector 01 나머지 Stage와 Sector 02·03 전체를 §10 상태값 기준으로 전수 확인해 아래에 반영한다(확인일 `2026-08-15 KST`).
+
+### Sector 01
+
 | 자료 | 현재 판정 | 다음 조치 |
 | --- | --- | --- |
 | Sector 01 공용 배경 | `APPROVED MOOD REFERENCE` | 환경 분위기에만 계속 사용 |
@@ -194,8 +198,27 @@ FORBIDDEN
 | 1-2 `05_scenario_art_reference.png` | `APPROVED ART REFERENCE` | C02 First Handoff의 Player 크기·A/B·B live Rope·P1·정지 Lift 위계 기준 |
 | 1-3 `03_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | live Rope와 경로 도식을 분리해 재생성 |
 | 1-4 `01_scenario_art_reference.png` | `TEMPORARY / PENDING REGENERATION` | Player 크기·실루엣과 Anchor 연결 의미를 통일해 재생성 |
+| 1-5 ~ 1-8 | `NEEDED` | `images/` 폴더 자체가 없음. Approved Blockout도 아직 없어([1-5](./1/1-5/PRODUCTION-ALIGNMENT.md)~[1-8](./1/1-8/PRODUCTION-ALIGNMENT.md) 판정 참고) Art Reference보다 Blockout 제작이 선행 과제다 |
 
-남은 재생성 순서는 Player 크기 편차가 가장 큰 `1-4 → 1-3`을 권장한다. 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다.
+남은 재생성 순서는 Player 크기 편차가 가장 큰 `1-4 → 1-3`을 권장하며, 각 이미지는 해당 Stage의 Runtime 구현 상태를 다시 확인한 뒤 별도 작업에서 만든다. 1-5~1-8은 Approved Blockout 확정이 먼저다.
+
+### Sector 02
+
+| 자료 | 현재 판정 | 다음 조치 |
+| --- | --- | --- |
+| Sector 02 공용 배경(`sector-02-background-reference.png`) | `TEMPORARY MOOD REFERENCE` | Sector 01처럼 `APPROVED MOOD REFERENCE`로 승격하려면 원본 출처·사용권 확인이 먼저([2/README.md](./2/README.md) §28 자산 상태와 동일한 유보 상태) |
+| 2-1 ~ 2-8 | `NEEDED` | 8개 Stage 전부 `images/` 폴더가 없다. Approved Blockout도 없어([2-1](./2/2-1/PRODUCTION-ALIGNMENT.md)~[2-8](./2/2-8/PRODUCTION-ALIGNMENT.md) 판정 참고) Art Reference보다 Blockout 제작이 선행 과제다 |
+
+### Sector 03
+
+| 자료 | 현재 판정 | 다음 조치 |
+| --- | --- | --- |
+| Sector 03 공용 배경 | `NEEDED` | 배경 레퍼런스 이미지 자체가 아직 없다 |
+| 3-1 ~ 3-8 | `HOLD` | Sector 03 Runtime Area·Camera Zone이 아직 없어(§19, `INTEGRATION-CROSS-VALIDATION-AUDIT.md` §19) Approved Art Reference 생성을 이 규격 자체가 보류시키고 있다. Runtime 통합 전까지 신규 생성 금지 |
+
+### 우선순위 요약
+
+Blockout·Runtime이 이미 있는 Sector 01의 재생성 대상(`1-3`, `1-4`)이 가장 먼저다. 다음은 Sector 01 1-5~1-8과 Sector 02 전체의 Approved Blockout 제작이며, Art Reference는 그 이후다. Sector 03은 Runtime 통합 전까지 규격상 생성 대상이 아니다.
 
 ## 12. 리소스 절약 원칙
 
