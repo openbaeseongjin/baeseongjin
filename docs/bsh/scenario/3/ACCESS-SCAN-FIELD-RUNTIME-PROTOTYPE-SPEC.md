@@ -24,6 +24,8 @@
 | Production Timing | HYPOTHESIS — 3-2 baseline initially |
 | Success Definition | authority + owner prediction match across normal, boundary, reconcile, and delayed-owner-motion cases |
 
+> 이 문서는 설계 전체를 다룬다. 실행 담당(Codex 등)에게 바로 전달할 압축된 지시서는 [`ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md)를 사용한다. Sector 03 Master Plan의 구현 상태 판정은 [`README.md`](./README.md) §7을 참고한다.
+
 ---
 
 ## 0. 목적
