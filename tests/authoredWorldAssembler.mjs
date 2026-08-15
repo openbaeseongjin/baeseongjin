@@ -146,7 +146,8 @@ export function run() {
             const expectedAnchor =
                 surface.kind === "grapple-target"
                     ? "center"
-                    : surface.kind === "sealed-door" || (surface.kind === "cover" && height > width)
+                    : surface.kind === "sealed-door" ||
+                        ((surface.kind === "cover" || surface.kind === "solid") && height > width)
                       ? "bottom-center"
                       : "top-center";
             assert.equal(

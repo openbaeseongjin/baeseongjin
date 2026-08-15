@@ -21,7 +21,7 @@ const DEFAULT_DEFINITIONS = {
         radius: 28,
         size: { width: 52, height: 62 }
     },
-    "world-object:wind-source": { renderMode: "mock-shape", color: "#67e8f9", radius: 24 },
+    "world-object:wind-source": { renderMode: "mock-shape", color: "#67e8f9", radius: 64 },
     "world-object:test-target": {
         renderMode: "mock-shape",
         color: "#a3e635",

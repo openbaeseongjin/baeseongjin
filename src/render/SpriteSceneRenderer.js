@@ -9,6 +9,7 @@ import {
     RopeRenderer,
     RopeShotRenderer,
     SwingRenderer,
+    WindParticleRenderer,
     WorldGeometryRenderer,
     localRopes,
     localShots,
@@ -72,6 +73,7 @@ export class SpriteSceneRenderer {
         const actorRenderers = new CameraWorldRenderer([
             new AuthoredAreaStructureRenderer(),
             new AuthoredWorldObjectRenderer(),
+            new WindParticleRenderer(),
             new AttachRangeRenderer(),
             new RopeRenderer(localRopes),
             new RopeRenderer(remoteRopes),

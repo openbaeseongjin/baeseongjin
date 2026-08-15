@@ -1,3 +1,7 @@
+import { WIND_CONFIG } from "../config.js";
+
+const GEOMETRY_EPSILON = 1e-7;
+
 export function pointInsideBounds(point, bounds) {
     return (
         point.x >= bounds.x &&
@@ -26,7 +30,68 @@ export function evaluateWindZone(zone, elapsedSeconds) {
     throw new Error(`Unknown wind mode '${zone.mode}'`);
 }
 
-export function sampleWorldForce(windZones, point, elapsedSeconds) {
+function zoneFalloffFactor(zone, point) {
+    const falloff = zone.falloff ?? WIND_CONFIG.defaultFalloff;
+    if (falloff <= 0) return 1;
+    const distanceToEdge = Math.min(
+        point.x - zone.bounds.x,
+        zone.bounds.x + zone.bounds.width - point.x,
+        point.y - zone.bounds.y,
+        zone.bounds.y + zone.bounds.height - point.y
+    );
+    if (distanceToEdge <= 0) return 0;
+    return Math.min(1, distanceToEdge / falloff);
+}
+
+function windOrigin(zone) {
+    const { bounds, direction } = zone;
+    const centerX = bounds.x + bounds.width * 0.5;
+    const centerY = bounds.y + bounds.height * 0.5;
+    if (direction.x < 0) return { x: bounds.x + bounds.width, y: centerY };
+    if (direction.x > 0) return { x: bounds.x, y: centerY };
+    if (direction.y < 0) return { x: centerX, y: bounds.y + bounds.height };
+    if (direction.y > 0) return { x: centerX, y: bounds.y };
+    return { x: centerX, y: centerY };
+}
+
+function crossProduct(a, b, c) {
+    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+function pointOnSegment(point, start, end) {
+    return (
+        Math.abs(crossProduct(start, end, point)) <= GEOMETRY_EPSILON &&
+        point.x >= Math.min(start.x, end.x) - GEOMETRY_EPSILON &&
+        point.x <= Math.max(start.x, end.x) + GEOMETRY_EPSILON &&
+        point.y >= Math.min(start.y, end.y) - GEOMETRY_EPSILON &&
+        point.y <= Math.max(start.y, end.y) + GEOMETRY_EPSILON
+    );
+}
+
+function segmentsIntersect(a, b, c, d) {
+    const abC = crossProduct(a, b, c);
+    const abD = crossProduct(a, b, d);
+    const cdA = crossProduct(c, d, a);
+    const cdB = crossProduct(c, d, b);
+    if (
+        ((abC > GEOMETRY_EPSILON && abD < -GEOMETRY_EPSILON) || (abC < -GEOMETRY_EPSILON && abD > GEOMETRY_EPSILON)) &&
+        ((cdA > GEOMETRY_EPSILON && cdB < -GEOMETRY_EPSILON) || (cdA < -GEOMETRY_EPSILON && cdB > GEOMETRY_EPSILON))
+    ) {
+        return true;
+    }
+    return pointOnSegment(c, a, b) || pointOnSegment(d, a, b) || pointOnSegment(a, c, d) || pointOnSegment(b, c, d);
+}
+
+function segmentIntersectsSurface(start, end, surface) {
+    const vertices = surface.vertices ?? [];
+    for (let index = 0; index < vertices.length; index += 1) {
+        if (segmentsIntersect(start, end, vertices[index], vertices[(index + 1) % vertices.length])) return true;
+    }
+    return false;
+}
+
+export function sampleWorldForce(windZones, point, elapsedSeconds, options = {}) {
+    const { occluders = [], shadowFactor = WIND_CONFIG.shadowFactor } = options;
     let x = 0;
     let y = 0;
     const activeZones = [];
@@ -35,8 +100,13 @@ export function sampleWorldForce(windZones, point, elapsedSeconds) {
         const state = evaluateWindZone(zone, elapsedSeconds);
         const directionLength = Math.hypot(zone.direction.x, zone.direction.y);
         if (directionLength <= 0) continue;
-        x += (zone.direction.x / directionLength) * zone.strength * state.multiplier;
-        y += (zone.direction.y / directionLength) * zone.strength * state.multiplier;
+        let factor = state.multiplier * zoneFalloffFactor(zone, point);
+        if (factor > 0 && occluders.length > 0) {
+            const occluded = occluders.some((surface) => segmentIntersectsSurface(windOrigin(zone), point, surface));
+            if (occluded) factor *= shadowFactor;
+        }
+        x += (zone.direction.x / directionLength) * zone.strength * factor;
+        y += (zone.direction.y / directionLength) * zone.strength * factor;
         activeZones.push(Object.freeze({ id: zone.id, ...state }));
     }
     return Object.freeze({ x, y, activeZones: Object.freeze(activeZones) });
@@ -45,5 +115,48 @@ export function sampleWorldForce(windZones, point, elapsedSeconds) {
 export function snapshotWindStates(windZones, elapsedSeconds) {
     return Object.freeze(
         windZones.map((zone) => Object.freeze({ id: zone.id, ...evaluateWindZone(zone, elapsedSeconds) }))
+    );
+}
+
+const BLADE_LULL_SPIN = 0.15;
+const BLADE_REST_SPIN = 0.15;
+
+export function windBladePhase(zone, elapsedSeconds) {
+    if (zone.mode === "continuous") return elapsedSeconds;
+    const { lull, warning, active, decay } = zone.cycle;
+    const duration = lull + warning + active + decay;
+    const cycles = Math.floor(elapsedSeconds / duration);
+    let phaseTime = elapsedSeconds - cycles * duration;
+    let spin = 0;
+    const lullTime = Math.min(phaseTime, lull);
+    spin += lullTime * BLADE_LULL_SPIN;
+    phaseTime -= lullTime;
+    if (phaseTime > 0) {
+        const warningTime = Math.min(phaseTime, warning);
+        spin += warningTime * BLADE_LULL_SPIN + (warningTime * warningTime * (1 - BLADE_LULL_SPIN)) / (2 * warning);
+        phaseTime -= warningTime;
+    }
+    if (phaseTime > 0) {
+        const activeTime = Math.min(phaseTime, active);
+        spin += activeTime;
+        phaseTime -= activeTime;
+    }
+    if (phaseTime > 0) {
+        const decayTime = Math.min(phaseTime, decay);
+        spin += decayTime - (decayTime * decayTime * (1 - BLADE_REST_SPIN)) / (2 * decay);
+    }
+    const cycleSpin =
+        lull * BLADE_LULL_SPIN +
+        warning * (BLADE_LULL_SPIN + (1 - BLADE_LULL_SPIN) / 2) +
+        active +
+        decay * (1 - (1 - BLADE_REST_SPIN) / 2);
+    return cycles * cycleSpin + spin;
+}
+
+export function windOccludingSurfaces(surfaces) {
+    return Object.freeze(
+        (surfaces ?? []).filter(
+            (surface) => surface.windOcclusion === true || (surface.collision !== false && surface.oneWay === false)
+        )
     );
 }

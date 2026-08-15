@@ -13,7 +13,7 @@ import {
 } from "../combat/CombatSystems.js";
 import { selectNearestEnemy } from "../combat/CombatTargeting.js";
 import { EnemyObject } from "../combat/EnemyObject.js";
-import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WORLD_CONFIG } from "../config.js";
+import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WIND_CONFIG, WORLD_CONFIG } from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";
 import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
@@ -30,7 +30,12 @@ import {
 import { generateWorld } from "../world/WorldGenerator.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
 import { collisionSurfacesForProgress } from "../world/WorldGateGeometry.js";
-import { pointInsideBounds, sampleWorldForce, snapshotWindStates } from "../world/WorldForceField.js";
+import {
+    pointInsideBounds,
+    sampleWorldForce,
+    snapshotWindStates,
+    windOccludingSurfaces
+} from "../world/WorldForceField.js";
 import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -112,6 +117,7 @@ export class GameSimulation {
             : generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
         this.worldProgress = worldCatalog ? new WorldProgressState(worldCatalog) : null;
         this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.windOccluders = windOccludingSurfaces(this.world.surfaces);
         this.elapsedSeconds = 0;
         this.metrics = new RunMetrics();
         this.registry = new EntityRegistry();
@@ -891,9 +897,12 @@ export class GameSimulation {
 
     #applyWorldForce(player, dt) {
         if (player.lifeState !== "active" || !this.world.windZones?.length) return;
-        const force = sampleWorldForce(this.world.windZones, player.physics.position, this.elapsedSeconds);
-        player.physics.velocity.x += force.x * dt;
-        player.physics.velocity.y += force.y * dt;
+        const force = sampleWorldForce(this.world.windZones, player.physics.position, this.elapsedSeconds, {
+            occluders: this.windOccluders
+        });
+        const groundedFactor = player.physics.isGrounded ? WIND_CONFIG.groundedFactor : 1;
+        player.physics.velocity.x += force.x * groundedFactor * dt;
+        player.physics.velocity.y += force.y * groundedFactor * dt;
     }
 
     #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0 } = {}) {

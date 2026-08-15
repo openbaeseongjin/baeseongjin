@@ -24,6 +24,94 @@ const ENTRY_PRESENTATIONS = Object.freeze({
             detail: "DETECTED",
             durationSeconds: 1.1
         })
+    ]),
+    "sector-01-05": Object.freeze([
+        Object.freeze({
+            id: "sector-01-05:live-calibration",
+            title: "AUGMENT TEST BAY",
+            detail: "LIVE CALIBRATION",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-01-06": Object.freeze([
+        Object.freeze({
+            id: "sector-01-06:airflow-unstable",
+            title: "COOLING DISTRIBUTION",
+            detail: "AIRFLOW UNSTABLE",
+            durationSeconds: 1.6
+        })
+    ]),
+    "sector-01-07": Object.freeze([
+        Object.freeze({
+            id: "sector-01-07:pressure-network",
+            title: "PRESSURE NETWORK",
+            detail: "UNSTABLE",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-01-08": Object.freeze([
+        Object.freeze({
+            id: "sector-01-08:containment-gate",
+            title: "CONTAINMENT GATE",
+            detail: "LOCKED",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-02-01": Object.freeze([
+        Object.freeze({
+            id: "sector-02-01:block-12-entry",
+            title: "WORKER BLOCK 12",
+            detail: "RESIDENTIAL COURTYARD",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-02-02": Object.freeze([
+        Object.freeze({
+            id: "sector-02-02:patrol-cycle",
+            title: "PATROL WALKWAY",
+            detail: "SECURITY STILL ACTIVE",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-02-03": Object.freeze([
+        Object.freeze({
+            id: "sector-02-03:foundation-detected",
+            title: "FOUNDATION AUGMENT",
+            detail: "DETECTED",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-02-04": Object.freeze([
+        Object.freeze({
+            id: "sector-02-04:residential-stack",
+            title: "RESIDENTIAL STACK",
+            detail: "MULTI-ROUTE HOUSING",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-02-05": Object.freeze([
+        Object.freeze({
+            id: "sector-02-05:upper-transit",
+            title: "EVACUATION WALKWAY",
+            detail: "UPPER TRANSIT RESTRICTED",
+            durationSeconds: 1.5
+        })
+    ]),
+    "sector-02-07": Object.freeze([
+        Object.freeze({
+            id: "sector-02-07:shelter-access",
+            title: "SHELTER ACCESS",
+            detail: "EVACUATION TRANSFER SUSPENDED",
+            durationSeconds: 1.5
+        })
+    ]),
+    "sector-02-08": Object.freeze([
+        Object.freeze({
+            id: "sector-02-08:evacuation-platform",
+            title: "EVACUATION PLATFORM",
+            detail: "GROUP C TRANSFER SUSPENDED",
+            durationSeconds: 1.5
+        })
     ])
 });
 
@@ -43,27 +131,6 @@ const POSITION_PRESENTATIONS = Object.freeze({
         })
     ]),
     "sector-01-03": Object.freeze([
-        Object.freeze({
-            token: "employee-scan",
-            minLocalX: -144,
-            maxLocalX: -48,
-            minLocalY: -160,
-            maxLocalY: 0,
-            presentations: Object.freeze([
-                Object.freeze({
-                    id: "sector-01-03:employee-verified",
-                    title: "EMPLOYEE VERIFIED",
-                    detail: "VERTICAL MAINTENANCE",
-                    durationSeconds: 1.1
-                }),
-                Object.freeze({
-                    id: "sector-01-03:assigned-sector",
-                    title: "ASSIGNED SECTOR",
-                    detail: "LOWER MAINTENANCE",
-                    durationSeconds: 1.1
-                })
-            ])
-        }),
         Object.freeze({
             token: "return-warning",
             minLocalX: 112,
@@ -133,6 +200,104 @@ const POSITION_PRESENTATIONS = Object.freeze({
                 })
             ])
         })
+    ]),
+    "sector-02-01": Object.freeze([
+        Object.freeze({
+            token: "community-notice",
+            minLocalX: 96,
+            maxLocalX: 224,
+            minLocalY: -1008,
+            maxLocalY: -896,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-02-01:community-notice",
+                    title: "COMMUNITY NOTICE",
+                    detail: "EVACUATION GROUP C",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-02-01:assembly-status",
+                    title: "ASSEMBLY: BLOCK 12",
+                    detail: "WAIT FOR FURTHER INSTRUCTION",
+                    durationSeconds: 1.3
+                })
+            ])
+        })
+    ]),
+    "sector-02-05": Object.freeze([
+        Object.freeze({
+            token: "evacuation-status",
+            minLocalX: 288,
+            maxLocalX: 416,
+            minLocalY: -768,
+            maxLocalY: -640,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-02-05:assembly-complete",
+                    title: "EVACUATION GROUP C",
+                    detail: "ASSEMBLY COMPLETE",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-02-05:transit-restricted",
+                    title: "TRANSFER AUTHORIZATION",
+                    detail: "PENDING",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-02-05:upper-transit",
+                    title: "UPPER TRANSIT ACCESS",
+                    detail: "RESTRICTED",
+                    durationSeconds: 1.1
+                })
+            ])
+        })
+    ]),
+    "sector-02-07": Object.freeze([
+        Object.freeze({
+            token: "shelter-status",
+            minLocalX: -64,
+            maxLocalX: 64,
+            minLocalY: -896,
+            maxLocalY: -752,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-02-07:shelter-capacity",
+                    title: "SHELTER CAPACITY",
+                    detail: "FULL",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-02-07:transfer-suspended",
+                    title: "EVACUATION TRANSFER",
+                    detail: "SUSPENDED",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-02-07:designated-area",
+                    title: "REMAIN IN",
+                    detail: "DESIGNATED AREA",
+                    durationSeconds: 1.2
+                })
+            ])
+        })
+    ])
+});
+
+const TRIGGER_CUE_PRESENTATIONS = Object.freeze({
+    "sector-01-03:employee-verified": Object.freeze([
+        Object.freeze({
+            id: "sector-01-03:employee-verified",
+            title: "EMPLOYEE VERIFIED",
+            detail: "VERTICAL MAINTENANCE",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-01-03:assigned-sector",
+            title: "ASSIGNED SECTOR",
+            detail: "LOWER MAINTENANCE",
+            durationSeconds: 1.1
+        })
     ])
 });
 
@@ -178,6 +343,88 @@ const OBJECTIVE_PRESENTATIONS = Object.freeze({
             detail: "OVERRIDE",
             durationSeconds: 0.9
         })
+    ]),
+    "sector-01-06:exit-panel-engaged": Object.freeze([
+        Object.freeze({
+            id: "sector-01-06:cooling-pressure",
+            title: "COOLING PRESSURE",
+            detail: "CRITICAL",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-01-06:automatic-bypass",
+            title: "AUTOMATIC BYPASS",
+            detail: "FAILED",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-01-06:manual-bypass",
+            title: "MANUAL PRESSURE BYPASS",
+            detail: "REQUIRED",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-01-07:bypass-open": Object.freeze([
+        Object.freeze({
+            id: "sector-01-07:pressure-stabilizing",
+            title: "PRESSURE",
+            detail: "STABILIZING",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-01-07:service-route",
+            title: "SERVICE ROUTE",
+            detail: "AVAILABLE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-01-08:maintenance-override": Object.freeze([
+        Object.freeze({
+            id: "sector-01-08:override-lock",
+            title: "OVERRIDE LOCK",
+            detail: "CONFIRM",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-01-08:lower-grid",
+            title: "LOWER GRID CONNECTION",
+            detail: "TERMINATING",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-02-03:specialization-selected": Object.freeze([
+        Object.freeze({
+            id: "sector-02-03:specialization-available",
+            title: "SPECIALIZATION",
+            detail: "AVAILABLE",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-02-03:specialization-pending",
+            title: "CALIBRATION PROTOCOL",
+            detail: "PENDING",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-02-08:transfer-control-read": Object.freeze([
+        Object.freeze({
+            id: "sector-02-08:group-a",
+            title: "EVACUATION GROUP A",
+            detail: "TRANSFER COMPLETE",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-02-08:group-b",
+            title: "EVACUATION GROUP B",
+            detail: "TRANSFER COMPLETE",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-02-08:group-c",
+            title: "EVACUATION GROUP C",
+            detail: "TRANSFER SUSPENDED",
+            durationSeconds: 1.3
+        })
     ])
 });
 
@@ -197,6 +444,46 @@ const GATE_PRESENTATIONS = Object.freeze({
             detail: "LOGGED",
             durationSeconds: 1.2
         })
+    ]),
+    "sector-01-05:gate": Object.freeze([
+        Object.freeze({
+            id: "sector-01-05:cooling-access",
+            title: "COOLING DISTRIBUTION",
+            detail: "SERVICE ACCESS",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-01-06:gate": Object.freeze([
+        Object.freeze({
+            id: "sector-01-06:bypass-required",
+            title: "PRESSURE BYPASS",
+            detail: "SERVICE ACCESS",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-01-07:gate": Object.freeze([
+        Object.freeze({
+            id: "sector-01-07:containment-route",
+            title: "SERVICE ROUTE",
+            detail: "AVAILABLE",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-01-08:gate": Object.freeze([
+        Object.freeze({
+            id: "sector-01-08:worker-district",
+            title: "WORKER DISTRICT",
+            detail: "ACCESS OPEN",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-02-08:gate": Object.freeze([
+        Object.freeze({
+            id: "sector-02-08:commercial-transfer",
+            title: "COMMERCIAL TRANSFER",
+            detail: "SERVICE ACCESS",
+            durationSeconds: 1.3
+        })
     ])
 });
 
@@ -209,6 +496,17 @@ function positionMatches(trigger, localX, localY) {
     return (
         insideOptionalRange(localX, trigger.minLocalX, trigger.maxLocalX) &&
         insideOptionalRange(localY, trigger.minLocalY, trigger.maxLocalY)
+    );
+}
+
+function triggerInsideBounds(triggerObject, localX, localY) {
+    if (!triggerObject?.bounds || !Number.isFinite(localX) || !Number.isFinite(localY)) return false;
+    const { bounds } = triggerObject;
+    return (
+        localX >= bounds.x &&
+        localX <= bounds.x + bounds.width &&
+        localY >= bounds.y &&
+        localY <= bounds.y + bounds.height
     );
 }
 
@@ -261,7 +559,10 @@ export class AuthoredStoryPresentation {
         }
     }
 
-    update(dt, { currentAreaId = null, currentAreaLocalX = null, currentAreaLocalY = null, events = [] } = {}) {
+    update(
+        dt,
+        { currentAreaId = null, currentAreaLocalX = null, currentAreaLocalY = null, events = [], triggers = [] } = {}
+    ) {
         if (currentAreaId !== this.currentAreaId) {
             this.currentAreaId = currentAreaId;
             this.#enqueue(`area:${currentAreaId}`, ENTRY_PRESENTATIONS[currentAreaId]);
@@ -269,6 +570,13 @@ export class AuthoredStoryPresentation {
         for (const trigger of POSITION_PRESENTATIONS[currentAreaId] ?? []) {
             if (positionMatches(trigger, currentAreaLocalX, currentAreaLocalY)) {
                 this.#enqueue(`position:${currentAreaId}:${trigger.token}`, trigger.presentations);
+            }
+        }
+        for (const triggerObject of triggers) {
+            if (triggerInsideBounds(triggerObject, currentAreaLocalX, currentAreaLocalY)) {
+                for (const cueId of triggerObject.cueIds ?? []) {
+                    this.#enqueue(`trigger:${cueId}`, TRIGGER_CUE_PRESENTATIONS[cueId]);
+                }
             }
         }
         for (const event of events) {
