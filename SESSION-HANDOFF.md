@@ -14,7 +14,7 @@
 
 ## 현재 구현
 
-- `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.agents/skills/github-task-flow/SKILL.md`를 따른다. 같은 저장소를 여러 Codex 작업이 동시에 개발할 때는 `.agents/skills/coordinate-github-tasks/SKILL.md`로 checkout·실제 diff·심볼·공개 계약 중첩을 확인하고 작업 메시지와 연결된 Issue 댓글에서 단일 소유자·의존 관계·병합 순서를 합의한다. 같은 checkout은 선행 작업이 병합될 때까지 Git 게시 단계를 직렬화하며, 반복 기준은 `docs/development-rules.md`의 **동시 Codex 작업과 GitHub 범위 조정**을 따른다.
+- `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.agents/skills/github-task-flow/SKILL.md`를 따른다. 개발 효율 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 검증은 base SHA·diff fingerprint ledger의 단일 소유자가 수행하고 같은 candidate의 fresh PASS를 역할별로 반복하지 않는다. 같은 저장소의 독립 작업은 별도 Git worktree를 기본으로 즉시 병렬 진행하며, 실제 같은 hunk·public contract dependency가 있을 때만 직렬화한다. 범위·검증·worktree 반복 기준은 `docs/development-rules.md`의 **효율 우선 실행과 검증 예산**, **동시 Codex 작업과 GitHub 범위 조정** 및 관련 Skill을 따른다.
 - 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(속도 1400px/s × 수명 2/7초 = 400px 도달), 재발사 0.20초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
 - 현재 기본 런은 하나의 연속 월드에 Sector 01·02의 저작 영역 16개를 순서대로 조립하며, 모든 표면 로프 부착과 수평 발판 아래→위 통과를 유지한다.
 - seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
@@ -343,7 +343,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 ### [L1] 모든 PR은 최신 main에 rebase한 뒤 병합한다
 
-- 병합 직전에 전용 작업 브랜치를 최신 `origin/main` 위로 rebase하고 필수 검사를 다시 실행한다. 검증 뒤 `main`이 전진하면 같은 절차를 반복한다.
+- 병합 직전에 전용 작업 브랜치를 최신 `origin/main` 위로 rebase하고 final candidate의 필수 검사 ledger를 완성한다. 같은 base·diff fingerprint·환경의 fresh PASS는 반복하지 않고, `main`이 전진하면 rebase로 실제 영향받은 ledger 항목만 무효화한다.
 - 이미 push한 단일 소유 전용 브랜치는 `--force-with-lease`로만 갱신할 수 있다. `main`과 공유 브랜치는 재작성하지 않는다.
 - 브랜치 rebase 뒤에도 PR은 별도 결정이 없는 한 일반 merge commit으로 병합한다. 실행 절차와 검증 기준은 `docs/development-rules.md`의 Git 운영 규칙을 따른다.
 

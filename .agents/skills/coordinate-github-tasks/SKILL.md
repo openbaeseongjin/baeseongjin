@@ -5,7 +5,7 @@ description: "같은 GitHub 저장소를 동시에 개발하는 여러 Codex 앱
 
 # GitHub 작업 간 조정
 
-같은 저장소의 병렬 작업을 멈추지 않으면서 공유 checkout과 파일·심볼·공개 계약의 쓰기 소유권을 한 곳으로 모은다. Codex 작업 메시지는 즉시 조정에, GitHub Issue 댓글은 지속 가능한 합의 기록에 사용한다.
+같은 저장소의 병렬 작업을 멈추지 않으면서 checkout과 파일·심볼·공개 계약의 쓰기 소유권을 한 곳으로 모은다. 독립 작업은 별도 worktree를 기본으로 하고, 실제 공유 경계가 있을 때만 의존 순서를 만든다. Codex 작업 메시지는 즉시 조정에, GitHub Issue 댓글은 지속 가능한 합의 기록에 사용한다.
 
 ## 호출 계약
 
@@ -24,6 +24,7 @@ COORDINATION-CARD v1
 repository: <owner/name>
 thread: <thread id>
 checkout: <정규화한 cwd와 shared-checkout|worktree>
+isolation: <separate-worktree|shared-checkout과 그 이유>
 issue: <#number 또는 pending>
 branch: <branch 또는 pending>
 goal: <한 문장>
@@ -32,6 +33,7 @@ owned-paths: <현재 수정하거나 수정할 경로>
 owned-symbols: <공유 파일 안에서 소유할 심볼·구간>
 contracts: <schema, public API, fixture, 기준 문서 또는 none>
 depends-on: <issue/thread 또는 none>
+wait-reason: <실제 hunk·contract dependency 또는 none>
 verification: <완료·예정 검증>
 ```
 
@@ -52,11 +54,12 @@ Codex 작업 도구가 없는 환경에서는 열린 Issue·PR, branch와 diff�
 ## 3. checkout 소유권을 먼저 정한다
 
 - 같은 저장소의 두 작업이 정규화한 `cwd`까지 같으면 `shared-checkout`, 서로 다른 Codex worktree면 `worktree`로 분류한다.
+- 새 작업이 독립 경로·심볼·계약을 소유하면 별도 `worktree`와 독립 브랜치를 기본으로 만든다. 같은 저장소라는 이유만으로 기존 shared checkout의 병합을 기다리지 않는다. worktree는 기존 Git object database를 공유하므로 저장소 전체를 다시 clone하지 않는다.
+- `shared-checkout`은 사용자가 같은 폴더를 요구했거나 환경상 worktree를 만들 수 없거나, 두 작업이 실제 같은 hunk·공개 계약을 순서대로 변경해야 할 때만 사용한다. 카드의 `isolation`과 `wait-reason`에 이유를 기록한다.
 - `shared-checkout`에서는 브랜치 전환·stash·stage·commit·rebase와 작업 트리를 모든 대화가 공유한다. 현재 Issue 브랜치의 소유 작업 한 곳만 편집과 Git 게시 단계를 진행한다.
-- 후행 작업은 자기 변경이 이미 섞였으면 상대 작업의 hunk를 보존하며 자기 hunk만 제거하고, 선행 작업이 clean `main`과 merge SHA를 전달할 때까지 읽기 전용 조사·계획만 수행한다.
-- 선행 병합 뒤 `HEAD == origin/main == 전달된 merge SHA`와 clean worktree를 확인한 다음 후행 작업의 Issue·브랜치·편집을 시작한다.
-- 별도 `worktree`는 아래 범위 조정 결과 안에서 병렬 편집과 독립 브랜치를 유지할 수 있다.
-- 실행 중인 작업을 자동으로 interrupt하거나 다른 worktree로 handoff하지 않는다. 진짜 병렬 편집을 위해 작업 이동이 필요하면 사용자에게 명시적인 권한을 받는다.
+- shared checkout의 후행 작업은 자기 변경이 이미 섞였으면 상대 작업의 hunk를 보존하며 자기 hunk만 제거하고, 실제 dependency가 해소될 때까지 읽기 전용 조사·계획만 수행한다. 단순히 같은 저장소이거나 파일명이 인접하다는 이유로 대기시키지 않는다.
+- 실제 선행 계약에 의존하면 merge SHA를 받은 뒤 자기 worktree에서 최신 `origin/main`에 rebase하고 재개한다. 의존하지 않으면 별도 worktree에서 즉시 병렬 진행하고 merge-order를 `independent`로 둔다.
+- 이미 실행 중인 작업을 자동 interrupt하거나 다른 worktree로 이동하지 않는다. 이동이 필요하면 사용자에게 권한을 받되, 아직 편집을 시작하지 않은 새 작업의 별도 worktree 생성에는 추가 확인을 요구하지 않는다.
 
 ## 4. 증거로 중첩을 분류한다
 
@@ -80,7 +83,7 @@ Codex 작업 도구가 없는 환경에서는 열린 Issue·PR, branch와 diff�
 - `file`은 각 작업이 소유할 심볼을 명시한다. 같은 hunk를 두 작업이 모두 고치지 않게 하고, 공통 hunk는 한 작업이 양쪽 요구를 함께 반영한다.
 - `contract`은 계약 소유 작업이 schema·public API·fixture·기준 문서를 함께 변경한다. 의존 작업은 필요한 소비자 요구와 테스트 사례를 메시지로 넘기고 해당 경계를 중복 수정하지 않는다.
 - `duplicate`는 주 Issue가 다른 Issue의 완료 조건과 고유 테스트를 흡수한 뒤 보조 작업이 중복 구현을 중단한다. 고유 변경을 잃지 않았다는 확인 전에는 보조 Issue를 닫지 않는다.
-- 선행 작업을 먼저 병합하고 의존 작업은 최신 `origin/main`에 rebase한 뒤 자기 변경과 검증을 다시 수행한다. 다른 작업의 커밋을 복사해 별도 계보를 만들지 않는다.
+- 실제 dependency가 있으면 선행 작업을 먼저 병합하고 의존 작업은 최신 `origin/main`에 rebase한다. 선행 변경으로 영향받은 verification ledger 항목만 무효화하며, 다른 작업의 커밋을 복사해 별도 계보를 만들지 않는다.
 
 영향받는 모든 작업에 다음 결정을 보내고 `ACK` 또는 구체적인 수정 요청을 받는다.
 
@@ -88,8 +91,10 @@ Codex 작업 도구가 없는 환경에서는 열린 Issue·PR, branch와 diff�
 COORDINATION-DECISION v1
 issues: <#A, #B>
 overlap: <등급과 근거>
+isolation: <각 작업의 worktree 또는 shared-checkout과 이유>
 owner: <공유 경계 소유 작업과 경로·심볼>
 dependent: <대기하거나 재조정할 작업과 범위>
+wait-reason: <실제 dependency 또는 none>
 merge-order: <#A -> #B 또는 independent>
 recheck: <다시 확인할 시점>
 ```
@@ -122,7 +127,9 @@ Issue가 `pending`이면 작업 메시지에서 임시 합의하고, Issue 생�
 2. 관련 파일을 stage하고 Lore 커밋을 만들기 전
 3. 최종 `origin/main` rebase와 병합 직전
 
-범위가 넓어지거나 새 작업이 같은 경계에 들어오면 분류와 합의를 갱신한다. 선행 PR이 병합됐으면 의존 작업이 fetch·rebase·재검증을 끝내기 전 병합하지 않는다. 완료 뒤 Issue 댓글에 `resolved`와 남은 의존성을 추가하고 원래 합의 기록은 보존한다.
+범위가 넓어지거나 새 작업이 같은 경계에 들어오면 분류와 합의를 갱신한다. 선행 PR이 병합됐으면 의존 작업이 fetch·rebase와 영향받은 ledger 재검증을 끝내기 전 병합하지 않는다. 완료 뒤 Issue 댓글에 `resolved`와 남은 의존성을 추가하고 원래 합의 기록은 보존한다.
+
+`none` 또는 `related`이고 별도 worktree를 사용하는 작업은 매 시점에 긴 카드 교환과 ACK 대기를 반복하지 않는다. checkout·diff·계약이 여전히 분리됐는지만 확인하고, 범위 변화가 생길 때만 전체 조정을 다시 연다.
 
 ## 완료 보고
 
