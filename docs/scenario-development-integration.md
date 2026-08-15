@@ -4,7 +4,7 @@
 
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 2bfaadcfe2e9be1e22a2b363fd52e7aea7928bfb5d3dda26a7e4dadbdb1cba8e
-authored-area-sha256: dcf096a444dd857c6691c6b49b4466863e63cdc5bfae889fbe6e7ef4f35ea203
+authored-area-sha256: 63a43aeca5a5abe1ec6ca7806f46e447cd4f7bcc9d0c735bb1ba465b081d5fb0
 stage-count: 32
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8
 reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
@@ -39,7 +39,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 | --- | --- | --- | --- |
 | Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증; #507이 Wind·Story·2-3 진행을 보강 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요; Camera Zone·남은 Position Story Trigger는 [구현 준비 문서](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) 작성 완료, 코드 반영 대기 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 남은 Story Presentation 공백 3건은 [구현 준비 문서](./bsh/scenario/2/STORY-IMPLEMENTATION-HANDOFF.md) 작성 완료, 코드 반영 대기; 2-3 Specialization 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
-| Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | Access Scan Field 런타임 구현 완료; 3-1~3-8 catalog는 `NOT CONNECTED`(3-1 순수 geometry만 `GRAYBOX READY`) | Sector 03 catalog·Camera Zone·Stable ID·Story trigger, Sector 종료 전환 필요 |
+| Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525) | Camera Zone·Story trigger는 코드 반영 대기, Post-Sector 03 Boss→3-8/4-1 전환 미정 |
 | Sector 04 / 4-1~4-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-4는 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519); 4-5~4-8은 `NOT CONNECTED` | Post-Sector 03 Boss→4-1 전환, Sector 04 catalog·Camera·Stable ID가 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증; Master의 상세 문서 범위 문구 재정렬 필요 |
 | Sector 05~06 | 상세 Stage 없음 | `NOT CONNECTED` | NPC 역할·대화 계약과 엔딩·최종 전환 계약 필요 |
 
@@ -66,6 +66,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 19. #519는 4-4 `INFRASTRUCTURE SERVICE NODE`(REST)를 추가했다. A1~A5 grapple target과 P0/P1/P2/R1/P3/P4 발판, `routing-status-display`(story-display, 상호작용 없음)를 저작했다. Enemy·Wind·Cutter 없음. 4-3 Gate는 4-4로 재배선했고 4-4는 content-boundary다.
 20. Sector 04 catalog(4-1~4-4)를 메인 월드에 잇기 전에 먼저 Sector 03(Access Scan Field → 3-1~3-8)을 구현하기로 했다. 이 과정에서 4-2·4-3 Gate/패널의 문서 좌표가 최종 데크를 벗어나던 것을 데크 위(`bottom-center`가 visible floor top에 닿도록)로 보정했다. 개발용 디버그 모드(`?start=<areaId>` 맵 선택 + 기존 `?metrics=1`)를 추가했다.
 21. Access Scan Field 런타임 Prototype을 구현했다. `src/game/world/AccessScanField.js`에 AVAILABLE 1.5/WARNING 0.6/LOCKED 1.1/RESET 0.3의 결정적 phase evaluator를 두고, `AreaDefinition.scannerGroups` authoring과 `AuthoredWorldAssembler`의 controlled surface `grappleAccessGroup` stamping·검증을 추가했다. `RopePointerInput.findRopeAttachment()`에 optional dynamic `canAttachToSurface` predicate를 추가하고 `GameSimulation`이 같은 tick의 scanner state를 live-input·prediction-restore 양쪽에 전달한다. LOCKED/RESET은 새 attach만 차단하며 이미 붙은 Rope는 끊지 않는다. delayed owner-motion에서 `worldElapsedSeconds` clock이 서버 시계와 어긋나던 문제를 `rebaseElapsedSeconds`로 수정했다. Phase는 network event로 복제하지 않는다.
+22. Sector 03 authored catalog(3-1~3-8)를 standalone으로 구현하고 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. 3-1 `POWERED PROMENADE`(무적), 3-2 `SCANNER GALLERY`(첫 scanner), 3-3·3-4·3-6·3-7 `scanner+Patrol Drone`, 3-5 `SERVICE NODE`(rest), 3-8 `UPPER MARKET GATE`(2 Drone + 4 controlled surface, content-boundary)를 저작했다. 3-8은 Post-Sector 03 Boss/전환(TBD)까지 content-boundary며 3-8→4-1 직접 연결은 확정하지 않는다. Camera Zone·Story trigger 코드 반영은 후속이다.
 
 ## 열린 기획·구현 게이트
 
