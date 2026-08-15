@@ -106,6 +106,12 @@ gh api user
 - 포함할 변경
 - 제외할 변경
 
+## 범위 예산
+
+- 소유 경로 또는 경로 그룹
+- 허용 변경 범주: 구현·테스트·기준 문서·운영
+- 범위를 넘을 때 분리할 후속 작업
+
 ## 완료 조건
 
 - [ ] 검증 가능한 조건
@@ -124,7 +130,8 @@ gh api user
 Issue 생성 뒤 전용 브랜치를 만들기 전에 `.agents/skills/coordinate-github-tasks/SKILL.md`를 적용한다.
 
 - 같은 저장소의 다른 활성 작업과 범위 카드를 교환하고 checkout·실제 diff·예정 심볼·공개 계약을 대조한다.
-- 같은 checkout은 한 작업만 편집과 Git 게시 단계를 소유한다. 후행 작업은 선행 merge SHA와 clean `main`을 확인한 뒤 자기 Issue 브랜치를 만든다.
+- 같은 checkout에 다른 작업이 있으면 실제 hunk·contract dependency를 먼저 확인한다. 독립 범위면 기다리지 않고 별도 worktree와 Issue 브랜치를 만든다.
+- shared checkout 직렬화는 worktree를 만들 수 없거나 실제 공유 hunk·contract 순서가 있을 때만 사용하고, 대기 이유를 조정 카드에 기록한다.
 - 별도 worktree에서 겹치는 공유 경계에는 단일 소유자, 의존 작업과 병합 순서를 정하고 양쪽 Issue 댓글에 기록한다.
 - 겹침이 없으면 조정 부재만 기록하고 독립 진행한다.
 - Lore 커밋 직전과 최종 rebase·병합 직전에 범위가 합의를 벗어나지 않았는지 다시 확인한다.
@@ -132,19 +139,22 @@ Issue 생성 뒤 전용 브랜치를 만들기 전에 `.agents/skills/coordinate
 
 ## 3. 이슈 브랜치 생성
 
-1. 미커밋 변경은 미추적 파일까지 포함해 복구 가능한 임시 stash로 보관한다.
+1. 현재 변경이 이 작업 소유인지, 다른 작업과 checkout을 공유하는지 확인한다. 다른 작업의 변경을 stash하거나 이동하지 않는다.
 2. `git fetch origin main`을 실행한다.
-3. `origin/main`에서 `issue/<number>-<slug>` 브랜치를 만든다.
-4. 임시 stash를 복원하고 충돌 여부를 확인한다.
-5. 브랜치가 정확한 Issue 번호를 포함하는지 확인한다.
+3. 현재 checkout이 이 작업의 독점 checkout이면 `origin/main`에서 `issue/<number>-<slug>` 브랜치를 만든다. 이 작업의 미커밋 변경이 있으면 미추적 파일까지 복구 가능한 임시 stash로 보관한 뒤 자기 변경만 복원한다.
+4. 현재 checkout을 다른 작업이 사용하고 범위가 독립이면 새 경로에 `git worktree add -b issue/<number>-<slug> <path> origin/main`으로 전용 worktree를 만든다. Git object database를 공유하므로 별도 clone을 만들지 않는다.
+5. 실제 공유 hunk·contract dependency가 있으면 조정 결정의 선행 merge SHA를 기다렸다가 별도 worktree를 만든다. 단순 same-repository 상태는 대기 사유가 아니다.
+6. 브랜치가 정확한 Issue 번호를 포함하고 checkout의 path·branch 소유권이 조정 카드와 일치하는지 확인한다.
 
 slug는 영문 소문자, 숫자, 하이픈만 사용하고 40자 이내로 유지한다.
 
 ## 4. 구현과 검증
 
 - 요청된 변경만 구현한다.
-- 위험도에 맞춰 테스트, lint, typecheck, 정적 분석을 실행한다.
-- 실패한 검증이 있으면 수정 후 다시 실행한다.
+- Issue의 범위 예산을 지킨다. 새 경로 그룹·변경 범주·공개 계약이 필요하면 자동으로 넓히지 않고 Issue 범위를 갱신하거나 후속 Issue로 분리한다.
+- base SHA와 diff fingerprint별 검증 ledger를 유지한다. 각 command에는 단일 소유자, 결과와 재실행 조건을 기록한다.
+- 구현 반복 중에는 위험도에 맞는 focused test, lint, typecheck와 정적 분석만 실행한다. 전체 suite는 안정화된 candidate의 최종 검증 단계에서 한 번 실행한다.
+- 실패한 전체 suite는 가장 작은 관련 명령으로 재현·수리한 뒤, 관련 입력이 바뀐 경우에만 다시 실행한다.
 - `git diff --check`와 최종 diff 검토를 포함한다.
 - Issue 완료 조건과 실제 diff가 일치하는지 확인한다.
 
@@ -191,11 +201,12 @@ Not-tested: <남은 검증 또는 None>
 2. 동시 작업 조정 합의와 연결된 Issue·PR을 다시 확인한다. 선행 작업이 남았거나 checkout·공유 경계 소유권이 바뀌었으면 먼저 재조정한다.
 3. 현재 브랜치가 Issue 전용 단일 소유 브랜치인지 확인한다. 공유 브랜치이거나 소유 여부가 불명확하면 기록을 재작성하지 말고 blocker를 보고한다.
 4. `git rebase origin/main`을 실행한다. 충돌은 작업 범위 안에서 해결하고 관련 없는 변경을 버리지 않는다.
-5. 최종 rebase 뒤 4절의 필수 검사를 모두 다시 실행하고 `git diff --check`를 통과시킨다.
-6. `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다.
-7. 이미 push한 전용 브랜치의 SHA가 바뀌었으면 원격 tip을 확인한 뒤 `git push --force-with-lease`로만 갱신한다. `--force`를 사용하지 않는다.
-8. PR의 필수 검사, 승인과 mergeable 상태를 다시 확인한다.
-9. 실제 병합 직전에 `git fetch origin main`을 한 번 더 실행한다. `origin/main`이 기록한 SHA보다 전진했으면 4~8단계를 반복한다.
+5. 최종 rebase 뒤 base SHA와 diff fingerprint를 ledger에 기록한다. 이 candidate에 아직 fresh PASS가 없는 필수 검사만 실행하고 `git diff --check`를 통과시킨다. 저장소가 요구하는 전체 suite는 이 시점의 단일 소유자가 한 번 실행한다.
+6. rebase가 no-op이고 base·diff·의존 환경이 기존 ledger와 같으면 같은 전체 suite를 반복하지 않는다. base가 바뀌었더라도 변경이 문서·메타데이터뿐이고 저장소 규칙이 재실행을 요구하지 않으면 영향받는 검사만 실행한다.
+7. `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다.
+8. 이미 push한 전용 브랜치의 SHA가 바뀌었으면 원격 tip을 확인한 뒤 `git push --force-with-lease`로만 갱신한다. `--force`를 사용하지 않는다.
+9. PR의 필수 검사, 승인과 mergeable 상태를 다시 확인한다.
+10. 실제 병합 직전에 `git fetch origin main`을 한 번 더 실행한다. `origin/main`이 기록한 SHA보다 전진했으면 rebase하고 영향받은 ledger 항목만 무효화한다. 관련 코드·테스트·설정 또는 저장소 필수 규칙이 요구할 때만 전체 suite를 다시 실행한다.
 
 rebase 충돌, 실패한 재검증 또는 최신 base 확인 실패를 우회해 stale 브랜치를 병합하지 않는다. 이 절의 브랜치 rebase는 GitHub의 rebase merge 방식과 다르며, 병합 자체는 8절의 일반 merge commit을 사용한다.
 
@@ -219,6 +230,7 @@ rebase 충돌, 실패한 재검증 또는 최신 base 확인 실패를 우회해
 - Commit: SHA와 제목
 - PR: 번호와 URL
 - Checks: 통과 항목 또는 blocker
+- Verification ledger: 최종 base SHA·diff fingerprint, 전체 suite 단일 소유자와 재사용한 증거
 - Rebase: 최종 `origin/main` SHA와 `--force-with-lease` 사용 여부
 - Merge: Lore 커밋 SHA, merge commit SHA, 일반 merge 방식
 - Post-merge: 기준 문서가 요구한 운영·배포 검증 결과 또는 해당 없음

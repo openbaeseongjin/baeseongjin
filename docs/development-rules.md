@@ -38,6 +38,19 @@
 - 구현·수정·조사·검토·계획·정리·위임·병렬 작업이라는 표현만으로는 활성화하지 않는다. 스킬 자체를 설명·설정·문제 해결·편집하려는 요청도 운영 호출이 아니다.
 - 음성 사례를 검증할 때는 핸드오프 문서와 `.handoffs/` 변경이 생기지 않는지 확인한다. 명시 호출 사례에서만 저장된 마스터 프롬프트와 복사용 한 줄을 생성한다.
 
+### 효율 우선 실행과 검증 예산
+
+개발 작업의 시간 낭비를 줄이는 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 빠른 실행을 이유로 검증 기준을 낮추지 않고, 같은 증거와 불필요한 대기만 제거한다.
+
+- 시작 전에 `scope budget`을 적는다. 최소 항목은 소유 경로 또는 경로 그룹, 허용 변경 범주(`구현`, `테스트`, `기준 문서`, `운영`), 직접 갱신할 기준 문서, 명시적 비범위다.
+- 발견한 문제가 새 경로 그룹·변경 범주·공개 계약을 요구하면 조용히 범위를 넓히지 않는다. 현재 결과에 필수면 범위와 완료 조건을 명시적으로 갱신하고, 독립 정리라면 후속 작업으로 분리한다. 런타임 수정과 저장소 전체 stale 문서 청소를 관성적으로 한 작업에 합치지 않는다.
+- 검증은 `command 또는 수동 기준`, `소유자`, `base SHA`, `diff fingerprint`, `결과`, `관련 환경`, `재실행 조건`을 기록한 ledger로 관리한다. 커밋된 candidate는 tree SHA를 fingerprint로 쓰고, 미커밋 candidate는 base SHA·`git diff --binary HEAD`·소유한 untracked 파일 내용의 hash를 사용한다. `diff --stat`이나 수정 시각만 fingerprint로 쓰지 않는다. base·관련 diff·설정·의존 환경이 같으면 fresh PASS를 재사용한다.
+- 구현 반복 중에는 가장 작은 관련 테스트와 정적 검사를 실행한다. 전체 `npm test`는 안정화된 candidate에서 단일 소유자가 실행하고, 부모·구현기·검증자가 같은 fingerprint에 같은 전체 suite를 반복하지 않는다.
+- 전체 suite가 실패하면 focused command로 재현·수리한다. 관련 입력이 바뀐 뒤 또는 최종 release 규칙이 요구할 때만 전체 suite를 다시 실행한다.
+- 서로 독립인 구현·테스트·문서·시각 검증 lane은 의존 그래프를 먼저 만든 뒤 준비된 lane을 한 wave에서 실행한다. 같은 worktree에서 writer가 있는 동안 read-only verifier가 변하는 diff를 읽게 하지 말고, 쓰기 완료와 fingerprint 고정 뒤 독립 verifier를 함께 실행한다.
+- 독립 작업은 별도 Git worktree를 기본으로 한다. worktree는 기존 Git object database를 공유하고 작업 파일·branch·index만 분리한다. shared checkout 직렬화는 worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 사용하며 대기 이유를 기록한다.
+- 자동 구현기는 고정 설계면 빠른 direct 경로를 우선하고, 미해결 구현 대안이 있을 때만 planned 경로를 쓴다. scope와 wall-time budget을 넘으면 부분 diff를 보존하고 좁은 수리로 전환하며 같은 broad pass를 반복하지 않는다. 구체 실행 계약은 해당 Skill을 단일 기준으로 사용한다.
+
 ## 3. 시뮬레이션 기반 구현 검증
 
 물리, 절차 생성, 전투, 보상처럼 시간과 수치가 개입하는 기능은 UI보다 먼저 독립 시뮬레이션으로 검증한다.
@@ -337,6 +350,8 @@ npm run check
 git diff --check
 ```
 
+이 목록은 최종 candidate가 통과해야 할 검증 집합이며 각 단계·각 실행기마다 반복하라는 뜻이 아니다. 구현 중에는 focused test를 사용하고, 전체 명령은 검증 ledger의 단일 소유자가 안정화된 candidate에서 한 번씩 실행한다.
+
 - 버그 수정은 가능하면 실패하는 회귀 테스트를 먼저 만든다.
 - 버그 수정은 관측된 출력만 덮어쓰는 예외 처리로 끝내지 않는다. 원인이 된 상태 소유권, 식별자, 데이터 흐름 또는 공개 계약의 불변식을 복구하고 같은 원인에서 파생되는 경로를 검색한다.
 - 최소 변경은 근본 원인을 복구하는 범위 안에서 적용한다. 증상별 보정 코드를 추가하는 편이 diff가 작더라도 근본 불변식이 깨진 채라면 채택하지 않는다.
@@ -347,6 +362,8 @@ git diff --check
 - 단순 상수, getter, 구현 내부 배열 모양처럼 메인 시나리오가 이미 증명하거나 자주 바뀌는 세부 구현만 별도 테스트하지 않는다.
 - 독립 테스트는 재현된 버그, 프로토콜 경계, 보안·데이터 손실 위험처럼 실패 원인이 분리되어야 할 때만 추가한다.
 - `npm test` 전체 실행은 3분을 넘기지 않으며 테스트 러너가 이 제한을 실패로 처리한다.
+- 같은 base SHA·diff fingerprint·의존 환경에서 이미 통과한 전체 `npm test`, `npm run check`, `npm run format:check`는 역할이 바뀌었다는 이유로 다시 실행하지 않는다. 새 검증자는 의미·시각·수명주기 등 아직 비어 있는 증거를 확인한다.
+- 수정으로 관련 fingerprint가 바뀌면 영향받는 focused test를 먼저 실행하고, 최종 candidate의 전체 suite ledger만 무효화한다. 문서·메타데이터만 바뀌어 런타임·테스트·설정 입력이 동일하면 저장소가 명시적으로 요구하지 않는 전체 suite를 다시 실행하지 않는다.
 - 시간 기반 테스트는 실제 대기보다 고정 시간과 주입 가능한 clock을 사용한다.
 - 랜덤 기능은 seed를 테스트 입력으로 노출한다.
 - 테스트 러너 파일을 임시 실험 코드로 덮어쓰지 않는다.
@@ -356,8 +373,8 @@ git diff --check
 ## 13. Git 운영
 
 - `main` 변경은 짧은 브랜치와 PR을 기본으로 한다.
-- 모든 PR은 병합 직전에 `git fetch origin main`과 `git rebase origin/main`으로 전용 작업 브랜치를 최신 `main` 위에 올린다. 검증 뒤 `origin/main`이 다시 전진했으면 리베이스와 검증을 반복한다.
-- 최종 리베이스 뒤 필수 검사를 모두 다시 실행하고, `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다. 충돌은 작업 브랜치에서만 해결하며 PR이 mergeable인지 다시 확인한다.
+- 모든 PR은 병합 직전에 `git fetch origin main`과 `git rebase origin/main`으로 전용 작업 브랜치를 최신 `main` 위에 올린다. 검증 뒤 `origin/main`이 다시 전진했으면 리베이스하되 변경된 입력과 연결된 ledger 항목만 무효화한다.
+- 최종 리베이스 뒤 final candidate의 필수 검사 ledger를 완성하고, `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다. rebase가 no-op이고 candidate fingerprint와 환경이 같으면 같은 전체 suite를 반복하지 않는다. 충돌은 작업 브랜치에서만 해결하며 PR이 mergeable인지 다시 확인한다.
 - 이미 push한 단일 소유 전용 작업 브랜치의 리베이스 결과만 `git push --force-with-lease`로 갱신할 수 있다. `--force`는 사용하지 않는다.
 - `main`을 rebase, reset 또는 force-push하지 않는다. 공유 브랜치이거나 단일 소유 여부를 증명할 수 없는 브랜치는 재작성하지 말고 소유자와 조정할 때까지 병합을 중단한다.
 - 브랜치 리베이스는 PR 병합 방식과 구분한다. 별도 결정이 없으면 최신 `main`에 리베이스한 브랜치를 일반 merge commit으로 병합하며 squash merge와 rebase merge를 사용하지 않는다.
@@ -370,11 +387,12 @@ git diff --check
 
 - 같은 저장소를 여러 Codex 앱 작업이 동시에 개발하면 `.agents/skills/coordinate-github-tasks/SKILL.md`를 공용 조정 계약으로 사용한다. `$github-task-flow`는 Issue 생성 뒤 브랜치 생성 전, Lore 커밋 전, 최종 rebase·병합 전에 조정 상태를 확인한다.
 - Codex 작업 메시지는 즉시 조정 채널, 상호 링크된 GitHub Issue 댓글은 지속 기록으로 사용한다. 작업 제목·요약은 후보 탐색 자료일 뿐 소유권 근거가 아니며 checkout, 실제 diff·hunk, 선언한 심볼·예정 파일, 공개 계약 순으로 확인한다.
-- 같은 `cwd`의 shared checkout에서는 브랜치·작업 트리·stage를 모든 대화가 공유하므로 현재 Issue 브랜치 소유 작업만 편집과 Git 게시 단계를 진행한다. 후행 작업은 자기 hunk만 제거하고 선행 merge SHA·clean `main`을 확인한 뒤 새 Issue 브랜치에서 재개한다. 별도 Codex worktree에서만 합의된 범위 안의 병렬 편집을 유지한다.
+- 독립 경로·심볼·계약을 소유한 새 작업은 별도 Git worktree와 branch를 기본으로 사용한다. 기존 Git object database를 공유하므로 별도 clone은 만들지 않는다. 같은 저장소라는 이유만으로 선행 merge를 기다리지 않는다.
+- 같은 `cwd`의 shared checkout에서는 브랜치·작업 트리·stage를 모든 대화가 공유하므로 현재 Issue 브랜치 소유 작업만 편집과 Git 게시 단계를 진행한다. shared checkout은 환경상 worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 사용하고, 후행 작업은 그 구체 대기 이유와 선행 merge SHA를 기록한다.
 - 같은 파일이라도 심볼과 hunk가 분리되면 독립 소유할 수 있다. 같은 hunk, public API, schema, fixture, 공통 index와 기준 문서는 한 작업만 소유하고 다른 작업은 요구사항과 테스트 사례를 전달한 뒤 선행 병합을 기다린다.
 - 동일 결과를 구현하는 중복 Issue는 주 작업 하나가 완료 조건과 고유 증거를 흡수한다. 보조 작업은 고유 변경을 잃지 않았다는 확인 전 Issue를 닫지 않으며 다른 작업의 커밋을 복사해 별도 계보를 만들지 않는다.
-- 각 작업은 자기 worktree·브랜치·stage·커밋·PR만 변경한다. 상대 작업에는 구조화된 범위 카드와 조정 결정을 메시지로 보내며, 응답하지 않은 작업의 공유 경계를 임의로 가져오거나 병합하지 않는다. 작업의 worktree 이동이나 handoff는 사용자 승인 없이 수행하지 않는다.
-- 선행 PR 병합 뒤 의존 작업은 최신 `origin/main`에 rebase하고 자기 범위의 검증을 다시 수행한다. 범위가 넓어지거나 새 작업이 같은 경계에 들어오면 소유권과 병합 순서를 다시 합의한다.
+- 각 작업은 자기 worktree·브랜치·stage·커밋·PR만 변경한다. 상대 작업에는 구조화된 범위 카드와 조정 결정을 메시지로 보내며, 응답하지 않은 작업의 공유 경계를 임의로 가져오거나 병합하지 않는다. 이미 실행 중인 작업의 worktree 이동이나 handoff는 사용자 승인 없이 수행하지 않지만, 아직 편집 전인 독립 새 작업의 전용 worktree 생성은 추가 승인을 요구하지 않는다.
+- 선행 PR 병합 뒤 실제 의존 작업은 최신 `origin/main`에 rebase하고 선행 변경으로 영향받은 verification ledger 항목만 다시 수행한다. 범위가 넓어지거나 새 작업이 같은 경계에 들어오면 소유권과 병합 순서를 다시 합의한다.
 
 ## 14. 문서 관리
 
