@@ -1,6 +1,6 @@
 # SECTOR 04-7 — ISOLATION JUNCTION
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
 
 ◀ PREV — [SECTOR 04-6 / POWER RELAY SPAN](../4-6/README.md) · NEXT — [SECTOR 04-8 / TRANSIT CONTROL TRUNK](../4-8/README.md) ▶
 
@@ -262,6 +262,35 @@ multiplier 1 → 0 linear
 ```
 
 Static rectangular zone 안에 있는 Player point에만 적용.
+
+### RUNTIME UPDATE — WIND SHADOW / GROUNDED ATTENUATION 구현됨
+
+4-7 최초 작성 이후 병합된 Runtime 변경(`WorldForceField.js`, `GameSimulation.js`)에서
+다음이 실제로 구현되고 **기본 활성화**됐다.
+
+```text
+WIND_CONFIG (config.js)
+groundedFactor  0.35
+shadowFactor    0.15
+defaultFalloff  0
+```
+
+```text
+GROUNDED ATTENUATION
+player.physics.isGrounded === true
+→ wind force × 0.35
+
+WIND SHADOW
+windOrigin(zone)와 player point 사이 segment가
+solid occluding surface(기본: collision !== false && oneWay !== true)와 교차
+→ wind force × 0.15 (추가 배율)
+```
+
+§24 FAIL 목록의 "Wind shadow 가정" / "grounded attenuation 가정" 문구는
+작성 당시 기준이며 이제 STALE이다.
+
+Falloff는 `defaultFalloff: 0`이므로 Zone이 명시적으로 `falloff` 값을 지정하지 않는 한
+비활성 상태로 남는다. 4-7 Wake Zone은 falloff를 지정하지 않으므로 설계 변경 없음.
 
 ---
 
@@ -2045,8 +2074,7 @@ intentional sacrifice
 ### Runtime
 
 - moving force volume 가정
-- Wind shadow 가정
-- grounded attenuation 가정
+- Wind Shadow(0.15 배율) / Grounded Attenuation(0.35 배율) 존재를 모르고 옛 무보정 물리로만 Mandatory Route graybox 검증
 - client-local Wind phase
 - old Combat values 사용
 
@@ -2294,4 +2322,4 @@ Sector 04 전체 Runtime integration 전에
 
 ---
 
-SECTOR 04-7 / ISOLATION JUNCTION — BLOCKOUT CANDIDATE · REV 1.0
+SECTOR 04-7 / ISOLATION JUNCTION — BLOCKOUT CANDIDATE · REV 1.1

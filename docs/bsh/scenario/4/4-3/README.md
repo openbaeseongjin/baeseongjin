@@ -1,6 +1,6 @@
 # SECTOR 04-3 — FREIGHT BYPASS
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
 
 ◀ PREV — [SECTOR 04-2 / CUTTER LINE](../4-2/README.md) · NEXT — SECTOR 04-4 / INFRASTRUCTURE SERVICE NODE ▶
 
@@ -99,8 +99,8 @@ DECAY
 - New Growth
 - Kill Gate
 - Damage Wind
-- Wind Shadow 가정
-- Grounded Wind Attenuation 가정
+- Wind Shadow(현재 구현됨, §0-1 참고)를 Mandatory Route 성립 조건으로 설계
+- Grounded Wind Attenuation(현재 구현됨, §0-1 참고)를 Mandatory Route 성립 조건으로 설계
 - Lower Feeder Isolation Reveal
 
 ---
@@ -231,6 +231,44 @@ DECAY    1 → 0 linear
 ```
 
 Point가 static rectangular zone 안에 있을 때만 적용.
+
+### RUNTIME UPDATE — WIND SHADOW / GROUNDED ATTENUATION 구현됨
+
+4-3 최초 작성 이후 병합된 Runtime 변경(`WorldForceField.js`, `GameSimulation.js`)에서
+다음이 실제로 구현되고 **기본 활성화**됐다.
+
+```text
+WIND_CONFIG (config.js)
+groundedFactor  0.35
+shadowFactor    0.15
+defaultFalloff  0
+```
+
+```text
+GROUNDED ATTENUATION
+player.physics.isGrounded === true
+→ wind force × 0.35
+
+WIND SHADOW
+windOrigin(zone)와 player point 사이 segment가
+solid occluding surface(기본: collision !== false && oneWay !== true)와 교차
+→ wind force × 0.15 (추가 배율)
+```
+
+이 Stage 초안의 §0 금지 목록과 §22 FAIL 목록에 있는
+"Wind Shadow 가정" / "Grounded Wind Attenuation 가정" 문구는
+**작성 당시(두 기능이 아직 없던 시점) 기준**이며 이제 STALE이다.
+아래 §0 / §22 해당 항목을 참고.
+
+여전히 없음:
+
+```text
+moving force volume
+train-following force volume
+```
+
+Falloff는 `defaultFalloff: 0`이므로 Zone이 명시적으로 `falloff` 값을 지정하지 않는 한
+spatial falloff는 비활성 상태로 남는다.
 
 ### TRANSIT WAKE BASELINE
 
@@ -1642,7 +1680,7 @@ Corporate decision
 - old projectile speed 260 사용
 - old attack range 520 사용
 - old fire interval 1.40 사용
-- Wind Shadow / Grounded attenuation 가정
+- Wind Shadow(0.15 배율) / Grounded Attenuation(0.35 배율) 존재를 모르고 옛 무보정 물리로만 Mandatory Route graybox 검증
 - moving Wake volume 가정
 
 ### Story
@@ -1994,4 +2032,4 @@ STATUS: SEGMENTED
 
 ---
 
-SECTOR 04-3 / FREIGHT BYPASS — BLOCKOUT CANDIDATE · REV 1.0
+SECTOR 04-3 / FREIGHT BYPASS — BLOCKOUT CANDIDATE · REV 1.1

@@ -1,6 +1,6 @@
 # SECTOR 04-8 — TRANSIT CONTROL TRUNK
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
 
 ◀ PREV — [SECTOR 04-7 / ISOLATION JUNCTION](../4-7/README.md) · NEXT — POST-SECTOR 04 BOSS / TRANSITION — TBD ▶
 
@@ -245,6 +245,35 @@ DECAY
 ```
 
 static rectangular zone 안의 Player point에 적용.
+
+### RUNTIME UPDATE — WIND SHADOW / GROUNDED ATTENUATION 구현됨
+
+4-8 최초 작성 이후 병합된 Runtime 변경(`WorldForceField.js`, `GameSimulation.js`)에서
+다음이 실제로 구현되고 **기본 활성화**됐다.
+
+```text
+WIND_CONFIG (config.js)
+groundedFactor  0.35
+shadowFactor    0.15
+defaultFalloff  0
+```
+
+```text
+GROUNDED ATTENUATION
+player.physics.isGrounded === true
+→ wind force × 0.35
+
+WIND SHADOW
+windOrigin(zone)와 player point 사이 segment가
+solid occluding surface(기본: collision !== false && oneWay !== true)와 교차
+→ wind force × 0.15 (추가 배율)
+```
+
+Falloff는 `defaultFalloff: 0`이므로 Zone이 명시적으로 `falloff` 값을 지정하지 않는 한
+비활성 상태로 남는다. 4-8 Wake Zone은 falloff를 지정하지 않으므로 설계 변경 없음.
+
+R1 / P3 / R2 Recovery Deck을 Wake / Enemy Activation 밖에 두는 기존 설계는
+Grounded Attenuation(0.35)이 완전 차단이 아니라 감쇠일 뿐이므로 그대로 유지한다.
 
 ### Baseline Reuse
 
@@ -2408,4 +2437,4 @@ Exit handoff를 직접 이어받는다.
 
 ---
 
-SECTOR 04-8 / TRANSIT CONTROL TRUNK — BLOCKOUT CANDIDATE · REV 1.0
+SECTOR 04-8 / TRANSIT CONTROL TRUNK — BLOCKOUT CANDIDATE · REV 1.1
