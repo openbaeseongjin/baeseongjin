@@ -33,7 +33,7 @@
 | P2 | -224~+224 | -384 | 448 | safe-deck | 일치 |
 | R1 | -32~+224 | -576 | 256 | recovery | 일치 |
 | P3 | +96~+384 | -672 | 288 | platform | 일치 |
-| Exit Deck | +160~+448 | -736 | 288 | safe-deck | 일치 |
+| Exit Deck | +160~+448 | -704 | 288 | safe-deck | 표준화(offset 64)로 32px 하강 |
 
 ### Node·Landmark
 
@@ -50,8 +50,8 @@
 | 항목 | 값 |
 | --- | --- |
 | `specialization-selected` | type `interact-choice`, sourceObjectId `specialization-node` — 공용 요청은 가능하지만 `selectionPool:"TBD"`라 chooser 개방 불가 |
-| Exit Panel | 좌표는 exitPanel 헬퍼로 계산(exit.x-112, floorY=-672) |
-| Gate | `(304,-736)` → `sector-02-04` |
+| Exit Panel | 좌표는 exitPanel 헬퍼로 계산(exit.x-112, floorY=-704) |
+| Gate | `(304,-704)` → `sector-02-04` |
 
 ## 4. Camera·Story — 미구현
 

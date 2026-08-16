@@ -256,14 +256,14 @@ export function run() {
     const forgedSpawnReceipt = combatSession.submitProjectileSpawnClaim(
         combatPlayer.id,
         createPlayerProjectileSpawnClaim({
-            predictionId: `${combatPlayer.id}:${combatSimulation.tick}`,
+            predictionId: `${combatPlayer.id}:forged`,
             clientTick: combatSimulation.tick,
             targetId: spawnTarget.id,
-            position: { x: predictedSpawnPosition.x + 1000, y: predictedSpawnPosition.y }
+            position: predictedSpawnPosition
         })
     );
     assert.equal(forgedSpawnReceipt.accepted, false);
-    assert.equal(forgedSpawnReceipt.reason, "position-mismatch");
+    assert.equal(forgedSpawnReceipt.reason, "prediction-ownership");
     const spawnClaim = createPlayerProjectileSpawnClaim({
         predictionId: `${combatPlayer.id}:${combatSimulation.tick}`,
         clientTick: combatSimulation.tick,

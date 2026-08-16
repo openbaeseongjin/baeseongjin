@@ -16,12 +16,12 @@
 
 ## 2. Runtime 좌표 / Stable ID 요약
 
-- Area: `sector-03-05`, entry `(-240,-32)`, exit `(352,-688)`, next `sector-03-06`
+- Area: `sector-03-05`, entry `(-240,-32)`, exit `(352,-656)`, next `sector-03-06`
 - Grapple: `G1(-32,-400)`, `G2(192,-512)`, `G3(32,-624)`
 - Recovery: `R1(-48,-488)`
 - Story / object: `service-calibration-frame`(gate-linked maintenance-frame), `node-id(0,-312)`, `access-summary(240,-312)`, `premium-atrium-ahead(288,-680)`
-- Gate set: `exit-panel(224,-656)`, `service-gate(352,-656)`
-- Objectives: `final-deck-reached bounds (160,-688,256×96)`, `exit-panel-engaged`
+- Gate set: `exit-panel(224,-624)`, `service-gate(352,-624)` — 출구 표준화(offset 64)로 32px 하강
+- Objectives: `final-deck-reached bounds (160,-656,256×96)`, `exit-panel-engaged`
 
 ## 3. Camera · Story 상태
 

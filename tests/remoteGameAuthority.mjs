@@ -700,14 +700,15 @@ export async function run() {
             spawnOwner.snapshot().owner.weaponCooldown > 0,
             "an in-flight pre-claim snapshot must not erase the immediate fire cooldown"
         );
-        assert.equal(spawnOwner.submitProjectileSpawnClaim({ ...rejectedSpawn, targetId: "forged-target" }), true);
+        spawnRoom.simulation.lastAcceptedPlayerProjectileSpawnTick.set(spawnOwner.playerId, rejectedSpawn.tick + 1);
+        assert.equal(spawnOwner.submitProjectileSpawnClaim(rejectedSpawn), true);
         await waitFor(
             () => spawnOwner.projectileSpawnClaimReceipts.length > 0,
-            "the invalid projectile spawn must return a rejection receipt"
+            "the too-early projectile spawn must return a rejection receipt"
         );
         const rejectedSpawnReceipt = spawnOwner.drainProjectileSpawnClaimReceipts()[0];
         assert.equal(rejectedSpawnReceipt.accepted, false);
-        assert.equal(rejectedSpawnReceipt.reason, "target-mismatch");
+        assert.equal(rejectedSpawnReceipt.reason, "fire-interval");
         rejectedSpawnStore.applySpawnClaimReceipts([rejectedSpawnReceipt]);
         assert.equal(rejectedSpawnStore.snapshot().projectiles.length, 0);
         assert.equal(

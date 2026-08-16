@@ -16,13 +16,13 @@
 
 ## 2. Runtime 좌표 / Stable ID 요약
 
-- Area: `sector-04-08`, entry `(-448,-32)`, exit `(560,-1792)`, next `null`
+- Area: `sector-04-08`, entry `(-448,-32)`, exit `(560,-1824)`, next `null`
 - Grapple: `A0(-320,-160)`, `C1(-96,-448)`, `C2(96,-736)`, `W3(-96,-960)`, `A3(96,-1024)`, `A4(96,-1216)`, `A5(-160,-1344)`, `W6(-96,-1536)`, `A6(128,-1640)`
 - Recovery: `R1(-256,-856)`, `R2(-320,-1432)`
 - Cutter: `cutter-sentry-01(448,-640)`, activation `(-192,-800,384×400)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
 - Patrol: `patrol-drone-01(176,-1280)`, patrol `(-208,-1280) ↔ (208,-1280)`, activation `(-208,-1392,416×240)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
 - Wake: `sector-04-08:control-trunk-wake`, bounds `(-192,-1664,384×1264)`, direction `(0,-1)`, cycle `1.75 / 0.7 / 1.4 / 0.3`
-- Story display: `final-status-display(64,-1760)`, `post-sector-access(352,-1728)`, gate set `exit-panel(432,-1760)`, `service-gate(560,-1760)`
+- Story display: `final-status-display(64,-1792)`, `post-sector-access(352,-1728)`, gate set `exit-panel(432,-1792)`, `service-gate(560,-1792)` — 출구 표준화(offset 64)로 32px 상승
 
 ## 3. Camera · Story 상태
 

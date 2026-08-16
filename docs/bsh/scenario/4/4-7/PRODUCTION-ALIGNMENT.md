@@ -16,13 +16,13 @@
 
 ## 2. Runtime 좌표 / Stable ID 요약
 
-- Area: `sector-04-07`, entry `(-480,-32)`, exit `(544,-1472)`, next `sector-04-08`
+- Area: `sector-04-07`, entry `(-480,-32)`, exit `(544,-1504)`, next `sector-04-08`
 - Grapple: `A0(-352,-128)`, `W1(-160,-416)`, `W2(160,-576)`, `W3(160,-800)`, `W4(-160,-960)`, `A5(-96,-1152)`, `A6(224,-1344)`
 - Recovery: `R1(320,-536)`, `R2(-320,-920)`
 - Cutter: `cutter-sentry-01(480,-640)`, activation `(-240,-1008,480×624)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
 - Wake: `sector-04-07:junction-wake`, bounds `(-224,-1008,448×688)`, direction `(+1,0)`, cycle `1.75 / 0.7 / 1.4 / 0.3`
 - Story display: `routing-status-display(-128,-256)`, `feeder-status-display(96,-1248)`
-- Gate set: `exit-panel(432,-1440)`, `service-gate(544,-1440)`
+- Gate set: `exit-panel(432,-1472)`, `service-gate(544,-1472)` — 출구 표준화(offset 64)로 32px 상승
 
 ## 3. Camera · Story 상태
 

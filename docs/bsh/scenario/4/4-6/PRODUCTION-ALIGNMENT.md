@@ -16,12 +16,12 @@
 
 ## 2. Runtime 좌표 / Stable ID 요약
 
-- Area: `sector-04-06`, entry `(-480,-32)`, exit `(-48,-1504)`, next `sector-04-07`
+- Area: `sector-04-06`, entry `(-480,-32)`, exit `(-48,-1536)`, next `sector-04-07`
 - Grapple: `A0(-352,-128)`, `C1(-96,-416)`, `C2(256,-576)`, `A3(320,-928)`, `A4(160,-1120)`, `A5(-192,-1248)`
 - Recovery: `R2(-320,-1336)`
 - Cutter: `cutter-sentry-01(80,-496)`, activation `(-160,-704,512×352)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
 - Patrol: `patrol-drone-01(208,-1184)`, patrol `(-240,-1184) ↔ (208,-1184)`, activation `(-448,-1280,896×224)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
-- Gate set: `exit-panel(-80,-1472)`, `service-gate(-48,-1472)`
+- Gate set: `exit-panel(-80,-1504)`, `service-gate(-48,-1504)` — 출구 표준화(offset 64)로 32px 상승
 
 ## 3. Camera · Story 상태
 

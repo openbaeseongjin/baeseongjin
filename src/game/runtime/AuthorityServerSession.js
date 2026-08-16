@@ -98,9 +98,7 @@ export class AuthorityServerSession {
         }
         const receipt = createPlayerProjectileSpawnReceipt({
             predictionId: claim.predictionId,
-            ...this.simulation.resolvePlayerProjectileSpawnClaim(authenticatedPlayerId, claim, {
-                positionTolerance: MULTIPLAYER_TIMING.spawnClaimPositionTolerance
-            })
+            ...this.simulation.resolvePlayerProjectileSpawnClaim(authenticatedPlayerId, claim)
         });
         if (receipt.accepted) {
             this.resolvedProjectileSpawnClaims.set(claim.predictionId, {

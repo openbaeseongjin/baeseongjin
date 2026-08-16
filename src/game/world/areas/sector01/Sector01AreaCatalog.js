@@ -26,7 +26,7 @@ function gate(id, x, y, nextAreaId, requiredObjectiveIds, { portalBottomY = y } 
         nextAreaId,
         requiredObjectiveIds: Object.freeze(requiredObjectiveIds),
         trigger: nextAreaId === null ? triggerBounds(x - 48, y - 96, 96, 160) : gatePortalBounds(x, portalBottomY),
-        barrier: triggerBounds(x - 32, y - 96, 64, 128)
+        barrier: triggerBounds(x - 32, y - 64, 64, 96)
     });
 }
 
@@ -52,7 +52,7 @@ const area01 = defineArea({
         }),
         horizontalSurface("sector-01-01:r3", -144, -736, 160, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-01:p3", 16, -800, 224, 16),
-        horizontalSurface("sector-01-01:p4", 192, -864, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-01:p4", 192, -896, 320, 32, { kind: "safe-deck" }),
         groundedSurface("sector-01-01:ground-shutter", -384, 0, 128, 128, {
             kind: "sealed-door",
             oneWay: false
@@ -81,14 +81,14 @@ const area01 = defineArea({
             gameplay: false,
             cueIds: ["sector-01-01:fan-inactive"]
         }),
-        worldObject("sector-01-01:service-terminal", "gate-panel", 208, -864, {
+        worldObject("sector-01-01:service-terminal", "gate-panel", 208, -896, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-01:terminal-read",
             gateId: "sector-01-01:gate",
             cueIds: ["sector-01-01:terminal-cascade", "sector-01-01:rooftop-pad-03"]
         }),
-        worldObject("sector-01-01:service-gate", "gate", 320, -864, {
+        worldObject("sector-01-01:service-gate", "gate", 320, -896, {
             coordinateAnchor: "bottom-center",
             gateId: "sector-01-01:gate"
         })
@@ -103,7 +103,7 @@ const area01 = defineArea({
         }
     ],
     gate: gate("sector-01-01:gate", 320, -928, "sector-01-02", ["sector-01-01:terminal-read"], {
-        portalBottomY: -864
+        portalBottomY: -896
     }),
     storyTriggers: ["lockdown", "terminal-read", "gate-open"],
     cameraZones: [
@@ -136,7 +136,7 @@ const area02 = defineArea({
         }),
         horizontalSurface("sector-01-02:p2", -192, -576, 192, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-02:p3", 160, -800, 192, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-02:p4", 208, -960, 288, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-02:p4", 208, -1024, 288, 32, { kind: "safe-deck" }),
         grappleTarget("sector-01-02:anchor-a-surface", -128, -192),
         grappleTarget("sector-01-02:anchor-b-surface", 160, -416),
         grappleTarget("sector-01-02:anchor-c-surface", -160, -640),
@@ -170,11 +170,11 @@ const area02 = defineArea({
                 label: "ABCD"[index]
             })
         ),
-        worldObject("sector-01-02:security-access-gate", "gate", 320, -960, {
+        worldObject("sector-01-02:security-access-gate", "gate", 320, -1024, {
             coordinateAnchor: "bottom-center",
             gateId: "sector-01-02:gate"
         }),
-        worldObject("sector-01-02:exit-panel", "gate-panel", 208, -960, {
+        worldObject("sector-01-02:exit-panel", "gate-panel", 208, -1024, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-02:exit-panel-engaged",
@@ -186,7 +186,7 @@ const area02 = defineArea({
         {
             id: "sector-01-02:final-deck-reached",
             type: "reach",
-            bounds: triggerBounds(64, -1024, 288, 96)
+            bounds: triggerBounds(64, -1056, 288, 96)
         },
         {
             id: "sector-01-02:exit-panel-engaged",
@@ -196,7 +196,7 @@ const area02 = defineArea({
         }
     ],
     gate: gate("sector-01-02:gate", 320, -1056, "sector-01-03", ["sector-01-02:exit-panel-engaged"], {
-        portalBottomY: -960
+        portalBottomY: -1024
     }),
     storyTriggers: ["lift-offline", "manual-access-only", "power-reduction-stage-2", "security-access-check"],
     cameraZones: [
@@ -216,7 +216,7 @@ const area03 = defineArea({
     name: "SECURITY CHECK",
     bounds: { width: 960, height: 1152 },
     entry: point("sector-01-03:entry", -320, -32),
-    exit: point("sector-01-03:exit", 320, -1120),
+    exit: point("sector-01-03:exit", 320, -1152),
     nextAreaId: "sector-01-04",
     surfaces: [
         horizontalSurface("sector-01-03:p0", -144, 0, 544),
@@ -225,7 +225,7 @@ const area03 = defineArea({
         horizontalSurface("sector-01-03:safe-ledge", -240, -640, 224, 16, { kind: "safe-deck" }),
         groundedSurface("sector-01-03:safe-cover", -112, -640, 32, 128, { kind: "cover", oneWay: false }),
         groundedSurface("sector-01-03:upper-cover", -16, -832, 96, 128, { kind: "cover", oneWay: false }),
-        horizontalSurface("sector-01-03:p4", 192, -1056, 320, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-03:p4", 192, -1088, 320, 32, { kind: "safe-deck" }),
         grappleTarget("sector-01-03:anchor-a-surface", 64, -224),
         grappleTarget("sector-01-03:anchor-b-surface", 64, -480),
         grappleTarget("sector-01-03:anchor-c-surface", -192, -736),
@@ -237,7 +237,7 @@ const area03 = defineArea({
         point("sector-01-03:route-b", 64, -480, { landmark: "B" }),
         point("sector-01-03:route-c", -192, -736, { landmark: "C" }),
         point("sector-01-03:route-d", 96, -960, { landmark: "D" }),
-        point("sector-01-03:route-exit", 288, -1088)
+        point("sector-01-03:route-exit", 288, -1120)
     ],
     recoveryPoints: [
         point("sector-01-03:recovery-r1", 96, -600),
@@ -263,13 +263,13 @@ const area03 = defineArea({
             activation: triggerBounds(-480, -928, 960, 544),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
         }),
-        worldObject("sector-01-03:service-panel", "gate-panel", 208, -1056, {
+        worldObject("sector-01-03:service-panel", "gate-panel", 208, -1088, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: "sector-01-03:maintenance-override",
             gateId: "sector-01-03:gate"
         }),
-        worldObject("sector-01-03:security-gate", "gate", 320, -1056, {
+        worldObject("sector-01-03:security-gate", "gate", 320, -1088, {
             coordinateAnchor: "bottom-center",
             gateId: "sector-01-03:gate"
         })
@@ -281,8 +281,8 @@ const area03 = defineArea({
             sourceObjectId: "sector-01-03:service-panel"
         }
     ],
-    gate: gate("sector-01-03:gate", 320, -1088, "sector-01-04", ["sector-01-03:maintenance-override"], {
-        portalBottomY: -1056
+    gate: gate("sector-01-03:gate", 320, -1120, "sector-01-04", ["sector-01-03:maintenance-override"], {
+        portalBottomY: -1088
     }),
     storyTriggers: [
         "employee-scan",
@@ -855,7 +855,7 @@ const area08 = defineArea({
             damage: false,
             windZoneId: "sector-01-08:final-pulsed-vent"
         }),
-        worldObject("sector-01-08:containment-gate", "gate", 256, -1584, {
+        worldObject("sector-01-08:containment-gate", "gate", 320, -1728, {
             coordinateAnchor: "bottom-center",
             gateId: "sector-01-08:gate",
             cueIds: ["sector-01-08:final-warning", "sector-01-08:locked"]

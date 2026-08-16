@@ -16,13 +16,13 @@
 
 ## 2. Runtime 좌표 / Stable ID 요약
 
-- Area: `sector-03-07`, entry `(-512,-32)`, exit `(448,-1344)`, next `sector-03-08`
+- Area: `sector-03-07`, entry `(-512,-32)`, exit `(448,-1312)`, next `sector-03-08`
 - Grapple: `C1(-192,-320)`, `S1(-32,-288)`, `S2(288,-416)`, `C2(-288,-864)`, `C3(64,-736)`, `G4(128,-896)`, `S3(352,-736)`, `S4(384,-896)`, `G5(192,-1184)`
 - Recovery: 없음
 - Drone: `drone-1(-64,-800)`, activation `(-160,-976,704×336)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
 - Story display: `concourse-sign(-352,-184)`, `access-directory(0,-1080)`, `upper-market-gate-ahead(384,-1336)`
 - Scanner group: `sector-03-07:scanner-priority-concourse-A`, controlled surfaces `c1-surface`, `c2-surface`, `c3-surface`
-- Gate set: `exit-panel(320,-1312)`, `service-gate(448,-1312)`
+- Gate set: `exit-panel(320,-1280)`, `service-gate(448,-1280)` — 출구 표준화(offset 64)로 32px 하강
 
 ## 3. Camera · Story 상태
 

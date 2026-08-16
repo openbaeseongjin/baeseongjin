@@ -42,9 +42,9 @@
 | P3 | -448~-160 | -736 | 288 | platform | 일치 |
 | R4 | -96~+128 | -784 | 224 | recovery | 일치 |
 | P4 | +32~+352 | -928 | 320 | safe-deck | 일치 |
-| Exit Deck | +288~+544 | -992 | 256 | safe-deck | 일치 |
+| Exit Deck | +288~+544 | -960 | 256 | safe-deck | 표준화(offset 64)로 32px 하강 |
 
-10개 Surface 전부 README §8과 정확히 일치한다 — Sector 01에서 발견됐던 것과 같은 종류의 드리프트가 2-1에는 없다.
+10개 Surface 전부 README §8과 정확히 일치한다(Exit Deck은 출구 표준화로 -992→-960, 32px 하강) — Sector 01에서 발견됐던 것과 같은 종류의 드리프트가 2-1에는 없다.
 
 ### Landmark(G1~G4) — 실제 Anchor 중심
 
@@ -61,11 +61,11 @@
 
 | 항목 | 값 |
 | --- | --- |
-| Exit Panel | `(304,-928)` bottom-center, `interactionRadius=72`, objective `exit-panel-engaged` |
-| Exit Frame(Gate) | `(416,-992)` bottom-center |
-| `exit-reached` | type `reach`, bounds `(352,-1024)`~`128×96` |
+| Exit Panel | `(304,-960)` bottom-center, `interactionRadius=72`, objective `exit-panel-engaged` |
+| Exit Frame(Gate) | `(416,-960)` bottom-center |
+| `exit-reached` | type `reach`, bounds `(352,-992)`~`128×96` |
 | Community Notice | `(160,-952)`, kind `story-display`, cueIds `["evacuation-group-c","wait-for-further-instruction"]` |
-| Gate 판정 좌표 | `(416,-992)` → `sector-02-02` |
+| Gate 판정 좌표 | `(416,-960)` → `sector-02-02` |
 
 ## 4. Camera — 완전 미구현
 
