@@ -65,6 +65,58 @@ export function run() {
         "a stale server snapshot must not undo a pending local Foundation selection"
     );
 
+    const choiceServer = createCurrentGameSimulation({ worldSeed: 1403 });
+    advanceToArea04(choiceServer);
+    choiceServer.enemies = [];
+    const choiceOwner = choiceServer.players[0];
+    const choiceNode = choiceServer.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    choiceOwner.physics.position.set(choiceNode.position.x, choiceNode.position.y);
+    const choiceSnapshot = buildAuthoritySnapshot({ simulation: choiceServer });
+    const choicePredictor = new OwnerPredictionRuntime({
+        ownerId: choiceOwner.id,
+        predictionLeadTicks: 0,
+        simulation: createGameSimulationForWorldRevision({
+            worldSeed: choiceSnapshot.worldSeed,
+            playerId: choiceOwner.id,
+            worldRevision: choiceSnapshot.worldRevision
+        })
+    });
+    choicePredictor.reconcile(choiceSnapshot, []);
+    choicePredictor.advance(command({ interact: true }));
+    assert.equal(
+        choicePredictor.foundationReward(),
+        null,
+        "the Foundation chooser must open only from the authority snapshot"
+    );
+
+    const detachServer = createCurrentGameSimulation({ worldSeed: 1403 });
+    advanceToArea04(detachServer);
+    detachServer.enemies = [];
+    const detachOwner = detachServer.players[0];
+    const detachNode = detachServer.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    detachOwner.physics.position.set(detachNode.position.x, detachNode.position.y);
+    detachOwner.ropeObject.rope.attach(detachOwner.physics.position, {
+        x: detachOwner.physics.position.x + 30,
+        y: detachOwner.physics.position.y - 60
+    });
+    detachServer.beginFoundationReward(detachOwner.id, detachNode.id, detachNode.objectiveId);
+    const detachSnapshot = buildAuthoritySnapshot({ simulation: detachServer });
+    const detachPredictor = new OwnerPredictionRuntime({
+        ownerId: detachOwner.id,
+        predictionLeadTicks: 0,
+        simulation: createGameSimulationForWorldRevision({
+            worldSeed: detachSnapshot.worldSeed,
+            playerId: detachOwner.id,
+            worldRevision: detachSnapshot.worldRevision
+        })
+    });
+    detachPredictor.reconcile(detachSnapshot, []);
+    assert.equal(
+        detachPredictor.state().rope.isAttached,
+        false,
+        "an authority-opened chooser must detach the predicted rope"
+    );
+
     const simulation = createCurrentGameSimulation({ worldSeed: 1404 });
     advanceToArea04(simulation);
     simulation.enemies = [];

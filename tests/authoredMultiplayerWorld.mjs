@@ -151,22 +151,22 @@ export function run() {
         gate.trigger.x + gate.trigger.width * 0.5,
         gate.trigger.y + gate.trigger.height * 0.5
     );
-    predictor.advance(command());
     predictedOwnerEntity.physics.velocity.set(55, -25);
     predictedOwnerEntity.ropeObject.rope.attach(predictedOwnerEntity.physics.position, {
         x: predictedOwnerEntity.physics.position.x + 30,
         y: predictedOwnerEntity.physics.position.y - 60
     });
     predictedOwnerEntity.weapon.cooldown = 0.25;
+    predictor.advance(command());
     const confirmedOwner = predictor.reconcile(portalSnapshot, []);
     assert.deepEqual(confirmedOwner.position, { x: nextEntry.x - 20, y: nextEntry.y });
     assert.deepEqual(
         confirmedOwner.velocity,
-        { x: 55, y: -25 },
-        "server confirmation must not reset state accumulated after the locally predicted portal"
+        { x: 0, y: 0 },
+        "the server-confirmed portal transition must reset the owner's pre-portal movement state"
     );
-    assert.equal(confirmedOwner.rope.isAttached, true);
-    assert.equal(confirmedOwner.weaponCooldown, 0.25);
+    assert.equal(confirmedOwner.rope.isAttached, false, "the confirmed portal transition must reset the owner rope");
+    assert.equal(confirmedOwner.weaponCooldown, 0, "the confirmed portal transition must reset the weapon cooldown");
     const waitingPartner = partnerPredictor.reconcile(portalSnapshot, []);
     assert.deepEqual(waitingPartner.position, partnerDeparture);
     assert.equal(
@@ -208,6 +208,92 @@ export function run() {
     assert.deepEqual(predictedPartner.position, { x: nextEntry.x + 20, y: nextEntry.y });
     assert.deepEqual(predictedPartner.velocity, { x: 0, y: 0 });
     assert.equal(predictedPartner.rope.isAttached, false, "the owner's own portal entry must reset the owner rope");
+
+    const predictionGuardServer = createCurrentGameSimulation({ worldSeed: 2718 });
+    const guardOwner = predictionGuardServer.players[0];
+    const guardTerminal = predictionGuardServer.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    guardOwner.physics.position.set(guardTerminal.position.x, guardTerminal.position.y);
+    const guardSnapshot = buildAuthoritySnapshot({ simulation: predictionGuardServer });
+    const guardPredictor = new OwnerPredictionRuntime({
+        ownerId: guardOwner.id,
+        predictionLeadTicks: 0,
+        simulation: createGameSimulationForWorldRevision({
+            worldSeed: guardSnapshot.worldSeed,
+            playerId: guardOwner.id,
+            worldRevision: guardSnapshot.worldRevision
+        })
+    });
+    guardPredictor.reconcile(guardSnapshot, []);
+    guardPredictor.advance(command({ interact: true }));
+    const guardProgress = guardPredictor.simulation.worldProgress.snapshot();
+    assert.deepEqual(
+        guardProgress.completedObjectiveIds,
+        [],
+        "owner prediction must not start shared authored progress"
+    );
+    assert.equal(
+        guardPredictor.simulation.worldProgress.objectiveSequence("sector-01-01:terminal-read"),
+        null,
+        "owner prediction must not start a shared objective sequence"
+    );
+    assert.deepEqual(guardProgress.unlockedGateIds, [], "owner prediction must not unlock shared Gates");
+    assert.equal(
+        guardPredictor.simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length,
+        DEFAULT_AUTHORED_AREA_CATALOG.areas.length,
+        "Gate barriers must stay closed until the authority snapshot unlocks them"
+    );
+
+    const floodServer = createCurrentGameSimulation({ worldSeed: 3141 });
+    const floodOwner = floodServer.players[0];
+    const floodSession = new AuthorityServerSession({ simulation: floodServer, snapshotIntervalTicks: 1 });
+    const floodTerminal = floodServer.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    floodOwner.physics.position.set(floodTerminal.position.x, floodTerminal.position.y);
+    floodSession.submit(
+        floodOwner.id,
+        createPlayerCommandBatch(1, [{ playerId: floodOwner.id, sequence: 0, command: command({ interact: true }) }])
+    );
+    floodSession.advance();
+    for (let step = 0; step < TERMINAL_SEQUENCE_STEPS; step += 1) floodSession.advance();
+    const floodGate = floodServer.world.gates[0];
+    const floodTrigger = {
+        x: floodGate.trigger.x + floodGate.trigger.width * 0.5,
+        y: floodGate.trigger.y + floodGate.trigger.height * 0.5
+    };
+    const firstMotionTick = floodServer.tick + 1;
+    floodSession.submitOwnerMotion(
+        floodOwner.id,
+        createOwnerMotionState({
+            clientTick: firstMotionTick,
+            position: floodTrigger,
+            velocity: { x: 0, y: 0 },
+            angle: 0,
+            angularVelocity: 0,
+            isGrounded: false,
+            rope: { isAttached: false, anchor: null }
+        })
+    );
+    for (let extra = 1; extra <= 5; extra += 1) {
+        floodSession.submitOwnerMotion(
+            floodOwner.id,
+            createOwnerMotionState({
+                clientTick: firstMotionTick + extra,
+                position: floodTrigger,
+                velocity: { x: 0, y: 0 },
+                angle: 0,
+                angularVelocity: 0,
+                isGrounded: false,
+                rope: { isAttached: false, anchor: null }
+            })
+        );
+    }
+    const floodSnapshot = floodSession.advance();
+    assert.equal(
+        floodSnapshot.events.filter(
+            ({ eventType, playerId }) => eventType === "gate-portal-entered" && playerId === floodOwner.id
+        ).length,
+        1,
+        "stale owner motion in the trigger must not re-emit the portal transition"
+    );
 
     const delayedServer = createCurrentGameSimulation({ worldSeed: 1618 });
     const delayedOwner = delayedServer.players[0];
