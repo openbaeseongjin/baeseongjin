@@ -88,7 +88,7 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 3. `SECTOR 03`: `3-1 → 3-8`
 4. `SECTOR 04`: `4-1 → 4-8`
 5. `SECTOR 05`: `5-1 → 5-8`
-6. `SECTOR 06`: `6-1 → 6-8` — 상세 기획은 `6-1 → 6-7`까지 작성됐고 `6-8`이 남아 있다. Runtime 저작은 Scenario-first 결정에 따라 Sector 06 상세 기획 완료 뒤 시작한다.
+6. `SECTOR 06`: `6-1 → 6-8` — 상세 기획 8개가 모두 작성됐다. Runtime 저작 전 Sector 01~06 Full Game Audit으로 전환·반복·content boundary를 정렬하고, 6-8 뒤 Final Security Encounter는 별도 상세 계약이 확정될 때까지 추정 구현하지 않는다.
 
 각 섹터의 오브젝트 목록은 다음 영역 구현과 전문 리소스 제작의 입력이지만, 정식 리소스 납품은 다음 영역 구현의 선행 조건이 아니다. 메인 개발은 달력상 예정 수량을 채우기보다 현재 실제 시나리오가 있는 영역을 끝까지 mock으로 연결하고, 새 시나리오는 Git 변경을 확인해 이어서 흡수한다. 맵 순서·핵심 기믹·완료 조건·Gate 연결·공개 asset 경계가 바뀌는 변경은 구현 전에 사용자 검토를 받는다.
 
