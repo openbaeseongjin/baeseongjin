@@ -69,7 +69,6 @@ settingsMenu.registerTab({
 });
 audioSettingsPanel.attach();
 debugPanel.attach();
-document.querySelector("[data-debug-open]")?.addEventListener("click", () => debugPanel.show());
 const loadSelectedAudioDefinition = createAudioDefinitionLoader(DEFAULT_GAME_AUDIO_SELECTION);
 const diagnosticsOptions = {
     root: document.getElementById("copy-diagnostics"),
