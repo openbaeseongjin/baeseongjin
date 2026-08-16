@@ -265,6 +265,28 @@ export class GameSimulation {
         return this.foundationRewards.get(playerId) ?? null;
     }
 
+    advanceWorldProgressToArea(areaId) {
+        if (!this.worldProgress) return false;
+        const target = this.world.areas.find(({ id }) => id === areaId);
+        if (!target) return false;
+        for (const area of this.world.areas) {
+            if (area.id === areaId) break;
+            for (const objectiveId of area.objectiveIds) this.worldProgress.completeObjective(objectiveId);
+            this.worldProgress.crossGate(area.gateId);
+        }
+        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+        return true;
+    }
+
+    debugTeleportPlayer(playerId, areaId) {
+        const player = this.#requirePlayer(playerId);
+        const area = this.world.areas.find(({ id }) => id === areaId);
+        if (!area) return null;
+        this.advanceWorldProgressToArea(areaId);
+        this.applyPortalTransition(playerId, { x: area.entry.x, y: area.entry.y }, this.tick, `debug:${areaId}`);
+        return Object.freeze({ x: area.entry.x, y: area.entry.y });
+    }
+
     getTick() {
         return this.tick;
     }

@@ -27,6 +27,10 @@ export class LocalAuthority {
         });
     }
 
+    applyDebugStartArea(areaId) {
+        return this.simulation.debugTeleportPlayer(this.playerId, areaId);
+    }
+
     drainEvents() {
         return this.simulation.drainReplicationEvents();
     }

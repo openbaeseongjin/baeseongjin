@@ -109,6 +109,15 @@ export class MultiplayerGameApp {
         this.frameId = null;
     }
 
+    setMetricsVisible(visible) {
+        this.metricsVisible = Boolean(visible);
+    }
+
+    applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
+        this.setMetricsVisible(metrics);
+        if (startAreaId) this.authority.requestDebugTeleport(startAreaId);
+    }
+
     syncFoundationReward(authoritativeReward, selectedFoundationId = null) {
         if (selectedFoundationId) {
             this.localFoundationReward = null;

@@ -34,8 +34,16 @@ function rebaseLaterTimerPredictions(entries, rejected, fixedDt, previousValueKe
 }
 
 function ownerPortalTransition(event, ownerId) {
-    if (event?.eventType !== "gate-portal-entered" || event.playerId !== ownerId) return null;
-    return event;
+    if (!event || event.playerId !== ownerId) return null;
+    if (event.eventType === "gate-portal-entered") return event;
+    if (event.eventType === "debug-teleported") {
+        return Object.freeze({
+            ...event,
+            eventType: "gate-portal-entered",
+            gateId: `debug:${event.areaId}`
+        });
+    }
+    return null;
 }
 
 export class OwnerPredictionRuntime {

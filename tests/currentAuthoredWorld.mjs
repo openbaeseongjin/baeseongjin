@@ -71,4 +71,25 @@ export function run() {
     const invalidStart = createCurrentGameSimulation({ worldSeed: 9182, startAreaId: "missing-area" });
     assert.equal(invalidStart.worldProgress.snapshot().currentAreaId, "sector-01-01");
     assert.equal(invalidStart.players[0].physics.position.y, invalidStart.world.areas[0].entry.y);
+
+    const teleportSim = createCurrentGameSimulation({ worldSeed: 9182 });
+    const teleportOwner = teleportSim.players[0];
+    teleportOwner.ropeObject.rope.attach(teleportOwner.physics.position, {
+        x: teleportOwner.physics.position.x + 30,
+        y: teleportOwner.physics.position.y - 60
+    });
+    const teleportArea = teleportSim.world.areas.find(({ id }) => id === "sector-03-02");
+    const teleportPosition = teleportSim.debugTeleportPlayer(teleportOwner.id, "sector-03-02");
+    assert.deepEqual(
+        teleportPosition,
+        { x: teleportArea.entry.x, y: teleportArea.entry.y },
+        "a debug teleport must place the player at the target area entry"
+    );
+    assert.equal(
+        teleportSim.worldProgress.snapshot().currentAreaId,
+        "sector-03-02",
+        "a debug teleport must advance the shared progress to the target area"
+    );
+    assert.equal(teleportOwner.ropeObject.rope.isAttached, false, "a debug teleport must reset the rope");
+    assert.equal(teleportSim.debugTeleportPlayer(teleportOwner.id, "missing-area"), null);
 }

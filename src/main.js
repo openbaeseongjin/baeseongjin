@@ -70,6 +70,7 @@ const debugPanel = new DebugPanel({
         settingsMenu.activate("debug", { focus: true });
     }
 });
+debugPanel.onApply = () => app?.applyDebugSettings(debugSettings.snapshot());
 const audioSettingsPanel = new AudioSettingsPanel({
     root: document.getElementById("settings-panel-audio"),
     settings: audioSettings

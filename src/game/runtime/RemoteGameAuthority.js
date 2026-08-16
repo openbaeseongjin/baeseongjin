@@ -83,6 +83,7 @@ export class RemoteGameAuthority {
         this.impactClaimReceipts = [];
         this.pendingImpactClaims = new Map();
         this.checkpointClaimReceipts = [];
+        this.debugTeleportReceipts = [];
         this.pendingCheckpointId = null;
         this.summitClaimReceipts = [];
         this.pendingSummitClaim = false;
@@ -198,6 +199,8 @@ export class RemoteGameAuthority {
                         this.ownerRuntime?.recordImpactReceipt(receipt, this.latestSnapshot);
                     } else if (message.type === "owner-motion-receipt") {
                         this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
+                    } else if (message.type === "debug-teleport-receipt") {
+                        this.debugTeleportReceipts.push(Object.freeze({ ...message.payload }));
                     } else if (message.type === "checkpoint-claim-receipt") {
                         this.recordCheckpointClaimReceipt(createCheckpointClaimReceipt(message.payload));
                     } else if (message.type === "summit-claim-receipt") {
@@ -384,6 +387,12 @@ export class RemoteGameAuthority {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         if (!this.ownerRuntime.releaseRope()) return false;
         this.submitOwnerMotion();
+        return true;
+    }
+
+    requestDebugTeleport(areaId) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
+        this.socket.send(JSON.stringify({ type: "debug-teleport", payload: JSON.stringify({ areaId }) }));
         return true;
     }
 

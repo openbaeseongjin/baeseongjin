@@ -295,6 +295,49 @@ export function run() {
         "stale owner motion in the trigger must not re-emit the portal transition"
     );
 
+    const debugTeleportServer = createCurrentGameSimulation({ worldSeed: 2718 });
+    const debugTeleportOwner = debugTeleportServer.players[0];
+    const debugTeleportSession = new AuthorityServerSession({
+        simulation: debugTeleportServer,
+        snapshotIntervalTicks: 1
+    });
+    const debugTeleportArea = debugTeleportServer.world.areas.find(({ id }) => id === "sector-03-02");
+    const debugTeleportReceipt = debugTeleportSession.debugTeleport(debugTeleportOwner.id, "sector-03-02");
+    assert.equal(debugTeleportReceipt.accepted, true);
+    assert.deepEqual(debugTeleportReceipt.position, { x: debugTeleportArea.entry.x, y: debugTeleportArea.entry.y });
+    const debugTeleportSnapshot = debugTeleportSession.advance();
+    assert.equal(
+        debugTeleportSnapshot.events.some(
+            ({ eventType, playerId, areaId }) =>
+                eventType === "debug-teleported" && playerId === debugTeleportOwner.id && areaId === "sector-03-02"
+        ),
+        true,
+        "the authority must replicate the debug teleport as a shared event"
+    );
+    assert.equal(debugTeleportSession.debugTeleport(debugTeleportOwner.id, "missing-area").accepted, false);
+
+    const teleportedPredictor = new OwnerPredictionRuntime({
+        ownerId: debugTeleportOwner.id,
+        predictionLeadTicks: 0,
+        simulation: createGameSimulationForWorldRevision({
+            worldSeed: debugTeleportSnapshot.worldSeed,
+            playerId: debugTeleportOwner.id,
+            worldRevision: debugTeleportSnapshot.worldRevision
+        })
+    });
+    teleportedPredictor.reconcile(debugTeleportSnapshot, []);
+    const teleportedState = teleportedPredictor.state();
+    assert.equal(
+        teleportedState.position.x,
+        debugTeleportArea.entry.x,
+        "the owner client must apply the replicated debug teleport transition"
+    );
+    assert.ok(
+        Math.abs(teleportedState.position.y - debugTeleportArea.entry.y) <= 40,
+        "the teleported owner may settle onto the deck below the entry point"
+    );
+    assert.equal(teleportedState.rope.isAttached, false);
+
     const delayedServer = createCurrentGameSimulation({ worldSeed: 1618 });
     const delayedOwner = delayedServer.players[0];
     const delayedPartner = delayedServer.addPlayer(

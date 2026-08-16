@@ -71,6 +71,20 @@ export class AuthorityWireAdapter {
         return this.session.submitOwnerMotion(authenticatedPlayerId, deserializeOwnerMotionState(serializedState));
     }
 
+    receiveDebugTeleport(authenticatedPlayerId, serializedRequest) {
+        if (typeof serializedRequest !== "string") throw new Error("serializedRequest must be a string");
+        let request;
+        try {
+            request = JSON.parse(serializedRequest);
+        } catch {
+            throw new Error("invalid debug teleport request");
+        }
+        if (!request || typeof request.areaId !== "string") {
+            throw new Error("debug teleport request requires areaId");
+        }
+        return this.session.debugTeleport(authenticatedPlayerId, request.areaId);
+    }
+
     advance() {
         const snapshot = this.session.advance();
         return snapshot ? serializeWorldSnapshotEnvelope(snapshot) : null;
