@@ -28,6 +28,11 @@
 - authored 사각 surface와 world object는 저작 좌표가 시각/충돌 사각형의 어느 점인지 `coordinateAnchor`로 명시한다. 수평 보행 발판·천장 부착 구조는 `top-center`, 바닥에 선 Gate·패널과 수직 바닥 고정 구조는 `bottom-center`, 자유 배치 표식은 `center`를 사용한다. `AuthoredCoordinateAnchor`가 꼭짓점과 렌더 bounds를 같은 기준점에서 계산하고 assembler가 기준점도 함께 이동시킨다. 층별 렌더 오프셋으로 바닥 접촉을 보정하지 않으며 상세 계약은 `docs/architecture.md`의 저작 좌표 기준점 규칙을 따른다.
 - 모든 authored 영역의 출구 조작은 `영역별 선행 목표 달성 → 문 옆 Gate 패널 활성화 → 패널 조작 → Gate 개방`으로 통일한다. 목표 종류는 시나리오별로 달라도 실제 문을 여는 입력은 바꾸지 않는다. 패널 조작은 별도 PC 키를 추가하지 않고 PC `W/↑`와 모바일 점프 버튼을 가까운 패널의 문맥 상호작용으로 함께 사용한다. 각 영역의 좌우 경계는 고정 충돌 벽으로 닫고, 층 경계는 Gate 개구부를 제외한 전폭 고정 충돌 격벽으로 막는다. 잠긴 동안은 Gate barrier가 개구부까지 막아 로프 탄성으로 벽 바깥을 돌아가거나 다른 위치를 월경할 수 없게 한다. 상세 구조는 `docs/architecture.md`의 저작 영역 Gate 계약과 `docs/sector-01-world-structure-plan.md`를 따른다.
 - 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용하며, 로컬 `PlayerPhysics`의 prototype getter를 복제하지 않고 하위 player renderer에 전달해 sprite·polygon 모두 같은 강체 각도를 그린다. ID 선택과 상태 보존 계약은 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
+- 2026-08-15 사용자가 제공한 최종 캐릭터 원본을 `assets/artwork/characters/player-main/source/pixellab-ready-character.png`에 보존하고 `player-main` 일곱 모션의 외형 기준으로 사용한다. 이전 repository mock 기반 `idle`·`run` blockout은 이 최종 외형으로 대체하며, 24×24 원본·48×48 출력·오른쪽 기본 방향 계약과 로프·피격 중심 VFX cue 우선순위는 유지한다. 정규화·검증 결과는 `assets/artwork/characters/player-main/README.md`를 기준으로 기록한다.
+- `player-main`의 대기는 발·골반·전체 높이를 고정하고 어깨·가슴·스카프만 미세하게 움직이는 2프레임 호흡으로 표현한다. 달리기는 최종 원본과 같은 2등신의 큰 머리·짧은 몸통·짧은 다리를 유지한 채 좌우 접지·하강·통과·상승이 이어지는 8프레임 주기로 표현하며, 긴 보폭이나 늘어난 다리 대신 무릎 방향·겹침·앞뒤 다리 명암으로 교차를 구분한다. 달리기 phase는 속도 임계값을 넘은 시간으로 진행하지 않고 실제 수평 이동 거리 180px당 한 주기로 진행해 짧은 탭 뒤 관성 감속 중 발이 여러 번 왕복하지 않게 한다. 세부 제작·검증 기준은 `assets/artwork/characters/player-main/README.md`를 따른다.
+- 현재 사용자 검토에서 납품 승인된 `player-main` 모션은 `idle`, `run`, `jump`, `fall` 네 가지다. `rope`, `hit`, `respawn`은 런타임 임시 연결 상태를 유지할 수 있지만 재작업 전에는 최종 승인·납품 자산으로 취급하지 않는다.
+- `player-main`의 기본 로프 자세도 최종 원본과 같은 2등신 덩어리감을 유지한다. 뒤쪽 한 손만 정수리 바로 위의 한 지점을 잡고 앞쪽 손은 가슴 앞 공격 준비 위치에 비워두며, 그립 손·빈손·머리 중심·몸통·골반·다리는 프레임 사이 같은 픽셀에 고정한다. 스카프는 위아래로 왕복하지 않고 모든 프레임에서 이동 반대쪽으로 길게 뻗으며, 4단계 안에서 목 쪽에서 꼬리 끝으로 작은 천 파동이 전달되게 표현한다. 머리카락 끝도 같은 뒤쪽 흐름만 보조하고 로프 cue에서 세로 확대·가로 축소를 사용하지 않는다. 향후 로프 탑승 중 공격 모션만 예외적으로 잡은 손과 그립 지점을 고정한 채 빈 앞손이 공격하도록 별도 표현 상태로 추가한다. 세부 제작·검증 기준은 `assets/artwork/characters/player-main/README.md`를 따른다.
+- 게임 시작 시 `assets/runtime/characters/player-main/sprite-manifest.json`을 기본 플레이어 리소스로 읽어 싱글·멀티 renderer에 같은 definition을 주입한다. manifest를 읽지 못하면 내장 `player-mock` definition으로 복구하고, atlas 이미지 준비에 실패하면 기존 polygon scene fallback을 유지한다. 런타임 연결 기준은 `docs/sprite-asset-format.md`를 따른다.
 - 별도 Discord 서비스는 상세 분류 앞에 결정적 3~5줄 `SUMMARY`가 있는 회의 기록과 기본 비활성 read-only Codex 기획 작업을 제공하며, Discord 입력을 비신뢰 데이터로 취급한다.
 - 고정 게임 서버의 4자리 채널 생성·참가, 채널별 독립 월드와 2인 분할 권한 동기화
 - 120Hz 권위 틱, 20Hz 스냅샷, 자기 예측·동료 보간과 투사체 사건 재생. 현재 적용된 분할 권한 방식과 상세 프로토콜의 단일 기준은 `docs/multiplayer-synchronization.md`다.
@@ -286,9 +291,9 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 현재 24×24 player mock과 production starter는 렌더러·manifest 연결 검증 자료이며 정식 캐릭터 크기 기준이 아니다. 정식 player는 32×32~48×48 셀을 사용하고 액션 확장은 48×48~64×64까지 허용하되 실제 셀 크기를 manifest에 기록한다.
 - 전용 template이 없는 자산에 player나 environment manifest를 억지로 재사용하지 않는다. 담당 개발자가 자산 종류에 맞는 공개 계약을 만든 뒤 runtime 경로로 승격하며, 충돌·물리·전투·네트워크 값은 그래픽 리소스와 분리한다.
 - 기본 player의 일곱 상태는 48×48 출력과 모바일 화면에서 자세·실루엣만으로 구분할 수 있게 제작한다. 다른 actor의 상태 목록은 플레이어 계약을 복사하지 않고 작업 요청에서 별도로 정한다.
-- 현재 런타임 mock인 `assets/runtime/characters/player-mock/player-action-mock.svg`는 동작 의미를 확인하는 자료이고, 정식 납품 형식은 여러 PNG atlas와 `sprite-manifest.json`이므로 그래픽 담당자에게 SVG mock이나 validator fixture를 직접 출발점으로 주지 않는다.
+- `assets/runtime/characters/player-mock/player-action-mock.svg`는 manifest 로딩 실패 시 사용하는 내장 복구 자료이며 정식 납품 형식은 여러 PNG atlas와 `sprite-manifest.json`이다. 그래픽 담당자에게 SVG mock이나 validator fixture를 직접 출발점으로 주지 않는다.
 - `assets/runtime/characters/player-production-template/`은 현재 mock의 일곱 상태·프레임·재생 설정을 실제 납품 형식으로 옮긴 개발 연결용 starter다. 그래픽 담당자는 배치만 참고해 `assets/artwork/characters/player-main/`에 납품하고, 담당 개발자가 starter를 `assets/runtime/characters/player-main/`으로 복사해 PNG와 manifest를 정규화한다.
-- starter는 그래픽 생성·정규화·validator 통과를 위한 인계 자료일 뿐 현재 런타임이 자동 참조하지 않는다. 기본 player 연결과 최종 교체는 별도 개발 작업으로 남긴다.
+- starter는 그래픽 생성·정규화·validator 통과를 위한 인계 자료일 뿐 현재 런타임이 자동 참조하지 않는다. 기본 player는 정규화된 `assets/runtime/characters/player-main/`을 참조하며, starter 자체를 기본 리소스로 연결하지 않는다.
 - starter의 위치, cell map, 수정 범위와 검증 절차는 `docs/sprite-asset-format.md`와 `assets/runtime/characters/README.md`를 기준으로 유지한다.
 
 ### [L2] 오디오 기반 계약과 현재 게임의 mock 연결을 구현했다

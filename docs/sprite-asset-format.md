@@ -25,12 +25,12 @@
 
 에이전트는 production starter를 `<character-id>/` package로 복사해 PNG와 값을 교체하고 `$schema`를 `../sprite-manifest.schema.json`으로 맞춘 뒤 `npm run validate:sprite-assets -- <directory>`를 실행한다. JSON 파싱, 상대 PNG 경로, 실제 PNG 크기, atlas 격자·cell 범위, 일곱 상태 coverage, fallback 순환과 duration을 모두 통과해야 `runtime-ready`로 보고한다. `fixtures/player-multi-atlas`는 공개 계약 회귀용 fixture로 유지하며 아트 품질이나 현재 13개 pose의 기준으로 사용하지 않는다.
 
-### 현재 mock, starter와 최종 결과물
+### 현재 production, starter와 fallback mock
 
-- 현재 게임은 `assets/runtime/characters/player-mock/player-action-mock.svg`를 `characters/player-mock` ID로 참조한다. 이 SVG는 일곱 동작 의미의 원본이다.
+- 현재 게임은 시작 시 `assets/runtime/characters/player-main/sprite-manifest.json`을 읽어 싱글·멀티 player renderer에 주입한다. manifest 로딩·파싱 실패 때만 `assets/runtime/characters/player-mock/player-action-mock.svg`의 내장 definition으로 복구한다.
 - `assets/runtime/characters/player-production-template/`은 그 mock의 13개 distinct frame, timing과 presentation cue를 정식 PNG multi-atlas 형식으로 옮긴 복사 가능한 starter다.
 - 그래픽 담당자의 결과물은 `assets/artwork/characters/<character-id>/`에 두고, 개발자가 정규화한 runtime package만 `assets/runtime/characters/<character-id>/`에 둔다.
-- starter와 생성 결과는 현재 runtime이 자동 참조하지 않는다. 최종 게임 연결은 별도 개발 작업에서 definition을 loader 경계에 주입한다.
+- 다른 character package를 sibling 폴더에 추가하는 것만으로 기본 캐릭터가 바뀌지는 않는다. 기본 package를 바꿀 때는 catalog의 manifest URL과 bootstrap 주입 경계를 함께 갱신한다.
 
 ### 작업 요청 템플릿
 

@@ -10,6 +10,7 @@ import { createPlayerSpriteDefinitionFromManifest } from "../src/render/sprites/
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const EXAMPLE_DIRECTORY = resolve(ROOT, "assets/runtime/characters/fixtures/player-multi-atlas");
 const PRODUCTION_TEMPLATE_DIRECTORY = resolve(ROOT, "assets/runtime/characters/player-production-template");
+const PLAYER_MAIN_DIRECTORY = resolve(ROOT, "assets/runtime/characters/player-main");
 
 export function run() {
     const valid = validateSpriteAssetDirectory(EXAMPLE_DIRECTORY);
@@ -21,6 +22,28 @@ export function run() {
     assert.equal(productionTemplate.id, "player-production-template");
     assert.equal(productionTemplate.atlasCount, 2);
     assert.equal(productionTemplate.animationCount, 7);
+
+    const playerMain = validateSpriteAssetDirectory(PLAYER_MAIN_DIRECTORY);
+    assert.equal(playerMain.id, "player-main");
+    assert.equal(playerMain.atlasCount, 3);
+    assert.equal(playerMain.animationCount, 7);
+    const playerMainManifest = JSON.parse(readFileSync(resolve(PLAYER_MAIN_DIRECTORY, "sprite-manifest.json"), "utf8"));
+    assert.deepEqual(playerMainManifest.atlases.locomotion.size, { width: 144, height: 48 });
+    assert.deepEqual(playerMainManifest.atlases.run.size, { width: 192, height: 24 });
+    assert.equal(playerMainManifest.animations.idle.frames.length, 2);
+    assert.ok(playerMainManifest.animations.idle.frames.every(({ durationMs }) => durationMs === 520));
+    assert.deepEqual(
+        playerMainManifest.animations.run.frames.map(({ atlas, cell, durationMs }) => ({ atlas, cell, durationMs })),
+        Array.from({ length: 8 }, (_, column) => ({ atlas: "run", cell: { column, row: 0 }, durationMs: 90 }))
+    );
+    assert.deepEqual(
+        playerMainManifest.animations.rope.frames.map(({ atlas, cell, durationMs }) => ({ atlas, cell, durationMs })),
+        Array.from({ length: 4 }, (_, index) => ({
+            atlas: "locomotion",
+            cell: { column: index + 2, row: 1 },
+            durationMs: 90
+        }))
+    );
     const templateManifest = JSON.parse(
         readFileSync(resolve(PRODUCTION_TEMPLATE_DIRECTORY, "sprite-manifest.json"), "utf8")
     );
