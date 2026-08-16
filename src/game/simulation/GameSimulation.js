@@ -621,7 +621,8 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            advanceInputDrivenObjects = true
+            advanceInputDrivenObjects = true,
+            resolveInteractChoice = true
         } = {}
     ) {
         const expectedTick = this.tick + 1;
@@ -639,7 +640,8 @@ export class GameSimulation {
             resolvePlayerProjectileHits,
             spawnPlayerProjectiles,
             recoverPlayerDeaths,
-            advanceInputDrivenObjects
+            advanceInputDrivenObjects,
+            resolveInteractChoice
         });
     }
 
@@ -653,7 +655,8 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            advanceInputDrivenObjects = true
+            advanceInputDrivenObjects = true,
+            resolveInteractChoice = true
         } = {}
     ) {
         this.tick += 1;
@@ -688,7 +691,9 @@ export class GameSimulation {
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile);
         }
-        if (this.worldProgress) this.#advanceAuthoredWorldProgress(gameplayCommands, { dt });
+        if (this.worldProgress) {
+            this.#advanceAuthoredWorldProgress(gameplayCommands, { dt, resolveInteractChoice });
+        }
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
             enemies: this.enemies,
@@ -934,13 +939,14 @@ export class GameSimulation {
         return (surface) => isSurfaceAccessAllowed(surface, stateMap);
     }
 
-    #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0 } = {}) {
+    #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0, resolveInteractChoice = true } = {}) {
         const events = advanceWorldProgress({
             world: this.world,
             progress: this.worldProgress,
             players: this.players,
             commandsByPlayerId,
-            dt
+            dt,
+            resolveInteractChoice
         });
         for (const event of events) {
             const { type, ...payload } = event;

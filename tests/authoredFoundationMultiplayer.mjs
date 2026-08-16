@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createFoundationSelectionClaim } from "../src/game/network/FoundationSelectionClaim.js";
 import { createFoundationShearClaim } from "../src/game/network/FoundationShearClaim.js";
+import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
-import { openFoundationChooserCandidate } from "../src/game/rewards/FoundationRewardSelection.js";
+import {
+    advanceFoundationRewardSelection,
+    openFoundationChooserCandidate
+} from "../src/game/rewards/FoundationRewardSelection.js";
 import {
     createCurrentGameSimulation,
     createGameSimulationForWorldRevision
@@ -224,6 +228,31 @@ export function run() {
     const chooserNode = chooserWorld.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
     const interactCommand = command({ interact: true });
     const idleCommand = command();
+
+    const chooserPress = command({ vertical: -1, interact: true });
+    const chooserRelease = command({ vertical: 0, interact: false });
+    const chooserRight = command({ horizontal: 1 });
+    const openedChooser = openFoundationChooserCandidate({
+        world: chooserWorld.world,
+        position: { x: chooserNode.position.x, y: chooserNode.position.y },
+        command: chooserPress
+    });
+    assert.ok(openedChooser, "an interact press at the node must open the chooser client-side");
+    let chooserStep = advanceFoundationRewardSelection(openedChooser, chooserPress);
+    assert.equal(chooserStep.confirmedFoundationId, null, "the opening press must not confirm the default choice");
+    chooserStep = advanceFoundationRewardSelection(chooserStep.selection, chooserPress);
+    assert.equal(chooserStep.confirmedFoundationId, null, "holding the open input must not confirm");
+    chooserStep = advanceFoundationRewardSelection(chooserStep.selection, chooserRelease);
+    assert.equal(chooserStep.confirmedFoundationId, null, "releasing must only arm the confirm input");
+    chooserStep = advanceFoundationRewardSelection(chooserStep.selection, chooserRight);
+    assert.equal(chooserStep.selection.selectedIndex, 1, "left/right must navigate the chooser");
+    chooserStep = advanceFoundationRewardSelection(chooserStep.selection, chooserPress);
+    assert.equal(
+        chooserStep.confirmedFoundationId,
+        "relay-link",
+        "the confirm press must send exactly the selected UI choice"
+    );
+
     assert.equal(
         openFoundationChooserCandidate({
             world: chooserWorld.world,
@@ -288,6 +317,35 @@ export function run() {
         simulation: clientDrivenServer,
         snapshotIntervalTicks: 1
     });
+    clientDrivenSession.submit(
+        clientDrivenOwner.id,
+        createPlayerCommandBatch(clientDrivenServer.getTick() + 1, [
+            { playerId: clientDrivenOwner.id, sequence: 0, command: command({ interact: true }) }
+        ])
+    );
+    clientDrivenSession.advance();
+    assert.equal(
+        clientDrivenServer.foundationRewards.has(clientDrivenOwner.id),
+        false,
+        "the authority session must not open the chooser from raw interact input"
+    );
+    const singlePlayerServer = createCurrentGameSimulation({ worldSeed: 1404 });
+    advanceToArea04(singlePlayerServer);
+    singlePlayerServer.enemies = [];
+    const singlePlayerOwner = singlePlayerServer.players[0];
+    const singlePlayerNode = singlePlayerServer.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    singlePlayerOwner.physics.position.set(singlePlayerNode.position.x, singlePlayerNode.position.y);
+    singlePlayerServer.stepCommandBatch(
+        1 / 120,
+        createPlayerCommandBatch(singlePlayerServer.tick + 1, [
+            { playerId: singlePlayerOwner.id, sequence: 0, command: command({ interact: true }) }
+        ])
+    );
+    assert.equal(
+        singlePlayerServer.foundationRewards.has(singlePlayerOwner.id),
+        true,
+        "single player must keep the interact-driven chooser open"
+    );
     const outOfRangeClaim = createFoundationSelectionClaim({
         sourceId: clientDrivenNode.id,
         foundationId: "impulse-coil",
