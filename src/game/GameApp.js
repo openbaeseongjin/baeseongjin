@@ -7,7 +7,6 @@ import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.js";
 import { CAMERA_CONFIG } from "./config.js";
-import { isMetricsPanelEnabled, parseStartAreaId } from "./metrics/MetricsDebugMode.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
@@ -28,8 +27,8 @@ export class GameApp {
         onDiagnostics = () => {},
         audioBindings = null,
         worldSeed = selectWorldSeed(globalThis.location?.search),
-        startAreaId = parseStartAreaId(globalThis.location?.search),
-        metricsVisible = isMetricsPanelEnabled(globalThis.location?.search)
+        startAreaId = null,
+        metricsVisible = false
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = renderer
