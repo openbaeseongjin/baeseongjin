@@ -413,9 +413,15 @@ export class GameSimulation {
 
     synchronizePredictionProgress(playerId, { foundationReward = null } = {}) {
         this.#requirePlayer(playerId);
+        const hadOpenReward = this.foundationRewards.has(playerId);
         this.foundationRewards.clear();
         if (foundationReward) {
             this.foundationRewards.set(playerId, createFoundationRewardSelection(foundationReward));
+            if (!hadOpenReward) {
+                const player = this.#findPlayer(playerId);
+                player.ropeObject.rope.detach();
+                player.ropeObject.swingDrag = null;
+            }
         }
         return this.getFoundationReward(playerId);
     }
@@ -466,9 +472,6 @@ export class GameSimulation {
         this.#applyWorldForce(player, dt);
         const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt);
         const projectile = this.#advanceAutomaticWeapon(player, dt);
-        if (this.worldProgress) {
-            this.#advanceAuthoredWorldProgress(new Map([[ownerId, command]]), { replicate: false, dt });
-        }
         this.projectiles.length = 0;
         this.tick = tick;
         return Object.freeze({
@@ -998,6 +1001,8 @@ export class GameSimulation {
             if (!nextArea) throw new Error(`Missing portal destination area '${gate.nextAreaId}'`);
             for (const [index, player] of activePlayers.entries()) {
                 if (!pointInsideBounds(player.physics.position, gate.trigger)) continue;
+                const transitioned = this.portalTransitions.get(player.id);
+                if (transitioned?.gateId === gate.id) continue;
                 const departure = Object.freeze({ x: player.physics.position.x, y: player.physics.position.y });
                 const position = portalArrivalPosition(nextArea.entry, index, activePlayers.length);
                 this.applyPortalTransition(player.id, position, this.tick, gate.id);
