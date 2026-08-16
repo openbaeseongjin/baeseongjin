@@ -141,3 +141,5 @@
 | [`bsh/scenario/5/5-7/README.md`](./bsh/scenario/5/5-7/README.md) | `bsh` Story Consequence Peak Stage(5-7) Blockout 후보·제작 규격 — `LOWER SECTORS EVACUATION STATUS SUSPENDED` 명시, Sector04 A4/5-3·5-6 Cutter wording alignment 항목 RESOLVED 반영, 좌표 검증 완료 |
 | [`bsh/scenario/5/5-8/README.md`](./bsh/scenario/5/5-8/README.md) | `bsh` Sector 05 General Finale(5-8) Blockout 후보·제작 규격, REV 1.1 — 5-5와의 Geometry 반복 문제로 전면 재설계, WHO/WHY 조직 책임 확정·Rooftop Pad 03 탈출 목표, 좌표 검증 완료 |
 | [`bsh/scenario/6/README.md`](./bsh/scenario/6/README.md) | `bsh` Sector 06 Rooftop/Evacuation 마스터플랜 — Open Sky/Structural Islands 공간 정체성, 기존 Wind·Sentry·Scanner·Patrol·Cutter 시스템 총복습(신규 시스템 없음), Rooftop Pad 03 도달·ACCESS DENIED·별도 Final Security Encounter 개념 |
+| [`bsh/scenario/6/6-1/README.md`](./bsh/scenario/6/6-1/README.md) | `bsh` Sector 06 첫 Stage(6-1) Blockout 후보·제작 규격 — Enemy/Wind 없는 순수 Open Sky 공간 문법 도입, 좌표 검증 완료 |
+| [`bsh/scenario/6/6-2/README.md`](./bsh/scenario/6/6-2/README.md) | `bsh` Known Wind Mastery Recall Stage(6-2) Blockout 후보·제작 규격 — 1-6 Fan A 현재 shipped 수치(continuous/500/falloff80) 재사용 확인, 좌표·Wind membership 검증 완료 |
