@@ -18,6 +18,7 @@ export class DebugPanel {
         this.onActivate = onActivate;
         this.metricsInput = null;
         this.startAreaSelect = null;
+        this.applyButton = null;
         this.holdTimerId = null;
         this.lastActivatedAt = 0;
         this.attached = false;
@@ -38,6 +39,7 @@ export class DebugPanel {
         this.onMetricsChange = () => this.settings.setMetrics(this.metricsInput.checked);
         this.onStartAreaChange = () =>
             this.settings.setStartAreaId(this.startAreaSelect.value.trim() ? this.startAreaSelect.value : null);
+        this.onApplyClick = () => this.onApply?.();
     }
 
     beginHold() {
@@ -63,7 +65,8 @@ export class DebugPanel {
         if (this.attached) return false;
         this.metricsInput = this.documentTarget.querySelector("[data-debug-metrics]");
         this.startAreaSelect = this.documentTarget.querySelector("[data-debug-start-area]");
-        if (!this.metricsInput || !this.startAreaSelect) {
+        this.applyButton = this.documentTarget.querySelector("[data-debug-apply]");
+        if (!this.metricsInput || !this.startAreaSelect || !this.applyButton) {
             throw new Error("DebugPanel is missing panel controls");
         }
         for (const areaId of this.areaIds) {
@@ -80,6 +83,7 @@ export class DebugPanel {
         this.trigger.addEventListener("click", this.onClickCapture, true);
         this.metricsInput.addEventListener("change", this.onMetricsChange);
         this.startAreaSelect.addEventListener("change", this.onStartAreaChange);
+        this.applyButton.addEventListener("click", this.onApplyClick);
         this.unsubscribe = this.settings.subscribe((value) => this.render(value));
         this.attached = true;
         return true;
@@ -101,6 +105,7 @@ export class DebugPanel {
         this.trigger.removeEventListener("click", this.onClickCapture, true);
         this.metricsInput.removeEventListener("change", this.onMetricsChange);
         this.startAreaSelect.removeEventListener("change", this.onStartAreaChange);
+        this.applyButton.removeEventListener("click", this.onApplyClick);
         this.unsubscribe?.();
         this.attached = false;
         return true;

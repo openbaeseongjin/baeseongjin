@@ -303,6 +303,24 @@ export class AuthorityServerSession {
         return receipt;
     }
 
+    debugTeleport(authenticatedPlayerId, areaId) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        if (typeof areaId !== "string" || areaId.length === 0) {
+            return Object.freeze({ accepted: false, reason: "invalid-area" });
+        }
+        const position = this.simulation.debugTeleportPlayer(authenticatedPlayerId, areaId);
+        if (!position) return Object.freeze({ accepted: false, reason: "unknown-area" });
+        this.simulation.recordReplicationEvent("debug-teleported", {
+            playerId: authenticatedPlayerId,
+            areaId,
+            position: Object.freeze({ ...position }),
+            tick: this.simulation.getTick()
+        });
+        return Object.freeze({ accepted: true, areaId, position: Object.freeze({ ...position }) });
+    }
+
     submitOwnerMotion(authenticatedPlayerId, state) {
         const player = this.simulation.playerState(authenticatedPlayerId);
         if (!player) throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);

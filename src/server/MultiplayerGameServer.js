@@ -243,6 +243,11 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "owner-motion-receipt", payload: receipt }));
                 return;
             }
+            if (message?.type === "debug-teleport" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveDebugTeleport(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "debug-teleport-receipt", payload: receipt }));
+                return;
+            }
             if (message?.type === "snapshot-ack") {
                 this.acknowledgeSnapshot(socket, message.snapshotSequence);
                 return;

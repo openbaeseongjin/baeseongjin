@@ -62,6 +62,17 @@ export class GameApp {
         };
     }
 
+    setMetricsVisible(visible) {
+        this.metricsVisible = Boolean(visible);
+    }
+
+    applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
+        this.setMetricsVisible(metrics);
+        if (startAreaId && this.authority.applyDebugStartArea(startAreaId)) {
+            this.camera = this.createCamera();
+        }
+    }
+
     flushInterruptedRopeRelease(input, reason) {
         if (reason === "pointerup") return false;
         this.update(this.runner.dt, input);

@@ -66,12 +66,14 @@ function memoryStorage(initialValue = null) {
 export function run() {
     const metricsInput = new FakeElement();
     const startAreaSelect = new FakeElement();
+    const applyButton = new FakeElement();
     const documentTarget = new FakeEventTarget();
     documentTarget.createElement = () => new FakeElement();
     documentTarget.querySelector = (selector) =>
         ({
             "[data-debug-metrics]": metricsInput,
-            "[data-debug-start-area]": startAreaSelect
+            "[data-debug-start-area]": startAreaSelect,
+            "[data-debug-apply]": applyButton
         })[selector] ?? null;
     const trigger = new FakeElement();
     const windowTarget = new FakeEventTarget();
@@ -92,8 +94,10 @@ export function run() {
     assert.throws(() => settings.setStartAreaId("retired-area"), /unknown debug start area/);
 
     let activated = 0;
+    let applied = 0;
     const panel = new DebugPanel({ trigger, settings, areaIds, documentTarget, windowTarget });
     panel.onActivate = () => (activated += 1);
+    panel.onApply = () => (applied += 1);
     let now = 0;
     windowTarget.performance = { now: () => now };
     assert.equal(panel.attach(), true);
@@ -159,6 +163,9 @@ export function run() {
     startAreaSelect.value = "";
     startAreaSelect.dispatch("change");
     assert.equal(settings.snapshot().startAreaId, null);
+
+    applyButton.dispatch("click");
+    assert.equal(applied, 1, "the apply button must notify the app to apply debug settings immediately");
 
     assert.equal(panel.detach(), true);
     assert.equal(panel.detach(), false, "detach must be idempotent");
