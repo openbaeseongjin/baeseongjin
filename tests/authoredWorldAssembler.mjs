@@ -7,6 +7,8 @@ import { gatePortalBounds, worldObject } from "../src/game/world/areas/AreaDefin
 import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../src/game/world/areas/sector02/Sector02AreaCatalog.js";
+import { SECTOR_03_AREA_CATALOG } from "../src/game/world/areas/sector03/Sector03AreaCatalog.js";
+import { SECTOR_04_AREA_CATALOG } from "../src/game/world/areas/sector04/Sector04AreaCatalog.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
     worldObjectPresentation
@@ -126,11 +128,17 @@ export function run() {
         /coordinateAnchor/,
         "authored objects must reject unknown coordinate anchor names before assembly"
     );
-    for (const catalog of [SECTOR_01_AREA_CATALOG, SECTOR_02_AREA_CATALOG]) {
+    for (const catalog of [
+        SECTOR_01_AREA_CATALOG,
+        SECTOR_02_AREA_CATALOG,
+        SECTOR_03_AREA_CATALOG,
+        SECTOR_04_AREA_CATALOG,
+        CURRENT_AUTHORED_AREA_CATALOG
+    ]) {
         for (const area of catalog.areas.filter(({ gate }) => gate.nextAreaId !== null)) {
-            const portalObject = area.objects.find(
-                ({ gateId, kind }) => gateId === area.gate.id && kind !== "gate-panel"
-            );
+            const linked = area.objects.filter(({ gateId }) => gateId === area.gate.id);
+            const portalObject =
+                linked.find(({ kind }) => kind === "gate") ?? linked.find(({ kind }) => kind !== "gate-panel");
             assert.ok(portalObject, `${area.id} must expose one visible object for its progression portal`);
             assert.deepEqual(
                 area.gate.trigger,
@@ -158,9 +166,9 @@ export function run() {
         }
     }
     const firstPlatform = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id.endsWith(":p4"));
-    assert.deepEqual(firstPlatform.position, { x: 192, y: -864 });
-    assert.deepEqual(firstPlatform.vertices[0], { x: 32, y: -864 });
-    assert.deepEqual(firstPlatform.vertices[1], { x: 352, y: -864 });
+    assert.deepEqual(firstPlatform.position, { x: 192, y: -896 });
+    assert.deepEqual(firstPlatform.vertices[0], { x: 32, y: -896 });
+    assert.deepEqual(firstPlatform.vertices[1], { x: 352, y: -896 });
     assert.equal(
         first.surfaces.find(({ id }) => id === firstPlatform.id).position.y,
         firstPlatform.position.y + 320,
@@ -182,7 +190,7 @@ export function run() {
             "crossbeam-x1": { x: -64, y: -544, width: 128, height: 32, grappleable: false },
             p2: { x: -288, y: -576, width: 192, height: 16, grappleable: true },
             p3: { x: 64, y: -800, width: 192, height: 16, grappleable: true },
-            p4: { x: 64, y: -960, width: 288, height: 32, grappleable: true }
+            p4: { x: 64, y: -1024, width: 288, height: 32, grappleable: true }
         },
         "1-2 gameplay surfaces must stay aligned with the REV 3.1 approved blockout"
     );
@@ -200,8 +208,8 @@ export function run() {
             { id: "anchor-b", position: { x: 160, y: -416 }, coordinateAnchor: "center" },
             { id: "anchor-c", position: { x: -160, y: -640 }, coordinateAnchor: "center" },
             { id: "anchor-d", position: { x: 128, y: -864 }, coordinateAnchor: "center" },
-            { id: "security-access-gate", position: { x: 320, y: -960 }, coordinateAnchor: "bottom-center" },
-            { id: "exit-panel", position: { x: 208, y: -960 }, coordinateAnchor: "bottom-center" }
+            { id: "security-access-gate", position: { x: 320, y: -1024 }, coordinateAnchor: "bottom-center" },
+            { id: "exit-panel", position: { x: 208, y: -1024 }, coordinateAnchor: "bottom-center" }
         ],
         "1-2 landmarks and floor-mounted exit objects must use the approved anchors"
     );

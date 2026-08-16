@@ -52,12 +52,12 @@
 | Safe Ledge | `(-240,-640)` | 224×16 | 첫 플레이 Safe Route |
 | Safe Cover | `(-112,-640)` bottom-center | 32×128 | C 접근 LOS 차단 |
 | Upper Cover | `(-16,-832)` bottom-center | 96×128 | 상단 Relief 경계 |
-| P4 | `(192,-1056)` | 320×32 | Final Safe Deck |
+| P4 | `(192,-1088)` | 320×32 | Final Safe Deck |
 | A/B/C/D | `(64,-224)` / `(64,-480)` / `(-192,-736)` / `(96,-960)` | 24×24 | Grapple Landmark |
 | Scanner | `(-96,-64)` | 96×128 trigger | 자동 직원 인증 |
 | Sentry T1 | `(416,-640)` | 32×32 mock | 오른쪽 벽 장착 |
-| Service Panel | `(208,-1056)` bottom-center | mock | `maintenance-override` |
-| Security Gate | `(320,-1056)` bottom-center | mock | 실제 문 개구부만 포탈 |
+| Service Panel | `(208,-1088)` bottom-center | mock | `maintenance-override` |
+| Security Gate | `(320,-1088)` bottom-center | mock | 실제 문 개구부만 포탈 |
 
 Sentry activation band는 `x=-480~480`, `y=-928~-384`다. P1에서는 접힌 Turret을 먼저 보고, 위로 출발한 뒤에만 Acquire가 시작된다. Turret 파괴는 Gate 요구 조건이 아니다.
 

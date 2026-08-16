@@ -38,7 +38,7 @@ function progressionGate(areaId, x, y, nextAreaId, requiredObjectiveIds, propert
         nextAreaId,
         requiredObjectiveIds: Object.freeze(requiredObjectiveIds),
         trigger: nextAreaId === null ? triggerBounds(x - 48, y - 96, 96, 160) : gatePortalBounds(x, y),
-        barrier: triggerBounds(x - 32, y - 96, 64, 128),
+        barrier: triggerBounds(x - 32, y - 96, 64, 96),
         ...properties
     });
 }
@@ -91,7 +91,7 @@ const area01Landmarks = [
     landmark(area01Id, "g3", 0, 128, -640),
     landmark(area01Id, "g4", -160, -32, -832)
 ];
-const area01Exit = point(`${area01Id}:exit`, 416, -992);
+const area01Exit = point(`${area01Id}:exit`, 416, -960);
 const area01Objective = reachExitObjective(area01Id, area01Exit.x, area01Exit.y);
 const area01PanelObjective = exitPanelObjective(area01Id, [area01Objective.id]);
 const area01 = defineArea({
@@ -114,7 +114,7 @@ const area01 = defineArea({
         platform(area01Id, "p3", -448, -160, -736),
         platform(area01Id, "r4", -96, 128, -784, "recovery"),
         platform(area01Id, "p4", 32, 352, -928, "safe-deck"),
-        platform(area01Id, "exit-deck", 288, 544, -992, "safe-deck"),
+        platform(area01Id, "exit-deck", 288, 544, -960, "safe-deck"),
         ...area01Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
@@ -140,7 +140,7 @@ const area01 = defineArea({
         worldObject(`${area01Id}:community-notice`, "story-display", 160, -952, {
             cueIds: ["evacuation-group-c", "wait-for-further-instruction"]
         }),
-        exitPanel(area01Id, area01Exit, area01PanelObjective, -928),
+        exitPanel(area01Id, area01Exit, area01PanelObjective, -960),
         worldObject(`${area01Id}:exit-frame`, "gate", area01Exit.x, area01Exit.y, {
             coordinateAnchor: "bottom-center",
             gateId: `${area01Id}:gate`
@@ -218,7 +218,7 @@ const area02 = defineArea({
 
 const area03Id = "sector-02-03";
 const area03Landmarks = [landmark(area03Id, "g1", 128, 256, -512), landmark(area03Id, "g2", -96, 32, -608)];
-const area03Exit = point(`${area03Id}:exit`, 304, -736);
+const area03Exit = point(`${area03Id}:exit`, 304, -704);
 const area03Objective = Object.freeze({
     id: `${area03Id}:specialization-selected`,
     type: "interact",
@@ -241,7 +241,7 @@ const area03 = defineArea({
         platform(area03Id, "p2", -224, 224, -384, "safe-deck"),
         platform(area03Id, "r1", -32, 224, -576, "recovery"),
         platform(area03Id, "p3", 96, 384, -672),
-        platform(area03Id, "exit-deck", 160, 448, -736, "safe-deck"),
+        platform(area03Id, "exit-deck", 160, 448, -704, "safe-deck"),
         ...area03Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
@@ -265,7 +265,7 @@ const area03 = defineArea({
             perPlayerSelection: true,
             cueIds: ["foundation-detected", "specialization-available"]
         }),
-        exitPanel(area03Id, area03Exit, area03PanelObjective, -672),
+        exitPanel(area03Id, area03Exit, area03PanelObjective, -704),
         worldObject(`${area03Id}:exit-frame`, "gate", area03Exit.x, area03Exit.y, {
             coordinateAnchor: "bottom-center",
             gateId: `${area03Id}:gate`
@@ -291,7 +291,7 @@ const area04Landmarks = [
     landmark(area04Id, "g8a", -128, 0, -1024),
     landmark(area04Id, "g9", 224, 352, -1152)
 ];
-const area04Exit = point(`${area04Id}:exit`, 496, -1248);
+const area04Exit = point(`${area04Id}:exit`, 496, -1216);
 const area04Objective = reachExitObjective(area04Id, area04Exit.x, area04Exit.y);
 const area04PanelObjective = exitPanelObjective(area04Id, [area04Objective.id]);
 const area04 = defineArea({
@@ -317,7 +317,7 @@ const area04 = defineArea({
         platform(area04Id, "s4", -512, -192, -1056, "safe-deck"),
         platform(area04Id, "m3", 0, 352, -1088, "safe-deck"),
         platform(area04Id, "p7", 288, 608, -1216),
-        platform(area04Id, "exit-deck", 352, 640, -1248, "safe-deck"),
+        platform(area04Id, "exit-deck", 352, 640, -1216, "safe-deck"),
         ...area04Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
@@ -371,7 +371,7 @@ const area05Landmarks = [
     landmark(area05Id, "g6", -64, 64, -928),
     landmark(area05Id, "g7", 224, 352, -1088)
 ];
-const area05Exit = point(`${area05Id}:exit`, 464, -1120);
+const area05Exit = point(`${area05Id}:exit`, 464, -1088);
 const area05Objective = reachExitObjective(area05Id, area05Exit.x, area05Exit.y);
 const area05PanelObjective = exitPanelObjective(area05Id, [area05Objective.id]);
 const area05 = defineArea({
@@ -398,7 +398,7 @@ const area05 = defineArea({
         }),
         platform(area05Id, "r1", 64, 320, -832, "recovery"),
         platform(area05Id, "p4", 32, 320, -1024),
-        platform(area05Id, "exit-deck", 320, 608, -1120, "safe-deck"),
+        platform(area05Id, "exit-deck", 320, 608, -1088, "safe-deck"),
         ...area05Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
@@ -455,7 +455,7 @@ const area06Landmarks = [
     landmark(area06Id, "g6", 32, 160, -896),
     landmark(area06Id, "g7", 192, 320, -1088)
 ];
-const area06Exit = point(`${area06Id}:exit`, 544, -1184);
+const area06Exit = point(`${area06Id}:exit`, 544, -1152);
 const area06Objective = reachExitObjective(area06Id, area06Exit.x, area06Exit.y);
 const area06PanelObjective = exitPanelObjective(area06Id, [area06Objective.id]);
 const area06 = defineArea({
@@ -477,7 +477,7 @@ const area06 = defineArea({
         platform(area06Id, "r3", 224, 512, -832, "recovery"),
         platform(area06Id, "p5", -64, 320, -992),
         platform(area06Id, "p6", 320, 608, -1152),
-        platform(area06Id, "exit-deck", 416, 672, -1184, "safe-deck"),
+        platform(area06Id, "exit-deck", 416, 672, -1152, "safe-deck"),
         ...area06Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
@@ -532,7 +532,7 @@ const area07Landmarks = [
     landmark(area07Id, "g9", 160, 288, -1120),
     landmark(area07Id, "g10", 224, 352, -1312)
 ];
-const area07Exit = point(`${area07Id}:exit`, 544, -1408);
+const area07Exit = point(`${area07Id}:exit`, 544, -1376);
 const area07Objective = reachExitObjective(area07Id, area07Exit.x, area07Exit.y);
 const area07PanelObjective = exitPanelObjective(area07Id, [area07Objective.id]);
 const area07 = defineArea({
@@ -557,7 +557,7 @@ const area07 = defineArea({
         platform(area07Id, "r4", 288, 544, -1024, "recovery"),
         platform(area07Id, "p7", -32, 320, -1216),
         platform(area07Id, "p8", 320, 608, -1376),
-        platform(area07Id, "exit-deck", 416, 672, -1408, "safe-deck"),
+        platform(area07Id, "exit-deck", 416, 672, -1376, "safe-deck"),
         ...area07Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
@@ -627,7 +627,7 @@ const area08Landmarks = [
     landmark(area08Id, "g10", -32, 96, -1184),
     landmark(area08Id, "g11", 160, 288, -1376)
 ];
-const area08Exit = point(`${area08Id}:exit`, 576, -1440);
+const area08Exit = point(`${area08Id}:exit`, 576, -1472);
 const area08Objective = Object.freeze({
     id: `${area08Id}:transfer-control-read`,
     type: "interact",
@@ -653,7 +653,7 @@ const area08 = defineArea({
         platform(area08Id, "s5", -576, -288, -1088, "recovery"),
         platform(area08Id, "b5", 288, 576, -1088, "recovery"),
         platform(area08Id, "p9", -160, 224, -1280, "safe-deck"),
-        platform(area08Id, "p10", 256, 608, -1440, "safe-deck"),
+        platform(area08Id, "p10", 256, 608, -1472, "safe-deck"),
         ...area08Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
@@ -670,7 +670,7 @@ const area08 = defineArea({
         area08Landmarks[11].route,
         point(`${area08Id}:route-p9`, 32, -1280),
         area08Landmarks[12].route,
-        point(`${area08Id}:route-p10`, 432, -1440),
+        point(`${area08Id}:route-p10`, 432, -1472),
         point(`${area08Id}:route-exit`, area08Exit.x, area08Exit.y)
     ],
     recoveryPoints: [
@@ -682,7 +682,7 @@ const area08 = defineArea({
         point(`${area08Id}:recovery-p9`, 32, -1304)
     ],
     checkpoints: [
-        point(`${area08Id}:sector-end-checkpoint`, 576, -1440, {
+        point(`${area08Id}:sector-end-checkpoint`, 576, -1472, {
             sourceObjectId: `${area08Id}:sector-end-checkpoint-object`
         })
     ],
@@ -696,14 +696,14 @@ const area08 = defineArea({
             { x: -384, y: -1088 },
             { x: 480, y: -1088 }
         ]),
-        worldObject(`${area08Id}:transfer-control`, "gate-panel", 448, -1440, {
+        worldObject(`${area08Id}:transfer-control`, "gate-panel", 448, -1472, {
             coordinateAnchor: "bottom-center",
             interactionRadius,
             objectiveId: area08Objective.id,
             gateId: `${area08Id}:gate`,
             cueIds: ["group-a-complete", "group-b-complete", "group-c-suspended", "priority-access-active"]
         }),
-        worldObject(`${area08Id}:sector-end-checkpoint-object`, "checkpoint", 576, -1440, {
+        worldObject(`${area08Id}:sector-end-checkpoint-object`, "checkpoint", 576, -1472, {
             checkpointId: `${area08Id}:sector-end-checkpoint`
         }),
         worldObject(`${area08Id}:content-boundary`, "gate", area08Exit.x, area08Exit.y, {

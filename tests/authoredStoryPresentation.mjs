@@ -647,7 +647,7 @@ export function run() {
         localTriggerObjects(sector04World, "sector-04-08"),
         "sector-04-08:upper-trunk-limited"
     );
-    assert.deepEqual(finalStatusDisplay?.bounds, { x: -32, y: -1792, width: 192, height: 64 });
+    assert.deepEqual(finalStatusDisplay?.bounds, { x: -32, y: -1824, width: 192, height: 64 });
     controlTrunk.update(0, { currentAreaId: "sector-04-08", currentAreaLocalY: -32 });
     controlTrunk.update(1.4, { currentAreaId: "sector-04-08", currentAreaLocalY: -32 });
     assert.deepEqual(

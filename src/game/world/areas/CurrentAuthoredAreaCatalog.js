@@ -1,10 +1,25 @@
-import { defineArea, defineAreaCatalog } from "./AreaDefinition.js";
+import { defineArea, defineAreaCatalog, gatePortalBounds } from "./AreaDefinition.js";
 import { SECTOR_01_AREA_CATALOG } from "./sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "./sector02/Sector02AreaCatalog.js";
 import { SECTOR_03_AREA_CATALOG } from "./sector03/Sector03AreaCatalog.js";
 
 function connectArea(area, { order, nextAreaId, gate = {} }) {
-    const baseGate = nextAreaId === null ? area.gate : { ...area.gate, completionMode: undefined };
+    const rewired = nextAreaId !== null && area.nextAreaId === null;
+    const baseGate =
+        nextAreaId === null
+            ? area.gate
+            : {
+                  ...area.gate,
+                  completionMode: undefined,
+                  ...(rewired
+                      ? {
+                            trigger: gatePortalBounds(
+                                area.gate.barrier.x + area.gate.barrier.width * 0.5,
+                                area.gate.barrier.y + area.gate.barrier.height
+                            )
+                        }
+                      : {})
+              };
     return defineArea({
         ...area,
         order,

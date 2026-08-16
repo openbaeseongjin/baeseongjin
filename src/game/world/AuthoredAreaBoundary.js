@@ -1,5 +1,3 @@
-const MINIMUM_GATE_HALF_WIDTH = 52;
-const GATE_OPENING_PADDING = 20;
 const DIVIDER_HEIGHT = 48;
 const SIDE_WALL_WIDTH = 32;
 
@@ -58,7 +56,7 @@ export function authoredGateOpening(area, gate) {
     const centerX = barrier
         ? barrier.x + barrier.width * 0.5
         : (area.exit?.x ?? area.bounds.x + area.bounds.width * 0.5);
-    const halfWidth = Math.max(MINIMUM_GATE_HALF_WIDTH, (barrier?.width ?? 64) * 0.5 + GATE_OPENING_PADDING);
+    const halfWidth = (barrier?.width ?? 64) * 0.5;
     return Object.freeze({ centerX, left: centerX - halfWidth, right: centerX + halfWidth });
 }
 

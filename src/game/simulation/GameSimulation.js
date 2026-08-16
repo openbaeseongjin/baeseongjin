@@ -11,8 +11,8 @@ import {
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
-import { selectNearestEnemy } from "../combat/CombatTargeting.js";
 import { EnemyObject } from "../combat/EnemyObject.js";
+import { HomingProjectileObject } from "../combat/ProjectileObject.js";
 import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WIND_CONFIG, WORLD_CONFIG } from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";
 import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
@@ -125,6 +125,7 @@ export class GameSimulation {
         this.#inputDispatcher = new InputDispatcher();
         this.#inputDrivenObjectsByOwner = new Map();
         this.portalTransitions = new Map();
+        this.lastAcceptedPlayerProjectileSpawnTick = new Map();
         this.players = [];
         const startArea = this.world.areas?.find(({ id }) => id === startAreaId) ?? this.world.areas?.[0];
         const playerRuntime = this.addPlayer(startArea?.entry, playerId);
@@ -1315,7 +1316,7 @@ export class GameSimulation {
         );
     }
 
-    resolvePlayerProjectileSpawnClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+    resolvePlayerProjectileSpawnClaim(authenticatedPlayerId, claim) {
         const player = this.players.find(({ id }) => id === authenticatedPlayerId);
         if (!player || player.lifeState !== "active") {
             return Object.freeze({ accepted: false, reason: "player-ineligible" });
@@ -1323,22 +1324,30 @@ export class GameSimulation {
         if (claim.predictionId !== `${authenticatedPlayerId}:${claim.clientTick}`) {
             return Object.freeze({ accepted: false, reason: "prediction-ownership" });
         }
-        if (player.weapon.cooldown > 0) return Object.freeze({ accepted: false, reason: "weapon-cooldown" });
-        const target = selectNearestEnemy(player.physics.position, this.enemies, player.weapon.range);
-        if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
-        if (target.id !== claim.targetId) return Object.freeze({ accepted: false, reason: "target-mismatch" });
-        const expectedSpawnPosition = player.weapon.projectileSpawnPosition(player, target);
-        if (
-            Math.hypot(claim.position.x - expectedSpawnPosition.x, claim.position.y - expectedSpawnPosition.y) >
-            positionTolerance
-        ) {
-            return Object.freeze({ accepted: false, reason: "position-mismatch" });
+        if (!Number.isFinite(claim.position?.x) || !Number.isFinite(claim.position?.y)) {
+            return Object.freeze({ accepted: false, reason: "position-invalid" });
         }
-        const projectile = this.#advanceAutomaticWeapon(player, 0);
-        if (!projectile) return Object.freeze({ accepted: false, reason: "weapon-unavailable" });
-        projectile.position.set(claim.position.x, claim.position.y);
-        projectile.predictionId = claim.predictionId;
+        const fireIntervalTicks = Math.round(COMBAT_CONFIG.fireInterval * 120);
+        const minimumSpacingTicks = fireIntervalTicks - 2;
+        const lastSpawnTick = this.lastAcceptedPlayerProjectileSpawnTick.get(authenticatedPlayerId);
+        if (lastSpawnTick !== undefined && claim.clientTick - lastSpawnTick < minimumSpacingTicks) {
+            return Object.freeze({ accepted: false, reason: "fire-interval" });
+        }
+        const projectile = new HomingProjectileObject({
+            id: this.registry.createId("projectile"),
+            ownerId: authenticatedPlayerId,
+            targetId: claim.targetId,
+            position: new Vector2(claim.position.x, claim.position.y),
+            velocity: new Vector2(),
+            speed: COMBAT_CONFIG.projectileSpeed,
+            damage: COMBAT_CONFIG.weaponDamage,
+            radius: COMBAT_CONFIG.projectileRadius,
+            predictionId: claim.predictionId
+        });
+        this.projectiles.push(projectile);
         this.recordProjectileSpawn(projectile);
+        this.lastAcceptedPlayerProjectileSpawnTick.set(authenticatedPlayerId, claim.clientTick);
+        player.weapon.cooldown = COMBAT_CONFIG.fireInterval;
         return Object.freeze({ accepted: true, projectileId: projectile.id });
     }
 
