@@ -28,7 +28,8 @@ export class GameApp {
         onDiagnostics = () => {},
         audioBindings = null,
         worldSeed = selectWorldSeed(globalThis.location?.search),
-        startAreaId = parseStartAreaId(globalThis.location?.search)
+        startAreaId = parseStartAreaId(globalThis.location?.search),
+        metricsVisible = isMetricsPanelEnabled(globalThis.location?.search)
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = renderer
@@ -39,7 +40,7 @@ export class GameApp {
         });
         this.authority = new LocalAuthority(createCurrentGameSimulation({ worldSeed, startAreaId }));
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
-        this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
+        this.metricsVisible = metricsVisible;
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
         this.camera = this.createCamera();

@@ -49,7 +49,8 @@ export class MultiplayerGameApp {
         authority,
         onDisconnect = () => {},
         onDiagnostics = () => {},
-        audioBindings = null
+        audioBindings = null,
+        metricsVisible = isMetricsPanelEnabled(globalThis.location?.search)
     }) {
         this.renderer = renderer
             ? assertGameRenderer(renderer)
@@ -61,7 +62,7 @@ export class MultiplayerGameApp {
         this.onDisconnect = onDisconnect;
         this.disconnectHandled = false;
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
-        this.metricsVisible = isMetricsPanelEnabled(globalThis.location?.search);
+        this.metricsVisible = metricsVisible;
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
         this.camera = {

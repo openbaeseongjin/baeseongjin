@@ -276,6 +276,35 @@
             .audio-resume-notice[hidden] {
                 display: none;
             }
+            .debug-panel-body {
+                display: grid;
+                gap: 12px;
+                margin-top: 18px;
+            }
+            .debug-toggle,
+            .debug-select-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                min-height: 46px;
+                font-weight: 800;
+            }
+            .debug-select-row select {
+                min-width: 240px;
+                min-height: 40px;
+                padding: 0 10px;
+                border: 1px solid rgba(148, 163, 184, 0.4);
+                border-radius: 9px;
+                color: #e2e8f0;
+                background: #243047;
+                font-weight: 700;
+            }
+            .debug-note {
+                margin: 0;
+                color: #94a3b8;
+                font-weight: 700;
+            }
             .settings-card {
                 width: min(560px, 100%);
                 max-height: min(720px, calc(100dvh - 40px));
@@ -563,6 +592,38 @@
                             <button class="audio-reset" type="button" data-audio-reset>기본값 복원</button>
                         </div>
                     </section>
+                </div>
+            </section>
+            <section
+                class="settings-dialog"
+                id="debug-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="debug-title"
+                hidden
+            >
+                <div class="settings-card">
+                    <header class="settings-header">
+                        <h2 id="debug-title">디버그</h2>
+                        <button class="settings-close" type="button" data-debug-close aria-label="디버그 패널 닫기">
+                            닫기
+                        </button>
+                    </header>
+                    <div class="debug-panel-body">
+                        <label class="debug-toggle">
+                            <span>디버그 수치 표시</span>
+                            <input type="checkbox" data-debug-metrics />
+                        </label>
+                        <label class="debug-select-row">
+                            <span>시작 맵</span>
+                            <select data-debug-start-area>
+                                <option value="">기본 (1-1부터)</option>
+                            </select>
+                        </label>
+                        <p class="debug-note">
+                            변경 사항은 다음 게임 시작부터 적용됩니다. 설정 버튼을 1초간 길게 누르면 열립니다.
+                        </p>
+                    </div>
                 </div>
             </section>
             <p class="audio-resume-notice" id="audio-resume-notice" role="status" hidden>

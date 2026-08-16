@@ -17,6 +17,9 @@ import { AudioEventBindings } from "./audio/AudioEventBindings.js";
 import { BrowserAudioLifecycle } from "./audio/BrowserAudioLifecycle.js";
 import { SettingsMenu } from "./game/ui/SettingsMenu.js";
 import { AudioSettingsPanel } from "./game/ui/AudioSettingsPanel.js";
+import { DebugSettings } from "./game/metrics/DebugSettings.js";
+import { DebugPanel } from "./game/ui/DebugPanel.js";
+import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
 
 const canvas = document.getElementById("game-canvas");
 if (!canvas) {
@@ -48,6 +51,13 @@ const settingsMenu = new SettingsMenu({
     root: document.getElementById("settings-dialog"),
     trigger: document.getElementById("settings-trigger")
 });
+const debugSettings = new DebugSettings({ storage: audioStorage });
+const debugPanel = new DebugPanel({
+    root: document.getElementById("debug-dialog"),
+    trigger: document.getElementById("settings-trigger"),
+    settings: debugSettings,
+    areaIds: CURRENT_AUTHORED_AREA_CATALOG.areas.map(({ id }) => id)
+});
 const audioSettingsPanel = new AudioSettingsPanel({
     root: document.getElementById("settings-panel-audio"),
     settings: audioSettings
@@ -59,11 +69,12 @@ settingsMenu.registerTab({
     panel: document.getElementById("settings-panel-audio")
 });
 audioSettingsPanel.attach();
+debugPanel.attach();
 const loadSelectedAudioDefinition = createAudioDefinitionLoader(DEFAULT_GAME_AUDIO_SELECTION);
 const diagnostics = setupPlaytestDiagnostics({
     root: document.getElementById("copy-diagnostics"),
     navigator: globalThis.navigator,
-    enabled: isMetricsPanelEnabled(globalThis.location?.search),
+    enabled: debugSettings.snapshot().metrics || isMetricsPanelEnabled(globalThis.location?.search),
     context: () => ({
         version: document.getElementById("app-version").dataset.version,
         url: globalThis.location.href,
@@ -134,11 +145,14 @@ async function launch() {
             audioBindings.uiConfirm();
             if (choice.mode === "single") {
                 activeChannelId = null;
+                const debug = debugSettings.snapshot();
                 app = new GameApp({
                     canvas,
                     renderer: createGameRenderer({ canvas, profile: rendererProfile }),
                     audioBindings,
-                    onDiagnostics: updateDiagnostics
+                    onDiagnostics: updateDiagnostics,
+                    startAreaId: debug.startAreaId ?? undefined,
+                    metricsVisible: debug.metrics || isMetricsPanelEnabled(globalThis.location?.search)
                 });
             } else {
                 const serverUrl = configuredMultiplayerServer();
@@ -146,13 +160,15 @@ async function launch() {
                 authority = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, choice.channelId) });
                 await authority.connect();
                 activeChannelId = authority.channelId;
+                const debug = debugSettings.snapshot();
                 app = new MultiplayerGameApp({
                     canvas,
                     renderer: createGameRenderer({ canvas, profile: rendererProfile }),
                     authority,
                     audioBindings,
                     onDisconnect: returnToMenu,
-                    onDiagnostics: updateDiagnostics
+                    onDiagnostics: updateDiagnostics,
+                    metricsVisible: debug.metrics || isMetricsPanelEnabled(globalThis.location?.search)
                 });
                 channelBadge.textContent = `채널 ${authority.channelId}`;
                 channelBadge.hidden = false;
@@ -201,6 +217,7 @@ globalThis.addEventListener(
         audioHost?.suspend();
         audioSettingsPanel.detach();
         settingsMenu.detach();
+        debugPanel.detach();
         app?.stop();
     },
     { once: true }
