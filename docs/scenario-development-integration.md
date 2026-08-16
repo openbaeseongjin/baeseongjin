@@ -7,7 +7,9 @@ scenario-source-sha256: 8d8d6e845ec5bbdd8abda2e098fa82703f50f6981eb51ee3640fb321
 authored-area-sha256: 91d877421c2be171b28b8b3f1b0f322294ad1be92edd734b11806a071fa2d1eb
 stage-count: 32
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8
-reviewed-upstream: 709b009e6f69eaf1516146b543ce42ac32c541c9
+reviewed-upstream: 28d99edd464c66ca5be37bc1708e9e4d7d61ae14
+NOTE: scenario-source-sha256 / authored-area-sha256는 이번(#29) 검토에서 재생성하지 않았다.
+`npm run check:scenario-integration -- --print`를 실행할 node/npm이 이 환경에 없어 값을 추측하지 않고 이전 값을 그대로 유지한다.
 -->
 
 ## 상태를 읽는 법
@@ -28,10 +30,10 @@ reviewed-upstream: 709b009e6f69eaf1516146b543ce42ac32c541c9
 
 ## 2026-08-16 확인 체크포인트
 
-- 확인 기준 upstream: `709b009e6f69eaf1516146b543ce42ac32c541c9` (`origin/main`, 최근 DeepSeek 구현 26개 커밋과 후속 debug·멀티 병합까지 포함한 clean base)
+- 확인 기준 upstream: `28d99edd464c66ca5be37bc1708e9e4d7d61ae14` (`origin/main`, Sector 04 4-1~4-8 standalone catalog·Camera/Story 구현·디버그 패널 재구성까지 포함한 clean base)
 - 상세 Stage 문서: **32개**, `1-1`부터 `4-8`까지
 - 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-8` standalone)
-- 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1~4-8·#510 Wind 문구 정렬, `CurrentAuthoredAreaCatalog.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
+- 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.1과 4-1~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), `CurrentAuthoredAreaCatalog.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03/04 전체 등반의 실제 브라우저·기기 플레이테스트. 이번 #557 검토에서는 디버그 패널로 `sector-03-02` 직접 시작과 화면 렌더까지만 확인했으며, 모든 영역의 판정은 계속 `MOCK INTEGRATED`이고 `PLAYTEST VERIFIED`는 아직 없다.
 
@@ -40,7 +42,7 @@ reviewed-upstream: 709b009e6f69eaf1516146b543ce42ac32c541c9
 | Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증; #507이 Wind·Story·2-3 진행을 보강; 1-5~1-8 Camera Zone과 남은 Position Story Trigger 코드 반영 완료 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강; Story Presentation 공백 3건(2-2·2-3 POSITION, 2-6 최소 위치 표지) 코드 반영 완료 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 2-3 Specialization 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525); Camera는 8개 Stage 의도적 기본 카메라 확인, Story signage 28개 코드 반영 | Post-Sector 03 Boss→3-8/4-1 전환 미정 |
-| Sector 04 / 4-1~4-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결; Camera Zone 8개 Stage 구현 확인, Story 바인딩 반영 완료 | Post-Sector 03 Boss→4-1 전환이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증 |
+| Sector 04 / 4-1~4-8 | Master REV 1.1과 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결; Camera Zone 8개 Stage 구현 확인, Story 바인딩 반영 완료; Gate 좌표·Cutter Fire opt-in 모델·Wind Strength 문서 정합 완료(#29) | Post-Sector 03 Boss→4-1 전환이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증 |
 | Sector 05~06 | 상세 Stage 없음 | `NOT CONNECTED` | NPC 역할·대화 계약과 엔딩·최종 전환 계약 필요 |
 
 ## 최근 반영된 시나리오 변화
@@ -73,6 +75,7 @@ reviewed-upstream: 709b009e6f69eaf1516146b543ce42ac32c541c9
 26. Sector 04 Master의 stale 상태 문구를 정리했다. `4-2 ~ 4-8 Master outline only`를 8개 상세 Stage README 목록으로 바꾸고, Current Runtime Boundary를 `1-1 → 3-8 연결 + Sector 04 4-1~4-8 standalone` 현실에 맞췄다.
 27. Sector 04 Camera·Story를 정리했다. 8개 Stage README의 Camera 절을 전수 대조해 Sector 04는 문서가 per-zone zoom을 제안하는 유일한 Sector이며 8개 Stage 전부 Runtime `cameraZones`로 이미 구현돼 있음을 확인했고(4-2~4-4는 문서가 band를 주지 않아 Geometry에서 파생), Story는 문서의 "짧은 infrastructure status" 원칙대로 ENTRY 8개·POSITION 15개·기존 `story-display` 8개 cue 바인딩을 코드에 반영했다([인계 문서](./bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)). `LOWER ASCENT FEEDER ISOLATED`는 4-7에서만 노출되며 4-4는 `SEGMENTED / PARTIAL`까지만 표시한다.
 28. #557 검토에서 Sector 03/04 구현에 Stage별 `PRODUCTION-ALIGNMENT.md` 16개가 없고 `story-display`가 실제 앱 trigger 목록에서 빠지는 문제를 확인했다. 각 Stage의 현재 catalog 좌표·Stable ID·Camera·Story·검증·blocker를 제작 정렬 문서로 승격하고, 카탈로그에서 조립한 `story-display` 위치를 `192×64` 로컬 trigger bounds로 전달하는 회귀 테스트를 추가했다. 잠긴 Gate barrier 너머 다음 Area grapple target도 후보에서 제외해 authored 진행 경계를 복구했다. 브라우저에서 `sector-03-02` 직접 시작과 화면 렌더는 확인했지만 Sector 03/04 전체 등반·실기기 증거는 없으므로 Sector 03은 `MOCK INTEGRATED`, Sector 04는 standalone `GRAYBOX READY` 판정을 유지한다.
+29. Sector 04 4-1~4-8 문서 전체를 shipped `Sector04AreaCatalog.js`와 재대조했다. 핵심 발견: 여러 문서(4-1 §10, 그리고 그걸 인용한 4-2/4-3/4-5/4-6/4-7)가 "4-1 Flow Route `A3→A4` 408.9px가 새 400px Hook Reach를 초과해 좌표 수정이 필요하다"고 반복 기술했으나 이는 **FALSE ALARM**이었다 — 4-1의 Mandatory Safe Route는 같은 구간을 `A3→M1→A4`로 우회해(§9) 이미 400px 이내(max 374.5px)이고, Flow Route는 4-1 문서 자체가 `OPTIONAL EXPRESSION`으로 명시한 skilled-only 지름길이라 Mandatory 진행에 영향이 없다. Shipped catalog도 원래 좌표(A4 `(-64,-800)`) 그대로이며 좌표 변경은 하지 않았다. 이 오분석이 반복 인용된 5개 파일의 관련 서술을 RESOLVED로 정정했다. 추가로: (a) 4-1 §9/§10 자체의 산술 오류(Safe Route margin `65.5px`→`25.5px`, `400−374.5`)와 자기모순("408.9px" 표 바로 아래 "400px보다 작다")을 고쳤다. (b) Master `§6/§8`과 `OPEN QUESTION #1`이 Cutter Fire를 여전히 "opt-out, harden 검토 중"으로 기술했으나 실제로는 `#513`에서 이미 `canCutRope = rules.includes("cutter-fire")` opt-in으로 구현됐음을 확인해 RESOLVED로 정리했다. (c) 4-3/4-5/4-8의 Wind Strength 360을 "Sector01 baseline 재사용"이라 기술한 서술을 정정 — 실제 Sector01 pulsed tuning은 500~800이며 360은 Sector04 고유 hypothesis였다(Cycle 1.75/0.70/1.40/0.30만 Sector01과 일치하는 precedent). 다만 360은 실제 shipped catalog가 그대로 사용하는 CURRENT RUNTIME 값이므로 "아직 미구현" 취급은 하지 않는다. (d) 4-2/4-3/4-4/4-5/4-6/4-7 6개 문서의 Gate/Panel worldObject 좌표가 실제 catalog와 어긋나 있어(주로 Y 32px, 일부 X도) 전부 실제 좌표로 정정했고, 4-8 D1 activation X 범위(`±192`→`±208`)도 정정했다. (e) 4-1 metadata 표의 Design Carry Build·Runtime Status·Art Status 문구를 현재 상태(Foundation CURRENT RUNTIME / First Specialization CONTENT BLOCKED, standalone catalog AUTHORED & VALIDATED)에 맞췄고 이 Runtime Status 표준 문구를 8개 문서 전체에 동일 적용했다. (f) 4-1 NEXT·4-3 NEXT nav 링크가 plain text였던 것을 실제 markdown 링크로 고쳤다. Runtime 코드는 변경하지 않았다.
 
 ## 열린 기획·구현 게이트
 

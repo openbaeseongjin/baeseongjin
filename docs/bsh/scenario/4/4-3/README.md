@@ -1,8 +1,8 @@
 # SECTOR 04-3 — FREIGHT BYPASS
 
-*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
+*BLOCKOUT CANDIDATE · REV 1.2 — WIND STRENGTH RECLASSIFIED / 4-1 DRIFT FALSE ALARM RESOLVED*
 
-◀ PREV — [SECTOR 04-2 / CUTTER LINE](../4-2/README.md) · NEXT — SECTOR 04-4 / INFRASTRUCTURE SERVICE NODE ▶
+◀ PREV — [SECTOR 04-2 / CUTTER LINE](../4-2/README.md) · NEXT — [SECTOR 04-4 / INFRASTRUCTURE SERVICE NODE](../4-4/README.md) ▶
 
 `SECTOR 04 TRANSIT / INFRASTRUCTURE` · `STAGE 03` · `CUTTER + TRANSIT WAKE` · `MOMENTUM UNDER INTERRUPTION`
 
@@ -30,7 +30,7 @@
 | Primary Role | Cutter와 Pulsed Wake를 처음 한 이동 판단 안에서 결합 |
 | Primary Space | Freight Pressure Bypass / Express Service Corridor |
 | Exit | Reach Final Deck → Gate Panel → Gate Open → Physical Crossing |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
 | Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
 
 ---
@@ -273,17 +273,26 @@ spatial falloff는 비활성 상태로 남는다.
 ### TRANSIT WAKE BASELINE
 
 4-3은 first combination이므로
-Sector 01-6의 기존 pulsed baseline을 그대로 재사용하는 후보로 시작한다.
+Sector 01-6의 기존 pulsed Cycle을 그대로 재사용하는 후보로 시작한다.
 
 ```text
-Strength 360
 Lull     1.75 sec
 Warning  0.70 sec
 Active   1.40 sec
 Decay    0.30 sec
 ```
 
-모두 현재 실제 Runtime에서 이미 사용되는 값.
+이 Cycle 값은 Sector01 Pulsed Wind precedent(1-6/1-7/1-8)와 정확히 일치하는
+**VERIFIED PRECEDENT**다.
+
+```text
+Strength 360
+```
+
+는 다르다. Sector01 실제 pulsed tuning(`Sector01AreaCatalog.js`)은 500~800이며
+360은 Sector01에서 재사용한 값이 아니라 **Sector 04 고유 hypothesis**였다.
+다만 이 값은 실제 shipped `Sector04AreaCatalog.js`의 4-3 `windZones`(`freight-wake`)에
+그대로 구현·검증돼 현재 Sector 04의 CURRENT RUNTIME 값이다.
 
 4-3에서 새 물리 튜닝값을 동시에 발명하지 않는다.
 
@@ -293,47 +302,25 @@ Decay    0.30 sec
 
 최신 Rope 변경으로 이전 Sector 04 문서 일부가 stale해졌다.
 
-### 4-1 Drift — REQUIRED PATCH
+### 4-1 Drift — FALSE ALARM (RESOLVED)
 
-현재 GitHub 4-1은 Rope Reach를:
-
-```text
-400 px
-```
-
-로 갱신했지만 Flow Route에는 여전히:
+4-1의 Flow Route에는:
 
 ```text
 A3 → A4
 408.9 px
 ```
 
-가 남아 있고 문서가 이를:
+가 있고, 이는 Rope Max 400px을 실제로 초과한다(4-1 §10, "400px보다 작다"였던
+오기는 수정됨).
 
-```text
-400px보다 작다
-```
-
-고 잘못 판정한다.
-
-실제로:
-
-```text
-408.9 > 400
-```
-
-이다.
-
-따라서:
-
-```text
-4-1 FLOW ROUTE
-= CURRENT RUNTIME INVALID
-```
-
-이며 좌표 수정 필요.
-
-Safe Route max `374.5`는 400 안쪽이라 영향 없음.
+하지만 이것이 **RUNTIME INVALID**를 의미하지 않는다. 4-1의 **Mandatory Safe
+Route**는 같은 구간을 `A3 → M1 → A4`로 우회하며(4-1 §9, 각 222.3px / 186.6px),
+전체 Safe Route max는 `374.5px`로 400px 이내다. Flow Route는 4-1 문서 자체가
+`OPTIONAL EXPRESSION`으로 명시한 skilled-only 지름길이라, A3 → A4 직결이
+막혀 있어도 Mandatory 진행에는 영향이 없다. 실제 shipped
+`Sector04AreaCatalog.js`도 A4 `(-64, -800)` 그대로 구현·검증돼 있으므로
+좌표 수정은 필요하지 않았다.
 
 ### 4-2 Drift — RESOLVED
 
@@ -346,9 +333,9 @@ Safe Route max `374.5`는 400 안쪽이라 영향 없음.
 로 새 400 Reach 안에 남는다(margin 14.7px, graybox 우선 재검증 대상으로 4-2 문서에 명시됨).
 
 Enemy Attack Range / Fire Interval / Projectile Speed / Artifact wording / Hook flight / reload contract는
-4-2 REV 1.1 Runtime Re-Alignment 패치로 이미 GitHub `main`에 반영됐다.
+4-2 REV 1.2 패치로 이미 GitHub `main`에 반영됐다.
 
-4-1은 여전히 미해결 — 아래 §0-2 "4-1 Drift" 참고.
+4-1도 위 "4-1 Drift — FALSE ALARM (RESOLVED)" 참고.
 
 ### 4-3 Policy
 
@@ -894,8 +881,8 @@ more release-control demand
 
 ```text
 P4 Final Deck
-Panel (-112, -1376)
-Gate  (+16, -1376)
+Panel (-208, -1376)
+Gate  (-80, -1376)
 ```
 
 Threat 완전 밖.
@@ -1693,17 +1680,16 @@ Corporate decision
 
 ## 23. 개발 구현 우선순위
 
-### P0 — Previous Drift Fix
-
-Sector 04 구현 전에:
+### P0 — Previous Drift Fix — RESOLVED
 
 ```text
 4-1 Flow 408.9 > 400
 ```
 
-교정.
+는 FALSE ALARM으로 확인됨(§0-2 참고, Mandatory Safe Route는 M1/R3 경유로
+이미 400px 이내). 좌표 교정 불필요.
 
-4-2 current Combat / Hook / Foundation status 교정.
+4-2 current Combat / Hook / Foundation status 교정은 4-2 REV 1.2로 완료.
 
 ### P1 — 4-3 Geometry Only
 
@@ -1999,18 +1985,18 @@ Enemy projectile speed를 Stage 전용으로 낮추는 것은 후순위.
 그건 별도 Foundation design change이며
 4-3 Stage가 몰래 구현하지 않는다.
 
-### 5. 4-1 Drift — 여전히 OPEN
+### 5. 4-1 Drift — RESOLVED
 
 ```text
 4-2 runtime alignment patch
-= RESOLVED (REV 1.1, GitHub main)
+= RESOLVED (REV 1.2, GitHub main)
 
 4-1 geometry patch (Flow Route A3→A4 408.9px > new 400px Hook Reach)
-= 여전히 OPEN
+= FALSE ALARM — Mandatory Safe Route는 M1/R3 경유로 이미 400px 이내
 ```
 
-4-4 이후 Stage로 가기 전에
-4-1 Flow Route geometry patch를 우선 처리하는 것을 권장.
+위 §0-2 "4-1 Drift — FALSE ALARM (RESOLVED)" 참고. 4-4 이후 Stage로 가기 전에
+추가로 처리할 4-1 Flow Route 항목은 없다.
 
 ### 6. First Specialization
 
@@ -2032,4 +2018,4 @@ STATUS: SEGMENTED
 
 ---
 
-SECTOR 04-3 / FREIGHT BYPASS — BLOCKOUT CANDIDATE · REV 1.1
+SECTOR 04-3 / FREIGHT BYPASS — BLOCKOUT CANDIDATE · REV 1.2

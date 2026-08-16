@@ -1,8 +1,8 @@
 # SECTOR 04-1 — TRANSIT INTAKE
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — RUNTIME ALIGNMENT / FLOW ROUTE CLAIM FIX*
 
-◀ PREV — POST-SECTOR 03 BOSS / TRANSITION TBD · NEXT — SECTOR 04-2 / CUTTER LINE — 상세 문서 미작성 ▶
+◀ PREV — POST-SECTOR 03 BOSS / TRANSITION TBD · NEXT — [SECTOR 04-2 / CUTTER LINE](../4-2/README.md) ▶
 
 `SECTOR 04 TRANSIT / INFRASTRUCTURE` · `STAGE 01` · `SPEED SPACE REVEAL` · `PURE ROPE FLOW`
 
@@ -26,12 +26,12 @@
 | Required Kill | NONE |
 | Design Checkpoint / Reward | NONE |
 | Boss | NONE |
-| Design Carry Build | Foundation + first Specialization KEEP — runtime pending |
+| Design Carry Build | Foundation KEEP — CURRENT RUNTIME; First Specialization — CONTENT BLOCKED (selection pool TBD) |
 | Primary Role | Sector 04 첫 대형 이동 스케일 + 순수 Momentum 표현 |
 | Primary Space | Vertical Transit Intake Shaft / Structural Truss Backbone |
 | Exit | Reach Final Deck → Gate Panel → Gate Open → Physical Crossing |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
-| Art Status | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
+| Art Status | Runtime Area / Camera Zone 존재, Stable ID 부여·메인 월드 연결 전까지 Approved Gameplay Art HOLD |
 
 ---
 
@@ -145,7 +145,7 @@ Revision:
 sector-01-rev3-sector-02-rev1-v2
 ```
 
-따라서:
+따라서 작성 당시:
 
 ```text
 SECTOR 03
@@ -155,13 +155,28 @@ SECTOR 04
 = not connected
 ```
 
-4-1 좌표는 모두:
+였고, 4-1 좌표는 모두 `HYPOTHESIS — BLOCKOUT DATA`였다.
+
+### RUNTIME UPDATE — 4-1 ~ 4-8 STANDALONE CATALOG 구현됨
+
+이후 병합된 Runtime 변경(`src/game/world/areas/sector04/Sector04AreaCatalog.js`)에서
+4-1 ~ 4-8이 standalone `Sector04AreaCatalog`로 실제 구현·validator·조립 테스트 검증을
+모두 통과했다. 이 문서의 A1~A6 좌표는 `HYPOTHESIS`가 아니라
+현재 shipped 코드의 실제 `routePoints`/`grappleTarget` 좌표와 정확히 일치한다.
+
+다만 이 catalog는 여전히 메인 월드(`1-1 → 3-8`)에는 연결되지 않은
+`standalone` 상태이며, Post-Sector 03 Boss/전환 결정 전까지 배선하지 않는다.
+Camera Zone(§7 대응 5개)과 Story 바인딩도 이미 코드에 구현돼 있다
+(`docs/bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md` 참고).
+
+Cutter Fire 모델도 이 문서 작성 이후 opt-in으로 강화됐다:
 
 ```text
-HYPOTHESIS — BLOCKOUT DATA
+canCutRope = rules.includes("cutter-fire")
 ```
 
-다.
+(이전의 "no-rope-cut opt-out" 전제가 아니라 "cutter-fire opt-in" 전제다.)
+4-1 자체에는 Enemy가 없으므로 이 변경은 4-1 Stage 설계에는 영향이 없다.
 
 ### VERIFIED — CURRENT ROPE
 
@@ -865,8 +880,10 @@ ROPE MAX
 Range margin:
 
 ```text
-65.5 px
+25.5 px
 ```
+
+(`400 − 374.5`)
 
 ### Mandatory Contract
 
@@ -923,10 +940,10 @@ Recovery Deck 대부분 생략.
 
 ```text
 MAX FLOW LINK
-= 408.9 px
+= 408.9 px (A3 → A4)
 ```
 
-400px보다 작다.
+Rope Max 400px을 **초과**한다.
 
 하지만 이 Route는:
 
@@ -936,8 +953,11 @@ OPTIONAL EXPRESSION
 
 이다.
 
-A3 → A4처럼 400px대 연결을
-Mandatory Safe Route에 요구하지 않는다.
+A3 → A4처럼 400px을 넘는 연결을
+Mandatory Safe Route에 요구하지 않는다. Safe Route는 같은 구간을
+A3 → M1 → A4로 우회해(§9, 각 222.3px / 186.6px) 400px 이내로 통과한다.
+Flow Route는 그 우회를 생략한 skilled 전용 표현이며, A3 → A4 직결이
+막혀 있어도 Mandatory 진행에는 영향이 없다.
 
 ### Desired Feel
 
@@ -1968,4 +1988,4 @@ NO explicit Cutter visual
 
 ---
 
-SECTOR 04-1 / TRANSIT INTAKE — BLOCKOUT CANDIDATE · REV 1.0
+SECTOR 04-1 / TRANSIT INTAKE — BLOCKOUT CANDIDATE · REV 1.1

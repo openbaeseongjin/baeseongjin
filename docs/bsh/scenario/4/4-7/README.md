@@ -1,6 +1,6 @@
 # SECTOR 04-7 — ISOLATION JUNCTION
 
-*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
+*BLOCKOUT CANDIDATE · REV 1.2 — GATE COORDINATE FIX / 4-1 DRIFT FALSE ALARM RESOLVED*
 
 ◀ PREV — [SECTOR 04-6 / POWER RELAY SPAN](../4-6/README.md) · NEXT — [SECTOR 04-8 / TRANSIT CONTROL TRUNK](../4-8/README.md) ▶
 
@@ -30,7 +30,7 @@
 | Primary Role | Cutter/Wake 숙련 Synthesis + Lower Ascent Feeder Isolation 확정 Reveal |
 | Primary Space | Transit Isolation Junction / Cross-Flow Routing Spine |
 | Exit | Reach Final Deck → Gate Panel → Gate Open → Physical Crossing |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
 | Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
 
 ---
@@ -1031,7 +1031,7 @@ authorization signature
 
 ```text
 Panel
-(+432, -1408)
+(+432, -1440)
 
 Gate
 (+544, -1440)
@@ -2314,12 +2314,13 @@ LOWER FEEDER ISOLATED
 
 4-7에서 그 대비를 미리 다 소비하지 않는다.
 
-### 9. 4-1 Geometry Drift
+### 9. 4-1 Geometry Drift — FALSE ALARM (RESOLVED)
 
-Sector 04 전체 Runtime integration 전에
-4-1 current GitHub Flow reach drift가 실제로 닫혔는지
-다시 확인 필요.
+4-1의 Flow Route `A3 → A4 = 408.9px > 400px Hook Reach`는 실제로는 문제가 아니었다.
+4-1의 Mandatory Safe Route는 같은 구간을 `A3 → M1 → A4`로 우회해 400px 이내로
+통과하며, shipped `Sector04AreaCatalog.js`도 이 좌표 그대로 구현·검증돼 있다.
+좌표 교정은 필요하지 않았다(4-1 §9/§10 참고).
 
 ---
 
-SECTOR 04-7 / ISOLATION JUNCTION — BLOCKOUT CANDIDATE · REV 1.1
+SECTOR 04-7 / ISOLATION JUNCTION — BLOCKOUT CANDIDATE · REV 1.2
