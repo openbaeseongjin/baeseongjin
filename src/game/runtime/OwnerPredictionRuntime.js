@@ -280,6 +280,11 @@ export class OwnerPredictionRuntime {
         return this.state();
     }
 
+    releaseRope() {
+        if (!this.initialized) return false;
+        return this.simulation.releasePlayerRope(this.ownerId);
+    }
+
     predictFall() {
         if (!this.initialized) return null;
         this.simulation.resolvePlayerFall(this.ownerId);
@@ -428,7 +433,10 @@ export class OwnerPredictionRuntime {
 
     applyPredictedFoundationSelection(selection) {
         if (!this.initialized || this.pendingFoundationSelection) return false;
-        const result = this.simulation.resolveFoundationSelection(this.ownerId, selection, { replicate: false });
+        const result = this.simulation.resolveFoundationSelection(this.ownerId, selection, {
+            replicate: false,
+            requireOpenReward: false
+        });
         if (!result.accepted) return false;
         this.pendingFoundationSelection = Object.freeze({ ...selection });
         const state = this.state();

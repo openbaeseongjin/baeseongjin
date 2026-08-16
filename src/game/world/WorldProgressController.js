@@ -71,16 +71,23 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
     const currentArea = world.areas.find(({ id }) => id === progress.currentAreaId);
     if (!currentArea) throw new Error(`Missing assembled area '${progress.currentAreaId}'`);
 
-    for (const objectiveId of currentArea.objectiveIds) {
-        const objective = world.objectives.find(({ id }) => id === objectiveId);
+    const objectiveAreaById = new Map();
+    for (const area of world.areas) {
+        for (const objectiveId of area.objectiveIds) objectiveAreaById.set(objectiveId, area);
+    }
+
+    for (const objective of world.objectives) {
+        const objectiveArea = objectiveAreaById.get(objective.id) ?? currentArea;
         if (objective.type === "interact-choice") {
+            // The personal Foundation chooser must stay openable in any area a player still
+            // occupies: the shared frontier may have moved past the node after the first entrant.
             for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
                 events.push(
                     Object.freeze({
                         type: "objective-choice-requested",
-                        objectiveId,
+                        objectiveId: objective.id,
                         sourceObjectId: objective.sourceObjectId,
-                        areaId: currentArea.id,
+                        areaId: objectiveArea.id,
                         playerId: player.id,
                         position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
                     })
@@ -88,14 +95,15 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
             }
             continue;
         }
-        if (progress.isObjectiveComplete(objectiveId)) continue;
-        const sequence = progress.objectiveSequence(objectiveId);
+        if (!currentArea.objectiveIds.includes(objective.id)) continue;
+        if (progress.isObjectiveComplete(objective.id)) continue;
+        const sequence = progress.objectiveSequence(objective.id);
         if (sequence) {
-            const result = progress.advanceObjectiveSequence(objectiveId, dt);
+            const result = progress.advanceObjectiveSequence(objective.id, dt);
             if (!result.sequenceCompleted) continue;
             appendCompletionEvents(events, {
                 result,
-                objectiveId,
+                objectiveId: objective.id,
                 areaId: currentArea.id,
                 playerId: result.playerId,
                 position: players.find(({ id }) => id === result.playerId)?.physics.position ?? currentArea.exit
@@ -105,7 +113,7 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
         const player = completingPlayer(objective, world, progress, players, commandsByPlayerId);
         if (!player) continue;
         if (objective.completionDelaySeconds) {
-            const result = progress.startObjectiveSequence(objectiveId, {
+            const result = progress.startObjectiveSequence(objective.id, {
                 playerId: player.id,
                 durationSeconds: objective.completionDelaySeconds
             });
@@ -113,7 +121,7 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
                 events.push(
                     Object.freeze({
                         type: "objective-sequence-started",
-                        objectiveId,
+                        objectiveId: objective.id,
                         areaId: currentArea.id,
                         playerId: player.id,
                         durationSeconds: objective.completionDelaySeconds,
@@ -124,10 +132,10 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
             }
             continue;
         }
-        const result = progress.completeObjective(objectiveId);
+        const result = progress.completeObjective(objective.id);
         appendCompletionEvents(events, {
             result,
-            objectiveId,
+            objectiveId: objective.id,
             areaId: currentArea.id,
             playerId: player.id,
             position: player.physics.position

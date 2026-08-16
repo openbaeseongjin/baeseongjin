@@ -1,4 +1,5 @@
 import { advanceRewardSelection, createRewardSelection } from "./RewardSelection.js";
+import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 
 function asFoundationSelection(selection, objectiveId) {
     return Object.freeze({ ...selection, objectiveId });
@@ -24,5 +25,23 @@ export function advanceFoundationRewardSelection(selection, command) {
     return Object.freeze({
         selection: asFoundationSelection(outcome.selection, selection.objectiveId),
         confirmedFoundationId: outcome.confirmedChoiceId
+    });
+}
+
+export function openFoundationChooserCandidate({ world, position, command }) {
+    if (!world || !position || !command?.interact) return null;
+    const node = world.objects.find(
+        (object) =>
+            object.kind === "augment-node" &&
+            Math.hypot(position.x - object.position.x, position.y - object.position.y) <= object.interactionRadius
+    );
+    if (!node) return null;
+    const choices = (node.choices ?? []).map((id) => foundationAugmentById(id));
+    if (choices.length === 0 || choices.some((choice) => choice === null)) return null;
+    return createFoundationRewardSelection({
+        sourceId: node.id,
+        objectiveId: node.objectiveId,
+        choices,
+        selectedIndex: 0
     });
 }

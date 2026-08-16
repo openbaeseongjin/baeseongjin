@@ -9,7 +9,8 @@ import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import {
     advanceFoundationRewardSelection,
-    createFoundationRewardSelection
+    createFoundationRewardSelection,
+    openFoundationChooserCandidate
 } from "./rewards/FoundationRewardSelection.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
@@ -115,12 +116,24 @@ export class MultiplayerGameApp {
             return;
         }
         if (this.pendingFoundationSelection) return;
-        if (!authoritativeReward) {
-            this.localFoundationReward = null;
-            return;
-        }
-        if (this.localFoundationReward?.sourceId === authoritativeReward.sourceId) return;
+        if (this.localFoundationReward) return;
+        if (!authoritativeReward) return;
         this.localFoundationReward = createFoundationRewardSelection(authoritativeReward);
+    }
+
+    maybeOpenLocalChooser(command, owner) {
+        if (this.localFoundationReward || this.pendingFoundationSelection || owner?.foundationAugment) return false;
+        if (!command.interact) return false;
+        const predicted = this.authority.snapshot().predicted;
+        const candidate = openFoundationChooserCandidate({
+            world: this.authority.renderSnapshot()?.world ?? null,
+            position: predicted?.position ?? null,
+            command
+        });
+        if (!candidate) return false;
+        this.localFoundationReward = candidate;
+        this.authority.releasePredictedRope();
+        return true;
     }
 
     applyFoundationSelectionReceipts(authoritativeReward) {
@@ -128,7 +141,10 @@ export class MultiplayerGameApp {
             if (receipt.sourceId !== this.pendingFoundationSelection?.sourceId) continue;
             const pending = this.pendingFoundationSelection;
             this.pendingFoundationSelection = null;
-            if (receipt.accepted) continue;
+            if (receipt.accepted) {
+                this.localFoundationReward = null;
+                continue;
+            }
             this.authority.rejectPredictedFoundationSelection(pending.sourceId);
             this.localFoundationReward = authoritativeReward
                 ? createFoundationRewardSelection(authoritativeReward)
@@ -236,6 +252,7 @@ export class MultiplayerGameApp {
         }
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
+        this.maybeOpenLocalChooser(command, current.owner);
         const authoritativeFoundationReward =
             current.ownerFoundationReward ?? current.state.foundationRewards?.[this.authority.playerId] ?? null;
         this.applyFoundationSelectionReceipts(authoritativeFoundationReward);

@@ -380,6 +380,13 @@ export class RemoteGameAuthority {
         return this.ownerRuntime?.rejectPredictedFoundationSelection(sourceId, this.latestSnapshot) ?? false;
     }
 
+    releasePredictedRope() {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.ownerRuntime.releaseRope()) return false;
+        this.submitOwnerMotion();
+        return true;
+    }
+
     submitFoundationSelection({ sourceId, foundationId }) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         if (!this.submitOwnerMotion()) return false;

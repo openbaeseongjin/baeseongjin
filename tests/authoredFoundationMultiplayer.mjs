@@ -5,6 +5,7 @@ import { createFoundationShearClaim } from "../src/game/network/FoundationShearC
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
+import { openFoundationChooserCandidate } from "../src/game/rewards/FoundationRewardSelection.js";
 import {
     createCurrentGameSimulation,
     createGameSimulationForWorldRevision
@@ -217,5 +218,122 @@ export function run() {
             .filter(({ eventType, targetId }) => eventType === "foundation-shear-hit" && targetId === dummy.id).length,
         1,
         "a duplicate Shear claim must produce one shared calibration event"
+    );
+
+    const chooserWorld = createCurrentGameSimulation({ worldSeed: 1404 });
+    const chooserNode = chooserWorld.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    const interactCommand = command({ interact: true });
+    const idleCommand = command();
+    assert.equal(
+        openFoundationChooserCandidate({
+            world: chooserWorld.world,
+            position: { x: chooserNode.position.x, y: chooserNode.position.y },
+            command: interactCommand
+        })?.sourceId,
+        chooserNode.id,
+        "an interact press at the node must open the chooser client-side"
+    );
+    assert.equal(
+        openFoundationChooserCandidate({
+            world: chooserWorld.world,
+            position: { x: chooserNode.position.x, y: chooserNode.position.y },
+            command: idleCommand
+        }),
+        null,
+        "the chooser must not open without an interact press"
+    );
+    assert.equal(
+        openFoundationChooserCandidate({
+            world: chooserWorld.world,
+            position: { x: chooserNode.position.x + 300, y: chooserNode.position.y },
+            command: interactCommand
+        }),
+        null,
+        "the chooser must not open outside the interaction radius"
+    );
+    assert.equal(
+        openFoundationChooserCandidate({ world: null, position: null, command: interactCommand }),
+        null,
+        "a missing world or position must never open the chooser"
+    );
+
+    const clientDrivenServer = createCurrentGameSimulation({ worldSeed: 1404 });
+    advanceToArea04(clientDrivenServer);
+    const clientDrivenOwner = clientDrivenServer.players[0];
+    const clientDrivenNode = clientDrivenServer.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    clientDrivenOwner.physics.position.set(clientDrivenNode.position.x, clientDrivenNode.position.y);
+    const clientDrivenSnapshot = buildAuthoritySnapshot({ simulation: clientDrivenServer });
+    const clientDrivenPredictor = new OwnerPredictionRuntime({
+        ownerId: clientDrivenOwner.id,
+        predictionLeadTicks: 0,
+        simulation: createGameSimulationForWorldRevision({
+            worldSeed: clientDrivenSnapshot.worldSeed,
+            playerId: clientDrivenOwner.id,
+            worldRevision: clientDrivenSnapshot.worldRevision
+        })
+    });
+    clientDrivenPredictor.reconcile(clientDrivenSnapshot, []);
+    assert.equal(clientDrivenPredictor.foundationReward(), null);
+    assert.equal(
+        clientDrivenPredictor.applyPredictedFoundationSelection({
+            sourceId: clientDrivenNode.id,
+            foundationId: "relay-link"
+        }),
+        true,
+        "a client-driven selection must apply before the authority reward exists"
+    );
+    assert.equal(clientDrivenPredictor.state().foundationAugment, "relay-link");
+
+    const clientDrivenSession = new AuthorityServerSession({
+        simulation: clientDrivenServer,
+        snapshotIntervalTicks: 1
+    });
+    const outOfRangeClaim = createFoundationSelectionClaim({
+        sourceId: clientDrivenNode.id,
+        foundationId: "impulse-coil",
+        clientTick: clientDrivenServer.getTick()
+    });
+    clientDrivenOwner.physics.position.set(clientDrivenNode.position.x + 300, clientDrivenNode.position.y);
+    const outOfRangeReceipt = clientDrivenSession.submitFoundationSelection(clientDrivenOwner.id, outOfRangeClaim);
+    assert.equal(outOfRangeReceipt.accepted, false);
+    assert.equal(outOfRangeReceipt.reason, "source-out-of-range");
+    clientDrivenOwner.physics.position.set(clientDrivenNode.position.x, clientDrivenNode.position.y);
+    const inRangeReceipt = clientDrivenSession.submitFoundationSelection(
+        clientDrivenOwner.id,
+        createFoundationSelectionClaim({
+            sourceId: clientDrivenNode.id,
+            foundationId: "impulse-coil",
+            clientTick: clientDrivenServer.getTick()
+        })
+    );
+    assert.equal(
+        inRangeReceipt.accepted,
+        true,
+        "the authority must answer a client-driven selection from a nearby player without a pre-opened reward"
+    );
+
+    const releaseServer = createCurrentGameSimulation({ worldSeed: 1404 });
+    const releaseOwner = releaseServer.players[0];
+    releaseOwner.ropeObject.rope.attach(releaseOwner.physics.position, {
+        x: releaseOwner.physics.position.x + 30,
+        y: releaseOwner.physics.position.y - 60
+    });
+    const releaseSnapshot = buildAuthoritySnapshot({ simulation: releaseServer });
+    const releasePredictor = new OwnerPredictionRuntime({
+        ownerId: releaseOwner.id,
+        predictionLeadTicks: 0,
+        simulation: createGameSimulationForWorldRevision({
+            worldSeed: releaseSnapshot.worldSeed,
+            playerId: releaseOwner.id,
+            worldRevision: releaseSnapshot.worldRevision
+        })
+    });
+    releasePredictor.reconcile(releaseSnapshot, []);
+    assert.equal(releasePredictor.state().rope.isAttached, true);
+    assert.equal(releasePredictor.releaseRope(), true);
+    assert.equal(
+        releasePredictor.state().rope.isAttached,
+        false,
+        "opening the chooser client-side must release the predicted rope immediately"
     );
 }
