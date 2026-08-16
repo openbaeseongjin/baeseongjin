@@ -399,7 +399,8 @@ export class AuthorityServerSession {
             resolvePlayerProjectileHits: false,
             spawnPlayerProjectiles: false,
             recoverPlayerDeaths: false,
-            advanceInputDrivenObjects: false
+            advanceInputDrivenObjects: false,
+            resolveInteractChoice: false
         });
         for (const playerId of this.simulation.playerIds()) {
             const portalTick = this.simulation.portalTransitionTick(playerId);

@@ -64,7 +64,14 @@ export function completeWorldProgressObjective({ progress, objectiveId, areaId, 
     return Object.freeze(events);
 }
 
-export function advanceWorldProgress({ world, progress, players, commandsByPlayerId, dt = 0 }) {
+export function advanceWorldProgress({
+    world,
+    progress,
+    players,
+    commandsByPlayerId,
+    dt = 0,
+    resolveInteractChoice = true
+}) {
     const progressSnapshot = progress?.snapshot();
     if (!progress || progressSnapshot.completed || progressSnapshot.contentBoundaryReached) return Object.freeze([]);
     const events = [];
@@ -79,19 +86,23 @@ export function advanceWorldProgress({ world, progress, players, commandsByPlaye
     for (const objective of world.objectives) {
         const objectiveArea = objectiveAreaById.get(objective.id) ?? currentArea;
         if (objective.type === "interact-choice") {
-            // The personal Foundation chooser must stay openable in any area a player still
-            // occupies: the shared frontier may have moved past the node after the first entrant.
-            for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
-                events.push(
-                    Object.freeze({
-                        type: "objective-choice-requested",
-                        objectiveId: objective.id,
-                        sourceObjectId: objective.sourceObjectId,
-                        areaId: objectiveArea.id,
-                        playerId: player.id,
-                        position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-                    })
-                );
+            // The personal Foundation chooser opens on the owning client; only the confirmed
+            // selection claim reaches the authority. When the authority resolves choice
+            // requests itself (single player), the node stays openable in any area a player
+            // still occupies, because the shared frontier may have moved past it.
+            if (resolveInteractChoice) {
+                for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
+                    events.push(
+                        Object.freeze({
+                            type: "objective-choice-requested",
+                            objectiveId: objective.id,
+                            sourceObjectId: objective.sourceObjectId,
+                            areaId: objectiveArea.id,
+                            playerId: player.id,
+                            position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+                        })
+                    );
+                }
             }
             continue;
         }
