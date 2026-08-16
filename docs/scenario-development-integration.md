@@ -3,11 +3,11 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: cbe95d2babb4f2f92a906017d886ed875092a8466cdca6e2e3a51aa71f0400fd
+scenario-source-sha256: 8d8d6e845ec5bbdd8abda2e098fa82703f50f6981eb51ee3640fb32120f22f70
 authored-area-sha256: 91d877421c2be171b28b8b3f1b0f322294ad1be92edd734b11806a071fa2d1eb
 stage-count: 32
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8
-reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
+reviewed-upstream: 709b009e6f69eaf1516146b543ce42ac32c541c9
 -->
 
 ## 상태를 읽는 법
@@ -26,14 +26,14 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 
 `BLOCKED`는 위 상태와 별개다. 예를 들어 Stage가 `AUTHORED`여도 선행 Boss 전환이나 새 시스템 결정이 없으면 연결은 차단된다.
 
-## 2026-08-15 확인 체크포인트
+## 2026-08-16 확인 체크포인트
 
-- 확인 기준 upstream: `6af1a4306012c2646327bc87247dd996e8df2362` (`origin/main`, Sector 04 Wind 정렬과 Sector 02 Story 구현 인계 문서 병합 뒤 clean base)
+- 확인 기준 upstream: `709b009e6f69eaf1516146b543ce42ac32c541c9` (`origin/main`, 최근 DeepSeek 구현 26개 커밋과 후속 debug·멀티 병합까지 포함한 clean base)
 - 상세 Stage 문서: **32개**, `1-1`부터 `4-8`까지
-- 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-4` standalone)
+- 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-8` standalone)
 - 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.0과 4-1~4-8·#510 Wind 문구 정렬, `CurrentAuthoredAreaCatalog.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
-- 확인하지 못한 항목: 실제 브라우저·기기 플레이테스트. 모든 영역은 `MOCK INTEGRATED`이며 `PLAYTEST VERIFIED`는 아직 없다.
+- 확인하지 못한 항목: Sector 03/04 전체 등반의 실제 브라우저·기기 플레이테스트. 이번 #557 검토에서는 디버그 패널로 `sector-03-02` 직접 시작과 화면 렌더까지만 확인했으며, 모든 영역의 판정은 계속 `MOCK INTEGRATED`이고 `PLAYTEST VERIFIED`는 아직 없다.
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
@@ -72,6 +72,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 25. Sector 03 Camera·Story를 정리했다. 8개 Stage README의 `## 14. Camera` 절을 전수 대조한 결과 전부 `Custom Pan 없음`(기본 Camera로 Geometry·Lighting 해결)을 명시해 `cameraZones` 미저작이 의도된 상태임을 확인했고([인계 문서](./bsh/scenario/3/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)), Story는 위치 기반 Signage 계약대로 데크별 `story-display` 28개와 `TRIGGER_CUE_PRESENTATIONS` 바인딩으로 구현했다. 3-7 M2 Access Directory와 3-8 A1 Evacuation/Access Archive 병치는 문서의 금지 해석(Group↔Tier 대응, 원인 확정, 연결 화살표)을 포함하지 않는다.
 26. Sector 04 Master의 stale 상태 문구를 정리했다. `4-2 ~ 4-8 Master outline only`를 8개 상세 Stage README 목록으로 바꾸고, Current Runtime Boundary를 `1-1 → 3-8 연결 + Sector 04 4-1~4-8 standalone` 현실에 맞췄다.
 27. Sector 04 Camera·Story를 정리했다. 8개 Stage README의 Camera 절을 전수 대조해 Sector 04는 문서가 per-zone zoom을 제안하는 유일한 Sector이며 8개 Stage 전부 Runtime `cameraZones`로 이미 구현돼 있음을 확인했고(4-2~4-4는 문서가 band를 주지 않아 Geometry에서 파생), Story는 문서의 "짧은 infrastructure status" 원칙대로 ENTRY 8개·POSITION 15개·기존 `story-display` 8개 cue 바인딩을 코드에 반영했다([인계 문서](./bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)). `LOWER ASCENT FEEDER ISOLATED`는 4-7에서만 노출되며 4-4는 `SEGMENTED / PARTIAL`까지만 표시한다.
+28. #557 검토에서 Sector 03/04 구현에 Stage별 `PRODUCTION-ALIGNMENT.md` 16개가 없고 `story-display`가 실제 앱 trigger 목록에서 빠지는 문제를 확인했다. 각 Stage의 현재 catalog 좌표·Stable ID·Camera·Story·검증·blocker를 제작 정렬 문서로 승격하고, 카탈로그에서 조립한 `story-display` 위치를 `192×64` 로컬 trigger bounds로 전달하는 회귀 테스트를 추가했다. 잠긴 Gate barrier 너머 다음 Area grapple target도 후보에서 제외해 authored 진행 경계를 복구했다. 브라우저에서 `sector-03-02` 직접 시작과 화면 렌더는 확인했지만 Sector 03/04 전체 등반·실기기 증거는 없으므로 Sector 03은 `MOCK INTEGRATED`, Sector 04는 standalone `GRAYBOX READY` 판정을 유지한다.
 
 ## 열린 기획·구현 게이트
 

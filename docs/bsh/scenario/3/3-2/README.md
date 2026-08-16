@@ -257,12 +257,12 @@ STATIC SURFACE GRAPPLEABLE FILTER
 = IMPLEMENTED
 
 DYNAMIC ACCESS-SCAN ELIGIBILITY
-= NOT IMPLEMENTED
+= IMPLEMENTED PROTOTYPE
 ```
 
-### IMPLEMENTATION DEPENDENCY — Dynamic Scanner Filter
+### IMPLEMENTED PROTOTYPE — Dynamic Scanner Filter
 
-**UPDATE**: 이 확장을 그대로 구체화한 구현 스펙과 실행 지시서가 이제 존재한다 — [`../ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](../ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md), [`../ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](../ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md). 아직 실행되지 않았으므로 아래 IMPLEMENTATION DEPENDENCY 판정은 그대로 유지된다.
+이 확장을 구체화한 [`../ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](../ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md)와 [`../ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](../ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md)를 현재 `AccessScanField`·`scannerGroups`·동적 부착 predicate로 구현했다. 아래 항목은 미구현 제안이 아니라 현재 계약이다.
 
 3-2에 필요한 것은
 Static Filter를 새로 만드는 것이 아니다.
@@ -1399,19 +1399,19 @@ Player가:
 
 ## 19. Implementation Notes
 
-### 19-1. CURRENT MAIN — Not Implemented
+### 19-1. CURRENT MAIN — Implemented Prototype
 
-Scanner Gameplay System은 현재 없다.
+Scanner Gameplay System은 `AccessScanField`와 authored `scannerGroups`로 현재 메인 Runtime에 구현돼 있다.
 
 따라서 3-2는:
 
 ```text
-SPEC — PLANNED
+MOCK INTEGRATED
 +
-IMPLEMENTATION DEPENDENCY
+IMPLEMENTED PROTOTYPE
 ```
 
-다.
+이며 정확한 Stable ID·좌표·검증 근거는 [`PRODUCTION-ALIGNMENT.md`](./PRODUCTION-ALIGNMENT.md)가 소유한다.
 
 ### 19-2. Recommended Minimal Surface Contract
 
@@ -1452,9 +1452,9 @@ controlled child surface
 현재 `findRopeAttachment()`는 모든 Surface를 검사하되
 `surface.grappleable === false`인 Surface는 candidate에서 제외한다(§0-1 STATIC SURFACE GRAPPLEABLE FILTER 참고).
 
-Dynamic Access Scan Field 기반 filter는 아직 없다.
+Dynamic Access Scan Field 기반 filter는 `canAttachToSurface` predicate로 구현돼 있다.
 
-권장 확장:
+현재 호출 계약:
 
 ```js
 findRopeAttachment({
@@ -1475,8 +1475,7 @@ if canAttachToSurface(surface) === false
 
 형태.
 
-기존 Stage는 Filter가 없으면
-현재 동작을 그대로 유지해야 한다.
+Scanner group이 없는 기존 Stage는 predicate가 모든 정적 grappleable surface를 허용해 이전 동작을 유지한다.
 
 ### 19-3A. Locked-Aim Feedback
 

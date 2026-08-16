@@ -3,7 +3,7 @@ import { parseWorldSeed, randomWorldSeed, selectWorldSeed } from "../src/game/wo
 
 export function run() {
     assert.equal(parseWorldSeed("?seed=1"), 1);
-    assert.equal(parseWorldSeed("?metrics=1&seed=4294967295"), 0xffffffff);
+    assert.equal(parseWorldSeed("?unrelated=1&seed=4294967295"), 0xffffffff);
     assert.equal(parseWorldSeed("?seed=0"), null);
     assert.equal(parseWorldSeed("?seed=-1"), null);
     assert.equal(parseWorldSeed("?seed=4294967296"), null);

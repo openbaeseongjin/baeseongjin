@@ -12,14 +12,15 @@
 | 자기 자동 발사와 플레이어 탄환 적중 | 공격자 클라이언트 | 생성·적중 claim을 서버가 검증하고 고유 사건으로 공유 |
 | 적 탄환의 본체 피격·로프 절단 | 피해자 클라이언트 | HP·넉백·절단·부활을 즉시 적용한 뒤 impact claim으로 공유 |
 | 몹·적 투사체·공용 월드 | 서버 | 서버 고정 틱에서 진행하고 스냅샷 또는 생성·해결 사건으로 공유 |
-| 체크포인트·정상·보상 선택 | 행동 클라이언트 | 로컬에서 먼저 반응하고 서버가 공용 진행과 개인 보상을 확정 |
-| 열린 Gate 포탈 | 문에 진입한 클라이언트가 자기 전이를 즉시 예측하고 서버가 확정 | 첫 진입의 `gate-crossed`는 공용 진행만 한 번 전진시키고, 각 `gate-portal-entered`가 해당 플레이어의 도착 좌표·전이 tick과 이전 영역 운동 폐기를 공유 |
+| 체크포인트 도달 | 도달한 소유 클라이언트 | 로컬에서 먼저 반응하고 `checkpoint-claim`으로 서버 공용 진행을 확정 |
+| 저작 objective·Gate·보상 개방·포탈 | 서버 | 서버 `GameSimulation`이 진행하고 클라이언트는 snapshot과 `gate-portal-entered` 같은 사건으로 수렴 |
+| Foundation 선택·효과 | 행동 클라이언트 | 서버가 연 chooser에서 개인 선택·효과를 즉시 적용하고 claim으로 검증·공유 |
 | 파티클·화면 흔들림·경고 | 각 클라이언트 | 서버는 의미 사건만 공유하고 각 화면이 audience에 맞춰 재생 |
 
 핵심 원칙은 다음과 같다.
 
 - 소유 클라이언트는 정상 승인 중 서버 스냅샷으로 위치·HP·로프·생명 상태를 되감지 않는다.
-- 열린 Gate 포탈은 공용 진행이 소유자 위치를 의도적으로 불연속 전이하는 예외다. 사건에 포함된 자기 도착 좌표를 한 번 적용하며, 이는 지연된 서버 위치 보정이나 일반 스냅샷 되감기가 아니다.
+- 열린 Gate 포탈은 서버 소유 공용 진행이 소유자 위치를 의도적으로 불연속 전이하는 예외다. 클라이언트는 사건에 포함된 자기 도착 좌표를 한 번 적용하며, 이는 지연된 서버 위치 보정이나 일반 스냅샷 되감기가 아니다.
 - 다른 플레이어와 적의 연속 위치는 보간하고, HP·로프 절단 같은 불연속 상태는 즉시 반영한다.
 - 투사체는 매 틱 위치를 보내지 않고 생성 tick과 초기 상태를 공유해 각 클라이언트가 재생한다.
 - 서버는 소유권·tick·중복과 서버가 소유한 중립 객체를 검증하며, 중립 시뮬레이션을 특정 참가자에게 맡기지 않는다.
@@ -164,7 +165,7 @@
 | 자기 사망·체크포인트 부활 | 피해·소유 클라이언트, 서버 검증·공유 | 즉시 로컬 복귀 후 검증 claim |
 | 월드 시드·지형·체크포인트 | 서버 | 시드로 생성 후 체크섬 확인 |
 | 체크포인트 도달 | 도달한 소유 클라이언트, 서버 공용 진행 검증·공유 | 로컬 진행도·로프 전이 후 위치 claim 전송 |
-| 영역 도달·진행 | 진입한 소유 클라이언트, 서버 공용 objective·Gate·포탈 검증·공유 | 로컬 포탈 전이 후 Gate 사건 전송, 현재 마지막 영역은 content boundary 유지 |
+| 영역 objective·Gate·보상 개방·포탈 | 서버 | snapshot의 `worldProgress`·`foundationRewards`와 `gate-portal-entered` 사건을 적용하고 현재 마지막 영역은 content boundary 유지 |
 | 플레이어별 Foundation 선택·효과 | 행동 클라이언트 선행, 서버 검증·공유 | 개인 chooser와 효과를 즉시 적용하고 선택·Shear claim 뒤 개인 상태와 공용 objective를 수렴 |
 | 카메라·HUD·파티클 | 클라이언트 | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용 |
 
@@ -172,9 +173,9 @@ Foundation은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두�
 
 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·현재 위치만 `checkpoint-claim`으로 보낸다. pending 동안 발생한 치명 피격과 낙사는 새 예측 체크포인트에서 즉시 부활한다. 서버는 연결 소유권, tick 범위, 실제 체크포인트와 반경, 최신 검증 소유자 상태와의 위치 오차를 확인한다. 승인된 첫 claim만 공용 활성 체크포인트를 만들고 고유 `checkpoint-reached` 사건을 배포한다. 같은 체크포인트의 중복 claim은 같은 receipt를 반환하며 지표·사건을 다시 만들지 않는다. 승인 snapshot은 예측 진행도를 같은 값으로 확정한다. 거부 receipt는 이전 공용 진행도와 소유자 상태를 복원한 뒤 이후 입력과 pending impact를 원래 tick 순서로 재실행하므로, 뒤따른 치명 피격도 이전 체크포인트 기준으로 다시 계산된다. 서버 fixed tick은 복제 플레이어 위치만으로 체크포인트를 시작하지 않고, 싱글 자동 감지·클라이언트 예측·서버 claim은 같은 `GameSimulation` 체크포인트 활성화 메서드를 사용한다.
 
-현재 저작 시나리오는 정상 도달을 summit claim으로 처리하지 않는다. 각 영역은 objective 완료와 Gate 패널 조작 뒤 플레이어별 포탈 진입을 예측하고 서버가 공용 진행과 개별 도착 사건을 검증·공유한다. 현재 구현된 마지막 `sector-02-08`은 content boundary이므로 `completed` 상태나 `run-completed` 사건을 만들지 않는다. 과거 절차 월드용 summit 프로토콜은 호환 코드로만 남아 있으며 엔딩 진입 조건이 확정되기 전까지 기본 제품 검증에서 제외한다.
+현재 저작 시나리오는 정상 도달을 summit claim으로 처리하지 않는다. 멀티에서는 서버 `GameSimulation`이 objective 완료, Gate 패널 조작과 플레이어별 포탈 진입을 진행하고 공용 진행 snapshot과 개별 도착 사건을 공유한다. 현재 구현된 마지막 `sector-03-08`은 content boundary이므로 `completed` 상태나 `run-completed` 사건을 만들지 않는다. 과거 절차 월드용 summit 프로토콜은 호환 코드로만 남아 있으며 엔딩 진입 조건이 확정되기 전까지 기본 제품 검증에서 제외한다.
 
-1-4 Foundation 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. Node에서 chooser를 연 클라이언트는 선택을 로컬 예측 상태에 먼저 적용하고 최신 `owner-motion` 다음 `foundation-selection` claim을 보낸다. 서버는 연결 소유권·tick·Node·반경·고정 선택지를 검증하고 플레이어·Node별 첫 선택만 멱등 확정한다. 첫 선택은 공유 `augment-selected` objective만 한 번 완료하며, 이후 동료도 자기 `foundationAugment`를 독립 확정할 수 있다. 사망·Checkpoint·포탈은 선택을 보존하고 Relay 같은 순간 window만 초기화한다.
+1-4 Foundation 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. 서버가 Node 상호작용을 진행해 snapshot에 chooser를 열면 해당 클라이언트는 선택을 로컬 예측 상태에 먼저 적용하고 최신 `owner-motion` 다음 `foundation-selection` claim을 보낸다. 서버는 연결 소유권·tick·Node·반경·고정 선택지를 검증하고 플레이어·Node별 첫 선택만 멱등 확정한다. 첫 선택은 공유 `augment-selected` objective만 한 번 완료하며, 이후 동료도 자기 `foundationAugment`를 독립 확정할 수 있다. 사망·Checkpoint·포탈은 선택을 보존하고 Relay 같은 순간 window만 초기화한다.
 
 Impulse·Relay는 소유 클라이언트가 Rope Release/Attach에 즉시 적용한 상태를 `owner-motion`과 snapshot으로 공유한다. Shear는 Release 순간 Anchor–Player segment 교차를 공격 클라이언트가 먼저 판정하고 `foundation-shear` claim으로 보낸다. 서버는 소유 Foundation·tick·위치·segment 범위·대상 교차를 검증해 적 피해 또는 Calibration Dummy 접촉 사건을 한 번 확정하며, 같은 prediction ID 재전송은 중복 피해·Spark를 만들지 않는다.
 
@@ -255,7 +256,7 @@ events[]
 | 무기 파라미터·Foundation 선택 | 검증된 협동 공유 진행 | 선택 UI는 즉시 반영하고 pending 동안 이전 진행으로 덮지 않음 | 최신 검증 공유값 즉시 적용 | 거부 claim의 로컬 전이만 복구 |
 | 로프 발사 shot/cooldown | 행동 클라이언트의 로컬 결과와 owner-motion | 발사·비행·부착을 즉시 진행하고 정상 snapshot으로 되감지 않음 | 검증된 최신 공유값 즉시 적용 | 포탈·사망·절단 리셋은 shot을 결정적으로 clear |
 | 자동 무기 쿨다운 | 소유 클라이언트의 발사 시뮬레이션 | 발사와 동시에 진행하고 정상 snapshot으로 쿨다운을 다시 쓰지 않음 | 검증된 발사 사건을 각 클라이언트에서 재생 | 후속 pending 쿨다운 유지·baseline 교정, 마지막 거절은 최초 준비값 복구 |
-| 열린 Gate 포탈의 소유자 운동 | 플레이어별 `gate-portal-entered` 사건의 전이 tick과 도착 좌표 | 자기 진입은 즉시 예측하고, 같은 Gate의 서버 확정에서는 초기화를 반복하지 않음 | 원격 플레이어는 해당 포탈 전후 위치·각도를 보간하지 않고 도착 표본으로 전환 | 전이를 일으킨 owner-motion tick 이하의 중복·역순 상태는 성공한 no-op, 이후 tick부터 소유자 운동 재개 |
+| 열린 Gate 포탈의 소유자 운동 | 플레이어별 `gate-portal-entered` 사건의 전이 tick과 도착 좌표 | 서버 사건을 한 번 적용하고 이후 로컬 입력을 계속 진행 | 원격 플레이어는 해당 포탈 전후 위치·각도를 보간하지 않고 도착 표본으로 전환 | 같은 Gate의 stale owner-motion과 전이 tick 이하의 중복·역순 상태는 성공한 no-op, 이후 tick부터 소유자 운동 재개 |
 | 적·적 HP·공용 진행 | 서버 fixed tick·claim 확정 snapshot | 권위 결과 사용 | 위치 보간·제한 외삽, 비위치 상태 최신값 | 클라이언트 예측을 권위 결과로 취소·복구 |
 
 - 플레이어·로프 같은 `InputDrivenObject`는 소유 클라이언트의 즉시 시뮬레이션이 원점이다. 클라이언트가 `owner-motion`으로 현재 tick·위치·속도·각도·접지·로프 상태를 보내면 서버는 인증·프로토콜 형식·유한값과 세션 tick 범위를 통과한 최신 상태를 공용 `GameSimulation` 명령에 적용하고 receipt를 돌려준다. 속도·각속도·이동 거리·로프 offset의 크기나 authored `areaId`는 네트워크 거부 조건이 아니다. 양쪽이 같은 공용 규칙으로 수행하는 각도 정규화·각속도 clamp 같은 도메인 물리 처리는 유지한다. 중복·역순·세션 범위 밖 tick, 완료된 런의 후속 상태와 Gate 포탈을 일으킨 owner-motion tick 이하 상태는 성공한 no-op이며 `ownerMotionTick`이나 새 위치 표본을 만들지 않는다. 서버와 다른 클라이언트는 이 최신 소유자 상태를 따라간다.
@@ -263,7 +264,7 @@ events[]
 - `owner-motion` receipt는 소유자의 물리·로프·제어 상태를 복원하거나 미확정 입력 재실행을 시작하지 않는다. 최신 상태는 서버 복제본과 동료가 흡수하고, 중복·역순 또는 런 완료 뒤 상태는 성공한 no-op으로 끝낸다. 최초 입장·재접속, 체크포인트 rollback과 Gate 포탈처럼 별도 사건 계약이 있는 전이 외에는 서버 상태로 소유자를 통째로 복원하지 않는다. 포탈은 서버 snapshot 전체가 아니라 자기 ID의 `gate-portal-entered` 도착 자료만 한 번 적용한다. impact `state-diverged`는 반대 방향 복구로, 피해 클라이언트가 자기 최신 상태를 서버에 보내며 로컬 예측은 복원·재실행하지 않는다.
 - 적과 공용 월드 같은 `SimulationDrivenObject`는 서버 스냅샷이 원점이다. 동료와 적은 두 표본 사이를 보간하고 표본 공백만 최대 120ms 외삽한 뒤 다음 스냅샷에서 서버 궤도로 돌아온다.
 
-`OwnerPredictionRuntime`은 별도 간이 물리를 만들지 않는다. 최초 입장 때 최신 공유 스냅샷을 로컬 예측용 `GameSimulation`의 공개 소유자 복원 명령에 전달하고 남은 입력을 고정 1/120초로 재실행한다. 이후 정상 스냅샷과 `owner-motion` receipt는 서버 상태를 소유자 복구 명령으로 사용하지 않고, 검증된 무기 파라미터 같은 공유 진행 정보만 `applySharedOwnerProgress()`로 흡수한다. 체크포인트처럼 별도 rollback 계약이 있는 사건 전이는 전용 기록과 복구 경계를 사용한다. Gate 포탈은 고유 사건 ID를 중복 제거한 뒤, 아직 로컬 예측하지 않은 자기 사건만 `GameSimulation.applyPortalTransition()`으로 초기화한다. 같은 Gate를 이미 예측했다면 서버 도착 좌표만 확인하고 그 뒤 쌓인 이동·로프·쿨다운 상태를 다시 초기화하지 않는다. 런타임은 `GameSimulation`의 플레이어 객체·배열·tick을 직접 수정하지 않는다. 60Hz 명령 사이의 빈 120Hz 틱은 서버와 예측이 같은 `InputStateSimulator`로 마지막 입력을 최대 30틱(250ms) 유지한다. 새 중립 입력이 오면 즉시 교체하고 제한 시간이 끝나면 이동축을 중립화한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
+`OwnerPredictionRuntime`은 별도 간이 물리를 만들지 않는다. 최초 입장 때 최신 공유 스냅샷을 로컬 예측용 `GameSimulation`의 공개 소유자 복원 명령에 전달하고 남은 입력을 고정 1/120초로 재실행한다. 이후 정상 스냅샷과 `owner-motion` receipt는 서버 상태를 소유자 복구 명령으로 사용하지 않고, 검증된 무기 파라미터 같은 공유 진행 정보만 `applySharedOwnerProgress()`로 흡수한다. 체크포인트처럼 별도 rollback 계약이 있는 사건 전이는 전용 기록과 복구 경계를 사용한다. Gate 포탈은 고유 사건 ID를 중복 제거한 뒤 자기 `gate-portal-entered` 사건을 `GameSimulation.applyPortalTransition()`으로 한 번 적용한다. 런타임은 `GameSimulation`의 플레이어 객체·배열·tick을 직접 수정하지 않는다. 60Hz 명령 사이의 빈 120Hz 틱은 서버와 예측이 같은 `InputStateSimulator`로 마지막 입력을 최대 30틱(250ms) 유지한다. 새 중립 입력이 오면 즉시 교체하고 제한 시간이 끝나면 이동축을 중립화한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
 
 멀티 조작감은 **로컬 입력 시뮬레이션 + 원격 데드 레코닝**을 사용한다. 입력 시뮬레이션은 자기 캐릭터가 네트워크 프레임 사이에서 멈추지 않게 하며, 데드 레코닝은 동료 캐릭터를 최신 위치·속도로 짧게 외삽한 뒤 새 검증 공유 상태와 오차를 보정한다. 두 기능 모두 별도 간이 게임 규칙을 만들지 않고 공용 `GameSimulation`과 스냅샷 물리 상태를 사용한다.
 
@@ -299,7 +300,7 @@ GameApp
 
 각 명령 제출 응답은 `CommandReceipt`로 serverTick·targetTick과 승인·거부된 playerId·sequence만 돌려준다. 명령 본문은 반사하지 않는다. 승인된 입력은 권위 스냅샷 ACK까지 예측 큐에 남고, 명시적으로 거부된 자기 입력만 receipt 수신 즉시 제거한다. 같은 receipt를 다시 받아도 이미 제거된 sequence에는 영향이 없다.
 
-원격 클라이언트는 명령 sequence별 전송 시각과 receipt 수신 시각으로 왕복 시간을 측정하고, 연속 스냅샷의 수신 간격과 명령·`owner-motion` 승인 누계를 함께 보관한다. 구버전·프로토콜 이상 진단을 위한 `owner-motion` 거부 누계는 호환 지표로 남기되 receipt가 소유자 복원이나 재시뮬레이션을 시작하지 않는다. 소유자 예측기는 최근 256개 비영점 보정 거리의 p50/p95와 하드 스냅 누계를, 원격 상태 버퍼는 현재·최대 외삽 시간을, 예측 투사체 저장소는 권위 해결 선행이나 claim 거부로 로컬 예측을 취소하거나 재무장한 횟수를 제공한다. 활성 시간·체크포인트·처치·피해·로프 절단·패배·첫 Foundation 선택 같은 런 지표는 예측 시뮬레이션에서 추정하지 않고 권위 서버의 `RunMetrics`를 전체 스냅샷에 포함한다. 이 값은 게임 규칙이나 보정값을 자동 변경하지 않으며 `?metrics=1` 진단 패널에서만 확인한다.
+원격 클라이언트는 명령 sequence별 전송 시각과 receipt 수신 시각으로 왕복 시간을 측정하고, 연속 스냅샷의 수신 간격과 명령·`owner-motion` 승인 누계를 함께 보관한다. 구버전·프로토콜 이상 진단을 위한 `owner-motion` 거부 누계는 호환 지표로 남기되 receipt가 소유자 복원이나 재시뮬레이션을 시작하지 않는다. 소유자 예측기는 최근 256개 비영점 보정 거리의 p50/p95와 하드 스냅 누계를, 원격 상태 버퍼는 현재·최대 외삽 시간을, 예측 투사체 저장소는 권위 해결 선행이나 claim 거부로 로컬 예측을 취소하거나 재무장한 횟수를 제공한다. 활성 시간·체크포인트·처치·피해·로프 절단·패배·첫 Foundation 선택 같은 런 지표는 예측 시뮬레이션에서 추정하지 않고 권위 서버의 `RunMetrics`를 전체 스냅샷에 포함한다. 이 값은 게임 규칙이나 보정값을 자동 변경하지 않으며 설정 버튼 길게 누르기로 여는 디버그 수치 패널에서만 확인한다.
 
 RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 제거하고, receipt가 손실된 기록은 이후 권위 snapshot의 승인 sequence 이하를 정리한다. ACK도 장시간 도착하지 않는 경우를 위해 송신 순서 기준 최근 2,048개만 유지한다. 이 상한은 계측 메모리만 제한하며 명령 재적용 큐나 서버 승인 규칙을 바꾸지 않는다.
 

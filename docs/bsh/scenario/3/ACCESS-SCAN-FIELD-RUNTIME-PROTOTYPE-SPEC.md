@@ -6,8 +6,8 @@
 
 | 항목 | 기준 |
 |---|---|
-| Status | IMPLEMENTATION SPEC — READY FOR PROTOTYPE |
-| Current Main | `9e05c14db009837ccab34aa920a9e6a557a600cf` |
+| Status | IMPLEMENTED PROTOTYPE — DESIGN RECORD |
+| Authoring Snapshot | `9e05c14db009837ccab34aa920a9e6a557a600cf` |
 | Primary Consumer | SECTOR 03-2 ~ 03-8 |
 | Core Question | “Scanner 상태가 바뀔 때 새 Rope Attach가 정확히 같은 규칙으로 허용/차단되는가?” |
 | New Player Input | NONE |
@@ -17,14 +17,16 @@
 | Rope Disable | NONE |
 | Forced Detach | NONE |
 | Static Grapple Filter | VERIFIED — IMPLEMENTED |
-| Dynamic Scanner Eligibility | NOT IMPLEMENTED — THIS PROTOTYPE |
+| Dynamic Scanner Eligibility | IMPLEMENTED — `AccessScanField` + authored `scannerGroups` |
 | Multiplayer Model | time-derived state from shared `worldElapsedSeconds`, gated by prediction-clock parity test |
-| Runtime Sector 03 | NOT YET CONNECTED |
+| Runtime Sector 03 | MOCK INTEGRATED — current truth is owned by `docs/scenario-development-integration.md` |
 | Art | MOCK / DEBUG ONLY until Sector 03 Runtime + Camera Zone stable |
 | Production Timing | HYPOTHESIS — 3-2 baseline initially |
 | Success Definition | authority + owner prediction match across normal, boundary, reconcile, and delayed-owner-motion cases |
 
 > 이 문서는 설계 전체를 다룬다. 실행 담당(Codex 등)에게 바로 전달할 압축된 지시서는 [`ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md)를 사용한다. Sector 03 Master Plan의 구현 상태 판정은 [`README.md`](./README.md) §7을 참고한다.
+
+> 구현 완료 뒤 보존된 설계 기록이다. 현재 3-2 좌표·Stable ID·테스트 근거는 [`3-2/PRODUCTION-ALIGNMENT.md`](./3-2/PRODUCTION-ALIGNMENT.md)가 소유한다.
 
 ---
 

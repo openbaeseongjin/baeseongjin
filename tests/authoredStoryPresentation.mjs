@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
+import { localTriggerObjects } from "../src/game/camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "../src/game/presentation/AuthoredStoryPresentation.js";
+import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
+import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
+import { SECTOR_04_AREA_CATALOG } from "../src/game/world/areas/sector04/Sector04AreaCatalog.js";
+
+function triggerWithCue(triggers, cueId) {
+    return triggers.find(({ cueIds }) => cueIds.includes(cueId));
+}
 
 export function run() {
+    const currentWorld = createCurrentGameSimulation({ worldSeed: 42 }).world;
+    const sector04World = new GameSimulation({ worldSeed: 42, worldCatalog: SECTOR_04_AREA_CATALOG }).world;
     const presentation = new AuthoredStoryPresentation();
     assert.equal(presentation.update(0.1, { currentAreaId: "sector-01-01" }).title, "GROUND SERVICE ACCESS");
     assert.equal(presentation.snapshot().detail, "LOCKDOWN");
@@ -432,10 +442,9 @@ export function run() {
     );
 
     const scannerGallery = new AuthoredStoryPresentation();
-    const accessControlPanel = Object.freeze({
-        cueIds: Object.freeze(["sector-03-02:access-control"]),
-        bounds: Object.freeze({ x: -400, y: -208, width: 192, height: 64 })
-    });
+    const scannerGalleryTriggers = localTriggerObjects(currentWorld, "sector-03-02");
+    const accessControlPanel = triggerWithCue(scannerGalleryTriggers, "sector-03-02:access-control");
+    assert.deepEqual(accessControlPanel?.bounds, { x: -400, y: -216, width: 192, height: 64 });
     scannerGallery.update(0, { currentAreaId: "sector-03-02", currentAreaLocalY: -32 });
     assert.deepEqual(
         [
@@ -462,10 +471,11 @@ export function run() {
     );
 
     const priorityConcourse = new AuthoredStoryPresentation();
-    const accessDirectory = Object.freeze({
-        cueIds: Object.freeze(["sector-03-07:access-directory"]),
-        bounds: Object.freeze({ x: -96, y: -1104, width: 192, height: 64 })
-    });
+    const accessDirectory = triggerWithCue(
+        localTriggerObjects(currentWorld, "sector-03-07"),
+        "sector-03-07:access-directory"
+    );
+    assert.deepEqual(accessDirectory?.bounds, { x: -96, y: -1112, width: 192, height: 64 });
     priorityConcourse.update(0, { currentAreaId: "sector-03-07", currentAreaLocalY: -32 });
     assert.deepEqual(
         [
@@ -492,14 +502,11 @@ export function run() {
     );
 
     const upperMarket = new AuthoredStoryPresentation();
-    const evacuationArchive = Object.freeze({
-        cueIds: Object.freeze(["sector-03-08:evacuation-archive"]),
-        bounds: Object.freeze({ x: -224, y: -1488, width: 192, height: 64 })
-    });
-    const accessArchive = Object.freeze({
-        cueIds: Object.freeze(["sector-03-08:access-archive"]),
-        bounds: Object.freeze({ x: 32, y: -1488, width: 192, height: 64 })
-    });
+    const upperMarketTriggers = localTriggerObjects(currentWorld, "sector-03-08");
+    const evacuationArchive = triggerWithCue(upperMarketTriggers, "sector-03-08:evacuation-archive");
+    const accessArchive = triggerWithCue(upperMarketTriggers, "sector-03-08:access-archive");
+    assert.deepEqual(evacuationArchive?.bounds, { x: -224, y: -1496, width: 192, height: 64 });
+    assert.deepEqual(accessArchive?.bounds, { x: 32, y: -1496, width: 192, height: 64 });
     upperMarket.update(0, { currentAreaId: "sector-03-08", currentAreaLocalY: -32 });
     assert.deepEqual(
         [
@@ -636,10 +643,11 @@ export function run() {
     );
 
     const controlTrunk = new AuthoredStoryPresentation();
-    const finalStatusDisplay = Object.freeze({
-        cueIds: Object.freeze(["sector-04-08:upper-trunk-limited", "sector-04-08:lower-feeder-isolated"]),
-        bounds: Object.freeze({ x: -32, y: -1792, width: 192, height: 64 })
-    });
+    const finalStatusDisplay = triggerWithCue(
+        localTriggerObjects(sector04World, "sector-04-08"),
+        "sector-04-08:upper-trunk-limited"
+    );
+    assert.deepEqual(finalStatusDisplay?.bounds, { x: -32, y: -1792, width: 192, height: 64 });
     controlTrunk.update(0, { currentAreaId: "sector-04-08", currentAreaLocalY: -32 });
     controlTrunk.update(1.4, { currentAreaId: "sector-04-08", currentAreaLocalY: -32 });
     assert.deepEqual(

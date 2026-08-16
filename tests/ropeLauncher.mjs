@@ -36,6 +36,21 @@ function grappleSurfaceAt(position, size = 24) {
     };
 }
 
+function gateBarrierAt({ x, y, width, height }) {
+    return {
+        id: "locked-gate-barrier",
+        kind: "gate-barrier",
+        collision: true,
+        grappleable: false,
+        vertices: [
+            { x, y },
+            { x: x + width, y },
+            { x: x + width, y: y + height },
+            { x, y: y + height }
+        ]
+    };
+}
+
 export function run() {
     assert.equal(ropeHookReach(), 400, "hook reach must be exactly 400px");
     assert.equal(ropeHookFlightSeconds() * ROPE_CONFIG.hookSpeed, 400, "speed x flight lifetime must equal the reach");
@@ -112,6 +127,29 @@ export function run() {
         }),
         null,
         "a 400px reach must not select a candidate beyond its bound"
+    );
+
+    const targetBehindGate = grappleSurfaceAt({ x: 200, y: 0 });
+    assert.equal(
+        findRopeAttachment({
+            aimPoint: { x: 200, y: 0 },
+            origin: { x: 0, y: 0 },
+            surfaces: [targetBehindGate, gateBarrierAt({ x: 80, y: -64, width: 64, height: 128 })],
+            maxAttachDistance: ropeHookReach(),
+            aimTolerance: 90
+        }),
+        null,
+        "a locked authored Gate must occlude grapple targets in the next area"
+    );
+    assert.ok(
+        findRopeAttachment({
+            aimPoint: { x: 200, y: 0 },
+            origin: { x: 0, y: 0 },
+            surfaces: [targetBehindGate],
+            maxAttachDistance: ropeHookReach(),
+            aimTolerance: 90
+        }),
+        "removing the unlocked Gate barrier must expose the same grapple target"
     );
 
     simulation.dispatchOwnerInput(player.id, command({ pointerDown: true, aimWorld }), 1 / 120);

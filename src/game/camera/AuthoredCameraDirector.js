@@ -1,7 +1,10 @@
+import { anchoredRectangleBounds } from "../world/AuthoredCoordinateAnchor.js";
+
 const HORIZONTAL_PLAYER_RATIO = 0.38;
 const VERTICAL_PLAYER_RATIO = 0.58;
 const CAMERA_BLEND_RATE = 5;
 const ZOOM_BLEND_RATE = 6;
+const STORY_DISPLAY_TRIGGER_SIZE = Object.freeze({ width: 192, height: 64 });
 
 function pointInsideArea(area, position) {
     return (
@@ -28,18 +31,30 @@ export function localTriggerObjects(world, areaId) {
     const originY = area.bounds.y + area.bounds.height;
     return Object.freeze(
         (world.objects ?? [])
-            .filter((object) => object.kind === "trigger" && object.areaId === areaId && object.bounds)
-            .map((object) =>
-                Object.freeze({
+            .filter(
+                (object) =>
+                    object.areaId === areaId &&
+                    (object.kind === "trigger" || object.kind === "story-display") &&
+                    (object.bounds || object.position)
+            )
+            .map((object) => {
+                const bounds =
+                    object.bounds ??
+                    anchoredRectangleBounds(
+                        object.position,
+                        STORY_DISPLAY_TRIGGER_SIZE,
+                        object.coordinateAnchor ?? "center"
+                    );
+                return Object.freeze({
                     cueIds: object.cueIds ?? Object.freeze([]),
                     bounds: Object.freeze({
-                        x: object.bounds.x - originX,
-                        y: object.bounds.y - originY,
-                        width: object.bounds.width,
-                        height: object.bounds.height
+                        x: bounds.x - originX,
+                        y: bounds.y - originY,
+                        width: bounds.width,
+                        height: bounds.height
                     })
-                })
-            )
+                });
+            })
     );
 }
 

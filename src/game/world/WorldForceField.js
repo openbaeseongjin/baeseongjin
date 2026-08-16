@@ -1,6 +1,5 @@
 import { WIND_CONFIG } from "../config.js";
-
-const GEOMETRY_EPSILON = 1e-7;
+import { segmentIntersectsSurface } from "./PolygonGeometry.js";
 
 export function pointInsideBounds(point, bounds) {
     return (
@@ -52,42 +51,6 @@ function windOrigin(zone) {
     if (direction.y < 0) return { x: centerX, y: bounds.y + bounds.height };
     if (direction.y > 0) return { x: centerX, y: bounds.y };
     return { x: centerX, y: centerY };
-}
-
-function crossProduct(a, b, c) {
-    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-}
-
-function pointOnSegment(point, start, end) {
-    return (
-        Math.abs(crossProduct(start, end, point)) <= GEOMETRY_EPSILON &&
-        point.x >= Math.min(start.x, end.x) - GEOMETRY_EPSILON &&
-        point.x <= Math.max(start.x, end.x) + GEOMETRY_EPSILON &&
-        point.y >= Math.min(start.y, end.y) - GEOMETRY_EPSILON &&
-        point.y <= Math.max(start.y, end.y) + GEOMETRY_EPSILON
-    );
-}
-
-function segmentsIntersect(a, b, c, d) {
-    const abC = crossProduct(a, b, c);
-    const abD = crossProduct(a, b, d);
-    const cdA = crossProduct(c, d, a);
-    const cdB = crossProduct(c, d, b);
-    if (
-        ((abC > GEOMETRY_EPSILON && abD < -GEOMETRY_EPSILON) || (abC < -GEOMETRY_EPSILON && abD > GEOMETRY_EPSILON)) &&
-        ((cdA > GEOMETRY_EPSILON && cdB < -GEOMETRY_EPSILON) || (cdA < -GEOMETRY_EPSILON && cdB > GEOMETRY_EPSILON))
-    ) {
-        return true;
-    }
-    return pointOnSegment(c, a, b) || pointOnSegment(d, a, b) || pointOnSegment(a, c, d) || pointOnSegment(b, c, d);
-}
-
-function segmentIntersectsSurface(start, end, surface) {
-    const vertices = surface.vertices ?? [];
-    for (let index = 0; index < vertices.length; index += 1) {
-        if (segmentsIntersect(start, end, vertices[index], vertices[(index + 1) % vertices.length])) return true;
-    }
-    return false;
 }
 
 export function sampleWorldForce(windZones, point, elapsedSeconds, options = {}) {

@@ -11,7 +11,7 @@
 | Sector Role | Commercial District 이후 도시의 대형 이동·전력·환기 Backbone 진입 |
 | Core Gameplay Shift | Active Route Control → Momentum Under Interruption |
 | Core Story Shift | “누가 위쪽 이동 우선권을 가졌지?” → “왜 Lower Ascent Feeder만 격리됐지?” |
-| Carry Build | Foundation + first Specialization KEEP — runtime pending |
+| Carry Build | Foundation KEEP 구현, first Specialization은 기획·runtime pending |
 | New Rope Mode | NONE |
 | New Input | NONE |
 | New Growth Tier | NONE — Growth Gate remains HOLD |
@@ -22,8 +22,8 @@
 | Existing Enemy Families | Sentry T1 / Patrol Drone T1 |
 | Boss | 4-8 내부 NONE; Post-Sector 04 Boss / Transition TBD |
 | General Stages | 8 authored progression regions |
-| Sector 04 Runtime | NOT IMPLEMENTED |
-| Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
+| Sector 04 Runtime | 4-1~4-8 standalone `GRAYBOX READY`, 메인 월드 미연결 |
+| Approved Gameplay Art | HOLD until Stage별 Approved Blockout·대표 Camera Shot 검증 |
 
 ---
 
@@ -786,7 +786,7 @@ ACCESS SCAN FIELD
 이유:
 
 1. Sector 04가 고유한 Momentum / Recovery 정체성을 가져야 한다.
-2. Scanner Runtime은 아직 구현 진행 중이다.
+2. Access Scan Field Runtime은 구현됐지만 Sector 04 core dependency로 사용하지 않는다.
 3. Sector 04 전체가 Sector 03 미완성 시스템에 연쇄 차단되면 안 된다.
 
 필요하면 Background Security Prop 또는 Story 흔적으로는 재사용할 수 있지만,
@@ -878,7 +878,7 @@ HOLD
 
 ### 왜
 
-Foundation Runtime / first Specialization Runtime과
+Foundation Runtime은 구현됐지만 first Specialization Runtime과
 Build 차이가 실제 플레이에서 충분히 검증되지 않았다.
 
 ### Sector 04 Growth Slot
@@ -2116,20 +2116,20 @@ SCENARIO-ART-GENERATION-STANDARD.md
 
 ```text
 Runtime Area
-NONE
+4-1 → 4-8 standalone catalog
 
 Camera Zone
-NONE
+8 Stage authored zones implemented
 
 Stable IDs
-NONE
+geometry / object / state / cue IDs implemented
 ```
 
 따라서:
 
 ```text
 APPROVED GAMEPLAY ART
-HOLD
+HOLD — Approved Blockout과 실제 Camera Shot 검증 대기
 ```
 
 ### Before Art
@@ -2155,13 +2155,13 @@ HOLD
 | Sentry T1 | IMPLEMENTED | REUSE |
 | Patrol Drone T1 | IMPLEMENTED | REUSE |
 | Pulsed Wind | IMPLEMENTED | TRANSIT WAKE로 REUSE |
-| Wind Shadow | NOT IMPLEMENTED | NOT REQUIRED |
-| Grounded Wind Attenuation | NOT IMPLEMENTED | geometry로 회피 |
+| Wind Shadow | IMPLEMENTED | solid occluder 뒤 감쇠를 재사용 |
+| Grounded Wind Attenuation | IMPLEMENTED | 접지 중 `groundedFactor` 적용 |
 | Moving Collision Platform | NOT FOUND | TECH SPIKE ONLY |
 | Moving Grapple Surface | NOT FOUND | TECH SPIKE ONLY |
 | Train Physics | NOT FOUND | VISUAL / TECH SPIKE ONLY |
-| Access Scan Field | SPEC ONLY / implementation pending | Sector 04 core에는 dependency로 만들지 않음 |
-| Foundation Runtime | pending | no mandatory Build lock |
+| Access Scan Field | IMPLEMENTED PROTOTYPE | Sector 04 core에는 dependency로 만들지 않음 |
+| Foundation Runtime | IMPLEMENTED | no mandatory Build lock |
 | Specialization Runtime | pending | no mandatory Build lock |
 
 ---
