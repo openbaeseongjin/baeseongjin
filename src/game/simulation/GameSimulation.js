@@ -465,13 +465,13 @@ export class GameSimulation {
         return this.ownerPredictionState(ownerId);
     }
 
-    advanceOwnerPrediction(ownerId, command, dt, tick) {
+    advanceOwnerPrediction(ownerId, command, dt, tick, { allowFire = true } = {}) {
         const player = this.#requirePlayer(ownerId);
         this.elapsedSeconds += dt;
         this.#prepareOwnerStep(player, dt);
         this.#applyWorldForce(player, dt);
         const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt);
-        const projectile = this.#advanceAutomaticWeapon(player, dt);
+        const projectile = this.#advanceAutomaticWeapon(player, dt, allowFire);
         this.projectiles.length = 0;
         this.tick = tick;
         return Object.freeze({

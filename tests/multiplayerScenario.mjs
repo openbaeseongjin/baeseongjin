@@ -7,6 +7,7 @@ import { run as predictableProjectileStore } from "./predictableProjectileStore.
 import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mjs";
 import { run as gameServerHandler } from "./gameServerHandler.mjs";
 import { run as staticHandler } from "./staticHandler.mjs";
+import { run as playerWeaponMultiplayer } from "./playerWeaponMultiplayer.mjs";
 import { run as foundationSelectionClaim } from "./foundationSelectionClaim.mjs";
 import { run as authoredFoundationMultiplayer } from "./authoredFoundationMultiplayer.mjs";
 import { run as checkpointClaim } from "./checkpointClaim.mjs";
@@ -33,7 +34,8 @@ const steps = {
     predictableProjectileStore,
     multiplayerServerEndpoint,
     gameServerHandler,
-    staticHandler
+    staticHandler,
+    playerWeaponMultiplayer
 };
 
 export async function run() {
