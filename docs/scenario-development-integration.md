@@ -7,7 +7,7 @@ scenario-source-sha256: 1a1b47618c4af2c2fea5e211faf69bffb4da43ce7d15a941ff3e0738
 authored-area-sha256: 91d877421c2be171b28b8b3f1b0f322294ad1be92edd734b11806a071fa2d1eb
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 5d8e37518467aa56dca308e1958a5d78007ae517
+reviewed-upstream: bd5be25b900b65f3ab42eeb4ee5ff45f2052a06b
 -->
 
 ## 상태를 읽는 법
@@ -28,7 +28,7 @@ reviewed-upstream: 5d8e37518467aa56dca308e1958a5d78007ae517
 
 ## 2026-08-16 확인 체크포인트
 
-- 확인 기준 upstream: `5d8e37518467aa56dca308e1958a5d78007ae517` (`origin/main`, Sector 06 6-5~6-7 추가(#584) 병합까지 포함한 clean base)
+- 확인 기준 upstream: `bd5be25b900b65f3ab42eeb4ee5ff45f2052a06b` (`origin/main`, 상세 Stage 48/48과 캐릭터 모션 갱신(#588)까지 포함한 clean base)
 - 상세 Stage 문서: **48개**, `1-1`부터 `6-8`까지 전 구간
 - 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-8` standalone; Sector 05는 Runtime 미저작)
 - 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.1과 4-1~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), Sector 06 Master와 6-1~6-8(Scanner phase·Patrol speed/wait·Cutter opt-in·순방향 Finale 및 Safe/Flow 산술 대조), `CurrentAuthoredAreaCatalog.js`, `Sector03AreaCatalog.js`, `Sector04AreaCatalog.js`, `AccessScanField.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
@@ -38,11 +38,11 @@ reviewed-upstream: 5d8e37518467aa56dca308e1958a5d78007ae517
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
 | Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증; #507이 Wind·Story·2-3 진행을 보강; 1-5~1-8 Camera Zone과 남은 Position Story Trigger 코드 반영 완료 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요 |
-| Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강; Story Presentation 공백 3건(2-2·2-3 POSITION, 2-6 최소 위치 표지) 코드 반영 완료 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 2-3 Specialization 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
+| Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강; Story Presentation 공백 3건(2-2·2-3 POSITION, 2-6 최소 위치 표지) 코드 반영 완료 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 2-3 Specialization 6종 계약은 확정됐고 구현 대기, Sector 02 Boss→3-1 상세 전환은 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525); Camera는 8개 Stage 의도적 기본 카메라 확인, Story signage 28개 코드 반영 | Post-Sector 03 Boss→3-8/4-1 전환 미정 |
 | Sector 04 / 4-1~4-8 | Master REV 1.1과 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결; Camera Zone 8개 Stage 구현 확인, Story 바인딩 반영 완료; Gate 좌표·Cutter Fire opt-in 모델·Wind Strength 문서 정합 완료(#29) | Post-Sector 03 Boss→4-1 전환이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증 |
 | Sector 05 / 5-1~5-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | `NOT AUTHORED` / `NOT CONNECTED`; Scenario-first 상세 48개 작성은 완료됐고 Full Game Audit 뒤 Runtime 저작 후보 | Post-Sector 04 Boss→5-1 전환 미정; Sealed Surface/Service Hardpoint 정적 grappleable 규칙은 실제 코드 계약(`surface.grappleable === false`)과 대조 완료, 실제 Runtime 저작 필요 |
-| Sector 06 / 6-1~6-8 | Master와 상세 Stage 8/8, `CROSS-REVIEWED` | `NOT CONNECTED` | 6-8은 Threat 0의 순방향 Final Runway에서 Pad 03에 물리적으로 도달한 뒤 `ACCESS DENIED / CONTAINMENT VIOLATION`을 표시하고 미확정 Final Security Encounter 앞 content boundary로 끝난다. Safe max 329.5px·Flow max 380.3px와 Recovery를 재검산; Sector 01~06 Full Game Audit, Post-Sector 05 Boss→6-1 전환, Final Security Encounter 상세 Boss 계약, NPC 역할·대화와 엔딩·최종 전환 계약 필요 |
+| Sector 06 / 6-1~6-8 | Master와 상세 Stage 8/8, `CROSS-REVIEWED` | `NOT CONNECTED` | 6-8은 Threat 0의 순방향 Final Runway에서 Pad 03에 물리적으로 도달한 뒤 `ACCESS DENIED / CONTAINMENT VIOLATION`을 표시하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03` 3 Phase 뒤 Access Restored·개별 Boarding·전원 준비·Escape로 확정됐지만 Runtime은 미구현이다. Safe max 329.5px·Flow max 380.3px와 Recovery를 재검산; Post-Sector 05 Boss→6-1 전환과 Runtime 저작 필요 |
 
 ## 최근 반영된 시나리오 변화
 
@@ -85,19 +85,21 @@ reviewed-upstream: 5d8e37518467aa56dca308e1958a5d78007ae517
 35. Sector 06 상세 Stage 6-5 `PAD ACCESS ARRAY`, 6-6 `BEACON SPAN`, 6-7 `CONTAINMENT LATTICE`를 추가했다(`docs/bsh/scenario/6/6-5/`~`6-7/`). 6-5는 Enemy 없이 controlled Hardpoint C1/C2/C3만 하나의 Scanner group으로 묶어 현재 `AVAILABLE 1.5 / WARNING 0.6 / LOCKED 1.1 / RESET 0.3` 및 AVAILABLE/WARNING attach 허용·기존 Rope 유지 계약을 재시험한다. 좌표 재계산에서 Safe/Flow max `344.7px`는 맞았지만 `Controlled Mandatory Max` 한 곳이 `275.3px`로 잘못 적혀 있어 실제 C2→C3 거리 `288.4px`로 정정했다. 6-6은 speed `48`·wait `0.45`의 Patrol Drone이 acquire 위치에서 정지 사격하는 현재 계약을 대각선 Open-Sky span에서 재시험하며 Safe max `307.8px`, Flow max `340.2px`를 확인했다. 6-7은 `cutter-fire` opt-in Sentry와 Rope Cut 뒤 R0→E1→P2 하부 recovery를 재시험하며 Safe max `297.6px`, Flow max `357.8px`, R0→E1 `233.0px`, E1→P2 `178.9px`를 확인했다. 세 Stage 모두 Runtime·Camera·Stable ID·Approved Art는 계속 HOLD다.
 
 36. Sector 06 마지막 상세 Stage 6-8 `ROOFTOP PAD 03`을 추가했다(`docs/bsh/scenario/6/6-8/`). 48번째 일반 progression region은 Enemy·Wind·Scanner·Cutter·Patrol·Damage Hazard 없이 X가 계속 증가하는 Final Runway로 구성하며, Pad 03과 Maintenance Shuttle에 실제 도달한 뒤 Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인한다. Safe Route max `329.5px`, optional Flow max `380.3px`(H4→H5 한 구간), R1→H3 `204.9px`, R2→H4 `170.1px`, R2→P2 `268.2px`를 독립 재계산해 모두 400px Hook Reach 안임을 확인했다. 6-8 내부 Boss·가짜 6-9·추정 Boss Timer를 추가하지 않고 `nextAreaId null` 수준의 Scenario-only content boundary만 정의한다. Sector 01~06 상세 시나리오는 48개로 완성됐지만 Runtime·Camera·Stable ID·Approved Art 및 Final Security 상세 계약은 계속 HOLD하며 다음 단계는 Full Game Audit이다.
+37. Full Game Audit의 P1~P5 답변을 확정했다. Foundation별 Specialization 2종(총 6종), 1-8 Checkpoint 뒤 Boss01 `CONTAINMENT GANTRY C-01`, 일반 Timer Prototype `960초 / Gate +45초 / cap 960초 / collapse 80px/s`, 예선 핵심 범위 NPC 제외, 6-8 뒤 `PAD SECURITY WARDEN P-03 → Access Restored → 개별 Boarding → Escape`를 구현 계약으로 기록했다. 동시에 1-7의 조기 `CONTAINMENT VIOLATION / ACTIVE`가 현재 Runtime에도 존재하고 Cutter가 `cutter-fire` positive opt-in임을 확인했다. 이번 변경은 기획 계약만 확정하며 P0 Runtime/문서 정렬과 기능 구현은 후속 작업이다.
 
 ## 열린 기획·구현 게이트
 
-1. Sector 02 Boss 위치·전투 시나리오와 `2-8 → 3-1` 전환 흐름
-2. Post-Sector 03 Boss와 `3-8 → 4-1` 전환
-3. 2-3 Specialization의 실제 이름·효과·수치·선택 pool
-4. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
-5. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
-6. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
-7. Post-Sector 04 Boss와 `4-8 → 5-1` 전환, Post-Sector 05 Boss와 `5-8 → 6-1` 전환. Sector 01~06 상세 시나리오 48개는 완성됐으므로, 다음 Runtime authoring 전에 Full Game Audit에서 전환·중복·상태 계약을 먼저 정렬한다.
-8. 6-8 Access Denial 뒤 Final Security Encounter의 identity·arena·phase·승리 조건·Boss Timer·멀티플레이 진입/합류·승리 후 Shuttle boarding 계약.
+1. P0 Alignment: 1-7 조기 최종 문구, Cutter 문서 의미, Foundation·Checkpoint·Scenario Art 카메라 계약을 최신 Runtime과 정렬한다.
+2. 2-3에서 확정된 Foundation별 고정 2종 Specialization 선택·효과·개인 상태·UI를 구현한다.
+3. 1-8 Checkpoint 뒤 Boss01 `CONTAINMENT GANTRY C-01`과 `2-1` 전환을 구현한다. 1-8 내부에는 Boss를 넣지 않는다.
+4. 일반 Timer Prototype `960초 / Gate +45초 / cap 960초 / collapse 80px/s`를 연결하고 실제 48-Stage 플레이 기록 뒤 조정한다.
+5. Sector 02~05 Boss의 identity·arena·phase·보상과 각 `n-8 → Boss → 다음 Sector` 상세 계약은 후속 기획으로 남는다.
+6. Sector 04를 메인 월드에 연결하고 Sector 05·06 Runtime을 저작한다. 상세 시나리오 48/48 완료를 Runtime 완료로 해석하지 않는다.
+7. 6-8 뒤 `PAD SECURITY WARDEN P-03 → Access Restored → 개별 Boarding → 전원 준비 → Escape`를 구현한다. 6-8 내부 Boss·첫 Boarding Player의 동료 자동 순간이동은 금지한다.
+8. NPC는 예선 핵심 범위에서 제외한다. 핵심 범위 완료 뒤 여유가 있을 때만 2-6의 선택지 없는 3줄 Stationary NPC를 검토한다.
+9. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영한다. 400px 도달은 속도×수명 파생 하나만 사용하며, authored Sentry activation band와 Cover LOS는 인식 거리 760과 별도 encounter 제약으로 유지한다.
 
-개발이 준비됐고 기획 결정만 기다리는 항목의 우선순위 요청과 답변 작성란은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다.
+P1~P5 확정 답변과 구현 상태는 [`design-decision-requests.md`](./design-decision-requests.md), 전체 수치·흐름은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md), 선행 정렬 목록은 [`p0-alignment-patch-package.md`](./p0-alignment-patch-package.md)에 유지한다.
 
 이 항목은 문서가 추가됐다는 이유만으로 닫지 않는다. 사용자 결정, 구현 diff와 검증 증거 중 해당 게이트를 실제로 해소한 근거가 있어야 한다.
 

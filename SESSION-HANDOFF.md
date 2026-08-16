@@ -4,7 +4,7 @@
 
 - 프로젝트: Canvas 기반 2D 고정 길이 로프 액션 로그라이크
 - 브랜치: `main`
-- 현재 단계: 로그라이크 런 순환 P0와 멀티 전송 기반 완료, P1·P2 실제 플레이테스트 대기
+- 현재 단계: 상세 시나리오 48/48과 P1~P5 기획 계약 완료, P0 Alignment 구현 대기
 - 실행 기반: 브라우저 ES Module, Canvas 2D, Node.js 로컬 서버와 무번들 테스트
 - 제품 기준: `docs/game-hackathon-planning.md`
 - 개발 일정: `docs/development-schedule.md`
@@ -55,7 +55,7 @@
 
 ## 다음 작업
 
-Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. 6-8 `ROOFTOP PAD 03`은 Threat 0의 순방향 Rope movement climax 뒤 Pad Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고, 미확정 Final Security Encounter 앞 content boundary로 끝난다. 다음 단계는 Sector 01~06 Full Game Audit이며, Sector 05·06 Runtime 저작과 Final Security 구현은 감사 및 상세 계약 확정 전까지 HOLD한다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
+Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. 6-8 `ROOFTOP PAD 03`은 Threat 0의 순방향 Rope movement climax 뒤 Pad Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03 → ACCESS RESTORED → 개별 Boarding → 전원 준비 → ESCAPE`로 확정됐으며 Runtime은 미구현이다. 다음 단계는 `P0 Alignment → Specialization → Boss01 → Timer → Sector04/05/06 Runtime → Final Security/Ending → Playtest`다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
 
 Scenario Art 생성의 현재 기준은 `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`다. 매 생성·수정 전에 해당 Stage README·Production Alignment와 현재 Area Catalog의 Camera Zone·Stable ID·정확한 오브젝트 수·구현 상태를 확인한다. Art Reference는 전체 맵이 아닌 대표 Gameplay Camera Shot 한 장으로 만들고, 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시한다. 정확한 World 좌표의 권위는 Approved Blockout에 두되, Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 구조 가이드로 고정해 이미지에서도 보존한다. 구도를 위해 Gameplay Geometry를 옮기거나 늘리지 않는다. `RETIRED`·`PENDING REGENERATION` 이미지는 새 생성 입력으로 사용하지 않는다. 프로젝트용으로 승인한 생성 이미지는 Stage `images/`에 저장하고 생성 기록·상태 문서와 같은 PR로 GitHub `main`에 병합한다. Sector 01은 Navy·Charcoal 산업 정비 시설, 어두운 전경·플레이 중경·푸른 원경, 제한된 Cyan과 드문 Amber를 유지하며 Player·Rope·Anchor·Telegraph 가독성을 우선한다. 1-1 C04의 `05_scenario_art_reference.png`, 1-2 C02의 `06_scenario_art_reference.png`, 1-3 Route Choice의 `05_scenario_art_reference.png`, 1-4 Node의 `03_scenario_art_reference.png`가 구조 정합 승인 기준이다. 1-5~1-8은 Approved Blockout 제작이 다음 선행 과제다.
 
@@ -79,15 +79,15 @@ Sector 01-8의 현재 기준은 `docs/bsh/scenario/1/1-8/README.md`의 `CONTAINM
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 48개(`1-1 → 6-8`)와 authored Runtime 24개(`1-1 → 3-8`) 및 Sector 04 standalone 8개(`4-1 → 4-8`)를 별도 상태로 기록한다. Sector 사이 Boss/전환, Specialization·NPC·Final Security·엔딩은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
+시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 48개(`1-1 → 6-8`)와 authored Runtime 24개(`1-1 → 3-8`) 및 Sector 04 standalone 8개(`4-1 → 4-8`)를 별도 상태로 기록한다. Specialization·Boss01·Timer Prototype·NPC 제외·Final Security·Ending의 P1~P5 기획은 확정됐고, P0 정렬과 실제 구현이 남았다. Sector02~05 개별 Boss 상세와 최종 밸런스는 후속 기획 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
 
-개발은 준비됐고 기획 결정만 기다리는 항목은 `docs/design-decision-requests.md`에 우선순위 순으로 정리하고 기획자가 같은 문서에 답변을 남긴다. 우선순위는 P1 Specialization 성장 규칙(2-3), P2 첫 보스 시나리오·전환, P3 일반 타이머·붕괴 수치, P4 NPC·대화, P5 엔딩이다. 답변이 붙은 항목부터 구현한다.
+P1~P5 기획 답변은 `docs/design-decision-requests.md`에 확정됐다. 전체 구현 계약은 `docs/design-decision-resolution-package.md`, 선행 Runtime·문서 정렬 범위는 `docs/p0-alignment-patch-package.md`를 따른다.
 
-`2-3 RESIDENTIAL SERVICE NODE`의 Specialization은 1-4에서 고른 Foundation Augment를 유지한 채 그 방향을 한 단계 심화하는 성장으로 시나리오에 명시됐다. Specialization의 입력·UI 흐름은 1-4 Foundation 선택 primitive를 재사용하되 Foundation과 Specialization의 ID·의미 체계는 합치지 않는다. 실제 Specialization 이름·효과·수치·선택 pool은 아직 미정이므로 geometry와 node flow만 먼저 구현하고 성장 규칙을 임의 확정하지 않는다. `2-5 EVACUATION WALKWAY`의 잠긴 Upper Transit Gate는 서사적 장애물이며 실제 다음 진행 경로는 Maintenance Service Frame이다. `2-8 EVACUATION PLATFORM`은 Boss가 없는 Sector 02 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 그 뒤 Boss/`3-1` 전환 순서는 공통 Boss Flow가 확정되기 전 연결하지 않는다. 새 시나리오의 좌표·문구·cue 조정은 기존 계약 안에서 흡수하지만 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계 변경은 사용자 검토를 먼저 받는다.
+`2-3 RESIDENTIAL SERVICE NODE`의 Specialization은 현재 Foundation에 종속된 고정 2종 중 1종을 개인별로 선택하는 총 6종으로 확정됐다. 첫 버전은 RNG·재선택이 없고 사망·Checkpoint·Sector 이동·Boss retry에 유지되며 New Run에서만 초기화된다. 입력·UI 흐름은 1-4 Foundation 선택 primitive를 재사용하되 Foundation과 Specialization의 ID·의미 체계는 합치지 않는다. `2-5 EVACUATION WALKWAY`의 잠긴 Upper Transit Gate는 서사적 장애물이며 실제 다음 진행 경로는 Maintenance Service Frame이다. `2-8 EVACUATION PLATFORM`은 Boss가 없는 Sector 02 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 Sector 02 Boss 상세가 확정되기 전 기존 `3-1` 연결을 임의 변경하지 않는다. 새 시나리오의 좌표·문구·cue 조정은 기존 계약 안에서 흡수하지만 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계 변경은 사용자 검토를 먼저 받는다.
 
 Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않는다. 기존 `EnemyObject`에 맵이 제공하는 순찰 corridor/route와 activation band를 소비하는 선택적 Patrol capability를 조합하고 기존 acquire·track·lock·fire·cooldown과 투사체 규칙을 재사용한다. Patrol 자료가 없는 기존 Sentry는 정지 동작을 그대로 유지한다. Drone은 자기 activation band를 벗어나지 않고 한 공격 cycle 동안 선택한 target을 유지하며, 다른 band의 플레이어 진입으로 cross-zone 재조준하거나 두 Drone이 지속 crossfire를 만들지 않게 한다. 영역별 stable ID와 미확정 경계는 `docs/sector-02-game-object-catalog.md`를 기준으로 한다.
 
-맵 외에도 개발을 막는 세 기획 게이트가 있다. 증강 내용·Foundation과 Specialization의 관계·관련 UI와 게임 요소는 8월 14일까지, NPC 역할·대사·대화 시스템·관련 UI와 게임 요소는 8월 15일까지, 엔딩·진입 조건·최종 흐름·관련 UI와 게임 요소는 8월 19일까지 확정한다. 각각 첫 Maintenance Node, 첫 NPC 섹터, `SECTOR 06` 구현의 선행 조건이다. 역할별 병렬 일정과 마감은 `docs/development-schedule.md`, 상세 구현 완료 기준은 `docs/implementation-roadmap.md`의 **제출 전 시나리오 구현 트랙**을 따른다.
+과거의 증강·NPC·엔딩 기획 마감은 모두 결정 상태로 갱신됐다. Specialization과 Ending은 구현 계약이 확정됐고, NPC는 예선 핵심 범위에서 제외한다. 현재 선행 작업은 1-7 Story 문구를 포함한 P0 Alignment이며 역할별 일정은 `docs/development-schedule.md`, 상세 구현 순서는 `docs/implementation-roadmap.md`의 **제출 전 시나리오 구현 트랙**을 따른다.
 
 메인 개발자는 현재 작성된 맵을 `SECTOR 01 → 02 → 03 → 04 → 05 → 06` 및 섹터 내 번호 순서로 구현한다. 각 맵을 시작할 때 등장 오브젝트·상태·표현 cue를 먼저 정리하고 gameplay와 레벨 흐름을 mock으로 플레이 가능하게 만든다. 맵 definition에는 이미지·atlas·음원 파일 경로를 넣지 않고 stable object/state/event/presentation/cue ID만 둔다. 환경·오디오는 검증된 runtime catalog의 package를 사용하고 준비되지 않았으면 `default-mock`을 선택한다. authored object는 교체 가능한 world-object mock presentation catalog를 거쳐 표시한다. 그래픽·오디오 담당자는 같은 ID와 mock 배치를 이어받아 정식 package·binding만 교체하며 지형·물리·완료 조건·Gate·네트워크 권위를 바꾸지 않는다.
 
@@ -346,7 +346,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 양쪽 작업의 유일한 필수 선행 합의는 manifest·loader·이벤트 binding 같은 공개 교환 계약 변경이다. 역할별 일정과 제출 판단은 `docs/game-hackathon-planning.md`의 **역할 분담**을 따른다.
 - 시나리오는 `6개 섹터 × 섹터당 8개 맵 = 48개 맵`이며 일정과 인계는 섹터 단위로 관리한다. 메인 개발자는 `SECTOR 01 → 06` 순서로 진행하고 각 섹터 안의 8개 맵은 번호순으로 구현한다. 맵별 오브젝트·상태·표현 cue를 먼저 목록화하고 mock으로 동작을 완성하면 그래픽·오디오 담당자가 앞 섹터 결과부터 정식 리소스로 교체 제작한다.
 - 그래픽·오디오 1차 생산 마감은 2026년 8월 19일이며, 전체 자산 완료가 아니라 앞서 공개된 우선 오브젝트의 첫 교체 묶음을 뜻한다.
-- 증강, NPC 대사·대화 시스템, 엔딩과 각각에 연결된 UI·게임 요소는 전문 표현 리소스와 달리 관련 섹터 개발의 필수 선행 기획이다. 확정되지 않은 내용을 메인 개발자가 임의의 mock 규칙으로 대신 결정하지 않는다.
+- Specialization·Boss01·Timer Prototype·Final Security·Ending과 관련 UI·게임 요소는 확정 기획 계약을 사용한다. NPC는 예선 핵심 범위에서 제외하며, Sector02~05 Boss와 최종 밸런스처럼 아직 열린 항목만 메인 개발자가 임의의 mock 규칙으로 대신 결정하지 않는다.
 
 ### [L1] 환경 도트 표현은 독립 component와 전용 multi-atlas 계약으로 조립한다
 
