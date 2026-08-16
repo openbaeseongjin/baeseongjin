@@ -65,6 +65,7 @@ export async function run() {
         Buffer.byteLength(body),
         "content-length must match the stripped body"
     );
+    assert.equal(index.headers["cache-control"], "no-store", "dev responses must never be browser-cached");
 
     const head = responseRecorder();
     await handler({ method: "HEAD", url: "/" }, head);

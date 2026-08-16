@@ -74,6 +74,7 @@ export function createStaticRequestHandler(root) {
             const end = range?.end ?? size - 1;
             response.writeHead(range ? 206 : 200, {
                 "accept-ranges": "bytes",
+                "cache-control": "no-store",
                 "content-length": end - start + 1,
                 "content-type": mime.get(extname(filePath)) ?? "application/octet-stream",
                 ...(range ? { "content-range": `bytes ${start}-${end}/${size}` } : {})
