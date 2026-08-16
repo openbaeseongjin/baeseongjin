@@ -19,12 +19,20 @@ export class DebugPanel {
         this.closeButton = null;
         this.metricsInput = null;
         this.startAreaSelect = null;
-        this.longPressTimer = null;
+        this.pressStartedAt = null;
         this.longPressFired = false;
         this.previouslyFocused = null;
         this.attached = false;
-        this.onPointerDown = () => this.beginLongPress();
-        this.onPointerEnd = () => this.cancelLongPress();
+        this.onPointerDown = () => {
+            this.pressStartedAt = this.windowTarget.performance.now();
+        };
+        this.onPointerEnd = () => this.completeLongPress();
+        this.onPointerAbort = () => {
+            this.pressStartedAt = null;
+        };
+        this.onContextMenu = (event) => {
+            if (this.longPressFired) event.preventDefault();
+        };
         this.onClickCapture = (event) => {
             if (!this.longPressFired) return;
             event.preventDefault();
@@ -45,21 +53,16 @@ export class DebugPanel {
         };
     }
 
-    beginLongPress() {
-        this.longPressFired = false;
-        if (this.longPressTimer !== null) this.windowTarget.clearTimeout(this.longPressTimer);
-        this.longPressTimer = this.windowTarget.setTimeout(() => {
-            this.longPressTimer = null;
-            this.longPressFired = true;
-            this.show();
-        }, DEBUG_PANEL_LONG_PRESS_MS);
-    }
-
-    cancelLongPress() {
-        if (this.longPressTimer !== null) {
-            this.windowTarget.clearTimeout(this.longPressTimer);
-            this.longPressTimer = null;
-        }
+    completeLongPress() {
+        if (this.pressStartedAt === null) return;
+        const heldMs = this.windowTarget.performance.now() - this.pressStartedAt;
+        this.pressStartedAt = null;
+        if (heldMs < DEBUG_PANEL_LONG_PRESS_MS) return;
+        this.longPressFired = true;
+        this.show();
+        this.windowTarget.setTimeout(() => {
+            this.longPressFired = false;
+        }, 0);
     }
 
     attach() {
@@ -78,8 +81,9 @@ export class DebugPanel {
         }
         this.trigger.addEventListener("pointerdown", this.onPointerDown);
         this.trigger.addEventListener("pointerup", this.onPointerEnd);
-        this.trigger.addEventListener("pointercancel", this.onPointerEnd);
-        this.trigger.addEventListener("pointerleave", this.onPointerEnd);
+        this.trigger.addEventListener("pointercancel", this.onPointerAbort);
+        this.trigger.addEventListener("pointerleave", this.onPointerAbort);
+        this.trigger.addEventListener("contextmenu", this.onContextMenu);
         this.trigger.addEventListener("click", this.onClickCapture, true);
         this.closeButton.addEventListener("click", this.onClose);
         this.root.addEventListener("pointerdown", this.onBackdrop);
@@ -111,12 +115,13 @@ export class DebugPanel {
 
     detach() {
         if (!this.attached) return false;
-        this.cancelLongPress();
+        this.pressStartedAt = null;
         this.hide();
         this.trigger.removeEventListener("pointerdown", this.onPointerDown);
         this.trigger.removeEventListener("pointerup", this.onPointerEnd);
-        this.trigger.removeEventListener("pointercancel", this.onPointerEnd);
-        this.trigger.removeEventListener("pointerleave", this.onPointerEnd);
+        this.trigger.removeEventListener("pointercancel", this.onPointerAbort);
+        this.trigger.removeEventListener("pointerleave", this.onPointerAbort);
+        this.trigger.removeEventListener("contextmenu", this.onContextMenu);
         this.trigger.removeEventListener("click", this.onClickCapture, true);
         this.closeButton.removeEventListener("click", this.onClose);
         this.root.removeEventListener("pointerdown", this.onBackdrop);
