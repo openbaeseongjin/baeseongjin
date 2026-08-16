@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { DebugSettings } from "../src/game/metrics/DebugSettings.js";
-import { DebugPanel, DEBUG_PANEL_LONG_PRESS_MS } from "../src/game/ui/DebugPanel.js";
+import { DebugPanel, DEBUG_PANEL_HOLD_MS } from "../src/game/ui/DebugPanel.js";
 
 class FakeEventTarget {
     constructor() {
@@ -23,22 +23,35 @@ class FakeEventTarget {
     }
 }
 
+class FakeClassList {
+    constructor() {
+        this.classes = new Set();
+    }
+
+    add(name) {
+        this.classes.add(name);
+    }
+
+    remove(name) {
+        this.classes.delete(name);
+    }
+
+    contains(name) {
+        return this.classes.has(name);
+    }
+}
+
 class FakeElement extends FakeEventTarget {
     constructor() {
         super();
-        this.hidden = false;
         this.checked = false;
         this.value = "";
         this.options = [];
-        this.focused = false;
+        this.classList = new FakeClassList();
     }
 
     append(option) {
         this.options.push(option);
-    }
-
-    focus() {
-        this.focused = true;
     }
 }
 
@@ -51,27 +64,26 @@ function memoryStorage(initialValue = null) {
 }
 
 export function run() {
-    const closeButton = new FakeElement();
     const metricsInput = new FakeElement();
     const startAreaSelect = new FakeElement();
-    const root = new FakeElement();
-    root.hidden = true;
-    root.querySelector = (selector) =>
+    const documentTarget = new FakeEventTarget();
+    documentTarget.createElement = () => new FakeElement();
+    documentTarget.querySelector = (selector) =>
         ({
-            "[data-debug-close]": closeButton,
             "[data-debug-metrics]": metricsInput,
             "[data-debug-start-area]": startAreaSelect
         })[selector] ?? null;
     const trigger = new FakeElement();
-    const documentTarget = new FakeEventTarget();
-    documentTarget.hidden = false;
-    documentTarget.activeElement = trigger;
-    documentTarget.createElement = () => new FakeElement();
     const windowTarget = new FakeEventTarget();
-    let now = 0;
-    const timers = [];
-    windowTarget.performance = { now: () => now };
-    windowTarget.setTimeout = (callback) => timers.push(callback);
+    let nextTimerId = 1;
+    const timers = new Map();
+    windowTarget.setTimeout = (callback) => {
+        const id = nextTimerId;
+        nextTimerId += 1;
+        timers.set(id, callback);
+        return id;
+    };
+    windowTarget.clearTimeout = (id) => timers.delete(id);
 
     const areaIds = ["sector-01-01", "sector-03-02"];
     const staleStorage = memoryStorage(JSON.stringify({ version: 1, metrics: true, startAreaId: "retired-area" }));
@@ -79,55 +91,75 @@ export function run() {
     assert.equal(settings.snapshot().startAreaId, null, "a stale authored area must be cleared when settings load");
     assert.throws(() => settings.setStartAreaId("retired-area"), /unknown debug start area/);
 
-    const panel = new DebugPanel({ root, trigger, settings, areaIds, documentTarget, windowTarget });
+    let activated = 0;
+    const panel = new DebugPanel({ trigger, settings, areaIds, documentTarget, windowTarget });
+    panel.onActivate = () => (activated += 1);
+    let now = 0;
+    windowTarget.performance = { now: () => now };
     assert.equal(panel.attach(), true);
     assert.deepEqual(
         startAreaSelect.options.map(({ value }) => value),
         areaIds
     );
+    assert.equal(metricsInput.checked, true, "the stored metrics toggle must render into the panel");
+    assert.equal(startAreaSelect.value, "", "the default start area must render as the empty option");
 
-    trigger.dispatch("pointerdown", { pointerId: 11, button: 0 });
-    now = DEBUG_PANEL_LONG_PRESS_MS + 1;
-    documentTarget.dispatch("pointerup", { pointerId: 12 });
-    assert.equal(root.hidden, true, "a different pointer must not complete the settings-button hold");
-    documentTarget.dispatch("pointerup", { pointerId: 11 });
-    assert.equal(root.hidden, false, "the pointer that started the hold must open the debug panel");
+    trigger.dispatch("pointerdown", { pointerId: 11, pointerType: "mouse", button: 0 });
+    assert.equal(
+        trigger.classList.contains("settings-trigger--holding"),
+        true,
+        "holding the settings button must show the hold indicator"
+    );
+    assert.equal(timers.size, 1, "a primary press must arm the hold timer");
+    for (const callback of [...timers.values()]) callback();
+    timers.clear();
+    assert.equal(activated, 1, "the hold timer must activate debug mode");
+    assert.equal(
+        trigger.classList.contains("settings-trigger--holding"),
+        false,
+        "activation must clear the hold indicator"
+    );
+    now += 50;
     let clickPrevented = false;
     trigger.dispatch("click", {
         preventDefault: () => (clickPrevented = true),
         stopPropagation: () => {}
     });
-    assert.equal(clickPrevented, true, "the synthetic click after a long press must not open normal settings");
-    timers.splice(0).forEach((callback) => callback());
-    closeButton.dispatch("click");
-    assert.equal(root.hidden, true);
+    assert.equal(clickPrevented, true, "the click right after a hold must not open normal settings");
+    now += 1000;
+    let laterClickPrevented = false;
+    trigger.dispatch("click", {
+        preventDefault: () => (laterClickPrevented = true),
+        stopPropagation: () => {}
+    });
+    assert.equal(laterClickPrevented, false, "a later normal click must pass through to the settings menu");
 
-    now = 2000;
-    trigger.dispatch("pointerdown", { pointerId: 21, button: 0 });
-    now += DEBUG_PANEL_LONG_PRESS_MS + 1;
+    trigger.dispatch("pointerdown", { pointerId: 21, pointerType: "mouse", button: 0 });
     trigger.dispatch("pointerleave", { pointerId: 21 });
-    documentTarget.dispatch("pointerup", { pointerId: 21 });
-    assert.equal(root.hidden, true, "leaving the settings button must cancel a long press");
+    assert.equal(timers.size, 0, "leaving the settings button must cancel the hold");
+    assert.equal(
+        trigger.classList.contains("settings-trigger--holding"),
+        false,
+        "cancelling must clear the hold indicator"
+    );
 
-    now = 4000;
-    trigger.dispatch("pointerdown", { pointerId: 31, button: 0 });
-    documentTarget.hidden = true;
-    documentTarget.dispatch("visibilitychange");
-    documentTarget.hidden = false;
-    now += DEBUG_PANEL_LONG_PRESS_MS + 1;
-    documentTarget.dispatch("pointerup", { pointerId: 31 });
-    assert.equal(root.hidden, true, "a hidden page must clear the pending long press");
+    trigger.dispatch("pointerdown", { pointerId: 31, pointerType: "mouse", button: 2 });
+    assert.equal(timers.size, 0, "a non-primary mouse button must not start the debug gesture");
 
-    now = 6000;
-    trigger.dispatch("pointerdown", { pointerId: 41, button: 0 });
-    windowTarget.dispatch("blur");
-    now += DEBUG_PANEL_LONG_PRESS_MS + 1;
-    documentTarget.dispatch("pointerup", { pointerId: 41 });
-    assert.equal(root.hidden, true, "window blur must clear the pending long press");
+    trigger.dispatch("pointerdown", { pointerId: 41, pointerType: "mouse", button: 0 });
+    trigger.dispatch("pointercancel", { pointerId: 41 });
+    assert.equal(timers.size, 0, "a pointer cancel must abort the hold");
 
-    trigger.dispatch("pointerdown", { pointerId: 51, button: 2 });
-    now += DEBUG_PANEL_LONG_PRESS_MS + 1;
-    documentTarget.dispatch("pointerup", { pointerId: 51 });
-    assert.equal(root.hidden, true, "a non-primary mouse button must not start the debug gesture");
+    metricsInput.checked = false;
+    metricsInput.dispatch("change");
+    assert.equal(settings.snapshot().metrics, false, "the panel toggle must persist into settings");
+    startAreaSelect.value = "sector-03-02";
+    startAreaSelect.dispatch("change");
+    assert.equal(settings.snapshot().startAreaId, "sector-03-02", "the start map select must persist into settings");
+    startAreaSelect.value = "";
+    startAreaSelect.dispatch("change");
+    assert.equal(settings.snapshot().startAreaId, null);
+
     assert.equal(panel.detach(), true);
+    assert.equal(panel.detach(), false, "detach must be idempotent");
 }
