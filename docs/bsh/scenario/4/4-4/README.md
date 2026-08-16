@@ -1,6 +1,6 @@
 # SECTOR 04-4 — INFRASTRUCTURE SERVICE NODE
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — GATE COORDINATE FIX*
 
 ◀ PREV — [SECTOR 04-3 / FREIGHT BYPASS](../4-3/README.md) · NEXT — [SECTOR 04-5 / EXPRESS SHAFT](../4-5/README.md) ▶
 
@@ -32,7 +32,7 @@
 | Primary Role | 4-3 Cutter+Wake 이후 완전한 Decompression + Lower Feeder 이상징후 첫 Setup |
 | Primary Space | Transit Routing Control Bay / Service Spine |
 | Exit | Reach Final Deck → Gate Panel → Gate Open → Physical Crossing |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
 | Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
 
 ---
@@ -816,7 +816,7 @@ P2 진입 Story Trigger와 연결되는 Presentation object 후보.
 
 ```text
 Panel
-(+400, -800)
+(+400, -832)
 
 Gate
 (+512, -832)
@@ -1908,4 +1908,4 @@ Stage traversal length
 
 ---
 
-SECTOR 04-4 / INFRASTRUCTURE SERVICE NODE — BLOCKOUT CANDIDATE · REV 1.0
+SECTOR 04-4 / INFRASTRUCTURE SERVICE NODE — BLOCKOUT CANDIDATE · REV 1.1

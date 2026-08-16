@@ -1,6 +1,6 @@
 # SECTOR 04-8 — TRANSIT CONTROL TRUNK
 
-*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
+*BLOCKOUT CANDIDATE · REV 1.2 — WIND STRENGTH RECLASSIFIED AS SECTOR04 HYPOTHESIS*
 
 ◀ PREV — [SECTOR 04-7 / ISOLATION JUNCTION](../4-7/README.md) · NEXT — POST-SECTOR 04 BOSS / TRANSITION — TBD ▶
 
@@ -34,7 +34,7 @@
 | Stage-local Completion | Reach P6 → Final Status Juxtaposition |
 | Final Gate / Boss Entry | VISUAL HOLD — product transition not locked |
 | `nextAreaId` | `null` / DO NOT WIRE Sector 05 |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
 | Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
 
 ---
@@ -277,18 +277,26 @@ Grounded Attenuation(0.35)이 완전 차단이 아니라 감쇠일 뿐이므로 
 
 ### Baseline Reuse
 
-4-8도 기존 Sector 04 Wake baseline:
+4-8도 기존 Sector 04 Wake Cycle:
 
 ```text
-Strength 360
-
 Lull     1.75 sec
 Warning  0.70 sec
 Active   1.40 sec
 Decay    0.30 sec
 ```
 
-를 재사용한다.
+를 재사용한다. Cycle은 Sector01 Pulsed Wind precedent와 일치하는
+**VERIFIED PRECEDENT**다.
+
+```text
+Strength 360
+```
+
+은 Sector01에서 재사용한 값이 아니라 4-3에서 시작된 **Sector 04 고유 hypothesis**이며,
+실제 shipped `Sector04AreaCatalog.js`의 4-8 `windZones`(`control-trunk-wake`)에
+그대로 구현·검증돼 현재 Sector 04의 CURRENT RUNTIME 값이다. Finale이라고 자동으로
+Sector01의 800까지 올리지 않는다.
 
 ---
 
@@ -969,7 +977,7 @@ activation-band-only
 ### 8-6. D1 Activation
 
 ```text
-X -192 ~ +192
+X -208 ~ +208
 Y -1392 ~ -1152
 ```
 
@@ -2437,4 +2445,4 @@ Exit handoff를 직접 이어받는다.
 
 ---
 
-SECTOR 04-8 / TRANSIT CONTROL TRUNK — BLOCKOUT CANDIDATE · REV 1.1
+SECTOR 04-8 / TRANSIT CONTROL TRUNK — BLOCKOUT CANDIDATE · REV 1.2

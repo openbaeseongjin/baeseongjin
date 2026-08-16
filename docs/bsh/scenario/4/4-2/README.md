@@ -1,6 +1,6 @@
 # SECTOR 04-2 — CUTTER LINE
 
-*BLOCKOUT CANDIDATE · REV 1.1 — RUNTIME RE-ALIGNMENT (HOOK FLIGHT / COMBAT REBALANCE)*
+*BLOCKOUT CANDIDATE · REV 1.2 — GATE COORDINATE FIX / BUILD METADATA ALIGNMENT*
 
 ◀ PREV — [SECTOR 04-1 / TRANSIT INTAKE](../4-1/README.md) · NEXT — [SECTOR 04-3 / FREIGHT BYPASS](../4-3/README.md) ▶
 
@@ -25,11 +25,11 @@
 | Required Kill | NONE |
 | Design Checkpoint / Reward | NONE |
 | Boss | NONE |
-| Design Carry Build | Foundation + first Specialization KEEP — runtime pending |
+| Design Carry Build | Foundation KEEP — CURRENT RUNTIME; First Specialization — CONTENT BLOCKED (selection pool TBD) |
 | Primary Role | Rope Cut의 원인·텔레그래프·0.6s 복구를 처음 학습 |
 | Primary Space | Protected Transit Security Line / Cutter Rail Node |
 | Exit | Reach Final Deck → Gate Panel → Gate Open → Physical Crossing |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
 | Art Status | Cutter gameplay presentation PROTOTYPE REQUIRED / Approved Art HOLD |
 
 ---
@@ -1042,10 +1042,10 @@ C2 COMMIT REGION
 
 ```text
 Panel
-(+448, -1248)
+(+352, -1248)
 
 Gate
-(+576, -1248)
+(+464, -1248)
 ```
 
 완전 Safe.
@@ -2439,19 +2439,22 @@ Exit Preview와 정렬됐다.
 향후 4-1 Runtime geometry가 실제 구현되면
 Portal arrival / camera handoff만 다시 검증.
 
-### 8. Runtime Re-Alignment — 4-1과 Rope Max 불일치
+### 8. Runtime Re-Alignment — 4-1과 Rope Max 불일치 — RESOLVED
 
 이 문서는 커밋 `904a328`(Hook Flight 전환, Rope Max 440→400, Enemy Combat 재조정) 이후 기준으로
 §0-1 / §9 / §10 / §11 / §14를 갱신했다.
 
-하지만 이미 merge된 **4-1(PR #481)은 여전히 440px 기준**으로 작성돼 있다.
+당시 이미 merge된 **4-1(PR #481)은 여전히 440px 기준**으로 작성돼 있었고,
+4-1의 Safe Route MAX SAFE LINK는 374.5px(400 이내, 문제 없음), Flow Route MAX는
+408.9px(400 초과)였다.
 
-4-1의 Safe Route MAX SAFE LINK는 374.5px, Flow Route MAX는 408.9px였다 —
-408.9px는 새 Rope Max 400px을 **초과**한다.
-
-즉 4-1도 이번 Runtime Re-Alignment를 반영해 재검증이 필요하다.
-이 문서(4-2)의 범위 밖이므로 여기서 직접 수정하지 않고 별도 패치가 필요함만 기록한다.
+이후 재검증 결과 이 408.9px는 실제로는 문제가 아니었다. 4-1의 **Mandatory
+Safe Route**는 같은 구간(A3→A4)을 `A3 → M1 → A4`로 우회해 400px 이내로
+통과하며(4-1 §9), Flow Route는 4-1 문서 자체가 `OPTIONAL EXPRESSION`으로
+명시한 skilled-only 지름길이라 Mandatory 진행에는 영향이 없다(4-1 §10). 좌표
+수정은 필요하지 않았고, 실제 shipped `Sector04AreaCatalog.js`도 원래 좌표
+그대로 구현·검증돼 있다. 4-1은 REV 1.1로 이 재검증 내용을 반영했다.
 
 ---
 
-SECTOR 04-2 / CUTTER LINE — BLOCKOUT CANDIDATE · REV 1.1
+SECTOR 04-2 / CUTTER LINE — BLOCKOUT CANDIDATE · REV 1.2

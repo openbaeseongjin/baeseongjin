@@ -1,6 +1,6 @@
 # SECTOR 04-5 — EXPRESS SHAFT
 
-*BLOCKOUT CANDIDATE · REV 1.1 — WIND SHADOW / GROUNDED ATTENUATION RUNTIME UPDATE*
+*BLOCKOUT CANDIDATE · REV 1.2 — WIND STRENGTH RECLASSIFIED / 4-1 DRIFT FALSE ALARM RESOLVED*
 
 ◀ PREV — [SECTOR 04-4 / INFRASTRUCTURE SERVICE NODE](../4-4/README.md) · NEXT — [SECTOR 04-6 / POWER RELAY SPAN](../4-6/README.md) ▶
 
@@ -30,7 +30,7 @@
 | Primary Role | Sector 04 중간의 순수 Movement Joy / Wake-assisted continuous ascent |
 | Primary Space | Tall Express Pressure Shaft / Central Service Core |
 | Exit | Reach Final Deck → Gate Panel → Gate Open → Physical Crossing |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
 | Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
 
 ---
@@ -258,17 +258,24 @@ falloff 관련 설계는 변경 없음.
 
 ### 4-5 BASELINE
 
-4-3에서 검증한 기존 Runtime baseline을
-동일하게 재사용한다.
+4-3과 동일한 Sector 04 Wake 값을 재사용한다.
 
 ```text
-Strength 360
-
 Lull     1.75 sec
 Warning  0.70 sec
 Active   1.40 sec
 Decay    0.30 sec
 ```
+
+Cycle은 Sector01 Pulsed Wind precedent와 일치하는 **VERIFIED PRECEDENT**다.
+
+```text
+Strength 360
+```
+
+는 Sector01에서 재사용한 값이 아니라 4-3에서 시작된 **Sector 04 고유 hypothesis**이며,
+실제 shipped `Sector04AreaCatalog.js`의 4-5 `windZones`(`express-wake`)에 그대로
+구현·검증돼 현재 Sector 04의 CURRENT RUNTIME 값이다.
 
 4-5에서 새 Wind 수치를 동시에 발명하지 않는다.
 
@@ -862,10 +869,10 @@ P5 OUT
 
 ```text
 Panel
-(+432, -1440)
+(+432, -1472)
 
 Gate
-(+544, -1472)
+(+528, -1472)
 ```
 
 Wake / Threat 밖.
@@ -2069,7 +2076,8 @@ base movement clear
 
 ### 1. Wake Strength 360
 
-기존 Runtime baseline을 재사용.
+Sector01 baseline이 아니라 Sector 04 고유 hypothesis(§0-1 참고)이며,
+현재 shipped `Sector04AreaCatalog.js`에 그대로 구현돼 CURRENT RUNTIME 값이다.
 
 실제 vertical ascent에서 너무 약해
 LULL과 차이가 거의 없으면:
@@ -2168,14 +2176,18 @@ Cutter / Patrol spatial read
 
 를 처음 보여주는 것을 기본으로 한다.
 
-### 8. 4-1 Drift
+### 8. 4-1 Drift — FALSE ALARM (RESOLVED)
 
-현재 GitHub 4-1의 Flow `408.9 > 400` 문제는
-별도 REV 1.1 patch가 아직 필요하다.
+4-1의 Flow Route `A3 → A4 = 408.9px > 400px Hook Reach`는 실제로는 문제가 아니었다.
+4-1의 **Mandatory Safe Route**는 같은 구간을 `A3 → M1 → A4`로 우회해
+(§9, 각 222.3px / 186.6px) 400px 이내로 통과하며, shipped
+`Sector04AreaCatalog.js`도 이 좌표 그대로 구현·검증돼 있다. Flow Route는
+문서 자체가 `OPTIONAL EXPRESSION`으로 명시한 skilled-only 지름길이라
+A3 → A4 직결이 막혀 있어도 Mandatory 진행에는 영향이 없다(4-1 §10 참고).
+좌표 변경은 필요하지 않았다.
 
-4-5 Runtime integration 전에
-Sector 04 전체 geometry audit에서 반드시 닫는다.
+4-5는 4-1의 Flow Route 수치를 참조하지 않으므로 추가 조치가 필요 없다.
 
 ---
 
-SECTOR 04-5 / EXPRESS SHAFT — BLOCKOUT CANDIDATE · REV 1.1
+SECTOR 04-5 / EXPRESS SHAFT — BLOCKOUT CANDIDATE · REV 1.2

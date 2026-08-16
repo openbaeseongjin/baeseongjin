@@ -1,6 +1,6 @@
 # SECTOR 04-6 — POWER RELAY SPAN
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — GATE COORDINATE FIX / 4-1 DRIFT FALSE ALARM RESOLVED*
 
 ◀ PREV — [SECTOR 04-5 / EXPRESS SHAFT](../4-5/README.md) · NEXT — [SECTOR 04-7 / ISOLATION JUNCTION](../4-7/README.md) ▶
 
@@ -31,7 +31,7 @@
 | Primary Role | Rope Line Geometry를 이동·회피·공격 판단에 동시에 사용 |
 | Primary Space | Power Relay Bridge / Transit Grid Coupling Span |
 | Exit | Reach Final Deck → Gate Panel → Gate Open → Physical Crossing |
-| Runtime Status | Sector 04 authored runtime NOT CONNECTED |
+| Runtime Status | Sector 04 standalone catalog AUTHORED & VALIDATED (4-1~4-8) — 메인 월드 NOT CONNECTED |
 | Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
 
 ---
@@ -904,10 +904,10 @@ activation-band-only
 
 ```text
 Panel
-(-80, -1440)
+(-80, -1472)
 
 Gate
-(+32, -1472)
+(-48, -1472)
 ```
 
 D1 activation 밖.
@@ -2214,11 +2214,13 @@ ISOLATED
 
 를 확정한다.
 
-### 8. 4-1 Geometry Drift
+### 8. 4-1 Geometry Drift — FALSE ALARM (RESOLVED)
 
-Sector 04 전체 Runtime integration 전에
-4-1 REV 1.1의 400px 교정이 GitHub에도 반영돼야 한다.
+4-1의 Flow Route `A3 → A4 = 408.9px > 400px Hook Reach`는 실제로는 문제가 아니었다.
+4-1의 Mandatory Safe Route는 같은 구간을 `A3 → M1 → A4`로 우회해 400px 이내로
+통과하며, shipped `Sector04AreaCatalog.js`도 이 좌표 그대로 구현·검증돼 있다.
+좌표 교정은 필요하지 않았다(4-1 §9/§10 참고).
 
 ---
 
-SECTOR 04-6 / POWER RELAY SPAN — BLOCKOUT CANDIDATE · REV 1.0
+SECTOR 04-6 / POWER RELAY SPAN — BLOCKOUT CANDIDATE · REV 1.1

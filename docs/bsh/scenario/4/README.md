@@ -1,10 +1,10 @@
 # SECTOR 04 — TRANSIT / INFRASTRUCTURE MASTER PLAN
 
-*MASTER PLAN CANDIDATE · REV 1.0*
+*MASTER PLAN CANDIDATE · REV 1.1 — CUTTER FIRE OPT-IN HARDENING RESOLVED*
 
 `SECTOR 04 TRANSIT / INFRASTRUCTURE` · `MOMENTUM UNDER INTERRUPTION` · `CUTTER FIRE` · `TRANSIT WAKE` · `CONTINUOUS SPEED FLOW`
 
-| 항목 | REV 1.0 기준 |
+| 항목 | REV 1.1 기준 |
 |---|---|
 | Status | HYPOTHESIS — MASTER PLAN CANDIDATE |
 | Authoring Snapshot | `37ebeb90a2f2197af0420c0a0b00970eab41dea7` |
@@ -366,15 +366,16 @@ RUNTIME CAPABILITY VERIFIED
 PRESENTATION / AUTHORING CONTRACT REQUIRED
 ```
 
-### Current Runtime — VERIFIED
+### Current Runtime — VERIFIED (UPDATED)
 
 Enemy projectile은:
 
 ```text
-canCutRope
+canCutRope = rules.includes("cutter-fire")
 ```
 
-를 지원한다.
+를 지원한다(`src/game/combat/EnemyObject.js`). 명시적으로 `cutter-fire` rule을
+가진 적만 Rope를 자를 수 있는 **opt-in** 모델이다.
 
 Projectile이 Player의 현재 Rope Segment:
 
@@ -392,19 +393,13 @@ rope-cut
 
 resolution이 존재한다.
 
-### 현재 Sector 01~03 Baseline
+### 현재 Sector 01~04 Baseline
 
-현재 사용 중인 Patrol / Sentry 시나리오는
-대부분 명시적으로:
+`cutter-fire` rule이 없는 모든 Patrol / Sentry는 기본적으로 Rope Cut이 불가능하다.
+Sector 04의 Cutter Sentry들은 `rules: ["cutter-fire", ...]`로 명시적으로 opt-in돼
+있고(4-2·4-3·4-6·4-7·4-8), 같은 Sector의 Patrol Drone은 `no-rope-cut`을 유지한다.
 
-```text
-no-rope-cut
-```
-
-을 사용해 Rope Cut을 비활성화한다.
-
-Sector 04는 이 이미 구현된 capability를
-처음 **명시적 Gameplay Rule**로 사용한다.
+Sector 04는 이 capability를 처음 **명시적 Gameplay Rule**로 사용한다.
 
 ---
 
@@ -497,29 +492,26 @@ CUTTER FIRE
 
 를 명시.
 
-### Production Hardening — 권장
+### Production Hardening — RESOLVED
 
-현재 구현은:
+과거 구현은:
 
 ```text
 !rules.includes("no-rope-cut")
 → canCutRope
 ```
 
-형태다.
+opt-out 형태였다.
 
-Sector 04 production integration 시
-의도하지 않은 Rope Cut이 생기지 않도록:
+Sector 04 standalone catalog 구현(#513) 때 이미:
 
 ```text
-rope-cut
+rules.includes("cutter-fire")
+→ canCutRope
 ```
 
-같은 **명시적 opt-in authoring rule**로 강화할지
-개발자가 검토한다.
-
-단 Master Plan은 이 refactor를
-Stage 구현의 절대 선행 조건으로 잠그지 않는다.
+명시적 **opt-in authoring rule**로 강화됐다. 의도하지 않은 Rope Cut을
+방지하려던 이 문서의 권장 사항은 이미 반영된 상태다.
 
 ---
 
@@ -1226,7 +1218,7 @@ Difficulty:
 
 ---
 
-## 22. Stage Master Table — REV 1.0
+## 22. Stage Master Table — REV 1.1
 
 | Stage | Name | Gameplay Role | Enemy / Threat | Environment | Growth | Story |
 |---|---|---|---|---|---|---|
@@ -2484,7 +2476,7 @@ DECISION / POLICY
 
 ---
 
-## 49. Canonical Sector 04 — REV 1.0
+## 49. Canonical Sector 04 — REV 1.1
 
 ```text
 4-1 TRANSIT INTAKE
@@ -2549,25 +2541,16 @@ TBD
 
 ## OPEN QUESTIONS
 
-### 1. Cutter Authoring Rule
+### 1. Cutter Authoring Rule — RESOLVED
 
-Current code is negative-default:
-
-```text
-no-rope-cut
-```
-
-absence means rope-cut capable.
-
-Before production Sector 04 integration:
+Sector 04 standalone catalog 구현(#513)과 함께 이미:
 
 ```text
-explicit rope-cut opt-in
+cutter-fire
 ```
 
-으로 harden할지 개발 검토.
-
-Gameplay meaning은 변하지 않는다.
+명시적 opt-in rule로 harden됐다(`canCutRope = rules.includes("cutter-fire")`).
+Gameplay meaning은 변하지 않았다.
 
 ### 2. Cutter Presentation
 
@@ -2638,4 +2621,4 @@ Lower Feeder Isolation
 
 ---
 
-SECTOR 04 / TRANSIT & INFRASTRUCTURE MASTER PLAN — REV 1.0
+SECTOR 04 / TRANSIT & INFRASTRUCTURE MASTER PLAN — REV 1.1
