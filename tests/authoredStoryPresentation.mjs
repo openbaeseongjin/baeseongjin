@@ -558,4 +558,111 @@ export function run() {
         ],
         ["ACCESS TIER CONTROL", "ENABLED"]
     );
+
+    const transitIntake = new AuthoredStoryPresentation();
+    assert.deepEqual(
+        [
+            transitIntake.update(0, { currentAreaId: "sector-04-01", currentAreaLocalY: -32 }).title,
+            transitIntake.snapshot().detail
+        ],
+        ["TRANSIT BACKBONE", "SERVICE DEGRADED"]
+    );
+    transitIntake.update(1.4, { currentAreaId: "sector-04-01", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            transitIntake.update(0, { currentAreaId: "sector-04-01", currentAreaLocalX: 96, currentAreaLocalY: -704 })
+                .title,
+            transitIntake.snapshot().detail
+        ],
+        ["UPPER EXPRESS TRUNK", "LIMITED OPERATION"]
+    );
+    transitIntake.update(1.3, { currentAreaId: "sector-04-01", currentAreaLocalX: 96, currentAreaLocalY: -704 });
+    assert.deepEqual(
+        [
+            transitIntake.update(0, { currentAreaId: "sector-04-01", currentAreaLocalX: 480, currentAreaLocalY: -1312 })
+                .title,
+            transitIntake.snapshot().detail
+        ],
+        ["INFRASTRUCTURE SECURITY", "ACTIVE"]
+    );
+
+    const serviceNodeStory = new AuthoredStoryPresentation();
+    serviceNodeStory.update(0, { currentAreaId: "sector-04-04", currentAreaLocalY: -32 });
+    serviceNodeStory.update(1.3, { currentAreaId: "sector-04-04", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            serviceNodeStory.update(0, { currentAreaId: "sector-04-04", currentAreaLocalX: 0, currentAreaLocalY: -384 })
+                .title,
+            serviceNodeStory.snapshot().detail
+        ],
+        ["LOWER ASCENT FEEDER", "STATUS: SEGMENTED"]
+    );
+    assert.deepEqual(
+        [
+            serviceNodeStory.update(1.3, {
+                currentAreaId: "sector-04-04",
+                currentAreaLocalX: 0,
+                currentAreaLocalY: -384
+            }).title,
+            serviceNodeStory.snapshot().detail
+        ],
+        ["TELEMETRY", "PARTIAL"]
+    );
+
+    const isolationJunction = new AuthoredStoryPresentation();
+    isolationJunction.update(0, { currentAreaId: "sector-04-07", currentAreaLocalY: -32 });
+    isolationJunction.update(1.4, { currentAreaId: "sector-04-07", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            isolationJunction.update(0, {
+                currentAreaId: "sector-04-07",
+                currentAreaLocalX: -32,
+                currentAreaLocalY: -1248
+            }).title,
+            isolationJunction.snapshot().detail
+        ],
+        ["LOWER ASCENT FEEDER", "ISOLATED"]
+    );
+    assert.deepEqual(
+        [
+            isolationJunction.update(1.3, {
+                currentAreaId: "sector-04-07",
+                currentAreaLocalX: -32,
+                currentAreaLocalY: -1248
+            }).title,
+            isolationJunction.snapshot().detail
+        ],
+        ["ROUTE TELEMETRY", "OFFLINE"]
+    );
+
+    const controlTrunk = new AuthoredStoryPresentation();
+    const finalStatusDisplay = Object.freeze({
+        cueIds: Object.freeze(["sector-04-08:upper-trunk-limited", "sector-04-08:lower-feeder-isolated"]),
+        bounds: Object.freeze({ x: -32, y: -1792, width: 192, height: 64 })
+    });
+    controlTrunk.update(0, { currentAreaId: "sector-04-08", currentAreaLocalY: -32 });
+    controlTrunk.update(1.4, { currentAreaId: "sector-04-08", currentAreaLocalY: -32 });
+    assert.deepEqual(
+        [
+            controlTrunk.update(0, {
+                currentAreaId: "sector-04-08",
+                currentAreaLocalX: 64,
+                currentAreaLocalY: -1760,
+                triggers: [finalStatusDisplay]
+            }).title,
+            controlTrunk.snapshot().detail
+        ],
+        ["UPPER EXPRESS TRUNK", "LIMITED OPERATION"]
+    );
+    assert.deepEqual(
+        [
+            controlTrunk.update(1.2, {
+                currentAreaId: "sector-04-08",
+                currentAreaLocalX: 64,
+                currentAreaLocalY: -1760
+            }).title,
+            controlTrunk.snapshot().detail
+        ],
+        ["LOWER ASCENT FEEDER", "ISOLATED"]
+    );
 }
