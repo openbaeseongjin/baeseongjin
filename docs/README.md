@@ -148,3 +148,4 @@
 | [`bsh/scenario/6/6-5/README.md`](./bsh/scenario/6/6-5/README.md) | `bsh` Access Scan Mastery Recall Stage(6-5) Blockout 후보·제작 규격 — Enemy 없는 controlled Hardpoint 3개 단일 timing band, 현재 Scanner phase 계약 대조 및 Safe/Flow 거리 검증 완료 |
 | [`bsh/scenario/6/6-6/README.md`](./bsh/scenario/6/6-6/README.md) | `bsh` Patrol Mastery Recall Stage(6-6) Blockout 후보·제작 규격 — Open-Sky 대각선 Patrol 진입 시점이 정지 사격 원점을 결정, 현재 Patrol speed/wait 계약 대조 및 Safe/Flow 거리 검증 완료 |
 | [`bsh/scenario/6/6-7/README.md`](./bsh/scenario/6/6-7/README.md) | `bsh` Final Cutter Mastery Recall Stage(6-7) Blockout 후보·제작 규격 — Open-Sky Rope Cut 뒤 하부 Catwalk recovery, Cutter opt-in 계약 대조 및 Safe/Flow·recovery 거리 검증 완료 |
+| [`bsh/scenario/6/6-8/README.md`](./bsh/scenario/6/6-8/README.md) | `bsh` Sector 06 General Finale(6-8) Blockout 후보·제작 규격 — Enemy·Wind·Scanner·Cutter 없는 순방향 Rope continuity climax, Pad 03 도달·ACCESS DENIED·Final Security content boundary, Safe/Flow·recovery 거리 검증 완료 |

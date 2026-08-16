@@ -50,7 +50,7 @@
 
 ## 다음 작업
 
-Sector 06 상세 시나리오는 `6-1 → 6-7`까지 작성됐다. 6-5는 Scanner mastery, 6-6은 Patrol mastery, 6-7은 Cutter/recovery mastery이며 모두 현재 Runtime 계약과 좌표를 대조한 `BLOCKOUT CANDIDATE`다. 다음 시나리오 작성 범위는 `6-8 ROOFTOP PAD 03`이며, Sector 05·06 Runtime 저작은 기존 Scenario-first 결정에 따라 6-8 상세 기획과 전체 감사 전까지 HOLD한다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
+Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. 6-8 `ROOFTOP PAD 03`은 Threat 0의 순방향 Rope movement climax 뒤 Pad Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고, 미확정 Final Security Encounter 앞 content boundary로 끝난다. 다음 단계는 Sector 01~06 Full Game Audit이며, Sector 05·06 Runtime 저작과 Final Security 구현은 감사 및 상세 계약 확정 전까지 HOLD한다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
 
 Scenario Art 생성의 현재 기준은 `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`다. 매 생성·수정 전에 해당 Stage README·Production Alignment와 현재 Area Catalog의 Camera Zone·Stable ID·정확한 오브젝트 수·구현 상태를 확인한다. Art Reference는 전체 맵이 아닌 대표 Gameplay Camera Shot 한 장으로 만들고, 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시한다. 정확한 World 좌표의 권위는 Approved Blockout에 두되, Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 구조 가이드로 고정해 이미지에서도 보존한다. 구도를 위해 Gameplay Geometry를 옮기거나 늘리지 않는다. `RETIRED`·`PENDING REGENERATION` 이미지는 새 생성 입력으로 사용하지 않는다. 프로젝트용으로 승인한 생성 이미지는 Stage `images/`에 저장하고 생성 기록·상태 문서와 같은 PR로 GitHub `main`에 병합한다. Sector 01은 Navy·Charcoal 산업 정비 시설, 어두운 전경·플레이 중경·푸른 원경, 제한된 Cyan과 드문 Amber를 유지하며 Player·Rope·Anchor·Telegraph 가독성을 우선한다. 1-1 C04의 `05_scenario_art_reference.png`, 1-2 C02의 `06_scenario_art_reference.png`, 1-3 Route Choice의 `05_scenario_art_reference.png`, 1-4 Node의 `03_scenario_art_reference.png`가 구조 정합 승인 기준이다. 1-5~1-8은 Approved Blockout 제작이 다음 선행 과제다.
 
@@ -74,7 +74,7 @@ Sector 01-8의 현재 기준은 `docs/bsh/scenario/1/1-8/README.md`의 `CONTAINM
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 32개(`1-1`~`4-8`)와 authored Runtime 24개(`1-1 → 3-8`) 및 Sector 04 standalone 8개(`4-1 → 4-8`)를 별도 상태로 기록한다. `3-8 → 4-1` Boss/전환과 Specialization·NPC·엔딩은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
+시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 48개(`1-1 → 6-8`)와 authored Runtime 24개(`1-1 → 3-8`) 및 Sector 04 standalone 8개(`4-1 → 4-8`)를 별도 상태로 기록한다. Sector 사이 Boss/전환, Specialization·NPC·Final Security·엔딩은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
 
 개발은 준비됐고 기획 결정만 기다리는 항목은 `docs/design-decision-requests.md`에 우선순위 순으로 정리하고 기획자가 같은 문서에 답변을 남긴다. 우선순위는 P1 Specialization 성장 규칙(2-3), P2 첫 보스 시나리오·전환, P3 일반 타이머·붕괴 수치, P4 NPC·대화, P5 엔딩이다. 답변이 붙은 항목부터 구현한다.
 
