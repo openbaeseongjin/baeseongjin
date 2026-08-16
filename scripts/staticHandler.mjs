@@ -1,6 +1,8 @@
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
+
+const MULTIPLAYER_META_PATTERN = /<meta\s+[^>]*name=["']multiplayer-server["'][^>]*>\s*/i;
 
 const mime = new Map([
     [".html", "text/html; charset=utf-8"],
@@ -53,22 +55,31 @@ export function createStaticRequestHandler(root) {
                 response.writeHead(403).end("Forbidden");
                 return;
             }
-            const fileStat = await stat(filePath);
-            if (!fileStat.isFile()) throw new Error("Not a file");
-            const range = requestedRange(request.headers?.range, fileStat.size);
+            // Dev pages must not advertise the production game server: the client falls back to
+            // the serving origin and uses the integrated development WebSocket server instead.
+            let content = null;
+            if (relativePath === "index.html") {
+                const html = await readFile(filePath, "utf8");
+                content = Buffer.from(html.replace(MULTIPLAYER_META_PATTERN, ""), "utf8");
+            }
+            const fileStat = content ? null : await stat(filePath);
+            if (fileStat && !fileStat.isFile()) throw new Error("Not a file");
+            const size = content ? content.length : fileStat.size;
+            const range = requestedRange(request.headers?.range, size);
             if (range === false) {
-                response.writeHead(416, { "content-range": `bytes */${fileStat.size}` }).end();
+                response.writeHead(416, { "content-range": `bytes */${size}` }).end();
                 return;
             }
             const start = range?.start ?? 0;
-            const end = range?.end ?? fileStat.size - 1;
+            const end = range?.end ?? size - 1;
             response.writeHead(range ? 206 : 200, {
                 "accept-ranges": "bytes",
                 "content-length": end - start + 1,
                 "content-type": mime.get(extname(filePath)) ?? "application/octet-stream",
-                ...(range ? { "content-range": `bytes ${start}-${end}/${fileStat.size}` } : {})
+                ...(range ? { "content-range": `bytes ${start}-${end}/${size}` } : {})
             });
-            if (request.method === "HEAD" || fileStat.size === 0) response.end();
+            if (request.method === "HEAD" || size === 0) response.end();
+            else if (content) response.end(content.subarray(start, end + 1));
             else createReadStream(filePath, { start, end }).pipe(response);
         } catch {
             response.writeHead(404, { "content-type": "text/plain; charset=utf-8" }).end("Not found");
