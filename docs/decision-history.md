@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-16 — 로프 스카프를 두 단계 위아래 펄럭임으로 표현한다
+
+- 맥락: 한 손 로프 자세에서 몸을 흔들지 않고도 이동감을 주기 위해 머리카락 끝과 길어진 스카프만 움직이는 두 프레임 루프를 사용했다.
+- 결정: 몸·양손·다리를 고정하고 스카프 꼬리가 위·아래 두 실루엣을 번갈아 표시하게 했다.
+- 영향: 몸 비율은 안정됐지만 실제 로프 이동의 관성보다 제자리에서 깃발이 위아래로 펄럭이는 모습에 가까웠다.
+- 대체: `스카프는 항상 이동 반대쪽으로 뻗고 네 단계의 얕은 파동이 목에서 꼬리 끝으로 전달된다` — 뒤쪽 흐름을 유지하면서 저해상도에서도 천의 관성이 읽히도록 대체했다.
+- 검증 상태: `assets/artwork/characters/player-main/source/validate_player_main.py`가 네 프레임의 고정 몸체 0픽셀 차이, 스카프 가로·세로 비율, 뒤쪽 길이와 인접 파동 차이를 검증한다.
+
 ## [L1] 2026-08-15 — Checkpoint Artifact 시스템을 제거하고 Foundation을 유일한 런 성장으로 둔다
 
 - 맥락: Checkpoint 기반 Artifact(동력핵·연사 톱니·로프 공명기)는 Sector 1-4 Foundation 선택과 개념·획득 흐름이 겹쳐 하나의 런이 두 보상 계층을 동시에 설명했다. Artifact의 런타임·네트워크 claim·HUD·문서·테스트가 Foundation과 역할을 중복해 유지 비용이 컸다.
@@ -86,7 +94,6 @@
 - 영향: Anchor A–C, Fan A/B, Recovery Platform과 Cooling Shaft 배경을 중심으로 1-3 문서와 레퍼런스 이미지를 구성했다.
 - 대체: `Sector 01-3 SECURITY CHECK` — 새로운 이동·환경 규칙 대신 첫 Sentry Turret의 Red Telegraph와 Rope 회피를 가르친다. Cooling Shaft와 Wind 학습은 Build Expression 뒤의 `Sector 01-6 COOLING SHAFT` REV 3.0으로 이동했다.
 - 검증 상태: 대체 방향은 유지되며 현재 상세 기준은 `docs/bsh/scenario/1/1-3/README.md` REV 3.0이다. Blockout과 플레이테스트는 아직 진행하지 않았다.
-
 ## [L2] 2026-08-12 — 플레이어와 환경별 최상위 runtime 폴더를 사용한다
 
 - 맥락: 첫 player·environment manifest를 각각 도입하면서 `assets/sprites/`와 `assets/environment/`가 독립된 작업·runtime 경로를 함께 맡았다.

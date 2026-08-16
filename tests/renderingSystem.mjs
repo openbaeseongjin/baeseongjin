@@ -4,9 +4,16 @@ import { assertGameRenderer } from "../src/render/SceneRenderer.js";
 import { CameraWorldRenderer, SceneRendererComposition } from "../src/render/SceneRendererComposition.js";
 import { SpriteAnimation } from "../src/render/sprites/SpriteAnimation.js";
 import { paintSpriteFrame } from "../src/render/sprites/SpriteCanvasPainter.js";
-import { PlayerAnimationController } from "../src/render/sprites/PlayerAnimationController.js";
+import {
+    PLAYER_RUN_CYCLE_DISTANCE,
+    PlayerAnimationController
+} from "../src/render/sprites/PlayerAnimationController.js";
 import { SpriteLocalPlayerRenderer } from "../src/render/sprites/SpriteActorRenderers.js";
-import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../src/render/sprites/PlayerSpriteCatalog.js";
+import {
+    DEFAULT_PLAYER_SPRITE_DEFINITION,
+    DEFAULT_PLAYER_SPRITE_MANIFEST_URL,
+    loadDefaultPlayerSpriteDefinition
+} from "../src/render/sprites/PlayerSpriteCatalog.js";
 import { PLAYER_SPRITE_STATES, PlayerSpriteDefinition } from "../src/render/sprites/PlayerSpriteDefinition.js";
 import {
     createPlayerSpriteDefinitionFromManifest,
@@ -132,6 +139,13 @@ export async function run() {
     const context = recordingContext();
     const canvas = makeCanvas(context);
     assert.equal(createGameRenderer({ canvas }).sceneRenderer.profile, "sprite");
+    const injectedPlayerDefinition = playerDefinition();
+    assert.equal(
+        createGameRenderer({ canvas, sceneRendererOptions: { playerDefinition: injectedPlayerDefinition } })
+            .sceneRenderer.playerDefinition,
+        injectedPlayerDefinition,
+        "the game renderer factory must pass the loaded production definition into the sprite renderer"
+    );
 
     const order = [];
     const composition = new SceneRendererComposition({
@@ -291,6 +305,7 @@ export async function run() {
 
     assert.throws(() => createGameRenderer({ canvas, profile: "missing" }), /Unknown renderer profile/);
     assert.throws(() => createGameRenderer({ canvas, sceneRendererFactories: null }), /must be an object/);
+    assert.throws(() => createGameRenderer({ canvas, sceneRendererOptions: null }), /must be an object/);
     assert.throws(
         () => createGameRenderer({ canvas, profile: "bad", sceneRendererFactories: { bad: true } }),
         /must be a function/
@@ -973,6 +988,28 @@ export async function run() {
     });
     assert.equal(fetchedManifestUrl, "https://game.test/sprites/player/sprite-manifest.json");
     assert.equal(fetchedDefinition.presentationFor("respawn").clip.frames[0].atlasId, "actions");
+    assert.match(
+        DEFAULT_PLAYER_SPRITE_MANIFEST_URL,
+        /\/assets\/runtime\/characters\/player-main\/sprite-manifest\.json$/
+    );
+    let defaultManifestUrl;
+    const defaultDefinition = await loadDefaultPlayerSpriteDefinition({
+        fetchFn: async (url) => {
+            defaultManifestUrl = url;
+            return { ok: true, json: async () => manifest };
+        }
+    });
+    assert.equal(defaultManifestUrl, DEFAULT_PLAYER_SPRITE_MANIFEST_URL);
+    assert.equal(defaultDefinition.id, "manifest-player");
+    const defaultWarnings = [];
+    const fallbackPlayerDefinition = await loadDefaultPlayerSpriteDefinition({
+        fetchFn: async () => {
+            throw new Error("offline");
+        },
+        warn: (message) => defaultWarnings.push(message)
+    });
+    assert.equal(fallbackPlayerDefinition, DEFAULT_PLAYER_SPRITE_DEFINITION);
+    assert.match(defaultWarnings[0], /built-in mock player sprite/);
     const unsafeManifest = structuredClone(manifest);
     unsafeManifest.atlases.actions.image = "../actions.png";
     assert.throws(() => createPlayerSpriteDefinitionFromManifest(unsafeManifest), /cannot leave/);
@@ -1019,7 +1056,7 @@ export async function run() {
     );
 
     const controller = new PlayerAnimationController();
-    const grounded = { velocity: { x: 0, y: 0 }, isGrounded: true, lifeState: "active" };
+    const grounded = { position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 }, isGrounded: true, lifeState: "active" };
     assert.equal(controller.update({ player: grounded, rope: { isAttached: false }, events: [], dt: 0 }).state, "idle");
     assert.equal(
         controller.update({
@@ -1031,6 +1068,51 @@ export async function run() {
         "run"
     );
     assert.equal(controller.snapshot().flipX, true);
+
+    const distanceDrivenRun = new PlayerAnimationController({ runCycleDurationSeconds: 0.72 });
+    const movingPlayer = (x, velocityX = 80) => ({
+        ...grounded,
+        position: { x, y: 0 },
+        velocity: { x: velocityX, y: 0 }
+    });
+    assert.equal(
+        distanceDrivenRun.update({
+            player: movingPlayer(0),
+            rope: { isAttached: false },
+            events: [],
+            dt: 0
+        }).elapsedSeconds,
+        0
+    );
+    assert.equal(
+        distanceDrivenRun.update({
+            player: movingPlayer(PLAYER_RUN_CYCLE_DISTANCE / 16),
+            rope: { isAttached: false },
+            events: [],
+            dt: 0.5
+        }).elapsedSeconds,
+        0.045,
+        "a short tap must advance only by travelled distance instead of looping during inertial slowdown"
+    );
+    assert.equal(
+        distanceDrivenRun.update({
+            player: movingPlayer(PLAYER_RUN_CYCLE_DISTANCE / 8),
+            rope: { isAttached: false },
+            events: [],
+            dt: 0.5
+        }).elapsedSeconds,
+        0.09,
+        "one eighth-stride of travel must advance exactly one of the eight run frames"
+    );
+    assert.equal(
+        distanceDrivenRun.update({
+            player: movingPlayer(32, 0),
+            rope: { isAttached: false },
+            events: [],
+            dt: 1
+        }).state,
+        "idle"
+    );
     assert.equal(
         controller.update({
             player: { ...grounded, isGrounded: false, velocity: { x: 0, y: -10 } },

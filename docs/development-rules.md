@@ -214,7 +214,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 렌더 프로필은 bootstrap factory 경계에서만 선택한다. 앱·시뮬레이션·네트워크 snapshot에 프로필별 타입 분기나 스프라이트 자산 계약을 추가하지 않는다.
 - 현재 기본 프로필은 `sprite`다. 기존 표현은 `?renderer=polygon`으로 유지하며 두 프로필은 같은 읽기 전용 scene snapshot을 소비하고 polygon renderer를 내부 모드 분기로 확장하지 않는다.
 - 시각 효과에 시간 상태가 필요하면 렌더러가 임의로 게임 시간을 만들지 않고 명시적인 render clock 또는 snapshot 값을 받는다.
-- 스프라이트 애니메이션은 불변 clip 데이터와 외부 경과 시간을 분리한다. Canvas painter는 보간을 끈 그리기만 담당하고 이미지 로딩·캐시·게임 시간 진행을 함께 소유하지 않는다.
+- 스프라이트 애니메이션은 불변 clip 데이터와 외부 phase 입력을 분리한다. 순간 상태는 표현 경과 시간을 사용하고 player 달리기처럼 보폭이 이동량과 맞아야 하는 반복 상태는 실제 수평 이동 거리로 phase를 진행한다. Canvas painter는 보간을 끈 그리기만 담당하고 이미지 로딩·캐시·게임 시간·이동 거리 진행을 함께 소유하지 않는다.
 - 상태 머신은 현재 상태·경과 시간·허용 전이만 아는 순수 조합 컴포넌트로 만들고, 도메인 snapshot·사건을 상태 전이 입력으로 바꾸는 resolver와 분리한다. 재사용성을 이유로 의미와 수명이 다른 기존 도메인 상태를 한 FSM으로 강제 이전하지 않는다.
 - 여러 actor의 순간 애니메이션은 사건 대상 ID로 각 표현 FSM에 전달한다. animation state나 frame index를 게임·네트워크 권위 snapshot에 저장해 동기화하지 않는다.
 - 로컬 예측 사건과 서버 확정 사건이 같은 화면 전이를 뜻하면 causal object ID를 같은 presentation ID로 정규화한다. 서버 receipt 때문에 이미 시작한 `hit`·`respawn`을 다시 재생하지 않는다.

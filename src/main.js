@@ -19,12 +19,14 @@ import { AudioSettingsPanel } from "./game/ui/AudioSettingsPanel.js";
 import { DebugSettings } from "./game/metrics/DebugSettings.js";
 import { DebugPanel } from "./game/ui/DebugPanel.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
+import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
 
 const canvas = document.getElementById("game-canvas");
 if (!canvas) {
     throw new Error("Bootstrap failed: canvas #game-canvas not found");
 }
 const rendererProfile = resolveRendererProfile(globalThis.location.search);
+let playerDefinition = null;
 
 let app = null;
 let launching = false;
@@ -168,7 +170,11 @@ async function launch() {
                 const debug = debugSettings.snapshot();
                 app = new GameApp({
                     canvas,
-                    renderer: createGameRenderer({ canvas, profile: rendererProfile }),
+                    renderer: createGameRenderer({
+                        canvas,
+                        profile: rendererProfile,
+                        sceneRendererOptions: { playerDefinition }
+                    }),
                     audioBindings,
                     onDiagnostics: updateDiagnostics,
                     startAreaId: debug.startAreaId ?? undefined,
@@ -183,7 +189,11 @@ async function launch() {
                 const debug = debugSettings.snapshot();
                 app = new MultiplayerGameApp({
                     canvas,
-                    renderer: createGameRenderer({ canvas, profile: rendererProfile }),
+                    renderer: createGameRenderer({
+                        canvas,
+                        profile: rendererProfile,
+                        sceneRendererOptions: { playerDefinition }
+                    }),
                     authority,
                     audioBindings,
                     onDisconnect: returnToMenu,
@@ -219,6 +229,8 @@ function returnToMenu(message) {
 async function bootstrap() {
     startupLoadingScreen.show();
     await serviceWorkerUpdater.ready;
+    if (pageClosing) return;
+    playerDefinition = await loadDefaultPlayerSpriteDefinition();
     if (pageClosing) return;
     startupLoadingScreen.hide();
     launch();

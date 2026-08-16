@@ -71,7 +71,8 @@ class PlayerSpriteRendererBase {
                 transientDurations: {
                     hit: this.definition.presentationFor("hit").clip.totalDurationSeconds,
                     respawn: this.definition.presentationFor("respawn").clip.totalDurationSeconds
-                }
+                },
+                runCycleDurationSeconds: this.definition.presentationFor("run").clip.totalDurationSeconds
             });
             this.controllers.set(playerId, controller);
         }

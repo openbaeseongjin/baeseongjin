@@ -1,4 +1,5 @@
 import { PlayerSpriteDefinition } from "./PlayerSpriteDefinition.js";
+import { loadPlayerSpriteManifest } from "./PlayerSpriteManifest.js";
 import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 
 const FRAME_SIZE = Object.freeze({ width: 24, height: 24 });
@@ -49,3 +50,14 @@ export const DEFAULT_PLAYER_SPRITE_DEFINITION = new PlayerSpriteDefinition({
         }
     }
 });
+
+export const DEFAULT_PLAYER_SPRITE_MANIFEST_URL = runtimeAssetUrl("characters", "player-main", "sprite-manifest.json");
+
+export async function loadDefaultPlayerSpriteDefinition({ fetchFn = globalThis.fetch, warn = console.warn } = {}) {
+    try {
+        return await loadPlayerSpriteManifest(DEFAULT_PLAYER_SPRITE_MANIFEST_URL, { fetchFn });
+    } catch (error) {
+        warn(`[renderer:sprite] ${error.message}; using built-in mock player sprite`);
+        return DEFAULT_PLAYER_SPRITE_DEFINITION;
+    }
+}

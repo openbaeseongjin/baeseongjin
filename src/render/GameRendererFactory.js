@@ -5,7 +5,7 @@ import { assertSceneRenderer } from "./SceneRenderer.js";
 
 export const DEFAULT_RENDERER_PROFILE = "sprite";
 const DEFAULT_FACTORIES = Object.freeze({
-    sprite: () => new SpriteSceneRenderer(),
+    sprite: (options) => new SpriteSceneRenderer(options),
     polygon: () => new PolygonSceneRenderer()
 });
 
@@ -21,15 +21,18 @@ export function createGameRenderer({
     canvas,
     profile = DEFAULT_RENDERER_PROFILE,
     sceneRendererFactories = DEFAULT_FACTORIES,
+    sceneRendererOptions = {},
     canvasOptions = undefined
 }) {
     if (!canvas) throw new Error("createGameRenderer requires a canvas element");
     if (!sceneRendererFactories || typeof sceneRendererFactories !== "object")
         throw new Error("sceneRendererFactories must be an object");
+    if (!sceneRendererOptions || Array.isArray(sceneRendererOptions) || typeof sceneRendererOptions !== "object")
+        throw new Error("sceneRendererOptions must be an object");
     const factory = sceneRendererFactories[profile];
     if (factory === undefined) throw new Error(`Unknown renderer profile '${profile}'`);
     if (typeof factory !== "function") throw new Error(`Renderer factory for profile '${profile}' must be a function`);
-    const renderer = assertSceneRenderer(factory());
+    const renderer = assertSceneRenderer(factory(sceneRendererOptions));
     if (renderer.profile !== profile)
         throw new Error(`Scene renderer profile '${renderer.profile}' does not match '${profile}'`);
     return new CanvasRenderer(canvas, renderer, canvasOptions);

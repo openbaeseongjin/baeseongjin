@@ -1,0 +1,106 @@
+{
+    "$schema": "../sprite-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "player-main",
+    "generator": {
+        "tool": "openai-imagegen-pillow-normalizer",
+        "exportVersion": "2026-08-16-rope-v5-four-phase-backward-flow",
+        "sourceExport": "../../../artwork/characters/player-main/source/pixellab-ready-character.png"
+    },
+    "render": {
+        "facing": "right",
+        "size": { "width": 48, "height": 48 },
+        "anchor": { "x": 0.5, "y": 0.625 },
+        "offset": { "x": 0, "y": 0 },
+        "pixelSnap": true
+    },
+    "atlases": {
+        "locomotion": {
+            "image": "locomotion.png",
+            "size": { "width": 144, "height": 48 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "run": {
+            "image": "run.png",
+            "size": { "width": 192, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "actions": {
+            "image": "actions.png",
+            "size": { "width": 120, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        }
+    },
+    "animations": {
+        "idle": {
+            "loop": true,
+            "frames": [
+                { "atlas": "locomotion", "cell": { "column": 0, "row": 0 }, "durationMs": 520 },
+                { "atlas": "locomotion", "cell": { "column": 1, "row": 0 }, "durationMs": 520 }
+            ]
+        },
+        "run": {
+            "loop": true,
+            "frames": [
+                { "atlas": "run", "cell": { "column": 0, "row": 0 }, "durationMs": 90 },
+                { "atlas": "run", "cell": { "column": 1, "row": 0 }, "durationMs": 90 },
+                { "atlas": "run", "cell": { "column": 2, "row": 0 }, "durationMs": 90 },
+                { "atlas": "run", "cell": { "column": 3, "row": 0 }, "durationMs": 90 },
+                { "atlas": "run", "cell": { "column": 4, "row": 0 }, "durationMs": 90 },
+                { "atlas": "run", "cell": { "column": 5, "row": 0 }, "durationMs": 90 },
+                { "atlas": "run", "cell": { "column": 6, "row": 0 }, "durationMs": 90 },
+                { "atlas": "run", "cell": { "column": 7, "row": 0 }, "durationMs": 90 }
+            ]
+        },
+        "jump": {
+            "loop": false,
+            "frames": [{ "atlas": "locomotion", "cell": { "column": 0, "row": 1 }, "durationMs": 1000 }],
+            "cue": { "offset": { "x": 0, "y": -3 } }
+        },
+        "fall": {
+            "loop": false,
+            "frames": [{ "atlas": "locomotion", "cell": { "column": 1, "row": 1 }, "durationMs": 1000 }],
+            "cue": {
+                "scale": { "x": 1.08, "y": 0.96 },
+                "offset": { "x": 0, "y": -1 }
+            }
+        },
+        "rope": {
+            "loop": true,
+            "frames": [
+                { "atlas": "locomotion", "cell": { "column": 2, "row": 1 }, "durationMs": 90 },
+                { "atlas": "locomotion", "cell": { "column": 3, "row": 1 }, "durationMs": 90 },
+                { "atlas": "locomotion", "cell": { "column": 4, "row": 1 }, "durationMs": 90 },
+                { "atlas": "locomotion", "cell": { "column": 5, "row": 1 }, "durationMs": 90 }
+            ],
+            "cue": {
+                "offset": { "x": 0, "y": -3 }
+            }
+        },
+        "hit": {
+            "loop": false,
+            "frames": [
+                { "atlas": "actions", "cell": { "column": 0, "row": 0 }, "durationMs": 80 },
+                { "atlas": "actions", "cell": { "column": 1, "row": 0 }, "durationMs": 160 }
+            ],
+            "cue": {
+                "scale": { "x": 1.12, "y": 0.9 },
+                "offset": { "x": -2, "y": 1 },
+                "opacity": 0.92
+            }
+        },
+        "respawn": {
+            "loop": false,
+            "frames": [
+                { "atlas": "actions", "cell": { "column": 2, "row": 0 }, "durationMs": 150 },
+                { "atlas": "actions", "cell": { "column": 3, "row": 0 }, "durationMs": 150 },
+                { "atlas": "actions", "cell": { "column": 4, "row": 0 }, "durationMs": 150 }
+            ],
+            "cue": {
+                "scale": { "x": 1.08, "y": 1.08 },
+                "offset": { "x": 0, "y": -2 },
+                "opacity": 0.96
+            }
+        }
+    }
+}

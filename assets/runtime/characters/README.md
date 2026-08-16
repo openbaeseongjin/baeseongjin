@@ -4,7 +4,7 @@
 
 현재 공개 manifest는 player의 일곱 animation 상태 전용이며 [`player-production-template`](./player-production-template)을 기준으로 `player-main/`을 만듭니다. 상태 구성이 다른 몹·보스에는 player manifest를 재사용하지 않고 별도 계약을 추가합니다. 상세 player 계약은 [`docs/sprite-asset-format.md`](../../../docs/sprite-asset-format.md)를 따릅니다.
 
-## Current runtime mock
+## Production runtime and fallback mock
 
 [`player-mock/player-action-mock.svg`](./player-mock/player-action-mock.svg) is a temporary side-view action atlas for validating the player sprite renderer. It was authored directly for this repository on 2026-08-12, uses no external source artwork, and is covered by the repository license.
 
@@ -19,7 +19,9 @@ The asset is intentionally simple, but every supported state has action-specific
 
 This mock is not the final interchange format. Production PixelLab, SpriteCook, or manually authored assets are normalized according to [`docs/sprite-asset-format.md`](../../../docs/sprite-asset-format.md), including multiple PNG atlases and manifest-defined animation timing.
 
-현재 runtime은 여전히 이 SVG mock을 직접 참조합니다. production template이나 담당자가 만든 sibling 폴더를 자동으로 읽지 않으며, 최종 player asset 연결은 별도 개발 작업입니다.
+게임 bootstrap은 [`player-main/sprite-manifest.json`](./player-main/sprite-manifest.json)을 기본 플레이어 리소스로 읽어 싱글·멀티 renderer에 주입합니다. 사용자가 제공한 최종 캐릭터 외형의 원본과 생성·정규화 기록은 `assets/artwork/characters/player-main/`에 있습니다.
+
+manifest를 가져오거나 파싱하지 못하면 이 SVG mock definition으로 복구합니다. manifest가 정상이어도 atlas 이미지 하나라도 준비되지 않으면 기존 polygon scene fallback을 사용합니다.
 
 ## Production starter and validator fixture
 
