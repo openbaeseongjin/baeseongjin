@@ -7,7 +7,6 @@ import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, ropeHookReach } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
-import { isMetricsPanelEnabled } from "./metrics/MetricsDebugMode.js";
 import {
     advanceFoundationRewardSelection,
     createFoundationRewardSelection
@@ -50,7 +49,7 @@ export class MultiplayerGameApp {
         onDisconnect = () => {},
         onDiagnostics = () => {},
         audioBindings = null,
-        metricsVisible = isMetricsPanelEnabled(globalThis.location?.search)
+        metricsVisible = false
     }) {
         this.renderer = renderer
             ? assertGameRenderer(renderer)

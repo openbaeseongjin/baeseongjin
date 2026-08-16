@@ -4,7 +4,6 @@ import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulati
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
 import { WorldProgressState } from "../src/game/world/WorldProgressState.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
-import { parseStartAreaId } from "../src/game/metrics/MetricsDebugMode.js";
 
 export function run() {
     const catalog = CURRENT_AUTHORED_AREA_CATALOG;
@@ -61,10 +60,6 @@ export function run() {
         () => new WorldProgressState(catalog, { ...progress.snapshot(), completed: true }),
         /content-boundary/i
     );
-
-    assert.equal(parseStartAreaId("?start=sector-03-02"), "sector-03-02");
-    assert.equal(parseStartAreaId("?metrics=1&start=sector-01-03"), "sector-01-03");
-    assert.equal(parseStartAreaId("?start="), null);
 
     const debugStart = createCurrentGameSimulation({ worldSeed: 9182, startAreaId: "sector-03-02" });
     assert.equal(debugStart.worldProgress.snapshot().currentAreaId, "sector-03-02");

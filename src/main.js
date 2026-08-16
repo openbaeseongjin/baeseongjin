@@ -6,7 +6,6 @@ import { GameModeMenu } from "./game/ui/GameModeMenu.js";
 import { setupInstallPrompt } from "./pwa/InstallPrompt.js";
 import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
 import { StartupUpdateLoadingScreen } from "./pwa/StartupUpdateLoadingScreen.js";
-import { isMetricsPanelEnabled } from "./game/metrics/MetricsDebugMode.js";
 import { setupPlaytestDiagnostics } from "./game/metrics/PlaytestDiagnostics.js";
 import { createGameRenderer, resolveRendererProfile } from "./render/GameRendererFactory.js";
 import { AudioSettings } from "./audio/AudioSettings.js";
@@ -74,7 +73,7 @@ const loadSelectedAudioDefinition = createAudioDefinitionLoader(DEFAULT_GAME_AUD
 const diagnostics = setupPlaytestDiagnostics({
     root: document.getElementById("copy-diagnostics"),
     navigator: globalThis.navigator,
-    enabled: debugSettings.snapshot().metrics || isMetricsPanelEnabled(globalThis.location?.search),
+    enabled: debugSettings.snapshot().metrics,
     context: () => ({
         version: document.getElementById("app-version").dataset.version,
         url: globalThis.location.href,
@@ -152,7 +151,7 @@ async function launch() {
                     audioBindings,
                     onDiagnostics: updateDiagnostics,
                     startAreaId: debug.startAreaId ?? undefined,
-                    metricsVisible: debug.metrics || isMetricsPanelEnabled(globalThis.location?.search)
+                    metricsVisible: debug.metrics
                 });
             } else {
                 const serverUrl = configuredMultiplayerServer();
@@ -168,7 +167,7 @@ async function launch() {
                     audioBindings,
                     onDisconnect: returnToMenu,
                     onDiagnostics: updateDiagnostics,
-                    metricsVisible: debug.metrics || isMetricsPanelEnabled(globalThis.location?.search)
+                    metricsVisible: debug.metrics
                 });
                 channelBadge.textContent = `채널 ${authority.channelId}`;
                 channelBadge.hidden = false;
