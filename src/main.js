@@ -70,15 +70,22 @@ settingsMenu.registerTab({
 audioSettingsPanel.attach();
 debugPanel.attach();
 const loadSelectedAudioDefinition = createAudioDefinitionLoader(DEFAULT_GAME_AUDIO_SELECTION);
-const diagnostics = setupPlaytestDiagnostics({
+const diagnosticsOptions = {
     root: document.getElementById("copy-diagnostics"),
     navigator: globalThis.navigator,
-    enabled: debugSettings.snapshot().metrics,
     context: () => ({
         version: document.getElementById("app-version").dataset.version,
         url: globalThis.location.href,
         channelId: activeChannelId
     })
+};
+let diagnosticsEnabled = debugSettings.snapshot().metrics;
+let diagnostics = setupPlaytestDiagnostics({ ...diagnosticsOptions, enabled: diagnosticsEnabled });
+debugSettings.subscribe((value) => {
+    if (value.metrics === diagnosticsEnabled) return;
+    diagnosticsEnabled = value.metrics;
+    diagnostics.release();
+    diagnostics = setupPlaytestDiagnostics({ ...diagnosticsOptions, enabled: diagnosticsEnabled });
 });
 const releaseInstallPrompt = setupInstallPrompt({
     window: globalThis.window,
