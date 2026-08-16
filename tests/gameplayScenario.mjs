@@ -31,6 +31,7 @@ import { run as authoredCameraDirector } from "./authoredCameraDirector.mjs";
 import { run as authoredStoryPresentation } from "./authoredStoryPresentation.mjs";
 import { run as interpolateRenderSnapshot } from "./interpolateRenderSnapshot.mjs";
 import { run as debugSettings } from "./debugSettings.mjs";
+import { run as debugPanel } from "./debugPanel.mjs";
 
 const steps = {
     worldSeed,
@@ -63,6 +64,7 @@ const steps = {
     authoredStoryPresentation,
     interpolateRenderSnapshot,
     debugSettings,
+    debugPanel,
     spriteAssetValidator,
     stateMachine,
     commandReplay

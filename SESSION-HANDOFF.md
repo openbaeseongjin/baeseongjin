@@ -43,7 +43,7 @@
 - `npm run publish:multiplayer`는 컴퓨터 재시작 뒤 운영자가 한 명령으로 상시 게임 서버와 외부 공유 터널을 다시 열고, 새 공개 주소를 Pages 설정에 반영해 배포까지 이어가는 운영 경로를 제공한다. 실행 전 clean `main` 전제를 확인하고 `index.html` 메타 값만 교체한 단일 커밋을 `origin main`에 push한 뒤 Pages 노출·공개 smoke를 검증하며, push 후 실패는 서버/터널을 유지한 채 안내만 출력한다. 기존 `share:multiplayer`는 로컬 정적 화면까지 함께 공유하는 개발용 경로로 유지한다. 상세 절차는 `docs/multiplayer-sharing.md`를 따른다.
 - AI 도구 설정 동기화는 `vsync`(`@nicepkg/vsync`)를 사용한다. 스킬·MCP의 단일 소스는 `.codex/skills/`와 `.codex/config.toml`이며 `vsync sync`가 `.opencode/skills/`, `.cursor/skills/`, `opencode.json`, `.cursor/mcp.json`을 포맷 변환과 함께 생성·갱신한다. 대상 도구 파일은 직접 편집하지 않는다. 반복 규칙은 `docs/development-rules.md`의 **AI 도구 설정 동기화(vsync)**를 따른다. opencode는 재시작하면 `opencode.json`의 Discord MCP와 `.opencode/skills/`를 읽는다.
 - 싱글 `GameApp` 렌더는 `FixedStepRunner`가 계산한 alpha로 이전·현재 권위 스냅샷을 보간해 표시한다(`src/render/interpolateRenderSnapshot.js`). 디스플레이 재생률과 120Hz 시뮬레이션 단계가 어긋나도 미세 저더 없이 표시되며, 리셋·런 상태 전이·96px 초과 순간이동(포탈·체크포인트 부활)은 보간하지 않고 최신 상태를 그린다. 멀티 로컬 플레이어는 소유자 예측·보정 계약이 있으므로 이 보간을 적용하지 않는다.
-- 디버그 모드 진입은 URL 쿼리가 아니라 **설정 버튼 1초 길게 누르기**로 연다(`src/game/ui/DebugPanel.js`). 디버그 패널에는 디버그 수치 표시 토글(기존 지표 패널)과 시작 맵 select(현재 메인 월드 24개 area)가 있고, 값은 `baeseongjin.debug-settings.v1`으로 localStorage에 저장돼 다음 게임 시작부터 적용된다. `?metrics=1`·`?start=<areaId>` URL 파라미터는 제거했으며(`MetricsDebugMode.js` 삭제), 실패 시드 재현용 `?seed=`만 유지한다.
+- 디버그 모드 진입은 URL 쿼리가 아니라 **설정 버튼 1초 길게 누르기**로 연다(`src/game/ui/DebugPanel.js`). 디버그 패널에는 즉시 적용되는 디버그 수치 표시 토글과 다음 싱글플레이 시작에만 적용되는 시작 맵 select(현재 메인 월드 24개 area)가 있고, 값은 `baeseongjin.debug-settings.v1`으로 localStorage에 저장된다. catalog에 없는 오래된 시작 맵 값은 `null`로 정리한다. `?metrics=1`·`?start=<areaId>` URL 파라미터는 제거했으며(`MetricsDebugMode.js` 삭제), 실패 시드 재현용 `?seed=`만 유지한다.
 
 실제 조작 기반 전체 등반 검사, 서로 다른 기기의 장시간 2인 플레이테스트와 고정 HTTPS/WSS 운영 주소 배포는 아직 완료하지 않았다.
 
@@ -71,7 +71,7 @@ Sector 01-8의 현재 기준은 `docs/bsh/scenario/1/1-8/README.md`의 `CONTAINM
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 32개(`1-1`~`4-8`)와 authored Runtime 24개(`1-1 → 3-8`, Sector 04 4-1~4-4는 standalone)를 별도 상태로 기록한다. `2-8 → 3-1`, `3-8 → 4-1` Boss/전환과 Specialization·NPC·엔딩은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
+시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 32개(`1-1`~`4-8`)와 authored Runtime 24개(`1-1 → 3-8`) 및 Sector 04 standalone 8개(`4-1 → 4-8`)를 별도 상태로 기록한다. `3-8 → 4-1` Boss/전환과 Specialization·NPC·엔딩은 아직 열린 게이트다. 시나리오 문서나 `src/game/world/areas/`가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
 
 개발은 준비됐고 기획 결정만 기다리는 항목은 `docs/design-decision-requests.md`에 우선순위 순으로 정리하고 기획자가 같은 문서에 답변을 남긴다. 우선순위는 P1 Specialization 성장 규칙(2-3), P2 첫 보스 시나리오·전환, P3 일반 타이머·붕괴 수치, P4 NPC·대화, P5 엔딩이다. 답변이 붙은 항목부터 구현한다.
 
@@ -85,7 +85,7 @@ Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않�
 
 로컬 실행과 네트워크 실행은 별도의 맵·게임플레이 구현이 아니다. 둘 다 `GameSimulationFactory`에서 같은 현재 authored catalog로 만든 하나의 `GameSimulation`을 사용한다. 네트워크 경로는 서버 스냅샷의 동일 world revision과 공용 진행 상태를 검증·복원할 뿐 별도 맵을 만들지 않는다. 실행 방식마다 월드 catalog를 따로 선택하는 코드를 추가하지 않는다.
 
-시나리오 mock 연결 뒤 최근 멀티 변경을 실제 두 기기에서 확인한다. 두 플레이어가 겹치지 않고 서로를 지지하는지, 모바일 HP가 항상 보이는지, 각 플레이어의 자동 공격 한 발이 예측본과 서버 확정본으로 중복 표시되지 않는지를 한 채널에서 함께 검증한다. 실패 시 채널 번호·월드 시드·`?metrics=1` 진단 복사 결과와 재현 순서를 남긴다.
+시나리오 mock 연결 뒤 최근 멀티 변경을 실제 두 기기에서 확인한다. 두 플레이어가 겹치지 않고 서로를 지지하는지, 모바일 HP가 항상 보이는지, 각 플레이어의 자동 공격 한 발이 예측본과 서버 확정본으로 중복 표시되지 않는지를 한 채널에서 함께 검증한다. 실패 시 채널 번호·월드 시드·디버그 패널의 **진단 복사** 결과와 재현 순서를 남긴다.
 
 `docs/implementation-roadmap.md`의 P1을 순서대로 진행한다.
 
@@ -96,7 +96,7 @@ Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않�
 5. 서로 다른 실제 기기에서 로프 절단·사망·개별 체크포인트 부활·정상 도달을 한 세션으로 검증
 6. 모바일망 지연과 장시간 세션에서 예측 오차, 보정 체감과 재접속 정책을 측정
 
-멀티 접속 중 `?metrics=1` 패널에서 RTT·스냅샷 간격·대기 명령 수·명령 거부율과 보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인할 수 있다. 같은 패널과 **진단 복사**는 frame interval·draw duration p50/p95/max, 최근·누적 dropped steps, CSS/backing 크기, 실제·유효 DPR과 collection별 `drawn/total`도 제공한다. 이 값은 게임 규칙이나 물리 120Hz를 자동 조정하지 않으며 실제 기기 플레이테스트에서 체감 문제와 함께 기록한다.
+멀티 접속 중 설정 버튼을 1초 길게 눌러 디버그 패널의 **디버그 수치 표시**를 켜면 RTT·스냅샷 간격·대기 명령 수·명령 거부율과 보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인할 수 있다. 같은 패널과 **진단 복사**는 frame interval·draw duration p50/p95/max, 최근·누적 dropped steps, CSS/backing 크기, 실제·유효 DPR과 collection별 `drawn/total`도 제공한다. 이 값은 게임 규칙이나 물리 120Hz를 자동 조정하지 않으며 실제 기기 플레이테스트에서 체감 문제와 함께 기록한다.
 
 태블릿 클라이언트 렉 최적화의 자동 회귀와 데스크톱 브라우저 확인은 완료했지만 실제 문제가 발생한 태블릿과 비교 휴대폰의 수치는 아직 수집하지 않았다. 다음 두 기기 테스트에서는 같은 채널·같은 시점의 네트워크 지표와 렌더 지표를 함께 복사해 RTT 문제와 로컬 draw/backing-store 문제를 분리한다.
 
@@ -165,10 +165,10 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 시간·Gate 보충량·붕괴 속도는 메인 개발자가 mock으로 구현하고 팀·기획자가 공동 플레이로 최종 조정한다. `1-8`에는 보스를 넣거나 기존 Shutdown·Worker District Reveal·일반 구간 종료 Checkpoint를 이동하지 않는다. 보스 위치·정체·전투 시나리오와 네트워크 권위·재접속·최종 cue는 아직 열려 있다. 상세 기준은 `docs/sector-timer-and-boss-flow.md`다.
 - 새 싱글 실행과 새 멀티 채널의 seed·revision은 모든 클라이언트가 같은 저작 월드 정의와 결정적 표현을 재현하는 계약으로 유지한다. seed를 절차 경로 통과성 검증 대상으로 사용하지 않는다.
 - 체크포인트 위치는 저작 영역과 섹터 흐름에 맞춰 다시 배치하되, 한번 활성화한 진행 지점은 아래로 내려가도 후퇴하지 않는다.
-- 현재 구현된 최종 영역 `sector-02-08`의 출구는 아직 전체 게임 완료가 아니라 다음 시나리오가 준비되지 않았음을 나타내는 content boundary다.
+- 현재 구현된 최종 연결 영역 `sector-03-08`의 출구는 아직 전체 게임 완료가 아니라 Post-Sector 03 Boss와 Sector 04 연결이 결정되지 않았음을 나타내는 content boundary다.
 - 기본 `npm test`는 현재 저작 영역 연결·Gate 진행·content boundary와 싱글·멀티 공용 시스템만 제품 시나리오로 검증한다. 48단계 절차 월드 생성·1,000시드 sweep·summit claim 테스트는 기본 suite에서 실행하지 않는다. 상세 기준은 `docs/development-rules.md`의 테스트와 회귀 방지 절을 따른다.
 - `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 Foundation 선택 시간과 현재 저작 영역 체류 시간·영역별 클리어 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다.
-- 배포 URL에 `?metrics=1`을 붙이면 일반 게임 규칙을 바꾸지 않고 현재 RunMetrics 개발 패널을 표시한다.
+- 설정 버튼을 1초 길게 눌러 디버그 패널의 **디버그 수치 표시**를 켜면 일반 게임 규칙을 바꾸지 않고 현재 RunMetrics를 표시한다.
 - 메트로배니아식 자유 역주행과 능력 잠금은 초기 범위에서 제외한다. 현재 기준의 상세 구현 흐름은 `docs/sector-01-world-structure-plan.md`를 따른다.
 
 ### [L1] 싱글과 멀티는 공용 권한 시뮬레이션을 사용한다
@@ -196,7 +196,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - `GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 다음 틱의 입력 capability를 실행한다. 멀티 서버 fixed tick은 같은 스케줄러의 입력 주도 객체 단계를 끄고 플레이어 타이머·무기 쿨다운과 중립 월드만 진행한다.
 - 이벤트의 즉시 체감과 지속 상태 수렴은 별도 경로다. 플레이어·로프·HP·사망·개별 체크포인트 부활의 수렴 원점은 서버 스냅샷이 아니라 소유·피해 클라이언트의 로컬 `GameSimulation` 결과이며, 서버 복제본과 동료가 검증된 claim·최신 `owner-motion`을 통해 이를 따라간다. 몹·공용 월드의 수렴 원점만 서버 스냅샷이다. `owner-motion`은 거부·롤백 없이 최신 소유자 상태를 적용하고, 체크포인트처럼 별도 복구 계약이 있는 사건 전이만 기준 상태와 미확정 입력으로 재실행한다. impact 지문 불일치는 서버가 피해 클라이언트의 최신 상태를 흡수한다. 동료와 적은 지연된 두 스냅샷 사이 보간과 제한 외삽으로 각 권한 원점에 수렴한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 멀티 체크포인트 도달은 소유 클라이언트가 자기 예측 위치에서 먼저 감지해 로컬 `GameSimulation`의 활성 체크포인트·보상·로프 해제와 피드백을 즉시 적용하고, 전이 직전 최신 `owner-motion` 다음에 체크포인트 ID·tick·위치 claim을 보낸다. pending 동안 로컬 치명 피격과 낙사는 새 체크포인트를 사용한다. 서버 fixed tick은 복제 위치만으로 체크포인트나 보상을 시작하지 않으며 승인 claim만 공용 활성 체크포인트·플레이어별 보상·`checkpoint-reached` 사건을 멱등 확정한다. 거부 receipt는 이전 공용 진행도와 소유자 상태를 복원하고 이후 입력·pending impact를 재실행한다. 싱글 자동 감지와 멀티 예측·서버 검증은 같은 체크포인트 활성화 로직을 사용한다.
-- 현재 저작 시나리오의 진행은 objective·Gate 패널·포탈 사건과 `sector-02-08` content boundary를 사용한다. 과거 절차 월드의 summit claim·즉시 `completed` 전이는 호환 코드로만 남아 있으며 엔딩 시나리오가 확정되기 전까지 기본 제품 테스트에서 제외한다.
+- 현재 저작 시나리오의 진행은 objective·Gate 패널·포탈 사건과 `sector-03-08` content boundary를 사용한다. 과거 절차 월드의 summit claim·즉시 `completed` 전이는 호환 코드로만 남아 있으며 엔딩 시나리오가 확정되기 전까지 기본 제품 테스트에서 제외한다.
 - 활성 로프 드래그가 브라우저 상단 UI로 빠지거나 `pointercancel`, 창 포커스 상실, 문서 숨김으로 끝나면 로프 유지가 아니라 해제 의도로 처리한다. 클라이언트는 렌더 프레임 재개를 기다리지 않고 해제 입력을 공용 시뮬레이션에 즉시 적용하며, 멀티는 일반 60Hz 전송 제한을 우회해 명령과 `owner-motion`을 바로 보낸다. 세부 입력 수명주기는 `docs/development-rules.md`, 동기화 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 플레이어끼리는 반지름 기반 물리 충돌을 한다. 각 소유 클라이언트가 다른 플레이어의 공유 위치를 기준으로 겹침의 절반을 즉시 해소하고 상대에게 파고드는 속도만 제거한 뒤 `owner-motion`으로 공유한다. 접선 방향 로프 관성은 보존하며 위에서 닿으면 다른 플레이어 위에 설 수 있다.
 - 특정 플레이어에게 귀속되는 이동·로프·공격·피격·절단 같은 사건은 소유자 또는 피해자 클라이언트가 즉시 로컬 적용하고 claim을 보낸다. 서버는 체감 경로를 먼저 시작하지 않는다. impact는 인증·형식·중복과 결과 지문을 확인하고, 그 밖의 claim은 각 계약의 tick·중립 객체 자료를 검증해 공용 결과를 확정·배포한다.
@@ -318,7 +318,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 준비 뒤 media `play()` 거부도 adapter 내부에 숨기지 않고 실패 voice를 정리해 host snapshot과 진단 복사에 남긴다. 사용자 활성화 제약은 `suspended`로 전이해 다음 입력에서 재시도하고 그 밖의 필수·선택 runtime 실패는 각각 `failed`·`degraded`로 전이한다.
 - buffer source가 graph 연결 뒤 `start()`에 실패해도 최초 오류를 보존하면서 active handle과 node를 즉시 해제한다. `stopAll`은 one-shot·loop를, `suspend`는 재생이 끝난 것으로 간주할 one-shot을 정리하고, `release`는 남은 voice·loop와 cooldown·variation·causal 추적 상태까지 결정적으로 비운다. 동일 loop 72,000회 스트레스 확인과 고유 emitter 1,024개·buffer 시작 실패 자동 회귀는 완료했으며 실제 두 모바일 기기의 장시간 frame·heap 계측은 플레이테스트에 남아 있다. 상세 불변식은 `docs/architecture.md`, `docs/development-rules.md`와 `docs/audio-asset-format.md`를 따른다.
 - 오디오 resource package category 허용 목록은 `gameplay`, `ui`, `ambience`, `bgm`이다. 각 package는 `assets/runtime/audio/<category>/<asset-id>/audio-manifest.json`에 두고, `assets/runtime/audio/packs/<pack-id>/audio-pack.json`이 category와 stable asset ID로 하나 이상의 package를 조합한다. pack은 package 참조만 소유하고 cue·clip 또는 gameplay binding을 중복 소유하지 않는다. aggregate validator는 알 수 없는 category·package, 중복 참조와 pack 전체 cue ID 충돌을 거부한다. 향후 디버그 선택은 전체 pack 또는 특정 category package를 교체해 새 immutable definition을 조립한다.
-- 일반 UI와 개발 진단을 분리한다. 시작 화면에는 준비 진행률과 필수 실패의 원인·재시도·메뉴 복귀만 표시한다. 선택 자산 실패는 게임을 계속하되 오디오 설정 탭에 `일부 음원 사용 불가` 상태만 작게 표시한다. `?metrics=1`과 기존 진단 복사에는 pack/package ID, `loading|ready|degraded|suspended|failed`, AudioContext 상태, clip별 선택 source·MIME·실패 코드, 필수/선택 준비 수, 그룹별 활성 voice 수와 cooldown drop·voice stealing 누계를 포함한다.
+- 일반 UI와 개발 진단을 분리한다. 시작 화면에는 준비 진행률과 필수 실패의 원인·재시도·메뉴 복귀만 표시한다. 선택 자산 실패는 게임을 계속하되 오디오 설정 탭에 `일부 음원 사용 불가` 상태만 작게 표시한다. 설정 버튼 길게 누르기로 여는 디버그 수치와 기존 진단 복사에는 pack/package ID, `loading|ready|degraded|suspended|failed`, AudioContext 상태, clip별 선택 source·MIME·실패 코드, 필수/선택 준비 수, 그룹별 활성 voice 수와 cooldown drop·voice stealing 누계를 포함한다.
 - 필수 stream이 모든 source fallback과 timeout 뒤에도 `canplay`에 도달하지 못하면 다른 gameplay 음원이 준비됐어도 자동 degraded 시작을 허용하지 않는다. `failed`로 시작을 차단하고 재시도·메뉴 복귀를 제공한다. 제작자가 해당 항목을 `required: false`로 명시한 경우에만 제외 후 시작할 수 있다.
 - mock은 기반 시스템과 싱글·멀티 연결을 증명하는 교체 가능한 검증 자료이며 향후 시나리오나 정식 오디오의 런타임 계약으로 굳히지 않는다.
 - 세부 자산 범위, 재생·믹싱 계약과 완료 기준은 인터뷰를 마쳤고 위 두 오디오 기준 문서와 `docs/architecture.md`에 승격했다. 다음 작업은 최종 시나리오가 구체화될 때 정식 package를 추가하고 기존 binding에 대표 cue만 확장하는 것이다.
@@ -345,7 +345,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 참고 이미지는 구체 디자인이 아니라 어두운 다층 실루엣·큰 여백·제한된 조명 같은 도트 화면 구성만 참고한다. 실제 mock은 기획 채널에서 확정한 폐쇄형 수직 기업도시의 폐기물·산업 정비·주거 상업·기업 보안·착륙장 5구역을 실제 약 8,880m 월드 범위 안에 나누고 고도 기반 일출 밝기 변화를 따른다.
 - 기존 `WorldGenerator`와 collision은 바꾸지 않는다. backdrop, collision polygon과 정확히 맞는 terrain skin, 이동 경로 밖의 non-collision decoration을 독립 하위 renderer로 조립하며 상위 renderer나 싱글·멀티 앱이 구체 component 종류를 분기하지 않는다.
 - 환경 리소스는 캐릭터 animation manifest와 분리된 여러 PNG atlas·JSON Schema·example·validator 계약을 사용한다. PixelLab·SpriteCook의 배열·metadata·개별 frame은 표준 manifest로 정규화하며 atlas 분할 수와 frame 배열은 계약 안에서 바꿀 수 있다.
-- asset 실패는 backdrop·terrain·decoration별로만 fallback하고 `?metrics=1`에서 실패 component와 atlas ID를 확인한다. 상세 교환 형식과 AI 작업 진입점은 `docs/environment-asset-format.md`, 구조 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
+- asset 실패는 backdrop·terrain·decoration별로만 fallback하고 설정 버튼 길게 누르기로 여는 디버그 수치에서 실패 component와 atlas ID를 확인한다. 상세 교환 형식과 AI 작업 진입점은 `docs/environment-asset-format.md`, 구조 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 
 ### [L1] 모든 PR은 최신 main에 rebase한 뒤 병합한다
 

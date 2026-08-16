@@ -15,7 +15,7 @@ function cloneSettings(settings) {
     });
 }
 
-export function normalizeDebugSettings(value) {
+export function normalizeDebugSettings(value, validAreaIds = null) {
     if (!value || typeof value !== "object" || Array.isArray(value) || value.version !== DEBUG_SETTINGS_VERSION) {
         return DEFAULT_DEBUG_SETTINGS;
     }
@@ -23,24 +23,26 @@ export function normalizeDebugSettings(value) {
     if (value.startAreaId !== null && (typeof value.startAreaId !== "string" || !value.startAreaId.trim())) {
         return DEFAULT_DEBUG_SETTINGS;
     }
-    return cloneSettings({ metrics: value.metrics, startAreaId: value.startAreaId });
+    const startAreaId = validAreaIds && !validAreaIds.has(value.startAreaId) ? null : value.startAreaId;
+    return cloneSettings({ metrics: value.metrics, startAreaId });
 }
 
-function readStoredSettings(storage, key) {
+function readStoredSettings(storage, key, validAreaIds) {
     if (!storage?.getItem) return DEFAULT_DEBUG_SETTINGS;
     try {
         const value = storage.getItem(key);
-        return value === null ? DEFAULT_DEBUG_SETTINGS : normalizeDebugSettings(JSON.parse(value));
+        return value === null ? DEFAULT_DEBUG_SETTINGS : normalizeDebugSettings(JSON.parse(value), validAreaIds);
     } catch {
         return DEFAULT_DEBUG_SETTINGS;
     }
 }
 
 export class DebugSettings {
-    constructor({ storage = null, key = DEBUG_SETTINGS_STORAGE_KEY } = {}) {
+    constructor({ storage = null, key = DEBUG_SETTINGS_STORAGE_KEY, validAreaIds = null } = {}) {
         this.storage = storage;
         this.key = key;
-        this.value = readStoredSettings(storage, key);
+        this.validAreaIds = validAreaIds ? new Set(validAreaIds) : null;
+        this.value = readStoredSettings(storage, key, this.validAreaIds);
         this.listeners = new Set();
     }
 
@@ -63,6 +65,9 @@ export class DebugSettings {
     setStartAreaId(startAreaId) {
         if (startAreaId !== null && (typeof startAreaId !== "string" || !startAreaId.trim())) {
             throw new Error("debug start area must be null or a non-empty string");
+        }
+        if (startAreaId !== null && this.validAreaIds && !this.validAreaIds.has(startAreaId)) {
+            throw new Error(`unknown debug start area '${startAreaId}'`);
         }
         this.#replace({ ...this.value, startAreaId });
     }

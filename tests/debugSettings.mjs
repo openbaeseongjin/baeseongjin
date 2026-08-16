@@ -39,4 +39,8 @@ export function run() {
     const reloaded = new DebugSettings({ storage });
     assert.deepEqual(reloaded.snapshot(), { version: 1, metrics: true, startAreaId: null });
     assert.equal(seen.length, 4, "every change notifies subscribers");
+
+    const catalogBound = new DebugSettings({ storage: memoryStorage(), validAreaIds: ["sector-01-01"] });
+    catalogBound.setStartAreaId("sector-01-01");
+    assert.throws(() => catalogBound.setStartAreaId("missing-area"), /unknown debug start area/);
 }

@@ -50,12 +50,13 @@ const settingsMenu = new SettingsMenu({
     root: document.getElementById("settings-dialog"),
     trigger: document.getElementById("settings-trigger")
 });
-const debugSettings = new DebugSettings({ storage: audioStorage });
+const debugAreaIds = CURRENT_AUTHORED_AREA_CATALOG.areas.map(({ id }) => id);
+const debugSettings = new DebugSettings({ storage: audioStorage, validAreaIds: debugAreaIds });
 const debugPanel = new DebugPanel({
     root: document.getElementById("debug-dialog"),
     trigger: document.getElementById("settings-trigger"),
     settings: debugSettings,
-    areaIds: CURRENT_AUTHORED_AREA_CATALOG.areas.map(({ id }) => id)
+    areaIds: debugAreaIds
 });
 const audioSettingsPanel = new AudioSettingsPanel({
     root: document.getElementById("settings-panel-audio"),

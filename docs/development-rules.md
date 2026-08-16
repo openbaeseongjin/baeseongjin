@@ -309,12 +309,12 @@ class Player extends RopeAttachable(GameObject) {}
 - 월드 좌표와 화면 좌표 변환은 카메라가 소유한다.
 - 시나리오가 구간별 Shot을 요구하면 local Y 범위·desktop/mobile zoom·player screen ratio를 area definition의 `cameraZones`에 선언하고 싱글·멀티 공용 Camera Director가 해석한다. 멀티에서 공용 진행보다 뒤에 남은 플레이어가 있으므로 현재 Shot은 공용 `currentAreaId`가 아니라 로컬 플레이어의 물리 좌표로 고른다.
 - 표시 시간이 있는 Objective Sequence의 진행·완료와 Gate 개방은 공용 월드 진행 상태가 소유한다. Presentation은 사건을 읽어 문구·그래픽·오디오만 재생하며 완료 시각이나 Gate 상태를 변경하지 않는다. 문서가 입력 차단을 명시하지 않으면 연출 중 이동을 허용한다.
-- 90~120초 같은 첫 플레이 시간은 강제 대기나 영역 전용 이동 제한으로 맞추지 않는다. 권위 시뮬레이션의 영역 체류·클리어 시간을 `?metrics=1`로 수집하고, 실제 표본이 벗어날 때 Geometry·Camera·Recovery 동선을 조정한다.
+- 90~120초 같은 첫 플레이 시간은 강제 대기나 영역 전용 이동 제한으로 맞추지 않는다. 권위 시뮬레이션의 영역 체류·클리어 시간을 설정 버튼 길게 누르기로 여는 디버그 수치에서 수집하고, 실제 표본이 벗어날 때 Geometry·Camera·Recovery 동선을 조정한다.
 - DPR 보정과 resize는 렌더링 경계에서 한 번만 처리한다.
 - 색만으로 상태를 전달하지 않고 형태, 굵기, 움직임, 문구를 함께 사용한다.
 - 사용자 입력, 성공, 실패, 쿨다운은 화면에서 구분 가능해야 한다.
 - Canvas 변경은 시작·동작 중·종료 또는 해제 상태를 실제 화면으로 검증한다.
-- 렌더 최적화는 보이는 결과가 같은지를 먼저 회귀 테스트하고, 화면 안/밖 객체를 함께 둔 수치 테스트로 draw 감소를 증명한다. 실제 브라우저에서는 `?metrics=1`로 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
+- 렌더 최적화는 보이는 결과가 같은지를 먼저 회귀 테스트하고, 화면 안/밖 객체를 함께 둔 수치 테스트로 draw 감소를 증명한다. 실제 브라우저에서는 설정 버튼 길게 누르기로 디버그 수치 표시를 켜고 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
 - 스프라이트 clip은 자산이 실제로 표현하는 행동 의미와 일치해야 한다. 지원하지 않는 행동을 방향 전환용 프레임 등 무관한 프레임에 임의 대응하지 않고, 불가피한 대체는 definition에 명시적 fallback으로 선언한다.
 - player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 자산 로더도 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다. 정식 입력은 `sprite-asset-format.md`의 PNG 묶음과 도구 중립 manifest로 정규화한다.
 - PixelLab·SpriteCook 같은 생성 도구의 ZIP·metadata·개별 frame은 import 입력으로만 다룬다. 도구별 adapter가 표준 manifest를 만들고 renderer와 gameplay에는 도구 이름 분기를 추가하지 않는다. GIF·WebP는 미리보기로만 사용한다.

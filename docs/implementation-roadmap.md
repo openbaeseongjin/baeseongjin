@@ -28,7 +28,7 @@
 - [과거 절차 프로토타입] 연속 1,000개 시드의 상승·로프 사거리 통과 가능성 자동 검사
 - [과거 절차 프로토타입] 경계값·기본값·발견된 문제 시드의 고정 회귀 목록
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 Foundation 선택 지표 수집
-- 원격 배포에서 `?metrics=1`로 확인하는 옵트인 런 지표 패널
+- 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
 - 첫 화면의 싱글·멀티 선택, 고정 게임 서버 연결과 모바일 4자리 채널 생성·참가
 - 2인 권위 서버의 명령 receipt, 20Hz 스냅샷, 자기 예측과 동료 보간
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
@@ -51,9 +51,9 @@
 
 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)에 현재 작성된 맵을 섹터·번호 순서대로 즉시 구현하고, 새 시나리오가 추가될 때 같은 흐름에 이어 붙인다. 각 맵은 별도 월드가 아니라 하나의 연속 월드 안에 놓이는 진행 영역이다. 각 단계는 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 목록과 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
 
-상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~`04`의 `1-1`~`4-8` 총 32개 상세 Stage 문서가 있다. 현재 Runtime은 `1-1 → 3-8` 24개 authored area를 한 월드로 연결하고 Sector 04 `4-1 → 4-4`는 standalone으로 저작했다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
+상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~`04`의 `1-1`~`4-8` 총 32개 상세 Stage 문서가 있다. 현재 Runtime은 `1-1 → 3-8` 24개 authored area를 한 월드로 연결하고 Sector 04 `4-1 → 4-8`은 standalone으로 저작했다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
 
-Sector 03은 Access Scan Field Runtime(#523)과 3-1~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. 남은 것은 Camera Zone·Story trigger 코드 반영과 Post-Sector 03 Boss→`3-8`/`4-1` 전환 사용자 검토다. Sector 04는 4-1~4-4 standalone catalog(#513·#514·#516·#519)를 저작했고 4-5~4-8과 Boss 전환은 기획 결정을 기다린다.
+Sector 03은 Access Scan Field Runtime(#523)과 3-1~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했고 Camera·Story 인계 범위도 반영했다. 남은 것은 Post-Sector 03 Boss→`4-1` 전환 사용자 검토다. Sector 04는 4-1~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
 
 `2-3` Specialization은 1-4에서 고른 Foundation Augment를 유지한 채 그 방향을 한 단계 심화하는 성장으로 시나리오에 명시됐다. 1-4 Foundation 선택·효과·개인별 멀티 흐름은 구현됐지만 실제 Specialization 이름·효과·수치·선택 pool은 미정이다. Foundation 선택의 입력·UI 흐름은 재사용 후보지만 Foundation ID와 Specialization ID의 의미 체계는 합치지 않는다. `2-5`의 잠긴 Upper Transit Gate는 서사적 장애물이고 실제 다음 진행 출구는 Maintenance Service Frame이다. `2-8`은 Boss가 없는 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며 이후 전환은 공통 Boss Flow가 확정되기 전 연결하지 않는다.
 
@@ -154,7 +154,7 @@ Foundation이 로프 숙련을 대체하지 않고 보상하도록 한다.
 
 4. [플레이테스트 필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 체크포인트 부활, Foundation 유지와 정상 도달을 한 세션으로 검증한다.
 5. [네트워크 검증 필요] 모바일망 지연과 장시간 세션에서 예측 오차, 보정 체감, 재접속 정책을 측정한다.
-   - [진단 계측 완료] `?metrics=1`에서 서버 권위 런 지표와 RTT·스냅샷 간격·대기 명령·명령 거부율·보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인하고 **진단 복사**로 기기별 기록을 남긴다.
+   - [진단 계측 완료] 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켠 뒤 서버 권위 런 지표와 RTT·스냅샷 간격·대기 명령·명령 거부율·보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인하고 **진단 복사**로 기기별 기록을 남긴다.
    - [네트워크 행렬 완료] 실제 WebSocket 경계에서 0/50/100/200ms 왕복 지연과 0/2/5% 송신 명령 손실의 12개 조합을 한 메인 시나리오로 검증한다.
    - [장시간 계측 경계 완료] 손실된 RTT 추적 기록은 snapshot ACK로 정리하고 ACK가 없어도 최근 2,048개만 유지한다.
    - [공개 경로 smoke 완료] `npm run smoke:multiplayer`로 Pages 설정부터 실제 WSS 채널의 2인 합류·퇴장·빈 방 제거·권위 RunMetrics 수신까지 검증한다.

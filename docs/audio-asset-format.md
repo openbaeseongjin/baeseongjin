@@ -112,7 +112,7 @@ pack은 category별 package 참조만 가진다. cue나 clip을 복제하지 않
 - 모든 필수 clip과 필수 cue가 준비되기 전에는 게임 loop를 시작하지 않는다.
 - 선택 실패만 `degraded`로 시작하며 진단과 설정 탭에 남긴다.
 - 상태는 `loading|ready|degraded|suspended|failed`다.
-- 준비 뒤 media `play()`가 거부되면 해당 voice를 즉시 정리하고 runtime failure를 host snapshot과 `?metrics=1` 진단에 포함한다. 사용자 활성화 제약인 `NotAllowedError`는 `suspended`로 전이해 다음 입력에서 재개하고, 그 밖의 필수 clip 재생 실패는 `failed`, 선택 clip 재생 실패는 해당 clip을 제외한 `degraded`로 전이한다.
+- 준비 뒤 media `play()`가 거부되면 해당 voice를 즉시 정리하고 runtime failure를 host snapshot과 디버그 수치 진단에 포함한다. 사용자 활성화 제약인 `NotAllowedError`는 `suspended`로 전이해 다음 입력에서 재개하고, 그 밖의 필수 clip 재생 실패는 `failed`, 선택 clip 재생 실패는 해당 clip을 제외한 `degraded`로 전이한다.
 - buffer source가 graph 연결 뒤 `start()`에서 예외를 내면 active handle과 source·gain·pan node를 즉시 정리하고 최초 시작 오류를 caller에 보존한다.
 - `document.hidden`과 `pagehide`는 one-shot을 폐기하고 context·stream을 suspend한다. `blur`만으로는 중지하지 않는다.
 - 복귀 시 과거 one-shot을 재생하지 않고 현재 BGM·ambience state만 재조정한다.

@@ -14,7 +14,7 @@
 2. [`../assets/runtime/environments/default-mock/`](../assets/runtime/environments/default-mock/)을 `assets/runtime/environments/<environment-id>/`로 복사해 PNG와 `sprite-manifest.json`을 교체한다.
 3. `npm run validate:environment-assets -- <asset-directory>`를 실행한다. 기본 mock을 검사할 때는 인자를 생략해도 된다.
 4. validator가 통과한 디렉터리만 renderer catalog에 연결한다.
-5. `?metrics=1`에서 fallback component와 atlas ID가 남지 않는지 확인하고 데스크톱·모바일 실제 화면을 검증한다.
+5. 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켠 뒤 fallback component와 atlas ID가 남지 않는지 확인하고 데스크톱·모바일 실제 화면을 검증한다.
 
 ## 디렉터리 계약
 
@@ -109,7 +109,7 @@ atlas 준비와 실패는 backdrop, terrain, decoration이 각각 판단한다.
 - terrain atlas만 실패하면 기존 collision geometry만 대신 그린다.
 - decoration atlas만 실패하면 장식만 생략한다. 충돌이나 다른 환경 component에는 영향이 없다.
 - 아직 로딩 중인 `pending`은 실패로 보고하지 않는다. 실제 load/크기 검증 실패로 전환할 때 한 번만 console 경고를 남긴다.
-- `?metrics=1`은 실패한 component와 관련 atlas ID를 표시한다.
+- 디버그 수치 표시는 실패한 component와 관련 atlas ID를 표시한다.
 
 전체 scene이나 캐릭터 renderer로 fallback하는 것은 환경 component 실패 규칙이 아니다. 이 경계를 바꾸면 partial-failure 테스트와 실제 화면 진단을 함께 갱신한다.
 

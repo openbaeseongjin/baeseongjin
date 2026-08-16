@@ -22,7 +22,7 @@ export async function run() {
     const text = formatPlaytestDiagnostics({
         capturedAt: "2026-08-10T10:00:00.000Z",
         version: "0.7.0",
-        url: "https://example.test/?metrics=1",
+        url: "https://example.test/",
         channelId: "1234",
         worldSeed: 481516,
         metrics: metrics(),
@@ -140,7 +140,7 @@ export async function run() {
             }
         },
         enabled: true,
-        context: () => ({ version: "0.7.0", url: "https://example.test/?metrics=1", channelId: null }),
+        context: () => ({ version: "0.7.0", url: "https://example.test/", channelId: null }),
         now: () => new Date("2026-08-10T10:00:00.000Z")
     });
     diagnostics.update({ metrics: metrics(), worldSeed: 108 });

@@ -9,9 +9,9 @@
 
 | 축 | 상태 |
 | --- | --- |
-| 월드 | `1-1 → 3-8` 24개 영역 `MOCK INTEGRATED`, 4-1~4-4 standalone `GRAYBOX READY` |
+| 월드 | `1-1 → 3-8` 24개 영역 `MOCK INTEGRATED`, 4-1~4-8 standalone `GRAYBOX READY` |
 | 시스템 | 로프 코어·전투(Sentry/Patrol Drone)·Foundation 3종·Wind·Access Scan Field·Cutter Fire·2인 멀티 완료 |
-| 프레젠테이션 | 아트·오디오는 mock 교체 대기. 스토리·Camera 일부는 인계 문서 작성 완료, 코드 반영 대기 |
+| 프레젠테이션 | 아트·오디오는 mock 교체 대기. Sector 01~04 Camera·Story의 현재 인계 범위는 코드 반영 완료 |
 | 검증 | 실제 브라우저·기기 플레이테스트 0건 (`PLAYTEST VERIFIED` 없음) |
 
 정확한 Stage별 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)를 따른다.
