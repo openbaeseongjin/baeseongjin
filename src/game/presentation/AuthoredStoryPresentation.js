@@ -120,6 +120,70 @@ const ENTRY_PRESENTATIONS = Object.freeze({
             detail: "GROUP C TRANSFER SUSPENDED",
             durationSeconds: 1.5
         })
+    ]),
+    "sector-04-01": Object.freeze([
+        Object.freeze({
+            id: "sector-04-01:transit-backbone",
+            title: "TRANSIT BACKBONE",
+            detail: "SERVICE DEGRADED",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-04-02": Object.freeze([
+        Object.freeze({
+            id: "sector-04-02:security-active",
+            title: "INFRASTRUCTURE SECURITY",
+            detail: "ACTIVE",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-04-03": Object.freeze([
+        Object.freeze({
+            id: "sector-04-03:pressure-service",
+            title: "FREIGHT BYPASS",
+            detail: "PRESSURE SERVICE · CYCLING",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-04-04": Object.freeze([
+        Object.freeze({
+            id: "sector-04-04:local-control",
+            title: "INFRASTRUCTURE SERVICE NODE",
+            detail: "LOCAL CONTROL AVAILABLE",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-04-05": Object.freeze([
+        Object.freeze({
+            id: "sector-04-05:service-channel",
+            title: "EXPRESS SHAFT",
+            detail: "SERVICE CHANNEL OPEN",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-04-06": Object.freeze([
+        Object.freeze({
+            id: "sector-04-06:grid-coupling",
+            title: "POWER RELAY SPAN",
+            detail: "GRID COUPLING ACTIVE",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-04-07": Object.freeze([
+        Object.freeze({
+            id: "sector-04-07:containment-routing",
+            title: "JUNCTION CONTROL",
+            detail: "CONTAINMENT ROUTING ACTIVE",
+            durationSeconds: 1.4
+        })
+    ]),
+    "sector-04-08": Object.freeze([
+        Object.freeze({
+            id: "sector-04-08:system-limited",
+            title: "TRANSIT CONTROL TRUNK",
+            detail: "SYSTEM ACCESS LIMITED",
+            durationSeconds: 1.4
+        })
     ])
 });
 
@@ -433,6 +497,259 @@ const POSITION_PRESENTATIONS = Object.freeze({
                     id: "sector-02-07:designated-area",
                     title: "REMAIN IN",
                     detail: "DESIGNATED AREA",
+                    durationSeconds: 1.2
+                })
+            ])
+        })
+    ]),
+    "sector-04-01": Object.freeze([
+        Object.freeze({
+            token: "upper-express-status",
+            minLocalX: -32,
+            maxLocalX: 224,
+            minLocalY: -736,
+            maxLocalY: -672,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-01:upper-express",
+                    title: "UPPER EXPRESS TRUNK",
+                    detail: "LIMITED OPERATION",
+                    durationSeconds: 1.3
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "security-line-preview",
+            minLocalX: 272,
+            maxLocalX: 688,
+            minLocalY: -1344,
+            maxLocalY: -1280,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-01:infrastructure-security",
+                    title: "INFRASTRUCTURE SECURITY",
+                    detail: "ACTIVE",
+                    durationSeconds: 1.1
+                }),
+                Object.freeze({
+                    id: "sector-04-01:service-line-ahead",
+                    title: "SERVICE LINE",
+                    detail: "AHEAD",
+                    durationSeconds: 1.0
+                })
+            ])
+        })
+    ]),
+    "sector-04-02": Object.freeze([
+        Object.freeze({
+            token: "structural-access-line",
+            minLocalY: -560,
+            maxLocalY: -240,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-02:structural-access",
+                    title: "STRUCTURAL ACCESS LINE",
+                    detail: "PROTECTED",
+                    durationSeconds: 1.2
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "freight-ahead",
+            minLocalX: 48,
+            maxLocalX: 464,
+            minLocalY: -1280,
+            maxLocalY: -1216,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-02:freight-ahead",
+                    title: "FREIGHT BYPASS",
+                    detail: "PRESSURE SERVICE AHEAD",
+                    durationSeconds: 1.3
+                })
+            ])
+        })
+    ]),
+    "sector-04-03": Object.freeze([
+        Object.freeze({
+            token: "automated-control",
+            minLocalY: -640,
+            maxLocalY: -320,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-03:automated-control",
+                    title: "TRANSIT PRESSURE",
+                    detail: "AUTOMATED CONTROL ACTIVE",
+                    durationSeconds: 1.3
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "freight-route-limited",
+            minLocalX: -496,
+            maxLocalX: -80,
+            minLocalY: -1408,
+            maxLocalY: -1344,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-03:freight-route",
+                    title: "FREIGHT SERVICE ROUTE",
+                    detail: "LIMITED OPERATION",
+                    durationSeconds: 1.2
+                })
+            ])
+        })
+    ]),
+    "sector-04-04": Object.freeze([
+        Object.freeze({
+            token: "lower-feeder-segmented",
+            minLocalX: -224,
+            maxLocalX: 224,
+            minLocalY: -480,
+            maxLocalY: -288,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-04:feeder-segmented",
+                    title: "LOWER ASCENT FEEDER",
+                    detail: "STATUS: SEGMENTED",
+                    durationSeconds: 1.3
+                }),
+                Object.freeze({
+                    id: "sector-04-04:telemetry-partial",
+                    title: "TELEMETRY",
+                    detail: "PARTIAL",
+                    durationSeconds: 1.1
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "express-shaft-open",
+            minLocalX: 128,
+            maxLocalX: 512,
+            minLocalY: -864,
+            maxLocalY: -800,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-04:express-open",
+                    title: "EXPRESS SHAFT",
+                    detail: "SERVICE CHANNEL OPEN",
+                    durationSeconds: 1.3
+                })
+            ])
+        })
+    ]),
+    "sector-04-05": Object.freeze([
+        Object.freeze({
+            token: "pressure-assist-cycling",
+            minLocalY: -544,
+            maxLocalY: -288,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-05:pressure-assist",
+                    title: "PRESSURE ASSIST",
+                    detail: "CYCLING",
+                    durationSeconds: 1.1
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "upper-express-limited",
+            minLocalX: 112,
+            maxLocalX: 528,
+            minLocalY: -1504,
+            maxLocalY: -1440,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-05:upper-express",
+                    title: "UPPER EXPRESS TRUNK",
+                    detail: "LIMITED OPERATION",
+                    durationSeconds: 1.2
+                })
+            ])
+        })
+    ]),
+    "sector-04-06": Object.freeze([
+        Object.freeze({
+            token: "redundant-channel",
+            minLocalX: -64,
+            maxLocalX: 384,
+            minLocalY: -832,
+            maxLocalY: -704,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-06:redundant-channel",
+                    title: "TRANSIT POWER FEED",
+                    detail: "REDUNDANT CHANNEL ONLINE",
+                    durationSeconds: 1.3
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "junction-security-ahead",
+            minLocalX: -464,
+            maxLocalX: -48,
+            minLocalY: -1504,
+            maxLocalY: -1440,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-06:junction-ahead",
+                    title: "JUNCTION CONTROL",
+                    detail: "ROUTING SECURITY AHEAD",
+                    durationSeconds: 1.3
+                })
+            ])
+        })
+    ]),
+    "sector-04-07": Object.freeze([
+        Object.freeze({
+            token: "feeder-isolated",
+            minLocalX: -288,
+            maxLocalX: 224,
+            minLocalY: -1280,
+            maxLocalY: -1216,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-07:feeder-isolated",
+                    title: "LOWER ASCENT FEEDER",
+                    detail: "ISOLATED",
+                    durationSeconds: 1.3
+                }),
+                Object.freeze({
+                    id: "sector-04-07:telemetry-offline",
+                    title: "ROUTE TELEMETRY",
+                    detail: "OFFLINE",
+                    durationSeconds: 1.1
+                })
+            ])
+        }),
+        Object.freeze({
+            token: "trunk-access-ahead",
+            minLocalX: 144,
+            maxLocalX: 560,
+            minLocalY: -1472,
+            maxLocalY: -1408,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-07:trunk-ahead",
+                    title: "TRANSIT CONTROL TRUNK",
+                    detail: "ACCESS AHEAD",
+                    durationSeconds: 1.2
+                })
+            ])
+        })
+    ]),
+    "sector-04-08": Object.freeze([
+        Object.freeze({
+            token: "upper-trunk-preview",
+            minLocalX: 176,
+            maxLocalX: 464,
+            minLocalY: -1120,
+            maxLocalY: -1056,
+            presentations: Object.freeze([
+                Object.freeze({
+                    id: "sector-04-08:upper-preview",
+                    title: "UPPER EXPRESS TRUNK",
+                    detail: "LIMITED OPERATION",
                     durationSeconds: 1.2
                 })
             ])
@@ -773,6 +1090,76 @@ const TRIGGER_CUE_PRESENTATIONS = Object.freeze({
             title: "UPPER CONTROL",
             detail: "ROUTE STATUS PENDING",
             durationSeconds: 1.2
+        })
+    ]),
+    "sector-04-04:service-node-online": Object.freeze([
+        Object.freeze({
+            id: "sector-04-04:local-control",
+            title: "INFRASTRUCTURE SERVICE NODE",
+            detail: "LOCAL CONTROL AVAILABLE",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-04-04:lower-feeder-segmented": Object.freeze([
+        Object.freeze({
+            id: "sector-04-04:feeder-segmented",
+            title: "LOWER ASCENT FEEDER",
+            detail: "STATUS: SEGMENTED",
+            durationSeconds: 1.3
+        }),
+        Object.freeze({
+            id: "sector-04-04:telemetry-partial",
+            title: "TELEMETRY",
+            detail: "PARTIAL",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-04-07:containment-routing-active": Object.freeze([
+        Object.freeze({
+            id: "sector-04-07:containment-routing",
+            title: "CONTAINMENT ROUTING",
+            detail: "ACTIVE",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-04-07:lower-feeder-isolated": Object.freeze([
+        Object.freeze({
+            id: "sector-04-07:feeder-isolated",
+            title: "LOWER ASCENT FEEDER",
+            detail: "ISOLATED",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-04-07:route-telemetry-offline": Object.freeze([
+        Object.freeze({
+            id: "sector-04-07:telemetry-offline",
+            title: "ROUTE TELEMETRY",
+            detail: "OFFLINE",
+            durationSeconds: 1.1
+        })
+    ]),
+    "sector-04-08:upper-trunk-limited": Object.freeze([
+        Object.freeze({
+            id: "sector-04-08:upper-trunk",
+            title: "UPPER EXPRESS TRUNK",
+            detail: "LIMITED OPERATION",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-04-08:lower-feeder-isolated": Object.freeze([
+        Object.freeze({
+            id: "sector-04-08:feeder-isolated",
+            title: "LOWER ASCENT FEEDER",
+            detail: "ISOLATED",
+            durationSeconds: 1.3
+        })
+    ]),
+    "sector-04-08:transit-core-access-pending": Object.freeze([
+        Object.freeze({
+            id: "sector-04-08:core-pending",
+            title: "TRANSIT CORE ACCESS",
+            detail: "ROUTE PENDING",
+            durationSeconds: 1.3
         })
     ])
 });

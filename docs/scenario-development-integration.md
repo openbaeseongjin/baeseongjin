@@ -3,7 +3,7 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: b8760f29764e14b229ebe982e602ecefc040bd5c5edb2fed99e06587d296158d
+scenario-source-sha256: cbe95d2babb4f2f92a906017d886ed875092a8466cdca6e2e3a51aa71f0400fd
 authored-area-sha256: 91d877421c2be171b28b8b3f1b0f322294ad1be92edd734b11806a071fa2d1eb
 stage-count: 32
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8
@@ -40,7 +40,7 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 | Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 102개 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증; #507이 Wind·Story·2-3 진행을 보강; 1-5~1-8 Camera Zone과 남은 Position Story Trigger 코드 반영 완료 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강; Story Presentation 공백 3건(2-2·2-3 POSITION, 2-6 최소 위치 표지) 코드 반영 완료 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 2-3 Specialization 실제 이름·효과·수치·pool과 Sector 02 Boss→3-1 전환 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525); Camera는 8개 Stage 의도적 기본 카메라 확인, Story signage 28개 코드 반영 | Post-Sector 03 Boss→3-8/4-1 전환 미정 |
-| Sector 04 / 4-1~4-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결 | Post-Sector 03 Boss→4-1 전환, Sector 04 Camera·Story 코드 반영이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증; Master의 상세 문서 범위 문구 재정렬 필요 |
+| Sector 04 / 4-1~4-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결; Camera Zone 8개 Stage 구현 확인, Story 바인딩 반영 완료 | Post-Sector 03 Boss→4-1 전환이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증 |
 | Sector 05~06 | 상세 Stage 없음 | `NOT CONNECTED` | NPC 역할·대화 계약과 엔딩·최종 전환 계약 필요 |
 
 ## 최근 반영된 시나리오 변화
@@ -71,16 +71,16 @@ reviewed-upstream: 6af1a4306012c2646327bc87247dd996e8df2362
 24. Sector 04 standalone catalog에 4-5 `EXPRESS SHAFT`(적 없음·상승 Wake), 4-6 `POWER RELAY SPAN`(Cutter Sentry+Patrol Drone 분리 band), 4-7 `ISOLATION JUNCTION`(Cutter+Wake 합성, `LOWER ASCENT FEEDER ISOLATED` 상태 디스플레이), 4-8 `TRANSIT CONTROL TRUNK`(Cutter+Drone+Wake 연속, Upper Trunk/Lower Feeder 병치, Post-Sector Visual Hold)를 추가하고 4-4 Gate를 4-5로 재배선했다. 4-8은 Sector 05 미배선(content-boundary)이다. 문서 대비 정렬 1건: 4-8 D1 activation X폭을 문서 patrol corridor(±208)를 포함하도록 ±192→±208로 넓혔다(문서 자체가 patrol corridor 폭을 open question으로 남김). 메인 월드에는 연결하지 않는다.
 25. Sector 03 Camera·Story를 정리했다. 8개 Stage README의 `## 14. Camera` 절을 전수 대조한 결과 전부 `Custom Pan 없음`(기본 Camera로 Geometry·Lighting 해결)을 명시해 `cameraZones` 미저작이 의도된 상태임을 확인했고([인계 문서](./bsh/scenario/3/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)), Story는 위치 기반 Signage 계약대로 데크별 `story-display` 28개와 `TRIGGER_CUE_PRESENTATIONS` 바인딩으로 구현했다. 3-7 M2 Access Directory와 3-8 A1 Evacuation/Access Archive 병치는 문서의 금지 해석(Group↔Tier 대응, 원인 확정, 연결 화살표)을 포함하지 않는다.
 26. Sector 04 Master의 stale 상태 문구를 정리했다. `4-2 ~ 4-8 Master outline only`를 8개 상세 Stage README 목록으로 바꾸고, Current Runtime Boundary를 `1-1 → 3-8 연결 + Sector 04 4-1~4-8 standalone` 현실에 맞췄다.
+27. Sector 04 Camera·Story를 정리했다. 8개 Stage README의 Camera 절을 전수 대조해 Sector 04는 문서가 per-zone zoom을 제안하는 유일한 Sector이며 8개 Stage 전부 Runtime `cameraZones`로 이미 구현돼 있음을 확인했고(4-2~4-4는 문서가 band를 주지 않아 Geometry에서 파생), Story는 문서의 "짧은 infrastructure status" 원칙대로 ENTRY 8개·POSITION 15개·기존 `story-display` 8개 cue 바인딩을 코드에 반영했다([인계 문서](./bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)). `LOWER ASCENT FEEDER ISOLATED`는 4-7에서만 노출되며 4-4는 `SEGMENTED / PARTIAL`까지만 표시한다.
 
 ## 열린 기획·구현 게이트
 
 1. Sector 02 Boss 위치·전투 시나리오와 `2-8 → 3-1` 전환 흐름
 2. Post-Sector 03 Boss와 `3-8 → 4-1` 전환
-3. Sector 04 Camera Zone과 Story trigger 코드 반영
-4. 2-3 Specialization의 실제 이름·효과·수치·선택 pool
-5. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
-6. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
-7. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
+3. 2-3 Specialization의 실제 이름·효과·수치·선택 pool
+4. NPC 역할·배치·대화 흐름과 Sector 06 엔딩·최종 완료 계약
+5. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영해야 한다. 400px 도달은 속도×수명 파생 하나만 쓰고 별도 사거리 상수를 두지 않는다.
+6. authored Sentry activation band와 Cover LOS는 인식 거리 760과 무관하게 encounter 제약으로 유지한다. 긴 인식 거리가 activation·LOS를 우회하지 않는다.
 
 개발이 준비됐고 기획 결정만 기다리는 항목의 우선순위 요청과 답변 작성란은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다.
 
