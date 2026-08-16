@@ -26,7 +26,7 @@ export class DebugPanel {
         this.onPointerDown = () => {
             this.pressStartedAt = this.windowTarget.performance.now();
         };
-        this.onPointerEnd = () => this.completeLongPress();
+        this.onDocumentPointerUp = () => this.completeLongPress();
         this.onPointerAbort = () => {
             this.pressStartedAt = null;
         };
@@ -80,9 +80,8 @@ export class DebugPanel {
             this.startAreaSelect.append(option);
         }
         this.trigger.addEventListener("pointerdown", this.onPointerDown);
-        this.trigger.addEventListener("pointerup", this.onPointerEnd);
+        this.documentTarget.addEventListener("pointerup", this.onDocumentPointerUp);
         this.trigger.addEventListener("pointercancel", this.onPointerAbort);
-        this.trigger.addEventListener("pointerleave", this.onPointerAbort);
         this.trigger.addEventListener("contextmenu", this.onContextMenu);
         this.trigger.addEventListener("click", this.onClickCapture, true);
         this.closeButton.addEventListener("click", this.onClose);
@@ -118,9 +117,8 @@ export class DebugPanel {
         this.pressStartedAt = null;
         this.hide();
         this.trigger.removeEventListener("pointerdown", this.onPointerDown);
-        this.trigger.removeEventListener("pointerup", this.onPointerEnd);
+        this.documentTarget.removeEventListener("pointerup", this.onDocumentPointerUp);
         this.trigger.removeEventListener("pointercancel", this.onPointerAbort);
-        this.trigger.removeEventListener("pointerleave", this.onPointerAbort);
         this.trigger.removeEventListener("contextmenu", this.onContextMenu);
         this.trigger.removeEventListener("click", this.onClickCapture, true);
         this.closeButton.removeEventListener("click", this.onClose);
