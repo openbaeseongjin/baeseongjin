@@ -10,5 +10,6 @@ export const MULTIPLAYER_TIMING = Object.freeze({
     ownerHardSnapDistance: 160,
     maxHitClaimPastTicks: 36,
     impactRecoveryRetentionTicks: 1200,
-    hitClaimPositionTolerance: 40
+    hitClaimPositionTolerance: 40,
+    spawnClaimPositionTolerance: 180
 });

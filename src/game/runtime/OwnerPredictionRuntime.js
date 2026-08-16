@@ -263,7 +263,9 @@ export class OwnerPredictionRuntime {
             const simulated = inputState.expand(batch, [this.ownerId]);
             const command = simulated.commands[0]?.command ?? this.simulation.idleOwnerCommand(this.ownerId);
             const previous = this.state();
-            const outcome = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick);
+            const outcome = this.simulation.advanceOwnerPrediction(this.ownerId, command, this.fixedDt, tick, {
+                allowFire: false
+            });
             this.recordPredictedOutcome(outcome, tick, previous);
             replayImpactsAtTick(tick);
         }
