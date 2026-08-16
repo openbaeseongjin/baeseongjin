@@ -52,11 +52,23 @@ const settingsMenu = new SettingsMenu({
 });
 const debugAreaIds = CURRENT_AUTHORED_AREA_CATALOG.areas.map(({ id }) => id);
 const debugSettings = new DebugSettings({ storage: audioStorage, validAreaIds: debugAreaIds });
+let debugTabRegistered = false;
 const debugPanel = new DebugPanel({
-    root: document.getElementById("debug-dialog"),
     trigger: document.getElementById("settings-trigger"),
     settings: debugSettings,
-    areaIds: debugAreaIds
+    areaIds: debugAreaIds,
+    onActivate: () => {
+        if (!debugTabRegistered) {
+            settingsMenu.registerTab({
+                id: "debug",
+                label: "디버그",
+                panel: document.getElementById("settings-panel-debug")
+            });
+            debugTabRegistered = true;
+        }
+        settingsMenu.show();
+        settingsMenu.activate("debug", { focus: true });
+    }
 });
 const audioSettingsPanel = new AudioSettingsPanel({
     root: document.getElementById("settings-panel-audio"),
