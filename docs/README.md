@@ -143,3 +143,4 @@
 | [`bsh/scenario/6/README.md`](./bsh/scenario/6/README.md) | `bsh` Sector 06 Rooftop/Evacuation 마스터플랜 — Open Sky/Structural Islands 공간 정체성, 기존 Wind·Sentry·Scanner·Patrol·Cutter 시스템 총복습(신규 시스템 없음), Rooftop Pad 03 도달·ACCESS DENIED·별도 Final Security Encounter 개념 |
 | [`bsh/scenario/6/6-1/README.md`](./bsh/scenario/6/6-1/README.md) | `bsh` Sector 06 첫 Stage(6-1) Blockout 후보·제작 규격 — Enemy/Wind 없는 순수 Open Sky 공간 문법 도입, 좌표 검증 완료 |
 | [`bsh/scenario/6/6-2/README.md`](./bsh/scenario/6/6-2/README.md) | `bsh` Known Wind Mastery Recall Stage(6-2) Blockout 후보·제작 규격 — 1-6 Fan A 현재 shipped 수치(continuous/500/falloff80) 재사용 확인, 좌표·Wind membership 검증 완료 |
+| [`bsh/scenario/6/6-3/README.md`](./bsh/scenario/6/6-3/README.md) | `bsh` Standard Sentry Mastery Recall Stage(6-3) Blockout 후보·제작 규격 — Cover 없는 Open-Sky body-path 회피, 실제 1-3 Sentry 좌표·activation·rules와 `cover-ends-los`/`cutter-fire` 판정식 대조 완료, 좌표 검증 완료 |
