@@ -5,10 +5,10 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 8d8d6e845ec5bbdd8abda2e098fa82703f50f6981eb51ee3640fb32120f22f70
 authored-area-sha256: 91d877421c2be171b28b8b3f1b0f322294ad1be92edd734b11806a071fa2d1eb
-stage-count: 40
-stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8
-reviewed-upstream: 5255f90b69788bf8f59b1d0aeaa7f6eb490e563d
-NOTE: scenario-source-sha256 / authored-area-sha256는 이번(#29/#30) 검토에서 재생성하지 않았다.
+stage-count: 42
+stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2
+reviewed-upstream: 17ea485751effbbc996e3cc1c2a1f88547944888
+NOTE: scenario-source-sha256 / authored-area-sha256는 이번(#29/#30/#31) 검토에서 재생성하지 않았다.
 `npm run check:scenario-integration -- --print`를 실행할 node/npm이 이 환경에 없어 값을 추측하지 않고 이전 값을 그대로 유지한다.
 -->
 
@@ -30,8 +30,8 @@ NOTE: scenario-source-sha256 / authored-area-sha256는 이번(#29/#30) 검토에
 
 ## 2026-08-16 확인 체크포인트
 
-- 확인 기준 upstream: `5255f90b69788bf8f59b1d0aeaa7f6eb490e563d` (`origin/main`, Sector 05 Master+8 Stage 추가(#577) 병합까지 포함한 clean base)
-- 상세 Stage 문서: **40개**, `1-1`부터 `5-8`까지
+- 확인 기준 upstream: `17ea485751effbbc996e3cc1c2a1f88547944888` (`origin/main`, Sector 06 Master 추가(#578) 병합까지 포함한 clean base)
+- 상세 Stage 문서: **42개**, `1-1`부터 `5-8` + Sector 06 `6-1`·`6-2`
 - 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-8` standalone; Sector 05는 Runtime 미저작)
 - 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.1과 4-1~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), `CurrentAuthoredAreaCatalog.js`, `Sector04AreaCatalog.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
@@ -44,7 +44,7 @@ NOTE: scenario-source-sha256 / authored-area-sha256는 이번(#29/#30) 검토에
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525); Camera는 8개 Stage 의도적 기본 카메라 확인, Story signage 28개 코드 반영 | Post-Sector 03 Boss→3-8/4-1 전환 미정 |
 | Sector 04 / 4-1~4-8 | Master REV 1.1과 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결; Camera Zone 8개 Stage 구현 확인, Story 바인딩 반영 완료; Gate 좌표·Cutter Fire opt-in 모델·Wind Strength 문서 정합 완료(#29) | Post-Sector 03 Boss→4-1 전환이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증 |
 | Sector 05 / 5-1~5-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | `NOT AUTHORED` / `NOT CONNECTED`; Runtime graybox는 Sector 06 Scenario 완료 후 HOLD(사용자 결정: Scenario-first) | Post-Sector 04 Boss→5-1 전환 미정; Sealed Surface/Service Hardpoint 정적 grappleable 규칙은 실제 코드 계약(`surface.grappleable === false`)과 대조 완료, 실제 Runtime 저작 필요 |
-| Sector 06 | Master, `OUTLINE`(상세 Stage 6-1~6-8은 아직 없음) | `NOT CONNECTED` | 상세 Stage 8개 저작, Post-Sector 05 Boss→6-1 전환, Final Security Encounter 상세 Boss 계약, NPC 역할·대화 계약과 엔딩·최종 전환 계약 필요 |
+| Sector 06 / 6-1~6-2 | Master와 상세 Stage 2/8(6-3~6-8은 아직 없음), `CROSS-REVIEWED` | `NOT CONNECTED` | 6-2 Wind(continuous/500/falloff80)는 1-6 Fan A shipped 수치와 정확히 일치 확인; 상세 Stage 6개 추가 저작, Post-Sector 05 Boss→6-1 전환, Final Security Encounter 상세 Boss 계약, NPC 역할·대화 계약과 엔딩·최종 전환 계약 필요 |
 
 ## 최근 반영된 시나리오 변화
 
@@ -79,6 +79,7 @@ NOTE: scenario-source-sha256 / authored-area-sha256는 이번(#29/#30) 검토에
 29. Sector 04 4-1~4-8 문서 전체를 shipped `Sector04AreaCatalog.js`와 재대조했다. 핵심 발견: 여러 문서(4-1 §10, 그리고 그걸 인용한 4-2/4-3/4-5/4-6/4-7)가 "4-1 Flow Route `A3→A4` 408.9px가 새 400px Hook Reach를 초과해 좌표 수정이 필요하다"고 반복 기술했으나 이는 **FALSE ALARM**이었다 — 4-1의 Mandatory Safe Route는 같은 구간을 `A3→M1→A4`로 우회해(§9) 이미 400px 이내(max 374.5px)이고, Flow Route는 4-1 문서 자체가 `OPTIONAL EXPRESSION`으로 명시한 skilled-only 지름길이라 Mandatory 진행에 영향이 없다. Shipped catalog도 원래 좌표(A4 `(-64,-800)`) 그대로이며 좌표 변경은 하지 않았다. 이 오분석이 반복 인용된 5개 파일의 관련 서술을 RESOLVED로 정정했다. 추가로: (a) 4-1 §9/§10 자체의 산술 오류(Safe Route margin `65.5px`→`25.5px`, `400−374.5`)와 자기모순("408.9px" 표 바로 아래 "400px보다 작다")을 고쳤다. (b) Master `§6/§8`과 `OPEN QUESTION #1`이 Cutter Fire를 여전히 "opt-out, harden 검토 중"으로 기술했으나 실제로는 `#513`에서 이미 `canCutRope = rules.includes("cutter-fire")` opt-in으로 구현됐음을 확인해 RESOLVED로 정리했다. (c) 4-3/4-5/4-8의 Wind Strength 360을 "Sector01 baseline 재사용"이라 기술한 서술을 정정 — 실제 Sector01 pulsed tuning은 500~800이며 360은 Sector04 고유 hypothesis였다(Cycle 1.75/0.70/1.40/0.30만 Sector01과 일치하는 precedent). 다만 360은 실제 shipped catalog가 그대로 사용하는 CURRENT RUNTIME 값이므로 "아직 미구현" 취급은 하지 않는다. (d) 4-2/4-3/4-4/4-5/4-6/4-7 6개 문서의 Gate/Panel worldObject 좌표가 실제 catalog와 어긋나 있어(주로 Y 32px, 일부 X도) 전부 실제 좌표로 정정했고, 4-8 D1 activation X 범위(`±192`→`±208`)도 정정했다. (e) 4-1 metadata 표의 Design Carry Build·Runtime Status·Art Status 문구를 현재 상태(Foundation CURRENT RUNTIME / First Specialization CONTENT BLOCKED, standalone catalog AUTHORED & VALIDATED)에 맞췄고 이 Runtime Status 표준 문구를 8개 문서 전체에 동일 적용했다. (f) 4-1 NEXT·4-3 NEXT nav 링크가 plain text였던 것을 실제 markdown 링크로 고쳤다. Runtime 코드는 변경하지 않았다.
 30. Sector 05 `CORPORATE ZONE` Master와 5-1~5-8 상세 Stage 8개를 신규 추가했다(`docs/bsh/scenario/5/`). Primary Spatial Rule은 `SEALED SURFACE`(`grappleable:false`) / `SERVICE HARDPOINT`(`grappleable:true`) 정적 규칙이며, 실제 Rope Targeting 코드(`RopePointerInput.js`의 `surface.grappleable === false` 제외 조건)와 대조해 새 Physics 없이도 성립함을 확인했다. Story는 Capacity(5-4) → Priority(5-5) → Authorization(5-6) → Consequence(5-7) → Responsibility/WHY + Rooftop Pad 03 탈출 목표(5-8) 순으로 disclosure ladder를 완성한다. 문서 자체 품질이 높아 Safe/Flow Route 산술·activation membership·collinearity 검증에서 9개 파일 전량 오류 0건이었다. 정정한 것은 Cutter Fire 모델 문구뿐이다: Master `§9`, 5-3 `§0-1`/`§8-3`(S1), 5-6 `§0-1`/`§8-7`(S2)이 여전히 옛 opt-out 모델(`!rules.includes("no-rope-cut")`)을 기술하고 있었고 5-3/5-6의 실제 Cutter Sentry rule list에도 `cutter-fire` 태그가 빠져 있어, 현재 opt-in 모델(`canCutRope = rules.includes("cutter-fire")`)에 맞춰 프로즈와 rule list를 모두 정정했다. 이 alignment 필요성은 5-7/5-8 문서가 스스로 "Later Alignment Queue"로 이미 정확히 짚어뒀던 항목이라 이번에 함께 반영했다. 5-7이 남겨둔 "Sector04 4-1 A4 known issue" 참조도 실제로는 FALSE ALARM(#29)이었음을 반영해 RESOLVED로 정정했다. Sector 05 Runtime authoring은 사용자 결정(`SECTOR 01~06 SCENARIO FIRST`)에 따라 Sector 06 Scenario 완료 후로 HOLD한다. Runtime 코드는 변경하지 않았다.
 31. Sector 06 `ROOFTOP / EVACUATION` Master Plan을 신규 추가했다(`docs/bsh/scenario/6/README.md`, 상세 6-1~6-8은 아직 없음). Sector06은 새 시스템 없이 기존 Wind·Standard Sentry·Access Scan Field·Patrol·Cutter를 Open Sky / Structural Island topology에서 한 번씩 총복습하는 최종 일반 구간이며, 6-8에서 Rooftop Pad 03 Shuttle에 도달하지만 `ACCESS DENIED`로 막혀 별도 Final Security Encounter(상세 Boss 계약 TBD)로 진입한다. Cutter Fire는 처음부터 opt-in(`cutter-fire ABSENT/PRESENT`) 모델로만 서술돼 정정할 opt-out 문구가 없었다. Master 자체의 `§0` snapshot과 `OPEN QUESTION #11`이 여전히 "Sector05는 문서 없음"·"5-3/5-6 Cutter wording 미정리"·"Sector04 A4 known issue"를 대기 항목으로 남겨뒀길래, 이번 통합에서 실제로는 전부 #576/#577로 이미 해소됐음을 반영해 RESOLVED로 정정했다. Sector06 Runtime authoring은 6-1~6-8 상세 작성 및 Full Game Audit 이후로 HOLD한다. Runtime 코드는 변경하지 않았다.
+32. Sector 06 첫 상세 Stage 2개(6-1 `SKYBREAK ACCESS`, 6-2 `CROSSWIND MASTS`)를 추가했다(`docs/bsh/scenario/6/6-1/`, `6-2/`). 6-1은 Enemy·Wind 없이 Open Sky 공간 문법만 도입하는 순수 geometry Stage다. 6-2는 1-6 Fan A Wind를 재사용하며, 문서가 주장한 수치(`direction (-1,0)`, `continuous`, `strength 500`, `falloff 80`)를 실제 `Sector01AreaCatalog.js`의 `sector-01-06:fan-a-wind`와 대조해 정확히 일치함을 확인했다. 6-2가 인용한 `windOccludingSurfaces()` 판정식(`windOcclusion === true || (collision !== false && oneWay !== true)`)과 `WIND_CONFIG`(`groundedFactor 0.35`, `shadowFactor 0.15`, `defaultFalloff 0`)도 `WorldForceField.js`/`config.js`와 정확히 일치했다. 두 문서 모두 Safe/Flow Route 거리·마진 계산을 재검산했고, 표에 기재된 값 자체는 오류가 없었다. 다만 6-2 `§12` Recovery 서술의 R1 좌표가 `(-544,-560)`으로 적혀 있어 `§8-1` 표·`§6` 지도의 `(-560,-560)`과 어긋났다(6-1의 R1 좌표를 복사한 흔적으로 보임 — 실제 6-1 R1도 `(-544,-560)`). 거리 표는 `(-560,-560)` 기준으로 정확히 맞았으므로 `§12`를 정정했다. 추가로 6-2의 NEXT nav 링크가 아직 존재하지 않는 6-3을 실제 markdown 링크로 가리키고 있던 것을, 다른 Sector들의 확립된 컨벤션(존재하지 않는 Stage는 plain text)에 맞춰 정정했다. Runtime 코드는 변경하지 않았다.
 
 ## 열린 기획·구현 게이트
 
