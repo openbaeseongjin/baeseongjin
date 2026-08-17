@@ -3,11 +3,11 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 82dadc1cfb2314054edb887377f4e6e154ae2709090d4c83a96755369653a29e
-authored-area-sha256: d3721f37b7d55af1cecd2543bab172175cba1410288d7a2b15cf5ca1871d1e7a
+scenario-source-sha256: 2c0b76c07ddac60bb51d11858d5feb0943a26407b63bc06f1589466a20300a3d
+authored-area-sha256: 8d5a94299075cd0492d294496328e6327c6f81824034b6ada016dc9f9d798dbe
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: f4dc2a9a2dd1258ee3f2e85956eea22a4c8f28dc
+reviewed-upstream: 9fdc35daedc6cbc249932240dd6daf48aedb2911
 -->
 
 ## 상태를 읽는 법
@@ -46,8 +46,8 @@ reviewed-upstream: f4dc2a9a2dd1258ee3f2e85956eea22a4c8f28dc
 
 ## 최근 반영된 시나리오 변화
 
-1. Sector 03은 3-1~3-8 상세 문서와 통합 Master까지 확장됐다. 3-2 이후 핵심은 Access Scan Field에 의존하지만 Runtime prototype과 Sector 03 authored catalog는 아직 없다.
-2. Sector 04는 Transit / Infrastructure Master와 4-1 `TRANSIT INTAKE`부터 4-8 `TRANSIT CONTROL TRUNK`까지 8개 상세 Stage로 확장됐다. 4-1 순수 geometry 후보는 준비됐지만 Sector 03 종료 전환은 미정이며, 4-2~4-8은 Runtime Area·Camera·Stable ID가 없어 `NOT CONNECTED`다. Master의 `4-2~4-8 outline only` 상태 문구는 현재 상세 문서 범위와 별도 정렬이 필요하다.
+1. **AUTHORING SNAPSHOT · SUPERSEDED BY #21/#22/#25/#28:** Sector 03은 3-1~3-8 상세 문서와 통합 Master까지 확장됐으나 당시에는 Access Scan Field와 authored catalog가 없었다. 현재 상태는 위 통합 표와 후속 항목을 따른다.
+2. **AUTHORING SNAPSHOT · SUPERSEDED BY #24/#26/#27/#29:** Sector 04 상세 문서를 먼저 확장하던 당시에는 4-2~4-8 Runtime Area·Camera·Stable ID가 없었다. 현재는 4-1~4-8 standalone `GRAYBOX READY`이며 메인 월드 연결만 남았다.
 3. #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Foundation ID와 Specialization ID의 의미 체계는 계속 분리한다.
 4. #478은 1-1 C04와 1-2 C02에서 보이는 발판·Anchor의 좌우·상하 관계와 상대 폭을 Approved Blockout·Area Catalog에 맞춘 구조 가이드로 다시 생성했다. 이전 구조 불일치 이미지는 `RETIRED / STRUCTURE MISMATCH`로 보존하고 새 이미지를 현재 승인 기준으로 전환했다. Runtime Geometry와 Collision은 변경하지 않았다.
 5. #506은 1-3 Route Choice Camera에서 D 위·C 왼쪽 중단·B 아래, Safe Ledge·R1·Safe Cover·Upper Cover·오른쪽 벽 Sentry 구조를 고정하고, 약 48px Player와 C live Rope·Red TRACK Telegraph 각 한 줄만 보이는 승인 Art Reference로 교체했다. 이전 `03`은 Rope와 경로 선의 의미가 겹쳐 `RETIRED / ROPE-ROUTE MISMATCH`로 보존했으며 Runtime Geometry·Camera·Sentry 수치는 변경하지 않았다. 이로써 Sector 01 1-1~1-4의 구조 정합 재생성이 완료됐다.
@@ -95,6 +95,7 @@ reviewed-upstream: f4dc2a9a2dd1258ee3f2e85956eea22a4c8f28dc
 44. 트리거를 오브젝트 상대 파생형으로 이관했다. `AreaDefinition.objectTriggerSpec(anchor, width, height, offset)`로 저작하고 `resolveObjectTriggerBounds(position, spec)` 하나가 bounds를 계산하며, `AuthoredWorldAssembler`가 조립 시 오브젝트의 `trigger`→`bounds`, `activationSpec`→`activation`, wind-source의 `zone`→windZone bounds를 확정한다. 오브젝트를 옮기면 트리거가 자동으로 따라가며(회귀 테스트 포함), 검증기가 스펙+하드코딩 동시 존재와 파생 wind zone의 잔여 bounds를 거부한다. 이관 범위: 1-3 scanner trigger, 전 Sentry activation, 전 Patrol Drone activation, wind-source가 있는 Wind Zone(1-6 fan-a/b, 1-7 vent, 1-8 final vent). wind-source가 없는 존(1-7 residual-airflow, 4-3/4-5/4-7/4-8 Transit Wake)은 Area 수준 특징이므로 저작 bounds를 유지한다. Foundation별 Specialization 2종(총 6종), 1-8 Checkpoint 뒤 Boss01 `CONTAINMENT GANTRY C-01`, 일반 Timer Prototype `960초 / Gate +45초 / cap 960초 / collapse 80px/s`, 예선 핵심 범위 NPC 제외, 6-8 뒤 `PAD SECURITY WARDEN P-03 → Access Restored → 개별 Boarding → Escape`를 구현 계약으로 기록했다. 동시에 1-7의 조기 `CONTAINMENT VIOLATION / ACTIVE`가 현재 Runtime에도 존재하고 Cutter가 `cutter-fire` positive opt-in임을 확인했다. 이번 변경은 기획 계약만 확정하며 P0 Runtime/문서 정렬과 기능 구현은 후속 작업이다.
 45. 앵커 축소 스크립트 실수로 커밋 상태로 되돌아가 소실된 4개 카탈로그 변경분(exitBlock 이관·출구 데크 offset 125·층 격벽 봉쇄·트리거 스펙)을 재구축하고, 600px 연쇄 링크 허용치(한 반동 포함)에 맞춰 32개 Area의 그래플 앵커를 순차 그리디로 축소했다. 카탈로그별 제거: s01 1-1 b, 1-2 b/d, 1-3 b/d, 1-4 a/b/c, 1-5 b/a/d/e/f/h, 1-6 a/c/e/f, 1-7 b/c/d/e/f/g, 1-8 b/c/e/g/h; s02 2-1 g1/g2/g4, 2-2 g1~g5, 2-3 g1/g2, 2-4 g2/g4/g6/g8/g9, 2-5 g1/g2/g3/g5/g6/g7, 2-6 g1/g2/g4/g6/g7, 2-7 g1/g3/g5/g6/g8/g9/g10, 2-8 g2a/g3/g5/g7/g9/g10/g11; s03 3-1 g1/g3/g4, 3-2 g1/g4/g5, 3-3 g3/g4/g5, 3-4 s0/gs1/gs2/g6, 3-5 g2/g3, 3-6 g1/g3/g4, 3-7 s1/s2/s3/s4/g4, 3-8 g1/w1/e1/w2/e2/g4/g6; s04 4-1 a3/a6, 4-2 c2/a4, 4-3 a0/w2/a5/a6, 4-4 a1/a3/a4/a5, 4-5 a0/w2/w4, 4-6 a0/a3/a5, 4-7 a0/w2/w3/a5, 4-8 a0/c2/a3/a4/a5. 파생 트리거 이관(s01/s04 `activationSpec`·wind `zone`, s02/s03 patrolDrone `activationSpec` 헬퍼)과 600px 초과 링크 수정(3-7 S2→C3→C2 재정렬, 3-8 W/E ±192 축소)을 함께 적용했다. 검증기의 `grapple-surface-isolated` 기본 한도가 hook reach 400px였던 것을 `GRAPPLE_LINK_BUDGET = 600`으로 올리고(러닝타임 물리 hook reach 400px는 유지), 카탈로그 회귀 테스트의 anchor 좌표·수치 기대값을 축소 결과에 맞췄다.
 46. 1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 바람이 나오지 않던 근본 원인을 수정했다. 트리거 스펙 이관 스크립트의 wind-source 정규식이 파일에서 첫 번째 wind-source(fan-a)부터 lazy 매칭해 모든 Zone에 fan-a 좌표로 offset을 계산해, 세 Zone의 파생 bounds가 플레이 영역 밖(-1184, -1824/-1696/-2032)에 찍혔다. 세 `zone` 스펙을 승인 좌표(fan-b (-352,-1280,704,384), 1-7 vent (-352,-1184,704,384), 1-8 vent (-384,-1504,768,448))에서 파생하도록 교정하고, 검증기가 wind-source 파생 Zone도 `resolveObjectTriggerBounds`로 bounds를 계산해 영역 안을 검사하게 강화해 같은 오염을 거부한다. 승인 bounds를 고정한 회귀 테스트도 추가했다.
+47. DeepSeek 구현 전수 검토 후 Camera/Story/Wind 상태 문서 drift와 Scanner 무피드백을 정렬했다. Sector 01 1-5~1-8과 Sector 02 2-1~2-8 Production Alignment에는 Current Runtime Override를 추가하고 과거 미구현 본문을 `AUTHORING SNAPSHOT`으로 표시했다. Sector 03 Master·Scenario Art 기준은 24개 Area 연결, 의도적 기본 Camera, Stable ID 현실로 갱신했다. Runtime은 Access Scan phase를 scene snapshot으로 노출하고 공용 overlay가 AVAILABLE/WARNING/LOCKED/RESET을 색+형태로 구분한다. Area `storyTriggers`는 시나리오 기획 인벤토리로만 유지하고 assembled world에서 제외했으며, exit panel의 미사용 cue 경로를 제거해 Story 문구는 entry·position·`story-display`·objective/gate binding만 소유한다. 2-8 Transfer Control은 A/B/C 결과 뒤 `PRIORITY ACCESS: ACTIVE`를 반드시 표시한다.
 
 ## 열린 기획·구현 게이트
 

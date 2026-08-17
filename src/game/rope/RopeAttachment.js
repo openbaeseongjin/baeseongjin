@@ -1,5 +1,14 @@
 import { rotateVector } from "../physics/AngularMotion.js";
 
+export function ropeLaunchHandPoint(player, handOffset, aimWorld) {
+    if (!player?.position) throw new Error("ropeLaunchHandPoint requires player.position");
+    if (!handOffset) throw new Error("ropeLaunchHandPoint requires handOffset");
+    if (!aimWorld) throw new Error("ropeLaunchHandPoint requires aimWorld");
+    const sign = aimWorld.x < player.position.x ? -1 : 1;
+    const offset = rotateVector({ x: Math.abs(handOffset.x) * sign, y: handOffset.y }, player.angle ?? 0);
+    return { x: player.position.x + offset.x, y: player.position.y + offset.y };
+}
+
 export function ropeAttachmentPoint(player, rope = player?.rope) {
     if (!player?.position) throw new Error("ropeAttachmentPoint requires player.position");
     if (!rope?.isAttached) {

@@ -673,4 +673,33 @@ export function run() {
         ],
         ["LOWER ASCENT FEEDER", "ISOLATED"]
     );
+
+    const evacuationPlatform = new AuthoredStoryPresentation();
+    let entryPresentation = evacuationPlatform.update(0, { currentAreaId: "sector-02-08" });
+    while (entryPresentation) {
+        entryPresentation = evacuationPlatform.update(entryPresentation.durationSeconds, {
+            currentAreaId: "sector-02-08"
+        });
+    }
+    const transferControl = {
+        eventType: "objective-completed",
+        objectiveId: "sector-02-08:transfer-control-read"
+    };
+    const transferStory = [];
+    let transferPresentation = evacuationPlatform.update(0, {
+        currentAreaId: "sector-02-08",
+        events: [transferControl]
+    });
+    while (transferPresentation) {
+        transferStory.push([transferPresentation.title, transferPresentation.detail]);
+        transferPresentation = evacuationPlatform.update(transferPresentation.durationSeconds, {
+            currentAreaId: "sector-02-08"
+        });
+    }
+    assert.deepEqual(transferStory, [
+        ["EVACUATION GROUP A", "TRANSFER COMPLETE"],
+        ["EVACUATION GROUP B", "TRANSFER COMPLETE"],
+        ["EVACUATION GROUP C", "TRANSFER SUSPENDED"],
+        ["PRIORITY ACCESS", "ACTIVE"]
+    ]);
 }

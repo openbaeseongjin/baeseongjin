@@ -1,6 +1,7 @@
 import { CameraWorldRenderer, SceneRendererComposition } from "./SceneRendererComposition.js";
 import {
     AttachRangeRenderer,
+    AccessScanSurfaceRenderer,
     AttachmentCandidateRenderer,
     AuthoredWorldObjectRenderer,
     BackdropRenderer,
@@ -74,6 +75,7 @@ export class SpriteSceneRenderer {
         const actorRenderers = new CameraWorldRenderer([
             new AuthoredAreaStructureRenderer(),
             new AuthoredWorldObjectRenderer(),
+            new AccessScanSurfaceRenderer(),
             new WindParticleRenderer(),
             new AttachRangeRenderer(),
             new RopeRenderer(localRopes),

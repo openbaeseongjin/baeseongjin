@@ -105,8 +105,6 @@ export function exitBlock({
     nextAreaId,
     panelObjectiveId,
     gateId = `${areaId}:gate`,
-    panelCueIds = [],
-    gateCueIds = [],
     completionMode,
     panelProperties = {},
     gateProperties = {}
@@ -143,13 +141,11 @@ export function exitBlock({
             interactionRadius: spec.interactionRadius,
             objectiveId: panelObjectiveId,
             gateId,
-            ...(panelCueIds.length ? { cueIds: Object.freeze(panelCueIds) } : {}),
             ...panelProperties
         }),
         gateVisual: worldObject(`${areaId}:exit-gate`, "gate", doorX, deckTopY, {
             coordinateAnchor: "bottom-center",
             gateId,
-            ...(gateCueIds.length ? { cueIds: Object.freeze(gateCueIds) } : {}),
             ...gateProperties
         }),
         reachBounds: triggerBounds(
@@ -173,6 +169,7 @@ export function defineArea(definition) {
         objectives: [],
         windZones: [],
         scannerGroups: [],
+        // Scenario-planning inventory only. The assembler intentionally does not expose this as runtime state.
         storyTriggers: [],
         routes: ["safe", "flow", "recovery"],
         cameraZones: [],

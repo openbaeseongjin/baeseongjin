@@ -4,6 +4,15 @@
 
 본 문서는 [1-7 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 1-7은 새 Mechanic 없이 Rope·Augment·Sentry·Wind를 처음 한 공간에서 겹치는 Stage다. 좌표 정확도는 1-1~1-4 수준으로 높지만, Camera·Story·Art는 1-5·1-6과 마찬가지로 아직 없다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Foundation 선택·세 효과가 구현되어 Safe/Flow/Build Route 차이를 Runtime에서 검증할 수 있다.
+- `cameraZones`는 실제 객체로 구현되어 Approach·Security·Decision·Pressure·Relief·Bypass 구도를 사용한다.
+- Story는 entry, `PRESSURE LIMIT EXCEEDED`, `CONTAINMENT VIOLATION ACTIVE`, bypass objective/gate binding으로 핵심 흐름이 구현됐다.
+- `storyTriggers`는 시나리오 기획 인벤토리이며 Bypass 이후 환경 상태 변화는 별도 World presentation 범위다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§4·§5·§7~§9의 Foundation/Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다. 좌표와 미검증 Knockback+Wind 기록은 유지한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

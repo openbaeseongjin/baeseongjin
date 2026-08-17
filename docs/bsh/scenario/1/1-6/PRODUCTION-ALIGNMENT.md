@@ -4,6 +4,15 @@
 
 본 문서는 [1-6 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 1-6은 Sector 01에서 Wind가 처음 등장하는 Stage이며, Wind 물리 자체는 실제로 구현되어 있다 — 이는 1-1~1-5와 구분되는 1-6 고유의 좋은 소식이다. 단 Approved Blockout, Art Reference, Camera Zone, Story Trigger는 1-5와 마찬가지로 아직 없다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Wind Shadow, grounded 감쇠(`0.35`), Zone falloff(`80`)가 구현됐고 Fan A/B 시각은 같은 Wind state를 읽는다.
+- `cameraZones`는 실제 객체로 구현되어 `airflow-preview → fan-a → neutral-deck → fan-b → exit`을 사용한다.
+- Story는 `COOLING DISTRIBUTION / AIRFLOW UNSTABLE` entry와 exit-panel objective binding이 구현됐다. `storyTriggers`는 시나리오 기획 인벤토리다.
+- Approved Blockout과 실제 브라우저 Wind/Camera 가독성 검증은 여전히 필요하다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§2·§4·§5·§8의 Wind Shadow/Grounded/Falloff/Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다. Geometry 비교 기록은 유지한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

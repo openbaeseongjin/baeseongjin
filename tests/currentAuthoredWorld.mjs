@@ -88,8 +88,23 @@ export function run() {
     assert.equal(
         teleportSim.worldProgress.snapshot().currentAreaId,
         "sector-03-02",
-        "a debug teleport must advance the shared progress to the target area"
+        "a debug teleport must reset the shared progress to the target area"
     );
+    assert.equal(teleportSim.activeCheckpoint.id, "checkpoint:sector-03-02");
     assert.equal(teleportOwner.ropeObject.rope.isAttached, false, "a debug teleport must reset the rope");
+    teleportSim.respawnPlayerAtCheckpoint(teleportOwner, "fall");
+    assert.deepEqual(
+        { x: teleportOwner.physics.position.x, y: teleportOwner.physics.position.y },
+        { x: teleportArea.entry.x, y: teleportArea.entry.y },
+        "a fall after debug teleport must respawn at the selected area's entry checkpoint"
+    );
+
+    const firstArea = teleportSim.world.areas[0];
+    teleportSim.debugTeleportPlayer(teleportOwner.id, firstArea.id);
+    const rewoundProgress = teleportSim.worldProgress.snapshot();
+    assert.equal(rewoundProgress.currentAreaId, firstArea.id);
+    assert.deepEqual(rewoundProgress.completedObjectiveIds, []);
+    assert.deepEqual(rewoundProgress.crossedGateIds, []);
+    assert.equal(teleportSim.activeCheckpoint.id, `checkpoint:${firstArea.id}`);
     assert.equal(teleportSim.debugTeleportPlayer(teleportOwner.id, "missing-area"), null);
 }

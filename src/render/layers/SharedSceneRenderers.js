@@ -1,5 +1,5 @@
-import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
-import { ropeHookReach } from "../../game/config.js";
+import { ropeAttachmentPoint, ropeLaunchHandPoint } from "../../game/rope/RopeAttachment.js";
+import { ROPE_CONFIG, ropeHookReach } from "../../game/config.js";
 import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
@@ -222,14 +222,92 @@ function drawWindStreaks(context, zone, intensity, timeSeconds) {
 }
 
 export class WindParticleRenderer {
-    draw({ context, scene, presentationTimeSeconds = 0 }) {
+    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
         const windZones = scene.world.windZones ?? [];
+        const visibleZones = windZones.filter((zone) =>
+            isVisible(viewport, {
+                minX: zone.bounds.x,
+                minY: zone.bounds.y,
+                maxX: zone.bounds.x + zone.bounds.width,
+                maxY: zone.bounds.y + zone.bounds.height
+            })
+        );
         const windStates = scene.windStates ?? [];
         const stateById = new Map(windStates.map((state) => [state.id, state]));
-        for (const zone of windZones) {
+        for (const zone of visibleZones) {
             const intensity = windVisualIntensity(zone, stateById.get(zone.id) ?? null);
             drawWindStreaks(context, zone, intensity, presentationTimeSeconds);
         }
+        renderStats?.recordCollection("windZones", windZones.length, visibleZones.length);
+    }
+}
+
+const ACCESS_SCAN_STYLE = Object.freeze({
+    AVAILABLE: Object.freeze({ color: "#67e8f9", lineWidth: 3 }),
+    WARNING: Object.freeze({ color: "#fbbf24", lineWidth: 5 }),
+    LOCKED: Object.freeze({ color: "#fb5b45", lineWidth: 6 }),
+    RESET: Object.freeze({ color: "#94a3b8", lineWidth: 3 })
+});
+
+function surfaceMidpoint(surface) {
+    const vertices = surface.vertices;
+    const total = vertices.reduce((sum, vertex) => ({ x: sum.x + vertex.x, y: sum.y + vertex.y }), { x: 0, y: 0 });
+    return { x: total.x / vertices.length, y: total.y / vertices.length };
+}
+
+function drawAccessScanMarker(context, surface, state) {
+    const style = ACCESS_SCAN_STYLE[state.phase] ?? ACCESS_SCAN_STYLE.RESET;
+    const vertices = surface.vertices;
+    const midpoint = surfaceMidpoint(surface);
+    context.save();
+    context.strokeStyle = style.color;
+    context.fillStyle = style.color;
+    context.lineWidth = style.lineWidth;
+    context.setLineDash?.(state.phase === "WARNING" ? [12, 7] : state.phase === "RESET" ? [4, 8] : []);
+    context.beginPath();
+    context.moveTo(vertices[0].x, vertices[0].y);
+    for (let index = 1; index < vertices.length; index += 1) {
+        context.lineTo(vertices[index].x, vertices[index].y);
+    }
+    if (vertices.length > 2) context.closePath();
+    context.stroke();
+    context.setLineDash?.([]);
+
+    if (state.phase === "AVAILABLE") {
+        context.beginPath();
+        context.arc(midpoint.x, midpoint.y, 5, 0, Math.PI * 2);
+        context.fill();
+    } else if (state.phase === "WARNING") {
+        context.beginPath();
+        context.moveTo(midpoint.x - 10, midpoint.y - 8);
+        context.lineTo(midpoint.x, midpoint.y + 2);
+        context.lineTo(midpoint.x + 10, midpoint.y - 8);
+        context.stroke();
+    } else if (state.phase === "LOCKED") {
+        context.beginPath();
+        context.moveTo(midpoint.x - 9, midpoint.y - 9);
+        context.lineTo(midpoint.x + 9, midpoint.y + 9);
+        context.moveTo(midpoint.x + 9, midpoint.y - 9);
+        context.lineTo(midpoint.x - 9, midpoint.y + 9);
+        context.stroke();
+    } else {
+        context.strokeRect?.(midpoint.x - 8, midpoint.y - 8, 16, 16);
+    }
+    context.restore();
+}
+
+export class AccessScanSurfaceRenderer {
+    draw({ context, scene, viewport, renderStats }) {
+        const stateById = new Map((scene.accessScanStates ?? []).map((state) => [state.id, state]));
+        const surfaces = (scene.world.surfaces ?? []).filter(({ grappleAccessGroup }) => grappleAccessGroup);
+        const visible = surfaces.filter(
+            (surface) =>
+                stateById.has(surface.grappleAccessGroup) && isVisible(viewport, boundsForVertices(surface.vertices))
+        );
+        for (const surface of visible) {
+            drawAccessScanMarker(context, surface, stateById.get(surface.grappleAccessGroup));
+        }
+        renderStats?.recordCollection("accessScanSurfaces", surfaces.length, visible.length);
     }
 }
 
@@ -848,7 +926,12 @@ export class RopeShotRenderer {
             y: shot.origin.y + shot.direction.y * distance
         };
         const angle = Math.atan2(shot.direction.y, shot.direction.x);
-        const body = player?.position ?? shot.origin;
+        const body = player?.position
+            ? ropeLaunchHandPoint(player, ROPE_CONFIG.handOffset, {
+                  x: player.position.x + shot.direction.x,
+                  y: player.position.y + shot.direction.y
+              })
+            : shot.origin;
         context.save();
         drawRopeShotLine(context, body, tip);
         drawRopeShotTrail(context, tip, shot.direction, distance);

@@ -31,6 +31,17 @@ export function run() {
     const second = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 9182, floorY: 320 });
     const currentWorld = assembleAuthoredWorld(CURRENT_AUTHORED_AREA_CATALOG, { seed: 9182, floorY: 320 });
 
+    assert.ok(SECTOR_01_AREA_CATALOG.areas[0].storyTriggers.length > 0, "scenario plans retain story inventory");
+    assert.equal(
+        Object.hasOwn(currentWorld.areas[0], "storyTriggers"),
+        false,
+        "scenario story inventory must not masquerade as a runtime presentation contract"
+    );
+    const firstExitPanel = currentWorld.objects.find(({ id }) => id === "sector-01-01:exit-panel");
+    const finalTransferPanel = currentWorld.objects.find(({ id }) => id === "sector-02-08:exit-panel");
+    assert.equal(firstExitPanel.cueIds, undefined, "exit-panel prose is owned by objective presentation");
+    assert.equal(finalTransferPanel.cueIds, undefined, "final transfer prose is owned by objective presentation");
+
     for (const area of SECTOR_01_AREA_CATALOG.areas) {
         const grappleTargets = area.surfaces.filter(({ kind }) => kind === "grapple-target");
         const grappleLandmarks = area.objects.filter(({ kind }) => kind === "grapple-landmark");

@@ -1,8 +1,7 @@
 import { closestPointOnSurface } from "../world/WorldGenerator.js";
 import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
-import { releaseRopeFromBody, ropeAttachmentPoint } from "../rope/RopeAttachment.js";
-import { rotateVector } from "../physics/AngularMotion.js";
+import { releaseRopeFromBody, ropeAttachmentPoint, ropeLaunchHandPoint } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
 import { createInputCapabilityMixin } from "./InputCapability.js";
 
@@ -57,12 +56,7 @@ export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, 
 }
 
 export function launchHandPosition(owner, ropeConfig, aimWorld) {
-    const sign = aimWorld.x < owner.physics.position.x ? -1 : 1;
-    const offset = rotateVector(
-        { x: Math.abs(ropeConfig.handOffset.x) * sign, y: ropeConfig.handOffset.y },
-        owner.physics.angle
-    );
-    return { x: owner.physics.position.x + offset.x, y: owner.physics.position.y + offset.y };
+    return ropeLaunchHandPoint(owner.physics, ropeConfig.handOffset, aimWorld);
 }
 
 function launchAimDirection(owner, ropeConfig, aimWorld, candidate = null) {

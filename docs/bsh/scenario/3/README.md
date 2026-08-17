@@ -14,7 +14,7 @@
 | New Rope Mode | NONE |
 | New Input | NONE |
 | New Augment in Sector 03 General Stages | NONE — Growth HOLD |
-| Primary New Security Mechanic | ACCESS SCAN FIELD — DESIGN SELECTED / RUNTIME GATE |
+| Primary New Security Mechanic | ACCESS SCAN FIELD — RUNTIME PROTOTYPE INTEGRATED / TELEGRAPH IMPLEMENTED |
 | Security Shutter | NOT USED in Sector 03 General Stages |
 | New Enemy Type | NONE |
 | Reused Enemy | Patrol Drone T1 |
@@ -22,16 +22,16 @@
 | General Stages | 8 authored progression regions |
 | Stage 03-8 Canonical | REV 1.1 FREE-WEAVE — merged to current GitHub main via PR #467 |
 | Sector 03 → 04 | Transit / Infrastructure 방향, 정확한 Boss / Transition 순서 TBD |
-| Current Runtime | Sector 01 + Sector 02 only; Sector 03 not connected |
-| Approved Gameplay Art | HOLD until Sector 03 Runtime Area / Camera Zone / Stable IDs exist |
+| Current Runtime | Sector 01 → Sector 03, 24개 Area 연결; Sector 04는 standalone |
+| Approved Gameplay Art | Runtime·Stable ID·기본 Camera 확인 완료; Stage별 Approved Blockout과 exact Camera Shot 확정 전 HOLD |
 
 ---
 
 ## 0. Source-of-Truth / Integration Status
 
-### CURRENT MAIN AT INTEGRATION
+### AUTHORING SNAPSHOT AT REV 1.2
 
-REV 1.2 통합 정리 시점 최신 `main` HEAD:
+REV 1.2 문서 통합 당시의 고정 authoring snapshot이며 현재 main 상태는 [`scenario-development-integration.md`](../../../scenario-development-integration.md)가 소유한다.
 
 ```text
 08db2906db9bc56d8a3f86c7bb030e99e6d27344
@@ -150,24 +150,26 @@ Sector 03 내부에서 충돌 시:
 SECTOR 01
 +
 SECTOR 02
++
+SECTOR 03
 ```
 
-만 assemble한다.
+를 하나의 연속 authored world로 assemble한다.
 
 현재 Revision:
 
 ```text
-sector-01-rev3-sector-02-rev1-v2
+sector-01-rev3-sector-02-rev1-sector-03-rev1-v1
 ```
 
 즉:
 
 ```text
 SECTOR 03 DOCUMENT SET
-= authored design spec
+= authored design + production alignment
 
 SECTOR 03 RUNTIME
-= NOT YET CONNECTED
+= MOCK INTEGRATED (3-1 → 3-8)
 ```
 
 ### Current Implemented Foundations
@@ -186,25 +188,13 @@ generic optional cover LOS capability
 multiplayer authored-world foundation
 ```
 
-### Missing Core Dependency
+### Current Runtime Boundary
 
-아직 구현 확인되지 않음:
-
-```text
-ACCESS SCAN FIELD dynamic state
-grappleAccessGroup
-phase-based effective attach eligibility
-Sector 03 authored area catalog
-Sector 03 camera zones / stable runtime IDs
-```
-
-따라서 Sector 03의 핵심 Production Gate:
-
-```text
-ACCESS SCAN FIELD PROTOTYPE
-```
-
-다.
+- `AccessScanField`가 AVAILABLE/WARNING/LOCKED/RESET을 결정적으로 계산하고 controlled surface의 새 Rope attach만 제한한다.
+- Scanner phase는 scene snapshot으로 전달되며 공용 overlay가 색뿐 아니라 solid/dash/chevron/X/box 형태로 네 상태를 구분한다.
+- 3-1~3-8 Area Catalog, stable object/surface IDs와 Stage별 `PRODUCTION-ALIGNMENT.md`가 존재한다.
+- Sector 03은 의도적으로 custom Camera Zone을 두지 않고 공용 기본 Camera를 사용한다. `Camera Zone 없음`은 구현 누락이 아니다.
+- 남은 Production Gate는 전체 등반·모바일 가독성·두 기기 phase 일치 플레이테스트와 Stage별 Approved Blockout이다.
 
 ---
 
@@ -1864,30 +1854,33 @@ ONE GAMEPLAY CAMERA SHOT
 
 ```text
 RUNTIME AREA
-NONE
+3-1 → 3-8 MOCK INTEGRATED
 
-CAMERA ZONE
-NONE
+CAMERA
+DEFAULT CAMERA INTENTIONAL · STAGE CUSTOM ZONE NONE
+
+STABLE IDS / STORY
+IMPLEMENTED
 ```
 
 따라서:
 
 ```text
 APPROVED GAMEPLAY ART
-HOLD
+HOLD FOR STAGE BLOCKOUT / EXACT CAMERA SHOT
 ```
 
 ---
 
 ## 33. Runtime Implementation Order
 
-### P0 — Scanner Spike
+### COMPLETED P0 — Scanner Runtime + Telegraph
 
 ```text
-ACCESS SCAN FIELD
+ACCESS SCAN FIELD + CONTROLLED SURFACE TELEGRAPH
 ```
 
-단독 prototype.
+공용 GameSimulation과 renderer에 통합된 prototype.
 
 검증:
 
@@ -2005,19 +1998,19 @@ ACCESS SCAN FIELD
 
 Runtime Spike.
 
-### REMAINING P1 — Sector 03 Authored Runtime
+### COMPLETED P1 — Sector 03 Authored Runtime
 
 ```text
 Sector 03 Area Catalog
 3-1 → 3-8 integration
-Camera Zones
+Intentional default Camera
 Stable IDs
-Story triggers
+Story entry / position / display bindings
 ```
 
-### REMAINING P2 — Production Alignment
+### COMPLETED P2 — Production Alignment
 
-Sector 03 Runtime이 생긴 뒤:
+Stage별 `PRODUCTION-ALIGNMENT.md`가 다음 Runtime 경계를 기록한다.
 
 ```text
 README vs Runtime coordinates
@@ -2030,14 +2023,14 @@ Gate progression
 
 을 Stage별 `PRODUCTION-ALIGNMENT.md`로 검증.
 
-### REMAINING P3 — Approved Gameplay Art
+### REMAINING P3 — Approved Blockout / Gameplay Art
 
-Runtime / Camera Zone / Stable ID가 안정된 이후만 진행.
+Runtime·기본 Camera·Stable ID는 안정됐다. 이제 Stage별 Approved Blockout과 대표 Camera Shot의 exact visible object count를 먼저 확정한다.
 
 현재는:
 
 ```text
-HOLD
+HOLD FOR BLOCKOUT, NOT FOR RUNTIME
 ```
 
 

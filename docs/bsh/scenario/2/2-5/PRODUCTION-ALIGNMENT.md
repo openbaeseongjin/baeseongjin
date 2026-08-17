@@ -4,6 +4,14 @@
 
 본 문서는 [2-5 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-5는 Sector 02의 첫 명시적 Evacuation Story Pressure Stage다. 지형·Gate 좌표는 README와 완전히 일치하며, Upper Transit Gate의 `grappleable:false` 봉쇄까지 정확히 구현되어 있다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
+- Evacuation Walkway entry와 Assembly/Upper Transit 위치 Story가 구현됐다.
+- `storyTriggers`는 시나리오 기획 인벤토리다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

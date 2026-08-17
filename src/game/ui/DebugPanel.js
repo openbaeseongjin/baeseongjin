@@ -69,7 +69,9 @@ export class DebugPanel {
         if (!this.metricsInput || !this.startAreaSelect || !this.applyButton) {
             throw new Error("DebugPanel is missing panel controls");
         }
+        const existingAreaIds = new Set([...this.startAreaSelect.options].map(({ value }) => value));
         for (const areaId of this.areaIds) {
+            if (existingAreaIds.has(areaId)) continue;
             const option = this.documentTarget.createElement("option");
             option.value = areaId;
             option.textContent = areaId;

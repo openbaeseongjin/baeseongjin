@@ -1287,6 +1287,12 @@ const OBJECTIVE_PRESENTATIONS = Object.freeze({
             title: "EVACUATION GROUP C",
             detail: "TRANSFER SUSPENDED",
             durationSeconds: 1.3
+        }),
+        Object.freeze({
+            id: "sector-02-08:priority-access",
+            title: "PRIORITY ACCESS",
+            detail: "ACTIVE",
+            durationSeconds: 1.2
         })
     ])
 });

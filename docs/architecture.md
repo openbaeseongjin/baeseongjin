@@ -61,6 +61,7 @@ index.html
 - scene renderer는 동일한 읽기 전용 scene snapshot과 viewport 계약을 받는다. 앱·시뮬레이션·네트워크 계층은 선택된 프로필이나 스프라이트 자산 형식을 해석하지 않는다.
 - 도트 프로필은 별도 scene renderer로 제공한다. 프로필별 분기를 `GameApp`, `MultiplayerGameApp`, 시뮬레이션 객체에 흩뜨리지 않고 factory 등록 경계에서만 선택한다.
 - `SpriteAnimation`은 프레임 사각형과 지속 시간을 불변 데이터로 보관하고 외부에서 받은 경과 시간으로 현재 프레임을 결정한다. `SpriteCanvasPainter`는 Canvas의 이미지 보간을 끄고 원본 프레임, anchor, 반전과 목적 크기만 그리며 자산 로딩이나 게임 시간을 소유하지 않는다.
+- 싱글 렌더 보간은 display frame 시작 상태가 아니라 마지막 fixed step의 직전·직후 snapshot(`N-1 → N`)만 사용한다. `GameApp.update()`가 각 step 직전에 previous snapshot을 교체하고, step이 없는 display frame은 같은 두 snapshot에서 증가한 alpha를 사용한다. catch-up으로 여러 step이 실행돼도 display frame 전체 이동을 한 번에 보간하지 않으며 포탈·부활처럼 96px을 넘는 전이는 최신 상태로 snap한다.
 - `PlayerSpriteManifest`는 도구 중립 manifest를 `PlayerSpriteDefinition`으로 정규화하고, definition은 atlas ID로 찾는 여러 source·atlas/frame·출력 크기, anchor·offset, 상태별 clip과 명시적 fallback을 하나의 불변 계약으로 검증한다. `SpriteImageAssetSet`은 모든 atlas의 준비·실패 상태와 ID별 이미지를 소유한다. player renderer는 frame에 기록된 atlas ID와 사각형만 소비하며 자산 배치나 생성 도구를 추측하지 않는다. 상세 교환 형식은 `sprite-asset-format.md`를 따른다.
 - 그래픽 제작 원본과 납품은 `assets/artwork/<category>/<asset-id>/`, 게임이 직접 읽는 검증 package는 `assets/runtime/<category>/<asset-id>/`에 둔다. `RuntimeAssetCatalog`가 `characters`, `environments`, `objects`, `effects`, `ui` category와 안정적인 kebab-case asset ID를 URL로 바꾸며 renderer가 제작 경로나 임의 상대 경로를 조합하지 않는다. category별 manifest 의미와 validator는 분리한다.
 - 오디오와 스프라이트 runtime package는 안정적인 asset ID와 주입 가능한 definition 선택 경계를 통해 조립한다. 향후 디버그 모드가 package를 교체해 비교할 수 있어야 하며 기본 catalog나 scene/audio host가 특정 mock ID에 영구 결합하지 않는다. 오디오는 공개 `loadAudioPackDefinition`의 pack·category override와 bootstrap의 `createAudioDefinitionLoader`를 회귀 테스트해 이 경계를 증명한다. package 선택은 표현 계층에만 영향을 주고 물리·충돌·전투·네트워크 상태를 바꾸지 않는다.
@@ -113,7 +114,7 @@ index.html
 - `PlayerPhysics`는 선형 위치·속도를 소유하고 `AngularMotion`과 공개 `Collider`를 각각 조합한다. `AngularMotion`은 각도, 각속도, 관성, 각 감쇠, 점 속도와 점 충격 계산을 담당한다. collider 형상은 계속 `PlayerRuntimeFactory`에서 독립적으로 교체할 수 있으며 몸체 회전이 원형 collider를 암묵적으로 바꾸지 않는다.
 - `Collider`는 겹침·해결뿐 아니라 대상 방향의 형상 바깥 점을 구하는 `outsidePointToward(center, target, clearance)`도 제공한다. 자동 무기는 구체 원형 반경을 읽지 않고 이 계약으로 발사체 반경과 여유를 포함한 총구 위치를 구하므로, collider 형상을 교체해도 몸 중심 발사나 renderer별 보정이 생기지 않아야 한다.
 - `FixedLengthRope`는 플레이어 강체의 일부나 상속 mixin이 아니라 외부 joint다. world anchor, 몸체 local-space의 `attachmentOffset`, 고정 길이와 장력을 소유하고 손 관절점의 위치·속도 제약을 푼다. 제약 충격은 중심 선속도와 `r × impulse / inertia` 각속도에 함께 반영한다.
-- 손 관절점은 부착 순간 anchor 쪽 손을 선택해 local offset으로 고정한다. 이후 몸체 각도에 따라 world-space 손 위치가 회전하며 공용 rope renderer, 스윙 입력, 투사체-로프 충돌도 같은 `ropeAttachmentPoint()` 계산을 사용한다.
+- 손 관절점은 부착 순간 anchor 쪽 손을 선택해 local offset으로 고정한다. 이후 몸체 각도에 따라 world-space 손 위치가 회전하며 공용 rope renderer, 스윙 입력, 투사체-로프 충돌도 같은 `ropeAttachmentPoint()` 계산을 사용한다. 비행 중 Grapple Hook의 선도 몸 중심이 아니라 현재 몸체 각도로 회전한 `ropeLaunchHandPoint()`에서 시작한다.
 - 로프 해제는 각속도를 제거하지 않는다. 게임 조작 체감을 위해 손끝 접선 속도의 `releaseAngularTransfer` 비율을 중심 선속도에 추가하는 명시적 게임플레이 보정만 적용한다. 이 비율은 joint solver나 collider에 숨기지 않는다.
 - 지면 접촉 중에는 `angle = 0`을 향한 복원 토크와 각 감쇠를 적용하고, 공중에서는 약한 각 감쇠만 적용한다. 따라서 지면에서는 오뚜기처럼 서고 매달린 동안에는 joint torque를 유지한다.
 
@@ -190,14 +191,16 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 ## 현재 게임 시스템
 
-- `CURRENT_AUTHORED_AREA_CATALOG`와 `assembleAuthoredWorld()`가 Sector 01·02의 저작 영역을 하나의 연속 좌표계로 조립한다. `GameSimulationFactory`는 seed와 world revision으로 같은 catalog를 선택해 싱글·멀티가 동일한 정의를 재현하게 한다.
+- `CURRENT_AUTHORED_AREA_CATALOG`와 `assembleAuthoredWorld()`가 Sector 01·02·03의 24개 저작 영역을 하나의 연속 좌표계로 조립한다. Sector 04의 8개 Area는 standalone catalog 상태다. `GameSimulationFactory`는 seed와 world revision으로 같은 catalog를 선택해 싱글·멀티가 동일한 정의를 재현하게 한다.
 - `GameSimulation`이 저작 영역의 목표·Gate·content boundary와 플레이어별 진행 상태를 권위 상태로 보존한다.
 - 사망 재개는 월드와 체크포인트 진행도를 유지한 채 활성 지점으로 복귀한다. Checkpoint는 진행 저장과 개인 부활만 소유하며 보상 선택을 열지 않는다.
 - 1-4 Foundation 선택은 `PlayerCommand`의 좌우·점프 명령을 사용한다. 선택 중인 플레이어의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
 - Foundation 선택 피드백은 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 선택 상태와 분리한다.
 - `npm test`의 current authored world 검증은 area catalog의 연결·출구 참조·Gate 진행과 마지막 content boundary를 확인한다. 절차형 48단계 경로의 시드 sweep은 현재 제품 검증에 포함하지 않는다.
 - `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가한다. 사망 횟수는 호환 필드 `defeats`에 기록하며 사망·부활로 공용 월드 시간을 멈추지 않는다. `areaTiming`은 공용 `WorldProgressState.currentAreaId`를 기준으로 현재 저작 영역 체류 시간과 첫 Gate 통과 때 확정된 영역별 클리어 시간을 기록해 1-1 같은 첫 진행 시간 목표를 인위적인 타이머 없이 검증한다.
-- 디버그 수치 표시는 설정 버튼을 1초 길게 눌러 여는 패널에서만 켜는 옵트인 개발 표시이며 `GameApp`·`MultiplayerGameApp`과 렌더러에만 전달되고 `PlayerCommand`나 게임 규칙에는 포함하지 않는다. 시작 맵 선택은 싱글플레이 생성에만 적용하며 멀티 월드 시작은 서버 세션이 소유한다.
+- 디버그 수치 표시는 설정 버튼을 1초 길게 눌러 여는 패널에서만 켜는 옵트인 개발 표시이며 `GameApp`·`MultiplayerGameApp`과 렌더러에만 전달되고 `PlayerCommand`나 게임 규칙에는 포함하지 않는다. 저장된 시작 맵은 새 싱글 생성에 적용한다. 실행 중 적용 버튼은 싱글의 공용 진행·entry checkpoint를 선택 Area 기준으로 다시 만들고, 멀티에서는 서버 `debug-teleport`가 같은 shared progress reset과 요청 플레이어 전이를 확정한다. 새 멀티 채널의 최초 월드 선택은 계속 서버 세션이 소유한다.
+- Area definition의 `storyTriggers`는 시나리오 기획 인벤토리이며 assembled world와 presentation runtime에 복제하지 않는다. 실제 Story 출력은 `AuthoredStoryPresentation`의 area entry·position, `trigger/story-display` cue, objective/gate event binding만 소유한다. gate-panel과 gate visual에 소비되지 않는 cue 배열을 두지 않으며, Story 완료 판정은 실제 출력 순서를 회귀 테스트해 증명한다.
+- Access Scan Field는 공용 `elapsedSeconds`에서 AVAILABLE/WARNING/LOCKED/RESET을 계산해 새 Rope attachment eligibility와 scene `accessScanStates`를 함께 만든다. 공용 surface overlay는 네 phase를 색뿐 아니라 solid/dash, chevron, X, outline box 형태로 구분하며 sprite·polygon profile이 같은 overlay를 사용한다. phase는 별도 network event가 아니라 동기화된 world clock에서 결정적으로 재생한다.
 - 사망·낙사는 `GameSimulation.respawnPlayerAtCheckpoint` 하나로 처리한다. 사망한 플레이어의 물리·입력·체력·로프 발사 shot만 초기화하며 동료와 공용 월드는 계속 진행한다.
 - Foundation 보상은 플레이어별 선택 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - 보상 Canvas 오버레이는 반투명 배경과 실시간 전투 경고를 사용해 선택 카드와 진행 중인 위험을 동시에 보여준다.

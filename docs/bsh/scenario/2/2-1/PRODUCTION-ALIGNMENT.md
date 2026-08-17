@@ -4,6 +4,15 @@
 
 본 문서는 [2-1 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. Sector 02는 Sector 01과 함께 이미 `CurrentAuthoredAreaCatalog`에 연결되어 실제 플레이 가능한 16개 Area 중 하나다 — Sector 03과 달리 "미연결" 상태가 아니다. 그럼에도 Camera Zone과 Story Trigger Presentation은 Sector 02 전체(2-1~2-8)에서 단 하나도 구현되어 있지 않다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Sector 02는 현재 Sector 03과 함께 메인 authored world에 연결돼 있다.
+- Custom Camera Zone 없음은 미구현이 아니라 Stage 문서가 정한 기본 Camera 사용 계약이다.
+- `WORKER BLOCK 12` entry와 Community Notice 위치 Story가 구현됐다.
+- `storyTriggers`는 시나리오 기획 인벤토리이며 Runtime 구현 여부는 entry·position·`story-display`·objective/gate binding으로 판정한다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 전면 미구현 서술은 위 Current Runtime Override로 대체됐다. Geometry 비교 기록은 유지한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

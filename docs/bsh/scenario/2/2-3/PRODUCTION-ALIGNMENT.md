@@ -4,6 +4,15 @@
 
 본 문서는 [2-3 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-3은 Sector 02의 첫 Specialization Rest Stage이며, 좌표 정합성이 이번에 검증한 8개 Stage 중 가장 높다 — 모든 Surface·Node 위치가 README와 정확히 일치한다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
+- `FOUNDATION AUGMENT / DETECTED` entry, Node detection 위치 Story와 specialization objective Story가 구현됐다.
+- Specialization 6종 실제 효과는 별도 확정 구현 범위이며 Story binding 완료와 구분한다.
+- `storyTriggers`는 시나리오 기획 인벤토리다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 전면 미구현 서술은 위 Current Runtime Override로 대체됐다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |
