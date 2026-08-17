@@ -39,26 +39,28 @@ const AUTHORED_SECTOR_ZONE_IDS = Object.freeze({
     "sector-02": "residential-commercial"
 });
 
-function pointInsideArea(position, area) {
+function playerYDistanceFromArea(position, area) {
     const bounds = area?.bounds;
-    if (!position || !bounds) return false;
-    return (
-        position.x >= bounds.x &&
-        position.x <= bounds.x + bounds.width &&
-        position.y >= bounds.y &&
-        position.y <= bounds.y + bounds.height
-    );
+    if (!Number.isFinite(position?.y) || !bounds) return Number.POSITIVE_INFINITY;
+    if (position.y < bounds.y) return bounds.y - position.y;
+    if (position.y > bounds.y + bounds.height) return position.y - (bounds.y + bounds.height);
+    return 0;
 }
 
 export function currentAuthoredArea(scene) {
     const areas = scene?.world?.areas;
     if (!Array.isArray(areas) || areas.length === 0) return null;
-    const currentAreaId = scene.worldProgress?.currentAreaId;
-    if (currentAreaId) {
-        const current = areas.find(({ id }) => id === currentAreaId);
-        if (current) return current;
+    let nearestArea = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    for (const area of areas) {
+        const distance = playerYDistanceFromArea(scene.player?.position, area);
+        if (distance < nearestDistance) {
+            nearestArea = area;
+            nearestDistance = distance;
+        }
+        if (distance === 0) break;
     }
-    return areas.find((area) => pointInsideArea(scene.player?.position, area)) ?? null;
+    return nearestArea;
 }
 
 export function sceneEnvironmentZone(definition, scene) {

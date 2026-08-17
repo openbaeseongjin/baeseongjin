@@ -4,6 +4,7 @@ import { EnvironmentAssetSet } from "../src/render/environment/EnvironmentAssetS
 import { EnvironmentRendererComposer } from "../src/render/environment/EnvironmentRendererComposer.js";
 import { currentAuthoredArea, sceneEnvironmentZone } from "../src/render/environment/AltitudeZoneResolver.js";
 import { PixelDecorationRenderer } from "../src/render/environment/renderers/PixelDecorationRenderer.js";
+import { PixelBackdropRenderer } from "../src/render/environment/renderers/PixelBackdropRenderer.js";
 import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelTerrainRenderer.js";
 import { RenderFrameStats } from "../src/render/RenderPerformanceMetrics.js";
 import { createRenderViewport } from "../src/render/RenderViewport.js";
@@ -22,11 +23,13 @@ function recordingContext() {
         beginPath: () => calls.push(["beginPath"]),
         moveTo: (...args) => calls.push(["moveTo", ...args]),
         lineTo: (...args) => calls.push(["lineTo", ...args]),
+        bezierCurveTo: (...args) => calls.push(["bezierCurveTo", ...args]),
         closePath: () => calls.push(["closePath"]),
         clip: () => calls.push(["clip"]),
         fill: () => calls.push(["fill"]),
         stroke: () => calls.push(["stroke"]),
         fillRect: (...args) => calls.push(["fillRect", ...args]),
+        strokeRect: (...args) => calls.push(["strokeRect", ...args]),
         arc: (...args) => calls.push(["arc", ...args]),
         fillText: (...args) => calls.push(["fillText", ...args])
     };
@@ -124,6 +127,56 @@ export function run() {
         sceneEnvironmentZone(definition, sector02Scene).id,
         "residential-commercial",
         "authored Sector 02 keeps its residential city theme instead of inheriting procedural altitude zones"
+    );
+    const fallenToPreviousSectorScene = {
+        ...sector02Scene,
+        player: { position: { x: 5000, y: -100 } },
+        world: {
+            ...sector02Scene.world,
+            areas: [
+                {
+                    id: "sector-01-08",
+                    sectorId: "sector-01",
+                    bounds: { x: -480, y: -1080, width: 960, height: 1080 },
+                    recoveryPoints: []
+                },
+                {
+                    id: "sector-02-01",
+                    sectorId: "sector-02",
+                    bounds: { x: -480, y: -2160, width: 960, height: 1080 },
+                    recoveryPoints: []
+                }
+            ]
+        }
+    };
+    assert.equal(
+        currentAuthoredArea(fallenToPreviousSectorScene)?.id,
+        "sector-01-08",
+        "authored background area follows the player's Y position when falling below forward-only progress"
+    );
+    assert.equal(
+        sceneEnvironmentZone(definition, fallenToPreviousSectorScene).id,
+        "industrial-maintenance",
+        "falling to the previous sector restores that sector's background theme"
+    );
+    const fallenBackdropContext = recordingContext();
+    new PixelBackdropRenderer({ definition, assets }).draw({
+        context: fallenBackdropContext,
+        scene: fallenToPreviousSectorScene,
+        viewport
+    });
+    assert.ok(
+        fallenBackdropContext.calls.some(
+            ([name, label]) => name === "fillText" && label === "VERTICAL GRID / LOCKDOWN"
+        ),
+        "the rendered backdrop uses the previous sector's industrial authored treatment"
+    );
+    assert.equal(
+        fallenBackdropContext.calls.some(
+            ([name, label]) => name === "fillText" && label === "SECTOR 02 / EVACUATION ROUTE"
+        ),
+        false,
+        "the forward progress sector must not keep controlling the rendered backdrop"
     );
     const terrainContext = recordingContext();
     new PixelTerrainRenderer({ definition, assets }).draw({ context: terrainContext, scene: currentScene });
