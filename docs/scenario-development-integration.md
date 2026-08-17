@@ -3,11 +3,11 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 2c0b76c07ddac60bb51d11858d5feb0943a26407b63bc06f1589466a20300a3d
+scenario-source-sha256: e50ce25201489af5116e8d2dae89e1f9acd746c4402a06070e69a411e8d2e5a5
 authored-area-sha256: 8d5a94299075cd0492d294496328e6327c6f81824034b6ada016dc9f9d798dbe
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 9fdc35daedc6cbc249932240dd6daf48aedb2911
+reviewed-upstream: 23512a22e2cd5e746ef3788f9f500e6e5ebc843c
 -->
 
 ## 상태를 읽는 법
@@ -26,12 +26,12 @@ reviewed-upstream: 9fdc35daedc6cbc249932240dd6daf48aedb2911
 
 `BLOCKED`는 위 상태와 별개다. 예를 들어 Stage가 `AUTHORED`여도 선행 Boss 전환이나 새 시스템 결정이 없으면 연결은 차단된다.
 
-## 2026-08-16 확인 체크포인트
+## 2026-08-17 확인 체크포인트
 
-- 확인 기준 upstream: `bd5be25b900b65f3ab42eeb4ee5ff45f2052a06b` (`origin/main`, 상세 Stage 48/48과 캐릭터 모션 갱신(#588)까지 포함한 clean base)
+- 확인 기준 upstream: `23512a22e2cd5e746ef3788f9f500e6e5ebc843c` (`origin/main`, Sector 03 Master REV 2.0 공간·Story 재작성 병합 #613까지 포함한 clean base)
 - 상세 Stage 문서: **48개**, `1-1`부터 `6-8`까지 전 구간
 - 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-8` standalone; Sector 05는 Runtime 미저작)
-- 직접 대조한 기준: Sector 03 Master REV 1.2와 3-1~3-8, Sector 04 Master REV 1.1과 4-1~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), Sector 06 Master와 6-1~6-8(Scanner phase·Patrol speed/wait·Cutter opt-in·순방향 Finale 및 Safe/Flow 산술 대조), `CurrentAuthoredAreaCatalog.js`, `Sector03AreaCatalog.js`, `Sector04AreaCatalog.js`, `AccessScanField.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
+- 직접 대조한 기준: Sector 03 Master REV 2.0과 현재 3-1~3-8 Runtime 경계(PR #613은 공간 정체·Stage 명칭·Story만 재작성하고 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 유지; 개별 Stage 문서와 Runtime `name/subtitle/cue` 명칭 마이그레이션은 대기), Sector 04 Master REV 1.1과 4-1~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), Sector 06 Master와 6-1~6-8(Scanner phase·Patrol speed/wait·Cutter opt-in·순방향 Finale 및 Safe/Flow 산술 대조), `CurrentAuthoredAreaCatalog.js`, `Sector03AreaCatalog.js`, `Sector04AreaCatalog.js`, `AccessScanField.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03/04 전체 등반의 실제 브라우저·기기 플레이테스트. 이번 #557 검토에서는 디버그 패널로 `sector-03-02` 직접 시작과 화면 렌더까지만 확인했으며, 모든 영역의 판정은 계속 `MOCK INTEGRATED`이고 `PLAYTEST VERIFIED`는 아직 없다.
 
@@ -39,7 +39,7 @@ reviewed-upstream: 9fdc35daedc6cbc249932240dd6daf48aedb2911
 | --- | --- | --- | --- |
 | Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증했고 600px 연쇄 링크 기준의 앵커 축소(#45) 뒤 14개 target·랜드마크가 남는다; #507이 Wind·Story·2-3 진행을 보강; 1-5~1-8 Camera Zone과 남은 Position Story Trigger 코드 반영 완료 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강; Story Presentation 공백 3건(2-2·2-3 POSITION, 2-6 최소 위치 표지) 코드 반영 완료 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 2-3 Specialization 6종 계약은 확정됐고 구현 대기, Sector 02 Boss→3-1 상세 전환은 미정 |
-| Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 1.2, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525); Camera는 8개 Stage 의도적 기본 카메라 확인, Story signage 28개 코드 반영 | Post-Sector 03 Boss→3-8/4-1 전환 미정 |
+| Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 2.0, `CROSS-REVIEWED`; Central Exchange Complex 공간·Story 재작성 통합, 개별 Stage 명칭 마이그레이션 대기 | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525); Camera는 8개 Stage 의도적 기본 카메라 확인, Story signage 28개 코드 반영; PR #613은 Runtime Geometry·시스템을 변경하지 않음 | 개별 `3-N` 문서와 Runtime `name/subtitle/cue` 명칭 마이그레이션 대기; Post-Sector 03 Boss→3-8/4-1 전환 미정 |
 | Sector 04 / 4-1~4-8 | Master REV 1.1과 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결; Camera Zone 8개 Stage 구현 확인, Story 바인딩 반영 완료; Gate 좌표·Cutter Fire opt-in 모델·Wind Strength 문서 정합 완료(#29) | Post-Sector 03 Boss→4-1 전환이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증 |
 | Sector 05 / 5-1~5-8 | Master와 8개 상세 Stage, `CROSS-REVIEWED` | `NOT AUTHORED` / `NOT CONNECTED`; Scenario-first 상세 48개 작성은 완료됐고 Full Game Audit 뒤 Runtime 저작 후보 | Post-Sector 04 Boss→5-1 전환 미정; Sealed Surface/Service Hardpoint 정적 grappleable 규칙은 실제 코드 계약(`surface.grappleable === false`)과 대조 완료, 실제 Runtime 저작 필요 |
 | Sector 06 / 6-1~6-8 | Master와 상세 Stage 8/8, `CROSS-REVIEWED` | `NOT CONNECTED` | 6-8은 Threat 0의 순방향 Final Runway에서 Pad 03에 물리적으로 도달한 뒤 `ACCESS DENIED / CONTAINMENT VIOLATION`을 표시하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03` 3 Phase 뒤 Access Restored·개별 Boarding·전원 준비·Escape로 확정됐지만 Runtime은 미구현이다. Safe max 329.5px·Flow max 380.3px와 Recovery를 재검산; Post-Sector 05 Boss→6-1 전환과 Runtime 저작 필요 |
@@ -96,6 +96,7 @@ reviewed-upstream: 9fdc35daedc6cbc249932240dd6daf48aedb2911
 45. 앵커 축소 스크립트 실수로 커밋 상태로 되돌아가 소실된 4개 카탈로그 변경분(exitBlock 이관·출구 데크 offset 125·층 격벽 봉쇄·트리거 스펙)을 재구축하고, 600px 연쇄 링크 허용치(한 반동 포함)에 맞춰 32개 Area의 그래플 앵커를 순차 그리디로 축소했다. 카탈로그별 제거: s01 1-1 b, 1-2 b/d, 1-3 b/d, 1-4 a/b/c, 1-5 b/a/d/e/f/h, 1-6 a/c/e/f, 1-7 b/c/d/e/f/g, 1-8 b/c/e/g/h; s02 2-1 g1/g2/g4, 2-2 g1~g5, 2-3 g1/g2, 2-4 g2/g4/g6/g8/g9, 2-5 g1/g2/g3/g5/g6/g7, 2-6 g1/g2/g4/g6/g7, 2-7 g1/g3/g5/g6/g8/g9/g10, 2-8 g2a/g3/g5/g7/g9/g10/g11; s03 3-1 g1/g3/g4, 3-2 g1/g4/g5, 3-3 g3/g4/g5, 3-4 s0/gs1/gs2/g6, 3-5 g2/g3, 3-6 g1/g3/g4, 3-7 s1/s2/s3/s4/g4, 3-8 g1/w1/e1/w2/e2/g4/g6; s04 4-1 a3/a6, 4-2 c2/a4, 4-3 a0/w2/a5/a6, 4-4 a1/a3/a4/a5, 4-5 a0/w2/w4, 4-6 a0/a3/a5, 4-7 a0/w2/w3/a5, 4-8 a0/c2/a3/a4/a5. 파생 트리거 이관(s01/s04 `activationSpec`·wind `zone`, s02/s03 patrolDrone `activationSpec` 헬퍼)과 600px 초과 링크 수정(3-7 S2→C3→C2 재정렬, 3-8 W/E ±192 축소)을 함께 적용했다. 검증기의 `grapple-surface-isolated` 기본 한도가 hook reach 400px였던 것을 `GRAPPLE_LINK_BUDGET = 600`으로 올리고(러닝타임 물리 hook reach 400px는 유지), 카탈로그 회귀 테스트의 anchor 좌표·수치 기대값을 축소 결과에 맞췄다.
 46. 1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 바람이 나오지 않던 근본 원인을 수정했다. 트리거 스펙 이관 스크립트의 wind-source 정규식이 파일에서 첫 번째 wind-source(fan-a)부터 lazy 매칭해 모든 Zone에 fan-a 좌표로 offset을 계산해, 세 Zone의 파생 bounds가 플레이 영역 밖(-1184, -1824/-1696/-2032)에 찍혔다. 세 `zone` 스펙을 승인 좌표(fan-b (-352,-1280,704,384), 1-7 vent (-352,-1184,704,384), 1-8 vent (-384,-1504,768,448))에서 파생하도록 교정하고, 검증기가 wind-source 파생 Zone도 `resolveObjectTriggerBounds`로 bounds를 계산해 영역 안을 검사하게 강화해 같은 오염을 거부한다. 승인 bounds를 고정한 회귀 테스트도 추가했다.
 47. DeepSeek 구현 전수 검토 후 Camera/Story/Wind 상태 문서 drift와 Scanner 무피드백을 정렬했다. Sector 01 1-5~1-8과 Sector 02 2-1~2-8 Production Alignment에는 Current Runtime Override를 추가하고 과거 미구현 본문을 `AUTHORING SNAPSHOT`으로 표시했다. Sector 03 Master·Scenario Art 기준은 24개 Area 연결, 의도적 기본 Camera, Stable ID 현실로 갱신했다. Runtime은 Access Scan phase를 scene snapshot으로 노출하고 공용 overlay가 AVAILABLE/WARNING/LOCKED/RESET을 색+형태로 구분한다. Area `storyTriggers`는 시나리오 기획 인벤토리로만 유지하고 assembled world에서 제외했으며, exit panel의 미사용 cue 경로를 제거해 Story 문구는 entry·position·`story-display`·objective/gate binding만 소유한다. 2-8 Transfer Control은 A/B/C 결과 뒤 `PRIORITY ACCESS: ACTIVE`를 반드시 표시한다.
+48. PR #613은 Sector 03 Master를 REV 2.0 `CENTRAL EXCHANGE COMPLEX`로 재작성해 공간 정체·Stage 명칭·Scanner 세계관 의미와 Story Arc를 갱신했다. PR 범위와 현재 Runtime을 재대조한 결과 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 변경되지 않아 3-1~3-8의 `MOCK INTEGRATED` 판정은 유지한다. 새 Master 명칭과 구 `3-N` Stage 문서·Runtime `name/subtitle/cue` 사이의 불일치는 문서가 명시한 후속 마이그레이션 blocker로 남기며 구현 완료로 올리지 않는다.
 
 ## 열린 기획·구현 게이트
 
