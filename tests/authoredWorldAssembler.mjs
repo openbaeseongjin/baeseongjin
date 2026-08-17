@@ -3,7 +3,7 @@ import { Vector2 } from "../src/game-kit/index.js";
 import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
 import { validateAreaCatalog } from "../src/game/world/AreaDefinitionValidator.js";
-import { gatePortalBounds, worldObject } from "../src/game/world/areas/AreaDefinition.js";
+import { gatePortalBounds, resolveObjectTriggerBounds, worldObject } from "../src/game/world/areas/AreaDefinition.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../src/game/world/areas/sector02/Sector02AreaCatalog.js";
@@ -49,6 +49,24 @@ export function run() {
                 `${surface.id} and ${expectedLandmarkId} must share the same authored anchor point`
             );
             assert.equal(landmark.coordinateAnchor, "center");
+        }
+    }
+
+    const approvedWindBounds = {
+        "sector-01-06:fan-a-wind": { x: -320, y: -640, width: 672, height: 320 },
+        "sector-01-06:fan-b-wind": { x: -352, y: -1280, width: 704, height: 384 },
+        "sector-01-07:main-pressure-vent-wind": { x: -352, y: -1184, width: 704, height: 384 },
+        "sector-01-08:final-pulsed-vent": { x: -384, y: -1504, width: 768, height: 448 }
+    };
+    for (const area of SECTOR_01_AREA_CATALOG.areas) {
+        for (const source of area.objects.filter(({ kind, zone }) => kind === "wind-source" && zone)) {
+            const approved = approvedWindBounds[source.windZoneId];
+            assert.ok(approved, `${source.id} must reference an approved wind zone`);
+            assert.deepEqual(
+                resolveObjectTriggerBounds(source.position, source.zone),
+                approved,
+                `${source.id} derived wind zone bounds must stay on the approved blockout`
+            );
         }
     }
 

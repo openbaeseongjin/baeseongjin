@@ -1,4 +1,5 @@
 import { assertAuthoredCoordinateAnchor } from "./AuthoredCoordinateAnchor.js";
+import { resolveObjectTriggerBounds } from "./areas/AreaDefinition.js";
 import { GRAPPLE_LINK_BUDGET, ropeHookReach } from "../config.js";
 
 function issue(code, areaId, details = {}) {
@@ -368,10 +369,19 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = GRAPPLE_LINK_
         const windSourceIds = new Set(
             area.objects.filter(({ kind, zone }) => kind === "wind-source" && zone).map(({ windZoneId }) => windZoneId)
         );
+        const windSourcesByZoneId = new Map(
+            area.objects
+                .filter(({ kind, zone }) => kind === "wind-source" && zone)
+                .map((object) => [object.windZoneId, object])
+        );
         for (const windZone of area.windZones) {
             if (windSourceIds.has(windZone.id)) {
                 if (windZone.bounds) {
                     issues.push(issue("wind-bounds-derived", area.id, { id: windZone.id }));
+                }
+                const source = windSourcesByZoneId.get(windZone.id);
+                if (source && !boundsInside(area.bounds, resolveObjectTriggerBounds(source.position, source.zone))) {
+                    issues.push(issue("wind-bounds", area.id, { id: windZone.id }));
                 }
                 continue;
             }
