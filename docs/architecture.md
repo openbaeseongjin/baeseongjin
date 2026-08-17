@@ -190,6 +190,14 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 모바일 coarse pointer 환경에서는 카메라 배율을 0.72로 낮춰 데스크톱보다 약 39% 넓은 월드 범위를 표시한다. 이때 화면 좌표와 월드 좌표 변환도 같은 배율을 사용하며, 플레이 공간을 확보하기 위해 데스크톱용 상단 상태 HUD는 그리지 않는다.
 
+## 연속 Sector authoring 선행 계약
+
+- 목표 authoring의 canonical root는 `SectorDefinition`이다. Sector는 3,840~4,800px 폭, 하나의 `sectorEntry`, 순서가 있는 landmark와 그 landmark가 소유하는 objective·encounter를 가진다. Stage 번호와 `areaId`는 새 Runtime 권위가 아니며 `legacyStageAlias`로만 migration·문서 대조에 남길 수 있다.
+- encounter topology 권위는 `encounterId`, `slotId`, `position`, `activation`이다. fixed/pool 적 선택은 topology와 분리된 `enemySelection` payload가 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 선언할 수 있다. selector는 후속 enemy Phase 6에서 `slotId + runSeed + worldRevision`을 사용한다. validator는 encounter와 selection payload에 `areaId`가 권위 필드로 들어오는 것을 거부하고, 빈/중복 pool이나 fixed+pool 동시 선언을 거부한다.
+- `LegacyAreaSectorPreviewCatalog`는 build/startup-only import adapter다. Sector 01~03의 기존 Area catalog를 preview metadata로 변환하고 Sector 04~06을 포함한 `1-1`~`6-8` 전체 alias를 제공하지만, per-tick simulation·snapshot·progress·renderer가 이 adapter나 Area/Sector 이중 모델을 분기하지 않는다.
+- #622는 authoring contract만 추가한다. 현재 기본 `CURRENT_AUTHORED_AREA_CATALOG`, `AuthoredWorldAssembler`, `WorldProgressState`, `GameSimulation`, Gate portal과 active Checkpoint는 그대로이며 Sector preview를 shipped Runtime으로 표현하지 않는다. 후속 Phase 3은 새 world revision에서 runtime cutover를 원자적으로 수행한다.
+- `src/game/world/sectors/`와 `SectorDefinitionValidator.js`는 시나리오 통합 fingerprint의 별도 `authored-sector-sha256`로 감시한다. Area source와 Sector source의 현재 상태를 각각 기록해 preview contract 추가를 Runtime 전환으로 오인하지 않는다.
+
 ## 현재 게임 시스템
 
 - `CURRENT_AUTHORED_AREA_CATALOG`와 `assembleAuthoredWorld()`가 Sector 01·02·03의 24개 저작 영역을 하나의 연속 좌표계로 조립한다. Sector 04의 8개 Area는 standalone catalog 상태다. `GameSimulationFactory`는 seed와 world revision으로 같은 catalog를 선택해 싱글·멀티가 동일한 정의를 재현하게 한다.

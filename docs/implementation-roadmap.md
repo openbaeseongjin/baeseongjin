@@ -47,9 +47,16 @@
 
 ## 구현 순서
 
+### 연속 Sector 전환 선행 트랙
+
+1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
+2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
+3. **Phase 3 이후:** Sector 01~03의 실제 3,840~4,800px blockout·assembler·progress·Sector-entry respawn·party-wipe protocol·camera/environment를 atomic world revision으로 전환한다. 이 단계 전까지 현재 Gate/Checkpoint Runtime은 유지한다.
+4. Timer +10 trigger, Purge origin/rejoin과 증강 획득 Landmark 좌표는 실제 physical landmark/objective graph가 생긴 뒤 별도 결정한다.
+
 ### 제출 전 시나리오 구현 트랙
 
-메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)에 현재 작성된 맵을 섹터·번호 순서대로 즉시 구현하고, 새 시나리오가 추가될 때 같은 흐름에 이어 붙인다. 각 맵은 별도 월드가 아니라 하나의 연속 월드 안에 놓이는 진행 영역이다. 각 단계는 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 목록과 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
+이하 Area/Gate 구현 순서는 현재 0.23.0 Runtime과 48개 migration source의 상태 기록이다. 새 구현은 위 연속 Sector 전환 선행 트랙을 우선하고, Stage 문서를 별도 Runtime 진행 단위로 다시 확장하지 않는다. 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)의 콘텐츠를 섹터·번호 순서로 흡수하되 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 stable ID와 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
 
 상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~`06`의 `1-1`~`6-8` 상세 Stage 문서는 48/48 작성됐다. 현재 Runtime은 `1-1 → 3-8` 24개 authored area를 한 월드로 연결하고 Sector 04 `4-1 → 4-8`은 standalone으로 저작했으며, Sector 05·06은 Runtime 미저작이다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
 

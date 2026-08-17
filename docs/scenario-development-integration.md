@@ -5,6 +5,7 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 26d782a6c2ea4cc20be6f8a8d6c7f3a8272b7306bfa6d3398808f5793a897875
 authored-area-sha256: 98375f3037b7920e4822e39bba03b8f1d67466c2e146bf56e7d1b82f41cd0202
+authored-sector-sha256: 1bea3c28d75c62ec296ea7fd6024b7e91caf3cafe2e69b3b91fba9e757518e70
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
 reviewed-upstream: 862a71b14b01d0927e509fca3ffcc138f5034a4f
@@ -31,8 +32,9 @@ reviewed-upstream: 862a71b14b01d0927e509fca3ffcc138f5034a4f
 - 확인 기준 upstream: `862a71b14b01d0927e509fca3ffcc138f5034a4f` (`origin/main`, 플레이어 위치 기반 섹터 배경 복귀 #616까지 포함한 clean base)
 - 상세 Stage 문서: **48개**, `1-1`부터 `6-8`까지 전 구간
 - 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-8` standalone; Sector 05는 Runtime 미저작)
+- 연속 Sector 선행 계약: #622의 `SectorDefinition`·validator·legacy preview catalog가 Sector 01~03을 **preview only**로 가져오고 `1-1 → 6-8` 전체를 deterministic alias로 덮는다. 기본 Runtime catalog·Gate·Checkpoint·Area 조립은 이번 단계에서 바꾸지 않는다.
 - 직접 대조한 기준: Sector 03 Master REV 2.0과 현재 3-1~3-8 Runtime 경계(PR #613은 공간 정체·Stage 명칭·Story만 재작성하고 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 유지; 개별 Stage 문서와 Runtime `name/subtitle/cue` 명칭 마이그레이션은 대기), Sector 04 Master REV 1.1과 4-1~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), Sector 06 Master와 6-1~6-8(Scanner phase·Patrol speed/wait·Cutter opt-in·순방향 Finale 및 Safe/Flow 산술 대조), `CurrentAuthoredAreaCatalog.js`, `Sector03AreaCatalog.js`, `Sector04AreaCatalog.js`, `AccessScanField.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
-- 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, 상세 Stage README 목록
+- 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, `src/game/world/sectors/**/*.js`, `src/game/world/SectorDefinitionValidator.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03/04 전체 등반의 실제 브라우저·기기 플레이테스트. 이번 #557 검토에서는 디버그 패널로 `sector-03-02` 직접 시작과 화면 렌더까지만 확인했으며, 모든 영역의 판정은 계속 `MOCK INTEGRATED`이고 `PLAYTEST VERIFIED`는 아직 없다.
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
@@ -98,6 +100,7 @@ reviewed-upstream: 862a71b14b01d0927e509fca3ffcc138f5034a4f
 47. DeepSeek 구현 전수 검토 후 Camera/Story/Wind 상태 문서 drift와 Scanner 무피드백을 정렬했다. Sector 01 1-5~1-8과 Sector 02 2-1~2-8 Production Alignment에는 Current Runtime Override를 추가하고 과거 미구현 본문을 `AUTHORING SNAPSHOT`으로 표시했다. Sector 03 Master·Scenario Art 기준은 24개 Area 연결, 의도적 기본 Camera, Stable ID 현실로 갱신했다. Runtime은 Access Scan phase를 scene snapshot으로 노출하고 공용 overlay가 AVAILABLE/WARNING/LOCKED/RESET을 색+형태로 구분한다. Area `storyTriggers`는 시나리오 기획 인벤토리로만 유지하고 assembled world에서 제외했으며, exit panel의 미사용 cue 경로를 제거해 Story 문구는 entry·position·`story-display`·objective/gate binding만 소유한다. 2-8 Transfer Control은 A/B/C 결과 뒤 `PRIORITY ACCESS: ACTIVE`를 반드시 표시한다.
 48. PR #613은 Sector 03 Master를 REV 2.0 `CENTRAL EXCHANGE COMPLEX`로 재작성해 공간 정체·Stage 명칭·Scanner 세계관 의미와 Story Arc를 갱신했다. PR 범위와 현재 Runtime을 재대조한 결과 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 변경되지 않아 3-1~3-8의 `MOCK INTEGRATED` 판정은 유지한다. 새 Master 명칭과 구 `3-N` Stage 문서·Runtime `name/subtitle/cue` 사이의 불일치는 문서가 명시한 후속 마이그레이션 blocker로 남기며 구현 완료로 올리지 않는다.
 49. #618은 Sector 01 `1-1`~`1-8`에 공용 `far/mid/near` 산업 정비 배경 package를 연결하고, 기존 지형·오브젝트 좌표를 유지한 채 Gameplay surface, 로프 앵커, 좌우 경계벽과 층간 bulkhead, Gate·Gate Panel, Checkpoint와 `wind-source`의 외형을 정렬한다. 1-1 P0만 사용자 최종 결정에 따라 Stage Local `X=-448~448`의 `896×32` one-way Collision으로 확장하고 같은 폭의 `terrain:ground-foundation` 기초를 아래로 이어 최하층 전체를 실제 바닥으로 읽히게 한다. Sector 이동 뒤 배경 선택 문제는 이 작업에 포함하지 않으며 최신 upstream #616의 플레이어 Y 기반 선택 계약을 그대로 사용한다.
+50. #622는 연속 Sector Runtime cutover에 앞서 canonical authoring 계약을 추가했다. `SectorDefinition`은 3,840~4,800px 폭, Sector entry, landmark, objective와 `encounterId/slotId/position/activation` encounter container를 소유하고 `areaId`를 encounter 권위에서 거부한다. `enemySelection`은 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나를 요구하며 build/startup-only preview adapter는 현재 Sector 01~03 Area catalog의 위치·activation·고정 적 선택을 보존해 4,800px preview metadata로 가져온다. `1-1`~`6-8` 48개 alias는 중복·누락 없이 제공하고 Sector 04~06 alias는 migration input일 뿐 Runtime 구현 완료가 아니다. 기본 `CURRENT_AUTHORED_AREA_CATALOG`, `AuthoredWorldAssembler`, `GameSimulation`, Gate portal과 per-Area Checkpoint는 변경하지 않았으므로 위 표의 Runtime 상태도 그대로다. 다음 경계는 이 계약의 merge SHA 위에서 enemy Phase 6을 rebase하고, 별도 Phase 3에서 실제 wide blockout·progress·respawn cutover를 수행하는 것이다.
 
 ## 열린 기획·구현 게이트
 
@@ -110,6 +113,7 @@ reviewed-upstream: 862a71b14b01d0927e509fca3ffcc138f5034a4f
 7. 6-8 뒤 `PAD SECURITY WARDEN P-03 → Access Restored → 개별 Boarding → 전원 준비 → Escape`를 구현한다. 6-8 내부 Boss·첫 Boarding Player의 동료 자동 순간이동은 금지한다.
 8. NPC는 예선 핵심 범위에서 제외한다. 핵심 범위 완료 뒤 여유가 있을 때만 2-6의 선택지 없는 3줄 Stationary NPC를 검토한다.
 9. 미래 authored Stage 공간 계획은 Hook 비행·빗맞음·재발사 telegraph와 원격 가시성을 반영한다. 400px 도달은 속도×수명 파생 하나만 사용하며, authored Sentry activation band와 Cover LOS는 인식 거리 760과 별도 encounter 제약으로 유지한다.
+10. #622의 Sector authoring preview를 기본 Runtime으로 전환하지 않는다. enemy authoring integration이 merge된 뒤 별도 Phase 3에서 Sector 01~03 실제 3,840~4,800px blockout, progress/respawn protocol과 camera/environment 입력을 함께 전환한다. Timer +10 trigger·Purge origin/rejoin과 증강 획득 Landmark 좌표는 그 물리 진행 계약 전까지 HOLD다.
 
 P1~P5 확정 답변과 구현 상태는 [`design-decision-requests.md`](./design-decision-requests.md), 전체 수치·흐름은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md), 선행 정렬 목록은 [`p0-alignment-patch-package.md`](./p0-alignment-patch-package.md)에 유지한다.
 

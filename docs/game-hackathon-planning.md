@@ -107,10 +107,13 @@
 
 전문 작업물의 완료는 메인 개발, 플레이테스트, 최종 스퍼트와 예선 제출의 선행 조건이 아니다. 정해진 통합 마감까지 validator와 실제 화면·청취 검증을 통과한 결과만 제출 빌드에 반영하고, 준비되지 않았거나 통합 위험이 큰 영역은 검증된 mock을 유지한다. 다만 공개 manifest·loader·이벤트 binding처럼 전문 작업과 메인 개발이 함께 사용하는 계약 변경은 양쪽 작업 전에 먼저 합의한다.
 
-제출 전 시나리오는 총 6개 섹터이며 각 섹터는 8개 맵, 전체 48개 맵으로 구성한다. 여기서 맵은 별도로 로드하거나 다시 생성하는 월드가 아니라 하나의 연속 월드 안에 순서대로 배치한 **진행 영역**이다. 구현과 인계 일정은 `SECTOR 01 → 02 → 03 → 04 → 05 → 06`을 단위로 관리하고, 메인 개발자는 각 섹터 안에서 `n-1 → n-8` 순서로 진행한다. 각 맵을 시작할 때 해당 맵의 오브젝트·상태·완료 조건·명시적 출구·표현 cue를 먼저 정리하고, 실제 게임 규칙과 레벨 흐름을 mock 이미지·사운드로 구현한다. 그래픽·오디오 담당자는 앞 섹터부터 공개되는 이 목록과 mock 배치를 이어받아 정식 리소스를 병행 제작한다. 전문 담당자가 gameplay·collision·network 계약을 다시 정하거나 메인 개발자가 정식 리소스를 기다리는 흐름으로 만들지 않는다.
+제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 플레이어-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관할 migration alias**다. 목표 Runtime에서 각 Sector는 강제 Gate 포탈과 층별 전환 없이 가로 3,840~4,800px의 하나의 물리 공간이며, 기존 순서와 일부 분기·재합류를 landmark 진행으로 보존한다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. 현재 0.23.0의 24개 Area/Gate Runtime은 migration source로 유지하며 Phase 3 cutover 전까지 구현 완료 상태를 과장하지 않는다.
 
 ### 월드와 진행 영역 기준
 
+- #622의 Phase 1~2는 `SectorDefinition`, Sector validator와 build/startup-only legacy preview adapter를 canonical authoring 경계로 둔다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`이고 `legacyStageAlias`는 문서·migration metadata일 뿐이다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
+- preview adapter는 Sector 01~03만 가져오고 Sector 04~06은 alias input으로만 남긴다. 기본 Runtime catalog·진행·부활은 바꾸지 않으며 실제 연속 공간 전환은 후속 Phase 3 계약이다.
+- 아래의 Area·Gate·보스 전환 규칙은 Phase 3 전까지 유지하는 현재 0.23.0 Runtime과 migration source 설명이다. 새 Sector target의 최종 진행 규칙으로 승격하거나 first-Gate Timer mapping을 자동 확정하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.
 - 각 진행 영역은 입구, 이동 경로, 필수 완료 조건, 명시적 출구와 다음 영역 연결을 가진다.
 - 출구가 필요한 이유는 붕괴 도시 탈출의 압박 속에서 현재 영역의 문제를 해결하고 다음 영역으로 넘어갔음을 플레이어에게 명확히 알리기 위해서다.

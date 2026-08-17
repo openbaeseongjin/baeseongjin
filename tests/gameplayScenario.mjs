@@ -33,6 +33,7 @@ import { run as interpolateRenderSnapshot } from "./interpolateRenderSnapshot.mj
 import { run as debugSettings } from "./debugSettings.mjs";
 import { run as debugPanel } from "./debugPanel.mjs";
 import { run as traversalDamageFeedback } from "./traversalDamageFeedback.mjs";
+import { run as sectorDefinitionValidator } from "./sectorDefinitionValidator.mjs";
 
 const steps = {
     worldSeed,
@@ -67,6 +68,7 @@ const steps = {
     debugSettings,
     debugPanel,
     traversalDamageFeedback,
+    sectorDefinitionValidator,
     spriteAssetValidator,
     stateMachine,
     commandReplay
