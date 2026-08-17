@@ -2,8 +2,8 @@ import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 6;
-const IMPACT_TYPES = new Set(["rope-cut", "player-hit"]);
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 7;
+const IMPACT_TYPES = new Set(["rope-cut", "player-hit", "fall-damage"]);
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
@@ -253,6 +253,7 @@ export function createPlayerImpactStateDigest(state, { impactType, respawned }) 
 }
 
 export function createPlayerImpactClaim({
+    impactId,
     projectileId,
     clientTick,
     impactType,
@@ -261,9 +262,11 @@ export function createPlayerImpactClaim({
     damage = 0,
     outcome
 }) {
-    if (typeof projectileId !== "string" || projectileId.length === 0) {
-        throw new Error("projectileId must be non-empty");
+    if (impactId !== undefined && projectileId !== undefined && impactId !== projectileId) {
+        throw new Error("impactId and projectileId must match when both are provided");
     }
+    impactId ??= projectileId;
+    assertId(impactId, "impactId");
     assertTick(clientTick, "clientTick");
     if (!IMPACT_TYPES.has(impactType)) throw new Error(`unsupported impactType: ${impactType}`);
     if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
@@ -278,8 +281,8 @@ export function createPlayerImpactClaim({
     }
     assertBoolean(outcome.respawned, "outcome.respawned");
     if (!/^[0-9a-f]{16}$/.test(outcome.digest)) throw new Error("outcome.digest must be a 64-bit hex digest");
-    if (impactType !== "player-hit" && outcome.respawned) {
-        throw new Error("only player-hit impacts may respawn the victim");
+    if (impactType === "rope-cut" && outcome.respawned) {
+        throw new Error("rope-cut impacts may not respawn the victim");
     }
 
     const hasRecoveryState = outcome.state !== undefined;
@@ -308,7 +311,8 @@ export function createPlayerImpactClaim({
     });
     return Object.freeze({
         protocolVersion: PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION,
-        projectileId,
+        impactId,
+        projectileId: impactId,
         clientTick,
         impactType,
         position: normalizeNetworkJson(position, "position"),
@@ -331,6 +335,7 @@ export function deserializePlayerImpactClaim(serialized) {
 }
 
 export function createPlayerImpactReceipt({
+    impactId,
     projectileId,
     accepted,
     resolution = null,
@@ -338,25 +343,28 @@ export function createPlayerImpactReceipt({
     reason = null,
     recoveryId = null
 }) {
-    if (typeof projectileId !== "string" || projectileId.length === 0) {
-        throw new Error("projectileId must be non-empty");
+    if (impactId !== undefined && projectileId !== undefined && impactId !== projectileId) {
+        throw new Error("impactId and projectileId must match when both are provided");
     }
+    impactId ??= projectileId;
+    assertId(impactId, "impactId");
     if (typeof accepted !== "boolean") throw new Error("accepted must be boolean");
     if (!accepted) {
         if (typeof reason !== "string" || reason.length === 0) throw new Error("rejected receipt reason is required");
         if (reason === "state-diverged") {
             return Object.freeze({
-                projectileId,
+                impactId,
+                projectileId: impactId,
                 accepted,
                 reason,
                 recoveryId: assertId(recoveryId, "recoveryId")
             });
         }
         if (recoveryId !== null) throw new Error("only state-diverged receipts may include recoveryId");
-        return Object.freeze({ projectileId, accepted, reason });
+        return Object.freeze({ impactId, projectileId: impactId, accepted, reason });
     }
     if (recoveryId !== null) throw new Error("accepted impact receipts must not include recoveryId");
     if (!IMPACT_TYPES.has(resolution)) throw new Error(`unsupported impact resolution: ${resolution}`);
     if (!Number.isFinite(damage) || damage < 0) throw new Error("damage must be non-negative and finite");
-    return Object.freeze({ projectileId, accepted, resolution, damage });
+    return Object.freeze({ impactId, projectileId: impactId, accepted, resolution, damage });
 }

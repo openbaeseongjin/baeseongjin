@@ -12,8 +12,17 @@ import {
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
 import { EnemyObject } from "../combat/EnemyObject.js";
+import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
 import { HomingProjectileObject } from "../combat/ProjectileObject.js";
-import { COMBAT_CONFIG, PLAYER_CONFIG, ROPE_CONFIG, WIND_CONFIG, WORLD_CONFIG } from "../config.js";
+import {
+    COMBAT_CONFIG,
+    FALL_DAMAGE_CONFIG,
+    PLAYER_CONFIG,
+    ROPE_CONFIG,
+    ROPE_IMPACT_CONFIG,
+    WIND_CONFIG,
+    WORLD_CONFIG
+} from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";
 import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
@@ -335,6 +344,7 @@ export class GameSimulation {
         player.ropeObject.attachBufferRemaining = 0;
         player.ropeObject.swingDrag = null;
         player.ropeObject.launcher.clear();
+        player.ropeImpactAttack.reset();
         player.weapon.cooldown = 0;
         player.hitInvulnerabilityRemaining = 0;
         player.ropeDisabledRemaining = 0;
@@ -394,6 +404,7 @@ export class GameSimulation {
         if (player.ropeDisabledRemaining <= 0) {
             player.ropeObject.launcher.restore(state.launcher);
         }
+        player.ropeImpactAttack.observe(player, this.enemies, state.clientTick ?? this.tick);
         return true;
     }
 
@@ -495,16 +506,19 @@ export class GameSimulation {
 
     advanceOwnerPrediction(ownerId, command, dt, tick, { allowFire = true } = {}) {
         const player = this.#requirePlayer(ownerId);
+        this.tick = tick;
         this.elapsedSeconds += dt;
         this.#prepareOwnerStep(player, dt);
         this.#applyWorldForce(player, dt);
-        const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt);
+        const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt, { replicateLandingImpacts: false });
+        const ropeImpactEvents = this.#advanceRopeImpactAttacks(player, { commit: false });
         const projectile = this.#advanceAutomaticWeapon(player, dt, allowFire);
         this.projectiles.length = 0;
-        this.tick = tick;
         return Object.freeze({
             projectile,
-            foundationEvents: inputOutcome.foundationEvents
+            foundationEvents: inputOutcome.foundationEvents,
+            fallImpactEvents: inputOutcome.fallImpactEvents,
+            ropeImpactEvents
         });
     }
 
@@ -715,6 +729,7 @@ export class GameSimulation {
                 this.#applyWorldForce(player, dt);
                 const inputOutcome = this.dispatchOwnerInput(player.id, playerCommand, dt);
                 this.commitFoundationEvents(inputOutcome.foundationEvents);
+                this.#advanceRopeImpactAttacks(player);
             }
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile);
@@ -811,9 +826,10 @@ export class GameSimulation {
         };
     }
 
-    dispatchOwnerInput(ownerId, command, dt) {
+    dispatchOwnerInput(ownerId, command, dt, { replicateLandingImpacts = true } = {}) {
         const player = this.#requirePlayer(ownerId);
         const foundationEvents = [];
+        const fallImpactEvents = [];
         const canControl = player.lifeState === "active";
         const effectiveCommand = canControl
             ? command
@@ -923,10 +939,111 @@ export class GameSimulation {
                 },
                 onFlash: (eventFlash) => {
                     this.eventFlash = { ...eventFlash, playerId: player.id };
+                },
+                onLanding: (landing) => {
+                    const event = this.#applyLandingImpact(player, landing, {
+                        replicate: replicateLandingImpacts
+                    });
+                    if (event) fallImpactEvents.push(event);
                 }
             }
         });
-        return Object.freeze({ foundationEvents: Object.freeze(foundationEvents) });
+        return Object.freeze({
+            foundationEvents: Object.freeze(foundationEvents),
+            fallImpactEvents: Object.freeze(fallImpactEvents)
+        });
+    }
+
+    #applyLandingImpact(player, landing, { replicate }) {
+        if (player.lifeState !== "active") return null;
+        const damage = fallDamageForImpactSpeed(landing.impactSpeed, player.maxHealth, FALL_DAMAGE_CONFIG);
+        if (damage <= 0) return null;
+        const position = Object.freeze({ x: player.physics.position.x, y: player.physics.position.y });
+        const impactId = `${player.id}:fall-damage:${this.tick}`;
+        player.health = Math.max(0, player.health - damage);
+        this.metrics.recordPlayerImpact("fall-damage", damage);
+        const respawned = player.health <= 0;
+        const event = Object.freeze({
+            eventType: "player-fall-damaged",
+            resolution: "fall-damage",
+            impactId,
+            clientTick: this.tick,
+            targetId: player.id,
+            playerId: player.id,
+            position,
+            velocity: landing.impactVelocity,
+            impactSpeed: landing.impactSpeed,
+            damage,
+            respawned
+        });
+        if (replicate) this.recordReplicationEvent(event.eventType, event);
+        this.eventFlash = { type: "fall-damage", age: 0, ...event };
+        if (respawned) this.respawnPlayerAtCheckpoint(player, "fall-damage", impactId);
+        return event;
+    }
+
+    #advanceRopeImpactAttacks(player, { commit = true } = {}) {
+        const events = player.ropeImpactAttack.advance(player, this.enemies, this.tick);
+        if (commit) {
+            for (const event of events) this.#commitRopeImpact(event);
+        }
+        return events;
+    }
+
+    #commitRopeImpact(event) {
+        const target = this.enemies.find(({ id, health }) => id === event.targetId && health > 0);
+        if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
+        target.health = Math.max(0, target.health - ROPE_IMPACT_CONFIG.damage);
+        const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
+        if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
+        this.recordReplicationEvent("resolve", {
+            objectId: event.predictionId,
+            resolution,
+            position: event.position,
+            parameters: Object.freeze({
+                sourceKind: "rope-impact",
+                predictionId: event.predictionId,
+                sourcePlayerId: event.sourcePlayerId,
+                targetId: event.targetId,
+                damage: ROPE_IMPACT_CONFIG.damage
+            })
+        });
+        this.eventFlash = {
+            type: resolution,
+            age: 0,
+            position: new Vector2(event.position.x, event.position.y),
+            damage: ROPE_IMPACT_CONFIG.damage,
+            sourcePlayerId: event.sourcePlayerId,
+            targetId: event.targetId
+        };
+        this.enemies = this.enemies.filter(({ health }) => health > 0);
+        return Object.freeze({ accepted: true, resolution, damage: ROPE_IMPACT_CONFIG.damage });
+    }
+
+    resolveRopeImpactClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+        const player = this.#findPlayer(authenticatedPlayerId);
+        if (!player || player.lifeState !== "active") {
+            return Object.freeze({ accepted: false, reason: "player-ineligible" });
+        }
+        if (!claim.predictionId.startsWith(`${authenticatedPlayerId}:rope-impact:${claim.clientTick}:`)) {
+            return Object.freeze({ accepted: false, reason: "prediction-ownership" });
+        }
+        const target = this.enemies.find(({ id, health }) => id === claim.targetId && health > 0);
+        if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
+        if (
+            Math.hypot(claim.position.x - target.position.x, claim.position.y - target.position.y) >
+                target.radius + positionTolerance ||
+            !player.physics.collider.overlapsCircle(
+                player.physics.position,
+                target.position,
+                target.radius + positionTolerance
+            )
+        ) {
+            return Object.freeze({ accepted: false, reason: "position-mismatch" });
+        }
+        const pendingImpact = player.ropeImpactAttack.consume(claim.predictionId, claim.targetId);
+        if (!pendingImpact) return Object.freeze({ accepted: false, reason: "rope-impact-ineligible" });
+        return this.#commitRopeImpact(pendingImpact);
     }
 
     commitFoundationEvents(events, { replicate = true } = {}) {
@@ -1326,6 +1443,9 @@ export class GameSimulation {
         if (!player || player.lifeState !== "active") {
             return Object.freeze({ accepted: false, reason: "player-ineligible" });
         }
+        if (!player.weapon.isEnabled) {
+            return Object.freeze({ accepted: false, reason: "weapon-disabled" });
+        }
         if (claim.predictionId !== `${authenticatedPlayerId}:${claim.clientTick}`) {
             return Object.freeze({ accepted: false, reason: "prediction-ownership" });
         }
@@ -1451,22 +1571,38 @@ export class GameSimulation {
     }
 
     resolveEnemyProjectileClaim(authenticatedPlayerId, claim) {
-        return this.#resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { allowRecoveryState: false });
+        return this.resolvePlayerImpactClaim(authenticatedPlayerId, claim);
     }
 
     resolveEnemyProjectileRecovery(authenticatedPlayerId, claim) {
-        return this.#resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { allowRecoveryState: true });
+        return this.resolvePlayerImpactRecovery(authenticatedPlayerId, claim);
     }
 
-    #resolveEnemyProjectileClaim(authenticatedPlayerId, claim, { allowRecoveryState }) {
+    resolvePlayerImpactClaim(authenticatedPlayerId, claim) {
+        return this.#resolvePlayerImpactClaim(authenticatedPlayerId, claim, { allowRecoveryState: false });
+    }
+
+    resolvePlayerImpactRecovery(authenticatedPlayerId, claim) {
+        return this.#resolvePlayerImpactClaim(authenticatedPlayerId, claim, { allowRecoveryState: true });
+    }
+
+    #resolvePlayerImpactClaim(authenticatedPlayerId, claim, { allowRecoveryState }) {
         const player = this.players.find(({ id }) => id === authenticatedPlayerId);
         if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
-        const projectile = this.enemyProjectiles.find(({ id }) => id === claim.projectileId);
+        const impactId = claim.impactId ?? claim.projectileId;
+        const isFallDamage = claim.impactType === "fall-damage";
+        const projectile = isFallDamage ? null : this.enemyProjectiles.find(({ id }) => id === impactId);
         if (projectile && claim.impactType === "rope-cut" && !projectile.canCutRope) {
             return Object.freeze({ accepted: false, reason: "rope-cut-disallowed" });
         }
+        const fallDamage = isFallDamage
+            ? fallDamageForImpactSpeed(Math.max(0, claim.velocity.y), player.maxHealth, FALL_DAMAGE_CONFIG)
+            : null;
+        if (isFallDamage && (fallDamage <= 0 || claim.damage !== fallDamage)) {
+            return Object.freeze({ accepted: false, reason: "fall-damage-mismatch" });
+        }
         if (claim.outcome) {
-            const damage = projectile?.damage ?? claim.damage;
+            const damage = isFallDamage ? fallDamage : (projectile?.damage ?? claim.damage);
             if (claim.outcome.state) {
                 if (!allowRecoveryState) {
                     return Object.freeze({ accepted: false, reason: "recovery-not-authorized" });
@@ -1486,6 +1622,7 @@ export class GameSimulation {
             }
             return this.#finalizeVictimImpact(player, claim, projectile, damage);
         }
+        if (isFallDamage) return Object.freeze({ accepted: false, reason: "impact-outcome-required" });
         if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
         if (projectile.targetId !== authenticatedPlayerId) {
             return Object.freeze({ accepted: false, reason: "target-mismatch" });
@@ -1530,7 +1667,7 @@ export class GameSimulation {
         );
         this.metrics.recordPlayerImpact(claim.impactType, projectile.damage);
         if (claim.impactType === "player-hit" && player.health <= 0) {
-            this.respawnPlayerAtCheckpoint(player, "health", claim.projectileId);
+            this.respawnPlayerAtCheckpoint(player, "health", impactId);
         }
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage: projectile.damage });
     }
@@ -1545,6 +1682,10 @@ export class GameSimulation {
             return;
         }
         player.health = Math.max(0, player.health - damage);
+        if (claim.impactType === "fall-damage") {
+            if (claim.outcome.respawned) this.#resetPlayerAtCheckpoint(player);
+            return;
+        }
         const speed = Math.hypot(claim.velocity.x, claim.velocity.y);
         if (speed > 0) {
             player.physics.addImpulse(
@@ -1557,6 +1698,22 @@ export class GameSimulation {
     }
 
     #finalizeVictimImpact(player, claim, projectile, damage) {
+        const impactId = claim.impactId ?? claim.projectileId;
+        if (claim.impactType === "fall-damage") {
+            this.recordReplicationEvent("player-fall-damaged", {
+                impactId,
+                playerId: player.id,
+                targetId: player.id,
+                position: new Vector2(claim.position.x, claim.position.y),
+                velocity: new Vector2(claim.velocity.x, claim.velocity.y),
+                impactSpeed: Math.max(0, claim.velocity.y),
+                damage,
+                respawned: claim.outcome.respawned
+            });
+            this.metrics.recordPlayerImpact(claim.impactType, damage);
+            if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "fall-damage", impactId);
+            return Object.freeze({ accepted: true, resolution: claim.impactType, damage });
+        }
         if (claim.impactType === "rope-cut") {
             this.eventFlash = {
                 type: "rope-cut",
@@ -1568,7 +1725,7 @@ export class GameSimulation {
         if (projectile) this.enemyProjectiles = this.enemyProjectiles.filter(({ id }) => id !== projectile.id);
         this.recordProjectileResolution(
             {
-                projectileId: claim.projectileId,
+                projectileId: impactId,
                 resolution: claim.impactType,
                 position: new Vector2(claim.position.x, claim.position.y)
             },
@@ -1578,7 +1735,7 @@ export class GameSimulation {
             }
         );
         this.metrics.recordPlayerImpact(claim.impactType, damage);
-        if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "health", claim.projectileId);
+        if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "health", impactId);
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage });
     }
 
@@ -1636,6 +1793,7 @@ export class GameSimulation {
         player.ropeObject.attachBufferRemaining = 0;
         player.ropeObject.swingDrag = null;
         player.ropeObject.launcher.clear();
+        player.ropeImpactAttack.reset();
         player.health = player.maxHealth;
         player.weapon.cooldown = 0;
         player.hitInvulnerabilityRemaining = 0;

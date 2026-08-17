@@ -30,10 +30,21 @@ export function run() {
     const falling = new PlayerPhysics(PLAYER_CONFIG);
     falling.position.set(100, 160);
     falling.velocity.set(0, 500);
-    falling.step(1 / 20, noInput, [platform], rope);
+    const landing = falling.step(1 / 20, noInput, [platform], rope);
     assert.equal(falling.position.y, platform.y - PLAYER_CONFIG.radius, "player must land from above");
     assert.equal(falling.velocity.y, 0);
     assert.equal(falling.isGrounded, true);
+    assert.equal(landing.landed, true, "the airborne-to-grounded transition must be reported once");
+    assert.equal(
+        landing.impactSpeed,
+        500 + PLAYER_CONFIG.gravity / 20,
+        "landing impact must preserve the downward speed from before collision resolution"
+    );
+    assert.equal(
+        falling.step(1 / 120, noInput, [platform], rope).landed,
+        false,
+        "remaining grounded must not report a second landing"
+    );
 
     const swingConfig = {
         ...PLAYER_CONFIG,

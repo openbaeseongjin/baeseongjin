@@ -231,6 +231,7 @@ export function run() {
     assert.equal(fallSimulation.runState, "playing", "one fallen player must not stop a cooperative world");
 
     combatPlayer.weapon.cooldown = 0;
+    combatPlayer.weapon.isEnabled = true;
     combatSession.advance();
     assert.equal(
         combatSimulation.projectiles.length,
@@ -369,7 +370,7 @@ export function run() {
                 impactType: "rope-cut",
                 outcome: { ...impactClaim.outcome, respawned: true }
             }),
-        /only player-hit/
+        /rope-cut impacts may not respawn/
     );
     const ropeCutLauncherState = {
         cooldownRemaining: 0.2,
@@ -612,6 +613,7 @@ export function run() {
     const forgedPartner = forgedSimulation.addPlayer({ x: 180, y: 500 });
     const forgedSession = new AuthorityServerSession({ simulation: forgedSimulation });
     forgedPlayer.weapon.cooldown = 0;
+    forgedPlayer.weapon.isEnabled = true;
     forgedSession.advance();
     const forgedTarget = forgedSimulation.enemies
         .filter((enemy) => forgedPlayer.physics.position.distanceTo(enemy.position) <= forgedPlayer.weapon.range)

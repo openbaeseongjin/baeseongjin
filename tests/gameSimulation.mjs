@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
-import { COMBAT_CONFIG } from "../src/game/config.js";
+import { COMBAT_CONFIG, FALL_DAMAGE_CONFIG, ROPE_IMPACT_CONFIG } from "../src/game/config.js";
+import { fallDamageForImpactSpeed } from "../src/game/combat/FallDamage.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
 import { LocalAuthority } from "../src/game/runtime/LocalAuthority.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
@@ -176,11 +177,18 @@ export function run() {
     const eventAuthority = new LocalAuthority(eventRun);
     eventPlayer.weapon.cooldown = 0;
     eventAuthority.step(1 / 120, command);
+    assert.equal(
+        eventRun.projectiles.length,
+        0,
+        "the retained automatic weapon system must be disabled for the default player"
+    );
+    eventPlayer.weapon.isEnabled = true;
+    eventAuthority.step(1 / 120, command);
     const spawnEvents = eventAuthority.drainEvents();
     assert.equal(spawnEvents[0].eventType, "spawn");
-    assert.equal(spawnEvents[0].tick, 1);
+    assert.equal(spawnEvents[0].tick, 2);
     assert.equal(spawnEvents[0].objectId, eventRun.projectiles[0].id);
-    assert.equal(spawnEvents[0].parameters.predictionId, `${eventPlayer.id}:1`);
+    assert.equal(spawnEvents[0].parameters.predictionId, `${eventPlayer.id}:2`);
     assert.equal(
         eventPlayer.physics.collider.overlapsCircle(
             eventPlayer.physics.position,
@@ -229,6 +237,96 @@ export function run() {
     assert.equal(localImpactReceipt.accepted, true);
     assert.equal(localImpactPlayer.health, localHealthBeforeImpact - localImpactProjectile.damage);
     assert.equal(localImpactSimulation.metrics.damageTaken, localImpactProjectile.damage);
+
+    const landingPlatform = {
+        id: "fall-damage-platform",
+        x: 0,
+        y: 200,
+        width: 240,
+        height: 20,
+        topY: 200,
+        oneWay: true,
+        vertices: [
+            { x: 0, y: 200 },
+            { x: 240, y: 200 },
+            { x: 240, y: 220 },
+            { x: 0, y: 220 }
+        ]
+    };
+    const landingSimulation = new GameSimulation();
+    landingSimulation.enemies = [];
+    landingSimulation.activeCollisionSurfaces = [landingPlatform];
+    const landingPlayer = primaryPlayer(landingSimulation);
+    landingPlayer.physics.position.set(120, 180);
+    landingPlayer.physics.velocity.set(0, 1100);
+    const expectedFallDamage = fallDamageForImpactSpeed(
+        1100 + landingPlayer.physics.config.gravity / 120,
+        landingPlayer.maxHealth,
+        FALL_DAMAGE_CONFIG
+    );
+    landingSimulation.step(1 / 120, { ...command, horizontal: 0 });
+    assert.equal(landingPlayer.health, landingPlayer.maxHealth - expectedFallDamage);
+    assert.equal(landingSimulation.metrics.damageTaken, expectedFallDamage);
+    const landingDamageEvent = landingSimulation
+        .drainReplicationEvents()
+        .find(({ eventType }) => eventType === "player-fall-damaged");
+    assert.equal(landingDamageEvent.damage, expectedFallDamage);
+    assert.equal(landingDamageEvent.targetId, landingPlayer.id);
+    const healthAfterLanding = landingPlayer.health;
+    landingSimulation.step(1 / 120, { ...command, horizontal: 0 });
+    assert.equal(landingPlayer.health, healthAfterLanding, "ground contact must not repeat fall damage each tick");
+
+    const lethalLandingSimulation = new GameSimulation();
+    lethalLandingSimulation.enemies = [];
+    lethalLandingSimulation.activeCollisionSurfaces = [landingPlatform];
+    lethalLandingSimulation.activeCheckpoint = lethalLandingSimulation.world.checkpoints[1];
+    const lethalLandingPlayer = primaryPlayer(lethalLandingSimulation);
+    lethalLandingPlayer.physics.position.set(120, 180);
+    lethalLandingPlayer.physics.velocity.set(0, FALL_DAMAGE_CONFIG.lethalImpactSpeed);
+    lethalLandingSimulation.step(1 / 120, { ...command, horizontal: 0 });
+    assert.equal(lethalLandingPlayer.health, lethalLandingPlayer.maxHealth);
+    assert.deepEqual(
+        { x: lethalLandingPlayer.physics.position.x, y: lethalLandingPlayer.physics.position.y },
+        {
+            x: lethalLandingSimulation.activeCheckpoint.x,
+            y: lethalLandingSimulation.activeCheckpoint.y
+        },
+        "a lethal landing must immediately respawn only that player at the active checkpoint"
+    );
+    assert.equal(lethalLandingSimulation.eventFlash.reason, "fall-damage");
+
+    const ropeImpactSimulation = new GameSimulation();
+    const ropeImpactPlayer = primaryPlayer(ropeImpactSimulation);
+    const ropeImpactEnemy = ropeImpactSimulation.enemies[0];
+    ropeImpactSimulation.enemies = [ropeImpactEnemy];
+    ropeImpactSimulation.activeCollisionSurfaces = [];
+    ropeImpactPlayer.physics.position.set(0, 0);
+    ropeImpactPlayer.physics.velocity.set(ROPE_IMPACT_CONFIG.minimumSpeed + 100, 0);
+    ropeImpactPlayer.ropeObject.rope.attach(ropeImpactPlayer.physics.position, { x: 0, y: -80 });
+    ropeImpactEnemy.position.set(20, 0);
+    const ropeImpactHealth = ropeImpactEnemy.health;
+    ropeImpactSimulation.step(0, { ...command, horizontal: 0 });
+    assert.equal(ropeImpactEnemy.health, ropeImpactHealth - ROPE_IMPACT_CONFIG.damage);
+    const ropeImpactEvent = ropeImpactSimulation
+        .drainReplicationEvents()
+        .find((event) => event.eventType === "resolve" && event.parameters?.sourceKind === "rope-impact");
+    assert.equal(ropeImpactEvent.resolution, "enemy-hit");
+    assert.equal(ropeImpactEvent.parameters.damage, ROPE_IMPACT_CONFIG.damage);
+    ropeImpactSimulation.step(0, { ...command, horizontal: 0 });
+    assert.equal(
+        ropeImpactEnemy.health,
+        ropeImpactHealth - ROPE_IMPACT_CONFIG.damage,
+        "remaining overlapped must not deal repeated rope collision damage"
+    );
+    ropeImpactEnemy.position.set(200, 0);
+    ropeImpactSimulation.step(0, { ...command, horizontal: 0 });
+    ropeImpactEnemy.position.set(20, 0);
+    ropeImpactSimulation.step(0, { ...command, horizontal: 0 });
+    assert.equal(
+        ropeImpactEnemy.health,
+        ropeImpactHealth - ROPE_IMPACT_CONFIG.damage * 2,
+        "separating and making a new high-speed rope collision must rearm the attack"
+    );
 
     const expirationSimulation = new GameSimulation();
     expirationSimulation.enemies = [];

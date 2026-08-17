@@ -8,6 +8,7 @@ import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
 import { createPlayerProjectileSpawnReceipt } from "../network/PlayerProjectileSpawnClaim.js";
 import { createProjectileHitReceipt } from "../network/ProjectileHitClaim.js";
+import { createRopeImpactReceipt } from "../network/RopeImpactClaim.js";
 import { createSummitClaimReceipt } from "../network/SummitClaim.js";
 import { buildAuthoritySnapshot } from "./AuthoritySnapshotBuilder.js";
 
@@ -21,8 +22,8 @@ function assertPositiveInteger(value, label) {
     return value;
 }
 
-function impactRecoveryKey(playerId, projectileId) {
-    return `${playerId}\u0000${projectileId}`;
+function impactRecoveryKey(playerId, impactId) {
+    return `${playerId}\u0000${impactId}`;
 }
 
 export class AuthorityServerSession {
@@ -44,6 +45,7 @@ export class AuthorityServerSession {
         this.pendingImpactRecoveries = new Map();
         this.resolvedFoundationSelections = new Map();
         this.resolvedFoundationShearClaims = new Map();
+        this.resolvedRopeImpactClaims = new Map();
         this.resolvedCheckpointClaims = new Map();
         this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
@@ -114,21 +116,21 @@ export class AuthorityServerSession {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
         if (!claim.outcome) throw new Error("victim impact outcome is required");
-        const existing = this.resolvedImpactClaims.get(claim.projectileId);
+        const existing = this.resolvedImpactClaims.get(claim.impactId);
         if (existing) return existing.receipt;
-        const recoveryKey = impactRecoveryKey(authenticatedPlayerId, claim.projectileId);
+        const recoveryKey = impactRecoveryKey(authenticatedPlayerId, claim.impactId);
         const pendingRecovery = this.pendingImpactRecoveries.get(recoveryKey);
         if (claim.outcome.state) {
             if (!pendingRecovery || pendingRecovery.recoveryId !== claim.outcome.recoveryId) {
                 return createPlayerImpactReceipt({
-                    projectileId: claim.projectileId,
+                    impactId: claim.impactId,
                     accepted: false,
                     reason: "recovery-not-requested"
                 });
             }
             if (claim.outcome.state.id !== authenticatedPlayerId) {
                 return createPlayerImpactReceipt({
-                    projectileId: claim.projectileId,
+                    impactId: claim.impactId,
                     accepted: false,
                     reason: "recovery-player-mismatch"
                 });
@@ -136,26 +138,26 @@ export class AuthorityServerSession {
             const previousOwnerTick = this.lastOwnerMotionTicks.get(authenticatedPlayerId) ?? -1;
             if (claim.outcome.stateTick < previousOwnerTick) {
                 return createPlayerImpactReceipt({
-                    projectileId: claim.projectileId,
+                    impactId: claim.impactId,
                     accepted: false,
                     reason: "stale-recovery-state"
                 });
             }
             if (claim.outcome.stateTick > this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks) {
                 return createPlayerImpactReceipt({
-                    projectileId: claim.projectileId,
+                    impactId: claim.impactId,
                     accepted: false,
                     reason: "recovery-tick-window"
                 });
             }
             const recoveryResult = createPlayerImpactReceipt({
-                projectileId: claim.projectileId,
-                ...this.simulation.resolveEnemyProjectileRecovery(authenticatedPlayerId, claim)
+                impactId: claim.impactId,
+                ...this.simulation.resolvePlayerImpactRecovery(authenticatedPlayerId, claim)
             });
             if (recoveryResult.accepted) {
                 this.lastOwnerMotionTicks.set(authenticatedPlayerId, claim.outcome.stateTick);
                 this.pendingImpactRecoveries.delete(recoveryKey);
-                this.resolvedImpactClaims.set(claim.projectileId, {
+                this.resolvedImpactClaims.set(claim.impactId, {
                     receipt: recoveryResult,
                     resolvedAtTick: this.simulation.getTick()
                 });
@@ -164,12 +166,12 @@ export class AuthorityServerSession {
         }
         if (pendingRecovery) return pendingRecovery.receipt;
 
-        const simulationResult = this.simulation.resolveEnemyProjectileClaim(authenticatedPlayerId, claim);
+        const simulationResult = this.simulation.resolvePlayerImpactClaim(authenticatedPlayerId, claim);
         if (!simulationResult.accepted && simulationResult.reason === "state-diverged") {
             this.nextImpactRecoverySequence += 1;
             const recoveryId = `impact-recovery:${this.nextImpactRecoverySequence}`;
             const receipt = createPlayerImpactReceipt({
-                projectileId: claim.projectileId,
+                impactId: claim.impactId,
                 accepted: false,
                 reason: "state-diverged",
                 recoveryId
@@ -181,9 +183,9 @@ export class AuthorityServerSession {
             });
             return receipt;
         }
-        const result = createPlayerImpactReceipt({ projectileId: claim.projectileId, ...simulationResult });
+        const result = createPlayerImpactReceipt({ impactId: claim.impactId, ...simulationResult });
         if (result.accepted) {
-            this.resolvedImpactClaims.set(claim.projectileId, {
+            this.resolvedImpactClaims.set(claim.impactId, {
                 receipt: result,
                 resolvedAtTick: this.simulation.getTick()
             });
@@ -250,6 +252,36 @@ export class AuthorityServerSession {
         });
         if (receipt.accepted) {
             this.resolvedFoundationShearClaims.set(claim.predictionId, {
+                receipt,
+                resolvedAtTick: this.simulation.getTick()
+            });
+        }
+        return receipt;
+    }
+
+    submitRopeImpact(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const existing = this.resolvedRopeImpactClaims.get(claim.predictionId);
+        if (existing) return existing.receipt;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return createRopeImpactReceipt({
+                predictionId: claim.predictionId,
+                accepted: false,
+                reason: "tick-window"
+            });
+        }
+        const receipt = createRopeImpactReceipt({
+            predictionId: claim.predictionId,
+            ...this.simulation.resolveRopeImpactClaim(authenticatedPlayerId, claim, {
+                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+            })
+        });
+        if (receipt.accepted) {
+            this.resolvedRopeImpactClaims.set(claim.predictionId, {
                 receipt,
                 resolvedAtTick: this.simulation.getTick()
             });
@@ -439,8 +471,13 @@ export class AuthorityServerSession {
                 this.resolvedFoundationShearClaims.delete(predictionId);
             }
         }
-        for (const [projectileId, entry] of this.resolvedImpactClaims) {
-            if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedImpactClaims.delete(projectileId);
+        for (const [predictionId, entry] of this.resolvedRopeImpactClaims) {
+            if (entry.resolvedAtTick < oldestRememberedTick) {
+                this.resolvedRopeImpactClaims.delete(predictionId);
+            }
+        }
+        for (const [impactId, entry] of this.resolvedImpactClaims) {
+            if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedImpactClaims.delete(impactId);
         }
         const oldestRecoveryTick = this.simulation.getTick() - MULTIPLAYER_TIMING.impactRecoveryRetentionTicks;
         for (const [key, entry] of this.pendingImpactRecoveries) {
@@ -472,6 +509,9 @@ export class AuthorityServerSession {
         }
         for (const predictionId of this.resolvedFoundationShearClaims.keys()) {
             if (predictionId.startsWith(`${playerId}:`)) this.resolvedFoundationShearClaims.delete(predictionId);
+        }
+        for (const predictionId of this.resolvedRopeImpactClaims.keys()) {
+            if (predictionId.startsWith(`${playerId}:`)) this.resolvedRopeImpactClaims.delete(predictionId);
         }
         for (const predictionId of this.resolvedProjectileSpawnClaims.keys()) {
             if (predictionId.startsWith(`${playerId}:`)) this.resolvedProjectileSpawnClaims.delete(predictionId);

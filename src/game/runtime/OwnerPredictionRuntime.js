@@ -368,13 +368,14 @@ export class OwnerPredictionRuntime {
     }
 
     recordImpactReceipt(receipt, snapshot = null) {
-        const pending = this.pendingImpacts.get(receipt.projectileId);
+        const impactId = receipt.impactId ?? receipt.projectileId;
+        const pending = this.pendingImpacts.get(impactId);
         if (!pending) return false;
         if (receipt.accepted) {
             pending.status = "accepted";
             return true;
         }
-        this.pendingImpacts.delete(receipt.projectileId);
+        this.pendingImpacts.delete(impactId);
         return true;
     }
 
@@ -506,9 +507,54 @@ export class OwnerPredictionRuntime {
         });
     }
 
-    recordPredictedOutcome({ projectile, foundationEvents = [] }, tick, previous) {
+    recordPredictedOutcome(
+        { projectile, foundationEvents = [], fallImpactEvents = [], ropeImpactEvents = [] },
+        tick,
+        previous
+    ) {
         this.recordPredictedFoundationEvents(foundationEvents, tick);
+        this.recordPredictedFallImpacts(fallImpactEvents);
+        this.recordPredictedRopeImpacts(ropeImpactEvents);
         this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);
+    }
+
+    recordPredictedFallImpacts(events) {
+        for (const event of events) {
+            const eventKey = `fall-damage:${event.impactId}`;
+            if (this.emittedPredictionTicks.has(eventKey)) continue;
+            this.emittedPredictionTicks.set(eventKey, event.clientTick);
+            this.predictedEvents.push(
+                Object.freeze({
+                    ...event,
+                    eventType: "predicted-player-fall-damaged"
+                })
+            );
+        }
+    }
+
+    recordPredictedRopeImpacts(events) {
+        for (const event of events) {
+            const eventKey = `rope-impact:${event.predictionId}`;
+            if (this.emittedPredictionTicks.has(eventKey)) continue;
+            this.emittedPredictionTicks.set(eventKey, event.clientTick);
+            this.predictedEvents.push(
+                Object.freeze({
+                    eventType: "predicted-resolve",
+                    predictionId: event.predictionId,
+                    clientTick: event.clientTick,
+                    resolution: event.predictedResolution,
+                    position: event.position,
+                    velocity: event.velocity,
+                    parameters: Object.freeze({
+                        sourceKind: "rope-impact",
+                        predictionId: event.predictionId,
+                        sourcePlayerId: event.sourcePlayerId,
+                        targetId: event.targetId,
+                        damage: event.damage
+                    })
+                })
+            );
+        }
     }
 
     recordPredictedFoundationEvents(events, tick) {

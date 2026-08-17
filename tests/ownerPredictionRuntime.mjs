@@ -656,6 +656,7 @@ export function run() {
         predictionLeadTicks: 0
     });
     attackPredictor.reconcile(attackSnapshot, []);
+    primaryPlayer(attackPredictor.simulation).weapon.isEnabled = true;
     const attackTick = attackPredictor.advance(move).tick;
     const predictedAttacks = attackPredictor.drainPredictedEvents();
     assert.equal(predictedAttacks.length, 1, "owner fire must emit a local predicted spawn");
@@ -664,6 +665,7 @@ export function run() {
 
     const overlappingShots = new OwnerPredictionRuntime({ ownerId: movingPlayer.id, predictionLeadTicks: 0 });
     overlappingShots.reconcile(attackSnapshot, []);
+    primaryPlayer(overlappingShots.simulation).weapon.isEnabled = true;
     overlappingShots.advance(move);
     const firstShotPrediction = overlappingShots.drainPredictedEvents()[0];
     const overlappingShotPlayer = primaryPlayer(overlappingShots.simulation);
@@ -702,6 +704,7 @@ export function run() {
     };
     const secondPlayerPredictor = new OwnerPredictionRuntime({ ownerId: secondPlayerId, predictionLeadTicks: 0 });
     secondPlayerPredictor.reconcile(secondPlayerSnapshot, []);
+    primaryPlayer(secondPlayerPredictor.simulation).weapon.isEnabled = true;
     secondPlayerPredictor.advance(move);
     const secondPlayerAttacks = secondPlayerPredictor.drainPredictedEvents();
     assert.equal(secondPlayerAttacks.length, 1);

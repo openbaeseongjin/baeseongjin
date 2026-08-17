@@ -1,5 +1,7 @@
 import { FoundationAugmentState } from "../augments/FoundationAugmentState.js";
 import { AutomaticWeaponObject } from "../combat/AutomaticWeaponObject.js";
+import { RopeImpactAttack } from "../combat/RopeImpactAttack.js";
+import { ROPE_IMPACT_CONFIG } from "../config.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { CircleCollider } from "../physics/colliders/CircleCollider.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
@@ -18,12 +20,14 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
     const foundation = new FoundationAugmentState();
     const ropeObject = new RopeObject({ id: `${id}:rope`, ownerId: id, rope });
     const weapon = new AutomaticWeaponObject({ id: `${id}:weapon`, ownerId: id, config: combatConfig });
+    const ropeImpactAttack = new RopeImpactAttack(ROPE_IMPACT_CONFIG);
     const entity = new PlayerObject({
         id,
         physics,
         ropeObject,
         foundation,
         weapon,
+        ropeImpactAttack,
         combatConfig
     });
     const inputDrivenObjects = Object.freeze([entity, ropeObject]);
@@ -34,6 +38,7 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         ropeObject,
         foundation,
         weapon,
+        ropeImpactAttack,
         entity,
         inputDrivenObjects
     });

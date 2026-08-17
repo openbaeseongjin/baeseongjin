@@ -40,7 +40,7 @@ export class RunMetrics {
     }
 
     recordPlayerImpact(impactType, damage = 0) {
-        if (impactType === "player-hit") this.damageTaken += damage;
+        if (impactType === "player-hit" || impactType === "fall-damage") this.damageTaken += damage;
         if (impactType === "rope-cut") this.ropeCuts += 1;
     }
 

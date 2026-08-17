@@ -311,10 +311,18 @@ export class MultiplayerGameApp {
         const predictedEvents = this.authority.drainPredictedEvents();
         this.applyFoundationFeedback([...events, ...predictedEvents], dt);
         this.authority.drainFoundationShearReceipts();
+        this.authority.drainRopeImpactReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
+        this.combatFeedback.apply(predictedEvents);
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
         for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-foundation-shear-hit")) {
             this.authority.submitFoundationShear(event);
+        }
+        for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "rope-impact")) {
+            this.authority.submitRopeImpact(event);
+        }
+        for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-player-fall-damaged")) {
+            this.authority.submitPredictedFallImpact(event);
         }
         this.predictableProjectiles.predict(predictedSpawns);
         for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);

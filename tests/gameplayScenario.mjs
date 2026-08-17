@@ -32,6 +32,7 @@ import { run as authoredStoryPresentation } from "./authoredStoryPresentation.mj
 import { run as interpolateRenderSnapshot } from "./interpolateRenderSnapshot.mjs";
 import { run as debugSettings } from "./debugSettings.mjs";
 import { run as debugPanel } from "./debugPanel.mjs";
+import { run as traversalDamageFeedback } from "./traversalDamageFeedback.mjs";
 
 const steps = {
     worldSeed,
@@ -65,6 +66,7 @@ const steps = {
     interpolateRenderSnapshot,
     debugSettings,
     debugPanel,
+    traversalDamageFeedback,
     spriteAssetValidator,
     stateMachine,
     commandReplay

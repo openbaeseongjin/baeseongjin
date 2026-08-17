@@ -34,6 +34,7 @@ export function run() {
         { id: "enemy-3", position: new Vector2(321, 0), radius: 18, health: 30 }
     ];
     const projectiles = [];
+    owner.weapon.isEnabled = true;
     const spawnedPlayerProjectile = updateAutomaticWeapon({
         owner,
         enemies,

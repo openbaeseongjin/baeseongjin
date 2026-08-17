@@ -41,6 +41,7 @@ export const CAMERA_CONFIG = Object.freeze({
 });
 
 export const COMBAT_CONFIG = Object.freeze({
+    automaticWeaponEnabled: false,
     weaponRange: 320,
     weaponDamage: 10,
     fireInterval: 0.65,
@@ -64,6 +65,16 @@ export const COMBAT_CONFIG = Object.freeze({
     playerHitInvulnerability: 0.45,
     playerHitKnockback: 260,
     ropeDisabledSeconds: 0.6
+});
+
+export const FALL_DAMAGE_CONFIG = Object.freeze({
+    safeImpactSpeed: 800,
+    lethalImpactSpeed: 1400
+});
+
+export const ROPE_IMPACT_CONFIG = Object.freeze({
+    minimumSpeed: 620,
+    damage: 25
 });
 
 export const WIND_CONFIG = Object.freeze({
