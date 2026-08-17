@@ -110,7 +110,7 @@
 | [`bsh/scenario/2/2-8/README.md`](./bsh/scenario/2/2-8/README.md) | `bsh` Sector 02 Finale·Group A/B/C Transfer 결과 공개 Stage(2-8) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-8/PRODUCTION-ALIGNMENT.md) | 2-8 Runtime 좌표 대조·Story Reveal cueId 순서 확인·Post-Sector 전환 미확정 명시 계약 |
 | [`bsh/scenario/2/STORY-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/2/STORY-IMPLEMENTATION-HANDOFF.md) | `bsh` Sector 02 Camera Zone 불필요 확인·Story Presentation 공백 3건 붙여넣기용 구현 준비 자료(코드 반영은 별도 진행) |
-| [`bsh/scenario/3/README.md`](./bsh/scenario/3/README.md) | `bsh` Sector 03 Commercial District 마스터플랜 REV 1.2(3-1~3-8 개요, Document Integration Patch 전부 GitHub main 반영 확인·Runtime Prototype Gate만 남음) |
+| [`bsh/scenario/3/README.md`](./bsh/scenario/3/README.md) | `bsh` Sector 03 Central Exchange Complex 마스터플랜 REV 2.0(공간 정체·Stage 명칭·Story 재작성 통합, 3-1~3-8 개요, 개별 Stage 문서 명칭 마이그레이션 대기 — Approved Blockout/Camera Shot 확정만 남음) |
 | [`bsh/scenario/3/3-1/README.md`](./bsh/scenario/3/3-1/README.md) | `bsh` Worker→Commercial District 저압 전환 Stage(3-1) Blockout 후보·제작 규격 |
 | [`bsh/scenario/3/3-2/README.md`](./bsh/scenario/3/3-2/README.md) | `bsh` 첫 Access Scan Field(Scanner) Stage(3-2) Blockout 후보·제작 규격, 구현 의존성 명세 포함 |
 | [`bsh/scenario/3/3-3/README.md`](./bsh/scenario/3/3-3/README.md) | `bsh` Scanner+Patrol Drone 첫 결합 Stage(3-3) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
