@@ -89,6 +89,7 @@ index.html
 - 피해 클라이언트의 즉시 impact와 뒤이은 서버 확정은 투사체·부활 원인의 같은 causal ID로 presentation event를 정규화해 한 번만 재생한다. 서버 확정이 로컬 `hit`·`respawn` 시간을 다시 시작하지 않는다.
 - 순간 표현 상태는 지속 locomotion 상태보다 높은 우선순위로 제한된 시간 동안 재생하고 종료 시 최신 snapshot으로 지속 상태를 다시 계산한다. 이 전이는 physics·input clock을 정지하거나 되감지 않는다.
 - actor facing과 animation phase는 renderer가 actor ID별로 보관하는 표현 상태다. snapshot의 움직임으로 방향을 갱신하되 정지·순간 상태에서는 마지막 방향을 유지하고 네트워크에 frame·phase·facing을 전송하지 않는다. player 달리기 phase는 관성 속도가 남은 시간을 그대로 재생하지 않고 actor의 실제 수평 이동 거리에 비례해 진행하며, 현재 8프레임 한 주기는 180px이다.
+- 플레이어의 지속 locomotion resolver는 접지 상태를 로프 부착보다 먼저 제한한다. `rope`는 부착 상태이면서 공중일 때만 선택하고, 지상에서는 부착 여부와 무관하게 `run` 또는 `idle`을 선택한다. 로프 없이 공중에서 `velocity.y < 0`인 상승 구간은 `jump` clip에 renderer 전용 `rotationOffset`을 초당 2회전으로 더하고, `velocity.y >= 0`인 하강 구간은 추가 회전 없이 기존 `fall` clip을 사용한다. 이 offset은 아래의 물리 `angle`과 그리기 시점에만 합성하며 gameplay·network snapshot에 저장하지 않는다.
 - 싱글의 로컬 플레이어는 `PlayerPhysics`의 prototype getter로 각도를 제공하고 멀티 플레이어는 직렬화 가능한 상태 필드로 각도를 제공할 수 있다. 하위 player renderer는 actor ID 선택과 상태 객체를 분리해 다루며 상태를 object spread로 복제하지 않는다. sprite와 polygon 구현은 모두 전달받은 `angle`을 몸체 중심 변환에 적용하고 `GameApp`·`MultiplayerGameApp`에 모드별 렌더 분기를 만들지 않는다.
 - sprite definition의 source·출력 크기·anchor는 표현 계약이고 collider의 크기·형태는 플레이어 런타임 조립이 선택하는 게임플레이 계약이다. 에셋이나 렌더 프로필 교체가 collider를 암묵적으로 바꾸지 않으며 scene snapshot은 필요할 때 두 계약의 결과를 읽기 전용으로 전달한다.
 - `PlayerRuntimeFactory`는 공개 `Collider` 계약의 구현을 플레이어 물리에 조립한다. 첫 구현은 `CircleCollider` 하나이며 이동·로프 capability와 지형·플레이어 충돌 계산은 구체 반지름 대신 조립된 collider 계약을 사용한다.
