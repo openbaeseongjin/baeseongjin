@@ -72,7 +72,7 @@ export function run() {
     });
     partnerPredictor.reconcile(firstSnapshot, []);
 
-    const terminal = server.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    const terminal = server.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     owner.physics.position.set(terminal.position.x, terminal.position.y);
     server.stepCommandBatch(
         1 / 120,
@@ -89,10 +89,7 @@ export function run() {
         true,
         "shared authored progress must open the same Gate collision on the predicting client"
     );
-    assert.equal(
-        predictor.simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length,
-        DEFAULT_AUTHORED_AREA_CATALOG.areas.length - 1
-    );
+    assert.equal(predictor.simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 0);
 
     const gate = server.world.gates[0];
     owner.physics.position.set(gate.trigger.x + gate.trigger.width * 0.5, gate.trigger.y + gate.trigger.height * 0.5);
@@ -211,7 +208,7 @@ export function run() {
 
     const predictionGuardServer = createCurrentGameSimulation({ worldSeed: 2718 });
     const guardOwner = predictionGuardServer.players[0];
-    const guardTerminal = predictionGuardServer.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    const guardTerminal = predictionGuardServer.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     guardOwner.physics.position.set(guardTerminal.position.x, guardTerminal.position.y);
     const guardSnapshot = buildAuthoritySnapshot({ simulation: predictionGuardServer });
     const guardPredictor = new OwnerPredictionRuntime({
@@ -239,14 +236,14 @@ export function run() {
     assert.deepEqual(guardProgress.unlockedGateIds, [], "owner prediction must not unlock shared Gates");
     assert.equal(
         guardPredictor.simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length,
-        DEFAULT_AUTHORED_AREA_CATALOG.areas.length,
-        "Gate barriers must stay closed until the authority snapshot unlocks them"
+        0,
+        "no dynamic Gate barrier must exist; the lock is enforced by shared progress alone"
     );
 
     const floodServer = createCurrentGameSimulation({ worldSeed: 3141 });
     const floodOwner = floodServer.players[0];
     const floodSession = new AuthorityServerSession({ simulation: floodServer, snapshotIntervalTicks: 1 });
-    const floodTerminal = floodServer.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    const floodTerminal = floodServer.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     floodOwner.physics.position.set(floodTerminal.position.x, floodTerminal.position.y);
     floodSession.submit(
         floodOwner.id,
@@ -345,7 +342,7 @@ export function run() {
         "delayed-portal-partner"
     ).entity;
     const delayedSession = new AuthorityServerSession({ simulation: delayedServer, snapshotIntervalTicks: 1 });
-    const delayedTerminal = delayedServer.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    const delayedTerminal = delayedServer.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     delayedOwner.physics.position.set(delayedTerminal.position.x, delayedTerminal.position.y);
     delayedSession.submit(
         delayedOwner.id,
@@ -395,7 +392,7 @@ export function run() {
     const guardedServer = createCurrentGameSimulation({ worldSeed: 3141 });
     const guardedOwner = guardedServer.players[0];
     const guardedSession = new AuthorityServerSession({ simulation: guardedServer, snapshotIntervalTicks: 1 });
-    const guardedTerminal = guardedServer.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    const guardedTerminal = guardedServer.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     guardedOwner.physics.position.set(guardedTerminal.position.x, guardedTerminal.position.y);
     guardedSession.submit(
         guardedOwner.id,
@@ -485,7 +482,7 @@ export function run() {
         "authority convergence must keep the owner's locally predicted portal arrival"
     );
     const sweptPanel = sweptServer.world.objects.find(({ id }) => id === "sector-01-02:exit-panel");
-    const sweptFinalDeck = sweptServer.world.surfaces.find(({ id }) => id === "sector-01-02:p4");
+    const sweptFinalDeck = sweptServer.world.surfaces.find(({ id }) => id === "sector-01-02:exit-deck");
     sweptSession.submitOwnerMotion(
         sweptOwner.id,
         createOwnerMotionState({

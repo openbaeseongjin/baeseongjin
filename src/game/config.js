@@ -33,6 +33,8 @@ export function ropeHookReach(ropeConfig = ROPE_CONFIG) {
     return (ropeConfig.hookSpeed * ropeConfig.hookFlightRatio.numerator) / ropeConfig.hookFlightRatio.denominator;
 }
 
+export const GRAPPLE_LINK_BUDGET = 600;
+
 export const CAMERA_CONFIG = Object.freeze({
     desktopZoom: 1,
     mobileZoom: 0.72

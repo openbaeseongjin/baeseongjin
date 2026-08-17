@@ -1,5 +1,5 @@
 import { assertAuthoredCoordinateAnchor } from "./AuthoredCoordinateAnchor.js";
-import { ropeHookReach } from "../config.js";
+import { GRAPPLE_LINK_BUDGET, ropeHookReach } from "../config.js";
 
 function issue(code, areaId, details = {}) {
     return Object.freeze({ code, areaId, ...details });
@@ -170,7 +170,7 @@ function validateGrappleLandmarks(area, issues) {
     }
 }
 
-export function validateAreaCatalog(catalog, { maxAttachDistance = ropeHookReach() } = {}) {
+export function validateAreaCatalog(catalog, { maxAttachDistance = GRAPPLE_LINK_BUDGET } = {}) {
     const issues = [];
     const areaIds = new Set(catalog.areas.map(({ id }) => id));
     const globalIds = new Set();
@@ -257,9 +257,17 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = ropeHookReach
             if (object.activation && !boundsInside(area.bounds, object.activation)) {
                 issues.push(issue("object-activation-bounds", area.id, { id: object.id }));
             }
+            if (object.activationSpec && object.activation) {
+                issues.push(issue("object-activation-spec-conflict", area.id, { id: object.id }));
+            }
+            if (object.trigger && object.bounds) {
+                issues.push(issue("object-trigger-spec-conflict", area.id, { id: object.id }));
+            }
             if (object.patrol) {
                 const points = patrolPoints(object.patrol);
-                if (!object.activation) issues.push(issue("patrol-activation-missing", area.id, { id: object.id }));
+                if (!object.activation && !object.activationSpec) {
+                    issues.push(issue("patrol-activation-missing", area.id, { id: object.id }));
+                }
                 if (!Number.isFinite(object.patrol.speed) || object.patrol.speed <= 0) {
                     issues.push(issue("patrol-speed", area.id, { id: object.id }));
                 }
@@ -357,7 +365,16 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = ropeHookReach
                 issues.push(issue("camera-zone", area.id, { cameraZoneId: zone.id ?? null }));
             }
         }
+        const windSourceIds = new Set(
+            area.objects.filter(({ kind, zone }) => kind === "wind-source" && zone).map(({ windZoneId }) => windZoneId)
+        );
         for (const windZone of area.windZones) {
+            if (windSourceIds.has(windZone.id)) {
+                if (windZone.bounds) {
+                    issues.push(issue("wind-bounds-derived", area.id, { id: windZone.id }));
+                }
+                continue;
+            }
             if (!boundsInside(area.bounds, windZone.bounds)) {
                 issues.push(issue("wind-bounds", area.id, { id: windZone.id }));
             }
@@ -369,15 +386,6 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = ropeHookReach
             })
         ) {
             issues.push(issue("gate-trigger-bounds", area.id, { gateId: area.gate.id }));
-        }
-        if (
-            area.gate.barrier &&
-            !boundsInside(area.bounds, area.gate.barrier, {
-                allowFloorOverlap: true,
-                allowConnectorOverlap: true
-            })
-        ) {
-            issues.push(issue("gate-barrier-bounds", area.id, { gateId: area.gate.id }));
         }
         for (const objectiveId of area.gate.requiredObjectiveIds) {
             if (!area.objectives.some(({ id }) => id === objectiveId)) {

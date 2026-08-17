@@ -21,7 +21,7 @@
 - Recovery: `R2(-320,-1336)`
 - Cutter: `cutter-sentry-01(80,-496)`, activation `(-160,-704,512×352)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
 - Patrol: `patrol-drone-01(208,-1184)`, patrol `(-240,-1184) ↔ (208,-1184)`, activation `(-448,-1280,896×224)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
-- Gate set: `exit-panel(-80,-1504)`, `service-gate(-48,-1504)` — 출구 표준화(offset 64)로 32px 상승
+- Gate set(exitBlock 표준): `exit-deck(-256,-1443,416)`, `exit-gate(-80,-1443)`, `exit-panel(-192,-1443)`, exit `(-80,-1475)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 
 ## 3. Camera · Story 상태
 

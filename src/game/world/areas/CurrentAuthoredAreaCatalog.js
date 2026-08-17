@@ -13,10 +13,7 @@ function connectArea(area, { order, nextAreaId, gate = {} }) {
                   completionMode: undefined,
                   ...(rewired
                       ? {
-                            trigger: gatePortalBounds(
-                                area.gate.barrier.x + area.gate.barrier.width * 0.5,
-                                area.gate.barrier.y + area.gate.barrier.height
-                            )
+                            trigger: gatePortalBounds(area.exit.x, area.exit.y + 32)
                         }
                       : {})
               };

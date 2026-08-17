@@ -20,7 +20,7 @@
 - Grapple: `A0(-320,-160)`, `W1(-96,-416)`, `W2(96,-640)`, `W3(96,-896)`, `W4(-96,-1152)`, `W5(96,-1376)`
 - Recovery: `R1(-256,-568)`, `R2(256,-792)`, `R3(-256,-1048)`, `R4(256,-1304)`
 - Wake: `sector-04-05:express-wake`, bounds `(-192,-1408,384×1088)`, direction `(0,-1)`, cycle `1.75 / 0.7 / 1.4 / 0.3`, strength `360`
-- Gate set: `exit-panel(432,-1472)`, `service-gate(528,-1472)`
+- Gate set(exitBlock 표준): `exit-deck(288,-1411,416)`, `exit-gate(464,-1411)`, `exit-panel(352,-1411)`, exit `(464,-1443)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 - Objectives: `final-deck-reached bounds (112,-1504,416×96)`, `exit-panel-engaged`
 
 ## 3. Camera · Story 상태

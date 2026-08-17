@@ -23,7 +23,6 @@ export function run() {
     const landmarksById = new Map(disconnectedArea.objects.map((object) => [object.id, object]));
     for (const [id, position] of [
         ["sector-01-01:anchor-a-surface", { x: -384, y: -864 }],
-        ["sector-01-01:anchor-b-surface", { x: -320, y: -864 }],
         ["sector-01-01:anchor-c-surface", { x: 320, y: -96 }]
     ]) {
         surfacesById.get(id).grappleable = true;

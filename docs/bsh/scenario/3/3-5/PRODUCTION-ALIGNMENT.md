@@ -20,7 +20,7 @@
 - Grapple: `G1(-32,-400)`, `G2(192,-512)`, `G3(32,-624)`
 - Recovery: `R1(-48,-488)`
 - Story / object: `service-calibration-frame`(gate-linked maintenance-frame), `node-id(0,-312)`, `access-summary(240,-312)`, `premium-atrium-ahead(288,-680)`
-- Gate set: `exit-panel(224,-624)`, `service-gate(352,-624)` — 출구 표준화(offset 64)로 32px 하강
+- Gate set(exitBlock 표준): `exit-deck(288,-563,256)`, `exit-gate(384,-563)`, `exit-panel(272,-563)`, exit `(384,-595)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 - Objectives: `final-deck-reached bounds (160,-656,256×96)`, `exit-panel-engaged`
 
 ## 3. Camera · Story 상태

@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
+import { resolveObjectTriggerBounds } from "../src/game/world/areas/AreaDefinition.js";
 import { validateAreaCatalog } from "../src/game/world/AreaDefinitionValidator.js";
 import { SECTOR_02_AREA_CATALOG } from "../src/game/world/areas/sector02/Sector02AreaCatalog.js";
 
 function patrolDrones(area) {
     return area.objects.filter(({ kind }) => kind === "patrol-drone");
+}
+
+function resolvedActivation(drone) {
+    return drone.activation ?? resolveObjectTriggerBounds(drone.position, drone.activationSpec);
 }
 
 function verticalBandsOverlap(left, right) {
@@ -40,8 +45,8 @@ export function run() {
     }
 
     for (const areaId of ["sector-02-07", "sector-02-08"]) {
-        const bands = patrolDrones(SECTOR_02_AREA_CATALOG.areas.find(({ id }) => id === areaId)).map(
-            ({ activation }) => activation
+        const bands = patrolDrones(SECTOR_02_AREA_CATALOG.areas.find(({ id }) => id === areaId)).map((drone) =>
+            resolvedActivation(drone)
         );
         assert.equal(verticalBandsOverlap(bands[0], bands[1]), false, `${areaId} patrol bands must not crossfire`);
     }
@@ -54,10 +59,10 @@ export function run() {
 
     const evacuationWalkway = SECTOR_02_AREA_CATALOG.areas[4];
     const narrativeGate = evacuationWalkway.objects.find(({ id }) => id.endsWith(":upper-transit-gate"));
-    const maintenanceFrame = evacuationWalkway.objects.find(({ id }) => id.endsWith(":maintenance-frame"));
+    const exitGate = evacuationWalkway.objects.find(({ id }) => id.endsWith(":exit-gate"));
     assert.equal(narrativeGate.narrativeLock, true);
     assert.equal(narrativeGate.gateId, undefined);
-    assert.equal(maintenanceFrame.gateId, evacuationWalkway.gate.id);
+    assert.equal(exitGate.gateId, evacuationWalkway.gate.id);
 
     const finale = SECTOR_02_AREA_CATALOG.areas.at(-1);
     assert.equal(finale.gate.completionMode, "content-boundary");

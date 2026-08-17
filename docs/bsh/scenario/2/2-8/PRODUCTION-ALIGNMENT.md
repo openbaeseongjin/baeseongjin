@@ -46,9 +46,9 @@ P0(-640~-384,0,256), P1(-512~-128,-160,384), P2(-160~160,-320,320), S2(-672~-352
 
 | 항목 | 값 |
 | --- | --- |
-| Transfer Control | `(448,-1472)` bottom-center, objective `transfer-control-read`(type `interact`) |
+| Transfer Control(exitBlock panel) | `(464,-1472)` bottom-center, objective `transfer-control-read`(type `interact`) |
 | Sector-end Checkpoint | `(576,-1472)`, `sourceObjectId: sector-end-checkpoint-object` |
-| Content Boundary Gate | `(576,-1472)`, `nextAreaId: null`, `completionMode: "content-boundary"` |
+| Content Boundary Gate | `(576,-1472)`, `nextAreaId: null`, `completionMode: "content-boundary"`(exitBlock 표준) |
 
 ## 4. Camera·Story — 미구현
 

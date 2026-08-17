@@ -26,7 +26,7 @@ export function run() {
         { x: player.physics.position.x, y: player.physics.position.y },
         { x: simulation.world.areas[0].entry.x, y: simulation.world.areas[0].entry.y }
     );
-    assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 8);
+    assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 0);
     assert.ok(
         simulation.world.surfaces.some(
             ({ kind, collision, renderable }) =>
@@ -34,14 +34,14 @@ export function run() {
         )
     );
 
-    const terminal = simulation.world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    const terminal = simulation.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     player.physics.position.set(terminal.position.x, terminal.position.y);
     simulation.step(1 / 120, command({ interact: true }));
     assert.equal(simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-01:gate"), false);
     assert.ok(simulation.snapshot().worldProgress.activeObjectiveSequences.length === 1);
     for (let step = 0; step < 325; step += 1) simulation.step(1 / 120, command());
     assert.equal(simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-01:gate"), true);
-    assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 7);
+    assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 0);
 
     const gate = simulation.world.gates[0];
     const worldBeforePortal = simulation.world;
@@ -111,7 +111,7 @@ export function run() {
     assert.equal(player.health, 73, "portal reset must not heal or damage the player");
 
     const secondPanel = simulation.world.objects.find(({ id }) => id === "sector-01-02:exit-panel");
-    const secondDeck = simulation.world.surfaces.find(({ id }) => id === "sector-01-02:p4");
+    const secondDeck = simulation.world.surfaces.find(({ id }) => id === "sector-01-02:exit-deck");
     player.physics.position.set(secondPanel.position.x, secondDeck.topY - player.physics.collider.radius);
     player.physics.velocity.set(0, 0);
     player.physics.isGrounded = true;
@@ -127,7 +127,7 @@ export function run() {
         true,
         "the shared jump and interaction command must open the ready 1-2 Gate panel"
     );
-    assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 6);
+    assert.equal(simulation.activeCollisionSurfaces.filter(({ kind }) => kind === "gate-barrier").length, 0);
 
     const secondGate = simulation.world.gates.find(({ id }) => id === "sector-01-02:gate");
     player.physics.position.set(
@@ -137,14 +137,14 @@ export function run() {
     simulation.step(1 / 120, command());
     assert.equal(simulation.snapshot().worldProgress.currentAreaId, "sector-01-03");
 
-    const thirdPanel = simulation.world.objects.find(({ id }) => id === "sector-01-03:service-panel");
+    const thirdPanel = simulation.world.objects.find(({ id }) => id === "sector-01-03:exit-panel");
     player.physics.position.set(thirdPanel.position.x, thirdPanel.position.y - player.physics.collider.radius);
     player.physics.velocity.set(0, 0);
     simulation.step(1 / 120, command({ interact: true, jump: true }));
     assert.equal(simulation.snapshot().worldProgress.unlockedGateIds.includes("sector-01-03:gate"), true);
 
     const thirdGate = simulation.world.gates.find(({ id }) => id === "sector-01-03:gate");
-    const thirdDoor = simulation.world.objects.find(({ id }) => id === "sector-01-03:security-gate");
+    const thirdDoor = simulation.world.objects.find(({ id }) => id === "sector-01-03:exit-gate");
     player.physics.position.set(thirdDoor.position.x, thirdGate.trigger.y - 8);
     player.physics.velocity.set(0, 0);
     assert.equal(

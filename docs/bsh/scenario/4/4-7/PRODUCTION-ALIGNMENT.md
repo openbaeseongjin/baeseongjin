@@ -22,7 +22,7 @@
 - Cutter: `cutter-sentry-01(480,-640)`, activation `(-240,-1008,480×624)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
 - Wake: `sector-04-07:junction-wake`, bounds `(-224,-1008,448×688)`, direction `(+1,0)`, cycle `1.75 / 0.7 / 1.4 / 0.3`
 - Story display: `routing-status-display(-128,-256)`, `feeder-status-display(96,-1248)`
-- Gate set: `exit-panel(432,-1472)`, `service-gate(544,-1472)` — 출구 표준화(offset 64)로 32px 상승
+- Gate set(exitBlock 표준): `exit-deck(352,-1411,416)`, `exit-gate(528,-1411)`, `exit-panel(416,-1411)`, exit `(528,-1443)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 
 ## 3. Camera · Story 상태
 

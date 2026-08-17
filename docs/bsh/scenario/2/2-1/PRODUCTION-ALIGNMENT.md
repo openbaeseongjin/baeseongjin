@@ -61,11 +61,11 @@
 
 | 항목 | 값 |
 | --- | --- |
-| Exit Panel | `(304,-960)` bottom-center, `interactionRadius=72`, objective `exit-panel-engaged` |
-| Exit Frame(Gate) | `(416,-960)` bottom-center |
+| Exit Panel(exitBlock) | `(400,-960)` bottom-center, `interactionRadius=72`, objective `exit-panel-engaged` |
+| Exit Gate(exitBlock) | `(512,-960)` bottom-center |
 | `exit-reached` | type `reach`, bounds `(352,-992)`~`128×96` |
 | Community Notice | `(160,-952)`, kind `story-display`, cueIds `["evacuation-group-c","wait-for-further-instruction"]` |
-| Gate 판정 좌표 | `(416,-960)` → `sector-02-02` |
+| Gate 판정 좌표 | `(512,-960)` → `sector-02-02`(exitBlock 표준) |
 
 ## 4. Camera — 완전 미구현
 

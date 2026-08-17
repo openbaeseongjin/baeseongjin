@@ -114,7 +114,6 @@ function scannerCatalog() {
                     nextAreaId: null,
                     requiredObjectiveIds: ["scanner-test-01:exit-panel-engaged"],
                     trigger: triggerBounds(272, -1024, 96, 160),
-                    barrier: triggerBounds(288, -1024, 64, 128),
                     completionMode: "content-boundary"
                 }
             })

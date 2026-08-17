@@ -22,7 +22,7 @@
 - Drone: `drone-1(-256,-560)`, activation bounds `(-512,-768,1024×320)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
 - Story display: `retail-security(-320,-184)`, `route-state(-48,-440)`, `patrol-status(48,-440)`, `service-arcade-next(368,-1176)`
 - Scanner group: `sector-03-03:scanner-retail-A`, controlled surfaces `c1-surface`, `c2-surface`
-- Gate set: `exit-panel(304,-1120)`, `service-gate(432,-1120)` — 출구 표준화(offset 64)로 32px 하강
+- Gate set(exitBlock 표준): `exit-deck(368,-1059,288)`, `exit-gate(480,-1059)`, `exit-panel(368,-1059)`, exit `(480,-1091)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 
 ## 3. Camera · Story 상태
 

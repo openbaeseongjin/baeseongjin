@@ -95,7 +95,7 @@ export class WorldGeometryRenderer {
         for (const { surface } of visibleSurfaces) this.drawRock(context, surface);
         renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
         this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
-        this.drawSummit(context, scene.world.summit, scene.runState, viewport);
+        this.drawSummit(context, scene.world.summit, scene.runState, viewport, Boolean(scene.world.areas?.length));
     }
 
     surfaceEntries(world) {
@@ -156,8 +156,9 @@ export class WorldGeometryRenderer {
         renderStats?.recordCollection("checkpoints", checkpoints.length, drawn);
     }
 
-    drawSummit(context, summit, runState, viewport) {
-        if (!summit || runState === "completed" || !isVisible(viewport, circleBounds(summit, summit.radius))) return;
+    drawSummit(context, summit, runState, viewport, authoredWorld = false) {
+        if (!summit || runState === "completed" || authoredWorld) return;
+        if (!isVisible(viewport, circleBounds(summit, summit.radius))) return;
         drawExitBeacon(context, summit);
     }
 }

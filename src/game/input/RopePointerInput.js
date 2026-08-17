@@ -15,9 +15,7 @@ export function findRopeAttachment({
     canAttachToSurface = null
 }) {
     if (!Number.isFinite(origin?.x) || !Number.isFinite(origin?.y)) return null;
-    const lockedGateBarriers = surfaces.filter(
-        (surface) => surface.kind === "gate-barrier" && surface.collision !== false
-    );
+    const sealedDividers = surfaces.filter((surface) => surface.kind === "inter-floor-divider");
     let best = null;
     let bestScore = Number.POSITIVE_INFINITY;
     for (const surface of surfaces) {
@@ -26,7 +24,7 @@ export function findRopeAttachment({
         const point = closestPointOnSurface(aimPoint, surface);
         const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
         if (launchDistance > maxAttachDistance) continue;
-        if (lockedGateBarriers.some((surface) => segmentIntersectsSurface(origin, point, surface))) continue;
+        if (sealedDividers.some((divider) => segmentIntersectsSurface(origin, point, divider))) continue;
         const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
         const score = aimDistance * 2 + launchDistance * 0.05;
         if (aimDistance <= aimTolerance && score < bestScore) {

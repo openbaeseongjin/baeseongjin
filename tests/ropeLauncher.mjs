@@ -36,10 +36,10 @@ function grappleSurfaceAt(position, size = 24) {
     };
 }
 
-function gateBarrierAt({ x, y, width, height }) {
+function sealedDividerAt({ x, y, width, height }) {
     return {
-        id: "locked-gate-barrier",
-        kind: "gate-barrier",
+        id: "sealed-divider",
+        kind: "inter-floor-divider",
         collision: true,
         grappleable: false,
         vertices: [
@@ -134,22 +134,23 @@ export function run() {
         findRopeAttachment({
             aimPoint: { x: 200, y: 0 },
             origin: { x: 0, y: 0 },
-            surfaces: [targetBehindGate, gateBarrierAt({ x: 80, y: -64, width: 64, height: 128 })],
+            surfaces: [targetBehindGate, sealedDividerAt({ x: 80, y: -64, width: 64, height: 128 })],
             maxAttachDistance: ropeHookReach(),
             aimTolerance: 90
         }),
         null,
-        "a locked authored Gate must occlude grapple targets in the next area"
+        "a sealed inter-floor divider must occlude grapple targets in the next area"
     );
-    assert.ok(
+    assert.equal(
         findRopeAttachment({
             aimPoint: { x: 200, y: 0 },
             origin: { x: 0, y: 0 },
-            surfaces: [targetBehindGate],
+            surfaces: [targetBehindGate, sealedDividerAt({ x: 80, y: -64, width: 64, height: 128 })],
             maxAttachDistance: ropeHookReach(),
             aimTolerance: 90
         }),
-        "removing the unlocked Gate barrier must expose the same grapple target"
+        null,
+        "the sealed floor keeps occluding the next area even after the Gate unlock"
     );
 
     simulation.dispatchOwnerInput(player.id, command({ pointerDown: true, aimWorld }), 1 / 120);

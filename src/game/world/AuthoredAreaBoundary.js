@@ -51,24 +51,10 @@ function sideWallSurface(area, side, x, y, width, height) {
     });
 }
 
-export function authoredGateOpening(area, gate) {
-    const barrier = gate?.barrier;
-    const centerX = barrier
-        ? barrier.x + barrier.width * 0.5
-        : (area.exit?.x ?? area.bounds.x + area.bounds.width * 0.5);
-    const halfWidth = (barrier?.width ?? 64) * 0.5;
-    return Object.freeze({ centerX, left: centerX - halfWidth, right: centerX + halfWidth });
-}
-
 export function interFloorDividerSurfaces(area, gate, height = DIVIDER_HEIGHT) {
     const { x, y, width } = area.bounds;
-    const right = x + width;
-    const opening = authoredGateOpening(area, gate);
     const dividerY = y - height * 0.5;
-    return Object.freeze([
-        dividerSurface(area, "left", x, dividerY, Math.max(0, opening.left - x), height),
-        dividerSurface(area, "right", opening.right, dividerY, Math.max(0, right - opening.right), height)
-    ]);
+    return Object.freeze([dividerSurface(area, "full", x, dividerY, width, height)]);
 }
 
 export function authoredAreaBoundarySurfaces(area, gate) {

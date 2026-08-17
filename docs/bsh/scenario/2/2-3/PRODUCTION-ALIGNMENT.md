@@ -50,8 +50,8 @@
 | 항목 | 값 |
 | --- | --- |
 | `specialization-selected` | type `interact-choice`, sourceObjectId `specialization-node` — 공용 요청은 가능하지만 `selectionPool:"TBD"`라 chooser 개방 불가 |
-| Exit Panel | 좌표는 exitPanel 헬퍼로 계산(exit.x-112, floorY=-704) |
-| Gate | `(304,-704)` → `sector-02-04` |
+| Exit Panel(exitBlock) | `(304,-704)`, exit.x-112 |
+| Gate | `(416,-704)` → `sector-02-04`(exitBlock 표준) |
 
 ## 4. Camera·Story — 미구현
 

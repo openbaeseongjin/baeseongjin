@@ -22,7 +22,7 @@
 - Recovery: `R1(416,-696)`
 - Story display: `access-control(-304,-184)`, `service-mount(64,-440)`, `retail-security-ahead(368,-1144)`
 - Scanner group: `sector-03-02:scanner-A`, cycle `1.5 / 0.6 / 1.1 / 0.3`, controlled surfaces `c1-surface`, `c2-surface`, `c3-surface`
-- Gate set: `exit-panel(304,-1120)`, `service-gate(432,-1120)`, gateId `sector-03-02:gate`
+- Gate set(exitBlock 표준): `exit-deck(368,-1059,288)`, `exit-gate(480,-1059)`, `exit-panel(368,-1059)`, exit `(480,-1091)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 - Objectives: `final-deck-reached bounds (224,-1152,288×96)`, `exit-panel-engaged`
 
 ## 3. Camera · Story 상태

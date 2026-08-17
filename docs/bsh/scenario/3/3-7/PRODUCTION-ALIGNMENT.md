@@ -22,7 +22,7 @@
 - Drone: `drone-1(-64,-800)`, activation `(-160,-976,704×336)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
 - Story display: `concourse-sign(-352,-184)`, `access-directory(0,-1080)`, `upper-market-gate-ahead(384,-1336)`
 - Scanner group: `sector-03-07:scanner-priority-concourse-A`, controlled surfaces `c1-surface`, `c2-surface`, `c3-surface`
-- Gate set: `exit-panel(320,-1280)`, `service-gate(448,-1280)` — 출구 표준화(offset 64)로 32px 하강
+- Gate set(exitBlock 표준): `exit-deck(384,-1219,320)`, `exit-gate(512,-1219)`, `exit-panel(400,-1219)`, exit `(512,-1251)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 
 ## 3. Camera · Story 상태
 

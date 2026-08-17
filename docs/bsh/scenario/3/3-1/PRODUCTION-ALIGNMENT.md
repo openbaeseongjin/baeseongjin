@@ -20,7 +20,7 @@
 - Grapple: `G1(-320,-256)`, `G2(-32,-448)`, `G3(96,-672)`, `G4(-96,-800)`, `G5(128,-960)`
 - Recovery: `R1(288,-632)`, `R2(352,-888)`
 - Story display: `district-sign(-320,-184)`, `welcome-kiosk(-416,-184)`
-- Gate set: `exit-panel(272,-1024)`, `service-gate(400,-1024)`, gateId `sector-03-01:gate`
+- Gate set(exitBlock 표준): `exit-deck(336,-963,288)`, `exit-gate(448,-963)`, `exit-panel(336,-963)`, exit `(448,-995)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 - Objectives: `final-deck-reached bounds (192,-1056,288×96)`, `exit-panel-engaged`
 
 ## 3. Camera · Story 상태
