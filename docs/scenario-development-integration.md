@@ -3,11 +3,11 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: e50ce25201489af5116e8d2dae89e1f9acd746c4402a06070e69a411e8d2e5a5
-authored-area-sha256: 8d5a94299075cd0492d294496328e6327c6f81824034b6ada016dc9f9d798dbe
+scenario-source-sha256: 26d782a6c2ea4cc20be6f8a8d6c7f3a8272b7306bfa6d3398808f5793a897875
+authored-area-sha256: 98375f3037b7920e4822e39bba03b8f1d67466c2e146bf56e7d1b82f41cd0202
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 23512a22e2cd5e746ef3788f9f500e6e5ebc843c
+reviewed-upstream: 862a71b14b01d0927e509fca3ffcc138f5034a4f
 -->
 
 ## 상태를 읽는 법
@@ -28,7 +28,7 @@ reviewed-upstream: 23512a22e2cd5e746ef3788f9f500e6e5ebc843c
 
 ## 2026-08-17 확인 체크포인트
 
-- 확인 기준 upstream: `23512a22e2cd5e746ef3788f9f500e6e5ebc843c` (`origin/main`, Sector 03 Master REV 2.0 공간·Story 재작성 병합 #613까지 포함한 clean base)
+- 확인 기준 upstream: `862a71b14b01d0927e509fca3ffcc138f5034a4f` (`origin/main`, 플레이어 위치 기반 섹터 배경 복귀 #616까지 포함한 clean base)
 - 상세 Stage 문서: **48개**, `1-1`부터 `6-8`까지 전 구간
 - 현재 authored Runtime: **24개**, `1-1 → 3-8` (+ Sector 04 `4-1 → 4-8` standalone; Sector 05는 Runtime 미저작)
 - 직접 대조한 기준: Sector 03 Master REV 2.0과 현재 3-1~3-8 Runtime 경계(PR #613은 공간 정체·Stage 명칭·Story만 재작성하고 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 유지; 개별 Stage 문서와 Runtime `name/subtitle/cue` 명칭 마이그레이션은 대기), Sector 04 Master REV 1.1과 4-1~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), Sector 06 Master와 6-1~6-8(Scanner phase·Patrol speed/wait·Cutter opt-in·순방향 Finale 및 Safe/Flow 산술 대조), `CurrentAuthoredAreaCatalog.js`, `Sector03AreaCatalog.js`, `Sector04AreaCatalog.js`, `AccessScanField.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
@@ -37,7 +37,7 @@ reviewed-upstream: 23512a22e2cd5e746ef3788f9f500e6e5ebc843c
 
 | 범위 | 기획 현황 | Runtime 현황 | 다음 경계 |
 | --- | --- | --- | --- |
-| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증했고 600px 연쇄 링크 기준의 앵커 축소(#45) 뒤 14개 target·랜드마크가 남는다; #507이 Wind·Story·2-3 진행을 보강; 1-5~1-8 Camera Zone과 남은 Position Story Trigger 코드 반영 완료 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요 |
+| Sector 01 / 1-1~1-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; 1-4 Foundation 선택·효과·개인별 멀티는 #480에서 검증; 그래플 표면·랜드마크 1:1 가시성은 #487에서 검증했고 600px 연쇄 링크 기준의 앵커 축소(#45) 뒤 14개 target·랜드마크가 남는다; #507이 Wind·Story·2-3 진행을 보강; 1-5~1-8 Camera Zone과 남은 Position Story Trigger 코드 반영 완료; `far/mid/near` 산업 정비 배경 package와 collision-aligned surface·경계벽·Gate·Panel·Anchor·Wind 외형을 #618에서 연결; 1-1 P0는 좌우 경계벽 사이 `896×32` one-way Collision과 같은 폭의 `terrain:ground-foundation` 기초로 최하층을 채움 | 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Scenario Art 구조 정합 완료; 실제 Build 플레이 수치 검증과 1-5~1-8 Approved Blockout 필요 |
 | Sector 02 / 2-1~2-8 | 8개 상세 Stage, `CROSS-REVIEWED` | 8개 `MOCK INTEGRATED`; #507이 2-3 진행 차단을 placeholder objective로 해소하고 일부 Story를 보강; Story Presentation 공백 3건(2-2·2-3 POSITION, 2-6 최소 위치 표지) 코드 반영 완료 | Camera Zone은 8개 Stage가 Custom Camera 불필요를 명시해 gap이 아님을 확인; 2-3 Specialization 6종 계약은 확정됐고 구현 대기, Sector 02 Boss→3-1 상세 전환은 미정 |
 | Sector 03 / 3-1~3-8 | 8개 상세 Stage와 Master REV 2.0, `CROSS-REVIEWED`; Central Exchange Complex 공간·Story 재작성 통합, 개별 Stage 명칭 마이그레이션 대기 | 8개 `MOCK INTEGRATED`; Access Scan Field 런타임 구현(#523) + standalone catalog로 2-8→3-1→…→3-8 연결(#525); Camera는 8개 Stage 의도적 기본 카메라 확인, Story signage 28개 코드 반영; PR #613은 Runtime Geometry·시스템을 변경하지 않음 | 개별 `3-N` 문서와 Runtime `name/subtitle/cue` 명칭 마이그레이션 대기; Post-Sector 03 Boss→3-8/4-1 전환 미정 |
 | Sector 04 / 4-1~4-8 | Master REV 1.1과 8개 상세 Stage, `CROSS-REVIEWED` | 4-1~4-8 standalone catalog로 `GRAYBOX READY`(#513·#514·#516·#519 + 4-5~4-8 추가); 메인 월드에는 미연결; Camera Zone 8개 Stage 구현 확인, Story 바인딩 반영 완료; Gate 좌표·Cutter Fire opt-in 모델·Wind Strength 문서 정합 완료(#29) | Post-Sector 03 Boss→4-1 전환이 먼저이며 Cutter·Wake·Rope Line Combat·Recovery Finale는 Runtime prototype 뒤 검증 |
@@ -97,6 +97,7 @@ reviewed-upstream: 23512a22e2cd5e746ef3788f9f500e6e5ebc843c
 46. 1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 바람이 나오지 않던 근본 원인을 수정했다. 트리거 스펙 이관 스크립트의 wind-source 정규식이 파일에서 첫 번째 wind-source(fan-a)부터 lazy 매칭해 모든 Zone에 fan-a 좌표로 offset을 계산해, 세 Zone의 파생 bounds가 플레이 영역 밖(-1184, -1824/-1696/-2032)에 찍혔다. 세 `zone` 스펙을 승인 좌표(fan-b (-352,-1280,704,384), 1-7 vent (-352,-1184,704,384), 1-8 vent (-384,-1504,768,448))에서 파생하도록 교정하고, 검증기가 wind-source 파생 Zone도 `resolveObjectTriggerBounds`로 bounds를 계산해 영역 안을 검사하게 강화해 같은 오염을 거부한다. 승인 bounds를 고정한 회귀 테스트도 추가했다.
 47. DeepSeek 구현 전수 검토 후 Camera/Story/Wind 상태 문서 drift와 Scanner 무피드백을 정렬했다. Sector 01 1-5~1-8과 Sector 02 2-1~2-8 Production Alignment에는 Current Runtime Override를 추가하고 과거 미구현 본문을 `AUTHORING SNAPSHOT`으로 표시했다. Sector 03 Master·Scenario Art 기준은 24개 Area 연결, 의도적 기본 Camera, Stable ID 현실로 갱신했다. Runtime은 Access Scan phase를 scene snapshot으로 노출하고 공용 overlay가 AVAILABLE/WARNING/LOCKED/RESET을 색+형태로 구분한다. Area `storyTriggers`는 시나리오 기획 인벤토리로만 유지하고 assembled world에서 제외했으며, exit panel의 미사용 cue 경로를 제거해 Story 문구는 entry·position·`story-display`·objective/gate binding만 소유한다. 2-8 Transfer Control은 A/B/C 결과 뒤 `PRIORITY ACCESS: ACTIVE`를 반드시 표시한다.
 48. PR #613은 Sector 03 Master를 REV 2.0 `CENTRAL EXCHANGE COMPLEX`로 재작성해 공간 정체·Stage 명칭·Scanner 세계관 의미와 Story Arc를 갱신했다. PR 범위와 현재 Runtime을 재대조한 결과 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 변경되지 않아 3-1~3-8의 `MOCK INTEGRATED` 판정은 유지한다. 새 Master 명칭과 구 `3-N` Stage 문서·Runtime `name/subtitle/cue` 사이의 불일치는 문서가 명시한 후속 마이그레이션 blocker로 남기며 구현 완료로 올리지 않는다.
+49. #618은 Sector 01 `1-1`~`1-8`에 공용 `far/mid/near` 산업 정비 배경 package를 연결하고, 기존 지형·오브젝트 좌표를 유지한 채 Gameplay surface, 로프 앵커, 좌우 경계벽과 층간 bulkhead, Gate·Gate Panel, Checkpoint와 `wind-source`의 외형을 정렬한다. 1-1 P0만 사용자 최종 결정에 따라 Stage Local `X=-448~448`의 `896×32` one-way Collision으로 확장하고 같은 폭의 `terrain:ground-foundation` 기초를 아래로 이어 최하층 전체를 실제 바닥으로 읽히게 한다. Sector 이동 뒤 배경 선택 문제는 이 작업에 포함하지 않으며 최신 upstream #616의 플레이어 Y 기반 선택 계약을 그대로 사용한다.
 
 ## 열린 기획·구현 게이트
 
