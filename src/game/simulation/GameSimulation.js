@@ -11,9 +11,16 @@ import {
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
+import {
+    createEnemyArchetype,
+    enemyDisplayName,
+    isEnemyArchetype,
+    isKnownEnemyType
+} from "../combat/EnemyArchetypeCatalog.js";
+import { advanceEnemyBehaviors } from "../combat/EnemyBehaviors.js";
 import { EnemyObject } from "../combat/EnemyObject.js";
 import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
-import { HomingProjectileObject } from "../combat/ProjectileObject.js";
+import { BallisticProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
 import {
     COMBAT_CONFIG,
     FALL_DAMAGE_CONFIG,
@@ -36,8 +43,9 @@ import {
     advanceFoundationRewardSelection,
     createFoundationRewardSelection
 } from "../rewards/FoundationRewardSelection.js";
-import { generateWorld } from "../world/WorldGenerator.js";
+import { generateWorld, WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
+import { resolveEnemyEncounter } from "../world/EnemyEncounterSelection.js";
 import { collisionSurfacesForProgress } from "../world/WorldGateGeometry.js";
 import {
     pointInsideBounds,
@@ -77,6 +85,14 @@ function segmentBoundsEntryPoint(start, end, bounds) {
 
 function vectorState(vector) {
     return vector ? { x: vector.x, y: vector.y } : null;
+}
+
+function createEnemyRuntime(properties) {
+    if (isEnemyArchetype(properties.enemyType)) return createEnemyArchetype(properties);
+    if (isKnownEnemyType(properties.enemyType)) {
+        return new EnemyObject({ ...properties, displayName: enemyDisplayName(properties.enemyType) });
+    }
+    throw new Error(`unknown enemy type: ${properties.enemyType}`);
 }
 
 function swingDragState(swingDrag) {
@@ -257,8 +273,11 @@ export class GameSimulation {
             areaId: enemy.areaId,
             objectId: enemy.objectId,
             enemyType: enemy.enemyType,
+            displayName: enemy.displayName,
             activation: enemy.activation,
             patrol: enemy.patrol,
+            swarmGroupId: enemy.swarmGroupId,
+            behaviorState: enemy.enemyBehaviorSnapshot(),
             lockedTargetId: enemy.lockedTargetId,
             attackState: enemy.attackState,
             attackStateRemaining: enemy.attackStateRemaining,
@@ -414,12 +433,11 @@ export class GameSimulation {
             if (!activeCheckpoint) throw new Error(`unknown active checkpoint: ${activeCheckpointId}`);
             this.activeCheckpoint = activeCheckpoint;
         }
-        this.enemies = enemies.map(
-            (enemy) =>
-                new EnemyObject({
-                    ...enemy,
-                    position: new Vector2(enemy.position.x, enemy.position.y)
-                })
+        this.enemies = enemies.map((enemy) =>
+            createEnemyRuntime({
+                ...enemy,
+                position: new Vector2(enemy.position.x, enemy.position.y)
+            })
         );
         this.projectiles = [];
         this.enemyProjectiles = [];
@@ -737,6 +755,7 @@ export class GameSimulation {
         if (this.worldProgress) {
             this.#advanceAuthoredWorldProgress(gameplayCommands, { dt, resolveInteractChoice });
         }
+        this.#advanceEnemyBehaviorSimulation(dt);
         const playerProjectileEvents = updatePlayerProjectiles({
             projectiles: this.projectiles,
             enemies: this.enemies,
@@ -993,6 +1012,10 @@ export class GameSimulation {
     #commitRopeImpact(event) {
         const target = this.enemies.find(({ id, health }) => id === event.targetId && health > 0);
         if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
+        const source = this.#findPlayer(event.sourcePlayerId);
+        if (source && target.blocksImpactFrom(source.physics.position)) {
+            return Object.freeze({ accepted: false, reason: "shield-blocked" });
+        }
         target.health = Math.max(0, target.health - ROPE_IMPACT_CONFIG.damage);
         const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
         if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
@@ -1018,6 +1041,26 @@ export class GameSimulation {
         };
         this.enemies = this.enemies.filter(({ health }) => health > 0);
         return Object.freeze({ accepted: true, resolution, damage: ROPE_IMPACT_CONFIG.damage });
+    }
+
+    #advanceEnemyBehaviorSimulation(dt) {
+        const outcomes = advanceEnemyBehaviors({ enemies: this.enemies, targets: this.players, dt });
+        for (const { enemyId, outcome } of outcomes) {
+            if (outcome?.type !== "artillery-strike") continue;
+            const projectile = new BallisticProjectileObject({
+                id: this.registry.createId("enemy-projectile"),
+                ownerId: enemyId,
+                targetId: outcome.targetId,
+                position: new Vector2(outcome.position.x, outcome.position.y),
+                velocity: new Vector2(),
+                radius: outcome.radius,
+                damage: outcome.damage,
+                canCutRope: false
+            });
+            this.enemyProjectiles.push(projectile);
+            this.recordProjectileSpawn(projectile);
+        }
+        return outcomes;
     }
 
     resolveRopeImpactClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
@@ -1383,24 +1426,31 @@ export class GameSimulation {
     }
 
     createEnemies() {
-        return this.world.enemySpawns.map(
-            (spawn) =>
-                new EnemyObject({
-                    id: this.registry.createId("enemy"),
-                    position: new Vector2(spawn.x, spawn.y),
-                    level: spawn.level,
-                    areaId: spawn.areaId,
-                    objectId: spawn.objectId,
-                    enemyType: spawn.enemyType,
-                    activation: spawn.activation,
-                    patrol: spawn.patrol,
-                    rules: spawn.rules,
-                    radius: COMBAT_CONFIG.enemyRadius,
-                    health: COMBAT_CONFIG.enemyHealth,
-                    maxHealth: COMBAT_CONFIG.enemyHealth,
-                    fireCooldown: COMBAT_CONFIG.enemyFireInterval
-                })
-        );
+        return this.world.enemySpawns.map((spawn) => {
+            const definition = spawn.enemySelection
+                ? resolveEnemyEncounter(spawn, {
+                      runSeed: this.world.seed,
+                      worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
+                  })
+                : spawn;
+            const position = definition.position ?? definition;
+            return createEnemyRuntime({
+                id: this.registry.createId("enemy"),
+                position: new Vector2(position.x, position.y),
+                level: definition.level,
+                areaId: definition.areaId ?? null,
+                objectId: definition.objectId ?? definition.encounterId ?? definition.slotId,
+                enemyType: definition.enemyType,
+                activation: definition.activation,
+                patrol: definition.patrol,
+                swarmGroupId: definition.swarmGroupId ?? definition.slotId,
+                rules: definition.rules,
+                radius: COMBAT_CONFIG.enemyRadius,
+                health: COMBAT_CONFIG.enemyHealth,
+                maxHealth: COMBAT_CONFIG.enemyHealth,
+                fireCooldown: COMBAT_CONFIG.enemyFireInterval
+            });
+        });
     }
 
     recordProjectileSpawn(projectile) {

@@ -2,6 +2,7 @@ import { SimulationDrivenObject } from "../objects/SimulationDrivenObject.js";
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
 import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { selectNearestPlayer } from "./CombatTargeting.js";
+import { ENEMY_BEHAVIOR_CAPABILITY } from "./EnemyBehaviors.js";
 import { advanceEnemyPatrol, createEnemyPatrolState } from "./EnemyPatrol.js";
 import { BallisticProjectileObject } from "./ProjectileObject.js";
 
@@ -74,6 +75,10 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
     id: "enemy-weapon",
     order: 10,
     apply({ targets, projectiles, registry, config, surfaces = [], dt }) {
+        if (this.rules.includes("no-projectile-attack")) {
+            resetAttack(this);
+            return null;
+        }
         const target = selectLockedTarget(
             this,
             targets,
@@ -165,8 +170,11 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         areaId = null,
         objectId = null,
         enemyType = "sentry-t1",
+        displayName = enemyType,
         activation = null,
         patrol = null,
+        behavior = null,
+        swarmGroupId = null,
         rules = [],
         radius,
         health,
@@ -183,8 +191,10 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         this.areaId = areaId;
         this.objectId = objectId;
         this.enemyType = enemyType;
+        this.displayName = displayName;
         this.activation = activation ? Object.freeze({ ...activation }) : null;
         this.patrol = createEnemyPatrolState({ patrol, activation: this.activation, origin: this.position });
+        this.swarmGroupId = swarmGroupId;
         this.lockedTargetId = lockedTargetId;
         this.rules = Object.freeze([...rules]);
         this.radius = radius;
@@ -195,5 +205,28 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         this.aimDirection = aimDirection ? Object.freeze({ x: aimDirection.x, y: aimDirection.y }) : null;
         this.fireCooldown =
             this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, fireCooldown ?? 0) : 0;
+        Object.defineProperty(this, "behavior", {
+            value: behavior,
+            enumerable: false,
+            writable: false
+        });
+        if (behavior !== null) {
+            if (typeof behavior.advance !== "function" || typeof behavior.snapshot !== "function") {
+                throw new Error("enemy behavior must expose advance and snapshot");
+            }
+            this.registerSimulationCapability({
+                id: ENEMY_BEHAVIOR_CAPABILITY,
+                order: 5,
+                apply: (context) => behavior.advance(this, context)
+            });
+        }
+    }
+
+    enemyBehaviorSnapshot() {
+        return this.behavior?.snapshot() ?? null;
+    }
+
+    blocksImpactFrom(sourcePosition) {
+        return this.behavior?.blocksImpactFrom?.(this, sourcePosition) ?? false;
     }
 }

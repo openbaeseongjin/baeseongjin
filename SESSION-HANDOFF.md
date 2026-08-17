@@ -21,7 +21,7 @@
 - seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
 - PC와 모바일 공용 이동·점프·로프 명령, 모바일 중앙 `좌 · 점프 · 우` 조작 바와 멀티터치
 - 기본 자동 사격은 비활성화하고 `AutomaticWeaponObject`·spawn/hit claim 기반은 후속 기능용으로 보존한다. 기본 공격은 로프 부착 중 속도 `620px/s` 이상으로 적과 새로 몸체 충돌할 때 `25` 피해를 주는 로프 충돌 공격이다. 같은 겹침은 분리 후 재진입하기 전까지 반복 피해를 만들지 않는다.
-- 현재 0.23.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 활성 체크포인트 즉시 부활을 사용한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용하며 치명 착지는 이 기존 부활 경로로 이어진다.
+- 현재 0.24.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 활성 체크포인트 즉시 부활을 사용한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용하며 치명 착지는 이 기존 부활 경로로 이어진다.
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
 - `CanvasRenderer`가 camera 기반 불변 world viewport를 프레임당 한 번 만들고 terrain·decoration·enemy·projectile 하위 renderer가 직접 컬링한다. 정적 surface geometry와 seed·zone 장식 배치는 renderer가 캐시하며 sprite·polygon, 싱글·멀티가 같은 경로를 사용한다. 기본 Canvas 정책은 DPR 최대 2와 backing store 최대 `3 * 1024 * 1024` pixel이고 `GameRendererFactory.canvasOptions`로 조정할 수 있다. 상세 경계는 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
@@ -138,6 +138,15 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 ## 활성 결정
 
+### [L1] 적 roster는 행동 계열 기본형과 topology 독립 encounter slot으로 확장한다
+
+- 기존 기본형은 고정 원거리 `경계 포탑`과 지정 경로 이동 `순찰 드론`이며 `절단 포탑`은 경계 포탑 확장형이다. 신규 기본형은 `추격 드론`, `방패 드론`, `포격 드론`, `지원 드론`, `군집 드론`의 5종이다. 기획·플레이어 표시 이름은 한글이고 Runtime ID는 한글 이름과 1:1 대응하는 영어 식별자를 사용한다.
+- 비슷한 행동을 별도 적으로 늘리지 않고 `행동 요소별 대표 기본형 1종 → 같은 계열 확장형`으로 구성한다. 신규 기본형 5종을 각각 단독으로 안정화한 뒤 확장형과 복합 랜덤 조합을 추가한다.
+- enemy slot은 Stage ID가 아니라 topology 독립 `slotId`를 권위 식별자로 사용한다. canonical encounter는 `encounterId/slotId/position/activation`과 nested `enemySelection.fixedEnemyType|allowedEnemyTypes`, 선택형 `legacyStageAlias`만 소유하며 `areaId`를 Runtime encounter 권위로 사용하지 않는다. pool 선택은 `slotId + run seed + world revision`으로 결정한다.
+- 현재 Runtime에는 pure fixed/pool selector, 다섯 기본형의 `enemy-behavior` capability, 서버 fixed-step 진행, snapshot 복원, 포격의 중립 투사체 재사용, 방패의 Rope 충돌 방향 방어가 구현됐다. #623의 `SectorDefinition`·validator·build/startup-only preview adapter와 Phase 6 selector integration도 완료했으며, current Area/Gate Runtime cutover는 후속 City Phase 3가 소유한다.
+- 보스·위치·activation·배치 수는 random pool 대상이 아니며 여러 확장형 무작위 중첩, 필수 Anchor 봉쇄, 연속 조작 불가, 예고 없는 공격과 단순 수치형 신규 계열을 만들지 않는다.
+- 자동 검증은 fixed 우선, seed 결정성, 위치·activation·Stable ID 보존, 잘못된 slot 거부, 행동 불변식, 싱글·멀티 공용 조립과 중립 서버 권위 같은 안정적인 코드 계약만 고정한다. roster 목록·가중치·수치·Stage 배치·표시 색은 테스트 snapshot으로 만들지 않으며 사용자 결정에 따라 이 범위의 브라우저 검증을 요구하지 않는다.
+
 ### [L1] 대화에서 확정된 결정을 문서 계층에 즉시 흡수한다
 
 - 사용자가 향후 작업에 영향을 주는 결정을 명시하면 같은 작업에서 먼저 이 문서의 활성 결정 또는 다음 작업에 반영한다.
@@ -181,7 +190,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 - 기본 플레이어 자동 사격은 비활성화한다. 자동 무기 객체·투사체·spawn/hit claim 시스템은 제거하지 않고 명시적으로 활성화하는 후속 기능과 회귀 검증에서만 사용한다.
 - 기본 적 공격은 로프가 실제 부착된 상태에서 최소 충돌 속도를 넘겨 적에게 새로 진입한 몸체 충돌이다. 적과 계속 겹친 상태에서 매 tick 피해를 반복하지 않고 완전히 분리한 뒤 다시 충돌해야 재무장한다.
-- 높은 곳에서 떨어져 발판에 착지하면 충돌 해소 직전의 하강 속도로 피해를 계산한다. 정상 이동 구간은 안전 속도 아래로 유지하고, 치명 피해는 현재 0.23.0 Runtime의 기존 개인 체크포인트 즉시 부활을 사용한다.
+- 높은 곳에서 떨어져 발판에 착지하면 충돌 해소 직전의 하강 속도로 피해를 계산한다. 정상 이동 구간은 안전 속도 아래로 유지하고, 치명 피해는 현재 0.24.0 Runtime의 기존 개인 체크포인트 즉시 부활을 사용한다.
 - 첫 L2 수치는 로프 충돌 최소 `620px/s`·피해 `25`, 낙하 안전 `800px/s`·치명 `1400px/s`이며 실제 Stage 플레이테스트로 조정한다. 싱글과 멀티의 권한·claim 상세는 `docs/architecture.md`와 `docs/multiplayer-synchronization.md`를 따른다.
 
 ### [L2] 기본 Grapple과 Sentry를 현재 authored 맵 밀도에 맞춘다

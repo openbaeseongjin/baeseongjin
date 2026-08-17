@@ -136,7 +136,7 @@ GameObject
 │  ├─ PlayerObject + LocomotionInput
 │  └─ RopeObject   + RopePointerInput
 └─ SimulationDrivenObject ── 직접 입력 없이 고정 스텝에서 진행
-   ├─ EnemyObject             + EnemyWeaponSimulation
+   ├─ EnemyObject             + EnemyWeaponSimulation + optional EnemyBehavior
    ├─ AutomaticWeaponObject   + AutomaticWeaponSimulation
    ├─ HomingProjectileObject  + ProjectileMotion + EnemyHitPrediction
    └─ BallisticProjectileObject + ProjectileMotion + PlayerImpactPrediction
@@ -164,6 +164,9 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 현재 저작 시나리오의 영역 도달은 objective·Gate 패널·포탈 사건으로 진행하고 `sector-03-08`에서는 content boundary에 머문다. 과거 절차 월드용 summit claim은 호환 코드로만 남아 있으며 최종 시나리오의 엔딩 진입 조건이 확정되기 전까지 기본 제품 테스트 계약으로 사용하지 않는다.
 - 입력과 시뮬레이션 capability는 `Base => class extends Base` 믹스인으로 구현한다. 이동·점프는 `LocomotionInput`, 로프는 `RopePointerInput`, 자동 무기·적 공격은 각자의 capability 계약을 가진다. 투사체 종류는 같은 `projectile-motion`과 `client-projectile-collision` ID 아래에 서로 다른 운동·충돌 믹스인을 조합한다. 두 디스패처는 구체 클래스나 `instanceof` 분기 없이 capability 존재 여부로 전달한다.
 - `SimulationDispatcher`는 월드 단계가 지정한 capability ID만 실행한다. 한 객체에 운동과 충돌처럼 여러 능력이 조합돼도 현재 단계와 무관한 능력을 실행하지 않으며, `GameSimulation`과 `CombatSystems`는 단계 순서와 context만 조정한다. `PredictableProjectileStore`는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 담당하고 투사체 종류별 충돌이나 거부 정책을 분기하지 않는다.
+- `EnemyArchetypeCatalog`는 영어 Runtime ID와 한글 표시 이름, Has-A behavior 조립만 소유한다. 추격·방패·포격·지원·군집의 구체 상태 진행은 공용 `enemy-behavior` capability가 담당하고 `GameSimulation`은 capability 단계와 outcome 연결만 조정한다. 포격 strike는 기존 `BallisticProjectileObject` 중립 spawn 경계를 사용하고, 방패는 `EnemyObject.blocksImpactFrom()` 계약을 통해 #611 Rope 충돌 prediction·claim 양쪽에서 같은 방향 판정을 사용한다.
+- `EnemyEncounterSelection`은 topology 독립 stable slot의 고정 선택 또는 허용 pool을 검증한다. pool 결과는 `slotId + run seed + world revision`으로 결정하고 position·activation·slot ID를 다시 저작하지 않는다. `resolveSectorEnemyEncounters()`와 #623 preview adapter는 canonical `encounterId/slotId/position/activation/enemySelection/legacyStageAlias`만 소비하고 `areaId`를 거부한다. `GameSimulation.createEnemies()`는 nested `enemySelection`이 주입된 canonical slot을 소비할 수 있지만 preview catalog 자체를 shipped world로 전환하지 않는다.
+- 적 snapshot은 표시 이름·군집 ID·behavior state를 포함하며 prediction simulation이 같은 archetype factory로 복원한다. roster 목록·가중치·수치 같은 변경 가능한 content는 네트워크 protocol 분기나 테스트 snapshot의 권위가 아니다.
 - 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
 - `GameSimulation`은 객체별 게임 규칙을 직접 모으는 거대 분기점이 아니라 월드 등록, 고정 tick, 객체 단계 실행과 사건 연결을 조정하는 월드 스케줄러로 축소한다. 투사체 spawn 사건도 종류를 검사하지 않고 객체의 `replicationState(tick)` 계약을 사용한다.
 - `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명·별도 rollback 계약이 있는 사건 전이·표시 보정만 조정한다. `owner-motion` receipt는 소유 상태 복원·입력 재실행을 시작하지 않는다. 정상 공유 스냅샷은 `applySharedOwnerProgress()`로 검증된 무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
@@ -193,7 +196,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 ## 연속 Sector authoring 선행 계약
 
 - 목표 authoring의 canonical root는 `SectorDefinition`이다. Sector는 3,840~4,800px 폭, 하나의 `sectorEntry`, 순서가 있는 landmark와 그 landmark가 소유하는 objective·encounter를 가진다. Stage 번호와 `areaId`는 새 Runtime 권위가 아니며 `legacyStageAlias`로만 migration·문서 대조에 남길 수 있다.
-- encounter topology 권위는 `encounterId`, `slotId`, `position`, `activation`이다. fixed/pool 적 선택은 topology와 분리된 `enemySelection` payload가 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 선언할 수 있다. selector는 후속 enemy Phase 6에서 `slotId + runSeed + worldRevision`을 사용한다. validator는 encounter와 selection payload에 `areaId`가 권위 필드로 들어오는 것을 거부하고, 빈/중복 pool이나 fixed+pool 동시 선언을 거부한다.
+- encounter topology 권위는 `encounterId`, `slotId`, `position`, `activation`이다. fixed/pool 적 선택은 topology와 분리된 `enemySelection` payload가 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 선언할 수 있다. Phase 6 selector는 `slotId + runSeed + worldRevision`을 사용해 preview corpus를 결정적으로 resolve한다. validator와 Runtime resolver는 encounter와 selection payload에 `areaId`가 권위 필드로 들어오는 것을 거부하고, 빈/중복 pool이나 fixed+pool 동시 선언을 거부한다.
 - `LegacyAreaSectorPreviewCatalog`는 build/startup-only import adapter다. Sector 01~03의 기존 Area catalog를 preview metadata로 변환하고 Sector 04~06을 포함한 `1-1`~`6-8` 전체 alias를 제공하지만, per-tick simulation·snapshot·progress·renderer가 이 adapter나 Area/Sector 이중 모델을 분기하지 않는다.
 - #622는 authoring contract만 추가한다. 현재 기본 `CURRENT_AUTHORED_AREA_CATALOG`, `AuthoredWorldAssembler`, `WorldProgressState`, `GameSimulation`, Gate portal과 active Checkpoint는 그대로이며 Sector preview를 shipped Runtime으로 표현하지 않는다. 후속 Phase 3은 새 world revision에서 runtime cutover를 원자적으로 수행한다.
 - `src/game/world/sectors/`와 `SectorDefinitionValidator.js`는 시나리오 통합 fingerprint의 별도 `authored-sector-sha256`로 감시한다. Area source와 Sector source의 현재 상태를 각각 기록해 preview contract 추가를 Runtime 전환으로 오인하지 않는다.

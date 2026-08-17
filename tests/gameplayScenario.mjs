@@ -7,6 +7,8 @@ import { run as ropeLauncher } from "./ropeLauncher.mjs";
 import { run as gameSimulation } from "./gameSimulation.mjs";
 import { run as combatSystems } from "./combatSystems.mjs";
 import { run as enemyPatrol } from "./enemyPatrol.mjs";
+import { run as enemyEncounterSelection } from "./enemyEncounterSelection.mjs";
+import { run as enemyArchetypes } from "./enemyArchetypes.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as worldSeed } from "./worldSeed.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
@@ -48,6 +50,8 @@ const steps = {
     gameSimulation,
     combatSystems,
     enemyPatrol,
+    enemyEncounterSelection,
+    enemyArchetypes,
     canvasRenderer,
     renderingSystem,
     renderPerformance,

@@ -56,7 +56,7 @@
 
 ### 제출 전 시나리오 구현 트랙
 
-이하 Area/Gate 구현 순서는 현재 0.23.0 Runtime과 48개 migration source의 상태 기록이다. 새 구현은 위 연속 Sector 전환 선행 트랙을 우선하고, Stage 문서를 별도 Runtime 진행 단위로 다시 확장하지 않는다. 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)의 콘텐츠를 섹터·번호 순서로 흡수하되 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 stable ID와 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
+이하 Area/Gate 구현 순서는 현재 0.24.0 Runtime과 48개 migration source의 상태 기록이다. 새 구현은 위 연속 Sector 전환 선행 트랙을 우선하고, Stage 문서를 별도 Runtime 진행 단위로 다시 확장하지 않는다. 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)의 콘텐츠를 섹터·번호 순서로 흡수하되 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 stable ID와 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
 
 상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~`06`의 `1-1`~`6-8` 상세 Stage 문서는 48/48 작성됐다. 현재 Runtime은 `1-1 → 3-8` 24개 authored area를 한 월드로 연결하고 Sector 04 `4-1 → 4-8`은 standalone으로 저작했으며, Sector 05·06은 Runtime 미저작이다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
 
@@ -168,5 +168,14 @@ Foundation이 로프 숙련을 대체하지 않고 보상하도록 한다.
 - 영구 성장과 자동 자원 생산
 - 적·무기·Foundation/Specialization 확장
 - 수집 도감, 섹터별 보스 전투, 바이옴과 완성형 아트
+
+적 roster 확장 순서:
+
+1. [완료] Stage ID에 의존하지 않는 stable enemy slot의 `고정 계열/type` 또는 `허용 pool` 선택과 `slotId + run seed + world revision` 결정성을 pure resolver로 구현한다.
+2. [완료] 기존 `경계 포탑`·`순찰 드론`과 분리된 신규 기본형 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`을 Has-A behavior와 공용 `enemy-behavior` capability로 조립한다.
+3. [완료] 신규 행동을 서버 fixed step·snapshot/prediction 복원에 연결하고 포격은 기존 중립 적 투사체, 방패는 #611 Rope 충돌 claim 경계를 재사용한다.
+4. [완료] #623 `SectorDefinition`의 `encounterId/slotId/position/activation/enemySelection/legacyStageAlias` 계약과 build/startup preview adapter를 selector에 연결하고, `areaId` 없이 Sector 01~03 preview encounter 전체를 결정적으로 resolve한다.
+5. [대기] City Phase 3 wide Runtime cutover가 canonical encounter를 실제 world spawn 입력으로 공급할 때 legacy Patrol route·Cutter variant 자료를 새 schema에 보존한다. Preview metadata를 shipped Runtime으로 오인하지 않는다.
+6. [후속] 신규 기본형 단독 조정 뒤 계열별 확장형과 Sector 누적 해금·허용/금지 조합을 추가한다. 현재 roster 목록·가중치·수치·배치·표시 색은 테스트에 고정하지 않는다.
 
 P0~P2에서 로프 손맛과 한 판의 순환이 검증되기 전에는 착수하지 않는다.

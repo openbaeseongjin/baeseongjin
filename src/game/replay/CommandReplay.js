@@ -45,6 +45,8 @@ export function createDeterminismDigest(state) {
                 .map((enemy) =>
                     Object.freeze({
                         id: enemy.id,
+                        enemyType: enemy.enemyType,
+                        behaviorState: enemy.behaviorState ?? enemy.enemyBehaviorSnapshot?.() ?? null,
                         health: enemy.health,
                         x: enemy.position.x,
                         y: enemy.position.y

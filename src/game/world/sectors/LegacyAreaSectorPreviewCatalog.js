@@ -1,4 +1,5 @@
 import { resolveObjectTriggerBounds } from "../areas/AreaDefinition.js";
+import { resolveSectorEnemyEncounters } from "../EnemyEncounterSelection.js";
 import { SECTOR_01_AREA_CATALOG } from "../areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js";
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
@@ -162,3 +163,10 @@ export function buildLegacyAreaSectorPreviewCatalog() {
 }
 
 export const LEGACY_AREA_SECTOR_PREVIEW_CATALOG = buildLegacyAreaSectorPreviewCatalog();
+
+export function resolveLegacyAreaSectorPreviewEnemyEncounters({
+    runSeed,
+    worldRevision = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.revision
+} = {}) {
+    return resolveSectorEnemyEncounters(LEGACY_AREA_SECTOR_PREVIEW_CATALOG, { runSeed, worldRevision });
+}
