@@ -17,8 +17,8 @@ export class LocalAuthority {
     }
 
     submitImpactClaim(event) {
-        return this.simulation.resolveEnemyProjectileClaim(this.playerId, {
-            projectileId: event.projectileId,
+        return this.simulation.resolvePlayerImpactClaim(this.playerId, {
+            impactId: event.projectileId,
             clientTick: event.clientTick,
             impactType: event.resolution,
             position: event.position,

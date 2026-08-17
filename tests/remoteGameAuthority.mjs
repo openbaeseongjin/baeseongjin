@@ -586,6 +586,8 @@ export async function run() {
         spawnTarget.position.set(spawnPlayer.physics.position.x + 120, spawnPlayer.physics.position.y);
         spawnTarget.activation = null;
         spawnRoom.simulation.enemies = [spawnTarget];
+        spawnPlayer.weapon.isEnabled = true;
+        spawnLocalPlayer.weapon.isEnabled = true;
         spawnPlayer.weapon.cooldown = 0;
         gameServer.broadcast(spawnRoom, { type: "snapshot", payload: spawnRoom.adapter.snapshot() });
         spawnTarget.activation = null;
@@ -739,6 +741,8 @@ export async function run() {
         collisionTarget.activation = null;
         collisionTarget.fireCooldown = 999;
         collisionRoom.simulation.enemies = [collisionTarget];
+        collisionServerPlayer.weapon.isEnabled = true;
+        collisionLocalPlayer.weapon.isEnabled = true;
         collisionServerPlayer.weapon.cooldown = 0;
         collisionTarget.activation = null;
         collisionLocalPlayer.weapon.cooldown = 0;

@@ -44,6 +44,7 @@ function enemyNear(simulation, offsetX = 200) {
 export function run() {
     const replayServer = createCurrentGameSimulation({ worldSeed: 3141 });
     const replayOwner = replayServer.players[0];
+    replayOwner.weapon.isEnabled = true;
     enemyNear(replayServer);
     const replaySnapshot = buildAuthoritySnapshot({ simulation: replayServer });
     const replayPredictor = new OwnerPredictionRuntime({
@@ -60,6 +61,7 @@ export function run() {
             { playerId: replayOwner.id, sequence: 0, command: idleCommand() }
         ])
     ]);
+    replayPredictor.simulation.players[0].weapon.isEnabled = true;
     assert.equal(
         replayPredictor.drainPredictedEvents().some(({ eventType }) => eventType === "predicted-spawn"),
         false,
@@ -74,6 +76,7 @@ export function run() {
 
     const claimServer = createCurrentGameSimulation({ worldSeed: 3141 });
     const claimOwner = claimServer.players[0];
+    claimOwner.weapon.isEnabled = true;
     const claimEnemy = enemyNear(claimServer);
     const claimSession = new AuthorityServerSession({
         simulation: claimServer,

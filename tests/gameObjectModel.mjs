@@ -125,6 +125,7 @@ export function run() {
     );
     const target = simulation.enemies[0];
     target.position.set(player.physics.position.x + 20, player.physics.position.y);
+    player.weapon.isEnabled = true;
     player.weapon.cooldown = 0;
     simulation.step(
         1 / 120,

@@ -19,8 +19,8 @@
 - 현재 기본 런은 하나의 연속 월드에 Sector 01·02·03의 저작 영역 24개(`1-1 → 3-8`)를 순서대로 조립하며, 모든 표면 로프 부착과 수평 발판 아래→위 통과를 유지한다.
 - seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
 - PC와 모바일 공용 이동·점프·로프 명령, 모바일 중앙 `좌 · 점프 · 우` 조작 바와 멀티터치
-- 사거리 기반 자동 공격, 원거리 적, 로프 절단, 본체 피해·넉백·무적 시간
-- 체력, 사망·낙사 시 플레이어별 활성 체크포인트 즉시 부활
+- 기본 자동 사격은 비활성화하고 `AutomaticWeaponObject`·spawn/hit claim 기반은 후속 기능용으로 보존한다. 기본 공격은 로프 부착 중 속도 `620px/s` 이상으로 적과 새로 몸체 충돌할 때 `25` 피해를 주는 로프 충돌 공격이다. 같은 겹침은 분리 후 재진입하기 전까지 반복 피해를 만들지 않는다.
+- 현재 0.23.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 활성 체크포인트 즉시 부활을 사용한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용하며 치명 착지는 이 기존 부활 경로로 이어진다.
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
 - `CanvasRenderer`가 camera 기반 불변 world viewport를 프레임당 한 번 만들고 terrain·decoration·enemy·projectile 하위 renderer가 직접 컬링한다. 정적 surface geometry와 seed·zone 장식 배치는 renderer가 캐시하며 sprite·polygon, 싱글·멀티가 같은 경로를 사용한다. 기본 Canvas 정책은 DPR 최대 2와 backing store 최대 `3 * 1024 * 1024` pixel이고 `GameRendererFactory.canvasOptions`로 조정할 수 있다. 상세 경계는 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
@@ -47,7 +47,7 @@
 - 서버는 소유 클라이언트가 만든 플레이어 상태·사건을 검증해 다른 클라이언트에 공유하는 허브다. 소유자의 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 서버 snapshot이나 impact receipt로 다시 쓰지 않는다. 서버가 상태를 직접 진행하는 범위는 몹·중립 투사체·공용 월드·세션 수명주기이며, 서버 상태로 소유자 전체를 복원하는 경우는 최초 입장·재접속과 체크포인트처럼 별도 복구 계약을 가진 사건 전이로 제한한다. 정상 또는 무시된 `owner-motion` receipt는 소유자 복원·입력 재실행을 시작하지 않는다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 멀티 소유 클라이언트 예측은 공용 월드 진행(출구 패널 interact, interact-choice 보상 개방, Gate 교차·포탈 전이)을 로컬에서 실행하지 않는다. 이 시스템 상호작용은 서버 `GameSimulation`만 진행하고 클라이언트는 스냅샷(`worldProgress`·`foundationRewards`)과 복제 사건(`gate-portal-entered` 등)으로 수렴한다. 보상이 서버에서 열리면 `synchronizePredictionProgress`가 예측 로프를 해제해 서버 `beginFoundationReward`와 맞춘다. 한 번 통과한 Gate의 trigger에 stale owner-motion이 남아도 `portalTransitions`의 gateId 일치로 재전이·이벤트 재발행을 막는다.
 - Foundation 선택 UI는 클라이언트가 즉시 연다(`openFoundationChooserCandidate`: 예측 위치가 augment-node의 interactionRadius 안 + interact 입력). 열리면 예측 로프를 해제하고 명령을 zeroing하며, UI에서 확정된 선택만 서버에 claim으로 보내 서버가 거리·선택 충돌·tick 창을 검증한 뒤 receipt로 답한다. 멀티 권위 세션은 `resolveInteractChoice: false`로 raw interact로 보상을 열지 않고, 싱글 플레이는 기존 interact 개방을 유지한다. UI 입력 상태기(열기 press는 확정하지 않음 → 해제로 arming → 방향키로 이동 → 다음 press가 선택한 항목만 확정)는 `RewardSelection`의 inputReady 엣지 계약을 그대로 쓴다.
-- impact의 최종 체감 결과는 피해 클라이언트가 소유한다. 정상 claim은 사건 자료와 도메인 상태 지문만 보내며 서버가 같은 전이를 적용해 일치하면 바로 확정한다. `state-diverged`일 때만 서버가 projectile·피해자 연결에 묶인 일회용 `recoveryId`를 발급하고, 피해 클라이언트가 응답 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보내 서버·동료를 자기 결과로 수렴시킨다. challenge 없는 전체 상태는 거부하고, 승인 복구는 상태와 `ownerMotionTick`을 원자적으로 갱신하며 로컬 HP·로프·부활은 복구하지 않는다. 엔진 공식 레퍼런스 대비 핵심 충족표와 상세 기준은 `docs/multiplayer-synchronization.md`의 **다른 게임 엔진 기준 충족 점검**과 **impact claim과 최종 수렴**을 따른다.
+- impact의 최종 체감 결과는 피해 클라이언트가 소유한다. 적 탄환과 착지 피해의 정상 claim은 사건 자료와 도메인 상태 지문만 보내며 서버가 같은 전이를 적용해 일치하면 바로 확정한다. `state-diverged`일 때만 impact ID·피해자 연결에 묶인 일회용 `recoveryId`를 발급하고, 피해 클라이언트가 응답 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보내 서버·동료를 자기 결과로 수렴시킨다. challenge 없는 전체 상태는 거부하고, 승인 복구는 상태와 `ownerMotionTick`을 원자적으로 갱신하며 로컬 HP·로프·부활은 복구하지 않는다. 엔진 공식 레퍼런스 대비 핵심 충족표와 상세 기준은 `docs/multiplayer-synchronization.md`의 **다른 게임 엔진 기준 충족 점검**과 **impact claim과 최종 수렴**을 따른다.
 - 투사체는 같은 `projectile-motion`·`client-projectile-collision` capability ID에 종류별 믹스인을 조합한다. 운동·충돌·claim 거부 뒤 수명 정책과 복제 상태는 객체가 소유하며 `PredictableProjectileStore`와 `GameSimulation`은 종류별 분기 없이 등록·식별자 대응·단계 실행·사건 연결만 담당한다. 상세 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - 정적 파일을 노출하지 않는 상시 게임 서버 실행 모드와 `/health` 상태 확인
 - game-only 서버는 기본적으로 공식 GitHub Pages Origin만 WebSocket에 허용하며 개발용 정적 통합 서버는 이 제한을 강제하지 않는다.
@@ -104,7 +104,7 @@ Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않�
 
 로컬 실행과 네트워크 실행은 별도의 맵·게임플레이 구현이 아니다. 둘 다 `GameSimulationFactory`에서 같은 현재 authored catalog로 만든 하나의 `GameSimulation`을 사용한다. 네트워크 경로는 서버 스냅샷의 동일 world revision과 공용 진행 상태를 검증·복원할 뿐 별도 맵을 만들지 않는다. 실행 방식마다 월드 catalog를 따로 선택하는 코드를 추가하지 않는다.
 
-시나리오 mock 연결 뒤 최근 멀티 변경을 실제 두 기기에서 확인한다. 두 플레이어가 겹치지 않고 서로를 지지하는지, 모바일 HP가 항상 보이는지, 각 플레이어의 자동 공격 한 발이 예측본과 서버 확정본으로 중복 표시되지 않는지를 한 채널에서 함께 검증한다. 실패 시 채널 번호·월드 시드·디버그 패널의 **진단 복사** 결과와 재현 순서를 남긴다.
+시나리오 mock 연결 뒤 최근 멀티 변경을 실제 두 기기에서 확인한다. 두 플레이어가 겹치지 않고 서로를 지지하는지, 모바일 HP가 항상 보이는지, 로프 몸체 충돌의 즉시 피드백과 서버 확정이 중복 표시되지 않는지, 착지 피해 HP가 피해자·서버·동료에서 수렴하는지를 한 채널에서 함께 검증한다. 실패 시 채널 번호·월드 시드·디버그 패널의 **진단 복사** 결과와 재현 순서를 남긴다.
 
 `docs/implementation-roadmap.md`의 P1을 순서대로 진행한다.
 
@@ -163,7 +163,14 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 - 순간 플레이는 로프 숙련이 주도하고, 1-4에서 선택하는 Foundation과 이후 Specialization이 한 런의 성장 방향을 만든다.
 - Checkpoint는 진행 저장과 개인 부활만 소유하며 보상 선택을 열지 않는다. 제거한 글로벌 Artifact 계층의 대체 결정은 `docs/decision-history.md`에 보존한다.
-- 자동 공격은 기본 전투 보조 수단이며 이동과 생존에서 로프를 대체할 수 없다. Foundation 효과도 기본 Rope 통과성을 필수 조건으로 바꾸지 않는다.
+- 자동 무기 시스템은 후속 기능용으로 보존하지만 기본 전투에서는 비활성화한다. Foundation 효과도 기본 Rope 통과성을 필수 조건으로 바꾸지 않는다.
+
+### [L1] 기본 전투와 낙하 위험은 로프 이동 결과에 직접 연결한다
+
+- 기본 플레이어 자동 사격은 비활성화한다. 자동 무기 객체·투사체·spawn/hit claim 시스템은 제거하지 않고 명시적으로 활성화하는 후속 기능과 회귀 검증에서만 사용한다.
+- 기본 적 공격은 로프가 실제 부착된 상태에서 최소 충돌 속도를 넘겨 적에게 새로 진입한 몸체 충돌이다. 적과 계속 겹친 상태에서 매 tick 피해를 반복하지 않고 완전히 분리한 뒤 다시 충돌해야 재무장한다.
+- 높은 곳에서 떨어져 발판에 착지하면 충돌 해소 직전의 하강 속도로 피해를 계산한다. 정상 이동 구간은 안전 속도 아래로 유지하고, 치명 피해는 현재 0.23.0 Runtime의 기존 개인 체크포인트 즉시 부활을 사용한다.
+- 첫 L2 수치는 로프 충돌 최소 `620px/s`·피해 `25`, 낙하 안전 `800px/s`·치명 `1400px/s`이며 실제 Stage 플레이테스트로 조정한다. 싱글과 멀티의 권한·claim 상세는 `docs/architecture.md`와 `docs/multiplayer-synchronization.md`를 따른다.
 
 ### [L2] 기본 Grapple과 Sentry를 현재 authored 맵 밀도에 맞춘다
 
@@ -200,7 +207,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 사용자 직접 입력에 반응하는 플레이어·로프는 별도 `InputDrivenObject`, 적·자동 행동 객체·직접 조작하지 않는 투사체는 `SimulationDrivenObject`로 분류한다. 이는 실행 위치가 아니라 상태 변화 원인의 Is-A 정체성이다.
 - 멀티 권한 감각은 P2P형으로 둔다. 특정 플레이어의 이동·로프·피격처럼 명확한 당사자가 있는 결과는 소유자 또는 피해자 클라이언트가 먼저 판정한다. 어느 한 클라이언트에 맡길 수 없는 몹·적 투사체 생성과 궤적은 서버가 중립적으로 진행한다. 두 영역이 만나는 impact는 피해 클라이언트가 사건과 결과 지문을 claim하고 서버가 같은 전이를 적용해 수렴 여부를 확인하며, 서버의 지연된 플레이어 위치만으로 피격을 먼저 발생시키거나 취소하지 않는다.
 - 협동 동기화는 클라이언트 트리거·서버 검증형으로 설계하며, 1/120초 공용 규칙·60Hz 입력·20Hz 공유 스냅샷을 초기값으로 사용한다. Foundation은 플레이어별 빌드로 유지한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
-- 투사체·낙하물처럼 예측 가능한 객체는 전체 위치를 반복 전송하지 않는다. 플레이어 자동 무기 발사는 소유 클라이언트가 즉시 예측한 뒤 `projectile-spawn-claim`으로 보내며, 서버는 소유권·`predictionId` 형식·tick 범위와 소유자 clientTick 간격(발사 주기 - 2틱 유예)만 검증해 같은 projectile ID receipt와 spawn 사건을 멱등 확정한다. 서버 시계의 쿨다운·서버 상태의 최근접 대상 재선택·재계산한 발사 위치 오차는 거부 조건이 아니다 — 소유자의 발사 결정을 서버의 시차 난 상태로 재유도하면 정상 발사가 간헐적으로 거절돼 탄환이 몸 근처에서 소멸하므로(총알 소멸 버그의 근본 원인), claim의 사건 자료를 그대로 적용하고 불일치는 후속 hit claim·지문 수렴에서 감지한다. 멀티 서버 fixed tick은 플레이어 탄환을 따로 생성하지 않고 쿨다운·확정 탄환의 검증용 궤적·수명만 진행하며, 거부 receipt는 로컬 예측 탄환을 취소한다. 몹·적 투사체 같은 중립 객체의 생성·궤적·수명은 서버가 담당한다. 양쪽 모두 생성 틱과 초기 상태를 공유해 각 클라이언트가 재생하며, 플레이어와 만나는 피격·로프 절단은 피해 클라이언트 claim으로 확정한다. 공격 클라이언트의 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 로컬 적중에서 소비되며 receipt 거부로 되살아나지 않는다. 중간 입장 welcome은 활성 객체의 원래 spawn 이벤트를 같은 ID로 다시 제공한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
+- 투사체·낙하물처럼 예측 가능한 객체는 전체 위치를 반복 전송하지 않는다. 명시적으로 자동 무기를 활성화한 경우 플레이어 발사는 소유 클라이언트가 즉시 예측한 뒤 `projectile-spawn-claim`으로 보내며, 서버는 비활성 claim을 거부하고 활성 claim의 소유권·`predictionId` 형식·tick 범위와 소유자 clientTick 간격(발사 주기 - 2틱 유예)을 검증해 같은 projectile ID receipt와 spawn 사건을 멱등 확정한다. 서버 시계의 쿨다운·서버 상태의 최근접 대상 재선택·재계산한 발사 위치 오차는 거부 조건이 아니다. 멀티 서버 fixed tick은 플레이어 탄환을 따로 생성하지 않고 쿨다운·확정 탄환의 검증용 궤적·수명만 진행하며, 거부 receipt는 로컬 예측 탄환을 취소한다. 몹·적 투사체 같은 중립 객체의 생성·궤적·수명은 서버가 담당한다. 양쪽 모두 생성 틱과 초기 상태를 공유해 각 클라이언트가 재생하며, 플레이어와 만나는 피격·로프 절단은 피해 클라이언트 claim으로 확정한다. 공격 클라이언트의 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 로컬 적중에서 소비되며 receipt 거부로 되살아나지 않는다. 중간 입장 welcome은 활성 객체의 원래 spawn 이벤트를 같은 ID로 다시 제공한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 플레이어 자동 발사 예측은 탄환뿐 아니라 발사 직전·직후 무기 쿨다운과 tick을 prediction ID별로 보존한다. 승인 receipt는 공유 확정을 뜻하며 소유자의 쿨다운을 서버 스냅샷으로 다시 쓰지 않는다. 앞 발사가 거절됐을 때 후속 발사 claim이 pending이면 현재 후속 쿨다운은 유지하고 그 후속 항목의 복구 기준만 앞 발사가 없었던 시간축으로 갱신한다. 마지막 pending 거절은 경과 tick을 뺀 준비 상태로 복구한다.
 - 파티클·타격 VFX·피해 숫자·화면 흔들림은 서버가 상태나 수명으로 시뮬레이션하지 않는다. 서버는 고유 ID가 있는 판정 이벤트만 확정하고, 싱글과 멀티의 각 클라이언트가 같은 피드백 컴포넌트로 효과를 생성·진행·소멸시킨다.
 - `AuthorityCommandInbox`가 플레이어별 승인 `sequence`와 허용 틱 범위를 검사해 재적용 원본·지연 진단 계약을 유지한다. 멀티 서버는 이 명령으로 `InputDrivenObject` 물리를 다시 실행하지 않으며 최신 적용 `owner-motion`만 플레이어·로프 연속 상태를 바꾼다.
@@ -219,7 +226,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 활성 로프 드래그가 브라우저 상단 UI로 빠지거나 `pointercancel`, 창 포커스 상실, 문서 숨김으로 끝나면 로프 유지가 아니라 해제 의도로 처리한다. 클라이언트는 렌더 프레임 재개를 기다리지 않고 해제 입력을 공용 시뮬레이션에 즉시 적용하며, 멀티는 일반 60Hz 전송 제한을 우회해 명령과 `owner-motion`을 바로 보낸다. 세부 입력 수명주기는 `docs/development-rules.md`, 동기화 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 플레이어끼리는 반지름 기반 물리 충돌을 한다. 각 소유 클라이언트가 다른 플레이어의 공유 위치를 기준으로 겹침의 절반을 즉시 해소하고 상대에게 파고드는 속도만 제거한 뒤 `owner-motion`으로 공유한다. 접선 방향 로프 관성은 보존하며 위에서 닿으면 다른 플레이어 위에 설 수 있다.
 - 특정 플레이어에게 귀속되는 이동·로프·공격·피격·절단 같은 사건은 소유자 또는 피해자 클라이언트가 즉시 로컬 적용하고 claim을 보낸다. 서버는 체감 경로를 먼저 시작하지 않는다. impact는 인증·형식·중복과 결과 지문을 확인하고, 그 밖의 claim은 각 계약의 tick·중립 객체 자료를 검증해 공용 결과를 확정·배포한다.
-- 플레이어 자동 무기 투사체는 발사한 클라이언트가 적중을 먼저 판정한다. 멀티 서버 fixed tick은 검증용 궤적·대상 소실·8초 수명만 진행하고 적 충돌이나 HP 감소를 자동 시작하지 않는다. 공격 클라이언트는 첫 적중에서 총알을 소비하고 VFX와 hit claim을 한 번만 만든다. 거부 receipt가 총알을 같은 겹침에 복구하지 않으며 승인 뒤에는 서버 적 HP 스냅샷과 resolve 사건으로 모두 수렴한다.
+- 명시적으로 활성화한 플레이어 자동 무기 투사체는 발사한 클라이언트가 적중을 먼저 판정한다. 멀티 서버 fixed tick은 검증용 궤적·대상 소실·8초 수명만 진행하고 적 충돌이나 HP 감소를 자동 시작하지 않는다. 공격 클라이언트는 첫 적중에서 총알을 소비하고 VFX와 hit claim을 한 번만 만든다. 거부 receipt가 총알을 같은 겹침에 복구하지 않으며 승인 뒤에는 서버 적 HP 스냅샷과 resolve 사건으로 모두 수렴한다.
 - 멀티 서버 fixed tick은 체력 0을 스캔해 사망·부활을 시작하거나 보상 선택 입력을 직접 확정하지 않는다. 플레이어 사망·부활은 피해 `player-impact` claim, Foundation 선택은 `foundation-selection` claim에서만 검증·확정한다. 싱글은 같은 `GameSimulation`의 기본 자동 복구와 로컬 보상 입력을 유지한다.
 - 몹·적 투사체 생성과 궤적처럼 특정 플레이어에게 귀속할 수 없는 중립 월드 사건은 서버가 진행한다. 이를 대표 클라이언트에게 위임하지 않으며 참가자 연결 수명과 분리한다.
 - 이 분할 권한 규칙은 신규 기능과 수정 기능에 즉시 적용한다. 플레이어 당사자 사건과 중립 시뮬레이션 사건의 경계를 먼저 정하고 양쪽 로직을 같은 주체에서 중복 실행하지 않는다.
@@ -263,7 +270,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 로프는 몸 중심이 아니라 부착 순간 anchor 쪽으로 선택한 손의 local-space `attachmentOffset`에 연결한다. 몸체 각도에 따라 손끝 world 위치가 회전하며 joint 제약력은 선속도와 각속도에 함께 작용한다.
 - 플레이어 각운동은 physics mixin 상속이 아니라 `PlayerPhysics Has-A AngularMotion` 조합으로 확정했다. collider도 독립 Has-A 조합이고 `FixedLengthRope`는 local anchor를 참조하는 외부 joint다. Box2D·Rapier·Unity 공식 강체 구조를 따른 근거와 확장 규칙은 `docs/architecture.md`의 **플레이어 강체 회전과 손 로프 관절**을 따른다.
 - 로프 해제 시 각속도를 보존하고 손끝 접선 속도의 설정 비율을 중심 이동 속도에 전달한다. 지면 접촉 중에는 `angle = 0` 방향의 복원 토크와 감쇠를 적용해 오뚜기처럼 일어서며 공중에서는 약한 각 감쇠만 적용한다.
-- `owner-motion` v3, `WorldSnapshot` v6, `player-impact` v6가 angle·angularVelocity·attachmentOffset·로프 발사 shot/cooldown을 전달하고 snapshot·impact 복구는 Foundation 선택·순간 상태도 보존한다. `owner-motion`은 형식·유한값·단조 tick만 경계로 삼고 물리량 봉투로 거부하지 않으며, impact 복구 상태는 별도 challenge와 전체 스키마를 검증한다. 원격 각도는 ownerMotionTick 기준 최단 회전 보간과 제한 외삽을 사용하며 상세 계약은 `docs/multiplayer-synchronization.md`의 **플레이어 강체 회전과 손 관절 동기화**를 따른다.
+- `owner-motion` v3, `WorldSnapshot` v6, `player-impact` v7이 angle·angularVelocity·attachmentOffset·로프 발사 shot/cooldown을 전달하고 snapshot·impact 복구는 Foundation 선택·순간 상태도 보존한다. `owner-motion`은 형식·유한값·단조 tick만 경계로 삼고 물리량 봉투로 거부하지 않으며, impact 복구 상태는 별도 challenge와 전체 스키마를 검증한다. 원격 각도는 ownerMotionTick 기준 최단 회전 보간과 제한 외삽을 사용하며 상세 계약은 `docs/multiplayer-synchronization.md`의 **플레이어 강체 회전과 손 관절 동기화**를 따른다.
 - 자동 무기 발사점은 몸 중심이 아니라 조합된 `Collider.outsidePointToward()`가 대상 방향으로 계산한 형상 바깥 점이다. 발사체 반경과 8px 여유를 포함하며 소유자는 최신 `owner-motion` 다음 총구 위치 claim을 보내고, 서버는 같은 collider 계약으로 계산한 위치 오차를 검증한 뒤 claim 위치를 동료에게 공유한다. 구현 경계는 `docs/architecture.md`, 전송·수치 검증 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 
 - 부착 순간 거리를 고정 반경으로 유지하고 방사 속도를 제거한다.

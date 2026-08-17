@@ -59,6 +59,7 @@ export class PlayerPhysics {
     }
 
     step(dt, input, surfaces, rope) {
+        const wasGrounded = this.isGrounded;
         if (!rope.isAttached) {
             const acceleration = this.isGrounded ? this.config.groundAcceleration : this.config.airAcceleration;
             this.velocity.x += input.horizontal * acceleration * dt;
@@ -83,8 +84,17 @@ export class PlayerPhysics {
         const previousPosition = this.position.clone();
         this.position.add(this.velocity.clone().scale(dt));
         this.integrateAngularMotion(dt);
+        const impactVelocity = this.velocity.clone();
         this.resolveSurfaces(surfaces, previousPosition);
         rope.apply(this.position, this.velocity, this.angularMotion, dt);
+        const landed = !wasGrounded && this.isGrounded;
+        return Object.freeze({
+            landed,
+            impactSpeed: landed ? Math.max(0, impactVelocity.y) : 0,
+            impactVelocity: landed
+                ? Object.freeze({ x: impactVelocity.x, y: impactVelocity.y })
+                : Object.freeze({ x: 0, y: 0 })
+        });
     }
 
     resolveSurfaces(surfaces, previousPosition) {

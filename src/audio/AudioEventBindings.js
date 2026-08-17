@@ -5,7 +5,12 @@ function eventPosition(event) {
 
 function eventCausalId(prefix, event) {
     const id =
-        event.predictionId ?? event.parameters?.predictionId ?? event.objectId ?? event.projectileId ?? event.eventId;
+        event.impactId ??
+        event.predictionId ??
+        event.parameters?.predictionId ??
+        event.objectId ??
+        event.projectileId ??
+        event.eventId;
     return id ? `${prefix}:${id}` : null;
 }
 
@@ -23,9 +28,12 @@ function projectileSpawnBinding(event, context) {
 }
 
 function playerHitBinding(event, context) {
+    const isFallDamage =
+        event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged";
     if (
-        (event.eventType !== "resolve" && event.eventType !== "predicted-resolve") ||
-        event.resolution !== "player-hit"
+        !isFallDamage &&
+        ((event.eventType !== "resolve" && event.eventType !== "predicted-resolve") ||
+            event.resolution !== "player-hit")
     ) {
         return null;
     }
@@ -34,7 +42,7 @@ function playerHitBinding(event, context) {
         request: Object.freeze({
             ...context,
             emitterId: event.targetId ?? event.parameters?.targetId ?? "player",
-            causalId: eventCausalId("player-hit", event),
+            causalId: eventCausalId(isFallDamage ? "fall-damage" : "player-hit", event),
             position: eventPosition(event) ?? context.listener
         })
     });

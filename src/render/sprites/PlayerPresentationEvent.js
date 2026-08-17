@@ -1,5 +1,11 @@
 function fallbackEventId(event, index) {
-    return event.eventId ?? event.predictionId ?? event.projectileId ?? `${event.eventType}:${event.tick ?? index}`;
+    return (
+        event.eventId ??
+        event.impactId ??
+        event.predictionId ??
+        event.projectileId ??
+        `${event.eventType}:${event.tick ?? index}`
+    );
 }
 
 function impactEventId(event, index) {
@@ -20,12 +26,20 @@ export function createPlayerPresentationEvents(events = []) {
         if (!event) return;
         if (
             (event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
-            event.resolution === "player-hit"
+            (event.resolution === "player-hit" || event.resolution === "fall-damage")
         ) {
             const playerId = event.targetId ?? event.parameters?.targetId;
             if (playerId) {
                 presentationEvents.push(Object.freeze({ id: impactEventId(event, index), playerId, type: "hit" }));
             }
+            return;
+        }
+        if (
+            (event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged") &&
+            (event.targetId || event.playerId)
+        ) {
+            const playerId = event.targetId ?? event.playerId;
+            presentationEvents.push(Object.freeze({ id: impactEventId(event, index), playerId, type: "hit" }));
             return;
         }
         if (event.eventType === "player-respawned" && event.playerId) {

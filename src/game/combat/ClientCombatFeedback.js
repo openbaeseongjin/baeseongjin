@@ -6,7 +6,24 @@ import {
 } from "./ClientFeedbackEventObject.js";
 import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 
-const COMBAT_RESOLUTIONS = new Set(["enemy-hit", "enemy-defeated", "player-hit", "rope-cut"]);
+const COMBAT_RESOLUTIONS = new Set(["enemy-hit", "enemy-defeated", "player-hit", "rope-cut", "fall-damage"]);
+
+function eventResolution(event) {
+    if (event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged") {
+        return "fall-damage";
+    }
+    return event.resolution;
+}
+
+function isCombatFeedbackEvent(event) {
+    if (event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged") {
+        return true;
+    }
+    return (
+        (event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
+        COMBAT_RESOLUTIONS.has(event.resolution)
+    );
+}
 
 export class ClientCombatFeedback {
     constructor({ viewerId }) {
@@ -22,12 +39,15 @@ export class ClientCombatFeedback {
 
     apply(events) {
         const feedbackEvents = events
-            .filter(
-                (event) =>
-                    (event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
-                    COMBAT_RESOLUTIONS.has(event.resolution)
-            )
-            .map((event, index) => createClientFeedbackEventObject(event, index));
+            .filter(isCombatFeedbackEvent)
+            .map((event, index) =>
+                createClientFeedbackEventObject(
+                    event.resolution === eventResolution(event)
+                        ? event
+                        : { ...event, resolution: eventResolution(event), parameters: { damage: event.damage } },
+                    index
+                )
+            );
         this.dispatcher.dispatch({
             objects: feedbackEvents,
             capabilityId: SHARED_CLIENT_FEEDBACK_CAPABILITY,

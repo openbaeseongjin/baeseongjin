@@ -35,7 +35,10 @@ class ClientFeedbackEventObject extends withPersonalClientFeedback(withSharedCli
         this.damage = damage;
         this.sourcePlayerId = sourcePlayerId;
         this.targetId = targetId;
-        this.personalViewerId = resolution === "player-hit" || resolution === "rope-cut" ? targetId : sourcePlayerId;
+        this.personalViewerId =
+            resolution === "player-hit" || resolution === "rope-cut" || resolution === "fall-damage"
+                ? targetId
+                : sourcePlayerId;
     }
 }
 
@@ -61,7 +64,7 @@ export function createClientFeedbackEventObject(event, index = 0) {
         id: event.eventId ?? event.predictionId ?? event.projectileId ?? `client-feedback-${index}`,
         resolution: event.resolution,
         position: event.position,
-        damage: parameters.damage ?? 0,
+        damage: event.damage ?? parameters.damage ?? 0,
         sourcePlayerId: event.sourcePlayerId ?? parameters.sourcePlayerId ?? null,
         targetId: event.targetId ?? parameters.targetId ?? null
     });

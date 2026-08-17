@@ -10,7 +10,7 @@ const withAutomaticWeaponSimulation = createSimulationCapabilityMixin({
     order: 10,
     apply({ owner, enemies, projectiles, registry, config, dt, allowFire = true }) {
         this.cooldown = Math.max(0, this.cooldown - dt);
-        if (owner.lifeState !== "active" || !allowFire || this.cooldown > 0) return null;
+        if (!this.isEnabled || owner.lifeState !== "active" || !allowFire || this.cooldown > 0) return null;
         const target = selectNearestEnemy(owner.physics.position, enemies, this.range);
         if (!target) return null;
         const spawnPosition = this.projectileSpawnPosition(owner, target);
@@ -41,6 +41,7 @@ export class AutomaticWeaponObject extends withAutomaticWeaponSimulation(Simulat
         this.fireInterval = config.fireInterval;
         this.projectileRadius = config.projectileRadius;
         this.projectileSpawnClearance = config.projectileSpawnClearance;
+        this.isEnabled = config.automaticWeaponEnabled === true;
         this.cooldown = 0;
     }
 

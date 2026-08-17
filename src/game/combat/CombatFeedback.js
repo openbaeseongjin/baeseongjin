@@ -8,9 +8,10 @@ function particleVelocity(index, count, speed, phase = 0) {
 export function appendCombatFeedback(effects, event) {
     const defeated = event.type === "enemy-defeated";
     const playerHit = event.type === "player-hit";
+    const fallDamage = event.type === "fall-damage";
     const ropeCut = event.type === "rope-cut";
-    const color = playerHit || ropeCut ? "#fb7185" : defeated ? "#fde68a" : "#67e8f9";
-    const count = defeated ? 12 : playerHit ? 9 : ropeCut ? 8 : 7;
+    const color = playerHit || fallDamage || ropeCut ? "#fb7185" : defeated ? "#fde68a" : "#67e8f9";
+    const count = defeated ? 12 : playerHit || fallDamage ? 9 : ropeCut ? 8 : 7;
     const speed = defeated ? 190 : 130;
 
     effects.push({
@@ -38,7 +39,7 @@ export function appendCombatFeedback(effects, event) {
             position: { x: event.position.x, y: event.position.y - 24 },
             velocity: { x: 0, y: -34 },
             color,
-            text: playerHit ? `-${Math.round(event.damage)}` : `${Math.round(event.damage)}`,
+            text: playerHit || fallDamage ? `-${Math.round(event.damage)}` : `${Math.round(event.damage)}`,
             age: 0,
             lifetime: EFFECT_LIFETIME.text,
             emphasis: defeated
@@ -61,7 +62,9 @@ export function updateCombatFeedback(effects, dt) {
 }
 
 export function createImpactState(events) {
-    if (events.some((event) => event.type === "player-hit")) return { age: 0, lifetime: 0.24, strength: 9 };
+    if (events.some((event) => event.type === "player-hit" || event.type === "fall-damage")) {
+        return { age: 0, lifetime: 0.24, strength: 9 };
+    }
     if (events.some((event) => event.type === "enemy-defeated")) return { age: 0, lifetime: 0.2, strength: 6 };
     if (events.length > 0) return { age: 0, lifetime: 0.12, strength: 2.5 };
     return null;

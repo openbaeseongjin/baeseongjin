@@ -228,6 +228,11 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "foundation-shear-receipt", payload: receipt }));
                 return;
             }
+            if (message?.type === "rope-impact" && typeof message.payload === "string") {
+                const receipt = room.adapter.receiveRopeImpact(playerId, message.payload);
+                socket.send(JSON.stringify({ type: "rope-impact-receipt", payload: receipt }));
+                return;
+            }
             if (message?.type === "checkpoint-claim" && typeof message.payload === "string") {
                 const receipt = room.adapter.receiveCheckpointClaim(playerId, message.payload);
                 socket.send(JSON.stringify({ type: "checkpoint-claim-receipt", payload: receipt }));

@@ -33,6 +33,11 @@ import {
     serializePlayerProjectileSpawnClaim
 } from "../network/PlayerProjectileSpawnClaim.js";
 import {
+    createRopeImpactClaim,
+    createRopeImpactReceipt,
+    serializeRopeImpactClaim
+} from "../network/RopeImpactClaim.js";
+import {
     createOwnerMotionReceipt,
     createOwnerMotionState,
     serializeOwnerMotionState
@@ -81,6 +86,12 @@ export class RemoteGameAuthority {
         this.hitClaimReceipts = [];
         this.projectileSpawnClaimReceipts = [];
         this.impactClaimReceipts = [];
+        this.ropeImpactReceipts = [];
+        this.locallyPredictedRopeImpactIds = new Set();
+        this.locallyPredictedRopeImpactOrder = [];
+        this.predictedRopeImpactResolutions = new Map();
+        this.locallyPredictedFallImpactIds = new Set();
+        this.locallyPredictedFallImpactOrder = [];
         this.pendingImpactClaims = new Map();
         this.checkpointClaimReceipts = [];
         this.debugTeleportReceipts = [];
@@ -177,7 +188,7 @@ export class RemoteGameAuthority {
                         this.ownerRuntime?.recordProjectileSpawnReceipt(receipt);
                     } else if (message.type === "impact-claim-receipt") {
                         const receipt = createPlayerImpactReceipt(message.payload);
-                        const pending = this.pendingImpactClaims.get(receipt.projectileId);
+                        const pending = this.pendingImpactClaims.get(receipt.impactId);
                         if (!receipt.accepted && receipt.reason === "state-diverged" && pending) {
                             const recovery = this.ownerRuntime?.impactRecoveryState();
                             if (!recovery) throw new Error("impact recovery requires an owner state");
@@ -194,9 +205,16 @@ export class RemoteGameAuthority {
                             this.submitImpactClaim(pending.event, outcome);
                             return;
                         }
-                        this.pendingImpactClaims.delete(receipt.projectileId);
+                        this.pendingImpactClaims.delete(receipt.impactId);
                         this.impactClaimReceipts.push(receipt);
                         this.ownerRuntime?.recordImpactReceipt(receipt, this.latestSnapshot);
+                    } else if (message.type === "rope-impact-receipt") {
+                        const receipt = createRopeImpactReceipt(message.payload);
+                        this.ropeImpactReceipts.push(receipt);
+                        if (!receipt.accepted) {
+                            this.locallyPredictedRopeImpactIds.delete(receipt.predictionId);
+                            this.predictedRopeImpactResolutions.delete(receipt.predictionId);
+                        }
                     } else if (message.type === "owner-motion-receipt") {
                         this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
                     } else if (message.type === "debug-teleport-receipt") {
@@ -330,6 +348,26 @@ export class RemoteGameAuthority {
         return this.submitImpactClaim(event, outcome);
     }
 
+    submitPredictedFallImpact(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const state = this.ownerRuntime.impactClaimState();
+        const outcome = {
+            respawned: event.respawned,
+            digest: createPlayerImpactStateDigest(state, {
+                impactType: "fall-damage",
+                respawned: event.respawned
+            })
+        };
+        this.pendingImpactClaims.set(event.impactId, { event, outcome });
+        this.locallyPredictedFallImpactIds.add(event.impactId);
+        this.locallyPredictedFallImpactOrder.push(event.impactId);
+        while (this.locallyPredictedFallImpactOrder.length > MAX_TRACKED_COMMANDS) {
+            this.locallyPredictedFallImpactIds.delete(this.locallyPredictedFallImpactOrder.shift());
+        }
+        return this.submitImpactClaim(event, outcome);
+    }
+
     submitHitClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createProjectileHitClaim({
@@ -363,15 +401,37 @@ export class RemoteGameAuthority {
     submitImpactClaim(event, outcome) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createPlayerImpactClaim({
-            projectileId: event.projectileId,
+            impactId: event.impactId ?? event.projectileId,
             clientTick: event.clientTick,
             impactType: event.resolution,
             position: event.position,
             velocity: event.velocity,
-            damage: event.parameters?.damage ?? 0,
+            damage: event.damage ?? event.parameters?.damage ?? 0,
             outcome
         });
         this.socket.send(JSON.stringify({ type: "impact-claim", payload: serializePlayerImpactClaim(claim) }));
+        return true;
+    }
+
+    submitRopeImpact(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const claim = createRopeImpactClaim({
+            predictionId: event.predictionId,
+            targetId: event.parameters.targetId,
+            clientTick: event.clientTick,
+            position: event.position,
+            velocity: event.velocity
+        });
+        this.locallyPredictedRopeImpactIds.add(event.predictionId);
+        this.predictedRopeImpactResolutions.set(event.predictionId, event.resolution);
+        this.locallyPredictedRopeImpactOrder.push(event.predictionId);
+        while (this.locallyPredictedRopeImpactOrder.length > MAX_TRACKED_COMMANDS) {
+            const expiredPredictionId = this.locallyPredictedRopeImpactOrder.shift();
+            this.locallyPredictedRopeImpactIds.delete(expiredPredictionId);
+            this.predictedRopeImpactResolutions.delete(expiredPredictionId);
+        }
+        this.socket.send(JSON.stringify({ type: "rope-impact", payload: serializeRopeImpactClaim(claim) }));
         return true;
     }
 
@@ -534,11 +594,33 @@ export class RemoteGameAuthority {
     }
 
     drainEvents() {
-        return this.buffer.drainEvents();
+        return Object.freeze(
+            this.buffer.drainEvents().filter((event) => {
+                if (
+                    event.eventType === "player-fall-damaged" &&
+                    event.impactId &&
+                    this.locallyPredictedFallImpactIds.delete(event.impactId)
+                ) {
+                    return false;
+                }
+                const predictionId =
+                    event.parameters?.sourceKind === "rope-impact" ? event.parameters.predictionId : null;
+                if (!predictionId || !this.locallyPredictedRopeImpactIds.delete(predictionId)) return true;
+                const predictedResolution = this.predictedRopeImpactResolutions.get(predictionId);
+                this.predictedRopeImpactResolutions.delete(predictionId);
+                return predictedResolution !== event.resolution;
+            })
+        );
     }
 
     drainPredictedEvents() {
         return this.ownerRuntime?.drainPredictedEvents() ?? Object.freeze([]);
+    }
+
+    drainRopeImpactReceipts() {
+        const receipts = Object.freeze([...this.ropeImpactReceipts]);
+        this.ropeImpactReceipts.length = 0;
+        return receipts;
     }
 
     recordReceipt(receipt) {
