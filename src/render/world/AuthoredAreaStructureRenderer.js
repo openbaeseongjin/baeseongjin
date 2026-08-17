@@ -30,6 +30,10 @@ function renderBounds(area) {
 
 export class AuthoredAreaStructureRenderer {
     draw({ context, scene, viewport, renderStats }) {
+        if (scene.world.landmarks?.length) {
+            renderStats?.recordCollection("areaStructures", 0, 0);
+            return;
+        }
         const areas = (scene.world.areas ?? []).filter(({ bounds }) => bounds);
         if (areas.length === 0) {
             renderStats?.recordCollection("areaStructures", 0, 0);

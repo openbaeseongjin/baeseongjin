@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 6;
+export const WORLD_SNAPSHOT_PROTOCOL_VERSION = 7;
 
 function assertTick(value, label) {
     if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${label} must be a non-negative safe integer`);
@@ -52,6 +52,32 @@ function normalizeState(state) {
     for (const player of normalized.players) {
         assertId(player?.id, "state.players[].id");
         assertTick(player?.ownerMotionTick, "state.players[].ownerMotionTick");
+    }
+    if (normalized.progressKind === "sector") {
+        assertId(normalized.respawnAnchorId, "state.respawnAnchorId");
+        if (Object.hasOwn(normalized, "activeCheckpointId")) {
+            throw new Error("sector progress must not include activeCheckpointId");
+        }
+        const baseline = normalized.partyWipeBaseline;
+        if (!baseline || Array.isArray(baseline) || typeof baseline !== "object") {
+            throw new Error("state.partyWipeBaseline must be an object");
+        }
+        assertId(baseline.sectorId, "state.partyWipeBaseline.sectorId");
+        assertTick(baseline.revision, "state.partyWipeBaseline.revision");
+        assertId(baseline.respawnAnchorId, "state.partyWipeBaseline.respawnAnchorId");
+        assertId(baseline.entryLandmarkId, "state.partyWipeBaseline.entryLandmarkId");
+        if (baseline.respawnAnchorId !== normalized.respawnAnchorId) {
+            throw new Error("state.partyWipeBaseline.respawnAnchorId must match state.respawnAnchorId");
+        }
+        if (baseline.sectorId !== normalized.worldProgress?.currentSectorId) {
+            throw new Error("state.partyWipeBaseline.sectorId must match state.worldProgress.currentSectorId");
+        }
+    } else if (normalized.progressKind === "area") {
+        if (normalized.activeCheckpointId !== null) {
+            assertId(normalized.activeCheckpointId, "state.activeCheckpointId");
+        }
+    } else {
+        throw new Error("state.progressKind must be sector or area");
     }
     return normalized;
 }

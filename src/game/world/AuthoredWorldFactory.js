@@ -3,8 +3,13 @@ import { assembleAuthoredWorld } from "./AuthoredWorldAssembler.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./areas/CurrentAuthoredAreaCatalog.js";
 import { SECTOR_01_AREA_CATALOG } from "./areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "./areas/sector02/Sector02AreaCatalog.js";
+import {
+    createLegacyAreaSeamlessSectorRuntimeWorld,
+    SEAMLESS_SECTOR_RUNTIME_REVISION
+} from "./sectors/LegacyAreaSeamlessSectorRuntime.js";
 
 export const DEFAULT_AUTHORED_AREA_CATALOG = CURRENT_AUTHORED_AREA_CATALOG;
+export const DEFAULT_AUTHORED_WORLD_REVISION = SEAMLESS_SECTOR_RUNTIME_REVISION;
 
 const AUTHORED_CATALOGS_BY_REVISION = new Map([
     [DEFAULT_AUTHORED_AREA_CATALOG.revision, DEFAULT_AUTHORED_AREA_CATALOG],
@@ -14,6 +19,14 @@ const AUTHORED_CATALOGS_BY_REVISION = new Map([
 
 export function authoredCatalogForRevision(revision) {
     return AUTHORED_CATALOGS_BY_REVISION.get(revision) ?? null;
+}
+
+export function authoredWorldFactoryForRevision(revision) {
+    return revision === SEAMLESS_SECTOR_RUNTIME_REVISION ? createLegacyAreaSeamlessSectorRuntimeWorld : null;
+}
+
+export function createSeamlessAuthoredWorld(options = {}) {
+    return createLegacyAreaSeamlessSectorRuntimeWorld(options);
 }
 
 export function createAuthoredWorld({

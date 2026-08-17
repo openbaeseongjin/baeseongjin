@@ -31,11 +31,22 @@ export function buildAuthoritySnapshot({
                 ownerMotionTick: ownerMotionTicks[player.id] ?? simulation.getTick()
             })),
             enemies: simulation.enemyStates(),
-            activeCheckpointId: simulation.activeCheckpoint?.id ?? null,
+            ...(simulation.isSeamlessSectorWorld
+                ? {
+                      progressKind: "sector",
+                      respawnAnchorId: simulation.activeRespawnAnchor?.id ?? null
+                  }
+                : {
+                      progressKind: "area",
+                      activeCheckpointId: simulation.activeCheckpoint?.id ?? null
+                  }),
             foundationRewards: Object.fromEntries(simulation.foundationRewards),
             runState: simulation.runState,
             metrics: simulation.metrics.snapshot(),
             worldProgress: simulation.worldProgress?.snapshot() ?? null,
+            ...(simulation.isSeamlessSectorWorld
+                ? { partyWipeBaseline: simulation.worldProgress.baselineSnapshot() }
+                : {}),
             worldElapsedSeconds: simulation.elapsedSeconds,
             windStates: simulation.snapshot().windStates,
             completed: simulation.runState === "completed"

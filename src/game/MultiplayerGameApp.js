@@ -405,6 +405,8 @@ export class MultiplayerGameApp {
             .map((state) => renderPlayer(state));
         const activeCheckpoint =
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
+        const activeRespawnAnchor =
+            base.world.respawnAnchors?.find(({ id }) => id === remote.state.respawnAnchorId) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
         this.playerPresentationEvents.push(...createPlayerPresentationEvents([base.eventFlash]));
@@ -433,6 +435,7 @@ export class MultiplayerGameApp {
             playerLifeState: remote.predicted.lifeState,
             ropeShot: remote.predicted.launcher,
             activeCheckpoint,
+            activeRespawnAnchor,
             foundationReward: this.localFoundationReward,
             runState: this.localRunCompleted ? "completed" : remote.state.runState,
             maxAttachDistance: ropeHookReach(),

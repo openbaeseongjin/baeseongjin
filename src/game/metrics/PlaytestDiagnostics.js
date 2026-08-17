@@ -17,6 +17,10 @@ export function formatPlaytestDiagnostics({
     renderMetrics = null,
     audioDiagnostics = null
 }) {
+    const currentProgressId = metrics.landmarkTiming?.currentLandmarkId ?? metrics.areaTiming?.currentAreaId ?? null;
+    const currentProgressSeconds =
+        metrics.landmarkTiming?.currentLandmarkSeconds ?? metrics.areaTiming?.currentAreaSeconds ?? null;
+    const progressClearSeconds = metrics.landmarkTiming?.clearSeconds ?? metrics.areaTiming?.clearSeconds ?? {};
     const lines = [
         "[ROPE PLAYTEST DIAGNOSTICS]",
         `capturedAt: ${capturedAt}`,
@@ -31,11 +35,12 @@ export function formatPlaytestDiagnostics({
         `ropeCuts: ${metrics.ropeCuts}`,
         `defeats: ${metrics.defeats}`,
         `firstFoundationSeconds: ${valueOrDash(metrics.firstFoundationSeconds, (value) => value.toFixed(1))}`,
-        `currentArea: ${metrics.areaTiming?.currentAreaId ?? "-"}`,
-        `currentAreaSeconds: ${valueOrDash(metrics.areaTiming?.currentAreaSeconds, (value) => value.toFixed(1))}`,
-        `areaClearSeconds: ${
-            Object.entries(metrics.areaTiming?.clearSeconds ?? {})
-                .map(([areaId, seconds]) => `${areaId}=${seconds.toFixed(1)}`)
+        `progressKind: ${metrics.progressKind ?? "area"}`,
+        `currentProgress: ${currentProgressId ?? "-"}`,
+        `currentProgressSeconds: ${valueOrDash(currentProgressSeconds, (value) => value.toFixed(1))}`,
+        `progressClearSeconds: ${
+            Object.entries(progressClearSeconds)
+                .map(([progressId, seconds]) => `${progressId}=${seconds.toFixed(1)}`)
                 .join(",") || "-"
         }`
     ];

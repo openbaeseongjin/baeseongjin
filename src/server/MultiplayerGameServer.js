@@ -152,7 +152,8 @@ export class MultiplayerGameServer {
             socket.close(1013, "channel full");
             return;
         }
-        const joinPosition = room.simulation.activeCheckpoint ??
+        const joinPosition = room.simulation.activeRespawnAnchor?.position ??
+            room.simulation.activeCheckpoint ??
             room.simulation.world.areas?.[0]?.entry ?? {
                 x: 160,
                 y: 500
@@ -161,7 +162,7 @@ export class MultiplayerGameServer {
             room.sockets.size === 0
                 ? room.simulation.getPrimaryPlayerId()
                 : room.simulation.addPlayer({
-                      x: joinPosition.x + room.sockets.size * 40,
+                      x: joinPosition.x,
                       y: joinPosition.y
                   }).entity.id;
         room.sockets.set(socket, playerId);

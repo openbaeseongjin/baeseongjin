@@ -35,6 +35,11 @@ import { run as interpolateRenderSnapshot } from "./interpolateRenderSnapshot.mj
 import { run as debugSettings } from "./debugSettings.mjs";
 import { run as debugPanel } from "./debugPanel.mjs";
 import { run as traversalDamageFeedback } from "./traversalDamageFeedback.mjs";
+import { run as legacyAreaSeamlessSectorRuntime } from "./legacyAreaSeamlessSectorRuntime.mjs";
+import { run as sectorProgressState } from "./sectorProgressState.mjs";
+import { run as sectorProgressController } from "./sectorProgressController.mjs";
+import { run as seamlessSectorGameSimulation } from "./seamlessSectorGameSimulation.mjs";
+import { run as seamlessSectorMultiplayerWorld } from "./seamlessSectorMultiplayerWorld.mjs";
 import { run as sectorDefinitionValidator } from "./sectorDefinitionValidator.mjs";
 
 const steps = {
@@ -72,6 +77,11 @@ const steps = {
     debugSettings,
     debugPanel,
     traversalDamageFeedback,
+    legacyAreaSeamlessSectorRuntime,
+    sectorProgressState,
+    sectorProgressController,
+    seamlessSectorGameSimulation,
+    seamlessSectorMultiplayerWorld,
     sectorDefinitionValidator,
     spriteAssetValidator,
     stateMachine,

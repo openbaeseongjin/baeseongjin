@@ -37,7 +37,11 @@ export function createDeterminismDigest(state) {
         health: state.playerHealth,
         lifeState: state.playerLifeState,
         runState: state.runState,
-        activeCheckpointId: state.activeCheckpoint?.id ?? null,
+        progressKind: state.worldProgress?.currentSectorId ? "sector" : "area",
+        ...(state.worldProgress?.currentSectorId
+            ? { respawnAnchorId: state.activeRespawnAnchor?.id ?? null }
+            : { activeCheckpointId: state.activeCheckpoint?.id ?? null }),
+        worldProgress: state.worldProgress,
         foundationAugment: state.foundationAugment,
         augmentRuntimeState: Object.freeze({ ...state.augmentRuntimeState }),
         enemies: Object.freeze(

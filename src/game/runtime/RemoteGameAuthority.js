@@ -254,7 +254,9 @@ export class RemoteGameAuthority {
         }
         this.previousSnapshotReceivedAt = receivedAt;
         this.latestSnapshot = snapshot;
-        if (snapshot.state.activeCheckpointId === this.pendingCheckpointId) this.pendingCheckpointId = null;
+        if (snapshot.state.progressKind === "area" && snapshot.state.activeCheckpointId === this.pendingCheckpointId) {
+            this.pendingCheckpointId = null;
+        }
         if (snapshot.state.runState === "completed") this.pendingSummitClaim = false;
         this.snapshotReceivedAt = receivedAt;
         this.buffer.push(snapshot, receivedAt);

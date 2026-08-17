@@ -2,6 +2,7 @@ import { run as playerCommandBatch } from "./playerCommandBatch.mjs";
 import { run as authorityServerSession } from "./authorityServerSession.mjs";
 import { run as ownerPredictionRuntime } from "./ownerPredictionRuntime.mjs";
 import { run as multiplayerGameServer } from "./multiplayerGameServer.mjs";
+import { run as seamlessSectorMultiplayerServer } from "./seamlessSectorMultiplayerServer.mjs";
 import { run as remoteGameAuthority } from "./remoteGameAuthority.mjs";
 import { run as predictableProjectileStore } from "./predictableProjectileStore.mjs";
 import { run as multiplayerServerEndpoint } from "./multiplayerServerEndpoint.mjs";
@@ -33,6 +34,7 @@ const steps = {
     authorityServerSession,
     ownerPredictionRuntime,
     multiplayerGameServer,
+    seamlessSectorMultiplayerServer,
     remoteGameAuthority,
     predictableProjectileStore,
     multiplayerServerEndpoint,

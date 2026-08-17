@@ -8,7 +8,11 @@ const statusPath = "docs/scenario-development-integration.md";
 const scenarioRoot = "docs/bsh/scenario";
 const authoredAreaRoot = "src/game/world/areas";
 const authoredSectorRoot = "src/game/world/sectors";
-const authoredSectorSupportFiles = ["src/game/world/SectorDefinitionValidator.js"];
+const authoredSectorSupportFiles = [
+    "src/game/world/SectorDefinitionValidator.js",
+    "src/game/world/SectorProgressController.js",
+    "src/game/world/SectorProgressState.js"
+];
 
 function normalizePath(path) {
     return path.split(sep).join("/");

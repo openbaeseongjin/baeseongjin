@@ -24,7 +24,23 @@ export class PixelTerrainRenderer {
             this.drawSurface(context, entry, material, palette, viewport, authoredArea?.sectorId);
         }
         renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
-        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
+        const savepoints = scene.world.checkpoints?.length
+            ? scene.world.checkpoints
+            : (scene.world.respawnAnchors ?? []).map((anchor, level) => ({
+                  id: anchor.id,
+                  x: anchor.position.x,
+                  y: anchor.position.y,
+                  level
+              }));
+        const activeSavepoint =
+            scene.activeCheckpoint ??
+            (scene.activeRespawnAnchor
+                ? {
+                      id: scene.activeRespawnAnchor.id,
+                      level: scene.world.respawnAnchors?.findIndex(({ id }) => id === scene.activeRespawnAnchor.id) ?? 0
+                  }
+                : null);
+        this.drawCheckpoints(context, savepoints, activeSavepoint, viewport, renderStats);
         this.drawSummit(context, scene.world.summit, scene.runState, viewport);
     }
 

@@ -134,7 +134,7 @@ export class OwnerPredictionRuntime {
     prepareSnapshot(snapshot, fallbackProgress = null) {
         if (!snapshot) {
             const progress = fallbackProgress ?? this.simulation.predictionProgressState(this.ownerId);
-            this.simulation.preparePrediction([], progress.activeCheckpointId);
+            this.simulation.preparePrediction([], progress.activeCheckpointId, progress.respawnAnchorId);
             this.simulation.synchronizePredictionProgress(this.ownerId, progress);
             return;
         }
@@ -146,9 +146,14 @@ export class OwnerPredictionRuntime {
             ? this.simulation.predictionProgressState(this.ownerId)
             : {
                   activeCheckpointId: snapshot.state.activeCheckpointId,
+                  respawnAnchorId: snapshot.state.respawnAnchorId,
                   foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null
               };
-        this.simulation.preparePrediction(snapshot.state.enemies ?? [], progress.activeCheckpointId);
+        this.simulation.preparePrediction(
+            snapshot.state.enemies ?? [],
+            progress.activeCheckpointId,
+            progress.respawnAnchorId
+        );
         if (this.simulation.worldProgress && snapshot.state.worldProgress) {
             this.simulation.restoreWorldProgress(
                 snapshot.state.worldProgress,

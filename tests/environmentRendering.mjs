@@ -12,6 +12,7 @@ import { PixelBackdropRenderer } from "../src/render/environment/renderers/Pixel
 import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelTerrainRenderer.js";
 import { RenderFrameStats } from "../src/render/RenderPerformanceMetrics.js";
 import { createRenderViewport } from "../src/render/RenderViewport.js";
+import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 
@@ -167,6 +168,19 @@ export function run() {
         "industrial-maintenance",
         "falling to the previous sector restores that sector's background theme"
     );
+    const seamlessWorld = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 560 });
+    const sector02Landmark = seamlessWorld.landmarks.find(({ id }) => id === "sector-02:landmark:01");
+    const seamlessScene = {
+        ...currentScene,
+        player: { position: sector02Landmark.entry },
+        world: seamlessWorld,
+        worldProgress: {
+            currentSectorId: "sector-02",
+            currentLandmarkId: sector02Landmark.id
+        }
+    };
+    assert.equal(currentAuthoredArea(seamlessScene)?.id, sector02Landmark.id);
+    assert.equal(sceneEnvironmentZone(definition, seamlessScene).id, "residential-commercial");
     const fallenBackdropContext = recordingContext();
     new PixelBackdropRenderer({ definition, assets }).draw({
         context: fallenBackdropContext,
