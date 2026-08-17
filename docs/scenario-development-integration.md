@@ -5,10 +5,10 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 26d782a6c2ea4cc20be6f8a8d6c7f3a8272b7306bfa6d3398808f5793a897875
 authored-area-sha256: 98375f3037b7920e4822e39bba03b8f1d67466c2e146bf56e7d1b82f41cd0202
-authored-sector-sha256: 1bea3c28d75c62ec296ea7fd6024b7e91caf3cafe2e69b3b91fba9e757518e70
+authored-sector-sha256: f520ecad0254d34f220dfe18223dd72ed60c55dcd318ec52fb5004512b9a57c1
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 862a71b14b01d0927e509fca3ffcc138f5034a4f
+reviewed-upstream: cf27af49a43cd86753ca37e7a029e9fcd60be635
 -->
 
 ## 상태를 읽는 법
@@ -101,6 +101,7 @@ reviewed-upstream: 862a71b14b01d0927e509fca3ffcc138f5034a4f
 48. PR #613은 Sector 03 Master를 REV 2.0 `CENTRAL EXCHANGE COMPLEX`로 재작성해 공간 정체·Stage 명칭·Scanner 세계관 의미와 Story Arc를 갱신했다. PR 범위와 현재 Runtime을 재대조한 결과 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 변경되지 않아 3-1~3-8의 `MOCK INTEGRATED` 판정은 유지한다. 새 Master 명칭과 구 `3-N` Stage 문서·Runtime `name/subtitle/cue` 사이의 불일치는 문서가 명시한 후속 마이그레이션 blocker로 남기며 구현 완료로 올리지 않는다.
 49. #618은 Sector 01 `1-1`~`1-8`에 공용 `far/mid/near` 산업 정비 배경 package를 연결하고, 기존 지형·오브젝트 좌표를 유지한 채 Gameplay surface, 로프 앵커, 좌우 경계벽과 층간 bulkhead, Gate·Gate Panel, Checkpoint와 `wind-source`의 외형을 정렬한다. 1-1 P0만 사용자 최종 결정에 따라 Stage Local `X=-448~448`의 `896×32` one-way Collision으로 확장하고 같은 폭의 `terrain:ground-foundation` 기초를 아래로 이어 최하층 전체를 실제 바닥으로 읽히게 한다. Sector 이동 뒤 배경 선택 문제는 이 작업에 포함하지 않으며 최신 upstream #616의 플레이어 Y 기반 선택 계약을 그대로 사용한다.
 50. #622는 연속 Sector Runtime cutover에 앞서 canonical authoring 계약을 추가했다. `SectorDefinition`은 3,840~4,800px 폭, Sector entry, landmark, objective와 `encounterId/slotId/position/activation` encounter container를 소유하고 `areaId`를 encounter 권위에서 거부한다. `enemySelection`은 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나를 요구하며 build/startup-only preview adapter는 현재 Sector 01~03 Area catalog의 위치·activation·고정 적 선택을 보존해 4,800px preview metadata로 가져온다. `1-1`~`6-8` 48개 alias는 중복·누락 없이 제공하고 Sector 04~06 alias는 migration input일 뿐 Runtime 구현 완료가 아니다. 기본 `CURRENT_AUTHORED_AREA_CATALOG`, `AuthoredWorldAssembler`, `GameSimulation`, Gate portal과 per-Area Checkpoint는 변경하지 않았으므로 위 표의 Runtime 상태도 그대로다. 다음 경계는 이 계약의 merge SHA 위에서 enemy Phase 6을 rebase하고, 별도 Phase 3에서 실제 wide blockout·progress·respawn cutover를 수행하는 것이다.
+51. Enemy Phase 6은 #623 merge SHA `cf27af4` 위에서 canonical encounter authoring을 selector에 연결했다. `resolveSectorEnemyEncounters()`와 build/startup-only preview adapter가 `enemySelection`이 있는 slot만 `slotId + run seed + world revision`으로 결정하며 `encounterId/slotId/position/activation/legacyStageAlias`를 보존하고 `areaId`를 거부한다. Sector 01~03 preview encounter 전체가 같은 입력에서 같은 선택을 재현하며 현재 legacy Area/Gate Runtime은 변경하지 않았다. Preview encounter에는 legacy Patrol route와 Cutter `rules`가 아직 없으므로 이를 추정해 shipped spawn으로 전환하지 않으며, City Phase 3 wide Runtime cutover가 canonical encounter를 실제 world spawn에 공급할 때 새 schema로 보존하는 것이 남은 blocker다.
 
 ## 열린 기획·구현 게이트
 

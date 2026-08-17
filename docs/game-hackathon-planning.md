@@ -47,7 +47,7 @@
 12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Foundation 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
 13. 발견된 문제 영역은 현재 시나리오의 관련 회귀 테스트에 이유와 함께 추가해 같은 영역·진행 계약에서 우선 재현한다.
 14. 원격 플레이테스트는 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켜고 현재 런 지표를 확인한다.
-15. 현재 0.23.0 Runtime은 체력이 0이 되거나 낙사하면 동료 입력이나 팀 전멸을 기다리지 않고 해당 플레이어만 활성 체크포인트에서 최대 체력으로 즉시 부활시킨다. 높은 속도의 착지 피해로 체력이 0이 된 경우도 이 기존 개인 부활 경로를 사용한다.
+15. 현재 0.24.0 Runtime은 체력이 0이 되거나 낙사하면 동료 입력이나 팀 전멸을 기다리지 않고 해당 플레이어만 활성 체크포인트에서 최대 체력으로 즉시 부활시킨다. 높은 속도의 착지 피해로 체력이 0이 된 경우도 이 기존 개인 부활 경로를 사용한다.
 18. 네트워크 연결 전 불변 PlayerCommand 기록을 재생해 위치·전투·진행·지표 결정성을 비교한다.
 19. 다중 플레이어 명령은 프로토콜 버전과 틱을 가진 배치로 묶고 플레이어 ID 순으로 정규화한다.
 20. 모든 플레이어는 같은 PlayerRuntimeFactory에서 물리·로프·전투·생명 상태를 조립한다.
@@ -107,13 +107,13 @@
 
 전문 작업물의 완료는 메인 개발, 플레이테스트, 최종 스퍼트와 예선 제출의 선행 조건이 아니다. 정해진 통합 마감까지 validator와 실제 화면·청취 검증을 통과한 결과만 제출 빌드에 반영하고, 준비되지 않았거나 통합 위험이 큰 영역은 검증된 mock을 유지한다. 다만 공개 manifest·loader·이벤트 binding처럼 전문 작업과 메인 개발이 함께 사용하는 계약 변경은 양쪽 작업 전에 먼저 합의한다.
 
-제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 플레이어-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관할 migration alias**다. 목표 Runtime에서 각 Sector는 강제 Gate 포탈과 층별 전환 없이 가로 3,840~4,800px의 하나의 물리 공간이며, 기존 순서와 일부 분기·재합류를 landmark 진행으로 보존한다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. 현재 0.23.0의 24개 Area/Gate Runtime은 migration source로 유지하며 Phase 3 cutover 전까지 구현 완료 상태를 과장하지 않는다.
+제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 플레이어-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관할 migration alias**다. 목표 Runtime에서 각 Sector는 강제 Gate 포탈과 층별 전환 없이 가로 3,840~4,800px의 하나의 물리 공간이며, 기존 순서와 일부 분기·재합류를 landmark 진행으로 보존한다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. 현재 0.24.0의 24개 Area/Gate Runtime은 migration source로 유지하며 Phase 3 cutover 전까지 구현 완료 상태를 과장하지 않는다.
 
 ### 월드와 진행 영역 기준
 
 - #622의 Phase 1~2는 `SectorDefinition`, Sector validator와 build/startup-only legacy preview adapter를 canonical authoring 경계로 둔다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`이고 `legacyStageAlias`는 문서·migration metadata일 뿐이다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
 - preview adapter는 Sector 01~03만 가져오고 Sector 04~06은 alias input으로만 남긴다. 기본 Runtime catalog·진행·부활은 바꾸지 않으며 실제 연속 공간 전환은 후속 Phase 3 계약이다.
-- 아래의 Area·Gate·보스 전환 규칙은 Phase 3 전까지 유지하는 현재 0.23.0 Runtime과 migration source 설명이다. 새 Sector target의 최종 진행 규칙으로 승격하거나 first-Gate Timer mapping을 자동 확정하지 않는다.
+- 아래의 Area·Gate·보스 전환 규칙은 Phase 3 전까지 유지하는 현재 0.24.0 Runtime과 migration source 설명이다. 새 Sector target의 최종 진행 규칙으로 승격하거나 first-Gate Timer mapping을 자동 확정하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.
 - 각 진행 영역은 입구, 이동 경로, 필수 완료 조건, 명시적 출구와 다음 영역 연결을 가진다.
 - 출구가 필요한 이유는 붕괴 도시 탈출의 압박 속에서 현재 영역의 문제를 해결하고 다음 영역으로 넘어갔음을 플레이어에게 명확히 알리기 위해서다.
@@ -227,6 +227,14 @@
 - [ ] 8개 진행 영역과 섹터 보스의 위치 관계
 - [x] Foundation Augment 3종의 효과 (1-4 Maintenance Node)
 - [x] 적 1종의 행동과 공격 방식: 플레이어를 향한 투사체, 로프 절단 우선 판정, 본체 피해·넉백
+- [x] 적 roster 기본형: 기존 `경계 포탑`·`순찰 드론`, 경계 포탑 확장형 `절단 포탑`, 신규 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`
+- [x] 적 분류·구현 순서: 행동 요소별 대표 기본형 하나를 먼저 단독 안정화하고 같은 계열 확장형과 복합 조합은 그 뒤에 추가
+- [x] encounter 선택: topology 독립 stable slot이 `고정 계열/type` 또는 `허용 pool`을 소유하며 pool은 slotId·run seed·world revision으로 결정 선택
+- [x] 향후 고정 저작: 맵 제작자가 slot 선택 선언 하나만 pool에서 고정 값으로 바꾸고 위치·activation·Stable ID·AI는 재사용
+- [x] 코드 구현: pure selector·다섯 enemy capability·서버 fixed step·snapshot 복원·중립 포격 투사체·방패 Rope 충돌 방어 완료
+- [x] #623 canonical `SectorDefinition`·encounter validator·build/startup-only preview adapter를 enemy selector에 연결하고 preview corpus 전체에서 areaId 없는 결정 선택 검증
+- [ ] City Phase 3 wide Runtime cutover 뒤 canonical encounter를 shipped world enemy spawn으로 사용하고 legacy Patrol route·Cutter variant authoring을 새 schema에 보존
+- [x] 검증 정책: 안정적인 코드 계약만 자동화하고 roster 목록·가중치·수치·배치·색은 고정하지 않으며 브라우저 검증 제외
 - [x] Foundation 선택 중에도 월드 시간과 협동 위험은 계속 흐르고 선택 입력만 플레이어 조작과 분리
 
 ## 13. 아직 열려 있는 질문
