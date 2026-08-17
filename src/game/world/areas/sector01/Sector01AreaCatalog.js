@@ -51,7 +51,9 @@ const area01 = defineArea({
     exit: block01.exit,
     nextAreaId: "sector-01-02",
     surfaces: [
-        horizontalSurface("sector-01-01:p0", -288, 0, 256),
+        horizontalSurface("sector-01-01:p0", 0, 0, 896, 32, {
+            presentationId: "terrain:ground-foundation"
+        }),
         horizontalSurface("sector-01-01:r1", -176, -224, 160, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-01:p1", 160, -288, 192, 16),
         horizontalSurface("sector-01-01:r2", -192, -480, 192, 16, { kind: "recovery" }),

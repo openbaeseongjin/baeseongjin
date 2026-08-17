@@ -695,13 +695,20 @@ export async function run() {
                 objects: [
                     {
                         id: "sector-01-01:anchor-a",
+                        areaId: "sector-01-01",
                         kind: "grapple-landmark",
                         presentationId: "world-object:grapple-landmark",
                         position: { x: 40, y: 60 },
                         label: "A"
                     }
                 ],
-                areas: [{ recoveryPoints: [{ x: 80, y: 100 }] }]
+                areas: [
+                    {
+                        id: "sector-01-01",
+                        sectorId: "sector-01",
+                        recoveryPoints: [{ x: 80, y: 100 }]
+                    }
+                ]
             }
         }
     });
@@ -711,13 +718,84 @@ export async function run() {
     );
     assert.equal(
         authoredObjectContext.calls.some(([name]) => name === "arc"),
-        false,
-        "grapple and recovery points are not exposed as circular debug markers"
+        true,
+        "Sector 01 grapple landmarks use a recessed circular coupling socket inside a mechanical housing"
+    );
+    assert.ok(
+        authoredObjectContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(5, 12, 20, 0.98)"
+        ),
+        "Sector 01 grapple landmarks use the dark industrial-maintenance housing"
+    );
+    assert.ok(
+        authoredObjectContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "strokeStyle" && value === "rgba(103, 232, 249, 0.78)"
+        ),
+        "Sector 01 grapple landmarks reserve strong cyan for the actual coupling socket"
     );
     assert.deepEqual(
         authoredObjectContext.calls.find(([name]) => name === "fillText")?.slice(1),
         ["A", 0, -25],
         "route landmark labels sit outside the grapple fixture instead of inside a circle"
+    );
+
+    const sharedWindSource = {
+        id: "sector-01-06:fan-a",
+        areaId: "sector-01-06",
+        kind: "wind-source",
+        presentationId: "world-object:wind-source",
+        position: { x: 416, y: -480 },
+        windZoneId: "sector-01-06:fan-a-wind"
+    };
+    const sharedWindZone = {
+        id: sharedWindSource.windZoneId,
+        bounds: { x: -320, y: -640, width: 672, height: 320 },
+        direction: { x: -1, y: 0 },
+        mode: "continuous",
+        strength: 500
+    };
+    const windSourceContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: windSourceContext,
+        scene: {
+            tick: 120,
+            windStates: [{ id: sharedWindZone.id, phase: "active", multiplier: 1, phaseTime: 0 }],
+            world: {
+                objects: [sharedWindSource],
+                areas: [{ id: "sector-01-06", sectorId: "sector-01" }],
+                windZones: [sharedWindZone]
+            }
+        }
+    });
+    assert.ok(
+        windSourceContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(5, 12, 20, 0.98)"
+        ),
+        "shared wind sources use the Sector 01 dark armored maintenance housing"
+    );
+    assert.ok(
+        windSourceContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "strokeStyle" && value === "#526f84"
+        ),
+        "shared wind sources use a reinforced blue-gray steel frame"
+    );
+    assert.ok(
+        windSourceContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(245, 158, 11, 0.72)"
+        ),
+        "shared wind sources keep orange limited to small maintenance fasteners"
+    );
+    assert.ok(
+        windSourceContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(103, 232, 249, 0.9)"
+        ),
+        "an active wind source reserves cyan for its pressure core"
+    );
+    assert.ok(
+        windSourceContext.calls.filter(
+            ([name, , , width, height]) => name === "fillRect" && width === 4 && height === 4
+        ).length >= 4,
+        "the armored vent exposes four corner service fasteners instead of a bright circular debug rim"
     );
 
     const foundationRoomContext = recordingContext();
@@ -804,6 +882,41 @@ export async function run() {
                 name === "fillRect" && x === 436 && y === -960 && width === 44 && height === 960
         ),
         "authored areas render a matching right wall instead of one screen-space shaft"
+    );
+    assert.ok(
+        areaStructureContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(6, 15, 25, 0.96)"
+        ),
+        "Sector 01 boundary walls use repeated dark armor-panel bays"
+    );
+    assert.ok(
+        areaStructureContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(103, 232, 249, 0.32)"
+        ),
+        "Sector 01 boundary walls reserve low-intensity cyan for sparse service slots"
+    );
+    assert.ok(
+        areaStructureContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(245, 158, 11, 0.62)"
+        ),
+        "Sector 01 boundary walls carry sparse orange maintenance fasteners"
+    );
+    assert.ok(
+        areaStructureContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(22, 39, 53, 0.98)"
+        ),
+        "Sector 01 floor boundaries use paired load-bearing steel beams"
+    );
+    assert.ok(
+        areaStructureContext.calls.filter(([name, key, value]) => name === "set" && key === "lineWidth" && value === 3)
+            .length >= 2,
+        "Sector 01 floor boundaries repeat heavy diagonal reinforcement across the sealed divider"
+    );
+    assert.ok(
+        areaStructureContext.calls.filter(
+            ([name, , , width, height]) => name === "fillRect" && width === 10 && height === 46
+        ).length >= 2,
+        "Sector 01 sealed bulkheads terminate in paired load posts"
     );
     assert.ok(
         areaStructureContext.calls.some(([name, label]) => name === "fillText" && label === "01 · SERVICE SHAFT"),
@@ -952,6 +1065,108 @@ export async function run() {
             ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#67e8f9"
         ),
         "an opened Gate panel matches the Gate's open-state color"
+    );
+
+    const sector01Area = { id: "sector-01-02", sectorId: "sector-01" };
+    const sector01Gate = {
+        id: "sector-01-02:security-access-gate",
+        areaId: sector01Area.id,
+        kind: "gate",
+        gateId: "sector-01-02:gate",
+        presentationId: "world-object:gate",
+        position: { x: 320, y: -1024 },
+        coordinateAnchor: "bottom-center"
+    };
+    const sector01LockedGateContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: sector01LockedGateContext,
+        scene: {
+            worldProgress: { completedObjectiveIds: [], unlockedGateIds: [] },
+            world: { objects: [sector01Gate], areas: [sector01Area] }
+        }
+    });
+    assert.ok(
+        sector01LockedGateContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#101c28"
+        ),
+        "a locked Sector 01 Gate uses the recessed industrial shutter body"
+    );
+    assert.ok(
+        sector01LockedGateContext.calls.some(
+            ([name, , , width, height]) => name === "strokeRect" && width === 10 && height === 14
+        ),
+        "a locked Sector 01 Gate has a distinct central maintenance lock"
+    );
+    const sector01OpenedGateContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: sector01OpenedGateContext,
+        scene: {
+            worldProgress: { completedObjectiveIds: [], unlockedGateIds: [sector01Gate.gateId] },
+            world: { objects: [sector01Gate], areas: [sector01Area] }
+        }
+    });
+    assert.equal(
+        sector01OpenedGateContext.calls.some(
+            ([name, , , width, height]) => name === "fillRect" && width === 34 && height === 48
+        ),
+        false,
+        "an opened Sector 01 Gate removes the central shutter body"
+    );
+    assert.ok(
+        sector01OpenedGateContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(103, 232, 249, 0.18)"
+        ),
+        "an opened Sector 01 Gate keeps only restrained passage lights"
+    );
+
+    const sector01GatePanel = { ...gatePanel, areaId: sector01Area.id };
+    const drawSector01GatePanel = (worldProgress) => {
+        const context = recordingContext();
+        new AuthoredWorldObjectRenderer().draw({
+            context,
+            scene: {
+                worldProgress,
+                world: { objects: [sector01GatePanel], areas: [sector01Area] }
+            }
+        });
+        return context;
+    };
+    const sector01BlockedPanelContext = drawSector01GatePanel({ completedObjectiveIds: [], unlockedGateIds: [] });
+    assert.ok(
+        sector01BlockedPanelContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#c65f43"
+        ),
+        "a blocked Sector 01 Gate panel uses the muted lock indicator"
+    );
+    assert.ok(
+        sector01BlockedPanelContext.calls.filter(
+            ([name, , , width, height]) => name === "fillRect" && width === 16 && height === 2
+        ).length >= 3,
+        "a blocked Sector 01 Gate panel closes its face with protective slats"
+    );
+    const sector01ReadyPanelContext = drawSector01GatePanel({
+        completedObjectiveIds: ["sector-01-02:final-deck-reached"],
+        unlockedGateIds: []
+    });
+    assert.ok(
+        sector01ReadyPanelContext.calls.some(
+            ([name, , , width, height]) => name === "fillRect" && width === 12 && height === 3
+        ),
+        "a ready Sector 01 Gate panel exposes a cross-shaped maintenance handle"
+    );
+    const sector01OpenedPanelContext = drawSector01GatePanel({
+        completedObjectiveIds: ["sector-01-02:final-deck-reached", "sector-01-02:exit-panel-engaged"],
+        unlockedGateIds: ["sector-01-02:gate"]
+    });
+    assert.ok(
+        sector01OpenedPanelContext.calls.filter(
+            ([name, , , width, height]) => name === "fillRect" && width === 4 && height === 9
+        ).length >= 2,
+        "an opened Sector 01 Gate panel separates its cyan status window into two columns"
+    );
+    assert.ok(
+        rectangleSpan(sector01OpenedPanelContext, "y") < 48,
+        "the Sector 01 Gate panel remains smaller than the player in every state"
     );
 
     const manifest = {

@@ -1,0 +1,201 @@
+{
+  "$schema": "../sprite-manifest.schema.json",
+  "formatVersion": 1,
+  "id": "environment-sector-01-maintenance",
+  "generator": {
+    "tool": "openai-imagegen-and-normalization",
+    "exportVersion": "2026-08-17",
+    "sourceExport": "assets/artwork/environments/sector-01-maintenance-vertical-backdrop/export/layers-v2"
+  },
+  "atlases": {
+    "sector-01-maintenance-backdrop-far": {
+      "image": "backdrop-far.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-01-maintenance-backdrop-mid": {
+      "image": "backdrop-mid.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-01-maintenance-backdrop-near": {
+      "image": "backdrop-near.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-01-maintenance-terrain-fill": {
+      "image": "terrain-fill.png",
+      "size": { "width": 48, "height": 48 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "sector-01-maintenance-terrain-edge": {
+      "image": "terrain-edge.png",
+      "size": { "width": 48, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "sector-01-maintenance-decoration": {
+      "image": "decoration.png",
+      "size": { "width": 96, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    }
+  },
+  "zones": [
+    {
+      "id": "waste",
+      "label": "Sector 01 하부 정비 격리구역",
+      "minAltitude": 0,
+      "palette": {
+        "skyTop": "#0a1422",
+        "skyBottom": "#050912",
+        "silhouetteFar": "#11243a",
+        "silhouetteMid": "#182c42",
+        "silhouetteNear": "#07111d",
+        "terrainFill": "#152333",
+        "terrainEdge": "#49667c",
+        "oneWayEdge": "#67e8f9",
+        "accent": "#f59e0b"
+      },
+      "backdropVariant": "sector-01-lower",
+      "terrainMaterial": "sector-01-metal",
+      "decorationGroup": "sector-01-industrial"
+    },
+    {
+      "id": "industrial-maintenance",
+      "label": "Sector 01 산업 정비구역",
+      "minAltitude": 1800,
+      "palette": {
+        "skyTop": "#0b1728",
+        "skyBottom": "#060b14",
+        "silhouetteFar": "#132944",
+        "silhouetteMid": "#1b334c",
+        "silhouetteNear": "#08131f",
+        "terrainFill": "#172738",
+        "terrainEdge": "#526f84",
+        "oneWayEdge": "#67e8f9",
+        "accent": "#f59e0b"
+      },
+      "backdropVariant": "sector-01-industrial",
+      "terrainMaterial": "sector-01-metal",
+      "decorationGroup": "sector-01-industrial"
+    },
+    {
+      "id": "residential-commercial",
+      "label": "Sector 01 상부 정비구역",
+      "minAltitude": 3600,
+      "palette": {
+        "skyTop": "#0c1a2c",
+        "skyBottom": "#07101b",
+        "silhouetteFar": "#17304b",
+        "silhouetteMid": "#203a53",
+        "silhouetteNear": "#0a1623",
+        "terrainFill": "#192a3b",
+        "terrainEdge": "#58768b",
+        "oneWayEdge": "#67e8f9",
+        "accent": "#f59e0b"
+      },
+      "backdropVariant": "sector-01-upper",
+      "terrainMaterial": "sector-01-metal",
+      "decorationGroup": "sector-01-industrial"
+    },
+    {
+      "id": "corporate-security",
+      "label": "Sector 01 보안 정비구역",
+      "minAltitude": 5400,
+      "palette": {
+        "skyTop": "#0d1d30",
+        "skyBottom": "#07111d",
+        "silhouetteFar": "#19334f",
+        "silhouetteMid": "#223e58",
+        "silhouetteNear": "#0b1826",
+        "terrainFill": "#1b2d3f",
+        "terrainEdge": "#5f7e92",
+        "oneWayEdge": "#67e8f9",
+        "accent": "#f59e0b"
+      },
+      "backdropVariant": "sector-01-security",
+      "terrainMaterial": "sector-01-metal",
+      "decorationGroup": "sector-01-industrial"
+    },
+    {
+      "id": "landing-pad",
+      "label": "Sector 01 봉쇄 전환구역",
+      "minAltitude": 7200,
+      "palette": {
+        "skyTop": "#102136",
+        "skyBottom": "#08131f",
+        "silhouetteFar": "#1b3652",
+        "silhouetteMid": "#26435d",
+        "silhouetteNear": "#0c1a29",
+        "terrainFill": "#1d3042",
+        "terrainEdge": "#66869a",
+        "oneWayEdge": "#67e8f9",
+        "accent": "#fb923c"
+      },
+      "backdropVariant": "sector-01-containment",
+      "terrainMaterial": "sector-01-metal",
+      "decorationGroup": "sector-01-industrial"
+    }
+  ],
+  "backdrop": {
+    "layers": [
+      {
+        "id": "far",
+        "depth": 0,
+        "parallaxX": 0.02,
+        "parallaxY": 0.035,
+        "frames": [
+          { "atlas": "sector-01-maintenance-backdrop-far", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      },
+      {
+        "id": "mid",
+        "depth": 1,
+        "parallaxX": 0.05,
+        "parallaxY": 0.07,
+        "frames": [
+          { "atlas": "sector-01-maintenance-backdrop-mid", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      },
+      {
+        "id": "near",
+        "depth": 2,
+        "parallaxX": 0.09,
+        "parallaxY": 0.12,
+        "frames": [
+          { "atlas": "sector-01-maintenance-backdrop-near", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      }
+    ]
+  },
+  "terrain": {
+    "materials": {
+      "sector-01-metal": {
+        "fill": { "atlas": "sector-01-maintenance-terrain-fill", "cell": { "column": 0, "row": 1 } },
+        "edge": { "atlas": "sector-01-maintenance-terrain-edge", "cell": { "column": 1, "row": 0 } },
+        "oneWayColor": "#67e8f9"
+      }
+    }
+  },
+  "decoration": {
+    "groups": {
+      "sector-01-industrial": {
+        "items": [
+          {
+            "frame": { "atlas": "sector-01-maintenance-decoration", "cell": { "column": 2, "row": 0 } },
+            "placement": { "depth": "near", "surfaceLevelOffset": -2, "avoidPlayPath": true },
+            "size": { "width": 10, "height": 18 }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -8,8 +8,10 @@ import { PixelBackdropRenderer } from "./renderers/PixelBackdropRenderer.js";
 import { PixelTerrainRenderer } from "./renderers/PixelTerrainRenderer.js";
 import { PixelDecorationRenderer } from "./renderers/PixelDecorationRenderer.js";
 
-function backdropAtlasIds(definition) {
-    return definition.backdrop.layers.flatMap(({ frames }) => frames.map(({ atlasId }) => atlasId));
+function backdropAtlasIds(definition, authoredAreaEnvironmentDefinitions) {
+    return [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].flatMap(({ backdrop }) =>
+        backdrop.layers.flatMap(({ frames }) => frames.map(({ atlasId }) => atlasId))
+    );
 }
 
 function terrainAtlasIds(definition) {
@@ -21,12 +23,19 @@ function decorationAtlasIds(definition) {
 }
 
 export class EnvironmentRendererComposer {
-    constructor({ definition, assets, polygonBackdrop, polygonTerrain, warn = console.warn } = {}) {
+    constructor({
+        definition,
+        assets,
+        authoredAreaEnvironmentDefinitions = Object.freeze({}),
+        polygonBackdrop,
+        polygonTerrain,
+        warn = console.warn
+    } = {}) {
         const backdrop = new EnvironmentComponentRenderer({
             id: "backdrop",
-            atlasIds: backdropAtlasIds(definition),
+            atlasIds: backdropAtlasIds(definition, authoredAreaEnvironmentDefinitions),
             assets,
-            renderer: new PixelBackdropRenderer({ definition, assets }),
+            renderer: new PixelBackdropRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
             fallbackRenderer: polygonBackdrop ?? new EmptyEnvironmentRenderer(),
             warn
         });

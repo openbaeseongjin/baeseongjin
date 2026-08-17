@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-17 — 1-1 P0는 256px 충돌을 유지하고 시각 기초만 아래로 잇는다
+
+- 맥락: 새 Sector 01 깊이 배경 적용 뒤 1-1의 얇은 P0가 공중에 떠 보였지만 기존 승인 Blockout의 Collision을 먼저 보존하려 했다.
+- 결정: P0의 `256×32` one-way Collision은 유지하고 같은 폭의 `terrain:ground-foundation` 시각 기초만 640px 아래로 이어 그린다.
+- 영향: 발판 바로 아래는 지지됐지만 좌우 바닥이 비어 있어 최하층 전체가 하나의 꽉 찬 바닥으로 읽히지 않았다.
+- 대체: 사용자의 최신 요청에 따라 P0 Collision과 기초 표현을 모두 좌우 authored 경계벽 사이 `X=-448~448`, 폭 896px로 확장한다. Spawn·Anchor·상부 발판·Recovery 위치는 유지한다.
+- 검증 상태: `areaDefinitionValidator`, `authoredWorldAssembler`, `environmentRendering`과 데스크톱·모바일 C01 실제 화면으로 대체 계약을 확인한다.
+
 ## [L1] 2026-08-17 — 기본 자동 사격을 전투 보조 수단으로 사용한다
 
 - 맥락: 초기 전투 프로토타입은 플레이어가 이동만 해도 사거리 안의 최근접 적에게 자동으로 탄환을 발사했다.

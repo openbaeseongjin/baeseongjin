@@ -20,6 +20,7 @@ import { DebugSettings } from "./game/metrics/DebugSettings.js";
 import { DebugPanel } from "./game/ui/DebugPanel.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
+import { loadAuthoredAreaEnvironmentDefinitions } from "./render/environment/AuthoredAreaEnvironmentCatalog.js";
 
 const canvas = document.getElementById("game-canvas");
 if (!canvas) {
@@ -27,6 +28,7 @@ if (!canvas) {
 }
 const rendererProfile = resolveRendererProfile(globalThis.location.search);
 let playerDefinition = null;
+let authoredAreaEnvironmentDefinitions = Object.freeze({});
 
 let app = null;
 let launching = false;
@@ -173,7 +175,7 @@ async function launch() {
                     renderer: createGameRenderer({
                         canvas,
                         profile: rendererProfile,
-                        sceneRendererOptions: { playerDefinition }
+                        sceneRendererOptions: { playerDefinition, authoredAreaEnvironmentDefinitions }
                     }),
                     audioBindings,
                     onDiagnostics: updateDiagnostics,
@@ -192,7 +194,7 @@ async function launch() {
                     renderer: createGameRenderer({
                         canvas,
                         profile: rendererProfile,
-                        sceneRendererOptions: { playerDefinition }
+                        sceneRendererOptions: { playerDefinition, authoredAreaEnvironmentDefinitions }
                     }),
                     authority,
                     audioBindings,
@@ -230,7 +232,10 @@ async function bootstrap() {
     startupLoadingScreen.show();
     await serviceWorkerUpdater.ready;
     if (pageClosing) return;
-    playerDefinition = await loadDefaultPlayerSpriteDefinition();
+    [playerDefinition, authoredAreaEnvironmentDefinitions] = await Promise.all([
+        loadDefaultPlayerSpriteDefinition(),
+        loadAuthoredAreaEnvironmentDefinitions()
+    ]);
     if (pageClosing) return;
     startupLoadingScreen.hide();
     launch();
