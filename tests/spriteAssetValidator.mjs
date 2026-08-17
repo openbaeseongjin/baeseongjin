@@ -25,17 +25,28 @@ export function run() {
 
     const playerMain = validateSpriteAssetDirectory(PLAYER_MAIN_DIRECTORY);
     assert.equal(playerMain.id, "player-main");
-    assert.equal(playerMain.atlasCount, 3);
+    assert.equal(playerMain.atlasCount, 4);
     assert.equal(playerMain.animationCount, 7);
     const playerMainManifest = JSON.parse(readFileSync(resolve(PLAYER_MAIN_DIRECTORY, "sprite-manifest.json"), "utf8"));
     assert.deepEqual(playerMainManifest.atlases.locomotion.size, { width: 144, height: 48 });
     assert.deepEqual(playerMainManifest.atlases.run.size, { width: 192, height: 24 });
+    assert.deepEqual(playerMainManifest.atlases["release-spin"].size, { width: 192, height: 24 });
     assert.equal(playerMainManifest.animations.idle.frames.length, 2);
     assert.ok(playerMainManifest.animations.idle.frames.every(({ durationMs }) => durationMs === 520));
     assert.deepEqual(
         playerMainManifest.animations.run.frames.map(({ atlas, cell, durationMs }) => ({ atlas, cell, durationMs })),
         Array.from({ length: 8 }, (_, column) => ({ atlas: "run", cell: { column, row: 0 }, durationMs: 90 }))
     );
+    assert.deepEqual(
+        playerMainManifest.animations.jump.frames.map(({ atlas, cell, durationMs }) => ({ atlas, cell, durationMs })),
+        Array.from({ length: 8 }, (_, column) => ({
+            atlas: "release-spin",
+            cell: { column, row: 0 },
+            durationMs: 65
+        }))
+    );
+    assert.equal(playerMainManifest.animations.jump.loop, true);
+    assert.equal(playerMainManifest.animations.death, undefined, "death asset must remain unregistered in this change");
     assert.deepEqual(
         playerMainManifest.animations.rope.frames.map(({ atlas, cell, durationMs }) => ({ atlas, cell, durationMs })),
         Array.from({ length: 4 }, (_, index) => ({

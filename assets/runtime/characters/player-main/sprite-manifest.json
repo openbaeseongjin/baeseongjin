@@ -4,7 +4,7 @@
     "id": "player-main",
     "generator": {
         "tool": "openai-imagegen-pillow-normalizer",
-        "exportVersion": "2026-08-16-rope-v5-four-phase-backward-flow",
+        "exportVersion": "2026-08-17-release-spin-8phase",
         "sourceExport": "../../../artwork/characters/player-main/source/pixellab-ready-character.png"
     },
     "render": {
@@ -28,6 +28,11 @@
         "actions": {
             "image": "actions.png",
             "size": { "width": 120, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "release-spin": {
+            "image": "release-spin.png",
+            "size": { "width": 192, "height": 24 },
             "frameSize": { "width": 24, "height": 24 }
         }
     },
@@ -53,8 +58,17 @@
             ]
         },
         "jump": {
-            "loop": false,
-            "frames": [{ "atlas": "locomotion", "cell": { "column": 0, "row": 1 }, "durationMs": 1000 }],
+            "loop": true,
+            "frames": [
+                { "atlas": "release-spin", "cell": { "column": 0, "row": 0 }, "durationMs": 65 },
+                { "atlas": "release-spin", "cell": { "column": 1, "row": 0 }, "durationMs": 65 },
+                { "atlas": "release-spin", "cell": { "column": 2, "row": 0 }, "durationMs": 65 },
+                { "atlas": "release-spin", "cell": { "column": 3, "row": 0 }, "durationMs": 65 },
+                { "atlas": "release-spin", "cell": { "column": 4, "row": 0 }, "durationMs": 65 },
+                { "atlas": "release-spin", "cell": { "column": 5, "row": 0 }, "durationMs": 65 },
+                { "atlas": "release-spin", "cell": { "column": 6, "row": 0 }, "durationMs": 65 },
+                { "atlas": "release-spin", "cell": { "column": 7, "row": 0 }, "durationMs": 65 }
+            ],
             "cue": { "offset": { "x": 0, "y": -3 } }
         },
         "fall": {
