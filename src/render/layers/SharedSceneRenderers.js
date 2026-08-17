@@ -94,8 +94,30 @@ export class WorldGeometryRenderer {
         const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
         for (const { surface } of visibleSurfaces) this.drawRock(context, surface);
         renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
-        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
-        this.drawSummit(context, scene.world.summit, scene.runState, viewport, Boolean(scene.world.areas?.length));
+        const savepoints = scene.world.checkpoints?.length
+            ? scene.world.checkpoints
+            : (scene.world.respawnAnchors ?? []).map((anchor, level) => ({
+                  id: anchor.id,
+                  x: anchor.position.x,
+                  y: anchor.position.y,
+                  level
+              }));
+        const activeSavepoint =
+            scene.activeCheckpoint ??
+            (scene.activeRespawnAnchor
+                ? {
+                      id: scene.activeRespawnAnchor.id,
+                      level: scene.world.respawnAnchors?.findIndex(({ id }) => id === scene.activeRespawnAnchor.id) ?? 0
+                  }
+                : null);
+        this.drawCheckpoints(context, savepoints, activeSavepoint, viewport, renderStats);
+        this.drawSummit(
+            context,
+            scene.world.summit,
+            scene.runState,
+            viewport,
+            Boolean(scene.world.areas?.length || scene.world.landmarks?.length)
+        );
     }
 
     surfaceEntries(world) {
@@ -344,6 +366,9 @@ export class AuthoredWorldObjectRenderer {
     }
 
     sectorIdFor(object, scene) {
+        if (object.landmarkId) {
+            return (scene.world.landmarks ?? []).find(({ id }) => id === object.landmarkId)?.sectorId ?? null;
+        }
         return (scene.world.areas ?? []).find(({ id }) => id === object.areaId)?.sectorId ?? null;
     }
 
@@ -354,7 +379,11 @@ export class AuthoredWorldObjectRenderer {
         const objectiveComplete = object.objectiveId
             ? progress?.completedObjectiveIds?.includes(object.objectiveId)
             : false;
-        const gateUnlocked = object.gateId ? progress?.unlockedGateIds?.includes(object.gateId) : false;
+        const gateUnlocked = object.routeLockId
+            ? progress?.unlockedRouteIds?.includes(object.routeLockId)
+            : object.gateId
+              ? progress?.unlockedGateIds?.includes(object.gateId)
+              : false;
         const requirementsComplete = (object.requiredObjectiveIds ?? []).every((objectiveId) =>
             progress?.completedObjectiveIds?.includes(objectiveId)
         );

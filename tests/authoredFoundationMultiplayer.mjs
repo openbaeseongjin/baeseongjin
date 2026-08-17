@@ -11,7 +11,7 @@ import {
     openFoundationChooserCandidate
 } from "../src/game/rewards/FoundationRewardSelection.js";
 import {
-    createCurrentGameSimulation,
+    createLegacyAuthoredGameSimulation as createCurrentGameSimulation,
     createGameSimulationForWorldRevision
 } from "../src/game/simulation/GameSimulationFactory.js";
 

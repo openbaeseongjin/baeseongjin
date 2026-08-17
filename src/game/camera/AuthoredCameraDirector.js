@@ -21,11 +21,13 @@ function cameraZoneForLocalY(area, localY) {
 }
 
 export function authoredAreaForPosition(world, position) {
-    return world?.areas?.find((area) => pointInsideArea(area, position)) ?? null;
+    const regions = world?.landmarks?.length ? world.landmarks : world?.areas;
+    return regions?.find((area) => pointInsideArea(area, position)) ?? null;
 }
 
 export function localTriggerObjects(world, areaId) {
-    const area = world?.areas?.find(({ id }) => id === areaId);
+    const regions = world?.landmarks?.length ? world.landmarks : world?.areas;
+    const area = regions?.find(({ id, legacyAreaId }) => id === areaId || legacyAreaId === areaId);
     if (!area) return Object.freeze([]);
     const originX = area.bounds.x + area.bounds.width * 0.5;
     const originY = area.bounds.y + area.bounds.height;
@@ -33,7 +35,7 @@ export function localTriggerObjects(world, areaId) {
         (world.objects ?? [])
             .filter(
                 (object) =>
-                    object.areaId === areaId &&
+                    (object.landmarkId === area.id || object.areaId === areaId) &&
                     (object.kind === "trigger" || object.kind === "story-display") &&
                     (object.bounds || object.position)
             )
@@ -63,6 +65,8 @@ export function resolveAuthoredCameraShot({ world, player, mobileView = false, d
     if (!area) {
         return Object.freeze({
             areaId: null,
+            landmarkId: null,
+            sectorId: null,
             zoneId: null,
             zoom: defaultZoom,
             localX: null,
@@ -75,7 +79,9 @@ export function resolveAuthoredCameraShot({ world, player, mobileView = false, d
     const localY = player.position.y - areaOriginY;
     const zone = cameraZoneForLocalY(area, localY);
     return Object.freeze({
-        areaId: area.id,
+        areaId: area.legacyAreaId ?? area.id,
+        landmarkId: area.legacyAreaId ? area.id : null,
+        sectorId: area.sectorId ?? null,
         zoneId: zone?.id ?? null,
         zoom: zone ? (mobileView ? zone.mobileZoom : zone.desktopZoom) : defaultZoom,
         localX: player.position.x - area.bounds.x - area.bounds.width * 0.5,

@@ -13,6 +13,8 @@ import { serializePlayerCommandBatch } from "../src/game/network/PlayerCommandBa
 import { deserializeWorldSnapshotEnvelope } from "../src/game/network/WorldSnapshotEnvelope.js";
 import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
+import { createGameSimulationForWorldRevision } from "../src/game/simulation/GameSimulationFactory.js";
+import { DEFAULT_AUTHORED_AREA_CATALOG } from "../src/game/world/AuthoredWorldFactory.js";
 
 function nextMessage(socket, type, timeoutMs = 2000) {
     return new Promise((resolve, reject) => {
@@ -65,7 +67,12 @@ export async function run() {
     const worldSeeds = [111, 222, 333];
     const multiplayer = new MultiplayerGameServer(httpServer, {
         channelNumber: () => channelNumbers.shift(),
-        worldSeed: () => worldSeeds.shift()
+        worldSeed: () => worldSeeds.shift(),
+        createSimulation: (options) =>
+            createGameSimulationForWorldRevision({
+                ...options,
+                worldRevision: DEFAULT_AUTHORED_AREA_CATALOG.revision
+            })
     });
     await new Promise((resolve) => httpServer.listen(0, "127.0.0.1", resolve));
     const { port } = httpServer.address();

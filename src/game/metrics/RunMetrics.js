@@ -1,5 +1,6 @@
 export class RunMetrics {
-    constructor() {
+    constructor({ progressKind = "area" } = {}) {
+        this.progressKind = progressKind;
         this.activeSeconds = 0;
         this.checkpointsReached = 0;
         this.enemyDefeats = 0;
@@ -7,9 +8,9 @@ export class RunMetrics {
         this.ropeCuts = 0;
         this.defeats = 0;
         this.firstFoundationSeconds = null;
-        this.currentAreaId = null;
-        this.areaActiveSeconds = new Map();
-        this.areaClearSeconds = new Map();
+        this.currentProgressId = null;
+        this.progressActiveSeconds = new Map();
+        this.progressClearSeconds = new Map();
     }
 
     recordActiveTime(dt) {
@@ -20,15 +21,23 @@ export class RunMetrics {
         this.checkpointsReached += 1;
     }
 
+    recordProgressTime(progressId, dt) {
+        if (typeof progressId !== "string" || !Number.isFinite(dt) || dt < 0) return;
+        this.currentProgressId = progressId;
+        this.progressActiveSeconds.set(progressId, (this.progressActiveSeconds.get(progressId) ?? 0) + dt);
+    }
+
+    recordProgressClear(progressId) {
+        if (typeof progressId !== "string" || this.progressClearSeconds.has(progressId)) return;
+        this.progressClearSeconds.set(progressId, this.progressActiveSeconds.get(progressId) ?? 0);
+    }
+
     recordAreaTime(areaId, dt) {
-        if (typeof areaId !== "string" || !Number.isFinite(dt) || dt < 0) return;
-        this.currentAreaId = areaId;
-        this.areaActiveSeconds.set(areaId, (this.areaActiveSeconds.get(areaId) ?? 0) + dt);
+        this.recordProgressTime(areaId, dt);
     }
 
     recordAreaClear(areaId) {
-        if (typeof areaId !== "string" || this.areaClearSeconds.has(areaId)) return;
-        this.areaClearSeconds.set(areaId, this.areaActiveSeconds.get(areaId) ?? 0);
+        this.recordProgressClear(areaId);
     }
 
     recordFirstFoundation() {
@@ -49,8 +58,15 @@ export class RunMetrics {
     }
 
     snapshot() {
-        const currentAreaSeconds = this.currentAreaId ? (this.areaActiveSeconds.get(this.currentAreaId) ?? 0) : 0;
-        return Object.freeze({
+        const currentProgressSeconds = this.currentProgressId
+            ? (this.progressActiveSeconds.get(this.currentProgressId) ?? 0)
+            : 0;
+        const progressTiming = Object.freeze({
+            currentProgressId: this.currentProgressId,
+            currentProgressSeconds,
+            clearSeconds: Object.freeze(Object.fromEntries(this.progressClearSeconds))
+        });
+        const snapshot = {
             activeSeconds: this.activeSeconds,
             checkpointsReached: this.checkpointsReached,
             enemyDefeats: this.enemyDefeats,
@@ -58,11 +74,22 @@ export class RunMetrics {
             ropeCuts: this.ropeCuts,
             defeats: this.defeats,
             firstFoundationSeconds: this.firstFoundationSeconds,
-            areaTiming: Object.freeze({
-                currentAreaId: this.currentAreaId,
-                currentAreaSeconds,
-                clearSeconds: Object.freeze(Object.fromEntries(this.areaClearSeconds))
-            })
-        });
+            progressKind: this.progressKind,
+            progressTiming
+        };
+        if (this.progressKind === "sector") {
+            snapshot.landmarkTiming = Object.freeze({
+                currentLandmarkId: this.currentProgressId,
+                currentLandmarkSeconds: currentProgressSeconds,
+                clearSeconds: progressTiming.clearSeconds
+            });
+        } else {
+            snapshot.areaTiming = Object.freeze({
+                currentAreaId: this.currentProgressId,
+                currentAreaSeconds: currentProgressSeconds,
+                clearSeconds: progressTiming.clearSeconds
+            });
+        }
+        return Object.freeze(snapshot);
     }
 }

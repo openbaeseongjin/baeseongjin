@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { validateAreaCatalog } from "../src/game/world/AreaDefinitionValidator.js";
-import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
+import { createLegacyAuthoredGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
 import { WorldProgressState } from "../src/game/world/WorldProgressState.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "../src/game/world/areas/CurrentAuthoredAreaCatalog.js";
@@ -43,7 +43,7 @@ export function run() {
     assert.equal(world.enemySpawns.filter(({ enemyType }) => enemyType === "patrol-drone-t1").length, 13);
     assert.equal(world.scannerGroups.length, 6);
 
-    const simulation = createCurrentGameSimulation({ worldSeed: 9182 });
+    const simulation = createLegacyAuthoredGameSimulation({ worldSeed: 9182 });
     assert.equal(simulation.world.definitionRevision, catalog.revision);
     assert.equal(simulation.world.areas.length, 24);
 
@@ -61,18 +61,18 @@ export function run() {
         /content-boundary/i
     );
 
-    const debugStart = createCurrentGameSimulation({ worldSeed: 9182, startAreaId: "sector-03-02" });
+    const debugStart = createLegacyAuthoredGameSimulation({ worldSeed: 9182, startAreaId: "sector-03-02" });
     assert.equal(debugStart.worldProgress.snapshot().currentAreaId, "sector-03-02");
     assert.equal(debugStart.activeCheckpoint.id, "checkpoint:sector-03-02");
     const sector03Entry = debugStart.world.areas.find(({ id }) => id === "sector-03-02").entry;
     assert.equal(debugStart.players[0].physics.position.x, sector03Entry.x);
     assert.equal(debugStart.players[0].physics.position.y, sector03Entry.y);
 
-    const invalidStart = createCurrentGameSimulation({ worldSeed: 9182, startAreaId: "missing-area" });
+    const invalidStart = createLegacyAuthoredGameSimulation({ worldSeed: 9182, startAreaId: "missing-area" });
     assert.equal(invalidStart.worldProgress.snapshot().currentAreaId, "sector-01-01");
     assert.equal(invalidStart.players[0].physics.position.y, invalidStart.world.areas[0].entry.y);
 
-    const teleportSim = createCurrentGameSimulation({ worldSeed: 9182 });
+    const teleportSim = createLegacyAuthoredGameSimulation({ worldSeed: 9182 });
     const teleportOwner = teleportSim.players[0];
     teleportOwner.ropeObject.rope.attach(teleportOwner.physics.position, {
         x: teleportOwner.physics.position.x + 30,

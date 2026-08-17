@@ -343,7 +343,8 @@ export class CanvasRenderer {
         const x = Math.max(8, this.cssWidth - 248);
         const firstFoundation =
             metrics.firstFoundationSeconds === null ? "-" : `${metrics.firstFoundationSeconds.toFixed(1)}초`;
-        const areaOffset = metrics.areaTiming ? 19 : 0;
+        const progressTiming = metrics.landmarkTiming ?? metrics.areaTiming;
+        const areaOffset = progressTiming ? 19 : 0;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
         const height = 118 + areaOffset + (networkMetrics ? 94 : 0) + (renderMetrics ? 132 : 0);
@@ -360,9 +361,11 @@ export class CanvasRenderer {
         ctx.fillText(`처치 ${metrics.enemyDefeats} · 피해 ${metrics.damageTaken}`, x + 12, 79);
         ctx.fillText(`절단 ${metrics.ropeCuts} · 사망 ${metrics.defeats}`, x + 12, 98);
         ctx.fillText(`첫 Foundation ${firstFoundation}`, x + 12, 117);
-        if (metrics.areaTiming) {
-            const areaLabel = metrics.areaTiming.currentAreaId?.replace("sector-", "") ?? "-";
-            ctx.fillText(`구간 ${areaLabel} · ${metrics.areaTiming.currentAreaSeconds.toFixed(1)}초`, x + 12, 136);
+        if (progressTiming) {
+            const progressId = progressTiming.currentLandmarkId ?? progressTiming.currentAreaId ?? "-";
+            const seconds = progressTiming.currentLandmarkSeconds ?? progressTiming.currentAreaSeconds ?? 0;
+            const label = progressId.replace("sector-", "");
+            ctx.fillText(`구간 ${label} · ${seconds.toFixed(1)}초`, x + 12, 136);
         }
         if (networkMetrics) {
             const rtt = networkMetrics.roundTripMs === null ? "-" : `${Math.round(networkMetrics.roundTripMs)}ms`;

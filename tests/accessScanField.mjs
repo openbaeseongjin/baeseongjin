@@ -22,7 +22,7 @@ import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
 import {
-    createCurrentGameSimulation,
+    createLegacyAuthoredGameSimulation as createCurrentGameSimulation,
     createGameSimulationForWorldRevision
 } from "../src/game/simulation/GameSimulationFactory.js";
 

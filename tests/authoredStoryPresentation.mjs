@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { localTriggerObjects } from "../src/game/camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "../src/game/presentation/AuthoredStoryPresentation.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
-import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
+import { createLegacyAuthoredGameSimulation as createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
 import { SECTOR_04_AREA_CATALOG } from "../src/game/world/areas/sector04/Sector04AreaCatalog.js";
 
 function triggerWithCue(triggers, cueId) {

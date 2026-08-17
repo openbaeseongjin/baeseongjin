@@ -5,10 +5,7 @@ import { createOwnerMotionState } from "../src/game/network/OwnerMotionState.js"
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
-import {
-    createCurrentGameSimulation,
-    createGameSimulationForWorldRevision
-} from "../src/game/simulation/GameSimulationFactory.js";
+import { createGameSimulationForWorldRevision } from "../src/game/simulation/GameSimulationFactory.js";
 import { authoredCatalogForRevision, DEFAULT_AUTHORED_AREA_CATALOG } from "../src/game/world/AuthoredWorldFactory.js";
 
 function command({ interact = false } = {}) {
@@ -26,6 +23,13 @@ function command({ interact = false } = {}) {
 
 const TERMINAL_SEQUENCE_STEPS = 325;
 
+function createLegacyGameSimulation(options = {}) {
+    return createGameSimulationForWorldRevision({
+        ...options,
+        worldRevision: DEFAULT_AUTHORED_AREA_CATALOG.revision
+    });
+}
+
 function completeTerminalSequence(simulation) {
     for (let step = 0; step < TERMINAL_SEQUENCE_STEPS; step += 1) {
         simulation.stepCommandBatch(1 / 120, createPlayerCommandBatch(simulation.tick + 1, []), {
@@ -38,7 +42,7 @@ export function run() {
     assert.equal(authoredCatalogForRevision(DEFAULT_AUTHORED_AREA_CATALOG.revision), DEFAULT_AUTHORED_AREA_CATALOG);
     assert.equal(authoredCatalogForRevision("unknown-world-revision"), null);
 
-    const server = createCurrentGameSimulation({ worldSeed: 2718 });
+    const server = createLegacyGameSimulation({ worldSeed: 2718 });
     const ownerId = server.getPrimaryPlayerId();
     const owner = server.players[0];
     const partner = server.addPlayer(
@@ -206,7 +210,7 @@ export function run() {
     assert.deepEqual(predictedPartner.velocity, { x: 0, y: 0 });
     assert.equal(predictedPartner.rope.isAttached, false, "the owner's own portal entry must reset the owner rope");
 
-    const predictionGuardServer = createCurrentGameSimulation({ worldSeed: 2718 });
+    const predictionGuardServer = createLegacyGameSimulation({ worldSeed: 2718 });
     const guardOwner = predictionGuardServer.players[0];
     const guardTerminal = predictionGuardServer.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     guardOwner.physics.position.set(guardTerminal.position.x, guardTerminal.position.y);
@@ -240,7 +244,7 @@ export function run() {
         "no dynamic Gate barrier must exist; the lock is enforced by shared progress alone"
     );
 
-    const floodServer = createCurrentGameSimulation({ worldSeed: 3141 });
+    const floodServer = createLegacyGameSimulation({ worldSeed: 3141 });
     const floodOwner = floodServer.players[0];
     const floodSession = new AuthorityServerSession({ simulation: floodServer, snapshotIntervalTicks: 1 });
     const floodTerminal = floodServer.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
@@ -292,7 +296,7 @@ export function run() {
         "stale owner motion in the trigger must not re-emit the portal transition"
     );
 
-    const debugTeleportServer = createCurrentGameSimulation({ worldSeed: 2718 });
+    const debugTeleportServer = createLegacyGameSimulation({ worldSeed: 2718 });
     const debugTeleportOwner = debugTeleportServer.players[0];
     const debugTeleportSession = new AuthorityServerSession({
         simulation: debugTeleportServer,
@@ -335,7 +339,7 @@ export function run() {
     );
     assert.equal(teleportedState.rope.isAttached, false);
 
-    const delayedServer = createCurrentGameSimulation({ worldSeed: 1618 });
+    const delayedServer = createLegacyGameSimulation({ worldSeed: 1618 });
     const delayedOwner = delayedServer.players[0];
     const delayedPartner = delayedServer.addPlayer(
         { x: delayedServer.world.areas[0].entry.x + 40, y: delayedServer.world.areas[0].entry.y },
@@ -389,7 +393,7 @@ export function run() {
         true
     );
 
-    const guardedServer = createCurrentGameSimulation({ worldSeed: 3141 });
+    const guardedServer = createLegacyGameSimulation({ worldSeed: 3141 });
     const guardedOwner = guardedServer.players[0];
     const guardedSession = new AuthorityServerSession({ simulation: guardedServer, snapshotIntervalTicks: 1 });
     const guardedTerminal = guardedServer.world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
@@ -441,7 +445,7 @@ export function run() {
         "pre-portal owner motion must not move the authority player back into the previous room"
     );
 
-    const sweptServer = createCurrentGameSimulation({ worldSeed: 1414 });
+    const sweptServer = createLegacyGameSimulation({ worldSeed: 1414 });
     const sweptOwner = sweptServer.players[0];
     const sweptSession = new AuthorityServerSession({ simulation: sweptServer, snapshotIntervalTicks: 1 });
     sweptServer.worldProgress.completeObjective("sector-01-01:terminal-read");

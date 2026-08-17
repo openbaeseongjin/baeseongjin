@@ -46,7 +46,9 @@ import {
 import { generateWorld, WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
 import { resolveEnemyEncounter } from "../world/EnemyEncounterSelection.js";
-import { collisionSurfacesForProgress } from "../world/WorldGateGeometry.js";
+import { advanceSectorProgress } from "../world/SectorProgressController.js";
+import { SectorProgressState } from "../world/SectorProgressState.js";
+import { collisionSurfacesForProgress, collisionSurfacesForSectorProgress } from "../world/WorldGateGeometry.js";
 import {
     pointInsideBounds,
     sampleWorldForce,
@@ -131,29 +133,52 @@ export class GameSimulation {
     #inputDispatcher;
     #inputDrivenObjectsByOwner;
 
-    constructor({ worldSeed = WORLD_CONFIG.seed, playerId = null, worldCatalog = null, startAreaId = null } = {}) {
+    constructor({
+        worldSeed = WORLD_CONFIG.seed,
+        playerId = null,
+        worldCatalog = null,
+        worldFactory = null,
+        startAreaId = null,
+        startLandmarkId = null
+    } = {}) {
         this.worldCatalog = worldCatalog;
-        this.world = worldCatalog
-            ? assembleAuthoredWorld(worldCatalog, {
-                  seed: worldSeed,
-                  floorY: WORLD_CONFIG.floorY,
-                  checkpointRadius: WORLD_CONFIG.checkpointRadius,
-                  summitRadius: WORLD_CONFIG.summitRadius
-              })
-            : generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
-        this.worldProgress = worldCatalog ? new WorldProgressState(worldCatalog, null, { startAreaId }) : null;
-        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.worldFactory = worldFactory;
+        this.world = worldFactory
+            ? worldFactory({ seed: worldSeed, floorY: WORLD_CONFIG.floorY, summitRadius: WORLD_CONFIG.summitRadius })
+            : worldCatalog
+              ? assembleAuthoredWorld(worldCatalog, {
+                    seed: worldSeed,
+                    floorY: WORLD_CONFIG.floorY,
+                    checkpointRadius: WORLD_CONFIG.checkpointRadius,
+                    summitRadius: WORLD_CONFIG.summitRadius
+                })
+              : generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
+        this.isSeamlessSectorWorld = this.world.layout === "seamless-sectors";
+        this.worldProgress = this.isSeamlessSectorWorld
+            ? new SectorProgressState(this.world)
+            : worldCatalog
+              ? new WorldProgressState(worldCatalog, null, { startAreaId })
+              : null;
+        this.activeCollisionSurfaces = this.isSeamlessSectorWorld
+            ? collisionSurfacesForSectorProgress(this.world, this.worldProgress)
+            : collisionSurfacesForProgress(this.world, this.worldProgress);
         this.windOccluders = windOccludingSurfaces(this.world.surfaces);
         this.elapsedSeconds = 0;
-        this.metrics = new RunMetrics();
+        this.metrics = new RunMetrics({ progressKind: this.isSeamlessSectorWorld ? "sector" : "area" });
         this.registry = new EntityRegistry();
         this.#inputDispatcher = new InputDispatcher();
         this.#inputDrivenObjectsByOwner = new Map();
         this.portalTransitions = new Map();
         this.lastAcceptedPlayerProjectileSpawnTick = new Map();
         this.players = [];
+        if (this.isSeamlessSectorWorld && (startLandmarkId ?? startAreaId)) {
+            this.advanceSectorProgressToLandmark(startLandmarkId ?? startAreaId);
+        }
         const startArea = this.world.areas?.find(({ id }) => id === startAreaId) ?? this.world.areas?.[0];
-        const playerRuntime = this.addPlayer(startArea?.entry, playerId);
+        const startLandmark = this.isSeamlessSectorWorld
+            ? this.world.landmarks.find(({ id }) => id === this.worldProgress.currentLandmarkId)
+            : null;
+        const playerRuntime = this.addPlayer(startLandmark?.entry ?? startArea?.entry, playerId);
         this.#primaryPlayerId = playerRuntime.entity.id;
         this.enemies = this.createEnemies();
         this.projectiles = [];
@@ -161,12 +186,18 @@ export class GameSimulation {
         this.eventFlash = { type: "ready", age: 10 };
         this.resets = 0;
         this.runState = "playing";
-        this.activeCheckpoint =
-            (startAreaId
-                ? (this.world.checkpoints.find(({ id }) => id === `checkpoint:${startAreaId}`) ?? null)
-                : null) ??
-            this.world.checkpoints[0] ??
-            null;
+        this.activeCheckpoint = this.isSeamlessSectorWorld
+            ? null
+            : ((startAreaId
+                  ? (this.world.checkpoints.find(({ id }) => id === `checkpoint:${startAreaId}`) ?? null)
+                  : null) ??
+              this.world.checkpoints[0] ??
+              null);
+        this.activeRespawnAnchor = this.isSeamlessSectorWorld
+            ? (this.world.respawnAnchors.find(({ id }) => id === this.worldProgress.snapshot().respawnAnchorId) ?? null)
+            : null;
+        this.sectorRespawnedPlayerIdsThisTick = new Set();
+        this.contentBoundaryAnnounced = false;
         this.foundationRewards = new Map();
         this.tick = 0;
         this.replicationEvents = [];
@@ -295,7 +326,7 @@ export class GameSimulation {
     }
 
     advanceWorldProgressToArea(areaId) {
-        if (!this.worldProgress) return false;
+        if (!this.worldProgress || this.isSeamlessSectorWorld) return false;
         const target = this.world.areas.find(({ id }) => id === areaId);
         if (!target) return false;
         this.worldProgress = new WorldProgressState(this.worldCatalog);
@@ -310,8 +341,49 @@ export class GameSimulation {
         return true;
     }
 
+    advanceSectorProgressToLandmark(landmarkId) {
+        if (!this.isSeamlessSectorWorld) return false;
+        const target = this.world.landmarks.find(
+            ({ id, legacyAreaId, legacyStageAlias }) =>
+                id === landmarkId || legacyAreaId === landmarkId || legacyStageAlias === landmarkId
+        );
+        if (!target) return false;
+        this.worldProgress = new SectorProgressState(this.world);
+        this.contentBoundaryAnnounced = false;
+        this.portalTransitions?.clear();
+        this.foundationRewards?.clear();
+        for (const route of this.world.routeLocks) {
+            if (this.worldProgress.currentLandmarkId === target.id) break;
+            const source = this.world.landmarks.find(({ id }) => id === route.sourceLandmarkId);
+            if (source.id !== this.worldProgress.currentLandmarkId) continue;
+            for (const objectiveId of source.objectiveIds) {
+                const objective = this.world.objectives.find(({ id }) => id === objectiveId);
+                for (const requiredId of objective.requiredObjectiveIds ?? []) {
+                    if (!this.worldProgress.isObjectiveComplete(requiredId)) {
+                        this.worldProgress.completeObjective(requiredId);
+                    }
+                }
+                this.worldProgress.completeObjective(objectiveId);
+            }
+            this.worldProgress.visitLandmark(route.targetLandmarkId);
+        }
+        this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+        this.activeRespawnAnchor =
+            this.world.respawnAnchors.find(({ id }) => id === this.worldProgress.snapshot().respawnAnchorId) ?? null;
+        return this.worldProgress.currentLandmarkId === target.id;
+    }
+
     debugTeleportPlayer(playerId, areaId) {
         const player = this.#requirePlayer(playerId);
+        if (this.isSeamlessSectorWorld) {
+            const landmark = this.world.landmarks.find(
+                ({ id, legacyAreaId, legacyStageAlias }) =>
+                    id === areaId || legacyAreaId === areaId || legacyStageAlias === areaId
+            );
+            if (!landmark || !this.advanceSectorProgressToLandmark(landmark.id)) return null;
+            this.applyPortalTransition(playerId, landmark.entry, this.tick, `debug:${landmark.id}`);
+            return Object.freeze({ x: landmark.entry.x, y: landmark.entry.y });
+        }
         const area = this.world.areas.find(({ id }) => id === areaId);
         if (!area) return null;
         this.advanceWorldProgressToArea(areaId);
@@ -373,7 +445,7 @@ export class GameSimulation {
     }
 
     #advanceSweptOwnerGate(player, destination) {
-        if (!this.worldProgress || player.lifeState !== "active") return false;
+        if (!this.worldProgress || this.isSeamlessSectorWorld || player.lifeState !== "active") return false;
         const currentArea = this.world.areas.find(({ id }) => id === this.worldProgress.currentAreaId);
         const gate = this.world.gates.find(({ id }) => id === currentArea?.gateId);
         if (
@@ -427,8 +499,18 @@ export class GameSimulation {
         return true;
     }
 
-    preparePrediction(enemies = [], activeCheckpointId = this.activeCheckpoint?.id ?? null) {
-        if (activeCheckpointId !== null && activeCheckpointId !== undefined) {
+    preparePrediction(
+        enemies = [],
+        activeCheckpointId = this.activeCheckpoint?.id ?? null,
+        respawnAnchorId = this.activeRespawnAnchor?.id ?? null
+    ) {
+        if (this.isSeamlessSectorWorld) {
+            if (respawnAnchorId !== null && respawnAnchorId !== undefined) {
+                const anchor = this.world.respawnAnchors.find(({ id }) => id === respawnAnchorId);
+                if (!anchor) throw new Error(`unknown respawn anchor: ${respawnAnchorId}`);
+                this.activeRespawnAnchor = anchor;
+            }
+        } else if (activeCheckpointId !== null && activeCheckpointId !== undefined) {
             const activeCheckpoint = this.world.checkpoints.find(({ id }) => id === activeCheckpointId);
             if (!activeCheckpoint) throw new Error(`unknown active checkpoint: ${activeCheckpointId}`);
             this.activeCheckpoint = activeCheckpoint;
@@ -452,8 +534,16 @@ export class GameSimulation {
             throw new Error("world elapsed seconds must be non-negative");
         }
         if (snapshot) this.worldProgress.restore(snapshot);
+        if (this.isSeamlessSectorWorld) this.contentBoundaryAnnounced = snapshot?.contentBoundaryReached === true;
         this.elapsedSeconds = elapsedSeconds;
-        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.activeCollisionSurfaces = this.isSeamlessSectorWorld
+            ? collisionSurfacesForSectorProgress(this.world, this.worldProgress)
+            : collisionSurfacesForProgress(this.world, this.worldProgress);
+        if (this.isSeamlessSectorWorld) {
+            this.activeRespawnAnchor =
+                this.world.respawnAnchors.find(({ id }) => id === this.worldProgress.snapshot().respawnAnchorId) ??
+                null;
+        }
         return this.worldProgress.snapshot();
     }
 
@@ -487,6 +577,7 @@ export class GameSimulation {
         this.#requirePlayer(playerId);
         return Object.freeze({
             activeCheckpointId: this.activeCheckpoint?.id ?? null,
+            respawnAnchorId: this.activeRespawnAnchor?.id ?? null,
             foundationReward: this.getFoundationReward(playerId)
         });
     }
@@ -720,12 +811,13 @@ export class GameSimulation {
         } = {}
     ) {
         this.tick += 1;
+        this.sectorRespawnedPlayerIdsThisTick.clear();
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
             return;
         }
         if (resolveSummitProgress && this.updateSummitProgress()) return;
-        if (resolveCheckpointProgress) this.updateCheckpointProgress();
+        if (resolveCheckpointProgress && !this.isSeamlessSectorWorld) this.updateCheckpointProgress();
         const choosingRewardPlayerIds = new Set([...this.foundationRewards.keys()]);
         this.updateFoundationRewards(commandsByPlayerId);
         const gameplayCommands = new Map(commandsByPlayerId);
@@ -738,7 +830,12 @@ export class GameSimulation {
             );
         }
         this.metrics.recordActiveTime(dt);
-        if (this.worldProgress) this.metrics.recordAreaTime(this.worldProgress.currentAreaId, dt);
+        if (this.worldProgress) {
+            const progressId = this.isSeamlessSectorWorld
+                ? this.worldProgress.currentLandmarkId
+                : this.worldProgress.currentAreaId;
+            this.metrics.recordProgressTime(progressId, dt);
+        }
         this.elapsedSeconds += dt;
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
@@ -792,7 +889,7 @@ export class GameSimulation {
             this.recordProjectileResolution(resolution, hitByProjectileId.get(resolution.projectileId));
         }
         this.metrics.recordEnemyOutcomes(playerProjectileEvents);
-        this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
+        this.#removeDefeatedEnemies();
         if (recoverPlayerDeaths) {
             for (const player of this.players) {
                 if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, "health");
@@ -1039,7 +1136,7 @@ export class GameSimulation {
             sourcePlayerId: event.sourcePlayerId,
             targetId: event.targetId
         };
-        this.enemies = this.enemies.filter(({ health }) => health > 0);
+        this.#removeDefeatedEnemies();
         return Object.freeze({ accepted: true, resolution, damage: ROPE_IMPACT_CONFIG.damage });
     }
 
@@ -1101,7 +1198,7 @@ export class GameSimulation {
             if (replicate) this.recordReplicationEvent(eventType, payload);
             this.eventFlash = { type: eventType, age: 0, ...payload };
         }
-        this.enemies = this.enemies.filter(({ health }) => health > 0);
+        this.#removeDefeatedEnemies();
         return events.length;
     }
 
@@ -1128,14 +1225,23 @@ export class GameSimulation {
     }
 
     #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0, resolveInteractChoice = true } = {}) {
-        const events = advanceWorldProgress({
-            world: this.world,
-            progress: this.worldProgress,
-            players: this.players,
-            commandsByPlayerId,
-            dt,
-            resolveInteractChoice
-        });
+        const events = this.isSeamlessSectorWorld
+            ? advanceSectorProgress({
+                  world: this.world,
+                  progress: this.worldProgress,
+                  players: this.players,
+                  commandsByPlayerId,
+                  dt,
+                  resolveInteractChoice
+              })
+            : advanceWorldProgress({
+                  world: this.world,
+                  progress: this.worldProgress,
+                  players: this.players,
+                  commandsByPlayerId,
+                  dt,
+                  resolveInteractChoice
+              });
         for (const event of events) {
             const { type, ...payload } = event;
             if (type === "objective-choice-requested") {
@@ -1145,7 +1251,7 @@ export class GameSimulation {
             }
             if (replicate) this.recordReplicationEvent(type, payload);
             this.eventFlash = { type, age: 0, ...payload };
-            if (type === "gate-unlocked") {
+            if (type === "gate-unlocked" || type === "route-unlocked") {
                 this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
             }
             if (type === "gate-crossed" && event.nextAreaId) {
@@ -1155,6 +1261,27 @@ export class GameSimulation {
                     this.#activateCheckpoint(checkpoint, event.playerId);
                 }
             }
+            if (type === "landmark-entered") this.metrics.recordProgressClear(event.previousLandmarkId);
+        }
+        if (this.isSeamlessSectorWorld) {
+            this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+            const sectorEvent = events.findLast(({ type }) => type === "sector-entered");
+            if (sectorEvent) {
+                this.activeRespawnAnchor =
+                    this.world.respawnAnchors.find(({ id }) => id === sectorEvent.respawnAnchorId) ??
+                    this.activeRespawnAnchor;
+            }
+            if (this.worldProgress.snapshot().contentBoundaryReached && !this.contentBoundaryAnnounced) {
+                const payload = Object.freeze({
+                    sectorId: this.worldProgress.currentSectorId,
+                    landmarkId: this.worldProgress.currentLandmarkId,
+                    playerId: events.at(-1)?.playerId ?? this.#primaryPlayerId
+                });
+                if (replicate) this.recordReplicationEvent("content-boundary-reached", payload);
+                this.eventFlash = { type: "content-boundary-reached", age: 0, ...payload };
+                this.contentBoundaryAnnounced = true;
+            }
+            return;
         }
         this.#transferPlayersThroughOpenPortals({ replicate });
         if (this.worldProgress.snapshot().completed) this.beginCompletion(events.at(-1)?.playerId);
@@ -1398,17 +1525,43 @@ export class GameSimulation {
         this.eventFlash = { type: "foundation-selected", age: 0, ...selectionPayload };
 
         if (this.worldProgress && !this.worldProgress.isObjectiveComplete(objectiveId)) {
-            const areaId = source.areaId ?? this.worldProgress.currentAreaId;
-            for (const event of completeWorldProgressObjective({
-                progress: this.worldProgress,
-                objectiveId,
-                areaId,
-                player
-            })) {
-                const { type, ...payload } = event;
-                if (replicate) this.recordReplicationEvent(type, payload);
-                if (type === "gate-unlocked") {
-                    this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+            if (this.isSeamlessSectorWorld) {
+                const beforeRoutes = new Set(this.worldProgress.snapshot().unlockedRouteIds);
+                const completion = this.worldProgress.completeObjective(objectiveId);
+                if (completion.changed) {
+                    const objectivePayload = {
+                        objectiveId,
+                        landmarkId: source.landmarkId ?? this.worldProgress.currentLandmarkId,
+                        playerId,
+                        position: vectorState(player.physics.position)
+                    };
+                    if (replicate) this.recordReplicationEvent("objective-completed", objectivePayload);
+                    for (const routeId of this.worldProgress.snapshot().unlockedRouteIds) {
+                        if (beforeRoutes.has(routeId)) continue;
+                        if (replicate) {
+                            this.recordReplicationEvent("route-unlocked", {
+                                routeId,
+                                landmarkId: objectivePayload.landmarkId,
+                                playerId,
+                                position: objectivePayload.position
+                            });
+                        }
+                    }
+                    this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+                }
+            } else {
+                const areaId = source.areaId ?? this.worldProgress.currentAreaId;
+                for (const event of completeWorldProgressObjective({
+                    progress: this.worldProgress,
+                    objectiveId,
+                    areaId,
+                    player
+                })) {
+                    const { type, ...payload } = event;
+                    if (replicate) this.recordReplicationEvent(type, payload);
+                    if (type === "gate-unlocked") {
+                        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+                    }
                 }
             }
         }
@@ -1428,10 +1581,13 @@ export class GameSimulation {
     createEnemies() {
         return this.world.enemySpawns.map((spawn) => {
             const definition = spawn.enemySelection
-                ? resolveEnemyEncounter(spawn, {
-                      runSeed: this.world.seed,
-                      worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
-                  })
+                ? {
+                      ...spawn,
+                      ...resolveEnemyEncounter(spawn, {
+                          runSeed: this.world.seed,
+                          worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
+                      })
+                  }
                 : spawn;
             const position = definition.position ?? definition;
             return createEnemyRuntime({
@@ -1616,8 +1772,17 @@ export class GameSimulation {
             { damage: projectile.damage, sourcePlayerId: projectile.ownerId, targetId: projectile.targetId }
         );
         if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
-        this.enemies = this.enemies.filter(({ health }) => health > 0);
+        this.#removeDefeatedEnemies();
         return Object.freeze({ accepted: true, resolution, damage: projectile.damage });
+    }
+
+    #removeDefeatedEnemies() {
+        if (this.isSeamlessSectorWorld) {
+            for (const enemy of this.enemies) {
+                if (enemy.health <= 0 && enemy.objectId) this.worldProgress.resolveEncounter(enemy.objectId);
+            }
+        }
+        this.enemies = this.enemies.filter(({ health }) => health > 0);
     }
 
     resolveEnemyProjectileClaim(authenticatedPlayerId, claim) {
@@ -1830,11 +1995,25 @@ export class GameSimulation {
         if (!player || this.runState !== "playing") return false;
         this.#resetPlayerAtCheckpoint(player);
         this.#recordPlayerRespawn(player, reason, causeId);
+        if (this.isSeamlessSectorWorld) {
+            this.sectorRespawnedPlayerIdsThisTick.add(player.id);
+            if (
+                this.players.length > 0 &&
+                this.players.every(({ id }) => this.sectorRespawnedPlayerIdsThisTick.has(id))
+            ) {
+                this.#resetCurrentSectorAfterPartyWipe(causeId);
+            }
+        }
         return true;
     }
 
     #resetPlayerAtCheckpoint(player) {
-        const respawnPosition = this.activeCheckpoint ?? { x: 120, y: 500 };
+        const respawnPosition = (this.isSeamlessSectorWorld
+            ? this.activeRespawnAnchor?.position
+            : this.activeCheckpoint) ?? {
+            x: 120,
+            y: 500
+        };
         player.physics.reset(respawnPosition);
         player.ropeObject.rope.detach();
         player.ropeObject.attachmentCandidate = null;
@@ -1855,7 +2034,7 @@ export class GameSimulation {
     #recordPlayerRespawn(player, reason, causeId) {
         this.metrics.recordDefeat();
         this.eventFlash = {
-            type: "checkpoint-respawn",
+            type: this.isSeamlessSectorWorld ? "sector-respawn" : "checkpoint-respawn",
             age: 0,
             playerId: player.id,
             reason,
@@ -1870,6 +2049,32 @@ export class GameSimulation {
             position: { x: player.physics.position.x, y: player.physics.position.y }
         });
         this.resets += 1;
+    }
+
+    #resetCurrentSectorAfterPartyWipe(causeId) {
+        const reset = this.worldProgress.resetCurrentSector();
+        this.activeRespawnAnchor =
+            this.world.respawnAnchors.find(({ id }) => id === reset.respawnAnchorId) ?? this.activeRespawnAnchor;
+        const currentEncounterIds = new Set(
+            this.world.enemySpawns
+                .filter(({ sectorId }) => sectorId === reset.sectorId)
+                .map(({ encounterId }) => encounterId)
+        );
+        const preservedEnemies = this.enemies.filter(({ objectId }) => !currentEncounterIds.has(objectId));
+        const resetEnemies = this.createEnemies().filter(({ objectId }) => currentEncounterIds.has(objectId));
+        this.enemies = [...preservedEnemies, ...resetEnemies];
+        this.foundationRewards.clear();
+        this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+        this.contentBoundaryAnnounced = false;
+        for (const player of this.players) this.#resetPlayerAtCheckpoint(player);
+        const payload = Object.freeze({
+            sectorId: reset.sectorId,
+            baselineRevision: reset.baselineRevision,
+            respawnAnchorId: reset.respawnAnchorId,
+            causeId
+        });
+        this.recordReplicationEvent("sector-reset", payload);
+        this.eventFlash = { type: "sector-reset", age: 0, ...payload };
     }
 
     beginCompletion(playerId = this.#primaryPlayerId) {
@@ -1909,6 +2114,7 @@ export class GameSimulation {
             playerLifeState: player.lifeState,
             runState: this.runState,
             activeCheckpoint: this.activeCheckpoint,
+            activeRespawnAnchor: this.activeRespawnAnchor,
             foundationAugment: player.foundation.selectedId,
             augmentRuntimeState: player.foundation.snapshot(),
             ropeShot: player.ropeObject.launcher.snapshot(),
@@ -1916,6 +2122,7 @@ export class GameSimulation {
             foundationRewards: Object.fromEntries(this.foundationRewards),
             metrics: this.metrics.snapshot(),
             worldProgress: this.worldProgress?.snapshot() ?? null,
+            partyWipeBaseline: this.isSeamlessSectorWorld ? this.worldProgress.baselineSnapshot() : null,
             windStates: this.world.windZones
                 ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
                 : Object.freeze([]),
