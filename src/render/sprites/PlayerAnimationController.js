@@ -2,13 +2,14 @@ import { StateMachine } from "../../core/state/StateMachine.js";
 
 export const PLAYER_ANIMATION_DURATIONS = Object.freeze({ hit: 0.24, respawn: 0.45 });
 export const PLAYER_RUN_CYCLE_DISTANCE = 180;
+export const PLAYER_AIR_SPIN_RADIANS_PER_SECOND = Math.PI * 4;
 const STATES = Object.freeze(["idle", "run", "jump", "fall", "rope", "hit", "respawn"]);
 const TRANSITIONS = Object.freeze(
     Object.fromEntries(STATES.map((state) => [state, STATES.filter((next) => next !== state)]))
 );
 
 function locomotionState(player, rope, horizontalThreshold) {
-    if (rope?.isAttached) return "rope";
+    if (!player.isGrounded && rope?.isAttached) return "rope";
     if (!player.isGrounded) return player.velocity.y < 0 ? "jump" : "fall";
     if (Math.abs(player.velocity.x) >= horizontalThreshold) return "run";
     return "idle";
@@ -118,6 +119,7 @@ export class PlayerAnimationController {
             snapshot.state === "run"
                 ? (this.runTravelDistance / this.runCycleDistance) * this.runCycleDurationSeconds
                 : snapshot.elapsedSeconds;
-        return Object.freeze({ ...snapshot, elapsedSeconds, flipX: this.flipX });
+        const rotationOffset = snapshot.state === "jump" ? elapsedSeconds * PLAYER_AIR_SPIN_RADIANS_PER_SECOND : 0;
+        return Object.freeze({ ...snapshot, elapsedSeconds, flipX: this.flipX, rotationOffset });
     }
 }

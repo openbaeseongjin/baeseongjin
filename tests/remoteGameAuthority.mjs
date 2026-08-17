@@ -1437,8 +1437,14 @@ export async function run() {
             events: observerRotationRender.playerPresentationEvents,
             dt: 0
         });
-        assert.equal(ownerRopeAnimation.state, "rope");
-        assert.equal(observerRopeAnimation.state, "rope");
+        assert.equal(ownerRotationRender.player.isGrounded, true);
+        assert.equal(renderedObserverPlayer.isGrounded, true);
+        assert.notEqual(ownerRopeAnimation.state, "rope", "a grounded owner must not use the hanging pose");
+        assert.equal(
+            observerRopeAnimation.state,
+            ownerRopeAnimation.state,
+            "the observer must resolve the same grounded non-rope pose"
+        );
         assert.ok(
             Math.abs(renderedObserverPlayer.angle) > 0.1,
             "the observer renderer must preserve non-zero rotation"

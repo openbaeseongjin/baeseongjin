@@ -5,6 +5,7 @@ import { CameraWorldRenderer, SceneRendererComposition } from "../src/render/Sce
 import { SpriteAnimation } from "../src/render/sprites/SpriteAnimation.js";
 import { paintSpriteFrame } from "../src/render/sprites/SpriteCanvasPainter.js";
 import {
+    PLAYER_AIR_SPIN_RADIANS_PER_SECOND,
     PLAYER_RUN_CYCLE_DISTANCE,
     PlayerAnimationController
 } from "../src/render/sprites/PlayerAnimationController.js";
@@ -573,6 +574,32 @@ export async function run() {
         ["rotate", 0.625],
         "the single-player renderer must preserve prototype-backed physics rotation"
     );
+    const risingContext = recordingContext();
+    const risingRenderer = new SpriteLocalPlayerRenderer({
+        assets: { imageFor: () => image },
+        definition: customDefinition
+    });
+    const risingPlayer = {
+        ...singlePlayer,
+        velocity: { x: 0, y: -80 },
+        isGrounded: false
+    };
+    Object.defineProperty(risingPlayer, "angle", { get: () => 0.625 });
+    risingRenderer.draw({
+        context: risingContext,
+        scene: { localPlayerId: "local-player", player: risingPlayer, playerPresentationEvents: [] },
+        presentationTimeSeconds: 0
+    });
+    risingRenderer.draw({
+        context: risingContext,
+        scene: { localPlayerId: "local-player", player: risingPlayer, playerPresentationEvents: [] },
+        presentationTimeSeconds: 0.1
+    });
+    assert.deepEqual(
+        risingContext.calls.filter(([name]) => name === "rotate").at(-1),
+        ["rotate", 0.625 + PLAYER_AIR_SPIN_RADIANS_PER_SECOND * 0.1],
+        "the sprite renderer must add the rising presentation spin to the physical body angle"
+    );
     const ropeContext = recordingContext();
     new RopeRenderer(localRopes).draw({
         context: ropeContext,
@@ -1122,10 +1149,41 @@ export async function run() {
         }).state,
         "jump"
     );
+    assert.equal(
+        controller.update({
+            player: { ...grounded, isGrounded: false, velocity: { x: 0, y: -10 } },
+            rope: { isAttached: false },
+            events: [],
+            dt: 0.125
+        }).rotationOffset,
+        Math.PI / 2,
+        "rising without a rope must add a two-turn-per-second presentation spin"
+    );
     assert.equal(controller.snapshot().flipX, true, "vertical motion must preserve facing");
     assert.equal(
         controller.update({ player: grounded, rope: { isAttached: true }, events: [], dt: 0.1 }).state,
-        "rope"
+        "idle",
+        "an attached rope must not select the hanging pose while the player is grounded"
+    );
+    assert.equal(
+        controller.update({
+            player: { ...grounded, isGrounded: false, velocity: { x: 0, y: 20 } },
+            rope: { isAttached: true },
+            events: [],
+            dt: 0.1
+        }).state,
+        "rope",
+        "an airborne attached player must keep the hanging pose"
+    );
+    assert.deepEqual(
+        controller.update({
+            player: { ...grounded, isGrounded: false, velocity: { x: 0, y: 20 } },
+            rope: { isAttached: false },
+            events: [],
+            dt: 0.1
+        }),
+        { state: "fall", elapsedSeconds: 0, flipX: true, rotationOffset: 0 },
+        "descending without a rope must keep the existing fall motion without added spin"
     );
     assert.equal(
         controller.update({
