@@ -537,7 +537,7 @@ const area06 = defineArea({
         worldObject("sector-01-06:fan-b", "wind-source", -416, -1024, {
             damage: false,
             windZoneId: "sector-01-06:fan-b-wind",
-            zone: objectTriggerSpec("center", 704, 384, { x: -416, y: -608 })
+            zone: objectTriggerSpec("center", 704, 384, { x: 416, y: -64 })
         }),
         worldObject("sector-01-06:central-cooling-core", "background-prop", 0, -800, { gameplay: false }),
         block06.panel,
@@ -645,7 +645,7 @@ const area07 = defineArea({
         worldObject("sector-01-07:main-pressure-vent", "wind-source", -416, -992, {
             damage: false,
             windZoneId: "sector-01-07:main-pressure-vent-wind",
-            zone: objectTriggerSpec("center", 704, 384, { x: -416, y: -512 })
+            zone: objectTriggerSpec("center", 704, 384, { x: 416, y: 0 })
         }),
         block07.panel,
         block07.gateVisual
@@ -775,7 +775,7 @@ const area08 = defineArea({
         worldObject("sector-01-08:final-vent", "wind-source", -448, -1248, {
             damage: false,
             windZoneId: "sector-01-08:final-pulsed-vent",
-            zone: objectTriggerSpec("center", 768, 448, { x: -416, y: -800 })
+            zone: objectTriggerSpec("center", 768, 448, { x: 448, y: -32 })
         }),
         block08.gateVisual,
         block08.panel,
