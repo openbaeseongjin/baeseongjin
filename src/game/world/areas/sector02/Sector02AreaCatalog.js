@@ -1,8 +1,9 @@
 import {
     defineArea,
     defineAreaCatalog,
-    gatePortalBounds,
+    exitBlock,
     grappleTarget,
+    objectTriggerSpec,
     point,
     rectangle,
     triggerBounds,
@@ -73,7 +74,10 @@ function exitPanel(areaId, exit, objective, floorY = exit.y) {
 function patrolDrone(areaId, id, x, y, activation, patrolPoints) {
     return worldObject(`${areaId}:${id}`, "patrol-drone", x, y, {
         enemyType: "patrol-drone-t1",
-        activation,
+        activationSpec: objectTriggerSpec("center", activation.width, activation.height, {
+            x: activation.x + activation.width * 0.5 - x,
+            y: activation.y + activation.height * 0.5 - y
+        }),
         patrol: {
             points: patrolPoints,
             speed: 48,
@@ -84,13 +88,18 @@ function patrolDrone(areaId, id, x, y, activation, patrolPoints) {
     });
 }
 
+const block01 = exitBlock({
+    areaId: "sector-02-01",
+    deckX: 416,
+    deckTopY: -899,
+    deckWidth: 256,
+    nextAreaId: "sector-02-02",
+    panelObjectiveId: "sector-02-01:exit-panel-engaged",
+    panelProperties: { requiredObjectiveIds: ["sector-02-01:exit-reached"] }
+});
+
 const area01Id = "sector-02-01";
-const area01Landmarks = [
-    landmark(area01Id, "g1", -288, -160, -192),
-    landmark(area01Id, "g2", 128, 256, -448),
-    landmark(area01Id, "g3", 0, 128, -640),
-    landmark(area01Id, "g4", -160, -32, -832)
-];
+const area01Landmarks = [landmark(area01Id, "g3", 0, 128, -640)];
 const area01Exit = point(`${area01Id}:exit`, 416, -960);
 const area01Objective = reachExitObjective(area01Id, area01Exit.x, area01Exit.y);
 const area01PanelObjective = exitPanelObjective(area01Id, [area01Objective.id]);
@@ -102,7 +111,7 @@ const area01 = defineArea({
     subtitle: "RESIDENTIAL COURTYARD",
     bounds: { width: 1152, height: 1024 },
     entry: point(`${area01Id}:entry`, -304, -32),
-    exit: area01Exit,
+    exit: block01.exit,
     nextAreaId: "sector-02-02",
     surfaces: [
         platform(area01Id, "p0", -416, -192, 0),
@@ -114,20 +123,17 @@ const area01 = defineArea({
         platform(area01Id, "p3", -448, -160, -736),
         platform(area01Id, "r4", -96, 128, -784, "recovery"),
         platform(area01Id, "p4", 32, 352, -928, "safe-deck"),
-        platform(area01Id, "exit-deck", 288, 544, -960, "safe-deck"),
+        block01.deck,
         ...area01Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area01Id}:route-entry`, -304, -32),
-        area01Landmarks[0].route,
         point(`${area01Id}:route-p1`, -32, -288),
-        area01Landmarks[1].route,
         point(`${area01Id}:route-p2`, 336, -544),
-        area01Landmarks[2].route,
+        area01Landmarks[0].route,
         point(`${area01Id}:route-p3`, -304, -736),
-        area01Landmarks[3].route,
         point(`${area01Id}:route-p4`, 192, -928),
-        point(`${area01Id}:route-exit`, area01Exit.x, area01Exit.y)
+        block01.routeExit
     ],
     recoveryPoints: [
         point(`${area01Id}:recovery-r1`, -240, -168),
@@ -140,27 +146,28 @@ const area01 = defineArea({
         worldObject(`${area01Id}:community-notice`, "story-display", 160, -952, {
             cueIds: ["evacuation-group-c", "wait-for-further-instruction"]
         }),
-        exitPanel(area01Id, area01Exit, area01PanelObjective, -960),
-        worldObject(`${area01Id}:exit-frame`, "gate", area01Exit.x, area01Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area01Id}:gate`
-        })
+        block01.panel,
+        block01.gateVisual
     ],
     objectives: [area01Objective, area01PanelObjective],
-    gate: progressionGate(area01Id, area01Exit.x, area01Exit.y, "sector-02-02", [area01PanelObjective.id]),
+    gate: block01.gate,
     storyTriggers: ["block-12-entry", "lived-in-trace", "community-notice"],
     routes: ["safe", "flow", "recovery"],
     cueIds: ["worker-block-12", "residential-courtyard", "quiet-housing", "community-notice"]
 });
 
+const block02 = exitBlock({
+    areaId: "sector-02-02",
+    deckX: 160,
+    deckTopY: -963,
+    deckWidth: 320,
+    nextAreaId: "sector-02-03",
+    panelObjectiveId: "sector-02-02:exit-panel-engaged",
+    panelProperties: { requiredObjectiveIds: ["sector-02-02:exit-reached"] }
+});
+
 const area02Id = "sector-02-02";
-const area02Landmarks = [
-    landmark(area02Id, "g1", -416, -288, -176),
-    landmark(area02Id, "g2", 64, 192, -384),
-    landmark(area02Id, "g3", 320, 448, -544),
-    landmark(area02Id, "g4", -96, 32, -768),
-    landmark(area02Id, "g5", -128, 0, -928)
-];
+const area02Landmarks = [];
 const area02Exit = point(`${area02Id}:exit`, 224, -1024);
 const area02Objective = reachExitObjective(area02Id, area02Exit.x, area02Exit.y);
 const area02PanelObjective = exitPanelObjective(area02Id, [area02Objective.id]);
@@ -172,7 +179,7 @@ const area02 = defineArea({
     subtitle: "FIRST MOVING SECURITY",
     bounds: { width: 1280, height: 1088 },
     entry: point(`${area02Id}:entry`, -416, -32),
-    exit: area02Exit,
+    exit: block02.exit,
     nextAreaId: "sector-02-03",
     surfaces: [
         platform(area02Id, "p0", -544, -288, 0),
@@ -181,20 +188,15 @@ const area02 = defineArea({
         platform(area02Id, "p2", -64, 480, -480),
         platform(area02Id, "cover-b", 160, 288, -608, "cover"),
         platform(area02Id, "p3", 32, 320, -704, "recovery"),
-        platform(area02Id, "exit-deck", 64, 384, -1024, "safe-deck"),
+        block02.deck,
         ...area02Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area02Id}:route-entry`, -416, -32),
-        area02Landmarks[0].route,
         point(`${area02Id}:route-p1`, -144, -256),
-        area02Landmarks[1].route,
         point(`${area02Id}:route-p2`, 208, -480),
-        area02Landmarks[2].route,
         point(`${area02Id}:route-p3`, 176, -704),
-        area02Landmarks[3].route,
-        area02Landmarks[4].route,
-        point(`${area02Id}:route-exit`, area02Exit.x, area02Exit.y)
+        block02.routeExit
     ],
     recoveryPoints: [point(`${area02Id}:recovery-lower`, -144, -280), point(`${area02Id}:recovery-upper`, 176, -728)],
     objects: [
@@ -203,21 +205,28 @@ const area02 = defineArea({
             { x: -320, y: -416 },
             { x: 320, y: -416 }
         ]),
-        exitPanel(area02Id, area02Exit, area02PanelObjective),
-        worldObject(`${area02Id}:exit-frame`, "gate", area02Exit.x, area02Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area02Id}:gate`
-        })
+        block02.panel,
+        block02.gateVisual
     ],
     objectives: [area02Objective, area02PanelObjective],
-    gate: progressionGate(area02Id, area02Exit.x, area02Exit.y, "sector-02-03", [area02PanelObjective.id]),
+    gate: block02.gate,
     storyTriggers: ["patrol-cycle-reveal", "security-still-active"],
     routes: ["safe", "flow", "pressure", "recovery"],
     cueIds: ["patrol-walkway", "patrol-drone-t1", "security-still-active"]
 });
 
+const block03 = exitBlock({
+    areaId: "sector-02-03",
+    deckX: 304,
+    deckTopY: -643,
+    deckWidth: 288,
+    nextAreaId: "sector-02-04",
+    panelObjectiveId: "sector-02-03:exit-panel-engaged",
+    panelProperties: { requiredObjectiveIds: ["sector-02-03:exit-reached"] }
+});
+
 const area03Id = "sector-02-03";
-const area03Landmarks = [landmark(area03Id, "g1", 128, 256, -512), landmark(area03Id, "g2", -96, 32, -608)];
+const area03Landmarks = [];
 const area03Exit = point(`${area03Id}:exit`, 304, -704);
 const area03Objective = Object.freeze({
     id: `${area03Id}:specialization-selected`,
@@ -233,7 +242,7 @@ const area03 = defineArea({
     subtitle: "FIRST SPECIALIZATION",
     bounds: { width: 960, height: 768 },
     entry: point(`${area03Id}:entry`, -288, -32),
-    exit: area03Exit,
+    exit: block03.exit,
     nextAreaId: "sector-02-04",
     surfaces: [
         platform(area03Id, "p0", -416, -160, 0),
@@ -241,18 +250,16 @@ const area03 = defineArea({
         platform(area03Id, "p2", -224, 224, -384, "safe-deck"),
         platform(area03Id, "r1", -32, 224, -576, "recovery"),
         platform(area03Id, "p3", 96, 384, -672),
-        platform(area03Id, "exit-deck", 160, 448, -704, "safe-deck"),
+        block03.deck,
         ...area03Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area03Id}:route-entry`, -288, -32),
         point(`${area03Id}:route-p1`, -160, -160),
         point(`${area03Id}:route-p2`, 0, -384),
-        area03Landmarks[0].route,
         point(`${area03Id}:route-r1`, 96, -576),
-        area03Landmarks[1].route,
         point(`${area03Id}:route-p3`, 240, -672),
-        point(`${area03Id}:route-exit`, area03Exit.x, area03Exit.y)
+        block03.routeExit
     ],
     recoveryPoints: [point(`${area03Id}:recovery-r1`, 96, -600)],
     objects: [
@@ -265,31 +272,33 @@ const area03 = defineArea({
             perPlayerSelection: true,
             cueIds: ["foundation-detected", "specialization-available"]
         }),
-        exitPanel(area03Id, area03Exit, area03PanelObjective, -704),
-        worldObject(`${area03Id}:exit-frame`, "gate", area03Exit.x, area03Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area03Id}:gate`
-        })
+        block03.panel,
+        block03.gateVisual
     ],
     objectives: [area03Objective, area03PanelObjective],
-    gate: progressionGate(area03Id, area03Exit.x, area03Exit.y, "sector-02-04", [area03PanelObjective.id]),
+    gate: block03.gate,
     storyTriggers: ["residential-service", "foundation-detected", "specialization-available"],
     routes: ["calibration", "recovery"],
     cueIds: ["residential-service-node", "foundation-detected", "specialization-placeholder"]
 });
 
+const block04 = exitBlock({
+    areaId: "sector-02-04",
+    deckX: 496,
+    deckTopY: -1155,
+    deckWidth: 288,
+    nextAreaId: "sector-02-05",
+    panelObjectiveId: "sector-02-04:exit-panel-engaged",
+    panelProperties: { requiredObjectiveIds: ["sector-02-04:exit-reached"] }
+});
+
 const area04Id = "sector-02-04";
 const area04Landmarks = [
     landmark(area04Id, "g1", -512, -384, -288),
-    landmark(area04Id, "g2", -96, 32, -288),
     landmark(area04Id, "g3", -544, -416, -480),
-    landmark(area04Id, "g4", 96, 224, -512),
     landmark(area04Id, "g5", -64, 64, -672),
-    landmark(area04Id, "g6", 224, 352, -672),
     landmark(area04Id, "g7", -416, -288, -896),
-    landmark(area04Id, "g8", 64, 192, -928),
-    landmark(area04Id, "g8a", -128, 0, -1024),
-    landmark(area04Id, "g9", 224, 352, -1152)
+    landmark(area04Id, "g8a", -128, 0, -1024)
 ];
 const area04Exit = point(`${area04Id}:exit`, 496, -1216);
 const area04Objective = reachExitObjective(area04Id, area04Exit.x, area04Exit.y);
@@ -302,7 +311,7 @@ const area04 = defineArea({
     subtitle: "MULTI-ROUTE HOUSING",
     bounds: { width: 1408, height: 1280 },
     entry: point(`${area04Id}:entry`, -448, -32),
-    exit: area04Exit,
+    exit: block04.exit,
     nextAreaId: "sector-02-05",
     surfaces: [
         platform(area04Id, "p0", -576, -320, 0),
@@ -317,24 +326,19 @@ const area04 = defineArea({
         platform(area04Id, "s4", -512, -192, -1056, "safe-deck"),
         platform(area04Id, "m3", 0, 352, -1088, "safe-deck"),
         platform(area04Id, "p7", 288, 608, -1216),
-        platform(area04Id, "exit-deck", 352, 640, -1216, "safe-deck"),
+        block04.deck,
         ...area04Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area04Id}:route-entry`, -448, -32),
         point(`${area04Id}:route-p1`, -256, -192),
-        area04Landmarks[1].route,
         point(`${area04Id}:route-c1`, 16, -416),
-        area04Landmarks[3].route,
         point(`${area04Id}:route-r2`, 144, -640),
         point(`${area04Id}:route-p4`, 336, -704),
-        area04Landmarks[5].route,
         point(`${area04Id}:route-r3`, 432, -864),
-        area04Landmarks[7].route,
         point(`${area04Id}:route-m3`, 176, -1088),
-        area04Landmarks[9].route,
         point(`${area04Id}:route-p7`, 448, -1216),
-        point(`${area04Id}:route-exit`, area04Exit.x, area04Exit.y)
+        block04.routeExit
     ],
     recoveryPoints: [
         point(`${area04Id}:recovery-s2`, -480, -632),
@@ -348,29 +352,28 @@ const area04 = defineArea({
             { x: -416, y: -768 },
             { x: 416, y: -768 }
         ]),
-        exitPanel(area04Id, area04Exit, area04PanelObjective, -1216),
-        worldObject(`${area04Id}:exit-frame`, "gate", area04Exit.x, area04Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area04Id}:gate`
-        })
+        block04.panel,
+        block04.gateVisual
     ],
     objectives: [area04Objective, area04PanelObjective],
-    gate: progressionGate(area04Id, area04Exit.x, area04Exit.y, "sector-02-05", [area04PanelObjective.id]),
+    gate: block04.gate,
     storyTriggers: ["housing-density", "route-choice", "residential-scale"],
     routes: ["safe-left", "flow-centre", "pressure-right", "recovery"],
     cueIds: ["residential-stack", "multi-route", "patrol-drone-t1", "no-build-lock"]
 });
 
+const block05 = exitBlock({
+    areaId: "sector-02-05",
+    deckX: 464,
+    deckTopY: -1027,
+    deckWidth: 288,
+    nextAreaId: "sector-02-06",
+    panelObjectiveId: "sector-02-05:exit-panel-engaged",
+    panelProperties: { requiredObjectiveIds: ["sector-02-05:exit-reached"] }
+});
+
 const area05Id = "sector-02-05";
-const area05Landmarks = [
-    landmark(area05Id, "g1", -448, -320, -256),
-    landmark(area05Id, "g2", -224, -96, -288),
-    landmark(area05Id, "g3", 32, 160, -560),
-    landmark(area05Id, "g4", 256, 384, -576),
-    landmark(area05Id, "g5", 256, 384, -768),
-    landmark(area05Id, "g6", -64, 64, -928),
-    landmark(area05Id, "g7", 224, 352, -1088)
-];
+const area05Landmarks = [landmark(area05Id, "g4", 256, 384, -576)];
 const area05Exit = point(`${area05Id}:exit`, 464, -1088);
 const area05Objective = reachExitObjective(area05Id, area05Exit.x, area05Exit.y);
 const area05PanelObjective = exitPanelObjective(area05Id, [area05Objective.id]);
@@ -382,7 +385,7 @@ const area05 = defineArea({
     subtitle: "UPPER TRANSIT RESTRICTED",
     bounds: { width: 1280, height: 1152 },
     entry: point(`${area05Id}:entry`, -480, -32),
-    exit: area05Exit,
+    exit: block05.exit,
     nextAreaId: "sector-02-06",
     surfaces: [
         platform(area05Id, "p0", -608, -352, 0),
@@ -398,24 +401,18 @@ const area05 = defineArea({
         }),
         platform(area05Id, "r1", 64, 320, -832, "recovery"),
         platform(area05Id, "p4", 32, 320, -1024),
-        platform(area05Id, "exit-deck", 320, 608, -1088, "safe-deck"),
+        block05.deck,
         ...area05Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area05Id}:route-entry`, -480, -32),
         point(`${area05Id}:route-p1`, -352, -160),
-        area05Landmarks[0].route,
         point(`${area05Id}:route-s1`, -352, -352),
-        area05Landmarks[1].route,
         point(`${area05Id}:route-p2`, 96, -448),
-        area05Landmarks[2].route,
         point(`${area05Id}:route-p3`, 368, -672),
-        area05Landmarks[4].route,
         point(`${area05Id}:route-r1`, 192, -832),
-        area05Landmarks[5].route,
         point(`${area05Id}:route-p4`, 176, -1024),
-        area05Landmarks[6].route,
-        point(`${area05Id}:route-exit`, area05Exit.x, area05Exit.y)
+        block05.routeExit
     ],
     recoveryPoints: [point(`${area05Id}:recovery-s1`, -352, -376), point(`${area05Id}:recovery-r1`, 192, -856)],
     objects: [
@@ -432,29 +429,28 @@ const area05 = defineArea({
         worldObject(`${area05Id}:evacuation-status`, "story-display", 352, -704, {
             cueIds: ["assembly-complete", "transfer-authorization-pending", "upper-transit-restricted"]
         }),
-        exitPanel(area05Id, area05Exit, area05PanelObjective),
-        worldObject(`${area05Id}:maintenance-frame`, "maintenance-frame", area05Exit.x, area05Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area05Id}:gate`
-        })
+        block05.panel,
+        block05.gateVisual
     ],
     objectives: [area05Objective, area05PanelObjective],
-    gate: progressionGate(area05Id, area05Exit.x, area05Exit.y, "sector-02-06", [area05PanelObjective.id]),
+    gate: block05.gate,
     storyTriggers: ["assembly-complete", "upper-transit-restricted", "maintenance-bypass"],
     routes: ["safe", "flow", "pressure", "maintenance-bypass", "recovery"],
     cueIds: ["evacuation-walkway", "assembly-complete", "upper-transit-restricted", "maintenance-bypass"]
 });
 
+const block06 = exitBlock({
+    areaId: "sector-02-06",
+    deckX: 544,
+    deckTopY: -1091,
+    deckWidth: 256,
+    nextAreaId: "sector-02-07",
+    panelObjectiveId: "sector-02-06:exit-panel-engaged",
+    panelProperties: { requiredObjectiveIds: ["sector-02-06:exit-reached"] }
+});
+
 const area06Id = "sector-02-06";
-const area06Landmarks = [
-    landmark(area06Id, "g1", -416, -288, -256),
-    landmark(area06Id, "g2", -128, 0, -512),
-    landmark(area06Id, "g3", 192, 320, -544),
-    landmark(area06Id, "g4", -288, -160, -704),
-    landmark(area06Id, "g5", 288, 416, -736),
-    landmark(area06Id, "g6", 32, 160, -896),
-    landmark(area06Id, "g7", 192, 320, -1088)
-];
+const area06Landmarks = [landmark(area06Id, "g3", 192, 320, -544), landmark(area06Id, "g5", 288, 416, -736)];
 const area06Exit = point(`${area06Id}:exit`, 544, -1152);
 const area06Objective = reachExitObjective(area06Id, area06Exit.x, area06Exit.y);
 const area06PanelObjective = exitPanelObjective(area06Id, [area06Objective.id]);
@@ -466,7 +462,7 @@ const area06 = defineArea({
     subtitle: "RESIDENTIAL SCALE REVEAL",
     bounds: { width: 1472, height: 1216 },
     entry: point(`${area06Id}:entry`, -512, -32),
-    exit: area06Exit,
+    exit: block06.exit,
     nextAreaId: "sector-02-07",
     surfaces: [
         platform(area06Id, "p0", -640, -384, 0),
@@ -477,23 +473,18 @@ const area06 = defineArea({
         platform(area06Id, "r3", 224, 512, -832, "recovery"),
         platform(area06Id, "p5", -64, 320, -992),
         platform(area06Id, "p6", 320, 608, -1152),
-        platform(area06Id, "exit-deck", 416, 672, -1152, "safe-deck"),
+        block06.deck,
         ...area06Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area06Id}:route-entry`, -512, -32),
         point(`${area06Id}:route-p1`, -400, -160),
-        area06Landmarks[0].route,
         point(`${area06Id}:route-p2`, -80, -384),
-        area06Landmarks[1].route,
         point(`${area06Id}:route-r1`, 48, -640),
-        area06Landmarks[3].route,
         point(`${area06Id}:route-p4`, -304, -832),
-        area06Landmarks[5].route,
         point(`${area06Id}:route-p5`, 128, -992),
-        area06Landmarks[6].route,
         point(`${area06Id}:route-p6`, 464, -1152),
-        point(`${area06Id}:route-exit`, area06Exit.x, area06Exit.y)
+        block06.routeExit
     ],
     recoveryPoints: [
         point(`${area06Id}:recovery-r1`, 48, -664),
@@ -505,32 +496,32 @@ const area06 = defineArea({
         worldObject(`${area06Id}:courtyard-void`, "background-prop", 0, -608, {
             cueIds: ["residential-scale", "quiet-void"]
         }),
-        exitPanel(area06Id, area06Exit, area06PanelObjective, -1152),
-        worldObject(`${area06Id}:exit-frame`, "gate", area06Exit.x, area06Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area06Id}:gate`
-        })
+        block06.panel,
+        block06.gateVisual
     ],
     objectives: [area06Objective, area06PanelObjective],
-    gate: progressionGate(area06Id, area06Exit.x, area06Exit.y, "sector-02-07", [area06PanelObjective.id]),
+    gate: block06.gate,
     storyTriggers: ["quiet-courtyard", "residential-scale", "upper-route-preview"],
     routes: ["safe", "flow", "recovery"],
     cueIds: ["quiet-residential-void", "residential-scale", "no-enemy", "visual-relief"]
 });
 
+const block07 = exitBlock({
+    areaId: "sector-02-07",
+    deckX: 544,
+    deckTopY: -1315,
+    deckWidth: 256,
+    nextAreaId: "sector-02-08",
+    panelObjectiveId: "sector-02-07:exit-panel-engaged",
+    panelProperties: { requiredObjectiveIds: ["sector-02-07:exit-reached"] }
+});
+
 const area07Id = "sector-02-07";
 const area07Landmarks = [
-    landmark(area07Id, "g1", -416, -288, -256),
     landmark(area07Id, "g2", -544, -416, -352),
-    landmark(area07Id, "g3", -96, 32, -352),
     landmark(area07Id, "g4", -352, -224, -544),
-    landmark(area07Id, "g5", 192, 320, -544),
-    landmark(area07Id, "g6", 32, 160, -736),
     landmark(area07Id, "g7", -352, -224, -928),
-    landmark(area07Id, "g8", 64, 192, -928),
-    landmark(area07Id, "g8s", -224, -96, -1120),
-    landmark(area07Id, "g9", 160, 288, -1120),
-    landmark(area07Id, "g10", 224, 352, -1312)
+    landmark(area07Id, "g8s", -224, -96, -1120)
 ];
 const area07Exit = point(`${area07Id}:exit`, 544, -1376);
 const area07Objective = reachExitObjective(area07Id, area07Exit.x, area07Exit.y);
@@ -543,7 +534,7 @@ const area07 = defineArea({
     subtitle: "EVACUATION TRANSFER SUSPENDED",
     bounds: { width: 1408, height: 1440 },
     entry: point(`${area07Id}:entry`, -480, -32),
-    exit: area07Exit,
+    exit: block07.exit,
     nextAreaId: "sector-02-08",
     surfaces: [
         platform(area07Id, "p0", -608, -352, 0),
@@ -557,26 +548,19 @@ const area07 = defineArea({
         platform(area07Id, "r4", 288, 544, -1024, "recovery"),
         platform(area07Id, "p7", -32, 320, -1216),
         platform(area07Id, "p8", 320, 608, -1376),
-        platform(area07Id, "exit-deck", 416, 672, -1376, "safe-deck"),
+        block07.deck,
         ...area07Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area07Id}:route-entry`, -480, -32),
         point(`${area07Id}:route-p1`, -336, -160),
-        area07Landmarks[0].route,
-        area07Landmarks[2].route,
         point(`${area07Id}:route-p3`, 0, -480),
-        area07Landmarks[4].route,
         point(`${area07Id}:route-p4`, 64, -640),
-        area07Landmarks[5].route,
         point(`${area07Id}:route-p5`, 0, -800),
-        area07Landmarks[7].route,
         point(`${area07Id}:route-r4`, 416, -1024),
-        area07Landmarks[9].route,
         point(`${area07Id}:route-p7`, 144, -1216),
-        area07Landmarks[10].route,
         point(`${area07Id}:route-p8`, 464, -1376),
-        point(`${area07Id}:route-exit`, area07Exit.x, area07Exit.y)
+        block07.routeExit
     ],
     recoveryPoints: [
         point(`${area07Id}:recovery-s2`, -464, -472),
@@ -598,40 +582,42 @@ const area07 = defineArea({
         worldObject(`${area07Id}:shelter-status`, "story-display", 0, -824, {
             cueIds: ["shelter-capacity-full", "evacuation-transfer-suspended", "remain-designated-area"]
         }),
-        exitPanel(area07Id, area07Exit, area07PanelObjective, -1376),
-        worldObject(`${area07Id}:exit-frame`, "gate", area07Exit.x, area07Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area07Id}:gate`
-        })
+        block07.panel,
+        block07.gateVisual
     ],
     objectives: [area07Objective, area07PanelObjective],
-    gate: progressionGate(area07Id, area07Exit.x, area07Exit.y, "sector-02-08", [area07PanelObjective.id]),
+    gate: block07.gate,
     storyTriggers: ["shelter-capacity-full", "transfer-suspended", "evacuation-platform-preview"],
     routes: ["safe", "flow", "pressure", "recovery"],
     cueIds: ["shelter-access", "two-patrol-bands", "no-crossfire", "transfer-suspended"]
 });
 
+const block08 = exitBlock({
+    areaId: "sector-02-08",
+    deckX: 432,
+    deckTopY: -1411,
+    deckWidth: 352,
+    nextAreaId: null,
+    panelObjectiveId: "sector-02-08:transfer-control-read",
+    panelCueIds: ["group-a-complete", "group-b-complete", "group-c-suspended", "priority-access-active"],
+    gateCueIds: ["post-sector-transition-tbd"],
+    completionMode: "content-boundary"
+});
+
 const area08Id = "sector-02-08";
 const area08Landmarks = [
     landmark(area08Id, "g1", -544, -416, -288),
-    landmark(area08Id, "g2a", 0, 128, -256),
     landmark(area08Id, "g2", 224, 352, -288),
-    landmark(area08Id, "g3", -160, -32, -480),
     landmark(area08Id, "g4", 160, 288, -480),
-    landmark(area08Id, "g5", -320, -192, -608),
     landmark(area08Id, "g6", 256, 384, -608),
-    landmark(area08Id, "g7", -64, 64, -832),
     landmark(area08Id, "g8", -352, -224, -960),
-    landmark(area08Id, "g9", 128, 256, -960),
-    landmark(area08Id, "g8s", -224, -96, -1184),
-    landmark(area08Id, "g10", -32, 96, -1184),
-    landmark(area08Id, "g11", 160, 288, -1376)
+    landmark(area08Id, "g8s", -224, -96, -1184)
 ];
 const area08Exit = point(`${area08Id}:exit`, 576, -1472);
 const area08Objective = Object.freeze({
     id: `${area08Id}:transfer-control-read`,
     type: "interact",
-    sourceObjectId: `${area08Id}:transfer-control`
+    sourceObjectId: `${area08Id}:exit-panel`
 });
 const area08 = defineArea({
     id: area08Id,
@@ -641,7 +627,7 @@ const area08 = defineArea({
     subtitle: "GROUP C TRANSFER SUSPENDED",
     bounds: { width: 1536, height: 1536 },
     entry: point(`${area08Id}:entry`, -512, -32),
-    exit: area08Exit,
+    exit: block08.exit,
     nextAreaId: null,
     surfaces: [
         platform(area08Id, "p0", -640, -384, 0),
@@ -653,25 +639,18 @@ const area08 = defineArea({
         platform(area08Id, "s5", -576, -288, -1088, "recovery"),
         platform(area08Id, "b5", 288, 576, -1088, "recovery"),
         platform(area08Id, "p9", -160, 224, -1280, "safe-deck"),
-        platform(area08Id, "p10", 256, 608, -1472, "safe-deck"),
+        block08.deck,
         ...area08Landmarks.map(({ surface }) => surface)
     ],
     routePoints: [
         point(`${area08Id}:route-entry`, -512, -32),
         point(`${area08Id}:route-p1`, -320, -160),
-        area08Landmarks[1].route,
         point(`${area08Id}:route-p2`, 0, -320),
-        area08Landmarks[3].route,
-        area08Landmarks[5].route,
         point(`${area08Id}:route-m2`, 0, -736),
-        area08Landmarks[7].route,
-        area08Landmarks[9].route,
         point(`${area08Id}:route-b5`, 432, -1088),
-        area08Landmarks[11].route,
         point(`${area08Id}:route-p9`, 32, -1280),
-        area08Landmarks[12].route,
         point(`${area08Id}:route-p10`, 432, -1472),
-        point(`${area08Id}:route-exit`, area08Exit.x, area08Exit.y)
+        block08.routeExit
     ],
     recoveryPoints: [
         point(`${area08Id}:recovery-s2`, -512, -472),
@@ -696,26 +675,14 @@ const area08 = defineArea({
             { x: -384, y: -1088 },
             { x: 480, y: -1088 }
         ]),
-        worldObject(`${area08Id}:transfer-control`, "gate-panel", 448, -1472, {
-            coordinateAnchor: "bottom-center",
-            interactionRadius,
-            objectiveId: area08Objective.id,
-            gateId: `${area08Id}:gate`,
-            cueIds: ["group-a-complete", "group-b-complete", "group-c-suspended", "priority-access-active"]
-        }),
+        block08.panel,
         worldObject(`${area08Id}:sector-end-checkpoint-object`, "checkpoint", 576, -1472, {
             checkpointId: `${area08Id}:sector-end-checkpoint`
         }),
-        worldObject(`${area08Id}:content-boundary`, "gate", area08Exit.x, area08Exit.y, {
-            coordinateAnchor: "bottom-center",
-            gateId: `${area08Id}:gate`,
-            cueIds: ["post-sector-transition-tbd"]
-        })
+        block08.gateVisual
     ],
     objectives: [area08Objective],
-    gate: progressionGate(area08Id, area08Exit.x, area08Exit.y, null, [area08Objective.id], {
-        completionMode: "content-boundary"
-    }),
+    gate: block08.gate,
     storyTriggers: ["evacuation-platform", "transfer-control", "priority-access-active"],
     routes: ["safe-outer", "flow-centre", "pressure-right", "recovery"],
     cueIds: [

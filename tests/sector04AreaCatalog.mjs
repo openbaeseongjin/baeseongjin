@@ -16,7 +16,7 @@ export function run() {
     assert.equal(area.gate.nextAreaId, "sector-04-02");
     assert.equal(area.gate.completionMode, undefined);
     assert.deepEqual(area.windZones, []);
-    assert.equal(area.surfaces.filter(({ kind }) => kind === "grapple-target").length, 6);
+    assert.equal(area.surfaces.filter(({ kind }) => kind === "grapple-target").length, 4);
 
     const anchorPositions = area.objects
         .filter(({ kind }) => kind === "grapple-landmark")
@@ -24,10 +24,8 @@ export function run() {
     assert.deepEqual(anchorPositions, [
         ["sector-04-01:anchor-a1", -352, -192],
         ["sector-04-01:anchor-a2", 0, -352],
-        ["sector-04-01:anchor-a3", 288, -592],
         ["sector-04-01:anchor-a4", -64, -800],
-        ["sector-04-01:anchor-a5", 192, -1056],
-        ["sector-04-01:anchor-a6", 448, -1248]
+        ["sector-04-01:anchor-a5", 192, -1056]
     ]);
 
     const cutterArea = SECTOR_04_AREA_CATALOG.areas[1];
@@ -38,7 +36,7 @@ export function run() {
     assert.equal(cutterArea.gate.nextAreaId, "sector-04-03");
     assert.equal(cutterArea.gate.completionMode, undefined);
     assert.deepEqual(cutterArea.windZones, []);
-    assert.equal(cutterArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 5);
+    assert.equal(cutterArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 3);
 
     const cutterSentry = cutterArea.objects.find(({ id }) => id.endsWith(":cutter-sentry-01"));
     assert.equal(cutterSentry.kind, "sentry");
@@ -53,7 +51,7 @@ export function run() {
     assert.equal(freightArea.nextAreaId, "sector-04-04");
     assert.equal(freightArea.gate.nextAreaId, "sector-04-04");
     assert.equal(freightArea.gate.completionMode, undefined);
-    assert.equal(freightArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 7);
+    assert.equal(freightArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 3);
 
     const wakeZone = freightArea.windZones[0];
     assert.equal(wakeZone.id, "sector-04-03:freight-wake");
@@ -73,7 +71,7 @@ export function run() {
     assert.equal(restArea.gate.nextAreaId, "sector-04-05");
     assert.equal(restArea.gate.completionMode, undefined, "4-4 REST is a mid-sector node once 4-5 is authored");
     assert.deepEqual(restArea.windZones, []);
-    assert.equal(restArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 5);
+    assert.equal(restArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 1);
     assert.equal(restArea.objects.filter(({ kind }) => kind === "sentry" || kind === "patrol-drone").length, 0);
     assert.ok(restArea.objects.find(({ id }) => id.endsWith(":routing-status-display")));
 
@@ -83,7 +81,7 @@ export function run() {
     assert.deepEqual(expressArea.bounds, { width: 1216, height: 1536 });
     assert.equal(expressArea.nextAreaId, "sector-04-06");
     assert.equal(expressArea.gate.nextAreaId, "sector-04-06");
-    assert.equal(expressArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 6);
+    assert.equal(expressArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 3);
     assert.equal(expressArea.objects.filter(({ kind }) => kind === "sentry" || kind === "patrol-drone").length, 0);
     assert.equal(expressArea.windZones.length, 1);
     assert.equal(expressArea.windZones[0].id, "sector-04-05:express-wake");
@@ -99,7 +97,7 @@ export function run() {
     assert.deepEqual(relayArea.bounds, { width: 1536, height: 1568 });
     assert.equal(relayArea.nextAreaId, "sector-04-07");
     assert.deepEqual(relayArea.windZones, []);
-    assert.equal(relayArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 6);
+    assert.equal(relayArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 3);
     const relaySentry = relayArea.objects.find(({ id }) => id.endsWith(":cutter-sentry-01"));
     assert.equal(relaySentry.kind, "sentry");
     assert.ok(relaySentry.rules.includes("cutter-fire"));
@@ -113,7 +111,7 @@ export function run() {
     assert.equal(junctionArea.name, "ISOLATION JUNCTION");
     assert.deepEqual(junctionArea.bounds, { width: 1472, height: 1536 });
     assert.equal(junctionArea.nextAreaId, "sector-04-08");
-    assert.equal(junctionArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 7);
+    assert.equal(junctionArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 3);
     assert.equal(junctionArea.windZones.length, 1);
     assert.equal(junctionArea.windZones[0].id, "sector-04-07:junction-wake");
     assert.deepEqual(junctionArea.windZones[0].direction, { x: 1, y: 0 });
@@ -131,7 +129,7 @@ export function run() {
     );
     assert.equal(trunkArea.gate.nextAreaId, null);
     assert.equal(trunkArea.gate.completionMode, "content-boundary");
-    assert.equal(trunkArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 9);
+    assert.equal(trunkArea.surfaces.filter(({ kind }) => kind === "grapple-target").length, 4);
     assert.equal(trunkArea.windZones.length, 1);
     assert.equal(trunkArea.windZones[0].id, "sector-04-08:control-trunk-wake");
     assert.deepEqual(trunkArea.windZones[0].direction, { x: 0, y: -1 });
@@ -155,7 +153,7 @@ export function run() {
     assert.equal(world.gates[7].nextAreaId, null);
     assert.equal(world.gates[7].completionMode, "content-boundary");
     assert.deepEqual(world.areas[0].entry, { id: "sector-04-01:entry", x: -640, y: 528 });
-    assert.deepEqual(world.areas[0].exit, { id: "sector-04-01:exit", x: 672, y: -784 });
+    assert.deepEqual(world.areas[0].exit, { id: "sector-04-01:exit", x: 656, y: -723 });
     assert.equal(
         world.enemySpawns.find(({ objectId }) => objectId === "sector-04-02:cutter-sentry-01").enemyType,
         "sentry-t1"

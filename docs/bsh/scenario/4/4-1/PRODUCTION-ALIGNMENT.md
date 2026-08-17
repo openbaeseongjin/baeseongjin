@@ -19,7 +19,7 @@
 - Area: `sector-04-01`, entry `(-640,-32)`, exit `(672,-1344)`, next `sector-04-02`
 - Grapple: `A1(-352,-192)`, `A2(0,-352)`, `A3(288,-592)`, `A4(-64,-800)`, `A5(192,-1056)`, `A6(448,-1248)`
 - Recovery: `R1(-192,-344)`, `R2(160,-536)`, `R3(-160,-952)`
-- Gate set: `exit-panel(560,-1312)`, `service-gate(672,-1312)`
+- Gate set(exitBlock 표준): `exit-deck(480,-1251,416)`, `exit-gate(656,-1251)`, `exit-panel(544,-1251)`, exit `(656,-1283)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 - Objectives: `final-deck-reached bounds (272,-1344,416×96)`, `exit-panel-engaged`
 - Camera zones: `intake-reveal`, `lower-long-span`, `cross-trunk`, `upper-relay`, `exit`
 

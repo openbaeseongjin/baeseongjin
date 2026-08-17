@@ -22,7 +22,7 @@
 - Drones: `drone-1(-512,-944)`, activation `(-640,-1120,480×416)` / `drone-2(192,-944)`, activation `(160,-1120,480×416)`
 - Story display: `market-gate(-416,-184)`, `market-directory(0,-632)`, `evacuation-archive(-128,-1464)`, `access-archive(128,-1464)`, `final-control(416,-1656)`
 - Scanner group: `sector-03-08:scanner-upper-market-A`, controlled surfaces `c1/c2/c3/c4`
-- Gate set: `exit-panel(352,-1600)`, `final-gate(480,-1600)`, gate `sector-03-08:gate` — 출구 표준화(offset 64)로 32px 하강
+- Gate set(exitBlock 표준): `exit-deck(416,-1539,320)`, `exit-gate(544,-1539)`, `exit-panel(432,-1539)`, exit `(544,-1571)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 
 ## 3. Camera · Story 상태
 

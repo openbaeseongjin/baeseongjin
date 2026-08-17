@@ -22,7 +22,7 @@
 - Drone: `drone-1(-128,-736)`, activation `(-384,-896,832×224)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
 - Story display: `atrium-id(-384,-184)`, `power-state(-64,-504)`, `upper-concourse(416,-1208)`, `access-control-ahead(384,-1432)`
 - Scanner group: `sector-03-06:scanner-premium-atrium-A`, controlled surfaces `c1-surface`, `c2-surface`
-- Gate set: `exit-panel(320,-1376)`, `service-gate(448,-1376)` — 출구 표준화(offset 64)로 32px 하강
+- Gate set(exitBlock 표준): `exit-deck(384,-1315,320)`, `exit-gate(512,-1315)`, `exit-panel(400,-1315)`, exit `(512,-1347)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 
 ## 3. Camera · Story 상태
 

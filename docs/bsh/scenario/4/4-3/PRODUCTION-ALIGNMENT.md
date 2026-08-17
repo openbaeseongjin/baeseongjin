@@ -21,7 +21,7 @@
 - Recovery: `R1(-240,-664)`, `R2(64,-1112)`
 - Cutter: `cutter-sentry-01(448,-640)`, activation `(-128,-832,704×480)`
 - Wake: `sector-04-03:freight-wake`, bounds `(-208,-832,560×544)`, direction `(+1,0)`, cycle `1.75 / 0.7 / 1.4 / 0.3`, strength `360`
-- Gate set: `exit-panel(-208,-1408)`, `service-gate(-80,-1408)` — 출구 표준화(offset 64)로 32px 상승
+- Gate set(exitBlock 표준): `exit-deck(-288,-1347,416)`, `exit-gate(-112,-1347)`, `exit-panel(-224,-1347)`, exit `(-112,-1379)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 
 ## 3. Camera · Story 상태
 

@@ -1,5 +1,6 @@
 import { polygonBounds } from "./PolygonGeometry.js";
 import { authoredAreaBoundarySurfaces } from "./AuthoredAreaBoundary.js";
+import { resolveObjectTriggerBounds } from "./areas/AreaDefinition.js";
 
 function translatePoint(value, offsetY) {
     return Object.freeze({ ...value, x: value.x, y: value.y + offsetY });
@@ -24,12 +25,23 @@ function translateSurface(areaId, surface, offsetY) {
 }
 
 function translateObject(areaId, object, offsetY) {
+    const position = translatePoint(object.position, offsetY);
+    const bounds = object.trigger
+        ? resolveObjectTriggerBounds(position, object.trigger)
+        : object.bounds
+          ? translateBounds(object.bounds, offsetY)
+          : null;
+    const activation = object.activationSpec
+        ? resolveObjectTriggerBounds(position, object.activationSpec)
+        : object.activation
+          ? translateBounds(object.activation, offsetY)
+          : null;
     return Object.freeze({
         ...object,
         areaId,
-        position: translatePoint(object.position, offsetY),
-        ...(object.bounds ? { bounds: translateBounds(object.bounds, offsetY) } : {}),
-        ...(object.activation ? { activation: translateBounds(object.activation, offsetY) } : {}),
+        position,
+        ...(bounds ? { bounds } : {}),
+        ...(activation ? { activation } : {}),
         ...(object.patrol
             ? {
                   patrol: Object.freeze({
@@ -74,8 +86,7 @@ function translateGate(areaId, gate, offsetY) {
     return Object.freeze({
         ...gate,
         areaId,
-        trigger: translateBounds(gate.trigger, offsetY),
-        ...(gate.barrier ? { barrier: translateBounds(gate.barrier, offsetY) } : {})
+        trigger: translateBounds(gate.trigger, offsetY)
     });
 }
 
@@ -177,7 +188,21 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
         objects.push(...areaObjects);
         objectives.push(...areaObjectives);
         gates.push(gate);
-        windZones.push(...definition.windZones.map((zone) => translateWindZone(definition.id, zone, originY)));
+        const windSourcesByZoneId = new Map(
+            areaObjects
+                .filter(({ kind, zone }) => kind === "wind-source" && zone)
+                .map((object) => [object.windZoneId, object])
+        );
+        windZones.push(
+            ...definition.windZones.map((zone) => {
+                const source = windSourcesByZoneId.get(zone.id);
+                const bounds = source ? resolveObjectTriggerBounds(source.position, source.zone) : zone.bounds;
+                return Object.freeze({
+                    ...translateWindZone(definition.id, { ...zone, bounds }, originY),
+                    ...(source ? { sourceObjectId: source.id } : {})
+                });
+            })
+        );
         enemySpawns.push(
             ...areaObjects
                 .filter(({ kind }) => kind === "sentry" || kind === "patrol-drone")

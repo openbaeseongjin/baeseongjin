@@ -38,5 +38,5 @@ export function run() {
     assert.equal(world.enemySpawns.filter(({ enemyType }) => enemyType === "patrol-drone-t1").length, 6);
     const stamped = world.surfaces.find(({ id }) => id === "sector-03-02:c1-surface");
     assert.equal(stamped.grappleAccessGroup, "sector-03-02:scanner-A");
-    assert.equal(world.surfaces.find(({ id }) => id === "sector-03-02:g1-surface").grappleAccessGroup, undefined);
+    assert.equal(world.surfaces.find(({ id }) => id === "sector-03-02:p2").grappleAccessGroup, undefined);
 }

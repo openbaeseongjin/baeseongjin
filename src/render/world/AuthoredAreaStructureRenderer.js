@@ -1,5 +1,4 @@
 import { isVisible } from "../RenderViewport.js";
-import { authoredGateOpening } from "../../game/world/AuthoredAreaBoundary.js";
 
 const SECTOR_STYLES = Object.freeze({
     "sector-01": Object.freeze({
@@ -47,7 +46,6 @@ export class AuthoredAreaStructureRenderer {
         const style = SECTOR_STYLES[area.sectorId] ?? DEFAULT_STYLE;
         const { x, y, width, height } = area.bounds;
         const right = x + width;
-        const opening = authoredGateOpening(area, gate);
         const wallWidth = style.wallWidth;
         const bulkheadHeight = style.bulkheadHeight;
 
@@ -60,15 +58,11 @@ export class AuthoredAreaStructureRenderer {
         context.fillRect(x + wallWidth - 10, y, 10, height);
         context.fillRect(right - wallWidth, y, 10, height);
 
-        const leftBulkheadWidth = Math.max(0, opening.left - x);
-        const rightBulkheadWidth = Math.max(0, right - opening.right);
         context.fillStyle = style.wall;
-        context.fillRect(x, y - bulkheadHeight * 0.5, leftBulkheadWidth, bulkheadHeight);
-        context.fillRect(opening.right, y - bulkheadHeight * 0.5, rightBulkheadWidth, bulkheadHeight);
+        context.fillRect(x, y - bulkheadHeight * 0.5, width, bulkheadHeight);
 
         context.fillStyle = style.wallInset;
-        context.fillRect(x, y + bulkheadHeight * 0.5 - 10, leftBulkheadWidth, 10);
-        context.fillRect(opening.right, y + bulkheadHeight * 0.5 - 10, rightBulkheadWidth, 10);
+        context.fillRect(x, y + bulkheadHeight * 0.5 - 10, width, 10);
 
         context.strokeStyle = style.edge;
         context.lineWidth = 3;
@@ -78,8 +72,6 @@ export class AuthoredAreaStructureRenderer {
         context.moveTo(right - wallWidth, y);
         context.lineTo(right - wallWidth, y + height);
         context.moveTo(x, y + bulkheadHeight * 0.5);
-        context.lineTo(opening.left, y + bulkheadHeight * 0.5);
-        context.moveTo(opening.right, y + bulkheadHeight * 0.5);
         context.lineTo(right, y + bulkheadHeight * 0.5);
         context.stroke();
 
@@ -88,18 +80,6 @@ export class AuthoredAreaStructureRenderer {
             context.fillRect(x + wallWidth, ribY, 22, 6);
             context.fillRect(right - wallWidth - 22, ribY + 64, 22, 6);
         }
-
-        context.fillStyle = style.wallInset;
-        context.fillRect(opening.left - 8, y - bulkheadHeight * 0.5 - 12, 12, bulkheadHeight + 24);
-        context.fillRect(opening.right - 4, y - bulkheadHeight * 0.5 - 12, 12, bulkheadHeight + 24);
-        context.strokeStyle = style.accent;
-        context.lineWidth = 2;
-        context.strokeRect(
-            opening.left - 8,
-            y - bulkheadHeight * 0.5 - 12,
-            opening.right - opening.left + 16,
-            bulkheadHeight + 24
-        );
 
         context.fillStyle = style.wall;
         context.fillRect(x + wallWidth + 18, y + 58, Math.min(250, width * 0.34), 46);

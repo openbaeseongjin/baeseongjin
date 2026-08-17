@@ -74,8 +74,8 @@
 | Anchor B | `(160, -448)` | Release Timing |
 | Anchor C | `(-64, -704)` | 큰 Swing |
 | Inactive Fan | `(-288, -672)` | 배경 전용, Wind·Damage 없음 |
-| Service Terminal | `(208, -896)` | 상호작용 반경 72, `terminal-read` 완료 |
-| Service Gate | `(320, -896)` | Terminal 완료 뒤 개방, 직접 통과 |
+| Exit Panel(exitBlock) | `(144, -896)` | 상호작용 반경 72, `terminal-read` 완료 |
+| Exit Gate(exitBlock) | `(288, -896)` | Terminal 완료 뒤 개방, 직접 통과 |
 | Exit | `(320, -928)` | 같은 Run을 유지하며 1-2로 연결 |
 
 ### Anchor 해석 규칙

@@ -73,7 +73,7 @@
 | Manual Bypass Control | `(256,-1472)` bottom-center, `interactionRadius=72`, objective `bypass-open` | 
 | Containment Route Gate | `(320,-1472)` bottom-center |
 | `bypass-open` | type `interact`, sourceObjectId `manual-bypass-control` (별도 `reach` Objective 없음 — 1-5/1-6과 구조가 다름) |
-| Gate 판정 좌표 | `(320,-1504)`, `portalBottomY=-1472` |
+| Gate 판정 좌표 | `(352,-1504)`, `portalBottomY=-1472`(exitBlock 표준) |
 
 ## 4. Camera Shot — 미구현, README 설계값만 존재
 

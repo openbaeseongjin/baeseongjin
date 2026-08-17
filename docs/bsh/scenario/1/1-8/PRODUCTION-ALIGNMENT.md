@@ -78,9 +78,9 @@
 | 항목 | 값 |
 | --- | --- |
 | Maintenance Override Panel | `(208,-1584)` bottom-center, `interactionRadius=72`, objective `maintenance-override` |
-| Containment Gate | `(320,-1728)` bottom-center — 포탈 문 위치 정렬로 `(256,-1584)`에서 Worker Transition Floor 위 실제 문으로 이동 |
+| Containment Gate(exitBlock) | `(288,-1728)` bottom-center — 포탈 문 위치 정렬로 `(256,-1584)`에서 Worker Transition Floor 위 실제 문으로 이동 |
 | `maintenance-override` | type `interact`, sourceObjectId `maintenance-override-panel`(별도 `reach` Objective 없음) |
-| Gate 판정 좌표 | `(320,-1760)` — 통합 catalog가 `nextAreaId`를 `2-1`로 재배선할 때 표준 문 aperture(`52×62`, 하단=출구 데크) trigger로 다시 계산한다 |
+| Gate 판정 좌표 | `(288,-1760)` — 통합 catalog가 `nextAreaId`를 `2-1`로 재배선할 때 표준 문 aperture(`52×62`, 하단=출구 데크) trigger로 다시 계산한다 |
 | Sector Checkpoint | `(0,-1696)`, `radius=38`, `reward=true`, `sourceObjectId: sector-checkpoint` |
 
 ## 4. Camera Shot — 미구현, README 설계값만 존재

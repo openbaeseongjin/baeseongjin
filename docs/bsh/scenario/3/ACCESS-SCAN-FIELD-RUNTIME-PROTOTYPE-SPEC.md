@@ -185,11 +185,9 @@ surfaces: activeCollisionSurfaces
 
 ```text
 world.surfaces
-+
-locked Gate barrier surfaces
 ```
 
-를 반환한다.
+를 반환한다. 잠금 Gate의 물리 barrier는 제거됐고 잠금은 공용 진행 상태로만 적용된다.
 
 따라서:
 

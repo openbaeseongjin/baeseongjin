@@ -20,7 +20,7 @@
 - Grapple: `A1(-256,-128)`, `A2(128,-320)`, `A3(224,-512)`, `A4(-32,-672)`, `A5(160,-800)`
 - Recovery: `R1(192,-632)`
 - Story display: `routing-status-display(176,-384)` → cue `service-node-online`, `lower-feeder-segmented`
-- Gate set: `exit-panel(400,-832)`, `service-gate(512,-832)`
+- Gate set(exitBlock 표준): `exit-deck(320,-771,384)`, `exit-gate(480,-771)`, `exit-panel(368,-771)`, exit `(480,-803)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
 - Objectives: `final-deck-reached bounds (128,-864,384×96)`, `exit-panel-engaged`
 
 ## 3. Camera · Story 상태

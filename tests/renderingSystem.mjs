@@ -758,7 +758,7 @@ export async function run() {
                 gates: [
                     {
                         id: "sector-01-01:gate",
-                        barrier: { x: 288, y: -1024, width: 64, height: 128 }
+                        trigger: { x: 294, y: -990, width: 52, height: 62 }
                     }
                 ]
             }

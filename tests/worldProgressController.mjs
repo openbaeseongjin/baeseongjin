@@ -15,7 +15,7 @@ export function run() {
         physics: { position: new Vector2() }
     };
     const commands = new Map([[player.id, { interact: true }]]);
-    const terminal = world.objects.find(({ id }) => id === "sector-01-01:service-terminal");
+    const terminal = world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
     player.physics.position.set(terminal.position.x, terminal.position.y);
 
     const sequenceStarted = advanceWorldProgress({
@@ -51,7 +51,7 @@ export function run() {
         objectiveEvents.map(({ type }) => type),
         ["objective-completed", "gate-unlocked"]
     );
-    assert.equal(collisionSurfacesForProgress(world, progress).filter(({ kind }) => kind === "gate-barrier").length, 7);
+    assert.equal(collisionSurfacesForProgress(world, progress).filter(({ kind }) => kind === "gate-barrier").length, 0);
 
     const firstGate = world.gates[0];
     player.physics.position.set(firstGate.trigger.x + 10, firstGate.trigger.y + 10);
@@ -104,7 +104,7 @@ export function run() {
     );
     assert.equal(progress.currentAreaId, "sector-01-03");
 
-    const area03Panel = world.objects.find(({ id }) => id === "sector-01-03:service-panel");
+    const area03Panel = world.objects.find(({ id }) => id === "sector-01-03:exit-panel");
     player.physics.position.set(area03Panel.position.x, area03Panel.position.y);
     const area03PanelEvents = advanceWorldProgress({
         world,
@@ -118,7 +118,7 @@ export function run() {
     );
 
     const area03Gate = world.gates.find(({ id }) => id === "sector-01-03:gate");
-    const area03Door = world.objects.find(({ id }) => id === "sector-01-03:security-gate");
+    const area03Door = world.objects.find(({ id }) => id === "sector-01-03:exit-gate");
     assert.deepEqual(area03Gate.trigger, {
         x: area03Door.position.x - 26,
         y: area03Door.position.y - 62,

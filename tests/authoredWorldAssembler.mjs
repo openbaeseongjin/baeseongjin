@@ -109,8 +109,8 @@ export function run() {
     assert.ok(first.objects.every((object) => first.areas.some(({ id }) => id === object.areaId)));
     assert.equal(
         first.surfaces.filter(({ kind }) => kind === "inter-floor-divider").length,
-        first.areas.length * 2,
-        "each authored floor boundary must stay physically sealed outside its Gate opening"
+        first.areas.length,
+        "each authored floor boundary must stay a fully sealed solid band so no hole opens to the previous floor"
     );
     assert.equal(
         first.surfaces.filter(({ kind }) => kind === "area-boundary-wall").length,
@@ -165,10 +165,10 @@ export function run() {
             );
         }
     }
-    const firstPlatform = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id.endsWith(":p4"));
-    assert.deepEqual(firstPlatform.position, { x: 192, y: -896 });
-    assert.deepEqual(firstPlatform.vertices[0], { x: 32, y: -896 });
-    assert.deepEqual(firstPlatform.vertices[1], { x: 352, y: -896 });
+    const firstPlatform = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id.endsWith(":exit-deck"));
+    assert.deepEqual(firstPlatform.position, { x: 128, y: -835 });
+    assert.deepEqual(firstPlatform.vertices[0], { x: -32, y: -835 });
+    assert.deepEqual(firstPlatform.vertices[1], { x: 288, y: -835 });
     assert.equal(
         first.surfaces.find(({ id }) => id === firstPlatform.id).position.y,
         firstPlatform.position.y + 320,
@@ -178,7 +178,7 @@ export function run() {
     assert.deepEqual(
         Object.fromEntries(
             secondAreaDefinition.surfaces
-                .filter(({ id }) => /:(p[0-4]|crossbeam-x1)$/.test(id))
+                .filter(({ id }) => /:(p[0-3]|crossbeam-x1|exit-deck)$/.test(id))
                 .map((surface) => [
                     surface.id.split(":").at(-1),
                     { ...authoredSurfaceBounds(surface), grappleable: surface.grappleable }
@@ -190,13 +190,13 @@ export function run() {
             "crossbeam-x1": { x: -64, y: -544, width: 128, height: 32, grappleable: false },
             p2: { x: -288, y: -576, width: 192, height: 16, grappleable: true },
             p3: { x: 64, y: -800, width: 192, height: 16, grappleable: true },
-            p4: { x: 64, y: -1024, width: 288, height: 32, grappleable: true }
+            "exit-deck": { x: 64, y: -963, width: 288, height: 32, grappleable: true }
         },
         "1-2 gameplay surfaces must stay aligned with the REV 3.1 approved blockout"
     );
     assert.deepEqual(
         secondAreaDefinition.objects
-            .filter(({ id }) => /:(maintenance-lift|anchor-[a-d]|security-access-gate|exit-panel)$/.test(id))
+            .filter(({ id }) => /:(maintenance-lift|anchor-[a-d]|exit-gate|exit-panel)$/.test(id))
             .map(({ id, position, coordinateAnchor }) => ({
                 id: id.split(":").at(-1),
                 position,
@@ -205,11 +205,9 @@ export function run() {
         [
             { id: "maintenance-lift", position: { x: 0, y: -544 }, coordinateAnchor: "center" },
             { id: "anchor-a", position: { x: -128, y: -192 }, coordinateAnchor: "center" },
-            { id: "anchor-b", position: { x: 160, y: -416 }, coordinateAnchor: "center" },
             { id: "anchor-c", position: { x: -160, y: -640 }, coordinateAnchor: "center" },
-            { id: "anchor-d", position: { x: 128, y: -864 }, coordinateAnchor: "center" },
-            { id: "security-access-gate", position: { x: 320, y: -1024 }, coordinateAnchor: "bottom-center" },
-            { id: "exit-panel", position: { x: 208, y: -1024 }, coordinateAnchor: "bottom-center" }
+            { id: "exit-gate", position: { x: 320, y: -963 }, coordinateAnchor: "bottom-center" },
+            { id: "exit-panel", position: { x: 208, y: -963 }, coordinateAnchor: "bottom-center" }
         ],
         "1-2 landmarks and floor-mounted exit objects must use the approved anchors"
     );
@@ -227,8 +225,25 @@ export function run() {
         "1-3 R1 must match the documented B handoff recovery deck"
     );
     const thirdSentry = thirdAreaDefinition.objects.find(({ id }) => id === "sector-01-03:sentry-turret-01");
-    assert.deepEqual(thirdSentry.activation, { x: -480, y: -928, width: 960, height: 544 });
+    assert.deepEqual(thirdSentry.activationSpec, {
+        anchor: "center",
+        offset: { x: -416, y: -16 },
+        size: { width: 960, height: 544 }
+    });
     assert.deepEqual(thirdSentry.rules, ["standard-projectile", "no-rope-cut", "cover-ends-los"]);
+
+    const movedCatalog = structuredClone(SECTOR_01_AREA_CATALOG);
+    const movedSentry = movedCatalog.areas[2].objects.find(({ id }) => id === "sector-01-03:sentry-turret-01");
+    const movedWorld = assembleAuthoredWorld(movedCatalog, { seed: 9182, floorY: 320 });
+    const originalSpawn = movedWorld.enemySpawns.find(({ objectId }) => objectId === "sector-01-03:sentry-turret-01");
+    movedSentry.position = Object.freeze({ x: movedSentry.position.x + 64, y: movedSentry.position.y - 32 });
+    const shiftedWorld = assembleAuthoredWorld(movedCatalog, { seed: 9182, floorY: 320 });
+    const shiftedSpawn = shiftedWorld.enemySpawns.find(({ objectId }) => objectId === "sector-01-03:sentry-turret-01");
+    assert.deepEqual(
+        shiftedSpawn.activation,
+        { x: originalSpawn.activation.x + 64, y: originalSpawn.activation.y - 32, width: 960, height: 544 },
+        "moving an authored object must move its derived activation trigger with it"
+    );
     for (const object of currentWorld.objects.filter(
         ({ kind, gateId }) => gateId && (kind === "gate" || kind === "gate-panel")
     )) {
@@ -287,24 +302,22 @@ export function run() {
             );
         }
         assert.ok(
-            Math.abs(gatePanel.position.x - (gate.barrier.x + gate.barrier.width * 0.5)) <= 160,
+            Math.abs(gatePanel.position.x - (gate.trigger.x + gate.trigger.width * 0.5)) <= 160,
             `${area.id} Gate panel must remain visibly adjacent to the door`
         );
-        assert.equal(dividers.length, 2);
+        assert.equal(dividers.length, 1);
         assert.equal(sideWalls.length, 2);
         assert.equal(sideWalls[0].x, area.bounds.x);
         assert.equal(sideWalls[1].x + sideWalls[1].width, area.bounds.x + area.bounds.width);
         assert.equal(dividers[0].x, area.bounds.x);
-        assert.equal(dividers[1].x + dividers[1].width, area.bounds.x + area.bounds.width);
+        assert.equal(dividers[0].x + dividers[0].width, area.bounds.x + area.bounds.width);
         assert.ok(dividers.every(({ collision, grappleable, renderable }) => collision && !grappleable && !renderable));
-        assert.ok(dividers[0].x + dividers[0].width <= gate.barrier.x);
-        assert.ok(dividers[1].x >= gate.barrier.x + gate.barrier.width);
     }
 
     const firstArea = first.areas[0];
     const firstGate = first.gates[0];
     const firstDivider = first.surfaces.find(
-        ({ areaId, id }) => areaId === firstArea.id && id.endsWith("inter-floor-divider-left")
+        ({ areaId, id }) => areaId === firstArea.id && id.endsWith("inter-floor-divider-full")
     );
     const collider = new CircleCollider({ radius: 18 });
     const blockedPosition = new Vector2(firstDivider.x + 120, firstDivider.y + firstDivider.height - 4);
@@ -319,19 +332,19 @@ export function run() {
         blockedPosition.y >= firstDivider.y + firstDivider.height + collider.radius - 0.001,
         "a fast upward body must be pushed back below the inter-floor divider"
     );
-    const gateGapPosition = new Vector2(
-        firstGate.barrier.x + firstGate.barrier.width * 0.5,
+    const doorPosition = new Vector2(
+        firstGate.trigger.x + firstGate.trigger.width * 0.5,
         firstDivider.y + firstDivider.height - 4
     );
-    const gateGapVelocity = new Vector2(0, -4200);
+    const doorVelocity = new Vector2(0, -4200);
     collider.resolveSurfaces({
-        position: gateGapPosition,
-        velocity: gateGapVelocity,
+        position: doorPosition,
+        velocity: doorVelocity,
         surfaces: first.surfaces,
-        previousPosition: new Vector2(gateGapPosition.x, firstDivider.y + firstDivider.height + 24)
+        previousPosition: new Vector2(doorPosition.x, firstDivider.y + firstDivider.height + 24)
     });
     assert.ok(
-        gateGapPosition.y < firstDivider.y + firstDivider.height,
-        "the authored Gate opening stays the only gap once its dynamic barrier is removed"
+        doorPosition.y >= firstDivider.y + firstDivider.height + collider.radius - 0.001,
+        "the fully sealed floor must block upward bodies above the Gate without any dynamic barrier"
     );
 }

@@ -60,10 +60,10 @@
 
 | 항목 | 값 |
 | --- | --- |
-| Exit Panel | `(176,-1216)` bottom-center, `interactionRadius=72`, `exit-panel-engaged` 필요조건 `final-deck-reached` |
-| Cooling Access Gate | `(288,-1216)` bottom-center |
+| Exit Panel(exitBlock) | `(144,-1216)` bottom-center, `interactionRadius=72`, `exit-panel-engaged` 필요조건 `final-deck-reached` |
+| Exit Gate(exitBlock) | `(256,-1216)` bottom-center |
 | `final-deck-reached` | type `reach`, bounds `(-32,-1280)`~`288×96` |
-| Gate 판정 좌표 | `(288,-1248)`, `portalBottomY=-1216` |
+| Gate 판정 좌표 | `(256,-1248)`, `portalBottomY=-1216`(exitBlock 표준) |
 
 ### Sentry T1
 
