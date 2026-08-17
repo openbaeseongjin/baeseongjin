@@ -300,4 +300,14 @@ export function run() {
             .join(","),
         "authority and delayed owner prediction must agree on time-derived Wind phase"
     );
+    const predictedScanStates = predictor.renderSnapshot().accessScanStates;
+    const authorityScanStates = server.snapshot().accessScanStates;
+    assert.deepEqual(
+        predictedScanStates.map(({ id, phase, attachAllowed }) => ({ id, phase, attachAllowed })),
+        authorityScanStates.map(({ id, phase, attachAllowed }) => ({ id, phase, attachAllowed })),
+        "authority and delayed owner prediction must expose the same Scanner phase presentation state"
+    );
+    for (let index = 0; index < predictedScanStates.length; index += 1) {
+        assert.ok(Math.abs(predictedScanStates[index].phaseProgress - authorityScanStates[index].phaseProgress) < 1e-9);
+    }
 }

@@ -4,6 +4,14 @@
 
 본 문서는 [2-6 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-6은 Enemy 없는 Relief Stage로, 좌표가 README와 완전히 일치하며 Enemy 부재 결정도 코드와 일치한다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
+- README가 허용한 최소 위치 표지 `RESIDENTIAL BLOCKS 12–18` entry만 구현한다. 추가 해석 문구는 의도적으로 넣지 않았다.
+- `storyTriggers`는 시나리오 기획 인벤토리다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera 전면 미구현과 Story 전면 미연결 서술은 위 Current Runtime Override로 대체됐다. Story 상태는 `MINIMAL ENTRY ONLY`다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
+import { GameApp } from "../src/game/GameApp.js";
 import { interpolateRenderSnapshot } from "../src/render/interpolateRenderSnapshot.js";
 
 function snapshot(overrides = {}) {
@@ -26,16 +27,36 @@ export function run() {
     const previous = snapshot();
     const sameTick = snapshot();
     assert.equal(interpolateRenderSnapshot(previous, sameTick, 0.5), sameTick, "same tick means no steps ran");
-    const current = snapshot({ tick: 102 });
-    assert.equal(interpolateRenderSnapshot(previous, current, 0), current);
-
-    const moved = snapshot({
+    const current = snapshot({
         tick: 102,
         player: { position: new Vector2(10, 0), angle: 0, velocity: new Vector2() }
     });
-    const midpoint = interpolateRenderSnapshot(previous, moved, 0.5);
+    assert.deepEqual(
+        interpolateRenderSnapshot(previous, current, 0).player.position,
+        previous.player.position,
+        "alpha zero must begin at the previous fixed-step state without snapping forward"
+    );
+
+    const midpoint = interpolateRenderSnapshot(previous, current, 0.5);
     assert.equal(midpoint.tick, 102);
     assert.deepEqual([midpoint.player.position.x, midpoint.player.position.y], [5, 0]);
+
+    const lastCatchUpStep = interpolateRenderSnapshot(
+        snapshot({
+            tick: 103,
+            player: { position: new Vector2(30, 0), angle: 0, velocity: new Vector2() }
+        }),
+        snapshot({
+            tick: 104,
+            player: { position: new Vector2(40, 0), angle: 0, velocity: new Vector2() }
+        }),
+        0.5
+    );
+    assert.equal(
+        lastCatchUpStep.player.position.x,
+        35,
+        "a catch-up frame must interpolate only the final fixed step instead of the whole display frame"
+    );
 
     const angleWrap = interpolateRenderSnapshot(
         snapshot({ player: { position: new Vector2(0, 0), angle: -3.0, velocity: new Vector2() } }),
@@ -72,4 +93,38 @@ export function run() {
     assert.deepEqual([enemies.enemies[0].position.x, enemies.enemies[0].position.y], [10, 0]);
     assert.equal(enemies.enemies[1].position.x, 40, "entities spawned this frame render at their current position");
     assert.deepEqual(enemies.projectiles, []);
+
+    const app = new GameApp({
+        canvas: {},
+        renderer: {
+            profile: "test",
+            cssWidth: 1280,
+            cssHeight: 720,
+            screenToWorld: () => ({ x: 0, y: 0 }),
+            draw: () => ({})
+        },
+        worldSeed: 1
+    });
+    const idleInput = Object.freeze({
+        horizontal: 0,
+        vertical: 0,
+        interact: false,
+        pointer: Object.freeze({ x: 0, y: 0, down: false }),
+        viewport: Object.freeze({ width: 1280, height: 720 }),
+        mobileControls: Object.freeze({
+            visible: false,
+            ropePointerDown: false,
+            left: false,
+            right: false,
+            jump: false
+        })
+    });
+    app.update(app.runner.dt, idleInput);
+    app.update(app.runner.dt, idleInput);
+    assert.equal(
+        app.previousRenderSnapshot.tick,
+        1,
+        "catch-up updates must retain only the final step's previous state"
+    );
+    assert.equal(app.authority.snapshot().tick, 2);
 }

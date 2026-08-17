@@ -263,7 +263,6 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
                     `checkpoint:${definition.id}`,
                     ...definition.checkpoints.map(({ id }) => id)
                 ]),
-                storyTriggers: definition.storyTriggers,
                 scannerGroupIds: Object.freeze(areaScannerGroups.map(({ id }) => id)),
                 routes: definition.routes,
                 cameraZones: definition.cameraZones,

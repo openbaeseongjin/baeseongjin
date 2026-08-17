@@ -8,6 +8,13 @@ import { createRenderViewport, isVisible } from "../src/render/RenderViewport.js
 import { enemyAimLine, enemySensorColor } from "../src/render/EnemyTelegraphPresentation.js";
 import { SpriteEnemyRenderer, SpriteProjectileRenderer } from "../src/render/sprites/SpriteActorRenderers.js";
 import { PolygonEnemyRenderer, PolygonProjectileRenderer } from "../src/render/polygon/PolygonActorRenderers.js";
+import {
+    AccessScanSurfaceRenderer,
+    RopeShotRenderer,
+    WindParticleRenderer
+} from "../src/render/layers/SharedSceneRenderers.js";
+import { ROPE_CONFIG } from "../src/game/config.js";
+import { ropeLaunchHandPoint } from "../src/game/rope/RopeAttachment.js";
 
 function drawingContext() {
     return new Proxy(
@@ -160,4 +167,116 @@ export function run() {
     });
     assert.deepEqual(polygonCounts.enemies, { total: 2, drawn: 1 });
     assert.deepEqual(polygonCounts.enemyProjectiles, { total: 2, drawn: 1 });
+
+    const windZones = [
+        {
+            id: "wind:visible",
+            bounds: { x: 20, y: 20, width: 80, height: 60 },
+            direction: { x: 1, y: 0 },
+            strength: 100,
+            mode: "continuous"
+        },
+        {
+            id: "wind:hidden",
+            bounds: { x: 800, y: 800, width: 80, height: 60 },
+            direction: { x: 1, y: 0 },
+            strength: 100,
+            mode: "continuous"
+        }
+    ];
+    const windCounts = collectorSnapshot((renderStats) => {
+        new WindParticleRenderer().draw({
+            context: drawingContext(),
+            scene: { world: { windZones }, windStates: [] },
+            viewport: actorViewport,
+            renderStats,
+            presentationTimeSeconds: 0
+        });
+    });
+    assert.deepEqual(windCounts.windZones, { total: 2, drawn: 1 });
+
+    const accessSurfaces = [
+        {
+            id: "scanner:visible",
+            grappleAccessGroup: "scanner:a",
+            vertices: [
+                { x: 20, y: 30 },
+                { x: 100, y: 30 }
+            ]
+        },
+        {
+            id: "scanner:hidden",
+            grappleAccessGroup: "scanner:b",
+            vertices: [
+                { x: 800, y: 800 },
+                { x: 880, y: 800 }
+            ]
+        }
+    ];
+    const accessCounts = collectorSnapshot((renderStats) => {
+        new AccessScanSurfaceRenderer().draw({
+            context: drawingContext(),
+            scene: {
+                world: { surfaces: accessSurfaces },
+                accessScanStates: [
+                    { id: "scanner:a", phase: "WARNING", phaseProgress: 0.5 },
+                    { id: "scanner:b", phase: "LOCKED", phaseProgress: 0.5 }
+                ]
+            },
+            viewport: actorViewport,
+            renderStats
+        });
+    });
+    assert.deepEqual(accessCounts.accessScanSurfaces, { total: 2, drawn: 1 });
+
+    const phaseSignals = {};
+    for (const phase of ["AVAILABLE", "WARNING", "LOCKED", "RESET"]) {
+        const calls = [];
+        const phaseContext = drawingContext();
+        for (const method of ["arc", "setLineDash", "strokeRect", "moveTo"]) {
+            phaseContext[method] = (...args) => calls.push([method, ...args]);
+        }
+        new AccessScanSurfaceRenderer().draw({
+            context: phaseContext,
+            scene: {
+                world: { surfaces: [accessSurfaces[0]] },
+                accessScanStates: [{ id: "scanner:a", phase, phaseProgress: 0.5 }]
+            },
+            viewport: actorViewport
+        });
+        phaseSignals[phase] = calls;
+    }
+    assert.ok(
+        phaseSignals.AVAILABLE.some(([method]) => method === "arc"),
+        "AVAILABLE uses a ready dot"
+    );
+    assert.ok(
+        phaseSignals.WARNING.some(([method, pattern]) => method === "setLineDash" && pattern.length > 0),
+        "WARNING uses a dashed closing marker"
+    );
+    assert.ok(
+        phaseSignals.LOCKED.filter(([method]) => method === "moveTo").length >= 3,
+        "LOCKED adds a visible X over the controlled surface"
+    );
+    assert.ok(
+        phaseSignals.RESET.some(([method]) => method === "strokeRect"),
+        "RESET uses an outline box"
+    );
+
+    const ropePlayer = { position: { x: 100, y: 100 }, angle: Math.PI / 2 };
+    const shot = {
+        origin: { x: 112, y: 93 },
+        direction: { x: 1, y: 0 },
+        traveled: 40
+    };
+    const expectedHand = ropeLaunchHandPoint(ropePlayer, ROPE_CONFIG.handOffset, {
+        x: ropePlayer.position.x + shot.direction.x,
+        y: ropePlayer.position.y + shot.direction.y
+    });
+    const moveCalls = [];
+    const ropeContext = drawingContext();
+    ropeContext.createLinearGradient = () => ({ addColorStop() {} });
+    ropeContext.moveTo = (x, y) => moveCalls.push({ x, y });
+    new RopeShotRenderer(() => [{ shot, player: ropePlayer }]).draw({ context: ropeContext, scene: {} });
+    assert.deepEqual(moveCalls[0], expectedHand, "an in-flight rope must remain connected to the rotating hand");
 }

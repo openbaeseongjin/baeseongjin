@@ -37,8 +37,7 @@ const block01 = exitBlock({
     deckTopY: -835,
     deckWidth: 320,
     nextAreaId: "sector-01-02",
-    panelObjectiveId: "sector-01-01:terminal-read",
-    panelCueIds: ["sector-01-01:terminal-cascade", "sector-01-01:rooftop-pad-03"]
+    panelObjectiveId: "sector-01-01:terminal-read"
 });
 
 const area01 = defineArea({
@@ -702,8 +701,7 @@ const block08 = exitBlock({
     deckTopY: -1667,
     deckWidth: 640,
     nextAreaId: "sector-02-01",
-    panelObjectiveId: "sector-01-08:maintenance-override",
-    gateCueIds: ["sector-01-08:final-warning", "sector-01-08:locked"]
+    panelObjectiveId: "sector-01-08:maintenance-override"
 });
 
 const area08 = defineArea({

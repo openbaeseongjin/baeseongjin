@@ -599,8 +599,6 @@ const block08 = exitBlock({
     deckWidth: 352,
     nextAreaId: null,
     panelObjectiveId: "sector-02-08:transfer-control-read",
-    panelCueIds: ["group-a-complete", "group-b-complete", "group-c-suspended", "priority-access-active"],
-    gateCueIds: ["post-sector-transition-tbd"],
     completionMode: "content-boundary"
 });
 

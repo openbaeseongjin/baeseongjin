@@ -169,4 +169,11 @@ export function run() {
 
     assert.equal(panel.detach(), true);
     assert.equal(panel.detach(), false, "detach must be idempotent");
+    assert.equal(panel.attach(), true, "a detached debug panel must support reattachment");
+    assert.deepEqual(
+        startAreaSelect.options.map(({ value }) => value),
+        areaIds,
+        "reattaching must not duplicate the generated start-area options"
+    );
+    assert.equal(panel.detach(), true);
 }

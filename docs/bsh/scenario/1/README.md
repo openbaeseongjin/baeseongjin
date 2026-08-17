@@ -38,12 +38,12 @@
 | [1-2](./1-2/README.md) · [제작 정렬](./1-2/PRODUCTION-ALIGNMENT.md) | DOUBLE ANCHOR SHAFT | Airborne Re-Attach · 구조 정합 C02 Art Reference · 승인 Blockout |
 | [1-3](./1-3/README.md) · [제작 정렬](./1-3/PRODUCTION-ALIGNMENT.md) | SECURITY CHECK | Sentry Telegraph·LOS · 구조 정합 Route Choice Art Reference · 승인 Blockout |
 | [1-4](./1-4/README.md) · [제작 정렬](./1-4/PRODUCTION-ALIGNMENT.md) | MAINTENANCE NODE | 첫 Foundation 선택 · 구조 정합 Node Art Reference · 구현 정렬 |
-| [1-5](./1-5/README.md) · [제작 정렬](./1-5/PRODUCTION-ALIGNMENT.md) | AUGMENT TEST BAY | Build Expression · Camera/Story 미구현 명시 |
-| [1-6](./1-6/README.md) · [제작 정렬](./1-6/PRODUCTION-ALIGNMENT.md) | COOLING SHAFT | Wind 학습 · Wind 물리 구현 확인, Camera/Story 미구현 명시 |
-| [1-7](./1-7/README.md) · [제작 정렬](./1-7/PRODUCTION-ALIGNMENT.md) | PRESSURE BYPASS | Rope·Build·Wind·Sentry 조합 · Camera/Story 미구현 명시 |
-| [1-8](./1-8/README.md) · [제작 정렬](./1-8/PRODUCTION-ALIGNMENT.md) | CONTAINMENT GATE | 일반 구간 최종 종합·전환 · Camera/Story 미구현 명시 |
+| [1-5](./1-5/README.md) · [제작 정렬](./1-5/PRODUCTION-ALIGNMENT.md) | AUGMENT TEST BAY | Build Expression · Camera 구현 · 핵심 Story binding 구현 |
+| [1-6](./1-6/README.md) · [제작 정렬](./1-6/PRODUCTION-ALIGNMENT.md) | COOLING SHAFT | Wind Shadow·Grounded 감쇠·Falloff·Camera 구현 · 핵심 Story binding 구현 |
+| [1-7](./1-7/README.md) · [제작 정렬](./1-7/PRODUCTION-ALIGNMENT.md) | PRESSURE BYPASS | Rope·Build·Wind·Sentry 조합 · Camera와 핵심 Story binding 구현 |
+| [1-8](./1-8/README.md) · [제작 정렬](./1-8/PRODUCTION-ALIGNMENT.md) | CONTAINMENT GATE | 일반 구간 최종 종합·Camera와 핵심 Story binding 구현 · Shutdown/정식 Prop 미구현 |
 
-1-5~1-8의 Camera Zone·Story Trigger는 [Camera/Story Implementation Handoff](./CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)에 붙여넣기 가능한 형태로 정리되어 있다(코드 반영은 별도 구현 담당).
+1-5~1-8의 Camera Zone과 핵심 Story binding은 [Camera/Story Implementation Handoff](./CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)를 기준으로 Runtime에 반영됐다. Area의 `storyTriggers`는 시나리오 기획 인벤토리이며 구현 완료 근거가 아니다. 실제 표시는 `AuthoredStoryPresentation`의 area entry·position·`story-display` cue·objective/gate event binding이 소유한다.
 
 1-1~1-3은 증강 없는 기본 Rope와 Telemetry 축적 구간, 1-4는 첫 Foundation Augment 선택, 1-5~1-8은 같은 공간을 선택한 증강에 따라 다르게 해석하는 검증 구간이다. Checkpoint는 진행 저장과 개인 부활만 소유하며 Foundation 선택은 authored Node에서 연다.
 

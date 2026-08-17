@@ -4,6 +4,14 @@
 
 본 문서는 [2-4 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-4는 Sector 02의 첫 본격 Multi-Route Stage로, Safe Perimeter / Central Flow / Pressure Line 세 경로 좌표가 README와 전부 일치한다. Drone 배치만 크게 다르다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
+- Story는 `RESIDENTIAL STACK / MULTI-ROUTE HOUSING` entry가 구현됐고 추가 위치 문구는 아직 없다.
+- `storyTriggers`는 시나리오 기획 인벤토리이므로 배열 존재만으로 Runtime 구현을 판정하지 않는다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera 미구현과 Story 전면 미연결 서술은 위 Current Runtime Override로 대체됐다. Story 상태는 `PARTIAL · ENTRY ONLY`다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

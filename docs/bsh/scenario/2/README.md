@@ -6,7 +6,7 @@
 
 > 이 문서는 `2-1`~`2-8` 개별 스테이지 시나리오 문서가 아니라, Sector 02 전체를 관통하는 기획 요약본이다. 개별 스테이지 상세 스펙(좌표, Grid, Camera 등)은 각 `2-N/README.md`에서 다룬다.
 
-Camera Zone은 8개 Stage README가 스스로 불필요하다고 명시하며(Level Geometry로 구도 해결), Story Presentation의 남은 공백 3건은 [Story Implementation Handoff](./STORY-IMPLEMENTATION-HANDOFF.md)에 붙여넣기 가능한 형태로 정리되어 있다(코드 반영은 별도 구현 담당).
+Camera Zone은 8개 Stage README가 스스로 불필요하다고 명시하며(Level Geometry와 공용 기본 Camera로 구도 해결), Story Presentation의 공백은 [Story Implementation Handoff](./STORY-IMPLEMENTATION-HANDOFF.md)를 기준으로 Runtime에 반영됐다. 2-4는 entry 중심, 2-6은 최소 위치 표지만 의도적으로 사용하고, 2-8 Transfer Control은 Group A/B/C와 `PRIORITY ACCESS: ACTIVE`를 objective event에서 순서대로 표시한다.
 
 ## Contents
 

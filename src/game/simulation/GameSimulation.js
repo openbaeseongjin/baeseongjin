@@ -36,7 +36,7 @@ import {
     snapshotWindStates,
     windOccludingSurfaces
 } from "../world/WorldForceField.js";
-import { accessScanStateMap, isSurfaceAccessAllowed } from "../world/AccessScanField.js";
+import { accessScanStateMap, isSurfaceAccessAllowed, snapshotAccessScanStates } from "../world/AccessScanField.js";
 import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -270,6 +270,9 @@ export class GameSimulation {
         if (!this.worldProgress) return false;
         const target = this.world.areas.find(({ id }) => id === areaId);
         if (!target) return false;
+        this.worldProgress = new WorldProgressState(this.worldCatalog);
+        this.portalTransitions.clear();
+        this.foundationRewards.clear();
         for (const area of this.world.areas) {
             if (area.id === areaId) break;
             for (const objectiveId of area.objectiveIds) this.worldProgress.completeObjective(objectiveId);
@@ -284,6 +287,8 @@ export class GameSimulation {
         const area = this.world.areas.find(({ id }) => id === areaId);
         if (!area) return null;
         this.advanceWorldProgressToArea(areaId);
+        this.activeCheckpoint =
+            this.world.checkpoints.find(({ id }) => id === `checkpoint:${areaId}`) ?? this.activeCheckpoint;
         this.applyPortalTransition(playerId, { x: area.entry.x, y: area.entry.y }, this.tick, `debug:${areaId}`);
         return Object.freeze({ x: area.entry.x, y: area.entry.y });
     }
@@ -1705,6 +1710,9 @@ export class GameSimulation {
             worldProgress: this.worldProgress?.snapshot() ?? null,
             windStates: this.world.windZones
                 ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
+                : Object.freeze([]),
+            accessScanStates: this.world.scannerGroups
+                ? snapshotAccessScanStates(this.world.scannerGroups, this.elapsedSeconds)
                 : Object.freeze([]),
             resets: this.resets,
             maxAttachDistance: hookReach(ROPE_CONFIG)

@@ -32,7 +32,6 @@ function interpolatePositions(previousItems, currentItems, alpha) {
 export function interpolateRenderSnapshot(previous, current, alpha = 0) {
     if (!previous || !current || current.tick === previous.tick) return current;
     const clamped = Math.max(0, Math.min(1, alpha));
-    if (clamped <= 0) return current;
     if (current.resets !== previous.resets || current.runState !== previous.runState) return current;
     const travel = Math.hypot(
         current.player.position.x - previous.player.position.x,

@@ -668,7 +668,7 @@ export async function run() {
     new RopeShotRenderer(localShots).draw({
         context: tetheredShotContext,
         scene: {
-            player: { position: { x: 30, y: 80 } },
+            player: { position: { x: 30, y: 80 }, angle: 0 },
             ropeShot: {
                 shot: {
                     origin: { x: 0, y: 0 },
@@ -683,8 +683,8 @@ export async function run() {
     });
     assert.deepEqual(
         tetheredShotContext.calls.find(([name]) => name === "moveTo"),
-        ["moveTo", 30, 80],
-        "the flying rope line must stay tethered to the player's current body instead of the fixed launch origin"
+        ["moveTo", 42, 73],
+        "the flying rope line must stay tethered to the player's current rotating hand"
     );
     const authoredObjectContext = recordingContext();
     new AuthoredWorldObjectRenderer().draw({

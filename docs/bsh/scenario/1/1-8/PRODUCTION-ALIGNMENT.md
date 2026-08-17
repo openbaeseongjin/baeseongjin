@@ -4,6 +4,15 @@
 
 본 문서는 [1-8 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 1-8은 Sector 01 일반 구간의 최종 Stage로, 두 Turret의 Crossfire 금지·Checkpoint·Wind 재사용이 실제로 좌표 수준까지 구현되어 있다. Camera·Story·Art는 1-5~1-7과 마찬가지로 아직 없다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Foundation 선택·세 효과와 Build별 Runtime 상태 유지가 구현됐다.
+- `cameraZones`는 Intro부터 Worker Reveal까지 실제 객체로 구현됐다.
+- Story는 entry, Final Warning/Closure, Mid Safe, Worker District position binding과 maintenance override/gate binding으로 핵심 공개 흐름이 구현됐다.
+- Lower Grid 순차 조명 Off와 Apartment/Locker/Canteen 정식 Prop은 계속 미구현이다. `storyTriggers`는 시나리오 기획 인벤토리다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§4·§5·§7~§9의 Foundation/Camera/Story 전면 미구현 서술은 위 Current Runtime Override로 대체됐다. Shutdown/Prop 미구현과 Geometry 비교 기록은 유지한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

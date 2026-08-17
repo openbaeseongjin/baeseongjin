@@ -4,6 +4,15 @@
 
 본 문서는 [1-5 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 1-5는 1-1~1-4와 달리 `Approved Blockout`, `Scenario Art Reference`, Camera Zone 수치, Story Trigger 문구가 아직 하나도 존재하지 않는다. 이 문서는 새로 만드는 것이 아니라 이미 구현된 `Sector01AreaCatalog.js`의 `sector-01-05` 정의를 기준으로 처음 정리한다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Foundation 선택·세 효과와 플레이어별 유지가 구현되어 Build 표현을 Runtime에서 검증할 수 있다.
+- `cameraZones`는 실제 `cameraZone()` 객체로 구현됐고 `load-gap → relay-spine → live-security → exit` 구간을 사용한다.
+- Story는 `AUGMENT TEST BAY / LIVE CALIBRATION` entry와 `VERTICAL LOAD TEST`, `SECURITY RESPONSE TEST` position binding이 구현됐다. 선택 Foundation 이름을 포함한 전체 진단 문구는 후속 표현 범위다.
+- `storyTriggers`는 시나리오 기획 인벤토리이며 Runtime binding이나 완료 증거가 아니다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§4·§5·§7~§9의 `NOT IMPLEMENTED`, 문자열 placeholder, Foundation 미구현 서술은 위 Current Runtime Override로 대체됐다. Geometry·좌표와 Approved Blockout 필요성 기록은 유지한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

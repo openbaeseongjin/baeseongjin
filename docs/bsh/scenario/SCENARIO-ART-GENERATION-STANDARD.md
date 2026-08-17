@@ -234,11 +234,11 @@ REV 1.0 작성 시점에는 이 표가 Sector 01의 1-1~1-4만 다뤘다. Sector
 | 자료 | 현재 판정 | 다음 조치 |
 | --- | --- | --- |
 | Sector 03 공용 배경 | `NEEDED` | 배경 레퍼런스 이미지 자체가 아직 없다 |
-| 3-1 ~ 3-8 | `HOLD` | Sector 03 Runtime Area·Camera Zone이 아직 없어(§19, `INTEGRATION-CROSS-VALIDATION-AUDIT.md` §19) Approved Art Reference 생성을 이 규격 자체가 보류시키고 있다. Runtime 통합 전까지 신규 생성 금지 |
+| 3-1 ~ 3-8 | `BLOCKOUT REQUIRED` | Runtime Area·Stable ID·Story binding과 의도적 기본 Camera 사용은 구현됐다. 신규 Art Reference 전에 각 Stage Approved Blockout, 대표 Camera Shot과 exact visible object count를 확정한다 |
 
 ### 우선순위 요약
 
-Blockout·Runtime이 있는 Sector 01 1-1~1-4의 구조 정합 재생성은 완료됐다. 다음은 Sector 01 1-5~1-8과 Sector 02 전체의 Approved Blockout 제작이며, Art Reference는 그 이후다. Sector 03은 Runtime 통합 전까지 규격상 생성 대상이 아니다.
+Blockout·Runtime이 있는 Sector 01 1-1~1-4의 구조 정합 재생성은 완료됐다. 다음은 Sector 01 1-5~1-8과 Sector 02 전체의 Approved Blockout 제작이며, Art Reference는 그 이후다. Sector 03도 Runtime 부재가 아니라 Stage별 Approved Blockout 미확정 때문에 생성 대기 상태다.
 
 ## 12. 리소스 절약 원칙
 

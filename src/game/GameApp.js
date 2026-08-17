@@ -56,7 +56,6 @@ export class GameApp {
         });
         this.previousRenderSnapshot = null;
         this.tick = (time) => {
-            this.previousRenderSnapshot = this.authority.snapshot();
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
             this.frameId = requestAnimationFrame(this.tick);
         };
@@ -94,6 +93,7 @@ export class GameApp {
     update(dt, input) {
         this.latestInput = input;
         const before = this.authority.snapshot();
+        this.previousRenderSnapshot = before;
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
         let state = this.authority.snapshot();

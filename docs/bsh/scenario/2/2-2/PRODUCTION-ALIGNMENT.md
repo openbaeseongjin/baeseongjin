@@ -4,6 +4,14 @@
 
 본 문서는 [2-2 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-2는 Sector 02에서 Patrol Drone T1이 처음 등장하는 Stage다. README는 REV 1.0에서 "PatrolDrone 전용 구현이 확인되지 않는다"(§19-1, OPEN QUESTIONS #4)고 적었으나, 이는 사실이 아니었다 — Patrol 이동은 `EnemyObject`에 통합된 범용 기능으로 실제 구현되어 있다. README §19-1·OPEN QUESTIONS #4는 REV 1.1에서 이 문서 기준으로 갱신됐다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
+- `PATROL WALKWAY / SECURITY STILL ACTIVE` entry와 security-status 위치 Story가 구현됐다.
+- `storyTriggers`는 시나리오 기획 인벤토리이며 Runtime 완료 근거가 아니다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다. P4 Geometry drift 기록은 유지한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |

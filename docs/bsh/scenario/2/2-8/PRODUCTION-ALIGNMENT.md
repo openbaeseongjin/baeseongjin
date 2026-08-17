@@ -4,6 +4,15 @@
 
 본 문서는 [2-8 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-8은 Sector 02 일반 진행 Finale로, Group A/B/C Transfer 결과와 Priority Access를 최초 공개하는 Story Climax이자 Sector-end Checkpoint 지점이다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+
+- Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
+- Transfer Control objective 완료 시 Group A/B Complete → Group C Suspended → `PRIORITY ACCESS: ACTIVE`를 순서대로 표시한다.
+- Exit panel의 미사용 `cueIds` 경로는 제거했고 objective presentation을 단일 Runtime 소유자로 사용한다.
+- `storyTriggers`는 시나리오 기획 인벤토리다.
+
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 미구현 및 panel `cueIds`가 구현을 보장한다는 서술은 위 Current Runtime Override로 대체됐다. Geometry·Drone 비교 기록은 유지한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |
