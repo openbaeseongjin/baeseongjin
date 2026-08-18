@@ -3,8 +3,8 @@ name: github-task-flow
 description: >-
   `$github-task-flow` 호출만으로 GitHub CLI 설치·웹 인증·쓰기 권한 점검을 자동 준비하고, 현재 작업을 GitHub
   Issue로 기록한 뒤 이슈 번호 기반 브랜치, 단일 Lore 커밋, push, pull request, 최신 origin/main
-  rebase와 재검증, 일반 merge commit과 이슈 종료까지 수행한다. 같은 저장소의 다른 Codex 작업·Issue·PR과
-  checkout 또는 범위가 겹치면 `$coordinate-github-tasks` 계약으로 소유권과 병합 순서를 먼저 조정한다.
+  rebase와 재검증, 일반 merge commit과 이슈 종료까지 수행한다. 두 활성 Codex 대화가 실제로 동시에 구현 소스를 수정하고
+  같은 checkout·hunk·public contract에서 충돌할 때만 `$coordinate-github-tasks`로 최소 조정한다.
   GitHub 쓰기 환경이 아직 구성되지 않았거나 팀원이 별도 설명 없이 현재 작업의 커밋과 브랜치 계보를 보존해 main에 병합하려 할 때
   사용한다.
 ---
@@ -22,7 +22,7 @@ GitHub Issue를 작업의 기준 이력으로 삼고 PR을 통해 단일 커밋�
 - 현재 대화와 작업 트리 모두에서 게시할 작업을 식별할 수 없을 때만 작업 부재를 보고하고 종료한다.
 - merge 권한, 필수 승인, 실패한 검사처럼 자동 해결할 수 없는 외부 blocker가 없으면 중간 확인 없이 끝까지 진행한다.
 - GitHub 쓰기 환경이 없으면 아래 초기화 절차까지 호출 의미에 포함하고, 설정 후 원래 흐름을 자동 재개한다.
-- 같은 저장소의 다른 활성 Codex 작업이나 열린 Issue·PR과 checkout 또는 범위가 겹칠 가능성이 있으면 `.codex/skills/coordinate-github-tasks/SKILL.md`를 읽고 작업 간 조정을 수행한다.
+- 다른 활성 Codex 대화가 실제로 동시에 구현 소스를 수정하고 현재 diff와 같은 checkout·hunk·public contract에서 겹친다는 근거가 있을 때만 `.codex/skills/coordinate-github-tasks/SKILL.md`를 적용한다. 계획·예정 파일·열린 Issue/PR만으로 조정하지 않고 완료된 대화에는 연락하지 않는다.
 
 ## 필수 원칙
 
@@ -133,14 +133,14 @@ gh api user
 
 ### 동시 Codex 작업 조정
 
-Issue 생성 뒤 전용 브랜치를 만들기 전에 `.codex/skills/coordinate-github-tasks/SKILL.md`를 적용한다.
+Issue 생성, 계획 수립, 예정 파일 선언은 조정 시점이 아니다. 현재 대화와 다른 활성 대화가 실제로 동시에 구현 소스를 수정하고 실제 diff가 겹칠 때만 `.codex/skills/coordinate-github-tasks/SKILL.md`를 적용한다.
 
-- 같은 저장소의 다른 활성 작업과 범위 카드를 교환하고 checkout·실제 diff·예정 심볼·공개 계약을 대조한다.
-- 같은 checkout에 다른 작업이 있으면 실제 hunk·contract dependency를 먼저 확인한다. 독립 범위면 기다리지 않고 별도 worktree와 Issue 브랜치를 만든다.
-- shared checkout 직렬화는 worktree를 만들 수 없거나 실제 공유 hunk·contract 순서가 있을 때만 사용하고, 대기 이유를 조정 카드에 기록한다.
-- 별도 worktree에서 겹치는 공유 경계에는 단일 소유자, 의존 작업과 병합 순서를 정하고 양쪽 Issue 댓글에 기록한다.
-- 겹침이 없으면 조정 부재만 기록하고 독립 진행한다.
-- Lore 커밋 직전과 최종 rebase·병합 직전에 범위가 합의를 벗어나지 않았는지 다시 확인한다.
+- 계획 전용·검증 전용·완료 대화와 카드나 ACK를 교환하지 않는다. 계획 분배와 새 구현 대화 생성은 사용자가 소유한다.
+- 실제 changed paths가 분리되면 메시지나 Issue 댓글 없이 독립 진행한다.
+- 같은 shared checkout, hunk 또는 public contract가 겹칠 때만 활성 편집 대화 한 곳을 소유자로 정한다.
+- 실제 병합 의존성이 생긴 경우에만 양쪽 Issue에 겹친 경로·소유자·병합 순서를 한 번 기록한다.
+- 고정된 3회 재확인은 하지 않는다. diff가 새 공유 경계로 넓어지거나 선행 PR 병합으로 의존 작업이 재개될 때만 다시 확인한다.
+- 선행 구현이 완료되면 해당 대화를 재활성화하지 않고 PR 또는 merge SHA를 읽어 후속 worktree에서 사용한다.
 - 다른 작업의 worktree·브랜치·stage·커밋을 이 작업에서 대신 변경하지 않는다.
 
 ## 3. 이슈 브랜치 생성
@@ -150,7 +150,7 @@ Issue 생성 뒤 전용 브랜치를 만들기 전에 `.codex/skills/coordinate-
 3. 현재 checkout이 이 작업의 독점 checkout이면 `origin/main`에서 `issue/<number>-<slug>` 브랜치를 만든다. 이 작업의 미커밋 변경이 있으면 미추적 파일까지 복구 가능한 임시 stash로 보관한 뒤 자기 변경만 복원한다.
 4. 현재 checkout을 다른 작업이 사용하고 범위가 독립이면 새 경로에 `git worktree add -b issue/<number>-<slug> <path> origin/main`으로 전용 worktree를 만든다. Git object database를 공유하므로 별도 clone을 만들지 않는다.
 5. 실제 공유 hunk·contract dependency가 있으면 조정 결정의 선행 merge SHA를 기다렸다가 별도 worktree를 만든다. 단순 same-repository 상태는 대기 사유가 아니다.
-6. 브랜치가 정확한 Issue 번호를 포함하고 checkout의 path·branch 소유권이 조정 카드와 일치하는지 확인한다.
+6. 브랜치가 정확한 Issue 번호를 포함하고, 실제 소스 충돌 조정이 있었으면 checkout의 path·branch 소유권이 그 결정과 일치하는지 확인한다.
 
 slug는 영문 소문자, 숫자, 하이픈만 사용하고 40자 이내로 유지한다.
 

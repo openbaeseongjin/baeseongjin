@@ -4,8 +4,17 @@ import { run as clientDelivery } from "./clientDeliveryScenario.mjs";
 import { run as environmentManifest } from "./environmentManifest.mjs";
 import { run as environmentRendering } from "./environmentRendering.mjs";
 import { run as audioSystem } from "./audioSystem.mjs";
+import { run as coordinateGithubTasksSkill } from "./coordinateGithubTasksSkill.mjs";
 
-const scenarios = { gameplay, multiplayer, clientDelivery, environmentManifest, environmentRendering, audioSystem };
+const scenarios = {
+    gameplay,
+    multiplayer,
+    clientDelivery,
+    environmentManifest,
+    environmentRendering,
+    audioSystem,
+    coordinateGithubTasksSkill
+};
 const startedAt = performance.now();
 let failures = 0;
 
