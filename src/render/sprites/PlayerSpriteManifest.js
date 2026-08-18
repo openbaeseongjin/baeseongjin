@@ -1,6 +1,6 @@
 import { PlayerSpriteDefinition } from "./PlayerSpriteDefinition.js";
 
-export const PLAYER_SPRITE_MANIFEST_VERSION = 1;
+export const PLAYER_SPRITE_MANIFEST_VERSION = 2;
 
 function plainObject(value, label) {
     if (!value || Array.isArray(value) || typeof value !== "object") throw new Error(`${label} must be an object`);

@@ -13,7 +13,7 @@
 1. 작업이 PixelLab·SpriteCook 원본을 만드는 단계인지, 저장소 표준 리소스로 정규화하는 단계인지 구분한다.
 2. 원본 생성 단계라면 아래 **도구별 원본 수령 형식**으로 export하고 원본을 임의로 재배열하지 않는다.
 3. 정규화 단계라면 납품된 `assets/artwork/characters/<character-id>/export/`를 확인하고 `assets/runtime/characters/player-production-template/`을 `assets/runtime/characters/<character-id>/`로 복사해 `sprite-manifest.json`과 모든 PNG atlas를 함께 만든다.
-4. 실제 PNG 크기, atlas ID·cell 범위, 일곱 animation 상태, duration·fallback과 collider 분리를 확인한다.
+4. 실제 PNG 크기, atlas ID·cell 범위, 여덟 animation 상태, duration·fallback과 collider 분리를 확인한다.
 5. 결과 보고에 출력 경로, 생성 도구·버전, 원본에서 수행한 crop·padding·repacking, 검증 명령과 결과를 남긴다.
 
 구현 기준 파일과 작업 시작점은 다음과 같다.
@@ -23,7 +23,7 @@
 - schema·validator 계약 fixture: [`assets/runtime/characters/fixtures/player-multi-atlas/sprite-manifest.json`](../assets/runtime/characters/fixtures/player-multi-atlas/sprite-manifest.json)
 - 런타임 loader: [`src/render/sprites/PlayerSpriteManifest.js`](../src/render/sprites/PlayerSpriteManifest.js)
 
-에이전트는 production starter를 `<character-id>/` package로 복사해 PNG와 값을 교체하고 `$schema`를 `../sprite-manifest.schema.json`으로 맞춘 뒤 `npm run validate:sprite-assets -- <directory>`를 실행한다. JSON 파싱, 상대 PNG 경로, 실제 PNG 크기, atlas 격자·cell 범위, 일곱 상태 coverage, fallback 순환과 duration을 모두 통과해야 `runtime-ready`로 보고한다. `fixtures/player-multi-atlas`는 공개 계약 회귀용 fixture로 유지하며 아트 품질이나 현재 13개 pose의 기준으로 사용하지 않는다.
+에이전트는 production starter를 `<character-id>/` package로 복사해 PNG와 값을 교체하고 `$schema`를 `../sprite-manifest.schema.json`으로 맞춘 뒤 `npm run validate:sprite-assets -- <directory>`를 실행한다. JSON 파싱, 상대 PNG 경로, 실제 PNG 크기, atlas 격자·cell 범위, 여덟 상태 coverage, fallback 순환과 duration을 모두 통과해야 `runtime-ready`로 보고한다. `fixtures/player-multi-atlas`는 공개 계약 회귀용 fixture로 유지하며 아트 품질이나 현재 13개 pose의 기준으로 사용하지 않는다.
 
 ### 현재 production, starter와 fallback mock
 
@@ -39,7 +39,7 @@
 ```text
 docs/sprite-asset-format.md를 전부 읽고 <character-id> 리소스를 준비한다.
 원본: <PixelLab character ZIP | SpriteCook PNG sheets/frames | manual PNG frames>
-필수 상태: idle, run, jump, fall, rope, hit, respawn
+필수 상태: idle, run, jump, fall, rope, hit, death, respawn
 정식 제작 프레임: 32×32~48×48, 액션 확장: 48×48~64×64
 현재 starter: 24×24 개발 mock 배치, 기본 방향: right, 기본 출력: 48×48
 출력: <target-directory>/sprite-manifest.json + manifest가 참조하는 모든 PNG atlas
@@ -67,13 +67,13 @@ player-main/
 - 현재 개발 mock과 production starter는 24×24픽셀 논리 프레임을 사용한다. 정식 player 제작 크기는 `pixel-graphics-design-guide.md`의 32×32~48×48 기준을 따르며 액션 프레임은 48×48~64×64로 확장할 수 있다. starter와 다른 크기를 쓰면 PNG atlas와 manifest의 `size`·`frameSize`를 함께 바꾸고 원본을 비정수 배율로 축소하지 않는다.
 - 파일명, atlas 개수, 프레임 순서와 프레임 개수는 고정 계약이 아니다. manifest의 ID 참조만 계약으로 삼는다.
 
-## manifest v1
+## manifest v2
 
 다음은 두 atlas를 사용하는 설명용 예다. 결과물은 이 코드 블록을 옮겨 적지 말고 위의 machine-readable example manifest를 복사해 만든다.
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "player-main",
   "generator": {
     "tool": "spritecook",
@@ -145,6 +145,7 @@ player-main/
         "opacity": 0.92
       }
     },
+    "death": { "fallback": "respawn" },
     "respawn": {
       "loop": false,
       "frames": [
@@ -159,7 +160,7 @@ player-main/
 
 ### 필드 규칙
 
-- `formatVersion`은 parser 호환성 버전이다. 의미가 달라지는 변경은 버전을 올린다.
+- `formatVersion`은 parser 호환성 버전이다. 현재 v2는 `death`를 필수 상태로 추가하며, 의미가 달라지는 변경은 버전을 올린다.
 - `generator`는 선택적인 출처 기록이다. renderer가 도구별 분기에 사용하지 않는다.
 - `atlases`는 atlas ID를 키로 갖는 객체다. `size`는 실제 PNG 크기와 일치해야 하고 두 축 모두 `frameSize`로 나누어떨어져야 한다.
 - 각 frame은 atlas ID, 0부터 시작하는 행·열과 양의 정수 `durationMs`를 가진다. 배열 순서가 재생 순서다.
@@ -167,7 +168,7 @@ player-main/
 - `fallback`을 사용하는 animation은 `frames` 대신 다른 animation ID 하나를 참조한다. 순환 fallback은 금지한다.
 - `cue`는 scale·offset·opacity 같은 표현 보정만 허용한다. 생략하면 중립값을 사용한다.
 - 기본 원본 방향은 오른쪽이며 왼쪽은 renderer의 `flipX`로 그린다.
-- `hit`과 `respawn` 같은 시간 제한 표현의 재생 길이는 frame duration 합계다. 상태 우선순위와 어떤 사건이 상태를 시작하는지는 JSON이 아니라 resolver가 소유한다.
+- `hit`, `death`, `respawn` 같은 시간 제한 표현의 재생 길이는 frame duration 합계다. 상태 우선순위와 어떤 사건이 상태를 시작하는지는 JSON이 아니라 resolver가 소유한다.
 
 manifest에는 collider·hitbox·hurtbox, 피해량·무적 시간, 물리 속성, 네트워크 권위 상태를 넣지 않는다. 특히 생성 도구가 keypoint를 제공하더라도 게임 충돌체로 자동 변환하지 않는다.
 
@@ -211,13 +212,13 @@ const renderer = new SpriteSceneRenderer({ playerDefinition: definition });
 
 ## 지원 범위와 검증
 
-manifest v1의 지원 범위는 다음과 같다.
+manifest v2의 지원 범위는 다음과 같다.
 
-- 한 캐릭터의 여러 atlas PNG
+- 한 캐릭터의 여러 atlas PNG와 필수 `death` 상태
 - atlas마다 다른 가로·세로 크기와 행·열 수
 - 상태마다 다른 프레임 수·순서·재생 속도
 - 상태별 loop 또는 마지막 프레임 clamp
 - 명시적 animation fallback과 표현 cue
 - atlas ID를 통한 프레임 선택과 좌우 반전
 
-`npm run validate:sprite-assets -- <directory>`는 manifest 구조를 runtime loader와 같은 계약으로 검사하고 PNG header의 실제 크기를 선언과 대조한다. 자동 테스트는 atlas·cell 참조 범위, 필수 일곱 상태 coverage, fallback 순환, 양수 duration, 경로 이탈 거부와 multi-atlas frame 선택을 검증한다. 도구 export를 앱이 직접 읽거나 renderer에 PixelLab·SpriteCook 분기를 추가하지 않는다.
+`npm run validate:sprite-assets -- <directory>`는 manifest 구조를 runtime loader와 같은 계약으로 검사하고 PNG header의 실제 크기를 선언과 대조한다. 자동 테스트는 atlas·cell 참조 범위, 필수 여덟 상태 coverage, fallback 순환, 양수 duration, 경로 이탈 거부와 multi-atlas frame 선택을 검증한다. 도구 export를 앱이 직접 읽거나 renderer에 PixelLab·SpriteCook 분기를 추가하지 않는다.

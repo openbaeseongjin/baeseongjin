@@ -50,8 +50,8 @@ category는 아래 이름을 사용한다.
 
 ### 캐릭터
 
-- 플레이어 필수 상태는 `idle`, `run`, `jump`, `fall`, `rope`, `hit`, `respawn`이다.
-- `jump`와 `fall`, `hit`과 `respawn`은 첫 프레임 자세만으로도 구분한다.
+- 플레이어 필수 상태는 `idle`, `run`, `jump`, `fall`, `rope`, `hit`, `death`, `respawn`이다.
+- `jump`와 `fall`, `hit`과 `death`, `death`와 `respawn`은 첫 프레임 자세만으로도 구분한다.
 - 몹과 보스는 작업 요청에 적힌 이동·공격·피격·사망 상태만 제작한다. 플레이어 상태 목록을 그대로 적용하지 않는다.
 - 기본 방향, 좌우 반전 여부, 원본 셀 크기와 게임 출력 크기를 `README.md`에 기록한다.
 - 플레이어 atlas 배치는 [`player-production-template/frame-map.png`](../assets/runtime/characters/player-production-template/frame-map.png)를 참고한다. 현재 starter의 24×24 셀과 48×48 출력은 manifest 연결 예시이며 정식 디자인 크기가 아니다. 정식 player는 `32×32`~`48×48` 제작 셀을 사용하고 실제 PNG와 manifest의 `frameSize`를 함께 맞춘다.

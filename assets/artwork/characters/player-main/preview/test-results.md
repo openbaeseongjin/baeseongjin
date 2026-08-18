@@ -43,9 +43,10 @@
 | `fall` | 1 | 1000 | PASS |
 | `rope` | 4 | 90, 90, 90, 90 | PASS |
 | `hit` | 2 | 80, 160 | PASS |
+| `death` | 8 | 120, 80, 80, 80, 80, 80, 80, 100 | PASS |
 | `respawn` | 3 | 150, 150, 150 | PASS |
 
-`death`는 manifest animation 상태가 아니므로 위 필수 상태 표에는 포함하지 않는다. 별도 후보 GIF는 120, 80, 80, 80, 80, 80, 80, 100ms로 총 700ms다.
+`death`의 manifest frame duration 합계와 검토 GIF는 모두 700ms다.
 
 ## Manual visual review
 
@@ -55,10 +56,10 @@
 - `rope`: 그립 손·빈 앞손·머리 중심·몸통·골반·다리를 고정하고, 스카프는 네 프레임 내내 뒤쪽으로 뻗은 채 얕은 파동만 목에서 꼬리 끝으로 전달된다.
 - `hit`: 수평 반동 뒤 웅크린 회복 자세로 이어진다.
 - `respawn`: 청록 실루엣에서 완전한 캐릭터와 외곽광으로 진행한다.
-- `death` 후보: 초반 캐릭터 형태가 뭉개지지 않고, 이후 작은 푸른 파편이 방사형으로 벌어진다.
+- `death`: 초반 캐릭터 형태가 뭉개지지 않고, 이후 작은 푸른 파편이 방사형으로 벌어진다.
 - 48×48 실제 출력에서도 검은 몸, 흰 눈, 빨간 스카프와 상태 실루엣이 판독된다.
 - 실제 게임은 데스크톱 1280×720과 모바일 390×844에서 로드 경고 없이 확인했다.
 
-`npm run validate:sprite-assets -- assets/runtime/characters/player-main` 결과: `Sprite assets valid: player-main (4 atlases, 7 animations)`.
+`npm run validate:sprite-assets -- assets/runtime/characters/player-main` 결과: `Sprite assets valid: player-main (5 atlases, 8 animations)`.
 
 저장소 전체 검사는 최종 candidate에서 별도 실행한다.

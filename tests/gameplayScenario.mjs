@@ -52,6 +52,7 @@ import { run as seamlessSectorGameSimulation } from "./seamlessSectorGameSimulat
 import { run as seamlessSectorMultiplayerWorld } from "./seamlessSectorMultiplayerWorld.mjs";
 import { run as sectorDefinitionValidator } from "./sectorDefinitionValidator.mjs";
 import { run as routeSurfaceVisibility } from "./routeSurfaceVisibility.mjs";
+import { run as playerRespawnPresentation } from "./playerRespawnPresentation.mjs";
 
 const steps = {
     worldSeed,
@@ -104,6 +105,7 @@ const steps = {
     seamlessSectorMultiplayerWorld,
     sectorDefinitionValidator,
     routeSurfaceVisibility,
+    playerRespawnPresentation,
     spriteAssetValidator,
     stateMachine,
     timedStateController,

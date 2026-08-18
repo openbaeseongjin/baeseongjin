@@ -43,6 +43,7 @@ export const DEFAULT_PLAYER_SPRITE_DEFINITION = new PlayerSpriteDefinition({
             frames: [frame(0, 2, 0.08), frame(1, 2, 0.16)],
             cue: { scale: { x: 1.12, y: 0.9 }, offset: { x: -2, y: 1 }, opacity: 0.92 }
         },
+        death: { fallback: "respawn" },
         respawn: {
             loop: false,
             frames: [frame(2, 2, 0.15), frame(3, 2, 0.15), frame(0, 3, 0.15)],

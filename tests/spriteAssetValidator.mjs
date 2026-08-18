@@ -16,17 +16,17 @@ export function run() {
     const valid = validateSpriteAssetDirectory(EXAMPLE_DIRECTORY);
     assert.equal(valid.id, "player-multi-atlas-example");
     assert.equal(valid.atlasCount, 2);
-    assert.equal(valid.animationCount, 7);
+    assert.equal(valid.animationCount, 8);
 
     const productionTemplate = validateSpriteAssetDirectory(PRODUCTION_TEMPLATE_DIRECTORY);
     assert.equal(productionTemplate.id, "player-production-template");
     assert.equal(productionTemplate.atlasCount, 2);
-    assert.equal(productionTemplate.animationCount, 7);
+    assert.equal(productionTemplate.animationCount, 8);
 
     const playerMain = validateSpriteAssetDirectory(PLAYER_MAIN_DIRECTORY);
     assert.equal(playerMain.id, "player-main");
-    assert.equal(playerMain.atlasCount, 4);
-    assert.equal(playerMain.animationCount, 7);
+    assert.equal(playerMain.atlasCount, 5);
+    assert.equal(playerMain.animationCount, 8);
     const playerMainManifest = JSON.parse(readFileSync(resolve(PLAYER_MAIN_DIRECTORY, "sprite-manifest.json"), "utf8"));
     assert.deepEqual(playerMainManifest.atlases.locomotion.size, { width: 144, height: 48 });
     assert.deepEqual(playerMainManifest.atlases.run.size, { width: 192, height: 24 });
@@ -46,7 +46,23 @@ export function run() {
         }))
     );
     assert.equal(playerMainManifest.animations.jump.loop, true);
-    assert.equal(playerMainManifest.animations.death, undefined, "death asset must remain unregistered in this change");
+    assert.deepEqual(playerMainManifest.atlases.death.size, { width: 384, height: 48 });
+    assert.deepEqual(
+        playerMainManifest.animations.death.frames.map(({ atlas, cell, durationMs }) => ({
+            atlas,
+            cell,
+            durationMs
+        })),
+        [120, 80, 80, 80, 80, 80, 80, 100].map((durationMs, column) => ({
+            atlas: "death",
+            cell: { column, row: 0 },
+            durationMs
+        }))
+    );
+    assert.equal(
+        playerMainManifest.animations.death.frames.reduce((total, { durationMs }) => total + durationMs, 0),
+        700
+    );
     assert.deepEqual(
         playerMainManifest.animations.rope.frames.map(({ atlas, cell, durationMs }) => ({ atlas, cell, durationMs })),
         Array.from({ length: 4 }, (_, index) => ({
@@ -100,8 +116,17 @@ export function run() {
         readFileSync(resolve(ROOT, "assets/runtime/characters/sprite-manifest.schema.json"), "utf8")
     );
     assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
-    assert.deepEqual(schema.properties.formatVersion, { const: 1 });
-    assert.deepEqual(schema.properties.animations.required, ["idle", "run", "jump", "fall", "rope", "hit", "respawn"]);
+    assert.deepEqual(schema.properties.formatVersion, { const: 2 });
+    assert.deepEqual(schema.properties.animations.required, [
+        "idle",
+        "run",
+        "jump",
+        "fall",
+        "rope",
+        "hit",
+        "death",
+        "respawn"
+    ]);
 
     const temporaryRoot = mkdtempSync(join(tmpdir(), "baeseongjin-sprite-assets-"));
     const fixture = join(temporaryRoot, "fixture");

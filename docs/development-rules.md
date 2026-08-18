@@ -223,7 +223,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 스프라이트 애니메이션은 불변 clip 데이터와 외부 phase 입력을 분리한다. 순간 상태는 표현 경과 시간을 사용하고 player 달리기처럼 보폭이 이동량과 맞아야 하는 반복 상태는 실제 수평 이동 거리로 phase를 진행한다. Canvas painter는 보간을 끈 그리기만 담당하고 이미지 로딩·캐시·게임 시간·이동 거리 진행을 함께 소유하지 않는다.
 - 상태 머신은 현재 상태·경과 시간·허용 전이만 아는 순수 조합 컴포넌트로 만들고, 도메인 snapshot·사건을 상태 전이 입력으로 바꾸는 resolver와 분리한다. 재사용성을 이유로 의미와 수명이 다른 기존 도메인 상태를 한 FSM으로 강제 이전하지 않는다.
 - 여러 actor의 순간 애니메이션은 사건 대상 ID로 각 표현 FSM에 전달한다. animation state나 frame index를 게임·네트워크 권위 snapshot에 저장해 동기화하지 않는다.
-- 로컬 예측 사건과 서버 확정 사건이 같은 화면 전이를 뜻하면 causal object ID를 같은 presentation ID로 정규화한다. 서버 receipt 때문에 이미 시작한 `hit`·`respawn`을 다시 재생하지 않는다.
+- 로컬 예측 사건과 서버 확정 사건이 같은 화면 전이를 뜻하면 causal object ID를 같은 presentation ID로 정규화한다. 서버 receipt 때문에 이미 시작한 `hit`·`death`·`respawn`이나 로컬 death 카메라 hold를 다시 재생하지 않는다.
 - 스프라이트 출력 크기·anchor와 collider 크기·형태를 하나의 에셋 설정으로 결합하지 않는다. collider는 플레이어 런타임 조립과 물리가 소유하고 렌더 프로필 또는 PNG 교체로 암묵적으로 변경하지 않는다.
 - 새 렌더 프로필이 기존 scene renderer의 일부만 바꿔야 하면 전체 클래스를 복사·상속 override하지 않는다. 안정된 그리기 순서를 유지하는 layer composer와 역할별 renderer를 조립한다.
 - 상위 renderer/composer에 `if (profile)`·`switch (actorType)` 분기를 두지 않는다. composer는 하위 renderer를 호출만 하고 각 하위 컴포넌트가 자기 collection의 draw 계약을 완결하며, 종류 선택은 immutable factory 조립에서 끝낸다.

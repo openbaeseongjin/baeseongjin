@@ -14,9 +14,15 @@ import {
 } from "./rewards/FoundationRewardSelection.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
+import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
-import { advanceAuthoredCamera, localTriggerObjects } from "./camera/AuthoredCameraDirector.js";
+import {
+    advanceAuthoredCamera,
+    localTriggerObjects,
+    resolveAuthoredCameraShot
+} from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
+import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -51,7 +57,8 @@ export class MultiplayerGameApp {
         onDisconnect = () => {},
         onDiagnostics = () => {},
         audioBindings = null,
-        metricsVisible = false
+        metricsVisible = false,
+        playerDefinition = null
     }) {
         this.renderer = renderer
             ? assertGameRenderer(renderer)
@@ -80,6 +87,14 @@ export class MultiplayerGameApp {
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.checkpointFeedback = null;
         this.playerPresentationEvents = [];
+        const presentationDefinition =
+            playerDefinition ?? this.renderer.sceneRenderer?.playerDefinition ?? DEFAULT_PLAYER_SPRITE_DEFINITION;
+        const deathPresentation = presentationDefinition.presentationFor("death");
+        this.respawnPresentation = new PlayerRespawnPresentation({
+            playerId: this.authority.playerId,
+            deathDurationSeconds: deathPresentation.clip.totalDurationSeconds,
+            spriteSize: deathPresentation.size
+        });
         this.storyPresentation = new AuthoredStoryPresentation();
         this.localRunCompleted = false;
         this.localFoundationReward = null;
@@ -265,7 +280,7 @@ export class MultiplayerGameApp {
             current.state.runState
         );
         this.audioBindings?.presentFrame({ events, context: initialAudioContext });
-        this.playerPresentationEvents.push(...createPlayerPresentationEvents(events));
+        this.queuePlayerPresentationEvents(events);
         this.applyCheckpointEvents(events);
         this.applyCheckpointClaimReceipts();
         this.applySummitClaimReceipts();
@@ -332,6 +347,7 @@ export class MultiplayerGameApp {
         }
         this.authority.resolveOwnerCollisions(current.state.players.filter(({ id }) => id !== this.authority.playerId));
         const predictedEvents = this.authority.drainPredictedEvents();
+        this.queuePlayerPresentationEvents(predictedEvents);
         this.applyFoundationFeedback([...events, ...predictedEvents], dt);
         this.authority.drainFoundationShearReceipts();
         this.authority.drainRopeImpactReceipts();
@@ -376,14 +392,20 @@ export class MultiplayerGameApp {
         };
         const predictedResolutions = this.predictableProjectiles.update(dt, collisionState, predictedPlayer.tick);
         this.audioBindings?.presentFrame({ events: predictedResolutions, context: predictedAudioContext });
-        this.playerPresentationEvents.push(...createPlayerPresentationEvents(predictedResolutions));
+        const presentationResolutions = [];
         for (const resolution of predictedResolutions) {
             if (resolution.projectileId) {
+                const respawned =
+                    resolution.resolution === "player-hit" &&
+                    (resolution.parameters?.damage ?? 0) >= collisionState.localPlayer.health;
                 this.authority.resolvePredictedImpact(resolution);
+                presentationResolutions.push(respawned ? { ...resolution, respawned: true } : resolution);
             } else {
                 this.authority.submitHitClaim(resolution);
+                presentationResolutions.push(resolution);
             }
         }
+        this.queuePlayerPresentationEvents(presentationResolutions);
         this.combatFeedback.apply(predictedResolutions);
         this.combatFeedback.update(dt);
         this.updateCheckpointFeedback(dt);
@@ -392,16 +414,7 @@ export class MultiplayerGameApp {
         }
         const player = this.authority.snapshot(1).predicted;
         const authoredWorld = this.authority.renderSnapshot()?.world;
-        const cameraShot = advanceAuthoredCamera({
-            camera: this.camera,
-            world: authoredWorld,
-            player,
-            mobileView: this.mobileView,
-            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
-            cssWidth: this.renderer.cssWidth,
-            cssHeight: this.renderer.cssHeight,
-            dt
-        });
+        const cameraShot = this.updatePresentationCamera(dt, player, authoredWorld);
         this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
@@ -415,6 +428,38 @@ export class MultiplayerGameApp {
                 player.tick,
                 this.localRunCompleted ? "completed" : current.state.runState
             )
+        });
+    }
+
+    queuePlayerPresentationEvents(events) {
+        const prepared = this.respawnPresentation.prepare(createPlayerPresentationEvents(events), {
+            camera: this.camera,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
+        });
+        this.playerPresentationEvents.push(...prepared);
+        return prepared;
+    }
+
+    updatePresentationCamera(dt, player, world) {
+        const phase = this.respawnPresentation.advance(dt, this.camera);
+        if (phase.holding) {
+            return resolveAuthoredCameraShot({
+                world,
+                player: { position: phase.deathPosition },
+                mobileView: this.mobileView,
+                defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom
+            });
+        }
+        return advanceAuthoredCamera({
+            camera: this.camera,
+            world,
+            player,
+            mobileView: this.mobileView,
+            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight,
+            dt
         });
     }
 
@@ -436,7 +481,7 @@ export class MultiplayerGameApp {
             base.world.respawnAnchors?.find(({ id }) => id === remote.state.respawnAnchorId) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
-        this.playerPresentationEvents.push(...createPlayerPresentationEvents([base.eventFlash]));
+        this.queuePlayerPresentationEvents([base.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         const renderMetrics = this.renderer.draw({
             ...base,
