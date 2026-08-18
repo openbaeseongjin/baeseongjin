@@ -16,6 +16,7 @@ import { run as checkpointClaim } from "./checkpointClaim.mjs";
 import { run as projectileHitClaim } from "./projectileHitClaim.mjs";
 import { run as playerProjectileSpawnClaim } from "./playerProjectileSpawnClaim.mjs";
 import { run as ropeImpactClaim } from "./ropeImpactClaim.mjs";
+import { run as augmentImpactClaim } from "./augmentImpactClaim.mjs";
 import { run as worldSnapshotEnvelope } from "./worldSnapshotEnvelope.mjs";
 import { run as ownerMotionState } from "./ownerMotionState.mjs";
 import { run as authoredMultiplayerWorld } from "./authoredMultiplayerWorld.mjs";
@@ -27,6 +28,7 @@ const steps = {
     projectileHitClaim,
     playerProjectileSpawnClaim,
     ropeImpactClaim,
+    augmentImpactClaim,
     worldSnapshotEnvelope,
     ownerMotionState,
     authoredMultiplayerWorld,

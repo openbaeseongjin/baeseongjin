@@ -27,6 +27,7 @@ export function run() {
     const snapshot = sampler.snapshot();
     assert.equal(snapshot.horizontal, 1);
     assert.equal(snapshot.interact, false);
+    assert.equal(snapshot.action, false);
     assert.deepEqual(snapshot.pointer, { x: 12, y: 34, down: false });
     assert.deepEqual(snapshot.viewport, { width: 1000, height: 700 });
     assert.ok(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.pointer));
@@ -40,6 +41,20 @@ export function run() {
     listeners.get("keydown")({ code: "KeyE" });
     assert.equal(sampler.snapshot().interact, false, "Gate panels must not introduce a separate PC interaction key");
     listeners.get("keyup")({ code: "KeyE" });
+    let contextPrevented = false;
+    listeners.get("pointerdown")({
+        pointerType: "mouse",
+        pointerId: 9,
+        button: 2,
+        clientX: 70,
+        clientY: 75,
+        preventDefault: () => (contextPrevented = true)
+    });
+    assert.equal(sampler.snapshot().action, true, "right click must drive the shared Action intent");
+    assert.equal(sampler.snapshot().pointer.down, false, "right click must not start a Rope gesture");
+    assert.equal(contextPrevented, true);
+    listeners.get("pointerup")({ pointerType: "mouse", pointerId: 9, button: 2 });
+    assert.equal(sampler.snapshot().action, false);
     listeners.get("pointerdown")({ pointerType: "mouse", pointerId: 10, clientX: 80, clientY: 90 });
     listeners.get("blur")();
     assert.equal(ropeReleases.length, 1, "losing window focus must synchronously release an active rope gesture");
@@ -135,4 +150,9 @@ export function run() {
     touchSnapshot = touchSampler.snapshot();
     assert.equal(touchSnapshot.horizontal, 1, "the bottom-right square must emit the same command as keyboard right");
     assert.equal(touchSnapshot.mobileControls.right, true);
+    touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 7 });
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 8, clientX: 750, clientY: 480 });
+    touchSnapshot = touchSampler.snapshot();
+    assert.equal(touchSnapshot.action, true, "the elevated mobile Action button must drive the same intent");
+    assert.equal(touchSnapshot.mobileControls.action, true);
 }

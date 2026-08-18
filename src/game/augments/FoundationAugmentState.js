@@ -1,71 +1,150 @@
-import { FOUNDATION_AUGMENT_CONFIG, foundationAugmentById } from "./FoundationAugmentCatalog.js";
+import {
+    augmentById,
+    compatibleAugmentsForSelection,
+    normalizeLegacyFoundationAugmentId,
+    selectedBaseActionId,
+    selectedSignatureId
+} from "./FoundationAugmentCatalog.js";
+
+function distinctIds(values, label) {
+    const ids = [...values];
+    if (ids.some((id) => typeof id !== "string" || id.length === 0) || new Set(ids).size !== ids.length) {
+        throw new Error(`${label} must contain distinct non-empty IDs`);
+    }
+    return ids;
+}
 
 export class FoundationAugmentState {
     constructor() {
-        this.selectedId = null;
-        this.relayWindowRemaining = 0;
+        this.selectedAugmentIds = Object.freeze([]);
+        this.consumedSourceIds = Object.freeze([]);
     }
 
-    select(id) {
-        if (!foundationAugmentById(id)) throw new Error(`unknown Foundation Augment: ${id}`);
-        if (this.selectedId !== null && this.selectedId !== id) return false;
-        this.selectedId = id;
+    select(id, { sourceId = null } = {}) {
+        const normalizedId = normalizeLegacyFoundationAugmentId(id);
+        if (!augmentById(normalizedId)) throw new Error(`unknown Augment: ${id}`);
+        if (this.selectedAugmentIds.length >= 6 || this.selectedAugmentIds.includes(normalizedId)) return false;
+        if (sourceId !== null && this.consumedSourceIds.includes(sourceId)) return false;
+        if (
+            !compatibleAugmentsForSelection(this.selectedAugmentIds).some(
+                ({ id: candidate }) => candidate === normalizedId
+            )
+        ) {
+            return false;
+        }
+        this.selectedAugmentIds = Object.freeze([...this.selectedAugmentIds, normalizedId]);
+        if (sourceId !== null) this.consumedSourceIds = Object.freeze([...this.consumedSourceIds, sourceId]);
+        return true;
+    }
+
+    deselect(id, { sourceId = null } = {}) {
+        const normalizedId = normalizeLegacyFoundationAugmentId(id);
+        if (this.selectedAugmentIds.at(-1) !== normalizedId) return false;
+        this.selectedAugmentIds = Object.freeze(this.selectedAugmentIds.slice(0, -1));
+        if (sourceId !== null && this.consumedSourceIds.at(-1) === sourceId) {
+            this.consumedSourceIds = Object.freeze(this.consumedSourceIds.slice(0, -1));
+        }
         return true;
     }
 
     clear() {
-        this.selectedId = null;
-        this.resetRuntime();
+        this.selectedAugmentIds = Object.freeze([]);
+        this.consumedSourceIds = Object.freeze([]);
     }
 
-    resetRuntime() {
-        this.relayWindowRemaining = 0;
-    }
+    resetRuntime() {}
 
     advance(dt) {
-        if (!Number.isFinite(dt) || dt < 0) throw new Error("Foundation Augment dt must be non-negative");
-        this.relayWindowRemaining = Math.max(0, this.relayWindowRemaining - dt);
+        if (!Number.isFinite(dt) || dt < 0) throw new Error("Augment dt must be non-negative");
     }
 
-    onRopeReleased() {
-        if (this.selectedId !== "relay-link") return false;
-        this.relayWindowRemaining = FOUNDATION_AUGMENT_CONFIG.relayWindowSeconds;
-        return true;
+    has(id) {
+        return this.selectedAugmentIds.includes(normalizeLegacyFoundationAugmentId(id));
+    }
+
+    hasAugment(id) {
+        return this.has(id);
+    }
+
+    selectedBaseActionId() {
+        return selectedBaseActionId(this.selectedAugmentIds);
+    }
+
+    selectedSignatureId() {
+        return selectedSignatureId(this.selectedAugmentIds);
+    }
+
+    effectiveRopeConfig(baseConfig) {
+        const baseReach =
+            (baseConfig.hookSpeed * baseConfig.hookFlightRatio.numerator) / baseConfig.hookFlightRatio.denominator;
+        const hookSpeed = this.has("fast-launch") ? baseConfig.hookSpeed * 1.5 : baseConfig.hookSpeed;
+        const reach = this.has("long-rope") ? baseReach * 1.2 : baseReach;
+        return Object.freeze({
+            ...baseConfig,
+            hookSpeed,
+            hookFlightRatio: Object.freeze({ numerator: reach, denominator: hookSpeed }),
+            hookReloadSeconds: this.has("fast-recover")
+                ? baseConfig.hookReloadSeconds * 0.5
+                : baseConfig.hookReloadSeconds
+        });
     }
 
     ropeInputModifiers(baseConfig) {
-        const relayActive = this.selectedId === "relay-link" && this.relayWindowRemaining > 0;
+        const effectiveConfig = this.effectiveRopeConfig(baseConfig);
         return Object.freeze({
-            attachBufferSeconds: relayActive
-                ? FOUNDATION_AUGMENT_CONFIG.relayAttachBufferSeconds
-                : baseConfig.attachBufferSeconds,
-            aimTolerance: relayActive ? FOUNDATION_AUGMENT_CONFIG.relayAimTolerance : 90,
-            relayActive
+            attachBufferSeconds: effectiveConfig.attachBufferSeconds,
+            aimTolerance: 90,
+            relayActive: false
         });
     }
 
     consumeRelayAttach() {
-        if (this.selectedId !== "relay-link" || this.relayWindowRemaining <= 0) return false;
-        this.relayWindowRemaining = 0;
-        return true;
+        return false;
+    }
+
+    onRopeReleased() {
+        return this.has("rope-link");
     }
 
     snapshot() {
-        return Object.freeze({ relayWindowRemaining: this.relayWindowRemaining });
+        return Object.freeze({
+            selectedAugmentIds: this.selectedAugmentIds,
+            consumedSourceIds: this.consumedSourceIds
+        });
     }
 
     restore(selectedId, runtimeState = {}) {
-        if (selectedId === null || selectedId === undefined) {
-            this.clear();
-            return this.snapshot();
+        const selectedIds = distinctIds(
+            Array.isArray(runtimeState.selectedAugmentIds)
+                ? runtimeState.selectedAugmentIds.map(normalizeLegacyFoundationAugmentId)
+                : selectedId === null || selectedId === undefined
+                  ? []
+                  : [normalizeLegacyFoundationAugmentId(selectedId)],
+            "selectedAugmentIds"
+        );
+        if (selectedIds.length > 6) throw new Error("selectedAugmentIds must contain at most six cards");
+        const restored = [];
+        for (const id of selectedIds) {
+            if (!augmentById(id)) throw new Error(`unknown Augment: ${id}`);
+            if (!compatibleAugmentsForSelection(restored).some(({ id: candidate }) => candidate === id)) {
+                throw new Error(`incompatible Augment selection: ${id}`);
+            }
+            restored.push(id);
         }
-        if (!foundationAugmentById(selectedId)) throw new Error(`unknown Foundation Augment: ${selectedId}`);
-        const relayWindowRemaining = runtimeState.relayWindowRemaining ?? 0;
-        if (!Number.isFinite(relayWindowRemaining) || relayWindowRemaining < 0) {
-            throw new Error("relayWindowRemaining must be non-negative");
-        }
-        this.selectedId = selectedId;
-        this.relayWindowRemaining = selectedId === "relay-link" ? relayWindowRemaining : 0;
+        this.selectedAugmentIds = Object.freeze(restored);
+        this.consumedSourceIds = Object.freeze(distinctIds(runtimeState.consumedSourceIds ?? [], "consumedSourceIds"));
         return this.snapshot();
+    }
+
+    get selectedId() {
+        return this.selectedAugmentIds[0] ?? null;
+    }
+
+    get selectedIds() {
+        return this.selectedAugmentIds;
+    }
+
+    get baseActionId() {
+        return this.selectedBaseActionId();
     }
 }

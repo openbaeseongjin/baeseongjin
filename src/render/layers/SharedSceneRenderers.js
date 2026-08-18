@@ -9,6 +9,7 @@ import {
     worldObjectWorldBounds
 } from "../assets/WorldObjectPresentationCatalog.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../world/WorldMarkerPrimitives.js";
+import { drawElectricArc } from "../effects/ElectricArc.js";
 
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
@@ -28,7 +29,7 @@ const COLORS = Object.freeze({
     hookTip: "#f8fafc"
 });
 
-function drawRope(context, rope, player) {
+function drawRope(context, rope, player, { electrified = false, time = 0 } = {}) {
     if (!rope?.anchor) return;
     const attachment = ropeAttachmentPoint(player, rope);
     const tension = Math.min(1, rope.tension / 900);
@@ -38,6 +39,7 @@ function drawRope(context, rope, player) {
     context.moveTo(rope.anchor.x, rope.anchor.y);
     context.lineTo(attachment.x, attachment.y);
     context.stroke();
+    if (electrified) drawElectricArc(context, rope.anchor, attachment, { time });
     context.fillStyle = "#f8fafc";
     context.beginPath();
     context.arc(rope.anchor.x, rope.anchor.y, 6 + tension * 3, 0, Math.PI * 2);
@@ -1007,8 +1009,10 @@ export class RopeRenderer {
         this.selectRopes = selectRopes;
     }
 
-    draw({ context, scene }) {
-        for (const { rope, player } of this.selectRopes(scene)) drawRope(context, rope, player);
+    draw({ context, scene, presentationTimeSeconds = 0 }) {
+        for (const { rope, player, electrified = false } of this.selectRopes(scene)) {
+            drawRope(context, rope, player, { electrified, time: presentationTimeSeconds });
+        }
     }
 }
 
@@ -1073,8 +1077,18 @@ export class CombatEffectRenderer {
     }
 }
 
+const LARGE_AUGMENT_EFFECTS = new Set([
+    "collision-explosion-direct",
+    "collision-explosion-splash",
+    "push-away",
+    "wall-impact",
+    "end-wave",
+    "explosive-trail"
+]);
+
 export class EventEffectRenderer {
     draw({ context, scene }) {
+        for (const effect of scene.augmentEffects ?? []) this.drawAugmentEffect(context, effect);
         const event = scene.eventFlash;
         if (event?.type !== "rope-cut" || !event.position || event.age >= 0.6) return;
         const progress = event.age / 0.6;
@@ -1089,6 +1103,36 @@ export class EventEffectRenderer {
         context.moveTo(event.position.x + radius, event.position.y - radius);
         context.lineTo(event.position.x - radius, event.position.y + radius);
         context.stroke();
+        context.restore();
+    }
+
+    drawAugmentEffect(context, effect) {
+        if (!effect.position) return;
+        const progress = Math.min(1, effect.age / effect.lifetime);
+        const alpha = Math.max(0, 1 - progress);
+        context.save();
+        context.globalAlpha = alpha;
+        context.globalCompositeOperation = "lighter";
+        if (effect.type === "damage-reflect" && effect.sourcePosition) {
+            context.strokeStyle = "#f4fdff";
+            context.shadowColor = "#67e8f9";
+            context.shadowBlur = 10;
+            context.lineWidth = 3;
+            context.beginPath();
+            context.moveTo(effect.sourcePosition.x, effect.sourcePosition.y);
+            context.lineTo(effect.position.x, effect.position.y);
+            context.stroke();
+        } else {
+            const large = LARGE_AUGMENT_EFFECTS.has(effect.type);
+            const radius = (large ? 18 : 6) + progress * (large ? 92 : 24);
+            context.strokeStyle = effect.type === "electrified-rope" ? "#a8e6ff" : "#fbbf24";
+            context.shadowColor = context.strokeStyle;
+            context.shadowBlur = large ? 12 : 7;
+            context.lineWidth = Math.max(1, 5 * (1 - progress));
+            context.beginPath();
+            context.arc(effect.position.x, effect.position.y, radius, 0, Math.PI * 2);
+            context.stroke();
+        }
         context.restore();
     }
 }
@@ -1236,8 +1280,19 @@ export class RopeShotRenderer {
     }
 }
 
-export const localRopes = (scene) => [{ rope: scene.rope, player: scene.player }];
-export const remoteRopes = (scene) => (scene.otherPlayers ?? []).map((player) => ({ rope: player.rope, player }));
+export const localRopes = (scene) => [
+    {
+        rope: scene.rope,
+        player: scene.player,
+        electrified: (scene.selectedAugmentIds ?? []).includes("electrified-rope")
+    }
+];
+export const remoteRopes = (scene) =>
+    (scene.otherPlayers ?? []).map((player) => ({
+        rope: player.rope,
+        player,
+        electrified: (player.selectedAugmentIds ?? []).includes("electrified-rope")
+    }));
 export const localShots = (scene) =>
     scene.ropeShot?.shot ? [{ shot: scene.ropeShot.shot, player: scene.player }] : [];
 export const remoteShots = (scene) =>

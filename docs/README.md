@@ -21,6 +21,7 @@
 | [`game-hackathon-planning.md`](./game-hackathon-planning.md) | 제품 방향과 핵심 경험 |
 | [`development-schedule.md`](./development-schedule.md) | 역할별 병렬 작업, 필수 선행 관계와 제출 일정 |
 | [`implementation-roadmap.md`](./implementation-roadmap.md) | 구현 현황과 개발 우선순위 |
+| [`augment-v1.md`](./augment-v1.md) | 0.26.0 증강 22장·선택·Action·멀티 피해 계약 |
 | [`scenario-development-integration.md`](./scenario-development-integration.md) | 상세 Stage 목록, authored Runtime 연결 상태, 차단 요소와 마지막 확인 근거 |
 | [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md) | 하나의 연속 월드 안에서 Sector 01 진행 영역을 연결하는 기획·구현 계획 |
 | [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 일반 타이머·상승 붕괴·최소 관전·보스 타이머 전환 기준 |

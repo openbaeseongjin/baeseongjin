@@ -20,7 +20,7 @@ export function run() {
             attachmentOffset: { x: 12, y: -7 }
         }
     });
-    assert.equal(OWNER_MOTION_STATE_PROTOCOL_VERSION, 3);
+    assert.equal(OWNER_MOTION_STATE_PROTOCOL_VERSION, 4);
     assert.equal(motion.angle, 0.75);
     assert.equal(motion.angularVelocity, -2.5);
     assert.deepEqual(motion.rope.attachmentOffset, { x: 12, y: -7 });
@@ -57,13 +57,13 @@ export function run() {
                         origin: { x: 0, y: 0 },
                         direction: { x: 1, y: 0 },
                         target: null,
-                        traveled: 401,
+                        traveled: 481,
                         elapsed: 0.1
                     }
                 }
             }),
         /hook reach/,
-        "owner motion must reject a launcher shot past the derived 400px reach"
+        "owner motion must reject a launcher shot past the maximum 480px Augment reach"
     );
     assert.throws(
         () =>

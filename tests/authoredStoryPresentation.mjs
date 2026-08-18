@@ -296,7 +296,7 @@ export function run() {
             }).title,
             foundationStory.snapshot().detail
         ],
-        ["RELAY LINK", "ONLINE"]
+        ["로프 연동", "ONLINE"]
     );
 
     const augmentTestBay = new AuthoredStoryPresentation();

@@ -9,6 +9,7 @@ export class InputSampler {
         this.onRopeRelease = onRopeRelease;
         this.keys = new Set();
         this.pointer = { x: 0, y: 0, down: false };
+        this.actionDown = false;
         this.ropePointerId = null;
         this.controlPointers = new Map();
         this.touchActive = false;
@@ -27,6 +28,13 @@ export class InputSampler {
         };
         this.onPointerDown = (event) => {
             if (event.pointerType !== "touch") {
+                if (event.button === 2) {
+                    event.preventDefault?.();
+                    this.pointer.x = event.clientX ?? this.pointer.x;
+                    this.pointer.y = event.clientY ?? this.pointer.y;
+                    this.actionDown = true;
+                    return;
+                }
                 this.pointer = { x: event.clientX ?? this.pointer.x, y: event.clientY ?? this.pointer.y, down: true };
                 return;
             }
@@ -45,14 +53,22 @@ export class InputSampler {
                 this.pointer = { x: event.clientX, y: event.clientY, down: true };
             }
         };
-        this.onPointerUp = (event) => this.releasePointer(event.pointerId, event.pointerType, "pointerup");
+        this.onPointerUp = (event) => {
+            if (event.pointerType !== "touch" && event.button === 2) {
+                this.actionDown = false;
+                return;
+            }
+            this.releasePointer(event.pointerId, event.pointerType, "pointerup");
+        };
         this.onPointerCancel = (event) => this.releasePointer(event.pointerId, event.pointerType, "pointercancel");
         this.onPointerLeave = (event) => {
             if (event.pointerType !== "touch" && event.relatedTarget === null) {
+                this.actionDown = false;
                 this.releasePointer(event.pointerId, event.pointerType, "pointer-leave");
             }
         };
         this.onInterrupted = () => this.clearTransientInput("blur");
+        this.onContextMenu = (event) => event.preventDefault?.();
         this.onVisibilityChange = () => {
             if (this.documentTarget?.hidden) this.clearTransientInput("visibility-hidden");
         };
@@ -98,6 +114,7 @@ export class InputSampler {
         this.keys.clear();
         this.ropePointerId = null;
         this.controlPointers.clear();
+        this.actionDown = false;
         this.pointer.down = false;
         if (releasedRope && reason) this.notifyRopeRelease(reason);
     }
@@ -117,6 +134,7 @@ export class InputSampler {
         this.surface.addEventListener("pointerup", this.onPointerUp);
         this.surface.addEventListener("pointercancel", this.onPointerCancel);
         this.surface.addEventListener("pointerleave", this.onPointerLeave);
+        this.surface.addEventListener("contextmenu", this.onContextMenu);
         this.attached = true;
     }
 
@@ -131,6 +149,7 @@ export class InputSampler {
         this.surface.removeEventListener("pointerup", this.onPointerUp);
         this.surface.removeEventListener("pointercancel", this.onPointerCancel);
         this.surface.removeEventListener("pointerleave", this.onPointerLeave);
+        this.surface.removeEventListener("contextmenu", this.onContextMenu);
         this.clearTransientInput();
         this.attached = false;
     }
@@ -145,17 +164,20 @@ export class InputSampler {
         const mobileLeft = [...this.controlPointers.values()].includes("left");
         const mobileRight = [...this.controlPointers.values()].includes("right");
         const mobileJump = [...this.controlPointers.values()].includes("jump");
+        const mobileAction = [...this.controlPointers.values()].includes("action");
         const mobileControls = Object.freeze({
             visible: this.touchActive,
             ropePointerDown: this.ropePointerId !== null,
             left: mobileLeft,
             right: mobileRight,
-            jump: mobileJump
+            jump: mobileJump,
+            action: mobileAction
         });
         return Object.freeze({
             horizontal: Math.max(-1, Math.min(1, keyboardHorizontal + Number(mobileRight) - Number(mobileLeft))),
             vertical: Math.max(-1, Math.min(1, keyboardVertical - Number(mobileJump))),
             interact: keyboardVertical < 0 || mobileJump,
+            action: this.actionDown || mobileAction,
             pointer: Object.freeze({ ...this.pointer }),
             viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),
             mobileControls

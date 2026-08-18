@@ -5,8 +5,40 @@ import { selectNearestPlayer } from "./CombatTargeting.js";
 import { ENEMY_BEHAVIOR_CAPABILITY } from "./EnemyBehaviors.js";
 import { advanceEnemyPatrol, createEnemyPatrolState } from "./EnemyPatrol.js";
 import { BallisticProjectileObject } from "./ProjectileObject.js";
+import { Vector2 } from "../../game-kit/index.js";
 
 const ATTACK_STATES = new Set(["idle", "acquire", "track", "lock", "fire", "cooldown"]);
+
+function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
+    if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
+    if (exclusiveMinimum ? value <= minimum : value < minimum) {
+        const comparison = exclusiveMinimum ? "greater than" : "at least";
+        throw new Error(`${label} must be ${comparison} ${minimum}`);
+    }
+    return value;
+}
+
+function normalizeImpactDirection(value, label) {
+    assertFinite(value?.x, `${label}.x`);
+    assertFinite(value?.y, `${label}.y`);
+    const direction = new Vector2(value.x, value.y);
+    if (direction.length() === 0) throw new Error(`${label} must be non-zero`);
+    return direction.normalize();
+}
+
+function cloneKnockbackState(state) {
+    if (!state) return null;
+    return Object.freeze({
+        direction: Object.freeze({ x: state.direction.x, y: state.direction.y }),
+        distance: state.distance,
+        durationSeconds: state.durationSeconds,
+        remainingSeconds: state.remainingSeconds,
+        sourcePlayerId: state.sourcePlayerId ?? null,
+        sourceEffectId: state.sourceEffectId ?? null,
+        wallImpactEligible: state.wallImpactEligible === true,
+        wallImpactTriggered: state.wallImpactTriggered === true
+    });
+}
 function hasLineOfSight(enemy, target, surfaces) {
     if (!enemy.rules.includes("cover-ends-los")) return true;
     return !surfaces.some(
@@ -183,7 +215,9 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         attackState = "idle",
         attackStateRemaining = 0,
         aimDirection = null,
-        lockedTargetId = null
+        lockedTargetId = null,
+        impactDisplacementEnabled = true,
+        knockbackState = null
     }) {
         super({ id });
         this.position = position;
@@ -205,6 +239,27 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         this.aimDirection = aimDirection ? Object.freeze({ x: aimDirection.x, y: aimDirection.y }) : null;
         this.fireCooldown =
             this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, fireCooldown ?? 0) : 0;
+        this.impactDisplacementEnabled = impactDisplacementEnabled !== false;
+        this.knockbackState = knockbackState
+            ? {
+                  direction: normalizeImpactDirection(knockbackState.direction, "knockbackState.direction"),
+                  distance: assertFinite(knockbackState.distance, "knockbackState.distance", {
+                      minimum: 0,
+                      exclusiveMinimum: true
+                  }),
+                  durationSeconds: assertFinite(knockbackState.durationSeconds, "knockbackState.durationSeconds", {
+                      minimum: 0,
+                      exclusiveMinimum: true
+                  }),
+                  remainingSeconds: assertFinite(knockbackState.remainingSeconds, "knockbackState.remainingSeconds", {
+                      minimum: 0
+                  }),
+                  sourcePlayerId: knockbackState.sourcePlayerId ?? null,
+                  sourceEffectId: knockbackState.sourceEffectId ?? null,
+                  wallImpactEligible: knockbackState.wallImpactEligible === true,
+                  wallImpactTriggered: knockbackState.wallImpactTriggered === true
+              }
+            : null;
         Object.defineProperty(this, "behavior", {
             value: behavior,
             enumerable: false,
@@ -228,5 +283,37 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
 
     blocksImpactFrom(sourcePosition) {
         return this.behavior?.blocksImpactFrom?.(this, sourcePosition) ?? false;
+    }
+
+    knockbackSnapshot() {
+        return cloneKnockbackState(this.knockbackState);
+    }
+
+    canApplyImpactKnockback() {
+        return this.impactDisplacementEnabled;
+    }
+
+    applyImpactKnockback({ direction, distance, durationSeconds }) {
+        if (!this.canApplyImpactKnockback()) return false;
+        this.knockbackState = {
+            direction: normalizeImpactDirection(direction, "direction"),
+            distance: assertFinite(distance, "distance", { minimum: 0, exclusiveMinimum: true }),
+            durationSeconds: assertFinite(durationSeconds, "durationSeconds", { minimum: 0, exclusiveMinimum: true }),
+            remainingSeconds: assertFinite(durationSeconds, "durationSeconds", { minimum: 0, exclusiveMinimum: true })
+        };
+        return true;
+    }
+
+    advanceImpactKnockback(dt) {
+        if (!this.knockbackState) return false;
+        const stepDt = assertFinite(dt, "dt", { minimum: 0 });
+        if (stepDt <= 0) return false;
+        const state = this.knockbackState;
+        const appliedSeconds = Math.min(stepDt, state.remainingSeconds);
+        const speed = state.distance / state.durationSeconds;
+        this.position.add(state.direction.clone().scale(speed * appliedSeconds));
+        state.remainingSeconds = Math.max(0, state.remainingSeconds - appliedSeconds);
+        if (state.remainingSeconds <= 0) this.knockbackState = null;
+        return true;
     }
 }

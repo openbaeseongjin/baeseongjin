@@ -1,5 +1,6 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
 import { WORLD_CONFIG } from "../config.js";
+import { createAugmentImpactReceipt } from "../network/AugmentImpactClaim.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
 import { createFoundationShearReceipt } from "../network/FoundationShearClaim.js";
@@ -44,8 +45,8 @@ export class AuthorityServerSession {
         this.resolvedImpactClaims = new Map();
         this.pendingImpactRecoveries = new Map();
         this.resolvedFoundationSelections = new Map();
-        this.resolvedFoundationShearClaims = new Map();
         this.resolvedRopeImpactClaims = new Map();
+        this.resolvedAugmentImpactClaims = new Map();
         this.resolvedCheckpointClaims = new Map();
         this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
@@ -233,30 +234,11 @@ export class AuthorityServerSession {
         if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
-        const existing = this.resolvedFoundationShearClaims.get(claim.predictionId);
-        if (existing) return existing.receipt;
-        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
-        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
-            return createFoundationShearReceipt({
-                predictionId: claim.predictionId,
-                accepted: false,
-                reason: "tick-window"
-            });
-        }
-        const receipt = createFoundationShearReceipt({
+        return createFoundationShearReceipt({
             predictionId: claim.predictionId,
-            ...this.simulation.resolveFoundationShearClaim(authenticatedPlayerId, claim, {
-                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
-            })
+            accepted: false,
+            reason: "retired-protocol"
         });
-        if (receipt.accepted) {
-            this.resolvedFoundationShearClaims.set(claim.predictionId, {
-                receipt,
-                resolvedAtTick: this.simulation.getTick()
-            });
-        }
-        return receipt;
     }
 
     submitRopeImpact(authenticatedPlayerId, claim) {
@@ -286,6 +268,66 @@ export class AuthorityServerSession {
                 resolvedAtTick: this.simulation.getTick()
             });
         }
+        return receipt;
+    }
+
+    submitAugmentOffer(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
+        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+            return Object.freeze({ sourceId: claim.sourceId, accepted: false, reason: "tick-window" });
+        }
+        const source = this.simulation.world.objects?.find(({ id }) => id === claim.sourceId);
+        const accepted = this.simulation.beginFoundationReward(
+            authenticatedPlayerId,
+            claim.sourceId,
+            source?.objectiveId ?? null
+        );
+        return Object.freeze({
+            sourceId: claim.sourceId,
+            accepted,
+            ...(accepted ? {} : { reason: "offer-unavailable" })
+        });
+    }
+
+    submitAugmentImpact(authenticatedPlayerId, claim) {
+        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
+            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
+        }
+        const claimKey = `${authenticatedPlayerId}\u0000${claim.eventId}`;
+        const existing = this.resolvedAugmentImpactClaims.get(claimKey);
+        if (existing) return existing.receipt;
+        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
+        const simulationResult =
+            claim.clientTick < minimumTick || claim.clientTick > maximumTick
+                ? Object.freeze({ accepted: false, reason: "invalid" })
+                : this.simulation.resolveAugmentImpactClaim(authenticatedPlayerId, claim, {
+                      positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
+                  });
+        const acceptedResolution =
+            simulationResult.resolution === "late-dead-noop"
+                ? "target-already-dead"
+                : simulationResult.resolution === "shield-blocked"
+                  ? "shield-blocked"
+                  : "applied";
+        const receipt = createAugmentImpactReceipt({
+            eventId: claim.eventId,
+            predictionId: claim.predictionId,
+            accepted: simulationResult.accepted,
+            ...(simulationResult.accepted
+                ? { resolution: acceptedResolution }
+                : { reason: simulationResult.reason === "target-missing" ? "target-missing" : "invalid" }),
+            damage: simulationResult.damage ?? 0,
+            knockbackApplied: simulationResult.knockbackApplied === true
+        });
+        this.resolvedAugmentImpactClaims.set(claimKey, {
+            receipt,
+            resolvedAtTick: this.simulation.getTick()
+        });
         return receipt;
     }
 
@@ -466,15 +508,13 @@ export class AuthorityServerSession {
                 this.resolvedProjectileSpawnClaims.delete(predictionId);
             }
         }
-        for (const [predictionId, entry] of this.resolvedFoundationShearClaims) {
-            if (entry.resolvedAtTick < oldestRememberedTick) {
-                this.resolvedFoundationShearClaims.delete(predictionId);
-            }
-        }
         for (const [predictionId, entry] of this.resolvedRopeImpactClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) {
                 this.resolvedRopeImpactClaims.delete(predictionId);
             }
+        }
+        for (const [claimKey, entry] of this.resolvedAugmentImpactClaims) {
+            if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedAugmentImpactClaims.delete(claimKey);
         }
         for (const [impactId, entry] of this.resolvedImpactClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedImpactClaims.delete(impactId);
@@ -507,11 +547,11 @@ export class AuthorityServerSession {
         for (const selectionKey of this.resolvedFoundationSelections.keys()) {
             if (selectionKey.startsWith(`${playerId}:`)) this.resolvedFoundationSelections.delete(selectionKey);
         }
-        for (const predictionId of this.resolvedFoundationShearClaims.keys()) {
-            if (predictionId.startsWith(`${playerId}:`)) this.resolvedFoundationShearClaims.delete(predictionId);
-        }
         for (const predictionId of this.resolvedRopeImpactClaims.keys()) {
             if (predictionId.startsWith(`${playerId}:`)) this.resolvedRopeImpactClaims.delete(predictionId);
+        }
+        for (const claimKey of this.resolvedAugmentImpactClaims.keys()) {
+            if (claimKey.startsWith(`${playerId}\u0000`)) this.resolvedAugmentImpactClaims.delete(claimKey);
         }
         for (const predictionId of this.resolvedProjectileSpawnClaims.keys()) {
             if (predictionId.startsWith(`${playerId}:`)) this.resolvedProjectileSpawnClaims.delete(predictionId);

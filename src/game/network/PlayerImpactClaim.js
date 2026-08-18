@@ -2,7 +2,7 @@ import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 7;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 8;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit", "fall-damage"]);
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
@@ -48,9 +48,23 @@ function assertFoundationState(foundationId, runtimeState, label) {
     if (!runtimeState || Array.isArray(runtimeState) || typeof runtimeState !== "object") {
         throw new Error(`${label}.augmentRuntimeState must be an object`);
     }
-    assertFinite(runtimeState.relayWindowRemaining, `${label}.augmentRuntimeState.relayWindowRemaining`, {
-        minimum: 0
-    });
+    const selectedAugmentIds = runtimeState.selectedAugmentIds ?? (foundationId === null ? [] : [foundationId]);
+    if (
+        !Array.isArray(selectedAugmentIds) ||
+        selectedAugmentIds.length > 6 ||
+        new Set(selectedAugmentIds).size !== selectedAugmentIds.length ||
+        selectedAugmentIds.some((id) => !foundationAugmentById(id))
+    ) {
+        throw new Error(`${label}.augmentRuntimeState.selectedAugmentIds must contain up to six known cards`);
+    }
+    if ((selectedAugmentIds[0] ?? null) !== foundationId) {
+        throw new Error(`${label}.foundationAugment must match the first selected Augment`);
+    }
+    if (runtimeState.combat !== undefined && runtimeState.combat !== null) {
+        if (typeof runtimeState.combat !== "object" || Array.isArray(runtimeState.combat)) {
+            throw new Error(`${label}.augmentRuntimeState.combat must be an object or null`);
+        }
+    }
 }
 
 function assertSwingDrag(value, label) {
@@ -87,11 +101,11 @@ function assertLauncher(value, label) {
     }
     assertFinite(value.shot.traveled, `${label}.shot.traveled`, {
         minimum: 0,
-        maximum: ropeHookReach() + LAUNCHER_NUMERIC_TOLERANCE
+        maximum: ropeHookReach() * 1.2 + LAUNCHER_NUMERIC_TOLERANCE
     });
     assertFinite(value.shot.elapsed, `${label}.shot.elapsed`, {
         minimum: 0,
-        maximum: ropeHookFlightSeconds() + LAUNCHER_NUMERIC_TOLERANCE
+        maximum: ropeHookFlightSeconds() * 1.2 + LAUNCHER_NUMERIC_TOLERANCE
     });
     return value;
 }
@@ -100,7 +114,7 @@ function normalizeImpactRecoveryState(state) {
     if (!state || Array.isArray(state) || typeof state !== "object") {
         throw new Error("outcome.state must be an object");
     }
-    const normalized = normalizeNetworkJson(state, "outcome.state");
+    const normalized = normalizeNetworkJson(JSON.parse(JSON.stringify(state)), "outcome.state");
     assertId(normalized.id, "outcome.state.id");
     assertFiniteVector(normalized.position, "outcome.state.position");
     assertFiniteVector(normalized.velocity, "outcome.state.velocity");
@@ -235,7 +249,7 @@ function impactStateProjection(state, { impactType, respawned }) {
             cooldownTicks: quantized(state.weapon.cooldown, 1 / 120)
         },
         foundationAugment: state.foundationAugment,
-        relayWindowTicks: quantized(state.augmentRuntimeState.relayWindowRemaining, 1 / 120),
+        selectedAugmentIds: state.augmentRuntimeState.selectedAugmentIds ?? [],
         launcher: launcherProjection(state)
     };
 }

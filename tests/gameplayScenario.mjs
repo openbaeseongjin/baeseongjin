@@ -13,6 +13,11 @@ import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as worldSeed } from "./worldSeed.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
 import { run as foundationAugment } from "./foundationAugment.mjs";
+import { run as augmentOffer } from "./augmentOffer.mjs";
+import { run as actionAugmentRuntime } from "./actionAugmentRuntime.mjs";
+import { run as ropeAugmentModules } from "./ropeAugmentModules.mjs";
+import { run as playerEnemyImpact } from "./playerEnemyImpact.mjs";
+import { run as augmentV1Integration } from "./augmentV1Integration.mjs";
 import { run as gameObjectModel } from "./gameObjectModel.mjs";
 import { run as renderingSystem } from "./renderingSystem.mjs";
 import { run as stateMachine } from "./stateMachine.mjs";
@@ -51,6 +56,11 @@ const steps = {
     swingDrag,
     ropeLauncher,
     foundationAugment,
+    augmentOffer,
+    actionAugmentRuntime,
+    ropeAugmentModules,
+    playerEnemyImpact,
+    augmentV1Integration,
     gameObjectModel,
     gameSimulation,
     combatSystems,
