@@ -25,6 +25,19 @@ export function run() {
     assert.equal(retail.objects.filter(({ kind }) => kind === "patrol-drone").length, 1);
     assert.equal(retail.objects.find(({ kind }) => kind === "patrol-drone").rules.includes("no-rope-cut"), true);
 
+    const serviceNodeArea = SECTOR_03_AREA_CATALOG.areas[4];
+    const serviceNode = serviceNodeArea.objects.find(({ id }) => id === "sector-03-05:service-calibration-frame");
+    const augmentObjective = serviceNodeArea.objectives.find(({ id }) => id === "sector-03-05:augment-selected");
+    const exitObjective = serviceNodeArea.objectives.find(({ id }) => id === "sector-03-05:exit-panel-engaged");
+    assert.equal(serviceNodeArea.subtitle, "REST / AUGMENT SERVICE");
+    assert.equal(serviceNode.kind, "augment-node");
+    assert.equal(serviceNode.objectiveId, augmentObjective.id);
+    assert.equal(augmentObjective.type, "interact-choice");
+    assert.deepEqual(exitObjective.requiredObjectiveIds, [
+        "sector-03-05:final-deck-reached",
+        "sector-03-05:augment-selected"
+    ]);
+
     const finale = SECTOR_03_AREA_CATALOG.areas[7];
     assert.equal(finale.id, "sector-03-08");
     assert.equal(finale.nextAreaId, null);

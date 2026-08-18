@@ -90,6 +90,11 @@ export function run() {
     assert.equal(session.submitFoundationSelection(owner.id, claim), receipt, "selection retry is idempotent");
     assert.ok(simulation.playerState(owner.id).selectedAugmentIds.includes(chosenId));
     assert.equal(simulation.playerState(partner.id).selectedAugmentIds.length, 0);
+    assert.equal(
+        simulation.worldProgress.isObjectiveComplete(node.objectiveId),
+        false,
+        "the shared route stays closed until every current Player consumes the Node"
+    );
 
     const partnerChoice = partnerOffer.choices[0].id;
     assert.equal(
@@ -104,6 +109,26 @@ export function run() {
         true
     );
     assert.ok(simulation.playerState(partner.id).selectedAugmentIds.includes(partnerChoice));
+    assert.equal(simulation.worldProgress.isObjectiveComplete(node.objectiveId), true);
+    const confirmedSnapshot = buildAuthoritySnapshot({ simulation });
+    const reconnectedOwner = predictorFor(confirmedSnapshot, owner.id);
+    reconnectedOwner.reconcile(confirmedSnapshot, []);
+    const reconnectedState = reconnectedOwner.state();
+    assert.ok(reconnectedState.selectedAugmentIds.includes(chosenId));
+    assert.ok(reconnectedState.augmentRuntimeState.consumedSourceIds.includes(node.id));
+    assert.equal(
+        openFoundationChooserCandidate({
+            world: reconnectedOwner.simulation.world,
+            position: node.position,
+            command: command({ interact: true }),
+            playerId: owner.id,
+            runSeed: reconnectedOwner.simulation.world.seed,
+            selectedAugmentIds: reconnectedState.selectedAugmentIds,
+            consumedSourceIds: reconnectedState.augmentRuntimeState.consumedSourceIds
+        }),
+        null,
+        "a reconnected selected Player must not be counted as an unselected Node participant"
+    );
     assert.equal(
         simulation.beginFoundationReward(owner.id, node.id, node.objectiveId),
         false,

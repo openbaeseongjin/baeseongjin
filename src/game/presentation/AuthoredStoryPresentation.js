@@ -76,8 +76,8 @@ const ENTRY_PRESENTATIONS = Object.freeze({
     "sector-02-03": Object.freeze([
         Object.freeze({
             id: "sector-02-03:foundation-detected",
-            title: "FOUNDATION AUGMENT",
-            detail: "DETECTED",
+            title: "AUGMENT SERVICE NODE",
+            detail: "OFFER 2 AVAILABLE",
             durationSeconds: 1.4
         })
     ]),
@@ -1258,14 +1258,28 @@ const OBJECTIVE_PRESENTATIONS = Object.freeze({
     "sector-02-03:specialization-selected": Object.freeze([
         Object.freeze({
             id: "sector-02-03:specialization-available",
-            title: "SPECIALIZATION",
+            title: "AUGMENT OFFER",
             detail: "AVAILABLE",
             durationSeconds: 1.1
         }),
         Object.freeze({
             id: "sector-02-03:specialization-pending",
-            title: "CALIBRATION PROTOCOL",
-            detail: "PENDING",
+            title: "SERVICE CALIBRATION",
+            detail: "READY",
+            durationSeconds: 1.2
+        })
+    ]),
+    "sector-03-05:augment-selected": Object.freeze([
+        Object.freeze({
+            id: "sector-03-05:augment-available",
+            title: "AUGMENT OFFER",
+            detail: "OFFER 3 AVAILABLE",
+            durationSeconds: 1.1
+        }),
+        Object.freeze({
+            id: "sector-03-05:service-ready",
+            title: "BUILDING SERVICES",
+            detail: "CALIBRATION READY",
             durationSeconds: 1.2
         })
     ]),

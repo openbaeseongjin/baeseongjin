@@ -11,11 +11,11 @@
 | Sector Role | Worker District 이후 첫 Powered Upper-City Contrast |
 | Core Gameplay | **ENVIRONMENT RHYTHM + COMMITMENT + ROPE FLOW** (= Moving Threat → Active Route Control → Free-Weave Synthesis) |
 | Core Story Shift | “왜 C만 멈췄지?” → “같은 사고였는데… 이동 조건은 같지 않았어.” |
-| Carry Build | Foundation + First Specialization KEEP |
+| Carry Build | Sector 01·02에서 고른 generic Augment 2장 KEEP |
 | New Rope Mode / New Input | NONE |
 | Runtime Mechanic | Existing `ACCESS SCAN FIELD` — RUNTIME PROTOTYPE INTEGRATED / TELEGRAPH IMPLEMENTED |
 | World-facing Meaning | **SMART MAINTENANCE SAFETY SYSTEM** (이전: Access Control 암시 → REV 2.0에서 명시적으로 교체) |
-| New Augment in Sector 03 General Stages | NONE — Growth HOLD |
+| New Augment in Sector 03 General Stages | 3-5 Building Services Hub의 세 번째 generic 3장 offer |
 | Security Shutter | NOT USED in Sector 03 General Stages |
 | New Enemy Type | NONE |
 | Reused Enemy | Patrol Drone T1 |
@@ -27,6 +27,12 @@
 | Approved Gameplay Art | Runtime·Stable ID·기본 Camera 확인 완료; Stage별 Approved Blockout과 exact Camera Shot 확정 전 HOLD |
 
 ---
+
+## CURRENT RUNTIME OVERRIDE — 0.28.0
+
+- 과거 Foundation + First Specialization 성장 가정은 22장 generic Augment v1로 대체됐다.
+- 3-5 `BUILDING SERVICES HUB`의 기존 Service Calibration Frame은 Player별 세 번째 명시적 offer source다. Rest/Enemy 없음/Scanner 없음/안전한 Calibration 공간은 유지한다.
+- 아래 `Growth HOLD`, `3-5 새 Augment 없음`과 Foundation/Specialization tier 서술은 **AUTHORING SNAPSHOT — SUPERSEDED**다. 특정 카드 없이 통과 가능한 Geometry와 Story 공개 제한은 계속 유효하다.
 
 ## 0. 재작성 목적
 
@@ -745,7 +751,11 @@ Safe observation / recovery / story deck은 `new target acquire`가 불가능한
 
 ---
 
-## 13. Growth Progression — HOLD
+## 13. Growth Progression — CURRENT GENERIC AUGMENT OVERRIDE
+
+Sector 03 시작에는 앞선 두 generic Augment를 유지하고, 3-5에서 현재 loadout과 호환되는 세 번째 결정적 3장 offer를 선택한다. 이는 Hybrid·Second Specialization 같은 새 tier가 아니라 동일한 22장 Catalog의 다음 selection index다. 선택은 3-5 outbound 진행의 선행 조건이지만 어떤 특정 카드도 필수 Route나 Scanner 해법이 아니다.
+
+### AUTHORING SNAPSHOT — SUPERSEDED
 
 Sector 03 시작 Design State:
 
@@ -800,7 +810,7 @@ Specialization names/values/pool = system gate
 | 3-2 SCANNER GALLERY | **FACADE SERVICE GALLERY** | 광고/외벽/조명 뒤 정비 Gallery | First Smart Maintenance Safety tutorial | 0 | first active | none |
 | 3-3 RETAIL SECURITY WALK | **CENTRAL RETAIL WALK** | 중앙 Atrium 가장자리 Public Walk | Scanner + Patrol first synthesis | 1 T1 | 1 group | none |
 | 3-4 SERVICE ARCADE | **RETAIL SERVICE SPINE** | Front / Back-of-House 분기 | Public vs Service first route identity | 1 T1 | Public route | none |
-| 3-5 COMMERCIAL SERVICE NODE | **BUILDING SERVICES HUB** | 전력·환기·안내·Facade 관리층 | Rest / Build Diagnostic | 0 | none | **HOLD / none** |
+| 3-5 COMMERCIAL SERVICE NODE | **BUILDING SERVICES HUB** | 전력·환기·안내·Facade 관리층 | Rest / third generic offer | 0 | none | **generic offer 3** |
 | 3-6 PREMIUM ATRIUM | **GRAND CENTRAL ATRIUM** | 복합시설 대표 대공간 | Large Rope Flow + known Security timing | 1 T1 | 1 shared group | none |
 | 3-7 PRIORITY CONCOURSE | **TRANSFER MEZZANINE** | 상층 Transit 환승층 | Static cost-profile route choice + Story pressure | 1 T1 | 1 shared group | none |
 | 3-8 UPPER MARKET GATE | **UPPER EXCHANGE GATE** | Commercial → Transit 경계 | Dynamic Free-Weave Finale | 2 T1 separated | 1 shared group | none |
@@ -1579,7 +1589,7 @@ Gameplay collision skin은 `actual authored geometry`를 따른다. Graphics가 
 
 ## 30. Build Interaction
 
-Foundation + First Specialization 유지.
+앞선 generic Augment 2장을 유지하고 3-5에서 세 번째 카드를 선택한다.
 
 IMPULSE: 큰 Atrium / 빠른 Commit / 노출시간 감소
 
@@ -1959,7 +1969,7 @@ Sector 03 내부에서 충돌 시:
 - Scanner Locked 시 current Rope 강제 detach
 - Shutter를 별도 주요 시스템으로 추가
 - Drone T2 추가
-- 3-5에서 Hybrid / second specialization 지급
+- 3-5 generic offer를 별도 Hybrid / second specialization tier로 해석
 - 특정 Build만 통과 가능한 Mandatory Route
 - 3-7과 3-8이 사실상 같은 3-Route choice
 - 3-8 D1/D2 activation overlap
@@ -2010,8 +2020,7 @@ Public vs Service
 ↓
 
 3-5 BUILDING SERVICES HUB
-REST
-Growth HOLD
+REST + GENERIC OFFER 3
 
 ↓
 

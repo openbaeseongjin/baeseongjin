@@ -1,10 +1,18 @@
 # SECTOR 03-5 — COMMERCIAL SERVICE NODE
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — GENERIC AUGMENT OVERRIDE*
 
 ◀ PREV — [SECTOR 03-4 / SERVICE ARCADE](../3-4/README.md) · NEXT — [SECTOR 03-6 / PREMIUM ATRIUM](../3-6/README.md) ▶
 
-`SECTOR 03 COMMERCIAL DISTRICT` · `STAGE 05` · `REST / BUILD DIAGNOSTIC` · `GROWTH GATE: HOLD`
+`SECTOR 03 COMMERCIAL DISTRICT` · `STAGE 05` · `REST / THIRD GENERIC AUGMENT`
+
+## CURRENT RUNTIME OVERRIDE — 0.28.0
+
+- 3-5의 기존 `sector-03-05:service-calibration-frame`을 세 번째 explicit `augment-node` source로 사용한다. 위치와 safe platform Geometry는 변경하지 않는다.
+- 선택은 새 Hybrid·Second Specialization tier가 아니라 동일한 22장 generic Catalog의 selection index 2 offer다.
+- Node의 `interact-choice` 선택과 final deck 도달을 모두 마쳐야 exit panel이 활성화된다. 특정 카드나 성공 Calibration은 요구하지 않는다.
+- pending offer·선택·source 소비는 Player별이며 사망·재접속·party wipe 뒤 유지된다. 현재 채널 Player 전원이 선택한 뒤 공용 outbound objective가 완료되고, 완료 전 퇴장 Player는 route를 교착시키지 않는다.
+- 아래 `NO NEW GROWTH`, Optional N1, Node 비필수, 새 Augment 금지 서술은 **AUTHORING SNAPSHOT — SUPERSEDED BY USER DECISION A / GENERIC AUGMENT V1**다. Rest, Enemy/Scanner/Wind 없음, Story 공개 제한과 안전한 Calibration Loop는 유지한다.
 
 | 항목 | 기준 |
 |---|---|

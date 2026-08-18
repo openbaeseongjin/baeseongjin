@@ -53,9 +53,12 @@ export function run() {
 
     const specializationArea = SECTOR_02_AREA_CATALOG.areas[2];
     const specializationNode = specializationArea.objects.find(({ id }) => id.endsWith(":specialization-node"));
-    assert.equal(specializationArea.objectives[0].type, "interact");
-    assert.equal(specializationNode.selectionPool, "TBD");
-    assert.equal(specializationNode.requiresFoundation, true);
+    assert.equal(specializationArea.subtitle, "AUGMENT SERVICE");
+    assert.equal(specializationArea.objectives[0].type, "interact-choice");
+    assert.equal(specializationNode.kind, "augment-node");
+    assert.equal(specializationNode.objectiveId, specializationArea.objectives[0].id);
+    assert.equal(Object.hasOwn(specializationNode, "selectionPool"), false);
+    assert.equal(Object.hasOwn(specializationNode, "requiresFoundation"), false);
 
     const evacuationWalkway = SECTOR_02_AREA_CATALOG.areas[4];
     const narrativeGate = evacuationWalkway.objects.find(({ id }) => id.endsWith(":upper-transit-gate"));

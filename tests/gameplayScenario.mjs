@@ -18,6 +18,7 @@ import { run as actionAugmentRuntime } from "./actionAugmentRuntime.mjs";
 import { run as ropeAugmentModules } from "./ropeAugmentModules.mjs";
 import { run as playerEnemyImpact } from "./playerEnemyImpact.mjs";
 import { run as augmentV1Integration } from "./augmentV1Integration.mjs";
+import { run as augmentAcquisitionTopology } from "./augmentAcquisitionTopology.mjs";
 import { run as gameObjectModel } from "./gameObjectModel.mjs";
 import { run as renderingSystem } from "./renderingSystem.mjs";
 import { run as stateMachine } from "./stateMachine.mjs";
@@ -63,6 +64,7 @@ const steps = {
     ropeAugmentModules,
     playerEnemyImpact,
     augmentV1Integration,
+    augmentAcquisitionTopology,
     gameObjectModel,
     gameSimulation,
     combatSystems,
