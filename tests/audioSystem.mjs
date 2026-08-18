@@ -345,6 +345,7 @@ async function testManifestAndValidator() {
         "ambience-altitude-wind",
         "bgm-climb",
         "bgm-run-complete",
+        "gameplay-action-swing",
         "gameplay-checkpoint-reached",
         "gameplay-player-hit",
         "gameplay-rope-attach",
@@ -354,7 +355,7 @@ async function testManifestAndValidator() {
     const result = validateAudioPackDirectory("assets/runtime/audio/packs/default-mock");
     assert.equal(result.packageCount, 4);
     assert.equal(result.sourceCount, 9);
-    assert.equal(result.cueCount, 8);
+    assert.equal(result.cueCount, 9);
 
     const invalid = readJson("assets/runtime/audio/gameplay/default-mock/audio-manifest.json");
     invalid.clips["rope-attach"].sources[0].path = "../escape.wav";
@@ -639,6 +640,20 @@ function testMixerVoicePolicyAndBindings() {
         ["gameplay-weapon-fire", "gameplay-player-hit"]
     );
     assert.equal(calls[0].request.causalId, "weapon-fire:player-1:4");
+    bindings.presentFrame({
+        events: [
+            {
+                eventType: "augment-action-started",
+                activationId: "action:default-punch:4",
+                playerId: "player-1",
+                actionId: "default-punch",
+                position: { x: 3, y: 4 }
+            }
+        ],
+        context: { ...world, localPlayerId: "player-1", tick: 4 }
+    });
+    assert.equal(calls.at(-1).cueId, "gameplay-action-swing");
+    assert.equal(calls.at(-1).request.causalId, "action-start:action:default-punch:4");
     bindings.presentFrame({
         events: [
             {

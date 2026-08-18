@@ -241,7 +241,7 @@ export class AugmentCombatRuntime {
         const pressed = command.action && !this.wasActionDown;
         if (pressed) {
             if (!this.actionState) {
-                this.#useDefaultPunch({ player, enemies, tick, impactEvents });
+                this.#useDefaultPunch({ player, enemies, tick, impactEvents, presentationEvents });
             } else {
                 this.#beginAction({ player, enemies, tick, impactEvents, presentationEvents });
             }
@@ -379,11 +379,19 @@ export class AugmentCombatRuntime {
         return id;
     }
 
-    #useDefaultPunch({ player, enemies, tick, impactEvents }) {
+    #useDefaultPunch({ player, enemies, tick, impactEvents, presentationEvents }) {
         if (this.punchCooldownRemaining > 0) return;
         const aimDirection = directionBetween(player.physics.position, player.ropeObject.aimWorld, {
             x: Math.sign(player.physics.velocity.x) || 1,
             y: 0
+        });
+        this.punchCooldownRemaining = 0.5;
+        presentationEvents.push({
+            eventType: "augment-action-started",
+            activationId: this.#nextEventId(player.id, "default-punch-activation", tick, "swing"),
+            actionId: "default-punch",
+            position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y }),
+            direction: Object.freeze({ x: aimDirection.x, y: aimDirection.y })
         });
         const forwardEnemies = enemies.filter((enemy) => {
             const direction = directionBetween(player.physics.position, enemy.position);
@@ -391,7 +399,6 @@ export class AugmentCombatRuntime {
         });
         const target = selectDefaultPunchTarget({ playerPosition: player.physics.position, enemies: forwardEnemies });
         if (!target) return;
-        this.punchCooldownRemaining = 0.5;
         impactEvents.push(
             impactEvent({
                 eventId: this.#nextEventId(player.id, "default-punch", tick, target.id),

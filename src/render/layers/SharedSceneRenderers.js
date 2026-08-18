@@ -1124,6 +1124,7 @@ const LARGE_AUGMENT_EFFECTS = new Set([
 
 export class EventEffectRenderer {
     draw({ context, scene }) {
+        for (const effect of scene.actionAfterimages ?? []) this.drawActionAfterimage(context, effect);
         for (const effect of scene.augmentEffects ?? []) this.drawAugmentEffect(context, effect);
         const event = scene.eventFlash;
         if (event?.type !== "rope-cut" || !event.position || event.age >= 0.6) return;
@@ -1139,6 +1140,41 @@ export class EventEffectRenderer {
         context.moveTo(event.position.x + radius, event.position.y - radius);
         context.lineTo(event.position.x - radius, event.position.y + radius);
         context.stroke();
+        context.restore();
+    }
+
+    drawActionAfterimage(context, effect) {
+        if (!effect.position) return;
+        const length = Math.hypot(effect.direction?.x ?? 0, effect.direction?.y ?? 0) || 1;
+        const direction = {
+            x: (effect.direction?.x ?? 1) / length,
+            y: (effect.direction?.y ?? 0) / length
+        };
+        const progress = Math.min(1, effect.age / effect.lifetime);
+        const color = effect.actionId === "default-punch" || effect.actionId === "dash-strike" ? "#fef08a" : "#67e8f9";
+        const angle = Math.atan2(direction.y, direction.x);
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        context.translate(effect.position.x, effect.position.y);
+        context.rotate(angle);
+        for (let index = 2; index >= 0; index -= 1) {
+            const distance = 18 + progress * 48 - index * 11;
+            context.globalAlpha = Math.max(0, (1 - progress) * (0.28 + (2 - index) * 0.22));
+            context.fillStyle = color;
+            context.strokeStyle = "#f8fafc";
+            context.lineWidth = 2;
+            context.fillRect(distance, -8, 18, 16);
+            context.strokeRect(distance, -8, 18, 16);
+            for (let knuckle = 0; knuckle < 3; knuckle += 1) {
+                context.fillRect(distance + 15 + knuckle * 5, -7 + knuckle * 2, 5, 5);
+            }
+            context.beginPath();
+            context.moveTo(distance - 16, -6);
+            context.lineTo(distance, -4);
+            context.lineTo(distance, 4);
+            context.lineTo(distance - 16, 6);
+            context.stroke();
+        }
         context.restore();
     }
 

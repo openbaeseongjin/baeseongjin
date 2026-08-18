@@ -153,6 +153,26 @@ export function run() {
     touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 7 });
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 8, clientX: 750, clientY: 480 });
     touchSnapshot = touchSampler.snapshot();
-    assert.equal(touchSnapshot.action, true, "the elevated mobile Action button must drive the same intent");
+    assert.equal(touchSnapshot.action, false, "the elevated mobile button must select an aim mode, not fire blindly");
     assert.equal(touchSnapshot.mobileControls.action, true);
+    assert.equal(touchSnapshot.mobileControls.aimMode, "action");
+    touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 8 });
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 9, clientX: 700, clientY: 220 });
+    touchSnapshot = touchSampler.snapshot();
+    assert.equal(touchSnapshot.action, true, "world touch in Action Aim must drive the shared Action intent");
+    assert.equal(touchSnapshot.pointer.down, false, "Action Aim must not launch the Rope");
+    assert.equal(touchSnapshot.mobileControls.actionPointerDown, true);
+    assert.deepEqual(touchSnapshot.pointer, { x: 700, y: 220, down: false });
+    touchListeners.get("pointermove")({ pointerType: "touch", pointerId: 9, clientX: 760, clientY: 180 });
+    assert.deepEqual(touchSampler.snapshot().pointer, { x: 760, y: 180, down: false });
+    touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 9 });
+    assert.equal(touchSampler.snapshot().action, false);
+
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 10, clientX: 750, clientY: 480 });
+    touchListeners.get("pointerup")({ pointerType: "touch", pointerId: 10 });
+    assert.equal(touchSampler.snapshot().mobileControls.aimMode, "rope");
+    touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 11, clientX: 680, clientY: 210 });
+    touchSnapshot = touchSampler.snapshot();
+    assert.equal(touchSnapshot.pointer.down, true, "world touch in Rope Aim must preserve Rope gestures");
+    assert.equal(touchSnapshot.action, false);
 }

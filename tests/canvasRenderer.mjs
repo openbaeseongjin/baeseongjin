@@ -166,12 +166,26 @@ export function run() {
     renderer.drawMobileControls({
         visible: true,
         ropePointerDown: false,
+        actionPointerDown: false,
+        aimMode: "rope",
         left: true,
         jump: false,
         right: false,
         action: false
     });
-    assert.deepEqual(textCalls, ["←", "점프", "→", "액션"]);
+    assert.deepEqual(textCalls, ["←", "점프", "→", "로프 조준"]);
+    textCalls.length = 0;
+    renderer.drawMobileControls({
+        visible: true,
+        ropePointerDown: false,
+        actionPointerDown: true,
+        aimMode: "action",
+        left: false,
+        jump: false,
+        right: false,
+        action: true
+    });
+    assert.deepEqual(textCalls, ["←", "점프", "→", "액션 조준"]);
 
     textCalls.length = 0;
     renderer.drawRunEndOverlay({ runState: "completed" });

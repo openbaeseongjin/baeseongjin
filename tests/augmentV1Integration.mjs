@@ -151,6 +151,19 @@ export function run() {
     );
     assert.equal(predicted.augmentImpactEvents[0].effectId, "default-punch");
     assert.equal(predicted.augmentImpactEvents[0].damage, 10);
+    assert.equal(predicted.augmentEvents[0].eventType, "augment-action-started");
+    assert.equal(predicted.augmentEvents[0].actionId, "default-punch");
+
+    const emptyPunchSimulation = new GameSimulation({ playerId: "empty-punch-owner" });
+    emptyPunchSimulation.enemies = [];
+    const emptyPunch = emptyPunchSimulation.advanceOwnerPrediction(
+        emptyPunchSimulation.players[0].id,
+        command({ action: true, aimWorld: { x: 500, y: 500 } }),
+        1 / 120,
+        1
+    );
+    assert.equal(emptyPunch.augmentImpactEvents.length, 0, "an empty punch must not invent an impact");
+    assert.equal(emptyPunch.augmentEvents[0].actionId, "default-punch", "an empty punch still needs input feedback");
 
     const dashSimulation = new GameSimulation({ playerId: "dash-owner" });
     dashSimulation.enemies = [];

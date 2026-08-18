@@ -7,6 +7,7 @@ import {
 import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 
 const COMBAT_RESOLUTIONS = new Set(["enemy-hit", "enemy-defeated", "player-hit", "rope-cut", "fall-damage"]);
+const ACTION_FEEDBACK_CAUSAL_LIMIT = 128;
 
 function eventResolution(event) {
     if (event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged") {
@@ -36,10 +37,33 @@ export class ClientCombatFeedback {
         this.impact = null;
         this.ropeCutFeedback = null;
         this.augmentEffects = [];
+        this.actionAfterimages = [];
+        this.seenActionActivationIds = new Set();
     }
 
     apply(events) {
         for (const event of events) {
+            if (
+                event.eventType === "augment-action-started" ||
+                event.eventType === "predicted-augment-action-started"
+            ) {
+                const activationId = event.activationId ?? event.parameters?.activationId;
+                if (activationId && !this.seenActionActivationIds.has(activationId)) {
+                    this.seenActionActivationIds.add(activationId);
+                    if (this.seenActionActivationIds.size > ACTION_FEEDBACK_CAUSAL_LIMIT) {
+                        this.seenActionActivationIds.delete(this.seenActionActivationIds.values().next().value);
+                    }
+                    this.actionAfterimages.push({
+                        id: activationId,
+                        actionId: event.actionId ?? event.parameters?.actionId ?? "default-punch",
+                        playerId: event.playerId ?? event.ownerId ?? event.parameters?.playerId ?? null,
+                        position: event.position ?? event.parameters?.position,
+                        direction: event.direction ?? event.parameters?.direction ?? { x: 1, y: 0 },
+                        age: 0,
+                        lifetime: 0.42
+                    });
+                }
+            }
             if (event.parameters?.sourceKind !== "augment-impact") continue;
             const effectId = event.effectId ?? event.parameters.effectId;
             if (!effectId || event.resolution === "target-already-dead") continue;
@@ -88,6 +112,8 @@ export class ClientCombatFeedback {
         updateCombatFeedback(this.effects, dt);
         for (const effect of this.augmentEffects) effect.age += dt;
         this.augmentEffects = this.augmentEffects.filter(({ age, lifetime }) => age < lifetime);
+        for (const effect of this.actionAfterimages) effect.age += dt;
+        this.actionAfterimages = this.actionAfterimages.filter(({ age, lifetime }) => age < lifetime);
         if (this.impact) {
             this.impact.age += dt;
             if (this.impact.age >= this.impact.lifetime) this.impact = null;
@@ -103,6 +129,7 @@ export class ClientCombatFeedback {
             combatEffects: this.effects,
             impact: this.impact,
             augmentEffects: this.augmentEffects,
+            actionAfterimages: this.actionAfterimages,
             ...(this.ropeCutFeedback ? { eventFlash: this.ropeCutFeedback } : {})
         };
     }

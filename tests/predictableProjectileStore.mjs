@@ -294,6 +294,31 @@ export function run() {
     assert.equal(feedback.snapshot().combatEffects.length, 0, "client effects must expire on the client clock");
     assert.equal(feedback.snapshot().impact, null);
 
+    const actionFeedback = new ClientCombatFeedback({ viewerId: "player-1" });
+    const actionStarted = {
+        eventType: "augment-action-started",
+        activationId: "action:default-punch:1",
+        actionId: "default-punch",
+        playerId: "player-1",
+        position: { x: 10, y: 20 },
+        direction: { x: 1, y: 0 }
+    };
+    actionFeedback.apply([actionStarted, actionStarted]);
+    assert.equal(
+        actionFeedback.snapshot().actionAfterimages.length,
+        1,
+        "confirmed action events must dedupe by activation"
+    );
+    assert.equal(actionFeedback.snapshot().actionAfterimages[0].actionId, "default-punch");
+    actionFeedback.update(0.43);
+    assert.equal(actionFeedback.snapshot().actionAfterimages.length, 0, "action afterimages must expire locally");
+    actionFeedback.apply([actionStarted]);
+    assert.equal(
+        actionFeedback.snapshot().actionAfterimages.length,
+        0,
+        "a late confirmed action must not replay an expired predicted afterimage"
+    );
+
     const ropeCutEvent = createPredictableResolveEvent({
         eventId: "event-rope-cut",
         objectId: "enemy-projectile-rope-cut",
