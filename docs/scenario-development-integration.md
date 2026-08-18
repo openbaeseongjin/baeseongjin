@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 3f77574394936ee5059959bbe0fc39266baea1a82151a49a22fe50aadb907b35
-authored-area-sha256: d25abf0816878967c91a7a83e8a8b1b2cf9cad3c8e7aee54785a311d00e9a3a8
-authored-sector-sha256: 14affbc14b23d28b0047c163edee5b9058aa79c067727f68bf46815d7dcb53e7
+scenario-source-sha256: ea02692ee788eb018d6282f7f76871c175ce17c50ae0ba39a6b32070b136e69d
+authored-area-sha256: b5bafad252aa7696072995f64290b9009fdda4063051568527754263ac9a013b
+authored-sector-sha256: 04b2d0adbd8bd14c02028a81980aeb61c4b30a5820804924b7722ad761f43bd1
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 6f8d2529a759ca37c8aecc0185d9a0a797c6bbda
+reviewed-upstream: 930c4d200ee79e13325c975d708391655fe703e7
 -->
 
 ## 상태를 읽는 법
@@ -32,7 +32,7 @@ reviewed-upstream: 6f8d2529a759ca37c8aecc0185d9a0a797c6bbda
 - 확인 기준 upstream: `6f8d2529a759ca37c8aecc0185d9a0a797c6bbda` (`origin/main`, 증강 v1 #628과 디버그 Rope tuning #631의 0.27.0 endpoint까지 포함한 #633 시작 base)
 - 상세 Stage 문서: **48개**, `1-1`부터 `6-8`까지 전 구간
 - 현재 기본 authored Runtime: **Sector 01~03의 24개 legacy Stage 정의를 3개 4,800px 연속 Sector의 local vertical landmark stack으로 compile**한다. `1-1 → 3-8`은 migration alias이며 compiler는 원래 Stage local geometry·object·objective를 보존한 채 lateral city wing을 더한다. intra-Sector Gate portal·per-Area Checkpoint와 Stage별 door/panel visual은 기본 Runtime에서 제거됐다. Sector 04 `4-1 → 4-8` standalone Area catalog와 Sector 05~06 문서는 아직 migration input이다.
-- 연속 Sector Runtime: #625/#637이 `seamless-sector-runtime-v2`, `SectorProgressState`, physical connector/route lock, Sector-entry respawn anchor와 party-wipe baseline을 기본 싱글·멀티 factory에 연결했다. Sector world origin과 local layout을 분리해 future Boss room을 transition slot에 삽입해도 downstream landmark local 좌표·ID를 유지한다. 개인 사망은 해당 플레이어만 Sector entry로 보내고 공용 objective·route·처치 적을 유지하며, 같은 tick의 전원 사망만 current Sector를 초기화한다.
+- 연속 Sector Runtime: #625/#637이 기본 구조를 연결했고 #642가 `seamless-sector-runtime-v3`의 Sector 01 Access Module을 추가했다. `SectorProgressState`, physical connector/route lock, Sector-entry respawn anchor와 party-wipe baseline은 기본 싱글·멀티 factory가 공유한다. Sector world origin과 local layout을 분리해 future Boss room을 transition slot에 삽입해도 downstream landmark local 좌표·ID를 유지한다. 개인 사망은 해당 플레이어만 Sector entry로 보내고 공용 objective·route·처치 적·Access Module을 유지하며, 같은 tick의 전원 사망만 current Sector를 초기화한다.
 - 직접 대조한 기준: Sector 03 Master REV 2.0과 현재 3-1~~3-8 Runtime 경계(PR #613은 공간 정체·Stage 명칭·Story만 재작성하고 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 유지; 개별 Stage 문서와 Runtime `name/subtitle/cue` 명칭 마이그레이션은 대기), Sector 04 Master REV 1.1과 4-1~~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), Sector 06 Master와 6-1~~6-8(Scanner phase·Patrol speed/wait·Cutter opt-in·순방향 Finale 및 Safe/Flow 산술 대조), `CurrentAuthoredAreaCatalog.js`, `Sector03AreaCatalog.js`, `Sector04AreaCatalog.js`, `AccessScanField.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, `src/game/world/sectors/**/*.js`, `SectorDefinitionValidator.js`, `SectorProgressState.js`, `SectorProgressController.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03/04 전체 등반의 실제 브라우저·기기 플레이테스트. 이번 #557 검토에서는 디버그 패널로 `sector-03-02` 직접 시작과 화면 렌더까지만 확인했으며, 모든 영역의 판정은 계속 `MOCK INTEGRATED`이고 `PLAYTEST VERIFIED`는 아직 없다.
@@ -112,6 +112,8 @@ reviewed-upstream: 6f8d2529a759ca37c8aecc0185d9a0a797c6bbda
 57. #637은 사용자 정정에 따라 `가로 4,800px`을 좌우 진행 순서가 아니라 도시의 실제 폭으로 해석했다. legacy Stage 정의는 수정하지 않고 Sector local `1 → 8` vertical stack으로 compile하며, 각 landmark의 양옆에 실제 collision·grapple이 가능한 city wing을 더한다. Stage별 `gate`·`gate-panel`·exit portal visual은 기본 world output에서 제거하고 door-source objective는 route mouth reach로 바꿔 objective가 곧 통로를 연다. `sectorTransitions`가 Sector world origin과 local layout을 분리하므로 future Boss room의 rise를 삽입해도 downstream Stage local origin·bounds·stable ID는 재작성하지 않는다. Sector 04~~06, Timer/Purge와 증강 source 계약은 변경하지 않는다.
 
 58. #640은 Stage 층을 없애지 않고, 잠긴 route connector가 화면에서만 발판으로 남던 공통 renderer/collision drift를 고쳤다. `WorldGateGeometry.isSurfaceEnabledForProgress()`를 physics와 polygon/pixel terrain renderer가 함께 사용해 `requiredRouteId`가 잠긴 surface는 양쪽에서 제외하고, unlock 뒤 같은 frame state에서 함께 추가한다. 실제 Stage floor와 city wing collision은 그대로 유지한다.
+
+59. #642는 Sector 01의 넓은 공간을 전투 기반 선택 동선으로 채우는 첫 vertical slice다. Stage-local 1-3·1-6·1-7 encounter에 stable Access Module A/B/C를 붙이고, `SectorProgressState`가 아무 2개의 수집·snapshot/restore·party-wipe reset을 소유한다. 1-6은 본선 Wind 학습을 적 없이 유지하면서 Neutral Deck에 기존 Sentry 행동을 재사용한 선택 Carrier를 추가했다. Sector 01→02 connector는 1-8 objective와 Access 2/3을 함께 요구하며 Stage별 Gate/portal은 복구하지 않는다. HUD의 coarse hint와 720px 근접 beacon으로 후보 존재를 알리고, 기본 Runtime의 `world.enemySpawns → GameSimulation.createEnemies() → enemyStates/render snapshot` 경로에 Carrier가 실제 포함되는 회귀를 고정한다. 가변 적 수·가중치·세부 selector 결과는 테스트로 고정하지 않는다. Sector 02~06, Boss, Timer/Purge는 계속 HOLD다.
 
 ## 열린 기획·구현 게이트
 

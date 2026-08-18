@@ -256,8 +256,8 @@ export function run() {
     const thirdSentry = thirdAreaDefinition.objects.find(({ id }) => id === "sector-01-03:sentry-turret-01");
     assert.deepEqual(thirdSentry.activationSpec, {
         anchor: "center",
-        offset: { x: -416, y: -16 },
-        size: { width: 960, height: 544 }
+        offset: { x: -300, y: -16 },
+        size: { width: 1100, height: 544 }
     });
     assert.deepEqual(thirdSentry.rules, ["standard-projectile", "no-rope-cut", "cover-ends-los"]);
 
@@ -270,7 +270,7 @@ export function run() {
     const shiftedSpawn = shiftedWorld.enemySpawns.find(({ objectId }) => objectId === "sector-01-03:sentry-turret-01");
     assert.deepEqual(
         shiftedSpawn.activation,
-        { x: originalSpawn.activation.x + 64, y: originalSpawn.activation.y - 32, width: 960, height: 544 },
+        { x: originalSpawn.activation.x + 64, y: originalSpawn.activation.y - 32, width: 1100, height: 544 },
         "moving an authored object must move its derived activation trigger with it"
     );
     for (const object of currentWorld.objects.filter(

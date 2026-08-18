@@ -19,7 +19,7 @@ New Gameplay Element:
 Sentry Turret
 
 Combat Requirement:
-NONE
+OPTIONAL ACCESS CARRIER (SECTOR 2-OF-3)
 
 Damage Hazard:
 Sentry Projectile
@@ -93,7 +93,7 @@ Release
 - Red Telegraph는 곧 공격이 온다는 의미
 - 계속 움직이면 공격을 피할 수 있음
 - Rope 이동 자체가 회피 행동이 됨
-- 적을 반드시 죽일 필요 없음
+- 이 Carrier 한 기를 반드시 죽일 필요는 없음(1-3·1-6·1-7 중 아무 2개를 선택)
 - 멈추는 경로와 계속 이동하는 경로가 다른 위험을 가짐
 
 ---
@@ -352,7 +352,7 @@ Service Panel:
 
 Stage Width:
 
-960 px
+3840 px (960px 기존 보안 spine + 오른쪽 Access Annex)
 = 30 tiles
 
 Stage Height:

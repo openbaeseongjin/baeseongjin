@@ -95,6 +95,7 @@ export class CanvasRenderer {
             this.drawCombatHud(scene);
             this.drawAugmentHud(scene.selectedAugmentIds ?? [], scene.actionState);
         }
+        this.drawAccessHud(scene);
         this.drawRewardSelectionOverlay(scene.foundationReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawStoryPresentation(scene.storyPresentation);
@@ -556,6 +557,40 @@ export class CanvasRenderer {
         ctx.fillRect(x + 14, y + 29, width - 28, 9);
         ctx.fillStyle = healthRatio > 0.35 ? "#22c55e" : "#fb7185";
         ctx.fillRect(x + 14, y + 29, (width - 28) * healthRatio, 9);
+        ctx.restore();
+    }
+
+    drawAccessHud({ world, worldProgress, mobileView = false }) {
+        if (!worldProgress?.currentSectorId || !world?.accessModules?.length) return;
+        const sector = world.sectors?.find(({ id }) => id === worldProgress.currentSectorId);
+        const requiredCount = sector?.accessModuleRequirement ?? 0;
+        if (requiredCount <= 0) return;
+        const moduleIds = sector.accessModuleIds ?? [];
+        const collected = new Set(worldProgress.collectedAccessModuleIds ?? []);
+        const remaining = moduleIds.filter((id) => !collected.has(id));
+        const x = 18;
+        const y = mobileView ? 78 : 132;
+        const width = mobileView ? Math.min(300, this.cssWidth - 36) : 300;
+        const height = remaining.length ? 54 : 34;
+        const hint = world.accessModules.find(({ id }) => id === remaining[0])?.hint;
+        const ctx = this.context;
+        ctx.save();
+        ctx.fillStyle = "rgba(7, 11, 20, 0.86)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = remaining.length ? "rgba(251, 191, 36, 0.72)" : "rgba(34, 211, 238, 0.72)";
+        ctx.strokeRect(x, y, width, height);
+        ctx.fillStyle = remaining.length ? "#fde68a" : "#67e8f9";
+        ctx.font = "900 12px ui-monospace, monospace";
+        ctx.fillText(
+            `ACCESS ${moduleIds.length - remaining.length}/${requiredCount} · SIGNAL ${remaining.length}`,
+            x + 14,
+            y + 21
+        );
+        if (hint) {
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "700 10px ui-monospace, monospace";
+            ctx.fillText(hint, x + 14, y + 42);
+        }
         ctx.restore();
     }
 

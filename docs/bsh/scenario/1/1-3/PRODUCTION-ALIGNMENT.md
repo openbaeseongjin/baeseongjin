@@ -4,11 +4,18 @@
 
 본 문서는 [1-3 시나리오](./README.md) REV 3.0을 현재 런타임으로 옮기는 제작 계약이다. 원문 수치는 플레이테스트 전 `BLOCKOUT HYPOTHESIS`이며, 아래 stable ID·상태·좌표 기준을 그래픽·오디오 담당자가 이어받는다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-18
+
+- 기존 Sentry T1 stable ID와 행동을 유지하면서 Stage-local 오른쪽 Annex `(1500,-640)`으로 옮겨 `sector-01:access-module:a`를 운반하는 Access Carrier A로 사용한다.
+- 처치하면 Sector 공용 모듈 1개를 얻지만, Sector 출구는 1-3·1-6·1-7 후보 중 아무 2개만 요구하므로 이 개체 자체는 필수가 아니다.
+- 근접 전에는 HUD의 `RIGHT · LOWER SECURITY ANNEX` 방향 힌트만 보이고, 720px 안에서 정확한 Carrier beacon이 나타난다.
+- 기존 960px 보안 spine 좌표는 유지하고 Stage 폭을 3840px로 확장했다. Annex Bridge `(640,-576, 832×16)`, Arena `(1320,-640, 960×32)`, Access Anchor `(448,-480)`, `(896,-544)`가 Stage-local 좌표를 소유한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |
 | --- | --- | --- |
-| 960×1152 Geometry | `IMPLEMENTED` | P0→A→P1→B→C→D→P4 흐름과 Safe/Flow/Recovery 제공 |
+| 3840×1152 Geometry | `IMPLEMENTED` | 기존 960px P0→A→P1→B→C→D→P4 spine과 오른쪽 Access Annex 제공 |
 | R1 Recovery | `IMPLEMENTED` | `x=-32~224`, `y=-576`, 256×16; 중심 `(96,-576)` |
 | Sentry T1 | `IMPLEMENTED PROTOTYPE` | `idle → acquire → track → lock → fire → cooldown`; 수치는 공동 플레이로 조정 |
 | Cover LOS | `IMPLEMENTED` | `kind=cover`가 조준선을 가리면 획득·사격 중지, `Y<-928`에서 Encounter 종료 |
@@ -55,11 +62,11 @@
 | P4 | `(192,-1088)` | 320×32 | Final Safe Deck |
 | A/B/C/D | `(64,-224)` / `(64,-480)` / `(-192,-736)` / `(96,-960)` | 24×24 | Grapple Landmark |
 | Scanner | `(-96,-64)` | 96×128 trigger | 자동 직원 인증 |
-| Sentry T1 | `(416,-640)` | 32×32 mock | 오른쪽 벽 장착 |
+| Access Carrier A | `(1500,-640)` | 32×32 mock | 오른쪽 Annex Arena, 기존 Sentry T1 행동 재사용 |
 | Service Panel | `(208,-1088)` bottom-center | mock | `maintenance-override` |
 | Security Gate | `(320,-1088)` bottom-center | mock | 실제 문 개구부만 포탈 |
 
-Sentry activation band는 `x=-480~480`, `y=-928~-384`다. P1에서는 접힌 Turret을 먼저 보고, 위로 출발한 뒤에만 Acquire가 시작된다. Turret 파괴는 Gate 요구 조건이 아니다.
+Access Carrier activation band는 `x=650~1750`, `y=-928~-384`다. 본선 P1에서는 coarse signal만 보이며 오른쪽 Annex에 진입해야 Acquire가 시작된다. 이 Carrier 하나의 파괴는 필수가 아니지만 Sector 01 전체에서는 세 후보 중 두 기를 처치해야 한다.
 
 ## 4. Sentry 상태·표현 계약
 

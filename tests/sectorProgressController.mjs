@@ -63,6 +63,9 @@ export function run() {
     }
     const transitionSource = world.landmarks.find(({ id }) => id === sectorTransitionRoute.sourceLandmarkId);
     completeObjectives(progress, world, transitionSource);
+    for (const accessModuleId of world.sectors[0].accessModuleIds.slice(0, 2)) {
+        progress.collectAccessModule(accessModuleId);
+    }
     const target = world.landmarks.find(({ id }) => id === sectorTransitionRoute.targetLandmarkId);
     owner.physics.position.set(target.entry.x, target.entry.y);
     events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });

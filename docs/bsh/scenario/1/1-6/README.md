@@ -24,7 +24,7 @@ Reused Mechanics:
 - First Rope Augment
 
 Enemy:
-NONE
+OPTIONAL ACCESS CARRIER (REUSED SENTRY T1)
 
 Damage Hazard:
 NONE
@@ -88,8 +88,10 @@ Wind + Turret + Augment Combination
 1-8:
 Sector Finale
 
-따라서 1-6에서는
-Enemy를 넣지 않는다.
+따라서 1-6의 본선 Wind 학습 구간은 적 없이 유지한다.
+다만 Sector 출구용 Access Module 후보 3개 중 하나를 얻는 선택 전투를
+Neutral Deck의 별도 Carrier encounter로 둔다. 플레이어는 다른 두 Carrier를 선택해
+이 전투를 건너뛸 수 있으며, 새 적 유형이나 새 공격 규칙은 도입하지 않는다.
 
 플레이어가 실패했을 때 원인은:
 
@@ -115,7 +117,7 @@ WIND + ROPE
 
 DO NOT ADD:
 
-- Turret
+- 본선 Wind 학습을 방해하는 추가 Turret(선택 Carrier 1기는 예외)
 - Drone
 - Projectile
 - Rope Cut
@@ -201,7 +203,7 @@ Large Fan Housing:
 256×256 ~ 320×320 equivalent
 
 Stage Width:
-960 px
+3840 px (960px 기존 Wind spine + 왼쪽 Access Annex)
 = 30 tiles
 
 Stage Height:

@@ -10,6 +10,7 @@
 - `cameraZones`는 실제 객체로 구현되어 Approach·Security·Decision·Pressure·Relief·Bypass 구도를 사용한다.
 - Story는 entry, `PRESSURE LIMIT EXCEEDED`, `CONTAINMENT VIOLATION ACTIVE`, bypass objective/gate binding으로 핵심 흐름이 구현됐다.
 - `storyTriggers`는 시나리오 기획 인벤토리이며 Bypass 이후 환경 상태 변화는 별도 World presentation 범위다.
+- 2026-08-18부터 Stage 폭은 3840px이며 기존 Sentry T1 stable ID와 행동을 오른쪽 Annex Arena `(1320,-944)`에서 Access Carrier C로 사용한다. Bridge `(560,-944, 736×16)`, Arena `(1320,-944, 800×32)`, Access Anchor `(480,-800)`, `(928,-864)`는 Stage-local 좌표다. 세 후보 중 아무 2개만 필요하다.
 
 > **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§4·§5·§7~§9의 Foundation/Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다. 좌표와 미검증 Knockback+Wind 기록은 유지한다.
 
@@ -17,10 +18,10 @@
 
 | 항목 | 상태 | 판정 |
 | --- | --- | --- |
-| 960×1536 Geometry | `IMPLEMENTED` | P0, A~G Anchor, R1~R3, Safe Shadow, Upper Catch, Final Deck이 Area Catalog에 존재 |
+| 3840×1536 Geometry | `IMPLEMENTED` | 기존 960px Pressure spine과 오른쪽 Access Annex가 Area Catalog에 존재 |
 | A~G Anchor, P0, Safe Shadow, R3 좌표 | `IMPLEMENTED — README와 일치` | README §12,13~39와 정확히 일치(1-5/1-6보다 드리프트가 적음) |
 | Manual Bypass Control Y | `IMPLEMENTED — README와 32px 오차` | README `-1440`, Runtime `-1472` |
-| Sentry T1 | `IMPLEMENTED` | 위치 `(64,-864)`가 README §17 권장 위치와 정확히 일치. `rules: ["standard-projectile","no-rope-cut"]` — README §56이 요구한 "Standard Projectile은 Rope를 끊지 않음" 그대로 구현 |
+| Access Carrier C | `IMPLEMENTED` | 위치 `(1320,-944)`, 기존 Sentry T1 stable ID와 `rules: ["standard-projectile","no-rope-cut"]` 행동 재사용 |
 | Residual Airflow + Main Pressure Vent | `IMPLEMENTED` | Main Pressure Vent는 1-6 Fan B와 **완전히 동일한 수치**(strength 360, cycle 1.75/0.7/1.4/0.3) 재사용 — README §24("1-6에서 튜닝된 값을 우선 재사용")를 그대로 만족 |
 | Turret + Wind 중첩(D→E 구간) | `IMPLEMENTED(물리) / NOT VERIFIED(체감 밸런스)` | 두 Zone이 좌표상 겹치는 것은 확인됨. 실제 플레이 밸런스(README §63 "Knockback+Wind로 바닥까지 추락 금지")는 미검증 |
 | Build 분기(Impulse/Relay/Shear Route) | `NOT IMPLEMENTED` | [1-4 판정](../1-4/PRODUCTION-ALIGNMENT.md)의 Foundation 저장·효과가 없으므로 재현 불가 |
@@ -60,7 +61,7 @@
 
 | 항목 | 값 | README 대비 |
 | --- | --- | --- |
-| 위치 | `(64,-864)`, Pressure Core 측면 | 일치(README §17 권장 위치) |
+| 위치 | `(1320,-944)`, 오른쪽 Access Annex Arena | 2026-08-18 Current Runtime Override |
 | activation | `x=-320~320`, `y=-1184~-544` | — |
 | rules | `["standard-projectile","no-rope-cut"]` | README §56·57 요구사항 충족 |
 

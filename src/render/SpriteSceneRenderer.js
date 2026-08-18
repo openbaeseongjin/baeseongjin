@@ -2,6 +2,7 @@ import { CameraWorldRenderer, SceneRendererComposition } from "./SceneRendererCo
 import {
     AttachRangeRenderer,
     AccessScanSurfaceRenderer,
+    AccessModuleSignalRenderer,
     AttachmentCandidateRenderer,
     AuthoredWorldObjectRenderer,
     BackdropRenderer,
@@ -87,6 +88,7 @@ export class SpriteSceneRenderer {
             new AuthoredAreaStructureRenderer(),
             new AuthoredWorldObjectRenderer(),
             new AccessScanSurfaceRenderer(),
+            new AccessModuleSignalRenderer(),
             new WindParticleRenderer(),
             new AttachRangeRenderer(),
             new RopeRenderer(localRopes),

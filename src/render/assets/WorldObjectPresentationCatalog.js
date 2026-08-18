@@ -34,6 +34,7 @@ const DEFAULT_DEFINITIONS = {
     "world-object:patrol-drone": { renderMode: "combat-entity" },
     "world-object:story-display": { renderMode: "mock-shape", color: "#f59e0b", radius: 20 },
     "world-object:maintenance-frame": { renderMode: "mock-shape", color: "#94a3b8", radius: 26 },
+    "world-object:access-transit-lock": { renderMode: "mock-shape", color: "#fbbf24", radius: 30 },
     "world-object:trigger": { renderMode: "hidden" }
 };
 

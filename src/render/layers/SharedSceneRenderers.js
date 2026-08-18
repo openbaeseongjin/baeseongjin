@@ -337,6 +337,40 @@ export class AccessScanSurfaceRenderer {
     }
 }
 
+export class AccessModuleSignalRenderer {
+    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
+        const currentSectorId = scene.worldProgress?.currentSectorId;
+        const collected = new Set(scene.worldProgress?.collectedAccessModuleIds ?? []);
+        const playerPosition = scene.player?.position ?? scene.player;
+        const modules = (scene.world.accessModules ?? []).filter(
+            (module) => module.sectorId === currentSectorId && !collected.has(module.id)
+        );
+        const visible = modules.filter((module) => {
+            if (!playerPosition) return false;
+            const distance = Math.hypot(module.position.x - playerPosition.x, module.position.y - playerPosition.y);
+            return distance <= 720 && isVisible(viewport, circleBounds(module.position, 48));
+        });
+        for (const module of visible) {
+            const pulse = 0.5 + Math.sin(presentationTimeSeconds * 7) * 0.15;
+            context.save();
+            context.translate(module.position.x, module.position.y - 56);
+            context.strokeStyle = `rgba(251, 191, 36, ${pulse + 0.25})`;
+            context.fillStyle = "rgba(251, 191, 36, 0.18)";
+            context.lineWidth = 3;
+            context.beginPath();
+            context.arc(0, 0, 18 + pulse * 5, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+            context.fillStyle = "#fde68a";
+            context.font = "900 10px ui-monospace, monospace";
+            context.textAlign = "center";
+            context.fillText("ACCESS CARRIER", 0, -30);
+            context.restore();
+        }
+        renderStats?.recordCollection("accessModuleSignals", modules.length, visible.length);
+    }
+}
+
 export class AuthoredWorldObjectRenderer {
     constructor({ presentationCatalog = DEFAULT_WORLD_OBJECT_MOCK_CATALOG } = {}) {
         this.presentationCatalog = presentationCatalog;

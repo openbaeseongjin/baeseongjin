@@ -32,6 +32,14 @@ export function run() {
         const routeId = completeLandmark(progress, world, sourceId);
         if (routeId) {
             const route = world.routeLocks.find(({ id }) => id === routeId);
+            if (route.requiredAccessModuleCount) {
+                assert.equal(progress.visitLandmark(route.targetLandmarkId).reason, "landmark-route-locked");
+                const [firstModuleId, secondModuleId] = world.sectors[0].accessModuleIds;
+                assert.equal(progress.collectAccessModule(firstModuleId).changed, true);
+                assert.equal(progress.accessSummary().ready, false);
+                assert.equal(progress.collectAccessModule(secondModuleId).changed, true);
+                assert.equal(progress.accessSummary().ready, true);
+            }
             assert.equal(progress.visitLandmark(route.targetLandmarkId).accepted, true);
         }
     }
@@ -71,7 +79,21 @@ export function run() {
             boundary.completeObjective(objectiveId);
         }
         const route = world.routeLocks.find(({ sourceLandmarkId }) => sourceLandmarkId === landmark.id);
+        if (route?.requiredAccessModuleCount) {
+            for (const accessModuleId of world.sectors[0].accessModuleIds.slice(0, route.requiredAccessModuleCount)) {
+                boundary.collectAccessModule(accessModuleId);
+            }
+        }
         if (route) boundary.visitLandmark(route.targetLandmarkId);
     }
     assert.equal(boundary.snapshot().contentBoundaryReached, true);
+
+    const resetAccess = new SectorProgressState(world);
+    for (const accessModuleId of world.sectors[0].accessModuleIds.slice(0, 2)) {
+        resetAccess.collectAccessModule(accessModuleId);
+    }
+    const accessSnapshot = resetAccess.snapshot();
+    assert.equal(new SectorProgressState(world, accessSnapshot).accessSummary().ready, true);
+    resetAccess.resetCurrentSector();
+    assert.deepEqual(resetAccess.snapshot().collectedAccessModuleIds, []);
 }

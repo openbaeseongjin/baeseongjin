@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
+import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { SEAMLESS_SECTOR_RUNTIME_REVISION } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
 
 function completeLandmark(progress, world, landmarkId) {
@@ -30,6 +31,59 @@ export function run() {
     assert.equal(simulation.world.gates.length, 0);
     assert.equal(simulation.activeCheckpoint, null);
     assert.equal(simulation.activeRespawnAnchor.id, "sector-01:entry");
+    assert.equal(simulation.world.accessModules.length, 3);
+    assert.ok(simulation.world.enemySpawns.some(({ accessModuleId }) => accessModuleId));
+    assert.equal(simulation.enemyStates().length, simulation.world.enemySpawns.length);
+    assert.equal(simulation.snapshot().enemies.length, simulation.world.enemySpawns.length);
+    for (const module of simulation.world.accessModules) {
+        const landmark = simulation.world.landmarks.find(({ id }) => id === module.landmarkId);
+        const spawn = simulation.world.enemySpawns.find(({ encounterId }) => encounterId === module.encounterId);
+        assert.ok(spawn, `missing access Carrier spawn ${module.encounterId}`);
+        assert.ok(
+            spawn.position.x >= landmark.bounds.x && spawn.position.x <= landmark.bounds.x + landmark.bounds.width
+        );
+        assert.ok(
+            spawn.position.y >= landmark.bounds.y && spawn.position.y <= landmark.bounds.y + landmark.bounds.height
+        );
+        assert.ok(spawn.activation, `missing access Carrier activation ${module.encounterId}`);
+        assert.ok(
+            spawn.position.x >= spawn.activation.x &&
+                spawn.position.x <= spawn.activation.x + spawn.activation.width &&
+                spawn.position.y >= spawn.activation.y &&
+                spawn.position.y <= spawn.activation.y + spawn.activation.height,
+            `access Carrier must spawn inside its activation band ${module.encounterId}`
+        );
+        assert.ok(
+            simulation.world.surfaces.some(
+                (surface) =>
+                    surface.landmarkId === module.landmarkId &&
+                    surface.id.includes("access-annex-arena") &&
+                    spawn.position.x >= surface.x &&
+                    spawn.position.x <= surface.x + surface.width &&
+                    spawn.position.y === surface.topY
+            ),
+            `access Carrier must stand on authored annex collision ${module.encounterId}`
+        );
+    }
+
+    const carrier = simulation.enemies.find(({ objectId }) =>
+        simulation.world.accessModules.some(({ encounterId }) => encounterId === objectId)
+    );
+    carrier.health = 0;
+    simulation.step(
+        0,
+        createPlayerCommand(
+            {
+                horizontal: 0,
+                vertical: 0,
+                pointer: { x: 0, y: 0, down: false },
+                viewport: { width: 1280, height: 720 }
+            },
+            { x: 0, y: 0 }
+        )
+    );
+    assert.equal(simulation.worldProgress.snapshot().collectedAccessModuleIds.length, 1);
+    assert.equal(simulation.snapshot().eventFlash.type, "access-module-collected");
 
     const owner = simulation.players[0];
     const teammate = simulation.addPlayer(
@@ -70,6 +124,7 @@ export function run() {
     simulation.respawnPlayerAtCheckpoint(teammate, "health", "party-wipe");
     assert.equal(simulation.worldProgress.snapshot().currentLandmarkId, "sector-01:landmark:01");
     assert.equal(simulation.worldProgress.snapshot().completedObjectiveIds.length, 0);
+    assert.deepEqual(simulation.worldProgress.snapshot().collectedAccessModuleIds, []);
     assert.ok(simulation.worldProgress.snapshot().sectorBaselineRevision > baselineBeforeWipe);
     assert.ok(simulation.enemies.some(({ objectId }) => currentSectorEnemyIds.has(objectId)));
     assert.equal(simulation.snapshot().eventFlash.type, "sector-reset");
