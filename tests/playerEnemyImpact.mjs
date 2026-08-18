@@ -17,6 +17,7 @@ function createEnemy(properties = {}) {
         health: 100,
         maxHealth: 100,
         fireCooldown: 0,
+        enemyType: "pursuit-drone-t1",
         ...properties
     });
 }
@@ -124,6 +125,42 @@ export function run() {
     assert.ok(survivingEnemy.knockbackSnapshot()?.remainingSeconds > 0);
     assert.equal(survivingEnemy.advanceImpactKnockback(0.2), true);
     assert.equal(survivingEnemy.knockbackSnapshot(), null, "knockback state must clear after its duration");
+
+    for (const enemyType of [
+        "sentry-t1",
+        "patrol-drone-t1",
+        "shield-drone-t1",
+        "artillery-drone-t1",
+        "support-drone-t1"
+    ]) {
+        const fixedEnemy = createEnemy({ enemyType });
+        const fixedImpact = resolvePlayerEnemyImpact({
+            targetId: fixedEnemy.id,
+            target: fixedEnemy,
+            sourcePosition: new Vector2(-100, 0),
+            damage: 25,
+            knockback: {
+                direction: new Vector2(0, -1),
+                distance: 90,
+                durationSeconds: 0.3
+            }
+        });
+        assert.equal(fixedImpact.resolution, "enemy-hit");
+        assert.equal(fixedImpact.damage, 25);
+        assert.equal(fixedImpact.knockbackApplied, false, `${enemyType} must preserve its authored position/path`);
+        assert.equal(fixedEnemy.health, 75);
+        assert.equal(fixedEnemy.knockbackSnapshot(), null);
+    }
+
+    const swarmEnemy = createEnemy({ enemyType: "swarm-drone-t1" });
+    const swarmImpact = resolvePlayerEnemyImpact({
+        targetId: swarmEnemy.id,
+        target: swarmEnemy,
+        sourcePosition: new Vector2(-100, 0),
+        damage: 25,
+        knockback: { direction: new Vector2(1, 0), distance: 60, durationSeconds: 0.2 }
+    });
+    assert.equal(swarmImpact.knockbackApplied, true, "direct swarm dives must retain displacement feedback");
 
     const bossLikeEnemy = createEnemy({ impactDisplacementEnabled: false });
     const bossLike = resolvePlayerEnemyImpact({

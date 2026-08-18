@@ -117,6 +117,8 @@ reviewed-upstream: c947ee59cc3f3f4e7ede0b5fa19b37db9d30f709
 
 60. #646은 기본 Hook 재발사 대기를 `1.00초 → 0.50초`로 줄였다. `1200px/s × 1/3초 = 400px` 비행·부착·스윙 수치는 유지하며, `빠른 회수 -50%`는 새 base에서 `0.25초`가 된다. AREA-SPEC은 Runtime tuning 수치를 복사하지 않으므로 Stage fingerprint 변경만 기록하고 맵 좌표·route·acceptance 기준은 바꾸지 않는다.
 
+61. #648은 적 위치 넉백 기준을 authored 이동 의미에 맞췄다. 플레이어를 직접 추격·돌진하는 Pursuit/Swarm만 주먹·Action·로프 충돌 displacement를 받고, Sentry/Turret·고정 Patrol 경로·제자리 Shield/Artillery/Support는 damage·defeat·hit feedback을 유지하면서 위치와 경로를 보존한다. 기존 encounter 좌표·activation·행동 FSM·적 수는 변경하지 않는다.
+
 ## 열린 기획·구현 게이트
 
 1. P0 Alignment: 1-7 조기 최종 문구, Cutter 문서 의미, Foundation·Checkpoint·Scenario Art 카메라 계약을 최신 Runtime과 정렬한다.

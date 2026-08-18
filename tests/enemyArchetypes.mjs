@@ -6,6 +6,7 @@ import {
     enemyArchetypeDefinition
 } from "../src/game/combat/EnemyArchetypeCatalog.js";
 import { advanceEnemyBehaviors } from "../src/game/combat/EnemyBehaviors.js";
+import { enemyImpactDisplacementEnabled, enemyMobilityKind } from "../src/game/combat/EnemyMobility.js";
 import { updateEnemyWeapons } from "../src/game/combat/CombatSystems.js";
 import { RopeImpactAttack } from "../src/game/combat/RopeImpactAttack.js";
 import { COMBAT_CONFIG } from "../src/game/config.js";
@@ -43,8 +44,15 @@ export function run() {
     for (const id of ENEMY_ARCHETYPE_IDS) {
         assert.match(enemyArchetypeDefinition(id).displayName, /[가-힣]/, "player-facing enemy names must be Korean");
         assert.equal(isDroneEnemy({ enemyType: id }), true);
+        assert.equal(
+            enemyImpactDisplacementEnabled(id),
+            id === "pursuit-drone-t1" || id === "swarm-drone-t1",
+            "only direct player pursuit archetypes may receive position knockback"
+        );
     }
     assert.equal(isDroneEnemy({ enemyType: "sentry-t1" }), false);
+    assert.equal(enemyMobilityKind("sentry-t1"), "authored-position");
+    assert.equal(enemyMobilityKind("patrol-drone-t1"), "authored-position");
     assert.throws(() => enemyArchetypeDefinition("missing-drone"), /unknown enemy archetype/);
 
     const target = activeTarget("player-a", 160, 0);
@@ -137,6 +145,7 @@ export function run() {
         const definition = enemyArchetypeDefinition(enemyType);
         assert.equal(instance.displayName, definition.displayName);
         assert.equal(instance.hasSimulationCapability("enemy-behavior"), true);
+        assert.equal(instance.canApplyImpactKnockback(), enemyImpactDisplacementEnabled(enemyType));
         assert.equal(instance.rules.includes("no-projectile-attack"), !definition.usesProjectileAttack);
         const restored = enemy(enemyType, `restored-${enemyType}`, 0, {
             behaviorState: instance.enemyBehaviorSnapshot()
@@ -199,8 +208,21 @@ export function run() {
     const replicatedState = simulation.enemyStates()[0];
     assert.equal(replicatedState.displayName, "포격 드론");
     assert.equal(replicatedState.behaviorState.kind, "artillery");
+    assert.equal(replicatedState.impactDisplacementEnabled, false);
     const prediction = new GameSimulation();
     prediction.preparePrediction([replicatedState]);
     assert.equal(prediction.enemies[0].hasSimulationCapability("enemy-behavior"), true);
+    assert.equal(prediction.enemies[0].impactDisplacementEnabled, false);
     assert.deepEqual(prediction.enemies[0].enemyBehaviorSnapshot(), replicatedState.behaviorState);
+
+    const pursuitState = {
+        ...replicatedState,
+        id: "pursuit-replicated",
+        enemyType: "pursuit-drone-t1",
+        displayName: "추격 드론",
+        behaviorState: pursuer.enemyBehaviorSnapshot(),
+        impactDisplacementEnabled: true
+    };
+    prediction.preparePrediction([pursuitState]);
+    assert.equal(prediction.enemies[0].impactDisplacementEnabled, true);
 }
