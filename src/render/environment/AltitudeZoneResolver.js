@@ -48,12 +48,22 @@ function playerYDistanceFromArea(position, area) {
 }
 
 export function currentAuthoredArea(scene) {
-    const areas = scene?.world?.areas;
+    const areas = scene?.world?.landmarks?.length ? scene.world.landmarks : scene?.world?.areas;
     if (!Array.isArray(areas) || areas.length === 0) return null;
+    const position = scene.player?.position;
+    const exact = areas.find(
+        ({ bounds }) =>
+            bounds &&
+            position?.x >= bounds.x &&
+            position.x <= bounds.x + bounds.width &&
+            position?.y >= bounds.y &&
+            position.y <= bounds.y + bounds.height
+    );
+    if (exact) return exact;
     let nearestArea = null;
     let nearestDistance = Number.POSITIVE_INFINITY;
     for (const area of areas) {
-        const distance = playerYDistanceFromArea(scene.player?.position, area);
+        const distance = playerYDistanceFromArea(position, area);
         if (distance < nearestDistance) {
             nearestArea = area;
             nearestDistance = distance;

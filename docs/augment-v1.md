@@ -1,0 +1,106 @@
+# 증강 v1
+
+이 문서는 0.26.0 증강 Runtime의 제품·수치·멀티플레이 기준이다. 과거 Foundation 3종과 Foundation별 Specialization은 이 계약으로 대체되며, 호환 ID는 이전 snapshot을 한 번 읽는 migration 입력으로만 사용한다.
+
+## 제품 의도
+
+- 증강은 Rope 중심 플레이스타일을 Run마다 다르게 조합해 반복 플레이 폭을 만든다.
+- 기본 Rope와 기본 펀치만으로도 필수 진행과 Boss를 완주할 수 있어야 한다.
+- 특정 카드나 파티 조합을 필수 geometry·Boss 해법으로 요구하지 않는다.
+- Player별 최대 6장, 한 Sector당 한 번의 logical entitlement를 사용한다.
+- 선택 위치의 정확한 Landmark 좌표, Timer `+10` trigger, Purge origin/rejoin은 별도 topology 결정 전까지 HOLD다.
+
+## 선택 계약
+
+- offer는 `runSeed + stablePlayerId + selectionIndex(0..5)`로 결정한다.
+- 현재 선택과 호환되는 서로 다른 카드 3장을 제시한다.
+- reroll, rarity, category quota는 없다.
+- 선택한 카드만 개인 Pool에서 제거되고, 선택하지 않은 카드는 다음 offer에 다시 나올 수 있다.
+- 다른 Player가 같은 카드를 고르는 것은 허용한다.
+- 기본 Action을 고르면 다른 기본 Action 5장은 제거한다.
+- Signature는 현재 기본 Action과 호환되는 한 장만 허용한다.
+- 선택 중인 Player의 gameplay 입력만 chooser가 가져가고 월드·적·투사체·동료는 계속 진행한다. 별도 무적은 없다.
+- pending offer, 선택 index, 획득 카드와 source 소비 상태는 사망·부활·재접속 뒤에도 보존한다.
+- 현재 authored `augment-node`는 명시적 source adapter다. `legacyStageAlias`, landmark 순서나 추정 좌표로 새 획득 지점을 자동 생성하지 않는다.
+
+## 22장 Catalog
+
+| 분류 | 카드 |
+| --- | --- |
+| 공통 Rope 6 | 빠른 발사, 긴 로프, 빠른 회수, 해제 추진, 감전 로프, 충돌 폭발 |
+| 기본 Action 6 | 방향 돌진, 돌진 타격, 순간 방어, 밀쳐내기, 직선 사격, 느린 낙하 |
+| Signature 6 | 폭발 흔적, 충돌 반동, 피해 반사, 벽 충돌, 관통 사격, 종료 파동 |
+| 범용 modifier 4 | 빠른 재사용, 추가 충전, 로프 연동, 사용 후 보호막 |
+
+Quest, 순수 기본 이동 modifier, rarity와 Specialization은 v1 범위가 아니다.
+
+## 기본 Rope와 펀치
+
+| 항목 | 0.25.0 | 0.26.0 기본 | 카드 적용 |
+| --- | ---: | ---: | ---: |
+| Hook speed | 1400px/s | 1200px/s | 빠른 발사 `+50%` → 1800px/s |
+| Hook lifetime | 2/7초 | 1/3초 | 빠른 발사 파생 2/9초 |
+| Hook reach | 400px | 400px | 긴 로프 `+20%` → 480px |
+| Reload | 0.20초 | 1.00초 | 빠른 회수 `-50%` → 0.50초 |
+
+Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. 해제 추진은 정상 Rope 해제 계산 뒤 전체 속도 벡터를 한 번 `×1.25` 한다.
+
+기본 우클릭 펀치는 조준 반구 안의 가장 가까운 적 하나를 사거리 55px에서 공격한다. 피해는 Rope impact의 40%(현재 10), 넉백 50px, cooldown 0.50초이며 이동·무적·다중 타격은 없다.
+
+## Rope 전투 카드
+
+### 감전 로프
+
+- 부착 중 Anchor–Player 선분과 `enemy radius + 10px` 이내로 닿은 모든 damageable 적이 대상이다.
+- DPS는 기본 Rope impact의 80%/초다.
+- 0.10초 pulse는 정산·표시 cadence이며 현재 pulse 피해는 2다.
+- 진입·재진입 burst가 없고 짧은 접촉의 미정산 시간은 보존한다.
+- VFX는 로컬 `C:\projects\ball-fight-simulator`의 전기 표현 문법을 의존성 없이 이식한다. endpoint 고정 wavering polyline에 반투명 청록 glow, 청색 본선, 백색 core를 additive로 겹친다.
+
+### 충돌 폭발
+
+- 기존 유효 고속 Rope 몸체 충돌을 trigger로 사용한다.
+- 반경 120px, 직접 대상 100%, 주변 대상 50% 피해다. 직접 대상은 splash를 중복 적용하지 않는다.
+- 일반·Elite는 0.25초 동안 100px 이동한다. 직접 대상은 Player 진행 방향, 주변 대상은 충돌점 바깥 방향이다.
+- Boss는 피해만 받고 이동하지 않는다.
+- 분리 뒤 다시 최소 속도 이상으로 접촉해야 재발동한다. falloff·stun은 없다.
+
+## Action과 Signature
+
+| Action | 기본 계약 | Signature |
+| --- | --- | --- |
+| 방향 돌진 | 150px/0.25초, cooldown 5초, momentum 보존, damage·무적 없음 | 폭발 흔적: 폭 60px 경로가 0.50초 뒤 80% 피해 |
+| 돌진 타격 | 조준 방향 `velocity += 500`, 0.50초 창, 100% 피해, 75px 넉백, cooldown 5초 | 충돌 반동: 적·solid 법선 반사, 속력 100% 보존, 적별 피해 1회 |
+| 순간 방어 | 0.50초 동안 첫 combat HP 피해만 0, cooldown 5초 | 피해 반사: 막은 HP 피해를 공격자에게 1회 반환하고 projectile은 인과 선 표시 |
+| 밀쳐내기 | 반경 140px, 모든 적 20% 피해, 175px 넉백, cooldown 5초, Boss 이동 없음 | 벽 충돌: 밀리는 중 solid 접촉 시 80% 피해 1회 |
+| 직선 사격 | 2000px/s, 3000px, 1.50초, 80% 피해, cooldown 2.5초, 기본 관통·유도·넉백 없음 | 관통 사격: 적별 1회 관통, 속도·피해 손실 없음 |
+| 느린 낙하 | 공중 hold 최대 2초, gravity ×0.25, release·timeout·landing 종료, cooldown 5초 | 종료 파동: 모든 종료에서 반경 120px, 80% 피해 1회 |
+
+범용 modifier:
+
+- 빠른 재사용: Action cooldown `×0.60`.
+- 추가 충전: 최대 2 charge, 획득 즉시 full, cooldown마다 한 charge씩 순차 회복.
+- 로프 연동: Rope 해제 뒤 1초 안의 다음 Action cooldown `×0.50`; 빠른 재사용과 곱연산.
+- 사용 후 보호막: 유효 Action 종료 시 최대 HP 15%, 2초. 중첩하지 않고 양·시간을 갱신하며 HP 피해만 흡수한다.
+
+## 피해·이동 권위
+
+- Player Rope·Action trigger는 공격 Player의 owner client가 먼저 시뮬레이션하고 즉시 feedback을 시작한다.
+- claim은 unique event ID, tick, source/target/effect, 공식 피해와 최소 접촉 자료를 보낸다. 넉백은 direction·distance·duration intent를 같은 사건에 넣는다.
+- 서버는 지연된 Player state로 충돌을 다시 만들지 않는다. 소유권, tick, finite payload, formula, card 보유, event 중복과 target 상태를 검증한다.
+- live target은 `EnemyObject.blocksImpactFrom(sourcePosition)` → damage → lethal이면 defeat 1회·own knockback 생략 → 생존자 public knockback 순서다.
+- 알려진 tombstone target의 늦은 사건은 `target-already-dead` 성공 no-op이다. damage, movement, defeat, loot, metric, feedback, VFX와 부활을 만들지 않는다.
+- 한 번도 알려지지 않은 target ID는 `target-missing`으로 거부한다.
+- 중립 적 위치·행동은 서버가 소유한다. owner client의 즉시 예측은 receipt 뒤 되감지 않고 snapshot으로 수렴한다.
+
+## Protocol
+
+- Player command v4: Action intent 추가.
+- Owner motion v4: owner-owned augment/action runtime mirror 추가.
+- Player impact v8: generic selected Augment state와 guard/shield 결과 수렴.
+- World snapshot v8: selected cards, pending offer, Action/knockback snapshot 추가.
+- Augment impact v1, Augment offer v1을 사용한다.
+
+## 반복 수치 규칙
+
+새 기본값·강화값을 제안할 때 정수는 5, 소수 첫째는 0.5, 소수 둘째는 0.05 단위를 기본으로 한다. 계산 파생값은 정확한 식을 유지한다. 기존 기본 수치를 강화하는 카드는 고정 결과값보다 percentage multiplier/reduction으로 정의해 기본값 조정에 따라가게 한다.

@@ -54,7 +54,7 @@
 
 | ID | X | Y | W×H | 속성 |
 | --- | ---: | ---: | ---: | --- |
-| P0 | -416 | 0 | 256×32 | 시작 발판, one-way |
+| P0 | -448 | 0 | 896×32 | 좌우 경계벽 사이를 채우는 최하층 시작 바닥, one-way |
 | R1 | -256 | -224 | 160×16 | Recovery, one-way |
 | P1 | 64 | -288 | 192×16 | 첫 Landing, one-way |
 | R2 | -288 | -480 | 192×16 | Recovery, one-way |
@@ -64,6 +64,8 @@
 | P3 | -96 | -800 | 224×16 | Open Swing Landing, one-way |
 | P4 | 32 | -896 | 320×32 | Terminal Safe Deck, one-way |
 | Ground Shutter | -448 | -128 | 128×128 | 봉쇄된 Solid Collision |
+
+P0는 Stage Local `X=-448~448`의 `896×32` one-way Collision으로 좌우 authored 경계벽 사이를 전부 채운다. `terrain:ground-foundation` 표현도 같은 폭으로 P0 아래에 깊은 기초 슬래브와 세로 지지 구조를 이어 그려, 최하층 전체가 실제 바닥으로 읽히게 한다. 이 확장은 P0 하단에서만 적용하며 Spawn·Anchor·상부 발판·Recovery 위치는 바꾸지 않는다.
 
 ### Gameplay Landmark와 진행
 

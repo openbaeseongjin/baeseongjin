@@ -157,6 +157,34 @@ export function createEnvironmentDefinitionFromManifest(manifest, { baseUrl = nu
     });
 }
 
+export async function loadEnvironmentManifest(manifestUrl, { fetchFn = globalThis.fetch } = {}) {
+    if (typeof fetchFn !== "function") throw new Error("loadEnvironmentManifest requires fetch");
+    let resolvedUrl;
+    try {
+        resolvedUrl = new URL(manifestUrl, globalThis.location?.href).href;
+    } catch (error) {
+        throw new Error(`environment manifest URL is invalid: ${error.message}`);
+    }
+    let response;
+    try {
+        response = await fetchFn(resolvedUrl);
+    } catch (error) {
+        throw new Error(`Failed to load environment manifest '${resolvedUrl}': ${error.message}`);
+    }
+    if (!response?.ok) {
+        throw new Error(
+            `Failed to load environment manifest '${resolvedUrl}' (${response?.status ?? "unknown status"})`
+        );
+    }
+    let manifest;
+    try {
+        manifest = await response.json();
+    } catch (error) {
+        throw new Error(`Failed to parse environment manifest '${resolvedUrl}': ${error.message}`);
+    }
+    return createEnvironmentDefinitionFromManifest(manifest, { baseUrl: resolvedUrl });
+}
+
 function validateGenerator(generator) {
     const item = plainObject(generator, "environment manifest generator");
     knownKeys(item, ["tool", "exportVersion", "sourceExport"], "environment manifest generator");

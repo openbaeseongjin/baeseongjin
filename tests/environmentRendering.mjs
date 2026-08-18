@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { DEFAULT_ENVIRONMENT_DEFINITION } from "../src/render/environment/EnvironmentCatalog.js";
 import { EnvironmentAssetSet } from "../src/render/environment/EnvironmentAssetSet.js";
+import { createEnvironmentDefinitionFromManifest } from "../src/render/environment/EnvironmentManifest.js";
 import { EnvironmentRendererComposer } from "../src/render/environment/EnvironmentRendererComposer.js";
 import { currentAuthoredArea, sceneEnvironmentZone } from "../src/render/environment/AltitudeZoneResolver.js";
 import { PixelDecorationRenderer } from "../src/render/environment/renderers/PixelDecorationRenderer.js";
@@ -8,6 +12,9 @@ import { PixelBackdropRenderer } from "../src/render/environment/renderers/Pixel
 import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelTerrainRenderer.js";
 import { RenderFrameStats } from "../src/render/RenderPerformanceMetrics.js";
 import { createRenderViewport } from "../src/render/RenderViewport.js";
+import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
+
+const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 
 function recordingContext() {
     const calls = [];
@@ -28,8 +35,9 @@ function recordingContext() {
         clip: () => calls.push(["clip"]),
         fill: () => calls.push(["fill"]),
         stroke: () => calls.push(["stroke"]),
-        fillRect: (...args) => calls.push(["fillRect", ...args]),
         strokeRect: (...args) => calls.push(["strokeRect", ...args]),
+        setLineDash: (...args) => calls.push(["setLineDash", ...args]),
+        fillRect: (...args) => calls.push(["fillRect", ...args]),
         arc: (...args) => calls.push(["arc", ...args]),
         fillText: (...args) => calls.push(["fillText", ...args])
     };
@@ -77,14 +85,14 @@ function scene() {
     };
 }
 
-function readyAssets({ fail = null } = {}) {
+function readyAssets({ fail = null, atlases = DEFAULT_ENVIRONMENT_DEFINITION.atlases } = {}) {
     MockImage.instances = [];
     const assets = new EnvironmentAssetSet({
-        atlases: DEFAULT_ENVIRONMENT_DEFINITION.atlases,
+        atlases,
         ImageClass: MockImage,
         warn: () => {}
     });
-    for (const [atlasId, atlas] of Object.entries(DEFAULT_ENVIRONMENT_DEFINITION.atlases)) {
+    for (const [atlasId, atlas] of Object.entries(atlases)) {
         const image = MockImage.instances.find((candidate) => candidate.src === atlas.source);
         image.naturalWidth = atlas.size.width;
         image.naturalHeight = atlas.size.height;
@@ -116,6 +124,7 @@ export function run() {
         }
     });
     const sector01Scene = authoredScene("sector-01", "sector-01-01", { x: 0, y: -100 });
+    const sector0102Scene = authoredScene("sector-01", "sector-01-02", { x: 0, y: -100 });
     const sector02Scene = authoredScene("sector-02", "sector-02-01", { x: 0, y: -100 });
     assert.equal(currentAuthoredArea(sector01Scene)?.id, "sector-01-01");
     assert.equal(
@@ -159,6 +168,19 @@ export function run() {
         "industrial-maintenance",
         "falling to the previous sector restores that sector's background theme"
     );
+    const seamlessWorld = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 560 });
+    const sector02Landmark = seamlessWorld.landmarks.find(({ id }) => id === "sector-02:landmark:01");
+    const seamlessScene = {
+        ...currentScene,
+        player: { position: sector02Landmark.entry },
+        world: seamlessWorld,
+        worldProgress: {
+            currentSectorId: "sector-02",
+            currentLandmarkId: sector02Landmark.id
+        }
+    };
+    assert.equal(currentAuthoredArea(seamlessScene)?.id, sector02Landmark.id);
+    assert.equal(sceneEnvironmentZone(definition, seamlessScene).id, "residential-commercial");
     const fallenBackdropContext = recordingContext();
     new PixelBackdropRenderer({ definition, assets }).draw({
         context: fallenBackdropContext,
@@ -178,6 +200,92 @@ export function run() {
         false,
         "the forward progress sector must not keep controlling the rendered backdrop"
     );
+    const sector01Manifest = JSON.parse(
+        readFileSync(resolve(ROOT, "assets/runtime/environments/sector-01-maintenance/sprite-manifest.json"), "utf8")
+    );
+    const sector01Definition = createEnvironmentDefinitionFromManifest(sector01Manifest);
+    const authoredAreaEnvironmentDefinitions = Object.freeze(
+        Object.fromEntries(
+            Array.from({ length: 8 }, (_, index) => [
+                `sector-01-${String(index + 1).padStart(2, "0")}`,
+                sector01Definition
+            ])
+        )
+    );
+    const mergedAtlases = { ...definition.atlases, ...sector01Definition.atlases };
+    const authoredAssets = readyAssets({ atlases: mergedAtlases });
+    const sector01LayerImages = ["far", "mid", "near"].map((layer) =>
+        authoredAssets.imageFor(`sector-01-maintenance-backdrop-${layer}`)
+    );
+    const authoredBackdropRenderer = new PixelBackdropRenderer({
+        definition,
+        assets: authoredAssets,
+        authoredAreaEnvironmentDefinitions
+    });
+    const sector0101BackdropContext = recordingContext();
+    authoredBackdropRenderer.draw({
+        context: sector0101BackdropContext,
+        scene: sector01Scene,
+        viewport
+    });
+    const sector0101DrawnImages = sector0101BackdropContext.calls
+        .filter(([name]) => name === "drawImage")
+        .map(([, image]) => image);
+    assert.deepEqual(
+        sector0101DrawnImages.slice(-3),
+        sector01LayerImages,
+        "Sector 01-1 draws the shared far, mid, and near layers in depth order"
+    );
+    const sector0101BottomContext = recordingContext();
+    authoredBackdropRenderer.draw({
+        context: sector0101BottomContext,
+        scene: authoredScene("sector-01", "sector-01-01", { x: 0, y: -10 }),
+        viewport
+    });
+    const sector0101TopContext = recordingContext();
+    authoredBackdropRenderer.draw({
+        context: sector0101TopContext,
+        scene: authoredScene("sector-01", "sector-01-01", { x: 0, y: -1070 }),
+        viewport
+    });
+    const farLayerDraw = (context) =>
+        context.calls.find(([name, image]) => name === "drawImage" && image === sector01LayerImages[0]);
+    const bottomBackdropY = farLayerDraw(sector0101BottomContext)[7];
+    const topBackdropY = farLayerDraw(sector0101TopContext)[7];
+    assert.ok(topBackdropY > bottomBackdropY, "Sector 01-1 far background moves downward as the player climbs");
+    const sector0102BackdropContext = recordingContext();
+    authoredBackdropRenderer.draw({
+        context: sector0102BackdropContext,
+        scene: sector0102Scene,
+        viewport
+    });
+    assert.deepEqual(
+        sector0102BackdropContext.calls
+            .filter(([name]) => name === "drawImage")
+            .map(([, image]) => image)
+            .slice(-3),
+        sector01LayerImages,
+        "Sector 01-2 continues the same Sector 01 depth-layer package"
+    );
+    const failedSector01Assets = readyAssets({
+        atlases: mergedAtlases,
+        fail: "sector-01-maintenance-backdrop-mid"
+    });
+    const authoredFallbackCalls = [];
+    const authoredWarnings = [];
+    const authoredComposer = new EnvironmentRendererComposer({
+        definition,
+        assets: failedSector01Assets,
+        authoredAreaEnvironmentDefinitions,
+        polygonBackdrop: { draw: () => authoredFallbackCalls.push("backdrop") },
+        polygonTerrain: { draw: () => authoredFallbackCalls.push("terrain") },
+        warn: (message) => authoredWarnings.push(message)
+    });
+    authoredComposer.draw({ context: recordingContext(), scene: sector01Scene, viewport });
+    assert.equal(authoredComposer.status.backdrop.status, "failed");
+    assert.deepEqual(authoredComposer.status.failedAtlasIds(), ["sector-01-maintenance-backdrop-mid"]);
+    assert.deepEqual(authoredFallbackCalls, ["backdrop"]);
+    assert.match(authoredWarnings[0], /backdrop atlas failed: sector-01-maintenance-backdrop-mid/);
     const terrainContext = recordingContext();
     new PixelTerrainRenderer({ definition, assets }).draw({ context: terrainContext, scene: currentScene });
     assert.ok(
@@ -209,6 +317,126 @@ export function run() {
         [0, 24],
         "Sector 01 paints the industrial terrain material"
     );
+    const groundFoundationContext = recordingContext();
+    new PixelTerrainRenderer({ definition, assets }).draw({
+        context: groundFoundationContext,
+        scene: {
+            ...sector01Scene,
+            world: {
+                ...sector01Scene.world,
+                surfaces: [
+                    {
+                        id: "sector-01-01:p0",
+                        presentationId: "terrain:ground-foundation",
+                        oneWay: true,
+                        oneWayEdgeEnd: 1,
+                        vertices: [
+                            { x: -448, y: 0 },
+                            { x: 448, y: 0 },
+                            { x: 448, y: 32 },
+                            { x: -448, y: 32 }
+                        ]
+                    }
+                ]
+            }
+        }
+    });
+    assert.ok(
+        groundFoundationContext.calls.some(
+            ([name, x, y, width, height]) =>
+                name === "fillRect" && x === -448 && y === 4 && width === 896 && height === 640
+        ),
+        "Sector 01-1 start floor and its foundation fill the shaft between both collision walls"
+    );
+    const sector01PlatformSkinContext = recordingContext();
+    new PixelTerrainRenderer({ definition, assets }).draw({
+        context: sector01PlatformSkinContext,
+        scene: {
+            ...sector01Scene,
+            world: {
+                ...sector01Scene.world,
+                surfaces: [
+                    {
+                        id: "sector-01-01:r1",
+                        kind: "recovery",
+                        oneWay: true,
+                        oneWayEdgeEnd: 1,
+                        vertices: [
+                            { x: -80, y: 0 },
+                            { x: 80, y: 0 },
+                            { x: 80, y: 16 },
+                            { x: -80, y: 16 }
+                        ]
+                    },
+                    {
+                        id: "sector-01-01:p4",
+                        kind: "safe-deck",
+                        oneWay: true,
+                        oneWayEdgeEnd: 1,
+                        vertices: [
+                            { x: -160, y: -64 },
+                            { x: 160, y: -64 },
+                            { x: 160, y: -32 },
+                            { x: -160, y: -32 }
+                        ]
+                    },
+                    {
+                        id: "sector-01-01:cable-overhang",
+                        kind: "overhang",
+                        oneWay: false,
+                        vertices: [
+                            { x: -112, y: -128 },
+                            { x: 112, y: -128 },
+                            { x: 112, y: -96 },
+                            { x: -112, y: -96 }
+                        ]
+                    }
+                ]
+            }
+        }
+    });
+    assert.ok(
+        sector01PlatformSkinContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(7, 15, 25, 0.94)"
+        ),
+        "Sector 01 recovery catwalks use the recessed maintenance skin"
+    );
+    assert.ok(
+        sector01PlatformSkinContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(13, 28, 42, 0.94)"
+        ),
+        "Sector 01 safe decks use reinforced panel skin"
+    );
+    assert.ok(
+        sector01PlatformSkinContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "strokeStyle" && value === "rgba(100, 116, 139, 0.7)"
+        ),
+        "Sector 01 overhangs use cross-braced solid structure"
+    );
+    assert.ok(
+        sector01PlatformSkinContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "strokeStyle" && value === "rgba(125, 166, 176, 0.62)"
+        ),
+        "Sector 01 one-way edges use a muted blue-gray cue instead of a bright cyan stripe"
+    );
+    assert.ok(
+        sector01PlatformSkinContext.calls.some(
+            ([name, pattern]) => name === "setLineDash" && pattern[0] === 12 && pattern[1] === 6
+        ),
+        "Sector 01 one-way catwalks use a segmented top edge as a non-color pass-through cue"
+    );
+    assert.ok(
+        sector01PlatformSkinContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "rgba(1, 6, 11, 0.92)"
+        ),
+        "Sector 01 one-way catwalks expose dark grate apertures instead of reading as solid slabs"
+    );
+    assert.ok(
+        sector01PlatformSkinContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "strokeStyle" && value === "rgba(110, 139, 151, 0.42)"
+        ),
+        "Sector 01 one-way grate apertures repeat a subtle upward structural notch"
+    );
     const sector02TerrainContext = recordingContext();
     new PixelTerrainRenderer({ definition, assets }).draw({ context: sector02TerrainContext, scene: sector02Scene });
     assert.deepEqual(
@@ -238,6 +466,38 @@ export function run() {
     assert.ok(
         checkpointContext.calls.some(([name]) => name === "fillRect"),
         "checkpoint beacon has a structural silhouette"
+    );
+    assert.ok(
+        checkpointContext.calls.some(
+            ([name, x, y, width, height]) =>
+                name === "fillRect" && x === -3 && y === -30 && width === 6 && height === 18
+        ),
+        "active checkpoint opens around a tall central core instead of relying on color alone"
+    );
+    assert.ok(
+        checkpointContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#cfe8eb"
+        ),
+        "shared checkpoint uses a neutral low-saturation status light"
+    );
+    const inactiveCheckpointContext = recordingContext();
+    new PixelTerrainRenderer({ definition, assets }).draw({
+        context: inactiveCheckpointContext,
+        scene: {
+            ...sector01Scene,
+            activeCheckpoint: null,
+            world: {
+                ...sector01Scene.world,
+                checkpoints: [{ id: "checkpoint:sector-01-01", x: 0, y: 0, level: 0, radius: 38 }]
+            }
+        }
+    });
+    assert.ok(
+        inactiveCheckpointContext.calls.some(
+            ([name, x, y, width, height]) =>
+                name === "fillRect" && x === -8 && y === -28 && width === 16 && height === 16
+        ),
+        "inactive checkpoint keeps its shutters visibly closed"
     );
     const culledWorld = {
         ...currentScene.world,

@@ -38,6 +38,7 @@ export function commandForLocalSimulation(command, choosingChoice) {
         horizontal: 0,
         vertical: 0,
         interact: false,
+        action: false,
         pointer: Object.freeze({ ...command.pointer, down: false })
     });
 }
@@ -118,8 +119,11 @@ export class MultiplayerGameApp {
         if (startAreaId) this.authority.requestDebugTeleport(startAreaId);
     }
 
-    syncFoundationReward(authoritativeReward, selectedFoundationId = null) {
-        if (selectedFoundationId) {
+    syncFoundationReward(authoritativeReward, selectedAugmentIds = []) {
+        if (
+            this.pendingFoundationSelection &&
+            selectedAugmentIds.includes(this.pendingFoundationSelection.foundationId)
+        ) {
             this.localFoundationReward = null;
             this.pendingFoundationSelection = null;
             return;
@@ -131,17 +135,28 @@ export class MultiplayerGameApp {
     }
 
     maybeOpenLocalChooser(command, owner) {
-        if (this.localFoundationReward || this.pendingFoundationSelection || owner?.foundationAugment) return false;
+        if (
+            this.localFoundationReward ||
+            this.pendingFoundationSelection ||
+            (owner?.selectedAugmentIds?.length ?? 0) >= 6
+        ) {
+            return false;
+        }
         if (!command.interact) return false;
         const predicted = this.authority.snapshot().predicted;
         const candidate = openFoundationChooserCandidate({
             world: this.authority.renderSnapshot()?.world ?? null,
             position: predicted?.position ?? null,
-            command
+            command,
+            playerId: this.authority.playerId,
+            runSeed: this.authority.renderSnapshot()?.world?.seed,
+            selectedAugmentIds: owner?.selectedAugmentIds ?? [],
+            consumedSourceIds: owner?.augmentRuntimeState?.consumedSourceIds ?? []
         });
         if (!candidate) return false;
         this.localFoundationReward = candidate;
         this.authority.releasePredictedRope();
+        this.authority.submitAugmentOfferOpen(candidate);
         return true;
     }
 
@@ -158,6 +173,13 @@ export class MultiplayerGameApp {
             this.localFoundationReward = authoritativeReward
                 ? createFoundationRewardSelection(authoritativeReward)
                 : null;
+        }
+    }
+
+    applyAugmentOfferReceipts() {
+        for (const receipt of this.authority.drainAugmentOfferReceipts()) {
+            if (receipt.accepted || receipt.sourceId !== this.localFoundationReward?.sourceId) continue;
+            this.localFoundationReward = null;
         }
     }
 
@@ -265,7 +287,8 @@ export class MultiplayerGameApp {
         const authoritativeFoundationReward =
             current.ownerFoundationReward ?? current.state.foundationRewards?.[this.authority.playerId] ?? null;
         this.applyFoundationSelectionReceipts(authoritativeFoundationReward);
-        this.syncFoundationReward(authoritativeFoundationReward, current.owner.foundationAugment);
+        this.applyAugmentOfferReceipts();
+        this.syncFoundationReward(authoritativeFoundationReward, current.owner.selectedAugmentIds ?? []);
         const choosingFoundation = Boolean(this.localFoundationReward || this.pendingFoundationSelection);
         if (this.localFoundationReward) {
             const outcome = advanceFoundationRewardSelection(this.localFoundationReward, command);
@@ -312,6 +335,7 @@ export class MultiplayerGameApp {
         this.applyFoundationFeedback([...events, ...predictedEvents], dt);
         this.authority.drainFoundationShearReceipts();
         this.authority.drainRopeImpactReceipts();
+        this.authority.drainAugmentImpactReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
         this.combatFeedback.apply(predictedEvents);
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
@@ -320,6 +344,9 @@ export class MultiplayerGameApp {
         }
         for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "rope-impact")) {
             this.authority.submitRopeImpact(event);
+        }
+        for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "augment-impact")) {
+            this.authority.submitAugmentImpact(event);
         }
         for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-player-fall-damaged")) {
             this.authority.submitPredictedFallImpact(event);
@@ -405,6 +432,8 @@ export class MultiplayerGameApp {
             .map((state) => renderPlayer(state));
         const activeCheckpoint =
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
+        const activeRespawnAnchor =
+            base.world.respawnAnchors?.find(({ id }) => id === remote.state.respawnAnchorId) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
         this.playerPresentationEvents.push(...createPlayerPresentationEvents([base.eventFlash]));
@@ -416,6 +445,10 @@ export class MultiplayerGameApp {
             swingDrag: remote.predicted.swingDrag,
             attachmentCandidate: base.attachmentCandidate,
             enemies: remote.state.enemies,
+            augmentProjectiles: [
+                ...(base.augmentProjectiles ?? []),
+                ...otherPlayers.flatMap((other) => other.augmentRuntimeState?.combat?.actionProjectiles ?? [])
+            ],
             ...predictableProjectiles,
             ...combatFeedback,
             localPlayerId: this.authority.playerId,
@@ -433,6 +466,7 @@ export class MultiplayerGameApp {
             playerLifeState: remote.predicted.lifeState,
             ropeShot: remote.predicted.launcher,
             activeCheckpoint,
+            activeRespawnAnchor,
             foundationReward: this.localFoundationReward,
             runState: this.localRunCompleted ? "completed" : remote.state.runState,
             maxAttachDistance: ropeHookReach(),

@@ -6,6 +6,7 @@ import {
 } from "../src/game/camera/AuthoredCameraDirector.js";
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
+import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
 
 function playerAt(area, localY, x = 0) {
     return { position: { x, y: area.bounds.y + area.bounds.height + localY } };
@@ -27,6 +28,8 @@ export function run() {
         assert.equal(authoredAreaForPosition(world, player.position)?.id, area.id);
         assert.deepEqual(resolveAuthoredCameraShot({ world, player, defaultZoom: 1 }), {
             areaId: area.id,
+            landmarkId: null,
+            sectorId: "sector-01",
             zoneId,
             zoom: desktopZoom,
             localX: player.position.x,
@@ -69,6 +72,8 @@ export function run() {
         const player = playerAt(area02, localY, -320);
         assert.deepEqual(resolveAuthoredCameraShot({ world, player, defaultZoom: 1 }), {
             areaId: "sector-01-02",
+            landmarkId: null,
+            sectorId: "sector-01",
             zoneId,
             zoom: desktopZoom,
             localX: player.position.x,
@@ -95,6 +100,8 @@ export function run() {
         const player = playerAt(area03, localY, -192);
         assert.deepEqual(resolveAuthoredCameraShot({ world, player, defaultZoom: 1 }), {
             areaId: "sector-01-03",
+            landmarkId: null,
+            sectorId: "sector-01",
             zoneId,
             zoom: desktopZoom,
             localX: player.position.x,
@@ -107,4 +114,15 @@ export function run() {
             mobileZoom
         );
     }
+
+    const seamlessWorld = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 42, floorY: 560 });
+    const landmark = seamlessWorld.landmarks[0];
+    const seamlessShot = resolveAuthoredCameraShot({
+        world: seamlessWorld,
+        player: playerAt(landmark, -32, landmark.entry.x),
+        defaultZoom: 1
+    });
+    assert.equal(seamlessShot.areaId, landmark.legacyAreaId);
+    assert.equal(seamlessShot.landmarkId, landmark.id);
+    assert.equal(seamlessShot.sectorId, "sector-01");
 }

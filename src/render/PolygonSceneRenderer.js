@@ -53,6 +53,11 @@ export class PolygonSceneRenderer {
                         category: "playerProjectiles"
                     }),
                     new PolygonProjectileRenderer({
+                        selectProjectiles: (scene) => scene.augmentProjectiles ?? [],
+                        color: "#67e8f9",
+                        category: "augmentProjectiles"
+                    }),
+                    new PolygonProjectileRenderer({
                         selectProjectiles: (scene) =>
                             (scene.enemyProjectiles ?? []).filter((projectile) => !projectile.canCutRope),
                         color: "#f43f5e",

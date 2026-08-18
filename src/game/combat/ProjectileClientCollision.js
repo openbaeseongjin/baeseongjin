@@ -36,7 +36,7 @@ export const withEnemyHitPrediction = createSimulationCapabilityMixin({
             clientTick,
             resolution: target.health <= this.damage ? "enemy-defeated" : "enemy-hit",
             position: { ...target.position },
-            parameters: { damage: this.damage }
+            parameters: { damage: this.damage, ownerId: this.ownerId, sourceKind: "projectile" }
         });
     }
 });
@@ -73,7 +73,7 @@ export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
             resolution: ropeHit ? "rope-cut" : "player-hit",
             position: ropeHit ? { ...this.position } : { ...player.position },
             velocity: { ...this.velocity },
-            parameters: { damage: this.damage }
+            parameters: { damage: this.damage, ownerId: this.ownerId, sourceKind: "projectile" }
         });
     }
 });

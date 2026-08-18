@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#171d2a" />
-        <meta name="multiplayer-server" content="https://canvas-foot-smithsonian-occupational.trycloudflare.com" />
+        <meta name="multiplayer-server" content="https://patches-roof-dreams-dubai.trycloudflare.com" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="manifest" href="./manifest.webmanifest" />
@@ -352,6 +352,65 @@
                 color: #94a3b8;
                 font-weight: 700;
             }
+            .rope-tuning-fieldset {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 14px;
+                margin: 4px 0 0;
+                padding: 14px;
+                border: 1px solid rgba(103, 232, 249, 0.28);
+                border-radius: 12px;
+            }
+            .rope-tuning-fieldset legend {
+                padding: 0 8px;
+                color: #67e8f9;
+                font-weight: 900;
+            }
+            .rope-tuning-fieldset:disabled {
+                opacity: 0.5;
+            }
+            .rope-tuning-row {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 92px;
+                align-items: center;
+                gap: 8px;
+                min-height: 36px;
+                font-size: 12px;
+                font-weight: 800;
+            }
+            .rope-tuning-row input {
+                min-width: 0;
+                height: 34px;
+                padding: 0 8px;
+                border: 1px solid rgba(148, 163, 184, 0.4);
+                border-radius: 8px;
+                color: #e2e8f0;
+                background: #111827;
+                font:
+                    700 12px ui-monospace,
+                    monospace;
+            }
+            .rope-tuning-derived {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                padding-top: 4px;
+                color: #cbd5e1;
+                font:
+                    800 12px ui-monospace,
+                    monospace;
+            }
+            .rope-tuning-actions {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: flex-end;
+            }
+            @media (max-width: 620px) {
+                .rope-tuning-fieldset {
+                    grid-template-columns: 1fr;
+                }
+            }
             .settings-card {
                 width: min(560px, 100%);
                 max-height: min(720px, calc(100dvh - 40px));
@@ -652,9 +711,70 @@
                                 </select>
                             </label>
                             <p class="debug-note">
-                                수치 표시와 시작 맵은 적용 버튼을 누르면 현재 게임에 즉시 반영되고(멀티 포함), 다음
-                                시작에도 유지됩니다.
+                                수치 표시와 시작 맵은 적용 버튼으로 반영됩니다. 싱글에서는 현재 Run을 종료하고 저장된
+                                시작 맵·Rope 수치로 즉시 새 Run을 시작합니다.
                             </p>
+                            <fieldset class="rope-tuning-fieldset" data-debug-rope-tuning>
+                                <legend>로프 수치</legend>
+                                <label class="rope-tuning-row">
+                                    <span>훅 속도</span>
+                                    <input type="number" data-debug-rope-field="hookSpeed" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>비행 수명 분자</span>
+                                    <input type="number" data-debug-rope-field="hookFlightRatio.numerator" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>비행 수명 분모</span>
+                                    <input type="number" data-debug-rope-field="hookFlightRatio.denominator" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>재발사 대기</span>
+                                    <input type="number" data-debug-rope-field="hookReloadSeconds" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>부착 버퍼</span>
+                                    <input type="number" data-debug-rope-field="attachBufferSeconds" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>드래그 임계 비율</span>
+                                    <input type="number" data-debug-rope-field="swingDragThresholdViewportRatio" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>최소 홀드</span>
+                                    <input type="number" data-debug-rope-field="swingDragMinHoldSeconds" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>스윙 임펄스</span>
+                                    <input type="number" data-debug-rope-field="swingImpulse" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>손 오프셋 X</span>
+                                    <input type="number" data-debug-rope-field="handOffset.x" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>손 오프셋 Y</span>
+                                    <input type="number" data-debug-rope-field="handOffset.y" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>해제 접선 전달</span>
+                                    <input type="number" data-debug-rope-field="releaseAngularTransfer" />
+                                </label>
+                                <label class="rope-tuning-row">
+                                    <span>절단 후 차단 시간</span>
+                                    <input type="number" data-debug-rope-field="ropeDisabledSeconds" />
+                                </label>
+                                <div class="rope-tuning-derived">
+                                    <span>비행 시간 <output data-debug-rope-flight></output></span>
+                                    <span>도달 거리 <output data-debug-rope-reach></output></span>
+                                </div>
+                                <div class="rope-tuning-actions">
+                                    <button class="audio-reset" type="button" data-debug-rope-reset>
+                                        로프 기본값 복원
+                                    </button>
+                                </div>
+                            </fieldset>
+                            <p class="debug-note" data-debug-rope-mode role="status"></p>
                             <div class="audio-settings-footer">
                                 <button class="audio-reset" type="button" data-debug-apply>적용</button>
                             </div>
@@ -686,7 +806,7 @@
                     <button type="button" data-install-action>앱 설치</button>
                 </div>
             </section>
-            <output class="version-badge" id="app-version" data-version="0.23.0" aria-label="배포 버전">v0.23.0</output>
+            <output class="version-badge" id="app-version" data-version="0.27.0" aria-label="배포 버전">v0.27.0</output>
         </main>
         <noscript><p>이 게임을 실행하려면 JavaScript가 필요합니다.</p></noscript>
         <script type="module" src="./src/main.js"></script>

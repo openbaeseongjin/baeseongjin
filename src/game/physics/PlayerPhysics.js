@@ -17,6 +17,8 @@ export class PlayerPhysics {
             uprightDamping: config.groundUprightDamping
         });
         this.isGrounded = false;
+        this.lastSurfaceCollisionNormals = Object.freeze([]);
+        this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: 0, y: 0 });
     }
 
     get angle() {
@@ -32,6 +34,8 @@ export class PlayerPhysics {
         this.velocity.set(0, 0);
         this.angularMotion.reset();
         this.isGrounded = false;
+        this.lastSurfaceCollisionNormals = Object.freeze([]);
+        this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: 0, y: 0 });
     }
 
     setAngularState(angle, angularVelocity) {
@@ -63,13 +67,15 @@ export class PlayerPhysics {
         if (!rope.isAttached) {
             const acceleration = this.isGrounded ? this.config.groundAcceleration : this.config.airAcceleration;
             this.velocity.x += input.horizontal * acceleration * dt;
-            if (input.horizontal === 0 && this.isGrounded) {
+            if (input.horizontal === 0 && this.isGrounded && !input.preserveActionImpulse) {
                 this.velocity.x *= Math.exp(-this.config.groundDrag * dt);
             }
-            this.velocity.x = Math.max(
-                -this.config.maxHorizontalSpeed,
-                Math.min(this.config.maxHorizontalSpeed, this.velocity.x)
-            );
+            if (!input.preserveActionImpulse) {
+                this.velocity.x = Math.max(
+                    -this.config.maxHorizontalSpeed,
+                    Math.min(this.config.maxHorizontalSpeed, this.velocity.x)
+                );
+            }
         }
 
         if (this.isGrounded && input.vertical < 0) {
@@ -77,7 +83,8 @@ export class PlayerPhysics {
             this.isGrounded = false;
         }
 
-        this.velocity.y += this.config.gravity * dt;
+        const gravityScale = Number.isFinite(input.gravityScale) ? Math.max(0, input.gravityScale) : 1;
+        this.velocity.y += this.config.gravity * gravityScale * dt;
         this.applyAngularForces(dt, this.isGrounded);
         rope.apply(this.position, this.velocity, this.angularMotion, dt);
 
@@ -86,6 +93,7 @@ export class PlayerPhysics {
         this.integrateAngularMotion(dt);
         const impactVelocity = this.velocity.clone();
         this.resolveSurfaces(surfaces, previousPosition);
+        this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: impactVelocity.x, y: impactVelocity.y });
         rope.apply(this.position, this.velocity, this.angularMotion, dt);
         const landed = !wasGrounded && this.isGrounded;
         return Object.freeze({
@@ -98,11 +106,14 @@ export class PlayerPhysics {
     }
 
     resolveSurfaces(surfaces, previousPosition) {
-        this.isGrounded = this.collider.resolveSurfaces({
+        const resolution = this.collider.resolveSurfaces({
             position: this.position,
             velocity: this.velocity,
             surfaces,
             previousPosition
-        }).isGrounded;
+        });
+        this.isGrounded = resolution.isGrounded;
+        this.lastSurfaceCollisionNormals = resolution.collisionNormals ?? Object.freeze([]);
+        return resolution;
     }
 }

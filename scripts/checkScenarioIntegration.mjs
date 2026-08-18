@@ -7,6 +7,12 @@ const projectRoot = resolve(process.cwd());
 const statusPath = "docs/scenario-development-integration.md";
 const scenarioRoot = "docs/bsh/scenario";
 const authoredAreaRoot = "src/game/world/areas";
+const authoredSectorRoot = "src/game/world/sectors";
+const authoredSectorSupportFiles = [
+    "src/game/world/SectorDefinitionValidator.js",
+    "src/game/world/SectorProgressController.js",
+    "src/game/world/SectorProgressState.js"
+];
 
 function normalizePath(path) {
     return path.split(sep).join("/");
@@ -78,6 +84,7 @@ function readExpectedCheckpoint() {
     for (const key of [
         "scenario-source-sha256",
         "authored-area-sha256",
+        "authored-sector-sha256",
         "stage-count",
         "stage-coverage",
         "reviewed-upstream"
@@ -87,7 +94,7 @@ function readExpectedCheckpoint() {
         }
     }
 
-    for (const key of ["scenario-source-sha256", "authored-area-sha256"]) {
+    for (const key of ["scenario-source-sha256", "authored-area-sha256", "authored-sector-sha256"]) {
         if (!/^[0-9a-f]{64}$/.test(checkpoint[key])) {
             throw new Error(`${statusPath} checkpoint의 ${key}가 SHA-256 형식이 아닙니다.`);
         }
@@ -110,20 +117,32 @@ function collectActualCheckpoint() {
     // below because it does not match the <sector>/<stage>/README.md stage pattern.
     const scenarioFiles = collectFiles(scenarioRoot, new Set([".md", ".json"]));
     const authoredAreaFiles = collectFiles(authoredAreaRoot, new Set([".js"]));
+    const authoredSectorFiles = [
+        ...collectFiles(authoredSectorRoot, new Set([".js"])),
+        ...authoredSectorSupportFiles
+    ].sort((left, right) => left.localeCompare(right, "en"));
     const stages = collectStageCoverage(scenarioFiles);
 
     return {
         "scenario-source-sha256": fingerprint(scenarioFiles),
         "authored-area-sha256": fingerprint(authoredAreaFiles),
+        "authored-sector-sha256": fingerprint(authoredSectorFiles),
         "stage-count": String(stages.length),
         "stage-coverage": stages.join(","),
         scenarioFiles,
-        authoredAreaFiles
+        authoredAreaFiles,
+        authoredSectorFiles
     };
 }
 
 function collectDifferences(expected, actual) {
-    const fields = ["scenario-source-sha256", "authored-area-sha256", "stage-count", "stage-coverage"];
+    const fields = [
+        "scenario-source-sha256",
+        "authored-area-sha256",
+        "authored-sector-sha256",
+        "stage-count",
+        "stage-coverage"
+    ];
     return fields
         .filter((field) => expected[field] !== actual[field])
         .map((field) => `${field}: recorded=${expected[field]} actual=${actual[field]}`);
@@ -132,28 +151,33 @@ function collectDifferences(expected, actual) {
 function printActualCheckpoint(actual) {
     console.log(`scenario-source-sha256: ${actual["scenario-source-sha256"]}`);
     console.log(`authored-area-sha256: ${actual["authored-area-sha256"]}`);
+    console.log(`authored-sector-sha256: ${actual["authored-sector-sha256"]}`);
     console.log(`stage-count: ${actual["stage-count"]}`);
     console.log(`stage-coverage: ${actual["stage-coverage"]}`);
     console.log(`scenario-files: ${actual.scenarioFiles.length}`);
     console.log(`authored-area-files: ${actual.authoredAreaFiles.length}`);
+    console.log(`authored-sector-files: ${actual.authoredSectorFiles.length}`);
 }
 
 function runSelfTest() {
     const actual = {
         "scenario-source-sha256": "a".repeat(64),
         "authored-area-sha256": "b".repeat(64),
+        "authored-sector-sha256": "c".repeat(64),
         "stage-count": "25",
         "stage-coverage": "1-1,4-1"
     };
     const expected = {
         ...actual,
         "scenario-source-sha256": "0".repeat(64),
-        "authored-area-sha256": "1".repeat(64)
+        "authored-area-sha256": "1".repeat(64),
+        "authored-sector-sha256": "2".repeat(64)
     };
     const differences = collectDifferences(expected, actual);
-    assert.equal(differences.length, 2);
+    assert.equal(differences.length, 3);
     assert.ok(differences.some((difference) => difference.startsWith("scenario-source-sha256:")));
     assert.ok(differences.some((difference) => difference.startsWith("authored-area-sha256:")));
+    assert.ok(differences.some((difference) => difference.startsWith("authored-sector-sha256:")));
     assert.equal(normalizeContent("a\r\nb\r"), "a\nb\n");
     console.log("Scenario integration stale-check self-test passed.");
 }
@@ -187,5 +211,6 @@ try {
 
 console.log(
     `Scenario integration checkpoint passed: ${actual["stage-count"]} stages, ` +
-        `${actual.scenarioFiles.length} scenario files, ${actual.authoredAreaFiles.length} authored-area files`
+        `${actual.scenarioFiles.length} scenario files, ${actual.authoredAreaFiles.length} authored-area files, ` +
+        `${actual.authoredSectorFiles.length} authored-sector files`
 );

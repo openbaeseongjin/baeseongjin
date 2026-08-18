@@ -6,7 +6,7 @@ import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { LocalAuthority } from "./runtime/LocalAuthority.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.js";
-import { CAMERA_CONFIG } from "./config.js";
+import { CAMERA_CONFIG, resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
@@ -28,7 +28,8 @@ export class GameApp {
         audioBindings = null,
         worldSeed = selectWorldSeed(globalThis.location?.search),
         startAreaId = null,
-        metricsVisible = false
+        metricsVisible = false,
+        ropeTuning = null
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = renderer
@@ -37,7 +38,14 @@ export class GameApp {
         this.input = new InputSampler(globalThis.window, canvas, {
             onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
         });
-        this.authority = new LocalAuthority(createCurrentGameSimulation({ worldSeed, startAreaId }));
+        this.authority = new LocalAuthority(
+            createCurrentGameSimulation({
+                worldSeed,
+                startAreaId,
+                ropeConfig: resolveEffectiveRopeConfig(ropeTuning),
+                ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(ropeTuning)
+            })
+        );
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = metricsVisible;
         this.onDiagnostics = onDiagnostics;

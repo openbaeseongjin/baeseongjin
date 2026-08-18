@@ -1,6 +1,6 @@
 import { createPlayerCommand } from "../commands/PlayerCommand.js";
 
-export const PLAYER_COMMAND_PROTOCOL_VERSION = 3;
+export const PLAYER_COMMAND_PROTOCOL_VERSION = 4;
 
 function assertFinite(value, label) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -19,6 +19,9 @@ function normalizeCommand(command) {
         throw new Error("movement axes must stay between -1 and 1");
     }
     if (typeof command.pointer.down !== "boolean") throw new Error("pointer.down must be boolean");
+    if (command.action !== undefined && typeof command.action !== "boolean") {
+        throw new Error("action must be boolean");
+    }
     if (command.viewport.width <= 0 || command.viewport.height <= 0) throw new Error("viewport must be positive");
     return createPlayerCommand(command, command.aimWorld);
 }

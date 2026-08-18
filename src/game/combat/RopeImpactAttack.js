@@ -27,7 +27,10 @@ export class RopeImpactAttack {
         const canHit = owner.ropeObject.rope.isAttached && speed >= this.minimumSpeed;
         const impacts = canHit
             ? overlaps
-                  .filter((enemy) => !this.overlappingEnemyIds.has(enemy.id))
+                  .filter(
+                      (enemy) =>
+                          !this.overlappingEnemyIds.has(enemy.id) && !enemy.blocksImpactFrom?.(owner.physics.position)
+                  )
                   .map((enemy) =>
                       Object.freeze({
                           predictionId: `${owner.id}:rope-impact:${tick}:${enemy.id}`,

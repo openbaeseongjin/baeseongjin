@@ -1,6 +1,11 @@
 import { ropeAttachmentPoint } from "../../game/rope/RopeAttachment.js";
 import { circleBounds, isVisible } from "../RenderViewport.js";
-import { enemyAimLine, enemySensorColor, isPatrolDrone } from "../EnemyTelegraphPresentation.js";
+import {
+    drawEnemyBehaviorTelegraph,
+    enemyAimLine,
+    enemySensorColor,
+    isDroneEnemy
+} from "../EnemyTelegraphPresentation.js";
 
 const PLAYER_COLORS = Object.freeze({
     local: "#67e8f9",
@@ -73,7 +78,8 @@ export class PolygonEnemyRenderer {
                 context.stroke();
                 context.restore();
             }
-            if (isPatrolDrone(enemy)) {
+            drawEnemyBehaviorTelegraph(context, enemy, enemies);
+            if (isDroneEnemy(enemy)) {
                 this.drawDroneBody(context, enemy);
             } else {
                 this.drawSentryBody(context, enemy);

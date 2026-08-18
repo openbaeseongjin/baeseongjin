@@ -74,6 +74,12 @@
 - 절차 생성은 같은 시드의 동일 결과와 다른 시드의 변화를 함께 검사한다.
 - 지형 생성 성공은 모양이 생성됐다는 뜻이 아니라 실제 이동 가능한 경로가 있다는 뜻이다.
 
+### 기본 수치와 강화 수치 제안
+
+- 새 gameplay 기본값·강화값을 제안할 때 정수는 5, 소수 첫째 자리는 0.5, 소수 둘째 자리는 0.05 단위를 기본으로 한다. 사용자가 명시한 값과 정확한 계산 파생값은 이 반올림 규칙보다 우선한다.
+- 기존 기본 수치를 강화하는 효과는 가능한 한 고정 결과값이 아니라 percentage multiplier 또는 reduction으로 정의한다. 예: 사거리 `+20%`, cooldown `-50%`.
+- 문서와 테스트에는 `기본값 → 적용 비율 → 현재 파생값`을 함께 남긴다. 기본값을 바꿀 때 카드별 고정값을 다시 맞추는 구조를 만들지 않는다.
+
 ## 4. 객체와 책임 설계
 
 새 상태나 행동은 먼저 작은 순수 함수로 구현할 수 있는지 확인하고, 객체가 필요할 때 아래 순서로 판단한다. 같은 책임을 상속·조합·믹스인에 중복해서 두지 않는다.
@@ -413,7 +419,7 @@ git diff --check
 
 - `docs/bsh/scenario/`는 Sector·Stage의 기획·제작 계약을 소유하고, `docs/scenario-development-integration.md`는 전체 Stage 목록과 현재 authored Runtime 연결 상태·차단 요소·마지막 확인 근거를 소유한다.
 - 상세 Stage README의 존재, 기획 교차검토, Runtime 연결과 실제 플레이테스트를 서로 다른 상태로 기록한다. 문서가 추가됐다는 이유만으로 구현 또는 검증 완료로 표시하지 않는다.
-- 시나리오 문서와 `src/game/world/areas/`를 바꾼 작업은 `npm run check:scenario-integration`의 fingerprint 경보를 해소해야 한다. 실제 변경 영향과 검증 근거를 통합 현황에 기록한 뒤 marker를 갱신하며 hash만 맞추지 않는다.
+- 시나리오 문서와 `src/game/world/areas/`, `src/game/world/sectors/` 또는 Sector validator를 바꾼 작업은 `npm run check:scenario-integration`의 fingerprint 경보를 해소해야 한다. 실제 변경 영향과 검증 근거를 통합 현황에 기록한 뒤 marker를 갱신하며 hash만 맞추지 않는다.
 - 좌표·문구·cue처럼 기존 계약 안에서 흡수할 변경과 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계처럼 사용자 검토가 필요한 변경을 분리한다.
 - Stage 문서에 고정 SHA를 남길 때는 `AUTHORING SNAPSHOT`으로 표시한다. 현재 main·Runtime 상태를 뜻하는 `CURRENT MAIN` 표기로 고정 SHA를 남기지 않는다.
 

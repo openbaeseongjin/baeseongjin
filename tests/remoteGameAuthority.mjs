@@ -971,6 +971,7 @@ export async function run() {
         }
         let recoveryClaim = null;
         await waitFor(() => {
+            if (authority.closed) throw new Error(authority.closeReason ?? "authority closed during impact recovery");
             recoveryClaim = RecordingWebSocket.sentMessages.find(
                 ({ type, payload }) =>
                     type === "impact-claim" &&

@@ -22,7 +22,7 @@ import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
 import {
-    createCurrentGameSimulation,
+    createLegacyAuthoredGameSimulation as createCurrentGameSimulation,
     createGameSimulationForWorldRevision
 } from "../src/game/simulation/GameSimulationFactory.js";
 
@@ -259,6 +259,8 @@ export function run() {
     assert.equal(player.ropeObject.rope.isAttached, false, "LOCKED must deny a new attach");
 
     player.ropeObject.launcher.clear();
+    player.physics.position.set(c1.position.x - 85, c1.position.y);
+    player.physics.velocity.set(0, 0);
     simulation.dispatchOwnerInput(player.id, command({ pointerDown: false, aimWorld: aimAtC1 }), 1 / 120);
     simulation.restoreWorldProgress(null, 3.6);
     simulation.dispatchOwnerInput(player.id, command({ pointerDown: true, aimWorld: aimAtC1 }), 1 / 120);

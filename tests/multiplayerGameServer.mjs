@@ -5,6 +5,7 @@ import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { deserializeCommandReceipt } from "../src/game/network/CommandReceipt.js";
+import { createAugmentImpactClaim, serializeAugmentImpactClaim } from "../src/game/network/AugmentImpactClaim.js";
 import {
     createFoundationSelectionClaim,
     serializeFoundationSelectionClaim
@@ -13,6 +14,8 @@ import { serializePlayerCommandBatch } from "../src/game/network/PlayerCommandBa
 import { deserializeWorldSnapshotEnvelope } from "../src/game/network/WorldSnapshotEnvelope.js";
 import { RemoteCommandStream } from "../src/game/runtime/RemoteCommandStream.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
+import { createGameSimulationForWorldRevision } from "../src/game/simulation/GameSimulationFactory.js";
+import { DEFAULT_AUTHORED_AREA_CATALOG } from "../src/game/world/AuthoredWorldFactory.js";
 
 function nextMessage(socket, type, timeoutMs = 2000) {
     return new Promise((resolve, reject) => {
@@ -65,7 +68,12 @@ export async function run() {
     const worldSeeds = [111, 222, 333];
     const multiplayer = new MultiplayerGameServer(httpServer, {
         channelNumber: () => channelNumbers.shift(),
-        worldSeed: () => worldSeeds.shift()
+        worldSeed: () => worldSeeds.shift(),
+        createSimulation: (options) =>
+            createGameSimulationForWorldRevision({
+                ...options,
+                worldRevision: DEFAULT_AUTHORED_AREA_CATALOG.revision
+            })
     });
     await new Promise((resolve) => httpServer.listen(0, "127.0.0.1", resolve));
     const { port } = httpServer.address();
@@ -138,13 +146,14 @@ export async function run() {
     const foundationNode = sharedRoom.simulation.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
     foundationPlayer.physics.position.set(foundationNode.position.x, foundationNode.position.y);
     sharedRoom.simulation.beginFoundationReward(foundationPlayer.id, foundationNode.id, foundationNode.objectiveId);
+    const offeredFoundationId = sharedRoom.simulation.getFoundationReward(foundationPlayer.id).choices[0].id;
     first.send(
         JSON.stringify({
             type: "foundation-selection",
             payload: serializeFoundationSelectionClaim(
                 createFoundationSelectionClaim({
                     sourceId: foundationNode.id,
-                    foundationId: "impulse-coil",
+                    foundationId: offeredFoundationId,
                     clientTick: sharedRoom.simulation.getTick()
                 })
             )
@@ -152,7 +161,35 @@ export async function run() {
     );
     const foundationReceipt = (await nextMessage(first, "foundation-selection-receipt")).payload;
     assert.equal(foundationReceipt.accepted, true);
-    assert.equal(sharedRoom.simulation.playerState(firstWelcome.playerId).foundationAugment, "impulse-coil");
+    assert.equal(sharedRoom.simulation.playerState(firstWelcome.playerId).foundationAugment, offeredFoundationId);
+    const augmentSource = sharedRoom.simulation.players.find(({ id }) => id === secondWelcome.playerId);
+    const augmentTarget = sharedRoom.simulation.enemies[0];
+    augmentSource.physics.position.set(foundationPlayer.physics.position.x, foundationPlayer.physics.position.y);
+    augmentTarget.position.set(augmentSource.physics.position.x + 35, augmentSource.physics.position.y);
+    const augmentEventId = `${augmentSource.id}:default-punch:${sharedRoom.simulation.getTick()}:${augmentTarget.id}:0`;
+    second.send(
+        JSON.stringify({
+            type: "augment-impact",
+            payload: serializeAugmentImpactClaim(
+                createAugmentImpactClaim({
+                    eventId: augmentEventId,
+                    predictionId: augmentEventId,
+                    sourcePlayerId: augmentSource.id,
+                    targetId: augmentTarget.id,
+                    clientTick: sharedRoom.simulation.getTick(),
+                    effectId: "default-punch",
+                    sourceKind: "default-punch",
+                    sourcePosition: augmentSource.physics.position,
+                    contactPosition: augmentTarget.position,
+                    damage: 10,
+                    knockback: { direction: { x: 1, y: 0 }, distance: 50, duration: 0.25 }
+                })
+            )
+        })
+    );
+    const augmentReceipt = (await nextMessage(second, "augment-impact-receipt")).payload;
+    assert.equal(augmentReceipt.accepted, true);
+    assert.equal(augmentTarget.health, augmentTarget.maxHealth - 10);
     multiplayer.startClock(sharedRoom);
 
     const { socket: third, message: roomFull } = await connectFor(url, "error");

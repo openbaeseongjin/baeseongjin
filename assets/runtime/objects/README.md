@@ -3,3 +3,9 @@
 장애물과 상호작용 오브젝트의 검증된 runtime package를 `<object-id>/`에 둔다. 아직 공개 manifest·loader·validator 계약은 없으며, 계약이 생기기 전에는 [`assets/artwork/objects/`](../../artwork/README.md)에만 납품한다.
 
 그래픽 package에는 충돌체, 피해량과 물리 값을 넣지 않는다.
+
+## 현재 공용 Canvas 표현
+
+- Checkpoint 비콘은 전용 object manifest가 생기기 전까지 `src/render/world/WorldMarkerPrimitives.js`의 공용 Canvas primitive가 싱글·멀티와 모든 환경 renderer에 동일하게 표시한다.
+- 본체는 특정 Sector 강조색을 사용하지 않는 중립 흑연색·철색 장치다. 비활성은 닫힌 shutter, 활성은 벌어진 shutter와 밝은 세로 core, 이미 지난 상태는 낮은 대비로 구분한다.
+- 표현 교체는 기존 Checkpoint 좌표·활성 반경·진행 저장·부활 상태에 영향을 주지 않는다.

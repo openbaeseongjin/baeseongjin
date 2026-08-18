@@ -24,7 +24,23 @@ export class PixelTerrainRenderer {
             this.drawSurface(context, entry, material, palette, viewport, authoredArea?.sectorId);
         }
         renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
-        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
+        const savepoints = scene.world.checkpoints?.length
+            ? scene.world.checkpoints
+            : (scene.world.respawnAnchors ?? []).map((anchor, level) => ({
+                  id: anchor.id,
+                  x: anchor.position.x,
+                  y: anchor.position.y,
+                  level
+              }));
+        const activeSavepoint =
+            scene.activeCheckpoint ??
+            (scene.activeRespawnAnchor
+                ? {
+                      id: scene.activeRespawnAnchor.id,
+                      level: scene.world.respawnAnchors?.findIndex(({ id }) => id === scene.activeRespawnAnchor.id) ?? 0
+                  }
+                : null);
+        this.drawCheckpoints(context, savepoints, activeSavepoint, viewport, renderStats);
         this.drawSummit(context, scene.world.summit, scene.runState, viewport);
     }
 
@@ -63,6 +79,10 @@ export class PixelTerrainRenderer {
         const { surface, bounds } = entry;
         const vertices = surface.vertices;
 
+        if (sectorId === "sector-01" && surface.presentationId === "terrain:ground-foundation") {
+            this.drawGroundFoundation(context, bounds);
+        }
+
         if (this.assets && this.assets.isReady(material.fill.atlasId)) {
             this.fillSurfaceWithTiles(context, vertices, bounds, material, viewport);
         } else {
@@ -71,17 +91,26 @@ export class PixelTerrainRenderer {
             context.fill();
         }
 
-        this.drawSurfaceEdgeTiles(context, entry, material, viewport);
+        if (sectorId === "sector-01" || sectorId === "sector-02") {
+            this.drawAuthoredStructure(context, vertices, bounds, sectorId, surface);
+        }
+        this.drawSurfaceEdgeTiles(context, entry, material, viewport, sectorId);
 
-        context.strokeStyle = palette.terrainEdge;
-        context.lineWidth = 3;
+        const subtleSector01OneWay = sectorId === "sector-01" && surface.oneWay;
+        context.strokeStyle = subtleSector01OneWay ? "rgba(61, 84, 100, 0.72)" : palette.terrainEdge;
+        context.lineWidth = subtleSector01OneWay ? 2 : 3;
         this.traceSurfacePath(context, vertices);
         context.stroke();
 
         if (surface.oneWay) {
-            context.strokeStyle = material.oneWayColor ?? palette.oneWayEdge;
-            context.lineWidth = 4;
-            context.lineCap = "round";
+            context.strokeStyle = subtleSector01OneWay
+                ? "rgba(125, 166, 176, 0.62)"
+                : (material.oneWayColor ?? palette.oneWayEdge);
+            context.lineWidth = subtleSector01OneWay ? 2 : 4;
+            context.lineCap = subtleSector01OneWay ? "butt" : "round";
+            if (subtleSector01OneWay && surface.presentationId !== "terrain:ground-foundation") {
+                context.setLineDash([12, 6]);
+            }
             context.beginPath();
             context.moveTo(vertices[0].x, vertices[0].y);
             const edgeEnd = surface.oneWayEdgeEnd ?? 1;
@@ -89,26 +118,59 @@ export class PixelTerrainRenderer {
                 context.lineTo(vertices[i].x, vertices[i].y);
             }
             context.stroke();
+            context.setLineDash([]);
             context.lineCap = "butt";
-        }
-        if (sectorId === "sector-01" || sectorId === "sector-02") {
-            this.drawAuthoredStructure(context, vertices, bounds, sectorId, surface);
         }
     }
 
+    drawGroundFoundation(context, bounds) {
+        const width = bounds.maxX - bounds.minX;
+        const top = bounds.minY + 4;
+        const depth = 640;
+        if (width <= 0) return;
+
+        context.save();
+        context.fillStyle = "rgba(3, 9, 16, 0.99)";
+        context.fillRect(bounds.minX, top, width, depth);
+        context.fillStyle = "rgba(18, 31, 44, 0.98)";
+        context.fillRect(bounds.minX + 8, top + 12, Math.max(0, width - 16), depth - 12);
+
+        context.fillStyle = "rgba(5, 13, 22, 0.92)";
+        for (let x = bounds.minX + 28; x < bounds.maxX - 12; x += 64) {
+            context.fillRect(x, top + 12, 8, depth - 12);
+        }
+        for (let y = top + 64; y < top + depth; y += 64) {
+            context.fillRect(bounds.minX + 8, y, Math.max(0, width - 16), 4);
+        }
+
+        context.fillStyle = "rgba(103, 232, 249, 0.12)";
+        context.fillRect(bounds.minX + 12, top + 18, 4, depth - 34);
+        context.fillRect(bounds.maxX - 16, top + 18, 4, depth - 34);
+        context.fillStyle = "rgba(245, 158, 11, 0.46)";
+        for (let x = bounds.minX + 18; x < bounds.maxX - 18; x += 48) {
+            context.fillRect(x, top + 18, 18, 4);
+        }
+        context.restore();
+    }
+
     drawAuthoredStructure(context, vertices, bounds, sectorId, surface) {
+        if (sectorId === "sector-01") {
+            this.drawSector01Structure(context, vertices, bounds, surface);
+            return;
+        }
+
         const width = bounds.maxX - bounds.minX;
         const height = bounds.maxY - bounds.minY;
         if (width <= 0 || height <= 0) return;
         context.save();
         this.traceSurfacePath(context, vertices);
         context.clip();
-        context.fillStyle = sectorId === "sector-01" ? "rgba(8, 15, 26, 0.62)" : "rgba(34, 28, 22, 0.48)";
+        context.fillStyle = "rgba(34, 28, 22, 0.48)";
         context.fillRect(bounds.minX, bounds.minY + Math.min(4, height * 0.2), width, height);
-        context.strokeStyle = sectorId === "sector-01" ? "rgba(103, 232, 249, 0.13)" : "rgba(253, 230, 138, 0.12)";
+        context.strokeStyle = "rgba(253, 230, 138, 0.12)";
         context.lineWidth = 1;
         context.beginPath();
-        const step = sectorId === "sector-01" ? 32 : 40;
+        const step = 40;
         for (let x = bounds.minX + step; x < bounds.maxX; x += step) {
             context.moveTo(x, bounds.minY);
             context.lineTo(x, bounds.maxY);
@@ -137,11 +199,175 @@ export class PixelTerrainRenderer {
             }
             context.stroke();
         }
-        context.fillStyle = sectorId === "sector-01" ? "rgba(165, 243, 252, 0.28)" : "rgba(253, 230, 138, 0.24)";
+        context.fillStyle = "rgba(253, 230, 138, 0.24)";
         for (let x = bounds.minX + 12; x < bounds.maxX; x += 28) {
             context.fillRect(x, bounds.minY + 3, 2, 2);
         }
         context.restore();
+    }
+
+    drawSector01Structure(context, vertices, bounds, surface) {
+        const width = bounds.maxX - bounds.minX;
+        const height = bounds.maxY - bounds.minY;
+        if (width <= 0 || height <= 0) return;
+
+        const kind = surface.kind ?? "platform";
+        const isThin = height <= 16;
+        const panelStep = kind === "safe-deck" ? 64 : 32;
+        const innerTop = bounds.minY + Math.min(4, Math.max(2, height * 0.2));
+        const innerBottom = bounds.maxY - Math.min(3, Math.max(1, height * 0.15));
+
+        context.save();
+        this.traceSurfacePath(context, vertices);
+        context.clip();
+
+        context.fillStyle =
+            kind === "safe-deck"
+                ? "rgba(13, 28, 42, 0.94)"
+                : kind === "recovery"
+                  ? "rgba(7, 15, 25, 0.94)"
+                  : kind === "overhang"
+                    ? "rgba(10, 18, 28, 0.96)"
+                    : kind === "sealed-door"
+                      ? "rgba(6, 12, 20, 0.98)"
+                      : "rgba(9, 19, 31, 0.92)";
+        context.fillRect(bounds.minX, bounds.minY, width, height);
+
+        context.fillStyle = "rgba(71, 94, 112, 0.38)";
+        context.fillRect(bounds.minX, innerTop, width, Math.min(3, height));
+        context.fillStyle = "rgba(2, 8, 15, 0.86)";
+        context.fillRect(bounds.minX, innerBottom, width, Math.max(1, bounds.maxY - innerBottom));
+
+        if (kind === "overhang") {
+            this.drawSector01Overhang(context, bounds);
+        } else if (kind === "sealed-door") {
+            this.drawSector01SealedDoor(context, bounds);
+        } else if (kind === "cover" || kind === "solid") {
+            this.drawSector01SolidPanel(context, bounds);
+        } else {
+            if (surface.oneWay && surface.presentationId !== "terrain:ground-foundation") {
+                this.drawSector01PassThroughGrate(context, bounds, kind);
+            }
+            this.drawSector01DeckPanels(context, bounds, panelStep, { isThin, kind });
+        }
+
+        context.restore();
+    }
+
+    drawSector01PassThroughGrate(context, bounds, kind) {
+        const height = bounds.maxY - bounds.minY;
+        const apertureTop = bounds.minY + (height <= 16 ? 5 : 7);
+        const apertureBottom = bounds.maxY - (kind === "safe-deck" || kind === "recovery" ? 7 : 4);
+        if (apertureBottom - apertureTop < 2) return;
+
+        context.fillStyle = "rgba(1, 6, 11, 0.92)";
+        context.strokeStyle = "rgba(110, 139, 151, 0.42)";
+        context.lineWidth = 1;
+        for (let x = bounds.minX; x < bounds.maxX; x += 32) {
+            const left = x + 4;
+            const right = Math.min(bounds.maxX - 4, x + 28);
+            if (right <= left) continue;
+            context.fillRect(left, apertureTop, right - left, apertureBottom - apertureTop);
+            context.strokeRect(left, apertureTop, right - left, apertureBottom - apertureTop);
+
+            const centerX = (left + right) * 0.5;
+            context.beginPath();
+            context.moveTo(centerX - 5, apertureBottom - 1);
+            context.lineTo(centerX, apertureTop + 1);
+            context.lineTo(centerX + 5, apertureBottom - 1);
+            context.stroke();
+        }
+    }
+
+    drawSector01DeckPanels(context, bounds, panelStep, { isThin, kind }) {
+        const panelTop = bounds.minY + (isThin ? 5 : 7);
+        const panelBottom = bounds.maxY - 3;
+
+        context.strokeStyle = kind === "recovery" ? "rgba(100, 116, 139, 0.5)" : "rgba(82, 111, 132, 0.58)";
+        context.lineWidth = 1;
+        for (let x = bounds.minX; x < bounds.maxX; x += panelStep) {
+            const right = Math.min(bounds.maxX, x + panelStep);
+            context.strokeRect(x + 2, panelTop, Math.max(0, right - x - 4), Math.max(1, panelBottom - panelTop));
+            context.fillStyle = "rgba(148, 163, 184, 0.34)";
+            context.fillRect(x + 5, panelTop + 2, 2, 2);
+            context.fillRect(Math.max(x + 5, right - 7), panelTop + 2, 2, 2);
+        }
+
+        if (kind === "safe-deck") {
+            context.fillStyle = "rgba(245, 158, 11, 0.62)";
+            for (let x = bounds.minX + 8; x < bounds.maxX - 4; x += 32) {
+                context.fillRect(x, bounds.maxY - 7, 16, 3);
+            }
+            context.fillStyle = "rgba(103, 232, 249, 0.26)";
+            for (let x = bounds.minX + 28; x < bounds.maxX; x += 64) {
+                context.fillRect(x, bounds.minY + 7, 4, Math.max(2, bounds.maxY - bounds.minY - 12));
+            }
+        } else if (kind === "recovery") {
+            context.fillStyle = "rgba(245, 158, 11, 0.52)";
+            context.fillRect(
+                bounds.minX + 4,
+                bounds.maxY - 5,
+                Math.min(12, Math.max(0, bounds.maxX - bounds.minX - 8)),
+                2
+            );
+            context.fillRect(Math.max(bounds.minX + 4, bounds.maxX - 16), bounds.maxY - 5, 12, 2);
+        } else {
+            context.fillStyle = "rgba(103, 232, 249, 0.2)";
+            for (let x = bounds.minX + 14; x < bounds.maxX; x += 32) {
+                context.fillRect(x, bounds.minY + 6, 3, Math.max(2, bounds.maxY - bounds.minY - 10));
+            }
+        }
+    }
+
+    drawSector01Overhang(context, bounds) {
+        context.strokeStyle = "rgba(100, 116, 139, 0.7)";
+        context.lineWidth = 2;
+        context.beginPath();
+        for (let x = bounds.minX; x < bounds.maxX; x += 48) {
+            const right = Math.min(bounds.maxX, x + 48);
+            context.moveTo(x + 3, bounds.minY + 6);
+            context.lineTo(right - 3, bounds.maxY - 5);
+            context.moveTo(right - 3, bounds.minY + 6);
+            context.lineTo(x + 3, bounds.maxY - 5);
+        }
+        context.stroke();
+        context.fillStyle = "rgba(148, 163, 184, 0.5)";
+        for (let x = bounds.minX + 5; x < bounds.maxX; x += 48) {
+            context.fillRect(x, bounds.minY + 5, 3, 3);
+        }
+    }
+
+    drawSector01SealedDoor(context, bounds) {
+        context.strokeStyle = "rgba(100, 116, 139, 0.52)";
+        context.lineWidth = 2;
+        context.beginPath();
+        for (let y = bounds.minY + 14; y < bounds.maxY; y += 16) {
+            context.moveTo(bounds.minX + 4, y);
+            context.lineTo(bounds.maxX - 4, y);
+        }
+        context.stroke();
+        context.fillStyle = "rgba(245, 158, 11, 0.7)";
+        for (let x = bounds.minX + 8; x < bounds.maxX - 4; x += 24) {
+            context.fillRect(x, bounds.minY + 6, 12, 4);
+        }
+        context.fillStyle = "rgba(103, 232, 249, 0.2)";
+        context.fillRect(bounds.minX + 7, bounds.minY + 16, 3, Math.max(0, bounds.maxY - bounds.minY - 24));
+        context.fillRect(bounds.maxX - 10, bounds.minY + 16, 3, Math.max(0, bounds.maxY - bounds.minY - 24));
+    }
+
+    drawSector01SolidPanel(context, bounds) {
+        context.strokeStyle = "rgba(82, 111, 132, 0.58)";
+        context.lineWidth = 1;
+        for (let y = bounds.minY + 8; y < bounds.maxY; y += 32) {
+            for (let x = bounds.minX + 3; x < bounds.maxX; x += 32) {
+                context.strokeRect(x, y, Math.min(26, bounds.maxX - x - 3), Math.min(24, bounds.maxY - y - 3));
+            }
+        }
+        context.fillStyle = "rgba(148, 163, 184, 0.34)";
+        for (let y = bounds.minY + 12; y < bounds.maxY; y += 32) {
+            context.fillRect(bounds.minX + 6, y, 3, 3);
+            context.fillRect(bounds.maxX - 9, y, 3, 3);
+        }
     }
 
     fillSurfaceWithTiles(context, vertices, bounds, material, viewport) {
@@ -178,9 +404,10 @@ export class PixelTerrainRenderer {
         context.restore();
     }
 
-    drawSurfaceEdgeTiles(context, entry, material, viewport) {
+    drawSurfaceEdgeTiles(context, entry, material, viewport, sectorId = null) {
         const frame = material.edge;
         const image = this.assets.imageFor(frame.atlasId);
+        const opacity = sectorId === "sector-01" && entry.surface.oneWay ? 0.56 : 1;
         context.save();
         this.traceSurfacePath(context, entry.surface.vertices);
         context.clip();
@@ -202,7 +429,7 @@ export class PixelTerrainRenderer {
                     size: { width: frame.width, height: Math.min(8, frame.height) },
                     anchor: { x: 0.5, y: 0.5 },
                     offset: { x: 0, y: 0 },
-                    opacity: 1,
+                    opacity,
                     pixelSnap: true,
                     flipX: false,
                     rotation: Math.atan2(edge.dy, edge.dx)

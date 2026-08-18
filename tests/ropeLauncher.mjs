@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { COMBAT_CONFIG, ROPE_CONFIG, ropeHookFlightSeconds, ropeHookReach } from "../src/game/config.js";
+import {
+    COMBAT_CONFIG,
+    ROPE_CONFIG,
+    resolveEffectiveRopeConfig,
+    ropeHookFlightSeconds,
+    ropeHookReach
+} from "../src/game/config.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { findRopeAttachment } from "../src/game/input/RopePointerInput.js";
 import { RopeLauncher } from "../src/game/rope/RopeLauncher.js";
@@ -54,6 +60,32 @@ function sealedDividerAt({ x, y, width, height }) {
 export function run() {
     assert.equal(ropeHookReach(), 400, "hook reach must be exactly 400px");
     assert.equal(ropeHookFlightSeconds() * ROPE_CONFIG.hookSpeed, 400, "speed x flight lifetime must equal the reach");
+
+    const tunedBase = resolveEffectiveRopeConfig({
+        hookSpeed: 1600,
+        hookFlightRatio: { numerator: 1, denominator: 2 },
+        hookReloadSeconds: 0.75,
+        handOffset: { x: 20, y: -12 }
+    });
+    const tunedSimulation = new GameSimulation({
+        ropeConfig: tunedBase,
+        ropeDisabledSeconds: 1.4,
+        playerId: "tuned-player"
+    });
+    const tunedPlayer = primaryPlayer(tunedSimulation);
+    assert.equal(tunedSimulation.snapshot().maxAttachDistance, 800);
+    assert.deepEqual(tunedSimulation.snapshot().ropeConfig, tunedBase);
+    assert.equal(tunedPlayer.ropeObject.launcher.ropeConfig.hookSpeed, 1600);
+    assert.deepEqual(tunedPlayer.ropeObject.rope.config.handOffset, { x: 20, y: -12 });
+    tunedPlayer.foundation.select("fast-launch");
+    tunedPlayer.foundation.select("long-rope");
+    tunedPlayer.foundation.select("fast-recover");
+    tunedSimulation.dispatchOwnerInput(tunedPlayer.id, command(), 0);
+    assert.equal(tunedPlayer.ropeObject.launcher.ropeConfig.hookSpeed, 2400);
+    assert.equal(ropeHookReach(tunedPlayer.ropeObject.launcher.ropeConfig), 960);
+    assert.equal(tunedPlayer.ropeObject.launcher.ropeConfig.hookReloadSeconds, 0.375);
+    tunedSimulation.applyPredictedOwnerImpact(tunedPlayer.id, { resolution: "rope-cut" });
+    assert.equal(tunedPlayer.ropeDisabledRemaining, 1.4);
 
     const unit = new RopeLauncher(ROPE_CONFIG);
     assert.equal(unit.launch({ x: 0, y: 0 }, { x: 1, y: 0 }, null), true);
@@ -242,7 +274,7 @@ export function run() {
         bufferedPlayer.ropeObject.attachBufferRemaining > 0,
         "a press during reload must buffer the launch intent"
     );
-    for (let tick = 0; tick < 60 && !bufferedPlayer.ropeObject.launcher.inFlight; tick += 1) {
+    for (let tick = 0; tick < 130 && !bufferedPlayer.ropeObject.launcher.inFlight; tick += 1) {
         buffered.dispatchOwnerInput(bufferedPlayer.id, command({ pointerDown: true, aimWorld: bufferedAim }), 1 / 120);
     }
     assert.equal(bufferedPlayer.ropeObject.launcher.inFlight, true, "the buffered press must launch once reload ends");

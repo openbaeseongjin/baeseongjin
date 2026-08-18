@@ -61,6 +61,7 @@ category는 아래 이름을 사용한다.
 - 배경은 far·mid·near 깊이와 반복 경계를 구분한다.
 - 지형 이미지는 기존 collision surface 위에 입히는 표면이다. PNG 모양으로 충돌 지형을 새로 결정하지 않는다.
 - 환경 장식은 이동 경로 밖이나 배경에 두며 충돌을 추가하지 않는다.
+- 중경 설비의 파이프·덕트·케이블은 빈 공간에서 이유 없이 잘린 형태로 끝내지 않는다. 가까운 설비·벽체·서비스 레일에 연결하거나 flange cap·guard·외부 충격 파손 흔적처럼 의도적인 끝임을 형태로 보여주며, 연결을 위해 중앙 이동 여백에 발판처럼 읽히는 넓은 구조를 추가하지 않는다.
 - 현재 구역은 `waste`, `industrial-maintenance`, `residential-commercial`, `corporate-security`, `landing-pad` 다섯 가지다.
 - 현재 pack 구성은 [`assets/runtime/environments/default-mock/`](../assets/runtime/environments/default-mock/)을 참고한다.
 
@@ -68,6 +69,8 @@ category는 아래 이름을 사용한다.
 
 - `충돌함`, `통과 가능`, `배경 장식`, `상호작용 가능` 중 역할을 `README.md`에 명시한다.
 - 활성·비활성, 파괴 전·후, 공격 예고·발동처럼 플레이 중 구분해야 할 상태를 작업 요청에 맞춰 제작한다.
+- 전 섹터 공용 Checkpoint 비콘은 특정 Sector의 배관·건축 문법이나 대표 강조색을 사용하지 않고 중립적인 흑연색·철색 장치로 표현한다. 비활성은 중앙 shutter가 닫힌 낮은 실루엣, 활성은 shutter가 양옆으로 열리고 세로 core가 드러나는 실루엣으로 구분하며 색만으로 상태를 전달하지 않는다. 이미 지난 Checkpoint는 같은 닫힌 형태의 대비만 낮춘다. 외형 교체로 좌표·활성 반경·진행 저장·부활 판정을 바꾸지 않는다.
+- 공용 `wind-source` 환풍구는 Sector 01의 산업 정비 설비 문법을 기준으로 어두운 장갑 하우징·매입 fan well·보호대·벽체 쪽 duct collar를 사용한다. Orange는 service fastener, Cyan은 작동 pressure core와 출력 meter에만 제한한다. 날개 회전과 meter 단계는 실제 Wind Zone 상태를 공유하고 외형 변경으로 위치·radius·Wind Zone bounds·방향·세기·주기·Wind Shadow·충돌과 Force를 바꾸지 않는다.
 - collider, hitbox, 피해량과 물리 값은 그래픽 파일에 넣지 않는다.
 
 ### 투사체와 VFX

@@ -9,6 +9,18 @@ function mutableCatalog() {
 export function run() {
     const valid = validateAreaCatalog(SECTOR_01_AREA_CATALOG);
     assert.deepEqual(valid, { valid: true, issues: [] });
+    const startFloor = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id === "sector-01-01:p0");
+    assert.deepEqual(
+        startFloor.vertices,
+        [
+            { x: -448, y: 0 },
+            { x: 448, y: 0 },
+            { x: 448, y: 32 },
+            { x: -448, y: 32 }
+        ],
+        "1-1 P0 must fill the full walkable width between both authored boundary walls"
+    );
+    assert.equal(startFloor.presentationId, "terrain:ground-foundation");
 
     const tightIsolation = validateAreaCatalog(SECTOR_01_AREA_CATALOG, { maxAttachDistance: 300 });
     assert.ok(

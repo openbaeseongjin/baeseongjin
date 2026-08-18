@@ -134,7 +134,7 @@ export class OwnerPredictionRuntime {
     prepareSnapshot(snapshot, fallbackProgress = null) {
         if (!snapshot) {
             const progress = fallbackProgress ?? this.simulation.predictionProgressState(this.ownerId);
-            this.simulation.preparePrediction([], progress.activeCheckpointId);
+            this.simulation.preparePrediction([], progress.activeCheckpointId, progress.respawnAnchorId);
             this.simulation.synchronizePredictionProgress(this.ownerId, progress);
             return;
         }
@@ -146,9 +146,14 @@ export class OwnerPredictionRuntime {
             ? this.simulation.predictionProgressState(this.ownerId)
             : {
                   activeCheckpointId: snapshot.state.activeCheckpointId,
+                  respawnAnchorId: snapshot.state.respawnAnchorId,
                   foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null
               };
-        this.simulation.preparePrediction(snapshot.state.enemies ?? [], progress.activeCheckpointId);
+        this.simulation.preparePrediction(
+            snapshot.state.enemies ?? [],
+            progress.activeCheckpointId,
+            progress.respawnAnchorId
+        );
         if (this.simulation.worldProgress && snapshot.state.worldProgress) {
             this.simulation.restoreWorldProgress(
                 snapshot.state.worldProgress,
@@ -165,7 +170,7 @@ export class OwnerPredictionRuntime {
         }
         const sharedOwner = snapshot.state.players.find(({ id }) => id === this.ownerId);
         if (!sharedOwner) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
-        if (sharedOwner.foundationAugment === this.pendingFoundationSelection?.foundationId) {
+        if (sharedOwner.selectedAugmentIds?.includes(this.pendingFoundationSelection?.foundationId)) {
             this.pendingFoundationSelection = null;
         }
         const ownerMotionTick = sharedOwner.ownerMotionTick;
@@ -346,6 +351,7 @@ export class OwnerPredictionRuntime {
         const before = this.simulation.playerState(this.ownerId);
         const tick = this.simulation.getTick();
         const applied = this.simulation.applyPredictedOwnerImpact(this.ownerId, event);
+        if (applied) this.recordPredictedAugmentImpacts(this.simulation.drainQueuedAugmentImpactEvents(this.ownerId));
         if (applied && event.projectileId) {
             this.pendingImpacts.set(event.projectileId, {
                 before,
@@ -467,8 +473,9 @@ export class OwnerPredictionRuntime {
 
     rejectPredictedFoundationSelection(sourceId, snapshot = null) {
         if (!this.initialized) return false;
+        const rejectedFoundationId = this.pendingFoundationSelection?.foundationId ?? null;
         this.pendingFoundationSelection = null;
-        this.simulation.clearFoundationSelection(this.ownerId);
+        this.simulation.clearFoundationSelection(this.ownerId, sourceId, rejectedFoundationId);
         if (snapshot?.state?.worldProgress && this.simulation.worldProgress) {
             this.simulation.restoreWorldProgress(
                 snapshot.state.worldProgress,
@@ -508,13 +515,22 @@ export class OwnerPredictionRuntime {
     }
 
     recordPredictedOutcome(
-        { projectile, foundationEvents = [], fallImpactEvents = [], ropeImpactEvents = [] },
+        {
+            projectile,
+            foundationEvents = [],
+            fallImpactEvents = [],
+            ropeImpactEvents = [],
+            augmentImpactEvents = [],
+            augmentEvents = []
+        },
         tick,
         previous
     ) {
         this.recordPredictedFoundationEvents(foundationEvents, tick);
         this.recordPredictedFallImpacts(fallImpactEvents);
         this.recordPredictedRopeImpacts(ropeImpactEvents);
+        this.recordPredictedAugmentImpacts(augmentImpactEvents);
+        this.recordPredictedAugmentEvents(augmentEvents, tick);
         this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);
     }
 
@@ -555,6 +571,55 @@ export class OwnerPredictionRuntime {
                 })
             );
         }
+    }
+
+    recordPredictedAugmentImpacts(events) {
+        for (const event of events) {
+            const eventKey = `augment-impact:${event.eventId}`;
+            if (this.emittedPredictionTicks.has(eventKey)) continue;
+            this.emittedPredictionTicks.set(eventKey, event.clientTick);
+            this.predictedEvents.push(
+                Object.freeze({
+                    eventType: "predicted-resolve",
+                    predictionId: event.predictionId ?? event.eventId,
+                    eventId: event.eventId,
+                    clientTick: event.clientTick,
+                    resolution: event.predictedResolution ?? "enemy-hit",
+                    position: event.contactPosition ?? event.position,
+                    sourcePosition: event.sourcePosition,
+                    damage: event.damage,
+                    knockback: event.knockback ?? null,
+                    effectId: event.effectId,
+                    sourceKind: event.sourceKind ?? "augment-action",
+                    sourcePlayerId: event.sourcePlayerId,
+                    targetId: event.targetId,
+                    parameters: Object.freeze({
+                        sourceKind: "augment-impact",
+                        eventId: event.eventId,
+                        predictionId: event.predictionId ?? event.eventId,
+                        effectId: event.effectId,
+                        effectSourceKind: event.sourceKind ?? "augment-action",
+                        sourcePlayerId: event.sourcePlayerId,
+                        targetId: event.targetId,
+                        damage: event.damage
+                    })
+                })
+            );
+        }
+    }
+
+    recordPredictedAugmentEvents(events, tick) {
+        events.forEach((event, index) => {
+            this.predictedEvents.push(
+                Object.freeze({
+                    ...event,
+                    eventType: `predicted-${event.eventType ?? "augment-effect"}`,
+                    predictionId: event.predictionId ?? `${this.ownerId}:augment-effect:${tick}:${index}`,
+                    tick,
+                    ownerId: this.ownerId
+                })
+            );
+        });
     }
 
     recordPredictedFoundationEvents(events, tick) {

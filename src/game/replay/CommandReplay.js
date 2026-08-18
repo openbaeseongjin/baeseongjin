@@ -2,6 +2,8 @@ function cloneCommand(command) {
     return Object.freeze({
         horizontal: command.horizontal,
         vertical: command.vertical,
+        interact: Boolean(command.interact),
+        action: Boolean(command.action),
         pointer: Object.freeze({ ...command.pointer }),
         viewport: Object.freeze({ ...command.viewport }),
         aimWorld: Object.freeze({ ...command.aimWorld })
@@ -37,14 +39,21 @@ export function createDeterminismDigest(state) {
         health: state.playerHealth,
         lifeState: state.playerLifeState,
         runState: state.runState,
-        activeCheckpointId: state.activeCheckpoint?.id ?? null,
+        progressKind: state.worldProgress?.currentSectorId ? "sector" : "area",
+        ...(state.worldProgress?.currentSectorId
+            ? { respawnAnchorId: state.activeRespawnAnchor?.id ?? null }
+            : { activeCheckpointId: state.activeCheckpoint?.id ?? null }),
+        worldProgress: state.worldProgress,
         foundationAugment: state.foundationAugment,
+        selectedAugmentIds: Object.freeze([...(state.selectedAugmentIds ?? [])]),
         augmentRuntimeState: Object.freeze({ ...state.augmentRuntimeState }),
         enemies: Object.freeze(
             state.enemies
                 .map((enemy) =>
                     Object.freeze({
                         id: enemy.id,
+                        enemyType: enemy.enemyType,
+                        behaviorState: enemy.behaviorState ?? enemy.enemyBehaviorSnapshot?.() ?? null,
                         health: enemy.health,
                         x: enemy.position.x,
                         y: enemy.position.y

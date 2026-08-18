@@ -3,9 +3,10 @@ import { drawAuthoredSectorBackdrop } from "../AuthoredSectorBackdrop.js";
 import { AltitudeSunrise, currentAuthoredArea, sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
 
 export class PixelBackdropRenderer {
-    constructor({ definition, assets }) {
+    constructor({ definition, assets, authoredAreaEnvironmentDefinitions = Object.freeze({}) }) {
         this.definition = definition;
         this.assets = assets;
+        this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
         this.sunrise = new AltitudeSunrise({ definition });
         this.status = assets ? "ready" : "pending";
     }
@@ -27,7 +28,9 @@ export class PixelBackdropRenderer {
         context.fillRect(0, 0, cssWidth, cssHeight);
 
         const area = currentAuthoredArea(scene);
-        const authoredBackdropDrawn = drawAuthoredSectorBackdrop(context, { scene, viewport, palette, area });
+        const authoredAreaBackdropDrawn = this.drawAuthoredAreaBackdrop(context, { area, viewport, scene });
+        const authoredBackdropDrawn =
+            authoredAreaBackdropDrawn || drawAuthoredSectorBackdrop(context, { scene, viewport, palette, area });
         if (!authoredBackdropDrawn) {
             const layers = this.definition.backdrop.layers;
             for (const layer of layers) {
@@ -46,6 +49,54 @@ export class PixelBackdropRenderer {
         haze.addColorStop(1, "rgba(8, 11, 16, 0)");
         context.fillStyle = haze;
         context.fillRect(0, 0, cssWidth, cssHeight);
+    }
+
+    drawAuthoredAreaBackdrop(context, { area, viewport, scene }) {
+        const definition = this.authoredAreaEnvironmentDefinitions[area?.id];
+        if (!definition) return false;
+        const layers = [...definition.backdrop.layers].sort((a, b) => a.depth - b.depth);
+        if (!layers.some(({ frames }) => frames.length > 0)) return false;
+        const climbProgress = sectorClimbProgress(scene, area);
+        const areaCenterX = area.bounds.x + area.bounds.width * 0.5;
+        const cameraX = scene.camera?.x ?? scene.player?.position?.x ?? areaCenterX;
+        const horizontalOverscan = viewport.cssWidth * 0.03;
+        context.save();
+        context.imageSmoothingEnabled = false;
+        for (const layer of layers) {
+            const frame = layer.frames[0];
+            if (!frame) continue;
+            const image = this.assets.imageFor(frame.atlasId);
+            const scale = Math.max(
+                (viewport.cssWidth + horizontalOverscan * 2) / frame.width,
+                viewport.cssHeight / frame.height
+            );
+            const destinationWidth = frame.width * scale;
+            const destinationHeight = frame.height * scale;
+            const verticalOverflow = Math.max(0, destinationHeight - viewport.cssHeight);
+            const parallaxX = Math.min(Math.max(layer.parallaxX ?? 0, 0), 0.3);
+            const parallaxY = Math.min(Math.max(layer.parallaxY ?? 0, 0), 0.3);
+            const horizontalDrift = clamp(
+                -(cameraX - areaCenterX) * parallaxX * 0.35,
+                -horizontalOverscan,
+                horizontalOverscan
+            );
+            const verticalDrift = (climbProgress - 0.5) * viewport.cssHeight * parallaxY * 0.2;
+            const destinationX = (viewport.cssWidth - destinationWidth) * 0.5 + horizontalDrift;
+            const destinationY = clamp(-verticalOverflow * (1 - climbProgress) + verticalDrift, -verticalOverflow, 0);
+            context.drawImage(
+                image,
+                frame.x,
+                frame.y,
+                frame.width,
+                frame.height,
+                destinationX,
+                destinationY,
+                destinationWidth,
+                destinationHeight
+            );
+        }
+        context.restore();
+        return true;
     }
 
     drawLayerSprites(context, layer, zone, offsetX, cssWidth, baseline, peakHeight) {
@@ -72,4 +123,20 @@ export class PixelBackdropRenderer {
             });
         }
     }
+}
+
+function sectorClimbProgress(scene, area) {
+    const playerY = scene.player?.position?.y;
+    const sectorAreas = (scene.world?.areas ?? []).filter(
+        (candidate) => candidate.sectorId === area?.sectorId && candidate.bounds
+    );
+    if (!Number.isFinite(playerY) || sectorAreas.length === 0) return 0;
+    const top = Math.min(...sectorAreas.map(({ bounds }) => bounds.y));
+    const bottom = Math.max(...sectorAreas.map(({ bounds }) => bounds.y + bounds.height));
+    if (![top, bottom].every(Number.isFinite) || bottom <= top) return 0;
+    return clamp((bottom - playerY) / (bottom - top), 0, 1);
+}
+
+function clamp(value, minimum, maximum) {
+    return Math.min(Math.max(value, minimum), maximum);
 }

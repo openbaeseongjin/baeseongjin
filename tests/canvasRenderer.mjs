@@ -107,14 +107,13 @@ export function run() {
     assert.deepEqual(textCalls, ["체크포인트 부활", "낙사 · 최대 체력으로 복귀"]);
     textCalls.length = 0;
     renderer.drawStatusFeedback({
-        type: "foundation-shear-hit",
-        targetKind: "calibration-dummy",
+        type: "augment-release-propulsion",
         age: 0.4
     });
-    assert.deepEqual(textCalls, ["CONTACT REGISTERED", "CALIBRATION TRACE VALID"]);
+    assert.deepEqual(textCalls, ["해제 추진", "속도 ×1.25"]);
     textCalls.length = 0;
     renderer.drawStatusFeedback({ type: "foundation-selected", foundationId: "impulse-coil", age: 0.4 });
-    assert.deepEqual(textCalls, ["FOUNDATION ONLINE", "IMPULSE COIL"]);
+    assert.deepEqual(textCalls, ["증강 획득", "해제 추진"]);
     textCalls.length = 0;
     renderer.drawStoryPresentation({
         title: "VERTICAL GRID",
@@ -127,6 +126,7 @@ export function run() {
     borderCalls.length = 0;
     renderer.drawRewardSelectionOverlay({
         rewardType: "foundation",
+        selectionIndex: 0,
         selectedIndex: 1,
         choices: [
             {
@@ -152,7 +152,7 @@ export function run() {
             }
         ]
     });
-    assert.ok(textCalls.includes("EMERGENCY GRAPPLE RECONFIGURATION"));
+    assert.ok(textCalls.includes("증강 선택 1 / 6"));
     assert.ok(textCalls.includes("IMPULSE COIL"));
     assert.ok(textCalls.includes("RELAY LINK"));
     assert.ok(textCalls.includes("SHEAR CURRENT"));
@@ -163,8 +163,15 @@ export function run() {
     assert.deepEqual(textCalls, ["로프 절단!", "재연결까지 0.4초"]);
     assert.deepEqual(borderCalls, [[4, 4, 836, 382]]);
     textCalls.length = 0;
-    renderer.drawMobileControls({ visible: true, ropePointerDown: false, left: true, jump: false, right: false });
-    assert.deepEqual(textCalls, ["←", "점프", "→"]);
+    renderer.drawMobileControls({
+        visible: true,
+        ropePointerDown: false,
+        left: true,
+        jump: false,
+        right: false,
+        action: false
+    });
+    assert.deepEqual(textCalls, ["←", "점프", "→", "액션"]);
 
     textCalls.length = 0;
     renderer.drawRunEndOverlay({ runState: "completed" });

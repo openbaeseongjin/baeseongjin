@@ -52,14 +52,24 @@ export class SpriteSceneRenderer {
         playerDefinition = DEFAULT_PLAYER_SPRITE_DEFINITION,
         playerAssets = null,
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
-        environmentAssets = null
+        environmentAssets = null,
+        authoredAreaEnvironmentDefinitions = Object.freeze({})
     } = {}) {
         this.profile = "sprite";
         this.playerDefinition = playerDefinition;
         this.playerAssets = playerAssets ?? new SpriteImageAssetSet({ atlases: playerDefinition.atlases });
         this.environmentDefinition = environmentDefinition;
+        this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
+        const authoredAreaEnvironmentAtlases = Object.fromEntries(
+            Object.values(authoredAreaEnvironmentDefinitions).flatMap((definition) =>
+                Object.entries(definition.atlases)
+            )
+        );
         this.environmentAssets =
-            environmentAssets ?? new EnvironmentAssetSet({ atlases: environmentDefinition.atlases });
+            environmentAssets ??
+            new EnvironmentAssetSet({
+                atlases: { ...environmentDefinition.atlases, ...authoredAreaEnvironmentAtlases }
+            });
         this.environmentDiagnostics = null;
 
         const polygonBackdrop = new BackdropRenderer();
@@ -68,6 +78,7 @@ export class SpriteSceneRenderer {
         this.environmentComposer = new EnvironmentRendererComposer({
             definition: this.environmentDefinition,
             assets: this.environmentAssets,
+            authoredAreaEnvironmentDefinitions: this.authoredAreaEnvironmentDefinitions,
             polygonBackdrop,
             polygonTerrain
         });
@@ -91,6 +102,13 @@ export class SpriteSceneRenderer {
                 palette: { a: "#f59e0b", b: "#fef08a" },
                 size: { width: 10, height: 10 },
                 category: "playerProjectiles"
+            }),
+            new SpriteProjectileRenderer({
+                selectProjectiles: (scene) => scene.augmentProjectiles ?? [],
+                sprite: playerProjectileSprite,
+                palette: { a: "#0891b2", b: "#ecfeff" },
+                size: { width: 12, height: 8 },
+                category: "augmentProjectiles"
             }),
             new SpriteProjectileRenderer({
                 selectProjectiles: (scene) =>

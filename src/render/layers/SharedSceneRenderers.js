@@ -9,6 +9,7 @@ import {
     worldObjectWorldBounds
 } from "../assets/WorldObjectPresentationCatalog.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../world/WorldMarkerPrimitives.js";
+import { drawElectricArc } from "../effects/ElectricArc.js";
 
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
@@ -28,7 +29,7 @@ const COLORS = Object.freeze({
     hookTip: "#f8fafc"
 });
 
-function drawRope(context, rope, player) {
+function drawRope(context, rope, player, { electrified = false, time = 0 } = {}) {
     if (!rope?.anchor) return;
     const attachment = ropeAttachmentPoint(player, rope);
     const tension = Math.min(1, rope.tension / 900);
@@ -38,6 +39,7 @@ function drawRope(context, rope, player) {
     context.moveTo(rope.anchor.x, rope.anchor.y);
     context.lineTo(attachment.x, attachment.y);
     context.stroke();
+    if (electrified) drawElectricArc(context, rope.anchor, attachment, { time });
     context.fillStyle = "#f8fafc";
     context.beginPath();
     context.arc(rope.anchor.x, rope.anchor.y, 6 + tension * 3, 0, Math.PI * 2);
@@ -94,8 +96,30 @@ export class WorldGeometryRenderer {
         const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
         for (const { surface } of visibleSurfaces) this.drawRock(context, surface);
         renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
-        this.drawCheckpoints(context, scene.world.checkpoints, scene.activeCheckpoint, viewport, renderStats);
-        this.drawSummit(context, scene.world.summit, scene.runState, viewport, Boolean(scene.world.areas?.length));
+        const savepoints = scene.world.checkpoints?.length
+            ? scene.world.checkpoints
+            : (scene.world.respawnAnchors ?? []).map((anchor, level) => ({
+                  id: anchor.id,
+                  x: anchor.position.x,
+                  y: anchor.position.y,
+                  level
+              }));
+        const activeSavepoint =
+            scene.activeCheckpoint ??
+            (scene.activeRespawnAnchor
+                ? {
+                      id: scene.activeRespawnAnchor.id,
+                      level: scene.world.respawnAnchors?.findIndex(({ id }) => id === scene.activeRespawnAnchor.id) ?? 0
+                  }
+                : null);
+        this.drawCheckpoints(context, savepoints, activeSavepoint, viewport, renderStats);
+        this.drawSummit(
+            context,
+            scene.world.summit,
+            scene.runState,
+            viewport,
+            Boolean(scene.world.areas?.length || scene.world.landmarks?.length)
+        );
     }
 
     surfaceEntries(world) {
@@ -343,13 +367,25 @@ export class AuthoredWorldObjectRenderer {
         return worldObjectPresentation(this.presentationCatalog, object.presentationId);
     }
 
+    sectorIdFor(object, scene) {
+        if (object.landmarkId) {
+            return (scene.world.landmarks ?? []).find(({ id }) => id === object.landmarkId)?.sectorId ?? null;
+        }
+        return (scene.world.areas ?? []).find(({ id }) => id === object.areaId)?.sectorId ?? null;
+    }
+
     drawObject(context, object, scene, renderArgs = {}) {
         const style = this.presentationFor(object);
+        const sectorId = this.sectorIdFor(object, scene);
         const progress = scene.worldProgress;
         const objectiveComplete = object.objectiveId
             ? progress?.completedObjectiveIds?.includes(object.objectiveId)
             : false;
-        const gateUnlocked = object.gateId ? progress?.unlockedGateIds?.includes(object.gateId) : false;
+        const gateUnlocked = object.routeLockId
+            ? progress?.unlockedRouteIds?.includes(object.routeLockId)
+            : object.gateId
+              ? progress?.unlockedGateIds?.includes(object.gateId)
+              : false;
         const requirementsComplete = (object.requiredObjectiveIds ?? []).every((objectiveId) =>
             progress?.completedObjectiveIds?.includes(objectiveId)
         );
@@ -364,10 +400,11 @@ export class AuthoredWorldObjectRenderer {
             this.drawGatePanel(context, style, bounds, {
                 blocked: !requirementsComplete,
                 ready: requirementsComplete && !objectiveComplete,
-                opened: gateUnlocked || objectiveComplete
+                opened: gateUnlocked || objectiveComplete,
+                sectorId
             });
         } else if (object.kind === "gate") {
-            this.drawGate(context, style, bounds, gateUnlocked);
+            this.drawGate(context, style, bounds, gateUnlocked, { sectorId });
         } else {
             context.translate(bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);
             if (object.kind === "augment-node") {
@@ -381,7 +418,7 @@ export class AuthoredWorldObjectRenderer {
                 context.fillRect(-width + 7, -height + 7, width * 2 - 14, 5);
                 context.fillRect(-width + 7, -height + 17, width - 3, 4);
             } else if (object.kind === "grapple-landmark") {
-                this.drawGrappleLandmark(context, style);
+                this.drawGrappleLandmark(context, style, { sectorId: this.sectorIdFor(object, scene) });
             } else if (object.kind === "wind-source") {
                 this.drawWindSource(context, style, {
                     zone: renderArgs.windZoneById?.get(object.windZoneId) ?? null,
@@ -420,7 +457,12 @@ export class AuthoredWorldObjectRenderer {
         context.restore();
     }
 
-    drawGate(context, style, bounds, unlocked) {
+    drawGate(context, style, bounds, unlocked, { sectorId = null } = {}) {
+        if (sectorId === "sector-01") {
+            this.drawSector01Gate(context, bounds, unlocked);
+            return;
+        }
+
         const { x: left, y: top, width, height } = bounds;
         const railWidth = 6;
 
@@ -456,7 +498,81 @@ export class AuthoredWorldObjectRenderer {
         context.fillRect(left + width - 10, top + 8, 5, 7);
     }
 
-    drawGatePanel(context, style, bounds, { blocked, ready, opened }) {
+    drawSector01Gate(context, bounds, unlocked) {
+        const { x: left, y: top, width, height } = bounds;
+        const right = left + width;
+        const centerX = left + width * 0.5;
+        const frame = "#0a121c";
+        const frameEdge = "#344453";
+        const recess = "#101c28";
+        const seam = "#050b12";
+        const amber = "#d97736";
+        const cyan = "#67e8f9";
+
+        context.fillStyle = frame;
+        if (unlocked) {
+            context.fillRect(left, top, 8, height);
+            context.fillRect(right - 8, top, 8, height);
+            context.fillRect(left, top, width, 9);
+        } else {
+            context.fillRect(left, top, width, height);
+        }
+        context.strokeStyle = unlocked ? "rgba(103, 232, 249, 0.64)" : frameEdge;
+        context.lineWidth = 3;
+        context.strokeRect(left, top, width, height);
+
+        context.fillStyle = "#1d2b38";
+        context.fillRect(left + 4, top + 4, 4, height - 8);
+        context.fillRect(right - 8, top + 4, 4, height - 8);
+        context.fillRect(left + 8, top + 4, width - 16, 5);
+
+        context.fillStyle = amber;
+        context.fillRect(left + 3, top + 4, 2, 2);
+        context.fillRect(right - 5, top + 4, 2, 2);
+        context.fillRect(left + 3, top + height - 6, 2, 2);
+        context.fillRect(right - 5, top + height - 6, 2, 2);
+
+        if (unlocked) {
+            context.fillStyle = "rgba(103, 232, 249, 0.18)";
+            context.fillRect(left + 9, top + 10, 3, height - 16);
+            context.fillRect(right - 12, top + 10, 3, height - 16);
+            context.fillStyle = cyan;
+            context.fillRect(left + 4, top + 13, 2, 10);
+            context.fillRect(right - 6, top + 13, 2, 10);
+            context.fillRect(centerX - 5, top + 5, 10, 2);
+            return;
+        }
+
+        context.fillStyle = recess;
+        context.fillRect(left + 9, top + 10, width - 18, height - 14);
+        context.fillStyle = seam;
+        context.fillRect(centerX - 1, top + 11, 2, height - 16);
+        context.fillStyle = "#263746";
+        for (let panelY = top + 14; panelY < top + height - 8; panelY += 9) {
+            context.fillRect(left + 11, panelY, width - 22, 3);
+        }
+
+        const lockTop = top + Math.floor(height * 0.5) - 5;
+        context.fillStyle = "#070d14";
+        context.fillRect(left + 7, lockTop, width - 14, 10);
+        context.fillStyle = "#324655";
+        context.fillRect(left + 10, lockTop + 3, width - 20, 4);
+        context.fillStyle = "#111c27";
+        context.fillRect(centerX - 5, lockTop - 2, 10, 14);
+        context.strokeStyle = amber;
+        context.lineWidth = 2;
+        context.strokeRect(centerX - 5, lockTop - 2, 10, 14);
+        context.fillStyle = amber;
+        context.fillRect(centerX - 1, lockTop + 2, 2, 6);
+        context.fillRect(right - 7, top + 12, 3, 5);
+    }
+
+    drawGatePanel(context, style, bounds, { blocked, ready, opened, sectorId = null }) {
+        if (sectorId === "sector-01") {
+            this.drawSector01GatePanel(context, bounds, { blocked, ready, opened });
+            return;
+        }
+
         const bodyWidth = 28;
         const bodyHeight = 26;
         const left = bounds.x + (bounds.width - bodyWidth) * 0.5;
@@ -488,7 +604,79 @@ export class AuthoredWorldObjectRenderer {
         context.fillRect(left + bodyWidth - 7, top + bodyHeight - 7, 3, 3);
     }
 
-    drawGrappleLandmark(context, style) {
+    drawSector01GatePanel(context, bounds, { blocked, ready, opened }) {
+        const bodyWidth = 30;
+        const bodyHeight = 27;
+        const left = bounds.x + (bounds.width - bodyWidth) * 0.5;
+        const top = bounds.y;
+        const bottom = top + bodyHeight;
+        const centerX = left + bodyWidth * 0.5;
+        const statusColor = opened ? "#67e8f9" : ready ? "#f59e0b" : "#c65f43";
+
+        context.strokeStyle = "#273746";
+        context.lineWidth = 4;
+        context.beginPath();
+        context.moveTo(left + bodyWidth, top + 8);
+        context.lineTo(bounds.x + bounds.width, top + 8);
+        context.lineTo(bounds.x + bounds.width, top + 3);
+        context.stroke();
+
+        context.fillStyle = "#253542";
+        context.fillRect(centerX - 3, bottom, 6, 15);
+        context.fillStyle = "#111b24";
+        context.fillRect(centerX - 8, bottom + 15, 16, 3);
+
+        context.fillStyle = "#09121b";
+        context.fillRect(left, top, bodyWidth, bodyHeight);
+        context.fillStyle = "#1b2a36";
+        context.fillRect(left + 3, top + 3, bodyWidth - 6, 5);
+        context.fillRect(left + 3, top + bodyHeight - 5, bodyWidth - 6, 2);
+        context.strokeStyle = statusColor;
+        context.lineWidth = opened ? 3 : 2;
+        context.strokeRect(left, top, bodyWidth, bodyHeight);
+
+        context.fillStyle = "#314451";
+        context.fillRect(left - 3, top + 5, 3, bodyHeight - 10);
+        context.fillRect(left + bodyWidth, top + 5, 3, bodyHeight - 10);
+        context.fillStyle = statusColor;
+        context.fillRect(left + bodyWidth - 6, top + 4, 3, 3);
+
+        if (opened) {
+            context.fillStyle = "rgba(103, 232, 249, 0.18)";
+            context.fillRect(left + 6, top + 10, bodyWidth - 12, 11);
+            context.fillStyle = statusColor;
+            context.fillRect(left + 7, top + 11, 4, 9);
+            context.fillRect(left + bodyWidth - 11, top + 11, 4, 9);
+            context.fillRect(centerX - 3, top + 9, 6, 2);
+            return;
+        }
+
+        if (ready) {
+            context.fillStyle = "#101a23";
+            context.fillRect(left + 6, top + 10, bodyWidth - 12, 12);
+            context.fillStyle = statusColor;
+            context.fillRect(centerX - 2, top + 11, 4, 9);
+            context.fillRect(centerX - 6, top + 13, 12, 3);
+            context.fillRect(left + 6, top + 20, bodyWidth - 12, 2);
+            return;
+        }
+
+        context.fillStyle = "#182631";
+        context.fillRect(left + 5, top + 10, bodyWidth - 10, 12);
+        context.fillStyle = "#30424e";
+        context.fillRect(left + 7, top + 12, bodyWidth - 14, 2);
+        context.fillRect(left + 7, top + 16, bodyWidth - 14, 2);
+        context.fillRect(left + 7, top + 20, bodyWidth - 14, 2);
+        context.fillStyle = statusColor;
+        context.fillRect(centerX - 2, top + 13, 4, 7);
+    }
+
+    drawGrappleLandmark(context, style, { sectorId = null } = {}) {
+        if (sectorId === "sector-01") {
+            this.drawSector01GrappleLandmark(context, style);
+            return;
+        }
+
         const radius = style.radius;
         context.strokeStyle = "rgba(71, 85, 105, 0.85)";
         context.lineWidth = 5;
@@ -515,63 +703,172 @@ export class AuthoredWorldObjectRenderer {
         context.fillRect(-4, -4, 8, 8);
     }
 
+    drawSector01GrappleLandmark(context, style) {
+        const radius = style.radius;
+
+        context.fillStyle = "#172738";
+        context.strokeStyle = "#526f84";
+        context.lineWidth = 2;
+        context.fillRect(-8, -radius - 3, 16, 5);
+        context.strokeRect(-8, -radius - 3, 16, 5);
+        context.fillStyle = "#263b4b";
+        context.fillRect(-3, -radius + 1, 6, 5);
+
+        context.fillStyle = "rgba(5, 12, 20, 0.98)";
+        context.strokeStyle = "#58768b";
+        context.lineWidth = 2.5;
+        context.beginPath();
+        context.moveTo(-radius * 0.68, -radius * 0.8);
+        context.lineTo(radius * 0.68, -radius * 0.8);
+        context.lineTo(radius * 0.94, -radius * 0.46);
+        context.lineTo(radius * 0.94, radius * 0.46);
+        context.lineTo(radius * 0.68, radius * 0.8);
+        context.lineTo(-radius * 0.68, radius * 0.8);
+        context.lineTo(-radius * 0.94, radius * 0.46);
+        context.lineTo(-radius * 0.94, -radius * 0.46);
+        context.closePath();
+        context.fill();
+        context.stroke();
+
+        context.fillStyle = "#22384a";
+        context.strokeStyle = "rgba(103, 232, 249, 0.42)";
+        context.lineWidth = 1.5;
+        context.fillRect(-radius - 1, -7, 5, 14);
+        context.strokeRect(-radius - 1, -7, 5, 14);
+        context.fillRect(radius - 4, -7, 5, 14);
+        context.strokeRect(radius - 4, -7, 5, 14);
+
+        context.strokeStyle = "rgba(100, 116, 139, 0.72)";
+        context.lineWidth = 1;
+        context.strokeRect(-8, -8, 16, 16);
+        context.fillStyle = "#07111d";
+        context.strokeStyle = "rgba(103, 232, 249, 0.78)";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.arc(0, 0, 6.5, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+
+        context.fillStyle = "#67e8f9";
+        context.fillRect(-2, -2, 4, 4);
+        context.fillStyle = "rgba(245, 158, 11, 0.78)";
+        context.fillRect(-2, radius * 0.58, 4, 2);
+    }
+
     drawWindSource(context, style, { zone = null, state = null, elapsedSeconds = 0 } = {}) {
         const radius = style.radius;
         const intensity = windVisualIntensity(zone, state);
         const bladeAngle = windBladePhase(zone, elapsedSeconds) * FAN_BLADE_SPEED;
+        const innerRadius = radius * 0.67;
+        const mountDirection = zone?.direction
+            ? {
+                  x: -Math.sign(zone.direction.x),
+                  y: -Math.sign(zone.direction.y)
+              }
+            : { x: 0, y: 0 };
 
-        context.fillStyle = "#0f172a";
-        context.strokeStyle = "#334155";
-        context.lineWidth = 6;
+        // The shared wind source uses Sector 01's maintenance-machine language:
+        // an armored octagonal housing, a recessed fan well, service fasteners,
+        // and only a restrained cyan pressure readout. The wind simulation still
+        // owns position, direction, timing, and blade phase.
+        context.fillStyle = "#101c28";
+        if (mountDirection.x !== 0) {
+            const mountLeft = mountDirection.x > 0 ? radius * 0.72 : -radius;
+            context.fillRect(mountLeft, -radius * 0.34, radius * 0.28, radius * 0.68);
+            context.fillStyle = "#263b4b";
+            context.fillRect(mountLeft, -radius * 0.26, radius * 0.28, radius * 0.12);
+            context.fillRect(mountLeft, radius * 0.14, radius * 0.28, radius * 0.12);
+        } else if (mountDirection.y !== 0) {
+            const mountTop = mountDirection.y > 0 ? radius * 0.72 : -radius;
+            context.fillRect(-radius * 0.34, mountTop, radius * 0.68, radius * 0.28);
+            context.fillStyle = "#263b4b";
+            context.fillRect(-radius * 0.26, mountTop, radius * 0.12, radius * 0.28);
+            context.fillRect(radius * 0.14, mountTop, radius * 0.12, radius * 0.28);
+        }
+
+        context.fillStyle = "rgba(5, 12, 20, 0.98)";
+        context.strokeStyle = "#526f84";
+        context.lineWidth = 4;
         context.beginPath();
-        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.moveTo(-radius * 0.72, -radius);
+        context.lineTo(radius * 0.72, -radius);
+        context.lineTo(radius, -radius * 0.72);
+        context.lineTo(radius, radius * 0.72);
+        context.lineTo(radius * 0.72, radius);
+        context.lineTo(-radius * 0.72, radius);
+        context.lineTo(-radius, radius * 0.72);
+        context.lineTo(-radius, -radius * 0.72);
+        context.closePath();
         context.fill();
         context.stroke();
 
-        context.strokeStyle = "rgba(251, 146, 60, 0.55)";
-        context.lineWidth = 3;
-        for (let index = 0; index < 8; index += 1) {
-            const angle = (index * Math.PI * 2) / 8;
-            context.beginPath();
-            context.moveTo(Math.cos(angle) * (radius - 3), Math.sin(angle) * (radius - 3));
-            context.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
-            context.stroke();
+        context.fillStyle = "#172738";
+        context.fillRect(-radius * 0.72, -radius * 0.88, radius * 1.44, radius * 0.12);
+        context.fillRect(-radius * 0.72, radius * 0.76, radius * 1.44, radius * 0.12);
+        context.fillRect(-radius * 0.88, -radius * 0.56, radius * 0.12, radius * 1.12);
+        context.fillRect(radius * 0.76, -radius * 0.56, radius * 0.12, radius * 1.12);
+
+        context.fillStyle = "rgba(245, 158, 11, 0.72)";
+        for (const [x, y] of [
+            [-radius * 0.72, -radius * 0.72],
+            [radius * 0.72, -radius * 0.72],
+            [-radius * 0.72, radius * 0.72],
+            [radius * 0.72, radius * 0.72]
+        ]) {
+            context.fillRect(x - 2, y - 2, 4, 4);
         }
+
+        context.fillStyle = "#07111d";
+        context.strokeStyle = "#3d5668";
+        context.lineWidth = 5;
+        context.beginPath();
+        context.arc(0, 0, innerRadius, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
 
         context.save();
         context.rotate(bladeAngle);
-        context.fillStyle = `rgba(148, 163, 184, ${0.55 + intensity * 0.4})`;
+        context.fillStyle = `rgba(111, 132, 148, ${0.58 + intensity * 0.34})`;
         for (let index = 0; index < 4; index += 1) {
             context.rotate(Math.PI / 2);
             context.beginPath();
-            context.moveTo(0, -radius * 0.12);
-            context.lineTo(radius * 0.8, -radius * 0.05);
-            context.lineTo(radius * 0.8, radius * 0.05);
-            context.lineTo(0, radius * 0.12);
+            context.moveTo(0, -innerRadius * 0.16);
+            context.lineTo(innerRadius * 0.88, -innerRadius * 0.34);
+            context.lineTo(innerRadius * 0.74, innerRadius * 0.08);
+            context.lineTo(0, innerRadius * 0.16);
             context.closePath();
             context.fill();
         }
         context.restore();
 
-        if (intensity > 0) {
-            context.strokeStyle = `rgba(125, 211, 252, ${0.16 + intensity * 0.3})`;
-            context.lineWidth = 2;
-            context.beginPath();
-            context.arc(0, 0, radius * 0.62, 0, Math.PI * 2);
-            context.stroke();
-        }
-
-        context.fillStyle = "#1f2937";
-        context.strokeStyle = "#475569";
+        context.strokeStyle = "rgba(82, 111, 132, 0.72)";
         context.lineWidth = 3;
         context.beginPath();
-        context.arc(0, 0, radius * 0.2, 0, Math.PI * 2);
+        context.moveTo(-innerRadius, 0);
+        context.lineTo(innerRadius, 0);
+        context.moveTo(0, -innerRadius);
+        context.lineTo(0, innerRadius);
+        context.stroke();
+
+        context.fillStyle = "#111c27";
+        context.strokeStyle = "#526f84";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.arc(0, 0, radius * 0.18, 0, Math.PI * 2);
         context.fill();
         context.stroke();
-        context.fillStyle = intensity > 0 ? "#67e8f9" : "#64748b";
+        context.fillStyle = intensity > 0 ? "rgba(103, 232, 249, 0.9)" : "#4b5c69";
         context.beginPath();
-        context.arc(0, 0, radius * 0.08, 0, Math.PI * 2);
+        context.arc(0, 0, radius * 0.07, 0, Math.PI * 2);
         context.fill();
+
+        const meterLeft = -radius * 0.27;
+        const meterTop = radius * 0.82;
+        for (let index = 0; index < 3; index += 1) {
+            const lit = intensity >= (index + 1) / 3;
+            context.fillStyle = lit ? "rgba(103, 232, 249, 0.72)" : "#263746";
+            context.fillRect(meterLeft + index * radius * 0.2, meterTop, radius * 0.12, 3);
+        }
     }
 
     drawAugmentNode(context, style, bounds, objectiveComplete) {
@@ -712,8 +1009,10 @@ export class RopeRenderer {
         this.selectRopes = selectRopes;
     }
 
-    draw({ context, scene }) {
-        for (const { rope, player } of this.selectRopes(scene)) drawRope(context, rope, player);
+    draw({ context, scene, presentationTimeSeconds = 0 }) {
+        for (const { rope, player, electrified = false } of this.selectRopes(scene)) {
+            drawRope(context, rope, player, { electrified, time: presentationTimeSeconds });
+        }
     }
 }
 
@@ -778,8 +1077,18 @@ export class CombatEffectRenderer {
     }
 }
 
+const LARGE_AUGMENT_EFFECTS = new Set([
+    "collision-explosion-direct",
+    "collision-explosion-splash",
+    "push-away",
+    "wall-impact",
+    "end-wave",
+    "explosive-trail"
+]);
+
 export class EventEffectRenderer {
     draw({ context, scene }) {
+        for (const effect of scene.augmentEffects ?? []) this.drawAugmentEffect(context, effect);
         const event = scene.eventFlash;
         if (event?.type !== "rope-cut" || !event.position || event.age >= 0.6) return;
         const progress = event.age / 0.6;
@@ -794,6 +1103,36 @@ export class EventEffectRenderer {
         context.moveTo(event.position.x + radius, event.position.y - radius);
         context.lineTo(event.position.x - radius, event.position.y + radius);
         context.stroke();
+        context.restore();
+    }
+
+    drawAugmentEffect(context, effect) {
+        if (!effect.position) return;
+        const progress = Math.min(1, effect.age / effect.lifetime);
+        const alpha = Math.max(0, 1 - progress);
+        context.save();
+        context.globalAlpha = alpha;
+        context.globalCompositeOperation = "lighter";
+        if (effect.type === "damage-reflect" && effect.sourcePosition) {
+            context.strokeStyle = "#f4fdff";
+            context.shadowColor = "#67e8f9";
+            context.shadowBlur = 10;
+            context.lineWidth = 3;
+            context.beginPath();
+            context.moveTo(effect.sourcePosition.x, effect.sourcePosition.y);
+            context.lineTo(effect.position.x, effect.position.y);
+            context.stroke();
+        } else {
+            const large = LARGE_AUGMENT_EFFECTS.has(effect.type);
+            const radius = (large ? 18 : 6) + progress * (large ? 92 : 24);
+            context.strokeStyle = effect.type === "electrified-rope" ? "#a8e6ff" : "#fbbf24";
+            context.shadowColor = context.strokeStyle;
+            context.shadowBlur = large ? 12 : 7;
+            context.lineWidth = Math.max(1, 5 * (1 - progress));
+            context.beginPath();
+            context.arc(effect.position.x, effect.position.y, radius, 0, Math.PI * 2);
+            context.stroke();
+        }
         context.restore();
     }
 }
@@ -916,10 +1255,11 @@ export class RopeShotRenderer {
     }
 
     draw({ context, scene }) {
-        for (const entry of this.selectShots(scene)) this.drawShot(context, entry.shot, entry.player);
+        const handOffset = scene.ropeConfig?.handOffset ?? ROPE_CONFIG.handOffset;
+        for (const entry of this.selectShots(scene)) this.drawShot(context, entry.shot, entry.player, handOffset);
     }
 
-    drawShot(context, shot, player = null) {
+    drawShot(context, shot, player = null, handOffset = ROPE_CONFIG.handOffset) {
         const distance = Math.min(shot.traveled, ropeHookReach());
         const tip = {
             x: shot.origin.x + shot.direction.x * distance,
@@ -927,7 +1267,7 @@ export class RopeShotRenderer {
         };
         const angle = Math.atan2(shot.direction.y, shot.direction.x);
         const body = player?.position
-            ? ropeLaunchHandPoint(player, ROPE_CONFIG.handOffset, {
+            ? ropeLaunchHandPoint(player, handOffset, {
                   x: player.position.x + shot.direction.x,
                   y: player.position.y + shot.direction.y
               })
@@ -941,8 +1281,19 @@ export class RopeShotRenderer {
     }
 }
 
-export const localRopes = (scene) => [{ rope: scene.rope, player: scene.player }];
-export const remoteRopes = (scene) => (scene.otherPlayers ?? []).map((player) => ({ rope: player.rope, player }));
+export const localRopes = (scene) => [
+    {
+        rope: scene.rope,
+        player: scene.player,
+        electrified: (scene.selectedAugmentIds ?? []).includes("electrified-rope")
+    }
+];
+export const remoteRopes = (scene) =>
+    (scene.otherPlayers ?? []).map((player) => ({
+        rope: player.rope,
+        player,
+        electrified: (player.selectedAugmentIds ?? []).includes("electrified-rope")
+    }));
 export const localShots = (scene) =>
     scene.ropeShot?.shot ? [{ shot: scene.ropeShot.shot, player: scene.player }] : [];
 export const remoteShots = (scene) =>

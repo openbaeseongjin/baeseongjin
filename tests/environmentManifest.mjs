@@ -6,8 +6,13 @@ import { fileURLToPath } from "node:url";
 import { EnvironmentDefinition } from "../src/render/environment/EnvironmentDefinition.js";
 import {
     assertEnvironmentAtlasImagePath,
-    createEnvironmentDefinitionFromManifest
+    createEnvironmentDefinitionFromManifest,
+    loadEnvironmentManifest
 } from "../src/render/environment/EnvironmentManifest.js";
+import {
+    AUTHORED_AREA_ENVIRONMENT_SELECTIONS,
+    loadAuthoredAreaEnvironmentDefinitions
+} from "../src/render/environment/AuthoredAreaEnvironmentCatalog.js";
 import {
     DEFAULT_ENVIRONMENT_DEFINITION,
     ENVIRONMENT_MAX_ALTITUDE,
@@ -20,7 +25,7 @@ import { runtimeAssetUrl } from "../src/render/assets/RuntimeAssetCatalog.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 
-export function run() {
+export async function run() {
     // Definition validation
     const def = DEFAULT_ENVIRONMENT_DEFINITION;
     assert.equal(def.id, "environment-default-mock");
@@ -99,6 +104,44 @@ export function run() {
     assert.equal(fromManifest.backdrop.layers.length, 3);
     assert.equal(fromManifest.backdrop.layers[0].frames[0].x, 0, "manifest cell column zero is valid");
     assert.equal(fromManifest.backdrop.layers[0].frames[0].y, 0, "manifest cell row zero is valid");
+
+    const sector01PackPath = resolve(ROOT, "assets/runtime/environments/sector-01-maintenance/sprite-manifest.json");
+    const sector01Manifest = JSON.parse(readFileSync(sector01PackPath, "utf8"));
+    const sector01Definition = createEnvironmentDefinitionFromManifest(sector01Manifest);
+    assert.equal(sector01Definition.id, "environment-sector-01-maintenance");
+    assert.equal(sector01Definition.backdrop.layers.length, 3);
+    assert.deepEqual(sector01Definition.atlases["sector-01-maintenance-backdrop-far"].size, {
+        width: 1024,
+        height: 1536
+    });
+    for (let index = 1; index <= 8; index += 1) {
+        const areaId = `sector-01-${String(index).padStart(2, "0")}`;
+        assert.equal(AUTHORED_AREA_ENVIRONMENT_SELECTIONS[areaId].packageId, "sector-01-maintenance");
+    }
+    validateEnvironmentAssetDirectory(resolve(sector01PackPath, ".."));
+
+    const fetchedUrls = [];
+    const fetchFn = async (url) => {
+        fetchedUrls.push(url);
+        return { ok: true, json: async () => sector01Manifest };
+    };
+    const loadedDefinition = await loadEnvironmentManifest(
+        AUTHORED_AREA_ENVIRONMENT_SELECTIONS["sector-01-01"].manifestUrl,
+        { fetchFn }
+    );
+    assert.equal(loadedDefinition.id, sector01Definition.id);
+    assert.equal(fetchedUrls.length, 1);
+    assert.match(loadedDefinition.atlases["sector-01-maintenance-backdrop-far"].source, /backdrop-far\.png$/);
+    const warnings = [];
+    const authoredDefinitions = await loadAuthoredAreaEnvironmentDefinitions({
+        fetchFn,
+        warn: (message) => warnings.push(message)
+    });
+    for (let index = 1; index <= 8; index += 1) {
+        assert.equal(authoredDefinitions[`sector-01-${String(index).padStart(2, "0")}`].id, sector01Definition.id);
+    }
+    assert.equal(fetchedUrls.length, 2, "Sector 01 areas share one manifest fetch");
+    assert.deepEqual(warnings, []);
 
     // Manifest rejects bad formatVersion
     assert.throws(() => createEnvironmentDefinitionFromManifest({ ...manifest, formatVersion: 99 }), /formatVersion/);

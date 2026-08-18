@@ -33,7 +33,12 @@ export function createRopeImpactReceipt({ predictionId, accepted, reason, resolu
     if (!accepted && (typeof reason !== "string" || reason.length === 0)) {
         throw new Error("rejected rope impact receipt requires a reason");
     }
-    if (accepted && resolution !== "enemy-hit" && resolution !== "enemy-defeated") {
+    if (
+        accepted &&
+        resolution !== "enemy-hit" &&
+        resolution !== "enemy-defeated" &&
+        resolution !== "target-already-dead"
+    ) {
         throw new Error("accepted rope impact receipt requires an enemy resolution");
     }
     if (!Number.isFinite(damage) || damage < 0) throw new Error("damage must be non-negative");

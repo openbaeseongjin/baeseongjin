@@ -7,10 +7,17 @@ import { run as ropeLauncher } from "./ropeLauncher.mjs";
 import { run as gameSimulation } from "./gameSimulation.mjs";
 import { run as combatSystems } from "./combatSystems.mjs";
 import { run as enemyPatrol } from "./enemyPatrol.mjs";
+import { run as enemyEncounterSelection } from "./enemyEncounterSelection.mjs";
+import { run as enemyArchetypes } from "./enemyArchetypes.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as worldSeed } from "./worldSeed.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
 import { run as foundationAugment } from "./foundationAugment.mjs";
+import { run as augmentOffer } from "./augmentOffer.mjs";
+import { run as actionAugmentRuntime } from "./actionAugmentRuntime.mjs";
+import { run as ropeAugmentModules } from "./ropeAugmentModules.mjs";
+import { run as playerEnemyImpact } from "./playerEnemyImpact.mjs";
+import { run as augmentV1Integration } from "./augmentV1Integration.mjs";
 import { run as gameObjectModel } from "./gameObjectModel.mjs";
 import { run as renderingSystem } from "./renderingSystem.mjs";
 import { run as stateMachine } from "./stateMachine.mjs";
@@ -34,6 +41,12 @@ import { run as interpolateRenderSnapshot } from "./interpolateRenderSnapshot.mj
 import { run as debugSettings } from "./debugSettings.mjs";
 import { run as debugPanel } from "./debugPanel.mjs";
 import { run as traversalDamageFeedback } from "./traversalDamageFeedback.mjs";
+import { run as legacyAreaSeamlessSectorRuntime } from "./legacyAreaSeamlessSectorRuntime.mjs";
+import { run as sectorProgressState } from "./sectorProgressState.mjs";
+import { run as sectorProgressController } from "./sectorProgressController.mjs";
+import { run as seamlessSectorGameSimulation } from "./seamlessSectorGameSimulation.mjs";
+import { run as seamlessSectorMultiplayerWorld } from "./seamlessSectorMultiplayerWorld.mjs";
+import { run as sectorDefinitionValidator } from "./sectorDefinitionValidator.mjs";
 
 const steps = {
     worldSeed,
@@ -44,10 +57,17 @@ const steps = {
     swingDrag,
     ropeLauncher,
     foundationAugment,
+    augmentOffer,
+    actionAugmentRuntime,
+    ropeAugmentModules,
+    playerEnemyImpact,
+    augmentV1Integration,
     gameObjectModel,
     gameSimulation,
     combatSystems,
     enemyPatrol,
+    enemyEncounterSelection,
+    enemyArchetypes,
     canvasRenderer,
     renderingSystem,
     renderPerformance,
@@ -69,6 +89,12 @@ const steps = {
     debugSettings,
     debugPanel,
     traversalDamageFeedback,
+    legacyAreaSeamlessSectorRuntime,
+    sectorProgressState,
+    sectorProgressController,
+    seamlessSectorGameSimulation,
+    seamlessSectorMultiplayerWorld,
+    sectorDefinitionValidator,
     spriteAssetValidator,
     stateMachine,
     commandReplay

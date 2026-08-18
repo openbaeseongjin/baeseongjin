@@ -2,7 +2,12 @@ import { paintPixelSprite } from "./PixelSpritePainter.js";
 import { PlayerAnimationController } from "./PlayerAnimationController.js";
 import { paintSpriteFrame } from "./SpriteCanvasPainter.js";
 import { centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
-import { enemyAimLine, enemySensorColor, isPatrolDrone } from "../EnemyTelegraphPresentation.js";
+import {
+    drawEnemyBehaviorTelegraph,
+    enemyAimLine,
+    enemySensorColor,
+    isDroneEnemy
+} from "../EnemyTelegraphPresentation.js";
 
 const ENEMY_SPRITE = Object.freeze({
     rows: Object.freeze(["......aa", "..aaaaaa", "abbbccca", "abccccba", "..aaaaaa", "......aa"])
@@ -126,16 +131,17 @@ export class SpriteEnemyRenderer {
                 context.stroke();
                 context.restore();
             }
+            drawEnemyBehaviorTelegraph(context, enemy, enemies);
             paintPixelSprite({
                 context,
                 sprite: ENEMY_SPRITE,
-                palette: isPatrolDrone(enemy)
+                palette: isDroneEnemy(enemy)
                     ? { a: "#78350f", b: "#fbbf24", c: "#fef3c7" }
                     : { a: "#881337", b: "#fb7185", c: "#fecdd3" },
                 position: enemy.position,
                 size: this.size
             });
-            if (isPatrolDrone(enemy)) {
+            if (isDroneEnemy(enemy)) {
                 context.strokeStyle = "#94a3b8";
                 context.lineWidth = 2;
                 context.beginPath();

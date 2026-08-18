@@ -106,9 +106,10 @@ export async function run() {
     assert.match(text, /clockCorrectionMs: -2/);
     assert.match(text, /maxClockCorrectionMs: 17/);
     assert.match(text, /firstFoundationSeconds: 58.2/);
-    assert.match(text, /currentArea: sector-01-02/);
-    assert.match(text, /currentAreaSeconds: 12.3/);
-    assert.match(text, /areaClearSeconds: sector-01-01=103.3/);
+    assert.match(text, /progressKind: area/);
+    assert.match(text, /currentProgress: sector-01-02/);
+    assert.match(text, /currentProgressSeconds: 12.3/);
+    assert.match(text, /progressClearSeconds: sector-01-01=103.3/);
     assert.match(text, /renderFps: 59/);
     assert.match(text, /backingStore: 2048x1536/);
     assert.match(text, /drawCounts: enemies=6\/48/);

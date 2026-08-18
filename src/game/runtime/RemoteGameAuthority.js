@@ -1,5 +1,11 @@
 import { deserializeCommandReceipt } from "../network/CommandReceipt.js";
 import {
+    createAugmentImpactClaim,
+    createAugmentImpactReceipt,
+    serializeAugmentImpactClaim
+} from "../network/AugmentImpactClaim.js";
+import { createAugmentOfferClaim, serializeAugmentOfferClaim } from "../network/AugmentOfferClaim.js";
+import {
     createCheckpointClaim,
     createCheckpointClaimReceipt,
     serializeCheckpointClaim
@@ -87,6 +93,10 @@ export class RemoteGameAuthority {
         this.projectileSpawnClaimReceipts = [];
         this.impactClaimReceipts = [];
         this.ropeImpactReceipts = [];
+        this.augmentImpactReceipts = [];
+        this.augmentOfferReceipts = [];
+        this.locallyPredictedAugmentImpactIds = new Set();
+        this.locallyPredictedAugmentImpactOrder = [];
         this.locallyPredictedRopeImpactIds = new Set();
         this.locallyPredictedRopeImpactOrder = [];
         this.predictedRopeImpactResolutions = new Map();
@@ -178,6 +188,8 @@ export class RemoteGameAuthority {
                         this.stream.acceptReceipt(receipt);
                     } else if (message.type === "foundation-selection-receipt") {
                         this.foundationSelectionReceipts.push(Object.freeze({ ...message.payload }));
+                    } else if (message.type === "augment-offer-receipt") {
+                        this.augmentOfferReceipts.push(Object.freeze({ ...message.payload }));
                     } else if (message.type === "foundation-shear-receipt") {
                         this.foundationShearReceipts.push(createFoundationShearReceipt(message.payload));
                     } else if (message.type === "hit-claim-receipt") {
@@ -215,6 +227,10 @@ export class RemoteGameAuthority {
                             this.locallyPredictedRopeImpactIds.delete(receipt.predictionId);
                             this.predictedRopeImpactResolutions.delete(receipt.predictionId);
                         }
+                    } else if (message.type === "augment-impact-receipt") {
+                        const receipt = createAugmentImpactReceipt(message.payload);
+                        this.augmentImpactReceipts.push(receipt);
+                        if (!receipt.accepted) this.locallyPredictedAugmentImpactIds.delete(receipt.eventId);
                     } else if (message.type === "owner-motion-receipt") {
                         this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
                     } else if (message.type === "debug-teleport-receipt") {
@@ -254,7 +270,9 @@ export class RemoteGameAuthority {
         }
         this.previousSnapshotReceivedAt = receivedAt;
         this.latestSnapshot = snapshot;
-        if (snapshot.state.activeCheckpointId === this.pendingCheckpointId) this.pendingCheckpointId = null;
+        if (snapshot.state.progressKind === "area" && snapshot.state.activeCheckpointId === this.pendingCheckpointId) {
+            this.pendingCheckpointId = null;
+        }
         if (snapshot.state.runState === "completed") this.pendingSummitClaim = false;
         this.snapshotReceivedAt = receivedAt;
         this.buffer.push(snapshot, receivedAt);
@@ -302,7 +320,8 @@ export class RemoteGameAuthority {
             angularVelocity: predicted.angularVelocity,
             isGrounded: predicted.isGrounded,
             rope: predicted.rope,
-            launcher: predicted.launcher
+            launcher: predicted.launcher,
+            augmentRuntimeState: predicted.augmentRuntimeState
         });
     }
 
@@ -432,6 +451,39 @@ export class RemoteGameAuthority {
             this.predictedRopeImpactResolutions.delete(expiredPredictionId);
         }
         this.socket.send(JSON.stringify({ type: "rope-impact", payload: serializeRopeImpactClaim(claim) }));
+        return true;
+    }
+
+    submitAugmentImpact(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const claim = createAugmentImpactClaim({
+            eventId: event.eventId,
+            predictionId: event.predictionId ?? event.eventId,
+            sourcePlayerId: event.sourcePlayerId ?? this.playerId,
+            targetId: event.targetId,
+            clientTick: event.clientTick ?? event.tick,
+            effectId: event.effectId,
+            sourceKind: event.sourceKind ?? "augment-action",
+            sourcePosition: event.sourcePosition,
+            contactPosition: event.contactPosition ?? event.position,
+            damage: event.damage,
+            ...(event.knockback
+                ? {
+                      knockback: {
+                          direction: event.knockback.direction,
+                          distance: event.knockback.distance,
+                          duration: event.knockback.duration ?? event.knockback.durationSeconds
+                      }
+                  }
+                : {})
+        });
+        this.locallyPredictedAugmentImpactIds.add(claim.eventId);
+        this.locallyPredictedAugmentImpactOrder.push(claim.eventId);
+        while (this.locallyPredictedAugmentImpactOrder.length > MAX_TRACKED_COMMANDS) {
+            this.locallyPredictedAugmentImpactIds.delete(this.locallyPredictedAugmentImpactOrder.shift());
+        }
+        this.socket.send(JSON.stringify({ type: "augment-impact", payload: serializeAugmentImpactClaim(claim) }));
         return true;
     }
 
@@ -605,6 +657,9 @@ export class RemoteGameAuthority {
                 }
                 const predictionId =
                     event.parameters?.sourceKind === "rope-impact" ? event.parameters.predictionId : null;
+                const augmentEventId =
+                    event.parameters?.sourceKind === "augment-impact" ? event.parameters.eventId : null;
+                if (augmentEventId && this.locallyPredictedAugmentImpactIds.delete(augmentEventId)) return false;
                 if (!predictionId || !this.locallyPredictedRopeImpactIds.delete(predictionId)) return true;
                 const predictedResolution = this.predictedRopeImpactResolutions.get(predictionId);
                 this.predictedRopeImpactResolutions.delete(predictionId);
@@ -620,6 +675,29 @@ export class RemoteGameAuthority {
     drainRopeImpactReceipts() {
         const receipts = Object.freeze([...this.ropeImpactReceipts]);
         this.ropeImpactReceipts.length = 0;
+        return receipts;
+    }
+
+    drainAugmentOfferReceipts() {
+        const receipts = Object.freeze([...this.augmentOfferReceipts]);
+        this.augmentOfferReceipts.length = 0;
+        return receipts;
+    }
+
+    submitAugmentOfferOpen({ sourceId }) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const claim = createAugmentOfferClaim({
+            sourceId,
+            clientTick: this.ownerRuntime.state().tick
+        });
+        this.socket.send(JSON.stringify({ type: "augment-offer", payload: serializeAugmentOfferClaim(claim) }));
+        return true;
+    }
+
+    drainAugmentImpactReceipts() {
+        const receipts = Object.freeze([...this.augmentImpactReceipts]);
+        this.augmentImpactReceipts.length = 0;
         return receipts;
     }
 

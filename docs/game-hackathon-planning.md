@@ -8,14 +8,14 @@
 
 ## 2. 현재 방향
 
-| 구분 | 방향 | 참고 작품 |
-| --- | --- | --- |
-| 핵심 조작 | 고정 길이 로프의 진자 운동과 접선 방향 충격 | 아크샨, 산나비 |
-| 플레이 구조 | 반복 플레이, 랜덤 빌드, 수집 | 아이작 |
-| 공간 경험 | 하나의 붕괴 도시 안에서 48개 진행 영역을 아래에서 위로 연속 돌파 | 점프킹, 할로우 나이트 |
-| 성장 구조 | 플레이 외 시간에도 누적되는 자동 성장 | 팰월드, OpenFront |
+| 구분        | 방향                                                             | 참고 작품             |
+| ----------- | ---------------------------------------------------------------- | --------------------- |
+| 핵심 조작   | 고정 길이 로프의 진자 운동과 접선 방향 충격                      | 아크샨, 산나비        |
+| 플레이 구조 | 반복 플레이, 랜덤 빌드, 수집                                     | 아이작                |
+| 공간 경험   | 하나의 붕괴 도시 안에서 48개 진행 영역을 아래에서 위로 연속 돌파 | 점프킹, 할로우 나이트 |
+| 성장 구조   | 플레이 외 시간에도 누적되는 자동 성장                            | 팰월드, OpenFront     |
 
-장르 중심은 **로프 액션 로그라이크**로 확정한다. 한 런은 하나의 붕괴 도시 월드 안에서 계속되며, 시나리오의 `맵`은 별도 월드가 아니라 명시적 입구·완료 조건·출구를 가진 진행 영역을 뜻한다. 실패해 체크포인트로 복귀하면 해당 도전을 다시 시도한다.
+장르 중심은 **로프 액션 로그라이크**로 확정한다. 한 런은 하나의 붕괴 도시 월드 안에서 계속되며, 시나리오의 `맵`은 별도 월드가 아니라 Sector 안의 landmark·objective·encounter를 뜻한다. 실패하면 현재 Sector entry에서 다시 합류하고 개인 사망은 공용 진행을 되돌리지 않는다.
 
 ## 3. 핵심 플레이 경험
 
@@ -36,21 +36,21 @@
 1. 붕괴 도시의 시작 영역에서 한 런을 시작한다.
 2. 로프로 이동하며 현재 영역이 요구하는 방해요소 처리 조건을 달성한다. 조건은 시나리오에 따라 처치·무력화·우회·상호작용·이동 달성 중 하나 이상이며, 적 처치로 일괄 고정하지 않는다.
 3. 완료 조건을 달성하면 명시적 출구를 열고, 플레이어가 출구를 통과해 다음 영역으로 진행한다.
-4. 영역을 넘어가도 월드·런·플레이어·Foundation·체크포인트 상태를 새로 만들지 않는다.
+4. landmark를 넘어가도 월드·런·플레이어·Foundation·Sector-entry 상태를 새로 만들지 않는다.
 5. 1-4 Maintenance Node에서 Foundation을 선택해 로프 조작·전투 방식을 강화한다.
 6. 더 높은 구역 또는 최종 목표를 향해 전진한다.
-7. 실패하면 최근 체크포인트로 복귀한다.
-8. 체크포인트는 시나리오 진행과 섹터 구조에 맞춰 배치하며, 한번 활성화한 진행 지점은 아래로 내려가도 후퇴하지 않는다.
+7. 개인 실패는 현재 Sector entry로 복귀하며 objective·열린 route·처치 적을 유지한다.
+8. 저장 지점은 Sector entry 하나다. 같은 tick의 전원 실패만 current Sector baseline을 초기화하고 이전 Sector 완료와 개인 Build는 유지한다.
 9. 첫 Foundation은 IMPULSE COIL·RELAY LINK·SHEAR CURRENT 3종 중 하나를 좌우 이동과 점프로 선택하며, 이후 Specialization이 이 방향을 심화한다.
 10. Foundation 선택은 공통 피드백으로 알리고, 데스크톱은 선택한 Foundation을 상시 HUD에 표시한다.
-11. 배포 전 `npm test`로 현재 저작 진행 영역의 연결·목표·Gate·content boundary와 싱글·멀티 공용 진행을 검증한다.
+11. 배포 전 `npm test`로 현재 저작 Sector의 landmark 연결·objective·route lock·content boundary와 싱글·멀티 공용 진행을 검증한다.
 12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Foundation 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
 13. 발견된 문제 영역은 현재 시나리오의 관련 회귀 테스트에 이유와 함께 추가해 같은 영역·진행 계약에서 우선 재현한다.
 14. 원격 플레이테스트는 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켜고 현재 런 지표를 확인한다.
-15. 현재 0.23.0 Runtime은 체력이 0이 되거나 낙사하면 동료 입력이나 팀 전멸을 기다리지 않고 해당 플레이어만 활성 체크포인트에서 최대 체력으로 즉시 부활시킨다. 높은 속도의 착지 피해로 체력이 0이 된 경우도 이 기존 개인 부활 경로를 사용한다.
-18. 네트워크 연결 전 불변 PlayerCommand 기록을 재생해 위치·전투·진행·지표 결정성을 비교한다.
-19. 다중 플레이어 명령은 프로토콜 버전과 틱을 가진 배치로 묶고 플레이어 ID 순으로 정규화한다.
-20. 모든 플레이어는 같은 PlayerRuntimeFactory에서 물리·로프·전투·생명 상태를 조립한다.
+15. 0.25.0 기본 Runtime은 체력이 0이 되거나 낙사하면 해당 플레이어만 현재 Sector entry에서 최대 체력으로 즉시 부활시키고 공용 objective·열린 route·처치 적을 유지한다. 같은 tick에 전원이 사망한 경우에만 current Sector baseline을 복구하고 전원을 Sector entry에 배치한다.
+16. 네트워크 연결 전 불변 PlayerCommand 기록을 재생해 위치·전투·진행·지표 결정성을 비교한다.
+17. 다중 플레이어 명령은 프로토콜 버전과 틱을 가진 배치로 묶고 플레이어 ID 순으로 정규화한다.
+18. 모든 플레이어는 같은 PlayerRuntimeFactory에서 물리·로프·전투·생명 상태를 조립한다.
 
 메트로배니아식 자유 역주행·능력 기반 진입 제한은 초기 범위에서 제외한다. 저자가 정한 영역 순서와 출구를 사용하는 것은 메트로배니아식 능력 잠금과 구분한다.
 
@@ -97,20 +97,23 @@
 
 ## 8. 역할 분담
 
-| 담당 | 역할 |
-| --- | --- |
-| 배용호 | 로프, 전투, 게임 시스템 개발 |
-| 이재진 | 모션, VFX |
-| 성현 | 기획, 자료 조사, GitHub 관리, 일정 관리 |
+| 담당   | 역할                                    |
+| ------ | --------------------------------------- |
+| 배용호 | 로프, 전투, 게임 시스템 개발            |
+| 이재진 | 모션, VFX                               |
+| 성현   | 기획, 자료 조사, GitHub 관리, 일정 관리 |
 
 메인 개발자는 그래픽·오디오·맵 제작 결과를 기다리지 않고 교체 가능한 mock으로 시스템과 전체 플레이 흐름을 먼저 완성한다. 각 전문 담당자는 이미 제공된 가이드·template·mock 배치를 기준으로 독립 제작을 병행하며, 작업물이 검증된 시점에 기존 runtime package나 definition을 교체한다.
 
 전문 작업물의 완료는 메인 개발, 플레이테스트, 최종 스퍼트와 예선 제출의 선행 조건이 아니다. 정해진 통합 마감까지 validator와 실제 화면·청취 검증을 통과한 결과만 제출 빌드에 반영하고, 준비되지 않았거나 통합 위험이 큰 영역은 검증된 mock을 유지한다. 다만 공개 manifest·loader·이벤트 binding처럼 전문 작업과 메인 개발이 함께 사용하는 계약 변경은 양쪽 작업 전에 먼저 합의한다.
 
-제출 전 시나리오는 총 6개 섹터이며 각 섹터는 8개 맵, 전체 48개 맵으로 구성한다. 여기서 맵은 별도로 로드하거나 다시 생성하는 월드가 아니라 하나의 연속 월드 안에 순서대로 배치한 **진행 영역**이다. 구현과 인계 일정은 `SECTOR 01 → 02 → 03 → 04 → 05 → 06`을 단위로 관리하고, 메인 개발자는 각 섹터 안에서 `n-1 → n-8` 순서로 진행한다. 각 맵을 시작할 때 해당 맵의 오브젝트·상태·완료 조건·명시적 출구·표현 cue를 먼저 정리하고, 실제 게임 규칙과 레벨 흐름을 mock 이미지·사운드로 구현한다. 그래픽·오디오 담당자는 앞 섹터부터 공개되는 이 목록과 mock 배치를 이어받아 정식 리소스를 병행 제작한다. 전문 담당자가 gameplay·collision·network 계약을 다시 정하거나 메인 개발자가 정식 리소스를 기다리는 흐름으로 만들지 않는다.
+제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 player-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관한 migration alias**다. 0.25.0 기본 Runtime에서 Sector 01~~03은 강제 Gate 포탈과 층별 전환 없이 가로 4,800px의 하나의 물리 공간이며, 기존 순서와 일부 분기·재합류를 landmark 진행으로 보존한다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. Sector 04~~06은 아직 migration input이며 Runtime 구현 완료가 아니다.
 
 ### 월드와 진행 영역 기준
 
+- #622의 Phase 1~2는 `SectorDefinition`, Sector validator와 build/startup-only legacy preview adapter를 canonical authoring 경계로 둔다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`이고 `legacyStageAlias`는 문서·migration metadata일 뿐이다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
+- #625는 Sector 01~~03 preview를 `seamless-sector-runtime-v1` 기본 Runtime으로 전환했다. Sector 04~~06은 alias input으로만 남고 legacy Area/Gate catalog는 이전 revision compatibility 검증에 사용한다.
+- 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.
 - 각 진행 영역은 입구, 이동 경로, 필수 완료 조건, 명시적 출구와 다음 영역 연결을 가진다.
 - 출구가 필요한 이유는 붕괴 도시 탈출의 압박 속에서 현재 영역의 문제를 해결하고 다음 영역으로 넘어갔음을 플레이어에게 명확히 알리기 위해서다.
@@ -122,23 +125,23 @@
 - `1-8 CONTAINMENT GATE`에는 보스를 넣지 않으며 기존 `Lower Grid Shutdown → Worker District Reveal → 일반 구간 종료 Checkpoint`를 유지한다. Sector 01 보스의 위치·전환 순서·시나리오는 기획자가 별도로 확정한다.
 - 시간·보충량·붕괴 속도는 메인 개발자가 mock 값으로 먼저 연결하고 팀과 기획자가 실제 플레이를 함께 확인해 최종 조정한다. 상세 계약은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
 - 현재 시드 기반 48단계 절차 생성 월드는 코어 조작을 검증한 프로토타입이다. 목표 시나리오 월드는 저자가 정한 48개 진행 영역을 기본으로 하며, 영역 내부의 시드 변형 허용 범위는 경로·완료 조건·출구를 훼손하지 않는 별도 기획으로 확정한다.
-- 섹터 1의 구조와 구현 흐름은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md)를 현재 기준으로 사용한다.
+- 섹터 1의 legacy 내부 콘텐츠와 완료 조건은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md)를 migration input으로 사용하고, topology·진행·부활은 0.25.0 seamless Sector 계약을 따른다.
 
 ## 9. 일정과 목표
 
 - 정기 회의: 매일 22:00~23:00, Discord
 - 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태이며 `SECTOR 01`의 `1-1`~`1-8` 시나리오가 모두 작성됐다. 전체 48개 중 나머지 40개 맵의 시나리오와 레벨 디자인은 아직 없으며 새로 만들어야 한다.
 - 나머지 40개 맵 시나리오와 레벨 디자인은 섹터 순서대로 작성해 8월 19일까지 확정한다. 메인 개발은 전체 완료를 기다리지 않고 `SECTOR 01`부터 mock으로 구현하며, 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름과 오브젝트 요구가 모두 필요하다.
-- 증강 내용과 Foundation·Specialization Module의 관계, 획득·선택 흐름과 관련 UI·게임 요소는 8월 14일까지 확정한다. 이 기획은 첫 Maintenance Node와 증강 시스템 구현의 선행 조건이다.
+- 증강 v1 기획과 topology-independent Runtime은 0.26.0에 완료됐다. Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer와 Player별 최대 6장을 사용한다. 후속 획득 Landmark 좌표, Quest·순수 이동 카드·Specialization은 별도 확장이다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
 - NPC 역할·배치·대사와 대화 진행 규칙, 관련 상호작용 UI·게임 요소는 8월 15일까지 확정한다. 이 기획은 NPC가 처음 등장하는 섹터와 공용 대화 시스템 구현의 선행 조건이다.
 - 엔딩 내용, 진입 조건, 최종 Encounter 이후 흐름과 관련 UI·게임 요소는 8월 19일까지 확정한다. 이 기획은 `SECTOR 06`과 최종 완료 상태 구현의 선행 조건이다.
 - 그래픽·오디오 담당자는 메인 개발자가 맵별로 정리한 오브젝트·cue 목록을 받아 8월 19일에 정식 리소스 1차 생산분을 인계한다. 1차 생산분은 전체 자산 완료가 아니라 앞서 정리된 우선 오브젝트의 교체 가능한 첫 묶음이다.
 - 메인 개발자는 8월 21일까지 6개 섹터의 48개 맵과 오브젝트 동작을 섹터 순서대로 mock으로 연결하고, 준비된 1차 정식 리소스만 검증해 선택 통합한다. 8월 22~23일은 전체 섹터 플레이 흐름의 마지막 스퍼트로 사용한다.
 - 8월 14~17일 가족여행 전까지 완료할 항목:
-  - 장르 중심 확정
-  - 코어 프로토타입 제작
-  - GitHub 프로젝트 구조 확정
-  - 아트 방향 확정
+    - 장르 중심 확정
+    - 코어 프로토타입 제작
+    - GitHub 프로젝트 구조 확정
+    - 아트 방향 확정
 
 ### Discord 회의 기록 방식
 
@@ -162,7 +165,7 @@
 4. 시드 기반 간단한 대형 맵으로 로프 코어를 검증하고, 이후 하나의 연속 월드 안에 저작된 진행 영역을 조립
 5. 단순한 적 1종
 6. Foundation Augment 3종
-7. 체크포인트 복귀와 빠른 재개
+7. Sector-entry 복귀와 빠른 재개
 
 ### 제외
 
@@ -214,7 +217,7 @@
 - [x] 그래픽 방향: 혼합 도트 `sprite` 기본, Canvas 플랫 도형 fallback
 - [x] 첫 프로토타입 포함·제외 범위
 - [x] 로프 물리의 초기 수치
-- [ ] 로프 물리 튜닝 결과와 조정 절차
+- [x] 로프 물리 조정 절차: 다음 싱글 Run에 적용하는 디버그 Rope tuning panel과 파생값 표시
 - [x] 목표 월드 구조: 하나의 연속 월드와 저작된 48개 진행 영역
 - [ ] 저작 영역 내부에서 허용할 절차 변형 범위
 - [x] 일반 타이머의 Gate 보충·0초 상승 붕괴·최소 관전·다음 Gate 재합류
@@ -222,8 +225,16 @@
 - [x] 섹터별 보스 1개
 - [ ] 두 타이머의 최종 수치·네트워크 권위·재접속·최종 UI/오디오 cue
 - [ ] 8개 진행 영역과 섹터 보스의 위치 관계
-- [x] Foundation Augment 3종의 효과 (1-4 Maintenance Node)
+- [x] 증강 v1 22장과 Player별 결정적 3장 offer·최대 6장 loadout
 - [x] 적 1종의 행동과 공격 방식: 플레이어를 향한 투사체, 로프 절단 우선 판정, 본체 피해·넉백
+- [x] 적 roster 기본형: 기존 `경계 포탑`·`순찰 드론`, 경계 포탑 확장형 `절단 포탑`, 신규 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`
+- [x] 적 분류·구현 순서: 행동 요소별 대표 기본형 하나를 먼저 단독 안정화하고 같은 계열 확장형과 복합 조합은 그 뒤에 추가
+- [x] encounter 선택: topology 독립 stable slot이 `고정 계열/type` 또는 `허용 pool`을 소유하며 pool은 slotId·run seed·world revision으로 결정 선택
+- [x] 향후 고정 저작: 맵 제작자가 slot 선택 선언 하나만 pool에서 고정 값으로 바꾸고 위치·activation·Stable ID·AI는 재사용
+- [x] 코드 구현: pure selector·다섯 enemy capability·서버 fixed step·snapshot 복원·중립 포격 투사체·방패 Rope 충돌 방어 완료
+- [x] #623 canonical `SectorDefinition`·encounter validator·build/startup-only preview adapter를 enemy selector에 연결하고 preview corpus 전체에서 areaId 없는 결정 선택 검증
+- [x] City Phase 3 wide Runtime에서 canonical encounter를 shipped world enemy spawn으로 사용하고 legacy Patrol route·Cutter rules를 새 schema에 보존
+- [x] 검증 정책: 안정적인 코드 계약만 자동화하고 roster 목록·가중치·수치·배치·색은 고정하지 않으며 브라우저 검증 제외
 - [x] Foundation 선택 중에도 월드 시간과 협동 위험은 계속 흐르고 선택 입력만 플레이어 조작과 분리
 
 ## 13. 아직 열려 있는 질문
