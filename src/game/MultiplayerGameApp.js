@@ -4,7 +4,7 @@ import { Vector2 } from "../game-kit/index.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../render/GameRendererFactory.js";
 import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
-import { CAMERA_CONFIG, ropeHookReach } from "./config.js";
+import { CAMERA_CONFIG, resolveMobileCameraZoom, ropeHookReach } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import {
@@ -76,7 +76,12 @@ export class MultiplayerGameApp {
         this.camera = {
             x: 0,
             y: 0,
-            zoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
+            zoom: this.mobileView
+                ? resolveMobileCameraZoom(undefined, {
+                      cssWidth: globalThis.innerWidth,
+                      cssHeight: globalThis.innerHeight
+                  })
+                : CAMERA_CONFIG.desktopZoom,
             initialized: false
         };
         this.latestInput = this.input.snapshot();
@@ -448,7 +453,9 @@ export class MultiplayerGameApp {
                 world,
                 player: { position: phase.deathPosition },
                 mobileView: this.mobileView,
-                defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom
+                defaultZoom: CAMERA_CONFIG.desktopZoom,
+                cssWidth: this.renderer.cssWidth,
+                cssHeight: this.renderer.cssHeight
             });
         }
         return advanceAuthoredCamera({
@@ -456,7 +463,7 @@ export class MultiplayerGameApp {
             world,
             player,
             mobileView: this.mobileView,
-            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
+            defaultZoom: CAMERA_CONFIG.desktopZoom,
             cssWidth: this.renderer.cssWidth,
             cssHeight: this.renderer.cssHeight,
             dt

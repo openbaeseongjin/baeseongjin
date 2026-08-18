@@ -7,12 +7,18 @@ import {
 import { assembleAuthoredWorld } from "../src/game/world/AuthoredWorldAssembler.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
+import { CAMERA_CONFIG, resolveMobileCameraZoom } from "../src/game/config.js";
 
 function playerAt(area, localY, x = 0) {
     return { position: { x, y: area.bounds.y + area.bounds.height + localY } };
 }
 
 export function run() {
+    const mobileViewport = Object.freeze({ cssWidth: 844, cssHeight: 390 });
+    const mobileViewportFit = Math.min(844 / 1920, 390 / 1080);
+    assert.equal(resolveMobileCameraZoom(0.72), 1, "the reference desktop viewport must remain the baseline");
+    assert.ok(Math.abs(resolveMobileCameraZoom(0.72, mobileViewport) - mobileViewportFit) < 1e-9);
+    assert.ok(Math.abs(resolveMobileCameraZoom(0.82, mobileViewport) - mobileViewportFit * (0.82 / 0.72)) < 1e-9);
     const world = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 42, floorY: 560 });
     const area = world.areas[0];
     const cases = [
@@ -38,8 +44,8 @@ export function run() {
             verticalPlayerRatio
         });
         assert.equal(
-            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 0.72 }).zoom,
-            mobileZoom
+            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 1, ...mobileViewport }).zoom,
+            resolveMobileCameraZoom(mobileZoom, mobileViewport)
         );
     }
 
@@ -59,6 +65,23 @@ export function run() {
     assert.ok(Math.abs(camera.x - (-320 - (1280 / 1.25) * 0.38)) < 1e-9);
     assert.ok(Math.abs(camera.y - (introPlayer.position.y - (720 / 1.25) * 0.46)) < 1e-9);
     assert.equal(camera.initialized, true);
+
+    const mobileCamera = { x: 0, y: 0, zoom: 1, initialized: false };
+    const mobileShot = advanceAuthoredCamera({
+        camera: mobileCamera,
+        world,
+        player: introPlayer,
+        mobileView: true,
+        cssWidth: mobileViewport.cssWidth,
+        cssHeight: mobileViewport.cssHeight,
+        dt: 1 / 120,
+        defaultZoom: 1
+    });
+    const expectedMobileZoom = resolveMobileCameraZoom(0.82, mobileViewport);
+    assert.equal(mobileShot.zoom, expectedMobileZoom);
+    assert.equal(mobileCamera.zoom, expectedMobileZoom);
+    assert.ok(Math.abs(mobileViewport.cssHeight / mobileCamera.zoom - 1080 * (0.72 / 0.82)) < 1e-9);
+    assert.ok(mobileViewport.cssWidth / mobileCamera.zoom >= 1920 * (0.72 / 0.82));
 
     const area02 = world.areas[1];
     const area02Cases = [
@@ -82,8 +105,8 @@ export function run() {
             verticalPlayerRatio: 0.58
         });
         assert.equal(
-            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 0.72 }).zoom,
-            mobileZoom
+            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 1, ...mobileViewport }).zoom,
+            resolveMobileCameraZoom(mobileZoom, mobileViewport)
         );
     }
 
@@ -110,8 +133,8 @@ export function run() {
             verticalPlayerRatio
         });
         assert.equal(
-            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 0.72 }).zoom,
-            mobileZoom
+            resolveAuthoredCameraShot({ world, player, mobileView: true, defaultZoom: 1, ...mobileViewport }).zoom,
+            resolveMobileCameraZoom(mobileZoom, mobileViewport)
         );
     }
 

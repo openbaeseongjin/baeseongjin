@@ -102,8 +102,27 @@ export const GRAPPLE_LINK_BUDGET = 600;
 
 export const CAMERA_CONFIG = Object.freeze({
     desktopZoom: 1,
-    mobileZoom: 0.72
+    authoredMobileBaselineZoom: 0.72,
+    referenceViewport: Object.freeze({ width: 1920, height: 1080 })
 });
+
+export function resolveMobileCameraZoom(
+    authoredMobileZoom = CAMERA_CONFIG.authoredMobileBaselineZoom,
+    { cssWidth = CAMERA_CONFIG.referenceViewport.width, cssHeight = CAMERA_CONFIG.referenceViewport.height } = {}
+) {
+    const authoredZoom =
+        Number.isFinite(authoredMobileZoom) && authoredMobileZoom > 0
+            ? authoredMobileZoom
+            : CAMERA_CONFIG.authoredMobileBaselineZoom;
+    const width = Number.isFinite(cssWidth) && cssWidth > 1 ? cssWidth : CAMERA_CONFIG.referenceViewport.width;
+    const height = Number.isFinite(cssHeight) && cssHeight > 1 ? cssHeight : CAMERA_CONFIG.referenceViewport.height;
+    const viewportFit = Math.min(
+        1,
+        width / CAMERA_CONFIG.referenceViewport.width,
+        height / CAMERA_CONFIG.referenceViewport.height
+    );
+    return viewportFit * (authoredZoom / CAMERA_CONFIG.authoredMobileBaselineZoom);
+}
 
 export const COMBAT_CONFIG = Object.freeze({
     automaticWeaponEnabled: false,
