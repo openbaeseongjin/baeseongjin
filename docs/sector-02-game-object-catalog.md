@@ -14,7 +14,7 @@ Sector 01과 Sector 02는 별도 게임 모드가 아니다. `CurrentAuthoredAre
 
 | 종류 | 상태·자료 | gameplay 책임 | 표현 인계 |
 | --- | --- | --- | --- |
-| `patrol-drone` | map route/corridor, activation band, `idle/patrol → acquire → fire → cooldown` | 기존 `EnemyObject` 공격 능력 재사용. band 밖 이동·획득 금지, 공격 cycle 동안 target 유지, 표준 탄은 Rope 절단 없음 | Patrol/telegraph/fire/cooldown 표현 |
+| `patrol-drone` | map route/corridor, activation band, `idle/patrol → acquire → fire → cooldown` | 기존 `EnemyObject` 공격 능력 재사용. band 밖 이동·획득 금지, 공격 cycle 동안 target 유지, 표준 탄은 Rope 절단 없음. authored Patrol 경로 보존을 위해 위치 넉백 없음 | Patrol/telegraph/fire/cooldown 표현 |
 | `story-display` | stable story/cue ID | 대사·서사 자료의 위치만 제공. 충돌·완료 조건 없음 | 표시 문구·환경 cue |
 | `maintenance-frame` | Gate ID 참조 | 실제 진행 출구. 2-5의 잠긴 Upper Transit Gate와 구분 | 우회 경로 가독성 |
 | `augment-node` | `interact-choice`, Foundation 필요 | 2-3 Specialization 선택 흐름만 정의. 실제 pool·효과는 기획 확정 전 차단 | 선택 UI와 node 상태 |

@@ -35,6 +35,15 @@ export function run() {
     assert.ok(simulation.world.enemySpawns.some(({ accessModuleId }) => accessModuleId));
     assert.equal(simulation.enemyStates().length, simulation.world.enemySpawns.length);
     assert.equal(simulation.snapshot().enemies.length, simulation.world.enemySpawns.length);
+    for (const enemy of simulation.enemies.filter(({ enemyType }) =>
+        ["sentry", "sentry-t1", "patrol-drone", "patrol-drone-t1"].includes(enemyType)
+    )) {
+        assert.equal(
+            enemy.impactDisplacementEnabled,
+            false,
+            `${enemy.enemyType} must preserve its authored position/path`
+        );
+    }
     for (const module of simulation.world.accessModules) {
         const landmark = simulation.world.landmarks.find(({ id }) => id === module.landmarkId);
         const spawn = simulation.world.enemySpawns.find(({ encounterId }) => encounterId === module.encounterId);

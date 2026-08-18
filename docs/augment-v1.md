@@ -59,7 +59,7 @@ Quest, 순수 기본 이동 modifier, rarity와 Specialization은 v1 범위가 �
 
 Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. 해제 추진은 정상 Rope 해제 계산 뒤 전체 속도 벡터를 한 번 `×1.25` 한다.
 
-기본 우클릭 펀치는 조준 반구 안의 가장 가까운 적 하나를 사거리 55px에서 공격한다. 피해는 Rope impact의 40%(현재 10), 넉백 50px, cooldown 0.50초이며 이동·무적·다중 타격은 없다.
+기본 우클릭 펀치는 조준 반구 안의 가장 가까운 적 하나를 사거리 55px에서 공격한다. 피해는 Rope impact의 40%(현재 10), 직접 플레이어를 추격하는 적에만 넉백 50px, cooldown 0.50초이며 이동·무적·다중 타격은 없다. 고정 Turret·고정 Patrol 경로·제자리 지원형은 피해만 받고 authored 위치를 유지한다.
 
 ## Rope 전투 카드
 
@@ -104,7 +104,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 - Player Rope·Action trigger는 공격 Player의 owner client가 먼저 시뮬레이션하고 즉시 feedback을 시작한다.
 - claim은 unique event ID, tick, source/target/effect, 공식 피해와 최소 접촉 자료를 보낸다. 넉백은 direction·distance·duration intent를 같은 사건에 넣는다.
 - 서버는 지연된 Player state로 충돌을 다시 만들지 않는다. 소유권, tick, finite payload, formula, card 보유, event 중복과 target 상태를 검증한다.
-- live target은 `EnemyObject.blocksImpactFrom(sourcePosition)` → damage → lethal이면 defeat 1회·own knockback 생략 → 생존자 public knockback 순서다.
+- live target은 `EnemyObject.blocksImpactFrom(sourcePosition)` → damage → lethal이면 defeat 1회·own knockback 생략 → 생존자 public knockback 순서다. 마지막 knockback은 `EnemyMobility`가 `direct-player-pursuit`로 분류한 Pursuit/Swarm에만 적용한다.
 - 알려진 tombstone target의 늦은 사건은 `target-already-dead` 성공 no-op이다. damage, movement, defeat, loot, metric, feedback, VFX와 부활을 만들지 않는다.
 - 한 번도 알려지지 않은 target ID는 `target-missing`으로 거부한다.
 - 중립 적 위치·행동은 서버가 소유한다. owner client의 즉시 예측은 receipt 뒤 되감지 않고 snapshot으로 수렴한다.

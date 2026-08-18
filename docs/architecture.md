@@ -260,7 +260,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `resolveEffectiveRopeConfig`는 DebugSettings의 부분 override를 유한 범위 안에서 완전한 immutable base config로 만든다. `GameSimulation`은 생성 시 이 base와 `ropeDisabledSeconds`를 주입받고 Player·launcher·rope·attachment candidate·render snapshot이 같은 참조를 소비한다. 싱글 적용은 기존 앱을 정지하고 새 `GameApp`·`GameSimulation`을 생성하는 restart 경계이며 살아 있는 Run hot swap과 멀티 session override는 지원하지 않는다.
 - owner client가 만든 모든 증강 적 피해는 `AugmentImpactClaim`으로 수렴한다. `PlayerEnemyImpactResolver`는 shield → damage → lethal/no-knockback → survivor knockback 순서만 소유하며 카드별 trigger를 알지 않는다.
 - 제거한 적은 `EnemyImpactTombstones`에 남겨 지연 claim을 arbitrary missing ID와 구분한다. tombstone no-op은 복제 사건이나 presentation을 만들지 않는다.
-- enemy knockback은 behavior 내부를 직접 수정하지 않는 public transient state다. `impactDisplacementEnabled = false`인 Boss형 대상은 damage만 받고 이동하지 않는다.
+- enemy knockback은 behavior 내부를 직접 수정하지 않는 public transient state다. `EnemyMobility`가 플레이어를 직접 추격·돌진하는 Pursuit/Swarm만 displacement 대상으로 분류한다. 고정 Sentry/Turret, authored Patrol 경로 적과 제자리 Shield/Artillery/Support는 damage·defeat·hit feedback을 유지하되 `impactDisplacementEnabled = false`로 위치 넉백과 wall-impact 파생을 만들지 않는다. 명시적 false는 Pursuit/Swarm도 추가로 고정할 수 있지만 고정 계열을 true로 opt-in할 수 없다.
 - chooser와 전투의 전체 수치·호환 계약은 [`augment-v1.md`](./augment-v1.md)를 따른다.
 
 ## 의존 방향

@@ -19,7 +19,7 @@
 | `gate-panel` | `blocked → ready → opened` | 영역별 선행 objective 뒤 활성화되고 공통 interaction으로 Gate 개방 | 문 옆 장착 패널, 잠금/준비/개방 상태색과 cue |
 | `augment-node` | `idle → selecting → selected` | Foundation Augment 선택과 `augment-selected` 완료 사건 | 선택 UI, node animation, 선택별 cue |
 | `gate` | `locked → unlocked → crossed` | 요구 objective 집계 뒤 해제, 플레이어가 직접 통과할 때 다음 영역 활성화 | 잠금/해제/통과 표현 |
-| `sentry` | `idle → acquire → track → lock → fire → cooldown` | 기존 Sentry FSM 재사용. 지정 activation 영역과 no-rope-cut/no-crossfire 규칙 적용 | telegraph, fire, cooldown cue |
+| `sentry` | `idle → acquire → track → lock → fire → cooldown` | 기존 Sentry FSM 재사용. 지정 activation 영역과 no-rope-cut/no-crossfire 규칙 적용. 피해는 받지만 위치 넉백은 받지 않음 | telegraph, fire, cooldown cue |
 | `wind-source` | `continuous` 또는 `lull → warning → active → decay` | player body에 deterministic force 적용. Anchor·Rope 고정점과 position을 직접 이동하지 않음 | Fan animation, particle direction, airflow loop |
 | `recovery` | `available` | 같은 Grapple 재시도용 catch surface. 전체 맵 reset 금지 | 안전 발판과 복귀 방향 표시 |
 | `checkpoint` | `inactive → active` | Sector 일반 구간 종료와 복구 지점. Gate·Augment 보상과 별도 | 활성화 연출과 checkpoint cue |

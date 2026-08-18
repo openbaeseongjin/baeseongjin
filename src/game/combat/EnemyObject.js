@@ -6,6 +6,7 @@ import { ENEMY_BEHAVIOR_CAPABILITY } from "./EnemyBehaviors.js";
 import { advanceEnemyPatrol, createEnemyPatrolState } from "./EnemyPatrol.js";
 import { BallisticProjectileObject } from "./ProjectileObject.js";
 import { Vector2 } from "../../game-kit/index.js";
+import { enemyImpactDisplacementEnabled } from "./EnemyMobility.js";
 
 const ATTACK_STATES = new Set(["idle", "acquire", "track", "lock", "fire", "cooldown"]);
 
@@ -216,7 +217,7 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         attackStateRemaining = 0,
         aimDirection = null,
         lockedTargetId = null,
-        impactDisplacementEnabled = true,
+        impactDisplacementEnabled = null,
         knockbackState = null
     }) {
         super({ id });
@@ -239,7 +240,8 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         this.aimDirection = aimDirection ? Object.freeze({ x: aimDirection.x, y: aimDirection.y }) : null;
         this.fireCooldown =
             this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, fireCooldown ?? 0) : 0;
-        this.impactDisplacementEnabled = impactDisplacementEnabled !== false;
+        this.impactDisplacementEnabled =
+            enemyImpactDisplacementEnabled(enemyType) && impactDisplacementEnabled !== false;
         this.knockbackState = knockbackState
             ? {
                   direction: normalizeImpactDirection(knockbackState.direction, "knockbackState.direction"),
