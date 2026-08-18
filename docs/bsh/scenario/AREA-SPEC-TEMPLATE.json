@@ -1,0 +1,121 @@
+{
+    "_comment": [
+        "TEMPLATE — not a real stage. Do not count this file as a Stage AREA-SPEC.",
+        "Copy this into docs/bsh/scenario/<sector>/<stage>/AREA-SPEC.json and fill in real,",
+        "reviewed values only. Every number/id below is a placeholder — do not treat it as",
+        "confirmed design data. See docs/bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md for the",
+        "full field-by-field contract, the known preset/system registry, and the reasons behind",
+        "each rule (local IDs, no world-global coordinates, no duplicated grapple data, etc.).",
+        "",
+        "npm run validate:area-specs will NOT flag this file as a stage error, because it does",
+        "not live at docs/bsh/scenario/<sector>/<stage>/AREA-SPEC.json — but it also will not be",
+        "schema-checked for that reason. Validate your copy after renaming/relocating it."
+    ],
+    "schemaVersion": "area-spec-v1",
+    "stage": {
+        "sector": 0,
+        "stage": 0,
+        "areaId": "sector-00-00",
+        "name": "PLACEHOLDER STAGE NAME",
+        "subtitle": "PLACEHOLDER SUBTITLE"
+    },
+    "bounds": { "width": 960, "height": 960 },
+    "entry": { "id": "entry", "x": 0, "y": -32 },
+    "surfaces": [
+        {
+            "_comment": "preset must be a KNOWN Runtime surface kind, or declared under runtimeDependencies.newSystems.",
+            "id": "p0",
+            "preset": "platform",
+            "x": 0,
+            "y": 0,
+            "width": 256,
+            "height": 32
+        }
+    ],
+    "grappleTargets": [
+        {
+            "_comment": "One entry covers both the grapple-target surface AND the grapple-landmark object — do not author them twice.",
+            "id": "anchor-a",
+            "label": "A",
+            "x": 0,
+            "y": -192
+        }
+    ],
+    "enemies": [
+        {
+            "_comment": "Remove this entry entirely if the stage has no enemies (most Rest / Reveal stages don't).",
+            "id": "drone-1",
+            "preset": "patrol-drone-t1",
+            "x": 0,
+            "y": -400,
+            "patrol": { "start": { "x": -64, "y": -400 }, "end": { "x": 64, "y": -400 } },
+            "activation": { "x": -160, "y": -480, "width": 320, "height": 160 }
+        }
+    ],
+    "scannerGroups": [
+        {
+            "_comment": "controlledTargets must reference grappleTargets ids declared above. A target may belong to only one group.",
+            "id": "scanner-a",
+            "profile": "sector03-default",
+            "controlledTargets": ["anchor-a"]
+        }
+    ],
+    "windZones": [],
+    "objectives": [
+        {
+            "id": "final-deck-reached",
+            "type": "reach",
+            "preset": "reach-deck"
+        },
+        {
+            "id": "exit-panel-engaged",
+            "type": "interact",
+            "preset": "exit-panel",
+            "requiredObjectiveIds": ["final-deck-reached"]
+        }
+    ],
+    "route": {
+        "_comment": "runtimeLandmarks = candidate authored routePoints. mandatory = must be clearable with swingImpulse=0. optional = flow/skill route. forbiddenBypasses = geometry that must NOT allow a progression skip.",
+        "runtimeLandmarks": ["entry", "anchor-a", "exit"],
+        "mandatory": ["entry", "anchor-a", "exit"],
+        "optional": [],
+        "forbiddenBypasses": []
+    },
+    "recovery": [
+        {
+            "id": "recover-a",
+            "failureZone": "p0",
+            "recoverTo": { "x": 0, "y": -48 },
+            "maxRetrySeconds": 5
+        }
+    ],
+    "exitBlock": {
+        "_comment": "Only the minimal inputs exitBlock() needs — do not author deck/exit/panel/gate objects separately.",
+        "deckX": 0,
+        "deckTopY": -800,
+        "deckWidth": 320,
+        "nextAreaId": "sector-00-01",
+        "panelObjectiveId": "exit-panel-engaged"
+    },
+    "camera": {
+        "zones": []
+    },
+    "story": {
+        "_comment": "planningTriggers = scenario-planning inventory only (mirrors defineArea().storyTriggers; the Assembler does not expose this as runtime state). runtimePresentations = story-display trigger-cue objects only; entry/objective/gate presentations are already implied by stage.areaId / objectives[].id / exitBlock.",
+        "planningTriggers": [],
+        "runtimePresentations": []
+    },
+    "runtimeDependencies": {
+        "_comment": "Anything referenced above (preset/profile) that is not in the validator's known-preset registry MUST be declared here with status NOT_IMPLEMENTED, or validation fails.",
+        "newSystems": []
+    },
+    "forbidden": [],
+    "acceptanceTests": [
+        {
+            "id": "mandatory-route-clear-zero-impulse",
+            "type": "geometry",
+            "requirement": "swingImpulse = 0으로도 route.mandatory 경로가 성립해야 한다.",
+            "automation": "MANUAL"
+        }
+    ]
+}

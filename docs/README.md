@@ -74,8 +74,11 @@
 | --- | --- |
 | [`bsh/scenario-skeleton-v0.1.html`](./bsh/scenario-skeleton-v0.1.html) | `bsh` 시나리오 발표 자료 |
 | [`bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`](./bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md) | 현재 Runtime을 확인한 뒤 일관된 Scenario Art Reference를 생성·검수하는 공통 규격 |
+| [`bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md`](./bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md) | Stage별 `AREA-SPEC.json`(구현 계약) 스키마·Local ID·preset·검증 규칙을 정의하는 공통 규격 |
+| [`bsh/scenario/AREA-SPEC-TEMPLATE.json`](./bsh/scenario/AREA-SPEC-TEMPLATE.json) | `AREA-SPEC.json` 작성용 template — 실제 Stage로 집계되지 않음 |
 | [`bsh/scenario/1/README.md`](./bsh/scenario/1/README.md) | `bsh` Sector 01 공용 배경 아트 레퍼런스와 Stage 인덱스 |
 | [`bsh/scenario/1/1-1/README.md`](./bsh/scenario/1/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격 |
+| [`bsh/scenario/1/1-1/AREA-SPEC.json`](./bsh/scenario/1/1-1/AREA-SPEC.json) | 1-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Acceptance Tests |
 | [`bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md) | 1-1 Runtime 좌표·Camera·Story·Asset 인계 계약 |
 | [`bsh/scenario/1/1-2/README.md`](./bsh/scenario/1/1-2/README.md) | `bsh` Airborne Re-Attach Benchmark Stage(1-2) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md) | 1-2 Runtime 좌표·Camera·Story·Asset 인계 계약 |

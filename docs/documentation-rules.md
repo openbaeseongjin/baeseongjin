@@ -28,6 +28,7 @@
 - 일반 문서는 Markdown(`.md`)으로 작성한다.
 - 발표를 목적으로 만든 자료는 예외적으로 HTML(`.html`), PowerPoint(`.ppt`, `.pptx`) 등 발표에 적합한 형식을 사용할 수 있다.
 - 발표 자료가 아닌 기획, 설계, 개발 규칙, 운영 절차와 기록은 Markdown 형식을 유지한다.
+- `docs/bsh/scenario/<sector>/<stage>/AREA-SPEC.json`은 기계 검증이 목적인 구현 계약 파일이라 위 발표 자료 예외와 무관하게 JSON을 유지한다. 스키마와 작성 규칙은 [`bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md`](./bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md)를 따른다.
 
 ## 5. 이미지 첨부
 

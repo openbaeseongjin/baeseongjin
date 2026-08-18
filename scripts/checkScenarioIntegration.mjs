@@ -103,7 +103,12 @@ function readExpectedCheckpoint() {
 }
 
 function collectActualCheckpoint() {
-    const scenarioFiles = collectFiles(scenarioRoot, new Set([".md"]));
+    // AREA-SPEC.json is the machine-readable implementation contract alongside each stage's
+    // README.md / PRODUCTION-ALIGNMENT.md — it must invalidate the stale-check like the .md files do.
+    // docs/bsh/scenario/AREA-SPEC-TEMPLATE.json is intentionally under this same root/extension set
+    // (a template edit should also invalidate the checkpoint), but it is excluded from stage-coverage
+    // below because it does not match the <sector>/<stage>/README.md stage pattern.
+    const scenarioFiles = collectFiles(scenarioRoot, new Set([".md", ".json"]));
     const authoredAreaFiles = collectFiles(authoredAreaRoot, new Set([".js"]));
     const stages = collectStageCoverage(scenarioFiles);
 

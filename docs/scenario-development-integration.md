@@ -3,7 +3,7 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: e50ce25201489af5116e8d2dae89e1f9acd746c4402a06070e69a411e8d2e5a5
+scenario-source-sha256: ac8fb92dc2781f5172dc4dbc38dcb6ffe9afdc7c9c114880b8e9698d0a003c0f
 authored-area-sha256: 8d5a94299075cd0492d294496328e6327c6f81824034b6ada016dc9f9d798dbe
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
@@ -97,6 +97,7 @@ reviewed-upstream: 23512a22e2cd5e746ef3788f9f500e6e5ebc843c
 46. 1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 바람이 나오지 않던 근본 원인을 수정했다. 트리거 스펙 이관 스크립트의 wind-source 정규식이 파일에서 첫 번째 wind-source(fan-a)부터 lazy 매칭해 모든 Zone에 fan-a 좌표로 offset을 계산해, 세 Zone의 파생 bounds가 플레이 영역 밖(-1184, -1824/-1696/-2032)에 찍혔다. 세 `zone` 스펙을 승인 좌표(fan-b (-352,-1280,704,384), 1-7 vent (-352,-1184,704,384), 1-8 vent (-384,-1504,768,448))에서 파생하도록 교정하고, 검증기가 wind-source 파생 Zone도 `resolveObjectTriggerBounds`로 bounds를 계산해 영역 안을 검사하게 강화해 같은 오염을 거부한다. 승인 bounds를 고정한 회귀 테스트도 추가했다.
 47. DeepSeek 구현 전수 검토 후 Camera/Story/Wind 상태 문서 drift와 Scanner 무피드백을 정렬했다. Sector 01 1-5~1-8과 Sector 02 2-1~2-8 Production Alignment에는 Current Runtime Override를 추가하고 과거 미구현 본문을 `AUTHORING SNAPSHOT`으로 표시했다. Sector 03 Master·Scenario Art 기준은 24개 Area 연결, 의도적 기본 Camera, Stable ID 현실로 갱신했다. Runtime은 Access Scan phase를 scene snapshot으로 노출하고 공용 overlay가 AVAILABLE/WARNING/LOCKED/RESET을 색+형태로 구분한다. Area `storyTriggers`는 시나리오 기획 인벤토리로만 유지하고 assembled world에서 제외했으며, exit panel의 미사용 cue 경로를 제거해 Story 문구는 entry·position·`story-display`·objective/gate binding만 소유한다. 2-8 Transfer Control은 A/B/C 결과 뒤 `PRIORITY ACCESS: ACTIVE`를 반드시 표시한다.
 48. PR #613은 Sector 03 Master를 REV 2.0 `CENTRAL EXCHANGE COMPLEX`로 재작성해 공간 정체·Stage 명칭·Scanner 세계관 의미와 Story Arc를 갱신했다. PR 범위와 현재 Runtime을 재대조한 결과 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 변경되지 않아 3-1~3-8의 `MOCK INTEGRATED` 판정은 유지한다. 새 Master 명칭과 구 `3-N` Stage 문서·Runtime `name/subtitle/cue` 사이의 불일치는 문서가 명시한 후속 마이그레이션 blocker로 남기며 구현 완료로 올리지 않는다.
+49. Scenario 작성 → 구현 해석 오차를 줄이기 위해 Stage별 `AREA-SPEC.json`(구현 계약) 인프라를 도입했다. `docs/bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md`가 `area-spec-v1` 스키마(Local ID, Area-local 좌표, preset/KNOWN·NOT_IMPLEMENTED·UNKNOWN 구분, Route mandatory/optional/forbiddenBypasses 분리, Recovery, exitBlock 최소 입력, Acceptance Tests)를 정의하고, `scripts/validateAreaSpecs.mjs`(`npm run validate:area-specs`, `npm run check`에 편입)가 스키마·Local ID 중복·bounds·참조 무결성·Scanner controlled-target 중복·preset/system KNOWN 여부를 검증한다. `checkScenarioIntegration.mjs`의 scenario fingerprint에 `.json`을 포함해 `AREA-SPEC.json`만 바뀌어도 stale-check가 반응하게 했다(그래서 이번 항목과 함께 checkpoint hash를 갱신했다). 대표 예시로 `1/1-1/AREA-SPEC.json` 1개만 추가했고 나머지 47개 Stage는 이번 범위에서 변환하지 않는다. `AreaDefinition.js` / `AuthoredWorldAssembler.js` / `AreaDefinitionValidator.js` / `SectorXXAreaCatalog.js` 구조와 Runtime 동작은 변경하지 않았고, AREA-SPEC → Runtime 자동 codegen이나 Runtime의 JSON 직접 로드는 이번 범위가 아니다. `AREA-SPEC.json`이 실제 Runtime과 일치하는지는 여전히 `PRODUCTION-ALIGNMENT.md`에서 사람이 판정한다.
 
 ## 열린 기획·구현 게이트
 
