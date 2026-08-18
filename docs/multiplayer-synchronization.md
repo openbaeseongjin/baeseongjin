@@ -30,6 +30,16 @@
 - 로컬 반응만 빠른 것으로 끝내지 않고 서버와 동료 복제본이 같은 결과로 수렴해야 한다.
 - 게임 규칙과 물리는 120Hz, 입력 제출은 60Hz, 공유 스냅샷은 20Hz를 사용한다.
 
+### 클라이언트 우선 수렴 우선순위
+
+1. **오차 무시:** 정상 연결 중 소유 플레이어의 서버 복제 위치·HP·로프 차이는 크기와 무관하게 화면 보정 입력으로 사용하지 않는다. 현재 서버는 소유자 물리를 독립 재실행하지 않아 별도의 권위 위치가 없으므로, 유한한 dead zone 대신 정상 snapshot 전체가 무보정 구간이다.
+2. **비대칭 표현 보정:** 정상 소유자 snapshot에는 보정을 적용하지 않는다. 이전 Area compatibility의 체크포인트 rollback처럼 명시적 전이가 있는 경우에만 예측 상태를 다시 만들고 표현 offset을 짧게 감쇠한다. 이 경로는 기본 Sector Runtime에서 호출하지 않는다.
+3. **소유권 분리:** 자기 이동·시야·로프·피격은 소유자 또는 피해자 클라이언트가 최종 원점이다. 서버는 동료 표시와 중립 월드·공용 진행을 배포하며 정상 snapshot으로 당사자 체감을 다시 쓰지 않는다.
+4. **원격 grace:** 동료와 적은 100ms 과거 표본을 보간하고 표본 공백에서만 최대 120ms 외삽한다. grace는 로컬 입력 결과를 지연시키는 용도가 아니라 다른 복제본의 지터를 숨기는 용도다.
+5. **공격자 관측 존중:** 로프·증강·명시적 자동 무기 적중은 공격 클라이언트가 본 표본의 사건을 사용한다. 서버 현재 위치·궤적·접촉 재구성 차이는 거부 조건이 아니며 소유권·승인된 prediction ID·tick·중복·공식 효과와 대상 생존/tombstone만 검증한다.
+
+발산 방지의 마지막 보루도 소유자를 지연된 서버 복제값으로 hard sync하지 않는다. WebSocket backlog, protocol/world revision 불일치 또는 역직렬화 실패처럼 수렴을 보장할 수 없으면 세션을 종료하고, 사용자가 재접속할 때 welcome snapshot으로 새 소유자 시뮬레이션을 초기화한다. 동료·적 복제본은 서버/소유자 표본을 계속 보간하며, 장시간 공백 뒤 새 표본이 오면 제한 외삽 상태에서 최신 표본으로 다시 수렴한다.
+
 ### 다른 게임 엔진 기준 충족 점검
 
 현재 구조는 2인 협동 브라우저 프로토타입에 필요한 멀티플레이 핵심 축을 충족한다. 아래 표는 기능을 더 만들기 위한 목록이 아니라, 다른 엔진의 공식 네트워크 모델과 비교해 현재 구조에 핵심 공백이 없는지 바로 판단하기 위한 기준이다.
@@ -50,7 +60,7 @@
 
 사용자 체감의 핵심은 **본체 피격·로프 절단·착지 피해의 최종 판정 주체가 피해 또는 소유 클라이언트**라는 점이다. 피해 클라이언트는 서버 응답 전에 HP·넉백·로프 절단·착지 피해·치명 시 부활을 적용한다. 정상 impact claim은 사건 자료와 적용 결과의 작은 상태 지문만 보내며 전체 소유자 상태를 반복 전송하지 않는다. 서버 receipt나 이후 snapshot은 이 결과를 복구하거나 소비한 탄환을 되살리지 않는다.
 
-서버의 impact 검증은 피해 결과를 다시 판정하기 위한 권위 판정이 아니다. 인증된 연결, 메시지 형식과 impact ID 중복 여부를 확인한 뒤 공용 `GameSimulation`으로 같은 피해 전이를 적용하고 상태 지문을 비교한다. 적 탄환 impact는 서버 projectile, 착지 impact는 보고된 충돌 전 하강 속도와 공용 `FallDamage` 규칙을 사용한다. 지문이 같으면 전체 상태 없이 사건을 확정한다. 지문이 다르면 서버의 임시 전이를 되돌리고 `state-diverged`와 해당 impact·피해자 연결에 묶인 일회용 `recoveryId`를 보낸다. 피해 클라이언트는 응답 시점의 최신 소유자 상태, 그 상태를 만든 `stateTick`, 새 지문과 `recoveryId`를 한 번 전송한다. 서버는 실제로 발급해 보관 중인 challenge와 일치할 때만 전체 상태를 흡수하고, 상태와 플레이어별 `ownerMotionTick`·로프 tick을 같은 처리에서 갱신한다. challenge 없는 첫 claim이나 다른 impact ID로 전체 상태를 보내면 `recovery-not-requested`로 거부한다. 이 응답은 gameplay 거부가 아니라 피해자 기준 복구 자료 요청이며 피해 클라이언트를 서버 상태로 되감지 않는다.
+서버의 impact 검증은 피해 결과를 다시 판정하기 위한 권위 판정이 아니다. 인증된 연결, 메시지 형식과 impact ID 중복 여부를 확인한 뒤 공용 `GameSimulation`으로 같은 피해 전이를 적용하고 상태 지문을 비교한다. 적 탄환 impact는 서버 projectile, 착지 impact는 보고된 충돌 전 하강 속도와 공용 `FallDamage` 규칙을 사용한다. 지문이 같으면 전체 상태 없이 사건을 확정한다. 지문이 다르면 서버의 임시 전이를 되돌리고 gameplay 거부 receipt와 분리된 `impact-recovery-request`에 해당 impact·피해자 연결에 묶인 일회용 `recoveryId`를 보낸다. 피해 클라이언트는 응답 시점의 최신 소유자 상태, 그 상태를 만든 `stateTick`, 새 지문과 `recoveryId`를 한 번 전송한다. 서버는 실제로 발급해 보관 중인 challenge와 일치할 때만 전체 상태를 흡수하고, 상태와 플레이어별 `ownerMotionTick`·로프 tick을 같은 처리에서 갱신한다. challenge 없는 첫 claim이나 다른 impact ID로 전체 상태를 보내면 `recovery-not-requested`로 거부한다. 복구 요청은 피해 클라이언트를 서버 상태로 되감지 않는다.
 
 상태가 크게 벌어졌을 때 수렴 기준은 상태 소유권에 따라 다르다.
 
@@ -173,7 +183,7 @@
 
 Foundation은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 `foundation-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 현재 `worldProgress.respawnAnchorId`가 가리키는 최근 도달 Stage checkpoint로 되돌리며 Foundation 선택과 보유 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-0.34.0 기본 Sector Runtime은 별도 checkpoint claim 없이 공용 landmark 진입으로 active checkpoint를 갱신한다. 피해·낙사 소유 클라이언트가 치명 결과를 적용하는 같은 전이에서 `respawnAnchorId`의 최근 도달 Stage entry로 즉시 부활하고 서버·동료가 player-impact v8 결과를 따른다. `WorldSnapshot` protocol v8은 active Stage anchor와 별도의 Sector-entry party-wipe baseline, Player별 증강·Action state를 공유한다. 같은 tick 전원 부활에서만 서버가 current Sector baseline을 초기화하며 prior Sector 완료와 Player별 Build·pending offer는 보존한다.
+0.36.0 기본 Sector Runtime은 별도 checkpoint claim 없이 공용 landmark 진입으로 active checkpoint를 갱신한다. 피해·낙사 소유 클라이언트가 치명 결과를 적용하는 같은 전이에서 `respawnAnchorId`의 최근 도달 Stage entry로 즉시 부활하고 서버·동료가 player-impact v8 결과를 따른다. `WorldSnapshot` protocol v9는 active Stage anchor와 별도의 Sector-entry party-wipe baseline, Player별 증강·Action state와 authored enemy의 동적 상태를 공유한다. enemy 정적 정의는 같은 `worldRevision + objectId`로 복원한다. 같은 tick 전원 부활에서만 서버가 current Sector baseline을 초기화하며 prior Sector 완료와 Player별 Build·pending offer는 보존한다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
@@ -181,7 +191,7 @@ Foundation은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두�
 
 1-4·2-3·3-5 explicit Augment Node 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. owner client는 Node 근처에서 공식 `runSeed + stablePlayerId + selectionIndex` offer를 즉시 열고 `augment-offer` claim으로 pending entitlement를 서버에 보존한다. 확정은 호환 `foundation-selection` claim을 사용하지만 의미는 generic Augment다. 서버는 연결 소유권·tick·stable source ID·반경·공식 offer membership·Player별 source 소비를 검증하고 멱등 확정한다. 현재 채널 Player 전원이 source를 소비한 뒤 공유 objective를 한 번 완료하며, 완료 전 퇴장한 Player는 요구 집합에서 제거해 route 교착을 막는다. 완료 뒤 합류한 Player도 Node에서 자기 offer를 독립 확정할 수 있지만 열린 route를 다시 잠그지 않는다. 사망·Sector-entry 부활·landmark 이동·party wipe는 선택과 consumed source를 보존하고 순간 Action/Rope window만 초기화하며, party wipe 뒤 소비 Node 재방문은 chooser를 다시 열지 않고 shared objective만 복구한다.
 
-Impulse·Relay는 소유 클라이언트가 Rope Release/Attach에 즉시 적용한 상태를 `owner-motion`과 snapshot으로 공유한다. Shear는 Release 순간 Anchor–Player segment 교차를 공격 클라이언트가 먼저 판정하고 `foundation-shear` claim으로 보낸다. 서버는 소유 Foundation·tick·위치·segment 범위·대상 교차를 검증해 적 피해 또는 Calibration Dummy 접촉 사건을 한 번 확정하며, 같은 prediction ID 재전송은 중복 피해·Spark를 만들지 않는다.
+Impulse·Relay는 소유 클라이언트가 Rope Release/Attach에 즉시 적용한 상태를 `owner-motion`과 snapshot으로 공유한다. 폐기된 Foundation Shear 전용 claim은 전송하지 않는다. Shear 계열 표현이나 피해가 다시 필요하면 generic `augment-impact`의 소유권·ID·공식 효과 계약으로만 확장한다.
 
 멀티 서버 fixed tick은 원시 게임 명령에 선택 입력이 포함돼도 보상 선택을 처리하지 않는다. Foundation 선택의 유일한 서버 전이는 `foundation-selection` claim이며, 체력 0을 스캔해 사망·부활을 보조 발생시키지도 않는다. 피해와 사망·부활은 피해 클라이언트의 `player-impact` claim 안에서 함께 확정한다. 싱글은 네트워크 claim 왕복이 없으므로 같은 `GameSimulation` 옵션의 기본값으로 로컬 보상 입력과 체력 복구를 직접 수행한다.
 
@@ -238,13 +248,13 @@ events[]
 
 플레이어 자동 무기 시스템은 현재 기본 비활성이고 명시적으로 켠 후속 기능·회귀에서만 아래 계약을 사용한다. 활성 상태의 발사는 소유 클라이언트가 같은 `GameSimulation`에서 먼저 생성하고 즉시 표시한다. 발사 위치는 몸 중심이 아니라 조합된 collider가 대상 방향으로 계산한 형상 바깥 점이며, 발사체 반경과 설정된 여유까지 더해 첫 프레임부터 소유자 몸체와 겹치지 않는다. 클라이언트는 소유자와 clientTick으로 만든 `predictionId`, 대상 ID와 이 발사 위치만 `projectile-spawn-claim`으로 보내되, 같은 소켓의 최신 `owner-motion`을 먼저 보낸다. 서버는 비활성 플레이어 claim을 `weapon-disabled`로 거부한다. 활성 플레이어는 연결 소유권, `predictionId` 형식, tick 범위를 검증하고 발사 간격은 소유자의 clientTick 간격(설정 발사 주기 - 2틱 유예)으로 확인한다. 서버 시계의 무기 쿨다운, 서버 상태에서 다시 고른 최근접 대상, 재계산한 발사 위치 오차는 거부 조건이 아니다. 발사 결정은 소유 클라이언트의 예측 시뮬레이션이 만들고 서버는 claim의 사건 자료를 그대로 탄환과 고유 `spawn` 사건의 초기 상태로 적용한다. 같은 claim은 같은 projectile ID가 든 receipt를 반환하고 다시 생성하지 않는다. 클라이언트는 prediction ID에 발사 직전·직후 무기 쿨다운과 tick을 보존한다. 여러 발사가 pending이면 앞 거절은 후속 발사의 현재 쿨다운을 지우지 않고 후속 rollback 기준만 갱신하며, 마지막 거절은 경과 tick을 뺀 최초 준비 상태로 복구한다. 승인 receipt와 정상 스냅샷은 소유자의 로컬 쿨다운을 다시 쓰지 않는다. 멀티 서버 fixed tick은 플레이어 발사를 독립적으로 시작하지 않는다.
 
-자기 탄환 충돌은 공격 클라이언트가 먼저 예측해 타격 VFX를 재생한다. 클라이언트는 `predictionId`, 대상 ID, clientTick과 적중 위치만 hit claim으로 보내며 서버 소유 적 HP나 대미지를 결정하지 않는다. 멀티 서버 fixed tick은 플레이어 투사체의 검증용 궤적·대상 소실·8초 수명만 진행하고 적 충돌이나 HP 감소를 자동 시작하지 않는다. 공격 클라이언트에서는 `EnemyHitPrediction` capability가 첫 충돌에서 탄환을 소비하고 화면과 추가 충돌에서 제거한다. hit claim이 거부돼도 같은 탄환을 겹친 위치에 복구하지 않으며 서버의 대상 소실·수명 종료 resolve가 오면 남은 식별자 대응만 정리한다. 승인 뒤에는 서버 적 HP 스냅샷과 resolve 사건으로 수렴한다.
+자기 탄환 충돌은 공격 클라이언트가 먼저 예측해 타격 VFX를 재생한다. 클라이언트는 `predictionId`, 대상 ID, clientTick과 적중 위치만 hit claim으로 보내며 서버 소유 적 HP나 대미지를 결정하지 않는다. 멀티 서버 fixed tick은 플레이어 투사체의 복제 궤적·대상 소실·8초 수명만 진행하고 적 충돌이나 HP 감소를 자동 시작하지 않는다. 공격 클라이언트에서는 `EnemyHitPrediction` capability가 첫 충돌에서 탄환을 소비하고 화면과 추가 충돌에서 제거한다. 서버는 같은 세션에서 승인한 spawn prediction ID·소유권·대상·tick·중복을 확인하되 서버 복제 탄환이 먼저 만료됐거나 현재 궤적·대상 위치가 다르다는 이유로 적중을 거부하지 않는다. hit claim이 거부돼도 같은 탄환을 겹친 위치에 복구하지 않으며 서버의 대상 소실·수명 종료 resolve가 오면 남은 식별자 대응만 정리한다. 승인 뒤에는 서버 적 HP 스냅샷과 resolve 사건으로 수렴한다.
 
-기본 로프 몸체 공격은 소유 클라이언트가 로프 부착, `620px/s` 이상 속도와 적 겹침의 새 진입을 같은 120Hz 스텝에서 감지해 즉시 `predicted-resolve` 피드백을 만든다. 정상 `rope-impact` claim은 `predictionId`, target ID, client tick, 충돌 위치와 플레이어 속도만 보낸다. 서버는 최신 `owner-motion` 뒤 연결 소유권·tick·로프 부착·최소 속도·서버 적 위치·중복을 검증하고 서버 소유 적 HP에 `25` 피해와 resolve 사건을 한 번 확정한다. 같은 겹침은 로컬 접촉 집합에서 재무장되지 않으며, 같은 prediction ID 재전송도 서버에서 같은 receipt를 반환한다.
+기본 로프 몸체 공격은 소유 클라이언트가 로프 부착, `620px/s` 이상 속도와 적 겹침의 새 진입을 같은 120Hz 스텝에서 감지해 즉시 `predicted-resolve` 피드백을 만든다. 정상 `rope-impact` claim은 `predictionId`, target ID, client tick, 충돌 위치와 플레이어 속도만 보낸다. 서버는 연결 소유권·tick·prediction ID 중복·공식 피해와 대상 생존/tombstone을 검증하고 서버 소유 적 HP에 `25` 피해와 resolve 사건을 한 번 확정한다. 로프 부착·속도·적 위치·접촉 집합은 지연된 서버 복제본으로 재판정하지 않는다. 같은 겹침은 소유 클라이언트 접촉 집합에서 재무장되지 않으며, 같은 prediction ID 재전송도 서버에서 같은 receipt를 반환한다.
 
 자신과 교차한 적 탄환은 피해 클라이언트가 `PlayerImpactPrediction` capability로 로컬 몸체·로프에 먼저 충돌시켜 즉시 피드백과 이동 반응을 적용한다. 본체 피격은 복제 탄환 대미지로 로컬 HP와 치명 시 Sector-entry 부활까지 공용 `GameSimulation`에서 실행하고, 멀티 HUD는 이 소유 클라이언트 상태를 표시한다. 정상 impact claim은 `projectileId`, clientTick, `player-hit` 또는 `rope-cut`, 충돌 위치·속도, 관측 대미지, 부활 여부와 결과 상태 지문만 보낸다. 피격 직전 `owner-motion`을 캡처하고 로컬 반응을 적용한 뒤 전송선에서는 캡처한 motion 다음 impact claim 순서를 지킨다.
 
-서버는 인증된 연결과 결정적 projectile ID 중복을 검사하고 같은 `GameSimulation` impact 전이를 임시 적용한다. 결과 지문이 같으면 resolve 사건을 한 번 확정하고 동료에게 공유한다. 다르면 임시 전이를 되돌린 뒤 일회용 `recoveryId`가 든 `state-diverged`를 보내며, 클라이언트는 그 응답을 받은 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보낸다. 서버는 발급 대기 중인 challenge, 피해자 ID, 단조 tick과 전체 복구 스키마가 모두 맞을 때만 이 상태를 흡수하고 challenge를 소비한 뒤 사건을 확정한다. 복구 대기는 유실된 응답이 세션 메모리에 무한히 남지 않도록 10초 뒤 정리한다. 탄환이 아직 서버에 있으면 서버 탄환 대미지를 사건 기록에 사용하고 제거하며, 이미 만료됐으면 claim의 관측 대미지를 사용한다. 서버 위치·피격 무적·server tick·기존 target ID 차이는 피해자 결과를 취소하는 gameplay 거부 조건이 아니다. 소비한 적 탄환을 다시 표시하거나 같은 충돌을 반복하지 않는다. 중간 입장과 재연결 welcome에는 아직 살아 있는 예측 객체의 원래 생성 이벤트를 같은 이벤트 ID로 다시 제공해 생성 tick부터 복원한다.
+서버는 인증된 연결과 결정적 projectile ID 중복을 검사하고 같은 `GameSimulation` impact 전이를 임시 적용한다. 결과 지문이 같으면 resolve 사건을 한 번 확정하고 동료에게 공유한다. 다르면 임시 전이를 되돌린 뒤 `accepted: true`, `resolution: recovery-required`와 일회용 `recoveryId`를 보내며, 클라이언트는 그 응답을 받은 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보낸다. 서버는 발급 대기 중인 challenge, 피해자 ID, 단조 tick과 전체 복구 스키마가 모두 맞을 때만 이 상태를 흡수하고 challenge를 소비한 뒤 사건을 확정한다. 복구 대기는 유실된 응답이 세션 메모리에 무한히 남지 않도록 10초 뒤 정리한다. 탄환이 아직 서버에 있으면 서버 탄환 대미지를 사건 기록에 사용하고 제거하며, 이미 만료됐으면 claim의 관측 대미지를 사용한다. 서버 위치·피격 무적·server tick·기존 target ID 차이는 피해자 결과를 취소하는 gameplay 거부 조건이 아니다. 소비한 적 탄환을 다시 표시하거나 같은 충돌을 반복하지 않는다. 중간 입장과 재연결 welcome에는 아직 살아 있는 예측 객체의 원래 생성 이벤트를 같은 이벤트 ID로 다시 제공해 생성 tick부터 복원한다.
 
 착지 피해는 소유 클라이언트의 `PlayerPhysics`가 공중→접지 전이에서 충돌 보정 전 하강 속도를 보존하고 같은 스텝의 `GameSimulation`이 HP·치명 부활·피드백을 먼저 적용한다. 최신 착지 후 `owner-motion` 다음 `fall-damage` impact claim은 impact ID, client tick, 착지 위치·충돌 전 속도, 계산 피해, 부활 여부와 결과 지문만 보낸다. 서버는 같은 `FallDamage` 규칙으로 피해를 다시 계산하고 다른 피해량을 거부하며, 정상 지문이 다를 때만 기존 impact recovery challenge를 사용한다. 승인 receipt와 snapshot은 소유자의 착지 HP나 부활을 되감지 않는다.
 
@@ -263,7 +273,7 @@ events[]
 | 상태군                              | 지속 상태 수렴 원점                                 | 소유 클라이언트                                                          | 다른 클라이언트 표시                                                  | 복구 정책                                                              |
 | ----------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | 위치·속도·접지·로프                 | 인증·형식 검사를 통과한 최신 `owner-motion`         | 즉시 예측하며 snapshot·receipt로 되감지 않음                             | 위치는 보간·제한 외삽, 로프는 최신값                                  | 운동 상태 복원 없음; 중복·역순 tick은 성공한 no-op                     |
-| HP·생명·부활·로프 절단              | 피해 클라이언트의 impact 결과                       | 피해 HP·치명 부활·절단을 즉시 적용하고 snapshot·receipt로 다시 쓰지 않음 | 정상은 사건을 적용하고, 지문 불일치 때만 받은 피해자 상태를 즉시 적용 | `state-diverged` 뒤 피해자의 최신 상태를 서버가 흡수                   |
+| HP·생명·부활·로프 절단              | 피해 클라이언트의 impact 결과                       | 피해 HP·치명 부활·절단을 즉시 적용하고 snapshot·receipt로 다시 쓰지 않음 | 정상은 사건을 적용하고, 지문 불일치 때만 받은 피해자 상태를 즉시 적용 | `recovery-required` 뒤 피해자의 최신 상태를 서버가 흡수               |
 | 무기 파라미터·Foundation 선택       | 검증된 협동 공유 진행                               | 선택 UI는 즉시 반영하고 pending 동안 이전 진행으로 덮지 않음             | 최신 검증 공유값 즉시 적용                                            | 거부 claim의 로컬 전이만 복구                                          |
 | 로프 발사 shot/cooldown             | 행동 클라이언트의 로컬 결과와 owner-motion          | 발사·비행·부착을 즉시 진행하고 정상 snapshot으로 되감지 않음             | 검증된 최신 공유값 즉시 적용                                          | 포탈·사망·절단 리셋은 shot을 결정적으로 clear                          |
 | 자동 무기 쿨다운                    | 소유 클라이언트의 발사 시뮬레이션                   | 발사와 동시에 진행하고 정상 snapshot으로 쿨다운을 다시 쓰지 않음         | 검증된 발사 사건을 각 클라이언트에서 재생                             | 후속 pending 쿨다운 유지·baseline 교정, 마지막 거절은 최초 준비값 복구 |
@@ -272,14 +282,14 @@ events[]
 
 - 플레이어·로프 같은 `InputDrivenObject`는 소유 클라이언트의 즉시 시뮬레이션이 원점이다. 클라이언트가 `owner-motion`으로 현재 tick·위치·속도·각도·접지·로프 상태를 보내면 서버는 인증·프로토콜 형식·유한값과 세션 tick 범위를 통과한 최신 상태를 공용 `GameSimulation` 명령에 적용하고 receipt를 돌려준다. 속도·각속도·이동 거리·로프 offset의 크기나 authored alias는 네트워크 거부 조건이 아니다. 양쪽이 같은 공용 규칙으로 수행하는 각도 정규화·각속도 clamp 같은 도메인 물리 처리는 유지한다. 중복·역순·세션 범위 밖 tick과 완료된 런의 후속 상태는 성공한 no-op이며 `ownerMotionTick`이나 새 위치 표본을 만들지 않는다. 서버와 다른 클라이언트는 이 최신 소유자 상태를 따라간다.
 - 정상 승인 중인 소유 클라이언트는 20Hz 서버 지연 위치뿐 아니라 HP·피격 무적·생명 상태·로프 절단·무기 쿨다운·시간 제한 강화도 서버 스냅샷 값으로 다시 쓰지 않는다. Foundation처럼 협동 전체가 알아야 하는 공유 진행 결과만 흡수하며, 소유자의 직접 체감 상태는 로컬 `GameSimulation`이 계속 작성한다.
-- `owner-motion` receipt는 소유자의 물리·로프·제어 상태를 복원하거나 미확정 입력 재실행을 시작하지 않는다. 최신 상태는 서버 복제본과 동료가 흡수하고, 중복·역순 또는 런 완료 뒤 상태는 성공한 no-op으로 끝낸다. 최초 입장·재접속과 검증된 impact recovery 외에는 서버 상태로 소유자를 통째로 복원하지 않는다. legacy checkpoint rollback과 Gate 포탈은 explicit Area revision compatibility에만 남는다. impact `state-diverged`는 반대 방향 복구로, 피해 클라이언트가 자기 최신 상태를 서버에 보내며 로컬 예측은 복원·재실행하지 않는다.
+- `owner-motion` receipt는 소유자의 물리·로프·제어 상태를 복원하거나 미확정 입력 재실행을 시작하지 않는다. 최신 상태는 서버 복제본과 동료가 흡수하고, 중복·역순 또는 런 완료 뒤 상태는 성공한 no-op으로 끝낸다. 최초 입장·재접속과 검증된 impact recovery 외에는 서버 상태로 소유자를 통째로 복원하지 않는다. legacy checkpoint rollback과 Gate 포탈은 explicit Area revision compatibility에만 남고 기본 Sector 앱은 이 claim을 호출하지 않는다. impact `recovery-required`는 반대 방향 복구로, 피해 클라이언트가 자기 최신 상태를 서버에 보내며 로컬 예측은 복원·재실행하지 않는다.
 - 적과 공용 월드 같은 `SimulationDrivenObject`는 서버 스냅샷이 원점이다. 동료와 적은 두 표본 사이를 보간하고 표본 공백만 최대 120ms 외삽한 뒤 다음 스냅샷에서 서버 궤도로 돌아온다.
 
 `OwnerPredictionRuntime`은 별도 간이 물리를 만들지 않는다. 최초 입장 때 최신 공유 스냅샷을 로컬 예측용 `GameSimulation`의 공개 소유자 복원 명령에 전달하고 남은 입력을 고정 1/120초로 재실행한다. 이후 정상 스냅샷과 `owner-motion` receipt는 서버 상태를 소유자 복구 명령으로 사용하지 않고, 검증된 무기 파라미터 같은 공유 진행 정보만 `applySharedOwnerProgress()`로 흡수한다. 기본 Sector Runtime의 landmark 이동은 순간이동 사건 없이 같은 연속 좌표계에서 진행한다. legacy Gate 포탈 적용은 explicit Area revision에만 남는다. 런타임은 `GameSimulation`의 플레이어 객체·배열·tick을 직접 수정하지 않는다. 60Hz 명령 사이의 빈 120Hz 틱은 서버와 예측이 같은 `InputStateSimulator`로 마지막 입력을 최대 30틱(250ms) 유지한다. 새 중립 입력이 오면 즉시 교체하고 제한 시간이 끝나면 이동축을 중립화한다. 월드 seed 또는 generation revision이 다르면 예측을 시작하지 않는다.
 
 멀티 조작감은 **로컬 입력 시뮬레이션 + 원격 데드 레코닝**을 사용한다. 입력 시뮬레이션은 자기 캐릭터가 네트워크 프레임 사이에서 멈추지 않게 하며, 데드 레코닝은 동료 캐릭터를 최신 위치·속도로 짧게 외삽한 뒤 새 검증 공유 상태와 오차를 보정한다. 두 기능 모두 별도 간이 게임 규칙을 만들지 않고 공용 `GameSimulation`과 스냅샷 물리 상태를 사용한다.
 
-HP 감소, 로프 절단, 사망·Sector-entry 부활, Sector reset, Foundation 선택과 런 완료는 시각적 보간 대상이 아니다. 당사자 클라이언트는 로컬 결과를 즉시 확정해 계속 사용하고, 서버는 claim을 검증·중복 제거해 다른 클라이언트에 공유한다. impact의 `state-diverged`는 전체 상태를 항상 보내라는 신호가 아니라 해당 사건의 서버 복제 결과가 어긋난 경우에만 최신 피해자 상태를 요청하는 진단 receipt다. 승인 receipt와 resolve 사건은 소유자의 로컬 결과를 서버 값으로 교체하는 신호가 아니라 복제본이 같은 사건을 받아들였다는 확인이다.
+HP 감소, 로프 절단, 사망·Sector-entry 부활, Sector reset, Foundation 선택과 런 완료는 시각적 보간 대상이 아니다. 당사자 클라이언트는 로컬 결과를 즉시 확정해 계속 사용하고, 서버는 claim을 검증·중복 제거해 다른 클라이언트에 공유한다. impact의 `recovery-required`는 전체 상태를 항상 보내라는 신호가 아니라 해당 사건의 서버 복제 결과가 어긋난 경우에만 최신 피해자 상태를 요청하는 성공 receipt다. 승인 receipt와 resolve 사건은 소유자의 로컬 결과를 서버 값으로 교체하는 신호가 아니라 복제본이 같은 사건을 받아들였다는 확인이다.
 
 ## 연결과 복구
 

@@ -363,18 +363,19 @@ export function createPlayerImpactReceipt({
     impactId ??= projectileId;
     assertId(impactId, "impactId");
     if (typeof accepted !== "boolean") throw new Error("accepted must be boolean");
+    if (accepted && resolution === "recovery-required") {
+        if (reason !== null) throw new Error("recovery requests must not include a rejection reason");
+        return Object.freeze({
+            impactId,
+            projectileId: impactId,
+            accepted,
+            resolution,
+            recoveryId: assertId(recoveryId, "recoveryId")
+        });
+    }
     if (!accepted) {
         if (typeof reason !== "string" || reason.length === 0) throw new Error("rejected receipt reason is required");
-        if (reason === "state-diverged") {
-            return Object.freeze({
-                impactId,
-                projectileId: impactId,
-                accepted,
-                reason,
-                recoveryId: assertId(recoveryId, "recoveryId")
-            });
-        }
-        if (recoveryId !== null) throw new Error("only state-diverged receipts may include recoveryId");
+        if (recoveryId !== null) throw new Error("rejected impact receipts must not include recoveryId");
         return Object.freeze({ impactId, projectileId: impactId, accepted, reason });
     }
     if (recoveryId !== null) throw new Error("accepted impact receipts must not include recoveryId");

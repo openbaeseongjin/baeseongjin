@@ -94,6 +94,7 @@ export function run() {
         position: ropePrediction.position,
         velocity: ropePrediction.velocity
     });
+    ropeServerEnemy.position.set(240, 0);
     assert.deepEqual(Object.keys(ropeClaim).sort(), [
         "clientTick",
         "position",
@@ -104,6 +105,11 @@ export function run() {
     ]);
     const ropeReceipt = ropeSession.submitRopeImpact(predictedRopePlayer.id, ropeClaim);
     assert.equal(ropeReceipt.accepted, true);
+    assert.equal(
+        ropeReceipt.reason,
+        undefined,
+        "server target movement after owner observation must not reject the owner's collision"
+    );
     assert.equal(ropeServerEnemy.health, predictedRopeHealth - ROPE_IMPACT_CONFIG.damage);
     assert.equal(ropeSession.submitRopeImpact(predictedRopePlayer.id, ropeClaim), ropeReceipt);
     assert.equal(
@@ -118,11 +124,11 @@ export function run() {
         predictionId: `${predictedRopePlayer.id}:rope-impact:2:${ropeServerEnemy.id}`,
         clientTick: 2
     });
-    assert.equal(ropeSession.submitRopeImpact(predictedRopePlayer.id, repeatedContactClaim).accepted, false);
+    assert.equal(ropeSession.submitRopeImpact(predictedRopePlayer.id, repeatedContactClaim).accepted, true);
     assert.equal(
         ropeServerEnemy.health,
-        predictedRopeHealth - ROPE_IMPACT_CONFIG.damage,
-        "a new prediction id must not bypass the server contact re-entry gate"
+        predictedRopeHealth - ROPE_IMPACT_CONFIG.damage * 2,
+        "the server must trust each unique owner collision instead of rebuilding the contact gate"
     );
 
     ropeServerSimulation.applyOwnerMotion(predictedRopePlayer.id, {
@@ -160,11 +166,9 @@ export function run() {
         position: ropeServerEnemy.position,
         velocity: { x: 5000, y: 0 }
     });
-    assert.equal(
-        ropeSession.submitRopeImpact(predictedRopePlayer.id, forgedVelocityClaim).reason,
-        "rope-impact-ineligible",
-        "the server must use owner-motion speed instead of trusting claimed velocity"
-    );
+    const velocityReceipt = ropeSession.submitRopeImpact(predictedRopePlayer.id, forgedVelocityClaim);
+    assert.equal(velocityReceipt.accepted, true);
+    assert.equal(velocityReceipt.damage, ROPE_IMPACT_CONFIG.damage, "claimed velocity must not change official damage");
 
     const predictedFallSimulation = new GameSimulation({ playerId: "fall-owner" });
     predictedFallSimulation.enemies = [];

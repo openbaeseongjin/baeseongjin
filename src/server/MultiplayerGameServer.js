@@ -224,11 +224,6 @@ export class MultiplayerGameServer {
                 socket.send(JSON.stringify({ type: "foundation-selection-receipt", payload: receipt }));
                 return;
             }
-            if (message?.type === "foundation-shear" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveFoundationShear(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "foundation-shear-receipt", payload: receipt }));
-                return;
-            }
             if (message?.type === "rope-impact" && typeof message.payload === "string") {
                 const receipt = room.adapter.receiveRopeImpact(playerId, message.payload);
                 socket.send(JSON.stringify({ type: "rope-impact-receipt", payload: receipt }));

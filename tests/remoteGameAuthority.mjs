@@ -4,7 +4,7 @@ import { WebSocket } from "ws";
 import { Vector2 } from "../src/game-kit/index.js";
 import { shortestAngleDelta } from "../src/game/physics/AngularMotion.js";
 import { MultiplayerGameApp } from "../src/game/MultiplayerGameApp.js";
-import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
+import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { WORLD_CONFIG } from "../src/game/config.js";
 import { createCheckpointClaim, serializeCheckpointClaim } from "../src/game/network/CheckpointClaim.js";
 import { MULTIPLAYER_TIMING } from "../src/game/network/MultiplayerTiming.js";
@@ -463,24 +463,6 @@ export async function run() {
         ["owner-motion", "foundation-selection"],
         "the latest owner position must precede a Foundation selection claim"
     );
-    foundationMessages.length = 0;
-    assert.equal(
-        foundationAuthority.submitFoundationShear({
-            predictionId: "player-1:foundation-shear:64:0",
-            targetId: "sector-01-04:calibration-dummy",
-            targetKind: "calibration-dummy",
-            tick: 64,
-            anchor: { x: -50, y: -448 },
-            playerPosition: { x: 50, y: -448 }
-        }),
-        true
-    );
-    assert.deepEqual(
-        foundationMessages.map(({ type }) => type),
-        ["owner-motion", "foundation-shear"],
-        "the latest owner position must precede a Shear claim"
-    );
-
     const httpServer = createServer();
     const gameServer = new MultiplayerGameServer(httpServer, {
         createSimulation: ({ worldSeed }) => new GameSimulation({ worldSeed, worldCatalog: null })
@@ -1064,23 +1046,26 @@ export async function run() {
         authority.ownerRuntime.simulation.releasePlayerRope(authority.playerId);
         room.simulation.releasePlayerRope(authority.playerId);
         const hitTarget = room.simulation.enemies[0];
-        const playerProjectile = new HomingProjectileObject({
-            id: "player-hit-receipt-projectile",
-            ownerId: authority.playerId,
+        const hitClientTick = authority.snapshot().owner.tick;
+        const serverHitOwner = room.simulation.players.find(({ id }) => id === authority.playerId);
+        serverHitOwner.weapon.isEnabled = true;
+        const spawnReceipt = room.session.submitProjectileSpawnClaim(authority.playerId, {
+            predictionId: `${authority.playerId}:${hitClientTick}`,
+            clientTick: hitClientTick,
             targetId: hitTarget.id,
-            predictionId: `${authority.playerId}:hit-receipt`,
-            position: hitTarget.position.clone(),
-            velocity: new Vector2(0, 0),
-            damage: 10,
-            radius: 5
+            position: hitTarget.position
         });
-        room.simulation.projectiles.push(playerProjectile);
+        assert.equal(spawnReceipt.accepted, true);
+        const playerProjectile = room.simulation.projectiles.find(
+            ({ predictionId }) => predictionId === `${authority.playerId}:${hitClientTick}`
+        );
+        assert.ok(playerProjectile);
         const hitTargetHealthBeforeClaim = hitTarget.health;
         assert.equal(
             authority.submitHitClaim({
                 predictionId: playerProjectile.predictionId,
                 targetId: hitTarget.id,
-                clientTick: authority.snapshot().owner.tick,
+                clientTick: hitClientTick,
                 position: hitTarget.position
             }),
             true

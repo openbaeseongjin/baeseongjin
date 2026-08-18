@@ -3,7 +3,6 @@ import { deserializeAugmentImpactClaim } from "../network/AugmentImpactClaim.js"
 import { deserializeAugmentOfferClaim } from "../network/AugmentOfferClaim.js";
 import { deserializeCheckpointClaim } from "../network/CheckpointClaim.js";
 import { deserializeFoundationSelectionClaim } from "../network/FoundationSelectionClaim.js";
-import { deserializeFoundationShearClaim } from "../network/FoundationShearClaim.js";
 import { deserializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { deserializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import { deserializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
@@ -48,14 +47,6 @@ export class AuthorityWireAdapter {
         return this.session.submitFoundationSelection(
             authenticatedPlayerId,
             deserializeFoundationSelectionClaim(serializedClaim)
-        );
-    }
-
-    receiveFoundationShear(authenticatedPlayerId, serializedClaim) {
-        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
-        return this.session.submitFoundationShear(
-            authenticatedPlayerId,
-            deserializeFoundationShearClaim(serializedClaim)
         );
     }
 

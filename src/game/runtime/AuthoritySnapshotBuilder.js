@@ -30,7 +30,7 @@ export function buildAuthoritySnapshot({
                 ...player,
                 ownerMotionTick: ownerMotionTicks[player.id] ?? simulation.getTick()
             })),
-            enemies: simulation.enemyStates(),
+            enemies: simulation.enemyNetworkStates(),
             ...(simulation.isSeamlessSectorWorld
                 ? {
                       progressKind: "sector",

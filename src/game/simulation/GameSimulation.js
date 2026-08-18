@@ -99,6 +99,33 @@ function createEnemyRuntime(properties) {
     throw new Error(`unknown enemy type: ${properties.enemyType}`);
 }
 
+function enemyState(enemy) {
+    return {
+        id: enemy.id,
+        position: vectorState(enemy.position),
+        level: enemy.level,
+        areaId: enemy.areaId,
+        objectId: enemy.objectId,
+        enemyType: enemy.enemyType,
+        displayName: enemy.displayName,
+        activation: enemy.activation,
+        patrol: enemy.patrol,
+        swarmGroupId: enemy.swarmGroupId,
+        behaviorState: enemy.enemyBehaviorSnapshot(),
+        impactDisplacementEnabled: enemy.impactDisplacementEnabled,
+        knockbackState: enemy.knockbackSnapshot(),
+        lockedTargetId: enemy.lockedTargetId,
+        attackState: enemy.attackState,
+        attackStateRemaining: enemy.attackStateRemaining,
+        aimDirection: enemy.aimDirection,
+        rules: enemy.rules,
+        radius: enemy.radius,
+        health: enemy.health,
+        maxHealth: enemy.maxHealth,
+        fireCooldown: enemy.fireCooldown
+    };
+}
+
 function swingDragState(swingDrag) {
     if (!swingDrag) return null;
     return {
@@ -321,30 +348,62 @@ export class GameSimulation {
     }
 
     enemyStates() {
-        return this.enemies.map((enemy) => ({
-            id: enemy.id,
-            position: vectorState(enemy.position),
-            level: enemy.level,
-            areaId: enemy.areaId,
-            objectId: enemy.objectId,
-            enemyType: enemy.enemyType,
-            displayName: enemy.displayName,
-            activation: enemy.activation,
-            patrol: enemy.patrol,
-            swarmGroupId: enemy.swarmGroupId,
-            behaviorState: enemy.enemyBehaviorSnapshot(),
-            impactDisplacementEnabled: enemy.impactDisplacementEnabled,
-            knockbackState: enemy.knockbackSnapshot(),
-            lockedTargetId: enemy.lockedTargetId,
-            attackState: enemy.attackState,
-            attackStateRemaining: enemy.attackStateRemaining,
-            aimDirection: enemy.aimDirection,
-            rules: enemy.rules,
-            radius: enemy.radius,
-            health: enemy.health,
-            maxHealth: enemy.maxHealth,
-            fireCooldown: enemy.fireCooldown
-        }));
+        return this.enemies.map(enemyState);
+    }
+
+    enemyNetworkStates() {
+        const authoredObjectIds = new Set(
+            this.world.enemySpawns.map(({ objectId, encounterId, slotId }) => objectId ?? encounterId ?? slotId)
+        );
+        return this.enemyStates().map((enemy) => {
+            if (!enemy.objectId || !authoredObjectIds.has(enemy.objectId)) return enemy;
+            return {
+                id: enemy.id,
+                objectId: enemy.objectId,
+                position: enemy.position,
+                patrol: enemy.patrol,
+                behaviorState: enemy.behaviorState,
+                knockbackState: enemy.knockbackState,
+                lockedTargetId: enemy.lockedTargetId,
+                attackState: enemy.attackState,
+                attackStateRemaining: enemy.attackStateRemaining,
+                aimDirection: enemy.aimDirection,
+                health: enemy.health,
+                fireCooldown: enemy.fireCooldown
+            };
+        });
+    }
+
+    hydrateEnemyNetworkStates(states) {
+        return states.map((state) => {
+            if (state.enemyType) return state;
+            const spawn = this.world.enemySpawns.find(
+                ({ objectId, encounterId, slotId }) => (objectId ?? encounterId ?? slotId) === state.objectId
+            );
+            if (!spawn) throw new Error(`unknown enemy network objectId: ${state.objectId}`);
+            const definition = spawn.enemySelection
+                ? {
+                      ...spawn,
+                      ...resolveEnemyEncounter(spawn, {
+                          runSeed: this.world.seed,
+                          worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
+                      })
+                  }
+                : spawn;
+            return enemyState(
+                createEnemyRuntime({
+                    ...definition,
+                    ...state,
+                    id: state.id,
+                    position: new Vector2(state.position.x, state.position.y),
+                    areaId: definition.areaId ?? null,
+                    objectId: state.objectId,
+                    swarmGroupId: definition.swarmGroupId ?? definition.slotId,
+                    radius: COMBAT_CONFIG.enemyRadius,
+                    maxHealth: COMBAT_CONFIG.enemyHealth
+                })
+            );
+        });
     }
 
     getFoundationReward(playerId) {
@@ -1293,7 +1352,7 @@ export class GameSimulation {
         return outcomes;
     }
 
-    resolveRopeImpactClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
+    resolveRopeImpactClaim(authenticatedPlayerId, claim) {
         const player = this.#findPlayer(authenticatedPlayerId);
         if (!player || player.lifeState !== "active") {
             return Object.freeze({ accepted: false, reason: "player-ineligible" });
@@ -1310,20 +1369,14 @@ export class GameSimulation {
             });
         }
         if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
-        if (
-            Math.hypot(claim.position.x - target.position.x, claim.position.y - target.position.y) >
-                target.radius + positionTolerance ||
-            !player.physics.collider.overlapsCircle(
-                player.physics.position,
-                target.position,
-                target.radius + positionTolerance
-            )
-        ) {
-            return Object.freeze({ accepted: false, reason: "position-mismatch" });
-        }
-        const pendingImpact = player.ropeImpactAttack.consume(claim.predictionId, claim.targetId);
-        if (!pendingImpact) return Object.freeze({ accepted: false, reason: "rope-impact-ineligible" });
-        return this.#commitRopeImpact(pendingImpact);
+        return this.#commitRopeImpact({
+            predictionId: claim.predictionId,
+            sourcePlayerId: authenticatedPlayerId,
+            targetId: claim.targetId,
+            position: claim.position,
+            velocity: claim.velocity,
+            damage: ROPE_IMPACT_CONFIG.damage
+        });
     }
 
     resolveAugmentImpactClaim(authenticatedPlayerId, claim, { positionTolerance = 40, replicate = true } = {}) {
@@ -1990,40 +2043,30 @@ export class GameSimulation {
         return Object.freeze({ accepted: true, projectileId: projectile.id });
     }
 
-    resolvePlayerProjectileClaim(authenticatedPlayerId, claim, { positionTolerance = 40 } = {}) {
-        const projectile = this.projectiles.find(({ predictionId }) => predictionId === claim.predictionId);
-        if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
-        if (projectile.ownerId !== authenticatedPlayerId) {
+    resolvePlayerProjectileClaim(authenticatedPlayerId, claim) {
+        const projectile = this.projectiles.find(({ predictionId }) => predictionId === claim.predictionId) ?? null;
+        if (projectile && projectile.ownerId !== authenticatedPlayerId) {
             return Object.freeze({ accepted: false, reason: "projectile-ownership" });
         }
-        if (projectile.targetId !== claim.targetId) {
+        if (projectile && projectile.targetId !== claim.targetId) {
             return Object.freeze({ accepted: false, reason: "target-mismatch" });
         }
         const target = this.enemies.find((enemy) => enemy.id === claim.targetId && enemy.health > 0);
+        if (!target && this.enemyImpactTombstones.has(claim.targetId)) {
+            return Object.freeze({ accepted: true, resolution: "target-already-dead", damage: 0 });
+        }
         if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
-        const targetDistance = Math.hypot(claim.position.x - target.position.x, claim.position.y - target.position.y);
-        if (targetDistance > target.radius + projectile.radius + positionTolerance) {
-            return Object.freeze({ accepted: false, reason: "position-mismatch" });
-        }
-        const projectileDistance = Math.hypot(
-            claim.position.x - projectile.position.x,
-            claim.position.y - projectile.position.y
-        );
-        const predictedTravel =
-            (COMBAT_CONFIG.projectileSpeed * Math.abs(claim.clientTick - this.tick)) / 120 + positionTolerance;
-        if (projectileDistance > predictedTravel + target.radius + projectile.radius) {
-            return Object.freeze({ accepted: false, reason: "trajectory-mismatch" });
-        }
-        this.projectiles = this.projectiles.filter(({ id }) => id !== projectile.id);
-        target.health = Math.max(0, target.health - projectile.damage);
+        const damage = projectile?.damage ?? COMBAT_CONFIG.weaponDamage;
+        if (projectile) this.projectiles = this.projectiles.filter(({ id }) => id !== projectile.id);
+        target.health = Math.max(0, target.health - damage);
         const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
         this.recordProjectileResolution(
-            { projectileId: projectile.id, resolution, position: target.position },
-            { damage: projectile.damage, sourcePlayerId: projectile.ownerId, targetId: projectile.targetId }
+            { projectileId: projectile?.id ?? claim.predictionId, resolution, position: target.position },
+            { damage, sourcePlayerId: authenticatedPlayerId, targetId: claim.targetId }
         );
         if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
         this.#removeDefeatedEnemies();
-        return Object.freeze({ accepted: true, resolution, damage: projectile.damage });
+        return Object.freeze({ accepted: true, resolution, damage });
     }
 
     #removeDefeatedEnemies() {
@@ -2114,7 +2157,7 @@ export class GameSimulation {
                 });
                 if (digest !== claim.outcome.digest) {
                     this.#restorePlayer(player, stateBeforeImpact);
-                    return Object.freeze({ accepted: false, reason: "state-diverged" });
+                    return Object.freeze({ accepted: false, reason: "recovery-required" });
                 }
             }
             return this.#finalizeVictimImpact(player, claim, projectile, damage);
