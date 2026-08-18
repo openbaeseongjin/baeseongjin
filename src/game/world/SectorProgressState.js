@@ -24,6 +24,7 @@ export class SectorProgressState {
         this.objectivesById = new Map(world.objectives.map((objective) => [objective.id, objective]));
         this.encountersById = new Map(world.enemySpawns.map((encounter) => [encounter.encounterId, encounter]));
         this.routesById = new Map(world.routeLocks.map((route) => [route.id, route]));
+        this.accessModulesById = new Map((world.accessModules ?? []).map((module) => [module.id, module]));
         this.idOrder = new Map();
         let order = 0;
         for (const sector of world.sectors) {
@@ -35,11 +36,13 @@ export class SectorProgressState {
                 if (landmark.outboundRouteId) this.idOrder.set(landmark.outboundRouteId, order++);
             }
         }
+        for (const accessModule of world.accessModules ?? []) this.idOrder.set(accessModule.id, order++);
         const firstSector = world.sectors[0];
         this.currentSectorId = firstSector.id;
         this.currentLandmarkId = firstSector.entryLandmarkId;
         this.completedObjectiveIds = new Set();
         this.resolvedEncounterIds = new Set();
+        this.collectedAccessModuleIds = new Set();
         this.unlockedRouteIds = new Set();
         this.visitedLandmarkIds = new Set([this.currentLandmarkId]);
         this.activeObjectiveSequences = new Map();
@@ -64,10 +67,22 @@ export class SectorProgressState {
         );
     }
 
+    #routeAccessReady(route) {
+        if (!route.requiredAccessModuleCount) return true;
+        const sourceSectorId = this.#landmark(route.sourceLandmarkId)?.sectorId;
+        const collected = [...this.collectedAccessModuleIds].filter(
+            (id) => this.accessModulesById.get(id)?.sectorId === sourceSectorId
+        );
+        return collected.length >= route.requiredAccessModuleCount;
+    }
+
     #unlockSatisfiedRoutes() {
         for (const route of this.world.routeLocks) {
             if (this.unlockedRouteIds.has(route.id)) continue;
-            if (route.requiredObjectiveIds.every((id) => this.completedObjectiveIds.has(id))) {
+            if (
+                route.requiredObjectiveIds.every((id) => this.completedObjectiveIds.has(id)) &&
+                this.#routeAccessReady(route)
+            ) {
                 this.unlockedRouteIds.add(route.id);
             }
         }
@@ -176,6 +191,40 @@ export class SectorProgressState {
         return freezeResult({ accepted: true, changed: true, encounterId });
     }
 
+    collectAccessModule(accessModuleId) {
+        const module = this.accessModulesById.get(accessModuleId);
+        if (!module) return freezeResult({ accepted: false, changed: false, reason: "access-module-unknown" });
+        if (module.sectorId !== this.currentSectorId) {
+            return freezeResult({ accepted: false, changed: false, reason: "access-module-not-current-sector" });
+        }
+        if (this.collectedAccessModuleIds.has(accessModuleId)) {
+            return freezeResult({ accepted: true, changed: false, reason: "access-module-already-collected" });
+        }
+        this.collectedAccessModuleIds.add(accessModuleId);
+        const before = this.unlockedRouteIds.size;
+        this.#unlockSatisfiedRoutes();
+        return freezeResult({
+            accepted: true,
+            changed: true,
+            accessModuleId,
+            routeChanged: this.unlockedRouteIds.size !== before,
+            access: this.accessSummary()
+        });
+    }
+
+    accessSummary(sectorId = this.currentSectorId) {
+        const sector = this.#sector(sectorId);
+        const moduleIds = (sector.accessModuleIds ?? []).filter((id) => this.accessModulesById.has(id));
+        const collectedModuleIds = moduleIds.filter((id) => this.collectedAccessModuleIds.has(id));
+        return freezeResult({
+            sectorId,
+            requiredCount: sector.accessModuleRequirement ?? 0,
+            collectedModuleIds: Object.freeze(collectedModuleIds),
+            availableModuleIds: Object.freeze(moduleIds),
+            ready: collectedModuleIds.length >= (sector.accessModuleRequirement ?? 0)
+        });
+    }
+
     visitLandmark(landmarkId) {
         const target = this.landmarksById.get(landmarkId);
         if (!target) return freezeResult({ accepted: false, changed: false, reason: "landmark-unknown" });
@@ -227,6 +276,11 @@ export class SectorProgressState {
                 this.resolvedEncounterIds.delete(encounterId);
             }
         }
+        for (const accessModuleId of [...this.collectedAccessModuleIds]) {
+            if (this.accessModulesById.get(accessModuleId)?.sectorId === sector.id) {
+                this.collectedAccessModuleIds.delete(accessModuleId);
+            }
+        }
         for (const routeId of [...this.unlockedRouteIds]) {
             const route = this.routesById.get(routeId);
             if (route && this.#routeTouchesSector(route, sector.id)) this.unlockedRouteIds.delete(routeId);
@@ -264,6 +318,7 @@ export class SectorProgressState {
             respawnAnchorId: this.#sector().respawnAnchorId,
             completedObjectiveIds: sortedIds(this.completedObjectiveIds, this.idOrder),
             resolvedEncounterIds: sortedIds(this.resolvedEncounterIds, this.idOrder),
+            collectedAccessModuleIds: sortedIds(this.collectedAccessModuleIds, this.idOrder),
             unlockedRouteIds: sortedIds(this.unlockedRouteIds, this.idOrder),
             visitedLandmarkIds: sortedIds(this.visitedLandmarkIds, this.idOrder),
             activeObjectiveSequences: Object.freeze(
@@ -286,6 +341,9 @@ export class SectorProgressState {
         const resolvedEncounterIds = new Set(
             requireSnapshotArray(snapshot.resolvedEncounterIds, "resolvedEncounterIds")
         );
+        const collectedAccessModuleIds = new Set(
+            requireSnapshotArray(snapshot.collectedAccessModuleIds ?? [], "collectedAccessModuleIds")
+        );
         const unlockedRouteIds = new Set(requireSnapshotArray(snapshot.unlockedRouteIds, "unlockedRouteIds"));
         const visitedLandmarkIds = new Set(requireSnapshotArray(snapshot.visitedLandmarkIds, "visitedLandmarkIds"));
         if (!Array.isArray(snapshot.activeObjectiveSequences)) {
@@ -293,6 +351,9 @@ export class SectorProgressState {
         }
         if ([...completedObjectiveIds].some((id) => !this.objectivesById.has(id))) throw new Error("unknown objective");
         if ([...resolvedEncounterIds].some((id) => !this.encountersById.has(id))) throw new Error("unknown encounter");
+        if ([...collectedAccessModuleIds].some((id) => !this.accessModulesById.has(id))) {
+            throw new Error("unknown access module");
+        }
         if ([...unlockedRouteIds].some((id) => !this.routesById.has(id))) throw new Error("unknown route");
         if ([...visitedLandmarkIds].some((id) => !this.landmarksById.has(id))) throw new Error("unknown landmark");
         if (!Number.isSafeInteger(snapshot.sectorBaselineRevision) || snapshot.sectorBaselineRevision < 0) {
@@ -302,6 +363,7 @@ export class SectorProgressState {
         this.currentLandmarkId = snapshot.currentLandmarkId;
         this.completedObjectiveIds = completedObjectiveIds;
         this.resolvedEncounterIds = resolvedEncounterIds;
+        this.collectedAccessModuleIds = collectedAccessModuleIds;
         this.unlockedRouteIds = unlockedRouteIds;
         this.visitedLandmarkIds = visitedLandmarkIds;
         this.activeObjectiveSequences = new Map(

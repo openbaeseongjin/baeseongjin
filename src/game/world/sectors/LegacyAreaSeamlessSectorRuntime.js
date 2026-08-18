@@ -5,7 +5,7 @@ import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v2";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v3";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
@@ -258,6 +258,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
     const surfaces = [];
     const route = [];
     const enemySpawns = [];
+    const accessModules = [];
     const objects = [];
     const objectives = [];
     const windZones = [];
@@ -338,11 +339,27 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                     y: encounter.position.y + dy,
                     activation: encounter.activation ? shiftBounds(encounter.activation, dx, dy) : null,
                     enemySelection: encounter.enemySelection,
+                    accessModuleId: encounter.accessModuleId,
                     patrol: source.patrol ? shiftPatrol(source.patrol, dx, dy) : null,
                     rules: source.rules ?? Object.freeze([]),
                     level: landmarks.length
                 });
             });
+            for (const encounter of landmarkEnemySpawns) {
+                if (!encounter.accessModuleId) continue;
+                accessModules.push(
+                    freezeValue({
+                        id: encounter.accessModuleId,
+                        sectorId: sectorDefinition.id,
+                        landmarkId: landmarkDefinition.id,
+                        encounterId: encounter.encounterId,
+                        position: encounter.position,
+                        hint: landmarkDefinition.encounters.find(
+                            ({ encounterId }) => encounterId === encounter.encounterId
+                        )?.accessHint
+                    })
+                );
+            }
             const landmarkSurfaces = localWorld.surfaces
                 .filter(({ kind }) => !LEGACY_BOUNDARY_KINDS.has(kind))
                 .map((surface) => shiftSurface(surface, dx, dy, landmarkDefinition));
@@ -424,6 +441,9 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                         targetLandmarkId: runtimeLandmark.id,
                         connectorId: connector.id,
                         requiredObjectiveIds: previousOutboundObjectiveIds,
+                        ...(connector.sectorTransition && previousLandmark.sectorId === "sector-01"
+                            ? { requiredAccessModuleCount: 2 }
+                            : {}),
                         sectorTransition: connector.sectorTransition
                     })
                 );
@@ -491,7 +511,11 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 respawnAnchorId: entryAnchor.id,
                 landmarkIds: sectorLandmarks.map(({ id }) => id),
                 entryLandmarkId: firstLandmark.id,
-                exitLandmarkId: lastLandmark.id
+                exitLandmarkId: lastLandmark.id,
+                accessModuleIds: accessModules
+                    .filter(({ sectorId }) => sectorId === sectorDefinition.id)
+                    .map(({ id }) => id),
+                accessModuleRequirement: sectorDefinition.id === "sector-01" ? 2 : 0
             })
         );
         const nextSectorDefinition = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex + 1];
@@ -511,6 +535,21 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
         }
     }
 
+    for (const lock of routeLocks.filter(({ requiredAccessModuleCount }) => requiredAccessModuleCount > 0)) {
+        const sourceLandmark = landmarks.find(({ id }) => id === lock.sourceLandmarkId);
+        objects.push(
+            freezeValue({
+                id: `${lock.id}:transit-lock`,
+                kind: "access-transit-lock",
+                presentationId: "world-object:access-transit-lock",
+                landmarkId: sourceLandmark.id,
+                routeLockId: lock.id,
+                position: sourceLandmark.exit,
+                label: "SECTOR TRANSIT"
+            })
+        );
+    }
+
     const finalLandmark = landmarks.at(-1);
     return freezeValue({
         seed,
@@ -520,6 +559,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
         surfaces,
         route,
         enemySpawns,
+        accessModules,
         checkpoints: [],
         summit: { x: finalLandmark.exit.x, y: finalLandmark.exit.y, radius: summitRadius },
         topY: Math.min(...landmarks.map(({ bounds }) => bounds.y)),

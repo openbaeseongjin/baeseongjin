@@ -307,7 +307,7 @@ Pressure Lever / Control:
 32×64 ~ 64×64 px
 
 Stage Width:
-960 px
+3840 px (960px 기존 Pressure spine + 오른쪽 Access Annex)
 = 30 tiles
 
 Stage Height:

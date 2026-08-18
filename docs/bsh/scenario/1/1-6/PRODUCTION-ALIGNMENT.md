@@ -10,6 +10,7 @@
 - `cameraZones`는 실제 객체로 구현되어 `airflow-preview → fan-a → neutral-deck → fan-b → exit`을 사용한다.
 - Story는 `COOLING DISTRIBUTION / AIRFLOW UNSTABLE` entry와 exit-panel objective binding이 구현됐다. `storyTriggers`는 시나리오 기획 인벤토리다.
 - Approved Blockout과 실제 브라우저 Wind/Camera 가독성 검증은 여전히 필요하다.
+- 2026-08-18부터 Stage 폭은 3840px이며 Neutral Deck에서 왼쪽으로 이어지는 Bridge `(-640,-832, 704×16)`와 Arena `(-1320,-832, 704×32)`를 Stage-local로 저작한다. Arena의 선택 Access Carrier B `(-1320,-832)`는 기존 Sentry T1 행동과 `900×512` activation band를 재사용해 `sector-01:access-module:b`를 운반한다. 본선 Wind 학습은 적 없이 유지되고, 이 encounter는 Sector 2-of-3 선택지라 건너뛸 수 있다.
 
 > **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§2·§4·§5·§8의 Wind Shadow/Grounded/Falloff/Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다. Geometry 비교 기록은 유지한다.
 
@@ -17,7 +18,7 @@
 
 | 항목 | 상태 | 판정 |
 | --- | --- | --- |
-| 960×1408 Geometry | `IMPLEMENTED` | P0, A~F Anchor, R1~R4, Neutral Deck, Final Deck이 Area Catalog에 존재 |
+| 3840×1408 Geometry | `IMPLEMENTED` | 기존 960px Wind spine과 왼쪽 Access Annex가 Area Catalog에 존재 |
 | A~F Anchor 좌표 | `IMPLEMENTED — README와 일치` | 6개 Anchor 전부 README와 Runtime 좌표 일치 |
 | P0/R1/R4/Final Deck 좌표 | `IMPLEMENTED — README와 일치` | |
 | R2 좌표 | `IMPLEMENTED — README와 불일치` | 위치·크기 모두 다름. 아래 §3 참고 |

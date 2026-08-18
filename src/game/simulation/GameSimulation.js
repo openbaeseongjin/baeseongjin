@@ -380,6 +380,12 @@ export class GameSimulation {
                 }
                 this.worldProgress.completeObjective(objectiveId);
             }
+            if (route.requiredAccessModuleCount) {
+                const sourceSectorId = source.sectorId;
+                for (const module of this.world.accessModules ?? []) {
+                    if (module.sectorId === sourceSectorId) this.worldProgress.collectAccessModule(module.id);
+                }
+            }
             this.worldProgress.visitLandmark(route.targetLandmarkId);
         }
         this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
@@ -2000,7 +2006,32 @@ export class GameSimulation {
         }
         if (this.isSeamlessSectorWorld) {
             for (const enemy of this.enemies) {
-                if (enemy.health <= 0 && enemy.objectId) this.worldProgress.resolveEncounter(enemy.objectId);
+                if (enemy.health > 0 || !enemy.objectId) continue;
+                this.worldProgress.resolveEncounter(enemy.objectId);
+                const accessModule = this.world.accessModules?.find(
+                    ({ encounterId }) => encounterId === enemy.objectId
+                );
+                if (!accessModule) continue;
+                const collection = this.worldProgress.collectAccessModule(accessModule.id);
+                if (!collection.changed) continue;
+                this.recordReplicationEvent("access-module-collected", {
+                    accessModuleId: accessModule.id,
+                    encounterId: enemy.objectId,
+                    sectorId: accessModule.sectorId,
+                    collectedCount: collection.access.collectedModuleIds.length,
+                    requiredCount: collection.access.requiredCount
+                });
+                this.eventFlash = {
+                    type: "access-module-collected",
+                    age: 0,
+                    accessModuleId: accessModule.id,
+                    position: enemy.position.clone(),
+                    collectedCount: collection.access.collectedModuleIds.length,
+                    requiredCount: collection.access.requiredCount
+                };
+                if (collection.routeChanged) {
+                    this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+                }
             }
         }
         this.enemies = this.enemies.filter(({ health }) => health > 0);

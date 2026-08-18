@@ -71,6 +71,8 @@ function importEncounters(area, landmarkId, legacyStageAlias) {
                 enemySelection: {
                     fixedEnemyType: object.enemyType ?? object.kind
                 },
+                accessModuleId: object.accessModuleId,
+                accessHint: object.accessHint,
                 legacyStageAlias
             });
         });

@@ -47,6 +47,8 @@ export function encounterSlot({
     position,
     activation = null,
     enemySelection = null,
+    accessModuleId = null,
+    accessHint = null,
     legacyStageAlias
 } = {}) {
     return freezeValue({
@@ -55,6 +57,8 @@ export function encounterSlot({
         position,
         activation,
         ...(enemySelection ? { enemySelection } : {}),
+        ...(accessModuleId ? { accessModuleId } : {}),
+        ...(accessHint ? { accessHint } : {}),
         ...(legacyStageAlias ? { legacyStageAlias } : {})
     });
 }
