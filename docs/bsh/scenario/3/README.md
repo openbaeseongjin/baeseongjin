@@ -1847,11 +1847,6 @@ Runtime `name / subtitle / cue` 변경은 개별 Stage 문서 승인 후 별도 
 
 이 마이그레이션이 완료되기 전까지 개별 `3-N/README.md`는 구(REV 1.2) 공간명을 그대로 유지하므로, 본 Master 문서의 신규 명칭과 개별 Stage 문서 사이에 명칭 불일치가 존재할 수 있다. 충돌 시 [§0 Document Priority](#document-priority)에 따라 최신 Master(본 문서)가 우선한다.
 
-### 진행 현황
-
-- `3-7`, `3-8`: 제목(H1)·태그 줄·PREV/NEXT nav 링크만 REV 2.0 명칭(`TRANSFER MEZZANINE`/`UPPER EXCHANGE GATE`)으로 갱신했다. 두 문서의 본문 설계 프로즈는 원문(디자인 패키지) 그대로 보존했으므로 내부에는 여전히 구 명칭 언급이 남아 있을 수 있다. `3-7`은 REV 2.0 설계 자체가 geometry까지 전면 재작성됐고(`AREA-SPEC.json` 포함) 아직 Runtime에 반영되지 않았다. `3-8`은 REV 1.1의 `M0/MX/M1` Free-Weave Lattice 구조 자체를 폐기하고 zig-zag Swing Spine 구조로 다시 썼으며 마찬가지로 아직 Runtime 미반영이다. 두 Stage 모두 `docs/bsh/scenario/3/3-N/PRODUCTION-ALIGNMENT.md`에서 `NOT IMPLEMENTED` 판정을 유지한다.
-- `3-1`~`3-6`, Runtime `name/subtitle/cue`: 아직 미착수.
-
 ---
 
 ## Document Priority
