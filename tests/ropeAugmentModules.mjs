@@ -42,13 +42,13 @@ export function run() {
     assert.equal(tuning.baseRope.hookSpeed, 1200);
     assert.equal(tuning.baseRope.reach, 400);
     assert.equal(tuning.baseRope.hookFlightSeconds, 400 / 1200);
-    assert.equal(tuning.baseRope.hookReloadSeconds, 1);
+    assert.equal(tuning.baseRope.hookReloadSeconds, 0.5);
     assert.equal(tuning.commonRope.fastLaunch.hookSpeed, 1800);
     assert.equal(tuning.commonRope.fastLaunch.reach, 400);
     assert.equal(tuning.commonRope.fastLaunch.hookFlightSeconds, 400 / 1800);
     assert.equal(tuning.commonRope.longRope.reach, 480);
     assert.equal(tuning.commonRope.longRope.hookFlightSeconds, 480 / 1200);
-    assert.equal(tuning.commonRope.fastRecover.hookReloadSeconds, 0.5);
+    assert.equal(tuning.commonRope.fastRecover.hookReloadSeconds, 0.25);
     assert.equal(tuning.commonRope.releasePropulsion.velocityMultiplier, 1.25);
     assert.equal(tuning.commonRope.electrifiedRope.contactBandPadding, 10);
     assert.equal(tuning.commonRope.electrifiedRope.damagePerSecond, 20);
@@ -67,7 +67,7 @@ export function run() {
     });
     assert.equal(modifiedProfile.hookSpeed, 1800);
     assert.equal(modifiedProfile.reach, 480);
-    assert.equal(modifiedProfile.hookReloadSeconds, 0.5);
+    assert.equal(modifiedProfile.hookReloadSeconds, 0.25);
     assert.equal(modifiedProfile.hookFlightSeconds, 480 / 1800);
 
     assert.deepEqual(applyReleasePropulsion({ x: 80, y: -40 }), { x: 100, y: -50 });

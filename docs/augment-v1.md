@@ -55,7 +55,7 @@ Quest, 순수 기본 이동 modifier, rarity와 Specialization은 v1 범위가 �
 | Hook speed | 1400px/s | 1200px/s | 빠른 발사 `+50%` → 1800px/s |
 | Hook lifetime | 2/7초 | 1/3초 | 빠른 발사 파생 2/9초 |
 | Hook reach | 400px | 400px | 긴 로프 `+20%` → 480px |
-| Reload | 0.20초 | 1.00초 | 빠른 회수 `-50%` → 0.50초 |
+| Reload | 0.20초 | 0.50초 | 빠른 회수 `-50%` → 0.25초 |
 
 Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. 해제 추진은 정상 Rope 해제 계산 뒤 전체 속도 벡터를 한 번 `×1.25` 한다.
 
