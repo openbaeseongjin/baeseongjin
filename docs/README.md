@@ -25,7 +25,7 @@
 | [`enemy-density-composition.md`](./enemy-density-composition.md) | 0.32.0 Sector 01~03 authored slot 밀도·결정적 적 조합 계약 |
 | [`scenario-development-integration.md`](./scenario-development-integration.md) | 상세 Stage 목록, authored Runtime 연결 상태, 차단 요소와 마지막 확인 근거 |
 | [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md) | 하나의 연속 월드 안에서 Sector 01 진행 영역을 연결하는 기획·구현 계획 |
-| [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 일반 타이머·상승 붕괴·최소 관전·보스 타이머 전환 기준 |
+| [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 `60/+10/cap60` Timer·Purge 240px/s·topology HOLD·보스 분리 기준 |
 | [`design-decision-requests.md`](./design-decision-requests.md) | P1~P5 기획 결정의 확정 답변과 구현 상태 추적 |
 | [`design-decision-resolution-package.md`](./design-decision-resolution-package.md) | Specialization·Boss·Timer·NPC·Ending의 구현 가능한 통합 기획 계약 |
 | [`p0-alignment-patch-package.md`](./p0-alignment-patch-package.md) | 최신 Runtime·문서 불일치의 P0 정렬 범위·순서·검증 계약 |

@@ -254,79 +254,36 @@ Artifact 없음.
 
 ---
 
-## P3. 일반 타이머·붕괴 수치
+## P3. 일반 Timer·Containment Purge Field
 
-- **상태**: `답변됨 — PROTOTYPE BASELINE`
-- **주의**: 실제 Full Run playtest 전 최종 밸런스 수치가 아님.
+- **상태**: `core 계약 확정 / topology mapping HOLD`
+- **대체 대상**: `960초 / +45초 / cap 960초 / 상승 붕괴 80px/s / 다음 Gate 자동 합류`
 
-### Prototype Baseline
-
-```text
-Sector General Timer
-960 sec
-
-Internal Gate Replenish
-+45 sec
-
-Timer Cap
-960 sec
-
-Collapse Speed
-80 world px/sec
-```
-
-Internal Gate는 `n-1→n-2` ... `n-7→n-8` 같은 일반 진행 Gate를 뜻한다.
-
-`n-8 → Boss`에서는:
+### 확정 계약
 
 ```text
-Gate replenish NONE
-general timer ends
-remaining time discarded
-Boss timer begins
+Sector General Timer: 60 sec
+Progress Reward: +10 sec
+Timer Cap: 60 sec
+Containment Purge Field: 240 px/sec
+Purge Contact: lethal
+Party Wipe: current Sector reset
+Boss Entry: general Timer/Purge ends, remaining time discarded
 ```
 
-최대 이론 일반 진행 budget:
+- Field는 시간 보상 중 현재 높이에서 멈추고 다음 0초부터 같은 위치에서 재상승한다.
+- Field는 후퇴하거나 Player를 추적·순간이동하지 않는다.
+- 전멸 reset은 Player별 증강과 이전 Sector 완료 진행을 보존한다.
+- 일반 Purge를 Boss 전투에 이어 붙이지 않는다.
+- 10초·3초·0초 경고는 시각·문구·음향을 함께 사용한다.
 
-```text
-960 + 45×7
-= 1275 sec
-= 21:15
-```
+### 구현 금지 HOLD
 
-### Warning
+- 어떤 physical landmark/objective transition이 +10초를 지급하는가.
+- 연속 Sector geometry에서 최초 Field origin은 어디인가.
+- 개인 Purge 사망 뒤 Sector-entry 즉시 복귀와 관전·후속 전이 합류 중 무엇을 사용하는가.
 
-```text
-120 sec
-LOW TIME
-
-30 sec
-CRITICAL
-
-0 sec
-COLLAPSE RISING
-```
-
-0초 즉시 Game Over 아님.
-
-### Collapse Elimination HUD
-
-```text
-붕괴에 휩쓸림
-다음 Gate에서 합류
-```
-
-### 최종 조정
-
-Graybox 후:
-- P50 first clear
-- P80 first clear
-- skilled clear
-- failures
-- recovery time
-- 2-player clear
-
-기록을 보고 수치 조정.
+Stage ID, legacy Gate portal과 Area 하단을 위 세 항목에 자동 매핑하지 않는다. 상세 현재 계약은 `docs/sector-timer-and-boss-flow.md`, 대체 이력은 `docs/decision-history.md`를 따른다.
 
 ---
 
@@ -560,7 +517,7 @@ New Run에서 Foundation/Specialization reset.
 P0 Alignment
 → Specialization
 → Boss primitive + Boss01
-→ Timer baseline
+→ Timer/Purge topology mapping
 → Sector04/05/06 Runtime expansion
 → Final Security
 → Boarding / Ending
@@ -577,7 +534,7 @@ P0 정렬 이후:
 - 2-3 Specialization implementation
 - Boss Flow common primitive
 - Boss01 prototype
-- 960/+45/80 Timer prototype
+- 60/+10/cap60/240px-s Timer/Purge core를 유지한 topology mapping 계획
 - Sector05/06 graybox authoring
 - Final Security mock
 - Boarding / Ending mock

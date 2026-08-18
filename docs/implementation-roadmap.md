@@ -70,7 +70,7 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 
 월드 선택도 실행 방식별로 나누지 않는다. 로컬 실행과 네트워크 서버·예측은 하나의 `GameSimulationFactory`와 현재 authored catalog를 공유한다. 네트워크는 같은 world revision과 진행 상태를 복제할 뿐 별도 맵을 생성하지 않는다. 맵 definition은 stable object/state/event/presentation/cue ID만 소유하고 이미지·atlas·음원 경로는 소유하지 않는다. 현재 표현은 environment/audio runtime catalog와 world-object mock presentation catalog를 통해 연결하며 정식 package가 준비되면 같은 ID의 표현만 교체한다.
 
-P1~~P5 기획 게이트의 Boss01·Final Security·Timer Prototype baseline·예선 NPC 제외·개별 Boarding·Ending 계약은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다. 과거 Specialization 6종은 generic 증강 v1로 대체됐다. 구현은 `P0 Alignment → Boss primitive/Boss01 → Timer baseline → Sector04/05/06 Runtime 확장 → Final Security/Ending → Playtest` 순서이며, Sector02~~05 개별 Boss 상세와 최종 밸런스만 후속 기획으로 남긴다. NPC는 핵심 범위 완료 뒤 여유가 있을 때만 2-6 최소안으로 검토한다.
+P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 제외·개별 Boarding·Ending 계약은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다. 과거 Specialization 6종은 generic 증강 v1로 대체됐다. 구현은 `P0 Alignment → Boss primitive/Boss01 → Timer/Purge topology mapping → Sector04/05/06 Runtime 확장 → Final Security/Ending → Playtest` 순서이며, Sector02~~05 개별 Boss 상세와 Timer/Purge HOLD 세 항목은 후속 기획으로 남긴다. NPC는 핵심 범위 완료 뒤 여유가 있을 때만 2-6 최소안으로 검토한다.
 
 ### 섹터 1 legacy authoring migration 기록
 
@@ -82,9 +82,9 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer Prototype baseline·예
 4. `1-2`·`1-3`을 이어 붙여 이동 달성형과 우회·패널 상호작용형 완료 조건이 같은 진행 흐름에서 작동하는지 검증한다.
 5. `1-4`~`1-7`을 순서대로 연결한다. 증강·Wind·Sentry·Manual Bypass는 각 시스템의 기존 또는 별도 구현을 사용하고, 맵 구조가 구체 오브젝트 동작을 중앙 분기로 소유하지 않는다.
 6. `1-8`의 T1 단독 Phase, T2+Pulsed Wind Phase, Containment Gate Override, Lower Grid Shutdown, Worker District Preview와 Sector-end Checkpoint를 연결한다. 실제 `2-1` 진입 영역은 해당 시나리오 확정 뒤 이어 붙인다.
-7. `1-1`~`1-8` 일반 영역 연결 뒤 mock 수치로 Sector 01 총 타이머를 연결한다. 타이머는 영역 전환에 유지하고 Gate 통과 때 보충하며, 0초부터 상승 붕괴를 시작한다. 붕괴 탈락자는 최소 관전 상태가 되어 다음 Gate에 합류하고 전원 탈락 때만 Sector 01 일반 구간을 재시작한다.
-8. Sector 01 보스의 위치·전투 시나리오가 확정되면 기획자 지정 진입 지점에서 일반 타이머·붕괴를 종료하고 잔여 시간을 폐기한 뒤 별도 보스 타이머를 연결한다. 0초부터 Arena 붕괴, 전원 탈락 때 보스 시도 재시작, 보스 처치 뒤 다음 섹터 타이머 시작을 검증한다. `1-8` 자체에는 Boss를 추가하거나 기존 후속 장면을 이동하지 않는다.
-9. 타이머·보충·붕괴 속도의 Prototype baseline은 팀과 기획자의 공동 플레이로 조정한다. 최종 수치와 네트워크 권위·재접속·최종 UI/오디오 cue가 미정이어도 7단계 흐름 구현은 대기시키지 않되, Prototype을 확정 밸런스로 취급하지 않는다. 상세 계약은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
+7. Timer/Purge 구현 전에 seamless Sector의 physical landmark/objective 중 +10초 trigger, 최초 Field origin과 개인 Purge 사망 복귀를 후속 결정으로 확정한다. Stage ID·Gate portal·Area 하단을 자동 매핑하지 않는다.
+8. 확정 mapping 위에 `60초 / +10초 / cap 60초 / Purge 240px/s`, 정지·재상승·no-retreat, lethal·전멸 current Sector reset을 연결한다. 증강과 이전 Sector 진행 보존, 10초·3초·0초 경고와 owner-first Purge claim을 검증한다.
+9. Sector 01 보스의 위치·전투 시나리오가 확정되면 transition slot에서 일반 Timer·Purge와 잔여 시간을 종료한 뒤 별도 Boss Timer·Arena 위험을 연결한다. `1-8` legacy 콘텐츠와 downstream Sector local 좌표는 이동하지 않는다. 상세 계약은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
 
 10. `SECTOR 01`: `1-1 → 1-8`
 11. `SECTOR 02`: `2-1 → 2-8`
