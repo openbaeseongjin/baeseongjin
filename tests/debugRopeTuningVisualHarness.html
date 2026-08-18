@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Debug Rope tuning visual harness</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: grid;
+                place-items: center;
+                color: #e2e8f0;
+                background: #080b10;
+                font-family: system-ui, sans-serif;
+            }
+            main {
+                width: min(700px, calc(100vw - 32px));
+                padding: 22px;
+                border: 1px solid rgba(103, 232, 249, 0.45);
+                border-radius: 18px;
+                background: #0f172a;
+            }
+            h1 {
+                margin: 0 0 16px;
+                font-size: 22px;
+            }
+            .debug-panel-body {
+                display: grid;
+                gap: 12px;
+            }
+            .rope-fields {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 14px;
+                padding: 14px;
+                border: 1px solid rgba(103, 232, 249, 0.28);
+                border-radius: 12px;
+            }
+            legend {
+                color: #67e8f9;
+                font-weight: 900;
+            }
+            label {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 92px;
+                align-items: center;
+                gap: 8px;
+                min-height: 36px;
+                font-size: 12px;
+                font-weight: 800;
+            }
+            input,
+            select,
+            button {
+                min-height: 34px;
+                border: 1px solid rgba(148, 163, 184, 0.4);
+                border-radius: 8px;
+                color: #e2e8f0;
+                background: #243047;
+            }
+            input {
+                width: 92px;
+                padding: 0 8px;
+            }
+            .derived,
+            .actions {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+            }
+            .note {
+                margin: 0;
+                color: #94a3b8;
+                font-weight: 700;
+            }
+            fieldset:disabled {
+                opacity: 0.5;
+            }
+            @media (max-width: 620px) {
+                .rope-fields {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <h1>디버그 · 로프 수치</h1>
+            <div class="debug-panel-body">
+                <label><span>디버그 수치 표시</span><input type="checkbox" data-debug-metrics /></label>
+                <label>
+                    <span>싱글플레이 시작 맵</span>
+                    <select data-debug-start-area>
+                        <option value="">기본</option>
+                    </select>
+                </label>
+                <fieldset class="rope-fields" data-debug-rope-tuning>
+                    <legend>로프 수치</legend>
+                    <div class="derived">
+                        <span>비행 시간 <output data-debug-rope-flight></output></span>
+                        <span>도달 거리 <output data-debug-rope-reach></output></span>
+                    </div>
+                    <div class="actions">
+                        <button type="button" data-debug-rope-reset>로프 기본값 복원</button>
+                    </div>
+                </fieldset>
+                <p class="note" data-debug-rope-mode role="status"></p>
+                <output class="note" data-harness-run role="status">Run 1 · 적용 사거리 400.0px</output>
+                <div class="actions">
+                    <button type="button" data-harness-mode>싱글/멀티 전환</button>
+                    <button type="button" data-debug-apply>적용</button>
+                </div>
+            </div>
+            <button type="button" data-debug-trigger hidden>설정</button>
+        </main>
+        <script type="module" src="./debugRopeTuningVisualHarness.mjs"></script>
+    </body>
+</html>

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { ROPE_TUNING_FIELDS } from "../src/game/config.js";
 import { DebugSettings } from "../src/game/metrics/DebugSettings.js";
 import { DebugPanel, DEBUG_PANEL_HOLD_MS } from "../src/game/ui/DebugPanel.js";
 
@@ -48,6 +49,12 @@ class FakeElement extends FakeEventTarget {
         this.value = "";
         this.options = [];
         this.classList = new FakeClassList();
+        this.dataset = {};
+        this.textContent = "";
+        this.disabled = false;
+        this.min = "";
+        this.max = "";
+        this.step = "";
     }
 
     append(option) {
@@ -67,14 +74,30 @@ export function run() {
     const metricsInput = new FakeElement();
     const startAreaSelect = new FakeElement();
     const applyButton = new FakeElement();
+    const ropeFieldset = new FakeElement();
+    const ropeResetButton = new FakeElement();
+    const ropeReachOutput = new FakeElement();
+    const ropeFlightOutput = new FakeElement();
+    const ropeModeOutput = new FakeElement();
+    const ropeInputs = ROPE_TUNING_FIELDS.map(({ path }) => {
+        const input = new FakeElement();
+        input.dataset.debugRopeField = path;
+        return input;
+    });
     const documentTarget = new FakeEventTarget();
     documentTarget.createElement = () => new FakeElement();
     documentTarget.querySelector = (selector) =>
         ({
             "[data-debug-metrics]": metricsInput,
             "[data-debug-start-area]": startAreaSelect,
-            "[data-debug-apply]": applyButton
+            "[data-debug-apply]": applyButton,
+            "[data-debug-rope-tuning]": ropeFieldset,
+            "[data-debug-rope-reset]": ropeResetButton,
+            "[data-debug-rope-reach]": ropeReachOutput,
+            "[data-debug-rope-flight]": ropeFlightOutput,
+            "[data-debug-rope-mode]": ropeModeOutput
         })[selector] ?? null;
+    documentTarget.querySelectorAll = (selector) => (selector === "[data-debug-rope-field]" ? ropeInputs : []);
     const trigger = new FakeElement();
     const windowTarget = new FakeEventTarget();
     let nextTimerId = 1;
@@ -107,6 +130,12 @@ export function run() {
     );
     assert.equal(metricsInput.checked, true, "the stored metrics toggle must render into the panel");
     assert.equal(startAreaSelect.value, "", "the default start area must render as the empty option");
+    assert.equal(ropeInputs.find(({ dataset }) => dataset.debugRopeField === "hookSpeed").value, "1200");
+    assert.equal(ropeFlightOutput.textContent, "0.333초");
+    assert.equal(ropeReachOutput.textContent, "400.0px");
+    assert.match(ropeModeOutput.textContent, /새 Run으로 즉시 재시작/);
+    assert.equal(ropeFieldset.disabled, false);
+    assert.equal(ropeInputs[0].min, String(ROPE_TUNING_FIELDS[0].min));
 
     trigger.dispatch("pointerdown", { pointerId: 11, pointerType: "mouse", button: 0 });
     assert.equal(
@@ -164,8 +193,30 @@ export function run() {
     startAreaSelect.dispatch("change");
     assert.equal(settings.snapshot().startAreaId, null);
 
+    const hookSpeedInput = ropeInputs.find(({ dataset }) => dataset.debugRopeField === "hookSpeed");
+    hookSpeedInput.value = "1800";
+    hookSpeedInput.dispatch("input");
+    assert.equal(ropeReachOutput.textContent, "600.0px", "editing must update derived values before commit");
+    hookSpeedInput.dispatch("change");
+    assert.deepEqual(settings.snapshot().ropeTuning, { hookSpeed: 1800 });
+    ropeResetButton.dispatch("click");
+    assert.equal(settings.snapshot().ropeTuning, null);
+    assert.equal(hookSpeedInput.value, "1200");
+
+    panel.setRopeTuningEnabled(false);
+    assert.equal(ropeFieldset.disabled, true);
+    assert.match(ropeModeOutput.textContent, /멀티 세션에서는 비활성/);
+    panel.setRopeTuningEnabled(true);
+    assert.equal(ropeFieldset.disabled, false);
+
+    hookSpeedInput.value = "1700";
     applyButton.dispatch("click");
     assert.equal(applied, 1, "the apply button must notify the app to apply debug settings immediately");
+    assert.deepEqual(
+        settings.snapshot().ropeTuning,
+        { hookSpeed: 1700 },
+        "Apply must commit the current input even when change has not fired yet"
+    );
 
     assert.equal(panel.detach(), true);
     assert.equal(panel.detach(), false, "detach must be idempotent");

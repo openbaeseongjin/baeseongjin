@@ -26,7 +26,9 @@ import {
     ROPE_CONFIG,
     ROPE_IMPACT_CONFIG,
     WIND_CONFIG,
-    WORLD_CONFIG
+    WORLD_CONFIG,
+    resolveEffectiveRopeConfig,
+    resolveEffectiveRopeDisabledSeconds
 } from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";
 import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
@@ -139,8 +141,12 @@ export class GameSimulation {
         worldCatalog = null,
         worldFactory = null,
         startAreaId = null,
-        startLandmarkId = null
+        startLandmarkId = null,
+        ropeConfig = ROPE_CONFIG,
+        ropeDisabledSeconds = COMBAT_CONFIG.ropeDisabledSeconds
     } = {}) {
+        this.ropeConfig = resolveEffectiveRopeConfig(ropeConfig);
+        this.ropeDisabledSeconds = resolveEffectiveRopeDisabledSeconds({ ropeDisabledSeconds });
         this.worldCatalog = worldCatalog;
         this.worldFactory = worldFactory;
         this.world = worldFactory
@@ -208,7 +214,7 @@ export class GameSimulation {
         const runtime = createPlayerRuntime({
             registry: this.registry,
             playerConfig: PLAYER_CONFIG,
-            ropeConfig: ROPE_CONFIG,
+            ropeConfig: this.ropeConfig,
             combatConfig: COMBAT_CONFIG,
             spawn,
             playerId
@@ -680,7 +686,7 @@ export class GameSimulation {
             this.releasePlayerRope(ownerId, { transferAngularMomentum: true });
             player.ropeObject.attachBufferRemaining = 0;
             player.ropeObject.launcher.clear();
-            player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
+            player.ropeDisabledRemaining = this.ropeDisabledSeconds;
             return true;
         }
         if (event.resolution !== "player-hit") return false;
@@ -798,7 +804,7 @@ export class GameSimulation {
         player.weapon.cooldown = state.weapon.cooldown;
         player.foundation.restore(state.foundationAugment ?? null, state.augmentRuntimeState);
         player.augmentCombat.restore(state.augmentRuntimeState?.combat ?? null, player.foundation, player.maxHealth);
-        const effectiveRopeConfig = player.foundation.effectiveRopeConfig(ROPE_CONFIG);
+        const effectiveRopeConfig = player.foundation.effectiveRopeConfig(this.ropeConfig);
         player.ropeObject.rope.config = effectiveRopeConfig;
         player.ropeObject.launcher.ropeConfig = effectiveRopeConfig;
         if (player.ropeDisabledRemaining > 0) {
@@ -812,7 +818,7 @@ export class GameSimulation {
             origin: launchOrigin,
             surfaces: this.world.surfaces,
             maxAttachDistance: hookReach(effectiveRopeConfig),
-            aimTolerance: player.foundation.ropeInputModifiers(ROPE_CONFIG).aimTolerance,
+            aimTolerance: player.foundation.ropeInputModifiers(this.ropeConfig).aimTolerance,
             canAttachToSurface: this.#accessScanPredicate()
         });
     }
@@ -1039,7 +1045,7 @@ export class GameSimulation {
                   pointer: { x: 0, y: 0, down: false },
                   aimWorld: player.ropeObject.aimWorld
               };
-        const effectiveRopeConfig = player.foundation.effectiveRopeConfig(ROPE_CONFIG);
+        const effectiveRopeConfig = player.foundation.effectiveRopeConfig(this.ropeConfig);
         player.ropeObject.rope.config = effectiveRopeConfig;
         player.ropeObject.launcher.ropeConfig = effectiveRopeConfig;
         this.#inputDispatcher.dispatch({
@@ -2030,7 +2036,7 @@ export class GameSimulation {
             player.ropeObject.swingDrag = null;
             player.ropeObject.attachBufferRemaining = 0;
             player.ropeObject.launcher.clear();
-            player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
+            player.ropeDisabledRemaining = this.ropeDisabledSeconds;
             this.eventFlash = {
                 type: "rope-cut",
                 age: 0,
@@ -2094,7 +2100,7 @@ export class GameSimulation {
             player.ropeObject.swingDrag = null;
             player.ropeObject.attachBufferRemaining = 0;
             player.ropeObject.launcher.clear();
-            player.ropeDisabledRemaining = COMBAT_CONFIG.ropeDisabledSeconds;
+            player.ropeDisabledRemaining = this.ropeDisabledSeconds;
             return;
         }
         if (claim.impactType === "fall-damage") {
@@ -2326,6 +2332,7 @@ export class GameSimulation {
             activeRespawnAnchor: this.activeRespawnAnchor,
             foundationAugment: player.foundation.selectedId,
             selectedAugmentIds: player.foundation.selectedIds,
+            ropeConfig: this.ropeConfig,
             augmentRuntimeState: Object.freeze({
                 ...player.foundation.snapshot(),
                 combat: player.augmentCombat.snapshot()
@@ -2344,7 +2351,7 @@ export class GameSimulation {
                 ? snapshotAccessScanStates(this.world.scannerGroups, this.elapsedSeconds)
                 : Object.freeze([]),
             resets: this.resets,
-            maxAttachDistance: hookReach(player.foundation.effectiveRopeConfig(ROPE_CONFIG))
+            maxAttachDistance: hookReach(player.foundation.effectiveRopeConfig(this.ropeConfig))
         };
     }
 }

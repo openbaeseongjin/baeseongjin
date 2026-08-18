@@ -1,5 +1,13 @@
 import assert from "node:assert/strict";
 import { DebugSettings, DEFAULT_DEBUG_SETTINGS, normalizeDebugSettings } from "../src/game/metrics/DebugSettings.js";
+import {
+    ROPE_CONFIG,
+    normalizeRopeTuningOverride,
+    resolveEffectiveRopeConfig,
+    resolveEffectiveRopeDisabledSeconds,
+    ropeHookFlightSeconds,
+    ropeHookReach
+} from "../src/game/config.js";
 
 function memoryStorage() {
     const store = new Map();
@@ -16,8 +24,44 @@ export function run() {
     assert.deepEqual(normalizeDebugSettings({ version: 1, metrics: true, startAreaId: null }), {
         version: 1,
         metrics: true,
-        startAreaId: null
+        startAreaId: null,
+        ropeTuning: null
     });
+    assert.deepEqual(
+        normalizeDebugSettings({
+            version: 1,
+            metrics: false,
+            startAreaId: null,
+            ropeTuning: {
+                hookSpeed: 1600,
+                hookReloadSeconds: 8,
+                hookFlightRatio: { numerator: 2, denominator: Number.NaN },
+                handOffset: { x: 20, y: -12 },
+                ropeDisabledSeconds: 1.2
+            }
+        }).ropeTuning,
+        {
+            hookSpeed: 1600,
+            hookFlightRatio: { numerator: 2 },
+            handOffset: { x: 20, y: -12 },
+            ropeDisabledSeconds: 1.2
+        },
+        "invalid fields must fall back independently without discarding valid Rope values"
+    );
+
+    const clamped = resolveEffectiveRopeConfig({
+        hookSpeed: 9999,
+        hookFlightRatio: { numerator: -1, denominator: 99 },
+        handOffset: { x: -20, y: 100 }
+    });
+    assert.equal(clamped.hookSpeed, 2400);
+    assert.deepEqual(clamped.hookFlightRatio, { numerator: 1, denominator: 10 });
+    assert.deepEqual(clamped.handOffset, { x: 0, y: 32 });
+    assert.equal(resolveEffectiveRopeDisabledSeconds({ ropeDisabledSeconds: 99 }), 3);
+    assert.deepEqual(resolveEffectiveRopeConfig(null), ROPE_CONFIG);
+    assert.equal(ropeHookFlightSeconds(clamped), 0.1);
+    assert.equal(ropeHookReach(clamped), 240);
+    assert.equal(normalizeRopeTuningOverride({ hookSpeed: ROPE_CONFIG.hookSpeed }), null);
 
     const storage = memoryStorage();
     const settings = new DebugSettings({ storage });
@@ -33,12 +77,25 @@ export function run() {
     assert.equal(settings.snapshot().startAreaId, "sector-03-02");
     settings.setStartAreaId(null);
     assert.equal(settings.snapshot().startAreaId, null);
+    settings.setRopeTuning({ hookSpeed: 1800, handOffset: { x: 18 }, ropeDisabledSeconds: 1.5 });
+    assert.deepEqual(settings.snapshot().ropeTuning, {
+        hookSpeed: 1800,
+        handOffset: { x: 18 },
+        ropeDisabledSeconds: 1.5
+    });
     assert.throws(() => settings.setMetrics("yes"), /boolean/);
     assert.throws(() => settings.setStartAreaId(""), /non-empty/);
 
     const reloaded = new DebugSettings({ storage });
-    assert.deepEqual(reloaded.snapshot(), { version: 1, metrics: true, startAreaId: null });
-    assert.equal(seen.length, 4, "every change notifies subscribers");
+    assert.deepEqual(reloaded.snapshot(), {
+        version: 1,
+        metrics: true,
+        startAreaId: null,
+        ropeTuning: { hookSpeed: 1800, handOffset: { x: 18 }, ropeDisabledSeconds: 1.5 }
+    });
+    settings.setRopeTuning(null);
+    assert.equal(settings.snapshot().ropeTuning, null);
+    assert.equal(seen.length, 6, "every change notifies subscribers");
 
     const catalogBound = new DebugSettings({ storage: memoryStorage(), validAreaIds: ["sector-01-01"] });
     catalogBound.setStartAreaId("sector-01-01");

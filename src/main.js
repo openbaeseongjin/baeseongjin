@@ -1,6 +1,7 @@
 import { GameApp } from "./game/GameApp.js";
 import { MultiplayerGameApp } from "./game/MultiplayerGameApp.js";
 import { RemoteGameAuthority } from "./game/runtime/RemoteGameAuthority.js";
+import { restartSingleGameForDebugSettings } from "./game/runtime/SingleGameDebugRestart.js";
 import { channelSocketUrl, configuredMultiplayerServer } from "./game/runtime/MultiplayerServerEndpoint.js";
 import { GameModeMenu } from "./game/ui/GameModeMenu.js";
 import { setupInstallPrompt } from "./pwa/InstallPrompt.js";
@@ -74,7 +75,20 @@ const debugPanel = new DebugPanel({
         settingsMenu.activate("debug", { focus: true });
     }
 });
-debugPanel.onApply = () => app?.applyDebugSettings(debugSettings.snapshot());
+debugPanel.onApply = () => {
+    const debug = debugSettings.snapshot();
+    if (app instanceof GameApp) {
+        app = restartSingleGameForDebugSettings({
+            currentApp: app,
+            debugSettings: debug,
+            createApp: createSingleGameApp,
+            beforeRestart: () => audioBindings?.stopScene()
+        });
+        settingsMenu.hide();
+        return;
+    }
+    app?.applyDebugSettings(debug);
+};
 const audioSettingsPanel = new AudioSettingsPanel({
     root: document.getElementById("settings-panel-audio"),
     settings: audioSettings
@@ -118,6 +132,22 @@ const serviceWorkerUpdater = setupServiceWorkerUpdater({
 
 function updateDiagnostics(snapshot) {
     diagnostics.update({ ...snapshot, audioDiagnostics: audioHost?.snapshot() ?? null });
+}
+
+function createSingleGameApp(debug) {
+    return new GameApp({
+        canvas,
+        renderer: createGameRenderer({
+            canvas,
+            profile: rendererProfile,
+            sceneRendererOptions: { playerDefinition, authoredAreaEnvironmentDefinitions }
+        }),
+        audioBindings,
+        onDiagnostics: updateDiagnostics,
+        startAreaId: debug.startAreaId ?? undefined,
+        metricsVisible: debug.metrics,
+        ropeTuning: debug.ropeTuning
+    });
 }
 
 async function prepareGameAudio() {
@@ -169,20 +199,11 @@ async function launch() {
             audioBindings.uiConfirm();
             if (choice.mode === "single") {
                 activeChannelId = null;
+                debugPanel.setRopeTuningEnabled(true);
                 const debug = debugSettings.snapshot();
-                app = new GameApp({
-                    canvas,
-                    renderer: createGameRenderer({
-                        canvas,
-                        profile: rendererProfile,
-                        sceneRendererOptions: { playerDefinition, authoredAreaEnvironmentDefinitions }
-                    }),
-                    audioBindings,
-                    onDiagnostics: updateDiagnostics,
-                    startAreaId: debug.startAreaId ?? undefined,
-                    metricsVisible: debug.metrics
-                });
+                app = createSingleGameApp(debug);
             } else {
+                debugPanel.setRopeTuningEnabled(false);
                 const serverUrl = configuredMultiplayerServer();
                 if (!serverUrl) throw new Error("고정 멀티 서버 주소가 아직 설정되지 않았습니다.");
                 authority = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, choice.channelId) });
@@ -209,6 +230,7 @@ async function launch() {
             app.start();
         } catch (error) {
             authority?.close();
+            debugPanel.setRopeTuningEnabled(true);
             modeMenu.setStatus(error.message, true);
             modeMenu.setBusy(false);
         }
@@ -222,6 +244,7 @@ function returnToMenu(message) {
     app = null;
     modeMenu.rememberChannel(stoppedApp?.authority?.channelId);
     stoppedApp?.stop();
+    debugPanel.setRopeTuningEnabled(true);
     audioBindings?.stopScene();
     channelBadge.hidden = true;
     modeMenu.setStatus(message, true);

@@ -15,7 +15,7 @@
 ## 현재 구현
 
 - `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.codex/skills/github-task-flow/SKILL.md`를 따른다. 개발 효율 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 검증은 base SHA·diff fingerprint ledger의 단일 소유자가 수행하고 같은 candidate의 fresh PASS를 역할별로 반복하지 않는다. 같은 저장소의 독립 작업은 별도 Git worktree를 기본으로 즉시 병렬 진행하며, 실제 같은 hunk·public contract dependency가 있을 때만 직렬화한다. 범위·검증·worktree 반복 기준은 `docs/development-rules.md`의 **효율 우선 실행과 검증 예산**, **동시 Codex 작업과 GitHub 범위 조정** 및 관련 Skill을 따른다.
-- 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(속도 1400px/s × 수명 2/7초 = 400px 도달), 재발사 0.20초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
+- 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(기본 속도 1200px/s × 수명 1/3초 = 400px 도달), 재발사 1.00초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
 - 0.25.0 기본 런은 Sector 01·02·03의 24개 legacy Stage를 3개 4,800px 연속 Sector의 landmark로 compile한다. 각 Sector는 4개 가로 도시 블록 열에 landmark를 2개씩 배치해 실제 bounds가 `4,800×2,851~3,203px`이고 한 화면을 확실히 넘는다. `1-1 → 3-8`은 presentation·migration alias이며 intra-Sector 진행은 objective로 열린 physical connector를 직접 통과한다. Gate portal·per-Area Checkpoint·Stage boundary collision은 기본 world output에 없다.
 - #622 City Phase 1~~2의 `SectorDefinition`·validator·canonical encounter 계약과 #624 Enemy Phase 6을 #625 Runtime cutover가 소비한다. 진행 권위는 `SectorProgressState`, 부활 권위는 `respawnAnchorId`, party wipe 증거는 `partyWipeBaseline`이 소유한다. Sector 04~~06 Runtime과 Timer/Purge·증강 topology mapping은 HOLD다.
 - seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
@@ -23,6 +23,7 @@
 - 기본 자동 사격은 비활성화하고 `AutomaticWeaponObject`·spawn/hit claim 기반은 후속 기능용으로 보존한다. 기본 공격은 로프 부착 중 속도 `620px/s` 이상으로 적과 새로 몸체 충돌할 때 `25` 피해를 주는 로프 충돌 공격이다. 같은 겹침은 분리 후 재진입하기 전까지 반복 피해를 만들지 않는다.
 - 현재 0.25.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 Sector-entry 즉시 부활을 사용한다. solo death는 공용 진행을 보존하고 같은 tick의 전원 사망만 current Sector를 reset한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용한다.
 - 0.26.0은 과거 Foundation 3종을 generic 증강 v1로 교체했다. Catalog는 Rope 6·기본 Action 6·Signature 6·범용 modifier 4의 22장이고 Player별 최대 6장을 갖는다. 각 offer는 `runSeed + stablePlayerId + selectionIndex`로 호환 카드 3장을 결정하며 reroll·rarity·동일 Player 중복 선택이 없다. PC 우클릭과 모바일 Action 버튼, 기본 펀치와 6개 Action, 감전 로프·충돌 폭발, owner-first `augment-impact`·known tombstone no-op이 구현됐다. 정확한 Sector 02~~06 획득 Landmark, Timer +10 trigger, Purge origin/rejoin은 계속 HOLD이며 상세 기준은 `docs/augment-v1.md`다.
+- 디버그 설정의 Rope tuning은 `ROPE_CONFIG` 전 항목과 절단 후 차단 시간을 부분 override로 저장하고, 같은 effective config에서 비행 시간·도달 거리를 파생한다. 싱글에서 `적용`을 누르면 현재 Run을 hot swap하지 않고 종료한 뒤 저장된 시작 맵·Rope base로 새 Run을 즉시 생성한다. selected Rope 증강의 percentage 계산도 이 effective base를 소비한다. 멀티에서는 공용 override 협상 protocol 전까지 입력을 비활성화한다.
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
 - `CanvasRenderer`가 camera 기반 불변 world viewport를 프레임당 한 번 만들고 terrain·decoration·enemy·projectile 하위 renderer가 직접 컬링한다. 정적 surface geometry와 seed·zone 장식 배치는 renderer가 캐시하며 sprite·polygon, 싱글·멀티가 같은 경로를 사용한다. 기본 Canvas 정책은 DPR 최대 2와 backing store 최대 `3 * 1024 * 1024` pixel이고 `GameRendererFactory.canvasOptions`로 조정할 수 있다. 상세 경계는 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
@@ -79,7 +80,7 @@ Gate/출구 표준화(전 32 Area), 포탈 위치 전수 감사·수정(connectA
 
 앵커 축소 스크립트 실수로 소실된 4개 카탈로그 변경분(exitBlock 이관·출구 데크 offset 125·층 격벽 봉쇄·트리거 스펙) 재구축과 600px 기준 앵커 축소가 완료됐다. 4개 카탈로그 모두 import·validator 통과, `tests/runAll.mjs` 6개 시나리오 전부 PASS, `npm run check`·`npm run format:check`·`git diff --check` 통과, `docs/scenario-development-integration.md` entry 45와 fingerprint 갱신 완료. 다음은 이 변경분을 커밋하고 github-task-flow PR로 게시하는 것이다.
 
-1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 팬 바람 미발생 근본 수정이 완료됐다(파생 bounds 오염 → 좌표 교정 + 검증기 가드 + 승인 bounds 회귀 테스트, entry 46). 다음 작업은 사용자 지시의 **디버그 모드 로프 수치 조정 패널**이다. 사용자 확정 요구: 디버그 모드에 로프 관련 기본 시스템 수치를 조정하는 패널을 구현한다. 합의된 계획(핸드오프 프롬프트에 상세 포함): ROPE_CONFIG 전 항목(hookSpeed·비행 수명비·재발사 대기·부착 버퍼·드래그 임계 비율·최소 홀드·swingImpulse·handOffset·해제 접선 전달) + 절단 후 로프 차단 시간, 파생값(도달 거리·비행 시간) 읽기 전용 표시, `resolveEffectiveRopeConfig(override)`로 clamp·유효화해 GameSimulation 생성 시 주입(모듈 상수 직접 사용 7곳 제거), 저장은 기존 `DebugSettings` 확장(부분 override), 적용 시점은 다음 시작부터(살아 있는 플레이어의 config 참조 즉시 교체는 후속), 멀티는 세션 공유 override 프로토콜 전까지 싱글 전용으로 비활성 표시.
+1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 팬 바람 미발생 근본 수정과 디버그 Rope tuning 패널 구현이 완료됐다. 싱글은 적용 버튼에서 새 Run으로 즉시 재시작하고 멀티는 비활성이다. 다음 기획 의존 작업은 Sector 02~~06 증강 획득 Landmark, Timer +10 trigger, Purge origin/rejoin의 physical topology mapping이다. 공용 멀티 Rope override 협상과 살아 있는 Run의 config hot swap은 별도 후속 Issue다.
 
 Scenario Art 생성의 현재 기준은 `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`다. 매 생성·수정 전에 해당 Stage README·Production Alignment와 현재 Area Catalog의 Camera Zone·Stable ID·정확한 오브젝트 수·구현 상태를 확인한다. Art Reference는 전체 맵이 아닌 대표 Gameplay Camera Shot 한 장으로 만들고, 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시한다. 정확한 World 좌표의 권위는 Approved Blockout에 두되, Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 구조 가이드로 고정해 이미지에서도 보존한다. 구도를 위해 Gameplay Geometry를 옮기거나 늘리지 않는다. `RETIRED`·`PENDING REGENERATION` 이미지는 새 생성 입력으로 사용하지 않는다. 프로젝트용으로 승인한 생성 이미지는 Stage `images/`에 저장하고 생성 기록·상태 문서와 같은 PR로 GitHub `main`에 병합한다. Sector 01은 Navy·Charcoal 산업 정비 시설, 어두운 전경·플레이 중경·푸른 원경, 제한된 Cyan과 드문 Amber를 유지하며 Player·Rope·Anchor·Telegraph 가독성을 우선한다. 1-1 C04의 `05_scenario_art_reference.png`, 1-2 C02의 `06_scenario_art_reference.png`, 1-3 Route Choice의 `05_scenario_art_reference.png`, 1-4 Node의 `03_scenario_art_reference.png`가 구조 정합 승인 기준이다. 1-5~1-8은 Approved Blockout 제작이 다음 선행 과제다.
 
@@ -199,7 +200,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 ### [L2] 기본 Grapple과 Sentry를 현재 authored 맵 밀도에 맞춘다
 
 - Rope는 입력 즉시 Anchor에 연결되지 않고 손에서 Grapple Hook을 발사해 실제 비행 후 유효 표면에 도달해야 부착된다. 빗나가거나 입력을 놓으면 취소되고 재발사 대기를 거친다.
-- 첫 Prototype은 Hook 속도 `1400px/s`, 비행 수명 약 `0.286초`로 최대 도달 거리 `400px`를 만든다. 별도 Rope 사거리 상수를 중복 소유하지 않고 후보 탐색·실제 명중·로프 최대 길이가 `속도 × 수명` 계산값 하나를 사용한다. 재발사 대기는 `0.20초`, 기존 `swingImpulse = 780`은 유지하며 실제 Stage 조작 표본으로 후속 조정한다.
+- 현재 기본 Hook은 `1200px/s × 1/3초 = 400px`, 재발사 대기 `1.00초`, `swingImpulse = 780`이다. 별도 Rope 사거리 상수를 중복 소유하지 않고 후보 탐색·실제 명중·로프 최대 길이가 같은 effective config의 `속도 × 수명`을 사용한다. 디버그 override는 다음 싱글 시작부터 이 base를 바꾸며 증강은 그 위에서 퍼센트로 계산한다.
 - Sentry와 같은 공격 FSM을 재사용하는 적의 첫 Prototype은 체력 `100`, 인식 거리 `760px`, 적 탄속 `520px/s`, 재사격 대기 `1.0초`를 사용한다. 기존 Acquire·Track·Lock Telegraph, authored activation band, Cover LOS와 `no-rope-cut` 규칙은 유지한다.
 
 ### [L1] 한 런은 하나의 붕괴 도시 월드를 48개 진행 영역으로 연결한다

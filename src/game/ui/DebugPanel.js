@@ -1,4 +1,31 @@
+import {
+    ROPE_TUNING_FIELDS,
+    resolveEffectiveRopeConfig,
+    resolveEffectiveRopeDisabledSeconds,
+    ropeHookFlightSeconds,
+    ropeHookReach
+} from "../config.js";
+
 export const DEBUG_PANEL_HOLD_MS = 1000;
+
+function valueAtPath(value, path) {
+    return path.split(".").reduce((current, key) => current?.[key], value);
+}
+
+function setPath(target, path, value) {
+    const [group, key] = path.split(".");
+    if (!key) {
+        target[group] = value;
+        return;
+    }
+    target[group] ??= {};
+    target[group][key] = value;
+}
+
+function inputNumber(input) {
+    if (typeof input.value === "string" && input.value.trim() === "") return Number.NaN;
+    return Number.isFinite(input.valueAsNumber) ? input.valueAsNumber : Number(input.value);
+}
 
 export class DebugPanel {
     constructor({
@@ -19,6 +46,13 @@ export class DebugPanel {
         this.metricsInput = null;
         this.startAreaSelect = null;
         this.applyButton = null;
+        this.ropeFieldset = null;
+        this.ropeInputs = [];
+        this.ropeResetButton = null;
+        this.ropeReachOutput = null;
+        this.ropeFlightOutput = null;
+        this.ropeModeOutput = null;
+        this.ropeTuningEnabled = true;
         this.holdTimerId = null;
         this.lastActivatedAt = 0;
         this.attached = false;
@@ -39,7 +73,13 @@ export class DebugPanel {
         this.onMetricsChange = () => this.settings.setMetrics(this.metricsInput.checked);
         this.onStartAreaChange = () =>
             this.settings.setStartAreaId(this.startAreaSelect.value.trim() ? this.startAreaSelect.value : null);
-        this.onApplyClick = () => this.onApply?.();
+        this.onApplyClick = () => {
+            if (this.ropeTuningEnabled) this.settings.setRopeTuning(this.ropeTuningFromInputs());
+            this.onApply?.();
+        };
+        this.onRopeInput = () => this.renderRopeDerived(this.ropeTuningFromInputs());
+        this.onRopeChange = () => this.settings.setRopeTuning(this.ropeTuningFromInputs());
+        this.onRopeReset = () => this.settings.setRopeTuning(null);
     }
 
     beginHold() {
@@ -66,8 +106,31 @@ export class DebugPanel {
         this.metricsInput = this.documentTarget.querySelector("[data-debug-metrics]");
         this.startAreaSelect = this.documentTarget.querySelector("[data-debug-start-area]");
         this.applyButton = this.documentTarget.querySelector("[data-debug-apply]");
-        if (!this.metricsInput || !this.startAreaSelect || !this.applyButton) {
+        this.ropeFieldset = this.documentTarget.querySelector("[data-debug-rope-tuning]");
+        this.ropeInputs = [...this.documentTarget.querySelectorAll("[data-debug-rope-field]")];
+        this.ropeResetButton = this.documentTarget.querySelector("[data-debug-rope-reset]");
+        this.ropeReachOutput = this.documentTarget.querySelector("[data-debug-rope-reach]");
+        this.ropeFlightOutput = this.documentTarget.querySelector("[data-debug-rope-flight]");
+        this.ropeModeOutput = this.documentTarget.querySelector("[data-debug-rope-mode]");
+        if (
+            !this.metricsInput ||
+            !this.startAreaSelect ||
+            !this.applyButton ||
+            !this.ropeFieldset ||
+            this.ropeInputs.length !== ROPE_TUNING_FIELDS.length ||
+            !this.ropeResetButton ||
+            !this.ropeReachOutput ||
+            !this.ropeFlightOutput ||
+            !this.ropeModeOutput
+        ) {
             throw new Error("DebugPanel is missing panel controls");
+        }
+        for (const input of this.ropeInputs) {
+            const field = ROPE_TUNING_FIELDS.find(({ path }) => path === input.dataset.debugRopeField);
+            if (!field) throw new Error(`unknown debug Rope field '${input.dataset.debugRopeField}'`);
+            input.min = String(field.min);
+            input.max = String(field.max);
+            input.step = String(field.step);
         }
         const existingAreaIds = new Set([...this.startAreaSelect.options].map(({ value }) => value));
         for (const areaId of this.areaIds) {
@@ -86,7 +149,13 @@ export class DebugPanel {
         this.metricsInput.addEventListener("change", this.onMetricsChange);
         this.startAreaSelect.addEventListener("change", this.onStartAreaChange);
         this.applyButton.addEventListener("click", this.onApplyClick);
+        for (const input of this.ropeInputs) {
+            input.addEventListener("input", this.onRopeInput);
+            input.addEventListener("change", this.onRopeChange);
+        }
+        this.ropeResetButton.addEventListener("click", this.onRopeReset);
         this.unsubscribe = this.settings.subscribe((value) => this.render(value));
+        this.renderRopeTuningAvailability();
         this.attached = true;
         return true;
     }
@@ -94,6 +163,43 @@ export class DebugPanel {
     render(value) {
         this.metricsInput.checked = value.metrics;
         this.startAreaSelect.value = value.startAreaId ?? "";
+        const effective = resolveEffectiveRopeConfig(value.ropeTuning);
+        for (const input of this.ropeInputs) {
+            const path = input.dataset.debugRopeField;
+            input.value = String(
+                path === "ropeDisabledSeconds"
+                    ? resolveEffectiveRopeDisabledSeconds(value.ropeTuning)
+                    : valueAtPath(effective, path)
+            );
+        }
+        this.renderRopeDerived(value.ropeTuning);
+    }
+
+    ropeTuningFromInputs() {
+        const tuning = {};
+        for (const input of this.ropeInputs) {
+            const value = inputNumber(input);
+            if (Number.isFinite(value)) setPath(tuning, input.dataset.debugRopeField, value);
+        }
+        return tuning;
+    }
+
+    renderRopeDerived(override) {
+        const effective = resolveEffectiveRopeConfig(override);
+        this.ropeFlightOutput.textContent = `${ropeHookFlightSeconds(effective).toFixed(3)}초`;
+        this.ropeReachOutput.textContent = `${ropeHookReach(effective).toFixed(1)}px`;
+    }
+
+    setRopeTuningEnabled(enabled) {
+        this.ropeTuningEnabled = Boolean(enabled);
+        if (this.attached) this.renderRopeTuningAvailability();
+    }
+
+    renderRopeTuningAvailability() {
+        this.ropeFieldset.disabled = !this.ropeTuningEnabled;
+        this.ropeModeOutput.textContent = this.ropeTuningEnabled
+            ? "싱글 전용 · 적용 버튼을 누르면 새 Run으로 즉시 재시작"
+            : "멀티 세션에서는 비활성 · 공유 Rope 설정 프로토콜 미구현";
     }
 
     detach() {
@@ -108,6 +214,11 @@ export class DebugPanel {
         this.metricsInput.removeEventListener("change", this.onMetricsChange);
         this.startAreaSelect.removeEventListener("change", this.onStartAreaChange);
         this.applyButton.removeEventListener("click", this.onApplyClick);
+        for (const input of this.ropeInputs) {
+            input.removeEventListener("input", this.onRopeInput);
+            input.removeEventListener("change", this.onRopeChange);
+        }
+        this.ropeResetButton.removeEventListener("click", this.onRopeReset);
         this.unsubscribe?.();
         this.attached = false;
         return true;

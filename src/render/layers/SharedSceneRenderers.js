@@ -1255,10 +1255,11 @@ export class RopeShotRenderer {
     }
 
     draw({ context, scene }) {
-        for (const entry of this.selectShots(scene)) this.drawShot(context, entry.shot, entry.player);
+        const handOffset = scene.ropeConfig?.handOffset ?? ROPE_CONFIG.handOffset;
+        for (const entry of this.selectShots(scene)) this.drawShot(context, entry.shot, entry.player, handOffset);
     }
 
-    drawShot(context, shot, player = null) {
+    drawShot(context, shot, player = null, handOffset = ROPE_CONFIG.handOffset) {
         const distance = Math.min(shot.traveled, ropeHookReach());
         const tip = {
             x: shot.origin.x + shot.direction.x * distance,
@@ -1266,7 +1267,7 @@ export class RopeShotRenderer {
         };
         const angle = Math.atan2(shot.direction.y, shot.direction.x);
         const body = player?.position
-            ? ropeLaunchHandPoint(player, ROPE_CONFIG.handOffset, {
+            ? ropeLaunchHandPoint(player, handOffset, {
                   x: player.position.x + shot.direction.x,
                   y: player.position.y + shot.direction.y
               })
