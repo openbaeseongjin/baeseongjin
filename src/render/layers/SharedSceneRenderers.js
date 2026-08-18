@@ -1,6 +1,7 @@
 import { ropeAttachmentPoint, ropeLaunchHandPoint } from "../../game/rope/RopeAttachment.js";
 import { ROPE_CONFIG, ropeHookReach } from "../../game/config.js";
 import { windBladePhase } from "../../game/world/WorldForceField.js";
+import { isSurfaceEnabledForProgress } from "../../game/world/WorldGateGeometry.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
@@ -92,7 +93,7 @@ export class WorldGeometryRenderer {
     }
 
     draw({ context, scene, viewport, renderStats }) {
-        const surfaces = this.surfaceEntries(scene.world);
+        const surfaces = this.surfaceEntries(scene.world, scene.worldProgress);
         const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
         for (const { surface } of visibleSurfaces) this.drawRock(context, surface);
         renderStats?.recordCollection("terrainSurfaces", surfaces.length, visibleSurfaces.length);
@@ -122,15 +123,16 @@ export class WorldGeometryRenderer {
         );
     }
 
-    surfaceEntries(world) {
-        if (this.cachedWorld === world) return this.cachedSurfaces;
-        this.cachedWorld = world;
-        this.cachedSurfaces = Object.freeze(
-            (world.surfaces ?? [])
-                .filter(({ renderable }) => renderable !== false)
-                .map((surface) => Object.freeze({ surface, bounds: boundsForVertices(surface.vertices) }))
-        );
-        return this.cachedSurfaces;
+    surfaceEntries(world, progress) {
+        if (this.cachedWorld !== world) {
+            this.cachedWorld = world;
+            this.cachedSurfaces = Object.freeze(
+                (world.surfaces ?? [])
+                    .filter(({ renderable }) => renderable !== false)
+                    .map((surface) => Object.freeze({ surface, bounds: boundsForVertices(surface.vertices) }))
+            );
+        }
+        return this.cachedSurfaces.filter(({ surface }) => isSurfaceEnabledForProgress(surface, progress));
     }
 
     drawRock(context, surface) {
