@@ -1,14 +1,14 @@
 # 증강 v1
 
-이 문서는 0.26.0 증강 Runtime의 제품·수치·멀티플레이 기준이다. 과거 Foundation 3종과 Foundation별 Specialization은 이 계약으로 대체되며, 호환 ID는 이전 snapshot을 한 번 읽는 migration 입력으로만 사용한다.
+이 문서는 0.26.0 증강 Runtime과 0.28.0 획득 topology의 제품·수치·멀티플레이 기준이다. 과거 Foundation 3종과 Foundation별 Specialization은 이 계약으로 대체되며, 호환 ID는 이전 snapshot을 한 번 읽는 migration 입력으로만 사용한다.
 
 ## 제품 의도
 
 - 증강은 Rope 중심 플레이스타일을 Run마다 다르게 조합해 반복 플레이 폭을 만든다.
 - 기본 Rope와 기본 펀치만으로도 필수 진행과 Boss를 완주할 수 있어야 한다.
 - 특정 카드나 파티 조합을 필수 geometry·Boss 해법으로 요구하지 않는다.
-- Player별 최대 6장, 한 Sector당 한 번의 logical entitlement를 사용한다.
-- 선택 위치의 정확한 Landmark 좌표, Timer `+10` trigger, Purge origin/rejoin은 별도 topology 결정 전까지 HOLD다.
+- Player별 최대 6장, Runtime에 연결된 각 Sector의 명시적 장비 Node에서 한 번의 logical entitlement를 사용한다.
+- Sector 01~03의 획득 위치는 아래 명시적 source로 고정한다. Sector 04~06 source, Timer `+10` trigger와 Purge origin/rejoin은 별도 topology 결정 전까지 HOLD다.
 
 ## 선택 계약
 
@@ -21,7 +21,21 @@
 - Signature는 현재 기본 Action과 호환되는 한 장만 허용한다.
 - 선택 중인 Player의 gameplay 입력만 chooser가 가져가고 월드·적·투사체·동료는 계속 진행한다. 별도 무적은 없다.
 - pending offer, 선택 index, 획득 카드와 source 소비 상태는 사망·부활·재접속 뒤에도 보존한다.
-- 현재 authored `augment-node`는 명시적 source adapter다. `legacyStageAlias`, landmark 순서나 추정 좌표로 새 획득 지점을 자동 생성하지 않는다.
+- authored `augment-node`만 명시적 source adapter다. `legacyStageAlias`, landmark 순서나 추정 좌표로 새 획득 지점을 자동 생성하지 않는다.
+
+## Runtime 획득 topology
+
+| 순서 | Sector / Landmark | Stable source ID | 역할 |
+| ---: | --- | --- | --- |
+| 1 | Sector 01 / landmark 04 | `sector-01-04:maintenance-node` | 첫 generic 3장 offer |
+| 2 | Sector 02 / landmark 03 | `sector-02-03:specialization-node` | 두 번째 generic 3장 offer. snapshot 호환을 위해 과거 object ID 유지 |
+| 3 | Sector 03 / landmark 05 | `sector-03-05:service-calibration-frame` | 세 번째 generic 3장 offer |
+
+- 세 source는 모두 `interact-choice` objective이며 선택이 해당 outbound panel 진행의 선행 조건이다.
+- 선택 종류는 고정 Foundation/Specialization tier가 아니라 현재 loadout과 호환되는 동일한 22장 Catalog offer다.
+- source 소비와 pending offer는 Player별 상태다. 개인 사망·부활·재접속·party wipe가 획득 카드나 소비 source를 초기화하지 않는다. party wipe로 current Sector objective가 reset되면 이미 전원이 소비한 Node를 다시 방문하는 순간 두 번째 offer 없이 shared objective만 복구한다.
+- 공용 objective는 현재 채널 Player 전원이 해당 source를 소비한 뒤 한 번 완료해 route를 연다. 완료 전 퇴장한 Player는 요구 집합에서 제거해 교착을 막고, objective 완료 뒤 합류한 Player에게도 같은 Node의 개인 offer를 제공하되 이미 열린 route를 다시 잠그지 않는다.
+- Sector 04~06은 Runtime 연결과 명시적 장비 Node 결정 전까지 source를 만들지 않는다.
 
 ## 22장 Catalog
 

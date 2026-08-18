@@ -230,7 +230,7 @@ const area03Landmarks = [];
 const area03Exit = point(`${area03Id}:exit`, 304, -704);
 const area03Objective = Object.freeze({
     id: `${area03Id}:specialization-selected`,
-    type: "interact",
+    type: "interact-choice",
     sourceObjectId: `${area03Id}:specialization-node`
 });
 const area03PanelObjective = exitPanelObjective(area03Id, [area03Objective.id]);
@@ -239,7 +239,7 @@ const area03 = defineArea({
     sectorId: "sector-02",
     order: 3,
     name: "RESIDENTIAL SERVICE NODE",
-    subtitle: "FIRST SPECIALIZATION",
+    subtitle: "AUGMENT SERVICE",
     bounds: { width: 960, height: 768 },
     entry: point(`${area03Id}:entry`, -288, -32),
     exit: block03.exit,
@@ -267,9 +267,6 @@ const area03 = defineArea({
         worldObject(`${area03Id}:specialization-node`, "augment-node", 0, -416, {
             interactionRadius,
             objectiveId: area03Objective.id,
-            selectionPool: "TBD",
-            requiresFoundation: true,
-            perPlayerSelection: true,
             cueIds: ["foundation-detected", "specialization-available"]
         }),
         block03.panel,

@@ -2,7 +2,13 @@
 
 *MASTER PLAN v1*
 
-`LEVELS 2-1–2-8` · `WORLD LEVELS 09–16` · `DIFFICULTY ★★ → ★★★★ SAWTOOTH` · `NEW ENEMY PATROL DRONE` · `NEW VARIABLE MOVING SECURITY PRESSURE` · `FIRST SPECIALIZATION @ 2-3`
+`LEVELS 2-1–2-8` · `WORLD LEVELS 09–16` · `DIFFICULTY ★★ → ★★★★ SAWTOOTH` · `NEW ENEMY PATROL DRONE` · `NEW VARIABLE MOVING SECURITY PRESSURE` · `SECOND GENERIC AUGMENT @ 2-3`
+
+## CURRENT RUNTIME OVERRIDE — 0.28.0
+
+- 과거 Foundation 3종과 Foundation별 Specialization 계층은 `docs/augment-v1.md`의 22장 generic Catalog로 대체됐다.
+- 2-3 Residential Service Node는 Player별 두 번째 결정적 3장 offer를 여는 명시적 source다. 특정 tier나 특정 카드 계열을 요구하지 않는다.
+- 아래 `Foundation → Specialization` 명칭과 고정 계열 후보는 **AUTHORING SNAPSHOT — SUPERSEDED**다. 2-3의 Rest/Reward 위치, 공동 Service Room 공간·Story, 적·Hazard 없음과 이후 Build 표현 의도는 유지한다.
 
 > 이 문서는 `2-1`~`2-8` 개별 스테이지 시나리오 문서가 아니라, Sector 02 전체를 관통하는 기획 요약본이다. 개별 스테이지 상세 스펙(좌표, Grid, Camera 등)은 각 `2-N/README.md`에서 다룬다.
 

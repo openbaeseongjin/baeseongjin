@@ -1,25 +1,26 @@
 # SECTOR 02-3 — PRODUCTION ALIGNMENT
 
-*IMPLEMENTATION · CAMERA · SPECIALIZATION HANDOFF · REV 1.1*
+*IMPLEMENTATION · CAMERA · GENERIC AUGMENT HANDOFF · REV 1.2*
 
-본 문서는 [2-3 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-3은 Sector 02의 첫 Specialization Rest Stage이며, 좌표 정합성이 이번에 검증한 8개 Stage 중 가장 높다 — 모든 Surface·Node 위치가 README와 정확히 일치한다.
+본 문서는 [2-3 시나리오](./README.md)를 현재 Runtime과 연결하는 제작 계약이다. 2-3은 Sector 02의 두 번째 generic Augment Rest Stage이며 모든 Surface·Node 위치를 그대로 유지한다.
 
-## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
+## 0. CURRENT RUNTIME OVERRIDE — 0.28.0
 
 - Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
-- `FOUNDATION AUGMENT / DETECTED` entry, Node detection 위치 Story와 specialization objective Story가 구현됐다.
-- Specialization 6종 실제 효과는 별도 확정 구현 범위이며 Story binding 완료와 구분한다.
+- stable `sector-02-03:specialization-node`는 두 번째 generic 3장 offer source다.
+- objective는 `interact-choice`이며 고정 `selectionPool:TBD`·`requiresFoundation` tier를 사용하지 않는다.
+- Story ID는 migration 호환을 위해 보존하고 표시 문구는 `AUGMENT SERVICE NODE / OFFER 2 AVAILABLE`로 정렬한다.
 - `storyTriggers`는 시나리오 기획 인벤토리다.
 
-> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 전면 미구현 서술은 위 Current Runtime Override로 대체됐다.
+> **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Specialization 전용 pool/effect와 Camera/Story 미구현 서술은 위 Current Runtime Override와 `docs/augment-v1.md`로 대체됐다.
 
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |
 | --- | --- | --- |
 | 960×768 Geometry | `IMPLEMENTED — README와 완전 일치` | P0~P3, R1, Exit Deck, G1/G2, Specialization Node 전부 좌표 일치 |
-| Specialization Node | `IMPLEMENTED(뼈대) / PENDING(실제 효과)` | `worldObject(..., "augment-node", 0, -416, {interactionRadius, objectiveId, selectionPool:"TBD", requiresFoundation:true, perPlayerSelection:true, cueIds:["foundation-detected","specialization-available"]})`. `selectionPool:"TBD"`가 README §0 "SYSTEM GATE — 아직 LOCKED가 아니다"와 정확히 일치 |
-| Objective 타입 | `IMPLEMENTED / CONTENT BLOCKED` | 공용 `interact-choice` 요청은 구현됐지만 `selectionPool:"TBD"`라 Specialization chooser와 결과 적용은 아직 열 수 없음 |
+| Augment Node | `IMPLEMENTED` | stable object ID와 좌표 `(0,-416)`을 유지하고 generic `augment-node` chooser를 연결 |
+| Objective 타입 | `IMPLEMENTED` | `interact-choice`가 Player별 selection index 1의 offer를 열고 선택 뒤 outbound 진행을 해제 |
 | Selection Input 재사용(`FoundationRewardSelection`) | `README 서술만 존재, 직접 확인 필요` | README §19-1이 "VERIFIED"로 표기하지만 이 Area 정의 자체는 Selection UI 로직을 포함하지 않는다(UI는 별도 시스템) |
 | Camera Zones | `NOT IMPLEMENTED` | 필드 없음 |
 | Story Trigger Presentation | `NOT IMPLEMENTED` | `storyTriggers: ["residential-service","foundation-detected","specialization-available"]` 3개 모두 미연결 |
@@ -58,7 +59,7 @@
 
 | 항목 | 값 |
 | --- | --- |
-| `specialization-selected` | type `interact-choice`, sourceObjectId `specialization-node` — 공용 요청은 가능하지만 `selectionPool:"TBD"`라 chooser 개방 불가 |
+| `specialization-selected` | type `interact-choice`, sourceObjectId `specialization-node` — stable ID를 유지한 generic offer 2 objective |
 | Exit Panel(exitBlock) | `(304,-704)`, exit.x-112 |
 | Gate | `(416,-704)` → `sector-02-04`(exitBlock 표준) |
 
@@ -80,13 +81,13 @@ Enemy 없음 — 코드·README 일치.
 | 범위 | 현재 | 다음 작업 |
 | --- | --- | --- |
 | 지형·Node 위치 | Runtime Mock 연결 완료, README와 완전 일치 | 없음 |
-| `interact-choice` 완료 | 공용 요청 구현 / 콘텐츠 미완료 | Specialization Catalog·효과·저장 계약 확정 뒤 전용 chooser 결과 적용 연결 |
-| Specialization Catalog | `selectionPool: "TBD"` | 카탈로그 확정 후 Node에 연결 |
+| `interact-choice` 완료 | 싱글·멀티 generic chooser 연결 | Player별 source 소비·selection index 회귀 유지 |
+| Augment Catalog | 22장 generic pool | `docs/augment-v1.md`의 호환성·중복 금지 규칙 유지 |
 | Camera / Story | 없음 | Zone·Trigger 연결 |
 
 ## 8. 증강·Story 연결
 
-2-3은 Sector 02의 첫 Specialization 선택 지점이다. `requiresFoundation:true`가 README의 "1-4 Foundation이 유지되어야 함" 요구와 일치한다. `perPlayerSelection:true`는 README §19-4의 멀티플레이 독립 선택 요구와 일치.
+2-3은 Sector 02의 두 번째 generic Augment 선택 지점이다. Player별 source 소비와 독립 chooser는 README §19-4의 멀티플레이 의도를 유지하되 고정 Foundation/Specialization 계층은 사용하지 않는다.
 
 ---
 

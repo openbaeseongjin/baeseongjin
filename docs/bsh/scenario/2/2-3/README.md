@@ -1,10 +1,17 @@
 # SECTOR 02-3 — RESIDENTIAL SERVICE NODE
 
-*BLOCKOUT CANDIDATE · REV 1.0*
+*BLOCKOUT CANDIDATE · REV 1.1 — GENERIC AUGMENT OVERRIDE*
 
 ◀ PREV — [SECTOR 02-2 / PATROL WALKWAY](../2-2/README.md) · NEXT — [SECTOR 02-4 / RESIDENTIAL STACK](../2-4/README.md) ▶
 
-`SECTOR 02 WORKER DISTRICT` · `STAGE 03` · `FIRST SPECIALIZATION` · `REST / REWARD`
+`SECTOR 02 WORKER DISTRICT` · `STAGE 03` · `SECOND GENERIC AUGMENT` · `REST / REWARD`
+
+## CURRENT RUNTIME OVERRIDE — 0.28.0
+
+- 2-3은 `sector-02-03:specialization-node` stable ID를 유지한 두 번째 generic Augment source다.
+- 선택은 Foundation 종속 Specialization이 아니라 현재 loadout과 호환되는 22장 Catalog의 결정적 3장 offer다. reroll과 rarity는 없다.
+- `interact-choice`로 chooser를 열고 Player별로 source를 한 번 소비한다. 현재 채널 Player 전원의 선택 뒤 공용 outbound objective가 완료되며 퇴장 Player는 교착을 만들지 않는다. pending offer·선택·소비 source는 사망·재접속·party wipe 뒤 유지된다.
+- 아래 Foundation/Specialization tier, `selectionPool:TBD`, 고정 계열 후보 서술은 **AUTHORING SNAPSHOT — SUPERSEDED BY GENERIC AUGMENT V1**다. Geometry, 안전한 Choice Deck, Enemy/Hazard 없음, 짧은 Calibration과 멀티 독립 선택 의도는 유지한다.
 
 | 항목 | 기준 |
 |---|---|

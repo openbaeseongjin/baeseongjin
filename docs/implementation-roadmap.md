@@ -52,7 +52,7 @@
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
 3. **Phase 3 · #625:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, Sector-entry respawn과 party-wipe baseline, local-position camera/environment, WorldSnapshot protocol v7로 전환한다. legacy Area revision은 compatibility test로만 유지한다.
-4. [완료 #628] topology-independent 증강 v1 core와 첫 explicit `augment-node` adapter를 연결했다. Timer +10 trigger, Purge origin/rejoin과 후속 증강 획득 Landmark 좌표는 별도 결정한다.
+4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~06 획득 Node는 별도 결정한다.
 
 ### 제출 전 시나리오 구현 트랙
 
@@ -62,13 +62,13 @@
 
 Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했고 Camera·Story 인계 범위도 반영했다. 남은 것은 Post-Sector 03 Boss→`4-1` 전환 사용자 검토다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
 
-`2-3`의 과거 Foundation별 Specialization은 0.26.0에 포함하지 않는다. Node skeleton은 Quest·순수 이동 카드·추가 Signature와 함께 후속 Catalog 확장 입력으로만 남긴다.
+`2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
 Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합한다. 맵은 결정적인 corridor/route·activation band만 제공하고 공격 acquire·track·lock·fire·cooldown과 투사체 규칙은 재사용한다. Patrol 자료가 없는 Sentry는 정지 동작을 유지한다. 각 Drone은 자기 band 안에서만 이동·획득하고 공격 cycle 중 target을 유지해 다른 band 플레이어 때문에 재조준하거나 지속 crossfire를 만들지 않는다.
 
 월드 선택도 실행 방식별로 나누지 않는다. 로컬 실행과 네트워크 서버·예측은 하나의 `GameSimulationFactory`와 현재 authored catalog를 공유한다. 네트워크는 같은 world revision과 진행 상태를 복제할 뿐 별도 맵을 생성하지 않는다. 맵 definition은 stable object/state/event/presentation/cue ID만 소유하고 이미지·atlas·음원 경로는 소유하지 않는다. 현재 표현은 environment/audio runtime catalog와 world-object mock presentation catalog를 통해 연결하며 정식 package가 준비되면 같은 ID의 표현만 교체한다.
 
-P1~~P5 기획 게이트는 2026-08-16에 답변됐다. Specialization 6종, Boss01과 Final Security, Timer Prototype baseline, 예선 NPC 제외, 개별 Boarding·Ending 계약은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다. 구현은 `P0 Alignment → Specialization → Boss primitive/Boss01 → Timer baseline → Sector04/05/06 Runtime 확장 → Final Security/Ending → Playtest` 순서이며, Sector02~~05 개별 Boss 상세와 최종 밸런스만 후속 기획으로 남긴다. NPC는 핵심 범위 완료 뒤 여유가 있을 때만 2-6 최소안으로 검토한다.
+P1~~P5 기획 게이트의 Boss01·Final Security·Timer Prototype baseline·예선 NPC 제외·개별 Boarding·Ending 계약은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다. 과거 Specialization 6종은 generic 증강 v1로 대체됐다. 구현은 `P0 Alignment → Boss primitive/Boss01 → Timer baseline → Sector04/05/06 Runtime 확장 → Final Security/Ending → Playtest` 순서이며, Sector02~~05 개별 Boss 상세와 최종 밸런스만 후속 기획으로 남긴다. NPC는 핵심 범위 완료 뒤 여유가 있을 때만 2-6 최소안으로 검토한다.
 
 ### 섹터 1 legacy authoring migration 기록
 
@@ -96,7 +96,7 @@ P1~~P5 기획 게이트는 2026-08-16에 답변됐다. Specialization 6종, Boss
 ### P0. 로그라이크 한 판의 순환 완성
 
 1. [완료] 하나의 큰 월드 정상에 최종 목표와 `completed` 상태를 추가한다. 완료 후 자동으로 다음 스테이지를 시작하지 않는다.
-2. [완료] 1-4 Maintenance Node에서 Foundation 3종 선택을 한 번 제공한다.
+2. [완료 #628, #633] 1-4·2-3·3-5 explicit Node에서 generic Augment 3장 offer를 Player별 한 번씩 제공한다.
     - [실시간 선택 완료] 선택은 월드 시간을 멈추지 않고 해당 플레이어의 메뉴 입력만 이동·점프·로프 조작과 분리한다.
 3. [완료] Player별 Foundation 상태와 런 한정 효과 적용 경계를 만든다.
 4. [완료] 사망 시 개인 Sector-entry 복귀, 같은 tick 전원 사망 시 current-Sector baseline reset 규칙을 적용한다.
@@ -166,7 +166,7 @@ Foundation이 로프 숙련을 대체하지 않고 보상하도록 한다.
 ### P3. 코어 검증 이후 확장
 
 - 영구 성장과 자동 자원 생산
-- 적·무기·Foundation/Specialization 확장
+- 적·무기·generic Augment 확장
 - 수집 도감, 섹터별 보스 전투, 바이옴과 완성형 아트
 
 적 roster 확장 순서:
