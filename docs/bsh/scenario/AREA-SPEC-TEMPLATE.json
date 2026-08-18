@@ -1,0 +1,145 @@
+{
+    "_comment": [
+        "TEMPLATE — not a real stage. Do not count this file as a Stage AREA-SPEC.",
+        "Copy this into docs/bsh/scenario/<sector>/<stage>/AREA-SPEC.json and fill in real,",
+        "reviewed values only. Every number/id below is a placeholder — do not treat it as",
+        "confirmed design data. See docs/bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md for the",
+        "full field-by-field contract, the known preset/system registry, and the reasons behind",
+        "each rule (local IDs, no world-global coordinates, no duplicated grapple data, etc.).",
+        "",
+        "IMPORTANT: `stage.sourceAreaId` is a legacy Area authoring-source ID, NOT the final Runtime",
+        "identity. The default product Runtime (Seamless Sector Landmark compiler) derives the",
+        "canonical landmark id (e.g. `sector-00:landmark:00`) from `stage.sector`/`stage.stage` order",
+        "— do not add a landmarkId field here, it would just duplicate what's already derivable.",
+        "",
+        "npm run validate:area-specs will NOT flag this file as a stage error, because it does",
+        "not live at docs/bsh/scenario/<sector>/<stage>/AREA-SPEC.json — but it also will not be",
+        "schema-checked for that reason. Validate your copy after renaming/relocating it."
+    ],
+    "schemaVersion": "area-spec-v1",
+    "stage": {
+        "sector": 0,
+        "stage": 0,
+        "legacyStageAlias": "0-0",
+        "sourceAreaId": "sector-00-00",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "PLACEHOLDER STAGE NAME",
+        "subtitle": "PLACEHOLDER SUBTITLE"
+    },
+    "bounds": { "width": 960, "height": 960 },
+    "entry": { "id": "entry", "x": 0, "y": -32 },
+    "surfaces": [
+        {
+            "_comment": "preset must be a KNOWN Runtime surface kind, or declared under runtimeDependencies.newSystems. The preset also determines which coordinate anchor the validator checks real extent against (see AUTHORING-STANDARD §6) — do not add an explicit anchor field.",
+            "id": "p0",
+            "preset": "platform",
+            "x": 0,
+            "y": 0,
+            "width": 256,
+            "height": 32
+        }
+    ],
+    "grappleTargets": [
+        {
+            "_comment": "One entry covers both the grapple-target surface AND the grapple-landmark object — do not author them twice.",
+            "id": "anchor-a",
+            "label": "A",
+            "x": 0,
+            "y": -192
+        }
+    ],
+    "enemies": [
+        {
+            "_comment": "Remove this entry entirely if the stage has no enemies (most Rest / Reveal stages don't).",
+            "id": "drone-1",
+            "preset": "patrol-drone-t1",
+            "x": 0,
+            "y": -400,
+            "patrol": { "start": { "x": -64, "y": -400 }, "end": { "x": 64, "y": -400 } },
+            "activation": { "x": -160, "y": -480, "width": 320, "height": 160 }
+        }
+    ],
+    "scannerGroups": [
+        {
+            "_comment": "controlledTargets must reference grappleTargets ids declared above. A target may belong to only one group.",
+            "id": "scanner-a",
+            "profile": "sector03-default",
+            "controlledTargets": ["anchor-a"]
+        }
+    ],
+    "windZones": [],
+    "objectives": [
+        {
+            "id": "final-deck-reached",
+            "type": "reach",
+            "preset": "reach-deck"
+        },
+        {
+            "id": "exit-panel-engaged",
+            "type": "interact",
+            "preset": "exit-panel",
+            "requiredObjectiveIds": ["final-deck-reached"]
+        }
+    ],
+    "route": {
+        "_comment": "runtimeLandmarks = candidate authored routePoints, MUST reference real entities (entry/surfaces/grappleTargets/enemies/\"exit\") — an unknown id here is a validation FAIL, not a free-form label. mandatory = flat id list, must be clearable with swingImpulse=0. optional = named alternate sequences (id + ordered id list). forbiddenBypasses = geometry that must NOT allow a progression skip, one entry per forbidden shortcut.",
+        "runtimeLandmarks": ["entry", "anchor-a", "exit"],
+        "mandatory": ["entry", "anchor-a", "exit"],
+        "optional": [
+            {
+                "id": "flow-route",
+                "sequence": ["entry", "anchor-a", "exit"]
+            }
+        ],
+        "forbiddenBypasses": [
+            {
+                "from": "entry",
+                "to": ["exit"],
+                "reason": "must not skip the mandatory Anchor A commit"
+            }
+        ]
+    },
+    "recovery": [
+        {
+            "id": "recover-a",
+            "failureZone": "p0",
+            "recoverTo": { "x": 0, "y": -48 },
+            "maxRetrySeconds": 5
+        }
+    ],
+    "sourceExit": {
+        "_comment": "Legacy source-layer input only — the minimal fields AreaDefinition.exitBlock() needs to build the authored Area (deck/door/panel/gate) that gets imported into a Sector landmark. This is NOT the Runtime's actual progression authority — see `progression` below. Do not author deck/exit/panel/gate objects separately.",
+        "deckX": 0,
+        "deckTopY": -800,
+        "deckWidth": 320,
+        "panelObjectiveId": "exit-panel-engaged"
+    },
+    "progression": {
+        "_comment": "The Seamless Sector Runtime's real progression authority: an objective-gated connector between this Stage's compiled landmark and the next. targetStageAlias is null ONLY for a genuine content boundary (e.g. a Sector's last Stage before a Boss/Post-Sector transition).",
+        "targetStageAlias": "0-1",
+        "mode": "objective-gated-connector",
+        "requiredObjectiveIds": ["exit-panel-engaged"]
+    },
+    "camera": {
+        "zones": []
+    },
+    "story": {
+        "_comment": "planningTriggers = scenario-planning inventory only (mirrors defineArea().storyTriggers; the Assembler does not expose this as runtime state). runtimePresentations = story-display trigger-cue objects only; entry/objective/gate presentations are already implied by stage.legacyStageAlias / objectives[].id / progression.",
+        "planningTriggers": [],
+        "runtimePresentations": []
+    },
+    "runtimeDependencies": {
+        "_comment": "required = system/profile that ALREADY exists in Runtime and this Stage depends on (informational, but the id must be a KNOWN name). newSystems = NOT YET implemented; anything referenced above (preset/profile/runtimeModel/progression.mode) that isn't in the validator's known registry MUST be declared here with status NOT_IMPLEMENTED, or validation fails.",
+        "required": [{ "id": "patrol-drone-t1" }],
+        "newSystems": []
+    },
+    "forbidden": [],
+    "acceptanceTests": [
+        {
+            "id": "mandatory-route-clear-zero-impulse",
+            "type": "geometry",
+            "requirement": "swingImpulse = 0으로도 route.mandatory 경로가 성립해야 한다.",
+            "automation": "MANUAL"
+        }
+    ]
+}
