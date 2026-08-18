@@ -1,4 +1,4 @@
-const CONTROL_ORDER = Object.freeze(["left", "jump", "right"]);
+const CONTROL_ORDER = Object.freeze(["left", "jump", "right", "action"]);
 
 export function getMobileControlLayout(width, height) {
     const size = Math.max(64, Math.min(96, height * 0.2));
@@ -11,7 +11,13 @@ export function getMobileControlLayout(width, height) {
         size,
         left: Object.freeze({ x: jumpX - size - controlGap, y, width: size, height: size }),
         jump: Object.freeze({ x: jumpX, y, width: jumpWidth, height: size }),
-        right: Object.freeze({ x: jumpX + jumpWidth + controlGap, y, width: size, height: size })
+        right: Object.freeze({ x: jumpX + jumpWidth + controlGap, y, width: size, height: size }),
+        action: Object.freeze({
+            x: jumpX + jumpWidth + controlGap,
+            y: y - size - controlGap,
+            width: size,
+            height: size
+        })
     });
 }
 

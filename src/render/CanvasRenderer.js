@@ -93,7 +93,7 @@ export class CanvasRenderer {
         if (scene.mobileView) this.drawPlayerHealthHud(scene);
         if (!scene.mobileView) {
             this.drawCombatHud(scene);
-            this.drawFoundationHud(scene.foundationAugment);
+            this.drawAugmentHud(scene.selectedAugmentIds ?? [], scene.actionState);
         }
         this.drawRewardSelectionOverlay(scene.foundationReward);
         this.drawMobileControls(scene.mobileControls);
@@ -130,7 +130,11 @@ export class CanvasRenderer {
         ctx.fillStyle = "#f8fafc";
         ctx.textAlign = "center";
         ctx.font = `900 ${this.cssWidth < 620 ? 14 : 22}px system-ui, sans-serif`;
-        ctx.fillText("EMERGENCY GRAPPLE RECONFIGURATION", this.cssWidth * 0.5, Math.max(30, startY - 50));
+        ctx.fillText(
+            `증강 선택 ${Math.min(6, (reward.selectionIndex ?? 0) + 1)} / 6`,
+            this.cssWidth * 0.5,
+            Math.max(30, startY - 50)
+        );
         ctx.fillStyle = "#bfdbfe";
         ctx.font = "700 13px system-ui, sans-serif";
         ctx.fillText("좌우 이동으로 선택 · 점프로 획득", this.cssWidth * 0.5, Math.max(52, startY - 20));
@@ -161,7 +165,7 @@ export class CanvasRenderer {
             this.drawCenteredWrappedText(choice.description, x + cardWidth * 0.5, startY + 151, cardWidth - 18, 15, 2);
             ctx.fillStyle = "#64748b";
             ctx.font = "800 10px ui-monospace, monospace";
-            ctx.fillText("FOUNDATION / FIRMWARE PROFILE", x + cardWidth * 0.5, startY + 190);
+            ctx.fillText("AUGMENT", x + cardWidth * 0.5, startY + 190);
         });
         ctx.fillStyle = "#fbbf24";
         ctx.font = "900 13px system-ui, sans-serif";
@@ -203,7 +207,8 @@ export class CanvasRenderer {
         ctx.strokeStyle = selected ? "#67e8f9" : "#94a3b8";
         ctx.fillStyle = selected ? "rgba(103, 232, 249, 0.22)" : "rgba(148, 163, 184, 0.14)";
         ctx.lineWidth = 3;
-        if (id === "impulse-coil") {
+        const augment = foundationAugmentById(id);
+        if (augment?.category === "action") {
             ctx.strokeRect(-18, -12, 22, 24);
             ctx.beginPath();
             ctx.moveTo(-13, -7);
@@ -215,7 +220,7 @@ export class CanvasRenderer {
             ctx.moveTo(21, 0);
             ctx.lineTo(15, 6);
             ctx.stroke();
-        } else if (id === "relay-link") {
+        } else if (augment?.category === "rope") {
             ctx.strokeRect(-21, -9, 16, 18);
             ctx.strokeRect(5, -9, 16, 18);
             ctx.beginPath();
@@ -232,22 +237,30 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawFoundationHud(foundationId) {
-        if (!foundationId) return;
-        const foundation = foundationAugmentById(foundationId);
-        if (!foundation) return;
+    drawAugmentHud(selectedAugmentIds, actionState = null) {
+        const selected = selectedAugmentIds.map((id) => foundationAugmentById(id)).filter(Boolean);
+        if (selected.length === 0) return;
         const ctx = this.context;
         ctx.save();
         ctx.fillStyle = "rgba(7, 17, 30, 0.88)";
-        ctx.fillRect(18, 92, 300, 34);
+        ctx.fillRect(18, 92, 360, 54);
         ctx.strokeStyle = "rgba(103, 232, 249, 0.58)";
-        ctx.strokeRect(18, 92, 300, 34);
+        ctx.strokeRect(18, 92, 360, 54);
         ctx.fillStyle = "#67e8f9";
         ctx.font = "900 11px ui-monospace, monospace";
-        ctx.fillText("FOUNDATION", 32, 113);
+        ctx.fillText(`AUGMENT ${selected.length}/6`, 30, 111);
         ctx.fillStyle = "#e2e8f0";
-        ctx.font = "800 11px ui-monospace, monospace";
-        ctx.fillText(`${foundation.name} · ${foundation.family}`, 116, 113);
+        ctx.font = "800 10px system-ui, sans-serif";
+        ctx.fillText(selected.map(({ name }) => name).join(" · "), 30, 130, 330);
+        if (actionState) {
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#fde68a";
+            ctx.fillText(
+                `충전 ${actionState.chargesRemaining}/${actionState.loadout?.modifierIds?.includes("extra-charge") ? 2 : 1}`,
+                366,
+                111
+            );
+        }
         ctx.restore();
     }
 
@@ -290,29 +303,19 @@ export class CanvasRenderer {
             color = "#67e8f9";
         } else if (eventFlash.type === "foundation-selected") {
             const foundation = foundationAugmentById(eventFlash.foundationId);
-            title = "FOUNDATION ONLINE";
+            title = "증강 획득";
             detail = foundation?.name ?? eventFlash.foundationId;
             color = "#67e8f9";
             foundationFeedback = true;
-        } else if (eventFlash.type === "foundation-impulse") {
-            title = "IMPULSE COIL";
-            detail = "RELEASE BURST";
+        } else if (eventFlash.type === "augment-release-propulsion") {
+            title = "해제 추진";
+            detail = "속도 ×1.25";
             color = "#fbbf24";
             foundationFeedback = true;
-        } else if (eventFlash.type === "foundation-relay-ready") {
-            title = "RELAY LINK";
-            detail = "NEXT ATTACH BUFFERED";
+        } else if (eventFlash.type === "augment-rope-link-ready") {
+            title = "로프 연동";
+            detail = "다음 액션 쿨다운 50%";
             color = "#67e8f9";
-            foundationFeedback = true;
-        } else if (eventFlash.type === "foundation-relay-linked") {
-            title = "RELAY LINK";
-            detail = "CHAIN RESTORED";
-            color = "#67e8f9";
-            foundationFeedback = true;
-        } else if (eventFlash.type === "foundation-shear-hit") {
-            title = eventFlash.targetKind === "calibration-dummy" ? "CONTACT REGISTERED" : "SHEAR CURRENT";
-            detail = eventFlash.targetKind === "calibration-dummy" ? "CALIBRATION TRACE VALID" : "ROPE SEGMENT HIT";
-            color = "#a3e635";
             foundationFeedback = true;
         } else {
             return;
@@ -510,6 +513,7 @@ export class CanvasRenderer {
         this.drawMobileButton(layout.left, "←", controls.left);
         this.drawMobileButton(layout.jump, "점프", controls.jump);
         this.drawMobileButton(layout.right, "→", controls.right);
+        this.drawMobileButton(layout.action, "액션", controls.action);
     }
 
     drawMobileButton(bounds, label, active) {
@@ -521,7 +525,7 @@ export class CanvasRenderer {
         ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         ctx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
         ctx.fillStyle = active ? "#111827" : "#f8fafc";
-        ctx.font = `800 ${label === "점프" ? 16 : 30}px system-ui, sans-serif`;
+        ctx.font = `800 ${label === "점프" || label === "액션" ? 16 : 30}px system-ui, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(label, bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);

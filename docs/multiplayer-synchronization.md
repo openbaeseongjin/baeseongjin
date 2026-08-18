@@ -173,7 +173,7 @@
 
 Foundation은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 `foundation-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 현재 Sector entry로 되돌리며 Foundation 선택과 보유 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-0.25.0 기본 Sector Runtime은 중간 체크포인트 claim을 사용하지 않는다. 피해·낙사 소유 클라이언트가 치명 결과를 적용하는 같은 전이에서 `respawnAnchorId`의 Sector entry로 즉시 부활하고 서버·동료가 player-impact v7 결과를 따른다. `WorldSnapshot` protocol v7은 `progressKind: sector`, `respawnAnchorId`, `partyWipeBaseline`을 공유하며 sector state와 `activeCheckpointId`의 동시 존재를 거부한다. 같은 tick에 모든 플레이어가 부활한 경우 서버 `GameSimulation`만 current Sector objective·route·enemy baseline을 초기화하고 `sector-reset` 사건과 증가한 baseline revision을 공유한다. prior Sector 완료와 Player별 Build는 보존한다.
+0.26.0 기본 Sector Runtime은 중간 체크포인트 claim을 사용하지 않는다. 피해·낙사 소유 클라이언트가 치명 결과를 적용하는 같은 전이에서 `respawnAnchorId`의 Sector entry로 즉시 부활하고 서버·동료가 player-impact v8 결과를 따른다. `WorldSnapshot` protocol v8은 기존 Sector baseline과 Player별 증강·Action state를 공유한다. 같은 tick 전원 부활에서만 서버가 current Sector baseline을 초기화하며 prior Sector 완료와 Player별 Build·pending offer는 보존한다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
@@ -345,6 +345,15 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.
 
 실제 소켓은 `ws` 기반 Node 권위 서버와 브라우저 WebSocket 클라이언트로 연결됐다. GitHub Pages는 정적 화면만 제공하고 별도로 항상 실행되는 게임 서버에 연결한다. 운영 서버는 `BAESEONGJIN_ALLOWED_ORIGINS=https://openbaeseongjin.github.io`처럼 허용 Origin을 제한하며, 4자리 채널 번호는 접속 편의 수단이지 인증 정보로 취급하지 않는다.
+
+## 증강 선택·피해 동기화
+
+- offer는 owner와 서버가 `runSeed + stablePlayerId + selectionIndex`로 독립 재계산한다. `augment-offer`는 pending source와 같은 세 장을 재접속 snapshot에 남기고, 확정 claim은 membership과 source 1회 소비를 검증한다.
+- Rope·Action 피해와 넉백은 공격 owner가 먼저 시뮬레이션한다. 서버 fixed tick은 지연된 owner 위치로 같은 충돌을 다시 만들지 않는다.
+- `augment-impact`는 event ID, tick, source/target/effect, 접촉 위치, 공식 damage와 선택적 movement intent만 보낸다. 서버는 source card 보유와 수치 공식을 다시 계산한다.
+- live enemy는 `blocksImpactFrom`을 먼저 호출하고, lethal event의 own knockback을 적용하지 않는다. Boss displacement 면역은 public reaction에서 처리한다.
+- 같은 event ID는 같은 receipt를 반환한다. known tombstone은 accepted `target-already-dead` silent no-op, never-known ID는 rejected `target-missing`이다.
+- owner가 이미 시작한 Action·피해·전기·반사 VFX는 정상 receipt와 resolve 사건 때문에 다시 재생하거나 되감지 않는다.
 
 ## 구현 순서와 검증 기준
 

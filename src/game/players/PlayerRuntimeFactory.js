@@ -1,4 +1,5 @@
 import { FoundationAugmentState } from "../augments/FoundationAugmentState.js";
+import { AugmentCombatRuntime } from "../augments/AugmentCombatRuntime.js";
 import { AutomaticWeaponObject } from "../combat/AutomaticWeaponObject.js";
 import { RopeImpactAttack } from "../combat/RopeImpactAttack.js";
 import { ROPE_IMPACT_CONFIG } from "../config.js";
@@ -18,6 +19,7 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
     if (spawn) physics.reset(spawn);
     const rope = new FixedLengthRope(ropeConfig);
     const foundation = new FoundationAugmentState();
+    const augmentCombat = new AugmentCombatRuntime({ maxHealth: combatConfig.playerMaxHealth });
     const ropeObject = new RopeObject({ id: `${id}:rope`, ownerId: id, rope });
     const weapon = new AutomaticWeaponObject({ id: `${id}:weapon`, ownerId: id, config: combatConfig });
     const ropeImpactAttack = new RopeImpactAttack(ROPE_IMPACT_CONFIG);
@@ -26,6 +28,7 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         physics,
         ropeObject,
         foundation,
+        augmentCombat,
         weapon,
         ropeImpactAttack,
         combatConfig
@@ -37,6 +40,7 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         rope,
         ropeObject,
         foundation,
+        augmentCombat,
         weapon,
         ropeImpactAttack,
         entity,

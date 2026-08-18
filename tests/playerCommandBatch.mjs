@@ -6,12 +6,13 @@ import {
     serializePlayerCommandBatch
 } from "../src/game/network/PlayerCommandBatch.js";
 
-function command(horizontal, interact = false) {
+function command(horizontal, interact = false, action = false) {
     return createPlayerCommand(
         {
             horizontal,
             vertical: 0,
             interact,
+            action,
             pointer: { x: 10, y: 20, down: false },
             viewport: { width: 1280, height: 720 }
         },
@@ -43,6 +44,10 @@ export function run() {
         deserializePlayerCommandBatch(serializePlayerCommandBatch(interacting)).commands[0].command.interact,
         true
     );
+    const acting = createPlayerCommandBatch(9, [
+        { playerId: "player-a", sequence: 6, command: command(0, false, true) }
+    ]);
+    assert.equal(deserializePlayerCommandBatch(serializePlayerCommandBatch(acting)).commands[0].command.action, true);
     assert.ok(Object.isFrozen(restored) && Object.isFrozen(restored.commands[0].command.pointer));
     assert.throws(
         () =>
@@ -53,7 +58,7 @@ export function run() {
         /duplicate playerId/
     );
     assert.throws(() => createPlayerCommandBatch(-1, []), /tick/);
-    assert.throws(() => deserializePlayerCommandBatch('{"protocolVersion":4,"tick":0,"commands":[]}'), /unsupported/);
+    assert.throws(() => deserializePlayerCommandBatch('{"protocolVersion":5,"tick":0,"commands":[]}'), /unsupported/);
     assert.throws(
         () => createPlayerCommandBatch(0, [{ playerId: "player", sequence: -1, command: command(0) }]),
         /sequence/

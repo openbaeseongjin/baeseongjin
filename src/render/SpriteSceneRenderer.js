@@ -104,6 +104,13 @@ export class SpriteSceneRenderer {
                 category: "playerProjectiles"
             }),
             new SpriteProjectileRenderer({
+                selectProjectiles: (scene) => scene.augmentProjectiles ?? [],
+                sprite: playerProjectileSprite,
+                palette: { a: "#0891b2", b: "#ecfeff" },
+                size: { width: 12, height: 8 },
+                category: "augmentProjectiles"
+            }),
+            new SpriteProjectileRenderer({
                 selectProjectiles: (scene) =>
                     (scene.enemyProjectiles ?? []).filter((projectile) => !projectile.canCutRope),
                 sprite: enemyProjectileSprite,

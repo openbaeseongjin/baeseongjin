@@ -45,6 +45,7 @@ export class CircleCollider {
 
     resolveSurfaces({ position, velocity, surfaces, previousPosition }) {
         let isGrounded = false;
+        const collisionNormals = [];
         for (let pass = 0; pass < 3; pass += 1) {
             let resolved = false;
             for (const surface of surfaces) {
@@ -85,11 +86,12 @@ export class CircleCollider {
                     velocity.y -= normalY * inwardSpeed;
                 }
                 if (normalY < -0.55) isGrounded = true;
+                collisionNormals.push(Object.freeze({ x: normalX, y: normalY }));
                 resolved = true;
             }
             if (!resolved) break;
         }
-        return Object.freeze({ isGrounded });
+        return Object.freeze({ isGrounded, collisionNormals: Object.freeze(collisionNormals) });
     }
 
     resolveActor({ actorId, position, velocity, other, isGrounded }) {

@@ -35,9 +35,24 @@ export class ClientCombatFeedback {
         this.effects = [];
         this.impact = null;
         this.ropeCutFeedback = null;
+        this.augmentEffects = [];
     }
 
     apply(events) {
+        for (const event of events) {
+            if (event.parameters?.sourceKind !== "augment-impact") continue;
+            const effectId = event.effectId ?? event.parameters.effectId;
+            if (!effectId || event.resolution === "target-already-dead") continue;
+            this.augmentEffects.push({
+                id: event.eventId ?? event.parameters.eventId,
+                type: effectId,
+                resolution: event.resolution,
+                position: event.position ?? event.parameters.contactPosition,
+                sourcePosition: event.sourcePosition ?? event.parameters.sourcePosition ?? null,
+                age: 0,
+                lifetime: effectId === "damage-reflect" ? 0.28 : 0.45
+            });
+        }
         const feedbackEvents = events
             .filter(isCombatFeedbackEvent)
             .map((event, index) =>
@@ -71,6 +86,8 @@ export class ClientCombatFeedback {
 
     update(dt) {
         updateCombatFeedback(this.effects, dt);
+        for (const effect of this.augmentEffects) effect.age += dt;
+        this.augmentEffects = this.augmentEffects.filter(({ age, lifetime }) => age < lifetime);
         if (this.impact) {
             this.impact.age += dt;
             if (this.impact.age >= this.impact.lifetime) this.impact = null;
@@ -85,6 +102,7 @@ export class ClientCombatFeedback {
         return {
             combatEffects: this.effects,
             impact: this.impact,
+            augmentEffects: this.augmentEffects,
             ...(this.ropeCutFeedback ? { eventFlash: this.ropeCutFeedback } : {})
         };
     }

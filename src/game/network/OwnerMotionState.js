@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 3;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 4;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
@@ -35,10 +35,10 @@ function normalizeLauncher(launcher) {
     }
     finiteNonNegative(shot.traveled, "launcher.shot.traveled");
     finiteNonNegative(shot.elapsed, "launcher.shot.elapsed");
-    if (shot.traveled > ropeHookReach() + LAUNCHER_NUMERIC_TOLERANCE) {
+    if (shot.traveled > ropeHookReach() * 1.2 + LAUNCHER_NUMERIC_TOLERANCE) {
         throw new Error("launcher.shot.traveled must not exceed the hook reach");
     }
-    if (shot.elapsed > ropeHookFlightSeconds() + LAUNCHER_NUMERIC_TOLERANCE) {
+    if (shot.elapsed > ropeHookFlightSeconds() * 1.2 + LAUNCHER_NUMERIC_TOLERANCE) {
         throw new Error("launcher.shot.elapsed must not exceed the hook flight lifetime");
     }
     return Object.freeze({
@@ -64,7 +64,8 @@ export function createOwnerMotionState({
     angularVelocity = 0,
     isGrounded,
     rope,
-    launcher = null
+    launcher = null,
+    augmentRuntimeState = null
 }) {
     if (typeof isGrounded !== "boolean") throw new Error("isGrounded must be boolean");
     if (typeof rope?.isAttached !== "boolean") throw new Error("rope.isAttached must be boolean");
@@ -83,7 +84,11 @@ export function createOwnerMotionState({
             anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null,
             attachmentOffset: rope.isAttached ? finiteVector(rope.attachmentOffset, "rope.attachmentOffset") : null
         }),
-        launcher: normalizeLauncher(launcher)
+        launcher: normalizeLauncher(launcher),
+        augmentRuntimeState:
+            augmentRuntimeState === null
+                ? null
+                : normalizeNetworkJson(JSON.parse(JSON.stringify(augmentRuntimeState)), "augmentRuntimeState")
     });
 }
 

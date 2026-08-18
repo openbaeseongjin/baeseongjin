@@ -3,6 +3,7 @@ export function createPlayerCommand(input, aimWorld) {
         horizontal: input.horizontal,
         vertical: input.vertical,
         interact: Boolean(input.interact),
+        action: Boolean(input.action),
         pointer: Object.freeze({ ...input.pointer }),
         viewport: Object.freeze({ width: input.viewport.width, height: input.viewport.height }),
         aimWorld: Object.freeze({ x: aimWorld.x, y: aimWorld.y })

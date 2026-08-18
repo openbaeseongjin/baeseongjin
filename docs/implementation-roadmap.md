@@ -6,14 +6,14 @@
 
 > 아크샨식 고정 길이 로프 액션 × 아이작식 로그라이크 구조
 
-순간 플레이의 중심은 로프 숙련이다. 자동 공격과 Foundation Augment는 전투 방식과 성장 폭을 만들지만 이동과 생존을 대신하지 않는다. 한 판은 하나의 붕괴 도시 월드 안에서 48개 진행 영역을 순서대로 돌파하고, 실패하면 활성 체크포인트에서 재개한다. 영역 전환은 별도 월드 로드가 아니라 완료 조건 달성 후 명시적 출구를 통과하는 진행 상태 변경이다.
+순간 플레이의 중심은 로프 숙련이다. 0.26.0 generic 증강 22장은 전투 방식과 성장 폭을 만들지만 이동과 생존을 대신하지 않는다. 상세 계약은 [`augment-v1.md`](./augment-v1.md)를 따른다.
 
 ## 현재 구현 상태
 
 ### 완료
 
 - PC·모바일 이동, 점프, 로프 부착·접선 스윙·해제
-- 손에서 실제 비행하는 Hook과 속도×수명에서 파생한 정확한 400px 도달·0.2초 재발사 대기
+- 손에서 실제 비행하는 Hook과 `1200px/s × 1/3초 = 400px`, 기본 1.0초 재발사 대기
 - 모든 암석 표면 부착과 수평 발판의 아래→위 통과
 - 시드 기반 48단계 수직 월드와 카메라 추적 프로토타입
 - 사거리 기반 자동 공격과 적 1종의 원거리 공격
@@ -24,7 +24,7 @@
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
 - [과거 절차 프로토타입] 마지막 암석의 정상 목표와 최종 완료 상태
 - 8레벨 간격 체크포인트 생성·활성화·시각 표시
-- 1-4 Maintenance Node의 Foundation 3종 선택·개인별 멀티·Snapshot/Claim
+- [0.26.0] Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer, Player별 최대 6장, owner-first damage/movement claim
 - [과거 절차 프로토타입] 연속 1,000개 시드의 상승·로프 사거리 통과 가능성 자동 검사
 - [과거 절차 프로토타입] 경계값·기본값·발견된 문제 시드의 고정 회귀 목록
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 Foundation 선택 지표 수집
@@ -41,7 +41,7 @@
 - 실제 조작 기반 전체 등반 자동 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
 - Sector 03~06의 나머지 저작 진행 영역과 Sector 02 이후 content boundary 연결
-- 확정된 일반 타이머·Gate 보충·상승 붕괴·최소 관전 흐름의 구현과 최종 수치·네트워크 권위·재접속 조정
+- 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
 - 섹터별 보스 1개의 위치·전투 시나리오와 확정된 보스 타이머·Arena 붕괴·다음 섹터 전환 구현
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
@@ -52,7 +52,7 @@
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
 3. **Phase 3 · #625:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, Sector-entry respawn과 party-wipe baseline, local-position camera/environment, WorldSnapshot protocol v7로 전환한다. legacy Area revision은 compatibility test로만 유지한다.
-4. Timer +10 trigger, Purge origin/rejoin과 증강 획득 Landmark 좌표는 실제 physical landmark/objective graph가 생긴 뒤 별도 결정한다.
+4. [완료 #628] topology-independent 증강 v1 core와 첫 explicit `augment-node` adapter를 연결했다. Timer +10 trigger, Purge origin/rejoin과 후속 증강 획득 Landmark 좌표는 별도 결정한다.
 
 ### 제출 전 시나리오 구현 트랙
 
@@ -62,7 +62,7 @@
 
 Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했고 Camera·Story 인계 범위도 반영했다. 남은 것은 Post-Sector 03 Boss→`4-1` 전환 사용자 검토다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
 
-`2-3` Specialization은 1-4에서 고른 Foundation을 유지한 채 Foundation별 고정 2종 중 1종을 개인별로 선택하는 총 6종 계약으로 확정됐다. 첫 버전에는 RNG와 재선택을 넣지 않고 사망·Checkpoint·Sector 이동·Boss retry에 유지하며 New Run에서만 초기화한다. Foundation 선택 primitive는 재사용하되 Foundation ID와 Specialization ID의 의미 체계는 합치지 않는다. 정확한 이름·효과·수치·UI는 [`design-decision-requests.md`](./design-decision-requests.md)와 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다. `2-5`의 잠긴 Upper Transit Gate는 서사적 장애물이고 실제 다음 진행 출구는 Maintenance Service Frame이다. `2-8`은 Boss가 없는 일반 진행 Finale와 Sector-end Checkpoint까지 구현하며, Sector 02 Boss 상세 계약 전에는 기존 `3-1` 연결을 임의의 Boss 전환으로 바꾸지 않는다.
+`2-3`의 과거 Foundation별 Specialization은 0.26.0에 포함하지 않는다. Node skeleton은 Quest·순수 이동 카드·추가 Signature와 함께 후속 Catalog 확장 입력으로만 남긴다.
 
 Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합한다. 맵은 결정적인 corridor/route·activation band만 제공하고 공격 acquire·track·lock·fire·cooldown과 투사체 규칙은 재사용한다. Patrol 자료가 없는 Sentry는 정지 동작을 유지한다. 각 Drone은 자기 band 안에서만 이동·획득하고 공격 cycle 중 target을 유지해 다른 band 플레이어 때문에 재조준하거나 지속 crossfire를 만들지 않는다.
 

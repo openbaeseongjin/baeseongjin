@@ -1,4 +1,6 @@
 import { serializeCommandReceipt } from "../network/CommandReceipt.js";
+import { deserializeAugmentImpactClaim } from "../network/AugmentImpactClaim.js";
+import { deserializeAugmentOfferClaim } from "../network/AugmentOfferClaim.js";
 import { deserializeCheckpointClaim } from "../network/CheckpointClaim.js";
 import { deserializeFoundationSelectionClaim } from "../network/FoundationSelectionClaim.js";
 import { deserializeFoundationShearClaim } from "../network/FoundationShearClaim.js";
@@ -60,6 +62,16 @@ export class AuthorityWireAdapter {
     receiveRopeImpact(authenticatedPlayerId, serializedClaim) {
         if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
         return this.session.submitRopeImpact(authenticatedPlayerId, deserializeRopeImpactClaim(serializedClaim));
+    }
+
+    receiveAugmentOffer(authenticatedPlayerId, serializedClaim) {
+        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
+        return this.session.submitAugmentOffer(authenticatedPlayerId, deserializeAugmentOfferClaim(serializedClaim));
+    }
+
+    receiveAugmentImpact(authenticatedPlayerId, serializedClaim) {
+        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
+        return this.session.submitAugmentImpact(authenticatedPlayerId, deserializeAugmentImpactClaim(serializedClaim));
     }
 
     receiveCheckpointClaim(authenticatedPlayerId, serializedClaim) {

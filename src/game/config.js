@@ -14,9 +14,9 @@ export const PLAYER_CONFIG = Object.freeze({
 });
 
 export const ROPE_CONFIG = Object.freeze({
-    hookSpeed: 1400,
-    hookFlightRatio: Object.freeze({ numerator: 2, denominator: 7 }),
-    hookReloadSeconds: 0.2,
+    hookSpeed: 1200,
+    hookFlightRatio: Object.freeze({ numerator: 1, denominator: 3 }),
+    hookReloadSeconds: 1,
     attachBufferSeconds: 0.1,
     swingDragThresholdViewportRatio: 0.11,
     swingDragMinHoldSeconds: 0.08,

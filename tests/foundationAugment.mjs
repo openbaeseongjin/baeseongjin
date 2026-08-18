@@ -1,172 +1,101 @@
 import assert from "node:assert/strict";
 import { FOUNDATION_AUGMENT_CATALOG } from "../src/game/augments/FoundationAugmentCatalog.js";
-import {
-    advanceFoundationRewardSelection,
-    createFoundationRewardSelection
-} from "../src/game/rewards/FoundationRewardSelection.js";
+import { FoundationAugmentState } from "../src/game/augments/FoundationAugmentState.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 
-function command({ horizontal = 0, vertical = 0, interact = false, pointerDown = false, aimWorld = null } = {}) {
+function command({ horizontal = 0, vertical = 0, interact = false, pointerDown = false, action = false } = {}) {
     return createPlayerCommand(
         {
             horizontal,
             vertical,
             interact,
-            pointer: { x: aimWorld?.x ?? 0, y: aimWorld?.y ?? 0, down: pointerDown },
+            action,
+            pointer: { x: 0, y: 0, down: pointerDown },
             viewport: { width: 1280, height: 720 }
         },
-        aimWorld ?? { x: 0, y: 0 }
+        { x: 300, y: 200 }
     );
 }
 
 function advanceToArea04(simulation) {
     for (const area of SECTOR_01_AREA_CATALOG.areas.slice(0, 3)) {
-        for (const objective of area.objectives) {
+        for (const objective of area.objectives)
             assert.equal(simulation.worldProgress.completeObjective(objective.id).accepted, true);
-        }
         assert.equal(simulation.worldProgress.crossGate(area.gate.id).accepted, true);
     }
     simulation.restoreWorldProgress(simulation.worldProgress.snapshot());
 }
 
-function releaseAttachedRope(simulation, player, { swingUsed = false, direction = { x: 1, y: 0 } } = {}) {
-    player.ropeObject.wasPointerDown = true;
-    player.ropeObject.lastPointer = { x: 0, y: 0, down: true };
-    player.ropeObject.swingDrag = {
-        origin: { x: 0, y: 0 },
-        direction,
-        progress: swingUsed ? 1 : 0,
-        age: 0.2,
-        used: swingUsed
-    };
-    return simulation.dispatchOwnerInput(player.id, command(), 1 / 120);
-}
-
 export function run() {
-    let selection = createFoundationRewardSelection({
-        sourceId: "sector-01-04:maintenance-node",
-        objectiveId: "sector-01-04:augment-selected",
-        choices: FOUNDATION_AUGMENT_CATALOG
-    });
-    assert.equal(selection.rewardType, "foundation");
+    assert.equal(FOUNDATION_AUGMENT_CATALOG.length, 22);
     assert.deepEqual(
-        selection.choices.map(({ id }) => id),
-        ["impulse-coil", "relay-link", "shear-current"]
+        Object.fromEntries(
+            ["rope", "action", "signature", "modifier"].map((category) => [
+                category,
+                FOUNDATION_AUGMENT_CATALOG.filter((card) => card.category === category).length
+            ])
+        ),
+        { rope: 6, action: 6, signature: 6, modifier: 4 }
     );
-    let outcome = advanceFoundationRewardSelection(selection, command({ horizontal: 1 }));
-    assert.equal(outcome.selection.selectedIndex, 0, "overlay entry input must be gated");
-    outcome = advanceFoundationRewardSelection(outcome.selection, command());
-    outcome = advanceFoundationRewardSelection(outcome.selection, command({ horizontal: -1 }));
-    assert.equal(outcome.selection.selectedIndex, 2);
-    outcome = advanceFoundationRewardSelection(outcome.selection, command());
-    outcome = advanceFoundationRewardSelection(outcome.selection, command({ vertical: -1 }));
-    assert.equal(outcome.confirmedFoundationId, "shear-current");
+
+    const state = new FoundationAugmentState();
+    assert.equal(state.select("direction-dash", { sourceId: "source-1" }), true);
+    assert.equal(state.select("dash-strike", { sourceId: "source-2" }), false, "one Player may own one base Action");
+    assert.equal(state.select("explosive-trail", { sourceId: "source-2" }), true);
+    assert.equal(state.select("explosive-trail", { sourceId: "source-3" }), false, "selected cards do not stack");
+    const restored = new FoundationAugmentState();
+    restored.restore(state.selectedId, state.snapshot());
+    assert.deepEqual(restored.snapshot(), state.snapshot());
+
+    const fastLong = new FoundationAugmentState();
+    fastLong.select("fast-launch");
+    fastLong.select("long-rope");
+    fastLong.select("fast-recover");
+    const effective = fastLong.effectiveRopeConfig(ROPE_CONFIG);
+    assert.equal(effective.hookSpeed, 1800);
+    assert.equal(ropeHookReach(effective), 480);
+    assert.equal(effective.hookReloadSeconds, 0.5);
 
     const simulation = new GameSimulation({ worldSeed: 1234, worldCatalog: SECTOR_01_AREA_CATALOG });
     advanceToArea04(simulation);
     const player = simulation.players[0];
     const node = simulation.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
     player.physics.position.set(node.position.x, node.position.y);
-    simulation.step(1 / 120, command({ interact: true, vertical: -1 }));
-    assert.equal(simulation.snapshot().foundationReward.sourceId, node.id);
-    assert.equal(
-        simulation.worldProgress.isObjectiveComplete("sector-01-04:augment-selected"),
-        false,
-        "opening the chooser must not complete the shared objective"
-    );
-    const choosingPosition = player.physics.position.clone();
-    simulation.step(1 / 120, command());
-    simulation.step(1 / 120, command({ horizontal: -1 }));
+    assert.equal(simulation.beginFoundationReward(player.id, node.id, node.objectiveId), true);
+    const firstOffer = simulation.getFoundationReward(player.id);
+    assert.equal(firstOffer.choices.length, 3);
+    assert.equal(new Set(firstOffer.choices.map(({ id }) => id)).size, 3);
     simulation.step(1 / 120, command());
     simulation.step(1 / 120, command({ vertical: -1 }));
-    assert.equal(simulation.playerState(player.id).foundationAugment, "shear-current");
-    assert.equal(simulation.snapshot().foundationReward, null);
-    assert.equal(simulation.worldProgress.isObjectiveComplete("sector-01-04:augment-selected"), true);
-    assert.equal(player.physics.position.x, choosingPosition.x, "choice input must not move its owner horizontally");
-
-    const exitPanel = simulation.world.objects.find(({ id }) => id === "sector-01-04:exit-panel");
-    player.physics.position.set(exitPanel.position.x, exitPanel.position.y);
-    simulation.step(1 / 120, command({ interact: true, vertical: -1 }));
-    assert.equal(
-        simulation.worldProgress.isGateUnlocked("sector-01-04:gate"),
-        true,
-        "the panel must become usable immediately after Foundation selection"
-    );
+    const selectedId = firstOffer.choices[0].id;
+    assert.deepEqual(simulation.playerState(player.id).selectedAugmentIds, [selectedId]);
+    assert.equal(simulation.worldProgress.isObjectiveComplete(node.objectiveId), true);
     simulation.respawnPlayerAtCheckpoint(player, "fall");
+    assert.deepEqual(simulation.playerState(player.id).selectedAugmentIds, [selectedId]);
     assert.equal(
-        simulation.playerState(player.id).foundationAugment,
-        "shear-current",
-        "Foundation selection must survive checkpoint respawn"
+        simulation.beginFoundationReward(player.id, node.id, node.objectiveId),
+        false,
+        "one source is consumed once"
     );
 
-    const impulseSimulation = new GameSimulation();
-    impulseSimulation.enemies = [];
-    const impulsePlayer = impulseSimulation.players[0];
-    impulsePlayer.foundation.select("impulse-coil");
-    impulsePlayer.physics.velocity.set(0, 0);
+    const propulsion = new GameSimulation();
+    propulsion.enemies = [];
+    const propulsionPlayer = propulsion.players[0];
+    propulsionPlayer.foundation.select("release-propulsion");
+    propulsionPlayer.physics.velocity.set(100, -40);
     assert.equal(
-        impulsePlayer.ropeObject.rope.attach(impulsePlayer.physics.position, {
-            x: impulsePlayer.physics.position.x,
-            y: impulsePlayer.physics.position.y - 100
+        propulsionPlayer.ropeObject.rope.attach(propulsionPlayer.physics.position, {
+            x: propulsionPlayer.physics.position.x,
+            y: propulsionPlayer.physics.position.y - 100
         }),
         true
     );
-    const impulseOutcome = releaseAttachedRope(impulseSimulation, impulsePlayer, { swingUsed: true });
-    assert.ok(impulsePlayer.physics.velocity.x > 0, "Impulse Coil must add a directional release burst");
-    assert.equal(impulseOutcome.foundationEvents[0].eventType, "foundation-impulse");
-
-    const relaySimulation = new GameSimulation();
-    relaySimulation.enemies = [];
-    const relayPlayer = relaySimulation.players[0];
-    relayPlayer.foundation.select("relay-link");
-    assert.equal(
-        relayPlayer.ropeObject.rope.attach(relayPlayer.physics.position, {
-            x: relayPlayer.physics.position.x,
-            y: relayPlayer.physics.position.y - 100
-        }),
-        true
-    );
-    releaseAttachedRope(relaySimulation, relayPlayer);
-    assert.ok(relaySimulation.playerState(relayPlayer.id).augmentRuntimeState.relayWindowRemaining > 0);
-    const relayTarget = {
-        id: "relay-target",
-        grappleable: true,
-        vertices: [
-            { x: relayPlayer.physics.position.x + 100, y: relayPlayer.physics.position.y - 10 },
-            { x: relayPlayer.physics.position.x + 110, y: relayPlayer.physics.position.y - 10 },
-            { x: relayPlayer.physics.position.x + 110, y: relayPlayer.physics.position.y + 10 },
-            { x: relayPlayer.physics.position.x + 100, y: relayPlayer.physics.position.y + 10 }
-        ]
-    };
-    relaySimulation.activeCollisionSurfaces = [relayTarget];
-    const relayAim = {
-        x: relayPlayer.physics.position.x + 105,
-        y: relayPlayer.physics.position.y + 110
-    };
-    for (let tick = 0; tick < 48 && !relayPlayer.ropeObject.rope.isAttached; tick += 1) {
-        relaySimulation.dispatchOwnerInput(relayPlayer.id, command({ pointerDown: true, aimWorld: relayAim }), 1 / 120);
-    }
-    assert.equal(relayPlayer.ropeObject.rope.isAttached, true, "Relay Link must allow the one assisted re-attach");
-    assert.equal(relaySimulation.playerState(relayPlayer.id).augmentRuntimeState.relayWindowRemaining, 0);
-
-    const shearSimulation = new GameSimulation();
-    const shearPlayer = shearSimulation.players[0];
-    const shearTarget = shearSimulation.enemies[0];
-    shearPlayer.foundation.select("shear-current");
-    shearPlayer.weapon.range = 0;
-    shearPlayer.physics.position.set(200, 300);
-    shearTarget.position.set(150, 300);
-    shearTarget.health = shearTarget.maxHealth;
-    assert.equal(shearPlayer.ropeObject.rope.attach(shearPlayer.physics.position, { x: 100, y: 300 }), true);
-    shearPlayer.ropeObject.wasPointerDown = true;
-    shearPlayer.ropeObject.lastPointer = { x: 0, y: 0, down: true };
-    shearSimulation.step(1 / 120, command());
-    assert.equal(shearTarget.health, shearTarget.maxHealth - 20);
-    assert.ok(
-        shearSimulation
-            .drainReplicationEvents()
-            .some(({ eventType, targetId }) => eventType === "foundation-shear-hit" && targetId === shearTarget.id)
-    );
+    propulsionPlayer.ropeObject.wasPointerDown = true;
+    const outcome = propulsion.dispatchOwnerInput(propulsionPlayer.id, command(), 0);
+    assert.equal(outcome.foundationEvents[0].eventType, "augment-release-propulsion");
+    assert.equal(propulsionPlayer.physics.velocity.x, 125);
+    assert.equal(propulsionPlayer.physics.velocity.y, -50);
 }

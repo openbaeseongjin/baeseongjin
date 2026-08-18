@@ -197,7 +197,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - encounter topology 권위는 `encounterId`, `slotId`, `position`, `activation`이다. fixed/pool 적 선택은 topology와 분리된 `enemySelection` payload가 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 선언할 수 있다. Phase 6 selector는 `slotId + runSeed + worldRevision`을 사용해 preview corpus를 결정적으로 resolve한다. validator와 Runtime resolver는 encounter와 selection payload에 `areaId`가 권위 필드로 들어오는 것을 거부하고, 빈/중복 pool이나 fixed+pool 동시 선언을 거부한다.
 - `LegacyAreaSectorPreviewCatalog`는 build/startup source이고, `LegacyAreaSeamlessSectorRuntime`이 Sector 01~~03 legacy geometry를 4개 가로 도시 블록 열 × 2개 landmark로 배치해 `4,800×2,851~3,203px` Sector와 physical connector/route lock으로 compile한다. Sector 04~~06은 alias input이며 Runtime output에 넣지 않는다.
 - `SectorProgressState`가 `currentSectorId/currentLandmarkId`, objective·route·encounter와 `sectorBaselineRevision`을 단독 소유한다. individual respawn은 이 상태를 바꾸지 않고, party wipe만 current Sector의 resettable set을 초기화하며 prior Sector 진행을 보존한다.
-- 0.25.0 default `GameSimulationFactory`는 `seamless-sector-runtime-v1`을 사용한다. `WorldSnapshot` protocol v7은 `progressKind: sector`, `respawnAnchorId`, `partyWipeBaseline`을 보내고 sector snapshot의 `activeCheckpointId`를 거부한다. legacy Area revision은 explicit compatibility factory로만 생성한다.
+- 0.26.0 default `GameSimulationFactory`는 `seamless-sector-runtime-v1`을 사용한다. `WorldSnapshot` protocol v8은 기존 Sector 진행 계약과 Player별 증강·Action/knockback state를 함께 보낸다. legacy Area revision은 explicit compatibility factory로만 생성한다.
 - intra-Sector route는 objective 완료로 connector collision surface를 활성화하고 플레이어가 다음 landmark entry에 물리적으로 들어오면 진행한다. 위치를 순간이동하거나 Gate portal event를 만들지 않는다.
 - `src/game/world/sectors/`, `SectorDefinitionValidator.js`, `SectorProgressState.js`와 `SectorProgressController.js`는 시나리오 통합 fingerprint의 별도 `authored-sector-sha256`로 감시한다. Area migration source와 Sector Runtime source의 현재 상태를 각각 기록한다.
 
@@ -250,6 +250,16 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 플레이어 자동 무기는 조합된 collider의 `outsidePointToward()`로 대상 방향 몸체 바깥 발사점을 계산한다. 이 위치는 소유자 예측, 서버 검증과 공유 spawn 사건이 함께 사용하며 renderer는 총구 위치나 collider 형상을 다시 해석하지 않는다.
 - 자기 탄환은 `EnemyHitPrediction` 믹스인이 로컬 충돌 VFX와 검증 가능한 hit claim을 한 번 만든다. 첫 로컬 충돌에서 탄환 수명은 소비되며 claim 거부가 같은 탄환을 겹친 위치에 복구해 추가 피격을 만들지 않는다. 서버는 연결 소유권·탄환·대상·tick·위치·중복을 검사하고 서버 소유 탄환 대미지로 검증된 결과를 다른 복제본에 공유한다. 중립 적 탄환도 피해 클라이언트가 충돌을 인식한 순간 소비하며, 거부 receipt가 객체를 다시 표시하거나 같은 겹침에서 재발화하게 하지 않는다.
 - `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
+
+## 증강 v1 구성과 전투 사건
+
+- `FoundationAugmentState`라는 호환 클래스명은 generic selected card IDs와 소비한 source IDs만 소유한다. 과거 Foundation gameplay state를 병렬 유지하지 않는다.
+- `AugmentCombatRuntime`은 Player의 Action cooldown·charge·guard·shield, 감전 contact accumulator와 Action projectile을 소유한다. `PlayerRuntimeFactory`가 loadout과 함께 Has-A로 조립한다.
+- Rope 기본값은 `ROPE_CONFIG` 한 곳에서 시작하고 selected card의 percentage modifier로 effective config를 만든다. launcher와 fixed rope는 같은 effective config 참조를 사용한다.
+- owner client가 만든 모든 증강 적 피해는 `AugmentImpactClaim`으로 수렴한다. `PlayerEnemyImpactResolver`는 shield → damage → lethal/no-knockback → survivor knockback 순서만 소유하며 카드별 trigger를 알지 않는다.
+- 제거한 적은 `EnemyImpactTombstones`에 남겨 지연 claim을 arbitrary missing ID와 구분한다. tombstone no-op은 복제 사건이나 presentation을 만들지 않는다.
+- enemy knockback은 behavior 내부를 직접 수정하지 않는 public transient state다. `impactDisplacementEnabled = false`인 Boss형 대상은 damage만 받고 이동하지 않는다.
+- chooser와 전투의 전체 수치·호환 계약은 [`augment-v1.md`](./augment-v1.md)를 따른다.
 
 ## 의존 방향
 

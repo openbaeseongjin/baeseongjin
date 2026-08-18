@@ -242,7 +242,7 @@ export function run() {
         bufferedPlayer.ropeObject.attachBufferRemaining > 0,
         "a press during reload must buffer the launch intent"
     );
-    for (let tick = 0; tick < 60 && !bufferedPlayer.ropeObject.launcher.inFlight; tick += 1) {
+    for (let tick = 0; tick < 130 && !bufferedPlayer.ropeObject.launcher.inFlight; tick += 1) {
         buffered.dispatchOwnerInput(bufferedPlayer.id, command({ pointerDown: true, aimWorld: bufferedAim }), 1 / 120);
     }
     assert.equal(bufferedPlayer.ropeObject.launcher.inFlight, true, "the buffered press must launch once reload ends");
