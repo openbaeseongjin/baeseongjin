@@ -2,6 +2,7 @@ import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
 import { boundsForVertices, boundsIntersect, circleBounds, intersectBounds, isVisible } from "../../RenderViewport.js";
 import { currentAuthoredArea, sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../../world/WorldMarkerPrimitives.js";
+import { isSurfaceEnabledForProgress } from "../../../game/world/WorldGateGeometry.js";
 
 export class PixelTerrainRenderer {
     constructor({ definition, assets }) {
@@ -17,7 +18,7 @@ export class PixelTerrainRenderer {
         const material = this.definition.materialFor(zone);
         const palette = zone.palette;
         const authoredArea = currentAuthoredArea(scene);
-        const surfaces = this.surfaceEntries(scene.world);
+        const surfaces = this.surfaceEntries(scene.world, scene.worldProgress);
         const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
 
         for (const entry of visibleSurfaces) {
@@ -44,35 +45,36 @@ export class PixelTerrainRenderer {
         this.drawSummit(context, scene.world.summit, scene.runState, viewport);
     }
 
-    surfaceEntries(world) {
-        if (this.cachedWorld === world) return this.cachedSurfaces;
-        this.cachedWorld = world;
-        this.cachedSurfaces = Object.freeze(
-            (world.surfaces ?? [])
-                .filter(({ renderable }) => renderable !== false)
-                .map((surface) =>
-                    Object.freeze({
-                        surface,
-                        bounds: boundsForVertices(surface.vertices),
-                        edges: Object.freeze(
-                            surface.vertices.map((start, index) => {
-                                const end = surface.vertices[(index + 1) % surface.vertices.length];
-                                const dx = end.x - start.x;
-                                const dy = end.y - start.y;
-                                return Object.freeze({
-                                    start,
-                                    end,
-                                    dx,
-                                    dy,
-                                    length: Math.hypot(dx, dy),
-                                    bounds: boundsForVertices([start, end])
-                                });
-                            })
-                        )
-                    })
-                )
-        );
-        return this.cachedSurfaces;
+    surfaceEntries(world, progress) {
+        if (this.cachedWorld !== world) {
+            this.cachedWorld = world;
+            this.cachedSurfaces = Object.freeze(
+                (world.surfaces ?? [])
+                    .filter(({ renderable }) => renderable !== false)
+                    .map((surface) =>
+                        Object.freeze({
+                            surface,
+                            bounds: boundsForVertices(surface.vertices),
+                            edges: Object.freeze(
+                                surface.vertices.map((start, index) => {
+                                    const end = surface.vertices[(index + 1) % surface.vertices.length];
+                                    const dx = end.x - start.x;
+                                    const dy = end.y - start.y;
+                                    return Object.freeze({
+                                        start,
+                                        end,
+                                        dx,
+                                        dy,
+                                        length: Math.hypot(dx, dy),
+                                        bounds: boundsForVertices([start, end])
+                                    });
+                                })
+                            )
+                        })
+                    )
+            );
+        }
+        return this.cachedSurfaces.filter(({ surface }) => isSurfaceEnabledForProgress(surface, progress));
     }
 
     drawSurface(context, entry, material, palette, viewport, sectorId = null) {

@@ -111,6 +111,8 @@ reviewed-upstream: 6f8d2529a759ca37c8aecc0185d9a0a797c6bbda
 
 57. #637은 사용자 정정에 따라 `가로 4,800px`을 좌우 진행 순서가 아니라 도시의 실제 폭으로 해석했다. legacy Stage 정의는 수정하지 않고 Sector local `1 → 8` vertical stack으로 compile하며, 각 landmark의 양옆에 실제 collision·grapple이 가능한 city wing을 더한다. Stage별 `gate`·`gate-panel`·exit portal visual은 기본 world output에서 제거하고 door-source objective는 route mouth reach로 바꿔 objective가 곧 통로를 연다. `sectorTransitions`가 Sector world origin과 local layout을 분리하므로 future Boss room의 rise를 삽입해도 downstream Stage local origin·bounds·stable ID는 재작성하지 않는다. Sector 04~~06, Timer/Purge와 증강 source 계약은 변경하지 않는다.
 
+58. #640은 Stage 층을 없애지 않고, 잠긴 route connector가 화면에서만 발판으로 남던 공통 renderer/collision drift를 고쳤다. `WorldGateGeometry.isSurfaceEnabledForProgress()`를 physics와 polygon/pixel terrain renderer가 함께 사용해 `requiredRouteId`가 잠긴 surface는 양쪽에서 제외하고, unlock 뒤 같은 frame state에서 함께 추가한다. 실제 Stage floor와 city wing collision은 그대로 유지한다.
+
 ## 열린 기획·구현 게이트
 
 1. P0 Alignment: 1-7 조기 최종 문구, Cutter 문서 의미, Foundation·Checkpoint·Scenario Art 카메라 계약을 최신 Runtime과 정렬한다.
