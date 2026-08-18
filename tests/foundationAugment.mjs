@@ -57,7 +57,7 @@ export function run() {
     const effective = fastLong.effectiveRopeConfig(ROPE_CONFIG);
     assert.equal(effective.hookSpeed, 1800);
     assert.equal(ropeHookReach(effective), 480);
-    assert.equal(effective.hookReloadSeconds, 0.5);
+    assert.equal(effective.hookReloadSeconds, 0.25);
 
     const simulation = new GameSimulation({ worldSeed: 1234, worldCatalog: SECTOR_01_AREA_CATALOG });
     advanceToArea04(simulation);

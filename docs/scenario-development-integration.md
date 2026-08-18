@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: ea02692ee788eb018d6282f7f76871c175ce17c50ae0ba39a6b32070b136e69d
+scenario-source-sha256: a12734d5bc92c5343f813852230142704d43dff1af0710e38b97fa652ca60736
 authored-area-sha256: b5bafad252aa7696072995f64290b9009fdda4063051568527754263ac9a013b
 authored-sector-sha256: 04b2d0adbd8bd14c02028a81980aeb61c4b30a5820804924b7722ad761f43bd1
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 930c4d200ee79e13325c975d708391655fe703e7
+reviewed-upstream: c947ee59cc3f3f4e7ede0b5fa19b37db9d30f709
 -->
 
 ## 상태를 읽는 법
@@ -114,6 +114,8 @@ reviewed-upstream: 930c4d200ee79e13325c975d708391655fe703e7
 58. #640은 Stage 층을 없애지 않고, 잠긴 route connector가 화면에서만 발판으로 남던 공통 renderer/collision drift를 고쳤다. `WorldGateGeometry.isSurfaceEnabledForProgress()`를 physics와 polygon/pixel terrain renderer가 함께 사용해 `requiredRouteId`가 잠긴 surface는 양쪽에서 제외하고, unlock 뒤 같은 frame state에서 함께 추가한다. 실제 Stage floor와 city wing collision은 그대로 유지한다.
 
 59. #642는 Sector 01의 넓은 공간을 전투 기반 선택 동선으로 채우는 첫 vertical slice다. Stage-local 1-3·1-6·1-7 encounter에 stable Access Module A/B/C를 붙이고, `SectorProgressState`가 아무 2개의 수집·snapshot/restore·party-wipe reset을 소유한다. 1-6은 본선 Wind 학습을 적 없이 유지하면서 Neutral Deck에 기존 Sentry 행동을 재사용한 선택 Carrier를 추가했다. Sector 01→02 connector는 1-8 objective와 Access 2/3을 함께 요구하며 Stage별 Gate/portal은 복구하지 않는다. HUD의 coarse hint와 720px 근접 beacon으로 후보 존재를 알리고, 기본 Runtime의 `world.enemySpawns → GameSimulation.createEnemies() → enemyStates/render snapshot` 경로에 Carrier가 실제 포함되는 회귀를 고정한다. 가변 적 수·가중치·세부 selector 결과는 테스트로 고정하지 않는다. Sector 02~06, Boss, Timer/Purge는 계속 HOLD다.
+
+60. #646은 기본 Hook 재발사 대기를 `1.00초 → 0.50초`로 줄였다. `1200px/s × 1/3초 = 400px` 비행·부착·스윙 수치는 유지하며, `빠른 회수 -50%`는 새 base에서 `0.25초`가 된다. AREA-SPEC은 Runtime tuning 수치를 복사하지 않으므로 Stage fingerprint 변경만 기록하고 맵 좌표·route·acceptance 기준은 바꾸지 않는다.
 
 ## 열린 기획·구현 게이트
 

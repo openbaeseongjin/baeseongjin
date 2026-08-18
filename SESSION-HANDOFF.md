@@ -15,7 +15,7 @@
 ## 현재 구현
 
 - `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.codex/skills/github-task-flow/SKILL.md`를 따른다. 개발 효율 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 검증은 base SHA·diff fingerprint ledger의 단일 소유자가 수행하고 같은 candidate의 fresh PASS를 역할별로 반복하지 않는다. 같은 저장소의 독립 작업은 별도 Git worktree를 기본으로 즉시 병렬 진행하며, 실제 같은 hunk·public contract dependency가 있을 때만 직렬화한다. `$coordinate-github-tasks`는 두 활성 대화가 실제 구현 소스를 동시에 수정해 충돌할 때만 사용하고 계획 분배에는 사용하지 않으며, 완료된 대화를 재활성화하지 않는다. 새 구현은 새 대화에서 시작한다. 범위·검증·worktree 반복 기준은 `docs/development-rules.md`의 **효율 우선 실행과 검증 예산**, **동시 Codex 작업과 GitHub 범위 조정** 및 관련 Skill을 따른다.
-- 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(기본 속도 1200px/s × 수명 1/3초 = 400px 도달), 재발사 1.00초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
+- 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(기본 속도 1200px/s × 수명 1/3초 = 400px 도달), 재발사 0.50초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
 - 0.30.0 기본 런은 Sector 01·02·03의 24개 legacy Stage 정의를 수정하지 않고, 각 Sector local 좌표 안에서 `1 → 8` 순서의 세로 등반 spine으로 compile한다. landmark 양옆에는 실제로 밟고 로프로 오갈 수 있는 city wing을 붙여 Sector 폭은 4,800px로 유지한다. Stage 층은 실제 collision surface로 남아 구분되지만, Stage별 Gate·exit panel·포탈·문 visual과 per-Area Checkpoint는 기본 world output에 없다. `requiredRouteId` connector는 collision과 renderer가 같은 predicate를 사용해 잠긴 동안에는 발판처럼 보이지 않고 unlock 뒤에 함께 나타난다. future Boss room은 Sector transition slot에 넣어 downstream Sector의 local 좌표·콘텐츠 ID를 다시 쓰지 않는다.
 - #622 City Phase 1~~2의 `SectorDefinition`·validator·canonical encounter 계약과 #624 Enemy Phase 6을 #625 Runtime cutover가 소비한다. 진행 권위는 `SectorProgressState`, 부활 권위는 `respawnAnchorId`, party wipe 증거는 `partyWipeBaseline`이 소유한다. Sector 04~~06 Runtime과 Timer/Purge·증강 topology mapping은 HOLD다.
 - #642의 0.30.0 Sector 01 access vertical slice는 1-3 Security Annex, 1-6 Cooling Intake, 1-7 Pressure Bypass의 기존/재사용 Sentry를 Access Carrier A/B/C로 사용한다. 아무 2개를 처치해 공용 모듈을 얻고 1-8 objective까지 완료하면 Sector 01→02 connector가 열린다. HUD는 항상 수집 수와 남은 signal을 표시하고, 근접 시 정확한 Carrier beacon을 보여준다. 개인 사망은 모듈을 보존하며 party wipe만 current Sector 모듈·encounter·route를 초기화한다. Stage-local 좌표와 세로 stack, Stage별 문 제거, future Boss transition slot 계약은 유지한다.
@@ -201,7 +201,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 ### [L2] 기본 Grapple과 Sentry를 현재 authored 맵 밀도에 맞춘다
 
 - Rope는 입력 즉시 Anchor에 연결되지 않고 손에서 Grapple Hook을 발사해 실제 비행 후 유효 표면에 도달해야 부착된다. 빗나가거나 입력을 놓으면 취소되고 재발사 대기를 거친다.
-- 현재 기본 Hook은 `1200px/s × 1/3초 = 400px`, 재발사 대기 `1.00초`, `swingImpulse = 780`이다. 별도 Rope 사거리 상수를 중복 소유하지 않고 후보 탐색·실제 명중·로프 최대 길이가 같은 effective config의 `속도 × 수명`을 사용한다. 디버그 override는 다음 싱글 시작부터 이 base를 바꾸며 증강은 그 위에서 퍼센트로 계산한다.
+- 현재 기본 Hook은 `1200px/s × 1/3초 = 400px`, 재발사 대기 `0.50초`, `swingImpulse = 780`이다. 별도 Rope 사거리 상수를 중복 소유하지 않고 후보 탐색·실제 명중·로프 최대 길이가 같은 effective config의 `속도 × 수명`을 사용한다. 디버그 override는 다음 싱글 시작부터 이 base를 바꾸며 증강은 그 위에서 퍼센트로 계산한다. `빠른 회수`의 `-50%`는 새 base에 적용되어 `0.25초`가 된다.
 - Sentry와 같은 공격 FSM을 재사용하는 적의 첫 Prototype은 체력 `100`, 인식 거리 `760px`, 적 탄속 `520px/s`, 재사격 대기 `1.0초`를 사용한다. 기존 Acquire·Track·Lock Telegraph, authored activation band, Cover LOS와 `no-rope-cut` 규칙은 유지한다.
 
 ### [L1] 한 런은 하나의 붕괴 도시 월드를 48개 진행 영역으로 연결한다

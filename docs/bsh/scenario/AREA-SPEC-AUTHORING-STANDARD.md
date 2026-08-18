@@ -303,7 +303,7 @@ REV 1.1부터는 `runtimeLandmarks` 자신도 §3 base referencable set(실제 `
 
 ## 12. Rope/Player/Combat 공통 수치 — 중복 기록 금지 재확인
 
-`ROPE_CONFIG`/`PLAYER_CONFIG`/`COMBAT_CONFIG`(`src/game/config.js`)의 수치를 AREA-SPEC에 복사하지 않는다. `#632`(Rope 기본값 조정: `hookSpeed 1400→1200`, `hookFlightRatio 2/7→1/3`, `hookReloadSeconds 0.2→1`)처럼 Runtime 값이 바뀌어도 AREA-SPEC은 그 자체로는 stale해지지 않아야 한다 — `swingImpulse = 0`처럼 **검증 방법**(methodology)만 acceptanceTests/route 설명에 쓰고, 실제 baseline 숫자(`780`, `400px` 등)를 하드코딩하지 않는다.
+`ROPE_CONFIG`/`PLAYER_CONFIG`/`COMBAT_CONFIG`(`src/game/config.js`)의 수치를 AREA-SPEC에 복사하지 않는다. `#632`(Rope 기본값 조정: `hookSpeed 1400→1200`, `hookFlightRatio 2/7→1/3`, `hookReloadSeconds 0.2→1`)와 `#646`(`hookReloadSeconds 1→0.5`)처럼 Runtime 값이 바뀌어도 AREA-SPEC은 그 자체로는 stale해지지 않아야 한다 — `swingImpulse = 0`처럼 **검증 방법**(methodology)만 acceptanceTests/route 설명에 쓰고, 실제 baseline 숫자(`780`, `400px` 등)를 하드코딩하지 않는다.
 
 ## 13. 하지 말아야 할 것
 
