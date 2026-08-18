@@ -509,12 +509,19 @@ export class CanvasRenderer {
         if (controls.ropePointerDown) {
             ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
             ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
+        } else if (controls.actionPointerDown) {
+            ctx.fillStyle = "rgba(103, 232, 249, 0.12)";
+            ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         }
         const layout = getMobileControlLayout(this.cssWidth, this.cssHeight);
         this.drawMobileButton(layout.left, "←", controls.left);
         this.drawMobileButton(layout.jump, "점프", controls.jump);
         this.drawMobileButton(layout.right, "→", controls.right);
-        this.drawMobileButton(layout.action, "액션", controls.action);
+        this.drawMobileButton(
+            layout.action,
+            controls.aimMode === "action" ? "액션 조준" : "로프 조준",
+            controls.aimMode === "action"
+        );
     }
 
     drawMobileButton(bounds, label, active) {
@@ -526,7 +533,7 @@ export class CanvasRenderer {
         ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         ctx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
         ctx.fillStyle = active ? "#111827" : "#f8fafc";
-        ctx.font = `800 ${label === "점프" || label === "액션" ? 16 : 30}px system-ui, sans-serif`;
+        ctx.font = `800 ${label === "점프" ? 16 : label.includes("조준") ? 11 : 30}px system-ui, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(label, bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);

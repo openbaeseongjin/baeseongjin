@@ -27,6 +27,22 @@ function projectileSpawnBinding(event, context) {
     });
 }
 
+function actionStartBinding(event, context) {
+    if (event.eventType !== "augment-action-started" && event.eventType !== "predicted-augment-action-started") {
+        return null;
+    }
+    const activationId = event.activationId ?? event.parameters?.activationId;
+    return Object.freeze({
+        cueId: "gameplay-action-swing",
+        request: Object.freeze({
+            ...context,
+            emitterId: event.playerId ?? event.ownerId ?? event.parameters?.playerId ?? "action",
+            causalId: activationId ? `action-start:${activationId}` : eventCausalId("action-start", event),
+            position: eventPosition(event) ?? context.listener
+        })
+    });
+}
+
 function playerHitBinding(event, context) {
     const isFallDamage =
         event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged";
@@ -85,6 +101,7 @@ function authoredProgressBinding(event, context) {
 }
 
 export const DEFAULT_AUDIO_EVENT_HANDLERS = Object.freeze([
+    actionStartBinding,
     projectileSpawnBinding,
     playerHitBinding,
     checkpointBinding,

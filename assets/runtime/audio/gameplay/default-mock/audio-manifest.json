@@ -60,6 +60,21 @@
             "pitchRandomizationPercent": 2,
             "gainRandomizationDb": 1
         },
+        "gameplay-action-swing": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [
+                { "clip": "weapon-fire-a", "weight": 1 },
+                { "clip": "weapon-fire-b", "weight": 1 }
+            ],
+            "spatial": "world",
+            "gainDb": -2,
+            "maxVoices": 3,
+            "retriggerCooldownMs": 80,
+            "priority": 60,
+            "pitchRandomizationPercent": 3,
+            "gainRandomizationDb": 1
+        },
         "gameplay-player-hit": {
             "group": "gameplay",
             "kind": "one-shot",

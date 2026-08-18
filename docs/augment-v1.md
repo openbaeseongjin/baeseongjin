@@ -81,6 +81,8 @@ Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. �
 
 ## Action과 Signature
 
+PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 `로프 조준 ↔ 액션 조준` 토글 뒤 액션 조준 상태에서 월드를 누른 실제 지점을 방향으로 사용하며, 그 터치는 Rope 발사 입력을 만들지 않는다. 기본 주먹과 모든 증강 Action의 유효 시작은 `augment-action-started` presentation event를 만들고 주먹/방향 잔상과 교체 가능한 `gameplay-action-swing` cue를 즉시 재생한다. predicted/confirmed 표현은 같은 `activationId`로 한 번만 보인다. 기본 주먹은 사거리 안 적이 없어도 입력 피드백을 만들지만 피해와 넉백은 기존 유효 대상에게만 적용한다.
+
 | Action | 기본 계약 | Signature |
 | --- | --- | --- |
 | 방향 돌진 | 150px/0.25초, cooldown 5초, momentum 보존, damage·무적 없음 | 폭발 흔적: 폭 60px 경로가 0.50초 뒤 80% 피해 |

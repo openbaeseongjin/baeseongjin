@@ -11,6 +11,8 @@ export class InputSampler {
         this.pointer = { x: 0, y: 0, down: false };
         this.actionDown = false;
         this.ropePointerId = null;
+        this.actionPointerId = null;
+        this.mobileAimMode = "rope";
         this.controlPointers = new Map();
         this.touchActive = false;
         this.attached = false;
@@ -44,7 +46,21 @@ export class InputSampler {
             const control = findMobileControl(point.x, point.y, this.viewportWidth(), this.viewportHeight());
             if (control) {
                 this.surface?.setPointerCapture?.(event.pointerId);
-                this.controlPointers.set(event.pointerId, control);
+                if (control === "action") {
+                    if (this.ropePointerId === null && this.actionPointerId === null) {
+                        this.mobileAimMode = this.mobileAimMode === "rope" ? "action" : "rope";
+                    }
+                    this.controlPointers.set(event.pointerId, "action-toggle");
+                } else {
+                    this.controlPointers.set(event.pointerId, control);
+                }
+                return;
+            }
+            if (this.mobileAimMode === "action" && this.actionPointerId === null) {
+                this.surface?.setPointerCapture?.(event.pointerId);
+                this.actionPointerId = event.pointerId;
+                this.pointer = { x: event.clientX, y: event.clientY, down: false };
+                this.actionDown = true;
                 return;
             }
             if (this.ropePointerId === null) {
@@ -88,7 +104,7 @@ export class InputSampler {
     }
 
     updateTouchPointer(event) {
-        if (this.ropePointerId === event.pointerId) {
+        if (this.ropePointerId === event.pointerId || this.actionPointerId === event.pointerId) {
             this.pointer.x = event.clientX;
             this.pointer.y = event.clientY;
         }
@@ -102,6 +118,11 @@ export class InputSampler {
             return;
         }
         if (this.controlPointers.delete(pointerId)) return;
+        if (this.actionPointerId === pointerId) {
+            this.actionPointerId = null;
+            this.actionDown = false;
+            return;
+        }
         if (this.ropePointerId === pointerId) {
             this.ropePointerId = null;
             this.pointer.down = false;
@@ -113,6 +134,7 @@ export class InputSampler {
         const releasedRope = this.pointer.down || this.ropePointerId !== null;
         this.keys.clear();
         this.ropePointerId = null;
+        this.actionPointerId = null;
         this.controlPointers.clear();
         this.actionDown = false;
         this.pointer.down = false;
@@ -164,20 +186,21 @@ export class InputSampler {
         const mobileLeft = [...this.controlPointers.values()].includes("left");
         const mobileRight = [...this.controlPointers.values()].includes("right");
         const mobileJump = [...this.controlPointers.values()].includes("jump");
-        const mobileAction = [...this.controlPointers.values()].includes("action");
         const mobileControls = Object.freeze({
             visible: this.touchActive,
             ropePointerDown: this.ropePointerId !== null,
+            actionPointerDown: this.actionPointerId !== null,
+            aimMode: this.mobileAimMode,
             left: mobileLeft,
             right: mobileRight,
             jump: mobileJump,
-            action: mobileAction
+            action: this.mobileAimMode === "action"
         });
         return Object.freeze({
             horizontal: Math.max(-1, Math.min(1, keyboardHorizontal + Number(mobileRight) - Number(mobileLeft))),
             vertical: Math.max(-1, Math.min(1, keyboardVertical - Number(mobileJump))),
             interact: keyboardVertical < 0 || mobileJump,
-            action: this.actionDown || mobileAction,
+            action: this.actionDown,
             pointer: Object.freeze({ ...this.pointer }),
             viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),
             mobileControls

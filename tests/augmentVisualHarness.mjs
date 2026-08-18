@@ -80,6 +80,16 @@ renderer.draw({
             lifetime: 0.28
         }
     ],
+    actionAfterimages: [
+        {
+            id: "action:default-punch:preview",
+            actionId: "default-punch",
+            position: { x: 410, y: 485 },
+            direction: { x: 1, y: -0.12 },
+            age: 0.08,
+            lifetime: 0.42
+        }
+    ],
     combatEffects: [],
     storyPresentation: null,
     eventFlash: null,
@@ -89,6 +99,8 @@ renderer.draw({
     mobileControls: {
         visible: true,
         ropePointerDown: false,
+        actionPointerDown: false,
+        aimMode: "action",
         left: false,
         jump: false,
         right: false,
