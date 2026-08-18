@@ -29,6 +29,7 @@ export function run() {
     assert.equal(SIGNATURE_ACTION_IDS.length, 6);
     assert.equal(UNIVERSAL_MODIFIER_IDS.length, 4);
     assert.equal(actionAugmentById("end-wave").displayName, "종료 파동");
+    assert.equal(actionAugmentById("direction-dash").displayName, "점멸");
     assert.throws(
         () => createActionLoadout({ baseActionId: "direction-dash", signatureId: "wall-impact" }),
         /not compatible/
@@ -44,12 +45,17 @@ export function run() {
     assert.equal(dashStart.accepted, true);
     assert.equal(dashStart.cooldownSeconds, 1.5);
     assert.equal(dashStart.activation.distance, 150);
-    assert.equal(dashStart.activation.durationSeconds, 0.25);
+    assert.equal(dashStart.activation.immediate, true);
+    assert.equal("durationSeconds" in dashStart.activation, false);
+    assert.equal(dash.activeAction, null);
     assert.equal(dash.chargesRemaining, 0);
-    const dashEnd = dash.advance(0.25);
-    assert.ok(dashEnd.some(({ eventType }) => eventType === "action-ended"));
-    assert.ok(dashEnd.some(({ eventType }) => eventType === "post-action-shield-applied"));
+    assert.ok(dashStart.events.some(({ eventType }) => eventType === "action-ended"));
+    assert.ok(dashStart.events.some(({ eventType }) => eventType === "post-action-shield-applied"));
     assert.equal(dash.shieldValue, 15);
+    assert.equal(
+        dash.setExplosiveTrailPath(dashStart.activation.activationId, { x: 10, y: 20 }, { x: 100, y: 20 }),
+        true
+    );
     const trail = dash.advance(0.5);
     assert.deepEqual(
         trail.find(({ eventType }) => eventType === "explosive-trail-detonated"),
@@ -57,11 +63,17 @@ export function run() {
             eventType: "explosive-trail-detonated",
             activationId: dashStart.activation.activationId,
             width: 60,
-            damage: 80
+            damage: 80,
+            start: { x: 10, y: 20 },
+            end: { x: 100, y: 20 }
         }
     );
     dash.advance(1);
     assert.equal(dash.chargesRemaining, 1, "the dash charge must return after its effective recharge");
+
+    const plainBlink = new ActionAugmentState({ baseActionId: "direction-dash", modifierIds: [] });
+    assert.equal(plainBlink.beginAction({ direction: direction(1, 0) }).accepted, true);
+    assert.equal(plainBlink.pendingEffects.length, 0, "blink without its Signature leaves no trail state");
 
     const charges = new ActionAugmentState({
         baseActionId: "straight-shot",
@@ -206,4 +218,30 @@ export function run() {
     assert.equal(restored.loadout.baseActionId, "direction-dash");
     assert.equal(restored.shieldValue, 15);
     assert.equal(restored.chargesRemaining, 1);
+
+    const pendingBlink = new ActionAugmentState({
+        baseActionId: "direction-dash",
+        signatureId: "explosive-trail",
+        modifierIds: []
+    });
+    const pendingStart = pendingBlink.beginAction({ direction: direction(1, 0) });
+    pendingBlink.setExplosiveTrailPath(pendingStart.activation.activationId, { x: 5, y: 6 }, { x: 55, y: 6 });
+    const restoredPendingBlink = new ActionAugmentState({
+        baseActionId: "direction-dash",
+        signatureId: "explosive-trail",
+        modifierIds: []
+    });
+    restoredPendingBlink.restore(pendingBlink.snapshot());
+    assert.deepEqual(
+        restoredPendingBlink.advance(0.5).find(({ eventType }) => eventType === "explosive-trail-detonated"),
+        {
+            eventType: "explosive-trail-detonated",
+            activationId: pendingStart.activation.activationId,
+            width: 60,
+            damage: 80,
+            start: { x: 5, y: 6 },
+            end: { x: 55, y: 6 }
+        },
+        "snapshot restore preserves an immediate blink trail path"
+    );
 }

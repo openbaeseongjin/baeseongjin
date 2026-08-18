@@ -32,6 +32,7 @@ export class GameApp {
         startAreaId = null,
         metricsVisible = false,
         ropeTuning = null,
+        debugAugmentIds = [],
         playerDefinition = null
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
@@ -46,7 +47,8 @@ export class GameApp {
                 worldSeed,
                 startAreaId,
                 ropeConfig: resolveEffectiveRopeConfig(ropeTuning),
-                ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(ropeTuning)
+                ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(ropeTuning),
+                debugAugmentIds
             })
         );
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;

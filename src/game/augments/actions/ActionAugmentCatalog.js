@@ -15,12 +15,11 @@ export const ACTION_AUGMENT_CATALOG = Object.freeze([
     freezeCard({
         id: "direction-dash",
         category: "base-action",
-        displayName: "방향 돌진",
+        displayName: "점멸",
         cooldownSeconds: 5,
         tags: ["movement", "right-click"],
         effect: Object.freeze({
-            distance: 150,
-            durationSeconds: 0.25
+            distance: 150
         })
     }),
     freezeCard({

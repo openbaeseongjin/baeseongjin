@@ -66,8 +66,8 @@ function normalizeState(state) {
         assertTick(baseline.revision, "state.partyWipeBaseline.revision");
         assertId(baseline.respawnAnchorId, "state.partyWipeBaseline.respawnAnchorId");
         assertId(baseline.entryLandmarkId, "state.partyWipeBaseline.entryLandmarkId");
-        if (baseline.respawnAnchorId !== normalized.respawnAnchorId) {
-            throw new Error("state.partyWipeBaseline.respawnAnchorId must match state.respawnAnchorId");
+        if (normalized.worldProgress?.respawnAnchorId !== normalized.respawnAnchorId) {
+            throw new Error("state.worldProgress.respawnAnchorId must match state.respawnAnchorId");
         }
         if (baseline.sectorId !== normalized.worldProgress?.currentSectorId) {
             throw new Error("state.partyWipeBaseline.sectorId must match state.worldProgress.currentSectorId");

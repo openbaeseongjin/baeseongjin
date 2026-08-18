@@ -1,7 +1,12 @@
-import { ROPE_TUNING_FIELDS, resolveEffectiveRopeConfig, ropeHookReach } from "../src/game/config.js";
+import {
+    ROPE_TUNING_FIELDS,
+    resolveEffectiveRopeConfig,
+    resolveEffectiveRopeDisabledSeconds
+} from "../src/game/config.js";
 import { DebugSettings } from "../src/game/metrics/DebugSettings.js";
 import { restartSingleGameForDebugSettings } from "../src/game/runtime/SingleGameDebugRestart.js";
 import { DebugPanel } from "../src/game/ui/DebugPanel.js";
+import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
 
 const labels = new Map([
     ["hookSpeed", "훅 속도"],
@@ -50,8 +55,16 @@ panel.onApply = () => {
             return {
                 stop() {},
                 start() {
-                    const reach = ropeHookReach(resolveEffectiveRopeConfig(debug.ropeTuning));
-                    runOutput.textContent = `Run ${generation} · 적용 사거리 ${reach.toFixed(1)}px`;
+                    const simulation = createCurrentGameSimulation({
+                        worldSeed: 9182,
+                        playerId: "visual-debug-player",
+                        debugAugmentIds: debug.debugAugmentIds,
+                        ropeConfig: resolveEffectiveRopeConfig(debug.ropeTuning),
+                        ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(debug.ropeTuning)
+                    });
+                    const selected = simulation.playerState("visual-debug-player").selectedAugmentIds;
+                    const reach = simulation.snapshot().maxAttachDistance;
+                    runOutput.textContent = `Run ${generation} · 적용 사거리 ${reach.toFixed(1)}px · ${selected.join(", ") || "증강 없음"}`;
                 }
             };
         }

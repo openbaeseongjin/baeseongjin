@@ -5,6 +5,8 @@ import {
     ropeHookFlightSeconds,
     ropeHookReach
 } from "../config.js";
+import { AUGMENT_CATALOG, isAugmentCompatibleWithSelection } from "../augments/FoundationAugmentCatalog.js";
+import { MAX_DEBUG_AUGMENT_COUNT } from "../metrics/DebugSettings.js";
 
 export const DEBUG_PANEL_HOLD_MS = 1000;
 
@@ -52,6 +54,10 @@ export class DebugPanel {
         this.ropeReachOutput = null;
         this.ropeFlightOutput = null;
         this.ropeModeOutput = null;
+        this.augmentFieldset = null;
+        this.augmentSelects = [];
+        this.augmentResetButton = null;
+        this.augmentModeOutput = null;
         this.ropeTuningEnabled = true;
         this.holdTimerId = null;
         this.lastActivatedAt = 0;
@@ -74,12 +80,14 @@ export class DebugPanel {
         this.onStartAreaChange = () =>
             this.settings.setStartAreaId(this.startAreaSelect.value.trim() ? this.startAreaSelect.value : null);
         this.onApplyClick = () => {
+            if (!this.ropeTuningEnabled) return;
             if (this.ropeTuningEnabled) this.settings.setRopeTuning(this.ropeTuningFromInputs());
             this.onApply?.();
         };
         this.onRopeInput = () => this.renderRopeDerived(this.ropeTuningFromInputs());
         this.onRopeChange = () => this.settings.setRopeTuning(this.ropeTuningFromInputs());
         this.onRopeReset = () => this.settings.setRopeTuning(null);
+        this.onAugmentReset = () => this.settings.setDebugAugmentIds([]);
     }
 
     beginHold() {
@@ -112,6 +120,10 @@ export class DebugPanel {
         this.ropeReachOutput = this.documentTarget.querySelector("[data-debug-rope-reach]");
         this.ropeFlightOutput = this.documentTarget.querySelector("[data-debug-rope-flight]");
         this.ropeModeOutput = this.documentTarget.querySelector("[data-debug-rope-mode]");
+        this.augmentFieldset = this.documentTarget.querySelector("[data-debug-augment-loadout]");
+        this.augmentSelects = [...this.documentTarget.querySelectorAll("[data-debug-augment-slot]")];
+        this.augmentResetButton = this.documentTarget.querySelector("[data-debug-augment-reset]");
+        this.augmentModeOutput = this.documentTarget.querySelector("[data-debug-augment-mode]");
         if (
             !this.metricsInput ||
             !this.startAreaSelect ||
@@ -121,7 +133,11 @@ export class DebugPanel {
             !this.ropeResetButton ||
             !this.ropeReachOutput ||
             !this.ropeFlightOutput ||
-            !this.ropeModeOutput
+            !this.ropeModeOutput ||
+            !this.augmentFieldset ||
+            this.augmentSelects.length !== MAX_DEBUG_AUGMENT_COUNT ||
+            !this.augmentResetButton ||
+            !this.augmentModeOutput
         ) {
             throw new Error("DebugPanel is missing panel controls");
         }
@@ -140,6 +156,16 @@ export class DebugPanel {
             option.textContent = areaId;
             this.startAreaSelect.append(option);
         }
+        for (const select of this.augmentSelects) {
+            const existingAugmentIds = new Set([...select.options].map(({ value }) => value));
+            for (const augment of AUGMENT_CATALOG) {
+                if (existingAugmentIds.has(augment.id)) continue;
+                const option = this.documentTarget.createElement("option");
+                option.value = augment.id;
+                option.textContent = `[${augment.family}] ${augment.name}`;
+                select.append(option);
+            }
+        }
         this.trigger.addEventListener("pointerdown", this.onPointerDown);
         this.trigger.addEventListener("pointerup", this.onPointerEnd);
         this.trigger.addEventListener("pointercancel", this.onPointerEnd);
@@ -154,6 +180,13 @@ export class DebugPanel {
             input.addEventListener("change", this.onRopeChange);
         }
         this.ropeResetButton.addEventListener("click", this.onRopeReset);
+        for (const [index, select] of this.augmentSelects.entries()) {
+            select.addEventListener(
+                "change",
+                ((this.augmentChangeHandlers ??= [])[index] ??= () => this.changeAugmentSlot(index))
+            );
+        }
+        this.augmentResetButton.addEventListener("click", this.onAugmentReset);
         this.unsubscribe = this.settings.subscribe((value) => this.render(value));
         this.renderRopeTuningAvailability();
         this.attached = true;
@@ -173,6 +206,7 @@ export class DebugPanel {
             );
         }
         this.renderRopeDerived(value.ropeTuning);
+        this.renderAugmentLoadout(value.debugAugmentIds);
     }
 
     ropeTuningFromInputs() {
@@ -190,6 +224,39 @@ export class DebugPanel {
         this.ropeReachOutput.textContent = `${ropeHookReach(effective).toFixed(1)}px`;
     }
 
+    changeAugmentSlot(index) {
+        if (!this.ropeTuningEnabled) return;
+        const current = [...this.settings.snapshot().debugAugmentIds];
+        const next = current.slice(0, index);
+        const selectedId = this.augmentSelects[index].value;
+        if (selectedId) next.push(selectedId);
+        for (const laterId of current.slice(index + 1)) {
+            if (!isAugmentCompatibleWithSelection(laterId, next)) break;
+            next.push(laterId);
+        }
+        this.settings.setDebugAugmentIds(next);
+    }
+
+    renderAugmentLoadout(debugAugmentIds) {
+        const selected = [...debugAugmentIds];
+        for (const [index, select] of this.augmentSelects.entries()) {
+            const prefix = selected.slice(0, index);
+            select.value = selected[index] ?? "";
+            select.disabled = !this.ropeTuningEnabled || index > selected.length;
+            for (const option of select.options) {
+                if (!option.value) {
+                    option.disabled = false;
+                    continue;
+                }
+                option.disabled =
+                    option.value !== selected[index] && !isAugmentCompatibleWithSelection(option.value, prefix);
+            }
+        }
+        this.augmentModeOutput.textContent = this.ropeTuningEnabled
+            ? `선택 ${selected.length}/${MAX_DEBUG_AUGMENT_COUNT} · 중복, 기본 Action 2개, Action 불일치 Signature와 Action 없는 범용 강화는 선택할 수 없습니다.`
+            : "멀티 세션에서는 비활성 · 공유 증강 loadout 프로토콜 미구현";
+    }
+
     setRopeTuningEnabled(enabled) {
         this.ropeTuningEnabled = Boolean(enabled);
         if (this.attached) this.renderRopeTuningAvailability();
@@ -197,9 +264,12 @@ export class DebugPanel {
 
     renderRopeTuningAvailability() {
         this.ropeFieldset.disabled = !this.ropeTuningEnabled;
+        this.augmentFieldset.disabled = !this.ropeTuningEnabled;
+        this.applyButton.disabled = !this.ropeTuningEnabled;
         this.ropeModeOutput.textContent = this.ropeTuningEnabled
             ? "싱글 전용 · 적용 버튼을 누르면 새 Run으로 즉시 재시작"
             : "멀티 세션에서는 비활성 · 공유 Rope 설정 프로토콜 미구현";
+        this.renderAugmentLoadout(this.settings.snapshot().debugAugmentIds);
     }
 
     detach() {
@@ -219,6 +289,10 @@ export class DebugPanel {
             input.removeEventListener("change", this.onRopeChange);
         }
         this.ropeResetButton.removeEventListener("click", this.onRopeReset);
+        for (const [index, select] of this.augmentSelects.entries()) {
+            select.removeEventListener("change", this.augmentChangeHandlers[index]);
+        }
+        this.augmentResetButton.removeEventListener("click", this.onAugmentReset);
         this.unsubscribe?.();
         this.attached = false;
         return true;

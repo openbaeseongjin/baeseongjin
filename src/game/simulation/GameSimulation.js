@@ -143,8 +143,10 @@ export class GameSimulation {
         startAreaId = null,
         startLandmarkId = null,
         ropeConfig = ROPE_CONFIG,
-        ropeDisabledSeconds = COMBAT_CONFIG.ropeDisabledSeconds
+        ropeDisabledSeconds = COMBAT_CONFIG.ropeDisabledSeconds,
+        debugAugmentIds = []
     } = {}) {
+        if (!Array.isArray(debugAugmentIds)) throw new Error("debugAugmentIds must be an array");
         this.ropeConfig = resolveEffectiveRopeConfig(ropeConfig);
         this.ropeDisabledSeconds = resolveEffectiveRopeDisabledSeconds({ ropeDisabledSeconds });
         this.worldCatalog = worldCatalog;
@@ -186,6 +188,15 @@ export class GameSimulation {
             : null;
         const playerRuntime = this.addPlayer(startLandmark?.entry ?? startArea?.entry, playerId);
         this.#primaryPlayerId = playerRuntime.entity.id;
+        this.debugAugmentPlayerId = debugAugmentIds.length > 0 ? playerRuntime.entity.id : null;
+        if (this.debugAugmentPlayerId) {
+            playerRuntime.foundation.restore(null, {
+                selectedAugmentIds: debugAugmentIds,
+                consumedSourceIds: []
+            });
+            playerRuntime.augmentCombat.syncLoadout(playerRuntime.foundation, playerRuntime.entity.maxHealth);
+            playerRuntime.ropeObject.rope.config = playerRuntime.foundation.effectiveRopeConfig(this.ropeConfig);
+        }
         this.enemies = this.createEnemies();
         this.enemyImpactTombstones = new Map();
         this.projectiles = [];
@@ -1471,6 +1482,7 @@ export class GameSimulation {
         for (const event of events) {
             const { type, ...payload } = event;
             if (type === "objective-choice-requested") {
+                if (event.playerId === this.debugAugmentPlayerId && this.#consumeDebugAugmentSource(event)) continue;
                 if (!this.beginFoundationReward(event.playerId, event.sourceObjectId, event.objectiveId)) continue;
                 this.eventFlash = { type: "foundation-choice-opened", age: 0, ...payload };
                 continue;
@@ -1492,12 +1504,10 @@ export class GameSimulation {
         this.#completeEligibleAugmentObjectivesForCurrentRoster();
         if (this.isSeamlessSectorWorld) {
             this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
-            const sectorEvent = events.findLast(({ type }) => type === "sector-entered");
-            if (sectorEvent) {
-                this.activeRespawnAnchor =
-                    this.world.respawnAnchors.find(({ id }) => id === sectorEvent.respawnAnchorId) ??
-                    this.activeRespawnAnchor;
-            }
+            const respawnAnchorId = this.worldProgress.snapshot().respawnAnchorId;
+            const respawnAnchor = this.world.respawnAnchors.find(({ id }) => id === respawnAnchorId);
+            if (!respawnAnchor) throw new Error(`unknown active respawn anchor: ${respawnAnchorId}`);
+            this.activeRespawnAnchor = respawnAnchor;
             if (this.worldProgress.snapshot().contentBoundaryReached && !this.contentBoundaryAnnounced) {
                 const payload = Object.freeze({
                     sectorId: this.worldProgress.currentSectorId,
@@ -1512,6 +1522,26 @@ export class GameSimulation {
         }
         this.#transferPlayersThroughOpenPortals({ replicate });
         if (this.worldProgress.snapshot().completed) this.beginCompletion(events.at(-1)?.playerId);
+    }
+
+    #consumeDebugAugmentSource({ playerId, sourceObjectId }) {
+        const player = this.#findPlayer(playerId);
+        const source = this.world.objects?.find(({ id }) => id === sourceObjectId);
+        if (!player || source?.kind !== "augment-node") return false;
+        if (!player.foundation.consumedSourceIds.includes(source.id)) {
+            player.foundation.restore(player.foundation.selectedId, {
+                ...player.foundation.snapshot(),
+                consumedSourceIds: [...player.foundation.consumedSourceIds, source.id]
+            });
+        }
+        this.eventFlash = {
+            type: "debug-augment-source-consumed",
+            age: 0,
+            playerId,
+            sourceId: source.id,
+            position: vectorState(player.physics.position)
+        };
+        return true;
     }
 
     beginFoundationReward(playerId, sourceId, objectiveId = null) {

@@ -5,6 +5,8 @@ import {
     collisionSurfacesForSectorProgress,
     isSurfaceEnabledForProgress
 } from "../src/game/world/WorldGateGeometry.js";
+import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
+import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
 
 function surface(id, requiredRouteId = null) {
     return {
@@ -63,5 +65,42 @@ export function run() {
         pixelRenderer.surfaceEntries(world, unlockedProgress).map(({ surface }) => surface.id),
         ["always", "locked-connector"],
         "pixel terrain must reveal the connector in the same state that enables collision"
+    );
+
+    const runtimeWorld = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 320 });
+    const runtimeProgress = new SectorProgressState(runtimeWorld);
+    const firstLandmark = runtimeWorld.landmarks[0];
+    const firstRoute = runtimeWorld.routeLocks.find(({ id }) => id === firstLandmark.outboundRouteId);
+    const connector = runtimeWorld.surfaces.find(
+        ({ id }) => id === firstRoute.connectorId.replace(":connector", ":surface")
+    );
+    const beforeUnlock = collisionSurfacesForSectorProgress(runtimeWorld, runtimeProgress).map(({ id }) => id);
+    for (const objectiveId of firstLandmark.objectiveIds) runtimeProgress.completeObjective(objectiveId);
+    const afterUnlock = collisionSurfacesForSectorProgress(runtimeWorld, runtimeProgress).map(({ id }) => id);
+    const renderableAfterUnlock = afterUnlock.filter(
+        (id) => runtimeWorld.surfaces.find((surface) => surface.id === id)?.renderable !== false
+    );
+    assert.deepEqual(
+        afterUnlock.filter((id) => !beforeUnlock.includes(id)),
+        [connector.id],
+        "objective progress adds only the authored route connector, not a Stage floor"
+    );
+    assert.equal(connector.kind, "sector-connector");
+    assert.equal(connector.requiredRouteId, firstRoute.id);
+    assert.deepEqual(
+        polygonRenderer.surfaceEntries(runtimeWorld, runtimeProgress.snapshot()).map(({ surface }) => surface.id),
+        renderableAfterUnlock,
+        "polygon rendering uses every unlocked collision surface that is authored as renderable"
+    );
+    assert.deepEqual(
+        pixelRenderer.surfaceEntries(runtimeWorld, runtimeProgress.snapshot()).map(({ surface }) => surface.id),
+        renderableAfterUnlock,
+        "pixel rendering uses every unlocked collision surface that is authored as renderable"
+    );
+    runtimeProgress.visitLandmark(firstRoute.targetLandmarkId);
+    assert.deepEqual(
+        collisionSurfacesForSectorProgress(runtimeWorld, runtimeProgress).map(({ id }) => id),
+        afterUnlock,
+        "landmark entry advances the checkpoint without introducing another floor"
     );
 }

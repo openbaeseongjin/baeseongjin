@@ -5,6 +5,7 @@ import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createAugmentImpactClaim } from "../src/game/network/AugmentImpactClaim.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
+import { closestPointOnPolygon, pointInPolygon } from "../src/game/world/PolygonGeometry.js";
 
 function command({ action = false, aimWorld = { x: 1000, y: 500 } } = {}) {
     return createPlayerCommand(
@@ -49,21 +50,60 @@ function plainEnemy(id, x, health = 100, properties = {}) {
     });
 }
 
-function verticalWall(x) {
+function verticalWall(x, width = 20) {
     return {
         id: `wall:${x}`,
         x,
         y: 0,
-        width: 20,
+        width,
         height: 700,
         topY: 0,
         collision: true,
         oneWay: false,
         vertices: [
             { x, y: 0 },
-            { x: x + 20, y: 0 },
-            { x: x + 20, y: 700 },
+            { x: x + width, y: 0 },
+            { x: x + width, y: 700 },
             { x, y: 700 }
+        ]
+    };
+}
+
+function oneWayPlatform(y, x = 0, width = 400) {
+    return {
+        id: `one-way:${x}:${y}`,
+        x,
+        y,
+        width,
+        height: 16,
+        topY: y,
+        collision: true,
+        oneWay: true,
+        oneWayEdgeEnd: 1,
+        vertices: [
+            { x, y },
+            { x: x + width, y },
+            { x: x + width, y: y + 16 },
+            { x, y: y + 16 }
+        ]
+    };
+}
+
+function solidBox(id, x, y, width, height) {
+    return {
+        id,
+        x,
+        y,
+        width,
+        height,
+        topY: y,
+        collision: true,
+        oneWay: false,
+        vertices: [
+            { x, y },
+            { x: x + width, y },
+            { x: x + width, y: y + height },
+            { x, y: y + height }
         ]
     };
 }
@@ -170,14 +210,166 @@ export function run() {
     const dashPlayer = dashSimulation.players[0];
     dashPlayer.foundation.select("direction-dash");
     dashPlayer.physics.position.set(100, 300);
+    dashSimulation.activeCollisionSurfaces = [];
     const dashStartX = dashPlayer.physics.position.x;
     dashSimulation.step(1 / 120, command({ action: true, aimWorld: { x: 1000, y: 300 } }));
+    assert.ok(
+        Math.abs(dashPlayer.physics.position.x - dashStartX - 150) < 0.000001,
+        "blink resolves its full distance on activation tick"
+    );
+    assert.equal(dashPlayer.augmentCombat.actionState.activeAction, null, "blink leaves no 0.25s active action");
+    const heldPosition = dashPlayer.physics.position.x;
     for (let index = 0; index < 30; index += 1) {
         dashSimulation.step(1 / 120, command({ action: true, aimWorld: { x: 1000, y: 300 } }));
     }
+    assert.equal(dashPlayer.physics.position.x, heldPosition, "holding Action does not blink again");
+
+    const velocityBeforeBlink = { x: -120, y: -30 };
+    dashPlayer.physics.velocity.set(velocityBeforeBlink.x, velocityBeforeBlink.y);
+    dashPlayer.physics.setAngularState(0.4, 2.5);
+    dashPlayer.ropeObject.aimWorld = Object.freeze({ x: 1000, y: dashPlayer.physics.position.y });
+    dashPlayer.augmentCombat.wasActionDown = false;
+    dashPlayer.augmentCombat.advance({
+        player: dashPlayer,
+        foundation: dashPlayer.foundation,
+        command: command({ action: true, aimWorld: { x: 1000, y: dashPlayer.physics.position.y } }),
+        dt: 0,
+        enemies: [],
+        surfaces: [],
+        tick: 100
+    });
+    assert.deepEqual(
+        { x: dashPlayer.physics.velocity.x, y: dashPlayer.physics.velocity.y },
+        velocityBeforeBlink,
+        "blink preserves linear velocity"
+    );
+    assert.equal(dashPlayer.physics.angularVelocity, 2.5, "blink preserves angular velocity");
+
+    const blockedSimulation = new GameSimulation({ playerId: "blink-wall-owner" });
+    blockedSimulation.enemies = [];
+    const blockedPlayer = blockedSimulation.players[0];
+    blockedPlayer.foundation.select("direction-dash");
+    blockedPlayer.physics.position.set(100, 300);
+    blockedSimulation.activeCollisionSurfaces = [verticalWall(145, 2)];
+    blockedSimulation.step(1 / 120, command({ action: true, aimWorld: { x: 1000, y: 300 } }));
+    assert.ok(blockedPlayer.physics.position.x > 100, "a nearby thin wall still allows the safe part of blink");
+    assert.ok(blockedPlayer.physics.position.x <= 130.001, "blink cannot cross a thin wall");
+
+    const thickWallPlayer = new GameSimulation({ playerId: "blink-thick-wall" }).players[0];
+    const thickWall = verticalWall(145, 100);
+    const thickResult = thickWallPlayer.physics.collider.farthestSafePositionAlong({
+        start: { x: 100, y: 300 },
+        direction: { x: 1, y: 0 },
+        distance: 150,
+        surfaces: [thickWall]
+    });
+    assert.ok(thickResult.position.x <= 130.001, "blink cannot cross a thick solid");
+    const touchingResult = thickWallPlayer.physics.collider.farthestSafePositionAlong({
+        start: { x: 130, y: 300 },
+        direction: { x: 1, y: 0 },
+        distance: 150,
+        surfaces: [thickWall]
+    });
+    assert.ok(touchingResult.distance <= 0.001, "blink into a touching solid does not jump behind it");
+    const tangentResult = thickWallPlayer.physics.collider.farthestSafePositionAlong({
+        start: { x: 130, y: 300 },
+        direction: { x: 0, y: -1 },
+        distance: 150,
+        surfaces: [thickWall]
+    });
+    assert.equal(tangentResult.distance, 150, "blink can move tangentially from a touching solid without jitter");
+
+    const corner = solidBox("corner", 155, 340, 30, 30);
+    const cornerResult = thickWallPlayer.physics.collider.farthestSafePositionAlong({
+        start: { x: 100, y: 300 },
+        direction: { x: 1, y: 1 },
+        distance: 150,
+        surfaces: [corner]
+    });
+    const cornerClosest = closestPointOnPolygon(cornerResult.position, corner.vertices);
+    assert.equal(pointInPolygon(cornerResult.position, corner.vertices), false);
     assert.ok(
-        Math.abs(dashPlayer.physics.position.x - dashStartX - 150) < 1,
-        "direction dash moves 150px over 0.25 seconds"
+        Math.hypot(cornerResult.position.x - cornerClosest.x, cornerResult.position.y - cornerClosest.y) >=
+            thickWallPlayer.physics.collider.radius - 0.001,
+        "blink ends outside a polygon corner"
+    );
+    assert.ok(cornerResult.distance < 150, "a polygon corner shortens blink instead of being skipped");
+
+    const oneWayDownSimulation = new GameSimulation({ playerId: "blink-one-way-down" });
+    oneWayDownSimulation.enemies = [];
+    const oneWayDownPlayer = oneWayDownSimulation.players[0];
+    oneWayDownPlayer.foundation.select("direction-dash");
+    oneWayDownPlayer.physics.position.set(100, 250);
+    oneWayDownPlayer.physics.isGrounded = false;
+    oneWayDownSimulation.activeCollisionSurfaces = [oneWayPlatform(300)];
+    oneWayDownSimulation.step(1 / 120, command({ action: true, aimWorld: { x: 100, y: 1000 } }));
+    assert.ok(oneWayDownPlayer.physics.position.y <= 285.001, "downward blink stops above a one-way platform");
+
+    const oneWayUpSimulation = new GameSimulation({ playerId: "blink-one-way-up" });
+    oneWayUpSimulation.enemies = [];
+    const oneWayUpPlayer = oneWayUpSimulation.players[0];
+    oneWayUpPlayer.foundation.select("direction-dash");
+    oneWayUpPlayer.physics.position.set(100, 350);
+    oneWayUpPlayer.physics.isGrounded = false;
+    oneWayUpSimulation.activeCollisionSurfaces = [oneWayPlatform(300)];
+    oneWayUpSimulation.step(1 / 120, command({ action: true, aimWorld: { x: 100, y: 0 } }));
+    assert.ok(oneWayUpPlayer.physics.position.y < 250, "upward blink passes through a one-way platform from below");
+
+    const ropeBlinkSimulation = new GameSimulation({ playerId: "blink-rope-owner" });
+    ropeBlinkSimulation.enemies = [];
+    const ropeBlinkPlayer = ropeBlinkSimulation.players[0];
+    ropeBlinkPlayer.foundation.select("direction-dash");
+    ropeBlinkPlayer.physics.position.set(100, 300);
+    ropeBlinkSimulation.activeCollisionSurfaces = [];
+    assert.equal(ropeBlinkPlayer.ropeObject.rope.attach(ropeBlinkPlayer.physics.position, { x: 100, y: 150 }), true);
+    ropeBlinkSimulation.step(1 / 120, command({ action: true, aimWorld: { x: 1000, y: 300 } }));
+    assert.equal(ropeBlinkPlayer.ropeObject.rope.isAttached, true, "blink keeps the attached Rope");
+    ropeBlinkSimulation.step(1 / 120, command({ action: false, aimWorld: { x: 1000, y: 300 } }));
+    assert.ok(
+        [
+            ropeBlinkPlayer.physics.position.x,
+            ropeBlinkPlayer.physics.position.y,
+            ropeBlinkPlayer.physics.velocity.x,
+            ropeBlinkPlayer.physics.velocity.y
+        ].every(Number.isFinite),
+        "the next Rope physics tick after blink remains finite"
+    );
+
+    const trailSimulation = new GameSimulation({ playerId: "blink-trail-owner" });
+    const trailPlayer = trailSimulation.players[0];
+    trailPlayer.foundation.select("direction-dash");
+    trailPlayer.foundation.select("explosive-trail");
+    trailPlayer.physics.position.set(100, 300);
+    trailPlayer.ropeObject.aimWorld = Object.freeze({ x: 1000, y: 300 });
+    const onPathEnemy = plainEnemy("trail-on-path", 145);
+    const trailBehindWallEnemy = plainEnemy("trail-behind-wall", 230);
+    onPathEnemy.position.y = 300;
+    trailBehindWallEnemy.position.y = 300;
+    const trailBegin = trailPlayer.augmentCombat.advance({
+        player: trailPlayer,
+        foundation: trailPlayer.foundation,
+        command: command({ action: true, aimWorld: { x: 1000, y: 300 } }),
+        dt: 0,
+        enemies: [onPathEnemy, trailBehindWallEnemy],
+        surfaces: [verticalWall(180, 2)],
+        tick: 200
+    });
+    assert.equal(trailBegin.impactEvents.length, 0);
+    const actualTrailEnd = trailPlayer.physics.position.x;
+    assert.ok(actualTrailEnd < 180);
+    const trailDetonation = trailPlayer.augmentCombat.advance({
+        player: trailPlayer,
+        foundation: trailPlayer.foundation,
+        command: command({ action: false, aimWorld: { x: 1000, y: 300 } }),
+        dt: 0.5,
+        enemies: [onPathEnemy, trailBehindWallEnemy],
+        surfaces: [verticalWall(180, 2)],
+        tick: 201
+    });
+    assert.deepEqual(
+        trailDetonation.impactEvents.map(({ targetId }) => targetId),
+        ["trail-on-path"],
+        "explosive trail uses only the actual collision-shortened blink path"
     );
 
     const reboundSimulation = new GameSimulation({ playerId: "rebound-owner" });

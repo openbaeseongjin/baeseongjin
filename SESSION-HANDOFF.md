@@ -18,6 +18,13 @@
 - 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(기본 속도 1200px/s × 수명 1/3초 = 400px 도달), 재발사 0.50초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
 - 0.30.0 기본 런은 Sector 01·02·03의 24개 legacy Stage 정의를 수정하지 않고, 각 Sector local 좌표 안에서 `1 → 8` 순서의 세로 등반 spine으로 compile한다. landmark 양옆에는 실제로 밟고 로프로 오갈 수 있는 city wing을 붙여 Sector 폭은 4,800px로 유지한다. Stage 층은 실제 collision surface로 남아 구분되지만, Stage별 Gate·exit panel·포탈·문 visual과 per-Area Checkpoint는 기본 world output에 없다. `requiredRouteId` connector는 collision과 renderer가 같은 predicate를 사용해 잠긴 동안에는 발판처럼 보이지 않고 unlock 뒤에 함께 나타난다. future Boss room은 Sector transition slot에 넣어 downstream Sector의 local 좌표·콘텐츠 ID를 다시 쓰지 않는다.
 - #622 City Phase 1~~2의 `SectorDefinition`·validator·canonical encounter 계약과 #624 Enemy Phase 6을 #625 Runtime cutover가 소비한다. 진행 권위는 `SectorProgressState`, 부활 권위는 `respawnAnchorId`, party wipe 증거는 `partyWipeBaseline`이 소유한다. Sector 04~~06 Runtime과 Timer/Purge·증강 topology mapping은 HOLD다.
+
+### [L1] 개인 사망은 최근 도달 Stage 체크포인트에서 재개한다
+
+- 연속 Sector에서도 개인 사망·낙사는 Sector 최하단 entry가 아니라 플레이어가 실제로 도달한 최신 Stage(landmark)의 안전한 체크포인트에서 재개한다. Stage 진입이 확인될 때 해당 Stage의 부활 anchor를 갱신하며, 아직 도달하지 않은 Stage로 전진시키지 않는다.
+- 이 체크포인트는 개인 부활 위치만 소유한다. objective·route·enemy·증강·공용 진행을 되돌리거나 보상을 열지 않으며, 같은 tick 전원 사망 시 current Sector baseline을 초기화하는 party wipe 계약은 유지한다.
+- 최근 Sector/Stage 통합 뒤 진행 중 갑자기 생기는 바닥은 별도 증상 보정으로 숨기지 않고, 실제로 추가된 surface ID·종류·`requiredRouteId`·collision/renderer 상태를 같은 frame에서 확인해 compiler 또는 공용 progress predicate의 근본 원인을 수정한다.
+
 - #642의 0.30.0 Sector 01 access vertical slice는 1-3 Security Annex, 1-6 Cooling Intake, 1-7 Pressure Bypass의 기존/재사용 Sentry를 Access Carrier A/B/C로 사용한다. 아무 2개를 처치해 공용 모듈을 얻고 1-8 objective까지 완료하면 Sector 01→02 connector가 열린다. HUD는 항상 수집 수와 남은 signal을 표시하고, 근접 시 정확한 Carrier beacon을 보여준다. 개인 사망은 모듈을 보존하며 party wipe만 current Sector 모듈·encounter·route를 초기화한다. Stage-local 좌표와 세로 stack, Stage별 문 제거, future Boss transition slot 계약은 유지한다.
 - 0.32.0 `seamless-sector-runtime-v4`는 Sector 01~03에 Stage-local enemy slot을 `16 → 18 → 22`로 배치한다. 1-1·1-2는 적 0, 1-3·1-6·1-7은 Carrier 포함 3기이며 후반으로 갈수록 Pursuit·Shield·Artillery·Support·Swarm 조합을 누적한다. 모든 slot은 매 Run 존재하고 위치·activation·수량은 authored 권위이며, 적 종류만 `slotId + runSeed + worldRevision` pool로 결정한다. 상세 기준은 `docs/enemy-density-composition.md`다.
 - 적 사격과 시간 기반 Pursuit·Artillery·Swarm 행동은 별도 타이머/FSM을 복제하지 않고 순수 `StateMachine`을 Has-A로 소유하는 `TimedStateController`를 공유하며, 비시간형 Support는 `StateMachine`을 직접 조합한다. gameplay snapshot의 기존 `attackState/attackStateRemaining/behaviorState` 계약은 유지한다. `EnemyStateCatalog`가 공통·몹별 상태와 허용 전이를 공개하고, 그래픽 계층은 `EnemyPresentationState`의 타입별 상태 목록과 `knockback → active behavior → attack → stance/patrol` 우선순위를 단일 인계 계약으로 사용한다. 기본 적 mock은 아직 정적 sprite지만 `SpriteEnemyRenderer`의 presentation/sprite resolver 주입 경계에서 상태별 정식 리소스로 교체한다.
@@ -30,6 +37,12 @@
 - 적 위치 넉백은 플레이어를 직접 추격·돌진하는 `pursuit-drone-t1`, `swarm-drone-t1`만 허용한다. 고정 Sentry/Turret, authored Patrol 경로만 왕복하는 `patrol-drone-t1`, 제자리 Shield·Artillery·Support 계열은 주먹·Action·로프 충돌 피해와 처치는 그대로 받지만 `knockbackState`를 만들지 않고 authored 위치/경로를 유지한다.
 - 현재 0.25.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 Sector-entry 즉시 부활을 사용한다. solo death는 공용 진행을 보존하고 같은 tick의 전원 사망만 current Sector를 reset한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용한다.
 - 0.26.0은 과거 Foundation 3종을 generic 증강 v1로 교체했다. Catalog는 Rope 6·기본 Action 6·Signature 6·범용 modifier 4의 22장이고 Player별 최대 6장을 갖는다. 각 offer는 `runSeed + stablePlayerId + selectionIndex`로 호환 카드 3장을 결정하며 reroll·rarity·동일 Player 중복 선택이 없다. PC 우클릭과 모바일 Action Aim, 기본 펀치와 6개 Action, 감전 로프·충돌 폭발, owner-first `augment-impact`·known tombstone no-op이 구현됐다. 모든 유효 Action 시작은 방향·종류를 포함한 공용 presentation event를 만들고 로컬 주먹 잔상과 `gameplay-action-swing` mock cue로 즉시 읽힌다. 기본 주먹은 적이 없어도 입력 피드백을 만들지만 피해는 기존 사거리·대상 판정만 따른다. 0.28.0 획득 source는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`의 명시적 stable object/objective이며 Sector 04~~06 Node, Timer +10 trigger, Purge origin/rejoin은 계속 HOLD다. 상세 기준은 `docs/augment-v1.md`다.
+
+### [L2] 증강 선택 입력과 노드 소비 상태는 플레이어별로 즉시 읽혀야 한다
+
+- 증강 선택 패널의 좌우 이동과 확정 입력은 서로의 해제를 기다리지 않는다. 패널을 연 입력이 같은 프레임에 카드를 확정하는 일만 막고, 각 입력은 자기 키가 한 번 해제된 뒤 다른 키의 hold 상태와 무관하게 동작한다.
+- 증강 선택을 완료한 Player의 클라이언트에서는 해당 `augment-node`의 전원이 꺼진 상태가 즉시 보여야 한다. 다른 Player가 아직 소비하지 않았다면 그 Player 화면에서는 계속 활성 상태로 보여야 하며, 공용 objective 완료 여부를 개인 소비 표시로 대신 사용하지 않는다.
+- 싱글·멀티 렌더 scene은 로컬 Player의 `consumedSourceIds`를 사용하고, 회귀 테스트는 교차 입력 hold와 같은 Node가 클라이언트별로 서로 다른 활성/소비 표현을 갖는 경우를 검증한다. 상세 기준은 `docs/augment-v1.md`가 소유한다.
 - 디버그 설정의 Rope tuning은 `ROPE_CONFIG` 전 항목과 절단 후 차단 시간을 부분 override로 저장하고, 같은 effective config에서 비행 시간·도달 거리를 파생한다. 싱글에서 `적용`을 누르면 현재 Run을 hot swap하지 않고 종료한 뒤 저장된 시작 맵·Rope base로 새 Run을 즉시 생성한다. selected Rope 증강의 percentage 계산도 이 effective base를 소비한다. 멀티에서는 공용 override 협상 protocol 전까지 입력을 비활성화한다.
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
@@ -76,6 +89,13 @@
 - AI 도구 설정 동기화는 `vsync`(`@nicepkg/vsync`)를 사용한다. 스킬·MCP의 단일 소스는 `.codex/skills/`와 `.codex/config.toml`이며 `vsync sync`가 `.opencode/skills/`, `.cursor/skills/`, `opencode.json`, `.cursor/mcp.json`을 포맷 변환과 함께 생성·갱신한다. 대상 도구 파일은 직접 편집하지 않는다. 반복 규칙은 `docs/development-rules.md`의 **AI 도구 설정 동기화(vsync)**를 따른다. opencode는 재시작하면 `opencode.json`의 Discord MCP와 `.opencode/skills/`를 읽는다.
 - 싱글 `GameApp` 렌더는 `FixedStepRunner`가 계산한 alpha로 이전·현재 권위 스냅샷을 보간해 표시한다(`src/render/interpolateRenderSnapshot.js`). 디스플레이 재생률과 120Hz 시뮬레이션 단계가 어긋나도 미세 저더 없이 표시되며, 리셋·런 상태 전이·96px 초과 순간이동(Sector-entry 부활·디버그 이동)은 보간하지 않고 최신 상태를 그린다. 멀티 로컬 플레이어는 소유자 예측·보정 계약이 있으므로 이 보간을 적용하지 않는다.
 - 디버그 모드 진입은 URL 쿼리가 아니라 **설정 버튼 1초 꾹 누르기**로 연다(`src/game/ui/DebugPanel.js`). 누르는 동안 `settings-trigger--holding` 진행바가 보이고, 1초 시점에 디버그 모드가 활성화되어 **설정 대화에 "디버그" 탭**(수치 표시 토글 + 시작 맵 select + 적용 버튼)이 등록·선택된다. 저장된 legacy Stage ID는 canonical landmark alias로 해석한다. 적용 버튼은 싱글에서 해당 landmark까지 `SectorProgressState`를 복원하고 요청 플레이어를 entry에 배치하며, 멀티는 서버 `debug-teleport`가 같은 shared progress와 `debug-teleported` 사건을 확정한다. 값은 `baeseongjin.debug-settings.v1`에 저장돼 다음 시작에도 유지된다. `?metrics=1`·`?start=<areaId>` URL 파라미터는 제거했으며 실패 시드 재현용 `?seed=`만 유지한다. 개발 정적 서버는 `Cache-Control: no-store`로 항상 최신 코드를 서빙한다.
+
+### [L2] 디버그 패널에서 증강을 직접 선택할 수 있어야 한다
+
+- 설정 버튼을 1초 길게 눌러 여는 디버그 UI는 generic 증강 Catalog의 한국어 이름·category를 쓰는 순서형 select 6개로 테스트 loadout을 저장한다. 중복·Action 2개·Action 불일치 Signature·Action 없는 modifier는 정식 Catalog 호환성으로 차단한다.
+- 싱글 `적용`은 살아 있는 상태를 바꾸지 않고 새 Run을 만들며 시작부터 해당 loadout의 Rope·Action·Signature·modifier 효과를 사용한다. 디버그 loadout Run이 authored Node와 상호작용하면 추가 offer 없이 그 source만 개인 소비하고 기존 공용 objective/route를 완료한다.
+- 멀티에서는 선택기와 적용을 비활성화하고 새 protocol을 만들지 않는다. 기본 Run의 결정적 3장 offer·Player별 source 소비·공용 objective 권위는 그대로 유지하며 상세 기준은 `docs/augment-v1.md`가 소유한다.
+- 증강 선택 UI는 카드 그리드가 아니라 기존 `싱글플레이 시작 맵` 선택처럼 리스트형 select를 사용한다. 최대 6장의 순서와 호환성은 각 선택 슬롯의 리스트 값으로 읽히게 표시한다.
 
 실제 조작 기반 전체 등반 검사, 서로 다른 기기의 장시간 2인 플레이테스트와 고정 HTTPS/WSS 운영 주소 배포는 아직 완료하지 않았다.
 
@@ -196,6 +216,12 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 순간 플레이는 로프 숙련이 주도하고, Player별 최대 6장의 증강 조합이 한 Run의 성장 방향을 만든다.
 - Checkpoint는 진행 저장과 개인 부활만 소유하며 보상 선택을 열지 않는다. 제거한 글로벌 Artifact 계층의 대체 결정은 `docs/decision-history.md`에 보존한다.
 - 자동 무기 시스템은 후속 기능용으로 보존하지만 기본 전투에서는 비활성화한다. 어떤 증강도 필수 Rope 통과성이나 특정 Boss 해법이 되지 않는다.
+
+### [L2] 방향 돌진을 충돌 안전한 점멸로 교체한다
+
+- 호환 ID `direction-dash`는 저장 상태를 위해 유지하지만 사용자 이름과 제품 개념은 `점멸`이다. Action 입력 순간 현재 위치에서 조준 방향으로 최대 150px를 한 번에 이동하며 0.25초 분할 이동이나 임펄스를 사용하지 않는다.
+- 점멸은 기존 속도를 바꾸거나 종료 시 위치·속도를 복원하지 않는다. solid를 통과하지 않고 플레이어 collider가 들어갈 수 있는 가장 먼 안전 지점에서 멈추며, cooldown 5초, damage·무적 없음, 공중·Rope 사용과 싱글·멀티 owner-first Action 경계는 유지한다.
+- 폭발 흔적 Signature는 점멸 시작점과 실제 도착점을 잇는 경로를 사용해 기존처럼 0.50초 뒤 폭발한다. 상세 수치와 동작 기준은 `docs/augment-v1.md`를 같은 변경에서 현행화한다.
 
 ### [L1] 기본 전투와 낙하 위험은 로프 이동 결과에 직접 연결한다
 

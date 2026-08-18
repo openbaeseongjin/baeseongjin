@@ -71,10 +71,10 @@ const AUGMENT_DEFINITIONS = Object.freeze([
     }),
     createCard({
         id: "direction-dash",
-        name: "방향 돌진",
+        name: "점멸",
         family: "기본 액션",
-        tagline: "150px 돌진",
-        description: "조준 방향으로 150px 돌진합니다.",
+        tagline: "최대 150px 순간이동",
+        description: "조준 방향의 가장 먼 안전 위치까지 즉시 점멸합니다.",
         category: "action",
         actionId: "direction-dash"
     }),
@@ -127,8 +127,8 @@ const AUGMENT_DEFINITIONS = Object.freeze([
         id: "explosive-trail",
         name: "폭발 흔적",
         family: "시그니처",
-        tagline: "방향 돌진 전용",
-        description: "돌진 경로를 0.50초 뒤 폭발시키는 흔적을 남깁니다.",
+        tagline: "점멸 전용",
+        description: "점멸의 실제 이동 경로를 0.50초 뒤 폭발시키는 흔적을 남깁니다.",
         category: "signature",
         actionId: "direction-dash"
     }),

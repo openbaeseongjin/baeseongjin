@@ -82,7 +82,11 @@ function cloneActiveAction(activeAction) {
 }
 
 function clonePendingEffects(pendingEffects) {
-    return pendingEffects.map((effect) => ({ ...effect }));
+    return pendingEffects.map((effect) => ({
+        ...effect,
+        start: effect.start ? Object.freeze({ ...effect.start }) : null,
+        end: effect.end ? Object.freeze({ ...effect.end }) : null
+    }));
 }
 
 export function createActionLoadout(options) {
@@ -154,6 +158,16 @@ export class ActionAugmentState {
     onRopeReleased() {
         if (!this.hasModifier("rope-link")) return false;
         this.ropeLinkWindowRemaining = ACTION_STATE_CONFIG.ropeLinkWindowSeconds;
+        return true;
+    }
+
+    setExplosiveTrailPath(activationId, start, end) {
+        const effect = this.pendingEffects.find(
+            (candidate) => candidate.effectType === "explosive-trail" && candidate.activationId === activationId
+        );
+        if (!effect) return false;
+        effect.start = freezePoint(start);
+        effect.end = freezePoint(end);
         return true;
     }
 
@@ -289,7 +303,9 @@ export class ActionAugmentState {
                             eventType: "explosive-trail-detonated",
                             activationId: effect.activationId,
                             width: effect.width,
-                            damage: effect.damage
+                            damage: effect.damage,
+                            start: effect.start ? freezePoint(effect.start) : null,
+                            end: effect.end ? freezePoint(effect.end) : null
                         })
                     );
                 }
@@ -369,8 +385,7 @@ export class ActionAugmentState {
         if (baseAction.id === "direction-dash") {
             return {
                 ...shared,
-                immediate: false,
-                durationSeconds: base.durationSeconds,
+                immediate: true,
                 distance: base.distance,
                 trailEffect:
                     signature?.id === "explosive-trail"
@@ -466,7 +481,9 @@ export class ActionAugmentState {
                 activationId: activation.activationId,
                 remainingSeconds: activation.trailEffect.delaySeconds,
                 width: activation.trailEffect.width,
-                damage: activation.trailEffect.damage
+                damage: activation.trailEffect.damage,
+                start: null,
+                end: null
             });
         }
         if (activation.baseActionId === "slow-fall" && activation.endWaveEffect) {

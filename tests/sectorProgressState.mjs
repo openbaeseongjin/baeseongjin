@@ -24,6 +24,17 @@ export function run() {
     const firstRouteId = completeLandmark(progress, world, "sector-01:landmark:01");
     assert.equal(progress.isRouteUnlocked(firstRouteId), true);
     assert.equal(progress.visitLandmark("sector-01:landmark:02").accepted, true);
+    assert.equal(progress.snapshot().respawnAnchorId, "sector-01:landmark:02:checkpoint");
+    const stage02Snapshot = progress.snapshot();
+    assert.deepEqual(new SectorProgressState(world, stage02Snapshot).snapshot(), stage02Snapshot);
+    assert.throws(
+        () =>
+            new SectorProgressState(world, {
+                ...stage02Snapshot,
+                respawnAnchorId: "sector-01:landmark:03:checkpoint"
+            }),
+        /respawn anchor/
+    );
     const encounterId = world.landmarks.find(({ id }) => id === "sector-02:landmark:02").encounterIds[0];
     assert.equal(progress.resolveEncounter(encounterId).reason, "encounter-not-current-sector");
 
@@ -44,6 +55,7 @@ export function run() {
         }
     }
     assert.equal(progress.snapshot().currentSectorId, "sector-02");
+    assert.equal(progress.snapshot().respawnAnchorId, "sector-02:entry");
     const priorObjectiveIds = progress.snapshot().completedObjectiveIds;
 
     completeLandmark(progress, world, "sector-02:landmark:01");
@@ -60,6 +72,7 @@ export function run() {
     assert.deepEqual(progress.snapshot().completedObjectiveIds, priorObjectiveIds);
     assert.equal(progress.snapshot().resolvedEncounterIds.includes(sector02Encounter), false);
     assert.equal(progress.snapshot().currentLandmarkId, "sector-02:landmark:01");
+    assert.equal(progress.snapshot().respawnAnchorId, "sector-02:entry");
     assert.equal(progress.baselineSnapshot().revision, reset.baselineRevision);
 
     const restored = new SectorProgressState(world, progress.snapshot());

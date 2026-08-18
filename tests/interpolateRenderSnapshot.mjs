@@ -143,16 +143,23 @@ export function run() {
             hookSpeed: 1800,
             hookFlightRatio: { numerator: 1, denominator: 2 },
             ropeDisabledSeconds: 1.2
-        }
+        },
+        debugAugmentIds: ["direction-dash", "fast-reuse"]
     });
     assert.equal(tunedApp.authority.snapshot().ropeConfig.hookSpeed, 1800);
     assert.equal(tunedApp.authority.snapshot().maxAttachDistance, 900);
     assert.equal(tunedApp.authority.simulation.ropeDisabledSeconds, 1.2);
+    assert.deepEqual(tunedApp.authority.snapshot().selectedAugmentIds, ["direction-dash", "fast-reuse"]);
     tunedApp.applyDebugSettings({ ropeTuning: { hookSpeed: 400 } });
     assert.equal(
         tunedApp.authority.snapshot().ropeConfig.hookSpeed,
         1800,
         "changing saved Rope tuning must not hot-swap the current Run"
+    );
+    assert.deepEqual(
+        tunedApp.authority.snapshot().selectedAugmentIds,
+        ["direction-dash", "fast-reuse"],
+        "changing saved debug settings must not hot-swap the current loadout"
     );
 
     const lifecycle = [];
