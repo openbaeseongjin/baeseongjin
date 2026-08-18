@@ -232,6 +232,7 @@ export class GameSimulation {
         this.portalTransitions.delete(playerId);
         this.foundationRewards.delete(playerId);
         if (removed.id === this.#primaryPlayerId) this.#primaryPlayerId = this.players[0]?.id ?? null;
+        this.#completeEligibleAugmentObjectivesForCurrentRoster();
         return true;
     }
 
@@ -1482,6 +1483,7 @@ export class GameSimulation {
             }
             if (type === "landmark-entered") this.metrics.recordProgressClear(event.previousLandmarkId);
         }
+        this.#completeEligibleAugmentObjectivesForCurrentRoster();
         if (this.isSeamlessSectorWorld) {
             this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
             const sectorEvent = events.findLast(({ type }) => type === "sector-entered");
@@ -1763,48 +1765,78 @@ export class GameSimulation {
         if (replicate) this.recordReplicationEvent("foundation-selected", selectionPayload);
         this.eventFlash = { type: "foundation-selected", age: 0, ...selectionPayload };
 
-        if (this.worldProgress && !this.worldProgress.isObjectiveComplete(objectiveId)) {
-            if (this.isSeamlessSectorWorld) {
-                const beforeRoutes = new Set(this.worldProgress.snapshot().unlockedRouteIds);
-                const completion = this.worldProgress.completeObjective(objectiveId);
-                if (completion.changed) {
-                    const objectivePayload = {
-                        objectiveId,
-                        landmarkId: source.landmarkId ?? this.worldProgress.currentLandmarkId,
-                        playerId,
-                        position: vectorState(player.physics.position)
-                    };
-                    if (replicate) this.recordReplicationEvent("objective-completed", objectivePayload);
-                    for (const routeId of this.worldProgress.snapshot().unlockedRouteIds) {
-                        if (beforeRoutes.has(routeId)) continue;
-                        if (replicate) {
-                            this.recordReplicationEvent("route-unlocked", {
-                                routeId,
-                                landmarkId: objectivePayload.landmarkId,
-                                playerId,
-                                position: objectivePayload.position
-                            });
-                        }
-                    }
-                    this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
-                }
-            } else {
-                const areaId = source.areaId ?? this.worldProgress.currentAreaId;
-                for (const event of completeWorldProgressObjective({
-                    progress: this.worldProgress,
-                    objectiveId,
-                    areaId,
-                    player
-                })) {
-                    const { type, ...payload } = event;
-                    if (replicate) this.recordReplicationEvent(type, payload);
-                    if (type === "gate-unlocked") {
-                        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
-                    }
+        this.#completeAugmentObjectiveIfPartyReady({ source, objectiveId, player, replicate });
+        return Object.freeze({ accepted: true, sourceId, foundationId: foundation.id, changed: true });
+    }
+
+    #allPlayersConsumedAugmentSource(sourceId) {
+        return (
+            this.players.length > 0 &&
+            this.players.every(({ foundation }) => foundation.consumedSourceIds.includes(sourceId))
+        );
+    }
+
+    #completeAugmentObjectiveIfPartyReady({ source, objectiveId, player, replicate = true }) {
+        if (
+            !this.worldProgress ||
+            this.worldProgress.isObjectiveComplete(objectiveId) ||
+            !this.#allPlayersConsumedAugmentSource(source.id)
+        ) {
+            return false;
+        }
+        if (this.isSeamlessSectorWorld) {
+            const beforeRoutes = new Set(this.worldProgress.snapshot().unlockedRouteIds);
+            const completion = this.worldProgress.completeObjective(objectiveId);
+            if (!completion.changed) return false;
+            const objectivePayload = {
+                objectiveId,
+                landmarkId: source.landmarkId ?? this.worldProgress.currentLandmarkId,
+                playerId: player.id,
+                position: vectorState(player.physics.position)
+            };
+            if (replicate) this.recordReplicationEvent("objective-completed", objectivePayload);
+            for (const routeId of this.worldProgress.snapshot().unlockedRouteIds) {
+                if (beforeRoutes.has(routeId)) continue;
+                if (replicate) {
+                    this.recordReplicationEvent("route-unlocked", {
+                        routeId,
+                        landmarkId: objectivePayload.landmarkId,
+                        playerId: player.id,
+                        position: objectivePayload.position
+                    });
                 }
             }
+            this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+            return true;
         }
-        return Object.freeze({ accepted: true, sourceId, foundationId: foundation.id, changed: true });
+
+        const areaId = source.areaId ?? this.worldProgress.currentAreaId;
+        let completed = false;
+        for (const event of completeWorldProgressObjective({
+            progress: this.worldProgress,
+            objectiveId,
+            areaId,
+            player
+        })) {
+            completed = true;
+            const { type, ...payload } = event;
+            if (replicate) this.recordReplicationEvent(type, payload);
+            if (type === "gate-unlocked") {
+                this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+            }
+        }
+        return completed;
+    }
+
+    #completeEligibleAugmentObjectivesForCurrentRoster() {
+        if (!this.worldProgress || this.players.length === 0) return;
+        for (const source of this.world.objects?.filter(({ kind }) => kind === "augment-node") ?? []) {
+            const objectiveId = source.objectiveId;
+            if (!objectiveId || this.worldProgress.isObjectiveComplete(objectiveId)) continue;
+            const player = this.players.find(({ foundation }) => foundation.consumedSourceIds.includes(source.id));
+            if (!player) continue;
+            this.#completeAugmentObjectiveIfPartyReady({ source, objectiveId, player });
+        }
     }
 
     clearFoundationSelection(playerId, sourceId = null, foundationId = null) {

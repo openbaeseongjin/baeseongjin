@@ -37,14 +37,14 @@
 2. 로프로 이동하며 현재 영역이 요구하는 방해요소 처리 조건을 달성한다. 조건은 시나리오에 따라 처치·무력화·우회·상호작용·이동 달성 중 하나 이상이며, 적 처치로 일괄 고정하지 않는다.
 3. 완료 조건을 달성하면 명시적 출구를 열고, 플레이어가 출구를 통과해 다음 영역으로 진행한다.
 4. landmark를 넘어가도 월드·런·플레이어·Foundation·Sector-entry 상태를 새로 만들지 않는다.
-5. 1-4 Maintenance Node에서 Foundation을 선택해 로프 조작·전투 방식을 강화한다.
+5. 1-4·2-3·3-5의 명시적 장비 Node에서 현재 loadout과 호환되는 generic Augment를 하나씩 선택해 로프 조작·전투 방식을 강화한다.
 6. 더 높은 구역 또는 최종 목표를 향해 전진한다.
 7. 개인 실패는 현재 Sector entry로 복귀하며 objective·열린 route·처치 적을 유지한다.
 8. 저장 지점은 Sector entry 하나다. 같은 tick의 전원 실패만 current Sector baseline을 초기화하고 이전 Sector 완료와 개인 Build는 유지한다.
-9. 첫 Foundation은 IMPULSE COIL·RELAY LINK·SHEAR CURRENT 3종 중 하나를 좌우 이동과 점프로 선택하며, 이후 Specialization이 이 방향을 심화한다.
-10. Foundation 선택은 공통 피드백으로 알리고, 데스크톱은 선택한 Foundation을 상시 HUD에 표시한다.
+9. 각 Node는 `runSeed + stablePlayerId + selectionIndex`로 서로 다른 호환 카드 3장을 제시하며 reroll·rarity·동일 Player 카드 중복은 없다.
+10. Augment 선택은 공통 피드백으로 알리고, 데스크톱은 선택한 generic loadout을 상시 HUD에 표시한다.
 11. 배포 전 `npm test`로 현재 저작 Sector의 landmark 연결·objective·route lock·content boundary와 싱글·멀티 공용 진행을 검증한다.
-12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Foundation 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
+12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Augment 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
 13. 발견된 문제 영역은 현재 시나리오의 관련 회귀 테스트에 이유와 함께 추가해 같은 영역·진행 계약에서 우선 재현한다.
 14. 원격 플레이테스트는 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켜고 현재 런 지표를 확인한다.
 15. 0.25.0 기본 Runtime은 체력이 0이 되거나 낙사하면 해당 플레이어만 현재 Sector entry에서 최대 체력으로 즉시 부활시키고 공용 objective·열린 route·처치 적을 유지한다. 같은 tick에 전원이 사망한 경우에만 current Sector baseline을 복구하고 전원을 Sector entry에 배치한다.
@@ -64,7 +64,7 @@
 - 로프는 부착 순간의 길이를 고정 반경으로 유지하며 늘어나거나 자동으로 감기지 않는다.
 - 접선 드래그 충격과 중력으로 진자 속도를 만들며, 해제 순간의 속도와 방향을 유지한다.
 - 핵심 숙련 요소는 부착 위치 선택, 충격 방향 설정, 중력을 이용한 회전, 해제 타이밍이다.
-- Foundation Augment가 전투 보조를 제공해도, 생존과 위치 선정에는 로프 이동이 계속 필요해야 한다.
+- 선택한 Augment가 전투 보조를 제공해도, 생존과 위치 선정에는 로프 이동이 계속 필요해야 한다.
 - 기본 자동 사격은 사용하지 않는다. 시스템 구현은 후속 기능을 위해 보존하되 기본 플레이어는 비활성 상태로 시작한다.
 - 로프 부착 중 `620px/s` 이상으로 적과 새로 몸체 충돌하면 `25` 피해를 준다. 겹친 채 머무르는 동안에는 반복 피해를 주지 않고 분리 후 재진입해야 한다.
 
@@ -132,7 +132,7 @@
 - 정기 회의: 매일 22:00~23:00, Discord
 - 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태이며 `SECTOR 01`의 `1-1`~`1-8` 시나리오가 모두 작성됐다. 전체 48개 중 나머지 40개 맵의 시나리오와 레벨 디자인은 아직 없으며 새로 만들어야 한다.
 - 나머지 40개 맵 시나리오와 레벨 디자인은 섹터 순서대로 작성해 8월 19일까지 확정한다. 메인 개발은 전체 완료를 기다리지 않고 `SECTOR 01`부터 mock으로 구현하며, 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름과 오브젝트 요구가 모두 필요하다.
-- 증강 v1 기획과 topology-independent Runtime은 0.26.0에 완료됐다. Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer와 Player별 최대 6장을 사용한다. 후속 획득 Landmark 좌표, Quest·순수 이동 카드·Specialization은 별도 확장이다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
+- 증강 v1 기획과 topology-independent Runtime은 0.26.0에 완료됐고 0.28.0에서 현재 Runtime Sector 01~03의 명시적 장비 Node를 `1-4 → 2-3 → 3-5` 순서의 Player별 획득원으로 연결한다. Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer와 Player별 최대 6장을 사용한다. Sector 04~06 획득 Node, Quest·순수 이동 카드·Specialization은 별도 확장이다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
 - NPC 역할·배치·대사와 대화 진행 규칙, 관련 상호작용 UI·게임 요소는 8월 15일까지 확정한다. 이 기획은 NPC가 처음 등장하는 섹터와 공용 대화 시스템 구현의 선행 조건이다.
 - 엔딩 내용, 진입 조건, 최종 Encounter 이후 흐름과 관련 UI·게임 요소는 8월 19일까지 확정한다. 이 기획은 `SECTOR 06`과 최종 완료 상태 구현의 선행 조건이다.
 - 그래픽·오디오 담당자는 메인 개발자가 맵별로 정리한 오브젝트·cue 목록을 받아 8월 19일에 정식 리소스 1차 생산분을 인계한다. 1차 생산분은 전체 자산 완료가 아니라 앞서 정리된 우선 오브젝트의 교체 가능한 첫 묶음이다.

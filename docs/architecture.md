@@ -206,19 +206,19 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `createLegacyAreaSeamlessSectorRuntimeWorld()`가 Sector 01·02·03의 24개 legacy Stage를 3개 4,800px Sector의 24 landmark로 조립한다. `CURRENT_AUTHORED_AREA_CATALOG`와 `assembleAuthoredWorld()`는 이전 revision compatibility에 남는다. Sector 04의 8개 Area는 standalone catalog 상태다.
 - `GameSimulation`이 Sector objective·route·content boundary와 플레이어별 진행 상태를 권위 상태로 보존한다.
 - 사망 재개는 월드와 공용 진행을 유지한 채 `activeRespawnAnchor`로 복귀한다. party wipe만 current Sector baseline을 초기화하며 보상 선택을 열지 않는다.
-- 1-4 Foundation 선택은 `PlayerCommand`의 좌우·점프 명령을 사용한다. 선택 중인 플레이어의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
-- Foundation 선택 피드백은 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 선택 상태와 분리한다.
+- 1-4·2-3·3-5 explicit Augment Node 선택은 `PlayerCommand`의 좌우·점프 명령을 사용한다. 선택 중인 플레이어의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
+- Augment 선택 피드백은 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 선택 상태와 분리한다.
 - `npm test`의 current authored world 검증은 Sector compiler·objective route·Sector-entry respawn·party-wipe baseline·마지막 content boundary를 확인한다. legacy Area/Gate tests는 이전 revision compatibility를 별도로 검증한다.
 - `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가한다. 기본 Runtime은 `landmarkTiming`으로 현재 landmark 체류와 route 진행 시간을 기록하며 legacy revision만 `areaTiming`을 유지한다.
 - 디버그 수치 표시는 설정 버튼을 1초 길게 눌러 여는 패널에서만 켜는 옵트인 개발 표시이며 `GameApp`·`MultiplayerGameApp`과 렌더러에만 전달되고 `PlayerCommand`나 게임 규칙에는 포함하지 않는다. 저장된 legacy Stage 선택은 새 싱글 생성에서 canonical landmark alias로 해석한다. 실행 중 적용 버튼은 싱글의 `SectorProgressState`와 `respawnAnchorId`를 선택 landmark 기준으로 다시 만들고, 멀티에서는 서버 `debug-teleport`가 같은 shared progress reset과 요청 플레이어 전이를 확정한다. 새 멀티 채널의 최초 world revision 선택은 계속 서버 세션이 소유한다.
 - Area definition의 `storyTriggers`는 시나리오 기획 인벤토리이며 assembled world와 presentation runtime에 복제하지 않는다. 실제 Story 출력은 `AuthoredStoryPresentation`의 area entry·position, `trigger/story-display` cue, objective/gate event binding만 소유한다. gate-panel과 gate visual에 소비되지 않는 cue 배열을 두지 않으며, Story 완료 판정은 실제 출력 순서를 회귀 테스트해 증명한다.
 - Access Scan Field는 공용 `elapsedSeconds`에서 AVAILABLE/WARNING/LOCKED/RESET을 계산해 새 Rope attachment eligibility와 scene `accessScanStates`를 함께 만든다. 공용 surface overlay는 네 phase를 색뿐 아니라 solid/dash, chevron, X, outline box 형태로 구분하며 sprite·polygon profile이 같은 overlay를 사용한다. phase는 별도 network event가 아니라 동기화된 world clock에서 결정적으로 재생한다.
 - 사망·낙사는 공용 player reset 경로를 사용하되 default Sector Runtime에서는 `activeRespawnAnchor`로 복귀한다. 사망한 플레이어의 물리·입력·체력·로프 발사 shot만 초기화하며 동료와 공용 진행은 유지한다. 같은 tick의 전원 respawn만 `sector-reset`을 발생시켜 current Sector enemy·objective·route baseline을 복구한다.
-- Foundation 보상은 플레이어별 선택 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
+- Augment offer는 플레이어별 선택·pending entitlement·consumed source 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - 보상 Canvas 오버레이는 반투명 배경과 실시간 전투 경고를 사용해 선택 카드와 진행 중인 위험을 동시에 보여준다.
-- `RewardSelection`은 Foundation 선택의 카드 이동·Confirm·진입 Input Gate만 공유한다. 2-3 Specialization은 별도 선택 시스템이 아니라 1-4 Foundation과 같은 authored choice primitive를 재사용한다.
-- `FoundationAugmentState`는 Player별 고정 선택과 Relay의 짧은 runtime window만 소유한다. Impulse·Relay·Shear는 기존 Rope Release/Attach 사건에서 한 번만 판정하며 Shear를 매 frame 충돌 시스템으로 확장하지 않는다.
-- `interact-choice`는 개인 chooser 요청을 만들고 첫 Foundation 확정이 공유 objective를 완료한다. 이미 공용 objective가 끝났어도 아직 선택하지 않은 동료는 같은 Node에서 자기 chooser를 열 수 있으며 Calibration 결과는 Gate 요구 조건이 아니다.
+- `RewardSelection`은 세 explicit Node에서 동일한 결정적 3장 offer의 카드 이동·Confirm·진입 Input Gate를 공유한다. 고정 Foundation/Specialization tier를 별도 선택 시스템으로 복구하지 않는다.
+- `FoundationAugmentState`라는 호환 class 이름은 Player별 최대 6장 generic loadout, consumed source와 순간 runtime window를 소유한다. 카드 효과는 기존 Rope/Action 사건에서 한 번만 판정하고 이름과 무관한 전역 분기를 추가하지 않는다.
+- `interact-choice`는 개인 chooser 요청을 만들고 현재 채널 Player 전원의 해당 source 소비가 끝나면 공유 objective를 한 번 완료한다. 완료 전 Player 퇴장은 요구 집합에서 제거해 route 교착을 막는다. 공용 objective가 끝난 뒤 합류한 Player도 같은 Node에서 자기 chooser를 열 수 있지만 이미 열린 route를 다시 잠그지 않는다. 선택 카드·consumed source는 개인 부활·재접속·party wipe 뒤 유지되며, party wipe 뒤 소비한 Node를 다시 방문하면 chooser 없이 objective만 복구한다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
 - `PlayerCommandBatch`는 목표 틱과 플레이어별 단조 증가 `sequence`를 보존하고 플레이어 ID 순으로 정규화하는 전송 계약이다. 권위 서버는 이 순서 번호로 중복·역순 입력을 거부한다.
 - `AuthorityCommandInbox`는 승인 순서와 허용 틱 범위를 검사하고, 승인된 명령을 목표 틱별로 한 번만 제공한다. 이 상태는 게임 규칙이 아니라 권위 전송 경계에 머문다.

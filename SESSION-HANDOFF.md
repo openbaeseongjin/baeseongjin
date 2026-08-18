@@ -22,7 +22,7 @@
 - PC와 모바일 공용 이동·점프·로프 명령, 모바일 중앙 `좌 · 점프 · 우` 조작 바와 멀티터치
 - 기본 자동 사격은 비활성화하고 `AutomaticWeaponObject`·spawn/hit claim 기반은 후속 기능용으로 보존한다. 기본 공격은 로프 부착 중 속도 `620px/s` 이상으로 적과 새로 몸체 충돌할 때 `25` 피해를 주는 로프 충돌 공격이다. 같은 겹침은 분리 후 재진입하기 전까지 반복 피해를 만들지 않는다.
 - 현재 0.25.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 Sector-entry 즉시 부활을 사용한다. solo death는 공용 진행을 보존하고 같은 tick의 전원 사망만 current Sector를 reset한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용한다.
-- 0.26.0은 과거 Foundation 3종을 generic 증강 v1로 교체했다. Catalog는 Rope 6·기본 Action 6·Signature 6·범용 modifier 4의 22장이고 Player별 최대 6장을 갖는다. 각 offer는 `runSeed + stablePlayerId + selectionIndex`로 호환 카드 3장을 결정하며 reroll·rarity·동일 Player 중복 선택이 없다. PC 우클릭과 모바일 Action 버튼, 기본 펀치와 6개 Action, 감전 로프·충돌 폭발, owner-first `augment-impact`·known tombstone no-op이 구현됐다. 정확한 Sector 02~~06 획득 Landmark, Timer +10 trigger, Purge origin/rejoin은 계속 HOLD이며 상세 기준은 `docs/augment-v1.md`다.
+- 0.26.0은 과거 Foundation 3종을 generic 증강 v1로 교체했다. Catalog는 Rope 6·기본 Action 6·Signature 6·범용 modifier 4의 22장이고 Player별 최대 6장을 갖는다. 각 offer는 `runSeed + stablePlayerId + selectionIndex`로 호환 카드 3장을 결정하며 reroll·rarity·동일 Player 중복 선택이 없다. PC 우클릭과 모바일 Action 버튼, 기본 펀치와 6개 Action, 감전 로프·충돌 폭발, owner-first `augment-impact`·known tombstone no-op이 구현됐다. 0.28.0 획득 source는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`의 명시적 stable object/objective이며 Sector 04~~06 Node, Timer +10 trigger, Purge origin/rejoin은 계속 HOLD다. 상세 기준은 `docs/augment-v1.md`다.
 - 디버그 설정의 Rope tuning은 `ROPE_CONFIG` 전 항목과 절단 후 차단 시간을 부분 override로 저장하고, 같은 effective config에서 비행 시간·도달 거리를 파생한다. 싱글에서 `적용`을 누르면 현재 Run을 hot swap하지 않고 종료한 뒤 저장된 시작 맵·Rope base로 새 Run을 즉시 생성한다. selected Rope 증강의 percentage 계산도 이 effective base를 소비한다. 멀티에서는 공용 override 협상 protocol 전까지 입력을 비활성화한다.
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 모바일은 전체 상태 HUD 대신 생존에 필수인 HP 전용 패널을 항상 표시
@@ -60,7 +60,7 @@
 - `owner-motion`은 인증·프로토콜 형식·유한값과 세션 tick 범위를 통과한 최신 소유 클라이언트 상태를 서버 복제본과 동료의 최종 수렴 원점으로 공용 `GameSimulation`에 적용한다. 속도·각속도·이동 거리·로프 offset 봉투로 거부하지 않으며 중복·역순·세션 범위 밖 tick과 완료된 런의 후속 상태는 성공한 no-op으로 처리해 `ownerMotionTick`을 오염시키거나 소유자를 되감지 않는다. 멀티 서버 fixed tick은 복제 플레이어 위치만으로 낙사를 시작하지 않고 최신 fallen `owner-motion`에서 부활·공유 사건을 한 번 확정한다.
 - 서버는 소유 클라이언트가 만든 플레이어 상태·사건을 검증해 다른 클라이언트에 공유하는 허브다. 소유자의 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 서버 snapshot이나 impact receipt로 다시 쓰지 않는다. 서버가 상태를 직접 진행하는 범위는 몹·중립 투사체·공용 월드·세션 수명주기이며, 서버 상태로 소유자 전체를 복원하는 경우는 최초 입장·재접속과 체크포인트처럼 별도 복구 계약을 가진 사건 전이로 제한한다. 정상 또는 무시된 `owner-motion` receipt는 소유자 복원·입력 재실행을 시작하지 않는다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 멀티 소유 클라이언트 예측은 공용 월드 진행(출구 패널 interact, interact-choice 보상 개방, Gate 교차·포탈 전이)을 로컬에서 실행하지 않는다. 이 시스템 상호작용은 서버 `GameSimulation`만 진행하고 클라이언트는 스냅샷(`worldProgress`·`foundationRewards`)과 복제 사건(`gate-portal-entered` 등)으로 수렴한다. 보상이 서버에서 열리면 `synchronizePredictionProgress`가 예측 로프를 해제해 서버 `beginFoundationReward`와 맞춘다. 한 번 통과한 Gate의 trigger에 stale owner-motion이 남아도 `portalTransitions`의 gateId 일치로 재전이·이벤트 재발행을 막는다.
-- 증강 선택 UI는 owner client가 명시적 `augment-node` 근처에서 결정적 3장 offer를 즉시 열고 `augment-offer`로 pending entitlement를 서버에 보존한다. 확정 전에는 선택 Player gameplay 입력만 zeroing하고 월드·동료는 계속 진행한다. 서버는 같은 공식으로 membership·source 소비·tick을 검증하고 `foundation-selection` 호환 claim으로 확정한다. 사망·재접속은 같은 offer와 index를 복원하며 `legacyStageAlias`나 추정 Landmark 좌표로 source를 만들지 않는다.
+- 증강 선택 UI는 owner client가 명시적 `augment-node` 근처에서 결정적 3장 offer를 즉시 열고 `augment-offer`로 pending entitlement를 서버에 보존한다. 확정 전에는 선택 Player gameplay 입력만 zeroing하고 월드·동료는 계속 진행한다. 서버는 같은 공식으로 membership·source 소비·tick을 검증하고 `foundation-selection` 호환 claim으로 확정한다. 현재 채널 Player 전원의 해당 source 소비 뒤 공유 objective를 한 번 완료하며 퇴장 Player는 요구 집합에서 제거한다. 완료 뒤 합류 Player의 개인 chooser는 유지하되 route를 다시 잠그지 않는다. 사망·재접속·party wipe는 같은 offer·selection index·consumed source를 복원하며 `legacyStageAlias`나 추정 Landmark 좌표로 source를 만들지 않는다.
 - impact의 최종 체감 결과는 피해 클라이언트가 소유한다. 적 탄환과 착지 피해의 정상 claim은 사건 자료와 도메인 상태 지문만 보내며 서버가 같은 전이를 적용해 일치하면 바로 확정한다. `state-diverged`일 때만 impact ID·피해자 연결에 묶인 일회용 `recoveryId`를 발급하고, 피해 클라이언트가 응답 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보내 서버·동료를 자기 결과로 수렴시킨다. challenge 없는 전체 상태는 거부하고, 승인 복구는 상태와 `ownerMotionTick`을 원자적으로 갱신하며 로컬 HP·로프·부활은 복구하지 않는다. 엔진 공식 레퍼런스 대비 핵심 충족표와 상세 기준은 `docs/multiplayer-synchronization.md`의 **다른 게임 엔진 기준 충족 점검**과 **impact claim과 최종 수렴**을 따른다.
 - 투사체는 같은 `projectile-motion`·`client-projectile-collision` capability ID에 종류별 믹스인을 조합한다. 운동·충돌·claim 거부 뒤 수명 정책과 복제 상태는 객체가 소유하며 `PredictableProjectileStore`와 `GameSimulation`은 종류별 분기 없이 등록·식별자 대응·단계 실행·사건 연결만 담당한다. 상세 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - 정적 파일을 노출하지 않는 상시 게임 서버 실행 모드와 `/health` 상태 확인
@@ -74,13 +74,13 @@
 
 ## 다음 작업
 
-Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. 6-8 `ROOFTOP PAD 03`은 Threat 0의 순방향 Rope movement climax 뒤 Pad Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03 → ACCESS RESTORED → 개별 Boarding → 전원 준비 → ESCAPE`로 확정됐으며 Runtime은 미구현이다. 다음 단계는 `P0 Alignment → Specialization → Boss01 → Timer → Sector04/05/06 Runtime → Final Security/Ending → Playtest`다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
+Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. 6-8 `ROOFTOP PAD 03`은 Threat 0의 순방향 Rope movement climax 뒤 Pad Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03 → ACCESS RESTORED → 개별 Boarding → 전원 준비 → ESCAPE`로 확정됐으며 Runtime은 미구현이다. 다음 단계는 `P0 Alignment → Boss01 → Timer → Sector04/05/06 Runtime → Final Security/Ending → Playtest`다. 과거 Specialization 단계는 generic 증강 v1과 #633 획득 Node로 대체됐다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
 
 Gate/출구 표준화(전 32 Area), 포탈 위치 전수 감사·수정(connectArea trigger 재계산·1-8 게이트 시각 정렬), 멀티 탄환 소멸 근본 수정(발사 claim 재유도 검증 제거)은 코드·테스트·문서 반영까지 완료됐다. 남은 단계는 병합 뒤 `docs/version-management.md` 절차(멀티 서버 코드 변경이므로 서버 재시작·버전 올림·공개 smoke)와 브라우저 화면 확인 결과를 PR에 기록하는 것이다.
 
 앵커 축소 스크립트 실수로 소실된 4개 카탈로그 변경분(exitBlock 이관·출구 데크 offset 125·층 격벽 봉쇄·트리거 스펙) 재구축과 600px 기준 앵커 축소가 완료됐다. 4개 카탈로그 모두 import·validator 통과, `tests/runAll.mjs` 6개 시나리오 전부 PASS, `npm run check`·`npm run format:check`·`git diff --check` 통과, `docs/scenario-development-integration.md` entry 45와 fingerprint 갱신 완료. 다음은 이 변경분을 커밋하고 github-task-flow PR로 게시하는 것이다.
 
-1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 팬 바람 미발생 근본 수정과 디버그 Rope tuning 패널 구현이 완료됐다. 싱글은 적용 버튼에서 새 Run으로 즉시 재시작하고 멀티는 비활성이다. 다음 기획 의존 작업은 Sector 02~~06 증강 획득 Landmark, Timer +10 trigger, Purge origin/rejoin의 physical topology mapping이다. 공용 멀티 Rope override 협상과 살아 있는 Run의 config hot swap은 별도 후속 Issue다.
+1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 팬 바람 미발생 근본 수정과 디버그 Rope tuning 패널 구현이 완료됐다. 싱글은 적용 버튼에서 새 Run으로 즉시 재시작하고 멀티는 비활성이다. Sector 01~~03 증강 획득 Node mapping도 완료됐으며 다음 기획 의존 작업은 Sector 04~~06 증강 Node, Timer +10 trigger, Purge origin/rejoin의 physical topology mapping이다. 공용 멀티 Rope override 협상과 살아 있는 Run의 config hot swap은 별도 후속 Issue다.
 
 Scenario Art 생성의 현재 기준은 `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`다. 매 생성·수정 전에 해당 Stage README·Production Alignment와 현재 Area Catalog의 Camera Zone·Stable ID·정확한 오브젝트 수·구현 상태를 확인한다. Art Reference는 전체 맵이 아닌 대표 Gameplay Camera Shot 한 장으로 만들고, 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시한다. 정확한 World 좌표의 권위는 Approved Blockout에 두되, Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 구조 가이드로 고정해 이미지에서도 보존한다. 구도를 위해 Gameplay Geometry를 옮기거나 늘리지 않는다. `RETIRED`·`PENDING REGENERATION` 이미지는 새 생성 입력으로 사용하지 않는다. 프로젝트용으로 승인한 생성 이미지는 Stage `images/`에 저장하고 생성 기록·상태 문서와 같은 PR로 GitHub `main`에 병합한다. Sector 01은 Navy·Charcoal 산업 정비 시설, 어두운 전경·플레이 중경·푸른 원경, 제한된 Cyan과 드문 Amber를 유지하며 Player·Rope·Anchor·Telegraph 가독성을 우선한다. 1-1 C04의 `05_scenario_art_reference.png`, 1-2 C02의 `06_scenario_art_reference.png`, 1-3 Route Choice의 `05_scenario_art_reference.png`, 1-4 Node의 `03_scenario_art_reference.png`가 구조 정합 승인 기준이다. 1-5~1-8은 Approved Blockout 제작이 다음 선행 과제다.
 
@@ -94,7 +94,7 @@ Sector 01-2의 현재 기준은 `docs/bsh/scenario/1/1-2/README.md`의 `DOUBLE A
 
 Sector 01-3의 현재 기준은 `docs/bsh/scenario/1/1-3/README.md`의 `SECURITY CHECK` REV 3.0과 `PRODUCTION-ALIGNMENT.md`다. 32px Grid·960×1152 Blockout에서 Scanner 인증 뒤 첫 Sentry T1의 `idle → acquire → track → lock → fire → cooldown` 공격 언어와 B→C Safe/Flow/Recovery 경로를 검증한다. R1은 `x=-32~224`, `y=-576`이며 Sentry activation은 전체 폭의 `y=-928~-384`다. Camera Shot은 로컬 플레이어 좌표로 고르고 Scanner·경고·위반·Access Denied는 개인 화면에 한 번 표시한다. Sentry 상태·고정 조준 방향은 서버 snapshot으로 공유하고 sprite/polygon mock은 같은 상태를 읽는다. Cover Wall C1 뒤와 `y<-928`에서는 LOS와 Encounter가 끝나야 하며, Turret 파괴는 Clear 조건이 아니다. 첫 Projectile은 Rope를 자르지 않고 one-shot·과도한 Knockback·전체 재등반을 만들지 않아야 한다. 상단 Service Panel의 `MAINTENANCE OVERRIDE → VIOLATION LOGGED`가 1-4 Maintenance Node로 연결된다. Route Choice `05_scenario_art_reference.png`는 B/C/D·Safe Ledge·R1·두 Cover·오른쪽 벽 Sentry의 구조와 Player→C live Rope·Red TRACK Telegraph 각 한 줄을 고정한 승인 기준이다. `01`·`02`·`03`은 모두 제작 입력으로 사용하지 않는다.
 
-Sector 01-4의 `maintenance-node`는 0.26.0 증강의 첫 명시적 source adapter다. 고정 Foundation 3종 대신 Player별 결정적 3장 offer를 열고 한 장을 선택한다. source는 Player별 한 번 소비되며 pending offer와 선택은 사망·재접속 뒤 유지된다. 첫 선택의 기존 objective 연결은 호환 유지하지만 후속 Sector의 정확한 획득 Landmark는 topology mapping 전까지 생성하지 않는다.
+Sector 01-4의 `maintenance-node`는 첫 명시적 source adapter다. Sector 02-3의 stable `specialization-node`는 두 번째 generic offer source로 재사용하고, Sector 03-5의 `service-calibration-frame`은 세 번째 source로 승격한다. 각 Node는 고정 tier 대신 Player별 결정적 3장 offer를 열고 한 장을 선택한다. source는 Player별 한 번 소비되며 pending offer와 선택은 사망·재접속·party wipe 뒤 유지된다. Sector 04~~06 source는 topology mapping 전까지 생성하지 않는다.
 
 Sector 01-5의 `AUGMENT TEST BAY`는 과거 Foundation 3종 전용 lane이 아니라 22장 증강 조합의 첫 공용 검증 구간으로 해석한다. 어떤 카드도 통과 필수 조건이 아니며 Base Safe Route와 Recovery를 유지한다. Stage 문서의 옛 세 Profile 문구는 후속 scenario 정렬 대상이고 Runtime 효과 권위는 `docs/augment-v1.md`다.
 
@@ -106,15 +106,15 @@ Sector 01-8의 현재 기준은 `docs/bsh/scenario/1/1-8/README.md`의 `CONTAINM
 
 실제 두 기기 검증은 `docs/two-device-playtest-protocol.md`의 단일 협동 시나리오와 기록 양식을 사용한다. 문서 작성은 플레이테스트 완료를 뜻하지 않는다.
 
-시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 48개(`1-1 → 6-8`)는 migration input이고 기본 Runtime은 Sector 01~~03의 24개 alias를 3개 seamless Sector로 compile한다. Sector 04 standalone 8개(`4-1 → 4-8`)와 Sector 05~~06은 아직 Runtime 미전환이다. Specialization·Boss01·Timer/Purge mapping·NPC 제외·Final Security·Ending의 열린 계약은 후속 기획 게이트다. 시나리오 문서나 Area/Sector authoring source가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
+시나리오의 상세 문서 범위와 Runtime 연결 상태는 `docs/scenario-development-integration.md`를 현재 기준으로 삼는다. 상세 Stage 48개(`1-1 → 6-8`)는 migration input이고 기본 Runtime은 Sector 01~~03의 24개 alias를 3개 seamless Sector로 compile한다. Sector 04 standalone 8개(`4-1 → 4-8`)와 Sector 05~~06은 아직 Runtime 미전환이다. Boss01·Timer/Purge mapping·NPC 제외·Final Security·Ending의 열린 계약은 후속 기획 게이트다. 시나리오 문서나 Area/Sector authoring source가 바뀌면 `npm run check:scenario-integration`의 fingerprint 경보를 해소하면서 최근 변경·Runtime 상태·차단 요소·확인 근거를 같은 작업에서 갱신한다.
 
 P1~P5 기획 답변은 `docs/design-decision-requests.md`에 확정됐다. 전체 구현 계약은 `docs/design-decision-resolution-package.md`, 선행 Runtime·문서 정렬 범위는 `docs/p0-alignment-patch-package.md`를 따른다.
 
-`2-3 RESIDENTIAL SERVICE NODE`의 과거 Foundation별 Specialization 6종은 0.26.0 증강 v1 범위가 아니며 구현 계약에서 제외한다. 해당 Node skeleton은 후속 Catalog 확장과 topology mapping 전까지 효과·pool을 자동 연결하지 않는다.
+`2-3 RESIDENTIAL SERVICE NODE`의 과거 Foundation별 Specialization 6종은 generic 증강 v1로 대체됐다. stable `sector-02-03:specialization-node` ID는 snapshot 호환을 위해 유지하지만 의미는 현재 loadout과 호환되는 두 번째 generic offer이며 `selectionPool:TBD`나 `requiresFoundation` tier를 복구하지 않는다. `3-5 COMMERCIAL SERVICE NODE`도 세 번째 generic offer를 제공한다.
 
 Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않는다. 기존 `EnemyObject`에 맵이 제공하는 순찰 corridor/route와 activation band를 소비하는 선택적 Patrol capability를 조합하고 기존 acquire·track·lock·fire·cooldown과 투사체 규칙을 재사용한다. Patrol 자료가 없는 기존 Sentry는 정지 동작을 그대로 유지한다. Drone은 자기 activation band를 벗어나지 않고 한 공격 cycle 동안 선택한 target을 유지하며, 다른 band의 플레이어 진입으로 cross-zone 재조준하거나 두 Drone이 지속 crossfire를 만들지 않게 한다. 영역별 stable ID와 미확정 경계는 `docs/sector-02-game-object-catalog.md`를 기준으로 한다.
 
-과거의 증강·NPC·엔딩 기획 마감은 모두 결정 상태로 갱신됐다. Specialization과 Ending은 구현 계약이 확정됐고, NPC는 예선 핵심 범위에서 제외한다. 현재 선행 작업은 1-7 Story 문구를 포함한 P0 Alignment이며 역할별 일정은 `docs/development-schedule.md`, 상세 구현 순서는 `docs/implementation-roadmap.md`의 **제출 전 시나리오 구현 트랙**을 따른다.
+과거의 증강·NPC·엔딩 기획 마감은 모두 결정 상태로 갱신됐다. 고정 Specialization은 generic 증강 v1로 대체됐고 Ending 계약은 확정됐으며 NPC는 예선 핵심 범위에서 제외한다. 현재 선행 작업은 1-7 Story 문구를 포함한 P0 Alignment이며 역할별 일정은 `docs/development-schedule.md`, 상세 구현 순서는 `docs/implementation-roadmap.md`의 **제출 전 시나리오 구현 트랙**을 따른다.
 
 메인 개발자는 현재 작성된 맵을 `SECTOR 01 → 02 → 03 → 04 → 05 → 06` 및 섹터 내 번호 순서로 구현한다. 각 맵을 시작할 때 등장 오브젝트·상태·표현 cue를 먼저 정리하고 gameplay와 레벨 흐름을 mock으로 플레이 가능하게 만든다. 맵 definition에는 이미지·atlas·음원 파일 경로를 넣지 않고 stable object/state/event/presentation/cue ID만 둔다. 환경·오디오는 검증된 runtime catalog의 package를 사용하고 준비되지 않았으면 `default-mock`을 선택한다. authored object는 교체 가능한 world-object mock presentation catalog를 거쳐 표시한다. 그래픽·오디오 담당자는 같은 ID와 mock 배치를 이어받아 정식 package·binding만 교체하며 지형·물리·완료 조건·Gate·네트워크 권위를 바꾸지 않는다.
 
@@ -389,7 +389,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 양쪽 작업의 유일한 필수 선행 합의는 manifest·loader·이벤트 binding 같은 공개 교환 계약 변경이다. 역할별 일정과 제출 판단은 `docs/game-hackathon-planning.md`의 **역할 분담**을 따른다.
 - 시나리오는 `6개 섹터 × 섹터당 8개 맵 = 48개 맵`이며 일정과 인계는 섹터 단위로 관리한다. 메인 개발자는 `SECTOR 01 → 06` 순서로 진행하고 각 섹터 안의 8개 맵은 번호순으로 구현한다. 맵별 오브젝트·상태·표현 cue를 먼저 목록화하고 mock으로 동작을 완성하면 그래픽·오디오 담당자가 앞 섹터 결과부터 정식 리소스로 교체 제작한다.
 - 그래픽·오디오 1차 생산 마감은 2026년 8월 19일이며, 전체 자산 완료가 아니라 앞서 공개된 우선 오브젝트의 첫 교체 묶음을 뜻한다.
-- Specialization·Boss01·Timer Prototype·Final Security·Ending과 관련 UI·게임 요소는 확정 기획 계약을 사용한다. NPC는 예선 핵심 범위에서 제외하며, Sector02~05 Boss와 최종 밸런스처럼 아직 열린 항목만 메인 개발자가 임의의 mock 규칙으로 대신 결정하지 않는다.
+- Boss01·Timer Prototype·Final Security·Ending과 관련 UI·게임 요소는 확정 기획 계약을 사용한다. 고정 Specialization tier는 generic 증강 v1로 대체됐으며 NPC는 예선 핵심 범위에서 제외한다. Sector02~05 Boss와 최종 밸런스처럼 아직 열린 항목만 메인 개발자가 임의의 mock 규칙으로 대신 결정하지 않는다.
 
 ### [L1] 환경 도트 표현은 독립 component와 전용 multi-atlas 계약으로 조립한다
 

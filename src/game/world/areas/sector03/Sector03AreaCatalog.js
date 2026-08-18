@@ -393,22 +393,26 @@ const area04 = defineArea({
     cueIds: ["service-arcade", "route-identity"]
 });
 
+const area05Id = "sector-03-05";
+const area05AugmentObjectiveId = `${area05Id}:augment-selected`;
+const area05ExitObjectiveId = `${area05Id}:final-deck-reached`;
+
 const block05 = exitBlock({
-    areaId: "sector-03-05",
+    areaId: area05Id,
     deckX: 288,
     deckTopY: -563,
     deckWidth: 256,
     nextAreaId: "sector-03-06",
-    panelObjectiveId: "sector-03-05:exit-panel-engaged",
-    panelProperties: { requiredObjectiveIds: ["sector-03-05:final-deck-reached"] }
+    panelObjectiveId: `${area05Id}:exit-panel-engaged`,
+    panelProperties: { requiredObjectiveIds: [area05ExitObjectiveId, area05AugmentObjectiveId] }
 });
 
 const area05 = defineArea({
-    id: "sector-03-05",
+    id: area05Id,
     sectorId: "sector-03",
     order: 5,
     name: "COMMERCIAL SERVICE NODE",
-    subtitle: "REST / DIAGNOSTIC",
+    subtitle: "REST / AUGMENT SERVICE",
     bounds: { width: 960, height: 688 },
     entry: point("sector-03-05:entry", -240, -32),
     exit: block05.exit,
@@ -435,14 +439,16 @@ const area05 = defineArea({
         ...[["g1", -32, -400, "G1"]].map(([id, x, y, label]) =>
             worldObject(`sector-03-05:${id}`, "grapple-landmark", x, y, { label })
         ),
-        worldObject("sector-03-05:service-calibration-frame", "maintenance-frame", 240, -288, {
+        worldObject(`${area05Id}:service-calibration-frame`, "augment-node", 240, -288, {
             coordinateAnchor: "bottom-center",
-            gateId: "sector-03-05:gate"
+            interactionRadius,
+            objectiveId: area05AugmentObjectiveId,
+            cueIds: ["node-id", "access-summary"]
         }),
         worldObject("sector-03-05:node-id", "story-display", 0, -312, {
             cueIds: ["sector-03-05:node-id"]
         }),
-        worldObject("sector-03-05:access-summary", "story-display", 240, -312, {
+        worldObject("sector-03-05:access-summary", "story-display", 120, -312, {
             cueIds: ["sector-03-05:access-summary"]
         }),
         worldObject("sector-03-05:premium-atrium-ahead", "story-display", 288, -680, {
@@ -452,16 +458,21 @@ const area05 = defineArea({
         block05.gateVisual
     ],
     objectives: [
-        { id: "sector-03-05:final-deck-reached", type: "reach", bounds: triggerBounds(160, -656, 256, 96) },
         {
-            id: "sector-03-05:exit-panel-engaged",
+            id: area05AugmentObjectiveId,
+            type: "interact-choice",
+            sourceObjectId: `${area05Id}:service-calibration-frame`
+        },
+        { id: area05ExitObjectiveId, type: "reach", bounds: triggerBounds(160, -656, 256, 96) },
+        {
+            id: `${area05Id}:exit-panel-engaged`,
             type: "interact",
-            sourceObjectId: "sector-03-05:exit-panel",
-            requiredObjectiveIds: ["sector-03-05:final-deck-reached"]
+            sourceObjectId: `${area05Id}:exit-panel`,
+            requiredObjectiveIds: [area05ExitObjectiveId, area05AugmentObjectiveId]
         }
     ],
     gate: block05.gate,
-    storyTriggers: ["commercial-service-node", "authority-scope", "calibration"],
+    storyTriggers: ["commercial-service-node", "augment-available", "authority-scope", "calibration"],
     routes: ["safe", "flow", "recovery"],
     cueIds: ["commercial-service-node", "rest"]
 });
