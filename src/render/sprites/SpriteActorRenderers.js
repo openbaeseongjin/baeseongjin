@@ -8,6 +8,7 @@ import {
     enemySensorColor,
     isDroneEnemy
 } from "../EnemyTelegraphPresentation.js";
+import { resolveEnemyPresentationState } from "../EnemyPresentationState.js";
 
 const ENEMY_SPRITE = Object.freeze({
     rows: Object.freeze(["......aa", "..aaaaaa", "abbbccca", "abccccba", "..aaaaaa", "......aa"])
@@ -109,8 +110,14 @@ export class SpriteRemotePlayerRenderer extends PlayerSpriteRendererBase {
 }
 
 export class SpriteEnemyRenderer {
-    constructor({ size = { width: 36, height: 36 } } = {}) {
+    constructor({
+        size = { width: 36, height: 36 },
+        presentationResolver = resolveEnemyPresentationState,
+        spriteResolver = () => ENEMY_SPRITE
+    } = {}) {
         this.size = Object.freeze({ ...size });
+        this.presentationResolver = presentationResolver;
+        this.spriteResolver = spriteResolver;
     }
 
     draw({ context, scene, viewport, renderStats }) {
@@ -132,9 +139,10 @@ export class SpriteEnemyRenderer {
                 context.restore();
             }
             drawEnemyBehaviorTelegraph(context, enemy, enemies);
+            const presentation = this.presentationResolver(enemy);
             paintPixelSprite({
                 context,
-                sprite: ENEMY_SPRITE,
+                sprite: this.spriteResolver(presentation, enemy),
                 palette: isDroneEnemy(enemy)
                     ? { a: "#78350f", b: "#fbbf24", c: "#fef3c7" }
                     : { a: "#881337", b: "#fb7185", c: "#fecdd3" },
