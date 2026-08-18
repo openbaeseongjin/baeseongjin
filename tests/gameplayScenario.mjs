@@ -25,6 +25,7 @@ import { run as spriteAssetValidator } from "./spriteAssetValidator.mjs";
 import { run as renderPerformance } from "./renderPerformance.mjs";
 import { run as areaDefinitionValidator } from "./areaDefinitionValidator.mjs";
 import { run as areaSpecValidator } from "./areaSpecValidator.mjs";
+import { run as scenarioIntegrationStaleCheck } from "./scenarioIntegrationStaleCheck.mjs";
 import { run as authoredWorldAssembler } from "./authoredWorldAssembler.mjs";
 import { run as worldProgressState } from "./worldProgressState.mjs";
 import { run as worldProgressController } from "./worldProgressController.mjs";
@@ -73,6 +74,7 @@ const steps = {
     renderPerformance,
     areaDefinitionValidator,
     areaSpecValidator,
+    scenarioIntegrationStaleCheck,
     authoredWorldAssembler,
     worldProgressState,
     worldProgressController,

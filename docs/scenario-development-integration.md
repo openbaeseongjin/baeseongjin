@@ -3,9 +3,9 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: PLACEHOLDER-RECOMPUTE-BEFORE-COMMIT
-authored-area-sha256: PLACEHOLDER-RECOMPUTE-BEFORE-COMMIT
-authored-sector-sha256: PLACEHOLDER-RECOMPUTE-BEFORE-COMMIT
+scenario-source-sha256: 6d07e898ab9579ab2903680f1bb7376658962747f796bbf0dfc4498b7d3d7587
+authored-area-sha256: 98375f3037b7920e4822e39bba03b8f1d67466c2e146bf56e7d1b82f41cd0202
+authored-sector-sha256: 54f07f1be2ebc8057a0c12f395adaeb0ecdfda955f7d283ca1af8c35bef04719
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
 reviewed-upstream: 6f8d2529a759ca37c8aecc0185d9a0a797c6bbda

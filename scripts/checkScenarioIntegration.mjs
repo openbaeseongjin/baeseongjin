@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { extname, relative, resolve, sep } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const projectRoot = resolve(process.cwd());
 const statusPath = "docs/scenario-development-integration.md";
-const scenarioRoot = "docs/bsh/scenario";
-const authoredAreaRoot = "src/game/world/areas";
-const authoredSectorRoot = "src/game/world/sectors";
-const authoredSectorSupportFiles = [
+export const scenarioRoot = "docs/bsh/scenario";
+export const authoredAreaRoot = "src/game/world/areas";
+export const authoredSectorRoot = "src/game/world/sectors";
+export const authoredSectorSupportFiles = [
     "src/game/world/SectorDefinitionValidator.js",
     "src/game/world/SectorProgressController.js",
     "src/game/world/SectorProgressState.js"
@@ -109,7 +110,7 @@ function readExpectedCheckpoint() {
     return checkpoint;
 }
 
-function collectActualCheckpoint() {
+export function collectActualCheckpoint() {
     // AREA-SPEC.json is the machine-readable implementation contract alongside each stage's
     // README.md / PRODUCTION-ALIGNMENT.md — it must invalidate the stale-check like the .md files do.
     // docs/bsh/scenario/AREA-SPEC-TEMPLATE.json is intentionally under this same root/extension set
@@ -135,7 +136,7 @@ function collectActualCheckpoint() {
     };
 }
 
-function collectDifferences(expected, actual) {
+export function collectDifferences(expected, actual) {
     const fields = [
         "scenario-source-sha256",
         "authored-area-sha256",
@@ -182,35 +183,44 @@ function runSelfTest() {
     console.log("Scenario integration stale-check self-test passed.");
 }
 
-if (process.argv.includes("--self-test")) {
-    runSelfTest();
-    process.exit(0);
-}
+function main() {
+    if (process.argv.includes("--self-test")) {
+        runSelfTest();
+        process.exit(0);
+    }
 
-const actual = collectActualCheckpoint();
-if (process.argv.includes("--print")) {
-    printActualCheckpoint(actual);
-    process.exit(0);
-}
+    const actual = collectActualCheckpoint();
+    if (process.argv.includes("--print")) {
+        printActualCheckpoint(actual);
+        process.exit(0);
+    }
 
-try {
-    const expected = readExpectedCheckpoint();
-    const differences = collectDifferences(expected, actual);
-    if (differences.length > 0) {
-        console.error("Scenario integration checkpoint가 현재 source와 다릅니다.");
-        for (const difference of differences) console.error(`- ${difference}`);
-        console.error(
-            `변경 내용을 Runtime 상태·차단 요소·확인 근거와 함께 ${statusPath}에서 재검토한 뒤 marker를 갱신하세요.`
-        );
+    try {
+        const expected = readExpectedCheckpoint();
+        const differences = collectDifferences(expected, actual);
+        if (differences.length > 0) {
+            console.error("Scenario integration checkpoint가 현재 source와 다릅니다.");
+            for (const difference of differences) console.error(`- ${difference}`);
+            console.error(
+                `변경 내용을 Runtime 상태·차단 요소·확인 근거와 함께 ${statusPath}에서 재검토한 뒤 marker를 갱신하세요.`
+            );
+            process.exit(1);
+        }
+    } catch (error) {
+        console.error(error instanceof Error ? error.message : error);
         process.exit(1);
     }
-} catch (error) {
-    console.error(error instanceof Error ? error.message : error);
-    process.exit(1);
+
+    console.log(
+        `Scenario integration checkpoint passed: ${actual["stage-count"]} stages, ` +
+            `${actual.scenarioFiles.length} scenario files, ${actual.authoredAreaFiles.length} authored-area files, ` +
+            `${actual.authoredSectorFiles.length} authored-sector files`
+    );
 }
 
-console.log(
-    `Scenario integration checkpoint passed: ${actual["stage-count"]} stages, ` +
-        `${actual.scenarioFiles.length} scenario files, ${actual.authoredAreaFiles.length} authored-area files, ` +
-        `${actual.authoredSectorFiles.length} authored-sector files`
-);
+// This module is imported by tests/scenarioIntegrationStaleCheck.mjs (regression coverage for the
+// AREA-SPEC / Sector-runtime fingerprint independence — see item 6/11 of the PR #630 follow-up), so the
+// CLI body must not run on import — only when invoked directly, same convention as the other scripts/*.mjs.
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+    main();
+}
