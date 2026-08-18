@@ -25,6 +25,7 @@
 - seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
 - PC와 모바일 공용 이동·점프·로프·Action 명령, 모바일 중앙 `좌 · 점프 · 우` 조작 바와 멀티터치. 0.31.0부터 우측 상단 조작 버튼은 `로프 조준 ↔ 액션 조준` 토글이며, 액션 조준 상태의 월드 터치는 같은 실제 접촉 지점을 `aimWorld`로 사용하면서 로프를 발사하지 않고 Action을 시작한다.
 - 모바일 coarse pointer 카메라는 작은 화면에서 오브젝트를 확대하는 대신 Full HD `1920×1080` 데스크톱 브라우저가 보여 주는 월드 범위를 한눈에 담도록 viewport 가로·세로 비율 중 작은 값으로 줌아웃한다. 기존 authored `mobileZoom`은 `0.72 = 기준 Shot 1.0`인 상대 비율로 해석해 구간별 구도 차이를 보존하며, 싱글·멀티와 화면→월드 조준 변환이 같은 최종 camera zoom을 사용한다.
+- 0.32.1은 위 모바일 Full HD viewport-fit 카메라와 seamless landmark의 `legacyAreaId` 환경 package 조회를 patch 릴리스로 묶는다. Sector 01 정식 far/mid/near 배경이 fallback 대신 다시 표시되며 `sw.js` 릴리스 신호와 Pages·게임 서버 버전을 함께 갱신한다.
 - 기본 자동 사격은 비활성화하고 `AutomaticWeaponObject`·spawn/hit claim 기반은 후속 기능용으로 보존한다. 기본 공격은 로프 부착 중 속도 `620px/s` 이상으로 적과 새로 몸체 충돌할 때 `25` 피해를 주는 로프 충돌 공격이다. 같은 겹침은 분리 후 재진입하기 전까지 반복 피해를 만들지 않는다.
 - 적 위치 넉백은 플레이어를 직접 추격·돌진하는 `pursuit-drone-t1`, `swarm-drone-t1`만 허용한다. 고정 Sentry/Turret, authored Patrol 경로만 왕복하는 `patrol-drone-t1`, 제자리 Shield·Artillery·Support 계열은 주먹·Action·로프 충돌 피해와 처치는 그대로 받지만 `knockbackState`를 만들지 않고 authored 위치/경로를 유지한다.
 - 현재 0.25.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 Sector-entry 즉시 부활을 사용한다. solo death는 공용 진행을 보존하고 같은 tick의 전원 사망만 current Sector를 reset한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용한다.
