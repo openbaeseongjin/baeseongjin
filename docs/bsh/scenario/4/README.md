@@ -35,7 +35,8 @@
 4-2  RESIDENTIAL COURTYARD    REV 2.3 동기화 완료
 4-3  SKY GARDEN TERRACES      REV 2.3 동기화 완료
 4-4  CARE PAVILION            REV 2.4 동기화 완료
-4-5~4-8                       아직 REV 1.1 TRANSIT / INFRASTRUCTURE 기준
+4-5  AMENITY ATRIUM           REV 2.5 동기화 완료
+4-6~4-8                       아직 REV 1.1 TRANSIT / INFRASTRUCTURE 기준
                                (TRANSIT INTAKE 계열 세계관 — 이 Master와 불일치, 별도 후속 작업 필요)
 ```
 

@@ -1,0 +1,567 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 4,
+    "stage": 5,
+    "legacyStageAlias": "4-5",
+    "sourceAreaId": "sector-04-05",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "AMENITY ATRIUM",
+    "subtitle": "STAGGERED ORBIT + MOVING ANCHOR"
+  },
+  "bounds": {
+    "width": 1600,
+    "height": 1720
+  },
+  "entry": {
+    "id": "entry",
+    "x": -560,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "safe-deck",
+      "x": -560,
+      "y": 0,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "lower-deck",
+      "preset": "safe-deck",
+      "x": 120,
+      "y": -350,
+      "width": 340,
+      "height": 32
+    },
+    {
+      "id": "atrium-read",
+      "preset": "safe-deck",
+      "x": -80,
+      "y": -690,
+      "width": 380,
+      "height": 32
+    },
+    {
+      "id": "mid-bridge",
+      "preset": "safe-deck",
+      "x": 150,
+      "y": -1040,
+      "width": 300,
+      "height": 32
+    },
+    {
+      "id": "drone-exit",
+      "preset": "safe-deck",
+      "x": 300,
+      "y": -1130,
+      "width": 250,
+      "height": 32
+    },
+    {
+      "id": "upper-gallery",
+      "preset": "safe-deck",
+      "x": -40,
+      "y": -1380,
+      "width": 380,
+      "height": 32
+    },
+    {
+      "id": "r1",
+      "preset": "recovery-deck",
+      "x": -190,
+      "y": -455,
+      "width": 220,
+      "height": 16
+    },
+    {
+      "id": "r2",
+      "preset": "recovery-deck",
+      "x": 230,
+      "y": -800,
+      "width": 220,
+      "height": 16
+    },
+    {
+      "id": "r3",
+      "preset": "recovery-deck",
+      "x": -160,
+      "y": -1160,
+      "width": 220,
+      "height": 16
+    },
+    {
+      "id": "r4",
+      "preset": "recovery-deck",
+      "x": 180,
+      "y": -1500,
+      "width": 220,
+      "height": 16
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "a1",
+      "label": "A1",
+      "x": -300,
+      "y": -200
+    },
+    {
+      "id": "a2",
+      "label": "A2",
+      "x": 350,
+      "y": -535
+    },
+    {
+      "id": "a3",
+      "label": "A3",
+      "x": -340,
+      "y": -900
+    },
+    {
+      "id": "a4",
+      "label": "A4",
+      "x": 370,
+      "y": -1230
+    },
+    {
+      "id": "a5",
+      "label": "A5",
+      "x": 240,
+      "y": -1500
+    }
+  ],
+  "enemies": [
+    {
+      "id": "guard-a",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -420,
+      "y": -650,
+      "activation": {
+        "x": -520,
+        "y": -920,
+        "width": 1040,
+        "height": 470
+      },
+      "patrolChoreography": {
+        "mode": "loop",
+        "speed": 60,
+        "waitSeconds": 0.0,
+        "phaseOffsetRatio": 0.0,
+        "points": [
+          {
+            "x": -420,
+            "y": -650
+          },
+          {
+            "x": 0,
+            "y": -850
+          },
+          {
+            "x": 420,
+            "y": -650
+          },
+          {
+            "x": 0,
+            "y": -500
+          }
+        ]
+      },
+      "pursuitBounds": {
+        "x": -760,
+        "y": -1680,
+        "width": 1520,
+        "height": 1680
+      }
+    },
+    {
+      "id": "guard-b",
+      "preset": "sector04-persistent-guard-v1",
+      "x": 420,
+      "y": -650,
+      "activation": {
+        "x": -520,
+        "y": -920,
+        "width": 1040,
+        "height": 470
+      },
+      "patrolChoreography": {
+        "mode": "loop",
+        "speed": 60,
+        "waitSeconds": 0.0,
+        "phaseOffsetRatio": 0.5,
+        "points": [
+          {
+            "x": -420,
+            "y": -650
+          },
+          {
+            "x": 0,
+            "y": -850
+          },
+          {
+            "x": 420,
+            "y": -650
+          },
+          {
+            "x": 0,
+            "y": -500
+          }
+        ]
+      },
+      "pursuitBounds": {
+        "x": -760,
+        "y": -1680,
+        "width": 1520,
+        "height": 1680
+      }
+    },
+    {
+      "id": "guard-c",
+      "preset": "sector04-persistent-guard-v1",
+      "x": 350,
+      "y": -1120,
+      "activation": {
+        "x": -50,
+        "y": -1540,
+        "width": 540,
+        "height": 510
+      },
+      "patrolChoreography": {
+        "mode": "pingpong",
+        "speed": 72,
+        "waitSeconds": 0.2,
+        "points": [
+          {
+            "x": 350,
+            "y": -1120
+          },
+          {
+            "x": 70,
+            "y": -1230
+          },
+          {
+            "x": 330,
+            "y": -1360
+          },
+          {
+            "x": 20,
+            "y": -1490
+          }
+        ]
+      },
+      "pursuitBounds": {
+        "x": -760,
+        "y": -1680,
+        "width": 1520,
+        "height": 1680
+      }
+    }
+  ],
+  "scannerGroups": [],
+  "windZones": [],
+  "objectives": [
+    {
+      "id": "final-deck-reached",
+      "type": "reach",
+      "preset": "reach-deck"
+    },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "entry",
+      "a1",
+      "a2",
+      "atrium-read",
+      "a3",
+      "mid-bridge",
+      "a4",
+      "upper-gallery",
+      "a5",
+      "exit"
+    ],
+    "mandatory": [
+      "entry",
+      "a1",
+      "a2",
+      "atrium-read",
+      "a3",
+      "mid-bridge",
+      "a4",
+      "upper-gallery",
+      "a5",
+      "exit"
+    ],
+    "optional": [
+      {
+        "id": "moving-anchor-expression",
+        "sequence": [
+          "atrium-read",
+          "drone-exit",
+          "a4",
+          "upper-gallery",
+          "a5",
+          "exit"
+        ]
+      }
+    ],
+    "forbiddenBypasses": [
+      {
+        "from": "entry",
+        "to": [
+          "atrium-read",
+          "a3",
+          "mid-bridge",
+          "drone-exit",
+          "a4",
+          "upper-gallery",
+          "a5",
+          "exit"
+        ],
+        "reason": "Lower Amenity entry and first commitment must remain."
+      },
+      {
+        "from": "atrium-read",
+        "to": [
+          "upper-gallery",
+          "a5",
+          "exit"
+        ],
+        "reason": "Neither Base Rope nor Long Rope 480 may bypass the complete Orbit/Moving-Anchor interaction band."
+      }
+    ]
+  },
+  "recovery": [
+    {
+      "id": "recover-r1",
+      "failureZone": "r1",
+      "recoverTo": {
+        "x": -190,
+        "y": -479
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r2",
+      "failureZone": "r2",
+      "recoverTo": {
+        "x": 230,
+        "y": -824
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r3",
+      "failureZone": "r3",
+      "recoverTo": {
+        "x": -160,
+        "y": -1184
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r4",
+      "failureZone": "r4",
+      "recoverTo": {
+        "x": 180,
+        "y": -1524
+      },
+      "maxRetrySeconds": 5
+    }
+  ],
+  "sourceExit": {
+    "deckX": 520,
+    "deckTopY": -1640,
+    "deckWidth": 400,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "4-6",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "exit-panel-engaged"
+    ]
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "entry-lobby",
+        "minY": -340,
+        "maxY": 0,
+        "desktopZoom": 0.95,
+        "mobileZoom": 0.72
+      },
+      {
+        "id": "orbit-reveal",
+        "minY": -720,
+        "maxY": -340,
+        "desktopZoom": 0.86,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "anchor-drone-read",
+        "minY": -1060,
+        "maxY": -720,
+        "desktopZoom": 0.84,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "upper-sweep",
+        "minY": -1440,
+        "maxY": -1060,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "exit",
+        "minY": -1720,
+        "maxY": -1440,
+        "desktopZoom": 0.94,
+        "mobileZoom": 0.72
+      }
+    ]
+  },
+  "story": {
+    "planningTriggers": [
+      "private-amenity-atrium",
+      "resident-access",
+      "atrium-service-drone-active",
+      "automated-security-active"
+    ],
+    "runtimePresentations": []
+  },
+  "runtimeDependencies": {
+    "required": [
+      {
+        "id": "patrol-drone-t1"
+      }
+    ],
+    "newSystems": [
+      {
+        "id": "sector04-persistent-guard-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "moving-anchor-drone-v1",
+        "status": "NOT_IMPLEMENTED"
+      }
+    ]
+  },
+  "forbidden": [
+    "Wind in 4-5",
+    "Cutter / rope-cut enemy in 4-5",
+    "Scanner in 4-5",
+    "Treatment Pod in 4-5",
+    "Augment Node in 4-5 before Sector04 source topology is approved",
+    "Moving Anchor Drone required for mandatory clear",
+    "Anchor Drone hostile behavior",
+    "Anchor Drone death/destruction",
+    "Anchor Drone moved by Rope tension",
+    "forced single-player ownership of Anchor Drone",
+    "enemy Security Drone grapple in 4-5",
+    "kill gate",
+    "mandatory Augment",
+    "fourth Guard"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "schema-valid-after-moving-anchor-extension",
+      "type": "schema",
+      "requirement": "AREA-SPEC REV1.1을 유지하면서 sector04-persistent-guard-v1과 moving-anchor-drone-v1의 approved validator/authoring extension이 명시적으로 지원되어야 한다.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "mandatory-route-clear-zero-impulse",
+      "type": "geometry",
+      "requirement": "Moving Anchor Drone 없이 swingImpulse=0에서도 route.mandatory가 성립해야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "base-rope-static-links",
+      "type": "geometry",
+      "requirement": "A1~A5 static mandatory Hook은 Base Reach 400 안에서 충분한 margin을 유지한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "anchor-drone-whole-path-in-base-reach",
+      "type": "geometry",
+      "requirement": "Atrium Read launch sample에서 Anchor Drone grapple socket의 양 끝 위치가 모두 Base Reach 400 안에 있고 최소 약 100px 정적 margin을 유지한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "orbit-phase-pair",
+      "type": "runtime",
+      "requirement": "Guard A/B는 동일 Diamond Loop와 speed를 공유하고 0.5 phase offset을 유지하여 움직이는 Security Window를 만든다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "orbit-breaks-on-alert",
+      "type": "runtime",
+      "requirement": "A/B 중 발각된 Guard만 Orbit을 떠나 Persistent Pursuit로 전환하고, 미발각 Guard는 authored Orbit을 계속 수행한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "moving-anchor-targeting",
+      "type": "runtime",
+      "requirement": "기존 Rope input으로 dynamic grapple socket을 조준할 수 있고 static surface와 동일한 입력 철학을 유지한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "moving-anchor-hook-flight-tracking",
+      "type": "runtime",
+      "requirement": "Moving Anchor 대상 Hook은 비행 중 현재 socket 위치를 추적하며 hookSpeed/flight lifetime/reach 제한을 우회하지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "moving-anchor-fixed-length-constraint",
+      "type": "runtime",
+      "requirement": "부착 후 Rope length는 hit 순간 길이로 고정되고, moving socket position/velocity를 사용해 상대 방사속도 constraint를 만족한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "moving-anchor-release",
+      "type": "runtime",
+      "requirement": "Release는 기존 Rope release/reload와 동일하고 Moving Anchor 전용 추가 boost를 만들지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "moving-anchor-multiattach",
+      "type": "multiplayer",
+      "requirement": "여러 Player가 같은 Drone에 부착 가능하며 Player Rope tension이 Drone path/speed를 변경하지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "moving-anchor-authority",
+      "type": "multiplayer",
+      "requirement": "Drone transform과 dynamic socket position/velocity는 authoritative simulation에서 결정되고 client가 독립적인 anchor motion을 추가하지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "three-pursuer-ceiling",
+      "type": "traversal",
+      "requirement": "Worst case는 A+B+C 3 Pursuers이며 네 번째 Guard를 추가하지 않는다. Base mandatory route는 여전히 읽히고 생존 가능해야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "augment-regression",
+      "type": "regression",
+      "requirement": "Long Rope 480/Fast Recover/Release Propulsion/Direction Dash는 Moving Anchor 표현력을 높일 수 있지만 mandatory가 아니며 Atrium interaction band 전체를 bypass하지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "camera-moving-window-readability",
+      "type": "camera",
+      "requirement": "Atrium Read에서 A/B phase, Anchor Drone, next static Anchor A3를 동시에 읽을 수 있어야 한다.",
+      "automation": "MANUAL"
+    }
+  ]
+}

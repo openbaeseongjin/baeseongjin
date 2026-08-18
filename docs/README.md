@@ -126,7 +126,7 @@
 | [`bsh/scenario/3/INTEGRATION-CROSS-VALIDATION-AUDIT.md`](./bsh/scenario/3/INTEGRATION-CROSS-VALIDATION-AUDIT.md) | `bsh` Sector 03(3-1~3-8) Scenario/Runtime/Story/Multiplayer/Art 통합 교차검증 감사 — Document Integration Patch List(P0~P3) 포함 |
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md) | `bsh` Sector 03 핵심 의존성 Access Scan Field Runtime Prototype 구현 스펙 — Prediction Clock Parity 위험(delayed owner-motion) 포함 실제 코드 대조 완료 |
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md) | `bsh` 위 스펙을 Codex/개발 담당에게 바로 전달할 실행 지시서 — 우선순위(P0A~P6)·완료 조건·보고 형식·복붙용 지시문 포함 |
-| [`bsh/scenario/4/README.md`](./bsh/scenario/4/README.md) | `bsh` Sector 04 Upper Residential/Amenity District 마스터플랜, REV 2.3 — Patrol-Heavy Security + Persistent Pursuit 채택. 4-1~4-4 REV 2.3/2.4 동기화 완료, 4-5~4-8은 아직 REV 1.1 Transit/Infrastructure 레거시 |
+| [`bsh/scenario/4/README.md`](./bsh/scenario/4/README.md) | `bsh` Sector 04 Upper Residential/Amenity District 마스터플랜, REV 2.3 — Patrol-Heavy Security + Persistent Pursuit 채택. 4-1~4-5 REV 2.3/2.4/2.5 동기화 완료, 4-6~4-8은 아직 REV 1.1 Transit/Infrastructure 레거시 |
 | [`bsh/scenario/4/PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md`](./bsh/scenario/4/PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md) | `bsh` Sector 04 공용 Persistent Pursuit Alert Latch 시스템(Patrol→Detect→Latched Pursuit) Runtime 구현 인계 — NEW SYSTEM / NOT IMPLEMENTED |
 | [`bsh/scenario/4/4-1/README.md`](./bsh/scenario/4/4-1/README.md) | `bsh` Sector 04 첫 Stage(4-1) SKY RESIDENCE ARRIVAL Blockout 후보·제작 규격, REV 2.3 — Security Drone 2기(Guard A/B) + Persistent Pursuit 도입, Kill Optional |
 | [`bsh/scenario/4/4-1/AREA-SPEC.json`](./bsh/scenario/4/4-1/AREA-SPEC.json) | 4-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Persistent Pursuit newSystems·Acceptance Tests |
@@ -144,7 +144,10 @@
 | [`bsh/scenario/4/4-4/AREA-SPEC.json`](./bsh/scenario/4/4-4/AREA-SPEC.json) | 4-4 구현 계약(area-spec-v1) — Local ID·Route(Treatment 분기 optional)·Recovery·Treatment Pod newSystems·Acceptance Tests |
 | [`bsh/scenario/4/4-4/RUNTIME-HANDOFF.md`](./bsh/scenario/4/4-4/RUNTIME-HANDOFF.md) | 4-4 Runtime 구현 인계 — Guard A/B/C patrol 튜닝, Treatment Pod 채널링/피격 중단 계약, 필수 테스트 목록 |
 | [`bsh/scenario/4/4-4/VALIDATION.md`](./bsh/scenario/4/4-4/VALIDATION.md) | 4-4 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
-| [`bsh/scenario/4/4-5/README.md`](./bsh/scenario/4/4-5/README.md) | `bsh` Sector 04 순수 Movement Joy Stage(4-5) Blockout 후보·제작 규격, REV 1.2 — Enemy 없음, Wake-assisted 상승, Wind Strength 재분류·4-1 Drift false alarm 정리 |
+| [`bsh/scenario/4/4-5/README.md`](./bsh/scenario/4/4-5/README.md) | `bsh` Sector 04 Stage(4-5) AMENITY ATRIUM Blockout 후보·제작 규격, REV 2.5 — Guard 3기(A/B diamond orbit + C sweep) 최대 3-Pursuer, Moving Anchor Drone(신규 시스템, NOT IMPLEMENTED, Mandatory 아님) |
+| [`bsh/scenario/4/4-5/AREA-SPEC.json`](./bsh/scenario/4/4-5/AREA-SPEC.json) | 4-5 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Moving Anchor Drone newSystems·Acceptance Tests |
+| [`bsh/scenario/4/4-5/RUNTIME-HANDOFF.md`](./bsh/scenario/4/4-5/RUNTIME-HANDOFF.md) | 4-5 Runtime 구현 인계 — Guard A/B/C patrol 튜닝, Moving Anchor Drone 계약, 필수 테스트 목록 |
+| [`bsh/scenario/4/4-5/VALIDATION.md`](./bsh/scenario/4/4-5/VALIDATION.md) | 4-5 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
 | [`bsh/scenario/4/4-6/README.md`](./bsh/scenario/4/4-6/README.md) | `bsh` Rope Line Geometry Combat Stage(4-6) Blockout 후보·제작 규격, REV 1.1 — Cutter Sentry+Patrol Drone 분리 배치, Shear 공격선 활용, Gate 좌표·4-1 Drift false alarm 정리 |
 | [`bsh/scenario/4/4-7/README.md`](./bsh/scenario/4/4-7/README.md) | `bsh` Sector 04 Story Pressure Stage(4-7) Blockout 후보·제작 규격, REV 1.2 — Cutter+Wake Synthesis, `LOWER ASCENT FEEDER ISOLATED` 확정 Reveal(인과관계는 미확정 유지), Gate 좌표·4-1 Drift false alarm 정리 |
 | [`bsh/scenario/4/4-8/README.md`](./bsh/scenario/4/4-8/README.md) | `bsh` Sector 04 General Finale(4-8) Blockout 후보·제작 규격, REV 1.2 — Cutter+Patrol+Wake Continuous Flow, Upper Trunk/Lower Feeder Status 병치, Wind Strength 재분류·D1 activation 좌표 정정 |
