@@ -26,6 +26,7 @@ export function run() {
     assert.equal(world.respawnAnchors.length, 3);
     assert.equal(world.connectors.length, 23);
     assert.equal(world.routeLocks.length, 23);
+    assert.equal(world.sectorTransitions.length, 2);
     assert.equal(world.gates.length, 0);
     assert.equal(world.checkpoints.length, 0);
     assert.equal(world.areas.length, 0);
@@ -34,17 +35,28 @@ export function run() {
         assert.equal(sector.width, SEAMLESS_SECTOR_RUNTIME_WIDTH);
         assert.equal(sector.bounds.width, SEAMLESS_SECTOR_RUNTIME_WIDTH);
         assert.ok(sector.bounds.height <= SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT);
-        assert.ok(sector.bounds.width > sector.bounds.height);
+        assert.ok(sector.bounds.height > sector.bounds.width);
         assert.ok(world.respawnAnchors.some(({ id }) => id === sector.respawnAnchorId));
         const sectorLandmarks = sector.landmarkIds.map((id) => world.landmarks.find((landmark) => landmark.id === id));
-        assert.equal(new Set(sectorLandmarks.map(({ origin }) => origin.x)).size, 4);
-        for (let index = 1; index < sectorLandmarks.length; index += 2) {
+        assert.deepEqual(new Set(sectorLandmarks.map(({ origin }) => origin.x)), new Set([0]));
+        for (let index = 1; index < sectorLandmarks.length; index += 1) {
             assert.equal(sectorLandmarks[index - 1].exit.y, sectorLandmarks[index].entry.y);
         }
         for (const landmarkId of sector.landmarkIds) {
             const landmark = world.landmarks.find(({ id }) => id === landmarkId);
+            assert.equal(landmark.bounds.width, SEAMLESS_SECTOR_RUNTIME_WIDTH);
             assert.ok(landmark.bounds.x >= sector.bounds.x);
             assert.ok(landmark.bounds.x + landmark.bounds.width <= sector.bounds.x + sector.bounds.width);
+            const wingSurfaces = landmark.surfaceIds
+                .map((id) => world.surfaces.find((surface) => surface.id === id))
+                .filter(({ id }) => id.includes(":city-wing:"));
+            assert.equal(wingSurfaces.length, 5);
+            for (const wing of wingSurfaces) {
+                assert.equal(wing.oneWay, true);
+                assert.equal(wing.grappleable, true);
+                assert.ok(wing.x >= sector.bounds.x);
+                assert.ok(wing.x + wing.width <= sector.bounds.x + sector.bounds.width);
+            }
         }
     }
     assert.equal(
@@ -55,6 +67,33 @@ export function run() {
         world.enemySpawns.some((spawn) => "areaId" in spawn),
         false
     );
+    assert.equal(
+        world.objects.some(({ kind }) => kind === "gate" || kind === "gate-panel"),
+        false
+    );
+    assert.equal(
+        world.objectives.some(({ sourceObjectId }) => sourceObjectId?.endsWith(":exit-panel")),
+        false
+    );
+
+    const bossReadyWorld = createLegacyAreaSeamlessSectorRuntimeWorld({
+        seed: 9182,
+        floorY: 320,
+        interSectorRiseById: { "sector-01:transition:sector-02": 960 }
+    });
+    const originalSector02Landmark = world.landmarks.find(({ id }) => id === "sector-02:landmark:01");
+    const bossReadySector02Landmark = bossReadyWorld.landmarks.find(({ id }) => id === "sector-02:landmark:01");
+    assert.deepEqual(bossReadySector02Landmark.localOrigin, originalSector02Landmark.localOrigin);
+    assert.deepEqual(bossReadySector02Landmark.localBounds, originalSector02Landmark.localBounds);
+    assert.equal(bossReadySector02Landmark.origin.y, originalSector02Landmark.origin.y - 960);
+    assert.deepEqual(world.sectorTransitions[0], {
+        id: "sector-01:transition:sector-02",
+        sourceSectorId: "sector-01",
+        targetSectorId: "sector-02",
+        sourceExit: world.landmarks.find(({ id }) => id === "sector-01:landmark:08").exit,
+        targetOrigin: { x: 0, y: originalSector02Landmark.entry.y },
+        rise: 0
+    });
 
     for (const connector of world.connectors) {
         const source = world.landmarks.find(({ id }) => id === connector.sourceLandmarkId);

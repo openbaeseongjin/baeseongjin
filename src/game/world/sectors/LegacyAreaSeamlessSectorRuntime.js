@@ -5,15 +5,18 @@ import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v1";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v2";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
-export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 3600;
+export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
 const LEGACY_SECTOR_CATALOGS = Object.freeze([SECTOR_01_AREA_CATALOG, SECTOR_02_AREA_CATALOG, SECTOR_03_AREA_CATALOG]);
-const LANDMARK_COLUMN_X = Object.freeze([-1600, -533, 533, 1600]);
-const LANDMARKS_PER_COLUMN = 2;
+const SECTOR_HALF_WIDTH = SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5;
+const CITY_WING_INSET = 96;
+const CITY_WING_OVERLAP = 48;
+const CITY_WING_THICKNESS = 32;
 const LEGACY_BOUNDARY_KINDS = new Set(["area-boundary-wall", "inter-floor-divider"]);
 const LEGACY_ENEMY_KINDS = new Set(["sentry", "patrol-drone"]);
+const LEGACY_STAGE_DOOR_KINDS = new Set(["gate", "gate-panel"]);
 
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
@@ -112,6 +115,107 @@ function connectorSurface(id, routeLockId, sourceLandmarkId, start, end) {
     });
 }
 
+function horizontalSurface(id, landmark, x, topY, width, kind) {
+    return freezeValue({
+        id,
+        kind,
+        landmarkId: landmark.id,
+        legacyStageAlias: landmark.legacyStageAlias,
+        oneWay: true,
+        oneWayEdgeEnd: 1,
+        grappleable: true,
+        x,
+        y: topY,
+        width,
+        height: CITY_WING_THICKNESS,
+        topY,
+        position: { x: x + width * 0.5, y: topY },
+        vertices: [
+            { x, y: topY },
+            { x: x + width, y: topY },
+            { x: x + width, y: topY + CITY_WING_THICKNESS },
+            { x, y: topY + CITY_WING_THICKNESS }
+        ]
+    });
+}
+
+function wideLandmarkBounds(coreBounds) {
+    return freezeValue({
+        x: -SECTOR_HALF_WIDTH,
+        y: coreBounds.y,
+        width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
+        height: coreBounds.height
+    });
+}
+
+function routeMouthBounds(exit) {
+    return freezeValue({
+        x: exit.x - 96,
+        y: exit.y - 64,
+        width: 192,
+        height: 112
+    });
+}
+
+function cityWingSurfaces({ landmark, coreBounds, entry, exit, landmarkIndex }) {
+    const leftWingStart = -SECTOR_HALF_WIDTH + CITY_WING_INSET;
+    const leftWingEnd = coreBounds.x + CITY_WING_OVERLAP;
+    const rightWingStart = coreBounds.x + coreBounds.width - CITY_WING_OVERLAP;
+    const rightWingEnd = SECTOR_HALF_WIDTH - CITY_WING_INSET;
+    const leftWingWidth = leftWingEnd - leftWingStart;
+    const rightWingWidth = rightWingEnd - rightWingStart;
+    const middleY = Math.round((coreBounds.y + coreBounds.height * 0.52) / 32) * 32;
+    const leftMid = landmarkIndex % 2 === 0;
+    const midStart = leftMid ? leftWingStart + 256 : rightWingStart + 96;
+    const midWidth = leftMid ? Math.max(320, leftWingWidth - 512) : Math.max(320, rightWingWidth - 192);
+    return Object.freeze([
+        horizontalSurface(
+            `${landmark.id}:city-wing:left:entry`,
+            landmark,
+            leftWingStart,
+            entry.y + 32,
+            leftWingWidth,
+            "safe-deck"
+        ),
+        horizontalSurface(
+            `${landmark.id}:city-wing:right:entry`,
+            landmark,
+            rightWingStart,
+            entry.y + 32,
+            rightWingWidth,
+            "safe-deck"
+        ),
+        horizontalSurface(
+            `${landmark.id}:city-wing:left:exit`,
+            landmark,
+            leftWingStart,
+            exit.y + 32,
+            leftWingWidth,
+            "recovery"
+        ),
+        horizontalSurface(
+            `${landmark.id}:city-wing:right:exit`,
+            landmark,
+            rightWingStart,
+            exit.y + 32,
+            rightWingWidth,
+            "recovery"
+        ),
+        horizontalSurface(
+            `${landmark.id}:city-wing:${leftMid ? "left" : "right"}:mid`,
+            landmark,
+            midStart,
+            middleY,
+            midWidth,
+            "safe-deck"
+        )
+    ]);
+}
+
+function isLegacyStageDoorObjective(objective, sourceObjectsById) {
+    return LEGACY_STAGE_DOOR_KINDS.has(sourceObjectsById.get(objective.sourceObjectId)?.kind);
+}
+
 function isolatedAreaWorld(area, seed) {
     const isolatedArea = freezeValue({
         ...area,
@@ -133,7 +237,24 @@ function routeId(sourceLandmarkId, targetLandmarkId) {
     return `${sourceLandmarkId}:route:${targetLandmarkId}`;
 }
 
-export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320, summitRadius = 42 } = {}) {
+function sectorTransitionId(sourceSectorId, targetSectorId) {
+    return `${sourceSectorId}:transition:${targetSectorId}`;
+}
+
+function interSectorRise(interSectorRiseById, sourceSectorId, targetSectorId) {
+    const rise = interSectorRiseById?.[sectorTransitionId(sourceSectorId, targetSectorId)] ?? 0;
+    if (!Number.isFinite(rise) || rise < 0) {
+        throw new Error(`inter-Sector rise for '${sourceSectorId}' must be a non-negative number`);
+    }
+    return rise;
+}
+
+export function createLegacyAreaSeamlessSectorRuntimeWorld({
+    seed,
+    floorY = 320,
+    summitRadius = 42,
+    interSectorRiseById = {}
+} = {}) {
     const surfaces = [];
     const route = [];
     const enemySpawns = [];
@@ -147,30 +268,35 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
     const respawnAnchors = [];
     const connectors = [];
     const routeLocks = [];
+    const sectorTransitions = [];
     let previousLandmark = null;
     let previousOutboundObjectiveIds = Object.freeze([]);
-    let sectorBaseY = floorY;
+    let sectorWorldOriginY = floorY;
 
     for (const [sectorIndex, sourceCatalog] of LEGACY_SECTOR_CATALOGS.entries()) {
         const sectorDefinition = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex];
         const sectorLandmarks = [];
         let sectorLeftX = Number.POSITIVE_INFINITY;
         let sectorRightX = Number.NEGATIVE_INFINITY;
-        let sectorTopY = Number.POSITIVE_INFINITY;
-        let sectorBottomY = Number.NEGATIVE_INFINITY;
+        let sectorLocalTopY = Number.POSITIVE_INFINITY;
+        let sectorLocalBottomY = Number.NEGATIVE_INFINITY;
 
         for (const [landmarkIndex, area] of sourceCatalog.areas.entries()) {
             const landmarkDefinition = sectorDefinition.landmarks[landmarkIndex];
             const localWorld = isolatedAreaWorld(area, seed);
             const localArea = localWorld.areas[0];
-            const columnIndex = Math.floor(landmarkIndex / LANDMARKS_PER_COLUMN);
-            const startsColumn = landmarkIndex % LANDMARKS_PER_COLUMN === 0;
-            const dx = LANDMARK_COLUMN_X[columnIndex];
-            const targetEntryY = startsColumn ? sectorBaseY : sectorLandmarks.at(-1).exit.y;
-            const dy = targetEntryY - localArea.entry.y;
+            const dx = 0;
+            const localTargetEntryY = sectorLandmarks.length ? sectorLandmarks.at(-1).localExit.y : 0;
+            const localDy = localTargetEntryY - localArea.entry.y;
+            const localEntry = shiftPoint(localArea.entry, dx, localDy);
+            const localExit = shiftPoint(localArea.exit, dx, localDy);
+            const localCoreBounds = shiftBounds(localArea.bounds, dx, localDy);
+            const localBounds = wideLandmarkBounds(localCoreBounds);
+            const dy = sectorWorldOriginY + localDy;
             const entry = shiftPoint(localArea.entry, dx, dy);
             const exit = shiftPoint(localArea.exit, dx, dy);
-            const bounds = shiftBounds(localArea.bounds, dx, dy);
+            const coreBounds = shiftBounds(localArea.bounds, dx, dy);
+            const bounds = shiftBounds(localBounds, 0, sectorWorldOriginY);
             const nextLandmarkDefinition =
                 sectorDefinition.landmarks[landmarkIndex + 1] ??
                 LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex + 1]?.landmarks[0] ??
@@ -181,13 +307,22 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
             const objectiveIdMap = new Map(
                 area.objectives.map((objective, index) => [objective.id, landmarkDefinition.objectives[index]?.id])
             );
-            const landmarkObjectives = landmarkDefinition.objectives.map((objective) =>
-                freezeValue({
+            const sourceObjectsById = new Map(localWorld.objects.map((object) => [object.id, object]));
+            const landmarkObjectives = landmarkDefinition.objectives.map((objective) => {
+                const sourceObjective = area.objectives.find(({ id }) => objectiveIdMap.get(id) === objective.id);
+                const stageDoorObjective = isLegacyStageDoorObjective(sourceObjective ?? objective, sourceObjectsById);
+                return freezeValue({
                     ...objective,
+                    type: stageDoorObjective ? "reach" : objective.type,
                     landmarkId: landmarkDefinition.id,
-                    bounds: objective.bounds ? shiftBounds(objective.bounds, dx, dy) : undefined
-                })
-            );
+                    bounds: stageDoorObjective
+                        ? routeMouthBounds(exit)
+                        : objective.bounds
+                          ? shiftBounds(objective.bounds, dx, dy)
+                          : undefined,
+                    sourceObjectId: stageDoorObjective ? undefined : objective.sourceObjectId
+                });
+            });
             const sourceEnemySpawns = localWorld.enemySpawns;
             const landmarkEnemySpawns = landmarkDefinition.encounters.map((encounter, encounterIndex) => {
                 const source = sourceEnemySpawns[encounterIndex] ?? {};
@@ -211,8 +346,15 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
             const landmarkSurfaces = localWorld.surfaces
                 .filter(({ kind }) => !LEGACY_BOUNDARY_KINDS.has(kind))
                 .map((surface) => shiftSurface(surface, dx, dy, landmarkDefinition));
+            const landmarkWingSurfaces = cityWingSurfaces({
+                landmark: landmarkDefinition,
+                coreBounds,
+                entry,
+                exit,
+                landmarkIndex
+            });
             const landmarkObjects = localWorld.objects
-                .filter(({ kind }) => !LEGACY_ENEMY_KINDS.has(kind))
+                .filter(({ kind }) => !LEGACY_ENEMY_KINDS.has(kind) && !LEGACY_STAGE_DOOR_KINDS.has(kind))
                 .map((object) => shiftObject(object, dx, dy, landmarkDefinition, objectiveIdMap, outboundRouteId));
             const landmarkRoute = localWorld.route.map((point) =>
                 withoutAreaAuthority(shiftPoint(point, dx, dy), {
@@ -244,10 +386,14 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
                 name: landmarkDefinition.name,
                 subtitle: landmarkDefinition.subtitle,
                 origin: { x: dx, y: dy },
+                localOrigin: { x: dx, y: localDy },
+                localBounds,
+                localEntry,
+                localExit,
                 bounds,
                 entry,
                 exit,
-                surfaceIds: landmarkSurfaces.map(({ id }) => id),
+                surfaceIds: [...landmarkSurfaces, ...landmarkWingSurfaces].map(({ id }) => id),
                 objectIds: landmarkObjects.map(({ id }) => id),
                 objectiveIds: landmarkObjectives.map(({ id }) => id),
                 encounterIds: landmarkEnemySpawns.map(({ encounterId }) => encounterId),
@@ -284,7 +430,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
                 surfaces.push(connectorSurface(surfaceId, lockId, previousLandmark.id, connector.start, connector.end));
             }
 
-            surfaces.push(...landmarkSurfaces);
+            surfaces.push(...landmarkSurfaces, ...landmarkWingSurfaces);
             route.push(...landmarkRoute);
             objects.push(...landmarkObjects);
             objectives.push(...landmarkObjectives);
@@ -299,8 +445,8 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
             );
             sectorLeftX = Math.min(sectorLeftX, bounds.x);
             sectorRightX = Math.max(sectorRightX, bounds.x + bounds.width);
-            sectorTopY = Math.min(sectorTopY, bounds.y);
-            sectorBottomY = Math.max(sectorBottomY, bounds.y + bounds.height);
+            sectorLocalTopY = Math.min(sectorLocalTopY, localBounds.y);
+            sectorLocalBottomY = Math.max(sectorLocalBottomY, localBounds.y + localBounds.height);
         }
 
         const firstLandmark = sectorLandmarks[0];
@@ -313,7 +459,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
         });
         sectorEntries.push(entryAnchor);
         respawnAnchors.push(entryAnchor);
-        const sectorHeight = sectorBottomY - sectorTopY;
+        const sectorHeight = sectorLocalBottomY - sectorLocalTopY;
         const sectorContentWidth = sectorRightX - sectorLeftX;
         if (sectorContentWidth > SEAMLESS_SECTOR_RUNTIME_WIDTH) {
             throw new Error(`${sectorDefinition.id} exceeds the seamless Sector width`);
@@ -322,17 +468,25 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
             throw new Error(`${sectorDefinition.id} exceeds the seamless Sector height`);
         }
         const sectorCenterX = (sectorLeftX + sectorRightX) * 0.5;
+        const sectorBounds = {
+            x: sectorCenterX - SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5,
+            y: sectorWorldOriginY + sectorLocalTopY,
+            width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
+            height: sectorHeight
+        };
         sectors.push(
             freezeValue({
                 id: sectorDefinition.id,
                 order: sectorIndex + 1,
                 width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
-                bounds: {
-                    x: sectorCenterX - SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5,
-                    y: sectorTopY,
-                    width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
+                origin: { x: 0, y: sectorWorldOriginY },
+                localBounds: {
+                    x: sectorBounds.x,
+                    y: sectorLocalTopY,
+                    width: sectorBounds.width,
                     height: sectorHeight
                 },
+                bounds: sectorBounds,
                 sectorEntryId: entryAnchor.id,
                 respawnAnchorId: entryAnchor.id,
                 landmarkIds: sectorLandmarks.map(({ id }) => id),
@@ -340,7 +494,21 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
                 exitLandmarkId: lastLandmark.id
             })
         );
-        sectorBaseY = lastLandmark.exit.y;
+        const nextSectorDefinition = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex + 1];
+        if (nextSectorDefinition) {
+            const rise = interSectorRise(interSectorRiseById, sectorDefinition.id, nextSectorDefinition.id);
+            sectorTransitions.push(
+                freezeValue({
+                    id: sectorTransitionId(sectorDefinition.id, nextSectorDefinition.id),
+                    sourceSectorId: sectorDefinition.id,
+                    targetSectorId: nextSectorDefinition.id,
+                    sourceExit: lastLandmark.exit,
+                    targetOrigin: { x: 0, y: lastLandmark.exit.y - rise },
+                    rise
+                })
+            );
+            sectorWorldOriginY = lastLandmark.exit.y - rise;
+        }
     }
 
     const finalLandmark = landmarks.at(-1);
@@ -363,6 +531,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({ seed, floorY = 320,
         respawnAnchors,
         connectors,
         routeLocks,
+        sectorTransitions,
         objects,
         objectives,
         gates: [],

@@ -33,44 +33,15 @@ export class AltitudeSunrise {
     }
 }
 import { ENVIRONMENT_MAX_ALTITUDE } from "./EnvironmentAltitude.js";
+import { authoredRegionForPosition } from "../../game/world/AuthoredLandmarkResolver.js";
 
 const AUTHORED_SECTOR_ZONE_IDS = Object.freeze({
     "sector-01": "industrial-maintenance",
     "sector-02": "residential-commercial"
 });
 
-function playerYDistanceFromArea(position, area) {
-    const bounds = area?.bounds;
-    if (!Number.isFinite(position?.y) || !bounds) return Number.POSITIVE_INFINITY;
-    if (position.y < bounds.y) return bounds.y - position.y;
-    if (position.y > bounds.y + bounds.height) return position.y - (bounds.y + bounds.height);
-    return 0;
-}
-
 export function currentAuthoredArea(scene) {
-    const areas = scene?.world?.landmarks?.length ? scene.world.landmarks : scene?.world?.areas;
-    if (!Array.isArray(areas) || areas.length === 0) return null;
-    const position = scene.player?.position;
-    const exact = areas.find(
-        ({ bounds }) =>
-            bounds &&
-            position?.x >= bounds.x &&
-            position.x <= bounds.x + bounds.width &&
-            position?.y >= bounds.y &&
-            position.y <= bounds.y + bounds.height
-    );
-    if (exact) return exact;
-    let nearestArea = null;
-    let nearestDistance = Number.POSITIVE_INFINITY;
-    for (const area of areas) {
-        const distance = playerYDistanceFromArea(position, area);
-        if (distance < nearestDistance) {
-            nearestArea = area;
-            nearestDistance = distance;
-        }
-        if (distance === 0) break;
-    }
-    return nearestArea;
+    return authoredRegionForPosition(scene?.world, scene?.player?.position);
 }
 
 export function sceneEnvironmentZone(definition, scene) {

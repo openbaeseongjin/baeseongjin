@@ -27,9 +27,14 @@ export function run() {
     const progress = new SectorProgressState(world);
     const first = world.landmarks[0];
     const second = world.landmarks[1];
-    const source = world.objects.find(({ id }) => id === "sector-01-01:exit-panel");
-    const owner = player("player-1", source.position);
-    const commands = new Map([[owner.id, { interact: true }]]);
+    const firstObjective = world.objectives.find(({ id }) => id === first.objectiveIds[0]);
+    assert.equal(firstObjective.type, "reach");
+    assert.equal(firstObjective.sourceObjectId, undefined);
+    const owner = player("player-1", {
+        x: firstObjective.bounds.x + firstObjective.bounds.width * 0.5,
+        y: firstObjective.bounds.y + firstObjective.bounds.height * 0.5
+    });
+    const commands = new Map();
 
     assert.equal(progress.isRouteUnlocked(first.outboundRouteId), false);
     let events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: commands, dt: 0 });

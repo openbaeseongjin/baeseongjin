@@ -125,4 +125,11 @@ export function run() {
     assert.equal(seamlessShot.areaId, landmark.legacyAreaId);
     assert.equal(seamlessShot.landmarkId, landmark.id);
     assert.equal(seamlessShot.sectorId, "sector-01");
+
+    const sector02Landmark = seamlessWorld.landmarks.find(({ id }) => id === "sector-02:landmark:01");
+    assert.equal(
+        authoredAreaForPosition(seamlessWorld, sector02Landmark.entry)?.id,
+        sector02Landmark.id,
+        "overlapping vertical landmark bounds resolve to the nearest entry or exit anchor"
+    );
 }
