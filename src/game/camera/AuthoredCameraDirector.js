@@ -1,5 +1,6 @@
 import { anchoredRectangleBounds } from "../world/AuthoredCoordinateAnchor.js";
 import { authoredRegionForPosition } from "../world/AuthoredLandmarkResolver.js";
+import { resolveMobileCameraZoom } from "../config.js";
 
 const HORIZONTAL_PLAYER_RATIO = 0.38;
 const VERTICAL_PLAYER_RATIO = 0.58;
@@ -51,15 +52,16 @@ export function localTriggerObjects(world, areaId) {
     );
 }
 
-export function resolveAuthoredCameraShot({ world, player, mobileView = false, defaultZoom = 1 }) {
+export function resolveAuthoredCameraShot({ world, player, mobileView = false, defaultZoom = 1, cssWidth, cssHeight }) {
     const area = authoredAreaForPosition(world, player.position);
+    const resolvedDefaultZoom = mobileView ? resolveMobileCameraZoom(undefined, { cssWidth, cssHeight }) : defaultZoom;
     if (!area) {
         return Object.freeze({
             areaId: null,
             landmarkId: null,
             sectorId: null,
             zoneId: null,
-            zoom: defaultZoom,
+            zoom: resolvedDefaultZoom,
             localX: null,
             localY: null,
             horizontalPlayerRatio: HORIZONTAL_PLAYER_RATIO,
@@ -74,7 +76,11 @@ export function resolveAuthoredCameraShot({ world, player, mobileView = false, d
         landmarkId: area.legacyAreaId ? area.id : null,
         sectorId: area.sectorId ?? null,
         zoneId: zone?.id ?? null,
-        zoom: zone ? (mobileView ? zone.mobileZoom : zone.desktopZoom) : defaultZoom,
+        zoom: zone
+            ? mobileView
+                ? resolveMobileCameraZoom(zone.mobileZoom, { cssWidth, cssHeight })
+                : zone.desktopZoom
+            : resolvedDefaultZoom,
         localX: player.position.x - area.bounds.x - area.bounds.width * 0.5,
         localY,
         horizontalPlayerRatio: zone?.horizontalPlayerRatio ?? HORIZONTAL_PLAYER_RATIO,
@@ -92,7 +98,7 @@ export function advanceAuthoredCamera({
     cssHeight,
     dt
 }) {
-    const shot = resolveAuthoredCameraShot({ world, player, mobileView, defaultZoom });
+    const shot = resolveAuthoredCameraShot({ world, player, mobileView, defaultZoom, cssWidth, cssHeight });
     const zoomBlend = 1 - Math.exp(-ZOOM_BLEND_RATE * dt);
     camera.zoom += (shot.zoom - camera.zoom) * zoomBlend;
     const targetX = player.position.x - (cssWidth / shot.zoom) * shot.horizontalPlayerRatio;

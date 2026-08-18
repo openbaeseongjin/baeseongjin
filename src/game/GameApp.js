@@ -174,7 +174,7 @@ export class GameApp {
             world,
             player,
             mobileView: this.mobileView,
-            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom,
+            defaultZoom: CAMERA_CONFIG.desktopZoom,
             cssWidth: this.renderer.cssWidth,
             cssHeight: this.renderer.cssHeight,
             dt
@@ -198,18 +198,21 @@ export class GameApp {
             world,
             player: { position: phase.deathPosition },
             mobileView: this.mobileView,
-            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom
+            defaultZoom: CAMERA_CONFIG.desktopZoom,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
         });
     }
 
     createCamera() {
-        const defaultZoom = this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom;
         const state = this.authority.snapshot();
         const zoom = resolveAuthoredCameraShot({
             world: state.world,
             player: state.player,
             mobileView: this.mobileView,
-            defaultZoom
+            defaultZoom: CAMERA_CONFIG.desktopZoom,
+            cssWidth: globalThis.innerWidth,
+            cssHeight: globalThis.innerHeight
         }).zoom;
         return { x: 0, y: 0, zoom, initialized: false };
     }
