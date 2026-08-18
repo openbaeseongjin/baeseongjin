@@ -1,17 +1,21 @@
+import { normalizeRopeTuningOverride } from "../config.js";
+
 export const DEBUG_SETTINGS_STORAGE_KEY = "baeseongjin.debug-settings.v1";
 export const DEBUG_SETTINGS_VERSION = 1;
 
 export const DEFAULT_DEBUG_SETTINGS = Object.freeze({
     version: DEBUG_SETTINGS_VERSION,
     metrics: false,
-    startAreaId: null
+    startAreaId: null,
+    ropeTuning: null
 });
 
 function cloneSettings(settings) {
     return Object.freeze({
         version: DEBUG_SETTINGS_VERSION,
         metrics: settings.metrics,
-        startAreaId: settings.startAreaId
+        startAreaId: settings.startAreaId,
+        ropeTuning: settings.ropeTuning
     });
 }
 
@@ -24,7 +28,11 @@ export function normalizeDebugSettings(value, validAreaIds = null) {
         return DEFAULT_DEBUG_SETTINGS;
     }
     const startAreaId = validAreaIds && !validAreaIds.has(value.startAreaId) ? null : value.startAreaId;
-    return cloneSettings({ metrics: value.metrics, startAreaId });
+    return cloneSettings({
+        metrics: value.metrics,
+        startAreaId,
+        ropeTuning: normalizeRopeTuningOverride(value.ropeTuning)
+    });
 }
 
 function readStoredSettings(storage, key, validAreaIds) {
@@ -70,6 +78,13 @@ export class DebugSettings {
             throw new Error(`unknown debug start area '${startAreaId}'`);
         }
         this.#replace({ ...this.value, startAreaId });
+    }
+
+    setRopeTuning(ropeTuning) {
+        if (ropeTuning !== null && (typeof ropeTuning !== "object" || Array.isArray(ropeTuning))) {
+            throw new Error("debug Rope tuning must be an object or null");
+        }
+        this.#replace({ ...this.value, ropeTuning: normalizeRopeTuningOverride(ropeTuning) });
     }
 
     #replace(next) {

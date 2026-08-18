@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { GameApp } from "../src/game/GameApp.js";
+import { restartSingleGameForDebugSettings } from "../src/game/runtime/SingleGameDebugRestart.js";
 import { interpolateRenderSnapshot } from "../src/render/interpolateRenderSnapshot.js";
 
 function snapshot(overrides = {}) {
@@ -127,4 +128,43 @@ export function run() {
         "catch-up updates must retain only the final step's previous state"
     );
     assert.equal(app.authority.snapshot().tick, 2);
+
+    const tunedApp = new GameApp({
+        canvas: {},
+        renderer: {
+            profile: "test",
+            cssWidth: 1280,
+            cssHeight: 720,
+            screenToWorld: () => ({ x: 0, y: 0 }),
+            draw: () => ({})
+        },
+        worldSeed: 2,
+        ropeTuning: {
+            hookSpeed: 1800,
+            hookFlightRatio: { numerator: 1, denominator: 2 },
+            ropeDisabledSeconds: 1.2
+        }
+    });
+    assert.equal(tunedApp.authority.snapshot().ropeConfig.hookSpeed, 1800);
+    assert.equal(tunedApp.authority.snapshot().maxAttachDistance, 900);
+    assert.equal(tunedApp.authority.simulation.ropeDisabledSeconds, 1.2);
+    tunedApp.applyDebugSettings({ ropeTuning: { hookSpeed: 400 } });
+    assert.equal(
+        tunedApp.authority.snapshot().ropeConfig.hookSpeed,
+        1800,
+        "changing saved Rope tuning must not hot-swap the current Run"
+    );
+
+    const lifecycle = [];
+    const restarted = restartSingleGameForDebugSettings({
+        currentApp: { stop: () => lifecycle.push("stop") },
+        debugSettings: { ropeTuning: { hookSpeed: 1800 } },
+        beforeRestart: () => lifecycle.push("before"),
+        createApp: (debug) => ({
+            debug,
+            start: () => lifecycle.push("start")
+        })
+    });
+    assert.deepEqual(lifecycle, ["stop", "before", "start"]);
+    assert.equal(restarted.debug.ropeTuning.hookSpeed, 1800);
 }
