@@ -36,6 +36,30 @@ function patrolDrone(id, x, y, start, end, activation, rules = DRONE_RULES) {
     });
 }
 
+const SECTOR_03_STANDARD_POOL = Object.freeze(["pursuit-drone-t1", "shield-drone-t1", "artillery-drone-t1"]);
+const SECTOR_03_SUPPORT_POOL = Object.freeze([
+    "pursuit-drone-t1",
+    "shield-drone-t1",
+    "artillery-drone-t1",
+    "support-drone-t1"
+]);
+const SECTOR_03_LATE_POOL = Object.freeze([
+    "pursuit-drone-t1",
+    "shield-drone-t1",
+    "artillery-drone-t1",
+    "support-drone-t1",
+    "swarm-drone-t1"
+]);
+
+function pooledSentry(id, x, y, allowedEnemyTypes, { width = 640, height = 480 } = {}) {
+    return worldObject(id, "sentry", x, y, {
+        enemyType: "sentry-t1",
+        enemySelection: { allowedEnemyTypes },
+        activationSpec: objectTriggerSpec("center", width, height),
+        rules: ["kill-optional", "no-rope-cut", "activation-band-only"]
+    });
+}
+
 function gate(id, x, y, nextAreaId, requiredObjectiveIds, { portalBottomY = y } = {}) {
     return Object.freeze({
         id,
@@ -101,6 +125,10 @@ const area01 = defineArea({
         }),
         worldObject("sector-03-01:welcome-kiosk", "story-display", -416, -184, {
             cueIds: ["sector-03-01:welcome-kiosk"]
+        }),
+        pooledSentry("sector-03-01:promenade-guard", -96, -352, SECTOR_03_STANDARD_POOL, {
+            width: 576,
+            height: 448
         }),
         block01.panel,
         block01.gateVisual
@@ -177,6 +205,14 @@ const area02 = defineArea({
         }),
         worldObject("sector-03-02:service-mount", "story-display", 64, -440, {
             cueIds: ["sector-03-02:service-mount"]
+        }),
+        pooledSentry("sector-03-02:scanner-lower-guard", 64, -416, SECTOR_03_STANDARD_POOL, {
+            width: 576,
+            height: 448
+        }),
+        pooledSentry("sector-03-02:scanner-upper-guard", -96, -928, SECTOR_03_SUPPORT_POOL, {
+            width: 576,
+            height: 448
         }),
         worldObject("sector-03-02:retail-security-ahead", "story-display", 368, -1144, {
             cueIds: ["sector-03-02:retail-security-ahead"]
@@ -261,6 +297,10 @@ const area03 = defineArea({
             { x: 256, y: -560 },
             { x: -512, y: -768, width: 1024, height: 320 }
         ),
+        pooledSentry("sector-03-03:retail-support-guard", 384, -416, SECTOR_03_SUPPORT_POOL, {
+            width: 448,
+            height: 448
+        }),
         worldObject("sector-03-03:retail-security", "story-display", -320, -184, {
             cueIds: ["sector-03-03:retail-security"]
         }),
@@ -357,6 +397,14 @@ const area04 = defineArea({
             { x: -64, y: -576 },
             { x: -608, y: -704, width: 624, height: 224 }
         ),
+        pooledSentry("sector-03-04:service-route-guard", 432, -512, SECTOR_03_SUPPORT_POOL, {
+            width: 352,
+            height: 384
+        }),
+        pooledSentry("sector-03-04:upper-arcade-guard", 96, -832, SECTOR_03_LATE_POOL, {
+            width: 576,
+            height: 448
+        }),
         worldObject("sector-03-04:route-split", "story-display", -272, -184, {
             cueIds: ["sector-03-04:route-split"]
         }),
@@ -444,6 +492,14 @@ const area05 = defineArea({
             interactionRadius,
             objectiveId: area05AugmentObjectiveId,
             cueIds: ["node-id", "access-summary"]
+        }),
+        pooledSentry("sector-03-05:node-entry-guard", -240, -128, SECTOR_03_SUPPORT_POOL, {
+            width: 320,
+            height: 240
+        }),
+        pooledSentry("sector-03-05:node-exit-guard", -48, -464, SECTOR_03_LATE_POOL, {
+            width: 480,
+            height: 384
         }),
         worldObject("sector-03-05:node-id", "story-display", 0, -312, {
             cueIds: ["sector-03-05:node-id"]
@@ -538,6 +594,14 @@ const area06 = defineArea({
             { x: 320, y: -736 },
             { x: -384, y: -896, width: 832, height: 224 }
         ),
+        pooledSentry("sector-03-06:atrium-lower-guard", 352, -512, SECTOR_03_SUPPORT_POOL, {
+            width: 448,
+            height: 448
+        }),
+        pooledSentry("sector-03-06:atrium-upper-guard", -16, -992, SECTOR_03_LATE_POOL, {
+            width: 576,
+            height: 480
+        }),
         worldObject("sector-03-06:atrium-id", "story-display", -384, -184, {
             cueIds: ["sector-03-06:atrium-id"]
         }),
@@ -634,6 +698,18 @@ const area07 = defineArea({
             { x: 416, y: -800 },
             { x: -160, y: -976, width: 704, height: 336 }
         ),
+        pooledSentry("sector-03-07:concourse-lower-guard", -320, -416, SECTOR_03_SUPPORT_POOL, {
+            width: 448,
+            height: 384
+        }),
+        pooledSentry("sector-03-07:concourse-centre-guard", 0, -576, SECTOR_03_LATE_POOL, {
+            width: 576,
+            height: 448
+        }),
+        pooledSentry("sector-03-07:concourse-upper-guard", 0, -1056, SECTOR_03_LATE_POOL, {
+            width: 576,
+            height: 448
+        }),
         worldObject("sector-03-07:concourse-sign", "story-display", -352, -184, {
             cueIds: ["sector-03-07:concourse-sign"]
         }),
@@ -746,6 +822,18 @@ const area08 = defineArea({
             { x: 512, y: -944 },
             { x: 160, y: -1120, width: 480, height: 416 }
         ),
+        pooledSentry("sector-03-08:market-lower-guard", -64, -480, SECTOR_03_SUPPORT_POOL, {
+            width: 576,
+            height: 448
+        }),
+        pooledSentry("sector-03-08:market-upper-guard", 0, -1184, SECTOR_03_LATE_POOL, {
+            width: 640,
+            height: 480
+        }),
+        pooledSentry("sector-03-08:final-control-guard", 0, -1440, SECTOR_03_LATE_POOL, {
+            width: 640,
+            height: 400
+        }),
         worldObject("sector-03-08:market-gate", "story-display", -416, -184, {
             cueIds: ["sector-03-08:market-gate"]
         }),

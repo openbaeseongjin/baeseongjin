@@ -114,6 +114,7 @@
 - #622의 Phase 1~2는 `SectorDefinition`, Sector validator와 build/startup-only legacy preview adapter를 canonical authoring 경계로 둔다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`이고 `legacyStageAlias`는 문서·migration metadata일 뿐이다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
 - #625/#637은 Sector 01~~03 preview를 seamless 기본 Runtime으로 전환했고, #642의 0.30.0은 이를 `seamless-sector-runtime-v3`로 확장했다. Stage 정의는 local vertical stack으로 보존하고, compiler가 actual lateral city wing과 future Boss room용 transition slot을 조립한다. Sector 04~~06은 alias input으로만 남고 legacy Area/Gate catalog는 이전 revision compatibility 검증에 사용한다.
 - #642의 Sector 01 access vertical slice는 기본 전투를 넓은 공간의 탐색 이유로 사용한다. 1-3·1-6·1-7의 Stage-local Carrier 후보 3곳 중 아무 2곳을 골라 Access Module을 얻고 1-8 Sector Transit Lock을 연다. 후보 존재는 HUD coarse signal로, 정확한 위치는 근접 beacon으로 알린다. 개인 사망은 수집을 보존하고 party wipe만 current Sector를 초기화한다.
+- 0.32.0은 Sector 01~03을 authored safe slot과 결정적 enemy pool로 채운다. 1-1·1-2는 비전투, 이후는 화면당 약 1기와 후반 역할 중첩을 기준으로 하며 exact slot 예산과 보존 계약은 [`enemy-density-composition.md`](./enemy-density-composition.md)를 따른다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.
 - 각 진행 영역은 입구, 이동 경로, 필수 완료 조건, 명시적 출구와 다음 영역 연결을 가진다.

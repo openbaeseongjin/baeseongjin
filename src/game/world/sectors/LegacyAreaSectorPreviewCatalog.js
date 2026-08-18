@@ -68,7 +68,7 @@ function importEncounters(area, landmarkId, legacyStageAlias) {
                     : object.activationSpec
                       ? resolveObjectTriggerBounds(object.position, object.activationSpec)
                       : null,
-                enemySelection: {
+                enemySelection: object.enemySelection ?? {
                     fixedEnemyType: object.enemyType ?? object.kind
                 },
                 accessModuleId: object.accessModuleId,
@@ -155,7 +155,7 @@ export function buildLegacyAreaSectorPreviewCatalog() {
     );
     return defineSectorCatalog({
         id: "legacy-area-sector-preview",
-        revision: "sector-preview-v1",
+        revision: "sector-preview-v2",
         sectors: previewSectors,
         stageAliases: [
             ...previewSectors.flatMap((sector) => previewStageAliasesFromSector(sector)),

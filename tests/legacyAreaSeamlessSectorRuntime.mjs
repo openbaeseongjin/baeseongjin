@@ -126,4 +126,17 @@ export function run() {
         width: legacyActivation.width,
         height: legacyActivation.height
     });
+
+    const pooledEncounter = world.enemySpawns.find(
+        ({ slotId }) => slotId === "sector-03:landmark:08:slot:final-control-guard"
+    );
+    assert.ok(pooledEncounter);
+    assert.deepEqual(pooledEncounter.enemySelection.allowedEnemyTypes, [
+        "pursuit-drone-t1",
+        "shield-drone-t1",
+        "artillery-drone-t1",
+        "support-drone-t1",
+        "swarm-drone-t1"
+    ]);
+    assert.equal("areaId" in pooledEncounter, false);
 }

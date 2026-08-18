@@ -162,6 +162,11 @@ export function run() {
     );
     const resolvedPreview = resolveSectorEnemyEncounters(LEGACY_AREA_SECTOR_PREVIEW_CATALOG, previewContext);
     const replayedPreview = resolveSectorEnemyEncounters(LEGACY_AREA_SECTOR_PREVIEW_CATALOG, previewContext);
+    const importedPool = authoredEncounters.find(
+        ({ slotId }) => slotId === "sector-03:landmark:08:slot:final-control-guard"
+    );
+    assert.ok(importedPool.enemySelection.allowedEnemyTypes.includes("swarm-drone-t1"));
+    assert.equal("fixedEnemyType" in importedPool.enemySelection, false);
     assert.deepEqual(
         resolveLegacyAreaSectorPreviewEnemyEncounters(previewContext),
         resolvedPreview,

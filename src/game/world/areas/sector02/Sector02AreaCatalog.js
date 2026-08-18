@@ -88,6 +88,24 @@ function patrolDrone(areaId, id, x, y, activation, patrolPoints) {
     });
 }
 
+const SECTOR_02_STANDARD_POOL = Object.freeze(["patrol-drone-t1", "pursuit-drone-t1", "shield-drone-t1"]);
+const SECTOR_02_SUPPORT_POOL = Object.freeze(["patrol-drone-t1", "shield-drone-t1", "support-drone-t1"]);
+const SECTOR_02_LATE_POOL = Object.freeze([
+    "pursuit-drone-t1",
+    "shield-drone-t1",
+    "support-drone-t1",
+    "artillery-drone-t1"
+]);
+
+function pooledSentry(areaId, id, x, y, allowedEnemyTypes, { width = 640, height = 480 } = {}) {
+    return worldObject(`${areaId}:${id}`, "sentry", x, y, {
+        enemyType: "sentry-t1",
+        enemySelection: { allowedEnemyTypes },
+        activationSpec: objectTriggerSpec("center", width, height),
+        rules: ["kill-optional", "no-rope-cut", "activation-band-only"]
+    });
+}
+
 const block01 = exitBlock({
     areaId: "sector-02-01",
     deckX: 416,
@@ -143,6 +161,10 @@ const area01 = defineArea({
     ],
     objects: [
         ...area01Landmarks.map(({ object }) => object),
+        pooledSentry(area01Id, "courtyard-guard", 320, -544, SECTOR_02_STANDARD_POOL, {
+            width: 480,
+            height: 448
+        }),
         worldObject(`${area01Id}:community-notice`, "story-display", 160, -952, {
             cueIds: ["evacuation-group-c", "wait-for-further-instruction"]
         }),
@@ -205,6 +227,10 @@ const area02 = defineArea({
             { x: -320, y: -416 },
             { x: 320, y: -416 }
         ]),
+        pooledSentry(area02Id, "upper-walkway-guard", 320, -704, SECTOR_02_STANDARD_POOL, {
+            width: 512,
+            height: 480
+        }),
         block02.panel,
         block02.gateVisual
     ],
@@ -268,6 +294,10 @@ const area03 = defineArea({
             interactionRadius,
             objectiveId: area03Objective.id,
             cueIds: ["foundation-detected", "specialization-available"]
+        }),
+        pooledSentry(area03Id, "node-approach-guard", -280, -160, SECTOR_02_SUPPORT_POOL, {
+            width: 320,
+            height: 256
         }),
         block03.panel,
         block03.gateVisual
@@ -349,6 +379,10 @@ const area04 = defineArea({
             { x: -416, y: -768 },
             { x: 416, y: -768 }
         ]),
+        pooledSentry(area04Id, "route-choice-guard", 336, -704, SECTOR_02_SUPPORT_POOL, {
+            width: 576,
+            height: 480
+        }),
         block04.panel,
         block04.gateVisual
     ],
@@ -418,6 +452,14 @@ const area05 = defineArea({
             { x: -320, y: -512 },
             { x: 352, y: -512 }
         ]),
+        pooledSentry(area05Id, "assembly-guard", 96, -448, SECTOR_02_SUPPORT_POOL, {
+            width: 512,
+            height: 384
+        }),
+        pooledSentry(area05Id, "upper-transit-guard", 368, -832, SECTOR_02_LATE_POOL, {
+            width: 480,
+            height: 448
+        }),
         worldObject(`${area05Id}:upper-transit-gate`, "gate", 544, -576, {
             coordinateAnchor: "center",
             narrativeLock: true,
@@ -490,6 +532,14 @@ const area06 = defineArea({
     ],
     objects: [
         ...area06Landmarks.map(({ object }) => object),
+        pooledSentry(area06Id, "courtyard-left-guard", -304, -832, SECTOR_02_SUPPORT_POOL, {
+            width: 576,
+            height: 480
+        }),
+        pooledSentry(area06Id, "courtyard-right-guard", 368, -832, SECTOR_02_LATE_POOL, {
+            width: 576,
+            height: 480
+        }),
         worldObject(`${area06Id}:courtyard-void`, "background-prop", 0, -608, {
             cueIds: ["residential-scale", "quiet-void"]
         }),
@@ -576,6 +626,10 @@ const area07 = defineArea({
             { x: -320, y: -1080 },
             { x: 480, y: -1080 }
         ]),
+        pooledSentry(area07Id, "shelter-centre-guard", 64, -640, SECTOR_02_LATE_POOL, {
+            width: 640,
+            height: 480
+        }),
         worldObject(`${area07Id}:shelter-status`, "story-display", 0, -824, {
             cueIds: ["shelter-capacity-full", "evacuation-transfer-suspended", "remain-designated-area"]
         }),
@@ -670,6 +724,14 @@ const area08 = defineArea({
             { x: -384, y: -1088 },
             { x: 480, y: -1088 }
         ]),
+        pooledSentry(area08Id, "transfer-lower-guard", 448, -448, SECTOR_02_LATE_POOL, {
+            width: 512,
+            height: 480
+        }),
+        pooledSentry(area08Id, "transfer-upper-guard", 432, -1088, SECTOR_02_LATE_POOL, {
+            width: 512,
+            height: 480
+        }),
         block08.panel,
         worldObject(`${area08Id}:sector-end-checkpoint-object`, "checkpoint", 576, -1472, {
             checkpointId: `${area08Id}:sector-end-checkpoint`

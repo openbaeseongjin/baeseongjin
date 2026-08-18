@@ -35,6 +35,46 @@ export function run() {
     assert.ok(simulation.world.enemySpawns.some(({ accessModuleId }) => accessModuleId));
     assert.equal(simulation.enemyStates().length, simulation.world.enemySpawns.length);
     assert.equal(simulation.snapshot().enemies.length, simulation.world.enemySpawns.length);
+    const encounterCountByAlias = Object.fromEntries(
+        simulation.world.landmarks.map((landmark) => [
+            landmark.legacyStageAlias,
+            simulation.world.enemySpawns.filter(({ landmarkId }) => landmarkId === landmark.id).length
+        ])
+    );
+    assert.equal(encounterCountByAlias["1-1"], 0);
+    assert.equal(encounterCountByAlias["1-2"], 0);
+    for (const keyAlias of ["1-3", "1-6", "1-7"]) assert.equal(encounterCountByAlias[keyAlias], 3);
+    const sectorEnemyCounts = simulation.world.sectors.map(
+        (sector) => simulation.world.enemySpawns.filter(({ sectorId }) => sectorId === sector.id).length
+    );
+    assert.ok(
+        sectorEnemyCounts[0] < sectorEnemyCounts[1] && sectorEnemyCounts[1] < sectorEnemyCounts[2],
+        "coarse authored density must rise across the current Sector progression"
+    );
+    const resolvedFamilies = new Set(simulation.enemies.map(({ enemyType }) => enemyType));
+    for (const family of [
+        "pursuit-drone-t1",
+        "shield-drone-t1",
+        "artillery-drone-t1",
+        "support-drone-t1",
+        "swarm-drone-t1"
+    ]) {
+        assert.equal(resolvedFamilies.has(family), true, `${family} must reach the shipped seamless simulation`);
+    }
+    for (const spawn of simulation.world.enemySpawns) {
+        const landmark = simulation.world.landmarks.find(({ id }) => id === spawn.landmarkId);
+        assert.ok(
+            spawn.position.x >= landmark.bounds.x && spawn.position.x <= landmark.bounds.x + landmark.bounds.width
+        );
+        assert.ok(
+            spawn.position.y >= landmark.bounds.y && spawn.position.y <= landmark.bounds.y + landmark.bounds.height
+        );
+        if (!spawn.activation) continue;
+        assert.ok(spawn.activation.x >= landmark.bounds.x);
+        assert.ok(spawn.activation.x + spawn.activation.width <= landmark.bounds.x + landmark.bounds.width);
+        assert.ok(spawn.activation.y >= landmark.bounds.y);
+        assert.ok(spawn.activation.y + spawn.activation.height <= landmark.bounds.y + landmark.bounds.height);
+    }
     for (const enemy of simulation.enemies.filter(({ enemyType }) =>
         ["sentry", "sentry-t1", "patrol-drone", "patrol-drone-t1"].includes(enemyType)
     )) {

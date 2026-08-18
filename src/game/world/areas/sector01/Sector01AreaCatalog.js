@@ -21,6 +21,19 @@ function groundedSurface(id, x, y, width, height, properties = {}) {
     return rectangle(id, x, y, width, height, { ...properties, coordinateAnchor: "bottom-center" });
 }
 
+const SECTOR_01_EARLY_POOL = Object.freeze(["sentry-t1", "pursuit-drone-t1"]);
+const SECTOR_01_GUARD_POOL = Object.freeze(["sentry-t1", "pursuit-drone-t1", "shield-drone-t1"]);
+const SECTOR_01_LATE_POOL = Object.freeze(["pursuit-drone-t1", "shield-drone-t1", "artillery-drone-t1"]);
+
+function pooledSentry(id, x, y, allowedEnemyTypes, { width = 640, height = 480, rules = [] } = {}) {
+    return worldObject(id, "sentry", x, y, {
+        enemyType: "sentry-t1",
+        enemySelection: { allowedEnemyTypes },
+        activationSpec: objectTriggerSpec("center", width, height),
+        rules: ["standard-projectile", "no-rope-cut", ...rules]
+    });
+}
+
 function gate(id, x, y, nextAreaId, requiredObjectiveIds, { portalBottomY = y } = {}) {
     return Object.freeze({
         id,
@@ -274,6 +287,14 @@ const area03 = defineArea({
             activationSpec: objectTriggerSpec("center", 1100, 544, { x: -300, y: -16 }),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
         }),
+        pooledSentry("sector-01-03:access-guard-left", 1040, -640, SECTOR_01_GUARD_POOL, {
+            width: 480,
+            height: 480
+        }),
+        pooledSentry("sector-01-03:access-guard-right", 1760, -640, SECTOR_01_GUARD_POOL, {
+            width: 320,
+            height: 480
+        }),
         block03.panel,
         block03.gateVisual
     ],
@@ -355,6 +376,10 @@ const area04 = defineArea({
         worldObject("sector-01-04:calibration-dummy", "test-target", 80, -448, {
             hostile: false,
             damage: false
+        }),
+        pooledSentry("sector-01-04:node-approach-guard", -240, -384, SECTOR_01_EARLY_POOL, {
+            width: 288,
+            height: 320
         }),
         block04.panel,
         block04.gateVisual
@@ -445,8 +470,13 @@ const area05 = defineArea({
             })
         ),
         worldObject("sector-01-05:sentry-turret-01", "sentry", 384, -960, {
+            enemySelection: { allowedEnemyTypes: SECTOR_01_EARLY_POOL },
             activationSpec: objectTriggerSpec("center", 576, 448, { x: -288, y: 0 }),
             rules: ["standard-projectile", "no-rope-cut"]
+        }),
+        pooledSentry("sector-01-05:lower-route-guard", -224, -640, SECTOR_01_EARLY_POOL, {
+            width: 448,
+            height: 480
         }),
         block05.panel,
         block05.gateVisual
@@ -562,6 +592,16 @@ const area06 = defineArea({
             activationSpec: objectTriggerSpec("center", 900, 512, { x: 0, y: -32 }),
             rules: ["standard-projectile", "no-rope-cut", "wind-pressure"]
         }),
+        pooledSentry("sector-01-06:access-guard-left", -1640, -832, SECTOR_01_GUARD_POOL, {
+            width: 400,
+            height: 480,
+            rules: ["wind-pressure"]
+        }),
+        pooledSentry("sector-01-06:access-guard-right", -1000, -832, SECTOR_01_GUARD_POOL, {
+            width: 400,
+            height: 480,
+            rules: ["wind-pressure"]
+        }),
         block06.panel,
         block06.gateVisual
     ],
@@ -671,6 +711,16 @@ const area07 = defineArea({
             accessHint: "RIGHT · UPPER PRESSURE BYPASS",
             activationSpec: objectTriggerSpec("center", 900, 640, { x: 0, y: 0 }),
             rules: ["standard-projectile", "no-rope-cut"]
+        }),
+        pooledSentry("sector-01-07:access-guard-left", 960, -944, SECTOR_01_GUARD_POOL, {
+            width: 400,
+            height: 560,
+            rules: ["wind-pressure"]
+        }),
+        pooledSentry("sector-01-07:access-guard-right", 1680, -944, SECTOR_01_GUARD_POOL, {
+            width: 400,
+            height: 560,
+            rules: ["wind-pressure"]
         }),
         worldObject("sector-01-07:main-pressure-vent", "wind-source", -416, -992, {
             damage: false,
@@ -794,12 +844,24 @@ const area08 = defineArea({
             })
         ),
         worldObject("sector-01-08:sentry-turret-lower", "sentry", 384, -768, {
+            enemySelection: { allowedEnemyTypes: SECTOR_01_LATE_POOL },
             activationSpec: objectTriggerSpec("center", 640, 384, { x: -320, y: -64 }),
             rules: ["sequential-activation", "no-crossfire", "standard-projectile", "no-rope-cut"]
         }),
         worldObject("sector-01-08:sentry-turret-upper", "sentry", 384, -1280, {
+            enemySelection: { allowedEnemyTypes: SECTOR_01_LATE_POOL },
             activationSpec: objectTriggerSpec("center", 640, 416, { x: -320, y: -16 }),
             rules: ["sequential-activation", "no-crossfire", "standard-projectile", "no-rope-cut"]
+        }),
+        pooledSentry("sector-01-08:lower-grid-guard", -240, -544, SECTOR_01_LATE_POOL, {
+            width: 480,
+            height: 416,
+            rules: ["sequential-activation", "no-crossfire"]
+        }),
+        pooledSentry("sector-01-08:upper-grid-guard", -240, -1376, SECTOR_01_LATE_POOL, {
+            width: 480,
+            height: 416,
+            rules: ["sequential-activation", "no-crossfire"]
         }),
         worldObject("sector-01-08:final-vent", "wind-source", -448, -1248, {
             damage: false,

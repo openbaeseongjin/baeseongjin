@@ -1,5 +1,7 @@
 # SECTOR 03 — CENTRAL EXCHANGE COMPLEX MASTER PLAN
 
+> **CURRENT RUNTIME OVERRIDE — 0.32.0:** authored slot 합계 22기와 Artillery·Support·Swarm까지 누적된 pool을 사용한다. Scanner·Node 진행 계약은 유지하며 정확한 기준은 [`../../../enemy-density-composition.md`](../../../enemy-density-composition.md)를 따른다.
+
 *MASTER PLAN · REV 2.0 — SPATIAL / STORY REWRITE INTEGRATED · INDIVIDUAL STAGE DOCS MIGRATION PENDING*
 
 `SECTOR 03 CENTRAL EXCHANGE COMPLEX` · `SMART MAINTENANCE SAFETY SYSTEM` · `ENVIRONMENT RHYTHM` · `COMMITMENT` · `ROPE FLOW` · `FREE-WEAVE FINALE`
