@@ -121,8 +121,11 @@
 | [`bsh/scenario/3/3-4/README.md`](./bsh/scenario/3/3-4/README.md) | `bsh` Public/Service 첫 Multi-Route 분기 Stage(3-4) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
 | [`bsh/scenario/3/3-5/README.md`](./bsh/scenario/3/3-5/README.md) | `bsh` Rest·Build Diagnostic Stage(3-5) Blockout 후보·제작 규격, Growth Gate HOLD 근거와 Runtime 교차검증 포함 |
 | [`bsh/scenario/3/3-6/README.md`](./bsh/scenario/3/3-6/README.md) | `bsh` 첫 대형 Atrium Rope 표현·Security Timing Stage(3-6) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
-| [`bsh/scenario/3/3-7/README.md`](./bsh/scenario/3/3-7/README.md) | `bsh` Access Tier·Priority Route Story Pressure·3-Route 종합 Stage(3-7) Blockout 후보·제작 규격, Runtime 교차검증 포함 |
-| [`bsh/scenario/3/3-8/README.md`](./bsh/scenario/3/3-8/README.md) | `bsh` Sector 03 일반 구간 Finale·2-Drone 병렬 Route·Evacuation/Access Archive 병치 Stage(3-8) Blockout 후보·제작 규격, Boss 전환 미확정 명시 포함 |
+| [`bsh/scenario/3/3-7/README.md`](./bsh/scenario/3/3-7/README.md) | `bsh` TRANSFER MEZZANINE Stage(3-7) REV 2.0 Design Spec — Pre-Implementation, Access Tier Story Pressure, Runtime은 아직 legacy PRIORITY CONCOURSE |
+| [`bsh/scenario/3/3-7/AREA-SPEC.json`](./bsh/scenario/3/3-7/AREA-SPEC.json) | 3-7 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Scanner·Acceptance Tests |
+| [`bsh/scenario/3/3-8/README.md`](./bsh/scenario/3/3-8/README.md) | `bsh` UPPER EXCHANGE GATE Stage(3-8) REV 2.0 Rope-Aware Blockout Candidate — zig-zag Swing Spine, Runtime은 아직 legacy free-weave lattice, Boss 전환 미확정 |
+| [`bsh/scenario/3/3-8/ROPE-AWARE-BLOCKOUT.md`](./bsh/scenario/3/3-8/ROPE-AWARE-BLOCKOUT.md) | 3-8 Physics-first 좌표 작업 노트 — Hook flight/Fixed Rope/Swing tangent 기준 provisional node 검토 |
+| [`bsh/scenario/3/3-8/CODEX-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/3/3-8/CODEX-IMPLEMENTATION-HANDOFF.md) | 3-8 REV 2.0 Runtime migration 실행 지시서 — provisional 좌표·Stable ID·필수 physics/augment 검증 목록 |
 | [`bsh/scenario/3/INTEGRATION-CROSS-VALIDATION-AUDIT.md`](./bsh/scenario/3/INTEGRATION-CROSS-VALIDATION-AUDIT.md) | `bsh` Sector 03(3-1~3-8) Scenario/Runtime/Story/Multiplayer/Art 통합 교차검증 감사 — Document Integration Patch List(P0~P3) 포함 |
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md) | `bsh` Sector 03 핵심 의존성 Access Scan Field Runtime Prototype 구현 스펙 — Prediction Clock Parity 위험(delayed owner-motion) 포함 실제 코드 대조 완료 |
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md) | `bsh` 위 스펙을 Codex/개발 담당에게 바로 전달할 실행 지시서 — 우선순위(P0A~P6)·완료 조건·보고 형식·복붙용 지시문 포함 |

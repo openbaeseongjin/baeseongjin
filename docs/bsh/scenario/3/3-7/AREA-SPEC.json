@@ -1,0 +1,338 @@
+{
+    "schemaVersion": "area-spec-v1",
+    "_conversionNote": "Adapted from a planner-supplied ad-hoc area-spec-v1 draft (generated before this repo's own area-spec-v1 schema existed on GitHub, see docs/bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md) into this repo's actual REV 1.1 schema. Geometry, IDs, and design intent are preserved from the source draft; only field names/shapes were adapted (stage identity, sourceExit/progression split, scannerGroups.profile, route.runtimeLandmarks as entity-id references, recovery references, objectives, runtimeDependencies.required membership).",
+    "verifiedAgainst": {
+        "repository": "openbaeseongjin/baeseongjin",
+        "mainCommitAtDraftTime": "862a71b14b01d0927e509fca3ffcc138f5034a4f",
+        "canonicalMaster": "docs/bsh/scenario/3/README.md",
+        "runtimeCatalog": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
+    },
+    "stage": {
+        "sector": 3,
+        "stage": 7,
+        "legacyStageAlias": "3-7",
+        "sourceAreaId": "sector-03-07",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "TRANSFER MEZZANINE",
+        "subtitle": "EMERGENCY TRANSFER RECORD"
+    },
+    "bounds": { "width": 1280, "height": 1344 },
+    "entry": { "id": "entry", "x": -512, "y": -32 },
+    "surfaces": [
+        { "id": "p0", "preset": "safe-deck", "x": -512, "y": 0, "width": 256, "height": 32, "intent": "entry balcony" },
+        { "id": "p1", "preset": "safe-deck", "x": -352, "y": -160, "width": 384, "height": 32, "intent": "C1 approach" },
+        {
+            "id": "p2",
+            "preset": "safe-deck",
+            "x": 32,
+            "y": -416,
+            "width": 288,
+            "height": 32,
+            "intent": "conservative landing after C1"
+        },
+        {
+            "id": "m1",
+            "preset": "safe-deck",
+            "x": 320,
+            "y": -480,
+            "width": 256,
+            "height": 32,
+            "intent": "safe observation before C2 + Drone"
+        },
+        {
+            "id": "r1",
+            "preset": "recovery-deck",
+            "x": 320,
+            "y": -880,
+            "width": 192,
+            "height": 24,
+            "intent": "pressure-band recovery outside Drone acquire"
+        },
+        {
+            "id": "m2",
+            "preset": "safe-deck",
+            "x": -128,
+            "y": -1056,
+            "width": 320,
+            "height": 32,
+            "intent": "safe transfer-control Story deck"
+        }
+    ],
+    "grappleTargets": [
+        { "id": "c1", "label": "C1", "x": -128, "y": -320, "intent": "low-pressure Smart Mount reminder" },
+        { "id": "c2", "label": "C2", "x": 0, "y": -736, "intent": "Mandatory Scanner commit inside Drone band" },
+        { "id": "g3", "label": "G3", "x": -352, "y": -896, "intent": "Permanent continuation after C2" },
+        { "id": "g4", "label": "G4", "x": 192, "y": -1184, "intent": "final Permanent attach" }
+    ],
+    "enemies": [
+        {
+            "id": "drone-1",
+            "preset": "patrol-drone-t1",
+            "x": -128,
+            "y": -800,
+            "patrol": { "start": { "x": -320, "y": -800 }, "end": { "x": 64, "y": -800 } },
+            "activation": { "x": -416, "y": -976, "width": 576, "height": 368 }
+        }
+    ],
+    "scannerGroups": [
+        {
+            "id": "scanner-A",
+            "profile": "sector03-default",
+            "controlledTargets": ["c1", "c2"],
+            "multiplayer": "shared deterministic simulation phase"
+        }
+    ],
+    "windZones": [],
+    "objectives": [
+        { "id": "final-deck-reached", "type": "reach", "preset": "reach-deck" },
+        {
+            "id": "exit-panel-engaged",
+            "type": "interact",
+            "preset": "exit-panel",
+            "requiredObjectiveIds": ["final-deck-reached"]
+        }
+    ],
+    "route": {
+        "runtimeLandmarks": ["entry", "p1", "c1", "p2", "m1", "c2", "g3", "m2", "g4", "exit"],
+        "mandatory": ["entry", "p1", "c1", "p2", "m1", "c2", "g3", "m2", "g4", "exit"],
+        "optional": [
+            { "id": "flow-skip-p2", "sequence": ["p1", "c1", "m1"], "intent": "skip conservative landing without bypassing C1" },
+            {
+                "id": "c2-g3-continuous",
+                "sequence": ["m1", "c2", "g3"],
+                "intent": "carry momentum through Scanner + Drone band"
+            }
+        ],
+        "forbiddenBypasses": [
+            { "from": "p1", "to": ["m1", "c2"], "reason": "C1 must remain mandatory" },
+            { "from": "m1", "to": ["g3", "m2"], "reason": "C2 must remain Mandatory middle commit" },
+            { "from": "r1", "to": ["g3", "m2"], "reason": "Recovery re-enters through C2" }
+        ],
+        "linkChecks": [
+            { "from": "p1", "to": "c1", "distancePx": 172.3 },
+            { "from": "c1", "to": "p2", "distancePx": 273.4 },
+            { "from": "p2", "to": "m1", "distancePx": 90.5 },
+            { "from": "m1", "to": "c2", "distancePx": 320.0 },
+            { "from": "c2", "to": "g3", "distancePx": 386.7 },
+            { "from": "g3", "to": "m2", "distancePx": 329.5 },
+            { "from": "m2", "to": "g4", "distancePx": 286.2 },
+            { "from": "g4", "to": "exit", "distancePx": 264.6 }
+        ]
+    },
+    "recovery": [
+        {
+            "id": "main-band-recovery",
+            "failureZone": "c2",
+            "recoverTo": "r1",
+            "maxRetrySeconds": 4,
+            "notes": [
+                "failure window is the C2 -> G3 swing",
+                "intentional Scanner waiting excluded from retry target",
+                "r1 outside Drone new-target activation",
+                "r1 cannot reach g3 directly"
+            ]
+        }
+    ],
+    "sourceExit": {
+        "deckX": 384,
+        "deckTopY": -1219,
+        "deckWidth": 320,
+        "panelObjectiveId": "exit-panel-engaged"
+    },
+    "progression": {
+        "targetStageAlias": "3-8",
+        "mode": "objective-gated-connector",
+        "requiredObjectiveIds": ["exit-panel-engaged"]
+    },
+    "camera": {
+        "zones": []
+    },
+    "story": {
+        "planningTriggers": [
+            "transfer-mezzanine-entry",
+            "smart-mount-reminder",
+            "scanner-drone-commit",
+            "transfer-control-directory",
+            "upper-exchange-preview"
+        ],
+        "runtimePresentations": [
+            {
+                "cueId": "transfer-mezzanine-sign",
+                "entries": [
+                    {
+                        "id": "mezzanine-sign-title",
+                        "title": "TRANSFER MEZZANINE",
+                        "detail": "SHUTTLE / PLATFORM CONNECTION",
+                        "durationSeconds": 1.0
+                    }
+                ]
+            },
+            {
+                "cueId": "transfer-control-directory",
+                "entries": [
+                    { "id": "directory-header", "title": "EMERGENCY TRANSFER CONTROL", "durationSeconds": 1.0 },
+                    {
+                        "id": "directory-service-class",
+                        "title": "SERVICE CLASS CONTROL",
+                        "detail": "ENABLED",
+                        "durationSeconds": 1.0
+                    },
+                    {
+                        "id": "directory-access-tier",
+                        "title": "ACCESS TIER CONTROL",
+                        "detail": "ENABLED",
+                        "durationSeconds": 1.0
+                    },
+                    {
+                        "id": "directory-priority-route",
+                        "title": "PRIORITY ROUTE",
+                        "detail": "ACTIVE",
+                        "durationSeconds": 1.0
+                    }
+                ]
+            },
+            {
+                "cueId": "upper-exchange-ahead",
+                "entries": [
+                    {
+                        "id": "gate-preview",
+                        "title": "UPPER EXCHANGE GATE",
+                        "detail": "TRANSIT CONNECTION",
+                        "durationSeconds": 1.1
+                    }
+                ]
+            }
+        ]
+    },
+    "runtimeDependencies": {
+        "required": [{ "id": "patrol-drone-t1" }, { "id": "sector03-default" }],
+        "newSystems": [],
+        "verifiedRuntimeModules": [
+            { "id": "AreaDefinition", "source": "src/game/world/areas/AreaDefinition.js" },
+            { "id": "AuthoredWorldAssembler", "source": "src/game/world/AuthoredWorldAssembler.js" },
+            { "id": "AccessScanField", "source": "src/game/world/AccessScanField.js" },
+            { "id": "exitBlock", "source": "src/game/world/areas/AreaDefinition.js" },
+            { "id": "story-display", "source": "current authored Story Presentation pipeline" },
+            { "id": "default-camera", "source": "current Sector 03 camera contract" }
+        ]
+    },
+    "physicsValidation": {
+        "sourceOfTruth": {
+            "hookReach": "ropeHookReach(ROPE_CONFIG)",
+            "grappleLinkBudget": "GRAPPLE_LINK_BUDGET",
+            "playerPhysics": "PLAYER_CONFIG"
+        },
+        "reviewSnapshotHookReachPx": 400,
+        "reviewSnapshotGrappleLinkBudgetPx": 600,
+        "implementationRule": "Re-read config at implementation time; do not create Stage-local copies.",
+        "mandatoryMaxAuthoredLinkPx": 386.7,
+        "mandatoryLinkResult": "PASS",
+        "swingImpulseZeroBlockoutRequired": true
+    },
+    "forbidden": [
+        "outer-priority-service-three-route-layout",
+        "scanner-as-social-access-control",
+        "priority-route-access-denial-puzzle",
+        "new-rope-mode",
+        "new-input",
+        "new-augment",
+        "second-drone",
+        "drone-t2",
+        "faster-drone-variant",
+        "moving-platform",
+        "train-collision",
+        "security-shutter",
+        "wind",
+        "turret",
+        "scanner-damage",
+        "scanner-knockback",
+        "scanner-rope-cut",
+        "forced-rope-detach",
+        "kill-gate",
+        "build-locked-route",
+        "group-tier-mapping",
+        "direct-group-c-causality",
+        "sector-03-8-story-climax-early",
+        "always-grappleable-parent-overlapping-scanner-controlled-target"
+    ],
+    "acceptanceTests": [
+        {
+            "id": "mandatory-route-clear",
+            "type": "traversal",
+            "requirement": "Base Rope로 Mandatory route 전체 통과 가능",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "mandatory-link-budget",
+            "type": "geometry",
+            "requirement": "모든 AREA-SPEC Mandatory link가 구현 시점 current Hook Reach 이하",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "zero-impulse-blockout",
+            "type": "traversal",
+            "requirement": "swingImpulse=0 blockout에서도 Mandatory geometry progression 성립",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "c1-required",
+            "type": "geometry",
+            "requirement": "p1에서 m1/c2로 직접 진행해 C1 무료 우회 불가",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "c2-required",
+            "type": "geometry",
+            "requirement": "m1/r1에서 g3/m2로 직접 진행해 C2 무료 우회 불가",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "scanner-existing-rope-persists",
+            "type": "runtime",
+            "requirement": "AVAILABLE/WARNING에서 붙은 Rope는 LOCKED 전환 후에도 유지",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "scanner-shared-phase",
+            "type": "multiplayer",
+            "requirement": "동일 simulation time에 모든 Player가 scanner-A 동일 phase 관찰",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "drone-kill-optional",
+            "type": "runtime",
+            "requirement": "drone-1 처치 없이 Stage 완료 가능",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "safe-decks-outside-acquire",
+            "type": "runtime",
+            "requirement": "m1, r1, m2에서 drone-1 신규 target acquire 불가",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "recovery-retry",
+            "type": "runtime",
+            "requirement": "C2→G3 실패 시 r1에서 Stage 시작 복귀 없이 C2 재시도 가능",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "exit-contract",
+            "type": "runtime",
+            "requirement": "final-deck reach → Gate Panel → opened Gate physical crossing → sector-03-08",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "story-disclosure-boundary",
+            "type": "story",
+            "requirement": "Service Class / Access Tier / Priority Route 존재까지만 공개; Group mapping/Group C 인과 금지",
+            "automation": "MANUAL"
+        },
+        {
+            "id": "no-new-system",
+            "type": "regression",
+            "requirement": "runtimeDependencies.newSystems 빈 배열 유지",
+            "automation": "AUTOMATED"
+        }
+    ]
+}

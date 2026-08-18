@@ -1,44 +1,296 @@
 # SECTOR 03-8 — PRODUCTION ALIGNMENT
 
-*FREE-WEAVE FINALE · SCANNER + DRONES · REV 1.0*
+*ROPE-AWARE FINALE · REV 2.0 MIGRATION*
 
-본 문서는 [3-8 시나리오](./README.md)와 현재 `Sector03AreaCatalog` 구현을 연결한다. 3-8은 Sector 03 일반 구간 finale이며 현재 메인 authored world에 `MOCK INTEGRATED` 상태로 연결돼 있고, `Post-Sector 03 Boss / Transition` 전까지 `content-boundary`를 유지한다.
+본 문서는 [3-8 시나리오](./README.md)의 REV2 Rope-aware 설계와 현재 `main` Runtime의 차이를 기록한다.
 
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `MOCK INTEGRATED` | 메인 authored chain의 최종 area로 연결된다 |
-| Finale boundary | `IMPLEMENTED AS CONTENT-BOUNDARY` | `nextAreaId: null`, gate `completionMode: content-boundary` |
-| Scanner | `IMPLEMENTED PROTOTYPE` | `scanner-upper-market-A`가 `C1/C2/C3/C4`를 제어한다 |
-| Patrol Drone | `IMPLEMENTED` | `drone-1`, `drone-2` 두 기체가 분리된 activation band를 사용한다 |
-| Story | `IMPLEMENTED` | archive pair와 final control을 `story-display` 5개로 노출한다 |
+|---|---|---|
+| Latest checked main | `6f8d2529a759ca37c8aecc0185d9a0a797c6bbda` | VERIFIED |
+| Runtime 연결 | `MOCK INTEGRATED` | Sector03 authored chain의 마지막 area |
+| REV2 Geometry | `NOT IMPLEMENTED` | Current area08은 legacy vertical/free-weave layout |
+| Finale boundary | `IMPLEMENTED AS CONTENT-BOUNDARY` | 유지 |
+| Scanner | `IMPLEMENTED PROTOTYPE` | C1/C2/C3/C4 shared group exists |
+| Wait Pivot S2/S3 | `NOT IMPLEMENTED` | REV2 신규 authored geometry |
+| Patrol Drone | `IMPLEMENTED LEGACY PLACEMENT` | 2기 존재, REV2 band 재배치 필요 |
+| Recovery | `NONE IN CURRENT RUNTIME` | REV2 1–2개 검토 |
+| Story Archive Pair | `IMPLEMENTED` | Stable IDs 유지 권장 |
+| Augment V1 | `IMPLEMENTED` | 22-card catalog를 blockout compatibility에 반영해야 함 |
+| Debug Rope Tuning | `IMPLEMENTED FOR NEXT SINGLE RUN` | Production baseline 대체 아님 |
 
-## 2. Runtime 좌표 / Stable ID 요약
+---
 
-- Area: `sector-03-08`, entry `(-544,-32)`, exit `(480,-1632)`, next `null`
-- Grapple: `G1(-448,-288)`, `C1(-160,-384)`, `C2(0,-736)`, `W1(-352,-800)`, `E1(352,-800)`, `C3(0,-1024)`, `W2(-320,-1088)`, `E2(320,-1088)`, `G4(224,-1280)`, `C4(0,-1344)`, `G6(256,-1536)`
-- Recovery: 없음
-- Drones: `drone-1(-512,-944)`, activation `(-640,-1120,480×416)` / `drone-2(192,-944)`, activation `(160,-1120,480×416)`
-- Story display: `market-gate(-416,-184)`, `market-directory(0,-632)`, `evacuation-archive(-128,-1464)`, `access-archive(128,-1464)`, `final-control(416,-1656)`
-- Scanner group: `sector-03-08:scanner-upper-market-A`, controlled surfaces `c1/c2/c3/c4`
-- Gate set(exitBlock 표준): `exit-deck(416,-1539,320)`, `exit-gate(544,-1539)`, `exit-panel(432,-1539)`, exit `(544,-1571)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
+## 2. Current Runtime — LEGACY
 
-## 3. Camera · Story 상태
+Source:
 
-- Camera는 README §14 `Custom Pan 없음` 기준으로 baseline follow만 사용한다.
-- Story cue는 `sector-03-08:market-gate`, `market-directory`, `evacuation-archive`, `access-archive`, `final-control`
-- `storyTriggers`: `upper-market-gate`, `evacuation-archive`, `access-archive`
+```text
+src/game/world/areas/sector03/Sector03AreaCatalog.js
+```
 
-## 4. 검증 근거
+Current area:
 
-- Source: `src/game/world/areas/sector03/Sector03AreaCatalog.js`
-- Tests: `tests/sector03AreaCatalog.mjs`, `tests/currentAuthoredWorld.mjs`
-- Integration: `docs/scenario-development-integration.md`가 `3-8 → 4-1 직접 연결 금지`를 현재 기준으로 기록한다
-- 미확인: 실제 브라우저 / 기기 finale 플레이, 2인 분산 플레이에서 두 Drone separation 체감
+```text
+sector-03-08
+UPPER MARKET GATE
+FREE-WEAVE FINALE
+bounds 1408×1664
+entry (-544,-32)
+nextAreaId null
+completionMode content-boundary
+```
 
-## 5. 남은 blocker / asset handoff
+Current Scanner targets:
 
-- `Post-Sector 03 Boss / Transition`과 `3-8 → 4-1` 흐름은 아직 미확정이다.
-- Archive pair / finale signage / commercial market near art / audio 자산이 없다.
-- README가 요구한 “Free-Weave Finale 기억점”이 실제 플레이에서 살아 있는지 검증이 남아 있다.
+```text
+C1 (-160,-384)
+C2 (0,-736)
+C3 (0,-1024)
+C4 (0,-1344)
+```
+
+문제:
+
+```text
+C2 / C3 / C4가 거의 중앙 수직 spine
+```
+
+이라 REV2 Rope tangent / reload rhythm 설계와 맞지 않는다.
+
+Current Drones:
+
+```text
+drone-1 lower/left
+drone-2 lower/right
+```
+
+현재 두 기체가 유사한 높이의 좌/우 pocket 성격을 가진다.
+REV2에서는 서로 다른 progression beat로 분리한다.
+
+Current Recovery:
+
+```text
+NONE
+```
+
+---
+
+## 3. REV2 Target
+
+### Main Swing Spine
+
+```text
+C1
+→ opposite-side C2
+→ opposite-side C3
+→ C4
+```
+
+수직 ladder가 아니라 diagonal zig-zag.
+
+### Wait Pivot
+
+```text
+S2
+S3
+```
+
+- permanent structural
+- grappleable
+- not scanner-controlled
+- not fragile
+- not moving
+- one pivot per scanner pressure beat
+
+### Drone
+
+```text
+Drone A
+= C2/S2 beat only
+
+Drone B
+= C3/S3 beat only
+```
+
+Activation overlap 금지.
+
+### Recovery
+
+REV2에서 1–2개의 service catwalk recovery를 검토한다.
+
+---
+
+## 4. Verified Base Rope Contract
+
+Current `src/game/config.js`:
+
+```text
+hookSpeed          1200
+hookFlightSeconds  1/3
+reach              400
+hookReloadSeconds  1.0
+attachBuffer       0.1
+swingImpulse       780
+releaseTransfer    0.55
+aimTolerance       90
+```
+
+중요:
+
+`AreaDefinitionValidator`의 default grapple topology budget은 현재 600이다.
+
+따라서:
+
+```text
+default validator PASS
+!=
+Base Rope traversal PASS
+```
+
+REV2 구현은 별도로 400 reach 기준을 검증해야 한다.
+
+---
+
+## 5. Augment Runtime Alignment
+
+Current Rope Augments:
+
+```text
+fast-launch         hook speed +50%
+long-rope           reach +20% => 480
+fast-recover        reload -50% => 0.5s
+release-propulsion  release velocity ×1.25
+electrified-rope
+collision-explosion
+```
+
+Current movement/action relevant Augments:
+
+```text
+direction-dash  150px / 0.25s
+dash-strike     +500 impulse
+slow-fall       2s, gravity ×0.25
+fast-reuse
+extra-charge
+rope-link
+post-action-shield
+```
+
+REV2 requirement:
+
+```text
+NO MOVEMENT AUGMENT
+= baseline mandatory clear
+
+AUGMENT
+= optimization / expression / recovery
+```
+
+---
+
+## 6. Stable IDs
+
+가능하면 유지:
+
+```text
+sector-03-08:entry
+sector-03-08:c1-surface
+sector-03-08:c2-surface
+sector-03-08:c3-surface
+sector-03-08:c4-surface
+sector-03-08:c1
+sector-03-08:c2
+sector-03-08:c3
+sector-03-08:c4
+sector-03-08:scanner-upper-market-A
+sector-03-08:drone-1
+sector-03-08:drone-2
+sector-03-08:market-gate
+sector-03-08:market-directory
+sector-03-08:evacuation-archive
+sector-03-08:access-archive
+sector-03-08:final-control
+sector-03-08:final-deck-reached
+sector-03-08:exit-panel-engaged
+```
+
+신규 후보:
+
+```text
+sector-03-08:s2-surface
+sector-03-08:s3-surface
+sector-03-08:s2
+sector-03-08:s3
+sector-03-08:recovery-a
+sector-03-08:recovery-b
+```
+
+Stable ID 이름은 구현 PR에서 current schema와 test convention을 다시 확인 후 확정한다.
+
+---
+
+## 7. Story / Boundary
+
+유지:
+
+```text
+evacuation-archive
+access-archive
+final-control
+```
+
+Boss transition이 확정되기 전:
+
+```text
+nextAreaId: null
+completionMode: content-boundary
+```
+
+유지.
+
+3-8에서 `sector-04-01`로 직접 연결하지 않는다.
+
+---
+
+## 8. Migration Checklist
+
+- [ ] Branch 시작 직전 `main` HEAD 다시 기록
+- [ ] Rope / Player / Scanner / Augment source re-read
+- [ ] area08 legacy vertical C1–C4 재배치
+- [ ] S2/S3 authored grapple 추가
+- [ ] Drone activation sequential bands로 재배치
+- [ ] recovery 1–2개 추가 여부 확정
+- [ ] archive/final stable IDs 유지
+- [ ] default validator 실행
+- [ ] `ropeHookReach() = 400` 기준 별도 geometry validation
+- [ ] no-Augment traversal simulation
+- [ ] `long-rope` 480 skip test
+- [ ] `fast-recover` 0.5 scanner timing test
+- [ ] `release-propulsion` collision safety test
+- [ ] `direction-dash` / `slow-fall` bypass safety test
+- [ ] Desktop/Mobile camera readability
+- [ ] 2-player Scanner/Drone separation smoke
+- [ ] tests / check / format / diff check
+
+---
+
+## 9. Production Status Rule
+
+REV2 runtime PR이 병합되기 전까지 문서 표기는 반드시:
+
+```text
+ROPE-AWARE BLOCKOUT CANDIDATE
+RUNTIME MIGRATION REQUIRED
+```
+
+로 유지한다.
+
+실제 Runtime 좌표와 테스트가 병합된 뒤에만:
+
+```text
+MOCK INTEGRATED — REV2
+```
+
+로 변경한다.
