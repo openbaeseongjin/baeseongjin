@@ -1,22 +1,54 @@
 import { Vector2 } from "../../game-kit/index.js";
+import { StateMachine } from "../../core/state/StateMachine.js";
+import { TimedStateController } from "../../core/state/TimedStateController.js";
 import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 import { selectNearestPlayer } from "./CombatTargeting.js";
+import { ENEMY_BEHAVIOR_STATES, ENEMY_BEHAVIOR_TRANSITIONS, normalizeEnemyState } from "./EnemyStateCatalog.js";
 
 export const ENEMY_BEHAVIOR_CAPABILITY = "enemy-behavior";
 
 const simulationDispatcher = new SimulationDispatcher();
-const VALID_PURSUIT_STATES = new Set(["seek", "windup", "dash", "recover"]);
-const VALID_ARTILLERY_STATES = new Set(["idle", "telegraph", "cooldown"]);
-const VALID_SWARM_STATES = new Set(["orbit", "dive", "recover"]);
+
+function attachState(owner, { kind, initialState, state }) {
+    const controller = new StateMachine({
+        initialState: normalizeEnemyState(state, ENEMY_BEHAVIOR_STATES[kind], initialState),
+        transitions: ENEMY_BEHAVIOR_TRANSITIONS[kind]
+    });
+    Object.defineProperty(owner, "stateController", { value: controller, enumerable: false, writable: false });
+    Object.defineProperty(owner, "state", { enumerable: true, get: () => controller.state });
+    return controller;
+}
+
+function attachTimedState(owner, { kind, initialState, state, remainingSeconds = 0 }) {
+    const controller = new TimedStateController({
+        initialState,
+        transitions: ENEMY_BEHAVIOR_TRANSITIONS[kind],
+        state: normalizeEnemyState(state, ENEMY_BEHAVIOR_STATES[kind], initialState),
+        remainingSeconds
+    });
+    Object.defineProperty(owner, "stateController", { value: controller, enumerable: false, writable: false });
+    Object.defineProperties(owner, {
+        state: { enumerable: true, get: () => controller.state },
+        remainingSeconds: {
+            enumerable: true,
+            get: () => controller.remainingSeconds,
+            set: (value) => controller.setRemainingSeconds(value)
+        }
+    });
+    return controller;
+}
+
+function transitionState(component, nextState, durationSeconds = 0) {
+    const result = component.stateController.transition(nextState, { durationSeconds });
+    if (!result.accepted) throw new Error(`invalid ${component.kind} transition: ${result.from} -> ${result.to}`);
+}
 
 function clamp(value, minimum, maximum) {
     return Math.max(minimum, Math.min(maximum, value));
 }
 
 function consumeTimer(component, dt) {
-    const consumed = Math.min(Math.max(0, dt), component.remainingSeconds);
-    component.remainingSeconds = Math.max(0, component.remainingSeconds - consumed);
-    return consumed;
+    return component.stateController.consume(dt);
 }
 
 function eligibleTargets(enemy, targets, range = Number.POSITIVE_INFINITY) {
@@ -79,8 +111,7 @@ export class PursuitEnemyBehavior {
         recoverySeconds = 0.5
     } = {}) {
         this.kind = "pursuit";
-        this.state = VALID_PURSUIT_STATES.has(state) ? state : "seek";
-        this.remainingSeconds = Math.max(0, remainingSeconds);
+        attachTimedState(this, { kind: this.kind, initialState: "seek", state, remainingSeconds });
         this.targetId = targetId;
         this.dashDirection = dashDirection ? new Vector2(dashDirection.x, dashDirection.y).normalize() : new Vector2();
         this.moveSpeed = moveSpeed;
@@ -107,8 +138,7 @@ export class PursuitEnemyBehavior {
                 const direction = directionBetween(enemy.position, target.physics.position);
                 const distance = enemy.position.distanceTo(target.physics.position);
                 if (distance <= this.triggerDistance) {
-                    this.state = "windup";
-                    this.remainingSeconds = this.windupSeconds;
+                    transitionState(this, "windup", this.windupSeconds);
                     this.dashDirection = direction;
                     outcome = Object.freeze({ type: "pursuit-windup", targetId: target.id });
                     if (remainingDt <= 0) return outcome;
@@ -125,8 +155,7 @@ export class PursuitEnemyBehavior {
                 const consumed = consumeTimer(this, remainingDt);
                 remainingDt -= consumed;
                 if (this.remainingSeconds > 0) return outcome;
-                this.state = "dash";
-                this.remainingSeconds = this.dashSeconds;
+                transitionState(this, "dash", this.dashSeconds);
                 outcome = Object.freeze({
                     type: "pursuit-dash-started",
                     targetId: this.targetId,
@@ -140,8 +169,7 @@ export class PursuitEnemyBehavior {
                 remainingDt -= consumed;
                 moveInDirection(enemy, this.dashDirection, this.dashSpeed * consumed);
                 if (this.remainingSeconds > 0) return outcome;
-                this.state = "recover";
-                this.remainingSeconds = this.recoverySeconds;
+                transitionState(this, "recover", this.recoverySeconds);
                 outcome = Object.freeze({ type: "pursuit-recovery-started" });
                 if (remainingDt <= 0) return outcome;
                 continue;
@@ -149,7 +177,7 @@ export class PursuitEnemyBehavior {
             const consumed = consumeTimer(this, remainingDt);
             remainingDt -= consumed;
             if (this.remainingSeconds > 0) return outcome;
-            this.state = "seek";
+            transitionState(this, "seek");
             this.targetId = null;
             if (remainingDt <= 0) return outcome;
         }
@@ -219,8 +247,7 @@ export class ArtilleryEnemyBehavior {
         acquireRange = 760
     } = {}) {
         this.kind = "artillery";
-        this.state = VALID_ARTILLERY_STATES.has(state) ? state : "idle";
-        this.remainingSeconds = Math.max(0, remainingSeconds);
+        attachTimedState(this, { kind: this.kind, initialState: "idle", state, remainingSeconds });
         this.targetPosition = targetPosition ? { x: targetPosition.x, y: targetPosition.y } : null;
         this.targetId = targetId;
         this.telegraphSeconds = telegraphSeconds;
@@ -235,8 +262,7 @@ export class ArtilleryEnemyBehavior {
         if (this.state === "idle") {
             const target = nearestTarget(enemy, targets, this.acquireRange);
             if (!target) return null;
-            this.state = "telegraph";
-            this.remainingSeconds = this.telegraphSeconds;
+            transitionState(this, "telegraph", this.telegraphSeconds);
             this.targetId = target.id;
             this.targetPosition = { x: target.physics.position.x, y: target.physics.position.y };
             return Object.freeze({
@@ -256,13 +282,12 @@ export class ArtilleryEnemyBehavior {
                 radius: this.strikeRadius,
                 damage: this.damage
             });
-            this.state = "cooldown";
-            this.remainingSeconds = this.cooldownSeconds;
+            transitionState(this, "cooldown", this.cooldownSeconds);
             return outcome;
         }
         consumeTimer(this, dt);
         if (this.remainingSeconds <= 0) {
-            this.state = "idle";
+            transitionState(this, "idle");
             this.targetId = null;
             this.targetPosition = null;
         }
@@ -284,6 +309,7 @@ export class ArtilleryEnemyBehavior {
 export class SupportEnemyBehavior {
     constructor({ targetId = null, range = 320, healingPerSecond = 18 } = {}) {
         this.kind = "support";
+        attachState(this, { kind: this.kind, initialState: "idle", state: targetId ? "link" : "idle" });
         this.targetId = targetId;
         this.range = range;
         this.healingPerSecond = healingPerSecond;
@@ -308,9 +334,11 @@ export class SupportEnemyBehavior {
         if (!wounded) {
             const endedTargetId = this.targetId;
             this.targetId = null;
+            if (this.state === "link") transitionState(this, "idle");
             return endedTargetId ? Object.freeze({ type: "support-link-ended", targetId: endedTargetId }) : null;
         }
         this.targetId = wounded.id;
+        if (this.state === "idle") transitionState(this, "link");
         const previousHealth = wounded.health;
         wounded.health = Math.min(wounded.maxHealth, wounded.health + this.healingPerSecond * dt);
         return Object.freeze({
@@ -321,7 +349,7 @@ export class SupportEnemyBehavior {
     }
 
     snapshot() {
-        return Object.freeze({ kind: this.kind, state: this.targetId ? "link" : "idle", targetId: this.targetId });
+        return Object.freeze({ kind: this.kind, state: this.state, targetId: this.targetId });
     }
 }
 
@@ -336,8 +364,7 @@ export class SwarmEnemyBehavior {
         acquireRange = 560
     } = {}) {
         this.kind = "swarm";
-        this.state = VALID_SWARM_STATES.has(state) ? state : "orbit";
-        this.remainingSeconds = Math.max(0, remainingSeconds);
+        attachTimedState(this, { kind: this.kind, initialState: "orbit", state, remainingSeconds });
         this.diveDirection = diveDirection ? new Vector2(diveDirection.x, diveDirection.y).normalize() : new Vector2();
         this.diveSpeed = diveSpeed;
         this.diveSeconds = diveSeconds;
@@ -361,8 +388,7 @@ export class SwarmEnemyBehavior {
             );
             const firstReady = group.find((candidate) => candidate.enemyBehaviorSnapshot()?.state === "orbit");
             if (hasDiver || firstReady !== enemy) return null;
-            this.state = "dive";
-            this.remainingSeconds = this.diveSeconds;
+            transitionState(this, "dive", this.diveSeconds);
             this.diveDirection = directionBetween(enemy.position, target.physics.position);
             return Object.freeze({ type: "swarm-dive-started", targetId: target.id });
         }
@@ -370,14 +396,13 @@ export class SwarmEnemyBehavior {
             const consumed = consumeTimer(this, dt);
             moveInDirection(enemy, this.diveDirection, this.diveSpeed * consumed);
             if (this.remainingSeconds <= 0) {
-                this.state = "recover";
-                this.remainingSeconds = this.recoverySeconds;
+                transitionState(this, "recover", this.recoverySeconds);
                 return Object.freeze({ type: "swarm-recovery-started" });
             }
             return null;
         }
         consumeTimer(this, dt);
-        if (this.remainingSeconds <= 0) this.state = "orbit";
+        if (this.remainingSeconds <= 0) transitionState(this, "orbit");
         return null;
     }
 

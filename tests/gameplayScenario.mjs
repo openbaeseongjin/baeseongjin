@@ -9,6 +9,7 @@ import { run as combatSystems } from "./combatSystems.mjs";
 import { run as enemyPatrol } from "./enemyPatrol.mjs";
 import { run as enemyEncounterSelection } from "./enemyEncounterSelection.mjs";
 import { run as enemyArchetypes } from "./enemyArchetypes.mjs";
+import { run as enemyPresentationState } from "./enemyPresentationState.mjs";
 import { run as canvasRenderer } from "./canvasRenderer.mjs";
 import { run as worldSeed } from "./worldSeed.mjs";
 import { run as commandReplay } from "./commandReplay.mjs";
@@ -22,6 +23,7 @@ import { run as augmentAcquisitionTopology } from "./augmentAcquisitionTopology.
 import { run as gameObjectModel } from "./gameObjectModel.mjs";
 import { run as renderingSystem } from "./renderingSystem.mjs";
 import { run as stateMachine } from "./stateMachine.mjs";
+import { run as timedStateController } from "./timedStateController.mjs";
 import { run as spriteAssetValidator } from "./spriteAssetValidator.mjs";
 import { run as renderPerformance } from "./renderPerformance.mjs";
 import { run as areaDefinitionValidator } from "./areaDefinitionValidator.mjs";
@@ -72,6 +74,7 @@ const steps = {
     enemyPatrol,
     enemyEncounterSelection,
     enemyArchetypes,
+    enemyPresentationState,
     canvasRenderer,
     renderingSystem,
     renderPerformance,
@@ -103,6 +106,7 @@ const steps = {
     routeSurfaceVisibility,
     spriteAssetValidator,
     stateMachine,
+    timedStateController,
     commandReplay
 };
 

@@ -7,8 +7,8 @@ import { advanceEnemyPatrol, createEnemyPatrolState } from "./EnemyPatrol.js";
 import { BallisticProjectileObject } from "./ProjectileObject.js";
 import { Vector2 } from "../../game-kit/index.js";
 import { enemyImpactDisplacementEnabled } from "./EnemyMobility.js";
-
-const ATTACK_STATES = new Set(["idle", "acquire", "track", "lock", "fire", "cooldown"]);
+import { TimedStateController } from "../../core/state/TimedStateController.js";
+import { ENEMY_ATTACK_STATES, ENEMY_ATTACK_TRANSITIONS, normalizeEnemyState } from "./EnemyStateCatalog.js";
 
 function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -86,22 +86,20 @@ function aimAt(enemy, target) {
     return true;
 }
 
-function transitionAttack(enemy, state, durationSeconds = 0) {
-    enemy.attackState = state;
-    enemy.attackStateRemaining = durationSeconds;
+function transitionAttack(enemy, state, durationSeconds = 0, { restart = false } = {}) {
+    const result = enemy.attackStateController.transition(state, { durationSeconds, restart });
+    if (!result.accepted) throw new Error(`invalid enemy attack transition: ${result.from} -> ${result.to}`);
 }
 
 function resetAttack(enemy) {
     enemy.lockedTargetId = null;
     enemy.aimDirection = null;
     enemy.fireCooldown = 0;
-    transitionAttack(enemy, "idle");
+    transitionAttack(enemy, "idle", 0, { restart: true });
 }
 
 function consumeStateTime(enemy, remainingDt) {
-    const consumed = Math.min(remainingDt, enemy.attackStateRemaining);
-    enemy.attackStateRemaining = Math.max(0, enemy.attackStateRemaining - consumed);
-    return consumed;
+    return enemy.attackStateController.consume(remainingDt);
 }
 
 const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
@@ -235,8 +233,16 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
         this.radius = radius;
         this.health = health;
         this.maxHealth = maxHealth;
-        this.attackState = ATTACK_STATES.has(attackState) ? attackState : "idle";
-        this.attackStateRemaining = Math.max(0, attackStateRemaining ?? 0);
+        Object.defineProperty(this, "attackStateController", {
+            value: new TimedStateController({
+                initialState: "idle",
+                transitions: ENEMY_ATTACK_TRANSITIONS,
+                state: normalizeEnemyState(attackState, ENEMY_ATTACK_STATES, "idle"),
+                remainingSeconds: Math.max(0, attackStateRemaining ?? 0)
+            }),
+            enumerable: false,
+            writable: false
+        });
         this.aimDirection = aimDirection ? Object.freeze({ x: aimDirection.x, y: aimDirection.y }) : null;
         this.fireCooldown =
             this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, fireCooldown ?? 0) : 0;
@@ -277,6 +283,14 @@ export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObjec
                 apply: (context) => behavior.advance(this, context)
             });
         }
+    }
+
+    get attackState() {
+        return this.attackStateController.state;
+    }
+
+    get attackStateRemaining() {
+        return this.attackStateController.remainingSeconds;
     }
 
     enemyBehaviorSnapshot() {

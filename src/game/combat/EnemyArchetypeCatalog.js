@@ -6,35 +6,46 @@ import {
     SupportEnemyBehavior,
     SwarmEnemyBehavior
 } from "./EnemyBehaviors.js";
+import { ENEMY_BEHAVIOR_STATES } from "./EnemyStateCatalog.js";
 
 const DEFINITIONS = Object.freeze([
     Object.freeze({
         id: "pursuit-drone-t1",
         displayName: "추격 드론",
+        behaviorKind: "pursuit",
+        behaviorStates: ENEMY_BEHAVIOR_STATES.pursuit,
         usesProjectileAttack: true,
         createBehavior: (state) => new PursuitEnemyBehavior(state)
     }),
     Object.freeze({
         id: "shield-drone-t1",
         displayName: "방패 드론",
+        behaviorKind: "shield",
+        behaviorStates: ENEMY_BEHAVIOR_STATES.shield,
         usesProjectileAttack: true,
         createBehavior: (state) => new ShieldEnemyBehavior(state)
     }),
     Object.freeze({
         id: "artillery-drone-t1",
         displayName: "포격 드론",
+        behaviorKind: "artillery",
+        behaviorStates: ENEMY_BEHAVIOR_STATES.artillery,
         usesProjectileAttack: false,
         createBehavior: (state) => new ArtilleryEnemyBehavior(state)
     }),
     Object.freeze({
         id: "support-drone-t1",
         displayName: "지원 드론",
+        behaviorKind: "support",
+        behaviorStates: ENEMY_BEHAVIOR_STATES.support,
         usesProjectileAttack: false,
         createBehavior: (state) => new SupportEnemyBehavior(state)
     }),
     Object.freeze({
         id: "swarm-drone-t1",
         displayName: "군집 드론",
+        behaviorKind: "swarm",
+        behaviorStates: ENEMY_BEHAVIOR_STATES.swarm,
         usesProjectileAttack: true,
         createBehavior: (state) => new SwarmEnemyBehavior(state)
     })
