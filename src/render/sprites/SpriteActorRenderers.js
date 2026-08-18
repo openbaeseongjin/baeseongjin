@@ -49,21 +49,24 @@ class PlayerSpriteRendererBase {
             });
             const presentation = this.definition.presentationFor(animation.state);
             const frame = presentation.clip.frameAt(animation.elapsedSeconds);
+            const position = animation.positionOverride ?? player.position;
             paintSpriteFrame({
                 context: args.context,
                 image: this.assets.imageFor(frame.atlasId),
                 frame,
-                position: player.position,
+                position,
                 size: presentation.size,
                 anchor: presentation.anchor,
                 offset: presentation.offset,
                 opacity: presentation.opacity,
                 pixelSnap: presentation.pixelSnap,
                 flipX: animation.flipX,
-                rotation: (player.angle ?? 0) + animation.rotationOffset
+                rotation: animation.state === "death" ? 0 : (player.angle ?? 0) + animation.rotationOffset
             });
-            args.context.fillStyle = this.markerColor;
-            args.context.fillRect(Math.round(player.position.x) - 6, Math.round(player.position.y) + 18, 12, 2);
+            if (animation.state !== "death") {
+                args.context.fillStyle = this.markerColor;
+                args.context.fillRect(Math.round(position.x) - 6, Math.round(position.y) + 18, 12, 2);
+            }
         }
         for (const id of this.controllers.keys()) {
             if (!activeIds.has(id)) this.controllers.delete(id);
@@ -76,6 +79,7 @@ class PlayerSpriteRendererBase {
             controller = new PlayerAnimationController({
                 transientDurations: {
                     hit: this.definition.presentationFor("hit").clip.totalDurationSeconds,
+                    death: this.definition.presentationFor("death").clip.totalDurationSeconds,
                     respawn: this.definition.presentationFor("respawn").clip.totalDurationSeconds
                 },
                 runCycleDurationSeconds: this.definition.presentationFor("run").clip.totalDurationSeconds

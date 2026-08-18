@@ -19,6 +19,8 @@ import {
 } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
+import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
+import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 
 export class GameApp {
     constructor({
@@ -29,7 +31,8 @@ export class GameApp {
         worldSeed = selectWorldSeed(globalThis.location?.search),
         startAreaId = null,
         metricsVisible = false,
-        ropeTuning = null
+        ropeTuning = null,
+        playerDefinition = null
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = renderer
@@ -57,6 +60,14 @@ export class GameApp {
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.playerPresentationEvents = [];
+        const presentationDefinition =
+            playerDefinition ?? this.renderer.sceneRenderer?.playerDefinition ?? DEFAULT_PLAYER_SPRITE_DEFINITION;
+        const deathPresentation = presentationDefinition.presentationFor("death");
+        this.respawnPresentation = new PlayerRespawnPresentation({
+            playerId: this.authority.playerId,
+            deathDurationSeconds: deathPresentation.clip.totalDurationSeconds,
+            spriteSize: deathPresentation.size
+        });
         this.storyPresentation = new AuthoredStoryPresentation();
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
@@ -106,7 +117,7 @@ export class GameApp {
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
-        this.playerPresentationEvents.push(...createPlayerPresentationEvents(authorityEvents));
+        this.queuePlayerPresentationEvents(authorityEvents);
         const authorityFeedback = this.predictableProjectiles.apply(authorityEvents, state.tick, state);
         const owner = this.authority.ownerState();
         const predictedImpacts = this.predictableProjectiles
@@ -122,12 +133,11 @@ export class GameApp {
         for (const impact of predictedImpacts) {
             this.predictableProjectiles.applyImpactReceipts([this.authority.submitImpactClaim(impact)]);
         }
-        this.playerPresentationEvents.push(...createPlayerPresentationEvents(predictedImpacts));
+        this.queuePlayerPresentationEvents(predictedImpacts);
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
-        if (state.resets !== before.resets) this.camera = this.createCamera();
-        const cameraShot = this.updateCamera(dt, state.player, state.world);
+        const cameraShot = this.updatePresentationCamera(dt, state.player, state.world);
         this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
@@ -171,6 +181,27 @@ export class GameApp {
         });
     }
 
+    queuePlayerPresentationEvents(events) {
+        const prepared = this.respawnPresentation.prepare(createPlayerPresentationEvents(events), {
+            camera: this.camera,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
+        });
+        this.playerPresentationEvents.push(...prepared);
+        return prepared;
+    }
+
+    updatePresentationCamera(dt, player, world) {
+        const phase = this.respawnPresentation.advance(dt, this.camera);
+        if (!phase.holding) return this.updateCamera(dt, player, world);
+        return resolveAuthoredCameraShot({
+            world,
+            player: { position: phase.deathPosition },
+            mobileView: this.mobileView,
+            defaultZoom: this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom
+        });
+    }
+
     createCamera() {
         const defaultZoom = this.mobileView ? CAMERA_CONFIG.mobileZoom : CAMERA_CONFIG.desktopZoom;
         const state = this.authority.snapshot();
@@ -187,7 +218,7 @@ export class GameApp {
         const state = interpolateRenderSnapshot(this.previousRenderSnapshot, this.authority.snapshot(), alpha);
         const combatFeedback = this.combatFeedback.snapshot();
         this.stats.resets = state.resets;
-        this.playerPresentationEvents.push(...createPlayerPresentationEvents([state.eventFlash]));
+        this.queuePlayerPresentationEvents([state.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         const renderMetrics = this.renderer.draw({
             ...state,

@@ -1,6 +1,6 @@
 {
     "$schema": "../sprite-manifest.schema.json",
-    "formatVersion": 1,
+    "formatVersion": 2,
     "id": "player-main",
     "generator": {
         "tool": "openai-imagegen-pillow-normalizer",
@@ -34,6 +34,11 @@
             "image": "release-spin.png",
             "size": { "width": 192, "height": 24 },
             "frameSize": { "width": 24, "height": 24 }
+        },
+        "death": {
+            "image": "death.png",
+            "size": { "width": 384, "height": 48 },
+            "frameSize": { "width": 48, "height": 48 }
         }
     },
     "animations": {
@@ -102,6 +107,19 @@
                 "offset": { "x": -2, "y": 1 },
                 "opacity": 0.92
             }
+        },
+        "death": {
+            "loop": false,
+            "frames": [
+                { "atlas": "death", "cell": { "column": 0, "row": 0 }, "durationMs": 120 },
+                { "atlas": "death", "cell": { "column": 1, "row": 0 }, "durationMs": 80 },
+                { "atlas": "death", "cell": { "column": 2, "row": 0 }, "durationMs": 80 },
+                { "atlas": "death", "cell": { "column": 3, "row": 0 }, "durationMs": 80 },
+                { "atlas": "death", "cell": { "column": 4, "row": 0 }, "durationMs": 80 },
+                { "atlas": "death", "cell": { "column": 5, "row": 0 }, "durationMs": 80 },
+                { "atlas": "death", "cell": { "column": 6, "row": 0 }, "durationMs": 80 },
+                { "atlas": "death", "cell": { "column": 7, "row": 0 }, "durationMs": 100 }
+            ]
         },
         "respawn": {
             "loop": false,

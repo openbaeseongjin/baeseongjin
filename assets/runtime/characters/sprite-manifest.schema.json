@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "sprite-manifest.schema.json",
-  "title": "Baeseongjin player sprite manifest v1",
+  "title": "Baeseongjin player sprite manifest v2",
   "type": "object",
   "additionalProperties": false,
   "required": ["formatVersion", "id", "render", "atlases", "animations"],
   "properties": {
     "$schema": { "type": "string" },
-    "formatVersion": { "const": 1 },
+    "formatVersion": { "const": 2 },
     "id": { "type": "string", "minLength": 1 },
     "generator": { "$ref": "#/$defs/generator" },
     "render": { "$ref": "#/$defs/render" },
@@ -20,7 +20,7 @@
     "animations": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["idle", "run", "jump", "fall", "rope", "hit", "respawn"],
+      "required": ["idle", "run", "jump", "fall", "rope", "hit", "death", "respawn"],
       "properties": {
         "idle": { "$ref": "#/$defs/animation" },
         "run": { "$ref": "#/$defs/animation" },
@@ -28,6 +28,7 @@
         "fall": { "$ref": "#/$defs/animation" },
         "rope": { "$ref": "#/$defs/animation" },
         "hit": { "$ref": "#/$defs/animation" },
+        "death": { "$ref": "#/$defs/animation" },
         "respawn": { "$ref": "#/$defs/animation" }
       }
     }
@@ -148,7 +149,7 @@
           "required": ["fallback"],
           "properties": {
             "fallback": {
-              "enum": ["idle", "run", "jump", "fall", "rope", "hit", "respawn"]
+              "enum": ["idle", "run", "jump", "fall", "rope", "hit", "death", "respawn"]
             },
             "cue": { "$ref": "#/$defs/cue" }
           }

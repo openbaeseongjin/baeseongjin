@@ -1,6 +1,6 @@
 # 플레이어 스프라이트 제작 starter
 
-이 폴더는 현재 개발용 player mock의 일곱 동작을 실제 납품 형식인 투명 PNG multi-atlas와 `sprite-manifest.json`으로 옮긴 작업 시작점입니다. 최종 아트가 아니며 현재 게임이 이 폴더를 자동으로 읽지도 않습니다.
+이 폴더는 현재 개발용 player mock의 여덟 동작을 실제 납품 형식인 투명 PNG multi-atlas와 `sprite-manifest.json`으로 옮긴 작업 시작점입니다. `death`는 전용 제작물이 들어오기 전까지 `respawn`을 명시적으로 fallback합니다. 최종 아트가 아니며 현재 게임이 이 폴더를 자동으로 읽지도 않습니다.
 
 ## 사용 방법
 

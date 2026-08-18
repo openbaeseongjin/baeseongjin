@@ -2203,7 +2203,9 @@ export class GameSimulation {
                 respawned: claim.outcome.respawned
             });
             this.metrics.recordPlayerImpact(claim.impactType, damage);
-            if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "fall-damage", impactId);
+            if (claim.outcome.respawned) {
+                this.#recordPlayerRespawn(player, "fall-damage", impactId, claim.position);
+            }
             return Object.freeze({ accepted: true, resolution: claim.impactType, damage });
         }
         if (claim.impactType === "rope-cut") {
@@ -2227,7 +2229,7 @@ export class GameSimulation {
             }
         );
         this.metrics.recordPlayerImpact(claim.impactType, damage);
-        if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "health", impactId);
+        if (claim.outcome.respawned) this.#recordPlayerRespawn(player, "health", impactId, claim.position);
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage });
     }
 
@@ -2270,8 +2272,9 @@ export class GameSimulation {
 
     respawnPlayerAtCheckpoint(player, reason, causeId = `${reason}:${this.tick}`) {
         if (!player || this.runState !== "playing") return false;
+        const deathPosition = this.#deathPosition(player.physics.position);
         this.#resetPlayerAtCheckpoint(player);
-        this.#recordPlayerRespawn(player, reason, causeId);
+        this.#recordPlayerRespawn(player, reason, causeId, deathPosition);
         if (this.isSeamlessSectorWorld) {
             this.sectorRespawnedPlayerIdsThisTick.add(player.id);
             if (
@@ -2309,7 +2312,15 @@ export class GameSimulation {
         player.augmentCombat.resetForRespawn(player.foundation, player.maxHealth);
     }
 
-    #recordPlayerRespawn(player, reason, causeId) {
+    #deathPosition(position) {
+        return Object.freeze({
+            x: Number.isFinite(position?.x) ? position.x : (this.activeRespawnAnchor?.position.x ?? 120),
+            y: Number.isFinite(position?.y) ? position.y : WORLD_CONFIG.floorY + 780
+        });
+    }
+
+    #recordPlayerRespawn(player, reason, causeId, deathPosition = player.physics.position) {
+        const normalizedDeathPosition = this.#deathPosition(deathPosition);
         this.metrics.recordDefeat();
         this.eventFlash = {
             type: this.isSeamlessSectorWorld ? "sector-respawn" : "checkpoint-respawn",
@@ -2317,6 +2328,7 @@ export class GameSimulation {
             playerId: player.id,
             reason,
             causeId,
+            deathPosition: normalizedDeathPosition,
             position: player.physics.position.clone()
         };
         this.recordReplicationEvent("player-respawned", {
@@ -2324,6 +2336,7 @@ export class GameSimulation {
             reason,
             causeId,
             health: player.health,
+            deathPosition: normalizedDeathPosition,
             position: { x: player.physics.position.x, y: player.physics.position.y }
         });
         this.resets += 1;

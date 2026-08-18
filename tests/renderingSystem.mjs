@@ -465,7 +465,11 @@ export async function run() {
     for (const state of PLAYER_SPRITE_STATES) {
         const presentation = DEFAULT_PLAYER_SPRITE_DEFINITION.presentationFor(state);
         assert.equal(presentation.state, state);
-        assert.equal(presentation.clipState, state, `${state} must use action-specific frames instead of a fallback`);
+        assert.equal(
+            presentation.clipState,
+            state === "death" ? "respawn" : state,
+            `${state} must resolve its declared clip or explicit fallback`
+        );
         for (const spriteFrame of presentation.clip.frames) {
             assert.equal(spriteFrame.atlasId, "mock");
             assert.equal(spriteFrame.width, 24);
@@ -1170,7 +1174,7 @@ export async function run() {
     );
 
     const manifest = {
-        formatVersion: 1,
+        formatVersion: 2,
         id: "manifest-player",
         render: {
             facing: "right",
@@ -1193,7 +1197,7 @@ export async function run() {
         },
         animations: Object.fromEntries(
             PLAYER_SPRITE_STATES.map((state, index) => {
-                const action = state === "hit" || state === "respawn";
+                const action = state === "hit" || state === "death" || state === "respawn";
                 return [
                     state,
                     {
@@ -1397,7 +1401,7 @@ export async function run() {
             events: [],
             dt: 0.1
         }),
-        { state: "fall", elapsedSeconds: 0, flipX: true, rotationOffset: 0 },
+        { state: "fall", elapsedSeconds: 0, flipX: true, rotationOffset: 0, positionOverride: null },
         "descending without a rope must keep the existing fall motion without added spin"
     );
     assert.equal(
@@ -1426,8 +1430,9 @@ export async function run() {
             events: [{ id: "respawn-1", type: "respawn" }],
             dt: 0
         }).state,
-        "respawn"
+        "death"
     );
+    assert.deepEqual(controller.snapshot().positionOverride, grounded.position);
     assert.equal(
         controller.update({
             player: grounded,
@@ -1435,11 +1440,16 @@ export async function run() {
             events: [{ id: "hit-3", type: "hit" }],
             dt: 0.1
         }).state,
-        "respawn",
-        "hit must be ignored during respawn"
+        "death",
+        "hit must be ignored during death"
     );
     assert.equal(
         controller.update({ player: grounded, rope: { isAttached: false }, events: [], dt: 0.35 }).state,
+        "respawn",
+        "death completion must begin respawn at the checkpoint"
+    );
+    assert.equal(
+        controller.update({ player: grounded, rope: { isAttached: false }, events: [], dt: 0.45 }).state,
         "idle",
         "transient completion must resolve current locomotion"
     );
@@ -1463,7 +1473,13 @@ export async function run() {
         ]),
         [
             { id: "hit:enemy-projectile-1", playerId: "remote-player", type: "hit" },
-            { id: "respawn:local-player:enemy-projectile-1", playerId: "local-player", type: "respawn" }
+            {
+                id: "respawn:local-player:enemy-projectile-1",
+                playerId: "local-player",
+                type: "respawn",
+                deathPosition: { x: 120, y: 500 },
+                respawnPosition: { x: 120, y: 500 }
+            }
         ]
     );
     assert.deepEqual(
@@ -1484,8 +1500,35 @@ export async function run() {
         ]),
         [
             { id: "hit:enemy-projectile-1", playerId: "remote-player", type: "hit" },
-            { id: "respawn:local-player:enemy-projectile-1", playerId: "local-player", type: "respawn" }
+            {
+                id: "respawn:local-player:enemy-projectile-1",
+                playerId: "local-player",
+                type: "respawn",
+                deathPosition: { x: 120, y: 500 },
+                respawnPosition: { x: 120, y: 500 }
+            }
         ],
         "predicted and authoritative impact/status events must collapse to the same presentation ids"
+    );
+    assert.deepEqual(
+        createPlayerPresentationEvents([
+            {
+                projectileId: "enemy-projectile-2",
+                eventType: "predicted-resolve",
+                resolution: "player-hit",
+                targetId: "local-player",
+                respawned: true,
+                position: { x: 40, y: 80 }
+            },
+            {
+                eventType: "player-respawned",
+                playerId: "local-player",
+                causeId: "enemy-projectile-2",
+                deathPosition: { x: 40, y: 80 },
+                position: { x: 120, y: 500 }
+            }
+        ]).map(({ id }) => id),
+        ["respawn:local-player:enemy-projectile-2", "respawn:local-player:enemy-projectile-2"],
+        "local prediction and server confirmation must share the respawn causal id"
     );
 }

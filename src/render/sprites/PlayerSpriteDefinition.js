@@ -1,6 +1,6 @@
 import { SpriteAnimation } from "./SpriteAnimation.js";
 
-export const PLAYER_SPRITE_STATES = Object.freeze(["idle", "run", "jump", "fall", "rope", "hit", "respawn"]);
+export const PLAYER_SPRITE_STATES = Object.freeze(["idle", "run", "jump", "fall", "rope", "hit", "death", "respawn"]);
 
 function positiveSize(value, label, { integer = false } = {}) {
     if (!value || !Number.isFinite(value.width) || !Number.isFinite(value.height)) {

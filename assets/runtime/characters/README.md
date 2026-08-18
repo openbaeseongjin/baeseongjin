@@ -2,7 +2,7 @@
 
 그래픽 담당자의 납품 경로는 `assets/artwork/characters/<asset-id>/`이며 공통 기준은 [`docs/graphics-asset-guide.md`](../../../docs/graphics-asset-guide.md)를 따릅니다. 이 폴더는 담당 개발자가 납품된 캐릭터 PNG를 `<character-id>/` runtime package로 정규화하는 경로입니다.
 
-현재 공개 manifest는 player의 일곱 animation 상태 전용이며 [`player-production-template`](./player-production-template)을 기준으로 `player-main/`을 만듭니다. 상태 구성이 다른 몹·보스에는 player manifest를 재사용하지 않고 별도 계약을 추가합니다. 상세 player 계약은 [`docs/sprite-asset-format.md`](../../../docs/sprite-asset-format.md)를 따릅니다.
+현재 공개 manifest v2는 player의 여덟 animation 상태(`idle`, `run`, `jump`, `fall`, `rope`, `hit`, `death`, `respawn`) 전용이며 [`player-production-template`](./player-production-template)을 기준으로 `player-main/`을 만듭니다. 상태 구성이 다른 몹·보스에는 player manifest를 재사용하지 않고 별도 계약을 추가합니다. 상세 player 계약은 [`docs/sprite-asset-format.md`](../../../docs/sprite-asset-format.md)를 따릅니다.
 
 ## Production runtime and fallback mock
 
@@ -15,7 +15,7 @@
 - Row 3: `respawn-2`; the remaining cells are intentionally transparent
 - Default world output: 48×48 with anchor `(0.5, 0.625)`
 
-The asset is intentionally simple, but every supported state has action-specific frames. `PlayerSpriteCatalog.js` owns frame timing and state-specific presentation cues, while `PlayerSpriteDefinition.js` validates the atlas grid, state coverage, and explicit fallback rules. Replacing the visual asset must not change the independently assembled player collider.
+The asset is intentionally simple; its `death` state explicitly falls back to the existing respawn frames, while production packages can provide a dedicated death atlas. `PlayerSpriteCatalog.js` owns frame timing and state-specific presentation cues, while `PlayerSpriteDefinition.js` validates the atlas grid, state coverage, and explicit fallback rules. Replacing the visual asset must not change the independently assembled player collider.
 
 This mock is not the final interchange format. Production PixelLab, SpriteCook, or manually authored assets are normalized according to [`docs/sprite-asset-format.md`](../../../docs/sprite-asset-format.md), including multiple PNG atlases and manifest-defined animation timing.
 

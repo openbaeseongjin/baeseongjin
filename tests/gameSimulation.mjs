@@ -372,6 +372,13 @@ export function run() {
     const respawnEvent = defeated.drainReplicationEvents().find(({ eventType }) => eventType === "player-respawned");
     assert.equal(respawnEvent.playerId, defeatedPlayer.id);
     assert.equal(respawnEvent.reason, "health");
+    assert.ok(Number.isFinite(respawnEvent.deathPosition.x));
+    assert.ok(Number.isFinite(respawnEvent.deathPosition.y));
+    assert.notDeepEqual(
+        respawnEvent.deathPosition,
+        respawnEvent.position,
+        "the presentation event must preserve the pre-respawn position"
+    );
     assert.equal(respawnEvent.artifactIds, undefined);
 
     const teamLoss = new GameSimulation();
@@ -407,6 +414,8 @@ export function run() {
     const fallEvent = fallWorld.drainReplicationEvents().find(({ eventType }) => eventType === "player-respawned");
     assert.equal(fallEvent.playerId, fallPartner.entity.id);
     assert.equal(fallEvent.reason, "fall");
+    assert.ok(Number.isFinite(fallEvent.deathPosition.x));
+    assert.ok(Number.isFinite(fallEvent.deathPosition.y));
     assert.equal(fallEvent.artifactIds, undefined);
 
     const soloFall = new GameSimulation();

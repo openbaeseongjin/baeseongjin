@@ -1,6 +1,6 @@
 {
   "$schema": "../../sprite-manifest.schema.json",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "player-multi-atlas-example",
   "generator": {
     "tool": "manual-example",
@@ -71,6 +71,7 @@
         "opacity": 0.92
       }
     },
+    "death": { "fallback": "respawn" },
     "respawn": {
       "loop": false,
       "frames": [

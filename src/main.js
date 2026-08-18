@@ -143,6 +143,7 @@ function createSingleGameApp(debug) {
             sceneRendererOptions: { playerDefinition, authoredAreaEnvironmentDefinitions }
         }),
         audioBindings,
+        playerDefinition,
         onDiagnostics: updateDiagnostics,
         startAreaId: debug.startAreaId ?? undefined,
         metricsVisible: debug.metrics,
@@ -219,6 +220,7 @@ async function launch() {
                     }),
                     authority,
                     audioBindings,
+                    playerDefinition,
                     onDisconnect: returnToMenu,
                     onDiagnostics: updateDiagnostics,
                     metricsVisible: debug.metrics

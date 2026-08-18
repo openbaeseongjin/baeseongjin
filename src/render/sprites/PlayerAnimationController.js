@@ -1,9 +1,9 @@
 import { StateMachine } from "../../core/state/StateMachine.js";
 
-export const PLAYER_ANIMATION_DURATIONS = Object.freeze({ hit: 0.24, respawn: 0.45 });
+export const PLAYER_ANIMATION_DURATIONS = Object.freeze({ hit: 0.24, death: 0.45, respawn: 0.45 });
 export const PLAYER_RUN_CYCLE_DISTANCE = 180;
 export const PLAYER_AIR_SPIN_RADIANS_PER_SECOND = Math.PI * 4;
-const STATES = Object.freeze(["idle", "run", "jump", "fall", "rope", "hit", "respawn"]);
+const STATES = Object.freeze(["idle", "run", "jump", "fall", "rope", "hit", "death", "respawn"]);
 const TRANSITIONS = Object.freeze(
     Object.fromEntries(STATES.map((state) => [state, STATES.filter((next) => next !== state)]))
 );
@@ -29,10 +29,12 @@ export class PlayerAnimationController {
             !transientDurations ||
             !Number.isFinite(transientDurations.hit) ||
             transientDurations.hit <= 0 ||
+            !Number.isFinite(transientDurations.death) ||
+            transientDurations.death <= 0 ||
             !Number.isFinite(transientDurations.respawn) ||
             transientDurations.respawn <= 0
         ) {
-            throw new Error("transientDurations requires positive hit and respawn durations");
+            throw new Error("transientDurations requires positive hit, death, and respawn durations");
         }
         if (!Number.isFinite(runCycleDurationSeconds) || runCycleDurationSeconds <= 0) {
             throw new Error("runCycleDurationSeconds must be positive");
@@ -43,6 +45,7 @@ export class PlayerAnimationController {
         this.horizontalThreshold = horizontalThreshold;
         this.transientDurations = Object.freeze({
             hit: transientDurations.hit,
+            death: transientDurations.death,
             respawn: transientDurations.respawn
         });
         this.runCycleDurationSeconds = runCycleDurationSeconds;
@@ -53,6 +56,7 @@ export class PlayerAnimationController {
         this.flipX = false;
         this.processedEventIds = new Set();
         this.processedEventOrder = [];
+        this.deathPosition = null;
     }
 
     update({ player, rope, events = [], dt }) {
@@ -64,6 +68,18 @@ export class PlayerAnimationController {
         const respawn = freshEvents.find(({ type }) => type === "respawn");
         if (respawn) {
             this.runTravelDistance = 0;
+            this.deathPosition = respawn.deathPosition ?? player.position;
+            this.machine.transition("death", { restart: true });
+            return this.snapshot();
+        }
+        if (
+            this.machine.state === "death" &&
+            this.machine.elapsedSeconds + Number.EPSILON < this.transientDurations.death
+        ) {
+            return this.snapshot();
+        }
+        if (this.machine.state === "death") {
+            this.deathPosition = null;
             this.machine.transition("respawn", { restart: true });
             return this.snapshot();
         }
@@ -120,6 +136,12 @@ export class PlayerAnimationController {
                 ? (this.runTravelDistance / this.runCycleDistance) * this.runCycleDurationSeconds
                 : snapshot.elapsedSeconds;
         const rotationOffset = snapshot.state === "jump" ? elapsedSeconds * PLAYER_AIR_SPIN_RADIANS_PER_SECOND : 0;
-        return Object.freeze({ ...snapshot, elapsedSeconds, flipX: this.flipX, rotationOffset });
+        return Object.freeze({
+            ...snapshot,
+            elapsedSeconds,
+            flipX: this.flipX,
+            rotationOffset,
+            positionOverride: snapshot.state === "death" ? this.deathPosition : null
+        });
     }
 }
