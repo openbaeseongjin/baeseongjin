@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-17 — 960초 Timer와 다음 Gate 자동 합류를 일반 구간 기준으로 사용한다
+
+- 맥락: 하층 정체를 억제하면서 0초 뒤에도 협동 진행을 이어 갈 첫 Timer prototype이 필요했다.
+- 결정: `960초`, 내부 Gate당 `+45초`, cap `960초`, 상승 붕괴 `80px/s`를 사용하고 먼저 잡힌 Player는 관전 뒤 다음 Gate에서 합류시킨다.
+- 영향: 긴 Sector 예산과 Stage/Gate portal을 전제로 Timer·붕괴·개인 합류가 하나의 계약으로 묶였다.
+- 대체: 일반 구간은 `60초`, 진행 보상 `+10초`, cap `60초`, `CONTAINMENT PURGE FIELD` `240px/s`를 사용한다. Purge 접촉은 lethal이고 전멸은 current Sector만 reset하며 증강과 이전 Sector 진행을 보존한다. Boss 진입에서는 일반 Timer·Purge·잔여 시간을 종료하고 별도 Boss 계약을 시작한다. seamless Sector에서 정확한 `+10초` trigger, Field origin과 개인 사망 복귀는 후속 결정 전 HOLD다.
+- 검증 상태: 현재 계약은 `docs/sector-timer-and-boss-flow.md`가 소유하며 Runtime은 아직 미구현이다.
+
 ## [L2] 2026-08-18 — 계획·완료 대화까지 GitHub 작업 조정 대상으로 삼는다
 
 - 맥락: 병렬 작업 충돌을 넓게 예방하려고 계획 단계, 예정 파일, 열린 Issue·PR과 완료된 대화까지 범위 카드·ACK·반복 재확인 대상으로 포함했다.

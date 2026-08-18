@@ -1,99 +1,103 @@
-# 섹터 타이머·붕괴·보스 전환 기획
+# 섹터 타이머·Containment Purge Field·보스 전환 기획
 
-이 문서는 붕괴 도시 탈출 흐름에서 섹터 일반 구간 타이머, 만료 뒤 붕괴, 멀티플레이 탈락·재합류와 별도 보스 전투 타이머의 현재 제품 결정을 정의한다. 정확한 밸런스 수치는 mock 구현과 공동 플레이 검증을 거쳐 조정한다.
+이 문서는 연속 Sector에서 플레이어가 하층에 무기한 머물지 않고 계속 상승하도록 만드는 공용 Timer와 `CONTAINMENT PURGE FIELD`, 전멸 재시작과 별도 Boss 전환의 현재 제품 계약을 정의한다.
 
-## 설계 의도
+## 현재 상태
 
-타이머는 스피드런 점수를 만들기 위한 장치가 아니다. 플레이어가 하층에서 로프를 반복하며 무기한 체류하지 않고 위쪽 탈출 결정을 계속 내리게 하는 압박 장치다. 꾸준히 전진한 플레이어에게는 Gate 통과로 시간을 되돌려 주고, 정체한 플레이어에게는 아래에서 올라오는 붕괴로 탈출을 재촉한다.
-
-## 전체 흐름
-
-| Phase | 시작 | 진행 | 시간 만료 | 종료 |
-| --- | --- | --- | --- | --- |
-| 섹터 일반 구간 | 섹터 진입 때 일반 타이머 시작 | 영역 사이에서도 계속 감소하고 명시적 Gate 통과 때 시간 보충 | 즉시 실패하지 않고 하층부터 붕괴 상승 | 기획자가 정한 보스 진입 또는 다음 확정 전환에서 일반 타이머·붕괴 종료 |
-| 보스 전투 | 일반 잔여 시간을 폐기하고 별도 보스 타이머 시작 | 일반 구간 시간과 독립적으로 진행 | Arena가 점차 붕괴 | 보스 처치 또는 전원 탈락 |
-| 다음 섹터 | 보스 처치 뒤 다음 섹터 진입 | 새 일반 타이머 사용 | 일반 구간 규칙 반복 | 다음 기획 전환까지 유지 |
-
-## 일반 구간 타이머
-
-- 각 섹터의 일반 진행 영역은 하나의 총 타이머를 공유한다.
-- 개별 영역 진입 때 타이머를 초기화하지 않는다.
-- 완료 조건을 달성해 열린 명시적 Gate를 통과하면 시간을 보충한다.
-- Gate 보충은 계속 위로 전진하는 플레이와 하층 정체를 구분하는 핵심 보상이다.
-- 일반 타이머가 0초가 되어도 즉시 게임오버시키지 않는다.
-- 0초부터 하층 붕괴가 위로 상승하며 플레이어는 남은 경로를 계속 탈출할 수 있다.
-
-## 붕괴 탈락과 최소 관전
-
-붕괴에 잡힌 플레이어는 즉시 체크포인트 부활하지 않고 일시 탈락한다.
-
-- 탈락자의 조작 입력을 차단한다.
-- 카메라는 생존 동료를 자동 추적한다.
-- 화면에 `붕괴에 휩쓸림` 상태를 표시한다.
-- 생존자가 다음 명시적 Gate를 통과하면 탈락자를 자동 합류시킨다.
-- 전원이 탈락하면 해당 섹터 일반 구간을 재시작한다.
-
-제출 범위에는 관전 대상 전환, 자유 카메라, 재합류 위치 선택을 포함하지 않는다.
-
-## 보스 전환과 보스 타이머
-
-- 각 섹터에는 보스 1개와 일반 구간에서 분리된 보스 전투 타이머가 있다.
-- Boss01과 Final Security의 위치·정체·전투 목표·Phase·보상·전환은 확정 기획을 사용한다. Sector02~05 Boss는 별도 상세 계약 전 추정하지 않는다.
-- 기획자가 지정한 보스 진입 지점에서 일반 타이머와 상승 붕괴를 끝낸다.
-- 남은 일반 시간은 보스 시간에 더하지 않고 폐기한다.
-- 보스 전투는 고정된 별도 타이머로 시작한다.
-- 보스 타이머가 0초가 되면 Arena가 점차 붕괴한다.
-- 붕괴에 잡힌 플레이어는 같은 최소 관전 상태를 사용한다.
-- 전원이 탈락하면 섹터 전체가 아니라 보스 시도만 재시작한다.
-- 보스를 처치하고 다음 섹터에 진입하면 새 일반 타이머를 시작한다.
-
-## `1-8 CONTAINMENT GATE` 예외가 아닌 기준
-
-`1-8`은 Sector 01 일반 구간의 Rope 문법 종합 Stage다. 이 Stage에는 보스를 넣지 않는다. `Maintenance Override → Lower Grid Shutdown → Worker District Reveal → 일반 구간 종료 Checkpoint` 순서도 그대로 유지한다.
-
-Sector 01의 별도 보스는 `1-8`의 일반 구간 종료 Checkpoint 뒤 `CONTAINMENT GANTRY C-01`로 확정됐다. 순서는 `1-8 Shutdown → Worker District Reveal → Checkpoint → Boss01 → 2-1`이며 기존 1-8 장면을 보스 처치 뒤로 이동하지 않는다.
-
-## mock 수치와 최종 조정
-
-| 수치 | 초기 처리 | 최종 확정 |
+| 구분 | 상태 | 계약 |
 | --- | --- | --- |
-| 일반 구간 총 시간 | Prototype `960초` | 48-Stage 실제 플레이 기록과 공동 플레이로 조정 |
-| Gate 보충량 | 내부 Gate당 `+45초`, cap `960초` | 정상 전진과 정체의 체감 차이를 함께 확인해 조정 |
-| 일반 붕괴 속도 | Prototype `80px/s` | 탈출 가능성과 압박 강도를 함께 확인해 조정 |
-| Boss01 전투 시간 | Prototype `210초` | 전투 플레이테스트로 조정 |
-| Final Security 전투 시간 | Prototype `240초` | 전투 플레이테스트로 조정 |
-| Arena 붕괴 속도 | Prototype `80px/s` | 관전·전원 탈락 흐름과 함께 조정 |
+| 일반 Timer 수치 | 확정 | Sector 시작 `60초`, 진행 보상 `+10초`, cap `60초` |
+| Purge 동작 | 확정 | Timer 0초부터 `240px/s`, 보상 중 정지, 다음 0초 재상승, 후퇴 없음 |
+| Purge 접촉 | 확정 | lethal |
+| 전멸 | 확정 | current Sector reset, 보유 성장과 이전 Sector 진행 보존 |
+| Boss 경계 | 확정 | 일반 Timer·Purge·잔여 시간 종료, 별도 Boss Timer·Arena 계약 시작 |
+| `+10초` trigger | **HOLD** | seamless landmark/objective 중 어떤 physical transition인지 후속 결정 |
+| 최초 Field origin | **HOLD** | 연속 Sector geometry 안의 시작 위치 후속 결정 |
+| 개인 Purge 사망 복귀 | **HOLD** | Sector-entry 즉시 복귀와 관전·후속 전이 합류 중 후속 결정 |
 
-Prototype 값은 최종 밸런스가 아니다. `960 + 45×7 = 1,275초`, 즉 약 21분 15초는 Sector 내부 Gate 7개를 모두 통과했을 때의 이론상 일반 구간 예산이다. Stage08에서 Boss로 넘어갈 때 시간을 보충하지 않고 남은 시간을 폐기한다. 팀과 기획자가 실제 플레이를 함께 확인한 뒤 최종 수치를 바꾼다.
+HOLD 세 항목은 Runtime 구현 금지다. 과거 Stage 번호, Gate portal과 Area 하단을 자동 대응시키지 않는다.
+
+## 설계 의도와 세계관
+
+Timer는 speedrun 점수가 아니라 안전한 하층 정체를 막는 상승 압박이다. `CONTAINMENT PURGE FIELD`는 붕괴 확산을 막기 위해 도시 하층을 아래부터 폐쇄·소거하는 자동 격리 절차다. Battle Royale식 원형 안전지대가 아니라 하나의 수평 전선이 아래에서 위로 올라온다.
+
+## 확정 수치와 상태 흐름
+
+1. Sector 일반 구간은 60초로 시작한다.
+2. 같은 Sector 안의 landmark를 이동해도 Timer를 초기화하지 않는다.
+3. 확정될 physical progress trigger가 발생하면 한 번 `min(현재 시간 + 10초, 60초)`를 적용한다.
+4. 처음 또는 다시 0초가 되면 Field가 240px/s로 상승한다.
+5. 상승 중 시간을 보충하면 Field는 현재 높이에서 정지한다.
+6. 시간이 다시 0초가 되면 같은 위치에서 상승을 재개한다.
+7. Field는 후퇴하거나 Player를 추적·순간이동하지 않는다.
+
+120Hz simulation에서 240px/s는 tick당 2px다. 수치는 첫 구현 기준이며 실제 P50/P80 성공률과 실패 원인으로 검증하되 사용자 결정 없이 과거 baseline으로 되돌리지 않는다.
+
+## 경고와 표현
+
+| 남은 시간 | UI | 월드·오디오 |
+| --- | --- | --- |
+| 10초 | Amber 점멸 | 하단 방향의 희미한 수평 예고와 낮은 기계음 |
+| 3초 | Red/White 빠른 점멸, `PURGE FIELD IMMINENT` | 초 단위 경고음과 위험 방향 강화 |
+| 0초 | Field 활성 표시 | 활성 stinger와 하단 방향 화면 반응 |
+
+경고와 Field는 색만으로 구분하지 않고 형태·속도·문구·음향을 함께 사용한다. Rope·Anchor·Enemy Telegraph를 가리거나 전체 화면을 불투명하게 덮지 않는다.
+
+## 사망과 Sector 재시작
+
+- Purge 접촉은 일반 HP 피격이나 낙사와 구분되는 lethal 사건이다.
+- 개인 Purge 사망 뒤 정확한 복귀 위치와 관전 여부는 HOLD다.
+- 활성 Player 전원이 사망하면 current Sector 실패다.
+- current Sector의 objective·route·enemy·Timer·Field baseline을 초기화하고 Sector entry에서 재시작한다.
+- Player별 증강과 이전 Sector 완료 진행은 유지한다.
+- 일반 피격·낙사 한 건만으로 공용 Sector reset을 시작하지 않는다.
+
+## Boss 전환
+
+- 기획자가 확정할 Sector transition slot의 Boss 진입에서 일반 Timer와 Purge를 종료한다.
+- 남은 일반 시간은 Boss 시간에 더하지 않고 폐기한다.
+- Boss는 별도 전투 Timer와 Arena 위험을 사용한다.
+- 일반 `60초 / +10초 / Purge Field`를 Boss에 이어 붙이지 않는다.
+- Boss 전원 탈락은 Boss 시도만 재시작하고, 처치 뒤 다음 Sector의 일반 Timer를 새로 시작한다.
+
+`1-8` 같은 legacy Stage alias는 migration 주소다. Boss room은 Sector transition slot에 삽입하며 downstream Sector local 좌표와 콘텐츠 ID를 다시 쓰지 않는다.
+
+## 멀티플레이 권한 경계
+
+- Timer와 Field 위치는 특정 Player에게 귀속되지 않는 중립 월드 상태이므로 서버가 진행한다.
+- Field 접촉은 피해 Player 클라이언트가 자기 최신 위치에서 먼저 lethal 반응을 적용하고 claim한다.
+- 서버는 Field 상태·tick·중복을 검증해 공용 사건을 공유한다.
+- 정상 승인 receipt가 이미 시작한 로컬 사망 표현을 되감거나 중복 재생하지 않는다.
+- 전멸 reset과 향후 개인 복귀 사건은 결정적 event ID로 멱등 처리한다.
+- 재접속 복원 schema는 Runtime 구현 설계에서 별도로 확정한다.
 
 ## 비목표
 
-- 타이머의 스피드런 점수화
-- 영역별 타이머 초기화
-- 0초 즉시 게임오버
-- 일반·보스 타이머 동시 작동 또는 잔여 시간 이월
-- 완전한 관전 시스템
-- `1-8` 보스 추가나 Shutdown·Reveal·Checkpoint 이동
-- mock 수치의 개발자 단독 최종 확정
-- 보스 세부와 배치 위치의 추정 구현
+- Area·landmark 진입마다 Timer 초기화
+- 60초 초과 비축
+- 원형 안전지대
+- Player 추적·순간이동·시간 보충 시 Field 후퇴
+- Stage ID 또는 legacy Gate portal을 새 Runtime trigger 권위로 사용
+- 개인 Purge 사망 복귀 규칙을 후속 결정 전에 추정
+- 전멸 시 전체 Run·증강·이전 Sector 진행 초기화
+- 일반 Purge를 Boss 전투에 재사용
+- Field가 collision surface나 authored geometry를 실제 삭제
 
 ## 테스트 가능한 완료 기준
 
-1. 일반 타이머는 같은 섹터의 영역 전환에서 유지되고 Gate 통과 때만 정해진 mock 시간만큼 보충된다.
-2. 일반 타이머 0초는 상승 붕괴를 시작하며 즉시 런을 끝내지 않는다.
-3. 한 플레이어가 잡혀도 생존 동료는 진행을 계속하고 탈락자는 최소 관전 상태가 된다.
-4. 생존자의 다음 Gate 통과가 탈락자를 자동 합류시키며 전원 탈락만 섹터 일반 구간을 재시작한다.
-5. `1-8`은 보스 없이 기존 Shutdown·Worker District Reveal·Checkpoint 순서를 유지한다.
-6. 기획자 지정 보스 진입은 일반 타이머·붕괴를 종료하고 잔여 시간을 폐기한 뒤 별도 보스 타이머를 시작한다.
-7. 보스 타이머 0초는 Arena 붕괴를 시작하고 전원 탈락은 보스 시도만 재시작한다.
-8. 다음 섹터 진입은 새 일반 타이머를 시작한다.
-9. 수치만 mock에서 최종값으로 교체해도 위 상태 흐름은 바뀌지 않는다.
+1. 일반 Timer는 60초로 시작하고 같은 Sector 안에서 유지된다.
+2. 확정 progress trigger는 한 번만 +10초를 적용하고 cap 60초를 넘지 않는다.
+3. 첫 0초부터 Field가 240px/s로 상승한다.
+4. 시간 보충은 Field를 현재 높이에서 정지시키고 다음 0초부터 같은 위치에서 재개한다.
+5. Field는 후퇴·추적·순간이동하지 않는다.
+6. 10초·3초·0초 경고가 시각·문구·음향으로 구분된다.
+7. Purge 접촉은 피해 클라이언트에서 서버 receipt보다 먼저 lethal 반응을 만든다.
+8. 전멸은 current Sector만 reset하고 증강과 이전 Sector 진행을 보존한다.
+9. Boss 진입은 일반 Timer·Purge·잔여 시간을 종료하고 별도 Boss 계약을 시작한다.
+10. HOLD 세 항목은 별도 제품 결정 전 Runtime·validator·snapshot에 들어가지 않는다.
 
-## 아직 열린 항목
+## 대체된 계약
 
-- 섹터별 최종 시간·Gate 보충량·붕괴 속도
-- Sector02~05 Boss 위치·정체·전투 시나리오·보상과 전환 순서
-- 타이머·탈락 상태의 네트워크 권위와 재접속 처리
-- 최소 관전 HUD, 타이머 경고와 붕괴의 최종 그래픽·오디오 cue
+과거 `960초 / 내부 Gate +45초 / cap 960초 / 상승 붕괴 80px/s / 다음 Gate 자동 합류`는 폐기됐다. 대체 이유와 당시 맥락은 [`decision-history.md`](./decision-history.md)에 보존한다.
 
-Sector 01 영역 구현은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md), 전체 제품 방향은 [`game-hackathon-planning.md`](./game-hackathon-planning.md), 작업 순서는 [`implementation-roadmap.md`](./implementation-roadmap.md)를 함께 따른다.
+전체 제품 방향은 [`game-hackathon-planning.md`](./game-hackathon-planning.md), 현재 구현 순서는 [`implementation-roadmap.md`](./implementation-roadmap.md), seamless topology는 [`architecture.md`](./architecture.md)를 함께 따른다.
