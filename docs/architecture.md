@@ -2,7 +2,7 @@
 
 ## 현재 범위
 
-브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 세로 등반 spine과 실제 lateral city wing으로 조립된 4,800px 연속 Sector, 적 전투·투사체, 최근 도달 Stage 체크포인트 복귀와 Foundation 런 성장 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
+브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 세로 등반 spine과 실제 lateral city wing으로 조립된 4,800px 연속 Sector, 적 전투·투사체, 최근 도달 Stage 체크포인트 복귀와 generic Augment 런 성장 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
 
 ## 주요 모듈
 
@@ -149,7 +149,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 ```
 
 - `InputDrivenObject`와 `SimulationDrivenObject`는 실행 위치가 아니라 상태 변화 원인의 Is-A 정체성이다. 서버는 입력 주도 객체 claim을 검증할 복제 상태를 가지며 클라이언트는 시뮬레이션 주도 객체를 표시·보간할 복제 상태를 가질 수 있다.
-- 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·Foundation을 Has-A로 소유하고, 로프는 부착·장력·드래그·발사 shot 상태를 독립 소유한다. 소유 관계는 ID와 공개 계약으로 연결한다.
+- 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·generic Augment loadout을 Has-A로 소유하고, 로프는 부착·장력·드래그·발사 shot 상태를 독립 소유한다. `FoundationAugmentState` 같은 기존 이름은 migration 호환 경계에만 남고 소유 관계는 ID와 공개 계약으로 연결한다.
 - 적과 직접 조작하지 않는 자동 행동 객체는 `SimulationDrivenObject`다. 서버가 진행하되 플레이어 피격처럼 사용자 체감과 만나는 사건은 피해 클라이언트가 먼저 반응하고 서버가 권위 객체 상태로 검증한다.
 - 멀티는 권한 감각만 보면 P2P형이다. 플레이어별 `InputDrivenObject` 결과는 해당 소유자·피해자 클라이언트가 먼저 결정하고, 특정 클라이언트에 귀속할 수 없는 몹과 적 투사체 같은 `SimulationDrivenObject`의 생성·궤적은 서버가 중립적으로 진행한다. 서버는 지연된 플레이어 복제 위치로 충돌을 먼저 확정하지 않고 피해 클라이언트 claim을 중립 객체 상태로 검증한다.
 - 사건 전파와 지속 상태 수렴을 같은 것으로 취급하지 않는다. `InputDrivenObject`의 지속 상태는 인증·형식·세션 tick 검사를 통과한 최신 `owner-motion`을 값의 크기와 무관하게 서버와 동료가 따라가고, `SimulationDrivenObject`는 서버 상태를 모든 클라이언트가 따라간다. 원격 플레이어 위치는 상태가 실제 생성된 `ownerMotionTick` 표본 사이를 보간하고 공용 입력 선행 tick으로 서버 표시 시계와 정렬하며, 적은 `serverTick` 표본을 사용한다. 중복·역순·세션 범위 밖 owner tick은 성공한 no-op으로 무시하고 소유자는 어떤 `owner-motion` receipt에도 서버 지연 위치로 되감기거나 미확정 입력을 재실행하지 않는다.
@@ -169,7 +169,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 적 snapshot은 표시 이름·군집 ID·behavior state를 포함하며 prediction simulation이 같은 archetype factory로 복원한다. roster 목록·가중치·수치 같은 변경 가능한 content는 네트워크 protocol 분기나 테스트 snapshot의 권위가 아니다.
 - 싱글은 입력 주도 역할과 시뮬레이션 주도 역할이 한 프로세스에 함께 있을 뿐 같은 객체 분류와 디스패치 경계를 사용한다. 멀티는 그 경계 사이에 입력·claim·snapshot 전송만 추가한다.
 - `GameSimulation`은 객체별 게임 규칙을 직접 모으는 거대 분기점이 아니라 월드 등록, 고정 tick, 객체 단계 실행과 사건 연결을 조정하는 월드 스케줄러로 축소한다. 투사체 spawn 사건도 종류를 검사하지 않고 객체의 `replicationState(tick)` 계약을 사용한다.
-- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명·별도 rollback 계약이 있는 사건 전이·표시 보정만 조정한다. `owner-motion` receipt는 소유 상태 복원·입력 재실행을 시작하지 않는다. 정상 공유 스냅샷은 `applySharedOwnerProgress()`로 검증된 무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 이동·로프·전투 규칙은 런타임에 넣지 않고 객체 capability와 시뮬레이션 단계에 둔다.
+- `OwnerPredictionRuntime`은 소유 `InputDrivenObject` 집합의 입력 이력·예측 tick·claim 수명과 explicit compatibility 전이만 조정한다. `owner-motion` receipt와 정상 snapshot은 소유 상태 복원·입력 재실행·표시 보정을 시작하지 않는다. `applySharedOwnerProgress()`는 검증된 무기 파라미터 같은 협동 진행 정보만 흡수하고 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 쓰지 않는다. 짧은 표시 offset과 hard-snap 계측은 legacy Area checkpoint rollback에만 남으며 기본 Sector Runtime은 해당 claim을 호출하지 않는다.
 
 ### 적용된 마이그레이션 순서
 
@@ -251,7 +251,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 협동은 소유 클라이언트 권한과 서버 중립 월드 권한을 분할한다. 서버의 주역할은 소유 상태·사건 검증과 복제 공유이며, 시간 모델·상태 소유권·스냅샷과 거부 복구 계약은 `multiplayer-synchronization.md`를 기준으로 한다.
 - `MultiplayerGameApp`은 `RemoteGameAuthority.snapshot()`과 공개 명령만 사용한다. `OwnerPredictionRuntime`도 로컬 `GameSimulation`의 공개 소유자 예측 계약만 사용하며, 앱·예측 런타임·서버 세션 어느 쪽도 중첩된 플레이어 컴포넌트 내부로 들어가 직접 읽거나 수정하지 않는다.
 - 투사체와 같은 예측 가능한 객체는 위치를 계속 전송하지 않고 권위 `spawn` 이벤트의 시작 틱·초기 상태로 각 실행 환경에서 진행한다. 서버 `CombatSystems`와 클라이언트 `PredictableProjectileStore`는 투사체의 공통 `projectile-motion` capability를 실행해 `ProjectileMotion`의 동일한 유도·직선 적분식을 호출하며 별도 궤적 공식을 두지 않는다. 충돌·claim 확정·수명 만료만 `resolve` 이벤트로 확정한다. 원래 spawn 이벤트는 활성 객체에 보존해 중간 입장 welcome에서만 같은 ID로 재전송한다.
-- 플레이어 자동 무기는 조합된 collider의 `outsidePointToward()`로 대상 방향 몸체 바깥 발사점을 계산한다. 이 위치는 소유자 예측, 서버 검증과 공유 spawn 사건이 함께 사용하며 renderer는 총구 위치나 collider 형상을 다시 해석하지 않는다.
+- 플레이어 자동 무기는 조합된 collider의 `outsidePointToward()`로 대상 방향 몸체 바깥 발사점을 계산한다. 소유자 예측이 만든 위치를 서버가 승인된 spawn 사건에 그대로 사용하며, 서버 현재 위치에서 총구를 재계산해 claim을 거부하지 않는다. renderer도 총구 위치나 collider 형상을 다시 해석하지 않는다.
 - 자기 탄환은 `EnemyHitPrediction` 믹스인이 로컬 충돌 VFX와 검증 가능한 hit claim을 한 번 만든다. 첫 로컬 충돌에서 탄환 수명은 소비되며 claim 거부가 같은 탄환을 겹친 위치에 복구해 추가 피격을 만들지 않는다. 서버는 연결 소유권·탄환·대상·tick·중복을 검사하고 서버 소유 탄환 대미지로 검증된 결과를 다른 복제본에 공유한다. 서버 현재 위치·궤적과 공격 클라이언트가 본 지연 표본의 차이는 거부 조건이 아니다. 중립 적 탄환도 피해 클라이언트가 충돌을 인식한 순간 소비하며, 거부 receipt가 객체를 다시 표시하거나 같은 겹침에서 재발화하게 하지 않는다.
 - `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
 

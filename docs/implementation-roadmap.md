@@ -27,7 +27,7 @@
 - [0.26.0] Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer, Player별 최대 6장, owner-first damage/movement claim
 - [과거 절차 프로토타입] 연속 1,000개 시드의 상승·로프 사거리 통과 가능성 자동 검사
 - [과거 절차 프로토타입] 경계값·기본값·발견된 문제 시드의 고정 회귀 목록
-- 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 Foundation 선택 지표 수집
+- 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 generic Augment 선택 지표 수집
 - 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
 - 첫 화면의 싱글·멀티 선택, 고정 게임 서버 연결과 모바일 4자리 채널 생성·참가
 - 2인 권위 서버의 명령 receipt, 20Hz 스냅샷, 자기 예측과 동료 보간
@@ -51,7 +51,7 @@
 
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
-3. **Phase 3 · #625 / layout correction #637 / checkpoint correction 0.34.0:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, active Stage checkpoint respawn과 별도 Sector-entry party-wipe baseline, local-position camera/environment, WorldSnapshot protocol v8로 전환한다. Stage 정의는 Sector local vertical stack으로 보존하고 lateral city wing만 compiler가 더한다. Stage별 Gate·exit panel은 기본 Runtime에서 제거하며 future Boss room은 Sector transition slot에 삽입한다. legacy Area revision은 compatibility test로만 유지한다.
+3. **Phase 3 · #625 / layout correction #637 / checkpoint correction 0.34.0:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, active Stage checkpoint respawn과 별도 Sector-entry party-wipe baseline, local-position camera/environment로 전환했다. 이 단계의 AUTHORING SNAPSHOT은 WorldSnapshot protocol v8이며 현재 Runtime은 v9를 사용한다. Stage 정의는 Sector local vertical stack으로 보존하고 lateral city wing만 compiler가 더한다. Stage별 Gate·exit panel은 기본 Runtime에서 제거하며 future Boss room은 Sector transition slot에 삽입한다. legacy Area revision은 compatibility test로만 유지한다.
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
 5. **Sector 01 access vertical slice · #642:** 1-3·1-6·1-7의 Stage-local Carrier encounter 세 곳에 공용 Access Module을 연결하고, 아무 2개와 1-8 objective로 Sector 01→02 connector를 연다. 개인 사망은 수집 상태를 보존하고 party wipe만 current Sector Carrier·module·route를 초기화한다. Sector 02~06 rollout과 Boss·Timer/Purge는 포함하지 않는다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
@@ -77,7 +77,7 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
 세부 흐름, 영역별 완료 조건과 검증 기준은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md)에 남아 있다. 다음 순서는 0.24.0 이전 Area/Gate 구현의 기록이며, 0.25.0에서는 각 번호를 landmark 내부 콘텐츠로 옮기되 Gate portal·per-Area Checkpoint를 다시 만들지 않는다.
 
 1. 하나의 월드에 여러 진행 영역을 담는 공용 정의와 연결 검증을 먼저 만든다. 기존 시드 월드가 제공하던 지형·적·체크포인트 소비 계약은 호환 경계를 두어 한 번에 전부 교체하지 않는다.
-2. 영역 완료 조건과 출구 상태를 공용 진행 흐름으로 만든다. 출구를 통과해도 월드·런·플레이어·Foundation·체크포인트를 재생성하지 않는다.
+2. 영역 완료 조건과 출구 상태를 공용 진행 흐름으로 만든다. 출구를 통과해도 월드·런·플레이어·generic Augment loadout·체크포인트를 재생성하지 않는다.
 3. `1-1`을 첫 수직 절편으로 연결해 선행 목표 전의 잠긴 Gate, 이후 활성화된 Gate 패널 조작, 열린 문을 통한 `1-2` 진입을 검증한다.
 4. `1-2`·`1-3`을 이어 붙여 이동 달성형과 우회·패널 상호작용형 완료 조건이 같은 진행 흐름에서 작동하는지 검증한다.
 5. `1-4`~`1-7`을 순서대로 연결한다. 증강·Wind·Sentry·Manual Bypass는 각 시스템의 기존 또는 별도 구현을 사용하고, 맵 구조가 구체 오브젝트 동작을 중앙 분기로 소유하지 않는다.
@@ -100,18 +100,12 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
 1. [완료] 하나의 큰 월드 정상에 최종 목표와 `completed` 상태를 추가한다. 완료 후 자동으로 다음 스테이지를 시작하지 않는다.
 2. [완료 #628, #633] 1-4·2-3·3-5 explicit Node에서 generic Augment 3장 offer를 Player별 한 번씩 제공한다.
     - [실시간 선택 완료] 선택은 월드 시간을 멈추지 않고 해당 플레이어의 메뉴 입력만 이동·점프·로프 조작과 분리한다.
-3. [완료] Player별 Foundation 상태와 런 한정 효과 적용 경계를 만든다.
+3. [완료] Player별 generic Augment loadout과 런 한정 효과 적용 경계를 만든다. `FoundationAugmentState`는 호환 클래스명으로만 유지한다.
 4. [완료] 사망 시 개인 active Stage checkpoint 복귀, 같은 tick 전원 사망 시 current-Sector entry baseline reset 규칙을 적용한다.
 
-완료 기준: 시작 → 등반·전투 → Foundation 선택 → 빌드 변화 체감 → 사망 시 최근 Stage checkpoint 부활 → content boundary 도달을 한 흐름으로 플레이할 수 있다.
+완료 기준: 시작 → 등반·전투 → generic Augment 선택 → 빌드 변화 체감 → 사망 시 최근 Stage checkpoint 부활 → content boundary 도달을 한 흐름으로 플레이할 수 있다.
 
-Foundation 3종은 다음 역할을 권장하되 효과와 수치는 구현 전 L2 결정으로 확정한다.
-
-- Impulse Coil: 해제 추진
-- Relay Link: 다음 부착 보조
-- Shear Current: 로프 절단 피해
-
-Foundation이 로프 숙련을 대체하지 않고 보상하도록 한다.
+과거 Foundation 3종(`Impulse Coil`, `Relay Link`, `Shear Current`)은 0.26.0 generic Augment v1으로 대체됐다. 현재 Catalog는 Rope 6·기본 Action 6·Signature 6·범용 modifier 4의 22장이며, legacy ID는 이전 snapshot을 읽는 migration 입력으로만 정규화한다. 어떤 Augment도 로프 숙련이나 기본 Safe Route를 대체하지 않는다.
 
 ### P1. 초기 절차 프로토타입과 초반 난이도 검증
 
@@ -120,7 +114,7 @@ Foundation이 로프 숙련을 대체하지 않고 보상하도록 한다.
 1. [완료] 생성된 핵심 경로의 연속 구간이 로프 사거리 안에 있는지 1,000개 시드에서 자동 검사한다.
 2. [완료] 고정 시드 회귀 목록을 두고 실패 시드를 이유와 함께 재현한다.
     - [런별 시드 완료] 새 싱글 실행과 새 멀티 채널은 새 시드를 사용하고, 싱글 `?seed=`로 기록된 실패 지형을 다시 연다.
-3. [수집 구현 완료] 시작 2분의 적 수, 피해량, 로프 절단 빈도와 첫 Foundation 선택 시간을 플레이테스트에서 측정한다.
+3. [수집 구현 완료] 시작 2분의 적 수, 피해량, 로프 절단 빈도와 첫 generic Augment 선택 시간을 플레이테스트에서 측정한다.
 4. 설명 없이 부착·스윙·해제를 이해하는지 플레이테스트한다.
 
 완료 기준: 검사 대상 시드가 모두 통과 가능 계약을 만족하고, 초반 실패가 조작 오해보다 플레이어 선택에서 발생한다.
@@ -155,7 +149,7 @@ Foundation이 로프 숙련을 대체하지 않고 보상하도록 한다.
     - [소유자 표시 보정 완료] 작은 권위 오차는 물리 예측과 분리된 표시 offset으로 100ms 안에 수렴하고, 160px 초과·로프·생명 불일치는 즉시 스냅한다.
     - [원격 스냅샷 보간 완료] 동료와 적은 100ms 지연된 서버 tick의 두 권위 표본 사이에서 표시하고, 미래 표본이 없을 때만 최대 120ms 외삽한다.
 
-4. [플레이테스트 필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Sector-entry 부활, party wipe reset, Foundation 유지와 content boundary 도달을 한 세션으로 검증한다.
+4. [플레이테스트 필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Sector-entry 부활, party wipe reset, generic Augment loadout 유지와 content boundary 도달을 한 세션으로 검증한다.
 5. [네트워크 검증 필요] 모바일망 지연과 장시간 세션에서 예측 오차, 보정 체감, 재접속 정책을 측정한다.
     - [진단 계측 완료] 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켠 뒤 서버 권위 런 지표와 RTT·스냅샷 간격·대기 명령·명령 거부율·보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인하고 **진단 복사**로 기기별 기록을 남긴다.
     - [네트워크 행렬 완료] 실제 WebSocket 경계에서 0/50/100/200ms 왕복 지연과 0/2/5% 송신 명령 손실의 12개 조합을 한 메인 시나리오로 검증한다.

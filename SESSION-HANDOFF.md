@@ -82,11 +82,12 @@
 - 서버는 소유 클라이언트가 만든 플레이어 상태·사건을 검증해 다른 클라이언트에 공유하는 허브다. 소유자의 HP·피격 무적·생명·로프·쿨다운·시간 제한 강화는 서버 snapshot이나 impact receipt로 다시 쓰지 않는다. 서버가 상태를 직접 진행하는 범위는 몹·중립 투사체·공용 월드·세션 수명주기이며, 서버 상태로 소유자 전체를 복원하는 경우는 최초 입장·재접속과 체크포인트처럼 별도 복구 계약을 가진 사건 전이로 제한한다. 정상 또는 무시된 `owner-motion` receipt는 소유자 복원·입력 재실행을 시작하지 않는다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 기본 Sector Runtime에서 멀티 소유 클라이언트 예측은 공용 world progress(route objective·interact-choice 보상·landmark entry)를 로컬에서 확정하지 않는다. 이 시스템 상호작용은 서버 `GameSimulation`만 진행하고 클라이언트는 `worldProgress` snapshot과 복제 사건으로 수렴한다. 보상이 서버에서 열리면 `synchronizePredictionProgress`가 예측 로프를 해제해 서버 `beginFoundationReward`와 맞춘다. legacy Area revision의 exit panel·Gate portal은 compatibility 경로에만 남는다.
 - 증강 선택 UI는 owner client가 명시적 `augment-node` 근처에서 결정적 3장 offer를 즉시 열고 `augment-offer`로 pending entitlement를 서버에 보존한다. 확정 전에는 선택 Player gameplay 입력만 zeroing하고 월드·동료는 계속 진행한다. 서버는 같은 공식으로 membership·source 소비·tick을 검증하고 `foundation-selection` 호환 claim으로 확정한다. 현재 채널 Player 전원의 해당 source 소비 뒤 공유 objective를 한 번 완료하며 퇴장 Player는 요구 집합에서 제거한다. 완료 뒤 합류 Player의 개인 chooser는 유지하되 route를 다시 잠그지 않는다. 사망·재접속·party wipe는 같은 offer·selection index·consumed source를 복원하며 `legacyStageAlias`나 추정 Landmark 좌표로 source를 만들지 않는다.
-- impact의 최종 체감 결과는 피해 클라이언트가 소유한다. 적 탄환과 착지 피해의 정상 claim은 사건 자료와 도메인 상태 지문만 보내며 서버가 같은 전이를 적용해 일치하면 바로 확정한다. 지문이 다를 때는 gameplay 거부 receipt가 아니라 `impact-recovery-request`로 impact ID·피해자 연결에 묶인 일회용 `recoveryId`를 발급하고, 피해 클라이언트가 응답 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보내 서버·동료를 자기 결과로 수렴시킨다. challenge 없는 전체 상태는 거부하고, 승인 복구는 상태와 `ownerMotionTick`을 원자적으로 갱신하며 로컬 HP·로프·부활은 복구하지 않는다. 엔진 공식 레퍼런스 대비 핵심 충족표와 상세 기준은 `docs/multiplayer-synchronization.md`의 **다른 게임 엔진 기준 충족 점검**과 **impact claim과 최종 수렴**을 따른다.
+- impact의 최종 체감 결과는 피해 클라이언트가 소유한다. 적 탄환과 착지 피해의 정상 claim은 사건 자료와 도메인 상태 지문만 보내며 서버가 같은 전이를 적용해 일치하면 바로 확정한다. 지문이 다를 때는 `impact-claim-receipt`의 `accepted: true`, `resolution: recovery-required`와 impact ID·피해자 연결에 묶인 일회용 `recoveryId`로 복구 자료를 요청한다. 피해 클라이언트는 응답 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보내 서버·동료를 자기 결과로 수렴시킨다. challenge 없는 전체 상태는 거부하고, 승인 복구는 상태와 `ownerMotionTick`을 원자적으로 갱신하며 로컬 HP·로프·부활은 복구하지 않는다. 상세 기준은 `docs/multiplayer-synchronization.md`의 **impact claim과 최종 수렴**을 따른다.
 - 투사체는 같은 `projectile-motion`·`client-projectile-collision` capability ID에 종류별 믹스인을 조합한다. 운동·충돌·claim 거부 뒤 수명 정책과 복제 상태는 객체가 소유하며 `PredictableProjectileStore`와 `GameSimulation`은 종류별 분기 없이 등록·식별자 대응·단계 실행·사건 연결만 담당한다. 상세 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - 정적 파일을 노출하지 않는 상시 게임 서버 실행 모드와 `/health` 상태 확인
 - game-only 서버는 기본적으로 공식 GitHub Pages Origin만 WebSocket에 허용하며 개발용 정적 통합 서버는 이 제한을 강제하지 않는다.
 - 게임 서버의 운영 배포는 `docs/multiplayer-sharing.md`를 따른다. 개발 정적 서버(`serve.mjs`·`start:multiplayer`·`share:multiplayer`의 `staticHandler`)는 응답하는 `index.html`에서 `meta[name="multiplayer-server"]`를 제거해, 클라이언트가 serving origin(통합 개발 WebSocket 서버)으로 폴백하게 한다. 운영 엔드포인트는 저장소 파일·Pages에만 남고 개발 페이지에는 노출하지 않는다. 로컬 멀티 테스트는 `npm start`가 아니라 `npm run start:multiplayer`(정적+WS 통합)로 한다.
+- 0.36.0 client-first claim·WorldSnapshot v9·Shear 전용 전송 제거는 Issue #669 / PR #670의 Lore 커밋 `8e4c3b5`, merge commit `a6a1c7e`로 main에 반영됐다. 운영 endpoint 커밋 `773666f` 뒤 Pages와 게임 서버 `/health.version`이 0.36.0으로 일치했고 공개 WSS의 채널 생성·2인 합류·퇴장·빈 방 제거 smoke를 통과했다. Quick Tunnel URL 자체는 재시작 때 바뀌므로 영구 결정으로 기록하지 않고 `index.html`의 현재 meta를 따른다.
 - AI 도구 설정 동기화는 `vsync`(`@nicepkg/vsync`)를 사용한다. 스킬·MCP의 단일 소스는 `.codex/skills/`와 `.codex/config.toml`이며 `vsync sync`가 `.opencode/skills/`, `.cursor/skills/`, `opencode.json`, `.cursor/mcp.json`을 포맷 변환과 함께 생성·갱신한다. 대상 도구 파일은 직접 편집하지 않는다. 반복 규칙은 `docs/development-rules.md`의 **AI 도구 설정 동기화(vsync)**를 따른다. opencode는 재시작하면 `opencode.json`의 Discord MCP와 `.opencode/skills/`를 읽는다.
 - 싱글 `GameApp` 렌더는 `FixedStepRunner`가 계산한 alpha로 이전·현재 권위 스냅샷을 보간해 표시한다(`src/render/interpolateRenderSnapshot.js`). 디스플레이 재생률과 120Hz 시뮬레이션 단계가 어긋나도 미세 저더 없이 표시되며, 리셋·런 상태 전이·96px 초과 순간이동(Sector-entry 부활·디버그 이동)은 보간하지 않고 최신 상태를 그린다. 멀티 로컬 플레이어는 소유자 예측·보정 계약이 있으므로 이 보간을 적용하지 않는다.
 - 디버그 모드 진입은 URL 쿼리가 아니라 **설정 버튼 1초 꾹 누르기**로 연다(`src/game/ui/DebugPanel.js`). 누르는 동안 `settings-trigger--holding` 진행바가 보이고, 1초 시점에 디버그 모드가 활성화되어 **설정 대화에 "디버그" 탭**(수치 표시 토글 + 시작 맵 select + 적용 버튼)이 등록·선택된다. 저장된 legacy Stage ID는 canonical landmark alias로 해석한다. 적용 버튼은 싱글에서 해당 landmark까지 `SectorProgressState`를 복원하고 요청 플레이어를 entry에 배치하며, 멀티는 서버 `debug-teleport`가 같은 shared progress와 `debug-teleported` 사건을 확정한다. 값은 `baeseongjin.debug-settings.v1`에 저장돼 다음 시작에도 유지된다. `?metrics=1`·`?start=<areaId>` URL 파라미터는 제거했으며 실패 시드 재현용 `?seed=`만 유지한다. 개발 정적 서버는 `Cache-Control: no-store`로 항상 최신 코드를 서빙한다.
@@ -252,7 +253,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 체크포인트 위치는 저작 영역과 섹터 흐름에 맞춰 다시 배치하되, 한번 활성화한 진행 지점은 아래로 내려가도 후퇴하지 않는다.
 - 현재 구현된 최종 연결 영역 `sector-03-08`의 출구는 아직 전체 게임 완료가 아니라 Post-Sector 03 Boss와 Sector 04 연결이 결정되지 않았음을 나타내는 content boundary다.
 - 기본 `npm test`는 현재 저작 Sector의 landmark 연결·objective/route 진행·Sector-entry 부활·party wipe reset·content boundary와 싱글·멀티 공용 시스템을 제품 시나리오로 검증한다. 48단계 절차 월드 생성·1,000시드 sweep·summit claim 테스트는 기본 suite에서 실행하지 않는다. 상세 기준은 `docs/development-rules.md`의 테스트와 회귀 방지 절을 따른다.
-- `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 Foundation 선택 시간과 현재 저작 영역 체류 시간·영역별 클리어 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다.
+- `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 generic Augment 선택 시간과 현재 저작 영역 체류 시간·영역별 클리어 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다. 기존 metric 필드의 Foundation 명칭은 wire 호환 이름이다.
 - 설정 버튼을 1초 길게 눌러 디버그 패널의 **디버그 수치 표시**를 켜면 일반 게임 규칙을 바꾸지 않고 현재 RunMetrics를 표시한다.
 - 메트로배니아식 자유 역주행과 능력 잠금은 초기 범위에서 제외한다. 현재 기준의 상세 구현 흐름은 `docs/sector-01-world-structure-plan.md`를 따른다.
 
@@ -261,12 +262,12 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 입력 장치 상태는 불변 입력 프레임으로 정규화하고 하나의 `InputDispatcher`를 거친다. 디스패처는 소유권이 일치하고 입력 capability 믹스인을 가진 `InputDrivenObject`에만 intent를 전달한다.
 - 싱글은 플레이어 1명인 같은 시뮬레이션이며, 향후 네트워크는 명령·스냅샷 전송 계층만 교체한다.
 - 체력이 0이 되거나 낙사한 플레이어는 동료 상호작용이나 팀 전멸을 기다리지 않고 각자 활성 체크포인트에서 즉시 최대 체력으로 부활한다.
-- `CommandRecorder`가 dt와 PlayerCommand 복제본을 기록하고, 재생 결과의 위치·전투·체크포인트·Foundation·지표 다이제스트로 결정성을 비교한다.
-- `PlayerCommandBatch` 프로토콜 v3가 목표 틱·플레이어 ID·입력 `sequence`와 협동 `interact` 의도를 정규 정렬하고 JSON 왕복 시 동일한 불변 계약을 유지한다.
+- `CommandRecorder`가 dt와 PlayerCommand 복제본을 기록하고, 재생 결과의 위치·전투·체크포인트·generic Augment·지표 다이제스트로 결정성을 비교한다.
+- `PlayerCommandBatch` 프로토콜 v4가 목표 틱·플레이어 ID·입력 `sequence`와 협동 `interact` 의도를 정규 정렬하고 JSON 왕복 시 동일한 불변 계약을 유지한다.
 - 사용자 직접 입력에 반응하는 플레이어·로프는 별도 `InputDrivenObject`, 적·자동 행동 객체·직접 조작하지 않는 투사체는 `SimulationDrivenObject`로 분류한다. 이는 실행 위치가 아니라 상태 변화 원인의 Is-A 정체성이다.
 - 멀티 권한 감각은 P2P형으로 둔다. 특정 플레이어의 이동·로프·피격처럼 명확한 당사자가 있는 결과는 소유자 또는 피해자 클라이언트가 먼저 판정한다. 어느 한 클라이언트에 맡길 수 없는 몹·적 투사체 생성과 궤적은 서버가 중립적으로 진행한다. 두 영역이 만나는 impact는 피해 클라이언트가 사건과 결과 지문을 claim하고 서버가 같은 전이를 적용해 수렴 여부를 확인하며, 서버의 지연된 플레이어 위치만으로 피격을 먼저 발생시키거나 취소하지 않는다.
-- 협동 동기화는 클라이언트 트리거·서버 검증형으로 설계하며, 1/120초 공용 규칙·60Hz 입력·20Hz 공유 스냅샷을 초기값으로 사용한다. Foundation은 플레이어별 빌드로 유지한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
-- 투사체·낙하물처럼 예측 가능한 객체는 전체 위치를 반복 전송하지 않는다. 명시적으로 자동 무기를 활성화한 경우 플레이어 발사는 소유 클라이언트가 즉시 예측한 뒤 `projectile-spawn-claim`으로 보내며, 서버는 비활성 claim을 거부하고 활성 claim의 소유권·`predictionId` 형식·tick 범위와 소유자 clientTick 간격(발사 주기 - 2틱 유예)을 검증해 같은 projectile ID receipt와 spawn 사건을 멱등 확정한다. 서버 시계의 쿨다운·서버 상태의 최근접 대상 재선택·재계산한 발사 위치 오차는 거부 조건이 아니다. 멀티 서버 fixed tick은 플레이어 탄환을 따로 생성하지 않고 쿨다운·확정 탄환의 검증용 궤적·수명만 진행하며, 거부 receipt는 로컬 예측 탄환을 취소한다. 몹·적 투사체 같은 중립 객체의 생성·궤적·수명은 서버가 담당한다. 양쪽 모두 생성 틱과 초기 상태를 공유해 각 클라이언트가 재생하며, 플레이어와 만나는 피격·로프 절단은 피해 클라이언트 claim으로 확정한다. 공격 클라이언트의 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 로컬 적중에서 소비되며 receipt 거부로 되살아나지 않는다. 중간 입장 welcome은 활성 객체의 원래 spawn 이벤트를 같은 ID로 다시 제공한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
+- 협동 동기화는 클라이언트 트리거·서버 검증형으로 설계하며, 1/120초 공용 규칙·60Hz 입력·20Hz 공유 스냅샷을 사용한다. generic Augment loadout은 플레이어별 빌드로 유지하며 `FoundationAugmentState`와 관련 wire 필드명은 호환 경계다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
+- 투사체·낙하물처럼 예측 가능한 객체는 전체 위치를 반복 전송하지 않는다. 명시적으로 자동 무기를 활성화한 경우 플레이어 발사는 소유 클라이언트가 즉시 예측한 뒤 `projectile-spawn-claim`으로 보내며, 서버는 비활성 claim을 거부하고 활성 claim의 소유권·`predictionId` 형식·tick 범위와 소유자 clientTick 간격(발사 주기 - 2틱 유예)을 검증해 같은 projectile ID receipt와 spawn 사건을 멱등 확정한다. 서버 시계의 쿨다운·서버 상태의 최근접 대상 재선택·재계산한 발사 위치 오차는 거부 조건이 아니다. 멀티 서버 fixed tick은 플레이어 탄환을 따로 생성하지 않고 승인된 탄환의 복제 궤적·수명만 진행하며, 거부 receipt는 로컬 예측 탄환을 취소한다. 몹·적 투사체 같은 중립 객체의 생성·궤적·수명은 서버가 담당한다. 양쪽 모두 생성 틱과 초기 상태를 공유해 각 클라이언트가 재생하며, 플레이어와 만나는 피격·로프 절단은 피해 클라이언트 claim으로 확정한다. 공격 클라이언트의 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 로컬 적중에서 소비되며 receipt 거부로 되살아나지 않는다. 중간 입장 welcome은 활성 객체의 원래 spawn 이벤트를 같은 ID로 다시 제공한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 플레이어 자동 발사 예측은 탄환뿐 아니라 발사 직전·직후 무기 쿨다운과 tick을 prediction ID별로 보존한다. 승인 receipt는 공유 확정을 뜻하며 소유자의 쿨다운을 서버 스냅샷으로 다시 쓰지 않는다. 앞 발사가 거절됐을 때 후속 발사 claim이 pending이면 현재 후속 쿨다운은 유지하고 그 후속 항목의 복구 기준만 앞 발사가 없었던 시간축으로 갱신한다. 마지막 pending 거절은 경과 tick을 뺀 준비 상태로 복구한다.
 - 파티클·타격 VFX·피해 숫자·화면 흔들림은 서버가 상태나 수명으로 시뮬레이션하지 않는다. 서버는 고유 ID가 있는 판정 이벤트만 확정하고, 싱글과 멀티의 각 클라이언트가 같은 피드백 컴포넌트로 효과를 생성·진행·소멸시킨다.
 - `AuthorityCommandInbox`가 플레이어별 승인 `sequence`와 허용 틱 범위를 검사해 재적용 원본·지연 진단 계약을 유지한다. 멀티 서버는 이 명령으로 `InputDrivenObject` 물리를 다시 실행하지 않으며 최신 적용 `owner-motion`만 플레이어·로프 연속 상태를 바꾼다.
@@ -286,11 +287,11 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 플레이어끼리는 반지름 기반 물리 충돌을 한다. 각 소유 클라이언트가 다른 플레이어의 공유 위치를 기준으로 겹침의 절반을 즉시 해소하고 상대에게 파고드는 속도만 제거한 뒤 `owner-motion`으로 공유한다. 접선 방향 로프 관성은 보존하며 위에서 닿으면 다른 플레이어 위에 설 수 있다.
 - 특정 플레이어에게 귀속되는 이동·로프·공격·피격·절단 같은 사건은 소유자 또는 피해자 클라이언트가 즉시 로컬 적용하고 claim을 보낸다. 서버는 체감 경로를 먼저 시작하지 않는다. impact는 인증·형식·중복과 결과 지문을 확인하고, 공격 claim은 소유권·ID·중복·공식 효과와 대상 생존/tombstone만 검증한다. 클라이언트가 본 지연 표본과 서버 현재 위치·궤적·겹침이 다르다는 이유로 정상 공격을 거부하지 않는다.
 - 명시적으로 활성화한 플레이어 자동 무기 투사체는 발사한 클라이언트가 적중을 먼저 판정한다. 멀티 서버 fixed tick은 검증용 궤적·대상 소실·8초 수명만 진행하고 적 충돌이나 HP 감소를 자동 시작하지 않는다. 공격 클라이언트는 첫 적중에서 총알을 소비하고 VFX와 hit claim을 한 번만 만든다. 거부 receipt가 총알을 같은 겹침에 복구하지 않으며 승인 뒤에는 서버 적 HP 스냅샷과 resolve 사건으로 모두 수렴한다.
-- 멀티 서버 fixed tick은 체력 0을 스캔해 사망·부활을 시작하거나 보상 선택 입력을 직접 확정하지 않는다. 플레이어 사망·부활은 피해 `player-impact` claim, Foundation 선택은 `foundation-selection` claim에서만 검증·확정한다. 싱글은 같은 `GameSimulation`의 기본 자동 복구와 로컬 보상 입력을 유지한다.
+- 멀티 서버 fixed tick은 체력 0을 스캔해 사망·부활을 시작하거나 보상 선택 입력을 직접 확정하지 않는다. 플레이어 사망·부활은 피해 `player-impact` claim, generic Augment 선택은 호환 이름의 `foundation-selection` claim에서만 검증·확정한다. 싱글은 같은 `GameSimulation`의 기본 자동 복구와 로컬 보상 입력을 유지한다.
 - 몹·적 투사체 생성과 궤적처럼 특정 플레이어에게 귀속할 수 없는 중립 월드 사건은 서버가 진행한다. 이를 대표 클라이언트에게 위임하지 않으며 참가자 연결 수명과 분리한다.
 - 이 분할 권한 규칙은 신규 기능과 수정 기능에 즉시 적용한다. 플레이어 당사자 사건과 중립 시뮬레이션 사건의 경계를 먼저 정하고 양쪽 로직을 같은 주체에서 중복 실행하지 않는다.
 - 클라이언트의 자기 캐릭터 체감을 최우선으로 한다. 멀티 HUD는 owner HP·로프·선택 증강·Action charge를 표시한다. Player 피격과 Player-source 적 피해 모두 로컬 반응을 먼저 적용하고 정상 승인 뒤 서버 snapshot으로 owner 반응을 되감지 않는다.
-- impact receipt는 피해 클라이언트가 이미 인식한 HP·부활·로프 상태를 되감지 않는다. 서버가 같은 전이를 적용한 지문이 다르면 별도 `impact-recovery-request`로 복구 자료를 요청하고, 그때만 피해 클라이언트가 최신 소유자 상태를 한 번 보내 서버 복제본과 동료를 수렴시킨다. 정상 impact마다 전체 상태를 보내거나 소비한 적 탄환을 다시 표시하지 않는다.
+- impact receipt는 피해 클라이언트가 이미 인식한 HP·부활·로프 상태를 되감지 않는다. 서버가 같은 전이를 적용한 지문이 다르면 같은 `impact-claim-receipt`의 `recovery-required` 성공 결과로 복구 자료를 요청하고, 그때만 피해 클라이언트가 최신 소유자 상태를 한 번 보내 서버 복제본과 동료를 수렴시킨다. 정상 impact마다 전체 상태를 보내거나 소비한 적 탄환을 다시 표시하지 않는다.
 - 클라이언트 피드백은 공용 월드 효과와 개인 상태 효과를 capability/mixin으로 분리한다. 타격·로프 절단 위치의 링·파티클은 모든 클라이언트가 같은 사건으로 재생하지만 화면 흔들림·피해 강조·로프 절단 경고는 사건의 공격자 또는 피해 당사자 화면에서만 재생한다. 서버는 효과 수명이나 파티클을 전송하지 않고 `sourcePlayerId`·`targetId`가 포함된 판정 사건만 공유한다. 상세 계약은 `docs/architecture.md`와 `docs/multiplayer-synchronization.md`를 따른다.
 - 소유자의 로프·HP·생명·위치가 서버 복제 스냅샷과 달라도 소유자 상태를 스냅하지 않는다. 최초 입장·재접속과 체크포인트처럼 별도 복구 계약이 있는 사건 전이에서만 공유 기준 상태를 사용한다. `owner-motion` receipt는 소유자 상태 복원이나 누적 입력 재실행을 일으키지 않으며, impact 불일치는 반대로 피해자의 최신 상태를 서버가 흡수해 HP·부활·로프를 로컬에서 복구하지 않는다.
 - 서버의 적은 사거리 안의 살아 있는 최근접 플레이어를 안정적인 ID 동률 규칙으로 조준하고 적 투사체 생성·궤적을 진행한다. 각 피해 클라이언트는 자기 예측 위치에서 로프를 몸체보다 먼저 판정해 playerId가 있는 절단·피격 claim을 만든다.
@@ -321,7 +322,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 ### [L1] 공용 기반과 게임 규칙을 분리한다
 
-- `game-kit`은 순수 기반만 소유하고 로프·월드·적·Foundation·HUD는 `src/game/`과 렌더링 계층이 소유한다.
+- `game-kit`은 순수 기반만 소유하고 로프·월드·적·generic Augment·HUD는 `src/game/`과 렌더링 계층이 소유한다.
 - Vanilla JavaScript ES Module, Canvas 2D, CSS, Node.js, npm, Prettier와 무번들 구조를 유지한다. Alpine.js는 DOM 상태 UI가 실제로 필요할 때만 도입한다.
 
 ### [L2] 고정 길이 로프에서 접선 충격과 중력으로 회전한다
@@ -330,7 +331,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 플레이어 각운동은 physics mixin 상속이 아니라 `PlayerPhysics Has-A AngularMotion` 조합으로 확정했다. collider도 독립 Has-A 조합이고 `FixedLengthRope`는 local anchor를 참조하는 외부 joint다. Box2D·Rapier·Unity 공식 강체 구조를 따른 근거와 확장 규칙은 `docs/architecture.md`의 **플레이어 강체 회전과 손 로프 관절**을 따른다.
 - 로프 해제 시 각속도를 보존하고 손끝 접선 속도의 설정 비율을 중심 이동 속도에 전달한다. 지면 접촉 중에는 `angle = 0` 방향의 복원 토크와 감쇠를 적용해 오뚜기처럼 일어서며 공중에서는 약한 각 감쇠만 적용한다.
 - `owner-motion` v4와 `player-impact` v8은 owner-owned Action cooldown·guard·shield mirror와 피해 결과를 수렴시키되 정상 승인 때 서버 snapshot으로 owner 반응을 되감지 않는다. `augment-impact`는 공격 owner가 만든 damage+movement 사건만 검증·공유하며 known tombstone의 late event를 atomic no-op 처리한다.
-- 자동 무기 발사점은 몸 중심이 아니라 조합된 `Collider.outsidePointToward()`가 대상 방향으로 계산한 형상 바깥 점이다. 발사체 반경과 8px 여유를 포함하며 소유자는 최신 `owner-motion` 다음 총구 위치 claim을 보내고, 서버는 같은 collider 계약으로 계산한 위치 오차를 검증한 뒤 claim 위치를 동료에게 공유한다. 구현 경계는 `docs/architecture.md`, 전송·수치 검증 계약은 `docs/multiplayer-synchronization.md`를 따른다.
+- 자동 무기 발사점은 몸 중심이 아니라 조합된 `Collider.outsidePointToward()`가 대상 방향으로 계산한 형상 바깥 점이다. 발사체 반경과 8px 여유를 포함하며 소유자는 최신 `owner-motion` 다음 총구 위치 claim을 보낸다. 서버는 소유권·prediction ID·tick·발사 간격을 검증하고 claim 위치를 그대로 spawn 사건에 사용하며, 지연된 서버 위치에서 총구를 재계산해 거부하지 않는다. 구현 경계는 `docs/architecture.md`, 전송 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 
 - 부착 순간 거리를 고정 반경으로 유지하고 방사 속도를 제거한다.
 - 능동 운동량은 임계 접선 드래그가 부착당 한 번 만드는 임펄스로만 추가한다.
