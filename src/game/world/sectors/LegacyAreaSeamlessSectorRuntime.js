@@ -5,7 +5,7 @@ import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v3";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v4";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 

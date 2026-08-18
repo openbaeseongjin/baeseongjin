@@ -1,5 +1,7 @@
 # SECTOR 01 — MAINTENANCE
 
+> **CURRENT RUNTIME OVERRIDE — 0.32.0:** 1-1·1-2는 비전투를 유지하고 1-3 이후 authored slot 합계 16기를 사용한다. 1-3·1-6·1-7 Access 구역은 Carrier 포함 3기이며 정확한 pool/보존 계약은 [`../../../enemy-density-composition.md`](../../../enemy-density-composition.md)를 따른다.
+
 *SHARED BACKGROUND ART REFERENCE · REV 1.1*
 
 ![Sector 01 Maintenance 배경 레퍼런스](./images/sector-01-background-reference.png)

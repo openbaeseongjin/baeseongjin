@@ -54,6 +54,7 @@
 3. **Phase 3 · #625 / layout correction #637:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, Sector-entry respawn과 party-wipe baseline, local-position camera/environment, WorldSnapshot protocol v8로 전환한다. Stage 정의는 Sector local vertical stack으로 보존하고 lateral city wing만 compiler가 더한다. Stage별 Gate·exit panel은 기본 Runtime에서 제거하며 future Boss room은 Sector transition slot에 삽입한다. legacy Area revision은 compatibility test로만 유지한다.
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
 5. **Sector 01 access vertical slice · #642:** 1-3·1-6·1-7의 Stage-local Carrier encounter 세 곳에 공용 Access Module을 연결하고, 아무 2개와 1-8 objective로 Sector 01→02 connector를 연다. 개인 사망은 수집 상태를 보존하고 party wipe만 current Sector Carrier·module·route를 초기화한다. Sector 02~06 rollout과 Boss·Timer/Purge는 포함하지 않는다.
+6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
 
 ### 제출 전 시나리오 구현 트랙
 

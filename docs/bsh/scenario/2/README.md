@@ -1,5 +1,7 @@
 # SECTOR 02 — WORKER DISTRICT
 
+> **CURRENT RUNTIME OVERRIDE — 0.32.0:** authored slot 합계 18기와 Patrol·Pursuit·Shield·Support·Artillery pool을 사용한다. Node chooser는 적 처치 없이 즉시 열리며 정확한 기준은 [`../../../enemy-density-composition.md`](../../../enemy-density-composition.md)를 따른다.
+
 *MASTER PLAN v1*
 
 `LEVELS 2-1–2-8` · `WORLD LEVELS 09–16` · `DIFFICULTY ★★ → ★★★★ SAWTOOTH` · `NEW ENEMY PATROL DRONE` · `NEW VARIABLE MOVING SECURITY PRESSURE` · `SECOND GENERIC AUGMENT @ 2-3`
