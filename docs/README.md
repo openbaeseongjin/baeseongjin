@@ -126,7 +126,7 @@
 | [`bsh/scenario/3/INTEGRATION-CROSS-VALIDATION-AUDIT.md`](./bsh/scenario/3/INTEGRATION-CROSS-VALIDATION-AUDIT.md) | `bsh` Sector 03(3-1~3-8) Scenario/Runtime/Story/Multiplayer/Art 통합 교차검증 감사 — Document Integration Patch List(P0~P3) 포함 |
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-RUNTIME-PROTOTYPE-SPEC.md) | `bsh` Sector 03 핵심 의존성 Access Scan Field Runtime Prototype 구현 스펙 — Prediction Clock Parity 위험(delayed owner-motion) 포함 실제 코드 대조 완료 |
 | [`bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/3/ACCESS-SCAN-FIELD-CODEX-IMPLEMENTATION-HANDOFF.md) | `bsh` 위 스펙을 Codex/개발 담당에게 바로 전달할 실행 지시서 — 우선순위(P0A~P6)·완료 조건·보고 형식·복붙용 지시문 포함 |
-| [`bsh/scenario/4/README.md`](./bsh/scenario/4/README.md) | `bsh` Sector 04 Upper Residential/Amenity District 마스터플랜, REV 2.3 — Patrol-Heavy Security + Persistent Pursuit 채택. 4-1~4-5 REV 2.3/2.4/2.5 동기화 완료, 4-6~4-8은 아직 REV 1.1 Transit/Infrastructure 레거시 |
+| [`bsh/scenario/4/README.md`](./bsh/scenario/4/README.md) | `bsh` Sector 04 Upper Residential/Amenity District 마스터플랜, REV 2.3 — Patrol-Heavy Security + Persistent Pursuit 채택. 8/8 Stage REV 2.3~2.8 동기화 완료, Resident Security Override 계약(4-8) 도입 |
 | [`bsh/scenario/4/PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md`](./bsh/scenario/4/PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md) | `bsh` Sector 04 공용 Persistent Pursuit Alert Latch 시스템(Patrol→Detect→Latched Pursuit) Runtime 구현 인계 — NEW SYSTEM / NOT IMPLEMENTED |
 | [`bsh/scenario/4/4-1/README.md`](./bsh/scenario/4/4-1/README.md) | `bsh` Sector 04 첫 Stage(4-1) SKY RESIDENCE ARRIVAL Blockout 후보·제작 규격, REV 2.3 — Security Drone 2기(Guard A/B) + Persistent Pursuit 도입, Kill Optional |
 | [`bsh/scenario/4/4-1/AREA-SPEC.json`](./bsh/scenario/4/4-1/AREA-SPEC.json) | 4-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Persistent Pursuit newSystems·Acceptance Tests |
@@ -148,9 +148,22 @@
 | [`bsh/scenario/4/4-5/AREA-SPEC.json`](./bsh/scenario/4/4-5/AREA-SPEC.json) | 4-5 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Moving Anchor Drone newSystems·Acceptance Tests |
 | [`bsh/scenario/4/4-5/RUNTIME-HANDOFF.md`](./bsh/scenario/4/4-5/RUNTIME-HANDOFF.md) | 4-5 Runtime 구현 인계 — Guard A/B/C patrol 튜닝, Moving Anchor Drone 계약, 필수 테스트 목록 |
 | [`bsh/scenario/4/4-5/VALIDATION.md`](./bsh/scenario/4/4-5/VALIDATION.md) | 4-5 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
-| [`bsh/scenario/4/4-6/README.md`](./bsh/scenario/4/4-6/README.md) | `bsh` Rope Line Geometry Combat Stage(4-6) Blockout 후보·제작 규격, REV 1.1 — Cutter Sentry+Patrol Drone 분리 배치, Shear 공격선 활용, Gate 좌표·4-1 Drift false alarm 정리 |
-| [`bsh/scenario/4/4-7/README.md`](./bsh/scenario/4/4-7/README.md) | `bsh` Sector 04 Story Pressure Stage(4-7) Blockout 후보·제작 규격, REV 1.2 — Cutter+Wake Synthesis, `LOWER ASCENT FEEDER ISOLATED` 확정 Reveal(인과관계는 미확정 유지), Gate 좌표·4-1 Drift false alarm 정리 |
-| [`bsh/scenario/4/4-8/README.md`](./bsh/scenario/4/4-8/README.md) | `bsh` Sector 04 General Finale(4-8) Blockout 후보·제작 규격, REV 1.2 — Cutter+Patrol+Wake Continuous Flow, Upper Trunk/Lower Feeder Status 병치, Wind Strength 재분류·D1 activation 좌표 정정 |
+| [`bsh/scenario/4/4-6/README.md`](./bsh/scenario/4/4-6/README.md) | `bsh` Sector 04 Stage(4-6) PRIVATE SKYBRIDGE Blockout 후보·제작 규격, REV 2.6 — Persistent Guard 2기 + Cutter Sentry 역할 분리, `cutter-sentry-area-spec-v1`(신규 시스템, NOT IMPLEMENTED) |
+| [`bsh/scenario/4/4-6/AREA-SPEC.json`](./bsh/scenario/4/4-6/AREA-SPEC.json) | 4-6 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Cutter/Guard newSystems·Acceptance Tests |
+| [`bsh/scenario/4/4-6/RUNTIME-HANDOFF.md`](./bsh/scenario/4/4-6/RUNTIME-HANDOFF.md) | 4-6 Runtime 구현 인계 — Guard A/B patrol 튜닝, Cutter Sentry 계약, 필수 테스트 목록 |
+| [`bsh/scenario/4/4-6/VALIDATION.md`](./bsh/scenario/4/4-6/VALIDATION.md) | 4-6 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
+| [`bsh/scenario/4/4-7/README.md`](./bsh/scenario/4/4-7/README.md) | `bsh` Sector 04 Stage(4-7) REFUGE TERRACE Blockout 후보·제작 규격, REV 2.7 — Guard 3기(A/B/C) + Wind 2개 zone 결합, Resident Security Override Relay(Proof C/3) 포함 |
+| [`bsh/scenario/4/4-7/AREA-SPEC.json`](./bsh/scenario/4/4-7/AREA-SPEC.json) | 4-7 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Wind Zone·Guard newSystems·Acceptance Tests |
+| [`bsh/scenario/4/4-7/RUNTIME-HANDOFF.md`](./bsh/scenario/4/4-7/RUNTIME-HANDOFF.md) | 4-7 Runtime 구현 인계 — Guard A/B/C patrol 튜닝, 2-Wind-zone 상호작용, 필수 테스트 목록 |
+| [`bsh/scenario/4/4-7/VALIDATION.md`](./bsh/scenario/4/4-7/VALIDATION.md) | 4-7 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
+| [`bsh/scenario/4/4-8/README.md`](./bsh/scenario/4/4-8/README.md) | `bsh` Sector 04 General Finale(4-8) UPPER RESIDENTIAL THRESHOLD Blockout 후보·제작 규격, REV 2.8 — Guard 3기 Sequential Security, Sector04 Access(4-2/4-5/4-7 중 2개) Quorum 판정 |
+| [`bsh/scenario/4/4-8/AREA-SPEC.json`](./bsh/scenario/4/4-8/AREA-SPEC.json) | 4-8 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Guard newSystems·Acceptance Tests |
+| [`bsh/scenario/4/4-8/RUNTIME-HANDOFF.md`](./bsh/scenario/4/4-8/RUNTIME-HANDOFF.md) | 4-8 Runtime 구현 인계 — Guard A/B/C patrol 튜닝, Access Quorum 판정, 필수 테스트 목록 |
+| [`bsh/scenario/4/4-8/VALIDATION.md`](./bsh/scenario/4/4-8/VALIDATION.md) | 4-8 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
+| [`bsh/scenario/4/4-8/SECTOR-04-ACCESS-ROLLOUT.md`](./bsh/scenario/4/4-8/SECTOR-04-ACCESS-ROLLOUT.md) | Sector 04 공용 Resident Security Override 계약 — 4-2/4-5/4-7 Relay 3개 중 2개로 Post-Sector04 전환 경로 확보, `SectorProgressState` 공유 access 로직 재사용 전제 |
+| [`bsh/scenario/4/4-8/ACCESS-PATCHES/4-2-RELAY-PATCH.md`](./bsh/scenario/4/4-8/ACCESS-PATCHES/4-2-RELAY-PATCH.md) | 4-2에 추가된 `resident-override-courtyard` Relay(Proof A/3) 패치 명세 |
+| [`bsh/scenario/4/4-8/ACCESS-PATCHES/4-5-RELAY-PATCH.md`](./bsh/scenario/4/4-8/ACCESS-PATCHES/4-5-RELAY-PATCH.md) | 4-5에 추가된 `resident-override-amenity` Relay(Proof B/3) 패치 명세 |
+| [`bsh/scenario/4/4-8/ACCESS-PATCHES/4-7-RELAY-PATCH.md`](./bsh/scenario/4/4-8/ACCESS-PATCHES/4-7-RELAY-PATCH.md) | 4-7 자체 `resident-override-refuge` Relay(Proof C/3) 패치 명세 |
 | [`bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) | `bsh` Sector 04 Camera Zone/Story Presentation 점검·구현 인계 문서 — Camera Zone은 이미 구현 완료, Story ENTRY/POSITION/TRIGGER_CUE 바인딩 코드 반영 지점 정리 |
 | [`bsh/scenario/4/INTEGRATION-CROSS-VALIDATION-AUDIT.md`](./bsh/scenario/4/INTEGRATION-CROSS-VALIDATION-AUDIT.md) | `bsh` Sector 04 Master·Stage·Runtime 교차검증 감사 원본 기록 + 재검증 정정 addendum(4-1 reach drift는 실제로 FALSE ALARM이었음을 확인) |
 | [`bsh/scenario/5/README.md`](./bsh/scenario/5/README.md) | `bsh` Sector 05 Corporate Zone 마스터플랜 — Sealed Surface/Service Hardpoint 정적 규칙, Cutter Fire opt-in 모델 정합, Capacity→Priority→Authorization→Consequence Story Disclosure Ladder |

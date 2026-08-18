@@ -19,6 +19,7 @@
 | Cutter / Wind / Scanner | NONE |
 | Augment Node | NONE |
 | New System | Persistent Pursuit Alert Latch — NOT IMPLEMENTED |
+| Resident Security Override | Relay `resident-override-courtyard` on `decision-deck` (Proof A/3, optional, no Alert clear) — see [Sector Access Rollout](../4-8/SECTOR-04-ACCESS-ROLLOUT.md) |
 
 ---
 

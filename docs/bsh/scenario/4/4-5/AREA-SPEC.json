@@ -147,8 +147,8 @@
       "patrolChoreography": {
         "mode": "loop",
         "speed": 60,
-        "waitSeconds": 0.0,
-        "phaseOffsetRatio": 0.0,
+        "waitSeconds": 0,
+        "phaseOffsetRatio": 0,
         "points": [
           {
             "x": -420,
@@ -189,7 +189,7 @@
       "patrolChoreography": {
         "mode": "loop",
         "speed": 60,
-        "waitSeconds": 0.0,
+        "waitSeconds": 0,
         "phaseOffsetRatio": 0.5,
         "points": [
           {
@@ -274,6 +274,11 @@
       "requiredObjectiveIds": [
         "final-deck-reached"
       ]
+    },
+    {
+      "id": "resident-override-amenity",
+      "type": "interact",
+      "preset": "resident-security-override-relay-v1"
     }
   ],
   "route": {
@@ -453,6 +458,12 @@
       {
         "id": "moving-anchor-drone-v1",
         "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "resident-security-override-relay-v1",
+        "status": "NOT_IMPLEMENTED",
+        "purpose": "Optional shared-proof interact relay for the Sector04 Resident Security Override quorum (2-of-3 with 4-2/4-7). Does not clear Alert; not required for stage progression.",
+        "contractRef": "../4-8/SECTOR-04-ACCESS-ROLLOUT.md"
       }
     ]
   },

@@ -93,10 +93,30 @@
     }
   ],
   "grappleTargets": [
-    { "id": "a1", "label": "A1", "x": -230, "y": -210 },
-    { "id": "a2", "label": "A2", "x": 330, "y": -540 },
-    { "id": "a3", "label": "A3", "x": -250, "y": -835 },
-    { "id": "a4", "label": "A4", "x": 350, "y": -1140 }
+    {
+      "id": "a1",
+      "label": "A1",
+      "x": -230,
+      "y": -210
+    },
+    {
+      "id": "a2",
+      "label": "A2",
+      "x": 330,
+      "y": -540
+    },
+    {
+      "id": "a3",
+      "label": "A3",
+      "x": -250,
+      "y": -835
+    },
+    {
+      "id": "a4",
+      "label": "A4",
+      "x": 350,
+      "y": -1140
+    }
   ],
   "enemies": [
     {
@@ -105,20 +125,45 @@
       "preset": "pursuit-drone-t1",
       "x": -390,
       "y": -390,
-      "activation": { "x": -520, "y": -640, "width": 980, "height": 350 },
+      "activation": {
+        "x": -520,
+        "y": -640,
+        "width": 980,
+        "height": 350
+      },
       "patrol": {
         "mode": "pingpong",
         "speed": 58,
         "waitSeconds": 0.18,
         "points": [
-          { "x": -390, "y": -390 },
-          { "x": -30, "y": -535 },
-          { "x": 300, "y": -405 }
+          {
+            "x": -390,
+            "y": -390
+          },
+          {
+            "x": -30,
+            "y": -535
+          },
+          {
+            "x": 300,
+            "y": -405
+          }
         ],
-        "start": { "x": -390, "y": -390 },
-        "end": { "x": 300, "y": -405 }
+        "start": {
+          "x": -390,
+          "y": -390
+        },
+        "end": {
+          "x": 300,
+          "y": -405
+        }
       },
-      "pursuitBounds": { "x": -700, "y": -1380, "width": 1400, "height": 1380 },
+      "pursuitBounds": {
+        "x": -700,
+        "y": -1380,
+        "width": 1400,
+        "height": 1380
+      },
       "alertPolicy": "sector04-persistent-pursuit-v1",
       "killRequired": false
     },
@@ -128,20 +173,45 @@
       "preset": "pursuit-drone-t1",
       "x": 330,
       "y": -735,
-      "activation": { "x": -40, "y": -1130, "width": 620, "height": 470 },
+      "activation": {
+        "x": -40,
+        "y": -1130,
+        "width": 620,
+        "height": 470
+      },
       "patrol": {
         "mode": "pingpong",
         "speed": 72,
         "waitSeconds": 0.28,
         "points": [
-          { "x": 330, "y": -735 },
-          { "x": 330, "y": -945 },
-          { "x": 20, "y": -1070 }
+          {
+            "x": 330,
+            "y": -735
+          },
+          {
+            "x": 330,
+            "y": -945
+          },
+          {
+            "x": 20,
+            "y": -1070
+          }
         ],
-        "start": { "x": 330, "y": -735 },
-        "end": { "x": 20, "y": -1070 }
+        "start": {
+          "x": 330,
+          "y": -735
+        },
+        "end": {
+          "x": 20,
+          "y": -1070
+        }
       },
-      "pursuitBounds": { "x": -700, "y": -1380, "width": 1400, "height": 1380 },
+      "pursuitBounds": {
+        "x": -700,
+        "y": -1380,
+        "width": 1400,
+        "height": 1380
+      },
       "alertPolicy": "sector04-persistent-pursuit-v1",
       "killRequired": false
     }
@@ -149,40 +219,96 @@
   "scannerGroups": [],
   "windZones": [],
   "objectives": [
-    { "id": "final-deck-reached", "type": "reach" },
+    {
+      "id": "final-deck-reached",
+      "type": "reach"
+    },
     {
       "id": "exit-panel-engaged",
       "type": "interact",
       "preset": "exit-panel",
-      "requiredObjectiveIds": ["final-deck-reached"]
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    },
+    {
+      "id": "resident-override-courtyard",
+      "type": "interact",
+      "preset": "resident-security-override-relay-v1"
     }
   ],
   "route": {
-    "runtimeLandmarks": ["a1", "a2", "a3", "a4"],
-    "mandatory": ["entry", "a1", "landing-a", "a2", "decision-deck", "a3", "upper-landing", "a4", "exit-deck", "exit"],
+    "runtimeLandmarks": [
+      "a1",
+      "a2",
+      "a3",
+      "a4"
+    ],
+    "mandatory": [
+      "entry",
+      "a1",
+      "landing-a",
+      "a2",
+      "decision-deck",
+      "a3",
+      "upper-landing",
+      "a4",
+      "exit-deck",
+      "exit"
+    ],
     "optional": [],
     "forbiddenBypasses": [
       {
         "from": "entry",
-        "to": ["decision-deck"],
+        "to": [
+          "decision-deck"
+        ],
         "reason": "Entry must not directly reach the decision balcony, skipping the Guard A read."
       },
       {
         "from": "decision-deck",
-        "to": ["exit-deck"],
+        "to": [
+          "exit-deck"
+        ],
         "reason": "Decision balcony must not directly reach the exit deck, skipping the Guard B band."
       },
       {
         "from": "entry",
-        "to": ["exit-deck"],
+        "to": [
+          "exit-deck"
+        ],
         "reason": "Long Rope 480 must not bypass both Guard bands in a single reach from entry to exit."
       }
     ]
   },
   "recovery": [
-    { "id": "recover-r1", "failureZone": "r1", "recoverTo": { "x": -130, "y": -440 }, "maxRetrySeconds": 5 },
-    { "id": "recover-r2", "failureZone": "r2", "recoverTo": { "x": 210, "y": -790 }, "maxRetrySeconds": 5 },
-    { "id": "recover-r3", "failureZone": "r3", "recoverTo": { "x": -80, "y": -1090 }, "maxRetrySeconds": 5 }
+    {
+      "id": "recover-r1",
+      "failureZone": "r1",
+      "recoverTo": {
+        "x": -130,
+        "y": -440
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r2",
+      "failureZone": "r2",
+      "recoverTo": {
+        "x": 210,
+        "y": -790
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r3",
+      "failureZone": "r3",
+      "recoverTo": {
+        "x": -80,
+        "y": -1090
+      },
+      "maxRetrySeconds": 5
+    }
   ],
   "sourceExit": {
     "deckX": 500,
@@ -193,15 +319,47 @@
   "progression": {
     "targetStageAlias": "4-3",
     "mode": "objective-gated-connector",
-    "requiredObjectiveIds": ["exit-panel-engaged"]
+    "requiredObjectiveIds": [
+      "exit-panel-engaged"
+    ]
   },
   "camera": {
     "zones": [
-      { "id": "entry-lower-court", "minY": -300, "maxY": 0, "desktopZoom": 0.95, "mobileZoom": 0.72 },
-      { "id": "guard-a-band", "minY": -650, "maxY": -300, "desktopZoom": 0.9, "mobileZoom": 0.7 },
-      { "id": "decision-balcony", "minY": -830, "maxY": -650, "desktopZoom": 0.92, "mobileZoom": 0.7 },
-      { "id": "guard-b-band", "minY": -1180, "maxY": -830, "desktopZoom": 0.88, "mobileZoom": 0.7 },
-      { "id": "exit", "minY": -1400, "maxY": -1180, "desktopZoom": 0.95, "mobileZoom": 0.72 }
+      {
+        "id": "entry-lower-court",
+        "minY": -300,
+        "maxY": 0,
+        "desktopZoom": 0.95,
+        "mobileZoom": 0.72
+      },
+      {
+        "id": "guard-a-band",
+        "minY": -650,
+        "maxY": -300,
+        "desktopZoom": 0.9,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "decision-balcony",
+        "minY": -830,
+        "maxY": -650,
+        "desktopZoom": 0.92,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "guard-b-band",
+        "minY": -1180,
+        "maxY": -830,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "exit",
+        "minY": -1400,
+        "maxY": -1180,
+        "desktopZoom": 0.95,
+        "mobileZoom": 0.72
+      }
     ],
     "goal": "Player should be able to read whether Guard A is still arriving from below when entering Guard B band."
   },
@@ -227,6 +385,12 @@
         "status": "NOT_IMPLEMENTED",
         "purpose": "Guard A must leave its initial patrol/detection band after alert and reach the Guard B band.",
         "contractRef": "../PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md"
+      },
+      {
+        "id": "resident-security-override-relay-v1",
+        "status": "NOT_IMPLEMENTED",
+        "purpose": "Optional shared-proof interact relay for the Sector04 Resident Security Override quorum (2-of-3 with 4-5/4-7). Does not clear Alert; not required for stage progression.",
+        "contractRef": "../4-8/SECTOR-04-ACCESS-ROLLOUT.md"
       }
     ]
   },
@@ -369,7 +533,13 @@
   "persistentPursuitContract": {
     "profile": "sector04-persistent-pursuit-v1",
     "status": "NOT_IMPLEMENTED",
-    "stateFlow": ["PATROL", "DETECT", "ALERT_LATCHED", "PERSISTENT_PURSUIT", "KILLED_OR_AREA_UNLOAD"],
+    "stateFlow": [
+      "PATROL",
+      "DETECT",
+      "ALERT_LATCHED",
+      "PERSISTENT_PURSUIT",
+      "KILLED_OR_AREA_UNLOAD"
+    ],
     "rules": {
       "alertClearsOnDistance": false,
       "alertClearsOnTemporaryLineOfSightLoss": false,
@@ -393,13 +563,24 @@
     "cameraZone"
   ],
   "staticValidation": {
-    "baseRope": { "hookSpeed": 1200, "hookReach": 400, "hookReloadSeconds": 1, "handOffset": { "x": 12, "y": -7 } },
+    "baseRope": {
+      "hookSpeed": 1200,
+      "hookReach": 400,
+      "hookReloadSeconds": 1,
+      "handOffset": {
+        "x": 12,
+        "y": -7
+      }
+    },
     "launchChecks": [
       {
         "sample": "l0",
         "from": "entry",
         "anchorId": "a1",
-        "handOrigin": { "x": -488, "y": -39 },
+        "handOrigin": {
+          "x": -488,
+          "y": -39
+        },
         "handToAnchorDistance": 309.5,
         "baseReachMargin": 90.5,
         "hookFlightSecondsAtBaseSpeed": 0.258,
@@ -409,7 +590,10 @@
         "sample": "l1",
         "from": "landing-a",
         "anchorId": "a2",
-        "handOrigin": { "x": 152, "y": -357 },
+        "handOrigin": {
+          "x": 152,
+          "y": -357
+        },
         "handToAnchorDistance": 255.3,
         "baseReachMargin": 144.7,
         "hookFlightSecondsAtBaseSpeed": 0.213,
@@ -419,7 +603,10 @@
         "sample": "l2",
         "from": "decision-deck",
         "anchorId": "a3",
-        "handOrigin": { "x": -52, "y": -697 },
+        "handOrigin": {
+          "x": -52,
+          "y": -697
+        },
         "handToAnchorDistance": 241.3,
         "baseReachMargin": 158.7,
         "hookFlightSecondsAtBaseSpeed": 0.201,
@@ -429,7 +616,10 @@
         "sample": "l3",
         "from": "upper-landing",
         "anchorId": "a4",
-        "handOrigin": { "x": 162, "y": -977 },
+        "handOrigin": {
+          "x": 162,
+          "y": -977
+        },
         "handToAnchorDistance": 248.8,
         "baseReachMargin": 151.2,
         "hookFlightSecondsAtBaseSpeed": 0.207,

@@ -1,45 +1,84 @@
 # SECTOR 04-8 — PRODUCTION ALIGNMENT
 
-*GENERAL FINALE · CUTTER + PATROL + WAKE · REV 1.0*
+Status: **MIGRATION REQUIRED**
 
-본 문서는 [4-8 시나리오](./README.md)와 현재 `Sector04AreaCatalog` 구현을 연결한다. 4-8은 Sector 04 일반 구간 finale이며 현재 standalone catalog에서 `GRAYBOX READY` 상태로 존재하고 `Post-Sector 04 Boss / Transition` 전까지 `content-boundary`를 유지한다.
+Latest checked main:
 
-## 1. 현재 판정
+```text
+1cb2d48870352dc71637cfc7ad553d655e0a94d4
+version 0.32.0
+```
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `GRAYBOX READY / STANDALONE ONLY` | 메인 authored chain 미연결 |
-| Finale boundary | `IMPLEMENTED AS CONTENT-BOUNDARY` | `nextAreaId: null`, gate `completionMode: content-boundary` |
-| Cutter / Patrol | `IMPLEMENTED` | lower `cutter-sentry-01` + upper `patrol-drone-01` 분리 배치 |
-| Wake | `IMPLEMENTED` | `control-trunk-wake` 하나의 긴 중앙 zone으로 구현 |
-| Story | `IMPLEMENTED` | `final-status-display`, `post-sector-access` 두 object가 finale juxtaposition을 담당한다 |
+## Current source
 
-## 2. Runtime 좌표 / Stable ID 요약
+Current shipped/source `sector-04-08` is still legacy:
 
-- Area: `sector-04-08`, entry `(-448,-32)`, exit `(560,-1824)`, next `null`
-- Grapple: `A0(-320,-160)`, `C1(-96,-448)`, `C2(96,-736)`, `W3(-96,-960)`, `A3(96,-1024)`, `A4(96,-1216)`, `A5(-160,-1344)`, `W6(-96,-1536)`, `A6(128,-1640)`
-- Recovery: `R1(-256,-856)`, `R2(-320,-1432)`
-- Cutter: `cutter-sentry-01(448,-640)`, activation `(-192,-800,384×400)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
-- Patrol: `patrol-drone-01(176,-1280)`, patrol `(-208,-1280) ↔ (208,-1280)`, activation `(-208,-1392,416×240)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
-- Wake: `sector-04-08:control-trunk-wake`, bounds `(-192,-1664,384×1264)`, direction `(0,-1)`, cycle `1.75 / 0.7 / 1.4 / 0.3`
-- Story display: `final-status-display(64,-1792)`, `post-sector-access(352,-1728)`, gate set `exit-panel(432,-1792)`, `service-gate(560,-1792)` — 출구 표준화(offset 64)로 32px 상승
+```text
+TRANSIT CONTROL TRUNK
+Cutter Sentry
+Patrol Drone
+vertical pulsed Wind
+content-boundary exit
+```
 
-## 3. Camera · Story 상태
+Target package:
 
-- Camera zones: `entry-scale`, `cutter-band`, `re-acceleration`, `patrol-band`, `final-flow`, `final-deck`
-- Story cue는 `sector-04-08:upper-trunk-limited`, `lower-feeder-isolated`, `transit-core-access-pending`
-- `storyTriggers`: `trunk-entry`, `upper-trunk-limited`, `final-status-juxtaposition`
-- 현재 runtime은 README 금지 조건대로 internal boss와 Sector 05 direct link를 추가하지 않는다
+```text
+UPPER RESIDENTIAL THRESHOLD
+3 staged Patrol bands
+Persistent Pursuit
+NO Cutter
+NO Wind
+2-of-3 Resident Override payoff
+```
 
-## 4. 검증 근거
+## Runtime alignment
 
-- Source: `src/game/world/areas/sector04/Sector04AreaCatalog.js`
-- Tests: `tests/sector04AreaCatalog.mjs`, `tests/worldForceField.mjs`, `tests/combatSystems.mjs`, `tests/renderPerformance.mjs`
-- Integration recent change #24, #27이 4-8 runtime / camera / story 반영을 기록한다
-- 미확인: finale 전체 브라우저 플레이, 2인 분리 band, post-sector visual hold 체감
+### VERIFIED existing
 
-## 5. 남은 blocker / asset handoff
+- Base Rope Reach 400 / Hook 1200 / Reload .50.
+- `patrol-drone-t1` is a known AREA-SPEC preset.
+- `EnemyPatrol` supports endpoint pingpong movement.
+- `SectorProgressState` already stores collected access modules and evaluates required access counts on route unlock.
+- Seamless progression uses connector/routeLock, not Stage portal gates.
+- 4-8 is currently a content boundary.
 
-- Post-Sector 04 Boss / Transition, Boss timer, Sector 05 연결은 여전히 미확정이다.
-- Finale trunk / cutter / patrol / wake / final summary 자산과 오디오 / VFX가 아직 없다.
-- README가 요구한 “4-8 ≠ 3-8” finale 기억점이 실제 플레이에서 살아 있는지 검증이 남아 있다.
+### NOT IMPLEMENTED
+
+```text
+sector04-persistent-pursuit-latch-v1
+resident-security-override-quorum-v1
+Sector04 source migration
+Sector04 inclusion in default seamless compiled Runtime
+Post-Sector04 Boss / Transition landmark
+```
+
+## Access rollout dependency
+
+Current compiler creates Access Modules from Access Carrier encounters and currently hardcodes the 2-module transition requirement to Sector01.
+
+Sector04 needs a deliberate generalization so a Relay interaction can collect a shared Access proof without pretending it came from an enemy death.
+
+Do not create a second parallel currency/state class unless the existing access state proves structurally insufficient.
+
+## 4-8 progression
+
+`AREA-SPEC.json` intentionally uses:
+
+```text
+targetStageAlias = null
+```
+
+It does not wire to `5-1`.
+
+When Post-Sector04 transition content exists, the compiler/world transition layer should own the actual target route.
+
+## Scenario Art
+
+HOLD until:
+
+- Sector04 source migration
+- three Relay sources integrated
+- Persistent Pursuit integrated
+- 4-8 graybox approved
+- post-Sector transition shape known

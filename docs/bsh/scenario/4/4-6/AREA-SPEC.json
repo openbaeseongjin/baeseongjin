@@ -1,0 +1,472 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 4,
+    "stage": 6,
+    "legacyStageAlias": "4-6",
+    "sourceAreaId": "sector-04-06",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "PRIVATE SKYBRIDGE",
+    "subtitle": "ROPE INTERRUPTION UNDER PURSUIT"
+  },
+  "bounds": {
+    "width": 1800,
+    "height": 1680
+  },
+  "entry": {
+    "id": "entry",
+    "x": -650,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "safe-deck",
+      "x": -650,
+      "y": 0,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "lower-bridge",
+      "preset": "safe-deck",
+      "x": -100,
+      "y": -360,
+      "width": 620,
+      "height": 32
+    },
+    {
+      "id": "cutter-read",
+      "preset": "safe-deck",
+      "x": 380,
+      "y": -690,
+      "width": 300,
+      "height": 32
+    },
+    {
+      "id": "central-pylon",
+      "preset": "safe-deck",
+      "x": -220,
+      "y": -1000,
+      "width": 300,
+      "height": 32
+    },
+    {
+      "id": "upper-bridge",
+      "preset": "safe-deck",
+      "x": 260,
+      "y": -1290,
+      "width": 660,
+      "height": 32
+    },
+    {
+      "id": "r1",
+      "preset": "recovery-deck",
+      "x": -390,
+      "y": -545,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r2",
+      "preset": "recovery-deck",
+      "x": 110,
+      "y": -930,
+      "width": 240,
+      "height": 16
+    },
+    {
+      "id": "r3",
+      "preset": "recovery-deck",
+      "x": -30,
+      "y": -1210,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r4",
+      "preset": "recovery-deck",
+      "x": 250,
+      "y": -1500,
+      "width": 220,
+      "height": 16
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "a1",
+      "x": -390,
+      "y": -190,
+      "label": "A1"
+    },
+    {
+      "id": "a2",
+      "x": 170,
+      "y": -500,
+      "label": "A2"
+    },
+    {
+      "id": "a3",
+      "x": 130,
+      "y": -840,
+      "label": "A3"
+    },
+    {
+      "id": "a4",
+      "x": 50,
+      "y": -1140,
+      "label": "A4"
+    },
+    {
+      "id": "a5",
+      "x": 350,
+      "y": -1470,
+      "label": "A5"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "guard-a",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -440,
+      "y": -430,
+      "activation": {
+        "x": -520,
+        "y": -600,
+        "width": 900,
+        "height": 300
+      },
+      "patrol": {
+        "mode": "pingpong",
+        "speed": 64,
+        "waitSeconds": 0.22,
+        "points": [
+          {
+            "x": -440,
+            "y": -430
+          },
+          {
+            "x": 320,
+            "y": -430
+          }
+        ],
+        "start": {
+          "x": -440,
+          "y": -430
+        },
+        "end": {
+          "x": 320,
+          "y": -430
+        }
+      }
+    },
+    {
+      "id": "cutter",
+      "preset": "cutter-sentry-area-spec-v1",
+      "x": 650,
+      "y": -825,
+      "activation": {
+        "x": -120,
+        "y": -1320,
+        "width": 900,
+        "height": 750
+      },
+      "rules": [
+        "cutter-fire",
+        "kill-optional",
+        "target-lock-cycle",
+        "activation-band-only"
+      ]
+    },
+    {
+      "id": "guard-b",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -260,
+      "y": -1350,
+      "activation": {
+        "x": -340,
+        "y": -1490,
+        "width": 980,
+        "height": 300
+      },
+      "patrol": {
+        "mode": "pingpong",
+        "speed": 76,
+        "waitSeconds": 0.18,
+        "points": [
+          {
+            "x": -260,
+            "y": -1350
+          },
+          {
+            "x": 520,
+            "y": -1350
+          }
+        ],
+        "start": {
+          "x": -260,
+          "y": -1350
+        },
+        "end": {
+          "x": 520,
+          "y": -1350
+        }
+      }
+    }
+  ],
+  "scannerGroups": [],
+  "windZones": [],
+  "objectives": [
+    {
+      "id": "final-deck-reached",
+      "type": "reach",
+      "preset": "reach-deck"
+    },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "entry",
+      "a1",
+      "lower-bridge",
+      "a2",
+      "cutter-read",
+      "a3",
+      "central-pylon",
+      "a4",
+      "upper-bridge",
+      "a5",
+      "exit"
+    ],
+    "mandatory": [
+      "entry",
+      "a1",
+      "lower-bridge",
+      "a2",
+      "cutter-read",
+      "a3",
+      "central-pylon",
+      "a4",
+      "upper-bridge",
+      "a5",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": [
+      {
+        "from": "entry",
+        "to": [
+          "cutter-read",
+          "a3",
+          "central-pylon",
+          "a4",
+          "upper-bridge",
+          "a5",
+          "exit"
+        ],
+        "reason": "Lower Private Bridge and first pursuit beat must remain."
+      },
+      {
+        "from": "cutter-read",
+        "to": [
+          "upper-bridge",
+          "a5",
+          "exit"
+        ],
+        "reason": "The Cutter interruption band and Central Security Pylon cannot be skipped as one beat."
+      }
+    ]
+  },
+  "recovery": [
+    {
+      "id": "recover-r1",
+      "failureZone": "r1",
+      "recoverTo": {
+        "x": -390,
+        "y": -569
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r2",
+      "failureZone": "r2",
+      "recoverTo": {
+        "x": 110,
+        "y": -954
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r3",
+      "failureZone": "r3",
+      "recoverTo": {
+        "x": -30,
+        "y": -1234
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r4",
+      "failureZone": "r4",
+      "recoverTo": {
+        "x": 250,
+        "y": -1524
+      },
+      "maxRetrySeconds": 5
+    }
+  ],
+  "sourceExit": {
+    "deckX": 600,
+    "deckTopY": -1600,
+    "deckWidth": 400,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "4-7",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "exit-panel-engaged"
+    ]
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "entry-bridge",
+        "minY": -360,
+        "maxY": 0,
+        "desktopZoom": 0.94,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "lower-pursuit",
+        "minY": -680,
+        "maxY": -360,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "cutter-read",
+        "minY": -1020,
+        "maxY": -680,
+        "desktopZoom": 0.86,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "upper-bridge",
+        "minY": -1420,
+        "maxY": -1020,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "exit",
+        "minY": -1680,
+        "maxY": -1420,
+        "desktopZoom": 0.94,
+        "mobileZoom": 0.72
+      }
+    ]
+  },
+  "story": {
+    "planningTriggers": [
+      "private-skybridge",
+      "resident-only-tower-link",
+      "rope-interdiction-security-active"
+    ],
+    "runtimePresentations": []
+  },
+  "runtimeDependencies": {
+    "required": [],
+    "newSystems": [
+      {
+        "id": "sector04-persistent-guard-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "cutter-sentry-area-spec-v1",
+        "status": "NOT_IMPLEMENTED"
+      }
+    ]
+  },
+  "forbidden": [
+    "Wind in 4-6",
+    "Scanner in 4-6",
+    "Moving Anchor Drone in 4-6",
+    "Treatment Pod in 4-6",
+    "mandatory Cutter kill",
+    "mandatory Guard kill",
+    "mandatory Augment",
+    "fourth hostile",
+    "Cutter rope-cut as unavoidable instant death",
+    "Recovery clearing Persistent Pursuit"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "schema-valid-after-authoring-support",
+      "type": "schema",
+      "requirement": "Official AREA-SPEC contract must explicitly support the persistent-guard and Cutter authoring presets before repo integration.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "mandatory-route-current-base-rope",
+      "type": "geometry",
+      "requirement": "The mandatory route must remain attachable with the current effective Base Rope configuration and must not depend on debug tuning or an Augment.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "mandatory-route-zero-swing-impulse",
+      "type": "traversal",
+      "requirement": "The approved mandatory chain must be grayboxed with swingImpulse=0.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "cutter-rope-priority",
+      "type": "runtime",
+      "requirement": "A cutter projectile overlapping an attached Rope resolves as rope-cut before body hit and applies the existing Rope-disabled punishment.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "cutter-drop-recovery",
+      "type": "traversal",
+      "requirement": "Representative Cutter rope-cuts on the A3/A4 beat must have a recoverable fall outcome rather than deterministic death.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "persistent-guard-through-cutter-band",
+      "type": "runtime",
+      "requirement": "An alerted Guard A can remain in pursuit while the Player enters the Cutter band; Cutter Read must not reset Alert.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "upper-guard-stack",
+      "type": "runtime",
+      "requirement": "Guard B can add upper-bridge pressure while Guard A is alive, with total authored hostiles capped at three including Cutter.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "kill-optional",
+      "type": "traversal",
+      "requirement": "The Stage must be clearable without killing Cutter, Guard A, or Guard B.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "augment-regression",
+      "type": "regression",
+      "requirement": "Current Rope and action Augments may change retry or combat efficiency but cannot become required or delete the Cutter/Pursuit interaction band.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "camera-threat-readability",
+      "type": "camera",
+      "requirement": "Cutter Read must show Cutter source, current grapple target, recovery catch and incoming pursuit pressure clearly enough for a commit decision.",
+      "automation": "MANUAL"
+    }
+  ]
+}

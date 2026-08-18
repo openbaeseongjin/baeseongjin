@@ -75,5 +75,6 @@ Persistent Pursuit Alert Latch
 6. Update Sector04 catalog tests.
 7. Dynamic Rope + Pursuit stacking graybox validation.
 8. 4-3 migration before final continuity.
+9. Resident Security Override relay (`resident-override-courtyard`, Proof A/3) — new interact on `decision-deck`, not yet implemented.
 
 Scenario Art remains HOLD until Runtime and graybox alignment.

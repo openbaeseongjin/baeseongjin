@@ -1,0 +1,553 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 4,
+    "stage": 7,
+    "legacyStageAlias": "4-7",
+    "sourceAreaId": "sector-04-07",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "REFUGE TERRACE",
+    "subtitle": "SECURITY CONVERGENCE IN ARCHITECTURAL TURBULENCE"
+  },
+  "bounds": {
+    "width": 1680,
+    "height": 1720
+  },
+  "entry": {
+    "id": "entry",
+    "x": -620,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "safe-deck",
+      "x": -620,
+      "y": 0,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "lower",
+      "preset": "safe-deck",
+      "x": -120,
+      "y": -370,
+      "width": 520,
+      "height": 32
+    },
+    {
+      "id": "mid",
+      "preset": "safe-deck",
+      "x": 70,
+      "y": -690,
+      "width": 420,
+      "height": 32
+    },
+    {
+      "id": "central",
+      "preset": "safe-deck",
+      "x": -80,
+      "y": -1030,
+      "width": 380,
+      "height": 32
+    },
+    {
+      "id": "upper",
+      "preset": "safe-deck",
+      "x": 170,
+      "y": -1340,
+      "width": 520,
+      "height": 32
+    },
+    {
+      "id": "r1",
+      "preset": "recovery-deck",
+      "x": -360,
+      "y": -550,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r2",
+      "preset": "recovery-deck",
+      "x": 300,
+      "y": -900,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r3",
+      "preset": "recovery-deck",
+      "x": -390,
+      "y": -1260,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r4",
+      "preset": "recovery-deck",
+      "x": 90,
+      "y": -1520,
+      "width": 220,
+      "height": 16
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "a1",
+      "label": "A1",
+      "x": -350,
+      "y": -205
+    },
+    {
+      "id": "a2",
+      "label": "A2",
+      "x": 160,
+      "y": -520
+    },
+    {
+      "id": "a3",
+      "label": "A3",
+      "x": -220,
+      "y": -860
+    },
+    {
+      "id": "a4",
+      "label": "A4",
+      "x": 220,
+      "y": -1165
+    },
+    {
+      "id": "a5",
+      "label": "A5",
+      "x": 300,
+      "y": -1490
+    }
+  ],
+  "enemies": [
+    {
+      "id": "guard-a",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -470,
+      "y": -470,
+      "activation": {
+        "x": -560,
+        "y": -620,
+        "width": 940,
+        "height": 330
+      },
+      "patrol": {
+        "start": {
+          "x": -470,
+          "y": -470
+        },
+        "end": {
+          "x": 250,
+          "y": -470
+        }
+      },
+      "patrolTuning": {
+        "mode": "pingpong",
+        "speed": 58,
+        "waitSeconds": 0.2
+      },
+      "pursuitBounds": {
+        "x": -800,
+        "y": -1680,
+        "width": 1600,
+        "height": 1680
+      },
+      "windDriftProfile": "guard-wind-drift-v1"
+    },
+    {
+      "id": "guard-b",
+      "preset": "sector04-persistent-guard-v1",
+      "x": 380,
+      "y": -760,
+      "activation": {
+        "x": -340,
+        "y": -920,
+        "width": 800,
+        "height": 340
+      },
+      "patrol": {
+        "start": {
+          "x": 380,
+          "y": -760
+        },
+        "end": {
+          "x": -260,
+          "y": -760
+        }
+      },
+      "patrolTuning": {
+        "mode": "pingpong",
+        "speed": 66,
+        "waitSeconds": 0.18
+      },
+      "pursuitBounds": {
+        "x": -800,
+        "y": -1680,
+        "width": 1600,
+        "height": 1680
+      },
+      "windDriftProfile": "guard-wind-drift-v1"
+    },
+    {
+      "id": "guard-c",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -360,
+      "y": -1080,
+      "activation": {
+        "x": -430,
+        "y": -1390,
+        "width": 800,
+        "height": 390
+      },
+      "patrolChoreography": {
+        "mode": "loop",
+        "speed": 54,
+        "waitSeconds": 0.1,
+        "points": [
+          {
+            "x": -360,
+            "y": -1080
+          },
+          {
+            "x": 300,
+            "y": -1080
+          },
+          {
+            "x": 300,
+            "y": -1320
+          },
+          {
+            "x": -360,
+            "y": -1320
+          }
+        ]
+      },
+      "pursuitBounds": {
+        "x": -800,
+        "y": -1680,
+        "width": 1600,
+        "height": 1680
+      },
+      "windDriftProfile": "guard-wind-drift-v1"
+    }
+  ],
+  "scannerGroups": [],
+  "windZones": [
+    {
+      "id": "tower-gap-gust",
+      "x": -480,
+      "y": -1420,
+      "width": 1100,
+      "height": 820,
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "mode": "pulsed",
+      "strength": 220,
+      "falloff": 0,
+      "cycle": {
+        "lull": 1.1,
+        "warning": 0.3,
+        "active": 0.55,
+        "decay": 0.2
+      }
+    },
+    {
+      "id": "return-eddy",
+      "x": -420,
+      "y": -1510,
+      "width": 940,
+      "height": 570,
+      "direction": {
+        "x": -1,
+        "y": 0
+      },
+      "mode": "pulsed",
+      "strength": 170,
+      "falloff": 0,
+      "cycle": {
+        "lull": 1.55,
+        "warning": 0.35,
+        "active": 0.45,
+        "decay": 0.25
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "id": "final-deck-reached",
+      "type": "reach",
+      "preset": "reach-deck"
+    },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    },
+    {
+      "id": "resident-override-refuge",
+      "type": "interact",
+      "preset": "resident-security-override-relay-v1"
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "entry",
+      "a1",
+      "lower",
+      "a2",
+      "mid",
+      "a3",
+      "central",
+      "a4",
+      "upper",
+      "a5",
+      "exit"
+    ],
+    "mandatory": [
+      "entry",
+      "a1",
+      "lower",
+      "a2",
+      "mid",
+      "a3",
+      "central",
+      "a4",
+      "upper",
+      "a5",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": [
+      {
+        "from": "entry",
+        "to": [
+          "mid",
+          "a3",
+          "central",
+          "a4",
+          "upper",
+          "a5",
+          "exit"
+        ],
+        "reason": "Lower Guard A and first commitment band must remain."
+      },
+      {
+        "from": "lower",
+        "to": [
+          "central",
+          "a4",
+          "upper",
+          "a5",
+          "exit"
+        ],
+        "reason": "Guard B and first Gust band cannot be removed as one Long Rope skip."
+      },
+      {
+        "from": "mid",
+        "to": [
+          "upper",
+          "a5",
+          "exit"
+        ],
+        "reason": "Upper counter-gust and Guard C convergence must remain."
+      }
+    ]
+  },
+  "recovery": [
+    {
+      "id": "recover-r1",
+      "failureZone": "r1",
+      "recoverTo": "lower",
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r2",
+      "failureZone": "r2",
+      "recoverTo": "mid",
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r3",
+      "failureZone": "r3",
+      "recoverTo": "central",
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r4",
+      "failureZone": "r4",
+      "recoverTo": "upper",
+      "maxRetrySeconds": 5
+    }
+  ],
+  "sourceExit": {
+    "deckX": 570,
+    "deckTopY": -1640,
+    "deckWidth": 400,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "4-8",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "exit-panel-engaged"
+    ]
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "entry-lower",
+        "minY": -390,
+        "maxY": 0,
+        "desktopZoom": 0.94,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "guard-a",
+        "minY": -690,
+        "maxY": -390,
+        "desktopZoom": 0.89,
+        "mobileZoom": 0.69
+      },
+      {
+        "id": "guard-b-gust",
+        "minY": -1030,
+        "maxY": -690,
+        "desktopZoom": 0.86,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "refuge-core",
+        "minY": -1340,
+        "maxY": -1030,
+        "desktopZoom": 0.86,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "guard-c-turbulence",
+        "minY": -1720,
+        "maxY": -1340,
+        "desktopZoom": 0.9,
+        "mobileZoom": 0.7
+      }
+    ]
+  },
+  "story": {
+    "planningTriggers": [
+      "resident-emergency-refuge",
+      "resident-access-only",
+      "refuge-systems-standby",
+      "refuge-security-network-active",
+      "architectural-turbulence"
+    ],
+    "runtimePresentations": []
+  },
+  "runtimeDependencies": {
+    "required": [],
+    "newSystems": [
+      {
+        "id": "sector04-persistent-guard-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "guard-wind-drift-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "resident-security-override-relay-v1",
+        "status": "NOT_IMPLEMENTED",
+        "purpose": "Optional shared-proof interact relay for the Sector04 Resident Security Override quorum (2-of-3 with 4-2/4-5).",
+        "contractRef": "../4-8/SECTOR-04-ACCESS-ROLLOUT.md"
+      }
+    ]
+  },
+  "forbidden": [
+    "Cutter in 4-7",
+    "Scanner in 4-7",
+    "Moving Anchor Drone in 4-7",
+    "Treatment Pod in 4-7",
+    "true RNG wind direction or strength",
+    "untelegraphed gust",
+    "fourth Guard",
+    "recovery clearing Persistent Pursuit",
+    "mandatory Guard kill",
+    "mandatory Augment"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "schema-current-contract",
+      "type": "schema",
+      "requirement": "AREA-SPEC REV1.1 top-level/reference contract remains valid; custom Guard systems are declared NOT_IMPLEMENTED.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "mandatory-current-base-rope",
+      "type": "geometry",
+      "requirement": "Mandatory chain remains attachable under current effective Base Rope without debug tuning or Augment.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "zero-impulse-authoring",
+      "type": "traversal",
+      "requirement": "Mandatory route is grayboxed with swingImpulse=0.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "deterministic-irregular-wind",
+      "type": "runtime",
+      "requirement": "Irregular airflow is deterministic overlap of two pulsed zones; no RNG direction/strength.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "wind-warning",
+      "type": "runtime",
+      "requirement": "Each Gust has readable environmental warning before force is active.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "upper-counter-flow",
+      "type": "traversal",
+      "requirement": "Upper band can produce +X, cancellation, or -X net airflow from deterministic phase relation.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-wind-shared-rule",
+      "type": "runtime",
+      "requirement": "Guards sample the same World Wind phase/direction via Guard Drift integration; Wind is not a Player-only hidden handicap.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "persistent-pursuit-wind",
+      "type": "runtime",
+      "requirement": "Alerted A/B remain in Pursuit through Gust and Recovery; Wind does not clear Alert.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "three-pursuer-ceiling",
+      "type": "traversal",
+      "requirement": "Worst case remains A+B+C = three Pursuers; no fourth Guard.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "long-rope-regression",
+      "type": "regression",
+      "requirement": "Long Rope cannot delete Guard B or Guard C interaction bands as a whole.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "camera-airflow-readability",
+      "type": "camera",
+      "requirement": "Wind telegraph, Guard, next Anchor and Recovery are simultaneously readable in mid/upper bands.",
+      "automation": "MANUAL"
+    }
+  ]
+}

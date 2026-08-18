@@ -1,0 +1,456 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 4,
+    "stage": 8,
+    "legacyStageAlias": "4-8",
+    "sourceAreaId": "sector-04-08",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "UPPER RESIDENTIAL THRESHOLD",
+    "subtitle": "SEQUENTIAL SECURITY FINALE"
+  },
+  "bounds": {
+    "width": 1680,
+    "height": 1850
+  },
+  "entry": {
+    "id": "entry",
+    "x": -620,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "safe-deck",
+      "x": -620,
+      "y": 0,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "lower",
+      "preset": "safe-deck",
+      "x": -120,
+      "y": -390,
+      "width": 560,
+      "height": 32
+    },
+    {
+      "id": "mid",
+      "preset": "safe-deck",
+      "x": 120,
+      "y": -730,
+      "width": 440,
+      "height": 32
+    },
+    {
+      "id": "core",
+      "preset": "safe-deck",
+      "x": -80,
+      "y": -1080,
+      "width": 400,
+      "height": 32
+    },
+    {
+      "id": "upper",
+      "preset": "safe-deck",
+      "x": 180,
+      "y": -1430,
+      "width": 520,
+      "height": 32
+    },
+    {
+      "id": "r1",
+      "preset": "recovery-deck",
+      "x": -390,
+      "y": -585,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r2",
+      "preset": "recovery-deck",
+      "x": 350,
+      "y": -930,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r3",
+      "preset": "recovery-deck",
+      "x": -390,
+      "y": -1250,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r4",
+      "preset": "recovery-deck",
+      "x": 80,
+      "y": -1580,
+      "width": 220,
+      "height": 16
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "a1",
+      "label": "A1",
+      "x": -360,
+      "y": -210
+    },
+    {
+      "id": "a2",
+      "label": "A2",
+      "x": 180,
+      "y": -560
+    },
+    {
+      "id": "a3",
+      "label": "A3",
+      "x": -180,
+      "y": -910
+    },
+    {
+      "id": "a4",
+      "label": "A4",
+      "x": 230,
+      "y": -1250
+    },
+    {
+      "id": "a5",
+      "label": "A5",
+      "x": 330,
+      "y": -1580
+    }
+  ],
+  "enemies": [
+    {
+      "id": "guard-a",
+      "preset": "patrol-drone-t1",
+      "x": -460,
+      "y": -500,
+      "patrol": {
+        "start": {
+          "x": -460,
+          "y": -500
+        },
+        "end": {
+          "x": 300,
+          "y": -500
+        }
+      },
+      "activation": {
+        "x": -540,
+        "y": -620,
+        "width": 900,
+        "height": 280
+      }
+    },
+    {
+      "id": "guard-b",
+      "preset": "patrol-drone-t1",
+      "x": 360,
+      "y": -840,
+      "patrol": {
+        "start": {
+          "x": 360,
+          "y": -840
+        },
+        "end": {
+          "x": -260,
+          "y": -840
+        }
+      },
+      "activation": {
+        "x": -360,
+        "y": -980,
+        "width": 800,
+        "height": 300
+      }
+    },
+    {
+      "id": "guard-c",
+      "preset": "patrol-drone-t1",
+      "x": 300,
+      "y": -1190,
+      "patrol": {
+        "start": {
+          "x": 300,
+          "y": -1190
+        },
+        "end": {
+          "x": 300,
+          "y": -1460
+        }
+      },
+      "activation": {
+        "x": 60,
+        "y": -1510,
+        "width": 500,
+        "height": 420
+      }
+    }
+  ],
+  "scannerGroups": [],
+  "windZones": [],
+  "objectives": [
+    {
+      "id": "final-deck-reached",
+      "type": "reach",
+      "preset": "reach-deck"
+    },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "entry",
+      "a1",
+      "lower",
+      "a2",
+      "mid",
+      "a3",
+      "core",
+      "a4",
+      "upper",
+      "a5",
+      "exit"
+    ],
+    "mandatory": [
+      "entry",
+      "a1",
+      "lower",
+      "a2",
+      "mid",
+      "a3",
+      "core",
+      "a4",
+      "upper",
+      "a5",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": [
+      {
+        "from": "entry",
+        "to": [
+          "mid",
+          "a3",
+          "core",
+          "a4",
+          "upper",
+          "a5",
+          "exit"
+        ],
+        "reason": "The lower security band must remain part of the Sector04 finale."
+      },
+      {
+        "from": "lower",
+        "to": [
+          "core",
+          "a4",
+          "upper",
+          "a5",
+          "exit"
+        ],
+        "reason": "Long Rope must not delete the Guard B band as a whole."
+      },
+      {
+        "from": "mid",
+        "to": [
+          "upper",
+          "a5",
+          "exit"
+        ],
+        "reason": "The Threshold Core and Guard C band must remain part of progression."
+      }
+    ]
+  },
+  "recovery": [
+    {
+      "id": "recover-r1",
+      "failureZone": "r1",
+      "recoverTo": {
+        "x": -390,
+        "y": -609
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r2",
+      "failureZone": "r2",
+      "recoverTo": {
+        "x": 350,
+        "y": -954
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r3",
+      "failureZone": "r3",
+      "recoverTo": {
+        "x": -390,
+        "y": -1274
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r4",
+      "failureZone": "r4",
+      "recoverTo": {
+        "x": 80,
+        "y": -1604
+      },
+      "maxRetrySeconds": 5
+    }
+  ],
+  "sourceExit": {
+    "deckX": 560,
+    "deckTopY": -1760,
+    "deckWidth": 440,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": null,
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "exit-panel-engaged"
+    ]
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "entry-lower",
+        "minY": -390,
+        "maxY": 0,
+        "desktopZoom": 0.94,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "guard-a",
+        "minY": -730,
+        "maxY": -390,
+        "desktopZoom": 0.89,
+        "mobileZoom": 0.69
+      },
+      {
+        "id": "guard-b",
+        "minY": -1080,
+        "maxY": -730,
+        "desktopZoom": 0.87,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "threshold-core",
+        "minY": -1430,
+        "maxY": -1080,
+        "desktopZoom": 0.87,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "guard-c-lock",
+        "minY": -1850,
+        "maxY": -1430,
+        "desktopZoom": 0.92,
+        "mobileZoom": 0.7
+      }
+    ]
+  },
+  "story": {
+    "planningTriggers": [
+      "upper-residential-egress",
+      "resident-security-network",
+      "override-quorum-required",
+      "corporate-control-boundary-ahead"
+    ],
+    "runtimePresentations": []
+  },
+  "runtimeDependencies": {
+    "required": [
+      {
+        "id": "patrol-drone-t1"
+      }
+    ],
+    "newSystems": [
+      {
+        "id": "sector04-persistent-pursuit-latch-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "resident-security-override-quorum-v1",
+        "status": "NOT_IMPLEMENTED"
+      }
+    ]
+  },
+  "forbidden": [
+    "Wind in 4-8",
+    "Cutter in 4-8",
+    "Scanner in 4-8",
+    "Moving Anchor Drone in 4-8",
+    "Treatment Pod in 4-8",
+    "Augment Node in 4-8 before Sector04 source topology approval",
+    "fourth Guard",
+    "mandatory Guard kill",
+    "mandatory Augment",
+    "recovery clearing Persistent Pursuit",
+    "fourth Resident Security Override source in 4-8",
+    "direct 4-8 to 5-1 wiring before Post-Sector04 transition is authored"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "mandatory-route-current-base-rope",
+      "type": "geometry",
+      "requirement": "Mandatory route clears with the current effective Base Rope and no Augment/debug tuning.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "mandatory-route-zero-impulse",
+      "type": "traversal",
+      "requirement": "Mandatory route is grayboxed with swingImpulse=0.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "sequential-detection-bands",
+      "type": "runtime",
+      "requirement": "A, B and C initial detection regions remain staged instead of all three engaging from entry.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "persistent-pursuit-stack",
+      "type": "runtime",
+      "requirement": "Alerted Guards may continue into later bands and recovery without Alert reset; worst case remains three Pursuers.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "long-rope-regression",
+      "type": "regression",
+      "requirement": "Long Rope expands expression but cannot delete the Guard B or Guard C interaction bands as a whole.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "sector04-access-quorum",
+      "type": "runtime",
+      "requirement": "After the 4-8 final objective, the Post-Sector04 transition route can become ready only when the shared Resident Security Override count is at least two of the three approved sources.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "content-boundary",
+      "type": "story",
+      "requirement": "4-8 remains a content boundary; it does not directly reveal Sector05 corporate causality or wire directly to 5-1.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "multiplayer-shared-access",
+      "type": "multiplayer",
+      "requirement": "Resident Security Override progress is shared, preserved across individual death, synchronized on reconnect, and reset only by the approved current-Sector wipe policy.",
+      "automation": "MANUAL"
+    }
+  ]
+}

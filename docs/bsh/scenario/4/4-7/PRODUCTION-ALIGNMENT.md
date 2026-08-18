@@ -1,45 +1,32 @@
 # SECTOR 04-7 — PRODUCTION ALIGNMENT
 
-*CUTTER + WAKE SYNTHESIS · STORY REVEAL · REV 1.0*
+Status: **MIGRATION REQUIRED**
 
-본 문서는 [4-7 시나리오](./README.md)와 현재 `Sector04AreaCatalog` 구현을 연결한다. 4-7은 Lower Ascent Feeder reveal과 Cutter + Wake 합성을 담당하는 Stage이며 현재 standalone catalog에서 `GRAYBOX READY` 상태다.
+Snapshot `1cb2d48870352dc71637cfc7ad553d655e0a94d4` / `0.32.0`.
 
-## 1. 현재 판정
+## VERIFIED Runtime basis
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `GRAYBOX READY / STANDALONE ONLY` | 메인 authored chain 미연결 |
-| Geometry / Gate | `IMPLEMENTED` | bounds `1472×1536`, junction flow / recovery / exit 구현 |
-| Cutter | `IMPLEMENTED` | `cutter-sentry-01` 한 기체가 lower band를 차단한다 |
-| Wake | `IMPLEMENTED` | `junction-wake` pulsed zone이 route 전체를 관통한다 |
-| Story | `IMPLEMENTED` | `routing-status-display`, `feeder-status-display` 두 object로 reveal을 노출한다 |
+- Wind Runtime supports `continuous` and `pulsed`.
+- Pulsed phases are `LULL → WARNING → ACTIVE → DECAY`.
+- Multiple active Wind Zone vectors are summed.
+- Current simulation applies World Wind to Players.
+- AREA-SPEC official contract remains REV1.1 / `area-spec-v1` / `seamless-sector-landmark-v1`.
 
-## 2. Runtime 좌표 / Stable ID 요약
+Therefore the irregular-feeling airflow does **not** need RNG: two authored pulsed zones with different cycles/directions are sufficient.
 
-- Area: `sector-04-07`, entry `(-480,-32)`, exit `(544,-1504)`, next `sector-04-08`
-- Grapple: `A0(-352,-128)`, `W1(-160,-416)`, `W2(160,-576)`, `W3(160,-800)`, `W4(-160,-960)`, `A5(-96,-1152)`, `A6(224,-1344)`
-- Recovery: `R1(320,-536)`, `R2(-320,-920)`
-- Cutter: `cutter-sentry-01(480,-640)`, activation `(-240,-1008,480×624)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
-- Wake: `sector-04-07:junction-wake`, bounds `(-224,-1008,448×688)`, direction `(+1,0)`, cycle `1.75 / 0.7 / 1.4 / 0.3`
-- Story display: `routing-status-display(-128,-256)`, `feeder-status-display(96,-1248)`
-- Gate set(exitBlock 표준): `exit-deck(352,-1411,416)`, `exit-gate(528,-1411)`, `exit-panel(416,-1411)`, exit `(528,-1443)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
+## NOT IMPLEMENTED
 
-## 3. Camera · Story 상태
+- `sector04-persistent-guard-v1`: approved whole-Stage Alert/Pursuit integration.
+- `guard-wind-drift-v1`: Enemy sampling/application of the same World Wind.
 
-- Camera zones: `junction-read`, `lower-assist`, `center-turn`, `upper-opposed-return`, `story-deck`, `exit`
-- Story cue는 `sector-04-07:containment-routing-active`, `lower-feeder-isolated`, `route-telemetry-offline`
-- `storyTriggers`: `junction-entry`, `feeder-isolated`, `trunk-access-ahead`
-- README 기준으로 `LOWER ASCENT FEEDER ISOLATED` reveal은 4-7에서 처음 노출되며, 현재 runtime도 그 경계를 지킨다
+## Current 4-7 source
 
-## 4. 검증 근거
+Legacy `ISOLATION JUNCTION / CUTTER + WAKE SYNTHESIS` remains migration source. Target removes Cutter and changes Wind usage to deterministic counter-flow turbulence in the Refuge Terrace.
 
-- Source: `src/game/world/areas/sector04/Sector04AreaCatalog.js`
-- Tests: `tests/sector04AreaCatalog.mjs`, `tests/worldForceField.mjs`, `tests/combatSystems.mjs`
-- Integration recent change #27이 4-7 story binding 반영을 기록한다
-- 미확인: 실제 reveal 타이밍, wake + cutter 합성 난이도, 브라우저 플레이
+## Security Override
 
-## 5. 남은 blocker / asset handoff
+4-7 Relay (`resident-override-refuge`, Proof C/3) is confirmed by the 4-8 Sector Access Rollout and is now in AREA-SPEC as an optional interact objective (`resident-security-override-relay-v1`, `NOT_IMPLEMENTED`). See `../4-8/SECTOR-04-ACCESS-ROLLOUT.md` and `../4-8/ACCESS-PATCHES/4-7-RELAY-PATCH.md`.
 
-- Junction reveal용 signage / backdrop / wake VFX / story audio 자산이 아직 없다.
-- README가 요구한 lower assist vs upper opposed return 리듬이 실제 플레이에서 구분되는지 검증이 필요하다.
-- 4-8로 이어지는 continuity는 현재 standalone 수준으로만 확인됐다.
+## Scenario Art
+
+HOLD until source migration, persistent pursuit, Guard Wind Drift, overlap graybox, telegraph/camera validation and proof-slot review.

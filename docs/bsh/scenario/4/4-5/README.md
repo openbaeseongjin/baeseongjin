@@ -20,6 +20,7 @@
 | Static Mandatory Route | Base Rope 400 clear |
 | Wind / Cutter / Scanner / Treatment | NONE |
 | Augment Node | NONE |
+| Resident Security Override | Relay `resident-override-amenity` on `upper-gallery` (Proof B/3, optional, no Alert clear) — see [Sector Access Rollout](../4-8/SECTOR-04-ACCESS-ROLLOUT.md) |
 
 ---
 

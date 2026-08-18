@@ -77,8 +77,9 @@ Therefore current Runtime does NOT support:
 ## New systems
 
 ```text
-sector04-persistent-guard-v1  NOT_IMPLEMENTED
-moving-anchor-drone-v1        NOT_IMPLEMENTED
+sector04-persistent-guard-v1               NOT_IMPLEMENTED
+moving-anchor-drone-v1                     NOT_IMPLEMENTED
+resident-security-override-relay-v1        NOT_IMPLEMENTED (Proof B/3, on upper-gallery — see ../4-8/SECTOR-04-ACCESS-ROLLOUT.md)
 ```
 
 ## AREA-SPEC gap

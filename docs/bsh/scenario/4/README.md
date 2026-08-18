@@ -31,16 +31,19 @@
 이 Master Plan은 REV 2.3(Upper Residential / Persistent Pursuit)이다. Stage 문서 동기화 현재 상태:
 
 ```text
-4-1  SKY RESIDENCE ARRIVAL    REV 2.3 동기화 완료
-4-2  RESIDENTIAL COURTYARD    REV 2.3 동기화 완료
-4-3  SKY GARDEN TERRACES      REV 2.3 동기화 완료
-4-4  CARE PAVILION            REV 2.4 동기화 완료
-4-5  AMENITY ATRIUM           REV 2.5 동기화 완료
-4-6~4-8                       아직 REV 1.1 TRANSIT / INFRASTRUCTURE 기준
-                               (TRANSIT INTAKE 계열 세계관 — 이 Master와 불일치, 별도 후속 작업 필요)
+4-1  SKY RESIDENCE ARRIVAL         REV 2.3 동기화 완료
+4-2  RESIDENTIAL COURTYARD         REV 2.3 동기화 완료
+4-3  SKY GARDEN TERRACES           REV 2.3 동기화 완료
+4-4  CARE PAVILION                 REV 2.4 동기화 완료
+4-5  AMENITY ATRIUM                REV 2.5 동기화 완료
+4-6  PRIVATE SKYBRIDGE             REV 2.6 동기화 완료
+4-7  REFUGE TERRACE                REV 2.7 동기화 완료
+4-8  UPPER RESIDENTIAL THRESHOLD   REV 2.8 동기화 완료
 ```
 
-`Persistent Pursuit Alert Latch` 시스템 상세는 [`PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md`](./PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md)를 따른다.
+8/8 상세 Stage가 REV 2.x로 동기화됐다. `Persistent Pursuit Alert Latch` 시스템 상세는 [`PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md`](./PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md)를 따른다.
+
+4-8이 도입하는 `Resident Security Override`(4-2/4-5/4-7 세 곳의 Relay 중 2개 수집 시 Post-Sector04 전환 경로 확보) 계약은 [`4-8/SECTOR-04-ACCESS-ROLLOUT.md`](./4-8/SECTOR-04-ACCESS-ROLLOUT.md)를 따르며, 4-2·4-5는 이 계약을 위한 Relay Objective를 이번 갱신에서 함께 반영했다.
 
 ---
 
