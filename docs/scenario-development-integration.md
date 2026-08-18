@@ -5,10 +5,10 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: a12734d5bc92c5343f813852230142704d43dff1af0710e38b97fa652ca60736
 authored-area-sha256: b5bafad252aa7696072995f64290b9009fdda4063051568527754263ac9a013b
-authored-sector-sha256: 04b2d0adbd8bd14c02028a81980aeb61c4b30a5820804924b7722ad761f43bd1
+authored-sector-sha256: cd6662964ec79bfc4471b58e89ce10fa860c6a44fc3fbd28334b2a4b2bdb3759
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: c947ee59cc3f3f4e7ede0b5fa19b37db9d30f709
+reviewed-upstream: 90208deb1e1946538dd76c22e280fcf7677106bd
 -->
 
 ## 상태를 읽는 법
@@ -118,6 +118,8 @@ reviewed-upstream: c947ee59cc3f3f4e7ede0b5fa19b37db9d30f709
 60. #646은 기본 Hook 재발사 대기를 `1.00초 → 0.50초`로 줄였다. `1200px/s × 1/3초 = 400px` 비행·부착·스윙 수치는 유지하며, `빠른 회수 -50%`는 새 base에서 `0.25초`가 된다. AREA-SPEC은 Runtime tuning 수치를 복사하지 않으므로 Stage fingerprint 변경만 기록하고 맵 좌표·route·acceptance 기준은 바꾸지 않는다.
 
 61. #648은 적 위치 넉백 기준을 authored 이동 의미에 맞췄다. 플레이어를 직접 추격·돌진하는 Pursuit/Swarm만 주먹·Action·로프 충돌 displacement를 받고, Sentry/Turret·고정 Patrol 경로·제자리 Shield/Artillery/Support는 damage·defeat·hit feedback을 유지하면서 위치와 경로를 보존한다. 기존 encounter 좌표·activation·행동 FSM·적 수는 변경하지 않는다.
+
+62. 실제 traversal에서 landmark entry 판정점을 비껴 다음 Stage 장비 Node에 도달하면 `currentLandmarkId`가 뒤에 남아 선택창이 열리지 않던 회귀를 수정했다. `SectorProgressController`는 current Sector의 명시적 `interact-choice` objective를 landmark 진행값과 별도로 근접 검사하므로, 디버그 이동 없이 실제 도달한 1-4·2-3·3-5 Node에서 PC W/점프와 모바일 점프 상호작용이 chooser 요청을 만든다. 다른 Sector의 Node, 거리 밖 Node와 일반 objective는 기존 current-landmark 경계를 유지한다.
 
 ## 열린 기획·구현 게이트
 

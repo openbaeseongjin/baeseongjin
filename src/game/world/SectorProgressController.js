@@ -78,25 +78,35 @@ export function advanceSectorProgress({
     const landmark = world.landmarks.find(({ id }) => id === snapshot.currentLandmarkId);
     if (!landmark) throw new Error(`Missing current landmark '${snapshot.currentLandmarkId}'`);
 
+    if (resolveInteractChoice) {
+        const sector = world.sectors.find(({ id }) => id === snapshot.currentSectorId);
+        for (const landmarkId of sector?.landmarkIds ?? []) {
+            const choiceLandmark = world.landmarks.find(({ id }) => id === landmarkId);
+            for (const objectiveId of choiceLandmark?.objectiveIds ?? []) {
+                const objective = world.objectives.find(({ id }) => id === objectiveId);
+                if (!objective || objective.type !== "interact-choice" || progress.isObjectiveComplete(objective.id)) {
+                    continue;
+                }
+                for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
+                    events.push(
+                        Object.freeze({
+                            type: "objective-choice-requested",
+                            objectiveId: objective.id,
+                            sourceObjectId: objective.sourceObjectId,
+                            landmarkId: choiceLandmark.id,
+                            playerId: player.id,
+                            position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+                        })
+                    );
+                }
+            }
+        }
+    }
+
     for (const objectiveId of landmark.objectiveIds) {
         const objective = world.objectives.find(({ id }) => id === objectiveId);
         if (!objective || progress.isObjectiveComplete(objective.id)) continue;
-        if (objective.type === "interact-choice") {
-            if (!resolveInteractChoice) continue;
-            for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
-                events.push(
-                    Object.freeze({
-                        type: "objective-choice-requested",
-                        objectiveId: objective.id,
-                        sourceObjectId: objective.sourceObjectId,
-                        landmarkId: landmark.id,
-                        playerId: player.id,
-                        position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-                    })
-                );
-            }
-            continue;
-        }
+        if (objective.type === "interact-choice") continue;
         const sequence = progress.objectiveSequence(objective.id);
         if (sequence) {
             const beforeRoutes = new Set(progress.snapshot().unlockedRouteIds);
