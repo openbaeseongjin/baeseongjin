@@ -138,12 +138,18 @@
 | [`bsh/scenario/4/4-8/README.md`](./bsh/scenario/4/4-8/README.md) | `bsh` Sector 04 General Finale(4-8) Blockout 후보·제작 규격, REV 1.2 — Cutter+Patrol+Wake Continuous Flow, Upper Trunk/Lower Feeder Status 병치, Wind Strength 재분류·D1 activation 좌표 정정 |
 | [`bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/4/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) | `bsh` Sector 04 Camera Zone/Story Presentation 점검·구현 인계 문서 — Camera Zone은 이미 구현 완료, Story ENTRY/POSITION/TRIGGER_CUE 바인딩 코드 반영 지점 정리 |
 | [`bsh/scenario/4/INTEGRATION-CROSS-VALIDATION-AUDIT.md`](./bsh/scenario/4/INTEGRATION-CROSS-VALIDATION-AUDIT.md) | `bsh` Sector 04 Master·Stage·Runtime 교차검증 감사 원본 기록 + 재검증 정정 addendum(4-1 reach drift는 실제로 FALSE ALARM이었음을 확인) |
-| [`bsh/scenario/5/README.md`](./bsh/scenario/5/README.md) | `bsh` Sector 05 Corporate Zone 마스터플랜 — Sealed Surface/Service Hardpoint 정적 규칙, Cutter Fire opt-in 모델 정합, Capacity→Priority→Authorization→Consequence Story Disclosure Ladder |
-| [`bsh/scenario/5/5-1/README.md`](./bsh/scenario/5/5-1/README.md) | `bsh` Sector 05 첫 Stage(5-1) Blockout 후보·제작 규격 — Enemy 없음, Sealed Surface/Service Hardpoint 공간 규칙 도입, 좌표 검증 완료 |
+| [`bsh/scenario/5/README.md`](./bsh/scenario/5/README.md) | `bsh` Sector 05 Continuity Control 마스터플랜, REV 3.0 — Sealed Corporate Surface/Service Hardpoint, AEGIS/Jammer/Artillery/Cutter 4대 Special Security, Corporate Authorization 3/3 Story Ladder. 5-1/5-5만 REV 3.x 상세로 동기화, 나머지는 draft 또는 레거시 |
+| [`bsh/scenario/5/5-1/README.md`](./bsh/scenario/5/5-1/README.md) | `bsh` Sector 05 Stage(5-1) CONTINUITY RECEPTION Blockout 후보·제작 규격, REV 3.1 — Enemy 없음, Sealed Corporate Surface/Service Hardpoint 공간 규칙 |
+| [`bsh/scenario/5/5-1/AREA-SPEC.json`](./bsh/scenario/5/5-1/AREA-SPEC.json) | 5-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Sealed Corporate Surface newSystems·Acceptance Tests |
+| [`bsh/scenario/5/5-1/RUNTIME-HANDOFF.md`](./bsh/scenario/5/5-1/RUNTIME-HANDOFF.md) | 5-1 Runtime 구현 인계 — Sealed Corporate Surface preset, Service Hardpoint 계약, 필수 테스트 목록 |
+| [`bsh/scenario/5/5-1/VALIDATION.md`](./bsh/scenario/5/5-1/VALIDATION.md) | 5-1 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
 | [`bsh/scenario/5/5-2/README.md`](./bsh/scenario/5/5-2/README.md) | `bsh` Sparse Hardpoint + Patrol Entry Timing Stage(5-2) Blockout 후보·제작 규격, 좌표 검증 완료 |
 | [`bsh/scenario/5/5-3/README.md`](./bsh/scenario/5/5-3/README.md) | `bsh` Cutter Recovery-Planning Stage(5-3) Blockout 후보·제작 규격 — Cutter Fire opt-in(`cutter-fire`) 모델 정합, 좌표 검증 완료 |
 | [`bsh/scenario/5/5-4/README.md`](./bsh/scenario/5/5-4/README.md) | `bsh` Sector 05 Rest Stage(5-4) Blockout 후보·제작 규격 — Enemy 없음, `GRID CAPACITY CRITICAL DEFICIT` 첫 단서, 좌표 검증 완료 |
-| [`bsh/scenario/5/5-5/README.md`](./bsh/scenario/5/5-5/README.md) | `bsh` Standard Sentry→Patrol 순차 보안 Stage(5-5) Blockout 후보·제작 규격 — `CONTINUITY PRIORITY / UPPER MAINTAIN` 첫 공개, 좌표 검증 완료 |
+| [`bsh/scenario/5/5-5/README.md`](./bsh/scenario/5/5-5/README.md) | `bsh` Sector 05 Stage(5-5) PRIORITY ROUTING HALL Blockout 후보·제작 규격, REV 3.8 — Jammer+AEGIS 결합, `PRIORITY DIRECTIVE 2/3` |
+| [`bsh/scenario/5/5-5/AREA-SPEC.json`](./bsh/scenario/5/5-5/AREA-SPEC.json) | 5-5 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Jammer/AEGIS/Sentry newSystems·Acceptance Tests |
+| [`bsh/scenario/5/5-5/RUNTIME-HANDOFF.md`](./bsh/scenario/5/5-5/RUNTIME-HANDOFF.md) | 5-5 Runtime 구현 인계 — Hardpoint Jammer 계약, Priority Directive 획득 흐름, 필수 테스트 목록 |
+| [`bsh/scenario/5/5-5/VALIDATION.md`](./bsh/scenario/5/5-5/VALIDATION.md) | 5-5 정적 검증 근거 — Launch sample별 Base Rope attach margin, 남은 Dynamic/Blocked 검증 항목 |
 | [`bsh/scenario/5/5-6/README.md`](./bsh/scenario/5/5-6/README.md) | `bsh` Body-shot vs Rope-cut Route Choice Stage(5-6) Blockout 후보·제작 규격 — Cutter Fire opt-in 모델 정합, `LOWER ASCENT ROUTING SUSPENSION AUTHORIZED` 첫 공개, 좌표 검증 완료 |
 | [`bsh/scenario/5/5-7/README.md`](./bsh/scenario/5/5-7/README.md) | `bsh` Story Consequence Peak Stage(5-7) Blockout 후보·제작 규격 — `LOWER SECTORS EVACUATION STATUS SUSPENDED` 명시, Sector04 A4/5-3·5-6 Cutter wording alignment 항목 RESOLVED 반영, 좌표 검증 완료 |
 | [`bsh/scenario/5/5-8/README.md`](./bsh/scenario/5/5-8/README.md) | `bsh` Sector 05 General Finale(5-8) Blockout 후보·제작 규격, REV 1.1 — 5-5와의 Geometry 반복 문제로 전면 재설계, WHO/WHY 조직 책임 확정·Rooftop Pad 03 탈출 목표, 좌표 검증 완료 |
