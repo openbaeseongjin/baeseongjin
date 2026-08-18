@@ -169,6 +169,17 @@ export function run() {
         "falling to the previous sector restores that sector's background theme"
     );
     const seamlessWorld = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 560 });
+    const sector01Landmark = seamlessWorld.landmarks.find(({ id }) => id === "sector-01:landmark:01");
+    const seamlessSector01Scene = {
+        ...currentScene,
+        player: { position: sector01Landmark.entry },
+        world: seamlessWorld,
+        worldProgress: {
+            currentSectorId: "sector-01",
+            currentLandmarkId: sector01Landmark.id
+        }
+    };
+    assert.equal(currentAuthoredArea(seamlessSector01Scene)?.legacyAreaId, "sector-01-01");
     const sector02Landmark = seamlessWorld.landmarks.find(({ id }) => id === "sector-02:landmark:01");
     const seamlessScene = {
         ...currentScene,
@@ -235,6 +246,20 @@ export function run() {
         sector0101DrawnImages.slice(-3),
         sector01LayerImages,
         "Sector 01-1 draws the shared far, mid, and near layers in depth order"
+    );
+    const seamlessSector01BackdropContext = recordingContext();
+    authoredBackdropRenderer.draw({
+        context: seamlessSector01BackdropContext,
+        scene: seamlessSector01Scene,
+        viewport
+    });
+    assert.deepEqual(
+        seamlessSector01BackdropContext.calls
+            .filter(([name]) => name === "drawImage")
+            .map(([, image]) => image)
+            .slice(-3),
+        sector01LayerImages,
+        "the seamless Sector 01 landmark resolves its legacy Area environment package"
     );
     const sector0101BottomContext = recordingContext();
     authoredBackdropRenderer.draw({

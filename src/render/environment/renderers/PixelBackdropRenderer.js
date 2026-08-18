@@ -52,7 +52,9 @@ export class PixelBackdropRenderer {
     }
 
     drawAuthoredAreaBackdrop(context, { area, viewport, scene }) {
-        const definition = this.authoredAreaEnvironmentDefinitions[area?.id];
+        const definition =
+            this.authoredAreaEnvironmentDefinitions[area?.legacyAreaId] ??
+            this.authoredAreaEnvironmentDefinitions[area?.id];
         if (!definition) return false;
         const layers = [...definition.backdrop.layers].sort((a, b) => a.depth - b.depth);
         if (!layers.some(({ frames }) => frames.length > 0)) return false;
