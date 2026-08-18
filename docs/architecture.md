@@ -220,6 +220,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `RewardSelection`은 세 explicit Node에서 동일한 결정적 3장 offer의 카드 이동·Confirm·진입 Input Gate를 공유한다. 고정 Foundation/Specialization tier를 별도 선택 시스템으로 복구하지 않는다.
 - `FoundationAugmentState`라는 호환 class 이름은 Player별 최대 6장 generic loadout, consumed source와 순간 runtime window를 소유한다. 카드 효과는 기존 Rope/Action 사건에서 한 번만 판정하고 이름과 무관한 전역 분기를 추가하지 않는다.
 - `interact-choice`는 개인 chooser 요청을 만들고 현재 채널 Player 전원의 해당 source 소비가 끝나면 공유 objective를 한 번 완료한다. 완료 전 Player 퇴장은 요구 집합에서 제거해 route 교착을 막는다. 공용 objective가 끝난 뒤 합류한 Player도 같은 Node에서 자기 chooser를 열 수 있지만 이미 열린 route를 다시 잠그지 않는다. 선택 카드·consumed source는 개인 부활·재접속·party wipe 뒤 유지되며, party wipe 뒤 소비한 Node를 다시 방문하면 chooser 없이 objective만 복구한다.
+- `SectorProgressController`는 일반 objective를 `currentLandmarkId`에 한정하지만, 같은 current Sector의 명시적 `interact-choice`는 모든 landmark에서 근접 검사한다. 실제 traversal이 entry trigger를 비껴 진행 landmark가 뒤처져도 플레이어가 물리적으로 도달한 Node chooser는 열리며, 다른 Sector와 거리 밖 source는 허용하지 않는다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
 - `PlayerCommandBatch`는 목표 틱과 플레이어별 단조 증가 `sequence`를 보존하고 플레이어 ID 순으로 정규화하는 전송 계약이다. 권위 서버는 이 순서 번호로 중복·역순 입력을 거부한다.
 - `AuthorityCommandInbox`는 승인 순서와 허용 틱 범위를 검사하고, 승인된 명령을 목표 틱별로 한 번만 제공한다. 이 상태는 게임 규칙이 아니라 권위 전송 경계에 머문다.

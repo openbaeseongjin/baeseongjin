@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
+import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
+import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
 import { advanceSectorProgress } from "../src/game/world/SectorProgressController.js";
 import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
 import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
@@ -25,6 +27,53 @@ function completeObjectives(progress, world, landmark) {
 export function run() {
     const world = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 320 });
     const progress = new SectorProgressState(world);
+    const futureChoiceObjective = world.objectives.find(
+        ({ landmarkId, type }) => landmarkId === "sector-01:landmark:04" && type === "interact-choice"
+    );
+    const futureChoiceSource = world.objects.find(({ id }) => id === futureChoiceObjective.sourceObjectId);
+    const staleProgressPlayer = player("stale-progress-player", futureChoiceSource.position);
+    const staleChoiceEvents = advanceSectorProgress({
+        world,
+        progress,
+        players: [staleProgressPlayer],
+        commandsByPlayerId: new Map([
+            [staleProgressPlayer.id, { horizontal: 0, vertical: -1, interact: true, action: false }]
+        ]),
+        dt: 0
+    });
+    assert.ok(
+        staleChoiceEvents.some(
+            ({ type, objectiveId }) => type === "objective-choice-requested" && objectiveId === futureChoiceObjective.id
+        ),
+        "a physically reached Node must request its chooser even when currentLandmarkId is stale"
+    );
+    assert.equal(progress.currentLandmarkId, "sector-01:landmark:01");
+
+    const staleSimulation = createCurrentGameSimulation({ worldSeed: 9182, playerId: "stale-simulation-player" });
+    staleSimulation.enemies = [];
+    const staleSimulationSource = staleSimulation.world.objects.find(
+        ({ id }) => id === "sector-01-04:maintenance-node"
+    );
+    staleSimulation.players[0].physics.position.set(staleSimulationSource.position.x, staleSimulationSource.position.y);
+    staleSimulation.step(
+        1 / 120,
+        createPlayerCommand(
+            {
+                horizontal: 0,
+                vertical: -1,
+                interact: true,
+                action: false,
+                pointer: { x: 0, y: 0, down: false },
+                viewport: { width: 1280, height: 720 }
+            },
+            { x: 0, y: 0 }
+        )
+    );
+    assert.ok(
+        staleSimulation.getFoundationReward(staleSimulation.players[0].id),
+        "the stale-landmark choice request must open the actual GameSimulation chooser"
+    );
+
     const first = world.landmarks[0];
     const second = world.landmarks[1];
     const firstObjective = world.objectives.find(({ id }) => id === first.objectiveIds[0]);
