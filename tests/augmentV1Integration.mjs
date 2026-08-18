@@ -120,8 +120,14 @@ export function run() {
         enemy: lethalEnemy,
         eventId: `${serverPlayer.id}:default-punch:0:impact-target:0`
     });
+    lethalEnemy.position.set(400, 500);
     const lethalReceipt = session.submitAugmentImpact(serverPlayer.id, lethalClaim);
     assert.equal(lethalReceipt.accepted, true);
+    assert.equal(
+        lethalReceipt.reason,
+        undefined,
+        "server target movement after the client impact must not reject a valid owner formula"
+    );
     assert.equal(lethalReceipt.resolution, "applied");
     assert.equal(lethalReceipt.knockbackApplied, false, "lethal damage skips its own movement");
     assert.equal(session.submitAugmentImpact(serverPlayer.id, lethalClaim), lethalReceipt, "same event is idempotent");

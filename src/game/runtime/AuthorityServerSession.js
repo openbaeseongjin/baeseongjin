@@ -1,9 +1,8 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
-import { WORLD_CONFIG } from "../config.js";
+import { COMBAT_CONFIG, WORLD_CONFIG } from "../config.js";
 import { createAugmentImpactReceipt } from "../network/AugmentImpactClaim.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
-import { createFoundationShearReceipt } from "../network/FoundationShearClaim.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import { createPlayerImpactReceipt } from "../network/PlayerImpactClaim.js";
@@ -60,7 +59,15 @@ export class AuthorityServerSession {
         }
         const existing = this.resolvedHitClaims.get(claim.predictionId);
         if (existing) return existing.receipt;
-        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
+        if (!this.resolvedProjectileSpawnClaims.has(claim.predictionId)) {
+            return createProjectileHitReceipt({
+                predictionId: claim.predictionId,
+                accepted: false,
+                reason: "spawn-not-authorized"
+            });
+        }
+        const minimumTick =
+            this.simulation.getTick() - Math.round(COMBAT_CONFIG.playerProjectileLifetimeSeconds / this.fixedDt);
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
         if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
             return createProjectileHitReceipt({
@@ -71,9 +78,7 @@ export class AuthorityServerSession {
         }
         const result = createProjectileHitReceipt({
             predictionId: claim.predictionId,
-            ...this.simulation.resolvePlayerProjectileClaim(authenticatedPlayerId, claim, {
-                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
-            })
+            ...this.simulation.resolvePlayerProjectileClaim(authenticatedPlayerId, claim)
         });
         if (result.accepted) {
             this.resolvedHitClaims.set(claim.predictionId, {
@@ -168,13 +173,13 @@ export class AuthorityServerSession {
         if (pendingRecovery) return pendingRecovery.receipt;
 
         const simulationResult = this.simulation.resolvePlayerImpactClaim(authenticatedPlayerId, claim);
-        if (!simulationResult.accepted && simulationResult.reason === "state-diverged") {
+        if (!simulationResult.accepted && simulationResult.reason === "recovery-required") {
             this.nextImpactRecoverySequence += 1;
             const recoveryId = `impact-recovery:${this.nextImpactRecoverySequence}`;
             const receipt = createPlayerImpactReceipt({
                 impactId: claim.impactId,
-                accepted: false,
-                reason: "state-diverged",
+                accepted: true,
+                resolution: "recovery-required",
                 recoveryId
             });
             this.pendingImpactRecoveries.set(recoveryKey, {
@@ -230,17 +235,6 @@ export class AuthorityServerSession {
         return receipt;
     }
 
-    submitFoundationShear(authenticatedPlayerId, claim) {
-        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
-            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
-        }
-        return createFoundationShearReceipt({
-            predictionId: claim.predictionId,
-            accepted: false,
-            reason: "retired-protocol"
-        });
-    }
-
     submitRopeImpact(authenticatedPlayerId, claim) {
         if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
@@ -258,9 +252,7 @@ export class AuthorityServerSession {
         }
         const receipt = createRopeImpactReceipt({
             predictionId: claim.predictionId,
-            ...this.simulation.resolveRopeImpactClaim(authenticatedPlayerId, claim, {
-                positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
-            })
+            ...this.simulation.resolveRopeImpactClaim(authenticatedPlayerId, claim)
         });
         if (receipt.accepted) {
             this.resolvedRopeImpactClaims.set(claim.predictionId, {
@@ -503,8 +495,10 @@ export class AuthorityServerSession {
         for (const [predictionId, entry] of this.resolvedHitClaims) {
             if (entry.resolvedAtTick < oldestRememberedTick) this.resolvedHitClaims.delete(predictionId);
         }
+        const oldestPlayerProjectileTick =
+            this.simulation.getTick() - Math.round(COMBAT_CONFIG.playerProjectileLifetimeSeconds / this.fixedDt);
         for (const [predictionId, entry] of this.resolvedProjectileSpawnClaims) {
-            if (entry.resolvedAtTick < oldestRememberedTick) {
+            if (entry.resolvedAtTick < oldestPlayerProjectileTick) {
                 this.resolvedProjectileSpawnClaims.delete(predictionId);
             }
         }

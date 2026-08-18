@@ -334,35 +334,36 @@ export class MultiplayerGameApp {
         }
         const gameplayCommand = commandForLocalSimulation(command, choosingFoundation);
         this.authority.advance(gameplayCommand);
-        const checkpointClaim = this.authority.submitReachedCheckpoint();
-        if (checkpointClaim) {
-            this.showCheckpointFeedback({
-                checkpointId: checkpointClaim.checkpointId,
-                position: checkpointClaim.feedbackPosition
-            });
-            this.audioBindings?.presentFrame({
-                checkpoint: { checkpointId: checkpointClaim.checkpointId, position: checkpointClaim.feedbackPosition },
-                context: initialAudioContext
-            });
-        }
-        if (this.authority.submitReachedSummit()) {
-            this.localRunCompleted = true;
-            this.audioBindings?.presentFrame({ scene: { ...initialAudioContext, runState: "completed" } });
-            return;
+        if (current.state.progressKind === "area") {
+            const checkpointClaim = this.authority.submitReachedCheckpoint();
+            if (checkpointClaim) {
+                this.showCheckpointFeedback({
+                    checkpointId: checkpointClaim.checkpointId,
+                    position: checkpointClaim.feedbackPosition
+                });
+                this.audioBindings?.presentFrame({
+                    checkpoint: {
+                        checkpointId: checkpointClaim.checkpointId,
+                        position: checkpointClaim.feedbackPosition
+                    },
+                    context: initialAudioContext
+                });
+            }
+            if (this.authority.submitReachedSummit()) {
+                this.localRunCompleted = true;
+                this.audioBindings?.presentFrame({ scene: { ...initialAudioContext, runState: "completed" } });
+                return;
+            }
         }
         this.authority.resolveOwnerCollisions(current.state.players.filter(({ id }) => id !== this.authority.playerId));
         const predictedEvents = this.authority.drainPredictedEvents();
         this.queuePlayerPresentationEvents(predictedEvents);
         this.applyFoundationFeedback([...events, ...predictedEvents], dt);
-        this.authority.drainFoundationShearReceipts();
         this.authority.drainRopeImpactReceipts();
         this.authority.drainAugmentImpactReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
         this.combatFeedback.apply(predictedEvents);
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
-        for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-foundation-shear-hit")) {
-            this.authority.submitFoundationShear(event);
-        }
         for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "rope-impact")) {
             this.authority.submitRopeImpact(event);
         }

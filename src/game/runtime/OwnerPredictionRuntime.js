@@ -150,7 +150,7 @@ export class OwnerPredictionRuntime {
                   foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null
               };
         this.simulation.preparePrediction(
-            snapshot.state.enemies ?? [],
+            this.hydrateEnemyNetworkStates(snapshot.state.enemies ?? []),
             progress.activeCheckpointId,
             progress.respawnAnchorId
         );
@@ -161,6 +161,10 @@ export class OwnerPredictionRuntime {
             );
         }
         if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
+    }
+
+    hydrateEnemyNetworkStates(states) {
+        return this.simulation.hydrateEnemyNetworkStates(states);
     }
 
     reconcile(snapshot, pendingBatches) {

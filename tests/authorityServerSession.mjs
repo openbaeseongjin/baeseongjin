@@ -481,10 +481,10 @@ export function run() {
     const divergentReceipt = combatSession.submitImpactClaim(combatPlayer.id, divergentClaim);
     assert.equal(
         divergentReceipt.accepted,
-        false,
-        "a mismatched compact impact must request state recovery instead of pretending to converge"
+        true,
+        "a mismatched compact impact must request recovery without rejecting the victim outcome"
     );
-    assert.equal(divergentReceipt.reason, "state-diverged");
+    assert.equal(divergentReceipt.resolution, "recovery-required");
     assert.match(divergentReceipt.recoveryId, /^impact-recovery:/);
     assert.equal(combatPlayer.health, 99, "a digest probe must not leave its provisional transition on the server");
     assert.equal(
@@ -540,10 +540,10 @@ export function run() {
     const missingProjectileReceipt = combatSession.submitImpactClaim(combatPlayer.id, missingProjectileClaim);
     assert.equal(
         missingProjectileReceipt.accepted,
-        false,
+        true,
         "an expired projectile may request recovery but must not discard the victim result"
     );
-    assert.equal(missingProjectileReceipt.reason, "state-diverged");
+    assert.equal(missingProjectileReceipt.resolution, "recovery-required");
     const missingProjectileRecovery = createPlayerImpactClaim({
         ...missingProjectileClaim,
         outcome: {

@@ -14,11 +14,6 @@ import {
     createFoundationSelectionClaim,
     serializeFoundationSelectionClaim
 } from "../network/FoundationSelectionClaim.js";
-import {
-    createFoundationShearClaim,
-    createFoundationShearReceipt,
-    serializeFoundationShearClaim
-} from "../network/FoundationShearClaim.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createSummitClaim, createSummitClaimReceipt, serializeSummitClaim } from "../network/SummitClaim.js";
@@ -88,7 +83,6 @@ export class RemoteGameAuthority {
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
         this.foundationSelectionReceipts = [];
-        this.foundationShearReceipts = [];
         this.hitClaimReceipts = [];
         this.projectileSpawnClaimReceipts = [];
         this.impactClaimReceipts = [];
@@ -190,8 +184,6 @@ export class RemoteGameAuthority {
                         this.foundationSelectionReceipts.push(Object.freeze({ ...message.payload }));
                     } else if (message.type === "augment-offer-receipt") {
                         this.augmentOfferReceipts.push(Object.freeze({ ...message.payload }));
-                    } else if (message.type === "foundation-shear-receipt") {
-                        this.foundationShearReceipts.push(createFoundationShearReceipt(message.payload));
                     } else if (message.type === "hit-claim-receipt") {
                         this.recordHitClaimReceipt(createProjectileHitReceipt(message.payload));
                     } else if (message.type === "projectile-spawn-claim-receipt") {
@@ -201,7 +193,7 @@ export class RemoteGameAuthority {
                     } else if (message.type === "impact-claim-receipt") {
                         const receipt = createPlayerImpactReceipt(message.payload);
                         const pending = this.pendingImpactClaims.get(receipt.impactId);
-                        if (!receipt.accepted && receipt.reason === "state-diverged" && pending) {
+                        if (receipt.accepted && receipt.resolution === "recovery-required" && pending) {
                             const recovery = this.ownerRuntime?.impactRecoveryState();
                             if (!recovery) throw new Error("impact recovery requires an owner state");
                             const outcome = {
@@ -250,13 +242,20 @@ export class RemoteGameAuthority {
     }
 
     acceptSnapshot(serialized) {
-        const snapshot = deserializeWorldSnapshotEnvelope(serialized);
+        const receivedSnapshot = deserializeWorldSnapshotEnvelope(serialized);
         this.ownerRuntime ??= new OwnerPredictionRuntime({
             ownerId: this.playerId,
             simulation: createGameSimulationForWorldRevision({
-                worldSeed: snapshot.worldSeed,
+                worldSeed: receivedSnapshot.worldSeed,
                 playerId: this.playerId,
-                worldRevision: snapshot.worldRevision
+                worldRevision: receivedSnapshot.worldRevision
+            })
+        });
+        const snapshot = Object.freeze({
+            ...receivedSnapshot,
+            state: Object.freeze({
+                ...receivedSnapshot.state,
+                enemies: Object.freeze(this.ownerRuntime.hydrateEnemyNetworkStates(receivedSnapshot.state.enemies))
             })
         });
         if (!this.stream.acceptSnapshot(snapshot)) return false;
@@ -525,21 +524,6 @@ export class RemoteGameAuthority {
         return true;
     }
 
-    submitFoundationShear(event) {
-        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
-        if (!this.submitOwnerMotion()) return false;
-        const claim = createFoundationShearClaim({
-            predictionId: event.predictionId,
-            targetId: event.targetId,
-            targetKind: event.targetKind,
-            clientTick: event.tick,
-            anchor: event.anchor,
-            playerPosition: event.playerPosition
-        });
-        this.socket.send(JSON.stringify({ type: "foundation-shear", payload: serializeFoundationShearClaim(claim) }));
-        return true;
-    }
-
     submitReachedCheckpoint() {
         if (this.pendingCheckpointId || this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) {
             return null;
@@ -569,12 +553,6 @@ export class RemoteGameAuthority {
     drainFoundationSelectionReceipts() {
         const receipts = Object.freeze(this.foundationSelectionReceipts);
         this.foundationSelectionReceipts = [];
-        return receipts;
-    }
-
-    drainFoundationShearReceipts() {
-        const receipts = Object.freeze(this.foundationShearReceipts);
-        this.foundationShearReceipts = [];
         return receipts;
     }
 

@@ -3,6 +3,7 @@ import { Vector2 } from "../src/game-kit/index.js";
 import { EnemyObject } from "../src/game/combat/EnemyObject.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createPlayerCommandBatch } from "../src/game/network/PlayerCommandBatch.js";
+import { createProjectileHitClaim } from "../src/game/network/ProjectileHitClaim.js";
 import { AuthorityServerSession } from "../src/game/runtime/AuthorityServerSession.js";
 import { buildAuthoritySnapshot } from "../src/game/runtime/AuthoritySnapshotBuilder.js";
 import { OwnerPredictionRuntime } from "../src/game/runtime/OwnerPredictionRuntime.js";
@@ -141,5 +142,38 @@ export function run() {
         claimServer.projectiles[1].position.x,
         farClaim.position.x,
         "the shared projectile must use the owner's claimed spawn position without re-deriving it"
+    );
+
+    const hitServer = createCurrentGameSimulation({ worldSeed: 2718 });
+    const hitOwner = hitServer.players[0];
+    hitOwner.weapon.isEnabled = true;
+    const hitEnemy = enemyNear(hitServer);
+    const hitSession = new AuthorityServerSession({ simulation: hitServer });
+    const hitTick = hitServer.getTick() + 1;
+    const spawnReceipt = hitSession.submitProjectileSpawnClaim(hitOwner.id, {
+        predictionId: `${hitOwner.id}:${hitTick}`,
+        clientTick: hitTick,
+        targetId: hitEnemy.id,
+        position: hitOwner.physics.position
+    });
+    assert.equal(spawnReceipt.accepted, true);
+    for (let step = 0; step < 60; step += 1) hitSession.advance();
+    const hitClaimTick = hitServer.getTick();
+    const observedPosition = { x: hitEnemy.position.x, y: hitEnemy.position.y };
+    hitEnemy.position.x += 600;
+    hitServer.projectiles = [];
+    const hitReceipt = hitSession.submitHitClaim(
+        hitOwner.id,
+        createProjectileHitClaim({
+            predictionId: `${hitOwner.id}:${hitTick}`,
+            targetId: hitEnemy.id,
+            clientTick: hitClaimTick,
+            position: observedPosition
+        })
+    );
+    assert.equal(
+        hitReceipt.accepted,
+        true,
+        "server trajectory drift or earlier replica expiry must not reject an authorized owner hit"
     );
 }

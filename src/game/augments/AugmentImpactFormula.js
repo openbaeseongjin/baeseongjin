@@ -80,13 +80,6 @@ export function validateAugmentImpactFormula(player, claim, target = null, { pos
     } else if (!nearlyEqual(claim.damage, resolved.damage)) {
         return Object.freeze({ valid: false });
     }
-    if (target) {
-        const contactDistance = Math.hypot(
-            claim.contactPosition.x - target.position.x,
-            claim.contactPosition.y - target.position.y
-        );
-        if (contactDistance > target.radius + positionTolerance) return Object.freeze({ valid: false });
-    }
     const sourceDistance = Math.hypot(
         claim.sourcePosition.x - claim.contactPosition.x,
         claim.sourcePosition.y - claim.contactPosition.y

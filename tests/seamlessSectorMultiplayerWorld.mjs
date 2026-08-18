@@ -16,6 +16,11 @@ export function run() {
     assert.equal(snapshot.state.respawnAnchorId, "sector-01:entry");
     assert.equal("activeCheckpointId" in snapshot.state, false);
     assert.equal(snapshot.state.worldProgress.currentSectorId, "sector-01");
+    assert.equal("enemyType" in snapshot.state.enemies[0], false, "authored enemy static data must not repeat at 20Hz");
+    assert.ok(
+        JSON.stringify(snapshot.state.enemies).length < JSON.stringify(server.enemyStates()).length * 0.6,
+        "dynamic enemy replication must materially reduce the enemy payload"
+    );
     assert.deepEqual(snapshot.state.partyWipeBaseline, {
         sectorId: "sector-01",
         revision: 0,
@@ -33,6 +38,11 @@ export function run() {
         })
     });
     predictor.reconcile(snapshot, []);
+    assert.equal(
+        predictor.simulation.enemyStates()[0].enemyType,
+        server.enemyStates()[0].enemyType,
+        "the client world revision must hydrate omitted enemy static data"
+    );
     assert.equal(predictor.renderSnapshot().world.definitionRevision, SEAMLESS_SECTOR_RUNTIME_REVISION);
     assert.equal(predictor.simulation.activeRespawnAnchor.id, "sector-01:entry");
     assert.deepEqual(predictor.simulation.worldProgress.snapshot(), snapshot.state.worldProgress);
