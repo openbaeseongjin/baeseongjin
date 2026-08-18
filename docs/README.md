@@ -52,7 +52,7 @@
 | 문서 | 역할 |
 | --- | --- |
 | [`multiplayer-synchronization.md`](./multiplayer-synchronization.md) | **현재 기준.** 멀티 권한과 동기화 계약 |
-| [`client-first-network-feel.md`](./client-first-network-feel.md) | 클라이언트 우선 구조 전환 기록 |
+| [`client-first-network-feel.md`](./client-first-network-feel.md) | 클라이언트 우선 구조의 검증 관점과 폐기한 이전 전제 |
 | [`two-device-playtest-protocol.md`](./two-device-playtest-protocol.md) | 실제 두 기기 검증 절차 |
 | [`multiplayer-sharing.md`](./multiplayer-sharing.md) | 게임 서버 공유와 Pages 배포 절차 |
 
@@ -72,6 +72,8 @@
 
 ## 작업자별 문서
 
+Stage README와 과거 제작 자료에는 0.26.0 이전 Foundation·Impulse·Relay·Shear 아이디어가 authored history로 남아 있을 수 있다. 현재 Runtime 효과와 멀티 claim 권위는 [`augment-v1.md`](./augment-v1.md)와 [`multiplayer-synchronization.md`](./multiplayer-synchronization.md)이며, legacy 이름을 새 구현 입력이나 필수 Route 조건으로 사용하지 않는다.
+
 | 문서 | 역할 |
 | --- | --- |
 | [`bsh/scenario-skeleton-v0.1.html`](./bsh/scenario-skeleton-v0.1.html) | `bsh` 시나리오 발표 자료 |
@@ -87,7 +89,7 @@
 | [`bsh/scenario/1/1-3/README.md`](./bsh/scenario/1/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md) | 1-3 Runtime 좌표·Camera·Sentry FSM·Story·Asset 인계 계약 |
 | [`bsh/scenario/1/1-4/README.md`](./bsh/scenario/1/1-4/README.md) | `bsh` 첫 Rope Augment 3지선다·Calibration Stage(1-4) Blockout 후보·제작 규격 |
-| [`bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md) | 1-4 Runtime 좌표·Camera·Foundation 선택 구현 Gap 계약 |
+| [`bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md) | 1-4 Runtime 좌표·Camera·generic Augment 선택 구현 Gap 계약 |
 | [`bsh/scenario/1/1-5/README.md`](./bsh/scenario/1/1-5/README.md) | `bsh` 첫 Build Expression·Augment별 경로 Stage(1-5) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md) | 1-5 Runtime 좌표 대조·Camera/Story 미구현 명시 계약 |
 | [`bsh/scenario/1/1-6/README.md`](./bsh/scenario/1/1-6/README.md) | `bsh` 첫 Wind·지속풍과 주기풍 Stage(1-6) Blockout 후보·제작 규격 |

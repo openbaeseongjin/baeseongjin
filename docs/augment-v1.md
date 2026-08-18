@@ -2,6 +2,8 @@
 
 이 문서는 0.26.0 증강 Runtime과 0.28.0 획득 topology의 제품·수치·멀티플레이 기준이다. 과거 Foundation 3종과 Foundation별 Specialization은 이 계약으로 대체되며, 호환 ID는 이전 snapshot을 한 번 읽는 migration 입력으로만 사용한다.
 
+`impulse-coil`, `relay-link`, `shear-current`는 각각 현재 카드로 정규화하는 legacy ID다. Foundation Shear 전용 network claim과 `foundation-shear-hit` 판정은 현행 계약이 아니며, 감전 로프를 포함한 Rope·Action 피해는 모두 generic `augment-impact` 경계를 사용한다. Stage 문서의 옛 Profile·Shear 문구는 authored history이지 현재 Runtime 구현 지시가 아니다.
+
 ## 제품 의도
 
 - 증강은 Rope 중심 플레이스타일을 Run마다 다르게 조합해 반복 플레이 폭을 만든다.
