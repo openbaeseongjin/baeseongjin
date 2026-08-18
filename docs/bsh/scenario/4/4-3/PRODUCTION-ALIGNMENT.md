@@ -1,43 +1,63 @@
 # SECTOR 04-3 — PRODUCTION ALIGNMENT
 
-*CUTTER + WAKE · CAMERA · REV 1.0*
+Status: **MIGRATION REQUIRED**
 
-본 문서는 [4-3 시나리오](./README.md)와 현재 `Sector04AreaCatalog` 구현을 연결한다. 4-3은 첫 Transit Wake + Cutter 결합 Stage이며 현재 standalone catalog에서 `GRAYBOX READY` 상태다.
+Latest checked main:
 
-## 1. 현재 판정
+```text
+b6e5b640f04135545341d3368a843b45c35fcedd
+```
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `GRAYBOX READY / STANDALONE ONLY` | 메인 authored chain 미연결 |
-| Geometry / Gate | `IMPLEMENTED` | bounds `1472×1472`, route / recovery / gate 구현 |
-| Cutter | `IMPLEMENTED` | `cutter-sentry-01` 한 기체가 `cutter-fire` 규칙으로 배치돼 있다 |
-| Wake | `IMPLEMENTED` | `freight-wake` pulsed zone이 들어가 있다 |
-| Camera | `IMPLEMENTED` | `cameraZones` 5개 구현 |
+## Current source Runtime
 
-## 2. Runtime 좌표 / Stable ID 요약
+`sector-04-03` is still:
 
-- Area: `sector-04-03`, entry `(-560,-32)`, exit `(-80,-1440)`, next `sector-04-04`
-- Grapple: `A0(-432,-128)`, `W1(-176,-384)`, `W2(96,-544)`, `W3(256,-736)`, `A4(96,-992)`, `A5(-160,-1184)`, `A6(-320,-1312)`
-- Recovery: `R1(-240,-664)`, `R2(64,-1112)`
-- Cutter: `cutter-sentry-01(448,-640)`, activation `(-128,-832,704×480)`
-- Wake: `sector-04-03:freight-wake`, bounds `(-208,-832,560×544)`, direction `(+1,0)`, cycle `1.75 / 0.7 / 1.4 / 0.3`, strength `360`
-- Gate set(exitBlock 표준): `exit-deck(-288,-1347,416)`, `exit-gate(-112,-1347)`, `exit-panel(-224,-1347)`, exit `(-112,-1379)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
+```text
+FREIGHT BYPASS
+CUTTER + TRANSIT WAKE
+Cutter Sentry ×1
+Wind strength 360 →
+cycle 1.75 / 0.70 / 1.40 / 0.30
+```
 
-## 3. Camera · Story 상태
+## REV2.3 target
 
-- Camera zones: `entry-wake-read`, `combined-freight`, `cutter-exit`, `upper-decompression`, `gate`
-- Zone 값: `(-352~0,0.95/0.72)`, `(-736~-352,0.88/0.7)`, `(-992~-736,0.9/0.7)`, `(-1184~-992,0.95/0.72)`, `(-1472~-1184,1/0.72)`
-- `storyTriggers`: `freight-entry`, `wake-warning`, `combined-commit`, `decompression`
-- `cueIds`: `freight-bypass`, `transit-wake`, `cutter-fire`
+```text
+SKY GARDEN TERRACES
+Guard A: Perimeter Loop → Persistent Pursuit
+Guard B: Trellis Sweep → Persistent Pursuit
+Crosswind: same existing 360 pulsed baseline
+Guard Wind Drift: new
+Cutter: none
+Scanner: none
+```
 
-## 4. 검증 근거
+## Verified existing facts
 
-- Source: `src/game/world/areas/sector04/Sector04AreaCatalog.js`
-- Tests: `tests/sector04AreaCatalog.mjs`, `tests/worldForceField.mjs`, `tests/combatSystems.mjs`
-- 미확인: wake + cutter 동시 체감, 브라우저 플레이, 메인 world 연결
+- `sampleWorldForce()` owns Wind phase/direction/strength/shadow evaluation.
+- GameSimulation applies sampled Wind to Player velocity only.
+- Enemy Patrol supports arbitrary 2D points in Runtime.
+- PursuitEnemyBehavior exists.
+- Current Pursuit still reacquires inside activation/acquireRange and clears target on seek reset.
+- Enemy has no Player-like velocity body for World Wind.
 
-## 5. 남은 blocker / asset handoff
+## Gaps
 
-- Wake source / warning lamp / cutter audiovisual presentation은 아직 mock 수준이다.
-- README가 요구한 first combination fairness는 실제 플레이에서 확인이 필요하다.
-- 4-3 이후 4-4 rest 대비가 충분한지 standalone playtest가 남아 있다.
+```text
+sector04-persistent-guard-v1 = NOT IMPLEMENTED
+guard-wind-drift-v1         = NOT IMPLEMENTED
+```
+
+Guard Wind Drift must be authoritative and additive after primary AI movement.
+
+## AREA-SPEC standard
+
+Package is authored for REV1.1 Seamless Sector semantics:
+
+- `sourceExit` = legacy source geometry
+- `progression` = real connector authority
+- runtimeModel = `seamless-sector-landmark-v1`
+
+Generic enemy patrol validation is still start/end-oriented, so validator support for the new integrated Guard preset must be added rather than flattening the approved choreography.
+
+Scenario Art: **HOLD** until runtime + graybox alignment.

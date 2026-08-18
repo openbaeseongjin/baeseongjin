@@ -1,0 +1,467 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 4,
+    "stage": 3,
+    "legacyStageAlias": "4-3",
+    "sourceAreaId": "sector-04-03",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "SKY GARDEN TERRACES",
+    "subtitle": "CROSSWIND PURSUIT"
+  },
+  "bounds": {
+    "width": 1500,
+    "height": 1500
+  },
+  "entry": {
+    "id": "entry",
+    "x": -540,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "safe-deck",
+      "x": -540,
+      "y": 0,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "lower-deck",
+      "preset": "safe-deck",
+      "x": 140,
+      "y": -350,
+      "width": 320,
+      "height": 32
+    },
+    {
+      "id": "shelter-deck",
+      "preset": "safe-deck",
+      "x": -40,
+      "y": -700,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "exposed-deck",
+      "preset": "safe-deck",
+      "x": 370,
+      "y": -1010,
+      "width": 300,
+      "height": 32
+    },
+    {
+      "id": "r1",
+      "preset": "recovery-deck",
+      "x": -150,
+      "y": -445,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r2",
+      "preset": "recovery-deck",
+      "x": 210,
+      "y": -790,
+      "width": 230,
+      "height": 16
+    },
+    {
+      "id": "r3",
+      "preset": "recovery-deck",
+      "x": -80,
+      "y": -1120,
+      "width": 220,
+      "height": 16
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "a1",
+      "label": "A1",
+      "x": -280,
+      "y": -200
+    },
+    {
+      "id": "a2",
+      "label": "A2",
+      "x": 340,
+      "y": -540
+    },
+    {
+      "id": "a3",
+      "label": "A3",
+      "x": 230,
+      "y": -845
+    },
+    {
+      "id": "a4",
+      "label": "A4",
+      "x": 100,
+      "y": -1160
+    }
+  ],
+  "enemies": [
+    {
+      "id": "guard-a",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -390,
+      "y": -390,
+      "activation": {
+        "x": -520,
+        "y": -650,
+        "width": 940,
+        "height": 330
+      },
+      "patrolChoreography": {
+        "mode": "loop",
+        "points": [
+          {
+            "x": -390,
+            "y": -390
+          },
+          {
+            "x": 260,
+            "y": -390
+          },
+          {
+            "x": 260,
+            "y": -610
+          },
+          {
+            "x": -390,
+            "y": -610
+          }
+        ],
+        "speed": 54,
+        "waitSeconds": 0.18
+      },
+      "pursuitBounds": {
+        "x": -720,
+        "y": -1400,
+        "width": 1440,
+        "height": 1400
+      },
+      "windResponseProfile": "guard-wind-drift-v1"
+    },
+    {
+      "id": "guard-b",
+      "preset": "sector04-persistent-guard-v1",
+      "x": 330,
+      "y": -780,
+      "activation": {
+        "x": -20,
+        "y": -1110,
+        "width": 500,
+        "height": 420
+      },
+      "patrolChoreography": {
+        "mode": "pingpong",
+        "points": [
+          {
+            "x": 330,
+            "y": -780
+          },
+          {
+            "x": 80,
+            "y": -920
+          },
+          {
+            "x": 330,
+            "y": -1050
+          }
+        ],
+        "speed": 66,
+        "waitSeconds": 0.25
+      },
+      "pursuitBounds": {
+        "x": -720,
+        "y": -1400,
+        "width": 1440,
+        "height": 1400
+      },
+      "windResponseProfile": "guard-wind-drift-v1"
+    }
+  ],
+  "scannerGroups": [],
+  "windZones": [
+    {
+      "id": "sky-garden-crosswind",
+      "x": -460,
+      "y": -1080,
+      "width": 980,
+      "height": 360,
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "mode": "pulsed",
+      "strength": 360,
+      "cycle": {
+        "lull": 1.75,
+        "warning": 0.7,
+        "active": 1.4,
+        "decay": 0.3
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "id": "final-deck-reached",
+      "type": "reach",
+      "preset": "reach-deck"
+    },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "entry",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "exit"
+    ],
+    "mandatory": [
+      "entry",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": [
+      {
+        "from": "entry",
+        "to": [
+          "a3",
+          "a4",
+          "exit"
+        ],
+        "reason": "Lower Garden and Guard A read must not be skipped."
+      },
+      {
+        "from": "shelter-deck",
+        "to": [
+          "exit"
+        ],
+        "reason": "Crosswind + Guard B combined beat must remain."
+      }
+    ]
+  },
+  "recovery": [
+    {
+      "id": "recover-r1",
+      "failureZone": "r1",
+      "recoverTo": {
+        "x": -150,
+        "y": -469
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r2",
+      "failureZone": "r2",
+      "recoverTo": {
+        "x": 210,
+        "y": -814
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r3",
+      "failureZone": "r3",
+      "recoverTo": {
+        "x": -80,
+        "y": -1144
+      },
+      "maxRetrySeconds": 5
+    }
+  ],
+  "sourceExit": {
+    "deckX": 500,
+    "deckTopY": -1370,
+    "deckWidth": 380,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "4-4",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "exit-panel-engaged"
+    ]
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "garden-entry",
+        "minY": -320,
+        "maxY": 0,
+        "desktopZoom": 0.95,
+        "mobileZoom": 0.72
+      },
+      {
+        "id": "guard-a-loop",
+        "minY": -680,
+        "maxY": -320,
+        "desktopZoom": 0.9,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "wind-preview",
+        "minY": -800,
+        "maxY": -680,
+        "desktopZoom": 0.92,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "crosswind-combined",
+        "minY": -1180,
+        "maxY": -800,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "exit-pursuit",
+        "minY": -1500,
+        "maxY": -1180,
+        "desktopZoom": 0.94,
+        "mobileZoom": 0.72
+      }
+    ]
+  },
+  "story": {
+    "planningTriggers": [
+      "sky-garden-resident-amenity",
+      "exterior-weather-safety-cycling",
+      "automated-security-persists"
+    ],
+    "runtimePresentations": []
+  },
+  "runtimeDependencies": {
+    "required": [
+      {
+        "id": "patrol-drone-t1"
+      }
+    ],
+    "newSystems": [
+      {
+        "id": "sector04-persistent-guard-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "guard-wind-drift-v1",
+        "status": "NOT_IMPLEMENTED"
+      }
+    ]
+  },
+  "forbidden": [
+    "Cutter / rope-cut enemy in 4-3",
+    "Scanner in 4-3",
+    "third Guard",
+    "Augment Node in 4-3 before Sector04 source topology is approved",
+    "kill gate",
+    "aggro reset at shelter-deck",
+    "waiting for LULL as the only valid Wind solution",
+    "Guard immune to Crosswind",
+    "Player and Guard required to share identical Wind factor",
+    "Wind affecting enemy projectiles unless separately implemented and approved",
+    "mandatory Augment",
+    "separate Safe / Flow route branches"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "area-spec-schema-valid",
+      "type": "schema",
+      "requirement": "npm run validate:area-specs가 4-3 AREA-SPEC을 통과해야 하며 신규 Guard preset/validator support가 정합해야 한다.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "base-rope-static-reach",
+      "type": "geometry",
+      "requirement": "A1~A4 필수 Hook은 Base 400px보다 충분한 margin을 유지한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "mandatory-route-clear-zero-impulse",
+      "type": "geometry",
+      "requirement": "공식 계약대로 swingImpulse=0에서도 route.mandatory가 성립해야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-a-loop-choreography",
+      "type": "runtime",
+      "requirement": "Guard A는 발각 전 4점 Loop, 발각 후 Persistent Pursuit.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-b-wind-sweep",
+      "type": "runtime",
+      "requirement": "Guard B는 3점 Sweep 중 Wind ACTIVE/DECAY에서 Guard Drift를 받는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "persistent-pursuit-through-wind",
+      "type": "runtime",
+      "requirement": "Guard A를 살리면 Wind/B band까지 추격하며 Wind zone 진입 후 Drift가 적용된다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-wind-factor-normal",
+      "type": "runtime",
+      "requirement": "일반 Patrol/Pursuit 초기 factor 0.30. Behavior는 locked, 수치는 playtest 조정 가능.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-wind-factor-dash",
+      "type": "runtime",
+      "requirement": "Pursuit Dash 초기 factor 0.12.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "wind-not-wait-gate",
+      "type": "traversal",
+      "requirement": "LULL뿐 아니라 ACTIVE/DECAY에도 유효한 Base progression이 있어야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "two-pursuer-crosswind-survivable",
+      "type": "traversal",
+      "requirement": "A+B 생존 worst case에서도 Base Rope로 읽히고 생존 가능해야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "recovery-does-not-clear-alert",
+      "type": "runtime",
+      "requirement": "R1/R2/R3이 Alert를 해제하지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "augment-regression",
+      "type": "regression",
+      "requirement": "Long Rope/Fast Recover/Release Propulsion/Dash/Slow Fall은 표현 이점만 제공한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "camera-pursuit-readability",
+      "type": "camera",
+      "requirement": "Crosswind에서 Player/Anchor/B/A pressure/Wind phase를 함께 읽을 수 있어야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "multiplayer-wind-authority",
+      "type": "multiplayer",
+      "requirement": "Guard Drift/Pursuit position은 authoritative simulation으로 replicate되어야 한다.",
+      "automation": "MANUAL"
+    }
+  ]
+}
