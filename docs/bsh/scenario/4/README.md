@@ -1,2624 +1,1599 @@
-# SECTOR 04 — TRANSIT / INFRASTRUCTURE MASTER PLAN
+# SECTOR 04 — UPPER RESIDENTIAL / AMENITY DISTRICT
 
-*MASTER PLAN CANDIDATE · REV 1.1 — CUTTER FIRE OPT-IN HARDENING RESOLVED*
+*MASTER PLAN CANDIDATE · REV 2.3 — PERSISTENT PURSUIT SECURITY*
 
-`SECTOR 04 TRANSIT / INFRASTRUCTURE` · `MOMENTUM UNDER INTERRUPTION` · `CUTTER FIRE` · `TRANSIT WAKE` · `CONTINUOUS SPEED FLOW`
+`SECTOR 04 UPPER RESIDENTIAL / AMENITY DISTRICT` · `PRIVILEGE IS PROTECTED` · `PATROL-HEAVY SECURITY` · `LONG-ARC ROPE PLAY` · `SECTOR 02 MIRROR` · `SECTOR 05 HANDOFF`
 
-| 항목 | REV 1.1 기준 |
+| 항목 | REV 2.1 기준 |
 |---|---|
-| Status | HYPOTHESIS — MASTER PLAN CANDIDATE |
-| Authoring Snapshot | `37ebeb90a2f2197af0420c0a0b00970eab41dea7` |
-| Sector Role | Commercial District 이후 도시의 대형 이동·전력·환기 Backbone 진입 |
-| Core Gameplay Shift | Active Route Control → Momentum Under Interruption |
-| Core Story Shift | “누가 위쪽 이동 우선권을 가졌지?” → “왜 Lower Ascent Feeder만 격리됐지?” |
-| Carry Build | Foundation KEEP 구현, first Specialization은 기획·runtime pending |
-| New Rope Mode | NONE |
-| New Input | NONE |
-| New Growth Tier | NONE — Growth Gate remains HOLD |
-| Primary New Threat | CUTTER FIRE — existing Rope-Cut capability, new player-facing rule |
-| Secondary Environment | TRANSIT WAKE / PRESSURE PULSE — reuse existing deterministic Wind |
-| Moving Platform / Train Collision | TECH SPIKE ONLY — not mandatory canon |
-| New Enemy AI Type | NONE |
-| Existing Enemy Families | Sentry T1 / Patrol Drone T1 |
-| Boss | 4-8 내부 NONE; Post-Sector 04 Boss / Transition TBD |
-| General Stages | 8 authored progression regions |
-| Sector 04 Runtime | 4-1~4-8 standalone `GRAYBOX READY`, 메인 월드 미연결 |
-| Approved Gameplay Art | HOLD until Stage별 Approved Blockout·대표 Camera Shot 검증 |
+| Status | DESIGN LOCKED AT MASTER CONCEPT / PATROL CHOREOGRAPHY + PERSISTENT PURSUIT ADOPTED / INDIVIDUAL STAGE BLOCKOUTS PENDING |
+| Latest Main Checked | `8afd16bc76462436490fe7c753611c2ecf36b548` |
+| World Identity | **UPPER RESIDENTIAL / AMENITY DISTRICT — 상층 주거·여가·지원 생활권** |
+| Sector Role | Sector 02 Worker District의 사회적·공간적 Mirror / Sector 05 Corporate로 넘어가는 상층 생활권 |
+| Core Theme | **PRIVILEGE IS PROTECTED** |
+| Core Gameplay | **PATROL READ → DETECTION → PERSISTENT PURSUIT → OUTRUN OR KILL → LONG-ARC ROPE CONTINUATION** |
+| Primary Enemy | `Patrol Drone T1` — current implemented moving-security family |
+| Humanoid Guard | NOT IMPLEMENTED — Master mandatory requirement 아님 |
+| Cutter | Limited reuse candidate from 4-6 onward only |
+| Wind | Limited reuse as upper-level Crosswind candidate at exposed terraces |
+| Scanner | NONE as Sector core |
+| New Rope Mode / New Input | NONE |
+| New Mandatory Augment | NONE |
+| Augment Contract | Base Rope clear mandatory / Augment = expression, speed, recovery advantage |
+| Boss | 4-8 내부 NONE / Post-Sector 04 Boss or transition TBD |
+| Runtime | Existing Sector04 standalone catalog = LEGACY TRANSIT VERSION / REV2.1 MIGRATION REQUIRED |
+| Sector 04 → 05 | Corporate boundary only; direct wiring locked only after transition contract |
 
 ---
 
-## 0. Source-of-Truth / 현재 상태
+## 마이그레이션 상태 — Stage 문서 동기화
 
-### AUTHORING SNAPSHOT
-
-Sector 04 Master Plan 작성 시작 시점 최신 `main`:
+이 Master Plan은 REV 2.3(Upper Residential / Persistent Pursuit)이다. Stage 문서 동기화 현재 상태:
 
 ```text
-37ebeb90a2f2197af0420c0a0b00970eab41dea7
+4-1  SKY RESIDENCE ARRIVAL   REV 2.3 동기화 완료
+4-2  RESIDENTIAL COURTYARD   REV 2.3 동기화 완료
+4-3~4-8                      아직 REV 1.1 TRANSIT / INFRASTRUCTURE 기준
+                              (TRANSIT INTAKE 계열 세계관 — 이 Master와 불일치, 별도 후속 작업 필요)
 ```
 
-최근 관련 상태:
+`Persistent Pursuit Alert Latch` 시스템 상세는 [`PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md`](./PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md)를 따른다.
+
+---
+
+## 0. Source of Truth
+
+### Latest checked `main`
 
 ```text
-Sector 03
-3-1 ~ 3-8 docs complete
-
-3-8
-REV 1.1 FREE-WEAVE
-
-ACCESS SCAN FIELD
-Runtime prototype spec / Codex handoff merged
-
-Scenario Art Standard
-Sector 01~03 status audit merged
+6f8d2529a759ca37c8aecc0185d9a0a797c6bbda
 ```
 
-### Sector 04 Scenario Tree
+Latest HEAD change is multiplayer Quick Tunnel metadata only.
+Gameplay contract change 없음.
 
-현재 저장소 검색 기준:
+### Current Base Rope
 
 ```text
-docs/bsh/scenario/4/
+Player radius             15
+Gravity                   1250
+Max horizontal speed      360
+Jump speed                440
+
+Hook speed                1200 px/s
+Hook lifetime             1/3 sec
+Hook reach                400 px
+Hook reload               1.0 sec
+Attach buffer             0.1 sec
+Swing impulse             780
+Release angular transfer  0.55
 ```
 
-현재 상세 문서 범위:
+### Augment V1
+
+Current v1 replaces the old Foundation / Specialization product contract.
+
+Key rules:
+
+- Base Rope + base action만으로 mandatory progression 완주 가능해야 함.
+- 특정 card / party combination을 mandatory geometry 해법으로 요구하지 않음.
+- Player당 최대 6장.
+- Sector당 1회 logical entitlement.
+- 정확한 Sector 02~06 획득 Landmark는 아직 HOLD.
+- Therefore Sector 04 Master does not lock an Augment room or exact Augment pickup stage.
+
+Relevant movement expression:
 
 ```text
-README.md          Sector 04 Master
-4-1/README.md      TRANSIT INTAKE 상세 Stage
-4-2/README.md      CUTTER LINE 상세 Stage
-4-3/README.md      FREIGHT BYPASS 상세 Stage
-4-4/README.md      INFRASTRUCTURE SERVICE NODE 상세 Stage
-4-5/README.md      EXPRESS SHAFT 상세 Stage
-4-6/README.md      POWER RELAY SPAN 상세 Stage
-4-7/README.md      ISOLATION JUNCTION 상세 Stage
-4-8/README.md      TRANSIT CONTROL TRUNK 상세 Stage
+fast-launch
+long-rope
+fast-recover
+release-propulsion
+direction-dash
+slow-fall
+rope-link
 ```
 
-현재 전체 Stage·Runtime 대조 상태는 [`scenario-development-integration.md`](../../../scenario-development-integration.md)를 따른다.
+---
 
-### Current Runtime Boundary
+# 1. Sector 04 한 줄 정의
 
-현재 authored Runtime은:
+**Player가 Sector 03의 공공 상업·교류 공간을 빠져나와, Sector 02의 노동자 주거와 정반대로 넓고 조용하며 빛·식재·의료·여가·개인 서비스가 풍부했던 상층 생활권에 진입하지만 사람은 사라지고 자동 Security Patrol만 규칙적으로 계속 움직이는 공간에서, 경비의 현재 위치와 순찰 경로를 읽은 뒤 큰 Rope Arc로 그 coverage를 통과하고, 상층의 생활·지원·대피 체계가 하층보다 더 오래 유지되었다는 운영 상태를 확인한 뒤 Corporate Continuity 영역으로 올라가는 Sector.**
+
+---
+
+# 2. World Role — Sector 02 Mirror
+
+## Sector 02 — Worker District
 
 ```text
-SECTOR 01 + SECTOR 02 + SECTOR 03
-= 1-1 → 3-8 연결
-
-SECTOR 04
-= 4-1 → 4-8 standalone catalog (메인 월드 미연결)
+dense
+shared
+worn
+labor-centered
+balcony
+canteen
+laundry
+shelter
+waiting
 ```
+
+Question:
+
+> 왜 이 사람들은 여기서 기다리고 있었지?
+
+## Sector 04 — Upper Residential / Amenity
+
+```text
+spacious
+private
+quiet
+clean
+care-centered
+sky garden
+private lounge
+clinic
+amenity
+refuge terrace
+persistent security
+```
+
+Question:
+
+> 같은 사고인데 왜 이곳의 삶과 지원 시스템은 더 오래 유지됐지?
+
+## Contrast Rule
+
+Sector 04를 단순한 “부자 구역 caricature”로 만들지 않는다.
+
+차이는 다음으로 보여준다.
+
+- 1인당 공간
+- 조명과 시야
+- 조경과 외부 접촉
+- 의료·건강·여가 서비스
+- private / shared 공간 비율
+- Security coverage
+- evacuation support 상태
+
+---
+
+# 3. Core Theme — PRIVILEGE IS PROTECTED
+
+Sector 04의 첫 인상:
+
+```text
+People are gone.
+
+Lights remain.
+Gardens remain.
+Care systems remain.
+
+Security still patrols.
+```
+
+Gameplay적으로:
+
+> **Patrol은 예외적 Encounter가 아니라 공간의 정상 상태다.**
+
+Sector 02에서 Patrol Drone은 “첫 Moving Enemy”였다.
+
+Sector 04에서 Patrol Drone은:
+
+```text
+normal environmental pressure
+```
+
+가 된다.
+
+Player가 새 공간에 들어오면:
+
+```text
+WHERE IS THE NEXT ANCHOR?
++
+WHERE IS THE PATROL NOW?
++
+WHERE IS IT MOVING?
++
+WHEN DO I COMMIT?
+```
+
+를 함께 읽는다.
+
+---
+
+# 4. Current Patrol Runtime Reality
+
+## VERIFIED
+
+Current patrol state supports:
+
+```text
+2+ patrol points
+pingpong
+loop
+speed
+waitSeconds
+activation bounds
+```
+
+Patrol route는 activation bounds 안으로 clamp된다.
+
+## Combat behavior
+
+Current Patrol Drone is not a continuous chase-shoot guard.
+
+Conceptually:
+
+```text
+PATROL
+→ PLAYER ACQUIRED
+→ TRACK
+→ LOCK
+→ FIRE
+→ COOLDOWN
+```
+
+따라서 Sector 04의 핵심 skill은:
+
+> “발견된 뒤 추격전을 오래 한다”
+
+가 아니라
+
+> **“순찰 위치가 바뀌는 공간에 Rope로 언제 Commit하느냐”**
 
 다.
 
-### Important — 3-8 → 4-1 직접 연결 금지
-
-현재 공통 계약:
+## NOT IMPLEMENTED
 
 ```text
-3-8 GENERAL FINALE
+humanoid walking guard
+continuous chase while firing
+squad search
+stealth vision cone
+cover-state investigation
+```
+
+이 기능들은 REV2.1 Master의 mandatory dependency가 아니다.
+
+---
+
+# 5. Many Guards ≠ Many Simultaneous Fights
+
+현재 enemy attack range:
+
+```text
+760 px
+```
+
+Projectile damage:
+
+```text
+20
+```
+
+따라서 3~4기 Crossfire를 한 화면에 동시에 넣으면 Rope보다 탄막이 Gameplay를 지배한다.
+
+### Sector-wide rule
+
+```text
+MANY TOTAL PATROLS
++
+FEW SIMULTANEOUS ACTIVE PATROLS
+```
+
+권장:
+
+```text
+normal beat:
+active combat 0~1
+
+high-pressure beat:
+active combat <=2
+
+3+ simultaneous combat:
+FORBIDDEN BY DEFAULT
+```
+
+Patrol 총량은 많지만 `activation-band-only`를 이용해 progression band를 나눈다.
+
+---
+
+# 6. Sector 04 Gameplay Grammar
+
+```text
+OBSERVE PATROL POSITION
 →
-POST-SECTOR 03 BOSS / TRANSITION TBD
+READ NEXT LONG ARC
 →
-SECTOR 04
+COMMIT ROPE
+→
+CROSS SECURITY COVERAGE
+→
+LAND / COAST / RELOAD
+→
+REASSESS
 ```
 
-정확한 Boss Entry가 미확정이다.
+## Not a stealth game
 
-따라서 Sector 04 Master는:
+금지:
 
 ```text
-4-1 Entry
+wait behind cover for 10 seconds
+vision cone puzzle
+mandatory crouch / hide
+silent takedown
+enemy clearance gate
 ```
 
-의 공간·Gameplay 역할은 정하지만,
+Player의 가장 좋은 해법은 여전히:
 
-```text
-3-8 Gate → 4-1
-```
-
-직접 wiring을 확정하지 않는다.
-
----
-
-## 1. 레퍼런스 스캔
-
-### VERIFIED / OFFICIAL — SANABI
-
-공식 설명에서 Chain-hook 계열 도구는:
-
-```text
-movement
-+
-bullet / trap traversal
-+
-enemy defeat
-```
-
-를 하나의 행동 체계로 묶는다.
-
-### TRANSFER
-
-Sector 04에서:
-
-```text
-이동 구간
-→ 전투 구간
-→ 이동 구간
-```
-
-으로 나누지 않는다.
-
-대신:
-
-```text
-ROPE FLOW
-+
-CUTTER PROJECTILE
-+
-TRANSIT PRESSURE
-```
-
-가 같은 순간 판단 안에 들어간다.
-
-### VERIFIED / DEVELOPER — Rusted Moss
-
-개발자 설명에서:
-
-```text
-one unusual grapple mechanic
-→ everything revolves around it
-
-same challenge
-→ multiple valid solutions
-```
-
-을 핵심 철학으로 둔다.
-
-### TRANSFER
-
-Sector 04는:
-
-```text
-“정해진 열차를 기다리고 탄다.”
-```
-
-보다:
-
-```text
-“같은 인프라 공간을
-Momentum / Chaining / Rope Geometry에 따라
-다르게 통과한다.”
-```
-
-를 우선한다.
-
-### TRANSFER — Celeste / N 계열 원칙
-
-- 실패 후 즉시 다시 판단 가능
-- 사실적인 철도 시뮬레이션보다 예측 가능한 상태
-- Player intention을 과도하게 벌하지 않음
-- Speed Stage라도 Blind Reaction Test로 만들지 않음
-
----
-
-## 2. 이전 초안에서 가져올 것 / 버릴 것
-
-Historical scenario skeleton에는 Sector 04가:
-
-```text
-TRANSIT / INFRASTRUCTURE
-=
-SPEED ZONE
-```
-
-으로 제안돼 있었다.
-
-공간 후보:
-
-- 대형 수직 열차 Shaft
-- Freight Rail
-- Power Transmission Structure
-- Ventilation Infrastructure
-- 긴 이동 공간
-
-### TRANSFER — 유지
-
-```text
-SPEED
-LONG SPAN
-INFRASTRUCTURE SCALE
-ROPE INTERRUPTION
-```
-
-은 유지한다.
-
-### RETIRED — 폐기
-
-과거 초안의:
-
-```text
-CYAN / AMBER / VIOLET MODE
-```
-
-전제는 폐기.
-
-현재:
-
-```text
-ONE ROPE, GROWING TOOL
-```
-
-기준.
-
-또 과거 초안의:
-
-```text
-“중앙 시스템이 의도적으로
-하층을 못 올라오게 만들었다.”
-```
-
-라는 직접 결론은
-현재 Story Disclosure 기준보다 강하다.
-
-Sector 04에서는:
-
-```text
-LOWER ASCENT FEEDER
-ISOLATED
-
-UPPER EXPRESS TRUNK
-LIMITED / ACTIVE
-```
-
-라는 **운영 상태**까지만 확정한다.
-
-누가 왜 그 격리를 결정했는지는
-Sector 05 이후로 남긴다.
-
----
-
-## 3. Sector 04 한 줄 정의
-
-**Player가 Commercial District의 상부 Gate를 넘어 도시 전체를 연결하는 Transit / Infrastructure Backbone에 진입해, 긴 수직·사선 이동 공간에서 Rope Momentum을 키우고, Rope 자체를 끊을 수 있는 Cutter Fire와 반복되는 Transit Wake 때문에 Flow가 흔들릴 때마다 빠르게 다음 Anchor를 선택·재부착하며, 마지막에는 Lower Ascent Feeder가 다른 상부 이동망과 다르게 격리된 상태였음을 확인하는 고속 Rope-Recovery Sector.**
-
----
-
-## 4. Sector 04 핵심 Gameplay 질문
-
-Sector 01:
-
-> **“Rope를 사용할 수 있는가?”**
-
-Sector 02:
-
-> **“움직이는 Threat 속에서 어떤 Route를 선택할 것인가?”**
-
-Sector 03:
-
-> **“Security State가 바뀔 때 언제 붙고 어디로 갈 것인가?”**
-
-Sector 04:
-
-> **“속도를 유지하다 Rope Flow가 끊겼을 때, 얼마나 빠르고 유리하게 다음 연결을 만들 수 있는가?”**
-
-짧게:
-
-> **MOMENTUM → INTERRUPTION → RECOVERY → MOMENTUM**
-
----
-
-## 5. Core Gameplay Shift
-
-### Sector 03
-
-```text
-READ SECURITY STATE
-→ choose attach timing / route
-```
-
-### Sector 04
-
-```text
-BUILD MOMENTUM
-→ commit through long span
-→ flow interruption
-→ re-attach / redirect
-→ keep moving
-```
-
-### 중요
-
-Sector 04는:
-
-```text
-FASTER PLATFORMING
-```
-
-만 의미하지 않는다.
-
-핵심은:
-
-```text
-SPEED
-+
-RECOVERY QUALITY
-```
+> **좋은 Rope movement**
 
 다.
 
-잘하는 Player는
-방해를 맞지 않는 사람만이 아니라:
+## Not an arena shooter
 
-> **방해를 받아도 다음 Rope를 빠르게 만드는 사람**
+Patrol kill:
 
-이어야 한다.
+```text
+OPTIONAL
+```
+
+Kill하면 통과가 쉬워질 수는 있다.
+
+하지만:
+
+```text
+ALL GUARDS DEAD
+→ DOOR OPEN
+```
+
+금지.
 
 ---
 
-## 6. Primary New Threat — CUTTER FIRE
+# 7. Rope Geometry Rule
 
-### STATUS
+Sector 04 공간은 넓다.
 
-```text
-DESIGN SELECTED
-RUNTIME CAPABILITY VERIFIED
-PRESENTATION / AUTHORING CONTRACT REQUIRED
-```
-
-### Current Runtime — VERIFIED (UPDATED)
-
-Enemy projectile은:
+따라서 촘촘한 Grapple ladder 금지.
 
 ```text
-canCutRope = rules.includes("cutter-fire")
+BAD
+A → B → C → D
+short repetitive hook chain
 ```
 
-를 지원한다(`src/game/combat/EnemyObject.js`). 명시적으로 `cutter-fire` rule을
-가진 적만 Rope를 자를 수 있는 **opt-in** 모델이다.
-
-Projectile이 Player의 현재 Rope Segment:
+권장:
 
 ```text
-Player Rope Attachment Point
-→
-Rope Anchor
+HOOK
+→ LARGE PENDULUM
+→ RELEASE
+→ COAST / TERRACE LANDING
+→ RELOAD
+→ NEXT LONG COMMIT
 ```
 
-를 가로지르면:
+### Base validation
+
+Mandatory Base Rope:
 
 ```text
-rope-cut
+reach <= 400
 ```
 
-resolution이 존재한다.
+Default `GRAPPLE_LINK_BUDGET = 600` validation만으로 Gameplay PASS 판정 금지.
 
-### 현재 Sector 01~04 Baseline
+### Augment validation
 
-`cutter-fire` rule이 없는 모든 Patrol / Sentry는 기본적으로 Rope Cut이 불가능하다.
-Sector 04의 Cutter Sentry들은 `rules: ["cutter-fire", ...]`로 명시적으로 opt-in돼
-있고(4-2·4-3·4-6·4-7·4-8), 같은 Sector의 Patrol Drone은 `no-rope-cut`을 유지한다.
+`long-rope`:
 
-Sector 04는 이 capability를 처음 **명시적 Gameplay Rule**로 사용한다.
+```text
+400 → 480
+```
+
+허용:
+
+- aggressive grab
+- landing reduction
+- expressive shortcut
+
+금지:
+
+- Story skip
+- Gate skip
+- entire security beat bypass
 
 ---
 
-## 7. Cutter Fire의 디자인 목적
+# 8. Patrol Geometry Vocabulary
 
-Cutter는:
-
-```text
-Player Body를 맞히는 Bullet
-```
-
-의 강화판이 아니다.
-
-질문:
-
-> **“내 Rope Line을 어디에 만들 것인가?”**
-
-### Cutter가 압박하는 것
-
-- Anchor Choice
-- Rope Line Angle
-- Release Timing
-- Re-Attach Speed
-- Momentum Recovery
-
-### Cutter가 압박하지 않는 것
-
-- 새로운 회피 버튼
-- Parry
-- Shield
-- Rope Mode Switch
-- 특정 Augment 보유 여부
-
-### 핵심
-
-Cutter 때문에 Player가:
+## A. Balcony Pingpong
 
 ```text
-Rope를 덜 쓰는 것
+● ←────────→ ●
 ```
 
-이 아니라:
+Use:
+- Residential bridge
+- Private balcony line
+
+Question:
+- patrol이 어느 쪽 끝에 있는가?
+
+## B. Courtyard Loop
 
 ```text
-Rope를 더 잘 다시 쓰는 것
+●────●
+│    │
+●────●
 ```
 
-이 목표다.
+Use:
+- Garden
+- Amenity Atrium perimeter
+
+Question:
+- coverage가 어느 변으로 이동 중인가?
+
+## C. Staggered Patrol
+
+```text
+LOWER  ←────→
+            UPPER ←────→
+```
+
+Use:
+- multi-height courtyard
+- refuge terrace
+
+No overlapping crossfire.
+
+## D. Sequential Bands
+
+```text
+BAND A
+↓
+SAFE / RECOMPOSE
+↓
+BAND B
+```
+
+Use:
+- 4-5 onward
 
 ---
 
-## 8. Cutter Fire 공정성 계약
+# 9. Eight-Stage Spatial / Security Progression
 
-Rope Cut은 체감상 큰 상태 변화이므로
-기존 일반 Projectile과 **명확하게 구분**돼야 한다.
+## 4-1 — SKY RESIDENCE ARRIVAL
 
-### Required Telegraph
-
-최소:
+Role:
 
 ```text
-distinct charge cue
-distinct projectile silhouette
-distinct audio cue
-distinct trail
+WORLD CONTRAST
++
+SECURITY PRESENCE INTRO
 ```
 
-### 금지
+Space:
 
-같은 Sentry가 같은 Bullet Graphic으로
-갑자기 Rope만 끊는 것.
+- arrival terrace
+- upper residential lobby
+- open planted courtyard
+- long sightline
 
-### Recommended Presentation Profile
-
-Underlying AI:
+Security:
 
 ```text
-sentry-t1
-or
-patrol-drone-t1
+1 Patrol Drone
 ```
 
-재사용.
+Purpose:
+- “경비가 존재한다”를 첫 화면부터 보여줌.
+- 적 튜토리얼 아님.
+- 한 번의 low-pressure timing beat.
 
-Presentation / authored rule:
-
-```text
-CUTTER FIRE
-```
-
-를 명시.
-
-### Production Hardening — RESOLVED
-
-과거 구현은:
-
-```text
-!rules.includes("no-rope-cut")
-→ canCutRope
-```
-
-opt-out 형태였다.
-
-Sector 04 standalone catalog 구현(#513) 때 이미:
-
-```text
-rules.includes("cutter-fire")
-→ canCutRope
-```
-
-명시적 **opt-in authoring rule**로 강화됐다. 의도하지 않은 Rope Cut을
-방지하려던 이 문서의 권장 사항은 이미 반영된 상태다.
+No:
+- Cutter
+- Wind
+- Scanner
+- kill gate
 
 ---
 
-## 9. Cutter Recovery Contract
+## 4-2 — RESIDENTIAL COURTYARD
 
-Rope Cut 발생 후:
-
-```text
-Player
-→ free airborne
-```
-
-상태가 된다.
-
-### Stage Design Rule
-
-Cutter Encounter에는 항상:
+Role:
 
 ```text
-NEXT VALID ATTACH
+FIRST PATROL TIMING
 ```
 
-가 보여야 한다.
+Space:
 
-### Recovery Target
+- private balcony
+- residential bridge
+- courtyard planting
 
-대부분:
+Security:
 
 ```text
-≤ 2.0 sec
+2 Patrols total
+simultaneous combat <=1
 ```
 
-안에:
+Different height patrols.
 
-- 다음 Anchor
-- Recovery Ledge
-- Safe Lower Pivot
-
-중 하나를 선택 가능.
-
-### 금지
-
-```text
-Rope Cut
-→ 6초 낙하
-→ Stage Start
-```
-
-### 좋은 Cutter 성공
-
-```text
-CUT
-→ emergency re-attach
-→ lower arc
-→ regain momentum
-→ continue
-```
-
-이 자체가 재미있는 순간이어야 한다.
+Player learns:
+- 같은 Backbone도 patrol 위치에 따라 좋은 release timing이 바뀜.
 
 ---
 
-## 10. Secondary Environment — TRANSIT WAKE
+## 4-3 — SKY GARDEN TERRACES
 
-### STATUS
-
-```text
-TRANSFER OF EXISTING WIND SYSTEM
-NO NEW PHYSICS REQUIRED
-```
-
-### Current Runtime — VERIFIED
-
-기존 Wind는:
+Role:
 
 ```text
-continuous
-pulsed
+PATROL ROUTE GEOMETRY
 ```
 
-지원.
+Space:
 
-Pulsed:
+- exterior garden
+- terrace chain
+- canopy frame
+
+Security:
 
 ```text
-LULL
-→ WARNING
-→ ACTIVE
-→ DECAY
+2 Patrols
+loop / pingpong variation
 ```
 
-deterministic phase.
-
-### Sector 04 Recontextualization
-
-Sector 01:
+Optional environment candidate:
 
 ```text
-COOLING WIND
+Crosswind
 ```
 
-Sector 04:
-
-```text
-TRANSIT WAKE
-PRESSURE DISPLACEMENT
-VENT / EXPRESS TRUNK PULSE
-```
-
-### 중요한 차이
-
-Sector 01의 질문:
-
-> Wind를 어떻게 이용할까?
-
-Sector 04의 질문:
-
-> Momentum이 이미 큰 상태에서 Wake가 밀 때 Flow를 유지하거나 재설계할 수 있는가?
+Crosswind is not locked until Stage design proves it adds value.
 
 ---
 
-## 11. Transit Wake 구현 한계
+## 4-4 — CARE PAVILION
 
-Current Wind Runtime:
-
-```text
-STATIC RECT ZONE
-```
-
-이다.
-
-없음:
-
-- moving force volume
-- train-following force volume
-- wind shadow
-- grounded attenuation
-- spatial falloff
-
-### 따라서
-
-Sector 04 Prototype에서:
+Role:
 
 ```text
-moving train wake volume
+LOW-PRESSURE STORY TRAVERSE
 ```
 
-처럼 구현되지 않은 것을 사실로 가정하지 않는다.
+Space:
 
-### 구현 가능한 표현
+- clinic
+- wellness
+- care atrium
+- protected balcony
 
-Static Corridor 안에서:
+Security:
 
 ```text
-WARNING
-→ pressure ACTIVE
-→ DECAY
+1 visible Patrol pressure
 ```
 
-가 반복.
+No Rest Room.
 
-Visual은:
+Movement continues.
 
-- tunnel pressure light
-- warning stripe
-- dust / cable movement
-- passing-train-like background streak
+Story:
+- Upper Residential Support / Emergency Care remained available for a limited period.
 
-로 Transit context를 줄 수 있다.
-
-Gameplay Force Zone은 정적.
+No causal explanation.
 
 ---
 
-## 12. Moving Train / Moving Platform — TECH SPIKE ONLY
+## 4-5 — AMENITY ATRIUM
 
-### Current Runtime Result
-
-코드 검색 기준:
+Role:
 
 ```text
-moving authored collision surface
-moving train platform
-moving grapple surface
+PATROL DENSITY PEAK
++
+BUILD EXPRESSION
 ```
 
-공통 Runtime system은 확인되지 않는다.
+Space:
 
-`maintenance-lift`도 현재:
+- large lounge atrium
+- indoor garden void
+- suspended architecture
+
+Security:
 
 ```text
-background-prop
-gameplay:false
+3 Patrols total
+simultaneous active <=2
 ```
 
-다.
+Sector 04 largest pure Rope expression room under moving security.
 
-### 결론
+Augment benefits are visible but never required.
 
-Sector 04의 필수 재미를:
+---
+
+## 4-6 — PRIVATE SKYBRIDGE
+
+Role:
 
 ```text
-moving platform
+MOBILE + STATIC SECURITY
 ```
 
-에 의존시키지 않는다.
+Space:
 
-### TECH SPIKE CANDIDATE
+- controlled private bridge
+- upper facade crossover
+- private boundary
 
-후반 Stage에서 선택적으로:
+Security candidate:
 
 ```text
-MOVING GRAPPLE CARRIER
+2 Patrols
++
+1 Cutter Sentry
+```
+
+Roles separated:
+
+```text
+Patrol
+= changing position pressure
+
+Cutter
+= Rope-line pressure
+```
+
+No full overlap / crossfire wall.
+
+---
+
+## 4-7 — REFUGE TERRACE
+
+Role:
+
+```text
+PATROL NETWORK SYNTHESIS
++
+STORY REVEAL
+```
+
+Space:
+
+- emergency refuge
+- protected terrace
+- upper evacuation interface
+
+Security:
+
+```text
+3 Patrols total
+simultaneous active <=2
+```
+
+Optional:
+- limited Crosswind if spatially justified.
+
+Story:
+- Upper Residential Evacuation Support remained LIMITED / AVAILABLE.
+
+No Group mapping.
+
+---
+
+## 4-8 — UPPER RESIDENTIAL THRESHOLD
+
+Role:
+
+```text
+SECURITY ECOSYSTEM FINALE
++
+CORPORATE HANDOFF
+```
+
+Space:
+
+- private upper lobby
+- controlled transfer hall
+- Corporate threshold
+
+Security:
+
+```text
+3~4 Patrols total
+sequential bands
+simultaneous active <=2
+```
+
+Final rhythm:
+
+```text
+PATROL READ
+→ LONG COMMIT
+→ SECURITY INTERRUPTION
+→ RECOVERY
+→ SECOND PATROL BAND
+→ FINAL CLEAN SWING
+```
+
+No new mechanic.
+
+---
+
+# 10. Patrol Count Candidate
+
+| Stage | Patrol Total | Simultaneous Active Target |
+|---|---:|---:|
+| 4-1 | 1 | 0~1 |
+| 4-2 | 2 | ≤1 |
+| 4-3 | 2 | ≤2 |
+| 4-4 | 1 | ≤1 |
+| 4-5 | 3 | ≤2 |
+| 4-6 | 2 + Cutter 1 | ≤2 security sources |
+| 4-7 | 3 | ≤2 |
+| 4-8 | 3~4 | ≤2 |
+
+Approx total Sector presence:
+
+```text
+17~18 moving patrol instances
+```
+
+This is a planning density target, not a locked spawn count.
+Individual Stage blockout/playtest may reduce counts.
+
+---
+
+
+# 8-1. Patrol Choreography — Sector 04 대표 Gameplay 언어
+
+Sector 04에서 Patrol을 단순한 `좌↔우 왕복 적`으로 반복하지 않는다.
+
+현재 Runtime이 지원하는:
+
+```text
+2+ patrol points
+pingpong
+loop
+speed
+waitSeconds
+activation bounds
+```
+
+를 조합해 Stage마다 다른 **경비 동선 문법**을 만든다.
+
+## Pattern A — LONG PINGPONG
+
+```text
+●────────────────────●
+        ←      →
+```
+
+사용:
+- residential skybridge
+- long balcony
+- private corridor edge
+
+Player 판단:
+- 경비가 반대편 끝으로 이동한 순간 긴 Rope commit.
+
+## Pattern B — PERIMETER LOOP
+
+```text
+●──────●
+│      │
+│      │
+●──────●
+```
+
+사용:
+- courtyard
+- amenity atrium
+- sky garden perimeter
+
+Player 판단:
+- 어느 변의 coverage가 비어 있는가.
+
+## Pattern C — VERTICAL / DIAGONAL SWEEP
+
+```text
+●
+ ╲
+  ╲
+   ●
 ```
 
 또는:
 
 ```text
-NON-COLLIDING MOVING TRANSIT OBJECT
+●
+│
+│
+●
 ```
 
-실험 가능.
+사용:
+- double-height lounge
+- facade void
+- refuge terrace
 
-### Production Gate
+현재 Patrol point는 2D 좌표이므로 수평 patrol만 고집하지 않는다.
 
-다음이 모두 PASS하기 전:
+Player 판단:
+- 다음 Rope arc와 Guard path가 언제 교차하는가.
 
-- collision
-- Rope attach
-- player carry
-- release velocity
-- multiplayer authority/prediction
-- rollback/reconcile
-- recovery
+## Pattern D — STAGGERED PAIR
 
-Mandatory Route에 넣지 않는다.
-
-### Fallback
-
-Tech Spike 실패:
-
-```text
-STATIC INFRASTRUCTURE
-+
-CUTTER FIRE
-+
-TRANSIT WAKE
-```
-
-만으로 Sector 04 전체를 완성할 수 있어야 한다.
-
----
-
-## 12-1. Sector 03 Mechanic Carry Policy
-
-Sector 04는 Sector 03의 Scanner를
-주요 Gameplay Layer로 계속 쌓지 않는다.
-
-```text
-ACCESS SCAN FIELD
-= NOT REQUIRED FOR SECTOR 04 CORE
-```
-
-이유:
-
-1. Sector 04가 고유한 Momentum / Recovery 정체성을 가져야 한다.
-2. Access Scan Field Runtime은 구현됐지만 Sector 04 core dependency로 사용하지 않는다.
-3. Sector 04 전체가 Sector 03 미완성 시스템에 연쇄 차단되면 안 된다.
-
-필요하면 Background Security Prop 또는 Story 흔적으로는 재사용할 수 있지만,
-4-1~4-8 Mandatory Route에 Scanner timing을 요구하지 않는다.
-
----
-
-## 13. Build Expression
-
-Sector 04 시작 Design State:
-
-```text
-FOUNDATION
-+
-FIRST SPECIALIZATION
-```
-
-Current actual runtime:
-
-```text
-pending / incomplete
-```
-
-### IMPULSE
-
-빛나는 상황:
-
-- long span
-- wake-assisted arc
-- Cutter exposure time compression
-- interrupted momentum recovery
-
-### RELAY
-
-빛나는 상황:
-
-```text
-CUT
-→ emergency re-attach
-→ next attach
-```
-
-연속 recovery.
-
-### SHEAR
-
-빛나는 상황:
-
-- Cutter / Patrol path를 Rope Line으로 가로지름
-- 긴 Infrastructure geometry를 공격각으로 활용
-- Kill Optional
-
-### 중요한 원칙
-
-```text
-BUILD
-= efficiency / expression
-```
-
-이지:
-
-```text
-BUILD
-= mandatory key
-```
-
-가 아니다.
-
----
-
-## 14. Growth Progression — HOLD
-
-Sector 03의 Growth Gate를
-Sector 04 Master가 임의 해제하지 않는다.
-
-```text
-SECOND SPECIALIZATION
-HOLD
-
-SECONDARY AUGMENT
-HOLD
-
-HYBRID
-HOLD
-
-CAPSTONE
-HOLD
-```
-
-### 왜
-
-Foundation Runtime은 구현됐지만 first Specialization Runtime과
-Build 차이가 실제 플레이에서 충분히 검증되지 않았다.
-
-### Sector 04 Growth Slot
-
-4-4:
-
-```text
-INFRASTRUCTURE SERVICE NODE
-```
-
-를 Growth Slot 후보 위치로 남긴다.
-
-Default:
-
-```text
-REST / BUILD DIAGNOSTIC
-NO NEW REWARD
-```
-
-나중에 Growth Gate가 공식적으로 reopen되면
-이 위치를 재검토할 수 있다.
-
-### 중요한 계약
-
-4-5~4-8 Mandatory Geometry는:
-
-```text
-new growth tier
-```
-
-를 요구하지 않는다.
-
----
-
-## 15. Story 역할
-
-Sector 03 종료:
-
-Player는:
-
-```text
-Evacuation Archive
-+
-Access Archive
-```
-
-가 같은 Upper facility에 존재했다는 것을 안다.
-
-하지만 관계는 모른다.
-
-### Sector 04에서 추가할 것
-
-이제 도시의 **물리적 이동망 상태**를 본다.
-
-```text
-LOWER ASCENT FEEDER
-ISOLATED
-
-UPPER EXPRESS TRUNK
-LIMITED / ACTIVE
-```
-
-### 의미
-
-Player는 확실히 알게 된다:
-
-> 도시의 모든 이동망이 똑같이 고장난 것은 아니었다.
-
-그리고:
-
-> Lower → Upper 연결부가 별도 상태로 격리돼 있었다.
-
-### 아직 말하지 않음
-
-- 누가 격리를 명령했는가
-- 회사 경영진의 정확한 정책
-- Group A/B/C와 Feeder 상태의 직접 매핑
-- 하층을 의도적으로 죽이려 했다는 결론
-- 사고 자체가 계획됐다는 결론
-
-Sector 05가
-더 직접적인 Corporate record / policy reveal을 소유한다.
-
----
-
-## 16. Sector 04 Story 질문
-
-### 시작
-
-> **“이 Access 구조와 대피 결과는 어떤 관계였지?”**
-
-### 중간
-
-> **“왜 Upper Trunk는 살아 있는데 Lower Feeder는 격리되어 있지?”**
-
-### 종료
-
-> **“이 격리 상태가 Group C의 중단과 관련 있었다면, 누가 이 Routing을 결정했지?”**
-
-중요:
-
-```text
-IF
-```
-
-의심은 생겨도 된다.
-
-```text
-CONFIRMED CAUSALITY
-```
-
-는 아직 아니다.
-
----
-
-## 17. 권장 System 문구
-
-### 허용
-
-```text
-TRANSIT BACKBONE
-SERVICE DEGRADED
-```
-
-```text
-UPPER EXPRESS TRUNK
-LIMITED OPERATION
-```
-
-```text
-CONTAINMENT ROUTING
-ACTIVE
-```
-
-```text
-LOWER ASCENT FEEDER
-ISOLATED
-```
-
-```text
-LOCAL OVERRIDE
-UNAVAILABLE
-```
-
-### 금지
-
-```text
-LOWER WORKERS DENIED
-```
-
-```text
-EXECUTIVE EVACUATION PRIORITY
-```
-
-```text
-GROUP C BLOCKED BY ORDER
-```
-
-```text
-LOWER SECTORS SACRIFICED
-```
-
-Sector 05 Story scope 침범.
-
----
-
-## 18. Spatial Identity
-
-Sector 03:
-
-```text
-POLISHED COMMERCIAL ATRIUM
-```
-
-Sector 04:
-
-```text
-CITY BACKBONE
-```
-
-### Architecture
-
-- huge vertical transit shaft
-- freight bypass bridge
-- rail support truss
-- power relay span
-- cable gallery
-- ventilation pressure chamber
-- switching junction
-- control trunk
-
-### 공간 비율
-
-Player는 더 작아진다.
-
-```text
-SMALL TECHNICIAN
-vs
-CITY-SCALE MACHINE
-```
-
-### Level Rhythm
-
-Sector 03보다:
-
-```text
-LONGER READABLE LINES
-FEWER SMALL ROOMS
-MORE CONTINUOUS AIRTIME
-```
-
----
-
-## 19. Visual Direction
-
-### Base
-
-```text
-Deep Steel Blue
-Graphite
-Black Structural Frame
-Cold Concrete
-```
-
-### Infrastructure Energy
-
-```text
-Sodium Amber
-Electrical White
-Desaturated Green
-Warning Red
-```
-
-### Gameplay Priority
-
-```text
-Rope
-CYAN
-
-Cutter
-distinct RED / HOT ORANGE + unique trail
-
-Transit Wake
-WHITE / AMBER pressure cue
-```
-
-### Cyan Rule
-
-Train lights / utility LEDs에 Cyan 남발 금지.
-
-Rope가 최우선.
-
----
-
-## 20. Motion / Parallax Direction
-
-Sector 04는
-실제 moving collision 없이도
-**움직이는 도시**처럼 보여야 한다.
-
-### Far
-
-- passing light streak
-- distant elevator/rail silhouette
-- power pulses
-- moving signal bands
-
-### Mid
-
-- rotating ventilation machinery
-- cable vibration
-- pressure shutters as visual-only distant props
-- freight indicator sequence
-
-### Gameplay Layer
-
-Static unless Runtime system verified.
-
-### Important
-
-```text
-BACKGROUND MOTION
-≠
-GAMEPLAY MOVING SURFACE
-```
-
-명확히 분리.
-
----
-
-## 21. Sector Rhythm
-
-```text
-4-1
-SPEED SPACE REVEAL
-
-↓
-
-4-2
-TEACH CUTTER FIRE
-
-↓
-
-4-3
-CUTTER + TRANSIT WAKE
-
-↓
-
-4-4
-REST / ROUTING PREVIEW
-
-↓
-
-4-5
-EXPRESS FLOW
-
-↓
-
-4-6
-ROPE GEOMETRY + INFRASTRUCTURE PRESSURE
-
-↓
-
-4-7
-ISOLATION STORY PRESSURE
-
-↓
-
-4-8
-CONTINUOUS VELOCITY / RECOVERY FINALE
-```
-
-Difficulty:
-
-```text
-4-1  ★★☆
-4-2  ★★★
-4-3  ★★★
-4-4  REST
-4-5  ★★★☆
-4-6  ★★★☆
-4-7  ★★★★
-4-8  ★★★★
-```
-
----
-
-## 22. Stage Master Table — REV 1.1
-
-| Stage | Name | Gameplay Role | Enemy / Threat | Environment | Growth | Story |
-|---|---|---|---|---|---|---|
-| 4-1 | TRANSIT INTAKE | Long-span Speed Space reveal | NONE | static infrastructure | none | Upper Express Trunk is degraded but not dead |
-| 4-2 | CUTTER LINE | First Rope-Cut tutorial | Sentry T1 ×1, Cutter Fire | no Wake | none | Infrastructure security still enforces route control |
-| 4-3 | FREIGHT BYPASS | Cutter + pressure-flow combination | Cutter Sentry ×1 | Pulsed Transit Wake | none | Freight/service routing remains partially active |
-| 4-4 | INFRASTRUCTURE SERVICE NODE | REST / Build Diagnostic / Routing Preview | NONE | quiet service bay | HOLD | Lower feeder status begins to look abnormal |
-| 4-5 | EXPRESS SHAFT | High-speed movement-expression stage | NONE | Pulsed Wake | none | Upper trunk is still carrying limited service |
-| 4-6 | POWER RELAY SPAN | Rope geometry / threat separation | Cutter Sentry ×1 + Patrol T1 ×1 separated | NO Wake; static power span; optional tech-spike carrier only | none | Transit and power routing share the same protected backbone |
-| 4-7 | ISOLATION JUNCTION | Story pressure + Cutter/Wake synthesis | Cutter Sentry ×1 | Pulsed Transit Wake | none | Lower Ascent Feeder = ISOLATED confirmed |
-| 4-8 | TRANSIT CONTROL TRUNK | Continuous speed / interruption / recovery Finale | Cutter Sentry ×1 + Patrol T1 ×1 separated | Pulsed Wake + long trunk | none | Upper Trunk vs Lower Feeder state juxtaposition |
-
----
-
-## 23. 4-1 — TRANSIT INTAKE
-
-### Role
-
-Sector 04의 첫 인상.
-
-### Enemy
-
-```text
-NONE
-```
-
-### New Threat
-
-```text
-NONE
-```
-
-Cutter를 바로 쏘지 않는다.
-
-### Gameplay
-
-긴:
-
-```text
-ENTRY DECK
-→ LONG ARC
-→ RE-ATTACH
-→ LONG ARC
-```
-
-로 Commercial의 작은 판단 밀도에서
-Infrastructure의 큰 이동 스케일로 전환.
-
-### 핵심 감정
-
-> **“여기서는 속도를 만들 수 있다.”**
-
-### Story
-
-허용:
-
-```text
-TRANSIT BACKBONE
-SERVICE DEGRADED
-
-UPPER EXPRESS TRUNK
-LIMITED OPERATION
-```
-
-Lower Isolation은 아직 확정하지 않는다.
-
----
-
-## 24. 4-2 — CUTTER LINE
-
-### Role
-
-First Cutter Tutorial.
-
-### Enemy
-
-```text
-SENTRY T1 ×1
-```
-
-Stationary 권장.
-
-### 왜 Stationary
-
-첫 학습에서:
-
-```text
-enemy movement
-+
-rope-cut projectile
-```
-
-을 동시에 해석시키지 않는다.
-
-### Structure
-
-```text
-SAFE OBSERVATION
-→
-CLEAR CUTTER TELEGRAPH
-→
-FIRST LONG ROPE
-→
-CUT POSSIBILITY
-→
-VISIBLE EMERGENCY RE-ATTACH
-→
-SAFE LANDING
-```
-
-### Pass
-
-Player가 한 번 Rope를 잘렸어도:
-
-> “왜 잘렸는지, 다음에 뭘 해야 하는지”
-
-이해.
-
----
-
-## 25. 4-3 — FREIGHT BYPASS
-
-### Role
-
-이미 배운:
-
-```text
-CUTTER
-+
-WIND
-```
-
-를 Transit context에서 결합.
-
-### Threat
-
-```text
-Cutter Sentry ×1
-```
-
-### Environment
-
-```text
-PULSED TRANSIT WAKE
-```
-
-### Gameplay
-
-Wake가:
-
-```text
-ACTIVE
-```
-
-일 때도 통과 가능.
-
-LULL 대기가 유일한 답이면 FAIL.
-
-### Build
-
-Impulse:
-
-```text
-Wake-assisted long arc
-```
-
-Relay:
-
-```text
-Cut recovery chain
-```
-
-Shear:
-
-```text
-Cutter line offense opportunity
-```
-
----
-
-## 26. 4-4 — INFRASTRUCTURE SERVICE NODE
-
-### Role
-
-REST.
-
-### Enemy
-
-NONE.
-
-### Growth
-
-Default:
-
-```text
-NO NEW TIER
-```
-
-### Optional Diagnostic
-
-현재 Build Runtime이 구현된 뒤에만
-read-only diagnostic.
-
-### Story
-
-처음 이상징후:
-
-```text
-LOWER ASCENT FEEDER
-STATUS: SEGMENTED
-```
-
-정도.
-
-아직:
-
-```text
-ISOLATED
-```
-
-를 핵심 Reveal로 쓰지 않는다.
-
-### Purpose
-
-4-7 Story reveal을 위한 setup.
-
----
-
-## 27. 4-5 — EXPRESS SHAFT
-
-### Role
-
-Sector 04의 Movement Joy Stage.
-
-4-4 Rest 뒤
-다시 크게 속도를 낸다.
-
-### Threat
-
-```text
-NONE
-```
-
-### Environment
-
-Pulsed Transit Wake.
-
-### 핵심
-
-4-3의 결합 압박과 4-4 Rest 뒤,
-적을 완전히 빼고 **고속 Rope 이동 자체**를 다시 즐긴다.
-
-Sector 04가:
-
-```text
-ROPE-CUT GAUNTLET
-```
-
-로만 느껴지지 않게 하는 중요한 Movement Joy Stage다.
-
-### Question
-
-> **“Wake와 Momentum을 싸우지 않고 같이 쓸 수 있는가?”**
-
-### Important
-
-Wake를 기다리는 것보다
-ACTIVE / DECAY를 이용해 흐름을 이어가는 숙련 선택이 있어야 한다.
-
----
-
-## 28. 4-6 — POWER RELAY SPAN
-
-### Role
-
-Cutter / Patrol / Rope Geometry를
-한 큰 Infrastructure Span에서 분리 조합.
-
-### Threat
-
-권장:
-
-```text
-Cutter Sentry ×1
-
-+
-
-Patrol Drone T1 ×1
-no-rope-cut
-```
-
-### Environment
-
-```text
-TRANSIT WAKE
-NONE
-```
-
-4-6은 force timing보다
-Rope Line / Enemy Geometry에 집중한다.
-
-### Important
-
-Activation / exposure는 겹치지 않거나
-짧게만 교차.
-
-지속 2-Enemy Crossfire 금지.
-
-### SHEAR
-
-실제 Rope line이
-Enemy route를 가로지르는 유효한 공격각을 만든다.
-
-Kill Optional.
-
-### Moving Carrier
-
-```text
-TECH SPIKE PASS
-```
-
-시에만 optional shortcut 후보.
-
-실패하면 static geometry로 동일 Stage 유지.
-
----
-
-## 29. 4-7 — ISOLATION JUNCTION
-
-### Role
-
-Sector 04 Story Pressure.
-
-### Threat
-
-```text
-Cutter Sentry ×1
-```
-
-Patrol은 넣지 않는다.
-
-### Gameplay
-
-```text
-MOMENTUM
-+
-CUTTER
-+
-TRANSIT WAKE
-```
-
-synthesis.
-
-### Story Reveal
-
-처음 확정:
-
-```text
-CONTAINMENT ROUTING
-ACTIVE
-
-LOWER ASCENT FEEDER
-ISOLATED
-```
-
-동시에 상부 쪽:
-
-```text
-UPPER EXPRESS TRUNK
-LIMITED OPERATION
-```
-
-### Player Interpretation
-
-확실:
-
-```text
-NETWORK FAILURE WAS NOT UNIFORM
-```
-
-확실하지 않음:
-
-```text
-WHO ORDERED IT
-WHY
-WHICH GROUP MAPPED TO WHICH ROUTE
-```
-
----
-
-## 30. 4-8 — TRANSIT CONTROL TRUNK
-
-### Role
-
-Sector 04 General Finale.
-
-### Boss
-
-```text
-4-8 INTERNAL BOSS
-= NONE
-
-POST-SECTOR 04 BOSS / TRANSITION
-= TBD
-```
-
-### 핵심 Gameplay
-
-3-8처럼:
-
-```text
-LEFT / CENTER / RIGHT
-route selection
-```
-
-을 반복하지 않는다.
-
-4-8은 **하나의 긴 Control Trunk**다.
-
-```text
-MOMENTUM BUILD
-→
-CUTTER INTERRUPTION
-→
-RECOVERY
-→
-WAKE ACCELERATION
-→
-RE-ATTACH CHAIN
-→
-SECOND INTERRUPTION
-→
-FINAL FLOW
-```
-
-### Threat Budget
-
-정확히:
-
-```text
-Cutter Sentry ×1
-+
-Patrol Drone T1 ×1
-no-rope-cut
-```
-
-서로 다른 연속 구간.
-
-둘이 동시에 한 Arena를 점유하지 않는다.
-
-### 금지
-
-두 적을 한 Arena에서
-동시에 오래 싸우게 하지 않는다.
-
-### Story
-
-Final Control Deck에서:
-
-```text
-UPPER EXPRESS TRUNK
-LIMITED OPERATION
-
-LOWER ASCENT FEEDER
-ISOLATED
-```
-
-상태를 같은 routing overview에서 본다.
-
-### Still No Causality
-
-다음 인과는 **NOT CONFIRMED**:
-
-```text
-GROUP C SUSPENSION
-← CAUSED BY →
-LOWER FEEDER ISOLATION
-```
-
-문서 / Terminal / UI에서 직접 인과로 쓰지 않는다.
-
-Player가:
-
-```text
-MAY BE RELATED
-```
-
-라고 의심하게만 한다.
-
----
-
-## 31. 3-8 vs 4-8 반복 방지
-
-### 3-8
-
-```text
-FREE-WEAVE
-Scanner state
-→ central / side movement 선택
-```
-
-### 4-8
-
-```text
-CONTINUOUS TRUNK
-Momentum is already active
-→ interruption
-→ recovery
-→ resume speed
-```
-
-### Pass Question
-
-Player에게:
-
-> “3-8과 4-8이 어떻게 달랐나요?”
-
-기대:
-
-```text
-3-8:
-어디로 엮을지 계속 골랐다.
-
-4-8:
-한 흐름을 계속 살리면서
-끊기면 다시 붙었다.
-```
-
----
-
-## 32. Safe Route / Flow Route 철학
-
-Sector 04의 Stage 상세에서도:
-
-```text
-SAFE ROUTE
-```
-
-와:
-
-```text
-FLOW ROUTE
-```
-
-를 둘 다 제공.
-
-### Safe
-
-- 짧은 Rope
-- Recovery Landing
-- Cutter Observation
-- Wake Wait 가능
-- swingImpulse=0 clearable
-
-### Flow
-
-- fewer landings
-- longer arc
-- wake timing 활용
-- Cutter exposure 압축
-- emergency re-attach 연계
-
-### Skill Reward
-
-Flow Route는:
-
-```text
-MORE FUN / FASTER / CLEANER
-```
-
-이지:
-
-```text
-ONLY POSSIBLE ROUTE
-```
-
-가 아니다.
-
----
-
-## 33. Rope Geometry Contract
-
-Current:
-
-```text
-maxAttachDistance = 400
-```
-
-### Sector 04
-
-긴 공간이어도:
-
-```text
-MANDATORY ATTACH
-≤ 400
-```
-
-### Speed Illusion
-
-긴 느낌은:
-
-```text
-one huge impossible gap
-```
-
-이 아니라:
-
-```text
-multiple readable anchors
-+
-fewer forced landings
-+
-large background scale
-```
-
-로 만든다.
-
-### Validation
-
-모든 Mandatory geometry:
-
-```text
-swingImpulse = 0
-```
-
-에서도 안전 경로 통과 가능.
-
----
-
-## 34. Enemy / Cutter Authoring Contract
-
-### Cutter Sentry
-
-Underlying family:
-
-```text
-sentry-t1
-```
-
-가능.
-
-### Required Stage Data Meaning
-
-문서에서 반드시:
-
-```text
-ROPE-CUT ENABLED
-```
-
-또는 동등한 명시적 표기를 한다.
-
-단순히:
-
-```text
-no-rope-cut rule을 빼면 됨
-```
-
-이라고만 쓰지 않는다.
-
-### Patrol
-
-기존 T1을 쓸 경우:
-
-```text
-no-rope-cut
-```
-
-유지하는 Stage와
-Cutter-enabled Stage를 구분.
-
-### Why
-
-Player-facing expectation을
-맵마다 암묵적으로 바꾸지 않기 위해.
-
----
-
-## 35. Multiplayer Contract
-
-### Cutter
-
-Projectile / Rope Cut 결과는
-현재 projectile prediction / impact contract를 따른다.
-
-### Design Requirement
-
-Player A의 Cutter encounter가
-다른 구간 Player B의 Rope를
-장거리 우발적으로 자르지 않도록:
-
-- activation bounds
-- projectile angle
-- platform separation
-
-검증.
-
-### Transit Wake
-
-둘 다 같은 deterministic phase를 봐야 함.
-
-현재 Wind time-derived state가
-owner prediction clock parity 문제와 연결될 수 있으므로:
-
-```text
-ACCESS SCAN FIELD clock parity audit
-```
-
-결과를 함께 확인.
-
-### Moving Carrier
-
-Multiplayer tech spike PASS 전
-사용 금지.
-
----
-
-## 36. Recovery Contract
-
-Sector 04의 난이도는 높지만
-Retry friction은 낮춘다.
-
-### Cutter
-
-```text
-≤ 2 sec
-```
-
-다음 Attach 의사결정.
-
-### Fall
-
-대부분:
-
-```text
-≤ 5 sec
-```
-
-내 원래 flow 구간 재진입.
-
-### Wake
-
-Recovery deck이
-ACTIVE Wake 안에서 계속 밀려나지 않게
-Zone bounds를 설계.
-
-현재 Grounded Wind attenuation이 없다는 점 중요.
-
-### 금지
-
-```text
-Cut
-→ bottomless fall
-→ stage reset
-```
-
-반복.
-
----
-
-## 37. Camera Direction
-
-Sector 04 Camera는
-“속도감” 때문에 Player를 너무 확대하지 않는다.
-
-### Long Span
-
-앞쪽:
-
-```text
-NEXT ANCHOR
-+
-CUTTER TELEGRAPH
-+
-RECOVERY TARGET
-```
-
-을 미리 보여야 한다.
-
-### Warning
-
-Speed Section에서
-Off-screen Cutter projectile 금지.
-
-### Mobile
-
-0.72 baseline에서도
-Cutter projectile과 Rope line이 분리돼 보여야 함.
-
-### Moving Background
-
-Parallax speed를 높여도
-Gameplay Surface가 흐려지지 않게 한다.
-
----
-
-## 38. Sound / VFX Direction
-
-### Ambient
-
-- rail hum
-- heavy transformer hum
-- pressure release
-- distant freight resonance
-- structural vibration
-
-### Cutter
-
-반드시 고유:
-
-```text
-CHARGE
-→ FIRE
-→ CUT
-```
-
-Audio family.
-
-### Transit Wake
-
-```text
-warning pressure build
-→ active roar
-→ decay
-```
-
-### Rope Cut Feedback
-
-강하지만 짧게.
-
-Player에게:
-
-```text
-Rope is gone
-```
-
-을 즉시 알려야 한다.
-
-화면을 길게 흔들어
-Emergency Re-Attach를 방해하지 않는다.
-
----
-
-## 39. Pixel / Asset Direction
-
-### Base Grid
-
 ```text
-32×32
+LOWER   ●──────●
+              ↑ phase offset
+UPPER       ●──────●
 ```
-
-### Major Structures
-
-- Rail Truss 128–256 wide modules
-- Freight Support 64–128
-- Power Relay Core 96–192
-- Vent / Pressure Duct 64–128
-- Signal Tower 32–64
-- Cutter Housing 32–64
 
-### Background
+두 경비의 route/activation을 서로 다른 progression band에 둔다.
 
-- huge shaft
-- distant rail line
-- transformer silhouette
-- conduit bundle
-- suspended freight frame
+목적:
+- 경비가 많은 느낌
+- 동시 Crossfire 제한
 
-### Player Scale
+## Pattern E — DIFFERENT SPEED / WAIT RHYTHM
 
-계속 작게.
+현재 Runtime은 segment별 speed variation은 지원하지 않는다.
 
-Infrastructure Scale이 주인공처럼 커져야 한다.
+하지만 Enemy instance마다:
 
----
-
-## 40. Scenario Art Contract
-
-Current global:
-
 ```text
-SCENARIO-ART-GENERATION-STANDARD.md
+speed
+waitSeconds
 ```
-
-따름.
 
-### Sector 04 현재 상태
-
-```text
-Runtime Area
-4-1 → 4-8 standalone catalog
-
-Camera Zone
-8 Stage authored zones implemented
-
-Stable IDs
-geometry / object / state / cue IDs implemented
-```
+를 다르게 줄 수 있다.
 
 따라서:
 
 ```text
-APPROVED GAMEPLAY ART
-HOLD — Approved Blockout과 실제 Camera Shot 검증 대기
+FAST PATROL / SHORT WAIT
+SLOW PATROL / LONG WAIT
 ```
 
-### Before Art
+처럼 서로 다른 경비 리듬을 만든다.
 
-1. Stage README
-2. Runtime graybox
-3. Camera Zone
-4. Stable IDs
-5. exact visible object count
-6. approved blockout
+## Pattern F — SEQUENTIAL SECURITY BANDS
 
-순서.
+```text
+PATROL A
+↓
+RECOMPOSE TERRACE
+↓
+PATROL B
+↓
+RECOMPOSE
+↓
+PATROL C
+```
+
+Sector 04 후반 기본 구조.
 
 ---
 
-## 41. Runtime Feasibility Matrix
+# 8-2. Patrol Choreography 금지선
 
-| 시스템 | 현재 Runtime | Sector 04 판정 |
-|---|---|---|
-| Static Grapple Surface | IMPLEMENTED | CORE |
-| Rope Max 400 | IMPLEMENTED | CORE |
-| Rope Cut Projectile | IMPLEMENTED | PRIMARY NEW PLAYER-FACING THREAT |
-| Sentry T1 | IMPLEMENTED | REUSE |
-| Patrol Drone T1 | IMPLEMENTED | REUSE |
-| Pulsed Wind | IMPLEMENTED | TRANSIT WAKE로 REUSE |
-| Wind Shadow | IMPLEMENTED | solid occluder 뒤 감쇠를 재사용 |
-| Grounded Wind Attenuation | IMPLEMENTED | 접지 중 `groundedFactor` 적용 |
-| Moving Collision Platform | NOT FOUND | TECH SPIKE ONLY |
-| Moving Grapple Surface | NOT FOUND | TECH SPIKE ONLY |
-| Train Physics | NOT FOUND | VISUAL / TECH SPIKE ONLY |
-| Access Scan Field | IMPLEMENTED PROTOTYPE | Sector 04 core에는 dependency로 만들지 않음 |
-| Foundation Runtime | IMPLEMENTED | no mandatory Build lock |
-| Specialization Runtime | pending | no mandatory Build lock |
+현재 Runtime에 없는 것을 있는 것처럼 설계하지 않는다.
+
+NOT IMPLEMENTED:
+
+```text
+vision cone stealth
+player chase while continuously patrolling
+guard-to-guard alert propagation
+search state
+formation movement
+segment-by-segment variable speed
+humanoid guard locomotion
+```
+
+따라서 현재 Master의 “경비가 다양하게 움직인다”는 의미는:
+
+> **각 경비가 서로 다른 2D patrol route / loop / pingpong / speed / wait / activation choreography를 가진다.**
+
+새 AI는 실제 구현된 뒤 별도 확장한다.
 
 ---
 
-## 42. Production Risk Ranking
+# 8-3. Stage별 Patrol Choreography 목표
 
-### LOW
+| Stage | Patrol Choreography |
+|---|---|
+| 4-1 | `PERIMETER LOOP + LONG PINGPONG` — 첫 두 문법 소개, activation 분리 |
+| 4-2 | 서로 다른 높이의 `STAGGERED PINGPONG` |
+| 4-3 | Sky Garden `PERIMETER LOOP + DIAGONAL SWEEP` |
+| 4-4 | 외곽 `SLOW LOOP` 1기 — Story 공간 안쪽은 상대적 안전 |
+| 4-5 | `3-LAYER CIRCUIT` — Loop / Pingpong / Diagonal, 동시 active ≤2 |
+| 4-6 | `LONG PINGPONG Patrol + Cutter Line` 역할 분리 |
+| 4-7 | `STAGGERED PAIR + PERIMETER LOOP` |
+| 4-8 | `SEQUENTIAL BANDS`로 이전 Patrol pattern 전체 회수 |
 
-- static long-span geometry
-- Cutter projectile reuse
-- existing Patrol reuse
-- existing Wind reuse
-- Story terminals
-- visual-only infrastructure
 
-### MEDIUM
+# 11. Recovery
 
-- Cutter visual distinction
-- high-speed camera framing
-- 2-player projectile cross-lane safety
-- Wake + Cutter combined tuning
+Sector 04 failure should usually mean:
 
-### HIGH
+```text
+MOMENTUM / POSITION LOSS
+```
 
-- moving collision train
-- moving grapple target
-- carrying Player on moving surface
-- moving surface + attached Rope
-- multiplayer moving-platform prediction
+not:
 
-### 결론
+```text
+FULL STAGE RESET
+```
 
-High-risk features 없이
-Sector 04의 핵심 재미가 성립해야 한다.
+Recovery is architectural:
+
+- balcony
+- terrace
+- planter ledge
+- lounge deck
+- care balcony
+- refuge platform
+
+Target:
+
+```text
+~3–5 sec to regain current progression band
+```
+
+Recovery must not become the fastest intentional route.
 
 ---
 
-## 43. Implementation Order
+# 12. Story Progression
 
-### P0 — CUTTER PLAYTEST SLICE
+## 4-1 — CONTRAST
 
-Synthetic room.
-
-검증:
+Observe:
 
 ```text
-normal projectile
-vs
-Cutter projectile
+UPPER RESIDENTIAL
+LIGHTING / BASIC SERVICE
+STILL ACTIVE OR RECENTLY ACTIVE
 ```
 
-가 즉시 구분되는가?
+No causal statement.
 
-Rope Cut 후
-2초 내 재부착이 재미있는가?
+## 4-4 — SUPPORT
 
-### P1 — 4-1 Static Speed Graybox
-
-Enemy 없음.
-
-### P2 — 4-2 Cutter Tutorial
-
-Stationary Sentry.
-
-### P3 — Transit Wake Recontextualization
-
-Existing pulsed Wind.
-
-### P4 — 4-3 Combined Slice
-
-Cutter + Wake.
-
-### P5 — 4-4~4-8 Static Geometry
-
-Moving platform 없이 먼저 완성.
-
-### P6 — Multiplayer
-
-Cutter / Wake / recovery.
-
-### P7 — Moving Carrier TECH SPIKE
-
-시간이 남고 P0~P6 PASS 후에만.
-
-### P8 — Art / Audio
-
-Runtime / Camera 안정 뒤.
-
----
-
-## 44. Playtest Metrics
-
-### Sector-level
+Confirm:
 
 ```text
-clear time
-airborne time ratio
-landing count
-average re-attach chain
-momentum loss events
-full reset count
-```
-
-### Cutter
-
-```text
-cutter shots
-rope cuts
-body hits
-successful emergency re-attach
-time-to-re-attach
-death after rope cut
-```
-
-### Transit Wake
-
-```text
-waited through active
-entered during active
-wake-assisted clear
-wake-caused fall
-```
-
-### Build
-
-Runtime 구현 뒤:
-
-```text
-IMPULSE
-exposure compression / landing skip
-
-RELAY
-cut recovery chain
-
-SHEAR
-rope-line offense opportunity
-```
-
----
-
-## 45. Sector-level Playtest Questions
-
-### Q1
-
-> “4구간에서 잘하면 무엇을 잘하는 느낌이었나요?”
-
-기대:
-
-> 속도를 만들고, 끊겨도 빨리 다시 연결하는 것.
-
-FAIL:
-
-> 그냥 총알을 피하는 것.
-
-### Q2
-
-> “Rope가 잘렸을 때 불공평했나요?”
-
-기대:
-
-> 미리 알아볼 수 있었고 다음 Anchor가 보여서 복구 가능했다.
-
-### Q3
-
-> “4-3 / 4-5의 Wake가 1-6 Wind와 똑같이 느껴졌나요?”
-
-기대:
-
-> 같은 힘이지만 긴 Transit 속도 흐름 안에서 다르게 느껴졌다.
-
-### Q4
-
-> “3-8과 4-8의 차이가 있었나요?”
-
-기대:
-
-> 3-8은 경로를 엮고, 4-8은 속도를 끊기지 않게 복구했다.
-
----
-
-## 46. PASS Criteria — Sector 04
-
-### Gameplay
-
-- `MOMENTUM → INTERRUPTION → RECOVERY`가 기억됨
-- Cutter가 Rope usage를 억제하지 않음
-- Cutter telegraph 명확
-- Rope Cut 후 빠른 recovery 가능
-- no new player input
-- no new Rope mode
-- no new enemy AI required
-- Wake가 기존 physics로 동작
-- Moving Platform 없이 Sector 전체 성립
-- all mandatory geometry ≤ 400
-- `swingImpulse=0` safe clear 가능
-- Kill Optional
-- 4-8 ≠ 3-8 decision pattern
-
-### Growth
-
-- no new tier
-- Foundation + first Specialization carry
-- Foundation과 Rope Growth 분리
-
-### Story
-
-Player가 확실히 앎:
-
-```text
-Lower ascent feeder was isolated.
-Upper trunk still had limited operation.
-Network failure was not uniform.
-```
-
-Player가 아직 모름:
-
-```text
-who ordered isolation
-exact reason
-group-tier-route mapping
-direct causal link to Group C
-```
-
-### Production
-
-- moving train not mandatory
-- Sector 04 does not depend on unfinished Access Scan Field
-- no premature approved art
-- post-sector Boss/transition remains TBD
-
----
-
-## 47. FAIL Conditions — Sector 04
-
-### Gameplay
-
-- Cutter Bullet이 일반 Bullet과 구분 안 됨
-- Rope Cut이 사실상 즉사
-- Cutter 때문에 Rope를 안 쓰는 게 최적
-- every stage = Cutter gauntlet
-- Wind LULL 기다리기만 정답
-- moving train tech가 실패하면 Sector가 붕괴
-- exact 400px max-range mandatory
-- specific Build required
-- 3-8처럼 left/center/right route choice Finale 반복
-
-### Story
-
-- 회사가 사고를 고의로 냈다고 확정
-- 회사가 하층을 죽이려 했다고 확정
-- Group C = lower feeder라고 확정
-- Group A/B = upper trunk라고 확정
-- Corporate executive order 공개
-- Sector 05의 policy reveal 선점
-
-### Runtime
-
-- unverified moving collision을 LOCKED 기능처럼 문서화
-- moving train을 static Surface teleport로 fake
-- Cutter encounter에서 cross-zone multiplayer rope cut
-- Wake를 client-local timer로 계산
-- 4-8을 Sector05에 바로 연결
-
----
-
-## 48. Sector 03 → 04 → 05 Story Handoff
-
-### Sector 03
-
-```text
-ACCESS STRUCTURE EXISTS
-
-EVACUATION ARCHIVE
-+
-ACCESS ARCHIVE
-COEXIST
-```
-
-질문:
-
-> 둘이 무슨 관계지?
-
-### Sector 04
-
-```text
-LOWER ASCENT FEEDER
-ISOLATED
-
-UPPER EXPRESS TRUNK
+UPPER RESIDENTIAL SUPPORT
+EMERGENCY CARE
 LIMITED OPERATION
 ```
 
-질문:
+## 4-7 — EVACUATION
 
-> 왜 이 Routing만 다르게 적용됐지?
-
-### Sector 05
-
-예약:
+Confirm:
 
 ```text
-WHO / WHY
-POLICY / CORPORATE RECORD
+UPPER RESIDENTIAL
+EVACUATION SUPPORT
+LIMITED / AVAILABLE
 ```
 
-즉:
+## 4-8 — JUXTAPOSITION
+
+Player has now seen:
 
 ```text
-03
-STRUCTURE
+LOWER:
+waiting / suspended / degraded traces
 
-04
-PHYSICAL / NETWORK CONSEQUENCE
-
-05
-DECISION / POLICY
+UPPER:
+residential support
+security
+evacuation support
+persisted longer
 ```
 
-순서.
+Question carried into Sector 05:
+
+> **누가 왜 이 차이를 유지했는가?**
 
 ---
 
-## 49. Canonical Sector 04 — REV 1.1
+# 13. Story Disclosure Boundary
+
+## Sector 04 may confirm
+
+- Upper residential services persisted longer.
+- Upper care support existed after the incident.
+- Upper evacuation support remained available in limited form.
+- Security patrol persisted.
+
+## Sector 04 must not confirm
+
+- Group C = a specific lower route.
+- Group A/B = upper residential population.
+- Priority caused lower suspension.
+- Exact Corporate decision maker.
+- Deliberate sacrifice of a named group.
+- Exact resource-allocation order.
+
+These belong to Sector 05 Corporate Continuity.
+
+---
+
+# 14. Visual / Architectural Identity
+
+## Material
+
+- warm stone
+- pale composite
+- controlled glass
+- timber-like panels
+- planted systems
+- low signage density
+
+## Scale
+
+- wide courtyards
+- double-height lounge
+- long terrace views
+- low object density around Player
+- large negative space for Rope arcs
+
+## Life trace
+
+- private furniture
+- gardens
+- health / care props
+- recreation
+- education / family amenity traces
+- emergency refuge equipment
+
+Avoid:
+- cartoon luxury
+- gold-everything caricature
+- generic hotel corridor repetition
+
+---
+
+# 15. Augment Compatibility
+
+## Fast Launch
+
+Advantage:
+- patrol window에 더 빠른 hook commit.
+
+Must not:
+- be required for a mandatory gap.
+
+## Long Rope
+
+Advantage:
+- aggressive terrace grab / fewer landings.
+
+Must not:
+- skip Stage objective/security/story.
+
+## Fast Recover
+
+Advantage:
+- shorter exposure after release.
+
+Must not:
+- invalidate a timing puzzle built around exactly 1.0 sec waiting.
+
+## Release Propulsion
+
+Advantage:
+- large atrium expressive arc.
+
+Must not:
+- cause mandatory ceiling/wall impact.
+
+## Direction Dash
+
+Advantage:
+- correction / recovery.
+
+Must not:
+- be the only way through security.
+
+## Slow Fall
+
+Advantage:
+- safer miss recovery.
+
+Must not:
+- be required for any mandatory fall.
+
+## Combat cards
+
+Advantage:
+- remove Patrol/Cutter more easily.
+
+Must not:
+- create kill requirement.
+
+---
+
+
+# 16-A. NEW SECTOR 04 SECURITY CONTRACT — PERSISTENT PURSUIT
+
+## Design Decision
+
+Sector 04부터 상층 Security Guard/Drone은:
 
 ```text
-4-1 TRANSIT INTAKE
-Speed Space Reveal
-No Enemy
+PATROL
+→
+PLAYER DETECTED
+→
+ALERT LATCHED
+→
+PERSISTENT PURSUIT
+→
+KILLED
+```
 
-↓
+를 기본 상태 전이로 사용한다.
 
-4-2 CUTTER LINE
-First Rope-Cut Tutorial
-1 Stationary Cutter Sentry
+### Core Rule
 
-↓
+> **한 번 Player를 인지한 경비는 다시 Patrol 상태로 돌아가지 않는다.**
 
-4-3 FREIGHT BYPASS
-Cutter + Transit Wake
+단순히 공격 사거리 밖으로 나갔다고 Aggro가 해제되지 않는다.
 
-↓
+Line of sight가 잠시 끊겨도 Alert는 해제되지 않는다.
 
-4-4 INFRASTRUCTURE SERVICE NODE
-REST
-Growth HOLD
-Routing Preview
+---
 
-↓
+## Current Runtime Basis
 
-4-5 EXPRESS SHAFT
-Pure High-Speed Rope Flow
-Wake
-No Enemy
+현재 코드에는 이미:
 
-↓
+```text
+pursuit-drone-t1
+PursuitEnemyBehavior
+```
 
-4-6 POWER RELAY SPAN
-Cutter + Patrol separated
-Rope Geometry
-Moving Carrier optional only
+가 존재한다.
 
-↓
+Current default behavior:
 
-4-7 ISOLATION JUNCTION
-1 Cutter + Wake
-Story Pressure
-Lower Feeder Isolation Reveal
+```text
+seek
+→ windup
+→ dash
+→ recover
+→ seek
+```
 
-↓
+Default tuning:
 
-4-8 TRANSIT CONTROL TRUNK
-1 Cutter + 1 Patrol + Wake
-Continuous Momentum
-→ Interruption
-→ Recovery Finale
+```text
+moveSpeed        160
+dashSpeed        640
+triggerDistance   96
+acquireRange     640
+windupSeconds   0.25
+dashSeconds     0.20
+recoverySeconds 0.50
+```
 
-↓
+또한 `pursuit-drone-t1`은 projectile attack도 사용하는 current archetype이다.
 
-POST-SECTOR 04
-BOSS / TRANSITION
-TBD
+하지만 현재 behavior는:
+
+```text
+target outside acquireRange / activation
+→ may lose target
+```
+
+이므로 REV2.3의 persistent pursuit는 아직 완전히 구현된 상태가 아니다.
+
+Status:
+
+```text
+PERSISTENT PURSUIT LATCH
+= NEW SYSTEM / NOT IMPLEMENTED
 ```
 
 ---
 
-## OPEN QUESTIONS
+## Required Runtime Behavior
 
-### 1. Cutter Authoring Rule — RESOLVED
+### Before Detection
 
-Sector 04 standalone catalog 구현(#513)과 함께 이미:
-
-```text
-cutter-fire
-```
-
-명시적 opt-in rule로 harden됐다(`canCutRope = rules.includes("cutter-fire")`).
-Gameplay meaning은 변하지 않았다.
-
-### 2. Cutter Presentation
-
-Underlying AI를 재사용하더라도:
+경비는 authored Patrol Route를 따른다.
 
 ```text
-charge
-projectile
-trail
-audio
+loop
+pingpong
+multi-point
+speed / waitSeconds
 ```
 
-는 일반 Projectile과 구분돼야 한다.
+### Detection
 
-Exact VFX 아직 OPEN.
-
-### 3. Transit Wake Tuning
-
-1-6 Runtime 수치를 그대로 copy할 필요 없음.
-
-Physics system은 reuse하되
-Sector 04 stage별 strength/cycle은 HYPOTHESIS.
-
-### 4. Moving Carrier
+첫 valid Player acquisition 순간:
 
 ```text
-OPTIONAL TECH SPIKE
+alerted = true
+latchedTargetId = detected player
 ```
 
-Only.
+### After Detection
 
-PASS하지 않아도 Sector04 design 유지.
-
-### 5. Growth Gate
-
-4-4는 future slot일 뿐.
-
-현재는:
+Patrol route를 중단.
 
 ```text
-NO NEW GROWTH
+PATROL OFF
+PERSISTENT PURSUIT ON
 ```
 
-### 6. Sector 03 Boss → 4-1 Entry
+경비는 해당 Stage 안에서 Player를 계속 추적한다.
 
-정확한 연결 OPEN.
+### Chase Persistence
 
-4-1의 첫 공간은 설계 가능하지만
-Gate / Timer / Checkpoint semantics는 Boss flow 확정 뒤 연결.
-
-### 7. Sector 04 Boss
-
-Identity / location / combat / reward 전부 OPEN.
-
-4-8 내부 Boss 없음.
-
-### 8. Sector 05 Story Scope
-
-Sector05 Master Plan을 만들 때
-Sector04의:
+다음으로 Aggro를 해제하지 않는다.
 
 ```text
-Lower Feeder Isolation
+distance > initial acquireRange
+temporary line-of-sight loss
+Player reaches recovery ledge
+Player enters next security band
 ```
 
-에서 어느 정도 직접적인 Corporate Policy로 넘어갈지
-다시 Story Disclosure audit 필요.
+### Chase End
+
+다음 중 하나만 허용:
+
+```text
+guard health <= 0
+Stage / Area unloaded by valid transition
+party wipe / area reset
+```
+
+### Multiplayer Target Policy
+
+초기 Target은 최초 인지 Player.
+
+그 Player가:
+
+```text
+dead
+disconnected
+not active
+```
+
+가 되면:
+
+```text
+nearest active Player in same area
+```
+
+로 retarget.
+
+Area 안에 active Player가 없으면 alerted state는 유지하되 이동/공격은 정지하고 reset contract를 기다린다.
 
 ---
 
-SECTOR 04 / TRANSIT & INFRASTRUCTURE MASTER PLAN — REV 1.1
+## Pursuit Movement Rule
+
+Player는 경비를 완전히 따돌리는 stealth 게임을 하지 않는다.
+
+대신:
+
+```text
+OUTRUN
+or
+KILL
+```
+
+을 선택한다.
+
+Existing Pursuit default:
+
+```text
+moveSpeed 160
+```
+
+은 Player의 일반 수평 max 360보다 느리므로,
+Rope Momentum을 유지하는 Player는 추격을 앞설 수 있다.
+
+하지만 Player가:
+
+```text
+landing
+miss
+recovery
+story reading
+```
+
+으로 오래 멈추면 Pursuit가 따라붙는다.
+
+근접하면 current Pursuit dash:
+
+```text
+windup 0.25
+→ dash 640
+→ recover 0.5
+```
+
+가 압박한다.
+
+Exact tuning은 playtest 대상이며 Master에서 lock하지 않는다.
+
+---
+
+## Important Gameplay Consequence
+
+기존:
+
+```text
+PATROL BAND A
+→ leave activation
+→ pressure ends
+```
+
+이제:
+
+```text
+PATROL A detects Player
+→ Player climbs
+→ Patrol A follows
+→ next beat에도 뒤에서 pressure
+```
+
+가 된다.
+
+즉 **경비를 죽이지 않고 지나가는 선택에는 미래 비용이 생긴다.**
+
+### Player Choice
+
+```text
+KILL GUARD
+= 현재 시간을 쓰고 이후 pressure 제거
+
+OUTRUN GUARD
+= 현재 Momentum 유지
+  but pursuit pressure carries forward through Stage
+```
+
+이 선택이 Sector 04의 전투/이동 결합 핵심이다.
+
+---
+
+## Stage Boundary Rule
+
+Persistent Pursuit는 기본적으로:
+
+```text
+CURRENT STAGE / AREA ONLY
+```
+
+다.
+
+경비가 다음 Stage로 물리적으로 넘어오지는 않는다.
+
+이유:
+
+- authored area lifecycle과 충돌 방지
+- 4-1에서 놓친 Guard가 4-8까지 누적되는 snowball 방지
+- 각 Stage의 Security composition 보존
+- multiplayer state 단순화
+
+Stage Gate를 정상 통과하면 해당 Stage 경비는 unload된다.
+
+---
+
+## Density Rule Revision
+
+이전 Master의:
+
+```text
+MANY TOTAL
+FEW ACTIVE
+```
+
+는 다음으로 수정한다.
+
+```text
+MANY PATROLS
++
+PERSISTENT ONCE ALERTED
++
+LIMIT INITIAL SPAWN COUNT
+```
+
+### Early Sector
+
+```text
+4-1: 2 total
+4-2: 2 total
+4-3: 2 total
+```
+
+Worst case:
+2 Pursuers.
+
+### Mid / Late Sector
+
+```text
+4-5: 3 total
+4-7: 3 total
+4-8: 3~4 total
+```
+
+하지만 Stage geometry / spawn bands는
+Player가 3~4 Pursuers에게 동시에 즉시 발각되지 않게 구성한다.
+
+Skillful Player:
+- 일부를 지나치고 Momentum으로 outrun 가능.
+
+Slow Player:
+- 추격자가 합류하며 pressure 증가.
+
+---
+
+## No Fake Stealth
+
+REV2.3에서도 다음은 없음:
+
+```text
+vision-cone stealth
+hide meter
+aggro decay
+silent takedown
+search mode
+alert reset room
+```
+
+“발각되지 않기”보다:
+
+> **발각된 뒤에도 Rope Momentum으로 얼마나 잘 계속 올라가는가**
+
+가 Sector 04 핵심이다.
+
+---
+
+## Story Meaning
+
+Persistent Security는 Story에도 의미를 가진다.
+
+```text
+Residents are gone.
+Security does not disengage.
+```
+
+즉 상층 생활권 보호 시스템은:
+
+> 사고 이후에도 자기 임무를 계속 수행하고 있다.
+
+Sector 05로 넘기는 질문:
+
+> **왜 이 상층 영역의 보호와 연속성은 이렇게 오래 유지되도록 설계됐는가?**
+
+
+# 16. Runtime Migration Status
+
+Current `Sector04AreaCatalog.js` is the legacy Transit version.
+
+Current area names / mechanics are not the REV2.1 target.
+
+Therefore:
+
+```text
+CURRENT SECTOR04 RUNTIME
+= LEGACY STANDALONE
+
+REV2.1 UPPER RESIDENTIAL / PATROL
+= NOT IMPLEMENTED
+```
+
+Do not label REV2.1 as Runtime aligned until migration PR + tests + playtest pass.
+
+---
+
+# 17. Before Every Stage Design
+
+Re-check latest `main`:
+
+```text
+src/game/config.js
+src/game/physics/PlayerPhysics.js
+src/game/rope/*
+src/game/combat/EnemyPatrol.js
+enemy attack / projectile logic
+src/game/augments/*
+src/game/world/AreaDefinitionValidator.js
+src/game/world/areas/sector04/Sector04AreaCatalog.js
+adjacent Stage docs / runtime
+```
+
+Review:
+
+- Rope reach / reload / release changed?
+- Patrol behavior changed?
+- Attack range / damage changed?
+- new Guard family implemented?
+- Augment catalog changed?
+- Camera changed?
+- Cutter changed?
+- World validator changed?
+
+Map planning must use current code, not stale Master numbers.
+
+---
+
+# 18. Sector 04 Master PASS
+
+### Space
+
+- [ ] Sector 02/03와 첫 화면부터 다른 Upper Residential identity.
+- [ ] 8 Stages are explainable as one continuous upper living district.
+- [ ] Security patrol feels native to the space.
+
+### Gameplay
+
+- [ ] Base Rope only clear.
+- [ ] Patrol position meaningfully changes commit timing.
+- [ ] Many patrols across Sector, few simultaneous active fights.
+- [ ] No kill gate.
+- [ ] No artificial Safe/Flow corridor menu.
+- [ ] Recovery is architectural and quick.
+
+### Runtime
+
+- [ ] No humanoid Guard required until actually implemented.
+- [ ] Patrol routes use current pingpong/loop contract.
+- [ ] Activation bands limit crossfire.
+- [ ] 400px actual reach validated separately from 600 topology budget.
+- [ ] Augment bypass regression tested.
+
+### Story
+
+- [ ] Upper privilege is shown through space and system persistence.
+- [ ] Security remains active after residents disappear.
+- [ ] Sector 05 still owns causality and decision responsibility.
+
+---
+
+# 19. Final Master Summary
+
+```text
+SECTOR 04
+UPPER RESIDENTIAL / AMENITY DISTRICT
+
+VISUAL FANTASY
+Spacious upper-city life
+
+GAMEPLAY FANTASY
+Read moving security positions
+→ commit Rope through patrol coverage
+→ recover quickly
+→ keep climbing
+
+STORY FANTASY
+People are gone,
+but the systems protecting upper life are still running.
+
+CORE THEME
+PRIVILEGE IS PROTECTED
+```

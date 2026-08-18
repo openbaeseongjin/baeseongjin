@@ -1,0 +1,443 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 4,
+    "stage": 2,
+    "legacyStageAlias": "4-2",
+    "sourceAreaId": "sector-04-02",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "RESIDENTIAL COURTYARD",
+    "subtitle": "PURSUIT STACKING"
+  },
+  "bounds": {
+    "width": 1440,
+    "height": 1400
+  },
+  "entry": {
+    "id": "entry",
+    "x": -500,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "safe-deck",
+      "x": -500,
+      "y": 0,
+      "width": 360,
+      "height": 32,
+      "label": "ENTRY TERRACE"
+    },
+    {
+      "id": "landing-a",
+      "preset": "safe-deck",
+      "x": 140,
+      "y": -350,
+      "width": 320,
+      "height": 32,
+      "label": "LOWER BALCONY"
+    },
+    {
+      "id": "decision-deck",
+      "preset": "safe-deck",
+      "x": -40,
+      "y": -690,
+      "width": 340,
+      "height": 32,
+      "label": "DECISION BALCONY"
+    },
+    {
+      "id": "upper-landing",
+      "preset": "safe-deck",
+      "x": 150,
+      "y": -970,
+      "width": 320,
+      "height": 32,
+      "label": "UPPER BALCONY"
+    },
+    {
+      "id": "r1",
+      "preset": "recovery-deck",
+      "x": -130,
+      "y": -440,
+      "width": 230,
+      "height": 16,
+      "label": "GARDEN LEDGE"
+    },
+    {
+      "id": "r2",
+      "preset": "recovery-deck",
+      "x": 210,
+      "y": -790,
+      "width": 220,
+      "height": 16,
+      "label": "BALCONY LIP"
+    },
+    {
+      "id": "r3",
+      "preset": "recovery-deck",
+      "x": -80,
+      "y": -1090,
+      "width": 220,
+      "height": 16,
+      "label": "FACADE LEDGE"
+    },
+    {
+      "id": "exit-deck",
+      "preset": "safe-deck",
+      "x": 500,
+      "y": -1305,
+      "width": 380,
+      "height": 32,
+      "label": "EXIT TERRACE"
+    }
+  ],
+  "grappleTargets": [
+    { "id": "a1", "label": "A1", "x": -230, "y": -210 },
+    { "id": "a2", "label": "A2", "x": 330, "y": -540 },
+    { "id": "a3", "label": "A3", "x": -250, "y": -835 },
+    { "id": "a4", "label": "A4", "x": 350, "y": -1140 }
+  ],
+  "enemies": [
+    {
+      "id": "guard-a",
+      "label": "LOWER COURTYARD SECURITY A",
+      "preset": "pursuit-drone-t1",
+      "x": -390,
+      "y": -390,
+      "activation": { "x": -520, "y": -640, "width": 980, "height": 350 },
+      "patrol": {
+        "mode": "pingpong",
+        "speed": 58,
+        "waitSeconds": 0.18,
+        "points": [
+          { "x": -390, "y": -390 },
+          { "x": -30, "y": -535 },
+          { "x": 300, "y": -405 }
+        ],
+        "start": { "x": -390, "y": -390 },
+        "end": { "x": 300, "y": -405 }
+      },
+      "pursuitBounds": { "x": -700, "y": -1380, "width": 1400, "height": 1380 },
+      "alertPolicy": "sector04-persistent-pursuit-v1",
+      "killRequired": false
+    },
+    {
+      "id": "guard-b",
+      "label": "UPPER COURTYARD SECURITY B",
+      "preset": "pursuit-drone-t1",
+      "x": 330,
+      "y": -735,
+      "activation": { "x": -40, "y": -1130, "width": 620, "height": 470 },
+      "patrol": {
+        "mode": "pingpong",
+        "speed": 72,
+        "waitSeconds": 0.28,
+        "points": [
+          { "x": 330, "y": -735 },
+          { "x": 330, "y": -945 },
+          { "x": 20, "y": -1070 }
+        ],
+        "start": { "x": 330, "y": -735 },
+        "end": { "x": 20, "y": -1070 }
+      },
+      "pursuitBounds": { "x": -700, "y": -1380, "width": 1400, "height": 1380 },
+      "alertPolicy": "sector04-persistent-pursuit-v1",
+      "killRequired": false
+    }
+  ],
+  "scannerGroups": [],
+  "windZones": [],
+  "objectives": [
+    { "id": "final-deck-reached", "type": "reach" },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": ["final-deck-reached"]
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": ["a1", "a2", "a3", "a4"],
+    "mandatory": ["entry", "a1", "landing-a", "a2", "decision-deck", "a3", "upper-landing", "a4", "exit-deck", "exit"],
+    "optional": [],
+    "forbiddenBypasses": [
+      {
+        "from": "entry",
+        "to": ["decision-deck"],
+        "reason": "Entry must not directly reach the decision balcony, skipping the Guard A read."
+      },
+      {
+        "from": "decision-deck",
+        "to": ["exit-deck"],
+        "reason": "Decision balcony must not directly reach the exit deck, skipping the Guard B band."
+      },
+      {
+        "from": "entry",
+        "to": ["exit-deck"],
+        "reason": "Long Rope 480 must not bypass both Guard bands in a single reach from entry to exit."
+      }
+    ]
+  },
+  "recovery": [
+    { "id": "recover-r1", "failureZone": "r1", "recoverTo": { "x": -130, "y": -440 }, "maxRetrySeconds": 5 },
+    { "id": "recover-r2", "failureZone": "r2", "recoverTo": { "x": 210, "y": -790 }, "maxRetrySeconds": 5 },
+    { "id": "recover-r3", "failureZone": "r3", "recoverTo": { "x": -80, "y": -1090 }, "maxRetrySeconds": 5 }
+  ],
+  "sourceExit": {
+    "deckX": 500,
+    "deckTopY": -1305,
+    "deckWidth": 380,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "4-3",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["exit-panel-engaged"]
+  },
+  "camera": {
+    "zones": [
+      { "id": "entry-lower-court", "minY": -300, "maxY": 0, "desktopZoom": 0.95, "mobileZoom": 0.72 },
+      { "id": "guard-a-band", "minY": -650, "maxY": -300, "desktopZoom": 0.9, "mobileZoom": 0.7 },
+      { "id": "decision-balcony", "minY": -830, "maxY": -650, "desktopZoom": 0.92, "mobileZoom": 0.7 },
+      { "id": "guard-b-band", "minY": -1180, "maxY": -830, "desktopZoom": 0.88, "mobileZoom": 0.7 },
+      { "id": "exit", "minY": -1400, "maxY": -1180, "desktopZoom": 0.95, "mobileZoom": 0.72 }
+    ],
+    "goal": "Player should be able to read whether Guard A is still arriving from below when entering Guard B band."
+  },
+  "story": {
+    "planningTriggers": [
+      "private-residential-courtyard",
+      "automated-security-still-active",
+      "upper-residential-density-contrast"
+    ],
+    "runtimePresentations": []
+  },
+  "runtimeDependencies": {
+    "required": [],
+    "newSystems": [
+      {
+        "id": "sector04-persistent-pursuit-alert-latch",
+        "status": "NOT_IMPLEMENTED",
+        "purpose": "One detection latches alert until death or area unload.",
+        "contractRef": "../PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md"
+      },
+      {
+        "id": "state-aware-detection-vs-pursuit-bounds",
+        "status": "NOT_IMPLEMENTED",
+        "purpose": "Guard A must leave its initial patrol/detection band after alert and reach the Guard B band.",
+        "contractRef": "../PERSISTENT-PURSUIT-RUNTIME-HANDOFF.md"
+      }
+    ]
+  },
+  "forbidden": [
+    "Cutter in 4-2",
+    "Wind/Crosswind in 4-2",
+    "Scanner",
+    "kill gate",
+    "aggro reset balcony",
+    "vision cone stealth",
+    "mandatory Augment",
+    "separate Safe/Flow route branches",
+    "third Guard",
+    "humanoid guard assumption"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "launch-samples-attach-with-margin",
+      "type": "geometry",
+      "requirement": "All four mandatory launch samples attach with Base Rope 400 with at least 90px static margin.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "no-augment-required",
+      "type": "geometry",
+      "requirement": "No Augment is required.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-a-patrol-shape",
+      "type": "runtime",
+      "requirement": "Guard A follows a 3-point diagonal pingpong before alert.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-b-patrol-shape",
+      "type": "runtime",
+      "requirement": "Guard B follows a 3-point vertical/diagonal pingpong before alert.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-a-follows-into-guard-b-band",
+      "type": "runtime",
+      "requirement": "If Guard A is detected and left alive, it follows through Decision Balcony into Guard B band.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "guard-a-killed-removes-pressure",
+      "type": "runtime",
+      "requirement": "If Guard A is killed before Guard B band, only Guard B remains as pressure.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "two-pursuers-survivable",
+      "type": "traversal",
+      "requirement": "If Guard A and Guard B are both alerted and left alive, two Pursuers can follow to exit but Base Rope traversal remains survivable.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "decision-balcony-does-not-clear-alert",
+      "type": "runtime",
+      "requirement": "Decision Balcony does not clear alert or reset enemies.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "exit-never-requires-kill",
+      "type": "geometry",
+      "requirement": "Exit never requires enemy death.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "long-rope-no-full-bypass",
+      "type": "geometry",
+      "requirement": "Long Rope 480 cannot skip the entire Decision Balcony and Guard B beat.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "fast-recover-no-progression-break",
+      "type": "regression",
+      "requirement": "Fast Recover 0.5 does not break story/gate progression.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "release-propulsion-no-forced-collision",
+      "type": "regression",
+      "requirement": "Release Propulsion x1.25 does not force unavoidable collision.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "recovery-does-not-clear-alert",
+      "type": "traversal",
+      "requirement": "Recovery r1/r2/r3 does not clear alert and returns to current band in approximately 3-5 seconds.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "camera-keeps-pursuer-readable",
+      "type": "camera",
+      "requirement": "Camera keeps relevant pursuing Guard pressure readable from the next band.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "no-extra-hazards",
+      "type": "geometry",
+      "requirement": "No Cutter, Wind, Scanner, Augment Node, or third Guard is present.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "area-spec-schema-valid",
+      "type": "schema",
+      "requirement": "npm run validate:area-specs가 이 파일을 area-spec-v1 스키마로 통과시켜야 한다.",
+      "automation": "AUTOMATED"
+    }
+  ],
+  "_conversionNote": "Converted from an externally-authored design package (schemaVersion already area-spec-v1, but field shapes diverged: identity/connections/authoringSnapshot/coordinateSystem, enemies.enemyPreset+position+detectionBounds, recovery as a single prose object, route.forbiddenBypasses as prose strings, exit.objectives, story.disclosureLevel+environmentalRead+runtimePresentations[].cueIds, runtimeDependencies.requiredExisting as plain strings, acceptanceTests as plain strings). Converted to the repo's actual area-spec-v1 REV 1.1 shape (see AREA-SPEC-AUTHORING-STANDARD.md). Original narrative/derivation content that has no validated field is preserved below for reference; it is not schema-checked.",
+  "authoringSnapshot": {
+    "gitMain": "eaf05cd4b771879504f76d078ee728c48be5feb6",
+    "checkedAt": "2026-08-18",
+    "runtimeTruth": "Current shipped sector-04-02 remains legacy CUTTER LINE; this is a migration target."
+  },
+  "connections": {
+    "previous": {
+      "areaId": "sector-04-01",
+      "designName": "SKY RESIDENCE ARRIVAL",
+      "expectedHandoff": "Player already understands Patrol -> Detect -> Persistent Pursuit."
+    },
+    "next": {
+      "areaId": "sector-04-03",
+      "designTargetName": "SKY GARDEN TERRACES",
+      "runtimeWarning": "Current sector-04-03 is legacy FREIGHT BYPASS and requires later migration."
+    }
+  },
+  "pursuitStacking": {
+    "status": "REQUIRES sector04-persistent-pursuit-v1",
+    "guardAContinuation": "If Guard A is alerted and alive, it must be able to pursue through the Decision Balcony and into Guard B band.",
+    "guardBContinuation": "If Guard B is alerted and alive, it pursues to the exit band.",
+    "worstCaseAlivePursuers": 2,
+    "killGate": false,
+    "designIntent": "Outrun preserves immediate momentum but carries future pressure; kill spends time now to remove later pressure."
+  },
+  "persistentPursuitContract": {
+    "profile": "sector04-persistent-pursuit-v1",
+    "status": "NOT_IMPLEMENTED",
+    "stateFlow": ["PATROL", "DETECT", "ALERT_LATCHED", "PERSISTENT_PURSUIT", "KILLED_OR_AREA_UNLOAD"],
+    "rules": {
+      "alertClearsOnDistance": false,
+      "alertClearsOnTemporaryLineOfSightLoss": false,
+      "alertClearsOnRecoveryLanding": false,
+      "patrolStopsAfterAlert": true,
+      "normalAreaTransitionUnloadsGuard": true,
+      "guardCrossesIntoNextArea": false,
+      "killRequiredForGate": false
+    }
+  },
+  "augments": {
+    "sourceNode": "NONE_IN_4-2",
+    "mandatoryAugment": "NONE"
+  },
+  "runtimeDependenciesNote": [
+    "current Player/ROPE_CONFIG",
+    "EnemyPatrol multi-point pingpong",
+    "pursuit-drone-t1",
+    "PursuitEnemyBehavior",
+    "exitBlock",
+    "cameraZone"
+  ],
+  "staticValidation": {
+    "baseRope": { "hookSpeed": 1200, "hookReach": 400, "hookReloadSeconds": 1, "handOffset": { "x": 12, "y": -7 } },
+    "launchChecks": [
+      {
+        "sample": "l0",
+        "from": "entry",
+        "anchorId": "a1",
+        "handOrigin": { "x": -488, "y": -39 },
+        "handToAnchorDistance": 309.5,
+        "baseReachMargin": 90.5,
+        "hookFlightSecondsAtBaseSpeed": 0.258,
+        "staticAttachCheck": "PASS"
+      },
+      {
+        "sample": "l1",
+        "from": "landing-a",
+        "anchorId": "a2",
+        "handOrigin": { "x": 152, "y": -357 },
+        "handToAnchorDistance": 255.3,
+        "baseReachMargin": 144.7,
+        "hookFlightSecondsAtBaseSpeed": 0.213,
+        "staticAttachCheck": "PASS"
+      },
+      {
+        "sample": "l2",
+        "from": "decision-deck",
+        "anchorId": "a3",
+        "handOrigin": { "x": -52, "y": -697 },
+        "handToAnchorDistance": 241.3,
+        "baseReachMargin": 158.7,
+        "hookFlightSecondsAtBaseSpeed": 0.201,
+        "staticAttachCheck": "PASS"
+      },
+      {
+        "sample": "l3",
+        "from": "upper-landing",
+        "anchorId": "a4",
+        "handOrigin": { "x": 162, "y": -977 },
+        "handToAnchorDistance": 248.8,
+        "baseReachMargin": 151.2,
+        "hookFlightSecondsAtBaseSpeed": 0.207,
+        "staticAttachCheck": "PASS"
+      }
+    ],
+    "boundsCheck": "PASS",
+    "dynamicSwingLandingCheck": "PENDING_RUNTIME_GRAYBOX",
+    "pursuitStackingCheck": "BLOCKED_BY_NEW_SYSTEM"
+  }
+}

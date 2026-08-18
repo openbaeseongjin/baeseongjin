@@ -47,7 +47,8 @@ const KNOWN_OBJECTIVE_PRESETS = new Set([
 ]);
 
 const KNOWN_ENEMY_PRESETS = new Set([
-    "patrol-drone-t1" // enemyType "patrol-drone-t1", see src/game/config.js COMBAT_CONFIG + Sector03/04 patrolDrone()
+    "patrol-drone-t1", // enemyType "patrol-drone-t1", see src/game/config.js COMBAT_CONFIG + Sector03/04 patrolDrone()
+    "pursuit-drone-t1" // enemyType "pursuit-drone-t1" + PursuitEnemyBehavior, see src/game/combat/EnemyArchetypeCatalog.js
 ]);
 
 const KNOWN_SCANNER_PROFILES = new Set([
