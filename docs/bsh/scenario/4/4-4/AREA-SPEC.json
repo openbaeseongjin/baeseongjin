@@ -1,0 +1,555 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 4,
+    "stage": 4,
+    "legacyStageAlias": "4-4",
+    "sourceAreaId": "sector-04-04",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "CARE PAVILION",
+    "subtitle": "TREATMENT UNDER PURSUIT"
+  },
+  "bounds": {
+    "width": 1500,
+    "height": 1640
+  },
+  "entry": {
+    "id": "entry",
+    "x": -540,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "safe-deck",
+      "x": -540,
+      "y": 0,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "lower-deck",
+      "preset": "safe-deck",
+      "x": 120,
+      "y": -340,
+      "width": 340,
+      "height": 32
+    },
+    {
+      "id": "consult-deck",
+      "preset": "safe-deck",
+      "x": -80,
+      "y": -660,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "care-bridge",
+      "preset": "safe-deck",
+      "x": 180,
+      "y": -970,
+      "width": 320,
+      "height": 32
+    },
+    {
+      "id": "treatment-deck",
+      "preset": "safe-deck",
+      "x": 60,
+      "y": -1100,
+      "width": 300,
+      "height": 32
+    },
+    {
+      "id": "upper-gallery",
+      "preset": "safe-deck",
+      "x": -40,
+      "y": -1300,
+      "width": 360,
+      "height": 32
+    },
+    {
+      "id": "r1",
+      "preset": "recovery-deck",
+      "x": -170,
+      "y": -455,
+      "width": 220,
+      "height": 16
+    },
+    {
+      "id": "r2",
+      "preset": "recovery-deck",
+      "x": 210,
+      "y": -770,
+      "width": 220,
+      "height": 16
+    },
+    {
+      "id": "r3",
+      "preset": "recovery-deck",
+      "x": -140,
+      "y": -1190,
+      "width": 220,
+      "height": 16
+    },
+    {
+      "id": "r4",
+      "preset": "recovery-deck",
+      "x": 180,
+      "y": -1400,
+      "width": 220,
+      "height": 16
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "a1",
+      "label": "A1",
+      "x": -280,
+      "y": -200
+    },
+    {
+      "id": "a2",
+      "label": "A2",
+      "x": 320,
+      "y": -510
+    },
+    {
+      "id": "a3",
+      "label": "A3",
+      "x": -300,
+      "y": -830
+    },
+    {
+      "id": "a4",
+      "label": "A4",
+      "x": 370,
+      "y": -1160
+    },
+    {
+      "id": "a5",
+      "label": "A5",
+      "x": 260,
+      "y": -1450
+    }
+  ],
+  "enemies": [
+    {
+      "id": "guard-a",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -400,
+      "y": -390,
+      "activation": {
+        "x": -520,
+        "y": -620,
+        "width": 930,
+        "height": 310
+      },
+      "patrolChoreography": {
+        "mode": "loop",
+        "speed": 56,
+        "waitSeconds": 0.16,
+        "points": [
+          {
+            "x": -400,
+            "y": -390
+          },
+          {
+            "x": 260,
+            "y": -390
+          },
+          {
+            "x": 260,
+            "y": -585
+          },
+          {
+            "x": -400,
+            "y": -585
+          }
+        ]
+      },
+      "pursuitBounds": {
+        "x": -720,
+        "y": -1600,
+        "width": 1440,
+        "height": 1600
+      }
+    },
+    {
+      "id": "guard-b",
+      "preset": "sector04-persistent-guard-v1",
+      "x": -300,
+      "y": -705,
+      "activation": {
+        "x": -410,
+        "y": -930,
+        "width": 820,
+        "height": 310
+      },
+      "patrolChoreography": {
+        "mode": "loop",
+        "speed": 68,
+        "waitSeconds": 0.12,
+        "points": [
+          {
+            "x": -300,
+            "y": -705
+          },
+          {
+            "x": 300,
+            "y": -865
+          },
+          {
+            "x": -300,
+            "y": -865
+          },
+          {
+            "x": 300,
+            "y": -705
+          }
+        ]
+      },
+      "pursuitBounds": {
+        "x": -720,
+        "y": -1600,
+        "width": 1440,
+        "height": 1600
+      }
+    },
+    {
+      "id": "guard-c",
+      "preset": "sector04-persistent-guard-v1",
+      "x": 360,
+      "y": -1110,
+      "activation": {
+        "x": -40,
+        "y": -1510,
+        "width": 560,
+        "height": 520
+      },
+      "patrolChoreography": {
+        "mode": "pingpong",
+        "speed": 74,
+        "waitSeconds": 0.2,
+        "points": [
+          {
+            "x": 360,
+            "y": -1110
+          },
+          {
+            "x": 80,
+            "y": -1210
+          },
+          {
+            "x": 340,
+            "y": -1320
+          },
+          {
+            "x": 20,
+            "y": -1450
+          }
+        ]
+      },
+      "pursuitBounds": {
+        "x": -720,
+        "y": -1600,
+        "width": 1440,
+        "height": 1600
+      }
+    }
+  ],
+  "scannerGroups": [],
+  "windZones": [],
+  "objectives": [
+    {
+      "id": "treatment-pod-used",
+      "type": "interact",
+      "preset": "care-treatment-pod-v1"
+    },
+    {
+      "id": "final-deck-reached",
+      "type": "reach",
+      "preset": "reach-deck"
+    },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "entry",
+      "a1",
+      "a2",
+      "a3",
+      "care-bridge",
+      "treatment-deck",
+      "a4",
+      "upper-gallery",
+      "a5",
+      "exit"
+    ],
+    "mandatory": [
+      "entry",
+      "a1",
+      "a2",
+      "a3",
+      "care-bridge",
+      "a4",
+      "upper-gallery",
+      "a5",
+      "exit"
+    ],
+    "optional": [
+      {
+        "id": "treatment-opportunity",
+        "sequence": [
+          "care-bridge",
+          "treatment-deck",
+          "upper-gallery"
+        ]
+      }
+    ],
+    "forbiddenBypasses": [
+      {
+        "from": "entry",
+        "to": [
+          "a3",
+          "care-bridge",
+          "a4",
+          "upper-gallery",
+          "a5",
+          "exit"
+        ],
+        "reason": "Reception and Consultation security beats must not be skipped from entry."
+      },
+      {
+        "from": "care-bridge",
+        "to": [
+          "exit"
+        ],
+        "reason": "Treatment / Guard C / Recovery Gallery pressure must remain part of Stage progression."
+      }
+    ]
+  },
+  "recovery": [
+    {
+      "id": "recover-r1",
+      "failureZone": "r1",
+      "recoverTo": {
+        "x": -170,
+        "y": -479
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r2",
+      "failureZone": "r2",
+      "recoverTo": {
+        "x": 210,
+        "y": -794
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r3",
+      "failureZone": "r3",
+      "recoverTo": {
+        "x": -140,
+        "y": -1214
+      },
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "recover-r4",
+      "failureZone": "r4",
+      "recoverTo": {
+        "x": 180,
+        "y": -1424
+      },
+      "maxRetrySeconds": 5
+    }
+  ],
+  "sourceExit": {
+    "deckX": 500,
+    "deckTopY": -1560,
+    "deckWidth": 380,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "4-5",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "exit-panel-engaged"
+    ]
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "reception",
+        "minY": -320,
+        "maxY": 0,
+        "desktopZoom": 0.95,
+        "mobileZoom": 0.72
+      },
+      {
+        "id": "guard-a",
+        "minY": -640,
+        "maxY": -320,
+        "desktopZoom": 0.9,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "guard-b",
+        "minY": -980,
+        "maxY": -640,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "treatment",
+        "minY": -1220,
+        "maxY": -980,
+        "desktopZoom": 0.9,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "guard-c-exit",
+        "minY": -1640,
+        "maxY": -1220,
+        "desktopZoom": 0.9,
+        "mobileZoom": 0.7
+      }
+    ]
+  },
+  "story": {
+    "planningTriggers": [
+      "private-care-pavilion",
+      "resident-consult-recovery",
+      "automated-care-services-active",
+      "treatment-pod-operational"
+    ],
+    "runtimePresentations": []
+  },
+  "runtimeDependencies": {
+    "required": [
+      {
+        "id": "patrol-drone-t1"
+      }
+    ],
+    "newSystems": [
+      {
+        "id": "sector04-persistent-guard-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "care-treatment-pod-v1",
+        "status": "NOT_IMPLEMENTED"
+      }
+    ]
+  },
+  "forbidden": [
+    "Wind in 4-4",
+    "Cutter / rope-cut enemy in 4-4",
+    "Scanner in 4-4",
+    "Treatment Pod clearing Alert",
+    "Treatment Pod despawning or pausing enemies",
+    "Treatment Pod granting channel invulnerability",
+    "Treatment Pod being required for progression",
+    "shared team-wide single-use Treatment Pod",
+    "automatic full heal",
+    "mandatory kill gate",
+    "mandatory Augment",
+    "fourth Guard",
+    "separate Safe / Flow route branches"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "area-spec-schema-valid-after-new-system-support",
+      "type": "schema",
+      "requirement": "AREA-SPEC REV1.1을 유지하면서 sector04-persistent-guard-v1 및 care-treatment-pod-v1 preset/authoring extension이 validator에 명시적으로 지원되어야 한다.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "mandatory-route-clear-zero-impulse",
+      "type": "geometry",
+      "requirement": "Treatment Pod를 사용하지 않고 swingImpulse=0에서도 route.mandatory가 성립해야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "base-rope-static-reach",
+      "type": "geometry",
+      "requirement": "A1~A5 필수 Hook은 Base Rope 400px 안에서 충분한 margin을 유지해야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "three-distinct-patrol-silhouettes",
+      "type": "runtime",
+      "requirement": "A=Reception Ring, B=Cross-Atrium X Loop, C=Recovery Gallery Zigzag로 발각 전 이동 silhouette가 서로 달라야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "persistent-pursuit-three-stack",
+      "type": "runtime",
+      "requirement": "A/B/C가 모두 발각되고 생존하면 최대 3 Pursuers가 Exit band까지 누적될 수 있어야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "treatment-pod-channel",
+      "type": "runtime",
+      "requirement": "Pod는 Player 상호작용 후 3.0초 채널링 완료 시 현재 HP에 +40을 더하되 100을 넘지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "treatment-pod-damage-interrupt",
+      "type": "runtime",
+      "requirement": "치료 채널링 중 Player가 유효한 HP damage를 받으면 치료가 중단되고 회복은 적용되지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "treatment-pod-alert-persists",
+      "type": "runtime",
+      "requirement": "Pod 사용 시작/중단/완료 어느 시점에도 Persistent Pursuit Alert가 초기화되지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "treatment-pod-no-safe-room",
+      "type": "runtime",
+      "requirement": "Alerted Guard A/B가 Treatment Deck까지 도달할 수 있고 Pod 사용이 Enemy movement/attack/despawn을 막지 않아야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "treatment-pod-per-player-use",
+      "type": "multiplayer",
+      "requirement": "Pod 사용 소모 상태는 Player별 1회이며 한 Player 사용이 다른 Player의 사용권을 제거하지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "treatment-pod-authority",
+      "type": "multiplayer",
+      "requirement": "채널 시작/중단/완료, Player별 사용 상태, HP 회복 결과는 authoritative simulation에서 결정되어야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "three-pursuer-treatment-survivability",
+      "type": "traversal",
+      "requirement": "3 Pursuer worst case는 어렵지만 읽을 수 있어야 하며, Pod 사용을 강제하지 않고 치료를 포기하고 Base Rope로 탈출할 수 있어야 한다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "augment-regression",
+      "type": "regression",
+      "requirement": "Combat Augment는 Guard 정리 효율, Movement Augment는 outrun/Pod 접근 효율만 높이고 Pod나 Stage clear에 필수가 되지 않는다.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "camera-treatment-readability",
+      "type": "camera",
+      "requirement": "Treatment Deck에서 Pod, 접근 중인 Pursuer, 다음 A4 방향을 동시에 읽을 수 있어야 한다.",
+      "automation": "MANUAL"
+    }
+  ]
+}
