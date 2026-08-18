@@ -2,7 +2,7 @@
 
 ## 현재 범위
 
-브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 4,800px 가로 블록으로 조립된 연속 Sector, 적 전투·투사체, Sector-entry 복귀와 Foundation 런 성장 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
+브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 세로 등반 spine과 실제 lateral city wing으로 조립된 4,800px 연속 Sector, 적 전투·투사체, Sector-entry 복귀와 Foundation 런 성장 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
 
 ## 주요 모듈
 
@@ -195,10 +195,10 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 - 목표 authoring의 canonical root는 `SectorDefinition`이다. Sector는 3,840~4,800px 폭, 하나의 `sectorEntry`, 순서가 있는 landmark와 그 landmark가 소유하는 objective·encounter를 가진다. Stage 번호와 `areaId`는 새 Runtime 권위가 아니며 `legacyStageAlias`로만 migration·문서 대조에 남길 수 있다.
 - encounter topology 권위는 `encounterId`, `slotId`, `position`, `activation`이다. fixed/pool 적 선택은 topology와 분리된 `enemySelection` payload가 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 선언할 수 있다. Phase 6 selector는 `slotId + runSeed + worldRevision`을 사용해 preview corpus를 결정적으로 resolve한다. validator와 Runtime resolver는 encounter와 selection payload에 `areaId`가 권위 필드로 들어오는 것을 거부하고, 빈/중복 pool이나 fixed+pool 동시 선언을 거부한다.
-- `LegacyAreaSectorPreviewCatalog`는 build/startup source이고, `LegacyAreaSeamlessSectorRuntime`이 Sector 01~~03 legacy geometry를 4개 가로 도시 블록 열 × 2개 landmark로 배치해 `4,800×2,851~3,203px` Sector와 physical connector/route lock으로 compile한다. Sector 04~~06은 alias input이며 Runtime output에 넣지 않는다.
+- `LegacyAreaSectorPreviewCatalog`는 build/startup source이고, `LegacyAreaSeamlessSectorRuntime`은 Sector 01~~03 legacy Stage 정의를 수정하지 않은 채 각 Sector local 좌표에서 `1 → 8` 세로 stack으로 compile한다. 각 landmark는 4,800px width와 실제 lateral city wing을 가지며, compiler는 local origin/bounds와 Sector world origin을 분리한다. future Boss room은 transition slot의 rise를 바꾸어 끼우므로 downstream landmark local origin·ID·콘텐츠는 유지한다. Sector 04~~06은 alias input이며 Runtime output에 넣지 않는다.
 - `SectorProgressState`가 `currentSectorId/currentLandmarkId`, objective·route·encounter와 `sectorBaselineRevision`을 단독 소유한다. individual respawn은 이 상태를 바꾸지 않고, party wipe만 current Sector의 resettable set을 초기화하며 prior Sector 진행을 보존한다.
-- 0.26.0 default `GameSimulationFactory`는 `seamless-sector-runtime-v1`을 사용한다. `WorldSnapshot` protocol v8은 기존 Sector 진행 계약과 Player별 증강·Action/knockback state를 함께 보낸다. legacy Area revision은 explicit compatibility factory로만 생성한다.
-- intra-Sector route는 objective 완료로 connector collision surface를 활성화하고 플레이어가 다음 landmark entry에 물리적으로 들어오면 진행한다. 위치를 순간이동하거나 Gate portal event를 만들지 않는다.
+- 0.29.0 default `GameSimulationFactory`는 `seamless-sector-runtime-v2`를 사용한다. `WorldSnapshot` protocol v8은 기존 Sector 진행 계약과 Player별 증강·Action/knockback state를 함께 보낸다. legacy Area revision은 explicit compatibility factory로만 생성한다.
+- intra-Sector route는 objective 완료로 connector collision surface를 활성화하고 플레이어가 다음 landmark entry에 물리적으로 들어오면 진행한다. Stage별 Gate·exit panel·포탈·문 visual은 만들지 않으며, objective reach가 도시 통로를 직접 연다. 위치를 순간이동하거나 Gate portal event를 만들지 않는다.
 - `src/game/world/sectors/`, `SectorDefinitionValidator.js`, `SectorProgressState.js`와 `SectorProgressController.js`는 시나리오 통합 fingerprint의 별도 `authored-sector-sha256`로 감시한다. Area migration source와 Sector Runtime source의 현재 상태를 각각 기록한다.
 
 ## 현재 게임 시스템
@@ -231,7 +231,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 외부 실행 계층은 `getPrimaryPlayerId()`, `playerState()`·`playerStates()`, `applyOwnerMotion()`, 예측 복원·진행·피격·충돌 명령을 사용한다. 서버 세션과 로컬 예측기는 `players` 배열이나 플레이어 컴포넌트를 직접 수정하지 않는다.
 - 이동·점프와 로프 입력은 각각 `LocomotionInput`, `RopePointerInput` capability로 전달한다. 적 공격·자동 무기·양측 투사체 운동과 클라이언트 충돌도 각 `SimulationDrivenObject`의 capability로 한 번만 구현하며, `GameSimulation`은 소유자 입력 그룹과 이름 있는 시뮬레이션 단계를 일정 순서로 실행한다. 실행 위치는 Is-A 정체성과 별개이므로 서버가 궤적을 진행하는 투사체도 피해·공격 클라이언트에서 `client-projectile-collision` capability를 실행할 수 있다.
 - `stepCommandBatch`는 싱글과 소유 클라이언트 예측에서 정확히 다음 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 로컬 예측은 `InputStateSimulator`로 마지막 입력을 제한된 틱 동안 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다. 멀티 서버는 같은 스케줄러를 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 입력 물리를 다시 적분하지 않고 최신 적용 `owner-motion`을 연속 상태 원점으로 유지한다.
-- `PlayerCommand.interact`는 Gate 패널 같은 근접 문맥 상호작용 의도다. `InputSampler`는 PC `W/↑`와 모바일 점프 버튼을 점프 축과 `interact`에 함께 매핑하며, 진행 시스템은 준비된 패널의 반경 안에서만 이를 소비한다. 따라서 별도 PC 상호작용 키를 추가하지 않고 패널 밖에서는 기존 점프 동작을 그대로 유지한다.
+- `PlayerCommand.interact`는 augment Node·명시적 terminal 같은 근접 문맥 상호작용 의도다. `InputSampler`는 PC `W/↑`와 모바일 점프 버튼을 점프 축과 `interact`에 함께 매핑하며, 진행 시스템은 명시적 source의 반경 안에서만 이를 소비한다. Stage route는 exit panel 상호작용이 아니라 objective reach가 자동으로 연다. 따라서 별도 PC 상호작용 키를 추가하지 않고 source 밖에서는 기존 점프 동작을 그대로 유지한다.
 - `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력을 `player-respawned` 사건으로 남긴다.
 - 각 사망자는 현재 `respawnAnchorId`의 Sector entry에서 독립 부활한다. 같은 tick에 전원이 부활한 경우에만 current Sector objective·route·enemy baseline을 재구성하며 prior Sector 진행, 다른 플레이어의 Build와 이미 끝난 이전 Sector 적은 보존한다.
 - 적은 사거리 안의 살아 있는 플레이어 중 최근접 대상을 선택하고 거리 동률은 ID로 결정한다. 적 투사체의 생성·직선 궤적·8초 수명은 서버가 진행한다. 각 피해 클라이언트가 자기 예측 위치에서 로프를 몸체보다 먼저 판정해 playerId가 있는 claim을 보내며, 서버 고정 스텝은 지연된 플레이어 위치로 충돌을 먼저 만들지 않는다.

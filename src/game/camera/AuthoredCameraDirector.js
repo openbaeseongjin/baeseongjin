@@ -1,4 +1,5 @@
 import { anchoredRectangleBounds } from "../world/AuthoredCoordinateAnchor.js";
+import { authoredRegionForPosition } from "../world/AuthoredLandmarkResolver.js";
 
 const HORIZONTAL_PLAYER_RATIO = 0.38;
 const VERTICAL_PLAYER_RATIO = 0.58;
@@ -6,23 +7,13 @@ const CAMERA_BLEND_RATE = 5;
 const ZOOM_BLEND_RATE = 6;
 const STORY_DISPLAY_TRIGGER_SIZE = Object.freeze({ width: 192, height: 64 });
 
-function pointInsideArea(area, position) {
-    return (
-        position.x >= area.bounds.x &&
-        position.x <= area.bounds.x + area.bounds.width &&
-        position.y >= area.bounds.y &&
-        position.y <= area.bounds.y + area.bounds.height
-    );
-}
-
 function cameraZoneForLocalY(area, localY) {
     const zones = area.cameraZones?.filter((zone) => zone && typeof zone === "object") ?? [];
     return zones.find(({ minY, maxY }) => localY >= minY && localY <= maxY) ?? null;
 }
 
 export function authoredAreaForPosition(world, position) {
-    const regions = world?.landmarks?.length ? world.landmarks : world?.areas;
-    return regions?.find((area) => pointInsideArea(area, position)) ?? null;
+    return authoredRegionForPosition(world, position);
 }
 
 export function localTriggerObjects(world, areaId) {

@@ -47,7 +47,7 @@
 12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Augment 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
 13. 발견된 문제 영역은 현재 시나리오의 관련 회귀 테스트에 이유와 함께 추가해 같은 영역·진행 계약에서 우선 재현한다.
 14. 원격 플레이테스트는 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켜고 현재 런 지표를 확인한다.
-15. 0.25.0 기본 Runtime은 체력이 0이 되거나 낙사하면 해당 플레이어만 현재 Sector entry에서 최대 체력으로 즉시 부활시키고 공용 objective·열린 route·처치 적을 유지한다. 같은 tick에 전원이 사망한 경우에만 current Sector baseline을 복구하고 전원을 Sector entry에 배치한다.
+15. 0.29.0 기본 Runtime은 체력이 0이 되거나 낙사하면 해당 플레이어만 현재 Sector entry에서 최대 체력으로 즉시 부활시키고 공용 objective·열린 route·처치 적을 유지한다. 같은 tick에 전원이 사망한 경우에만 current Sector baseline을 복구하고 전원을 Sector entry에 배치한다.
 16. 네트워크 연결 전 불변 PlayerCommand 기록을 재생해 위치·전투·진행·지표 결정성을 비교한다.
 17. 다중 플레이어 명령은 프로토콜 버전과 틱을 가진 배치로 묶고 플레이어 ID 순으로 정규화한다.
 18. 모든 플레이어는 같은 PlayerRuntimeFactory에서 물리·로프·전투·생명 상태를 조립한다.
@@ -107,12 +107,12 @@
 
 전문 작업물의 완료는 메인 개발, 플레이테스트, 최종 스퍼트와 예선 제출의 선행 조건이 아니다. 정해진 통합 마감까지 validator와 실제 화면·청취 검증을 통과한 결과만 제출 빌드에 반영하고, 준비되지 않았거나 통합 위험이 큰 영역은 검증된 mock을 유지한다. 다만 공개 manifest·loader·이벤트 binding처럼 전문 작업과 메인 개발이 함께 사용하는 계약 변경은 양쪽 작업 전에 먼저 합의한다.
 
-제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 player-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관한 migration alias**다. 0.25.0 기본 Runtime에서 Sector 01~~03은 강제 Gate 포탈과 층별 전환 없이 가로 4,800px의 하나의 물리 공간이며, 기존 순서와 일부 분기·재합류를 landmark 진행으로 보존한다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. Sector 04~~06은 아직 migration input이며 Runtime 구현 완료가 아니다.
+제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 player-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관한 migration alias**다. 0.29.0 기본 Runtime에서 Sector 01~~03은 강제 Gate 포탈과 Stage별 문 없이 가로 4,800px의 하나의 물리 공간이며, 기존 아래→위 콘텐츠 순서를 local vertical stack으로 보존한다. 넓어진 양옆은 실제 exploration·combat·recovery wing이고 진행을 좌우 지그재그로 바꾸지 않는다. future Boss room은 Sector transition slot에 삽입해 downstream Stage local 좌표를 다시 쓰지 않는다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. Sector 04~~06은 아직 migration input이며 Runtime 구현 완료가 아니다.
 
 ### 월드와 진행 영역 기준
 
 - #622의 Phase 1~2는 `SectorDefinition`, Sector validator와 build/startup-only legacy preview adapter를 canonical authoring 경계로 둔다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`이고 `legacyStageAlias`는 문서·migration metadata일 뿐이다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
-- #625는 Sector 01~~03 preview를 `seamless-sector-runtime-v1` 기본 Runtime으로 전환했다. Sector 04~~06은 alias input으로만 남고 legacy Area/Gate catalog는 이전 revision compatibility 검증에 사용한다.
+- #625/#637은 Sector 01~~03 preview를 `seamless-sector-runtime-v2` 기본 Runtime으로 전환했다. Stage 정의는 local vertical stack으로 보존하고, compiler가 actual lateral city wing과 future Boss room용 transition slot을 조립한다. Sector 04~~06은 alias input으로만 남고 legacy Area/Gate catalog는 이전 revision compatibility 검증에 사용한다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.
 - 각 진행 영역은 입구, 이동 경로, 필수 완료 조건, 명시적 출구와 다음 영역 연결을 가진다.
@@ -132,7 +132,7 @@
 - 정기 회의: 매일 22:00~23:00, Discord
 - 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태이며 `SECTOR 01`의 `1-1`~`1-8` 시나리오가 모두 작성됐다. 전체 48개 중 나머지 40개 맵의 시나리오와 레벨 디자인은 아직 없으며 새로 만들어야 한다.
 - 나머지 40개 맵 시나리오와 레벨 디자인은 섹터 순서대로 작성해 8월 19일까지 확정한다. 메인 개발은 전체 완료를 기다리지 않고 `SECTOR 01`부터 mock으로 구현하며, 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름과 오브젝트 요구가 모두 필요하다.
-- 증강 v1 기획과 topology-independent Runtime은 0.26.0에 완료됐고 0.28.0에서 현재 Runtime Sector 01~03의 명시적 장비 Node를 `1-4 → 2-3 → 3-5` 순서의 Player별 획득원으로 연결한다. Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer와 Player별 최대 6장을 사용한다. Sector 04~06 획득 Node, Quest·순수 이동 카드·Specialization은 별도 확장이다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
+- 증강 v1 기획과 topology-independent Runtime은 0.26.0에 완료됐고 0.28.0에서 현재 Runtime Sector 01~~03의 명시적 장비 Node를 `1-4 → 2-3 → 3-5` 순서의 Player별 획득원으로 연결한다. Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer와 Player별 최대 6장을 사용한다. Sector 04~~06 획득 Node, Quest·순수 이동 카드·Specialization은 별도 확장이다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
 - NPC 역할·배치·대사와 대화 진행 규칙, 관련 상호작용 UI·게임 요소는 8월 15일까지 확정한다. 이 기획은 NPC가 처음 등장하는 섹터와 공용 대화 시스템 구현의 선행 조건이다.
 - 엔딩 내용, 진입 조건, 최종 Encounter 이후 흐름과 관련 UI·게임 요소는 8월 19일까지 확정한다. 이 기획은 `SECTOR 06`과 최종 완료 상태 구현의 선행 조건이다.
 - 그래픽·오디오 담당자는 메인 개발자가 맵별로 정리한 오브젝트·cue 목록을 받아 8월 19일에 정식 리소스 1차 생산분을 인계한다. 1차 생산분은 전체 자산 완료가 아니라 앞서 정리된 우선 오브젝트의 교체 가능한 첫 묶음이다.
