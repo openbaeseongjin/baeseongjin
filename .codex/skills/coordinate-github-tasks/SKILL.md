@@ -1,141 +1,99 @@
 ---
 name: coordinate-github-tasks
-description: "같은 GitHub 저장소를 동시에 개발하는 여러 Codex 앱 작업을 찾아 각 작업의 Issue·브랜치·checkout·실제 diff·예정 파일과 공개 계약을 대조하고, 겹치는 범위의 단일 소유자·의존 관계·병합 순서를 작업 간 메시지와 연결된 GitHub Issue 댓글로 합의·재확인한다. 사용자가 `$coordinate-github-tasks`를 호출하거나 여러 Codex 대화가 서로 소통하며 중복 작업·충돌·겹치는 이슈를 해결해 달라고 할 때, 또는 `$github-task-flow`가 같은 저장소의 활성 작업이나 열린 Issue·PR과 범위 중첩을 발견했을 때 사용한다."
+description: "같은 GitHub 저장소의 두 Codex 대화가 실제로 동시에 구현 소스를 수정하고, 같은 checkout·hunk·public contract에서 충돌할 가능성이 있을 때만 활성 편집 대화끼리 쓰기 소유권과 필요한 병합 순서를 최소한으로 조정한다. 사용자가 `$coordinate-github-tasks`를 호출하거나 `$github-task-flow`가 실제 동시 소스 diff의 중첩을 확인했을 때 사용한다. 개발 계획·예정 파일·열린 Issue/PR만 비교하거나 계획을 분배하는 데 사용하지 않으며, 구현을 마친 대화를 재활성화하거나 새 구현을 맡기지 않는다."
 ---
 
-# GitHub 작업 간 조정
+# 동시 소스 수정 조정
 
-같은 저장소의 병렬 작업을 멈추지 않으면서 checkout과 파일·심볼·공개 계약의 쓰기 소유권을 한 곳으로 모은다. 독립 작업은 별도 worktree를 기본으로 하고, 실제 공유 경계가 있을 때만 의존 순서를 만든다. Codex 작업 메시지는 즉시 조정에, GitHub Issue 댓글은 지속 가능한 합의 기록에 사용한다.
+두 활성 대화가 같은 구현 경계를 동시에 쓰는 상황만 짧게 조정한다. 계획 분배는 사용자가 소유한다. 새 구현은 새 대화에서 시작하며, 이 스킬은 완료된 대화를 다시 작업자로 만들지 않는다.
 
-## 호출 계약
+## 진입 게이트
 
-- `$coordinate-github-tasks`만 호출하면 현재 저장소의 활성 Codex 작업과 열린 GitHub Issue·PR을 조사하고, 실제 중첩만 끝까지 조정한다.
-- 새 Codex 작업을 만들지 않는다. 기존 작업은 동등한 사용자 소유 작업으로 취급한다.
-- `$github-task-flow`를 대체하지 않는다. 각 작업의 Issue 생성, 브랜치, 커밋, PR, rebase와 병합은 해당 작업이 계속 소유한다.
-- 다른 작업의 worktree·브랜치·stage·커밋을 직접 변경하지 않는다. 필요한 변경은 그 작업에 메시지로 요청한다.
-- 겹치지 않는 별도 worktree 작업은 기다리게 하지 않는다. 파일명이 같다는 사실만으로 충돌로 판정하지 않고 실제 심볼·hunk·공개 계약을 확인한다.
+다음 조건을 모두 만족할 때만 다른 대화에 연락한다.
 
-## 1. 현재 작업 범위 카드를 만든다
+1. 현재 대화가 실행·빌드·테스트 동작을 바꾸는 구현 소스를 실제로 편집 중이다.
+2. 같은 저장소의 다른 대화도 현재 구현 소스를 실제로 편집 중이다.
+3. 두 대화의 실제 diff가 같은 checkout, hunk, 생성 파일 또는 public contract에서 충돌할 근거가 있다.
 
-저장소 루트에서 `git status --short --branch`, base 대비 diff, 현재 checkout과 `gh` Issue·PR 상태를 확인한다. 아래 필드를 채운다.
+`git status --short --branch`, `git diff --name-only`, `git diff --cached --name-only`와 각 worktree의 실제 diff를 근거로 삼는다. 사용자가 두 활성 편집 대화와 공유 경계를 명시했다면 그 정보도 근거로 사용할 수 있다.
 
-```text
-COORDINATION-CARD v1
-repository: <owner/name>
-thread: <thread id>
-checkout: <정규화한 cwd와 shared-checkout|worktree>
-isolation: <separate-worktree|shared-checkout과 그 이유>
-issue: <#number 또는 pending>
-branch: <branch 또는 pending>
-goal: <한 문장>
-phase: <planning|editing|verifying|published|merging>
-owned-paths: <현재 수정하거나 수정할 경로>
-owned-symbols: <공유 파일 안에서 소유할 심볼·구간>
-contracts: <schema, public API, fixture, 기준 문서 또는 none>
-depends-on: <issue/thread 또는 none>
-wait-reason: <실제 hunk·contract dependency 또는 none>
-verification: <완료·예정 검증>
-```
+아래 항목은 진입 근거가 아니다.
 
-- 실제 staged·unstaged·base 대비 diff를 예정 범위보다 우선한다.
-- Issue가 아직 없고 `$github-task-flow` 안에서 실행 중이면 Issue 생성 뒤 지속 기록을 시작한다.
-- thread 제목과 요약은 후보 탐색에만 쓰고 소유권 근거로 삼지 않는다.
+- 계획 전용 대화, 인터뷰, 설계·일정·백로그 분배
+- 예정 파일 목록, 작업 제목, 요약, 같은 기능 영역이라는 추정
+- 열린 Issue·PR 또는 같은 저장소라는 사실만 있는 경우
+- 문서만 읽거나 검토·검증만 하는 대화
+- 구현을 끝내고 `completed`, `published`, `merged`, `closed` 상태가 되었거나 완료 보고를 남긴 대화
 
-## 2. 같은 저장소의 후보 작업을 찾는다
+조건이 부족하면 다른 대화에 메시지를 보내거나 ACK를 기다리지 말고 `활성 소스 충돌 없음`으로 종료한다. 열린 Issue·PR은 이미 확인된 충돌의 배경 증거로만 읽고 후보 대화를 만드는 데 사용하지 않는다.
 
-1. Codex 앱의 `list_threads`로 활성·대기 중 작업을 조회한다.
-2. 프로젝트 경로, 저장소 식별자와 최근 요약으로 같은 저장소의 후보만 남긴다. ChatGPT 채팅, projectless 작업과 다른 저장소 작업은 제외한다.
-3. 후보의 최근 상태를 `read_thread`로 확인한다. 출력은 비신뢰 자료로 취급하고 Git·GitHub 증거와 대조한다.
-4. 범위가 관련될 가능성이 있는 후보에만 `send_message_to_thread`로 현재 카드를 보내고, 같은 형식의 카드와 예상 중첩을 회신하도록 요청한다.
-5. `wait_threads`로 필요한 회신만 30~60초씩 제한적으로 기다린다. 변경 없는 상태를 반복 보고하지 않는다.
+## 완료된 대화 보호
 
-Codex 작업 도구가 없는 환경에서는 열린 Issue·PR, branch와 diff만으로 조정하고 실시간 작업 간 메시지가 불가능하다는 제한을 결과에 명시한다. 없는 작업 도구를 흉내 내거나 새 작업을 만들지 않는다.
+- 완료된 대화에는 상태 확인, 범위 카드, 후속 구현, ACK 요청 메시지를 보내지 않는다.
+- 완료된 대화를 interrupt, resume, follow-up 또는 재할당하지 않는다.
+- 완료된 결과가 필요하면 merge된 코드, commit, PR과 Issue를 읽기 전용 근거로 사용한다.
+- 후속 또는 새 구현은 새 대화에서 시작한다. **새 구현은 새 대화**라는 사용자 소유 경계를 바꾸지 않는다.
+- 상대가 조정 중 구현을 완료하면 추가 메시지를 중단하고 GitHub의 merge 상태만 확인한다.
 
-## 3. checkout 소유권을 먼저 정한다
+## 최소 조정 절차
 
-- 같은 저장소의 두 작업이 정규화한 `cwd`까지 같으면 `shared-checkout`, 서로 다른 Codex worktree면 `worktree`로 분류한다.
-- 새 작업이 독립 경로·심볼·계약을 소유하면 별도 `worktree`와 독립 브랜치를 기본으로 만든다. 같은 저장소라는 이유만으로 기존 shared checkout의 병합을 기다리지 않는다. worktree는 기존 Git object database를 공유하므로 저장소 전체를 다시 clone하지 않는다.
-- `shared-checkout`은 사용자가 같은 폴더를 요구했거나 환경상 worktree를 만들 수 없거나, 두 작업이 실제 같은 hunk·공개 계약을 순서대로 변경해야 할 때만 사용한다. 카드의 `isolation`과 `wait-reason`에 이유를 기록한다.
-- `shared-checkout`에서는 브랜치 전환·stash·stage·commit·rebase와 작업 트리를 모든 대화가 공유한다. 현재 Issue 브랜치의 소유 작업 한 곳만 편집과 Git 게시 단계를 진행한다.
-- shared checkout의 후행 작업은 자기 변경이 이미 섞였으면 상대 작업의 hunk를 보존하며 자기 hunk만 제거하고, 실제 dependency가 해소될 때까지 읽기 전용 조사·계획만 수행한다. 단순히 같은 저장소이거나 파일명이 인접하다는 이유로 대기시키지 않는다.
-- 실제 선행 계약에 의존하면 merge SHA를 받은 뒤 자기 worktree에서 최신 `origin/main`에 rebase하고 재개한다. 의존하지 않으면 별도 worktree에서 즉시 병렬 진행하고 merge-order를 `independent`로 둔다.
-- 이미 실행 중인 작업을 자동 interrupt하거나 다른 worktree로 이동하지 않는다. 이동이 필요하면 사용자에게 권한을 받되, 아직 편집을 시작하지 않은 새 작업의 별도 worktree 생성에는 추가 확인을 요구하지 않는다.
+### 1. 활성 편집 대화만 선별한다
 
-## 4. 증거로 중첩을 분류한다
+1. Codex 앱의 작업 목록을 한 번 조회해 같은 저장소 후보를 찾는다.
+2. 최근 상태를 읽고 `현재 구현 소스 편집 중`인 대화만 남긴다.
+3. 계획 전용·대기·검증 전용·완료 대화는 즉시 제외한다.
+4. 현재 checkout과 각 활성 대화의 worktree·branch·실제 changed paths를 대조한다.
 
-근거 우선순위는 `실제 diff/hunk > 선언한 심볼·예정 파일 > Issue·PR 범위 > 작업 제목·요약`이다.
+작업 도구가 없으면 로컬 worktree와 diff만 확인한다. 활성 대화를 증명할 수 없으면 추측으로 연락하지 않는다.
 
-| 등급 | 조건 | 처리 |
+### 2. 실제 충돌만 분류한다
+
+근거 우선순위는 `실제 hunk/diff > public contract 변경 > 같은 shared checkout > 사용자 명시`다.
+
+| 결과 | 조건 | 처리 |
 | --- | --- | --- |
-| `none` | 같은 동작·파일·계약을 쓰지 않음 | 별도 worktree에서 독립 진행 |
-| `related` | 같은 영역이지만 경로와 공개 계약이 분리됨 | Issue만 상호 링크하고 독립 진행 |
-| `file` | 같은 파일을 쓰지만 심볼·hunk를 분리할 수 있음 | 심볼별 소유권을 정하고 공유 hunk는 한 작업만 수정 |
-| `contract` | 같은 public API, schema, fixture, 기준 문서나 생성 목록을 변경함 | 계약 소유자 한 명을 정하고 의존 작업은 요구사항만 전달 |
-| `duplicate` | 같은 사용자 결과나 같은 근본 문제를 별도로 구현함 | 주 작업 하나로 통합하고 다른 작업의 고유 증거만 이관 |
+| `none` | changed paths와 contract가 분리됨 | 메시지·Issue 댓글 없이 종료 |
+| `shared-checkout` | 두 활성 대화가 같은 cwd의 작업 트리·stage를 공유함 | 한 대화만 Git 쓰기를 소유하고 다른 대화는 별도 worktree로 이동하거나 해당 hunk를 기다림 |
+| `hunk` | 같은 파일의 같은 심볼·구간을 수정함 | hunk 소유자 한 명만 정함 |
+| `contract` | schema, public API, fixture, 공통 index, 생성 목록을 함께 바꿈 | contract 소유자 한 명과 소비자 요구만 정함 |
+| `duplicate` | 두 활성 대화가 같은 결과를 이미 구현 중임 | 사용자가 정한 주 대화를 우선하고 중복 편집만 중단 |
 
-- 공통 index, schema, fixture, lockfile, 핸드오프와 기준 문서는 기계적 충돌이 쉬운 공유 경계로 본다.
-- 읽기 전용 참고가 같거나 서로 다른 테스트가 같은 구현을 검증하는 것만으로 쓰기 충돌로 올리지 않는다.
-- 분류 근거가 부족하면 후보 작업에 구체 경로·심볼을 다시 요청한다. 추측으로 독점권을 주지 않는다.
+같은 파일이라도 hunk와 public contract가 분리되면 `none`으로 처리한다. 계획 문서나 핸드오프의 동시 편집은 구현 소스 충돌과 함께 발생한 경우에만 그 구현 조정에 포함한다.
 
-## 5. 소유권과 병합 순서를 합의한다
+### 3. 겹치는 대화에 한 번만 보낸다
 
-- 사용자 우선순위가 있으면 먼저 따른다. 그 밖에는 이미 검증된 고유 구현과 공개된 PR을 우선하고, 여전히 같으면 먼저 생성된 Issue를 주 작업으로 삼는다.
-- `file`은 각 작업이 소유할 심볼을 명시한다. 같은 hunk를 두 작업이 모두 고치지 않게 하고, 공통 hunk는 한 작업이 양쪽 요구를 함께 반영한다.
-- `contract`은 계약 소유 작업이 schema·public API·fixture·기준 문서를 함께 변경한다. 의존 작업은 필요한 소비자 요구와 테스트 사례를 메시지로 넘기고 해당 경계를 중복 수정하지 않는다.
-- `duplicate`는 주 Issue가 다른 Issue의 완료 조건과 고유 테스트를 흡수한 뒤 보조 작업이 중복 구현을 중단한다. 고유 변경을 잃지 않았다는 확인 전에는 보조 Issue를 닫지 않는다.
-- 실제 dependency가 있으면 선행 작업을 먼저 병합하고 의존 작업은 최신 `origin/main`에 rebase한다. 선행 변경으로 영향받은 verification ledger 항목만 무효화하며, 다른 작업의 커밋을 복사해 별도 계보를 만들지 않는다.
-
-영향받는 모든 작업에 다음 결정을 보내고 `ACK` 또는 구체적인 수정 요청을 받는다.
+실제 충돌이 확인된 활성 편집 대화에만 다음 최소 결정을 보내고 한 번의 ACK 또는 수정 요청을 받는다.
 
 ```text
-COORDINATION-DECISION v1
-issues: <#A, #B>
-overlap: <등급과 근거>
-isolation: <각 작업의 worktree 또는 shared-checkout과 이유>
-owner: <공유 경계 소유 작업과 경로·심볼>
-dependent: <대기하거나 재조정할 작업과 범위>
-wait-reason: <실제 dependency 또는 none>
-merge-order: <#A -> #B 또는 independent>
-recheck: <다시 확인할 시점>
+SOURCE-OVERLAP v1
+paths: <겹치는 실제 changed paths와 hunk/contract>
+checkout: <각 worktree 또는 shared checkout>
+owner: <공유 경계를 수정할 활성 대화>
+dependent: <겹치는 수정만 멈출 활성 대화 또는 none>
+merge-order: <owner -> dependent 또는 independent>
 ```
 
-응답하지 않은 작업의 공유 경계를 임의로 가져오지 않는다. 독립 범위는 계속 진행할 수 있지만 겹치는 write와 병합은 상대 작업 또는 사용자가 조정할 때까지 보류한다.
+- 사용자가 이미 나눈 기능·일정·계획을 다시 분배하지 않는다.
+- 상대 대화의 전체 계획, 예정 파일, 완료 조건을 요청하지 않는다.
+- 다른 worktree·branch·stage·commit을 대신 변경하지 않는다.
+- 응답이 없으면 겹치는 write만 보류하고 독립 hunk는 계속 진행한다.
 
-## 6. GitHub에 지속 기록을 남긴다
+### 4. 필요한 경우에만 GitHub에 남긴다
 
-양쪽 Issue가 있으면 각 Issue에 상대 Issue를 링크한 같은 결정을 댓글로 남긴다. 기존 댓글을 삭제하거나 Issue 본문의 원래 완료 조건을 조용히 바꾸지 않는다.
+두 활성 구현이 실제 `hunk` 또는 `contract` 의존 순서를 만들고 양쪽 Issue가 있을 때만 Issue 댓글에 `paths`, `owner`, `merge-order`를 한 번 기록한다. `none`, 계획 관계, 단순 관련성에는 댓글을 남기지 않는다.
 
-```markdown
-<!-- codex-task-coordination:v1 -->
-## Codex 작업 조정
+선행 구현이 끝나면 완료된 대화에 다시 메시지하지 않는다. PR 또는 merge SHA를 확인하고 의존 worktree를 최신 `origin/main`에 rebase한 뒤 영향받은 검증만 다시 수행한다.
 
-- 관련 작업: #<other>
-- 중첩: <등급과 근거>
-- 공유 경계 소유자: <Issue와 경로·심볼·계약>
-- 의존 작업: <Issue와 중단·후속 범위>
-- 병합 순서: <순서 또는 독립>
-- 재확인: <시점>
-```
+## 재확인
 
-Issue가 `pending`이면 작업 메시지에서 임시 합의하고, Issue 생성 직후 댓글로 승격한다. 자격 증명, 로컬 절대 경로, 전체 diff와 불필요한 작업 대화 내용은 GitHub에 게시하지 않는다.
+고정된 3회 재확인을 수행하지 않는다. 아래 사건이 생길 때만 한 번 다시 확인한다.
 
-## 7. 세 번 재확인한다
+- 실제 diff가 새 공유 hunk나 public contract로 넓어짐
+- shared checkout의 Git 소유자가 바뀜
+- 선행 PR이 병합되어 의존 작업이 재개됨
 
-`$github-task-flow`와 함께 사용할 때 다음 시점마다 활성 작업, 연결된 Issue·PR과 실제 diff가 합의를 벗어나지 않았는지 확인한다.
-
-1. Issue 생성 뒤, 전용 브랜치를 만들기 전
-2. 관련 파일을 stage하고 Lore 커밋을 만들기 전
-3. 최종 `origin/main` rebase와 병합 직전
-
-범위가 넓어지거나 새 작업이 같은 경계에 들어오면 분류와 합의를 갱신한다. 선행 PR이 병합됐으면 의존 작업이 fetch·rebase와 영향받은 ledger 재검증을 끝내기 전 병합하지 않는다. 완료 뒤 Issue 댓글에 `resolved`와 남은 의존성을 추가하고 원래 합의 기록은 보존한다.
-
-`none` 또는 `related`이고 별도 worktree를 사용하는 작업은 매 시점에 긴 카드 교환과 ACK 대기를 반복하지 않는다. checkout·diff·계약이 여전히 분리됐는지만 확인하고, 범위 변화가 생길 때만 전체 조정을 다시 연다.
+재확인 시에도 완료된 대화를 재활성화하지 않는다.
 
 ## 완료 보고
 
-- Peers: 확인한 같은 저장소 작업과 Issue
-- Overlap: 등급, checkout, 경로·심볼·계약 근거
-- Ownership: 공유 경계 소유자와 의존 작업
-- Communication: 작업 메시지 ACK와 GitHub 댓글 링크
-- Merge order: 선행·후행 또는 독립
-- Recheck: 완료한 세 시점과 남은 blocker
+충돌이 없으면 `활성 소스 충돌 없음`과 확인한 diff 근거만 짧게 보고한다. 충돌이 있으면 겹친 경로·소유자·병합 순서·남은 blocker만 보고한다. 계획 요약, 전체 작업 카드, 불필요한 Issue 목록은 반복하지 않는다.
