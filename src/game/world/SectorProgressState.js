@@ -25,6 +25,7 @@ export class SectorProgressState {
         this.encountersById = new Map(world.enemySpawns.map((encounter) => [encounter.encounterId, encounter]));
         this.routesById = new Map(world.routeLocks.map((route) => [route.id, route]));
         this.accessModulesById = new Map((world.accessModules ?? []).map((module) => [module.id, module]));
+        this.respawnAnchorsById = new Map((world.respawnAnchors ?? []).map((anchor) => [anchor.id, anchor]));
         this.idOrder = new Map();
         let order = 0;
         for (const sector of world.sectors) {
@@ -40,6 +41,7 @@ export class SectorProgressState {
         const firstSector = world.sectors[0];
         this.currentSectorId = firstSector.id;
         this.currentLandmarkId = firstSector.entryLandmarkId;
+        this.respawnAnchorId = this.#landmark().respawnAnchorId ?? firstSector.respawnAnchorId;
         this.completedObjectiveIds = new Set();
         this.resolvedEncounterIds = new Set();
         this.collectedAccessModuleIds = new Set();
@@ -241,6 +243,7 @@ export class SectorProgressState {
         const previousSectorId = this.currentSectorId;
         this.currentSectorId = target.sectorId;
         this.currentLandmarkId = landmarkId;
+        this.respawnAnchorId = target.respawnAnchorId;
         this.visitedLandmarkIds.add(landmarkId);
         if (previousSectorId !== this.currentSectorId) this.sectorBaselineRevision += 1;
         return freezeResult({
@@ -250,7 +253,7 @@ export class SectorProgressState {
             previousSectorId,
             currentSectorId: this.currentSectorId,
             sectorChanged: previousSectorId !== this.currentSectorId,
-            respawnAnchorId: this.#sector().respawnAnchorId
+            respawnAnchorId: this.respawnAnchorId
         });
     }
 
@@ -287,6 +290,7 @@ export class SectorProgressState {
         }
         for (const landmarkId of sector.landmarkIds) this.visitedLandmarkIds.delete(landmarkId);
         this.currentLandmarkId = sector.entryLandmarkId;
+        this.respawnAnchorId = sector.respawnAnchorId;
         this.visitedLandmarkIds.add(this.currentLandmarkId);
         this.sectorBaselineRevision += 1;
         this.contentBoundaryReached = false;
@@ -315,7 +319,7 @@ export class SectorProgressState {
         return freezeResult({
             currentSectorId: this.currentSectorId,
             currentLandmarkId: this.currentLandmarkId,
-            respawnAnchorId: this.#sector().respawnAnchorId,
+            respawnAnchorId: this.respawnAnchorId,
             completedObjectiveIds: sortedIds(this.completedObjectiveIds, this.idOrder),
             resolvedEncounterIds: sortedIds(this.resolvedEncounterIds, this.idOrder),
             collectedAccessModuleIds: sortedIds(this.collectedAccessModuleIds, this.idOrder),
@@ -346,6 +350,15 @@ export class SectorProgressState {
         );
         const unlockedRouteIds = new Set(requireSnapshotArray(snapshot.unlockedRouteIds, "unlockedRouteIds"));
         const visitedLandmarkIds = new Set(requireSnapshotArray(snapshot.visitedLandmarkIds, "visitedLandmarkIds"));
+        const respawnAnchor = this.respawnAnchorsById.get(snapshot.respawnAnchorId);
+        if (
+            !respawnAnchor ||
+            respawnAnchor.sectorId !== snapshot.currentSectorId ||
+            respawnAnchor.landmarkId !== snapshot.currentLandmarkId ||
+            !visitedLandmarkIds.has(respawnAnchor.landmarkId)
+        ) {
+            throw new Error("respawn anchor must match the current visited landmark");
+        }
         if (!Array.isArray(snapshot.activeObjectiveSequences)) {
             throw new Error("activeObjectiveSequences must be an array");
         }
@@ -361,6 +374,7 @@ export class SectorProgressState {
         }
         this.currentSectorId = snapshot.currentSectorId;
         this.currentLandmarkId = snapshot.currentLandmarkId;
+        this.respawnAnchorId = snapshot.respawnAnchorId;
         this.completedObjectiveIds = completedObjectiveIds;
         this.resolvedEncounterIds = resolvedEncounterIds;
         this.collectedAccessModuleIds = collectedAccessModuleIds;

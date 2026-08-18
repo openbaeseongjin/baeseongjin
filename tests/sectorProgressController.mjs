@@ -96,6 +96,13 @@ export function run() {
     events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });
     assert.ok(events.some(({ type, landmarkId }) => type === "landmark-entered" && landmarkId === second.id));
     assert.equal(progress.snapshot().currentLandmarkId, second.id);
+    assert.equal(progress.snapshot().respawnAnchorId, second.respawnAnchorId);
+    assert.ok(
+        events.some(
+            ({ type, respawnAnchorId }) =>
+                type === "landmark-entered" && respawnAnchorId === "sector-01:landmark:02:checkpoint"
+        )
+    );
     assert.deepEqual(
         owner.physics.position,
         new Vector2(second.entry.x, second.entry.y),

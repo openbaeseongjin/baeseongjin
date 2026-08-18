@@ -38,27 +38,41 @@ export function run() {
         ...envelope,
         state: {
             progressKind: "sector",
-            respawnAnchorId: "sector-01:entry",
+            respawnAnchorId: "sector-01:landmark:02:checkpoint",
             partyWipeBaseline: {
                 sectorId: "sector-01",
                 revision: 0,
                 respawnAnchorId: "sector-01:entry",
                 entryLandmarkId: "sector-01:landmark:01"
             },
-            worldProgress: { currentSectorId: "sector-01" },
+            worldProgress: {
+                currentSectorId: "sector-01",
+                respawnAnchorId: "sector-01:landmark:02:checkpoint"
+            },
             players: envelope.state.players,
             enemies: []
         }
     });
-    assert.equal(sectorEnvelope.state.respawnAnchorId, "sector-01:entry");
+    assert.equal(sectorEnvelope.state.respawnAnchorId, "sector-01:landmark:02:checkpoint");
     assert.equal("activeCheckpointId" in sectorEnvelope.state, false);
     assert.throws(
         () =>
             createWorldSnapshotEnvelope({
                 ...envelope,
                 state: {
+                    ...sectorEnvelope.state,
+                    worldProgress: { ...sectorEnvelope.state.worldProgress, respawnAnchorId: "sector-01:entry" }
+                }
+            }),
+        /worldProgress.respawnAnchorId/
+    );
+    assert.throws(
+        () =>
+            createWorldSnapshotEnvelope({
+                ...envelope,
+                state: {
                     progressKind: "sector",
-                    respawnAnchorId: "sector-01:entry",
+                    respawnAnchorId: "sector-01:landmark:02:checkpoint",
                     partyWipeBaseline: sectorEnvelope.state.partyWipeBaseline,
                     worldProgress: sectorEnvelope.state.worldProgress,
                     activeCheckpointId: "checkpoint:legacy",
@@ -74,8 +88,11 @@ export function run() {
                 ...envelope,
                 state: {
                     progressKind: "sector",
-                    respawnAnchorId: "sector-01:entry",
-                    worldProgress: { currentSectorId: "sector-01" },
+                    respawnAnchorId: "sector-01:landmark:02:checkpoint",
+                    worldProgress: {
+                        currentSectorId: "sector-01",
+                        respawnAnchorId: "sector-01:landmark:02:checkpoint"
+                    },
                     players: envelope.state.players,
                     enemies: []
                 }
@@ -88,14 +105,17 @@ export function run() {
                 ...envelope,
                 state: {
                     progressKind: "sector",
-                    respawnAnchorId: "sector-01:entry",
+                    respawnAnchorId: "sector-01:landmark:02:checkpoint",
                     partyWipeBaseline: {
                         sectorId: "sector-01",
                         revision: -1,
                         respawnAnchorId: "sector-01:entry",
                         entryLandmarkId: "sector-01:landmark:01"
                     },
-                    worldProgress: { currentSectorId: "sector-01" },
+                    worldProgress: {
+                        currentSectorId: "sector-01",
+                        respawnAnchorId: "sector-01:landmark:02:checkpoint"
+                    },
                     players: envelope.state.players,
                     enemies: []
                 }

@@ -392,6 +392,14 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                     legacyStageAlias: landmarkDefinition.legacyStageAlias
                 })
             );
+            const respawnAnchorId =
+                landmarkIndex === 0 ? `${sectorDefinition.id}:entry` : `${landmarkDefinition.id}:checkpoint`;
+            const landmarkRespawnAnchor = freezeValue({
+                id: respawnAnchorId,
+                sectorId: sectorDefinition.id,
+                landmarkId: landmarkDefinition.id,
+                position: entry
+            });
             const runtimeLandmark = freezeValue({
                 id: landmarkDefinition.id,
                 order: landmarks.length + 1,
@@ -410,6 +418,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 bounds,
                 entry,
                 exit,
+                respawnAnchorId,
                 surfaceIds: [...landmarkSurfaces, ...landmarkWingSurfaces].map(({ id }) => id),
                 objectIds: landmarkObjects.map(({ id }) => id),
                 objectiveIds: landmarkObjectives.map(({ id }) => id),
@@ -457,6 +466,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
             enemySpawns.push(...landmarkEnemySpawns);
             windZones.push(...landmarkWindZones);
             scannerGroups.push(...landmarkScannerGroups);
+            respawnAnchors.push(landmarkRespawnAnchor);
             landmarks.push(runtimeLandmark);
             sectorLandmarks.push(runtimeLandmark);
             previousLandmark = runtimeLandmark;
@@ -471,14 +481,8 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
 
         const firstLandmark = sectorLandmarks[0];
         const lastLandmark = sectorLandmarks.at(-1);
-        const entryAnchor = freezeValue({
-            id: `${sectorDefinition.id}:entry`,
-            sectorId: sectorDefinition.id,
-            landmarkId: firstLandmark.id,
-            position: firstLandmark.entry
-        });
+        const entryAnchor = respawnAnchors.find(({ id }) => id === firstLandmark.respawnAnchorId);
         sectorEntries.push(entryAnchor);
-        respawnAnchors.push(entryAnchor);
         const sectorHeight = sectorLocalBottomY - sectorLocalTopY;
         const sectorContentWidth = sectorRightX - sectorLeftX;
         if (sectorContentWidth > SEAMLESS_SECTOR_RUNTIME_WIDTH) {

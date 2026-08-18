@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
-import { DebugSettings, DEFAULT_DEBUG_SETTINGS, normalizeDebugSettings } from "../src/game/metrics/DebugSettings.js";
+import {
+    DebugSettings,
+    DEFAULT_DEBUG_SETTINGS,
+    normalizeDebugSettings,
+    validateDebugAugmentIds
+} from "../src/game/metrics/DebugSettings.js";
 import {
     ROPE_CONFIG,
     normalizeRopeTuningOverride,
@@ -25,7 +30,8 @@ export function run() {
         version: 1,
         metrics: true,
         startAreaId: null,
-        ropeTuning: null
+        ropeTuning: null,
+        debugAugmentIds: []
     });
     assert.deepEqual(
         normalizeDebugSettings({
@@ -83,6 +89,29 @@ export function run() {
         handOffset: { x: 18 },
         ropeDisabledSeconds: 1.5
     });
+    settings.setDebugAugmentIds(["long-rope", "direction-dash", "explosive-trail", "fast-reuse"]);
+    assert.deepEqual(settings.snapshot().debugAugmentIds, [
+        "long-rope",
+        "direction-dash",
+        "explosive-trail",
+        "fast-reuse"
+    ]);
+    assert.equal(validateDebugAugmentIds(["direction-dash", "dash-strike"]).valid, false);
+    assert.match(validateDebugAugmentIds(["explosive-trail"]).error, /Action을 먼저/);
+    assert.match(validateDebugAugmentIds(["direction-dash", "end-wave"]).error, /호환되지/);
+    assert.match(validateDebugAugmentIds(["long-rope", "long-rope"]).error, /중복/);
+    assert.match(
+        validateDebugAugmentIds([
+            "fast-launch",
+            "long-rope",
+            "fast-recover",
+            "release-propulsion",
+            "electrified-rope",
+            "collision-explosion",
+            "direction-dash"
+        ]).error,
+        /최대 6장/
+    );
     assert.throws(() => settings.setMetrics("yes"), /boolean/);
     assert.throws(() => settings.setStartAreaId(""), /non-empty/);
 
@@ -91,11 +120,35 @@ export function run() {
         version: 1,
         metrics: true,
         startAreaId: null,
-        ropeTuning: { hookSpeed: 1800, handOffset: { x: 18 }, ropeDisabledSeconds: 1.5 }
+        ropeTuning: { hookSpeed: 1800, handOffset: { x: 18 }, ropeDisabledSeconds: 1.5 },
+        debugAugmentIds: ["long-rope", "direction-dash", "explosive-trail", "fast-reuse"]
     });
+    assert.deepEqual(
+        normalizeDebugSettings({ version: 1, metrics: false, startAreaId: null, ropeTuning: null }),
+        {
+            version: 1,
+            metrics: false,
+            startAreaId: null,
+            ropeTuning: null,
+            debugAugmentIds: []
+        },
+        "stored v1 settings from before debug loadouts migrate to an empty loadout"
+    );
+    assert.deepEqual(
+        normalizeDebugSettings({
+            version: 1,
+            metrics: false,
+            startAreaId: null,
+            ropeTuning: null,
+            debugAugmentIds: ["direction-dash", "dash-strike"]
+        }).debugAugmentIds,
+        [],
+        "an incompatible stored loadout falls back without corrupting other settings"
+    );
     settings.setRopeTuning(null);
     assert.equal(settings.snapshot().ropeTuning, null);
-    assert.equal(seen.length, 6, "every change notifies subscribers");
+    settings.setDebugAugmentIds([]);
+    assert.equal(seen.length, 8, "every change notifies subscribers");
 
     const catalogBound = new DebugSettings({ storage: memoryStorage(), validAreaIds: ["sector-01-01"] });
     catalogBound.setStartAreaId("sector-01-01");

@@ -175,6 +175,7 @@ export function advanceSectorProgress({
             landmarkId: target.id,
             previousLandmarkId: route.sourceLandmarkId,
             sectorId: target.sectorId,
+            respawnAnchorId: result.respawnAnchorId,
             playerId: player.id,
             position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
         })

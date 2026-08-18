@@ -165,15 +165,15 @@
 | 적 상태·HP 최종값                           | 서버                                              | 권위 스냅샷 적용                                                                                                        |
 | 자기 피격·로프 절단                         | 피해 클라이언트, 서버 검증·공유                   | 즉시 로컬 적용 후 검증 claim                                                                                            |
 | 예측 가능한 투사체·낙하물                   | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                   |
-| 자기 사망·Sector-entry 부활                 | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                            |
+| 자기 사망·active Stage checkpoint 부활      | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                            |
 | 월드 시드·지형·Sector entry와 wipe baseline | 서버                                              | 시드로 생성 후 `worldRevision`과 protocol v7 검증                                                                       |
 | Sector objective·route·landmark 진행        | 서버                                              | snapshot의 `worldProgress`, physical connector와 `foundationRewards`를 적용하고 마지막 landmark는 content boundary 유지 |
 | 플레이어별 Foundation 선택·효과             | 행동 클라이언트 선행, 서버 검증·공유              | 개인 chooser와 효과를 즉시 적용하고 선택·Shear claim 뒤 개인 상태와 공용 objective를 수렴                               |
 | 카메라·HUD·파티클                           | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                   |
 
-Foundation은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 `foundation-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 현재 Sector entry로 되돌리며 Foundation 선택과 보유 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
+Foundation은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 `foundation-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 현재 `worldProgress.respawnAnchorId`가 가리키는 최근 도달 Stage checkpoint로 되돌리며 Foundation 선택과 보유 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-0.26.0 기본 Sector Runtime은 중간 체크포인트 claim을 사용하지 않는다. 피해·낙사 소유 클라이언트가 치명 결과를 적용하는 같은 전이에서 `respawnAnchorId`의 Sector entry로 즉시 부활하고 서버·동료가 player-impact v8 결과를 따른다. `WorldSnapshot` protocol v8은 기존 Sector baseline과 Player별 증강·Action state를 공유한다. 같은 tick 전원 부활에서만 서버가 current Sector baseline을 초기화하며 prior Sector 완료와 Player별 Build·pending offer는 보존한다.
+0.34.0 기본 Sector Runtime은 별도 checkpoint claim 없이 공용 landmark 진입으로 active checkpoint를 갱신한다. 피해·낙사 소유 클라이언트가 치명 결과를 적용하는 같은 전이에서 `respawnAnchorId`의 최근 도달 Stage entry로 즉시 부활하고 서버·동료가 player-impact v8 결과를 따른다. `WorldSnapshot` protocol v8은 active Stage anchor와 별도의 Sector-entry party-wipe baseline, Player별 증강·Action state를 공유한다. 같은 tick 전원 부활에서만 서버가 current Sector baseline을 초기화하며 prior Sector 완료와 Player별 Build·pending offer는 보존한다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
@@ -185,9 +185,9 @@ Impulse·Relay는 소유 클라이언트가 Rope Release/Attach에 즉시 적용
 
 멀티 서버 fixed tick은 원시 게임 명령에 선택 입력이 포함돼도 보상 선택을 처리하지 않는다. Foundation 선택의 유일한 서버 전이는 `foundation-selection` claim이며, 체력 0을 스캔해 사망·부활을 보조 발생시키지도 않는다. 피해와 사망·부활은 피해 클라이언트의 `player-impact` claim 안에서 함께 확정한다. 싱글은 네트워크 claim 왕복이 없으므로 같은 `GameSimulation` 옵션의 기본값으로 로컬 보상 입력과 체력 복구를 직접 수행한다.
 
-현재 권위 복귀 구현은 사망한 플레이어 한 명의 물리·로프·입력·체력·무기 상태만 현재 Sector entry에서 초기화한다. 해당 플레이어의 `player-respawned` 사건을 남기며 다른 플레이어와 공용 진행·적·투사체 상태는 유지한다. 같은 tick에 모든 플레이어가 부활한 경우에만 current Sector objective·route·enemy baseline을 reset한다.
+현재 권위 복귀 구현은 사망한 플레이어 한 명의 물리·로프·입력·체력·무기 상태만 active Stage checkpoint에서 초기화한다. 해당 플레이어의 `player-respawned` 사건을 남기며 다른 플레이어와 공용 진행·적·투사체 상태는 유지한다. 같은 tick에 모든 플레이어가 부활한 경우에만 current Sector objective·route·enemy baseline을 reset하고 Sector entry baseline으로 돌아간다.
 
-낙사 경계는 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 판정한다. 한 플레이어가 경계를 통과하면 fallen `owner-motion`을 즉시 보내고 같은 프레임에 로컬 Sector-entry 부활을 예측한다. 멀티 서버 fixed tick은 지연된 복제 위치만으로 낙사를 시작하지 않으며 claim을 받은 뒤 체력 소진과 같은 `respawnPlayerAtCheckpoint` 호환 메서드로 현재 `respawnAnchorId` 복구와 공유 사건을 한 번 확정한다. 소유자 운동 receipt는 `player-fell`, 공유 사건은 원인 `fall`이 포함된 `player-respawned`를 사용한다. 싱글은 같은 프로세스의 `GameSimulation`이 자동 경계 판정과 복구를 계속 수행한다.
+낙사 경계는 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 판정한다. 한 플레이어가 경계를 통과하면 fallen `owner-motion`을 즉시 보내고 같은 프레임에 로컬 active Stage checkpoint 부활을 예측한다. 멀티 서버 fixed tick은 지연된 복제 위치만으로 낙사를 시작하지 않으며 claim을 받은 뒤 체력 소진과 같은 `respawnPlayerAtCheckpoint` 호환 메서드로 현재 `respawnAnchorId` 복구와 공유 사건을 한 번 확정한다. 소유자 운동 receipt는 `player-fell`, 공유 사건은 원인 `fall`이 포함된 `player-respawned`를 사용한다. 싱글은 같은 프로세스의 `GameSimulation`이 자동 경계 판정과 복구를 계속 수행한다.
 
 `owner-motion`은 위치·속도 같은 연속 운동과 로프 상태·낙사 경계 보고를 하나의 최신 소유자 상태로 운반한다. 서버는 최신 tick의 물리·로프 상태를 원자적으로 적용하므로 과거 부착 상태가 최신 해제를 되돌리지 못한다. 낙사 경계를 넘은 최신 상태는 위치를 그대로 복제하는 대신 `GameSimulation`의 공용 낙사 복구 전이로 처리하고 `player-fell` receipt를 보낸다. 중복·역순 tick은 성공한 no-op으로 끝나며 별도 rope tick이나 부분 승인 경로를 두지 않는다.
 

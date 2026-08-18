@@ -2,7 +2,7 @@
 
 ## 현재 범위
 
-브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 세로 등반 spine과 실제 lateral city wing으로 조립된 4,800px 연속 Sector, 적 전투·투사체, Sector-entry 복귀와 Foundation 런 성장 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
+브라우저 Canvas에서 실행되는 2D 로프 액션 프로토타입이다. 고정 길이 로프 물리, 세로 등반 spine과 실제 lateral city wing으로 조립된 4,800px 연속 Sector, 적 전투·투사체, 최근 도달 Stage 체크포인트 복귀와 Foundation 런 성장 상태를 공용 시뮬레이션에서 처리한다. PC와 모바일은 입력 방식만 다르고 게임 규칙은 공유한다.
 
 ## 주요 모듈
 
@@ -237,10 +237,10 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `stepCommandBatch`는 싱글과 소유 클라이언트 예측에서 정확히 다음 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 로컬 예측은 `InputStateSimulator`로 마지막 입력을 제한된 틱 동안 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다. 멀티 서버는 같은 스케줄러를 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 입력 물리를 다시 적분하지 않고 최신 적용 `owner-motion`을 연속 상태 원점으로 유지한다.
 - `PlayerCommand.interact`는 augment Node·명시적 terminal 같은 근접 문맥 상호작용 의도다. `InputSampler`는 PC `W/↑`와 모바일 점프 버튼을 점프 축과 `interact`에 함께 매핑하며, 진행 시스템은 명시적 source의 반경 안에서만 이를 소비한다. Stage route는 exit panel 상호작용이 아니라 objective reach가 자동으로 연다. 따라서 별도 PC 상호작용 키를 추가하지 않고 source 밖에서는 기존 점프 동작을 그대로 유지한다.
 - `respawnPlayerAtCheckpoint`는 부활한 playerId·원인·위치·체력을 `player-respawned` 사건으로 남긴다.
-- 각 사망자는 현재 `respawnAnchorId`의 Sector entry에서 독립 부활한다. 같은 tick에 전원이 부활한 경우에만 current Sector objective·route·enemy baseline을 재구성하며 prior Sector 진행, 다른 플레이어의 Build와 이미 끝난 이전 Sector 적은 보존한다.
+- 각 사망자는 현재 `respawnAnchorId`가 가리키는 최근 도달 landmark(Stage)의 안전한 entry에서 독립 부활한다. 아직 도달하지 않은 landmark anchor는 복원할 수 없다. 같은 tick에 전원이 부활한 경우에만 current Sector objective·route·enemy baseline을 재구성하고 전원을 Sector entry로 돌리며 prior Sector 진행과 Player별 Build는 보존한다.
 - 적은 사거리 안의 살아 있는 플레이어 중 최근접 대상을 선택하고 거리 동률은 ID로 결정한다. 적 투사체의 생성·직선 궤적·8초 수명은 서버가 진행한다. 각 피해 클라이언트가 자기 예측 위치에서 로프를 몸체보다 먼저 판정해 playerId가 있는 claim을 보내며, 서버 고정 스텝은 지연된 플레이어 위치로 충돌을 먼저 만들지 않는다.
 - 현재 구현된 마지막 영역 `sector-03-08`은 다음 시나리오가 아직 연결되지 않은 content boundary이며 `completed` 전체 게임 종료로 판정하지 않는다.
-- `GameSimulation`이 플레이어·로프·적·투사체·체력·낙하 피해·사망·플레이어별 Sector-entry 부활을 소유한다. legacy 메서드명 `respawnPlayerAtCheckpoint()`는 현재 world의 `respawnAnchorId`를 소비한다. `PlayerPhysics`는 공중→접지 전이와 충돌 보정 전 속도만 보고하고, `FallDamage`가 순수 피해량을 계산하며 `GameSimulation`이 HP·지표·피드백·부활을 한 번 전이한다.
+- `GameSimulation`이 플레이어·로프·적·투사체·체력·낙하 피해·사망·플레이어별 active Stage checkpoint 부활을 소유한다. legacy 메서드명 `respawnPlayerAtCheckpoint()`는 현재 world의 `respawnAnchorId`를 소비한다. `PlayerPhysics`는 공중→접지 전이와 충돌 보정 전 속도만 보고하고, `FallDamage`가 순수 피해량을 계산하며 `GameSimulation`이 HP·지표·피드백·부활을 한 번 전이한다.
 - `AutomaticWeaponObject`와 플레이어 투사체 spawn/hit claim은 보존하지만 기본 플레이어에서는 `isEnabled = false`다. 현재 기본 공격은 플레이어 Has-A `RopeImpactAttack`이 로프 부착·최소 속도·적 원형 겹침의 새 진입을 감지하고, 싱글은 즉시 적 HP를 적용하며 멀티는 공격자 예측 피드백 뒤 `rope-impact` claim으로 서버 소유 적 HP와 resolve 사건을 확정한다.
 - `RopeImpactAttack`은 현재 겹친 적 ID 집합을 소유해 같은 접촉의 반복 피해를 막고, 분리 뒤 재진입 때만 다시 공격한다. 서버는 claim 소유권·tick·로프 부착·속도·적 위치·중복을 검증한다.
 - 적은 플레이어를 향해 투사체를 발사한다. 적 탄환의 플레이어 피해와 아래의 플레이어 impact 수렴 계약은 유지한다.

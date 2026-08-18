@@ -79,6 +79,17 @@ export function run() {
     const ropeReachOutput = new FakeElement();
     const ropeFlightOutput = new FakeElement();
     const ropeModeOutput = new FakeElement();
+    const augmentFieldset = new FakeElement();
+    const augmentResetButton = new FakeElement();
+    const augmentModeOutput = new FakeElement();
+    const augmentSelects = Array.from({ length: 6 }, () => {
+        const select = new FakeElement();
+        const empty = new FakeElement();
+        empty.value = "";
+        empty.textContent = "비어 있음";
+        select.append(empty);
+        return select;
+    });
     const ropeInputs = ROPE_TUNING_FIELDS.map(({ path }) => {
         const input = new FakeElement();
         input.dataset.debugRopeField = path;
@@ -95,9 +106,17 @@ export function run() {
             "[data-debug-rope-reset]": ropeResetButton,
             "[data-debug-rope-reach]": ropeReachOutput,
             "[data-debug-rope-flight]": ropeFlightOutput,
-            "[data-debug-rope-mode]": ropeModeOutput
+            "[data-debug-rope-mode]": ropeModeOutput,
+            "[data-debug-augment-loadout]": augmentFieldset,
+            "[data-debug-augment-reset]": augmentResetButton,
+            "[data-debug-augment-mode]": augmentModeOutput
         })[selector] ?? null;
-    documentTarget.querySelectorAll = (selector) => (selector === "[data-debug-rope-field]" ? ropeInputs : []);
+    documentTarget.querySelectorAll = (selector) =>
+        selector === "[data-debug-rope-field]"
+            ? ropeInputs
+            : selector === "[data-debug-augment-slot]"
+              ? augmentSelects
+              : [];
     const trigger = new FakeElement();
     const windowTarget = new FakeEventTarget();
     let nextTimerId = 1;
@@ -136,6 +155,12 @@ export function run() {
     assert.match(ropeModeOutput.textContent, /새 Run으로 즉시 재시작/);
     assert.equal(ropeFieldset.disabled, false);
     assert.equal(ropeInputs[0].min, String(ROPE_TUNING_FIELDS[0].min));
+    assert.equal(augmentSelects.length, 6);
+    assert.equal(augmentSelects[0].options.length, 23, "each slot contains empty plus all 22 Catalog cards");
+    assert.match(augmentSelects[0].options[1].textContent, /^\[.+\] .+/);
+    assert.equal(augmentSelects[0].disabled, false);
+    assert.equal(augmentSelects[1].disabled, true, "only the next ordered slot is enabled");
+    assert.match(augmentModeOutput.textContent, /선택 0\/6/);
 
     trigger.dispatch("pointerdown", { pointerId: 11, pointerType: "mouse", button: 0 });
     assert.equal(
@@ -193,6 +218,29 @@ export function run() {
     startAreaSelect.dispatch("change");
     assert.equal(settings.snapshot().startAreaId, null);
 
+    augmentSelects[0].value = "direction-dash";
+    augmentSelects[0].dispatch("change");
+    assert.deepEqual(settings.snapshot().debugAugmentIds, ["direction-dash"]);
+    assert.equal(augmentSelects[1].disabled, false);
+    const incompatibleAction = augmentSelects[1].options.find(({ value }) => value === "dash-strike");
+    const compatibleSignature = augmentSelects[1].options.find(({ value }) => value === "explosive-trail");
+    assert.equal(incompatibleAction.disabled, true, "a second base Action must be explained by a disabled option");
+    assert.equal(compatibleSignature.disabled, false);
+    augmentSelects[1].value = "explosive-trail";
+    augmentSelects[1].dispatch("change");
+    augmentSelects[2].value = "fast-reuse";
+    augmentSelects[2].dispatch("change");
+    assert.deepEqual(settings.snapshot().debugAugmentIds, ["direction-dash", "explosive-trail", "fast-reuse"]);
+    augmentSelects[1].value = "";
+    augmentSelects[1].dispatch("change");
+    assert.deepEqual(
+        settings.snapshot().debugAugmentIds,
+        ["direction-dash", "fast-reuse"],
+        "clearing a slot keeps later cards that remain compatible and compacts their order"
+    );
+    augmentResetButton.dispatch("click");
+    assert.deepEqual(settings.snapshot().debugAugmentIds, []);
+
     const hookSpeedInput = ropeInputs.find(({ dataset }) => dataset.debugRopeField === "hookSpeed");
     hookSpeedInput.value = "1800";
     hookSpeedInput.dispatch("input");
@@ -206,8 +254,15 @@ export function run() {
     panel.setRopeTuningEnabled(false);
     assert.equal(ropeFieldset.disabled, true);
     assert.match(ropeModeOutput.textContent, /멀티 세션에서는 비활성/);
+    assert.equal(augmentFieldset.disabled, true);
+    assert.equal(applyButton.disabled, true);
+    assert.match(augmentModeOutput.textContent, /공유 증강 loadout 프로토콜 미구현/);
+    applyButton.dispatch("click");
+    assert.equal(applied, 0, "multiplayer mode cannot apply local-only debug settings");
     panel.setRopeTuningEnabled(true);
     assert.equal(ropeFieldset.disabled, false);
+    assert.equal(augmentFieldset.disabled, false);
+    assert.equal(applyButton.disabled, false);
 
     hookSpeedInput.value = "1700";
     applyButton.dispatch("click");

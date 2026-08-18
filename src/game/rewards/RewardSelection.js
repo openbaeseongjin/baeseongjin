@@ -4,7 +4,9 @@ function freezeSelection(selection) {
         rewardType: selection.rewardType,
         choices: selection.choices,
         selectedIndex: selection.selectedIndex,
-        inputReady: selection.inputReady,
+        openingInputCaptured: selection.openingInputCaptured,
+        horizontalReady: selection.horizontalReady,
+        confirmReady: selection.confirmReady,
         previousHorizontal: selection.previousHorizontal,
         previousConfirm: selection.previousConfirm
     });
@@ -22,34 +24,43 @@ export function createRewardSelection({ sourceId, rewardType, choices, selectedI
         rewardType,
         choices: Object.freeze([...choices]),
         selectedIndex,
-        inputReady: false,
-        previousHorizontal: 0,
-        previousConfirm: false
+        openingInputCaptured: false,
+        horizontalReady: false,
+        confirmReady: false,
+        previousHorizontal: null,
+        previousConfirm: null
     });
 }
 
 export function advanceRewardSelection(selection, command) {
     const horizontal = Math.sign(command.horizontal);
     const confirm = command.vertical < 0;
-    if (!selection.inputReady) {
+    if (!selection.openingInputCaptured) {
         return Object.freeze({
             selection: freezeSelection({
                 ...selection,
-                inputReady: horizontal === 0 && !confirm
+                openingInputCaptured: true,
+                horizontalReady: horizontal === 0,
+                confirmReady: !confirm,
+                previousHorizontal: horizontal,
+                previousConfirm: confirm
             }),
             confirmedChoiceId: null
         });
     }
 
     let selectedIndex = selection.selectedIndex;
-    if (horizontal !== 0 && selection.previousHorizontal === 0) {
+    if (selection.horizontalReady && horizontal !== 0 && selection.previousHorizontal === 0) {
         selectedIndex = (selectedIndex + horizontal + selection.choices.length) % selection.choices.length;
     }
-    const confirmedChoiceId = confirm && !selection.previousConfirm ? selection.choices[selectedIndex].id : null;
+    const confirmedChoiceId =
+        selection.confirmReady && confirm && !selection.previousConfirm ? selection.choices[selectedIndex].id : null;
     return Object.freeze({
         selection: freezeSelection({
             ...selection,
             selectedIndex,
+            horizontalReady: selection.horizontalReady || horizontal === 0,
+            confirmReady: selection.confirmReady || !confirm,
             previousHorizontal: horizontal,
             previousConfirm: confirm
         }),

@@ -23,9 +23,51 @@ export function run() {
         startAreaId: "sector-03-02"
     });
     assert.equal(debugStart.worldProgress.snapshot().currentLandmarkId, "sector-03:landmark:02");
-    assert.equal(debugStart.activeRespawnAnchor.id, "sector-03:entry");
+    assert.equal(debugStart.activeRespawnAnchor.id, "sector-03:landmark:02:checkpoint");
+
+    const debugAugmentIds = ["long-rope", "direction-dash", "explosive-trail", "fast-reuse"];
+    const debugLoadout = createCurrentGameSimulation({
+        worldSeed: 9182,
+        playerId: "debug-loadout-player",
+        startAreaId: "sector-01-04",
+        debugAugmentIds
+    });
+    assert.deepEqual(debugLoadout.playerState("debug-loadout-player").selectedAugmentIds, debugAugmentIds);
+    assert.deepEqual(debugLoadout.playerState("debug-loadout-player").augmentRuntimeState.consumedSourceIds, []);
+    assert.equal(debugLoadout.snapshot().maxAttachDistance, 480, "debug Rope cards affect the new Run immediately");
+    assert.equal(debugLoadout.playerState("debug-loadout-player").actionState.loadout.baseActionId, "direction-dash");
+    assert.deepEqual(debugLoadout.playerState("debug-loadout-player").actionState.loadout.modifierIds, ["fast-reuse"]);
+    const debugNode = debugLoadout.world.objects.find(({ id }) => id === "sector-01-04:maintenance-node");
+    const debugPlayer = debugLoadout.players[0];
+    debugPlayer.physics.position.set(debugNode.position.x, debugNode.position.y);
+    debugLoadout.step(
+        1 / 120,
+        createPlayerCommand(
+            {
+                horizontal: 0,
+                vertical: -1,
+                interact: true,
+                pointer: { x: 0, y: 0, down: false },
+                viewport: { width: 1280, height: 720 }
+            },
+            debugNode.position
+        )
+    );
+    assert.equal(debugLoadout.getFoundationReward(debugPlayer.id), null, "debug loadouts do not open a second offer");
+    assert.deepEqual(debugLoadout.playerState(debugPlayer.id).selectedAugmentIds, debugAugmentIds);
+    assert.deepEqual(debugLoadout.playerState(debugPlayer.id).augmentRuntimeState.consumedSourceIds, [debugNode.id]);
+    assert.equal(
+        debugLoadout.worldProgress.isObjectiveComplete(debugNode.objectiveId),
+        true,
+        "interacting with an authored Node consumes only that source and preserves route progression"
+    );
+    assert.throws(
+        () => createCurrentGameSimulation({ debugAugmentIds: ["direction-dash", "dash-strike"] }),
+        /incompatible Augment selection/
+    );
 
     const simulation = createCurrentGameSimulation({ worldSeed: 9182, playerId: "player-1" });
+    assert.deepEqual(simulation.playerState("player-1").selectedAugmentIds, []);
     assert.equal(simulation.world.definitionRevision, SEAMLESS_SECTOR_RUNTIME_REVISION);
     assert.equal(simulation.world.areas.length, 0);
     assert.equal(simulation.world.gates.length, 0);
@@ -140,6 +182,9 @@ export function run() {
         "player-2"
     ).entity;
     completeLandmark(simulation.worldProgress, simulation.world, "sector-01:landmark:01");
+    simulation.restoreWorldProgress(simulation.worldProgress.snapshot());
+    assert.equal(simulation.worldProgress.snapshot().currentLandmarkId, "sector-01:landmark:02");
+    assert.equal(simulation.activeRespawnAnchor.id, "sector-01:landmark:02:checkpoint");
     const progressBeforeSoloDeath = simulation.worldProgress.snapshot();
     const teammateBefore = teammate.physics.position.clone();
     const removedEnemyId = simulation.enemies[0].objectId;
@@ -160,6 +205,13 @@ export function run() {
         }
     );
     assert.equal(simulation.snapshot().eventFlash.type, "sector-respawn");
+    owner.physics.position.set(700, -700);
+    assert.equal(simulation.respawnPlayerAtCheckpoint(owner, "fall", "solo-fall"), true);
+    assert.deepEqual(simulation.worldProgress.snapshot(), progressBeforeSoloDeath);
+    assert.deepEqual(
+        { x: owner.physics.position.x, y: owner.physics.position.y },
+        { x: simulation.activeRespawnAnchor.position.x, y: simulation.activeRespawnAnchor.position.y }
+    );
 
     completeLandmark(simulation.worldProgress, simulation.world, "sector-01:landmark:02");
     const baselineBeforeWipe = simulation.worldProgress.snapshot().sectorBaselineRevision;

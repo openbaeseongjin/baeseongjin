@@ -108,7 +108,6 @@ export class AugmentCombatRuntime {
         this.punchCooldownRemaining = 0;
         this.electrified = new ElectrifiedRopeContactState({ impactDamage: IMPACT_DAMAGE });
         this.actionProjectiles = [];
-        this.trailPaths = new Map();
         this.hitIdsByActivation = new Map();
         this.maxHealth = maxHealth;
         this.eventSequence = 0;
@@ -195,16 +194,7 @@ export class AugmentCombatRuntime {
         const impactEvents = [];
         const presentationEvents = [];
         const activeBefore = this.actionState?.activeAction ? { ...this.actionState.activeAction } : null;
-        const positionBefore = { x: player.physics.position.x, y: player.physics.position.y };
 
-        if (activeBefore?.baseActionId === "direction-dash") {
-            const distance = (150 / 0.25) * Math.min(dt, activeBefore.durationRemaining);
-            player.physics.position.x += activeBefore.direction.x * distance;
-            player.physics.position.y += activeBefore.direction.y * distance;
-            player.physics.resolveSurfaces(surfaces, new Vector2(positionBefore.x, positionBefore.y));
-            const path = this.trailPaths.get(activeBefore.activationId);
-            if (path) path.end = { x: player.physics.position.x, y: player.physics.position.y };
-        }
         if (activeBefore?.baseActionId === "dash-strike") {
             this.#resolveDashStrikeContacts({ player, active: activeBefore, enemies, tick, impactEvents });
             if (
@@ -243,7 +233,7 @@ export class AugmentCombatRuntime {
             if (!this.actionState) {
                 this.#useDefaultPunch({ player, enemies, tick, impactEvents, presentationEvents });
             } else {
-                this.#beginAction({ player, enemies, tick, impactEvents, presentationEvents });
+                this.#beginAction({ player, enemies, surfaces, tick, impactEvents, presentationEvents });
             }
         }
         this.wasActionDown = command.action;
@@ -366,7 +356,6 @@ export class AugmentCombatRuntime {
         this.punchCooldownRemaining = 0;
         this.electrified.reset();
         this.actionProjectiles = [];
-        this.trailPaths.clear();
         this.hitIdsByActivation.clear();
         this.queuedImpactEvents.length = 0;
         this.syncLoadout(foundation, maxHealth);
@@ -417,7 +406,7 @@ export class AugmentCombatRuntime {
         );
     }
 
-    #beginAction({ player, enemies, tick, impactEvents, presentationEvents }) {
+    #beginAction({ player, enemies, surfaces, tick, impactEvents, presentationEvents }) {
         const direction = directionBetween(player.physics.position, player.ropeObject.aimWorld, {
             x: Math.sign(player.physics.velocity.x) || 1,
             y: 0
@@ -433,10 +422,17 @@ export class AugmentCombatRuntime {
             direction
         });
         if (activation.baseActionId === "direction-dash") {
-            this.trailPaths.set(activation.activationId, {
-                start: { x: player.physics.position.x, y: player.physics.position.y },
-                end: { x: player.physics.position.x, y: player.physics.position.y }
+            const start = { x: player.physics.position.x, y: player.physics.position.y };
+            const destination = player.physics.collider.farthestSafePositionAlong({
+                start,
+                direction,
+                distance: activation.distance,
+                surfaces
             });
+            player.physics.position.set(destination.position.x, destination.position.y);
+            if (activation.trailEffect) {
+                this.actionState.setExplosiveTrailPath(activation.activationId, start, destination.position);
+            }
         } else if (activation.baseActionId === "dash-strike") {
             player.physics.addImpulse(direction, activation.impulse);
             this.hitIdsByActivation.set(activation.activationId, { damaged: new Set(), contacts: new Set() });
@@ -552,12 +548,11 @@ export class AugmentCombatRuntime {
                 }
             }
             if (event.eventType === "explosive-trail-detonated") {
-                const path = this.trailPaths.get(event.activationId);
-                if (!path) continue;
+                if (!event.start || !event.end) continue;
                 for (const enemy of enemies) {
                     if (
                         enemy.health <= 0 ||
-                        distancePointToSegment(enemy.position, path.start, path.end) > enemy.radius + 30
+                        distancePointToSegment(enemy.position, event.start, event.end) > enemy.radius + 30
                     ) {
                         continue;
                     }
@@ -570,12 +565,11 @@ export class AugmentCombatRuntime {
                             effectId: "explosive-trail",
                             sourceKind: "action-trail",
                             damage: IMPACT_DAMAGE * 0.8,
-                            sourcePosition: path.start,
+                            sourcePosition: event.start,
                             contactPosition: enemy.position
                         })
                     );
                 }
-                this.trailPaths.delete(event.activationId);
             }
             if (event.eventType === "action-ended") this.hitIdsByActivation.delete(event.activationId);
         }

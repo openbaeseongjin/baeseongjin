@@ -803,6 +803,14 @@ export async function run() {
     );
 
     const foundationRoomContext = recordingContext();
+    const augmentNode = {
+        id: "sector-01-04:maintenance-node",
+        kind: "augment-node",
+        objectiveId: "sector-01-04:augment-selected",
+        presentationId: "world-object:augment-node",
+        position: { x: 0, y: -160 },
+        coordinateAnchor: "bottom-center"
+    };
     new AuthoredWorldObjectRenderer().draw({
         context: foundationRoomContext,
         scene: {
@@ -811,17 +819,14 @@ export async function run() {
                 targetId: "sector-01-04:calibration-dummy",
                 age: 0.2
             },
-            worldProgress: { completedObjectiveIds: [], unlockedGateIds: [] },
+            player: { augmentRuntimeState: { consumedSourceIds: [] } },
+            worldProgress: {
+                completedObjectiveIds: ["sector-01-04:augment-selected"],
+                unlockedGateIds: []
+            },
             world: {
                 objects: [
-                    {
-                        id: "sector-01-04:maintenance-node",
-                        kind: "augment-node",
-                        objectiveId: "sector-01-04:augment-selected",
-                        presentationId: "world-object:augment-node",
-                        position: { x: 0, y: -160 },
-                        coordinateAnchor: "bottom-center"
-                    },
+                    augmentNode,
                     {
                         id: "sector-01-04:calibration-dummy",
                         kind: "test-target",
@@ -836,15 +841,41 @@ export async function run() {
     const foundationRoomLabels = foundationRoomContext.calls
         .filter(([name]) => name === "fillText")
         .map(([, label]) => label);
-    assert.ok(foundationRoomLabels.includes("EMERGENCY PROFILES"));
+    assert.ok(foundationRoomLabels.includes("AUGMENT READY"));
+    assert.ok(foundationRoomLabels.includes("3 OPTIONS AVAILABLE"));
     assert.deepEqual(
-        foundationRoomLabels.filter((label) => ["IMPULSE", "RELAY", "SHEAR"].includes(label)),
-        ["IMPULSE", "RELAY", "SHEAR"],
-        "the Maintenance Node must expose all three Foundation profiles in-world"
+        foundationRoomLabels.filter((label) => ["OPTION 1", "OPTION 2", "OPTION 3"].includes(label)),
+        ["OPTION 1", "OPTION 2", "OPTION 3"],
+        "an unconsumed Node stays visibly available even when the shared objective is already complete"
     );
     assert.ok(
         foundationRoomContext.calls.filter(([name]) => name === "stroke").length >= 9,
         "a registered dummy contact must add an eight-ray calibration spark"
+    );
+
+    const consumedNodeContext = recordingContext();
+    new AuthoredWorldObjectRenderer().draw({
+        context: consumedNodeContext,
+        scene: {
+            player: { augmentRuntimeState: { consumedSourceIds: [augmentNode.id] } },
+            worldProgress: {
+                completedObjectiveIds: [augmentNode.objectiveId],
+                unlockedGateIds: []
+            },
+            world: { objects: [augmentNode], areas: [] }
+        }
+    });
+    const consumedNodeLabels = consumedNodeContext.calls
+        .filter(([name]) => name === "fillText")
+        .map(([, label]) => label);
+    assert.ok(consumedNodeLabels.includes("CONSUMED"));
+    assert.ok(consumedNodeLabels.includes("NODE OFFLINE"));
+    assert.ok(!consumedNodeLabels.includes("AUGMENT READY"));
+    assert.ok(
+        consumedNodeContext.calls.some(
+            ([name, key, value]) => name === "set" && key === "fillStyle" && value === "#334155"
+        ),
+        "the local Player's consumed source list turns the Node status lamp off"
     );
 
     const areaStructureContext = recordingContext();

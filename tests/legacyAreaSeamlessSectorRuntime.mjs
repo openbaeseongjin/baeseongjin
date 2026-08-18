@@ -23,7 +23,7 @@ export function run() {
     assert.equal(world.landmarks.length, 24);
     assert.equal(world.landmarkAliases.length, 24);
     assert.equal(world.sectorEntries.length, 3);
-    assert.equal(world.respawnAnchors.length, 3);
+    assert.equal(world.respawnAnchors.length, 24);
     assert.equal(world.connectors.length, 23);
     assert.equal(world.routeLocks.length, 23);
     assert.equal(world.sectorTransitions.length, 2);
@@ -44,6 +44,11 @@ export function run() {
         }
         for (const landmarkId of sector.landmarkIds) {
             const landmark = world.landmarks.find(({ id }) => id === landmarkId);
+            const anchor = world.respawnAnchors.find(({ id }) => id === landmark.respawnAnchorId);
+            assert.ok(anchor, `landmark respawn anchor must exist: ${landmark.id}`);
+            assert.equal(anchor.landmarkId, landmark.id);
+            assert.deepEqual(anchor.position, landmark.entry);
+            if (landmark.id === sector.entryLandmarkId) assert.equal(anchor.id, sector.respawnAnchorId);
             assert.equal(landmark.bounds.width, SEAMLESS_SECTOR_RUNTIME_WIDTH);
             assert.ok(landmark.bounds.x >= sector.bounds.x);
             assert.ok(landmark.bounds.x + landmark.bounds.width <= sector.bounds.x + sector.bounds.width);

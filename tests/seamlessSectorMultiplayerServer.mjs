@@ -49,7 +49,8 @@ export async function run() {
     const joined = snapshot.state.players.find(({ id }) => id === secondWelcome.playerId);
     const anchor = room.simulation.activeRespawnAnchor.position;
     assert.equal(snapshot.state.progressKind, "sector");
-    assert.equal(snapshot.state.respawnAnchorId, "sector-01:entry");
+    assert.equal(snapshot.state.respawnAnchorId, "sector-01:landmark:02:checkpoint");
+    assert.equal(snapshot.state.partyWipeBaseline.respawnAnchorId, "sector-01:entry");
     assert.equal(snapshot.state.worldProgress.currentLandmarkId, "sector-01:landmark:02");
     assert.equal(joined.position.x, anchor.x);
     assert.equal(joined.position.y, anchor.y);

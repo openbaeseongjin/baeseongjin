@@ -147,7 +147,8 @@ function createSingleGameApp(debug) {
         onDiagnostics: updateDiagnostics,
         startAreaId: debug.startAreaId ?? undefined,
         metricsVisible: debug.metrics,
-        ropeTuning: debug.ropeTuning
+        ropeTuning: debug.ropeTuning,
+        debugAugmentIds: debug.debugAugmentIds
     });
 }
 

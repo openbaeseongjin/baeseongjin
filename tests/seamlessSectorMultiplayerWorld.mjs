@@ -39,9 +39,14 @@ export function run() {
 
     const objectiveId = server.world.landmarks[0].objectiveIds[0];
     server.worldProgress.completeObjective(objectiveId);
+    server.worldProgress.visitLandmark("sector-01:landmark:02");
+    server.restoreWorldProgress(server.worldProgress.snapshot());
     const progressed = buildAuthoritySnapshot({ simulation: server });
+    assert.equal(progressed.state.respawnAnchorId, "sector-01:landmark:02:checkpoint");
+    assert.equal(progressed.state.partyWipeBaseline.respawnAnchorId, "sector-01:entry");
     predictor.reconcile(progressed, []);
     assert.ok(predictor.simulation.worldProgress.snapshot().completedObjectiveIds.includes(objectiveId));
+    assert.equal(predictor.simulation.activeRespawnAnchor.id, "sector-01:landmark:02:checkpoint");
 
     const wrongRevision = { ...progressed, worldRevision: "legacy-mismatch" };
     assert.throws(() => predictor.reconcile(wrongRevision, []), /world revision mismatch/);
