@@ -76,11 +76,21 @@ const area01 = defineArea({
             oneWay: false
         }),
         horizontalSurface("sector-01-01:r3", -144, -736, 160, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-01:p3", 16, -800, 224, 16),
+        horizontalSurface("sector-01-01:p3", 224, -800, 192, 16),
         block01.deck,
         groundedSurface("sector-01-01:ground-shutter", -384, 0, 128, 128, {
             kind: "sealed-door",
             oneWay: false
+        }),
+        horizontalSurface("sector-01-01:shaft-shell-left", -464, -960, 32, 960, {
+            kind: "shaft-shell",
+            oneWay: false,
+            grappleable: false
+        }),
+        horizontalSurface("sector-01-01:shaft-shell-right", 464, -960, 32, 960, {
+            kind: "shaft-shell",
+            oneWay: false,
+            grappleable: false
         }),
         grappleTarget("sector-01-01:anchor-a-surface", -96, -192),
 
