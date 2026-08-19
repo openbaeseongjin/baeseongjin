@@ -15,7 +15,8 @@
     "stage": 5,
     "sourceAreaId": "sector-02-05",
     "name": "EVACUATION WALKWAY",
-    "subtitle": "UPPER TRANSIT RESTRICTED"
+    "subtitle": "UPPER TRANSIT RESTRICTED",
+    "legacyStageAlias": "2-5"
   },
   "bounds": {
     "width": 1984,
@@ -157,43 +158,50 @@
       "id": "g1",
       "x": -560,
       "y": -224,
-      "role": "queue-span-1"
+      "role": "queue-span-1",
+      "label": "G1"
     },
     {
       "id": "g2",
       "x": -192,
       "y": -320,
-      "role": "queue-span-2"
+      "role": "queue-span-2",
+      "label": "G2"
     },
     {
       "id": "g3",
       "x": 160,
       "y": -384,
-      "role": "transit-neck-entry"
+      "role": "transit-neck-entry",
+      "label": "G3"
     },
     {
       "id": "g4",
       "x": 512,
       "y": -448,
-      "role": "transit-neck-exit"
+      "role": "transit-neck-exit",
+      "label": "G4"
     },
     {
       "id": "g5",
       "x": 464,
       "y": -336,
-      "role": "commit-drop-1-catch"
+      "role": "commit-drop-1-catch",
+      "label": "G5"
     },
     {
       "id": "access-anchor",
       "x": 320,
       "y": -320,
-      "role": "access-module-b-branch"
+      "role": "access-module-b-branch",
+      "label": "ACCESS-ANCHOR"
     },
     {
       "id": "g6",
       "x": 96,
       "y": -96,
-      "role": "commit-drop-2-catch"
+      "role": "commit-drop-2-catch",
+      "label": "G6"
     }
   ],
   "mainRoute": [
@@ -458,6 +466,61 @@
     }
   ],
   "nextAreaId": "sector-02-06",
+  "route": {
+    "runtimeLandmarks": [
+      "sector-02-05:entry",
+      "assembly-concourse",
+      "transit-neck",
+      "story-forecourt",
+      "service-hatch-lip",
+      "maintenance-shelf",
+      "low-service-exit",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-02-05:entry",
+      "assembly-concourse",
+      "transit-neck",
+      "story-forecourt",
+      "low-service-exit",
+      "exit"
+    ],
+    "optional": [
+      {
+        "id": "main",
+        "sequence": [
+          "assembly-concourse",
+          "g1",
+          "queue-shelf-a",
+          "g2",
+          "g3",
+          "g4",
+          "story-forecourt",
+          "service-hatch-lip",
+          "g5",
+          "maintenance-shelf",
+          "g6",
+          "exit"
+        ]
+      },
+      {
+        "id": "access",
+        "sequence": ["maintenance-shelf", "access-anchor", "carrier-alcove", "access-anchor", "maintenance-shelf"]
+      }
+    ],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 80,
+    "deckTopY": -64,
+    "deckWidth": 256,
+    "panelObjectiveId": "sector-02-05:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "2-6",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["sector-02-05:exit-panel-engaged"]
+  },
   "story": {
     "entry": {
       "title": "EVACUATION WALKWAY",
@@ -515,6 +578,7 @@
   },
   "camera": {
     "mode": "default-authored-camera",
+    "zones": [],
     "customZonesRequired": false,
     "requirements": {
       "forecourt": [
