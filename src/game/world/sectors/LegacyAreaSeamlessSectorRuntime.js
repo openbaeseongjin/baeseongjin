@@ -87,7 +87,7 @@ function walkingSurfaceAt(surfaces, point) {
         .filter(
             (surface) =>
                 surface.requiredRouteId === undefined &&
-                surface.blockedUntilRouteId === undefined &&
+                surface.blockedByRouteId === undefined &&
                 surface.topY === point.y + 32 &&
                 surface.x <= point.x &&
                 surface.x + surface.width >= point.x
@@ -164,10 +164,10 @@ function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces, 
         landmarkId: sourceLandmarkId,
         oneWay: false,
         // An overlap barrier must not be grappleable past/through, and is gated by
-        // blockedUntilRouteId (solid while locked, gone once unlocked) instead of requiredRouteId
+        // blockedByRouteId (solid while locked, gone once unlocked) instead of requiredRouteId
         // (absent while locked, appears once unlocked) - see WorldGateGeometry.js.
         grappleable: !overlap,
-        ...(overlap ? { blockedUntilRouteId: requiredRouteId } : { requiredRouteId }),
+        ...(overlap ? { blockedByRouteId: requiredRouteId } : { requiredRouteId }),
         x: left,
         y: top,
         width: right - left,

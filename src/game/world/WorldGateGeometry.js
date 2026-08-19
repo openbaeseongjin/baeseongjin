@@ -12,7 +12,7 @@ export function isSurfaceEnabledForProgress(surface, progress) {
     // semantics can't block passage - e.g. two landmarks whose walkable floors already touch/overlap
     // in world-x, so removing a surface leaves nothing blocking the shortcut (see
     // LegacyAreaSeamlessSectorRuntime.js's connectorSurface() overlap branch).
-    if (surface.blockedUntilRouteId && progress && routeUnlocked(surface.blockedUntilRouteId, progress)) {
+    if (surface.blockedByRouteId && progress && routeUnlocked(surface.blockedByRouteId, progress)) {
         return false;
     }
     return true;

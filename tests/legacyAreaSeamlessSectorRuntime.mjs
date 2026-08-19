@@ -122,7 +122,7 @@ export function run() {
                         (candidate) =>
                             candidate.id !== surface?.id &&
                             candidate.requiredRouteId === undefined &&
-                            candidate.blockedUntilRouteId === undefined &&
+                            candidate.blockedByRouteId === undefined &&
                             candidate.topY === point.y + 32 &&
                             candidate.x <= point.x &&
                             candidate.x + candidate.width >= point.x
@@ -138,10 +138,10 @@ export function run() {
                 // Overlapping authored decks mean there is no gap to bridge, but the transition still
                 // needs to be gated - otherwise a player can walk the shortcut created by the overlap
                 // without ever satisfying the route's requiredObjectiveIds (see WorldGateGeometry.js's
-                // blockedUntilRouteId: solid while locked, gone once unlocked - the inverse of a normal
+                // blockedByRouteId: solid while locked, gone once unlocked - the inverse of a normal
                 // "appears once unlocked" connector bridge, since here "absent" would not block anything).
                 assert.ok(surface, "an overlapping transition must still get a gating barrier surface");
-                assert.equal(surface.blockedUntilRouteId, connector.routeLockId);
+                assert.equal(surface.blockedByRouteId, connector.routeLockId);
                 assert.equal(surface.requiredRouteId, undefined);
                 assert.equal(surface.grappleable, false);
                 assert.equal(surface.oneWay, false);
