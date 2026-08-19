@@ -54,7 +54,7 @@ const withClientStatusVisibility = createSimulationCapabilityMixin({
     id: CLIENT_STATUS_VISIBILITY_CAPABILITY,
     order: 10,
     apply({ viewerId }) {
-        return !this.personalViewerId || this.personalViewerId === viewerId;
+        return !this.personalViewerId || this.personalViewerId === viewerId ? this.event : null;
     }
 });
 
@@ -64,6 +64,22 @@ class ClientStatusEventObject extends withClientStatusVisibility(SimulationDrive
         this.event = event;
         this.personalViewerId = PERSONAL_STATUS_TYPES.has(event.type) ? (event.playerId ?? null) : null;
     }
+}
+
+function normalizeClientStatusEvent(event) {
+    if (event?.eventType === "player-respawned") {
+        if (event.statusType !== "checkpoint-respawn" && event.statusType !== "sector-respawn") return null;
+        return Object.freeze({
+            type: event.statusType,
+            age: 0,
+            playerId: event.playerId,
+            reason: event.reason,
+            causeId: event.causeId,
+            deathPosition: event.deathPosition,
+            position: event.position
+        });
+    }
+    return typeof event?.type === "string" ? event : null;
 }
 
 export function createClientFeedbackEventObject(event, index = 0) {
@@ -79,12 +95,13 @@ export function createClientFeedbackEventObject(event, index = 0) {
 }
 
 export function selectClientStatusFeedback(event, viewerId) {
-    if (!event) return null;
-    const statusEvent = new ClientStatusEventObject(event);
+    const normalized = normalizeClientStatusEvent(event);
+    if (!normalized) return null;
+    const statusEvent = new ClientStatusEventObject(normalized);
     const [outcome] = feedbackDispatcher.dispatch({
         objects: [statusEvent],
         capabilityId: CLIENT_STATUS_VISIBILITY_CAPABILITY,
         context: { viewerId }
     });
-    return outcome?.result ? event : null;
+    return outcome?.result ?? null;
 }

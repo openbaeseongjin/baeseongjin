@@ -147,4 +147,21 @@ export function run() {
         480,
         "multiplayer rendering must preserve the owner's effective Rope range"
     );
+    rangeApp.statusFeedback.apply([
+        {
+            eventType: "player-respawned",
+            statusType: "sector-respawn",
+            playerId: "local-player",
+            reason: "health",
+            causeId: "rendered-owner-death",
+            deathPosition: { x: 20, y: 30 },
+            position: { x: 0, y: 0 }
+        }
+    ]);
+    rangeApp.render();
+    assert.equal(
+        renderedState.eventFlash.type,
+        "sector-respawn",
+        "multiplayer rendering must surface the local owner's personal respawn status"
+    );
 }

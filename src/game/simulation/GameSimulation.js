@@ -2416,9 +2416,10 @@ export class GameSimulation {
 
     #recordPlayerRespawn(player, reason, causeId, deathPosition = player.physics.position) {
         const normalizedDeathPosition = this.#deathPosition(deathPosition);
+        const statusType = this.isSeamlessSectorWorld ? "sector-respawn" : "checkpoint-respawn";
         this.metrics.recordDefeat();
         this.eventFlash = {
-            type: this.isSeamlessSectorWorld ? "sector-respawn" : "checkpoint-respawn",
+            type: statusType,
             age: 0,
             playerId: player.id,
             reason,
@@ -2430,6 +2431,7 @@ export class GameSimulation {
             playerId: player.id,
             reason,
             causeId,
+            statusType,
             health: player.health,
             deathPosition: normalizedDeathPosition,
             position: { x: player.physics.position.x, y: player.physics.position.y }

@@ -11,6 +11,7 @@ import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewpo
 import { assertSceneRenderer } from "./SceneRenderer.js";
 import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus } from "./ActorStatusPresentation.js";
 import { resolveScreenEdgeGuide } from "./ScreenEdgeGuide.js";
+import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
 
 export class CanvasRenderer {
     constructor(
@@ -334,7 +335,7 @@ export class CanvasRenderer {
     }
 
     drawStatusFeedback(eventFlash) {
-        if (!eventFlash || eventFlash.age >= 2.2) return;
+        if (!eventFlash || eventFlash.age >= CLIENT_STATUS_FEEDBACK_SECONDS) return;
         let title;
         let detail;
         let color;
@@ -367,7 +368,7 @@ export class CanvasRenderer {
             return;
         }
         const ctx = this.context;
-        const alpha = Math.min(1, eventFlash.age / 0.15, (2.2 - eventFlash.age) / 0.35);
+        const alpha = Math.min(1, eventFlash.age / 0.15, (CLIENT_STATUS_FEEDBACK_SECONDS - eventFlash.age) / 0.35);
         const top = foundationFeedback ? 92 : 18;
         ctx.save();
         ctx.globalAlpha = Math.max(0, alpha);
