@@ -772,8 +772,8 @@ const area06 = defineArea({
 
 const block07 = exitBlock({
     areaId: "sector-02-07",
-    deckX: 544,
-    deckTopY: -1315,
+    deckX: 640,
+    deckTopY: -1248,
     deckWidth: 256,
     nextAreaId: "sector-02-08",
     panelObjectiveId: "sector-02-07:exit-panel-engaged",
@@ -781,14 +781,18 @@ const block07 = exitBlock({
 });
 
 const area07Id = "sector-02-07";
-const area07Landmarks = [
-    landmark(area07Id, "g2", -544, -416, -352),
-    landmark(area07Id, "g4", -352, -224, -544),
-    landmark(area07Id, "g7", -352, -224, -928),
-    landmark(area07Id, "g8s", -224, -96, -1120)
-];
-const area07Exit = point(`${area07Id}:exit`, 544, -1376);
-const area07Objective = reachExitObjective(area07Id, area07Exit.x, area07Exit.y);
+// REV8.0: DIAGONAL SHELTER BUTTRESS -> SAFE SHELTER CORE -> VERTICAL TRANSFER MAST. All 7 grips
+// are unlabeled structural-grapple-target (no matching visible landmark object authored).
+const area07Grips = {
+    g1: structuralGrip(area07Id, "g1-surface", -576, -240),
+    g2: structuralGrip(area07Id, "g2-surface", -256, -416),
+    g3: structuralGrip(area07Id, "g3-surface", 64, -592),
+    accessAnchor: structuralGrip(area07Id, "access-anchor-surface", -64, -736),
+    g4: structuralGrip(area07Id, "g4-surface", 416, -800),
+    g5: structuralGrip(area07Id, "g5-surface", 128, -1056),
+    g6: structuralGrip(area07Id, "g6-surface", 448, -1216)
+};
+const area07Objective = reachExitObjective(area07Id, block07.exit.x, block07.exit.y);
 const area07PanelObjective = exitPanelObjective(area07Id, [area07Objective.id]);
 const area07 = defineArea({
     id: area07Id,
@@ -796,59 +800,72 @@ const area07 = defineArea({
     order: 7,
     name: "SHELTER ACCESS",
     subtitle: "EVACUATION TRANSFER SUSPENDED",
-    bounds: { width: 1408, height: 1440 },
-    entry: point(`${area07Id}:entry`, -480, -32),
+    bounds: { width: 1792, height: 1312 },
+    entry: point(`${area07Id}:entry`, -768, -32),
     exit: block07.exit,
     nextAreaId: "sector-02-08",
     surfaces: [
-        platform(area07Id, "p0", -608, -352, 0),
-        platform(area07Id, "p1", -512, -160, -160),
-        platform(area07Id, "s2", -608, -320, -448, "recovery"),
-        platform(area07Id, "p3", -160, 160, -480),
-        platform(area07Id, "r2", 288, 544, -480, "recovery"),
-        platform(area07Id, "p4", -96, 224, -640),
-        platform(area07Id, "p5", -320, 320, -800, "safe-deck"),
-        platform(area07Id, "s4", -576, -288, -1024, "recovery"),
-        platform(area07Id, "r4", 288, 544, -1024, "recovery"),
-        platform(area07Id, "p7", -32, 320, -1216),
-        platform(area07Id, "p8", 320, 608, -1376),
+        horizontalSurface(area07Id, "p0", -736, 0, 320, 32, "platform"),
+        horizontalSurface(area07Id, "buttress-a", -480, -320, 176, 22, "platform"),
+        horizontalSurface(area07Id, "buttress-recovery", -128, -288, 256, 18, "recovery"),
+        horizontalSurface(area07Id, "buttress-b", -144, -480, 160, 22, "platform"),
+        horizontalSurface(area07Id, "shelter-core", 160, -672, 384, 26, "safe-deck"),
+        horizontalSurface(area07Id, "carrier-alcove", -256, -768, 160, 20, "platform"),
+        horizontalSurface(area07Id, "mast-landing-a", 448, -864, 144, 22, "platform"),
+        horizontalSurface(area07Id, "low-mast-recovery", 512, -736, 160, 18, "recovery"),
+        horizontalSurface(area07Id, "upper-mast-recovery", -32, -896, 160, 18, "recovery"),
+        // Architectural stop that forces the diagonal-to-vertical axis turn (RUNTIME-HANDOFF /
+        // AREA-SPEC's shelter-core-wall). The package omits explicit width/height for this solid -
+        // sized as a judgment call (32 wide, tall enough to span from the Shelter Core deck up to
+        // the Mast approach) and disclosed in PRODUCTION-ALIGNMENT.md.
+        rectangle(`${area07Id}:shelter-core-wall`, 376, -688 + 128, 32, 256, {
+            kind: "solid",
+            grappleable: false,
+            oneWay: false,
+            coordinateAnchor: "bottom-center"
+        }),
         block07.deck,
-        ...area07Landmarks.map(({ surface }) => surface)
+        ...Object.values(area07Grips)
     ],
     routePoints: [
-        point(`${area07Id}:route-entry`, -480, -32),
-        point(`${area07Id}:route-p1`, -336, -160),
-        point(`${area07Id}:route-p3`, 0, -480),
-        point(`${area07Id}:route-p4`, 64, -640),
-        point(`${area07Id}:route-p5`, 0, -800),
-        point(`${area07Id}:route-r4`, 416, -1024),
-        point(`${area07Id}:route-p7`, 144, -1216),
-        point(`${area07Id}:route-p8`, 464, -1376),
+        point(`${area07Id}:route-entry`, -768, -32),
+        point(`${area07Id}:route-g1`, -576, -240),
+        point(`${area07Id}:route-buttress-a`, -480, -320),
+        point(`${area07Id}:route-g2`, -256, -416),
+        point(`${area07Id}:route-buttress-b`, -144, -480),
+        point(`${area07Id}:route-g3`, 64, -592),
+        point(`${area07Id}:route-shelter-core`, 160, -672),
+        point(`${area07Id}:route-story-core-right-edge`, 352, -672),
+        point(`${area07Id}:route-g4`, 416, -800),
+        point(`${area07Id}:route-mast-landing-a`, 448, -864),
+        point(`${area07Id}:route-g5`, 128, -1056),
+        point(`${area07Id}:route-g6`, 448, -1216),
         block07.routeExit
     ],
     recoveryPoints: [
-        point(`${area07Id}:recovery-s2`, -464, -472),
-        point(`${area07Id}:recovery-r2`, 416, -504),
-        point(`${area07Id}:recovery-p5`, 0, -824),
-        point(`${area07Id}:recovery-s4`, -432, -1048),
-        point(`${area07Id}:recovery-r4`, 416, -1048)
+        point(`${area07Id}:recovery-point-buttress`, -128, -306),
+        point(`${area07Id}:recovery-point-low-mast`, 512, -754),
+        point(`${area07Id}:recovery-point-upper-mast`, -32, -914)
     ],
     objects: [
-        ...area07Landmarks.map(({ object }) => object),
-        patrolDrone(area07Id, "drone-1", -416, -400, triggerBounds(-640, -640, 1280, 480), [
-            { x: -416, y: -400 },
-            { x: 256, y: -400 }
+        // Patrol A: diagonal same-axis synthesis, activation ends before Story Core.
+        patrolDrone(area07Id, "drone-1", -320, -394, triggerBounds(-704, -656, 928, 448), [
+            { x: -512, y: -304 },
+            { x: 32, y: -560 }
         ]),
-        patrolDrone(area07Id, "drone-2", -320, -1080, triggerBounds(-640, -1320, 1280, 488), [
-            { x: -320, y: -1080 },
-            { x: 480, y: -1080 }
+        // Patrol B: horizontal crossing while player climbs the vertical Mast. No overlap with A.
+        patrolDrone(area07Id, "drone-2", 272, -992, triggerBounds(-64, -1136, 704, 288), [
+            { x: 32, y: -992 },
+            { x: 448, y: -992 }
         ]),
-        pooledSentry(area07Id, "shelter-centre-guard", 64, -640, SECTOR_02_LATE_POOL, {
-            width: 640,
-            height: 480,
-            accessModuleId: "sector-02:access-module:c"
+        // Access Carrier C: Late Pool, kill required for Module C only, never gates local exit.
+        pooledSentry(area07Id, "shelter-centre-guard", -256, -768, SECTOR_02_LATE_POOL, {
+            width: 320,
+            height: 288,
+            accessModuleId: "sector-02:access-module:c",
+            rules: ["kill-optional-for-stage-exit", "kill-required-for-access-module", "no-rope-cut", "activation-band-only"]
         }),
-        worldObject(`${area07Id}:shelter-status`, "story-display", 0, -824, {
+        worldObject(`${area07Id}:shelter-status`, "story-display", 96, -736, {
             cueIds: ["shelter-capacity-full", "evacuation-transfer-suspended", "remain-designated-area"]
         }),
         block07.panel,
@@ -857,7 +874,7 @@ const area07 = defineArea({
     objectives: [area07Objective, area07PanelObjective],
     gate: block07.gate,
     storyTriggers: ["shelter-capacity-full", "transfer-suspended", "evacuation-platform-preview"],
-    routes: ["safe", "flow", "pressure", "recovery"],
+    routes: ["main", "access", "recovery"],
     cueIds: ["shelter-access", "two-patrol-bands", "no-crossfire", "transfer-suspended"]
 });
 
