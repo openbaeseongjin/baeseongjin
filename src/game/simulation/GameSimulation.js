@@ -1,6 +1,8 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { FOUNDATION_AUGMENT_CATALOG, foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { validateAugmentImpactFormula } from "../augments/AugmentImpactFormula.js";
+import { BOSS_01_DEFINITION } from "../boss/Boss01Definition.js";
+import { BossEncounterRuntime } from "../boss/BossEncounterRuntime.js";
 import {
     advanceEnemyProjectiles,
     updateAutomaticWeapon,
@@ -161,6 +163,7 @@ export class GameSimulation {
                 })
               : generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
         this.isSeamlessSectorWorld = this.world.layout === "seamless-sectors";
+        this.bossRuntime = this.isSeamlessSectorWorld ? new BossEncounterRuntime(BOSS_01_DEFINITION) : null;
         this.worldProgress = this.isSeamlessSectorWorld
             ? new SectorProgressState(this.world)
             : worldCatalog
@@ -275,6 +278,76 @@ export class GameSimulation {
 
     playerIds() {
         return this.players.map(({ id }) => id);
+    }
+
+    #commitBossEvents() {
+        if (!this.bossRuntime) return Object.freeze([]);
+        const events = this.bossRuntime.drainEvents();
+        for (const event of events) {
+            const { eventId: bossEventId, eventType, sequence: bossSequence, ...payload } = event;
+            this.recordReplicationEvent(eventType, { ...payload, bossEventId, bossSequence });
+        }
+        const latest = events.at(-1);
+        if (latest) {
+            const { eventType, ...payload } = latest;
+            this.eventFlash = { type: eventType, age: 0, ...payload };
+        }
+        return events;
+    }
+
+    startBossEncounter(participantIds = this.playerIds()) {
+        if (!this.bossRuntime) {
+            return Object.freeze({ accepted: false, changed: false, reason: "boss-runtime-unavailable" });
+        }
+        const outcome = this.bossRuntime.start({ participantIds });
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    interactBossBreaker(playerId, breakerId) {
+        if (!this.bossRuntime) {
+            return Object.freeze({ accepted: false, changed: false, reason: "boss-runtime-unavailable" });
+        }
+        const outcome = this.bossRuntime.interactBreaker({ playerId, breakerId });
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    applyBossDamage(sourcePlayerId, damage) {
+        if (!this.bossRuntime) {
+            return Object.freeze({
+                accepted: false,
+                changed: false,
+                reason: "boss-runtime-unavailable",
+                appliedDamage: 0
+            });
+        }
+        const outcome = this.bossRuntime.applyDamage({ sourcePlayerId, damage });
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    handleBossParticipantDefeat(playerId, cause) {
+        if (!this.bossRuntime) {
+            return Object.freeze({
+                accepted: false,
+                changed: false,
+                reason: "boss-runtime-unavailable",
+                retryStarted: false
+            });
+        }
+        const outcome = this.bossRuntime.handlePlayerDefeat(playerId, cause);
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    restoreBossRuntime(snapshot) {
+        if (!this.bossRuntime) {
+            if (snapshot) throw new Error("cannot restore Boss runtime outside a seamless Sector world");
+            return null;
+        }
+        if (snapshot) this.bossRuntime.restore(snapshot);
+        return this.bossRuntime.snapshot();
     }
 
     portalTransitionTick(playerId) {
@@ -966,6 +1039,10 @@ export class GameSimulation {
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
             return;
+        }
+        if (this.bossRuntime) {
+            this.bossRuntime.advance(dt);
+            this.#commitBossEvents();
         }
         if (resolveSummitProgress && this.updateSummitProgress()) return;
         if (resolveCheckpointProgress && !this.isSeamlessSectorWorld) this.updateCheckpointProgress();
@@ -2490,6 +2567,7 @@ export class GameSimulation {
             foundationRewards: Object.fromEntries(this.foundationRewards),
             metrics: this.metrics.snapshot(),
             worldProgress: this.worldProgress?.snapshot() ?? null,
+            bossRuntime: this.bossRuntime?.snapshot() ?? null,
             windStates: this.world.windZones
                 ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
                 : Object.freeze([]),

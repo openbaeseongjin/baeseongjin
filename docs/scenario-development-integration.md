@@ -140,8 +140,8 @@ reviewed-upstream: c042f614f07ff62184aca3d0c128c89f51f25708
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.
 2. [완료 #633] 과거 2-3 Foundation별 Specialization skeleton을 두 번째 generic offer로 대체하고 3-5에 세 번째 explicit source를 연결했다. 고정 Specialization tier를 복구하지 않는다.
-3. 1-8 Checkpoint 뒤 Boss01 `CONTAINMENT GANTRY C-01`과 `2-1` 전환을 구현한다. 1-8 내부에는 Boss를 넣지 않는다.
-4. 일반 Timer Prototype `960초 / Gate +45초 / cap 960초 / collapse 80px/s`를 연결하고 실제 48-Stage 플레이 기록 뒤 조정한다.
+3. [진행] Boss01 `CONTAINMENT GANTRY C-01`의 별도 Has-A runtime과 top-level snapshot을 구현했다. 남은 범위는 1-8 Checkpoint 뒤 physical Arena·Breaker/Core/Emitter/Wind mock, 자동 진입, 피해/사망 연결과 승리 후 `2-1` 전이다. 1-8 내부에는 Boss를 넣지 않는다.
+4. 일반 Timer Prototype `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s`는 HOLD 세 physical mapping이 확정된 뒤 연결한다. 과거 `960/+45/80px/s` baseline은 복구하지 않는다.
 5. Sector 02~05 Boss의 identity·arena·phase·보상과 각 `n-8 → Boss → 다음 Sector` 상세 계약은 후속 기획으로 남는다.
 6. Sector 04를 메인 월드에 연결하고 Sector 05·06 Runtime을 저작한다. 상세 시나리오 48/48 완료를 Runtime 완료로 해석하지 않는다.
 7. 6-8 뒤 `PAD SECURITY WARDEN P-03 → Access Restored → 개별 Boarding → 전원 준비 → Escape`를 구현한다. 6-8 내부 Boss·첫 Boarding Player의 동료 자동 순간이동은 금지한다.
