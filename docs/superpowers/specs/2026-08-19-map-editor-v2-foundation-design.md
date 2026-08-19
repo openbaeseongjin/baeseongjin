@@ -19,9 +19,9 @@ v2 schema·validator, 결정적 generator, cutover manifest 데이터·validator
 
 시각 에디터, 나머지 46개 Stage의 일괄 migration, gameplay 규칙 변경, 브라우저 JSON 직접 로드, 월드 hot-swap, 멀티플레이 권한 변경은 포함하지 않는다. 이 source lane에서는 기존 Sector facade와 seamless Runtime 통합 파일도 수정하지 않는다.
 
-## 협업 경계
+## 협업 경계 — 최우선 제약
 
-메인 개발자와 병렬로 진행할 수 있도록 이 작업은 source를 분리한다. v2 lane은 새 경로만 소유한다. 수기 v2 schema·validation·generation·registry·composition contract 코드는 `src/game/world/area-authoring-v2/`, 결정적 출력은 `src/game/world/areas/generated/`, 격리 Node 명령은 `scripts/area-authoring-v2/`, 그리고 focused v2 test, migration한 두 Stage spec, 이 설계의 handoff 자료에 둔다.
+메인 개발자와 병렬로 진행할 수 있도록 이 작업은 source를 분리한다. 이는 다른 구현 편의·속도보다 우선하는 L1 협업 제약이다. v2 lane은 새 경로만 소유한다. 수기 v2 schema·validation·generation·registry·composition contract 코드는 `src/game/world/area-authoring-v2/`, 결정적 출력은 `src/game/world/areas/generated/`, 격리 Node 명령은 `scripts/area-authoring-v2/`, 그리고 focused v2 test, migration한 두 Stage spec, 이 설계의 handoff 자료에 둔다.
 
 병렬로 활성일 수 있는 통합 파일은 메인 개발자가 소유한다. 현재 `Sector01AreaCatalog`, legacy provider 분리, `LegacyAreaSeamlessSectorRuntime`, 루트 `package.json` script, 공용 test runner 등록, 전역 scenario-integration 상태가 이에 해당한다. 이 lane은 이를 수정하지 않는다. 대신 검증된 manifest 데이터와 legacy/generated Stage definition을 받아 현재 catalog 모양을 돌려주고 모든 source-selection 위반을 거부하는 `composeSectorCatalog` 입·출력 API 하나를 작고 테스트된 공개 계약으로 인계한다.
 
