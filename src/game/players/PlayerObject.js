@@ -1,7 +1,8 @@
 import { withLocomotionInput } from "../input/LocomotionInput.js";
 import { InputDrivenObject } from "../objects/InputDrivenObject.js";
+import { withPlayerRenderSnapshot } from "./PlayerRenderSnapshot.js";
 
-export class PlayerObject extends withLocomotionInput(InputDrivenObject) {
+export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(InputDrivenObject)) {
     constructor({
         id,
         physics,

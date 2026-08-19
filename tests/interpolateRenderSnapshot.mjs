@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
+import { AudioEventBindings } from "../src/audio/AudioEventBindings.js";
 import { Vector2 } from "../src/game-kit/index.js";
+import { EnemyObject } from "../src/game/combat/EnemyObject.js";
+import { BallisticProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { GameApp } from "../src/game/GameApp.js";
+import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
+import { enemyAimLine } from "../src/render/EnemyTelegraphPresentation.js";
 import { restartSingleGameForDebugSettings } from "../src/game/runtime/SingleGameDebugRestart.js";
 import { interpolateRenderSnapshot } from "../src/render/interpolateRenderSnapshot.js";
 
@@ -94,6 +99,96 @@ export function run() {
     assert.deepEqual([enemies.enemies[0].position.x, enemies.enemies[0].position.y], [10, 0]);
     assert.equal(enemies.enemies[1].position.x, 40, "entities spawned this frame render at their current position");
     assert.deepEqual(enemies.projectiles, []);
+
+    const singleSimulation = new GameSimulation({ worldSeed: 1 });
+    const liveEnemy = new EnemyObject({
+        id: "single:sentry",
+        position: new Vector2(0, 0),
+        level: 1,
+        radius: 18,
+        health: 100,
+        maxHealth: 100,
+        fireCooldown: 0,
+        attackState: "track",
+        attackStateRemaining: 0.5,
+        aimDirection: { x: 1, y: 0 },
+        patrol: {
+            speed: 80,
+            mode: "pingpong",
+            points: [
+                { x: 0, y: 0 },
+                { x: 100, y: 0 }
+            ],
+            waitSeconds: 1
+        },
+        behavior: {
+            advance: () => null,
+            snapshot: () => ({ kind: "pursuit", state: "windup", dashDirection: { x: 1, y: 0 } })
+        }
+    });
+    singleSimulation.enemies = [liveEnemy];
+    const singlePlayer = singleSimulation.players[0];
+    const enemyProjectile = new BallisticProjectileObject({
+        id: "single:projectile",
+        ownerId: liveEnemy.id,
+        targetId: singlePlayer.id,
+        position: new Vector2(0, 20),
+        velocity: new Vector2(120, 0),
+        damage: 10,
+        radius: 6
+    });
+    singleSimulation.enemyProjectiles = [enemyProjectile];
+    const singlePrevious = singleSimulation.snapshot();
+    liveEnemy.position.set(20, 0);
+    liveEnemy.patrol.waitRemaining = 0.75;
+    singlePlayer.physics.position.x += 20;
+    singlePlayer.physics.setAngularState(0.25, 1.5);
+    enemyProjectile.position.x = 20;
+    assert.equal(
+        singlePlayer.ropeObject.rope.attach(singlePlayer.physics.position, {
+            x: singlePlayer.physics.position.x + 100,
+            y: singlePlayer.physics.position.y
+        }),
+        true
+    );
+    singleSimulation.tick += 1;
+    const singleCurrent = singleSimulation.snapshot();
+    const singleInterpolated = interpolateRenderSnapshot(singlePrevious, singleCurrent, 0.5);
+    const singleInterpolatedEnemy = singleInterpolated.enemies[0];
+    assert.equal(
+        singleInterpolatedEnemy.position.x,
+        10,
+        "single enemy snapshots must not alias live simulation position"
+    );
+    assert.equal(
+        singleInterpolatedEnemy.attackState,
+        "track",
+        "single interpolation must preserve the attack state sent by multiplayer snapshots"
+    );
+    assert.equal(singleInterpolatedEnemy.attackStateRemaining, 0.5);
+    assert.equal(singleInterpolatedEnemy.behaviorState.kind, "pursuit");
+    assert.equal(singlePrevious.enemies[0].patrol.waitRemaining, 0, "single enemy patrol snapshots must be detached");
+    assert.equal(singleCurrent.enemies[0].patrol.waitRemaining, 0.75);
+    assert.equal(singleInterpolated.player.position.x, singlePrevious.player.position.x + 10);
+    assert.equal(singleInterpolated.player.angularVelocity, 1.5);
+    assert.equal(singleInterpolated.enemyProjectiles[0].position.x, 10);
+    assert.equal(singlePrevious.rope.isAttached, false, "the previous Rope snapshot must stay detached");
+    assert.equal(singleCurrent.rope.isAttached, true);
+    assert.ok(
+        enemyAimLine(singleInterpolatedEnemy),
+        "single and multiplayer enemy render states must expose aim lines"
+    );
+    const audioCalls = [];
+    const audioBindings = new AudioEventBindings({ play: (cueId) => audioCalls.push(cueId) });
+    audioBindings.presentFrame({
+        ropeTransition: { before: singlePrevious.rope, after: singleCurrent.rope },
+        context: {
+            localPlayerId: singlePlayer.id,
+            tick: singleCurrent.tick,
+            listener: singleCurrent.player.position
+        }
+    });
+    assert.deepEqual(audioCalls, ["gameplay-rope-attach"], "single Rope attachment must use the shared audio cue");
 
     const app = new GameApp({
         canvas: {},

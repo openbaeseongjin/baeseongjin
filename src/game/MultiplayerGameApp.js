@@ -4,7 +4,7 @@ import { Vector2 } from "../game-kit/index.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../render/GameRendererFactory.js";
 import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
-import { CAMERA_CONFIG, resolveMobileCameraZoom, ropeHookReach } from "./config.js";
+import { CAMERA_CONFIG, resolveMobileCameraZoom } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import {
@@ -550,7 +550,6 @@ export class MultiplayerGameApp {
             activeRespawnAnchor,
             foundationReward: this.localFoundationReward,
             runState: this.localRunCompleted ? "completed" : remote.state.runState,
-            maxAttachDistance: ropeHookReach(),
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,
