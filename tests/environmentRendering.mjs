@@ -484,9 +484,9 @@ export function run() {
         }
     });
     assert.equal(
-        checkpointContext.calls.some(([name]) => name === "arc" || name === "fillText"),
+        checkpointContext.calls.some(([name]) => name === "arc"),
         false,
-        "checkpoint presentation uses an in-world beacon instead of a labelled debug circle"
+        "checkpoint presentation uses an in-world structure instead of a debug circle"
     );
     assert.ok(
         checkpointContext.calls.some(([name]) => name === "fillRect"),
@@ -495,9 +495,13 @@ export function run() {
     assert.ok(
         checkpointContext.calls.some(
             ([name, x, y, width, height]) =>
-                name === "fillRect" && x === -3 && y === -30 && width === 6 && height === 18
+                name === "fillRect" && x === -5 && y === -48 && width === 10 && height === 36
         ),
-        "active checkpoint opens around a tall central core instead of relying on color alone"
+        "active Stage save point opens around a player-scale central core instead of relying on color alone"
+    );
+    assert.ok(
+        checkpointContext.calls.some(([name, text]) => name === "fillText" && text === "STAGE SAVE"),
+        "the structure explicitly identifies the Stage save function"
     );
     assert.ok(
         checkpointContext.calls.some(
@@ -520,7 +524,7 @@ export function run() {
     assert.ok(
         inactiveCheckpointContext.calls.some(
             ([name, x, y, width, height]) =>
-                name === "fillRect" && x === -8 && y === -28 && width === 16 && height === 16
+                name === "fillRect" && x === -13 && y === -45 && width === 26 && height === 30
         ),
         "inactive checkpoint keeps its shutters visibly closed"
     );

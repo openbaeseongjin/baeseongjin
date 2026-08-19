@@ -351,6 +351,18 @@ export function run() {
         null,
         "replicated personal status must not leak through the scene snapshot fallback"
     );
+    const replicatedStageRespawn = {
+        type: "sector-respawn",
+        playerId: "player-1",
+        age: 0.1,
+        position: { x: 8, y: 12 }
+    };
+    assert.equal(selectClientStatusFeedback(replicatedStageRespawn, "player-1"), replicatedStageRespawn);
+    assert.equal(
+        selectClientStatusFeedback(replicatedStageRespawn, "player-2"),
+        null,
+        "Stage save point respawn feedback is personal even though the active save point is shared"
+    );
     const sharedCheckpointStatus = { type: "checkpoint", playerId: "player-1", age: 0.1, position: { x: 0, y: 0 } };
     assert.equal(
         selectClientStatusFeedback(sharedCheckpointStatus, "player-2"),

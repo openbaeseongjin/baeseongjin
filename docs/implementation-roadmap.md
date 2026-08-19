@@ -23,7 +23,7 @@
 - 전투 HUD, 피해 숫자, 충격파, 파편과 화면 흔들림
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
 - [과거 절차 프로토타입] 마지막 암석의 정상 목표와 최종 완료 상태
-- 8레벨 간격 체크포인트 생성·활성화·시각 표시
+- [과거 절차 프로토타입] 8레벨 간격 체크포인트 생성·활성화·시각 표시. 현재 기본 Runtime은 24개 Stage마다 진입 세이브 포인트를 사용한다.
 - [0.26.0] Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer, Player별 최대 6장, owner-first damage/movement claim
 - [과거 절차 프로토타입] 연속 1,000개 시드의 상승·로프 사거리 통과 가능성 자동 검사
 - [과거 절차 프로토타입] 경계값·기본값·발견된 문제 시드의 고정 회귀 목록
@@ -74,7 +74,7 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
 
 ### 섹터 1 legacy authoring migration 기록
 
-세부 흐름, 영역별 완료 조건과 검증 기준은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md)에 남아 있다. 다음 순서는 0.24.0 이전 Area/Gate 구현의 기록이며, 0.25.0에서는 각 번호를 landmark 내부 콘텐츠로 옮기되 Gate portal·per-Area Checkpoint를 다시 만들지 않는다.
+세부 흐름, 영역별 완료 조건과 검증 기준은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md)에 남아 있다. 다음 순서는 0.24.0 이전 Area/Gate 구현의 기록이다. 0.25.0 이후에는 Gate portal과 legacy per-Area Checkpoint claim을 다시 만들지 않지만, 각 landmark entry의 `respawnAnchor`는 명시적인 Stage 세이브 포인트 구조물과 활성화 피드백으로 표현한다.
 
 1. 하나의 월드에 여러 진행 영역을 담는 공용 정의와 연결 검증을 먼저 만든다. 기존 시드 월드가 제공하던 지형·적·체크포인트 소비 계약은 호환 경계를 두어 한 번에 전부 교체하지 않는다.
 2. 영역 완료 조건과 출구 상태를 공용 진행 흐름으로 만든다. 출구를 통과해도 월드·런·플레이어·generic Augment loadout·체크포인트를 재생성하지 않는다.
@@ -109,7 +109,7 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
 
 ### P1. 초기 절차 프로토타입과 초반 난이도 검증
 
-이 절의 시드 경로 검사는 초기 로프 프로토타입 완료 이력이며 현재 기본 제품 테스트에서는 실행하지 않는다. 현재 검증 기준은 저작 Sector의 landmark·objective/route 진행·Sector-entry 부활·party wipe reset·content boundary다.
+이 절의 시드 경로 검사는 초기 로프 프로토타입 완료 이력이며 현재 기본 제품 테스트에서는 실행하지 않는다. 현재 검증 기준은 저작 Sector의 landmark·objective/route 진행·Stage 세이브 포인트 부활·party wipe Sector-entry reset·content boundary다.
 
 1. [완료] 생성된 핵심 경로의 연속 구간이 로프 사거리 안에 있는지 1,000개 시드에서 자동 검사한다.
 2. [완료] 고정 시드 회귀 목록을 두고 실패 시드를 이유와 함께 재현한다.
@@ -149,7 +149,7 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
     - [소유자 표시 보정 완료] 작은 권위 오차는 물리 예측과 분리된 표시 offset으로 100ms 안에 수렴하고, 160px 초과·로프·생명 불일치는 즉시 스냅한다.
     - [원격 스냅샷 보간 완료] 동료와 적은 100ms 지연된 서버 tick의 두 권위 표본 사이에서 표시하고, 미래 표본이 없을 때만 최대 120ms 외삽한다.
 
-4. [플레이테스트 필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Sector-entry 부활, party wipe reset, generic Augment loadout 유지와 content boundary 도달을 한 세션으로 검증한다.
+4. [플레이테스트 필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Stage 세이브 포인트 부활, party wipe Sector-entry reset, generic Augment loadout 유지와 content boundary 도달을 한 세션으로 검증한다.
 5. [네트워크 검증 필요] 모바일망 지연과 장시간 세션에서 예측 오차, 보정 체감, 재접속 정책을 측정한다.
     - [진단 계측 완료] 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켠 뒤 서버 권위 런 지표와 RTT·스냅샷 간격·대기 명령·명령 거부율·보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인하고 **진단 복사**로 기기별 기록을 남긴다.
     - [네트워크 행렬 완료] 실제 WebSocket 경계에서 0/50/100/200ms 왕복 지연과 0/2/5% 송신 명령 손실의 12개 조합을 한 메인 시나리오로 검증한다.

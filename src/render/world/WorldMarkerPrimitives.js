@@ -1,73 +1,83 @@
 export function drawCheckpointBeacon(context, checkpoint, { active = false, reached = false } = {}) {
     context.save();
     context.translate(checkpoint.x, checkpoint.y);
-    context.globalAlpha = reached ? 0.42 : 0.96;
+    context.globalAlpha = reached ? 0.48 : 0.98;
 
-    // Keep the shared checkpoint readable in every sector without borrowing a
-    // sector-specific accent. Its state is carried by the shutter silhouette:
-    // closed while dormant, split open around a vertical core while active.
+    // Stage save points share one neutral industrial silhouette across sectors.
+    // The player-scale arch and explicit header communicate function, while the
+    // closed/open shutters communicate state without relying on color alone.
     context.fillStyle = "#090e13";
-    context.fillRect(-24, -7, 48, 12);
+    context.fillRect(-38, -10, 76, 14);
     context.fillStyle = "#252d35";
-    context.fillRect(-20, -10, 40, 4);
+    context.fillRect(-34, -14, 68, 5);
     context.fillStyle = "#3a444d";
-    context.fillRect(-16, -6, 32, 2);
-    context.fillRect(-21, 0, 6, 3);
-    context.fillRect(15, 0, 6, 3);
+    context.fillRect(-29, -8, 58, 3);
+    context.fillRect(-36, 0, 10, 4);
+    context.fillRect(26, 0, 10, 4);
 
     context.fillStyle = "#111820";
     context.beginPath();
-    context.moveTo(-16, -10);
-    context.lineTo(-16, -27);
-    context.lineTo(-11, -35);
-    context.lineTo(11, -35);
-    context.lineTo(16, -27);
-    context.lineTo(16, -10);
+    context.moveTo(-28, -13);
+    context.lineTo(-28, -50);
+    context.lineTo(-20, -62);
+    context.lineTo(20, -62);
+    context.lineTo(28, -50);
+    context.lineTo(28, -13);
     context.closePath();
     context.fill();
     context.strokeStyle = "#4a5660";
-    context.lineWidth = 2;
+    context.lineWidth = 3;
     context.stroke();
 
     context.fillStyle = "#202a33";
-    context.fillRect(-11, -30, 22, 18);
+    context.fillRect(-19, -50, 38, 36);
     context.fillStyle = "#3f4a54";
-    context.fillRect(-16, -27, 4, 16);
-    context.fillRect(12, -27, 4, 16);
+    context.fillRect(-28, -49, 7, 34);
+    context.fillRect(21, -49, 7, 34);
+
+    context.fillStyle = "#0b1118";
+    context.fillRect(-27, -78, 54, 14);
+    context.strokeStyle = "#56636d";
+    context.lineWidth = 2;
+    context.strokeRect(-27, -78, 54, 14);
+    context.fillStyle = active ? "#d9f4ff" : reached ? "#65717a" : "#b6c0c7";
+    context.font = "900 9px ui-monospace, monospace";
+    context.textAlign = "center";
+    context.fillText("STAGE SAVE", 0, -68);
 
     if (active) {
         context.fillStyle = "#4f5b65";
         context.beginPath();
-        context.moveTo(-10, -30);
-        context.lineTo(-18, -37);
-        context.lineTo(-15, -41);
-        context.lineTo(-7, -34);
-        context.lineTo(-5, -30);
+        context.moveTo(-18, -50);
+        context.lineTo(-31, -58);
+        context.lineTo(-28, -64);
+        context.lineTo(-13, -55);
+        context.lineTo(-9, -49);
         context.closePath();
         context.fill();
         context.beginPath();
-        context.moveTo(10, -30);
-        context.lineTo(18, -37);
-        context.lineTo(15, -41);
-        context.lineTo(7, -34);
-        context.lineTo(5, -30);
+        context.moveTo(18, -50);
+        context.lineTo(31, -58);
+        context.lineTo(28, -64);
+        context.lineTo(13, -55);
+        context.lineTo(9, -49);
         context.closePath();
         context.fill();
 
         context.fillStyle = "rgba(207, 232, 235, 0.18)";
-        context.fillRect(-6, -33, 12, 24);
+        context.fillRect(-10, -52, 20, 40);
         context.fillStyle = "#cfe8eb";
-        context.fillRect(-3, -30, 6, 18);
+        context.fillRect(-5, -48, 10, 36);
         context.fillStyle = "#f2f6f5";
-        context.fillRect(-1, -28, 2, 14);
+        context.fillRect(-2, -45, 4, 29);
     } else {
         context.fillStyle = reached ? "#3f4850" : "#69757f";
-        context.fillRect(-8, -28, 16, 16);
+        context.fillRect(-13, -45, 26, 30);
         context.fillStyle = "#151d24";
-        context.fillRect(-1, -28, 2, 16);
+        context.fillRect(-2, -45, 4, 30);
         context.fillStyle = reached ? "#59636c" : "#9ba5ad";
-        context.fillRect(-9, -34, 18, 3);
-        context.fillRect(-4, -25, 8, 3);
+        context.fillRect(-15, -53, 30, 4);
+        context.fillRect(-7, -39, 14, 4);
     }
 
     context.restore();

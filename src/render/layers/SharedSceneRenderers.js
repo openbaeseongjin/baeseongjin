@@ -103,14 +103,19 @@ export class WorldGeometryRenderer {
                   id: anchor.id,
                   x: anchor.position.x,
                   y: anchor.position.y,
-                  level
+                  level: anchor.level ?? level,
+                  radius: anchor.radius ?? 64,
+                  label: anchor.label ?? "STAGE SAVE"
               }));
         const activeSavepoint =
             scene.activeCheckpoint ??
             (scene.activeRespawnAnchor
                 ? {
                       id: scene.activeRespawnAnchor.id,
-                      level: scene.world.respawnAnchors?.findIndex(({ id }) => id === scene.activeRespawnAnchor.id) ?? 0
+                      level:
+                          scene.activeRespawnAnchor.level ??
+                          scene.world.respawnAnchors?.findIndex(({ id }) => id === scene.activeRespawnAnchor.id) ??
+                          0
                   }
                 : null);
         this.drawCheckpoints(context, savepoints, activeSavepoint, viewport, renderStats);

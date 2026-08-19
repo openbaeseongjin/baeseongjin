@@ -666,6 +666,18 @@ function testMixerVoicePolicyAndBindings() {
         context: { ...world, localPlayerId: "player-1", tick: 5 }
     });
     assert.equal(calls.at(-1).request.causalId, "weapon-fire:player-1:4");
+    bindings.presentFrame({
+        events: [
+            {
+                eventType: "landmark-entered",
+                respawnAnchorId: "sector-01:landmark:02:checkpoint",
+                position: { x: 10, y: -20 }
+            }
+        ],
+        context: { ...world, localPlayerId: "player-1", tick: 6 }
+    });
+    assert.equal(calls.at(-1).cueId, "gameplay-checkpoint-reached");
+    assert.equal(calls.at(-1).request.causalId, "checkpoint:sector-01:landmark:02:checkpoint");
     const extensibleBindings = new AudioEventBindings(
         { play: (cueId, request) => calls.push({ cueId, request }) },
         {

@@ -23,6 +23,7 @@
 
 - 연속 Sector에서도 개인 사망·낙사는 Sector 최하단 entry가 아니라 플레이어가 실제로 도달한 최신 Stage(landmark)의 안전한 체크포인트에서 재개한다. Stage 진입이 확인될 때 해당 Stage의 부활 anchor를 갱신하며, 아직 도달하지 않은 Stage로 전진시키지 않는다.
 - 이 체크포인트는 개인 부활 위치만 소유한다. objective·route·enemy·증강·공용 진행을 되돌리거나 보상을 열지 않으며, 같은 tick 전원 사망 시 current Sector baseline을 초기화하는 party wipe 계약은 유지한다.
+- 24개 기본 Runtime Stage는 각각 진입 지점에 명시적인 `STAGE SAVE` 구조물을 가진다. Stage 진입으로 활성 anchor가 바뀌면 구조물의 열린 core, 화면 피드백과 cue로 저장 완료를 즉시 알리고, 사망·낙사 안내도 `Sector entry`가 아니라 활성 Stage 세이브 포인트 복귀로 표현한다. 구조물은 부활 좌표와 같은 `respawnAnchor`를 직접 렌더하며 별도 장식 좌표를 만들지 않는다.
 - 최근 Sector/Stage 통합 뒤 진행 중 갑자기 생기는 바닥은 별도 증상 보정으로 숨기지 않고, 실제로 추가된 surface ID·종류·`requiredRouteId`·collision/renderer 상태를 같은 frame에서 확인해 compiler 또는 공용 progress predicate의 근본 원인을 수정한다.
 
 - #642의 0.30.0 Sector 01 access vertical slice는 1-3 Security Annex, 1-6 Cooling Intake, 1-7 Pressure Bypass의 기존/재사용 Sentry를 Access Carrier A/B/C로 사용한다. 아무 2개를 처치해 공용 모듈을 얻고 1-8 objective까지 완료하면 Sector 01→02 connector가 열린다. HUD는 항상 수집 수와 남은 signal을 표시하고, 근접 시 정확한 Carrier beacon을 보여준다. 개인 사망은 모듈을 보존하며 party wipe만 current Sector 모듈·encounter·route를 초기화한다. Stage-local 좌표와 세로 stack, Stage별 문 제거, future Boss transition slot 계약은 유지한다.
@@ -35,7 +36,7 @@
 - 0.32.1은 위 모바일 Full HD viewport-fit 카메라와 seamless landmark의 `legacyAreaId` 환경 package 조회를 patch 릴리스로 묶는다. Sector 01 정식 far/mid/near 배경이 fallback 대신 다시 표시되며 `sw.js` 릴리스 신호와 Pages·게임 서버 버전을 함께 갱신한다.
 - 기본 자동 사격은 비활성화하고 `AutomaticWeaponObject`·spawn/hit claim 기반은 후속 기능용으로 보존한다. 기본 공격은 로프 부착 중 속도 `620px/s` 이상으로 적과 새로 몸체 충돌할 때 `25` 피해를 주는 로프 충돌 공격이다. 같은 겹침은 분리 후 재진입하기 전까지 반복 피해를 만들지 않는다.
 - 적 위치 넉백은 플레이어를 직접 추격·돌진하는 `pursuit-drone-t1`, `swarm-drone-t1`만 허용한다. 고정 Sentry/Turret, authored Patrol 경로만 왕복하는 `patrol-drone-t1`, 제자리 Shield·Artillery·Support 계열은 주먹·Action·로프 충돌 피해와 처치는 그대로 받지만 `knockbackState`를 만들지 않고 authored 위치/경로를 유지한다.
-- 현재 0.25.0 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 Sector-entry 즉시 부활을 사용한다. solo death는 공용 진행을 보존하고 같은 tick의 전원 사망만 current Sector를 reset한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용한다.
+- 현재 Runtime은 체력, 적 본체 피해·넉백·무적 시간, 사망·낙사 시 플레이어별 활성 Stage 세이브 포인트 즉시 부활을 사용한다. solo death는 공용 진행을 보존하고 같은 tick의 전원 사망만 current Sector를 entry baseline으로 reset한다. 착지 직전 하강 속도 `800px/s`까지는 안전하고 `1400px/s`에서 최대 체력만큼 피해가 되도록 선형 낙하 피해를 적용한다.
 - 0.26.0은 과거 Foundation 3종을 generic 증강 v1로 교체했다. Catalog는 Rope 6·기본 Action 6·Signature 6·범용 modifier 4의 22장이고 Player별 최대 6장을 갖는다. 각 offer는 `runSeed + stablePlayerId + selectionIndex`로 호환 카드 3장을 결정하며 reroll·rarity·동일 Player 중복 선택이 없다. PC 우클릭과 모바일 Action Aim, 기본 펀치와 6개 Action, 감전 로프·충돌 폭발, owner-first `augment-impact`·known tombstone no-op이 구현됐다. 모든 유효 Action 시작은 방향·종류를 포함한 공용 presentation event를 만들고 로컬 주먹 잔상과 `gameplay-action-swing` mock cue로 즉시 읽힌다. 기본 주먹은 적이 없어도 입력 피드백을 만들지만 피해는 기존 사거리·대상 판정만 따른다. 0.28.0 획득 source는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`의 명시적 stable object/objective이며 Sector 04~~06 Node, Timer +10 trigger, Purge origin/rejoin은 계속 HOLD다. 상세 기준은 `docs/augment-v1.md`다.
 
 ### [L2] 증강 선택 입력과 노드 소비 상태는 플레이어별로 즉시 읽혀야 한다
@@ -89,7 +90,7 @@
 - 게임 서버의 운영 배포는 `docs/multiplayer-sharing.md`를 따른다. 개발 정적 서버(`serve.mjs`·`start:multiplayer`·`share:multiplayer`의 `staticHandler`)는 응답하는 `index.html`에서 `meta[name="multiplayer-server"]`를 제거해, 클라이언트가 serving origin(통합 개발 WebSocket 서버)으로 폴백하게 한다. 운영 엔드포인트는 저장소 파일·Pages에만 남고 개발 페이지에는 노출하지 않는다. 로컬 멀티 테스트는 `npm start`가 아니라 `npm run start:multiplayer`(정적+WS 통합)로 한다.
 - 0.36.0 client-first claim·WorldSnapshot v9·Shear 전용 전송 제거는 Issue #669 / PR #670의 Lore 커밋 `8e4c3b5`, merge commit `a6a1c7e`로 main에 반영됐다. 운영 endpoint 커밋 `773666f` 뒤 Pages와 게임 서버 `/health.version`이 0.36.0으로 일치했고 공개 WSS의 채널 생성·2인 합류·퇴장·빈 방 제거 smoke를 통과했다. Quick Tunnel URL 자체는 재시작 때 바뀌므로 영구 결정으로 기록하지 않고 `index.html`의 현재 meta를 따른다.
 - AI 도구 설정 동기화는 `vsync`(`@nicepkg/vsync`)를 사용한다. 스킬·MCP의 단일 소스는 `.codex/skills/`와 `.codex/config.toml`이며 `vsync sync`가 `.opencode/skills/`, `.cursor/skills/`, `opencode.json`, `.cursor/mcp.json`을 포맷 변환과 함께 생성·갱신한다. 대상 도구 파일은 직접 편집하지 않는다. 반복 규칙은 `docs/development-rules.md`의 **AI 도구 설정 동기화(vsync)**를 따른다. opencode는 재시작하면 `opencode.json`의 Discord MCP와 `.opencode/skills/`를 읽는다.
-- 싱글 `GameApp` 렌더는 `FixedStepRunner`가 계산한 alpha로 이전·현재 권위 스냅샷을 보간해 표시한다(`src/render/interpolateRenderSnapshot.js`). 디스플레이 재생률과 120Hz 시뮬레이션 단계가 어긋나도 미세 저더 없이 표시되며, 리셋·런 상태 전이·96px 초과 순간이동(Sector-entry 부활·디버그 이동)은 보간하지 않고 최신 상태를 그린다. 멀티 로컬 플레이어는 소유자 예측·보정 계약이 있으므로 이 보간을 적용하지 않는다.
+- 싱글 `GameApp` 렌더는 `FixedStepRunner`가 계산한 alpha로 이전·현재 권위 스냅샷을 보간해 표시한다(`src/render/interpolateRenderSnapshot.js`). 디스플레이 재생률과 120Hz 시뮬레이션 단계가 어긋나도 미세 저더 없이 표시되며, 리셋·런 상태 전이·96px 초과 순간이동(Stage 세이브 포인트 부활·디버그 이동)은 보간하지 않고 최신 상태를 그린다. 멀티 로컬 플레이어는 소유자 예측·보정 계약이 있으므로 이 보간을 적용하지 않는다.
 - 디버그 모드 진입은 URL 쿼리가 아니라 **설정 버튼 1초 꾹 누르기**로 연다(`src/game/ui/DebugPanel.js`). 누르는 동안 `settings-trigger--holding` 진행바가 보이고, 1초 시점에 디버그 모드가 활성화되어 **설정 대화에 "디버그" 탭**(수치 표시 토글 + 시작 맵 select + 적용 버튼)이 등록·선택된다. 저장된 legacy Stage ID는 canonical landmark alias로 해석한다. 적용 버튼은 싱글에서 해당 landmark까지 `SectorProgressState`를 복원하고 요청 플레이어를 entry에 배치하며, 멀티는 서버 `debug-teleport`가 같은 shared progress와 `debug-teleported` 사건을 확정한다. 값은 `baeseongjin.debug-settings.v1`에 저장돼 다음 시작에도 유지된다. `?metrics=1`·`?start=<areaId>` URL 파라미터는 제거했으며 실패 시드 재현용 `?seed=`만 유지한다. 개발 정적 서버는 `Cache-Control: no-store`로 항상 최신 코드를 서빙한다.
 
 ### [L2] 디버그 패널에서 증강을 직접 선택할 수 있어야 한다
@@ -113,9 +114,9 @@ Gate/출구 표준화(전 32 Area), 포탈 위치 전수 감사·수정(connectA
 
 Scenario Art 생성의 현재 기준은 `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`다. 매 생성·수정 전에 해당 Stage README·Production Alignment와 현재 Area Catalog의 Camera Zone·Stable ID·정확한 오브젝트 수·구현 상태를 확인한다. Art Reference는 전체 맵이 아닌 대표 Gameplay Camera Shot 한 장으로 만들고, 살아 있는 Rope는 Player와 현재 Anchor 사이 한 줄만 표시한다. 정확한 World 좌표의 권위는 Approved Blockout에 두되, Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 구조 가이드로 고정해 이미지에서도 보존한다. 구도를 위해 Gameplay Geometry를 옮기거나 늘리지 않는다. `RETIRED`·`PENDING REGENERATION` 이미지는 새 생성 입력으로 사용하지 않는다. 프로젝트용으로 승인한 생성 이미지는 Stage `images/`에 저장하고 생성 기록·상태 문서와 같은 PR로 GitHub `main`에 병합한다. Sector 01은 Navy·Charcoal 산업 정비 시설, 어두운 전경·플레이 중경·푸른 원경, 제한된 Cyan과 드문 Amber를 유지하며 Player·Rope·Anchor·Telegraph 가독성을 우선한다. 1-1 C04의 `05_scenario_art_reference.png`, 1-2 C02의 `06_scenario_art_reference.png`, 1-3 Route Choice의 `05_scenario_art_reference.png`, 1-4 Node의 `03_scenario_art_reference.png`가 구조 정합 승인 기준이다. 1-5~1-8은 Approved Blockout 제작이 다음 선행 과제다.
 
-섹터 1 맵 구조의 현재 Runtime 기준은 `SectorDefinition → LegacyAreaSeamlessSectorRuntime → SectorProgressState`다. 실제 월드는 하나이며 `1-1`~`1-8`은 별도 층이나 포탈이 아니라 같은 4,800px Sector local stack 안의 landmark alias다. landmark 정의는 기존 Area-local geometry·object·objective를 그대로 보존하고 compiler가 세로 순서로 쌓는다. 각 landmark objective를 마치면 다음 physical connector가 열리고 플레이어가 다음 landmark entry에 직접 들어가 공용 진행을 전진시킨다. Stage별 문·패널은 없으며, 양옆 city wing은 실제 exploration·combat·recovery 공간이다. Boss room은 Sector transition slot에 삽입하며 이후 Sector의 local 좌표는 바꾸지 않는다. 사망·낙사는 개인만 Sector entry로 복귀하고, 같은 tick의 전원 사망만 current Sector objective·route·enemy baseline을 초기화한다. Timer 보충 trigger·Purge origin/rejoin·보스 전환은 물리 landmark/objective에 다시 매핑될 때까지 HOLD다.
+섹터 1 맵 구조의 현재 Runtime 기준은 `SectorDefinition → LegacyAreaSeamlessSectorRuntime → SectorProgressState`다. 실제 월드는 하나이며 `1-1`~`1-8`은 별도 층이나 포탈이 아니라 같은 4,800px Sector local stack 안의 landmark alias다. landmark 정의는 기존 Area-local geometry·object·objective를 그대로 보존하고 compiler가 세로 순서로 쌓는다. 각 landmark objective를 마치면 다음 physical connector가 열리고 플레이어가 다음 landmark entry에 직접 들어가 공용 진행을 전진시킨다. Stage별 문·패널은 없지만 각 Stage entry에는 부활 anchor와 동일 좌표의 명시적인 세이브 포인트 구조물이 있으며, 양옆 city wing은 실제 exploration·combat·recovery 공간이다. Boss room은 Sector transition slot에 삽입하며 이후 Sector의 local 좌표는 바꾸지 않는다. 사망·낙사는 해당 플레이어만 최근 활성 Stage 세이브 포인트로 복귀하고, 같은 tick의 전원 사망만 current Sector objective·route·enemy baseline을 초기화해 Sector entry로 되돌린다. Timer 보충 trigger·Purge origin/rejoin·보스 전환은 물리 landmark/objective에 다시 매핑될 때까지 HOLD다.
 
-아래 `1-1`~`1-8` 상세 절은 landmark 내부 콘텐츠·Story·Camera·Collision을 옮기기 위한 authoring reference다. Stage 번호, Gate, Checkpoint와 `RunMetrics.areaTiming` 표현은 legacy alias이며 기본 Runtime 진행·부활 권위로 사용하지 않는다. 현재 계측은 `landmarkTiming`, 진행은 objective/route/landmark, 부활은 Sector entry를 사용한다.
+아래 `1-1`~`1-8` 상세 절은 landmark 내부 콘텐츠·Story·Camera·Collision을 옮기기 위한 authoring reference다. Stage 번호는 `legacyStageAlias`로 보존하고 Gate와 과거 Area Checkpoint는 compatibility 계약이다. 기본 Runtime 계측은 `landmarkTiming`, 진행은 objective/route/landmark, 부활은 각 landmark entry의 Stage 세이브 포인트(`respawnAnchorId`)를 사용한다.
 
 Sector 01-1의 현재 기준은 `docs/bsh/scenario/1/1-1/README.md`의 `SERVICE SHAFT` REV 3.1과 `PRODUCTION-ALIGNMENT.md`다. 첫 Authored Stage를 32px Grid·960×960 Blockout으로 만들고, A=Attach·B=Release Timing·C=Swing Enjoyment와 R1/R2/R3의 5초 이내 재시도를 검증한다. 최초 플레이의 목표 클리어 시간은 90~~120초지만 이를 강제 대기시간이나 전용 속도 제한으로 만들지 않는다. C01~~C05의 local Y Camera Zone과 desktop/mobile zoom을 싱글·멀티 공용 카메라에 적용하고, 실제 `RunMetrics.areaTiming` 표본이 목표를 벗어나면 Geometry·Camera·Recovery를 조정한다. Turret·Wind·Augment·필수 공중 ReAttach는 제외하며, `swingImpulse = 0`에서도 전 구간이 재미있고 안정적으로 통과되어야 한다. Terminal은 이동을 막지 않는 0.9초 문구 세 개를 공용 진행 상태로 2.7초 처리한 뒤 Gate를 열며, 하부 봉쇄와 Rooftop Pad 03 Maintenance Shuttle 목표를 전달한다.
 
@@ -157,7 +158,7 @@ Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않�
 2. 초반 난이도와 체크포인트 간격 플레이테스트
 3. 실제 조작 기반 전체 등반 검사
 4. 고정 HTTPS/WSS 호스트를 정한 뒤 상시 게임 서버를 배포하고 Pages의 서버 주소를 설정
-5. 서로 다른 실제 기기에서 로프 절단·사망·개별 Sector-entry 부활·party wipe reset·content boundary 도달을 한 세션으로 검증
+5. 서로 다른 실제 기기에서 로프 절단·사망·개별 Stage 세이브 포인트 부활·party wipe Sector-entry reset·content boundary 도달을 한 세션으로 검증
 6. 모바일망 지연과 장시간 세션에서 예측 오차, 보정 체감과 재접속 정책을 측정
 
 멀티 접속 중 설정 버튼을 1초 길게 눌러 디버그 패널의 **디버그 수치 표시**를 켜면 RTT·스냅샷 간격·대기 명령 수·명령 거부율과 보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인할 수 있다. 같은 패널과 **진단 복사**는 frame interval·draw duration p50/p95/max, 최근·누적 dropped steps, CSS/backing 크기, 실제·유효 DPR과 collection별 `drawn/total`도 제공한다. 이 값은 게임 규칙이나 물리 120Hz를 자동 조정하지 않으며 실제 기기 플레이테스트에서 체감 문제와 함께 기록한다.
@@ -229,7 +230,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 - 기본 플레이어 자동 사격은 비활성화한다. 자동 무기 객체·투사체·spawn/hit claim 시스템은 제거하지 않고 명시적으로 활성화하는 후속 기능과 회귀 검증에서만 사용한다.
 - 기본 적 공격은 로프가 실제 부착된 상태에서 최소 충돌 속도를 넘겨 적에게 새로 진입한 몸체 충돌이다. 적과 계속 겹친 상태에서 매 tick 피해를 반복하지 않고 완전히 분리한 뒤 다시 충돌해야 재무장한다.
-- 높은 곳에서 떨어져 발판에 착지하면 충돌 해소 직전의 하강 속도로 피해를 계산한다. 정상 이동 구간은 안전 속도 아래로 유지하고, 치명 피해는 0.29.0 기본 Runtime의 개인 Sector-entry 즉시 부활을 사용한다.
+- 높은 곳에서 떨어져 발판에 착지하면 충돌 해소 직전의 하강 속도로 피해를 계산한다. 정상 이동 구간은 안전 속도 아래로 유지하고, 치명 피해는 기본 Runtime의 개인 Stage 세이브 포인트 즉시 부활을 사용한다.
 - 첫 L2 수치는 로프 충돌 최소 `620px/s`·피해 `25`, 낙하 안전 `800px/s`·치명 `1400px/s`이며 실제 Stage 플레이테스트로 조정한다. 싱글과 멀티의 권한·claim 상세는 `docs/architecture.md`와 `docs/multiplayer-synchronization.md`를 따른다.
 
 ### [L2] 기본 Grapple과 Sentry를 현재 authored 맵 밀도에 맞춘다
@@ -252,7 +253,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 새 싱글 실행과 새 멀티 채널의 seed·revision은 모든 클라이언트가 같은 저작 월드 정의와 결정적 표현을 재현하는 계약으로 유지한다. seed를 절차 경로 통과성 검증 대상으로 사용하지 않는다.
 - 체크포인트 위치는 저작 영역과 섹터 흐름에 맞춰 다시 배치하되, 한번 활성화한 진행 지점은 아래로 내려가도 후퇴하지 않는다.
 - 현재 구현된 최종 연결 영역 `sector-03-08`의 출구는 아직 전체 게임 완료가 아니라 Post-Sector 03 Boss와 Sector 04 연결이 결정되지 않았음을 나타내는 content boundary다.
-- 기본 `npm test`는 현재 저작 Sector의 landmark 연결·objective/route 진행·Sector-entry 부활·party wipe reset·content boundary와 싱글·멀티 공용 시스템을 제품 시나리오로 검증한다. 48단계 절차 월드 생성·1,000시드 sweep·summit claim 테스트는 기본 suite에서 실행하지 않는다. 상세 기준은 `docs/development-rules.md`의 테스트와 회귀 방지 절을 따른다.
+- 기본 `npm test`는 현재 저작 Sector의 landmark 연결·objective/route 진행·Stage 세이브 포인트 부활·party wipe Sector-entry reset·content boundary와 싱글·멀티 공용 시스템을 제품 시나리오로 검증한다. 48단계 절차 월드 생성·1,000시드 sweep·summit claim 테스트는 기본 suite에서 실행하지 않는다. 상세 기준은 `docs/development-rules.md`의 테스트와 회귀 방지 절을 따른다.
 - `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 generic Augment 선택 시간과 현재 저작 영역 체류 시간·영역별 클리어 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다. 기존 metric 필드의 Foundation 명칭은 wire 호환 이름이다.
 - 설정 버튼을 1초 길게 눌러 디버그 패널의 **디버그 수치 표시**를 켜면 일반 게임 규칙을 바꾸지 않고 현재 RunMetrics를 표시한다.
 - 메트로배니아식 자유 역주행과 능력 잠금은 초기 범위에서 제외한다. 현재 기준의 상세 구현 흐름은 `docs/sector-01-world-structure-plan.md`를 따른다.
@@ -280,8 +281,8 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 시뮬레이션 capability 디스패치는 실행 구조만 정리하며 분할 권한을 바꾸지 않는다. 중립 객체는 서버가 진행하고 플레이어 당사자 피격·적중은 소유자 또는 피해 클라이언트가 먼저 claim하는 기존 계약을 유지한다. 상세 구현 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - `PlayerRuntimeFactory`는 `PlayerObject`, 별도 `RopeObject`, `AutomaticWeaponObject`와 Has-A 컴포넌트를 조립하고 소유자 입력 객체 목록을 반환한다. `GameSimulation`은 객체 등록·고정 tick·단계 실행·사건 연결을 조정하는 월드 스케줄러로 유지한다.
 - `GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 다음 틱의 입력 capability를 실행한다. 멀티 서버 fixed tick은 같은 스케줄러의 입력 주도 객체 단계를 끄고 플레이어 타이머·무기 쿨다운과 중립 월드만 진행한다.
-- 이벤트의 즉시 체감과 지속 상태 수렴은 별도 경로다. 플레이어·로프·HP·사망·개별 Sector-entry 부활의 수렴 원점은 서버 스냅샷이 아니라 소유·피해 클라이언트의 로컬 `GameSimulation` 결과이며, 서버 복제본과 동료가 검증된 claim·최신 `owner-motion`을 통해 이를 따라간다. 몹·공용 월드와 party wipe baseline의 수렴 원점은 서버 스냅샷이다. `owner-motion`은 거부·롤백 없이 최신 소유자 상태를 적용하고 impact 지문 불일치 때만 서버가 피해 클라이언트의 최신 상태를 흡수한다. 동료와 적은 지연된 두 스냅샷 사이 보간과 제한 외삽으로 각 권한 원점에 수렴한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
-- 0.36.0 기본 멀티는 `WorldSnapshot` protocol v9의 `progressKind: sector`, `respawnAnchorId`, `partyWipeBaseline`과 동적 enemy state를 사용한다. 개인 치명 피격·낙사는 피해 클라이언트가 Sector entry 부활을 먼저 적용하고 서버·동료가 수렴하며 checkpoint claim을 보내지 않는다. 같은 tick 전원 사망만 서버가 `sector-reset`을 한 번 확정한다. 체크포인트 claim·rollback은 이전 Area world revision compatibility에만 남고 기본 `MultiplayerGameApp`은 Area progress에서만 해당 경로를 호출한다.
+- 이벤트의 즉시 체감과 지속 상태 수렴은 별도 경로다. 플레이어·로프·HP·사망·개별 Stage 세이브 포인트 부활의 수렴 원점은 서버 스냅샷이 아니라 소유·피해 클라이언트의 로컬 `GameSimulation` 결과이며, 서버 복제본과 동료가 검증된 claim·최신 `owner-motion`을 통해 이를 따라간다. 몹·공용 월드와 party wipe baseline의 수렴 원점은 서버 스냅샷이다. `owner-motion`은 거부·롤백 없이 최신 소유자 상태를 적용하고 impact 지문 불일치 때만 서버가 피해 클라이언트의 최신 상태를 흡수한다. 동료와 적은 지연된 두 스냅샷 사이 보간과 제한 외삽으로 각 권한 원점에 수렴한다. 상세 계약은 `docs/multiplayer-synchronization.md`를 따른다.
+- 0.36.0 기본 멀티는 `WorldSnapshot` protocol v9의 `progressKind: sector`, `respawnAnchorId`, `partyWipeBaseline`과 동적 enemy state를 사용한다. 개인 치명 피격·낙사는 피해 클라이언트가 활성 Stage 세이브 포인트 부활을 먼저 적용하고 서버·동료가 수렴하며 legacy checkpoint claim을 보내지 않는다. 같은 tick 전원 사망만 서버가 `sector-reset`을 한 번 확정한다. 체크포인트 claim·rollback은 이전 Area world revision compatibility에만 남고 기본 `MultiplayerGameApp`은 Area progress에서만 해당 경로를 호출한다.
 - 현재 기본 저작 시나리오의 진행은 landmark objective·route unlock·physical connector와 `sector-03:landmark:08` content boundary를 사용한다. legacy Gate/panel은 migration source에만 남고 기본 Runtime world output에는 Stage별 문·패널·포탈 표현을 만들지 않는다. 이전 Area revision의 Gate/portal과 절차 월드 summit claim은 compatibility test에만 남는다.
 - 활성 로프 드래그가 브라우저 상단 UI로 빠지거나 `pointercancel`, 창 포커스 상실, 문서 숨김으로 끝나면 로프 유지가 아니라 해제 의도로 처리한다. 클라이언트는 렌더 프레임 재개를 기다리지 않고 해제 입력을 공용 시뮬레이션에 즉시 적용하며, 멀티는 일반 60Hz 전송 제한을 우회해 명령과 `owner-motion`을 바로 보낸다. 세부 입력 수명주기는 `docs/development-rules.md`, 동기화 계약은 `docs/multiplayer-synchronization.md`를 따른다.
 - 플레이어끼리는 반지름 기반 물리 충돌을 한다. 각 소유 클라이언트가 다른 플레이어의 공유 위치를 기준으로 겹침의 절반을 즉시 해소하고 상대에게 파고드는 속도만 제거한 뒤 `owner-motion`으로 공유한다. 접선 방향 로프 관성은 보존하며 위에서 닿으면 다른 플레이어 위에 설 수 있다.
@@ -296,7 +297,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 소유자의 로프·HP·생명·위치가 서버 복제 스냅샷과 달라도 소유자 상태를 스냅하지 않는다. 최초 입장·재접속과 체크포인트처럼 별도 복구 계약이 있는 사건 전이에서만 공유 기준 상태를 사용한다. `owner-motion` receipt는 소유자 상태 복원이나 누적 입력 재실행을 일으키지 않으며, impact 불일치는 반대로 피해자의 최신 상태를 서버가 흡수해 HP·부활·로프를 로컬에서 복구하지 않는다.
 - 서버의 적은 사거리 안의 살아 있는 최근접 플레이어를 안정적인 ID 동률 규칙으로 조준하고 적 투사체 생성·궤적을 진행한다. 각 피해 클라이언트는 자기 예측 위치에서 로프를 몸체보다 먼저 판정해 playerId가 있는 절단·피격 claim을 만든다.
 - 동료 구조, 다운 대기, 팀 전멸 상태는 사용하지 않는다. 사망·낙사한 플레이어만 활성 체크포인트로 즉시 되돌리고 다른 플레이어와 공용 월드 시간은 그대로 진행한다.
-- 증강 선택 중에도 공용 월드 시간·적·투사체·동료는 계속 진행한다. 선택 Player의 이동·점프·로프·Action만 UI가 가져간다. `augment-offer`가 pending entitlement를 서버에 저장하고 확정 claim은 결정적 membership과 source 소비를 멱등 검증한다. 사망·Sector-entry 부활·재접속은 같은 offer와 보유 카드를 유지한다.
+- 증강 선택 중에도 공용 월드 시간·적·투사체·동료는 계속 진행한다. 선택 Player의 이동·점프·로프·Action만 UI가 가져간다. `augment-offer`가 pending entitlement를 서버에 저장하고 확정 claim은 결정적 membership과 source 소비를 멱등 검증한다. 사망·Stage 세이브 포인트 부활·재접속은 같은 offer와 보유 카드를 유지한다.
 - 보상 오버레이는 진행 중인 전투를 식별할 수 있는 반투명 암막을 사용하고 `선택 중에도 전투 진행` 경고를 표시한다. 선택 카드의 가독성을 유지하되 월드를 불투명하게 가리지 않는다.
 - `AuthorityServerSession`이 연결 소유권을 검사한 명령을 목표 tick에 소비해 승인 sequence를 전진시키고, 별도 `owner-motion`만 플레이어 연속 상태에 적용한다. 서버 120Hz 틱은 중립 월드와 타이머를 진행하고 6틱마다 20Hz 스냅샷과 플레이어별 `ownerMotionTick`을 만든다. `MultiplayerGameServer`가 이 경계를 실제 WebSocket에 연결한다.
 - 현재 serverTick 이하의 늦은 명령은 `elapsed-tick`으로 거부하며 ACK를 올리지 않는다. 초기 서버는 과거 입력 롤백을 지원하지 않는다.
@@ -348,7 +349,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 플레이어 첫 애니메이션 상태는 `idle`, `run`, `jump`, `fall`, `rope`, `hit`, `respawn`으로 둔다. 피격 애니메이션은 충돌 VFX와 별개로 캐릭터의 피격감을 전달해야 한다.
 - 개발용 mock 단계에서도 일곱 상태는 실제 데스크톱·모바일 플레이 화면에서 동작 의미가 구분돼야 한다. 자산이 제공하지 않는 행동을 비슷해 보이는 방향 프레임에 임의 대응해 시스템만 연결된 상태로 끝내지 않으며, 상태 가독성을 막는 원인이 clip·자산 정의 경계에 있으면 국소 보정보다 그 경계를 복구한다.
 - `hit`, `death`, `respawn` 애니메이션은 자기 캐릭터와 화면에 보이는 원격 동료 모두 재생한다. 기존 판정·부활 사건의 `playerId`를 renderer 전용 presentation event로 보존해 각 클라이언트가 재생하며, 네트워크 snapshot에 애니메이션 상태를 권위 상태로 추가하지 않는다. 피해 클라이언트의 즉시 사건과 서버 확정은 같은 causal ID로 중복 제거해 애니메이션과 카메라 hold를 다시 시작하지 않는다.
-- 플레이어 표현 상태의 우선순위는 `death → respawn > hit > 공중 로프 > 공중 상승/하강 > 지상 run/idle`이다. 로프가 부착돼도 플레이어가 지면에 닿아 있으면 `rope`를 표시하지 않는다. 로프 없이 공중에서 상승할 때는 `jump` 자세를 초당 2회전시켜 소닉형 회전으로 표시하고, 하강할 때는 기존 `fall` 모션을 유지한다. 정식 리소스에서는 manifest frame duration 합계를 사용한다. 로컬 사망은 사망 순간 카메라 transform을 `death` 0.70초 동안 유지한 뒤 Sector-entry 부활 위치로 즉시 컷하고 그 위치에서 기존 `respawn`을 시작한다. 낙사 사망 위치는 현재 viewport의 플레이어 출력 크기 안쪽으로 clamp하며 원격 사망은 내 카메라를 멈추지 않는다. 이 표현 지연은 즉시 체력 복구·collider·물리·입력·네트워크 권위를 바꾸지 않는다. 상세 경계는 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
+- 플레이어 표현 상태의 우선순위는 `death → respawn > hit > 공중 로프 > 공중 상승/하강 > 지상 run/idle`이다. 로프가 부착돼도 플레이어가 지면에 닿아 있으면 `rope`를 표시하지 않는다. 로프 없이 공중에서 상승할 때는 `jump` 자세를 초당 2회전시켜 소닉형 회전으로 표시하고, 하강할 때는 기존 `fall` 모션을 유지한다. 정식 리소스에서는 manifest frame duration 합계를 사용한다. 로컬 사망은 사망 순간 카메라 transform을 `death` 0.70초 동안 유지한 뒤 활성 Stage 세이브 포인트 위치로 즉시 컷하고 그 위치에서 기존 `respawn`을 시작한다. 낙사 사망 위치는 현재 viewport의 플레이어 출력 크기 안쪽으로 clamp하며 원격 사망은 내 카메라를 멈추지 않는다. 이 표현 지연은 즉시 체력 복구·collider·물리·입력·네트워크 권위를 바꾸지 않는다. 상세 경계는 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
 - 플레이어 facing은 actor별 renderer 상태로 둔다. 수평 속도가 임계값을 넘으면 갱신하고 정지·수직 점프·로프·피격·부활 중에는 마지막 유효 방향을 유지하며 최초 방향은 오른쪽이다. 좌우 별도 이미지를 요구하지 않고 `flipX`를 사용하며 gameplay·network state에는 facing을 추가하지 않는다.
 - 실제 렌더 경로 검증을 위해 최소한의 24×24 개발용 mock 스프라이트를 함께 제공하되, 완성형 캐릭터 디자인·색감·고급 픽셀 아트에는 공수를 쓰지 않는다. mock 고유 정보는 게임 상태 계약에 넣지 않고 동일 규격 atlas 교체로 정식 에셋을 적용할 수 있어야 한다.
 - mock은 직접 새로 그리는 데 공수를 쓰지 않고 24×24 규격과 용도에 맞는 외부 공개 예제를 사용할 수 있다. 외부 에셋은 재배포·수정 가능한 라이선스를 확인하고 저장소에 출처와 라이선스를 함께 기록한다.

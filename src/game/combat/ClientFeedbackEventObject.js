@@ -7,7 +7,14 @@ export const PERSONAL_CLIENT_FEEDBACK_CAPABILITY = "personal-client-feedback";
 export const CLIENT_STATUS_VISIBILITY_CAPABILITY = "client-status-visibility";
 const feedbackDispatcher = new SimulationDispatcher();
 
-const PERSONAL_STATUS_TYPES = new Set(["attach", "release", "swing", "rope-cut", "checkpoint-respawn"]);
+const PERSONAL_STATUS_TYPES = new Set([
+    "attach",
+    "release",
+    "swing",
+    "rope-cut",
+    "checkpoint-respawn",
+    "sector-respawn"
+]);
 
 const withSharedClientFeedback = createSimulationCapabilityMixin({
     id: SHARED_CLIENT_FEEDBACK_CAPABILITY,

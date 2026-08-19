@@ -1532,6 +1532,7 @@ export class GameSimulation {
                   dt,
                   resolveInteractChoice
               });
+        let stageSaveEvent = null;
         for (const event of events) {
             const { type, ...payload } = event;
             if (type === "objective-choice-requested") {
@@ -1552,7 +1553,11 @@ export class GameSimulation {
                     this.#activateCheckpoint(checkpoint, event.playerId);
                 }
             }
-            if (type === "landmark-entered") this.metrics.recordProgressClear(event.previousLandmarkId);
+            if (type === "landmark-entered") {
+                this.metrics.recordProgressClear(event.previousLandmarkId);
+                this.metrics.recordCheckpoint();
+                stageSaveEvent = event;
+            }
         }
         this.#completeEligibleAugmentObjectivesForCurrentRoster();
         if (this.isSeamlessSectorWorld) {
@@ -1561,6 +1566,10 @@ export class GameSimulation {
             const respawnAnchor = this.world.respawnAnchors.find(({ id }) => id === respawnAnchorId);
             if (!respawnAnchor) throw new Error(`unknown active respawn anchor: ${respawnAnchorId}`);
             this.activeRespawnAnchor = respawnAnchor;
+            if (stageSaveEvent) {
+                const { type: _type, ...payload } = stageSaveEvent;
+                this.eventFlash = { type: "stage-saved", age: 0, ...payload };
+            }
             if (this.worldProgress.snapshot().contentBoundaryReached && !this.contentBoundaryAnnounced) {
                 const payload = Object.freeze({
                     sectorId: this.worldProgress.currentSectorId,

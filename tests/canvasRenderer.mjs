@@ -106,6 +106,17 @@ export function run() {
     renderer.drawStatusFeedback({ type: "checkpoint-respawn", reason: "fall", age: 0.4 });
     assert.deepEqual(textCalls, ["체크포인트 부활", "낙사 · 최대 체력으로 복귀"]);
     textCalls.length = 0;
+    renderer.drawStatusFeedback({ type: "sector-respawn", reason: "health", age: 0.4 });
+    assert.deepEqual(textCalls, ["Stage 세이브 포인트 부활", "사망 · 최대 체력으로 복귀"]);
+    textCalls.length = 0;
+    renderer.drawStatusFeedback({
+        type: "stage-saved",
+        landmarkId: "sector-01:landmark:02",
+        stageAlias: "1-2",
+        age: 0.4
+    });
+    assert.deepEqual(textCalls, ["STAGE SAVE", "1-2 · 부활 지점 저장 완료"]);
+    textCalls.length = 0;
     renderer.drawStatusFeedback({
         type: "augment-release-propulsion",
         age: 0.4

@@ -398,6 +398,10 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 id: respawnAnchorId,
                 sectorId: sectorDefinition.id,
                 landmarkId: landmarkDefinition.id,
+                legacyStageAlias: landmarkDefinition.legacyStageAlias,
+                label: `STAGE ${landmarkDefinition.legacyStageAlias} SAVE`,
+                level: landmarks.length,
+                radius: 64,
                 position: entry
             });
             const runtimeLandmark = freezeValue({

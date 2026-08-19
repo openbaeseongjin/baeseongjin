@@ -65,13 +65,14 @@ function playerHitBinding(event, context) {
 }
 
 function checkpointBinding(event, context) {
-    if (event.eventType !== "checkpoint-reached") return null;
+    if (event.eventType !== "checkpoint-reached" && event.eventType !== "landmark-entered") return null;
+    const checkpointId = event.checkpointId ?? event.respawnAnchorId;
     return Object.freeze({
         cueId: "gameplay-checkpoint-reached",
         request: Object.freeze({
             ...context,
-            emitterId: event.checkpointId,
-            causalId: `checkpoint:${event.checkpointId}`,
+            emitterId: checkpointId,
+            causalId: `checkpoint:${checkpointId}`,
             position: event.position
         })
     });
