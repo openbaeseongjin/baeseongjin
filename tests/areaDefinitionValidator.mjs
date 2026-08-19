@@ -10,17 +10,19 @@ function mutableCatalog() {
 export function run() {
     const valid = validateAreaCatalog(SECTOR_01_AREA_CATALOG);
     assert.deepEqual(valid, { valid: true, issues: [] });
-    const crossbeam = SECTOR_01_AREA_CATALOG.areas[1].surfaces.find(({ id }) => id === "sector-01-02:crossbeam-x1");
-    assert.equal(crossbeam.oneWay, false);
-    assert.equal(crossbeam.grappleable, true, "a solid horizontal platform must remain grappleable from below");
+    const deadLiftCage = SECTOR_01_AREA_CATALOG.areas[1].surfaces.find(
+        ({ id }) => id === "sector-01-02:dead-lift-cage"
+    );
+    assert.equal(deadLiftCage.oneWay, false);
+    assert.equal(deadLiftCage.grappleable, true, "a solid horizontal platform must remain grappleable from below");
     assert.ok(
         findRopeAttachment({
-            aimPoint: { x: 0, y: -544 },
-            origin: { x: 0, y: -320 },
-            surfaces: [crossbeam],
+            aimPoint: { x: 128, y: -608 },
+            origin: { x: 128, y: -320 },
+            surfaces: [deadLiftCage],
             maxAttachDistance: 400
         }),
-        "the runtime Rope resolver must return an attachment point on crossbeam-x1"
+        "the runtime Rope resolver must return an attachment point on dead-lift-cage"
     );
     const invalidSolidPlatform = mutableCatalog();
     invalidSolidPlatform.areas[0].surfaces[0].oneWay = false;

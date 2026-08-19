@@ -264,6 +264,7 @@ export class GameSimulation {
         this.portalTransitions.delete(playerId);
         this.foundationRewards.delete(playerId);
         if (removed.id === this.#primaryPlayerId) this.#primaryPlayerId = this.players[0]?.id ?? null;
+        this.#advanceCalibrationVerification();
         this.#completeEligibleAugmentObjectivesForCurrentRoster();
         return true;
     }
@@ -1653,6 +1654,7 @@ export class GameSimulation {
                 stageSaveEvent = event;
             }
         }
+        this.#advanceCalibrationVerification();
         this.#completeEligibleAugmentObjectivesForCurrentRoster();
         if (this.isSeamlessSectorWorld) {
             this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
@@ -2015,6 +2017,34 @@ export class GameSimulation {
             }
         }
         return completed;
+    }
+
+    // Records, per player, that their selected Augment's canonical effect actually fired while in
+    // range of a "calibration-frame" source - never from card ownership alone. Rope-family Augments
+    // (no actionId in FoundationAugmentCatalog) verify on a live rope attach; action-family Augments
+    // verify on a canonical action activation (a queued cooldown, or an action currently resolving -
+    // e.g. slow-fall, which never enqueues a cooldown). This intentionally does not reproduce each
+    // CALIBRATION-PROFILES.json profile's exact distance/timing window (all marked NOT_IMPLEMENTED in
+    // that package) - see docs/bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md for the flagged gap.
+    #advanceCalibrationVerification() {
+        const sources = this.world.objects?.filter(({ kind }) => kind === "calibration-frame") ?? [];
+        if (sources.length === 0) return;
+        for (const player of this.players) {
+            if (player.lifeState !== "active" || player.foundation.selectedAugmentIds.length === 0) continue;
+            const augmentId = player.foundation.selectedAugmentIds.at(-1);
+            const definition = foundationAugmentById(augmentId);
+            if (!definition) continue;
+            const used = definition.actionId
+                ? player.augmentCombat.actionState?.rechargeQueue.length > 0 ||
+                  player.augmentCombat.actionState?.activeAction != null
+                : player.ropeObject.rope.isAttached;
+            if (!used) continue;
+            for (const source of sources) {
+                if (player.calibrationVerifiedSourceIds.includes(source.id)) continue;
+                if (player.physics.position.distanceTo(source.position) > source.interactionRadius) continue;
+                player.calibrationVerifiedSourceIds = [...player.calibrationVerifiedSourceIds, source.id];
+            }
+        }
     }
 
     #completeEligibleAugmentObjectivesForCurrentRoster() {

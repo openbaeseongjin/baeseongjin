@@ -84,12 +84,15 @@ export function run() {
     assert.ok(mobileViewport.cssWidth / mobileCamera.zoom >= 1920 * (0.72 / 0.82));
 
     const area02 = world.areas[1];
+    // REV8.0 geometry (docs/bsh/scenario/1/1-2/AREA-SPEC.json camera.zones): bounds height dropped to
+    // 960 (was 1088), zones renamed first-handoff->left-cross, direction-reversal->airborne-reattach,
+    // flow-test->roof-wrap, and zoom values rescaled.
     const area02Cases = [
-        [-32, "lift-failure", 1.2, 0.8],
-        [-300, "first-handoff", 1, 0.72],
-        [-600, "direction-reversal", 0.95, 0.7],
-        [-800, "flow-test", 1, 0.72],
-        [-1000, "exit", 1.15, 0.78]
+        [-32, "lift-failure", 1.15, 0.79],
+        [-300, "left-cross", 0.94, 0.7],
+        [-600, "airborne-reattach", 0.9, 0.68],
+        [-700, "roof-wrap", 0.96, 0.71],
+        [-880, "exit", 1.1, 0.76]
     ];
     for (const [localY, zoneId, desktopZoom, mobileZoom] of area02Cases) {
         const player = playerAt(area02, localY, -320);
@@ -114,8 +117,8 @@ export function run() {
     const area03Cases = [
         [-32, "identification", 1.15, 0.78, 0.5],
         [-320, "warning", 1, 0.72, 0.6],
-        [-480, "turret-reveal", 0.95, 0.7, 0.68],
-        [-700, "route-choice", 0.88, 0.66, 0.62],
+        [-480, "turret-reveal", 0.94, 0.7, 0.68],
+        [-700, "annex-combat", 0.86, 0.66, 0.62],
         [-880, "relief", 1, 0.72, 0.6],
         [-1000, "exit", 1.15, 0.78, 0.68]
     ];

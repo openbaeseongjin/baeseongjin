@@ -1,0 +1,19 @@
+# 1-5 MANIFEST — REV8.0
+
+Stage payload:
+- README.md
+- AREA-SPEC.json
+- DIRECTION-SPEC.json
+- MAP-PREVIEW.html
+- STORY-DIRECTION-PREVIEW.html
+- PRODUCTION-ALIGNMENT.md
+- RUNTIME-HANDOFF.md
+- VALIDATION.md
+- ASSET-REQUIREMENTS.md
+- MANIFEST.md
+
+Approved core:
+`SHORT ASCENT → LONG RIGHT COMMIT → CONTROLLED DROP → LOW TEST SLOT → RE-LAUNCH → UPPER LEFT RETURN`
+
+Gameplay Map Preview:
+background/decorative structures intentionally hidden.

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 1-8 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#061019;--p:#0d1820;--l:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--v:#caa7ff;--w:#91a8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.42 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:440px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+button{padding:6px 9px;margin:2px;background:#10212a;color:#eef5f8;border:1px solid #4d6874;border-radius:6px;cursor:pointer}button.on{border-color:#91a8ff;color:#c6ceff}
+svg{width:100%;height:84vh;min-height:780px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.recovery{fill:#315944;stroke:var(--g);stroke-width:2}.cover{fill:#3c484e;stroke:#b4c3c9;stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.joint{fill:var(--a);stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.enemy.inactive{opacity:.26}.route{fill:none;stroke:var(--y);stroke-width:5;stroke-dasharray:14 9}.wind{fill:#586db61b;stroke:#91a8ff;stroke-width:2;stroke-dasharray:8 8}.arrow{stroke:#91a8ff;stroke-width:5;marker-end:url(#arr)}.objective{fill:#213b46;stroke:#5de8ff;stroke-width:3}.checkpoint{fill:#3b2f52;stroke:#caa7ff;stroke-width:3}.current{fill:none;stroke:var(--r);stroke-width:3;stroke-dasharray:7 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.11}.hidden{display:none}
+text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:var(--g)}.hyp{color:var(--a)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>1-8 CONTAINMENT GATE · REV8</h1><div class="sub">GAMEPLAY ONLY · COUNTERFLOW SECURITY LANES → FINAL PULSE → OVERRIDE → SECTOR CHECKPOINT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>BODY TRACE</b><br>
+LOWER: LEFT → RIGHT Security<br>
+MID: SAFE RESET<br>
+UPPER: RIGHT → LEFT Security<br>
+FINAL: LEFT → RIGHT Pulse<br>
+OVERRIDE → WORKER DISTRICT</div>
+<div class="card"><b>ENEMY SEQUENCE</b><br>
+<button data-phase="1" class="on">1 LOWER GUARD</button>
+<button data-phase="2">2 LOWER TURRET</button><br>
+<button data-phase="3">3 UPPER GUARD</button>
+<button data-phase="4">4 UPPER TURRET</button><br>
+<div id="phaseText" style="margin-top:7px;color:#a8bbc3"></div>
+<b>NO CROSSFIRE</b> — 한 시점에 주 위협 하나.</div>
+<div class="card"><b>FINAL VENT</b><br>
+RIGHT / Pulsed / 800<br>
+1.75 LULL → 0.7 WARNING → 1.4 ACTIVE → 0.3 DECAY</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Main Route</label>
+<label><input id="showWind" type="checkbox" checked> Final Wind Zone</label>
+<label><input id="showCurrent" type="checkbox"> Current 1024×1792 outline</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>GAMEPLAY-ONLY</b><br>
+표시: Collision / Grapple / Enemy / Wind / Objective / Checkpoint / Recovery.<br>
+숨김: 배경 Gate 구조·배관·장식.</div>
+<div class="card"><b>GATES</b><br>
+Scale <span class="pass">PASS</span><br>
+Similarity <span class="pass">PASS</span><br>
+Obstacle <span class="pass">PASS</span><br>
+Pacing <span class="hyp">HYPOTHESIS</span></div>
+</aside><main>
+<svg viewBox="-920 -1860 1840 1925">
+<defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#91a8ff"/></marker></defs>
+<rect class="bounds" x="-832" y="-1792" width="1664" height="1792"/><text class="tiny" x="-810" y="-1762">REV8 1664×1792</text>
+
+<!-- entry/lower -->
+<rect class="surface" x="-800" y="0" width="384" height="32"/><text class="tiny" x="-785" y="-12">ENTRY</text>
+<circle class="anchor" cx="-480" cy="-224" r="13"/><text x="-458" y="-214">A</text>
+<circle class="joint" cx="-96" cy="-320" r="11"/><text class="tiny" x="-75" y="-310">B</text>
+<circle class="joint" cx="352" cy="-416" r="11"/><text class="tiny" x="373" y="-406">C</text>
+<rect class="recovery" x="-272" y="-176" width="288" height="18"/><text class="tiny" x="-260" y="-188">LOWER RECOVERY</text>
+<rect class="recovery" x="144" y="-352" width="224" height="18"/><text class="tiny" x="154" y="-364">LOCAL CATCH</text>
+<rect class="surface" x="320" y="-512" width="320" height="24"/><text class="tiny" x="333" y="-526">LOWER TRANSFER</text>
+<circle id="enemy1" class="enemy" cx="-64" cy="-384" r="18"/><text class="tiny" x="-115" y="-414">LOWER GUARD</text>
+<circle id="enemy2" class="enemy inactive" cx="544" cy="-512" r="18"/><text class="tiny" x="490" y="-542">LOWER TURRET</text>
+
+<!-- mid relief -->
+<circle class="anchor" cx="384" cy="-704" r="13"/><text class="tiny" x="405" y="-694">D</text>
+<rect class="recovery" x="-256" y="-832" width="512" height="30"/><text class="tiny" x="-244" y="-846">MID RELIEF · SAFE</text>
+
+<!-- upper -->
+<circle class="anchor" cx="416" cy="-960" r="13"/><text x="438" y="-950">E</text>
+<circle class="joint" cx="64" cy="-1056" r="11"/><text class="tiny" x="85" y="-1046">F</text>
+<circle class="joint" cx="-384" cy="-1152" r="11"/><text class="tiny" x="-363" y="-1142">G</text>
+<rect class="recovery" x="32" y="-896" width="256" height="18"/><text class="tiny" x="44" y="-908">UPPER RECOVERY</text>
+<rect class="recovery" x="-368" y="-1088" width="224" height="18"/><text class="tiny" x="-356" y="-1100">UPPER CATCH</text>
+<rect class="surface" x="-640" y="-1248" width="320" height="24"/><text class="tiny" x="-628" y="-1262">UPPER TRANSFER</text>
+<circle id="enemy3" class="enemy inactive" cx="192" cy="-1056" r="18"/><text class="tiny" x="143" y="-1086">UPPER GUARD</text>
+<circle id="enemy4" class="enemy inactive" cx="-544" cy="-1184" r="18"/><text class="tiny" x="-600" y="-1214">UPPER TURRET</text>
+
+<!-- final pulse -->
+<circle class="anchor" cx="-96" cy="-1344" r="13"/><text x="-74" y="-1334">H</text>
+<circle class="joint" cx="352" cy="-1432" r="11"/><text class="tiny" x="373" y="-1422">I</text>
+<g id="wind">
+<rect class="wind" x="-672" y="-1504" width="1152" height="288"/><text class="tiny" x="-650" y="-1480">FINAL RIGHT PULSE · 800</text>
+<line class="arrow" x1="-560" y1="-1360" x2="-150" y2="-1360"/>
+<line class="arrow" x1="-60" y1="-1425" x2="350" y2="-1425"/>
+</g>
+
+<!-- override / checkpoint -->
+<rect class="surface" x="304" y="-1536" width="352" height="28"/><text class="tiny" x="316" y="-1550">OVERRIDE DECK</text>
+<rect class="objective" x="488" y="-1624" width="48" height="88"/><text class="tiny" x="440" y="-1638">MAINTENANCE OVERRIDE</text>
+<rect class="surface" x="-320" y="-1664" width="640" height="28"/><text class="tiny" x="-305" y="-1678">GATE PASSAGE</text>
+<circle class="checkpoint" cx="0" cy="-1728" r="22"/><text class="tiny" x="32" y="-1720">SECTOR CHECKPOINT → WORKER DISTRICT</text>
+
+<g id="route"><path class="route" d="M-640,-32 Q-560,-130 -480,-224 Q-300,-275 -96,-320 Q140,-365 352,-416 Q470,-470 480,-512 Q430,-620 384,-704 Q160,-780 0,-832 Q230,-900 416,-960 Q250,-1015 64,-1056 Q-165,-1105 -384,-1152 Q-465,-1200 -480,-1248 Q-300,-1300 -96,-1344 Q120,-1395 352,-1432 Q420,-1490 480,-1536 Q300,-1610 0,-1664 L0,-1728"/></g>
+
+<g id="current" class="hidden"><rect class="current" x="-512" y="-1792" width="1024" height="1792"/><text class="tiny" x="-495" y="-1750">CURRENT 1024×1792</text></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-480" cy="-224" r="400"/><circle class="reach" cx="-96" cy="-320" r="400"/><circle class="reach" cx="384" cy="-704" r="400"/><circle class="reach" cx="416" cy="-960" r="400"/><circle class="reach" cx="-384" cy="-1152" r="400"/><circle class="reach" cx="-96" cy="-1344" r="400"/></g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showWind.onchange=()=>wind.classList.toggle("hidden",!showWind.checked);
+showCurrent.onchange=()=>current.classList.toggle("hidden",!showCurrent.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+const enemies=[enemy1,enemy2,enemy3,enemy4];
+const labels=[
+"LOWER GUARD active · 다음 Lower Turret은 아직 비활성.",
+"LOWER TURRET active · Lower Guard 단계 종료.",
+"UPPER GUARD active · Lower lane 위협 종료.",
+"UPPER TURRET active · Final Vent에는 적이 겹치지 않음."
+];
+function phase(n){
+ document.querySelectorAll("button[data-phase]").forEach(b=>b.classList.toggle("on",+b.dataset.phase===n));
+ enemies.forEach((e,i)=>e.classList.toggle("inactive",i!==n-1));
+ phaseText.textContent=labels[n-1];
+}
+document.querySelectorAll("button[data-phase]").forEach(b=>b.onclick=()=>phase(+b.dataset.phase));
+phase(1);
+</script></body></html>

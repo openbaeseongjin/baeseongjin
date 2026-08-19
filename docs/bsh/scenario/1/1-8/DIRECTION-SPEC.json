@@ -1,0 +1,462 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "ea9c4438c0f106474baa09621bfb42ae5876b86e",
+  "stage": {
+    "sector": 1,
+    "stage": 8,
+    "sourceAreaId": "sector-01-08",
+    "name": "CONTAINMENT GATE"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "establish final Containment lock",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "1-8:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "intro",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "CONTAINMENT GATE",
+            "detail": "LOCKED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "heavy-lock-resonance"
+        }
+      ],
+      "completion": "presentation duration only",
+      "validation": "Player control remains on"
+    },
+    {
+      "beatId": "s1-lower-warning",
+      "status": "DESIGN LOCKED",
+      "purpose": "turn system status into explicit retreat order",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "lower-security-commit"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "1-8:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "lower-security",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED TRIGGER",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "FINAL WARNING",
+              "detail": ""
+            },
+            {
+              "title": "RETURN TO LOWER MAINTENANCE",
+              "detail": ""
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…이제 와서 돌아가라고?"
+          },
+          "timing": {
+            "mode": "after-warning-sequence-if-readable"
+          }
+        },
+        {
+          "type": "enemy",
+          "target": "lower-grid-guard",
+          "action": "activation-order-1"
+        }
+      ],
+      "completion": "lower warning sequence complete",
+      "validation": "Bark does not cover critical enemy telegraph"
+    },
+    {
+      "beatId": "s2-lower-closure",
+      "status": "DESIGN LOCKED",
+      "purpose": "confirm closure is progressing while Player continues",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "lower-transfer"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "1-8:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "lower-security",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED TRIGGER",
+          "content": {
+            "title": "CONTAINMENT GATE",
+            "detail": "CLOSURE IN PROGRESS"
+          }
+        },
+        {
+          "type": "enemy",
+          "target": "lower-turret",
+          "action": "activation-order-2"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "Player reaches D / Mid connector",
+      "validation": "Lower Guard and Lower Turret never crossfire"
+    },
+    {
+      "beatId": "s3-mid-relief",
+      "status": "DESIGN LOCKED",
+      "purpose": "safe Story reset and closure progress read",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "mid-relief"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "1-8:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "mid-relief",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED TRIGGER",
+          "content": {
+            "title": "CONTAINMENT GATE",
+            "detail": "LOCKDOWN · 87%"
+          }
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…멈출 생각이 없네."
+          },
+          "timing": {
+            "mode": "after-system-text"
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "wind",
+          "action": "none"
+        }
+      ],
+      "completion": "Upper lane commit",
+      "validation": "Mid remains fully safe"
+    },
+    {
+      "beatId": "s4-upper-security",
+      "status": "DESIGN LOCKED",
+      "purpose": "counterflow second combat lane",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "upper-security"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-8:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "upper-security",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "target": "upper-grid-guard-then-upper-turret",
+          "action": "activation-orders-3-then-4-no-crossfire"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "Upper Transfer",
+      "validation": "Upper enemies never overlap as dominant crossfire threats"
+    },
+    {
+      "beatId": "s5-final-pulse",
+      "status": "DESIGN LOCKED",
+      "purpose": "known Wind mechanic as final movement reprise",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "final-pulse"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-8:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "final-crossing",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "wind",
+          "target": "sector-01-08:final-pulsed-vent",
+          "action": "current-right-800-cycle"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "Override Deck",
+      "validation": "No enemies overlap final Vent"
+    },
+    {
+      "beatId": "s6-override-commit",
+      "status": "DESIGN LOCKED",
+      "purpose": "make Override a deliberate Player action",
+      "trigger": {
+        "type": "interaction-ready",
+        "objectId": "sector-01-08:exit-panel"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-objective-attempt",
+      "dedupeToken": "1-8:bark-c:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "override",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "좋아… 열어."
+          },
+          "timing": {
+            "mode": "before-or-during-committed-interact"
+          }
+        },
+        {
+          "type": "interaction",
+          "target": "sector-01-08:exit-panel",
+          "action": "complete-maintenance-override"
+        }
+      ],
+      "completion": "sector-01-08:maintenance-override",
+      "validation": "Speech never delays the interaction"
+    },
+    {
+      "beatId": "s7-override-result",
+      "status": "DESIGN LOCKED",
+      "purpose": "turn local escape action into world-state consequence",
+      "trigger": {
+        "type": "objective-complete",
+        "objectiveId": "sector-01-08:maintenance-override"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once",
+      "dedupeToken": "runtime-objective-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "override",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "OVERRIDE LOCK",
+              "detail": "CONFIRM"
+            },
+            {
+              "title": "LOWER GRID CONNECTION",
+              "detail": "TERMINATING"
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…하부 연결이 끊긴다고?"
+          },
+          "timing": {
+            "mode": "after-grid-termination-text"
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "deep-grid-disconnect-relay"
+        }
+      ],
+      "completion": "objective presentation complete",
+      "validation": "Dialogue makes no sabotage or harm claim"
+    },
+    {
+      "beatId": "s8-gate-open",
+      "status": "DESIGN LOCKED",
+      "purpose": "open route and name next district without dialogue stacking",
+      "trigger": {
+        "type": "gate-unlocked",
+        "gateId": "sector-01-08:gate"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once",
+      "dedupeToken": "runtime-gate-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "gate-open",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "WORKER DISTRICT",
+            "detail": "ACCESS OPEN"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "object",
+          "target": "containment-gate",
+          "action": "open"
+        }
+      ],
+      "completion": "passage open",
+      "validation": "No Bark here; allow visual/system reveal to breathe"
+    },
+    {
+      "beatId": "s9-sector-checkpoint",
+      "status": "DESIGN LOCKED",
+      "purpose": "reframe infrastructure problem as inhabited-world problem",
+      "trigger": {
+        "type": "checkpoint",
+        "checkpointId": "checkpoint:sector-01-08:end"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once",
+      "dedupeToken": "1-8:sector-checkpoint:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "worker-reveal",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "WORKER DISTRICT",
+            "detail": "BLOCK 12"
+          }
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "사람들이 사는 곳까지 이어져 있었던 건가…"
+          },
+          "timing": {
+            "mode": "after-place-name"
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "maintenance-ambience-to-inhabited-district-bed"
+        }
+      ],
+      "completion": "Sector 02 handoff",
+      "validation": "Does not reveal Group C or future Sector 02 plot"
+    }
+  ],
+  "validation": [
+    "worldPause false for all beats",
+    "exact 4-enemy sequential/no-crossfire contract",
+    "Mid Relief fully safe",
+    "final Vent has no enemy overlap",
+    "all verified Runtime Story strings preserved exactly",
+    "five approved Barks are Player dialogue, never System Toast",
+    "Gate-open beat intentionally has no Bark",
+    "final Worker District Bark happens at checkpoint only",
+    "unsupported sabotage/civilian harm claims absent",
+    "MAP-PREVIEW remains gameplay-only"
+  ]
+}

@@ -1,0 +1,260 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 1,
+    "stage": 2,
+    "legacyStageAlias": "1-2",
+    "sourceAreaId": "sector-01-02",
+    "name": "DOUBLE ANCHOR SHAFT"
+  },
+  "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "psychology": {
+    "start": {
+      "fear": 72,
+      "control": 28,
+      "understanding": 15
+    },
+    "exit": {
+      "fear": 67,
+      "control": 36,
+      "understanding": 22
+    }
+  },
+  "beats": [
+    {
+      "beatId": "s0-dead-lift",
+      "status": "DESIGN LOCKED",
+      "purpose": "Break expectation that normal Lift can solve the ascent.",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "1-2:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "lift-failure",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "LIFT CONTROL",
+            "detail": "OFFLINE"
+          },
+          "timing": {
+            "durationSeconds": 1.6
+          }
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…리프트도?"
+          },
+          "action": "local-player-bark"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "dead-motor-silence-plus-cable-brake-settle"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-manual-access",
+      "status": "DESIGN LOCKED",
+      "purpose": "Confirm the physical bypass the player is already reading.",
+      "trigger": {
+        "type": "position-threshold",
+        "maxLocalY": -96
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "1-2:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "left-cross",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "AUTOMATIC LIFT SERVICE",
+            "detail": "SUSPENDED · MANUAL ACCESS ONLY"
+          },
+          "timing": {
+            "durationSeconds": 1.8
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-airborne-c",
+      "status": "DESIGN LOCKED",
+      "purpose": "Teach first Airborne Re-Attach through body movement, not text.",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "airborne-reattach"
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "1-2:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "airborne-reattach",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "release-free-air-clear-c-attach"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-roof-reversal",
+      "status": "DESIGN LOCKED",
+      "purpose": "Show practical adaptation by wrapping around the dead machinery.",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "roof-wrap"
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "1-2:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "roof-wrap",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "rope-air-priority-lift-remains-silent"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-catwalk-close",
+      "status": "DESIGN LOCKED",
+      "purpose": "Close the Stage without adding a new mechanic.",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "upper-catwalk"
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "1-2:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "exit",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s5-security-preview",
+      "status": "DESIGN LOCKED",
+      "purpose": "Seed 1-3 without starting its Security conflict.",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "sector-01-02:final-deck-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "1-2:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "exit",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "action": "sequence",
+          "items": [
+            {
+              "atSeconds": 0,
+              "title": "POWER REDUCTION",
+              "detail": "STAGE 2"
+            },
+            {
+              "atSeconds": 1.2,
+              "title": "SECURITY ACCESS",
+              "detail": "CHECK"
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "dead-machinery-to-clean-security-beep-servo"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "worldPause false for every beat",
+    "Player text only in S0",
+    "Airborne Re-Attach contains no tutorial text",
+    "Final-deck verified sequence order and 1.2s cadence preserved",
+    "Current 400px Hook Reach is geometry authority"
+  ]
+}

@@ -1,0 +1,19 @@
+# 1-4 MANIFEST — REV8.1
+
+Stage payload:
+- README.md
+- AREA-SPEC.json
+- DIRECTION-SPEC.json
+- CALIBRATION-PROFILES.json
+- MAP-PREVIEW.html
+- STORY-DIRECTION-PREVIEW.html
+- PRODUCTION-ALIGNMENT.md
+- RUNTIME-HANDOFF.md
+- VALIDATION.md
+- ASSET-REQUIREMENTS.md
+- MANIFEST.md
+
+REV8.1 authority:
+`SELECT → USE SELECTED AUGMENT → CALIBRATION VERIFIED → EXIT`
+
+The old fixed Foundation 3-card design is superseded.

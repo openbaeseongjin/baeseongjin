@@ -1,0 +1,553 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED",
+  "baselineCommit": "29d72baa1879850ea9e811ff6640dfce7e23c7c9",
+  "stage": {
+    "sector": 1,
+    "stage": 5,
+    "legacyStageAlias": "1-5",
+    "sourceAreaId": "sector-01-05",
+    "name": "AUGMENT TEST BAY",
+    "subtitle": "LIVE CALIBRATION"
+  },
+  "bounds": {
+    "width": 2304,
+    "height": 1152
+  },
+  "entry": {
+    "id": "sector-01-05:entry",
+    "x": -896,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "kind": "platform",
+      "x": -832,
+      "y": 0,
+      "width": 512,
+      "height": 32
+    },
+    {
+      "id": "launch-deck",
+      "kind": "platform",
+      "x": -560,
+      "y": -320,
+      "width": 288,
+      "height": 24
+    },
+    {
+      "id": "r1",
+      "kind": "recovery",
+      "x": 64,
+      "y": -256,
+      "width": 320,
+      "height": 18
+    },
+    {
+      "id": "far-right-landing",
+      "kind": "safe-deck",
+      "x": 736,
+      "y": -448,
+      "width": 320,
+      "height": 24
+    },
+    {
+      "id": "low-test-slot",
+      "kind": "safe-deck",
+      "x": 736,
+      "y": -160,
+      "width": 448,
+      "height": 32
+    },
+    {
+      "id": "low-cover",
+      "kind": "cover",
+      "x": 608,
+      "y": -216,
+      "width": 72,
+      "height": 112,
+      "properties": {
+        "coordinateIntent": "floor-standing on low-test-slot",
+        "static": true,
+        "solid": true,
+        "grappleable": false,
+        "damage": false,
+        "losBlock": true
+      }
+    },
+    {
+      "id": "upper-return-deck",
+      "kind": "safe-deck",
+      "x": -416,
+      "y": -832,
+      "width": 288,
+      "height": 20
+    },
+    {
+      "id": "upper-cover",
+      "kind": "cover",
+      "x": -224,
+      "y": -888,
+      "width": 64,
+      "height": 112,
+      "properties": {
+        "coordinateIntent": "floor-standing on upper-return-deck",
+        "static": true,
+        "solid": true,
+        "grappleable": false,
+        "damage": false,
+        "losBlock": true
+      }
+    },
+    {
+      "id": "final-deck",
+      "kind": "safe-deck",
+      "x": -768,
+      "y": -1024,
+      "width": 384,
+      "height": 32
+    },
+    {
+      "id": "c-surface",
+      "kind": "grapple-target",
+      "x": -704,
+      "y": -224
+    },
+    {
+      "id": "f1-surface",
+      "kind": "structural-grapple-target",
+      "x": -176,
+      "y": -384
+    },
+    {
+      "id": "f2-surface",
+      "kind": "structural-grapple-target",
+      "x": 224,
+      "y": -416
+    },
+    {
+      "id": "relaunch-surface",
+      "kind": "grapple-target",
+      "x": 544,
+      "y": -352
+    },
+    {
+      "id": "mid-grip-surface",
+      "kind": "structural-grapple-target",
+      "x": 352,
+      "y": -512
+    },
+    {
+      "id": "high-capture-surface",
+      "kind": "structural-grapple-target",
+      "x": 192,
+      "y": -672
+    },
+    {
+      "id": "g-surface",
+      "kind": "grapple-target",
+      "x": -160,
+      "y": -768
+    },
+    {
+      "id": "final-grip-surface",
+      "kind": "structural-grapple-target",
+      "x": -576,
+      "y": -928
+    }
+  ],
+  "routePoints": [
+    {
+      "id": "entry",
+      "x": -896,
+      "y": -32
+    },
+    {
+      "id": "c",
+      "x": -704,
+      "y": -224,
+      "landmark": "C"
+    },
+    {
+      "id": "launch",
+      "x": -560,
+      "y": -320
+    },
+    {
+      "id": "f1",
+      "x": -176,
+      "y": -384
+    },
+    {
+      "id": "f2",
+      "x": 224,
+      "y": -416
+    },
+    {
+      "id": "far-right",
+      "x": 736,
+      "y": -448
+    },
+    {
+      "id": "controlled-drop",
+      "x": 736,
+      "y": -180
+    },
+    {
+      "id": "low-slot",
+      "x": 620,
+      "y": -160
+    },
+    {
+      "id": "relaunch",
+      "x": 544,
+      "y": -352
+    },
+    {
+      "id": "mid-grip",
+      "x": 352,
+      "y": -512
+    },
+    {
+      "id": "high-capture",
+      "x": 192,
+      "y": -672
+    },
+    {
+      "id": "g",
+      "x": -160,
+      "y": -768,
+      "landmark": "G"
+    },
+    {
+      "id": "upper-return",
+      "x": -416,
+      "y": -832
+    },
+    {
+      "id": "final-grip",
+      "x": -576,
+      "y": -928
+    },
+    {
+      "id": "final-deck",
+      "x": -768,
+      "y": -1024
+    }
+  ],
+  "recoveryPoints": [
+    {
+      "id": "r1",
+      "x": 64,
+      "y": -280,
+      "retrySecondsTarget": [
+        4,
+        6
+      ]
+    },
+    {
+      "id": "low-slot-reset",
+      "x": 620,
+      "y": -192,
+      "retrySecondsTarget": [
+        4,
+        7
+      ]
+    },
+    {
+      "id": "upper-reset",
+      "x": -416,
+      "y": -856,
+      "retrySecondsTarget": [
+        4,
+        7
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "anchor-c",
+      "kind": "grapple-landmark",
+      "x": -704,
+      "y": -224,
+      "label": "C"
+    },
+    {
+      "id": "anchor-g",
+      "kind": "grapple-landmark",
+      "x": -160,
+      "y": -768,
+      "label": "G"
+    },
+    {
+      "id": "f1",
+      "kind": "structural-grapple-joint",
+      "x": -176,
+      "y": -384
+    },
+    {
+      "id": "f2",
+      "kind": "structural-grapple-joint",
+      "x": 224,
+      "y": -416
+    },
+    {
+      "id": "relaunch",
+      "kind": "grapple-landmark",
+      "x": 544,
+      "y": -352,
+      "label": "RE-LAUNCH"
+    },
+    {
+      "id": "mid-grip",
+      "kind": "structural-grapple-joint",
+      "x": 352,
+      "y": -512
+    },
+    {
+      "id": "high-capture",
+      "kind": "structural-grapple-joint",
+      "x": 192,
+      "y": -672
+    },
+    {
+      "id": "final-grip",
+      "kind": "structural-grapple-joint",
+      "x": -576,
+      "y": -928
+    },
+    {
+      "id": "low-guard",
+      "kind": "sentry-slot",
+      "x": 864,
+      "y": -160,
+      "properties": {
+        "enemyPool": "SECTOR_01_EARLY_POOL",
+        "killRequired": false
+      }
+    },
+    {
+      "id": "upper-guard",
+      "kind": "sentry-slot",
+      "x": 96,
+      "y": -832,
+      "properties": {
+        "enemyPool": "SECTOR_01_EARLY_POOL",
+        "killRequired": false
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "id": "sector-01-05:final-deck-reached",
+      "type": "reach",
+      "region": "final-deck"
+    },
+    {
+      "id": "sector-01-05:exit-panel-engaged",
+      "type": "interact",
+      "sourceObjectId": "sector-01-05:exit-panel",
+      "requiredObjectiveIds": [
+        "sector-01-05:final-deck-reached"
+      ]
+    }
+  ],
+  "exit": {
+    "conceptualDeckCenterX": -768,
+    "conceptualDeckTopY": -1024,
+    "deckWidth": 384,
+    "nextAreaId": "sector-01-06",
+    "panelObjectiveId": "sector-01-05:exit-panel-engaged"
+  },
+  "route": {
+    "runtimeLandmarks": [
+      "sector-01-05:entry",
+      "c-surface",
+      "g-surface",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-01-05:entry",
+      "c-surface",
+      "g-surface",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": -768,
+    "deckTopY": -1024,
+    "deckWidth": 384,
+    "panelObjectiveId": "sector-01-05:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "1-6",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "sector-01-05:final-deck-reached",
+      "sector-01-05:exit-panel-engaged"
+    ]
+  },
+  "story": {
+    "entryPresentationStatus": "VERIFIED",
+    "loadTestSequenceStatus": "VERIFIED",
+    "gatePresentationStatus": "VERIFIED",
+    "triggerGeometryStatus": "REAUTHOR_FOR_REV8"
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "launch-span",
+        "intent": "entry through far-right landing",
+        "minY": -192,
+        "maxY": 0,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.66
+      },
+      {
+        "id": "drop-slot",
+        "intent": "far-right landing through controlled drop and low slot",
+        "minY": -448,
+        "maxY": -192,
+        "desktopZoom": 0.96,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "relaunch",
+        "intent": "low slot through high capture",
+        "minY": -704,
+        "maxY": -448,
+        "desktopZoom": 0.92,
+        "mobileZoom": 0.68
+      },
+      {
+        "id": "upper-return",
+        "intent": "G through upper return and final grip",
+        "minY": -928,
+        "maxY": -704,
+        "desktopZoom": 0.9,
+        "mobileZoom": 0.67
+      },
+      {
+        "id": "exit",
+        "intent": "final deck and sector handoff",
+        "minY": -1152,
+        "maxY": -928,
+        "desktopZoom": 1.1,
+        "mobileZoom": 0.76
+      }
+    ]
+  },
+  "buildExpression": {
+    "requiredSpecificAugment": false,
+    "requiredNewObjective": false,
+    "sameBaseRouteForAll": true,
+    "cards": {
+      "fast-launch": [
+        "long-span-late-hook",
+        "drop-late-catch",
+        "relaunch-catch"
+      ],
+      "long-rope": [
+        "early-f2",
+        "wide-drop-catch",
+        "early-high-capture"
+      ],
+      "fast-recover": [
+        "span-chain-retry",
+        "drop-retry",
+        "relaunch-retry"
+      ],
+      "release-propulsion": [
+        "right-span-carry",
+        "relaunch-height",
+        "upper-return-compression"
+      ],
+      "electrified-rope": [
+        "low-guard-rope-line",
+        "upper-guard-rope-line"
+      ],
+      "collision-explosion": [
+        "low-slot-exit-contact",
+        "upper-pressure-contact"
+      ],
+      "direction-dash": [
+        "right-landing-correction",
+        "drop-slot-correction",
+        "upper-return-correction"
+      ],
+      "dash-strike": [
+        "low-slot-exit-plus-attack"
+      ],
+      "instant-guard": [
+        "drop-or-upper-shot-flow-preservation"
+      ],
+      "push-away": [
+        "low-slot-space"
+      ],
+      "straight-shot": [
+        "upper-guard-from-return-deck"
+      ],
+      "slow-fall": [
+        "controlled-drop",
+        "right-span-release-correction"
+      ]
+    }
+  },
+  "forbidden": [
+    "vertical anchor staircase",
+    "fixed impulse relay shear route",
+    "card-labelled gate",
+    "specific augment required",
+    "enemy-kill gate",
+    "wind",
+    "moving platform",
+    "rope cutter",
+    "grapple jammer",
+    "background decoration in gameplay map preview"
+  ],
+  "verifiedRuntimeConstants": {
+    "hookReach": 400,
+    "longRopeReach": 480
+  },
+  "acceptanceTests": [
+    {
+      "id": "similarity",
+      "type": "geometry",
+      "requirement": "Body trace visibly includes intentional large descent and horseshoe return."
+    },
+    {
+      "id": "drop-read",
+      "type": "traversal",
+      "requirement": "At least 80% of first-time testers read the Controlled Drop as intended progression without assuming death/failure.",
+      "status": "HYPOTHESIS"
+    },
+    {
+      "id": "base-clear",
+      "type": "runtime",
+      "requirement": "Base valid first builds all clear common route without card-specific geometry key."
+    },
+    {
+      "id": "enemy-budget",
+      "type": "schema",
+      "requirement": "Exactly 2 enemy slots."
+    },
+    {
+      "id": "no-kill-gate",
+      "type": "runtime",
+      "requirement": "Enemy deaths never gate exit."
+    },
+    {
+      "id": "recovery",
+      "type": "traversal",
+      "requirement": "Long-span and relaunch failures retry locally under ~7s."
+    },
+    {
+      "id": "pacing",
+      "type": "traversal",
+      "requirement": "First clear 1:45–2:25; mastered 0:50–1:15."
+    }
+  ]
+}

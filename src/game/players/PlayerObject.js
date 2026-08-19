@@ -27,5 +27,6 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         this.ropeDisabledRemaining = 0;
         this.lifeState = "active";
         this.respawnAnchorId = respawnAnchorId;
+        this.calibrationVerifiedSourceIds = [];
     }
 }

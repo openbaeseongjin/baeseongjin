@@ -1,0 +1,352 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "ea9c4438c0f106474baa09621bfb42ae5876b86e",
+  "stage": {
+    "sector": 1,
+    "stage": 6,
+    "sourceAreaId": "sector-01-06",
+    "name": "COOLING SHAFT"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "establish unstable cooling before force contact",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "1-6:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "airflow-preview",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "COOLING DISTRIBUTION",
+            "detail": "AIRFLOW UNSTABLE"
+          },
+          "timing": {
+            "durationSeconds": 1.6
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "wide-fan-low-frequency-preview"
+        }
+      ],
+      "completion": "presentation duration only",
+      "validation": "movement never blocked"
+    },
+    {
+      "beatId": "s1-first-fan-a-push",
+      "status": "DESIGN LOCKED",
+      "purpose": "startle Player with first external-force interference",
+      "trigger": {
+        "type": "wind-influence",
+        "windZoneId": "sector-01-06:fan-a-wind",
+        "condition": "first meaningful lateral influence while airborne or rope-attached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "1-6:bark-a:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "fan-a-crossflow",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "뭐야—!"
+          },
+          "timing": {
+            "mode": "immediate-reflex"
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "air-impact-plus-rope-tension-change"
+        }
+      ],
+      "completion": "one-shot local presentation only",
+      "validation": "never fires from visual preview alone"
+    },
+    {
+      "beatId": "s2-fan-a-assist",
+      "status": "DESIGN LOCKED",
+      "purpose": "let continuous Wind help the first lesson",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "fan-a-crossflow"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-6:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "fan-a-crossflow",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "wind",
+          "target": "fan-a",
+          "action": "continuous-left-assist"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "Neutral Landing / recovery",
+      "validation": "mainline contains no enemy"
+    },
+    {
+      "beatId": "s3-wind-shadow",
+      "status": "DESIGN LOCKED",
+      "purpose": "identify Wind as spatial force through its absence",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "neutral-shadow"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "1-6:bark-b:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "neutral-shadow",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "object",
+          "target": "wind-baffle",
+          "action": "real-wind-occlusion"
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…바람 때문에 밀린 건가."
+          },
+          "timing": {
+            "mode": "after-stabilization"
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "fan-a-force-and-audio-drop"
+        }
+      ],
+      "completion": "local beat only",
+      "validation": "Bark follows physical event rather than explaining it first"
+    },
+    {
+      "beatId": "s4-fan-b-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "teach timing without labeling ACTIVE as purely unsafe",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "pulse-setup"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-6:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "fan-b-crossflow",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "wind",
+          "target": "fan-b",
+          "action": "lull-warning-active-decay-current-runtime-cycle"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "traversal attempt starts",
+      "validation": "telegraph comes from gameplay state, not lore Toast"
+    },
+    {
+      "beatId": "s5-fan-b-active-success",
+      "status": "DESIGN LOCKED",
+      "purpose": "convert external force into intentional movement tool",
+      "trigger": {
+        "type": "wind-assisted-success",
+        "windZoneId": "sector-01-06:fan-b-wind",
+        "condition": "reach Far Catch after meaningful WARNING/ACTIVE rightward assistance"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "1-6:bark-c:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "fan-b-crossflow",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…이 바람, 이용할 수 있겠는데."
+          },
+          "timing": {
+            "mode": "after-success"
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "no-special-reward-sting"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "does not fire on LULL-only clear or failed ACTIVE attempt"
+    },
+    {
+      "beatId": "s6-optional-access",
+      "status": "DESIGN LOCKED",
+      "purpose": "optional application of learned continuous Wind with Sector Access pressure",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "access-intake"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-access-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "access-intake",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "target": "carrier-plus-two-guards",
+          "action": "current-access-contract"
+        },
+        {
+          "type": "wind",
+          "target": "residual-fan-a-flow",
+          "action": "reuse-known-continuous-behavior-only"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "module obtained or Player returns to mainline",
+      "validation": "does not introduce a third Wind behavior"
+    },
+    {
+      "beatId": "s7-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "handoff to Pressure Bypass",
+      "trigger": {
+        "type": "final-deck-reached",
+        "objectiveId": "sector-01-06:final-deck-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "1-6:s7",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "exit",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "fan-pulse-to-pressure-pipe-rhythm"
+        }
+      ],
+      "completion": "exit panel / gate handoff",
+      "validation": "no extra Bark at exit"
+    }
+  ],
+  "validation": [
+    "worldPause false for every beat",
+    "mainline has zero enemy slots",
+    "Fan A Bark is reflexive and first-use only",
+    "Fan A recognition Bark occurs in Wind Shadow",
+    "Fan B use Bark requires successful WARNING/ACTIVE assistance",
+    "LULL-only clear does not trigger Bark C",
+    "Player Bark layer absence never blocks Stage",
+    "unverified storyTriggers do not become visible Toasts",
+    "Access pocket holds all 3 enemy slots",
+    "MAP-PREVIEW remains gameplay-only"
+  ]
+}

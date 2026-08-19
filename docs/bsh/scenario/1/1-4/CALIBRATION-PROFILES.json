@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "augment-calibration-profiles-v1",
+  "stageId": "sector-01-04",
+  "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
+  "objectiveId": "sector-01-04:augment-calibrated",
+  "designRules": {
+    "selectedCardMustBeUsed": true,
+    "specificCardSelectionRequired": false,
+    "worldGeometryChangesByCard": false,
+    "killRequired": false,
+    "failureKillsPlayer": false,
+    "resetSecondsTarget": [
+      1,
+      2
+    ],
+    "microTestSecondsTarget": [
+      5,
+      15
+    ]
+  },
+  "profiles": [
+    {
+      "augmentId": "fast-launch",
+      "family": "rope",
+      "effect": "hook-speed-1.5x",
+      "instrument": "timed-far-hook-sensor",
+      "success": "attach designated sensor during the active timing window using the selected card effect",
+      "targetGeometry": {
+        "approxDistance": 390,
+        "windowSecondsTarget": 0.28
+      },
+      "validationAuthority": "calibration adapter must validate selected augment + canonical hook launch/attach timing",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "long-rope",
+      "family": "rope",
+      "effect": "hook-reach-400-to-480",
+      "instrument": "extended-reach-anchor",
+      "success": "attach designated target placed outside 400px base reach and inside 480px augmented reach",
+      "targetGeometry": {
+        "distanceRange": [
+          440,
+          455
+        ]
+      },
+      "validationAuthority": "selected augment + designated target attachment",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "fast-recover",
+      "family": "rope",
+      "effect": "reload-0.50-to-0.25",
+      "instrument": "dual-reload-sensors",
+      "success": "release/cancel Sensor A then attach Sensor B inside fast-reload-only window",
+      "targetTiming": {
+        "openAfterReleaseSeconds": 0.25,
+        "closeBeforeBaseReloadSeconds": 0.5
+      },
+      "validationAuthority": "selected augment + release event + second designated attachment",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "release-propulsion",
+      "family": "rope",
+      "effect": "normal-release-velocity-x1.25",
+      "instrument": "release-speed-gate",
+      "success": "normal release from marked tether then cross designated gate in active window",
+      "validationAuthority": "selected augment + canonical release-propulsion activation + gate crossing",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "electrified-rope",
+      "family": "rope",
+      "effect": "attached-rope-contact-pulse",
+      "instrument": "rope-contact-receiver",
+      "success": "cause one valid electrified-rope pulse on neutral calibration receiver",
+      "validationAuthority": "selected augment + canonical augment-impact/electrified pulse cause",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "collision-explosion",
+      "family": "rope",
+      "effect": "high-speed-rope-body-collision-explosion",
+      "instrument": "impact-receiver",
+      "success": "cause one valid collision-explosion activation on neutral receiver",
+      "validationAuthority": "selected augment + canonical collision explosion cause/event",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "direction-dash",
+      "family": "action",
+      "actionId": "direction-dash",
+      "instrument": "dash-line-gate",
+      "success": "activate direction dash and end across designated safe sensor line",
+      "validationAuthority": "canonical augment-action-started/action result + gate crossing",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "dash-strike",
+      "family": "action",
+      "actionId": "dash-strike",
+      "instrument": "strike-receiver",
+      "success": "activate Dash Strike and contact designated neutral receiver during action window",
+      "validationAuthority": "canonical action activation + receiver contact",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "instant-guard",
+      "family": "action",
+      "actionId": "instant-guard",
+      "instrument": "nonlethal-calibration-pulse",
+      "success": "block the announced calibration pulse with the actual Instant Guard effect",
+      "safety": "pulse must never reduce Player below 1 HP and must not create a death requirement",
+      "validationAuthority": "canonical prevented-combat-damage/guard resolution associated with calibration pulse",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "push-away",
+      "family": "action",
+      "actionId": "push-away",
+      "instrument": "displacement-puck-receiver",
+      "success": "activate Push Away and produce required calibration receiver displacement/event",
+      "validationAuthority": "canonical action activation + instrument displacement event",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "straight-shot",
+      "family": "action",
+      "actionId": "straight-shot",
+      "instrument": "remote-shot-receiver",
+      "success": "hit designated receiver with canonical straight-shot projectile",
+      "validationAuthority": "canonical projectile/action cause + receiver hit",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "augmentId": "slow-fall",
+      "family": "action",
+      "actionId": "slow-fall",
+      "instrument": "vertical-scan-field",
+      "success": "remain in canonical slow-fall state through the minimum active scan interval while descending",
+      "targetScanSeconds": 0.5,
+      "validationAuthority": "canonical slow-fall active state + scan-field occupancy",
+      "status": "NOT_IMPLEMENTED"
+    }
+  ]
+}

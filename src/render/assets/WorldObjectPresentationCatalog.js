@@ -2,6 +2,7 @@ import { anchoredRectangleBounds } from "../../game/world/AuthoredCoordinateAnch
 
 const DEFAULT_DEFINITIONS = {
     "world-object:grapple-landmark": { renderMode: "mock-shape", color: "#22d3ee", radius: 15 },
+    "world-object:structural-grapple-joint": { renderMode: "mock-shape", color: "#64748b", radius: 10 },
     "world-object:terminal": { renderMode: "mock-shape", color: "#fbbf24", radius: 20 },
     "world-object:gate-panel": {
         renderMode: "mock-shape",
@@ -34,6 +35,7 @@ const DEFAULT_DEFINITIONS = {
     "world-object:patrol-drone": { renderMode: "combat-entity" },
     "world-object:story-display": { renderMode: "mock-shape", color: "#f59e0b", radius: 20 },
     "world-object:maintenance-frame": { renderMode: "mock-shape", color: "#94a3b8", radius: 26 },
+    "world-object:calibration-frame": { renderMode: "mock-shape", color: "#38bdf8", radius: 32 },
     "world-object:access-transit-lock": { renderMode: "mock-shape", color: "#fbbf24", radius: 30 },
     "world-object:trigger": { renderMode: "hidden" }
 };

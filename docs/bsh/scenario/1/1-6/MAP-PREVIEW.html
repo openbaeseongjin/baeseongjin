@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 1-6 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#061019;--p:#0d1820;--l:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--v:#caa7ff;--w:#71d8e8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.42 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:430px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:760px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.recovery{fill:#315944;stroke:var(--g);stroke-width:2}.cover{fill:#3c484e;stroke:#b4c3c9;stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.joint{fill:var(--a);stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.carrier{fill:#7d3a7d;stroke:#e0a8ff;stroke-width:3}.route{fill:none;stroke:var(--y);stroke-width:5;stroke-dasharray:14 9}.access{fill:none;stroke:var(--v);stroke-width:5;stroke-dasharray:8 7}.windA{fill:#2c718022;stroke:#71d8e8;stroke-width:2;stroke-dasharray:8 8}.windB{fill:#586db622;stroke:#91a8ff;stroke-width:2;stroke-dasharray:8 8}.arrow{stroke:var(--w);stroke-width:5;marker-end:url(#arr)}.arrowB{stroke:#91a8ff;stroke-width:5;marker-end:url(#arrB)}.current{fill:none;stroke:var(--r);stroke-width:3;stroke-dasharray:7 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.11}.hidden{display:none}
+text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:var(--g)}.hyp{color:var(--a)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>1-6 COOLING SHAFT · REV8</h1><div class="sub">GAMEPLAY ONLY · WIDE CROSS-FLOW PLENUM · CONTINUOUS LEFT → PULSED RIGHT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>MAIN BODY TRACE</b><br>
+ENTRY RIGHT → <b>Fan A가 LEFT로 밀어 횡단</b> → WIND SHADOW → <b>Fan B Pulse를 타고 RIGHT 횡단</b> → EXIT RIGHT</div>
+<div class="card"><b>WIND</b><br>
+Fan A: LEFT / continuous / 500<br>
+Fan B: RIGHT / pulsed / 800<br>
+1.75 LULL → 0.7 WARNING → 1.4 ACTIVE → 0.3 DECAY</div>
+<div class="card"><b>GAMEPLAY-ONLY</b><br>
+Wind Zone은 실제 Gameplay이므로 표시.<br>
+배경 Fan Housing/배관/증기/장식 구조는 표시하지 않음.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Main Route</label>
+<label><input id="showWind" type="checkbox" checked> Wind Zones</label>
+<label><input id="showAccess" type="checkbox" checked> Optional Access Module B</label>
+<label><input id="showCurrent" type="checkbox"> Current 3840×1408 outline</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>ENEMY</b><br>Mainline: 0<br>Optional Access Pocket: Carrier + 2 Guards = 3</div>
+<div class="card"><b>GATES</b><br>Scale <span class="pass">PASS</span><br>Similarity <span class="pass">PASS</span><br>Obstacle <span class="pass">PASS</span><br>Pacing <span class="hyp">HYPOTHESIS</span></div>
+</aside><main>
+<svg viewBox="-2050 -1360 4100 1420">
+<defs>
+<marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#71d8e8"/></marker>
+<marker id="arrB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#91a8ff"/></marker>
+</defs>
+<rect class="bounds" x="-1920" y="-1280" width="3840" height="1280"/><text class="tiny" x="-1900" y="-1248">REV8 3840×1280</text>
+
+<!-- lower entry / fan A -->
+<rect class="surface" x="1152" y="0" width="512" height="32"/><text class="tiny" x="1170" y="-12">ENTRY RIGHT</text>
+<circle class="anchor" cx="1120" cy="-192" r="13"/><text x="1143" y="-183">A</text>
+<circle class="joint" cx="736" cy="-288" r="11"/><text class="tiny" x="756" y="-279">B</text>
+<circle class="joint" cx="320" cy="-352" r="11"/><text class="tiny" x="340" y="-343">C</text>
+<rect class="recovery" x="384" y="-128" width="320" height="18"/><text class="tiny" x="395" y="-140">LOWER RECOVERY</text>
+<rect class="surface" x="-336" y="-416" width="416" height="28"/><text class="tiny" x="-325" y="-430">NEUTRAL LANDING</text>
+
+<!-- real functional wind shadow -->
+<rect class="cover" x="-272" y="-688" width="96" height="288"/><text class="tiny" x="-345" y="-700">WIND-OCCLUDING BAFFLE</text>
+<rect class="recovery" x="-416" y="-576" width="512" height="32"/><text class="tiny" x="-405" y="-590">NEUTRAL WIND SHADOW</text>
+
+<!-- upper fan B -->
+<rect class="surface" x="-848" y="-704" width="288" height="22"/><text class="tiny" x="-835" y="-718">PULSE SETUP</text>
+<circle class="anchor" cx="-448" cy="-768" r="13"/><text x="-425" y="-758">D</text>
+<circle class="joint" cx="64" cy="-832" r="11"/><text class="tiny" x="84" y="-823">E</text>
+<rect class="recovery" x="160" y="-736" width="320" height="18"/><text class="tiny" x="170" y="-748">PULSE MISS CATCH</text>
+<circle class="joint" cx="704" cy="-896" r="11"/><text class="tiny" x="724" y="-887">F</text>
+<rect class="surface" x="1008" y="-992" width="352" height="28"/><text class="tiny" x="1020" y="-1006">EXIT APPROACH</text>
+<rect class="surface" x="1184" y="-1088" width="416" height="32"/><text class="tiny" x="1195" y="-1102">FINAL DECK / EXIT RIGHT</text>
+
+<!-- optional Access pocket -->
+<g id="access">
+<circle class="anchor" cx="-672" cy="-576" r="13"/><text class="tiny" x="-650" y="-566">ACCESS A</text>
+<circle class="anchor" cx="-1056" cy="-640" r="13"/><text class="tiny" x="-1034" y="-630">ACCESS B</text>
+<rect class="surface" x="-1808" y="-672" width="704" height="32"/><text class="tiny" x="-1795" y="-686">COOLING INTAKE ACCESS POCKET</text>
+<circle class="enemy" cx="-1728" cy="-672" r="18"/><text class="tiny" x="-1775" y="-700">GUARD</text>
+<circle class="carrier" cx="-1456" cy="-672" r="21"/><text class="tiny" x="-1515" y="-706">CARRIER · MODULE B</text>
+<circle class="enemy" cx="-1184" cy="-672" r="18"/><text class="tiny" x="-1230" y="-700">GUARD</text>
+<path class="access" d="M-160,-576 Q-430,-570 -672,-576 Q-850,-600 -1056,-640 Q-1250,-665 -1456,-672"/>
+</g>
+
+<!-- wind zones -->
+<g id="wind">
+<rect class="windA" x="-480" y="-480" width="2016" height="320"/><text class="tiny" x="1260" y="-460">FAN A · CONTINUOUS LEFT 500</text>
+<line class="arrow" x1="1380" y1="-245" x2="980" y2="-245"/><line class="arrow" x1="850" y1="-315" x2="450" y2="-315"/><line class="arrow" x1="300" y1="-390" x2="-100" y2="-390"/>
+<rect class="windB" x="-1408" y="-992" width="2688" height="288"/><text class="tiny" x="-1385" y="-970">FAN B · PULSED RIGHT 800</text>
+<line class="arrowB" x1="-1180" y1="-780" x2="-700" y2="-780"/><line class="arrowB" x1="-520" y1="-850" x2="-40" y2="-850"/><line class="arrowB" x1="180" y1="-910" x2="660" y2="-910"/>
+</g>
+
+<g id="route"><path class="route" d="M1408,-32 Q1260,-120 1120,-192 Q930,-250 736,-288 Q530,-330 320,-352 Q80,-390 -128,-416 Q-150,-500 -160,-576 Q-440,-650 -704,-704 Q-590,-740 -448,-768 Q-190,-810 64,-832 Q360,-870 704,-896 Q940,-950 1184,-992 Q1280,-1040 1392,-1088"/></g>
+
+<g id="current" class="hidden"><rect class="current" x="-1920" y="-1408" width="3840" height="1408"/><text class="tiny" x="-1890" y="-1372">CURRENT 3840×1408</text></g>
+<g id="reach" class="hidden"><circle class="reach" cx="1120" cy="-192" r="400"/><circle class="reach" cx="736" cy="-288" r="400"/><circle class="reach" cx="-448" cy="-768" r="400"/><circle class="reach" cx="64" cy="-832" r="400"/><circle class="reach" cx="-672" cy="-576" r="400"/></g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showWind.onchange=()=>wind.classList.toggle("hidden",!showWind.checked);
+showAccess.onchange=()=>access.classList.toggle("hidden",!showAccess.checked);
+showCurrent.onchange=()=>current.classList.toggle("hidden",!showCurrent.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

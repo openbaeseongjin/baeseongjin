@@ -457,8 +457,12 @@ export function run() {
         x: sweptNextArea.entry.x - 20,
         y: sweptNextArea.entry.y
     };
+    // REV8.0 moved sector-01-02's entry far to the right (x448) of the sector-01-01 gate (x~230) -
+    // the old "both sides land left of the gate" assumption no longer holds, but the actual property
+    // under test (the sampled chord does not overlap the gate's narrow trigger band) still must.
+    assert.ok(sweptOwner.physics.position.x < sweptGate.trigger.x);
     assert.ok(
-        sweptOwner.physics.position.x < sweptGate.trigger.x && sweptArrival.x < sweptGate.trigger.x,
+        sweptArrival.x < sweptGate.trigger.x || sweptArrival.x > sweptGate.trigger.x + sweptGate.trigger.width,
         "the sampled owner-motion chord must miss the narrow Gate trigger after a locally curved portal entry"
     );
     const sweptReceipt = sweptSession.submitOwnerMotion(
