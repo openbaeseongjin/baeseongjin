@@ -938,9 +938,9 @@ const area07 = defineArea({
 const block08 = exitBlock({
     areaId: "sector-01-08",
     deckX: 0,
-    deckTopY: -1667,
+    deckTopY: -1664,
     deckWidth: 640,
-    nextAreaId: "sector-02-01",
+    nextAreaId: null,
     panelObjectiveId: "sector-01-08:maintenance-override"
 });
 
@@ -950,86 +950,111 @@ const area08 = defineArea({
     order: 8,
     name: "CONTAINMENT GATE",
     subtitle: "FINAL MAINTENANCE ACCESS",
-    bounds: { width: 1024, height: 1792 },
-    entry: point("sector-01-08:entry", -352, -32),
+    bounds: { width: 1664, height: 1792 },
+    entry: point("sector-01-08:entry", -640, -32),
     exit: block08.exit,
     nextAreaId: null,
     surfaces: [
-        horizontalSurface("sector-01-08:p0", -288, 0, 320),
-        horizontalSurface("sector-01-08:r1", -176, -288, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-08:r2", 144, -544, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-08:r3", -176, -832, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-08:mid-safe-deck", 0, -1024, 512, 32, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-08:r4", 160, -1376, 256, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-08:upper-catch", -112, -1504, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-08:p8", 48, -1584, 608, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-08:p0", -608, 0, 384),
+        horizontalSurface("sector-01-08:lower-recovery", -128, -176, 288, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:lower-local-catch", 256, -352, 224, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:lower-transfer", 480, -512, 320, 24, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-08:mid-relief", 0, -832, 512, 30, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-08:upper-recovery", 160, -896, 256, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:upper-catch", -256, -1088, 224, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-08:upper-transfer", -480, -1248, 320, 24, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-08:override-deck", 480, -1536, 352, 28, { kind: "safe-deck" }),
         block08.deck,
+        grappleTarget("sector-01-08:anchor-a-surface", -480, -224),
+        grappleTarget("sector-01-08:anchor-d-surface", 384, -704),
+        grappleTarget("sector-01-08:anchor-e-surface", 416, -960),
+        grappleTarget("sector-01-08:anchor-f-surface", 64, -1056),
+        grappleTarget("sector-01-08:anchor-h-surface", -96, -1344),
         ...[
-            ["a", -160, -224],
-            ["d", -96, -768],
-            ["f", -160, -1152]
-        ].map(([id, x, y]) => grappleTarget(`sector-01-08:anchor-${id}-surface`, x, y))
+            ["grip-b", -96, -320],
+            ["grip-c", 352, -416],
+            ["grip-g", -384, -1152],
+            ["grip-i", 352, -1432]
+        ].map(([id, x, y]) => grappleTarget(`sector-01-08:${id}-surface`, x, y))
     ],
     routePoints: [
-        point("sector-01-08:route-entry", -352, -32),
-        ...[
-            ["a", -160, -224, "A"],
-            ["d", -96, -768, "D"],
-            ["f", -160, -1152, "F"]
-        ].map(([id, x, y, label]) => point(`sector-01-08:route-${id}`, x, y, { landmark: label })),
-        point("sector-01-08:route-override", 208, -1584),
+        point("sector-01-08:route-entry", -640, -32),
+        point("sector-01-08:route-a", -480, -224, { landmark: "A" }),
+        point("sector-01-08:route-b", -96, -320),
+        point("sector-01-08:route-c", 352, -416),
+        point("sector-01-08:route-lower-transfer", 480, -512),
+        point("sector-01-08:route-d", 384, -704, { landmark: "D" }),
+        point("sector-01-08:route-mid-relief", 0, -832),
+        point("sector-01-08:route-e", 416, -960),
+        point("sector-01-08:route-f", 64, -1056, { landmark: "F" }),
+        point("sector-01-08:route-g", -384, -1152),
+        point("sector-01-08:route-upper-transfer", -480, -1248),
+        point("sector-01-08:route-h", -96, -1344),
+        point("sector-01-08:route-i", 352, -1432),
+        point("sector-01-08:route-override", 480, -1536),
         block08.routeExit
     ],
     recoveryPoints: [
-        point("sector-01-08:recovery-r1", -176, -312),
-        point("sector-01-08:recovery-r2", 144, -568),
-        point("sector-01-08:recovery-r3", -176, -856),
-        point("sector-01-08:recovery-r4", 160, -1400)
+        point("sector-01-08:recovery-lower-r1", -128, -200),
+        point("sector-01-08:recovery-lower-r2", 256, -376),
+        point("sector-01-08:recovery-upper-r1", 160, -920),
+        point("sector-01-08:recovery-upper-r2", -256, -1112)
     ],
     checkpoints: [
-        point("checkpoint:sector-01-08:end", 0, -1696, {
+        point("checkpoint:sector-01-08:end", 0, -1728, {
             radius: 38,
             sourceObjectId: "sector-01-08:sector-checkpoint"
         })
     ],
     objects: [
+        worldObject("sector-01-08:anchor-a", "grapple-landmark", -480, -224, { label: "A" }),
+        worldObject("sector-01-08:anchor-d", "grapple-landmark", 384, -704, { label: "D" }),
+        worldObject("sector-01-08:anchor-e", "grapple-landmark", 416, -960, { label: "E" }),
+        worldObject("sector-01-08:anchor-f", "grapple-landmark", 64, -1056, { label: "F" }),
+        worldObject("sector-01-08:anchor-h", "grapple-landmark", -96, -1344, { label: "H" }),
         ...[
-            ["a", -160, -224, "A"],
-            ["d", -96, -768, "D"],
-            ["f", -160, -1152, "F"]
-        ].map(([id, x, y, label]) =>
-            worldObject(`sector-01-08:anchor-${id}`, "grapple-landmark", x, y, {
-                label
+            ["grip-b", -96, -320],
+            ["grip-c", 352, -416],
+            ["grip-g", -384, -1152],
+            ["grip-i", 352, -1432]
+        ].map(([id, x, y]) =>
+            worldObject(`sector-01-08:${id}`, "grapple-landmark", x, y, {
+                presentationId: "world-object:structural-grapple-joint"
             })
         ),
-        worldObject("sector-01-08:sentry-turret-lower", "sentry", 384, -768, {
-            enemySelection: { allowedEnemyTypes: SECTOR_01_LATE_POOL },
-            activationSpec: objectTriggerSpec("center", 640, 384, { x: -320, y: -64 }),
-            rules: ["sequential-activation", "no-crossfire", "standard-projectile", "no-rope-cut"]
-        }),
-        worldObject("sector-01-08:sentry-turret-upper", "sentry", 384, -1280, {
-            enemySelection: { allowedEnemyTypes: SECTOR_01_LATE_POOL },
-            activationSpec: objectTriggerSpec("center", 640, 416, { x: -320, y: -16 }),
-            rules: ["sequential-activation", "no-crossfire", "standard-projectile", "no-rope-cut"]
-        }),
-        pooledSentry("sector-01-08:lower-grid-guard", -240, -544, SECTOR_01_LATE_POOL, {
-            width: 480,
-            height: 416,
+        // No enemy-sequencing state machine exists in Runtime (only "cover-ends-los" /
+        // "no-projectile-attack" / "cutter-fire" are actually read from `rules` - see
+        // src/game/combat/EnemyObject.js). "sequential-activation"/"no-crossfire" are delivered the
+        // same way every other Stage's proximity-gated Sentry already works: activation boxes placed
+        // so the Lower pair and Upper pair never overlap, matching the Lower->Upper vertical
+        // progression and the fixed activationOrder 1-4. See PRODUCTION-ALIGNMENT.md.
+        pooledSentry("sector-01-08:lower-grid-guard", -64, -384, SECTOR_01_LATE_POOL, {
+            width: 384,
+            height: 320,
             rules: ["sequential-activation", "no-crossfire"]
         }),
-        pooledSentry("sector-01-08:upper-grid-guard", -240, -1376, SECTOR_01_LATE_POOL, {
-            width: 480,
-            height: 416,
+        worldObject("sector-01-08:lower-turret", "sentry", 544, -512, {
+            enemySelection: { allowedEnemyTypes: SECTOR_01_LATE_POOL },
+            activationSpec: objectTriggerSpec("center", 384, 320, { x: 0, y: -16 }),
+            rules: ["sequential-activation", "no-crossfire", "standard-projectile", "no-rope-cut"]
+        }),
+        pooledSentry("sector-01-08:upper-grid-guard", 192, -1056, SECTOR_01_LATE_POOL, {
+            width: 384,
+            height: 320,
             rules: ["sequential-activation", "no-crossfire"]
         }),
-        worldObject("sector-01-08:final-vent", "wind-source", -448, -1248, {
+        worldObject("sector-01-08:upper-turret", "sentry", -544, -1184, {
+            enemySelection: { allowedEnemyTypes: SECTOR_01_LATE_POOL },
+            activationSpec: objectTriggerSpec("center", 384, 320, { x: 0, y: -16 }),
+            rules: ["sequential-activation", "no-crossfire", "standard-projectile", "no-rope-cut"]
+        }),
+        worldObject("sector-01-08:final-vent", "wind-source", -704, -1392, {
             damage: false,
-            windZoneId: "sector-01-08:final-pulsed-vent",
-            zone: objectTriggerSpec("center", 768, 448, { x: 448, y: -32 })
+            windZoneId: "sector-01-08:final-pulsed-vent"
         }),
         block08.gateVisual,
         block08.panel,
-        worldObject("sector-01-08:sector-checkpoint", "checkpoint", 0, -1696, {
+        worldObject("sector-01-08:sector-checkpoint", "checkpoint", 0, -1728, {
             cueIds: ["sector-01-08:worker-district-reveal", "sector-01-08:sector-checkpoint"]
         })
     ],
@@ -1043,6 +1068,7 @@ const area08 = defineArea({
     windZones: [
         {
             id: "sector-01-08:final-pulsed-vent",
+            bounds: triggerBounds(-672, -1504, 1152, 288),
             direction: { x: 1, y: 0 },
             mode: "pulsed",
             strength: 800,
@@ -1050,30 +1076,34 @@ const area08 = defineArea({
             cycle: { lull: 1.75, warning: 0.7, active: 1.4, decay: 0.3 }
         }
     ],
+    // Preserving nextAreaId: null deliberately (see AREA-SPEC.json's "transition" block). The real
+    // Sector 01->02 handoff is owned by LegacyAreaSeamlessSectorRuntime.js's sectorTransitions/
+    // access-transit-lock system (built from consecutive Sector catalogs), not this legacy gate's
+    // nextAreaId - blindly setting it here would not create a Boss/sector-02 destination that exists
+    // yet, and risks conflicting with whatever the real checkpoint/transition owner does later.
     gate: gate("sector-01-08:gate", 320, -1760, null, ["sector-01-08:maintenance-override"]),
     storyTriggers: [
         "final-warning",
+        "return-to-lower-maintenance",
         "closure-in-progress",
+        "lockdown-87-percent",
+        "override-lock-confirm",
         "lower-grid-terminating",
-        "access-denied",
-        "maintenance-override",
-        "violation-logged",
-        "lower-grid-suspension",
-        "worker-district-reveal",
-        "evacuation-group-c",
+        "worker-district-access-open",
+        "worker-district-block-12",
         "sector-checkpoint"
     ],
-    routes: ["safe", "flow", "recovery", "impulse", "relay", "shear"],
+    routes: ["safe", "flow", "recovery"],
     cameraZones: [
-        cameraZone("intro", -288, 0, 1.15, 0.78),
-        cameraZone("chain-ascent", -640, -288, 1.05, 0.75),
-        cameraZone("turret-one", -1024, -640, 0.85, 0.64, { verticalPlayerRatio: 0.64 }),
-        cameraZone("mid-relief", -1088, -1024, 1.1, 0.76),
-        cameraZone("final-preview", -1344, -1088, 0.9, 0.66, { verticalPlayerRatio: 0.6 }),
-        cameraZone("final-crossing", -1504, -1344, 0.8, 0.6, { verticalPlayerRatio: 0.68 }),
-        cameraZone("gate", -1584, -1504, 1, 0.72),
-        cameraZone("shutdown", -1696, -1584, 0.95, 0.7),
-        cameraZone("worker-reveal", -1792, -1696, 1.15, 0.8)
+        cameraZone("intro", -192, 0, 1.08, 0.76),
+        cameraZone("lower-security", -512, -192, 0.88, 0.66, { verticalPlayerRatio: 0.64 }),
+        cameraZone("mid-relief", -832, -512, 1.08, 0.75),
+        cameraZone("upper-security", -1152, -832, 0.86, 0.65, { verticalPlayerRatio: 0.64 }),
+        cameraZone("final-preview", -1344, -1152, 0.94, 0.68),
+        cameraZone("final-crossing", -1536, -1344, 0.84, 0.64, { verticalPlayerRatio: 0.66 }),
+        cameraZone("override", -1664, -1536, 1.1, 0.76),
+        cameraZone("gate-open", -1728, -1664, 1.02, 0.73),
+        cameraZone("worker-reveal", -1792, -1728, 1.12, 0.78)
     ],
     cueIds: [
         "containment-gate",
