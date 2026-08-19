@@ -77,3 +77,22 @@ Approved:
 `…사람은 없는데, 순찰은 그대로네.`
 
 Do not fake as System Toast.
+
+## Runtime implementation (2026-08-19)
+
+`Sector02AreaCatalog.js` area02 rewritten in full against REV8.0: bounds 1792x896, entry
+(-768,-32), horizontal SAFE OBSERVE -> COVER A -> MOVING LOS -> COVER B -> DISENGAGE -> SHORT
+RISE -> EXIT route replacing the old vertical climb. `patrolDrone()` contract preserved exactly
+(speed 48, wait 0.45, pingpong, kill-optional, no-rope-cut, target-lock-cycle,
+activation-band-only) - only its local Y/path retuned to the new -320<->320 horizontal band.
+Access Carrier A (`upper-walkway-guard`) kept on `sector-02:access-module:a` and moved into the
+small post-lesson Access Alcove (256,-800); its activation box was narrowed from an initially
+authored 384x320 to 384x192 because the taller box spilled 64px past the area's own top bound
+(`encounter-activation-bounds` invariant in `tests/seamlessSectorGameSimulation.mjs`) - same
+disclosed-narrowing pattern used for 1-7/1-8 in Sector 01, position unchanged. Covers A/B are
+static/non-grappleable/non-damaging LOS blockers placed with the confirmed center-point
+convention (`bottom = centerY + height/2`). G3 and the Access Anchor are unlabeled
+`structural-grapple-target` grips (same pattern as 2-1's B/D/F). Security Status sequence text
+preserved exactly. `npm run check` (2-2 clean)/`npm test` (7 scenario groups) pass.
+
+Player Bark layer: still absent - approved Bark remains NOT IMPLEMENTED.
