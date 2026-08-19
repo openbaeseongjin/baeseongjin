@@ -163,15 +163,6 @@ export class SpriteEnemyRenderer {
             }
             context.fillStyle = enemySensorColor(enemy);
             context.fillRect(enemy.position.x - 11, enemy.position.y - 3, 6, 6);
-            context.fillStyle = "#1f2937";
-            context.fillRect(enemy.position.x - 20, enemy.position.y - enemy.radius - 11, 40, 5);
-            context.fillStyle = "#fda4af";
-            context.fillRect(
-                enemy.position.x - 20,
-                enemy.position.y - enemy.radius - 11,
-                40 * (enemy.health / enemy.maxHealth),
-                5
-            );
         }
         renderStats?.recordCollection("enemies", enemies.length, drawn);
     }

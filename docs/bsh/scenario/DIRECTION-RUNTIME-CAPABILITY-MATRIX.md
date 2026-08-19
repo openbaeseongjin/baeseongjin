@@ -1,6 +1,7 @@
 # DIRECTION-SPEC RUNTIME CAPABILITY MATRIX
 
-> AUTHORING SNAPSHOT: `main@ddaeaba6aec183e49b974de88bafed87493080b2` (2026-08-19)
+> AUTHORING SNAPSHOT: `main@f202b8cd895f34da2959c1978b08ed36bd43ca8c` (2026-08-19, re-verified after merge)
+> Re-verification note: `ddaeaba6` → `f202b8c` touched `GameSimulation.js`, `SectorProgressController.js`, `SectorProgressState.js`, `CommandReplay.js` (savepoint-authority refactor), `LegacyAreaSeamlessSectorRuntime.js`, and `ActionAugmentState.js` (HUD recharge-duration field). `AuthoredStoryPresentation.js`, `AuthoredCameraDirector.js`, and `AudioEventBindings.js` are byte-identical across the range, and a fresh grep for `worldPause`/`playerControl`/`composition-contract`/`temporary-shot` still returns zero hits. **No entry in this matrix changes status.**
 > 상태 정의는 [`DIRECTION-SPEC-AUTHORING-STANDARD.md`](./DIRECTION-SPEC-AUTHORING-STANDARD.md) §3을 따른다.
 
 이 표는 `DIRECTION-SPEC.json`의 각 필드/값이 **오늘 시점 실제 Runtime에 대응 코드가 있는지**를 기록한다. 추측하지 않는다 — 아래 상태는 모두 직접 `grep`/코드 열람으로 확인한 결과이며, 확인하지 못한 항목은 `VERIFIED`나 `NOT IMPLEMENTED`로 단정하지 않고 `HOLD`로 남긴다. `scripts/validateDirectionSpecs.mjs`의 KNOWN registry는 이 표의 `VERIFIED`/`PARTIAL` 항목과 동기화되어야 한다 — 이 표를 갱신하지 않고 검증기 registry만 넓히지 않는다.

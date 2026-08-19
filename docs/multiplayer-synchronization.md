@@ -16,7 +16,7 @@
 | 몹·적 투사체·공용 월드                    | 서버                               | 서버 고정 틱에서 진행하고 스냅샷 또는 생성·해결 사건으로 공유                         |
 | Sector 개인 부활                          | 피해·낙사 플레이어 소유 클라이언트 | receipt 전 Sector entry로 즉시 부활하고 공용 진행은 유지                              |
 | Sector 전원 사망                          | 각 피해·소유 클라이언트             | 각자 자기 checkpoint에서 부활하고 Timer·Purge 결정 전에는 공용 reset을 만들지 않음    |
-| 저작 objective·route unlock·landmark 진입 | 서버                               | 서버 `GameSimulation`이 진행하고 클라이언트는 `worldProgress` snapshot으로 수렴       |
+| 저작 objective                            | 서버                               | 각 objective trigger/source/prerequisite 결과를 `worldProgress` snapshot으로 수렴     |
 | generic Augment 선택·효과                 | 행동 클라이언트                    | 개인 chooser와 효과를 즉시 적용하고 서버가 호환 `foundation-selection` claim으로 검증·공유 |
 | 파티클·화면 흔들림·경고                   | 각 클라이언트                      | 서버는 의미 사건만 공유하고 각 화면이 audience에 맞춰 재생                            |
 
@@ -177,7 +177,7 @@
 | 예측 가능한 투사체·낙하물                   | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                   |
 | 자기 사망·active Stage checkpoint 부활      | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                            |
 | 월드 시드·지형·Sector entry                 | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v10 검증                                                        |
-| Sector objective·route·landmark 진행        | 서버                                              | snapshot의 `worldProgress`, physical connector와 `foundationRewards`를 적용하고 마지막 landmark는 content boundary 유지 |
+| Sector objective                            | 서버                                              | 독립 trigger/source/prerequisite 결과와 `foundationRewards`를 공유하며 마지막 objective는 content boundary 유지            |
 | 플레이어별 generic Augment 선택·효과        | 행동 클라이언트 선행, 서버 검증·공유              | 개인 chooser와 효과를 즉시 적용하고 호환 `foundation-selection`·generic `augment-impact` 뒤 개인 상태와 공용 objective를 수렴 |
 | 카메라·HUD·파티클                           | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                   |
 
@@ -187,7 +187,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
-현재 저작 시나리오는 정상 도달을 summit claim으로 처리하지 않는다. 멀티에서는 서버 `GameSimulation`이 objective 완료와 route unlock을 진행하고 플레이어가 다음 landmark entry에 물리적으로 들어온 결과를 공용 snapshot으로 공유한다. 현재 구현된 마지막 `sector-03:landmark:08`은 content boundary이므로 `completed` 상태나 `run-completed` 사건을 만들지 않는다. 과거 Area/Gate와 절차 월드 summit 프로토콜은 호환 코드로만 남아 있으며 엔딩 진입 조건이 확정되기 전까지 기본 제품 검증에서 제외한다.
+현재 저작 시나리오는 Stage 진입 cursor나 summit claim을 사용하지 않는다. 서버 `GameSimulation`은 위치 기반 objective와 prerequisite만 공유하고 Player별 savepoint 충돌은 owner-first claim으로 수렴한다. 마지막 landmark objective 완료가 content boundary를 만들며 과거 Area/Gate와 절차 월드 summit 프로토콜은 호환 코드로만 남는다.
 
 1-4·2-3·3-5 explicit Augment Node 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. owner client는 Node 근처에서 공식 `runSeed + stablePlayerId + selectionIndex` offer를 즉시 열고 `augment-offer` claim으로 pending entitlement를 서버에 보존한다. 확정은 호환 `foundation-selection` claim을 사용하지만 의미는 generic Augment다. 서버는 연결 소유권·tick·stable source ID·반경·공식 offer membership·Player별 source 소비를 검증하고 멱등 확정한다. 현재 채널 Player 전원이 source를 소비한 뒤 공유 objective를 한 번 완료하며, 완료 전 퇴장한 Player는 요구 집합에서 제거해 route 교착을 막는다. 완료 뒤 합류 Player도 Node에서 자기 offer를 독립 확정할 수 있지만 열린 route를 다시 잠그지 않는다. 사망·Stage 세이브 포인트 부활·landmark 이동과 전원 사망은 선택·consumed source·공용 objective를 보존하고 순간 Action/Rope window만 초기화한다.
 
@@ -232,7 +232,7 @@ players[]
 enemies[]
 progressKind: sector
 players[].respawnAnchorId
-worldProgress(currentSectorId, currentLandmarkId, objective/route/encounter sets)
+worldProgress(objective/route-prerequisite/encounter sets)
 foundationRewards
 completed
 ackSequenceByPlayer
@@ -374,6 +374,6 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 6. [완료] 장시간 로컬 수신 시계 드리프트에서도 최신 표본이 계속 오면 원격 시간축이 지속 외삽으로 밀리지 않는지 테스트한다.
 7. [완료] Node 권위 서버와 실제 WebSocket 클라이언트 두 개를 같은 오픈월드에 연결한다.
 8. [완료] impact 전체 상태는 서버가 먼저 발급한 일회용 challenge 뒤에만 받고, 복구 상태와 `stateTick`을 원자적으로 수용하며 실제 복원 필드 전체의 wire schema를 검증한다.
-9. [필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Stage 세이브 포인트 부활과 party wipe Sector-entry reset을 장시간 검증한다.
+9. [필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Stage 세이브 포인트 부활과 전원 사망 공용 진행 보존을 장시간 검증한다.
 
 완료 증거는 단순 접속 성공이 아니다. 플레이어 상태는 소유 클라이언트가 만든 승인 상태로 서버 복제본과 동료 클라이언트가 수렴하고, 중립 월드 상태는 서버가 만든 상태로 모든 클라이언트가 수렴해야 한다. 지연과 패킷 순서 변경 뒤에도 이 두 권한 원점이 뒤바뀌지 않아야 한다.

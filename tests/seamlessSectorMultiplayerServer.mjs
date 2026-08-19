@@ -37,7 +37,6 @@ export async function run() {
     multiplayer.stopClock(room);
     const firstLandmark = room.simulation.world.landmarks[0];
     for (const objectiveId of firstLandmark.objectiveIds) room.simulation.worldProgress.completeObjective(objectiveId);
-    room.simulation.worldProgress.visitLandmark(firstLandmark.outboundRouteId.split(":route:")[1]);
     room.simulation.restoreWorldProgress(room.simulation.worldProgress.snapshot());
     room.simulation.setPlayerRespawnAnchor(firstWelcome.playerId, "sector-01:landmark:02:checkpoint");
     room.simulation.players[0].physics.position.set(1200, -900);
@@ -57,7 +56,7 @@ export async function run() {
     assert.equal(joined.respawnAnchorId, "sector-01:entry");
     assert.equal("respawnAnchorId" in snapshot.state, false);
     assert.equal("partyWipeBaseline" in snapshot.state, false);
-    assert.equal(snapshot.state.worldProgress.currentLandmarkId, "sector-01:landmark:02");
+    assert.equal("currentLandmarkId" in snapshot.state.worldProgress, false);
     assert.equal(joined.position.x, anchor.x);
     assert.equal(joined.position.y, anchor.y);
     assert.equal("activeCheckpointId" in snapshot.state, false);

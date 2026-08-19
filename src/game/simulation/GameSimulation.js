@@ -59,6 +59,7 @@ import {
     windOccludingSurfaces
 } from "../world/WorldForceField.js";
 import { accessScanStateMap, isSurfaceAccessAllowed, snapshotAccessScanStates } from "../world/AccessScanField.js";
+import { authoredRegionForPosition } from "../world/AuthoredLandmarkResolver.js";
 import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -207,13 +208,18 @@ export class GameSimulation {
         this.portalTransitions = new Map();
         this.lastAcceptedPlayerProjectileSpawnTick = new Map();
         this.players = [];
-        if (this.isSeamlessSectorWorld && (startLandmarkId ?? startAreaId)) {
-            this.advanceSectorProgressToLandmark(startLandmarkId ?? startAreaId);
-        }
         const startArea = this.world.areas?.find(({ id }) => id === startAreaId) ?? this.world.areas?.[0];
         const startLandmark = this.isSeamlessSectorWorld
-            ? this.world.landmarks.find(({ id }) => id === this.worldProgress.currentLandmarkId)
+            ? (this.world.landmarks.find(
+                  ({ id, legacyAreaId, legacyStageAlias }) =>
+                      id === (startLandmarkId ?? startAreaId) ||
+                      legacyAreaId === (startLandmarkId ?? startAreaId) ||
+                      legacyStageAlias === (startLandmarkId ?? startAreaId)
+              ) ?? this.world.landmarks[0])
             : null;
+        if (this.isSeamlessSectorWorld && startLandmark.order > 1) {
+            this.advanceSectorProgressToLandmark(startLandmark.id);
+        }
         const playerRuntime = this.addPlayer(
             startLandmark?.entry ?? startArea?.entry,
             playerId,
@@ -250,8 +256,14 @@ export class GameSimulation {
     }
 
     addPlayer(spawn, playerId = null, respawnAnchorId = null) {
+        const primaryRegion = authoredRegionForPosition(
+            this.world,
+            this.#findPlayer(this.#primaryPlayerId)?.physics.position
+        );
+        const joinSector =
+            this.world.sectors?.find(({ id }) => id === primaryRegion?.sectorId) ?? this.world.sectors?.[0];
         const initialRespawnAnchorId = this.isSeamlessSectorWorld
-            ? (respawnAnchorId ?? this.worldProgress.baselineSnapshot().respawnAnchorId)
+            ? (respawnAnchorId ?? joinSector?.respawnAnchorId ?? this.world.respawnAnchors[0]?.id)
             : null;
         if (initialRespawnAnchorId && !this.world.respawnAnchors.some(({ id }) => id === initialRespawnAnchorId)) {
             throw new Error(`unknown player respawn anchor: ${initialRespawnAnchorId}`);
@@ -378,15 +390,8 @@ export class GameSimulation {
     updatePlayerStageSavepoint(playerId, { present = true, expectedRespawnAnchorId = null } = {}) {
         if (!this.isSeamlessSectorWorld) return null;
         const player = this.#requirePlayer(playerId);
-        const visitedLandmarkIds = new Set(this.worldProgress.snapshot().visitedLandmarkIds);
-        const nextRoute = this.world.routeLocks.find(
-            ({ sourceLandmarkId }) => sourceLandmarkId === this.worldProgress.currentLandmarkId
-        );
-        if (nextRoute && this.worldProgress.isRouteUnlocked(nextRoute.id)) {
-            visitedLandmarkIds.add(nextRoute.targetLandmarkId);
-        }
         const anchor = this.world.respawnAnchors
-            .filter(({ landmarkId }) => visitedLandmarkIds.has(landmarkId))
+            .slice()
             .sort((left, right) => right.level - left.level)
             .find((candidate) => playerOverlapsStageSavePoint(player, candidate));
         const current = this.respawnAnchorForPlayer(playerId);
@@ -500,10 +505,8 @@ export class GameSimulation {
         this.contentBoundaryAnnounced = false;
         this.portalTransitions?.clear();
         this.foundationRewards?.clear();
-        for (const route of this.world.routeLocks) {
-            if (this.worldProgress.currentLandmarkId === target.id) break;
-            const source = this.world.landmarks.find(({ id }) => id === route.sourceLandmarkId);
-            if (source.id !== this.worldProgress.currentLandmarkId) continue;
+        for (const source of this.world.landmarks) {
+            if (source.order >= target.order) break;
             for (const objectiveId of source.objectiveIds) {
                 const objective = this.world.objectives.find(({ id }) => id === objectiveId);
                 for (const requiredId of objective.requiredObjectiveIds ?? []) {
@@ -513,16 +516,12 @@ export class GameSimulation {
                 }
                 this.worldProgress.completeObjective(objectiveId);
             }
-            if (route.requiredAccessModuleCount) {
-                const sourceSectorId = source.sectorId;
-                for (const module of this.world.accessModules ?? []) {
-                    if (module.sectorId === sourceSectorId) this.worldProgress.collectAccessModule(module.id);
-                }
+            for (const module of this.world.accessModules ?? []) {
+                if (module.sectorId === source.sectorId) this.worldProgress.collectAccessModule(module.id);
             }
-            this.worldProgress.visitLandmark(route.targetLandmarkId);
         }
         this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
-        return this.worldProgress.currentLandmarkId === target.id;
+        return true;
     }
 
     debugTeleportPlayer(playerId, areaId) {
@@ -1051,7 +1050,7 @@ export class GameSimulation {
         this.metrics.recordActiveTime(dt);
         if (this.worldProgress) {
             const progressId = this.isSeamlessSectorWorld
-                ? this.worldProgress.currentLandmarkId
+                ? authoredRegionForPosition(this.world, this.#primaryPlayer()?.physics.position)?.id
                 : this.worldProgress.currentAreaId;
             this.metrics.recordProgressTime(progressId, dt);
         }
@@ -1650,9 +1649,10 @@ export class GameSimulation {
                 this.eventFlash = { type: "stage-saved", age: 0, ...payload };
             }
             if (this.worldProgress.snapshot().contentBoundaryReached && !this.contentBoundaryAnnounced) {
+                const region = authoredRegionForPosition(this.world, this.#primaryPlayer()?.physics.position);
                 const payload = Object.freeze({
-                    sectorId: this.worldProgress.currentSectorId,
-                    landmarkId: this.worldProgress.currentLandmarkId,
+                    sectorId: region?.sectorId ?? null,
+                    landmarkId: region?.id ?? null,
                     playerId: events.at(-1)?.playerId ?? this.#primaryPlayerId
                 });
                 if (replicate) this.recordReplicationEvent("content-boundary-reached", payload);
@@ -1967,7 +1967,7 @@ export class GameSimulation {
             if (!completion.changed) return false;
             const objectivePayload = {
                 objectiveId,
-                landmarkId: source.landmarkId ?? this.worldProgress.currentLandmarkId,
+                landmarkId: source.landmarkId ?? null,
                 playerId: player.id,
                 position: vectorState(player.physics.position)
             };

@@ -31,6 +31,7 @@ export function replayCommands(authority, frames) {
 }
 
 export function createDeterminismDigest(state) {
+    const sectorProgress = state.world?.layout === "seamless-sectors";
     return Object.freeze({
         player: Object.freeze({
             position: Object.freeze({ x: state.player.position.x, y: state.player.position.y }),
@@ -39,8 +40,8 @@ export function createDeterminismDigest(state) {
         health: state.playerHealth,
         lifeState: state.playerLifeState,
         runState: state.runState,
-        progressKind: state.worldProgress?.currentSectorId ? "sector" : "area",
-        ...(state.worldProgress?.currentSectorId
+        progressKind: sectorProgress ? "sector" : "area",
+        ...(sectorProgress
             ? { respawnAnchorId: state.activeRespawnAnchor?.id ?? null }
             : { activeCheckpointId: state.activeCheckpoint?.id ?? null }),
         worldProgress: state.worldProgress,

@@ -10,6 +10,7 @@
 6. 코드·설정 변경을 끝내기 전에 이번 대화의 명시적 결정이 핸드오프와 기준 문서에 반영됐는지 검색하고, 누락된 문서를 같은 Issue와 커밋에 포함한다.
 7. 자동 CI를 전제로 하지 않는다. 최종 candidate의 단일 검증 소유자는 병합 전에 `npm test`, `npm run check`, `npm run format:check`를 각각 한 번 통과시키고 ledger에 base SHA·diff fingerprint와 함께 기록한다. 같은 candidate의 fresh PASS를 executor·부모·verifier가 반복하지 않는다. 관련 입력이 바뀌면 focused test를 먼저 실행하고 필요한 final-suite 항목만 무효화한다. 화면 변경은 브라우저에서 직접 검증한 뒤 Pull Request에 결과를 기록한다. 버전 또는 멀티플레이 서버 코드가 바뀐 작업은 PR 병합만으로 완료 처리하지 않고 `docs/version-management.md`의 기존 필수 변경·완료 절차까지 수행한다.
 8. 독립 작업은 기존 Git object database를 공유하는 별도 worktree와 branch를 기본으로 사용한다. 같은 저장소라는 이유로 직렬 대기하지 않으며, worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 shared checkout을 직렬화한다. 독립 검증 lane은 준비되는 대로 한 wave에서 병렬 실행한다.
+9. 같은 증상군의 버그가 이전 수정 뒤 다시 요청되면 새 예외 처리를 추가하기 전에 반복 유사 버그 모순 감사를 수행한다. 이전 수정 이력과 대체된 결정, 같은 의미를 소유하는 상태 필드·controller·protocol 중복, client/server와 collision/renderer predicate 차이를 먼저 확인하고 근본 불변식을 회귀 테스트로 고정한다. 상세 절차는 `docs/development-rules.md`의 **반복 유사 버그 모순 감사**를 따른다.
 
 ## Scenario planning and integration
 

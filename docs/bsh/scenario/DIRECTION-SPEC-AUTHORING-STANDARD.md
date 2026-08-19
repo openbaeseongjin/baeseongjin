@@ -2,7 +2,7 @@
 
 *STAGE DESIGN → BEAT-LEVEL IMPLEMENTATION CONTRACT LAYER · REV 1.0*
 
-> AUTHORING SNAPSHOT: `main@ddaeaba6aec183e49b974de88bafed87493080b2` (2026-08-19)
+> AUTHORING SNAPSHOT: `main@f202b8cd895f34da2959c1978b08ed36bd43ca8c` (2026-08-19, re-verified after merge; no capability-relevant Runtime change from `ddaeaba6` — see §0's Story/Camera/Audio file list, all byte-identical across the range)
 
 이 문서는 ONE ROPE Stage를 기획(ChatGPT 등)에서 확정한 뒤 `docs/bsh/scenario/<sector>/<stage>/DIRECTION-SPEC.json`으로 저작하고, Claude Code/Codex가 이를 해석 없이 구현하기 위한 공통 계약을 정의한다. `AREA-SPEC.json`이 `WHERE/WHAT`(공간 구현 계약)을 담당하는 것과 짝을 이루어, `DIRECTION-SPEC.json`은 `WHEN/HOW`(연출 구현 계약)를 담당한다.
 

@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
 import { CanvasRenderer } from "../src/render/CanvasRenderer.js";
 import { PolygonSceneRenderer } from "../src/render/PolygonSceneRenderer.js";
+import { ActorStatusRenderer, resolveActionCooldownStatus } from "../src/render/ActorStatusPresentation.js";
 
 export function run() {
     const textCalls = [];
     const borderCalls = [];
+    const fillCalls = [];
     const context = {
         save() {},
         restore() {},
-        fillRect() {},
+        fillRect: (...args) => fillCalls.push(args),
         translate() {},
         moveTo() {},
         lineTo() {},
@@ -26,6 +28,15 @@ export function run() {
     };
     const renderer = new CanvasRenderer(canvas, new PolygonSceneRenderer());
     assert.deepEqual(
+        resolveActionCooldownStatus({
+            loadout: { modifierIds: ["extra-charge"] },
+            chargesRemaining: 1,
+            rechargeRemaining: 2,
+            rechargeDuration: 4
+        }),
+        { charges: 1, maximum: 2, remaining: 2, duration: 4, ratio: 0.5 }
+    );
+    assert.deepEqual(
         renderer.screenToWorld({ x: 360, y: 180 }, { x: 100, y: 50, zoom: 0.5 }),
         { x: 800, y: 370 },
         "screen aiming must account for the wider zoomed-out mobile camera"
@@ -34,11 +45,60 @@ export function run() {
 
     renderer.cssWidth = 844;
     renderer.cssHeight = 390;
-    renderer.drawPlayerHealthHud({ playerHealth: 35, playerMaxHealth: 100 });
-    assert.deepEqual(textCalls, ["HP", "35 / 100"]);
+    renderer.drawLocalStatusHud({
+        world: {
+            landmarks: [
+                {
+                    id: "sector-01:landmark:02",
+                    legacyStageAlias: "1-2",
+                    order: 2,
+                    bounds: { x: -480, y: -960, width: 960, height: 960 },
+                    entry: { x: 0, y: 0 },
+                    exit: { x: 0, y: -960 }
+                }
+            ]
+        },
+        player: { position: { x: 0, y: -100 } },
+        playerHealth: 35,
+        playerMaxHealth: 100,
+        actionState: {
+            loadout: { modifierIds: ["extra-charge"] },
+            chargesRemaining: 1,
+            rechargeRemaining: 2,
+            rechargeDuration: 4
+        },
+        selectedAugmentIds: ["long-rope"],
+        mobileView: false
+    });
+    assert.ok(textCalls.includes("STAGE 1-2"));
+    assert.ok(textCalls.includes("HP"));
+    assert.ok(textCalls.includes("ACTION"));
+    assert.ok(textCalls.includes("1/2"));
+    assert.ok(textCalls.some((text) => String(text).startsWith("증강 ")));
     textCalls.length = 0;
-    renderer.drawPlayerHealthHud({ playerHealth: 0, playerMaxHealth: 100 });
-    assert.deepEqual(textCalls, ["HP", "0 / 100"]);
+    fillCalls.length = 0;
+    new ActorStatusRenderer().draw({
+        context,
+        scene: {
+            player: { position: { x: 0, y: 0 }, collider: { type: "circle", radius: 18 } },
+            playerHealth: 80,
+            playerMaxHealth: 100,
+            actionState: { loadout: { modifierIds: [] }, chargesRemaining: 1 },
+            otherPlayers: [
+                {
+                    position: { x: 40, y: 0 },
+                    collider: { type: "circle", radius: 18 },
+                    health: 60,
+                    maxHealth: 100,
+                    actionState: { loadout: { modifierIds: ["extra-charge"] }, chargesRemaining: 1 }
+                }
+            ],
+            enemies: [{ position: { x: 80, y: 0 }, radius: 20, health: 50, maxHealth: 100 }]
+        }
+    });
+    assert.ok(fillCalls.length >= 10, "local, remote and Enemy overhead bars must always render");
+    assert.ok(textCalls.includes("1/1"));
+    assert.ok(textCalls.includes("1/2"));
     textCalls.length = 0;
     renderer.drawMetricsPanel({
         activeSeconds: 12.5,
@@ -55,7 +115,7 @@ export function run() {
         "활성 12.5초 · 체크 1",
         "처치 3 · 피해 20",
         "절단 2 · 사망 1",
-        "첫 Foundation 10.0초",
+        "첫 증강 10.0초",
         "구간 01-01 · 42.8초"
     ]);
     textCalls.length = 0;
