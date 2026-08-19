@@ -83,13 +83,13 @@ const area01 = defineArea({
             oneWay: false
         }),
         grappleTarget("sector-01-01:anchor-a-surface", -96, -192),
-
+        grappleTarget("sector-01-01:anchor-b-surface", 160, -448),
         grappleTarget("sector-01-01:anchor-c-surface", -64, -704)
     ],
     routePoints: [
         point("sector-01-01:route-entry", -320, -32),
         point("sector-01-01:route-a", -96, -192, { landmark: "A" }),
-
+        point("sector-01-01:route-b", 160, -448, { landmark: "B" }),
         point("sector-01-01:route-c", -64, -704, { landmark: "C" }),
         block01.routeExit
     ],
@@ -100,7 +100,7 @@ const area01 = defineArea({
     ],
     objects: [
         worldObject("sector-01-01:anchor-a", "grapple-landmark", -96, -192, { label: "A" }),
-
+        worldObject("sector-01-01:anchor-b", "grapple-landmark", 160, -448, { label: "B" }),
         worldObject("sector-01-01:anchor-c", "grapple-landmark", -64, -704, { label: "C" }),
         worldObject("sector-01-01:cooling-fan", "background-prop", -288, -672, {
             gameplay: false,
@@ -912,6 +912,7 @@ const area07 = defineArea({
     gate: block07.gate,
     storyTriggers: [
         "pressure-unstable",
+        "security-response-active",
         "pressure-limit",
         "containment-violation",
         "bypass-ready",

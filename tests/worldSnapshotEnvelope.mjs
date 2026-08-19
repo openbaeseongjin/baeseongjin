@@ -41,6 +41,12 @@ export function run() {
             worldProgress: {
                 currentSectorId: "sector-01"
             },
+            bossRuntime: {
+                encounterId: "boss-01:containment-gantry-c-01",
+                status: "active",
+                phase: 1,
+                health: 360
+            },
             players: [
                 {
                     ...envelope.state.players[0],
@@ -54,6 +60,7 @@ export function run() {
     assert.equal("respawnAnchorId" in sectorEnvelope.state, false);
     assert.equal("partyWipeBaseline" in sectorEnvelope.state, false);
     assert.equal("activeCheckpointId" in sectorEnvelope.state, false);
+    assert.equal(sectorEnvelope.state.bossRuntime.encounterId, "boss-01:containment-gantry-c-01");
     assert.throws(
         () =>
             createWorldSnapshotEnvelope({

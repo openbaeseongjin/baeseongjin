@@ -20,7 +20,7 @@
 
 1. 해당 Stage `README.md`: 핵심 학습, Story, 등장·금지 요소
 2. 해당 Stage `PRODUCTION-ALIGNMENT.md`: 현재 구현·미구현 상태, Camera, Asset 인계 계약
-3. 현재 Area Catalog와 관련 Runtime 정의: 실제 `cameraZones`, Stable ID, 오브젝트 수와 상태
+3. 현재 Area Catalog와 관련 Runtime 정의: 실제 `cameraZones` 또는 검증된 기본 Camera capture 계약, Stable ID, 오브젝트 수와 상태
 4. 해당 Stage `Approved Blockout`: Geometry·좌표·경로 의미
 5. 이 문서: 공통 화면·Player·Rope·색·출력 규격
 6. Sector 공용 배경 레퍼런스: 환경의 분위기만 참고
@@ -78,7 +78,10 @@ Purple·Amber·Red를 장식용으로 넓게 퍼뜨리지 않는다. 각 색은 
 
 - 기본 문서 출력은 `1672×941`, landscape, RGB/sRGB PNG다.
 - Side-on 2D orthographic gameplay camera를 사용하고 원근 왜곡·3/4 시점·영화식 클로즈업을 금지한다.
-- Stage 전체가 아니라 하나의 대표 `cameraZone`을 선택한다. 프롬프트에 Zone ID, local Y 범위, desktop zoom, player screen ratio를 기록한다.
+- Stage 전체가 아니라 하나의 대표 Gameplay Camera Shot을 선택한다.
+- **Mode A — explicit Runtime `cameraZone`:** Zone ID, local Y 범위, desktop/mobile zoom, player screen ratio를 기록한다.
+- **Mode B — verified default-camera capture:** custom gameplay Camera를 추가하지 않고 Area ID, local Y 범위, 기본 desktop/mobile zoom, 세로 player ratio/framing target, Stable ID와 보이는 Geometry를 기록한다.
+- Mode B를 위해 Gameplay Runtime에 가짜 `cameraZone`을 추가하지 않는다. 두 Mode 모두 Approved Blockout·정확한 visible object count와 Runtime capture 근거가 필요하다.
 - Player의 화면상 크기는 `48 × desktopZoom`을 기준으로 한다.
 - 실제 Camera Zone에서 보여야 하는 다음 Anchor·Recovery·Gate·위협만 프레임에 포함한다.
 - 전경 구조물이 Player, 현재 Anchor, 다음 의사결정 지점을 가리지 않아야 한다.

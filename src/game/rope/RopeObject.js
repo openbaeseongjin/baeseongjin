@@ -1,8 +1,9 @@
 import { withRopePointerInput } from "../input/RopePointerInput.js";
 import { InputDrivenObject } from "../objects/InputDrivenObject.js";
 import { RopeLauncher } from "./RopeLauncher.js";
+import { withRopeRenderSnapshot } from "./RopeRenderSnapshot.js";
 
-export class RopeObject extends withRopePointerInput(InputDrivenObject) {
+export class RopeObject extends withRopeRenderSnapshot(withRopePointerInput(InputDrivenObject)) {
     constructor({ id, ownerId, rope }) {
         super({ id, ownerId });
         this.rope = rope;

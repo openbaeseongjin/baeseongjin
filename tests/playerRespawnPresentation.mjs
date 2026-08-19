@@ -90,4 +90,78 @@ export function run() {
         true,
         "the multiplayer owner must use the same local death hold policy"
     );
+
+    let renderedState = null;
+    const renderAuthority = {
+        playerId: "local-player",
+        snapshot: () => ({
+            state: {
+                players: [
+                    {
+                        id: "local-player",
+                        position: { x: 0, y: 0 },
+                        velocity: { x: 0, y: 0 },
+                        angle: 0,
+                        angularVelocity: 0,
+                        rope: { isAttached: false },
+                        health: 100,
+                        maxHealth: 100,
+                        lifeState: "active"
+                    }
+                ],
+                enemies: [],
+                activeCheckpointId: null,
+                runState: "playing",
+                metrics: {}
+            },
+            predicted: {
+                position: { x: 0, y: 0 },
+                velocity: { x: 0, y: 0 },
+                angle: 0,
+                angularVelocity: 0,
+                rope: { isAttached: false },
+                swingDrag: null,
+                health: 100,
+                maxHealth: 100,
+                lifeState: "active",
+                launcher: null
+            }
+        }),
+        renderSnapshot: () => ({
+            world: { checkpoints: [], respawnAnchors: [] },
+            eventFlash: null,
+            attachmentCandidate: null,
+            augmentProjectiles: [],
+            maxAttachDistance: 480
+        }),
+        metrics: () => ({})
+    };
+    const rangeApp = new MultiplayerGameApp({
+        canvas: {},
+        renderer: { ...renderer(), draw: (state) => (renderedState = state) },
+        authority: renderAuthority
+    });
+    rangeApp.render();
+    assert.equal(
+        renderedState.maxAttachDistance,
+        480,
+        "multiplayer rendering must preserve the owner's effective Rope range"
+    );
+    rangeApp.statusFeedback.apply([
+        {
+            eventType: "player-respawned",
+            statusType: "sector-respawn",
+            playerId: "local-player",
+            reason: "health",
+            causeId: "rendered-owner-death",
+            deathPosition: { x: 20, y: 30 },
+            position: { x: 0, y: 0 }
+        }
+    ]);
+    rangeApp.render();
+    assert.equal(
+        renderedState.eventFlash.type,
+        "sector-respawn",
+        "multiplayer rendering must surface the local owner's personal respawn status"
+    );
 }

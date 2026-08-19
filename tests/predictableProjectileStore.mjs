@@ -5,6 +5,7 @@ import {
 } from "../src/game/network/PredictableObjectEvent.js";
 import { PredictableProjectileStore } from "../src/game/runtime/PredictableProjectileStore.js";
 import { ClientCombatFeedback } from "../src/game/combat/ClientCombatFeedback.js";
+import { ClientStatusFeedback } from "../src/game/combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "../src/game/combat/ClientFeedbackEventObject.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
@@ -371,6 +372,41 @@ export function run() {
     };
     assert.equal(selectClientStatusFeedback(personalStageSave, "player-1"), personalStageSave);
     assert.equal(selectClientStatusFeedback(personalStageSave, "player-2"), null);
+    const playerRespawned = {
+        eventId: "event:respawn:player-1",
+        eventType: "player-respawned",
+        statusType: "sector-respawn",
+        playerId: "player-1",
+        reason: "health",
+        causeId: "lethal-hit:1",
+        deathPosition: { x: 8, y: 12 },
+        position: { x: 20, y: 30 }
+    };
+    assert.deepEqual(selectClientStatusFeedback(playerRespawned, "player-1"), {
+        type: "sector-respawn",
+        age: 0,
+        playerId: "player-1",
+        reason: "health",
+        causeId: "lethal-hit:1",
+        deathPosition: { x: 8, y: 12 },
+        position: { x: 20, y: 30 }
+    });
+    assert.equal(
+        selectClientStatusFeedback(playerRespawned, "player-2"),
+        null,
+        "a teammate may animate the respawn event but must not receive the owner's status banner"
+    );
+    const ownerStatus = new ClientStatusFeedback({ viewerId: "player-1" });
+    const teammateStatus = new ClientStatusFeedback({ viewerId: "player-2" });
+    ownerStatus.apply([playerRespawned]);
+    teammateStatus.apply([playerRespawned]);
+    assert.equal(ownerStatus.snapshot().type, "sector-respawn");
+    assert.equal(teammateStatus.snapshot(), null);
+    ownerStatus.update(1);
+    ownerStatus.apply([playerRespawned]);
+    assert.equal(ownerStatus.snapshot().age, 1, "a server duplicate must not restart an owner-predicted status");
+    ownerStatus.update(1.2);
+    assert.equal(ownerStatus.snapshot(), null, "personal status lifetime must remain client-owned and bounded");
     const sharedCheckpointStatus = { type: "checkpoint", playerId: "player-1", age: 0.1, position: { x: 0, y: 0 } };
     assert.equal(
         selectClientStatusFeedback(sharedCheckpointStatus, "player-2"),

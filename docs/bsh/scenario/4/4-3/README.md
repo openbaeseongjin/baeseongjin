@@ -1506,7 +1506,7 @@ worldObject(
 )
 ```
 
-현재 Runtime에서 `no-rope-cut`가 없으므로 Cutter capable.
+현재 Runtime에서 이 Sentry가 `cutter-fire`를 명시했으므로 Cutter capable이다. `no-rope-cut` 부재는 capability switch가 아니다.
 
 ### Important
 

@@ -849,18 +849,13 @@ Y -704 ~ -352
 Rules:
 
 ```text
+cutter-fire
 kill-optional
 target-lock-cycle
 activation-band-only
 ```
 
-중요:
-
-```text
-NO "no-rope-cut"
-```
-
-따라서 current Runtime에서 Cutter capable.
+`cutter-fire`를 명시했으므로 current Runtime에서 Cutter capable이다. `no-rope-cut` 부재만으로는 Cutter가 되지 않는다.
 
 ### 8-4. Patrol Drone D1
 
@@ -2155,13 +2150,10 @@ Enemy radius / camera readability까지 고려해
 Current:
 
 ```text
-absence of no-rope-cut
+rules.includes("cutter-fire")
 ```
 
-semantics 유지.
-
-Sector 04 production integration 전에
-positive opt-in rule로 바꿀지는 계속 시스템 이슈.
+positive opt-in semantics가 적용됐다. `no-rope-cut`은 일반 Patrol의 호환 메타데이터로만 남고 부재 자체는 capability를 부여하지 않는다.
 
 ### 6. 4-5 Runtime Handoff
 

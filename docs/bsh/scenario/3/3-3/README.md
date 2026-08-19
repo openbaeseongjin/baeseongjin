@@ -207,13 +207,11 @@ TARGET INVALID / LEFT BAND
 
 ### VERIFIED — Patrol Drone Rope-Cut Rule
 
-Current Enemy projectile 생성은:
+Current Enemy projectile 생성은 양의 capability를 사용한다.
 
 ```text
-canCutRope = !rules.includes("no-rope-cut")
+canCutRope = rules.includes("cutter-fire")
 ```
-
-을 사용한다.
 
 Sector 02 Patrol Drone authored rule에는:
 
@@ -223,8 +221,7 @@ no-rope-cut
 
 이 있다.
 
-3-3도 같은 Patrol Drone T1을 재사용하므로
-Projectile은 Rope Cut을 만들지 않는다.
+3-3도 같은 Patrol Drone T1을 재사용하고 `cutter-fire`를 선언하지 않으므로 Projectile은 Rope Cut을 만들지 않는다. `no-rope-cut`는 호환 메타데이터일 뿐, 그 부재가 Rope Cut을 허용하지 않는다.
 
 ### VERIFIED — Current Rope Surface Rule
 

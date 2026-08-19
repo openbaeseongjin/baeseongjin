@@ -209,11 +209,7 @@ export class PredictableProjectileStore {
         const collections = { projectiles, enemyProjectiles };
         for (const projectile of this.objects.values()) {
             if (!projectile.isClientVisible()) continue;
-            collections[projectile.renderCollection].push({
-                ...projectile,
-                position: { ...projectile.position },
-                velocity: { ...projectile.velocity }
-            });
+            collections[projectile.renderCollection].push(projectile.renderSnapshot());
         }
         return { projectiles, enemyProjectiles };
     }

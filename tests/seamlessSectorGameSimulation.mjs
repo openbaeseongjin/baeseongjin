@@ -313,6 +313,10 @@ export function run() {
         }
     );
     assert.equal(simulation.snapshot().eventFlash.type, "sector-respawn");
+    const soloDeathEvent = simulation
+        .drainReplicationEvents()
+        .find(({ eventType, causeId }) => eventType === "player-respawned" && causeId === "solo-death");
+    assert.equal(soloDeathEvent.statusType, "sector-respawn");
     owner.physics.position.set(700, -700);
     assert.equal(simulation.respawnPlayerAtCheckpoint(owner, "fall", "solo-fall"), true);
     assert.deepEqual(simulation.worldProgress.snapshot(), progressBeforeSoloDeath);
@@ -346,5 +350,36 @@ export function run() {
     assert.deepEqual(
         { x: teammate.physics.position.x, y: teammate.physics.position.y },
         { x: teammateAnchor.position.x, y: teammateAnchor.position.y }
+    );
+
+    const bossSimulation = createCurrentGameSimulation({ worldSeed: 6991, playerId: "boss-owner" });
+    const bossProgressBefore = bossSimulation.worldProgress.snapshot();
+    assert.equal(bossSimulation.snapshot().bossRuntime.status, "inactive");
+    assert.equal(bossSimulation.startBossEncounter().accepted, true);
+    assert.equal(
+        bossSimulation.interactBossBreaker("boss-owner", bossSimulation.snapshot().bossRuntime.currentBreakerId)
+            .accepted,
+        true
+    );
+    bossSimulation.step(
+        0.5,
+        createPlayerCommand(
+            {
+                horizontal: 0,
+                vertical: 0,
+                pointer: { x: 0, y: 0, down: false },
+                viewport: { width: 1280, height: 720 }
+            },
+            { x: 0, y: 0 }
+        )
+    );
+    assert.equal(bossSimulation.snapshot().bossRuntime.timerRemainingSeconds, 209.5);
+    assert.equal(bossSimulation.snapshot().bossRuntime.exposureRemainingSeconds, 7.5);
+    assert.equal(bossSimulation.applyBossDamage("boss-owner", 120).appliedDamage, 120);
+    assert.equal(bossSimulation.snapshot().bossRuntime.phase, 2);
+    assert.deepEqual(
+        bossSimulation.worldProgress.snapshot(),
+        bossProgressBefore,
+        "Boss progress must remain outside SectorProgressState"
     );
 }

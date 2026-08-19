@@ -64,7 +64,7 @@
 - 한 번의 성공 사례보다 정상·경계·실패 시나리오를 함께 검증한다.
 - 결과는 상태, 사건, 수치로 측정하고 화면 느낌만으로 판정하지 않는다.
 - 멀티 동기화 버그는 `health`, 로프 부착·비활성 시간, 투사체 ID·개수, pending claim과 서버·동료 상태의 수렴값을 직접 단언한다. 스크린샷과 VFX는 시뮬레이션 정합성의 합격 근거로 사용하지 않는다.
-- 클라이언트 연출은 `공용 월드 효과`와 `개인 상태 효과`를 명시적으로 분류한다. 공용 효과는 모든 클라이언트가 같은 판정 사건에서 로컬 생성하고, 개인 효과는 사건의 `sourcePlayerId`·`targetId`와 현재 viewer ID를 capability가 비교해 당사자에게만 생성한다. 앱이나 Canvas 렌더러에 사건 종류별 viewer 분기를 추가하지 않는다.
+- 클라이언트 연출은 `공용 월드 효과`와 `개인 상태 효과`를 명시적으로 분류한다. 공용 효과는 모든 클라이언트가 같은 판정 사건에서 로컬 생성하고, 개인 효과는 사건의 `playerId`·`sourcePlayerId`·`targetId`와 현재 viewer ID를 capability가 비교해 당사자에게만 생성한다. 사망 animation과 개인 부활 문구를 같은 가시성으로 묶지 않으며, `player-respawned`의 상태 문구는 causal 중복 제거와 표시 수명을 각 클라이언트가 소유한다. 앱이나 Canvas 렌더러에 사건 종류별 viewer 분기를 추가하지 않는다.
 - NaN, Infinity, 속도 폭주, 무한 루프는 즉시 실패로 처리하고 원인 직전 상태를 보존한다.
 
 ### 로프·월드 적용 기준
@@ -179,6 +179,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 한 객체에 이동·공격처럼 여러 capability가 붙을 수 있으므로 “객체당 capability 하나”를 가정하지 않는다. 각 단계는 무관한 capability를 실행하지 않는 회귀 테스트를 가진다.
 - capability는 객체 자신의 상태 전이와 행동을 소유하고, 월드 스케줄러는 단계 순서·대상 집합·공용 context와 사건 연결만 조정한다. 전송 계층이나 예측 저장소에 별도 운동 공식을 복제하지 않는다.
 - capability 디스패치는 네트워크 권한을 결정하지 않는다. `InputDrivenObject`와 `SimulationDrivenObject`의 상태 변화 원인, 클라이언트 claim과 서버 중립 시뮬레이션 경계는 기존 분할 권한 규칙을 그대로 따른다.
+- 화면에 전달되는 gameplay object는 상태 변화 원인과 별개로 종류별 `render-snapshot` capability mixin을 가져야 한다. Player·Rope·Enemy·Projectile의 mixin은 자기 소유 상태만 detached DTO로 만들며, 중앙 snapshot 조립기에서 `instanceof`, object kind switch, prototype getter 의존 또는 필드별 복사를 추가하지 않는다. 새 renderable 종류는 capability 존재, 중첩 mutable reference 비공유, 실제 `GameSimulation` 전후 snapshot 보간, 싱글·멀티 scene parity를 같은 변경에서 검증한다.
 - 같은 단계에서 종류별 동작이 다르면 중앙 `if (type)` 분기를 추가하지 않고 같은 capability ID를 구현하는 서로 다른 믹스인을 조합한다. 종류 선택은 객체 생성 팩토리 경계에서만 하고 스케줄러·예측 저장소·전송 계층으로 퍼뜨리지 않는다.
 - 충돌 가능·claim 대기·거부 후 재시도 같은 수명 상태는 해당 객체가 공개 명령으로 소유한다. receipt 처리기가 객체의 임시 boolean을 직접 풀거나 같은 겹침에 객체를 복구하지 않는다. 재시도가 가능한 중립 객체도 분리 후 재진입 같은 명시적 재무장 조건을 통과해야 한다.
 - 예측 객체 저장소는 등록, 식별자 대응, 권위 사건 정리와 렌더 snapshot만 담당한다. 운동·충돌·피드백 발생 조건·거부 정책을 객체 종류별로 해석하지 않는다.

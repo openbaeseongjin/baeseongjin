@@ -4,8 +4,9 @@ import { Vector2 } from "../game-kit/index.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../render/GameRendererFactory.js";
 import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
-import { CAMERA_CONFIG, resolveMobileCameraZoom, ropeHookReach } from "./config.js";
+import { CAMERA_CONFIG, resolveMobileCameraZoom } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import {
     advanceFoundationRewardSelection,
@@ -93,6 +94,7 @@ export class MultiplayerGameApp {
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
+        this.statusFeedback = new ClientStatusFeedback({ viewerId: this.authority.playerId });
         this.checkpointFeedback = null;
         this.playerPresentationEvents = [];
         const presentationDefinition =
@@ -288,6 +290,8 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
         const events = this.authority.drainEvents();
+        this.statusFeedback.update(dt);
+        this.statusFeedback.apply(events);
         this.worldUnlockPresentation.prepare(events, {
             world: this.authority.renderSnapshot()?.world,
             camera: this.camera,
@@ -517,6 +521,7 @@ export class MultiplayerGameApp {
             ) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
+        this.statusFeedback.apply([base.eventFlash]);
         this.queuePlayerPresentationEvents([base.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         const renderMetrics = this.renderer.draw({
@@ -539,6 +544,7 @@ export class MultiplayerGameApp {
                 combatFeedback.eventFlash ??
                 this.foundationFeedback ??
                 this.checkpointFeedback ??
+                this.statusFeedback.snapshot() ??
                 selectClientStatusFeedback(base.eventFlash, this.authority.playerId),
             otherPlayers,
             playerHealth: remote.predicted.health,
@@ -550,7 +556,6 @@ export class MultiplayerGameApp {
             activeRespawnAnchor,
             foundationReward: this.localFoundationReward,
             runState: this.localRunCompleted ? "completed" : remote.state.runState,
-            maxAttachDistance: ropeHookReach(),
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,

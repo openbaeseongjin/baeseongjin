@@ -8,7 +8,7 @@
 | Audit Source Snapshot | `bd5be25b900b65f3ab42eeb4ee5ff45f2052a06b` |
 | Detailed Scenario | 48/48 merged |
 | Goal | Geometry redesign 없이 Runtime·문서·기획 게이트를 한 진실로 정렬 |
-| Status | **APPROVED PATCH CONTRACT — P0-F/P0-G APPLIED; RUNTIME PATCH NOT YET IMPLEMENTED** |
+| Status | **P0 ALIGNMENT APPLIED — P0-I SUPERSEDED BY GENERIC AUGMENT V1** |
 
 ---
 
@@ -16,41 +16,35 @@
 
 이 패키지는 Full Game Audit 이후 최신 `main`을 다시 확인해 정정한 버전이다.
 
-가장 중요한 정정:
+가장 중요한 정정은 P0-A 패치 전 Runtime에도 조기 최종 문구가 존재했다는 점이었다. 현재는 P0-A가 반영되어 1-7이 다음을 사용한다.
 
 ```text
 1-7
-CONTAINMENT VIOLATION / ACTIVE
+VERTICAL TRANSIT VIOLATION / SECURITY RESPONSE ACTIVE
 ```
 
-는 오래된 문서에만 남아 있는 것이 아니다.
-
-현재:
+최종 `CONTAINMENT VIOLATION`은 6-8 / Final Security 경계에만 남긴다. 패치 대상은:
 
 ```text
 src/game/presentation/AuthoredStoryPresentation.js
 ```
 
-에도 실제 Position Presentation으로 구현되어 있다.
+의 Position Presentation과 Area `storyTriggers`, 테스트와 현행 시나리오 문서였다.
 
-따라서 이 항목은:
-
-```text
-DOC ONLY
-```
-
-가 아니라:
+따라서 이 항목은 `DOC ONLY`가 아닌:
 
 ```text
 RUNTIME + DOC
 P0
 ```
 
-이다.
+수직 변경 수정이었으며 지형·Wind·Sentry·Access 계약은 변경하지 않았다.
 
 ---
 
 ## 1. P0-A — SECURITY ESCALATION RUNTIME PATCH
+
+Integration status: **APPLIED** — Runtime token/ID, visible copy, regression test, Sector 01 scenario handoff are aligned. `CONTAINMENT VIOLATION` remains reserved for 6-8 / Final Security.
 
 ## Problem
 
@@ -118,23 +112,7 @@ for 6-8 / Final Security boundary.
 
 ### `src/game/presentation/AuthoredStoryPresentation.js`
 
-Replace:
-
-```text
-token:
-containment-violation
-
-id:
-sector-01-07:containment-violation
-
-title:
-CONTAINMENT VIOLATION
-
-detail:
-ACTIVE
-```
-
-with:
+Applied definition:
 
 ```text
 token:
@@ -152,13 +130,7 @@ SECURITY RESPONSE ACTIVE
 
 ### `src/game/world/areas/sector01/Sector01AreaCatalog.js`
 
-Area07 `storyTriggers`:
-
-```text
-containment-violation
-```
-
-→
+Area07 `storyTriggers` uses:
 
 ```text
 security-response-active
@@ -177,19 +149,13 @@ At minimum:
 - `docs/bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md`
 - related Story Presentation tests if exact IDs are asserted
 
-Global search after patch:
-
-```text
-CONTAINMENT VIOLATION ACTIVE
-sector-01-07:containment-violation
-"containment-violation"
-```
-
-Only historical/forbidden/final valid occurrences may remain.
+Global search after patch confirms the retired 1-7 token, ID, and combined copy no longer appear in active source, tests, or Sector 01 documents. The final phrase remains valid only in the 6-8 / Final Security contract.
 
 ---
 
 ## 2. P0-B — CUTTER POSITIVE OPT-IN TRUTH
+
+Integration status: **APPLIED** — active Stage/Master docs use `cutter-fire` positive opt-in, and the historical audit carries a do-not-author banner.
 
 ## Current Runtime Truth
 
@@ -246,21 +212,14 @@ CURRENT = cutter-fire POSITIVE OPT-IN
 
 ---
 
-## 3. P0-C — FOUNDATION IMPLEMENTATION STATE
+## 3. P0-C — GENERIC AUGMENT IMPLEMENTATION STATE
 
-Current 1-4 truth:
+Integration status: **APPLIED** — 1-5~1-8 Production Alignment records the 22-card generic Augment prototype and playtest-balance gap; retired three-Foundation routes are not mandatory.
+
+Current 1-4 / 2-3 / 3-5 truth:
 
 ```text
-Foundation selection
-IMPLEMENTED PROTOTYPE
-
-Impulse
-IMPLEMENTED PROTOTYPE
-
-Relay
-IMPLEMENTED PROTOTYPE
-
-Shear
+generic Augment deterministic offer / selection / effects
 IMPLEMENTED PROTOTYPE
 
 player-local persistence / multiplayer
@@ -297,11 +256,13 @@ DESIGN VALID
 PHYSICAL PLAYTEST PENDING
 ```
 
-Do not mark Foundation-dependent route as mandatory.
+Do not restore or mark retired Foundation-dependent routes as mandatory.
 
 ---
 
 ## 4. P0-D — CHECKPOINT REWARD DRIFT
+
+Integration status: **APPLIED** — 1-8 Production Alignment now records checkpoint progress/personal respawn only and no reward selection.
 
 Current Sector01 AreaCatalog checkpoint:
 
@@ -340,6 +301,8 @@ Preserve only historical clearly marked references.
 ---
 
 ## 5. P0-E — SCENARIO ART CAMERA CONTRACT
+
+Integration status: **APPLIED** — the common Art standard and Sector 02/03 masters accept a verified default-camera capture contract without adding fake gameplay Camera zones.
 
 ## Problem
 
@@ -461,7 +424,7 @@ P5
 
 ## 7. P0-G — IMPLEMENTATION ROADMAP / SCHEDULE REFRESH
 
-Integration status: **APPLIED FOR DECISION STATE** — 48/48과 현재 구현 순서를 roadmap·schedule·handoff·scenario integration에 반영했다. 후속 P0 Runtime/문서 패치 결과는 해당 구현 PR에서 다시 갱신한다.
+Integration status: **APPLIED** — 48/48, 현재 구현 순서, P0-A~E 완료 상태를 roadmap·schedule·handoff·scenario integration에 반영했다.
 
 Before this integration, roadmap/schedule still contained older scenario-count statements.
 
@@ -480,7 +443,6 @@ Scenario authoring
 
 next
 Alignment
-→ Specialization
 → Boss primitive / Boss01
 → Timer baseline
 → Runtime expansion
@@ -500,13 +462,7 @@ but actual status must be explicit.
 
 ## 8. P0-H — BOSS BOUNDARY CONTRACT
 
-Create a dedicated current file:
-
-Suggested path:
-
-```text
-docs/boss-placement-and-cadence.md
-```
+Integration status: **APPLIED IN EXISTING OWNERS** — `docs/sector-timer-and-boss-flow.md`, `docs/design-decision-requests.md`, and the scenario integration checkpoint own this boundary. A duplicate file is not created.
 
 Lock:
 
@@ -530,47 +486,15 @@ Do not connect guessed Sector02~05 bosses until their detailed contracts exist.
 
 ---
 
-## 9. P0-I — SPECIALIZATION CONTRACT
+## 9. P0-I — SPECIALIZATION CONTRACT — SUPERSEDED
 
-Create:
-
-Suggested:
-
-```text
-docs/specialization-system.md
-```
-
-or update a current growth system doc if one already owns the contract.
-
-Must contain:
-
-- 6 IDs
-- Foundation prerequisite mapping
-- exact REV1 prototype values
-- fixed pair pool
-- selection/persistence
-- multiplayer player-local state
-- reset policy
-- no geometry dependency
-- future random pool is OPEN, not current behavior
-
-Then:
-
-```text
-2-3 selectionPool:"TBD"
-```
-
-can be replaced during implementation.
+Integration status: **DO NOT IMPLEMENT** — the fixed six-Specialization tier and Foundation prerequisite mapping were replaced by `docs/augment-v1.md`. The stable 2-3 Node is the second generic Augment offer source; no separate Specialization state, pool, or document is introduced.
 
 ---
 
 ## 10. P0-J — FINAL SECURITY / ENDING CONTRACT
 
-Create:
-
-```text
-docs/final-security-and-ending.md
-```
+Integration status: **APPLIED IN EXISTING OWNERS** — `docs/design-decision-requests.md`, its resolution package, `SESSION-HANDOFF.md`, and the scenario integration checkpoint own this contract. A duplicate file is not created.
 
 Lock:
 
@@ -612,7 +536,7 @@ PATCH 5
 Design decisions + roadmap/current-state docs
 
 PATCH 6
-new Boss / Specialization / Ending contracts
+Boss / Ending contracts in existing canonical owners
 ```
 
 Why Story first:
@@ -670,7 +594,7 @@ No:
 - Sector05 geometry redesign
 - Sector06 geometry redesign
 - boss implementation
-- Specialization implementation
+- a new Specialization tier
 - timer implementation
 - NPC implementation
 - art generation
@@ -683,7 +607,7 @@ This package only defines the safe repo normalization before those tasks.
 ## 14. Final Verdict
 
 ```text
-READY
+APPLIED
 ```
 
 Highest immediate issue:

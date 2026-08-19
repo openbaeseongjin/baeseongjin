@@ -10,6 +10,9 @@ import { SEAMLESS_SECTOR_RUNTIME_REVISION } from "../src/game/world/sectors/Lega
 export function run() {
     const server = createCurrentGameSimulation({ worldSeed: 2718, playerId: "player-1" });
     const ownerId = server.getPrimaryPlayerId();
+    server.startBossEncounter();
+    server.interactBossBreaker(ownerId, server.snapshot().bossRuntime.currentBreakerId);
+    server.applyBossDamage(ownerId, 45);
     const snapshot = buildAuthoritySnapshot({ simulation: server });
     assert.equal(snapshot.worldRevision, SEAMLESS_SECTOR_RUNTIME_REVISION);
     assert.equal(snapshot.state.progressKind, "sector");
@@ -25,6 +28,12 @@ export function run() {
         "dynamic enemy replication must materially reduce the enemy payload"
     );
     assert.equal("partyWipeBaseline" in snapshot.state, false);
+    assert.equal(snapshot.state.bossRuntime.health, 315);
+    assert.equal(snapshot.state.bossRuntime.shieldState, "exposed");
+    assert.deepEqual(
+        snapshot.events.filter(({ eventType }) => eventType.startsWith("boss-")).map(({ eventType }) => eventType),
+        ["boss-encounter-started", "boss-core-exposed", "boss-damaged"]
+    );
 
     const predictor = new OwnerPredictionRuntime({
         ownerId,
@@ -45,6 +54,7 @@ export function run() {
     assert.equal(predictor.simulation.activeRespawnAnchor.id, "sector-01:entry");
     assert.equal(predictor.simulation.playerState(ownerId).actionState.loadout.baseActionId, "default-punch");
     assert.deepEqual(predictor.simulation.worldProgress.snapshot(), snapshot.state.worldProgress);
+    assert.deepEqual(predictor.simulation.snapshot().bossRuntime, snapshot.state.bossRuntime);
 
     const objectiveId = server.world.landmarks[0].objectiveIds[0];
     server.worldProgress.completeObjective(objectiveId);

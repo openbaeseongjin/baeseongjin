@@ -1,6 +1,8 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { FOUNDATION_AUGMENT_CATALOG, foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { validateAugmentImpactFormula } from "../augments/AugmentImpactFormula.js";
+import { BOSS_01_DEFINITION } from "../boss/Boss01Definition.js";
+import { BossEncounterRuntime } from "../boss/BossEncounterRuntime.js";
 import {
     advanceEnemyProjectiles,
     updateAutomaticWeapon,
@@ -93,50 +95,20 @@ function vectorState(vector) {
     return vector ? { x: vector.x, y: vector.y } : null;
 }
 
+function eventFlashState(eventFlash) {
+    const snapshot = { ...eventFlash };
+    for (const key of ["position", "deathPosition", "sourcePosition", "contactPosition", "velocity"]) {
+        if (eventFlash[key]) snapshot[key] = vectorState(eventFlash[key]);
+    }
+    return snapshot;
+}
+
 function createEnemyRuntime(properties) {
     if (isEnemyArchetype(properties.enemyType)) return createEnemyArchetype(properties);
     if (isKnownEnemyType(properties.enemyType)) {
         return new EnemyObject({ ...properties, displayName: enemyDisplayName(properties.enemyType) });
     }
     throw new Error(`unknown enemy type: ${properties.enemyType}`);
-}
-
-function enemyState(enemy) {
-    return {
-        id: enemy.id,
-        position: vectorState(enemy.position),
-        level: enemy.level,
-        areaId: enemy.areaId,
-        objectId: enemy.objectId,
-        enemyType: enemy.enemyType,
-        displayName: enemy.displayName,
-        activation: enemy.activation,
-        patrol: enemy.patrol,
-        swarmGroupId: enemy.swarmGroupId,
-        behaviorState: enemy.enemyBehaviorSnapshot(),
-        impactDisplacementEnabled: enemy.impactDisplacementEnabled,
-        knockbackState: enemy.knockbackSnapshot(),
-        lockedTargetId: enemy.lockedTargetId,
-        attackState: enemy.attackState,
-        attackStateRemaining: enemy.attackStateRemaining,
-        aimDirection: enemy.aimDirection,
-        rules: enemy.rules,
-        radius: enemy.radius,
-        health: enemy.health,
-        maxHealth: enemy.maxHealth,
-        fireCooldown: enemy.fireCooldown
-    };
-}
-
-function swingDragState(swingDrag) {
-    if (!swingDrag) return null;
-    return {
-        origin: vectorState(swingDrag.origin),
-        direction: vectorState(swingDrag.direction),
-        progress: swingDrag.progress,
-        age: swingDrag.age,
-        used: swingDrag.used
-    };
 }
 
 function cloneSwingDrag(swingDrag) {
@@ -191,6 +163,7 @@ export class GameSimulation {
                 })
               : generateWorld({ ...WORLD_CONFIG, seed: worldSeed });
         this.isSeamlessSectorWorld = this.world.layout === "seamless-sectors";
+        this.bossRuntime = this.isSeamlessSectorWorld ? new BossEncounterRuntime(BOSS_01_DEFINITION) : null;
         this.worldProgress = this.isSeamlessSectorWorld
             ? new SectorProgressState(this.world)
             : worldCatalog
@@ -308,6 +281,76 @@ export class GameSimulation {
         return this.players.map(({ id }) => id);
     }
 
+    #commitBossEvents() {
+        if (!this.bossRuntime) return Object.freeze([]);
+        const events = this.bossRuntime.drainEvents();
+        for (const event of events) {
+            const { eventId: bossEventId, eventType, sequence: bossSequence, ...payload } = event;
+            this.recordReplicationEvent(eventType, { ...payload, bossEventId, bossSequence });
+        }
+        const latest = events.at(-1);
+        if (latest) {
+            const { eventType, ...payload } = latest;
+            this.eventFlash = { type: eventType, age: 0, ...payload };
+        }
+        return events;
+    }
+
+    startBossEncounter(participantIds = this.playerIds()) {
+        if (!this.bossRuntime) {
+            return Object.freeze({ accepted: false, changed: false, reason: "boss-runtime-unavailable" });
+        }
+        const outcome = this.bossRuntime.start({ participantIds });
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    interactBossBreaker(playerId, breakerId) {
+        if (!this.bossRuntime) {
+            return Object.freeze({ accepted: false, changed: false, reason: "boss-runtime-unavailable" });
+        }
+        const outcome = this.bossRuntime.interactBreaker({ playerId, breakerId });
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    applyBossDamage(sourcePlayerId, damage) {
+        if (!this.bossRuntime) {
+            return Object.freeze({
+                accepted: false,
+                changed: false,
+                reason: "boss-runtime-unavailable",
+                appliedDamage: 0
+            });
+        }
+        const outcome = this.bossRuntime.applyDamage({ sourcePlayerId, damage });
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    handleBossParticipantDefeat(playerId, cause) {
+        if (!this.bossRuntime) {
+            return Object.freeze({
+                accepted: false,
+                changed: false,
+                reason: "boss-runtime-unavailable",
+                retryStarted: false
+            });
+        }
+        const outcome = this.bossRuntime.handlePlayerDefeat(playerId, cause);
+        this.#commitBossEvents();
+        return outcome;
+    }
+
+    restoreBossRuntime(snapshot) {
+        if (!this.bossRuntime) {
+            if (snapshot) throw new Error("cannot restore Boss runtime outside a seamless Sector world");
+            return null;
+        }
+        if (snapshot) this.bossRuntime.restore(snapshot);
+        return this.bossRuntime.snapshot();
+    }
+
     portalTransitionTick(playerId) {
         return this.portalTransitions.get(playerId)?.tick ?? null;
     }
@@ -319,50 +362,14 @@ export class GameSimulation {
     playerState(playerId) {
         const player = this.#findPlayer(playerId);
         if (!player) return null;
+        const playerSnapshot = player.renderSnapshot();
+        const ropeSnapshot = player.ropeObject.renderSnapshot();
         return {
-            id: player.id,
-            position: vectorState(player.physics.position),
-            velocity: vectorState(player.physics.velocity),
-            angle: player.physics.angle,
-            angularVelocity: player.physics.angularVelocity,
-            isGrounded: player.physics.isGrounded,
-            collider: player.physics.collider.snapshot(),
-            health: player.health,
-            maxHealth: player.maxHealth,
-            hitInvulnerabilityRemaining: player.hitInvulnerabilityRemaining,
-            ropeDisabledRemaining: player.ropeDisabledRemaining,
-            lifeState: player.lifeState,
+            ...playerSnapshot,
             ...(this.isSeamlessSectorWorld ? { respawnAnchorId: player.respawnAnchorId } : {}),
-            rope: {
-                isAttached: player.ropeObject.rope.isAttached,
-                anchor: vectorState(player.ropeObject.rope.anchor),
-                attachmentOffset: vectorState(player.ropeObject.rope.attachmentOffset),
-                length: player.ropeObject.rope.length,
-                currentLength: player.ropeObject.rope.currentLength,
-                tension: player.ropeObject.rope.tension
-            },
-            control: {
-                aimWorld: vectorState(player.ropeObject.aimWorld),
-                lastPointer: { ...player.ropeObject.lastPointer },
-                lastViewport: { ...player.ropeObject.lastViewport },
-                wasPointerDown: player.ropeObject.wasPointerDown,
-                attachBufferRemaining: player.ropeObject.attachBufferRemaining,
-                swingDrag: swingDragState(player.ropeObject.swingDrag)
-            },
-            launcher: player.ropeObject.launcher.snapshot(),
-            weapon: {
-                range: player.weapon.range,
-                damage: player.weapon.damage,
-                fireInterval: player.weapon.fireInterval,
-                cooldown: player.weapon.cooldown
-            },
-            foundationAugment: player.foundation.selectedId,
-            selectedAugmentIds: player.foundation.selectedIds,
-            augmentRuntimeState: Object.freeze({
-                ...player.foundation.snapshot(),
-                combat: player.augmentCombat.snapshot()
-            }),
-            actionState: player.augmentCombat.actionState?.snapshot() ?? null
+            rope: ropeSnapshot.rope,
+            control: ropeSnapshot.control,
+            launcher: ropeSnapshot.launcher
         };
     }
 
@@ -418,7 +425,7 @@ export class GameSimulation {
     }
 
     enemyStates() {
-        return this.enemies.map(enemyState);
+        return this.enemies.map((enemy) => enemy.renderSnapshot());
     }
 
     enemyNetworkStates() {
@@ -460,19 +467,17 @@ export class GameSimulation {
                       })
                   }
                 : spawn;
-            return enemyState(
-                createEnemyRuntime({
-                    ...definition,
-                    ...state,
-                    id: state.id,
-                    position: new Vector2(state.position.x, state.position.y),
-                    areaId: definition.areaId ?? null,
-                    objectId: state.objectId,
-                    swarmGroupId: definition.swarmGroupId ?? definition.slotId,
-                    radius: COMBAT_CONFIG.enemyRadius,
-                    maxHealth: COMBAT_CONFIG.enemyHealth
-                })
-            );
+            return createEnemyRuntime({
+                ...definition,
+                ...state,
+                id: state.id,
+                position: new Vector2(state.position.x, state.position.y),
+                areaId: definition.areaId ?? null,
+                objectId: state.objectId,
+                swarmGroupId: definition.swarmGroupId ?? definition.slotId,
+                radius: COMBAT_CONFIG.enemyRadius,
+                maxHealth: COMBAT_CONFIG.enemyHealth
+            }).renderSnapshot();
         });
     }
 
@@ -1035,6 +1040,10 @@ export class GameSimulation {
         if (this.runState !== "playing") {
             this.eventFlash.age += dt;
             return;
+        }
+        if (this.bossRuntime) {
+            this.bossRuntime.advance(dt);
+            this.#commitBossEvents();
         }
         if (resolveSummitProgress && this.updateSummitProgress()) return;
         if (resolveCheckpointProgress && !this.isSeamlessSectorWorld) this.updateCheckpointProgress();
@@ -2514,9 +2523,10 @@ export class GameSimulation {
 
     #recordPlayerRespawn(player, reason, causeId, deathPosition = player.physics.position) {
         const normalizedDeathPosition = this.#deathPosition(deathPosition);
+        const statusType = this.isSeamlessSectorWorld ? "sector-respawn" : "checkpoint-respawn";
         this.metrics.recordDefeat();
         this.eventFlash = {
-            type: this.isSeamlessSectorWorld ? "sector-respawn" : "checkpoint-respawn",
+            type: statusType,
             age: 0,
             playerId: player.id,
             reason,
@@ -2528,6 +2538,7 @@ export class GameSimulation {
             playerId: player.id,
             reason,
             causeId,
+            statusType,
             health: player.health,
             deathPosition: normalizedDeathPosition,
             position: { x: player.physics.position.x, y: player.physics.position.y }
@@ -2554,39 +2565,39 @@ export class GameSimulation {
 
     snapshot() {
         const player = this.#primaryPlayer();
+        const playerState = this.playerState(player.id);
+        const ropeState = player.ropeObject.renderSnapshot();
         return {
             tick: this.tick,
             world: this.world,
-            player: player.physics,
-            rope: player.ropeObject.rope,
-            aimWorld: player.ropeObject.aimWorld,
-            attachmentCandidate: player.ropeObject.attachmentCandidate,
-            eventFlash: this.eventFlash,
-            swingDrag: player.ropeObject.swingDrag,
-            enemies: this.enemies,
-            projectiles: this.projectiles,
-            enemyProjectiles: this.enemyProjectiles,
-            augmentProjectiles: player.augmentCombat.snapshot().actionProjectiles,
-            playerHealth: player.health,
-            playerMaxHealth: player.maxHealth,
-            ropeDisabledRemaining: player.ropeDisabledRemaining,
-            playerLifeState: player.lifeState,
+            player: playerState,
+            rope: playerState.rope,
+            aimWorld: playerState.control.aimWorld,
+            attachmentCandidate: ropeState.attachmentCandidate,
+            eventFlash: eventFlashState(this.eventFlash),
+            swingDrag: playerState.control.swingDrag,
+            enemies: this.enemyStates(),
+            projectiles: this.projectiles.map((projectile) => projectile.renderSnapshot()),
+            enemyProjectiles: this.enemyProjectiles.map((projectile) => projectile.renderSnapshot()),
+            augmentProjectiles: playerState.augmentRuntimeState.combat.actionProjectiles,
+            playerHealth: playerState.health,
+            playerMaxHealth: playerState.maxHealth,
+            ropeDisabledRemaining: playerState.ropeDisabledRemaining,
+            playerLifeState: playerState.lifeState,
             runState: this.runState,
             activeCheckpoint: this.activeCheckpoint,
             activeRespawnAnchor: this.activeRespawnAnchor,
-            foundationAugment: player.foundation.selectedId,
-            selectedAugmentIds: player.foundation.selectedIds,
+            foundationAugment: playerState.foundationAugment,
+            selectedAugmentIds: playerState.selectedAugmentIds,
             ropeConfig: this.ropeConfig,
-            augmentRuntimeState: Object.freeze({
-                ...player.foundation.snapshot(),
-                combat: player.augmentCombat.snapshot()
-            }),
-            actionState: player.augmentCombat.actionState?.snapshot() ?? null,
-            ropeShot: player.ropeObject.launcher.snapshot(),
+            augmentRuntimeState: playerState.augmentRuntimeState,
+            actionState: playerState.actionState,
+            ropeShot: playerState.launcher,
             foundationReward: this.foundationRewards.get(player.id) ?? null,
             foundationRewards: Object.fromEntries(this.foundationRewards),
             metrics: this.metrics.snapshot(),
             worldProgress: this.worldProgress?.snapshot() ?? null,
+            bossRuntime: this.bossRuntime?.snapshot() ?? null,
             windStates: this.world.windZones
                 ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
                 : Object.freeze([]),

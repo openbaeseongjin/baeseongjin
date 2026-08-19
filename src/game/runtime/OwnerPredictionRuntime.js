@@ -171,6 +171,7 @@ export class OwnerPredictionRuntime {
                 snapshot.state.worldElapsedSeconds ?? snapshot.serverTick * this.fixedDt
             );
         }
+        this.simulation.restoreBossRuntime(snapshot.state.bossRuntime ?? null);
         if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
     }
 

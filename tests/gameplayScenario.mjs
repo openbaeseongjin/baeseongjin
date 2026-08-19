@@ -56,6 +56,8 @@ import { run as routeSurfaceVisibility } from "./routeSurfaceVisibility.mjs";
 import { run as playerRespawnPresentation } from "./playerRespawnPresentation.mjs";
 import { run as worldUnlockPresentation } from "./worldUnlockPresentation.mjs";
 import { run as screenEdgeGuide } from "./screenEdgeGuide.mjs";
+import { run as bossEncounterRuntime } from "./bossEncounterRuntime.mjs";
+import { run as sector01MapReconstruction } from "./sector01MapReconstruction.mjs";
 
 const steps = {
     worldSeed,
@@ -112,6 +114,8 @@ const steps = {
     playerRespawnPresentation,
     worldUnlockPresentation,
     screenEdgeGuide,
+    bossEncounterRuntime,
+    sector01MapReconstruction,
     spriteAssetValidator,
     stateMachine,
     timedStateController,
