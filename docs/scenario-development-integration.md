@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 0ddda9476ceb261568089af081af6a5ae452b97c9e72c5ba749c1c5ade3e7dac
-authored-area-sha256: 4567d0560f2dc1cf29b40d773a0bf76b3ec185ab640b2ff335d60336795ae4ff
-authored-sector-sha256: 504d999ef2b111fdb708b9cf63dec47e854d79d7f7dcf33853f0ad26cfd60422
+scenario-source-sha256: 94b5288fffab7e09b1cea0b3aa719b01c0b35b7695aa93c300060bc3ecaf7f97
+authored-area-sha256: b56097e9fbc02ce696ae026f9fa0f30e8b602152ae58bec2af108856c7eb5653
+authored-sector-sha256: 5aa91732e7174dbca73750681cfa7578c6d87ddccf23235b627bc6097faedcb2
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: eb8722eb4fbdac23b9c43cb224b259d4ad439a8b
+reviewed-upstream: 5ae6efca720720ee34f2a8b45daf1778fd206c1f
 -->
 
 ## 상태를 읽는 법
@@ -129,6 +129,7 @@ reviewed-upstream: eb8722eb4fbdac23b9c43cb224b259d4ad439a8b
 67. **PARTIALLY SUPERSEDED BY 68:** 세이브·Stage 경계 회귀를 수정해 `StageSavePointGeometry`의 `76×82` 로컬 시각 bounds와 player `CircleCollider` 겹침을 저장 trigger로 사용하고 과거 임의 `128×128` entry 판정을 제거했다. 수평 `sector-connector`는 두 authored deck 사이 빈 구간만 deck top에 생성하며, 1-1→1-2의 anchor 중심 `576×32` platform은 실제 `128×32` gap bridge로 줄였다. 당시 2인 이상 same-tick party wipe는 68의 Player별 checkpoint 계약에서 제거됐다.
 68. 멀티 세이브 권위를 Player별 checkpoint로 전환했다. 공용 `SectorProgressState`와 WorldSnapshot top-level의 `respawnAnchorId`를 제거하고 각 `players[]` state가 개인 anchor를 소유한다. owner-motion v5는 owner가 먼저 감지한 anchor ID를 위치와 함께 보내며 서버는 방문 가능 Stage와 실제 trigger 겹침을 확인한 뒤 해당 Player만 갱신한다. 혼자 만든 멀티 채널과 2인 채널 모두 사망자는 자기 마지막 anchor에서 부활하고, 신규 합류자는 현재 Sector entry에서 자기 anchor를 시작한다. 전원 사망도 공용 objective·route·enemy를 reset하지 않으며 `partyWipeBaseline`은 WorldSnapshot v10에서 제거했다. 향후 reset은 Timer/Purge 기획에서 명시적 사건과 권위를 별도로 확정한다.
 69. 반복된 Stage save/platform 회귀의 구조적 모순을 제거했다. `currentSectorId/currentLandmarkId/visitedLandmarkIds`와 `visitLandmark()`를 공용 진행 snapshot에서 제거하고 모든 objective가 자기 trigger/source와 `requiredObjectiveIds`만으로 판정된다. save collision은 모든 anchor를 동일 resolver로 검사하는 유일한 Stage 도달 사건이며 UI Stage는 Player 좌표에서 파생한다. `sector-connector`는 동적 route surface가 아니라 Run 시작부터 존재하는 정적 `sector-seam`이고 objective/save 전후 collision·renderer surface ID 집합은 변하지 않는다. Stage/route door·barrier·portal은 추가하지 않았고 inter-Sector 제약은 Boss 구현까지 HOLD다. HUD는 generic Augment, 좌표 Stage, HP와 다음 Action charge cooldown을 표시하며 모든 Player는 HP+cooldown overhead, 모든 Enemy는 항상 HP overhead를 공유한다. 반복 유사 버그 모순 감사 절차를 `AGENTS.md`와 `docs/development-rules.md`에 승격했다.
+70. `docs/sector-01-2-01-3-rev8-implementation` 브랜치는 `ONE-ROPE-SECTOR-01-02/03-REV8.0-GITHUB-READY` 패키지(baseline `5ae6efca`, latest main과 일치)를 설치하던 중 1-2의 REV8 `p0`가 1-1 exit deck과 world-x상 겹쳐 `LegacyAreaSeamlessSectorRuntime.js`의 connector 생성이 억제되는 것을 발견했고, 조사 결과 이건 1-2만의 문제가 아니라 **Sector 01~03 전체 landmark 전환에 걸친 기존 결함**임을 확인했다 — `connectorSurface()`가 만드는 `sector-seam` surface는 애초에 `requiredRouteId`를 설정한 적이 없어(전체 코드베이스 grep으로 확인), `SectorProgressState`의 논리적 unlock 계산은 정확했지만 실제 충돌 판정에 반영되지 않았다. `WorldGateGeometry.js`에 `requiredRouteId`(잠긴 동안 부재→해제 시 등장)의 대칭 짝인 `blockedUntilRouteId`(잠긴 동안 존재→해제 시 소멸)를 추가하고, `connectorSurface()`가 모든 connector에 `requiredRouteId`를 부여하며 바닥이 겹쳐 다리가 필요 없는 경우엔 `blockedUntilRouteId`가 붙은 세로 barrier를 만들도록 고쳤다. Barrier 높이는 고정 상수가 아니라 두 landmark의 실제 `bounds` 합집합에서 산출한다(월드 전체 landmark 중 최대 `bounds.height`가 1792px로 애초에 검토했던 고정 ±640px보다 컸다). `tests/legacyAreaSeamlessSectorRuntime.mjs`의 "겹치는 deck은 platform을 만들면 안 된다" 단언(이게 버그였던 동작 자체를 고정하고 있었음)을 barrier 검증으로 교체했다. 실제 physics 시뮬레이션으로 objective 완료 전/후 crossing과 barrier 상단·중단·하단 우회 시도를 모두 검증했다 — 셋 다 정확히 차단되고, `completeObjective` 후에만 통과한다. `1-2/1-3 REV8` 좌표는 패키지 그대로 유지했다(Runtime 결함이 원인이었지 좌표 문제가 아니었다). `npm run check`/`npm test`/관련 targeted regression 전체 통과.
 
 ## 열린 기획·구현 게이트
 

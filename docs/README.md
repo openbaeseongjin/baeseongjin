@@ -81,13 +81,30 @@ Stage README와 과거 제작 자료에는 0.26.0 이전 Foundation·Impulse·Re
 | [`bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md`](./bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md) | Stage별 `AREA-SPEC.json`(구현 계약) 스키마·Local ID·preset·검증 규칙을 정의하는 공통 규격 |
 | [`bsh/scenario/AREA-SPEC-TEMPLATE.json`](./bsh/scenario/AREA-SPEC-TEMPLATE.json) | `AREA-SPEC.json` 작성용 template — 실제 Stage로 집계되지 않음 |
 | [`bsh/scenario/1/README.md`](./bsh/scenario/1/README.md) | `bsh` Sector 01 공용 배경 아트 레퍼런스와 Stage 인덱스 |
+| [`bsh/scenario/1/STAGE-SCALE-UNIQUENESS-GATE-REV1.md`](./bsh/scenario/1/STAGE-SCALE-UNIQUENESS-GATE-REV1.md) | `bsh` Stage 규모/고유성 승인 게이트 프로세스 규칙(DESIGN LOCKED) — bounds 산출 순서, Map similarity, Obstacle function, Length/pacing, Runtime check |
 | [`bsh/scenario/1/1-1/README.md`](./bsh/scenario/1/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격 |
 | [`bsh/scenario/1/1-1/AREA-SPEC.json`](./bsh/scenario/1/1-1/AREA-SPEC.json) | 1-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Acceptance Tests |
 | [`bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md) | 1-1 Runtime 좌표·Camera·Story·Asset 인계 계약 |
-| [`bsh/scenario/1/1-2/README.md`](./bsh/scenario/1/1-2/README.md) | `bsh` Airborne Re-Attach Benchmark Stage(1-2) Blockout 후보·제작 규격 |
-| [`bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md) | 1-2 Runtime 좌표·Camera·Story·Asset 인계 계약 |
-| [`bsh/scenario/1/1-3/README.md`](./bsh/scenario/1/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout 후보·제작 규격 |
-| [`bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md) | 1-3 Runtime 좌표·Camera·Sentry FSM·Story·Asset 인계 계약 |
+| [`bsh/scenario/1/1-2/README.md`](./bsh/scenario/1/1-2/README.md) | `bsh` Airborne Re-Attach Benchmark Stage(1-2) Blockout·제작 규격, REV 8.0 |
+| [`bsh/scenario/1/1-2/AREA-SPEC.json`](./bsh/scenario/1/1-2/AREA-SPEC.json) | 1-2 구현 계약(area-spec-v1), REV 8.0 |
+| [`bsh/scenario/1/1-2/DIRECTION-SPEC.json`](./bsh/scenario/1/1-2/DIRECTION-SPEC.json) | 1-2 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/1/1-2/MAP-PREVIEW.html`](./bsh/scenario/1/1-2/MAP-PREVIEW.html) | 1-2 승인 Map 시각화 |
+| [`bsh/scenario/1/1-2/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-2/STORY-DIRECTION-PREVIEW.html) | 1-2 승인 심리/서사/분위기 시각화 |
+| [`bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md) | 1-2 Runtime 좌표·Camera·Story·Asset 인계 계약, REV 8.0 — geometry 구현 완료 |
+| [`bsh/scenario/1/1-2/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-2/RUNTIME-HANDOFF.md) | 1-2 구현 delta 인계 |
+| [`bsh/scenario/1/1-2/VALIDATION.md`](./bsh/scenario/1/1-2/VALIDATION.md) | 1-2 acceptance checklist |
+| [`bsh/scenario/1/1-2/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-2/ASSET-REQUIREMENTS.md) | 1-2 art/audio/UI 요구사항 |
+| [`bsh/scenario/1/1-2/MANIFEST.md`](./bsh/scenario/1/1-2/MANIFEST.md) | 1-2 REV8.0 패키지 파일 목록·권위 |
+| [`bsh/scenario/1/1-3/README.md`](./bsh/scenario/1/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout·제작 규격, REV 8.0 |
+| [`bsh/scenario/1/1-3/AREA-SPEC.json`](./bsh/scenario/1/1-3/AREA-SPEC.json) | 1-3 구현 계약(area-spec-v1), REV 8.0 |
+| [`bsh/scenario/1/1-3/DIRECTION-SPEC.json`](./bsh/scenario/1/1-3/DIRECTION-SPEC.json) | 1-3 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/1/1-3/MAP-PREVIEW.html`](./bsh/scenario/1/1-3/MAP-PREVIEW.html) | 1-3 승인 Map 시각화 |
+| [`bsh/scenario/1/1-3/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-3/STORY-DIRECTION-PREVIEW.html) | 1-3 승인 심리/서사/분위기 시각화 |
+| [`bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-3/PRODUCTION-ALIGNMENT.md) | 1-3 Runtime 좌표·Camera·Sentry FSM·Story·Asset 인계 계약, REV 8.0 — Runtime 구현 대기 |
+| [`bsh/scenario/1/1-3/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-3/RUNTIME-HANDOFF.md) | 1-3 구현 delta 인계 |
+| [`bsh/scenario/1/1-3/VALIDATION.md`](./bsh/scenario/1/1-3/VALIDATION.md) | 1-3 acceptance checklist |
+| [`bsh/scenario/1/1-3/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-3/ASSET-REQUIREMENTS.md) | 1-3 art/audio/UI 요구사항 |
+| [`bsh/scenario/1/1-3/MANIFEST.md`](./bsh/scenario/1/1-3/MANIFEST.md) | 1-3 REV8.0 패키지 파일 목록·권위 |
 | [`bsh/scenario/1/1-4/README.md`](./bsh/scenario/1/1-4/README.md) | `bsh` 첫 Rope Augment 3지선다·Calibration Stage(1-4) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md) | 1-4 Runtime 좌표·Camera·generic Augment 선택 구현 Gap 계약 |
 | [`bsh/scenario/1/1-5/README.md`](./bsh/scenario/1/1-5/README.md) | `bsh` 첫 Build Expression·Augment별 경로 Stage(1-5) Blockout 후보·제작 규격 |

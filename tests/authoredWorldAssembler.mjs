@@ -204,24 +204,34 @@ export function run() {
         "assembly must translate the authored platform anchor together with its vertices"
     );
     const secondAreaDefinition = SECTOR_01_AREA_CATALOG.areas.find(({ id }) => id === "sector-01-02");
+    // REV8.0 geometry (docs/bsh/scenario/1/1-2/AREA-SPEC.json): crossbeam-x1 was replaced by the
+    // dead-lift-cage/counterweight-tower/hoist-casing-left/right non-grapple-solid masses.
     assert.deepEqual(
         Object.fromEntries(
             secondAreaDefinition.surfaces
-                .filter(({ id }) => /:(p[0-3]|crossbeam-x1|exit-deck)$/.test(id))
+                .filter(({ id }) =>
+                    /:(p[0-3]|r2|dead-lift-cage|counterweight-tower|hoist-casing-left|hoist-casing-right|exit-deck)$/.test(
+                        id
+                    )
+                )
                 .map((surface) => [
                     surface.id.split(":").at(-1),
                     { ...authoredSurfaceBounds(surface), grappleable: surface.grappleable }
                 ])
         ),
         {
-            p0: { x: -416, y: 0, width: 256, height: 32, grappleable: true },
-            p1: { x: 64, y: -288, width: 192, height: 16, grappleable: true },
-            "crossbeam-x1": { x: -64, y: -544, width: 128, height: 32, grappleable: false },
-            p2: { x: -288, y: -576, width: 192, height: 16, grappleable: true },
-            p3: { x: 64, y: -800, width: 192, height: 16, grappleable: true },
-            "exit-deck": { x: 64, y: -963, width: 288, height: 32, grappleable: true }
+            p0: { x: 192, y: 0, width: 448, height: 32, grappleable: true },
+            p1: { x: -528, y: -320, width: 224, height: 16, grappleable: true },
+            r2: { x: -48, y: -656, width: 224, height: 16, grappleable: true },
+            p2: { x: -64, y: -704, width: 256, height: 16, grappleable: true },
+            p3: { x: -320, y: -768, width: 320, height: 24, grappleable: true },
+            "dead-lift-cage": { x: -96, y: -608, width: 448, height: 320, grappleable: false },
+            "counterweight-tower": { x: -592, y: -704, width: 96, height: 448, grappleable: false },
+            "hoist-casing-left": { x: -832, y: -960, width: 32, height: 960, grappleable: false },
+            "hoist-casing-right": { x: 800, y: -960, width: 32, height: 960, grappleable: false },
+            "exit-deck": { x: -544, y: -832, width: 384, height: 32, grappleable: true }
         },
-        "1-2 gameplay surfaces must stay aligned with the REV 3.1 approved blockout"
+        "1-2 gameplay surfaces must stay aligned with the REV8.0 approved blockout"
     );
     assert.deepEqual(
         secondAreaDefinition.objects
@@ -232,11 +242,11 @@ export function run() {
                 coordinateAnchor
             })),
         [
-            { id: "maintenance-lift", position: { x: 0, y: -544 }, coordinateAnchor: "center" },
-            { id: "anchor-a", position: { x: -128, y: -192 }, coordinateAnchor: "center" },
-            { id: "anchor-c", position: { x: -160, y: -640 }, coordinateAnchor: "center" },
-            { id: "exit-gate", position: { x: 320, y: -963 }, coordinateAnchor: "bottom-center" },
-            { id: "exit-panel", position: { x: 208, y: -963 }, coordinateAnchor: "bottom-center" }
+            { id: "maintenance-lift", position: { x: 128, y: -448 }, coordinateAnchor: "center" },
+            { id: "anchor-a", position: { x: 224, y: -192 }, coordinateAnchor: "center" },
+            { id: "anchor-c", position: { x: -320, y: -560 }, coordinateAnchor: "center" },
+            { id: "exit-gate", position: { x: -192, y: -832 }, coordinateAnchor: "bottom-center" },
+            { id: "exit-panel", position: { x: -304, y: -832 }, coordinateAnchor: "bottom-center" }
         ],
         "1-2 landmarks and floor-mounted exit objects must use the approved anchors"
     );

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 1-2 REV8 Map Preview</title>
+<style>
+:root{--bg:#061019;--panel:#0d1820;--line:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:410px 1fr}aside{padding:11px;background:var(--panel);border-right:1px solid var(--line);max-height:100vh;overflow:auto}main{padding:11px}
+.card{padding:9px;border:1px solid var(--line);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:740px;background:#061019;border:1px solid var(--line);border-radius:8px}
+.core{fill:#0b1820;stroke:#4c6977;stroke-width:3}.old1{fill:none;stroke:#7e8e95;stroke-width:2;stroke-dasharray:6 6}.current{fill:none;stroke:var(--r);stroke-width:3;stroke-dasharray:7 6}
+.shell{fill:#292e31;stroke:#a97659;stroke-width:3}.lift{fill:#2b3034;stroke:#c18a61;stroke-width:3}.inner{fill:#12191d;stroke:#65727a;stroke-width:2}.counter{fill:#333237;stroke:#a28b76;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.rec{fill:#315944;stroke:var(--g);stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.flow{fill:none;stroke:var(--y);stroke-width:4;stroke-dasharray:12 8}.safe{fill:none;stroke:var(--g);stroke-width:3;stroke-dasharray:7 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.14}.wing{fill:#273b43;stroke:#627983;stroke-width:2;opacity:.8}
+text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.hidden{display:none}.pass{color:var(--g)}.hyp{color:var(--a)}.delta{color:#f2a790}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>1-2 DOUBLE ANCHOR SHAFT · REV8</h1><div class="sub">1664×960 · RIGHT ENTRY → LEFT AIRBORNE C → ROOF WRAP → LEFT EXIT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>WHAT IS DIFFERENT NOW?</b><br>
+이 맵은 넓은 빈 Shaft가 아니다.<br><br>
+<b>Dead Lift + Counterweight</b>가 실제로 공간을 두 덩어리로 나누고,
+Player는 둘 사이 400px Service Slot을 공중으로 통과한다.</div>
+<div class="card">
+MAP SCALE <span class="pass">PASS</span><br>
+MAP SIMILARITY <span class="pass">PASS</span><br>
+OBSTACLE FUNCTION <span class="pass">PASS</span><br>
+LENGTH/PACING <span class="hyp">HYPOTHESIS</span><br>
+CURRENT RUNTIME <span class="delta">MAJOR DELTA</span>
+</div>
+<div class="card"><b>SCALE</b><br>
+1-1 REV8: 1280×1024<br>
+<b>1-2 REV8: 1664×960</b><br>
+1-3 Runtime: 3840×1152<br><br>
+1-2는 더 <b>넓고 낮다.</b></div>
+<div class="card"><b>FLOW</b><br>
+Entry RIGHT (+448)<br>
+A RIGHT (+224)<br>
+→ airborne cross LEFT<br>
+C LEFT (-320)<br>
+→ roof reversal RIGHT<br>
+P2 (+64)<br>
+→ catwalk LEFT<br>
+Exit (-352)</div>
+<div class="card"><b>MACHINERY</b><br>
+Dead Lift: x -96..+352<br>
+Counterweight: x -592..-496<br>
+Bypass Slot: <b>400px</b></div>
+<div class="card">
+<label><input type="checkbox" data-layer="flow" checked> Target Flow</label>
+<label><input type="checkbox" data-layer="safe" checked> Failure / Recovery</label>
+<label><input type="checkbox" data-layer="current"> Current 1-2 Runtime</label>
+<label><input type="checkbox" data-layer="one"> 1-1 REV8 footprint</label>
+<label><input type="checkbox" data-layer="reach"> 400px Hook Reach</label>
+<label><input type="checkbox" data-layer="wings"> Seamless outside-core concept</label>
+</div>
+<div class="card"><b>PACING</b><br>
+Core Rope decisions: 3<br>
+First clear 1:00–1:30<br>
+Mastered 0:25–0:42<br><br>
+A→C retry가 길어지면 맵을 늘리지 않고 attach window를 완화한다.</div>
+</aside><main>
+<svg viewBox="-980 -1020 1960 1080">
+
+<rect class="core" x="-832" y="-960" width="1664" height="960"/>
+<text class="tiny" x="-815" y="-930">REV8 CORE 1664×960</text>
+
+<g data-group="one" class="hidden">
+<rect class="old1" x="-640" y="-1024" width="1280" height="1024"/>
+<text class="tiny" x="-625" y="-995">1-1 REV8 FOOTPRINT 1280×1024</text>
+</g>
+
+<g data-group="wings" class="hidden">
+<rect class="wing" x="-970" y="-32" width="170" height="32"/>
+<rect class="wing" x="800" y="-32" width="170" height="32"/>
+<text class="tiny" x="-965" y="-50">SEAMLESS OUTSIDE CORE</text>
+</g>
+
+<rect class="shell" x="-832" y="-960" width="32" height="960"/>
+<rect class="shell" x="800" y="-960" width="32" height="960"/>
+
+<!-- start -->
+<rect class="surface" x="192" y="0" width="448" height="32"/>
+<text class="tiny" x="200" y="-10">P0 / ENTRY RIGHT</text>
+
+<!-- machinery -->
+<rect class="lift" x="-96" y="-608" width="448" height="320"/>
+<rect class="inner" x="-48" y="-560" width="352" height="224"/>
+<line x1="-48" y1="-560" x2="304" y2="-336" stroke="#5e696f" stroke-width="3"/>
+<line x1="304" y1="-560" x2="-48" y2="-336" stroke="#5e696f" stroke-width="3"/>
+<text x="65" y="-445">DEAD LIFT</text>
+
+<rect class="counter" x="-592" y="-704" width="96" height="448"/>
+<text class="tiny" x="-585" y="-715">COUNTERWEIGHT</text>
+<line x1="-496" y1="-260" x2="-96" y2="-260" stroke="#efb75b" stroke-width="2" stroke-dasharray="7 6"/>
+<text class="tiny" x="-430" y="-270">400px SERVICE SLOT</text>
+
+<!-- targets/platforms -->
+<circle class="anchor" cx="224" cy="-192" r="13"/><text x="245" y="-184">A</text>
+<rect class="rec" x="-528" y="-320" width="224" height="16"/><text class="tiny" x="-520" y="-330">P1 MISS CATCH</text>
+
+<circle class="anchor" cx="-320" cy="-560" r="13"/><text x="-298" y="-552">C</text>
+
+<rect class="rec" x="-48" y="-656" width="224" height="16"/><text class="tiny" x="-40" y="-666">R2 LOW CATCH</text>
+<rect class="surface" x="-64" y="-704" width="256" height="16"/><text class="tiny" x="-56" y="-714">P2 ROOF REVERSAL LANDING</text>
+<rect class="surface" x="-320" y="-768" width="320" height="24"/><text class="tiny" x="-312" y="-780">P3 UPPER CATWALK</text>
+<rect class="surface" x="-544" y="-832" width="384" height="32"/><text class="tiny" x="-536" y="-844">FINAL DECK LEFT</text>
+
+<g data-group="flow">
+<path class="flow" d="M448,-32 Q340,-115 224,-192 Q45,-275 -5,-350 Q-120,-430 -320,-560 Q-150,-660 64,-704 Q-55,-748 -160,-768 Q-250,-805 -352,-832"/>
+<text class="tiny" x="-35" y="-370">AIRBORNE C WINDOW</text>
+<text class="tiny" x="-235" y="-640">LEFT C → ROOF REVERSAL</text>
+</g>
+
+<g data-group="safe">
+<path class="safe" d="M224,-192 Q-60,-285 -416,-320"/>
+<path class="safe" d="M-320,-560 Q-130,-650 64,-656"/>
+</g>
+
+<g data-group="reach" class="hidden">
+<circle class="reach" cx="224" cy="-192" r="400"/>
+<circle class="reach" cx="-320" cy="-560" r="400"/>
+<circle class="reach" cx="0" cy="-350" r="400"/>
+</g>
+
+<g data-group="current" class="hidden">
+<rect class="current" x="-480" y="-1088" width="960" height="1088"/>
+<text class="tiny" x="-465" y="-1045">CURRENT 1-2 960×1088</text>
+<circle class="current" cx="-128" cy="-192" r="15"/>
+<circle class="current" cx="-160" cy="-640" r="15"/>
+<rect class="current" x="64" y="-288" width="192" height="16"/>
+<rect class="current" x="-288" y="-576" width="192" height="16"/>
+<rect class="current" x="64" y="-800" width="192" height="16"/>
+</g>
+
+</svg></main></div>
+<script>
+document.querySelectorAll('input[data-layer]').forEach(cb=>{
+ const f=()=>document.querySelectorAll(`[data-group="${cb.dataset.layer}"]`).forEach(el=>el.classList.toggle('hidden',!cb.checked));
+ cb.addEventListener('change',f);f();
+});
+</script></body></html>

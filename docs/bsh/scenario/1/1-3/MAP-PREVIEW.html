@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 1-3 REV8 Map Preview</title>
+<style>
+:root{--bg:#061019;--panel:#0d1820;--line:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--purple:#c9a7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.42 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:420px 1fr}aside{padding:11px;background:var(--panel);border-right:1px solid var(--line);max-height:100vh;overflow:auto}main{padding:11px}
+.card{padding:9px;border:1px solid var(--line);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:740px;background:#061019;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151c;stroke:#4c6977;stroke-width:3}.spine{fill:#10212a;stroke:#66808c;stroke-width:2}.annex{fill:#121c22;stroke:#6f536f;stroke-width:2}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#315944;stroke:var(--g);stroke-width:2}.cover{fill:#35434a;stroke:#a7bbc4;stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.access{fill:var(--purple);stroke:white;stroke-width:2}.scanner{fill:#0c2c36;stroke:var(--c);stroke-width:3}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.carrier{fill:#6b3d20;stroke:#ffc168;stroke-width:4}.route{fill:none;stroke:var(--y);stroke-width:4;stroke-dasharray:12 8}.accessRoute{fill:none;stroke:var(--purple);stroke-width:4;stroke-dasharray:10 7}.returnRoute{fill:none;stroke:var(--g);stroke-width:3;stroke-dasharray:7 7}.los{fill:none;stroke:var(--r);stroke-width:2;stroke-dasharray:5 6;opacity:.75}.current{fill:none;stroke:var(--r);stroke-width:3;stroke-dasharray:7 7}.oldFoot{fill:none;stroke:#7b8c94;stroke-width:2;stroke-dasharray:6 6}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.13}
+text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.hidden{display:none}.pass{color:var(--g)}.hyp{color:var(--a)}.partial{color:#f2a790}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>1-3 SECURITY CHECK · REV8 APPROVED MAP PREVIEW</h1><div class="sub">3840×1152 KEEP · MAIN SECURITY SPINE + PURPOSEFUL ACCESS A ANNEX</div></header>
+<div class="layout"><aside>
+<div class="card"><b>SCALE DECISION</b><br>
+1-1 1280×1024<br>
+1-2 1664×960<br>
+<b>1-3 3840×1152 KEEP</b><br><br>
+이번 Stage는 크기를 바꾸는 게 아니라 <b>현재 큰 폭을 실제 Annex 깊이·Combat·Return에 맞게 다시 저작</b>한다.</div>
+<div class="card">
+MAP SCALE <span class="pass">PASS</span><br>
+MAP SIMILARITY <span class="pass">PASS</span><br>
+OBSTACLE FUNCTION <span class="pass">PASS</span><br>
+LENGTH/PACING <span class="hyp">HYPOTHESIS</span><br>
+CURRENT RUNTIME <span class="partial">PARTIAL MATCH</span>
+</div>
+<div class="card"><b>NO FAKE ROUTE CHOICE</b><br>
+Main Spine = Stage progression.<br>
+Access Annex = Access Module A의 명확한 기능 공간.<br><br>
+좌/우를 같은 가치의 자유선택처럼 연출하지 않는다.</div>
+<div class="card"><b>ACCESS APPROACH</b><br>
+Junction → ACCESS A → Mid Gantry → ACCESS B → Arena → Carrier<br><br>
+Key까지 <b>2 meaningful Rope decisions</b>.</div>
+<div class="card"><b>ENEMIES = EXACTLY 3</b><br>
+Approach Guard ≈ +960<br>
+Upper Guard ≈ +1512<br>
+Carrier A ≈ +1760<br><br>
+Carrier가 Annex의 가장 깊은 의미 지점.</div>
+<div class="card"><b>ARENA COVER</b><br>Security Console + Power Rack<br><b>STATIC / NOT MOVING</b><br>바닥 위에 서 있는 LOS 차단 설비.</div>
+<div class="card"><b>PACING</b><br>
+Mainline first: 1:15–1:45<br>
+Access A first: 2:10–3:00<br>
+Access mastered: 1:15–1:45</div>
+<div class="card">
+<label><input type="checkbox" data-layer="main" checked> Main Spine Route</label>
+<label><input type="checkbox" data-layer="access" checked> Access A Excursion</label>
+<label><input type="checkbox" data-layer="return" checked> Return Route</label>
+<label><input type="checkbox" data-layer="los"> Enemy Pressure / LOS</label>
+<label><input type="checkbox" data-layer="current"> Current Runtime Annex</label>
+<label><input type="checkbox" data-layer="prev"> 1-2 REV8 footprint</label>
+<label><input type="checkbox" data-layer="reach"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>Important</b><br>
+Old main B/D anchor framing is retired.<br>
+REV8 = Main A/C + Annex ACCESS A/B.</div>
+</aside><main>
+<svg viewBox="-2040 -1210 4080 1270">
+<rect class="bounds" x="-1920" y="-1152" width="3840" height="1152"/>
+<text class="tiny" x="-1890" y="-1115">1-3 REV8 BOUNDS 3840×1152</text>
+
+<g data-group="prev" class="hidden">
+<rect class="oldFoot" x="-832" y="-960" width="1664" height="960"/>
+<text class="tiny" x="-810" y="-930">1-2 REV8 FOOTPRINT</text>
+</g>
+
+<!-- conceptual playable regions -->
+<rect class="spine" x="-480" y="-1152" width="864" height="1152"/>
+<rect class="annex" x="384" y="-864" width="1536" height="480"/>
+<text class="tiny" x="-455" y="-1080">MAIN SECURITY SPINE</text>
+<text class="tiny" x="410" y="-840">ACCESS A SECURITY ANNEX</text>
+
+<!-- main geometry -->
+<rect class="surface" x="-416" y="0" width="544" height="32"/>
+<rect class="scanner" x="-144" y="-128" width="96" height="128"/>
+<text class="tiny" x="-138" y="-140">SCANNER</text>
+
+<circle class="anchor" cx="64" cy="-224" r="13"/><text x="86" y="-215">A</text>
+<rect class="surface" x="128" y="-320" width="256" height="18"/><text class="tiny" x="135" y="-332">P1 WARNING DECK</text>
+<rect class="surface" x="160" y="-480" width="256" height="20"/><text class="tiny" x="168" y="-492">SECURITY JUNCTION</text>
+<rect class="safe" x="-48" y="-592" width="256" height="16"/><text class="tiny" x="-42" y="-603">R1</text>
+<rect class="safe" x="-360" y="-656" width="240" height="16"/><text class="tiny" x="-354" y="-667">SAFE LEDGE</text>
+<circle class="anchor" cx="-192" cy="-752" r="13"/><text x="-169" y="-744">C</text>
+<rect class="cover" x="-56" y="-848" width="48" height="160"/>
+<rect class="surface" x="-96" y="-896" width="320" height="20"/><text class="tiny" x="-88" y="-908">UPPER RELIEF</text>
+<rect class="surface" x="32" y="-1027" width="320" height="32"/><text class="tiny" x="40" y="-1040">FINAL DECK / PANEL / GATE</text>
+
+<!-- annex rope -->
+<circle class="access" cx="512" cy="-496" r="13"/><text x="535" y="-487">ACCESS A</text>
+<rect class="surface" x="640" y="-560" width="192" height="16"/><text class="tiny" x="648" y="-571">MID GANTRY</text>
+<circle class="access" cx="960" cy="-608" r="13"/><text x="983" y="-600">ACCESS B</text>
+<rect class="surface" x="1056" y="-640" width="224" height="18"/><text class="tiny" x="1064" y="-652">ARENA ENTRY</text>
+<rect class="surface" x="1168" y="-640" width="736" height="32"/><text class="tiny" x="1176" y="-654">ACCESS ARENA FLOOR</text>
+<rect class="surface" x="1352" y="-768" width="320" height="20"/><text class="tiny" x="1360" y="-780">UPPER SECURITY BALCONY</text>
+<rect class="cover" x="1292" y="-752" width="72" height="112"/><text class="tiny" x="1260" y="-765">STATIC SECURITY CONSOLE</text>
+<rect class="cover" x="1556" y="-800" width="88" height="160"/><text class="tiny" x="1530" y="-815">STATIC POWER RACK</text>
+
+<!-- enemies -->
+<circle class="enemy" cx="960" cy="-576" r="18"/><text class="tiny" x="920" y="-548">APPROACH GUARD</text>
+<circle class="enemy" cx="1512" cy="-768" r="18"/><text class="tiny" x="1472" y="-790">UPPER GUARD</text>
+<circle class="carrier" cx="1760" cy="-640" r="21"/><text class="tiny" x="1700" y="-665">ACCESS CARRIER A</text>
+
+<!-- main route -->
+<g data-group="main">
+<path class="route" d="M-320,-32 Q-105,-110 64,-224 Q170,-275 256,-320 Q288,-405 288,-480 Q80,-590 -192,-752 Q-30,-840 64,-896 Q135,-965 192,-1027"/>
+</g>
+
+<!-- access excursion -->
+<g data-group="access">
+<path class="accessRoute" d="M288,-480 Q405,-475 512,-496 Q625,-520 736,-560 Q830,-585 960,-608 Q1060,-625 1168,-640 Q1450,-625 1760,-640"/>
+</g>
+
+<g data-group="return">
+<path class="returnRoute" d="M1760,-640 Q1410,-650 1168,-640 Q1040,-625 960,-608 Q820,-575 736,-560 Q610,-525 512,-496 Q400,-480 288,-480"/>
+</g>
+
+<g data-group="los" class="hidden">
+<path class="los" d="M960,-576 L288,-480"/>
+<path class="los" d="M1512,-768 L1260,-640"/>
+<path class="los" d="M1760,-640 L1390,-640"/>
+<circle class="reach" cx="960" cy="-576" r="760"/>
+<circle class="reach" cx="1512" cy="-768" r="760"/>
+<circle class="reach" cx="1760" cy="-640" r="760"/>
+</g>
+
+<g data-group="reach" class="hidden">
+<circle class="reach" cx="64" cy="-224" r="400"/>
+<circle class="reach" cx="-192" cy="-752" r="400"/>
+<circle class="reach" cx="512" cy="-496" r="400"/>
+<circle class="reach" cx="960" cy="-608" r="400"/>
+</g>
+
+<!-- current runtime annex overlay -->
+<g data-group="current" class="hidden">
+<rect class="current" x="224" y="-576" width="832" height="16"/>
+<text class="tiny" x="230" y="-590">CURRENT CONTINUOUS ANNEX BRIDGE W832</text>
+<rect class="current" x="840" y="-640" width="960" height="32"/>
+<text class="tiny" x="850" y="-615">CURRENT ARENA W960</text>
+<circle class="current" cx="448" cy="-480" r="15"/>
+<circle class="current" cx="896" cy="-544" r="15"/>
+<circle class="current" cx="1500" cy="-640" r="20"/>
+<circle class="current" cx="1040" cy="-640" r="18"/>
+<circle class="current" cx="1760" cy="-640" r="18"/>
+</g>
+</svg></main></div>
+<script>
+document.querySelectorAll('input[data-layer]').forEach(cb=>{
+ const f=()=>document.querySelectorAll(`[data-group="${cb.dataset.layer}"]`).forEach(el=>el.classList.toggle('hidden',!cb.checked));
+ cb.addEventListener('change',f); f();
+});
+</script></body></html>
