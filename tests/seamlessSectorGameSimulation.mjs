@@ -312,6 +312,10 @@ export function run() {
         }
     );
     assert.equal(simulation.snapshot().eventFlash.type, "sector-respawn");
+    const soloDeathEvent = simulation
+        .drainReplicationEvents()
+        .find(({ eventType, causeId }) => eventType === "player-respawned" && causeId === "solo-death");
+    assert.equal(soloDeathEvent.statusType, "sector-respawn");
     owner.physics.position.set(700, -700);
     assert.equal(simulation.respawnPlayerAtCheckpoint(owner, "fall", "solo-fall"), true);
     assert.deepEqual(simulation.worldProgress.snapshot(), progressBeforeSoloDeath);

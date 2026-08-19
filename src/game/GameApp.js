@@ -8,6 +8,7 @@ import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore
 import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.js";
 import { CAMERA_CONFIG, resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
@@ -64,6 +65,7 @@ export class GameApp {
         this.latestInput = this.input.snapshot();
         this.predictableProjectiles = new PredictableProjectileStore();
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
+        this.statusFeedback = new ClientStatusFeedback({ viewerId: this.authority.playerId });
         this.playerPresentationEvents = [];
         const presentationDefinition =
             playerDefinition ?? this.renderer.sceneRenderer?.playerDefinition ?? DEFAULT_PLAYER_SPRITE_DEFINITION;
@@ -128,6 +130,8 @@ export class GameApp {
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
+        this.statusFeedback.update(dt);
+        this.statusFeedback.apply(authorityEvents);
         this.queuePlayerPresentationEvents(authorityEvents);
         this.worldUnlockPresentation.prepare(authorityEvents, {
             world: state.world,
@@ -248,6 +252,7 @@ export class GameApp {
     render(alpha = 0) {
         const state = interpolateRenderSnapshot(this.previousRenderSnapshot, this.authority.snapshot(), alpha);
         const combatFeedback = this.combatFeedback.snapshot();
+        this.statusFeedback.apply([state.eventFlash]);
         this.stats.resets = state.resets;
         this.queuePlayerPresentationEvents([state.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
@@ -258,7 +263,9 @@ export class GameApp {
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
             eventFlash:
-                combatFeedback.eventFlash ?? selectClientStatusFeedback(state.eventFlash, this.authority.playerId),
+                combatFeedback.eventFlash ??
+                this.statusFeedback.snapshot() ??
+                selectClientStatusFeedback(state.eventFlash, this.authority.playerId),
             camera: this.camera,
             stats: this.stats,
             mobileView: this.mobileView,

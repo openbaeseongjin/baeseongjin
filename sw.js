@@ -1,4 +1,4 @@
-const RELEASE_VERSION = "0.42.2";
+const RELEASE_VERSION = "0.42.3";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));

@@ -372,6 +372,7 @@ export function run() {
     const respawnEvent = defeated.drainReplicationEvents().find(({ eventType }) => eventType === "player-respawned");
     assert.equal(respawnEvent.playerId, defeatedPlayer.id);
     assert.equal(respawnEvent.reason, "health");
+    assert.equal(respawnEvent.statusType, "checkpoint-respawn");
     assert.ok(Number.isFinite(respawnEvent.deathPosition.x));
     assert.ok(Number.isFinite(respawnEvent.deathPosition.y));
     assert.notDeepEqual(
