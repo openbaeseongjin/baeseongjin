@@ -33,7 +33,13 @@ function selectAt(sim, player, node, foundationId) {
         sim.step(
             0,
             createPlayerCommand(
-                { horizontal: 0, vertical: 0, pointer: { x: 0, y: 0, down: false }, interact: true, viewport: { width: 1280, height: 720 } },
+                {
+                    horizontal: 0,
+                    vertical: 0,
+                    pointer: { x: 0, y: 0, down: false },
+                    interact: true,
+                    viewport: { width: 1280, height: 720 }
+                },
                 { x: 0, y: 0 }
             )
         );
@@ -116,7 +122,12 @@ export function run() {
         ropeSim.step(
             1 / 60,
             createPlayerCommand(
-                { horizontal: 0, vertical: 0, pointer: { x: 1, y: 0, down: i > 2 }, viewport: { width: 1280, height: 720 } },
+                {
+                    horizontal: 0,
+                    vertical: 0,
+                    pointer: { x: 1, y: 0, down: i > 2 },
+                    viewport: { width: 1280, height: 720 }
+                },
                 aim
             )
         );
@@ -138,7 +149,13 @@ export function run() {
         farSim.step(
             1 / 60,
             createPlayerCommand(
-                { horizontal: 0, vertical: 0, pointer: { x: 1, y: 0, down: false }, action: i < 3, viewport: { width: 1280, height: 720 } },
+                {
+                    horizontal: 0,
+                    vertical: 0,
+                    pointer: { x: 1, y: 0, down: false },
+                    action: i < 3,
+                    viewport: { width: 1280, height: 720 }
+                },
                 { x: 1, y: 0 }
             )
         );
