@@ -36,10 +36,10 @@ export function run() {
     assert.deepEqual(
         startFloor.vertices,
         [
-            { x: -448, y: 0 },
-            { x: 448, y: 0 },
-            { x: 448, y: 32 },
-            { x: -448, y: 32 }
+            { x: -592, y: 0 },
+            { x: 592, y: 0 },
+            { x: 592, y: 32 },
+            { x: -592, y: 32 }
         ],
         "1-1 P0 must fill the full walkable width between both authored boundary walls"
     );
