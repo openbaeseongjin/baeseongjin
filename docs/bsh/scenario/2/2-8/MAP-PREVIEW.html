@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-8 REV8 REV2 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--r:#df7669;--y:#ffe16c;--v:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:485px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:760px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.divider{fill:#242b31;stroke:#a77f62;stroke-width:3}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.story{fill:#796d43;stroke:#ead38d;stroke-width:2}.checkpoint{fill:#4b6c91;stroke:#a9d5ff;stroke-width:3}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.drop{fill:none;stroke:#caa7ff;stroke-width:5;stroke-dasharray:9 8}.patrol{stroke:#ff8e7c;stroke-width:3;stroke-dasharray:8 7}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.09}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-8 EVACUATION PLATFORM · REV8 DRAFT REV2</h1><div class="sub">GAMEPLAY ONLY · BROKEN TRANSFER FAN / SUSPENDED RING · MULTI-LEVEL SINGLE ROUTE</div></header>
+<div class="layout"><aside>
+<div class="card"><b>WHY REV2</b><br>REV1의 ↗→↖ 한 줄 구조를 폐기. Finale는 실제 높이층을 바꾸며 같은 거대한 Transfer 구조 안팎을 통과한다.</div>
+<div class="card"><b>BODY</b><br>ARRIVAL ↗ → HUB → DEAD LIP → DROP ↓ → SAFE RING → RELAUNCH ↖ → UPPER ARM → FINAL CONTROL</div>
+<div class="card"><b>ENEMY = 4</b><br>Patrol A → Lower Guard → SAFE RING → Patrol B → Upper Guard → Story</div>
+<div class="card"><b>CRITICAL ROPE</b><br>G1→G2 ≈358<br>G2→G3 ≈358<br>Ring→G6 ≈385<br>G6→G7 ≈375<br>G7→G8 ≈358<br>G8→G9 ≈358</div>
+<div class="card"><b>NOT MULTI-ROUTE</b><br>모든 복잡성은 높이층/Hub/Ring/Departure Arm에서 발생. 선택 lane 없음.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Mandatory Route</label>
+<label><input id="showDrop" type="checkbox" checked> Controlled Drop</label>
+<label><input id="showPatrol" type="checkbox" checked> Patrol Paths</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP RULE</b><br>배경 Boarding architecture는 숨김. 여기 보이는 Hub/Ring/Divider/Platforms는 실제 gameplay 기능이 있는 것만 표시.</div>
+</aside><main>
+<svg viewBox="-1220 -1480 2440 1550">
+<rect class="bounds" x="-1152" y="-1408" width="2304" height="1408"/><text class="tiny" x="-1125" y="-1378">REV2 2304×1408</text>
+
+<!-- Entry / arrival arm -->
+<rect class="surface" x="-1088" y="0" width="320" height="32"/><text class="tiny" x="-1072" y="-12">ENTRY</text>
+<circle class="anchor" cx="-768" cy="-224" r="13"/><text class="tiny" x="-748" y="-214">G1</text>
+<rect class="surface" x="-832" y="-288" width="176" height="22"/><text class="tiny" x="-820" y="-302">ARRIVAL A</text>
+<line id="patrolA" class="patrol" x1="-704" y1="-272" x2="-160" y2="-528"/>
+<circle class="enemy" cx="-448" cy="-392" r="19"/><text class="tiny" x="-516" y="-424">PATROL A / ARRIVAL</text>
+<circle class="anchor" cx="-448" cy="-384" r="13"/><text class="tiny" x="-428" y="-374">G2</text>
+<rect class="recovery" x="-464" y="-256" width="288" height="18"/><text class="tiny" x="-450" y="-270">RECOVERY A</text>
+<circle class="anchor" cx="-128" cy="-544" r="13"/><text class="tiny" x="-108" y="-534">G3</text>
+
+<!-- Hub and lower guard -->
+<rect class="surface" x="-128" y="-608" width="384" height="26"/><text class="tiny" x="-112" y="-622">CENTRAL HUB</text>
+<circle class="enemy" cx="288" cy="-608" r="18"/><text class="tiny" x="220" y="-640">LOWER GUARD / LATE</text>
+<circle class="anchor" cx="448" cy="-736" r="13"/><text class="tiny" x="468" y="-726">G4</text>
+<rect class="surface" x="448" y="-768" width="256" height="24"/><text class="tiny" x="462" y="-782">DEAD BOARDING LIP</text>
+
+<!-- Drop / ring -->
+<circle class="anchor" cx="608" cy="-512" r="13"/><text class="tiny" x="628" y="-502">G5 DROP CATCH</text>
+<rect class="safe" x="352" y="-448" width="384" height="26"/><text class="tiny" x="368" y="-462">SAFE SUSPENDED TRANSFER RING</text>
+<rect class="recovery" x="720" y="-320" width="224" height="18"/><text class="tiny" x="734" y="-334">DROP RECOVERY</text>
+<rect class="divider" x="690" y="-520" width="28" height="230"/><text class="tiny" x="650" y="-540">RING HOUSING</text>
+
+<!-- Relaunch -->
+<circle class="anchor" cx="64" cy="-704" r="13"/><text class="tiny" x="84" y="-694">G6 RELAUNCH</text>
+<rect class="recovery" x="-144" y="-640" width="224" height="18"/><text class="tiny" x="-130" y="-654">RECOVERY C</text>
+
+<!-- Patrol B and upper arm -->
+<line id="patrolB" class="patrol" x1="320" y1="-784" x2="-320" y2="-784"/>
+<circle class="enemy" cx="0" cy="-784" r="19"/><text class="tiny" x="-64" y="-816">PATROL B / CENTRAL CROSSING</text>
+<circle class="anchor" cx="-288" cy="-832" r="13"/><text class="tiny" x="-268" y="-822">G7</text>
+<rect class="recovery" x="-480" y="-768" width="192" height="18"/><text class="tiny" x="-468" y="-782">RECOVERY D</text>
+<circle class="anchor" cx="-608" cy="-992" r="13"/><text class="tiny" x="-588" y="-982">G8</text>
+<rect class="surface" x="-704" y="-1024" width="192" height="22"/><text class="tiny" x="-692" y="-1038">UPPER DEPARTURE ARM</text>
+<circle class="enemy" cx="-544" cy="-992" r="18"/><text class="tiny" x="-612" y="-1028">UPPER GUARD / LATE</text>
+<circle class="anchor" cx="-288" cy="-1152" r="13"/><text class="tiny" x="-268" y="-1142">G9</text>
+
+<!-- Final -->
+<rect class="safe" x="-224" y="-1248" width="448" height="28"/><text class="tiny" x="-208" y="-1262">FINAL CONTROL APRON · PRESSURE 0</text>
+<rect class="story" x="-128" y="-1216" width="96" height="72" rx="6"/><text class="tiny" x="-150" y="-1132">TRANSFER CONTROL</text>
+<rect class="checkpoint" x="64" y="-1216" width="96" height="72" rx="6"/><text class="tiny" x="54" y="-1132">CHECKPOINT</text>
+
+<g id="route">
+<path class="route" d="M-960,-32 Q-860,-125 -768,-224 Q-610,-310 -448,-384 Q-286,-470 -128,-544 Q-20,-585 64,-608 L256,-608 Q350,-670 448,-736"/>
+<path class="route" d="M352,-448 Q210,-565 64,-704 Q-112,-770 -288,-832 Q-450,-910 -608,-992 Q-450,-1075 -288,-1152 Q-155,-1215 0,-1248"/>
+</g>
+<g id="drop"><path class="drop" d="M576,-768 Q670,-650 608,-512 Q575,-465 544,-448"/></g>
+<g id="reach" class="hidden">
+<circle class="reach" cx="-768" cy="-224" r="400"/>
+<circle class="reach" cx="-448" cy="-384" r="400"/>
+<circle class="reach" cx="-128" cy="-544" r="400"/>
+<circle class="reach" cx="448" cy="-736" r="400"/>
+<circle class="reach" cx="608" cy="-512" r="400"/>
+<circle class="reach" cx="64" cy="-704" r="400"/>
+<circle class="reach" cx="-288" cy="-832" r="400"/>
+<circle class="reach" cx="-608" cy="-992" r="400"/>
+<circle class="reach" cx="-288" cy="-1152" r="400"/>
+</g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showDrop.onchange=()=>drop.classList.toggle("hidden",!showDrop.checked);
+showPatrol.onchange=()=>{patrolA.classList.toggle("hidden",!showPatrol.checked);patrolB.classList.toggle("hidden",!showPatrol.checked)};
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

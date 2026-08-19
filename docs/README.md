@@ -165,8 +165,16 @@ Stage README와 과거 제작 자료에는 0.26.0 이전 Foundation·Impulse·Re
 | [`bsh/scenario/1/1-8/MANIFEST.md`](./bsh/scenario/1/1-8/MANIFEST.md) | 1-8 REV8.0 패키지 파일 목록·권위 |
 | [`bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) | `bsh` 1-5~1-8 Camera Zone·Story Trigger 붙여넣기용 구현 준비 자료(코드 반영은 별도 진행) |
 | [`bsh/scenario/2/README.md`](./bsh/scenario/2/README.md) | `bsh` Sector 02 Worker District 마스터플랜(2-1~2-8 개요) |
-| [`bsh/scenario/2/2-1/README.md`](./bsh/scenario/2/2-1/README.md) | `bsh` Worker District 첫 저압 전환 Stage(2-1) Blockout 후보·제작 규격 |
-| [`bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md) | 2-1 Runtime 좌표 대조·Anchor Object 설계-구현 불일치 명시 계약 |
+| [`bsh/scenario/2/2-1/README.md`](./bsh/scenario/2/2-1/README.md) | `bsh` Worker District 첫 저압 전환 Stage(2-1) Blockout 후보·제작 규격, REV8.1 |
+| [`bsh/scenario/2/2-1/AREA-SPEC.json`](./bsh/scenario/2/2-1/AREA-SPEC.json) | 2-1 구현 계약(area-spec-v1), REV8.1 — diagonal rowhouse cut-through Route·Recovery·Acceptance Tests |
+| [`bsh/scenario/2/2-1/DIRECTION-SPEC.json`](./bsh/scenario/2/2-1/DIRECTION-SPEC.json) | 2-1 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/2/2-1/MAP-PREVIEW.html`](./bsh/scenario/2/2-1/MAP-PREVIEW.html) | 2-1 승인 Map 시각화 |
+| [`bsh/scenario/2/2-1/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/2/2-1/STORY-DIRECTION-PREVIEW.html) | 2-1 승인 심리/서사/분위기 시각화 |
+| [`bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-1/PRODUCTION-ALIGNMENT.md) | 2-1 Runtime 좌표·Camera·Story·Asset 인계 계약, REV8.1 구현 완료 |
+| [`bsh/scenario/2/2-1/RUNTIME-HANDOFF.md`](./bsh/scenario/2/2-1/RUNTIME-HANDOFF.md) | 2-1 구현 delta 인계(REV8.0 초안 SUPERSEDED 안내 포함) |
+| [`bsh/scenario/2/2-1/VALIDATION.md`](./bsh/scenario/2/2-1/VALIDATION.md) | 2-1 acceptance checklist |
+| [`bsh/scenario/2/2-1/ASSET-REQUIREMENTS.md`](./bsh/scenario/2/2-1/ASSET-REQUIREMENTS.md) | 2-1 art/audio/UI 요구사항 |
+| [`bsh/scenario/2/2-1/MANIFEST.md`](./bsh/scenario/2/2-1/MANIFEST.md) | 2-1 REV8.1 패키지 파일 목록·권위 |
 | [`bsh/scenario/2/2-2/README.md`](./bsh/scenario/2/2-2/README.md) | `bsh` 첫 Patrol Drone·Moving Threat Stage(2-2) Blockout 후보·제작 규격 |
 | [`bsh/scenario/2/2-2/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/2/2-2/PRODUCTION-ALIGNMENT.md) | 2-2 Runtime 좌표 대조·Patrol Drone AI 구현 확인·P4 누락 명시 계약 |
 | [`bsh/scenario/2/2-3/README.md`](./bsh/scenario/2/2-3/README.md) | `bsh` 첫 Rope Specialization 선택 Rest/Reward Stage(2-3) Blockout 후보·제작 규격 |

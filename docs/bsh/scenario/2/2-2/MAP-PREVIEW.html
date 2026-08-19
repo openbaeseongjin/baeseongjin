@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-2 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--v:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:440px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+button{padding:6px 9px;margin:2px;background:#10212a;color:#eef5f8;border:1px solid #4d6874;border-radius:6px;cursor:pointer}
+input[type=range]{width:100%}
+svg{width:100%;height:84vh;min-height:720px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.recovery{fill:#315944;stroke:var(--g);stroke-width:2}.cover{fill:#36434a;stroke:#c1d0d6;stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.joint{fill:var(--a);stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.carrier{fill:#482b61;stroke:#d1adff;stroke-width:3}.module{fill:var(--v);stroke:white;stroke-width:2}.route{fill:none;stroke:var(--y);stroke-width:5;stroke-dasharray:14 9}.access{fill:none;stroke:var(--v);stroke-width:4;stroke-dasharray:7 7}.patrol{stroke:#ff8e7c;stroke-width:3;stroke-dasharray:8 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.1}.hidden{display:none}text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:var(--g)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-2 PATROL WALKWAY · REV8</h1><div class="sub">GAMEPLAY ONLY · LONG RESIDENTIAL PATROL BRIDGE / SINGLE MOVING WINDOW</div></header>
+<div class="layout"><aside>
+<div class="card"><b>CORE</b><br>
+SAFE OBSERVE → long RIGHTWARD crossing → DISENGAGE → short rise → optional ACCESS A → EXIT</div>
+<div class="card"><b>PATROL DRONE</b><br>
+Path: X -320 ↔ +320<br>
+Speed: 48 px/s<br>
+Wait: 0.45s · pingpong<br>
+Kill optional · No Rope Cut</div>
+<div class="card"><b>DRONE PREVIEW</b><br>
+<button id="play">Pause</button>
+<input id="slider" type="range" min="-320" max="320" value="-320">
+<div id="droneX">X -320</div>
+<small>슬라이더로 Drone 위치가 Cover/Grapple read를 어떻게 바꾸는지 확인.</small></div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Main Route</label>
+<label><input id="showAccess" type="checkbox" checked> Access Module A Branch</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>ENEMY BUDGET</b><br>
+1. Moving Patrol Drone<br>
+2. Access Module A Carrier<br>
+No third enemy.</div>
+<div class="card"><b>GAMEPLAY-ONLY</b><br>
+주거배경/문/간판/빨래 등은 표시하지 않음.</div>
+<div class="card"><b>UNIQUENESS</b><br>
+2-1 diagonal ≠ 2-2 long horizontal<br>
+1-6 Wind ≠ Moving LOS<br>
+<span class="pass">PASS</span></div>
+</aside><main>
+<svg viewBox="-970 -970 1940 1040">
+<rect class="bounds" x="-896" y="-896" width="1792" height="896"/><text class="tiny" x="-875" y="-865">REV8 1792×896</text>
+
+<!-- Entry / observe -->
+<rect class="surface" x="-896" y="0" width="352" height="32"/><text class="tiny" x="-880" y="-12">ENTRY</text>
+<circle class="anchor" cx="-560" cy="-160" r="13"/><text x="-538" y="-150">G1</text>
+<rect class="surface" x="-640" y="-224" width="352" height="24"/><text class="tiny" x="-628" y="-238">SAFE OBSERVATION</text>
+<rect class="recovery" x="-432" y="-288" width="224" height="16"/><text class="tiny" x="-420" y="-300">LOWER RECOVERY</text>
+
+<!-- Main patrol -->
+<circle class="anchor" cx="-240" cy="-352" r="13"/><text x="-218" y="-342">G2</text>
+<rect class="surface" x="-304" y="-416" width="256" height="22"/>
+<rect class="cover" x="-152" y="-512" width="80" height="160"/><text class="tiny" x="-165" y="-526">COVER A</text>
+
+<circle class="joint" cx="80" cy="-352" r="11"/><text class="tiny" x="101" y="-342">G3</text>
+<rect class="surface" x="-48" y="-416" width="224" height="22"/><text class="tiny" x="-32" y="-430">CENTRAL</text>
+<rect class="recovery" x="-48" y="-320" width="224" height="16"/><text class="tiny" x="-36" y="-332">MID RECOVERY</text>
+
+<rect class="cover" x="200" y="-512" width="80" height="160"/><text class="tiny" x="188" y="-526">COVER B</text>
+<circle class="anchor" cx="368" cy="-448" r="13"/><text x="390" y="-438">G4</text>
+<rect class="recovery" x="288" y="-448" width="224" height="16"/><text class="tiny" x="300" y="-460">FAR RECOVERY</text>
+<rect class="surface" x="368" y="-512" width="288" height="24"/><text class="tiny" x="380" y="-526">DISENGAGE</text>
+
+<line class="patrol" x1="-320" y1="-384" x2="320" y2="-384"/>
+<text class="tiny" x="-150" y="-398">PATROL PATH -320 ↔ +320</text>
+<circle id="drone" class="enemy" cx="-320" cy="-384" r="19"/><text id="dlabel" class="tiny" x="-370" y="-412">PATROL DRONE</text>
+
+<!-- Exit rise -->
+<circle class="anchor" cx="608" cy="-640" r="13"/><text x="630" y="-630">G5</text>
+<rect class="surface" x="464" y="-704" width="288" height="24"/><text class="tiny" x="476" y="-718">UPPER LANDING</text>
+
+<!-- Access branch -->
+<g id="accessBranch">
+<circle class="module" cx="416" cy="-752" r="11"/><text class="tiny" x="438" y="-742">ACCESS ANCHOR</text>
+<rect class="surface" x="144" y="-800" width="224" height="24"/><text class="tiny" x="155" y="-814">ACCESS A CARRIER BALCONY</text>
+<circle class="carrier" cx="256" cy="-800" r="19"/><path class="module" d="M256 -838 l9 9 -9 9 -9 -9z"/><text class="tiny" x="200" y="-850">CARRIER / MODULE A</text>
+<path class="access" d="M608,-704 Q510,-735 416,-752 Q335,-782 256,-800 Q335,-775 416,-752 Q510,-730 608,-704"/>
+</g>
+
+<!-- Exit -->
+<rect class="surface" x="608" y="-800" width="256" height="24"/><text class="tiny" x="620" y="-814">EXIT DECK → 2-3</text>
+
+<g id="route"><path class="route" d="M-768,-32 Q-660,-95 -560,-160 Q-510,-195 -464,-224 Q-350,-290 -240,-352 Q-80,-350 80,-352 Q220,-400 368,-448 Q455,-480 512,-512 Q565,-570 608,-640 Q610,-680 608,-704 Q690,-755 800,-800"/></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-560" cy="-160" r="400"/><circle class="reach" cx="-240" cy="-352" r="400"/><circle class="reach" cx="80" cy="-352" r="400"/><circle class="reach" cx="368" cy="-448" r="400"/><circle class="reach" cx="608" cy="-640" r="400"/></g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showAccess.onchange=()=>accessBranch.classList.toggle("hidden",!showAccess.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+let playing=true, dir=1, x=-320, last=performance.now(), hold=0;
+const slider=document.getElementById("slider");
+function setX(v){x=+v;drone.setAttribute("cx",x);dlabel.setAttribute("x",x-50);slider.value=x;droneX.textContent=`X ${Math.round(x)}`;}
+slider.oninput=()=>{playing=false;play.textContent="Play";setX(slider.value)};
+play.onclick=()=>{playing=!playing;play.textContent=playing?"Pause":"Play"};
+function tick(t){let dt=(t-last)/1000;last=t;if(playing){if(hold>0){hold-=dt}else{x+=dir*48*dt;if(x>=320){x=320;dir=-1;hold=.45}if(x<=-320){x=-320;dir=1;hold=.45}setX(x)}}requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+</script></body></html>

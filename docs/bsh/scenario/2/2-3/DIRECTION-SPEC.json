@@ -1,0 +1,279 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "c042f614f07ff62184aca3d0c128c89f51f25708",
+  "stage": {
+    "sector": 2,
+    "stage": 3,
+    "sourceAreaId": "sector-02-03",
+    "name": "RESIDENTIAL SERVICE NODE"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "decompress from Patrol pressure and announce reward source",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-3:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "AUGMENT SERVICE NODE",
+            "detail": "OFFER 2 AVAILABLE"
+          }
+        },
+        {
+          "type": "enemy",
+          "target": "node-approach-guard",
+          "action": "remain outside immediate spawn pressure"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "entry presentation duration only",
+      "validation": "Guard does not spawn directly on Player."
+    },
+    {
+      "beatId": "s1-active-approach",
+      "status": "DESIGN LOCKED",
+      "purpose": "preserve current 1-slot density without turning Node into combat reward",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "approach-band"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-approach-slot-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "node-approach-guard",
+          "action": "current pooled security behavior"
+        },
+        {
+          "type": "route",
+          "action": "allow-pass-evade-kill"
+        }
+      ],
+      "completion": "Player crosses Service Core threshold",
+      "validation": "Guard kill optional."
+    },
+    {
+      "beatId": "s2-safe-threshold",
+      "status": "DESIGN LOCKED",
+      "purpose": "physically end enemy pressure before chooser",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "safe-hall-landing"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-3:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "solid",
+          "target": "service-core",
+          "action": "block-line-of-sight"
+        },
+        {
+          "type": "enemy",
+          "target": "node-approach-guard",
+          "action": "no-authored-pressure-inside-hall"
+        }
+      ],
+      "completion": "Player stands inside safe Hall",
+      "validation": "Guard cannot maintain direct LOS to chooser."
+    },
+    {
+      "beatId": "s3-node-detection",
+      "status": "DESIGN LOCKED",
+      "purpose": "show the same infrastructure embedded in residential life",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "node-detection"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-3:node-detection:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED POSITION",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "GRAPPLE DEVICE",
+              "detail": "DETECTED"
+            },
+            {
+              "title": "EMERGENCY CONFIGURATION",
+              "detail": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "two-part node presentation complete",
+      "validation": "No Foundation/Specialization tier text."
+    },
+    {
+      "beatId": "s4-player-recognition",
+      "status": "DESIGN LOCKED",
+      "purpose": "recognize maintenance infrastructure in residential life",
+      "trigger": {
+        "type": "presentation-progress",
+        "presentationId": "sector-02-03:grapple-device-detected"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-3:bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…이 장비, 여기에도 있네."
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-bark-with-toast"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No future Story inference."
+    },
+    {
+      "beatId": "s5-generic-offer",
+      "status": "DESIGN LOCKED",
+      "purpose": "deliver second generic Augment choice",
+      "trigger": {
+        "type": "interact",
+        "sourceObjectId": "sector-02-03:specialization-node"
+      },
+      "scope": "player-local-selection / shared-outbound-progress",
+      "replayPolicy": "until-personal-source-consumed",
+      "dedupeToken": "sector-02-03:specialization-node:<player>",
+      "worldPause": false,
+      "playerControl": "CHOOSER CAPTURES SELECTING PLAYER INPUT ONLY",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "augmentChoice",
+          "action": "open-compatible-deterministic-3-card-offer"
+        },
+        {
+          "type": "enemy",
+          "action": "none-in-authored-hall"
+        },
+        {
+          "type": "calibration",
+          "action": "none"
+        }
+      ],
+      "completion": "personal source consumed; shared outbound completes per current roster contract",
+      "validation": "No reroll/rarity/fixed Specialization choices."
+    },
+    {
+      "beatId": "s6-flat-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "leave reward room without repeating 1-4 calibration",
+      "trigger": {
+        "type": "objective-ready",
+        "objectiveId": "sector-02-03:specialization-selected"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-3:s6",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "flat-safe-exit"
+        },
+        {
+          "type": "calibration",
+          "action": "forbidden"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → sector-02-04",
+      "validation": "No post-choice Rope/Proof gate."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "exactly one enemy slot",
+    "Guard pressure ends before Node Hall",
+    "Service Core is real LOS blocker",
+    "generic second offer uses stable source ID",
+    "no player-facing current Specialization tier",
+    "no post-choice calibration",
+    "no dummy",
+    "1-4 meaningful overlap <=1",
+    "Bark is not a System Toast",
+    "default camera only",
+    "MAP-PREVIEW gameplay-only"
+  ]
+}

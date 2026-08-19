@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-6 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--r:#df7669;--y:#ffe16c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:450px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:82vh;min-height:680px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.zone{fill:#80d39a15;stroke:#80d39a;stroke-width:2;stroke-dasharray:7 7}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.09}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:#80d39a}.warn{color:#efb75b}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-6 QUIET RESIDENTIAL VOID · REV8</h1><div class="sub">GAMEPLAY ONLY · L-SHAPED COURTYARD RIM / REVEAL TURN</div></header>
+<div class="layout"><aside>
+<div class="card"><b>BODY</b><br>SHORT UP → SAFE REVEAL TURN → LONG RIGHT RIM</div>
+<div class="card"><b>RELIEF RULE</b><br>
+First half = Enemy 0 pressure.<br>
+Actual Runtime still owns 2 slots, so both are delayed into final third and never overlap.</div>
+<div class="card"><b>ENEMIES = 2</b><br>
+Guard A: Support Pool<br>
+Guard B: Late Pool<br>
+No Patrol / no Access / no Rope Cut.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Main Route</label>
+<label><input id="showSafe" type="checkbox" checked> Reveal Safe Zone</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP RULE</b><br>
+Courtyard façades / doors / laundry / plants / background void architecture are hidden.</div>
+<div class="card"><b>SIMILARITY</b><br>2-5: → then ↓<br>2-6: ↑ then →<br>2-2 horizontal overlap only; no Patrol.</div>
+</aside><main>
+<svg viewBox="-1040 -900 2080 970">
+<rect class="bounds" x="-960" y="-832" width="1920" height="832"/><text class="tiny" x="-936" y="-802">REV8 1920×832</text>
+
+<rect class="surface" x="-960" y="0" width="320" height="32"/><text class="tiny" x="-945" y="-12">ENTRY / LOW SERVICE</text>
+<circle class="anchor" cx="-704" cy="-224" r="13"/><text class="tiny" x="-684" y="-214">G1</text>
+<rect class="surface" x="-768" y="-288" width="256" height="22"/><text class="tiny" x="-753" y="-302">LIFT LANDING</text>
+<circle class="anchor" cx="-608" cy="-480" r="13"/><text class="tiny" x="-588" y="-470">G2</text>
+
+<g id="safeZone">
+<rect class="zone" x="-672" y="-592" width="736" height="136" rx="8"/><text class="tiny" x="-652" y="-570">SAFE REVEAL + QUIET RIM · NO AUTHORED ENEMY PRESSURE</text>
+</g>
+<rect class="safe" x="-640" y="-512" width="384" height="24"/><text class="tiny" x="-625" y="-526">REVEAL OVERLOOK / 90° TURN</text>
+<rect class="safe" x="-288" y="-512" width="320" height="24"/><text class="tiny" x="-270" y="-526">QUIET UPPER RIM</text>
+
+<circle class="anchor" cx="192" cy="-576" r="13"/><text class="tiny" x="212" y="-566">G3</text>
+<rect class="surface" x="192" y="-544" width="256" height="22"/><text class="tiny" x="206" y="-558">RIM LANDING A</text>
+<rect class="recovery" x="0" y="-384" width="256" height="18"/><text class="tiny" x="14" y="-398">RECOVERY A</text>
+
+<circle class="enemy" cx="352" cy="-544" r="18"/><text class="tiny" x="296" y="-574">GUARD A / SUPPORT</text>
+<rect class="surface" x="368" y="-544" width="224" height="22"/><text class="tiny" x="382" y="-558">RIM TRANSFER</text>
+
+<circle class="anchor" cx="640" cy="-608" r="13"/><text class="tiny" x="660" y="-598">G4</text>
+<rect class="recovery" x="400" y="-448" width="224" height="18"/><text class="tiny" x="414" y="-462">RECOVERY B</text>
+<rect class="surface" x="576" y="-576" width="320" height="22"/><text class="tiny" x="590" y="-590">FINAL RESIDENTIAL RIM</text>
+<circle class="enemy" cx="704" cy="-576" r="18"/><text class="tiny" x="650" y="-638">GUARD B / LATE</text>
+
+<rect class="safe" x="672" y="-640" width="256" height="24"/><text class="tiny" x="690" y="-654">EXIT DECK → 2-7</text>
+
+<g id="route"><path class="route" d="M-816,-32 Q-755,-125 -704,-224 Q-665,-255 -640,-288 Q-625,-380 -608,-480 Q-535,-505 -448,-512 L-128,-512 Q30,-535 192,-576 Q260,-555 320,-544 L480,-544 Q555,-575 640,-608 Q715,-610 800,-640"/></g>
+<g id="reach" class="hidden">
+<circle class="reach" cx="-704" cy="-224" r="400"/>
+<circle class="reach" cx="-608" cy="-480" r="400"/>
+<circle class="reach" cx="192" cy="-576" r="400"/>
+<circle class="reach" cx="640" cy="-608" r="400"/>
+</g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showSafe.onchange=()=>safeZone.classList.toggle("hidden",!showSafe.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

@@ -16,6 +16,24 @@ function middle(left, right) {
     return (left + right) * 0.5;
 }
 
+// AREA-SPEC's x,y for "platform"/"safe-deck"/"recovery" presets are already top-center
+// (matches AreaDefinition.js's rectangle() coordinateAnchor:"top-center" 1:1, no conversion).
+function horizontalSurface(areaId, id, x, y, width, height, kind, props = {}) {
+    return rectangle(`${areaId}:${id}`, x, y, width, height, {
+        kind,
+        coordinateAnchor: "top-center",
+        ...props
+    });
+}
+
+// A grip point that is grappleable but intentionally has no visible landmark marker (AREA-SPEC's
+// "structural-grapple-target" preset) - kind is overridden away from "grapple-target" so the
+// validator's strict landmark-pairing rule (validateGrappleLandmarks) does not require a matching
+// kind:"grapple-landmark" object for it. Hooking is driven by grappleable !== false, not by kind.
+function structuralGrip(areaId, id, x, y) {
+    return grappleTarget(`${areaId}:${id}`, x, y, { kind: "structural-grapple-target" });
+}
+
 function platform(areaId, id, left, right, y, kind = "platform") {
     return rectangle(`${areaId}:${id}`, middle(left, right), y, right - left, kind === "platform" ? 24 : 20, {
         kind,
@@ -23,9 +41,8 @@ function platform(areaId, id, left, right, y, kind = "platform") {
     });
 }
 
-function landmark(areaId, id, left, right, y) {
+function landmark(areaId, id, left, right, y, label = id.toUpperCase()) {
     const x = middle(left, right);
-    const label = id.toUpperCase();
     return Object.freeze({
         surface: grappleTarget(`${areaId}:${id}-surface`, x, y),
         route: point(`${areaId}:route-${id}`, x, y, { landmark: label }),
@@ -109,18 +126,28 @@ function pooledSentry(areaId, id, x, y, allowedEnemyTypes, { width = 640, height
 
 const block01 = exitBlock({
     areaId: "sector-02-01",
-    deckX: 416,
-    deckTopY: -899,
-    deckWidth: 256,
+    deckX: 536,
+    deckTopY: -768,
+    deckWidth: 320,
     nextAreaId: "sector-02-02",
     panelObjectiveId: "sector-02-01:exit-panel-engaged",
     panelProperties: { requiredObjectiveIds: ["sector-02-01:exit-reached"] }
 });
 
 const area01Id = "sector-02-01";
-const area01Landmarks = [landmark(area01Id, "g3", 0, 128, -640)];
-const area01Exit = point(`${area01Id}:exit`, 416, -960);
-const area01Objective = reachExitObjective(area01Id, area01Exit.x, area01Exit.y);
+// REV8.1 (supersedes REV8.0's 1-7-shaped S-curve route). Diagonal rowhouse cut-through:
+// LOWER ALLEY -> SMALL COURT -> MID UTILITY -> LAUNDRY OFFSET -> UPPER GALLERY -> COMMUNITY TERRACE.
+const area01Landmarks = [
+    landmark(area01Id, "anchor-a", -384, -384, -176, "A"),
+    landmark(area01Id, "anchor-c", 224, 224, -352, "C"),
+    landmark(area01Id, "anchor-e", 160, 160, -576, "E"),
+    landmark(area01Id, "anchor-g", 416, 416, -752, "G")
+];
+const [anchorA, anchorC, anchorE, anchorG] = area01Landmarks;
+const gripB = structuralGrip(area01Id, "grip-b-surface", -96, -256);
+const gripD = structuralGrip(area01Id, "grip-d-surface", 160, -464);
+const gripF = structuralGrip(area01Id, "grip-f-surface", 416, -640);
+const area01Objective = reachExitObjective(area01Id, block01.exit.x, block01.exit.y);
 const area01PanelObjective = exitPanelObjective(area01Id, [area01Objective.id]);
 const area01 = defineArea({
     id: area01Id,
@@ -128,45 +155,68 @@ const area01 = defineArea({
     order: 1,
     name: "WORKER BLOCK 12",
     subtitle: "RESIDENTIAL COURTYARD",
-    bounds: { width: 1152, height: 1024 },
-    entry: point(`${area01Id}:entry`, -304, -32),
+    bounds: { width: 1472, height: 832 },
+    entry: point(`${area01Id}:entry`, -624, -32),
     exit: block01.exit,
     nextAreaId: "sector-02-02",
     surfaces: [
-        platform(area01Id, "p0", -416, -192, 0),
-        platform(area01Id, "r1", -352, -128, -144, "recovery"),
-        platform(area01Id, "p1", -192, 128, -288),
-        platform(area01Id, "r2", 0, 224, -400, "recovery"),
-        platform(area01Id, "p2", 192, 480, -544),
-        platform(area01Id, "r3", -128, 96, -592, "recovery"),
-        platform(area01Id, "p3", -448, -160, -736),
-        platform(area01Id, "r4", -96, 128, -784, "recovery"),
-        platform(area01Id, "p4", 32, 352, -928, "safe-deck"),
+        horizontalSurface(area01Id, "entry-walk", -560, 0, 352, 32, "platform"),
+        horizontalSurface(area01Id, "lower-alley", -448, -96, 288, 20, "platform"),
+        horizontalSurface(area01Id, "r1", -192, -112, 224, 16, "recovery"),
+        horizontalSurface(area01Id, "r2", 16, -208, 224, 16, "recovery"),
+        horizontalSurface(area01Id, "small-court-landing", 96, -288, 256, 22, "platform"),
+        horizontalSurface(area01Id, "r3", 160, -320, 224, 16, "recovery"),
+        horizontalSurface(area01Id, "mid-utility-landing", 320, -384, 224, 22, "platform"),
+        horizontalSurface(area01Id, "r4", -64, -416, 208, 16, "recovery"),
+        horizontalSurface(area01Id, "laundry-landing", -32, -496, 256, 22, "platform"),
+        horizontalSurface(area01Id, "upper-shared-gallery", 480, -672, 288, 22, "platform"),
+        horizontalSurface(area01Id, "story-safe-landing", 288, -704, 256, 18, "safe-deck"),
         block01.deck,
-        ...area01Landmarks.map(({ surface }) => surface)
+        anchorA.surface,
+        gripB,
+        anchorC.surface,
+        gripD,
+        anchorE.surface,
+        gripF,
+        anchorG.surface
     ],
     routePoints: [
-        point(`${area01Id}:route-entry`, -304, -32),
-        point(`${area01Id}:route-p1`, -32, -288),
-        point(`${area01Id}:route-p2`, 336, -544),
-        area01Landmarks[0].route,
-        point(`${area01Id}:route-p3`, -304, -736),
-        point(`${area01Id}:route-p4`, 192, -928),
+        point(`${area01Id}:route-entry`, -624, -32),
+        point(`${area01Id}:route-lower-alley`, -448, -96),
+        anchorA.route,
+        point(`${area01Id}:route-b`, -96, -256),
+        point(`${area01Id}:route-small-court`, 96, -288),
+        anchorC.route,
+        point(`${area01Id}:route-mid-utility`, 320, -384),
+        point(`${area01Id}:route-d`, 160, -464),
+        point(`${area01Id}:route-laundry-landing`, -32, -496),
+        anchorE.route,
+        point(`${area01Id}:route-f`, 416, -640),
+        point(`${area01Id}:route-upper-gallery`, 480, -672),
+        point(`${area01Id}:route-story-safe`, 288, -704),
+        anchorG.route,
         block01.routeExit
     ],
     recoveryPoints: [
-        point(`${area01Id}:recovery-r1`, -240, -168),
-        point(`${area01Id}:recovery-r2`, 112, -424),
-        point(`${area01Id}:recovery-r3`, -16, -616),
-        point(`${area01Id}:recovery-r4`, 16, -808)
+        point(`${area01Id}:recovery-r1`, -192, -128),
+        point(`${area01Id}:recovery-r2`, 16, -224),
+        point(`${area01Id}:recovery-r3`, 160, -336),
+        point(`${area01Id}:recovery-r4`, -64, -432)
     ],
     objects: [
-        ...area01Landmarks.map(({ object }) => object),
-        pooledSentry(area01Id, "courtyard-guard", 320, -544, SECTOR_02_STANDARD_POOL, {
-            width: 480,
-            height: 448
+        anchorA.object,
+        anchorC.object,
+        anchorE.object,
+        anchorG.object,
+        // Legacy static Security residue (RUNTIME-HANDOFF: "Recommended: fixed sentry-t1" - the
+        // Runtime pool default previously allowed patrol-drone-t1, but 2-2 owns "first moving
+        // Patrol" as its reveal beat; a single-entry pool here makes Patrol structurally impossible).
+        pooledSentry(area01Id, "courtyard-guard", 384, -384, ["sentry-t1"], {
+            width: 384,
+            height: 256
         }),
-        worldObject(`${area01Id}:community-notice`, "story-display", 160, -952, {
+        worldObject(`${area01Id}:community-notice`, "story-display", 568, -768, {
+            coordinateAnchor: "bottom-center",
             cueIds: ["evacuation-group-c", "wait-for-further-instruction"]
         }),
         block01.panel,

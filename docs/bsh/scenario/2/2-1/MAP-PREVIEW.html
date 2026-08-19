@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-1 REV8.1 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--old:#b47a62}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:430px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:720px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.recovery{fill:#315944;stroke:var(--g);stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.joint{fill:var(--a);stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.route{fill:none;stroke:var(--y);stroke-width:5;stroke-dasharray:14 9}.oldroute{fill:none;stroke:var(--old);stroke-width:3;stroke-dasharray:7 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.11}.hidden{display:none}text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:var(--g)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-1 WORKER BLOCK 12 · REV8.1</h1><div class="sub">GAMEPLAY ONLY · DIAGONAL ROWHOUSE CUT-THROUGH / STAGGERED LOW-RISE TERRACES</div></header>
+<div class="layout"><aside>
+<div class="card"><b>NEW BODY TRACE</b><br>
+LOWER-LEFT → MID-CENTER → UPPER-RIGHT<br><br>
+한 방향의 대각 상승이 주축.<br>
+Full-width 좌우 왕복 없음.</div>
+<div class="card"><b>1-7 CONFLICT FIX</b><br>
+REV8.0: L→R / R→L / L→R = 1-7과 유사.<br><br>
+REV8.1: diagonal progression + one small offset correction.</div>
+<div class="card"><b>ENEMY</b><br>
+1 static security residue.<br>
+Patrol Drone 금지.<br>
+Kill optional.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> REV8.1 Route</label>
+<label><input id="showOld" type="checkbox"> Retired REV8.0 S-route</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP PREVIEW</b><br>
+Gameplay object만 표시.<br>
+주거 배경/문/빨래/화분/Notice 아트는 Story Preview에서만.</div>
+<div class="card"><b>UNIQUENESS</b><br>1-7 overlap: <span class="pass">1 · PASS</span><br>Sector 01 overall: <span class="pass">PASS</span></div>
+</aside><main>
+<svg viewBox="-800 -900 1600 965">
+<rect class="bounds" x="-720" y="-832" width="1440" height="832"/><text class="tiny" x="-698" y="-803">REV8.1 1440×832</text>
+
+<rect class="surface" x="-720" y="0" width="352" height="32"/><text class="tiny" x="-705" y="-12">ENTRY</text>
+<rect class="surface" x="-592" y="-96" width="288" height="20"/><text class="tiny" x="-580" y="-110">LOWER ALLEY</text>
+
+<circle class="anchor" cx="-384" cy="-176" r="13"/><text x="-362" y="-166">A</text>
+<circle class="joint" cx="-96" cy="-256" r="11"/><text class="tiny" x="-75" y="-246">B</text>
+<rect class="surface" x="-32" y="-288" width="256" height="22"/><text class="tiny" x="-20" y="-302">SMALL COURT LANDING</text>
+<rect class="recovery" x="-304" y="-112" width="224" height="16"/><text class="tiny" x="-292" y="-124">R1</text>
+<rect class="recovery" x="-96" y="-208" width="224" height="16"/><text class="tiny" x="-84" y="-220">R2</text>
+
+<circle class="anchor" cx="224" cy="-352" r="13"/><text x="246" y="-342">C</text>
+<rect class="surface" x="208" y="-384" width="224" height="22"/><text class="tiny" x="220" y="-398">MID UTILITY LANDING</text>
+<circle class="enemy" cx="384" cy="-384" r="18"/><text class="tiny" x="326" y="-414">STATIC SECURITY</text>
+
+<circle class="joint" cx="160" cy="-464" r="11"/><text class="tiny" x="181" y="-454">D</text>
+<rect class="surface" x="-160" y="-496" width="256" height="22"/><text class="tiny" x="-148" y="-510">LAUNDRY LANDING</text>
+<rect class="recovery" x="48" y="-320" width="224" height="16"/><text class="tiny" x="60" y="-332">R3</text>
+<rect class="recovery" x="-168" y="-416" width="208" height="16"/><text class="tiny" x="-156" y="-428">R4</text>
+
+<circle class="anchor" cx="160" cy="-576" r="13"/><text x="182" y="-566">E</text>
+<circle class="joint" cx="416" cy="-640" r="11"/><text class="tiny" x="437" y="-630">F</text>
+<rect class="surface" x="336" y="-672" width="288" height="22"/><text class="tiny" x="348" y="-686">UPPER SHARED GALLERY</text>
+<rect class="recovery" x="160" y="-704" width="256" height="18"/><text class="tiny" x="172" y="-716">STORY SAFE LANDING</text>
+
+<circle class="anchor" cx="416" cy="-752" r="13"/><text x="438" y="-742">G</text>
+<rect class="surface" x="376" y="-768" width="320" height="24"/><text class="tiny" x="388" y="-782">COMMUNITY TERRACE / EXIT</text>
+
+<g id="route"><path class="route" d="M-624,-32 Q-510,-75 -448,-96 Q-420,-135 -384,-176 Q-240,-220 -96,-256 Q5,-275 96,-288 Q160,-320 224,-352 Q270,-370 320,-384 Q250,-425 160,-464 Q65,-485 -32,-496 Q65,-535 160,-576 Q280,-610 416,-640 Q455,-660 480,-672 Q390,-695 288,-704 Q350,-725 416,-752 Q505,-760 640,-768"/></g>
+
+<g id="old" class="hidden">
+<path class="oldroute" d="M-592,-32 L-480,-160 L-160,-224 L160,-224 L416,-256 L480,-416 L160,-480 L-160,-480 L-416,-512 L-480,-656 L-160,-704 L192,-704 L576,-768"/>
+<text class="tiny" x="-610" y="-760">RETIRED REV8.0 FULL-WIDTH REVERSAL ROUTE</text>
+</g>
+
+<g id="reach" class="hidden"><circle class="reach" cx="-384" cy="-176" r="400"/><circle class="reach" cx="-96" cy="-256" r="400"/><circle class="reach" cx="224" cy="-352" r="400"/><circle class="reach" cx="160" cy="-464" r="400"/><circle class="reach" cx="160" cy="-576" r="400"/><circle class="reach" cx="416" cy="-640" r="400"/></g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showOld.onchange=()=>old.classList.toggle("hidden",!showOld.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

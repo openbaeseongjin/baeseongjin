@@ -1,0 +1,387 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "4fce8a27bc6cb7b4141735dec6c8e56cb9f88b5b",
+  "stage": {
+    "sector": 2,
+    "stage": 8,
+    "sourceAreaId": "sector-02-08",
+    "name": "EVACUATION PLATFORM"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "reveal Sector 02's largest public transfer infrastructure without revealing final comparison text",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-8:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "EVACUATION PLATFORM",
+            "detail": "GROUP C TRANSFER SUSPENDED"
+          }
+        },
+        {
+          "type": "environment",
+          "action": "read-arrival-finger-hub-and-upper-structure-depth"
+        },
+        {
+          "type": "enemy",
+          "action": "no-four-slot-crossfire"
+        }
+      ],
+      "completion": "entry presentation duration",
+      "validation": "Final Transfer Control copy is not pre-read from Entry."
+    },
+    {
+      "beatId": "s1-patrol-a",
+      "status": "DESIGN LOCKED",
+      "purpose": "finalize known Patrol timing on the arrival finger",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "arrival-patrol-a"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-8:patrol-a",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "diagonal-current-ai-pingpong"
+        },
+        {
+          "type": "route",
+          "action": "g1-to-g2-to-g3-skilled-sequence"
+        },
+        {
+          "type": "recovery",
+          "target": "recovery-a",
+          "action": "4-7-second-retry"
+        }
+      ],
+      "completion": "Central Hub reached",
+      "validation": "Patrol A ends before Lower Guard representative band."
+    },
+    {
+      "beatId": "s2-lower-guard",
+      "status": "DESIGN LOCKED",
+      "purpose": "terminate the public Arrival Finger at the dead Boarding Lip",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "lower-guard-band"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-8:lower-guard",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "transfer-lower-guard",
+          "action": "activate-late-pool-slot"
+        },
+        {
+          "type": "route",
+          "action": "hub-to-g4-dead-lip"
+        },
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "inactive"
+        }
+      ],
+      "completion": "Dead Boarding Lip reached",
+      "validation": "Kill optional; no sustained Patrol A + Lower Guard crossfire."
+    },
+    {
+      "beatId": "s3-drop-ring",
+      "status": "DESIGN LOCKED",
+      "purpose": "create the Finale's spatial surprise by abandoning the dead public lip for the suspended transfer layer",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "sector-02-08:ring-drop"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-8:ring-drop",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "dead-lip-to-g5-controlled-drop"
+        },
+        {
+          "type": "recovery",
+          "target": "drop-recovery",
+          "action": "5-9-second-retry-with-divider"
+        },
+        {
+          "type": "enemy",
+          "action": "all-four-inactive-on-success-ring"
+        }
+      ],
+      "completion": "Transfer Ring reached",
+      "validation": "Drop Recovery cannot walk directly onto successful Ring route."
+    },
+    {
+      "beatId": "s4-ring-relief",
+      "status": "DESIGN LOCKED",
+      "purpose": "let Player understand terminal layering before the upper-half relaunch",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "transfer-ring"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt-no-system-story",
+      "dedupeToken": "2-8:ring-relief",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default-first",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "all-four-inactive"
+        },
+        {
+          "type": "environment",
+          "action": "show-dead-lip-above-and-opposite-upper-departure-arm"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "Player commits to Ring relaunch",
+      "validation": "5-10 seconds of first-play orientation is possible without pressure."
+    },
+    {
+      "beatId": "s5-patrol-b",
+      "status": "DESIGN LOCKED",
+      "purpose": "deliver upper-half movement synthesis after the Ring relaunch",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "upper-patrol-b"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-8:patrol-b",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "ring-left-edge-to-g6-to-g7-to-g8"
+        },
+        {
+          "type": "enemy",
+          "target": "drone-2",
+          "action": "horizontal-current-ai-pingpong"
+        },
+        {
+          "type": "recovery",
+          "targets": [
+            "recovery-c",
+            "recovery-d"
+          ],
+          "action": "4-8-second-retry"
+        }
+      ],
+      "completion": "Upper Guard band reached",
+      "validation": "Patrol A remains inactive; Ring Recovery cannot skip upper sequence."
+    },
+    {
+      "beatId": "s6-upper-guard",
+      "status": "DESIGN LOCKED",
+      "purpose": "deliver Sector 02's final combat pressure",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "upper-guard-band"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-8:upper-guard",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "transfer-upper-guard",
+          "action": "activate-late-pool-slot"
+        },
+        {
+          "type": "enemy",
+          "target": "drone-2",
+          "action": "representative-pressure-ended"
+        },
+        {
+          "type": "route",
+          "action": "g8-to-g9-final-security-exit"
+        }
+      ],
+      "completion": "Final Control Apron reached",
+      "validation": "No enemy pressure persists into Final Story."
+    },
+    {
+      "beatId": "s7-transfer-control",
+      "status": "DESIGN LOCKED",
+      "purpose": "turn gameplay climax into comparative Story climax in a fully safe frame",
+      "trigger": {
+        "type": "interact",
+        "objectiveId": "sector-02-08:transfer-control-read"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-objective-owned",
+      "dedupeToken": "sector-02-08:transfer-control-read",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "pressure-zero"
+        },
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "EVACUATION GROUP A",
+              "detail": "TRANSFER COMPLETE"
+            },
+            {
+              "title": "EVACUATION GROUP B",
+              "detail": "TRANSFER COMPLETE"
+            },
+            {
+              "title": "EVACUATION GROUP C",
+              "detail": "TRANSFER SUSPENDED"
+            },
+            {
+              "title": "PRIORITY ACCESS",
+              "detail": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "target": "sector-end-checkpoint-object",
+          "action": "remain-visible-but-secondary"
+        }
+      ],
+      "completion": "transfer-control-read objective complete",
+      "validation": "All four records appear in one safe interaction context."
+    },
+    {
+      "beatId": "s8-player-bark-checkpoint",
+      "status": "DESIGN LOCKED",
+      "purpose": "leave Sector 02 on the unanswered C-difference question",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-02-08:priority-access"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-8:bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…왜 C만 멈춘 거지?"
+          }
+        },
+        {
+          "type": "checkpoint",
+          "target": "sector-02-08:sector-end-checkpoint-object",
+          "action": "preserve-sector-end-checkpoint"
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-bark-with-toast"
+        }
+      ],
+      "completion": "current content boundary",
+      "validation": "No Priority recipient or causation is asserted."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "exactly 4 enemy slots",
+    "two Patrol T1 slots preserved",
+    "two Late Pool Guard slots preserved",
+    "no sustained phase crossfire",
+    "Transfer Ring fully safe",
+    "Final Control fully safe",
+    "exact A/B/C/Priority Story sequence",
+    "Bark not converted to System Toast",
+    "content-boundary preserved",
+    "nextAreaId null",
+    "3-of-3 Area-gate requirement not invented",
+    "generic Augment terminology only",
+    "no Stage-scale Multi-Route",
+    "all critical Rope relations <=400px",
+    "maximum meaningful map similarity overlap <=1",
+    "default camera first",
+    "MAP-PREVIEW gameplay-only"
+  ]
+}

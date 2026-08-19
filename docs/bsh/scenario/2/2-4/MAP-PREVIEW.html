@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-4 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--v:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:450px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:720px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.anchor{fill:#5de8ff;stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.route{fill:none;stroke-width:5}.safeRoute{stroke:#80d39a;stroke-dasharray:13 8}.flowRoute{stroke:#ffe16c;stroke-dasharray:14 8}.pressureRoute{stroke:#ff8e7c;stroke-dasharray:8 7}.sharedRoute{stroke:#eef5f6;stroke-dasharray:10 8}.switch{fill:#4d5560;stroke:#d5dde1;stroke-width:2}.patrol{stroke:#ff8e7c;stroke-width:3;stroke-dasharray:8 7}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.09}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:#80d39a}.warn{color:#efb75b}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-4 RESIDENTIAL STACK · REV8</h1><div class="sub">GAMEPLAY ONLY · INTERLOCKED TENEMENT COURTS / BRAIDED ROUTE FIELD</div></header>
+<div class="layout"><aside>
+<div class="card"><b>CORE</b><br>
+REVEAL → SPLIT A → SWITCH → SPLIT B → MERGE → EXIT<br><br>
+Routes separate, cross, and reconnect. Not 3 permanent lanes.</div>
+<div class="card"><b>ROUTE STYLES</b><br>
+<span style="color:#80d39a">SAFE</span> = longer / broad landings / low exposure<br>
+<span style="color:#ffe16c">FLOW</span> = continuous Rope / smaller landings<br>
+<span style="color:#ff8e7c">PRESSURE</span> = shortest geometry / enemy exposure</div>
+<div class="card"><b>ENEMIES = 2</b><br>
+1. First-braid route-choice Guard<br>
+2. Second-braid Patrol Drone<br>
+No Access / no third enemy.</div>
+<div class="card">
+<label><input id="showSafe" type="checkbox" checked> Safe Braid</label>
+<label><input id="showFlow" type="checkbox" checked> Flow Braid</label>
+<label><input id="showPressure" type="checkbox" checked> Pressure Braid</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP RULE</b><br>Doors / laundry / benches / housing façades / child drawing are hidden.</div>
+<div class="card"><b>GATES</b><br>
+Scale <span class="pass">PASS</span><br>
+Similarity <span class="pass">PASS</span><br>
+Obstacle <span class="pass">PASS</span><br>
+Pacing <span class="warn">HYPOTHESIS</span></div>
+</aside><main>
+<svg viewBox="-1080 -1160 2160 1230">
+<rect class="bounds" x="-992" y="-1088" width="1984" height="1088"/><text class="tiny" x="-970" y="-1058">REV8 1984×1088</text>
+
+<!-- Shared entry -->
+<rect class="surface" x="-992" y="0" width="320" height="32"/><text class="tiny" x="-975" y="-12">ENTRY</text>
+<rect class="safe" x="-864" y="-160" width="384" height="24"/><text class="tiny" x="-850" y="-174">REVEAL / SPLIT A</text>
+
+<!-- First braid -->
+<circle class="anchor" cx="-560" cy="-320" r="13"/><text class="tiny" x="-540" y="-310">SAFE A</text>
+<rect class="safe" x="-816" y="-384" width="288" height="22"/>
+<circle class="anchor" cx="-352" cy="-480" r="13"/><text class="tiny" x="-332" y="-470">SAFE X</text>
+
+<circle class="anchor" cx="-336" cy="-352" r="13"/><text class="tiny" x="-284" y="-342">FLOW A</text>
+<rect class="surface" x="-304" y="-416" width="256" height="22"/>
+
+<circle class="anchor" cx="-304" cy="-256" r="13"/><text class="tiny" x="-284" y="-246">PRESS A</text>
+<rect class="surface" x="-96" y="-352" width="320" height="22"/><text class="tiny" x="-76" y="-366">PRESSURE A</text>
+<circle class="enemy" cx="96" cy="-352" r="18"/><text class="tiny" x="45" y="-382">ROUTE GUARD</text>
+
+<rect class="recovery" x="-400" y="-480" width="352" height="18"/><text class="tiny" x="-385" y="-494">RECOVERY A</text>
+<rect class="switch" x="-288" y="-544" width="448" height="26"/><text class="tiny" x="-270" y="-558">SWITCH DECK · ROUTE CHANGE</text>
+
+<!-- Second braid -->
+<circle class="anchor" cx="-352" cy="-672" r="13"/><text class="tiny" x="-332" y="-662">SAFE B</text>
+<rect class="safe" x="-608" y="-768" width="320" height="22"/>
+<circle class="anchor" cx="-192" cy="-848" r="13"/><text class="tiny" x="-172" y="-838">SAFE M1</text>
+<circle class="anchor" cx="96" cy="-896" r="13"/><text class="tiny" x="116" y="-886">SAFE M2</text>
+
+<circle class="anchor" cx="64" cy="-672" r="13"/><text class="tiny" x="84" y="-662">FLOW B1</text>
+<circle class="anchor" cx="320" cy="-768" r="13"/><text class="tiny" x="340" y="-758">FLOW B2</text>
+<rect class="surface" x="48" y="-832" width="256" height="22"/>
+
+<circle class="anchor" cx="224" cy="-608" r="13"/><text class="tiny" x="244" y="-598">PRESS B</text>
+<rect class="surface" x="336" y="-672" width="352" height="22"/><text class="tiny" x="350" y="-686">PRESSURE B</text>
+<line class="patrol" x1="-128" y1="-736" x2="544" y2="-736"/>
+<circle class="enemy" cx="256" cy="-736" r="19"/><text class="tiny" x="205" y="-766">PATROL DRONE</text>
+
+<rect class="recovery" x="-112" y="-704" width="352" height="18"/><text class="tiny" x="-98" y="-718">RECOVERY B</text>
+<rect class="recovery" x="272" y="-832" width="288" height="18"/><text class="tiny" x="286" y="-846">RIGHT RECOVERY</text>
+
+<!-- Merge / exit -->
+<rect class="safe" x="32" y="-928" width="512" height="26"/><text class="tiny" x="50" y="-942">MERGE / RELIEF</text>
+<circle class="anchor" cx="560" cy="-960" r="13"/><text class="tiny" x="580" y="-950">FINAL</text>
+<rect class="safe" x="560" y="-992" width="320" height="26"/><text class="tiny" x="578" y="-1006">EXIT DECK → 2-5</text>
+
+<!-- Routes -->
+<g id="safeRoute">
+<path class="route safeRoute" d="M-864,-32 Q-760,-100 -672,-160 Q-615,-235 -560,-320 Q-620,-355 -672,-384 Q-500,-430 -352,-480 Q-205,-515 -64,-544 Q-230,-610 -352,-672 Q-400,-720 -448,-768 Q-315,-815 -192,-848 Q-45,-875 96,-896 Q190,-915 288,-928 Q430,-950 560,-960 Q660,-980 832,-992"/>
+</g>
+<g id="flowRoute">
+<path class="route flowRoute" d="M-864,-32 Q-760,-100 -672,-160 Q-500,-255 -336,-352 Q-250,-390 -176,-416 Q-120,-475 -64,-544 Q0,-610 64,-672 Q190,-715 320,-768 Q250,-810 176,-832 Q215,-880 288,-928 Q430,-950 560,-960 Q660,-980 832,-992"/>
+</g>
+<g id="pressureRoute">
+<path class="route pressureRoute" d="M-864,-32 Q-760,-100 -672,-160 Q-490,-210 -304,-256 Q-120,-305 64,-352 Q0,-455 -64,-544 Q80,-575 224,-608 Q365,-640 512,-672 Q500,-760 416,-832 Q350,-875 288,-928 Q430,-950 560,-960 Q660,-980 832,-992"/>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-560" cy="-320" r="400"/>
+<circle class="reach" cx="-336" cy="-352" r="400"/>
+<circle class="reach" cx="-352" cy="-672" r="400"/>
+<circle class="reach" cx="-192" cy="-848" r="400"/>
+<circle class="reach" cx="96" cy="-896" r="400"/>
+<circle class="reach" cx="224" cy="-608" r="400"/>
+<circle class="reach" cx="64" cy="-672" r="400"/>
+<circle class="reach" cx="320" cy="-768" r="400"/>
+<circle class="reach" cx="560" cy="-960" r="400"/>
+</g>
+</svg></main></div>
+<script>
+showSafe.onchange=()=>safeRoute.classList.toggle("hidden",!showSafe.checked);
+showFlow.onchange=()=>flowRoute.classList.toggle("hidden",!showFlow.checked);
+showPressure.onchange=()=>pressureRoute.classList.toggle("hidden",!showPressure.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

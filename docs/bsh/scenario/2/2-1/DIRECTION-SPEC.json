@@ -1,0 +1,327 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "447e6c11e0a007364809aaad634afcb499a2d309",
+  "stage": {
+    "sector": 2,
+    "stage": 1,
+    "sourceAreaId": "sector-02-01",
+    "name": "WORKER BLOCK 12"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "introduce low-rise Worker Housing at human scale",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "2-1:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "WORKER BLOCK 12",
+            "detail": "RESIDENTIAL COURTYARD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "environment",
+          "action": "low-rise-front-door-scale"
+        }
+      ],
+      "completion": "entry presentation duration only",
+      "validation": "No giant skyline reveal."
+    },
+    {
+      "beatId": "s1-diagonal-court",
+      "status": "DESIGN LOCKED",
+      "purpose": "establish continuous diagonal forward movement",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "small-courtyard-cut"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "2-1:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "movement",
+          "action": "lower-left-to-mid-center-diagonal"
+        }
+      ],
+      "completion": "Small Court Landing",
+      "validation": "No full-width reversal."
+    },
+    {
+      "beatId": "s2-security",
+      "status": "DESIGN LOCKED",
+      "purpose": "show powered legacy security without moving-security reveal",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "mid-utility-landing"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-enemy-slot-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "courtyard-guard",
+          "action": "activate-static-security-residue"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "Player passes or kills optional Guard",
+      "validation": "Patrol Drone impossible; enemy does not stop flow."
+    },
+    {
+      "beatId": "s3-laundry-offset",
+      "status": "DESIGN LOCKED",
+      "purpose": "provide one architectural offset without becoming S-curve",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "laundry-offset"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "2-1:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "movement",
+          "action": "single-small-leftward-offset"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "Laundry Landing",
+      "validation": "Offset is local, not a full-width lane reversal."
+    },
+    {
+      "beatId": "s4-absence",
+      "status": "DESIGN LOCKED",
+      "purpose": "state Sector 02 question after lived-in evidence",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "upper-story-safe"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-1:bark-a:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…다 어디 간 거지?"
+          },
+          "timing": {
+            "mode": "after-lived-in-evidence"
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No evacuation conclusion asserted."
+    },
+    {
+      "beatId": "s5-community-notice",
+      "status": "DESIGN LOCKED",
+      "purpose": "introduce first concrete Group C evacuation procedure",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "community-terrace"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-1:notice:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED POSITION",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "COMMUNITY NOTICE",
+              "detail": "EVACUATION GROUP C"
+            },
+            {
+              "title": "ASSEMBLY: BLOCK 12",
+              "detail": "WAIT FOR FURTHER INSTRUCTION"
+            }
+          ]
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "full notice sequence",
+      "validation": "Notice is safe and follows domestic evidence."
+    },
+    {
+      "beatId": "s6-notice-question",
+      "status": "DESIGN LOCKED",
+      "purpose": "turn procedure into unresolved question",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-02-01:assembly-status"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-1:bark-b:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…여기서 기다리라고 한 건가."
+          },
+          "timing": {
+            "mode": "after-notice"
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "Question form; no abandonment claim."
+    },
+    {
+      "beatId": "s7-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "preserve 2-2 first moving-security reveal",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-02-01:exit-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-1:s7",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "preview",
+          "action": "do-not-show-patrol-drone"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → sector-02-02",
+      "validation": "2-2 remains first Patrol Drone."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "zero full-width route reversals",
+    "one local leftward offset only",
+    "1-7 meaningful overlap <= 1",
+    "exactly one static enemy slot",
+    "Patrol Drone impossible in 2-1",
+    "verified Story copy exact",
+    "lived-in evidence precedes Notice",
+    "Barks are not System Toasts",
+    "2-2 owns first moving-security reveal",
+    "MAP-PREVIEW remains gameplay-only"
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "447e6c11e0a007364809aaad634afcb499a2d309",
+  "stage": {
+    "sector": 2,
+    "stage": 2,
+    "sourceAreaId": "sector-02-02",
+    "name": "PATROL WALKWAY"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "establish active security before combat",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-2:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "PATROL WALKWAY",
+            "detail": "SECURITY STILL ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "patrol-visible-but-no-unavoidable-pressure"
+        }
+      ],
+      "completion": "entry presentation duration only",
+      "validation": "Player is not surprised by an unseen moving enemy."
+    },
+    {
+      "beatId": "s1-observe",
+      "status": "DESIGN LOCKED",
+      "purpose": "show movement before pressure",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "safe-observation"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-2:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "continue-current-patrol"
+        },
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED POSITION",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "SECURITY PATROL",
+              "detail": "ACTIVE"
+            },
+            {
+              "title": "RESIDENTIAL TRANSIT",
+              "detail": "RESTRICTED"
+            }
+          ]
+        }
+      ],
+      "completion": "security status complete",
+      "validation": "Do not require full Patrol cycle."
+    },
+    {
+      "beatId": "s2-bark",
+      "status": "DESIGN LOCKED",
+      "purpose": "name the contradiction only after evidence",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-02-02:residential-transit-restricted"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-2:bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…사람은 없는데, 순찰은 그대로네."
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No motive or confinement claim."
+    },
+    {
+      "beatId": "s3-main-cross",
+      "status": "DESIGN LOCKED",
+      "purpose": "make moving threat alter Rope timing",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "main-patrol-bridge"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-patrol-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "current-patrol-and-target-lock-cycle"
+        },
+        {
+          "type": "route",
+          "action": "allow-wait-flow-kill"
+        },
+        {
+          "type": "cover",
+          "targets": [
+            "cover-a",
+            "cover-b"
+          ],
+          "action": "los-block"
+        }
+      ],
+      "completion": "Disengage Deck reached",
+      "validation": "Waiting, flowing and killing remain viable."
+    },
+    {
+      "beatId": "s4-disengage",
+      "status": "DESIGN LOCKED",
+      "purpose": "end first Patrol lesson before optional Carrier",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "disengage-deck"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-2:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "no-new-lesson"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "Upper Landing reached",
+      "validation": "Main Patrol pressure no longer dominates Access branch."
+    },
+    {
+      "beatId": "s5-access-a",
+      "status": "DESIGN LOCKED",
+      "purpose": "optional local acquisition of first Sector 02 Carrier module",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "sector-02-02:access-a"
+      },
+      "scope": "shared-world-with-local-route-cue",
+      "replayPolicy": "until-module-collected",
+      "dedupeToken": "sector-02:access-module:a",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "upper-walkway-guard",
+          "action": "activate-current-carrier-slot"
+        },
+        {
+          "type": "marker",
+          "target": "sector-02:access-module:a",
+          "action": "current-edge-arrow-to-diamond-contract"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "Carrier killed and module collected OR Player returns to main route",
+      "validation": "No third enemy and no main Patrol crossfire."
+    },
+    {
+      "beatId": "s6-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "hand off from pressure to 2-3 Service Node",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-02-02:exit-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-2:s6",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → sector-02-03",
+      "validation": "Exit Deck is safe."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "Player sees moving threat before unavoidable pressure",
+    "full Patrol cycle is not required",
+    "Wait/Flow/Kill viable",
+    "exactly 2 enemy slots",
+    "Access Carrier separated from first Patrol lesson",
+    "exact Story copy preserved",
+    "Bark not converted to System Toast",
+    "default camera tested first",
+    "MAP-PREVIEW gameplay-only"
+  ]
+}

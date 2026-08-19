@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-7 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--r:#df7669;--v:#caa7ff;--y:#ffe16c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:470px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:720px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.wall{fill:#242b31;stroke:#a77f62;stroke-width:3}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.carrier{fill:#482b61;stroke:#d1adff;stroke-width:3}.story{fill:#796d43;stroke:#ead38d;stroke-width:2}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.branch{fill:none;stroke:#caa7ff;stroke-width:4;stroke-dasharray:8 7}.patrol{stroke:#ff8e7c;stroke-width:3;stroke-dasharray:8 7}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.09}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:#80d39a}.warn{color:#efb75b}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-7 SHELTER ACCESS · REV8 DRAFT</h1><div class="sub">GAMEPLAY ONLY · SHELTER BUTTRESS → SAFE CORE → TRANSFER MAST · BODY ↗ THEN ↑</div></header>
+<div class="layout"><aside>
+<div class="card"><b>BODY</b><br>DIAGONAL BUTTRESS ↗ → SAFE STORY CORE → VERTICAL TRANSFER MAST ↑</div>
+<div class="card"><b>ENEMY = 3</b><br>1. Patrol A — diagonal same-axis<br>2. Access C Carrier — optional branch<br>3. Patrol B — horizontal crossing vertical Mast<br><br>No crossfire.</div>
+<div class="card"><b>DIFFICULTY</b><br>G1→G2 ≈365px<br>G2→G3 ≈365px<br>G4→G5 ≈385px<br>G5→G6 ≈358px</div>
+<div class="card"><b>UNIQUENESS</b><br>2-4 Multi-Route 없음<br>2-5 horizontal→down 아님<br>2-6 up→right 아님<br>2-1 diagonal 전체 Stage 아님<br>1-3 vertical spine 전체 Stage 아님</div>
+<div class="card">
+<label><input id="showMain" type="checkbox" checked> Mandatory Route</label>
+<label><input id="showAccess" type="checkbox" checked> Access C Branch</label>
+<label><input id="showPatrol" type="checkbox" checked> Patrol Paths</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP RULE</b><br>Shelter façade / waiting traces / signs / background structure are hidden unless gameplay-relevant.</div>
+</aside><main>
+<svg viewBox="-970 -1350 1940 1420">
+<rect class="bounds" x="-896" y="-1280" width="1792" height="1280"/><text class="tiny" x="-872" y="-1250">REV8 1792×1280</text>
+<rect class="surface" x="-896" y="0" width="320" height="32"/><text class="tiny" x="-880" y="-12">ENTRY</text>
+<circle class="anchor" cx="-576" cy="-240" r="13"/><text class="tiny" x="-556" y="-230">G1</text>
+<rect class="surface" x="-568" y="-320" width="176" height="22"/><text class="tiny" x="-555" y="-334">BUTTRESS A</text>
+<line id="patrolA" class="patrol" x1="-512" y1="-304" x2="32" y2="-560"/>
+<circle class="enemy" cx="-320" cy="-394" r="19"/><text class="tiny" x="-382" y="-425">PATROL A / DIAGONAL</text>
+<circle class="anchor" cx="-256" cy="-416" r="13"/><text class="tiny" x="-236" y="-406">G2</text>
+<rect class="recovery" x="-256" y="-288" width="256" height="18"/><text class="tiny" x="-242" y="-302">BUTTRESS RECOVERY</text>
+<rect class="surface" x="-224" y="-480" width="160" height="22"/><text class="tiny" x="-212" y="-494">BUTTRESS B</text>
+<circle class="anchor" cx="64" cy="-592" r="13"/><text class="tiny" x="84" y="-582">G3</text>
+<rect class="safe" x="-32" y="-672" width="384" height="26"/><text class="tiny" x="-16" y="-686">SAFE SHELTER CORE / STORY</text>
+<rect class="story" x="48" y="-744" width="96" height="64" rx="6"/><text class="tiny" x="34" y="-762">STATUS DISPLAY</text>
+<rect class="wall" x="352" y="-800" width="48" height="224"/><text class="tiny" x="330" y="-820">SEALED CORE WALL</text>
+<circle class="anchor" cx="-64" cy="-736" r="11"/><text class="tiny" x="-126" y="-726">ACCESS ANCHOR</text>
+<rect class="surface" x="-336" y="-768" width="160" height="20"/><text class="tiny" x="-344" y="-782">CARRIER ALCOVE</text>
+<circle class="carrier" cx="-256" cy="-768" r="19"/><text class="tiny" x="-325" y="-812">CARRIER / ACCESS C</text>
+<circle class="anchor" cx="416" cy="-800" r="13"/><text class="tiny" x="436" y="-790">G4 / TURN</text>
+<rect class="surface" x="376" y="-864" width="144" height="22"/><text class="tiny" x="365" y="-878">MAST LANDING A</text>
+<rect class="recovery" x="432" y="-736" width="160" height="18"/><text class="tiny" x="432" y="-750">LOW MAST RECOVERY</text>
+<line id="patrolB" class="patrol" x1="32" y1="-992" x2="448" y2="-992"/>
+<circle class="enemy" cx="272" cy="-992" r="19"/><text class="tiny" x="208" y="-1020">PATROL B / CROSSING</text>
+<circle class="anchor" cx="128" cy="-1056" r="13"/><text class="tiny" x="148" y="-1046">G5</text>
+<rect class="recovery" x="-112" y="-896" width="160" height="18"/><text class="tiny" x="-112" y="-910">UPPER MAST RECOVERY</text>
+<circle class="anchor" cx="448" cy="-1216" r="13"/><text class="tiny" x="468" y="-1206">G6</text>
+<rect class="safe" x="512" y="-1248" width="256" height="26"/><text class="tiny" x="528" y="-1262">EXIT DECK → 2-8</text>
+<g id="mainRoute"><path class="route" d="M-768,-32 Q-665,-140 -576,-240 Q-510,-285 -480,-320 Q-365,-365 -256,-416 Q-195,-455 -144,-480 Q-40,-530 64,-592 Q110,-630 160,-672 L352,-672 Q385,-730 416,-800 Q432,-835 448,-864 Q300,-950 128,-1056 Q285,-1140 448,-1216 Q545,-1230 640,-1248"/></g>
+<g id="accessRoute"><path class="branch" d="M160,-672 Q35,-700 -64,-736 Q-160,-750 -256,-768 Q-160,-750 -64,-736 Q35,-700 160,-672"/></g>
+<g id="reach" class="hidden">
+<circle class="reach" cx="-576" cy="-240" r="400"/><circle class="reach" cx="-256" cy="-416" r="400"/><circle class="reach" cx="64" cy="-592" r="400"/><circle class="reach" cx="416" cy="-800" r="400"/><circle class="reach" cx="128" cy="-1056" r="400"/><circle class="reach" cx="448" cy="-1216" r="400"/>
+</g>
+</svg></main></div>
+<script>
+showMain.onchange=()=>mainRoute.classList.toggle("hidden",!showMain.checked);
+showAccess.onchange=()=>accessRoute.classList.toggle("hidden",!showAccess.checked);
+showPatrol.onchange=()=>{patrolA.classList.toggle("hidden",!showPatrol.checked);patrolB.classList.toggle("hidden",!showPatrol.checked)};
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>
