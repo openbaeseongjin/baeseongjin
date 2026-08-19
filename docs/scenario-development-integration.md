@@ -3,12 +3,13 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 3bb17425fd8ffe6c34bd217a47c5202e04adf2b749bf3a438bc66b91d61e74ce
-authored-area-sha256: d6c25321486d499d2382f9db8e2e3036898fb15206224af84a1cb8e8c87ccf43
+scenario-source-sha256: 008b7d2ef6f912f17903a60dac6fa9c3c25252ce4ccb6e1b089b571f79fdd995
+authored-area-sha256: 876597b13ba8e66a7cac54e08a63cd3c0c9dd10c7a6b66e0f21dca3af792a844
 authored-sector-sha256: 8dd5c3dddb4158f05910d7d3f6b4a2f9c0bf0dae9ee78da4ba8f034235f201a2
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 4fce8a2
+reviewed-upstream: bf012f7ec13ee8880885584b50cb0c40756b5385
+-->
 
 ## 상태를 읽는 법
 
