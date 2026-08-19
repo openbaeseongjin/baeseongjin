@@ -87,6 +87,7 @@ function walkingSurfaceAt(surfaces, point) {
         .filter(
             (surface) =>
                 surface.requiredRouteId === undefined &&
+                surface.blockedUntilRouteId === undefined &&
                 surface.topY === point.y + 32 &&
                 surface.x <= point.x &&
                 surface.x + surface.width >= point.x
@@ -94,7 +95,18 @@ function walkingSurfaceAt(surfaces, point) {
         .sort((left, right) => left.width - right.width)[0];
 }
 
-function horizontalConnectorVertices(start, end, surfaces, thickness) {
+// Returns `undefined` for a non-horizontal (different-y) transition, so the caller falls back to a
+// diagonal bridge. Returns `{ vertices, overlap: true }` when the two landmarks' walking surfaces
+// already touch/overlap in world-x (no gap to bridge) - the caller must still gate this boundary,
+// just as a blocking barrier rather than an appearing bridge, or a player can walk the shortcut
+// created by the overlap without ever satisfying the route's requiredObjectiveIds.
+//
+// verticalSpan must cover the full reachable y-range of BOTH landmarks (their bounds union), not an
+// arbitrary constant - a fixed height was checked against every landmark in the compiled world and
+// found insufficient (max landmark bounds.height observed: 1792px, taller than a naive +-640 pick),
+// so a Rope swing arc within either landmark's own bounds could otherwise go over or under a
+// fixed-height wall and re-enter the other landmark from above/below it.
+function horizontalConnectorVertices(start, end, surfaces, thickness, verticalSpan) {
     if (start.y !== end.y) return undefined;
     const sourceSupport = walkingSurfaceAt(surfaces, start);
     const targetSupport = walkingSurfaceAt(surfaces, end);
@@ -103,26 +115,40 @@ function horizontalConnectorVertices(start, end, surfaces, thickness) {
     const rightSupport = leftSupport === sourceSupport ? targetSupport : sourceSupport;
     const left = leftSupport.x + leftSupport.width;
     const right = rightSupport.x;
-    if (right <= left) return [];
     const top = start.y + 32;
-    return [
-        { x: left, y: top },
-        { x: right, y: top },
-        { x: right, y: top + thickness },
-        { x: left, y: top + thickness }
-    ];
+    if (right <= left) {
+        const barrierX = (start.x + end.x) * 0.5;
+        return {
+            overlap: true,
+            vertices: [
+                { x: barrierX - thickness / 2, y: verticalSpan.top },
+                { x: barrierX + thickness / 2, y: verticalSpan.top },
+                { x: barrierX + thickness / 2, y: verticalSpan.bottom },
+                { x: barrierX - thickness / 2, y: verticalSpan.bottom }
+            ]
+        };
+    }
+    return {
+        overlap: false,
+        vertices: [
+            { x: left, y: top },
+            { x: right, y: top },
+            { x: right, y: top + thickness },
+            { x: left, y: top + thickness }
+        ]
+    };
 }
 
-function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces) {
+function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces, requiredRouteId, verticalSpan) {
     const thickness = 32;
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const length = Math.max(1, Math.hypot(dx, dy));
     const normalX = (-dy / length) * thickness * 0.5;
     const normalY = (dx / length) * thickness * 0.5;
-    const horizontalVertices = horizontalConnectorVertices(start, end, supportingSurfaces, thickness);
-    if (horizontalVertices?.length === 0) return null;
-    const vertices = horizontalVertices ?? [
+    const horizontal = horizontalConnectorVertices(start, end, supportingSurfaces, thickness, verticalSpan);
+    const overlap = horizontal?.overlap === true;
+    const vertices = horizontal?.vertices ?? [
         { x: start.x + normalX, y: start.y + normalY },
         { x: end.x + normalX, y: end.y + normalY },
         { x: end.x - normalX, y: end.y - normalY },
@@ -137,7 +163,11 @@ function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces) 
         kind: "sector-seam",
         landmarkId: sourceLandmarkId,
         oneWay: false,
-        grappleable: true,
+        // An overlap barrier must not be grappleable past/through, and is gated by
+        // blockedUntilRouteId (solid while locked, gone once unlocked) instead of requiredRouteId
+        // (absent while locked, appears once unlocked) - see WorldGateGeometry.js.
+        grappleable: !overlap,
+        ...(overlap ? { blockedUntilRouteId: requiredRouteId } : { requiredRouteId }),
         x: left,
         y: top,
         width: right - left,
@@ -470,17 +500,28 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
             if (previousLandmark) {
                 const lockId = routeId(previousLandmark.id, runtimeLandmark.id);
                 const surfaceId = `${lockId}:surface`;
+                // Union of both landmarks' own vertical extent - any position reachable within either
+                // landmark, by construction, falls inside this range (see horizontalConnectorVertices).
+                const verticalSpan = {
+                    top: Math.min(previousLandmark.bounds.y, runtimeLandmark.bounds.y),
+                    bottom: Math.max(
+                        previousLandmark.bounds.y + previousLandmark.bounds.height,
+                        runtimeLandmark.bounds.y + runtimeLandmark.bounds.height
+                    )
+                };
                 const connectorBridge = connectorSurface(
                     surfaceId,
                     previousLandmark.id,
                     previousLandmark.exit,
                     runtimeLandmark.entry,
-                    [...surfaces, ...landmarkSurfaces, ...landmarkWingSurfaces]
+                    [...surfaces, ...landmarkSurfaces, ...landmarkWingSurfaces],
+                    lockId,
+                    verticalSpan
                 );
                 const connector = freezeValue({
                     id: `${lockId}:connector`,
                     routeLockId: lockId,
-                    surfaceId: connectorBridge?.id ?? null,
+                    surfaceId: connectorBridge.id,
                     sourceLandmarkId: previousLandmark.id,
                     targetLandmarkId: runtimeLandmark.id,
                     start: previousLandmark.exit,

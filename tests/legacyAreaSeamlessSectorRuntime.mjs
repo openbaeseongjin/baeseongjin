@@ -122,6 +122,7 @@ export function run() {
                         (candidate) =>
                             candidate.id !== surface?.id &&
                             candidate.requiredRouteId === undefined &&
+                            candidate.blockedUntilRouteId === undefined &&
                             candidate.topY === point.y + 32 &&
                             candidate.x <= point.x &&
                             candidate.x + candidate.width >= point.x
@@ -134,8 +135,25 @@ export function run() {
             const gapStart = leftSupport.x + leftSupport.width;
             const gapWidth = rightSupport.x - gapStart;
             if (gapWidth <= 0) {
-                assert.equal(connector.surfaceId, null, "overlapping authored decks must not create a platform");
-                assert.equal(surface, undefined);
+                // Overlapping authored decks mean there is no gap to bridge, but the transition still
+                // needs to be gated - otherwise a player can walk the shortcut created by the overlap
+                // without ever satisfying the route's requiredObjectiveIds (see WorldGateGeometry.js's
+                // blockedUntilRouteId: solid while locked, gone once unlocked - the inverse of a normal
+                // "appears once unlocked" connector bridge, since here "absent" would not block anything).
+                assert.ok(surface, "an overlapping transition must still get a gating barrier surface");
+                assert.equal(surface.blockedUntilRouteId, connector.routeLockId);
+                assert.equal(surface.requiredRouteId, undefined);
+                assert.equal(surface.grappleable, false);
+                assert.equal(surface.oneWay, false);
+                const barrierX = (connector.start.x + connector.end.x) / 2;
+                assert.ok(
+                    surface.x <= barrierX && barrierX <= surface.x + surface.width,
+                    "the barrier must sit between the two landmarks' exit/entry points"
+                );
+                assert.ok(
+                    surface.y < connector.start.y && surface.y + surface.height > connector.start.y,
+                    "the barrier must vertically cover the shared floor height it is blocking"
+                );
             } else {
                 assert.ok(surface);
                 assert.equal(surface.oneWay, false);
