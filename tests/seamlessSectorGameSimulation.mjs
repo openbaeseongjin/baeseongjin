@@ -181,10 +181,28 @@ export function run() {
         { x: owner.physics.position.x + 80, y: owner.physics.position.y },
         "player-2"
     ).entity;
-    completeLandmark(simulation.worldProgress, simulation.world, "sector-01:landmark:01");
+    const firstLandmark = simulation.world.landmarks.find(({ id }) => id === "sector-01:landmark:01");
+    for (const objectiveId of firstLandmark.objectiveIds) simulation.worldProgress.completeObjective(objectiveId);
     simulation.restoreWorldProgress(simulation.worldProgress.snapshot());
+    const secondLandmark = simulation.world.landmarks.find(({ id }) => id === "sector-01:landmark:02");
+    owner.physics.position.set(secondLandmark.entry.x, secondLandmark.entry.y);
+    simulation.step(
+        1 / 120,
+        createPlayerCommand(
+            {
+                horizontal: 0,
+                vertical: 0,
+                pointer: { x: 0, y: 0, down: false },
+                viewport: { width: 1280, height: 720 }
+            },
+            secondLandmark.entry
+        )
+    );
     assert.equal(simulation.worldProgress.snapshot().currentLandmarkId, "sector-01:landmark:02");
     assert.equal(simulation.activeRespawnAnchor.id, "sector-01:landmark:02:checkpoint");
+    assert.equal(simulation.metrics.snapshot().checkpointsReached, 1);
+    assert.equal(simulation.snapshot().eventFlash.type, "stage-saved");
+    assert.equal(simulation.snapshot().eventFlash.respawnAnchorId, "sector-01:landmark:02:checkpoint");
     const progressBeforeSoloDeath = simulation.worldProgress.snapshot();
     const teammateBefore = teammate.physics.position.clone();
     const removedEnemyId = simulation.enemies[0].objectId;

@@ -48,6 +48,9 @@ export function run() {
             assert.ok(anchor, `landmark respawn anchor must exist: ${landmark.id}`);
             assert.equal(anchor.landmarkId, landmark.id);
             assert.deepEqual(anchor.position, landmark.entry);
+            assert.equal(anchor.level, landmark.order - 1);
+            assert.ok(anchor.radius >= 64, `Stage save point must have a visible culling radius: ${landmark.id}`);
+            assert.equal(anchor.label, `STAGE ${landmark.legacyStageAlias} SAVE`);
             if (landmark.id === sector.entryLandmarkId) assert.equal(anchor.id, sector.respawnAnchorId);
             assert.equal(landmark.bounds.width, SEAMLESS_SECTOR_RUNTIME_WIDTH);
             assert.ok(landmark.bounds.x >= sector.bounds.x);

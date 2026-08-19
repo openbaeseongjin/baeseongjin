@@ -36,10 +36,10 @@
 1. 붕괴 도시의 시작 영역에서 한 런을 시작한다.
 2. 로프로 이동하며 현재 영역이 요구하는 방해요소 처리 조건을 달성한다. 조건은 시나리오에 따라 처치·무력화·우회·상호작용·이동 달성 중 하나 이상이며, 적 처치로 일괄 고정하지 않는다.
 3. 완료 조건을 달성하면 명시적 출구를 열고, 플레이어가 출구를 통과해 다음 영역으로 진행한다.
-4. landmark를 넘어가도 월드·런·플레이어·Foundation·Sector-entry 상태를 새로 만들지 않는다.
+4. landmark를 넘어가도 월드·런·플레이어·Foundation 상태를 새로 만들지 않고, 해당 Stage 진입점의 세이브 포인트만 새 활성 부활 지점으로 저장한다.
 5. 1-4·2-3·3-5의 명시적 장비 Node에서 현재 loadout과 호환되는 generic Augment를 하나씩 선택해 로프 조작·전투 방식을 강화한다.
 6. 더 높은 구역 또는 최종 목표를 향해 전진한다.
-7. 개인 실패는 현재 Sector entry로 복귀하며 objective·열린 route·처치 적을 유지한다.
+7. 개인 실패는 최근 도달 Stage 세이브 포인트로 복귀하며 objective·열린 route·처치 적을 유지한다.
 8. 저장 지점은 Sector entry 하나다. 같은 tick의 전원 실패만 current Sector baseline을 초기화하고 이전 Sector 완료와 개인 Build는 유지한다.
 9. 각 Node는 `runSeed + stablePlayerId + selectionIndex`로 서로 다른 호환 카드 3장을 제시하며 reroll·rarity·동일 Player 카드 중복은 없다.
 10. Augment 선택은 공통 피드백으로 알리고, 데스크톱은 선택한 generic loadout을 상시 HUD에 표시한다.
@@ -47,7 +47,7 @@
 12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Augment 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
 13. 발견된 문제 영역은 현재 시나리오의 관련 회귀 테스트에 이유와 함께 추가해 같은 영역·진행 계약에서 우선 재현한다.
 14. 원격 플레이테스트는 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켜고 현재 런 지표를 확인한다.
-15. 0.34.0 기본 Runtime은 체력이 0이 되거나 낙사하면 해당 플레이어만 최근 도달 Stage checkpoint에서 최대 체력으로 즉시 부활시키고 공용 objective·열린 route·처치 적을 유지한다. 같은 tick에 전원이 사망한 경우에만 current Sector baseline을 복구하고 전원을 Sector entry에 배치한다.
+15. 0.34.0 기본 Runtime은 체력이 0이 되거나 낙사하면 해당 플레이어만 최근 도달 Stage 세이브 포인트에서 최대 체력으로 즉시 부활시키고 공용 objective·열린 route·처치 적을 유지한다. 각 Stage entry에는 같은 `respawnAnchor`를 직접 표현하는 `STAGE SAVE` 구조물을 두며 활성화 때 열린 core·화면 안내·cue로 저장 완료를 알린다. 같은 tick에 전원이 사망한 경우에만 current Sector baseline을 복구하고 전원을 Sector entry에 배치한다.
 16. 네트워크 연결 전 불변 PlayerCommand 기록을 재생해 위치·전투·진행·지표 결정성을 비교한다.
 17. 다중 플레이어 명령은 프로토콜 버전과 틱을 가진 배치로 묶고 플레이어 ID 순으로 정규화한다.
 18. 모든 플레이어는 같은 PlayerRuntimeFactory에서 물리·로프·전투·생명 상태를 조립한다.

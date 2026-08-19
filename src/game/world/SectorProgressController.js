@@ -173,6 +173,7 @@ export function advanceSectorProgress({
         Object.freeze({
             type: "landmark-entered",
             landmarkId: target.id,
+            stageAlias: target.legacyStageAlias,
             previousLandmarkId: route.sourceLandmarkId,
             sectorId: target.sectorId,
             respawnAnchorId: result.respawnAnchorId,

@@ -189,7 +189,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 현재 저작 시나리오는 정상 도달을 summit claim으로 처리하지 않는다. 멀티에서는 서버 `GameSimulation`이 objective 완료와 route unlock을 진행하고 플레이어가 다음 landmark entry에 물리적으로 들어온 결과를 공용 snapshot으로 공유한다. 현재 구현된 마지막 `sector-03:landmark:08`은 content boundary이므로 `completed` 상태나 `run-completed` 사건을 만들지 않는다. 과거 Area/Gate와 절차 월드 summit 프로토콜은 호환 코드로만 남아 있으며 엔딩 진입 조건이 확정되기 전까지 기본 제품 검증에서 제외한다.
 
-1-4·2-3·3-5 explicit Augment Node 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. owner client는 Node 근처에서 공식 `runSeed + stablePlayerId + selectionIndex` offer를 즉시 열고 `augment-offer` claim으로 pending entitlement를 서버에 보존한다. 확정은 호환 `foundation-selection` claim을 사용하지만 의미는 generic Augment다. 서버는 연결 소유권·tick·stable source ID·반경·공식 offer membership·Player별 source 소비를 검증하고 멱등 확정한다. 현재 채널 Player 전원이 source를 소비한 뒤 공유 objective를 한 번 완료하며, 완료 전 퇴장한 Player는 요구 집합에서 제거해 route 교착을 막는다. 완료 뒤 합류한 Player도 Node에서 자기 offer를 독립 확정할 수 있지만 열린 route를 다시 잠그지 않는다. 사망·Sector-entry 부활·landmark 이동·party wipe는 선택과 consumed source를 보존하고 순간 Action/Rope window만 초기화하며, party wipe 뒤 소비 Node 재방문은 chooser를 다시 열지 않고 shared objective만 복구한다.
+1-4·2-3·3-5 explicit Augment Node 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. owner client는 Node 근처에서 공식 `runSeed + stablePlayerId + selectionIndex` offer를 즉시 열고 `augment-offer` claim으로 pending entitlement를 서버에 보존한다. 확정은 호환 `foundation-selection` claim을 사용하지만 의미는 generic Augment다. 서버는 연결 소유권·tick·stable source ID·반경·공식 offer membership·Player별 source 소비를 검증하고 멱등 확정한다. 현재 채널 Player 전원이 source를 소비한 뒤 공유 objective를 한 번 완료하며, 완료 전 퇴장한 Player는 요구 집합에서 제거해 route 교착을 막는다. 완료 뒤 합류한 Player도 Node에서 자기 offer를 독립 확정할 수 있지만 열린 route를 다시 잠그지 않는다. 사망·Stage 세이브 포인트 부활·landmark 이동·party wipe는 선택과 consumed source를 보존하고 순간 Action/Rope window만 초기화하며, party wipe 뒤 소비 Node 재방문은 chooser 없이 objective만 복구한다.
 
 해제 추진·로프 연동·감전 로프 같은 generic Augment 효과는 소유 클라이언트가 Rope/Action 사건에 즉시 적용하고 `owner-motion`, `augment-impact`와 snapshot으로 공유한다. 과거 `Impulse Coil`·`Relay Link`·`Shear Current` ID는 migration 때 현재 카드로 정규화하며 Foundation Shear 전용 claim은 전송하지 않는다.
 
@@ -252,7 +252,7 @@ events[]
 
 기본 로프 몸체 공격은 소유 클라이언트가 로프 부착, `620px/s` 이상 속도와 적 겹침의 새 진입을 같은 120Hz 스텝에서 감지해 즉시 `predicted-resolve` 피드백을 만든다. 정상 `rope-impact` claim은 `predictionId`, target ID, client tick, 충돌 위치와 플레이어 속도만 보낸다. 서버는 연결 소유권·tick·prediction ID 중복·공식 피해와 대상 생존/tombstone을 검증하고 서버 소유 적 HP에 `25` 피해와 resolve 사건을 한 번 확정한다. 로프 부착·속도·적 위치·접촉 집합은 지연된 서버 복제본으로 재판정하지 않는다. 같은 겹침은 소유 클라이언트 접촉 집합에서 재무장되지 않으며, 같은 prediction ID 재전송도 서버에서 같은 receipt를 반환한다.
 
-자신과 교차한 적 탄환은 피해 클라이언트가 `PlayerImpactPrediction` capability로 로컬 몸체·로프에 먼저 충돌시켜 즉시 피드백과 이동 반응을 적용한다. 본체 피격은 복제 탄환 대미지로 로컬 HP와 치명 시 Sector-entry 부활까지 공용 `GameSimulation`에서 실행하고, 멀티 HUD는 이 소유 클라이언트 상태를 표시한다. 정상 impact claim은 `projectileId`, clientTick, `player-hit` 또는 `rope-cut`, 충돌 위치·속도, 관측 대미지, 부활 여부와 결과 상태 지문만 보낸다. 피격 직전 `owner-motion`을 캡처하고 로컬 반응을 적용한 뒤 전송선에서는 캡처한 motion 다음 impact claim 순서를 지킨다.
+자신과 교차한 적 탄환은 피해 클라이언트가 `PlayerImpactPrediction` capability로 로컬 몸체·로프에 먼저 충돌시켜 즉시 피드백과 이동 반응을 적용한다. 본체 피격은 복제 탄환 대미지로 로컬 HP와 치명 시 활성 Stage 세이브 포인트 부활까지 공용 `GameSimulation`에서 실행하고, 멀티 HUD는 이 소유 클라이언트 상태를 표시한다. 정상 impact claim은 `projectileId`, clientTick, `player-hit` 또는 `rope-cut`, 충돌 위치·속도, 관측 대미지, 부활 여부와 결과 상태 지문만 보낸다. 피격 직전 `owner-motion`을 캡처하고 로컬 반응을 적용한 뒤 전송선에서는 캡처한 motion 다음 impact claim 순서를 지킨다.
 
 서버는 인증된 연결과 결정적 projectile ID 중복을 검사하고 같은 `GameSimulation` impact 전이를 임시 적용한다. 결과 지문이 같으면 resolve 사건을 한 번 확정하고 동료에게 공유한다. 다르면 임시 전이를 되돌린 뒤 `accepted: true`, `resolution: recovery-required`와 일회용 `recoveryId`를 보내며, 클라이언트는 그 응답을 받은 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보낸다. 서버는 발급 대기 중인 challenge, 피해자 ID, 단조 tick과 전체 복구 스키마가 모두 맞을 때만 이 상태를 흡수하고 challenge를 소비한 뒤 사건을 확정한다. 복구 대기는 유실된 응답이 세션 메모리에 무한히 남지 않도록 10초 뒤 정리한다. 탄환이 아직 서버에 있으면 서버 탄환 대미지를 사건 기록에 사용하고 제거하며, 이미 만료됐으면 claim의 관측 대미지를 사용한다. 서버 위치·피격 무적·server tick·기존 target ID 차이는 피해자 결과를 취소하는 gameplay 거부 조건이 아니다. 소비한 적 탄환을 다시 표시하거나 같은 충돌을 반복하지 않는다. 중간 입장과 재연결 welcome에는 아직 살아 있는 예측 객체의 원래 생성 이벤트를 같은 이벤트 ID로 다시 제공해 생성 tick부터 복원한다.
 
@@ -289,7 +289,7 @@ v9는 측정된 대역폭의 대부분을 차지하던 authored enemy의 정적 
 
 멀티 조작감은 **로컬 입력 시뮬레이션 + 원격 데드 레코닝**을 사용한다. 입력 시뮬레이션은 자기 캐릭터가 네트워크 프레임 사이에서 멈추지 않게 하며, 데드 레코닝은 동료 캐릭터를 최신 위치·속도로 짧게 외삽한 뒤 새 검증 공유 상태와 오차를 보정한다. 두 기능 모두 별도 간이 게임 규칙을 만들지 않고 공용 `GameSimulation`과 스냅샷 물리 상태를 사용한다.
 
-HP 감소, 로프 절단, 사망·Sector-entry 부활, Sector reset, Augment 선택과 런 완료는 시각적 보간 대상이 아니다. 당사자 클라이언트는 로컬 결과를 즉시 확정해 계속 사용하고, 서버는 claim을 검증·중복 제거해 다른 클라이언트에 공유한다. impact의 `recovery-required`는 전체 상태를 항상 보내라는 신호가 아니라 해당 사건의 서버 복제 결과가 어긋난 경우에만 최신 피해자 상태를 요청하는 성공 receipt다. 승인 receipt와 resolve 사건은 소유자의 로컬 결과를 서버 값으로 교체하는 신호가 아니라 복제본이 같은 사건을 받아들였다는 확인이다.
+HP 감소, 로프 절단, 사망·Stage 세이브 포인트 부활, Sector reset, Augment 선택과 런 완료는 시각적 보간 대상이 아니다. 당사자 클라이언트는 로컬 결과를 즉시 확정해 계속 사용하고, 서버는 claim을 검증·중복 제거해 다른 클라이언트에 공유한다. impact의 `recovery-required`는 전체 상태를 항상 보내라는 신호가 아니라 해당 사건의 서버 복제 결과가 어긋난 경우에만 최신 피해자 상태를 요청하는 성공 receipt다. 승인 receipt와 resolve 사건은 소유자의 로컬 결과를 서버 값으로 교체하는 신호가 아니라 복제본이 같은 사건을 받아들였다는 확인이다.
 
 ## 연결과 복구
 
@@ -375,6 +375,6 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 6. [완료] 장시간 로컬 수신 시계 드리프트에서도 최신 표본이 계속 오면 원격 시간축이 지속 외삽으로 밀리지 않는지 테스트한다.
 7. [완료] Node 권위 서버와 실제 WebSocket 클라이언트 두 개를 같은 오픈월드에 연결한다.
 8. [완료] impact 전체 상태는 서버가 먼저 발급한 일회용 challenge 뒤에만 받고, 복구 상태와 `stateTick`을 원자적으로 수용하며 실제 복원 필드 전체의 wire schema를 검증한다.
-9. [필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Sector-entry 부활과 party wipe reset을 장시간 검증한다.
+9. [필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Stage 세이브 포인트 부활과 party wipe Sector-entry reset을 장시간 검증한다.
 
 완료 증거는 단순 접속 성공이 아니다. 플레이어 상태는 소유 클라이언트가 만든 승인 상태로 서버 복제본과 동료 클라이언트가 수렴하고, 중립 월드 상태는 서버가 만든 상태로 모든 클라이언트가 수렴해야 한다. 지연과 패킷 순서 변경 뒤에도 이 두 권한 원점이 뒤바뀌지 않아야 한다.

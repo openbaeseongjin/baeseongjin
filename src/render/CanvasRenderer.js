@@ -298,10 +298,14 @@ export class CanvasRenderer {
         let detail;
         let color;
         let foundationFeedback = false;
-        if (eventFlash.type === "checkpoint-respawn") {
-            title = "체크포인트 부활";
+        if (eventFlash.type === "checkpoint-respawn" || eventFlash.type === "sector-respawn") {
+            title = eventFlash.type === "sector-respawn" ? "Stage 세이브 포인트 부활" : "체크포인트 부활";
             detail = eventFlash.reason === "fall" ? "낙사 · 최대 체력으로 복귀" : "사망 · 최대 체력으로 복귀";
             color = "#67e8f9";
+        } else if (eventFlash.type === "stage-saved") {
+            title = "STAGE SAVE";
+            detail = `${eventFlash.stageAlias ?? "새 Stage"} · 부활 지점 저장 완료`;
+            color = "#d9f4ff";
         } else if (eventFlash.type === "foundation-selected") {
             const foundation = foundationAugmentById(eventFlash.foundationId);
             title = "증강 획득";
