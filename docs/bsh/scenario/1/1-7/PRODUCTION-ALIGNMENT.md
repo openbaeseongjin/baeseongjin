@@ -6,9 +6,9 @@
 
 ## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
 
-- Foundation 선택·세 효과가 구현되어 Safe/Flow/Build Route 차이를 Runtime에서 검증할 수 있다.
+- 22장 generic Augment의 Player별 선택·저장·효과가 구현되어 Safe/Flow 공간의 Build 체감을 Runtime에서 검증할 수 있다.
 - `cameraZones`는 실제 객체로 구현되어 Approach·Security·Decision·Pressure·Relief·Bypass 구도를 사용한다.
-- Story는 entry, `PRESSURE LIMIT EXCEEDED`, `CONTAINMENT VIOLATION ACTIVE`, bypass objective/gate binding으로 핵심 흐름이 구현됐다.
+- Story는 entry, `PRESSURE LIMIT EXCEEDED`, `VERTICAL TRANSIT VIOLATION / SECURITY RESPONSE ACTIVE`, bypass objective/gate binding으로 핵심 흐름이 구현됐다. `CONTAINMENT VIOLATION`은 6-8과 Final Security 경계의 최종 거부 문구로 보존한다.
 - `storyTriggers`는 시나리오 기획 인벤토리이며 Bypass 이후 환경 상태 변화는 별도 World presentation 범위다.
 - 2026-08-18부터 Stage 폭은 3840px이며 기존 Sentry T1 stable ID와 행동을 오른쪽 Annex Arena `(1320,-944)`에서 Access Carrier C로 사용한다. Bridge `(560,-944, 736×16)`, Arena `(1320,-944, 800×32)`, Access Anchor `(480,-800)`, `(928,-864)`는 Stage-local 좌표다. 0.41.0의 3-of-3 계약에서 세 Carrier를 모두 요구한다.
 - 0.42.0부터 Carrier 위치 문자열은 제거하고 화면 밖 edge arrow와 화면 안 diamond marker를 같은 module world position에서 전환한다.
@@ -25,7 +25,7 @@
 | Access Carrier C | `IMPLEMENTED` | 위치 `(1320,-944)`, 기존 Sentry T1 stable ID와 `rules: ["standard-projectile","no-rope-cut"]` 행동 재사용 |
 | Residual Airflow + Main Pressure Vent | `IMPLEMENTED` | Main Pressure Vent는 1-6 Fan B와 **완전히 동일한 수치**(strength 360, cycle 1.75/0.7/1.4/0.3) 재사용 — README §24("1-6에서 튜닝된 값을 우선 재사용")를 그대로 만족 |
 | Turret + Wind 중첩(D→E 구간) | `IMPLEMENTED(물리) / NOT VERIFIED(체감 밸런스)` | 두 Zone이 좌표상 겹치는 것은 확인됨. 실제 플레이 밸런스(README §63 "Knockback+Wind로 바닥까지 추락 금지")는 미검증 |
-| Build 분기(Impulse/Relay/Shear Route) | `NOT IMPLEMENTED` | [1-4 판정](../1-4/PRODUCTION-ALIGNMENT.md)의 Foundation 저장·효과가 없으므로 재현 불가 |
+| generic Augment Build 표현 | `IMPLEMENTED PROTOTYPE / PLAYTEST BALANCE PENDING` | 과거 Impulse/Relay/Shear 전용 Route는 대체됨. 현재 카드 조합이 Rope·Wind·Sentry 공간을 다르게 읽히게 하는지 검증 대기 |
 | Camera Zones | `NOT IMPLEMENTED` | 문자열 6개(`approach, security-entry, decision-frame, pressure-crossing, relief, bypass`)만 존재 |
 | Story Trigger Presentation | `NOT IMPLEMENTED` | `storyTriggers` 6개 모두 미연결 |
 | Approved Blockout / Art Reference | `NEEDED` | `images/` 폴더 없음 |
@@ -106,7 +106,7 @@
 | EVENT | README 제안 문구 |
 | --- | --- |
 | `pressure-unstable` | `PRESSURE NETWORK UNSTABLE`(진입) |
-| `containment-violation` | `CONTAINMENT VIOLATION ACTIVE`(Turret 활성) |
+| `security-response-active` | `VERTICAL TRANSIT VIOLATION / SECURITY RESPONSE ACTIVE`(Turret 활성) |
 | `pressure-limit` | `PRESSURE LIMIT EXCEEDED`(상승 중) |
 | `bypass-ready` | `MANUAL BYPASS READY`(최상단 도달) |
 | `bypass-open` | `OPEN BYPASS` → 밸브 작동 → `PRESSURE: STABILIZING` → `SERVICE ROUTE: AVAILABLE` |
@@ -125,7 +125,7 @@
 
 ## 7. Acceptance
 
-- README §66 PASS 15개 중 Build 분기 관련(PASS 06,07)은 Foundation Runtime 없이는 확인 불가.
+- README §66 PASS 15개 중 과거 세 Foundation 전용 Build 분기(PASS 06,07)는 generic Augment 조합 체감 검증으로 대체하며 실제 플레이테스트가 필요하다.
 - PASS 08(Standard projectile이 Rope를 끊지 않음)은 이미 `rules`에 `no-rope-cut`으로 구현됨 — Acceptance Capture로 시각 확인만 남음.
 - PASS 11(한 번 피격으로 Stage 바닥까지 추락 금지)은 Knockback+Wind 상호작용 테스트가 필요하며 현재 미검증.
 - FAIL 조건 중 "Wind와 Turret가 동시에 처음 등장"은 Zone B(C→D 구간, Wind 없음)와 Zone C(D→E, Wind+Turret)의 좌표 분리로 이미 구조적으로 충족되어 있다: Turret activation은 `y=-1184~-544`, `main-pressure-vent-wind`는 `y=-1184~-800`으로 겹치는 구간이 D~E 부근에 한정된다.
@@ -138,14 +138,14 @@
 | Approved Blockout | 없음 | 이 문서 §3 기준 SVG 제작 필요 |
 | Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 1 참고(§4 제안값은 그 문서로 대체됨), 특히 Decision Frame(D 위치) 구도 우선 |
 | Story | 문자열 placeholder만 존재 | 6개 트리거 연결 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 2 참고. Bypass 이후 환경 상태 변화는 별도 검토 |
-| Build 분기 | 미구현 | [1-4 §1](../1-4/PRODUCTION-ALIGNMENT.md) Foundation Runtime 선행 필요 |
+| generic Augment Build 표현 | 구현 Prototype | 실제 카드 조합별 Rope·Wind·Sentry 체감과 Safe Route 공정성 검증 |
 | Knockback+Wind 상호작용 | 미검증 | Acceptance Capture 전 필수 테스트 항목 |
 
 ## 9. 증강·Story 연결
 
-[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-7은 세 Foundation이 처음 실전 조합으로 검증되는 Stage다.
+[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-7은 generic Augment 조합이 Rope·Wind·Sentry와 처음 실전에서 겹치는 Stage다.
 
-- Foundation 저장·효과가 없으므로 IMPULSE/RELAY/SHEAR별 Route 차이(README §32~36)는 현재 재현되지 않는다.
+- generic Augment 저장·효과는 구현됐다. 과거 IMPULSE/RELAY/SHEAR 전용 Route는 현재 성장 계약이 아니며, 어떤 카드도 통과 필수 조건이 아니다.
 - README §72(LOCKED DECISIONS)에 따라 Manual Pressure Bypass는 도시 복구가 아니라 위쪽 탈출 경로 개방이 목적이며, 일반 Sentry Projectile은 Rope를 끊지 않는다 — 두 결정 모두 이미 Runtime `rules: ["standard-projectile","no-rope-cut"]`와 objective 구조(별도 reach 없이 interact 하나로 Gate 개방)로 일치한다.
 - Bypass 이후 "잠깐 안정화 → 1-8 Containment로 다시 악화"라는 Story Logic(README §72 Q3)은 1-8 PRODUCTION-ALIGNMENT.md와 함께 확인해야 한다.
 

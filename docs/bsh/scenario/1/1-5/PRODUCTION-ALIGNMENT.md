@@ -6,7 +6,7 @@
 
 ## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
 
-- Foundation 선택·세 효과와 플레이어별 유지가 구현되어 Build 표현을 Runtime에서 검증할 수 있다.
+- 22장 generic Augment 선택·효과와 플레이어별 유지가 구현되어 Build 표현을 Runtime에서 검증할 수 있다. 과거 Impulse/Relay/Shear Foundation 전용 분기는 현재 성장 계약이 아니다.
 - `cameraZones`는 실제 `cameraZone()` 객체로 구현됐고 `load-gap → relay-spine → live-security → exit` 구간을 사용한다.
 - Story는 `AUGMENT TEST BAY / LIVE CALIBRATION` entry와 `VERTICAL LOAD TEST`, `SECURITY RESPONSE TEST` position binding이 구현됐다. 선택 Foundation 이름을 포함한 전체 진단 문구는 후속 표현 범위다.
 - `storyTriggers`는 시나리오 기획 인벤토리이며 Runtime binding이나 완료 증거가 아니다.
@@ -21,7 +21,7 @@
 | A~H Anchor 좌표 | `IMPLEMENTED — README와 일치` | 8개 Anchor 전부 README 좌표와 Runtime 좌표가 정확히 일치 |
 | P0/R1/R2/R3/Safe Ledge 좌표 | `IMPLEMENTED — README와 불일치` | Anchor와 달리 Platform 4개 중 3개(R1/R2/R3)의 위치가 README 초안과 다름. 아래 §3 참고 |
 | Sentry T1 | `IMPLEMENTED` | 1-3 FSM 재사용, `activation` bounds 존재. 단 1-3에 있던 `cover-ends-los` rule 없음 |
-| Impulse/Relay/Shear Route 분기 | `NOT IMPLEMENTED` | Foundation 저장·효과 자체가 [1-4 판정](../1-4/PRODUCTION-ALIGNMENT.md)에서 `PENDING`이므로 Build별 Shortcut·Route 차이는 현재 재현 불가 |
+| generic Augment Build 표현 | `IMPLEMENTED PROTOTYPE / PLAYTEST BALANCE PENDING` | 1-4·2-3·3-5 source의 22장 Catalog·Player별 선택·효과·유지는 구현. 과거 Impulse/Relay/Shear 전용 Route는 제거된 기획이며 현재 Safe Route는 특정 카드를 필수로 하지 않음 |
 | Camera Zones | `NOT IMPLEMENTED` | `cameraZones: ["load-gap","relay-spine","live-security","exit"]`는 문자열 4개일 뿐 `{id,minY,maxY,desktopZoom,mobileZoom}` 객체가 아니다. `AuthoredCameraDirector`의 zone 판정 함수가 문자열을 걸러내므로 전체 Stage가 `defaultZoom`(1)과 기본 화면비(0.38/0.58)로만 렌더링된다 |
 | Story Trigger Presentation | `NOT IMPLEMENTED` | `storyTriggers: ["active-augment-display","live-calibration","cooling-access-preview"]` 3개 모두 `AuthoredStoryPresentation.js`에 연결된 화면 문구가 없다 |
 | Approved Blockout / Art Reference | `NEEDED` | `images/` 폴더 자체가 없음. 1-1~1-4와 달리 아직 아무 이미지도 존재하지 않는다 |
@@ -105,7 +105,7 @@
 | `live-calibration` | `VERTICAL LOAD TEST`, `SECURITY RESPONSE TEST`, `EMERGENCY TRANSIT TEST` (Background Monitor) |
 | `cooling-access-preview` | `COOLING DISTRIBUTION`, `SERVICE ACCESS` (Exit 근처) |
 
-`active-augment-display`는 선택한 Foundation 이름을 표시해야 하는데, [1-4 판정](../1-4/PRODUCTION-ALIGNMENT.md)에 따르면 Foundation 저장 자체가 아직 없으므로 이 트리거는 Foundation Runtime이 붙기 전까지 구현할 수 없다.
+`active-augment-display`의 동적 카드 이름 표시는 후속 표현 범위다. Player의 generic Augment 선택·저장·효과 자체는 이미 구현되어 있다.
 
 ## 6. 저비용 Art Package
 
@@ -120,9 +120,9 @@
 
 ## 7. Acceptance
 
-- 세 Foundation 모두 Base Route로 클리어 가능해야 한다(현재 Foundation 자체가 미구현이므로 검증 불가 — Foundation Runtime 완료 후 재확인).
+- 어떤 generic Augment 선택이든, 또는 카드가 없어도 Base Safe Route로 클리어 가능해야 한다. 실제 카드 조합별 체감 밸런스는 플레이테스트 대기다.
 - Turret Auto-Fire만으로 Encounter가 종료되지 않아야 한다.
-- README §75의 PASS 14개 항목 중 Route 분기 관련(PASS 02~04, 06)은 Foundation Runtime 없이는 확인 불가능하며, 나머지(PASS 01, 05, 07~13)는 기본 Rope만으로 검증 가능하다.
+- README §75의 과거 세 Foundation 전용 Route 항목(PASS 02~04, 06)은 generic Augment 조합별 체감·Safe Route 공정성 검증으로 대체한다. 나머지(PASS 01, 05, 07~13)는 기본 Rope만으로 검증 가능하다.
 
 ## 8. 현재 구현과 다음 작업
 
@@ -131,15 +131,15 @@
 | 지형·Anchor·Gate | Runtime Mock 연결 완료 | R1/R2/R3/Safe Ledge 좌표를 README와 같은 변경에서 정리하거나, README를 Runtime에 맞춰 갱신 |
 | Approved Blockout | 없음 | 이 문서 §3을 기준으로 SVG 제작 필요 |
 | Camera | 문자열 placeholder만 존재 | `cameraZone()` 객체로 교체 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 1 참고(§4 제안값은 그 문서로 대체됨) |
-| Story | 문자열 placeholder만 존재 | `AuthoredStoryPresentation.js`에 3개 트리거 연결 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 2 참고. `active-augment-display`는 Foundation Runtime 선행 필요 |
-| Build 분기(Impulse/Relay/Shear Route) | 미구현 | [1-4 §1](../1-4/PRODUCTION-ALIGNMENT.md)의 Foundation 저장·효과 구현 이후에만 의미 있음 |
+| Story | 핵심 entry/position binding 구현 | `active-augment-display`의 선택 generic Augment 동적 이름 표시는 후속 표현 범위 |
+| generic Augment Build 표현 | 구현 Prototype | 실제 카드 조합별 플레이 수치·Safe Route 공정성 검증 |
 | 오브젝트 그래픽 | Mock Shape | 공용 Sector 01 Atlas로 교체 |
 
 ## 9. 증강·Story 연결
 
-[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-5는 1-4에서 선택한 Foundation을 처음 체감하는 Stage다.
+[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-5는 1-4에서 선택한 generic Augment 조합을 처음 체감하는 Stage다.
 
-- 현재 Foundation 저장·효과가 없으므로 이 Stage의 핵심 설계 의도(Build별 다른 최적 경로)는 Foundation Runtime이 붙기 전까지 재현되지 않는다.
+- generic Augment 저장·효과는 구현됐다. 현재 핵심 설계는 특정 세 Profile 전용 경로가 아니라 여러 카드 조합으로 같은 Safe/Flow 공간을 다르게 해석하는 것이며, 체감 밸런스는 플레이테스트 대기다.
 - Sentry T1은 1-3과 동일한 Enemy를 재사용하며 새 Attack을 추가하지 않는다.
 - Turret 파괴는 Gate 요구 조건이 아니다.
 

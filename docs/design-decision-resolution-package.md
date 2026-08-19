@@ -1,5 +1,7 @@
 # DESIGN DECISION RESOLUTION PACKAGE
 
+> **CURRENT GROWTH OVERRIDE:** 이 문서의 Foundation/Specialization 세부 계약은 0.26.0 generic Augment v1으로 대체됐다. 현재 성장 계약은 `docs/augment-v1.md`, 획득 source는 `1-4 → 2-3 → 3-5` explicit Node를 따른다. 아래 Specialization catalog·pair pool·별도 상태는 이력으로만 보존하며 구현 입력으로 사용하지 않는다.
+
 *SPECIALIZATION / BOSS / TIMER / NPC / ENDING · IMPLEMENTABLE PLANNING CONTRACT · REV 1.0 REVIEWED*
 
 | 항목 | 기준 |
@@ -20,12 +22,12 @@
 권장 결정:
 
 ```text
-P1 SPECIALIZATION
-IMPLEMENT NOW
-2 choices per Foundation
-6 total Specializations
-fixed conditional pool
-no RNG at first specialization
+P1 GENERIC AUGMENT V1
+IMPLEMENTED
+22-card catalog
+deterministic 3-card offers at 1-4 / 2-3 / 3-5
+player-local selection and persistence
+no fixed Specialization tier
 
 P2 FIRST BOSS
 LOCK NOW

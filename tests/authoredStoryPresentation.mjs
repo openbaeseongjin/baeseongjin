@@ -339,7 +339,7 @@ export function run() {
             pressureBypass.update(0, { currentAreaId: "sector-01-07", currentAreaLocalY: -800 }).title,
             pressureBypass.snapshot().detail
         ],
-        ["CONTAINMENT VIOLATION", "ACTIVE"]
+        ["VERTICAL TRANSIT VIOLATION", "SECURITY RESPONSE ACTIVE"]
     );
 
     const containmentGate = new AuthoredStoryPresentation();

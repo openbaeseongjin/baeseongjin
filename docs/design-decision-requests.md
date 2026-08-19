@@ -11,6 +11,7 @@
 - 정확한 Stage별 Runtime 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)를 따른다.
 - 전체 수치·상태·UI 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다.
 - 구현 전 선행 정렬 범위는 [`p0-alignment-patch-package.md`](./p0-alignment-patch-package.md)를 따른다.
+- 과거 Foundation/Specialization 설계는 [`augment-v1.md`](./augment-v1.md)의 22장 generic Augment 계약으로 대체됐다. 이 문서와 resolution package의 Specialization 세부 본문은 이력으로만 읽고 현재 구현 입력으로 사용하지 않는다.
 
 ## 현재 구현 기준
 
@@ -18,8 +19,8 @@
 |---|---|
 | 월드 | `1-1 → 3-8` 24개 영역 `MOCK INTEGRATED`; Sector04 `4-1→4-8` standalone authored; Sector05·06 Runtime 미저작 |
 | 시나리오 | Sector01~06 상세 Stage 48/48 완료 |
-| 시스템 | Rope core, Sentry/Patrol, Foundation 3종, Wind, Access Scan Field, Cutter Fire, 2인 멀티 구현 |
-| 성장 | Foundation 선택·효과 구현; 2-3 Specialization Node skeleton 존재, 실제 pool/effect 미구현 |
+| 시스템 | Rope core, 22장 generic Augment v1, Sentry/Patrol, Wind, Access Scan Field, Cutter Fire, 2인 멀티 구현 |
+| 성장 | 1-4·2-3·3-5 explicit Node의 Player별 결정적 3장 offer·최대 6장 loadout·선택/효과/저장/복원 구현; 고정 Specialization tier는 대체됨 |
 | Boss | 공통 Timer/Collapse 흐름 계약 존재; 개별 Boss는 미구현 |
 | 프레젠테이션 | Sector01~04 Camera/Story 일부/대부분 반영; 정식 Art/Audio 교체 대기 |
 | 검증 | 전체 48-Stage 실제 브라우저/기기 플레이테스트 없음 |
@@ -33,10 +34,12 @@
 
 ---
 
-## P1. Specialization 성장 규칙 (2-3)
+## P1. Specialization 성장 규칙 (2-3) — AUTHORING SNAPSHOT / SUPERSEDED
 
-- **상태**: `답변됨 — IMPLEMENTATION READY`
-- **현재 구현**: 2-3 Node skeleton, `requiresFoundation:true`, `perPlayerSelection:true`, `selectionPool:"TBD"`.
+- **상태**: `대체됨 — DO NOT IMPLEMENT`
+- **현재 구현**: 2-3 stable Node는 두 번째 generic Augment offer source다. `requiresFoundation`/고정 pair pool/별도 Specialization 상태를 복구하지 않는다.
+
+> 아래 P1 세부 본문은 대체된 과거 결정 기록이다. 현재 구현 계약은 `docs/augment-v1.md`와 `SESSION-HANDOFF.md`가 소유한다.
 
 ### 결정
 
@@ -308,7 +311,7 @@ NPC/대화 시스템은 현재 예선 빌드의 필수 조건이 아니다.
 이유:
 - Runtime 없음
 - 현재 Environmental Story만으로 48-Stage Story chain 존재
-- Boss / Specialization / Ending이 더 높은 제품 가치
+- Boss / generic Augment 조합 검증 / Ending이 더 높은 제품 가치
 - Networking·UI·Animation 신규 비용 회피
 
 ### Optional Post-Core NPC
@@ -482,8 +485,7 @@ ROUTE COMPLETE
 - Areas Cleared
 - Deaths
 - Rope Cuts
-- Foundation
-- Specialization
+- Selected generic Augments
 
 Optional:
 
@@ -496,7 +498,7 @@ UNRESOLVED
 - New Run
 - Title
 
-New Run에서 Foundation/Specialization reset.
+New Run에서 generic Augment loadout·source 소비·선택 인덱스를 런 상태와 함께 reset한다.
 
 ---
 
@@ -504,18 +506,17 @@ New Run에서 Foundation/Specialization reset.
 
 ### P0 — 먼저 정렬
 
-1. 1-7 Runtime의 조기 `CONTAINMENT VIOLATION` 제거/rename.
-2. Cutter `cutter-fire` positive opt-in 문서 정렬.
-3. 1-5~1-8 Foundation 구현 상태 문서 갱신.
-4. 1-8 checkpoint `reward:true` stale 문구 제거.
-5. Scenario Art의 default-camera capture contract 허용.
+1. [완료] 1-7 Runtime의 조기 `CONTAINMENT VIOLATION` 제거/rename.
+2. [완료] Cutter `cutter-fire` positive opt-in 문서 정렬.
+3. [완료] 1-5~1-8 generic Augment 구현 상태 문서 갱신.
+4. [완료] 1-8 checkpoint `reward:true` stale 문구 제거.
+5. [완료] Scenario Art의 verified default-camera capture contract 허용.
 6. [완료] 이 문서와 roadmap/schedule를 48/48 상태로 갱신.
 
 ### 구현 순서
 
 ```text
 P0 Alignment
-→ Specialization
 → Boss primitive + Boss01
 → Timer/Purge topology mapping
 → Sector04/05/06 Runtime expansion
@@ -531,10 +532,9 @@ P0 Alignment
 
 P0 정렬 이후:
 
-- 2-3 Specialization implementation
 - Boss Flow common primitive
 - Boss01 prototype
-- 60/+10/cap60/240px-s Timer/Purge core를 유지한 topology mapping 계획
+- `960초 / Gate +45초 / cap 960초 / collapse 80px/s` Timer/Purge Prototype topology mapping
 - Sector05/06 graybox authoring
 - Final Security mock
 - Boarding / Ending mock

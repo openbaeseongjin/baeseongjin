@@ -309,14 +309,14 @@ const POSITION_PRESENTATIONS = Object.freeze({
             ])
         }),
         Object.freeze({
-            token: "containment-violation",
+            token: "security-response-active",
             minLocalY: -960,
             maxLocalY: -736,
             presentations: Object.freeze([
                 Object.freeze({
-                    id: "sector-01-07:containment-violation",
-                    title: "CONTAINMENT VIOLATION",
-                    detail: "ACTIVE",
+                    id: "sector-01-07:security-response-active",
+                    title: "VERTICAL TRANSIT VIOLATION",
+                    detail: "SECURITY RESPONSE ACTIVE",
                     durationSeconds: 1.2
                 })
             ])
