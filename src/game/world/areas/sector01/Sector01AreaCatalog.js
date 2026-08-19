@@ -83,13 +83,13 @@ const area01 = defineArea({
             oneWay: false
         }),
         grappleTarget("sector-01-01:anchor-a-surface", -96, -192),
-
+        grappleTarget("sector-01-01:anchor-b-surface", 160, -448),
         grappleTarget("sector-01-01:anchor-c-surface", -64, -704)
     ],
     routePoints: [
         point("sector-01-01:route-entry", -320, -32),
         point("sector-01-01:route-a", -96, -192, { landmark: "A" }),
-
+        point("sector-01-01:route-b", 160, -448, { landmark: "B" }),
         point("sector-01-01:route-c", -64, -704, { landmark: "C" }),
         block01.routeExit
     ],
@@ -100,7 +100,7 @@ const area01 = defineArea({
     ],
     objects: [
         worldObject("sector-01-01:anchor-a", "grapple-landmark", -96, -192, { label: "A" }),
-
+        worldObject("sector-01-01:anchor-b", "grapple-landmark", 160, -448, { label: "B" }),
         worldObject("sector-01-01:anchor-c", "grapple-landmark", -64, -704, { label: "C" }),
         worldObject("sector-01-01:cooling-fan", "background-prop", -288, -672, {
             gameplay: false,
@@ -162,15 +162,16 @@ const area02 = defineArea({
         horizontalSurface("sector-01-02:p3", 160, -800, 192, 16, { kind: "recovery" }),
         block02.deck,
         grappleTarget("sector-01-02:anchor-a-surface", -128, -192),
-
-        grappleTarget("sector-01-02:anchor-c-surface", -160, -640)
+        grappleTarget("sector-01-02:anchor-b-surface", 160, -416),
+        grappleTarget("sector-01-02:anchor-c-surface", -160, -640),
+        grappleTarget("sector-01-02:anchor-d-surface", 128, -864)
     ],
     routePoints: [
         point("sector-01-02:route-entry", -320, -32),
         point("sector-01-02:route-a", -128, -192, { landmark: "A" }),
-
+        point("sector-01-02:route-b", 160, -416, { landmark: "B" }),
         point("sector-01-02:route-c", -160, -640, { landmark: "C" }),
-
+        point("sector-01-02:route-d", 128, -864, { landmark: "D" }),
         block02.routeExit
     ],
     recoveryPoints: [
@@ -185,7 +186,9 @@ const area02 = defineArea({
         }),
         ...[
             ["a", -128, -192, "A"],
-            ["c", -160, -640, "C"]
+            ["b", 160, -416, "B"],
+            ["c", -160, -640, "C"],
+            ["d", 128, -864, "D"]
         ].map(([id, x, y, label]) =>
             worldObject(`sector-01-02:anchor-${id}`, "grapple-landmark", x, y, {
                 label
@@ -248,17 +251,18 @@ const area03 = defineArea({
         groundedSurface("sector-01-03:upper-cover", -16, -832, 96, 128, { kind: "cover", oneWay: false }),
         block03.deck,
         grappleTarget("sector-01-03:anchor-a-surface", 64, -224),
-
+        grappleTarget("sector-01-03:anchor-b-surface", 64, -480),
         grappleTarget("sector-01-03:anchor-c-surface", -192, -736),
+        grappleTarget("sector-01-03:anchor-d-surface", 96, -960),
         grappleTarget("sector-01-03:access-anchor-a-surface", 448, -480),
         grappleTarget("sector-01-03:access-anchor-b-surface", 896, -544)
     ],
     routePoints: [
         point("sector-01-03:route-entry", -320, -32),
         point("sector-01-03:route-a", 64, -224, { landmark: "A" }),
-
+        point("sector-01-03:route-b", 64, -480, { landmark: "B" }),
         point("sector-01-03:route-c", -192, -736, { landmark: "C" }),
-
+        point("sector-01-03:route-d", 96, -960, { landmark: "D" }),
         block03.routeExit
     ],
     recoveryPoints: [
@@ -268,7 +272,9 @@ const area03 = defineArea({
     objects: [
         ...[
             ["a", 64, -224, "A"],
-            ["c", -192, -736, "C"]
+            ["b", 64, -480, "B"],
+            ["c", -192, -736, "C"],
+            ["d", 96, -960, "D"]
         ].map(([id, x, y, label]) =>
             worldObject(`sector-01-03:anchor-${id}`, "grapple-landmark", x, y, {
                 label
@@ -351,17 +357,26 @@ const area04 = defineArea({
         horizontalSurface("sector-01-04:node-deck", 0, -160, 320, 32, { kind: "safe-deck" }),
         horizontalSurface("sector-01-04:p1", 160, -384, 192, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-04:p2", -96, -512, 192, 16, { kind: "recovery" }),
-        block04.deck
+        block04.deck,
+        grappleTarget("sector-01-04:anchor-a-surface", 192, -320),
+        grappleTarget("sector-01-04:anchor-b-surface", -96, -448),
+        grappleTarget("sector-01-04:anchor-c-surface", 160, -560)
     ],
     routePoints: [
         point("sector-01-04:route-entry", -288, -32),
         point("sector-01-04:route-node", 0, -128),
-
+        point("sector-01-04:route-a", 192, -320, { landmark: "A" }),
+        point("sector-01-04:route-b", -96, -448, { landmark: "B" }),
+        point("sector-01-04:route-c", 160, -560, { landmark: "C" }),
         block04.routeExit
     ],
     recoveryPoints: [point("sector-01-04:recovery-p1", 160, -408), point("sector-01-04:recovery-p2", -96, -536)],
     objects: [
-        ...[].map(([id, x, y, label]) =>
+        ...[
+            ["a", 192, -320, "A"],
+            ["b", -96, -448, "B"],
+            ["c", 160, -560, "C"]
+        ].map(([id, x, y, label]) =>
             worldObject(`sector-01-04:anchor-${id}`, "grapple-landmark", x, y, {
                 label
             })
@@ -442,15 +457,27 @@ const area05 = defineArea({
         horizontalSurface("sector-01-05:r3", 176, -1088, 224, 16, { kind: "recovery" }),
         block05.deck,
         ...[
+            ["a", -160, -224],
+            ["b", 224, -384],
             ["c", -160, -544],
-            ["g", 32, -1040]
+            ["d", 64, -640],
+            ["e", 224, -752],
+            ["f", -128, -896],
+            ["g", 32, -1040],
+            ["h", -128, -1168]
         ].map(([id, x, y]) => grappleTarget(`sector-01-05:anchor-${id}-surface`, x, y))
     ],
     routePoints: [
         point("sector-01-05:route-entry", -320, -32),
         ...[
+            ["a", -160, -224, "A"],
+            ["b", 224, -384, "B"],
             ["c", -160, -544, "C"],
-            ["g", 32, -1040, "G"]
+            ["d", 64, -640, "D"],
+            ["e", 224, -752, "E"],
+            ["f", -128, -896, "F"],
+            ["g", 32, -1040, "G"],
+            ["h", -128, -1168, "H"]
         ].map(([id, x, y, label]) => point(`sector-01-05:route-${id}`, x, y, { landmark: label })),
         block05.routeExit
     ],
@@ -461,8 +488,14 @@ const area05 = defineArea({
     ],
     objects: [
         ...[
+            ["a", -160, -224, "A"],
+            ["b", 224, -384, "B"],
             ["c", -160, -544, "C"],
-            ["g", 32, -1040, "G"]
+            ["d", 64, -640, "D"],
+            ["e", 224, -752, "E"],
+            ["f", -128, -896, "F"],
+            ["g", 32, -1040, "G"],
+            ["h", -128, -1168, "H"]
         ].map(([id, x, y, label]) =>
             worldObject(`sector-01-05:anchor-${id}`, "grapple-landmark", x, y, {
                 label
@@ -542,8 +575,12 @@ const area06 = defineArea({
             windOcclusion: true
         }),
         ...[
+            ["a", -128, -224],
             ["b", 96, -416],
-            ["d", -160, -896]
+            ["c", -224, -640],
+            ["d", -160, -896],
+            ["e", 192, -1088],
+            ["f", -32, -1280]
         ].map(([id, x, y]) => grappleTarget(`sector-01-06:anchor-${id}-surface`, x, y)),
         grappleTarget("sector-01-06:access-anchor-a-surface", -640, -704),
         grappleTarget("sector-01-06:access-anchor-b-surface", -1056, -768)
@@ -551,8 +588,12 @@ const area06 = defineArea({
     routePoints: [
         point("sector-01-06:route-entry", -320, -32),
         ...[
+            ["a", -128, -224, "A"],
             ["b", 96, -416, "B"],
-            ["d", -160, -896, "D"]
+            ["c", -224, -640, "C"],
+            ["d", -160, -896, "D"],
+            ["e", 192, -1088, "E"],
+            ["f", -32, -1280, "F"]
         ].map(([id, x, y, label]) => point(`sector-01-06:route-${id}`, x, y, { landmark: label })),
         block06.routeExit
     ],
@@ -564,8 +605,12 @@ const area06 = defineArea({
     ],
     objects: [
         ...[
+            ["a", -128, -224, "A"],
             ["b", 96, -416, "B"],
-            ["d", -160, -896, "D"]
+            ["c", -224, -640, "C"],
+            ["d", -160, -896, "D"],
+            ["e", 192, -1088, "E"],
+            ["f", -32, -1280, "F"]
         ].map(([id, x, y, label]) =>
             worldObject(`sector-01-06:anchor-${id}`, "grapple-landmark", x, y, {
                 label
@@ -675,18 +720,29 @@ const area07 = defineArea({
         horizontalSurface("sector-01-07:access-annex-arena", 1320, -944, 800, 32, { kind: "safe-deck" }),
         horizontalSurface("sector-01-07:upper-catch", -64, -1264, 256, 16, { kind: "recovery" }),
         block07.deck,
-        ...[["a", -128, -224]].map(([id, x, y]) => grappleTarget(`sector-01-07:anchor-${id}-surface`, x, y)),
+        ...[
+            ["a", -128, -224],
+            ["b", 160, -416],
+            ["c", 224, -608],
+            ["d", -192, -832],
+            ["e", 224, -1056],
+            ["f", -32, -1216],
+            ["g", 128, -1376]
+        ].map(([id, x, y]) => grappleTarget(`sector-01-07:anchor-${id}-surface`, x, y)),
         grappleTarget("sector-01-07:access-anchor-a-surface", 480, -800),
         grappleTarget("sector-01-07:access-anchor-b-surface", 928, -864)
     ],
     routePoints: [
         point("sector-01-07:route-entry", -320, -32),
-        point("sector-01-07:route-a", -128, -224, { landmark: "A" }),
-
-        point("sector-01-07:route-security", 0, -736),
-
-        point("sector-01-07:route-pressure-mid", 16, -944),
-
+        ...[
+            ["a", -128, -224, "A"],
+            ["b", 160, -416, "B"],
+            ["c", 224, -608, "C"],
+            ["d", -192, -832, "D"],
+            ["e", 224, -1056, "E"],
+            ["f", -32, -1216, "F"],
+            ["g", 128, -1376, "G"]
+        ].map(([id, x, y, label]) => point(`sector-01-07:route-${id}`, x, y, { landmark: label })),
         block07.routeExit
     ],
     recoveryPoints: [
@@ -696,7 +752,15 @@ const area07 = defineArea({
         point("sector-01-07:recovery-upper", -64, -1288)
     ],
     objects: [
-        ...[["a", -128, -224, "A"]].map(([id, x, y, label]) =>
+        ...[
+            ["a", -128, -224, "A"],
+            ["b", 160, -416, "B"],
+            ["c", 224, -608, "C"],
+            ["d", -192, -832, "D"],
+            ["e", 224, -1056, "E"],
+            ["f", -32, -1216, "F"],
+            ["g", 128, -1376, "G"]
+        ].map(([id, x, y, label]) =>
             worldObject(`sector-01-07:anchor-${id}`, "grapple-landmark", x, y, {
                 label
             })
@@ -804,16 +868,26 @@ const area08 = defineArea({
         block08.deck,
         ...[
             ["a", -160, -224],
+            ["b", 192, -416],
+            ["c", -192, -608],
             ["d", -96, -768],
-            ["f", -160, -1152]
+            ["e", 128, -944],
+            ["f", -160, -1152],
+            ["g", 224, -1344],
+            ["h", -32, -1504]
         ].map(([id, x, y]) => grappleTarget(`sector-01-08:anchor-${id}-surface`, x, y))
     ],
     routePoints: [
         point("sector-01-08:route-entry", -352, -32),
         ...[
             ["a", -160, -224, "A"],
+            ["b", 192, -416, "B"],
+            ["c", -192, -608, "C"],
             ["d", -96, -768, "D"],
-            ["f", -160, -1152, "F"]
+            ["e", 128, -944, "E"],
+            ["f", -160, -1152, "F"],
+            ["g", 224, -1344, "G"],
+            ["h", -32, -1504, "H"]
         ].map(([id, x, y, label]) => point(`sector-01-08:route-${id}`, x, y, { landmark: label })),
         point("sector-01-08:route-override", 208, -1584),
         block08.routeExit
@@ -833,8 +907,13 @@ const area08 = defineArea({
     objects: [
         ...[
             ["a", -160, -224, "A"],
+            ["b", 192, -416, "B"],
+            ["c", -192, -608, "C"],
             ["d", -96, -768, "D"],
-            ["f", -160, -1152, "F"]
+            ["e", 128, -944, "E"],
+            ["f", -160, -1152, "F"],
+            ["g", 224, -1344, "G"],
+            ["h", -32, -1504, "H"]
         ].map(([id, x, y, label]) =>
             worldObject(`sector-01-08:anchor-${id}`, "grapple-landmark", x, y, {
                 label

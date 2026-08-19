@@ -234,7 +234,9 @@ export function run() {
         [
             { id: "maintenance-lift", position: { x: 0, y: -544 }, coordinateAnchor: "center" },
             { id: "anchor-a", position: { x: -128, y: -192 }, coordinateAnchor: "center" },
+            { id: "anchor-b", position: { x: 160, y: -416 }, coordinateAnchor: "center" },
             { id: "anchor-c", position: { x: -160, y: -640 }, coordinateAnchor: "center" },
+            { id: "anchor-d", position: { x: 128, y: -864 }, coordinateAnchor: "center" },
             { id: "exit-gate", position: { x: 320, y: -963 }, coordinateAnchor: "bottom-center" },
             { id: "exit-panel", position: { x: 208, y: -963 }, coordinateAnchor: "bottom-center" }
         ],

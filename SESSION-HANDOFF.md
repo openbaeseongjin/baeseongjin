@@ -4,7 +4,7 @@
 
 - 프로젝트: Canvas 기반 2D 고정 길이 로프 액션 로그라이크
 - 브랜치: `main`
-- 현재 단계: P0 Alignment 완료, Boss01 Has-A runtime primitive 구현 중
+- 현재 단계: Boss01 Has-A runtime primitive 완료, Sector 01 기획 Anchor 맵 재구성 완료
 - 실행 기반: 브라우저 ES Module, Canvas 2D, Node.js 로컬 서버와 무번들 테스트
 - 제품 기준: `docs/game-hackathon-planning.md`
 - 개발 일정: `docs/development-schedule.md`
@@ -69,7 +69,7 @@
 - 32개 authored Area의 출구 지오메트리는 하나의 표준으로 통일한다. 문은 폭 64에 출구 데크 상단에 서는 문 visual(lock 상태 표현)과 바닥 하단 중앙의 `52×62` aperture trigger로만 존재하며, 층 격벽은 개구부 없이 전폭 봉쇄된다. 출구 데크는 모든 Area에서 영역 상단 경계 아래 정확히 125px에 놓여 문 상단이 천장 밴드 아래 5px에서 일정하다. 각 Stage의 출구 좌표(데크·exit·route-exit·패널·게이트 오브젝트·reach bounds·체크포인트)는 함께 이동하며, Assembler 회귀(`tests/authoredWorldAssembler.mjs`)와 전수 감사가 표준 이탈을 거부한다. Stage README의 출구 좌표가 이 표준과 다르면 Runtime 표준을 기준으로 Production Alignment에 이동 내용을 남긴다. 통합 catalog(`connectArea`)가 `nextAreaId`를 재배선하면 content-boundary형 trigger 대신 exit point에서 파생한 표준 aperture(`gatePortalBounds(exit.x, exit.y + 32)`)로 다시 계산한다. Gate의 보이는 문 오브젝트(kind `gate`)는 `bottom-center`로 실제 문 바닥 좌표와 같아야 하고, 회귀 테스트가 섹터 catalog와 통합 catalog 모두를 검사한다.
 - 출구는 모두 `AreaDefinition.exitBlock` 세트 블록으로 저작한다. 블록은 데크 위치·폭만 받아 데크(기본 320×32), 문(aperture trigger `52×62` + 문 visual), 문 왼쪽 112px의 exit-panel, exit point(문 x, 데크 위 32px), route-exit(문 왼쪽 64px), reach bounds를 생성한다. 출구 데크는 영역 상단 아래 125px에 놓아 문 상단이 천장 밴드(48px) 아래 정확히 5px 여유를 둔다. 층간 격벽은 전폭 solid 밴드 1개로 완전히 봉쇄한다(개구부 없음 — 이전 층의 문 구멍으로 되돌아가는 경로 차단). 라우트는 `... → route-exit`으로 끝나며 수치 감사가 ① 트리거⊆데크 ② 모든 연속 라우트 링크 ≤600px ③ route-exit on deck ④ 문 상단↔밴드 갭 5px ⑤ 격벽 전폭 봉쇄를 전 Area에서 검증한다. 새 Area 저작 시에도 이 블록과 감사를 사용한다.
 - 오브젝트에 붙는 트리거는 하드코딩 좌표가 아니라 오브젝트 상대 파생 스펙으로 저작한다. `objectTriggerSpec(anchor, width, height, offset)`으로 선언하고 `resolveObjectTriggerBounds(position, spec)` 하나가 bounds를 계산하며, assembler가 조립 시 확정 bounds를 stamping한다. 오브젝트 위치를 옮기면 트리거가 자동으로 따라가고, 검증기가 스펙+하드코딩 동시 존재를 거부해 drift를 `npm test`에서 잡는다. 대상: 오브젝트 `trigger`(bounds), 적 `activationSpec`(activation), wind-source `zone`(windZone bounds). wind-source가 없는 Zone은 Area 수준 특징이므로 저작 bounds를 유지한다.
-- 연쇄 링크 허용치는 600px(한 반동 포함)이다. 그래플 앵커 네트워크는 연속 라우트 링크가 600px 안에 들도록 순차 그리디로 축소했고(32개 Area 전수 반영: s01 14개 target/랜드마크, s02 19, s03 22, s04 24), 검증기의 `grapple-surface-isolated` 기본 한도도 `GRAPPLE_LINK_BUDGET = 600`(`src/game/config.js`)을 사용한다. 런타임 물리 hook reach 400px(속도×수명)는 그대로 두고, 400px 초과·600px 이내 링크는 반동 재발사로 넘어간다.
+- 연쇄 링크 허용치는 600px(한 반동 포함)이고 런타임 물리 hook reach 400px(속도×수명)는 그대로다. 다만 2026-08-19 사용자의 Sector 01 기획 문서 기반 맵 재구성 결정에 따라, 순차 그리디 축소가 삭제한 1-1~1-8의 기획 gameplay Anchor A~H를 복원했다. Sector 01은 gameplay Anchor 43개와 Access Anchor 6개의 target/랜드마크 1:1 쌍을 사용하며 600px 검증 예산은 이 Stable ID를 삭제하는 근거가 아니다. Sector 02~04의 기존 축소 결과는 이 변경에서 건드리지 않는다.
 - Exit Beacon(summit ▼ 마커)은 절차형 48단계 월드의 완주 목표 표식이며 authored 월드에는 그리지 않는다(`drawSummit`이 `world.areas` 존재 시 skip). authored의 마지막 Area(3-8/4-8) 출구는 content boundary지 게임의 끝이 아니므로 beacon을 띄우지 않는다.
 - 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용하며, 로컬 `PlayerPhysics`의 prototype getter를 복제하지 않고 하위 player renderer에 전달해 sprite·polygon 모두 같은 강체 각도를 그린다. ID 선택과 상태 보존 계약은 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
 - 2026-08-15 사용자가 제공한 최종 캐릭터 원본을 `assets/artwork/characters/player-main/source/pixellab-ready-character.png`에 보존하고 `player-main` 일곱 모션의 외형 기준으로 사용한다. 이전 repository mock 기반 `idle`·`run` blockout은 이 최종 외형으로 대체하며, 24×24 원본·48×48 출력·오른쪽 기본 방향 계약과 로프·피격 중심 VFX cue 우선순위는 유지한다. 정규화·검증 결과는 `assets/artwork/characters/player-main/README.md`를 기준으로 기록한다.
@@ -112,7 +112,7 @@ Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. P0
 
 Gate/출구 표준화(전 32 Area), 포탈 위치 전수 감사·수정(connectArea trigger 재계산·1-8 게이트 시각 정렬), 멀티 탄환 소멸 근본 수정(발사 claim 재유도 검증 제거)은 코드·테스트·문서 반영까지 완료됐다. 남은 단계는 병합 뒤 `docs/version-management.md` 절차(멀티 서버 코드 변경이므로 서버 재시작·버전 올림·공개 smoke)와 브라우저 화면 확인 결과를 PR에 기록하는 것이다.
 
-앵커 축소 스크립트 실수로 소실된 4개 카탈로그 변경분(exitBlock 이관·출구 데크 offset 125·층 격벽 봉쇄·트리거 스펙) 재구축과 600px 기준 앵커 축소가 완료됐다. 4개 카탈로그 모두 import·validator 통과, `tests/runAll.mjs` 6개 시나리오 전부 PASS, `npm run check`·`npm run format:check`·`git diff --check` 통과, `docs/scenario-development-integration.md` entry 45와 fingerprint 갱신 완료. 다음은 이 변경분을 커밋하고 github-task-flow PR로 게시하는 것이다.
+과거 600px 순차 그리디 축소는 Sector 01에서 A/B/C/D 기획 Stable ID·Camera Shot·Approved Blockout 계약까지 삭제해 맵 의미를 훼손했다. 현재 Sector 01은 1-1 A~C, 1-2 A~D, 1-3 A~D, 1-4 A~C, 1-5 A~H, 1-6 A~F, 1-7 A~G, 1-8 A~H를 문서 좌표로 복원했다. 플랫폼·Recovery·Enemy·Wind·Access annex·Stage 경계 하강 개구부는 변경하지 않았고, 별도 회귀 테스트가 43개 gameplay Anchor의 target·object·route 1:1 정합과 600px 예산을 고정한다.
 
 1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 팬 바람 미발생 근본 수정과 디버그 Rope tuning 패널 구현이 완료됐다. 싱글은 적용 버튼에서 새 Run으로 즉시 재시작하고 멀티는 비활성이다. Sector 01~~03 증강 획득 Node mapping도 완료됐으며 다음 기획 의존 작업은 Sector 04~~06 증강 Node, Timer +10 trigger, Purge origin/rejoin의 physical topology mapping이다. 공용 멀티 Rope override 협상과 살아 있는 Run의 config hot swap은 별도 후속 Issue다.
 
