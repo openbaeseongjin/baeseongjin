@@ -118,3 +118,20 @@ Status:
 **NOT IMPLEMENTED — PLAYER BARK LAYER**
 
 Do not convert to System Toast.
+
+## 8. Runtime implementation (2026-08-19)
+
+`Sector02AreaCatalog.js` area06 rewritten in full against REV8.0: bounds 1920x832, entry
+(-816,-32), SHORT UP -> HARD 90 DEGREE TURN -> LONG RIGHT (SHORT RECOVERY LIFT -> SAFE REVEAL
+TURN -> QUIET UPPER RIM -> GAP A/GUARD A -> GAP B/GUARD B -> EXIT), replacing the old tall zigzag
+climb. G1-G4 are real labeled `grapple-landmark` targets (unlike 2-4/2-5, this package's
+`grappleTargets[]` corresponds 1:1 to labeled visible landmark objects). All authored Rope
+relations kept intentionally easy (<=273px). Both delayed-security guards preserved on their
+stable slot IDs/pools, activation bands approximated around each guard's own authored position
+per the doc's own "Suggested band" language, verified non-overlapping (left x:[192,512], right
+x:[528,880]). `courtyard-void` kept as a non-collision background Story prop
+(`gameplayCollision:false`). Stale `no-enemy` cue retired and replaced with `delayed-security`
+without touching either enemy slot, per the doc's explicit correction. `npm run check` (2-6
+clean)/`npm test` (7 scenario groups) pass.
+
+Player Bark layer: still absent - approved Bark remains NOT IMPLEMENTED.

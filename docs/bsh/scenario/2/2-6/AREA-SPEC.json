@@ -7,7 +7,8 @@
     "stage": 6,
     "sourceAreaId": "sector-02-06",
     "name": "QUIET RESIDENTIAL VOID",
-    "subtitle": "RESIDENTIAL SCALE REVEAL"
+    "subtitle": "RESIDENTIAL SCALE REVEAL",
+    "legacyStageAlias": "2-6"
   },
   "bounds": {
     "width": 1920,
@@ -105,25 +106,29 @@
       "id": "g1",
       "x": -704,
       "y": -224,
-      "role": "recovery-lift-1"
+      "role": "recovery-lift-1",
+      "label": "G1"
     },
     {
       "id": "g2",
       "x": -608,
       "y": -480,
-      "role": "reveal-turn-entry"
+      "role": "reveal-turn-entry",
+      "label": "G2"
     },
     {
       "id": "g3",
       "x": 192,
       "y": -576,
-      "role": "courtyard-gap-a"
+      "role": "courtyard-gap-a",
+      "label": "G3"
     },
     {
       "id": "g4",
       "x": 640,
       "y": -608,
-      "role": "courtyard-gap-b"
+      "role": "courtyard-gap-b",
+      "label": "G4"
     }
   ],
   "mainRoute": [
@@ -354,6 +359,47 @@
     }
   ],
   "nextAreaId": "sector-02-07",
+  "route": {
+    "runtimeLandmarks": [
+      "sector-02-06:entry",
+      "g1",
+      "lift-landing",
+      "g2",
+      "reveal-overlook",
+      "quiet-upper-rim",
+      "g3",
+      "rim-landing-a",
+      "rim-transfer",
+      "g4",
+      "final-residential-rim",
+      "exit-deck",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-02-06:entry",
+      "g1",
+      "g2",
+      "reveal-overlook",
+      "quiet-upper-rim",
+      "g3",
+      "g4",
+      "exit-deck",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 800,
+    "deckTopY": -640,
+    "deckWidth": 256,
+    "panelObjectiveId": "sector-02-06:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "2-7",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["sector-02-06:exit-panel-engaged"]
+  },
   "story": {
     "entry": {
       "title": "RESIDENTIAL BLOCKS",
@@ -389,6 +435,7 @@
   },
   "camera": {
     "mode": "default-authored-camera",
+    "zones": [],
     "customZonesRequired": false,
     "revealRequirement": [
       "Player remains readable",
