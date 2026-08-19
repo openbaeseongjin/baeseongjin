@@ -105,16 +105,57 @@ Stage README와 과거 제작 자료에는 0.26.0 이전 Foundation·Impulse·Re
 | [`bsh/scenario/1/1-3/VALIDATION.md`](./bsh/scenario/1/1-3/VALIDATION.md) | 1-3 acceptance checklist |
 | [`bsh/scenario/1/1-3/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-3/ASSET-REQUIREMENTS.md) | 1-3 art/audio/UI 요구사항 |
 | [`bsh/scenario/1/1-3/MANIFEST.md`](./bsh/scenario/1/1-3/MANIFEST.md) | 1-3 REV8.0 패키지 파일 목록·권위 |
-| [`bsh/scenario/1/1-4/README.md`](./bsh/scenario/1/1-4/README.md) | `bsh` 첫 Rope Augment 3지선다·Calibration Stage(1-4) Blockout 후보·제작 규격 |
-| [`bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md) | 1-4 Runtime 좌표·Camera·generic Augment 선택 구현 Gap 계약 |
-| [`bsh/scenario/1/1-5/README.md`](./bsh/scenario/1/1-5/README.md) | `bsh` 첫 Build Expression·Augment별 경로 Stage(1-5) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-4/README.md`](./bsh/scenario/1/1-4/README.md) | `bsh` 첫 Rope Augment 3지선다·Calibration Stage(1-4) Blockout 후보·제작 규격, REV 8.1 |
+| [`bsh/scenario/1/1-4/AREA-SPEC.json`](./bsh/scenario/1/1-4/AREA-SPEC.json) | 1-4 구현 계약(area-spec-v1), REV 8.1 |
+| [`bsh/scenario/1/1-4/CALIBRATION-PROFILES.json`](./bsh/scenario/1/1-4/CALIBRATION-PROFILES.json) | 1-4 12개 첫선택 카드별 calibration profile 정의(전부 계획 단계 NOT_IMPLEMENTED) |
+| [`bsh/scenario/1/1-4/DIRECTION-SPEC.json`](./bsh/scenario/1/1-4/DIRECTION-SPEC.json) | 1-4 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/1/1-4/MAP-PREVIEW.html`](./bsh/scenario/1/1-4/MAP-PREVIEW.html) | 1-4 승인 Map 시각화 |
+| [`bsh/scenario/1/1-4/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-4/STORY-DIRECTION-PREVIEW.html) | 1-4 승인 심리/서사/분위기 시각화 |
+| [`bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md) | 1-4 Runtime 좌표·Camera·generic Augment 선택·augment-calibration objective 구현 계약 |
+| [`bsh/scenario/1/1-4/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-4/RUNTIME-HANDOFF.md) | 1-4 구현 delta 인계 |
+| [`bsh/scenario/1/1-4/VALIDATION.md`](./bsh/scenario/1/1-4/VALIDATION.md) | 1-4 acceptance checklist |
+| [`bsh/scenario/1/1-4/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-4/ASSET-REQUIREMENTS.md) | 1-4 art/audio/UI 요구사항 |
+| [`bsh/scenario/1/1-4/MANIFEST.md`](./bsh/scenario/1/1-4/MANIFEST.md) | 1-4 REV8.1 패키지 파일 목록·권위 |
+| [`bsh/scenario/1/1-5/README.md`](./bsh/scenario/1/1-5/README.md) | `bsh` 첫 Build Expression·Augment별 경로 Stage(1-5) Blockout 후보·제작 규격, REV 8.0 |
+| [`bsh/scenario/1/1-5/AREA-SPEC.json`](./bsh/scenario/1/1-5/AREA-SPEC.json) | 1-5 구현 계약(area-spec-v1), REV 8.0 |
+| [`bsh/scenario/1/1-5/DIRECTION-SPEC.json`](./bsh/scenario/1/1-5/DIRECTION-SPEC.json) | 1-5 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/1/1-5/MAP-PREVIEW.html`](./bsh/scenario/1/1-5/MAP-PREVIEW.html) | 1-5 승인 Map 시각화 |
+| [`bsh/scenario/1/1-5/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-5/STORY-DIRECTION-PREVIEW.html) | 1-5 승인 심리/서사/분위기 시각화 |
 | [`bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md) | 1-5 Runtime 좌표 대조·Camera/Story 미구현 명시 계약 |
-| [`bsh/scenario/1/1-6/README.md`](./bsh/scenario/1/1-6/README.md) | `bsh` 첫 Wind·지속풍과 주기풍 Stage(1-6) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-5/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-5/RUNTIME-HANDOFF.md) | 1-5 구현 delta 인계 |
+| [`bsh/scenario/1/1-5/VALIDATION.md`](./bsh/scenario/1/1-5/VALIDATION.md) | 1-5 acceptance checklist |
+| [`bsh/scenario/1/1-5/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-5/ASSET-REQUIREMENTS.md) | 1-5 art/audio/UI 요구사항 |
+| [`bsh/scenario/1/1-5/MANIFEST.md`](./bsh/scenario/1/1-5/MANIFEST.md) | 1-5 REV8.0 패키지 파일 목록·권위 |
+| [`bsh/scenario/1/1-6/README.md`](./bsh/scenario/1/1-6/README.md) | `bsh` 첫 Wind·지속풍과 주기풍 Stage(1-6) Blockout 후보·제작 규격, REV 8.0 |
+| [`bsh/scenario/1/1-6/AREA-SPEC.json`](./bsh/scenario/1/1-6/AREA-SPEC.json) | 1-6 구현 계약(area-spec-v1), REV 8.0 |
+| [`bsh/scenario/1/1-6/DIRECTION-SPEC.json`](./bsh/scenario/1/1-6/DIRECTION-SPEC.json) | 1-6 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/1/1-6/MAP-PREVIEW.html`](./bsh/scenario/1/1-6/MAP-PREVIEW.html) | 1-6 승인 Map 시각화 |
+| [`bsh/scenario/1/1-6/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-6/STORY-DIRECTION-PREVIEW.html) | 1-6 승인 심리/서사/분위기 시각화 |
 | [`bsh/scenario/1/1-6/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-6/PRODUCTION-ALIGNMENT.md) | 1-6 Wind 물리 구현 확인·Runtime 좌표 대조·Camera/Story 미구현 명시 계약 |
-| [`bsh/scenario/1/1-7/README.md`](./bsh/scenario/1/1-7/README.md) | `bsh` Rope·Augment·Wind·Sentry 첫 복합 Stage(1-7) Blockout 후보·제작 규격 |
+| [`bsh/scenario/1/1-6/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-6/RUNTIME-HANDOFF.md) | 1-6 구현 delta 인계 |
+| [`bsh/scenario/1/1-6/VALIDATION.md`](./bsh/scenario/1/1-6/VALIDATION.md) | 1-6 acceptance checklist |
+| [`bsh/scenario/1/1-6/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-6/ASSET-REQUIREMENTS.md) | 1-6 art/audio/UI 요구사항 |
+| [`bsh/scenario/1/1-6/MANIFEST.md`](./bsh/scenario/1/1-6/MANIFEST.md) | 1-6 REV8.0 패키지 파일 목록·권위 |
+| [`bsh/scenario/1/1-7/README.md`](./bsh/scenario/1/1-7/README.md) | `bsh` Rope·Augment·Wind·Sentry 첫 복합 Stage(1-7) Blockout 후보·제작 규격, REV 8.0 |
+| [`bsh/scenario/1/1-7/AREA-SPEC.json`](./bsh/scenario/1/1-7/AREA-SPEC.json) | 1-7 구현 계약(area-spec-v1), REV 8.0 |
+| [`bsh/scenario/1/1-7/DIRECTION-SPEC.json`](./bsh/scenario/1/1-7/DIRECTION-SPEC.json) | 1-7 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/1/1-7/MAP-PREVIEW.html`](./bsh/scenario/1/1-7/MAP-PREVIEW.html) | 1-7 승인 Map 시각화 |
+| [`bsh/scenario/1/1-7/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-7/STORY-DIRECTION-PREVIEW.html) | 1-7 승인 심리/서사/분위기 시각화 |
 | [`bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md) | 1-7 Runtime 좌표 대조·Wind/Sentry 중첩 구현 확인·Camera/Story 미구현 명시 계약 |
-| [`bsh/scenario/1/1-8/README.md`](./bsh/scenario/1/1-8/README.md) | `bsh` Sector 1 일반 구간 최종 종합·Containment Gate·Boss 전환 후보 Stage(1-8) Blockout 제작 규격 |
-| [`bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md) | 1-8 Runtime 좌표 대조·두 Turret Crossfire 금지 구현 확인·Camera/Story 미구현 명시 계약 |
+| [`bsh/scenario/1/1-7/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-7/RUNTIME-HANDOFF.md) | 1-7 구현 delta 인계 |
+| [`bsh/scenario/1/1-7/VALIDATION.md`](./bsh/scenario/1/1-7/VALIDATION.md) | 1-7 acceptance checklist |
+| [`bsh/scenario/1/1-7/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-7/ASSET-REQUIREMENTS.md) | 1-7 art/audio/UI 요구사항 |
+| [`bsh/scenario/1/1-7/MANIFEST.md`](./bsh/scenario/1/1-7/MANIFEST.md) | 1-7 REV8.0 패키지 파일 목록·권위 |
+| [`bsh/scenario/1/1-8/README.md`](./bsh/scenario/1/1-8/README.md) | `bsh` Sector 1 일반 구간 최종 종합·Containment Gate·Boss 전환 후보 Stage(1-8) Blockout 제작 규격, REV 8.0 |
+| [`bsh/scenario/1/1-8/AREA-SPEC.json`](./bsh/scenario/1/1-8/AREA-SPEC.json) | 1-8 구현 계약(area-spec-v1), REV 8.0 |
+| [`bsh/scenario/1/1-8/DIRECTION-SPEC.json`](./bsh/scenario/1/1-8/DIRECTION-SPEC.json) | 1-8 연출 계약(`direction-spec-v1`, 미검증 스키마) |
+| [`bsh/scenario/1/1-8/MAP-PREVIEW.html`](./bsh/scenario/1/1-8/MAP-PREVIEW.html) | 1-8 승인 Map 시각화 |
+| [`bsh/scenario/1/1-8/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-8/STORY-DIRECTION-PREVIEW.html) | 1-8 승인 심리/서사/분위기 시각화 |
+| [`bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-8/PRODUCTION-ALIGNMENT.md) | 1-8 Runtime 좌표 대조·두 Turret Crossfire 금지 구현 확인·nextAreaId 전환 소유권 감사·Camera/Story 미구현 명시 계약 |
+| [`bsh/scenario/1/1-8/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-8/RUNTIME-HANDOFF.md) | 1-8 구현 delta 인계 |
+| [`bsh/scenario/1/1-8/VALIDATION.md`](./bsh/scenario/1/1-8/VALIDATION.md) | 1-8 acceptance checklist |
+| [`bsh/scenario/1/1-8/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-8/ASSET-REQUIREMENTS.md) | 1-8 art/audio/UI 요구사항 |
+| [`bsh/scenario/1/1-8/MANIFEST.md`](./bsh/scenario/1/1-8/MANIFEST.md) | 1-8 REV8.0 패키지 파일 목록·권위 |
 | [`bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md`](./bsh/scenario/1/CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) | `bsh` 1-5~1-8 Camera Zone·Story Trigger 붙여넣기용 구현 준비 자료(코드 반영은 별도 진행) |
 | [`bsh/scenario/2/README.md`](./bsh/scenario/2/README.md) | `bsh` Sector 02 Worker District 마스터플랜(2-1~2-8 개요) |
 | [`bsh/scenario/2/2-1/README.md`](./bsh/scenario/2/2-1/README.md) | `bsh` Worker District 첫 저압 전환 Stage(2-1) Blockout 후보·제작 규격 |
