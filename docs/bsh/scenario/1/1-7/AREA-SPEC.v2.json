@@ -1,0 +1,933 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "sector": 1,
+    "stage": 7,
+    "legacyStageAlias": "1-7",
+    "sourceAreaId": "sector-01-07"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "subtitle": "MANUAL PRESSURE CONTROL",
+    "surfaces": [
+      {
+        "id": "sector-01-07:p0",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1248,
+          "y": 0
+        },
+        "vertices": [
+          {
+            "x": -1472,
+            "y": 0
+          },
+          {
+            "x": -1024,
+            "y": 0
+          },
+          {
+            "x": -1024,
+            "y": 32
+          },
+          {
+            "x": -1472,
+            "y": 32
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:lower-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -544,
+          "y": -128
+        },
+        "vertices": [
+          {
+            "x": -688,
+            "y": -128
+          },
+          {
+            "x": -400,
+            "y": -128
+          },
+          {
+            "x": -400,
+            "y": -110
+          },
+          {
+            "x": -688,
+            "y": -110
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:right-turn-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 352,
+          "y": -352
+        },
+        "vertices": [
+          {
+            "x": 192,
+            "y": -352
+          },
+          {
+            "x": 512,
+            "y": -352
+          },
+          {
+            "x": 512,
+            "y": -328
+          },
+          {
+            "x": 192,
+            "y": -328
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:middle-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 64,
+          "y": -544
+        },
+        "vertices": [
+          {
+            "x": -96,
+            "y": -544
+          },
+          {
+            "x": 224,
+            "y": -544
+          },
+          {
+            "x": 224,
+            "y": -526
+          },
+          {
+            "x": -96,
+            "y": -526
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:left-safe-shadow",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -704,
+          "y": -832
+        },
+        "vertices": [
+          {
+            "x": -880,
+            "y": -832
+          },
+          {
+            "x": -528,
+            "y": -832
+          },
+          {
+            "x": -528,
+            "y": -808
+          },
+          {
+            "x": -880,
+            "y": -808
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:pressure-baffle",
+        "kind": "solid",
+        "oneWay": false,
+        "grappleable": false,
+        "windOcclusion": true,
+        "coordinateAnchor": "bottom-center",
+        "position": {
+          "x": -832,
+          "y": -704
+        },
+        "vertices": [
+          {
+            "x": -880,
+            "y": -928
+          },
+          {
+            "x": -784,
+            "y": -928
+          },
+          {
+            "x": -784,
+            "y": -704
+          },
+          {
+            "x": -880,
+            "y": -704
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:bypass-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 896,
+          "y": -1216
+        },
+        "vertices": [
+          {
+            "x": 704,
+            "y": -1216
+          },
+          {
+            "x": 1088,
+            "y": -1216
+          },
+          {
+            "x": 1088,
+            "y": -1188
+          },
+          {
+            "x": 704,
+            "y": -1188
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:bypass-panel-body",
+        "kind": "solid",
+        "oneWay": false,
+        "grappleable": false,
+        "coordinateAnchor": "bottom-center",
+        "position": {
+          "x": 960,
+          "y": -1216
+        },
+        "vertices": [
+          {
+            "x": 936,
+            "y": -1296
+          },
+          {
+            "x": 984,
+            "y": -1296
+          },
+          {
+            "x": 984,
+            "y": -1216
+          },
+          {
+            "x": 936,
+            "y": -1216
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:exit-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1184,
+          "y": -1344
+        },
+        "vertices": [
+          {
+            "x": 1008,
+            "y": -1344
+          },
+          {
+            "x": 1360,
+            "y": -1344
+          },
+          {
+            "x": 1360,
+            "y": -1312
+          },
+          {
+            "x": 1008,
+            "y": -1312
+          }
+        ]
+      },
+      {
+        "id": "sector-01-07:access-pocket-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1440,
+          "y": -832
+        },
+        "vertices": [
+          {
+            "x": 1200,
+            "y": -832
+          },
+          {
+            "x": 1680,
+            "y": -832
+          },
+          {
+            "x": 1680,
+            "y": -804
+          },
+          {
+            "x": 1200,
+            "y": -804
+          }
+        ]
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-01-07:route-entry",
+        "x": -1248,
+        "y": -32
+      },
+      {
+        "id": "sector-01-07:route-a",
+        "x": -1088,
+        "y": -192,
+        "landmark": "A"
+      },
+      {
+        "id": "sector-01-07:route-b",
+        "x": -672,
+        "y": -256
+      },
+      {
+        "id": "sector-01-07:route-c",
+        "x": -224,
+        "y": -320
+      },
+      {
+        "id": "sector-01-07:route-right-turn",
+        "x": 352,
+        "y": -352
+      },
+      {
+        "id": "sector-01-07:route-d",
+        "x": 608,
+        "y": -512,
+        "landmark": "D"
+      },
+      {
+        "id": "sector-01-07:route-e",
+        "x": 352,
+        "y": -640
+      },
+      {
+        "id": "sector-01-07:route-f",
+        "x": -128,
+        "y": -704
+      },
+      {
+        "id": "sector-01-07:route-left-shadow",
+        "x": -704,
+        "y": -832
+      },
+      {
+        "id": "sector-01-07:route-g",
+        "x": -320,
+        "y": -960,
+        "landmark": "G"
+      },
+      {
+        "id": "sector-01-07:route-h",
+        "x": 160,
+        "y": -1024
+      },
+      {
+        "id": "sector-01-07:route-far-catch",
+        "x": 704,
+        "y": -1088
+      },
+      {
+        "id": "sector-01-07:route-bypass",
+        "x": 896,
+        "y": -1216
+      },
+      {
+        "id": "sector-01-07:route-exit",
+        "x": 1264,
+        "y": -1376
+      }
+    ],
+    "recoveryPoints": [
+      {
+        "id": "sector-01-07:recovery-lower",
+        "x": -544,
+        "y": -152
+      },
+      {
+        "id": "sector-01-07:recovery-middle",
+        "x": 64,
+        "y": -568
+      },
+      {
+        "id": "sector-01-07:recovery-upper-local",
+        "x": 352,
+        "y": -944
+      },
+      {
+        "id": "sector-01-07:recovery-access-local",
+        "x": 1216,
+        "y": -864
+      }
+    ],
+    "checkpoints": [],
+    "objects": [
+      {
+        "id": "sector-01-07:main-pressure-vent",
+        "kind": "wind-source",
+        "presentationId": "world-object:wind-source",
+        "position": {
+          "x": -1504,
+          "y": -832
+        },
+        "damage": false,
+        "windZoneId": "sector-01-07:main-pressure-vent-wind",
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-01-07:access-carrier",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 1440,
+          "y": -832
+        },
+        "enemyType": "sentry-t1",
+        "accessModuleId": "sector-01:access-module:c",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": -16
+          },
+          "size": {
+            "width": 480,
+            "height": 480
+          }
+        },
+        "rules": [
+          "standard-projectile",
+          "no-rope-cut"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-01-07:access-guard-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 1216,
+          "y": -832
+        },
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "pursuit-drone-t1",
+            "shield-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 320,
+            "height": 320
+          }
+        },
+        "rules": [
+          "standard-projectile",
+          "no-rope-cut"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-01-07:access-guard-b",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 1600,
+          "y": -832
+        },
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "pursuit-drone-t1",
+            "shield-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 160,
+            "height": 320
+          }
+        },
+        "rules": [
+          "standard-projectile",
+          "no-rope-cut"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-01-07:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 1216,
+          "y": -1344
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-01-07:bypass-open",
+        "gateId": "sector-01-07:gate"
+      },
+      {
+        "id": "sector-01-07:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 1328,
+          "y": -1344
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-07:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "sector-01-07:bypass-open",
+        "type": "interact",
+        "sourceObjectId": "sector-01-07:exit-panel"
+      }
+    ],
+    "windZones": [
+      {
+        "id": "sector-01-07:residual-airflow",
+        "bounds": {
+          "x": -1248,
+          "y": -384,
+          "width": 1664,
+          "height": 256
+        },
+        "direction": {
+          "x": 1,
+          "y": 0
+        },
+        "mode": "continuous",
+        "strength": 220,
+        "falloff": 80
+      },
+      {
+        "id": "sector-01-07:main-pressure-vent-wind",
+        "bounds": {
+          "x": -736,
+          "y": -1120,
+          "width": 1696,
+          "height": 576
+        },
+        "direction": {
+          "x": 1,
+          "y": 0
+        },
+        "mode": "pulsed",
+        "strength": 800,
+        "falloff": 80,
+        "cycle": {
+          "lull": 1.75,
+          "warning": 0.7,
+          "active": 1.4,
+          "decay": 0.3
+        }
+      }
+    ],
+    "scannerGroups": [],
+    "storyTriggers": [
+      "pressure-unstable",
+      "security-response-active",
+      "pressure-limit",
+      "containment-violation",
+      "bypass-ready",
+      "bypass-open",
+      "service-route-available"
+    ],
+    "routes": [
+      "safe",
+      "flow",
+      "recovery"
+    ],
+    "cameraZones": [
+      {
+        "id": "lower-approach",
+        "minY": -176,
+        "maxY": 0,
+        "desktopZoom": 0.95,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "pressure-preview",
+        "minY": -352,
+        "maxY": -176,
+        "desktopZoom": 1.02,
+        "mobileZoom": 0.72
+      },
+      {
+        "id": "middle-against",
+        "minY": -544,
+        "maxY": -352,
+        "desktopZoom": 0.84,
+        "mobileZoom": 0.64,
+        "verticalPlayerRatio": 0.64
+      },
+      {
+        "id": "left-shadow",
+        "minY": -832,
+        "maxY": -544,
+        "desktopZoom": 1.05,
+        "mobileZoom": 0.74,
+        "verticalPlayerRatio": 0.62
+      },
+      {
+        "id": "upper-with",
+        "minY": -1088,
+        "maxY": -832,
+        "desktopZoom": 0.82,
+        "mobileZoom": 0.63,
+        "verticalPlayerRatio": 0.62
+      },
+      {
+        "id": "access-pocket",
+        "minY": -1216,
+        "maxY": -1088,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.66,
+        "verticalPlayerRatio": 0.62
+      },
+      {
+        "id": "bypass",
+        "minY": -1344,
+        "maxY": -1216,
+        "desktopZoom": 1.08,
+        "mobileZoom": 0.75
+      },
+      {
+        "id": "exit",
+        "minY": -1472,
+        "maxY": -1344,
+        "desktopZoom": 1.12,
+        "mobileZoom": 0.77
+      }
+    ],
+    "cueIds": [
+      "pressure-unstable",
+      "pressure-limit",
+      "containment-violation",
+      "manual-bypass",
+      "service-route-available"
+    ],
+    "id": "sector-01-07",
+    "sectorId": "sector-01",
+    "order": 7,
+    "name": "PRESSURE BYPASS",
+    "bounds": {
+      "width": 3360,
+      "height": 1472
+    },
+    "entry": {
+      "id": "sector-01-07:entry",
+      "x": -1248,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-01-07:exit",
+      "x": 1328,
+      "y": -1376
+    },
+    "nextAreaId": "sector-01-08",
+    "gate": {
+      "id": "sector-01-07:gate",
+      "nextAreaId": "sector-01-08",
+      "requiredObjectiveIds": [
+        "sector-01-07:bypass-open"
+      ],
+      "trigger": {
+        "x": 1302,
+        "y": -1406,
+        "width": 52,
+        "height": 62
+      }
+    }
+  },
+  "anchors": [
+    {
+      "surfaceIndex": 10,
+      "objectIndex": 0,
+      "target": {
+        "id": "sector-01-07:anchor-a-surface",
+        "x": -1088,
+        "y": -192,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:anchor-a",
+        "x": -1088,
+        "y": -192,
+        "properties": {
+          "presentationId": "world-object:grapple-landmark",
+          "label": "A",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 11,
+      "objectIndex": 1,
+      "target": {
+        "id": "sector-01-07:anchor-d-surface",
+        "x": 608,
+        "y": -512,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:anchor-d",
+        "x": 608,
+        "y": -512,
+        "properties": {
+          "presentationId": "world-object:grapple-landmark",
+          "label": "D",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 12,
+      "objectIndex": 2,
+      "target": {
+        "id": "sector-01-07:anchor-g-surface",
+        "x": -320,
+        "y": -960,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:anchor-g",
+        "x": -320,
+        "y": -960,
+        "properties": {
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 15,
+      "objectIndex": 3,
+      "target": {
+        "id": "sector-01-07:grip-b-surface",
+        "x": -672,
+        "y": -256,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:grip-b",
+        "x": -672,
+        "y": -256,
+        "properties": {
+          "presentationId": "world-object:structural-grapple-joint",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 16,
+      "objectIndex": 4,
+      "target": {
+        "id": "sector-01-07:grip-c-surface",
+        "x": -224,
+        "y": -320,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:grip-c",
+        "x": -224,
+        "y": -320,
+        "properties": {
+          "presentationId": "world-object:structural-grapple-joint",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 17,
+      "objectIndex": 5,
+      "target": {
+        "id": "sector-01-07:grip-e-surface",
+        "x": 352,
+        "y": -640,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:grip-e",
+        "x": 352,
+        "y": -640,
+        "properties": {
+          "presentationId": "world-object:structural-grapple-joint",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 18,
+      "objectIndex": 6,
+      "target": {
+        "id": "sector-01-07:grip-f-surface",
+        "x": -128,
+        "y": -704,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:grip-f",
+        "x": -128,
+        "y": -704,
+        "properties": {
+          "presentationId": "world-object:structural-grapple-joint",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 19,
+      "objectIndex": 7,
+      "target": {
+        "id": "sector-01-07:grip-h-surface",
+        "x": 160,
+        "y": -1024,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:grip-h",
+        "x": 160,
+        "y": -1024,
+        "properties": {
+          "presentationId": "world-object:structural-grapple-joint",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 20,
+      "objectIndex": 8,
+      "target": {
+        "id": "sector-01-07:far-catch-surface",
+        "x": 704,
+        "y": -1088,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:far-catch",
+        "x": 704,
+        "y": -1088,
+        "properties": {
+          "presentationId": "world-object:structural-grapple-joint",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 13,
+      "objectIndex": 10,
+      "target": {
+        "id": "sector-01-07:access-anchor-a-surface",
+        "x": 960,
+        "y": -992,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:access-anchor-a",
+        "x": 960,
+        "y": -992,
+        "properties": {
+          "presentationId": "world-object:grapple-landmark",
+          "label": "ACCESS A",
+          "coordinateAnchor": "center"
+        }
+      }
+    },
+    {
+      "surfaceIndex": 14,
+      "objectIndex": 11,
+      "target": {
+        "id": "sector-01-07:access-anchor-b-surface",
+        "x": 1280,
+        "y": -896,
+        "properties": {}
+      },
+      "landmark": {
+        "id": "sector-01-07:access-anchor-b",
+        "x": 1280,
+        "y": -896,
+        "properties": {
+          "presentationId": "world-object:grapple-landmark",
+          "label": "ACCESS B",
+          "coordinateAnchor": "center"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": []
+}

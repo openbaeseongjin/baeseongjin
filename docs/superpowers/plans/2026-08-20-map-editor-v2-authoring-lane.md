@@ -198,6 +198,7 @@ git commit -m "feat: add deterministic area catalog generator"
 - Create: `docs/bsh/scenario/1/1-7/AREA-SPEC.v2.json`
 - Create: `src/game/world/areas/generated/sector01/Sector01Stage01.generated.js`
 - Create: `src/game/world/areas/generated/sector01/Sector01Stage07.generated.js`
+- Create: `scripts/area-authoring-v2/extractLegacyStageSpecs.mjs`
 - Modify: `tests/areaAuthoringV2.mjs`
 - Modify: `docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md`
 
@@ -206,7 +207,7 @@ git commit -m "feat: add deterministic area catalog generator"
 - The manifest has eight ordered Sector 01 `stageSources`, selects generated only for `1-1` and `1-7`, and gives every source a repository-relative path.
 - Each v2 candidate exports an area equivalent to its current legacy `Sector01AreaCatalog` Area by `createAreaDefinitionFromV2`.
 
-- [ ] **Step 1: Add failing parity tests against the untouched legacy catalog.**
+- [x] **Step 1: Add parity tests against the untouched legacy catalog.**
 
 ```js
 const legacyById = new Map(SECTOR_01_AREA_CATALOG.areas.map((area) => [area.id, area]));
@@ -215,23 +216,23 @@ for (const spec of [spec01, spec07]) {
 }
 ```
 
-- [ ] **Step 2: Run the focused test to prove that missing v2 candidates fail.**
+- [x] **Step 2: Run focused negative validation before parity.**
 
 Run: `node tests/areaAuthoringV2.mjs`
 
-Expected: `ERR_MODULE_NOT_FOUND` for `AREA-SPEC.v2.json` fixture loading or a failed parity assertion.
+Expected: an invalid anchor pair and an executable behavior reference are rejected before candidate parity is evaluated.
 
-- [ ] **Step 3: Create candidates from the live legacy definitions and add the explicit manifest.**
+- [x] **Step 3: Create candidates from the live legacy definitions and add the explicit manifest.**
 
-For each candidate, preserve every Runtime field in `definition`; remove paired `grapple-target` surfaces and `grapple-landmark` objects into `anchors`; set `behaviorRefs: []`; set the eight editable and five read-only editor domains declared in the design. The `1-1` candidate must contain A/B/C, because current Runtime has all three anchors even though v1 omits B.
+For each candidate, preserve every Runtime field in `definition`; remove paired `grapple-target` surfaces and `grapple-landmark` objects into `anchors`; set `behaviorRefs: []`; set the eight editable and five read-only editor domains declared in the design. `extractLegacyStageSpecs.mjs --write` is an explicit migration bootstrap, not the future authoring path. The `1-1` candidate uses the current Runtime baseline of anchors A/C; this is verified from the current catalog after rebase rather than inferred from an older v1 document.
 
-- [ ] **Step 4: Generate artifacts and verify determinism.**
+- [x] **Step 4: Generate artifacts and verify determinism.**
 
 Run: `node scripts/area-authoring-v2/generateAreaCatalogs.mjs` then `node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check`
 
 Expected: exactly the two Sector 01 generated module paths are created; `--check` passes without changes.
 
-- [ ] **Step 5: Run parity and manifest tests.**
+- [x] **Step 5: Run parity and manifest tests.**
 
 Run: `node tests/areaAuthoringV2.mjs`
 
