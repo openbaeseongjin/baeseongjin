@@ -167,7 +167,7 @@ Expected: `ERR_MODULE_NOT_FOUND` for `AreaSpecV2Generator.js`.
 ```js
 export function renderGeneratedAreaModule(spec) {
     const canonical = canonicalizeAreaSpecV2(spec);
-    return `// GENERATED FILE - DO NOT EDIT\nimport { createAreaDefinitionFromV2 } from "../../area-authoring-v2/AreaSpecV2.js";\n` +
+    return `// GENERATED FILE - DO NOT EDIT\nimport { createAreaDefinitionFromV2 } from "../../../area-authoring-v2/AreaSpecV2.js";\n` +
         `export const GENERATED_STAGE_ID = ${JSON.stringify(canonical.stage.legacyStageAlias)};\n` +
         `const SPEC = ${stableJson(canonical)};\n` +
         "export const GENERATED_AREA = createAreaDefinitionFromV2(SPEC);\n";
@@ -176,11 +176,11 @@ export function renderGeneratedAreaModule(spec) {
 
 The command reads only `AREA-CATALOG.json` and `AREA-SPEC.v2.json`, validates every selected generated Stage before calling `writeFileSync`, writes only below `areas/generated/`, and reports every stale path in `--check` mode.
 
-- [ ] **Step 4: Run generator write and check modes.**
+- [ ] **Step 4: Run the generator unit assertions.**
 
-Run: `node scripts/area-authoring-v2/generateAreaCatalogs.mjs` then `node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check`
+Run: `node tests/areaAuthoringV2.mjs`
 
-Expected: no generated output before Task 4; command reports the empty generated selection is valid.
+Expected: deterministic rendering and invalid-output assertions pass. The filesystem command is first run after Task 4 creates its manifest and candidates.
 
 - [ ] **Step 5: Commit the generator command.**
 
@@ -255,33 +255,23 @@ git commit -m "feat: add v2 candidates for sector 01 stages"
 
 - Documents the exact source-lane output paths, the `composeSectorCatalog` signature, the sidecar-to-canonical promotion step, and main developer ownership of facade/root-script/live-Runtime work.
 
-- [ ] **Step 1: Add the failing source-boundary assertion to the focused test command.**
-
-```js
-assert.deepEqual(
-    changedRuntimeIntegrationPaths,
-    [],
-    "the authoring lane must not change Sector facade, seamless Runtime, root scripts, or shared runner files"
-);
-```
-
-- [ ] **Step 2: Run source-lane checks before documentation updates.**
+- [ ] **Step 1: Run source-lane checks before documentation updates.**
 
 Run: `node tests/areaAuthoringV2.mjs; node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check; npm run check:scenario-integration`
 
 Expected: all commands pass; the scenario-integration marker is not edited by this lane.
 
-- [ ] **Step 3: Record the integration handoff without changing main-owned files.**
+- [ ] **Step 2: Record the integration handoff without changing main-owned files.**
 
 Document these exact main-developer actions: promote the two sidecars to `AREA-SPEC.json` v2 while extending the root validator, relocate legacy Sector 01 Stage definitions behind a provider, apply `composeSectorCatalog`, register root commands/tests, and record live cutover evidence after the final suite.
 
-- [ ] **Step 4: Re-run the source-lane checks and inspect the diff.**
+- [ ] **Step 3: Re-run the source-lane checks and inspect the diff.**
 
 Run: `node tests/areaAuthoringV2.mjs; node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check; npm run check:scenario-integration; git diff --check; git diff --name-only main...HEAD`
 
 Expected: only new v2 lane paths, candidate specs, generated files, focused test, and handoff/design/plan documents differ from `main`.
 
-- [ ] **Step 5: Commit the verified handoff.**
+- [ ] **Step 4: Commit the verified handoff.**
 
 ```powershell
 git add SESSION-HANDOFF.md docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md docs/superpowers/plans/2026-08-20-map-editor-v2-authoring-lane.md
