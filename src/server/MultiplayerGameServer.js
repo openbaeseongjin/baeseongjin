@@ -152,7 +152,13 @@ export class MultiplayerGameServer {
             socket.close(1013, "channel full");
             return;
         }
-        const joinPosition = room.simulation.activeRespawnAnchor?.position ??
+        const currentSector = room.simulation.world.sectors?.find(
+            ({ id }) => id === room.simulation.worldProgress?.currentSectorId
+        );
+        const joinRespawnAnchor = room.simulation.world.respawnAnchors?.find(
+            ({ id }) => id === currentSector?.respawnAnchorId
+        );
+        const joinPosition = joinRespawnAnchor?.position ??
             room.simulation.activeCheckpoint ??
             room.simulation.world.areas?.[0]?.entry ?? {
                 x: 160,
@@ -161,10 +167,14 @@ export class MultiplayerGameServer {
         const playerId =
             room.sockets.size === 0
                 ? room.simulation.getPrimaryPlayerId()
-                : room.simulation.addPlayer({
-                      x: joinPosition.x,
-                      y: joinPosition.y
-                  }).entity.id;
+                : room.simulation.addPlayer(
+                      {
+                          x: joinPosition.x,
+                          y: joinPosition.y
+                      },
+                      null,
+                      joinRespawnAnchor?.id ?? null
+                  ).entity.id;
         room.sockets.set(socket, playerId);
         this.connections.set(socket, room);
         const delivery = {

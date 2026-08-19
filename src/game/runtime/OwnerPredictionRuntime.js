@@ -142,11 +142,22 @@ export class OwnerPredictionRuntime {
             this.pendingCheckpoint = null;
         }
         const preserveCheckpoint = this.pendingCheckpoint !== null;
+        const sharedOwner = snapshot.state.players.find(({ id }) => id === this.ownerId);
+        const localProgress = this.simulation.predictionProgressState(this.ownerId);
+        const localRespawnAnchor = this.simulation.world.respawnAnchors?.find(
+            ({ id }) => id === localProgress.respawnAnchorId
+        );
+        const sharedRespawnAnchor = this.simulation.world.respawnAnchors?.find(
+            ({ id }) => id === sharedOwner?.respawnAnchorId
+        );
+        const predictedRespawnIsAhead = (localRespawnAnchor?.level ?? -1) > (sharedRespawnAnchor?.level ?? -1);
         const progress = preserveCheckpoint
-            ? this.simulation.predictionProgressState(this.ownerId)
+            ? localProgress
             : {
                   activeCheckpointId: snapshot.state.activeCheckpointId,
-                  respawnAnchorId: snapshot.state.respawnAnchorId,
+                  respawnAnchorId: predictedRespawnIsAhead
+                      ? localProgress.respawnAnchorId
+                      : (sharedOwner?.respawnAnchorId ?? null),
                   foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null
               };
         this.simulation.preparePrediction(

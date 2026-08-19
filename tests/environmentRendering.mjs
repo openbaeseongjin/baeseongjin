@@ -13,6 +13,7 @@ import { PixelTerrainRenderer } from "../src/render/environment/renderers/PixelT
 import { RenderFrameStats } from "../src/render/RenderPerformanceMetrics.js";
 import { createRenderViewport } from "../src/render/RenderViewport.js";
 import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
+import { STAGE_SAVE_POINT_LOCAL_BOUNDS } from "../src/game/world/StageSavePointGeometry.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 
@@ -491,6 +492,19 @@ export function run() {
     assert.ok(
         checkpointContext.calls.some(([name]) => name === "fillRect"),
         "checkpoint beacon has a structural silhouette"
+    );
+    assert.ok(
+        checkpointContext.calls.some(
+            ([name, x, y, width]) =>
+                name === "fillRect" &&
+                x === STAGE_SAVE_POINT_LOCAL_BOUNDS.x &&
+                y === -10 &&
+                width === STAGE_SAVE_POINT_LOCAL_BOUNDS.width
+        ) &&
+            checkpointContext.calls.some(
+                ([name, x, y]) => name === "fillRect" && x === -27 && y === STAGE_SAVE_POINT_LOCAL_BOUNDS.y
+            ),
+        "Stage save point outer drawing uses the same local bounds as its gameplay trigger"
     );
     assert.ok(
         checkpointContext.calls.some(

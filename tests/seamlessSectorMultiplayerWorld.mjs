@@ -13,7 +13,8 @@ export function run() {
     const snapshot = buildAuthoritySnapshot({ simulation: server });
     assert.equal(snapshot.worldRevision, SEAMLESS_SECTOR_RUNTIME_REVISION);
     assert.equal(snapshot.state.progressKind, "sector");
-    assert.equal(snapshot.state.respawnAnchorId, "sector-01:entry");
+    assert.equal(snapshot.state.players[0].respawnAnchorId, "sector-01:entry");
+    assert.equal("respawnAnchorId" in snapshot.state, false);
     assert.equal("activeCheckpointId" in snapshot.state, false);
     assert.equal(snapshot.state.worldProgress.currentSectorId, "sector-01");
     assert.equal("enemyType" in snapshot.state.enemies[0], false, "authored enemy static data must not repeat at 20Hz");
@@ -21,12 +22,7 @@ export function run() {
         JSON.stringify(snapshot.state.enemies).length < JSON.stringify(server.enemyStates()).length * 0.6,
         "dynamic enemy replication must materially reduce the enemy payload"
     );
-    assert.deepEqual(snapshot.state.partyWipeBaseline, {
-        sectorId: "sector-01",
-        revision: 0,
-        respawnAnchorId: "sector-01:entry",
-        entryLandmarkId: "sector-01:landmark:01"
-    });
+    assert.equal("partyWipeBaseline" in snapshot.state, false);
 
     const predictor = new OwnerPredictionRuntime({
         ownerId,
@@ -51,9 +47,28 @@ export function run() {
     server.worldProgress.completeObjective(objectiveId);
     server.worldProgress.visitLandmark("sector-01:landmark:02");
     server.restoreWorldProgress(server.worldProgress.snapshot());
+    const stage02Anchor = server.world.respawnAnchors.find(({ id }) => id === "sector-01:landmark:02:checkpoint");
+    const ownerMotion = server.playerState(ownerId);
+    server.applyOwnerMotion(ownerId, {
+        ...ownerMotion,
+        clientTick: server.getTick(),
+        position: stage02Anchor.position,
+        respawnAnchorId: stage02Anchor.id
+    });
     const progressed = buildAuthoritySnapshot({ simulation: server });
-    assert.equal(progressed.state.respawnAnchorId, "sector-01:landmark:02:checkpoint");
-    assert.equal(progressed.state.partyWipeBaseline.respawnAnchorId, "sector-01:entry");
+    assert.equal(progressed.state.players[0].respawnAnchorId, "sector-01:landmark:02:checkpoint");
+    const stage03Anchor = server.world.respawnAnchors.find(({ id }) => id === "sector-01:landmark:03:checkpoint");
+    server.applyOwnerMotion(ownerId, {
+        ...server.playerState(ownerId),
+        clientTick: server.getTick() + 1,
+        position: stage03Anchor.position,
+        respawnAnchorId: stage03Anchor.id
+    });
+    assert.equal(
+        server.playerState(ownerId).respawnAnchorId,
+        stage02Anchor.id,
+        "owner motion must not claim an unvisited Stage save point"
+    );
     predictor.reconcile(progressed, []);
     assert.ok(predictor.simulation.worldProgress.snapshot().completedObjectiveIds.includes(objectiveId));
     assert.equal(predictor.simulation.activeRespawnAnchor.id, "sector-01:landmark:02:checkpoint");

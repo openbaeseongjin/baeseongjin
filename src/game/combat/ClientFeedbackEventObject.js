@@ -13,7 +13,8 @@ const PERSONAL_STATUS_TYPES = new Set([
     "swing",
     "rope-cut",
     "checkpoint-respawn",
-    "sector-respawn"
+    "sector-respawn",
+    "stage-saved"
 ]);
 
 const withSharedClientFeedback = createSimulationCapabilityMixin({

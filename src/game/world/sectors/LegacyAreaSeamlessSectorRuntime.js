@@ -4,6 +4,7 @@ import { SECTOR_01_AREA_CATALOG } from "../areas/sector01/Sector01AreaCatalog.js
 import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js";
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
+import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 
 export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v4";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
@@ -81,14 +82,47 @@ function shiftObject(object, dx, dy, landmark, objectiveIdMap, routeLockId) {
     });
 }
 
-function connectorSurface(id, routeLockId, sourceLandmarkId, start, end) {
+function walkingSurfaceAt(surfaces, point) {
+    return surfaces
+        .filter(
+            (surface) =>
+                surface.requiredRouteId === undefined &&
+                surface.topY === point.y + 32 &&
+                surface.x <= point.x &&
+                surface.x + surface.width >= point.x
+        )
+        .sort((left, right) => left.width - right.width)[0];
+}
+
+function horizontalConnectorVertices(start, end, surfaces, thickness) {
+    if (start.y !== end.y) return undefined;
+    const sourceSupport = walkingSurfaceAt(surfaces, start);
+    const targetSupport = walkingSurfaceAt(surfaces, end);
+    if (!sourceSupport || !targetSupport) return undefined;
+    const leftSupport = sourceSupport.x < targetSupport.x ? sourceSupport : targetSupport;
+    const rightSupport = leftSupport === sourceSupport ? targetSupport : sourceSupport;
+    const left = leftSupport.x + leftSupport.width;
+    const right = rightSupport.x;
+    if (right <= left) return [];
+    const top = start.y + 32;
+    return [
+        { x: left, y: top },
+        { x: right, y: top },
+        { x: right, y: top + thickness },
+        { x: left, y: top + thickness }
+    ];
+}
+
+function connectorSurface(id, routeLockId, sourceLandmarkId, start, end, supportingSurfaces) {
     const thickness = 32;
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const length = Math.max(1, Math.hypot(dx, dy));
     const normalX = (-dy / length) * thickness * 0.5;
     const normalY = (dx / length) * thickness * 0.5;
-    const vertices = [
+    const horizontalVertices = horizontalConnectorVertices(start, end, supportingSurfaces, thickness);
+    if (horizontalVertices?.length === 0) return null;
+    const vertices = horizontalVertices ?? [
         { x: start.x + normalX, y: start.y + normalY },
         { x: end.x + normalX, y: end.y + normalY },
         { x: end.x - normalX, y: end.y - normalY },
@@ -401,7 +435,8 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 legacyStageAlias: landmarkDefinition.legacyStageAlias,
                 label: `STAGE ${landmarkDefinition.legacyStageAlias} SAVE`,
                 level: landmarks.length,
-                radius: 64,
+                radius: STAGE_SAVE_POINT_CULL_RADIUS,
+                triggerBounds: stageSavePointBounds(entry),
                 position: entry
             });
             const runtimeLandmark = freezeValue({
@@ -436,10 +471,18 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
             if (previousLandmark) {
                 const lockId = routeId(previousLandmark.id, runtimeLandmark.id);
                 const surfaceId = `${lockId}:surface`;
+                const connectorBridge = connectorSurface(
+                    surfaceId,
+                    lockId,
+                    previousLandmark.id,
+                    previousLandmark.exit,
+                    runtimeLandmark.entry,
+                    [...surfaces, ...landmarkSurfaces, ...landmarkWingSurfaces]
+                );
                 const connector = freezeValue({
                     id: `${lockId}:connector`,
                     routeLockId: lockId,
-                    surfaceId,
+                    surfaceId: connectorBridge?.id ?? null,
                     sourceLandmarkId: previousLandmark.id,
                     targetLandmarkId: runtimeLandmark.id,
                     start: previousLandmark.exit,
@@ -460,7 +503,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                         sectorTransition: connector.sectorTransition
                     })
                 );
-                surfaces.push(connectorSurface(surfaceId, lockId, previousLandmark.id, connector.start, connector.end));
+                if (connectorBridge) surfaces.push(connectorBridge);
             }
 
             surfaces.push(...landmarkSurfaces, ...landmarkWingSurfaces);

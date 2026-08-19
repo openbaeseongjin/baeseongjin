@@ -39,6 +39,7 @@ export async function run() {
     for (const objectiveId of firstLandmark.objectiveIds) room.simulation.worldProgress.completeObjective(objectiveId);
     room.simulation.worldProgress.visitLandmark(firstLandmark.outboundRouteId.split(":route:")[1]);
     room.simulation.restoreWorldProgress(room.simulation.worldProgress.snapshot());
+    room.simulation.setPlayerRespawnAnchor(firstWelcome.playerId, "sector-01:landmark:02:checkpoint");
     room.simulation.players[0].physics.position.set(1200, -900);
 
     const { socket: second, message: secondWelcome } = await connectFor(
@@ -47,10 +48,15 @@ export async function run() {
     );
     const snapshot = deserializeWorldSnapshotEnvelope(secondWelcome.snapshot);
     const joined = snapshot.state.players.find(({ id }) => id === secondWelcome.playerId);
-    const anchor = room.simulation.activeRespawnAnchor.position;
+    const anchor = room.simulation.world.sectorEntries[0].position;
     assert.equal(snapshot.state.progressKind, "sector");
-    assert.equal(snapshot.state.respawnAnchorId, "sector-01:landmark:02:checkpoint");
-    assert.equal(snapshot.state.partyWipeBaseline.respawnAnchorId, "sector-01:entry");
+    assert.equal(
+        snapshot.state.players.find(({ id }) => id === firstWelcome.playerId).respawnAnchorId,
+        "sector-01:landmark:02:checkpoint"
+    );
+    assert.equal(joined.respawnAnchorId, "sector-01:entry");
+    assert.equal("respawnAnchorId" in snapshot.state, false);
+    assert.equal("partyWipeBaseline" in snapshot.state, false);
     assert.equal(snapshot.state.worldProgress.currentLandmarkId, "sector-01:landmark:02");
     assert.equal(joined.position.x, anchor.x);
     assert.equal(joined.position.y, anchor.y);

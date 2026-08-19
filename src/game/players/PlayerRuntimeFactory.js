@@ -9,7 +9,15 @@ import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 import { RopeObject } from "../rope/RopeObject.js";
 import { PlayerObject } from "./PlayerObject.js";
 
-export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combatConfig, spawn, playerId = null }) {
+export function createPlayerRuntime({
+    registry,
+    playerConfig,
+    ropeConfig,
+    combatConfig,
+    spawn,
+    playerId = null,
+    respawnAnchorId = null
+}) {
     if (playerId !== null && (typeof playerId !== "string" || playerId.length === 0)) {
         throw new Error("playerId must be a non-empty string");
     }
@@ -31,7 +39,8 @@ export function createPlayerRuntime({ registry, playerConfig, ropeConfig, combat
         augmentCombat,
         weapon,
         ropeImpactAttack,
-        combatConfig
+        combatConfig,
+        respawnAnchorId
     });
     const inputDrivenObjects = Object.freeze([entity, ropeObject]);
     return Object.freeze({

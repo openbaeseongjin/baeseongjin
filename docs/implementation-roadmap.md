@@ -51,7 +51,7 @@
 
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
-3. **Phase 3 · #625 / layout correction #637 / checkpoint correction 0.34.0:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, active Stage checkpoint respawn과 별도 Sector-entry party-wipe baseline, local-position camera/environment로 전환했다. 이 단계의 AUTHORING SNAPSHOT은 WorldSnapshot protocol v8이며 현재 Runtime은 v9를 사용한다. Stage 정의는 Sector local vertical stack으로 보존하고 lateral city wing만 compiler가 더한다. Stage별 Gate·exit panel은 기본 Runtime에서 제거하며 future Boss room은 Sector transition slot에 삽입한다. legacy Area revision은 compatibility test로만 유지한다.
+3. **Phase 3 · #625 / layout correction #637 / checkpoint correction 0.34.0:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, Player별 active Stage checkpoint respawn과 local-position camera/environment로 전환했다. 이 단계의 AUTHORING SNAPSHOT은 WorldSnapshot protocol v8이며 현재 Runtime은 v10을 사용한다. Timer·Purge가 미정인 동안 party-wipe baseline reset은 사용하지 않는다. Stage 정의는 Sector local vertical stack으로 보존하고 lateral city wing만 compiler가 더한다. Stage별 Gate·exit panel은 기본 Runtime에서 제거하며 future Boss room은 Sector transition slot에 삽입한다. legacy Area revision은 compatibility test로만 유지한다.
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
 5. **Sector 01 access vertical slice · #642:** 1-3·1-6·1-7의 Stage-local Carrier encounter 세 곳에 공용 Access Module을 연결하고, 아무 2개와 1-8 objective로 Sector 01→02 connector를 연다. 개인 사망은 수집 상태를 보존하고 party wipe만 current Sector Carrier·module·route를 초기화한다. Sector 02~06 rollout과 Boss·Timer/Purge는 포함하지 않는다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
@@ -101,7 +101,7 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
 2. [완료 #628, #633] 1-4·2-3·3-5 explicit Node에서 generic Augment 3장 offer를 Player별 한 번씩 제공한다.
     - [실시간 선택 완료] 선택은 월드 시간을 멈추지 않고 해당 플레이어의 메뉴 입력만 이동·점프·로프 조작과 분리한다.
 3. [완료] Player별 generic Augment loadout과 런 한정 효과 적용 경계를 만든다. `FoundationAugmentState`는 호환 클래스명으로만 유지한다.
-4. [완료] 사망 시 개인 active Stage checkpoint 복귀, 같은 tick 전원 사망 시 current-Sector entry baseline reset 규칙을 적용한다.
+4. [완료] 사망 시 Player별 active Stage checkpoint 복귀를 적용한다. Timer·Purge가 미정인 현재는 같은 tick 전원 사망도 current Sector를 reset하지 않는다.
 
 완료 기준: 시작 → 등반·전투 → generic Augment 선택 → 빌드 변화 체감 → 사망 시 최근 Stage checkpoint 부활 → content boundary 도달을 한 흐름으로 플레이할 수 있다.
 

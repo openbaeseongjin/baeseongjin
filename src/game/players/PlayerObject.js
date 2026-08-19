@@ -2,7 +2,17 @@ import { withLocomotionInput } from "../input/LocomotionInput.js";
 import { InputDrivenObject } from "../objects/InputDrivenObject.js";
 
 export class PlayerObject extends withLocomotionInput(InputDrivenObject) {
-    constructor({ id, physics, ropeObject, foundation, augmentCombat, weapon, ropeImpactAttack, combatConfig }) {
+    constructor({
+        id,
+        physics,
+        ropeObject,
+        foundation,
+        augmentCombat,
+        weapon,
+        ropeImpactAttack,
+        combatConfig,
+        respawnAnchorId = null
+    }) {
         super({ id, ownerId: id });
         this.physics = physics;
         this.ropeObject = ropeObject;
@@ -15,5 +25,6 @@ export class PlayerObject extends withLocomotionInput(InputDrivenObject) {
         this.hitInvulnerabilityRemaining = 0;
         this.ropeDisabledRemaining = 0;
         this.lifeState = "active";
+        this.respawnAnchorId = respawnAnchorId;
     }
 }

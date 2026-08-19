@@ -1,13 +1,16 @@
+import { STAGE_SAVE_POINT_LOCAL_BOUNDS } from "../../game/world/StageSavePointGeometry.js";
+
 export function drawCheckpointBeacon(context, checkpoint, { active = false, reached = false } = {}) {
     context.save();
     context.translate(checkpoint.x, checkpoint.y);
     context.globalAlpha = reached ? 0.48 : 0.98;
+    const saveBounds = STAGE_SAVE_POINT_LOCAL_BOUNDS;
 
     // Stage save points share one neutral industrial silhouette across sectors.
     // The player-scale arch and explicit header communicate function, while the
     // closed/open shutters communicate state without relying on color alone.
     context.fillStyle = "#090e13";
-    context.fillRect(-38, -10, 76, 14);
+    context.fillRect(saveBounds.x, -10, saveBounds.width, 14);
     context.fillStyle = "#252d35";
     context.fillRect(-34, -14, 68, 5);
     context.fillStyle = "#3a444d";
@@ -36,10 +39,10 @@ export function drawCheckpointBeacon(context, checkpoint, { active = false, reac
     context.fillRect(21, -49, 7, 34);
 
     context.fillStyle = "#0b1118";
-    context.fillRect(-27, -78, 54, 14);
+    context.fillRect(-27, saveBounds.y, 54, 14);
     context.strokeStyle = "#56636d";
     context.lineWidth = 2;
-    context.strokeRect(-27, -78, 54, 14);
+    context.strokeRect(-27, saveBounds.y, 54, 14);
     context.fillStyle = active ? "#d9f4ff" : reached ? "#65717a" : "#b6c0c7";
     context.font = "900 9px ui-monospace, monospace";
     context.textAlign = "center";

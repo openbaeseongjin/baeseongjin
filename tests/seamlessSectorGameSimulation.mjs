@@ -17,6 +17,27 @@ function completeLandmark(progress, world, landmarkId) {
 }
 
 export function run() {
+    const soloRespawn = createCurrentGameSimulation({
+        worldSeed: 9182,
+        playerId: "solo-respawn-player",
+        startAreaId: "sector-01-02"
+    });
+    const soloProgressBeforeDeath = soloRespawn.worldProgress.snapshot();
+    const soloAnchorBeforeDeath = soloRespawn.activeRespawnAnchor;
+    soloRespawn.players[0].physics.position.set(900, -500);
+    assert.equal(soloRespawn.respawnPlayerAtCheckpoint(soloRespawn.players[0], "health", "solo-regression"), true);
+    assert.deepEqual(
+        soloRespawn.worldProgress.snapshot(),
+        soloProgressBeforeDeath,
+        "a single-player death must not be promoted to a party wipe"
+    );
+    assert.equal(soloRespawn.activeRespawnAnchor.id, soloAnchorBeforeDeath.id);
+    assert.deepEqual(
+        { x: soloRespawn.players[0].physics.position.x, y: soloRespawn.players[0].physics.position.y },
+        { x: soloAnchorBeforeDeath.position.x, y: soloAnchorBeforeDeath.position.y },
+        "single-player death must respawn at the active Stage save point"
+    );
+
     const debugStart = createCurrentGameSimulation({
         worldSeed: 9182,
         playerId: "debug-player",
@@ -200,6 +221,8 @@ export function run() {
     );
     assert.equal(simulation.worldProgress.snapshot().currentLandmarkId, "sector-01:landmark:02");
     assert.equal(simulation.activeRespawnAnchor.id, "sector-01:landmark:02:checkpoint");
+    assert.equal(simulation.playerState(owner.id).respawnAnchorId, "sector-01:landmark:02:checkpoint");
+    assert.equal(simulation.playerState(teammate.id).respawnAnchorId, "sector-01:entry");
     assert.equal(simulation.metrics.snapshot().checkpointsReached, 1);
     assert.equal(simulation.snapshot().eventFlash.type, "stage-saved");
     assert.equal(simulation.snapshot().eventFlash.respawnAnchorId, "sector-01:landmark:02:checkpoint");
@@ -232,7 +255,7 @@ export function run() {
     );
 
     completeLandmark(simulation.worldProgress, simulation.world, "sector-01:landmark:02");
-    const baselineBeforeWipe = simulation.worldProgress.snapshot().sectorBaselineRevision;
+    const progressBeforeAllPlayersDie = simulation.worldProgress.snapshot();
     const currentSectorEnemyIds = new Set(
         simulation.world.enemySpawns
             .filter(({ sectorId }) => sectorId === "sector-01")
@@ -241,19 +264,20 @@ export function run() {
     simulation.enemies = simulation.enemies.filter(({ objectId }) => !currentSectorEnemyIds.has(objectId));
     simulation.respawnPlayerAtCheckpoint(owner, "health", "party-wipe");
     simulation.respawnPlayerAtCheckpoint(teammate, "health", "party-wipe");
-    assert.equal(simulation.worldProgress.snapshot().currentLandmarkId, "sector-01:landmark:01");
-    assert.equal(simulation.worldProgress.snapshot().completedObjectiveIds.length, 0);
-    assert.deepEqual(simulation.worldProgress.snapshot().collectedAccessModuleIds, []);
-    assert.ok(simulation.worldProgress.snapshot().sectorBaselineRevision > baselineBeforeWipe);
-    assert.ok(simulation.enemies.some(({ objectId }) => currentSectorEnemyIds.has(objectId)));
-    assert.equal(simulation.snapshot().eventFlash.type, "sector-reset");
-    for (const player of simulation.players) {
-        assert.deepEqual(
-            { x: player.physics.position.x, y: player.physics.position.y },
-            {
-                x: simulation.activeRespawnAnchor.position.x,
-                y: simulation.activeRespawnAnchor.position.y
-            }
-        );
-    }
+    assert.deepEqual(simulation.worldProgress.snapshot(), progressBeforeAllPlayersDie);
+    assert.equal(
+        simulation.enemies.some(({ objectId }) => currentSectorEnemyIds.has(objectId)),
+        false
+    );
+    assert.equal(simulation.snapshot().eventFlash.type, "sector-respawn");
+    const ownerAnchor = simulation.respawnAnchorForPlayer(owner.id);
+    const teammateAnchor = simulation.respawnAnchorForPlayer(teammate.id);
+    assert.deepEqual(
+        { x: owner.physics.position.x, y: owner.physics.position.y },
+        { x: ownerAnchor.position.x, y: ownerAnchor.position.y }
+    );
+    assert.deepEqual(
+        { x: teammate.physics.position.x, y: teammate.physics.position.y },
+        { x: teammateAnchor.position.x, y: teammateAnchor.position.y }
+    );
 }

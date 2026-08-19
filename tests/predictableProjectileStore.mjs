@@ -361,8 +361,16 @@ export function run() {
     assert.equal(
         selectClientStatusFeedback(replicatedStageRespawn, "player-2"),
         null,
-        "Stage save point respawn feedback is personal even though the active save point is shared"
+        "Stage save point respawn feedback must remain personal"
     );
+    const personalStageSave = {
+        type: "stage-saved",
+        playerId: "player-1",
+        age: 0.1,
+        position: { x: 8, y: 12 }
+    };
+    assert.equal(selectClientStatusFeedback(personalStageSave, "player-1"), personalStageSave);
+    assert.equal(selectClientStatusFeedback(personalStageSave, "player-2"), null);
     const sharedCheckpointStatus = { type: "checkpoint", playerId: "player-1", age: 0.1, position: { x: 0, y: 0 } };
     assert.equal(
         selectClientStatusFeedback(sharedCheckpointStatus, "player-2"),

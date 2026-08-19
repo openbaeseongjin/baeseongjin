@@ -486,7 +486,9 @@ export class MultiplayerGameApp {
         const activeCheckpoint =
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
         const activeRespawnAnchor =
-            base.world.respawnAnchors?.find(({ id }) => id === remote.state.respawnAnchorId) ?? null;
+            base.world.respawnAnchors?.find(
+                ({ id }) => id === (remote.predicted.respawnAnchorId ?? localState.respawnAnchorId)
+            ) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
         this.queuePlayerPresentationEvents([base.eventFlash]);

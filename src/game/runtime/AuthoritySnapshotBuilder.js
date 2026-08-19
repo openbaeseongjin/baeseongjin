@@ -33,8 +33,7 @@ export function buildAuthoritySnapshot({
             enemies: simulation.enemyNetworkStates(),
             ...(simulation.isSeamlessSectorWorld
                 ? {
-                      progressKind: "sector",
-                      respawnAnchorId: simulation.activeRespawnAnchor?.id ?? null
+                      progressKind: "sector"
                   }
                 : {
                       progressKind: "area",
@@ -44,9 +43,6 @@ export function buildAuthoritySnapshot({
             runState: simulation.runState,
             metrics: simulation.metrics.snapshot(),
             worldProgress: simulation.worldProgress?.snapshot() ?? null,
-            ...(simulation.isSeamlessSectorWorld
-                ? { partyWipeBaseline: simulation.worldProgress.baselineSnapshot() }
-                : {}),
             worldElapsedSeconds: simulation.elapsedSeconds,
             windStates: simulation.snapshot().windStates,
             completed: simulation.runState === "completed"
