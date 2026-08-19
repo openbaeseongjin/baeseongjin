@@ -8,6 +8,7 @@
 
 - 0.32.0 enemy density 이후 pooled Sentry slot 두 기가 존재하며, 0.41.0부터 `scanner-upper-guard(-96,-928)`가 `sector-03:access-module:a` Carrier다.
 - 적 수·위치·activation·pool과 Scanner cycle은 바꾸지 않고 Sector 03의 첫 3-of-3 source만 부여한다. 아래 Threat 0 서술은 이 override로 대체한다.
+- 0.42.0부터 Carrier 위치 문자열은 제거하고 화면 밖 edge arrow와 화면 안 diamond marker를 같은 module world position에서 전환한다.
 
 ## 1. 현재 판정
 

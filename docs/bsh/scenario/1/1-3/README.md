@@ -19,7 +19,7 @@ New Gameplay Element:
 Sentry Turret
 
 Combat Requirement:
-OPTIONAL ACCESS CARRIER (SECTOR 2-OF-3)
+REQUIRED ACCESS CARRIER (SECTOR 3-OF-3)
 
 Damage Hazard:
 Sentry Projectile

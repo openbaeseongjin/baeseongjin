@@ -5,6 +5,7 @@ import { PolygonSceneRenderer } from "../src/render/PolygonSceneRenderer.js";
 
 const canvas = document.getElementById("preview");
 const unlockButton = document.getElementById("unlock");
+const focusButton = document.getElementById("focus-carrier");
 const simulation = createCurrentGameSimulation({
     worldSeed: 9182,
     playerId: "visual-player"
@@ -14,6 +15,10 @@ const route = simulation.world.routeLocks.find(({ sourceLandmarkId }) => sourceL
 const device = simulation.world.objects.find(
     ({ kind, routeLockId }) => kind === "access-transit-lock" && routeLockId === route.id
 );
+const firstModule = simulation.world.accessModules.find(
+    ({ id }) => id === simulation.world.sectors[0].accessModuleIds[0]
+);
+let cameraFocus = device.position;
 simulation.players[0].physics.position.set(device.position.x + 180, device.position.y);
 
 function completeObjective(objectiveId) {
@@ -27,8 +32,8 @@ function completeObjective(objectiveId) {
 function render() {
     const zoom = 0.72;
     const camera = {
-        x: device.position.x - innerWidth / zoom / 2,
-        y: device.position.y - innerHeight / zoom / 2,
+        x: cameraFocus.x - innerWidth / zoom / 2,
+        y: cameraFocus.y - innerHeight / zoom / 2,
         zoom,
         initialized: true
     };
@@ -48,6 +53,12 @@ unlockButton.addEventListener("click", () => {
     }
     simulation.restoreWorldProgress(simulation.worldProgress.snapshot());
     unlockButton.textContent = "ACCESS READY";
+    render();
+});
+
+focusButton.addEventListener("click", () => {
+    cameraFocus = cameraFocus === device.position ? firstModule.position : device.position;
+    focusButton.textContent = cameraFocus === device.position ? "Carrier 보기" : "경계 보기";
     render();
 });
 

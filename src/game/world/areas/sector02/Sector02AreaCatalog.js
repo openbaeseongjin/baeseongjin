@@ -97,19 +97,11 @@ const SECTOR_02_LATE_POOL = Object.freeze([
     "artillery-drone-t1"
 ]);
 
-function pooledSentry(
-    areaId,
-    id,
-    x,
-    y,
-    allowedEnemyTypes,
-    { width = 640, height = 480, accessModuleId = null, accessHint = null } = {}
-) {
+function pooledSentry(areaId, id, x, y, allowedEnemyTypes, { width = 640, height = 480, accessModuleId = null } = {}) {
     return worldObject(`${areaId}:${id}`, "sentry", x, y, {
         enemyType: "sentry-t1",
         enemySelection: { allowedEnemyTypes },
         ...(accessModuleId ? { accessModuleId } : {}),
-        ...(accessHint ? { accessHint } : {}),
         activationSpec: objectTriggerSpec("center", width, height),
         rules: ["kill-optional", "no-rope-cut", "activation-band-only"]
     });
@@ -239,8 +231,7 @@ const area02 = defineArea({
         pooledSentry(area02Id, "upper-walkway-guard", 320, -704, SECTOR_02_STANDARD_POOL, {
             width: 512,
             height: 480,
-            accessModuleId: "sector-02:access-module:a",
-            accessHint: "2-2 · UPPER PATROL WALKWAY"
+            accessModuleId: "sector-02:access-module:a"
         }),
         block02.panel,
         block02.gateVisual
@@ -470,8 +461,7 @@ const area05 = defineArea({
         pooledSentry(area05Id, "upper-transit-guard", 368, -832, SECTOR_02_LATE_POOL, {
             width: 480,
             height: 448,
-            accessModuleId: "sector-02:access-module:b",
-            accessHint: "2-5 · UPPER TRANSIT"
+            accessModuleId: "sector-02:access-module:b"
         }),
         worldObject(`${area05Id}:upper-transit-gate`, "gate", 544, -576, {
             coordinateAnchor: "center",
@@ -642,8 +632,7 @@ const area07 = defineArea({
         pooledSentry(area07Id, "shelter-centre-guard", 64, -640, SECTOR_02_LATE_POOL, {
             width: 640,
             height: 480,
-            accessModuleId: "sector-02:access-module:c",
-            accessHint: "2-7 · SHELTER CENTRE"
+            accessModuleId: "sector-02:access-module:c"
         }),
         worldObject(`${area07Id}:shelter-status`, "story-display", 0, -824, {
             cueIds: ["shelter-capacity-full", "evacuation-transfer-suspended", "remain-designated-area"]

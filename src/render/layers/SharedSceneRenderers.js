@@ -351,17 +351,12 @@ export class AccessModuleSignalRenderer {
         const sectorModuleIds = sector?.accessModuleIds ?? [];
         const collectedCount = sectorModuleIds.filter((id) => collected.has(id)).length;
         const accessReady = collectedCount >= (sector?.accessModuleRequirement ?? Number.POSITIVE_INFINITY);
-        const playerPosition = scene.player?.position ?? scene.player;
         const modules = accessReady
             ? []
             : (scene.world.accessModules ?? []).filter(
                   (module) => module.sectorId === currentSectorId && !collected.has(module.id)
               );
-        const visible = modules.filter((module) => {
-            if (!playerPosition) return false;
-            const distance = Math.hypot(module.position.x - playerPosition.x, module.position.y - playerPosition.y);
-            return distance <= 720 && isVisible(viewport, circleBounds(module.position, 48));
-        });
+        const visible = modules.filter((module) => isVisible(viewport, circleBounds(module.position, 48)));
         for (const module of visible) {
             const pulse = 0.5 + Math.sin(presentationTimeSeconds * 7) * 0.15;
             context.save();
@@ -374,9 +369,14 @@ export class AccessModuleSignalRenderer {
             context.fill();
             context.stroke();
             context.fillStyle = "#fde68a";
-            context.font = "900 10px ui-monospace, monospace";
-            context.textAlign = "center";
-            context.fillText("ACCESS CARRIER", 0, -30);
+            context.beginPath();
+            context.moveTo(0, -12);
+            context.lineTo(12, 0);
+            context.lineTo(0, 12);
+            context.lineTo(-12, 0);
+            context.closePath();
+            context.fill();
+            context.stroke();
             context.restore();
         }
         renderStats?.recordCollection("accessModuleSignals", modules.length, visible.length);

@@ -8,6 +8,7 @@
 
 - 0.32.0 enemy density 이후 pooled Sentry slot 두 기가 존재하며, 0.41.0부터 `node-exit-guard(-48,-464)`가 `sector-03:access-module:b` Carrier다.
 - 적 수·위치·activation·pool과 generic Augment Node는 바꾸지 않고 Sector 03의 두 번째 3-of-3 source만 부여한다. 아래 Threat 없음 서술은 이 override로 대체한다.
+- 0.42.0부터 Carrier 위치 문자열은 제거하고 화면 밖 edge arrow와 화면 안 diamond marker를 같은 module world position에서 전환한다.
 
 ## 1. 현재 판정
 

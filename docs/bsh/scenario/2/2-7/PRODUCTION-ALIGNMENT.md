@@ -10,6 +10,7 @@
 - Shelter Access entry와 Capacity/Transfer/Designated Area 위치 Story가 구현됐다.
 - `storyTriggers`는 시나리오 기획 인벤토리다.
 - 0.41.0부터 기존 `shelter-centre-guard(64,-640)` slot이 `sector-02:access-module:c` Carrier다. 두 Patrol band와 적 수·위치·activation은 바꾸지 않으며 Sector 02의 세 번째 3-of-3 source를 맡는다.
+- 0.42.0부터 Carrier 위치 문자열은 제거하고 화면 밖 edge arrow와 화면 안 diamond marker를 같은 module world position에서 전환한다.
 
 > **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다.
 
