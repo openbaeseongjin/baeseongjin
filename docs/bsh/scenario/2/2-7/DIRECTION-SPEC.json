@@ -1,0 +1,337 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "c8b7a23276574cc4965da8f94fb98022ac967d53",
+  "stage": {
+    "sector": 2,
+    "stage": 7,
+    "sourceAreaId": "sector-02-07",
+    "name": "SHELTER ACCESS"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "raise pressure again after 2-6 relief and announce transfer suspension",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-7:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "SHELTER ACCESS",
+            "detail": "EVACUATION TRANSFER SUSPENDED"
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "no-immediate-crossfire"
+        },
+        {
+          "type": "audio",
+          "action": "security-motor-returns-at-distance"
+        }
+      ],
+      "completion": "entry presentation duration",
+      "validation": "Player can read first diagonal route direction before Encounter A."
+    },
+    {
+      "beatId": "s1-patrol-a",
+      "status": "DESIGN LOCKED",
+      "purpose": "synthesize skilled Rope timing with diagonal same-axis moving pressure",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "buttress-patrol-a"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-patrol-a-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "diagonal-pingpong-current-ai"
+        },
+        {
+          "type": "route",
+          "action": "g1-to-g2-to-g3-skilled-sequence"
+        },
+        {
+          "type": "recovery",
+          "target": "buttress-recovery",
+          "action": "4-7-second-retry"
+        }
+      ],
+      "completion": "Safe Shelter Core reached",
+      "validation": "Patrol A phase ends before Story; no second Patrol pressure."
+    },
+    {
+      "beatId": "s2-safe-core",
+      "status": "DESIGN LOCKED",
+      "purpose": "fully stop pressure and deliver Shelter status escalation",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "shelter-core"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-7:shelter-status",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "no-authored-pressure-on-story-core"
+        },
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED POSITION",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "SHELTER CAPACITY",
+              "detail": "FULL"
+            },
+            {
+              "title": "EVACUATION TRANSFER",
+              "detail": "SUSPENDED"
+            },
+            {
+              "title": "REMAIN IN",
+              "detail": "DESIGNATED AREA"
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "target": "shelter-core-wall",
+          "action": "remain-closed-and-quiet"
+        }
+      ],
+      "completion": "three-part Shelter status sequence complete",
+      "validation": "No Patrol/Carrier attack reaches the Story Core."
+    },
+    {
+      "beatId": "s3-player-bark",
+      "status": "DESIGN LOCKED",
+      "purpose": "react emotionally to FULL + SUSPENDED + REMAIN without solving the cause",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-02-07:shelter-status"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-7:bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…대피소가 꽉 찼는데, 여기 남으라고?"
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-bark-with-toast"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No Group A/B, Priority Access or causation claim."
+    },
+    {
+      "beatId": "s4-access-c",
+      "status": "DESIGN LOCKED",
+      "purpose": "offer the third Sector 02 Access Module in a deliberate optional branch",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "sector-02-07:access-c"
+      },
+      "scope": "shared-world-with-local-route-cue",
+      "replayPolicy": "until-module-collected",
+      "dedupeToken": "sector-02:access-module:c",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "shelter-centre-guard",
+          "action": "activate-current-late-pool-carrier-slot"
+        },
+        {
+          "type": "marker",
+          "target": "sector-02:access-module:c",
+          "action": "preserve-edge-arrow-to-diamond-contract"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "Carrier killed and Module C collected OR Player returns to Shelter Core",
+      "validation": "No escort/fourth enemy; local Stage exit remains available without C."
+    },
+    {
+      "beatId": "s5-axis-turn",
+      "status": "DESIGN LOCKED",
+      "purpose": "make the sealed Shelter Core cause the diagonal-to-vertical route change",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "mast-entry"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-7:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "short-core-to-g4-turn"
+        },
+        {
+          "type": "enemy",
+          "target": "drone-2",
+          "action": "motor-may-enter-audio-space-but-no-pressure-before-mast-commit"
+        }
+      ],
+      "completion": "Mast Landing A reached",
+      "validation": "Player can read the new vertical movement axis before Encounter B."
+    },
+    {
+      "beatId": "s6-patrol-b",
+      "status": "DESIGN LOCKED",
+      "purpose": "deliver Gameplay Peak 2 with perpendicular moving pressure",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "mast-patrol-b"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-patrol-b-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-2",
+          "action": "horizontal-pingpong-current-ai"
+        },
+        {
+          "type": "route",
+          "action": "g4-to-g5-to-g6-skilled-sequence"
+        },
+        {
+          "type": "recovery",
+          "targets": [
+            "low-mast-recovery",
+            "upper-mast-recovery"
+          ],
+          "action": "4-8-second-retry"
+        }
+      ],
+      "completion": "Exit Deck reached",
+      "validation": "G4→G5 remains <=400px; Patrol B is the only active Patrol in representative mast play."
+    },
+    {
+      "beatId": "s7-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "decompress and hand off to Sector 02 finale",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-02-07:exit-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-7:s7",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "no-active-pressure-after-final-landing"
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-preempt-sector-02-08"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → sector-02-08",
+      "validation": "No Group A/B or Priority Access reveal."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "exactly 3 enemy slots",
+    "two Patrol T1 slots preserved",
+    "Access C Late Pool carrier preserved",
+    "current arbitrary 2D Patrol movement used; no new AI",
+    "Patrol A/Carrier/Patrol B never create representative three-way crossfire",
+    "Story Core fully safe",
+    "exact Shelter Story order preserved",
+    "Bark not converted to System Toast",
+    "Access C optional for local exit and required globally",
+    "generic Augment terminology only",
+    "no Stage-scale Multi-Route",
+    "all critical Rope relations <=400px",
+    "maximum meaningful map similarity overlap <=1",
+    "2-8 Story not pre-empted",
+    "default camera first",
+    "MAP-PREVIEW gameplay-only"
+  ]
+}

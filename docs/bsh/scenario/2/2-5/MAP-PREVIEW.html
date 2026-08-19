@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-5 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--v:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:460px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:720px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.gate{fill:#252b31;stroke:#e2a67c;stroke-width:4}.anchor{fill:#5de8ff;stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.carrier{fill:#482b61;stroke:#d1adff;stroke-width:3}.module{fill:#caa7ff;stroke:white;stroke-width:2}.story{fill:#796d43;stroke:#ead38d;stroke-width:2}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.branch{fill:none;stroke:#caa7ff;stroke-width:4;stroke-dasharray:8 7}.patrol{stroke:#ff8e7c;stroke-width:3;stroke-dasharray:8 7}.drop{stroke:#caa7ff;stroke-width:5;stroke-dasharray:5 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.09}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:#80d39a}.warn{color:#efb75b}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-5 EVACUATION WALKWAY · REV8 FINAL</h1><div class="sub">GAMEPLAY ONLY · HORIZONTAL EVACUATION FUNNEL / HIGH-PRESSURE NECK → SAFE STORY → TWO-STAGE MAINTENANCE DROP</div></header>
+<div class="layout"><aside>
+<div class="card"><b>FINAL BODY</b><br>
+PUBLIC FUNNEL → BROKEN QUEUE SPANS → NARROW PRESSURE NECK → SAFE LOCKED GATE → COMMIT DROP 1 → ACCESS B → COMMIT DROP 2 → EXIT</div>
+<div class="card"><b>WHY NOT EASY</b><br>
+Public challenge catches: ~351–378px<br>
+Transit Neck landing: 96–128px target class<br>
+Maintenance Drop 1 nominal catch: ~330px<br>
+Maintenance Drop 2 nominal catch: ~379px<br>
+390–400px mandatory catch: 0</div>
+<div class="card"><b>ENEMY PHASES</b><br>
+1. Vertical Patrol Band<br>
+2. Assembly Guard at Neck<br>
+3. <span class="pass">SAFE STORY</span><br>
+4. Carrier B after Service commit<br><br>
+No 3-way crossfire.</div>
+<div class="card"><b>UNIQUENESS</b><br>
+2-4 route braid 삭제<br>
+2-2 horizontal Patrol behavior 삭제<br>
+2-1 diagonal ascent body 삭제<br>
+1-5 drop→relaunch 없음<br>
+1-8 Gate override 없음</div>
+<div class="card">
+<label><input id="showMain" type="checkbox" checked> Mandatory route</label>
+<label><input id="showAccess" type="checkbox" checked> Access Module B local branch</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP RULE</b><br>Queue chairs / bags / blankets / signs / background architecture are intentionally hidden.</div>
+</aside><main>
+<svg viewBox="-1080 -790 2160 860">
+<rect class="bounds" x="-992" y="-704" width="1984" height="704"/><text class="tiny" x="-968" y="-674">REV8 FINAL 1984×704</text>
+
+<!-- Public entry / assembly -->
+<rect class="surface" x="-992" y="0" width="320" height="32"/><text class="tiny" x="-975" y="-12">ENTRY / BROAD PUBLIC BASE</text>
+<rect class="surface" x="-832" y="-128" width="384" height="24"/><text class="tiny" x="-815" y="-142">ASSEMBLY CONCOURSE</text>
+
+<!-- Challenging broken queue spans -->
+<circle class="anchor" cx="-560" cy="-224" r="13"/><text class="tiny" x="-540" y="-214">G1</text>
+<rect class="surface" x="-544" y="-256" width="192" height="20"/><text class="tiny" x="-530" y="-270">QUEUE SHELF A</text>
+
+<circle class="anchor" cx="-192" cy="-320" r="13"/><text class="tiny" x="-172" y="-310">G2</text>
+<rect class="recovery" x="-224" y="-192" width="256" height="18"/><text class="tiny" x="-210" y="-206">PUBLIC RECOVERY</text>
+
+<!-- vertical patrol band: different from 2-2 -->
+<line class="patrol" x1="-288" y1="-160" x2="-288" y2="-368"/>
+<circle class="enemy" cx="-288" cy="-270" r="19"/><text class="tiny" x="-350" y="-390">VERTICAL PATROL BAND</text>
+
+<circle class="anchor" cx="160" cy="-384" r="13"/><text class="tiny" x="180" y="-374">G3</text>
+<rect class="surface" x="96" y="-416" width="128" height="20"/><text class="tiny" x="92" y="-430">TRANSIT NECK</text>
+
+<circle class="enemy" cx="288" cy="-416" r="18"/><text class="tiny" x="232" y="-446">ASSEMBLY GUARD</text>
+<circle class="anchor" cx="512" cy="-448" r="13"/><text class="tiny" x="532" y="-438">G4</text>
+
+<!-- safe story forecourt -->
+<rect class="safe" x="448" y="-480" width="256" height="24"/><text class="tiny" x="462" y="-494">SAFE STORY FORECOURT</text>
+<rect class="story" x="560" y="-552" width="96" height="64" rx="6"/><text class="tiny" x="541" y="-570">EVAC STATUS</text>
+<rect class="gate" x="752" y="-608" width="72" height="256"/><text class="tiny" x="719" y="-628">LOCKED UPPER TRANSIT</text>
+
+<!-- service hatch / first drop -->
+<rect class="surface" x="672" y="-576" width="96" height="18"/><text class="tiny" x="652" y="-594">SERVICE HATCH</text>
+<circle class="anchor" cx="464" cy="-336" r="13"/><text class="tiny" x="416" y="-326">DROP CATCH 1</text>
+<rect class="surface" x="368" y="-272" width="128" height="20"/><text class="tiny" x="350" y="-286">NARROW MAINT SHELF</text>
+<rect class="recovery" x="592" y="-160" width="192" height="18"/><text class="tiny" x="606" y="-174">DROP 1 RECOVERY</text>
+<rect class="gate" x="520" y="-336" width="24" height="272"/><text class="tiny" x="486" y="-350">DROP 1 DIVIDER</text>
+
+<!-- optional access B branch off shelf -->
+<circle class="anchor" cx="320" cy="-320" r="11"/><text class="tiny" x="270" y="-310">ACCESS ANCHOR</text>
+<rect class="surface" x="128" y="-272" width="160" height="20"/><text class="tiny" x="120" y="-286">CARRIER B ALCOVE</text>
+<circle class="carrier" cx="208" cy="-272" r="19"/><path class="module" d="M208 -310 l9 9 -9 9 -9 -9z"/><text class="tiny" x="145" y="-322">CARRIER / MODULE B</text>
+
+<!-- second commit drop -->
+<circle class="anchor" cx="96" cy="-96" r="13"/><text class="tiny" x="45" y="-86">DROP CATCH 2</text>
+<rect class="recovery" x="304" y="-80" width="160" height="16"/><text class="tiny" x="300" y="-94">DROP 2 RECOVERY</text>
+<rect class="gate" x="232" y="-176" width="24" height="176"/><text class="tiny" x="194" y="-190">DROP 2 DIVIDER</text>
+<rect class="safe" x="-48" y="-64" width="256" height="24"/><text class="tiny" x="-30" y="-78">LOW SERVICE EXIT → 2-6</text>
+
+<g id="mainRoute">
+<path class="route" d="M-864,-32 Q-750,-85 -640,-128 Q-600,-175 -560,-224 Q-375,-270 -192,-320 Q-15,-350 160,-384 Q335,-420 512,-448 Q575,-462 624,-480 L704,-480 Q720,-530 720,-558"/>
+<path class="drop" d="M720,-558 Q600,-480 464,-336 Q450,-300 432,-272"/>
+<path class="drop" d="M432,-272 Q270,-185 96,-96 Q55,-75 32,-64"/>
+</g>
+<g id="accessBranch">
+<path class="branch" d="M432,-272 Q375,-300 320,-320 Q265,-295 208,-272 Q265,-295 320,-320 Q375,-300 432,-272"/>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-560" cy="-224" r="400"/>
+<circle class="reach" cx="-192" cy="-320" r="400"/>
+<circle class="reach" cx="160" cy="-384" r="400"/>
+<circle class="reach" cx="512" cy="-448" r="400"/>
+<circle class="reach" cx="464" cy="-336" r="400"/>
+<circle class="reach" cx="320" cy="-320" r="400"/>
+<circle class="reach" cx="96" cy="-96" r="400"/>
+</g>
+</svg></main></div>
+<script>
+showMain.onchange=()=>mainRoute.classList.toggle("hidden",!showMain.checked);
+showAccess.onchange=()=>accessBranch.classList.toggle("hidden",!showAccess.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

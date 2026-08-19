@@ -181,7 +181,12 @@ export function run() {
             const height =
                 Math.max(...surface.vertices.map(({ y }) => y)) - Math.min(...surface.vertices.map(({ y }) => y));
             const expectedAnchor =
-                surface.kind === "grapple-target"
+                // "structural-grapple-target" (Sector 02) is the same center-anchored 24x24 grip as
+                // "grapple-target" - it only carries a different kind label so
+                // AreaDefinitionValidator's validateGrappleLandmarks() pairing rule (every
+                // "grapple-target" surface needs a matching "grapple-landmark" object) does not
+                // apply to unlabeled mid-route grips that have no visible landmark marker.
+                surface.kind === "grapple-target" || surface.kind === "structural-grapple-target"
                     ? "center"
                     : surface.kind === "sealed-door" ||
                         ((surface.kind === "cover" || surface.kind === "solid") && height > width)

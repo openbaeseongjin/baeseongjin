@@ -1,0 +1,285 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "1325320dc89d3c2da45ebd53204901d5ebbd10f1",
+  "stage": {
+    "sector": 2,
+    "stage": 4,
+    "sourceAreaId": "sector-02-04",
+    "name": "RESIDENTIAL STACK"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "open housing scale without a high-rise reveal",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-4:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "RESIDENTIAL STACK",
+            "detail": "MULTI-ROUTE HOUSING"
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "no-immediate-pressure"
+        }
+      ],
+      "completion": "entry presentation duration",
+      "validation": "No tower/skyline-first composition."
+    },
+    {
+      "beatId": "s1-reveal",
+      "status": "DESIGN LOCKED",
+      "purpose": "show density and route choice",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "reveal-deck"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-4:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "environment",
+          "action": "show-multiple-low-rise-housing-clusters"
+        },
+        {
+          "type": "route",
+          "action": "show-at-least-two-first-half-options"
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…여기서 몇 명이나 살았던 거지."
+          }
+        }
+      ],
+      "completion": "local reveal",
+      "validation": "Physical evidence precedes Bark."
+    },
+    {
+      "beatId": "s2-first-braid",
+      "status": "DESIGN LOCKED",
+      "purpose": "first risk/speed choice",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "first-braid"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-4:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "offer-safe-flow-pressure-without-build-lock"
+        },
+        {
+          "type": "enemy",
+          "target": "route-choice-guard",
+          "action": "pressure-first-braid-only"
+        },
+        {
+          "type": "recovery",
+          "target": "recovery-a",
+          "action": "allow-reentry-and-route-change"
+        }
+      ],
+      "completion": "Switch Deck reached",
+      "validation": "Guard kill optional; all styles Base-Rope viable."
+    },
+    {
+      "beatId": "s3-switch",
+      "status": "DESIGN LOCKED",
+      "purpose": "make route choice reversible",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "switch-deck"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-4:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "make-at-least-two-second-half-options-readable"
+        },
+        {
+          "type": "enemy",
+          "target": "route-choice-guard",
+          "action": "first-braid-pressure-ends"
+        },
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "familiar-motor-can-enter-audio-space"
+        }
+      ],
+      "completion": "Player commits to any second-half style",
+      "validation": "Safe/Flow/Pressure switching is possible."
+    },
+    {
+      "beatId": "s4-second-braid",
+      "status": "DESIGN LOCKED",
+      "purpose": "make Patrol a route price",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "second-braid"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-patrol-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "current-patrol-and-target-lock-cycle"
+        },
+        {
+          "type": "route",
+          "action": "differentiate-patrol-exposure-by-style"
+        },
+        {
+          "type": "recovery",
+          "targets": [
+            "recovery-b",
+            "right-recovery"
+          ],
+          "action": "allow-route-change-after-failure"
+        }
+      ],
+      "completion": "Merge Deck reached",
+      "validation": "Safe minimal / Flow brief / Pressure sustained exposure."
+    },
+    {
+      "beatId": "s5-merge",
+      "status": "DESIGN LOCKED",
+      "purpose": "decompress before 2-5",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "merge-deck"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-4:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "no-active-pressure-after-merge"
+        },
+        {
+          "type": "story",
+          "action": "do-not-preempt-2-5-evacuation-reveal"
+        },
+        {
+          "type": "route",
+          "action": "single-clear-exit"
+        }
+      ],
+      "completion": "Exit Deck reached",
+      "validation": "No enemy pressure persists."
+    },
+    {
+      "beatId": "s6-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "handoff to 2-5",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-02-04:exit-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-4:s6",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → sector-02-05",
+      "validation": "2-5 owns explicit Evacuation Pressure Story."
+    }
+  ],
+  "validation": [
+    "exactly 2 enemy slots",
+    "all route styles Base-Rope viable",
+    "route switching possible",
+    "Patrol behavior preserved",
+    "Guard kill optional",
+    "no Access Carrier",
+    "generic Augment terminology only",
+    "exact Entry Story preserved",
+    "Bark not System Toast",
+    "2-5 Story not pre-empted",
+    "default camera first",
+    "MAP-PREVIEW gameplay-only"
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED",
+  "baselineCommit": "c042f614f07ff62184aca3d0c128c89f51f25708",
+  "stage": {
+    "sector": 2,
+    "stage": 3,
+    "legacyStageAlias": "2-3",
+    "sourceAreaId": "sector-02-03",
+    "name": "RESIDENTIAL SERVICE NODE",
+    "subtitle": "AUGMENT SERVICE"
+  },
+  "bounds": {
+    "width": 1344,
+    "height": 576
+  },
+  "entry": {
+    "id": "sector-02-03:entry",
+    "x": -576,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "kind": "platform",
+      "x": -544,
+      "y": 0,
+      "width": 256,
+      "height": 32
+    },
+    {
+      "id": "approach-deck",
+      "kind": "platform",
+      "x": -416,
+      "y": -128,
+      "width": 256,
+      "height": 22
+    },
+    {
+      "id": "service-core",
+      "kind": "solid",
+      "x": -64,
+      "y": -208,
+      "width": 64,
+      "height": 288,
+      "properties": {
+        "solid": true,
+        "grappleable": false,
+        "damage": false,
+        "losBlocker": true
+      }
+    },
+    {
+      "id": "choice-floor",
+      "kind": "safe-deck",
+      "x": 288,
+      "y": -256,
+      "width": 640,
+      "height": 26
+    },
+    {
+      "id": "exit-deck",
+      "kind": "safe-deck",
+      "x": 560,
+      "y": -288,
+      "width": 224,
+      "height": 26
+    },
+    {
+      "id": "g1-surface",
+      "kind": "grapple-target",
+      "x": -160,
+      "y": -352
+    }
+  ],
+  "routePoints": [
+    {
+      "id": "entry",
+      "x": -576,
+      "y": -32
+    },
+    {
+      "id": "approach",
+      "x": -416,
+      "y": -128
+    },
+    {
+      "id": "g1",
+      "x": -160,
+      "y": -352,
+      "landmark": "G1"
+    },
+    {
+      "id": "safe-hall-landing",
+      "x": 96,
+      "y": -256
+    },
+    {
+      "id": "node",
+      "x": 256,
+      "y": -256
+    },
+    {
+      "id": "exit",
+      "x": 576,
+      "y": -288
+    }
+  ],
+  "recoveryPoints": [
+    {
+      "id": "threshold-fallback",
+      "x": 96,
+      "y": -272,
+      "retrySecondsTarget": [
+        2,
+        5
+      ],
+      "purpose": "safe hall landing doubles as local recovery"
+    }
+  ],
+  "objects": [
+    {
+      "id": "g1",
+      "kind": "grapple-landmark",
+      "x": -160,
+      "y": -352,
+      "label": "G1"
+    },
+    {
+      "id": "node-approach-guard",
+      "kind": "sentry-slot",
+      "x": -384,
+      "y": -128,
+      "properties": {
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "authority": "SECTOR_02_SUPPORT_POOL",
+          "allowedEnemyTypes": [
+            "patrol-drone-t1",
+            "shield-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "activationPolicy": "approach-band-only",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "purpose": "residual-service-security"
+      }
+    },
+    {
+      "id": "specialization-node",
+      "kind": "augment-node",
+      "x": 256,
+      "y": -256,
+      "stableSourceId": "sector-02-03:specialization-node",
+      "properties": {
+        "interactionRadius": 72,
+        "objectiveId": "sector-02-03:specialization-selected",
+        "runtimeRole": "second-generic-augment-source",
+        "legacyNameOnly": "specialization-node"
+      }
+    },
+    {
+      "id": "exit-panel",
+      "kind": "interaction",
+      "x": 576,
+      "y": -288,
+      "properties": {
+        "objectiveId": "sector-02-03:exit-panel-engaged",
+        "requiredObjectiveIds": [
+          "sector-02-03:specialization-selected"
+        ]
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "id": "sector-02-03:specialization-selected",
+      "type": "interact-choice",
+      "sourceObjectId": "sector-02-03:specialization-node",
+      "runtimeRole": "second-generic-augment-selection"
+    },
+    {
+      "id": "sector-02-03:exit-panel-engaged",
+      "type": "interact",
+      "sourceObjectId": "sector-02-03:exit-panel",
+      "requiredObjectiveIds": [
+        "sector-02-03:specialization-selected"
+      ]
+    }
+  ],
+  "nextAreaId": "sector-02-04",
+  "story": {
+    "entry": {
+      "title": "AUGMENT SERVICE NODE",
+      "detail": "OFFER 2 AVAILABLE",
+      "status": "VERIFIED"
+    },
+    "nodeDetection": [
+      {
+        "title": "GRAPPLE DEVICE",
+        "detail": "DETECTED",
+        "status": "VERIFIED"
+      },
+      {
+        "title": "EMERGENCY CONFIGURATION",
+        "detail": "ACTIVE",
+        "status": "VERIFIED"
+      }
+    ],
+    "playerBarkLayer": {
+      "status": "NOT IMPLEMENTED"
+    }
+  },
+  "playerBarks": [
+    {
+      "id": "residential-node-recognition",
+      "text": "…이 장비, 여기에도 있네.",
+      "triggerIntent": "after first node-detection presentation in safe communal hall",
+      "scope": "local-player",
+      "replay": "once-per-stage-attempt",
+      "status": "NOT IMPLEMENTED — PLAYER BARK LAYER"
+    }
+  ],
+  "augment": {
+    "sourceId": "sector-02-03:specialization-node",
+    "offerRole": "second generic offer",
+    "catalogSize": 22,
+    "offerSize": 3,
+    "reroll": false,
+    "rarity": false,
+    "categoryQuota": false,
+    "playerMaxCards": 6,
+    "selectionScope": "player-local",
+    "worldPause": false,
+    "postSelectionCalibrationRequired": false
+  },
+  "camera": {
+    "mode": "default-authored-camera",
+    "customZonesRequired": false,
+    "intent": [
+      "keep approach Guard and threshold readable before Node",
+      "keep Node and broad safe floor readable together",
+      "no cinematic Node zoom",
+      "no calibration shot"
+    ]
+  },
+  "uniqueness": {
+    "signature": "SIDE-LOADED COMMUNAL UTILITY HALL / ONE-WAY SAFE THRESHOLD",
+    "comparisonToSector0104": {
+      "meaningfulOverlapCount": 1,
+      "overlap": [
+        "generic Augment selection"
+      ],
+      "verdict": "PASS",
+      "forbiddenRegression": [
+        "post-choice calibration route",
+        "calibration dummy",
+        "selected-card proof gate",
+        "vertical calibration stack",
+        "authored calibration camera sequence"
+      ]
+    }
+  },
+  "forbidden": [
+    "Enemy NONE assumption",
+    "Foundation/Specialization tier as current product behavior",
+    "post-choice Rope test",
+    "calibration dummy",
+    "augment-calibrated gate",
+    "card-specific proof",
+    "Guard LOS into chooser room",
+    "Guard kill gate",
+    "custom cinematic Node camera",
+    "Player Bark as System Toast"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "bounds",
+      "type": "data",
+      "requirement": "Bounds 1344×576."
+    },
+    {
+      "id": "enemy-count",
+      "type": "data",
+      "requirement": "Exactly 1 enemy slot."
+    },
+    {
+      "id": "threshold-reach",
+      "type": "data",
+      "requirement": "Approach→G1 and G1→Safe Hall remain <=400px."
+    },
+    {
+      "id": "los-separation",
+      "type": "runtime",
+      "requirement": "Service Core blocks Guard LOS into Node Hall."
+    },
+    {
+      "id": "kill-optional",
+      "type": "runtime",
+      "requirement": "Guard death does not gate Node."
+    },
+    {
+      "id": "generic-offer",
+      "type": "runtime",
+      "requirement": "Stable source opens second compatible generic 3-card offer."
+    },
+    {
+      "id": "no-calibration",
+      "type": "runtime/review",
+      "requirement": "No post-choice calibration/proof requirement."
+    },
+    {
+      "id": "similarity",
+      "type": "review",
+      "requirement": "Meaningful overlap with 1-4 <=1."
+    },
+    {
+      "id": "pacing",
+      "type": "playtest",
+      "requirement": "First 0:45–1:05 excluding deliberate menu reading.",
+      "status": "HYPOTHESIS"
+    }
+  ]
+}

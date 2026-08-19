@@ -1,0 +1,628 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED",
+  "baselineCommit": "4fce8a27bc6cb7b4141735dec6c8e56cb9f88b5b",
+  "revision": {
+    "final": "REV8.0",
+    "designIteration": "REV2",
+    "supersedes": [
+      "REV1 DRAFT"
+    ]
+  },
+  "stage": {
+    "sector": 2,
+    "stage": 8,
+    "sourceAreaId": "sector-02-08",
+    "name": "EVACUATION PLATFORM",
+    "subtitle": "GROUP C TRANSFER SUSPENDED",
+    "role": "SECTOR 02 FINALE"
+  },
+  "bounds": {
+    "width": 2304,
+    "height": 1408
+  },
+  "entry": {
+    "id": "sector-02-08:entry",
+    "x": -960,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "kind": "platform",
+      "x": -928,
+      "y": 0,
+      "width": 320,
+      "height": 32
+    },
+    {
+      "id": "arrival-a",
+      "kind": "platform",
+      "x": -744,
+      "y": -288,
+      "width": 176,
+      "height": 22
+    },
+    {
+      "id": "recovery-a",
+      "kind": "recovery",
+      "x": -320,
+      "y": -256,
+      "width": 288,
+      "height": 18
+    },
+    {
+      "id": "central-hub",
+      "kind": "platform",
+      "x": 64,
+      "y": -608,
+      "width": 384,
+      "height": 26
+    },
+    {
+      "id": "dead-boarding-lip",
+      "kind": "platform",
+      "x": 576,
+      "y": -768,
+      "width": 256,
+      "height": 24
+    },
+    {
+      "id": "transfer-ring",
+      "kind": "safe-deck",
+      "x": 544,
+      "y": -448,
+      "width": 384,
+      "height": 26
+    },
+    {
+      "id": "drop-recovery",
+      "kind": "recovery",
+      "x": 832,
+      "y": -320,
+      "width": 224,
+      "height": 18
+    },
+    {
+      "id": "ring-divider",
+      "kind": "solid",
+      "x": 704,
+      "y": -405,
+      "width": 28,
+      "height": 230,
+      "properties": {
+        "solid": true,
+        "grappleable": false,
+        "damage": false,
+        "purpose": "prevent drop recovery walking directly onto successful ring route"
+      }
+    },
+    {
+      "id": "recovery-c",
+      "kind": "recovery",
+      "x": -32,
+      "y": -640,
+      "width": 224,
+      "height": 18
+    },
+    {
+      "id": "recovery-d",
+      "kind": "recovery",
+      "x": -384,
+      "y": -768,
+      "width": 192,
+      "height": 18
+    },
+    {
+      "id": "upper-departure-arm",
+      "kind": "platform",
+      "x": -608,
+      "y": -1024,
+      "width": 192,
+      "height": 22
+    },
+    {
+      "id": "final-control-apron",
+      "kind": "safe-deck",
+      "x": 0,
+      "y": -1248,
+      "width": 448,
+      "height": 28
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "g1",
+      "x": -768,
+      "y": -224,
+      "role": "arrival-approach"
+    },
+    {
+      "id": "g2",
+      "x": -448,
+      "y": -384,
+      "role": "arrival-patrol-mid"
+    },
+    {
+      "id": "g3",
+      "x": -128,
+      "y": -544,
+      "role": "arrival-hub-entry"
+    },
+    {
+      "id": "g4",
+      "x": 448,
+      "y": -736,
+      "role": "dead-boarding-lip"
+    },
+    {
+      "id": "g5",
+      "x": 608,
+      "y": -512,
+      "role": "controlled-drop-catch"
+    },
+    {
+      "id": "g6",
+      "x": 64,
+      "y": -704,
+      "role": "ring-relaunch"
+    },
+    {
+      "id": "g7",
+      "x": -288,
+      "y": -832,
+      "role": "upper-arm-patrol-mid"
+    },
+    {
+      "id": "g8",
+      "x": -608,
+      "y": -992,
+      "role": "upper-arm-guard-approach"
+    },
+    {
+      "id": "g9",
+      "x": -288,
+      "y": -1152,
+      "role": "final-security-exit"
+    }
+  ],
+  "mainRoute": [
+    {
+      "id": "entry",
+      "x": -960,
+      "y": -32
+    },
+    {
+      "id": "g1",
+      "x": -768,
+      "y": -224
+    },
+    {
+      "id": "g2",
+      "x": -448,
+      "y": -384
+    },
+    {
+      "id": "g3",
+      "x": -128,
+      "y": -544
+    },
+    {
+      "id": "central-hub",
+      "x": 64,
+      "y": -608
+    },
+    {
+      "id": "g4",
+      "x": 448,
+      "y": -736
+    },
+    {
+      "id": "dead-lip",
+      "x": 576,
+      "y": -768
+    },
+    {
+      "id": "g5",
+      "x": 608,
+      "y": -512
+    },
+    {
+      "id": "ring",
+      "x": 544,
+      "y": -448
+    },
+    {
+      "id": "ring-left-edge",
+      "x": 352,
+      "y": -448
+    },
+    {
+      "id": "g6",
+      "x": 64,
+      "y": -704
+    },
+    {
+      "id": "g7",
+      "x": -288,
+      "y": -832
+    },
+    {
+      "id": "g8",
+      "x": -608,
+      "y": -992
+    },
+    {
+      "id": "g9",
+      "x": -288,
+      "y": -1152
+    },
+    {
+      "id": "final-left-edge",
+      "x": -224,
+      "y": -1248
+    },
+    {
+      "id": "transfer-control",
+      "x": -80,
+      "y": -1248
+    }
+  ],
+  "recoveryPoints": [
+    {
+      "id": "recovery-a",
+      "x": -320,
+      "y": -274,
+      "retrySecondsTarget": [
+        4,
+        7
+      ]
+    },
+    {
+      "id": "drop-recovery",
+      "x": 832,
+      "y": -338,
+      "retrySecondsTarget": [
+        5,
+        9
+      ],
+      "forwardWalkBlockedBy": "ring-divider"
+    },
+    {
+      "id": "recovery-c",
+      "x": -32,
+      "y": -658,
+      "retrySecondsTarget": [
+        4,
+        8
+      ]
+    },
+    {
+      "id": "recovery-d",
+      "x": -384,
+      "y": -786,
+      "retrySecondsTarget": [
+        4,
+        8
+      ]
+    }
+  ],
+  "safeZones": [
+    {
+      "id": "transfer-ring-relief",
+      "minX": 352,
+      "maxX": 736,
+      "minY": -520,
+      "maxY": -416,
+      "contract": [
+        "all four enemy slots inactive",
+        "no hazard",
+        "5–10 second first-play orientation relief"
+      ]
+    },
+    {
+      "id": "final-control-story",
+      "minX": -224,
+      "maxX": 224,
+      "minY": -1320,
+      "maxY": -1200,
+      "contract": [
+        "all enemy pressure zero",
+        "Transfer Control readable",
+        "Checkpoint readable",
+        "no combat/story overlap"
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "drone-1",
+      "kind": "patrol-drone",
+      "x": -448,
+      "y": -392,
+      "properties": {
+        "enemyType": "patrol-drone-t1",
+        "patrol": {
+          "points": [
+            {
+              "x": -704,
+              "y": -272
+            },
+            {
+              "x": -160,
+              "y": -528
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ],
+        "purpose": "arrival-finger same-axis Patrol A"
+      }
+    },
+    {
+      "id": "transfer-lower-guard",
+      "kind": "sentry-slot",
+      "x": 288,
+      "y": -608,
+      "properties": {
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "authority": "SECTOR_02_LATE_POOL",
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "support-drone-t1",
+            "artillery-drone-t1"
+          ]
+        },
+        "activationPolicy": "hub-to-dead-lip-only",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      }
+    },
+    {
+      "id": "drone-2",
+      "kind": "patrol-drone",
+      "x": 0,
+      "y": -784,
+      "properties": {
+        "enemyType": "patrol-drone-t1",
+        "patrol": {
+          "points": [
+            {
+              "x": 320,
+              "y": -784
+            },
+            {
+              "x": -320,
+              "y": -784
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ],
+        "purpose": "central horizontal crossing Patrol B during up-left relaunch"
+      }
+    },
+    {
+      "id": "transfer-upper-guard",
+      "kind": "sentry-slot",
+      "x": -544,
+      "y": -992,
+      "properties": {
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "authority": "SECTOR_02_LATE_POOL",
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "support-drone-t1",
+            "artillery-drone-t1"
+          ]
+        },
+        "activationPolicy": "upper-departure-arm-final-only",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      }
+    },
+    {
+      "id": "transfer-control",
+      "kind": "interaction",
+      "x": -80,
+      "y": -1248,
+      "properties": {
+        "objectiveId": "sector-02-08:transfer-control-read",
+        "storySequenceId": "sector-02-08:transfer-control-read"
+      }
+    },
+    {
+      "id": "sector-end-checkpoint-object",
+      "kind": "checkpoint",
+      "x": 112,
+      "y": -1248,
+      "properties": {
+        "checkpointId": "sector-02-08:sector-end-checkpoint"
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "id": "sector-02-08:transfer-control-read",
+      "type": "interact",
+      "sourceObjectId": "sector-02-08:transfer-control"
+    },
+    {
+      "id": "sector-02-08:sector-end-checkpoint",
+      "type": "checkpoint",
+      "sourceObjectId": "sector-02-08:sector-end-checkpoint-object"
+    }
+  ],
+  "gate": {
+    "completionMode": "content-boundary",
+    "nextAreaId": null,
+    "requiredObjectiveIds": [
+      "sector-02-08:transfer-control-read"
+    ],
+    "accessModuleRequirementStatus": "NOT IMPLEMENTED — current Area gate does not directly require A/B/C"
+  },
+  "story": {
+    "entry": {
+      "title": "EVACUATION PLATFORM",
+      "detail": "GROUP C TRANSFER SUSPENDED",
+      "status": "VERIFIED"
+    },
+    "transferControl": [
+      {
+        "title": "EVACUATION GROUP A",
+        "detail": "TRANSFER COMPLETE",
+        "status": "VERIFIED"
+      },
+      {
+        "title": "EVACUATION GROUP B",
+        "detail": "TRANSFER COMPLETE",
+        "status": "VERIFIED"
+      },
+      {
+        "title": "EVACUATION GROUP C",
+        "detail": "TRANSFER SUSPENDED",
+        "status": "VERIFIED"
+      },
+      {
+        "title": "PRIORITY ACCESS",
+        "detail": "ACTIVE",
+        "status": "VERIFIED"
+      }
+    ],
+    "playerBarkLayer": {
+      "status": "NOT IMPLEMENTED"
+    }
+  },
+  "playerBarks": [
+    {
+      "id": "sector-02-final-question",
+      "text": "…왜 C만 멈춘 거지?",
+      "triggerIntent": "after PRIORITY ACCESS / ACTIVE on final safe Control Apron",
+      "scope": "local-player",
+      "replay": "once-per-stage-attempt",
+      "status": "NOT IMPLEMENTED — PLAYER BARK LAYER"
+    }
+  ],
+  "accessModuleRuntimeGap": {
+    "planningContract": "Sector 02 Access Modules A/B/C treated as 3-of-3 Transit progression",
+    "currentAreaGate": "only requires sector-02-08:transfer-control-read",
+    "status": "NOT IMPLEMENTED AS 2-8 AREA GATE REQUIREMENT",
+    "geometryDependsOnAccessModules": false
+  },
+  "augment": {
+    "currentContract": "generic Augment v1",
+    "requiresSpecificCard": false,
+    "baseRopeClearable": true,
+    "stageScaleMultiRouteRequired": false
+  },
+  "camera": {
+    "mode": "default-authored-camera",
+    "customZonesRequired": false,
+    "requirements": {
+      "entry": [
+        "Player",
+        "Arrival Finger",
+        "Central Hub"
+      ],
+      "deadLip": [
+        "Player",
+        "dead lip",
+        "G5 / Transfer Ring below"
+      ],
+      "ring": [
+        "Player",
+        "Ring",
+        "opposite Upper Departure Arm"
+      ],
+      "patrolB": [
+        "Player",
+        "next up-left catch",
+        "horizontal Patrol B line"
+      ],
+      "final": [
+        "Player",
+        "Transfer Control",
+        "empty final apron",
+        "Checkpoint"
+      ]
+    }
+  },
+  "uniqueness": {
+    "signature": "BROKEN TRANSFER FAN / HUB → DEAD BOARDING LIP → SUSPENDED RING → UPPER DEPARTURE ARM",
+    "dominantBody": "LONG UP-RIGHT ARRIVAL → DEAD LIP → CONTROLLED DROP → LONG UP-LEFT DEPARTURE → FINAL CONTROL",
+    "maximumMeaningfulOverlap": 1,
+    "comparisons": {
+      "2-4": {
+        "verdict": "PASS",
+        "overlapCount": 0
+      },
+      "2-5": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "one deliberate downward transition"
+        ]
+      },
+      "1-5": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "drop followed by relaunch"
+        ]
+      },
+      "2-7": {
+        "verdict": "PASS",
+        "overlapCount": 0
+      },
+      "1-7": {
+        "verdict": "PASS",
+        "overlapCount": 0
+      },
+      "1-8": {
+        "verdict": "PASS",
+        "overlapCount": 0
+      }
+    }
+  },
+  "forbidden": [
+    "Stage-scale Safe/Flow/Build route lanes",
+    "braided route switching",
+    "fifth enemy",
+    "Boss",
+    "Wind",
+    "Rope Cutter",
+    "enemy pressure in Transfer Ring relief",
+    "enemy pressure in Final Story",
+    "mandatory Access-module geometry",
+    "invented 3-of-3 Area gate requirement",
+    "Foundation/Specialization current-tier wording",
+    "VIP signage or class-coded A/B visuals",
+    "intentional abandonment conclusion",
+    "Priority recipient identification",
+    "Player Bark as System Toast"
+  ]
+}

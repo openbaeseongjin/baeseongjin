@@ -1,0 +1,372 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "1325320dc89d3c2da45ebd53204901d5ebbd10f1",
+  "stage": {
+    "sector": 2,
+    "stage": 5,
+    "sourceAreaId": "sector-02-05",
+    "name": "EVACUATION WALKWAY"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "shift from lived-in housing to public evacuation infrastructure",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-5:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "EVACUATION WALKWAY",
+            "detail": "UPPER TRANSIT RESTRICTED"
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "no-immediate-spawn-pressure"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "entry presentation duration only",
+      "validation": "Player has a readable public-route direction before the first skilled catch."
+    },
+    {
+      "beatId": "s1-patrol-compression",
+      "status": "DESIGN LOCKED",
+      "purpose": "raise difficulty through narrowing public circulation rather than route choice",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "public-patrol-band"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-patrol-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "current-patrol-and-target-lock-cycle-with-reauthed-path"
+        },
+        {
+          "type": "route",
+          "action": "broken-queue-spans-g1-g2"
+        },
+        {
+          "type": "recovery",
+          "target": "public-recovery",
+          "action": "position-loss-not-stage-reset"
+        }
+      ],
+      "completion": "Player reaches Transit Neck entry",
+      "validation": "G1→G2 remains a skilled ~380px relation and Patrol does not follow the 2-2 horizontal-bridge pattern."
+    },
+    {
+      "beatId": "s2-transit-neck",
+      "status": "DESIGN LOCKED",
+      "purpose": "create Gameplay Peak 1 before Story relief",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "transit-neck"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-5:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "assembly-guard",
+          "action": "activate-neck-only"
+        },
+        {
+          "type": "route",
+          "action": "g2-to-g3-to-g4-skilled-sequence"
+        },
+        {
+          "type": "enemy",
+          "target": "drone-1",
+          "action": "public-patrol-phase-ends-before-forecourt"
+        }
+      ],
+      "completion": "Safe Story Forecourt reached",
+      "validation": "Assembly Guard kill optional; Patrol and Guard do not create sustained crossfire into Forecourt."
+    },
+    {
+      "beatId": "s3-safe-story-forecourt",
+      "status": "DESIGN LOCKED",
+      "purpose": "cut pressure to zero before revealing evacuation status",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "story-forecourt"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-5:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "no-authored-pressure-in-forecourt"
+        },
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED POSITION",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "EVACUATION GROUP C",
+              "detail": "ASSEMBLY COMPLETE"
+            },
+            {
+              "title": "TRANSFER AUTHORIZATION",
+              "detail": "PENDING"
+            },
+            {
+              "title": "UPPER TRANSIT ACCESS",
+              "detail": "RESTRICTED"
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "target": "upper-transit-gate",
+          "action": "remain-sealed"
+        }
+      ],
+      "completion": "three-part status sequence complete",
+      "validation": "Player can read Gate and Story Display without attacks."
+    },
+    {
+      "beatId": "s4-player-bark",
+      "status": "DESIGN LOCKED",
+      "purpose": "turn verified status into a restrained player question",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-02-05:upper-transit"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-5:bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…여기까지 왔는데, 위로는 못 간 건가."
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-bark-with-toast"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No claim about who caused the restriction or why."
+    },
+    {
+      "beatId": "s5-service-hatch",
+      "status": "DESIGN LOCKED",
+      "purpose": "show that the public route stays closed while service circulation continues",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "sector-02-05:maintenance-drop"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-5:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "object",
+          "target": "upper-transit-gate",
+          "action": "stay-closed"
+        },
+        {
+          "type": "route",
+          "action": "commit-drop-1-to-g5"
+        },
+        {
+          "type": "recovery",
+          "target": "drop1-recovery",
+          "action": "miss-recovery-with-forward-divider"
+        }
+      ],
+      "completion": "Maintenance Shelf reached",
+      "validation": "Gate never opens and Drop 1 Recovery cannot walk directly into successful route."
+    },
+    {
+      "beatId": "s6-access-b",
+      "status": "DESIGN LOCKED",
+      "purpose": "offer Sector 02 Access Module B only after Story reading",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "sector-02-05:access-b"
+      },
+      "scope": "shared-world-with-local-route-cue",
+      "replayPolicy": "until-module-collected",
+      "dedupeToken": "sector-02:access-module:b",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "upper-transit-guard",
+          "action": "activate-current-carrier-slot"
+        },
+        {
+          "type": "marker",
+          "target": "sector-02:access-module:b",
+          "action": "preserve-current-edge-arrow-to-diamond-contract"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "Carrier killed and Module B collected OR Player returns to main drop route",
+      "validation": "No escort, no fourth enemy, local Stage exit remains possible without Module B."
+    },
+    {
+      "beatId": "s7-commit-drop-2",
+      "status": "DESIGN LOCKED",
+      "purpose": "deliver Gameplay Peak 2 without recovering Gate elevation",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "maintenance-shelf"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-5:s7",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "commit-drop-2-to-g6"
+        },
+        {
+          "type": "recovery",
+          "target": "drop2-recovery",
+          "action": "miss-recovery-with-forward-divider"
+        },
+        {
+          "type": "enemy",
+          "action": "no-new-enemy-after-carrier-region"
+        }
+      ],
+      "completion": "Low Service Exit side reached",
+      "validation": "Nominal relation ~379px; miss Recovery cannot walk directly to Exit."
+    },
+    {
+      "beatId": "s8-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "handoff into 2-6 Quiet Residential Void with all pressure removed",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-02-05:exit-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-5:s8",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → sector-02-06",
+      "validation": "Exit is lower than Gate and there is no height regain."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "exactly 3 enemy slots",
+    "Patrol and Assembly phases end before Story",
+    "Carrier activates after Story / service commit",
+    "Gate never opens",
+    "Story exact copy/order preserved",
+    "Bark not converted to Toast",
+    "G1→G2 skilled range",
+    "G2→G3→G4 skilled range",
+    "Drop 1 and Drop 2 recovery dividers prevent walking bypass",
+    "Access B optional for local exit",
+    "generic Augment terminology only",
+    "maximum meaningful similarity overlap <=1",
+    "default camera tested first",
+    "MAP-PREVIEW gameplay-only"
+  ]
+}

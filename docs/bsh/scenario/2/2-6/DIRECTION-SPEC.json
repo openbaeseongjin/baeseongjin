@@ -1,0 +1,294 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "2ea921fed1fee27a4b3837ecde3281d5cd3390dd",
+  "stage": {
+    "sector": 2,
+    "stage": 6,
+    "sourceAreaId": "sector-02-06",
+    "name": "QUIET RESIDENTIAL VOID"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "cut 2-5 pressure and announce broader residential block range",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-6:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "RESIDENTIAL BLOCKS",
+            "detail": "12–18"
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "no-authored-pressure"
+        },
+        {
+          "type": "audio",
+          "action": "security-cues-off"
+        }
+      ],
+      "completion": "entry presentation duration",
+      "validation": "Entry begins as relief, not another combat start."
+    },
+    {
+      "beatId": "s1-recovery-lift",
+      "status": "DESIGN LOCKED",
+      "purpose": "restore height gently after 2-5 low service exit",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "recovery-lift"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-6:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "entry-to-g1-to-g2-comfort-sequence"
+        },
+        {
+          "type": "enemy",
+          "action": "keep-both-guards-inactive"
+        }
+      ],
+      "completion": "Reveal Overlook reached",
+      "validation": "No precision peak or enemy activation."
+    },
+    {
+      "beatId": "s2-reveal-turn",
+      "status": "DESIGN LOCKED",
+      "purpose": "reveal the scale and silence of Blocks 12–18",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "reveal-overlook"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "2-6:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default-first",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "environment",
+          "target": "courtyard-void",
+          "action": "show-multiple-residential-depth-layers"
+        },
+        {
+          "type": "enemy",
+          "action": "no-authored-pressure-in-reveal-zone"
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…이렇게 많은데, 너무 조용해."
+          }
+        }
+      ],
+      "completion": "local reveal / Bark if layer exists",
+      "validation": "Physical residential scale appears before Bark; Player remains readable."
+    },
+    {
+      "beatId": "s3-quiet-rim",
+      "status": "DESIGN LOCKED",
+      "purpose": "allow sustained environment reading after the reveal",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "quiet-upper-rim"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-6:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "guards-still-inactive"
+        },
+        {
+          "type": "route",
+          "action": "walking-small-jump-easy-rope-only"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "Gap A commit",
+      "validation": "Player gets meaningful no-pressure travel time after Bark."
+    },
+    {
+      "beatId": "s4-gap-a-guard-a",
+      "status": "DESIGN LOCKED",
+      "purpose": "return Security only after relief has landed",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "guard-a-band"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-6:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "easy-courtyard-gap-a"
+        },
+        {
+          "type": "enemy",
+          "target": "courtyard-left-guard",
+          "action": "activate-current-support-pool-slot"
+        },
+        {
+          "type": "enemy",
+          "target": "courtyard-right-guard",
+          "action": "remain-inactive"
+        },
+        {
+          "type": "recovery",
+          "target": "recovery-a",
+          "action": "3-5-second-retry"
+        }
+      ],
+      "completion": "Rim Transfer reached / Guard A band exited",
+      "validation": "Guard A never pressures Reveal zone and does not overlap Guard B representative band."
+    },
+    {
+      "beatId": "s5-gap-b-guard-b",
+      "status": "DESIGN LOCKED",
+      "purpose": "brief second late Security band before Shelter Access",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "guard-b-band"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "2-6:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "courtyard-left-guard",
+          "action": "no-longer-representative-pressure"
+        },
+        {
+          "type": "route",
+          "action": "easy-courtyard-gap-b"
+        },
+        {
+          "type": "enemy",
+          "target": "courtyard-right-guard",
+          "action": "activate-current-late-pool-slot"
+        },
+        {
+          "type": "recovery",
+          "target": "recovery-b",
+          "action": "3-5-second-retry"
+        }
+      ],
+      "completion": "Exit Deck reached",
+      "validation": "No sustained two-guard crossfire; no new Story."
+    },
+    {
+      "beatId": "s6-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "handoff to 2-7 where evacuation pressure returns",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-02-06:exit-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "2-6:s6",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "action": "no-new-enemy"
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-preempt-sector-02-07"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → sector-02-07",
+      "validation": "No SHELTER ACCESS or TRANSFER SUSPENDED Story appears in 2-6."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "exactly 2 existing enemy slots preserved",
+    "no literal Enemy 0 implementation",
+    "Reveal and Quiet Rim have zero authored enemy pressure",
+    "Guard A and Guard B are delayed and sequential",
+    "no Access Carrier",
+    "no Patrol",
+    "exact Entry Story preserved",
+    "no positional System Story invented",
+    "Bark not converted to System Toast",
+    "2-7 Story not pre-empted",
+    "generic Augment terminology only",
+    "maximum map similarity overlap <=1",
+    "default camera first",
+    "MAP-PREVIEW gameplay-only"
+  ]
+}

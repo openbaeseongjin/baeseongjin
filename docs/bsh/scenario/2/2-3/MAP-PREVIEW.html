@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 2-3 REV8 REV2 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--a:#efb75b;--v:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:440px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:82vh;min-height:660px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.core{fill:#3c484c;stroke:#c1d0d6;stroke-width:2}.anchor{fill:#5de8ff;stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.node{fill:#483a64;stroke:#d6b8ff;stroke-width:3}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.1}.zone{fill:#80d39a18;stroke:#80d39a;stroke-width:2;stroke-dasharray:7 7}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:#80d39a}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>2-3 RESIDENTIAL SERVICE NODE · REV8 REV2</h1><div class="sub">GAMEPLAY ONLY · SIDE-LOADED COMMUNAL UTILITY HALL / ONE-WAY SAFE THRESHOLD</div></header>
+<div class="layout"><aside>
+<div class="card"><b>1-4 AUDIT FIX</b><br>Post-choice G1/G2 Feel route 제거.<br>Calibration/Dummy/Proof 없음.<br><br><b>Overlap with 1-4 = 1 → PASS</b></div>
+<div class="card"><b>CORE</b><br>ACTIVE APPROACH → ONE EASY ROPE → SAFE NODE HALL → SELECT → FLAT EXIT</div>
+<div class="card"><b>ENEMY</b><br>1 current approach slot.<br>Kill optional.<br>Guard pressure must end before Node Hall.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Main Route</label>
+<label><input id="showSafe" type="checkbox" checked> Node Safe Zone</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP PREVIEW</b><br>생활소품/Locker/컵/장갑/배관 장식은 표시하지 않음.</div>
+</aside><main>
+<svg viewBox="-735 -635 1470 700">
+<rect class="bounds" x="-672" y="-576" width="1344" height="576"/><text class="tiny" x="-650" y="-548">REV8 REV2 1344×576</text>
+<rect class="surface" x="-672" y="0" width="256" height="32"/><text class="tiny" x="-655" y="-12">ENTRY</text>
+<rect class="surface" x="-544" y="-128" width="256" height="22"/><text class="tiny" x="-532" y="-142">ACTIVE APPROACH</text>
+<circle class="enemy" cx="-384" cy="-128" r="18"/><text class="tiny" x="-438" y="-158">APPROACH SLOT</text>
+
+<rect class="core" x="-96" y="-352" width="64" height="288"/><text class="tiny" x="-133" y="-370">SERVICE CORE / LOS</text>
+<circle class="anchor" cx="-160" cy="-352" r="13"/><text x="-138" y="-342">G1</text>
+
+<g id="safeZone">
+<rect class="zone" x="16" y="-352" width="624" height="144" rx="8"/><text class="tiny" x="35" y="-334">SAFE COMMUNAL NODE HALL</text>
+</g>
+<rect class="safe" x="-32" y="-256" width="640" height="26"/><text class="tiny" x="-15" y="-270">SAFE CHOICE FLOOR</text>
+<rect class="node" x="216" y="-320" width="80" height="64" rx="8"/><text class="tiny" x="185" y="-338">GENERIC AUGMENT NODE #2</text>
+<rect class="safe" x="448" y="-288" width="224" height="26"/><text class="tiny" x="472" y="-302">FLAT EXIT → 2-4</text>
+
+<g id="route"><path class="route" d="M-576,-32 Q-490,-82 -416,-128 Q-285,-215 -160,-352 Q-40,-305 96,-256 L256,-256 L448,-256 Q520,-275 576,-288"/></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-160" cy="-352" r="400"/></g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showSafe.onchange=()=>safeZone.classList.toggle("hidden",!showSafe.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>
