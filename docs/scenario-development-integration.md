@@ -4,11 +4,11 @@
 
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 008b7d2ef6f912f17903a60dac6fa9c3c25252ce4ccb6e1b089b571f79fdd995
-authored-area-sha256: 876597b13ba8e66a7cac54e08a63cd3c0c9dd10c7a6b66e0f21dca3af792a844
-authored-sector-sha256: 8dd5c3dddb4158f05910d7d3f6b4a2f9c0bf0dae9ee78da4ba8f034235f201a2
+authored-area-sha256: ee4ddecf36c32d28843642aba32fbe1c24c5939f6b09e6c65c474d2d7ff29a36
+authored-sector-sha256: 2d9a97ef61f08c27802f9aba16dac634df51246eafe6ce9181467684f274ee25
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: bf012f7ec13ee8880885584b50cb0c40756b5385
+reviewed-upstream: eb5de48cef0457a26a26aec615036bf04a925304
 -->
 
 ## 상태를 읽는 법
@@ -175,6 +175,8 @@ reviewed-upstream: bf012f7ec13ee8880885584b50cb0c40756b5385
 91. `ONE-ROPE-SECTOR-02-07-REV8.0-GITHUB-READY` 패키지를 `area07`에 반영해 구 tall segmented multi-route Stage를 REV8의 DIAGONAL SHELTER BUTTRESS→SAFE SHELTER CORE→VERTICAL TRANSFER MAST로 재저작했다. 7개 그립(Access Anchor 포함) 전부 마커 없는 `structural-grapple-target`. Patrol A/B 계약은 그대로 유지(패키지 자체가 `patrolCapability`로 `EnemyPatrol`이 이미 임의 2D 점을 지원함을 확인)하고 diagonal/horizontal 경로로 재배치했다. Access Carrier C는 2-5의 Carrier B와 동일한 `rules` override(`kill-required-for-access-module`)로 저작했다. Exit objective의 trigger bounds가 문서 stated 높이(1280)를 32px 초과해 1-7/2-1과 동일한 패턴으로 1312로 넓혔다. `shelter-core-wall`은 패키지에 width/height가 아예 없어(x/y만 존재) 32×256으로 판단해 배치하고 문서에 명시했다. `npm run check`(2-7 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
 
 92. `ONE-ROPE-SECTOR-02-08-REV8.0-GITHUB-READY` 패키지를 `area08`에 반영해 구 1536×1536 giant atrium을 REV8의 ARRIVAL FINGER→CENTRAL HUB→DEAD BOARDING LIP→CONTROLLED DROP→SAFE SUSPENDED RING→RELAUNCH→UPPER DEPARTURE ARM→FINAL CONTROL(SECTOR 02 FINALE)로 재저작했다. 9개 그립 전부 마커 없는 `structural-grapple-target`. Ring Divider를 실제 static solid wall로 구현해 miss-Recovery가 성공 Ring 경로로 바로 걸어가지 못하게 했다. 두 Patrol 계약은 그대로 유지하되 `tests/sector02AreaCatalog.mjs`가 검증하는 "Patrol A/B activation band가 수직으로 겹치면 안 된다" 불변 조건을 만족시키기 위해 Patrol A의 band 상단을 y=-608 위로 좁혔다(naive한 전체 path+margin box는 Patrol B의 Ring-relaunch band와 겹쳤음). 두 Late Pool guard는 phase-scoped(Hub→Dead Lip만 / Upper Arm final만)를 유지했다. Sector-end Checkpoint·`nextAreaId:null`·`completionMode:"content-boundary"`는 그대로 보존했고, 패키지 자체가 명시한 `accessModuleRuntimeGap`(3-of-3을 local gate 요구사항으로 발명하지 말 것)을 그대로 따랐다. AREA-SPEC 자체의 `objectives[]`에 있던 잘못된 `type:"checkpoint"`(validator의 OBJECTIVE_TYPES에 없음) 항목은 기계적으로 제거했다(실제 checkpoint 메커니즘은 별도 `checkpoints` 필드+`kind:"checkpoint"` object). 이것으로 Sector 02의 8개 Stage(2-1~2-8) REV8/REV8.1 Runtime 구현이 전부 완료됐다. `npm run check`(2-8 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
+
+93. 사용자가 "최근에 복구를 자꾸 하는" 원인을 물어 조사했다. `AGENTS.md` 7번 규칙은 "자동 CI를 전제로 하지 않는다. 최종 candidate의 단일 검증 소유자는 병합 전에 `npm test`, `npm run check`, `npm run format:check`를 각각 한 번 통과시키고 ledger에 base SHA·diff fingerprint와 함께 기록한다"고 명시하는데, 68-92번 항목(Sector 01 1-1, Sector 02 2-1~2-8 전체)의 병합 세션에서 `npm test`/`npm run check`만 실행하고 `npm run format:check`는 한 번도 실행하지 않았던 것을 확인했다. 그 결과 main의 `Sector01AreaCatalog.js`·`Sector02AreaCatalog.js`·`SectorProgressController.js`·`WorldProgressController.js`·`tests/augmentCalibration.mjs` 5개 파일이 Prettier 불일치 상태였다 — 이 중 4개는 이미 한 번(83번 항목 근처, PR #705 병합 뒤 커밋 `968c59d` "최신 main의 필수 포맷 검증을 복구한다")도 같은 방식으로 고쳐진 적이 있었는데 이후 세션들이 다시 `npm run format:check` 없이 병합을 반복해 재발했다 — 이것이 "복구를 자꾸 하는" 원인이다. `npm run format`으로 5개 파일을 기계적으로 재정렬했다(Runtime 값·분기·테스트 의미는 바꾸지 않음). `npm run check`/`npm test`(7개 시나리오 전체)/`npm run format:check` 전부 통과 확인 후 authored fingerprint를 갱신했다. **앞으로 이 저장소에서 병합할 때는 매번 `npm test` → `npm run check` → `npm run format:check` 세 개를 전부 통과시킨 뒤에만 머지한다** (형식 위반이 있으면 `npm run format`으로 먼저 고치고 재검증); `AGENTS.md`·`docs/development-rules.md`의 다른 병합 전 요구사항(관련 문서 갱신, `git diff --check`, 브라우저 검증이 필요한 화면 변경 확인)도 병합 직전에 함께 확인한다.
 
 ## 열린 기획·구현 게이트
 

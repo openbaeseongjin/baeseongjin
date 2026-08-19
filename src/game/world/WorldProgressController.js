@@ -36,9 +36,7 @@ function completingPlayer(objective, world, progress, players, commandsByPlayerI
 function completingCalibrationPlayer(objective, world, players) {
     const source = world.objects.find(({ id }) => id === objective.sourceObjectId);
     if (!source) return null;
-    const eligible = activePlayers(players).filter(
-        ({ foundation }) => foundation?.selectedAugmentIds?.length > 0
-    );
+    const eligible = activePlayers(players).filter(({ foundation }) => foundation?.selectedAugmentIds?.length > 0);
     if (eligible.length === 0) return null;
     const allVerified = eligible.every((player) => player.calibrationVerifiedSourceIds?.includes(source.id));
     return allVerified ? eligible[0] : null;

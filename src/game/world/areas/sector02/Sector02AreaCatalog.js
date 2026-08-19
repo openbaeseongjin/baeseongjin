@@ -650,7 +650,12 @@ const area05 = defineArea({
             width: 320,
             height: 288,
             accessModuleId: "sector-02:access-module:b",
-            rules: ["kill-optional-for-stage-exit", "kill-required-for-access-module", "no-rope-cut", "activation-band-only"]
+            rules: [
+                "kill-optional-for-stage-exit",
+                "kill-required-for-access-module",
+                "no-rope-cut",
+                "activation-band-only"
+            ]
         }),
         // Sealed public Gate - never opens in 2-5, no override interaction.
         worldObject(`${area05Id}:upper-transit-gate`, "gate", 788, -480, {
@@ -863,7 +868,12 @@ const area07 = defineArea({
             width: 320,
             height: 288,
             accessModuleId: "sector-02:access-module:c",
-            rules: ["kill-optional-for-stage-exit", "kill-required-for-access-module", "no-rope-cut", "activation-band-only"]
+            rules: [
+                "kill-optional-for-stage-exit",
+                "kill-required-for-access-module",
+                "no-rope-cut",
+                "activation-band-only"
+            ]
         }),
         worldObject(`${area07Id}:shelter-status`, "story-display", 96, -736, {
             cueIds: ["shelter-capacity-full", "evacuation-transfer-suspended", "remain-designated-area"]
