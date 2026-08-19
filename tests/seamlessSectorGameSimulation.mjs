@@ -172,7 +172,7 @@ export function run() {
                 simulation.world.surfaces.some(
                     (surface) =>
                         surface.landmarkId === module.landmarkId &&
-                        surface.id.includes("access-annex-arena") &&
+                        surface.id.includes("annex-arena") &&
                         spawn.position.x >= surface.x &&
                         spawn.position.x <= surface.x + surface.width &&
                         spawn.position.y === surface.topY

@@ -258,36 +258,53 @@ const area03 = defineArea({
     nextAreaId: "sector-01-04",
     surfaces: [
         horizontalSurface("sector-01-03:p0", -144, 0, 544),
-        horizontalSurface("sector-01-03:p1", 240, -320, 224),
-        horizontalSurface("sector-01-03:r1", 96, -576, 256, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-03:safe-ledge", -240, -640, 224, 16, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-03:access-annex-bridge", 640, -576, 832, 16, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-03:access-annex-arena", 1320, -640, 960, 32, { kind: "safe-deck" }),
-        groundedSurface("sector-01-03:safe-cover", -112, -640, 32, 128, { kind: "cover", oneWay: false }),
-        groundedSurface("sector-01-03:upper-cover", -16, -832, 96, 128, { kind: "cover", oneWay: false }),
+        horizontalSurface("sector-01-03:p1-warning", 256, -320, 256, 16),
+        horizontalSurface("sector-01-03:security-junction", 288, -480, 256, 20, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-03:r1", 80, -592, 256, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-03:safe-ledge", -240, -656, 240, 16, { kind: "safe-deck" }),
+        groundedSurface("sector-01-03:upper-cover", -32, -768, 64, 160, {
+            kind: "cover",
+            oneWay: false,
+            grappleable: false
+        }),
+        horizontalSurface("sector-01-03:upper-relief", 64, -896, 320, 20, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-03:annex-mid-gantry", 736, -560, 192, 16),
+        horizontalSurface("sector-01-03:annex-entry", 1168, -640, 224, 18),
+        horizontalSurface("sector-01-03:annex-arena", 1536, -640, 736, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-03:annex-upper-balcony", 1512, -768, 320, 20),
+        groundedSurface("sector-01-03:annex-cover-security-console", 1328, -584, 72, 112, {
+            kind: "cover",
+            oneWay: false,
+            grappleable: false
+        }),
+        groundedSurface("sector-01-03:annex-cover-power-rack", 1600, -560, 88, 160, {
+            kind: "cover",
+            oneWay: false,
+            grappleable: false
+        }),
         block03.deck,
         grappleTarget("sector-01-03:anchor-a-surface", 64, -224),
 
-        grappleTarget("sector-01-03:anchor-c-surface", -192, -736),
-        grappleTarget("sector-01-03:access-anchor-a-surface", 448, -480),
-        grappleTarget("sector-01-03:access-anchor-b-surface", 896, -544)
+        grappleTarget("sector-01-03:anchor-c-surface", -192, -752),
+        grappleTarget("sector-01-03:access-anchor-a-surface", 512, -496),
+        grappleTarget("sector-01-03:access-anchor-b-surface", 960, -608)
     ],
     routePoints: [
         point("sector-01-03:route-entry", -320, -32),
         point("sector-01-03:route-a", 64, -224, { landmark: "A" }),
 
-        point("sector-01-03:route-c", -192, -736, { landmark: "C" }),
+        point("sector-01-03:route-c", -192, -752, { landmark: "C" }),
 
         block03.routeExit
     ],
     recoveryPoints: [
-        point("sector-01-03:recovery-r1", 96, -600),
-        point("sector-01-03:recovery-safe-ledge", -240, -664)
+        point("sector-01-03:recovery-r1", 80, -616),
+        point("sector-01-03:recovery-safe-ledge", -240, -680)
     ],
     objects: [
         ...[
             ["a", 64, -224, "A"],
-            ["c", -192, -736, "C"]
+            ["c", -192, -752, "C"]
         ].map(([id, x, y, label]) =>
             worldObject(`sector-01-03:anchor-${id}`, "grapple-landmark", x, y, {
                 label
@@ -297,22 +314,32 @@ const area03 = defineArea({
             trigger: objectTriggerSpec("center", 96, 128, { x: 0, y: 0 }),
             cueIds: ["sector-01-03:employee-verified"]
         }),
-        worldObject("sector-01-03:access-anchor-a", "grapple-landmark", 448, -480, { label: "ACCESS A" }),
-        worldObject("sector-01-03:access-anchor-b", "grapple-landmark", 896, -544, { label: "ACCESS B" }),
-        worldObject("sector-01-03:sentry-turret-01", "sentry", 1500, -640, {
+        worldObject("sector-01-03:access-anchor-a", "grapple-landmark", 512, -496, { label: "ACCESS A" }),
+        worldObject("sector-01-03:access-anchor-b", "grapple-landmark", 960, -608, { label: "ACCESS B" }),
+        worldObject("sector-01-03:annex-cover-security-console-visual", "background-prop", 1328, -584, {
+            gameplay: false,
+            cueIds: []
+        }),
+        worldObject("sector-01-03:annex-cover-power-rack-visual", "background-prop", 1600, -560, {
+            gameplay: false,
+            cueIds: []
+        }),
+        pooledSentry("sector-01-03:access-guard-approach", 960, -576, SECTOR_01_GUARD_POOL, {
+            width: 1100,
+            height: 544,
+            rules: ["cover-ends-los"]
+        }),
+        pooledSentry("sector-01-03:access-guard-upper", 1512, -768, SECTOR_01_GUARD_POOL, {
+            width: 480,
+            height: 384,
+            rules: ["cover-ends-los"]
+        }),
+        worldObject("sector-01-03:access-carrier-a", "sentry", 1760, -640, {
             enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:a",
-            accessHint: "RIGHT · LOWER SECURITY ANNEX",
-            activationSpec: objectTriggerSpec("center", 1100, 544, { x: -300, y: -16 }),
+            accessHint: "RIGHT · SECURITY ANNEX",
+            activationSpec: objectTriggerSpec("center", 720, 384, { x: -240, y: -16 }),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
-        }),
-        pooledSentry("sector-01-03:access-guard-left", 1040, -640, SECTOR_01_GUARD_POOL, {
-            width: 480,
-            height: 480
-        }),
-        pooledSentry("sector-01-03:access-guard-right", 1760, -640, SECTOR_01_GUARD_POOL, {
-            width: 320,
-            height: 480
         }),
         block03.panel,
         block03.gateVisual
@@ -338,8 +365,8 @@ const area03 = defineArea({
     cameraZones: [
         cameraZone("identification", -224, 0, 1.15, 0.78, { verticalPlayerRatio: 0.5 }),
         cameraZone("warning", -416, -224, 1, 0.72, { verticalPlayerRatio: 0.6 }),
-        cameraZone("turret-reveal", -544, -416, 0.95, 0.7, { verticalPlayerRatio: 0.68 }),
-        cameraZone("route-choice", -800, -544, 0.88, 0.66, { verticalPlayerRatio: 0.62 }),
+        cameraZone("turret-reveal", -544, -416, 0.94, 0.7, { verticalPlayerRatio: 0.68 }),
+        cameraZone("annex-combat", -800, -544, 0.86, 0.66, { verticalPlayerRatio: 0.62 }),
         cameraZone("relief", -944, -800, 1, 0.72, { verticalPlayerRatio: 0.6 }),
         cameraZone("exit", -1152, -944, 1.15, 0.78, { verticalPlayerRatio: 0.68 })
     ],

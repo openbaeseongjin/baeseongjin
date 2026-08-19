@@ -8,19 +8,19 @@ Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 |---|---|---|---|
 | Bounds | 3840×1152 | same | VERIFIED / KEEP |
 | Entry / Scanner | existing | same intent | VERIFIED |
-| Main Grapple | A/C | A/C | VERIFIED / RETUNE C |
-| Annex Grapple | Access A/B | Access A/B | VERIFIED / RETUNE |
-| Annex Bridge | continuous W832 | segmented two-commit approach | NOT IMPLEMENTED |
-| Arena | W960 around x1320 | W736 around x1536 | NOT IMPLEMENTED |
-| Carrier | x1500 | x1760 deepest point | NOT IMPLEMENTED |
-| Guard 1 | x1040 floor | x960 approach pressure | RETUNE |
-| Guard 2 | x1760 floor | x1512 elevated balcony | NOT IMPLEMENTED |
-| Cover | current cover elements | distinct static Console + Power Rack | NOT IMPLEMENTED |
-| Enemy budget | 3 | 3 | VERIFIED / PRESERVE |
-| Access Module A | present | present | VERIFIED |
+| Main Grapple | A/C | A(64,-224)/C(-192,-752) | VERIFIED |
+| Annex Grapple | Access A/B | Access A(512,-496)/B(960,-608) | VERIFIED |
+| Annex Bridge | segmented (mid-gantry + entry) | segmented two-commit approach | VERIFIED |
+| Arena | W736 around x1536 | W736 around x1536 | VERIFIED |
+| Carrier | x1760 deepest point | x1760 deepest point | VERIFIED |
+| Guard 1 | x960 approach pressure | x960 approach pressure | VERIFIED |
+| Guard 2 | x1512 elevated balcony | x1512 elevated balcony | VERIFIED |
+| Cover | distinct static Console(1328,-584,72×112) + Power Rack(1600,-560,88×160), grappleable:false | distinct static Console + Power Rack | VERIFIED |
+| Enemy budget | 3 (Carrier + 2 guards) | 3 | VERIFIED / PRESERVE |
+| Access Module A | present, 3-of-3 Sector contract | present | VERIFIED |
 | Story | implemented/tested | preserve exact | VERIFIED |
-| Camera | 6 zones | preserve count, rename/reframe annex shot | PARTIAL |
-| Old Main B/D docs | stale | retired | DOC FIX |
+| Camera | 6 zones, `turret-reveal`+`annex-combat` retuned | preserve count, rename/reframe annex shot | VERIFIED |
+| Old Main B/D docs | retired | retired | DOC FIX |
 
 ## Access Module A (Sector 3-of-3 contract)
 
@@ -63,8 +63,18 @@ Preserve:
 - cover ends LOS
 - Carrier + 2 guards
 - Access Module A
-- 2-of-3 Sector transit rule
+- 3-of-3 Sector transit rule (0.41.0 `seamless-sector-runtime-v5`, supersedes this doc's original 2-of-3 text)
+
+## Runtime implementation note
+
+Implemented in `src/game/world/areas/sector01/Sector01AreaCatalog.js`'s `area03`. The two static Cover
+surfaces use `groundedSurface()` (bottom-center anchor, required by `AreaDefinitionValidator`/tests for
+any `kind: "cover"` surface taller than it is wide) with the AREA-SPEC's `(x,y)` passed straight through
+as the bottom-anchor point - the spec does not state which anchor convention its cover preset authors
+against, so this is a documented judgment call rather than a value taken from the package. Actual
+LOS-blocking geometry should be re-checked visually (`MAP-PREVIEW.html`) before treating `cover-los`
+(MANUAL acceptance test) as satisfied.
 
 ## Verdict
 
-`PARTIAL MATCH — BOUNDS/CORE SYSTEMS VALID, ANNEX RE-AUTHOR REQUIRED`
+`FULL MATCH — Runtime rewritten to REV8.0, npm run check / npm test (7 scenarios) / targeted regressions all pass`

@@ -117,8 +117,8 @@ export function run() {
     const area03Cases = [
         [-32, "identification", 1.15, 0.78, 0.5],
         [-320, "warning", 1, 0.72, 0.6],
-        [-480, "turret-reveal", 0.95, 0.7, 0.68],
-        [-700, "route-choice", 0.88, 0.66, 0.62],
+        [-480, "turret-reveal", 0.94, 0.7, 0.68],
+        [-700, "annex-combat", 0.86, 0.66, 0.62],
         [-880, "relief", 1, 0.72, 0.6],
         [-1000, "exit", 1.15, 0.78, 0.68]
     ];

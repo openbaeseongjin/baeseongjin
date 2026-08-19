@@ -253,34 +253,34 @@ export function run() {
     const thirdAreaDefinition = SECTOR_01_AREA_CATALOG.areas.find(({ id }) => id === "sector-01-03");
     const thirdRecovery = thirdAreaDefinition.surfaces.find(({ id }) => id === "sector-01-03:r1");
     assert.deepEqual(authoredSurfaceBounds(thirdRecovery), {
-        x: -32,
-        y: -576,
+        x: -48,
+        y: -592,
         width: 256,
         height: 16
     });
     assert.deepEqual(
         thirdAreaDefinition.recoveryPoints.find(({ id }) => id === "sector-01-03:recovery-r1"),
-        { id: "sector-01-03:recovery-r1", x: 96, y: -600 },
-        "1-3 R1 must match the documented B handoff recovery deck"
+        { id: "sector-01-03:recovery-r1", x: 80, y: -616 },
+        "1-3 R1 must match the REV8 B handoff recovery deck"
     );
-    const thirdSentry = thirdAreaDefinition.objects.find(({ id }) => id === "sector-01-03:sentry-turret-01");
-    assert.deepEqual(thirdSentry.activationSpec, {
+    const thirdCarrier = thirdAreaDefinition.objects.find(({ id }) => id === "sector-01-03:access-carrier-a");
+    assert.deepEqual(thirdCarrier.activationSpec, {
         anchor: "center",
-        offset: { x: -300, y: -16 },
-        size: { width: 1100, height: 544 }
+        offset: { x: -240, y: -16 },
+        size: { width: 720, height: 384 }
     });
-    assert.deepEqual(thirdSentry.rules, ["standard-projectile", "no-rope-cut", "cover-ends-los"]);
+    assert.deepEqual(thirdCarrier.rules, ["standard-projectile", "no-rope-cut", "cover-ends-los"]);
 
     const movedCatalog = structuredClone(SECTOR_01_AREA_CATALOG);
-    const movedSentry = movedCatalog.areas[2].objects.find(({ id }) => id === "sector-01-03:sentry-turret-01");
+    const movedSentry = movedCatalog.areas[2].objects.find(({ id }) => id === "sector-01-03:access-carrier-a");
     const movedWorld = assembleAuthoredWorld(movedCatalog, { seed: 9182, floorY: 320 });
-    const originalSpawn = movedWorld.enemySpawns.find(({ objectId }) => objectId === "sector-01-03:sentry-turret-01");
+    const originalSpawn = movedWorld.enemySpawns.find(({ objectId }) => objectId === "sector-01-03:access-carrier-a");
     movedSentry.position = Object.freeze({ x: movedSentry.position.x + 64, y: movedSentry.position.y - 32 });
     const shiftedWorld = assembleAuthoredWorld(movedCatalog, { seed: 9182, floorY: 320 });
-    const shiftedSpawn = shiftedWorld.enemySpawns.find(({ objectId }) => objectId === "sector-01-03:sentry-turret-01");
+    const shiftedSpawn = shiftedWorld.enemySpawns.find(({ objectId }) => objectId === "sector-01-03:access-carrier-a");
     assert.deepEqual(
         shiftedSpawn.activation,
-        { x: originalSpawn.activation.x + 64, y: originalSpawn.activation.y - 32, width: 1100, height: 544 },
+        { x: originalSpawn.activation.x + 64, y: originalSpawn.activation.y - 32, width: 720, height: 384 },
         "moving an authored object must move its derived activation trigger with it"
     );
     for (const object of currentWorld.objects.filter(
