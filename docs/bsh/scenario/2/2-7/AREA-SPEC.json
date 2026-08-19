@@ -7,11 +7,12 @@
     "stage": 7,
     "sourceAreaId": "sector-02-07",
     "name": "SHELTER ACCESS",
-    "subtitle": "EVACUATION TRANSFER SUSPENDED"
+    "subtitle": "EVACUATION TRANSFER SUSPENDED",
+    "legacyStageAlias": "2-7"
   },
   "bounds": {
     "width": 1792,
-    "height": 1280
+    "height": 1312
   },
   "entry": {
     "id": "sector-02-07:entry",
@@ -105,43 +106,50 @@
       "id": "g1",
       "x": -576,
       "y": -240,
-      "role": "buttress-approach"
+      "role": "buttress-approach",
+      "label": "G1"
     },
     {
       "id": "g2",
       "x": -256,
       "y": -416,
-      "role": "buttress-patrol-a-mid"
+      "role": "buttress-patrol-a-mid",
+      "label": "G2"
     },
     {
       "id": "g3",
       "x": 64,
       "y": -592,
-      "role": "buttress-patrol-a-exit"
+      "role": "buttress-patrol-a-exit",
+      "label": "G3"
     },
     {
       "id": "access-anchor",
       "x": -64,
       "y": -736,
-      "role": "access-c-branch"
+      "role": "access-c-branch",
+      "label": "ACCESS-ANCHOR"
     },
     {
       "id": "g4",
       "x": 416,
       "y": -800,
-      "role": "axis-turn-mast-entry"
+      "role": "axis-turn-mast-entry",
+      "label": "G4"
     },
     {
       "id": "g5",
       "x": 128,
       "y": -1056,
-      "role": "mast-patrol-b-mid"
+      "role": "mast-patrol-b-mid",
+      "label": "G5"
     },
     {
       "id": "g6",
       "x": 448,
       "y": -1216,
-      "role": "mast-patrol-b-exit"
+      "role": "mast-patrol-b-exit",
+      "label": "G6"
     }
   ],
   "mainRoute": [
@@ -426,6 +434,53 @@
     }
   ],
   "nextAreaId": "sector-02-08",
+  "route": {
+    "runtimeLandmarks": [
+      "sector-02-07:entry",
+      "g1",
+      "buttress-a",
+      "g2",
+      "buttress-b",
+      "g3",
+      "shelter-core",
+      "g4",
+      "mast-landing-a",
+      "g5",
+      "g6",
+      "exit-deck",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-02-07:entry",
+      "g1",
+      "g2",
+      "g3",
+      "shelter-core",
+      "g4",
+      "g5",
+      "g6",
+      "exit-deck",
+      "exit"
+    ],
+    "optional": [
+      {
+        "id": "access",
+        "sequence": ["shelter-core", "access-anchor", "carrier-alcove", "access-anchor", "shelter-core"]
+      }
+    ],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 640,
+    "deckTopY": -1248,
+    "deckWidth": 256,
+    "panelObjectiveId": "sector-02-07:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "2-8",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["sector-02-07:exit-panel-engaged"]
+  },
   "story": {
     "entry": {
       "title": "SHELTER ACCESS",
@@ -489,6 +544,7 @@
   },
   "camera": {
     "mode": "default-authored-camera",
+    "zones": [],
     "customZonesRequired": false,
     "requirements": {
       "encounterA": [

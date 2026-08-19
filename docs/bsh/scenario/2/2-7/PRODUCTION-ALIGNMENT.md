@@ -63,3 +63,27 @@ Bark:
 Current presentation directory has no dedicated Bark layer.
 Status: NOT IMPLEMENTED.
 Do not fake as System Toast.
+
+## Runtime implementation (2026-08-19)
+
+`Sector02AreaCatalog.js` area07 rewritten in full against REV8.0: DIAGONAL SHELTER BUTTRESS ->
+SAFE SHELTER CORE -> VERTICAL TRANSFER MAST, replacing the old tall segmented multi-route Stage.
+All 7 grips (including Access Anchor) are unlabeled `structural-grapple-target` grips - no
+matching visible landmark object exists in the package for any of them. Patrol A/B contracts
+preserved exactly (`patrolCapability` in the package itself confirms `EnemyPatrol` already
+accepts arbitrary 2D point targets - no new AI needed), repositioned to the diagonal
+`(-512,-304)<->(32,-560)` and horizontal `(32,-992)<->(448,-992)` paths with non-overlapping
+activation bands. Access Carrier C moved to the small deliberate-branch alcove, kept on
+`sector-02:access-module:c` with its distinct `kill-required-for-access-module` rule set (same
+`pooledSentry()` `rules` override added for 2-5's Carrier B).
+
+Bounds widened from the doc's stated 1792x1280 to 1792x1312 (32px) - the exit objective's trigger
+bounds (derived from the exit point, itself derived from the exitBlock's fixed door-inset/
+exit-height convention) extended 32px above the doc's stated top edge. Same disclosed-widening
+pattern as 1-7/2-1. `shelter-core-wall`'s width/height were not specified anywhere in the
+package (only x/y) - sized as a judgment call (32 wide, 256 tall, spanning from the Shelter Core
+deck up toward the Mast approach) since its stated purpose ("architectural stop that causes
+diagonal-to-vertical axis turn") only requires it to block rightward movement past the Core, not
+an exact footprint. `npm run check` (2-7 clean)/`npm test` (7 scenario groups) pass.
+
+Player Bark layer: still absent - approved Bark remains NOT IMPLEMENTED.

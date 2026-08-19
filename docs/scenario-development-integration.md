@@ -171,6 +171,8 @@ reviewed-upstream: 4fce8a2
 
 90. `ONE-ROPE-SECTOR-02-06-REV8.0-GITHUB-READY` 패키지를 `area06`에 반영해 구 tall zigzag climb을 REV8의 SHORT UP→HARD 90° TURN→LONG RIGHT(SHORT RECOVERY LIFT→SAFE REVEAL TURN→QUIET UPPER RIM→GAP A/GUARD A→GAP B/GUARD B→EXIT)로 재저작했다. 2-4/2-5와 달리 이 패키지의 `grappleTargets[]`는 실제 labeled `grapple-landmark` object와 1:1 대응해 `landmark()` 헬퍼를 그대로 사용했다. 두 delayed-security guard는 기존 stable slot ID·pool을 유지하고 activation band는 문서 자체의 "Suggested band" 표현대로 각 guard의 실제 위치 주변으로 근사했으며(non-overlap 확인: 좌측 x:[192,512], 우측 x:[528,880]) `courtyard-void`는 non-collision background prop으로 유지했다. Stale `no-enemy` cue를 `delayed-security`로 교체하되 실제 적 슬롯 수는 건드리지 않았다(문서의 명시적 정정 사항). `npm run check`(2-6 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
 
+91. `ONE-ROPE-SECTOR-02-07-REV8.0-GITHUB-READY` 패키지를 `area07`에 반영해 구 tall segmented multi-route Stage를 REV8의 DIAGONAL SHELTER BUTTRESS→SAFE SHELTER CORE→VERTICAL TRANSFER MAST로 재저작했다. 7개 그립(Access Anchor 포함) 전부 마커 없는 `structural-grapple-target`. Patrol A/B 계약은 그대로 유지(패키지 자체가 `patrolCapability`로 `EnemyPatrol`이 이미 임의 2D 점을 지원함을 확인)하고 diagonal/horizontal 경로로 재배치했다. Access Carrier C는 2-5의 Carrier B와 동일한 `rules` override(`kill-required-for-access-module`)로 저작했다. Exit objective의 trigger bounds가 문서 stated 높이(1280)를 32px 초과해 1-7/2-1과 동일한 패턴으로 1312로 넓혔다. `shelter-core-wall`은 패키지에 width/height가 아예 없어(x/y만 존재) 32×256으로 판단해 배치하고 문서에 명시했다. `npm run check`(2-7 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
+
 ## 열린 기획·구현 게이트
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.
