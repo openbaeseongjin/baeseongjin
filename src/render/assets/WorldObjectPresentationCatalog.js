@@ -63,6 +63,7 @@ export function worldObjectLocalBounds(object, presentation) {
 }
 
 export function worldObjectWorldBounds(object, presentation) {
+    if (object.presentationBounds) return Object.freeze({ ...object.presentationBounds });
     const local = worldObjectLocalBounds(object, presentation);
     return Object.freeze({
         x: object.position.x + local.x,

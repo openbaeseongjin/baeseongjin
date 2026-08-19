@@ -7,7 +7,7 @@
 - `1-1`, `1-2`: 로프 학습을 위해 적 0.
 - `1-3` 이후: 대표 Gameplay 화면당 약 1기가 읽히도록 세로 구간에 분산.
 - Sector 후반: 단순 수량보다 서로 다른 역할의 동시 압박을 증가.
-- `1-3`, `1-6`, `1-7`: Access Carrier 포함 3기.
+- Sector 01의 `1-3·1-6·1-7`, Sector 02의 `2-2·2-5·2-7`, Sector 03의 `3-2·3-5·3-7`: 기존 경비 slot 한 기가 Access Carrier이며 Sector당 정확히 3개다.
 - Node `1-4`, `2-3`, `3-5`: 적 처치 조건 없이 chooser 즉시 개방. 선택 중 Player 입력만 멈추고 월드·적·동료는 계속 진행.
 
 ## 현재 slot 예산
@@ -30,7 +30,7 @@
 
 ## 보존 계약
 
-- `accessModuleId`, Carrier 처치와 2-of-3 Transit Lock.
+- `accessModuleId`, Sector당 Carrier 3기 처치와 3-of-3 Transit Lock. Carrier 지정은 기존 slot 수·위치·activation을 바꾸지 않는다.
 - 개인 사망의 shared progress/처치 보존과 Sector-entry 부활.
 - party wipe의 current-sector enemy/module/route baseline reset.
 - 고정·고정경로·제자리 지원형의 위치 넉백 면역, Pursuit/Swarm의 직접 추격형 displacement.

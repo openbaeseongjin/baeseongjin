@@ -1,9 +1,14 @@
-export function isSurfaceEnabledForProgress(surface, progress) {
-    if (!surface.requiredRouteId || !progress) return true;
+function isRouteUnlocked(progress, routeId) {
     if (typeof progress.isRouteUnlocked === "function") {
-        return progress.isRouteUnlocked(surface.requiredRouteId);
+        return progress.isRouteUnlocked(routeId);
     }
-    return Array.isArray(progress.unlockedRouteIds) && progress.unlockedRouteIds.includes(surface.requiredRouteId);
+    return Array.isArray(progress.unlockedRouteIds) && progress.unlockedRouteIds.includes(routeId);
+}
+
+export function isSurfaceEnabledForProgress(surface, progress) {
+    if (surface.blockedByRouteId) return !progress || !isRouteUnlocked(progress, surface.blockedByRouteId);
+    if (!surface.requiredRouteId || !progress) return true;
+    return isRouteUnlocked(progress, surface.requiredRouteId);
 }
 
 export function collisionSurfacesForProgress(world, progress) {

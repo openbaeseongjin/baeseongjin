@@ -1,5 +1,7 @@
 import { PREVIEW_SECTOR_WIDTH_RANGE } from "./sectors/SectorDefinition.js";
 
+const ACCESS_MODULES_PER_SECTOR = 3;
+
 function issue(code, sectorId = null, details = {}) {
     return Object.freeze({ code, ...(sectorId ? { sectorId } : {}), ...details });
 }
@@ -95,6 +97,7 @@ export function validateSectorCatalog(catalog) {
     const objectiveIds = new Set();
     const encounterIds = new Set();
     const slotIds = new Set();
+    const accessModuleIds = new Set();
 
     for (const [sectorIndex, sector] of catalog.sectors.entries()) {
         if (typeof sector.id !== "string" || !sector.id) {
@@ -116,6 +119,7 @@ export function validateSectorCatalog(catalog) {
         }
 
         const sectorLandmarkIds = new Set();
+        const sectorAccessModuleIds = new Set();
         for (const [landmarkIndex, landmark] of sector.landmarks.entries()) {
             if (typeof landmark.id !== "string" || !landmark.id) {
                 issues.push(issue("landmark-id-missing", sector.id));
@@ -212,6 +216,23 @@ export function validateSectorCatalog(catalog) {
                 }
                 encounterIds.add(encounter.encounterId);
                 slotIds.add(encounter.slotId);
+                if (encounter.accessModuleId) {
+                    if (!isNonEmptyString(encounter.accessModuleId)) {
+                        issues.push(
+                            issue("access-module-id-invalid", sector.id, { encounterId: encounter.encounterId })
+                        );
+                    } else if (accessModuleIds.has(encounter.accessModuleId)) {
+                        issues.push(
+                            issue("access-module-id-duplicate", sector.id, {
+                                encounterId: encounter.encounterId,
+                                accessModuleId: encounter.accessModuleId
+                            })
+                        );
+                    } else {
+                        accessModuleIds.add(encounter.accessModuleId);
+                        sectorAccessModuleIds.add(encounter.accessModuleId);
+                    }
+                }
                 if (!pointInsideLocalBounds(landmark.localBounds, encounter.position)) {
                     issues.push(
                         issue("encounter-position-bounds", sector.id, {
@@ -229,6 +250,15 @@ export function validateSectorCatalog(catalog) {
                     );
                 }
             }
+        }
+
+        if (sector.runtimePreview && sectorAccessModuleIds.size !== ACCESS_MODULES_PER_SECTOR) {
+            issues.push(
+                issue("access-module-count", sector.id, {
+                    expected: ACCESS_MODULES_PER_SECTOR,
+                    actual: sectorAccessModuleIds.size
+                })
+            );
         }
 
         if (!isNonEmptyString(sector.sectorEntry?.id)) {

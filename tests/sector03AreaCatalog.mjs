@@ -6,6 +6,13 @@ import { SECTOR_03_AREA_CATALOG } from "../src/game/world/areas/sector03/Sector0
 export function run() {
     assert.deepEqual(validateAreaCatalog(SECTOR_03_AREA_CATALOG), { valid: true, issues: [] });
     assert.equal(SECTOR_03_AREA_CATALOG.areas.length, 8);
+    assert.deepEqual(
+        SECTOR_03_AREA_CATALOG.areas
+            .flatMap(({ objects }) => objects)
+            .filter(({ accessModuleId }) => accessModuleId)
+            .map(({ accessModuleId }) => accessModuleId),
+        ["sector-03:access-module:a", "sector-03:access-module:b", "sector-03:access-module:c"]
+    );
 
     const scannerGallery = SECTOR_03_AREA_CATALOG.areas[1];
     assert.equal(scannerGallery.id, "sector-03-02");

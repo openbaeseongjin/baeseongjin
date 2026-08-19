@@ -93,6 +93,46 @@ export function run() {
         "mobile-sized landscape viewports must use the compact HUD even without coarse pointer emulation"
     );
 
+    const accessWorld = {
+        landmarks: [
+            {
+                id: "sector-01:landmark:01",
+                sectorId: "sector-01",
+                bounds: { x: -480, y: -960, width: 960, height: 960 },
+                entry: { x: 0, y: 0 },
+                exit: { x: 0, y: -960 }
+            }
+        ],
+        sectors: [
+            {
+                id: "sector-01",
+                accessModuleIds: ["module:a", "module:b", "module:c"],
+                accessModuleRequirement: 3
+            }
+        ],
+        accessModules: [
+            { id: "module:a", hint: "LOWER" },
+            { id: "module:b", hint: "MIDDLE" },
+            { id: "module:c", hint: "UPPER" }
+        ]
+    };
+    textCalls.length = 0;
+    renderer.drawAccessHud({
+        world: accessWorld,
+        worldProgress: { collectedAccessModuleIds: ["module:a", "module:b"] },
+        player: { position: { x: 0, y: -100 } },
+        mobileView: true
+    });
+    assert.ok(textCalls.includes("ACCESS 2/3 · NEED 1"));
+    textCalls.length = 0;
+    renderer.drawAccessHud({
+        world: accessWorld,
+        worldProgress: { collectedAccessModuleIds: ["module:a", "module:b", "module:c"] },
+        player: { position: { x: 0, y: -100 } },
+        mobileView: true
+    });
+    assert.deepEqual(textCalls, ["ACCESS READY"]);
+
     let sceneDraws = 0;
     let localHudDraws = 0;
     let accessHudDraws = 0;

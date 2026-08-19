@@ -4,6 +4,11 @@
 
 본 문서는 [3-7 시나리오](./README.md)와 현재 `Sector03AreaCatalog` 구현을 연결한다. 3-7은 Access Tier story pressure와 static cost profile 분기를 도입하는 Stage이며 현재 메인 authored world에 `MOCK INTEGRATED` 상태로 연결돼 있다.
 
+## 0. CURRENT RUNTIME OVERRIDE — 2026-08-19
+
+- 0.32.0 enemy density 이후 Patrol 한 기와 pooled Sentry 세 기가 존재하며, 0.41.0부터 `concourse-upper-guard(0,-1056)`가 `sector-03:access-module:c` Carrier다.
+- 적 수·위치·activation·pool과 Scanner cycle은 바꾸지 않고 Sector 03의 세 번째 3-of-3 source만 부여한다. 아래 Patrol 한 기만 존재한다는 서술은 이 override로 대체한다.
+
 ## 1. 현재 판정
 
 | 항목 | 상태 | 판정 |
