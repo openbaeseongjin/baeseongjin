@@ -1,0 +1,119 @@
+import assert from "node:assert/strict";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import {
+    AREA_SPEC_V2,
+    EDITOR_EDITABLE_DOMAINS,
+    EDITOR_READ_ONLY_DOMAINS,
+    createAreaDefinitionFromV2
+} from "../src/game/world/area-authoring-v2/AreaSpecV2.js";
+import {
+    EMPTY_AREA_BEHAVIOR_REGISTRY,
+    createAreaBehaviorRegistry,
+    validateBehaviorRefs
+} from "../src/game/world/area-authoring-v2/AreaBehaviorRegistry.js";
+import { validateAreaSpecV2 } from "../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
+
+export function createValidSpec() {
+    return {
+        schemaVersion: AREA_SPEC_V2,
+        stage: {
+            sector: 1,
+            stage: 1,
+            legacyStageAlias: "1-1",
+            sourceAreaId: "sector-01-01"
+        },
+        editor: {
+            editableDomains: [...EDITOR_EDITABLE_DOMAINS],
+            readOnlyDomains: [...EDITOR_READ_ONLY_DOMAINS]
+        },
+        definition: {
+            id: "sector-01-01",
+            sectorId: "sector-01",
+            order: 1,
+            name: "TEST SHAFT",
+            subtitle: "V2 FIXTURE",
+            bounds: { width: 960, height: 960 },
+            entry: { id: "sector-01-01:entry", x: 0, y: -32 },
+            exit: { id: "sector-01-01:exit", x: 160, y: -128 },
+            nextAreaId: "sector-01-02",
+            surfaces: [],
+            routePoints: [],
+            recoveryPoints: [],
+            checkpoints: [],
+            objects: [],
+            objectives: [],
+            windZones: [],
+            scannerGroups: [],
+            storyTriggers: [],
+            routes: ["safe", "flow", "recovery"],
+            cameraZones: [],
+            cueIds: [],
+            gate: {
+                id: "sector-01-01:gate",
+                nextAreaId: "sector-01-02",
+                requiredObjectiveIds: [],
+                trigger: { x: 112, y: -160, width: 96, height: 160 }
+            }
+        },
+        anchors: [
+            {
+                target: { id: "sector-01-01:anchor-a-surface", x: 32, y: -128, properties: {} },
+                landmark: { id: "sector-01-01:anchor-a", x: 32, y: -128, properties: { label: "A" } }
+            }
+        ],
+        behaviorRefs: []
+    };
+}
+
+export function run() {
+    const validSpec = createValidSpec();
+    assert.deepEqual(validateAreaSpecV2(validSpec, { file: "fixture" }), { valid: true, issues: [] });
+
+    const area = createAreaDefinitionFromV2(validSpec);
+    const target = area.surfaces.find(({ id }) => id === "sector-01-01:anchor-a-surface");
+    const landmark = area.objects.find(({ id }) => id === "sector-01-01:anchor-a");
+    assert.equal(target.kind, "grapple-target");
+    assert.deepEqual(target.position, { x: 32, y: -128 });
+    assert.equal(landmark.kind, "grapple-landmark");
+    assert.deepEqual(landmark.position, target.position);
+
+    const brokenAnchor = structuredClone(validSpec);
+    brokenAnchor.anchors[0].target.id = "broken-target";
+    const brokenAnchorResult = validateAreaSpecV2(brokenAnchor, { file: "fixture" });
+    assert.equal(brokenAnchorResult.valid, false);
+    assert.ok(brokenAnchorResult.issues.some(({ code }) => code === "anchor-target-id"));
+
+    const mutableReadOnlyPolicy = structuredClone(validSpec);
+    mutableReadOnlyPolicy.editor.editableDomains.push("objectives");
+    const policyResult = validateAreaSpecV2(mutableReadOnlyPolicy, { file: "fixture" });
+    assert.equal(policyResult.valid, false);
+    assert.ok(policyResult.issues.some(({ code }) => code === "editor-domain-not-editable"));
+
+    const unknownReference = { id: "unknown-behavior", arguments: {} };
+    assert.throws(
+        () => validateBehaviorRefs([unknownReference], EMPTY_AREA_BEHAVIOR_REGISTRY),
+        ({ code, details }) => code === "behavior-reference-unknown" && details.id === "unknown-behavior"
+    );
+
+    const registry = createAreaBehaviorRegistry([
+        {
+            id: "behavior:fixture",
+            factory: ({ enabled }) => ({ enabled })
+        }
+    ]);
+    assert.deepEqual(validateBehaviorRefs([{ id: "behavior:fixture", arguments: { enabled: true } }], registry), [
+        { id: "behavior:fixture", arguments: { enabled: true } }
+    ]);
+
+    const executableReference = structuredClone(validSpec);
+    executableReference.behaviorRefs = [{ id: "behavior:fixture", arguments: { callback: () => {} } }];
+    const executableResult = validateAreaSpecV2(executableReference, { file: "fixture", registry });
+    assert.equal(executableResult.valid, false);
+    assert.ok(executableResult.issues.some(({ code }) => code === "behavior-reference-executable-value"));
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+    run();
+    console.log("PASS areaAuthoringV2");
+}

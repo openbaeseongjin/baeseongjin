@@ -41,7 +41,7 @@ legacy Stage provider ───────────────────�
                                                   기존 defineAreaCatalog Runtime 계약
 ```
 
-Stage를 migration할 때 해당 `AREA-SPEC.json`은 제자리에서 `schemaVersion: 2`로 승격한다. 기존 v1 spec은 각자의 migration 전까지 v1로 남긴다. migration한 v2 spec은 서술 문서가 아니라 실행 중인 legacy area definition에서 도출하므로, legacy definition을 독립적인 의미 동등성 기준으로 사용할 수 있다.
+source-isolated lane은 기존 루트 v1 validator를 바꾸지 않으므로, migration 후보를 우선 `AREA-SPEC.v2.json` sidecar에 기록한다. 메인 개발자가 root validator와 Sector facade를 같은 통합 변경에서 연결할 때에만 sidecar를 canonical `AREA-SPEC.json` v2로 승격한다. 기존 v1 spec은 각자의 migration 전까지 v1로 남긴다. v2 후보는 서술 문서가 아니라 실행 중인 legacy area definition에서 도출하므로, legacy definition을 독립적인 의미 동등성 기준으로 사용할 수 있다.
 
 generator는 Node build-time 도구다. `src/game/world/areas/generated/` 아래에만 결정적이고 Git에 포함되는 JS를 내보낸다. 생성물은 generated header를 가지며 전체 집합으로 덮어쓴다. Runtime ES module은 생성된 정적 import를 사용하고 저작 JSON을 직접 해석하지 않는다.
 
@@ -55,7 +55,7 @@ v2 spec은 stable `stageId`, Runtime `areaId`, Sector identity, bounds·entry와
 
 ## Cutover 계약
 
-`docs/bsh/scenario/AREA-CATALOG.json`은 명시적 v2 cutover manifest다. 합성 Runtime catalog에 참여하는 각 Stage에 stable Stage ID, Runtime Area ID, Sector, `source: "legacy" | "generated"`, 권위 source 경로를 기록한다. 초기 manifest는 Sector 01의 여덟 Stage entry를 모두 담으며, `1-1`·`1-7`은 generated이고 나머지 여섯 개는 legacy다.
+`docs/bsh/scenario/AREA-CATALOG.json`은 명시적 v2 cutover manifest 후보다. 합성 Runtime catalog에 참여하는 각 Stage에 stable Stage ID, Runtime Area ID, Sector, `source: "legacy" | "generated"`, 권위 source 경로를 기록한다. 초기 manifest는 Sector 01의 여덟 Stage entry를 모두 담으며, `1-1`·`1-7`은 generated 후보이고 나머지 여섯 개는 legacy다. 메인 개발자가 facade를 연결하기 전에는 이 manifest가 live Runtime source를 전환하지 않는다.
 
 manifest만 source selector다. build-time validation은 예상 Sector Stage가 정확히 한 번 존재하는지, source가 하나인지, identity triple·source 경로가 맞는지, generated entry에는 output module이 있는지를 확인한다. 중복·누락·미지의 항목·필드 overlay source 선택은 거부한다.
 
@@ -67,7 +67,7 @@ generator는 결정적이다. 같은 validation을 통과한 v2 spec, manifest, 
 
 명령 계약은 다음과 같다.
 
-- `npm run validate:area-specs`는 선언한 schema version에 따라 v1·v2 file을 검증하고, 합성 catalog의 cutover manifest를 검증한다.
+- 메인 개발자 통합 뒤 `npm run validate:area-specs`는 선언한 schema version에 따라 v1·v2 file을 검증하고, 합성 catalog의 cutover manifest를 검증한다.
 - 격리된 `scripts/area-authoring-v2/` 명령은 먼저 validation하고 generated output 경로에만 쓴다.
 - `--check` mode는 메모리에서 재생성하고 Git에 포함된 generated file이 없거나 stale하면 실패한다.
 - 메인 개발자는 integration facade가 준비되면 이 명령을 `npm run generate:area-catalogs`, `npm run check`에 연결한다. 이 lane은 루트 script를 바꾸지 않고 command contract를 제공한다.
