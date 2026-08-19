@@ -39,3 +39,30 @@ A COMPLETE → B COMPLETE → C SUSPENDED → PRIORITY ACCESS ACTIVE.
 
 REV1 was rejected because it was too linear for the Sector Finale.
 REV2 adds layered terminal architecture without adding new mechanics/enemies.
+
+## Runtime implementation (2026-08-19)
+
+`Sector02AreaCatalog.js` area08 rewritten in full against REV8.0: bounds 2304x1408, ARRIVAL
+FINGER -> CENTRAL HUB -> DEAD BOARDING LIP -> CONTROLLED DROP -> SAFE SUSPENDED RING -> RELAUNCH
+-> UPPER DEPARTURE ARM -> FINAL CONTROL, replacing the old 1536x1536 giant atrium. All 9 grips
+are unlabeled `structural-grapple-target` grips. Ring Divider implemented as a real static/
+non-grappleable solid wall (center-point convention) so a missed Controlled Drop's Recovery
+cannot walk directly onto the successful Ring route. Both Patrol contracts preserved exactly,
+phase-isolated (`tests/sector02AreaCatalog.mjs` asserts Patrol A/B activation bands never
+vertically overlap - Patrol A's band was tightened to stay above y=-608 specifically to satisfy
+this, since a naive full-path-plus-margin box would have overlapped Patrol B's Ring-relaunch
+band). Both Late Pool guards kept phase-scoped (Hub->Dead Lip only / Upper Arm final only), kill
+optional, no crossfire. Sector-end Checkpoint and `nextAreaId: null`/`completionMode:
+"content-boundary"` preserved exactly - no Sector 03 transition invented here. No mandatory
+Access-module 3-of-3 gate added to the local Area gate (matches the package's own explicit
+`accessModuleRuntimeGap` disclosure - global Sector 02 3-of-3 progression is a separate system
+this local gate does not depend on).
+
+AREA-SPEC.json's `objectives[]` included the Sector-end checkpoint with an invalid `type:
+"checkpoint"` (not in the validator's `OBJECTIVE_TYPES`) - removed as a mechanical schema fix; the
+actual Runtime checkpoint mechanism is the area's separate `checkpoints` field plus a
+`kind:"checkpoint"` world object, matching how 1-8's Sector-end checkpoint already works. This is
+the eighth and final Sector 02 Stage - Sector 02 REV8/REV8.1 implementation is now complete
+end-to-end (2-1 through 2-8). `npm run check` (2-8 clean)/`npm test` (7 scenario groups) pass.
+
+Player Bark layer: still absent - approved Bark remains NOT IMPLEMENTED.

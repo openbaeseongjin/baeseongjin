@@ -880,24 +880,33 @@ const area07 = defineArea({
 
 const block08 = exitBlock({
     areaId: "sector-02-08",
-    deckX: 432,
-    deckTopY: -1411,
-    deckWidth: 352,
+    deckX: 0,
+    deckTopY: -1248,
+    deckWidth: 448,
     nextAreaId: null,
     panelObjectiveId: "sector-02-08:transfer-control-read",
     completionMode: "content-boundary"
 });
 
 const area08Id = "sector-02-08";
-const area08Landmarks = [
-    landmark(area08Id, "g1", -544, -416, -288),
-    landmark(area08Id, "g2", 224, 352, -288),
-    landmark(area08Id, "g4", 160, 288, -480),
-    landmark(area08Id, "g6", 256, 384, -608),
-    landmark(area08Id, "g8", -352, -224, -960),
-    landmark(area08Id, "g8s", -224, -96, -1184)
-];
-const area08Exit = point(`${area08Id}:exit`, 576, -1472);
+// REV8.0 (SECTOR 02 FINALE): ARRIVAL FINGER -> CENTRAL HUB -> DEAD BOARDING LIP -> CONTROLLED
+// DROP -> SAFE SUSPENDED RING -> RELAUNCH -> UPPER DEPARTURE ARM -> FINAL CONTROL. All 9 grips
+// are unlabeled structural-grapple-target (no matching visible landmark object authored).
+// AREA-SPEC's own objectives[] listed the sector-end checkpoint with an invalid "checkpoint" type
+// (not in scripts/validateAreaSpecs.mjs's OBJECTIVE_TYPES) - removed from objectives (mechanical
+// schema fix) since the actual Runtime checkpoint mechanism is the separate `checkpoints` area
+// field + a kind:"checkpoint" world object, matching how 1-8's Sector-end checkpoint works.
+const area08Grips = {
+    g1: structuralGrip(area08Id, "g1-surface", -768, -224),
+    g2: structuralGrip(area08Id, "g2-surface", -448, -384),
+    g3: structuralGrip(area08Id, "g3-surface", -128, -544),
+    g4: structuralGrip(area08Id, "g4-surface", 448, -736),
+    g5: structuralGrip(area08Id, "g5-surface", 608, -512),
+    g6: structuralGrip(area08Id, "g6-surface", 64, -704),
+    g7: structuralGrip(area08Id, "g7-surface", -288, -832),
+    g8: structuralGrip(area08Id, "g8-surface", -608, -992),
+    g9: structuralGrip(area08Id, "g9-surface", -288, -1152)
+};
 const area08Objective = Object.freeze({
     id: `${area08Id}:transfer-control-read`,
     type: "interact",
@@ -909,66 +918,85 @@ const area08 = defineArea({
     order: 8,
     name: "EVACUATION PLATFORM",
     subtitle: "GROUP C TRANSFER SUSPENDED",
-    bounds: { width: 1536, height: 1536 },
-    entry: point(`${area08Id}:entry`, -512, -32),
+    bounds: { width: 2304, height: 1408 },
+    entry: point(`${area08Id}:entry`, -960, -32),
     exit: block08.exit,
     nextAreaId: null,
     surfaces: [
-        platform(area08Id, "p0", -640, -384, 0),
-        platform(area08Id, "p1", -512, -128, -160),
-        platform(area08Id, "p2", -160, 160, -320),
-        platform(area08Id, "s2", -672, -352, -448, "recovery"),
-        platform(area08Id, "b2", 288, 608, -448, "recovery"),
-        platform(area08Id, "m2", -224, 224, -736, "safe-deck"),
-        platform(area08Id, "s5", -576, -288, -1088, "recovery"),
-        platform(area08Id, "b5", 288, 576, -1088, "recovery"),
-        platform(area08Id, "p9", -160, 224, -1280, "safe-deck"),
+        horizontalSurface(area08Id, "p0", -928, 0, 320, 32, "platform"),
+        horizontalSurface(area08Id, "arrival-a", -744, -288, 176, 22, "platform"),
+        horizontalSurface(area08Id, "recovery-a", -320, -256, 288, 18, "recovery"),
+        horizontalSurface(area08Id, "central-hub", 64, -608, 384, 26, "platform"),
+        horizontalSurface(area08Id, "dead-boarding-lip", 576, -768, 256, 24, "platform"),
+        horizontalSurface(area08Id, "transfer-ring", 544, -448, 384, 26, "safe-deck"),
+        horizontalSurface(area08Id, "drop-recovery", 832, -320, 224, 18, "recovery"),
+        // Real Ring Divider: miss-Recovery cannot walk directly onto the successful Ring route.
+        rectangle(`${area08Id}:ring-divider`, 704, -405 + 115, 28, 230, {
+            kind: "solid",
+            grappleable: false,
+            oneWay: false,
+            coordinateAnchor: "bottom-center"
+        }),
+        horizontalSurface(area08Id, "recovery-c", -32, -640, 224, 18, "recovery"),
+        horizontalSurface(area08Id, "recovery-d", -384, -768, 192, 18, "recovery"),
+        horizontalSurface(area08Id, "upper-departure-arm", -608, -1024, 192, 22, "platform"),
+        horizontalSurface(area08Id, "final-control-apron", 0, -1248, 448, 28, "safe-deck"),
         block08.deck,
-        ...area08Landmarks.map(({ surface }) => surface)
+        ...Object.values(area08Grips)
     ],
     routePoints: [
-        point(`${area08Id}:route-entry`, -512, -32),
-        point(`${area08Id}:route-p1`, -320, -160),
-        point(`${area08Id}:route-p2`, 0, -320),
-        point(`${area08Id}:route-m2`, 0, -736),
-        point(`${area08Id}:route-b5`, 432, -1088),
-        point(`${area08Id}:route-p9`, 32, -1280),
-        point(`${area08Id}:route-p10`, 432, -1472),
+        point(`${area08Id}:route-entry`, -960, -32),
+        point(`${area08Id}:route-g1`, -768, -224),
+        point(`${area08Id}:route-g2`, -448, -384),
+        point(`${area08Id}:route-g3`, -128, -544),
+        point(`${area08Id}:route-central-hub`, 64, -608),
+        point(`${area08Id}:route-g4`, 448, -736),
+        point(`${area08Id}:route-dead-lip`, 576, -768),
+        point(`${area08Id}:route-g5`, 608, -512),
+        point(`${area08Id}:route-ring`, 544, -448),
+        point(`${area08Id}:route-ring-left-edge`, 352, -448),
+        point(`${area08Id}:route-g6`, 64, -704),
+        point(`${area08Id}:route-g7`, -288, -832),
+        point(`${area08Id}:route-g8`, -608, -992),
+        point(`${area08Id}:route-g9`, -288, -1152),
+        point(`${area08Id}:route-final-left-edge`, -224, -1248),
         block08.routeExit
     ],
     recoveryPoints: [
-        point(`${area08Id}:recovery-s2`, -512, -472),
-        point(`${area08Id}:recovery-b2`, 448, -472),
-        point(`${area08Id}:recovery-m2`, 0, -760),
-        point(`${area08Id}:recovery-s5`, -432, -1112),
-        point(`${area08Id}:recovery-b5`, 432, -1112),
-        point(`${area08Id}:recovery-p9`, 32, -1304)
+        point(`${area08Id}:recovery-point-a`, -320, -274),
+        point(`${area08Id}:recovery-point-drop`, 832, -338),
+        point(`${area08Id}:recovery-point-c`, -32, -658),
+        point(`${area08Id}:recovery-point-d`, -384, -786)
     ],
     checkpoints: [
-        point(`${area08Id}:sector-end-checkpoint`, 576, -1472, {
+        point(`${area08Id}:sector-end-checkpoint`, 112, -1248, {
             sourceObjectId: `${area08Id}:sector-end-checkpoint-object`
         })
     ],
     objects: [
-        ...area08Landmarks.map(({ object }) => object),
-        patrolDrone(area08Id, "drone-1", -448, -544, triggerBounds(-704, -768, 1408, 608), [
-            { x: -448, y: -544 },
-            { x: 448, y: -544 }
+        // Patrol A: arrival-finger same-axis crossing. Band kept above -608 so it cannot
+        // vertically overlap Patrol B's band (no representative crossfire between phases).
+        patrolDrone(area08Id, "drone-1", -448, -392, triggerBounds(-864, -560, 800, 400), [
+            { x: -704, y: -272 },
+            { x: -160, y: -528 }
         ]),
-        patrolDrone(area08Id, "drone-2", -384, -1088, triggerBounds(-704, -1376, 1408, 576), [
-            { x: -384, y: -1088 },
-            { x: 480, y: -1088 }
-        ]),
-        pooledSentry(area08Id, "transfer-lower-guard", 448, -448, SECTOR_02_LATE_POOL, {
-            width: 512,
-            height: 480
+        // Late Pool: Hub -> Dead Lip only, kill optional, no crossfire with other phases.
+        pooledSentry(area08Id, "transfer-lower-guard", 288, -608, SECTOR_02_LATE_POOL, {
+            width: 384,
+            height: 288
         }),
-        pooledSentry(area08Id, "transfer-upper-guard", 432, -1088, SECTOR_02_LATE_POOL, {
-            width: 512,
-            height: 480
+        // Patrol B: central horizontal crossing during up-left relaunch, after Ring only.
+        patrolDrone(area08Id, "drone-2", 0, -784, triggerBounds(-544, -960, 1088, 352), [
+            { x: 320, y: -784 },
+            { x: -320, y: -784 }
+        ]),
+        // Late Pool: Upper Departure Arm final pressure only.
+        pooledSentry(area08Id, "transfer-upper-guard", -544, -992, SECTOR_02_LATE_POOL, {
+            width: 384,
+            height: 288
         }),
         block08.panel,
-        worldObject(`${area08Id}:sector-end-checkpoint-object`, "checkpoint", 576, -1472, {
+        worldObject(`${area08Id}:sector-end-checkpoint-object`, "checkpoint", 112, -1248, {
             checkpointId: `${area08Id}:sector-end-checkpoint`
         }),
         block08.gateVisual
@@ -976,7 +1004,7 @@ const area08 = defineArea({
     objectives: [area08Objective],
     gate: block08.gate,
     storyTriggers: ["evacuation-platform", "transfer-control", "priority-access-active"],
-    routes: ["safe-outer", "flow-centre", "pressure-right", "recovery"],
+    routes: ["main", "recovery"],
     cueIds: [
         "evacuation-platform",
         "two-patrol-bands",
