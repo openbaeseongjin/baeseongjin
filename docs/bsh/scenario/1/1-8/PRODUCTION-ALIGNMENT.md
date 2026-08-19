@@ -3,6 +3,10 @@
 Baseline:
 `ea9c4438c0f106474baa09621bfb42ae5876b86e`
 
+## MAP-PREVIEW primary route sync — 2026-08-20
+
+`MAP-PREVIEW.html`의 Lower Security→Mid Relief→Upper Security→Final Pulse→Override→Gate Passage→Sector Checkpoint endpoint 전체를 Runtime `routePoints`와 seamless `world.route`에 반영했다. Enemy·Wind·Access transit collision은 변경하지 않았다.
+
 ## Current Runtime vs REV8
 
 | Item | Current | REV8 | Status |

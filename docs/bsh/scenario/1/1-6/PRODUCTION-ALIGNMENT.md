@@ -3,6 +3,10 @@
 Baseline:
 `ea9c4438c0f106474baa09621bfb42ae5876b86e`
 
+## MAP-PREVIEW primary route sync — 2026-08-20
+
+`MAP-PREVIEW.html`의 RIGHT ENTRY→Fan A Left Sweep→Neutral Shadow→Fan B Right Sweep→RIGHT EXIT endpoint를 Runtime `routePoints`와 seamless `world.route`에 정확히 동기화했다. Wind·Access pocket·Collision은 변경하지 않았다.
+
 ## Current Runtime vs REV8
 
 | Item | Current | REV8 | Status |

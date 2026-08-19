@@ -2,6 +2,10 @@
 
 Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 
+## MAP-PREVIEW primary route sync — 2026-08-20
+
+`MAP-PREVIEW.html`의 RIGHT ENTRY→A→Airborne C Window→C→Roof Reversal P2→Upper Catwalk→Final Deck endpoint 전체를 Runtime `routePoints`와 seamless `world.route`에 반영했다. Collision 좌표는 이미 REV8과 일치해 변경하지 않았다.
+
 ## Current vs REV8
 
 | Item | Current Runtime | REV8 Target | Status |

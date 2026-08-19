@@ -12,6 +12,12 @@
 
 이 이미지는 `1-1`부터 `1-8`까지 이어지는 Sector 01 일반 구간의 공용 배경 아트 레퍼런스다. 전체 구간이 하나의 거대한 지하 정비 시설 안에 있다는 인상, 색과 조명, 공간의 깊이, 구조물 밀도를 정하는 기준으로 사용한다.
 
+## MAP-PREVIEW 핵심 흐름 권위
+
+- 각 Stage `MAP-PREVIEW.html`의 첫 `class="route"` 또는 `class="flow"` SVG path endpoint 순서가 Sector 01 authored core의 핵심 이동 흐름이다.
+- Runtime `routePoints`와 seamless compiled `world.route`는 이 경로를 중간 지점까지 그대로 보존한다. Collision·Enemy·Wind는 AREA-SPEC/Area Catalog가 소유하고 HTML을 Runtime collision이나 통이미지 배경으로 사용하지 않는다.
+- 4,800px Sector city wing은 outside-core 공간으로 유지하되 MAP-PREVIEW의 교차·Annex·drop/relaunch·cross-flow·S-curve·counterflow 경로를 대체하지 않는다.
+
 이미지 속 플랫폼이나 배관 위치를 그대로 레벨 지형으로 복제하지 않는다. 실제 이동 경로, 충돌, Anchor, Enemy, Wind, Recovery 배치는 각 Stage README의 Blockout 규격을 우선한다.
 
 ## 핵심 시각 방향

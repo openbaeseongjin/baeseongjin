@@ -511,7 +511,8 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
             const landmarkRoute = localWorld.route.map((point) =>
                 withoutAreaAuthority(shiftPoint(point, dx, dy), {
                     landmarkId: landmarkDefinition.id,
-                    legacyStageAlias: landmarkDefinition.legacyStageAlias
+                    legacyStageAlias: landmarkDefinition.legacyStageAlias,
+                    topY: point.topY + dy
                 })
             );
             const landmarkWindZones = localWorld.windZones.map((zone) =>
