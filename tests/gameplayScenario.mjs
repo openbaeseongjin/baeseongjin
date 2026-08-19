@@ -55,6 +55,7 @@ import { run as sectorDefinitionValidator } from "./sectorDefinitionValidator.mj
 import { run as routeSurfaceVisibility } from "./routeSurfaceVisibility.mjs";
 import { run as playerRespawnPresentation } from "./playerRespawnPresentation.mjs";
 import { run as worldUnlockPresentation } from "./worldUnlockPresentation.mjs";
+import { run as screenEdgeGuide } from "./screenEdgeGuide.mjs";
 
 const steps = {
     worldSeed,
@@ -110,6 +111,7 @@ const steps = {
     routeSurfaceVisibility,
     playerRespawnPresentation,
     worldUnlockPresentation,
+    screenEdgeGuide,
     spriteAssetValidator,
     stateMachine,
     timedStateController,

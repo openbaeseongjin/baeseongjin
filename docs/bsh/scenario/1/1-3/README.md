@@ -23,6 +23,9 @@ Story meaning:
 
 으로 해석하지 않는다.
 
+Combat Requirement:
+REQUIRED ACCESS CARRIER (SECTOR 3-OF-3)
+
 ## 2. Scale
 
 Keep:

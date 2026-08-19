@@ -85,7 +85,7 @@ export function run() {
         /incompatible Augment selection/
     );
 
-    const simulation = createCurrentGameSimulation({ worldSeed: 9182, playerId: "player-1" });
+    const simulation = createCurrentGameSimulation({ worldSeed: 1, playerId: "player-1" });
     assert.deepEqual(simulation.playerState("player-1").selectedAugmentIds, []);
     assert.equal(simulation.world.definitionRevision, SEAMLESS_SECTOR_RUNTIME_REVISION);
     assert.equal(simulation.world.areas.length, 0);

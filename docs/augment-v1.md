@@ -126,7 +126,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 
 ## Protocol
 
-- Player command v4: Action intent 추가.
+- Player command v5: Action intent와 물리 입력 장치의 단조 증가 `interactSequence`를 전송한다. 증강 선택 Confirm은 sampled W 상태 변화가 아니라 선택창이 열린 뒤 발생한 새 W/점프 누름 sequence만 소비한다.
 - Owner motion v4: owner-owned augment/action runtime mirror 추가.
 - Player impact v8: generic selected Augment state와 guard/shield 결과 수렴.
 - World snapshot v11: 모든 Player의 non-null Action state를 전송하며 기본 주먹도 charge/recharge snapshot으로 수렴한다.

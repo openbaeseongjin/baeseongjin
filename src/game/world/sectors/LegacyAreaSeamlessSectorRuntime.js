@@ -6,14 +6,14 @@ import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v5";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v7";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
 const LEGACY_SECTOR_CATALOGS = Object.freeze([SECTOR_01_AREA_CATALOG, SECTOR_02_AREA_CATALOG, SECTOR_03_AREA_CATALOG]);
 const SECTOR_HALF_WIDTH = SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5;
 const CITY_WING_INSET = 96;
-const CITY_WING_OVERLAP = 48;
+const CITY_WING_CORE_GAP = 64;
 const CITY_WING_THICKNESS = 32;
 const ACCESS_MODULES_PER_SECTOR = 3;
 const TRANSIT_BARRIER_THICKNESS = 24;
@@ -295,8 +295,8 @@ function routeMouthBounds(exit) {
 
 function cityWingSurfaces({ landmark, coreBounds, entry, exit, landmarkIndex }) {
     const leftWingStart = -SECTOR_HALF_WIDTH + CITY_WING_INSET;
-    const leftWingEnd = coreBounds.x + CITY_WING_OVERLAP;
-    const rightWingStart = coreBounds.x + coreBounds.width - CITY_WING_OVERLAP;
+    const leftWingEnd = coreBounds.x - CITY_WING_CORE_GAP;
+    const rightWingStart = coreBounds.x + coreBounds.width + CITY_WING_CORE_GAP;
     const rightWingEnd = SECTOR_HALF_WIDTH - CITY_WING_INSET;
     const leftWingWidth = leftWingEnd - leftWingStart;
     const rightWingWidth = rightWingEnd - rightWingStart;
@@ -489,10 +489,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                         sectorId: sectorDefinition.id,
                         landmarkId: landmarkDefinition.id,
                         encounterId: encounter.encounterId,
-                        position: encounter.position,
-                        hint: landmarkDefinition.encounters.find(
-                            ({ encounterId }) => encounterId === encounter.encounterId
-                        )?.accessHint
+                        position: encounter.position
                     })
                 );
             }

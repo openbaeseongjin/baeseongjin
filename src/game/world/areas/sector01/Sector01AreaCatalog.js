@@ -159,7 +159,7 @@ const area02 = defineArea({
         horizontalSurface("sector-01-02:dead-lift-cage", 128, -608, 448, 320, {
             kind: "dead-lift-cage",
             oneWay: false,
-            grappleable: false
+            grappleable: true
         }),
         horizontalSurface("sector-01-02:counterweight-tower", -544, -704, 96, 448, {
             kind: "counterweight-tower",
@@ -337,7 +337,6 @@ const area03 = defineArea({
         worldObject("sector-01-03:access-carrier-a", "sentry", 1760, -640, {
             enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:a",
-            accessHint: "RIGHT · SECURITY ANNEX",
             activationSpec: objectTriggerSpec("center", 720, 384, { x: -240, y: -16 }),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
         }),
@@ -711,7 +710,6 @@ const area06 = defineArea({
         worldObject("sector-01-06:access-carrier", "sentry", -1456, -672, {
             enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:b",
-            accessHint: "LEFT · COOLING INTAKE",
             activationSpec: objectTriggerSpec("center", 900, 480, { x: 0, y: -16 }),
             rules: ["standard-projectile", "no-rope-cut"]
         }),
@@ -871,7 +869,6 @@ const area07 = defineArea({
         worldObject("sector-01-07:access-carrier", "sentry", 1440, -832, {
             enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:c",
-            accessHint: "RIGHT · OVERPRESSURE POCKET",
             activationSpec: objectTriggerSpec("center", 480, 480, { x: 0, y: -16 }),
             rules: ["standard-projectile", "no-rope-cut"]
         }),

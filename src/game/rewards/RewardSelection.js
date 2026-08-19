@@ -5,10 +5,9 @@ function freezeSelection(selection) {
         choices: selection.choices,
         selectedIndex: selection.selectedIndex,
         openingInputCaptured: selection.openingInputCaptured,
+        openingInteractSequence: selection.openingInteractSequence,
         horizontalReady: selection.horizontalReady,
-        confirmReady: selection.confirmReady,
-        previousHorizontal: selection.previousHorizontal,
-        previousConfirm: selection.previousConfirm
+        previousHorizontal: selection.previousHorizontal
     });
 }
 
@@ -25,25 +24,24 @@ export function createRewardSelection({ sourceId, rewardType, choices, selectedI
         choices: Object.freeze([...choices]),
         selectedIndex,
         openingInputCaptured: false,
+        openingInteractSequence: null,
         horizontalReady: false,
-        confirmReady: false,
-        previousHorizontal: null,
-        previousConfirm: null
+        previousHorizontal: null
     });
 }
 
 export function advanceRewardSelection(selection, command) {
     const horizontal = Math.sign(command.horizontal);
     const confirm = command.vertical < 0;
+    const interactSequence = Number.isSafeInteger(command.interactSequence) ? command.interactSequence : 0;
     if (!selection.openingInputCaptured) {
         return Object.freeze({
             selection: freezeSelection({
                 ...selection,
                 openingInputCaptured: true,
+                openingInteractSequence: interactSequence,
                 horizontalReady: horizontal === 0,
-                confirmReady: !confirm,
-                previousHorizontal: horizontal,
-                previousConfirm: confirm
+                previousHorizontal: horizontal
             }),
             confirmedChoiceId: null
         });
@@ -54,15 +52,13 @@ export function advanceRewardSelection(selection, command) {
         selectedIndex = (selectedIndex + horizontal + selection.choices.length) % selection.choices.length;
     }
     const confirmedChoiceId =
-        selection.confirmReady && confirm && !selection.previousConfirm ? selection.choices[selectedIndex].id : null;
+        confirm && interactSequence > selection.openingInteractSequence ? selection.choices[selectedIndex].id : null;
     return Object.freeze({
         selection: freezeSelection({
             ...selection,
             selectedIndex,
             horizontalReady: selection.horizontalReady || horizontal === 0,
-            confirmReady: selection.confirmReady || !confirm,
-            previousHorizontal: horizontal,
-            previousConfirm: confirm
+            previousHorizontal: horizontal
         }),
         confirmedChoiceId
     });

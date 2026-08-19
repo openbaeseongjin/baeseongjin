@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { findRopeAttachment } from "../src/game/input/RopePointerInput.js";
 import { validateAreaCatalog } from "../src/game/world/AreaDefinitionValidator.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 
@@ -9,6 +10,28 @@ function mutableCatalog() {
 export function run() {
     const valid = validateAreaCatalog(SECTOR_01_AREA_CATALOG);
     assert.deepEqual(valid, { valid: true, issues: [] });
+    const deadLiftCage = SECTOR_01_AREA_CATALOG.areas[1].surfaces.find(
+        ({ id }) => id === "sector-01-02:dead-lift-cage"
+    );
+    assert.equal(deadLiftCage.oneWay, false);
+    assert.equal(deadLiftCage.grappleable, true, "a solid horizontal platform must remain grappleable from below");
+    assert.ok(
+        findRopeAttachment({
+            aimPoint: { x: 128, y: -608 },
+            origin: { x: 128, y: -320 },
+            surfaces: [deadLiftCage],
+            maxAttachDistance: 400
+        }),
+        "the runtime Rope resolver must return an attachment point on dead-lift-cage"
+    );
+    const invalidSolidPlatform = mutableCatalog();
+    invalidSolidPlatform.areas[0].surfaces[0].oneWay = false;
+    invalidSolidPlatform.areas[0].surfaces[0].grappleable = false;
+    assert.ok(
+        validateAreaCatalog(invalidSolidPlatform).issues.some(
+            ({ code, id }) => code === "solid-horizontal-not-grappleable" && id === "sector-01-01:p0"
+        )
+    );
     const startFloor = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id === "sector-01-01:p0");
     assert.deepEqual(
         startFloor.vertices,

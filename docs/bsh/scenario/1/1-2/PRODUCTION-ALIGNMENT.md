@@ -54,4 +54,4 @@ Because local core changes from 960 to 1664:
 
 ## Verdict
 
-`MAJOR BLOCKOUT REWRITE REQUIRED`
+`IMPLEMENTED` - Stage 1-2 REV8 is fully built and committed (see docs/scenario-development-integration.md entries). The table above is stale (predates implementation); left as historical record rather than rewritten line-by-line this pass.

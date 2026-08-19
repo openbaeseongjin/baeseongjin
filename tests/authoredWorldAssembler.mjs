@@ -225,7 +225,7 @@ export function run() {
             r2: { x: -48, y: -656, width: 224, height: 16, grappleable: true },
             p2: { x: -64, y: -704, width: 256, height: 16, grappleable: true },
             p3: { x: -320, y: -768, width: 320, height: 24, grappleable: true },
-            "dead-lift-cage": { x: -96, y: -608, width: 448, height: 320, grappleable: false },
+            "dead-lift-cage": { x: -96, y: -608, width: 448, height: 320, grappleable: true },
             "counterweight-tower": { x: -592, y: -704, width: 96, height: 448, grappleable: false },
             "hoist-casing-left": { x: -832, y: -960, width: 32, height: 960, grappleable: false },
             "hoist-casing-right": { x: 800, y: -960, width: 32, height: 960, grappleable: false },

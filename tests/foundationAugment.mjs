@@ -6,12 +6,20 @@ import { ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 
-function command({ horizontal = 0, vertical = 0, interact = false, pointerDown = false, action = false } = {}) {
+function command({
+    horizontal = 0,
+    vertical = 0,
+    interact = false,
+    interactSequence = 0,
+    pointerDown = false,
+    action = false
+} = {}) {
     return createPlayerCommand(
         {
             horizontal,
             vertical,
             interact,
+            interactSequence,
             action,
             pointer: { x: 0, y: 0, down: pointerDown },
             viewport: { width: 1280, height: 720 }
@@ -69,7 +77,7 @@ export function run() {
     assert.equal(firstOffer.choices.length, 3);
     assert.equal(new Set(firstOffer.choices.map(({ id }) => id)).size, 3);
     simulation.step(1 / 120, command());
-    simulation.step(1 / 120, command({ vertical: -1 }));
+    simulation.step(1 / 120, command({ vertical: -1, interact: true, interactSequence: 1 }));
     const selectedId = firstOffer.choices[0].id;
     assert.deepEqual(simulation.playerState(player.id).selectedAugmentIds, [selectedId]);
     assert.equal(simulation.worldProgress.isObjectiveComplete(node.objectiveId), true);

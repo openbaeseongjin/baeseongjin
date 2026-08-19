@@ -14,10 +14,15 @@ export class InputSampler {
         this.actionPointerId = null;
         this.mobileAimMode = "rope";
         this.controlPointers = new Map();
+        this.interactSequence = 0;
         this.touchActive = false;
         this.attached = false;
         this.onKeyDown = (event) => {
+            const alreadyHeld = this.keys.has(event.code);
             if (movementKeys.has(event.code)) this.keys.add(event.code);
+            if (!alreadyHeld && (event.code === "KeyW" || event.code === "ArrowUp")) {
+                this.interactSequence += 1;
+            }
         };
         this.onKeyUp = (event) => this.keys.delete(event.code);
         this.onPointerMove = (event) => {
@@ -53,6 +58,7 @@ export class InputSampler {
                     this.controlPointers.set(event.pointerId, "action-toggle");
                 } else {
                     this.controlPointers.set(event.pointerId, control);
+                    if (control === "jump") this.interactSequence += 1;
                 }
                 return;
             }
@@ -200,6 +206,7 @@ export class InputSampler {
             horizontal: Math.max(-1, Math.min(1, keyboardHorizontal + Number(mobileRight) - Number(mobileLeft))),
             vertical: Math.max(-1, Math.min(1, keyboardVertical - Number(mobileJump))),
             interact: keyboardVertical < 0 || mobileJump,
+            interactSequence: this.interactSequence,
             action: this.actionDown,
             pointer: Object.freeze({ ...this.pointer }),
             viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),

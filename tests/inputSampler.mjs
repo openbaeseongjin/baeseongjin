@@ -34,9 +34,13 @@ export function run() {
     listeners.get("keydown")({ code: "KeyW" });
     assert.equal(sampler.snapshot().vertical, -1);
     assert.equal(sampler.snapshot().interact, true, "keyboard jump must keep the contextual interaction intent");
+    assert.equal(sampler.snapshot().interactSequence, 1);
+    listeners.get("keydown")({ code: "KeyW", repeat: true });
+    assert.equal(sampler.snapshot().interactSequence, 1, "keyboard repeat must not create a new interact press");
     listeners.get("keyup")({ code: "KeyW" });
     listeners.get("keydown")({ code: "ArrowUp" });
     assert.equal(sampler.snapshot().interact, true, "the alternate keyboard jump must share the same interaction");
+    assert.equal(sampler.snapshot().interactSequence, 2);
     listeners.get("keyup")({ code: "ArrowUp" });
     listeners.get("keydown")({ code: "KeyE" });
     assert.equal(sampler.snapshot().interact, false, "Gate panels must not introduce a separate PC interaction key");
@@ -135,6 +139,7 @@ export function run() {
     assert.equal(touchSnapshot.vertical, -1, "the bottom-center square must emit the same command as keyboard jump");
     assert.equal(touchSnapshot.mobileControls.jump, true);
     assert.equal(touchSnapshot.interact, true, "holding mobile jump must expose the contextual interaction intent");
+    assert.equal(touchSnapshot.interactSequence, 1);
 
     touchListeners.get("pointerdown")({ pointerType: "touch", pointerId: 6, clientX: 400, clientY: 240 });
     touchSnapshot = touchSampler.snapshot();

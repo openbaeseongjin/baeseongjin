@@ -10,6 +10,7 @@ import {
 import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewport.js";
 import { assertSceneRenderer } from "./SceneRenderer.js";
 import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus } from "./ActorStatusPresentation.js";
+import { resolveScreenEdgeGuide } from "./ScreenEdgeGuide.js";
 
 export class CanvasRenderer {
     constructor(
@@ -88,6 +89,7 @@ export class CanvasRenderer {
             presentationTimeSeconds: this.now()
         });
         if (scene.hudVisible !== false) {
+            this.drawAccessGuide(scene);
             this.drawLocalStatusHud(scene);
             this.drawAccessHud(scene);
         }
@@ -598,8 +600,7 @@ export class CanvasRenderer {
         const x = 18;
         const y = compactView ? 156 : 178;
         const width = compactView ? Math.min(240, this.cssWidth - 36) : 300;
-        const height = ready ? 34 : 54;
-        const hint = ready ? null : world.accessModules.find(({ id }) => id === remaining[0])?.hint;
+        const height = 34;
         const ctx = this.context;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.86)";
@@ -615,11 +616,51 @@ export class CanvasRenderer {
             x + 14,
             y + 21
         );
-        if (hint) {
-            ctx.fillStyle = "#cbd5e1";
-            ctx.font = "700 10px ui-monospace, monospace";
-            ctx.fillText(hint, x + 14, y + 42);
-        }
+        ctx.restore();
+    }
+
+    drawAccessGuide({ world, worldProgress, player, camera, mobileView = false }) {
+        if (!world?.accessModules?.length || !camera || !player?.position) return;
+        const region = authoredRegionForPosition(world, player.position);
+        const sector = world.sectors?.find(({ id }) => id === region?.sectorId);
+        const requiredCount = sector?.accessModuleRequirement ?? 0;
+        if (requiredCount <= 0) return;
+        const collected = new Set(worldProgress?.collectedAccessModuleIds ?? []);
+        const collectedCount = (sector.accessModuleIds ?? []).filter((id) => collected.has(id)).length;
+        if (collectedCount >= requiredCount) return;
+        const nextModuleId = (sector.accessModuleIds ?? []).find((id) => !collected.has(id));
+        const target = world.accessModules.find(({ id }) => id === nextModuleId)?.position;
+        if (!target) return;
+        const guide = resolveScreenEdgeGuide({
+            target,
+            camera,
+            viewportWidth: this.cssWidth,
+            viewportHeight: this.cssHeight,
+            insets: { left: 30, right: 30, top: 54, bottom: mobileView ? 116 : 30 }
+        });
+        if (!guide) return;
+        let x = guide.x;
+        let y = guide.y;
+        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+        if (guide.edge === "left" && y < (compactView ? 214 : 252)) y = compactView ? 214 : 252;
+        if (guide.edge === "top" && x < 184) x = 184;
+        const pulse = 0.9 + Math.sin(this.now() * 7) * 0.1;
+        const ctx = this.context;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(guide.angle);
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = "#fbbf24";
+        ctx.strokeStyle = "#fff7d6";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(16, 0);
+        ctx.lineTo(-10, -12);
+        ctx.lineTo(-3, 0);
+        ctx.lineTo(-10, 12);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
         ctx.restore();
     }
 }

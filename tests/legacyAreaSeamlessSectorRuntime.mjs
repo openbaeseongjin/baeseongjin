@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createAuthoredWorld, DEFAULT_AUTHORED_AREA_CATALOG } from "../src/game/world/AuthoredWorldFactory.js";
 import { resolveObjectTriggerBounds } from "../src/game/world/areas/AreaDefinition.js";
+import { PLAYER_CONFIG } from "../src/game/config.js";
 import { SECTOR_02_AREA_CATALOG } from "../src/game/world/areas/sector02/Sector02AreaCatalog.js";
 import {
     createLegacyAreaSeamlessSectorRuntimeWorld,
@@ -191,6 +192,39 @@ export function run() {
             assert.ok(surface);
             assert.equal(surface.oneWay, false);
             assert.ok(surface.height >= 32);
+        }
+        if (!connector.sectorTransition) {
+            const boundaryY = connector.start.y + 32;
+            const left = -SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5 + 96;
+            const right = SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5 - 96;
+            const intervals = world.surfaces
+                .filter(
+                    (candidate) =>
+                        candidate.collision !== false &&
+                        candidate.renderable !== false &&
+                        candidate.topY === boundaryY &&
+                        candidate.width > candidate.height
+                )
+                .map(({ x, width }) => [Math.max(left, x), Math.min(right, x + width)])
+                .filter(([start, end]) => end > start)
+                .sort((a, b) => a[0] - b[0]);
+            const merged = [];
+            for (const interval of intervals) {
+                const previous = merged.at(-1);
+                if (!previous || interval[0] > previous[1]) merged.push([...interval]);
+                else previous[1] = Math.max(previous[1], interval[1]);
+            }
+            const gaps = [];
+            let cursor = left;
+            for (const [start, end] of merged) {
+                if (start > cursor) gaps.push(start - cursor);
+                cursor = Math.max(cursor, end);
+            }
+            if (cursor < right) gaps.push(right - cursor);
+            assert.ok(
+                gaps.some((width) => width >= PLAYER_CONFIG.radius * 2 + 16),
+                `${connector.sourceLandmarkId} → ${connector.targetLandmarkId} must keep a downward backtracking opening`
+            );
         }
     }
 
