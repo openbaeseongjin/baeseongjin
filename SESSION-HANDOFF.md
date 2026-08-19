@@ -189,7 +189,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - Stage 단위 cutover는 원자적이다. 각 Stage는 `legacy` 또는 `generated` source 하나만 사용하며, generated Stage의 모든 편집 대상 필드는 v2가 소유한다. composer는 Stage의 source 중복·누락을 validation 오류로 막고 legacy/generated 필드 overlay나 예외 수기 값을 허용하지 않는다.
 - Stage별 cutover 선택의 단일 권위는 v2 catalog의 명시적 manifest다. manifest는 stable Stage ID, `source: legacy | generated`, source 원본 경로를 선언하며 composer는 이 manifest만 사용한다. generated 파일 존재 여부나 Sector Catalog의 수기 import로 source를 추론·선택하지 않는다.
 - 맵 에디터 인터뷰는 위 사용자·저작 규칙의 확정으로 종료한다. schema, module wiring, validation 명령과 test 구성 같은 개발 세부사항은 [`docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md`](docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md) 및 `docs/development-rules.md`에 따라 결정하며, 새 제품·조작 요구가 충돌할 때만 사용자에게 다시 확인한다.
-- 메인 개발자와 병렬 개발할 때 이 작업은 새 `area-authoring-v2` source·`generated/` output·focused test·Stage v2 spec만 소유한다. 기존 Sector facade, legacy provider, seamless Runtime, root script와 shared test-runner wiring은 메인 개발자 소유이며, 이 작업은 manifest와 `composeSectorCatalog`의 검증된 integration contract만 인계한다. live cutover 완료·최종 suite·통합 현황 갱신은 그 연결 변경을 소유한 메인 개발자가 증명한다.
+- **[최우선 협업 제약]** 메인 개발자와 병렬 개발할 때 source 분리가 다른 구현 편의보다 우선한다. 이 작업은 새 `area-authoring-v2` source·`generated/` output·focused test·Stage v2 spec만 소유한다. 기존 Sector facade, legacy provider, seamless Runtime, root script와 shared test-runner wiring은 메인 개발자 소유이며, 이 작업은 manifest와 `composeSectorCatalog`의 검증된 integration contract만 인계한다. live cutover 완료·최종 suite·통합 현황 갱신은 그 연결 변경을 소유한 메인 개발자가 증명한다.
 - 설계 승인과 migration 전에는 현재 `area-spec-v1`·JS Catalog Runtime 계약을 유지하고 새 schema·codegen·에디터 구현을 시작하지 않는다.
 
 ### [L1] 적 roster는 행동 계열 기본형과 topology 독립 encounter slot으로 확장한다
