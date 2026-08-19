@@ -88,6 +88,21 @@ export function run() {
     const predicted = predictor.reconcile(snapshot, [pending]);
     server.stepCommandBatch(1 / 120, pending);
 
+    const originalSnapshot = predictor.simulation.snapshot.bind(predictor.simulation);
+    let fullSnapshotCalls = 0;
+    predictor.simulation.snapshot = () => {
+        fullSnapshotCalls += 1;
+        return originalSnapshot();
+    };
+    assert.equal(predictor.worldSnapshot(), predictor.simulation.world);
+    assert.equal(
+        fullSnapshotCalls,
+        0,
+        "reading immutable authored world data must not allocate a full render snapshot"
+    );
+    predictor.renderSnapshot();
+    assert.equal(fullSnapshotCalls, 1);
+
     assert.equal(predicted.tick, server.tick);
     close(predicted.position.x, serverPlayer.physics.position.x, "position.x");
     close(predicted.position.y, serverPlayer.physics.position.y, "position.y");

@@ -5,8 +5,9 @@ import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
+import { GRAPPLE_LINK_BUDGET } from "../../config.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v7";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v8";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
@@ -17,6 +18,7 @@ const CITY_WING_CORE_GAP = 64;
 const CITY_WING_THICKNESS = 32;
 const ACCESS_MODULES_PER_SECTOR = 3;
 const TRANSIT_BARRIER_THICKNESS = 24;
+const TRANSIT_BARRIER_LATERAL_MARGIN = GRAPPLE_LINK_BUDGET;
 const LEGACY_BOUNDARY_KINDS = new Set(["area-boundary-wall", "inter-floor-divider"]);
 const LEGACY_ENEMY_KINDS = new Set(["sentry", "patrol-drone"]);
 const LEGACY_STAGE_DOOR_KINDS = new Set(["gate", "gate-panel"]);
@@ -210,9 +212,9 @@ function transitBarrierGeometry(lock, sourceLandmark, targetLandmark) {
     const pathX = (sourceLandmark.exit.x + targetLandmark.entry.x) * 0.5;
     const segments = [
         {
-            x: sourceLandmark.bounds.x,
+            x: sourceLandmark.bounds.x - TRANSIT_BARRIER_LATERAL_MARGIN,
             y: boundaryY,
-            width: sourceLandmark.bounds.width,
+            width: sourceLandmark.bounds.width + TRANSIT_BARRIER_LATERAL_MARGIN * 2,
             height: TRANSIT_BARRIER_THICKNESS
         },
         {

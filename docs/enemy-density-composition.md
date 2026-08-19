@@ -20,6 +20,8 @@
 
 정확한 pool 결과는 seed에 따라 바뀌지만 slot 수·위치·activation·Stable ID는 바뀌지 않는다. 전체 exact roster를 테스트 snapshot으로 고정하지 않고 안전 구간, Access 3기, Sector coarse tier, family 도달과 결정성을 검증한다.
 
+멀티 snapshot은 현재 56개 slot의 정적 authored 정의를 `world revision + objectId` 인덱스로 재사용한다. 축약 state hydration은 runtime을 만들거나 slot을 다시 선택하지 않고 동적 state만 합성하며, prediction 복원에서 snapshot당 slot 하나에 Enemy runtime 하나만 만든다. 이 최적화는 20Hz snapshot·중립 Enemy 권위·slot 수와 pool 결과를 바꾸지 않는다.
+
 ## Authoring 계약
 
 - legacy Stage source의 `sentry`/`patrol-drone` object가 slot 위치·activation·patrol·rules를 소유한다.
@@ -31,8 +33,7 @@
 ## 보존 계약
 
 - `accessModuleId`, Sector당 Carrier 3기 처치와 3-of-3 Transit Lock. Carrier 지정은 기존 slot 수·위치·activation을 바꾸지 않는다.
-- Carrier 위치는 authored 글자 hint를 소유하지 않는다. Runtime은 stable module world position만 전달하고 화면 밖에서는 다음 미수집 Carrier edge arrow, 화면 안에서는 무문자 diamond marker로 안내한다.
-- 개인 사망의 shared progress/처치 보존과 Sector-entry 부활.
-- party wipe의 current-sector enemy/module/route baseline reset.
+- Carrier 위치는 authored 글자 hint를 소유하지 않는다. Runtime은 stable module world position만 전달하고 거리순 최대 3개를 화면 밖 edge arrow 또는 화면 안 무문자 diamond marker로 같은 scale 규칙에 따라 안내한다.
+- 개인·전원 사망 모두 shared progress/처치/module/route를 보존하고 각 Player의 마지막 Stage savepoint에서 부활한다.
 - 고정·고정경로·제자리 지원형의 위치 넉백 면역, Pursuit/Swarm의 직접 추격형 displacement.
 - Boss·Timer/Purge·Sector 04~06과 새 enemy behavior는 이 범위 밖이다.

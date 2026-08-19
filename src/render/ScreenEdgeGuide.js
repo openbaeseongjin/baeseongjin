@@ -1,6 +1,109 @@
+import { authoredRegionForPosition } from "../game/world/AuthoredLandmarkResolver.js";
+
 function finite(value, label) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
     return value;
+}
+
+const ACCESS_GUIDE_MAX_TARGETS = 3;
+const ACCESS_GUIDE_MIN_SCALE = 0.62;
+
+export function resolveAccessModuleTargets({
+    world,
+    worldProgress,
+    playerPosition,
+    maxTargets = ACCESS_GUIDE_MAX_TARGETS
+}) {
+    if (!world?.accessModules?.length || !playerPosition || maxTargets <= 0) return Object.freeze([]);
+    const sectorId = authoredRegionForPosition(world, playerPosition)?.sectorId;
+    const sector = (world.sectors ?? []).find(({ id }) => id === sectorId);
+    const requiredCount = sector?.accessModuleRequirement ?? 0;
+    if (requiredCount <= 0) return Object.freeze([]);
+    const collected = new Set(worldProgress?.collectedAccessModuleIds ?? []);
+    const moduleIds = sector.accessModuleIds ?? [];
+    if (moduleIds.filter((id) => collected.has(id)).length >= requiredCount) return Object.freeze([]);
+    const moduleById = new Map(world.accessModules.map((module) => [module.id, module]));
+    const remaining = moduleIds
+        .filter((id) => !collected.has(id))
+        .map((id) => moduleById.get(id))
+        .filter(Boolean)
+        .map((module) => ({
+            module,
+            distance: Math.hypot(module.position.x - playerPosition.x, module.position.y - playerPosition.y)
+        }))
+        .sort((left, right) => left.distance - right.distance || left.module.id.localeCompare(right.module.id))
+        .slice(0, Math.min(ACCESS_GUIDE_MAX_TARGETS, Math.floor(maxTargets)));
+    const nearestDistance = remaining[0]?.distance ?? 0;
+    const farthestDistance = remaining.at(-1)?.distance ?? nearestDistance;
+    return Object.freeze(
+        remaining.map(({ module, distance }) =>
+            Object.freeze({
+                module,
+                distance,
+                scale:
+                    farthestDistance === nearestDistance
+                        ? 1
+                        : Math.max(
+                              ACCESS_GUIDE_MIN_SCALE,
+                              1 - ((distance - nearestDistance) / (farthestDistance - nearestDistance)) * 0.38
+                          )
+            })
+        )
+    );
+}
+
+function distributeGuides(guides, { minimum, maximum, spacing, coordinate }) {
+    if (guides.length === 0) return [];
+    const availableSpacing = guides.length === 1 ? 0 : Math.min(spacing, (maximum - minimum) / (guides.length - 1));
+    const center = guides.reduce((sum, guide) => sum + guide[coordinate], 0) / guides.length;
+    const span = availableSpacing * (guides.length - 1);
+    const start = Math.min(Math.max(center - span * 0.5, minimum), maximum - span);
+    return guides.map((guide, index) => ({ ...guide, [coordinate]: start + index * availableSpacing }));
+}
+
+export function layoutAccessEdgeGuides({
+    targets,
+    camera,
+    viewportWidth,
+    viewportHeight,
+    insets = {},
+    compactView = false,
+    spacing = 28
+}) {
+    const guides = (targets ?? [])
+        .map((target) => {
+            const guide = resolveScreenEdgeGuide({
+                target: target.module.position,
+                camera,
+                viewportWidth,
+                viewportHeight,
+                insets
+            });
+            return guide ? { ...guide, moduleId: target.module.id, scale: target.scale } : null;
+        })
+        .filter(Boolean);
+    const groups = new Map();
+    for (const guide of guides) groups.set(guide.edge, [...(groups.get(guide.edge) ?? []), guide]);
+    const laidOutById = new Map();
+    for (const [edge, group] of groups) {
+        const vertical = edge === "left" || edge === "right";
+        const preferredMinimum = vertical
+            ? edge === "left"
+                ? compactView
+                    ? 214
+                    : 252
+                : (insets.top ?? 54)
+            : edge === "top"
+              ? 184
+              : (insets.left ?? 30);
+        const maximum = vertical ? viewportHeight - (insets.bottom ?? 30) : viewportWidth - (insets.right ?? 30);
+        const insetMinimum = vertical ? (insets.top ?? 54) : (insets.left ?? 30);
+        const minimum = Math.min(preferredMinimum, Math.max(insetMinimum, maximum - spacing * (group.length - 1)));
+        for (const guide of distributeGuides(group, { minimum, maximum, spacing, coordinate: vertical ? "y" : "x" })) {
+            laidOutById.set(guide.moduleId, Object.freeze(guide));
+        }
+    }
+    return Object.freeze(guides.map(({ moduleId }) => laidOutById.get(moduleId)));
 }
 
 export function projectWorldToScreen(position, camera) {

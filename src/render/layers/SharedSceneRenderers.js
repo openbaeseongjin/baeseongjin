@@ -3,6 +3,7 @@ import { ROPE_CONFIG, ropeHookReach } from "../../game/config.js";
 import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { isSurfaceEnabledForProgress } from "../../game/world/WorldGateGeometry.js";
 import { authoredRegionForPosition } from "../../game/world/AuthoredLandmarkResolver.js";
+import { resolveAccessModuleTargets } from "../ScreenEdgeGuide.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
@@ -345,22 +346,17 @@ export class AccessScanSurfaceRenderer {
 
 export class AccessModuleSignalRenderer {
     draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
-        const currentSectorId = authoredRegionForPosition(scene.world, scene.player?.position)?.sectorId;
-        const collected = new Set(scene.worldProgress?.collectedAccessModuleIds ?? []);
-        const sector = (scene.world.sectors ?? []).find(({ id }) => id === currentSectorId);
-        const sectorModuleIds = sector?.accessModuleIds ?? [];
-        const collectedCount = sectorModuleIds.filter((id) => collected.has(id)).length;
-        const accessReady = collectedCount >= (sector?.accessModuleRequirement ?? Number.POSITIVE_INFINITY);
-        const modules = accessReady
-            ? []
-            : (scene.world.accessModules ?? []).filter(
-                  (module) => module.sectorId === currentSectorId && !collected.has(module.id)
-              );
-        const visible = modules.filter((module) => isVisible(viewport, circleBounds(module.position, 48)));
-        for (const module of visible) {
+        const targets = resolveAccessModuleTargets({
+            world: scene.world,
+            worldProgress: scene.worldProgress,
+            playerPosition: scene.player?.position
+        });
+        const visible = targets.filter(({ module }) => isVisible(viewport, circleBounds(module.position, 48)));
+        for (const { module, scale } of visible) {
             const pulse = 0.5 + Math.sin(presentationTimeSeconds * 7) * 0.15;
             context.save();
             context.translate(module.position.x, module.position.y - 56);
+            context.scale(scale, scale);
             context.strokeStyle = `rgba(251, 191, 36, ${pulse + 0.25})`;
             context.fillStyle = "rgba(251, 191, 36, 0.18)";
             context.lineWidth = 3;
@@ -379,7 +375,7 @@ export class AccessModuleSignalRenderer {
             context.stroke();
             context.restore();
         }
-        renderStats?.recordCollection("accessModuleSignals", modules.length, visible.length);
+        renderStats?.recordCollection("accessModuleSignals", targets.length, visible.length);
     }
 }
 

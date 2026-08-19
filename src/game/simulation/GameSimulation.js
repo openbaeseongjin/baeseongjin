@@ -208,6 +208,7 @@ export class GameSimulation {
             playerRuntime.augmentCombat.syncLoadout(playerRuntime.foundation, playerRuntime.entity.maxHealth);
             playerRuntime.ropeObject.rope.config = playerRuntime.foundation.effectiveRopeConfig(this.ropeConfig);
         }
+        this.enemyRuntimeCreations = 0;
         this.enemies = this.createEnemies();
         this.enemyImpactTombstones = new Map();
         this.projectiles = [];
@@ -452,32 +453,37 @@ export class GameSimulation {
     }
 
     hydrateEnemyNetworkStates(states) {
+        const spawnsByObjectId = (this.enemySpawnsByObjectId ??= new Map(
+            this.world.enemySpawns.map((spawn) => [spawn.objectId ?? spawn.encounterId ?? spawn.slotId, spawn])
+        ));
+        const staticStateByObjectId = (this.enemyStaticStateByObjectId ??= new Map());
         return states.map((state) => {
             if (state.enemyType) return state;
-            const spawn = this.world.enemySpawns.find(
-                ({ objectId, encounterId, slotId }) => (objectId ?? encounterId ?? slotId) === state.objectId
-            );
+            const spawn = spawnsByObjectId.get(state.objectId);
             if (!spawn) throw new Error(`unknown enemy network objectId: ${state.objectId}`);
-            const definition = spawn.enemySelection
-                ? {
-                      ...spawn,
-                      ...resolveEnemyEncounter(spawn, {
-                          runSeed: this.world.seed,
-                          worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
-                      })
-                  }
-                : spawn;
-            return createEnemyRuntime({
+            let definition = staticStateByObjectId.get(state.objectId);
+            if (!definition) {
+                definition = spawn.enemySelection
+                    ? {
+                          ...spawn,
+                          ...resolveEnemyEncounter(spawn, {
+                              runSeed: this.world.seed,
+                              worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
+                          })
+                      }
+                    : spawn;
+                staticStateByObjectId.set(state.objectId, definition);
+            }
+            return {
                 ...definition,
                 ...state,
                 id: state.id,
-                position: new Vector2(state.position.x, state.position.y),
                 areaId: definition.areaId ?? null,
                 objectId: state.objectId,
                 swarmGroupId: definition.swarmGroupId ?? definition.slotId,
                 radius: COMBAT_CONFIG.enemyRadius,
                 maxHealth: COMBAT_CONFIG.enemyHealth
-            }).renderSnapshot();
+            };
         });
     }
 
@@ -692,12 +698,13 @@ export class GameSimulation {
             if (!activeCheckpoint) throw new Error(`unknown active checkpoint: ${activeCheckpointId}`);
             this.activeCheckpoint = activeCheckpoint;
         }
-        this.enemies = enemies.map((enemy) =>
-            createEnemyRuntime({
+        this.enemies = enemies.map((enemy) => {
+            this.enemyRuntimeCreations += 1;
+            return createEnemyRuntime({
                 ...enemy,
                 position: new Vector2(enemy.position.x, enemy.position.y)
-            })
-        );
+            });
+        });
         this.projectiles = [];
         this.enemyProjectiles = [];
     }
@@ -2081,6 +2088,7 @@ export class GameSimulation {
                   }
                 : spawn;
             const position = definition.position ?? definition;
+            this.enemyRuntimeCreations += 1;
             return createEnemyRuntime({
                 id: this.registry.createId("enemy"),
                 position: new Vector2(position.x, position.y),
@@ -2098,6 +2106,10 @@ export class GameSimulation {
                 fireCooldown: COMBAT_CONFIG.enemyFireInterval
             });
         });
+    }
+
+    enemyRuntimeMetrics() {
+        return Object.freeze({ creations: this.enemyRuntimeCreations });
     }
 
     recordProjectileSpawn(projectile) {

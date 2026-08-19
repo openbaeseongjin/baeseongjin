@@ -129,12 +129,13 @@ export class PixelBackdropRenderer {
 
 function sectorClimbProgress(scene, area) {
     const playerY = scene.player?.position?.y;
-    const sectorAreas = (scene.world?.areas ?? []).filter(
-        (candidate) => candidate.sectorId === area?.sectorId && candidate.bounds
-    );
-    if (!Number.isFinite(playerY) || sectorAreas.length === 0) return 0;
-    const top = Math.min(...sectorAreas.map(({ bounds }) => bounds.y));
-    const bottom = Math.max(...sectorAreas.map(({ bounds }) => bounds.y + bounds.height));
+    const sectorId = area?.sectorId;
+    const sectorBounds = [...(scene.world?.areas ?? []), ...(scene.world?.landmarks ?? [])]
+        .filter((candidate) => candidate.sectorId === sectorId && candidate.bounds)
+        .map(({ bounds }) => bounds);
+    if (!Number.isFinite(playerY) || sectorBounds.length === 0) return 0;
+    const top = Math.min(...sectorBounds.map(({ y }) => y));
+    const bottom = Math.max(...sectorBounds.map(({ y, height }) => y + height));
     if (![top, bottom].every(Number.isFinite) || bottom <= top) return 0;
     return clamp((bottom - playerY) / (bottom - top), 0, 1);
 }

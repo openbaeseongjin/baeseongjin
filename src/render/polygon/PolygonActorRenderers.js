@@ -209,7 +209,7 @@ export class PolygonLocalPlayerRenderer {
             context.globalAlpha = 1;
         }
         drawPlayerBody(context, player, scene.rope, PLAYER_COLORS.local, PLAYER_COLORS.localEdge);
-        const speed = player.velocity.length();
+        const speed = Math.hypot(player.velocity.x, player.velocity.y);
         if (speed <= 160) return;
         context.strokeStyle = "rgba(103, 232, 249, 0.45)";
         context.lineWidth = 4;

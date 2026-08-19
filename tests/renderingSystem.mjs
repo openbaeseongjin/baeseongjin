@@ -22,6 +22,7 @@ import {
 } from "../src/render/sprites/PlayerSpriteManifest.js";
 import { createPlayerPresentationEvents } from "../src/render/sprites/PlayerPresentationEvent.js";
 import { SpriteAssetFallbackRenderer } from "../src/render/SpriteSceneRenderer.js";
+import { PolygonLocalPlayerRenderer } from "../src/render/polygon/PolygonActorRenderers.js";
 import { SpriteImageAsset, SpriteImageAssetSet } from "../src/render/sprites/SpriteImageAsset.js";
 import {
     AuthoredWorldObjectRenderer,
@@ -168,6 +169,28 @@ export async function run() {
     assetFallback.asset.status = "ready";
     assetFallback.draw({});
     assert.deepEqual(fallbackCalls, ["polygon", "sprite"]);
+
+    const detachedPlayerContext = recordingContext();
+    const detachedPlayerScene = {
+        player: {
+            position: { x: 40, y: 60 },
+            velocity: { x: 240, y: -40 },
+            collider: { type: "circle", radius: 18 },
+            angle: 0
+        },
+        rope: { isAttached: false },
+        eventFlash: null
+    };
+    const detachedFallback = new SpriteAssetFallbackRenderer({
+        asset: { status: "failed" },
+        spriteRenderer: { draw: () => assert.fail("failed assets must not reach the sprite renderer") },
+        polygonRenderer: new PolygonLocalPlayerRenderer()
+    });
+    assert.doesNotThrow(() => detachedFallback.draw({ context: detachedPlayerContext, scene: detachedPlayerScene }));
+    assert.ok(
+        detachedPlayerContext.calls.some(([name, x, y]) => name === "lineTo" && x === 20.8 && y === 63.2),
+        "polygon fallback must consume detached plain velocity DTOs when drawing the speed trail"
+    );
 
     let mockImage;
     const mockImages = [];

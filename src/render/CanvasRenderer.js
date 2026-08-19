@@ -10,7 +10,7 @@ import {
 import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewport.js";
 import { assertSceneRenderer } from "./SceneRenderer.js";
 import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus } from "./ActorStatusPresentation.js";
-import { resolveScreenEdgeGuide } from "./ScreenEdgeGuide.js";
+import { layoutAccessEdgeGuides, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
 
 export class CanvasRenderer {
@@ -622,46 +622,36 @@ export class CanvasRenderer {
 
     drawAccessGuide({ world, worldProgress, player, camera, mobileView = false }) {
         if (!world?.accessModules?.length || !camera || !player?.position) return;
-        const region = authoredRegionForPosition(world, player.position);
-        const sector = world.sectors?.find(({ id }) => id === region?.sectorId);
-        const requiredCount = sector?.accessModuleRequirement ?? 0;
-        if (requiredCount <= 0) return;
-        const collected = new Set(worldProgress?.collectedAccessModuleIds ?? []);
-        const collectedCount = (sector.accessModuleIds ?? []).filter((id) => collected.has(id)).length;
-        if (collectedCount >= requiredCount) return;
-        const nextModuleId = (sector.accessModuleIds ?? []).find((id) => !collected.has(id));
-        const target = world.accessModules.find(({ id }) => id === nextModuleId)?.position;
-        if (!target) return;
-        const guide = resolveScreenEdgeGuide({
-            target,
+        const targets = resolveAccessModuleTargets({ world, worldProgress, playerPosition: player.position });
+        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+        const ctx = this.context;
+        const guides = layoutAccessEdgeGuides({
+            targets,
             camera,
             viewportWidth: this.cssWidth,
             viewportHeight: this.cssHeight,
-            insets: { left: 30, right: 30, top: 54, bottom: mobileView ? 116 : 30 }
+            insets: { left: 30, right: 30, top: 54, bottom: mobileView ? 116 : 30 },
+            compactView
         });
-        if (!guide) return;
-        let x = guide.x;
-        let y = guide.y;
-        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
-        if (guide.edge === "left" && y < (compactView ? 214 : 252)) y = compactView ? 214 : 252;
-        if (guide.edge === "top" && x < 184) x = 184;
-        const pulse = 0.9 + Math.sin(this.now() * 7) * 0.1;
-        const ctx = this.context;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(guide.angle);
-        ctx.globalAlpha = pulse;
-        ctx.fillStyle = "#fbbf24";
-        ctx.strokeStyle = "#fff7d6";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(16, 0);
-        ctx.lineTo(-10, -12);
-        ctx.lineTo(-3, 0);
-        ctx.lineTo(-10, 12);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
+        for (const guide of guides) {
+            const pulse = 0.9 + Math.sin(this.now() * 7) * 0.1;
+            ctx.save();
+            ctx.translate(guide.x, guide.y);
+            ctx.rotate(guide.angle);
+            ctx.scale(guide.scale, guide.scale);
+            ctx.globalAlpha = pulse;
+            ctx.fillStyle = "#fbbf24";
+            ctx.strokeStyle = "#fff7d6";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(16, 0);
+            ctx.lineTo(-10, -12);
+            ctx.lineTo(-3, 0);
+            ctx.lineTo(-10, 12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
     }
 }
