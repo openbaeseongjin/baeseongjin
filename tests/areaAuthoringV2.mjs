@@ -15,6 +15,7 @@ import {
 import { validateAreaSpecV2 } from "../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
 import { AREA_CATALOG_MANIFEST_V2, validateAreaCatalogManifest } from "../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
 import { composeSectorCatalog } from "../src/game/world/area-authoring-v2/AreaCatalogComposer.js";
+import { collectGeneratedOutputs, generatedModulePath, renderGeneratedAreaModule } from "../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
 
 export function createValidSpec() {
     return {
@@ -190,6 +191,17 @@ export function run() {
         validateAreaCatalogManifest(overlayManifest, { expectedStageIds: ["1-1", "1-2"] }).issues.some(
             ({ code }) => code === "manifest-overlay-forbidden"
         )
+    );
+
+    const firstOutput = renderGeneratedAreaModule(validSpec);
+    const secondOutput = renderGeneratedAreaModule(structuredClone(validSpec));
+    assert.equal(firstOutput, secondOutput);
+    assert.match(firstOutput, /^\/\/ GENERATED FILE - DO NOT EDIT\n/);
+    assert.match(firstOutput, /export const GENERATED_STAGE_ID = "1-1"/);
+    assert.equal(generatedModulePath(manifest.stageSources[0]), manifest.stageSources[0].outputPath);
+    assert.deepEqual(
+        collectGeneratedOutputs({ manifest, specsByStageId: new Map([["1-1", validSpec]]) }),
+        [{ outputPath: manifest.stageSources[0].outputPath, content: firstOutput }]
     );
 }
 

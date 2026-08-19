@@ -146,7 +146,7 @@ git commit -m "feat: add atomic area catalog composer contract"
 - Produces `renderGeneratedAreaModule(spec)`, `generatedModulePath(entry)`, and `collectGeneratedOutputs({ manifest, specsByStageId })`.
 - The Node command accepts no argument to write generated files and `--check` to compare in-memory output with checked-in files. It exits nonzero without writing when manifest or v2 validation fails.
 
-- [ ] **Step 1: Add failing deterministic-output and stale-file tests.**
+- [x] **Step 1: Add failing deterministic-output and stale-file tests.**
 
 ```js
 const first = renderGeneratedAreaModule(validSpec);
@@ -156,13 +156,13 @@ assert.match(first, /^\/\/ GENERATED FILE - DO NOT EDIT\n/);
 assert.match(first, /export const GENERATED_STAGE_ID = "1-1"/);
 ```
 
-- [ ] **Step 2: Run the focused test to verify the generator assertions fail.**
+- [x] **Step 2: Run the focused test to verify the generator assertions fail.**
 
 Run: `node tests/areaAuthoringV2.mjs`
 
 Expected: `ERR_MODULE_NOT_FOUND` for `AreaSpecV2Generator.js`.
 
-- [ ] **Step 3: Implement stable serialization and all-or-nothing output writing.**
+- [x] **Step 3: Implement stable serialization and all-or-nothing output writing.**
 
 ```js
 export function renderGeneratedAreaModule(spec) {
@@ -176,13 +176,13 @@ export function renderGeneratedAreaModule(spec) {
 
 The command reads only `AREA-CATALOG.json` and `AREA-SPEC.v2.json`, validates every selected generated Stage before calling `writeFileSync`, writes only below `areas/generated/`, and reports every stale path in `--check` mode.
 
-- [ ] **Step 4: Run the generator unit assertions.**
+- [x] **Step 4: Run the generator unit assertions.**
 
 Run: `node tests/areaAuthoringV2.mjs`
 
 Expected: deterministic rendering and invalid-output assertions pass. The filesystem command is first run after Task 4 creates its manifest and candidates.
 
-- [ ] **Step 5: Commit the generator command.**
+- [x] **Step 5: Commit the generator command.**
 
 ```powershell
 git add src/game/world/area-authoring-v2 scripts/area-authoring-v2 tests/areaAuthoringV2.mjs
