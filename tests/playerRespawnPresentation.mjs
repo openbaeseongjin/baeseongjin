@@ -90,4 +90,61 @@ export function run() {
         true,
         "the multiplayer owner must use the same local death hold policy"
     );
+
+    let renderedState = null;
+    const renderAuthority = {
+        playerId: "local-player",
+        snapshot: () => ({
+            state: {
+                players: [
+                    {
+                        id: "local-player",
+                        position: { x: 0, y: 0 },
+                        velocity: { x: 0, y: 0 },
+                        angle: 0,
+                        angularVelocity: 0,
+                        rope: { isAttached: false },
+                        health: 100,
+                        maxHealth: 100,
+                        lifeState: "active"
+                    }
+                ],
+                enemies: [],
+                activeCheckpointId: null,
+                runState: "playing",
+                metrics: {}
+            },
+            predicted: {
+                position: { x: 0, y: 0 },
+                velocity: { x: 0, y: 0 },
+                angle: 0,
+                angularVelocity: 0,
+                rope: { isAttached: false },
+                swingDrag: null,
+                health: 100,
+                maxHealth: 100,
+                lifeState: "active",
+                launcher: null
+            }
+        }),
+        renderSnapshot: () => ({
+            world: { checkpoints: [], respawnAnchors: [] },
+            eventFlash: null,
+            attachmentCandidate: null,
+            augmentProjectiles: [],
+            maxAttachDistance: 480
+        }),
+        metrics: () => ({})
+    };
+    const rangeApp = new MultiplayerGameApp({
+        canvas: {},
+        renderer: { ...renderer(), draw: (state) => (renderedState = state) },
+        authority: renderAuthority
+    });
+    rangeApp.render();
+    assert.equal(
+        renderedState.maxAttachDistance,
+        480,
+        "multiplayer rendering must preserve the owner's effective Rope range"
+    );
 }

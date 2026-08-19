@@ -9,6 +9,7 @@ import { Vector2 } from "../../game-kit/index.js";
 import { enemyImpactDisplacementEnabled } from "./EnemyMobility.js";
 import { TimedStateController } from "../../core/state/TimedStateController.js";
 import { ENEMY_ATTACK_STATES, ENEMY_ATTACK_TRANSITIONS, normalizeEnemyState } from "./EnemyStateCatalog.js";
+import { withEnemyRenderSnapshot } from "./EnemyRenderSnapshot.js";
 
 function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -193,7 +194,7 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
     }
 });
 
-export class EnemyObject extends withEnemyWeaponSimulation(SimulationDrivenObject) {
+export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulation(SimulationDrivenObject)) {
     constructor({
         id,
         position,

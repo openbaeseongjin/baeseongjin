@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { InputDispatcher } from "../src/game/input/InputDispatcher.js";
 import { createInputCapabilityMixin } from "../src/game/input/InputCapability.js";
 import { InputDrivenObject } from "../src/game/objects/InputDrivenObject.js";
+import { createRenderSnapshotCapabilityMixin } from "../src/game/objects/RenderSnapshotCapability.js";
 import { SimulationDrivenObject } from "../src/game/objects/SimulationDrivenObject.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../src/game/combat/ProjectileObject.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
@@ -51,15 +52,42 @@ class CounterSimulationObject extends withUnrelatedSimulation(withCounterSimulat
     }
 }
 
+const withCounterRenderSnapshot = createRenderSnapshotCapabilityMixin({
+    kind: "counter",
+    snapshot() {
+        return { id: this.id, total: this.total };
+    }
+});
+
+const withDuplicateRenderSnapshot = createRenderSnapshotCapabilityMixin({
+    kind: "duplicate",
+    snapshot() {
+        return { id: this.id };
+    }
+});
+
+class CounterRenderObject extends withCounterRenderSnapshot(CounterInputObject) {}
+
+class InvalidDoubleRenderObject extends withDuplicateRenderSnapshot(withCounterRenderSnapshot(CounterInputObject)) {}
+
 export function run() {
     const dispatcher = new InputDispatcher();
     const owned = new CounterInputObject({ id: "owned", ownerId: "player-a" });
     const other = new CounterInputObject({ id: "other", ownerId: "player-b" });
     const simulated = new SimulationDrivenObject({ id: "enemy" });
+    const renderedCounter = new CounterRenderObject({ id: "rendered-counter", ownerId: "player-a" });
 
     assert.equal(owned.driveKind, "input");
     assert.equal(simulated.driveKind, "simulation");
+    assert.equal(owned.hasRenderSnapshotCapability(), false, "non-rendered objects need no snapshot capability");
     assert.equal(owned.hasInputCapability("counter"), true);
+    assert.equal(renderedCounter.hasRenderSnapshotCapability("counter"), true);
+    assert.deepEqual(renderedCounter.renderSnapshot(), { id: "rendered-counter", total: 0 });
+    assert.throws(
+        () => new InvalidDoubleRenderObject({ id: "duplicate-render", ownerId: "player-a" }),
+        /duplicate render snapshot capability/,
+        "one object kind must not attach two competing render snapshot owners"
+    );
     assert.equal(
         dispatcher.dispatch({
             objects: [simulated, other, owned],
@@ -107,6 +135,8 @@ export function run() {
     );
     assert.equal(player.hasInputCapability("locomotion"), true);
     assert.equal(player.ropeObject.hasInputCapability("rope-pointer"), true);
+    assert.equal(player.hasRenderSnapshotCapability("player"), true);
+    assert.equal(player.ropeObject.hasRenderSnapshotCapability("rope"), true);
     assert.deepEqual(
         simulation.inputDrivenObjects(player.id),
         [player, player.ropeObject],
@@ -122,6 +152,11 @@ export function run() {
         simulation.enemies.every((enemy) => enemy.hasSimulationCapability("enemy-weapon")),
         true,
         "enemy behavior must be exposed as a simulation capability"
+    );
+    assert.equal(
+        simulation.enemies.every((enemy) => enemy.hasRenderSnapshotCapability("enemy")),
+        true,
+        "every rendered enemy type must own its render snapshot mixin"
     );
     const target = simulation.enemies[0];
     target.position.set(player.physics.position.x + 20, player.physics.position.y);
@@ -174,6 +209,27 @@ export function run() {
         true,
         "projectiles must own client collision behavior instead of leaving type branches in the runtime store"
     );
+    assert.equal(
+        projectileKinds.every((projectile) => projectile.hasRenderSnapshotCapability("projectile")),
+        true,
+        "every projectile type must own its render snapshot mixin"
+    );
+    const playerRenderState = player.renderSnapshot();
+    const ropeRenderState = player.ropeObject.renderSnapshot();
+    const enemyRenderState = target.renderSnapshot();
+    const projectileRenderState = projectileKinds[1].renderSnapshot();
+    const playerX = playerRenderState.position.x;
+    player.physics.position.x += 10;
+    target.position.x += 10;
+    projectileKinds[1].position.x += 10;
+    assert.equal(playerRenderState.position.x, playerX, "player render state must detach from live physics");
+    assert.notEqual(enemyRenderState.position.x, target.position.x, "enemy render state must detach from live motion");
+    assert.notEqual(
+        projectileRenderState.position.x,
+        projectileKinds[1].position.x,
+        "projectile render state must detach from live motion"
+    );
+    assert.equal(ropeRenderState.rope.isAttached, false);
     assert.equal(projectileKinds[0].replicationState(42).predictionId, `${player.id}:42`);
     assert.equal(projectileKinds[0].replicationState(42).objectType, "player-projectile");
     assert.equal(projectileKinds[1].replicationState(42).predictionId, null);

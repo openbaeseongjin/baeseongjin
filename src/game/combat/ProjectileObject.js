@@ -3,6 +3,7 @@ import { defineObjectOwner } from "../objects/GameObject.js";
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
 import { withEnemyHitPrediction, withPlayerImpactPrediction } from "./ProjectileClientCollision.js";
 import { advanceHomingProjectileMotion, advanceProjectileMotion } from "./ProjectileMotion.js";
+import { withProjectileRenderSnapshot } from "./ProjectileRenderSnapshot.js";
 
 export const PROJECTILE_MOTION_CAPABILITY = "projectile-motion";
 
@@ -24,7 +25,7 @@ const withBallisticProjectileMotion = createSimulationCapabilityMixin({
     }
 });
 
-class ProjectileObject extends SimulationDrivenObject {
+class ProjectileObject extends withProjectileRenderSnapshot(SimulationDrivenObject) {
     #clientCollisionState;
     #collisionRejectionPolicy;
     #renderCollection;

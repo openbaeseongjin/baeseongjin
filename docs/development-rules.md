@@ -179,6 +179,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 한 객체에 이동·공격처럼 여러 capability가 붙을 수 있으므로 “객체당 capability 하나”를 가정하지 않는다. 각 단계는 무관한 capability를 실행하지 않는 회귀 테스트를 가진다.
 - capability는 객체 자신의 상태 전이와 행동을 소유하고, 월드 스케줄러는 단계 순서·대상 집합·공용 context와 사건 연결만 조정한다. 전송 계층이나 예측 저장소에 별도 운동 공식을 복제하지 않는다.
 - capability 디스패치는 네트워크 권한을 결정하지 않는다. `InputDrivenObject`와 `SimulationDrivenObject`의 상태 변화 원인, 클라이언트 claim과 서버 중립 시뮬레이션 경계는 기존 분할 권한 규칙을 그대로 따른다.
+- 화면에 전달되는 gameplay object는 상태 변화 원인과 별개로 종류별 `render-snapshot` capability mixin을 가져야 한다. Player·Rope·Enemy·Projectile의 mixin은 자기 소유 상태만 detached DTO로 만들며, 중앙 snapshot 조립기에서 `instanceof`, object kind switch, prototype getter 의존 또는 필드별 복사를 추가하지 않는다. 새 renderable 종류는 capability 존재, 중첩 mutable reference 비공유, 실제 `GameSimulation` 전후 snapshot 보간, 싱글·멀티 scene parity를 같은 변경에서 검증한다.
 - 같은 단계에서 종류별 동작이 다르면 중앙 `if (type)` 분기를 추가하지 않고 같은 capability ID를 구현하는 서로 다른 믹스인을 조합한다. 종류 선택은 객체 생성 팩토리 경계에서만 하고 스케줄러·예측 저장소·전송 계층으로 퍼뜨리지 않는다.
 - 충돌 가능·claim 대기·거부 후 재시도 같은 수명 상태는 해당 객체가 공개 명령으로 소유한다. receipt 처리기가 객체의 임시 boolean을 직접 풀거나 같은 겹침에 객체를 복구하지 않는다. 재시도가 가능한 중립 객체도 분리 후 재진입 같은 명시적 재무장 조건을 통과해야 한다.
 - 예측 객체 저장소는 등록, 식별자 대응, 권위 사건 정리와 렌더 snapshot만 담당한다. 운동·충돌·피드백 발생 조건·거부 정책을 객체 종류별로 해석하지 않는다.
