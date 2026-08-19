@@ -13,6 +13,19 @@ function freezeCard(definition) {
 
 export const ACTION_AUGMENT_CATALOG = Object.freeze([
     freezeCard({
+        id: "default-punch",
+        category: "base-action",
+        displayName: "주먹",
+        cooldownSeconds: 0.5,
+        tags: ["built-in", "attack", "right-click"],
+        effect: Object.freeze({
+            range: 55,
+            damageMultiplier: 0.4,
+            knockbackDistance: 50,
+            knockbackSeconds: 0.25
+        })
+    }),
+    freezeCard({
         id: "direction-dash",
         category: "base-action",
         displayName: "점멸",

@@ -167,13 +167,17 @@ export class SectorProgressState {
             return freezeResult({ accepted: true, changed: false, reason: "access-module-already-collected" });
         }
         this.collectedAccessModuleIds.add(accessModuleId);
-        const before = this.unlockedRouteIds.size;
+        const beforeRoutes = new Set(this.unlockedRouteIds);
         this.#unlockSatisfiedRoutes();
         return freezeResult({
             accepted: true,
             changed: true,
             accessModuleId,
-            routeChanged: this.unlockedRouteIds.size !== before,
+            unlockedRouteIds: sortedIds(
+                [...this.unlockedRouteIds].filter((id) => !beforeRoutes.has(id)),
+                this.idOrder
+            ),
+            routeChanged: this.unlockedRouteIds.size !== beforeRoutes.size,
             access: this.accessSummary(module.sectorId)
         });
     }

@@ -23,6 +23,7 @@ import {
 } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
+import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -102,6 +103,7 @@ export class MultiplayerGameApp {
             deathDurationSeconds: deathPresentation.clip.totalDurationSeconds,
             spriteSize: deathPresentation.size
         });
+        this.worldUnlockPresentation = new WorldUnlockPresentation();
         this.storyPresentation = new AuthoredStoryPresentation();
         this.localRunCompleted = false;
         this.localFoundationReward = null;
@@ -286,6 +288,12 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
         const events = this.authority.drainEvents();
+        this.worldUnlockPresentation.prepare(events, {
+            world: this.authority.renderSnapshot()?.world,
+            camera: this.camera,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
+        });
         const initialAudioContext = this.createAudioContext(
             current.predicted.position,
             current.predicted.tick,
@@ -455,6 +463,17 @@ export class MultiplayerGameApp {
     }
 
     updatePresentationCamera(dt, player, world) {
+        const unlockPhase = this.worldUnlockPresentation.advance(dt, this.camera);
+        if (unlockPhase.holding) {
+            return resolveAuthoredCameraShot({
+                world,
+                player: { position: unlockPhase.focusPosition },
+                mobileView: this.mobileView,
+                defaultZoom: CAMERA_CONFIG.desktopZoom,
+                cssWidth: this.renderer.cssWidth,
+                cssHeight: this.renderer.cssHeight
+            });
+        }
         const phase = this.respawnPresentation.advance(dt, this.camera);
         if (phase.holding) {
             return resolveAuthoredCameraShot({

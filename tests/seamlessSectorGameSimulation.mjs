@@ -92,7 +92,11 @@ export function run() {
     assert.equal(simulation.world.gates.length, 0);
     assert.equal(simulation.activeCheckpoint, null);
     assert.equal(simulation.activeRespawnAnchor.id, "sector-01:entry");
-    assert.equal(simulation.world.accessModules.length, 3);
+    assert.equal(simulation.world.accessModules.length, 9);
+    for (const sector of simulation.world.sectors) {
+        assert.equal(sector.accessModuleIds.length, 3);
+        assert.equal(sector.accessModuleRequirement, 3);
+    }
     assert.ok(simulation.world.enemySpawns.some(({ accessModuleId }) => accessModuleId));
     assert.equal(simulation.enemyStates().length, simulation.world.enemySpawns.length);
     assert.equal(simulation.snapshot().enemies.length, simulation.world.enemySpawns.length);
@@ -163,17 +167,19 @@ export function run() {
                 spawn.position.y <= spawn.activation.y + spawn.activation.height,
             `access Carrier must spawn inside its activation band ${module.encounterId}`
         );
-        assert.ok(
-            simulation.world.surfaces.some(
-                (surface) =>
-                    surface.landmarkId === module.landmarkId &&
-                    surface.id.includes("access-annex-arena") &&
-                    spawn.position.x >= surface.x &&
-                    spawn.position.x <= surface.x + surface.width &&
-                    spawn.position.y === surface.topY
-            ),
-            `access Carrier must stand on authored annex collision ${module.encounterId}`
-        );
+        if (module.sectorId === "sector-01") {
+            assert.ok(
+                simulation.world.surfaces.some(
+                    (surface) =>
+                        surface.landmarkId === module.landmarkId &&
+                        surface.id.includes("access-annex-arena") &&
+                        spawn.position.x >= surface.x &&
+                        spawn.position.x <= surface.x + surface.width &&
+                        spawn.position.y === surface.topY
+                ),
+                `Sector 01 access Carrier must stand on its authored annex ${module.encounterId}`
+            );
+        }
     }
 
     const carrier = simulation.enemies.find(({ objectId }) =>
@@ -194,6 +200,69 @@ export function run() {
     );
     assert.equal(simulation.worldProgress.snapshot().collectedAccessModuleIds.length, 1);
     assert.equal(simulation.snapshot().eventFlash.type, "access-module-collected");
+
+    const unlockSimulation = createCurrentGameSimulation({ worldSeed: 9182, playerId: "unlock-player" });
+    const transitionRoute = unlockSimulation.world.routeLocks.find(
+        ({ sourceLandmarkId }) => sourceLandmarkId === "sector-01:landmark:08"
+    );
+    completeLandmark(unlockSimulation.worldProgress, unlockSimulation.world, "sector-01:landmark:08");
+    const barrierIds = unlockSimulation.world.objects.find(
+        ({ kind, routeLockId }) => kind === "access-transit-lock" && routeLockId === transitionRoute.id
+    ).barrierSurfaceIds;
+    assert.equal(
+        unlockSimulation.activeCollisionSurfaces.filter(({ id }) => barrierIds.includes(id)).length,
+        2,
+        "the locked Sector transition must include both authored barrier segments"
+    );
+    const transitionConnector = unlockSimulation.world.connectors.find(
+        ({ routeLockId }) => routeLockId === transitionRoute.id
+    );
+    const pathDirection = {
+        x: transitionConnector.end.x - transitionConnector.start.x,
+        y: transitionConnector.end.y - transitionConnector.start.y
+    };
+    const pathDistance = Math.hypot(pathDirection.x, pathDirection.y);
+    const lockedSweep = unlockSimulation.players[0].physics.collider.farthestSafePositionAlong({
+        start: transitionConnector.start,
+        direction: pathDirection,
+        distance: pathDistance,
+        surfaces: unlockSimulation.activeCollisionSurfaces
+    });
+    assert.equal(lockedSweep.blocked, true);
+    assert.ok(barrierIds.includes(lockedSweep.surfaceId), "the visible transit device must own the blocking collider");
+    for (const moduleId of unlockSimulation.world.sectors[0].accessModuleIds) {
+        const module = unlockSimulation.world.accessModules.find(({ id }) => id === moduleId);
+        unlockSimulation.enemies.find(({ objectId }) => objectId === module.encounterId).health = 0;
+    }
+    unlockSimulation.step(
+        0,
+        createPlayerCommand(
+            {
+                horizontal: 0,
+                vertical: 0,
+                pointer: { x: 0, y: 0, down: false },
+                viewport: { width: 1280, height: 720 }
+            },
+            { x: 0, y: 0 }
+        )
+    );
+    assert.equal(unlockSimulation.worldProgress.isRouteUnlocked(transitionRoute.id), true);
+    assert.equal(
+        unlockSimulation.activeCollisionSurfaces.some(({ id }) => barrierIds.includes(id)),
+        false,
+        "the third module must remove only the Sector transit blocker from active collision"
+    );
+    const unlockedSweep = unlockSimulation.players[0].physics.collider.farthestSafePositionAlong({
+        start: transitionConnector.start,
+        direction: pathDirection,
+        distance: pathDistance,
+        surfaces: unlockSimulation.activeCollisionSurfaces
+    });
+    assert.equal(barrierIds.includes(unlockedSweep.surfaceId), false);
+    const unlockEvents = unlockSimulation
+        .drainReplicationEvents()
+        .filter(({ eventType, routeId }) => eventType === "route-unlocked" && routeId === transitionRoute.id);
+    assert.equal(unlockEvents.length, 1, "the third module must publish one shared route unlock event");
 
     const owner = simulation.players[0];
     const teammate = simulation.addPlayer(

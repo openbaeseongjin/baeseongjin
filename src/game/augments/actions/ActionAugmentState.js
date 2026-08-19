@@ -386,6 +386,16 @@ export class ActionAugmentState {
             modifierIds: [...this.loadout.modifierIds],
             direction: freezePoint(direction)
         };
+        if (baseAction.id === "default-punch") {
+            return {
+                ...shared,
+                immediate: true,
+                range: base.range,
+                damageMultiplier: base.damageMultiplier,
+                knockbackDistance: base.knockbackDistance,
+                knockbackSeconds: base.knockbackSeconds
+            };
+        }
         if (baseAction.id === "direction-dash") {
             return {
                 ...shared,

@@ -11,14 +11,19 @@ import {
     createActionLoadout,
     createActionResolutionTracker
 } from "../src/game/augments/actions/ActionAugmentState.js";
+import { selectNearestActionTarget } from "../src/game/augments/actions/ActionTargeting.js";
+import { AugmentCombatRuntime } from "../src/game/augments/AugmentCombatRuntime.js";
+import { FoundationAugmentState } from "../src/game/augments/FoundationAugmentState.js";
+import { foundationAugmentById } from "../src/game/augments/FoundationAugmentCatalog.js";
 
 function direction(x, y) {
     return { x, y };
 }
 
 export function run() {
-    assert.equal(ACTION_AUGMENT_CATALOG.length, 16);
+    assert.equal(ACTION_AUGMENT_CATALOG.length, 17);
     assert.deepEqual(BASE_ACTION_IDS, [
+        "default-punch",
         "direction-dash",
         "dash-strike",
         "instant-guard",
@@ -30,10 +35,60 @@ export function run() {
     assert.equal(UNIVERSAL_MODIFIER_IDS.length, 4);
     assert.equal(actionAugmentById("end-wave").displayName, "종료 파동");
     assert.equal(actionAugmentById("direction-dash").displayName, "점멸");
+    assert.equal(actionAugmentById("default-punch").displayName, "주먹");
+    assert.equal(foundationAugmentById("default-punch"), null, "the built-in punch must not enter Augment offers");
     assert.throws(
         () => createActionLoadout({ baseActionId: "direction-dash", signatureId: "wall-impact" }),
         /not compatible/
     );
+
+    const punch = new ActionAugmentState({ baseActionId: "default-punch" });
+    const punchStart = punch.beginAction({ direction: direction(1, 0) });
+    assert.equal(punchStart.accepted, true);
+    assert.equal(punchStart.cooldownSeconds, 0.5);
+    assert.deepEqual(
+        {
+            baseActionId: punchStart.activation.baseActionId,
+            immediate: punchStart.activation.immediate,
+            range: punchStart.activation.range,
+            damageMultiplier: punchStart.activation.damageMultiplier,
+            knockbackDistance: punchStart.activation.knockbackDistance,
+            knockbackSeconds: punchStart.activation.knockbackSeconds
+        },
+        {
+            baseActionId: "default-punch",
+            immediate: true,
+            range: 55,
+            damageMultiplier: 0.4,
+            knockbackDistance: 50,
+            knockbackSeconds: 0.25
+        }
+    );
+    assert.equal(punch.chargesRemaining, 0);
+    assert.equal(punch.rechargeRemaining, 0.5);
+    assert.ok(punchStart.events.some(({ eventType }) => eventType === "action-ended"));
+    punch.advance(0.25);
+    assert.equal(punch.rechargeRemaining, 0.25);
+    punch.advance(0.25);
+    assert.equal(punch.chargesRemaining, 1);
+    assert.equal(
+        selectNearestActionTarget({
+            playerPosition: { x: 0, y: 0 },
+            range: punchStart.activation.range,
+            enemies: [
+                { id: "far", health: 100, position: { x: 80, y: 0 } },
+                { id: "near", health: 100, position: { x: 54, y: 0 } }
+            ]
+        }).id,
+        "near"
+    );
+    const migratedPunchRuntime = new AugmentCombatRuntime();
+    migratedPunchRuntime.restore({ punchCooldownRemaining: 0.25 }, new FoundationAugmentState(), 100);
+    assert.equal(migratedPunchRuntime.actionState.loadout.baseActionId, "default-punch");
+    assert.equal(migratedPunchRuntime.actionState.chargesRemaining, 0);
+    assert.equal(migratedPunchRuntime.actionState.rechargeRemaining, 0.25);
+    assert.equal(migratedPunchRuntime.actionState.rechargeDuration, 0.5);
+    assert.equal("punchCooldownRemaining" in migratedPunchRuntime.snapshot(), false);
 
     const dash = new ActionAugmentState({
         baseActionId: "direction-dash",

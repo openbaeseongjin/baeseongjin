@@ -38,6 +38,16 @@ export function run() {
         { charges: 1, maximum: 2, remaining: 2, duration: 4, ratio: 0.5 }
     );
     assert.deepEqual(
+        resolveActionCooldownStatus({
+            loadout: { baseActionId: "default-punch", modifierIds: [] },
+            chargesRemaining: 0,
+            rechargeRemaining: 0.25,
+            rechargeDuration: 0.5
+        }),
+        { charges: 0, maximum: 1, remaining: 0.25, duration: 0.5, ratio: 0.5 },
+        "the built-in punch must use the same visible Action cooldown resolver"
+    );
+    assert.deepEqual(
         renderer.screenToWorld({ x: 360, y: 180 }, { x: 100, y: 50, zoom: 0.5 }),
         { x: 800, y: 370 },
         "screen aiming must account for the wider zoomed-out mobile camera"
@@ -92,6 +102,46 @@ export function run() {
         [18, 54, 240, 92],
         "mobile-sized landscape viewports must use the compact HUD even without coarse pointer emulation"
     );
+
+    const accessWorld = {
+        landmarks: [
+            {
+                id: "sector-01:landmark:01",
+                sectorId: "sector-01",
+                bounds: { x: -480, y: -960, width: 960, height: 960 },
+                entry: { x: 0, y: 0 },
+                exit: { x: 0, y: -960 }
+            }
+        ],
+        sectors: [
+            {
+                id: "sector-01",
+                accessModuleIds: ["module:a", "module:b", "module:c"],
+                accessModuleRequirement: 3
+            }
+        ],
+        accessModules: [
+            { id: "module:a", hint: "LOWER" },
+            { id: "module:b", hint: "MIDDLE" },
+            { id: "module:c", hint: "UPPER" }
+        ]
+    };
+    textCalls.length = 0;
+    renderer.drawAccessHud({
+        world: accessWorld,
+        worldProgress: { collectedAccessModuleIds: ["module:a", "module:b"] },
+        player: { position: { x: 0, y: -100 } },
+        mobileView: true
+    });
+    assert.ok(textCalls.includes("ACCESS 2/3 · NEED 1"));
+    textCalls.length = 0;
+    renderer.drawAccessHud({
+        world: accessWorld,
+        worldProgress: { collectedAccessModuleIds: ["module:a", "module:b", "module:c"] },
+        player: { position: { x: 0, y: -100 } },
+        mobileView: true
+    });
+    assert.deepEqual(textCalls, ["ACCESS READY"]);
 
     let sceneDraws = 0;
     let localHudDraws = 0;

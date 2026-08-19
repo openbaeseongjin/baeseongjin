@@ -35,10 +35,14 @@ export function run() {
         if (routeId) {
             const route = world.routeLocks.find(({ id }) => id === routeId);
             if (route.requiredAccessModuleCount) {
-                const [firstModuleId, secondModuleId] = world.sectors[0].accessModuleIds;
+                const [firstModuleId, secondModuleId, thirdModuleId] = world.sectors[0].accessModuleIds;
                 assert.equal(progress.collectAccessModule(firstModuleId).changed, true);
                 assert.equal(progress.accessSummary("sector-01").ready, false);
                 assert.equal(progress.collectAccessModule(secondModuleId).changed, true);
+                assert.equal(progress.accessSummary("sector-01").ready, false);
+                const finalCollection = progress.collectAccessModule(thirdModuleId);
+                assert.equal(finalCollection.changed, true);
+                assert.deepEqual(finalCollection.unlockedRouteIds, [routeId]);
                 assert.equal(progress.accessSummary("sector-01").ready, true);
             }
         }
@@ -69,7 +73,8 @@ export function run() {
         }
         const route = world.routeLocks.find(({ sourceLandmarkId }) => sourceLandmarkId === landmark.id);
         if (route?.requiredAccessModuleCount) {
-            for (const accessModuleId of world.sectors[0].accessModuleIds.slice(0, route.requiredAccessModuleCount)) {
+            const sourceSector = world.sectors.find(({ id }) => id === landmark.sectorId);
+            for (const accessModuleId of sourceSector.accessModuleIds.slice(0, route.requiredAccessModuleCount)) {
                 boundary.collectAccessModule(accessModuleId);
             }
         }
@@ -80,6 +85,8 @@ export function run() {
     for (const accessModuleId of world.sectors[0].accessModuleIds.slice(0, 2)) {
         resetAccess.collectAccessModule(accessModuleId);
     }
+    assert.equal(resetAccess.accessSummary("sector-01").ready, false);
+    resetAccess.collectAccessModule(world.sectors[0].accessModuleIds[2]);
     const accessSnapshot = resetAccess.snapshot();
     assert.equal(new SectorProgressState(world, accessSnapshot).accessSummary("sector-01").ready, true);
 }

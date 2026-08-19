@@ -27,6 +27,13 @@ export function run() {
         [0, 1, 0, 1, 1, 0, 2, 2]
     );
     assert.ok(SECTOR_02_AREA_CATALOG.areas.every(({ windZones }) => windZones.length === 0));
+    assert.deepEqual(
+        SECTOR_02_AREA_CATALOG.areas
+            .flatMap(({ objects }) => objects)
+            .filter(({ accessModuleId }) => accessModuleId)
+            .map(({ accessModuleId }) => accessModuleId),
+        ["sector-02:access-module:a", "sector-02:access-module:b", "sector-02:access-module:c"]
+    );
     assert.ok(
         SECTOR_02_AREA_CATALOG.areas.every((area) =>
             area.objects.some(({ kind, gateId }) => kind === "gate-panel" && gateId === area.gate.id)

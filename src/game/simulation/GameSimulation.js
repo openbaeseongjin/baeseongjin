@@ -277,6 +277,7 @@ export class GameSimulation {
             playerId,
             respawnAnchorId: initialRespawnAnchorId
         });
+        runtime.entity.augmentCombat.syncLoadout(runtime.entity.foundation, runtime.entity.maxHealth);
         this.players.push(runtime.entity);
         this.#inputDrivenObjectsByOwner.set(runtime.entity.id, runtime.inputDrivenObjects);
         return runtime;
@@ -2182,6 +2183,13 @@ export class GameSimulation {
                     collectedCount: collection.access.collectedModuleIds.length,
                     requiredCount: collection.access.requiredCount
                 });
+                for (const routeId of collection.unlockedRouteIds ?? []) {
+                    this.recordReplicationEvent("route-unlocked", {
+                        routeId,
+                        landmarkId: accessModule.landmarkId,
+                        position: vectorState(enemy.position)
+                    });
+                }
                 this.eventFlash = {
                     type: "access-module-collected",
                     age: 0,

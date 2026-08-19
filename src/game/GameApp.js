@@ -21,6 +21,7 @@ import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentat
 import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
+import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
 
 export class GameApp {
     constructor({
@@ -72,6 +73,7 @@ export class GameApp {
             deathDurationSeconds: deathPresentation.clip.totalDurationSeconds,
             spriteSize: deathPresentation.size
         });
+        this.worldUnlockPresentation = new WorldUnlockPresentation();
         this.storyPresentation = new AuthoredStoryPresentation();
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
@@ -127,6 +129,12 @@ export class GameApp {
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
         this.queuePlayerPresentationEvents(authorityEvents);
+        this.worldUnlockPresentation.prepare(authorityEvents, {
+            world: state.world,
+            camera: this.camera,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
+        });
         const authorityFeedback = this.predictableProjectiles.apply(authorityEvents, state.tick, state);
         const owner = this.authority.ownerState();
         const predictedImpacts = this.predictableProjectiles
@@ -201,6 +209,17 @@ export class GameApp {
     }
 
     updatePresentationCamera(dt, player, world) {
+        const unlockPhase = this.worldUnlockPresentation.advance(dt, this.camera);
+        if (unlockPhase.holding) {
+            return resolveAuthoredCameraShot({
+                world,
+                player: { position: unlockPhase.focusPosition },
+                mobileView: this.mobileView,
+                defaultZoom: CAMERA_CONFIG.desktopZoom,
+                cssWidth: this.renderer.cssWidth,
+                cssHeight: this.renderer.cssHeight
+            });
+        }
         const phase = this.respawnPresentation.advance(dt, this.camera);
         if (!phase.holding) return this.updateCamera(dt, player, world);
         return resolveAuthoredCameraShot({

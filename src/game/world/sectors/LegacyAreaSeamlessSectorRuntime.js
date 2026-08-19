@@ -6,7 +6,7 @@ import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v4";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v5";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
@@ -15,6 +15,8 @@ const SECTOR_HALF_WIDTH = SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5;
 const CITY_WING_INSET = 96;
 const CITY_WING_OVERLAP = 48;
 const CITY_WING_THICKNESS = 32;
+const ACCESS_MODULES_PER_SECTOR = 3;
+const TRANSIT_BARRIER_THICKNESS = 24;
 const LEGACY_BOUNDARY_KINDS = new Set(["area-boundary-wall", "inter-floor-divider"]);
 const LEGACY_ENEMY_KINDS = new Set(["sentry", "patrol-drone"]);
 const LEGACY_STAGE_DOOR_KINDS = new Set(["gate", "gate-panel"]);
@@ -175,6 +177,65 @@ function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces, 
         topY: top,
         position: { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 },
         vertices
+    });
+}
+
+function rectangleVertices(bounds) {
+    return [
+        { x: bounds.x, y: bounds.y },
+        { x: bounds.x + bounds.width, y: bounds.y },
+        { x: bounds.x + bounds.width, y: bounds.y + bounds.height },
+        { x: bounds.x, y: bounds.y + bounds.height }
+    ];
+}
+
+function transitBarrierGeometry(lock, sourceLandmark, targetLandmark) {
+    const boundaryY = sourceLandmark.bounds.y;
+    const overlapBottom = Math.min(
+        sourceLandmark.bounds.y + sourceLandmark.bounds.height,
+        targetLandmark.bounds.y + targetLandmark.bounds.height
+    );
+    const pathX = (sourceLandmark.exit.x + targetLandmark.entry.x) * 0.5;
+    const segments = [
+        {
+            x: sourceLandmark.bounds.x,
+            y: boundaryY,
+            width: sourceLandmark.bounds.width,
+            height: TRANSIT_BARRIER_THICKNESS
+        },
+        {
+            x: pathX - TRANSIT_BARRIER_THICKNESS * 0.5,
+            y: boundaryY,
+            width: TRANSIT_BARRIER_THICKNESS,
+            height: Math.max(TRANSIT_BARRIER_THICKNESS, overlapBottom - boundaryY)
+        }
+    ];
+    const left = Math.min(...segments.map(({ x }) => x));
+    const top = Math.min(...segments.map(({ y }) => y));
+    const right = Math.max(...segments.map(({ x, width }) => x + width));
+    const bottom = Math.max(...segments.map(({ y, height }) => y + height));
+    const surfaces = segments.map((bounds, index) =>
+        freezeValue({
+            id: `${lock.id}:barrier:${index + 1}`,
+            kind: "sector-transit-barrier",
+            landmarkId: sourceLandmark.id,
+            oneWay: false,
+            grappleable: false,
+            renderable: false,
+            blockedByRouteId: lock.id,
+            x: bounds.x,
+            y: bounds.y,
+            width: bounds.width,
+            height: bounds.height,
+            topY: bounds.y,
+            position: { x: bounds.x + bounds.width * 0.5, y: bounds.y + bounds.height * 0.5 },
+            vertices: rectangleVertices(bounds)
+        })
+    );
+    return freezeValue({
+        segments,
+        surfaces,
+        presentationBounds: { x: left, y: top, width: right - left, height: bottom - top }
     });
 }
 
@@ -536,9 +597,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                         targetLandmarkId: runtimeLandmark.id,
                         connectorId: connector.id,
                         requiredObjectiveIds: previousOutboundObjectiveIds,
-                        ...(connector.sectorTransition && previousLandmark.sectorId === "sector-01"
-                            ? { requiredAccessModuleCount: 2 }
-                            : {}),
+                        ...(connector.sectorTransition ? { requiredAccessModuleCount: ACCESS_MODULES_PER_SECTOR } : {}),
                         sectorTransition: connector.sectorTransition
                     })
                 );
@@ -605,7 +664,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 accessModuleIds: accessModules
                     .filter(({ sectorId }) => sectorId === sectorDefinition.id)
                     .map(({ id }) => id),
-                accessModuleRequirement: sectorDefinition.id === "sector-01" ? 2 : 0
+                accessModuleRequirement: ACCESS_MODULES_PER_SECTOR
             })
         );
         const nextSectorDefinition = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex + 1];
@@ -627,14 +686,23 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
 
     for (const lock of routeLocks.filter(({ requiredAccessModuleCount }) => requiredAccessModuleCount > 0)) {
         const sourceLandmark = landmarks.find(({ id }) => id === lock.sourceLandmarkId);
+        const targetLandmark = landmarks.find(({ id }) => id === lock.targetLandmarkId);
+        const barrier = transitBarrierGeometry(lock, sourceLandmark, targetLandmark);
+        surfaces.push(...barrier.surfaces);
         objects.push(
             freezeValue({
                 id: `${lock.id}:transit-lock`,
                 kind: "access-transit-lock",
                 presentationId: "world-object:access-transit-lock",
                 landmarkId: sourceLandmark.id,
+                sectorId: sourceLandmark.sectorId,
                 routeLockId: lock.id,
                 position: sourceLandmark.exit,
+                requiredAccessModuleCount: lock.requiredAccessModuleCount,
+                requiredObjectiveIds: lock.requiredObjectiveIds,
+                barrierSurfaceIds: barrier.surfaces.map(({ id }) => id),
+                barrierSegments: barrier.segments,
+                presentationBounds: barrier.presentationBounds,
                 label: "SECTOR TRANSIT"
             })
         );

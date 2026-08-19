@@ -347,10 +347,16 @@ export class AccessModuleSignalRenderer {
     draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
         const currentSectorId = authoredRegionForPosition(scene.world, scene.player?.position)?.sectorId;
         const collected = new Set(scene.worldProgress?.collectedAccessModuleIds ?? []);
+        const sector = (scene.world.sectors ?? []).find(({ id }) => id === currentSectorId);
+        const sectorModuleIds = sector?.accessModuleIds ?? [];
+        const collectedCount = sectorModuleIds.filter((id) => collected.has(id)).length;
+        const accessReady = collectedCount >= (sector?.accessModuleRequirement ?? Number.POSITIVE_INFINITY);
         const playerPosition = scene.player?.position ?? scene.player;
-        const modules = (scene.world.accessModules ?? []).filter(
-            (module) => module.sectorId === currentSectorId && !collected.has(module.id)
-        );
+        const modules = accessReady
+            ? []
+            : (scene.world.accessModules ?? []).filter(
+                  (module) => module.sectorId === currentSectorId && !collected.has(module.id)
+              );
         const visible = modules.filter((module) => {
             if (!playerPosition) return false;
             const distance = Math.hypot(module.position.x - playerPosition.x, module.position.y - playerPosition.y);
@@ -447,6 +453,8 @@ export class AuthoredWorldObjectRenderer {
             });
         } else if (object.kind === "gate") {
             this.drawGate(context, style, bounds, gateUnlocked, { sectorId });
+        } else if (object.kind === "access-transit-lock") {
+            this.drawAccessTransitLock(context, object, scene, gateUnlocked, renderArgs.presentationTimeSeconds ?? 0);
         } else {
             context.translate(bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);
             if (object.kind === "augment-node") {
@@ -498,6 +506,58 @@ export class AuthoredWorldObjectRenderer {
             }
         }
         context.restore();
+    }
+
+    drawAccessTransitLock(context, object, scene, unlocked, presentationTimeSeconds) {
+        const sector = (scene.world.sectors ?? []).find(({ id }) => id === object.sectorId);
+        const moduleIds = sector?.accessModuleIds ?? [];
+        const collected = new Set(scene.worldProgress?.collectedAccessModuleIds ?? []);
+        const collectedCount = moduleIds.filter((id) => collected.has(id)).length;
+        const requiredCount = object.requiredAccessModuleCount ?? sector?.accessModuleRequirement ?? 0;
+        const remainingCount = Math.max(0, requiredCount - collectedCount);
+        const routeObjectivesComplete = (object.requiredObjectiveIds ?? []).every((objectiveId) =>
+            scene.worldProgress?.completedObjectiveIds?.includes(objectiveId)
+        );
+        const pulse = 0.62 + Math.sin(presentationTimeSeconds * 8) * 0.18;
+
+        if (!unlocked) {
+            for (const segment of object.barrierSegments ?? []) {
+                const x = segment.x - object.position.x;
+                const y = segment.y - object.position.y;
+                context.fillStyle = `rgba(251, 191, 36, ${0.08 + pulse * 0.08})`;
+                context.fillRect(x, y, segment.width, segment.height);
+                context.strokeStyle = `rgba(251, 191, 36, ${pulse})`;
+                context.lineWidth = 3;
+                context.setLineDash?.([18, 12]);
+                context.strokeRect(x, y, segment.width, segment.height);
+                context.setLineDash?.([]);
+            }
+        }
+
+        context.fillStyle = unlocked ? "rgba(6, 78, 89, 0.88)" : "rgba(69, 26, 3, 0.92)";
+        context.strokeStyle = unlocked ? "#67e8f9" : "#fbbf24";
+        context.lineWidth = 4;
+        context.fillRect(-54, -96, 108, 72);
+        context.strokeRect(-54, -96, 108, 72);
+        context.fillStyle = unlocked ? "#67e8f9" : "#fde68a";
+        context.fillRect(-38, -78, 76, 8);
+        context.fillRect(-38, -58, unlocked ? 76 : Math.max(8, (76 * collectedCount) / Math.max(1, requiredCount)), 8);
+        context.font = "900 11px ui-monospace, monospace";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(unlocked ? "ACCESS READY" : `ACCESS ${collectedCount}/${requiredCount}`, 0, -112);
+        if (!unlocked) {
+            context.font = "800 9px ui-monospace, monospace";
+            context.fillText(
+                remainingCount > 0
+                    ? `NEED ${remainingCount} MODULE`
+                    : routeObjectivesComplete
+                      ? "SECTOR TRANSIT LOCKED"
+                      : "ROUTE OBJECTIVE INCOMPLETE",
+                0,
+                -12
+            );
+        }
     }
 
     drawGate(context, style, bounds, unlocked, { sectorId = null } = {}) {

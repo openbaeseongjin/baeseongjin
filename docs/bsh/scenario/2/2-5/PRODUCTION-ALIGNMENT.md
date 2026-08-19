@@ -9,6 +9,7 @@
 - Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
 - Evacuation Walkway entry와 Assembly/Upper Transit 위치 Story가 구현됐다.
 - `storyTriggers`는 시나리오 기획 인벤토리다.
+- 0.41.0부터 기존 `upper-transit-guard(368,-832)` slot이 `sector-02:access-module:b` Carrier다. 적 수·위치·activation·pool과 Story 전용 Upper Transit Gate는 바꾸지 않으며 Sector 02의 두 번째 3-of-3 source를 맡는다.
 
 > **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다.
 

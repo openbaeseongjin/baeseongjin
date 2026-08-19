@@ -35,7 +35,6 @@ export const ROPE_AUGMENT_PERCENTAGES = Object.freeze({
     releasePropulsionVelocity: 0.25,
     electrifiedDps: 0.8,
     electrifiedPulseSeconds: 0.1,
-    defaultPunchDamage: 0.4,
     collisionExplosionSplashDamage: 0.5
 });
 
@@ -44,9 +43,6 @@ export const ROPE_AUGMENT_STATIC_VALUES = Object.freeze({
     baseReach: 400,
     baseReloadSeconds: 0.5,
     contactBandPadding: 10,
-    defaultPunchRange: 55,
-    defaultPunchKnockbackDistance: 50,
-    defaultPunchCooldownSeconds: 0.5,
     collisionExplosionRadius: 120,
     collisionExplosionKnockbackDistance: 100,
     collisionExplosionKnockbackSeconds: 0.25
@@ -108,12 +104,6 @@ export function createRopeAugmentTuning({
                 knockbackDistance: ROPE_AUGMENT_STATIC_VALUES.collisionExplosionKnockbackDistance,
                 knockbackSeconds: ROPE_AUGMENT_STATIC_VALUES.collisionExplosionKnockbackSeconds
             })
-        }),
-        defaultPunch: Object.freeze({
-            range: ROPE_AUGMENT_STATIC_VALUES.defaultPunchRange,
-            damage: resolvedImpactDamage * ROPE_AUGMENT_PERCENTAGES.defaultPunchDamage,
-            knockbackDistance: ROPE_AUGMENT_STATIC_VALUES.defaultPunchKnockbackDistance,
-            cooldownSeconds: ROPE_AUGMENT_STATIC_VALUES.defaultPunchCooldownSeconds
         })
     });
 }
@@ -148,25 +138,4 @@ export function applyReleasePropulsion(baseVelocity, velocityMultiplier = 1.25) 
         x: baseVelocity.x * velocityMultiplier,
         y: baseVelocity.y * velocityMultiplier
     });
-}
-
-export function selectDefaultPunchTarget({
-    playerPosition,
-    enemies,
-    range = ROPE_AUGMENT_STATIC_VALUES.defaultPunchRange
-}) {
-    if (!Number.isFinite(playerPosition?.x) || !Number.isFinite(playerPosition?.y)) {
-        throw new Error("playerPosition must contain finite x and y");
-    }
-    const candidates = (enemies ?? [])
-        .filter(
-            (enemy) => enemy?.health > 0 && Number.isFinite(enemy?.position?.x) && Number.isFinite(enemy?.position?.y)
-        )
-        .map((enemy) => ({
-            enemy,
-            distance: Math.hypot(enemy.position.x - playerPosition.x, enemy.position.y - playerPosition.y)
-        }))
-        .filter(({ distance }) => distance <= range)
-        .sort((left, right) => left.distance - right.distance || left.enemy.id.localeCompare(right.enemy.id));
-    return candidates[0]?.enemy ?? null;
 }
