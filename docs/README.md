@@ -82,16 +82,17 @@ Stage README와 과거 제작 자료에는 0.26.0 이전 Foundation·Impulse·Re
 | [`bsh/scenario/AREA-SPEC-TEMPLATE.json`](./bsh/scenario/AREA-SPEC-TEMPLATE.json) | `AREA-SPEC.json` 작성용 template — 실제 Stage로 집계되지 않음 |
 | [`bsh/scenario/1/README.md`](./bsh/scenario/1/README.md) | `bsh` Sector 01 공용 배경 아트 레퍼런스와 Stage 인덱스 |
 | [`bsh/scenario/1/SECTOR-01-MASTERPLAN-REV7.md`](./bsh/scenario/1/SECTOR-01-MASTERPLAN-REV7.md) | `bsh` Sector 01 마스터플랜 REV7.0 |
-| [`bsh/scenario/1/1-1/README.md`](./bsh/scenario/1/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격, REV 7.0 |
-| [`bsh/scenario/1/1-1/AREA-SPEC.json`](./bsh/scenario/1/1-1/AREA-SPEC.json) | 1-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Acceptance Tests, REV 7.0 |
+| [`bsh/scenario/1/STAGE-SCALE-UNIQUENESS-GATE-REV1.md`](./bsh/scenario/1/STAGE-SCALE-UNIQUENESS-GATE-REV1.md) | `bsh` Stage 규모/고유성 승인 게이트 프로세스 규칙(DESIGN LOCKED) — bounds 산출 순서, Map similarity, Obstacle function, Length/pacing, Runtime check |
+| [`bsh/scenario/1/1-1/README.md`](./bsh/scenario/1/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격, REV 8.0(REV7 geometry 대체, REV7 psychology/story 유지) |
+| [`bsh/scenario/1/1-1/AREA-SPEC.json`](./bsh/scenario/1/1-1/AREA-SPEC.json) | 1-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Acceptance Tests, REV 8.0 |
 | [`bsh/scenario/1/1-1/DIRECTION-SPEC.json`](./bsh/scenario/1/1-1/DIRECTION-SPEC.json) | 1-1 연출 계약(`direction-spec-v1` — `DIRECTION-SPEC-AUTHORING-STANDARD.md`의 `one-rope-direction-spec-v1`과 스키마가 다름, 미검증) — Beat별 trigger·camera·track·player bark |
 | [`bsh/scenario/1/1-1/MAP-PREVIEW.html`](./bsh/scenario/1/1-1/MAP-PREVIEW.html) | 1-1 승인 Map 시각화 |
 | [`bsh/scenario/1/1-1/STORY-DIRECTION-PREVIEW.html`](./bsh/scenario/1/1-1/STORY-DIRECTION-PREVIEW.html) | 1-1 승인 심리/서사/분위기 시각화 |
-| [`bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md) | 1-1 Runtime 좌표·Camera·Story·Asset 인계 계약, REV 7.0 — P3/Shaft Shell geometry 구현 완료, Player Bark 미구현 |
-| [`bsh/scenario/1/1-1/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-1/RUNTIME-HANDOFF.md) | 1-1 구현 delta 인계(Codex/Claude Code용) |
-| [`bsh/scenario/1/1-1/VALIDATION.md`](./bsh/scenario/1/1-1/VALIDATION.md) | 1-1 acceptance checklist |
-| [`bsh/scenario/1/1-1/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-1/ASSET-REQUIREMENTS.md) | 1-1 art/audio/UI 요구사항 |
-| [`bsh/scenario/1/1-1/MANIFEST.md`](./bsh/scenario/1/1-1/MANIFEST.md) | 1-1 REV7.0 패키지 파일 목록·권위 |
+| [`bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md) | 1-1 Runtime 좌표·Camera·Story·Asset 인계 계약, REV 8.0 — 전체 geometry 구현 완료(P0/Shaft Shell 16px gap 기지 사실로 기록), Player Bark 미구현 |
+| [`bsh/scenario/1/1-1/RUNTIME-HANDOFF.md`](./bsh/scenario/1/1-1/RUNTIME-HANDOFF.md) | 1-1 구현 delta 인계(Codex/Claude Code용), REV 8.0 |
+| [`bsh/scenario/1/1-1/VALIDATION.md`](./bsh/scenario/1/1-1/VALIDATION.md) | 1-1 acceptance checklist, REV 8.0 |
+| [`bsh/scenario/1/1-1/ASSET-REQUIREMENTS.md`](./bsh/scenario/1/1-1/ASSET-REQUIREMENTS.md) | 1-1 art/audio/UI 요구사항, REV 8.0 |
+| [`bsh/scenario/1/1-1/MANIFEST.md`](./bsh/scenario/1/1-1/MANIFEST.md) | 1-1 REV8.0 패키지 파일 목록·권위 |
 | [`bsh/scenario/1/1-2/README.md`](./bsh/scenario/1/1-2/README.md) | `bsh` Airborne Re-Attach Benchmark Stage(1-2) Blockout 후보·제작 규격 |
 | [`bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md`](./bsh/scenario/1/1-2/PRODUCTION-ALIGNMENT.md) | 1-2 Runtime 좌표·Camera·Story·Asset 인계 계약 |
 | [`bsh/scenario/1/1-3/README.md`](./bsh/scenario/1/1-3/README.md) | `bsh` Sentry Telegraph·LOS·이동 회피 Stage(1-3) Blockout 후보·제작 규격 |

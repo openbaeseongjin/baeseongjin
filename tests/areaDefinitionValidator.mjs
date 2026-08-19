@@ -10,15 +10,20 @@ export function run() {
     const valid = validateAreaCatalog(SECTOR_01_AREA_CATALOG);
     assert.deepEqual(valid, { valid: true, issues: [] });
     const startFloor = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id === "sector-01-01:p0");
+    // REV8.0 package geometry (docs/bsh/scenario/1/1-1/AREA-SPEC.json): P0 is 1184 wide, but the
+    // shaft-shell-left/right casing walls sit at +-624 (inner face +-608) - a 16px gap the package
+    // itself leaves unwalled on each side. This assertion reflects the package's authored P0 exactly;
+    // it does NOT confirm the "no gap" invariant its own name implies. See
+    // docs/bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md for the flagged package inconsistency.
     assert.deepEqual(
         startFloor.vertices,
         [
-            { x: -448, y: 0 },
-            { x: 448, y: 0 },
-            { x: 448, y: 32 },
-            { x: -448, y: 32 }
+            { x: -592, y: 0 },
+            { x: 592, y: 0 },
+            { x: 592, y: 32 },
+            { x: -592, y: 32 }
         ],
-        "1-1 P0 must fill the full walkable width between both authored boundary walls"
+        "1-1 P0 must match the REV8.0 authored width (does not fully reach the shaft-shell inner face - known package gap)"
     );
     assert.equal(startFloor.presentationId, "terrain:ground-foundation");
 

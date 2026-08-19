@@ -1,5 +1,6 @@
 {
   "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
   "stage": {
     "sector": 1,
     "stage": 1,
@@ -7,7 +8,6 @@
     "sourceAreaId": "sector-01-01",
     "name": "SERVICE SHAFT"
   },
-  "directionStatus": "DESIGN LOCKED",
   "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
   "globalControl": {
     "worldPause": false,
@@ -27,38 +27,21 @@
       "fear": 72,
       "control": 28,
       "understanding": 15
-    },
-    "arc": [
-      "STARTLED",
-      "FOCUS",
-      "FIRST_ENVIRONMENTAL_UNDERSTANDING",
-      "SMALL_CONTROL",
-      "SCALE_REVEAL",
-      "UNCERTAIN_DIRECTION"
-    ]
+    }
   },
   "beats": [
     {
       "beatId": "s0-incident-bay",
       "status": "DESIGN LOCKED",
-      "purpose": "First crack in familiar infrastructure normality.",
       "trigger": {
-        "type": "area-enter",
-        "areaId": "sector-01-01"
+        "type": "area-enter"
       },
       "scope": "local-player",
       "replayPolicy": "once-per-sector-attempt",
-      "dedupeToken": "sector-01-01:s0",
+      "dedupeToken": "1-1:s0",
       "worldPause": false,
-      "playerControl": {
-        "movement": true,
-        "aim": true,
-        "rope": true,
-        "action": true,
-        "interaction": true
-      },
+      "playerControl": "ON",
       "camera": {
-        "mode": "authored-zone",
         "zoneId": "intro",
         "forcedPan": false
       },
@@ -66,239 +49,145 @@
         {
           "type": "systemText",
           "status": "VERIFIED",
-          "action": "show",
-          "timing": {
-            "startSeconds": 0,
-            "durationSeconds": 1.8
-          },
           "content": {
             "title": "GROUND SERVICE ACCESS",
             "detail": "LOCKDOWN"
-          }
-        },
-        {
-          "type": "lighting",
-          "status": "NOT IMPLEMENTED",
-          "action": "relay-interruption-then-local-amber",
+          },
           "timing": {
-            "startSeconds": 0,
-            "maxDurationSeconds": 1.2
-          }
-        },
-        {
-          "type": "audio",
-          "status": "NOT IMPLEMENTED",
-          "action": "facility-hum-relay-trip-shutter-settle-acoustic-gap",
-          "timing": {
-            "startSeconds": 0
+            "durationSeconds": 1.8
           }
         },
         {
           "type": "dialogue",
           "status": "NOT IMPLEMENTED",
-          "action": "player-bark",
-          "timing": {
-            "afterSystemReadSeconds": 0.1
-          },
           "content": {
             "speaker": "PLAYER",
             "text": "뭐야…?"
-          }
+          },
+          "action": "local-bark-after-system-read"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "normal-hum-relay-trip-shutter-settle"
+        },
+        {
+          "type": "lighting",
+          "status": "NOT IMPLEMENTED",
+          "action": "maintenance-white-plus-local-amber"
         }
-      ],
-      "completion": {
-        "type": "non-blocking",
-        "condition": "entry presentation completes or player continues"
-      },
-      "validation": [
-        "No control lock.",
-        "No red full-screen wash.",
-        "Bark does not repeat LOCKDOWN fact."
       ]
     },
     {
-      "beatId": "s1-first-rope",
+      "beatId": "s1-first-swing",
       "status": "DESIGN LOCKED",
-      "purpose": "Gameplay focus suppresses panic without resolving it.",
       "trigger": {
-        "type": "position-zone",
-        "cameraZoneId": "first-hook"
+        "type": "camera-zone",
+        "zoneId": "first-hook"
       },
       "scope": "local-player",
       "replayPolicy": "repeatable-gameplay-no-story-replay",
-      "dedupeToken": "sector-01-01:s1",
+      "dedupeToken": "1-1:s1",
       "worldPause": false,
-      "playerControl": {
-        "movement": true,
-        "aim": true,
-        "rope": true,
-        "action": true,
-        "interaction": true
-      },
+      "playerControl": "ON",
       "camera": {
-        "mode": "authored-zone",
         "zoneId": "first-hook",
         "forcedPan": false
       },
       "tracks": [
         {
-          "type": "audio",
-          "status": "NOT IMPLEMENTED",
-          "action": "prioritize-rope-launch-attach-tension-release"
-        },
-        {
           "type": "dialogue",
-          "status": "DESIGN LOCKED",
           "action": "none"
         },
         {
           "type": "systemText",
-          "status": "DESIGN LOCKED",
           "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "rope-priority"
         }
-      ],
-      "completion": {
-        "type": "gameplay-driven",
-        "condition": "player progresses beyond first-hook zone"
-      },
-      "validation": [
-        "No tutorial popup.",
-        "No self-calming monologue.",
-        "Rope readability wins over story ambience."
       ]
     },
     {
-      "beatId": "s2-structural-read",
+      "beatId": "s2-cross-back-structural-read",
       "status": "DESIGN LOCKED",
-      "purpose": "Player discovers a real Maintenance structure as grapple affordance.",
       "trigger": {
-        "type": "position-zone",
-        "cameraZoneId": "release-corridor"
+        "type": "camera-zone",
+        "zoneId": "cross-back"
       },
       "scope": "local-player",
       "replayPolicy": "repeatable-gameplay-no-story-replay",
-      "dedupeToken": "sector-01-01:s2",
+      "dedupeToken": "1-1:s2",
       "worldPause": false,
-      "playerControl": {
-        "movement": true,
-        "aim": true,
-        "rope": true,
-        "action": true,
-        "interaction": true
-      },
+      "playerControl": "ON",
       "camera": {
-        "mode": "authored-zone",
-        "zoneId": "release-corridor",
+        "zoneId": "cross-back",
         "forcedPan": false
       },
       "tracks": [
         {
           "type": "object",
-          "status": "DESIGN LOCKED",
           "target": "cable-overhang",
-          "action": "remain-normal-grappleable-structure"
-        },
-        {
-          "type": "audio",
-          "status": "NOT IMPLEMENTED",
-          "action": "optional-structural-metal-attach-resonance"
+          "action": "normal-grappleable-maintenance-structure"
         },
         {
           "type": "dialogue",
-          "status": "DESIGN LOCKED",
           "action": "none"
         },
         {
           "type": "systemText",
-          "status": "DESIGN LOCKED",
           "action": "none"
         }
-      ],
-      "completion": {
-        "type": "gameplay-driven",
-        "condition": "player leaves release-corridor"
-      },
-      "validation": [
-        "No dedicated Anchor B.",
-        "No tutorial arrow.",
-        "No line equivalent to '저것도 잡히네'."
       ]
     },
     {
       "beatId": "s3-open-swing",
       "status": "DESIGN LOCKED",
-      "purpose": "First brief relief comes from movement success.",
       "trigger": {
-        "type": "position-zone",
-        "cameraZoneId": "open-swing"
+        "type": "camera-zone",
+        "zoneId": "open-swing"
       },
       "scope": "local-player",
       "replayPolicy": "once-per-life-nonverbal-only",
-      "dedupeToken": "sector-01-01:s3",
+      "dedupeToken": "1-1:s3",
       "worldPause": false,
-      "playerControl": {
-        "movement": true,
-        "aim": true,
-        "rope": true,
-        "action": true,
-        "interaction": true
-      },
+      "playerControl": "ON",
       "camera": {
-        "mode": "authored-zone",
         "zoneId": "open-swing",
         "forcedPan": false
       },
       "tracks": [
         {
-          "type": "audio",
-          "status": "NOT IMPLEMENTED",
-          "action": "recede-alarm-prioritize-air-rope-landing"
+          "type": "dialogue",
+          "action": "none"
         },
         {
           "type": "character",
           "status": "NOT IMPLEMENTED",
-          "action": "nonverbal-exhale",
-          "timing": {
-            "afterSuccessfulLandingSeconds": 0.1
-          }
+          "action": "optional-nonverbal-exhale"
         },
         {
-          "type": "dialogue",
-          "status": "DESIGN LOCKED",
-          "action": "none"
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "air-rope-landing-priority"
         }
-      ],
-      "completion": {
-        "type": "gameplay-driven",
-        "condition": "player reaches upper open-swing landing region"
-      },
-      "validation": [
-        "No generic success bark.",
-        "0.3-0.5s uncluttered audiovisual space is preferred.",
-        "No input lock."
       ]
     },
     {
       "beatId": "s4-terminal-reveal",
       "status": "DESIGN LOCKED",
-      "purpose": "Interrupt relief with objective scale reveal.",
       "trigger": {
         "type": "objective-started",
         "objectiveId": "sector-01-01:terminal-read"
       },
       "scope": "local-player",
       "replayPolicy": "once-per-run",
-      "dedupeToken": "sector-01-01:s4",
+      "dedupeToken": "1-1:s4",
       "worldPause": false,
-      "playerControl": {
-        "movement": true,
-        "aim": true,
-        "rope": true,
-        "action": true,
-        "interaction": true
-      },
+      "playerControl": "ON",
       "camera": {
-        "mode": "authored-zone",
         "zoneId": "terminal",
         "forcedPan": false
       },
@@ -327,127 +216,55 @@
         },
         {
           "type": "dialogue",
-          "status": "DESIGN LOCKED",
-          "action": "none-during-sequence"
-        },
-        {
-          "type": "lighting",
-          "status": "NOT IMPLEMENTED",
-          "action": "terminal-blue-white-information-focus"
-        },
-        {
-          "type": "audio",
-          "status": "NOT IMPLEMENTED",
-          "action": "drop-rope-layer-return-low-hum-and-distant-structure"
+          "action": "none"
         }
-      ],
-      "completion": {
-        "type": "sequence-complete",
-        "condition": "existing 2.7s terminal objective sequence completes"
-      },
-      "validation": [
-        "Exact current system sequence/order/cadence remains intact.",
-        "Player does not summarize the system text.",
-        "No forced control-off."
       ]
     },
     {
       "beatId": "s5-route-open",
       "status": "DESIGN LOCKED",
-      "purpose": "Give an uncertain direction, not emotional resolution.",
       "trigger": {
-        "type": "gate-unlocked",
-        "gateId": "sector-01-01:gate"
+        "type": "gate-unlocked"
       },
       "scope": "local-player",
       "replayPolicy": "once-per-run",
-      "dedupeToken": "sector-01-01:s5",
+      "dedupeToken": "1-1:s5",
       "worldPause": false,
-      "playerControl": {
-        "movement": true,
-        "aim": true,
-        "rope": true,
-        "action": true,
-        "interaction": true
-      },
+      "playerControl": "ON",
       "camera": {
-        "mode": "authored-zone",
         "zoneId": "terminal",
         "forcedPan": false
       },
       "tracks": [
         {
-          "type": "object",
-          "status": "VERIFIED",
-          "target": "service-gate-02",
-          "action": "open-on-existing-gate-state"
-        },
-        {
           "type": "systemText",
           "status": "VERIFIED",
-          "action": "show",
-          "timing": {
-            "durationSeconds": 1.2
-          },
           "content": {
             "title": "SERVICE SHAFT 02",
             "detail": "ACCESS OPEN"
+          },
+          "timing": {
+            "durationSeconds": 1.2
           }
         },
         {
           "type": "dialogue",
           "status": "NOT IMPLEMENTED",
-          "action": "player-bark-after-system-reading-window",
-          "timing": {
-            "minDelaySeconds": 1.2
-          },
           "content": {
             "speaker": "PLAYER",
             "text": "…일단 위로."
+          },
+          "timing": {
+            "minDelaySeconds": 1.2
           }
-        },
-        {
-          "type": "audio",
-          "status": "NOT IMPLEMENTED",
-          "action": "distant-ambiguous-lift-machinery-handoff"
         }
-      ],
-      "completion": {
-        "type": "non-blocking",
-        "condition": "player may leave immediately after connector unlock"
-      },
-      "validation": [
-        "Gate state is readable before/with text.",
-        "Bark does not block movement.",
-        "Network replay must not duplicate bark.",
-        "Exit remains emotionally unresolved."
       ]
     }
   ],
-  "runtimeDependencies": [
-    {
-      "id": "player-bark-layer",
-      "status": "NOT IMPLEMENTED",
-      "requirement": "local-player, non-blocking, separate timing from system Story toast, deduped"
-    },
-    {
-      "id": "character-breath-reaction",
-      "status": "NOT IMPLEMENTED",
-      "requirement": "optional nonverbal reaction only; never gates progress"
-    },
-    {
-      "id": "atmosphere-mix-lighting-hooks",
-      "status": "NOT IMPLEMENTED",
-      "requirement": "must not reduce Rope readability"
-    }
-  ],
   "validation": [
-    "worldPause is false for all beats",
-    "movement/aim/rope/action remain enabled",
-    "system Story sequence remains exact",
-    "no player text during S1/S2/S3/S4",
-    "only S0 and S5 contain player text",
-    "dialogue is local-player and deduped",
-    "story never changes objective authority"
+    "No control lock",
+    "Only S0/S5 contain player text",
+    "Verified system story wording/order retained",
+    "400px current Hook Reach used for geometry review"
   ]
 }

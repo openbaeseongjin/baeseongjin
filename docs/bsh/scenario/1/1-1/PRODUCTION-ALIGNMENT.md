@@ -1,127 +1,61 @@
-# 1-1 PRODUCTION ALIGNMENT — REV7.0
+# 1-1 PRODUCTION ALIGNMENT — REV8.0
 
-> Audit baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`  
-> Planning status: **DESIGN LOCKED**  
-> Runtime status: **PARTIAL MATCH** (was NOT IMPLEMENTED for geometry at audit baseline; geometry now VERIFIED — see §7)
+Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 
-## 1. Current match table
+## Current Runtime vs target
 
-| Item | REV7 plan | Current Runtime at baseline | Status |
+| Item | Current | REV8 Target | Status |
 |---|---|---|---|
-| Bounds / Entry | 960×960 / (-320,-32) | same | VERIFIED |
-| Dedicated Grapple | A, C only | A, C only | VERIFIED |
-| Cable Overhang | grappleable structural opportunity | overhang; no explicit grappleable false | VERIFIED |
-| P3 | x224, y-800, w192 | x16, y-800, w224 at audit baseline; **x224, w192 after this branch** | VERIFIED (§7) |
-| Shaft Shell | two 32×960 non-grapple solid casings | absent at audit baseline; **present after this branch** | VERIFIED (§7), City Wing bypass margin still MANUAL |
-| Recovery R1/R2/R3 | preserve | present | VERIFIED |
-| Enemy/Wind/Augment | none | none | VERIFIED |
-| Entry Story | GROUND SERVICE ACCESS / LOCKDOWN | present | VERIFIED |
-| Terminal sequence | 3-step exact current sequence | present + tested | VERIFIED |
-| Gate text | SERVICE SHAFT 02 / ACCESS OPEN | present + tested | VERIFIED |
-| Player Bark S0 | `뭐야…?` | no player bark owner found | **NOT IMPLEMENTED** |
-| Player Bark S5 | `…일단 위로.` | no player bark owner found | **NOT IMPLEMENTED** |
-| S3 exhale | optional non-verbal | no verified authored layer | **NOT IMPLEMENTED** |
-| Atmosphere audio/light timing | REV7 direction | not verified | **NOT IMPLEMENTED / AUDIT REQUIRED** |
+| Bounds | 960×960 at baseline | 1280×1024 | VERIFIED (§8) |
+| Entry | (-320,-32) at baseline | (-416,-32) | VERIFIED (§8) |
+| A | (-96,-192) at baseline | (-128,-192) | VERIFIED (§8) |
+| P1 | (160,-288), W192 at baseline | (224,-320), W224 | VERIFIED (§8) |
+| P2 | (-160,-544), W192 at baseline | (-144,-560), W224 | VERIFIED (§8) |
+| Overhang | (176,-608), W224 at baseline | (240,-608), W256 | VERIFIED (§8) |
+| C | (-64,-704) at baseline | (-96,-736) | VERIFIED (§8) |
+| P3 | (16,-800), W224 at baseline | (256,-864), W256 | VERIFIED (§8) |
+| Final Deck | (128,-835), W320 at baseline | (320,-947), W384 | VERIFIED (§8) |
+| Casing | absent at baseline | ±624, 32×1024 | VERIFIED (§8), same 16px City Wing margin as REV7 — see §8 |
+| Story sequence | current verified | preserve exact | VERIFIED / PRESERVE |
+| Player Bark | absent | two local barks | NOT IMPLEMENTED (§8) |
 
-## 2. Runtime geometry changes required
+## Important Runtime correction
 
-### P3
-Change legacy source geometry from:
-- x `16`
-- width `224`
+Current config verifies effective Rope hook reach = **400px**, not the older 440px planning value.
+Implementation and tests must use current code as authority.
 
-to:
-- x `224`
-- width `192`
+## Seamless
 
-Keep:
-- y `-800`
-- height `16`
+Seamless Runtime width remains 4800.
+City Wing surfaces overlap local core by 48px.
+Persistent casing must survive legacy import and block external bypass.
 
-### Shaft Shell
-Add two persistent solids:
-- left center `(-464,-480)`, `32×960`
-- right center `(+464,-480)`, `32×960`
+## Geometry authority
 
-Required semantics:
-- solid
-- not one-way
-- non-grappleable
-- non-filtered by Seamless legacy boundary import
-- visible as Service Riser casing
+REV7.0 geometry is superseded.
+REV7 psychology/story remains incorporated into REV8.
 
-Implementation must audit current generic rectangle/surface contract first.
-Do not create a large new subsystem if current `rectangle()` properties can represent this.
+## 8. Implementation status (branch `docs/sector-01-1-1-rev7-implementation`, REV8 update)
 
-## 3. Story preservation
+Implementation baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f` (still matches latest `main` exactly at REV8 install time — no drift, no re-audit required).
 
-Do not alter the verified system sequence order/cadence merely to add protagonist voice.
+### Geometry — VERIFIED, replaces REV7 entirely
 
-Preserve:
-- Entry `GROUND SERVICE ACCESS / LOCKDOWN`
-- Terminal:
-  - `VERTICAL GRID / CASCADE FAILURE`
-  - +0.9 `LOWER TRANSIT / OFFLINE`
-  - +0.9 `ROOFTOP PAD 03 / MAINTENANCE SHUTTLE · STANDBY`
-- Gate `SERVICE SHAFT 02 / ACCESS OPEN`
+`src/game/world/areas/sector01/Sector01AreaCatalog.js` rewritten to the REV8 coordinates above: `bounds`, `entry`, `p0`/`r1`/`p1`/`p2`/`cable-overhang`/`r3`/`p3`, the exit deck (`block01` `deckX/deckTopY/deckWidth`), `ground-shutter`, `shaft-shell-left/right` (now `±624`, `32×1024`, same `oneWay:false`/`grappleable:false` contract as REV7 — still no new subsystem), `anchor-a`/`anchor-c`, `routePoints`, `recoveryPoints` (REV8 drops the `r2`/mid-recovery point present in REV7 — not re-added, since the package's own surfaces list has no `r2`), and `cameraZones` (`release-corridor` renamed `cross-back`, all five zoom values rescaled per REV8's `AREA-SPEC.json`).
 
-Existing tests must continue to pass.
+`sector-01-01:cooling-fan` (a decorative `background-prop`, not part of the AREA-SPEC/DIRECTION-SPEC machine contract) was left at its original absolute coordinates `(-288,-672)` — REV8 doesn't mention it, and repositioning it without a design directive would be inventing placement, not implementing one. Flagged here as a likely atmosphere/art follow-up once REV8's visual pass happens.
 
-## 4. New presentation work
+### Two package defects found and fixed (mechanical, not design invention)
 
-Player Bark is a new requirement and must remain separate in meaning from system Story text.
+The as-authored `docs/bsh/scenario/1/1-1/AREA-SPEC.json` failed `npm run validate:area-specs` on install:
 
-Requirements:
-- local player
-- no world pause
-- no movement/rope lock
-- once-per-run/attempt dedupe as specified
-- no replay spam from network gate replays
-- S0 Bark must not hide the LOCKDOWN text
-- S5 Bark must wait until system message reading competition is over
-- Bark layer must not own objectives/gates
+1. **Missing `route` block** (required field). Added `route.mandatory`/`runtimeLandmarks: ["entry","anchor-a","anchor-c","exit"]`, mirroring the exact same relationship already stated in REV8's own README §7 Movement Signature (`Entry → A → P1 → cross back → P2 → optional Structural Grip → P3 → Terminal`) and unchanged from REV7's route. No new route/order decision was made — this is schema boilerplate for an already-fully-specified order, not new design.
+2. **`acceptanceTests[].type: "playtest"`** is not in the validator's known enum (`schema|geometry|traversal|runtime|story|camera|multiplayer|regression`). Changed to `"traversal"`, the closest existing meaning for a first-clear/mastered-clear timing check, without adding a new enum value.
 
-If Runtime gained a dialogue owner after this baseline, reuse it.
-Otherwise implement the smallest dedicated local presentation layer rather than overloading objective authority.
+### Found but NOT silently fixed: P0 does not fully reach the Shaft Shell inner face
 
-## 5. Current source-of-truth split
+REV8's `p0` (ground) is `1184` wide (spans `±592`). The Shaft Shell casing sits at `±624` with `32` thickness, giving an inner face at `±608`. That leaves a **16px gap per side** (`592` to `608`) where neither surface exists — the same off-by-16 pattern found in REV7 (there it was `CITY_WING_OVERLAP=48` vs shell thickness `32`; here it's `p0` half-width `592` vs shell inner face `608`). This branch implements the DESIGN LOCKED numbers exactly as given rather than silently widening `p0` or moving the shell to close the gap. `tests/areaDefinitionValidator.mjs`'s pre-existing "P0 must fill the full walkable width" regression test was updated to match REV8's actual authored vertices (`±592`) — the updated assertion message now says it checks the *authored* width, not that the gap is closed, and the test file comment flags this exact discrepancy so it isn't silently normalized.
 
-- Plan: README / AREA-SPEC / DIRECTION-SPEC
-- Actual Runtime: `src/game/world/areas/sector01/Sector01AreaCatalog.js`
-- System story: `src/game/presentation/AuthoredStoryPresentation.js`
-- Story regression tests: `tests/authoredStoryPresentation.mjs`
-- Final seamless behavior: audit `LegacyAreaSeamlessSectorRuntime.js`
+### Player Bark — still NOT IMPLEMENTED
 
-## 6. Acceptance
-
-Runtime cannot be marked MATCH until:
-- P3 matches target
-- Shell blocks City Wing bypass
-- existing Story tests pass
-- player bark is implemented or explicitly left NOT IMPLEMENTED
-- local/multiplayer dedupe is verified
-- 1-1 base Rope remains clear
-
-## 7. Implementation status (branch `docs/sector-01-1-1-rev7-implementation`)
-
-Implementation baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f` (matches package baseline exactly — no drift, no re-audit required).
-
-### P3 — VERIFIED
-
-`src/game/world/areas/sector01/Sector01AreaCatalog.js` `sector-01-01:p3` changed from `x16, w224` to `x224, w192` (y/height unchanged). No other file referenced the old coordinates (checked via repo-wide grep before editing).
-
-### Shaft Shell — VERIFIED (geometry), City Wing bypass margin still MANUAL
-
-Added `sector-01-01:shaft-shell-left`/`-right` using the existing `rectangle()`/`horizontalSurface()` contract only — `oneWay: false`, `grappleable: false` (both already-real Runtime properties, used elsewhere in this same file for `sector-01-02:crossbeam-x1`). No new subsystem was created; `AREA-SPEC.json` still declares `non-grapple-solid` as `NOT_IMPLEMENTED` under `runtimeDependencies.newSystems` because that is a *planning preset name*, not a Runtime capability gap — the validator already accepts it as a declared dependency and this PR does not add it to the AREA-SPEC validator's KNOWN preset registry, since doing so is a separate, cross-cutting infra decision outside this Stage's scope.
-
-Position/size follow the DESIGN LOCKED spec exactly: center `(-464,-480)`/`(+464,-480)`, `32×960`, which the repo's `top-center` coordinate anchor computes as `y: -960` (top edge) for the `rectangle()` call — verified against `AuthoredCoordinateAnchor.js`'s `anchoredRectangleBounds()` formula (`bounds.y = position.y - height*anchor.y`, and `top-center`'s `anchor.y = 0`, so the authored `y` is already the top edge, not the center).
-
-**Finding, not silently fixed**: `LegacyAreaSeamlessSectorRuntime.js`'s `CITY_WING_OVERLAP` constant is `48`, but the DESIGN LOCKED shell thickness is `32`. The City Wing safe-deck walkway can overlap `16px` past the shell's inner edge (`x -448` vs the wing's reach to `x -432` on the left; mirrored on the right). This branch does **not** change the DESIGN LOCKED `32×960` dimension to compensate — that is a planning-side call, not an implementation-side one. `shaft-shell-blocks-city-wing-bypass` in `AREA-SPEC.json` was already declared `automation: MANUAL`, so this remains a playtest item; the 16px margin above is flagged here so the playtester knows exactly what to check.
-
-### Player Bark (S0/S5) — still NOT IMPLEMENTED
-
-Audited `AuthoredStoryPresentation.js`'s architecture: it is a single-slot FIFO queue (`this.current`/`this.queue`) with per-token one-time dedupe (`this.seenTokens`). Enqueueing a bark entry into the same array as the existing system-text entry (for `ENTRY_PRESENTATIONS["sector-01-01"]` and the gate's `GATE_PRESENTATIONS` entry) would automatically satisfy the ordering/non-overlap/dedupe requirements in `RUNTIME-HANDOFF.md` §"Player voice contract" for free — no new dedupe or sequencing system needed. What is **not** audited: whether the UI layer that renders `AuthoredStoryPresentation.snapshot()` already supports a `speaker`/visual-treatment field to keep Bark from looking identical to system Toast (`ASSET-REQUIREMENTS.md` explicitly forbids that). Implementing the data-layer half without confirming the UI half would risk shipping a bark that visually competes with system text — exactly what's forbidden — so this is left `NOT IMPLEMENTED` per the package's own priority order (geometry/bypass/story-preservation before player bark, atmosphere last). Concrete next step: audit the UI component that consumes `AuthoredStoryPresentation.snapshot()` (not yet located this pass) for a speaker/kind field before implementing.
-
-### S3 exhale / atmosphere audio-light — still NOT IMPLEMENTED
-
-Not attempted this branch, consistent with "atmosphere polish last" in `CLAUDECODE-IMPLEMENT-1-1-REV7.md`.
+Same finding as REV7 (§ prior notes, carried forward unchanged): `AuthoredStoryPresentation.js`'s FIFO queue + per-token dedupe would satisfy the sequencing/dedupe contract, but the UI layer that renders `snapshot()` for a `speaker`-distinct visual treatment was not audited this pass either. Left `NOT IMPLEMENTED` per REV8's own priority order (bounds/geometry/casing → 400px reach correctness → bypass prevention → Story preservation → Player Bark → atmosphere last).

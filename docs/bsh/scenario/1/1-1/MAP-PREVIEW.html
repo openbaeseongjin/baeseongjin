@@ -1,73 +1,114 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ONE ROPE 1-1 REV7 Map Preview</title>
+<title>ONE ROPE 1-1 REV8 Map Preview</title>
 <style>
-:root{--bg:#071019;--p:#0d1820;--l:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--a:#efb75b;--g:#74bc8c;--r:#d96f63;--route:#ffe16c}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 ui-monospace,Consolas,monospace}
-header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m);font-size:12px}
-.layout{display:grid;grid-template-columns:360px 1fr}aside{padding:12px;background:var(--p);border-right:1px solid var(--l)}main{padding:12px}
-.card{padding:9px;border:1px solid var(--l);border-radius:8px;margin:8px 0;background:#0a141a}button{background:#14242e;border:1px solid #3b5662;color:var(--t);padding:7px 9px;border-radius:6px;margin:2px}button.on{border-color:var(--c);color:var(--c)}
-label{display:block;margin:6px 0}svg{width:100%;height:80vh;min-height:700px;background:#061019;border:1px solid var(--l);border-radius:8px}
-.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.rec{fill:#345f48;stroke:#78b38c;stroke-width:2}.shell{fill:#272e32;stroke:#c78e65;stroke-width:3}.anchor{fill:var(--c);stroke:white;stroke-width:2}.grip{fill:var(--a);stroke:white;stroke-width:2}.route{fill:none;stroke:var(--route);stroke-width:4;stroke-dasharray:12 8}.ghost{fill:none;stroke:#8b979d;stroke-width:3;stroke-dasharray:6 6;opacity:.7}.psych{fill:#5de8ff14;stroke:#5de8ff;stroke-width:2;stroke-dasharray:8 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.15}
-text{fill:var(--t);font-size:14px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a7bac2}.sm{font-size:12px}.hidden{display:none}.key{color:var(--c)}.warn{color:var(--a)}
-@media(max-width:980px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--l)}}
+:root{--bg:#061019;--panel:#0d1820;--line:#314854;--text:#edf5f8;--mut:#91a5ae;--cyan:#5de8ff;--yellow:#ffe16c;--green:#80d39a;--red:#df7669;--amber:#efb75b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:18px}.sub{color:var(--mut)}
+.layout{display:grid;grid-template-columns:395px 1fr}aside{padding:11px;background:var(--panel);border-right:1px solid var(--line);max-height:100vh;overflow:auto}main{padding:11px}
+.card{padding:9px;border:1px solid var(--line);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--cyan)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:740px;background:#061019;border:1px solid var(--line);border-radius:8px}
+.core{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.rec{fill:#315944;stroke:#80d39a;stroke-width:2}.shell{fill:#292e31;stroke:#a97659;stroke-width:3}.anchor{fill:var(--cyan);stroke:white;stroke-width:2}.grip{fill:var(--amber);stroke:white;stroke-width:2}.route{fill:none;stroke:var(--yellow);stroke-width:4;stroke-dasharray:12 8}.current{fill:none;stroke:var(--red);stroke-width:3;stroke-dasharray:7 6}.reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.13}.wing{fill:#273b43;stroke:#627983;stroke-width:2;opacity:.8}
+text{fill:var(--text);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.hidden{display:none}.pass{color:var(--green)}.hyp{color:var(--amber)}.delta{color:#f2a790}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
 </style></head><body>
-<header><h1>1-1 SERVICE SHAFT · REV7 MAP PREVIEW</h1><div class="sub">Masterplan REV7 · Baseline 5ae6efca… · Map geometry preserves prior approval</div></header>
+<header><h1>1-1 SERVICE SHAFT · REV8 SCALE RESET</h1><div class="sub">CURRENT 960×960 → TARGET 1280×1024</div></header>
 <div class="layout"><aside>
-<div class="card"><b>SPATIAL SIGNATURE</b><br><span class="key">STRAIGHT EMERGENCY SERVICE RISER</span><br><br>
-<b>PSYCHOLOGICAL JOB</b><br>공간이 해결되는 게 아니라, Player가 이 공간에서 <span class="warn">작은 통제감만</span> 얻는다.</div>
-<div class="card"><b>APPROVED ROUTE</b><br>ENTRY → A → P1 → Structural Grip opportunity → P2 → C → P3 → Terminal → Gate</div>
-<div class="card"><b>Dedicated Grapple</b><br>A / C only<br><b>NO B</b><br>Cable Overhang = actual Maintenance structure.</div>
+<div class="card"><b>WHAT ACTUALLY CHANGES</b><br>
+Old map은 960폭 안에서 거의 세로 상승.<br><br>
+REV8은 <b>1280폭을 실제 Swing 공간으로 사용</b>:<br>
+ENTRY LEFT → P1 RIGHT → P2 LEFT → P3 RIGHT.</div>
 <div class="card">
-<label><input type="checkbox" data-g="route" checked> Route</label>
-<label><input type="checkbox" data-g="recovery" checked> Recovery</label>
-<label><input type="checkbox" data-g="shell" checked> Shaft Shell target</label>
-<label><input type="checkbox" data-g="psych" checked> Psychology Zones</label>
-<label><input type="checkbox" data-g="reach"> Rope Reach 400</label>
-<label><input type="checkbox" data-g="ghost"> Current Runtime differences</label>
+MAP SCALE <span class="pass">PASS</span><br>
+OBSTACLE FUNCTION <span class="pass">PASS</span><br>
+LENGTH/PACING <span class="hyp">HYPOTHESIS</span><br>
+GITHUB RUNTIME <span class="delta">MAJOR DELTA</span>
 </div>
-<div class="card"><b>Psychology Zones</b><br>
-A — STARTLED<br>B — FOCUS<br>C — UNDERSTAND<br>D — SMALL CONTROL<br>E — SCALE REVEAL</div>
-<div class="card"><b>Runtime gap</b><br>Current P3 = x16 / w224.<br>Target P3 = <b>x224 / w192</b>.<br>Shaft Shell is still target, not verified Runtime.</div>
+<div class="card"><b>TARGET BOUNDS</b><br>
+1280×1024<br>
+X -640..+640<br>
+Y 0..-1024</div>
+<div class="card"><b>TARGET ROUTE</b><br>
+ENTRY (-416)<br>
+A (-128,-192)<br>
+P1 (+224,-320)<br>
+P2 (-144,-560)<br>
+C (-96,-736)<br>
+P3 (+256,-864)<br>
+Terminal (+320,-947)</div>
+<div class="card"><b>STRUCTURAL GRIP</b><br>
+Cable Overhang (+304,-608), W256<br>
+Optional real-structure affordance.<br>
+NO dedicated B.</div>
+<div class="card">
+<label><input type="checkbox" data-layer="route" checked> New Route</label>
+<label><input type="checkbox" data-layer="current"> Old 960×960 Runtime</label>
+<label><input type="checkbox" data-layer="reach"> Rope Reach 440</label>
+<label><input type="checkbox" data-layer="wings"> Seamless Wing concept</label>
+</div>
+<div class="card"><b>PACING</b><br>
+First clear 1:20–1:50<br>
+Mastered 0:38–0:58<br><br>
+Width를 늘렸지만 Height는 +64만 증가.</div>
 </aside><main>
-<svg viewBox="-520 -1005 1040 1065">
-<rect x="-480" y="-960" width="960" height="960" fill="#0b1820" stroke="#4c6977" stroke-width="3"/>
-<g data-layer="shell"><rect class="shell" x="-480" y="-960" width="32" height="960"/><rect class="shell" x="448" y="-960" width="32" height="960"/><text class="tiny" x="-445" y="-930">NON-GRAPPLE SHAFT CASING</text></g>
+<svg viewBox="-760 -1080 1520 1140">
 
-<rect class="surface" x="-448" y="0" width="896" height="32"/><text class="tiny" x="-430" y="-8">P0 / INCIDENT BAY</text>
-<g data-layer="recovery">
-<rect class="rec" x="-256" y="-224" width="160" height="16"/><text class="tiny" x="-250" y="-233">R1</text>
-<rect class="rec" x="-288" y="-480" width="192" height="16"/><text class="tiny" x="-282" y="-489">R2</text>
-<rect class="rec" x="-224" y="-736" width="160" height="16"/><text class="tiny" x="-218" y="-745">R3</text>
-</g>
-<rect class="surface" x="64" y="-288" width="192" height="16"/><text class="tiny" x="72" y="-297">P1</text>
-<rect class="surface" x="-256" y="-544" width="192" height="16"/><text class="tiny" x="-249" y="-553">P2</text>
-<rect class="surface" x="64" y="-608" width="224" height="32"/><circle class="grip" cx="176" cy="-592" r="10"/><text class="tiny" x="65" y="-618">CABLE OVERHANG · STRUCTURAL GRIP</text>
-<rect class="surface" x="128" y="-800" width="192" height="16"/><text class="tiny" x="135" y="-810">P3 TARGET x224 / w192</text>
-<rect class="surface" x="-32" y="-835" width="320" height="32"/><text class="tiny" x="-25" y="-845">FINAL DECK / TERMINAL</text>
+<rect class="core" x="-640" y="-1024" width="1280" height="1024"/>
+<text class="tiny" x="-625" y="-995">REV8 CORE 1280×1024</text>
 
-<!-- ground shutter -->
-<rect x="-448" y="-128" width="128" height="128" fill="#34262a" stroke="#d96f63" stroke-width="3"/><text class="tiny" x="-445" y="-140">GROUND SHUTTER</text>
-
-<circle class="anchor" cx="-96" cy="-192" r="13"/><text x="-72" y="-184">A</text>
-<circle class="anchor" cx="-64" cy="-704" r="13"/><text x="-40" y="-696">C</text>
-
-<g data-layer="route"><path class="route" d="M-320,-32 Q-190,-100 -96,-192 Q60,-255 160,-288 Q160,-410 -160,-544 Q30,-600 176,-592 Q40,-665 -64,-704 Q80,-820 224,-800 Q240,-845 256,-867"/></g>
-
-<g data-layer="reach" class="hidden"><circle class="reach" cx="-96" cy="-192" r="400"/><circle class="reach" cx="-64" cy="-704" r="400"/><circle class="reach" cx="176" cy="-592" r="400"/></g>
-
-<g data-layer="ghost" class="hidden">
-<rect class="ghost" x="-96" y="-800" width="224" height="16"/><text class="tiny" x="-90" y="-780">CURRENT RUNTIME P3 x16 / w224</text>
+<g data-group="wings" class="hidden">
+<rect class="wing" x="-750" y="-32" width="142" height="32"/><rect class="wing" x="608" y="-32" width="142" height="32"/>
+<rect class="wing" x="-750" y="-544" width="142" height="32"/>
+<text class="tiny" x="-745" y="-560">SEAMLESS OUTSIDE CORE</text>
 </g>
 
-<g data-layer="psych">
-<rect class="psych" x="-440" y="-176" width="880" height="176"/><text class="sm" x="250" y="-150">A · STARTLED</text>
-<rect class="psych" x="-440" y="-352" width="880" height="176"/><text class="sm" x="250" y="-326">B · FOCUS</text>
-<rect class="psych" x="-440" y="-608" width="880" height="256"/><text class="sm" x="210" y="-580">C · UNDERSTAND</text>
-<rect class="psych" x="-440" y="-832" width="880" height="224"/><text class="sm" x="205" y="-805">D · SMALL CONTROL</text>
-<rect class="psych" x="-440" y="-960" width="880" height="128"/><text class="sm" x="190" y="-930">E · SCALE REVEAL</text>
+<rect class="shell" x="-640" y="-1024" width="32" height="1024"/>
+<rect class="shell" x="608" y="-1024" width="32" height="1024"/>
+
+<rect class="surface" x="-592" y="0" width="1184" height="32"/>
+<rect x="-624" y="-128" width="128" height="128" fill="#34262a" stroke="#df7669" stroke-width="3"/>
+<text class="tiny" x="-620" y="-140">GROUND SHUTTER</text>
+
+<rect class="rec" x="-400" y="-240" width="192" height="16"/><text class="tiny" x="-394" y="-250">R1</text>
+<rect class="surface" x="112" y="-320" width="224" height="16"/><text class="tiny" x="118" y="-330">P1 RIGHT</text>
+
+<rect class="surface" x="-256" y="-560" width="224" height="16"/><text class="tiny" x="-250" y="-570">P2 LEFT</text>
+<rect class="surface" x="176" y="-608" width="256" height="32"/>
+<circle class="grip" cx="304" cy="-592" r="10"/><text class="tiny" x="180" y="-619">STRUCTURAL GRIP</text>
+
+<rect class="rec" x="-368" y="-768" width="192" height="16"/><text class="tiny" x="-362" y="-778">R3</text>
+<rect class="surface" x="128" y="-864" width="256" height="24"/><text class="tiny" x="135" y="-875">P3 OPEN SWING LANDING</text>
+
+<rect class="surface" x="128" y="-947" width="384" height="32"/>
+<text class="tiny" x="135" y="-960">TERMINAL / EXIT DECK</text>
+
+<circle class="anchor" cx="-128" cy="-192" r="13"/><text x="-105" y="-184">A</text>
+<circle class="anchor" cx="-96" cy="-736" r="13"/><text x="-73" y="-728">C</text>
+
+<g data-group="route">
+<path class="route" d="M-416,-32 Q-250,-110 -128,-192 Q55,-240 224,-320 Q75,-425 -144,-560 Q70,-595 304,-592 Q65,-670 -96,-736 Q80,-830 256,-864 Q305,-905 320,-947"/>
 </g>
+
+<g data-group="reach" class="hidden">
+<circle class="reach" cx="-128" cy="-192" r="440"/>
+<circle class="reach" cx="-96" cy="-736" r="440"/>
+<circle class="reach" cx="304" cy="-592" r="440"/>
+</g>
+
+<g data-group="current" class="hidden">
+<rect class="current" x="-480" y="-960" width="960" height="960"/>
+<text class="tiny" x="-470" y="-930">CURRENT RUNTIME 960×960</text>
+<rect class="current" x="64" y="-288" width="192" height="16"/>
+<rect class="current" x="-256" y="-544" width="192" height="16"/>
+<rect class="current" x="64" y="-608" width="224" height="32"/>
+<circle class="current" cx="-64" cy="-704" r="15"/>
+<rect class="current" x="-96" y="-800" width="224" height="16"/>
+</g>
+
 </svg></main></div>
 <script>
-document.querySelectorAll('input[data-g]').forEach(cb=>{const f=()=>document.querySelectorAll(`[data-layer="${cb.dataset.g}"]`).forEach(x=>x.classList.toggle('hidden',!cb.checked));cb.addEventListener('change',f);f()});
+document.querySelectorAll('input[data-layer]').forEach(cb=>{
+ const f=()=>document.querySelectorAll(`[data-group="${cb.dataset.layer}"]`).forEach(el=>el.classList.toggle('hidden',!cb.checked));
+ cb.addEventListener('change',f);f();
+});
 </script></body></html>

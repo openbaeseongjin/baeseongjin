@@ -1,52 +1,35 @@
-# 1-1 ASSET REQUIREMENTS — REV7.0
+# 1-1 ASSET REQUIREMENTS — REV8.0
 
-## Priority
-`GAMEPLAY READABILITY > STORY OBJECT > ATMOSPHERE > DECORATION`
+## Architecture
+- wider Service Riser casing matching 1280px local core
+- left Ground Shutter
+- alternating Maintenance ledges
+- upper-right terminal service deck
+- Cable Overhang as ordinary facility structure
 
-## Existing / reusable
-- Sector 01 Maintenance industrial background language
-- Cyan dedicated Grapple Target visual for A/C
-- Ground Shutter / exit gate / terminal visual language
-- Cable / beam / overhang industrial structure
+## Readability
+Dedicated A/C:
+- cyan landmark language
+- not oversized to compensate for wider map
 
-## Required geometry presentation
-### Shaft Shell
-Two vertical Service Riser casing walls.
-They must look physically present, not invisible collision.
-Do not make them look like Grapple surfaces.
-
-### P3
-Right-side landing deck must visually support the first memorable large C swing.
+Cable Overhang:
+- visually structural
+- no tutorial glow equivalent to a dedicated Anchor
+- must remain legible as potentially grappleable through material/profile
 
 ## Lighting
-S0:
 - Maintenance white dominant
-- local Amber fault indicator
-- optional relay flicker
+- local Amber failure only
 - no screen-wide red wash
 
-S4:
-- Terminal blue-white information focus
-
-S5:
-- Gate state change is visually readable before decorative effects
-
 ## Audio
-Candidate / NOT IMPLEMENTED:
 - normal facility hum
-- relay trip
-- shutter metal settle
-- structural metal Grapple resonance
-- Rope/air/landing focus mix
-- nonverbal player exhale
-- low hum returning at Terminal
-- ambiguous distant Lift machinery at exit
-
-## Character
-No new cinematic animation required.
-Optional S3 exhale should be audio-first and must not steal control.
+- relay trip / shutter settle
+- Rope/air/landing priority
+- optional structural metal attach resonance
+- low hum return at Terminal
+- optional S3 exhale
 
 ## UI
-System Story remains existing style.
-Player Bark requires a visually distinct local dialogue treatment if implemented.
-Do not make Bark visually identical to facility system Toast.
+System Story = existing facility UI.
+Player Bark, if implemented, visually distinct from system Toast.

@@ -1,95 +1,58 @@
-# 1-1 RUNTIME HANDOFF — REV7.0
+# 1-1 RUNTIME HANDOFF — REV8.0
 
-## Baseline
-`5ae6efca720720ee34f2a8b45daf1778fd206c1f`
+Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 
-## Goal
-Implement only the delta needed to make current Runtime match the approved 1-1 REV7 plan.
+## Before edit
+1. fetch latest main
+2. record SHA
+3. reread:
+   - Sector01AreaCatalog.js
+   - LegacyAreaSeamlessSectorRuntime.js
+   - AreaDefinition.js
+   - config.js
+   - AuthoredStoryPresentation.js
+   - authored Story tests
+4. if current constants/owners differ, report before adapting
 
-## Audit before edit
-Re-read latest:
-- `src/game/world/areas/sector01/Sector01AreaCatalog.js`
-- `src/game/presentation/AuthoredStoryPresentation.js`
-- `tests/authoredStoryPresentation.mjs`
-- `src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js`
-- current surface helper/validator contracts
-- current player presentation owners
+## Geometry delta
+Implement the REV8 coordinates in AREA-SPEC.
 
-If `main` changed after the package baseline, record the new SHA and re-audit before applying.
+Important:
+- bounds 1280×1024
+- Entry -416,-32
+- A -128,-192
+- C -96,-736
+- P1/P2/P3/Overhang/Final Deck exact target positions
+- two persistent non-grappleable casing walls
 
-## Required geometry delta
-1. P3 target:
-   - x 224
-   - y -800
-   - width 192
-   - height 16
+Use existing rectangle/surface semantics where possible.
+Do not create a new collision subsystem just for casing.
 
-2. Add persistent Shaft Shell:
-   - left center (-464,-480), 32×960
-   - right center (+464,-480), 32×960
-   - solid, non-one-way, non-grappleable
-   - must survive Seamless import
-   - must read as visible Service Riser casing
+## Story
+Preserve exact verified facility system Story.
+Do not rewrite terminal order/cadence.
 
-3. Preserve:
-   - A (-96,-192)
-   - C (-64,-704)
-   - no B
-   - Cable Overhang structural grapple opportunity
-   - R1/R2/R3
-   - exitBlock source geometry
-   - five camera zones
+Player Bark if implemented:
+- `뭐야…?`
+- `…일단 위로.`
+local-player / nonblocking / deduped / not objective authority.
 
-## Required story delta
-Preserve current verified system Story exactly.
+## Runtime reach
+Current effective hook reach is 400px.
+Do not implement geometry based on stale 440px assumptions.
 
-Add player voice only if no equivalent owner exists:
-- S0: `뭐야…?`
-- S5: `…일단 위로.`
-
-Player voice contract:
-- local-player
-- no objective ownership
-- no gate ownership
-- non-blocking
-- no world pause
-- no input lock
-- dedupe network/retry repeats
-- must not visually compete with system Toast
-- exact scheduling follows DIRECTION-SPEC
-
-Optional:
-- S3 nonverbal exhale
-- atmosphere lighting/audio hooks
-
-These optional presentation items must never delay geometry/story correctness.
-
-## Do not implement
-- dedicated Anchor B
-- enemy
-- Wind/Laser/Cutter
-- Augment
-- Key/Access Module
-- mandatory airborne reattach
-- cutscene camera
-- long dialogue
-- conspiracy implication
-
-## Suggested validation
-- existing full tests
-- `npm run validate:area-specs`
-- direction validator if present
-- authored story regression
+## Tests
+- area definition/schema checks
+- Story regression
+- seamless geometry/bypass
 - 1-1 traversal smoke
-- seamless City Wing bypass test
-- multiplayer/replay bark dedupe test if bark implemented
+- multiplayer story/bark dedupe if bark exists
+- playtest timing
 
 ## Report
-Return:
-- baseline SHA
-- implementation SHA
-- files changed
+- pre-edit main SHA
+- final SHA
+- changed files
 - exact geometry delta
-- Story presentation delta
-- tests/checks
-- remaining NOT IMPLEMENTED items
+- checks
+- remaining NOT IMPLEMENTED

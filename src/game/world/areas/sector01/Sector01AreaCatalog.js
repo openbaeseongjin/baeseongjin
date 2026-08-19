@@ -46,9 +46,9 @@ function gate(id, x, y, nextAreaId, requiredObjectiveIds, { portalBottomY = y } 
 
 const block01 = exitBlock({
     areaId: "sector-01-01",
-    deckX: 128,
-    deckTopY: -835,
-    deckWidth: 320,
+    deckX: 320,
+    deckTopY: -947,
+    deckWidth: 384,
     nextAreaId: "sector-01-02",
     panelObjectiveId: "sector-01-01:terminal-read"
 });
@@ -59,59 +59,57 @@ const area01 = defineArea({
     order: 1,
     name: "SERVICE SHAFT",
     subtitle: "VERTICAL GRID CASCADE FAILURE",
-    bounds: { width: 960, height: 960 },
-    entry: point("sector-01-01:entry", -320, -32),
+    bounds: { width: 1280, height: 1024 },
+    entry: point("sector-01-01:entry", -416, -32),
     exit: block01.exit,
     nextAreaId: "sector-01-02",
     surfaces: [
-        horizontalSurface("sector-01-01:p0", 0, 0, 896, 32, {
+        horizontalSurface("sector-01-01:p0", 0, 0, 1184, 32, {
             presentationId: "terrain:ground-foundation"
         }),
-        horizontalSurface("sector-01-01:r1", -176, -224, 160, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-01:p1", 160, -288, 192, 16),
-        horizontalSurface("sector-01-01:r2", -192, -480, 192, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-01:p2", -160, -544, 192, 16),
-        horizontalSurface("sector-01-01:cable-overhang", 176, -608, 224, 32, {
+        horizontalSurface("sector-01-01:r1", -304, -240, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-01:p1", 224, -320, 224, 16),
+        horizontalSurface("sector-01-01:p2", -144, -560, 224, 16),
+        horizontalSurface("sector-01-01:cable-overhang", 240, -608, 256, 32, {
             kind: "overhang",
             oneWay: false
         }),
-        horizontalSurface("sector-01-01:r3", -144, -736, 160, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-01:p3", 224, -800, 192, 16),
+        horizontalSurface("sector-01-01:r3", -272, -768, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-01:p3", 256, -864, 256, 24),
         block01.deck,
-        groundedSurface("sector-01-01:ground-shutter", -384, 0, 128, 128, {
+        groundedSurface("sector-01-01:ground-shutter", -560, 0, 128, 128, {
             kind: "sealed-door",
             oneWay: false
         }),
-        horizontalSurface("sector-01-01:shaft-shell-left", -464, -960, 32, 960, {
+        horizontalSurface("sector-01-01:shaft-shell-left", -624, -1024, 32, 1024, {
             kind: "shaft-shell",
             oneWay: false,
             grappleable: false
         }),
-        horizontalSurface("sector-01-01:shaft-shell-right", 464, -960, 32, 960, {
+        horizontalSurface("sector-01-01:shaft-shell-right", 624, -1024, 32, 1024, {
             kind: "shaft-shell",
             oneWay: false,
             grappleable: false
         }),
-        grappleTarget("sector-01-01:anchor-a-surface", -96, -192),
+        grappleTarget("sector-01-01:anchor-a-surface", -128, -192),
 
-        grappleTarget("sector-01-01:anchor-c-surface", -64, -704)
+        grappleTarget("sector-01-01:anchor-c-surface", -96, -736)
     ],
     routePoints: [
-        point("sector-01-01:route-entry", -320, -32),
-        point("sector-01-01:route-a", -96, -192, { landmark: "A" }),
+        point("sector-01-01:route-entry", -416, -32),
+        point("sector-01-01:route-a", -128, -192, { landmark: "A" }),
 
-        point("sector-01-01:route-c", -64, -704, { landmark: "C" }),
+        point("sector-01-01:route-c", -96, -736, { landmark: "C" }),
         block01.routeExit
     ],
     recoveryPoints: [
-        point("sector-01-01:recovery-r1", -176, -248),
-        point("sector-01-01:recovery-r2", -192, -504),
-        point("sector-01-01:recovery-r3", -144, -760)
+        point("sector-01-01:recovery-r1", -304, -264),
+        point("sector-01-01:recovery-r3", -272, -792)
     ],
     objects: [
-        worldObject("sector-01-01:anchor-a", "grapple-landmark", -96, -192, { label: "A" }),
+        worldObject("sector-01-01:anchor-a", "grapple-landmark", -128, -192, { label: "A" }),
 
-        worldObject("sector-01-01:anchor-c", "grapple-landmark", -64, -704, { label: "C" }),
+        worldObject("sector-01-01:anchor-c", "grapple-landmark", -96, -736, { label: "C" }),
         worldObject("sector-01-01:cooling-fan", "background-prop", -288, -672, {
             gameplay: false,
             cueIds: ["sector-01-01:fan-inactive"]
@@ -131,11 +129,11 @@ const area01 = defineArea({
     gate: block01.gate,
     storyTriggers: ["lockdown", "terminal-read", "gate-open"],
     cameraZones: [
-        cameraZone("intro", -176, 0, 1.25, 0.82, { verticalPlayerRatio: 0.46 }),
-        cameraZone("first-hook", -352, -176, 1.2, 0.8),
-        cameraZone("release-corridor", -608, -352, 1.1, 0.76),
-        cameraZone("open-swing", -832, -608, 1, 0.72),
-        cameraZone("terminal", -960, -832, 1.15, 0.78)
+        cameraZone("intro", -192, 0, 1.25, 0.82, { verticalPlayerRatio: 0.46 }),
+        cameraZone("first-hook", -384, -192, 1.16, 0.79),
+        cameraZone("cross-back", -640, -384, 1.06, 0.75),
+        cameraZone("open-swing", -896, -640, 0.96, 0.7),
+        cameraZone("terminal", -1024, -896, 1.12, 0.77)
     ],
     cueIds: ["service-shaft", "sealed-ground-access", "cyan-grapple", "service-gate-02"]
 });

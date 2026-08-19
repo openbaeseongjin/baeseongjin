@@ -10,12 +10,12 @@
     "subtitle": "VERTICAL GRID CASCADE FAILURE"
   },
   "bounds": {
-    "width": 960,
-    "height": 960
+    "width": 1280,
+    "height": 1024
   },
   "entry": {
     "id": "entry",
-    "x": -320,
+    "x": -416,
     "y": -32
   },
   "surfaces": [
@@ -24,69 +24,61 @@
       "preset": "platform",
       "x": 0,
       "y": 0,
-      "width": 896,
+      "width": 1184,
       "height": 32
     },
     {
       "id": "r1",
       "preset": "recovery-deck",
-      "x": -176,
-      "y": -224,
-      "width": 160,
+      "x": -304,
+      "y": -240,
+      "width": 192,
       "height": 16
     },
     {
       "id": "p1",
       "preset": "platform",
-      "x": 160,
-      "y": -288,
-      "width": 192,
-      "height": 16
-    },
-    {
-      "id": "r2",
-      "preset": "recovery-deck",
-      "x": -192,
-      "y": -480,
-      "width": 192,
+      "x": 224,
+      "y": -320,
+      "width": 224,
       "height": 16
     },
     {
       "id": "p2",
       "preset": "platform",
-      "x": -160,
-      "y": -544,
-      "width": 192,
+      "x": -144,
+      "y": -560,
+      "width": 224,
       "height": 16
     },
     {
       "id": "cable-overhang",
       "preset": "overhang",
-      "x": 176,
+      "x": 240,
       "y": -608,
-      "width": 224,
+      "width": 256,
       "height": 32
     },
     {
       "id": "r3",
       "preset": "recovery-deck",
-      "x": -144,
-      "y": -736,
-      "width": 160,
+      "x": -272,
+      "y": -768,
+      "width": 192,
       "height": 16
     },
     {
       "id": "p3",
       "preset": "platform",
-      "x": 224,
-      "y": -800,
-      "width": 192,
-      "height": 16
+      "x": 256,
+      "y": -864,
+      "width": 256,
+      "height": 24
     },
     {
       "id": "ground-shutter",
       "preset": "sealed-door",
-      "x": -384,
+      "x": -560,
       "y": 0,
       "width": 128,
       "height": 128
@@ -94,37 +86,43 @@
     {
       "id": "shaft-shell-left",
       "preset": "non-grapple-solid",
-      "x": -464,
-      "y": -480,
+      "x": -624,
+      "y": -512,
       "width": 32,
-      "height": 960
+      "height": 1024
     },
     {
       "id": "shaft-shell-right",
       "preset": "non-grapple-solid",
-      "x": 464,
-      "y": -480,
+      "x": 624,
+      "y": -512,
       "width": 32,
-      "height": 960
+      "height": 1024
     }
   ],
   "grappleTargets": [
     {
       "id": "anchor-a",
       "label": "A",
-      "x": -96,
+      "x": -128,
       "y": -192
     },
     {
       "id": "anchor-c",
       "label": "C",
-      "x": -64,
-      "y": -704
+      "x": -96,
+      "y": -736
     }
   ],
   "enemies": [],
-  "scannerGroups": [],
   "windZones": [],
+  "scannerGroups": [],
+  "sourceExit": {
+    "deckX": 320,
+    "deckTopY": -947,
+    "deckWidth": 384,
+    "panelObjectiveId": "terminal-read"
+  },
   "objectives": [
     {
       "id": "terminal-read",
@@ -134,6 +132,13 @@
       "storySequenceId": "terminal-read"
     }
   ],
+  "progression": {
+    "targetStageAlias": "1-2",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "terminal-read"
+    ]
+  },
   "route": {
     "runtimeLandmarks": [
       "entry",
@@ -155,17 +160,8 @@
       "id": "recover-r1",
       "failureZone": "r1",
       "recoverTo": {
-        "x": -176,
-        "y": -248
-      },
-      "maxRetrySeconds": 5
-    },
-    {
-      "id": "recover-r2",
-      "failureZone": "r2",
-      "recoverTo": {
-        "x": -192,
-        "y": -504
+        "x": -304,
+        "y": -264
       },
       "maxRetrySeconds": 5
     },
@@ -173,77 +169,52 @@
       "id": "recover-r3",
       "failureZone": "r3",
       "recoverTo": {
-        "x": -144,
-        "y": -760
+        "x": -272,
+        "y": -792
       },
       "maxRetrySeconds": 5
     }
   ],
-  "sourceExit": {
-    "deckX": 128,
-    "deckTopY": -835,
-    "deckWidth": 320,
-    "panelObjectiveId": "terminal-read"
-  },
-  "progression": {
-    "targetStageAlias": "1-2",
-    "mode": "objective-gated-connector",
-    "requiredObjectiveIds": [
-      "terminal-read"
-    ]
-  },
   "camera": {
     "zones": [
       {
         "id": "intro",
-        "minY": -176,
+        "minY": -192,
         "maxY": 0,
         "desktopZoom": 1.25,
         "mobileZoom": 0.82
       },
       {
         "id": "first-hook",
-        "minY": -352,
-        "maxY": -176,
-        "desktopZoom": 1.2,
-        "mobileZoom": 0.8
+        "minY": -384,
+        "maxY": -192,
+        "desktopZoom": 1.16,
+        "mobileZoom": 0.79
       },
       {
-        "id": "release-corridor",
-        "minY": -608,
-        "maxY": -352,
-        "desktopZoom": 1.1,
-        "mobileZoom": 0.76
+        "id": "cross-back",
+        "minY": -640,
+        "maxY": -384,
+        "desktopZoom": 1.06,
+        "mobileZoom": 0.75
       },
       {
         "id": "open-swing",
-        "minY": -832,
-        "maxY": -608,
-        "desktopZoom": 1.0,
-        "mobileZoom": 0.72
+        "minY": -896,
+        "maxY": -640,
+        "desktopZoom": 0.96,
+        "mobileZoom": 0.7
       },
       {
         "id": "terminal",
-        "minY": -960,
-        "maxY": -832,
-        "desktopZoom": 1.15,
-        "mobileZoom": 0.78
+        "minY": -1024,
+        "maxY": -896,
+        "desktopZoom": 1.12,
+        "mobileZoom": 0.77
       }
     ]
   },
-  "story": {
-    "planningTriggers": [
-      "lockdown",
-      "first-rope",
-      "structural-read",
-      "open-swing",
-      "terminal-read",
-      "gate-open"
-    ],
-    "runtimePresentations": []
-  },
   "runtimeDependencies": {
-    "required": [],
     "newSystems": [
       {
         "id": "non-grapple-solid",
@@ -259,47 +230,59 @@
       }
     ]
   },
+  "verifiedRuntimeConstants": {
+    "ropeHookReach": 400,
+    "grappleLinkBudget": 600,
+    "playerJumpSpeed": 440
+  },
   "forbidden": [
-    "contact damage",
-    "enemy of any kind",
-    "environmental hazard (wind, laser, cutter)",
-    "augment / maintenance node before 1-4",
     "dedicated grapple anchor B",
     "mandatory airborne re-attach",
-    "full-stage reset on grapple failure",
-    "player dialogue that explains rope affordance",
+    "enemy",
+    "wind",
+    "laser",
+    "cutter",
+    "augment",
+    "key/access module",
+    "full-stage reset",
     "full-screen red emergency wash"
   ],
   "acceptanceTests": [
     {
-      "id": "mandatory-route-base-rope",
+      "id": "reach-entry-a",
       "type": "geometry",
-      "requirement": "Base Rope로 entry -> A -> C -> exit 필수 경로가 성립해야 한다.",
+      "requirement": "Entry→A static distance remains below verified 400px Hook Reach.",
       "automation": "MANUAL"
     },
     {
-      "id": "structural-grip-not-mandatory",
-      "type": "traversal",
-      "requirement": "Cable Overhang Structural Grip은 유용한 발견이지만 유일한 hidden mandatory solution이면 안 된다.",
-      "automation": "MANUAL"
-    },
-    {
-      "id": "recovery-cost-under-5-seconds",
-      "type": "traversal",
-      "requirement": "Grapple 실패 후 같은 문제 재시도까지 5초 이내로 복귀하고 full-stage reset이 없어야 한다.",
-      "automation": "MANUAL"
-    },
-    {
-      "id": "shaft-shell-blocks-city-wing-bypass",
+      "id": "reach-a-p1",
       "type": "geometry",
-      "requirement": "좌우 Shaft Shell이 Seamless City Wing overlap을 통한 riser 외부 우회를 막아야 한다.",
+      "requirement": "A/P1 relationship remains below verified 400px Hook Reach and supports first basic swing.",
       "automation": "MANUAL"
     },
     {
-      "id": "area-spec-schema-valid",
-      "type": "schema",
-      "requirement": "npm run validate:area-specs가 area-spec-v1로 통과해야 한다. NOT_IMPLEMENTED preset은 declared dependency로 처리한다.",
-      "automation": "AUTOMATED"
+      "id": "reach-p2-c",
+      "type": "geometry",
+      "requirement": "P2→C remains comfortable, not a max-range commit.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "reach-c-p3",
+      "type": "geometry",
+      "requirement": "C/P3 relationship supports a readable open swing without frame-perfect attach.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "shell-bypass",
+      "type": "geometry",
+      "requirement": "Persistent casing blocks Seamless City Wing bypass.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "pacing",
+      "type": "traversal",
+      "requirement": "First clear 1:20–1:50 target; mastered 0:38–0:58 target.",
+      "automation": "MANUAL"
     }
   ]
 }
