@@ -25,6 +25,10 @@ Baseline:
 | Player Bark layer | absent | 5 Barks designed | NOT IMPLEMENTED (barks test explicitly allows this) |
 | nextAreaId | null, deliberately unchanged | do not blindly change | VERIFIED (audit below) |
 
+## Seamless Access override — 2026-08-19
+
+- 0.43.2 `seamless-sector-runtime-v8`의 Sector 01→02 transit device는 `ACCESS 3/3`과 기존 1-8 objective를 함께 요구한다. 같은 Sector 안의 Stage별 문은 되살리지 않으며, 1-3·1-6·1-7 Carrier 세 기를 모두 처치해야 T자형 force-field blocker가 해제되고 모든 Player에게 camera unlock scene이 재생된다. force-field의 가로 collision/visual segment는 compiled 1-8 source bounds 양끝에서 기본 Grapple budget 600px만큼 연장돼 중앙과 좌우 도달 경로를 함께 막는다. 미수집 Carrier는 거리순 최대 3개를 화면 밖 edge arrow 또는 화면 안 diamond로 안내한다.
+
 ## Sequential-activation note
 
 There is no enemy-sequencing engine anywhere in this codebase to build on or extend - Sentry

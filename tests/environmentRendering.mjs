@@ -279,6 +279,29 @@ export function run() {
     const bottomBackdropY = farLayerDraw(sector0101BottomContext)[7];
     const topBackdropY = farLayerDraw(sector0101TopContext)[7];
     assert.ok(topBackdropY > bottomBackdropY, "Sector 01-1 far background moves downward as the player climbs");
+    const seamlessSector01Landmarks = seamlessWorld.landmarks.filter(({ sectorId }) => sectorId === "sector-01");
+    const seamlessSectorTop = Math.min(...seamlessSector01Landmarks.map(({ bounds }) => bounds.y));
+    const seamlessSectorBottom = Math.max(...seamlessSector01Landmarks.map(({ bounds }) => bounds.y + bounds.height));
+    const seamlessBackdropAtY = (playerY) => {
+        const context = recordingContext();
+        authoredBackdropRenderer.draw({
+            context,
+            scene: {
+                ...seamlessSector01Scene,
+                player: { position: { x: 0, y: playerY } }
+            },
+            viewport
+        });
+        return sector01LayerImages.map(
+            (image) => context.calls.find(([name, drawnImage]) => name === "drawImage" && drawnImage === image)[7]
+        );
+    };
+    const seamlessBottomLayerYs = seamlessBackdropAtY(seamlessSectorBottom - 1);
+    const seamlessTopLayerYs = seamlessBackdropAtY(seamlessSectorTop + 1);
+    assert.ok(
+        seamlessTopLayerYs.every((destinationY, index) => destinationY > seamlessBottomLayerYs[index]),
+        "seamless Sector 01 far/mid/near backgrounds must all move downward monotonically as the player climbs"
+    );
     const sector0102BackdropContext = recordingContext();
     authoredBackdropRenderer.draw({
         context: sector0102BackdropContext,

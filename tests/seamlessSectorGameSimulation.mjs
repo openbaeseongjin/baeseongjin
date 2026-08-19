@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { SEAMLESS_SECTOR_RUNTIME_REVISION } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
+import { GRAPPLE_LINK_BUDGET } from "../src/game/config.js";
 
 function completeLandmark(progress, world, landmarkId) {
     const landmark = world.landmarks.find(({ id }) => id === landmarkId);
@@ -100,6 +101,27 @@ export function run() {
     assert.ok(simulation.world.enemySpawns.some(({ accessModuleId }) => accessModuleId));
     assert.equal(simulation.enemyStates().length, simulation.world.enemySpawns.length);
     assert.equal(simulation.snapshot().enemies.length, simulation.world.enemySpawns.length);
+    const performanceSimulation = createCurrentGameSimulation({ worldSeed: 9182, playerId: "perf-player" });
+    const compactEnemyStates = performanceSimulation.enemyNetworkStates();
+    const creationsBeforeHydration = performanceSimulation.enemyRuntimeMetrics().creations;
+    let hydratedEnemyStates;
+    for (let snapshotIndex = 0; snapshotIndex < 300; snapshotIndex += 1) {
+        hydratedEnemyStates = performanceSimulation.hydrateEnemyNetworkStates(compactEnemyStates);
+    }
+    assert.equal(
+        performanceSimulation.enemyRuntimeMetrics().creations,
+        creationsBeforeHydration,
+        "static enemy hydration must not create runtime objects"
+    );
+    assert.equal(hydratedEnemyStates.length, compactEnemyStates.length);
+    assert.ok(hydratedEnemyStates.every(({ enemyType, position }) => enemyType && Number.isFinite(position.x)));
+    const creationsBeforePrediction = performanceSimulation.enemyRuntimeMetrics().creations;
+    performanceSimulation.preparePrediction(hydratedEnemyStates);
+    assert.equal(
+        performanceSimulation.enemyRuntimeMetrics().creations - creationsBeforePrediction,
+        compactEnemyStates.length,
+        "one snapshot must create exactly one prediction runtime per Enemy, not a second hydration runtime"
+    );
     const encounterCountByAlias = Object.fromEntries(
         simulation.world.landmarks.map((landmark) => [
             landmark.legacyStageAlias,
@@ -231,6 +253,19 @@ export function run() {
     });
     assert.equal(lockedSweep.blocked, true);
     assert.ok(barrierIds.includes(lockedSweep.surfaceId), "the visible transit device must own the blocking collider");
+    const sourceLandmark = unlockSimulation.world.landmarks.find(({ id }) => id === transitionRoute.sourceLandmarkId);
+    const lateralX = sourceLandmark.bounds.x - GRAPPLE_LINK_BUDGET * 0.5;
+    const lateralSweep = unlockSimulation.players[0].physics.collider.farthestSafePositionAlong({
+        start: { x: lateralX, y: sourceLandmark.bounds.y + 120 },
+        direction: { x: 0, y: -240 },
+        distance: 240,
+        surfaces: unlockSimulation.activeCollisionSurfaces
+    });
+    assert.equal(lateralSweep.blocked, true, "a reachable lateral route must not bypass the locked Sector boundary");
+    assert.ok(
+        barrierIds.includes(lateralSweep.surfaceId),
+        "the same visible transit barrier must block the lateral traversal"
+    );
     for (const moduleId of unlockSimulation.world.sectors[0].accessModuleIds) {
         const module = unlockSimulation.world.accessModules.find(({ id }) => id === moduleId);
         unlockSimulation.enemies.find(({ objectId }) => objectId === module.encounterId).health = 0;
@@ -260,6 +295,17 @@ export function run() {
         surfaces: unlockSimulation.activeCollisionSurfaces
     });
     assert.equal(barrierIds.includes(unlockedSweep.surfaceId), false);
+    const unlockedLateralSweep = unlockSimulation.players[0].physics.collider.farthestSafePositionAlong({
+        start: { x: lateralX, y: sourceLandmark.bounds.y + 120 },
+        direction: { x: 0, y: -240 },
+        distance: 240,
+        surfaces: unlockSimulation.activeCollisionSurfaces
+    });
+    assert.equal(
+        barrierIds.includes(unlockedLateralSweep.surfaceId),
+        false,
+        "3/3 unlock must remove the lateral transit barrier as well"
+    );
     const unlockEvents = unlockSimulation
         .drainReplicationEvents()
         .filter(({ eventType, routeId }) => eventType === "route-unlocked" && routeId === transitionRoute.id);

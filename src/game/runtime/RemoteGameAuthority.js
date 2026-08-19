@@ -346,6 +346,10 @@ export class RemoteGameAuthority {
         return this.ownerRuntime?.renderSnapshot() ?? null;
     }
 
+    worldSnapshot() {
+        return this.ownerRuntime?.worldSnapshot() ?? null;
+    }
+
     applyPredictedImpact(event) {
         return this.ownerRuntime?.applyPredictedImpact(event) ?? false;
     }

@@ -518,6 +518,10 @@ export class OwnerPredictionRuntime {
         return this.initialized ? this.simulation.snapshot() : null;
     }
 
+    worldSnapshot() {
+        return this.initialized ? this.simulation.world : null;
+    }
+
     impactClaimState() {
         return this.initialized ? this.simulation.playerState(this.ownerId) : null;
     }

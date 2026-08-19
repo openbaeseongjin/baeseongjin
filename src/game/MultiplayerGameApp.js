@@ -175,12 +175,13 @@ export class MultiplayerGameApp {
         }
         if (!command.interact) return false;
         const predicted = this.authority.snapshot().predicted;
+        const world = this.authority.worldSnapshot();
         const candidate = openFoundationChooserCandidate({
-            world: this.authority.renderSnapshot()?.world ?? null,
+            world,
             position: predicted?.position ?? null,
             command,
             playerId: this.authority.playerId,
-            runSeed: this.authority.renderSnapshot()?.world?.seed,
+            runSeed: world?.seed,
             selectedAugmentIds: owner?.selectedAugmentIds ?? [],
             consumedSourceIds: owner?.augmentRuntimeState?.consumedSourceIds ?? []
         });
@@ -293,7 +294,7 @@ export class MultiplayerGameApp {
         this.statusFeedback.update(dt);
         this.statusFeedback.apply(events);
         this.worldUnlockPresentation.prepare(events, {
-            world: this.authority.renderSnapshot()?.world,
+            world: this.authority.worldSnapshot(),
             camera: this.camera,
             cssWidth: this.renderer.cssWidth,
             cssHeight: this.renderer.cssHeight
@@ -438,7 +439,7 @@ export class MultiplayerGameApp {
             this.authority.submit(gameplayCommand);
         }
         const player = this.authority.snapshot(1).predicted;
-        const authoredWorld = this.authority.renderSnapshot()?.world;
+        const authoredWorld = this.authority.worldSnapshot();
         const cameraShot = this.updatePresentationCamera(dt, player, authoredWorld);
         this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
