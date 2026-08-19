@@ -12,8 +12,7 @@ import {
     applyReleasePropulsion,
     createModifiedRopeProfile,
     createRopeAugmentTuning,
-    ROPE_AUGMENT_PERCENTAGES,
-    selectDefaultPunchTarget
+    ROPE_AUGMENT_PERCENTAGES
 } from "../src/game/augments/rope/RopeAugmentTuning.js";
 
 function enemy({ id, x, y, radius = 18, health = 100, isBoss = false } = {}) {
@@ -55,10 +54,6 @@ export function run() {
     assert.equal(tuning.commonRope.electrifiedRope.damagePerPulse, 2);
     assert.equal(tuning.commonRope.collisionExplosion.directDamage, 25);
     assert.equal(tuning.commonRope.collisionExplosion.splashDamage, 12.5);
-    assert.equal(tuning.defaultPunch.range, 55);
-    assert.equal(tuning.defaultPunch.damage, 10);
-    assert.equal(tuning.defaultPunch.knockbackDistance, 50);
-    assert.equal(tuning.defaultPunch.cooldownSeconds, 0.5);
 
     const modifiedProfile = createModifiedRopeProfile(tuning.baseRope, {
         speedPercent: ROPE_AUGMENT_PERCENTAGES.fastLaunchSpeed,
@@ -71,21 +66,6 @@ export function run() {
     assert.equal(modifiedProfile.hookFlightSeconds, 480 / 1800);
 
     assert.deepEqual(applyReleasePropulsion({ x: 80, y: -40 }), { x: 100, y: -50 });
-    assert.equal(
-        selectDefaultPunchTarget({
-            playerPosition: { x: 0, y: 0 },
-            enemies: [enemy({ id: "far", x: 80, y: 0 }), enemy({ id: "near", x: 54, y: 0 })]
-        }).id,
-        "near"
-    );
-    assert.equal(
-        selectDefaultPunchTarget({
-            playerPosition: { x: 0, y: 0 },
-            enemies: [enemy({ id: "outside", x: 56, y: 0 })]
-        }),
-        null
-    );
-
     assert.equal(ropeTouchesEnemy({ segments: HORIZONTAL_SEGMENT, enemy: enemy({ id: "touch", x: 50, y: 27 }) }), true);
     assert.equal(ropeTouchesEnemy({ segments: HORIZONTAL_SEGMENT, enemy: enemy({ id: "miss", x: 50, y: 29 }) }), false);
 

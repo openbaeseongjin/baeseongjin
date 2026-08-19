@@ -1,6 +1,8 @@
 import { ROPE_IMPACT_CONFIG } from "../config.js";
+import { actionAugmentById } from "./actions/ActionAugmentCatalog.js";
 
 const IMPACT = ROPE_IMPACT_CONFIG.damage;
+const DEFAULT_PUNCH = actionAugmentById("default-punch").effect;
 
 function formula({ cardId = null, damageMultiplier, range, knockback = null, dynamicDamage = false }) {
     return Object.freeze({
@@ -14,7 +16,14 @@ function formula({ cardId = null, damageMultiplier, range, knockback = null, dyn
 
 const FORMULAS = new Map([
     ["rope-impact", formula({ damageMultiplier: 1, range: 80 })],
-    ["default-punch", formula({ damageMultiplier: 0.4, range: 55, knockback: { distance: 50, duration: 0.25 } })],
+    [
+        "default-punch",
+        formula({
+            damageMultiplier: DEFAULT_PUNCH.damageMultiplier,
+            range: DEFAULT_PUNCH.range,
+            knockback: { distance: DEFAULT_PUNCH.knockbackDistance, duration: DEFAULT_PUNCH.knockbackSeconds }
+        })
+    ],
     ["electrified-rope", formula({ cardId: "electrified-rope", damageMultiplier: 0.08, range: 500 })],
     [
         "collision-explosion-direct",

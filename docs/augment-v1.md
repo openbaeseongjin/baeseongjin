@@ -10,7 +10,7 @@
 - 기본 Rope와 기본 펀치만으로도 필수 진행과 Boss를 완주할 수 있어야 한다.
 - 특정 카드나 파티 조합을 필수 geometry·Boss 해법으로 요구하지 않는다.
 - Player별 최대 6장, Runtime에 연결된 각 Sector의 명시적 장비 Node에서 한 번의 logical entitlement를 사용한다.
-- Sector 01~03의 획득 위치는 아래 명시적 source로 고정한다. Sector 04~06 source, Timer `+10` trigger와 Purge origin/rejoin은 별도 topology 결정 전까지 HOLD다.
+- Sector 01~~03의 획득 위치는 아래 명시적 source로 고정한다. Sector 04~~06 source, Timer `+10` trigger와 Purge origin/rejoin은 별도 topology 결정 전까지 HOLD다.
 
 ## 선택 계약
 
@@ -36,11 +36,11 @@
 
 ## Runtime 획득 topology
 
-| 순서 | Sector / Landmark | Stable source ID | 역할 |
-| ---: | --- | --- | --- |
-| 1 | Sector 01 / landmark 04 | `sector-01-04:maintenance-node` | 첫 generic 3장 offer |
-| 2 | Sector 02 / landmark 03 | `sector-02-03:specialization-node` | 두 번째 generic 3장 offer. snapshot 호환을 위해 과거 object ID 유지 |
-| 3 | Sector 03 / landmark 05 | `sector-03-05:service-calibration-frame` | 세 번째 generic 3장 offer |
+| 순서 | Sector / Landmark       | Stable source ID                         | 역할                                                                |
+| ---: | ----------------------- | ---------------------------------------- | ------------------------------------------------------------------- |
+|    1 | Sector 01 / landmark 04 | `sector-01-04:maintenance-node`          | 첫 generic 3장 offer                                                |
+|    2 | Sector 02 / landmark 03 | `sector-02-03:specialization-node`       | 두 번째 generic 3장 offer. snapshot 호환을 위해 과거 object ID 유지 |
+|    3 | Sector 03 / landmark 05 | `sector-03-05:service-calibration-frame` | 세 번째 generic 3장 offer                                           |
 
 - 세 source는 모두 `interact-choice` objective이며 선택이 해당 outbound panel 진행의 선행 조건이다.
 - 선택 종류는 고정 Foundation/Specialization tier가 아니라 현재 loadout과 호환되는 동일한 22장 Catalog offer다.
@@ -51,23 +51,23 @@
 
 ## 22장 Catalog
 
-| 분류 | 카드 |
-| --- | --- |
-| 공통 Rope 6 | 빠른 발사, 긴 로프, 빠른 회수, 해제 추진, 감전 로프, 충돌 폭발 |
-| 기본 Action 6 | 점멸, 돌진 타격, 순간 방어, 밀쳐내기, 직선 사격, 느린 낙하 |
-| Signature 6 | 폭발 흔적, 충돌 반동, 피해 반사, 벽 충돌, 관통 사격, 종료 파동 |
-| 범용 modifier 4 | 빠른 재사용, 추가 충전, 로프 연동, 사용 후 보호막 |
+| 분류            | 카드                                                           |
+| --------------- | -------------------------------------------------------------- |
+| 공통 Rope 6     | 빠른 발사, 긴 로프, 빠른 회수, 해제 추진, 감전 로프, 충돌 폭발 |
+| 기본 Action 6   | 점멸, 돌진 타격, 순간 방어, 밀쳐내기, 직선 사격, 느린 낙하     |
+| Signature 6     | 폭발 흔적, 충돌 반동, 피해 반사, 벽 충돌, 관통 사격, 종료 파동 |
+| 범용 modifier 4 | 빠른 재사용, 추가 충전, 로프 연동, 사용 후 보호막              |
 
 Quest, 순수 기본 이동 modifier, rarity와 Specialization은 v1 범위가 아니다.
 
 ## 기본 Rope와 펀치
 
-| 항목 | 0.25.0 | 0.26.0 기본 | 카드 적용 |
-| --- | ---: | ---: | ---: |
-| Hook speed | 1400px/s | 1200px/s | 빠른 발사 `+50%` → 1800px/s |
-| Hook lifetime | 2/7초 | 1/3초 | 빠른 발사 파생 2/9초 |
-| Hook reach | 400px | 400px | 긴 로프 `+20%` → 480px |
-| Reload | 0.20초 | 0.50초 | 빠른 회수 `-50%` → 0.25초 |
+| 항목          |   0.25.0 | 0.26.0 기본 |                   카드 적용 |
+| ------------- | -------: | ----------: | --------------------------: |
+| Hook speed    | 1400px/s |    1200px/s | 빠른 발사 `+50%` → 1800px/s |
+| Hook lifetime |    2/7초 |       1/3초 |        빠른 발사 파생 2/9초 |
+| Hook reach    |    400px |       400px |      긴 로프 `+20%` → 480px |
+| Reload        |   0.20초 |      0.50초 |   빠른 회수 `-50%` → 0.25초 |
 
 Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. 해제 추진은 정상 Rope 해제 계산 뒤 전체 속도 벡터를 한 번 `×1.25` 한다.
 
@@ -93,16 +93,17 @@ Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. �
 
 ## Action과 Signature
 
-PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 `로프 조준 ↔ 액션 조준` 토글 뒤 액션 조준 상태에서 월드를 누른 실제 지점을 방향으로 사용하며, 그 터치는 Rope 발사 입력을 만들지 않는다. 기본 주먹과 모든 증강 Action의 유효 시작은 `augment-action-started` presentation event를 만들고 주먹/방향 잔상과 교체 가능한 `gameplay-action-swing` cue를 즉시 재생한다. predicted/confirmed 표현은 같은 `activationId`로 한 번만 보인다. 기본 주먹은 사거리 안 적이 없어도 입력 피드백을 만들지만 피해와 넉백은 기존 유효 대상에게만 적용한다.
+PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 `로프 조준 ↔ 액션 조준` 토글 뒤 액션 조준 상태에서 월드를 누른 실제 지점을 방향으로 사용하며, 그 터치는 Rope 발사 입력을 만들지 않는다. `default-punch`는 증강 카드가 없는 별도 공격 예외가 아니라 모든 Player가 시작부터 가진 built-in 기본 Action이다. 주먹과 여섯 교체 Action은 같은 `ActionAugmentState`의 입력 edge·activation sequence·charge·recharge queue·snapshot/restore를 사용하고 유효 시작에서 `augment-action-started` presentation event를 만든다. 주먹/방향 잔상과 교체 가능한 `gameplay-action-swing` cue는 즉시 재생하며 predicted/confirmed 표현은 같은 `activationId`로 한 번만 보인다. 기본 주먹은 사거리 안 적이 없어도 charge를 소비하고 입력 피드백을 만들지만 피해와 넉백은 기존 유효 대상에게만 적용한다.
 
-| Action | 기본 계약 | Signature |
-| --- | --- | --- |
-| 점멸 (`direction-dash`) | 조준 방향 최대 150px 즉시 위치 전환, collider sweep으로 가장 먼 안전 위치에 정지, cooldown 5초, 속도·Rope 보존, damage·무적 없음 | 폭발 흔적: 실제 시작점→도착점의 폭 60px 경로가 0.50초 뒤 80% 피해 |
-| 돌진 타격 | 조준 방향 `velocity += 500`, 0.50초 창, 100% 피해, 75px 넉백, cooldown 5초 | 충돌 반동: 적·solid 법선 반사, 속력 100% 보존, 적별 피해 1회 |
-| 순간 방어 | 0.50초 동안 첫 combat HP 피해만 0, cooldown 5초 | 피해 반사: 막은 HP 피해를 공격자에게 1회 반환하고 projectile은 인과 선 표시 |
-| 밀쳐내기 | 반경 140px, 모든 적 20% 피해, 175px 넉백, cooldown 5초, Boss 이동 없음 | 벽 충돌: 밀리는 중 solid 접촉 시 80% 피해 1회 |
-| 직선 사격 | 2000px/s, 3000px, 1.50초, 80% 피해, cooldown 2.5초, 기본 관통·유도·넉백 없음 | 관통 사격: 적별 1회 관통, 속도·피해 손실 없음 |
-| 느린 낙하 | 공중 hold 최대 2초, gravity ×0.25, release·timeout·landing 종료, cooldown 5초 | 종료 파동: 모든 종료에서 반경 120px, 80% 피해 1회 |
+| Action                           | 기본 계약                                                                                                                             | Signature                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 주먹 (`default-punch`, built-in) | 사거리 55px, 40% 피해, 50px 넉백, cooldown 0.5초, 1 charge. 증강 offer에는 나오지 않고 다른 기본 Action 획득 전 기본 loadout으로 사용 | 없음                                                                        |
+| 점멸 (`direction-dash`)          | 조준 방향 최대 150px 즉시 위치 전환, collider sweep으로 가장 먼 안전 위치에 정지, cooldown 5초, 속도·Rope 보존, damage·무적 없음      | 폭발 흔적: 실제 시작점→도착점의 폭 60px 경로가 0.50초 뒤 80% 피해           |
+| 돌진 타격                        | 조준 방향 `velocity += 500`, 0.50초 창, 100% 피해, 75px 넉백, cooldown 5초                                                            | 충돌 반동: 적·solid 법선 반사, 속력 100% 보존, 적별 피해 1회                |
+| 순간 방어                        | 0.50초 동안 첫 combat HP 피해만 0, cooldown 5초                                                                                       | 피해 반사: 막은 HP 피해를 공격자에게 1회 반환하고 projectile은 인과 선 표시 |
+| 밀쳐내기                         | 반경 140px, 모든 적 20% 피해, 175px 넉백, cooldown 5초, Boss 이동 없음                                                                | 벽 충돌: 밀리는 중 solid 접촉 시 80% 피해 1회                               |
+| 직선 사격                        | 2000px/s, 3000px, 1.50초, 80% 피해, cooldown 2.5초, 기본 관통·유도·넉백 없음                                                          | 관통 사격: 적별 1회 관통, 속도·피해 손실 없음                               |
+| 느린 낙하                        | 공중 hold 최대 2초, gravity ×0.25, release·timeout·landing 종료, cooldown 5초                                                         | 종료 파동: 모든 종료에서 반경 120px, 80% 피해 1회                           |
 
 범용 modifier:
 
@@ -111,7 +112,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 - 로프 연동: Rope 해제 뒤 1초 안의 다음 Action cooldown `×0.50`; 빠른 재사용과 곱연산.
 - 사용 후 보호막: 유효 Action 종료 시 최대 HP 15%, 2초. 중첩하지 않고 양·시간을 갱신하며 HP 피해만 흡수한다.
 
-점멸은 0.25초 분할 이동이나 impulse를 사용하지 않는다. Action 입력 상승 edge에서 한 번만 실행하며 hold 중 반복되지 않는다. Solid는 Player circle collider를 포함한 연속 경로로 검사하고, one-way는 위→아래 이동만 기존 PlayerPhysics 의미대로 차단한다. 내부 ID `direction-dash`와 `explosive-trail` 호환 관계는 저장·snapshot 호환을 위해 유지한다. `dash-strike`는 별도 속도 impulse와 0.50초 접촉 공격 창을 가진다.
+주먹의 수치 정의는 내부 Action Catalog가 소유하고 target resolver·owner prediction·서버 `augment-impact` formula가 같은 activation 값을 소비한다. 과거 `punchCooldownRemaining` snapshot은 restore 시 default-punch의 `chargesRemaining=0`과 recharge 상태로 한 번 migration하며 새 snapshot에는 별도 punch 필드를 쓰지 않는다. 점멸은 0.25초 분할 이동이나 impulse를 사용하지 않는다. Action 입력 상승 edge에서 한 번만 실행하며 hold 중 반복되지 않는다. Solid는 Player circle collider를 포함한 연속 경로로 검사하고, one-way는 위→아래 이동만 기존 PlayerPhysics 의미대로 차단한다. 내부 ID `direction-dash`와 `explosive-trail` 호환 관계는 저장·snapshot 호환을 위해 유지한다. `dash-strike`는 별도 속도 impulse와 0.50초 접촉 공격 창을 가진다.
 
 ## 피해·이동 권위
 
@@ -128,7 +129,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 - Player command v4: Action intent 추가.
 - Owner motion v4: owner-owned augment/action runtime mirror 추가.
 - Player impact v8: generic selected Augment state와 guard/shield 결과 수렴.
-- World snapshot v8: selected cards, pending offer, Action/knockback snapshot 추가.
+- World snapshot v11: 모든 Player의 non-null Action state를 전송하며 기본 주먹도 charge/recharge snapshot으로 수렴한다.
 - Augment impact v1, Augment offer v1을 사용한다.
 
 ## 반복 수치 규칙

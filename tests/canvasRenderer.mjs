@@ -38,6 +38,16 @@ export function run() {
         { charges: 1, maximum: 2, remaining: 2, duration: 4, ratio: 0.5 }
     );
     assert.deepEqual(
+        resolveActionCooldownStatus({
+            loadout: { baseActionId: "default-punch", modifierIds: [] },
+            chargesRemaining: 0,
+            rechargeRemaining: 0.25,
+            rechargeDuration: 0.5
+        }),
+        { charges: 0, maximum: 1, remaining: 0.25, duration: 0.5, ratio: 0.5 },
+        "the built-in punch must use the same visible Action cooldown resolver"
+    );
+    assert.deepEqual(
         renderer.screenToWorld({ x: 360, y: 180 }, { x: 100, y: 50, zoom: 0.5 }),
         { x: 800, y: 370 },
         "screen aiming must account for the wider zoomed-out mobile camera"

@@ -14,6 +14,8 @@ export function run() {
     assert.equal(snapshot.worldRevision, SEAMLESS_SECTOR_RUNTIME_REVISION);
     assert.equal(snapshot.state.progressKind, "sector");
     assert.equal(snapshot.state.players[0].respawnAnchorId, "sector-01:entry");
+    assert.equal(snapshot.state.players[0].actionState.loadout.baseActionId, "default-punch");
+    assert.equal(snapshot.state.players[0].actionState.chargesRemaining, 1);
     assert.equal("respawnAnchorId" in snapshot.state, false);
     assert.equal("activeCheckpointId" in snapshot.state, false);
     assert.equal("currentSectorId" in snapshot.state.worldProgress, false);
@@ -41,6 +43,7 @@ export function run() {
     );
     assert.equal(predictor.renderSnapshot().world.definitionRevision, SEAMLESS_SECTOR_RUNTIME_REVISION);
     assert.equal(predictor.simulation.activeRespawnAnchor.id, "sector-01:entry");
+    assert.equal(predictor.simulation.playerState(ownerId).actionState.loadout.baseActionId, "default-punch");
     assert.deepEqual(predictor.simulation.worldProgress.snapshot(), snapshot.state.worldProgress);
 
     const objectiveId = server.world.landmarks[0].objectiveIds[0];

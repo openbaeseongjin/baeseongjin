@@ -202,6 +202,10 @@ export function run() {
 
     const emptyPunchSimulation = new GameSimulation({ playerId: "empty-punch-owner" });
     emptyPunchSimulation.enemies = [];
+    const readyPunchState = emptyPunchSimulation.snapshot().actionState;
+    assert.equal(readyPunchState.loadout.baseActionId, "default-punch");
+    assert.equal(readyPunchState.chargesRemaining, 1);
+    assert.equal(readyPunchState.rechargeRemaining, 0);
     const emptyPunch = emptyPunchSimulation.advanceOwnerPrediction(
         emptyPunchSimulation.players[0].id,
         command({ action: true, aimWorld: { x: 500, y: 500 } }),
@@ -210,6 +214,13 @@ export function run() {
     );
     assert.equal(emptyPunch.augmentImpactEvents.length, 0, "an empty punch must not invent an impact");
     assert.equal(emptyPunch.augmentEvents[0].actionId, "default-punch", "an empty punch still needs input feedback");
+    const coolingPunchState = emptyPunchSimulation.snapshot().actionState;
+    assert.equal(coolingPunchState.loadout.baseActionId, "default-punch");
+    assert.equal(coolingPunchState.chargesRemaining, 0);
+    assert.equal(coolingPunchState.rechargeRemaining, 0.5);
+    assert.equal(coolingPunchState.rechargeDuration, 0.5);
+    assert.deepEqual(emptyPunchSimulation.snapshot().augmentRuntimeState.combat.actionState, coolingPunchState);
+    assert.equal("punchCooldownRemaining" in emptyPunchSimulation.snapshot().augmentRuntimeState.combat, false);
 
     const dashSimulation = new GameSimulation({ playerId: "dash-owner" });
     dashSimulation.enemies = [];
