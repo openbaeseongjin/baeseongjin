@@ -13,6 +13,8 @@ import {
     validateBehaviorRefs
 } from "../src/game/world/area-authoring-v2/AreaBehaviorRegistry.js";
 import { validateAreaSpecV2 } from "../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
+import { AREA_CATALOG_MANIFEST_V2, validateAreaCatalogManifest } from "../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
+import { composeSectorCatalog } from "../src/game/world/area-authoring-v2/AreaCatalogComposer.js";
 
 export function createValidSpec() {
     return {
@@ -66,6 +68,30 @@ export function createValidSpec() {
     };
 }
 
+function createManifest() {
+    return {
+        schemaVersion: AREA_CATALOG_MANIFEST_V2,
+        catalogId: "sector-01",
+        stageSources: [
+            {
+                stageId: "1-1",
+                areaId: "sector-01-01",
+                sectorId: "sector-01",
+                source: "generated",
+                sourcePath: "docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json",
+                outputPath: "src/game/world/areas/generated/sector01/Sector01Stage01.generated.js"
+            },
+            {
+                stageId: "1-2",
+                areaId: "sector-01-02",
+                sectorId: "sector-01",
+                source: "legacy",
+                sourcePath: "src/game/world/areas/sector01/Sector01AreaCatalog.js"
+            }
+        ]
+    };
+}
+
 export function run() {
     const validSpec = createValidSpec();
     assert.deepEqual(validateAreaSpecV2(validSpec, { file: "fixture" }), { valid: true, issues: [] });
@@ -111,6 +137,60 @@ export function run() {
     const executableResult = validateAreaSpecV2(executableReference, { file: "fixture", registry });
     assert.equal(executableResult.valid, false);
     assert.ok(executableResult.issues.some(({ code }) => code === "behavior-reference-executable-value"));
+
+    const manifest = createManifest();
+    assert.deepEqual(validateAreaCatalogManifest(manifest, { expectedStageIds: ["1-1", "1-2"] }), {
+        valid: true,
+        issues: []
+    });
+
+    const generatedArea01 = createAreaDefinitionFromV2(validSpec);
+    const legacyArea02 = structuredClone(generatedArea01);
+    legacyArea02.id = "sector-01-02";
+    legacyArea02.order = 2;
+    legacyArea02.name = "LEGACY AREA 02";
+    legacyArea02.entry.id = "sector-01-02:entry";
+    legacyArea02.exit.id = "sector-01-02:exit";
+    legacyArea02.gate.id = "sector-01-02:gate";
+    const composed = composeSectorCatalog({
+        id: "sector-01",
+        revision: "test",
+        manifest,
+        legacyAreas: [legacyArea02],
+        generatedAreas: [generatedArea01],
+        expectedStageIds: ["1-1", "1-2"]
+    });
+    assert.equal(composed.areas[0].id, "sector-01-01");
+    assert.equal(composed.areas[1].name, "LEGACY AREA 02");
+
+    assert.throws(
+        () =>
+            composeSectorCatalog({
+                id: "sector-01",
+                revision: "test",
+                manifest,
+                legacyAreas: [legacyArea02],
+                generatedAreas: [generatedArea01, generatedArea01],
+                expectedStageIds: ["1-1", "1-2"]
+            }),
+        /generated-area-duplicate/
+    );
+
+    const missingStageManifest = structuredClone(manifest);
+    missingStageManifest.stageSources.pop();
+    assert.ok(
+        validateAreaCatalogManifest(missingStageManifest, { expectedStageIds: ["1-1", "1-2"] }).issues.some(
+            ({ code }) => code === "manifest-stage-missing"
+        )
+    );
+
+    const overlayManifest = structuredClone(manifest);
+    overlayManifest.stageSources[0].overlay = { objectives: "legacy" };
+    assert.ok(
+        validateAreaCatalogManifest(overlayManifest, { expectedStageIds: ["1-1", "1-2"] }).issues.some(
+            ({ code }) => code === "manifest-overlay-forbidden"
+        )
+    );
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
