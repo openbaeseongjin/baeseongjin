@@ -6,6 +6,7 @@ import { PolygonSceneRenderer } from "../src/render/PolygonSceneRenderer.js";
 const canvas = document.getElementById("preview");
 const unlockButton = document.getElementById("unlock");
 const focusButton = document.getElementById("focus-carrier");
+const backtrackButton = document.getElementById("focus-backtrack");
 const simulation = createCurrentGameSimulation({
     worldSeed: 9182,
     playerId: "visual-player"
@@ -18,6 +19,10 @@ const device = simulation.world.objects.find(
 const firstModule = simulation.world.accessModules.find(
     ({ id }) => id === simulation.world.sectors[0].accessModuleIds[0]
 );
+const backtrackConnector = simulation.world.connectors.find(
+    ({ sourceLandmarkId }) => sourceLandmarkId === "sector-01:landmark:03"
+);
+const backtrackFocus = Object.freeze({ x: 400, y: backtrackConnector.start.y + 32 });
 let cameraFocus = device.position;
 simulation.players[0].physics.position.set(device.position.x + 180, device.position.y);
 
@@ -59,6 +64,13 @@ unlockButton.addEventListener("click", () => {
 focusButton.addEventListener("click", () => {
     cameraFocus = cameraFocus === device.position ? firstModule.position : device.position;
     focusButton.textContent = cameraFocus === device.position ? "Carrier 보기" : "경계 보기";
+    render();
+});
+
+backtrackButton.addEventListener("click", () => {
+    cameraFocus = backtrackFocus;
+    simulation.players[0].physics.position.set(backtrackFocus.x, backtrackFocus.y - 48);
+    focusButton.textContent = "경계 보기";
     render();
 });
 

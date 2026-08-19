@@ -11,6 +11,7 @@ export function run() {
             {
                 horizontal: index < 90 ? 1 : -1,
                 vertical: index === 30 ? -1 : 0,
+                interactSequence: index < 30 ? 0 : 1,
                 pointer: { x: 640, y: 160, down: false },
                 viewport: { width: 1280, height: 720 }
             },
@@ -20,6 +21,7 @@ export function run() {
     }
     const frames = recorder.snapshot();
     assert.ok(Object.isFrozen(frames) && Object.isFrozen(frames[0].command.pointer));
+    assert.equal(frames[30].command.interactSequence, 1);
     assert.throws(() => recorder.record(0, frames[0].command), /positive finite dt/);
 
     const first = replayCommands(new LocalAuthority(new GameSimulation()), frames);

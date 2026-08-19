@@ -55,6 +55,7 @@
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
 5. **Sector Access 3-of-3 · 0.42.0:** Sector 01의 1-3·1-6·1-7, Sector 02의 2-2·2-5·2-7, Sector 03의 3-2·3-5·3-7 기존 경비 slot을 공용 Module source로 연결했다. 각 Sector는 세 개 전부를 요구하며 outgoing 경계의 transit device가 실제 crossing을 막고, unlock 시 모든 Player에게 camera scene을 재생한다. 같은 Sector 안의 Stage surface는 잠그지 않고 개인·전원 사망 뒤 module·route 상태를 보존한다. 위치 문자열은 제거하고 다음 미수집 Carrier를 viewport 밖 edge arrow와 화면 안 diamond marker로 이어서 안내한다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
+7. **Traversal·선택 입력 일관성 · 0.42.1:** intra-Sector Stage 경계의 core와 city wing 사이에 Player 폭 이상의 하강 개구부를 보장해 놓친 Access Carrier로 되돌아갈 수 있게 했다. W/점프 선택 확정은 실제 새 누름 sequence만 소비하고, 렌더되는 solid horizontal platform은 별도 봉쇄 장치가 아닌 한 Rope 부착 가능하다는 validator 계약을 둔다.
 
 ### 제출 전 시나리오 구현 트랙
 

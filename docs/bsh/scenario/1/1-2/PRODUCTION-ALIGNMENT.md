@@ -1,6 +1,6 @@
 # SECTOR 01-2 — PRODUCTION ALIGNMENT
 
-*IMPLEMENTATION · CAMERA · ART HANDOFF · REV 1.0*
+*IMPLEMENTATION · CAMERA · ART HANDOFF · REV 1.1*
 
 본 문서는 [1-2 시나리오](./README.md)를 실제 화면으로 옮기는 제작 계약이다. `APPROVED BLOCKOUT`은 좌표를, `SCENARIO ART REFERENCE`는 최종 화면의 분위기와 정보 위계를 담당한다.
 
@@ -61,7 +61,7 @@
 | --- | ---: | ---: | ---: | --- |
 | P0 | -416 | 0 | 256×32 | 시작 발판, one-way |
 | P1 | 64 | -288 | 192×16 | 첫 Recovery, one-way |
-| Crossbeam X1 | -64 | -544 | 128×32 | Solid, Rope 부착 불가 |
+| Crossbeam X1 | -64 | -544 | 128×32 | Solid, Rope 부착 가능 |
 | P2 | -288 | -576 | 192×16 | 방향 전환 Recovery, one-way |
 | P3 | 64 | -800 | 192×16 | Flow Recovery, one-way |
 | P4 | 64 | -1024 | 288×32 | Exit Safe Deck, one-way |
@@ -89,7 +89,7 @@ Recovery 중심은 P1 `(160, -312)`, P2 `(-192, -600)`, P3 `(160, -824)`다. 실
 - Landmark 중심의 24×24 Target은 비충돌이며 기존 Surface 부착 규칙을 막지 않는다.
 - 각 중심 반경 64px에는 다른 Cyan 장식, 충돌 Pipe, 경쟁 조준 후보를 두지 않는다.
 - 정식 Sprite 중심과 실제 부착 위치의 오차는 12px 이하로 유지한다.
-- Crossbeam X1은 충돌하지만 Rope 후보가 아니며, 이 차이가 외형으로 읽혀야 한다.
+- Crossbeam X1은 아래→위 통과를 막는 단단한 수평 플랫폼이므로 Rope 후보이기도 하다. 충돌과 Rope 가능 여부가 어긋나는 숨은 예외를 두지 않는다.
 
 ## 5. Camera Shot 계약
 

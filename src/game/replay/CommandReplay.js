@@ -3,6 +3,7 @@ function cloneCommand(command) {
         horizontal: command.horizontal,
         vertical: command.vertical,
         interact: Boolean(command.interact),
+        interactSequence: Number.isSafeInteger(command.interactSequence) ? command.interactSequence : 0,
         action: Boolean(command.action),
         pointer: Object.freeze({ ...command.pointer }),
         viewport: Object.freeze({ ...command.viewport }),

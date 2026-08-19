@@ -11,7 +11,7 @@
 | 768×640 Geometry | `IMPLEMENTED` | Node Deck, A→B→C, P1/P2 Recovery, Final Deck, Gate가 Area Catalog에 존재 |
 | Maintenance Node 위치 | `IMPLEMENTED ALIGNMENT` | `(0,-160)` bottom-center로 Node Deck에 정렬, Interaction Radius 80 |
 | Camera Zones | `IMPLEMENTED PROTOTYPE` | 문자열 Placeholder를 실제 Entry/Node/Calibration/Exit Shot 데이터로 교체 |
-| 3개 고정 Choice 데이터 | `IMPLEMENTED` | 세 카드를 동시에 표시하고 좌우·기존 점프 Confirm·진입 Input Gate를 공용 Reward Selection으로 처리 |
+| 3개 고정 Choice 데이터 | `IMPLEMENTED` | 세 카드를 동시에 표시하고 좌우·새 점프 누름 Confirm·진입 Input Gate를 공용 Reward Selection으로 처리 |
 | `interact-choice` 진행 | `IMPLEMENTED` | Node 상호작용은 개인 chooser를 열고 첫 확정이 공유 `augment-selected`를 완료해 Exit Panel을 활성화 |
 | Foundation 저장·효과 | `IMPLEMENTED PROTOTYPE` | Player별 상태·snapshot·claim과 Release/Attach 기반 Impulse·Relay·Shear 효과 구현 |
 | Node Story Presentation | `IMPLEMENTED` | 진입·Node Scan·선택 확정 사건을 계약 문구에 연결 |
@@ -80,7 +80,7 @@ Foundation 확정은 Calibration 성공 여부와 분리된다. 첫 개인 선�
 5. 좌우 입력으로 이동하고 기존 Confirm 입력으로 하나를 확정한다. 새 Gameplay Button은 추가하지 않는다.
 6. 선택한 Player의 `foundationAugment`를 저장·복제하고 `augment-selected → firmware-applied`를 표시한다.
 7. 해당 Player만 조작을 잠시 잠그며 멀티플레이 전체 Simulation을 Pause하지 않는다.
-8. Input Gate로 Overlay 진입에 사용한 방향·확정 입력이 선택까지 중복 소비되지 않게 한다.
+8. Input Gate는 Overlay 진입 당시 W/점프가 계속 눌려 있어도 확정하지 않는다. 물리 입력 장치가 release 뒤 만든 새 누름 sequence만 Confirm으로 소비한다.
 
 Foundation Overlay의 카드 배치와 Input Gate는 공용 `FoundationRewardSelection`으로 소유한다. `checkpointId`와 자동사격 효과에 Foundation을 억지로 넣지 않는다. Checkpoint는 보상 선택을 열지 않는다.
 

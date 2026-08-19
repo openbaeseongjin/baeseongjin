@@ -1,6 +1,6 @@
 # SECTOR 01-2 — DOUBLE ANCHOR SHAFT
 
-*BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.1*
+*BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.2*
 
 > **PRODUCTION SOURCE**
 > 구현·카메라·그래픽 검수 때는 먼저 [1-2 Production Alignment](./PRODUCTION-ALIGNMENT.md)를 확인한다. 실제 Runtime 좌표를 따르는 승인 Blockout과 현재 시나리오에 맞게 새로 제작한 Art Reference를 분리해 관리한다.
@@ -231,10 +231,10 @@ GATE Exit
 - Role: B→C의 너무 낮은 궤적 차단, 높은 Release Arc 유도
 - Collision: `true`
 - Damage: `false`
-- Recommended: `grappleable = false`
+- Grappleable: `true`
 
 > **IMPLEMENTATION NOTE**
-> 현재 엔진에서 Non-grapple Collision Surface 분리가 어렵다면 초기 Blockout에서는 X1을 비충돌 시각 요소로 테스트한 뒤 `grappleable` Surface Filter 구현 후 Collision을 적용한다.
+> X1은 아래→위 통과를 막는 단단한 수평 플랫폼이므로 Rope 후보에서도 제외하지 않는다. 충돌은 보이는데 Rope가 걸리지 않는 숨은 예외를 만들지 않으며, 향후 명시적인 봉쇄 표면이 필요하면 별도 kind·시각 언어·validator 예외를 함께 설계한다.
 
 ### P2 — SECOND RECOVERY PLATFORM
 
@@ -576,8 +576,8 @@ Cyan Neon Background를 남발하지 않는다. Cyan은 Rope 언어로 보호한
 
 - Recommended Clean Radius: Anchor 중심에서 약 `128–160px`
 - 금지: 작은 Collision Pipe, Decorative Collision, 겹치는 Ledge, 복잡한 Protrusion
-- 장기 권장: Surface에 `grappleable: true / false` 속성 도입 검토
-- Crossbeam X1의 이상적인 설정: `grappleable = false`
+- Surface의 `grappleable`은 충돌과 별도 속성이지만, 렌더되는 단단한 수평 플랫폼은 기본적으로 `true`다.
+- Crossbeam X1 설정: `collision = true`, `oneWay = false`, `grappleable = true`
 
 ## 28. 구현 요구사항 — Momentum Test
 
@@ -808,4 +808,4 @@ Stage 성공 기준은 **“Release가 Rope 이동의 끝이 아니라 다음 At
 
 기존 `01`, `02`, `03`, `05` PNG는 결정 이력을 위해 보존하지만 현재 배치·Camera·Rope 표현 기준으로 사용하지 않는다. 현재 Gameplay 화면은 C02 First Handoff의 B·P1·A 구조 관계까지 맞춘 [승인 Scenario Art Reference](./images/06_scenario_art_reference.png)를 따른다.
 
-SECTOR 01-2 / DOUBLE ANCHOR SHAFT — BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.1
+SECTOR 01-2 / DOUBLE ANCHOR SHAFT — BLOCKOUT & PRODUCTION SPECIFICATION · REV 3.2

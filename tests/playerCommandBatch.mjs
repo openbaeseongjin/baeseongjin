@@ -1,17 +1,19 @@
 import assert from "node:assert/strict";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import {
+    PLAYER_COMMAND_PROTOCOL_VERSION,
     createPlayerCommandBatch,
     deserializePlayerCommandBatch,
     serializePlayerCommandBatch
 } from "../src/game/network/PlayerCommandBatch.js";
 
-function command(horizontal, interact = false, action = false) {
+function command(horizontal, interact = false, action = false, interactSequence = 0) {
     return createPlayerCommand(
         {
             horizontal,
             vertical: 0,
             interact,
+            interactSequence,
             action,
             pointer: { x: 10, y: 20, down: false },
             viewport: { width: 1280, height: 720 }
@@ -21,6 +23,7 @@ function command(horizontal, interact = false, action = false) {
 }
 
 export function run() {
+    assert.equal(PLAYER_COMMAND_PROTOCOL_VERSION, 5);
     const reversed = createPlayerCommandBatch(7, [
         { playerId: "player-b", sequence: 12, command: command(-1) },
         { playerId: "player-a", sequence: 4, command: command(1) }
@@ -44,6 +47,14 @@ export function run() {
         deserializePlayerCommandBatch(serializePlayerCommandBatch(interacting)).commands[0].command.interact,
         true
     );
+    const sequencedInteraction = createPlayerCommandBatch(9, [
+        { playerId: "player-a", sequence: 6, command: command(0, true, false, 37) }
+    ]);
+    assert.equal(
+        deserializePlayerCommandBatch(serializePlayerCommandBatch(sequencedInteraction)).commands[0].command
+            .interactSequence,
+        37
+    );
     const acting = createPlayerCommandBatch(9, [
         { playerId: "player-a", sequence: 6, command: command(0, false, true) }
     ]);
@@ -58,7 +69,7 @@ export function run() {
         /duplicate playerId/
     );
     assert.throws(() => createPlayerCommandBatch(-1, []), /tick/);
-    assert.throws(() => deserializePlayerCommandBatch('{"protocolVersion":5,"tick":0,"commands":[]}'), /unsupported/);
+    assert.throws(() => deserializePlayerCommandBatch('{"protocolVersion":4,"tick":0,"commands":[]}'), /unsupported/);
     assert.throws(
         () => createPlayerCommandBatch(0, [{ playerId: "player", sequence: -1, command: command(0) }]),
         /sequence/
@@ -70,5 +81,12 @@ export function run() {
                 { playerId: "player", sequence: 0, command: { ...command(0), horizontal: 2 } }
             ]),
         /movement axes/
+    );
+    assert.throws(
+        () =>
+            createPlayerCommandBatch(0, [
+                { playerId: "player", sequence: 0, command: { ...command(0), interactSequence: -1 } }
+            ]),
+        /interactSequence/
     );
 }
