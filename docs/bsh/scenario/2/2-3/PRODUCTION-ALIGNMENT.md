@@ -90,3 +90,18 @@ Status:
 NOT IMPLEMENTED.
 
 Do not fake as System Toast.
+
+## 6. Runtime implementation (2026-08-19)
+
+`Sector02AreaCatalog.js` area03 rewritten in full against REV8.0: bounds 1344x576, entry
+(-576,-32), horizontal ACTIVE APPROACH -> G1 OVER SERVICE CORE -> SAFE COMMUNAL HALL -> NODE ->
+FLAT EXIT (was a 960x768 compact vertical stack). Service Core added as a real static/
+non-grappleable/non-damaging LOS-blocking solid separating the approach Guard from the chooser
+Hall (center-point convention: `bottom = centerY + height/2`). Stable source ID
+(`specialization-node`)/objective ID (`specialization-selected`)/generic `interact-choice`/
+second-generic-offer semantics all preserved unchanged - only geometry moved. Guard kept to the
+single preserved slot, approach-band-only, kill optional, no death gate on Node access. No
+calibration dummy, no post-choice Rope requirement, default Camera - all per REV8's explicit
+forbidden list. `npm run check` (2-3 clean)/`npm test` (7 scenario groups) pass.
+
+Player Bark layer: still absent - approved Bark remains NOT IMPLEMENTED.

@@ -350,17 +350,18 @@ const area02 = defineArea({
 
 const block03 = exitBlock({
     areaId: "sector-02-03",
-    deckX: 304,
-    deckTopY: -643,
-    deckWidth: 288,
+    deckX: 560,
+    deckTopY: -288,
+    deckWidth: 224,
     nextAreaId: "sector-02-04",
     panelObjectiveId: "sector-02-03:exit-panel-engaged",
-    panelProperties: { requiredObjectiveIds: ["sector-02-03:exit-reached"] }
+    panelProperties: { requiredObjectiveIds: ["sector-02-03:specialization-selected"] }
 });
 
 const area03Id = "sector-02-03";
-const area03Landmarks = [];
-const area03Exit = point(`${area03Id}:exit`, 304, -704);
+// REV8.0: ACTIVE APPROACH -> G1 OVER SERVICE CORE -> SAFE COMMUNAL HALL -> NODE -> FLAT EXIT.
+// Second generic Augment offer (stable source ID/objective ID preserved) - no calibration route.
+const g1Landmark = landmark(area03Id, "g1", -160, -160, -352, "G1");
 const area03Objective = Object.freeze({
     id: `${area03Id}:specialization-selected`,
     type: "interact-choice",
@@ -373,47 +374,59 @@ const area03 = defineArea({
     order: 3,
     name: "RESIDENTIAL SERVICE NODE",
     subtitle: "AUGMENT SERVICE",
-    bounds: { width: 960, height: 768 },
-    entry: point(`${area03Id}:entry`, -288, -32),
+    bounds: { width: 1344, height: 576 },
+    entry: point(`${area03Id}:entry`, -576, -32),
     exit: block03.exit,
     nextAreaId: "sector-02-04",
     surfaces: [
-        platform(area03Id, "p0", -416, -160, 0),
-        platform(area03Id, "p1", -352, 32, -160, "safe-deck"),
-        platform(area03Id, "p2", -224, 224, -384, "safe-deck"),
-        platform(area03Id, "r1", -32, 224, -576, "recovery"),
-        platform(area03Id, "p3", 96, 384, -672),
+        horizontalSurface(area03Id, "p0", -544, 0, 256, 32, "platform"),
+        horizontalSurface(area03Id, "approach-deck", -416, -128, 256, 22, "platform"),
+        // Service Core: static/non-grappleable/non-damaging LOS blocker between the approach Guard
+        // and the chooser Hall (RUNTIME-HANDOFF: "Guard must not maintain direct authored LOS into
+        // chooser Hall"). Tall (height>width) so bottom-center anchor is required; AREA-SPEC's (x,y)
+        // is the shape's center (confirmed center-point convention).
+        rectangle(`${area03Id}:service-core`, -64, -208 + 144, 64, 288, {
+            kind: "solid",
+            grappleable: false,
+            oneWay: false,
+            losBlocker: true,
+            coordinateAnchor: "bottom-center"
+        }),
+        horizontalSurface(area03Id, "choice-floor", 288, -256, 640, 26, "safe-deck"),
         block03.deck,
-        ...area03Landmarks.map(({ surface }) => surface)
+        g1Landmark.surface
     ],
     routePoints: [
-        point(`${area03Id}:route-entry`, -288, -32),
-        point(`${area03Id}:route-p1`, -160, -160),
-        point(`${area03Id}:route-p2`, 0, -384),
-        point(`${area03Id}:route-r1`, 96, -576),
-        point(`${area03Id}:route-p3`, 240, -672),
+        point(`${area03Id}:route-entry`, -576, -32),
+        point(`${area03Id}:route-approach`, -416, -128),
+        g1Landmark.route,
+        point(`${area03Id}:route-safe-hall-landing`, 96, -256),
+        point(`${area03Id}:route-node`, 256, -256),
         block03.routeExit
     ],
-    recoveryPoints: [point(`${area03Id}:recovery-r1`, 96, -600)],
+    recoveryPoints: [point(`${area03Id}:recovery-threshold-fallback`, 96, -272)],
     objects: [
-        ...area03Landmarks.map(({ object }) => object),
-        worldObject(`${area03Id}:specialization-node`, "augment-node", 0, -416, {
+        g1Landmark.object,
+        worldObject(`${area03Id}:specialization-node`, "augment-node", 256, -256, {
             interactionRadius,
             objectiveId: area03Objective.id,
-            cueIds: ["foundation-detected", "specialization-available"]
+            stableSourceId: `${area03Id}:specialization-node`,
+            cueIds: ["grapple-device-detected", "emergency-configuration-active"]
         }),
-        pooledSentry(area03Id, "node-approach-guard", -280, -160, SECTOR_02_SUPPORT_POOL, {
+        // Single preserved slot; approach-band-only activation, kill optional, Node access does
+        // not require Guard death.
+        pooledSentry(area03Id, "node-approach-guard", -384, -128, SECTOR_02_SUPPORT_POOL, {
             width: 320,
-            height: 256
+            height: 224
         }),
         block03.panel,
         block03.gateVisual
     ],
     objectives: [area03Objective, area03PanelObjective],
     gate: block03.gate,
-    storyTriggers: ["residential-service", "foundation-detected", "specialization-available"],
-    routes: ["calibration", "recovery"],
-    cueIds: ["residential-service-node", "foundation-detected", "specialization-placeholder"]
+    storyTriggers: ["augment-service-node", "grapple-device-detected", "emergency-configuration-active"],
+    routes: ["safe", "recovery"],
+    cueIds: ["residential-service-node", "second-generic-augment-source"]
 });
 
 const block04 = exitBlock({

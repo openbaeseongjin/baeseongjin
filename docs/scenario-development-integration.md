@@ -163,6 +163,8 @@ reviewed-upstream: 4fce8a2
 
 86. `ONE-ROPE-SECTOR-02-02-REV8.0-GITHUB-READY` 패키지를 `area02`에 반영해 구 수직 climb을 REV8의 수평 Patrol bridge(SAFE OBSERVE→COVER A→MOVING LOS→COVER B→DISENGAGE→SHORT RISE→EXIT)로 재저작했다. RUNTIME-HANDOFF의 명시적 지시("Do not rewrite AI")대로 `patrol-drone-t1` 계약(speed 48/wait 0.45/pingpong/kill-optional/no-rope-cut/target-lock-cycle/activation-band-only)은 그대로 두고 로컬 Y/경로만 새 수평 축(-320↔320)으로 재배치했다. 기존 Access Carrier A(`upper-walkway-guard`, `sector-02:access-module:a`)는 post-lesson Access Alcove로 이동했는데, 최초 저작한 384×320 activation box가 area 상단 경계를 64px 초과해(`tests/seamlessSectorGameSimulation.mjs`의 `encounter-activation-bounds` 불변 조건) 1-7/1-8과 동일한 방식으로 높이만 192로 줄였다(위치는 그대로). G3·Access Anchor는 2-1의 B/D/F와 동일하게 마커 없는 `structural-grapple-target` 그립으로 저작했다. Cover A/B는 71/74에서 확정한 중심점 공식으로 배치했다. `npm run check`(2-2 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
 
+87. `ONE-ROPE-SECTOR-02-03-REV8.0-GITHUB-READY` 패키지를 `area03`에 반영해 구 960×768 수직 스택을 REV8의 수평 side-loaded Hall(ACTIVE APPROACH→G1 OVER SERVICE CORE→SAFE COMMUNAL HALL→NODE→FLAT EXIT)로 재저작했다. Stable source ID(`specialization-node`)·objective ID(`specialization-selected`)·generic `interact-choice`·second-generic-offer 의미 체계는 그대로 두고 지오메트리만 이동했다. Service Core를 실제 static/non-grappleable/non-damaging LOS blocker로 신규 추가해 approach Guard가 chooser Hall에 직접 LOS를 가지지 못하게 분리했다(중심점 공식으로 배치). Guard는 기존 단일 슬롯·approach-band-only·kill-optional·Node 접근에 죽음 요구 없음을 유지했다. `npm run check`(2-3 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
+
 ## 열린 기획·구현 게이트
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.

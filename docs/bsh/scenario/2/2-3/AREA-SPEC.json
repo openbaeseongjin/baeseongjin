@@ -193,6 +193,36 @@
     }
   ],
   "nextAreaId": "sector-02-04",
+  "route": {
+    "runtimeLandmarks": [
+      "sector-02-03:entry",
+      "approach-deck",
+      "g1-surface",
+      "choice-floor",
+      "exit-deck",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-02-03:entry",
+      "g1-surface",
+      "choice-floor",
+      "exit-deck",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 560,
+    "deckTopY": -288,
+    "deckWidth": 224,
+    "panelObjectiveId": "sector-02-03:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "2-4",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["sector-02-03:exit-panel-engaged"]
+  },
   "story": {
     "entry": {
       "title": "AUGMENT SERVICE NODE",
@@ -240,6 +270,7 @@
   },
   "camera": {
     "mode": "default-authored-camera",
+    "zones": [],
     "customZonesRequired": false,
     "intent": [
       "keep approach Guard and threshold readable before Node",
@@ -280,17 +311,17 @@
   "acceptanceTests": [
     {
       "id": "bounds",
-      "type": "data",
+      "type": "schema",
       "requirement": "Bounds 1344×576."
     },
     {
       "id": "enemy-count",
-      "type": "data",
+      "type": "schema",
       "requirement": "Exactly 1 enemy slot."
     },
     {
       "id": "threshold-reach",
-      "type": "data",
+      "type": "geometry",
       "requirement": "Approach→G1 and G1→Safe Hall remain <=400px."
     },
     {
@@ -310,17 +341,17 @@
     },
     {
       "id": "no-calibration",
-      "type": "runtime/review",
+      "type": "runtime",
       "requirement": "No post-choice calibration/proof requirement."
     },
     {
       "id": "similarity",
-      "type": "review",
+      "type": "schema",
       "requirement": "Meaningful overlap with 1-4 <=1."
     },
     {
       "id": "pacing",
-      "type": "playtest",
+      "type": "traversal",
       "requirement": "First 0:45–1:05 excluding deliberate menu reading.",
       "status": "HYPOTHESIS"
     }
