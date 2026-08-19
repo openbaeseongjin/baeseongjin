@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 4f93e7c31969ddaa908bacfbe18d4cbfe627bf27c9360373c1f759d9c816ffe4
-authored-area-sha256: a1d81983b3178d5fa18907169fc46b08127d83c1e676c45fb422effd2ce8a62d
-authored-sector-sha256: cf7682ac4ca970f37e135b566fe5d3e37d1c6496094934cd440e3b4bd0d072eb
+scenario-source-sha256: 5879f01688c8fb80af8d5618e36b51362f86a59e4f7381cc016a607ec29c78f1
+authored-area-sha256: fdfd58d0ba4fec3b4393a40bbd8b1923bf7bb30f983316c608fafa49500759b8
+authored-sector-sha256: c65cbfcf43221a8bcfc44053b578f07c762f9cccb6b448c1bcd8ba4613e7eb89
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 5ae6efca720720ee34f2a8b45daf1778fd206c1f
+reviewed-upstream: ea9c4438c0f106474baa09621bfb42ae5876b86e
 -->
 
 ## 상태를 읽는 법
@@ -133,6 +133,8 @@ reviewed-upstream: 5ae6efca720720ee34f2a8b45daf1778fd206c1f
 70. 0.41.0 `seamless-sector-runtime-v5`는 사용자 정정에 따라 층간 자유 이동과 Sector 경계 잠금을 분리한다. Sector 01은 1-3·1-6·1-7, Sector 02는 2-2·2-5·2-7, Sector 03은 3-2·3-5·3-7의 기존 경비 slot에 stable Access Module A/B/C를 부여해 적 수·좌표·activation을 바꾸지 않는다. 각 Sector는 정확히 3개 source를 가지며 outgoing transition은 3개 전부와 source objective를 요구한다. `access-transit-lock`은 source/target overlap을 막는 T자형 force-field visual과 `blockedByRouteId` collider를 같은 geometry에서 파생하고, `3/3` 뒤 blocker만 비활성화해 정적 `sector-seam`과 Stage surface 집합을 바꾸지 않는다. 공용 `route-unlocked` event는 모든 연결 Player의 재사용 가능한 1.2초 camera scene을 한 번 시작하며 world·전투·입력은 계속 진행한다. HUD는 `ACCESS x/3 · NEED n`과 `ACCESS READY`를 사용하고 ready 뒤 Carrier signal을 숨긴다. content-end Sector 03에는 module topology만 저작하고 존재하지 않는 Sector 04 transition을 만들지 않는다.
 
 71. `docs/sector-01-2-01-3-rev8-implementation` 브랜치는 `ONE-ROPE-SECTOR-01-02/03-REV8.0-GITHUB-READY` 패키지(baseline `5ae6efca`, 당시 latest main과 일치)를 설치하던 중 1-2의 REV8 `p0`가 1-1 exit deck과 world-x상 겹쳐 `LegacyAreaSeamlessSectorRuntime.js`의 connector 생성이 억제되는 것을 발견했고, 조사 결과 이건 1-2만의 문제가 아니라 **Sector 01~03 전체 landmark 전환에 걸친 기존 결함**임을 확인했다 — `connectorSurface()`가 만드는 `sector-seam` surface는 애초에 `requiredRouteId`를 설정한 적이 없어(전체 코드베이스 grep으로 확인), `SectorProgressState`의 논리적 unlock 계산은 정확했지만 실제 충돌 판정에 반영되지 않았다. `WorldGateGeometry.js`에 `requiredRouteId`(잠긴 동안 부재→해제 시 등장)의 대칭 짝인 `blockedByRouteId`(잠긴 동안 존재→해제 시 소멸)를 추가하고, `connectorSurface()`가 모든 connector에 `requiredRouteId`를 부여하며 바닥이 겹쳐 다리가 필요 없는 경우엔 `blockedByRouteId`가 붙은 세로 barrier를 만들도록 고쳤다. Barrier 높이는 고정 상수가 아니라 두 landmark의 실제 `bounds` 합집합에서 산출한다(월드 전체 landmark 중 최대 `bounds.height`가 1792px로 애초에 검토했던 고정 ±640px보다 컸다). `tests/legacyAreaSeamlessSectorRuntime.mjs`의 "겹치는 deck은 platform을 만들면 안 된다" 단언(이게 버그였던 동작 자체를 고정하고 있었음)을 barrier 검증으로 교체했다. 실제 physics 시뮬레이션으로 objective 완료 전/후 crossing과 barrier 상단·중단·하단 우회 시도를 모두 검증했다 — 셋 다 정확히 차단되고, `completeObjective` 후에만 통과한다. `1-2/1-3 REV8` 좌표는 패키지 그대로 유지했다(Runtime 결함이 원인이었지 좌표 문제가 아니었다). 이 fix는 70의 Sector-경계 `blockedByRouteId` transit-lock과 별개로 **같은 Sector 내부** landmark 전환에 적용되며, 병합 시 필드명을 70과 동일한 `blockedByRouteId`로 통일했다(원래 `blockedUntilRouteId`로 독립 명명했던 것을 rename). `npm run check`/`npm test`/관련 targeted regression 전체 통과.
+
+72. `docs/sector-01-2-01-3-rev8-implementation` 브랜치를 새 `origin/main`(`ea9c4438`, 71이 관찰한 6개 신규 commit 포함)에 병합하며 71과 70이 `WorldGateGeometry.js`/`LegacyAreaSeamlessSectorRuntime.js`를 독립적으로 같은 영역에서 고친 데서 실제 충돌이 발생했다. 필드명 통일(71 참고) 후 병합했더니 `connectorSurface()`가 **Sector-transition** landmark pair에도 여전히 자기 `requiredRouteId`/`blockedByRouteId`를 부여하고 있어, 70의 `transitBarrierGeometry()`가 만드는 전용 `access-transit-lock` barrier와 같은 lock을 이중으로 게이팅하는 것을 발견했다 — 두 landmark의 바닥이 overlap하는 실제 sector-01→02 seam에서 물리 sweep이 71이 만든 (문서화되지 않은) 여분의 벽에 먼저 막혀 70이 의도한 "visible transit device가 collider를 소유해야 한다" 계약을 깨는 회귀였다(`tests/seamlessSectorGameSimulation.mjs`가 이를 정확히 잡아냈다). `connectorSurface()`가 Sector-transition pair에는 게이팅을 걸지 않도록 고쳤다: `horizontalConnectorVertices()`에 `allowWall` 플래그를 추가해 overlap이어도 vertical barrier 대신 path 아래 32px에 놓이는 얇은 floor sliver로 collapse하며(실제 도보 경로 y와 겹치지 않아 물리적으로 아무것도 막지 않는다), non-overlap(실제 gap)인 경우엔 기존과 동일하게 always-present 이어붙임 바닥을 만든다. Sector-transition seam의 게이팅은 이제 전적으로 70의 `access-transit-lock`이 소유하며, intra-Sector seam의 게이팅은 여전히 71의 `connectorSurface()`가 소유한다. `tests/legacyAreaSeamlessSectorRuntime.mjs`에 sector-transition 분기 검증(자기 surface는 ungated, 대응하는 `access-transit-lock`의 barrier가 실제로 `blockedByRouteId`를 소유)을 추가했다. `npm run check`/`npm test`(7개 시나리오 전체)/`legacyAreaSeamlessSectorRuntime`·`seamlessSectorGameSimulation`·`seamlessSectorMultiplayerWorld`·`routeSurfaceVisibility`·`sectorProgressState`·`sectorDefinitionValidator`·`worldUnlockPresentation`·`canvasRenderer` 개별 재실행 전체 통과.
 
 ## 열린 기획·구현 게이트
 

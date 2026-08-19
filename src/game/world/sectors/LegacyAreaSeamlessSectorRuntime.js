@@ -99,16 +99,19 @@ function walkingSurfaceAt(surfaces, point) {
 
 // Returns `undefined` for a non-horizontal (different-y) transition, so the caller falls back to a
 // diagonal bridge. Returns `{ vertices, overlap: true }` when the two landmarks' walking surfaces
-// already touch/overlap in world-x (no gap to bridge) - the caller must still gate this boundary,
-// just as a blocking barrier rather than an appearing bridge, or a player can walk the shortcut
-// created by the overlap without ever satisfying the route's requiredObjectiveIds.
+// already touch/overlap in world-x (no gap to bridge) and `allowWall` is set - the caller must still
+// gate this boundary, just as a blocking barrier rather than an appearing bridge, or a player can
+// walk the shortcut created by the overlap without ever satisfying the route's requiredObjectiveIds.
+// When `allowWall` is false (sector-transition seams, gated instead by the dedicated
+// access-transit-lock barrier - see transitBarrierGeometry), an overlap collapses to a below-path
+// floor sliver instead of a wall, so this surface never blocks or gates on its own.
 //
 // verticalSpan must cover the full reachable y-range of BOTH landmarks (their bounds union), not an
 // arbitrary constant - a fixed height was checked against every landmark in the compiled world and
 // found insufficient (max landmark bounds.height observed: 1792px, taller than a naive +-640 pick),
 // so a Rope swing arc within either landmark's own bounds could otherwise go over or under a
 // fixed-height wall and re-enter the other landmark from above/below it.
-function horizontalConnectorVertices(start, end, surfaces, thickness, verticalSpan) {
+function horizontalConnectorVertices(start, end, surfaces, thickness, verticalSpan, allowWall) {
     if (start.y !== end.y) return undefined;
     const sourceSupport = walkingSurfaceAt(surfaces, start);
     const targetSupport = walkingSurfaceAt(surfaces, end);
@@ -118,7 +121,7 @@ function horizontalConnectorVertices(start, end, surfaces, thickness, verticalSp
     const left = leftSupport.x + leftSupport.width;
     const right = rightSupport.x;
     const top = start.y + 32;
-    if (right <= left) {
+    if (right <= left && allowWall) {
         const barrierX = (start.x + end.x) * 0.5;
         return {
             overlap: true,
@@ -130,13 +133,15 @@ function horizontalConnectorVertices(start, end, surfaces, thickness, verticalSp
             ]
         };
     }
+    const floorLeft = Math.min(left, right);
+    const floorRight = Math.max(left, right);
     return {
         overlap: false,
         vertices: [
-            { x: left, y: top },
-            { x: right, y: top },
-            { x: right, y: top + thickness },
-            { x: left, y: top + thickness }
+            { x: floorLeft, y: top },
+            { x: floorRight, y: top },
+            { x: floorRight, y: top + thickness },
+            { x: floorLeft, y: top + thickness }
         ]
     };
 }
@@ -148,7 +153,14 @@ function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces, 
     const length = Math.max(1, Math.hypot(dx, dy));
     const normalX = (-dy / length) * thickness * 0.5;
     const normalY = (dx / length) * thickness * 0.5;
-    const horizontal = horizontalConnectorVertices(start, end, supportingSurfaces, thickness, verticalSpan);
+    const horizontal = horizontalConnectorVertices(
+        start,
+        end,
+        supportingSurfaces,
+        thickness,
+        verticalSpan,
+        Boolean(requiredRouteId)
+    );
     const overlap = horizontal?.overlap === true;
     const vertices = horizontal?.vertices ?? [
         { x: start.x + normalX, y: start.y + normalY },
@@ -561,6 +573,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
             if (previousLandmark) {
                 const lockId = routeId(previousLandmark.id, runtimeLandmark.id);
                 const surfaceId = `${lockId}:surface`;
+                const sectorTransition = previousLandmark.sectorId !== runtimeLandmark.sectorId;
                 // Union of both landmarks' own vertical extent - any position reachable within either
                 // landmark, by construction, falls inside this range (see horizontalConnectorVertices).
                 const verticalSpan = {
@@ -576,7 +589,10 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                     previousLandmark.exit,
                     runtimeLandmark.entry,
                     [...surfaces, ...landmarkSurfaces, ...landmarkWingSurfaces],
-                    lockId,
+                    // Sector-transition seams are gated by the dedicated access-transit-lock barrier
+                    // (transitBarrierGeometry) instead - this connector's own surface must stay an
+                    // always-present, ungated bridge there or it duplicates that barrier.
+                    sectorTransition ? undefined : lockId,
                     verticalSpan
                 );
                 const connector = freezeValue({
@@ -587,7 +603,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                     targetLandmarkId: runtimeLandmark.id,
                     start: previousLandmark.exit,
                     end: runtimeLandmark.entry,
-                    sectorTransition: previousLandmark.sectorId !== runtimeLandmark.sectorId
+                    sectorTransition
                 });
                 connectors.push(connector);
                 routeLocks.push(

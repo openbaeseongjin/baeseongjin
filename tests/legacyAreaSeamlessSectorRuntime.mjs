@@ -138,7 +138,24 @@ export function run() {
             const rightSupport = leftSupport === sourceSupport ? targetSupport : sourceSupport;
             const gapStart = leftSupport.x + leftSupport.width;
             const gapWidth = rightSupport.x - gapStart;
-            if (gapWidth <= 0) {
+            if (connector.sectorTransition) {
+                // Sector-transition seams delegate gating entirely to the dedicated
+                // access-transit-lock barrier (transitBarrierGeometry) - this connector's own
+                // surface must stay an always-present, ungated bridge or it duplicates that barrier
+                // (see LegacyAreaSeamlessSectorRuntime.js's connectorSurface() sectorTransition branch).
+                assert.ok(surface, "a sector-transition connector must still get a bridge surface");
+                assert.equal(surface.requiredRouteId, undefined);
+                assert.equal(surface.blockedByRouteId, undefined);
+                const transitLock = world.objects.find(
+                    ({ kind, routeLockId }) => kind === "access-transit-lock" && routeLockId === connector.routeLockId
+                );
+                assert.ok(transitLock, "a sector-transition connector must have a matching access-transit-lock");
+                const barrierSurfaces = transitLock.barrierSurfaceIds.map((id) =>
+                    world.surfaces.find((candidate) => candidate.id === id)
+                );
+                assert.ok(barrierSurfaces.every(Boolean));
+                assert.ok(barrierSurfaces.every((barrier) => barrier.blockedByRouteId === connector.routeLockId));
+            } else if (gapWidth <= 0) {
                 // Overlapping authored decks mean there is no gap to bridge, but the transition still
                 // needs to be gated - otherwise a player can walk the shortcut created by the overlap
                 // without ever satisfying the route's requiredObjectiveIds (see WorldGateGeometry.js's
