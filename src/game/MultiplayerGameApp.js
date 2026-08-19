@@ -165,7 +165,7 @@ export class MultiplayerGameApp {
         this.localFoundationReward = createFoundationRewardSelection(authoritativeReward);
     }
 
-    maybeOpenLocalChooser(command, owner) {
+    maybeOpenLocalChooser(command, owner, predicted) {
         if (
             this.localFoundationReward ||
             this.pendingFoundationSelection ||
@@ -174,7 +174,6 @@ export class MultiplayerGameApp {
             return false;
         }
         if (!command.interact) return false;
-        const predicted = this.authority.snapshot().predicted;
         const world = this.authority.worldSnapshot();
         const candidate = openFoundationChooserCandidate({
             world,
@@ -323,7 +322,7 @@ export class MultiplayerGameApp {
         }
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
-        this.maybeOpenLocalChooser(command, current.owner);
+        this.maybeOpenLocalChooser(command, current.owner, current.predicted);
         const authoritativeFoundationReward =
             current.ownerFoundationReward ?? current.state.foundationRewards?.[this.authority.playerId] ?? null;
         this.applyFoundationSelectionReceipts(authoritativeFoundationReward);
@@ -395,7 +394,7 @@ export class MultiplayerGameApp {
         }
         this.predictableProjectiles.predict(predictedSpawns);
         for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);
-        const predictedPlayer = this.authority.snapshot().owner;
+        const predictedPlayer = this.authority.ownerState();
         const predictedAudioContext = this.createAudioContext(predictedPlayer.position, predictedPlayer.tick);
         this.audioBindings?.presentFrame({
             ropeTransition: { before: current.predicted.rope, after: predictedPlayer.rope },
@@ -438,7 +437,7 @@ export class MultiplayerGameApp {
         if (forceSubmit || this.stepCount % 2 === 0) {
             this.authority.submit(gameplayCommand);
         }
-        const player = this.authority.snapshot(1).predicted;
+        const player = this.authority.presentationState();
         const authoredWorld = this.authority.worldSnapshot();
         const cameraShot = this.updatePresentationCamera(dt, player, authoredWorld);
         this.storyPresentation.update(dt, {

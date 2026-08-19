@@ -209,6 +209,7 @@ export class GameSimulation {
             playerRuntime.ropeObject.rope.config = playerRuntime.foundation.effectiveRopeConfig(this.ropeConfig);
         }
         this.enemyRuntimeCreations = 0;
+        this.enemyRuntimeReconciliations = 0;
         this.enemies = this.createEnemies();
         this.enemyImpactTombstones = new Map();
         this.projectiles = [];
@@ -698,7 +699,16 @@ export class GameSimulation {
             if (!activeCheckpoint) throw new Error(`unknown active checkpoint: ${activeCheckpointId}`);
             this.activeCheckpoint = activeCheckpoint;
         }
+        const existingById = new Map(this.enemies.map((enemy) => [enemy.id, enemy]));
+        const seenIds = new Set();
         this.enemies = enemies.map((enemy) => {
+            if (seenIds.has(enemy.id)) throw new Error(`duplicate predicted enemy id: ${enemy.id}`);
+            seenIds.add(enemy.id);
+            const existing = existingById.get(enemy.id);
+            if (existing?.restoreNetworkState(enemy)) {
+                this.enemyRuntimeReconciliations += 1;
+                return existing;
+            }
             this.enemyRuntimeCreations += 1;
             return createEnemyRuntime({
                 ...enemy,
@@ -2109,7 +2119,10 @@ export class GameSimulation {
     }
 
     enemyRuntimeMetrics() {
-        return Object.freeze({ creations: this.enemyRuntimeCreations });
+        return Object.freeze({
+            creations: this.enemyRuntimeCreations,
+            reconciliations: this.enemyRuntimeReconciliations
+        });
     }
 
     recordProjectileSpawn(projectile) {

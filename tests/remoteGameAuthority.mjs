@@ -208,7 +208,13 @@ export async function run() {
     assert.equal(sameTickStream.acceptSnapshot(snapshot(12, 10, 60, 2)), false);
     interpolation.push(snapshot(6, 0), 0);
     interpolation.push(snapshot(12, 6, 80), 70);
+    for (const entry of interpolation.history) {
+        entry.snapshot.state.players.find = () => assert.fail("indexed player sampling must not scan arrays");
+        entry.snapshot.state.enemies.find = () => assert.fail("indexed Enemy sampling must not scan arrays");
+    }
+    const sampleCallsBeforeProjection = interpolation.metrics().sampleCalls;
     let projected = interpolation.sample({ now: 75, localPlayerId: "local" });
+    assert.equal(interpolation.metrics().sampleCalls, sampleCallsBeforeProjection + 1);
     assert.equal(projected.players[0].position.x, 6, "the local player must use owner prediction instead");
     assert.ok(
         Math.abs(projected.players[1].position.x - 3) <= 0.5,
@@ -1101,7 +1107,13 @@ export async function run() {
             room.simulation.playerState(authority.playerId),
             authority.snapshot().owner.tick
         );
+        const samplesBeforeUpdate = authority.buffer.metrics().sampleCalls;
         app.update(1 / 120, movementCommand(0));
+        assert.equal(
+            authority.buffer.metrics().sampleCalls - samplesBeforeUpdate,
+            1,
+            "one multiplayer fixed step must reuse one remote sample across chooser, collision, audio and camera work"
+        );
         assert.equal(
             app.checkpointFeedback?.checkpointId,
             rewardCheckpoint.id,

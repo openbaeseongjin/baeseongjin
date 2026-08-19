@@ -103,6 +103,20 @@ export function createEnemyPatrolState({ patrol = null, activation = null, origi
     };
 }
 
+export function restoreEnemyPatrolState(target, snapshot) {
+    if (target === null || snapshot === null) return target === snapshot;
+    if (!target || !snapshot || target.mode !== snapshot.mode || target.points.length !== snapshot.points?.length) {
+        return false;
+    }
+    const targetIndex = snapshot.targetIndex;
+    if (!Number.isSafeInteger(targetIndex) || targetIndex < 0 || targetIndex >= target.points.length) return false;
+    if (!Number.isFinite(snapshot.waitRemaining) || snapshot.waitRemaining < 0) return false;
+    target.targetIndex = targetIndex;
+    target.direction = snapshot.direction === -1 ? -1 : 1;
+    target.waitRemaining = snapshot.waitRemaining;
+    return true;
+}
+
 export function advanceEnemyPatrol(enemy, dt) {
     if (!enemy.patrol || !Number.isFinite(dt) || dt <= 0) return false;
     let remainingTime = dt;

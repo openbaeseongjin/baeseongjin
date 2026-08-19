@@ -259,6 +259,8 @@ events[]
 
 v9는 측정된 대역폭의 대부분을 차지하던 authored enemy의 정적 필드를 제거하고 `worldRevision + objectId`로 복원한다. 플레이어·enemy 동적 상태는 아직 20Hz 전체 목록으로 보내며 delta나 관심 영역은 사용하지 않는다. 이후 메시지 크기나 head-of-line 지연이 다시 문제가 되면 동일한 논리 계약을 유지한 채 동적 delta·관심 영역 또는 채널 전환을 검토한다.
 
+0.43.4부터 클라이언트 예측은 같은 stable Enemy ID의 snapshot을 받을 때 runtime·collider·behavior/FSM을 다시 만들지 않고 기존 객체에 동적 상태를 restore한다. 누락 ID는 despawn하고 새 ID 또는 `objectId/enemyType` 변경만 새 runtime을 만든다. history snapshot은 push 시 collection별 ID index를 가지므로 Enemy 위치 보간이 history마다 배열 `find()`를 반복하지 않는다. 한 120Hz client fixed update는 remote sample을 한 번만 계산하고 그 step의 chooser·collision·audio·camera에 재사용하며 render는 자기 시점의 sample을 별도로 계산한다. 이 변경은 20Hz wire 목록, server tick/ownerMotionTick 시간축, 100ms interpolation, 120ms 제한 외삽과 owner-first 권위를 유지한다.
+
 `WorldSnapshotEnvelope`가 스냅샷 순서, 서버 틱, 월드 식별자, 플레이어별 승인 번호, 비예측 상태와 권위 이벤트를 하나의 전송 단위로 묶는다. `serverTick`은 중립 월드 시뮬레이션 시간을 뜻하고 각 플레이어의 `ownerMotionTick`은 그 물리·로프 상태를 만든 마지막 승인 소유자 tick을 뜻한다. `snapshotSequence`는 같은 server tick에 참가·퇴장·claim 확정으로 다시 만들어진 봉투까지 구분한다. 클라이언트는 sequence가 새롭고 serverTick이 같거나 증가한 봉투를 수용해야 한다. 투사체·낙하물처럼 예측 가능한 객체 배열을 `state`에 넣으면 계약 검증이 실패하며 반드시 생성·종료 이벤트를 사용해야 한다. 이벤트는 틱과 ID 순으로 정규화하고 한 봉투 안의 중복 ID를 거부한다.
 
 `GameSimulation`은 처리한 스텝마다 단조 증가하는 `tick`을 기록한다. 명시적으로 활성화한 싱글 자동 무기 발사, 멀티에서 승인된 플레이어 발사 claim, 서버 중립 발사와 투사체 종료는 이 틱의 `PredictableObjectEvent`를 발행하며, 권위 전송 계층은 `drainReplicationEvents()`로 각 사건을 한 번만 가져간다. 플레이어·적 투사체는 8초의 서버 수명이 끝나면 `expired` resolve로 제거한다. 활성 투사체는 원래 spawn 이벤트를 내부에 보존해 welcome 복원에만 재사용하며 일반 스냅샷마다 반복하지 않는다. 로컬 렌더링은 기존 투사체 배열을 계속 사용하지만 네트워크 상태에는 그 배열을 넣지 않는다.

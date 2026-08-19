@@ -34,5 +34,11 @@ export function run() {
         to: "missing",
         reason: "transition-not-allowed"
     });
+    machine.restore({ state: "hit", elapsedSeconds: 0.35 });
+    assert.deepEqual(machine.snapshot(), {
+        state: "hit",
+        elapsedSeconds: 0.35
+    });
+    assert.throws(() => machine.restore({ state: "missing" }), /Unknown StateMachine state/);
     assert.throws(() => machine.advance(-1), /non-negative/);
 }

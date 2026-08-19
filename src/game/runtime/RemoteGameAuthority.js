@@ -350,6 +350,14 @@ export class RemoteGameAuthority {
         return this.ownerRuntime?.worldSnapshot() ?? null;
     }
 
+    ownerState() {
+        return this.ownerRuntime?.state() ?? null;
+    }
+
+    presentationState() {
+        return this.ownerRuntime?.presentationState() ?? null;
+    }
+
     applyPredictedImpact(event) {
         return this.ownerRuntime?.applyPredictedImpact(event) ?? false;
     }

@@ -28,5 +28,11 @@ export function run() {
         remainingSeconds: 0.2
     });
     assert.deepEqual(restored.snapshot(), { state: "windup", elapsedSeconds: 0, remainingSeconds: 0.2 });
+    restored.restore({ state: "fire", elapsedSeconds: 0.01, remainingSeconds: 0.04 });
+    assert.deepEqual(restored.snapshot(), {
+        state: "fire",
+        elapsedSeconds: 0.01,
+        remainingSeconds: 0.04
+    });
     assert.throws(() => restored.setRemainingSeconds(-1), /non-negative/);
 }
