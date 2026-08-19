@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 1,
+    "stage": 1,
+    "legacyStageAlias": "1-1",
+    "sourceAreaId": "sector-01-01",
+    "name": "SERVICE SHAFT"
+  },
+  "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "psychology": {
+    "start": {
+      "fear": 92,
+      "control": 8,
+      "understanding": 5
+    },
+    "exit": {
+      "fear": 72,
+      "control": 28,
+      "understanding": 15
+    }
+  },
+  "beats": [
+    {
+      "beatId": "s0-incident-bay",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "1-1:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "intro",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "GROUND SERVICE ACCESS",
+            "detail": "LOCKDOWN"
+          },
+          "timing": {
+            "durationSeconds": 1.8
+          }
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "뭐야…?"
+          },
+          "action": "local-bark-after-system-read"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "normal-hum-relay-trip-shutter-settle"
+        },
+        {
+          "type": "lighting",
+          "status": "NOT IMPLEMENTED",
+          "action": "maintenance-white-plus-local-amber"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-first-swing",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "first-hook"
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "1-1:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "first-hook",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "rope-priority"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-cross-back-structural-read",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "cross-back"
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "1-1:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "cross-back",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "object",
+          "target": "cable-overhang",
+          "action": "normal-grappleable-maintenance-structure"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-open-swing",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "open-swing"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-life-nonverbal-only",
+      "dedupeToken": "1-1:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "open-swing",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "character",
+          "status": "NOT IMPLEMENTED",
+          "action": "optional-nonverbal-exhale"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "air-rope-landing-priority"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-terminal-reveal",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "objective-started",
+        "objectiveId": "sector-01-01:terminal-read"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "1-1:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "terminal",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "action": "sequence",
+          "items": [
+            {
+              "atSeconds": 0,
+              "title": "VERTICAL GRID",
+              "detail": "CASCADE FAILURE"
+            },
+            {
+              "atSeconds": 0.9,
+              "title": "LOWER TRANSIT",
+              "detail": "OFFLINE"
+            },
+            {
+              "atSeconds": 1.8,
+              "title": "ROOFTOP PAD 03",
+              "detail": "MAINTENANCE SHUTTLE · STANDBY"
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s5-route-open",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "gate-unlocked"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "1-1:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "terminal",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "SERVICE SHAFT 02",
+            "detail": "ACCESS OPEN"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…일단 위로."
+          },
+          "timing": {
+            "minDelaySeconds": 1.2
+          }
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No control lock",
+    "Only S0/S5 contain player text",
+    "Verified system story wording/order retained",
+    "400px current Hook Reach used for geometry review"
+  ]
+}

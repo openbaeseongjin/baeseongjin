@@ -23,10 +23,10 @@ export function run() {
     const area = world.areas[0];
     const cases = [
         [-32, "intro", 1.25, 0.82, 0.46],
-        [-224, "first-hook", 1.2, 0.8, 0.58],
-        [-480, "release-corridor", 1.1, 0.76, 0.58],
-        [-704, "open-swing", 1, 0.72, 0.58],
-        [-896, "terminal", 1.15, 0.78, 0.58]
+        [-300, "first-hook", 1.16, 0.79, 0.58],
+        [-500, "cross-back", 1.06, 0.75, 0.58],
+        [-700, "open-swing", 0.96, 0.7, 0.58],
+        [-950, "terminal", 1.12, 0.77, 0.58]
     ];
 
     for (const [localY, zoneId, desktopZoom, mobileZoom, verticalPlayerRatio] of cases) {

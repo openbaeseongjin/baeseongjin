@@ -195,9 +195,9 @@ export function run() {
         }
     }
     const firstPlatform = SECTOR_01_AREA_CATALOG.areas[0].surfaces.find(({ id }) => id.endsWith(":exit-deck"));
-    assert.deepEqual(firstPlatform.position, { x: 128, y: -835 });
-    assert.deepEqual(firstPlatform.vertices[0], { x: -32, y: -835 });
-    assert.deepEqual(firstPlatform.vertices[1], { x: 288, y: -835 });
+    assert.deepEqual(firstPlatform.position, { x: 320, y: -947 });
+    assert.deepEqual(firstPlatform.vertices[0], { x: 128, y: -947 });
+    assert.deepEqual(firstPlatform.vertices[1], { x: 512, y: -947 });
     assert.equal(
         first.surfaces.find(({ id }) => id === firstPlatform.id).position.y,
         firstPlatform.position.y + 320,

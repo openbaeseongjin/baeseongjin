@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: e5494cbb4cff702916a750f7939f9498e6ca9471f08a0f502ff511d92316a529
-authored-area-sha256: 7895f6b8522fb1775fb9543211f7b7662351605ec482e23f0fb4d0e0986cbdbe
+scenario-source-sha256: 6442b272b4f908e8d05e3d50ff3829d3b6a27c2e4c1c6def1941ee2a8be1cabb
+authored-area-sha256: 4791ba89a574a4f9ba9519f82780b99fe79ee34e975442e201c7e14d7fdd2355
 authored-sector-sha256: 8dd5c3dddb4158f05910d7d3f6b4a2f9c0bf0dae9ee78da4ba8f034235f201a2
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 2ea921fed1fee27a4b3837ecde3281d5cd3390dd
+reviewed-upstream: c8b7a23276574cc4965da8f94fb98022ac967d53
 -->
 
 ## 상태를 읽는 법
@@ -157,6 +157,8 @@ reviewed-upstream: 2ea921fed1fee27a4b3837ecde3281d5cd3390dd
 82. `docs/sector-01-2-01-3-rev8-implementation` 브랜치를 다시 최신 `origin/main`(`32e3713`, 71/72가 도입한 accessHint 폐지·crossbeam-x1 grappleable 수정·solid-horizontal-not-grappleable validator 규칙 포함)에 병합했다. 71/72와 74-81(1-3~1-8 REV8 배치)가 같은 파일(`Sector01AreaCatalog.js`, 여러 Stage `PRODUCTION-ALIGNMENT.md`/`README.md`)을 독립적으로 건드려 실제 충돌이 다수 발생했다: 각 문서 충돌은 이전과 같은 패턴(HEAD가 이미 설치한 REV8 패키지 전체가 origin의 구버전 blockout 문서를 완전히 대체) — HEAD를 유지했다. `Sector01AreaCatalog.js`에서는 71이 제거한 `accessHint` 필드를 74/78/80(1-3/1-6/1-7)의 Carrier sentry에서도 동일하게 제거해(`ScreenEdgeGuide.js`/`CanvasRenderer.js`가 실제로 이 필드를 전혀 읽지 않음을 확인) 화면-밖-화살표·다이아몬드 마커 체계로 일원화했다. 72가 도입한 새 validator 규칙(`solid-horizontal-not-grappleable`: collision 있고 renderable하고 oneWay:false인 가로로 넓은 solid는 `grappleable:true`여야 함)이 1-2의 `dead-lift-cage`(448×320, `grappleable:false`)를 위반한다고 잡아냈다 — 72가 같은 이유로 `crossbeam-x1`을 고친 것과 동일한 결함이었으므로 `grappleable:true`로 고쳤다. `tests/areaDefinitionValidator.mjs`의 최신-main측 회귀 테스트가 그 예시로 `sector-01-02:crossbeam-x1`을 참조했는데 이 surface는 74 이전(1-2 REV8 재저작, entry #7e16d21)에 이미 완전히 제거된 상태라 존재하지 않았다 — 같은 원칙(가로로 넓은 solid는 아래에서 rope 부착 가능해야 함)을 실제로 존재하는 `sector-01-02:dead-lift-cage`로 검증하도록 테스트를 고쳤다(원칙은 유지, 예시 surface만 교체). `npm run check`/`npm test`(7개 시나리오 전체)/`legacyAreaSeamlessSectorRuntime`·`seamlessSectorGameSimulation`·`seamlessSectorMultiplayerWorld`·`routeSurfaceVisibility`·`sectorProgressState`·`sectorDefinitionValidator`·`worldUnlockPresentation`·`canvasRenderer`·`augmentCalibration`·`authoredCameraDirector`·`worldProgressController` 개별 재실행 전체 통과.
 
 83. `docs/sector-01-2-01-3-rev8-implementation` 브랜치를 세 번째로 `origin/main`(`6d0808d`)에 병합했다. 73(사용자 기획 문서 기반 43개 Anchor 복원, PR #703/704)이 `Sector01AreaCatalog.js`의 area02~area08을 독립적으로 건드려 실제 충돌이 발생했는데, 확인해보니 73은 REV8 패키지가 main에 아직 병합되지 않은 시점의 **구버전(pre-REV8) blockout**을 기준으로 삭제된 Anchor를 복원한 것이었다 — 즉 area02~08의 A/B/C/D 단순 순차 Anchor 체계는 74-81이 설치한 실제 승인 REV8 패키지(AREA-SPEC.json)가 이미 다른 좌표·다른 개수로 재설계한 것과 겹치지 않는 대상이었다. 사용자에게 확인 후 REV8을 우선해 area02~08은 HEAD(REV8) 그대로 유지하고, 73의 복원 대상 중 유일하게 REV8 배치가 건드리지 않은 area01(1-1)의 B Anchor 추가만 자동 병합으로 그대로 반영됐다. 1-7의 `storyTriggers`에 upstream이 추가한 신규 trigger id `security-response-active`를 병합해 살렸다. `npm run check`/`npm test`(7개 시나리오 전체) 통과.
+
+84. 사용자가 `ONE-ROPE-SECTOR-01-01~08-REV8.0/8.1-GITHUB-READY` zip 8개를 다시 첨부하며 "이 zip에 있는 파일들 전부다 github에 올라간 거 맞는지 확인해봐"라고 요청해 각 zip을 직접 풀어 파일 목록·핵심 좌표(bounds/entry/surfaces count)를 main과 대조했다. 1-2~1-8은 문서·Runtime 전부 정확히 반영돼 있었지만, **1-1은 REV8 문서 7개(ASSET-REQUIREMENTS.md/DIRECTION-SPEC.json/MANIFEST.md/MAP-PREVIEW.html/RUNTIME-HANDOFF.md/STORY-DIRECTION-PREVIEW.html/VALIDATION.md)가 아예 없었고, 더 중요하게는 Runtime(`area01`)이 여태 REV8 이전 구버전(960×960, entry -320,-32, casing 없음, Anchor B 존재)에 머물러 있었다** — 이 세션 앞부분에서 진행했다고 기록된 1-1 REV7→REV8 Runtime 전환이 실제로는 main에 한 번도 반영되지 않았던 것으로 확인됐다. 사용자 확인("그냥 내가 올려준걸로 다 교체해서 main에 머지해줘") 후 1-1 문서 전체를 설치하고 `area01`을 REV8.0 AREA-SPEC 그대로(bounds 1280×1024, entry -416,-32, A(-128,-192)/C(-96,-736), P1/P2/P3/Overhang/Final Deck 정확한 좌표, `shaft-shell-left/right` 논그래플 casing 신규 추가) 재저작했다. AREA-SPEC의 `forbidden` 목록이 명시한 "dedicated grapple anchor B"에 따라 기존 Anchor B(160,-448)를 제거했다 — 이는 최근 병합된 upstream anchor 복원 PR(#703/704, 73번 항목)이 1-1에 추가했던 B와 정면으로 배치되지만, 사용자가 직접 올린 REV8 패키지가 명시적으로 금지하는 내용이라 패키지를 따랐다. `tests/areaDefinitionValidator.mjs`(P0 vertices)·`tests/authoredWorldAssembler.mjs`(exit-deck position/vertices)·`tests/authoredCameraDirector.mjs`(first-hook/cross-back/open-swing/terminal 표)·`tests/sector01MapReconstruction.mjs`(AREA01_ANCHORS를 A/C만 남기고 B 제거)를 갱신했다. `npm run check`/`npm test`(7개 시나리오 전체)/관련 targeted regression 전체 통과. 사용자가 이후 "branch로 하지말고 항상 main에 머지해줘"라고 지시해 이 작업부터는 별도 브랜치·PR 없이 `main`에 직접 커밋·push한다.
 
 ## 열린 기획·구현 게이트
 

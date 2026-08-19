@@ -2,19 +2,17 @@ import assert from "node:assert/strict";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 
 // This test originally hardcoded the pre-REV8 43-anchor blockout's coordinates for all 8 Stages
-// (PR #703/704). Stages 1-2 through 1-8 were subsequently rewritten against their approved REV8
-// packages (see docs/scenario-development-integration.md entries #74-83), which redesigned each
-// Stage's landmark set/positions/route shape - the old hardcoded table no longer describes the
-// approved content for those Stages and duplicating REV8's coordinates here would just create a
-// second copy to drift out of sync with Sector01AreaCatalog.js (the actual authority) and each
-// Stage's own PRODUCTION-ALIGNMENT.md. Only 1-1 (never touched by the REV8 batch) still matches
-// the original table, so it's kept as a real regression; the other Stages verify structural
-// invariants instead of specific coordinates.
+// (PR #703/704). All 8 Stages were subsequently rewritten against their approved REV8 packages (see
+// docs/scenario-development-integration.md entries #74-83 and #84), which redesigned each Stage's
+// landmark set/positions/route shape - the old hardcoded table no longer describes the approved
+// content and duplicating REV8's coordinates here would just create a second copy to drift out of
+// sync with Sector01AreaCatalog.js (the actual authority) and each Stage's own
+// PRODUCTION-ALIGNMENT.md. 1-1's REV8 package explicitly forbids a dedicated Anchor B ("dedicated
+// grapple anchor B" is in its AREA-SPEC.json forbidden list) - only A/C remain.
 
 const AREA01_ANCHORS = Object.freeze([
-    ["a", -96, -192],
-    ["b", 160, -448],
-    ["c", -64, -704]
+    ["a", -128, -192],
+    ["c", -96, -736]
 ]);
 
 function anchorPosition(area, kind, anchorId) {
