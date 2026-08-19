@@ -15,7 +15,8 @@
     "sourceAreaId": "sector-02-08",
     "name": "EVACUATION PLATFORM",
     "subtitle": "GROUP C TRANSFER SUSPENDED",
-    "role": "SECTOR 02 FINALE"
+    "role": "SECTOR 02 FINALE",
+    "legacyStageAlias": "2-8"
   },
   "bounds": {
     "width": 2304,
@@ -135,55 +136,64 @@
       "id": "g1",
       "x": -768,
       "y": -224,
-      "role": "arrival-approach"
+      "role": "arrival-approach",
+      "label": "G1"
     },
     {
       "id": "g2",
       "x": -448,
       "y": -384,
-      "role": "arrival-patrol-mid"
+      "role": "arrival-patrol-mid",
+      "label": "G2"
     },
     {
       "id": "g3",
       "x": -128,
       "y": -544,
-      "role": "arrival-hub-entry"
+      "role": "arrival-hub-entry",
+      "label": "G3"
     },
     {
       "id": "g4",
       "x": 448,
       "y": -736,
-      "role": "dead-boarding-lip"
+      "role": "dead-boarding-lip",
+      "label": "G4"
     },
     {
       "id": "g5",
       "x": 608,
       "y": -512,
-      "role": "controlled-drop-catch"
+      "role": "controlled-drop-catch",
+      "label": "G5"
     },
     {
       "id": "g6",
       "x": 64,
       "y": -704,
-      "role": "ring-relaunch"
+      "role": "ring-relaunch",
+      "label": "G6"
     },
     {
       "id": "g7",
       "x": -288,
       "y": -832,
-      "role": "upper-arm-patrol-mid"
+      "role": "upper-arm-patrol-mid",
+      "label": "G7"
     },
     {
       "id": "g8",
       "x": -608,
       "y": -992,
-      "role": "upper-arm-guard-approach"
+      "role": "upper-arm-guard-approach",
+      "label": "G8"
     },
     {
       "id": "g9",
       "x": -288,
       "y": -1152,
-      "role": "final-security-exit"
+      "role": "final-security-exit",
+      "label": "G9"
     }
   ],
   "mainRoute": [
@@ -470,13 +480,54 @@
       "id": "sector-02-08:transfer-control-read",
       "type": "interact",
       "sourceObjectId": "sector-02-08:transfer-control"
-    },
-    {
-      "id": "sector-02-08:sector-end-checkpoint",
-      "type": "checkpoint",
-      "sourceObjectId": "sector-02-08:sector-end-checkpoint-object"
     }
   ],
+  "route": {
+    "runtimeLandmarks": [
+      "sector-02-08:entry",
+      "g1",
+      "g2",
+      "g3",
+      "central-hub",
+      "g4",
+      "dead-boarding-lip",
+      "g5",
+      "transfer-ring",
+      "g6",
+      "g7",
+      "g8",
+      "g9",
+      "final-control-apron"
+    ],
+    "mandatory": [
+      "sector-02-08:entry",
+      "g1",
+      "g2",
+      "g3",
+      "central-hub",
+      "g4",
+      "g5",
+      "transfer-ring",
+      "g6",
+      "g7",
+      "g8",
+      "g9",
+      "final-control-apron"
+    ],
+    "optional": [],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 0,
+    "deckTopY": -1248,
+    "deckWidth": 448,
+    "panelObjectiveId": "sector-02-08:transfer-control-read"
+  },
+  "progression": {
+    "targetStageAlias": null,
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["sector-02-08:transfer-control-read"]
+  },
   "gate": {
     "completionMode": "content-boundary",
     "nextAreaId": null,
@@ -541,6 +592,7 @@
   },
   "camera": {
     "mode": "default-authored-camera",
+    "zones": [],
     "customZonesRequired": false,
     "requirements": {
       "entry": [
