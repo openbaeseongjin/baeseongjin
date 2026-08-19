@@ -620,8 +620,8 @@ const area05 = defineArea({
 
 const block06 = exitBlock({
     areaId: "sector-01-06",
-    deckX: 112,
-    deckTopY: -1283,
+    deckX: 1392,
+    deckTopY: -1088,
     deckWidth: 416,
     nextAreaId: "sector-01-07",
     panelObjectiveId: "sector-01-06:exit-panel-engaged",
@@ -634,85 +634,94 @@ const area06 = defineArea({
     order: 6,
     name: "COOLING SHAFT",
     subtitle: "AIRFLOW FAILURE",
-    bounds: { width: 3840, height: 1408 },
-    entry: point("sector-01-06:entry", -320, -32),
+    bounds: { width: 3840, height: 1280 },
+    entry: point("sector-01-06:entry", 1408, -32),
     exit: block06.exit,
     nextAreaId: "sector-01-07",
     surfaces: [
-        horizontalSurface("sector-01-06:p0", -256, 0, 320),
-        horizontalSurface("sector-01-06:r1", -144, -192, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-06:r2", 144, -544, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-06:r3", 0, -800, 256, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-06:neutral-deck", -112, -832, 352, 32, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-06:access-annex-bridge", -640, -832, 704, 16, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-06:access-annex-arena", -1320, -832, 704, 32, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-06:r4", 160, -1120, 256, 16, { kind: "recovery" }),
-        block06.deck,
-        groundedSurface("sector-01-06:cooling-core-column", -304, -896, 64, 128, {
+        horizontalSurface("sector-01-06:p0", 1408, 0, 512),
+        horizontalSurface("sector-01-06:fan-a-recovery", 544, -128, 320, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-06:neutral-landing", -128, -416, 416, 28, { kind: "safe-deck" }),
+        groundedSurface("sector-01-06:wind-baffle", -224, -400, 96, 288, {
             kind: "solid",
             oneWay: false,
             grappleable: false,
             windOcclusion: true
         }),
+        horizontalSurface("sector-01-06:neutral-shadow-deck", -160, -576, 512, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-06:pulse-setup", -704, -704, 288, 22),
+        horizontalSurface("sector-01-06:fan-b-recovery", 320, -736, 320, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-06:exit-approach", 1184, -992, 352, 28),
+        horizontalSurface("sector-01-06:final-deck", 1392, -1088, 416, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-06:access-intake-deck", -1456, -672, 704, 32, { kind: "safe-deck" }),
+        block06.deck,
+        grappleTarget("sector-01-06:anchor-a-surface", 1120, -192),
+        grappleTarget("sector-01-06:anchor-d-surface", -448, -768),
+        grappleTarget("sector-01-06:access-anchor-a-surface", -672, -576),
+        grappleTarget("sector-01-06:access-anchor-b-surface", -1056, -640),
         ...[
-            ["b", 96, -416],
-            ["d", -160, -896]
-        ].map(([id, x, y]) => grappleTarget(`sector-01-06:anchor-${id}-surface`, x, y)),
-        grappleTarget("sector-01-06:access-anchor-a-surface", -640, -704),
-        grappleTarget("sector-01-06:access-anchor-b-surface", -1056, -768)
+            ["grip-b", 736, -288],
+            ["grip-c", 320, -352],
+            ["grip-e", 64, -832],
+            ["grip-f", 704, -896]
+        ].map(([id, x, y]) => grappleTarget(`sector-01-06:${id}-surface`, x, y))
     ],
     routePoints: [
-        point("sector-01-06:route-entry", -320, -32),
-        ...[
-            ["b", 96, -416, "B"],
-            ["d", -160, -896, "D"]
-        ].map(([id, x, y, label]) => point(`sector-01-06:route-${id}`, x, y, { landmark: label })),
+        point("sector-01-06:route-entry", 1408, -32),
+        point("sector-01-06:route-a", 1120, -192, { landmark: "A" }),
+        point("sector-01-06:route-b", 736, -288),
+        point("sector-01-06:route-c", 320, -352),
+        point("sector-01-06:route-neutral-landing", -128, -416),
+        point("sector-01-06:route-neutral-shadow", -160, -576),
+        point("sector-01-06:route-pulse-setup", -704, -704),
+        point("sector-01-06:route-d", -448, -768, { landmark: "D" }),
+        point("sector-01-06:route-e", 64, -832),
+        point("sector-01-06:route-f", 704, -896),
+        point("sector-01-06:route-exit-approach", 1184, -992),
         block06.routeExit
     ],
     recoveryPoints: [
-        point("sector-01-06:recovery-r1", -144, -216),
-        point("sector-01-06:recovery-r2", 144, -568),
-        point("sector-01-06:recovery-r3", 0, -824),
-        point("sector-01-06:recovery-r4", 160, -1144)
+        point("sector-01-06:recovery-fan-a-miss", 544, -152),
+        point("sector-01-06:recovery-fan-b-miss", 320, -760),
+        point("sector-01-06:recovery-access-local-reset", -1184, -704)
     ],
     objects: [
+        worldObject("sector-01-06:anchor-a", "grapple-landmark", 1120, -192, { label: "A" }),
+        worldObject("sector-01-06:anchor-d", "grapple-landmark", -448, -768, { label: "D" }),
         ...[
-            ["b", 96, -416, "B"],
-            ["d", -160, -896, "D"]
-        ].map(([id, x, y, label]) =>
-            worldObject(`sector-01-06:anchor-${id}`, "grapple-landmark", x, y, {
-                label
+            ["grip-b", 736, -288],
+            ["grip-c", 320, -352],
+            ["grip-e", 64, -832],
+            ["grip-f", 704, -896]
+        ].map(([id, x, y]) =>
+            worldObject(`sector-01-06:${id}`, "grapple-landmark", x, y, {
+                presentationId: "world-object:structural-grapple-joint"
             })
         ),
-        worldObject("sector-01-06:fan-a", "wind-source", 416, -480, {
+        worldObject("sector-01-06:fan-a", "wind-source", 1664, -352, {
             damage: false,
-            windZoneId: "sector-01-06:fan-a-wind",
-            zone: objectTriggerSpec("center", 672, 320, { x: -400, y: 0 })
+            windZoneId: "sector-01-06:fan-a-wind"
         }),
-        worldObject("sector-01-06:fan-b", "wind-source", -416, -1024, {
+        worldObject("sector-01-06:fan-b", "wind-source", -1664, -800, {
             damage: false,
-            windZoneId: "sector-01-06:fan-b-wind",
-            zone: objectTriggerSpec("center", 704, 384, { x: 416, y: -64 })
+            windZoneId: "sector-01-06:fan-b-wind"
         }),
-        worldObject("sector-01-06:central-cooling-core", "background-prop", 0, -800, { gameplay: false }),
-        worldObject("sector-01-06:access-anchor-a", "grapple-landmark", -640, -704, { label: "ACCESS A" }),
-        worldObject("sector-01-06:access-anchor-b", "grapple-landmark", -1056, -768, { label: "ACCESS B" }),
-        worldObject("sector-01-06:access-carrier", "sentry", -1320, -832, {
+        worldObject("sector-01-06:access-anchor-a", "grapple-landmark", -672, -576, { label: "ACCESS A" }),
+        worldObject("sector-01-06:access-anchor-b", "grapple-landmark", -1056, -640, { label: "ACCESS B" }),
+        worldObject("sector-01-06:access-carrier", "sentry", -1456, -672, {
             enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:b",
-            accessHint: "LEFT · MID COOLING INTAKE",
-            activationSpec: objectTriggerSpec("center", 900, 512, { x: 0, y: -32 }),
-            rules: ["standard-projectile", "no-rope-cut", "wind-pressure"]
+            accessHint: "LEFT · COOLING INTAKE",
+            activationSpec: objectTriggerSpec("center", 900, 480, { x: 0, y: -16 }),
+            rules: ["standard-projectile", "no-rope-cut"]
         }),
-        pooledSentry("sector-01-06:access-guard-left", -1640, -832, SECTOR_01_GUARD_POOL, {
-            width: 400,
-            height: 480,
-            rules: ["wind-pressure"]
+        pooledSentry("sector-01-06:access-guard-left", -1728, -672, SECTOR_01_GUARD_POOL, {
+            width: 320,
+            height: 320
         }),
-        pooledSentry("sector-01-06:access-guard-right", -1000, -832, SECTOR_01_GUARD_POOL, {
-            width: 400,
-            height: 480,
-            rules: ["wind-pressure"]
+        pooledSentry("sector-01-06:access-guard-right", -1184, -672, SECTOR_01_GUARD_POOL, {
+            width: 320,
+            height: 320
         }),
         block06.panel,
         block06.gateVisual
@@ -733,6 +742,7 @@ const area06 = defineArea({
     windZones: [
         {
             id: "sector-01-06:fan-a-wind",
+            bounds: triggerBounds(-480, -480, 2016, 320),
             direction: { x: -1, y: 0 },
             mode: "continuous",
             strength: 500,
@@ -740,6 +750,7 @@ const area06 = defineArea({
         },
         {
             id: "sector-01-06:fan-b-wind",
+            bounds: triggerBounds(-1408, -992, 2688, 288),
             direction: { x: 1, y: 0 },
             mode: "pulsed",
             strength: 800,
@@ -750,13 +761,14 @@ const area06 = defineArea({
     gate: block06.gate,
     storyTriggers: ["airflow-unstable", "cooling-pressure-critical", "bypass-required"],
     cameraZones: [
-        cameraZone("airflow-preview", -320, 0, 1.15, 0.78),
-        cameraZone("fan-a", -640, -320, 0.9, 0.68, { verticalPlayerRatio: 0.6 }),
-        cameraZone("neutral-deck", -896, -640, 1.05, 0.74, { verticalPlayerRatio: 0.62 }),
-        cameraZone("fan-b", -1344, -896, 0.85, 0.64, { verticalPlayerRatio: 0.62 }),
-        cameraZone("exit", -1408, -1344, 1.15, 0.78)
+        cameraZone("airflow-preview", -288, 0, 1.05, 0.74),
+        cameraZone("fan-a-crossflow", -544, -288, 0.81, 0.62, { verticalPlayerRatio: 0.6 }),
+        cameraZone("neutral-shadow", -672, -544, 1.02, 0.72, { verticalPlayerRatio: 0.62 }),
+        cameraZone("fan-b-crossflow", -928, -672, 0.79, 0.61, { verticalPlayerRatio: 0.62 }),
+        cameraZone("access-intake", -1024, -928, 0.86, 0.65, { verticalPlayerRatio: 0.62 }),
+        cameraZone("exit", -1280, -1024, 1.1, 0.76)
     ],
-    cueIds: ["wind-direction", "fan-a-continuous", "fan-b-lull-warning-active-decay", "bypass-required"]
+    cueIds: ["airflow-unstable", "fan-a-continuous", "fan-b-lull-warning-active-decay", "cooling-pressure-critical"]
 });
 
 const block07 = exitBlock({

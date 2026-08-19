@@ -172,12 +172,13 @@ export function run() {
                 simulation.world.surfaces.some(
                     (surface) =>
                         surface.landmarkId === module.landmarkId &&
-                        surface.id.includes("annex-arena") &&
+                        surface.requiredRouteId === undefined &&
+                        surface.blockedByRouteId === undefined &&
                         spawn.position.x >= surface.x &&
                         spawn.position.x <= surface.x + surface.width &&
                         spawn.position.y === surface.topY
                 ),
-                `Sector 01 access Carrier must stand on its authored annex ${module.encounterId}`
+                `Sector 01 access Carrier must stand on a real authored floor surface ${module.encounterId}`
             );
         }
     }
