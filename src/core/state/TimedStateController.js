@@ -38,6 +38,11 @@ export class TimedStateController {
         this.remainingSeconds = nonNegativeFinite(value, "remainingSeconds");
     }
 
+    restore({ state, elapsedSeconds = 0, remainingSeconds = 0 }) {
+        this.machine.restore({ state, elapsedSeconds });
+        this.remainingSeconds = nonNegativeFinite(remainingSeconds, "remainingSeconds");
+    }
+
     snapshot() {
         return Object.freeze({
             state: this.state,

@@ -37,14 +37,31 @@ function extrapolateAngle(entity, tickDelta, maxSeconds) {
     return normalizeAngle((entity.angle ?? 0) + (entity.angularVelocity ?? 0) * elapsedSeconds);
 }
 
-function entityAt(snapshot, collection, id) {
-    const entity = snapshot?.state?.[collection]?.find((candidate) => candidate.id === id);
-    if (!entity) return null;
-    const tick =
-        collection === "players" && Number.isSafeInteger(entity.ownerMotionTick)
-            ? entity.ownerMotionTick
-            : snapshot.serverTick;
-    return { ...entity, tick, snapshotTick: snapshot.serverTick };
+function indexEntities(snapshot, collection) {
+    return new Map(
+        (snapshot?.state?.[collection] ?? []).map((entity) => {
+            const tick =
+                collection === "players" && Number.isSafeInteger(entity.ownerMotionTick)
+                    ? entity.ownerMotionTick
+                    : snapshot.serverTick;
+            return [entity.id, { ...entity, tick, snapshotTick: snapshot.serverTick }];
+        })
+    );
+}
+
+function historyEntry(snapshot, receivedAt) {
+    return {
+        snapshot,
+        receivedAt,
+        entitiesByCollection: {
+            players: indexEntities(snapshot, "players"),
+            enemies: indexEntities(snapshot, "enemies")
+        }
+    };
+}
+
+function entityAt(entry, collection, id) {
+    return entry?.entitiesByCollection?.[collection]?.get(id) ?? null;
 }
 
 function portalTicks(history, playerId) {
@@ -116,6 +133,7 @@ export class RemoteWorldStateBuffer {
         this.maxExtrapolationSecondsObserved = 0;
         this.lastClockCorrectionTicks = 0;
         this.maxClockCorrectionTicksObserved = 0;
+        this.sampleCalls = 0;
     }
 
     push(snapshot, receivedAt = performance.now()) {
@@ -155,9 +173,9 @@ export class RemoteWorldStateBuffer {
         this.latestSnapshotSequence = snapshotSequence;
         this.latestReceivedAt = receivedAt;
         if (sameTick) {
-            this.history[this.history.length - 1] = { snapshot, receivedAt };
+            this.history[this.history.length - 1] = historyEntry(snapshot, receivedAt);
         } else {
-            this.history.push({ snapshot, receivedAt });
+            this.history.push(historyEntry(snapshot, receivedAt));
         }
         if (this.history.length > this.maxSnapshots) this.history.splice(0, this.history.length - this.maxSnapshots);
         for (const event of snapshot.events) {
@@ -175,6 +193,7 @@ export class RemoteWorldStateBuffer {
     sample({ now = this.latestReceivedAt, localPlayerId = null } = {}) {
         if (!this.latest) return null;
         if (!Number.isFinite(now)) throw new Error("now must be finite");
+        this.sampleCalls += 1;
         const elapsedTicks = (Math.max(0, now - this.clockAnchorAt) * TICKS_PER_SECOND) / 1000;
         const targetTick = this.clockAnchorTick + elapsedTicks - this.interpolationSeconds * TICKS_PER_SECOND;
         this.lastExtrapolationSeconds = 0;
@@ -202,9 +221,7 @@ export class RemoteWorldStateBuffer {
     }
 
     samplePosition(collection, id, serverTargetTick) {
-        let samples = this.history
-            .map(({ snapshot }) => entityAt(snapshot, collection, id))
-            .filter((entity) => entity !== null);
+        let samples = this.history.map((entry) => entityAt(entry, collection, id)).filter((entity) => entity !== null);
         let latest = samples.at(-1);
         if (!latest) return null;
         const targetTick =
@@ -231,9 +248,7 @@ export class RemoteWorldStateBuffer {
     }
 
     samplePlayerAngle(id, serverTargetTick) {
-        let samples = this.history
-            .map(({ snapshot }) => entityAt(snapshot, "players", id))
-            .filter((entity) => entity !== null);
+        let samples = this.history.map((entry) => entityAt(entry, "players", id)).filter((entity) => entity !== null);
         let latest = samples.at(-1);
         if (!latest) return 0;
         const targetTick = Number.isSafeInteger(latest.ownerMotionTick)
@@ -264,7 +279,8 @@ export class RemoteWorldStateBuffer {
             extrapolationMs: this.lastExtrapolationSeconds * 1000,
             maxExtrapolationMs: this.maxExtrapolationSecondsObserved * 1000,
             clockCorrectionMs: (this.lastClockCorrectionTicks / TICKS_PER_SECOND) * 1000,
-            maxClockCorrectionMs: (this.maxClockCorrectionTicksObserved / TICKS_PER_SECOND) * 1000
+            maxClockCorrectionMs: (this.maxClockCorrectionTicksObserved / TICKS_PER_SECOND) * 1000,
+            sampleCalls: this.sampleCalls
         });
     }
 }

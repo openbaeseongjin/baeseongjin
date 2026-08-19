@@ -115,12 +115,48 @@ export function run() {
     );
     assert.equal(hydratedEnemyStates.length, compactEnemyStates.length);
     assert.ok(hydratedEnemyStates.every(({ enemyType, position }) => enemyType && Number.isFinite(position.x)));
+    const runtimeById = new Map(performanceSimulation.enemies.map((enemy) => [enemy.id, enemy]));
     const creationsBeforePrediction = performanceSimulation.enemyRuntimeMetrics().creations;
-    performanceSimulation.preparePrediction(hydratedEnemyStates);
+    const reconciliationsBeforePrediction = performanceSimulation.enemyRuntimeMetrics().reconciliations;
+    for (let snapshotIndex = 0; snapshotIndex < 300; snapshotIndex += 1) {
+        performanceSimulation.preparePrediction(hydratedEnemyStates);
+    }
     assert.equal(
         performanceSimulation.enemyRuntimeMetrics().creations - creationsBeforePrediction,
-        compactEnemyStates.length,
-        "one snapshot must create exactly one prediction runtime per Enemy, not a second hydration runtime"
+        0,
+        "stable Enemy IDs must reconcile without recreating prediction runtimes"
+    );
+    assert.equal(
+        performanceSimulation.enemyRuntimeMetrics().reconciliations - reconciliationsBeforePrediction,
+        compactEnemyStates.length * 300,
+        "every snapshot Enemy must synchronize into its existing runtime"
+    );
+    assert.ok(
+        performanceSimulation.enemies.every((enemy) => runtimeById.get(enemy.id) === enemy),
+        "Enemy runtime identity must remain stable across snapshot reconciliation"
+    );
+    const changedState = {
+        ...hydratedEnemyStates[0],
+        position: {
+            x: hydratedEnemyStates[0].position.x + 17,
+            y: hydratedEnemyStates[0].position.y - 9
+        },
+        health: hydratedEnemyStates[0].health - 13
+    };
+    performanceSimulation.preparePrediction([changedState, ...hydratedEnemyStates.slice(1)]);
+    assert.deepEqual(performanceSimulation.enemyStates()[0].position, changedState.position);
+    assert.equal(performanceSimulation.enemyStates()[0].health, changedState.health);
+    const creationsBeforeReplacement = performanceSimulation.enemyRuntimeMetrics().creations;
+    performanceSimulation.preparePrediction(hydratedEnemyStates.slice(1));
+    assert.equal(performanceSimulation.enemies.length, hydratedEnemyStates.length - 1, "missing IDs must despawn");
+    performanceSimulation.preparePrediction([
+        { ...hydratedEnemyStates[0], id: "replacement-enemy-runtime" },
+        ...hydratedEnemyStates.slice(1)
+    ]);
+    assert.equal(
+        performanceSimulation.enemyRuntimeMetrics().creations - creationsBeforeReplacement,
+        1,
+        "only a new stable ID may create a replacement runtime"
     );
     const encounterCountByAlias = Object.fromEntries(
         simulation.world.landmarks.map((landmark) => [

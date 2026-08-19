@@ -62,6 +62,17 @@ export class StateMachine {
         return this.snapshot();
     }
 
+    restore({ state, elapsedSeconds = 0 }) {
+        if (typeof state !== "string" || !Object.hasOwn(this.transitions, state)) {
+            throw new Error(`Unknown StateMachine state '${state}'`);
+        }
+        if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < 0) {
+            throw new Error("StateMachine elapsedSeconds must be non-negative");
+        }
+        this.state = state;
+        this.elapsedSeconds = elapsedSeconds;
+    }
+
     snapshot() {
         return Object.freeze({ state: this.state, elapsedSeconds: this.elapsedSeconds });
     }

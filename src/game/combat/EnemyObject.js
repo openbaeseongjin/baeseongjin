@@ -3,7 +3,7 @@ import { createSimulationCapabilityMixin } from "../simulation/SimulationCapabil
 import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { selectNearestPlayer } from "./CombatTargeting.js";
 import { ENEMY_BEHAVIOR_CAPABILITY } from "./EnemyBehaviors.js";
-import { advanceEnemyPatrol, createEnemyPatrolState } from "./EnemyPatrol.js";
+import { advanceEnemyPatrol, createEnemyPatrolState, restoreEnemyPatrolState } from "./EnemyPatrol.js";
 import { BallisticProjectileObject } from "./ProjectileObject.js";
 import { Vector2 } from "../../game-kit/index.js";
 import { enemyImpactDisplacementEnabled } from "./EnemyMobility.js";
@@ -40,6 +40,28 @@ function cloneKnockbackState(state) {
         wallImpactEligible: state.wallImpactEligible === true,
         wallImpactTriggered: state.wallImpactTriggered === true
     });
+}
+
+function createKnockbackState(knockbackState) {
+    if (!knockbackState) return null;
+    return {
+        direction: normalizeImpactDirection(knockbackState.direction, "knockbackState.direction"),
+        distance: assertFinite(knockbackState.distance, "knockbackState.distance", {
+            minimum: 0,
+            exclusiveMinimum: true
+        }),
+        durationSeconds: assertFinite(knockbackState.durationSeconds, "knockbackState.durationSeconds", {
+            minimum: 0,
+            exclusiveMinimum: true
+        }),
+        remainingSeconds: assertFinite(knockbackState.remainingSeconds, "knockbackState.remainingSeconds", {
+            minimum: 0
+        }),
+        sourcePlayerId: knockbackState.sourcePlayerId ?? null,
+        sourceEffectId: knockbackState.sourceEffectId ?? null,
+        wallImpactEligible: knockbackState.wallImpactEligible === true,
+        wallImpactTriggered: knockbackState.wallImpactTriggered === true
+    };
 }
 function hasLineOfSight(enemy, target, surfaces) {
     if (!enemy.rules.includes("cover-ends-los")) return true;
@@ -249,26 +271,7 @@ export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulati
             this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, fireCooldown ?? 0) : 0;
         this.impactDisplacementEnabled =
             enemyImpactDisplacementEnabled(enemyType) && impactDisplacementEnabled !== false;
-        this.knockbackState = knockbackState
-            ? {
-                  direction: normalizeImpactDirection(knockbackState.direction, "knockbackState.direction"),
-                  distance: assertFinite(knockbackState.distance, "knockbackState.distance", {
-                      minimum: 0,
-                      exclusiveMinimum: true
-                  }),
-                  durationSeconds: assertFinite(knockbackState.durationSeconds, "knockbackState.durationSeconds", {
-                      minimum: 0,
-                      exclusiveMinimum: true
-                  }),
-                  remainingSeconds: assertFinite(knockbackState.remainingSeconds, "knockbackState.remainingSeconds", {
-                      minimum: 0
-                  }),
-                  sourcePlayerId: knockbackState.sourcePlayerId ?? null,
-                  sourceEffectId: knockbackState.sourceEffectId ?? null,
-                  wallImpactEligible: knockbackState.wallImpactEligible === true,
-                  wallImpactTriggered: knockbackState.wallImpactTriggered === true
-              }
-            : null;
+        this.knockbackState = createKnockbackState(knockbackState);
         Object.defineProperty(this, "behavior", {
             value: behavior,
             enumerable: false,
@@ -296,6 +299,42 @@ export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulati
 
     enemyBehaviorSnapshot() {
         return this.behavior?.snapshot() ?? null;
+    }
+
+    restoreNetworkState(state) {
+        const behaviorState = state?.behaviorState ?? null;
+        if (
+            state?.id !== this.id ||
+            state.objectId !== this.objectId ||
+            state.enemyType !== this.enemyType ||
+            !restoreEnemyPatrolState(this.patrol, state.patrol ?? null) ||
+            (this.behavior === null) !== (behaviorState === null)
+        ) {
+            return false;
+        }
+        if (this.behavior && typeof this.behavior.restore !== "function") return false;
+        this.position.set(
+            assertFinite(state.position?.x, "enemy.position.x"),
+            assertFinite(state.position?.y, "enemy.position.y")
+        );
+        this.health = assertFinite(state.health, "enemy.health", { minimum: 0 });
+        this.maxHealth = assertFinite(state.maxHealth, "enemy.maxHealth", { minimum: 0, exclusiveMinimum: true });
+        this.lockedTargetId = state.lockedTargetId ?? null;
+        this.attackStateController.restore({
+            state: normalizeEnemyState(state.attackState, ENEMY_ATTACK_STATES, "idle"),
+            remainingSeconds: Math.max(0, state.attackStateRemaining ?? 0)
+        });
+        this.aimDirection = state.aimDirection
+            ? Object.freeze({
+                  x: assertFinite(state.aimDirection.x, "enemy.aimDirection.x"),
+                  y: assertFinite(state.aimDirection.y, "enemy.aimDirection.y")
+              })
+            : null;
+        this.fireCooldown =
+            this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, state.fireCooldown ?? 0) : 0;
+        this.knockbackState = createKnockbackState(state.knockbackState);
+        this.behavior?.restore(behaviorState);
+        return true;
     }
 
     blocksImpactFrom(sourcePosition) {

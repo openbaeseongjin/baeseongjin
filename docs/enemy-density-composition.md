@@ -20,7 +20,7 @@
 
 정확한 pool 결과는 seed에 따라 바뀌지만 slot 수·위치·activation·Stable ID는 바뀌지 않는다. 전체 exact roster를 테스트 snapshot으로 고정하지 않고 안전 구간, Access 3기, Sector coarse tier, family 도달과 결정성을 검증한다.
 
-멀티 snapshot은 현재 56개 slot의 정적 authored 정의를 `world revision + objectId` 인덱스로 재사용한다. 축약 state hydration은 runtime을 만들거나 slot을 다시 선택하지 않고 동적 state만 합성하며, prediction 복원에서 snapshot당 slot 하나에 Enemy runtime 하나만 만든다. 이 최적화는 20Hz snapshot·중립 Enemy 권위·slot 수와 pool 결과를 바꾸지 않는다.
+멀티 snapshot은 현재 56개 slot의 정적 authored 정의를 `world revision + objectId` 인덱스로 재사용한다. 축약 state hydration은 runtime을 만들거나 slot을 다시 선택하지 않고 동적 state만 합성한다. prediction 복원은 stable ID가 같은 기존 Enemy runtime에 동적 상태를 in-place restore하며 실제 spawn/despawn 또는 identity 변경에만 runtime을 만든다. 이 최적화는 20Hz snapshot·중립 Enemy 권위·slot 수와 pool 결과를 바꾸지 않는다.
 
 ## Authoring 계약
 

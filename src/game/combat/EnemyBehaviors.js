@@ -193,6 +193,15 @@ export class PursuitEnemyBehavior {
             dashDirection: frozenDirection(this.dashDirection)
         });
     }
+
+    restore(snapshot = {}) {
+        this.stateController.restore({
+            state: normalizeEnemyState(snapshot.state, ENEMY_BEHAVIOR_STATES[this.kind], "seek"),
+            remainingSeconds: Math.max(0, snapshot.remainingSeconds ?? 0)
+        });
+        this.targetId = snapshot.targetId ?? null;
+        this.dashDirection.set(snapshot.dashDirection?.x ?? 0, snapshot.dashDirection?.y ?? 0).normalize();
+    }
 }
 
 export class ShieldEnemyBehavior {
@@ -231,6 +240,11 @@ export class ShieldEnemyBehavior {
             guardDirection: frozenDirection(this.guardDirection),
             guardHalfAngle: this.guardHalfAngle
         });
+    }
+
+    restore(snapshot = {}) {
+        this.guardDirection.set(snapshot.guardDirection?.x ?? 1, snapshot.guardDirection?.y ?? 0).normalize();
+        if (this.guardDirection.length() === 0) this.guardDirection.set(1, 0);
     }
 }
 
@@ -304,6 +318,15 @@ export class ArtilleryEnemyBehavior {
             strikeRadius: this.strikeRadius
         });
     }
+
+    restore(snapshot = {}) {
+        this.stateController.restore({
+            state: normalizeEnemyState(snapshot.state, ENEMY_BEHAVIOR_STATES[this.kind], "idle"),
+            remainingSeconds: Math.max(0, snapshot.remainingSeconds ?? 0)
+        });
+        this.targetId = snapshot.targetId ?? null;
+        this.targetPosition = snapshot.targetPosition ? { ...snapshot.targetPosition } : null;
+    }
 }
 
 export class SupportEnemyBehavior {
@@ -350,6 +373,13 @@ export class SupportEnemyBehavior {
 
     snapshot() {
         return Object.freeze({ kind: this.kind, state: this.state, targetId: this.targetId });
+    }
+
+    restore(snapshot = {}) {
+        this.stateController.restore({
+            state: normalizeEnemyState(snapshot.state, ENEMY_BEHAVIOR_STATES[this.kind], "idle")
+        });
+        this.targetId = snapshot.targetId ?? null;
     }
 }
 
@@ -413,6 +443,14 @@ export class SwarmEnemyBehavior {
             remainingSeconds: this.remainingSeconds,
             diveDirection: frozenDirection(this.diveDirection)
         });
+    }
+
+    restore(snapshot = {}) {
+        this.stateController.restore({
+            state: normalizeEnemyState(snapshot.state, ENEMY_BEHAVIOR_STATES[this.kind], "orbit"),
+            remainingSeconds: Math.max(0, snapshot.remainingSeconds ?? 0)
+        });
+        this.diveDirection.set(snapshot.diveDirection?.x ?? 0, snapshot.diveDirection?.y ?? 0).normalize();
     }
 }
 
