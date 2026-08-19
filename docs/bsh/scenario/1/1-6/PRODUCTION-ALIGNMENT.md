@@ -7,6 +7,7 @@
 ## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
 
 - Wind Shadow, grounded 감쇠(`0.35`), Zone falloff(`80`)가 구현됐고 Fan A/B 시각은 같은 Wind state를 읽는다.
+- 22장 generic Augment의 Player별 선택·저장·효과가 구현됐으며, 1-6은 어떤 카드도 필수로 요구하지 않는 Wind 학습 Stage다.
 - `cameraZones`는 실제 객체로 구현되어 `airflow-preview → fan-a → neutral-deck → fan-b → exit`을 사용한다.
 - Story는 `COOLING DISTRIBUTION / AIRFLOW UNSTABLE` entry와 exit-panel objective binding이 구현됐다. `storyTriggers`는 시나리오 기획 인벤토리다.
 - Approved Blockout과 실제 브라우저 Wind/Camera 가독성 검증은 여전히 필요하다.
@@ -134,9 +135,9 @@ README는 Wind Shadow(§28)와 Grounded 감쇠(§59)를 명시적으로 요구�
 
 ## 10. 증강·Story 연결
 
-[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-6은 Enemy 없이 진행되는 Stage이며 Foundation Augment는 등장하되 특별한 우열을 주지 않는다(README §26,42~44).
+[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-6은 Enemy 없이 진행되는 Stage이며 generic Augment 조합 사이에 특별한 우열을 주지 않는다(README §26,42~44).
 
-- Foundation 저장·효과가 아직 없으므로(1-4 판정 참고) Build별 Wind 상호작용 차이는 현재 재현되지 않는다.
+- generic Augment 저장·효과는 구현됐다. 카드 조합별 Wind 체감 차이와 Base Safe Route 공정성은 실제 플레이테스트 대기다.
 - 1-6의 Wind는 1-7·1-8에서 동일 튜닝값으로 재사용될 예정이므로(README §24,34) 이 문서의 §3 Wind Zone 수치가 1-7·1-8 PRODUCTION-ALIGNMENT.md의 참조 기준이 된다.
 
 ---

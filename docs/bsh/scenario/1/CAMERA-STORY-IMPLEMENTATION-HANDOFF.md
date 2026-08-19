@@ -199,17 +199,17 @@ BYPASS FAILED → MANUAL PRESSURE BYPASS REQUIRED)는 #507이
     }),
     Object.freeze({
         // Turret 감지 — Turret 위치(-864) 근접, localY -960~-736
-        token: "containment-violation",
+        token: "security-response-active",
         minLocalY: -960, maxLocalY: -736,
         presentations: Object.freeze([
-            Object.freeze({ id: "sector-01-07:containment-violation", title: "CONTAINMENT VIOLATION", detail: "ACTIVE", durationSeconds: 1.2 })
+            Object.freeze({ id: "sector-01-07:security-response-active", title: "VERTICAL TRANSIT VIOLATION", detail: "SECURITY RESPONSE ACTIVE", durationSeconds: 1.2 })
         ])
     })
 ])
 ```
 
 §6 Story Sequence의 "상승 중 PRESSURE LIMIT EXCEEDED"와 "Security가 Player
-감지: CONTAINMENT VIOLATION ACTIVE" 두 비트다. #507은 이 Stage에
+감지: VERTICAL TRANSIT VIOLATION / SECURITY RESPONSE ACTIVE" 두 비트다. `CONTAINMENT VIOLATION`은 6-8과 Final Security 경계에서만 사용한다. #507은 이 Stage에
 `POSITION_PRESENTATIONS`를 추가하지 않았으므로 겹치지 않는다. §6의 "MANUAL
 BYPASS READY"(최상단 도착)는 #507의 `sector-01-07:bypass-open`
 `OBJECTIVE_PRESENTATIONS`(PRESSURE STABILIZING → SERVICE ROUTE AVAILABLE)로

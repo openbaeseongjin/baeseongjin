@@ -2025,7 +2025,7 @@ intentional sacrifice
 ### Runtime Fidelity
 
 - current 100 / 760 / 1.00 / 520 Combat
-- Cutter = absence of `no-rope-cut`
+- Cutter = explicit `cutter-fire` opt-in
 - Wind static rectangular zone
 - global deterministic phase
 - already-fired projectile persists

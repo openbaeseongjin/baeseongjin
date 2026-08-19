@@ -755,7 +755,7 @@ const area07 = defineArea({
     gate: block07.gate,
     storyTriggers: [
         "pressure-unstable",
-        "containment-violation",
+        "security-response-active",
         "pressure-limit",
         "bypass-ready",
         "bypass-open",

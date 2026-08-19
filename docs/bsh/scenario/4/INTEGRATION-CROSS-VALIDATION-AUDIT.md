@@ -2,6 +2,8 @@
 
 *MASTER · STAGE · CURRENT RUNTIME CROSS-REVIEW · REV 1.0*
 
+> **HISTORICAL CUTTER SEMANTICS — DO NOT USE FOR CURRENT AUTHORING:** 아래 원본 감사의 `no-rope-cut` 부재 기반 설명은 현재 계약이 아니다. 현재 Runtime과 저작은 `rules.includes("cutter-fire")` 명시적 positive opt-in만 Rope Cut capability로 사용한다.
+
 `SECTOR 04 TRANSIT / INFRASTRUCTURE` · `4-1 → 4-8` · `MOMENTUM → INTERRUPTION → RECOVERY → MOMENTUM`
 
 | 항목 | 판정 |
@@ -2076,18 +2078,10 @@ Sector04 first graybox에서는 dedicated blocker를 쓰지 않는 것을 권장
 현재:
 
 ```text
-absence of no-rope-cut
+rules.includes("cutter-fire")
 ```
 
-이 capability switch.
-
-Production authoring safety를 위해:
-
-```text
-rope-cut-enabled
-```
-
-계열 positive opt-in으로 바꿀지 시스템 결정 OPEN.
+이 유일한 capability switch다. 과거 `no-rope-cut` 부재 기반 opt-out 제안은 폐기됐다.
 
 ### 5. Sector04 Timer
 

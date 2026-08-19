@@ -141,7 +141,7 @@ multiplayer authored-world foundation
 - `AccessScanField`가 AVAILABLE/WARNING/LOCKED/RESET을 결정적으로 계산하고 controlled surface의 새 Rope attach만 제한한다.
 - Scanner phase는 scene snapshot으로 전달되며 공용 overlay가 색뿐 아니라 solid/dash/chevron/X/box 형태로 네 상태를 구분한다.
 - 3-1~3-8 Area Catalog, stable object/surface IDs와 Stage별 `PRODUCTION-ALIGNMENT.md`가 존재한다.
-- Sector 03은 의도적으로 custom Camera Zone을 두지 않고 공용 기본 Camera를 사용한다. `Camera Zone 없음`은 구현 누락이 아니다.
+- Sector 03은 의도적으로 custom Camera Zone을 두지 않고 공용 기본 Camera를 사용한다. `Camera Zone 없음`은 구현 누락이 아니다. Scenario Art 전에는 Area ID·local Y·기본 desktop/mobile zoom·player framing·Stable ID·visible object count를 고정한 verified default-camera capture 계약을 작성한다.
 - 남은 Production Gate는 전체 등반·모바일 가독성·두 기기 phase 일치 플레이테스트와 Stage별 Approved Blockout이다.
 
 ---

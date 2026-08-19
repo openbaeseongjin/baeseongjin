@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Authored story visual harness</title>
+        <style>
+            html,
+            body {
+                margin: 0;
+                overflow: hidden;
+                background: #080b10;
+            }
+
+            canvas {
+                display: block;
+                width: 1000px;
+                height: 360px;
+                image-rendering: pixelated;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="preview" width="1000" height="360" aria-label="1-7 Story 문구 시각 검증"></canvas>
+        <script type="module" src="./authoredStoryVisualHarness.mjs"></script>
+    </body>
+</html>

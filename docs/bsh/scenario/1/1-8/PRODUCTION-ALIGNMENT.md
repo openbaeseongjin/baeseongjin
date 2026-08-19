@@ -6,7 +6,7 @@
 
 ## 0. CURRENT RUNTIME OVERRIDE — 2026-08-17
 
-- Foundation 선택·세 효과와 Build별 Runtime 상태 유지가 구현됐다.
+- 22장 generic Augment 선택·효과와 Player별 Runtime 상태 유지가 구현됐다.
 - `cameraZones`는 Intro부터 Worker Reveal까지 실제 객체로 구현됐다.
 - Story는 entry, Final Warning/Closure, Mid Safe, Worker District position binding과 maintenance override/gate binding으로 핵심 공개 흐름이 구현됐다.
 - Lower Grid 순차 조명 Off와 Apartment/Locker/Canteen 정식 Prop은 계속 미구현이다. `storyTriggers`는 시나리오 기획 인벤토리다.
@@ -26,8 +26,8 @@
 | Sentry T1/T2 위치 | `IMPLEMENTED — README와 일치` | `(384,-768)`, `(384,-1280)` 모두 정확히 일치 |
 | T1·T2 Crossfire 금지 | `IMPLEMENTED (데이터 레벨)` | 두 Turret 모두 `rules: ["sequential-activation","no-crossfire", ...]` — README §35 요구를 데이터로 명시. 실제 activation bounds도 겹치지 않음(`y=-1024~-1024`에서 서로 인접만 하고 겹치지 않음) |
 | Final Vent | `IMPLEMENTED` | 위치 `(-448,-1248)`가 README §34와 정확히 일치, Wind 수치는 1-6/1-7과 완전히 동일 재사용 |
-| Sector Checkpoint | `IMPLEMENTED` | `(0,-1696)`, `radius=38`(`WORLD_CONFIG.checkpointRadius`와 일치), `reward:true` |
-| Build 분기(Impulse/Relay/Shear Route) | `NOT IMPLEMENTED` | [1-4 판정](../1-4/PRODUCTION-ALIGNMENT.md)의 Foundation 저장·효과가 없으므로 재현 불가 |
+| Sector Checkpoint | `IMPLEMENTED` | `(0,-1696)`, `radius=38`(`WORLD_CONFIG.checkpointRadius`와 일치). 진행 저장·개인 부활만 소유하며 보상 선택을 열지 않음 |
+| generic Augment Build 표현 | `IMPLEMENTED PROTOTYPE / PLAYTEST BALANCE PENDING` | 과거 Impulse/Relay/Shear 전용 Route는 대체됨. 현재 종합 Stage가 여러 카드 조합을 공정하게 수용하는지 검증 대기 |
 | Camera Zones | `NOT IMPLEMENTED` | 문자열 9개(`intro, chain-ascent, turret-one, mid-relief, final-preview, final-crossing, gate, shutdown, worker-reveal`)만 존재 |
 | Story Trigger Presentation | `NOT IMPLEMENTED` | `storyTriggers` 10개 모두 미연결. `WAIT FOR FURTHER INSTRUCTION` Evacuation Notice 문구도 아직 화면에 표시되지 않음 |
 | Lower Grid Shutdown 연출 | `NOT IMPLEMENTED` | README §55~56이 요구하는 순차 조명 Off는 Story Presentation과 별개의 World State 연출이며 현재 코드 없음 |
@@ -91,7 +91,7 @@
 | Containment Gate(exitBlock) | `(288,-1728)` bottom-center — 포탈 문 위치 정렬로 `(256,-1584)`에서 Worker Transition Floor 위 실제 문으로 이동 |
 | `maintenance-override` | type `interact`, sourceObjectId `maintenance-override-panel`(별도 `reach` Objective 없음) |
 | Gate 판정 좌표 | `(288,-1760)` — 통합 catalog가 `nextAreaId`를 `2-1`로 재배선할 때 표준 문 aperture(`52×62`, 하단=출구 데크) trigger로 다시 계산한다 |
-| Sector Checkpoint | `(0,-1696)`, `radius=38`, `reward=true`, `sourceObjectId: sector-checkpoint` |
+| Sector Checkpoint | `(0,-1696)`, `radius=38`, `sourceObjectId: sector-checkpoint`; 진행 저장·개인 부활 전용, 보상 없음 |
 
 ## 4. Camera Shot — 미구현, README 설계값만 존재
 
@@ -139,7 +139,7 @@
 
 ## 7. Acceptance
 
-- README §88 PASS 15개(Gameplay) 중 Build 분기 관련(PASS 11)은 Foundation Runtime 없이 확인 불가.
+- README §88 PASS 15개(Gameplay) 중 과거 Foundation 분기 PASS 11은 generic Augment 조합별 종합 플레이 검증으로 대체하며 실제 플레이테스트가 필요하다.
 - PASS 07(T1+T2 Crossfire 없음)은 activation bounds 비겹침으로 데이터상 이미 충족 — Acceptance Capture로 시각 확인만 남음.
 - README §89 Story PASS(PASS 16~25)는 전부 Story Trigger·Lower Grid Shutdown·Worker Preview 구현 이후에만 검증 가능하며 현재는 전부 미착수.
 - FAIL 조건 "Checkpoint 직후 또 전투"는 Checkpoint(`0,-1696`)가 Worker Transition Floor(`0,-1728`) 및 Gate(`320,-1760`) 이후에 위치해 Enemy activation bounds와 겹치지 않으므로 구조적으로 충족.
@@ -154,15 +154,15 @@
 | Story | 문자열 placeholder만 존재 | 10개 트리거 연결 — 붙여넣기 가능한 값은 [Camera/Story Implementation Handoff](../CAMERA-STORY-IMPLEMENTATION-HANDOFF.md) Part 2 참고(핵심 비트만 우선 연결, 나머지는 확장 필요). Tone 제약(§57)과 Group A/B/C reveal 순서 준수 필수 |
 | Lower Grid Shutdown 연출 | 미구현 | Story Presentation과 별개의 World State/조명 시스템 필요 |
 | Worker District Preview | 지형만 존재 | Apartment/Locker/Canteen 등 생활 Prop, Evacuation Notice 오브젝트 추가 |
-| Build 분기 | 미구현 | [1-4 §1](../1-4/PRODUCTION-ALIGNMENT.md) Foundation Runtime 선행 필요 |
+| generic Augment Build 표현 | 구현 Prototype | 실제 카드 조합별 종합 플레이·Safe Route 공정성 검증 |
 | Sector 01 Boss 연결 | 이 문서 범위 밖 | [`sector-timer-and-boss-flow.md`](../../../../sector-timer-and-boss-flow.md) 확정 대기 |
 
 ## 9. 증강·Story 연결
 
-[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-8은 Foundation Check가 아니라 Skill/Synthesis Check다(README §81).
+[Sector 01 증강·스토리 통합 기준](../AUGMENT-STORY-INTEGRATION.md)에 따라 1-8은 특정 generic Augment Check가 아니라 Rope·Wind·Sentry를 합친 Skill/Synthesis Check다(README §81).
 
-- Foundation 저장·효과가 없으므로 Build별 Final Stage 경험(README §80)은 현재 재현되지 않는다.
-- 모든 Build가 Safe Route로 클리어 가능해야 한다는 제약은 Foundation Runtime 여부와 무관하게 기본 Rope만으로 이미 성립해야 하며, Greybox 단계(README §91 PRIORITY 1)에서 우선 검증한다.
+- generic Augment 저장·효과는 구현됐다. 카드 조합별 Final Stage 체감과 수치 밸런스는 플레이테스트 대기다.
+- 모든 generic Augment Build가 Safe Route로 클리어 가능해야 하며, 카드가 없는 기본 Rope만으로도 이미 성립해야 한다. Greybox 단계(README §91 PRIORITY 1)에서 우선 검증한다.
 - 1-8 Checkpoint 통과는 Sector 01 완료를 단독으로 확정하지 않는다(README §66) — Boss 처치까지 별도로 필요하다는 점을 Story/Progress 로직에 반영할 때 유의한다.
 
 ---

@@ -106,7 +106,7 @@
 
 ## 다음 작업
 
-Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. 6-8 `ROOFTOP PAD 03`은 Threat 0의 순방향 Rope movement climax 뒤 Pad Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03 → ACCESS RESTORED → 개별 Boarding → 전원 준비 → ESCAPE`로 확정됐으며 Runtime은 미구현이다. 다음 단계는 `P0 Alignment → Boss01 → Timer → Sector04/05/06 Runtime → Final Security/Ending → Playtest`다. 과거 Specialization 단계는 generic 증강 v1과 #633 획득 Node로 대체됐다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
+Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. P0 Alignment는 1-7 보안 상승 문구, Cutter positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약까지 정렬해 완료했다. 1-7의 `VERTICAL TRANSIT VIOLATION / SECURITY RESPONSE ACTIVE`는 최종 `CONTAINMENT VIOLATION`을 6-8 / Final Security에 보존한다. 6-8 `ROOFTOP PAD 03`은 Threat 0의 순방향 Rope movement climax 뒤 Pad Access Console에서 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03 → ACCESS RESTORED → 개별 Boarding → 전원 준비 → ESCAPE`로 확정됐으며 Runtime은 미구현이다. 다음 순서는 `핵심 루프 브라우저·실기기 검증 → Boss01 → Timer → Sector04/05/06 Runtime → Final Security/Ending → Playtest`다. 과거 Specialization 단계는 generic 증강 v1과 #633 획득 Node로 대체됐다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
 
 Gate/출구 표준화(전 32 Area), 포탈 위치 전수 감사·수정(connectArea trigger 재계산·1-8 게이트 시각 정렬), 멀티 탄환 소멸 근본 수정(발사 claim 재유도 검증 제거)은 코드·테스트·문서 반영까지 완료됐다. 남은 단계는 병합 뒤 `docs/version-management.md` 절차(멀티 서버 코드 변경이므로 서버 재시작·버전 올림·공개 smoke)와 브라우저 화면 확인 결과를 PR에 기록하는 것이다.
 

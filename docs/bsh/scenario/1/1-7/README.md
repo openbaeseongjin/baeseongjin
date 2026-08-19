@@ -211,8 +211,8 @@ EXCEEDED
 
 Security가 Player 감지:
 
-CONTAINMENT VIOLATION
-ACTIVE
+VERTICAL TRANSIT VIOLATION
+SECURITY RESPONSE ACTIVE
 
 ↓
 
@@ -671,8 +671,8 @@ Turret 규칙을 안다.
 
 짧은 System Message만:
 
-CONTAINMENT VIOLATION
-ACTIVE
+VERTICAL TRANSIT VIOLATION
+SECURITY RESPONSE ACTIVE
 
 ---
 
@@ -2109,7 +2109,7 @@ interactables:
 
 storyTriggers:
 - pressure-unstable
-- containment-violation
+- security-response-active
 - pressure-limit
 - bypass-ready
 - bypass-open

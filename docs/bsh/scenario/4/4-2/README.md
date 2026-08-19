@@ -2349,16 +2349,10 @@ test.
 Current:
 
 ```text
-absence of no-rope-cut
+rules.includes("cutter-fire")
 ```
 
-로 capability 활성.
-
-Sector 04 integration 전에:
-
-```text
-rope-cut-enabled
-```
+로 capability를 활성한다. `no-rope-cut` 부재는 Rope Cut을 허용하지 않는다.
 
 같은 positive authoring rule로 harden할지 결정.
 
