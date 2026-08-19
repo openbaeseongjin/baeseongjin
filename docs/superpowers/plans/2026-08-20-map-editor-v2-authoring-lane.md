@@ -92,7 +92,7 @@ git commit -m "feat: add isolated area spec v2 model"
 - Produces `validateAreaCatalogManifest(manifest, { expectedStageIds, projectRoot })`, returning `{ valid, issues }`.
 - Produces `composeSectorCatalog({ id, revision, manifest, legacyAreas, generatedAreas })`, returning `defineAreaCatalog({ id, revision, areas })` or throwing `AreaCatalogCompositionError` with an issue code.
 
-- [ ] **Step 1: Add failing manifest and composer tests.**
+- [x] **Step 1: Add failing manifest and composer tests.**
 
 ```js
 assert.deepEqual(validateAreaCatalogManifest(manifest, { expectedStageIds: ["1-1", "1-2"] }).issues, []);
@@ -101,13 +101,13 @@ assert.throws(() => composeSectorCatalog({ ...input, manifest: missingStageManif
 assert.equal(composed.areas.find(({ id }) => id === "sector-01-01"), generatedArea01);
 ```
 
-- [ ] **Step 2: Run the focused test to verify the new assertions fail.**
+- [x] **Step 2: Run the focused test to verify the new assertions fail.**
 
 Run: `node tests/areaAuthoringV2.mjs`
 
 Expected: `ERR_MODULE_NOT_FOUND` for `AreaCatalogManifest.js`.
 
-- [ ] **Step 3: Implement strict manifest and atomic composer behavior.**
+- [x] **Step 3: Implement strict manifest and atomic composer behavior.**
 
 ```js
 for (const entry of manifest.stageSources) {
@@ -120,13 +120,13 @@ return defineAreaCatalog({ id, revision, areas });
 
 The manifest validator must require one entry per expected Stage ID, valid `legacy|generated` source, matching Sector/Stage/Area identity, readable declared source path, and a generated output path for generated entries. It must reject duplicate Stage IDs, duplicate Area IDs, missing source paths, and any `overlay` key.
 
-- [ ] **Step 4: Run the focused test to verify it passes.**
+- [x] **Step 4: Run the focused test to verify it passes.**
 
 Run: `node tests/areaAuthoringV2.mjs`
 
 Expected: all Task 1–2 assertions pass.
 
-- [ ] **Step 5: Commit the contract.**
+- [x] **Step 5: Commit the contract.**
 
 ```powershell
 git add src/game/world/area-authoring-v2 tests/areaAuthoringV2.mjs
