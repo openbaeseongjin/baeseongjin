@@ -4,7 +4,7 @@ const GENERATED_OUTPUT_ROOT = "src/game/world/areas/generated/";
 const GENERATED_RUNTIME_IMPORT = "../../../area-authoring-v2/AreaSpecV2.js";
 
 function stableJson(value) {
-    return JSON.stringify(value, null, 2);
+    return JSON.stringify(value, null, 2).replaceAll("\n", "\r\n");
 }
 
 export function generatedModulePath(entry) {
@@ -21,7 +21,8 @@ export function renderGeneratedAreaModule(spec) {
     const canonical = canonicalizeAreaSpecV2(spec);
     const stageId = canonical.stage?.legacyStageAlias;
     const areaId = canonical.definition?.id;
-    if (typeof stageId !== "string" || typeof areaId !== "string") throw new TypeError("generated-spec-identity-invalid");
+    if (typeof stageId !== "string" || typeof areaId !== "string")
+        throw new TypeError("generated-spec-identity-invalid");
     return [
         "// GENERATED FILE - DO NOT EDIT",
         `// Source: ${stageId} AREA-SPEC.v2.json`,
@@ -29,11 +30,13 @@ export function renderGeneratedAreaModule(spec) {
         "",
         `export const GENERATED_STAGE_ID = ${JSON.stringify(stageId)};`,
         `export const GENERATED_AREA_ID = ${JSON.stringify(areaId)};`,
+        "// JSON ordering and formatting are deterministic generator output.",
+        "// prettier-ignore",
         `const SPEC = ${stableJson(canonical)};`,
         "",
         "export const GENERATED_AREA = createAreaDefinitionFromV2(SPEC);",
         ""
-    ].join("\n");
+    ].join("\r\n");
 }
 
 export function collectGeneratedOutputs({ manifest, specsByStageId }) {
@@ -46,7 +49,9 @@ export function collectGeneratedOutputs({ manifest, specsByStageId }) {
         if (spec.stage?.legacyStageAlias !== entry.stageId || spec.definition?.id !== entry.areaId) {
             throw new TypeError(`generated-spec-identity-mismatch:${entry.stageId}`);
         }
-        outputs.push(Object.freeze({ outputPath: generatedModulePath(entry), content: renderGeneratedAreaModule(spec) }));
+        outputs.push(
+            Object.freeze({ outputPath: generatedModulePath(entry), content: renderGeneratedAreaModule(spec) })
+        );
     }
     return Object.freeze(outputs);
 }

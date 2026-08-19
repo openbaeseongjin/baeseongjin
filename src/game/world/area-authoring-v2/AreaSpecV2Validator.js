@@ -1,4 +1,8 @@
-import { EMPTY_AREA_BEHAVIOR_REGISTRY, AreaBehaviorReferenceError, validateBehaviorRefs } from "./AreaBehaviorRegistry.js";
+import {
+    EMPTY_AREA_BEHAVIOR_REGISTRY,
+    AreaBehaviorReferenceError,
+    validateBehaviorRefs
+} from "./AreaBehaviorRegistry.js";
 import { AREA_SPEC_V2, EDITOR_EDITABLE_DOMAINS, EDITOR_READ_ONLY_DOMAINS } from "./AreaSpecV2.js";
 
 function freezeValue(value) {
@@ -57,7 +61,11 @@ function validateAnchor(issues, file, anchor, bounds, seenLandmarks, seenTargets
     }
     if (
         finitePoint(target) &&
-        (!bounds || target.x < -bounds.width * 0.5 || target.x > bounds.width * 0.5 || target.y < -bounds.height || target.y > 0)
+        (!bounds ||
+            target.x < -bounds.width * 0.5 ||
+            target.x > bounds.width * 0.5 ||
+            target.y < -bounds.height ||
+            target.y > 0)
     ) {
         issue(issues, file, "anchor-out-of-bounds", { id: landmark.id ?? null });
     }
@@ -65,8 +73,12 @@ function validateAnchor(issues, file, anchor, bounds, seenLandmarks, seenTargets
         ["target", target.properties ?? {}],
         ["landmark", landmark.properties ?? {}]
     ]) {
-        if (!isPlainObject(properties)) issue(issues, file, "anchor-properties-invalid", { id: landmark.id ?? null, label });
-        if (isPlainObject(properties) && ["id", "kind", "position", "vertices", "width", "height"].some((key) => key in properties)) {
+        if (!isPlainObject(properties))
+            issue(issues, file, "anchor-properties-invalid", { id: landmark.id ?? null, label });
+        if (
+            isPlainObject(properties) &&
+            ["id", "kind", "position", "vertices", "width", "height"].some((key) => key in properties)
+        ) {
             issue(issues, file, "anchor-properties-reserved", { id: landmark.id ?? null, label });
         }
     }
@@ -83,7 +95,8 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
         issue(issues, file, "spec-not-object");
         return freezeValue({ valid: false, issues });
     }
-    if (spec.schemaVersion !== AREA_SPEC_V2) issue(issues, file, "schema-version-invalid", { schemaVersion: spec.schemaVersion });
+    if (spec.schemaVersion !== AREA_SPEC_V2)
+        issue(issues, file, "schema-version-invalid", { schemaVersion: spec.schemaVersion });
 
     const stage = spec.stage;
     const definition = spec.definition;
@@ -92,18 +105,32 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
     } else {
         const expectedAreaId = `sector-${String(stage.sector).padStart(2, "0")}-${String(stage.stage).padStart(2, "0")}`;
         if (!/^\d+-\d+$/.test(stage.legacyStageAlias ?? "")) issue(issues, file, "stage-alias-invalid");
-        if (stage.sourceAreaId !== expectedAreaId) issue(issues, file, "stage-source-area-id", { expected: expectedAreaId });
+        if (stage.sourceAreaId !== expectedAreaId)
+            issue(issues, file, "stage-source-area-id", { expected: expectedAreaId });
     }
     if (!isPlainObject(definition)) {
         issue(issues, file, "definition-block-invalid");
     } else {
-        if (definition.id !== stage?.sourceAreaId) issue(issues, file, "definition-area-id", { expected: stage?.sourceAreaId });
-        if (!Number.isInteger(definition.order) || definition.order <= 0) issue(issues, file, "definition-order-invalid");
+        if (definition.id !== stage?.sourceAreaId)
+            issue(issues, file, "definition-area-id", { expected: stage?.sourceAreaId });
+        if (!Number.isInteger(definition.order) || definition.order <= 0)
+            issue(issues, file, "definition-order-invalid");
         if (!isPlainObject(definition.bounds) || definition.bounds.width <= 0 || definition.bounds.height <= 0) {
             issue(issues, file, "definition-bounds-invalid");
         }
-        if (!finitePoint(definition.entry) || !finitePoint(definition.exit)) issue(issues, file, "definition-entry-exit-invalid");
-        for (const key of ["surfaces", "routePoints", "recoveryPoints", "checkpoints", "objects", "objectives", "windZones", "scannerGroups", "cameraZones"]) {
+        if (!finitePoint(definition.entry) || !finitePoint(definition.exit))
+            issue(issues, file, "definition-entry-exit-invalid");
+        for (const key of [
+            "surfaces",
+            "routePoints",
+            "recoveryPoints",
+            "checkpoints",
+            "objects",
+            "objectives",
+            "windZones",
+            "scannerGroups",
+            "cameraZones"
+        ]) {
             if (!Array.isArray(definition[key])) issue(issues, file, "definition-collection-invalid", { key });
         }
     }
@@ -134,7 +161,8 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
     } else {
         const seenLandmarks = new Set();
         const seenTargets = new Set();
-        for (const anchor of spec.anchors) validateAnchor(issues, file, anchor, definition?.bounds, seenLandmarks, seenTargets);
+        for (const anchor of spec.anchors)
+            validateAnchor(issues, file, anchor, definition?.bounds, seenLandmarks, seenTargets);
     }
 
     try {

@@ -92,7 +92,10 @@ export function validateAreaCatalogManifest(
             sourcePathExists &&
             !sourcePathExists(entry.outputPath)
         ) {
-            issue(issues, "manifest-generated-output-missing", { stageId: entry.stageId, outputPath: entry.outputPath });
+            issue(issues, "manifest-generated-output-missing", {
+                stageId: entry.stageId,
+                outputPath: entry.outputPath
+            });
         }
         if (Object.hasOwn(entry, "overlay")) issue(issues, "manifest-overlay-forbidden", { stageId: entry.stageId });
     }

@@ -14,9 +14,16 @@ import {
     validateBehaviorRefs
 } from "../src/game/world/area-authoring-v2/AreaBehaviorRegistry.js";
 import { validateAreaSpecV2 } from "../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
-import { AREA_CATALOG_MANIFEST_V2, validateAreaCatalogManifest } from "../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
+import {
+    AREA_CATALOG_MANIFEST_V2,
+    validateAreaCatalogManifest
+} from "../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
 import { composeSectorCatalog } from "../src/game/world/area-authoring-v2/AreaCatalogComposer.js";
-import { collectGeneratedOutputs, generatedModulePath, renderGeneratedAreaModule } from "../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
+import {
+    collectGeneratedOutputs,
+    generatedModulePath,
+    renderGeneratedAreaModule
+} from "../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 import { GENERATED_AREA as generatedStage01 } from "../src/game/world/areas/generated/sector01/Sector01Stage01.generated.js";
 import { GENERATED_AREA as generatedStage07 } from "../src/game/world/areas/generated/sector01/Sector01Stage07.generated.js";
@@ -207,13 +214,12 @@ export function run() {
     const firstOutput = renderGeneratedAreaModule(validSpec);
     const secondOutput = renderGeneratedAreaModule(structuredClone(validSpec));
     assert.equal(firstOutput, secondOutput);
-    assert.match(firstOutput, /^\/\/ GENERATED FILE - DO NOT EDIT\n/);
+    assert.match(firstOutput, /^\/\/ GENERATED FILE - DO NOT EDIT\r?\n/);
     assert.match(firstOutput, /export const GENERATED_STAGE_ID = "1-1"/);
     assert.equal(generatedModulePath(manifest.stageSources[0]), manifest.stageSources[0].outputPath);
-    assert.deepEqual(
-        collectGeneratedOutputs({ manifest, specsByStageId: new Map([["1-1", validSpec]]) }),
-        [{ outputPath: manifest.stageSources[0].outputPath, content: firstOutput }]
-    );
+    assert.deepEqual(collectGeneratedOutputs({ manifest, specsByStageId: new Map([["1-1", validSpec]]) }), [
+        { outputPath: manifest.stageSources[0].outputPath, content: firstOutput }
+    ]);
 
     const sector01Manifest = readJson("docs/bsh/scenario/AREA-CATALOG.json");
     const sector01Stage01Spec = readJson("docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json");

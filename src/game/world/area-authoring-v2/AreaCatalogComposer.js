@@ -17,7 +17,8 @@ function indexAreas(areas, source) {
         if (typeof area?.id !== "string" || area.id.length === 0) {
             throw new AreaCatalogCompositionError(`${source}-area-id-invalid`);
         }
-        if (byAreaId.has(area.id)) throw new AreaCatalogCompositionError(`${source}-area-duplicate`, { areaId: area.id });
+        if (byAreaId.has(area.id))
+            throw new AreaCatalogCompositionError(`${source}-area-duplicate`, { areaId: area.id });
         byAreaId.set(area.id, area);
     }
     return byAreaId;
@@ -41,7 +42,8 @@ export function composeSectorCatalog({ id, revision, manifest, legacyAreas, gene
     }
 
     const areas = manifest.stageSources.map((entry) => {
-        const selected = entry.source === "legacy" ? legacyByAreaId.get(entry.areaId) : generatedByAreaId.get(entry.areaId);
+        const selected =
+            entry.source === "legacy" ? legacyByAreaId.get(entry.areaId) : generatedByAreaId.get(entry.areaId);
         if (!selected) throw new AreaCatalogCompositionError(`${entry.source}-area-missing`, { areaId: entry.areaId });
         return selected;
     });
