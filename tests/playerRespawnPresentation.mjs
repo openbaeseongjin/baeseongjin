@@ -61,6 +61,8 @@ export function run() {
         renderer: renderer(),
         authority: { playerId: "local-player" }
     });
+    assert.equal(multiplayer.setHudVisible(false), false);
+    assert.equal(multiplayer.hudVisible, false, "multiplayer HUD visibility must stay local to the owner client");
     multiplayer.camera = { x: 40, y: 50, zoom: 1, initialized: true };
     multiplayer.queuePlayerPresentationEvents([
         {

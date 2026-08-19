@@ -122,6 +122,8 @@ export function run() {
     });
     app.update(app.runner.dt, idleInput);
     app.update(app.runner.dt, idleInput);
+    assert.equal(app.setHudVisible(false), false);
+    assert.equal(app.hudVisible, false, "single-player HUD visibility must be presentation-only app state");
     assert.equal(
         app.previousRenderSnapshot.tick,
         1,

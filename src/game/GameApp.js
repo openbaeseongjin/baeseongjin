@@ -31,6 +31,7 @@ export class GameApp {
         worldSeed = selectWorldSeed(globalThis.location?.search),
         startAreaId = null,
         metricsVisible = false,
+        hudVisible = true,
         ropeTuning = null,
         debugAugmentIds = [],
         playerDefinition = null
@@ -53,6 +54,7 @@ export class GameApp {
         );
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = metricsVisible;
+        this.hudVisible = hudVisible !== false;
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
         this.camera = this.createCamera();
@@ -84,6 +86,11 @@ export class GameApp {
 
     setMetricsVisible(visible) {
         this.metricsVisible = Boolean(visible);
+    }
+
+    setHudVisible(visible) {
+        this.hudVisible = Boolean(visible);
+        return this.hudVisible;
     }
 
     applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
@@ -237,6 +244,7 @@ export class GameApp {
             stats: this.stats,
             mobileView: this.mobileView,
             metricsVisible: this.metricsVisible,
+            hudVisible: this.hudVisible,
             mobileControls: {
                 ...this.latestInput.mobileControls,
                 visible: this.mobileView || this.latestInput.mobileControls.visible

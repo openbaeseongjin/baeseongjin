@@ -218,6 +218,7 @@ class Player extends RopeAttachable(GameObject) {}
 - `draw()` 안에서 입력 처리, 물리 진행, 랜덤 추출, event 발행을 하지 않는다.
 - 월드 객체별 그리기 함수는 좌표 변환이나 DPR 보정을 중복하지 않는다.
 - 공통 Canvas 호스트는 context, DPR·resize, 좌표 변환, HUD·오버레이를 소유하고 월드 표현은 선택된 scene renderer에 한 번 위임한다.
+- 고정 HUD의 표시 토글은 각 클라이언트의 표현 상태로만 두고 게임 명령·시뮬레이션·네트워크 snapshot에 넣지 않는다. 모바일·짧은 가로 viewport의 고정 HUD는 별도 gameplay 정보를 줄이지 않고 축소 레이아웃을 사용하며, 토글은 고정 상태·objective 패널과 하단 조작 안내를 함께 숨긴다. 토글 중에도 Player HP·Action cooldown과 Enemy HP의 머리 위 bar는 유지한다.
 - 렌더 프로필은 bootstrap factory 경계에서만 선택한다. 앱·시뮬레이션·네트워크 snapshot에 프로필별 타입 분기나 스프라이트 자산 계약을 추가하지 않는다.
 - 현재 기본 프로필은 `sprite`다. 기존 표현은 `?renderer=polygon`으로 유지하며 두 프로필은 같은 읽기 전용 scene snapshot을 소비하고 polygon renderer를 내부 모드 분기로 확장하지 않는다.
 - 시각 효과에 시간 상태가 필요하면 렌더러가 임의로 게임 시간을 만들지 않고 명시적인 render clock 또는 snapshot 값을 받는다.

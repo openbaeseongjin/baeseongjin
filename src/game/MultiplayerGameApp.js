@@ -58,6 +58,7 @@ export class MultiplayerGameApp {
         onDiagnostics = () => {},
         audioBindings = null,
         metricsVisible = false,
+        hudVisible = true,
         playerDefinition = null
     }) {
         this.renderer = renderer
@@ -71,6 +72,7 @@ export class MultiplayerGameApp {
         this.disconnectHandled = false;
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = metricsVisible;
+        this.hudVisible = hudVisible !== false;
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
         this.camera = {
@@ -132,6 +134,11 @@ export class MultiplayerGameApp {
 
     setMetricsVisible(visible) {
         this.metricsVisible = Boolean(visible);
+    }
+
+    setHudVisible(visible) {
+        this.hudVisible = Boolean(visible);
+        return this.hudVisible;
     }
 
     applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
@@ -529,6 +536,7 @@ export class MultiplayerGameApp {
             stats: this.stats,
             mobileView: this.mobileView,
             metricsVisible: this.metricsVisible,
+            hudVisible: this.hudVisible,
             metrics: remote.state.metrics,
             networkMetrics,
             mobileControls: {
