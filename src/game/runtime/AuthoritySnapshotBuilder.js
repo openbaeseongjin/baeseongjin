@@ -43,6 +43,7 @@ export function buildAuthoritySnapshot({
             runState: simulation.runState,
             metrics: simulation.metrics.snapshot(),
             worldProgress: simulation.worldProgress?.snapshot() ?? null,
+            bossRuntime: simulation.bossRuntime?.snapshot() ?? null,
             worldElapsedSeconds: simulation.elapsedSeconds,
             windStates: simulation.snapshot().windStates,
             completed: simulation.runState === "completed"
