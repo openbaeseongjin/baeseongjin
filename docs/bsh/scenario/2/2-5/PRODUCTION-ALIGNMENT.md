@@ -88,3 +88,31 @@ Status:
 NOT IMPLEMENTED.
 
 Do not fake as System Toast.
+
+## Runtime implementation (2026-08-19)
+
+`Sector02AreaCatalog.js` area05 rewritten in full against REV8.0: bounds 1984x704, entry
+(-864,-32), horizontal PUBLIC FUNNEL -> PRESSURE NECK -> SAFE GATE STORY -> SERVICE HATCH ->
+DROP 1 -> MAINTENANCE SHELF -> DROP 2 -> LOW EXIT, replacing the old 1280x1152 mostly-vertical
+climb. All 7 grip points are unlabeled `structural-grapple-target` grips (no visible landmark
+object authored for any of them in the package). Both Commit Drop dividers implemented as real
+static/non-grappleable solid walls (not visual-only) using the confirmed center-point convention
+(`bottom = centerY + height/2`) - they physically prevent walking from a miss-Recovery into the
+next successful phase, matching RUNTIME-HANDOFF's "Recovery is mercy, not challenge bypass".
+Sealed Gate preserved with `opensInStage:false`/`narrativeLock:true`/`grappleable:false` - no
+override interaction exists. `pooledSentry()` gained an optional `rules` override so the Access
+Carrier B slot could carry its exact authored rule set (`kill-optional-for-stage-exit` +
+`kill-required-for-access-module`, distinct from every other Sector 02 sentry's plain
+`kill-optional`).
+
+## Patrol vertical-segment verification (resolves HYPOTHESIS above)
+
+`patrolDrone()`/the underlying `EnemyPatrol` runtime accept arbitrary two-point segments with no
+axis restriction - the vertical path `(-288,-160)<->(-288,-368)` was implemented as authored with
+no fallback needed. Verified via `npm test`'s full multiplayer/gameplay simulation passing with
+this exact vertical patrol in place (not just a static assertion - the patrol actually steps
+through simulated ticks). Status upgraded from HYPOTHESIS to VERIFIED.
+
+`npm run check` (2-5 clean)/`npm test` (7 scenario groups) pass.
+
+Player Bark layer: still absent - approved Bark remains NOT IMPLEMENTED.

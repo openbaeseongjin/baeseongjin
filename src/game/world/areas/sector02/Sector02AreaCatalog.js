@@ -114,13 +114,25 @@ const SECTOR_02_LATE_POOL = Object.freeze([
     "artillery-drone-t1"
 ]);
 
-function pooledSentry(areaId, id, x, y, allowedEnemyTypes, { width = 640, height = 480, accessModuleId = null } = {}) {
+function pooledSentry(
+    areaId,
+    id,
+    x,
+    y,
+    allowedEnemyTypes,
+    {
+        width = 640,
+        height = 480,
+        accessModuleId = null,
+        rules = ["kill-optional", "no-rope-cut", "activation-band-only"]
+    } = {}
+) {
     return worldObject(`${areaId}:${id}`, "sentry", x, y, {
         enemyType: "sentry-t1",
         enemySelection: { allowedEnemyTypes },
         ...(accessModuleId ? { accessModuleId } : {}),
         activationSpec: objectTriggerSpec("center", width, height),
-        rules: ["kill-optional", "no-rope-cut", "activation-band-only"]
+        rules
     });
 }
 
@@ -539,18 +551,28 @@ const area04 = defineArea({
 
 const block05 = exitBlock({
     areaId: "sector-02-05",
-    deckX: 464,
-    deckTopY: -1027,
-    deckWidth: 288,
+    deckX: 80,
+    deckTopY: -64,
+    deckWidth: 256,
     nextAreaId: "sector-02-06",
     panelObjectiveId: "sector-02-05:exit-panel-engaged",
     panelProperties: { requiredObjectiveIds: ["sector-02-05:exit-reached"] }
 });
 
 const area05Id = "sector-02-05";
-const area05Landmarks = [landmark(area05Id, "g4", 256, 384, -576)];
-const area05Exit = point(`${area05Id}:exit`, 464, -1088);
-const area05Objective = reachExitObjective(area05Id, area05Exit.x, area05Exit.y);
+// REV8.0: PUBLIC FUNNEL -> G1/G2/G3/G4 PRESSURE NECK -> SAFE GATE STORY -> SERVICE HATCH ->
+// DROP 1 -> MAINTENANCE SHELF -> DROP 2 -> LOW EXIT. The public Gate never opens in 2-5. All 7
+// grips are unlabeled structural-grapple-target (no matching visible landmark object authored).
+const area05Grips = {
+    g1: structuralGrip(area05Id, "g1-surface", -560, -224),
+    g2: structuralGrip(area05Id, "g2-surface", -192, -320),
+    g3: structuralGrip(area05Id, "g3-surface", 160, -384),
+    g4: structuralGrip(area05Id, "g4-surface", 512, -448),
+    g5: structuralGrip(area05Id, "g5-surface", 464, -336),
+    accessAnchor: structuralGrip(area05Id, "access-anchor-surface", 320, -320),
+    g6: structuralGrip(area05Id, "g6-surface", 96, -96)
+};
+const area05Objective = reachExitObjective(area05Id, block05.exit.x, block05.exit.y);
 const area05PanelObjective = exitPanelObjective(area05Id, [area05Objective.id]);
 const area05 = defineArea({
     id: area05Id,
@@ -558,59 +580,87 @@ const area05 = defineArea({
     order: 5,
     name: "EVACUATION WALKWAY",
     subtitle: "UPPER TRANSIT RESTRICTED",
-    bounds: { width: 1280, height: 1152 },
-    entry: point(`${area05Id}:entry`, -480, -32),
+    bounds: { width: 1984, height: 704 },
+    entry: point(`${area05Id}:entry`, -864, -32),
     exit: block05.exit,
     nextAreaId: "sector-02-06",
     surfaces: [
-        platform(area05Id, "p0", -608, -352, 0),
-        platform(area05Id, "p1", -512, -192, -160),
-        platform(area05Id, "s1", -512, -192, -352, "safe-deck"),
-        platform(area05Id, "p2", -256, 448, -448),
-        platform(area05Id, "p3", 224, 512, -672),
-        rectangle(`${area05Id}:upper-transit-blockade`, 544, -416, 64, 320, {
-            kind: "sealed-door",
-            oneWay: false,
+        horizontalSurface(area05Id, "p0", -832, 0, 320, 32, "platform"),
+        horizontalSurface(area05Id, "assembly-concourse", -640, -128, 384, 24, "platform"),
+        horizontalSurface(area05Id, "queue-shelf-a", -448, -256, 192, 20, "platform"),
+        horizontalSurface(area05Id, "public-recovery", -96, -192, 256, 18, "recovery"),
+        horizontalSurface(area05Id, "transit-neck", 160, -416, 128, 20, "platform"),
+        horizontalSurface(area05Id, "story-forecourt", 576, -480, 256, 24, "safe-deck"),
+        horizontalSurface(area05Id, "service-hatch-lip", 720, -576, 96, 18, "platform"),
+        horizontalSurface(area05Id, "maintenance-shelf", 432, -272, 128, 20, "platform"),
+        horizontalSurface(area05Id, "drop1-recovery", 688, -160, 192, 18, "recovery"),
+        // Real gameplay dividers (not visual only) - mercy for a missed Drop, not a challenge
+        // bypass: block walking from Recovery into the successful route. Tall (height>width) so
+        // bottom-center anchor is required; AREA-SPEC's (x,y) is the shape's center.
+        rectangle(`${area05Id}:drop1-divider`, 532, -200 + 136, 24, 272, {
+            kind: "solid",
             grappleable: false,
+            oneWay: false,
             coordinateAnchor: "bottom-center"
         }),
-        platform(area05Id, "r1", 64, 320, -832, "recovery"),
-        platform(area05Id, "p4", 32, 320, -1024),
+        horizontalSurface(area05Id, "carrier-alcove", 208, -272, 160, 20, "platform"),
+        horizontalSurface(area05Id, "drop2-recovery", 384, -80, 160, 16, "recovery"),
+        rectangle(`${area05Id}:drop2-divider`, 244, -88 + 88, 24, 176, {
+            kind: "solid",
+            grappleable: false,
+            oneWay: false,
+            coordinateAnchor: "bottom-center"
+        }),
         block05.deck,
-        ...area05Landmarks.map(({ surface }) => surface)
+        ...Object.values(area05Grips)
     ],
     routePoints: [
-        point(`${area05Id}:route-entry`, -480, -32),
-        point(`${area05Id}:route-p1`, -352, -160),
-        point(`${area05Id}:route-s1`, -352, -352),
-        point(`${area05Id}:route-p2`, 96, -448),
-        point(`${area05Id}:route-p3`, 368, -672),
-        point(`${area05Id}:route-r1`, 192, -832),
-        point(`${area05Id}:route-p4`, 176, -1024),
+        point(`${area05Id}:route-entry`, -864, -32),
+        point(`${area05Id}:route-assembly`, -640, -128),
+        point(`${area05Id}:route-g1`, -560, -224),
+        point(`${area05Id}:route-queue-a`, -448, -256),
+        point(`${area05Id}:route-g2`, -192, -320),
+        point(`${area05Id}:route-g3`, 160, -384),
+        point(`${area05Id}:route-g4`, 512, -448),
+        point(`${area05Id}:route-story-forecourt`, 576, -480),
+        point(`${area05Id}:route-service-hatch`, 720, -558),
+        point(`${area05Id}:route-g5`, 464, -336),
+        point(`${area05Id}:route-maintenance-shelf`, 432, -272),
+        point(`${area05Id}:route-g6`, 96, -96),
         block05.routeExit
     ],
-    recoveryPoints: [point(`${area05Id}:recovery-s1`, -352, -376), point(`${area05Id}:recovery-r1`, 192, -856)],
+    recoveryPoints: [
+        point(`${area05Id}:recovery-point-public`, -96, -210),
+        point(`${area05Id}:recovery-point-drop1`, 688, -178),
+        point(`${area05Id}:recovery-point-drop2`, 384, -96)
+    ],
     objects: [
-        ...area05Landmarks.map(({ object }) => object),
-        patrolDrone(area05Id, "drone-1", -320, -512, triggerBounds(-576, -720, 1056, 480), [
-            { x: -320, y: -512 },
-            { x: 352, y: -512 }
+        // Preserve exact Patrol contract, reoriented to a vertical segment.
+        patrolDrone(area05Id, "drone-1", -288, -264, triggerBounds(-448, -496, 320, 464), [
+            { x: -288, y: -160 },
+            { x: -288, y: -368 }
         ]),
-        pooledSentry(area05Id, "assembly-guard", 96, -448, SECTOR_02_SUPPORT_POOL, {
-            width: 512,
-            height: 384
+        // Support Pool assembly guard, transit-neck phase only, kill optional, no Story pressure.
+        pooledSentry(area05Id, "assembly-guard", 288, -416, SECTOR_02_SUPPORT_POOL, {
+            width: 320,
+            height: 320
         }),
-        pooledSentry(area05Id, "upper-transit-guard", 368, -832, SECTOR_02_LATE_POOL, {
-            width: 480,
-            height: 448,
-            accessModuleId: "sector-02:access-module:b"
+        // Late Pool Access Carrier B: kill required for Module B, but never gates the local exit.
+        pooledSentry(area05Id, "upper-transit-guard", 208, -272, SECTOR_02_LATE_POOL, {
+            width: 320,
+            height: 288,
+            accessModuleId: "sector-02:access-module:b",
+            rules: ["kill-optional-for-stage-exit", "kill-required-for-access-module", "no-rope-cut", "activation-band-only"]
         }),
-        worldObject(`${area05Id}:upper-transit-gate`, "gate", 544, -576, {
+        // Sealed public Gate - never opens in 2-5, no override interaction.
+        worldObject(`${area05Id}:upper-transit-gate`, "gate", 788, -480, {
             coordinateAnchor: "center",
             narrativeLock: true,
+            grappleable: false,
+            opensInStage: false,
             cueIds: ["upper-transit-restricted", "transfer-authorization-pending"]
         }),
-        worldObject(`${area05Id}:evacuation-status`, "story-display", 352, -704, {
+        worldObject(`${area05Id}:evacuation-status`, "story-display", 608, -544, {
             cueIds: ["assembly-complete", "transfer-authorization-pending", "upper-transit-restricted"]
         }),
         block05.panel,
@@ -619,7 +669,7 @@ const area05 = defineArea({
     objectives: [area05Objective, area05PanelObjective],
     gate: block05.gate,
     storyTriggers: ["assembly-complete", "upper-transit-restricted", "maintenance-bypass"],
-    routes: ["safe", "flow", "pressure", "maintenance-bypass", "recovery"],
+    routes: ["main", "access", "recovery"],
     cueIds: ["evacuation-walkway", "assembly-complete", "upper-transit-restricted", "maintenance-bypass"]
 });
 
