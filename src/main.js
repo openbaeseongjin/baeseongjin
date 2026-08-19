@@ -32,6 +32,7 @@ let playerDefinition = null;
 let authoredAreaEnvironmentDefinitions = Object.freeze({});
 
 let app = null;
+let hudVisible = true;
 let launching = false;
 let pageClosing = false;
 let audioHost = null;
@@ -43,6 +44,7 @@ const modeMenu = new GameModeMenu(document.getElementById("game-mode-menu"));
 const startupLoadingScreen = new StartupUpdateLoadingScreen(document.getElementById("startup-update-loading"));
 const channelBadge = document.getElementById("channel-badge");
 const audioResumeNotice = document.getElementById("audio-resume-notice");
+const hudToggle = document.getElementById("hud-toggle");
 let activeChannelId = null;
 let audioStorage = null;
 try {
@@ -55,6 +57,14 @@ const settingsMenu = new SettingsMenu({
     root: document.getElementById("settings-dialog"),
     trigger: document.getElementById("settings-trigger")
 });
+function applyHudVisibility(visible) {
+    hudVisible = Boolean(visible);
+    app?.setHudVisible?.(hudVisible);
+    document.body.classList.toggle("hud-hidden", !hudVisible);
+    hudToggle.textContent = hudVisible ? "HUD 숨김" : "HUD 표시";
+    hudToggle.setAttribute("aria-pressed", String(hudVisible));
+}
+hudToggle.addEventListener("click", () => applyHudVisibility(!hudVisible));
 const debugAreaIds = CURRENT_AUTHORED_AREA_CATALOG.areas.map(({ id }) => id);
 const debugSettings = new DebugSettings({ storage: audioStorage, validAreaIds: debugAreaIds });
 let debugTabRegistered = false;
@@ -147,6 +157,7 @@ function createSingleGameApp(debug) {
         onDiagnostics: updateDiagnostics,
         startAreaId: debug.startAreaId ?? undefined,
         metricsVisible: debug.metrics,
+        hudVisible,
         ropeTuning: debug.ropeTuning,
         debugAugmentIds: debug.debugAugmentIds
     });
@@ -224,7 +235,8 @@ async function launch() {
                     playerDefinition,
                     onDisconnect: returnToMenu,
                     onDiagnostics: updateDiagnostics,
-                    metricsVisible: debug.metrics
+                    metricsVisible: debug.metrics,
+                    hudVisible
                 });
                 channelBadge.textContent = `채널 ${authority.channelId}`;
                 channelBadge.hidden = false;

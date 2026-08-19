@@ -67,6 +67,9 @@
                 pointer-events: none;
                 user-select: none;
             }
+            .hud-hidden .controls-hint {
+                display: none;
+            }
             .version-badge {
                 position: fixed;
                 right: max(8px, env(safe-area-inset-right));
@@ -299,6 +302,24 @@
                 background: linear-gradient(90deg, #67e8f9 0%, #22d3ee 100%);
                 animation: debug-hold-progress 1s linear forwards;
                 transform-origin: left;
+            }
+            .hud-toggle {
+                left: max(72px, calc(env(safe-area-inset-left) + 72px));
+                min-width: 82px;
+                border-color: rgba(103, 232, 249, 0.55);
+            }
+            @media (pointer: coarse) {
+                .controls-hint {
+                    display: none;
+                }
+                .settings-trigger {
+                    min-height: 36px;
+                    padding: 0 10px;
+                }
+                .hud-toggle {
+                    left: max(66px, calc(env(safe-area-inset-left) + 66px));
+                    min-width: 74px;
+                }
             }
             @keyframes debug-hold-progress {
                 from {
@@ -682,6 +703,9 @@
                 aria-describedby="controls-description"
             ></canvas>
             <button class="settings-trigger" id="settings-trigger" type="button" aria-haspopup="dialog">설정</button>
+            <button class="settings-trigger hud-toggle" id="hud-toggle" type="button" aria-pressed="true">
+                HUD 숨김
+            </button>
             <section
                 class="settings-dialog"
                 id="settings-dialog"
@@ -887,7 +911,7 @@
                     <button type="button" data-install-action>앱 설치</button>
                 </div>
             </section>
-            <output class="version-badge" id="app-version" data-version="0.39.0" aria-label="배포 버전">v0.39.0</output>
+            <output class="version-badge" id="app-version" data-version="0.40.0" aria-label="배포 버전">v0.40.0</output>
         </main>
         <noscript><p>이 게임을 실행하려면 JavaScript가 필요합니다.</p></noscript>
         <script type="module" src="./src/main.js"></script>

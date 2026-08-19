@@ -192,7 +192,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 스윙 드래그 임계값은 고정 픽셀이 아니라 현재 Canvas의 짧은 변에 대한 비율로 계산한다. 화면 크기는 `PlayerCommand.viewport`에 포함되어 권한 주체에서도 같은 판정을 재현한다.
 - 활성 로프 드래그가 브라우저 상단 UI로 빠지는 `pointerleave`, `pointercancel`, 창 포커스 상실 또는 문서 숨김으로 끝나면 로프 유지가 아니라 사용자의 해제 의도로 처리한다. 입력 상태를 먼저 정리하고, 렌더 프레임이 멈추기 전에 싱글의 공용 시뮬레이션과 멀티의 로컬 예측·즉시 전송을 한 번 실행한다. 화면 안의 정상 `pointerup`은 기존 고정 스텝에서 처리한다.
 
-모바일 coarse pointer 환경은 Full HD `1920×1080` 데스크톱 기준 viewport를 화면 안에 맞추기 위해 현재 CSS 가로·세로 비율 중 작은 값을 기본 카메라 배율로 사용하고 `1.0`을 상한으로 둔다. 기존 Area/landmark의 authored `mobileZoom`은 절대 배율이 아니라 `0.72 = 기준 Shot 1.0`인 상대 비율로 합성해 구간별 확대·축소 의도를 보존한다. 싱글·멀티와 화면→월드 좌표 변환은 같은 최종 배율을 사용하며, 플레이 공간을 확보하기 위해 데스크톱용 상단 상태 HUD는 그리지 않는다.
+모바일 coarse pointer 환경은 Full HD `1920×1080` 데스크톱 기준 viewport를 화면 안에 맞추기 위해 현재 CSS 가로·세로 비율 중 작은 값을 기본 카메라 배율로 사용하고 `1.0`을 상한으로 둔다. 기존 Area/landmark의 authored `mobileZoom`은 절대 배율이 아니라 `0.72 = 기준 Shot 1.0`인 상대 비율로 합성해 구간별 확대·축소 의도를 보존한다. 싱글·멀티와 화면→월드 좌표 변환은 같은 최종 배율을 사용한다. coarse pointer 또는 900×500 이하의 짧은 가로 viewport에서 고정 상태 HUD는 240×92px 포맷으로 그리며, 모바일에서는 Canvas 조작 버튼과 중복되는 하단 조작 안내를 표시하지 않는다.
 
 ## 연속 Sector Runtime 계약
 
@@ -222,7 +222,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `RewardSelection`은 세 explicit Node에서 동일한 결정적 3장 offer의 카드 이동·Confirm·진입 Input Gate를 공유한다. 고정 Foundation/Specialization tier를 별도 선택 시스템으로 복구하지 않는다.
 - `FoundationAugmentState`라는 호환 class 이름은 Player별 최대 6장 generic loadout, consumed source와 순간 runtime window를 소유한다. 카드 효과는 기존 Rope/Action 사건에서 한 번만 판정하고 이름과 무관한 전역 분기를 추가하지 않는다.
 - `interact-choice`는 개인 chooser 요청을 만들고 현재 채널 Player 전원의 해당 source 소비가 끝나면 공유 objective를 한 번 완료한다. 완료 뒤 합류 Player도 같은 Node에서 자기 chooser를 열 수 있으며 선택 카드·consumed source는 개인 부활·재접속·전원 사망 뒤 유지된다.
-- 고정 HUD는 local Player의 좌표 기반 Stage, HP, 다음 Action charge cooldown과 generic Augment를 표시한다. local/remote Player 머리 위에는 HP+cooldown 두 bar를, viewport 내 모든 Enemy 머리 위에는 HP bar를 항상 표시한다. fixed/overhead cooldown은 같은 resolver의 `rechargeRemaining/rechargeDuration`과 `chargesRemaining/maxCharges`를 사용한다.
+- 고정 HUD는 local Player의 좌표 기반 Stage, HP, 다음 Action charge cooldown과 generic Augment를 표시한다. 데스크톱·모바일 공통 `HUD 숨김/표시` 버튼은 이 고정 상태 HUD, Access 패널과 하단 조작 안내를 함께 토글하며 기본값은 표시다. 이 값은 각 클라이언트의 표현 상태로만 소유하고 gameplay command나 network snapshot에 넣지 않는다. local/remote Player 머리 위에는 HP+cooldown 두 bar를, viewport 내 모든 Enemy 머리 위에는 HP bar를 토글과 무관하게 항상 표시한다. fixed/overhead cooldown은 같은 resolver의 `rechargeRemaining/rechargeDuration`과 `chargesRemaining/maxCharges`를 사용한다.
 - `SectorProgressController`는 모든 objective를 전역 Stage cursor 없이 자기 trigger/source와 prerequisite로 평가한다. savepoint는 모든 anchor를 같은 collision resolver로 검사하고 낮은 checkpoint 재접촉은 Player anchor를 후퇴시키지 않는다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
 - `PlayerCommandBatch`는 목표 틱과 플레이어별 단조 증가 `sequence`를 보존하고 플레이어 ID 순으로 정규화하는 전송 계약이다. 권위 서버는 이 순서 번호로 중복·역순 입력을 거부한다.

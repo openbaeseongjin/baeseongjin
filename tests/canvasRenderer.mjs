@@ -18,13 +18,14 @@ export function run() {
         arc() {},
         fill() {},
         stroke() {},
+        setTransform() {},
         fillText: (text) => textCalls.push(text),
         strokeRect: (...args) => borderCalls.push(args),
         measureText: (text) => ({ width: String(text).length * 6 })
     };
     const canvas = {
         getContext: () => context,
-        getBoundingClientRect: () => ({ left: 10, top: 20 })
+        getBoundingClientRect: () => ({ left: 10, top: 20, width: 844, height: 390 })
     };
     const renderer = new CanvasRenderer(canvas, new PolygonSceneRenderer());
     assert.deepEqual(
@@ -75,6 +76,43 @@ export function run() {
     assert.ok(textCalls.includes("ACTION"));
     assert.ok(textCalls.includes("1/2"));
     assert.ok(textCalls.some((text) => String(text).startsWith("증강 ")));
+    textCalls.length = 0;
+    borderCalls.length = 0;
+    renderer.drawLocalStatusHud({
+        world: { landmarks: [] },
+        player: { position: { x: 0, y: 0 } },
+        playerHealth: 100,
+        playerMaxHealth: 100,
+        actionState: { loadout: { modifierIds: [] }, chargesRemaining: 1 },
+        selectedAugmentIds: [],
+        mobileView: false
+    });
+    assert.deepEqual(
+        borderCalls[0],
+        [18, 54, 240, 92],
+        "mobile-sized landscape viewports must use the compact HUD even without coarse pointer emulation"
+    );
+
+    let sceneDraws = 0;
+    let localHudDraws = 0;
+    let accessHudDraws = 0;
+    const visibilityRenderer = new CanvasRenderer(canvas, { profile: "test", draw: () => sceneDraws++ });
+    visibilityRenderer.drawLocalStatusHud = () => localHudDraws++;
+    visibilityRenderer.drawAccessHud = () => accessHudDraws++;
+    visibilityRenderer.drawRewardSelectionOverlay = () => {};
+    visibilityRenderer.drawMobileControls = () => {};
+    visibilityRenderer.drawStoryPresentation = () => {};
+    visibilityRenderer.drawStatusFeedback = () => {};
+    visibilityRenderer.drawRopeCutFeedback = () => {};
+    visibilityRenderer.drawRunEndOverlay = () => {};
+    visibilityRenderer.draw({ camera: { x: 0, y: 0, zoom: 1 }, hudVisible: false });
+    assert.equal(sceneDraws, 1, "hiding the fixed HUD must not hide the world or overhead actor bars");
+    assert.equal(localHudDraws, 0);
+    assert.equal(accessHudDraws, 0);
+    visibilityRenderer.draw({ camera: { x: 0, y: 0, zoom: 1 }, hudVisible: true });
+    assert.equal(localHudDraws, 1);
+    assert.equal(accessHudDraws, 1);
+
     textCalls.length = 0;
     fillCalls.length = 0;
     new ActorStatusRenderer().draw({

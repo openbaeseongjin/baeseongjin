@@ -87,8 +87,10 @@ export class CanvasRenderer {
             renderStats,
             presentationTimeSeconds: this.now()
         });
-        this.drawLocalStatusHud(scene);
-        this.drawAccessHud(scene);
+        if (scene.hudVisible !== false) {
+            this.drawLocalStatusHud(scene);
+            this.drawAccessHud(scene);
+        }
         this.drawRewardSelectionOverlay(scene.foundationReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawStoryPresentation(scene.storyPresentation);
@@ -241,11 +243,19 @@ export class CanvasRenderer {
         mobileView = false
     }) {
         const ctx = this.context;
-        const width = mobileView ? Math.min(330, this.cssWidth - 36) : 360;
+        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+        const width = compactView ? Math.min(240, this.cssWidth - 36) : 360;
         const x = 18;
         const y = 54;
-        const height = 112;
+        const height = compactView ? 92 : 112;
         const innerWidth = width - 28;
+        const stageY = y + (compactView ? 16 : 19);
+        const healthLabelY = y + (compactView ? 31 : 38);
+        const healthBarY = y + (compactView ? 35 : 43);
+        const actionLabelY = y + (compactView ? 53 : 67);
+        const actionBarY = y + (compactView ? 57 : 72);
+        const augmentY = y + (compactView ? 83 : 101);
+        const barHeight = compactView ? 7 : 9;
         const health = resolveHealthStatus(playerHealth, playerMaxHealth);
         const action = resolveActionCooldownStatus(actionState);
         const region = authoredRegionForPosition(world, player?.position);
@@ -262,35 +272,35 @@ export class CanvasRenderer {
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y, width, height);
         ctx.fillStyle = "#d9f4ff";
-        ctx.font = "900 12px ui-monospace, monospace";
+        ctx.font = `900 ${compactView ? 10 : 12}px ui-monospace, monospace`;
         ctx.textAlign = "left";
-        ctx.fillText(`STAGE ${stage}`, x + 14, y + 19);
+        ctx.fillText(`STAGE ${stage}`, x + 14, stageY);
 
         ctx.fillStyle = "#f8fafc";
-        ctx.font = "800 10px system-ui, sans-serif";
-        ctx.fillText("HP", x + 14, y + 38);
+        ctx.font = `800 ${compactView ? 9 : 10}px system-ui, sans-serif`;
+        ctx.fillText("HP", x + 14, healthLabelY);
         ctx.textAlign = "right";
-        ctx.fillText(`${Math.round(health.current)} / ${Math.round(health.maximum)}`, x + width - 14, y + 38);
+        ctx.fillText(`${Math.round(health.current)} / ${Math.round(health.maximum)}`, x + width - 14, healthLabelY);
         ctx.textAlign = "left";
         ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
-        ctx.fillRect(x + 14, y + 43, innerWidth, 9);
+        ctx.fillRect(x + 14, healthBarY, innerWidth, barHeight);
         ctx.fillStyle = health.ratio > 0.35 ? ACTOR_STATUS_COLORS.healthSafe : ACTOR_STATUS_COLORS.healthDanger;
-        ctx.fillRect(x + 14, y + 43, innerWidth * health.ratio, 9);
+        ctx.fillRect(x + 14, healthBarY, innerWidth * health.ratio, barHeight);
 
         ctx.fillStyle = "#f8fafc";
-        ctx.fillText("ACTION", x + 14, y + 67);
+        ctx.fillText("ACTION", x + 14, actionLabelY);
         ctx.textAlign = "right";
-        ctx.fillText(`${action.charges}/${action.maximum}`, x + width - 14, y + 67);
+        ctx.fillText(`${action.charges}/${action.maximum}`, x + width - 14, actionLabelY);
         ctx.textAlign = "left";
         ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
-        ctx.fillRect(x + 14, y + 72, innerWidth, 9);
+        ctx.fillRect(x + 14, actionBarY, innerWidth, barHeight);
         ctx.fillStyle = ACTOR_STATUS_COLORS.actionReady;
-        ctx.fillRect(x + 14, y + 72, innerWidth * action.ratio, 9);
+        ctx.fillRect(x + 14, actionBarY, innerWidth * action.ratio, barHeight);
 
         ctx.fillStyle = "#cbd5e1";
-        ctx.font = "700 9px system-ui, sans-serif";
+        ctx.font = `700 ${compactView ? 8 : 9}px system-ui, sans-serif`;
         const augmentText = augmentNames || "없음";
-        ctx.fillText(`증강 ${augmentText}`, x + 14, y + 101, innerWidth);
+        ctx.fillText(`증강 ${augmentText}`, x + 14, augmentY, innerWidth);
         ctx.restore();
     }
 
@@ -582,9 +592,10 @@ export class CanvasRenderer {
         const moduleIds = sector.accessModuleIds ?? [];
         const collected = new Set(worldProgress.collectedAccessModuleIds ?? []);
         const remaining = moduleIds.filter((id) => !collected.has(id));
+        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
         const x = 18;
-        const y = 178;
-        const width = mobileView ? Math.min(300, this.cssWidth - 36) : 300;
+        const y = compactView ? 156 : 178;
+        const width = compactView ? Math.min(240, this.cssWidth - 36) : 300;
         const height = remaining.length ? 54 : 34;
         const hint = world.accessModules.find(({ id }) => id === remaining[0])?.hint;
         const ctx = this.context;
