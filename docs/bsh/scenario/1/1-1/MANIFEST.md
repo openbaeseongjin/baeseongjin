@@ -1,0 +1,15 @@
+# 1-1 MANIFEST — REV8.0
+
+- README.md
+- AREA-SPEC.json
+- DIRECTION-SPEC.json
+- MAP-PREVIEW.html
+- STORY-DIRECTION-PREVIEW.html
+- PRODUCTION-ALIGNMENT.md
+- RUNTIME-HANDOFF.md
+- VALIDATION.md
+- ASSET-REQUIREMENTS.md
+- MANIFEST.md
+
+Geometry authority: REV8.0.
+REV7.0 geometry is superseded.

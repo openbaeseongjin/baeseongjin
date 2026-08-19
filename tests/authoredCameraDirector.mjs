@@ -21,12 +21,14 @@ export function run() {
     assert.ok(Math.abs(resolveMobileCameraZoom(0.82, mobileViewport) - mobileViewportFit * (0.82 / 0.72)) < 1e-9);
     const world = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 42, floorY: 560 });
     const area = world.areas[0];
+    // REV8.0 geometry (docs/bsh/scenario/1/1-1/AREA-SPEC.json camera.zones): "release-corridor" was
+    // renamed "cross-back" and zoom values were rescaled for the wider 1280x1024 bounds.
     const cases = [
         [-32, "intro", 1.25, 0.82, 0.46],
-        [-224, "first-hook", 1.2, 0.8, 0.58],
-        [-480, "release-corridor", 1.1, 0.76, 0.58],
-        [-704, "open-swing", 1, 0.72, 0.58],
-        [-896, "terminal", 1.15, 0.78, 0.58]
+        [-224, "first-hook", 1.16, 0.79, 0.58],
+        [-480, "cross-back", 1.06, 0.75, 0.58],
+        [-704, "open-swing", 0.96, 0.7, 0.58],
+        [-960, "terminal", 1.12, 0.77, 0.58]
     ];
 
     for (const [localY, zoneId, desktopZoom, mobileZoom, verticalPlayerRatio] of cases) {
