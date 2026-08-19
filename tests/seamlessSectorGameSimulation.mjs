@@ -12,8 +12,6 @@ function completeLandmark(progress, world, landmarkId) {
         }
         progress.completeObjective(objectiveId);
     }
-    const route = world.routeLocks.find(({ sourceLandmarkId }) => sourceLandmarkId === landmarkId);
-    if (route) progress.visitLandmark(route.targetLandmarkId);
 }
 
 export function run() {
@@ -43,7 +41,7 @@ export function run() {
         playerId: "debug-player",
         startAreaId: "sector-03-02"
     });
-    assert.equal(debugStart.worldProgress.snapshot().currentLandmarkId, "sector-03:landmark:02");
+    assert.equal("currentLandmarkId" in debugStart.worldProgress.snapshot(), false);
     assert.equal(debugStart.activeRespawnAnchor.id, "sector-03:landmark:02:checkpoint");
 
     const debugAugmentIds = ["long-rope", "direction-dash", "explosive-trail", "fast-reuse"];
@@ -219,7 +217,6 @@ export function run() {
             secondLandmark.entry
         )
     );
-    assert.equal(simulation.worldProgress.snapshot().currentLandmarkId, "sector-01:landmark:02");
     assert.equal(simulation.activeRespawnAnchor.id, "sector-01:landmark:02:checkpoint");
     assert.equal(simulation.playerState(owner.id).respawnAnchorId, "sector-01:landmark:02:checkpoint");
     assert.equal(simulation.playerState(teammate.id).respawnAnchorId, "sector-01:entry");

@@ -152,9 +152,8 @@ export class MultiplayerGameServer {
             socket.close(1013, "channel full");
             return;
         }
-        const currentSector = room.simulation.world.sectors?.find(
-            ({ id }) => id === room.simulation.worldProgress?.currentSectorId
-        );
+        const currentSectorId = room.simulation.respawnAnchorForPlayer(room.simulation.getPrimaryPlayerId())?.sectorId;
+        const currentSector = room.simulation.world.sectors?.find(({ id }) => id === currentSectorId);
         const joinRespawnAnchor = room.simulation.world.respawnAnchors?.find(
             ({ id }) => id === currentSector?.respawnAnchorId
         );

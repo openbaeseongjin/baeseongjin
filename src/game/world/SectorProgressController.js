@@ -55,11 +55,8 @@ function completionEvents({ result, objective, player, beforeRoutes, afterRoutes
     return events;
 }
 
-function stageSavepointEvents(world, progress, players, respawnAnchorIdByPlayerId) {
-    const visitedLandmarkIds = new Set(progress.snapshot().visitedLandmarkIds);
-    const reachableAnchors = world.respawnAnchors
-        .filter(({ landmarkId }) => visitedLandmarkIds.has(landmarkId))
-        .sort((left, right) => right.level - left.level);
+function stageSavepointEvents(world, players, respawnAnchorIdByPlayerId) {
+    const reachableAnchors = [...world.respawnAnchors].sort((left, right) => right.level - left.level);
     const events = [];
     for (const player of activePlayers(players)) {
         const anchor = reachableAnchors.find((candidate) => playerOverlapsStageSavePoint(player, candidate));
@@ -92,37 +89,26 @@ export function advanceSectorProgress({
     const events = [];
     const snapshot = progress.snapshot();
     if (snapshot.contentBoundaryReached) return Object.freeze(events);
-    const landmark = world.landmarks.find(({ id }) => id === snapshot.currentLandmarkId);
-    if (!landmark) throw new Error(`Missing current landmark '${snapshot.currentLandmarkId}'`);
-
     if (resolveInteractChoice) {
-        const sector = world.sectors.find(({ id }) => id === snapshot.currentSectorId);
-        for (const landmarkId of sector?.landmarkIds ?? []) {
-            const choiceLandmark = world.landmarks.find(({ id }) => id === landmarkId);
-            for (const objectiveId of choiceLandmark?.objectiveIds ?? []) {
-                const objective = world.objectives.find(({ id }) => id === objectiveId);
-                if (!objective || objective.type !== "interact-choice" || progress.isObjectiveComplete(objective.id)) {
-                    continue;
-                }
-                for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
-                    events.push(
-                        Object.freeze({
-                            type: "objective-choice-requested",
-                            objectiveId: objective.id,
-                            sourceObjectId: objective.sourceObjectId,
-                            landmarkId: choiceLandmark.id,
-                            playerId: player.id,
-                            position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-                        })
-                    );
-                }
+        for (const objective of world.objectives) {
+            if (objective.type !== "interact-choice" || progress.isObjectiveComplete(objective.id)) continue;
+            for (const player of interactingPlayers(objective, world, progress, players, commandsByPlayerId)) {
+                events.push(
+                    Object.freeze({
+                        type: "objective-choice-requested",
+                        objectiveId: objective.id,
+                        sourceObjectId: objective.sourceObjectId,
+                        landmarkId: objective.landmarkId,
+                        playerId: player.id,
+                        position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+                    })
+                );
             }
         }
     }
 
-    for (const objectiveId of landmark.objectiveIds) {
-        const objective = world.objectives.find(({ id }) => id === objectiveId);
-        if (!objective || progress.isObjectiveComplete(objective.id)) continue;
+    for (const objective of world.objectives) {
+        if (progress.isObjectiveComplete(objective.id)) continue;
         if (objective.type === "interact-choice") continue;
         const sequence = progress.objectiveSequence(objective.id);
         if (sequence) {
@@ -154,7 +140,7 @@ export function advanceSectorProgress({
                     Object.freeze({
                         type: "objective-sequence-started",
                         objectiveId: objective.id,
-                        landmarkId: landmark.id,
+                        landmarkId: objective.landmarkId,
                         playerId: player.id,
                         durationSeconds: objective.completionDelaySeconds,
                         position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
@@ -176,41 +162,6 @@ export function advanceSectorProgress({
         );
     }
 
-    const current = progress.snapshot();
-    const route = world.routeLocks.find(({ sourceLandmarkId }) => sourceLandmarkId === current.currentLandmarkId);
-    if (route && progress.isRouteUnlocked(route.id)) {
-        const target = world.landmarks.find(({ id }) => id === route.targetLandmarkId);
-        const targetAnchor = world.respawnAnchors.find(({ id }) => id === target.respawnAnchorId);
-        if (!targetAnchor) throw new Error(`Missing Stage save point '${target.respawnAnchorId}'`);
-        const player = activePlayers(players).find((candidate) =>
-            playerOverlapsStageSavePoint(candidate, targetAnchor)
-        );
-        const result = player ? progress.visitLandmark(target.id) : null;
-        if (result?.changed) {
-            events.push(
-                Object.freeze({
-                    type: "landmark-entered",
-                    landmarkId: target.id,
-                    stageAlias: target.legacyStageAlias,
-                    previousLandmarkId: route.sourceLandmarkId,
-                    sectorId: target.sectorId,
-                    playerId: player.id,
-                    position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-                })
-            );
-            if (result.sectorChanged) {
-                events.push(
-                    Object.freeze({
-                        type: "sector-entered",
-                        sectorId: target.sectorId,
-                        previousSectorId: result.previousSectorId,
-                        playerId: player.id,
-                        position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-                    })
-                );
-            }
-        }
-    }
-    events.push(...stageSavepointEvents(world, progress, players, respawnAnchorIdByPlayerId));
+    events.push(...stageSavepointEvents(world, players, respawnAnchorIdByPlayerId));
     return Object.freeze(events);
 }

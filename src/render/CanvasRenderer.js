@@ -1,5 +1,6 @@
 import { getMobileControlLayout } from "../core/input/MobileControlLayout.js";
 import { foundationAugmentById } from "../game/augments/FoundationAugmentCatalog.js";
+import { authoredRegionForPosition } from "../game/world/AuthoredLandmarkResolver.js";
 import {
     DEFAULT_CANVAS_PERFORMANCE_POLICY,
     RenderFrameStats,
@@ -8,11 +9,7 @@ import {
 } from "./RenderPerformanceMetrics.js";
 import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewport.js";
 import { assertSceneRenderer } from "./SceneRenderer.js";
-
-const HUD_COLORS = Object.freeze({
-    ropeAttached: "#fbbf24",
-    attachmentCandidate: "#a7f3d0"
-});
+import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus } from "./ActorStatusPresentation.js";
 
 export class CanvasRenderer {
     constructor(
@@ -90,11 +87,7 @@ export class CanvasRenderer {
             renderStats,
             presentationTimeSeconds: this.now()
         });
-        if (scene.mobileView) this.drawPlayerHealthHud(scene);
-        if (!scene.mobileView) {
-            this.drawCombatHud(scene);
-            this.drawAugmentHud(scene.selectedAugmentIds ?? [], scene.actionState);
-        }
+        this.drawLocalStatusHud(scene);
         this.drawAccessHud(scene);
         this.drawRewardSelectionOverlay(scene.foundationReward);
         this.drawMobileControls(scene.mobileControls);
@@ -238,30 +231,66 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawAugmentHud(selectedAugmentIds, actionState = null) {
-        const selected = selectedAugmentIds.map((id) => foundationAugmentById(id)).filter(Boolean);
-        if (selected.length === 0) return;
+    drawLocalStatusHud({
+        world,
+        player,
+        playerHealth,
+        playerMaxHealth,
+        actionState,
+        selectedAugmentIds = [],
+        mobileView = false
+    }) {
         const ctx = this.context;
+        const width = mobileView ? Math.min(330, this.cssWidth - 36) : 360;
+        const x = 18;
+        const y = 54;
+        const height = 112;
+        const innerWidth = width - 28;
+        const health = resolveHealthStatus(playerHealth, playerMaxHealth);
+        const action = resolveActionCooldownStatus(actionState);
+        const region = authoredRegionForPosition(world, player?.position);
+        const stage = region?.legacyStageAlias ?? region?.legacyAreaId ?? region?.id ?? "-";
+        const augmentNames = selectedAugmentIds
+            .map((id) => foundationAugmentById(id)?.name)
+            .filter(Boolean)
+            .join(" · ");
+
         ctx.save();
-        ctx.fillStyle = "rgba(7, 17, 30, 0.88)";
-        ctx.fillRect(18, 92, 360, 54);
-        ctx.strokeStyle = "rgba(103, 232, 249, 0.58)";
-        ctx.strokeRect(18, 92, 360, 54);
-        ctx.fillStyle = "#67e8f9";
-        ctx.font = "900 11px ui-monospace, monospace";
-        ctx.fillText(`AUGMENT ${selected.length}/6`, 30, 111);
-        ctx.fillStyle = "#e2e8f0";
+        ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.55)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        ctx.fillStyle = "#d9f4ff";
+        ctx.font = "900 12px ui-monospace, monospace";
+        ctx.textAlign = "left";
+        ctx.fillText(`STAGE ${stage}`, x + 14, y + 19);
+
+        ctx.fillStyle = "#f8fafc";
         ctx.font = "800 10px system-ui, sans-serif";
-        ctx.fillText(selected.map(({ name }) => name).join(" · "), 30, 130, 330);
-        if (actionState) {
-            ctx.textAlign = "right";
-            ctx.fillStyle = "#fde68a";
-            ctx.fillText(
-                `충전 ${actionState.chargesRemaining}/${actionState.loadout?.modifierIds?.includes("extra-charge") ? 2 : 1}`,
-                366,
-                111
-            );
-        }
+        ctx.fillText("HP", x + 14, y + 38);
+        ctx.textAlign = "right";
+        ctx.fillText(`${Math.round(health.current)} / ${Math.round(health.maximum)}`, x + width - 14, y + 38);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+        ctx.fillRect(x + 14, y + 43, innerWidth, 9);
+        ctx.fillStyle = health.ratio > 0.35 ? ACTOR_STATUS_COLORS.healthSafe : ACTOR_STATUS_COLORS.healthDanger;
+        ctx.fillRect(x + 14, y + 43, innerWidth * health.ratio, 9);
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillText("ACTION", x + 14, y + 67);
+        ctx.textAlign = "right";
+        ctx.fillText(`${action.charges}/${action.maximum}`, x + width - 14, y + 67);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+        ctx.fillRect(x + 14, y + 72, innerWidth, 9);
+        ctx.fillStyle = ACTOR_STATUS_COLORS.actionReady;
+        ctx.fillRect(x + 14, y + 72, innerWidth * action.ratio, 9);
+
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "700 9px system-ui, sans-serif";
+        const augmentText = augmentNames || "없음";
+        ctx.fillText(`증강 ${augmentText}`, x + 14, y + 101, innerWidth);
         ctx.restore();
     }
 
@@ -349,7 +378,7 @@ export class CanvasRenderer {
         if (!metrics) return;
         const ctx = this.context;
         const x = Math.max(8, this.cssWidth - 248);
-        const firstFoundation =
+        const firstAugment =
             metrics.firstFoundationSeconds === null ? "-" : `${metrics.firstFoundationSeconds.toFixed(1)}초`;
         const progressTiming = metrics.landmarkTiming ?? metrics.areaTiming;
         const areaOffset = progressTiming ? 19 : 0;
@@ -368,7 +397,7 @@ export class CanvasRenderer {
         ctx.fillText(`활성 ${metrics.activeSeconds.toFixed(1)}초 · 체크 ${metrics.checkpointsReached}`, x + 12, 60);
         ctx.fillText(`처치 ${metrics.enemyDefeats} · 피해 ${metrics.damageTaken}`, x + 12, 79);
         ctx.fillText(`절단 ${metrics.ropeCuts} · 사망 ${metrics.defeats}`, x + 12, 98);
-        ctx.fillText(`첫 Foundation ${firstFoundation}`, x + 12, 117);
+        ctx.fillText(`첫 증강 ${firstAugment}`, x + 12, 117);
         if (progressTiming) {
             const progressId = progressTiming.currentLandmarkId ?? progressTiming.currentAreaId ?? "-";
             const seconds = progressTiming.currentLandmarkSeconds ?? progressTiming.currentAreaSeconds ?? 0;
@@ -544,43 +573,17 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawPlayerHealthHud({ playerHealth, playerMaxHealth }) {
-        const ctx = this.context;
-        const health = Math.max(0, Math.round(playerHealth ?? 0));
-        const maxHealth = Math.max(1, Math.round(playerMaxHealth ?? 1));
-        const healthRatio = Math.max(0, Math.min(1, health / maxHealth));
-        const width = Math.min(220, Math.max(168, this.cssWidth * 0.34));
-        const x = 18;
-        const y = 18;
-
-        ctx.save();
-        ctx.fillStyle = "rgba(7, 11, 20, 0.88)";
-        ctx.fillRect(x, y, width, 50);
-        ctx.strokeStyle = healthRatio <= 0.35 ? "rgba(251, 113, 133, 0.8)" : "rgba(148, 163, 184, 0.42)";
-        ctx.strokeRect(x, y, width, 50);
-        ctx.fillStyle = "#f8fafc";
-        ctx.font = "800 12px system-ui, sans-serif";
-        ctx.fillText("HP", x + 14, y + 20);
-        ctx.textAlign = "right";
-        ctx.fillText(`${health} / ${maxHealth}`, x + width - 14, y + 20);
-        ctx.textAlign = "left";
-        ctx.fillStyle = "rgba(71, 85, 105, 0.9)";
-        ctx.fillRect(x + 14, y + 29, width - 28, 9);
-        ctx.fillStyle = healthRatio > 0.35 ? "#22c55e" : "#fb7185";
-        ctx.fillRect(x + 14, y + 29, (width - 28) * healthRatio, 9);
-        ctx.restore();
-    }
-
-    drawAccessHud({ world, worldProgress, mobileView = false }) {
-        if (!worldProgress?.currentSectorId || !world?.accessModules?.length) return;
-        const sector = world.sectors?.find(({ id }) => id === worldProgress.currentSectorId);
+    drawAccessHud({ world, worldProgress, player, mobileView = false }) {
+        if (!world?.accessModules?.length) return;
+        const region = authoredRegionForPosition(world, player?.position);
+        const sector = world.sectors?.find(({ id }) => id === region?.sectorId);
         const requiredCount = sector?.accessModuleRequirement ?? 0;
         if (requiredCount <= 0) return;
         const moduleIds = sector.accessModuleIds ?? [];
         const collected = new Set(worldProgress.collectedAccessModuleIds ?? []);
         const remaining = moduleIds.filter((id) => !collected.has(id));
         const x = 18;
-        const y = mobileView ? 78 : 132;
+        const y = 178;
         const width = mobileView ? Math.min(300, this.cssWidth - 36) : 300;
         const height = remaining.length ? 54 : 34;
         const hint = world.accessModules.find(({ id }) => id === remaining[0])?.hint;
@@ -603,106 +606,5 @@ export class CanvasRenderer {
             ctx.fillText(hint, x + 14, y + 42);
         }
         ctx.restore();
-    }
-
-    drawCombatHud({
-        player,
-        rope,
-        world,
-        attachmentCandidate,
-        swingDrag,
-        playerHealth,
-        playerMaxHealth,
-        ropeDisabledRemaining
-    }) {
-        const ctx = this.context;
-        const healthRatio = Math.max(0, Math.min(1, (playerHealth ?? 0) / Math.max(1, playerMaxHealth ?? 1)));
-        const climbed = Math.max(0, Math.round(560 - player.position.y));
-        const totalHeight = Math.round(560 - world.topY);
-        ctx.save();
-        ctx.fillStyle = "rgba(7, 11, 20, 0.82)";
-        ctx.fillRect(18, 18, 300, 104);
-        ctx.strokeStyle = "rgba(148, 163, 184, 0.38)";
-        ctx.strokeRect(18, 18, 300, 104);
-        ctx.fillStyle = "#f8fafc";
-        ctx.font = "800 12px system-ui, sans-serif";
-        ctx.fillText("생명력", 32, 40);
-        ctx.textAlign = "right";
-        ctx.fillText(`${playerHealth ?? 0} / ${playerMaxHealth ?? 0}`, 302, 40);
-        ctx.textAlign = "left";
-        ctx.fillStyle = "rgba(71, 85, 105, 0.8)";
-        ctx.fillRect(32, 48, 270, 10);
-        ctx.fillStyle = healthRatio > 0.35 ? "#22c55e" : "#fb7185";
-        ctx.fillRect(32, 48, 270 * healthRatio, 10);
-        ctx.fillStyle = "#cbd5e1";
-        ctx.font = "700 12px system-ui, sans-serif";
-        ctx.fillText(`고도 ${climbed} / ${totalHeight}m`, 32, 77);
-        ctx.textAlign = "right";
-        ctx.fillText(`속도 ${Math.round(player.velocity.length())}`, 302, 77);
-        ctx.textAlign = "left";
-        ctx.fillStyle = rope.isAttached
-            ? HUD_COLORS.ropeAttached
-            : ropeDisabledRemaining > 0
-              ? "#fb7185"
-              : HUD_COLORS.attachmentCandidate;
-        ctx.beginPath();
-        ctx.arc(37, 101, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#e2e8f0";
-        ctx.fillText(
-            rope.isAttached
-                ? swingDrag?.used
-                    ? "스윙 완료 · 놓아서 이동"
-                    : `스윙 충전 ${Math.round((swingDrag?.progress ?? 0) * 100)}%`
-                : ropeDisabledRemaining > 0
-                  ? `로프 재연결 ${ropeDisabledRemaining.toFixed(1)}초`
-                  : attachmentCandidate
-                    ? "부착 가능 · 누르고 드래그"
-                    : "사거리 안쪽 암벽을 조준",
-            50,
-            105
-        );
-        ctx.restore();
-    }
-
-    drawHud({
-        player,
-        rope,
-        world,
-        stats,
-        attachmentCandidate,
-        swingDrag,
-        playerHealth,
-        playerMaxHealth,
-        ropeDisabledRemaining
-    }) {
-        const ctx = this.context;
-        ctx.fillStyle = "rgba(7, 11, 20, 0.76)";
-        ctx.fillRect(18, 18, 290, 92);
-        ctx.strokeStyle = "rgba(107, 134, 179, 0.55)";
-        ctx.strokeRect(18, 18, 290, 92);
-        ctx.fillStyle = "#dbeafe";
-        ctx.font = "13px ui-monospace, monospace";
-        const climbed = Math.max(0, Math.round(560 - player.position.y));
-        const totalHeight = Math.round(560 - world.topY);
-        ctx.fillText(`height ${climbed}/${totalHeight} · speed ${Math.round(player.velocity.length())}`, 32, 42);
-        ctx.fillText(`HP ${playerHealth ?? 100}/${playerMaxHealth ?? 100}`, 205, 42);
-        ctx.fillText(
-            rope.isAttached
-                ? swingDrag?.used
-                    ? `SWING USED · release mouse`
-                    : `DRAG TANGENT ${Math.round((swingDrag?.progress ?? 0) * 100)}%`
-                : ropeDisabledRemaining > 0
-                  ? `ROPE DISABLED ${ropeDisabledRemaining.toFixed(1)}s`
-                  : attachmentCandidate
-                    ? "TARGET LOCKED · hold mouse"
-                    : "AIM AT ANY SURFACE",
-            32,
-            65
-        );
-        ctx.fillStyle = rope.isAttached ? HUD_COLORS.ropeAttached : HUD_COLORS.attachmentCandidate;
-        ctx.fillRect(32, 79, Math.min(250, rope.isAttached ? rope.tension * 0.2 : 36), 7);
-        ctx.fillStyle = "#94a3b8";
-        ctx.fillText(`fixed ${stats.totalSteps} · resets ${stats.resets}`, 32, 102);
     }
 }

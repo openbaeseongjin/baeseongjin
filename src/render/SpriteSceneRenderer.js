@@ -34,6 +34,7 @@ import { DEFAULT_ENVIRONMENT_DEFINITION } from "./environment/EnvironmentCatalog
 import { EnvironmentAssetSet } from "./environment/EnvironmentAssetSet.js";
 import { EnvironmentRendererComposer } from "./environment/EnvironmentRendererComposer.js";
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
+import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 
 export class SpriteAssetFallbackRenderer {
     constructor({ asset, spriteRenderer, polygonRenderer }) {
@@ -128,7 +129,8 @@ export class SpriteSceneRenderer {
             new CombatEffectRenderer(),
             new EventEffectRenderer(),
             new AttachmentCandidateRenderer(),
-            new SpriteLocalPlayerRenderer({ assets: this.playerAssets, definition: playerDefinition })
+            new SpriteLocalPlayerRenderer({ assets: this.playerAssets, definition: playerDefinition }),
+            new ActorStatusRenderer()
         ]);
 
         const spriteComposition = new SceneRendererComposition({

@@ -51,9 +51,9 @@
 
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
-3. **Phase 3 · #625 / layout correction #637 / checkpoint correction 0.34.0:** Sector 01~03을 4,800px seamless world, objective route lock, `SectorProgressState`, Player별 active Stage checkpoint respawn과 local-position camera/environment로 전환했다. 이 단계의 AUTHORING SNAPSHOT은 WorldSnapshot protocol v8이며 현재 Runtime은 v10을 사용한다. Timer·Purge가 미정인 동안 party-wipe baseline reset은 사용하지 않는다. Stage 정의는 Sector local vertical stack으로 보존하고 lateral city wing만 compiler가 더한다. Stage별 Gate·exit panel은 기본 Runtime에서 제거하며 future Boss room은 Sector transition slot에 삽입한다. legacy Area revision은 compatibility test로만 유지한다.
+3. **Phase 3 · #625 / #637 / savepoint-only progression:** Sector 01~03을 4,800px seamless world와 Player별 active Stage checkpoint로 전환했다. 현재 Runtime은 Stage cursor와 물리 route lock 없이 정적 geometry를 사용하고 objective는 자기 trigger/prerequisite로 판정한다. Timer·Purge와 Boss 전환 제약은 미정이다.
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
-5. **Sector 01 access vertical slice · #642:** 1-3·1-6·1-7의 Stage-local Carrier encounter 세 곳에 공용 Access Module을 연결하고, 아무 2개와 1-8 objective로 Sector 01→02 connector를 연다. 개인 사망은 수집 상태를 보존하고 party wipe만 current Sector Carrier·module·route를 초기화한다. Sector 02~06 rollout과 Boss·Timer/Purge는 포함하지 않는다.
+5. **Sector 01 access vertical slice · #642:** 1-3·1-6·1-7 Carrier 중 아무 2개를 처치하는 공용 Access objective를 연결했다. 이 objective는 geometry나 Sector 전환을 잠그지 않고 사망 뒤에도 보존된다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
 
 ### 제출 전 시나리오 구현 트랙
@@ -109,7 +109,7 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
 
 ### P1. 초기 절차 프로토타입과 초반 난이도 검증
 
-이 절의 시드 경로 검사는 초기 로프 프로토타입 완료 이력이며 현재 기본 제품 테스트에서는 실행하지 않는다. 현재 검증 기준은 저작 Sector의 landmark·objective/route 진행·Stage 세이브 포인트 부활·party wipe Sector-entry reset·content boundary다.
+이 절의 시드 경로 검사는 초기 로프 프로토타입 완료 이력이다. 현재 검증 기준은 정적 authored geometry·독립 objective·Player별 Stage save·전원 사망 진행 보존·content boundary다.
 
 1. [완료] 생성된 핵심 경로의 연속 구간이 로프 사거리 안에 있는지 1,000개 시드에서 자동 검사한다.
 2. [완료] 고정 시드 회귀 목록을 두고 실패 시드를 이유와 함께 재현한다.
@@ -149,7 +149,7 @@ P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 
     - [소유자 표시 보정 완료] 작은 권위 오차는 물리 예측과 분리된 표시 offset으로 100ms 안에 수렴하고, 160px 초과·로프·생명 불일치는 즉시 스냅한다.
     - [원격 스냅샷 보간 완료] 동료와 적은 100ms 지연된 서버 tick의 두 권위 표본 사이에서 표시하고, 미래 표본이 없을 때만 최대 120ms 외삽한다.
 
-4. [플레이테스트 필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Stage 세이브 포인트 부활, party wipe Sector-entry reset, generic Augment loadout 유지와 content boundary 도달을 한 세션으로 검증한다.
+4. [플레이테스트 필요] 서로 다른 실제 기기 두 대에서 로프 절단, 사망·낙사·개별 Stage 세이브 포인트 부활, 전원 사망 공용 진행 보존, generic Augment loadout 유지와 content boundary를 검증한다.
 5. [네트워크 검증 필요] 모바일망 지연과 장시간 세션에서 예측 오차, 보정 체감, 재접속 정책을 측정한다.
     - [진단 계측 완료] 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켠 뒤 서버 권위 런 지표와 RTT·스냅샷 간격·대기 명령·명령 거부율·보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인하고 **진단 복사**로 기기별 기록을 남긴다.
     - [네트워크 행렬 완료] 실제 WebSocket 경계에서 0/50/100/200ms 왕복 지연과 0/2/5% 송신 명령 손실의 12개 조합을 한 메인 시나리오로 검증한다.

@@ -2,6 +2,7 @@ import { ropeAttachmentPoint, ropeLaunchHandPoint } from "../../game/rope/RopeAt
 import { ROPE_CONFIG, ropeHookReach } from "../../game/config.js";
 import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { isSurfaceEnabledForProgress } from "../../game/world/WorldGateGeometry.js";
+import { authoredRegionForPosition } from "../../game/world/AuthoredLandmarkResolver.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
@@ -344,7 +345,7 @@ export class AccessScanSurfaceRenderer {
 
 export class AccessModuleSignalRenderer {
     draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
-        const currentSectorId = scene.worldProgress?.currentSectorId;
+        const currentSectorId = authoredRegionForPosition(scene.world, scene.player?.position)?.sectorId;
         const collected = new Set(scene.worldProgress?.collectedAccessModuleIds ?? []);
         const playerPosition = scene.player?.position ?? scene.player;
         const modules = (scene.world.accessModules ?? []).filter(
