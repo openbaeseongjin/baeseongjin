@@ -5,9 +5,9 @@ import { ropeAttachmentPoint } from "../rope/RopeAttachment.js";
 import { pointInPolygon } from "../world/PolygonGeometry.js";
 import { ActionAugmentState } from "./actions/ActionAugmentState.js";
 import { actionAugmentById } from "./actions/ActionAugmentCatalog.js";
+import { selectNearestActionTarget } from "./actions/ActionTargeting.js";
 import { ElectrifiedRopeContactState } from "./rope/ElectrifiedRopeContactState.js";
 import { resolveCollisionExplosion } from "./rope/CollisionExplosionState.js";
-import { selectDefaultPunchTarget } from "./rope/RopeAugmentTuning.js";
 
 const IMPACT_DAMAGE = ROPE_IMPACT_CONFIG.damage;
 
@@ -19,8 +19,7 @@ function directionBetween(from, to, fallback = { x: 1, y: 0 }) {
 }
 
 function actionLoadout(foundation) {
-    const baseActionId = foundation.selectedBaseActionId();
-    if (!baseActionId) return null;
+    const baseActionId = foundation.selectedBaseActionId() ?? "default-punch";
     return Object.freeze({
         baseActionId,
         signatureId: foundation.selectedSignatureId(),
@@ -105,7 +104,6 @@ export class AugmentCombatRuntime {
         this.actionState = null;
         this.actionLoadoutKey = "";
         this.wasActionDown = false;
-        this.punchCooldownRemaining = 0;
         this.electrified = new ElectrifiedRopeContactState({ impactDamage: IMPACT_DAMAGE });
         this.actionProjectiles = [];
         this.hitIdsByActivation = new Map();
@@ -122,10 +120,6 @@ export class AugmentCombatRuntime {
         const previous = this.actionState?.snapshot() ?? null;
         const previousModifiers = new Set(previous?.loadout?.modifierIds ?? []);
         this.actionLoadoutKey = nextKey;
-        if (!loadout) {
-            this.actionState = null;
-            return;
-        }
         const next = new ActionAugmentState({ ...loadout, maxHealth });
         if (previous && previous.loadout.baseActionId === loadout.baseActionId) {
             next.restore({
@@ -190,7 +184,6 @@ export class AugmentCombatRuntime {
 
     advance({ player, foundation, command, dt, enemies, surfaces, tick }) {
         this.syncLoadout(foundation, player.maxHealth);
-        this.punchCooldownRemaining = Math.max(0, this.punchCooldownRemaining - dt);
         const impactEvents = [];
         const presentationEvents = [];
         const activeBefore = this.actionState?.activeAction ? { ...this.actionState.activeAction } : null;
@@ -229,13 +222,7 @@ export class AugmentCombatRuntime {
         });
 
         const pressed = command.action && !this.wasActionDown;
-        if (pressed) {
-            if (!this.actionState) {
-                this.#useDefaultPunch({ player, enemies, tick, impactEvents, presentationEvents });
-            } else {
-                this.#beginAction({ player, enemies, surfaces, tick, impactEvents, presentationEvents });
-            }
-        }
+        if (pressed) this.#beginAction({ player, enemies, surfaces, tick, impactEvents, presentationEvents });
         this.wasActionDown = command.action;
         this.#advanceActionProjectiles({ player, enemies, surfaces, dt, tick, impactEvents, presentationEvents });
         return Object.freeze({
@@ -315,7 +302,6 @@ export class AugmentCombatRuntime {
             actionLoadoutKey: this.actionLoadoutKey,
             actionState: this.actionState?.snapshot() ?? null,
             wasActionDown: this.wasActionDown,
-            punchCooldownRemaining: this.punchCooldownRemaining,
             electrified: this.electrified.snapshot(),
             actionProjectiles: Object.freeze(
                 this.actionProjectiles.map((projectile) =>
@@ -328,7 +314,6 @@ export class AugmentCombatRuntime {
 
     restore(snapshot = null, foundation = null, maxHealth = this.maxHealth) {
         this.wasActionDown = snapshot?.wasActionDown === true;
-        this.punchCooldownRemaining = Math.max(0, snapshot?.punchCooldownRemaining ?? 0);
         this.electrified.restore(snapshot?.electrified ?? null);
         this.actionProjectiles = (snapshot?.actionProjectiles ?? []).map((projectile) => ({
             ...projectile,
@@ -344,6 +329,17 @@ export class AugmentCombatRuntime {
                 loadoutKey(snapshot.actionState.loadout) === this.actionLoadoutKey
             ) {
                 this.actionState.restore(snapshot.actionState);
+            } else if (
+                this.actionState?.loadout.baseActionId === "default-punch" &&
+                (snapshot?.punchCooldownRemaining ?? 0) > 0
+            ) {
+                this.actionState.restore({
+                    ...this.actionState.snapshot(),
+                    chargesRemaining: 0,
+                    rechargeRemaining: snapshot.punchCooldownRemaining,
+                    rechargeDuration: actionAugmentById("default-punch").cooldownSeconds,
+                    rechargeQueue: []
+                });
             }
         }
         return this.snapshot();
@@ -353,7 +349,6 @@ export class AugmentCombatRuntime {
         this.actionState = null;
         this.actionLoadoutKey = "";
         this.wasActionDown = false;
-        this.punchCooldownRemaining = 0;
         this.electrified.reset();
         this.actionProjectiles = [];
         this.hitIdsByActivation.clear();
@@ -366,44 +361,6 @@ export class AugmentCombatRuntime {
         const id = `${playerId}:${effectId}:${tick}:${targetId}:${this.eventSequence}`;
         this.eventSequence += 1;
         return id;
-    }
-
-    #useDefaultPunch({ player, enemies, tick, impactEvents, presentationEvents }) {
-        if (this.punchCooldownRemaining > 0) return;
-        const aimDirection = directionBetween(player.physics.position, player.ropeObject.aimWorld, {
-            x: Math.sign(player.physics.velocity.x) || 1,
-            y: 0
-        });
-        this.punchCooldownRemaining = 0.5;
-        presentationEvents.push({
-            eventType: "augment-action-started",
-            activationId: this.#nextEventId(player.id, "default-punch-activation", tick, "swing"),
-            actionId: "default-punch",
-            position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y }),
-            direction: Object.freeze({ x: aimDirection.x, y: aimDirection.y })
-        });
-        const forwardEnemies = enemies.filter((enemy) => {
-            const direction = directionBetween(player.physics.position, enemy.position);
-            return direction.x * aimDirection.x + direction.y * aimDirection.y >= 0;
-        });
-        const target = selectDefaultPunchTarget({ playerPosition: player.physics.position, enemies: forwardEnemies });
-        if (!target) return;
-        impactEvents.push(
-            impactEvent({
-                eventId: this.#nextEventId(player.id, "default-punch", tick, target.id),
-                player,
-                enemy: target,
-                tick,
-                effectId: "default-punch",
-                sourceKind: "default-punch",
-                damage: IMPACT_DAMAGE * 0.4,
-                knockback: {
-                    direction: directionBetween(player.physics.position, target.position),
-                    distance: 50,
-                    durationSeconds: 0.25
-                }
-            })
-        );
     }
 
     #beginAction({ player, enemies, surfaces, tick, impactEvents, presentationEvents }) {
@@ -421,7 +378,35 @@ export class AugmentCombatRuntime {
             position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y }),
             direction
         });
-        if (activation.baseActionId === "direction-dash") {
+        if (activation.baseActionId === "default-punch") {
+            const forwardEnemies = enemies.filter((enemy) => {
+                const targetDirection = directionBetween(player.physics.position, enemy.position);
+                return targetDirection.x * direction.x + targetDirection.y * direction.y >= 0;
+            });
+            const target = selectNearestActionTarget({
+                playerPosition: player.physics.position,
+                enemies: forwardEnemies,
+                range: activation.range
+            });
+            if (target) {
+                impactEvents.push(
+                    impactEvent({
+                        eventId: this.#nextEventId(player.id, "default-punch", tick, target.id),
+                        player,
+                        enemy: target,
+                        tick,
+                        effectId: "default-punch",
+                        sourceKind: "default-punch",
+                        damage: IMPACT_DAMAGE * activation.damageMultiplier,
+                        knockback: {
+                            direction: directionBetween(player.physics.position, target.position),
+                            distance: activation.knockbackDistance,
+                            durationSeconds: activation.knockbackSeconds
+                        }
+                    })
+                );
+            }
+        } else if (activation.baseActionId === "direction-dash") {
             const start = { x: player.physics.position.x, y: player.physics.position.y };
             const destination = player.physics.collider.farthestSafePositionAlong({
                 start,

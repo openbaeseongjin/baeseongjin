@@ -6,19 +6,19 @@
 
 플레이어가 직접 체감하는 결과는 당사자 클라이언트가 즉시 적용하고, 서버는 중립 월드를 진행하면서 검증된 상태와 사건을 다른 참가자에게 공유해 모든 복제본을 수렴시킨다. 조작 감각은 P2P 게임에 가깝지만 모든 통신은 서버를 거치며, 순수 P2P 구조는 아니다.
 
-| 범위                                      | 최초 판정 주체                     | 동기화 방식                                                                           |
-| ----------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| 자기 이동·점프·로프·낙사                  | 소유 클라이언트                    | 즉시 로컬 시뮬레이션 후 `owner-motion` 공유, 동료 화면에서 보간                       |
-| 자기 자동 발사와 플레이어 탄환 적중       | 공격자 클라이언트                  | 생성·적중 claim을 서버가 검증하고 고유 사건으로 공유                                  |
-| 적 탄환의 본체 피격·로프 절단             | 피해자 클라이언트                  | HP·넉백·절단·부활을 즉시 적용한 뒤 impact claim으로 공유                              |
-| 고속 착지 피해                            | 착지한 소유 클라이언트             | 충돌 직전 하강 속도로 HP·치명 부활을 즉시 적용한 뒤 impact claim으로 공유             |
-| 로프 몸체 충돌의 적 피해                  | 공격자 클라이언트                  | 로프 부착·최소 속도·새 접촉을 즉시 예측하고 `rope-impact` claim으로 서버 적 HP를 확정 |
-| 몹·적 투사체·공용 월드                    | 서버                               | 서버 고정 틱에서 진행하고 스냅샷 또는 생성·해결 사건으로 공유                         |
-| Sector 개인 부활                          | 피해·낙사 플레이어 소유 클라이언트 | receipt 전 Sector entry로 즉시 부활하고 공용 진행은 유지                              |
-| Sector 전원 사망                          | 각 피해·소유 클라이언트             | 각자 자기 checkpoint에서 부활하고 Timer·Purge 결정 전에는 공용 reset을 만들지 않음    |
-| 저작 objective                            | 서버                               | 각 objective trigger/source/prerequisite 결과를 `worldProgress` snapshot으로 수렴     |
-| generic Augment 선택·효과                 | 행동 클라이언트                    | 개인 chooser와 효과를 즉시 적용하고 서버가 호환 `foundation-selection` claim으로 검증·공유 |
-| 파티클·화면 흔들림·경고                   | 각 클라이언트                      | 서버는 의미 사건만 공유하고 각 화면이 audience에 맞춰 재생                            |
+| 범위                                | 최초 판정 주체                     | 동기화 방식                                                                                |
+| ----------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| 자기 이동·점프·로프·낙사            | 소유 클라이언트                    | 즉시 로컬 시뮬레이션 후 `owner-motion` 공유, 동료 화면에서 보간                            |
+| 자기 자동 발사와 플레이어 탄환 적중 | 공격자 클라이언트                  | 생성·적중 claim을 서버가 검증하고 고유 사건으로 공유                                       |
+| 적 탄환의 본체 피격·로프 절단       | 피해자 클라이언트                  | HP·넉백·절단·부활을 즉시 적용한 뒤 impact claim으로 공유                                   |
+| 고속 착지 피해                      | 착지한 소유 클라이언트             | 충돌 직전 하강 속도로 HP·치명 부활을 즉시 적용한 뒤 impact claim으로 공유                  |
+| 로프 몸체 충돌의 적 피해            | 공격자 클라이언트                  | 로프 부착·최소 속도·새 접촉을 즉시 예측하고 `rope-impact` claim으로 서버 적 HP를 확정      |
+| 몹·적 투사체·공용 월드              | 서버                               | 서버 고정 틱에서 진행하고 스냅샷 또는 생성·해결 사건으로 공유                              |
+| Sector 개인 부활                    | 피해·낙사 플레이어 소유 클라이언트 | receipt 전 Sector entry로 즉시 부활하고 공용 진행은 유지                                   |
+| Sector 전원 사망                    | 각 피해·소유 클라이언트            | 각자 자기 checkpoint에서 부활하고 Timer·Purge 결정 전에는 공용 reset을 만들지 않음         |
+| 저작 objective                      | 서버                               | 각 objective trigger/source/prerequisite 결과를 `worldProgress` snapshot으로 수렴          |
+| generic Augment 선택·효과           | 행동 클라이언트                    | 개인 chooser와 효과를 즉시 적용하고 서버가 호환 `foundation-selection` claim으로 검증·공유 |
+| 파티클·화면 흔들림·경고             | 각 클라이언트                      | 서버는 의미 사건만 공유하고 각 화면이 audience에 맞춰 재생                                 |
 
 핵심 원칙은 다음과 같다.
 
@@ -52,7 +52,7 @@
 | 입력/이동 표본은 tick 또는 timestamp, ACK, 보존된 입력과 결합한다. Unreal Character Movement는 saved move, timestamp, ACK와 correction을 같은 이동 계약으로 관리한다. ([Unreal Networked Movement](https://dev.epicgames.com/documentation/unreal-engine/understanding-networked-movement-in-the-character-movement-component-for-unreal-engine?lang=en-US)) | 명령 sequence·목표 tick·snapshot ACK를 보존하고 `owner-motion`은 최신 tick만 적용한다. 소유 클라이언트 최종 수렴 정책상 운동 correction은 하지 않으며, 체크포인트 같은 별도 사건 rollback과 impact 예외 복구만 상태 tick을 사용한다.                          | 협동·클라이언트 우선 정책 안에서 충족 |
 | 메시지 순서를 암묵적으로 가정하지 않고 상태 묶음과 사건 ID로 인과관계를 보존한다. Unreal도 actor·RPC 종류를 넘는 실행 순서가 항상 보장되지 않음을 명시한다. ([Unreal Replicated Object Execution Order](https://dev.epicgames.com/documentation/unreal-engine/replicated-object-execution-order-in-unreal-engine?lang=en-US))                                | snapshot envelope, 사건 ID 중복 제거, projectile/prediction ID와 impact 복구 challenge로 순서·중복을 명시한다. 현재 WebSocket의 FIFO는 보조 조건이지 게임 객체 식별자를 대신하지 않는다.                                                                      | 충족                                  |
 | 원격 입력은 소유권·형식·범위와 호출 빈도를 검증한다. Godot도 RPC 인자를 적용 전에 검증하고 위치·타이머·쿨다운을 무검증 신뢰하지 말 것을 권고한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html))                                                                                  | 인증된 player ID, 프로토콜 버전, 유한값·tick 순서와 사건 claim별 tick·쿨다운·대상·중복 ID를 검증한다. `owner-motion`은 협동 최종 수렴 정책상 물리량 봉투로 거부하지 않고, 예외 전체 상태는 서버가 발급한 일회용 challenge와 전체 복구 스키마를 통과해야 한다. | 협동·클라이언트 우선 정책 안에서 충족 |
-| 상태 snapshot은 필요에 따라 unreliable/delta/relevancy를 사용한다. 브라우저 HTML5는 raw UDP를 사용할 수 없고 WebSocket 또는 WebRTC 경계를 사용한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html))                                                                                | 현재는 2인·20Hz의 단일 reliable WebSocket을 유지하되 v9에서 authored enemy 정적 정의를 제외하고 동적 상태만 보낸다. 동적 delta·관심 영역·WebRTC는 실제 계측에서 head-of-line 지연이나 대역폭 문제가 다시 확인될 때 검토한다.                                   | 현재 규모에서는 핵심 누락 아님        |
+| 상태 snapshot은 필요에 따라 unreliable/delta/relevancy를 사용한다. 브라우저 HTML5는 raw UDP를 사용할 수 없고 WebSocket 또는 WebRTC 경계를 사용한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html))                                                                                | 현재는 2인·20Hz의 단일 reliable WebSocket을 유지하되 v9에서 authored enemy 정적 정의를 제외하고 동적 상태만 보낸다. 동적 delta·관심 영역·WebRTC는 실제 계측에서 head-of-line 지연이나 대역폭 문제가 다시 확인될 때 검토한다.                                  | 현재 규모에서는 핵심 누락 아님        |
 
 서버 rewind·공격자 lag compensation은 움직이는 서버 소유 표적이나 경쟁 PvP가 추가될 때 필요한 조건부 항목이다. 현재처럼 피해자가 자기 피격을 판정하고 적중 대상 수가 작은 2인 PvE에서는 선행 구현하지 않는다. 상태 지문은 우연한 시뮬레이션 불일치를 찾는 도구이지 신뢰 증명이나 치트 방지 수단이 아니므로 암호학적 해시로 바꾸는 것도 현재 핵심 요구가 아니다.
 
@@ -166,24 +166,24 @@
 
 ## 상태 소유권
 
-| 상태                                        | 최종 소유자                                       | 클라이언트 처리                                                                                                         |
-| ------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 자기 이동·속도·로프                         | 입력한 클라이언트                                 | 로컬 시뮬레이션 후 최신 상태 전송                                                                                       |
-| 플레이어 간 바디 충돌                       | 각 소유 클라이언트, 서버 공유                     | 겹침 절반씩 즉시 해소 후 최신 상태 전송                                                                                 |
-| 플레이어 위치·속도                          | 소유 클라이언트, 서버 공유                        | 즉시 적용 후 최신 상태 전송                                                                                             |
-| 로프 부착점·길이·절단                       | 소유·피해 클라이언트, 서버 검증                   | 즉시 적용 후 claim 전송                                                                                                 |
-| 적 상태·HP 최종값                           | 서버                                              | 권위 스냅샷 적용                                                                                                        |
-| 자기 피격·로프 절단                         | 피해 클라이언트, 서버 검증·공유                   | 즉시 로컬 적용 후 검증 claim                                                                                            |
-| 예측 가능한 투사체·낙하물                   | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                   |
-| 자기 사망·active Stage checkpoint 부활      | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                            |
-| 월드 시드·지형·Sector entry                 | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v10 검증                                                        |
-| Sector objective                            | 서버                                              | 독립 trigger/source/prerequisite 결과와 `foundationRewards`를 공유하며 마지막 objective는 content boundary 유지            |
-| 플레이어별 generic Augment 선택·효과        | 행동 클라이언트 선행, 서버 검증·공유              | 개인 chooser와 효과를 즉시 적용하고 호환 `foundation-selection`·generic `augment-impact` 뒤 개인 상태와 공용 objective를 수렴 |
-| 카메라·HUD·파티클                           | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                   |
+| 상태                                   | 최종 소유자                                       | 클라이언트 처리                                                                                                               |
+| -------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 자기 이동·속도·로프                    | 입력한 클라이언트                                 | 로컬 시뮬레이션 후 최신 상태 전송                                                                                             |
+| 플레이어 간 바디 충돌                  | 각 소유 클라이언트, 서버 공유                     | 겹침 절반씩 즉시 해소 후 최신 상태 전송                                                                                       |
+| 플레이어 위치·속도                     | 소유 클라이언트, 서버 공유                        | 즉시 적용 후 최신 상태 전송                                                                                                   |
+| 로프 부착점·길이·절단                  | 소유·피해 클라이언트, 서버 검증                   | 즉시 적용 후 claim 전송                                                                                                       |
+| 적 상태·HP 최종값                      | 서버                                              | 권위 스냅샷 적용                                                                                                              |
+| 자기 피격·로프 절단                    | 피해 클라이언트, 서버 검증·공유                   | 즉시 로컬 적용 후 검증 claim                                                                                                  |
+| 예측 가능한 투사체·낙하물              | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                         |
+| 자기 사망·active Stage checkpoint 부활 | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                                  |
+| 월드 시드·지형·Sector entry            | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v11 검증                                                              |
+| Sector objective                       | 서버                                              | 독립 trigger/source/prerequisite 결과와 `foundationRewards`를 공유하며 마지막 objective는 content boundary 유지               |
+| 플레이어별 generic Augment 선택·효과   | 행동 클라이언트 선행, 서버 검증·공유              | 개인 chooser와 효과를 즉시 적용하고 호환 `foundation-selection`·generic `augment-impact` 뒤 개인 상태와 공용 objective를 수렴 |
+| 카메라·HUD·파티클                      | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                         |
 
 generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. `FoundationAugmentState`, `foundation-selection`, `foundationRewards`는 이전 snapshot과 wire 호환을 위한 이름이며 과거 Foundation 3종 gameplay를 뜻하지 않는다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 호환 `foundation-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 대상 Player state의 `respawnAnchorId`가 가리키는 최근 직접 접촉 Stage checkpoint로 되돌리며 선택 카드와 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. 소유 클라이언트가 자기 collider와 save trigger의 겹침을 먼저 적용해 개인 `respawnAnchorId`를 갱신하고 서버가 owner motion·anchor ID·접촉 bounds를 검증해 동료에게 공유한다. 피해·낙사 소유 클라이언트는 치명 결과 전이에서 자기 anchor로 즉시 부활하고 서버·동료가 player-impact 결과를 따른다. WorldSnapshot v10은 top-level 공용 `respawnAnchorId`와 `partyWipeBaseline`을 제거하고 각 `players[]` state에 개인 anchor를 포함한다. enemy 정적 정의는 같은 `worldRevision + objectId`로 복원한다.
+기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. 소유 클라이언트가 자기 collider와 save trigger의 겹침을 먼저 적용해 개인 `respawnAnchorId`를 갱신하고 서버가 owner motion·anchor ID·접촉 bounds를 검증해 동료에게 공유한다. 피해·낙사 소유 클라이언트는 치명 결과 전이에서 자기 anchor로 즉시 부활하고 서버·동료가 player-impact 결과를 따른다. WorldSnapshot v11은 top-level 공용 `respawnAnchorId`와 `partyWipeBaseline`을 두지 않고 각 `players[]` state에 개인 anchor와 non-null Action state를 포함한다. 기본 주먹은 별도 cooldown mirror가 아니라 `default-punch` charge/recharge로 수렴하며 enemy 정적 정의는 같은 `worldRevision + objectId`로 복원한다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
@@ -208,7 +208,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
 - `owner-motion` protocol v5는 `angle`, `angularVelocity`, 부착 중인 `rope.attachmentOffset`, launcher, owner Action runtime과 개인 `respawnAnchorId`를 위치·속도·anchor와 함께 보낸다. 서버는 인증·프로토콜 형식·유한값·최신 tick을 확인하고, checkpoint 변경은 방문 가능한 Stage의 실제 trigger 겹침일 때만 수용한다.
-- `WorldSnapshot` protocol v10의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`, `launcher`(발사 shot/cooldown), `foundationAugment`, `augmentRuntimeState`, `respawnAnchorId`를 포함한다. authored enemy는 `worldRevision + objectId`로 정적 정의를 복원하고 20Hz에는 동적 상태만 보낸다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
+- `WorldSnapshot` protocol v11의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`, `launcher`(발사 shot/cooldown), `foundationAugment`, non-null `actionState`, `augmentRuntimeState`, `respawnAnchorId`를 포함한다. authored enemy는 `worldRevision + objectId`로 정적 정의를 복원하고 20Hz에는 동적 상태만 보낸다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
 - 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
 - `player-impact` protocol v9의 `recovery-required` 전체 상태에는 angle·angularVelocity·attachmentOffset·로프 발사 shot/cooldown·개인 `respawnAnchorId`와 generic Augment 선택·순간 상태가 포함된다. 부활 결과 지문에도 회전·부착 손·Augment·checkpoint 상태를 포함하지만, 정상 비치명 impact마다 전체 상태를 별도 전송하지 않는다.
@@ -272,7 +272,7 @@ v9는 측정된 대역폭의 대부분을 차지하던 authored enemy의 정적 
 | 상태군                              | 지속 상태 수렴 원점                                 | 소유 클라이언트                                                          | 다른 클라이언트 표시                                                  | 복구 정책                                                              |
 | ----------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | 위치·속도·접지·로프                 | 인증·형식 검사를 통과한 최신 `owner-motion`         | 즉시 예측하며 snapshot·receipt로 되감지 않음                             | 위치는 보간·제한 외삽, 로프는 최신값                                  | 운동 상태 복원 없음; 중복·역순 tick은 성공한 no-op                     |
-| HP·생명·부활·로프 절단              | 피해 클라이언트의 impact 결과                       | 피해 HP·치명 부활·절단을 즉시 적용하고 snapshot·receipt로 다시 쓰지 않음 | 정상은 사건을 적용하고, 지문 불일치 때만 받은 피해자 상태를 즉시 적용 | `recovery-required` 뒤 피해자의 최신 상태를 서버가 흡수               |
+| HP·생명·부활·로프 절단              | 피해 클라이언트의 impact 결과                       | 피해 HP·치명 부활·절단을 즉시 적용하고 snapshot·receipt로 다시 쓰지 않음 | 정상은 사건을 적용하고, 지문 불일치 때만 받은 피해자 상태를 즉시 적용 | `recovery-required` 뒤 피해자의 최신 상태를 서버가 흡수                |
 | 무기 파라미터·Augment 선택          | 검증된 협동 공유 진행                               | 선택 UI는 즉시 반영하고 pending 동안 이전 진행으로 덮지 않음             | 최신 검증 공유값 즉시 적용                                            | 거부 claim의 로컬 전이만 복구                                          |
 | 로프 발사 shot/cooldown             | 행동 클라이언트의 로컬 결과와 owner-motion          | 발사·비행·부착을 즉시 진행하고 정상 snapshot으로 되감지 않음             | 검증된 최신 공유값 즉시 적용                                          | 포탈·사망·절단 리셋은 shot을 결정적으로 clear                          |
 | 자동 무기 쿨다운                    | 소유 클라이언트의 발사 시뮬레이션                   | 발사와 동시에 진행하고 정상 snapshot으로 쿨다운을 다시 쓰지 않음         | 검증된 발사 사건을 각 클라이언트에서 재생                             | 후속 pending 쿨다운 유지·baseline 교정, 마지막 거절은 최초 준비값 복구 |

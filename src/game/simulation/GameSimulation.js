@@ -277,6 +277,7 @@ export class GameSimulation {
             playerId,
             respawnAnchorId: initialRespawnAnchorId
         });
+        runtime.entity.augmentCombat.syncLoadout(runtime.entity.foundation, runtime.entity.maxHealth);
         this.players.push(runtime.entity);
         this.#inputDrivenObjectsByOwner.set(runtime.entity.id, runtime.inputDrivenObjects);
         return runtime;
