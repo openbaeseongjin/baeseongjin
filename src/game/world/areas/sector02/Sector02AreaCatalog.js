@@ -675,8 +675,8 @@ const area05 = defineArea({
 
 const block06 = exitBlock({
     areaId: "sector-02-06",
-    deckX: 544,
-    deckTopY: -1091,
+    deckX: 800,
+    deckTopY: -640,
     deckWidth: 256,
     nextAreaId: "sector-02-07",
     panelObjectiveId: "sector-02-06:exit-panel-engaged",
@@ -684,9 +684,16 @@ const block06 = exitBlock({
 });
 
 const area06Id = "sector-02-06";
-const area06Landmarks = [landmark(area06Id, "g3", 192, 320, -544), landmark(area06Id, "g5", 288, 416, -736)];
-const area06Exit = point(`${area06Id}:exit`, 544, -1152);
-const area06Objective = reachExitObjective(area06Id, area06Exit.x, area06Exit.y);
+// REV8.0: SHORT RECOVERY LIFT -> SAFE REVEAL TURN -> QUIET UPPER RIM -> GAP A/GUARD A ->
+// GAP B/GUARD B -> EXIT. Relief Stage - all Rope relations intentionally easy (<=273px).
+const area06Landmarks = [
+    landmark(area06Id, "g1", -704, -704, -224, "G1"),
+    landmark(area06Id, "g2", -608, -608, -480, "G2"),
+    landmark(area06Id, "g3", 192, 192, -576, "G3"),
+    landmark(area06Id, "g4", 640, 640, -608, "G4")
+];
+const [area06G1, area06G2, area06G3, area06G4] = area06Landmarks;
+const area06Objective = reachExitObjective(area06Id, block06.exit.x, block06.exit.y);
 const area06PanelObjective = exitPanelObjective(area06Id, [area06Objective.id]);
 const area06 = defineArea({
     id: area06Id,
@@ -694,49 +701,64 @@ const area06 = defineArea({
     order: 6,
     name: "QUIET RESIDENTIAL VOID",
     subtitle: "RESIDENTIAL SCALE REVEAL",
-    bounds: { width: 1472, height: 1216 },
-    entry: point(`${area06Id}:entry`, -512, -32),
+    bounds: { width: 1920, height: 832 },
+    entry: point(`${area06Id}:entry`, -816, -32),
     exit: block06.exit,
     nextAreaId: "sector-02-07",
     surfaces: [
-        platform(area06Id, "p0", -640, -384, 0),
-        platform(area06Id, "p1", -576, -224, -160),
-        platform(area06Id, "p2", -256, 96, -384),
-        platform(area06Id, "r1", -96, 192, -640, "recovery"),
-        platform(area06Id, "p4", -448, -160, -832, "recovery"),
-        platform(area06Id, "r3", 224, 512, -832, "recovery"),
-        platform(area06Id, "p5", -64, 320, -992),
-        platform(area06Id, "p6", 320, 608, -1152),
+        horizontalSurface(area06Id, "p0", -800, 0, 320, 32, "platform"),
+        horizontalSurface(area06Id, "lift-landing", -640, -288, 256, 22, "platform"),
+        horizontalSurface(area06Id, "reveal-overlook", -448, -512, 384, 24, "safe-deck"),
+        horizontalSurface(area06Id, "quiet-upper-rim", -128, -512, 320, 24, "safe-deck"),
+        horizontalSurface(area06Id, "rim-landing-a", 320, -544, 256, 22, "platform"),
+        horizontalSurface(area06Id, "recovery-a", 128, -384, 256, 18, "recovery"),
+        horizontalSurface(area06Id, "rim-transfer", 480, -544, 224, 22, "platform"),
+        horizontalSurface(area06Id, "recovery-b", 512, -448, 224, 18, "recovery"),
+        horizontalSurface(area06Id, "final-residential-rim", 736, -576, 320, 22, "platform"),
         block06.deck,
-        ...area06Landmarks.map(({ surface }) => surface)
+        area06G1.surface,
+        area06G2.surface,
+        area06G3.surface,
+        area06G4.surface
     ],
     routePoints: [
-        point(`${area06Id}:route-entry`, -512, -32),
-        point(`${area06Id}:route-p1`, -400, -160),
-        point(`${area06Id}:route-p2`, -80, -384),
-        point(`${area06Id}:route-r1`, 48, -640),
-        point(`${area06Id}:route-p4`, -304, -832),
-        point(`${area06Id}:route-p5`, 128, -992),
-        point(`${area06Id}:route-p6`, 464, -1152),
+        point(`${area06Id}:route-entry`, -816, -32),
+        area06G1.route,
+        point(`${area06Id}:route-lift-landing`, -640, -288),
+        area06G2.route,
+        point(`${area06Id}:route-reveal-overlook`, -448, -512),
+        point(`${area06Id}:route-quiet-upper-rim-edge`, 32, -512),
+        area06G3.route,
+        point(`${area06Id}:route-rim-landing-a`, 320, -544),
+        point(`${area06Id}:route-rim-transfer`, 480, -544),
+        area06G4.route,
+        point(`${area06Id}:route-final-rim`, 736, -576),
         block06.routeExit
     ],
     recoveryPoints: [
-        point(`${area06Id}:recovery-r1`, 48, -664),
-        point(`${area06Id}:recovery-p4`, -304, -856),
-        point(`${area06Id}:recovery-r3`, 368, -856)
+        point(`${area06Id}:recovery-point-a`, 128, -402),
+        point(`${area06Id}:recovery-point-b`, 512, -466)
     ],
     objects: [
-        ...area06Landmarks.map(({ object }) => object),
-        pooledSentry(area06Id, "courtyard-left-guard", -304, -832, SECTOR_02_SUPPORT_POOL, {
-            width: 576,
-            height: 480
+        area06G1.object,
+        area06G2.object,
+        area06G3.object,
+        area06G4.object,
+        // Delayed security - activates only after Reveal/Quiet Rim, kill optional, no kill gate.
+        // Representative bands approximated around each guard's own position (doc: "Suggested
+        // band") - verified non-overlapping (left x:[192,512], right x:[528,880]).
+        pooledSentry(area06Id, "courtyard-left-guard", 352, -544, SECTOR_02_SUPPORT_POOL, {
+            width: 320,
+            height: 160
         }),
-        pooledSentry(area06Id, "courtyard-right-guard", 368, -832, SECTOR_02_LATE_POOL, {
-            width: 576,
-            height: 480
+        pooledSentry(area06Id, "courtyard-right-guard", 704, -576, SECTOR_02_LATE_POOL, {
+            width: 352,
+            height: 160
         }),
-        worldObject(`${area06Id}:courtyard-void`, "background-prop", 0, -608, {
-            cueIds: ["residential-scale", "quiet-void"]
+        // Story prop only - not collision, not a grapple field.
+        worldObject(`${area06Id}:courtyard-void`, "background-prop", -160, -560, {
+            cueIds: ["residential-scale", "quiet-void"],
+            gameplayCollision: false
         }),
         block06.panel,
         block06.gateVisual
@@ -744,8 +766,8 @@ const area06 = defineArea({
     objectives: [area06Objective, area06PanelObjective],
     gate: block06.gate,
     storyTriggers: ["quiet-courtyard", "residential-scale", "upper-route-preview"],
-    routes: ["safe", "flow", "recovery"],
-    cueIds: ["quiet-residential-void", "residential-scale", "no-enemy", "visual-relief"]
+    routes: ["main", "recovery"],
+    cueIds: ["quiet-residential-void", "residential-scale", "delayed-security", "visual-relief"]
 });
 
 const block07 = exitBlock({
