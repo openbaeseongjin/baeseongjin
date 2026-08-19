@@ -238,7 +238,7 @@ Run: `node tests/areaAuthoringV2.mjs`
 
 Expected: `1-1` and `1-7` match legacy Runtime values, manifest selects each Stage once, and generated files match the generator.
 
-- [ ] **Step 6: Commit v2 migration candidates and generated outputs.**
+- [x] **Step 6: Commit v2 migration candidates and generated outputs.**
 
 ```powershell
 git add docs/bsh/scenario/AREA-CATALOG.json docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json docs/bsh/scenario/1/1-7/AREA-SPEC.v2.json src/game/world/areas/generated tests/areaAuthoringV2.mjs docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md
@@ -256,23 +256,23 @@ git commit -m "feat: add v2 candidates for sector 01 stages"
 
 - Documents the exact source-lane output paths, the `composeSectorCatalog` signature, the sidecar-to-canonical promotion step, and main developer ownership of facade/root-script/live-Runtime work.
 
-- [ ] **Step 1: Run source-lane checks before documentation updates.**
+- [x] **Step 1: Run source-lane checks before documentation updates.**
 
 Run: `node tests/areaAuthoringV2.mjs; node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check; npm run check:scenario-integration`
 
-Expected: all commands pass; the scenario-integration marker is not edited by this lane.
+Expected: focused test와 generated-output check는 pass한다. 새 scenario 문서와 authored-area source를 감지한 scenario-integration checkpoint는 stale을 보고하며, 메인 개발자의 실제 Runtime 통합 검토 전에는 이 lane이 marker를 편집하지 않는다.
 
-- [ ] **Step 2: Record the integration handoff without changing main-owned files.**
+- [x] **Step 2: Record the integration handoff without changing main-owned files.**
 
 Document these exact main-developer actions: promote the two sidecars to `AREA-SPEC.json` v2 while extending the root validator, relocate legacy Sector 01 Stage definitions behind a provider, apply `composeSectorCatalog`, register root commands/tests, and record live cutover evidence after the final suite.
 
-- [ ] **Step 3: Re-run the source-lane checks and inspect the diff.**
+- [x] **Step 3: Re-run the source-lane checks and inspect the diff.**
 
 Run: `node tests/areaAuthoringV2.mjs; node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check; npm run check:scenario-integration; git diff --check; git diff --name-only main...HEAD`
 
-Expected: only new v2 lane paths, candidate specs, generated files, focused test, and handoff/design/plan documents differ from `main`.
+Expected: focused test와 generated-output check는 pass하고, scenario-integration checkpoint stale은 메인 개발자의 통합 현황 갱신 대상으로 남는다. `main`과의 diff에는 새 v2 lane path, candidate spec, generated file, focused test, handoff/design/plan document만 있다.
 
-- [ ] **Step 4: Commit the verified handoff.**
+- [x] **Step 4: Commit the verified handoff.**
 
 ```powershell
 git add SESSION-HANDOFF.md docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md docs/superpowers/plans/2026-08-20-map-editor-v2-authoring-lane.md
