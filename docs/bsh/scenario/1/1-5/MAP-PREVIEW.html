@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 1-5 REV4 Gameplay Map</title>
+<style>
+:root{--bg:#061019;--p:#0d1820;--l:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--v:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.42 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:430px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}select{width:100%;padding:7px;background:#10212a;color:var(--t);border:1px solid #4d6874;border-radius:6px}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:760px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.recovery{fill:#315944;stroke:var(--g);stroke-width:2}.cover{fill:#3c484e;stroke:#b4c3c9;stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.joint{fill:var(--a);stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.route{fill:none;stroke:var(--y);stroke-width:5;stroke-dasharray:14 9}.build{fill:none;stroke:var(--v);stroke-width:5;stroke-dasharray:8 7}.drop{fill:none;stroke:#8ad9ff;stroke-width:5;stroke-dasharray:5 8}.current{fill:none;stroke:var(--r);stroke-width:3;stroke-dasharray:7 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.12}.hidden{display:none}
+text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:var(--g)}.hyp{color:var(--a)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>1-5 AUGMENT TEST BAY · REV4</h1><div class="sub">GAMEPLAY ONLY · HORSESHOE / CONTROLLED DROP / RE-LAUNCH</div></header>
+<div class="layout"><aside>
+<div class="card"><b>REV3 → REV4</b><br>기존 상승형 Zig-zag 폐기.<br><br><b>→ 장거리 이동 → ↓ 의도적 낙하 → ↗ 재가속 → ← 상단 복귀</b></div>
+<div class="card"><b>BOUNDS</b><br>2304×1152<br><br>가로 Loop가 주인공. 배경 장식은 표시하지 않음.</div>
+<div class="card"><b>SELECTED AUGMENT VIEW</b><br>
+<select id="profile">
+<option value="fast-launch">빠른 발사</option><option value="long-rope">긴 로프</option><option value="fast-recover">빠른 회수</option><option value="release-propulsion">해제 추진</option><option value="electrified-rope">감전 로프</option><option value="collision-explosion">충돌 폭발</option><option value="direction-dash">점멸</option><option value="dash-strike">돌진 타격</option><option value="instant-guard">순간 방어</option><option value="push-away">밀쳐내기</option><option value="straight-shot">직선 사격</option><option value="slow-fall">느린 낙하</option>
+</select><div id="desc" style="margin-top:8px;color:#a8bbc3"></div></div>
+<div class="card"><b>GAMEPLAY-ONLY LEGEND</b><br>청록 원 = Grapple<br>주황 원 = 구조 Grip<br>회색 = 실제 Collision<br>초록 = Recovery/Safe<br>빨강 = Enemy<br>Cover = 실제 LOS 차단</div>
+<div class="card">
+<label><input id="showBase" type="checkbox" checked> Base Route</label>
+<label><input id="showBuild" type="checkbox" checked> Build Expression</label>
+<label><input id="showCurrent" type="checkbox"> Current 960×1280</label>
+<label><input id="showReach" type="checkbox"> 400px Reach</label>
+</div>
+<div class="card"><b>GATES</b><br>Scale <span class="pass">PASS</span><br>Similarity <span class="pass">PASS</span><br>Obstacle <span class="pass">PASS</span><br>Pacing <span class="hyp">HYPOTHESIS</span></div>
+</aside><main>
+<svg viewBox="-1250 -1230 2500 1290">
+<rect class="bounds" x="-1152" y="-1152" width="2304" height="1152"/><text class="tiny" x="-1130" y="-1120">REV4 CORE 2304×1152</text>
+
+<!-- entry / short rise -->
+<rect class="surface" x="-1088" y="0" width="512" height="32"/><text class="tiny" x="-1075" y="-10">ENTRY</text>
+<circle class="anchor" cx="-704" cy="-224" r="13"/><text x="-680" y="-215">C</text>
+<rect class="surface" x="-704" y="-320" width="288" height="20"/><text class="tiny" x="-690" y="-333">LAUNCH DECK</text>
+
+<!-- long span -->
+<circle class="joint" cx="-176" cy="-384" r="11"/><text class="tiny" x="-155" y="-375">F1</text>
+<circle class="joint" cx="224" cy="-416" r="11"/><text class="tiny" x="245" y="-407">F2</text>
+<rect class="recovery" x="-96" y="-256" width="320" height="18"/><text class="tiny" x="-85" y="-268">R1 MISS CATCH</text>
+<rect class="surface" x="576" y="-448" width="320" height="24"/><text class="tiny" x="590" y="-462">FAR RIGHT LANDING</text>
+
+<!-- controlled drop -->
+<path class="drop" d="M736,-448 L736,-180"/>
+<text class="tiny" x="760" y="-320">CONTROLLED DROP</text>
+<rect class="recovery" x="512" y="-160" width="448" height="32"/><text class="tiny" x="525" y="-174">LOW TEST SLOT</text>
+<rect class="cover" x="572" y="-272" width="72" height="112"/><text class="tiny" x="540" y="-284">STATIC COVER</text>
+<circle class="enemy" cx="864" cy="-160" r="18"/><text class="tiny" x="820" y="-187">LOW GUARD</text>
+
+<!-- relaunch -->
+<circle class="anchor" cx="544" cy="-352" r="13"/><text class="tiny" x="565" y="-344">RE-LAUNCH</text>
+<circle class="joint" cx="352" cy="-512" r="11"/><text class="tiny" x="372" y="-503">MID GRIP</text>
+<circle class="joint" cx="192" cy="-672" r="11"/><text class="tiny" x="212" y="-663">HIGH CAPTURE</text>
+
+<!-- upper return -->
+<circle class="anchor" cx="-160" cy="-768" r="13"/><text x="-138" y="-758">G</text>
+<circle class="enemy" cx="96" cy="-832" r="18"/><text class="tiny" x="55" y="-858">UPPER GUARD</text>
+<rect class="recovery" x="-560" y="-832" width="288" height="20"/><text class="tiny" x="-548" y="-845">UPPER RETURN DECK</text>
+<rect class="cover" x="-256" y="-944" width="64" height="112"/><text class="tiny" x="-285" y="-956">STATIC COVER</text>
+<circle class="joint" cx="-576" cy="-928" r="11"/><text class="tiny" x="-555" y="-918">FINAL GRIP</text>
+<rect class="surface" x="-960" y="-1024" width="384" height="32"/><text class="tiny" x="-945" y="-1038">FINAL DECK / EXIT LEFT</text>
+
+<g id="base"><path class="route" d="M-896,-32 Q-820,-120 -704,-224 Q-650,-280 -560,-320 Q-350,-360 -176,-384 Q20,-400 224,-416 Q470,-430 736,-448 L736,-180 Q690,-155 620,-160 Q610,-250 544,-352 Q460,-430 352,-512 Q290,-590 192,-672 Q20,-735 -160,-768 Q-260,-815 -416,-832 Q-500,-885 -576,-928 Q-650,-980 -768,-1024"/></g>
+<g id="build"><path id="buildPath" class="build" d="M736,-448 L736,-180"/></g>
+<g id="current" class="hidden"><rect class="current" x="-480" y="-1280" width="960" height="1280"/><text class="tiny" x="-465" y="-1245">CURRENT 960×1280</text></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-704" cy="-224" r="400"/><circle class="reach" cx="-176" cy="-384" r="400"/><circle class="reach" cx="544" cy="-352" r="400"/><circle class="reach" cx="-160" cy="-768" r="400"/></g>
+</svg></main></div>
+<script>
+const data={
+"fast-launch":["낙하 중 늦은 Hook, F1/F2 늦은 조준, re-launch catch가 유리.","M-176,-384 Q20,-400 224,-416 M736,-448 L736,-190 M544,-352 Q370,-530 192,-672"],
+"long-rope":["F2와 High Capture를 더 이른 위치에서 잡아 setup 동작을 압축.","M-560,-320 Q-120,-390 224,-416 M620,-160 Q430,-420 192,-672"],
+"fast-recover":["Span chain / drop catch / re-launch 실패 후 재시도 시간이 짧아짐.","M-704,-224 Q-350,-360 -176,-384 Q20,-400 224,-416 M544,-352 Q350,-520 192,-672"],
+"release-propulsion":["Launch release로 Right Landing, Low Slot re-launch에서 더 큰 거리/높이 확보.","M-704,-224 Q-100,-390 736,-448 M620,-160 Q400,-440 192,-672"],
+"electrified-rope":["Low Slot / Upper Guard를 Rope line에 걸치며 이동과 피해를 병행.","M620,-160 Q720,-260 544,-352 M192,-672 Q20,-760 96,-832"],
+"collision-explosion":["Low Slot 출구와 Upper Return의 고속 body contact에서 burst 표현.","M620,-160 Q760,-240 864,-160 M192,-672 Q100,-780 96,-832"],
+"direction-dash":["Right Landing, Drop Slot, Upper Return landing 오차를 즉시 보정.","M224,-416 Q520,-430 736,-448 M736,-448 L736,-180 M-160,-768 Q-300,-820 -416,-832"],
+"dash-strike":["Low Guard 압력을 re-launch 이동과 한 동작으로 묶음.","M620,-160 Q760,-180 864,-160 Q680,-260 544,-352"],
+"instant-guard":["Controlled Drop 또는 Upper Return에서 한 발을 버티고 흐름 유지.","M736,-448 L736,-180 M192,-672 Q0,-790 -416,-832"],
+"push-away":["Low Slot에서 Pursuit면 공간 확보, 고정형이면 피해로 통과 압력 감소.","M620,-160 L864,-160"],
+"straight-shot":["Upper Return Deck에서 Upper Guard를 원거리로 압박.","M-416,-832 L96,-832"],
+"slow-fall":["Controlled Drop이 가장 강한 표현 지점. 낙하 중 조준/착지 안정성 증가.","M736,-448 L736,-180"]
+};
+function update(){const [d,p]=data[profile.value];desc.innerHTML=d;buildPath.setAttribute("d",p)}
+profile.addEventListener("change",update);update();
+showBase.onchange=()=>base.classList.toggle("hidden",!showBase.checked);
+showBuild.onchange=()=>build.classList.toggle("hidden",!showBuild.checked);
+showCurrent.onchange=()=>current.classList.toggle("hidden",!showCurrent.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

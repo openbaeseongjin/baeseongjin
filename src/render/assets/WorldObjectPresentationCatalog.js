@@ -2,6 +2,7 @@ import { anchoredRectangleBounds } from "../../game/world/AuthoredCoordinateAnch
 
 const DEFAULT_DEFINITIONS = {
     "world-object:grapple-landmark": { renderMode: "mock-shape", color: "#22d3ee", radius: 15 },
+    "world-object:structural-grapple-joint": { renderMode: "mock-shape", color: "#64748b", radius: 10 },
     "world-object:terminal": { renderMode: "mock-shape", color: "#fbbf24", radius: 20 },
     "world-object:gate-panel": {
         renderMode: "mock-shape",

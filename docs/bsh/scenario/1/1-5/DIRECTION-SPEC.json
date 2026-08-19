@@ -1,0 +1,312 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "29d72baa1879850ea9e811ff6640dfce7e23c7c9",
+  "stage": {
+    "sector": 1,
+    "stage": 5,
+    "sourceAreaId": "sector-01-05",
+    "name": "AUGMENT TEST BAY"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "shift from quiet calibration room to live industrial application",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "1-5:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "launch-span",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "AUGMENT TEST BAY",
+            "detail": "LIVE CALIBRATION"
+          },
+          "timing": {
+            "durationSeconds": 1.4
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "node-hum-to-wide-test-bay-reverb"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "presentation duration only",
+      "validation": "does not block movement"
+    },
+    {
+      "beatId": "s1-long-right-span",
+      "status": "DESIGN LOCKED",
+      "purpose": "first live build expression without explicit tutorial",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "launch-span"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-5:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "launch-span",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "object",
+          "target": "F1/F2/Far Right Landing",
+          "action": "readable-next-action"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "player reaches far-right landing or falls to recovery",
+      "validation": "camera shows next 2 grips and landing"
+    },
+    {
+      "beatId": "s2-controlled-drop",
+      "status": "DESIGN LOCKED",
+      "purpose": "make deliberate height loss read as progression",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "far-right-drop-entry"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "1-5:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "drop-slot",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED TRIGGER",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "VERTICAL LOAD TEST",
+              "detail": "IN PROGRESS",
+              "durationSeconds": 1.1
+            },
+            {
+              "title": "SECURITY RESPONSE TEST",
+              "detail": "IN PROGRESS",
+              "durationSeconds": 1.1
+            }
+          ]
+        },
+        {
+          "type": "camera",
+          "action": "show-low-slot-before-player-commits-to-drop"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "air-rush-no-failure-sting"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "player enters low-slot band",
+      "validation": "drop never receives failure/death presentation"
+    },
+    {
+      "beatId": "s3-low-slot",
+      "status": "DESIGN LOCKED",
+      "purpose": "light pressure while Player chooses a build-informed exit",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "low-test-slot"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-5:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "drop-slot",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "target": "low-guard",
+          "action": "normal-runtime-pressure-no-kill-gate"
+        },
+        {
+          "type": "object",
+          "target": "low-cover",
+          "action": "static-los-cover"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "player begins relaunch",
+      "validation": "combat does not stall traversal"
+    },
+    {
+      "beatId": "s4-relaunch",
+      "status": "DESIGN LOCKED",
+      "purpose": "recover intentionally lost height in one clear committed arc",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "relaunch"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-5:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "relaunch",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "object",
+          "target": "relaunch/mid-grip/high-capture",
+          "action": "single-arc-readability"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "player reaches high-capture band",
+      "validation": "does not degrade into multi-platform ladder"
+    },
+    {
+      "beatId": "s5-upper-return",
+      "status": "DESIGN LOCKED",
+      "purpose": "close the horseshoe loop under light security",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "upper-return"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-5:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "upper-return",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "enemy",
+          "target": "upper-guard",
+          "action": "normal-runtime-pressure-no-kill-gate"
+        },
+        {
+          "type": "object",
+          "target": "upper-cover",
+          "action": "static-los-cover"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "player reaches final deck",
+      "validation": "dominant body direction is leftward"
+    },
+    {
+      "beatId": "s6-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "handoff from live tool test to cooling failure",
+      "trigger": {
+        "type": "gate-unlocked",
+        "gateId": "sector-01-05:gate"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-gate-unlock",
+      "dedupeToken": "runtime-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "exit",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "COOLING DISTRIBUTION",
+            "detail": "SERVICE ACCESS"
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "test-bay-fades-distant-fan-pulse"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "gate handoff",
+      "validation": "no future 1-6 map reveal beyond audio/environment hint"
+    }
+  ],
+  "validation": [
+    "worldPause false for all beats",
+    "no Player Bark",
+    "no Augment tutorial text",
+    "drop camera reveals lower destination before failure interpretation",
+    "existing verified Story strings preserved",
+    "enemy deaths not required",
+    "map background decoration absent from MAP-PREVIEW"
+  ]
+}

@@ -497,9 +497,9 @@ const area04 = defineArea({
 
 const block05 = exitBlock({
     areaId: "sector-01-05",
-    deckX: 128,
-    deckTopY: -1155,
-    deckWidth: 320,
+    deckX: -768,
+    deckTopY: -1024,
+    deckWidth: 384,
     nextAreaId: "sector-01-06",
     panelObjectiveId: "sector-01-05:exit-panel-engaged",
     panelProperties: { requiredObjectiveIds: ["sector-01-05:final-deck-reached"] }
@@ -511,53 +511,83 @@ const area05 = defineArea({
     order: 5,
     name: "AUGMENT TEST BAY",
     subtitle: "LIVE CALIBRATION",
-    bounds: { width: 960, height: 1280 },
-    entry: point("sector-01-05:entry", -320, -32),
+    bounds: { width: 2304, height: 1152 },
+    entry: point("sector-01-05:entry", -896, -32),
     exit: block05.exit,
     nextAreaId: "sector-01-06",
     surfaces: [
-        horizontalSurface("sector-01-05:p0", -272, 0, 288),
-        horizontalSurface("sector-01-05:r1", -176, -448, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-05:r2", 48, -768, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-05:safe-ledge", -256, -928, 192, 16, { kind: "safe-deck" }),
-        groundedSurface("sector-01-05:safe-cover", -144, -928, 32, 96, { kind: "cover", oneWay: false }),
-        horizontalSurface("sector-01-05:r3", 176, -1088, 224, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-05:p0", -832, 0, 512),
+        horizontalSurface("sector-01-05:launch-deck", -560, -320, 288, 24),
+        horizontalSurface("sector-01-05:r1", 64, -256, 320, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-05:far-right-landing", 736, -448, 320, 24, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-05:low-test-slot", 736, -160, 448, 32, { kind: "safe-deck" }),
+        groundedSurface("sector-01-05:low-cover", 608, -160, 72, 112, {
+            kind: "cover",
+            oneWay: false,
+            grappleable: false
+        }),
+        horizontalSurface("sector-01-05:upper-return-deck", -416, -832, 288, 20, { kind: "safe-deck" }),
+        groundedSurface("sector-01-05:upper-cover", -224, -832, 64, 112, {
+            kind: "cover",
+            oneWay: false,
+            grappleable: false
+        }),
         block05.deck,
+        grappleTarget("sector-01-05:anchor-c-surface", -704, -224),
+        grappleTarget("sector-01-05:anchor-g-surface", -160, -768),
         ...[
-            ["c", -160, -544],
-            ["g", 32, -1040]
-        ].map(([id, x, y]) => grappleTarget(`sector-01-05:anchor-${id}-surface`, x, y))
+            ["f1", -176, -384],
+            ["f2", 224, -416],
+            ["relaunch", 544, -352],
+            ["mid-grip", 352, -512],
+            ["high-capture", 192, -672],
+            ["final-grip", -576, -928]
+        ].map(([id, x, y]) => grappleTarget(`sector-01-05:${id}-surface`, x, y))
     ],
     routePoints: [
-        point("sector-01-05:route-entry", -320, -32),
-        ...[
-            ["c", -160, -544, "C"],
-            ["g", 32, -1040, "G"]
-        ].map(([id, x, y, label]) => point(`sector-01-05:route-${id}`, x, y, { landmark: label })),
+        point("sector-01-05:route-entry", -896, -32),
+        point("sector-01-05:route-c", -704, -224, { landmark: "C" }),
+        point("sector-01-05:route-launch", -560, -320),
+        point("sector-01-05:route-f1", -176, -384),
+        point("sector-01-05:route-f2", 224, -416),
+        point("sector-01-05:route-far-right", 736, -448),
+        point("sector-01-05:route-controlled-drop", 736, -180),
+        point("sector-01-05:route-low-slot", 620, -160),
+        point("sector-01-05:route-relaunch", 544, -352),
+        point("sector-01-05:route-mid-grip", 352, -512),
+        point("sector-01-05:route-high-capture", 192, -672),
+        point("sector-01-05:route-g", -160, -768, { landmark: "G" }),
+        point("sector-01-05:route-upper-return", -416, -832),
+        point("sector-01-05:route-final-grip", -576, -928),
         block05.routeExit
     ],
     recoveryPoints: [
-        point("sector-01-05:recovery-r1", -176, -472),
-        point("sector-01-05:recovery-r2", 48, -792),
-        point("sector-01-05:recovery-r3", 176, -1112)
+        point("sector-01-05:recovery-r1", 64, -280),
+        point("sector-01-05:recovery-low-slot", 620, -192),
+        point("sector-01-05:recovery-upper-return", -416, -856)
     ],
     objects: [
+        worldObject("sector-01-05:anchor-c", "grapple-landmark", -704, -224, { label: "C" }),
+        worldObject("sector-01-05:anchor-g", "grapple-landmark", -160, -768, { label: "G" }),
+        worldObject("sector-01-05:relaunch", "grapple-landmark", 544, -352, { label: "RE-LAUNCH" }),
         ...[
-            ["c", -160, -544, "C"],
-            ["g", 32, -1040, "G"]
-        ].map(([id, x, y, label]) =>
-            worldObject(`sector-01-05:anchor-${id}`, "grapple-landmark", x, y, {
-                label
+            ["f1", -176, -384],
+            ["f2", 224, -416],
+            ["mid-grip", 352, -512],
+            ["high-capture", 192, -672],
+            ["final-grip", -576, -928]
+        ].map(([id, x, y]) =>
+            worldObject(`sector-01-05:${id}`, "grapple-landmark", x, y, {
+                presentationId: "world-object:structural-grapple-joint"
             })
         ),
-        worldObject("sector-01-05:sentry-turret-01", "sentry", 384, -960, {
-            enemySelection: { allowedEnemyTypes: SECTOR_01_EARLY_POOL },
-            activationSpec: objectTriggerSpec("center", 576, 448, { x: -288, y: 0 }),
-            rules: ["standard-projectile", "no-rope-cut"]
+        pooledSentry("sector-01-05:low-guard", 864, -160, SECTOR_01_EARLY_POOL, {
+            width: 320,
+            height: 320
         }),
-        pooledSentry("sector-01-05:lower-route-guard", -224, -640, SECTOR_01_EARLY_POOL, {
-            width: 448,
-            height: 480
+        pooledSentry("sector-01-05:upper-guard", 96, -832, SECTOR_01_EARLY_POOL, {
+            width: 320,
+            height: 320
         }),
         block05.panel,
         block05.gateVisual
@@ -576,15 +606,16 @@ const area05 = defineArea({
         }
     ],
     gate: block05.gate,
-    routes: ["base-safe", "impulse-express", "relay-express", "shear-control", "recovery"],
-    storyTriggers: ["active-augment-display", "live-calibration", "cooling-access-preview"],
+    routes: ["base-safe", "recovery"],
+    storyTriggers: ["vertical-load-test", "security-response-test", "cooling-distribution-service-access"],
     cameraZones: [
-        cameraZone("load-gap", -544, 0, 1, 0.72),
-        cameraZone("relay-spine", -768, -544, 1.05, 0.74),
-        cameraZone("live-security", -1216, -768, 0.85, 0.66, { verticalPlayerRatio: 0.64 }),
-        cameraZone("exit", -1280, -1216, 1.15, 0.78)
+        cameraZone("launch-span", -192, 0, 0.88, 0.66),
+        cameraZone("drop-slot", -448, -192, 0.96, 0.7),
+        cameraZone("relaunch", -704, -448, 0.92, 0.68),
+        cameraZone("upper-return", -928, -704, 0.9, 0.67),
+        cameraZone("exit", -1152, -928, 1.1, 0.76)
     ],
-    cueIds: ["active-augment", "load-gap", "relay-spine", "live-sentry-geometry"]
+    cueIds: ["vertical-load-test", "security-response-test", "cooling-distribution-service-access"]
 });
 
 const block06 = exitBlock({
