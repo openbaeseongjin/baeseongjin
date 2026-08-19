@@ -100,10 +100,7 @@ const area01 = defineArea({
         point("sector-01-01:route-c", -96, -736, { landmark: "C" }),
         block01.routeExit
     ],
-    recoveryPoints: [
-        point("sector-01-01:recovery-r1", -304, -264),
-        point("sector-01-01:recovery-r3", -272, -792)
-    ],
+    recoveryPoints: [point("sector-01-01:recovery-r1", -304, -264), point("sector-01-01:recovery-r3", -272, -792)],
     objects: [
         worldObject("sector-01-01:anchor-a", "grapple-landmark", -128, -192, { label: "A" }),
         worldObject("sector-01-01:anchor-c", "grapple-landmark", -96, -736, { label: "C" }),
@@ -194,10 +191,7 @@ const area02 = defineArea({
 
         block02.routeExit
     ],
-    recoveryPoints: [
-        point("sector-01-02:recovery-p1", -416, -344),
-        point("sector-01-02:recovery-r2", 64, -680)
-    ],
+    recoveryPoints: [point("sector-01-02:recovery-p1", -416, -344), point("sector-01-02:recovery-r2", 64, -680)],
     objects: [
         worldObject("sector-01-02:maintenance-lift", "background-prop", 128, -448, {
             gameplay: false,
