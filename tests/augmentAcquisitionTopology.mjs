@@ -155,13 +155,10 @@ export function run() {
         assert.equal(state.selectedAugmentIds.length, 1);
         assert.deepEqual(state.augmentRuntimeState.consumedSourceIds, [wipeSource.id]);
     }
-    assert.equal(wipeSimulation.worldProgress.isObjectiveComplete(wipeSource.objectiveId), false);
-    assert.equal(wipeSimulation.advanceSectorProgressToLandmark("1-4"), true);
-    wipeSimulation.step(1 / 120, interactCommand());
     assert.equal(
         wipeSimulation.worldProgress.isObjectiveComplete(wipeSource.objectiveId),
         true,
-        "revisiting a consumed Node after party wipe must restore its shared objective without a second offer"
+        "all Players dying must preserve the shared objective until Timer/Purge defines an explicit reset"
     );
 
     const departureSimulation = createCurrentGameSimulation({ worldSeed: 634, playerId: "departure-owner" });

@@ -13,6 +13,7 @@ export function run() {
         velocity: { x: 30, y: -20 },
         angle: 0.75,
         angularVelocity: -2.5,
+        respawnAnchorId: "sector-01:landmark:02:checkpoint",
         isGrounded: false,
         rope: {
             isAttached: true,
@@ -20,10 +21,11 @@ export function run() {
             attachmentOffset: { x: 12, y: -7 }
         }
     });
-    assert.equal(OWNER_MOTION_STATE_PROTOCOL_VERSION, 4);
+    assert.equal(OWNER_MOTION_STATE_PROTOCOL_VERSION, 5);
     assert.equal(motion.angle, 0.75);
     assert.equal(motion.angularVelocity, -2.5);
     assert.deepEqual(motion.rope.attachmentOffset, { x: 12, y: -7 });
+    assert.equal(motion.respawnAnchorId, "sector-01:landmark:02:checkpoint");
     assert.deepEqual(deserializeOwnerMotionState(serializeOwnerMotionState(motion)), motion);
     assert.throws(
         () => createOwnerMotionState({ ...motion, rope: { ...motion.rope, attachmentOffset: null } }),

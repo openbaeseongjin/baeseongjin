@@ -669,8 +669,9 @@ function testMixerVoicePolicyAndBindings() {
     bindings.presentFrame({
         events: [
             {
-                eventType: "landmark-entered",
+                eventType: "stage-savepoint-reached",
                 respawnAnchorId: "sector-01:landmark:02:checkpoint",
+                playerId: "player-1",
                 position: { x: 10, y: -20 }
             }
         ],
@@ -678,6 +679,19 @@ function testMixerVoicePolicyAndBindings() {
     });
     assert.equal(calls.at(-1).cueId, "gameplay-checkpoint-reached");
     assert.equal(calls.at(-1).request.causalId, "checkpoint:sector-01:landmark:02:checkpoint");
+    const checkpointCallCount = calls.length;
+    bindings.presentFrame({
+        events: [
+            {
+                eventType: "stage-savepoint-reached",
+                respawnAnchorId: "sector-01:landmark:02:checkpoint",
+                playerId: "player-2",
+                position: { x: 10, y: -20 }
+            }
+        ],
+        context: { ...world, localPlayerId: "player-1", tick: 6 }
+    });
+    assert.equal(calls.length, checkpointCallCount, "another Player's save point must not play a local cue");
     const extensibleBindings = new AudioEventBindings(
         { play: (cueId, request) => calls.push({ cueId, request }) },
         {

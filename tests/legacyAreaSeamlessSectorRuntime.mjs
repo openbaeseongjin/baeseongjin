@@ -48,6 +48,12 @@ export function run() {
             assert.ok(anchor, `landmark respawn anchor must exist: ${landmark.id}`);
             assert.equal(anchor.landmarkId, landmark.id);
             assert.deepEqual(anchor.position, landmark.entry);
+            assert.deepEqual(anchor.triggerBounds, {
+                x: landmark.entry.x - 38,
+                y: landmark.entry.y - 78,
+                width: 76,
+                height: 82
+            });
             assert.equal(anchor.level, landmark.order - 1);
             assert.ok(anchor.radius >= 64, `Stage save point must have a visible culling radius: ${landmark.id}`);
             assert.equal(anchor.label, `STAGE ${landmark.legacyStageAlias} SAVE`);
@@ -109,9 +115,44 @@ export function run() {
         assert.deepEqual(connector.start, source.exit);
         assert.deepEqual(connector.end, target.entry);
         const surface = world.surfaces.find(({ id }) => id === connector.surfaceId);
-        assert.ok(surface);
-        assert.equal(surface.oneWay, false);
-        assert.ok(surface.height >= 32);
+        if (connector.start.y === connector.end.y) {
+            const supportAt = (point) =>
+                world.surfaces
+                    .filter(
+                        (candidate) =>
+                            candidate.id !== surface?.id &&
+                            candidate.requiredRouteId === undefined &&
+                            candidate.topY === point.y + 32 &&
+                            candidate.x <= point.x &&
+                            candidate.x + candidate.width >= point.x
+                    )
+                    .sort((left, right) => left.width - right.width)[0];
+            const sourceSupport = supportAt(connector.start);
+            const targetSupport = supportAt(connector.end);
+            const leftSupport = sourceSupport.x < targetSupport.x ? sourceSupport : targetSupport;
+            const rightSupport = leftSupport === sourceSupport ? targetSupport : sourceSupport;
+            const gapStart = leftSupport.x + leftSupport.width;
+            const gapWidth = rightSupport.x - gapStart;
+            if (gapWidth <= 0) {
+                assert.equal(connector.surfaceId, null, "overlapping authored decks must not create a platform");
+                assert.equal(surface, undefined);
+            } else {
+                assert.ok(surface);
+                assert.equal(surface.oneWay, false);
+                assert.equal(surface.x, gapStart);
+                assert.equal(surface.width, gapWidth);
+                assert.equal(surface.y, connector.start.y + 32);
+                assert.equal(surface.height, 32);
+                assert.ok(
+                    surface.width < Math.abs(connector.end.x - connector.start.x),
+                    "a route connector must fill only the authored deck gap instead of covering both Stage anchors"
+                );
+            }
+        } else {
+            assert.ok(surface);
+            assert.equal(surface.oneWay, false);
+            assert.ok(surface.height >= 32);
+        }
     }
 
     const transferLock = world.routeLocks.find(({ targetLandmarkId }) => targetLandmarkId === "sector-03:landmark:01");

@@ -25,7 +25,7 @@ export function run() {
         position: { x: 10, y: 20 }
     });
     assert.equal(envelope.protocolVersion, WORLD_SNAPSHOT_PROTOCOL_VERSION);
-    assert.equal(envelope.protocolVersion, 9);
+    assert.equal(envelope.protocolVersion, 10);
     assert.equal(envelope.state.players[0].ownerMotionTick, 38);
     assert.deepEqual(deserializeWorldSnapshotEnvelope(serializeWorldSnapshotEnvelope(envelope)), envelope);
     assert.throws(() => envelopeWithPlayer({ id: "player-1", position: { x: 10, y: 20 } }), /ownerMotionTick/);
@@ -38,22 +38,21 @@ export function run() {
         ...envelope,
         state: {
             progressKind: "sector",
-            respawnAnchorId: "sector-01:landmark:02:checkpoint",
-            partyWipeBaseline: {
-                sectorId: "sector-01",
-                revision: 0,
-                respawnAnchorId: "sector-01:entry",
-                entryLandmarkId: "sector-01:landmark:01"
-            },
             worldProgress: {
-                currentSectorId: "sector-01",
-                respawnAnchorId: "sector-01:landmark:02:checkpoint"
+                currentSectorId: "sector-01"
             },
-            players: envelope.state.players,
+            players: [
+                {
+                    ...envelope.state.players[0],
+                    respawnAnchorId: "sector-01:landmark:02:checkpoint"
+                }
+            ],
             enemies: []
         }
     });
-    assert.equal(sectorEnvelope.state.respawnAnchorId, "sector-01:landmark:02:checkpoint");
+    assert.equal(sectorEnvelope.state.players[0].respawnAnchorId, "sector-01:landmark:02:checkpoint");
+    assert.equal("respawnAnchorId" in sectorEnvelope.state, false);
+    assert.equal("partyWipeBaseline" in sectorEnvelope.state, false);
     assert.equal("activeCheckpointId" in sectorEnvelope.state, false);
     assert.throws(
         () =>
@@ -61,65 +60,31 @@ export function run() {
                 ...envelope,
                 state: {
                     ...sectorEnvelope.state,
-                    worldProgress: { ...sectorEnvelope.state.worldProgress, respawnAnchorId: "sector-01:entry" }
+                    players: [{ ...sectorEnvelope.state.players[0], respawnAnchorId: "" }]
                 }
             }),
-        /worldProgress.respawnAnchorId/
+        /players\[\]\.respawnAnchorId/
     );
     assert.throws(
         () =>
             createWorldSnapshotEnvelope({
                 ...envelope,
                 state: {
-                    progressKind: "sector",
-                    respawnAnchorId: "sector-01:landmark:02:checkpoint",
-                    partyWipeBaseline: sectorEnvelope.state.partyWipeBaseline,
-                    worldProgress: sectorEnvelope.state.worldProgress,
-                    activeCheckpointId: "checkpoint:legacy",
-                    players: envelope.state.players,
-                    enemies: []
+                    ...sectorEnvelope.state,
+                    respawnAnchorId: "sector-01:landmark:02:checkpoint"
                 }
             }),
-        /must not include activeCheckpointId/
+        /must not include respawnAnchorId/
     );
     assert.throws(
         () =>
             createWorldSnapshotEnvelope({
                 ...envelope,
                 state: {
-                    progressKind: "sector",
-                    respawnAnchorId: "sector-01:landmark:02:checkpoint",
-                    worldProgress: {
-                        currentSectorId: "sector-01",
-                        respawnAnchorId: "sector-01:landmark:02:checkpoint"
-                    },
-                    players: envelope.state.players,
-                    enemies: []
+                    ...sectorEnvelope.state,
+                    partyWipeBaseline: { sectorId: "sector-01" }
                 }
             }),
-        /partyWipeBaseline must be an object/
-    );
-    assert.throws(
-        () =>
-            createWorldSnapshotEnvelope({
-                ...envelope,
-                state: {
-                    progressKind: "sector",
-                    respawnAnchorId: "sector-01:landmark:02:checkpoint",
-                    partyWipeBaseline: {
-                        sectorId: "sector-01",
-                        revision: -1,
-                        respawnAnchorId: "sector-01:entry",
-                        entryLandmarkId: "sector-01:landmark:01"
-                    },
-                    worldProgress: {
-                        currentSectorId: "sector-01",
-                        respawnAnchorId: "sector-01:landmark:02:checkpoint"
-                    },
-                    players: envelope.state.players,
-                    enemies: []
-                }
-            }),
-        /partyWipeBaseline.revision/
+        /must not include partyWipeBaseline/
     );
 }

@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 4;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 5;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
@@ -65,12 +65,16 @@ export function createOwnerMotionState({
     isGrounded,
     rope,
     launcher = null,
-    augmentRuntimeState = null
+    augmentRuntimeState = null,
+    respawnAnchorId = null
 }) {
     if (typeof isGrounded !== "boolean") throw new Error("isGrounded must be boolean");
     if (typeof rope?.isAttached !== "boolean") throw new Error("rope.isAttached must be boolean");
     if (!Number.isFinite(angle)) throw new Error("angle must be finite");
     if (!Number.isFinite(angularVelocity)) throw new Error("angularVelocity must be finite");
+    if (respawnAnchorId !== null && (typeof respawnAnchorId !== "string" || respawnAnchorId.length === 0)) {
+        throw new Error("respawnAnchorId must be null or a non-empty string");
+    }
     return Object.freeze({
         protocolVersion: OWNER_MOTION_STATE_PROTOCOL_VERSION,
         clientTick: assertTick(clientTick, "clientTick"),
@@ -79,6 +83,7 @@ export function createOwnerMotionState({
         angle,
         angularVelocity,
         isGrounded,
+        respawnAnchorId,
         rope: Object.freeze({
             isAttached: rope.isAttached,
             anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null,

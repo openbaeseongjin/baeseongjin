@@ -320,7 +320,8 @@ export class RemoteGameAuthority {
             isGrounded: predicted.isGrounded,
             rope: predicted.rope,
             launcher: predicted.launcher,
-            augmentRuntimeState: predicted.augmentRuntimeState
+            augmentRuntimeState: predicted.augmentRuntimeState,
+            respawnAnchorId: predicted.respawnAnchorId ?? null
         });
     }
 

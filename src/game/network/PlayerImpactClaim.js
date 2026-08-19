@@ -2,7 +2,7 @@ import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 8;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 9;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit", "fall-damage"]);
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
@@ -130,6 +130,9 @@ function normalizeImpactRecoveryState(state) {
         minimum: 0
     });
     assertFinite(normalized.ropeDisabledRemaining, "outcome.state.ropeDisabledRemaining", { minimum: 0 });
+    if (normalized.respawnAnchorId !== undefined && normalized.respawnAnchorId !== null) {
+        assertId(normalized.respawnAnchorId, "outcome.state.respawnAnchorId");
+    }
     if (normalized.lifeState !== "active") throw new Error("outcome.state.lifeState must be active");
 
     assertBoolean(normalized.rope?.isAttached, "outcome.state.rope.isAttached");
@@ -235,6 +238,7 @@ function impactStateProjection(state, { impactType, respawned }) {
         maxHealth: quantized(state.maxHealth, 0.001),
         ropeDisabledTicks: quantized(state.ropeDisabledRemaining, 1 / 120),
         lifeState: state.lifeState,
+        respawnAnchorId: state.respawnAnchorId ?? null,
         rope: {
             isAttached: state.rope.isAttached,
             anchor: state.rope.isAttached ? quantizedVector(state.rope.anchor, 0.1) : null,

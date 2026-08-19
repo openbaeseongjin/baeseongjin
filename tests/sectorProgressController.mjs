@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { Vector2 } from "../src/game-kit/index.js";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
+import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
 import { advanceSectorProgress } from "../src/game/world/SectorProgressController.js";
 import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
 import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
@@ -10,7 +11,7 @@ function player(id, position) {
     return {
         id,
         lifeState: "active",
-        physics: { position: new Vector2(position.x, position.y) }
+        physics: { position: new Vector2(position.x, position.y), collider: new CircleCollider({ radius: 18 }) }
     };
 }
 
@@ -92,20 +93,28 @@ export function run() {
     assert.ok(events.some(({ type }) => type === "objective-completed"));
     assert.ok(events.some(({ type, routeId }) => type === "route-unlocked" && routeId === first.outboundRouteId));
 
-    owner.physics.position.set(second.entry.x, second.entry.y);
+    owner.physics.position.set(second.entry.x + 63, second.entry.y);
+    events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });
+    assert.equal(
+        events.some(({ type }) => type === "landmark-entered"),
+        false,
+        "entering an arbitrary square around the Stage start must not activate its save point"
+    );
+    assert.equal(progress.snapshot().currentLandmarkId, first.id);
+
+    owner.physics.position.set(second.entry.x + 56, second.entry.y);
     events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });
     assert.ok(events.some(({ type, landmarkId }) => type === "landmark-entered" && landmarkId === second.id));
     assert.equal(progress.snapshot().currentLandmarkId, second.id);
-    assert.equal(progress.snapshot().respawnAnchorId, second.respawnAnchorId);
     assert.ok(
         events.some(
             ({ type, respawnAnchorId }) =>
-                type === "landmark-entered" && respawnAnchorId === "sector-01:landmark:02:checkpoint"
+                type === "stage-savepoint-reached" && respawnAnchorId === "sector-01:landmark:02:checkpoint"
         )
     );
     assert.deepEqual(
         owner.physics.position,
-        new Vector2(second.entry.x, second.entry.y),
+        new Vector2(second.entry.x + 56, second.entry.y),
         "progress must not teleport the player"
     );
 
@@ -127,5 +136,4 @@ export function run() {
     events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });
     assert.ok(events.some(({ type }) => type === "sector-entered"));
     assert.equal(progress.snapshot().currentSectorId, "sector-02");
-    assert.equal(progress.snapshot().respawnAnchorId, "sector-02:entry");
 }

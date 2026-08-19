@@ -1,4 +1,5 @@
 import { pointInsideBounds } from "./WorldForceField.js";
+import { playerOverlapsStageSavePoint } from "./StageSavePointGeometry.js";
 
 function activePlayers(players) {
     return players.filter(({ lifeState }) => lifeState === "active");
@@ -54,13 +55,28 @@ function completionEvents({ result, objective, player, beforeRoutes, afterRoutes
     return events;
 }
 
-function entryBounds(position, size = 128) {
-    return Object.freeze({
-        x: position.x - size * 0.5,
-        y: position.y - size * 0.5,
-        width: size,
-        height: size
-    });
+function stageSavepointEvents(world, progress, players, respawnAnchorIdByPlayerId) {
+    const visitedLandmarkIds = new Set(progress.snapshot().visitedLandmarkIds);
+    const reachableAnchors = world.respawnAnchors
+        .filter(({ landmarkId }) => visitedLandmarkIds.has(landmarkId))
+        .sort((left, right) => right.level - left.level);
+    const events = [];
+    for (const player of activePlayers(players)) {
+        const anchor = reachableAnchors.find((candidate) => playerOverlapsStageSavePoint(player, candidate));
+        const currentAnchor = world.respawnAnchors.find(({ id }) => id === respawnAnchorIdByPlayerId.get(player.id));
+        if (!anchor || anchor.level <= (currentAnchor?.level ?? -1)) continue;
+        events.push(
+            Object.freeze({
+                type: "stage-savepoint-reached",
+                playerId: player.id,
+                respawnAnchorId: anchor.id,
+                landmarkId: anchor.landmarkId,
+                stageAlias: anchor.legacyStageAlias,
+                position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+            })
+        );
+    }
+    return events;
 }
 
 export function advanceSectorProgress({
@@ -68,6 +84,7 @@ export function advanceSectorProgress({
     progress,
     players,
     commandsByPlayerId,
+    respawnAnchorIdByPlayerId = new Map(),
     dt = 0,
     resolveInteractChoice = true
 }) {
@@ -161,37 +178,39 @@ export function advanceSectorProgress({
 
     const current = progress.snapshot();
     const route = world.routeLocks.find(({ sourceLandmarkId }) => sourceLandmarkId === current.currentLandmarkId);
-    if (!route || !progress.isRouteUnlocked(route.id)) return Object.freeze(events);
-    const target = world.landmarks.find(({ id }) => id === route.targetLandmarkId);
-    const player = activePlayers(players).find(({ physics }) =>
-        pointInsideBounds(physics.position, entryBounds(target.entry))
-    );
-    if (!player) return Object.freeze(events);
-    const result = progress.visitLandmark(target.id);
-    if (!result.changed) return Object.freeze(events);
-    events.push(
-        Object.freeze({
-            type: "landmark-entered",
-            landmarkId: target.id,
-            stageAlias: target.legacyStageAlias,
-            previousLandmarkId: route.sourceLandmarkId,
-            sectorId: target.sectorId,
-            respawnAnchorId: result.respawnAnchorId,
-            playerId: player.id,
-            position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-        })
-    );
-    if (result.sectorChanged) {
-        events.push(
-            Object.freeze({
-                type: "sector-entered",
-                sectorId: target.sectorId,
-                previousSectorId: result.previousSectorId,
-                respawnAnchorId: result.respawnAnchorId,
-                playerId: player.id,
-                position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
-            })
+    if (route && progress.isRouteUnlocked(route.id)) {
+        const target = world.landmarks.find(({ id }) => id === route.targetLandmarkId);
+        const targetAnchor = world.respawnAnchors.find(({ id }) => id === target.respawnAnchorId);
+        if (!targetAnchor) throw new Error(`Missing Stage save point '${target.respawnAnchorId}'`);
+        const player = activePlayers(players).find((candidate) =>
+            playerOverlapsStageSavePoint(candidate, targetAnchor)
         );
+        const result = player ? progress.visitLandmark(target.id) : null;
+        if (result?.changed) {
+            events.push(
+                Object.freeze({
+                    type: "landmark-entered",
+                    landmarkId: target.id,
+                    stageAlias: target.legacyStageAlias,
+                    previousLandmarkId: route.sourceLandmarkId,
+                    sectorId: target.sectorId,
+                    playerId: player.id,
+                    position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+                })
+            );
+            if (result.sectorChanged) {
+                events.push(
+                    Object.freeze({
+                        type: "sector-entered",
+                        sectorId: target.sectorId,
+                        previousSectorId: result.previousSectorId,
+                        playerId: player.id,
+                        position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+                    })
+                );
+            }
+        }
     }
+    events.push(...stageSavepointEvents(world, progress, players, respawnAnchorIdByPlayerId));
     return Object.freeze(events);
 }
