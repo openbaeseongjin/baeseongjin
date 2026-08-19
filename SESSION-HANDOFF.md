@@ -19,6 +19,11 @@
 - 기본 런은 Sector 01·02·03의 24개 legacy Stage 정의를 수정하지 않고 각 Sector local 좌표 안에서 세로 등반 spine으로 compile한다. landmark 양옆에는 실제 city wing을 붙여 Sector 폭은 4,800px로 유지한다. 같은 Sector 안의 Stage·층간에는 Gate·exit panel·포탈·문 visual과 물리 route lock을 두지 않고 모든 authored surface와 `sector-seam`은 Run 시작부터 collision/renderer에 같은 정적 집합으로 존재한다. 이 층간 자유 이동 결정을 Sector 경계 자유 이동으로 확대하지 않는다. Sector 경계는 `access-transit-lock` 장치와 같은 geometry에서 파생한 T자형 force-field collider가 요구 모듈 전부를 모으기 전 통과를 막고, 개방 시 blocker만 비활성화한다. future Boss room의 추가 제약은 Boss 구현 시 별도 계약으로 더한다.
 - #622 City Phase 1~~2의 `SectorDefinition`·validator·canonical encounter 계약과 #624 Enemy Phase 6을 #625 Runtime cutover가 소비한다. 진행 권위는 `SectorProgressState`, 부활 권위는 각 Player state의 `respawnAnchorId`가 소유한다. `partyWipeBaseline`은 제거됐고 Sector 04~~06 Runtime과 Timer/Purge·증강 topology mapping은 HOLD다.
 
+### [L2] Sector 01 MAP-PREVIEW의 primary route가 핵심 맵 흐름 권위다
+
+- Sector 01 `1-1`~`1-8`은 각 Stage `MAP-PREVIEW.html`의 첫 `class="route"` 또는 `class="flow"` SVG path endpoint 순서를 핵심 이동 흐름으로 사용한다. `Sector01AreaCatalog.routePoints`와 seamless compiler의 `world.route`는 이 순서를 전부 보존하며 중간 발판·구조 Grip·controlled drop·relaunch·counterflow·checkpoint를 과거 A/C 중심 축약 경로로 줄이지 않는다.
+- MAP HTML은 Runtime 이미지나 collision source로 직접 로드하지 않는다. 실제 Collision·Grapple·Enemy·Wind·Cover 좌표는 AREA-SPEC과 Area Catalog가 소유하되, 자동 회귀가 HTML primary route와 Area/compiled route의 좌표를 직접 대조한다. 4,800px Sector와 outside-core city wing은 유지하지만 authored core 흐름을 대체하거나 우회 경로로 해석하지 않는다.
+
 ### [L1] 개인 사망은 최근 도달 Stage 체크포인트에서 재개한다
 
 - 연속 Sector에서도 개인 사망·낙사는 Sector 최하단 entry가 아니라 해당 플레이어가 실제로 접촉한 최신 Stage(landmark)의 안전한 체크포인트에서 재개한다. 싱글과 멀티 모두 Player별 `respawnAnchorId`를 독립 소유하며, 먼저 전진한 Player의 저장 지점이 뒤에 남은 Player를 전진시키지 않는다. 다음 Stage의 공용 진행과 개인 anchor 갱신은 같은 세이브 구조물 접촉에서 발생할 수 있지만 상태 소유권은 분리한다.

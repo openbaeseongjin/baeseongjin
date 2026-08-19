@@ -3,6 +3,10 @@
 Baseline:
 `29d72baa1879850ea9e811ff6640dfce7e23c7c9`
 
+## MAP-PREVIEW primary route sync — 2026-08-20
+
+`MAP-PREVIEW.html`의 Horseshoe→Long Span→Controlled Drop→Low Slot→Relaunch→Upper Return→Final Deck endpoint를 Runtime `routePoints`와 seamless `world.route`에 정확히 동기화했다. 기존 Collision·Enemy·Cover는 변경하지 않았다.
+
 ## Latest-main audit
 
 Latest branch changed from the earlier planning baseline to `29d72baa1879850ea9e811ff6640dfce7e23c7c9`.

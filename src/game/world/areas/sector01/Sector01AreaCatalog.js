@@ -97,8 +97,12 @@ const area01 = defineArea({
     routePoints: [
         point("sector-01-01:route-entry", -416, -32),
         point("sector-01-01:route-a", -128, -192, { landmark: "A" }),
+        point("sector-01-01:route-p1", 224, -320),
+        point("sector-01-01:route-p2", -144, -560),
+        point("sector-01-01:route-structural-grip", 304, -592),
         point("sector-01-01:route-c", -96, -736, { landmark: "C" }),
-        block01.routeExit
+        point("sector-01-01:route-p3", 256, -864),
+        point("sector-01-01:route-final-deck", 320, -947)
     ],
     recoveryPoints: [point("sector-01-01:recovery-r1", -304, -264), point("sector-01-01:recovery-r3", -272, -792)],
     objects: [
@@ -186,10 +190,11 @@ const area02 = defineArea({
     routePoints: [
         point("sector-01-02:route-entry", 448, -32),
         point("sector-01-02:route-a", 224, -192, { landmark: "A" }),
-
+        point("sector-01-02:route-airborne-c-window", -5, -350),
         point("sector-01-02:route-c", -320, -560, { landmark: "C" }),
-
-        block02.routeExit
+        point("sector-01-02:route-p2", 64, -704),
+        point("sector-01-02:route-p3", -160, -768),
+        point("sector-01-02:route-final-deck", -352, -832)
     ],
     recoveryPoints: [point("sector-01-02:recovery-p1", -416, -344), point("sector-01-02:recovery-r2", 64, -680)],
     objects: [
@@ -291,10 +296,11 @@ const area03 = defineArea({
     routePoints: [
         point("sector-01-03:route-entry", -320, -32),
         point("sector-01-03:route-a", 64, -224, { landmark: "A" }),
-
+        point("sector-01-03:route-p1-warning", 256, -320),
+        point("sector-01-03:route-security-junction", 288, -480),
         point("sector-01-03:route-c", -192, -752, { landmark: "C" }),
-
-        block03.routeExit
+        point("sector-01-03:route-upper-relief", 64, -896),
+        point("sector-01-03:route-final-deck", 192, -1027)
     ],
     recoveryPoints: [
         point("sector-01-03:recovery-r1", 80, -616),
@@ -417,9 +423,12 @@ const area04 = defineArea({
     ],
     routePoints: [
         point("sector-01-04:route-entry", 224, -32),
-        point("sector-01-04:route-node", -96, -288),
-
-        block04.routeExit
+        point("sector-01-04:route-vestibule", 320, -160),
+        point("sector-01-04:route-baffle-approach", 96, -250),
+        point("sector-01-04:route-node", -96, -335),
+        point("sector-01-04:route-calibration", 32, -512),
+        point("sector-01-04:route-exit-transfer", -256, -704),
+        point("sector-01-04:route-final-deck", -256, -768)
     ],
     recoveryPoints: [],
     objects: [
@@ -557,7 +566,7 @@ const area05 = defineArea({
         point("sector-01-05:route-g", -160, -768, { landmark: "G" }),
         point("sector-01-05:route-upper-return", -416, -832),
         point("sector-01-05:route-final-grip", -576, -928),
-        block05.routeExit
+        point("sector-01-05:route-final-deck", -768, -1024)
     ],
     recoveryPoints: [
         point("sector-01-05:recovery-r1", 64, -280),
@@ -676,7 +685,7 @@ const area06 = defineArea({
         point("sector-01-06:route-e", 64, -832),
         point("sector-01-06:route-f", 704, -896),
         point("sector-01-06:route-exit-approach", 1184, -992),
-        block06.routeExit
+        point("sector-01-06:route-final-deck", 1392, -1088)
     ],
     recoveryPoints: [
         point("sector-01-06:recovery-fan-a-miss", 544, -152),
@@ -830,12 +839,13 @@ const area07 = defineArea({
         point("sector-01-07:route-d", 608, -512, { landmark: "D" }),
         point("sector-01-07:route-e", 352, -640),
         point("sector-01-07:route-f", -128, -704),
-        point("sector-01-07:route-left-shadow", -704, -832),
+        point("sector-01-07:route-middle-turn", -704, -768),
+        point("sector-01-07:route-upper-turn", -704, -928),
         point("sector-01-07:route-g", -320, -960, { landmark: "G" }),
         point("sector-01-07:route-h", 160, -1024),
         point("sector-01-07:route-far-catch", 704, -1088),
         point("sector-01-07:route-bypass", 896, -1216),
-        block07.routeExit
+        point("sector-01-07:route-final-deck", 1184, -1344)
     ],
     recoveryPoints: [
         point("sector-01-07:recovery-lower", -544, -152),
@@ -982,14 +992,15 @@ const area08 = defineArea({
         point("sector-01-08:route-lower-transfer", 480, -512),
         point("sector-01-08:route-d", 384, -704, { landmark: "D" }),
         point("sector-01-08:route-mid-relief", 0, -832),
-        point("sector-01-08:route-e", 416, -960),
+        point("sector-01-08:route-e", 416, -960, { landmark: "E" }),
         point("sector-01-08:route-f", 64, -1056, { landmark: "F" }),
         point("sector-01-08:route-g", -384, -1152),
         point("sector-01-08:route-upper-transfer", -480, -1248),
-        point("sector-01-08:route-h", -96, -1344),
+        point("sector-01-08:route-h", -96, -1344, { landmark: "H" }),
         point("sector-01-08:route-i", 352, -1432),
         point("sector-01-08:route-override", 480, -1536),
-        block08.routeExit
+        point("sector-01-08:route-gate-passage", 0, -1664),
+        point("sector-01-08:route-checkpoint", 0, -1728)
     ],
     recoveryPoints: [
         point("sector-01-08:recovery-lower-r1", -128, -200),

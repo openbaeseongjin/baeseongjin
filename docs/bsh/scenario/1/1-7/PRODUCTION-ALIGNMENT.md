@@ -3,6 +3,10 @@
 Baseline:
 `ea9c4438c0f106474baa09621bfb42ae5876b86e`
 
+## MAP-PREVIEW primary route sync — 2026-08-20
+
+`MAP-PREVIEW.html`의 Lower Left→Right→Middle Right→Left→Safe Shadow→Upper Left→Right→Bypass endpoint 전체를 Runtime `routePoints`와 seamless `world.route`에 반영했다. 같은 Pulse·Access pocket·Collision은 변경하지 않았다.
+
 ## Current Runtime vs REV8
 
 | Item | Current | REV8 | Status |

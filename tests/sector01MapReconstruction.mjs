@@ -1,14 +1,27 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
+import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/LegacyAreaSeamlessSectorRuntime.js";
 
-// This test originally hardcoded the pre-REV8 43-anchor blockout's coordinates for all 8 Stages
-// (PR #703/704). All 8 Stages were subsequently rewritten against their approved REV8 packages (see
-// docs/scenario-development-integration.md entries #74-83 and #84), which redesigned each Stage's
-// landmark set/positions/route shape - the old hardcoded table no longer describes the approved
-// content and duplicating REV8's coordinates here would just create a second copy to drift out of
-// sync with Sector01AreaCatalog.js (the actual authority) and each Stage's own
-// PRODUCTION-ALIGNMENT.md. 1-1's REV8 package explicitly forbids a dedicated Anchor B ("dedicated
-// grapple anchor B" is in its AREA-SPEC.json forbidden list) - only A/C remain.
+const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
+
+function previewRoute(stageAlias) {
+    const html = readFileSync(resolve(ROOT, `docs/bsh/scenario/1/${stageAlias}/MAP-PREVIEW.html`), "utf8");
+    const path = html.match(/<path\b[^>]*class="(?:route|flow)"[^>]*d="([^"]+)"/)?.[1];
+    assert.ok(path, `${stageAlias} MAP-PREVIEW must declare its primary route path`);
+    const points = [];
+    const commands = /([MQL])\s*(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:\s+(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?))?/g;
+    for (const match of path.matchAll(commands)) {
+        points.push(
+            match[1] === "Q"
+                ? { x: Number(match[4]), y: Number(match[5]) }
+                : { x: Number(match[2]), y: Number(match[3]) }
+        );
+    }
+    return points;
+}
 
 const AREA01_ANCHORS = Object.freeze([
     ["a", -128, -192],
@@ -44,7 +57,26 @@ export function run() {
     // labeled landmark must have both a real (collidable/renderable) grapple target and a matching
     // visible grapple-landmark object at the same position as its route point, and route entries must
     // be uniquely ordered (no duplicate ids).
+    const seamlessWorld = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 560 });
     for (const area of SECTOR_01_AREA_CATALOG.areas) {
+        const stageAlias = area.id.replace("sector-01-0", "1-");
+        assert.deepEqual(
+            area.routePoints.map(({ x, y }) => ({ x, y })),
+            previewRoute(stageAlias),
+            `${stageAlias} Runtime route must follow MAP-PREVIEW.html instead of a reduced legacy path`
+        );
+        const landmark = seamlessWorld.landmarks.find(({ legacyAreaId }) => legacyAreaId === area.id);
+        assert.ok(landmark, `${stageAlias} must be compiled into the seamless Runtime`);
+        assert.deepEqual(
+            seamlessWorld.route
+                .filter(({ landmarkId }) => landmarkId === landmark.id)
+                .map(({ x, width, topY }) => ({
+                    x: x + width * 0.5 - landmark.origin.x,
+                    y: topY - landmark.origin.y
+                })),
+            previewRoute(stageAlias),
+            `${stageAlias} seamless Runtime must preserve the MAP-PREVIEW core flow`
+        );
         const landmarkPoints = area.routePoints.filter(({ landmark }) => landmark);
         for (const point of landmarkPoints) {
             const anchorId = point.id.split(":route-").at(-1);

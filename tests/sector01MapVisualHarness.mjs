@@ -28,6 +28,16 @@ function surfaceColor(kind) {
     return "#cbd5e1";
 }
 
+function landmarkLabel(anchor) {
+    if (anchor.label) return anchor.label;
+    return anchor.id
+        .split(":")
+        .at(-1)
+        .replace(/^(?:anchor|grip)-/, "")
+        .replaceAll("-", " ")
+        .toUpperCase();
+}
+
 function drawArea(area, index) {
     const column = index % columns;
     const row = Math.floor(index / columns);
@@ -43,7 +53,7 @@ function drawArea(area, index) {
     const centerX = left + cellWidth * 0.5;
     const mapTop = top + paddingTop;
     const mapX = (x) => centerX + x * scale;
-    const mapY = (y) => mapTop + -y * scale;
+    const mapY = (y) => mapTop + (y + area.bounds.height) * scale;
 
     context.fillStyle = "#0f172a";
     context.fillRect(left, top, cellWidth, cellHeight);
@@ -54,7 +64,12 @@ function drawArea(area, index) {
     context.fillText(`${area.id.replace("sector-01-0", "1-")} · ${area.name}`, left + 14, top + 24);
 
     context.strokeStyle = "rgba(148, 163, 184, 0.32)";
-    context.strokeRect(mapX(-area.bounds.width * 0.5), mapY(0), area.bounds.width * scale, area.bounds.height * scale);
+    context.strokeRect(
+        mapX(-area.bounds.width * 0.5),
+        mapY(-area.bounds.height),
+        area.bounds.width * scale,
+        area.bounds.height * scale
+    );
 
     for (const surface of area.surfaces) {
         if (surface.kind === "grapple-target" || surface.renderable === false) continue;
@@ -93,7 +108,7 @@ function drawArea(area, index) {
         context.fill();
         context.fillStyle = "#cffafe";
         context.font = `${selectedArea ? 13 : 10}px ui-monospace, monospace`;
-        context.fillText(anchor.label, x + 7, y - 5);
+        context.fillText(landmarkLabel(anchor), x + 7, y - 5);
     }
 
     context.fillStyle = "#94a3b8";
