@@ -431,24 +431,34 @@ const area03 = defineArea({
 
 const block04 = exitBlock({
     areaId: "sector-02-04",
-    deckX: 496,
-    deckTopY: -1155,
-    deckWidth: 288,
+    deckX: 720,
+    deckTopY: -992,
+    deckWidth: 320,
     nextAreaId: "sector-02-05",
     panelObjectiveId: "sector-02-04:exit-panel-engaged",
     panelProperties: { requiredObjectiveIds: ["sector-02-04:exit-reached"] }
 });
 
 const area04Id = "sector-02-04";
-const area04Landmarks = [
-    landmark(area04Id, "g1", -512, -384, -288),
-    landmark(area04Id, "g3", -544, -416, -480),
-    landmark(area04Id, "g5", -64, 64, -672),
-    landmark(area04Id, "g7", -416, -288, -896),
-    landmark(area04Id, "g8a", -128, 0, -1024)
-];
-const area04Exit = point(`${area04Id}:exit`, 496, -1216);
-const area04Objective = reachExitObjective(area04Id, area04Exit.x, area04Exit.y);
+// REV8.0: ENTRY -> REVEAL -> FIRST BRAID (safe/flow/pressure) -> SWITCH -> SECOND BRAID -> MERGE
+// -> EXIT. Safe/Flow/Pressure are risk STYLES, not permanent lanes - Switch Deck lets the player
+// change style; recovery zones re-enter a different style. All 11 grip points are unlabeled
+// "structural-grapple-target" grips (AREA-SPEC's own grappleTargets[] carries no matching visible
+// landmark object for any of them).
+const area04Grips = {
+    gSafeA: structuralGrip(area04Id, "g-safe-a-surface", -560, -320),
+    gSafeX: structuralGrip(area04Id, "g-safe-x-surface", -352, -480),
+    gFlowA: structuralGrip(area04Id, "g-flow-a-surface", -336, -352),
+    gPressA: structuralGrip(area04Id, "g-press-a-surface", -304, -256),
+    gSafeB: structuralGrip(area04Id, "g-safe-b-surface", -352, -672),
+    gSafeM1: structuralGrip(area04Id, "g-safe-m1-surface", -192, -848),
+    gSafeM2: structuralGrip(area04Id, "g-safe-m2-surface", 96, -896),
+    gFlowB1: structuralGrip(area04Id, "g-flow-b1-surface", 64, -672),
+    gFlowB2: structuralGrip(area04Id, "g-flow-b2-surface", 320, -768),
+    gPressB: structuralGrip(area04Id, "g-press-b-surface", 224, -608),
+    gFinal: structuralGrip(area04Id, "g-final-surface", 560, -960)
+};
+const area04Objective = reachExitObjective(area04Id, block04.exit.x, block04.exit.y);
 const area04PanelObjective = exitPanelObjective(area04Id, [area04Objective.id]);
 const area04 = defineArea({
     id: area04Id,
@@ -456,60 +466,74 @@ const area04 = defineArea({
     order: 4,
     name: "RESIDENTIAL STACK",
     subtitle: "MULTI-ROUTE HOUSING",
-    bounds: { width: 1408, height: 1280 },
-    entry: point(`${area04Id}:entry`, -448, -32),
+    bounds: { width: 1984, height: 1088 },
+    entry: point(`${area04Id}:entry`, -864, -32),
     exit: block04.exit,
     nextAreaId: "sector-02-05",
     surfaces: [
-        platform(area04Id, "p0", -576, -320, 0),
-        platform(area04Id, "p1", -448, -64, -192),
-        platform(area04Id, "s1", -640, -352, -384, "safe-deck"),
-        platform(area04Id, "c1", -128, 160, -416),
-        platform(area04Id, "s2", -640, -320, -608, "recovery"),
-        platform(area04Id, "r2", -64, 352, -640, "recovery"),
-        platform(area04Id, "p4", 160, 512, -704),
-        platform(area04Id, "s3", -608, -288, -832, "recovery"),
-        platform(area04Id, "r3", 288, 576, -864, "recovery"),
-        platform(area04Id, "s4", -512, -192, -1056, "safe-deck"),
-        platform(area04Id, "m3", 0, 352, -1088, "safe-deck"),
-        platform(area04Id, "p7", 288, 608, -1216),
+        horizontalSurface(area04Id, "p0", -816, 0, 320, 32, "platform"),
+        horizontalSurface(area04Id, "reveal-deck", -672, -160, 384, 24, "safe-deck"),
+        horizontalSurface(area04Id, "safe-a", -672, -384, 288, 22, "safe-deck"),
+        horizontalSurface(area04Id, "flow-a", -176, -416, 256, 22, "platform"),
+        horizontalSurface(area04Id, "pressure-a", 64, -352, 320, 22, "platform"),
+        horizontalSurface(area04Id, "recovery-a", -224, -480, 352, 18, "recovery"),
+        horizontalSurface(area04Id, "switch-deck", -64, -544, 448, 26, "safe-deck"),
+        horizontalSurface(area04Id, "safe-b", -448, -768, 320, 22, "safe-deck"),
+        horizontalSurface(area04Id, "flow-b", 176, -832, 256, 22, "platform"),
+        horizontalSurface(area04Id, "pressure-b", 512, -672, 352, 22, "platform"),
+        horizontalSurface(area04Id, "recovery-b", 64, -704, 352, 18, "recovery"),
+        horizontalSurface(area04Id, "right-recovery", 416, -832, 288, 18, "recovery"),
+        horizontalSurface(area04Id, "merge-deck", 288, -928, 512, 26, "safe-deck"),
         block04.deck,
-        ...area04Landmarks.map(({ surface }) => surface)
+        ...Object.values(area04Grips)
     ],
     routePoints: [
-        point(`${area04Id}:route-entry`, -448, -32),
-        point(`${area04Id}:route-p1`, -256, -192),
-        point(`${area04Id}:route-c1`, 16, -416),
-        point(`${area04Id}:route-r2`, 144, -640),
-        point(`${area04Id}:route-p4`, 336, -704),
-        point(`${area04Id}:route-r3`, 432, -864),
-        point(`${area04Id}:route-m3`, 176, -1088),
-        point(`${area04Id}:route-p7`, 448, -1216),
+        point(`${area04Id}:route-entry`, -864, -32),
+        point(`${area04Id}:route-reveal`, -672, -160),
+        point(`${area04Id}:route-safe-a-grip`, -560, -320),
+        point(`${area04Id}:route-safe-a`, -672, -384),
+        point(`${area04Id}:route-safe-x-grip`, -352, -480),
+        point(`${area04Id}:route-flow-a-grip`, -336, -352),
+        point(`${area04Id}:route-flow-a`, -176, -416),
+        point(`${area04Id}:route-press-a-grip`, -304, -256),
+        point(`${area04Id}:route-pressure-a`, 64, -352),
+        point(`${area04Id}:route-switch`, -64, -544),
+        point(`${area04Id}:route-safe-b-grip`, -352, -672),
+        point(`${area04Id}:route-safe-b`, -448, -768),
+        point(`${area04Id}:route-safe-m1-grip`, -192, -848),
+        point(`${area04Id}:route-safe-m2-grip`, 96, -896),
+        point(`${area04Id}:route-flow-b1-grip`, 64, -672),
+        point(`${area04Id}:route-flow-b2-grip`, 320, -768),
+        point(`${area04Id}:route-flow-b`, 176, -832),
+        point(`${area04Id}:route-press-b-grip`, 224, -608),
+        point(`${area04Id}:route-pressure-b`, 512, -672),
+        point(`${area04Id}:route-right-recovery`, 416, -832),
+        point(`${area04Id}:route-merge`, 288, -928),
+        point(`${area04Id}:route-final-grip`, 560, -960),
         block04.routeExit
     ],
     recoveryPoints: [
-        point(`${area04Id}:recovery-s2`, -480, -632),
-        point(`${area04Id}:recovery-r2`, 144, -664),
-        point(`${area04Id}:recovery-s3`, -448, -856),
-        point(`${area04Id}:recovery-r3`, 432, -888)
+        point(`${area04Id}:recovery-point-a`, -224, -498),
+        point(`${area04Id}:recovery-point-b`, 64, -722),
+        point(`${area04Id}:recovery-point-right`, 416, -850)
     ],
     objects: [
-        ...area04Landmarks.map(({ object }) => object),
-        patrolDrone(area04Id, "drone-1", -416, -768, triggerBounds(-640, -1120, 1280, 800), [
-            { x: -416, y: -768 },
-            { x: 416, y: -768 }
-        ]),
-        pooledSentry(area04Id, "route-choice-guard", 336, -704, SECTOR_02_SUPPORT_POOL, {
-            width: 576,
-            height: 480
+        // Route Guard: first braid only, kill optional, no kill gate.
+        pooledSentry(area04Id, "route-choice-guard", 96, -352, SECTOR_02_SUPPORT_POOL, {
+            width: 384,
+            height: 288
         }),
+        patrolDrone(area04Id, "drone-1", -128, -736, triggerBounds(-448, -960, 1216, 448), [
+            { x: -128, y: -736 },
+            { x: 544, y: -736 }
+        ]),
         block04.panel,
         block04.gateVisual
     ],
     objectives: [area04Objective, area04PanelObjective],
     gate: block04.gate,
     storyTriggers: ["housing-density", "route-choice", "residential-scale"],
-    routes: ["safe-left", "flow-centre", "pressure-right", "recovery"],
+    routes: ["safe", "flow", "pressure", "recovery"],
     cueIds: ["residential-stack", "multi-route", "patrol-drone-t1", "no-build-lock"]
 });
 

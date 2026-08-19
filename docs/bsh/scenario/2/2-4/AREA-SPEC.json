@@ -7,7 +7,8 @@
     "stage": 4,
     "sourceAreaId": "sector-02-04",
     "name": "RESIDENTIAL STACK",
-    "subtitle": "MULTI-ROUTE HOUSING"
+    "subtitle": "MULTI-ROUTE HOUSING",
+    "legacyStageAlias": "2-4"
   },
   "bounds": {
     "width": 1984,
@@ -136,57 +137,68 @@
     {
       "id": "g-safe-a",
       "x": -560,
-      "y": -320
+      "y": -320,
+      "label": "G-SAFE-A"
     },
     {
       "id": "g-safe-x",
       "x": -352,
-      "y": -480
+      "y": -480,
+      "label": "G-SAFE-X"
     },
     {
       "id": "g-flow-a",
       "x": -336,
-      "y": -352
+      "y": -352,
+      "label": "G-FLOW-A"
     },
     {
       "id": "g-press-a",
       "x": -304,
-      "y": -256
+      "y": -256,
+      "label": "G-PRESS-A"
     },
     {
       "id": "g-safe-b",
       "x": -352,
-      "y": -672
+      "y": -672,
+      "label": "G-SAFE-B"
     },
     {
       "id": "g-safe-m1",
       "x": -192,
-      "y": -848
+      "y": -848,
+      "label": "G-SAFE-M1"
     },
     {
       "id": "g-safe-m2",
       "x": 96,
-      "y": -896
+      "y": -896,
+      "label": "G-SAFE-M2"
     },
     {
       "id": "g-flow-b1",
       "x": 64,
-      "y": -672
+      "y": -672,
+      "label": "G-FLOW-B1"
     },
     {
       "id": "g-flow-b2",
       "x": 320,
-      "y": -768
+      "y": -768,
+      "label": "G-FLOW-B2"
     },
     {
       "id": "g-press-b",
       "x": 224,
-      "y": -608
+      "y": -608,
+      "label": "G-PRESS-B"
     },
     {
       "id": "g-final",
       "x": 560,
-      "y": -960
+      "y": -960,
+      "label": "G-FINAL"
     }
   ],
   "routes": {
@@ -495,6 +507,88 @@
     }
   ],
   "nextAreaId": "sector-02-05",
+  "route": {
+    "runtimeLandmarks": [
+      "sector-02-04:entry",
+      "reveal-deck",
+      "switch-deck",
+      "merge-deck",
+      "exit-deck",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-02-04:entry",
+      "reveal-deck",
+      "switch-deck",
+      "merge-deck",
+      "exit-deck",
+      "exit"
+    ],
+    "optional": [
+      {
+        "id": "safe",
+        "sequence": [
+          "reveal-deck",
+          "g-safe-a",
+          "safe-a",
+          "g-safe-x",
+          "switch-deck",
+          "g-safe-b",
+          "safe-b",
+          "g-safe-m1",
+          "g-safe-m2",
+          "merge-deck",
+          "g-final",
+          "exit-deck",
+          "exit"
+        ]
+      },
+      {
+        "id": "flow",
+        "sequence": [
+          "reveal-deck",
+          "g-flow-a",
+          "flow-a",
+          "switch-deck",
+          "g-flow-b1",
+          "g-flow-b2",
+          "flow-b",
+          "merge-deck",
+          "g-final",
+          "exit-deck",
+          "exit"
+        ]
+      },
+      {
+        "id": "pressure",
+        "sequence": [
+          "reveal-deck",
+          "g-press-a",
+          "pressure-a",
+          "switch-deck",
+          "g-press-b",
+          "pressure-b",
+          "right-recovery",
+          "merge-deck",
+          "g-final",
+          "exit-deck",
+          "exit"
+        ]
+      }
+    ],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 720,
+    "deckTopY": -992,
+    "deckWidth": 320,
+    "panelObjectiveId": "sector-02-04:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "2-5",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["sector-02-04:exit-panel-engaged"]
+  },
   "story": {
     "entry": {
       "title": "RESIDENTIAL STACK",
@@ -523,6 +617,7 @@
   },
   "camera": {
     "mode": "default-authored-camera",
+    "zones": [],
     "customZonesRequired": false,
     "revealRequirement": [
       "Player readable",

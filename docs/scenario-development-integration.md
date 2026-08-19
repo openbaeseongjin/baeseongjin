@@ -165,6 +165,8 @@ reviewed-upstream: 4fce8a2
 
 87. `ONE-ROPE-SECTOR-02-03-REV8.0-GITHUB-READY` 패키지를 `area03`에 반영해 구 960×768 수직 스택을 REV8의 수평 side-loaded Hall(ACTIVE APPROACH→G1 OVER SERVICE CORE→SAFE COMMUNAL HALL→NODE→FLAT EXIT)로 재저작했다. Stable source ID(`specialization-node`)·objective ID(`specialization-selected`)·generic `interact-choice`·second-generic-offer 의미 체계는 그대로 두고 지오메트리만 이동했다. Service Core를 실제 static/non-grappleable/non-damaging LOS blocker로 신규 추가해 approach Guard가 chooser Hall에 직접 LOS를 가지지 못하게 분리했다(중심점 공식으로 배치). Guard는 기존 단일 슬롯·approach-band-only·kill-optional·Node 접근에 죽음 요구 없음을 유지했다. `npm run check`(2-3 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
 
+88. `ONE-ROPE-SECTOR-02-04-REV8.0-GITHUB-READY` 패키지를 `area04`에 반영해 구 1408×1280 수직 스택을 REV8의 넓은 braided tenement court(ENTRY→REVEAL→FIRST BRAID[safe/flow/pressure]→SWITCH→SECOND BRAID→MERGE→EXIT)로 재저작했다. AREA-SPEC의 top-level `grappleTargets[]` 11개는 전부 대응하는 visible landmark object가 없어 2-1/2-2의 B/D/F와 동일한 패턴으로 마커 없는 `structural-grapple-target` 그립으로 저작했다. AREA-SPEC 자체 스키마에 `stage.legacyStageAlias`와 각 grappleTarget의 `label`이 빠져 있어(2-1~2-3과 다른 포맷) 기계적으로 채웠다(label은 `id.toUpperCase()`). `route` 블록은 mandatory backbone(entry→reveal-deck→switch-deck→merge-deck→exit-deck→exit)과 세 개의 `optional` sequence(safe/flow/pressure 브레이드 전체 경로)로 인코딩했다. Route Guard·Patrol Drone 계약은 그대로 유지하고 위치만 재배치했다. `npm run check`(2-4 스키마 정상)/`npm test`(7개 시나리오 전체) 통과.
+
 ## 열린 기획·구현 게이트
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.

@@ -45,3 +45,20 @@ Approved:
 
 Current presentation directory has no dedicated Player Bark layer.
 Do not fake as System Toast.
+
+## Runtime implementation (2026-08-19)
+
+`Sector02AreaCatalog.js` area04 rewritten in full against REV8.0: bounds 1984x1088, entry
+(-864,-32), broad braided tenement-court topology (ENTRY -> REVEAL -> FIRST BRAID
+[safe/flow/pressure] -> SWITCH -> SECOND BRAID -> MERGE -> EXIT) replacing the old 1408x1280
+tall vertical stack. All 11 authored grip points (AREA-SPEC's top-level `grappleTargets[]`, none
+of which have a matching visible landmark object) are unlabeled `structural-grapple-target`
+grips - same pattern as 2-1/2-2's B/D/F. Route Guard preserved to its single first-braid slot
+(kill optional, no kill gate). Patrol Drone contract preserved exactly (speed 48, wait 0.45,
+pingpong, kill-optional, no-rope-cut, target-lock-cycle, activation-band-only), repositioned to
+the approved local path `(-128,-736)<->(544,-736)`. Route labels (`safe`/`flow`/`pressure`) are
+risk styles, not build-locked lanes - `routes` metadata carries them but no runtime system gates
+on card selection. Exactly 2 enemy slots, no Access Carrier, no Rope Cutter/Wind. `npm run check`
+(2-4 clean)/`npm test` (7 scenario groups) pass.
+
+Player Bark layer: still absent - approved Bark remains NOT IMPLEMENTED.
