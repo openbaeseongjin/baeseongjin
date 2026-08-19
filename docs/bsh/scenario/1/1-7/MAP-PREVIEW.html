@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 1-7 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#061019;--p:#0d1820;--l:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--v:#caa7ff;--w:#91a8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.42 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:440px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+button{padding:6px 9px;margin:2px;background:#10212a;color:#eef5f8;border:1px solid #4d6874;border-radius:6px;cursor:pointer}button.on{border-color:#91a8ff;color:#bfcaff}
+svg{width:100%;height:84vh;min-height:760px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.recovery{fill:#315944;stroke:var(--g);stroke-width:2}.cover{fill:#3c484e;stroke:#b4c3c9;stroke-width:2}.anchor{fill:var(--c);stroke:white;stroke-width:2}.joint{fill:var(--a);stroke:white;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.carrier{fill:#7d3a7d;stroke:#e0a8ff;stroke-width:3}.route{fill:none;stroke:var(--y);stroke-width:5;stroke-dasharray:14 9}.access{fill:none;stroke:var(--v);stroke-width:5;stroke-dasharray:8 7}.wind{fill:#586db61b;stroke:#91a8ff;stroke-width:2;stroke-dasharray:8 8}.residual{fill:#2c718017;stroke:#71d8e8;stroke-width:2;stroke-dasharray:8 8}.arrow{stroke:#91a8ff;stroke-width:5;marker-end:url(#arr)}.arrowWeak{stroke:#71d8e8;stroke-width:4;marker-end:url(#arrW)}.current{fill:none;stroke:var(--r);stroke-width:3;stroke-dasharray:7 7}.reach{fill:none;stroke:var(--c);stroke-width:2;opacity:.11}.hidden{display:none}
+text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.pass{color:var(--g)}.hyp{color:var(--a)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>1-7 PRESSURE BYPASS · REV8</h1><div class="sub">GAMEPLAY ONLY · ENCLOSED CHAMBERED S-CURVE · SAME PULSE / DIFFERENT MEANING</div></header>
+<div class="layout"><aside>
+<div class="card"><b>BODY TRACE</b><br>
+LOWER: LEFT → RIGHT<br>
+MIDDLE: RIGHT → LEFT<br>
+UPPER: LEFT → RIGHT<br><br>
+<b>같은 RIGHT Pulse:</b><br>
+Middle에서는 역풍 / Upper에서는 순풍.</div>
+<div class="card"><b>PRESSURE CYCLE</b><br>
+1.75 LULL → 0.7 WARNING → 1.4 ACTIVE → 0.3 DECAY<br><br>
+<button data-state="lull">LULL</button>
+<button data-state="warning">WARNING</button>
+<button data-state="active" class="on">ACTIVE</button>
+<button data-state="decay">DECAY</button>
+<div id="stateText" style="margin-top:7px;color:#a8bbc3"></div></div>
+<div class="card"><b>ENEMY BUDGET</b><br>
+Mainline: 0<br>
+Optional Access C: Carrier + 2 Guards = 3<br><br>
+Old mainline-Turret assumption retired.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Main Route</label>
+<label><input id="showWind" type="checkbox" checked> Wind Zones</label>
+<label><input id="showAccess" type="checkbox" checked> Optional Access C</label>
+<label><input id="showCurrent" type="checkbox"> Current 3840×1536 outline</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP PREVIEW RULE</b><br>
+실제 Collision / Grapple / Wind / Enemy / Cover만 표시.<br>
+배관·Valve Core·장식 벽은 표시하지 않음.</div>
+<div class="card"><b>GATES</b><br>Scale <span class="pass">PASS</span><br>Similarity <span class="pass">PASS</span><br>Obstacle <span class="pass">PASS</span><br>Pacing <span class="hyp">HYPOTHESIS</span></div>
+</aside><main>
+<svg viewBox="-1770 -1540 3540 1600">
+<defs>
+<marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#91a8ff"/></marker>
+<marker id="arrW" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#71d8e8"/></marker>
+</defs>
+<rect class="bounds" x="-1664" y="-1472" width="3328" height="1472"/><text class="tiny" x="-1640" y="-1440">REV8 3328×1472</text>
+
+<!-- LOWER CHAMBER -->
+<rect class="surface" x="-1472" y="0" width="448" height="32"/><text class="tiny" x="-1458" y="-12">ENTRY</text>
+<circle class="anchor" cx="-1088" cy="-192" r="13"/><text x="-1066" y="-182">A</text>
+<circle class="joint" cx="-672" cy="-256" r="11"/><text class="tiny" x="-651" y="-246">B</text>
+<circle class="joint" cx="-224" cy="-320" r="11"/><text class="tiny" x="-203" y="-310">C</text>
+<rect class="recovery" x="-688" y="-128" width="288" height="18"/><text class="tiny" x="-676" y="-140">LOWER RECOVERY</text>
+<rect class="surface" x="192" y="-352" width="320" height="24"/><text class="tiny" x="205" y="-365">RIGHT TURN DECK</text>
+<circle class="anchor" cx="608" cy="-512" r="13"/><text class="tiny" x="630" y="-502">D · PRESSURE ENTRY</text>
+
+<!-- MIDDLE CHAMBER -->
+<circle class="joint" cx="352" cy="-640" r="11"/><text class="tiny" x="373" y="-630">E</text>
+<circle class="joint" cx="-128" cy="-704" r="11"/><text class="tiny" x="-107" y="-694">F</text>
+<rect class="recovery" x="-96" y="-544" width="320" height="18"/><text class="tiny" x="-83" y="-556">MIDDLE RECOVERY</text>
+<rect class="recovery" x="-880" y="-832" width="352" height="24"/><text class="tiny" x="-868" y="-846">LEFT SAFE SHADOW</text>
+<rect class="cover" x="-880" y="-1056" width="96" height="224"/><text class="tiny" x="-950" y="-1068">WIND BAFFLE</text>
+
+<!-- UPPER CHAMBER -->
+<circle class="anchor" cx="-320" cy="-960" r="13"/><text x="-298" y="-950">G</text>
+<circle class="joint" cx="160" cy="-1024" r="11"/><text class="tiny" x="181" y="-1014">H</text>
+<circle class="joint" cx="704" cy="-1088" r="11"/><text class="tiny" x="725" y="-1078">FAR CATCH</text>
+<rect class="surface" x="704" y="-1216" width="384" height="28"/><text class="tiny" x="717" y="-1230">MANUAL BYPASS DECK</text>
+<rect class="cover" x="936" y="-1296" width="48" height="80"/><text class="tiny" x="900" y="-1308">BYPASS PANEL</text>
+<rect class="surface" x="1008" y="-1344" width="352" height="32"/><text class="tiny" x="1020" y="-1358">EXIT → 1-8</text>
+
+<!-- OPTIONAL ACCESS -->
+<g id="access">
+<circle class="anchor" cx="960" cy="-992" r="13"/><text class="tiny" x="981" y="-982">ACCESS A</text>
+<circle class="anchor" cx="1280" cy="-896" r="13"/><text class="tiny" x="1301" y="-886">ACCESS B</text>
+<rect class="surface" x="1160" y="-832" width="480" height="28"/><text class="tiny" x="1172" y="-846">OVERPRESSURE ACCESS POCKET</text>
+<circle class="enemy" cx="1216" cy="-832" r="18"/><text class="tiny" x="1170" y="-860">GUARD</text>
+<circle class="carrier" cx="1440" cy="-832" r="21"/><text class="tiny" x="1381" y="-867">CARRIER · MODULE C</text>
+<circle class="enemy" cx="1600" cy="-832" r="18"/><text class="tiny" x="1554" y="-860">GUARD</text>
+<path class="access" d="M704,-1088 Q850,-1045 960,-992 Q1100,-930 1280,-896 Q1380,-850 1440,-832"/>
+</g>
+
+<!-- WIND -->
+<g id="wind">
+<rect class="residual" x="-1248" y="-384" width="1664" height="256"/><text class="tiny" x="-1228" y="-365">RESIDUAL RIGHT · CONTINUOUS 220</text>
+<line class="arrowWeak" x1="-1050" y1="-250" x2="-650" y2="-250"/><line class="arrowWeak" x1="-500" y1="-315" x2="-100" y2="-315"/>
+
+<rect id="pulseZone" class="wind" x="-736" y="-1120" width="1696" height="576"/><text class="tiny" x="-715" y="-1095">MAIN RIGHT PULSE · 800 · SHARED ACROSS MIDDLE / UPPER</text>
+<g id="pulseArrows">
+<line class="arrow" x1="-530" y1="-680" x2="-80" y2="-680"/>
+<line class="arrow" x1="80" y1="-745" x2="530" y2="-745"/>
+<line class="arrow" x1="-520" y1="-985" x2="-70" y2="-985"/>
+<line class="arrow" x1="80" y1="-1050" x2="530" y2="-1050"/>
+</g>
+</g>
+
+<g id="route"><path class="route" d="M-1248,-32 Q-1170,-110 -1088,-192 Q-880,-230 -672,-256 Q-450,-290 -224,-320 Q70,-340 352,-352 Q500,-420 608,-512 Q520,-585 352,-640 Q120,-680 -128,-704 Q-410,-745 -704,-768 Q-730,-850 -704,-928 Q-520,-950 -320,-960 Q-80,-1000 160,-1024 Q430,-1060 704,-1088 Q800,-1150 896,-1216 Q1040,-1270 1184,-1344"/></g>
+
+<g id="current" class="hidden"><rect class="current" x="-1920" y="-1536" width="3840" height="1536"/><text class="tiny" x="-1885" y="-1500">CURRENT 3840×1536</text></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-1088" cy="-192" r="400"/><circle class="reach" cx="-672" cy="-256" r="400"/><circle class="reach" cx="608" cy="-512" r="400"/><circle class="reach" cx="-320" cy="-960" r="400"/><circle class="reach" cx="704" cy="-1088" r="400"/></g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showWind.onchange=()=>wind.classList.toggle("hidden",!showWind.checked);
+showAccess.onchange=()=>access.classList.toggle("hidden",!showAccess.checked);
+showCurrent.onchange=()=>current.classList.toggle("hidden",!showCurrent.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+
+const states={
+lull:["LULL · 바람 약화/정지. Middle 역풍 통과에 유리.",0.16,0.25],
+warning:["WARNING · 곧 RIGHT Pulse. Middle이면 서두르거나 대기, Upper면 Launch 준비.",0.35,0.55],
+active:["ACTIVE · RIGHT 800. Middle에서는 역풍 / Upper에서는 순풍.",0.9,1],
+decay:["DECAY · 힘이 빠지는 전환. Control 회복 구간.",0.28,0.4]
+};
+function setState(s){
+ document.querySelectorAll("button[data-state]").forEach(b=>b.classList.toggle("on",b.dataset.state===s));
+ const [txt,zoneOp,arrOp]=states[s]; stateText.textContent=txt;
+ pulseZone.style.fillOpacity=zoneOp; pulseZone.style.strokeOpacity=Math.max(.3,zoneOp);
+ pulseArrows.style.opacity=arrOp;
+}
+document.querySelectorAll("button[data-state]").forEach(b=>b.onclick=()=>setState(b.dataset.state));
+setState("active");
+</script></body></html>

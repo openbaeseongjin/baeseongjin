@@ -773,9 +773,9 @@ const area06 = defineArea({
 
 const block07 = exitBlock({
     areaId: "sector-01-07",
-    deckX: 224,
-    deckTopY: -1411,
-    deckWidth: 320,
+    deckX: 1184,
+    deckTopY: -1344,
+    deckWidth: 352,
     nextAreaId: "sector-01-08",
     panelObjectiveId: "sector-01-07:bypass-open"
 });
@@ -786,70 +786,102 @@ const area07 = defineArea({
     order: 7,
     name: "PRESSURE BYPASS",
     subtitle: "MANUAL PRESSURE CONTROL",
-    bounds: { width: 3840, height: 1536 },
-    entry: point("sector-01-07:entry", -320, -32),
+    bounds: { width: 3360, height: 1472 },
+    entry: point("sector-01-07:entry", -1248, -32),
     exit: block07.exit,
     nextAreaId: "sector-01-08",
     surfaces: [
-        horizontalSurface("sector-01-07:p0", -256, 0, 320),
-        horizontalSurface("sector-01-07:r1", -144, -192, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-07:r2", 144, -512, 224, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-07:safe-shadow", -256, -864, 192, 16, { kind: "safe-deck" }),
-        groundedSurface("sector-01-07:safe-shadow-cover", -128, -864, 64, 96, { kind: "cover", oneWay: false }),
-        horizontalSurface("sector-01-07:r3", 64, -944, 256, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-07:access-annex-bridge", 560, -944, 736, 16, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-07:access-annex-arena", 1320, -944, 800, 32, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-07:upper-catch", -64, -1264, 256, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-07:p0", -1248, 0, 448),
+        horizontalSurface("sector-01-07:lower-recovery", -544, -128, 288, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-07:right-turn-deck", 352, -352, 320, 24, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-07:middle-recovery", 64, -544, 320, 18, { kind: "recovery" }),
+        horizontalSurface("sector-01-07:left-safe-shadow", -704, -832, 352, 24, { kind: "safe-deck" }),
+        groundedSurface("sector-01-07:pressure-baffle", -832, -704, 96, 224, {
+            kind: "solid",
+            oneWay: false,
+            grappleable: false,
+            windOcclusion: true
+        }),
+        horizontalSurface("sector-01-07:bypass-deck", 896, -1216, 384, 28, { kind: "safe-deck" }),
+        groundedSurface("sector-01-07:bypass-panel-body", 960, -1216, 48, 80, {
+            kind: "solid",
+            oneWay: false,
+            grappleable: false
+        }),
         block07.deck,
-        ...[["a", -128, -224]].map(([id, x, y]) => grappleTarget(`sector-01-07:anchor-${id}-surface`, x, y)),
-        grappleTarget("sector-01-07:access-anchor-a-surface", 480, -800),
-        grappleTarget("sector-01-07:access-anchor-b-surface", 928, -864)
+        horizontalSurface("sector-01-07:access-pocket-deck", 1440, -832, 480, 28, { kind: "safe-deck" }),
+        grappleTarget("sector-01-07:anchor-a-surface", -1088, -192),
+        grappleTarget("sector-01-07:anchor-d-surface", 608, -512),
+        grappleTarget("sector-01-07:anchor-g-surface", -320, -960),
+        grappleTarget("sector-01-07:access-anchor-a-surface", 960, -992),
+        grappleTarget("sector-01-07:access-anchor-b-surface", 1280, -896),
+        ...[
+            ["grip-b", -672, -256],
+            ["grip-c", -224, -320],
+            ["grip-e", 352, -640],
+            ["grip-f", -128, -704],
+            ["grip-h", 160, -1024],
+            ["far-catch", 704, -1088]
+        ].map(([id, x, y]) => grappleTarget(`sector-01-07:${id}-surface`, x, y))
     ],
     routePoints: [
-        point("sector-01-07:route-entry", -320, -32),
-        point("sector-01-07:route-a", -128, -224, { landmark: "A" }),
-
-        point("sector-01-07:route-security", 0, -736),
-
-        point("sector-01-07:route-pressure-mid", 16, -944),
-
+        point("sector-01-07:route-entry", -1248, -32),
+        point("sector-01-07:route-a", -1088, -192, { landmark: "A" }),
+        point("sector-01-07:route-b", -672, -256),
+        point("sector-01-07:route-c", -224, -320),
+        point("sector-01-07:route-right-turn", 352, -352),
+        point("sector-01-07:route-d", 608, -512, { landmark: "D" }),
+        point("sector-01-07:route-e", 352, -640),
+        point("sector-01-07:route-f", -128, -704),
+        point("sector-01-07:route-left-shadow", -704, -832),
+        point("sector-01-07:route-g", -320, -960, { landmark: "G" }),
+        point("sector-01-07:route-h", 160, -1024),
+        point("sector-01-07:route-far-catch", 704, -1088),
+        point("sector-01-07:route-bypass", 896, -1216),
         block07.routeExit
     ],
     recoveryPoints: [
-        point("sector-01-07:recovery-r1", -144, -216),
-        point("sector-01-07:recovery-r2", 144, -536),
-        point("sector-01-07:recovery-r3", 64, -968),
-        point("sector-01-07:recovery-upper", -64, -1288)
+        point("sector-01-07:recovery-lower", -544, -152),
+        point("sector-01-07:recovery-middle", 64, -568),
+        point("sector-01-07:recovery-upper-local", 352, -944),
+        point("sector-01-07:recovery-access-local", 1216, -864)
     ],
     objects: [
-        ...[["a", -128, -224, "A"]].map(([id, x, y, label]) =>
-            worldObject(`sector-01-07:anchor-${id}`, "grapple-landmark", x, y, {
-                label
+        worldObject("sector-01-07:anchor-a", "grapple-landmark", -1088, -192, { label: "A" }),
+        worldObject("sector-01-07:anchor-d", "grapple-landmark", 608, -512, { label: "D" }),
+        worldObject("sector-01-07:anchor-g", "grapple-landmark", -320, -960, { label: "G" }),
+        ...[
+            ["grip-b", -672, -256],
+            ["grip-c", -224, -320],
+            ["grip-e", 352, -640],
+            ["grip-f", -128, -704],
+            ["grip-h", 160, -1024],
+            ["far-catch", 704, -1088]
+        ].map(([id, x, y]) =>
+            worldObject(`sector-01-07:${id}`, "grapple-landmark", x, y, {
+                presentationId: "world-object:structural-grapple-joint"
             })
         ),
-        worldObject("sector-01-07:pressure-valve-core", "background-prop", 0, -896, { gameplay: false }),
-        worldObject("sector-01-07:access-anchor-a", "grapple-landmark", 480, -800, { label: "ACCESS A" }),
-        worldObject("sector-01-07:access-anchor-b", "grapple-landmark", 928, -864, { label: "ACCESS B" }),
-        worldObject("sector-01-07:sentry-turret-01", "sentry", 1320, -944, {
+        worldObject("sector-01-07:main-pressure-vent", "wind-source", -1504, -832, {
+            damage: false,
+            windZoneId: "sector-01-07:main-pressure-vent-wind"
+        }),
+        worldObject("sector-01-07:access-anchor-a", "grapple-landmark", 960, -992, { label: "ACCESS A" }),
+        worldObject("sector-01-07:access-anchor-b", "grapple-landmark", 1280, -896, { label: "ACCESS B" }),
+        worldObject("sector-01-07:access-carrier", "sentry", 1440, -832, {
+            enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:c",
-            accessHint: "RIGHT · UPPER PRESSURE BYPASS",
-            activationSpec: objectTriggerSpec("center", 900, 640, { x: 0, y: 0 }),
+            accessHint: "RIGHT · OVERPRESSURE POCKET",
+            activationSpec: objectTriggerSpec("center", 480, 480, { x: 0, y: -16 }),
             rules: ["standard-projectile", "no-rope-cut"]
         }),
-        pooledSentry("sector-01-07:access-guard-left", 960, -944, SECTOR_01_GUARD_POOL, {
-            width: 400,
-            height: 560,
-            rules: ["wind-pressure"]
+        pooledSentry("sector-01-07:access-guard-a", 1216, -832, SECTOR_01_GUARD_POOL, {
+            width: 320,
+            height: 320
         }),
-        pooledSentry("sector-01-07:access-guard-right", 1680, -944, SECTOR_01_GUARD_POOL, {
-            width: 400,
-            height: 560,
-            rules: ["wind-pressure"]
-        }),
-        worldObject("sector-01-07:main-pressure-vent", "wind-source", -416, -992, {
-            damage: false,
-            windZoneId: "sector-01-07:main-pressure-vent-wind",
-            zone: objectTriggerSpec("center", 704, 384, { x: 416, y: 0 })
+        pooledSentry("sector-01-07:access-guard-b", 1600, -832, SECTOR_01_GUARD_POOL, {
+            width: 160,
+            height: 320
         }),
         block07.panel,
         block07.gateVisual
@@ -864,7 +896,7 @@ const area07 = defineArea({
     windZones: [
         {
             id: "sector-01-07:residual-airflow",
-            bounds: triggerBounds(-320, -640, 672, 384),
+            bounds: triggerBounds(-1248, -384, 1664, 256),
             direction: { x: 1, y: 0 },
             mode: "continuous",
             strength: 220,
@@ -872,6 +904,7 @@ const area07 = defineArea({
         },
         {
             id: "sector-01-07:main-pressure-vent-wind",
+            bounds: triggerBounds(-736, -1120, 1696, 576),
             direction: { x: 1, y: 0 },
             mode: "pulsed",
             strength: 800,
@@ -882,22 +915,24 @@ const area07 = defineArea({
     gate: block07.gate,
     storyTriggers: [
         "pressure-unstable",
-        "containment-violation",
         "pressure-limit",
+        "containment-violation",
         "bypass-ready",
         "bypass-open",
         "service-route-available"
     ],
-    routes: ["safe", "flow", "recovery", "impulse", "relay", "shear"],
+    routes: ["safe", "flow", "recovery"],
     cameraZones: [
-        cameraZone("approach", -416, 0, 1.1, 0.76),
-        cameraZone("security-entry", -608, -416, 1, 0.74),
-        cameraZone("decision-frame", -832, -608, 0.8, 0.62, { verticalPlayerRatio: 0.66 }),
-        cameraZone("pressure-crossing", -1216, -832, 0.85, 0.64, { verticalPlayerRatio: 0.62 }),
-        cameraZone("relief", -1376, -1216, 1.05, 0.74),
-        cameraZone("bypass", -1536, -1376, 1.15, 0.78)
+        cameraZone("lower-approach", -176, 0, 0.95, 0.7),
+        cameraZone("pressure-preview", -352, -176, 1.02, 0.72),
+        cameraZone("middle-against", -544, -352, 0.84, 0.64, { verticalPlayerRatio: 0.64 }),
+        cameraZone("left-shadow", -832, -544, 1.05, 0.74, { verticalPlayerRatio: 0.62 }),
+        cameraZone("upper-with", -1088, -832, 0.82, 0.63, { verticalPlayerRatio: 0.62 }),
+        cameraZone("access-pocket", -1216, -1088, 0.88, 0.66, { verticalPlayerRatio: 0.62 }),
+        cameraZone("bypass", -1344, -1216, 1.08, 0.75),
+        cameraZone("exit", -1472, -1344, 1.12, 0.77)
     ],
-    cueIds: ["pressure-valve-core", "vent-cycle", "sentry-pressure-overlap", "manual-bypass", "service-route-available"]
+    cueIds: ["pressure-unstable", "pressure-limit", "containment-violation", "manual-bypass", "service-route-available"]
 });
 
 const block08 = exitBlock({

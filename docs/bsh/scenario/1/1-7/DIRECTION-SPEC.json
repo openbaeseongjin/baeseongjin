@@ -1,0 +1,375 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "ea9c4438c0f106474baa09621bfb42ae5876b86e",
+  "stage": {
+    "sector": 1,
+    "stage": 7,
+    "sourceAreaId": "sector-01-07",
+    "name": "PRESSURE BYPASS"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "establish known pressure system in tighter architecture",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "1-7:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "lower-approach",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "PRESSURE NETWORK",
+            "detail": "UNSTABLE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "pressure-pipe-knocks-plus-residual-air"
+        }
+      ],
+      "completion": "presentation duration only",
+      "validation": "no movement block"
+    },
+    {
+      "beatId": "s1-lower-review",
+      "status": "DESIGN LOCKED",
+      "purpose": "reuse weak rightward continuous airflow before pulse inversion",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "lower-chamber"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-7:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "lower-approach",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "wind",
+          "target": "residual-airflow",
+          "action": "continuous-right-220"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "Right Turn Deck",
+      "validation": "mainline enemy count remains 0"
+    },
+    {
+      "beatId": "s2-pressure-preview",
+      "status": "DESIGN LOCKED",
+      "purpose": "show same known pulse before opposing traversal",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "right-turn-pressure-preview"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "1-7:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "pressure-preview",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED TRIGGER",
+          "content": {
+            "title": "PRESSURE LIMIT",
+            "detail": "EXCEEDED"
+          }
+        },
+        {
+          "type": "wind",
+          "target": "main-pressure-vent",
+          "action": "show-current-cycle"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "Middle Chamber commit",
+      "validation": "Player sees LEFT destination and RIGHT pulse before commit"
+    },
+    {
+      "beatId": "s3-middle-against",
+      "status": "DESIGN LOCKED",
+      "purpose": "make ACTIVE oppose the intended traversal without adding a new rule",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "middle-chamber"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-7:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "middle-against",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "wind",
+          "target": "main-pressure-vent",
+          "action": "right-pulse-opposes-right-to-left-traversal"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "Left Safe Shadow or Middle recovery",
+      "validation": "LULL/DECAY are controllable but ACTIVE is not an impossible wall"
+    },
+    {
+      "beatId": "s4-left-shadow",
+      "status": "DESIGN LOCKED",
+      "purpose": "recognize that the pressure rhythm itself is unchanged",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "left-safe-shadow"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "1-7:bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "left-shadow",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "object",
+          "target": "pressure-baffle",
+          "action": "real-wind-occlusion"
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…아까랑 같은 주기네."
+          },
+          "timing": {
+            "mode": "after-stabilization"
+          }
+        }
+      ],
+      "completion": "local recognition beat",
+      "validation": "Bark is not System Toast and never gates gameplay"
+    },
+    {
+      "beatId": "s5-upper-with",
+      "status": "DESIGN LOCKED",
+      "purpose": "invert the tactical meaning of the same ACTIVE pulse",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "upper-chamber"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-story-replay",
+      "dedupeToken": "1-7:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "upper-with",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "wind",
+          "target": "main-pressure-vent",
+          "action": "right-pulse-assists-left-to-right-traversal"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "Far Catch",
+      "validation": "ACTIVE helps but is not mandatory"
+    },
+    {
+      "beatId": "s6-access",
+      "status": "DESIGN LOCKED",
+      "purpose": "optional full-system combination at highest local pressure",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "access-pocket"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "runtime-access-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "access-pocket",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED TEXT / REAUTHORED TRIGGER",
+          "content": {
+            "title": "CONTAINMENT VIOLATION",
+            "detail": "ACTIVE"
+          }
+        },
+        {
+          "type": "enemy",
+          "target": "carrier-plus-two-guards",
+          "action": "current-access-contract"
+        },
+        {
+          "type": "wind",
+          "target": "main-pressure-vent",
+          "action": "reuse-current-right-pulse"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "Module C acquired or Player returns",
+      "validation": "no third Wind behavior and no fourth enemy"
+    },
+    {
+      "beatId": "s7-bypass",
+      "status": "DESIGN LOCKED",
+      "purpose": "safe manual interaction after combination challenge",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "bypass-deck"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "1-7:s7",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "bypass",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "interaction",
+          "target": "sector-01-07:exit-panel",
+          "action": "complete-bypass-open"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "pressure-settle-and-actuator-response"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "sector-01-07:bypass-open",
+      "validation": "no unverified bypass-ready/open Toast automatically added"
+    },
+    {
+      "beatId": "s8-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "handoff to Containment Gate",
+      "trigger": {
+        "type": "objective-complete",
+        "objectiveId": "sector-01-07:bypass-open"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "1-7:s8",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "exit",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "pressure-rhythm-to-heavy-containment-lock"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ],
+      "completion": "handoff to 1-8",
+      "validation": "1-8 Entry owns CONTAINMENT GATE / LOCKED"
+    }
+  ],
+  "validation": [
+    "worldPause false for all beats",
+    "mainline enemy count = 0",
+    "Access C contains exactly Carrier + 2 Guards",
+    "Middle and Upper share same current Pulse cycle",
+    "Middle ACTIVE opposes and Upper ACTIVE assists",
+    "Player Bark layer absence never blocks Stage",
+    "Bark never rendered as System Toast",
+    "unverified bypass storyTriggers do not become visible Toasts",
+    "MAP-PREVIEW remains gameplay-only"
+  ]
+}

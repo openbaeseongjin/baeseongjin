@@ -1,0 +1,651 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED",
+  "baselineCommit": "ea9c4438c0f106474baa09621bfb42ae5876b86e",
+  "stage": {
+    "sector": 1,
+    "stage": 7,
+    "legacyStageAlias": "1-7",
+    "sourceAreaId": "sector-01-07",
+    "name": "PRESSURE BYPASS",
+    "subtitle": "MANUAL PRESSURE CONTROL"
+  },
+  "bounds": {
+    "width": 3360,
+    "height": 1472
+  },
+  "entry": {
+    "id": "sector-01-07:entry",
+    "x": -1248,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "kind": "platform",
+      "x": -1248,
+      "y": 0,
+      "width": 448,
+      "height": 32
+    },
+    {
+      "id": "lower-recovery",
+      "kind": "recovery",
+      "x": -544,
+      "y": -128,
+      "width": 288,
+      "height": 18
+    },
+    {
+      "id": "right-turn-deck",
+      "kind": "safe-deck",
+      "x": 352,
+      "y": -352,
+      "width": 320,
+      "height": 24
+    },
+    {
+      "id": "middle-recovery",
+      "kind": "recovery",
+      "x": 64,
+      "y": -544,
+      "width": 320,
+      "height": 18
+    },
+    {
+      "id": "left-safe-shadow",
+      "kind": "safe-deck",
+      "x": -704,
+      "y": -832,
+      "width": 352,
+      "height": 24
+    },
+    {
+      "id": "pressure-baffle",
+      "kind": "solid",
+      "x": -832,
+      "y": -816,
+      "width": 96,
+      "height": 224,
+      "properties": {
+        "static": true,
+        "solid": true,
+        "grappleable": false,
+        "damage": false,
+        "windOcclusion": true
+      }
+    },
+    {
+      "id": "bypass-deck",
+      "kind": "safe-deck",
+      "x": 896,
+      "y": -1216,
+      "width": 384,
+      "height": 28
+    },
+    {
+      "id": "bypass-panel-body",
+      "kind": "interaction-body",
+      "x": 960,
+      "y": -1256,
+      "width": 48,
+      "height": 80,
+      "properties": {
+        "static": true,
+        "solid": true,
+        "grappleable": false,
+        "damage": false
+      }
+    },
+    {
+      "id": "exit-deck",
+      "kind": "safe-deck",
+      "x": 1184,
+      "y": -1344,
+      "width": 352,
+      "height": 32
+    },
+    {
+      "id": "access-pocket-deck",
+      "kind": "safe-deck",
+      "x": 1440,
+      "y": -832,
+      "width": 480,
+      "height": 28
+    },
+    {
+      "id": "anchor-a-surface",
+      "kind": "grapple-target",
+      "x": -1088,
+      "y": -192
+    },
+    {
+      "id": "grip-b-surface",
+      "kind": "structural-grapple-target",
+      "x": -672,
+      "y": -256
+    },
+    {
+      "id": "grip-c-surface",
+      "kind": "structural-grapple-target",
+      "x": -224,
+      "y": -320
+    },
+    {
+      "id": "anchor-d-surface",
+      "kind": "grapple-target",
+      "x": 608,
+      "y": -512
+    },
+    {
+      "id": "grip-e-surface",
+      "kind": "structural-grapple-target",
+      "x": 352,
+      "y": -640
+    },
+    {
+      "id": "grip-f-surface",
+      "kind": "structural-grapple-target",
+      "x": -128,
+      "y": -704
+    },
+    {
+      "id": "anchor-g-surface",
+      "kind": "grapple-target",
+      "x": -320,
+      "y": -960
+    },
+    {
+      "id": "grip-h-surface",
+      "kind": "structural-grapple-target",
+      "x": 160,
+      "y": -1024
+    },
+    {
+      "id": "far-catch-surface",
+      "kind": "structural-grapple-target",
+      "x": 704,
+      "y": -1088
+    },
+    {
+      "id": "access-anchor-a-surface",
+      "kind": "grapple-target",
+      "x": 960,
+      "y": -992
+    },
+    {
+      "id": "access-anchor-b-surface",
+      "kind": "grapple-target",
+      "x": 1280,
+      "y": -896
+    }
+  ],
+  "routePoints": [
+    {
+      "id": "entry",
+      "x": -1248,
+      "y": -32
+    },
+    {
+      "id": "a",
+      "x": -1088,
+      "y": -192,
+      "landmark": "A"
+    },
+    {
+      "id": "b",
+      "x": -672,
+      "y": -256
+    },
+    {
+      "id": "c",
+      "x": -224,
+      "y": -320
+    },
+    {
+      "id": "right-turn",
+      "x": 352,
+      "y": -352
+    },
+    {
+      "id": "d",
+      "x": 608,
+      "y": -512,
+      "landmark": "D"
+    },
+    {
+      "id": "e",
+      "x": 352,
+      "y": -640
+    },
+    {
+      "id": "f",
+      "x": -128,
+      "y": -704
+    },
+    {
+      "id": "left-shadow",
+      "x": -704,
+      "y": -832
+    },
+    {
+      "id": "g",
+      "x": -320,
+      "y": -960,
+      "landmark": "G"
+    },
+    {
+      "id": "h",
+      "x": 160,
+      "y": -1024
+    },
+    {
+      "id": "far-catch",
+      "x": 704,
+      "y": -1088
+    },
+    {
+      "id": "bypass",
+      "x": 896,
+      "y": -1216
+    },
+    {
+      "id": "exit",
+      "x": 1184,
+      "y": -1344
+    }
+  ],
+  "recoveryPoints": [
+    {
+      "id": "lower",
+      "x": -544,
+      "y": -152,
+      "retrySecondsTarget": [
+        4,
+        6
+      ]
+    },
+    {
+      "id": "middle",
+      "x": 64,
+      "y": -568,
+      "retrySecondsTarget": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "upper-local",
+      "x": 352,
+      "y": -944,
+      "retrySecondsTarget": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "access-local",
+      "x": 1216,
+      "y": -864,
+      "returnSecondsTarget": [
+        10,
+        20
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "anchor-a",
+      "kind": "grapple-landmark",
+      "x": -1088,
+      "y": -192,
+      "label": "A"
+    },
+    {
+      "id": "anchor-d",
+      "kind": "grapple-landmark",
+      "x": 608,
+      "y": -512,
+      "label": "D"
+    },
+    {
+      "id": "anchor-g",
+      "kind": "grapple-landmark",
+      "x": -320,
+      "y": -960,
+      "label": "G"
+    },
+    {
+      "id": "main-pressure-vent",
+      "kind": "wind-source",
+      "x": -1504,
+      "y": -832,
+      "properties": {
+        "damage": false,
+        "windZoneId": "sector-01-07:main-pressure-vent-wind"
+      }
+    },
+    {
+      "id": "bypass-panel",
+      "kind": "interaction",
+      "x": 960,
+      "y": -1216,
+      "properties": {
+        "objectiveId": "sector-01-07:bypass-open"
+      }
+    },
+    {
+      "id": "access-anchor-a",
+      "kind": "grapple-landmark",
+      "x": 960,
+      "y": -992,
+      "label": "ACCESS A"
+    },
+    {
+      "id": "access-anchor-b",
+      "kind": "grapple-landmark",
+      "x": 1280,
+      "y": -896,
+      "label": "ACCESS B"
+    },
+    {
+      "id": "access-carrier",
+      "kind": "access-carrier",
+      "x": 1440,
+      "y": -832,
+      "properties": {
+        "enemyType": "sentry-t1",
+        "accessModuleId": "sector-01:access-module:c",
+        "mainRouteRequired": false
+      }
+    },
+    {
+      "id": "access-guard-a",
+      "kind": "sentry-slot",
+      "x": 1216,
+      "y": -832,
+      "properties": {
+        "enemyPool": "SECTOR_01_GUARD_POOL"
+      }
+    },
+    {
+      "id": "access-guard-b",
+      "kind": "sentry-slot",
+      "x": 1600,
+      "y": -832,
+      "properties": {
+        "enemyPool": "SECTOR_01_GUARD_POOL"
+      }
+    }
+  ],
+  "windZones": [
+    {
+      "id": "sector-01-07:residual-airflow",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "mode": "continuous",
+      "strength": 220,
+      "falloff": 80,
+      "targetBounds": {
+        "minX": -1248,
+        "maxX": 416,
+        "minY": -384,
+        "maxY": -128
+      },
+      "status": "VERIFIED CURRENT PHYSICS / REAUTHORED SPATIAL BOUNDS"
+    },
+    {
+      "id": "sector-01-07:main-pressure-vent-wind",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "mode": "pulsed",
+      "strength": 800,
+      "falloff": 80,
+      "cycle": {
+        "lull": 1.75,
+        "warning": 0.7,
+        "active": 1.4,
+        "decay": 0.3
+      },
+      "targetBounds": {
+        "minX": -736,
+        "maxX": 960,
+        "minY": -1120,
+        "maxY": -544
+      },
+      "status": "VERIFIED CURRENT PHYSICS / REAUTHORED SPATIAL BOUNDS"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "sector-01-07:bypass-open",
+      "type": "interact",
+      "sourceObjectId": "sector-01-07:exit-panel"
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "sector-01-07:entry",
+      "anchor-a-surface",
+      "anchor-d-surface",
+      "anchor-g-surface",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-01-07:entry",
+      "anchor-a-surface",
+      "anchor-d-surface",
+      "anchor-g-surface",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 1184,
+    "deckTopY": -1344,
+    "deckWidth": 352,
+    "panelObjectiveId": "sector-01-07:bypass-open"
+  },
+  "progression": {
+    "targetStageAlias": "1-8",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "sector-01-07:bypass-open"
+    ]
+  },
+  "access": {
+    "moduleId": "sector-01:access-module:c",
+    "mainRouteRequired": false,
+    "carrierCount": 1,
+    "guardCount": 2,
+    "enemySlotsTotal": 3,
+    "route": [
+      "far-catch",
+      "access-a",
+      "access-b",
+      "overpressure-pocket"
+    ],
+    "returnRoute": [
+      "overpressure-pocket",
+      "access-b",
+      "access-a",
+      "far-catch"
+    ],
+    "returnSecondsTarget": [
+      10,
+      20
+    ]
+  },
+  "story": {
+    "entry": {
+      "title": "PRESSURE NETWORK",
+      "detail": "UNSTABLE",
+      "status": "VERIFIED"
+    },
+    "pressureLimit": {
+      "title": "PRESSURE LIMIT",
+      "detail": "EXCEEDED",
+      "status": "VERIFIED"
+    },
+    "containmentViolation": {
+      "title": "CONTAINMENT VIOLATION",
+      "detail": "ACTIVE",
+      "status": "VERIFIED"
+    },
+    "bypassReady": {
+      "status": "HOLD / NOT VERIFIED AS PRESENTATION"
+    },
+    "bypassOpen": {
+      "status": "HOLD / NOT VERIFIED AS PRESENTATION"
+    },
+    "serviceRouteAvailable": {
+      "status": "HOLD / NOT VERIFIED AS PRESENTATION"
+    },
+    "playerBarkLayer": {
+      "status": "NOT IMPLEMENTED"
+    }
+  },
+  "playerBarks": [
+    {
+      "id": "pulse-recognition",
+      "text": "…아까랑 같은 주기네.",
+      "triggerIntent": "first stable arrival in Left Safe Shadow after Middle opposing-Pulse traversal",
+      "scope": "local-player",
+      "replay": "once-per-stage-attempt",
+      "status": "NOT IMPLEMENTED — PLAYER BARK LAYER"
+    }
+  ],
+  "camera": {
+    "zones": [
+      {
+        "id": "lower-approach",
+        "minY": -176,
+        "maxY": 0,
+        "desktopZoom": 0.95,
+        "mobileZoom": 0.7,
+        "intent": "lower chamber + next 2 grips"
+      },
+      {
+        "id": "pressure-preview",
+        "minY": -352,
+        "maxY": -176,
+        "desktopZoom": 1.02,
+        "mobileZoom": 0.72,
+        "intent": "Right Turn + Middle destination + pulse telegraph"
+      },
+      {
+        "id": "middle-against",
+        "minY": -544,
+        "maxY": -352,
+        "desktopZoom": 0.84,
+        "mobileZoom": 0.64,
+        "intent": "opposing sweep + left Safe Shadow"
+      },
+      {
+        "id": "left-shadow",
+        "minY": -832,
+        "maxY": -544,
+        "desktopZoom": 1.05,
+        "mobileZoom": 0.74,
+        "intent": "tight reset + Upper setup"
+      },
+      {
+        "id": "upper-with",
+        "minY": -1088,
+        "maxY": -832,
+        "desktopZoom": 0.82,
+        "mobileZoom": 0.63,
+        "intent": "G/H/Far Catch + rightward look-ahead"
+      },
+      {
+        "id": "access-pocket",
+        "minY": -1216,
+        "maxY": -1088,
+        "desktopZoom": 0.88,
+        "mobileZoom": 0.66,
+        "intent": "optional local combat"
+      },
+      {
+        "id": "bypass",
+        "minY": -1344,
+        "maxY": -1216,
+        "desktopZoom": 1.08,
+        "mobileZoom": 0.75,
+        "intent": "safe manual control"
+      },
+      {
+        "id": "exit",
+        "minY": -1472,
+        "maxY": -1344,
+        "desktopZoom": 1.12,
+        "mobileZoom": 0.77,
+        "intent": "handoff to 1-8"
+      }
+    ]
+  },
+  "forbidden": [
+    "mainline enemy",
+    "fourth sentry slot",
+    "new wind type",
+    "new wind cycle",
+    "fan/vent damage",
+    "fixed impulse relay shear routes",
+    "huge flat access annex",
+    "vertical pressure spine topology",
+    "background pressure valve core in MAP-PREVIEW"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "enemy-budget",
+      "type": "schema",
+      "requirement": "Exactly 3 Stage enemy slots and all are optional Access C."
+    },
+    {
+      "id": "mainline-enemy-free",
+      "type": "runtime",
+      "requirement": "Lower, Middle, Upper mainline contain no enemy pressure."
+    },
+    {
+      "id": "middle-opposes",
+      "type": "traversal",
+      "requirement": "ACTIVE RIGHT pulse materially opposes RIGHT→LEFT Middle traversal without making it impossible.",
+      "status": "HYPOTHESIS"
+    },
+    {
+      "id": "upper-assists",
+      "type": "traversal",
+      "requirement": "ACTIVE RIGHT pulse materially assists LEFT→RIGHT Upper traversal without becoming mandatory.",
+      "status": "HYPOTHESIS"
+    },
+    {
+      "id": "same-cycle",
+      "type": "runtime",
+      "requirement": "Middle and Upper use same 1.75/0.7/1.4/0.3 cycle."
+    },
+    {
+      "id": "wind-shadow",
+      "type": "runtime",
+      "requirement": "Pressure Baffle creates a real no-wind safe read pocket."
+    },
+    {
+      "id": "bark",
+      "type": "runtime",
+      "requirement": "If Bark layer is implemented, recognition Bark occurs after Middle traversal and never gates gameplay."
+    },
+    {
+      "id": "access-return",
+      "type": "traversal",
+      "requirement": "Access C return to Far Catch targets 10–20s."
+    },
+    {
+      "id": "pacing",
+      "type": "traversal",
+      "requirement": "Mainline first 2:00–2:45, mastered 1:00–1:25."
+    }
+  ]
+}
