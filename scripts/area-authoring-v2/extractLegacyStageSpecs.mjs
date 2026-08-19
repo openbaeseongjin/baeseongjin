@@ -6,16 +6,7 @@ import { validateAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaS
 
 const projectRoot = resolve(import.meta.dirname, "../..");
 const writeCandidates = process.argv.includes("--write");
-const editableDomains = [
-    "bounds",
-    "entry",
-    "surfaces",
-    "anchors",
-    "recoveryRoute",
-    "enemySlots",
-    "wind",
-    "camera"
-];
+const editableDomains = ["bounds", "entry", "surfaces", "anchors", "recoveryRoute", "enemySlots", "wind", "camera"];
 const readOnlyDomains = ["objectives", "progression", "story", "scanner", "behaviorRegistry"];
 const selectedStages = [
     { stageId: "1-1", areaId: "sector-01-01", outputPath: "docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json" },
@@ -26,9 +17,7 @@ function toAnchor(area, landmark) {
     const { id, kind, position, coordinateAnchor, ...properties } = landmark;
     const target = area.surfaces.find(
         (surface) =>
-            surface.kind === "grapple-target" &&
-            surface.position.x === position.x &&
-            surface.position.y === position.y
+            surface.kind === "grapple-target" && surface.position.x === position.x && surface.position.y === position.y
     );
 
     if (!target) {
@@ -80,11 +69,7 @@ function extractAreaSpec(area, stageId) {
     };
     const validation = validateAreaSpecV2(spec, { file: `${stageId}:legacy-extract` });
     if (!validation.valid) {
-        throw new Error(
-            `area-spec-v2-invalid:${stageId}:${validation.issues
-                .map((issue) => issue.code)
-                .join(",")}`
-        );
+        throw new Error(`area-spec-v2-invalid:${stageId}:${validation.issues.map((issue) => issue.code).join(",")}`);
     }
     return spec;
 }

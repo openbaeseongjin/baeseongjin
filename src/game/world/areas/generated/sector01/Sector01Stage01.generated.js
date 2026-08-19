@@ -4,6 +4,8 @@ import { createAreaDefinitionFromV2 } from "../../../area-authoring-v2/AreaSpecV
 
 export const GENERATED_STAGE_ID = "1-1";
 export const GENERATED_AREA_ID = "sector-01-01";
+// JSON ordering and formatting are deterministic generator output.
+// prettier-ignore
 const SPEC = {
   "anchors": [
     {

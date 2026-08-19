@@ -73,7 +73,11 @@ export function collectAreaCatalogGeneration({ check = false } = {}) {
         }
         return { valid: issues.length === 0, issues, outputs };
     } catch (error) {
-        return { valid: false, issues: [{ code: "generated-output-render-failed", message: error.message }], outputs: [] };
+        return {
+            valid: false,
+            issues: [{ code: "generated-output-render-failed", message: error.message }],
+            outputs: []
+        };
     }
 }
 
@@ -92,7 +96,9 @@ export function main() {
             writeFileSync(path, output.content, "utf8");
         }
     }
-    console.log(`${check ? "Generated output check passed" : "Generated output written"}: ${result.outputs.length} file(s).`);
+    console.log(
+        `${check ? "Generated output check passed" : "Generated output written"}: ${result.outputs.length} file(s).`
+    );
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {

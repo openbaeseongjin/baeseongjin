@@ -63,7 +63,8 @@ export function validateBehaviorRefs(refs, registry = EMPTY_AREA_BEHAVIOR_REGIST
         if (!isPlainObject(reference) || typeof reference.id !== "string" || reference.id.length === 0) {
             throw new AreaBehaviorReferenceError("behavior-reference-id-invalid");
         }
-        if (ids.has(reference.id)) throw new AreaBehaviorReferenceError("behavior-reference-id-duplicate", { id: reference.id });
+        if (ids.has(reference.id))
+            throw new AreaBehaviorReferenceError("behavior-reference-id-duplicate", { id: reference.id });
         if (!registry?.has(reference.id)) {
             throw new AreaBehaviorReferenceError("behavior-reference-unknown", { id: reference.id });
         }

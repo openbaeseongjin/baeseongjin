@@ -11,7 +11,13 @@ export const EDITOR_EDITABLE_DOMAINS = Object.freeze([
     "wind",
     "camera"
 ]);
-export const EDITOR_READ_ONLY_DOMAINS = Object.freeze(["objectives", "progression", "story", "scanner", "behaviorRegistry"]);
+export const EDITOR_READ_ONLY_DOMAINS = Object.freeze([
+    "objectives",
+    "progression",
+    "story",
+    "scanner",
+    "behaviorRegistry"
+]);
 
 function stableValue(value) {
     if (Array.isArray(value)) return value.map((entry) => stableValue(entry));
