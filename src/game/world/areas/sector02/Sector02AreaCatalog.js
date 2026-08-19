@@ -231,18 +231,27 @@ const area01 = defineArea({
 
 const block02 = exitBlock({
     areaId: "sector-02-02",
-    deckX: 160,
-    deckTopY: -963,
-    deckWidth: 320,
+    deckX: 736,
+    deckTopY: -800,
+    deckWidth: 256,
     nextAreaId: "sector-02-03",
     panelObjectiveId: "sector-02-02:exit-panel-engaged",
     panelProperties: { requiredObjectiveIds: ["sector-02-02:exit-reached"] }
 });
 
 const area02Id = "sector-02-02";
-const area02Landmarks = [];
-const area02Exit = point(`${area02Id}:exit`, 224, -1024);
-const area02Objective = reachExitObjective(area02Id, area02Exit.x, area02Exit.y);
+// REV8.0: SAFE OBSERVE -> COVER A -> MOVING LOS -> COVER B -> DISENGAGE -> SHORT RISE -> EXIT.
+// Player transits the same long horizontal axis the Patrol Drone patrols (observe-first rule).
+const area02Landmarks = [
+    landmark(area02Id, "g1", -560, -560, -160, "G1"),
+    landmark(area02Id, "g2", -240, -240, -352, "G2"),
+    landmark(area02Id, "g4", 368, 368, -448, "G4"),
+    landmark(area02Id, "g5", 608, 608, -640, "G5")
+];
+const [g1, g2, g4, g5] = area02Landmarks;
+const g3Grip = structuralGrip(area02Id, "g3-surface", 80, -352);
+const accessAnchorGrip = structuralGrip(area02Id, "access-anchor-surface", 416, -752);
+const area02Objective = reachExitObjective(area02Id, block02.exit.x, block02.exit.y);
 const area02PanelObjective = exitPanelObjective(area02Id, [area02Objective.id]);
 const area02 = defineArea({
     id: area02Id,
@@ -250,38 +259,84 @@ const area02 = defineArea({
     order: 2,
     name: "PATROL WALKWAY",
     subtitle: "FIRST MOVING SECURITY",
-    bounds: { width: 1280, height: 1088 },
-    entry: point(`${area02Id}:entry`, -416, -32),
+    bounds: { width: 1792, height: 896 },
+    entry: point(`${area02Id}:entry`, -768, -32),
     exit: block02.exit,
     nextAreaId: "sector-02-03",
     surfaces: [
-        platform(area02Id, "p0", -544, -288, 0),
-        platform(area02Id, "p1", -320, 32, -256),
-        platform(area02Id, "cover-a", -32, 96, -320, "cover"),
-        platform(area02Id, "p2", -64, 480, -480),
-        platform(area02Id, "cover-b", 160, 288, -608, "cover"),
-        platform(area02Id, "p3", 32, 320, -704, "recovery"),
+        horizontalSurface(area02Id, "p0", -720, 0, 352, 32, "platform"),
+        horizontalSurface(area02Id, "observation-deck", -464, -224, 352, 24, "safe-deck"),
+        horizontalSurface(area02Id, "recovery-lower", -320, -288, 224, 16, "recovery"),
+        horizontalSurface(area02Id, "cover-a-deck", -176, -416, 256, 22, "platform"),
+        horizontalSurface(area02Id, "recovery-middle", 64, -320, 224, 16, "recovery"),
+        horizontalSurface(area02Id, "central-deck", 64, -416, 224, 22, "platform"),
+        horizontalSurface(area02Id, "recovery-far", 400, -448, 224, 16, "recovery"),
+        horizontalSurface(area02Id, "disengage-deck", 512, -512, 288, 24, "safe-deck"),
+        horizontalSurface(area02Id, "upper-landing", 608, -704, 288, 24, "safe-deck"),
+        horizontalSurface(area02Id, "access-carrier-balcony", 256, -800, 224, 24, "platform"),
+        // Static, non-grappleable, non-damaging LOS blockers (RUNTIME-HANDOFF: "safe option, not
+        // mandatory waiting") - tall (height>width) so AreaDefinitionValidator requires bottom-center;
+        // AREA-SPEC's cover (x,y) is the shape's CENTER (71/74's confirmed center-point convention).
+        rectangle(`${area02Id}:cover-a`, -112, -432 + 80, 80, 160, {
+            kind: "cover",
+            grappleable: false,
+            oneWay: false,
+            losBlocker: true,
+            coordinateAnchor: "bottom-center"
+        }),
+        rectangle(`${area02Id}:cover-b`, 240, -432 + 80, 80, 160, {
+            kind: "cover",
+            grappleable: false,
+            oneWay: false,
+            losBlocker: true,
+            coordinateAnchor: "bottom-center"
+        }),
         block02.deck,
-        ...area02Landmarks.map(({ surface }) => surface)
+        g1.surface,
+        g2.surface,
+        g3Grip,
+        g4.surface,
+        g5.surface,
+        accessAnchorGrip
     ],
     routePoints: [
-        point(`${area02Id}:route-entry`, -416, -32),
-        point(`${area02Id}:route-p1`, -144, -256),
-        point(`${area02Id}:route-p2`, 208, -480),
-        point(`${area02Id}:route-p3`, 176, -704),
+        point(`${area02Id}:route-entry`, -768, -32),
+        g1.route,
+        point(`${area02Id}:route-observation`, -464, -224),
+        g2.route,
+        point(`${area02Id}:route-g3`, 80, -352),
+        g4.route,
+        point(`${area02Id}:route-disengage`, 512, -512),
+        g5.route,
+        point(`${area02Id}:route-upper-landing`, 608, -704),
         block02.routeExit
     ],
-    recoveryPoints: [point(`${area02Id}:recovery-lower`, -144, -280), point(`${area02Id}:recovery-upper`, 176, -728)],
+    recoveryPoints: [
+        point(`${area02Id}:recovery-point-lower`, -320, -304),
+        point(`${area02Id}:recovery-point-middle`, 64, -336),
+        point(`${area02Id}:recovery-point-far`, 400, -464),
+        point(`${area02Id}:recovery-point-access`, 416, -720)
+    ],
     objects: [
-        ...area02Landmarks.map(({ object }) => object),
-        patrolDrone(area02Id, "drone-1", -320, -416, triggerBounds(-576, -672, 1152, 512), [
-            { x: -320, y: -416 },
-            { x: 320, y: -416 }
+        g1.object,
+        g2.object,
+        g4.object,
+        g5.object,
+        // Preserve exact Patrol contract (RUNTIME-HANDOFF: "do not rewrite AI") - only the local
+        // Y/path staging moves to the new horizontal transit axis.
+        patrolDrone(area02Id, "drone-1", -320, -384, triggerBounds(-640, -640, 1280, 512), [
+            { x: -320, y: -384 },
+            { x: 320, y: -384 }
         ]),
-        pooledSentry(area02Id, "upper-walkway-guard", 320, -704, SECTOR_02_STANDARD_POOL, {
-            width: 512,
-            height: 480,
+        // Access Carrier moved to the small post-lesson Access Alcove; activates only after the
+        // Access branch is committed, so it cannot crossfire with the main Patrol lesson.
+        pooledSentry(area02Id, "upper-walkway-guard", 256, -800, SECTOR_02_STANDARD_POOL, {
+            width: 384,
+            height: 192,
             accessModuleId: "sector-02:access-module:a"
+        }),
+        worldObject(`${area02Id}:security-status`, "story-display", 608, -704, {
+            cueIds: ["security-patrol-active", "residential-transit-restricted"]
         }),
         block02.panel,
         block02.gateVisual

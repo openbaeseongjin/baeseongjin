@@ -416,6 +416,44 @@
     }
   ],
   "nextAreaId": "sector-02-03",
+  "route": {
+    "runtimeLandmarks": [
+      "sector-02-02:entry",
+      "g1-surface",
+      "observation-deck",
+      "g2-surface",
+      "g3-surface",
+      "g4-surface",
+      "disengage-deck",
+      "g5-surface",
+      "upper-landing",
+      "exit-deck",
+      "exit"
+    ],
+    "mandatory": [
+      "sector-02-02:entry",
+      "g1-surface",
+      "g2-surface",
+      "g3-surface",
+      "g4-surface",
+      "g5-surface",
+      "exit-deck",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": 736,
+    "deckTopY": -800,
+    "deckWidth": 256,
+    "panelObjectiveId": "sector-02-02:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "2-3",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": ["sector-02-02:exit-panel-engaged"]
+  },
   "story": {
     "entry": {
       "title": "PATROL WALKWAY",
@@ -450,6 +488,7 @@
   ],
   "camera": {
     "mode": "default-authored-camera",
+    "zones": [],
     "customZonesRequired": false,
     "observationRequirement": [
       "Player",
@@ -487,27 +526,27 @@
   "acceptanceTests": [
     {
       "id": "bounds",
-      "type": "data",
+      "type": "schema",
       "requirement": "Bounds 1792×896."
     },
     {
       "id": "enemy-budget",
-      "type": "data",
+      "type": "schema",
       "requirement": "Exactly 2 enemy slots: one Patrol Drone + one Access Carrier."
     },
     {
       "id": "patrol",
-      "type": "data/runtime",
+      "type": "runtime",
       "requirement": "Patrol speed 48, wait 0.45, pingpong, kill optional, no Rope Cut."
     },
     {
       "id": "observe-first",
-      "type": "playtest",
+      "type": "traversal",
       "requirement": "Player can visibly read Drone movement before first unavoidable threat."
     },
     {
       "id": "multi-solution",
-      "type": "playtest",
+      "type": "traversal",
       "requirement": "Wait, Flow and Kill are all viable."
     },
     {
@@ -522,7 +561,7 @@
     },
     {
       "id": "pacing",
-      "type": "playtest",
+      "type": "traversal",
       "requirement": "Mainline first 1:20–1:55; mastered 0:40–1:00.",
       "status": "HYPOTHESIS"
     }
