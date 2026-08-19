@@ -283,7 +283,6 @@ const area03 = defineArea({
         worldObject("sector-01-03:sentry-turret-01", "sentry", 1500, -640, {
             enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:a",
-            accessHint: "RIGHT · LOWER SECURITY ANNEX",
             activationSpec: objectTriggerSpec("center", 1100, 544, { x: -300, y: -16 }),
             rules: ["standard-projectile", "no-rope-cut", "cover-ends-los"]
         }),
@@ -588,7 +587,6 @@ const area06 = defineArea({
         worldObject("sector-01-06:access-carrier", "sentry", -1320, -832, {
             enemyType: "sentry-t1",
             accessModuleId: "sector-01:access-module:b",
-            accessHint: "LEFT · MID COOLING INTAKE",
             activationSpec: objectTriggerSpec("center", 900, 512, { x: 0, y: -32 }),
             rules: ["standard-projectile", "no-rope-cut", "wind-pressure"]
         }),
@@ -708,7 +706,6 @@ const area07 = defineArea({
         worldObject("sector-01-07:access-anchor-b", "grapple-landmark", 928, -864, { label: "ACCESS B" }),
         worldObject("sector-01-07:sentry-turret-01", "sentry", 1320, -944, {
             accessModuleId: "sector-01:access-module:c",
-            accessHint: "RIGHT · UPPER PRESSURE BYPASS",
             activationSpec: objectTriggerSpec("center", 900, 640, { x: 0, y: 0 }),
             rules: ["standard-projectile", "no-rope-cut"]
         }),

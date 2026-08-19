@@ -11,6 +11,7 @@
 - Story는 `COOLING DISTRIBUTION / AIRFLOW UNSTABLE` entry와 exit-panel objective binding이 구현됐다. `storyTriggers`는 시나리오 기획 인벤토리다.
 - Approved Blockout과 실제 브라우저 Wind/Camera 가독성 검증은 여전히 필요하다.
 - 2026-08-18부터 Stage 폭은 3840px이며 Neutral Deck에서 왼쪽으로 이어지는 Bridge `(-640,-832, 704×16)`와 Arena `(-1320,-832, 704×32)`를 Stage-local로 저작한다. Arena의 Access Carrier B `(-1320,-832)`는 기존 Sentry T1 행동과 `900×512` activation band를 재사용해 `sector-01:access-module:b`를 운반한다. 0.41.0의 Sector당 3-of-3 계약에서 이 Carrier는 필수지만 본선 Wind 학습 spine과 분리된 annex 위치는 유지한다.
+- 0.42.0부터 Carrier 위치 문자열은 제거하고 화면 밖 edge arrow와 화면 안 diamond marker를 같은 module world position에서 전환한다.
 
 > **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§2·§4·§5·§8의 Wind Shadow/Grounded/Falloff/Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다. Geometry 비교 기록은 유지한다.
 

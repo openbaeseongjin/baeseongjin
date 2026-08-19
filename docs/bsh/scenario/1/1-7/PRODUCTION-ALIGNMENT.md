@@ -11,6 +11,7 @@
 - Story는 entry, `PRESSURE LIMIT EXCEEDED`, `CONTAINMENT VIOLATION ACTIVE`, bypass objective/gate binding으로 핵심 흐름이 구현됐다.
 - `storyTriggers`는 시나리오 기획 인벤토리이며 Bypass 이후 환경 상태 변화는 별도 World presentation 범위다.
 - 2026-08-18부터 Stage 폭은 3840px이며 기존 Sentry T1 stable ID와 행동을 오른쪽 Annex Arena `(1320,-944)`에서 Access Carrier C로 사용한다. Bridge `(560,-944, 736×16)`, Arena `(1320,-944, 800×32)`, Access Anchor `(480,-800)`, `(928,-864)`는 Stage-local 좌표다. 0.41.0의 3-of-3 계약에서 세 Carrier를 모두 요구한다.
+- 0.42.0부터 Carrier 위치 문자열은 제거하고 화면 밖 edge arrow와 화면 안 diamond marker를 같은 module world position에서 전환한다.
 
 > **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 §1·§4·§5·§7~§9의 Foundation/Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다. 좌표와 미검증 Knockback+Wind 기록은 유지한다.
 

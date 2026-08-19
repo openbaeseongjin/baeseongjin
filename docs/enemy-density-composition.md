@@ -31,6 +31,7 @@
 ## 보존 계약
 
 - `accessModuleId`, Sector당 Carrier 3기 처치와 3-of-3 Transit Lock. Carrier 지정은 기존 slot 수·위치·activation을 바꾸지 않는다.
+- Carrier 위치는 authored 글자 hint를 소유하지 않는다. Runtime은 stable module world position만 전달하고 화면 밖에서는 다음 미수집 Carrier edge arrow, 화면 안에서는 무문자 diamond marker로 안내한다.
 - 개인 사망의 shared progress/처치 보존과 Sector-entry 부활.
 - party wipe의 current-sector enemy/module/route baseline reset.
 - 고정·고정경로·제자리 지원형의 위치 넉백 면역, Pursuit/Swarm의 직접 추격형 displacement.

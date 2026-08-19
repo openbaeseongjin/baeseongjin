@@ -322,6 +322,7 @@ class Player extends RopeAttachable(GameObject) {}
 - DPR 보정과 resize는 렌더링 경계에서 한 번만 처리한다.
 - 색만으로 상태를 전달하지 않고 형태, 굵기, 움직임, 문구를 함께 사용한다.
 - 사용자 입력, 성공, 실패, 쿨다운은 화면에서 구분 가능해야 한다.
+- 화면 밖 objective 안내는 방향을 문장으로 하드코딩하지 않고 world position을 현재 camera로 투영한 screen-edge indicator를 사용한다. viewport 안에서는 world marker, 밖에서는 edge arrow 중 하나만 표시하고 safe-area·고정 HUD·모바일 조작 bounds를 피한다. 여러 후보가 있으면 제품 계약이 정한 다음 대상 하나만 안내해 화살표 중첩을 만들지 않으며 공용 HUD 표시 토글을 따른다.
 - Canvas 변경은 시작·동작 중·종료 또는 해제 상태를 실제 화면으로 검증한다.
 - 렌더 최적화는 보이는 결과가 같은지를 먼저 회귀 테스트하고, 화면 안/밖 객체를 함께 둔 수치 테스트로 draw 감소를 증명한다. 실제 브라우저에서는 설정 버튼 길게 누르기로 디버그 수치 표시를 켜고 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
 - 스프라이트 clip은 자산이 실제로 표현하는 행동 의미와 일치해야 한다. 지원하지 않는 행동을 방향 전환용 프레임 등 무관한 프레임에 임의 대응하지 않고, 불가피한 대체는 definition에 명시적 fallback으로 선언한다.

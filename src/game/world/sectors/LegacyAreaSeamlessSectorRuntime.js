@@ -6,7 +6,7 @@ import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v5";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v6";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
@@ -447,10 +447,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                         sectorId: sectorDefinition.id,
                         landmarkId: landmarkDefinition.id,
                         encounterId: encounter.encounterId,
-                        position: encounter.position,
-                        hint: landmarkDefinition.encounters.find(
-                            ({ encounterId }) => encounterId === encounter.encounterId
-                        )?.accessHint
+                        position: encounter.position
                     })
                 );
             }

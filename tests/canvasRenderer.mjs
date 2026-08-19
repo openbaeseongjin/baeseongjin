@@ -14,7 +14,9 @@ export function run() {
         translate() {},
         moveTo() {},
         lineTo() {},
+        closePath() {},
         beginPath() {},
+        rotate() {},
         arc() {},
         fill() {},
         stroke() {},
@@ -121,9 +123,9 @@ export function run() {
             }
         ],
         accessModules: [
-            { id: "module:a", hint: "LOWER" },
-            { id: "module:b", hint: "MIDDLE" },
-            { id: "module:c", hint: "UPPER" }
+            { id: "module:a", position: { x: -2000, y: -100 } },
+            { id: "module:b", position: { x: 2000, y: -100 } },
+            { id: "module:c", position: { x: 0, y: -2000 } }
         ]
     };
     textCalls.length = 0;
@@ -134,6 +136,10 @@ export function run() {
         mobileView: true
     });
     assert.ok(textCalls.includes("ACCESS 2/3 · NEED 1"));
+    assert.equal(
+        textCalls.some((text) => /LOWER|MIDDLE|UPPER/.test(String(text))),
+        false
+    );
     textCalls.length = 0;
     renderer.drawAccessHud({
         world: accessWorld,
@@ -146,9 +152,11 @@ export function run() {
     let sceneDraws = 0;
     let localHudDraws = 0;
     let accessHudDraws = 0;
+    let accessGuideDraws = 0;
     const visibilityRenderer = new CanvasRenderer(canvas, { profile: "test", draw: () => sceneDraws++ });
     visibilityRenderer.drawLocalStatusHud = () => localHudDraws++;
     visibilityRenderer.drawAccessHud = () => accessHudDraws++;
+    visibilityRenderer.drawAccessGuide = () => accessGuideDraws++;
     visibilityRenderer.drawRewardSelectionOverlay = () => {};
     visibilityRenderer.drawMobileControls = () => {};
     visibilityRenderer.drawStoryPresentation = () => {};
@@ -159,9 +167,11 @@ export function run() {
     assert.equal(sceneDraws, 1, "hiding the fixed HUD must not hide the world or overhead actor bars");
     assert.equal(localHudDraws, 0);
     assert.equal(accessHudDraws, 0);
+    assert.equal(accessGuideDraws, 0);
     visibilityRenderer.draw({ camera: { x: 0, y: 0, zoom: 1 }, hudVisible: true });
     assert.equal(localHudDraws, 1);
     assert.equal(accessHudDraws, 1);
+    assert.equal(accessGuideDraws, 1);
 
     textCalls.length = 0;
     fillCalls.length = 0;

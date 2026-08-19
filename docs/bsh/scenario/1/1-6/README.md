@@ -24,7 +24,7 @@ Reused Mechanics:
 - First Rope Augment
 
 Enemy:
-OPTIONAL ACCESS CARRIER (REUSED SENTRY T1)
+REQUIRED ACCESS CARRIER (REUSED SENTRY T1 · SECTOR 3-OF-3)
 
 Damage Hazard:
 NONE
