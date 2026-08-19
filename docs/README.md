@@ -80,6 +80,10 @@ Stage README와 과거 제작 자료에는 0.26.0 이전 Foundation·Impulse·Re
 | [`bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`](./bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md) | 현재 Runtime을 확인한 뒤 일관된 Scenario Art Reference를 생성·검수하는 공통 규격 |
 | [`bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md`](./bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md) | Stage별 `AREA-SPEC.json`(구현 계약) 스키마·Local ID·preset·검증 규칙을 정의하는 공통 규격 |
 | [`bsh/scenario/AREA-SPEC-TEMPLATE.json`](./bsh/scenario/AREA-SPEC-TEMPLATE.json) | `AREA-SPEC.json` 작성용 template — 실제 Stage로 집계되지 않음 |
+| [`bsh/scenario/DIRECTION-SPEC-AUTHORING-STANDARD.md`](./bsh/scenario/DIRECTION-SPEC-AUTHORING-STANDARD.md) | Stage별 `DIRECTION-SPEC.json`(연출 구현 계약) 스키마·Reference Gate·Map Uniqueness·Story Presentation·Stage Package 구조·검증 규칙을 정의하는 공통 규격 |
+| [`bsh/scenario/DIRECTION-SPEC-TEMPLATE.json`](./bsh/scenario/DIRECTION-SPEC-TEMPLATE.json) | `DIRECTION-SPEC.json` 작성용 template — 실제 Stage로 집계되지 않음 |
+| [`bsh/scenario/DIRECTION-RUNTIME-CAPABILITY-MATRIX.md`](./bsh/scenario/DIRECTION-RUNTIME-CAPABILITY-MATRIX.md) | Direction trigger/camera mode/track별 실제 Runtime 구현 여부(VERIFIED/PARTIAL/NOT IMPLEMENTED/HOLD) 감사 기록 |
+| [`bsh/scenario/stage-package-template/`](./bsh/scenario/stage-package-template/README.md) | 새 Stage 폴더 작성용 빈 template 모음(README/PRODUCTION-ALIGNMENT/RUNTIME-HANDOFF/VALIDATION/ASSET-REQUIREMENTS) |
 | [`bsh/scenario/1/README.md`](./bsh/scenario/1/README.md) | `bsh` Sector 01 공용 배경 아트 레퍼런스와 Stage 인덱스 |
 | [`bsh/scenario/1/1-1/README.md`](./bsh/scenario/1/1-1/README.md) | `bsh` 기본 Rope 오프닝 Authored Stage(1-1) Blockout·제작 규격 |
 | [`bsh/scenario/1/1-1/AREA-SPEC.json`](./bsh/scenario/1/1-1/AREA-SPEC.json) | 1-1 구현 계약(area-spec-v1) — Local ID·Route·Recovery·Acceptance Tests |

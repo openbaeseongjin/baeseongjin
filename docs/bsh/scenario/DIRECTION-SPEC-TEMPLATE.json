@@ -1,0 +1,72 @@
+{
+    "_comment": [
+        "TEMPLATE — not a real stage. Do not count this file as a Stage DIRECTION-SPEC.",
+        "Copy this into docs/bsh/scenario/<sector>/<stage>/DIRECTION-SPEC.json and fill in real,",
+        "reviewed values only. Every value below is a placeholder. See",
+        "docs/bsh/scenario/DIRECTION-SPEC-AUTHORING-STANDARD.md for the full field-by-field",
+        "contract and docs/bsh/scenario/DIRECTION-RUNTIME-CAPABILITY-MATRIX.md for which",
+        "trigger/camera/track values currently have real Runtime backing.",
+        "",
+        "npm run validate:direction-specs will NOT flag this file as a stage error, because it",
+        "does not live at docs/bsh/scenario/<sector>/<stage>/DIRECTION-SPEC.json — but it also",
+        "will not be schema-checked for that reason. Validate your copy after renaming/relocating it."
+    ],
+    "schemaVersion": "one-rope-direction-spec-v1",
+    "stageId": "sector-XX-YY",
+    "revision": "REV-1",
+    "sourceCommit": "GITHUB_MAIN_SHA",
+    "presentationSignature": "DEFINE_ME",
+    "beats": [
+        {
+            "beatId": "sector-XX-YY:S0-example",
+            "status": "HYPOTHESIS",
+            "purpose": "Describe exact player-facing purpose. Do not invent Story/Dialogue not already approved.",
+            "trigger": {
+                "type": "area-enter",
+                "areaId": "sector-XX-YY"
+            },
+            "scope": "local-player",
+            "replayPolicy": "once-per-run",
+            "dedupeToken": "sector-XX-YY:S0-example",
+            "worldPause": false,
+            "playerControl": {
+                "movement": true,
+                "aim": true,
+                "rope": true,
+                "action": true,
+                "interaction": true
+            },
+            "camera": {
+                "mode": "authored-zone",
+                "zoneId": "intro",
+                "compositionMustShow": ["player", "next-action", "story-object"]
+            },
+            "tracks": {
+                "systemText": [
+                    {
+                        "at": 0.0,
+                        "title": "EXAMPLE TITLE",
+                        "detail": "EXAMPLE DETAIL",
+                        "durationSeconds": 1.2,
+                        "status": "HYPOTHESIS"
+                    }
+                ],
+                "dialogue": [],
+                "character": [],
+                "object": [],
+                "camera": [],
+                "audio": [],
+                "vfx": [],
+                "lighting": [],
+                "gameplayEvent": []
+            },
+            "completion": {
+                "type": "tracks-finished"
+            },
+            "validation": {
+                "automated": ["cue plays once"],
+                "visual": ["player and story object visible together"]
+            }
+        }
+    ]
+}

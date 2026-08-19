@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 0ddda9476ceb261568089af081af6a5ae452b97c9e72c5ba749c1c5ade3e7dac
+scenario-source-sha256: 5476095ce0817dd46dab0deb6980399959227011597a1c6d6930b0b06c2f9607
 authored-area-sha256: 4567d0560f2dc1cf29b40d773a0bf76b3ec185ab640b2ff335d60336795ae4ff
 authored-sector-sha256: 504d999ef2b111fdb708b9cf63dec47e854d79d7f7dcf33853f0ad26cfd60422
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: eb8722eb4fbdac23b9c43cb224b259d4ad439a8b
+reviewed-upstream: f202b8cd895f34da2959c1978b08ed36bd43ca8c
 -->
 
 ## 상태를 읽는 법
@@ -129,6 +129,7 @@ reviewed-upstream: eb8722eb4fbdac23b9c43cb224b259d4ad439a8b
 67. **PARTIALLY SUPERSEDED BY 68:** 세이브·Stage 경계 회귀를 수정해 `StageSavePointGeometry`의 `76×82` 로컬 시각 bounds와 player `CircleCollider` 겹침을 저장 trigger로 사용하고 과거 임의 `128×128` entry 판정을 제거했다. 수평 `sector-connector`는 두 authored deck 사이 빈 구간만 deck top에 생성하며, 1-1→1-2의 anchor 중심 `576×32` platform은 실제 `128×32` gap bridge로 줄였다. 당시 2인 이상 same-tick party wipe는 68의 Player별 checkpoint 계약에서 제거됐다.
 68. 멀티 세이브 권위를 Player별 checkpoint로 전환했다. 공용 `SectorProgressState`와 WorldSnapshot top-level의 `respawnAnchorId`를 제거하고 각 `players[]` state가 개인 anchor를 소유한다. owner-motion v5는 owner가 먼저 감지한 anchor ID를 위치와 함께 보내며 서버는 방문 가능 Stage와 실제 trigger 겹침을 확인한 뒤 해당 Player만 갱신한다. 혼자 만든 멀티 채널과 2인 채널 모두 사망자는 자기 마지막 anchor에서 부활하고, 신규 합류자는 현재 Sector entry에서 자기 anchor를 시작한다. 전원 사망도 공용 objective·route·enemy를 reset하지 않으며 `partyWipeBaseline`은 WorldSnapshot v10에서 제거했다. 향후 reset은 Timer/Purge 기획에서 명시적 사건과 권위를 별도로 확정한다.
 69. 반복된 Stage save/platform 회귀의 구조적 모순을 제거했다. `currentSectorId/currentLandmarkId/visitedLandmarkIds`와 `visitLandmark()`를 공용 진행 snapshot에서 제거하고 모든 objective가 자기 trigger/source와 `requiredObjectiveIds`만으로 판정된다. save collision은 모든 anchor를 동일 resolver로 검사하는 유일한 Stage 도달 사건이며 UI Stage는 Player 좌표에서 파생한다. `sector-connector`는 동적 route surface가 아니라 Run 시작부터 존재하는 정적 `sector-seam`이고 objective/save 전후 collision·renderer surface ID 집합은 변하지 않는다. Stage/route door·barrier·portal은 추가하지 않았고 inter-Sector 제약은 Boss 구현까지 HOLD다. HUD는 generic Augment, 좌표 Stage, HP와 다음 Action charge cooldown을 표시하며 모든 Player는 HP+cooldown overhead, 모든 Enemy는 항상 HP overhead를 공유한다. 반복 유사 버그 모순 감사 절차를 `AGENTS.md`와 `docs/development-rules.md`에 승격했다.
+70. `docs/one-rope-authoring-standard-v1` 브랜치는 Sector/Stage content를 하나도 바꾸지 않고, 외부에서 전달된 `ONE-ROPE-PLANNING-DIRECTION-STANDARD-v1.0` 패키지를 authoring infrastructure로 정착시켰다: `docs/bsh/scenario/DIRECTION-SPEC-AUTHORING-STANDARD.md`(WHEN/HOW 계약 — `AREA-SPEC-AUTHORING-STANDARD.md`의 짝) + `DIRECTION-SPEC-TEMPLATE.json` + `DIRECTION-RUNTIME-CAPABILITY-MATRIX.md`(trigger/camera mode/track별 VERIFIED 6·PARTIAL 3·NOT IMPLEMENTED 6·HOLD 8 audit) + `stage-package-template/`(빈 template) + `scripts/validateDirectionSpecs.mjs`/`scripts/validateStagePackageCrossReferences.mjs`(각각 `tests/directionSpecValidator.mjs`/`tests/stagePackageCrossReferences.mjs` 회귀 포함, `npm run check`에 연결). Repo 전체에 `DIRECTION-SPEC.json`은 아직 하나도 없다 — 이번 변경은 스키마와 검증기만 준비했고, 1-1을 포함한 어떤 Stage의 실제 Beat 내용도 작성하지 않았다(Sector 01 재구성이 아직 Reference Gate 단계이기 때문). `scenario-source-sha256`가 바뀐 것은 이 문서 추가 때문이며 Sector 05를 포함한 기존 Stage 상태는 변경되지 않았다.
 
 ## 열린 기획·구현 게이트
 
