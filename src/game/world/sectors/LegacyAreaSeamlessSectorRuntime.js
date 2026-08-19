@@ -113,7 +113,7 @@ function horizontalConnectorVertices(start, end, surfaces, thickness) {
     ];
 }
 
-function connectorSurface(id, routeLockId, sourceLandmarkId, start, end, supportingSurfaces) {
+function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces) {
     const thickness = 32;
     const dx = end.x - start.x;
     const dy = end.y - start.y;
@@ -134,9 +134,8 @@ function connectorSurface(id, routeLockId, sourceLandmarkId, start, end, support
     const bottom = Math.max(...vertices.map(({ y }) => y));
     return freezeValue({
         id,
-        kind: "sector-connector",
+        kind: "sector-seam",
         landmarkId: sourceLandmarkId,
-        requiredRouteId: routeLockId,
         oneWay: false,
         grappleable: true,
         x: left,
@@ -473,7 +472,6 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 const surfaceId = `${lockId}:surface`;
                 const connectorBridge = connectorSurface(
                     surfaceId,
-                    lockId,
                     previousLandmark.id,
                     previousLandmark.exit,
                     runtimeLandmark.entry,

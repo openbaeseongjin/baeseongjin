@@ -15,16 +15,6 @@ function player(id, position) {
     };
 }
 
-function completeObjectives(progress, world, landmark) {
-    for (const objectiveId of landmark.objectiveIds) {
-        const objective = world.objectives.find(({ id }) => id === objectiveId);
-        for (const requiredId of objective.requiredObjectiveIds ?? []) {
-            if (!progress.isObjectiveComplete(requiredId)) progress.completeObjective(requiredId);
-        }
-        progress.completeObjective(objectiveId);
-    }
-}
-
 export function run() {
     const world = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 320 });
     const progress = new SectorProgressState(world);
@@ -46,9 +36,9 @@ export function run() {
         staleChoiceEvents.some(
             ({ type, objectiveId }) => type === "objective-choice-requested" && objectiveId === futureChoiceObjective.id
         ),
-        "a physically reached Node must request its chooser even when currentLandmarkId is stale"
+        "a physically reached Node must request its chooser without a Stage-entry cursor"
     );
-    assert.equal(progress.currentLandmarkId, "sector-01:landmark:01");
+    assert.equal("currentLandmarkId" in progress.snapshot(), false);
 
     const staleSimulation = createCurrentGameSimulation({ worldSeed: 9182, playerId: "stale-simulation-player" });
     staleSimulation.enemies = [];
@@ -72,7 +62,7 @@ export function run() {
     );
     assert.ok(
         staleSimulation.getFoundationReward(staleSimulation.players[0].id),
-        "the stale-landmark choice request must open the actual GameSimulation chooser"
+        "the position-driven choice request must open the actual GameSimulation chooser"
     );
 
     const first = world.landmarks[0];
@@ -96,16 +86,13 @@ export function run() {
     owner.physics.position.set(second.entry.x + 63, second.entry.y);
     events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });
     assert.equal(
-        events.some(({ type }) => type === "landmark-entered"),
+        events.some(({ type }) => type === "stage-savepoint-reached"),
         false,
         "entering an arbitrary square around the Stage start must not activate its save point"
     );
-    assert.equal(progress.snapshot().currentLandmarkId, first.id);
 
     owner.physics.position.set(second.entry.x + 56, second.entry.y);
     events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });
-    assert.ok(events.some(({ type, landmarkId }) => type === "landmark-entered" && landmarkId === second.id));
-    assert.equal(progress.snapshot().currentLandmarkId, second.id);
     assert.ok(
         events.some(
             ({ type, respawnAnchorId }) =>
@@ -118,22 +105,14 @@ export function run() {
         "progress must not teleport the player"
     );
 
-    const sectorTransitionRoute = world.routeLocks.find(
-        ({ targetLandmarkId }) => targetLandmarkId === "sector-02:landmark:01"
-    );
-    while (progress.snapshot().currentLandmarkId !== sectorTransitionRoute.sourceLandmarkId) {
-        const current = world.landmarks.find(({ id }) => id === progress.snapshot().currentLandmarkId);
-        completeObjectives(progress, world, current);
-        progress.visitLandmark(world.routeLocks.find(({ id }) => id === current.outboundRouteId).targetLandmarkId);
-    }
-    const transitionSource = world.landmarks.find(({ id }) => id === sectorTransitionRoute.sourceLandmarkId);
-    completeObjectives(progress, world, transitionSource);
-    for (const accessModuleId of world.sectors[0].accessModuleIds.slice(0, 2)) {
-        progress.collectAccessModule(accessModuleId);
-    }
-    const target = world.landmarks.find(({ id }) => id === sectorTransitionRoute.targetLandmarkId);
+    const target = world.landmarks.find(({ id }) => id === "sector-02:landmark:01");
     owner.physics.position.set(target.entry.x, target.entry.y);
     events = advanceSectorProgress({ world, progress, players: [owner], commandsByPlayerId: new Map(), dt: 0 });
-    assert.ok(events.some(({ type }) => type === "sector-entered"));
-    assert.equal(progress.snapshot().currentSectorId, "sector-02");
+    assert.ok(
+        events.some(
+            ({ type, respawnAnchorId }) =>
+                type === "stage-savepoint-reached" && respawnAnchorId === target.respawnAnchorId
+        ),
+        "a physically touched save point must activate without route or Sector-entry state"
+    );
 }

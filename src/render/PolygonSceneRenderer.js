@@ -26,6 +26,7 @@ import {
     PolygonRemotePlayerRenderer
 } from "./polygon/PolygonActorRenderers.js";
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
+import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 
 export class PolygonSceneRenderer {
     constructor() {
@@ -73,7 +74,8 @@ export class PolygonSceneRenderer {
                     new CombatEffectRenderer(),
                     new EventEffectRenderer(),
                     new AttachmentCandidateRenderer(),
-                    new PolygonLocalPlayerRenderer()
+                    new PolygonLocalPlayerRenderer(),
+                    new ActorStatusRenderer()
                 ])
             ]
         });

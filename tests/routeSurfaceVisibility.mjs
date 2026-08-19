@@ -82,11 +82,11 @@ export function run() {
     );
     assert.deepEqual(
         afterUnlock.filter((id) => !beforeUnlock.includes(id)),
-        [connector.id],
-        "objective progress adds only the authored route connector, not a Stage floor"
+        [],
+        "objective progress must not add any Stage floor or connector surface"
     );
-    assert.equal(connector.kind, "sector-connector");
-    assert.equal(connector.requiredRouteId, firstRoute.id);
+    assert.equal(connector.kind, "sector-seam");
+    assert.equal("requiredRouteId" in connector, false);
     assert.deepEqual(
         polygonRenderer.surfaceEntries(runtimeWorld, runtimeProgress.snapshot()).map(({ surface }) => surface.id),
         renderableAfterUnlock,
@@ -97,10 +97,9 @@ export function run() {
         renderableAfterUnlock,
         "pixel rendering uses every unlocked collision surface that is authored as renderable"
     );
-    runtimeProgress.visitLandmark(firstRoute.targetLandmarkId);
     assert.deepEqual(
         collisionSurfacesForSectorProgress(runtimeWorld, runtimeProgress).map(({ id }) => id),
         afterUnlock,
-        "landmark entry advances the checkpoint without introducing another floor"
+        "save and objective progress must preserve the static surface set"
     );
 }

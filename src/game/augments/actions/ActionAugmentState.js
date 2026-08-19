@@ -106,6 +106,7 @@ export class ActionAugmentState {
         this.actionSequence = 0;
         this.chargesRemaining = this.maxCharges();
         this.rechargeRemaining = 0;
+        this.rechargeDuration = 0;
         this.rechargeQueue = [];
         this.ropeLinkWindowRemaining = 0;
         this.shieldValue = 0;
@@ -325,6 +326,7 @@ export class ActionAugmentState {
             actionSequence: this.actionSequence,
             chargesRemaining: this.chargesRemaining,
             rechargeRemaining: this.rechargeRemaining,
+            rechargeDuration: this.rechargeDuration,
             rechargeQueue: Object.freeze([...this.rechargeQueue]),
             ropeLinkWindowRemaining: this.ropeLinkWindowRemaining,
             shieldValue: this.shieldValue,
@@ -343,6 +345,7 @@ export class ActionAugmentState {
         finiteNonNegative(snapshot?.actionSequence ?? 0, "actionSequence");
         finiteNonNegative(snapshot?.chargesRemaining ?? this.maxCharges(), "chargesRemaining");
         finiteNonNegative(snapshot?.rechargeRemaining ?? 0, "rechargeRemaining");
+        finiteNonNegative(snapshot?.rechargeDuration ?? snapshot?.rechargeRemaining ?? 0, "rechargeDuration");
         finiteNonNegative(snapshot?.ropeLinkWindowRemaining ?? 0, "ropeLinkWindowRemaining");
         finiteNonNegative(snapshot?.shieldValue ?? 0, "shieldValue");
         finiteNonNegative(snapshot?.shieldRemaining ?? 0, "shieldRemaining");
@@ -363,6 +366,7 @@ export class ActionAugmentState {
         this.actionSequence = snapshot?.actionSequence ?? 0;
         this.chargesRemaining = Math.min(this.maxCharges(), snapshot?.chargesRemaining ?? this.maxCharges());
         this.rechargeRemaining = snapshot?.rechargeRemaining ?? 0;
+        this.rechargeDuration = snapshot?.rechargeDuration ?? this.rechargeRemaining;
         this.rechargeQueue = rechargeQueue;
         this.ropeLinkWindowRemaining = snapshot?.ropeLinkWindowRemaining ?? 0;
         this.shieldValue = snapshot?.shieldValue ?? 0;
@@ -451,7 +455,10 @@ export class ActionAugmentState {
     #enqueueRecharge(cooldownSeconds) {
         finiteNonNegative(cooldownSeconds, "cooldownSeconds");
         this.rechargeQueue.push(cooldownSeconds);
-        if (this.rechargeRemaining === 0) this.rechargeRemaining = this.rechargeQueue.shift() ?? 0;
+        if (this.rechargeRemaining === 0) {
+            this.rechargeRemaining = this.rechargeQueue.shift() ?? 0;
+            this.rechargeDuration = this.rechargeRemaining;
+        }
     }
 
     #advanceRecharge(dt) {
@@ -464,8 +471,10 @@ export class ActionAugmentState {
             this.chargesRemaining = Math.min(this.maxCharges(), this.chargesRemaining + 1);
             if (this.chargesRemaining < this.maxCharges() && this.rechargeQueue.length > 0) {
                 this.rechargeRemaining = this.rechargeQueue.shift();
+                this.rechargeDuration = this.rechargeRemaining;
             } else {
                 this.rechargeRemaining = 0;
+                this.rechargeDuration = 0;
                 if (this.chargesRemaining === this.maxCharges()) this.rechargeQueue.length = 0;
             }
         }

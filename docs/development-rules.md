@@ -110,15 +110,16 @@
 - 능력에 독립 상태·검증·해제 과정이 커지면 믹스인이 아니라 Has-A 컴포넌트로 바꾼다.
 
 ```js
-const RopeAttachable = (Base) => class extends Base {
-  attachRope(anchor) {
-    this.ropeAnchor = { ...anchor };
-  }
+const RopeAttachable = (Base) =>
+    class extends Base {
+        attachRope(anchor) {
+            this.ropeAnchor = { ...anchor };
+        }
 
-  detachRope() {
-    this.ropeAnchor = null;
-  }
-};
+        detachRope() {
+            this.ropeAnchor = null;
+        }
+    };
 
 class Player extends RopeAttachable(GameObject) {}
 ```
@@ -348,6 +349,18 @@ class Player extends RopeAttachable(GameObject) {}
 
 ## 12. 테스트와 회귀 방지
 
+### 반복 유사 버그 모순 감사
+
+같은 증상군이 이전 수정 뒤 다시 보고되거나 사용자가 “아직도”, “여전히”, “또”와 같이 반복 회귀를 명시하면 증상별 보정 전에 다음 감사를 수행한다.
+
+1. 관련 파일의 Git 이력과 `SESSION-HANDOFF.md`·기준 문서·decision history에서 이전 수정과 대체 결정을 확인한다.
+2. 같은 의미를 쓰는 상태 필드, controller, event, protocol과 compatibility alias를 검색해 권위 소유자가 둘 이상인지 확인한다.
+3. client/server, owner/shared simulation, collision/renderer, authored/runtime이 같은 predicate와 데이터 원점을 사용하는지 나란히 비교한다.
+4. 이전 수정이 크기·표현·예외 조건만 바꾸고 기존 모순된 권위 계약을 유지했는지 확인한다.
+5. 편집 전에 사용자 증상과 함께 단일 권위·정적 geometry·상태 수렴 같은 근본 불변식을 실패 테스트로 고정한다.
+
+반복 회귀에서는 diff가 작다는 이유로 관측값 override, whitelist 확장, fallback 분기 또는 한쪽 계층만의 predicate를 추가하지 않는다. 기존 계약끼리 양립하지 않으면 최신 사용자 결정에 맞는 권위 하나를 남기고 나머지 상태와 호환 경로를 제거하거나 표시 전용 파생값으로 격리한다. 감사 결과는 최종 보고와 Lore commit의 Constraint 또는 Rejected trailer에 남겨 다음 수정자가 같은 증상 패치를 반복하지 않게 한다.
+
 기본 검증 명령:
 
 ```powershell
@@ -436,17 +449,17 @@ git diff --check
 
 기준 문서의 소유 범위는 다음과 같다.
 
-| 결정 종류 | 기준 문서 |
-| --- | --- |
-| 게임 방향, 플레이 흐름, 열린 기획 결정 | `docs/game-hackathon-planning.md`, `docs/implementation-roadmap.md` |
-| 시나리오 Stage 목록, Runtime 연결 상태, 차단 요소와 마지막 확인 근거 | `docs/scenario-development-integration.md` |
-| 모듈 책임, 상태 소유권, 의존 방향 | `docs/architecture.md` |
-| 멀티 권위, 전송, 채널과 세션 정책 | `docs/multiplayer-synchronization.md` |
-| 클래스·믹스인·컴포넌트·테스트·Git과 대화 결정 흡수 절차 | `docs/development-rules.md` |
-| 문서 인덱스, 작성 위치, 파일 형식과 이미지 첨부 | `docs/documentation-rules.md` |
-| Pages, PWA, 서버 실행, 버전 운영 | 해당 배포·버전 문서 |
-| 현재 유효한 결론과 다음 작업 요약 | `SESSION-HANDOFF.md` |
-| 대체되거나 종료된 결정과 이유 | `docs/decision-history.md` |
+| 결정 종류                                                            | 기준 문서                                                           |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 게임 방향, 플레이 흐름, 열린 기획 결정                               | `docs/game-hackathon-planning.md`, `docs/implementation-roadmap.md` |
+| 시나리오 Stage 목록, Runtime 연결 상태, 차단 요소와 마지막 확인 근거 | `docs/scenario-development-integration.md`                          |
+| 모듈 책임, 상태 소유권, 의존 방향                                    | `docs/architecture.md`                                              |
+| 멀티 권위, 전송, 채널과 세션 정책                                    | `docs/multiplayer-synchronization.md`                               |
+| 클래스·믹스인·컴포넌트·테스트·Git과 대화 결정 흡수 절차              | `docs/development-rules.md`                                         |
+| 문서 인덱스, 작성 위치, 파일 형식과 이미지 첨부                      | `docs/documentation-rules.md`                                       |
+| Pages, PWA, 서버 실행, 버전 운영                                     | 해당 배포·버전 문서                                                 |
+| 현재 유효한 결론과 다음 작업 요약                                    | `SESSION-HANDOFF.md`                                                |
+| 대체되거나 종료된 결정과 이유                                        | `docs/decision-history.md`                                          |
 
 다음 내용은 영구 결정으로 승격하지 않는다.
 

@@ -2,9 +2,9 @@
 
 ## 1. 프로젝트 한 줄 정의
 
-> **아크샨식 고정 길이 로프 액션 × 아이작의 로그라이크·Foundation 성장 구조**
+> **아크샨식 고정 길이 로프 액션 × 아이작의 로그라이크·증강 성장 구조**
 
-붕괴 중인 하나의 도시 월드를 고정 길이 로프로 탈출하며, 영역별 방해요소를 처리하고 Foundation 선택으로 매 플레이 성장 방향을 만드는 2D 횡스크롤 액션 게임이다.
+붕괴 중인 하나의 도시 월드를 고정 길이 로프로 탈출하며, 영역별 방해요소를 처리하고 generic Augment 선택으로 매 플레이 성장 방향을 만드는 2D 횡스크롤 액션 게임이다.
 
 ## 2. 현재 방향
 
@@ -24,7 +24,7 @@
 - 로프 조작은 별도 설명 없이도 빠르게 이해할 수 있어야 한다.
 - 초반 전투와 이동 난이도는 낮게 시작한다.
 - 실패 페널티를 최소화해 재도전을 부담스럽지 않게 만든다.
-- 첫 Foundation 선택이나 강화를 빠르게 제공한다.
+- 첫 증강 선택이나 강화를 빠르게 제공한다.
 - 첫 프로토타입은 콘텐츠 양보다 로프의 손맛을 우선 검증한다.
 - 기본 공격도 자동 사격이 아니라 로프 이동의 속도·충돌 진입을 사용해, 이동 숙련이 전투 성과로 직접 이어지게 한다.
 - 정상 짧은 낙하는 허용하되 큰 추락 착지에는 체력 위험을 두어 고도 관리와 안전한 Recovery 선택에 의미를 준다.
@@ -36,14 +36,14 @@
 1. 붕괴 도시의 시작 영역에서 한 런을 시작한다.
 2. 로프로 이동하며 현재 영역이 요구하는 방해요소 처리 조건을 달성한다. 조건은 시나리오에 따라 처치·무력화·우회·상호작용·이동 달성 중 하나 이상이며, 적 처치로 일괄 고정하지 않는다.
 3. 완료 조건을 달성하면 명시적 출구를 열고, 플레이어가 출구를 통과해 다음 영역으로 진행한다.
-4. landmark를 넘어가도 월드·런·플레이어·Foundation 상태를 새로 만들지 않는다. 플레이어 collider가 해당 Stage 진입점의 보이는 세이브 구조물 bounds와 실제로 겹칠 때만 그 지점을 새 활성 부활 위치로 저장한다.
+4. Stage 진입 판정은 두지 않는다. Player collider가 보이는 세이브 구조물 bounds와 겹칠 때만 개인 부활 위치를 저장하고 현재 Stage 표시는 좌표에서 파생한다.
 5. 1-4·2-3·3-5의 명시적 장비 Node에서 현재 loadout과 호환되는 generic Augment를 하나씩 선택해 로프 조작·전투 방식을 강화한다.
 6. 더 높은 구역 또는 최종 목표를 향해 전진한다.
 7. 개인 실패는 최근 도달 Stage 세이브 포인트로 복귀하며 objective·열린 route·처치 적을 유지한다.
 8. 저장 지점은 Player별 Stage 세이브 포인트다. 싱글·멀티와 현재 접속 인원 수에 관계없이 각 Player는 자기가 마지막으로 접촉한 지점에서 부활하며 다른 Player의 저장 위치를 공유하지 않는다. Timer·Purge가 미정인 동안 전원 실패도 current Sector baseline을 초기화하지 않는다.
 9. 각 Node는 `runSeed + stablePlayerId + selectionIndex`로 서로 다른 호환 카드 3장을 제시하며 reroll·rarity·동일 Player 카드 중복은 없다.
 10. Augment 선택은 공통 피드백으로 알리고, 데스크톱은 선택한 generic loadout을 상시 HUD에 표시한다.
-11. 배포 전 `npm test`로 현재 저작 Sector의 landmark 연결·objective·route lock·content boundary와 싱글·멀티 공용 진행을 검증한다.
+11. 배포 전 `npm test`로 정적 Sector geometry·독립 objective·Player별 save·content boundary와 싱글·멀티 공용 진행을 검증한다.
 12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Augment 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
 13. 발견된 문제 영역은 현재 시나리오의 관련 회귀 테스트에 이유와 함께 추가해 같은 영역·진행 계약에서 우선 재현한다.
 14. 원격 플레이테스트는 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켜고 현재 런 지표를 확인한다.
@@ -113,7 +113,7 @@
 
 - #622의 Phase 1~2는 `SectorDefinition`, Sector validator와 build/startup-only legacy preview adapter를 canonical authoring 경계로 둔다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`이고 `legacyStageAlias`는 문서·migration metadata일 뿐이다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
 - #625/#637은 Sector 01~~03 preview를 seamless 기본 Runtime으로 전환했고, #642의 0.30.0은 이를 `seamless-sector-runtime-v3`로 확장했다. Stage 정의는 local vertical stack으로 보존하고, compiler가 actual lateral city wing과 future Boss room용 transition slot을 조립한다. Sector 04~~06은 alias input으로만 남고 legacy Area/Gate catalog는 이전 revision compatibility 검증에 사용한다.
-- #642의 Sector 01 access vertical slice는 기본 전투를 넓은 공간의 탐색 이유로 사용한다. 1-3·1-6·1-7의 Stage-local Carrier 후보 3곳 중 아무 2곳을 골라 Access Module을 얻고 1-8 Sector Transit Lock을 연다. 후보 존재는 HUD coarse signal로, 정확한 위치는 근접 beacon으로 알린다. 개인 사망은 수집을 보존하고 party wipe만 current Sector를 초기화한다.
+- Sector 01 access vertical slice는 1-3·1-6·1-7 Carrier 후보 중 아무 2곳을 골라 Access Module을 얻는 objective를 유지한다. 현재는 Sector Transit Lock이나 party-wipe reset을 만들지 않는다.
 - 0.32.0은 Sector 01~03을 authored safe slot과 결정적 enemy pool로 채운다. 1-1·1-2는 비전투, 이후는 화면당 약 1기와 후반 역할 중첩을 기준으로 하며 exact slot 예산과 보존 계약은 [`enemy-density-composition.md`](./enemy-density-composition.md)를 따른다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.

@@ -17,17 +17,17 @@ function completeLandmark(progress, world, landmarkId) {
 export function run() {
     const world = createLegacyAreaSeamlessSectorRuntimeWorld({ seed: 9182, floorY: 320 });
     const progress = new SectorProgressState(world);
-    assert.equal(progress.snapshot().currentSectorId, "sector-01");
-    assert.equal(progress.snapshot().currentLandmarkId, "sector-01:landmark:01");
+    assert.equal("currentSectorId" in progress.snapshot(), false);
+    assert.equal("currentLandmarkId" in progress.snapshot(), false);
+    assert.equal("visitedLandmarkIds" in progress.snapshot(), false);
     assert.equal("respawnAnchorId" in progress.snapshot(), false);
 
     const firstRouteId = completeLandmark(progress, world, "sector-01:landmark:01");
     assert.equal(progress.isRouteUnlocked(firstRouteId), true);
-    assert.equal(progress.visitLandmark("sector-01:landmark:02").accepted, true);
     const stage02Snapshot = progress.snapshot();
     assert.deepEqual(new SectorProgressState(world, stage02Snapshot).snapshot(), stage02Snapshot);
     const encounterId = world.landmarks.find(({ id }) => id === "sector-02:landmark:02").encounterIds[0];
-    assert.equal(progress.resolveEncounter(encounterId).reason, "encounter-not-current-sector");
+    assert.equal(progress.resolveEncounter(encounterId).accepted, true);
 
     for (let order = 2; order <= 8; order += 1) {
         const sourceId = `sector-01:landmark:${String(order).padStart(2, "0")}`;
@@ -35,40 +35,28 @@ export function run() {
         if (routeId) {
             const route = world.routeLocks.find(({ id }) => id === routeId);
             if (route.requiredAccessModuleCount) {
-                assert.equal(progress.visitLandmark(route.targetLandmarkId).reason, "landmark-route-locked");
                 const [firstModuleId, secondModuleId] = world.sectors[0].accessModuleIds;
                 assert.equal(progress.collectAccessModule(firstModuleId).changed, true);
-                assert.equal(progress.accessSummary().ready, false);
+                assert.equal(progress.accessSummary("sector-01").ready, false);
                 assert.equal(progress.collectAccessModule(secondModuleId).changed, true);
-                assert.equal(progress.accessSummary().ready, true);
+                assert.equal(progress.accessSummary("sector-01").ready, true);
             }
-            assert.equal(progress.visitLandmark(route.targetLandmarkId).accepted, true);
         }
     }
-    assert.equal(progress.snapshot().currentSectorId, "sector-02");
     const priorObjectiveIds = progress.snapshot().completedObjectiveIds;
 
     completeLandmark(progress, world, "sector-02:landmark:01");
     const sector02Encounter = world.landmarks.find(({ id }) => id === "sector-02:landmark:02").encounterIds[0];
-    progress.visitLandmark("sector-02:landmark:02");
     assert.equal(progress.resolveEncounter(sector02Encounter).accepted, true);
     const beforeSoloDeath = progress.snapshot();
     assert.deepEqual(progress.snapshot(), beforeSoloDeath, "solo respawn must not mutate shared Sector progress");
 
-    const reset = progress.resetCurrentSector();
-    assert.equal(reset.type, "sector-reset");
-    assert.equal(reset.sectorId, "sector-02");
-    assert.deepEqual(progress.snapshot().completedObjectiveIds, priorObjectiveIds);
-    assert.equal(progress.snapshot().resolvedEncounterIds.includes(sector02Encounter), false);
-    assert.equal(progress.snapshot().currentLandmarkId, "sector-02:landmark:01");
-    assert.equal(progress.baselineSnapshot().revision, reset.baselineRevision);
+    assert.ok(progress.snapshot().completedObjectiveIds.length >= priorObjectiveIds.length);
+    assert.equal(progress.snapshot().resolvedEncounterIds.includes(sector02Encounter), true);
 
     const restored = new SectorProgressState(world, progress.snapshot());
     assert.deepEqual(restored.snapshot(), progress.snapshot());
-    assert.throws(
-        () => new SectorProgressState(world, { ...progress.snapshot(), currentSectorId: "missing" }),
-        /unknown current Sector/
-    );
+    assert.throws(() => new SectorProgressState(world, {}), /must be an array|activeObjectiveSequences/);
 
     const boundary = new SectorProgressState(world);
     for (const landmark of world.landmarks) {
@@ -85,7 +73,6 @@ export function run() {
                 boundary.collectAccessModule(accessModuleId);
             }
         }
-        if (route) boundary.visitLandmark(route.targetLandmarkId);
     }
     assert.equal(boundary.snapshot().contentBoundaryReached, true);
 
@@ -94,7 +81,5 @@ export function run() {
         resetAccess.collectAccessModule(accessModuleId);
     }
     const accessSnapshot = resetAccess.snapshot();
-    assert.equal(new SectorProgressState(world, accessSnapshot).accessSummary().ready, true);
-    resetAccess.resetCurrentSector();
-    assert.deepEqual(resetAccess.snapshot().collectedAccessModuleIds, []);
+    assert.equal(new SectorProgressState(world, accessSnapshot).accessSummary("sector-01").ready, true);
 }

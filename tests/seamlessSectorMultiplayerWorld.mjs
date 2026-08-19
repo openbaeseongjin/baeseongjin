@@ -16,7 +16,7 @@ export function run() {
     assert.equal(snapshot.state.players[0].respawnAnchorId, "sector-01:entry");
     assert.equal("respawnAnchorId" in snapshot.state, false);
     assert.equal("activeCheckpointId" in snapshot.state, false);
-    assert.equal(snapshot.state.worldProgress.currentSectorId, "sector-01");
+    assert.equal("currentSectorId" in snapshot.state.worldProgress, false);
     assert.equal("enemyType" in snapshot.state.enemies[0], false, "authored enemy static data must not repeat at 20Hz");
     assert.ok(
         JSON.stringify(snapshot.state.enemies).length < JSON.stringify(server.enemyStates()).length * 0.6,
@@ -45,7 +45,6 @@ export function run() {
 
     const objectiveId = server.world.landmarks[0].objectiveIds[0];
     server.worldProgress.completeObjective(objectiveId);
-    server.worldProgress.visitLandmark("sector-01:landmark:02");
     server.restoreWorldProgress(server.worldProgress.snapshot());
     const stage02Anchor = server.world.respawnAnchors.find(({ id }) => id === "sector-01:landmark:02:checkpoint");
     const ownerMotion = server.playerState(ownerId);
@@ -66,8 +65,8 @@ export function run() {
     });
     assert.equal(
         server.playerState(ownerId).respawnAnchorId,
-        stage02Anchor.id,
-        "owner motion must not claim an unvisited Stage save point"
+        stage03Anchor.id,
+        "owner motion must accept the physically touched save point without Stage-entry state"
     );
     predictor.reconcile(progressed, []);
     assert.ok(predictor.simulation.worldProgress.snapshot().completedObjectiveIds.includes(objectiveId));
