@@ -51,10 +51,18 @@ const SECTOR_03_LATE_POOL = Object.freeze([
     "swarm-drone-t1"
 ]);
 
-function pooledSentry(id, x, y, allowedEnemyTypes, { width = 640, height = 480 } = {}) {
+function pooledSentry(
+    id,
+    x,
+    y,
+    allowedEnemyTypes,
+    { width = 640, height = 480, accessModuleId = null, accessHint = null } = {}
+) {
     return worldObject(id, "sentry", x, y, {
         enemyType: "sentry-t1",
         enemySelection: { allowedEnemyTypes },
+        ...(accessModuleId ? { accessModuleId } : {}),
+        ...(accessHint ? { accessHint } : {}),
         activationSpec: objectTriggerSpec("center", width, height),
         rules: ["kill-optional", "no-rope-cut", "activation-band-only"]
     });
@@ -212,7 +220,9 @@ const area02 = defineArea({
         }),
         pooledSentry("sector-03-02:scanner-upper-guard", -96, -928, SECTOR_03_SUPPORT_POOL, {
             width: 576,
-            height: 448
+            height: 448,
+            accessModuleId: "sector-03:access-module:a",
+            accessHint: "3-2 · UPPER SCANNER GALLERY"
         }),
         worldObject("sector-03-02:retail-security-ahead", "story-display", 368, -1144, {
             cueIds: ["sector-03-02:retail-security-ahead"]
@@ -499,7 +509,9 @@ const area05 = defineArea({
         }),
         pooledSentry("sector-03-05:node-exit-guard", -48, -464, SECTOR_03_LATE_POOL, {
             width: 480,
-            height: 384
+            height: 384,
+            accessModuleId: "sector-03:access-module:b",
+            accessHint: "3-5 · SERVICE NODE EXIT"
         }),
         worldObject("sector-03-05:node-id", "story-display", 0, -312, {
             cueIds: ["sector-03-05:node-id"]
@@ -708,7 +720,9 @@ const area07 = defineArea({
         }),
         pooledSentry("sector-03-07:concourse-upper-guard", 0, -1056, SECTOR_03_LATE_POOL, {
             width: 576,
-            height: 448
+            height: 448,
+            accessModuleId: "sector-03:access-module:c",
+            accessHint: "3-7 · UPPER PRIORITY CONCOURSE"
         }),
         worldObject("sector-03-07:concourse-sign", "story-display", -352, -184, {
             cueIds: ["sector-03-07:concourse-sign"]

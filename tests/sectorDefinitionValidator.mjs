@@ -81,6 +81,12 @@ export function run() {
     assert.equal(sector02.landmarks.length, 8);
     assert.equal(sector02.landmarks[1].legacyStageAlias, "2-2");
     assert.equal(sector02.landmarks[1].subregionBounds.width, PREVIEW_SECTOR_WIDTH / 8);
+    for (const sector of LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors) {
+        const accessEncounters = sector.landmarks
+            .flatMap(({ encounters }) => encounters)
+            .filter(({ accessModuleId }) => accessModuleId);
+        assert.equal(accessEncounters.length, 3, `${sector.id} must expose three authored Access Module sources`);
+    }
 
     const legacyDrone = SECTOR_02_AREA_CATALOG.areas[1].objects.find(({ id }) => id === "sector-02-02:drone-1");
     const importedEncounter = sector02.landmarks[1].encounters.find(
@@ -120,6 +126,20 @@ export function run() {
         .flatMap((landmark) => landmark.encounters);
     duplicateSlotEncounters[1].slotId = duplicateSlotEncounters[0].slotId;
     assert.ok(validateSectorCatalog(duplicateSlot).issues.some(({ code }) => code === "encounter-slot-duplicate"));
+
+    const missingAccessModule = mutableCatalog();
+    delete missingAccessModule.sectors[1].landmarks[1].encounters.find(({ accessModuleId }) => accessModuleId)
+        .accessModuleId;
+    assert.ok(validateSectorCatalog(missingAccessModule).issues.some(({ code }) => code === "access-module-count"));
+
+    const duplicateAccessModule = mutableCatalog();
+    const accessEncounters = duplicateAccessModule.sectors[1].landmarks
+        .flatMap(({ encounters }) => encounters)
+        .filter(({ accessModuleId }) => accessModuleId);
+    accessEncounters[1].accessModuleId = accessEncounters[0].accessModuleId;
+    assert.ok(
+        validateSectorCatalog(duplicateAccessModule).issues.some(({ code }) => code === "access-module-id-duplicate")
+    );
 
     const missingEncounterId = mutableCatalog();
     missingEncounterId.sectors[1].landmarks[1].encounters[0].encounterId = "";

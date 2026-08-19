@@ -317,6 +317,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 월드 좌표와 화면 좌표 변환은 카메라가 소유한다.
 - 시나리오가 구간별 Shot을 요구하면 local Y 범위·desktop/mobile zoom·player screen ratio를 area definition의 `cameraZones`에 선언하고 싱글·멀티 공용 Camera Director가 해석한다. 모바일의 최종 zoom은 Full HD `1920×1080` 기준 viewport를 현재 CSS viewport 안에 맞춘 값에 authored `mobileZoom / 0.72` 상대 Shot 비율을 곱하며, renderer·입력 계층이 별도 보정식을 만들지 않는다. 멀티에서 공용 진행보다 뒤에 남은 플레이어가 있으므로 현재 Shot은 공용 `currentAreaId`가 아니라 로컬 플레이어의 물리 좌표로 고른다.
 - 표시 시간이 있는 Objective Sequence의 진행·완료와 Gate 개방은 공용 월드 진행 상태가 소유한다. Presentation은 사건을 읽어 문구·그래픽·오디오만 재생하며 완료 시각이나 Gate 상태를 변경하지 않는다. 문서가 입력 차단을 명시하지 않으면 연출 중 이동을 허용한다.
+- 같은 Sector 안의 정적 `sector-seam`과 Stage surface를 진행 상태로 추가·제거하지 않는다. Sector 경계를 실제로 잠글 때는 stable transit device의 visual과 blocker collider를 같은 geometry에서 파생하고 `blockedByRouteId`처럼 unlock 시 blocker만 비활성화하는 반대 극성 계약을 사용한다. `requiredRouteId` 발판을 잠금 장치로 재사용해 unlock 순간 새 바닥이 생기게 하지 않는다. 공용 unlock camera scene은 event ID로 중복 제거하고 gameplay pause·무적 여부를 제품 계약대로 명시한다.
 - 90~120초 같은 첫 플레이 시간은 강제 대기나 영역 전용 이동 제한으로 맞추지 않는다. 권위 시뮬레이션의 영역 체류·클리어 시간을 설정 버튼 길게 누르기로 여는 디버그 수치에서 수집하고, 실제 표본이 벗어날 때 Geometry·Camera·Recovery 동선을 조정한다.
 - DPR 보정과 resize는 렌더링 경계에서 한 번만 처리한다.
 - 색만으로 상태를 전달하지 않고 형태, 굵기, 움직임, 문구를 함께 사용한다.

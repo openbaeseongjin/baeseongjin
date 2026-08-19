@@ -9,6 +9,7 @@
 - Custom Camera Zone 없음은 의도된 기본 Camera 계약이다.
 - Shelter Access entry와 Capacity/Transfer/Designated Area 위치 Story가 구현됐다.
 - `storyTriggers`는 시나리오 기획 인벤토리다.
+- 0.41.0부터 기존 `shelter-centre-guard(64,-640)` slot이 `sector-02:access-module:c` Carrier다. 두 Patrol band와 적 수·위치·activation은 바꾸지 않으며 Sector 02의 세 번째 3-of-3 source를 맡는다.
 
 > **AUTHORING SNAPSHOT — STATUS SUPERSEDED:** 아래 Camera/Story 미구현 서술은 위 Current Runtime Override로 대체됐다.
 

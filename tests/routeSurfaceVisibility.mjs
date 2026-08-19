@@ -27,20 +27,28 @@ function surface(id, requiredRouteId = null) {
 
 export function run() {
     const routeId = "sector-01:landmark:01:route:sector-01:landmark:02";
-    const world = { surfaces: [surface("always"), surface("locked-connector", routeId)] };
+    const transitBarrier = {
+        ...surface("transit-barrier"),
+        requiredRouteId: undefined,
+        blockedByRouteId: routeId,
+        renderable: false
+    };
+    const world = { surfaces: [surface("always"), surface("locked-connector", routeId), transitBarrier] };
     const lockedProgress = { unlockedRouteIds: [] };
     const unlockedProgress = { unlockedRouteIds: [routeId] };
 
     assert.equal(isSurfaceEnabledForProgress(world.surfaces[0], lockedProgress), true);
     assert.equal(isSurfaceEnabledForProgress(world.surfaces[1], lockedProgress), false);
     assert.equal(isSurfaceEnabledForProgress(world.surfaces[1], unlockedProgress), true);
+    assert.equal(isSurfaceEnabledForProgress(transitBarrier, lockedProgress), true);
+    assert.equal(isSurfaceEnabledForProgress(transitBarrier, unlockedProgress), false);
     assert.deepEqual(
         collisionSurfacesForSectorProgress(world, { isRouteUnlocked: (id) => id === routeId }).map(({ id }) => id),
         ["always", "locked-connector"]
     );
     assert.deepEqual(
         collisionSurfacesForSectorProgress(world, { isRouteUnlocked: () => false }).map(({ id }) => id),
-        ["always"]
+        ["always", "transit-barrier"]
     );
 
     const polygonRenderer = new WorldGeometryRenderer();

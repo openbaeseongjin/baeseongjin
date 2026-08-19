@@ -592,22 +592,26 @@ export class CanvasRenderer {
         const moduleIds = sector.accessModuleIds ?? [];
         const collected = new Set(worldProgress.collectedAccessModuleIds ?? []);
         const remaining = moduleIds.filter((id) => !collected.has(id));
+        const collectedCount = moduleIds.length - remaining.length;
+        const ready = collectedCount >= requiredCount;
         const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
         const x = 18;
         const y = compactView ? 156 : 178;
         const width = compactView ? Math.min(240, this.cssWidth - 36) : 300;
-        const height = remaining.length ? 54 : 34;
-        const hint = world.accessModules.find(({ id }) => id === remaining[0])?.hint;
+        const height = ready ? 34 : 54;
+        const hint = ready ? null : world.accessModules.find(({ id }) => id === remaining[0])?.hint;
         const ctx = this.context;
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.86)";
         ctx.fillRect(x, y, width, height);
-        ctx.strokeStyle = remaining.length ? "rgba(251, 191, 36, 0.72)" : "rgba(34, 211, 238, 0.72)";
+        ctx.strokeStyle = ready ? "rgba(34, 211, 238, 0.72)" : "rgba(251, 191, 36, 0.72)";
         ctx.strokeRect(x, y, width, height);
-        ctx.fillStyle = remaining.length ? "#fde68a" : "#67e8f9";
+        ctx.fillStyle = ready ? "#67e8f9" : "#fde68a";
         ctx.font = "900 12px ui-monospace, monospace";
         ctx.fillText(
-            `ACCESS ${moduleIds.length - remaining.length}/${requiredCount} · SIGNAL ${remaining.length}`,
+            ready
+                ? "ACCESS READY"
+                : `ACCESS ${collectedCount}/${requiredCount} · NEED ${requiredCount - collectedCount}`,
             x + 14,
             y + 21
         );
