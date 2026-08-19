@@ -262,7 +262,7 @@ const area03 = defineArea({
         horizontalSurface("sector-01-03:security-junction", 288, -480, 256, 20, { kind: "safe-deck" }),
         horizontalSurface("sector-01-03:r1", 80, -592, 256, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-03:safe-ledge", -240, -656, 240, 16, { kind: "safe-deck" }),
-        groundedSurface("sector-01-03:upper-cover", -32, -768, 64, 160, {
+        groundedSurface("sector-01-03:upper-cover", -32, -688, 64, 160, {
             kind: "cover",
             oneWay: false,
             grappleable: false
@@ -272,12 +272,12 @@ const area03 = defineArea({
         horizontalSurface("sector-01-03:annex-entry", 1168, -640, 224, 18),
         horizontalSurface("sector-01-03:annex-arena", 1536, -640, 736, 32, { kind: "safe-deck" }),
         horizontalSurface("sector-01-03:annex-upper-balcony", 1512, -768, 320, 20),
-        groundedSurface("sector-01-03:annex-cover-security-console", 1328, -584, 72, 112, {
+        groundedSurface("sector-01-03:annex-cover-security-console", 1328, -528, 72, 112, {
             kind: "cover",
             oneWay: false,
             grappleable: false
         }),
-        groundedSurface("sector-01-03:annex-cover-power-rack", 1600, -560, 88, 160, {
+        groundedSurface("sector-01-03:annex-cover-power-rack", 1600, -480, 88, 160, {
             kind: "cover",
             oneWay: false,
             grappleable: false
@@ -375,12 +375,12 @@ const area03 = defineArea({
 
 const block04 = exitBlock({
     areaId: "sector-01-04",
-    deckX: 208,
-    deckTopY: -515,
-    deckWidth: 288,
+    deckX: -256,
+    deckTopY: -768,
+    deckWidth: 320,
     nextAreaId: "sector-01-05",
     panelObjectiveId: "sector-01-04:exit-panel-engaged",
-    panelProperties: { requiredObjectiveIds: ["sector-01-04:augment-selected"] }
+    panelProperties: { requiredObjectiveIds: ["sector-01-04:augment-selected", "sector-01-04:augment-calibrated"] }
 });
 
 const area04 = defineArea({
@@ -389,42 +389,69 @@ const area04 = defineArea({
     order: 4,
     name: "MAINTENANCE NODE",
     subtitle: "EMERGENCY CALIBRATION",
-    bounds: { width: 768, height: 640 },
-    entry: point("sector-01-04:entry", -288, -32),
+    bounds: { width: 1152, height: 832 },
+    entry: point("sector-01-04:entry", 224, -32),
     exit: block04.exit,
     nextAreaId: "sector-01-05",
     surfaces: [
-        horizontalSurface("sector-01-04:p0", -192, 0, 320),
-        horizontalSurface("sector-01-04:node-deck", 0, -160, 320, 32, { kind: "safe-deck" }),
-        horizontalSurface("sector-01-04:p1", 160, -384, 192, 16, { kind: "recovery" }),
-        horizontalSurface("sector-01-04:p2", -96, -512, 192, 16, { kind: "recovery" }),
+        horizontalSurface("sector-01-04:p0", 256, 0, 512),
+        horizontalSurface("sector-01-04:vestibule-deck", 320, -160, 320, 16),
+        groundedSurface("sector-01-04:service-baffle", 96, -160, 64, 256, {
+            kind: "solid",
+            oneWay: false,
+            grappleable: false
+        }),
+        horizontalSurface("sector-01-04:node-deck", -96, -288, 448, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-04:calibration-floor", 32, -512, 704, 32, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-04:calibration-upper-lip", -256, -640, 256, 16),
+        horizontalSurface("sector-01-04:exit-transfer", -256, -704, 320, 24, { kind: "safe-deck" }),
+        horizontalSurface("sector-01-04:room-casing-left", -560, -832, 32, 832, {
+            kind: "room-casing",
+            oneWay: false,
+            grappleable: false
+        }),
+        horizontalSurface("sector-01-04:room-casing-right", 560, -832, 32, 832, {
+            kind: "room-casing",
+            oneWay: false,
+            grappleable: false
+        }),
         block04.deck
     ],
     routePoints: [
-        point("sector-01-04:route-entry", -288, -32),
-        point("sector-01-04:route-node", 0, -128),
+        point("sector-01-04:route-entry", 224, -32),
+        point("sector-01-04:route-node", -96, -288),
 
         block04.routeExit
     ],
-    recoveryPoints: [point("sector-01-04:recovery-p1", 160, -408), point("sector-01-04:recovery-p2", -96, -536)],
+    recoveryPoints: [],
     objects: [
-        ...[].map(([id, x, y, label]) =>
-            worldObject(`sector-01-04:anchor-${id}`, "grapple-landmark", x, y, {
-                label
-            })
-        ),
-        worldObject("sector-01-04:maintenance-node", "augment-node", 0, -160, {
+        worldObject("sector-01-04:maintenance-node", "augment-node", -96, -288, {
             coordinateAnchor: "bottom-center",
             interactionRadius: 80,
-            objectiveId: "sector-01-04:augment-selected",
-            choices: ["impulse-coil", "relay-link", "shear-current"]
+            objectiveId: "sector-01-04:augment-selected"
         }),
-        worldObject("sector-01-04:calibration-dummy", "test-target", 80, -448, {
-            hostile: false,
-            damage: false
+        worldObject("sector-01-04:universal-calibration-frame", "calibration-frame", 32, -512, {
+            interactionRadius: 400,
+            objectiveId: "sector-01-04:augment-calibrated"
         }),
-        pooledSentry("sector-01-04:node-approach-guard", -240, -384, SECTOR_01_EARLY_POOL, {
-            width: 288,
+        worldObject("sector-01-04:calibration-far-sensor", "background-prop", 264, -608, {
+            gameplay: false,
+            cueIds: []
+        }),
+        worldObject("sector-01-04:calibration-receiver", "background-prop", 224, -512, {
+            gameplay: false,
+            cueIds: []
+        }),
+        worldObject("sector-01-04:calibration-pulse-emitter", "background-prop", -208, -576, {
+            gameplay: false,
+            cueIds: []
+        }),
+        worldObject("sector-01-04:calibration-scan-field", "background-prop", -256, -608, {
+            gameplay: false,
+            cueIds: []
+        }),
+        pooledSentry("sector-01-04:node-approach-guard", 432, -160, SECTOR_01_EARLY_POOL, {
+            width: 224,
             height: 320
         }),
         block04.panel,
@@ -437,10 +464,16 @@ const area04 = defineArea({
             sourceObjectId: "sector-01-04:maintenance-node"
         },
         {
+            id: "sector-01-04:augment-calibrated",
+            type: "augment-calibration",
+            sourceObjectId: "sector-01-04:universal-calibration-frame",
+            requiredObjectiveIds: ["sector-01-04:augment-selected"]
+        },
+        {
             id: "sector-01-04:exit-panel-engaged",
             type: "interact",
             sourceObjectId: "sector-01-04:exit-panel",
-            requiredObjectiveIds: ["sector-01-04:augment-selected"]
+            requiredObjectiveIds: ["sector-01-04:augment-selected", "sector-01-04:augment-calibrated"]
         }
     ],
     gate: block04.gate,
@@ -449,15 +482,17 @@ const area04 = defineArea({
         "telemetry-analyzed",
         "override-available",
         "augment-selected",
+        "calibration-profile-loaded",
+        "calibration-verified",
         "firmware-applied"
     ],
     cameraZones: [
-        cameraZone("entry", -160, 0, 1.15, 0.78, { verticalPlayerRatio: 0.55 }),
-        cameraZone("node", -320, -160, 1.1, 0.76, { verticalPlayerRatio: 0.58 }),
-        cameraZone("calibration", -576, -320, 0.95, 0.7, { verticalPlayerRatio: 0.62 }),
-        cameraZone("exit", -640, -576, 1.15, 0.78, { verticalPlayerRatio: 0.68 })
+        cameraZone("vestibule", -192, 0, 1.1, 0.76, { verticalPlayerRatio: 0.55 }),
+        cameraZone("node", -384, -192, 1.12, 0.77, { verticalPlayerRatio: 0.58 }),
+        cameraZone("calibration", -672, -384, 0.98, 0.7, { verticalPlayerRatio: 0.62 }),
+        cameraZone("exit", -832, -672, 1.12, 0.77, { verticalPlayerRatio: 0.68 })
     ],
-    cueIds: ["maintenance-node", "foundation-augment-choice", "calibration-dummy", "test-bay-05"]
+    cueIds: ["maintenance-node", "foundation-augment-choice", "calibration-frame", "calibration-verified"]
 });
 
 const block05 = exitBlock({

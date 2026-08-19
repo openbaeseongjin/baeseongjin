@@ -1,0 +1,355 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "stage": {
+    "sector": 1,
+    "stage": 4,
+    "legacyStageAlias": "1-4",
+    "sourceAreaId": "sector-01-04",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "MAINTENANCE NODE",
+    "subtitle": "EMERGENCY CALIBRATION"
+  },
+  "bounds": {
+    "width": 1152,
+    "height": 832
+  },
+  "entry": {
+    "id": "entry",
+    "x": 224,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0",
+      "preset": "platform",
+      "x": 256,
+      "y": 0,
+      "width": 512,
+      "height": 32
+    },
+    {
+      "id": "vestibule-deck",
+      "preset": "platform",
+      "x": 320,
+      "y": -160,
+      "width": 320,
+      "height": 16
+    },
+    {
+      "id": "service-baffle",
+      "preset": "non-grapple-solid",
+      "x": 96,
+      "y": -288,
+      "width": 64,
+      "height": 256,
+      "properties": {
+        "static": true,
+        "solid": true,
+        "grappleable": false,
+        "damage": false,
+        "losBlock": true
+      }
+    },
+    {
+      "id": "node-deck",
+      "preset": "safe-deck",
+      "x": -96,
+      "y": -288,
+      "width": 448,
+      "height": 32
+    },
+    {
+      "id": "calibration-floor",
+      "preset": "safe-deck",
+      "x": 32,
+      "y": -512,
+      "width": 704,
+      "height": 32
+    },
+    {
+      "id": "calibration-upper-lip",
+      "preset": "platform",
+      "x": -256,
+      "y": -640,
+      "width": 256,
+      "height": 16
+    },
+    {
+      "id": "exit-transfer",
+      "preset": "safe-deck",
+      "x": -256,
+      "y": -704,
+      "width": 320,
+      "height": 24
+    },
+    {
+      "id": "room-casing-left",
+      "preset": "non-grapple-solid",
+      "x": -560,
+      "y": -416,
+      "width": 32,
+      "height": 832
+    },
+    {
+      "id": "room-casing-right",
+      "preset": "non-grapple-solid",
+      "x": 560,
+      "y": -416,
+      "width": 32,
+      "height": 832
+    }
+  ],
+  "objects": [
+    {
+      "id": "maintenance-node",
+      "kind": "augment-node",
+      "x": -96,
+      "y": -288,
+      "interactionRadius": 80,
+      "objectiveId": "sector-01-04:augment-selected",
+      "offerPolicy": "current-compatible-deterministic-three-card-runtime"
+    },
+    {
+      "id": "node-approach-guard",
+      "kind": "sentry-slot",
+      "x": 432,
+      "y": -160,
+      "properties": {
+        "enemyPool": "SECTOR_01_EARLY_POOL",
+        "killRequired": false
+      }
+    },
+    {
+      "id": "universal-calibration-frame",
+      "kind": "calibration-frame",
+      "x": 32,
+      "y": -512,
+      "properties": {
+        "profileSource": "CALIBRATION-PROFILES.json",
+        "geometryChangesByCard": false,
+        "playerLocalProfile": true
+      }
+    },
+    {
+      "id": "calibration-far-sensor",
+      "kind": "calibration-instrument",
+      "x": 264,
+      "y": -608,
+      "properties": {
+        "dormantUnlessProfileActive": true
+      }
+    },
+    {
+      "id": "calibration-receiver",
+      "kind": "calibration-instrument",
+      "x": 224,
+      "y": -512,
+      "properties": {
+        "neutral": true,
+        "hostile": false
+      }
+    },
+    {
+      "id": "calibration-pulse-emitter",
+      "kind": "calibration-instrument",
+      "x": -208,
+      "y": -576,
+      "properties": {
+        "nonlethal": true,
+        "dormantUnlessProfileActive": true
+      }
+    },
+    {
+      "id": "calibration-scan-field",
+      "kind": "calibration-instrument",
+      "x": -256,
+      "y": -608,
+      "properties": {
+        "dormantUnlessProfileActive": true
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "id": "sector-01-04:augment-selected",
+      "type": "interact-choice",
+      "sourceObjectId": "sector-01-04:maintenance-node"
+    },
+    {
+      "id": "sector-01-04:augment-calibrated",
+      "type": "augment-calibration",
+      "requiredObjectiveIds": [
+        "sector-01-04:augment-selected"
+      ],
+      "sourceObjectId": "sector-01-04:universal-calibration-frame",
+      "profileSource": "CALIBRATION-PROFILES.json",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "sector-01-04:exit-panel-engaged",
+      "type": "interact",
+      "sourceObjectId": "sector-01-04:exit-panel",
+      "requiredObjectiveIds": [
+        "sector-01-04:augment-selected",
+        "sector-01-04:augment-calibrated"
+      ]
+    }
+  ],
+  "route": {
+    "runtimeLandmarks": [
+      "entry",
+      "node-deck",
+      "exit"
+    ],
+    "mandatory": [
+      "entry",
+      "node-deck",
+      "exit"
+    ],
+    "optional": [],
+    "forbiddenBypasses": []
+  },
+  "sourceExit": {
+    "deckX": -256,
+    "deckTopY": -768,
+    "deckWidth": 320,
+    "panelObjectiveId": "sector-01-04:exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "1-5",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "sector-01-04:augment-selected",
+      "sector-01-04:augment-calibrated",
+      "sector-01-04:exit-panel-engaged"
+    ]
+  },
+  "camera": {
+    "zones": [
+      {
+        "id": "vestibule",
+        "minY": -192,
+        "maxY": 0,
+        "desktopZoom": 1.1,
+        "mobileZoom": 0.76
+      },
+      {
+        "id": "node",
+        "minY": -384,
+        "maxY": -192,
+        "desktopZoom": 1.12,
+        "mobileZoom": 0.77
+      },
+      {
+        "id": "calibration",
+        "minY": -672,
+        "maxY": -384,
+        "desktopZoom": 0.98,
+        "mobileZoom": 0.7
+      },
+      {
+        "id": "exit",
+        "minY": -832,
+        "maxY": -672,
+        "desktopZoom": 1.12,
+        "mobileZoom": 0.77
+      }
+    ]
+  },
+  "verifiedRuntimeConstants": {
+    "ropeHookReach": 400,
+    "grappleLinkBudget": 600,
+    "playerJumpSpeed": 440,
+    "swingImpulse": 780
+  },
+  "runtimeDependencies": {
+    "newSystems": [
+      {
+        "id": "augment-calibration-runtime",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "augment-calibrated-objective",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "calibration-profile-presentation",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "nonlethal-calibration-pulse",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "player-bark-layer",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "non-grapple-solid",
+        "status": "NOT_IMPLEMENTED"
+      }
+    ]
+  },
+  "multiplayer": {
+    "profileOwnership": "player-local",
+    "sharedGeometry": true,
+    "sharedObjectiveCompletion": "current-required-player-set",
+    "leaverRemovedFromRequirement": true,
+    "lateJoinRelocksOpenedGate": false
+  },
+  "forbidden": [
+    "fixed impulse-relay-shear first offer",
+    "specific card required for progression",
+    "card-dependent world geometry swap",
+    "kill prerequisite for node",
+    "moving service baffle",
+    "player invulnerability during chooser",
+    "calibration death requirement",
+    "frame-perfect calibration",
+    "mandatory calibration dummy kill"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "all-first-candidates-supported",
+      "type": "schema",
+      "requirement": "All 12 valid empty-build first-choice candidates have calibration profiles.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "selected-card-used",
+      "type": "runtime",
+      "requirement": "Calibration cannot complete from inventory ownership alone; canonical selected-card effect must be used.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "no-specific-card",
+      "type": "runtime",
+      "requirement": "No particular card ID is required to progress; all valid first offers are completable.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "safe-chamber",
+      "type": "geometry",
+      "requirement": "Vestibule guard cannot establish LOS or damage the Player in Node/Calibration chamber.",
+      "automation": "MANUAL"
+    },
+    {
+      "id": "world-continues",
+      "type": "multiplayer",
+      "requirement": "Chooser does not pause world while spatial protection keeps the selecting Player safe.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "player-local-profile",
+      "type": "multiplayer",
+      "requirement": "Different Players can calibrate different cards without changing shared geometry or cross-completing each other.",
+      "automation": "AUTOMATED"
+    },
+    {
+      "id": "pacing",
+      "type": "traversal",
+      "requirement": "First clear incl. normal card read and first calibration targets 1:10–1:50.",
+      "automation": "MANUAL"
+    }
+  ]
+}

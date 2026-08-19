@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 1-4 REV8.1 Map Preview</title>
+<style>
+:root{--bg:#061019;--p:#0d1820;--l:#314854;--t:#edf5f8;--m:#91a5ae;--c:#5de8ff;--y:#ffe16c;--g:#80d39a;--r:#df7669;--a:#efb75b;--v:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.42 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:430px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}select{width:100%;padding:7px;background:#10212a;color:var(--t);border:1px solid #4d6874;border-radius:6px}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:740px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.threat{fill:#25191b;stroke:#7e4d4d;stroke-width:2}.safez{fill:#102a28;stroke:#6fae91;stroke-width:2}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#315944;stroke:var(--g);stroke-width:2}.wall{fill:#3c464c;stroke:#b4c3c9;stroke-width:3}.node{fill:#12333a;stroke:var(--c);stroke-width:4}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.instrument{fill:#273942;stroke:#7c9daa;stroke-width:2}.active{fill:#253c46;stroke:var(--y);stroke-width:4}.receiver{fill:#584969;stroke:var(--v);stroke-width:3}.route{fill:none;stroke:var(--y);stroke-width:4;stroke-dasharray:12 8}.los{fill:none;stroke:var(--r);stroke-width:2;stroke-dasharray:5 6}.old{fill:none;stroke:var(--r);stroke-width:3;stroke-dasharray:7 7}
+text{fill:var(--t);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.hidden{display:none}.pass{color:var(--g)}.new{color:var(--a)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>1-4 MAINTENANCE NODE · REV8.1</h1><div class="sub">1152×832 · SELECT → USE SELECTED CARD → CALIBRATION VERIFIED → EXIT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>CORE RULE</b><br>카드 선택만으로 출구가 열리지 않는다.<br><br><b>선택한 카드 효과를 실제로 1회 성공</b>해야 `augment-calibrated`.</div>
+<div class="card"><b>SCALE</b><br>Current 768×640<br><b>REV8.1 1152×832</b><br><br>1-3의 3840폭 이후 여전히 강한 공간 압축.</div>
+<div class="card"><b>SAFE BY ARCHITECTURE</b><br>Guard 1기 → STATIC BAFFLE → Node/Calibration Safe Chamber.<br>Chooser 중 World는 계속 움직임.</div>
+<div class="card"><b>CALIBRATION PROFILE</b><br>
+<select id="profile">
+<option value="fast-launch">빠른 발사 · timed hook</option>
+<option value="long-rope">긴 로프 · 440px+ reach</option>
+<option value="fast-recover">빠른 회수 · dual sensor</option>
+<option value="release-propulsion">해제 추진 · speed gate</option>
+<option value="electrified-rope">감전 로프 · contact receiver</option>
+<option value="collision-explosion">충돌 폭발 · impact receiver</option>
+<option value="direction-dash">점멸 · dash gate</option>
+<option value="dash-strike">돌진 타격 · strike receiver</option>
+<option value="instant-guard">순간 방어 · nonlethal pulse</option>
+<option value="push-away">밀쳐내기 · puck receiver</option>
+<option value="straight-shot">직선 사격 · remote receiver</option>
+<option value="slow-fall">느린 낙하 · scan field</option>
+</select>
+<div id="desc" style="margin-top:7px;color:#a8bbc3"></div></div>
+<div class="card">
+<label><input type="checkbox" id="showRoute" checked> Main Flow</label>
+<label><input type="checkbox" id="showLOS" checked> Guard LOS</label>
+<label><input type="checkbox" id="showOld"> Current 768×640</label>
+</div>
+<div class="card"><b>OBJECTIVE</b><br>
+augment-selected<br>↓<br><span class="new">augment-calibrated NEW</span><br>↓<br>exit-panel</div>
+<div class="card"><b>PACING</b><br>First 1:10–1:50<br>Mastered 0:40–1:00<br>Micro-test understood: 5–15s</div>
+</aside><main>
+<svg viewBox="-650 -890 1300 950">
+<rect class="bounds" x="-576" y="-832" width="1152" height="832"/><text class="tiny" x="-558" y="-800">REV8.1 CORE 1152×832</text>
+<rect class="threat" x="64" y="-224" width="496" height="224"/><text class="tiny" x="325" y="-198">SECURITY VESTIBULE</text>
+<rect class="safez" x="-544" y="-672" width="672" height="448"/><text class="tiny" x="-520" y="-640">NODE / CALIBRATION SAFE POCKET</text>
+
+<!-- casing -->
+<rect class="wall" x="-576" y="-832" width="32" height="832"/><rect class="wall" x="544" y="-832" width="32" height="832"/>
+
+<!-- entry and vestibule -->
+<rect class="surface" x="0" y="0" width="512" height="32"/><text class="tiny" x="12" y="-10">P0 ENTRY RIGHT</text>
+<rect class="surface" x="160" y="-160" width="320" height="16"/><circle class="enemy" cx="432" cy="-160" r="18"/><text class="tiny" x="380" y="-185">1 GUARD</text>
+
+<!-- baffle -->
+<rect class="wall" x="64" y="-416" width="64" height="256"/><text class="tiny" x="138" y="-392">STATIC SERVICE BAFFLE</text>
+
+<!-- node -->
+<rect class="safe" x="-320" y="-288" width="448" height="32"/>
+<rect class="node" x="-144" y="-384" width="96" height="96"/><text class="tiny" x="-188" y="-398">MAINTENANCE NODE</text>
+
+<!-- calibration floor -->
+<rect class="safe" x="-320" y="-512" width="704" height="32"/><text class="tiny" x="-310" y="-525">UNIVERSAL CALIBRATION FRAME</text>
+
+<!-- instruments -->
+<g id="instruments">
+<circle id="farSensor" class="instrument" cx="264" cy="-608" r="18"/><text class="tiny" x="285" y="-600">FAR SENSOR</text>
+<rect id="dualA" class="instrument" x="-200" y="-560" width="36" height="36"/><rect id="dualB" class="instrument" x="68" y="-560" width="36" height="36"/>
+<rect id="speedGate" class="instrument" x="172" y="-592" width="20" height="80"/><text class="tiny" x="198" y="-572">SPEED/ACTION GATE</text>
+<rect id="receiver" class="receiver" x="220" y="-560" width="56" height="48"/><text class="tiny" x="210" y="-570">RECEIVER</text>
+<rect id="pulse" class="instrument" x="-280" y="-600" width="48" height="56"/><text class="tiny" x="-310" y="-612">PULSE</text>
+<rect id="scan" class="instrument" x="-112" y="-672" width="112" height="144"/><text class="tiny" x="-105" y="-683">SCAN FIELD</text>
+</g>
+
+<!-- exit -->
+<rect class="surface" x="-384" y="-640" width="256" height="16"/>
+<rect class="safe" x="-416" y="-704" width="320" height="24"/>
+<rect class="surface" x="-416" y="-768" width="320" height="32"/><text class="tiny" x="-405" y="-780">EXIT LEFT · LOCKED UNTIL CALIBRATED</text>
+
+<g id="route"><path class="route" d="M224,-32 Q340,-100 320,-160 Q210,-205 96,-250 Q10,-280 -96,-335 Q-20,-430 32,-512 Q-100,-610 -256,-704 Q-270,-735 -256,-768"/></g>
+<g id="los"><path class="los" d="M432,-160 L128,-255"/><path class="los" d="M432,-160 L105,-275"/><text class="tiny" x="180" y="-245">LOS STOPS AT BAFFLE</text></g>
+<g id="old" class="hidden"><rect class="old" x="-384" y="-640" width="768" height="640"/><text class="tiny" x="-365" y="-610">CURRENT 768×640</text></g>
+</svg></main></div>
+<script>
+const profiles={
+"fast-launch":["FAR SENSOR","390px timed target. Fast hook speed로 active window 안 attach.","farSensor"],
+"long-rope":["EXTENDED REACH","기본 400px 밖 / Long Rope 480px 안 target attach.","farSensor"],
+"fast-recover":["DUAL RELOAD","Sensor A release 후 빠른 reload window 안 Sensor B 재부착.","dualA,dualB"],
+"release-propulsion":["RELEASE SPEED GATE","marked tether 정상 release 후 propulsion으로 gate 통과.","speedGate"],
+"electrified-rope":["CONTACT RECEIVER","attached Rope가 receiver와 접촉해 전기 pulse 1회.","receiver"],
+"collision-explosion":["IMPACT RECEIVER","고속 Rope-body collision으로 explosion event 1회.","receiver"],
+"direction-dash":["DASH GATE","direction dash로 sensor line을 안전하게 통과.","speedGate"],
+"dash-strike":["STRIKE RECEIVER","Dash Strike action window로 receiver 접촉.","receiver"],
+"instant-guard":["NONLETHAL PULSE","예고된 calibration pulse를 실제 Instant Guard로 차단.","pulse"],
+"push-away":["DISPLACEMENT RECEIVER","Push Away로 puck/receiver displacement event 발생.","receiver"],
+"straight-shot":["REMOTE RECEIVER","Straight Shot projectile로 원거리 receiver 명중.","receiver"],
+"slow-fall":["VERTICAL SCAN FIELD","Slow Fall active 상태로 scan field를 일정 시간 하강.","scan"]
+};
+function update(){
+ document.querySelectorAll('#instruments .active').forEach(e=>e.classList.remove('active'));
+ const [title,desc,ids]=profiles[profile.value];
+ descEl.innerHTML=`<b>${title}</b><br>${desc}`;
+ ids.split(',').forEach(id=>document.getElementById(id)?.classList.add('active'));
+}
+const descEl=document.getElementById('desc');profile.addEventListener('change',update);update();
+showRoute.addEventListener('change',()=>route.classList.toggle('hidden',!showRoute.checked));
+showLOS.addEventListener('change',()=>los.classList.toggle('hidden',!showLOS.checked));
+showOld.addEventListener('change',()=>old.classList.toggle('hidden',!showOld.checked));
+</script></body></html>

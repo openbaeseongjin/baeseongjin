@@ -24,8 +24,24 @@ function completingPlayer(objective, world, progress, players, commandsByPlayerI
             activePlayers(players).find(({ physics }) => pointInsideBounds(physics.position, objective.bounds)) ?? null
         );
     }
+    if (objective.type === "augment-calibration") {
+        return completingCalibrationPlayer(objective, world, players);
+    }
     if (objective.type !== "interact" && objective.type !== "interact-choice") return null;
     return interactingPlayers(objective, world, progress, players, commandsByPlayerId)[0] ?? null;
+}
+
+// See SectorProgressController.js's identical helper for the full rationale (player-local
+// verification, leaver/late-join semantics).
+function completingCalibrationPlayer(objective, world, players) {
+    const source = world.objects.find(({ id }) => id === objective.sourceObjectId);
+    if (!source) return null;
+    const eligible = activePlayers(players).filter(
+        ({ foundation }) => foundation?.selectedAugmentIds?.length > 0
+    );
+    if (eligible.length === 0) return null;
+    const allVerified = eligible.every((player) => player.calibrationVerifiedSourceIds?.includes(source.id));
+    return allVerified ? eligible[0] : null;
 }
 
 function appendCompletionEvents(events, { result, objectiveId, areaId, playerId, position }) {

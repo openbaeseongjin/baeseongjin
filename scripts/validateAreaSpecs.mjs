@@ -78,7 +78,7 @@ const ACCEPTANCE_TEST_TYPES = new Set([
 ]);
 
 const ACCEPTANCE_AUTOMATION_VALUES = new Set(["AUTOMATED", "MANUAL"]);
-const OBJECTIVE_TYPES = new Set(["interact", "reach"]);
+const OBJECTIVE_TYPES = new Set(["interact", "reach", "interact-choice", "augment-calibration"]);
 const RUNTIME_SYSTEM_STATUSES = new Set(["NOT_IMPLEMENTED"]);
 const ANCHOR_FRACTIONS = Object.freeze({
     "top-left": { x: 0, y: 0 },

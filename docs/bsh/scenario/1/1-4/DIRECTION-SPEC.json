@@ -1,0 +1,336 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 1,
+    "stage": 4,
+    "legacyStageAlias": "1-4",
+    "sourceAreaId": "sector-01-04",
+    "name": "MAINTENANCE NODE"
+  },
+  "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "psychology": {
+    "start": {
+      "fear": 69,
+      "control": 43,
+      "understanding": 30
+    },
+    "calibrationSuccess": {
+      "fear": 46,
+      "control": 55,
+      "understanding": 39
+    },
+    "exit": {
+      "fear": 48,
+      "control": 55,
+      "understanding": 39
+    }
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry-detection",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "1-4:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "vestibule",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "GRAPPLE DEVICE",
+            "detail": "DETECTED"
+          },
+          "timing": {
+            "durationSeconds": 1.1
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-safe-threshold",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "node-chamber"
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "1-4:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "node",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "object",
+          "target": "service-baffle",
+          "action": "static-los-and-projectile-block"
+        },
+        {
+          "type": "audio",
+          "status": "NOT_IMPLEMENTED",
+          "action": "security-high-frequency-filtered-out-node-hum-forward"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-node-scan",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "node"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "1-4:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "node",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "action": "sequence",
+          "items": [
+            {
+              "atSeconds": 0,
+              "title": "GRAPPLE TELEMETRY",
+              "detail": "ANALYZED"
+            },
+            {
+              "afterPrevious": true,
+              "title": "SAFETY LIMIT OVERRIDE",
+              "detail": "AVAILABLE"
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-choice",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "interact",
+        "objectId": "sector-01-04:maintenance-node"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-source-contract",
+      "dedupeToken": "runtime-owned",
+      "worldPause": false,
+      "playerControl": "CHOOSER_CAPTURE_ONLY",
+      "camera": {
+        "zoneId": "node",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "chooser",
+          "status": "VERIFIED",
+          "action": "current-compatible-deterministic-three-card-offer"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-selected-online",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "foundation-selected-compatible-runtime-event"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-source-consumption",
+      "dedupeToken": "runtime-owned",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "node",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "action": "sequence",
+          "items": [
+            {
+              "title": "AUGMENT PROTOCOL",
+              "detail": "ACCEPTED"
+            },
+            {
+              "title": "[SELECTED CARD NAME]",
+              "detail": "ONLINE"
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s5-calibration-load",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "augment-selected",
+        "objectiveId": "sector-01-04:augment-selected"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-personal-selected-card",
+      "dedupeToken": "1-4:s5:<player>:<source>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "calibration",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "NOT IMPLEMENTED",
+          "content": {
+            "title": "CALIBRATION PROFILE",
+            "detail": "LOADED"
+          }
+        },
+        {
+          "type": "object",
+          "target": "universal-calibration-frame",
+          "action": "activate-selected-player-profile-only"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s6-calibration-success",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "sector-01-04:augment-calibrated"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-personal-calibration",
+      "dedupeToken": "1-4:s6:<player>:<source>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "calibration",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "NOT IMPLEMENTED",
+          "content": {
+            "title": "CALIBRATION",
+            "detail": "VERIFIED"
+          },
+          "timing": {
+            "durationSeconds": 1.0
+          }
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…이건 쓸 수 있겠네."
+          },
+          "timing": {
+            "afterSystemReadWindow": true
+          }
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "industrial-confirmation-firmware-sync-no-magic-sting"
+        }
+      ]
+    },
+    {
+      "beatId": "s7-exit",
+      "status": "DESIGN LOCKED",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "exit"
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "1-4:s7",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "exit",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "status": "NOT IMPLEMENTED",
+          "action": "node-hum-recedes-test-bay-machinery-preview"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "worldPause false for every beat",
+    "only calibration success contains Player Bark",
+    "chooser gets no overlapping Story Toast",
+    "calibration completion is gameplay authority, not Presentation",
+    "selected card effect must be used",
+    "different players may run different profiles on shared geometry"
+  ]
+}
