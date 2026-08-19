@@ -156,7 +156,7 @@ const area02 = defineArea({
         horizontalSurface("sector-01-02:crossbeam-x1", 0, -544, 128, 32, {
             kind: "overhang",
             oneWay: false,
-            grappleable: false
+            grappleable: true
         }),
         horizontalSurface("sector-01-02:p2", -192, -576, 192, 16, { kind: "recovery" }),
         horizontalSurface("sector-01-02:p3", 160, -800, 192, 16, { kind: "recovery" }),

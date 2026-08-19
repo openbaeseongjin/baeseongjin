@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 2edde44823183c049234748bd9bbe992449f5075e98102674569ea51692afd34
-authored-area-sha256: f3633794795c743a1db010df66cec21117d83b13e177de73320ae1da9ee5dcf8
-authored-sector-sha256: d103f769a787e79f048a452ae82cfea8579b2cb01f0ef9311b9354b24de22491
+scenario-source-sha256: 33cc2cc2ac79c037947b88597e526c86ffded5b7358ae37375f4616144d11cc8
+authored-area-sha256: 5fa764da3026e7b02e1f2764ea7569f3ecb8bfe7be370c9d5f67b048c5381dd3
+authored-sector-sha256: bc22124456836a6fd33290b27e23c7116a332ccec3bbdec404fdb6ee903936cc
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: ea9c4438c0f106474baa09621bfb42ae5876b86e
+reviewed-upstream: 447e6c11e0a007364809aaad634afcb499a2d309
 -->
 
 ## 상태를 읽는 법
@@ -32,7 +32,7 @@ reviewed-upstream: ea9c4438c0f106474baa09621bfb42ae5876b86e
 - 확인 기준 upstream: `6f8d2529a759ca37c8aecc0185d9a0a797c6bbda` (`origin/main`, 증강 v1 #628과 디버그 Rope tuning #631의 0.27.0 endpoint까지 포함한 #633 시작 base)
 - 상세 Stage 문서: **48개**, `1-1`부터 `6-8`까지 전 구간
 - 현재 기본 authored Runtime: **Sector 01~03의 24개 legacy Stage 정의를 3개 4,800px 연속 Sector의 local vertical landmark stack으로 compile**한다. `1-1 → 3-8`은 migration alias이며 compiler는 원래 Stage local geometry·object·objective를 보존한 채 lateral city wing을 더한다. intra-Sector Gate portal·legacy per-Area Checkpoint claim과 Stage별 door/panel visual은 제거됐지만, 24개 landmark entry의 `respawnAnchor`는 각각 명시적인 `STAGE SAVE` 구조물·활성화 안내·cue를 가진다. Sector 04 `4-1 → 4-8` standalone Area catalog와 Sector 05~06 문서는 아직 migration input이다.
-- 연속 Sector Runtime: #625/#637 기반의 Sector 01~03 vertical stack과 0.42.0 `seamless-sector-runtime-v6`의 Sector당 Access Module 3-of-3을 사용한다. 같은 Sector 안의 Stage surface·`sector-seam`은 Run 시작부터 정적이고 Stage cursor·층간 route lock은 없지만, Sector 01→02와 02→03 경계에는 같은 `barrierSegments`에서 시각과 collision을 파생한 `access-transit-lock` T자형 force-field가 있다. 각 Sector의 세 Carrier를 모두 처치하고 source Stage objective를 달성하면 blocker만 비활성화되고 모든 Player에게 1.2초 camera unlock scene이 동시 재생된다. Carrier 위치 문자열은 없으며 다음 미수집 source를 화면 밖 edge arrow와 화면 안 diamond marker로 연속 안내한다. Player별 savepoint collision과 좌표 기반 Stage 표시는 그대로 유지한다.
+- 연속 Sector Runtime: #625/#637 기반의 Sector 01~03 vertical stack과 0.42.1 `seamless-sector-runtime-v7`의 Sector당 Access Module 3-of-3을 사용한다. 같은 Sector 안의 Stage surface·`sector-seam`은 Run 시작부터 정적이고 Stage cursor·층간 route lock은 없다. 각 Stage boundary의 authored core와 city wing 사이에는 64px 하강 개구부를 남겨 위 Stage에서 놓친 Carrier·세이브 포인트로 되돌아갈 수 있다. Sector 01→02와 02→03 경계에만 같은 `barrierSegments`에서 시각과 collision을 파생한 `access-transit-lock` T자형 force-field가 있다. 각 Sector의 세 Carrier를 모두 처치하고 source Stage objective를 달성하면 blocker만 비활성화되고 모든 Player에게 1.2초 camera unlock scene이 동시 재생된다. Carrier 위치 문자열은 없으며 다음 미수집 source를 화면 밖 edge arrow와 화면 안 diamond marker로 연속 안내한다. Player별 savepoint collision과 좌표 기반 Stage 표시는 그대로 유지한다.
 - 직접 대조한 기준: Sector 03 Master REV 2.0과 현재 3-1~~3-8 Runtime 경계(PR #613은 공간 정체·Stage 명칭·Story만 재작성하고 Geometry·Scanner timing·Enemy count·Gate·Rope physics는 유지; 개별 Stage 문서와 Runtime `name/subtitle/cue` 명칭 마이그레이션은 대기), Sector 04 Master REV 1.1과 4-1~~4-8(Gate 좌표·Cutter Fire 모델·Wind Strength 재분류 정렬, #29), Sector 05 Master와 5-1~~5-8(Cutter Fire opt-in 모델 정합, Safe/Flow Route 산술 전량 재검산, #30), Sector 06 Master와 6-1~~6-8(Scanner phase·Patrol speed/wait·Cutter opt-in·순방향 Finale 및 Safe/Flow 산술 대조), `CurrentAuthoredAreaCatalog.js`, `Sector03AreaCatalog.js`, `Sector04AreaCatalog.js`, `AccessScanField.js`, #507 Wind·Story·2-3 Runtime 변경, Sector 01 그래플 표면·랜드마크 1:1 계약, 1-1 C04·1-2 C02·1-3 Route Choice·1-4 Node Approved Blockout·Area Catalog·Scenario Art 구조 관계, Sector 01·02 Camera/Story 구현 인계 문서, 구현 로드맵과 세션 핸드오프
 - 자동 확인 범위: `docs/bsh/scenario/**/*.md`, `src/game/world/areas/**/*.js`, `src/game/world/sectors/**/*.js`, `SectorDefinitionValidator.js`, `SectorProgressState.js`, `SectorProgressController.js`, 상세 Stage README 목록
 - 확인하지 못한 항목: Sector 03/04 전체 등반의 실제 브라우저·기기 플레이테스트. 이번 #557 검토에서는 디버그 패널로 `sector-03-02` 직접 시작과 화면 렌더까지만 확인했으며, 모든 영역의 판정은 계속 `MOCK INTEGRATED`이고 `PLAYTEST VERIFIED`는 아직 없다.
@@ -133,6 +133,8 @@ reviewed-upstream: ea9c4438c0f106474baa09621bfb42ae5876b86e
 70. 0.41.0 `seamless-sector-runtime-v5`는 사용자 정정에 따라 층간 자유 이동과 Sector 경계 잠금을 분리한다. Sector 01은 1-3·1-6·1-7, Sector 02는 2-2·2-5·2-7, Sector 03은 3-2·3-5·3-7의 기존 경비 slot에 stable Access Module A/B/C를 부여해 적 수·좌표·activation을 바꾸지 않는다. 각 Sector는 정확히 3개 source를 가지며 outgoing transition은 3개 전부와 source objective를 요구한다. `access-transit-lock`은 source/target overlap을 막는 T자형 force-field visual과 `blockedByRouteId` collider를 같은 geometry에서 파생하고, `3/3` 뒤 blocker만 비활성화해 정적 `sector-seam`과 Stage surface 집합을 바꾸지 않는다. 공용 `route-unlocked` event는 모든 연결 Player의 재사용 가능한 1.2초 camera scene을 한 번 시작하며 world·전투·입력은 계속 진행한다. HUD는 `ACCESS x/3 · NEED n`과 `ACCESS READY`를 사용하고 ready 뒤 Carrier signal을 숨긴다. content-end Sector 03에는 module topology만 저작하고 존재하지 않는 Sector 04 transition을 만들지 않는다.
 
 71. 0.42.0 `seamless-sector-runtime-v6`는 Access 위치를 `RIGHT/LEFT · 장소명` 문자열로 저작·전송하던 `accessHint` 계약을 제거했다. `ScreenEdgeGuide`가 다음 미수집 module world position을 local camera에 투영해 viewport 밖일 때만 safe-area edge arrow를 그리고, 대상이 화면 안에 들어오면 `AccessModuleSignalRenderer`의 무문자 diamond marker로 전환한다. 좌측 고정 HUD·상단 설정 버튼·모바일 하단 조작 영역을 safe inset에서 제외하며 HUD 숨김은 count panel과 guide를 함께 끈다. 한 번에 authored 순서의 source 하나만 안내해 세 화살표가 겹치지 않고, module geometry·적 수·activation·3-of-3 진행과 멀티 snapshot에는 변화가 없다.
+
+72. 0.42.1 `seamless-sector-runtime-v7`은 세 반복 회귀의 서로 다른 권위를 정렬했다. 선택 Confirm은 sampled W 변화가 아니라 Player command v5의 단조 증가 `interactSequence` 중 Overlay 개방 뒤 새 누름만 소비한다. intra-Sector Stage boundary는 source/target deck·`sector-seam`·city wing 합성 구간을 검사해 Player 지름+16px 이상의 하강 개구부를 보장하므로 1-4에서 1-3 Carrier로 되돌아갈 수 있다. 1-2 `crossbeam-x1`은 아래→위 통과를 막는 solid horizontal platform이라는 외형·충돌 의미에 맞춰 Rope 부착 가능으로 바꾸고 validator가 같은 숨은 불일치를 거부한다. Sector transit lock, Access 3-of-3 수치, enemy topology, savepoint 권위는 바꾸지 않는다.
 
 ## 열린 기획·구현 게이트
 

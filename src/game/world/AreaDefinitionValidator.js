@@ -77,6 +77,14 @@ function surfaceCenter(surface) {
     return { x: total.x / vertices.length, y: total.y / vertices.length };
 }
 
+function surfaceSize(surface) {
+    const vertices = surface.vertices ?? [];
+    if (vertices.length === 0) return { width: 0, height: 0 };
+    const xs = vertices.map(({ x }) => x);
+    const ys = vertices.map(({ y }) => y);
+    return { width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+}
+
 function disconnectedGrappleSurfaces(area, maxAttachDistance) {
     const grappleSurfaces = area.surfaces.filter((surface) => surface.grappleable !== false);
     const centers = grappleSurfaces.map((surface) => ({ surface, center: surfaceCenter(surface) }));
@@ -209,6 +217,16 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = GRAPPLE_LINK_
         globalIds.add(area.gate.id);
 
         for (const surface of area.surfaces) {
+            const size = surfaceSize(surface);
+            if (
+                surface.collision !== false &&
+                surface.renderable !== false &&
+                surface.oneWay === false &&
+                surface.grappleable === false &&
+                size.width > size.height
+            ) {
+                issues.push(issue("solid-horizontal-not-grappleable", area.id, { id: surface.id }));
+            }
             try {
                 assertAuthoredCoordinateAnchor(surface.coordinateAnchor, `${surface.id}.coordinateAnchor`);
             } catch {

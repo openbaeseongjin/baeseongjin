@@ -216,12 +216,12 @@ export function run() {
         {
             p0: { x: -416, y: 0, width: 256, height: 32, grappleable: true },
             p1: { x: 64, y: -288, width: 192, height: 16, grappleable: true },
-            "crossbeam-x1": { x: -64, y: -544, width: 128, height: 32, grappleable: false },
+            "crossbeam-x1": { x: -64, y: -544, width: 128, height: 32, grappleable: true },
             p2: { x: -288, y: -576, width: 192, height: 16, grappleable: true },
             p3: { x: 64, y: -800, width: 192, height: 16, grappleable: true },
             "exit-deck": { x: 64, y: -963, width: 288, height: 32, grappleable: true }
         },
-        "1-2 gameplay surfaces must stay aligned with the REV 3.1 approved blockout"
+        "1-2 gameplay surfaces must stay aligned with the REV 3.2 approved blockout"
     );
     assert.deepEqual(
         secondAreaDefinition.objects

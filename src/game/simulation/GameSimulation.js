@@ -1162,6 +1162,7 @@ export class GameSimulation {
                 horizontal: 0,
                 vertical: 0,
                 interact: false,
+                interactSequence: 0,
                 action: false,
                 pointer: player.ropeObject.lastPointer,
                 viewport: player.ropeObject.lastViewport,
@@ -1195,6 +1196,7 @@ export class GameSimulation {
                   horizontal: 0,
                   vertical: 0,
                   interact: false,
+                  interactSequence: command.interactSequence ?? 0,
                   action: false,
                   pointer: { x: 0, y: 0, down: false },
                   aimWorld: player.ropeObject.aimWorld
