@@ -30,7 +30,7 @@ v2 schema·validator, 결정적 generator, cutover manifest 데이터·validator
 ## 소유권과 데이터 흐름
 
 ```text
-AREA-SPEC.json (schemaVersion: 2) ─┐
+AREA-SPEC.v2.json (source-lane candidate) ─┐
 AREA-CATALOG.json (source manifest) ─┼─> Node 검증과 생성
 수기 Behavior Registry ─────────────┘             │
                                                    ├─> generated Stage JS와 정적 source index
@@ -41,7 +41,7 @@ legacy Stage provider ───────────────────�
                                                   기존 defineAreaCatalog Runtime 계약
 ```
 
-source-isolated lane은 기존 루트 v1 validator를 바꾸지 않으므로, migration 후보를 우선 `AREA-SPEC.v2.json` sidecar에 기록한다. 메인 개발자가 root validator와 Sector facade를 같은 통합 변경에서 연결할 때에만 sidecar를 canonical `AREA-SPEC.json` v2로 승격한다. 기존 v1 spec은 각자의 migration 전까지 v1로 남긴다. v2 후보는 서술 문서가 아니라 실행 중인 legacy area definition에서 도출하므로, legacy definition을 독립적인 의미 동등성 기준으로 사용할 수 있다.
+source-isolated lane은 기존 루트 v1 validator를 바꾸지 않으므로, migration 후보를 우선 `AREA-SPEC.v2.json` sidecar에 기록한다. 메인 개발자가 root validator와 Sector facade를 같은 통합 변경에서 연결할 때에만 sidecar를 canonical `AREA-SPEC.json` v2로 승격한다. 기존 v1 spec은 각자의 migration 전까지 v1로 남긴다. v2 후보는 서술 문서가 아니라 실행 중인 legacy area definition에서 도출하므로, legacy definition을 독립적인 의미 동등성 기준으로 사용할 수 있다. 현재 첫 두 후보는 `docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json`, `docs/bsh/scenario/1/1-7/AREA-SPEC.v2.json`이며, `scripts/area-authoring-v2/extractLegacyStageSpecs.mjs --write`는 현재 legacy Catalog에서 이 초기 migration 입력을 명시적으로 만드는 bootstrap일 뿐 이후 편집 경로가 아니다.
 
 generator는 Node build-time 도구다. `src/game/world/areas/generated/` 아래에만 결정적이고 Git에 포함되는 JS를 내보낸다. 생성물은 generated header를 가지며 전체 집합으로 덮어쓴다. Runtime ES module은 생성된 정적 import를 사용하고 저작 JSON을 직접 해석하지 않는다.
 
@@ -76,7 +76,7 @@ generator는 결정적이다. 같은 validation을 통과한 v2 spec, manifest, 
 
 ## Parity와 안전성 test
 
-`1-1`·`1-7`에는 격리 legacy Stage definition과 generated counterpart를 import하는 semantic parity fixture를 둔다. 비교는 순서를 canonicalize하고, registry resolution 뒤의 Runtime 관련 area identity, bounds, entry, surface·property, grapple target·landmark object, recovery·route, encounter slot·activation bounds, wind, camera, objective, progression, story, scanner, behavior reference가 같은지 단언한다.
+`1-1`·`1-7`에는 현재 legacy Stage definition과 v2/generation counterpart를 import하는 semantic parity fixture를 둔다. `createAreaDefinitionFromV2(spec)`, generated export, manifest composer 결과를 legacy Catalog 값과 깊게 비교해 Runtime 관련 area identity, bounds, entry, surface·property, grapple target·landmark object, recovery·route, encounter slot·activation bounds, wind, camera, objective, progression, story, scanner, behavior reference가 같은지 단언한다.
 
 focused test는 유효하지 않은 v2 ID·geometry, 잘못 짝지은 Anchor, 읽기 전용 mutation policy metadata, 알 수 없는 behavior reference, 비결정적·stale output, 모든 manifest failure mode도 다룬다. integration test는 합성한 Sector 01 catalog에 `1-1`·`1-7`이 하나씩 있고 중복 Area ID 없이 seamless-sector Runtime까지 compile되는지 확인한다.
 
@@ -90,7 +90,7 @@ migration은 Stage 단위이며 원자적이다. 완료한 Stage는 generated ou
 
 ## 완료 기준
 
-- 이 lane은 기존 Runtime entrypoint를 바꾸지 않고 canonical v2 `1-1`·`1-7` spec, 결정적 생성물, semantic parity 근거, 검증된 integration contract를 제공한다.
+- 이 lane은 기존 Runtime entrypoint를 바꾸지 않고 canonical 승격 후보인 v2 `1-1`·`1-7` sidecar, 결정적 생성물, semantic parity 근거, 검증된 integration contract를 제공한다.
 - 메인 개발자는 명시적 manifest를 Sector 01에 적용하고 seamless Runtime을 통해 변경 없는 catalog API를 검증한다. 이때만 `1-1`·`1-7`이 원자적으로 선택된 live Runtime Stage가 된다.
 - generated output은 결정적·완전하며 수기 저작하지 않는다.
 - Registry reference는 stable하고 검증되며 수기 동작으로 가는 유일한 경로다.
