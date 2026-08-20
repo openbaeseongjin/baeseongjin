@@ -47,7 +47,7 @@
 - Consumes: validateAreaSpecV2(spec), EDITOR_EDITABLE_DOMAINS, EDITOR_READ_ONLY_DOMAINS and a parsed v2 spec.
 - Produces: AreaEditorDraft({ spec, revision, validate }) with snapshot(), mutate(), moveAnchor(), undo(), redo(), validate(), markApplied().
 
-- [ ] **Step 1: Write the failing read-only and Anchor-pair test**
+- [x] **Step 1: Write the failing read-only and Anchor-pair test**
 
 ~~~js
 const draft = new AreaEditorDraft({ spec: createValidSpec(), revision: 4 });
@@ -60,13 +60,13 @@ assert.equal(draft.undo(), true);
 assert.equal(draft.redo(), true);
 ~~~
 
-- [ ] **Step 2: Run the test and confirm it fails**
+- [x] **Step 2: Run the test and confirm it fails**
 
 Run: node tests/areaEditorDraft.mjs
 
 Expected: module-not-found for AreaEditorDraft.js.
 
-- [ ] **Step 3: Implement the Draft contract**
+- [x] **Step 3: Implement the Draft contract**
 
 ~~~js
 export class AreaEditorDraft {
@@ -81,13 +81,13 @@ export class AreaEditorDraft {
 
 Store history entries as changed JSON-pointer values, cap each history stack at 80 entries, and leave Draft state unchanged after a rejected mutation or invalid Apply acknowledgement.
 
-- [ ] **Step 4: Run the passing Draft test**
+- [x] **Step 4: Run the passing Draft test**
 
 Run: node tests/areaEditorDraft.mjs
 
 Expected: PASS areaEditorDraft, including no-write validation, surface translation, history cap and Apply revision acknowledgement.
 
-- [ ] **Step 5: Commit the state boundary**
+- [x] **Step 5: Commit the state boundary**
 
 ~~~powershell
 git add src/game/world/area-authoring-v2/editor tests/areaEditorDraft.mjs
@@ -104,7 +104,7 @@ git commit -m "feat: add map editor draft state"
 - Consumes: v2 definition and Anchor pairs.
 - Produces: collectEditorEntities(spec), worldToScreen(point, view), screenToWorld(point, view), hitTestEditorEntity(entities, point, radius), translateEntity(spec, entity, delta).
 
-- [ ] **Step 1: Extend the failing test with projection round-trip and hit-test assertions**
+- [x] **Step 1: Extend the failing test with projection round-trip and hit-test assertions**
 
 ~~~js
 const point = worldToScreen({ x: -96, y: -736 }, { x: 400, y: 300, zoom: 1 });
@@ -113,23 +113,23 @@ const anchor = hitTestEditorEntity(collectEditorEntities(createValidSpec()), { x
 assert.deepEqual(anchor, { domain: "anchors", id: "sector-01-01:anchor-a", kind: "anchor" });
 ~~~
 
-- [ ] **Step 2: Run the focused test and confirm failure**
+- [x] **Step 2: Run the focused test and confirm failure**
 
 Run: node tests/areaEditorDraft.mjs
 
 Expected: missing projection export.
 
-- [ ] **Step 3: Implement deterministic projection metadata**
+- [x] **Step 3: Implement deterministic projection metadata**
 
 Use stable object IDs and an entity path instead of array offsets. Represent surfaces as polygon entities, an Anchor as one landmark/target pair, entry/recovery/route as neutral point entities, Enemy/Wind as source entities and Camera as zone entities. Translation functions must call the Draft mutation path rather than mutate a renderer snapshot.
 
-- [ ] **Step 4: Run the passing test**
+- [x] **Step 4: Run the passing test**
 
 Run: node tests/areaEditorDraft.mjs
 
 Expected: PASS areaEditorDraft with projection reverse-transform and nearest stable-entity selection.
 
-- [ ] **Step 5: Amend the first commit only if it has not been shared; otherwise make a dedicated commit**
+- [x] **Step 5: Amend the first commit only if it has not been shared; otherwise make a dedicated commit**
 
 ~~~powershell
 git add src/game/world/area-authoring-v2/editor/AreaEditorProjection.js tests/areaEditorDraft.mjs
@@ -147,7 +147,7 @@ git commit -m "feat: project map editor entities for canvas"
 - Consumes: validateAreaCatalogManifest, validateAreaSpecV2, collectGeneratedOutputs and createStaticRequestHandler(root).
 - Produces: createMapEditorAuthoringServer({ projectRoot, manifestPath, failureInjector }) with requestHandler, stageSummary(), readStage(stageId) and applyStage({ stageId, spec, baseRevision }).
 
-- [ ] **Step 1: Write failing server transaction tests**
+- [x] **Step 1: Write failing server transaction tests**
 
 ~~~js
 const server = await createFixtureServer();
@@ -159,13 +159,13 @@ await assert.rejects(() => server.applyStage({ stageId: "1-1", spec: invalidSpec
 assert.equal((await server.applyStage({ stageId: "1-1", spec: validSpec, baseRevision: 0 })).revision, 1);
 ~~~
 
-- [ ] **Step 2: Run the server test and confirm failure**
+- [x] **Step 2: Run the server test and confirm failure**
 
 Run: node tests/mapEditorAuthoringServer.mjs
 
 Expected: module-not-found for MapEditorAuthoringServer.mjs.
 
-- [ ] **Step 3: Implement server API and staged transaction**
+- [x] **Step 3: Implement server API and staged transaction**
 
 Create an immutable generated-stage allowlist from the manifest. Validate body size, Stage identity, editable policy, behavior reference safety and base revision before generating all outputs in memory. Stage temporary files in each target directory, rename backed-up targets only after all staging succeeds, and restore the pre-Apply JSON/generated bytes if an injected rename failure occurs.
 
@@ -178,13 +178,13 @@ Expose:
 
 Return errors as { code, message, issues? }. serveMapEditor.mjs binds only 127.0.0.1 and does not edit root scripts.
 
-- [ ] **Step 4: Run the passing server test**
+- [x] **Step 4: Run the passing server test**
 
 Run: node tests/mapEditorAuthoringServer.mjs
 
 Expected: PASS mapEditorAuthoringServer, proving generated-only allowlisting, invalid no-write, revision conflict, deterministic output and rollback restoration.
 
-- [ ] **Step 5: Commit the server boundary**
+- [x] **Step 5: Commit the server boundary**
 
 ~~~powershell
 git add scripts/map-editor tests/mapEditorAuthoringServer.mjs
@@ -201,7 +201,7 @@ git commit -m "feat: add local map editor authoring server"
 - Consumes: GameApp, LocalAuthority, GameSimulation and defineAreaCatalog({ id, revision, areas }).
 - Produces: AreaPreviewGameApp({ canvas, generatedArea, revision, worldSeed }) with normal start()/stop() lifecycle.
 
-- [ ] **Step 1: Write a failing catalog-isolation test**
+- [x] **Step 1: Write a failing catalog-isolation test**
 
 ~~~js
 const preview = new AreaPreviewGameApp({ canvas, generatedArea, revision: 9 });
@@ -210,13 +210,13 @@ assert.equal(preview.authority.snapshot().world.areas[0].id, generatedArea.id);
 assert.equal(preview.authority.snapshot().worldProgress.currentAreaId, generatedArea.id);
 ~~~
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 Run: node tests/areaPreviewGameApp.mjs
 
 Expected: module-not-found for AreaPreviewGameApp.js.
 
-- [ ] **Step 3: Implement the adapter without modifying GameApp**
+- [x] **Step 3: Implement the adapter without modifying GameApp**
 
 ~~~js
 export class AreaPreviewGameApp extends GameApp {
@@ -231,13 +231,13 @@ export class AreaPreviewGameApp extends GameApp {
 
 Validate area identity before construction, recreate any player-ID-bound feedback state after replacement, and limit debug start selection to the preview Area.
 
-- [ ] **Step 4: Run the passing adapter test**
+- [x] **Step 4: Run the passing adapter test**
 
 Run: node tests/areaPreviewGameApp.mjs
 
 Expected: PASS areaPreviewGameApp, proving the normal authored catalog remains unchanged.
 
-- [ ] **Step 5: Commit preview isolation**
+- [x] **Step 5: Commit preview isolation**
 
 ~~~powershell
 git add src/game/runtime/AreaPreviewGameApp.js tests/areaPreviewGameApp.mjs
@@ -255,7 +255,7 @@ git commit -m "feat: preview generated map areas in isolation"
 - Consumes: server endpoints, AreaEditorDraft and projection helpers.
 - Produces: /map-editor/ with stage/layer panel, Canvas interaction, Inspector, Undo/Redo, Validate, Apply and Preview.
 
-- [ ] **Step 1: Build an accessible DOM shell with stable control IDs**
+- [x] **Step 1: Build an accessible DOM shell with stable control IDs**
 
 ~~~html
 <main class="editor-shell" aria-label="Map editor">
@@ -268,7 +268,7 @@ git commit -m "feat: preview generated map areas in isolation"
 
 Create repeated controls through DOM APIs, not string innerHTML. Controls have labels, focus order and disabled state from the current Draft.
 
-- [ ] **Step 2: Implement the one shared mutation entrypoint**
+- [x] **Step 2: Implement the one shared mutation entrypoint**
 
 ~~~js
 function applyMutation({ domain, label, apply }) {
@@ -280,7 +280,7 @@ function applyMutation({ domain, label, apply }) {
 
 Canvas drag and Inspector field edits must call this same function. Add presets only for surface, Anchor, recovery point, route point, Wind zone and Camera zone. Existing Enemy slots are editable but cannot be created or deleted. Render read-only summaries with disabled controls.
 
-- [ ] **Step 3: Implement reference-derived Canvas drawing**
+- [x] **Step 3: Implement reference-derived Canvas drawing**
 
 ~~~css
 :root { --ink: #09131d; --panel: #12212d; --cyan: #66e6ff; --amber: #f4ae4b; }
@@ -290,7 +290,7 @@ Canvas drag and Inspector field edits must call this same function. Add presets 
 
 Draw only current Draft geometry: surface polygons, landmark-circle/target-square Anchor pairs, neutral Entry/Recovery/Route markers, Amber Enemy/Wind markers and transparent Camera bands. Background reference art is not hit-testable and never denotes collision.
 
-- [ ] **Step 4: Wire server outcomes**
+- [x] **Step 4: Wire server outcomes**
 
 ~~~js
 const result = await api.apply({ stageId, spec: draft.specification(), baseRevision: draft.revision() });
@@ -300,7 +300,7 @@ previewButton.disabled = false;
 
 On validation error or revision conflict, preserve Draft and show issue codes. Only explicit user reload discards a Draft. Preview opens a new window only after successful Apply.
 
-- [ ] **Step 5: Commit the editor workspace**
+- [x] **Step 5: Commit the editor workspace**
 
 ~~~powershell
 git add tools/map-editor/index.html tools/map-editor/main.js tools/map-editor/editor.css
@@ -320,7 +320,7 @@ git commit -m "feat: add visual map editor workspace"
 - Consumes: GET /api/map-editor/stages/:id/preview and AreaPreviewGameApp.
 - Produces: an explicit fresh-run Preview page and an accurate lane handoff.
 
-- [ ] **Step 1: Build the preview shell**
+- [x] **Step 1: Build the preview shell**
 
 ~~~html
 <main class="preview-shell">
@@ -330,7 +330,7 @@ git commit -m "feat: add visual map editor workspace"
 </main>
 ~~~
 
-- [ ] **Step 2: Create a new preview authority on every load**
+- [x] **Step 2: Create a new preview authority on every load**
 
 ~~~js
 async function createPreview() {
@@ -344,7 +344,7 @@ async function createPreview() {
 
 Reject missing and legacy stages. Reload stops the old instance before constructing another; it never replaces a running simulation.
 
-- [ ] **Step 3: Run focused checks**
+- [x] **Step 3: Run focused checks**
 
 ~~~powershell
 node tests/areaAuthoringV2.mjs
@@ -364,7 +364,9 @@ Run: node scripts/map-editor/serveMapEditor.mjs --port=4178. Open http://127.0.0
 
 Expected: selection/Anchor are Cyan, dirty/wind/errors are Amber, Apply persists only the generated v2 stage, Preview starts a new one-Area single-player run, and the normal game/multiplayer remain unchanged.
 
-- [ ] **Step 5: Update the handoff and make the final lane commit**
+> **Environment note (2026-08-20):** The available Codex in-app browser blocked navigation to the loopback server with `net::ERR_BLOCKED_BY_CLIENT`, so no visual browser PASS is claimed. The local HTTP checks verified the editor shell, preview shell, generated module route and no-write Validate endpoint. A developer with a normal local browser must perform the listed drag → Validate → Apply → Preview interaction before treating this lane as visually verified.
+
+- [x] **Step 5: Update the handoff and make the final lane commit**
 
 Record the browser result, server command and remaining main-owned facade/cutover/final-ledger responsibilities. Do not change the scenario checkpoint marker because this lane does not change Stage content, sector facade or live runtime connection.
 
