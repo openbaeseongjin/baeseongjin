@@ -31,9 +31,6 @@ Bounds·Entry·terrain surface·Anchor·Recovery/Route·기존 Enemy slot·Wind�
 ## 확인 명령
 
 ```powershell
-node tests/areaAuthoringV2.mjs
-node tests/areaEditorDraft.mjs
-node tests/mapEditorAuthoringServer.mjs
-node tests/areaPreviewGameApp.mjs
 node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check
+npm run check
 ```

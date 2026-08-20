@@ -549,18 +549,18 @@ Wrong doc can generate wrong future runtime.
 
 ---
 
-## 12. Tests / Validation
+## 12. Validation
 
 After code-affecting Patch 1:
 
 Run:
 
 ```text
-npm test
+npm run check
 npm run check:scenario-integration
 ```
 
-Also search assertions for old Story ID/token.
+Also search production callers and documents for old Story ID/token.
 
 Acceptance:
 

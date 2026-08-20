@@ -10,7 +10,6 @@
         "share:multiplayer": "node scripts/share-multiplayer.mjs",
         "publish:multiplayer": "node scripts/publish-multiplayer.mjs",
         "smoke:multiplayer": "node scripts/smokeMultiplayer.mjs",
-        "test": "node tests/runAll.mjs",
         "check": "node scripts/checkSyntax.mjs && node scripts/validateAreaSpecs.mjs && node scripts/validateDirectionSpecs.mjs && node scripts/checkScenarioIntegration.mjs",
         "check:scenario-integration": "node scripts/checkScenarioIntegration.mjs",
         "validate:area-specs": "node scripts/validateAreaSpecs.mjs",
@@ -18,8 +17,8 @@
         "validate:environment-assets": "node scripts/validateEnvironmentAssets.mjs",
         "validate:audio-assets": "node scripts/validateAudioAssets.mjs",
         "validate:direction-specs": "node scripts/validateDirectionSpecs.mjs",
-        "format": "prettier --write \"src/**/*.js\" \"tests/**/*.mjs\" \"scripts/**/*.mjs\" \"*.html\"",
-        "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.mjs\" \"scripts/**/*.mjs\" \"*.html\""
+        "format": "prettier --write \"src/**/*.js\" \"scripts/**/*.mjs\" \"*.html\"",
+        "format:check": "prettier --check \"src/**/*.js\" \"scripts/**/*.mjs\" \"*.html\""
     },
     "dependencies": {
         "ws": "8.21.3"

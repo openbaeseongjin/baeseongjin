@@ -15,7 +15,7 @@ This long-running Node.js service captures a meeting only between `/meeting star
 - End-time history reconciliation so edits, deletions, and messages missed during a Gateway interruption use the final channel state when Discord permits history access.
 - Conservative promotion: only evidence-backed explicit agreement, rejection, assignment/commitment, blocker, or confirmed schedule can enter the corresponding final field.
 - Discord minutes-channel publication and one atomic Git commit covering the dated minutes plus any eligible decision/task ledger updates.
-- Local mock transcript tests. No OpenAI key or paid API call is used by the service or test suite.
+- No OpenAI key or paid API call is used by the service.
 - Opt-in `/codex plan`, `/codex status`, `/codex result`, and `/codex cancel` commands that run only allowlisted repository skills in the Codex CLI read-only sandbox.
 
 GitHub Issue creation is intentionally not implemented.

@@ -4,11 +4,11 @@
 
 ## 1. 기본 원칙
 
-1. **동작을 먼저 증명한다.** 감으로 수치를 고치지 않고 재현 가능한 시뮬레이션이나 테스트를 만든다.
+1. **동작을 먼저 증명한다.** 감으로 수치를 고치지 않고 재현 가능한 시뮬레이션, validator 또는 실제 사용자 경로로 확인한다.
 2. **한 책임은 한 소유자에게 둔다.** 같은 규칙을 여러 모듈이 해석하거나 보정하지 않는다.
 3. **작은 변경을 끝까지 검증한다.** 넓은 기능을 한 번에 넣기보다 실행 가능한 수직 단위로 나눈다.
 4. **기존 변경을 보존한다.** 관련 없는 사용자 작업을 되돌리거나 덮어쓰지 않는다.
-5. **문서와 테스트를 구현의 일부로 본다.** 사용자 동작이나 공개 계약이 바뀌면 같은 작업에서 갱신한다.
+5. **문서와 검증을 구현의 일부로 본다.** 사용자 동작이나 공개 계약이 바뀌면 같은 작업에서 갱신한다.
 6. **의존성보다 기존 기반을 우선한다.** 새 패키지는 명시적인 필요와 승인 없이는 추가하지 않는다.
 7. **임시 완성을 금지한다.** 실행되지 않는 placeholder, 생략 부호, 설명 없는 TODO를 결과물로 남기지 않는다.
 8. **반복 수정은 구조 검증 신호다.** 같은 기능에서 유사 수정이 계속되거나 한 수정 뒤 연관 버그가 이어지면 추가 증상 패치를 멈추고 정체성·상태 소유권·capability·권한 경계를 검증한다.
@@ -20,13 +20,13 @@
 
 - `git status --short --branch`로 브랜치와 기존 변경을 확인한다.
 - `package.json`의 스크립트와 관련 문서를 먼저 확인한다.
-- 수정 대상의 import, export, caller, 테스트를 함께 조사한다.
+- 수정 대상의 import, export, caller와 기준 문서를 함께 조사한다.
 - 활성 결정은 `SESSION-HANDOFF.md`, 전체 이력은 `docs/decision-history.md`에서 확인한다.
 - 변경의 완료 기준과 하지 않을 일을 짧게 고정한다.
 
 ### 종료 전
 
-- 관련 자동 테스트와 문법 검사를 실행한다.
+- 관련 validator와 문법 검사를 실행하고 실제 사용자 경로를 확인한다.
 - 사용자 화면 변경은 실제 브라우저에서 확인한다.
 - `git diff --check`를 통과한다.
 - 코드, README, 개발 규칙, 설계 문서가 같은 동작을 설명하는지 확인한다.
@@ -41,14 +41,14 @@
 
 ### 효율 우선 실행과 검증 예산
 
-개발 작업의 시간 낭비를 줄이는 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 빠른 실행을 이유로 검증 기준을 낮추지 않고, 같은 증거와 불필요한 대기만 제거한다.
+개발 작업의 시간 낭비를 줄이는 우선순위는 `불필요한 자동 테스트 금지 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 자동 테스트가 제품 요구를 대신하지 않게 하고 실제 실행·validator·문법·형식 증거를 사용한다.
 
-- 시작 전에 `scope budget`을 적는다. 최소 항목은 소유 경로 또는 경로 그룹, 허용 변경 범주(`구현`, `테스트`, `기준 문서`, `운영`), 직접 갱신할 기준 문서, 명시적 비범위다.
+- 시작 전에 `scope budget`을 적는다. 최소 항목은 소유 경로 또는 경로 그룹, 허용 변경 범주(`구현`, `기준 문서`, `운영`, 사용자가 명시한 경우의 `테스트`), 직접 갱신할 기준 문서, 명시적 비범위다.
 - 발견한 문제가 새 경로 그룹·변경 범주·공개 계약을 요구하면 조용히 범위를 넓히지 않는다. 현재 결과에 필수면 범위와 완료 조건을 명시적으로 갱신하고, 독립 정리라면 후속 작업으로 분리한다. 런타임 수정과 저장소 전체 stale 문서 청소를 관성적으로 한 작업에 합치지 않는다.
 - 검증은 `command 또는 수동 기준`, `소유자`, `base SHA`, `diff fingerprint`, `결과`, `관련 환경`, `재실행 조건`을 기록한 ledger로 관리한다. 커밋된 candidate는 tree SHA를 fingerprint로 쓰고, 미커밋 candidate는 base SHA·`git diff --binary HEAD`·소유한 untracked 파일 내용의 hash를 사용한다. `diff --stat`이나 수정 시각만 fingerprint로 쓰지 않는다. base·관련 diff·설정·의존 환경이 같으면 fresh PASS를 재사용한다.
-- 구현 반복 중에는 가장 작은 관련 테스트와 정적 검사를 실행한다. 전체 `npm test`는 안정화된 candidate에서 단일 소유자가 실행하고, 부모·구현기·검증자가 같은 fingerprint에 같은 전체 suite를 반복하지 않는다.
-- 전체 suite가 실패하면 focused command로 재현·수리한다. 관련 입력이 바뀐 뒤 또는 최종 release 규칙이 요구할 때만 전체 suite를 다시 실행한다.
-- 서로 독립인 구현·테스트·문서·시각 검증 lane은 의존 그래프를 먼저 만든 뒤 준비된 lane을 한 wave에서 실행한다. 같은 worktree에서 writer가 있는 동안 read-only verifier가 변하는 diff를 읽게 하지 말고, 쓰기 완료와 fingerprint 고정 뒤 독립 verifier를 함께 실행한다.
+- 구현 반복 중에는 가장 작은 관련 validator·문법 검사·재현 명령을 실행한다. 자동 테스트는 사용자가 해당 작업에서 명시한 경우에만 실행한다.
+- 검증 명령이 실패하면 가장 좁은 입력으로 재현·수리하고 관련 입력이 바뀐 항목만 다시 실행한다.
+- 서로 독립인 구현·문서·시각 검증 lane은 의존 그래프를 먼저 만든 뒤 준비된 lane을 한 wave에서 실행한다. 같은 worktree에서 writer가 있는 동안 read-only verifier가 변하는 diff를 읽게 하지 말고, 쓰기 완료와 fingerprint 고정 뒤 독립 verifier를 함께 실행한다.
 - 독립 작업은 별도 Git worktree를 기본으로 한다. worktree는 기존 Git object database를 공유하고 작업 파일·branch·index만 분리한다. shared checkout 직렬화는 worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 사용하며 대기 이유를 기록한다.
 - 자동 구현기는 고정 설계면 빠른 direct 경로를 우선하고, 미해결 구현 대안이 있을 때만 planned 경로를 쓴다. scope와 wall-time budget을 넘으면 부분 diff를 보존하고 좁은 수리로 전환하며 같은 broad pass를 반복하지 않는다. 구체 실행 계약은 해당 Skill을 단일 기준으로 사용한다.
 
@@ -59,7 +59,7 @@
 ### 원칙
 
 - 동일 초기 상태, 시드, 입력은 허용 오차 안에서 같은 결과를 내야 한다.
-- 생성 이벤트로 재생하는 예측 객체의 위치·속도 적분식은 서버와 클라이언트에 복사하지 않는다. 하나의 환경 독립 공용 모듈을 양쪽에서 호출하고, 같은 초기 상태를 여러 tick 진행한 뒤 위치·속도가 일치하는 수렴 테스트를 둔다.
+- 생성 이벤트로 재생하는 예측 객체의 위치·속도 적분식은 서버와 클라이언트에 복사하지 않는다. 하나의 환경 독립 공용 모듈을 양쪽에서 호출하고, 같은 초기 상태를 여러 tick 진행한 뒤 위치·속도가 일치하는 재현 명령 또는 진단을 남긴다.
 - 시뮬레이션은 렌더링이나 DOM 없이 실행 가능해야 한다.
 - 한 번의 성공 사례보다 정상·경계·실패 시나리오를 함께 검증한다.
 - 결과는 상태, 사건, 수치로 측정하고 화면 느낌만으로 판정하지 않는다.
@@ -79,7 +79,7 @@
 
 - 새 gameplay 기본값·강화값을 제안할 때 정수는 5, 소수 첫째 자리는 0.5, 소수 둘째 자리는 0.05 단위를 기본으로 한다. 사용자가 명시한 값과 정확한 계산 파생값은 이 반올림 규칙보다 우선한다.
 - 기존 기본 수치를 강화하는 효과는 가능한 한 고정 결과값이 아니라 percentage multiplier 또는 reduction으로 정의한다. 예: 사거리 `+20%`, cooldown `-50%`.
-- 문서와 테스트에는 `기본값 → 적용 비율 → 현재 파생값`을 함께 남긴다. 기본값을 바꿀 때 카드별 고정값을 다시 맞추는 구조를 만들지 않는다.
+- 기준 문서에는 `기본값 → 적용 비율 → 현재 파생값`을 함께 남긴다. 기본값을 바꿀 때 카드별 고정값을 다시 맞추는 구조를 만들지 않는다.
 
 ## 4. 객체와 책임 설계
 
@@ -144,7 +144,7 @@ class Player extends RopeAttachable(GameObject) {}
 3. **행동을 capability로 정한다.** 같은 월드 단계에서 종류별 행동이 다르면 같은 capability 계약을 구현하는 서로 다른 Can-Do 믹스인을 조합한다. 객체 종류 선택은 팩토리에서 끝내고 스케줄러의 `if (type)` 분기로 퍼뜨리지 않는다.
 4. **조정 계층을 얇게 유지한다.** 월드 스케줄러는 단계와 context, 저장소는 등록과 ID 대응, 전송 계층은 claim·receipt·snapshot 전달만 담당한다. 이 계층이 객체 종류별 운동·충돌·수명·거부 정책을 해석하면 책임이 잘못 올라온 것이다.
 5. **실행 권한과 도메인 로직을 분리한다.** 플레이어 당사자 사건은 소유자 또는 피해 클라이언트가 먼저 적용하고, 중립 월드는 서버가 진행한다. 양쪽은 같은 객체·컴포넌트·capability의 공용 규칙을 사용하며 서버·클라이언트별 복제 구현을 만들지 않는다. 서버는 소유 클라이언트 상태·사건의 검증·중복 제거·복제 공유를 담당하고, 정상 승인 중인 소유자 상태를 스냅샷으로 다시 쓰지 않는다.
-6. **사건과 수렴을 모두 검증한다.** 로컬 사건이 한 번만 즉시 발생하는지, 승인·거부 뒤 수명 상태가 유효한지, 같은 원인의 다른 객체 종류에서도 중앙 타입 분기가 생기지 않는지, 최종적으로 소유자·서버·동료 상태가 수렴하는지를 회귀 테스트로 고정한다.
+6. **사건과 수렴을 모두 검증한다.** 로컬 사건이 한 번만 즉시 발생하는지, 승인·거부 뒤 수명 상태가 유효한지, 같은 원인의 다른 객체 종류에서도 중앙 타입 분기가 생기지 않는지, 최종적으로 소유자·서버·동료 상태가 수렴하는지를 실제 재현 경로와 진단으로 확인한다.
 
 `LocalPlayerPredictor`, 저장소, 서버 세션처럼 실행 환경을 조정하는 클래스가 구체 객체의 게임 규칙이나 수명주기를 소유하기 시작하면 구조 경계가 무너진 신호다. 새 예외를 추가하기 전에 해당 로직을 객체, Has-A 컴포넌트 또는 capability로 되돌린다.
 
@@ -169,14 +169,14 @@ class Player extends RopeAttachable(GameObject) {}
 - 앱, 권한 어댑터, 예측기는 플레이어·로프 같은 구체 타입을 검사하거나 직접 입력 메서드를 호출하지 않는다.
 - 정규화된 입력 프레임은 하나의 `InputDispatcher`를 거친다. 디스패처는 소유권이 일치하는 `InputDrivenObject` 중 입력 capability 믹스인을 가진 객체에만 해당 intent를 전달한다.
 - 이동과 점프는 `LocomotionInput`, 로프 조준·부착·해제는 `RopePointerInput` Can-Do 믹스인에 한 번만 둔다. 믹스인은 고유 capability 계약을 사용하며 서로 같은 메서드를 덮어쓰거나 적용 순서에 의존하지 않는다.
-- 객체 종류가 늘어날 때 디스패처의 구체 타입 분기를 추가하지 않는다. 새 객체는 필요한 입력 capability를 조합하고 capability 단독 계약 테스트와 실제 객체 조합 테스트를 추가한다.
+- 객체 종류가 늘어날 때 디스패처의 구체 타입 분기를 추가하지 않는다. 새 객체는 필요한 입력 capability를 조합하고 실제 객체 호출 경로에서 계약을 확인한다.
 - 네트워크는 입력 프레임과 대상 소유자·tick·sequence를 운반할 뿐, 믹스인별 게임 규칙을 다시 구현하지 않는다. 싱글, 클라이언트 예측과 서버 검증은 같은 디스패처와 capability 구현을 사용한다.
 
 ### 시뮬레이션 capability 디스패치
 
 - 적 공격, 자동 무기, 유도탄·직선탄 운동처럼 직접 입력 없이 진행되는 행동은 해당 `SimulationDrivenObject`의 Can-Do capability에 한 번만 구현한다.
 - `GameSimulation`과 도메인 시스템은 객체 종류를 분기하지 않고 현재 단계의 capability ID와 필요한 context를 `SimulationDispatcher`에 전달한다. 디스패처는 그 ID를 가진 객체만 안정적인 순서로 실행한다.
-- 한 객체에 이동·공격처럼 여러 capability가 붙을 수 있으므로 “객체당 capability 하나”를 가정하지 않는다. 각 단계는 무관한 capability를 실행하지 않는 회귀 테스트를 가진다.
+- 한 객체에 이동·공격처럼 여러 capability가 붙을 수 있으므로 “객체당 capability 하나”를 가정하지 않는다. 각 단계는 무관한 capability를 실행하지 않도록 dispatcher 계약을 유지한다.
 - capability는 객체 자신의 상태 전이와 행동을 소유하고, 월드 스케줄러는 단계 순서·대상 집합·공용 context와 사건 연결만 조정한다. 전송 계층이나 예측 저장소에 별도 운동 공식을 복제하지 않는다.
 - capability 디스패치는 네트워크 권한을 결정하지 않는다. `InputDrivenObject`와 `SimulationDrivenObject`의 상태 변화 원인, 클라이언트 claim과 서버 중립 시뮬레이션 경계는 기존 분할 권한 규칙을 그대로 따른다.
 - 화면에 전달되는 gameplay object는 상태 변화 원인과 별개로 종류별 `render-snapshot` capability mixin을 가져야 한다. Player·Rope·Enemy·Projectile의 mixin은 자기 소유 상태만 detached DTO로 만들며, 중앙 snapshot 조립기에서 `instanceof`, object kind switch, prototype getter 의존 또는 필드별 복사를 추가하지 않는다. 새 renderable 종류는 capability 존재, 중첩 mutable reference 비공유, 실제 `GameSimulation` 전후 snapshot 보간, 싱글·멀티 scene parity를 같은 변경에서 검증한다.
@@ -184,12 +184,12 @@ class Player extends RopeAttachable(GameObject) {}
 - 충돌 가능·claim 대기·거부 후 재시도 같은 수명 상태는 해당 객체가 공개 명령으로 소유한다. receipt 처리기가 객체의 임시 boolean을 직접 풀거나 같은 겹침에 객체를 복구하지 않는다. 재시도가 가능한 중립 객체도 분리 후 재진입 같은 명시적 재무장 조건을 통과해야 한다.
 - 예측 객체 저장소는 등록, 식별자 대응, 권위 사건 정리와 렌더 snapshot만 담당한다. 운동·충돌·피드백 발생 조건·거부 정책을 객체 종류별로 해석하지 않는다.
 
-### 구현 계약과 테스트
+### 구현 계약과 검증
 
 - 클래스는 생성 직후 유효한 상태여야 하며 별도 `init()` 호출을 전제로 하지 않는다. 비동기 준비가 필요하면 팩토리가 준비된 인스턴스를 반환한다.
 - 외부에 노출할 상태는 명령 메서드나 읽기 전용 snapshot으로 제공한다.
 - 생성자에서는 필드 초기화만 하고 이벤트 등록, 타이머 시작, DOM 접근은 명시적 수명주기 메서드로 분리한다.
-- 기반 클래스 계약 테스트, 각 믹스인의 단독 계약 테스트, 실제 조합의 통합 테스트를 구분한다.
+- 기반 클래스, 각 믹스인과 실제 조합의 공개 계약을 구분해 문서화하고 실제 호출 경로에서 확인한다.
 - 하위 클래스가 부모 계약을 깨는 예외 분기를 요구하면 상속 관계를 제거한다.
 
 ## 5. 컴포넌트 구현 규칙
@@ -237,12 +237,12 @@ class Player extends RopeAttachable(GameObject) {}
 - collision surface bounds·edge 정보와 seed 기반 decoration placement처럼 정적인 계산은 소유 renderer가 world·zone 변화에 맞춰 무효화하는 캐시로 보관한다. camera 이동이나 매 draw마다 전체 월드 배치를 다시 만들지 않으며 캐시가 gameplay collision·권위 상태를 소유하게 하지 않는다.
 - backing store 배율은 기기 DPR, 명시적 최대 DPR과 최대 backing pixel 예산을 함께 적용한다. 기본 최대 DPR 2와 약 3 Mi-pixel 예산을 바꾸면 작은 화면의 픽셀 선명도, 큰 태블릿의 backing 크기와 `imageSmoothingEnabled=false`를 함께 검증한다. 기기별 user-agent 분기나 싱글·멀티별 해상도 정책을 두지 않는다.
 - 렌더 성능 진단은 프레임 간격·draw 시간·fixed-step drop·CSS/backing 크기·유효 DPR·하위 collection의 `drawn/total`을 관찰할 수 있어야 한다. 진단 값은 읽기 전용이며 물리 120Hz, 네트워크 전송률, gameplay state 또는 자동 품질 전환의 입력으로 사용하지 않는다.
-- 여러 환경 atlas는 캐릭터와 분리된 `environment-asset-format.md` 계약으로 로드한다. atlas 실패는 backdrop·terrain·decoration 단위로만 fallback하고 pending을 실패로 고정하지 않으며, loader·schema·example·validator 중 하나를 바꾸면 나머지 계약과 component별 실패 테스트를 함께 갱신한다.
+- 여러 환경 atlas는 캐릭터와 분리된 `environment-asset-format.md` 계약으로 로드한다. atlas 실패는 backdrop·terrain·decoration 단위로만 fallback하고 pending을 실패로 고정하지 않으며, loader·schema·example·validator 중 하나를 바꾸면 나머지 계약과 component별 실패 진단을 함께 갱신한다.
 - 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
 - 시나리오 문서용 이미지는 `bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`의 생성 전 Runtime 확인, 대표 Camera Shot, Player 상대 크기, 한 줄 live Rope, 정확한 오브젝트 수와 상태 검수를 통과해야 한다. 전체 경로·좌표의 권위는 Approved Blockout이 소유하지만 선택한 Camera Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 이미지에서도 보존한다. 생성 구도를 위해 Gameplay Geometry를 이동·확대·병합하지 않으며 `RETIRED`·`PENDING REGENERATION` 이미지를 다음 생성의 Style Anchor로 연쇄 사용하지 않는다.
 - collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
-- 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 테스트 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
-- 렌더러 변경에는 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 검증하는 테스트를 둔다.
+- 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 진단 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
+- 렌더러 변경은 실제 브라우저에서 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 확인한다.
 - 멀티플레이 파티클·VFX·화면 흔들림은 권위 판정 이벤트를 받아 각 클라이언트가 로컬로 생성·진행한다. 서버 시뮬레이션과 네트워크 스냅샷에 표현 객체나 효과 수명을 넣지 않는다.
 
 ### 모바일 우선 분할 권한 규칙
@@ -254,7 +254,7 @@ class Player extends RopeAttachable(GameObject) {}
 - `InputDrivenObject`는 최신 소유자 상태가 서버와 다른 클라이언트의 수렴 원점이다. `owner-motion`은 인증·프로토콜 형식·유한값과 세션 tick 범위를 통과한 최신 상태를 값의 크기와 무관하게 공용 `GameSimulation` 명령에 적용한다. 중복·역순·세션 범위 밖 tick과 완료된 런의 후속 상태는 성공한 no-op으로 처리하며 `ownerMotionTick`을 전진시키지 않는다. 속도·각속도·이동 거리·로프 offset 봉투로 거부하거나 receipt를 이유로 소유자를 지연된 서버 위치에 복원하지 않는다. 클라이언트와 서버가 함께 사용하는 각도 정규화·각속도 clamp 같은 도메인 물리 규칙은 네트워크 거부가 아니므로 유지한다. impact 불일치는 서버가 피해 클라이언트의 최신 결과 상태를 흡수한다.
 - 멀티 서버 fixed tick은 `InputDrivenObject`의 이동·점프·로프 capability를 다시 실행하지 않는다. 각 플레이어 snapshot은 최신 적용 `owner-motion`의 `ownerMotionTick`을 함께 가지며, 반복된 이전 tick은 새 위치 표본을 만들지 않는다. 서버 tick은 플레이어 타이머와 `SimulationDrivenObject` 월드 진행에 사용한다. 기준 상태에서 미확정 입력을 재실행하는 복구는 체크포인트처럼 별도 rollback 계약을 가진 사건 전이에만 둔다.
 - `SimulationDrivenObject`와 공용 월드 상태는 서버 스냅샷이 수렴 원점이다. 원격 표시는 보간하고 표본 공백만 제한 외삽하되 다음 스냅샷에서 반드시 서버 궤도로 돌아온다.
-- 원격 보간 시계를 첫 스냅샷에 영구 고정하지 않는다. 최신 `serverTick` 오차를 제한된 양으로 계속 흡수하고, 장시간 타이머 드리프트와 단일 수신 지연 모두에서 보간 시간축이 급변하거나 지속 외삽으로 밀리지 않는지 테스트한다.
+- 원격 보간 시계를 첫 스냅샷에 영구 고정하지 않는다. 최신 `serverTick` 오차를 제한된 양으로 계속 흡수하고, 장시간 타이머 드리프트와 단일 수신 지연 모두에서 보간 시간축이 급변하거나 지속 외삽으로 밀리지 않는지 네트워크 진단으로 확인한다.
 - 원격 위치 표본의 tick은 그 상태를 실제로 만든 시계를 사용한다. 적·공용 객체는 `serverTick`, 플레이어는 `ownerMotionTick`으로 보간하며 플레이어 목표 시각에는 공용 `inputLeadTicks`를 더해 서버 시계와 소유자 예측 시계를 맞춘다. 반복된 owner motion을 새 server tick의 새 위치처럼 취급하지 않는다.
 - 플레이어 당사자 사건에서 서버 역할은 claim 검증, 중복 제거, 서버 복제 상태 갱신과 다른 클라이언트로의 배포다. impact는 정상 경로에서 같은 사건 전이의 상태 지문만 비교하고, 불일치 때만 피해자의 최신 상태를 요청한다. 서버는 별도로 중립 객체의 생성·궤적·수명주기를 진행하되, 지연된 플레이어 복제 위치로 피격이나 절단을 먼저 발생시켜 모바일 클라이언트 반응을 왕복 지연시키거나 정상 스냅샷으로 소유자 상태를 다시 쓰면 안 된다.
 - 공격 클라이언트가 적중을 claim하는 플레이어 투사체는 멀티 서버 fixed tick에서 적 충돌과 HP 감소를 다시 실행하지 않는다. 서버는 검증용 궤적·대상 소실·수명만 진행하고 승인된 claim에서 최종 대미지와 resolve 사건을 한 번 확정한다.
@@ -263,9 +263,9 @@ class Player extends RopeAttachable(GameObject) {}
 - 멀티 서버 fixed tick은 플레이어 체력 0 스캔으로 사망·부활을 시작하거나 보상 선택 명령으로 Foundation을 확정하지 않는다. 피해·사망은 피해자 impact claim, Foundation 선택은 foundation-selection claim의 검증 경계에서만 서버 복제 상태와 공유 사건에 반영한다.
 - 여러 클라이언트가 감지 가능한 사건은 결정적 `eventKey`로 멱등 처리한다. 다른 클라이언트는 확정 사건을 받으면 자신의 로컬 표현 컴포넌트에서 연출한다.
 - 연결, 인증, 참가·퇴장, 빈 방 제거와 서버 장애처럼 클라이언트가 발생시킬 수 없는 세션 수명주기는 예외적으로 서버가 시작할 수 있다.
-- 새 게임플레이 시스템의 테스트에는 최소한 `로컬 트리거가 서버 receipt보다 먼저 발생함`, `정상 claim은 최소 사건 자료만 보냄`, `상태 불일치 때만 복구 상태를 보냄`, `중복 claim은 한 번만 확정됨`, `각 사건 claim 계약에 맞는 거부 처리`, `승인 receipt와 정상 snapshot이 소유 클라이언트 상태·연출을 되감지 않음`, `서버 복제본과 동료가 소유자의 상태로 수렴함`, `중립 객체는 모든 클라이언트가 서버 상태로 수렴함`을 포함한다. `owner-motion` 테스트는 큰 유한 속도·각속도·위치 변화·로프 offset도 최신 유효 tick이면 적용되고, 중복·역순·세션 범위 밖 tick은 성공한 no-op이며 어떤 receipt도 소유자 재시뮬레이션을 시작하지 않는지 검증한다. impact 테스트는 HP·부활·로프와 소비한 탄환이 복구되지 않고, 복구 요청 뒤 서버 상태가 피해자의 최신 수치로 수렴하는지 검증한다.
-- 예측 가능한 중립 객체는 원래 spawn 이벤트를 활성 수명 동안 보존하고 일반 스냅샷이 아니라 중간 입장 welcome에서만 재사용한다. claim 대기 객체는 로컬 궤적을 계속 진행하며, 승인 resolve의 중복 피드백 억제, 계약별 거부 처리와 서버 수명 만료를 각각 회귀 테스트한다.
-- 새 네트워크 상태에는 정상 승인 시 수렴 대상, 거부 시 복구 기준점, 원격 보간 여부를 명시하고 세 참가자의 값이 입력 종료 뒤 같은 공유 상태로 모이는 회귀 테스트를 둔다.
+- 새 게임플레이 시스템의 멀티 검증은 최소한 `로컬 트리거가 서버 receipt보다 먼저 발생함`, `정상 claim은 최소 사건 자료만 보냄`, `상태 불일치 때만 복구 상태를 보냄`, `중복 claim은 한 번만 확정됨`, `각 사건 claim 계약에 맞는 거부 처리`, `승인 receipt와 정상 snapshot이 소유 클라이언트 상태·연출을 되감지 않음`, `서버 복제본과 동료가 소유자의 상태로 수렴함`, `중립 객체는 모든 클라이언트가 서버 상태로 수렴함`을 실제 서버·클라이언트 진단에서 확인한다.
+- 예측 가능한 중립 객체는 원래 spawn 이벤트를 활성 수명 동안 보존하고 일반 스냅샷이 아니라 중간 입장 welcome에서만 재사용한다. claim 대기 객체는 로컬 궤적을 계속 진행하며, 승인 resolve의 중복 피드백 억제, 계약별 거부 처리와 서버 수명 만료를 실제 멀티 경로에서 확인한다.
+- 새 네트워크 상태에는 정상 승인 시 수렴 대상, 거부 시 복구 기준점, 원격 보간 여부를 명시하고 두 기기 검증에서 입력 종료 뒤 같은 공유 상태로 모이는지 확인한다.
 - 기존 서버 시작형 플레이어 당사자 사건을 건드리는 작업은 같은 범위에서 소유자·피해자 클라이언트 트리거형으로 전환한다. 중립 시뮬레이션 사건은 서버 소유 이유와 클라이언트에 맡기지 않을 상태 경계를 명시한다.
 - 멀티 서버 fixed tick은 복제 플레이어의 위치만으로 낙사처럼 당사자 클라이언트가 이미 판정하는 사건을 보조 발생시키지 않는다. 신뢰성은 동일 claim의 멱등 처리와 연결 종료 정책으로 확보하며 서버 중복 트리거로 보완하지 않는다.
 
@@ -274,7 +274,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 기본은 컴포넌트 하나당 파일 하나이며 파일명과 대표 export 이름을 맞춘다.
 - 외부 사용자는 `index.js` 같은 공개 진입점만 import하고 내부 파일 경로에 결합하지 않는다.
 - props, view model, event payload는 필요한 필드만 가진 평평한 구조를 우선한다.
-- 컴포넌트 테스트는 초기 상태, 공개 명령, 상태 전이, 해제를 검증한다. DOM/Canvas 컴포넌트는 실제 사용자 경로의 브라우저 검증도 추가한다.
+- 컴포넌트는 초기 상태, 공개 명령, 상태 전이, 해제를 실제 호출 경로에서 검증한다. DOM/Canvas 컴포넌트는 실제 사용자 경로의 브라우저 검증을 수행한다.
 
 ## 6. 로직 소유권
 
@@ -326,7 +326,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 사용자 입력, 성공, 실패, 쿨다운은 화면에서 구분 가능해야 한다.
 - 화면 밖 objective 안내는 방향을 문장으로 하드코딩하지 않고 world position을 현재 camera로 투영한 screen-edge indicator를 사용한다. viewport 안에서는 world marker, 밖에서는 edge arrow 중 하나만 표시하고 safe-area·고정 HUD·모바일 조작 bounds를 피한다. 여러 후보가 있으면 제품 계약이 정한 다음 대상 하나만 안내해 화살표 중첩을 만들지 않으며 공용 HUD 표시 토글을 따른다.
 - Canvas 변경은 시작·동작 중·종료 또는 해제 상태를 실제 화면으로 검증한다.
-- 렌더 최적화는 보이는 결과가 같은지를 먼저 회귀 테스트하고, 화면 안/밖 객체를 함께 둔 수치 테스트로 draw 감소를 증명한다. 실제 브라우저에서는 설정 버튼 길게 누르기로 디버그 수치 표시를 켜고 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
+- 렌더 최적화는 실제 브라우저에서 보이는 결과가 같은지와 화면 안/밖 객체를 함께 둔 draw 감소를 증명한다. 설정 버튼 길게 누르기로 디버그 수치 표시를 켜고 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
 - 스프라이트 clip은 자산이 실제로 표현하는 행동 의미와 일치해야 한다. 지원하지 않는 행동을 방향 전환용 프레임 등 무관한 프레임에 임의 대응하지 않고, 불가피한 대체는 definition에 명시적 fallback으로 선언한다.
 - player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 자산 로더도 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다. 정식 입력은 `sprite-asset-format.md`의 PNG 묶음과 도구 중립 manifest로 정규화한다.
 - PixelLab·SpriteCook 같은 생성 도구의 ZIP·metadata·개별 frame은 import 입력으로만 다룬다. 도구별 adapter가 표준 manifest를 만들고 renderer와 gameplay에는 도구 이름 분기를 추가하지 않는다. GIF·WebP는 미리보기로만 사용한다.
@@ -335,10 +335,10 @@ class Player extends RopeAttachable(GameObject) {}
 - 환경 리소스 작업은 `environment-asset-format.md`의 PNG 묶음·JSON Schema·example manifest와 `validate:environment-assets` 명령으로 진입한다. PixelLab·SpriteCook 원본 배열과 metadata는 import 입력일 뿐 renderer에 도구별 분기를 만들지 않는다.
 - 오디오 리소스 작업은 `audio-asset-guide.md`의 authoring 인계와 `audio-asset-format.md`의 runtime package를 분리한다. 생성 Skill·MCP·DAW 원본은 입력 자료이며 schema·parser·mock·validator가 공유하는 도구 중립 manifest로 정규화한다.
 - 오디오 manifest는 clip source·load·loop와 cue 표현 정책만 소유한다. 게임 사건 연결은 package 밖 `AudioEventBindings`의 조합 가능한 handler가 소유하고 싱글·멀티 앱은 같은 `presentFrame` 경계만 호출한다. Web Audio graph와 voice 수명은 audio host가 소유하며 gameplay·simulation·network state는 음원 경로나 mixer를 import하지 않는다.
-- 오디오와 sprite 같은 표현 package는 stable ID·catalog·immutable definition 주입 경계를 유지한다. package 선택은 렌더·재생 결과만 바꾸며 물리·충돌·전투·명령·network snapshot을 변경하지 않는다. 실제 디버그 selector가 추가되기 전에도 공개 loader의 전체 pack·category override와 bootstrap 선택 주입을 회귀 테스트로 보호한다.
+- 오디오와 sprite 같은 표현 package는 stable ID·catalog·immutable definition 주입 경계를 유지한다. package 선택은 렌더·재생 결과만 바꾸며 물리·충돌·전투·명령·network snapshot을 변경하지 않는다. 공개 loader의 전체 pack·category override와 bootstrap 선택 주입은 validator와 실제 로딩 경로에서 확인한다.
 - 오디오 media의 비동기 재생 거부는 준비 성공과 구분해 voice를 정리하고 host snapshot·개발 진단에 전파한다. 사용자 활성화 제약은 다음 사용자 동작에서 재시도 가능한 `suspended`, 복구 불가능한 필수·선택 실패는 각각 `failed`·`degraded`로 명시하며 실패를 adapter 내부 배열에만 남기지 않는다.
-- 오디오 scene·binding처럼 120Hz 고정 스텝에서 호출될 수 있는 경로는 같은 lifecycle key·cue·gain·pan 입력을 멱등 처리한다. 값이 같을 때 Web Audio automation을 추가하지 않고, 값이 변할 때는 해당 `AudioParam`의 기존 예약을 취소·교체한다. 앱별 호출 빈도 제한으로 우회하지 말고 공용 voice/adapter 경계의 장시간 반복 테스트로 증명한다.
-- emitter cooldown, causal ID, runtime failure처럼 사건 수에 따라 늘 수 있는 오디오 기록은 명시적 상한을 가진다. buffer source 시작 실패는 생성한 handle·node·voice를 즉시 정리한다. `stopAll`은 one-shot·loop를, `suspend`는 one-shot을, `release`는 남은 voice·loop와 cooldown·variation·causal 추적 Map까지 결정적으로 비워야 한다. 회귀 테스트는 동일 loop 수만 회, 고유 emitter가 상한을 넘는 경우와 graph 연결 뒤 `start()`가 실패하는 경우를 포함하고 각 수명주기 뒤 보유 수를 직접 단언한다.
+- 오디오 scene·binding처럼 120Hz 고정 스텝에서 호출될 수 있는 경로는 같은 lifecycle key·cue·gain·pan 입력을 멱등 처리한다. 값이 같을 때 Web Audio automation을 추가하지 않고, 값이 변할 때는 해당 `AudioParam`의 기존 예약을 취소·교체한다. 앱별 호출 빈도 제한으로 우회하지 말고 공용 voice/adapter 진단으로 확인한다.
+- emitter cooldown, causal ID, runtime failure처럼 사건 수에 따라 늘 수 있는 오디오 기록은 명시적 상한을 가진다. buffer source 시작 실패는 생성한 handle·node·voice를 즉시 정리한다. `stopAll`은 one-shot·loop를, `suspend`는 one-shot을, `release`는 남은 voice·loop와 cooldown·variation·causal 추적 Map까지 결정적으로 비워야 한다.
 - 스프라이트 화면 변경은 데스크톱과 모바일 크기에서 상태의 자세·실루엣·동작을 비교한다. 색 변화만을 상태 구분의 유일한 근거로 사용하지 않는다.
 
 ## 11. 코드 스타일과 파일 관리
@@ -349,10 +349,10 @@ class Player extends RopeAttachable(GameObject) {}
 - 매직 넘버는 소유 모듈의 설정 객체나 상수로 올린다.
 - 컬렉션은 의도를 드러내는 `map`, `filter`, `find`, `for...of`를 우선한다.
 - 파일명과 대표 export 이름을 맞춘다.
-- 파일명 변경 시 import, HTML 진입점, 테스트, 문서를 한 번에 검색하고 수정한다.
+- 파일명 변경 시 import, HTML 진입점과 문서를 한 번에 검색하고 수정한다.
 - UTF-8과 저장소 줄바꿈 규칙을 유지한다.
 
-## 12. 테스트와 회귀 방지
+## 12. 검증과 회귀 방지
 
 ### 반복 유사 버그 모순 감사
 
@@ -362,36 +362,31 @@ class Player extends RopeAttachable(GameObject) {}
 2. 같은 의미를 쓰는 상태 필드, controller, event, protocol과 compatibility alias를 검색해 권위 소유자가 둘 이상인지 확인한다.
 3. client/server, owner/shared simulation, collision/renderer, authored/runtime이 같은 predicate와 데이터 원점을 사용하는지 나란히 비교한다.
 4. 이전 수정이 크기·표현·예외 조건만 바꾸고 기존 모순된 권위 계약을 유지했는지 확인한다.
-5. 편집 전에 사용자 증상과 함께 단일 권위·정적 geometry·상태 수렴 같은 근본 불변식을 실패 테스트로 고정한다.
+5. 편집 전에 사용자 증상과 함께 단일 권위·정적 geometry·상태 수렴 같은 근본 불변식을 재현 가능한 명령·로그·브라우저 경로로 확인한다.
 
 반복 회귀에서는 diff가 작다는 이유로 관측값 override, whitelist 확장, fallback 분기 또는 한쪽 계층만의 predicate를 추가하지 않는다. 기존 계약끼리 양립하지 않으면 최신 사용자 결정에 맞는 권위 하나를 남기고 나머지 상태와 호환 경로를 제거하거나 표시 전용 파생값으로 격리한다. 감사 결과는 최종 보고와 Lore commit의 Constraint 또는 Rejected trailer에 남겨 다음 수정자가 같은 증상 패치를 반복하지 않게 한다.
+
+### 자동 테스트 금지와 명시 요청 예외
+
+- 저장소는 기본 자동 테스트 suite를 유지하지 않는다. 테스트 코드가 제품과 별도 권위·유지보수 대상이 되는 것을 막기 위한 사용자 결정이다.
+- 사용자가 현재 작업에서 테스트 작성이나 특정 자동 회귀를 명시적으로 요청한 경우에만 그 범위의 테스트를 추가한다. 과거 관례, 에이전트 판단, 일반적인 “버그 수정” 표현만으로 테스트를 만들지 않는다.
+- schema·asset·scenario validator는 제품 입력을 거부하는 실행 계약이므로 테스트와 구분해 유지한다. 문법·형식 검사와 실제 브라우저·서버 smoke도 유지한다.
+- 테스트가 없다는 이유로 구현 내부 상태를 수동 단언하는 임시 스크립트를 저장소에 남기지 않는다. 필요한 일회성 진단은 실행 결과만 보고하고 제품 파일로 승격하지 않는다.
 
 기본 검증 명령:
 
 ```powershell
-npm test
 npm run check
+npm run format:check
 git diff --check
 ```
 
-이 목록은 최종 candidate가 통과해야 할 검증 집합이며 각 단계·각 실행기마다 반복하라는 뜻이 아니다. 구현 중에는 focused test를 사용하고, 전체 명령은 검증 ledger의 단일 소유자가 안정화된 candidate에서 한 번씩 실행한다.
+이 목록은 최종 candidate가 통과해야 할 정적·계약 검증 집합이며 각 단계·각 실행기마다 반복하라는 뜻이 아니다. 화면 변경은 실제 브라우저, 멀티 서버 변경은 해당 smoke 절차로 별도 확인한다.
 
-- 버그 수정은 가능하면 실패하는 회귀 테스트를 먼저 만든다.
 - 버그 수정은 관측된 출력만 덮어쓰는 예외 처리로 끝내지 않는다. 원인이 된 상태 소유권, 식별자, 데이터 흐름 또는 공개 계약의 불변식을 복구하고 같은 원인에서 파생되는 경로를 검색한다.
-- 에이전트는 현재 작업의 메인 개발자로서 사용자 결과 전체를 책임진다. 최소 변경 자체를 목표로 하지 않고 근본 원인을 복구하는 단일 권위와 공개 계약을 세운 뒤 모든 생산 호출자, 싱글·멀티 상태, 표현, 저장·복원, migration, 테스트와 기준 문서를 같은 변경에서 정렬한다. 증상별 보정 코드가 더 작은 diff라도 예외 상태나 중복 경로를 남기면 채택하지 않는다. 반대로 완결성과 무관한 기능 추가나 전면 재작성은 책임 있는 개발이 아니라 범위 팽창으로 거부한다.
-- 회귀 테스트는 사용자에게 보인 증상과 함께 근본 불변식을 직접 검증한다. 잘못된 객체나 상태 주입이 가능하다면 사건 생성이나 외부 전파 전에 명시적으로 실패하는 조건도 포함한다.
-- 기본 테스트는 게임플레이, 멀티플레이, 클라이언트 배포의 메인 시나리오를 따라 여러 공개 동작을 함께 검증한다.
-- 기본 `npm test`의 제품 시나리오는 현재 저작 area catalog, 영역별 목표, Gate 패널·포탈 진행과 content boundary를 기준으로 한다. 현재 런에서 사용하지 않는 절차형 48단계 경로·summit 완료 계약은 기본 suite에 넣지 않는다.
-- seed와 world revision은 저작 월드·중립 시뮬레이션·결정적 표현의 싱글·멀티 재현 계약이므로 관련 동기화 테스트는 유지한다. 다만 시드별 절차 경로 통과성을 대량 sweep하는 검증을 필수 명령으로 두지 않는다.
-- 단순 상수, getter, 구현 내부 배열 모양처럼 메인 시나리오가 이미 증명하거나 자주 바뀌는 세부 구현만 별도 테스트하지 않는다.
-- 독립 테스트는 재현된 버그, 프로토콜 경계, 보안·데이터 손실 위험처럼 실패 원인이 분리되어야 할 때만 추가한다.
-- `npm test` 전체 실행은 3분을 넘기지 않으며 테스트 러너가 이 제한을 실패로 처리한다.
-- 같은 base SHA·diff fingerprint·의존 환경에서 이미 통과한 전체 `npm test`, `npm run check`, `npm run format:check`는 역할이 바뀌었다는 이유로 다시 실행하지 않는다. 새 검증자는 의미·시각·수명주기 등 아직 비어 있는 증거를 확인한다.
-- 수정으로 관련 fingerprint가 바뀌면 영향받는 focused test를 먼저 실행하고, 최종 candidate의 전체 suite ledger만 무효화한다. 문서·메타데이터만 바뀌어 런타임·테스트·설정 입력이 동일하면 저장소가 명시적으로 요구하지 않는 전체 suite를 다시 실행하지 않는다.
-- 시간 기반 테스트는 실제 대기보다 고정 시간과 주입 가능한 clock을 사용한다.
-- 랜덤 기능은 seed를 테스트 입력으로 노출한다.
-- 테스트 러너 파일을 임시 실험 코드로 덮어쓰지 않는다.
-- 테스트 통과와 사용자 동작 검증을 구분한다. Canvas 기능은 브라우저 증거 없이는 완료가 아니다.
+- 에이전트는 현재 작업의 메인 개발자로서 사용자 결과 전체를 책임진다. 최소 변경 자체를 목표로 하지 않고 근본 원인을 복구하는 단일 권위와 공개 계약을 세운 뒤 모든 생산 호출자, 싱글·멀티 상태, 표현, 저장·복원, migration과 기준 문서를 같은 변경에서 정렬한다.
+- seed와 world revision은 저작 월드·중립 시뮬레이션·결정적 표현의 싱글·멀티 재현 계약으로 유지하되 대량 seed sweep 자동 테스트를 만들지 않는다.
+- Canvas 기능은 브라우저 증거, 멀티플레이는 실제 서버·클라이언트 smoke 없이 완료 처리하지 않는다.
 - CI와 로컬 검증 명령이 다르면 문서와 워크플로를 함께 맞춘다.
 
 ## 13. Git 운영
@@ -414,7 +409,7 @@ git diff --check
 - 실제 changed paths가 분리되면 대화 메시지와 GitHub 댓글 없이 독립 진행한다. 작업 제목·요약보다 checkout과 실제 diff·hunk·public contract를 근거로 사용하며, 활성 편집과 충돌을 증명할 수 없으면 추측으로 연락하지 않는다.
 - 독립 경로·심볼·계약을 소유한 새 작업은 별도 Git worktree와 branch를 기본으로 사용한다. 기존 Git object database를 공유하므로 별도 clone은 만들지 않는다. 같은 저장소라는 이유만으로 선행 merge를 기다리지 않는다.
 - 같은 `cwd`의 shared checkout에서는 브랜치·작업 트리·stage를 모든 대화가 공유하므로 실제 동시 편집이 확인되면 한 대화만 Git 쓰기를 소유한다. shared checkout은 환경상 worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 사용한다.
-- 같은 파일이라도 심볼과 hunk가 분리되면 독립 소유할 수 있다. 같은 hunk, public API, schema, fixture, 공통 index와 기준 문서는 한 작업만 소유하고 다른 작업은 요구사항과 테스트 사례를 전달한 뒤 선행 병합을 기다린다.
+- 같은 파일이라도 심볼과 hunk가 분리되면 독립 소유할 수 있다. 같은 hunk, public API, schema, fixture, 공통 index와 기준 문서는 한 작업만 소유하고 다른 작업은 요구사항과 재현 사례를 전달한 뒤 선행 병합을 기다린다.
 - 실제 충돌이 확인된 활성 편집 대화에만 겹친 경로·checkout·소유자·병합 순서를 한 번 전달한다. 실제 병합 의존성이 있고 양쪽 Issue가 있을 때만 같은 최소 결정을 Issue 댓글에 기록한다.
 - 고정된 3회 조정 재확인은 하지 않는다. 실제 diff가 새 공유 경계로 넓어지거나 shared checkout 소유자가 바뀌거나 선행 PR 병합으로 의존 작업이 재개될 때만 다시 확인한다.
 - 각 작업은 자기 worktree·브랜치·stage·커밋·PR만 변경한다. 선행 구현이 완료되면 그 대화를 다시 호출하지 않고 PR 또는 merge SHA를 확인한 뒤 의존 worktree를 최신 `origin/main`에 rebase하고 영향받은 verification ledger 항목만 다시 수행한다.
@@ -460,7 +455,7 @@ git diff --check
 | 시나리오 Stage 목록, Runtime 연결 상태, 차단 요소와 마지막 확인 근거 | `docs/scenario-development-integration.md`                          |
 | 모듈 책임, 상태 소유권, 의존 방향                                    | `docs/architecture.md`                                              |
 | 멀티 권위, 전송, 채널과 세션 정책                                    | `docs/multiplayer-synchronization.md`                               |
-| 클래스·믹스인·컴포넌트·테스트·Git과 대화 결정 흡수 절차              | `docs/development-rules.md`                                         |
+| 클래스·믹스인·컴포넌트·검증·Git과 대화 결정 흡수 절차              | `docs/development-rules.md`                                         |
 | 문서 인덱스, 작성 위치, 파일 형식과 이미지 첨부                      | `docs/documentation-rules.md`                                       |
 | Pages, PWA, 서버 실행, 버전 운영                                     | 해당 배포·버전 문서                                                 |
 | 현재 유효한 결론과 다음 작업 요약                                    | `SESSION-HANDOFF.md`                                                |
@@ -505,4 +500,4 @@ git diff --check
 - 재귀 삭제·이동은 대상 절대 경로를 먼저 확인한다.
 - 장시간 서버는 별도 프로세스로 실행하고 검증 후 정확한 PID를 종료한다.
 - 자동 구현기가 중단돼도 하위 프로세스가 남아 파일을 덮어쓸 수 있으므로, 직접 작업으로 전환하기 전에 프로세스와 최근 수정 시간을 확인한다.
-- 대량 치환 후에는 import, 문법, 테스트, `git diff --check`를 다시 실행한다.
+- 대량 치환 후에는 import, 문법, 관련 validator와 `git diff --check`를 다시 실행한다.
