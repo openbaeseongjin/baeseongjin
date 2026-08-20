@@ -608,6 +608,7 @@ export class OwnerPredictionRuntime {
                     position: event.contactPosition ?? event.position,
                     sourcePosition: event.sourcePosition,
                     damage: event.damage,
+                    ...(event.impactSpeed === undefined ? {} : { impactSpeed: event.impactSpeed }),
                     knockback: event.knockback ?? null,
                     effectId: event.effectId,
                     sourceKind: event.sourceKind ?? "augment-action",

@@ -71,22 +71,22 @@ Quest, 순수 기본 이동 modifier, rarity와 Specialization은 v1 범위가 �
 
 Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. 해제 추진은 정상 Rope 해제 계산 뒤 전체 속도 벡터를 한 번 `×1.25` 한다.
 
-기본 우클릭 펀치는 조준 반구 안의 가장 가까운 적 하나를 사거리 55px에서 공격한다. 피해는 Rope impact의 40%(현재 10), 직접 플레이어를 추격하는 적에만 넉백 50px, cooldown 0.50초이며 이동·무적·다중 타격은 없다. 고정 Turret·고정 Patrol 경로·제자리 지원형은 피해만 받고 authored 위치를 유지한다.
+기본 우클릭 펀치는 조준 반구 안의 가장 가까운 적 하나를 사거리 55px에서 공격한다. Rope 몸체 충돌과 분리된 Action 피해 기준값은 25로 유지하며, 펀치는 그 40%인 10 피해를 준다. 직접 플레이어를 추격하는 적에만 넉백 50px, cooldown 0.50초이며 이동·무적·다중 타격은 없다. 고정 Turret·고정 Patrol 경로·제자리 지원형은 피해만 받고 authored 위치를 유지한다.
 
 ## Rope 전투 카드
 
 ### 감전 로프
 
 - 부착 중 Anchor–Player 선분과 `enemy radius + 10px` 이내로 닿은 모든 damageable 적이 대상이다.
-- DPS는 기본 Rope impact의 80%/초다.
-- 0.10초 pulse는 정산·표시 cadence이며 현재 pulse 피해는 2다.
+- DPS는 고정 `100/초`다.
+- 0.10초 pulse는 정산·표시 cadence이며 pulse 피해는 `10`이다.
 - 진입·재진입 burst가 없고 짧은 접촉의 미정산 시간은 보존한다.
 - VFX는 로컬 `C:\projects\ball-fight-simulator`의 전기 표현 문법을 의존성 없이 이식한다. endpoint 고정 wavering polyline에 반투명 청록 glow, 청색 본선, 백색 core를 additive로 겹친다.
 
 ### 충돌 폭발
 
 - 기존 유효 고속 Rope 몸체 충돌을 trigger로 사용한다.
-- 반경 120px, 직접 대상 100%, 주변 대상 50% 피해다. 직접 대상은 splash를 중복 적용하지 않는다.
+- 반경 120px, 직접 대상은 충돌 속력 기반 Rope 피해의 100%, 주변 대상은 50% 피해다. 직접 대상은 splash를 중복 적용하지 않는다.
 - 일반·Elite는 0.25초 동안 100px 이동한다. 직접 대상은 Player 진행 방향, 주변 대상은 충돌점 바깥 방향이다.
 - Boss는 피해만 받고 이동하지 않는다.
 - 분리 뒤 다시 최소 속도 이상으로 접촉해야 재발동한다. falloff·stun은 없다.
@@ -117,7 +117,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 ## 피해·이동 권위
 
 - Player Rope·Action trigger는 공격 Player의 owner client가 먼저 시뮬레이션하고 즉시 feedback을 시작한다.
-- claim은 unique event ID, tick, source/target/effect, 공식 피해와 최소 접촉 자료를 보낸다. 넉백은 direction·distance·duration intent를 같은 사건에 넣는다.
+- claim은 unique event ID, tick, source/target/effect, 공식 피해와 최소 접촉 자료를 보낸다. 충돌 폭발은 공식 피해를 재계산할 충돌 속력도 보내며, 넉백은 direction·distance·duration intent를 같은 사건에 넣는다.
 - 서버는 지연된 Player state로 충돌을 다시 만들지 않는다. 소유권, tick, finite payload, formula, card 보유, event 중복과 target 상태를 검증한다.
 - live target은 `EnemyObject.blocksImpactFrom(sourcePosition)` → damage → lethal이면 defeat 1회·own knockback 생략 → 생존자 public knockback 순서다. 마지막 knockback은 `EnemyMobility`가 `direct-player-pursuit`로 분류한 Pursuit/Swarm에만 적용한다.
 - 알려진 tombstone target의 늦은 사건은 `target-already-dead` 성공 no-op이다. damage, movement, defeat, loot, metric, feedback, VFX와 부활을 만들지 않는다.
@@ -130,7 +130,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 - Owner motion v4: owner-owned augment/action runtime mirror 추가.
 - Player impact v8: generic selected Augment state와 guard/shield 결과 수렴.
 - World snapshot v11: 모든 Player의 non-null Action state를 전송하며 기본 주먹도 charge/recharge snapshot으로 수렴한다.
-- Augment impact v1, Augment offer v1을 사용한다.
+- Augment impact v2, Augment offer v1을 사용한다. v2는 속력 기반 충돌 폭발의 공식 피해 검증을 위한 `impactSpeed`를 선택 필드로 추가한다.
 
 ## 반복 수치 규칙
 

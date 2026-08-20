@@ -480,6 +480,7 @@ export class RemoteGameAuthority {
             sourcePosition: event.sourcePosition,
             contactPosition: event.contactPosition ?? event.position,
             damage: event.damage,
+            ...(event.impactSpeed === undefined ? {} : { impactSpeed: event.impactSpeed }),
             ...(event.knockback
                 ? {
                       knockback: {

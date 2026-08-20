@@ -1,21 +1,30 @@
-import { ROPE_IMPACT_CONFIG } from "../config.js";
+import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
+import { AUGMENT_IMPACT_CONFIG, ROPE_IMPACT_CONFIG } from "../config.js";
 import { actionAugmentById } from "./actions/ActionAugmentCatalog.js";
 
-const IMPACT = ROPE_IMPACT_CONFIG.damage;
+const IMPACT = AUGMENT_IMPACT_CONFIG.baseDamage;
 const DEFAULT_PUNCH = actionAugmentById("default-punch").effect;
 
-function formula({ cardId = null, damageMultiplier, range, knockback = null, dynamicDamage = false }) {
+function formula({
+    cardId = null,
+    damageMultiplier,
+    range,
+    knockback = null,
+    dynamicDamage = false,
+    ropeImpactDamageMultiplier = null
+}) {
     return Object.freeze({
         cardId,
-        damage: dynamicDamage ? null : IMPACT * damageMultiplier,
+        damage: dynamicDamage || ropeImpactDamageMultiplier !== null ? null : IMPACT * damageMultiplier,
         dynamicDamage,
+        ropeImpactDamageMultiplier,
         range,
         knockback: knockback ? Object.freeze({ ...knockback }) : null
     });
 }
 
 const FORMULAS = new Map([
-    ["rope-impact", formula({ damageMultiplier: 1, range: 80 })],
+    ["rope-impact", formula({ damageMultiplier: 0, ropeImpactDamageMultiplier: 1, range: 80 })],
     [
         "default-punch",
         formula({
@@ -24,12 +33,23 @@ const FORMULAS = new Map([
             knockback: { distance: DEFAULT_PUNCH.knockbackDistance, duration: DEFAULT_PUNCH.knockbackSeconds }
         })
     ],
-    ["electrified-rope", formula({ cardId: "electrified-rope", damageMultiplier: 0.08, range: 500 })],
+    [
+        "electrified-rope",
+        Object.freeze({
+            cardId: "electrified-rope",
+            damage: AUGMENT_IMPACT_CONFIG.electrifiedDamagePerSecond * AUGMENT_IMPACT_CONFIG.electrifiedPulseSeconds,
+            dynamicDamage: false,
+            ropeImpactDamageMultiplier: null,
+            range: 500,
+            knockback: null
+        })
+    ],
     [
         "collision-explosion-direct",
         formula({
             cardId: "collision-explosion",
-            damageMultiplier: 1,
+            damageMultiplier: 0,
+            ropeImpactDamageMultiplier: 1,
             range: 80,
             knockback: { distance: 100, duration: 0.25 }
         })
@@ -38,7 +58,8 @@ const FORMULAS = new Map([
         "collision-explosion-splash",
         formula({
             cardId: "collision-explosion",
-            damageMultiplier: 0.5,
+            damageMultiplier: 0,
+            ropeImpactDamageMultiplier: 0.5,
             range: 120,
             knockback: { distance: 100, duration: 0.25 }
         })
@@ -84,7 +105,14 @@ export function validateAugmentImpactFormula(player, claim, target = null, { pos
     if (claim.effectId === "default-punch" && player.foundation?.baseActionId) {
         return Object.freeze({ valid: false });
     }
-    if (resolved.dynamicDamage) {
+    if (resolved.ropeImpactDamageMultiplier !== null) {
+        if (!Number.isFinite(claim.impactSpeed) || claim.impactSpeed < ROPE_IMPACT_CONFIG.minimumSpeed) {
+            return Object.freeze({ valid: false });
+        }
+        const expectedDamage =
+            ropeImpactDamageForSpeed(claim.impactSpeed, ROPE_IMPACT_CONFIG) * resolved.ropeImpactDamageMultiplier;
+        if (!nearlyEqual(claim.damage, expectedDamage)) return Object.freeze({ valid: false });
+    } else if (resolved.dynamicDamage) {
         if (claim.damage <= 0 || claim.damage > player.maxHealth) return Object.freeze({ valid: false });
     } else if (!nearlyEqual(claim.damage, resolved.damage)) {
         return Object.freeze({ valid: false });

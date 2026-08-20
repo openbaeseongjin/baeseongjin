@@ -20,12 +20,14 @@ import { EnemyObject } from "../combat/EnemyObject.js";
 import { recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
 import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js";
 import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
+import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
 import {
     COMBAT_CONFIG,
     FALL_DAMAGE_CONFIG,
     PLAYER_CONFIG,
     ROPE_CONFIG,
+    AUGMENT_IMPACT_CONFIG,
     ROPE_IMPACT_CONFIG,
     WIND_CONFIG,
     WORLD_CONFIG,
@@ -1347,11 +1349,16 @@ export class GameSimulation {
     #commitRopeImpact(event) {
         const target = this.enemies.find(({ id, health }) => id === event.targetId && health > 0);
         const source = this.#findPlayer(event.sourcePlayerId);
+        const impactSpeed = Math.hypot(event.velocity.x, event.velocity.y);
+        if (impactSpeed < ROPE_IMPACT_CONFIG.minimumSpeed) {
+            return Object.freeze({ accepted: false, reason: "speed-below-minimum" });
+        }
+        const damage = ropeImpactDamageForSpeed(impactSpeed, ROPE_IMPACT_CONFIG);
         const result = resolvePlayerEnemyImpact({
             targetId: event.targetId,
             target,
             sourcePosition: source?.physics.position ?? event.position,
-            damage: ROPE_IMPACT_CONFIG.damage,
+            damage,
             tombstones: this.enemyImpactTombstones
         });
         if (result.resolution === "shield-blocked") {
@@ -1369,14 +1376,16 @@ export class GameSimulation {
                 predictionId: event.predictionId,
                 sourcePlayerId: event.sourcePlayerId,
                 targetId: event.targetId,
-                damage: ROPE_IMPACT_CONFIG.damage
+                damage,
+                impactSpeed
             })
         });
         this.eventFlash = {
             type: resolution,
             age: 0,
             position: new Vector2(event.position.x, event.position.y),
-            damage: ROPE_IMPACT_CONFIG.damage,
+            damage,
+            impactSpeed,
             sourcePlayerId: event.sourcePlayerId,
             targetId: event.targetId
         };
@@ -1425,9 +1434,9 @@ export class GameSimulation {
                     sourcePosition: vectorState(previousPosition),
                     contactPosition: vectorState(enemy.position),
                     position: vectorState(enemy.position),
-                    damage: ROPE_IMPACT_CONFIG.damage * 0.8,
+                    damage: AUGMENT_IMPACT_CONFIG.baseDamage * 0.8,
                     predictedResolution:
-                        enemy.health <= ROPE_IMPACT_CONFIG.damage * 0.8 ? "enemy-defeated" : "enemy-hit"
+                        enemy.health <= AUGMENT_IMPACT_CONFIG.baseDamage * 0.8 ? "enemy-defeated" : "enemy-hit"
                 })
             );
         }
@@ -1481,7 +1490,7 @@ export class GameSimulation {
             targetId: claim.targetId,
             position: claim.position,
             velocity: claim.velocity,
-            damage: ROPE_IMPACT_CONFIG.damage
+            damage: ropeImpactDamageForSpeed(Math.hypot(claim.velocity.x, claim.velocity.y), ROPE_IMPACT_CONFIG)
         });
     }
 

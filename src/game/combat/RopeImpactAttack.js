@@ -1,13 +1,26 @@
+export function ropeImpactDamageForSpeed(speed, config) {
+    if (!Number.isFinite(speed) || speed < 0) {
+        throw new Error("rope impact speed must be non-negative and finite");
+    }
+    if (
+        !Number.isFinite(config?.referenceSpeed) ||
+        config.referenceSpeed <= 0 ||
+        !Number.isFinite(config?.referenceDamage) ||
+        config.referenceDamage <= 0
+    ) {
+        throw new Error("rope impact config requires positive reference speed and damage");
+    }
+    return (speed / config.referenceSpeed) * config.referenceDamage;
+}
+
 export class RopeImpactAttack {
     constructor(config) {
         if (!Number.isFinite(config?.minimumSpeed) || config.minimumSpeed <= 0) {
             throw new Error("RopeImpactAttack requires a positive minimumSpeed");
         }
-        if (!Number.isFinite(config?.damage) || config.damage <= 0) {
-            throw new Error("RopeImpactAttack requires positive damage");
-        }
+        ropeImpactDamageForSpeed(config.minimumSpeed, config);
         this.minimumSpeed = config.minimumSpeed;
-        this.damage = config.damage;
+        this.config = config;
         this.overlappingEnemyIds = new Set();
         this.pendingImpactsByEnemyId = new Map();
     }
@@ -25,6 +38,7 @@ export class RopeImpactAttack {
         );
         const speed = Math.hypot(owner.physics.velocity.x, owner.physics.velocity.y);
         const canHit = owner.ropeObject.rope.isAttached && speed >= this.minimumSpeed;
+        const damage = ropeImpactDamageForSpeed(speed, this.config);
         const impacts = canHit
             ? overlaps
                   .filter(
@@ -39,8 +53,9 @@ export class RopeImpactAttack {
                           targetId: enemy.id,
                           position: Object.freeze({ x: enemy.position.x, y: enemy.position.y }),
                           velocity: Object.freeze({ x: owner.physics.velocity.x, y: owner.physics.velocity.y }),
-                          damage: this.damage,
-                          predictedResolution: enemy.health <= this.damage ? "enemy-defeated" : "enemy-hit"
+                          impactSpeed: speed,
+                          damage,
+                          predictedResolution: enemy.health <= damage ? "enemy-defeated" : "enemy-hit"
                       })
                   )
             : [];

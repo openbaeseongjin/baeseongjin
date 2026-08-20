@@ -1,3 +1,5 @@
+import { AUGMENT_IMPACT_CONFIG } from "../../config.js";
+
 function requirePositiveNumber(value, label) {
     if (!Number.isFinite(value) || value <= 0) {
         throw new Error(`${label} must be a positive finite number`);
@@ -33,8 +35,6 @@ export const ROPE_AUGMENT_PERCENTAGES = Object.freeze({
     longRopeReach: 0.2,
     fastRecoverReloadReduction: 0.5,
     releasePropulsionVelocity: 0.25,
-    electrifiedDps: 0.8,
-    electrifiedPulseSeconds: 0.1,
     collisionExplosionSplashDamage: 0.5
 });
 
@@ -45,7 +45,9 @@ export const ROPE_AUGMENT_STATIC_VALUES = Object.freeze({
     contactBandPadding: 10,
     collisionExplosionRadius: 120,
     collisionExplosionKnockbackDistance: 100,
-    collisionExplosionKnockbackSeconds: 0.25
+    collisionExplosionKnockbackSeconds: 0.25,
+    electrifiedDamagePerSecond: AUGMENT_IMPACT_CONFIG.electrifiedDamagePerSecond,
+    electrifiedPulseSeconds: AUGMENT_IMPACT_CONFIG.electrifiedPulseSeconds
 });
 
 export function createRopeAugmentTuning({
@@ -61,8 +63,8 @@ export function createRopeAugmentTuning({
     const hookFlightSeconds = resolvedReach / resolvedHookSpeed;
     const fastLaunchSpeed = scaleByPercent(resolvedHookSpeed, ROPE_AUGMENT_PERCENTAGES.fastLaunchSpeed);
     const longRopeReach = scaleByPercent(resolvedReach, ROPE_AUGMENT_PERCENTAGES.longRopeReach);
-    const electrifiedDamagePerSecond = resolvedImpactDamage * ROPE_AUGMENT_PERCENTAGES.electrifiedDps;
-    const electrifiedPulseSeconds = ROPE_AUGMENT_PERCENTAGES.electrifiedPulseSeconds;
+    const electrifiedDamagePerSecond = ROPE_AUGMENT_STATIC_VALUES.electrifiedDamagePerSecond;
+    const electrifiedPulseSeconds = ROPE_AUGMENT_STATIC_VALUES.electrifiedPulseSeconds;
     return Object.freeze({
         rules: ROPE_AUGMENT_TUNING_RULES,
         baseRope: Object.freeze({
