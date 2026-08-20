@@ -10,7 +10,7 @@ import {
 import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewport.js";
 import { assertSceneRenderer } from "./SceneRenderer.js";
 import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus } from "./ActorStatusPresentation.js";
-import { layoutAccessEdgeGuides, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
+import { layoutAccessEdgeGuides, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
 
 export class CanvasRenderer {
@@ -97,6 +97,7 @@ export class CanvasRenderer {
         this.drawRewardSelectionOverlay(scene.foundationReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawStoryPresentation(scene.storyPresentation);
+        this.drawPlayerMessagePresentation(scene.playerMessagePresentation, scene);
         this.drawStatusFeedback(scene.eventFlash);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
@@ -331,6 +332,58 @@ export class CanvasRenderer {
         ctx.fillStyle = "#9fb7c7";
         ctx.font = "700 12px ui-monospace, monospace";
         ctx.fillText(presentation.detail, this.cssWidth * 0.5, y + 47);
+        ctx.restore();
+    }
+
+    drawPlayerMessagePresentation(presentation, scene) {
+        if (!presentation) return;
+        const speaker =
+            [scene.player, ...(scene.otherPlayers ?? [])].find((player) => player?.id === presentation.speakerId) ??
+            (presentation.audience === "local-player" ? scene.player : null);
+        if (!speaker?.position || !scene.camera) return;
+        const ctx = this.context;
+        const margin = 12;
+        const compactView = scene.mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+        const screen = projectWorldToScreen(speaker.position, scene.camera);
+        const fontSize = compactView ? 12 : 13;
+        const horizontalPadding = compactView ? 12 : 14;
+        const height = compactView ? 34 : 38;
+        ctx.save();
+        ctx.font = `700 ${fontSize}px system-ui, sans-serif`;
+        const width = Math.min(
+            compactView ? 230 : 280,
+            Math.max(88, ctx.measureText(presentation.text).width + horizontalPadding * 2)
+        );
+        const radius = speaker.collider?.radius ?? 18;
+        const overheadOffset = (radius + (compactView ? 44 : 50)) * (scene.camera.zoom ?? 1);
+        const x = Math.max(margin, Math.min(this.cssWidth - margin - width, screen.x - width * 0.5));
+        const y = Math.max(54, Math.min(this.cssHeight - margin - height - 10, screen.y - overheadOffset - height));
+        const fadeIn = Math.min(1, presentation.age / 0.1);
+        const fadeOut = Math.min(1, (presentation.durationSeconds - presentation.age) / 0.16);
+        const partyMessage = presentation.channel === "party-chat";
+        ctx.globalAlpha = Math.max(0, Math.min(fadeIn, fadeOut));
+        ctx.fillStyle = "rgba(8, 13, 22, 0.88)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = partyMessage ? "rgba(192, 132, 252, 0.82)" : "rgba(251, 191, 36, 0.82)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        const tailX = Math.max(x + 10, Math.min(x + width - 10, screen.x));
+        ctx.beginPath();
+        ctx.moveTo(tailX - 7, y + height);
+        ctx.lineTo(tailX, y + height + 9);
+        ctx.lineTo(tailX + 7, y + height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = `700 ${fontSize}px system-ui, sans-serif`;
+        ctx.fillText(
+            presentation.visibleText ?? presentation.text,
+            x + width * 0.5,
+            y + (compactView ? 22 : 25),
+            width - horizontalPadding * 2
+        );
         ctx.restore();
     }
 

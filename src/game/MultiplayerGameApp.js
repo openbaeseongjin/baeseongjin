@@ -23,6 +23,7 @@ import {
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
+import { PlayerMessagePresentation } from "./presentation/PlayerMessagePresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
 
@@ -107,6 +108,7 @@ export class MultiplayerGameApp {
         });
         this.worldUnlockPresentation = new WorldUnlockPresentation();
         this.storyPresentation = new AuthoredStoryPresentation();
+        this.playerMessagePresentation = new PlayerMessagePresentation({ viewerId: this.authority.playerId });
         this.localRunCompleted = false;
         this.localFoundationReward = null;
         this.pendingFoundationSelection = null;
@@ -440,12 +442,16 @@ export class MultiplayerGameApp {
         const player = this.authority.presentationState();
         const authoredWorld = this.authority.worldSnapshot();
         const cameraShot = this.updatePresentationCamera(dt, player, authoredWorld);
-        this.storyPresentation.update(dt, {
+        const storyPresentation = this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
             currentAreaLocalY: cameraShot.localY,
             events: [...events, ...predictedEvents],
             triggers: localTriggerObjects(authoredWorld, cameraShot.areaId)
+        });
+        this.playerMessagePresentation.update(dt, {
+            currentAreaId: cameraShot.areaId,
+            storyPresentation
         });
         this.audioBindings?.presentFrame({
             scene: this.createAudioContext(
@@ -540,6 +546,7 @@ export class MultiplayerGameApp {
             localPlayerId: this.authority.playerId,
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
+            playerMessagePresentation: this.playerMessagePresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ??
                 this.foundationFeedback ??

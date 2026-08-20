@@ -190,7 +190,7 @@ const area02 = defineArea({
     routePoints: [
         point("sector-01-02:route-entry", 448, -32),
         point("sector-01-02:route-a", 224, -192, { landmark: "A" }),
-        point("sector-01-02:route-airborne-c-window", -5, -350),
+        point("sector-01-02:route-airborne-c-window", -208, -350),
         point("sector-01-02:route-c", -320, -560, { landmark: "C" }),
         point("sector-01-02:route-p2", 64, -704),
         point("sector-01-02:route-p3", -160, -768),
@@ -233,8 +233,8 @@ const area02 = defineArea({
     gate: block02.gate,
     storyTriggers: ["lift-offline", "manual-access-only", "power-reduction-stage-2", "security-access-check"],
     cameraZones: [
-        cameraZone("lift-failure", -224, 0, 1.15, 0.79),
-        cameraZone("left-cross", -448, -224, 0.94, 0.7),
+        cameraZone("lift-failure", -224, 0, 1.15, 0.79, { horizontalPlayerRatio: 0.75 }),
+        cameraZone("left-cross", -448, -224, 0.94, 0.7, { horizontalPlayerRatio: 0.68 }),
         cameraZone("airborne-reattach", -640, -448, 0.9, 0.68),
         cameraZone("roof-wrap", -800, -640, 0.96, 0.71),
         cameraZone("exit", -960, -800, 1.1, 0.76)

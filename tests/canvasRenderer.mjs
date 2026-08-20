@@ -292,6 +292,46 @@ export function run() {
     });
     assert.deepEqual(textCalls, ["VERTICAL GRID", "CASCADE FAILURE"]);
     textCalls.length = 0;
+    renderer.drawPlayerMessagePresentation(
+        {
+            messageId: "sector-01-02:lift-reaction",
+            channel: "player-bark",
+            audience: "local-player",
+            speakerId: "player-local",
+            text: "…리프트도?",
+            visibleText: "…리프",
+            age: 0.3,
+            durationSeconds: 1.8
+        },
+        {
+            player: { id: "player-local", position: { x: 422, y: 260 }, collider: { radius: 18 } },
+            otherPlayers: [],
+            camera: { x: 0, y: 0, zoom: 1 },
+            mobileView: false
+        }
+    );
+    assert.deepEqual(textCalls, ["…리프"]);
+    textCalls.length = 0;
+    renderer.drawPlayerMessagePresentation(
+        {
+            messageId: "party-message-1",
+            channel: "party-chat",
+            audience: "party",
+            speakerId: "player-2",
+            text: "여기로 와",
+            visibleText: "여기로",
+            age: 0.3,
+            durationSeconds: 1.8
+        },
+        {
+            player: { id: "player-local", position: { x: 422, y: 260 }, collider: { radius: 18 } },
+            otherPlayers: [{ id: "player-2", position: { x: 520, y: 240 }, collider: { radius: 18 } }],
+            camera: { x: 0, y: 0, zoom: 1 },
+            mobileView: true
+        }
+    );
+    assert.deepEqual(textCalls, ["여기로"]);
+    textCalls.length = 0;
     borderCalls.length = 0;
     renderer.drawRewardSelectionOverlay({
         rewardType: "foundation",
