@@ -1,11 +1,14 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { readFile, rename, rm, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 import { validateAreaCatalogManifest } from "../../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
 import { canonicalizeAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaSpecV2.js";
 import { collectGeneratedOutputs } from "../../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
-import { validateAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
+import {
+    validateAreaSpecEditorMutation,
+    validateAreaSpecV2
+} from "../../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
 import { createStaticRequestHandler } from "../staticHandler.mjs";
 
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -58,6 +61,14 @@ async function readJson(filePath, code) {
     }
 }
 
+async function readText(filePath, code, message) {
+    try {
+        return await readFile(filePath, "utf8");
+    } catch {
+        throw error(code, message);
+    }
+}
+
 function assertStageIdentity(entry, spec) {
     if (spec?.stage?.legacyStageAlias !== entry.stageId || spec?.definition?.id !== entry.areaId) {
         throw error("stage-identity-invalid", "Map editor stage identity does not match the catalog manifest.");
@@ -76,44 +87,12 @@ function validateSpec(entry, spec) {
     return canonicalizeAreaSpecV2(spec);
 }
 
-async function stageTransaction(writes, failureInjector) {
-    const staged = [];
-    const committed = [];
-    try {
-        for (const [index, write] of writes.entries()) {
-            const token = `${process.pid}-${randomUUID()}`;
-            const temporaryPath = `${write.path}.map-editor-${token}.tmp`;
-            const backupPath = `${write.path}.map-editor-${token}.bak`;
-            await writeFile(temporaryPath, write.content, "utf8");
-            staged.push({ ...write, index, temporaryPath, backupPath, hadOriginal: existsSync(write.path) });
-            failureInjector?.({ phase: "stage", index, path: write.path });
-        }
-        for (const write of staged) {
-            if (write.hadOriginal) await rename(write.path, write.backupPath);
-            failureInjector?.({ phase: "commit", index: write.index, path: write.path });
-            await rename(write.temporaryPath, write.path);
-            committed.push(write);
-        }
-        await Promise.all(
-            staged.filter(({ hadOriginal }) => true).map(({ backupPath }) => rm(backupPath, { force: true }))
-        );
-    } catch (cause) {
-        for (const write of [...committed].reverse()) {
-            await rm(write.path, { force: true });
-            if (write.hadOriginal && existsSync(write.backupPath)) await rename(write.backupPath, write.path);
-        }
-        for (const write of staged.filter((entry) => !committed.includes(entry))) {
-            await rm(write.temporaryPath, { force: true });
-            if (write.hadOriginal && existsSync(write.backupPath)) await rename(write.backupPath, write.path);
-        }
-        throw error("apply-rolled-back", "Map editor Apply failed and restored the previous files.");
-    } finally {
-        await Promise.all(
-            staged.flatMap(({ temporaryPath, backupPath }) => [
-                rm(temporaryPath, { force: true }),
-                rm(backupPath, { force: true })
-            ])
-        );
+function assertEditableDraft(entry, baselineSpec, candidateSpec) {
+    const mutation = validateAreaSpecEditorMutation(baselineSpec, candidateSpec, { file: entry.sourcePath });
+    if (!mutation.valid) {
+        throw error("editor-read-only-changed", "Map editor draft modified a read-only stage subtree.", {
+            issues: mutation.issues
+        });
     }
 }
 
@@ -156,19 +135,21 @@ function requestRoute(url) {
 
 export async function createMapEditorAuthoringServer({
     projectRoot,
-    manifestPath = "docs/bsh/scenario/AREA-CATALOG.json",
-    failureInjector = null
+    manifestPath = "docs/bsh/scenario/AREA-CATALOG.json"
 } = {}) {
     const root = resolve(projectRoot ?? "");
     const manifestFile = safeProjectPath(root, manifestPath);
     const manifest = await readJson(manifestFile, "manifest-invalid-json");
     const manifestResult = validateAreaCatalogManifest(manifest, {
-        expectedStageIds: manifest.stageSources?.map(({ stageId }) => stageId) ?? [],
-        sourcePathExists: (relativePath) => existsSync(safeProjectPath(root, relativePath))
+        expectedStageIds: manifest.expectedStageIds ?? manifest.stageSources?.map(({ stageId }) => stageId) ?? [],
+        sourcePathExists: (relativePath) => existsSync(safeProjectPath(root, relativePath)),
+        requireGeneratedOutputs: true
     });
     if (!manifestResult.valid) {
         throw error("manifest-invalid", "Map editor manifest validation failed.", { issues: manifestResult.issues });
     }
+    const generatedCatalogPath = safeProjectPath(root, manifest.catalogOutputPath);
+    await readText(generatedCatalogPath, "generated-output-missing", "Map editor generated output could not be read.");
 
     const stages = new Map();
     for (const entry of manifest.stageSources) {
@@ -176,11 +157,18 @@ export async function createMapEditorAuthoringServer({
         const sourcePath = safeProjectPath(root, entry.sourcePath);
         const outputPath = safeProjectPath(root, entry.outputPath);
         const spec = validateSpec(entry, await readJson(sourcePath, "spec-invalid-json"));
+        const sourceContent = await readText(
+            sourcePath,
+            "spec-invalid-json",
+            "Map editor spec source could not be read."
+        );
+        await readText(outputPath, "generated-output-missing", "Map editor generated output could not be read.");
         stages.set(entry.stageId, {
             entry: Object.freeze({ ...entry }),
             sourcePath,
             outputPath,
             spec,
+            sourceHash: revisionFor(sourceContent),
             revision: 0
         });
     }
@@ -200,6 +188,42 @@ export async function createMapEditorAuthoringServer({
             spec: structuredClone(stage.spec),
             moduleUrl: `/${stage.entry.outputPath.replaceAll("\\", "/")}`,
             outputRevision: revisionFor(stableJson(stage.spec))
+        });
+    }
+
+    async function readStageSpecFromDisk(stage, code = "spec-invalid-json") {
+        return validateSpec(stage.entry, await readJson(stage.sourcePath, code));
+    }
+
+    async function latestStageValue(stage) {
+        const spec = await readStageSpecFromDisk(stage);
+        return Object.freeze({
+            stageId: stage.entry.stageId,
+            areaId: stage.entry.areaId,
+            name: spec.definition.name,
+            revision: stage.revision,
+            spec: structuredClone(spec),
+            moduleUrl: `/${stage.entry.outputPath.replaceAll("\\", "/")}`,
+            outputRevision: revisionFor(stableJson(spec))
+        });
+    }
+
+    async function assertSourceUnchanged(stage) {
+        const sourceContent = await readText(
+            stage.sourcePath,
+            "spec-invalid-json",
+            "Map editor spec source could not be read."
+        );
+        if (revisionFor(sourceContent) === stage.sourceHash) return;
+        throw error("filesystem-drift", "Map editor source changed on disk after this Draft was loaded.", {
+            issues: [
+                {
+                    stageId: stage.entry.stageId,
+                    kind: "source",
+                    path: stage.entry.sourcePath
+                }
+            ],
+            latest: await latestStageValue(stage).catch(() => null)
         });
     }
 
@@ -223,7 +247,9 @@ export async function createMapEditorAuthoringServer({
 
         async validateStage({ stageId, spec } = {}) {
             const stage = currentStage(stageId);
+            const baselineSpec = await readStageSpecFromDisk(stage);
             const canonical = validateSpec(stage.entry, spec);
+            assertEditableDraft(stage.entry, baselineSpec, canonical);
             return Object.freeze({ valid: true, issues: [], spec: structuredClone(canonical) });
         },
 
@@ -237,7 +263,9 @@ export async function createMapEditorAuthoringServer({
                     latest: stageValue(stage)
                 });
             }
+            const baselineSpec = stage.spec;
             const canonical = validateSpec(stage.entry, spec);
+            assertEditableDraft(stage.entry, baselineSpec, canonical);
             const specsByStageId = new Map(
                 [...stages.values()].map((candidate) => [
                     candidate.entry.stageId,
@@ -245,12 +273,18 @@ export async function createMapEditorAuthoringServer({
                 ])
             );
             const generated = collectGeneratedOutputs({ manifest, specsByStageId });
+            const sourceContent = stableJson(canonical);
             const writes = [
-                { path: stage.sourcePath, content: stableJson(canonical) },
-                ...generated.map(({ outputPath, content }) => ({ path: safeProjectPath(root, outputPath), content }))
+                { path: stage.sourcePath, content: sourceContent },
+                ...generated.map(({ outputPath, content }) => ({
+                    path: safeProjectPath(root, outputPath),
+                    content
+                }))
             ];
-            await stageTransaction(writes, failureInjector);
+            await assertSourceUnchanged(stage);
+            for (const write of writes) await writeFile(write.path, write.content, "utf8");
             stage.spec = canonical;
+            stage.sourceHash = revisionFor(sourceContent);
             stage.revision += 1;
             return stageValue(stage);
         }

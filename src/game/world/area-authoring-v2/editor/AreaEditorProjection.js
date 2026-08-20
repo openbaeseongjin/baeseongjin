@@ -1,3 +1,5 @@
+import { resolveObjectTriggerBounds } from "../../areas/AreaDefinition.js";
+
 function finitePoint(value) {
     return Number.isFinite(value?.x) && Number.isFinite(value?.y);
 }
@@ -25,6 +27,12 @@ function entity({ domain, id, kind, point, path, bounds = null, sourceId = null 
 
 function isEnemyObject(object) {
     return Boolean(object?.enemyType || object?.enemySelection || object?.kind === "sentry");
+}
+
+function enemyActivationBounds(object) {
+    if (!finitePoint(object?.position)) return null;
+    if (object.activationSpec) return resolveObjectTriggerBounds(object.position, object.activationSpec);
+    return object.activation ?? null;
 }
 
 function addPointEntities(result, entries, domain, kind, path) {
@@ -102,7 +110,8 @@ export function collectEditorEntities(spec) {
                     id: object.id,
                     kind: "enemy",
                     point: object.position,
-                    path: `/definition/objects/${index}`
+                    path: `/definition/objects/${index}`,
+                    bounds: enemyActivationBounds(object)
                 })
             );
         }

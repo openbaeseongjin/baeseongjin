@@ -2,6 +2,10 @@
 
 Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 
+## AREA-SPEC v2 live cutover — 2026-08-20
+
+`docs/bsh/scenario/AREA-CATALOG.json`은 `1-1`을 `source: generated`로 선택한다. 최신 Runtime route와 Direction migration 뒤 빈 `storyTriggers`를 `AREA-SPEC.v2.json`에 다시 흡수했고, generated Stage와 legacy provider의 Area definition deep parity를 확인했다. 일반 seamless 싱글·멀티 Runtime은 `Sector01AreaCatalog` 합성 facade를 통해 이 generated Stage를 사용하며 geometry·objective·Camera 의미는 변경하지 않았다.
+
 ## MAP-PREVIEW primary route sync — 2026-08-20
 
 `MAP-PREVIEW.html`의 ENTRY→A→P1→P2→Structural Grip→C→P3→Final Deck endpoint 전체를 Runtime `routePoints`와 seamless `world.route`에 반영했다. Collision 좌표는 이미 REV8과 일치해 변경하지 않았다.

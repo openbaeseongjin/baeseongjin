@@ -201,15 +201,35 @@ const SPEC = {
         "y": -192
       },
       {
+        "id": "sector-01-01:route-p1",
+        "x": 224,
+        "y": -320
+      },
+      {
+        "id": "sector-01-01:route-p2",
+        "x": -144,
+        "y": -560
+      },
+      {
+        "id": "sector-01-01:route-structural-grip",
+        "x": 304,
+        "y": -592
+      },
+      {
         "id": "sector-01-01:route-c",
         "landmark": "C",
         "x": -96,
         "y": -736
       },
       {
-        "id": "sector-01-01:route-exit",
-        "x": 416,
-        "y": -979
+        "id": "sector-01-01:route-p3",
+        "x": 256,
+        "y": -864
+      },
+      {
+        "id": "sector-01-01:route-final-deck",
+        "x": 320,
+        "y": -947
       }
     ],
     "routes": [
@@ -219,11 +239,7 @@ const SPEC = {
     ],
     "scannerGroups": [],
     "sectorId": "sector-01",
-    "storyTriggers": [
-      "lockdown",
-      "terminal-read",
-      "gate-open"
-    ],
+    "storyTriggers": [],
     "subtitle": "VERTICAL GRID CASCADE FAILURE",
     "surfaces": [
       {

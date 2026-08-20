@@ -530,9 +530,14 @@ const SPEC = {
         "y": -704
       },
       {
-        "id": "sector-01-07:route-left-shadow",
+        "id": "sector-01-07:route-middle-turn",
         "x": -704,
-        "y": -832
+        "y": -768
+      },
+      {
+        "id": "sector-01-07:route-upper-turn",
+        "x": -704,
+        "y": -928
       },
       {
         "id": "sector-01-07:route-g",
@@ -556,9 +561,9 @@ const SPEC = {
         "y": -1216
       },
       {
-        "id": "sector-01-07:route-exit",
-        "x": 1264,
-        "y": -1376
+        "id": "sector-01-07:route-final-deck",
+        "x": 1184,
+        "y": -1344
       }
     ],
     "routes": [

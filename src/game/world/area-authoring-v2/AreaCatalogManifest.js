@@ -1,4 +1,5 @@
 export const AREA_CATALOG_MANIFEST_V2 = "area-catalog-v2";
+const GENERATED_OUTPUT_ROOT = "src/game/world/areas/generated/";
 
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
@@ -33,6 +34,12 @@ function validPath(value) {
     return typeof value === "string" && value.length > 0 && !value.startsWith("/") && !/^[A-Za-z]:[\\/]/.test(value);
 }
 
+function validGeneratedPath(value) {
+    return (
+        validPath(value) && value.startsWith(GENERATED_OUTPUT_ROOT) && !value.includes("..") && value.endsWith(".js")
+    );
+}
+
 export function validateAreaCatalogManifest(
     manifest,
     { expectedStageIds = [], sourcePathExists = null, requireGeneratedOutputs = false } = {}
@@ -44,6 +51,11 @@ export function validateAreaCatalogManifest(
     }
     if (manifest.schemaVersion !== AREA_CATALOG_MANIFEST_V2) {
         issue(issues, "manifest-schema-version", { schemaVersion: manifest.schemaVersion ?? null });
+    }
+    if (!validGeneratedPath(manifest.catalogOutputPath)) {
+        issue(issues, "manifest-catalog-output-path-invalid", {
+            catalogOutputPath: manifest.catalogOutputPath ?? null
+        });
     }
     if (typeof manifest.catalogId !== "string" || !/^sector-\d{2}$/.test(manifest.catalogId)) {
         issue(issues, "manifest-catalog-id");
