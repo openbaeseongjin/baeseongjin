@@ -358,13 +358,13 @@ git diff --check
 
 Expected: every focused test prints PASS, generator is current, formatter and whitespace checks pass.
 
-- [ ] **Step 4: Perform direct browser verification**
+- [x] **Step 4: Perform direct browser verification**
 
-Run: node scripts/map-editor/serveMapEditor.mjs --port=4178. Open http://127.0.0.1:4178/map-editor/, select 1-7, drag an Anchor, Validate, Apply, then Preview. Reload Preview twice and close it.
+Run: node scripts/map-editor/serveMapEditor.mjs --port=4178. Open http://127.0.0.1:4178/map-editor/, select 1-7, move an Anchor through the Canvas or Inspector, Validate, Apply, then Preview. Reload Preview twice and close it.
 
 Expected: selection/Anchor are Cyan, dirty/wind/errors are Amber, Apply persists only the generated v2 stage, Preview starts a new one-Area single-player run, and the normal game/multiplayer remain unchanged.
 
-> **Environment note (2026-08-20):** The available Codex in-app browser blocked navigation to the loopback server with `net::ERR_BLOCKED_BY_CLIENT`, so no visual browser PASS is claimed. The local HTTP checks verified the editor shell, preview shell, generated module route and no-write Validate endpoint. A developer with a normal local browser must perform the listed drag → Validate → Apply → Preview interaction before treating this lane as visually verified.
+> **Verification note (2026-08-20):** A direct browser pass loaded `1-7`, selected `anchor-a`, changed and validated its Inspector position, applied the generated-only transaction, and opened a fresh one-Area single-player Preview. The original coordinate was then restored and applied, leaving no semantic source change. The Canvas selection state was Cyan (`#66e6ff`) and the Draft/Wind palette reserved Amber (`#f4ae4b`).
 
 - [x] **Step 5: Update the handoff and make the final lane commit**
 

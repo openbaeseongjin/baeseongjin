@@ -24,6 +24,16 @@ npm run validate:audio-assets
 
 서버를 시작한 뒤 `http://127.0.0.1:4173`을 연다.
 
+### 맵 에디터
+
+생성된 Stage `1-1`과 `1-7`은 별도 로컬 저작 서버에서 편집한다.
+
+```powershell
+node scripts/map-editor/serveMapEditor.mjs --port=4178
+```
+
+그 다음 `http://127.0.0.1:4178/map-editor/`을 열어 Draft → Validate → Apply → Preview 순서로 사용한다. 범위와 안전 경계는 [맵 에디터 사용 가이드](docs/map-editor.md)를 따른다.
+
 ## 프로토타입 조작
 
 - 이동: `A`/`D` 또는 좌우 방향키
