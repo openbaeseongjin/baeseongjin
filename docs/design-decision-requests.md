@@ -2,16 +2,14 @@
 
 이 문서는 개발 구현이 준비되어 있고 기획 결정이 필요한 항목을 우선순위 순으로 정리하며, 현재 확정된 답변을 개발 가능한 계약으로 기록한다.
 
-> **기획 계약 확정 / Runtime 구현 대기**
-> 검토 기준 `main`: `bd5be25b900b65f3ab42eeb4ee5ff45f2052a06b`
-> 2026-08-16 Full Game Audit 및 최신 Runtime 재검토 반영.
+> **기획 계약 확정 / Runtime 부분 구현**
+> 현재 구현 상태와 검토 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 
 - 상태 범례: `요청됨` → `답변됨` → `구현 완료`, 또는 `보류`
 - 상세 Stage: **48/48**, `1-1 → 6-8`
 - 정확한 Stage별 Runtime 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)를 따른다.
 - 전체 수치·상태·UI 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다.
-- 구현 전 선행 정렬 범위는 [`p0-alignment-patch-package.md`](./p0-alignment-patch-package.md)를 따른다.
-- 과거 Foundation/Specialization 설계는 [`augment-v1.md`](./augment-v1.md)의 22장 generic Augment 계약으로 대체됐다. 이 문서와 resolution package의 Specialization 세부 본문은 이력으로만 읽고 현재 구현 입력으로 사용하지 않는다.
+- 과거 Foundation/Specialization 설계는 [`augment-v1.md`](./augment-v1.md)의 22장 generic Augment 계약으로 대체됐으며 상세 legacy 본문은 제거했다.
 
 ## 현재 구현 기준
 
@@ -21,7 +19,7 @@
 | 시나리오 | Sector01~06 상세 Stage 48/48 완료 |
 | 시스템 | Rope core, 22장 generic Augment v1, Sentry/Patrol, Wind, Access Scan Field, Cutter Fire, 2인 멀티 구현 |
 | 성장 | 1-4·2-3·3-5 explicit Node의 Player별 결정적 3장 offer·최대 6장 loadout·선택/효과/저장/복원 구현; 고정 Specialization tier는 대체됨 |
-| Boss | 공통 Timer/Collapse 흐름 계약 존재; 개별 Boss는 미구현 |
+| Boss | Boss01 Has-A core와 snapshot 구현; physical Arena·피해/사망·`2-1` 전환 대기, Sector02~05 상세 미확정 |
 | 프레젠테이션 | Sector01~04 Camera/Story 일부/대부분 반영; 정식 Art/Audio 교체 대기 |
 | 검증 | 전체 48-Stage 실제 브라우저/기기 플레이테스트 없음 |
 
@@ -34,110 +32,10 @@
 
 ---
 
-## P1. Specialization 성장 규칙 (2-3) — AUTHORING SNAPSHOT / SUPERSEDED
+## P1. 성장 규칙 — generic Augment v1로 대체 완료
 
-- **상태**: `대체됨 — DO NOT IMPLEMENT`
-- **현재 구현**: 2-3 stable Node는 두 번째 generic Augment offer source다. `requiresFoundation`/고정 pair pool/별도 Specialization 상태를 복구하지 않는다.
-
-> 아래 P1 세부 본문은 대체된 과거 결정 기록이다. 현재 구현 계약은 `docs/augment-v1.md`와 `SESSION-HANDOFF.md`가 소유한다.
-
-### 결정
-
-Foundation은 유지하고, 2-3에서 **현재 Foundation에 종속된 2개 Specialization 중 1개**를 선택한다.
-
-```text
-IMPULSE COIL
-→ OVERDRIVE COIL
-or
-→ INERTIA COUPLER
-
-RELAY LINK
-→ CASCADE LINK
-or
-→ WIDE-BAND LINK
-
-SHEAR CURRENT
-→ DEEP CURRENT
-or
-→ BACKFEED LOOP
-```
-
-총 6종.
-
-### 효과 — REV 1 Prototype
-
-| Foundation | Specialization | Prototype Effect |
-|---|---|---|
-| Impulse | OVERDRIVE COIL | qualifying Impulse release bonus `+180 → +260` |
-| Impulse | INERTIA COUPLER | qualifying release effective angular transfer `0.55 → 0.72` |
-| Relay | CASCADE LINK | 첫 assisted Relay Attach 성공 시 Relay Window를 **1회만** 다시 연다 |
-| Relay | WIDE-BAND LINK | Relay window `0.65→0.85`, attach buffer `0.16→0.20`, aim tolerance `108→124` |
-| Shear | DEEP CURRENT | Shear damage `20→35` |
-| Shear | BACKFEED LOOP | Shear hit 성공 시 `0.45s` window 동안 다음 Hook fire 1회가 남은 reload를 무시 |
-
-### 선택 Pool
-
-REV 1:
-
-```text
-selected Foundation
-→ fixed 2-card pair
-```
-
-Random 없음.
-
-향후 3개 이상 후보가 생기면:
-
-```text
-2-of-N random pool
-```
-
-을 재검토한다.
-
-### 획득·손실
-
-```text
-death              KEEP
-checkpoint respawn KEEP
-area transition    KEEP
-sector transition  KEEP
-boss retry         KEEP
-new run / run reset CLEAR
-```
-
-Respec 없음.
-
-Foundation ID와 Specialization ID는 별도 상태로 저장한다.
-
-### UI
-
-현재 Foundation choice primitive를 재사용한다.
-
-```text
-SPECIALIZATION AVAILABLE
-
-FOUNDATION
-[FOUNDATION NAME]
-```
-
-2 Cards.
-
-Confirm:
-
-```text
-SPECIALIZATION ACCEPTED
-[SPECIALIZATION NAME]
-ONLINE
-```
-
-새 Gameplay Input 없음.
-
-### Geometry Contract
-
-어떤 Specialization도:
-- mandatory route key가 아님
-- Hook reach를 늘리지 않음
-- Stage 통과 필수조건이 아님
+- 현재 계약은 [`augment-v1.md`](./augment-v1.md)가 단독 소유한다.
+- 1-4·2-3·3-5 explicit Node는 Player별 결정적 3장 offer를 제공하며 고정 Foundation/Specialization tier, pair pool, 별도 선택 상태를 복구하지 않는다.
 
 ---
 
@@ -534,7 +432,7 @@ P0 정렬 이후:
 
 - Boss Flow common primitive
 - Boss01 prototype
-- `960초 / Gate +45초 / cap 960초 / collapse 80px/s` Timer/Purge Prototype topology mapping
+- `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s` topology mapping
 - Sector05/06 graybox authoring
 - Final Security mock
 - Boarding / Ending mock

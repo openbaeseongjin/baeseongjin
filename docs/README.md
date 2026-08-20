@@ -1,6 +1,6 @@
 # 프로젝트 문서 인덱스
 
-이 문서는 `docs/` 아래 문서의 역할과 읽는 순서를 안내한다. 같은 주제를 다루는 문서가 있으면 아래에 표시한 **현재 기준 문서**가 우선한다. 작업을 시작할 때는 저장소 루트의 [`SESSION-HANDOFF.md`](../SESSION-HANDOFF.md)에서 현재 상태와 다음 작업을 먼저 확인한다.
+이 문서는 `docs/` 아래 문서의 역할과 읽는 순서를 안내한다. 같은 주제를 다루는 문서가 있으면 아래에 표시한 **현재 기준 문서**가 우선한다. 저장소 루트의 [`SESSION-HANDOFF.md`](../SESSION-HANDOFF.md)는 아직 기준 문서에 흡수되지 않은 항목만 제공하며, 현재 구현 순서와 시나리오 상태는 아래 기준 문서에서 직접 확인한다.
 
 ## 빠른 시작
 
@@ -24,11 +24,9 @@
 | [`augment-v1.md`](./augment-v1.md) | 0.26.0 증강 22장·선택·Action·멀티 피해 계약 |
 | [`enemy-density-composition.md`](./enemy-density-composition.md) | 0.32.0 Sector 01~03 authored slot 밀도·결정적 적 조합 계약 |
 | [`scenario-development-integration.md`](./scenario-development-integration.md) | 상세 Stage 목록, authored Runtime 연결 상태, 차단 요소와 마지막 확인 근거 |
-| [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md) | 하나의 연속 월드 안에서 Sector 01 진행 영역을 연결하는 기획·구현 계획 |
 | [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 `60/+10/cap60` Timer·Purge 240px/s·topology HOLD·보스 분리 기준 |
 | [`design-decision-requests.md`](./design-decision-requests.md) | P1~P5 기획 결정의 확정 답변과 구현 상태 추적 |
-| [`design-decision-resolution-package.md`](./design-decision-resolution-package.md) | Specialization·Boss·Timer·NPC·Ending의 구현 가능한 통합 기획 계약 |
-| [`p0-alignment-patch-package.md`](./p0-alignment-patch-package.md) | 최신 Runtime·문서 불일치의 P0 정렬 범위·순서·검증 계약 |
+| [`design-decision-resolution-package.md`](./design-decision-resolution-package.md) | Boss·Timer·NPC·Ending의 구현 가능한 통합 기획 계약 |
 | [`decision-history.md`](./decision-history.md) | 대체되거나 완료된 결정 이력 |
 
 ## 아키텍처와 개발 규칙
@@ -53,7 +51,6 @@
 | 문서 | 역할 |
 | --- | --- |
 | [`multiplayer-synchronization.md`](./multiplayer-synchronization.md) | **현재 기준.** 멀티 권한과 동기화 계약 |
-| [`client-first-network-feel.md`](./client-first-network-feel.md) | 클라이언트 우선 구조의 검증 관점과 폐기한 이전 전제 |
 | [`two-device-playtest-protocol.md`](./two-device-playtest-protocol.md) | 실제 두 기기 검증 절차 |
 | [`multiplayer-sharing.md`](./multiplayer-sharing.md) | 게임 서버 공유와 Pages 배포 절차 |
 

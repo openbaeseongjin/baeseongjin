@@ -67,7 +67,7 @@ Preserve:
 - cover ends LOS
 - Carrier + 2 guards
 - Access Module A
-- 3-of-3 Sector transit rule (0.41.0 `seamless-sector-runtime-v5`, supersedes this doc's original 2-of-3 text)
+- 3-of-3 Sector transit rule (current `seamless-sector-runtime-v9`)
 
 ## Runtime implementation note
 

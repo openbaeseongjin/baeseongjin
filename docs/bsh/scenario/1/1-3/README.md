@@ -77,7 +77,7 @@ VERIFIED at baseline:
 - Cover LOS behavior
 - 6 Camera zones
 - Story sequence
-- 2-of-3 Sector Access Module rule
+- 3-of-3 Sector Access Module rule
 
 Old Main B/D documentation is retired.
 REV8 uses:
@@ -222,7 +222,7 @@ Why:
 - highest pressure around Key
 - architecture + firing angles make the cost, not HP/count alone
 
-Carrier defeat is not mandatory for Stage exit because Sector uses 2-of-3 modules.
+Carrier defeat is not mandatory for this Stage exit, but all three Sector 01 Carriers are required for the Sector transit device.
 
 ## 8. Access return
 

@@ -25,7 +25,7 @@ A COMPLETE → B COMPLETE → C SUSPENDED → PRIORITY ACCESS ACTIVE.
 
 ## Seamless Access override — 2026-08-19
 
-- 0.43.2 `seamless-sector-runtime-v8`에서 compiled 2-8→3-1 transit device는 Sector 02의 2-2·2-5·2-7 Carrier 3/3과 source objective를 요구한다. 같은 collision/visual 가로 segment가 source bounds 양끝에서 기본 Grapple budget 600px만큼 연장돼 중앙과 좌우 우회를 막고, 3/3 뒤 barrier만 제거한다. 미수집 Carrier는 거리순 최대 3개를 화면 밖 edge arrow 또는 화면 안 diamond로 안내한다. 아래 legacy `nextAreaId:null` 기록은 standalone authoring snapshot이며 기본 seamless Runtime의 전환 권위를 대체하지 않는다.
+- 0.46.0 `seamless-sector-runtime-v9`에서 compiled 2-8→3-1 transit device는 Sector 02의 2-2·2-5·2-7 Carrier 3/3과 source objective를 요구한다. 같은 collision/visual 가로 segment가 source bounds 양끝에서 기본 Grapple budget 600px만큼 연장돼 중앙과 좌우 우회를 막고, 3/3 뒤 barrier만 제거한다. 미수집 Carrier는 거리순 최대 3개를 화면 밖 edge arrow 또는 화면 안 diamond로 안내한다. 아래 legacy `nextAreaId:null` 기록은 standalone authoring snapshot이며 기본 seamless Runtime의 전환 권위를 대체하지 않는다.
 
 ## REV8 delta
 | Item | Current | REV8 |

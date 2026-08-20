@@ -84,7 +84,7 @@
 - 맥락: 저작 영역을 하나의 연속 월드로 조립하면서 별도 scene 전환 없이 방·Shaft·Atrium의 연결감을 유지하려 했다.
 - 결정: 열린 Gate는 공용 진행 상태만 다음 영역으로 바꾸고 플레이어 위치와 일시 물리 상태는 그대로 두며, 텔레포트를 사용하지 않는다.
 - 영향: Gate 뒤 지형을 물리적으로 계속 이동해야 했고 로프·속도·회전 상태도 영역 경계를 넘었다.
-- 대체: 열린 문을 같은 월드 안의 지속 단방향 포탈로 바꾼다. 첫 진입자가 공용 진행을 한 번 전진시키고 자기만 이동하며, 뒤의 플레이어는 같은 문에 직접 들어온 시점에 각각 이동한다. 진입자별로 로프·이동·회전·접지·입력 버퍼·일시 전투 상태를 초기화하되 진행 상태는 유지한다. 현재 기준은 `docs/sector-01-world-structure-plan.md`와 `docs/multiplayer-synchronization.md`를 따른다.
+- 대체: per-Area 문·포탈 전이를 제거하고 Player 좌표에서 Stage를 파생하는 seamless landmark와 개인 savepoint 진행으로 바꿨다. 현재 기준은 `docs/architecture.md`, `docs/multiplayer-synchronization.md`, `docs/scenario-development-integration.md`를 따른다.
 - 검증 상태: #432의 싱글·멀티 회귀와 원격 불연속 보간 검증으로 대체 계약을 확인한다.
 
 ## [L1] 2026-08-14 — 완전 절차 생성되는 48단계 대형 월드를 목표 제품 구조로 사용한다
@@ -92,7 +92,7 @@
 - 맥락: 첫 프로토타입에서 로프 사거리·수직 상승·결정성과 멀티플레이 월드 재현을 빠르게 검증해야 했다.
 - 결정: 같은 시드가 같은 48단계 수직 경로와 적 배치를 만드는 하나의 절차 생성 월드를 목표 제품 구조로 두고, 고정 월드는 초기 범위에서 제외했다.
 - 영향: `WorldGenerator`, 시드/revision 동기화, 1,000개 시드 상승 경로 validator와 8레벨 간격 체크포인트를 먼저 구현했다.
-- 대체: 한 런은 하나의 붕괴 도시 월드에서 계속되지만, 48개 맵은 별도 월드가 아니라 저자가 정한 입구·완료 조건·명시적 출구를 가진 진행 영역으로 사용한다. 현재 절차 생성 월드는 코어 검증과 마이그레이션의 구현 기준선으로 유지하며, 영역 내부 랜덤 변형 범위는 별도 기획으로 확정한다. 현재 기준은 `docs/game-hackathon-planning.md`와 `docs/sector-01-world-structure-plan.md`를 따른다.
+- 대체: 한 런은 하나의 붕괴 도시 월드에서 계속되며, 48개 Stage는 별도 월드나 물리 Gate가 아니라 authored landmark·objective·encounter 단위로 사용한다. 현재 기준은 `docs/game-hackathon-planning.md`, `docs/architecture.md`, `docs/scenario-development-integration.md`를 따른다.
 - 검증 상태: 제품 결정과 구현 계획은 문서에 반영했으며 저작 영역 조립·Gate 진행·타이머 동작은 아직 구현하지 않았다.
 
 ## [L2] 2026-08-13 — 초기 프로토타입은 Canvas 플랫 도형을 기본으로 사용한다
@@ -172,3 +172,10 @@
 - 대체: 낙하 피해는 같은 속도 구간과 비례 구조를 유지하되 최대 체력 `0~50%`로 절반 완화한다. Rope 몸체 충돌은 `620px/s` 최소 조건을 유지하면서 `1000px/s → 100 피해`의 전체 속력 비례식으로 계산하고, 감전 로프는 고정 100 DPS로 상향한다.
 - 영향: 충돌 폭발은 Rope 몸체 충돌의 100%/50% 계약을 지키기 위해 같은 속력 기반 피해를 사용하며 augment-impact v2가 `impactSpeed`를 운반해 서버에서 공식 피해를 재계산한다. Action·Signature의 독립 기준 피해 25는 유지한다.
 - 현재 기준: `docs/game-hackathon-planning.md`, `docs/augment-v1.md`, `docs/architecture.md`, `docs/multiplayer-synchronization.md`.
+
+## [L1] 2026-08-20 · 완료된 legacy 문서를 현재 기준에서 제거한다
+
+- 이전: `sector-01-world-structure-plan.md`, `p0-alignment-patch-package.md`, `client-first-network-feel.md`가 완료·대체된 뒤에도 문서 인덱스에 남아 현재 계약처럼 참조됐다. AREA-SPEC 표준과 통합 현황에는 intra-Sector connector를 objective로 잠그는 설명도 남아 있었다.
+- 대체: 과거 Area/Gate migration 계획과 완료된 P0 patch package는 이력 요약만 남기고 삭제한다. 멀티 권위는 `multiplayer-synchronization.md`, 월드 구조는 `architecture.md`, 현재 통합 상태는 `scenario-development-integration.md`, AREA-SPEC 저작 규칙은 `AREA-SPEC-AUTHORING-STANDARD.md`가 각각 단독 소유한다.
+- 영향: 같은 Sector의 `sector-seam`은 정적이며 `progression.requiredObjectiveIds`는 논리 authoring metadata일 뿐 물리 surface 생성·제거 지시가 아니다. Sector 간 `access-transit-lock`만 동적 blocker의 예외다.
+- 검증 상태: 0.46.0 `seamless-sector-runtime-v9`에서 intra-Sector 동적 surface를 21개에서 0개로 제거했고, Sector transit barrier 4개만 진행 상태에 반응함을 재현 명령으로 확인했다.

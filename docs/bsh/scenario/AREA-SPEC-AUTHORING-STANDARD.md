@@ -1,10 +1,10 @@
 # AREA-SPEC AUTHORING STANDARD
 
-*IMPLEMENTATION CONTRACT LAYER · REV 1.1*
+*IMPLEMENTATION CONTRACT LAYER · REV 1.2*
 
 이 문서는 `docs/bsh/scenario/<sector>/<stage>/AREA-SPEC.json`의 목적, 스키마, 검증 규칙을 정의한다. Stage 문서를 새로 쓰거나 기존 Stage에 `AREA-SPEC.json`을 추가할 때 이 문서를 먼저 확인한다.
 
-REV 1.1 변경 요약: `main`이 `#625`에서 Seamless Sector Runtime으로 전환된 뒤 재검토했다. §0에 현재 Runtime 구조를 명시하고, `stage` 식별자를 legacy Area 소스 ID와 최종 Runtime 정체성을 혼동하지 않도록 재정의했으며(§2-1), `exitBlock`을 legacy source geometry(`sourceExit`)와 실제 Runtime 진행 권위(`progression`)로 분리했다(§2-2). `route.optional`/`route.forbiddenBypasses`의 정확한 shape을 확정하고(§10), `route.runtimeLandmarks`가 검증을 우회하던 참조 버그를 수정했다(§10.1). `runtimeDependencies.required`를 추가했다(§7.1). Surface bounds 검증을 중심점이 아닌 실제 extent 기준으로 강화했다(§4.1).
+REV 1.2 변경 요약: 같은 Sector 안의 Stage 지형은 Run 시작부터 정적이라는 현재 계약에 맞춰 `progression`을 논리 objective 관계로 한정했다. `requiredObjectiveIds`와 호환 mode 이름은 Stage surface를 추가·제거하거나 세로 barrier를 만드는 지시가 아니다. 물리 잠금은 Sector 간 `access-transit-lock`만 소유한다. REV 1.1에서 확정한 Local ID·Route shape·Runtime dependency·extent 검증 규칙은 유지한다.
 
 ## 0. 현재 Runtime 구조 — 반드시 먼저 이해할 것
 
@@ -31,8 +31,9 @@ AREA-SPEC Stage (기획 확정값)
 핵심 사실:
 
 - `SectorXXAreaCatalog.js`의 개별 Area(`defineArea()`)는 여전히 **geometry/system의 source**로 쓰인다. 이 계층은 없어지지 않았다.
-- 하지만 실제 진행 권위(진행 순서, Gate, 잠금)는 legacy per-Area Gate portal이 아니라 **Seamless Sector의 landmark/connector/route-lock**이다.
-- Legacy Area의 `gate.requiredObjectiveIds`는 Seamless Runtime에서 두 landmark를 잇는 물리 connector surface를 잠그는 **routeLock**으로 변환된다(`requiredRouteId` on the connector surface). Per-Area Gate portal 자체는 최종 Runtime output에 없다(`gates: []`).
+- 실제 진행 권위는 legacy per-Area Gate portal이 아니라 **Seamless Sector의 landmark·objective·Sector transition**에 있다. 같은 Sector의 Stage 이동은 objective와 독립된 정적 geometry를 사용한다.
+- Legacy Area의 `gate.requiredObjectiveIds`는 Stage 저작 의미와 objective prerequisite를 보존하는 호환 입력이다. 이를 intra-Sector connector의 `requiredRouteId` 또는 `blockedByRouteId`로 변환해 지형을 생성·제거하지 않는다. Per-Area Gate portal 자체는 최종 Runtime output에 없다(`gates: []`).
+- Sector 간 이동만 `access-transit-lock`이 Access Module 3-of-3과 source objective를 요구하며, visual과 collider를 같은 `barrierSegments`에서 파생한다.
 - Canonical landmark ID(예: `sector-01:landmark:01`)는 `stage.sector`/`stage.stage` 순서에서 파생되며, **JSON에 수동으로 중복 기록하지 않는다.**
 
 이 구조를 알아야 `stage`/`sourceExit`/`progression` 필드가 왜 지금 모양인지 이해할 수 있다(§2-1, §2-2).
@@ -116,9 +117,9 @@ acceptanceTests
 ```
 
 - `sourceExit` — **legacy source geometry**. `AreaDefinition.exitBlock()` helper가 필요로 하는 최소 입력(데크 위치/폭, panel objective)이다. `deck`, `exit`, `routeExit`, `panel`, `gateVisual`, `reachBounds`, `gate` 같은 파생 오브젝트를 만드는 데 쓰이지만, 이 자체가 Runtime 진행 권위는 아니다. `nextAreaId`는 여기 없다 — Stage 순서에 따라 catalog 배선(`connectArea()`류)이 구조적으로 결정하는 것이지 Stage 저작자가 선언하는 값이 아니다.
-- `progression` — **실제 Seamless Sector Runtime 진행 권위**. Legacy Gate의 `requiredObjectiveIds`가 두 landmark 사이 connector를 잠그는 routeLock으로 변환되는 계약을 그대로 표현한다.
+- `progression` — Stage가 다음 Stage와 맺는 **논리 objective 관계와 authoring handoff**다. 같은 Sector의 connector collision을 잠그거나 surface를 동적으로 생성·제거하는 물리 권위가 아니다.
   - `targetStageAlias` — 다음 Stage의 `legacyStageAlias`(예: `"1-2"`). Sector/Post-Sector Boss 경계처럼 실제 content boundary일 때만 `null`.
-  - `mode` — 현재 KNOWN 값은 `objective-gated-connector` 하나뿐이다.
+  - `mode` — 현재 KNOWN 값 `objective-gated-connector`는 기존 JSON·validator 호환 이름이다. 이름과 달리 intra-Sector 물리 connector를 gate하지 않는다.
   - `requiredObjectiveIds` — `objectives[].id`를 참조하는 Local ID 배열.
 
 이 분리의 목적은 "legacy source geometry"와 "실제 Seamless Runtime 진행"을 혼동하지 않는 것이다. per-Area Gate portal은 기본 진행 경계가 아니다(§0).
@@ -183,7 +184,7 @@ oneWay, renderable, collision, coordinateAnchor, presentationId
 | enemy preset | `patrol-drone-t1` | `enemyType: "patrol-drone-t1"` | — |
 | scanner profile | `sector03-default` | `SCANNER_CYCLE` (`available 1.5 / warning 0.6 / locked 1.1 / reset 0.3`) | — |
 | stage runtime model | `seamless-sector-landmark-v1` | `LegacyAreaSeamlessSectorRuntime.js` compiler | — |
-| progression mode | `objective-gated-connector` | Gate `requiredObjectiveIds` → connector `routeLock` | — |
+| progression mode | `objective-gated-connector` | 다음 Stage objective 관계를 보존하는 호환 authoring metadata | — |
 
 Stage가 정말 baseline override가 필요하면, 해당 Runtime API가 실제로 override를 지원하는지 먼저 확인하고 explicit override 필드를 추가한다(임의 추가 금지).
 
@@ -285,7 +286,7 @@ REV 1.0 검증기는 `route.runtimeLandmarks`에 적힌 id를 검증 없이 "참
 }
 ```
 
-REV 1.1부터는 `runtimeLandmarks` 자신도 §3 base referencable set(실제 `entry`/`surfaces`/`grappleTargets`/`enemies`/`"exit"`)에 존재하는 id만 참조할 수 있다. 존재하지 않는 id는 `route-runtime-landmark-unknown`으로 FAIL한다. Regression test: [`tests/areaSpecValidator.mjs`](../../../tests/areaSpecValidator.mjs).
+REV 1.1부터는 `runtimeLandmarks` 자신도 §3 base referencable set(실제 `entry`/`surfaces`/`grappleTargets`/`enemies`/`"exit"`)에 존재하는 id만 참조할 수 있다. 존재하지 않는 id는 `route-runtime-landmark-unknown`으로 FAIL한다.
 
 ## 11. Acceptance Tests
 
@@ -315,7 +316,7 @@ Grapple target + grapple-landmark를 두 번 기록하지 않는다 (§5).
 exitBlock 파생 오브젝트(deck/exit/panel/gate 등)를 중복 기록하지 않는다 (§5).
 기획 storyTriggers를 Runtime presentation으로 착각하지 않는다 (§8).
 stage.sourceAreaId를 최종 Runtime landmark 정체성처럼 설명하지 않는다 (§0, §2-1).
-sourceExit(legacy source geometry)를 Runtime 진행 권위처럼 설명하지 않는다 (§2-2) — progression이 진행 권위다.
+sourceExit(legacy source geometry)를 Runtime 진행 권위처럼 설명하지 않는다 (§2-2). progression도 intra-Sector 물리 잠금 권위가 아니다.
 Canonical landmark ID를 JSON에 수동으로 중복 기록하지 않는다 (§2-1) — sector/stage 순서에서 파생한다.
 ```
 
