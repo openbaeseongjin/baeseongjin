@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 5e931d26441cf34efabfee36f8cbef54556ef74e658eb0355e86667ad97cfa2e
-authored-area-sha256: e5a2d8527d5846666596666bf456de80955eee74cdc7fc47cd11f256943308a6
+scenario-source-sha256: 936dda6405b3d0baccce71d9b10e0c71e2a452adc6b6ae22d59c19410249c0c3
+authored-area-sha256: c114b77a34ee4166fa2ca765c4449bac308af4ece1b2b09c6eea7823b59f2886
 authored-sector-sha256: 0ba1ad8cbc7e5b1bfaa345a8cd14faabd9ee5e4195c9b97803afec365bccbff2
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: d588aa041a350cab198cd187d8dccbe3b3a244dd
+reviewed-upstream: d39cbb49d3d8247caf2542393994704292dd5002
 -->
 
 ## 상태를 읽는 법
@@ -181,6 +181,8 @@ reviewed-upstream: d588aa041a350cab198cd187d8dccbe3b3a244dd
 95. 0.43.3은 사용자의 최신 정정에 따라 Sector 01 `MAP-PREVIEW.html`을 핵심 맵 flow 권위로 승격했다. 1-1~1-4의 A/C 중심 축약 route와 1-5~1-8의 어긋난 final deck/checkpoint route를 각 HTML 첫 primary SVG path endpoint 전체로 교체해 P1/P2/structural grip, airborne C window, Annex main spine, calibration, horseshoe/drop/relaunch, 양방향 cross-flow, chambered S-curve, counterflow/security/checkpoint 순서를 `Sector01AreaCatalog.routePoints`에 보존한다. seamless compiler가 route의 `topY`를 world offset으로 옮기지 않던 결함도 수정했으며, 자동 회귀가 HTML → Area Catalog → compiled `world.route`를 직접 비교한다. Collision·Enemy·Wind·Access topology와 outside-core city wing은 바꾸지 않았다.
 
 96. 0.44.0은 1-2 Dead Lift만 화면을 지배해 A→C 경로가 읽히지 않던 문제를 camera framing과 MAP HTML flow 수정으로 복구했다. Entry/A에서는 local player를 오른쪽에 두고 Counterweight·Service Slot·Anchor C를 선행 노출하며, A→C 정적 657px 직접 부착은 계속 금지한다. 기존 free-air sample `(0,-350)`이 Dead Lift 내부였던 모순을 제거하고 왼쪽 Service Slot의 `(-208,-350)`에서만 400px attach window가 생기도록 HTML·catalog·회귀를 정렬했다. 동시에 System Story와 분리된 `PlayerMessagePresentation`·data catalog·speaker 머리 위 타이핑 말풍선을 추가해 1-1 `뭐야…?`/`…일단 위로.`, 1-2 `…리프트도?`를 causal System cue 뒤 자기 화면에만 표시한다. message envelope는 표시 속도와 future party-chat audience를 수용하지만 network transport·입력·moderation은 구현하지 않았다.
+
+97. AREA-SPEC v2 저작 기반과 visual Map Editor를 Sector 01 `1-1`·`1-7`에 추가했다. manifest가 두 Stage를 `generated`로 명시하고 deterministic generator·composer·Behavior Registry가 legacy와 generated를 중복 없이 조합하며, focused regression은 생성 Area가 기존 legacy 정의와 깊게 동등함을 확인한다. localhost editor는 Draft → no-write Validate → atomic Apply → 새 generated-Area single-player Preview를 제공하고 실제 브라우저에서 `1-7` Anchor Inspector 변경·Validate·Apply·Preview를 확인했다. 이 결과는 normal Catalog나 multiplayer를 교체하지 않는다. 현재 seamless Sector 01 Runtime은 기존 legacy provider를 유지하며, v2 canonical 승격·`composeSectorCatalog` facade 연결·live cutover와 그 멀티플레이 증명은 별도 통합 게이트로 남는다.
 
 ## 열린 기획·구현 게이트
 

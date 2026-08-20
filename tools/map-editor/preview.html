@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="dark" />
+        <title>Map Editor Preview</title>
+        <link rel="stylesheet" href="./preview.css" />
+    </head>
+    <body>
+        <main class="preview-shell">
+            <header class="preview-header">
+                <a href="./">← Back to editor</a>
+                <p id="preview-label">새 싱글플레이 Run을 준비하는 중입니다.</p>
+                <button id="reload-preview" type="button">Reload fresh run</button>
+            </header>
+            <canvas id="preview-canvas" aria-label="맵 에디터 싱글플레이 미리보기"></canvas>
+            <output id="preview-status" aria-live="polite"></output>
+        </main>
+        <script type="module" src="./preview.js"></script>
+    </body>
+</html>

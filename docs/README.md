@@ -36,6 +36,7 @@
 | 문서 | 역할 |
 | --- | --- |
 | [`architecture.md`](./architecture.md) | 모듈 구조와 책임 경계 |
+| [`superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md`](./superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md) | 맵 에디터 v2 저작·생성·Stage cutover 기반 설계 |
 | [`development-rules.md`](./development-rules.md) | 공통 개발·검증·Git 규칙 |
 | [`documentation-rules.md`](./documentation-rules.md) | 문서 작성과 관리 규칙 |
 | [`graphics-asset-guide.md`](./graphics-asset-guide.md) | 그래픽 자산 공통 작업 안내 |
