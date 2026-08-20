@@ -217,6 +217,16 @@ export class CircleCollider {
                     normalX = -direction.x;
                     normalY = -direction.y;
                 }
+                const remainingDistance = Math.max(0, movementDistance - firstHit);
+                let remainingX = direction.x * remainingDistance;
+                let remainingY = direction.y * remainingDistance;
+                const inwardRemaining = remainingX * normalX + remainingY * normalY;
+                if (inwardRemaining < 0) {
+                    remainingX -= normalX * inwardRemaining;
+                    remainingY -= normalY * inwardRemaining;
+                }
+                position.x += remainingX;
+                position.y += remainingY;
                 const inwardSpeed = velocity.x * normalX + velocity.y * normalY;
                 if (inwardSpeed < 0) {
                     velocity.x -= normalX * inwardSpeed;
