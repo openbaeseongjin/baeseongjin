@@ -1,5 +1,11 @@
 export class SpriteImageAsset {
-    constructor({ source, expectedSize = null, ImageClass = globalThis.Image, warn = console.warn } = {}) {
+    constructor({
+        source,
+        expectedSize = null,
+        ImageClass = globalThis.Image,
+        warn = console.warn,
+        fallbackLabel = "polygon scene fallback"
+    } = {}) {
         if (typeof source !== "string" || !source) throw new Error("SpriteImageAsset requires source");
         if (
             expectedSize !== null &&
@@ -11,6 +17,7 @@ export class SpriteImageAsset {
             throw new Error("SpriteImageAsset expectedSize requires positive integer width and height");
         }
         this.source = source;
+        this.fallbackLabel = fallbackLabel;
         this.expectedSize = expectedSize ? Object.freeze({ ...expectedSize }) : null;
         this.status = "pending";
         this.image = null;
@@ -49,12 +56,17 @@ export class SpriteImageAsset {
         this.status = "failed";
         this.image = null;
         this.error = new Error(message);
-        warn(`[renderer:sprite] ${message}; using polygon scene fallback`);
+        warn(`[renderer:sprite] ${message}; using ${this.fallbackLabel}`);
     }
 }
 
 export class SpriteImageAssetSet {
-    constructor({ atlases, ImageClass = globalThis.Image, warn = console.warn } = {}) {
+    constructor({
+        atlases,
+        ImageClass = globalThis.Image,
+        warn = console.warn,
+        fallbackLabel = "polygon scene fallback"
+    } = {}) {
         if (!atlases || Array.isArray(atlases) || typeof atlases !== "object" || !Object.keys(atlases).length) {
             throw new Error("SpriteImageAssetSet requires atlas definitions");
         }
@@ -66,7 +78,8 @@ export class SpriteImageAssetSet {
                         source: atlas.source,
                         expectedSize: atlas.size,
                         ImageClass,
-                        warn
+                        warn,
+                        fallbackLabel
                     })
                 ])
             )

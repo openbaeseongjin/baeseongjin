@@ -1,6 +1,6 @@
 # 스프라이트 리소스 교환 형식
 
-이 문서는 PixelLab, SpriteCook 또는 수작업으로 만든 플레이어 캐릭터를 게임에 넣을 때 사용하는 현재 기준 형식이다. 도구의 원본 export는 입력 자료일 뿐이며, 런타임은 도구에 종속되지 않은 PNG atlas 묶음과 `sprite-manifest.json`을 소비한다. 상태 구성이 다른 몹·보스에는 이 player 계약을 재사용하지 않는다.
+이 문서는 PixelLab, SpriteCook 또는 수작업으로 만든 플레이어 캐릭터를 게임에 넣을 때 사용하는 현재 기준 형식이다. 도구의 원본 export는 입력 자료일 뿐이며, 런타임은 도구에 종속되지 않은 PNG atlas 묶음과 `sprite-manifest.json`을 소비한다. 상태 구성이 다른 일반 몹에는 이 player 계약을 재사용하지 않고 [`enemy-sprite-asset-format.md`](./enemy-sprite-asset-format.md)를 따른다.
 
 그래픽 담당자는 먼저 [`graphics-asset-guide.md`](./graphics-asset-guide.md)에서 공통 작업 위치를, [`pixel-graphics-design-guide.md`](./pixel-graphics-design-guide.md)에서 캐릭터 제작 크기와 화면 위계를 확인하고, 캐릭터 프레임 수나 atlas 구조를 바꿀 때 이 문서의 전체 계약을 확인한다.
 

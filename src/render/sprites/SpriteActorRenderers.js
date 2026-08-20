@@ -1,4 +1,5 @@
 import { paintPixelSprite } from "./PixelSpritePainter.js";
+import { EnemyAnimationController } from "./EnemyAnimationController.js";
 import { PlayerAnimationController } from "./PlayerAnimationController.js";
 import { paintSpriteFrame } from "./SpriteCanvasPainter.js";
 import { centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
@@ -18,6 +19,35 @@ const ENEMY_PROJECTILE_SPRITE = Object.freeze({ rows: Object.freeze(["..a..", ".
 
 function eventsForPlayer(scene, playerId) {
     return (scene.playerPresentationEvents ?? []).filter((event) => event.playerId === playerId);
+}
+
+function enemyFacingX(enemy) {
+    const pursuitFacing = enemy.behaviorState?.kind === "pursuit" ? enemy.behaviorState.dashDirection?.x : null;
+    if (Number.isFinite(pursuitFacing) && Math.abs(pursuitFacing) > Number.EPSILON) return pursuitFacing;
+    return enemy.aimDirection?.x ?? null;
+}
+
+export function resolveUprightAimTransform(aimDirection) {
+    const x = aimDirection?.x;
+    const y = aimDirection?.y;
+    if (!Number.isFinite(x) || !Number.isFinite(y) || Math.hypot(x, y) <= Number.EPSILON) {
+        return Object.freeze({ flipX: false, rotation: 0 });
+    }
+    const aimAngle = Math.atan2(y, x);
+    if (x < 0) {
+        return Object.freeze({
+            flipX: true,
+            rotation: aimAngle < 0 ? aimAngle + Math.PI : aimAngle - Math.PI
+        });
+    }
+    return Object.freeze({ flipX: false, rotation: aimAngle });
+}
+
+export function resolveEnemyAimLayerDirection(enemy) {
+    if (["track", "lock", "fire"].includes(enemy?.attackState) && enemy.aimDirection) {
+        return enemy.aimDirection;
+    }
+    return enemy?.presentationAimDirection ?? enemy?.aimDirection ?? null;
 }
 
 class PlayerSpriteRendererBase {
@@ -115,20 +145,36 @@ export class SpriteRemotePlayerRenderer extends PlayerSpriteRendererBase {
 
 export class SpriteEnemyRenderer {
     constructor({
+        assets = null,
+        definition = null,
         size = { width: 36, height: 36 },
         presentationResolver = resolveEnemyPresentationState,
         spriteResolver = () => ENEMY_SPRITE
     } = {}) {
+        this.assets = assets;
+        this.definition = definition;
         this.size = Object.freeze({ ...size });
         this.presentationResolver = presentationResolver;
         this.spriteResolver = spriteResolver;
+        this.controllers = new Map();
+        this.previousTime = null;
     }
 
-    draw({ context, scene, viewport, renderStats }) {
+    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
         const enemies = scene.enemies ?? [];
+        const currentTime = Number.isFinite(presentationTimeSeconds) ? presentationTimeSeconds : 0;
+        const dt = this.previousTime === null ? 0 : Math.min(0.1, Math.max(0, currentTime - this.previousTime));
+        this.previousTime = currentTime;
+        const activeAnimationIds = new Set();
         let drawn = 0;
         for (const enemy of enemies) {
-            const radius = Math.max(this.size.width, this.size.height, (enemy.radius ?? 0) * 2) * 0.5 + 14;
+            const presentation = this.presentationResolver(enemy);
+            const spritePresentation = this.definition?.presentationFor(
+                presentation.enemyType,
+                presentation.primaryState
+            );
+            const renderSize = spritePresentation?.size ?? this.size;
+            const radius = Math.max(renderSize.width, renderSize.height, (enemy.radius ?? 0) * 2) * 0.5 + 14;
             if (!isVisible(viewport, circleBounds(enemy.position, radius))) continue;
             drawn += 1;
             const aimLine = enemyAimLine(enemy);
@@ -143,17 +189,62 @@ export class SpriteEnemyRenderer {
                 context.restore();
             }
             drawEnemyBehaviorTelegraph(context, enemy, enemies);
-            const presentation = this.presentationResolver(enemy);
-            paintPixelSprite({
-                context,
-                sprite: this.spriteResolver(presentation, enemy),
-                palette: isDroneEnemy(enemy)
-                    ? { a: "#78350f", b: "#fbbf24", c: "#fef3c7" }
-                    : { a: "#881337", b: "#fb7185", c: "#fecdd3" },
-                position: enemy.position,
-                size: this.size
-            });
-            if (isDroneEnemy(enemy)) {
+            const usesProductionSprite = Boolean(spritePresentation && this.assets?.status === "ready");
+            if (usesProductionSprite) {
+                const animationId = typeof enemy.id === "string" && enemy.id ? enemy.id : enemy;
+                activeAnimationIds.add(animationId);
+                const controller = this.controllerFor(
+                    animationId,
+                    presentation.enemyType,
+                    spritePresentation.clipState
+                );
+                const animation = controller.update({
+                    state: spritePresentation.clipState,
+                    dt,
+                    facingX: enemyFacingX(enemy)
+                });
+                const frame = spritePresentation.clip.frameAt(animation.elapsedSeconds);
+                paintSpriteFrame({
+                    context,
+                    image: this.assets.imageFor(frame.atlasId),
+                    frame,
+                    position: enemy.position,
+                    size: spritePresentation.size,
+                    anchor: spritePresentation.anchor,
+                    offset: spritePresentation.offset,
+                    opacity: spritePresentation.opacity,
+                    pixelSnap: spritePresentation.pixelSnap,
+                    flipX: spritePresentation.aimLayer ? false : animation.flipX,
+                    rotation: enemy.angle ?? 0
+                });
+                if (spritePresentation.aimLayer) {
+                    const aimTransform = resolveUprightAimTransform(resolveEnemyAimLayerDirection(enemy));
+                    paintSpriteFrame({
+                        context,
+                        image: this.assets.imageFor(spritePresentation.aimLayer.frame.atlasId),
+                        frame: spritePresentation.aimLayer.frame,
+                        position: enemy.position,
+                        size: spritePresentation.size,
+                        anchor: spritePresentation.anchor,
+                        offset: spritePresentation.offset,
+                        opacity: spritePresentation.opacity,
+                        pixelSnap: spritePresentation.pixelSnap,
+                        flipX: aimTransform.flipX,
+                        rotation: aimTransform.rotation
+                    });
+                }
+            } else {
+                paintPixelSprite({
+                    context,
+                    sprite: this.spriteResolver(presentation, enemy),
+                    palette: isDroneEnemy(enemy)
+                        ? { a: "#78350f", b: "#fbbf24", c: "#fef3c7" }
+                        : { a: "#881337", b: "#fb7185", c: "#fecdd3" },
+                    position: enemy.position,
+                    size: this.size
+                });
+            }
+            if (!usesProductionSprite && isDroneEnemy(enemy)) {
                 context.strokeStyle = "#94a3b8";
                 context.lineWidth = 2;
                 context.beginPath();
@@ -161,10 +252,29 @@ export class SpriteEnemyRenderer {
                 context.lineTo(enemy.position.x + 20, enemy.position.y - 12);
                 context.stroke();
             }
-            context.fillStyle = enemySensorColor(enemy);
-            context.fillRect(enemy.position.x - 11, enemy.position.y - 3, 6, 6);
+            if (!usesProductionSprite) {
+                context.fillStyle = enemySensorColor(enemy);
+                context.fillRect(enemy.position.x - 11, enemy.position.y - 3, 6, 6);
+            }
+        }
+        for (const animationId of this.controllers.keys()) {
+            if (!activeAnimationIds.has(animationId)) this.controllers.delete(animationId);
         }
         renderStats?.recordCollection("enemies", enemies.length, drawn);
+    }
+
+    controllerFor(animationId, enemyType, initialState) {
+        const canonicalEnemyType = this.definition.canonicalEnemyType(enemyType);
+        let entry = this.controllers.get(animationId);
+        if (!entry || entry.enemyType !== canonicalEnemyType) {
+            const states = Object.keys(this.definition.enemies[canonicalEnemyType].clips);
+            entry = {
+                enemyType: canonicalEnemyType,
+                controller: new EnemyAnimationController({ states, initialState })
+            };
+            this.controllers.set(animationId, entry);
+        }
+        return entry.controller;
     }
 }
 

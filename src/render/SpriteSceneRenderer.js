@@ -53,6 +53,8 @@ export class SpriteSceneRenderer {
     constructor({
         playerDefinition = DEFAULT_PLAYER_SPRITE_DEFINITION,
         playerAssets = null,
+        enemyDefinition = null,
+        enemyAssets = null,
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
         authoredAreaEnvironmentDefinitions = Object.freeze({})
@@ -60,6 +62,15 @@ export class SpriteSceneRenderer {
         this.profile = "sprite";
         this.playerDefinition = playerDefinition;
         this.playerAssets = playerAssets ?? new SpriteImageAssetSet({ atlases: playerDefinition.atlases });
+        this.enemyDefinition = enemyDefinition;
+        this.enemyAssets =
+            enemyDefinition === null
+                ? null
+                : (enemyAssets ??
+                  new SpriteImageAssetSet({
+                      atlases: enemyDefinition.atlases,
+                      fallbackLabel: "built-in enemy mock sprites"
+                  }));
         this.environmentDefinition = environmentDefinition;
         this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
         const authoredAreaEnvironmentAtlases = Object.fromEntries(
@@ -98,7 +109,7 @@ export class SpriteSceneRenderer {
             new RopeShotRenderer(remoteShots),
             new SpriteRemotePlayerRenderer({ assets: this.playerAssets, definition: playerDefinition }),
             new SwingRenderer(),
-            new SpriteEnemyRenderer(),
+            new SpriteEnemyRenderer({ assets: this.enemyAssets, definition: this.enemyDefinition }),
             new SpriteProjectileRenderer({
                 selectProjectiles: (scene) => scene.projectiles ?? [],
                 sprite: playerProjectileSprite,

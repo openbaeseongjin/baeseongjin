@@ -6,6 +6,7 @@ import { BossEncounterRuntime } from "../boss/BossEncounterRuntime.js";
 import {
     advanceEnemyProjectiles,
     updateAutomaticWeapon,
+    updateEnemyPresentationAim,
     updateEnemyWeapons,
     updatePlayerProjectiles
 } from "../combat/CombatSystems.js";
@@ -448,6 +449,7 @@ export class GameSimulation {
                 attackState: enemy.attackState,
                 attackStateRemaining: enemy.attackStateRemaining,
                 aimDirection: enemy.aimDirection,
+                presentationAimDirection: enemy.presentationAimDirection,
                 health: enemy.health,
                 fireCooldown: enemy.fireCooldown
             };
@@ -1126,6 +1128,12 @@ export class GameSimulation {
             dt,
             resolveHits: resolvePlayerProjectileHits,
             maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds
+        });
+        updateEnemyPresentationAim({
+            enemies: this.enemies,
+            targets: this.players,
+            range: COMBAT_CONFIG.enemyAttackRange,
+            surfaces: this.activeCollisionSurfaces
         });
         const enemyProjectileSpawns = updateEnemyWeapons({
             enemies: this.enemies.filter(({ knockbackState }) => !knockbackState),

@@ -21,6 +21,7 @@ import { DebugSettings } from "./game/metrics/DebugSettings.js";
 import { DebugPanel } from "./game/ui/DebugPanel.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
+import { loadDefaultEnemySpriteDefinition } from "./render/sprites/EnemySpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "./render/environment/AuthoredAreaEnvironmentCatalog.js";
 import { loadDefaultDirectionDefinitions } from "./game/direction/DirectionCatalog.js";
 
@@ -30,6 +31,7 @@ if (!canvas) {
 }
 const rendererProfile = resolveRendererProfile(globalThis.location.search);
 let playerDefinition = null;
+let enemyDefinition = null;
 let authoredAreaEnvironmentDefinitions = Object.freeze({});
 let directionDefinitions = Object.freeze([]);
 
@@ -152,7 +154,7 @@ function createSingleGameApp(debug) {
         renderer: createGameRenderer({
             canvas,
             profile: rendererProfile,
-            sceneRendererOptions: { playerDefinition, authoredAreaEnvironmentDefinitions }
+            sceneRendererOptions: { playerDefinition, enemyDefinition, authoredAreaEnvironmentDefinitions }
         }),
         audioBindings,
         playerDefinition,
@@ -231,7 +233,7 @@ async function launch() {
                     renderer: createGameRenderer({
                         canvas,
                         profile: rendererProfile,
-                        sceneRendererOptions: { playerDefinition, authoredAreaEnvironmentDefinitions }
+                        sceneRendererOptions: { playerDefinition, enemyDefinition, authoredAreaEnvironmentDefinitions }
                     }),
                     authority,
                     audioBindings,
@@ -274,8 +276,9 @@ async function bootstrap() {
     startupLoadingScreen.show();
     await serviceWorkerUpdater.ready;
     if (pageClosing) return;
-    [playerDefinition, authoredAreaEnvironmentDefinitions, directionDefinitions] = await Promise.all([
+    [playerDefinition, enemyDefinition, authoredAreaEnvironmentDefinitions, directionDefinitions] = await Promise.all([
         loadDefaultPlayerSpriteDefinition(),
+        loadDefaultEnemySpriteDefinition(),
         loadAuthoredAreaEnvironmentDefinitions(),
         loadDefaultDirectionDefinitions()
     ]);

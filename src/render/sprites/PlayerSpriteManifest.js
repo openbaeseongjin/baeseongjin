@@ -1,4 +1,7 @@
 import { PlayerSpriteDefinition } from "./PlayerSpriteDefinition.js";
+import { assertSpriteAtlasImagePath, spriteAtlasSource } from "./SpriteManifestPath.js";
+
+export { assertSpriteAtlasImagePath } from "./SpriteManifestPath.js";
 
 export const PLAYER_SPRITE_MANIFEST_VERSION = 2;
 
@@ -22,33 +25,6 @@ function size(value, label) {
     const object = plainObject(value, label);
     knownKeys(object, ["width", "height"], label);
     return object;
-}
-
-export function assertSpriteAtlasImagePath(image) {
-    if (typeof image !== "string" || !image) throw new Error("sprite atlas image must be a non-empty string");
-    if (!image.toLowerCase().endsWith(".png")) throw new Error(`sprite atlas image '${image}' must be a PNG file`);
-    if (/^[a-z][a-z\d+.-]*:/i.test(image) || image.startsWith("/") || image.includes("\\")) {
-        throw new Error(`sprite atlas image '${image}' must be a relative path`);
-    }
-    let segments;
-    try {
-        segments = image.split("/").map((segment) => decodeURIComponent(segment));
-    } catch {
-        throw new Error(`sprite atlas image '${image}' contains invalid URL encoding`);
-    }
-    if (segments.includes("..")) {
-        throw new Error(`sprite atlas image '${image}' cannot leave the sprite asset directory`);
-    }
-    return image;
-}
-
-function sourceFor(image, baseUrl) {
-    if (baseUrl === undefined || baseUrl === null) return image;
-    try {
-        return new URL(image, baseUrl).href;
-    } catch (error) {
-        throw new Error(`sprite manifest base URL is invalid: ${error.message}`);
-    }
 }
 
 function normalizeGenerator(generator) {
@@ -153,7 +129,7 @@ export function createPlayerSpriteDefinitionFromManifest(manifest, { baseUrl } =
             return [
                 atlasId,
                 {
-                    source: sourceFor(atlas.image, baseUrl),
+                    source: spriteAtlasSource(atlas.image, baseUrl),
                     size: atlas.size,
                     frameSize: atlas.frameSize
                 }

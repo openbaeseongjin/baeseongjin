@@ -2,7 +2,7 @@
 
 그래픽 담당자의 납품 경로는 `assets/artwork/characters/<asset-id>/`이며 공통 기준은 [`docs/graphics-asset-guide.md`](../../../docs/graphics-asset-guide.md)를 따릅니다. 이 폴더는 담당 개발자가 납품된 캐릭터 PNG를 `<character-id>/` runtime package로 정규화하는 경로입니다.
 
-현재 공개 manifest v2는 player의 여덟 animation 상태(`idle`, `run`, `jump`, `fall`, `rope`, `hit`, `death`, `respawn`) 전용이며 [`player-production-template`](./player-production-template)을 기준으로 `player-main/`을 만듭니다. 상태 구성이 다른 몹·보스에는 player manifest를 재사용하지 않고 별도 계약을 추가합니다. 상세 player 계약은 [`docs/sprite-asset-format.md`](../../../docs/sprite-asset-format.md)를 따릅니다.
+공개 player manifest v2는 여덟 animation 상태(`idle`, `run`, `jump`, `fall`, `rope`, `hit`, `death`, `respawn`) 전용이며 [`player-production-template`](./player-production-template)을 기준으로 `player-main/`을 만듭니다. 일반 몹은 별도 manifest v3와 [`docs/enemy-sprite-asset-format.md`](../../../docs/enemy-sprite-asset-format.md)를 사용하며 현재 기본 package는 [`sector-01-enemies`](./sector-01-enemies)입니다. 두 계약의 상태 목록과 manifest 구조는 분리하지만 런타임 frame 재생은 공용 `SpriteAnimation` clip을 사용합니다. 몹 v3의 선택적 `upright-aim` layer는 평상시 서버가 계산한 가장 가까운 Player의 `presentationAimDirection`을, `track/lock/fire`에는 gameplay `aimDirection`을 소비해 고정 본체 위에 회전·수평 반전하는 장비 frame을 합성합니다.
 
 ## Production runtime and fallback mock
 
