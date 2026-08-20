@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
@@ -39,6 +40,7 @@ async function createFixtureServer(options = {}) {
         ]
     };
     await writeFixture(projectRoot, "docs/bsh/scenario/AREA-CATALOG.json", JSON.stringify(manifest));
+    await writeFixture(projectRoot, "tools/map-editor/index.html", '<main id="editor-canvas">fixture editor</main>');
     await writeFixture(
         projectRoot,
         "src/game/world/areas/sector01/Sector01AreaCatalog.js",
@@ -66,12 +68,30 @@ async function createFixtureServer(options = {}) {
     };
 }
 
+async function withRequestServer(handler, run) {
+    const httpServer = createServer(handler);
+    await new Promise((resolve) => httpServer.listen(0, "127.0.0.1", resolve));
+    const address = httpServer.address();
+    try {
+        await run(`http://127.0.0.1:${address.port}`);
+    } finally {
+        await new Promise((resolve, reject) => httpServer.close((cause) => (cause ? reject(cause) : resolve())));
+    }
+}
+
 export async function run() {
     const fixture = await createFixtureServer();
     try {
         assert.deepEqual(fixture.server.stageSummary(), [
             { stageId: "1-1", areaId: "sector-01-01", name: "TEST SHAFT", revision: 0 }
         ]);
+        await withRequestServer(fixture.server.requestHandler, async (origin) => {
+            const editor = await fetch(`${origin}/map-editor/`);
+            assert.equal(editor.status, 200);
+            assert.match(await editor.text(), /fixture editor/);
+            const stages = await fetch(`${origin}/api/map-editor/stages`);
+            assert.deepEqual((await stages.json()).stages, fixture.server.stageSummary());
+        });
         assert.equal((await fixture.server.readStage("1-1")).stageId, "1-1");
         await assert.rejects(() => fixture.server.readStage("1-2"), { code: "stage-not-generated" });
         await assert.rejects(() => fixture.server.readStage("../1-1"), { code: "stage-not-generated" });
@@ -79,10 +99,9 @@ export async function run() {
         const originalSource = await readFile(fixture.sourcePath, "utf8");
         const invalidSpec = createValidSpec();
         invalidSpec.anchors[0].target.id = "invalid";
-        await assert.rejects(
-            () => fixture.server.applyStage({ stageId: "1-1", spec: invalidSpec, baseRevision: 0 }),
-            { code: "spec-invalid" }
-        );
+        await assert.rejects(() => fixture.server.applyStage({ stageId: "1-1", spec: invalidSpec, baseRevision: 0 }), {
+            code: "spec-invalid"
+        });
         assert.equal(await readFile(fixture.sourcePath, "utf8"), originalSource);
 
         const validSpec = createValidSpec();
@@ -92,10 +111,9 @@ export async function run() {
         assert.equal(applied.moduleUrl, "/src/game/world/areas/generated/sector01/Sector01Stage01.generated.js");
         assert.equal(JSON.parse(await readFile(fixture.sourcePath, "utf8")).definition.name, "APPLIED SHAFT");
         assert.match(await readFile(fixture.outputPath, "utf8"), /APPLIED SHAFT/);
-        await assert.rejects(
-            () => fixture.server.applyStage({ stageId: "1-1", spec: validSpec, baseRevision: 0 }),
-            { code: "revision-conflict" }
-        );
+        await assert.rejects(() => fixture.server.applyStage({ stageId: "1-1", spec: validSpec, baseRevision: 0 }), {
+            code: "revision-conflict"
+        });
     } finally {
         await rm(fixture.projectRoot, { recursive: true, force: true });
     }

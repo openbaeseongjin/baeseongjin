@@ -34,11 +34,13 @@ function collectChanges(before, after, pointer = "") {
     const beforeObject = Boolean(before) && typeof before === "object";
     const afterObject = Boolean(after) && typeof after === "object";
     if (!beforeObject || !afterObject) {
-        return [{
-            pointer,
-            before: before === MISSING ? MISSING : structuredClone(before),
-            after: after === MISSING ? MISSING : structuredClone(after)
-        }];
+        return [
+            {
+                pointer,
+                before: before === MISSING ? MISSING : structuredClone(before),
+                after: after === MISSING ? MISSING : structuredClone(after)
+            }
+        ];
     }
     const keys = [...new Set([...Object.keys(before), ...Object.keys(after)])].sort((left, right) =>
         left.localeCompare(right, "en")
@@ -53,10 +55,7 @@ function collectChanges(before, after, pointer = "") {
 }
 
 function setPointerValue(target, pointer, value) {
-    const segments = pointer
-        .split("/")
-        .slice(1)
-        .map(unescapePointerSegment);
+    const segments = pointer.split("/").slice(1).map(unescapePointerSegment);
     if (segments.length === 0) throw new TypeError("draft-root-replacement-forbidden");
     const leaf = segments.pop();
     let parent = target;
@@ -122,7 +121,10 @@ export class AreaEditorDraft {
     }
 
     select(selection) {
-        if (selection !== null && (!selection || typeof selection.domain !== "string" || typeof selection.id !== "string")) {
+        if (
+            selection !== null &&
+            (!selection || typeof selection.domain !== "string" || typeof selection.id !== "string")
+        ) {
             throw new TypeError("editor-draft-selection-invalid");
         }
         this.selection = cloneSelection(selection);

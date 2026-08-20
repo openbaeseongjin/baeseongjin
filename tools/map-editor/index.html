@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="dark" />
+        <title>Baeseongjin Map Editor</title>
+        <link rel="stylesheet" href="./editor.css" />
+    </head>
+    <body>
+        <main class="editor-shell" aria-label="맵 에디터">
+            <header class="editor-header">
+                <div>
+                    <p class="eyebrow">SECTOR 01 / AUTHORING CONSOLE</p>
+                    <h1>MAP EDITOR</h1>
+                </div>
+                <label class="stage-picker"
+                    >Stage
+                    <select id="stage-select" aria-label="편집할 Stage"></select
+                ></label>
+            </header>
+            <nav id="layer-panel" class="panel layer-panel" aria-label="Stage 레이어와 오브젝트"></nav>
+            <section class="canvas-workspace" aria-label="월드 Canvas 작업 공간">
+                <div class="workspace-ruler top-ruler" aria-hidden="true"></div>
+                <div class="workspace-ruler side-ruler" aria-hidden="true"></div>
+                <canvas id="editor-canvas" aria-label="맵 편집 Canvas"></canvas>
+                <p id="canvas-hint" class="canvas-hint">휠: 확대 · 드래그: 이동 · Space+드래그: 화면 이동</p>
+            </section>
+            <aside id="inspector-panel" class="panel inspector-panel" aria-label="선택한 오브젝트 Inspector"></aside>
+            <footer class="draft-strip" aria-live="polite">
+                <div id="draft-status" class="draft-status">Stage를 불러오는 중입니다.</div>
+                <div class="draft-actions" aria-label="Draft 작업">
+                    <button id="undo-draft" type="button">Undo</button>
+                    <button id="redo-draft" type="button">Redo</button>
+                    <button id="validate-draft" type="button">Validate</button>
+                    <button id="apply-draft" type="button" class="primary">Apply</button>
+                    <button id="preview-stage" type="button" class="preview">Preview</button>
+                </div>
+            </footer>
+        </main>
+        <script type="module" src="./main.js"></script>
+    </body>
+</html>

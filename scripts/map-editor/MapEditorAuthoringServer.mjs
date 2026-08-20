@@ -94,7 +94,9 @@ async function stageTransaction(writes, failureInjector) {
             await rename(write.temporaryPath, write.path);
             committed.push(write);
         }
-        await Promise.all(staged.filter(({ hadOriginal }) => true).map(({ backupPath }) => rm(backupPath, { force: true })));
+        await Promise.all(
+            staged.filter(({ hadOriginal }) => true).map(({ backupPath }) => rm(backupPath, { force: true }))
+        );
     } catch (cause) {
         for (const write of [...committed].reverse()) {
             await rm(write.path, { force: true });
@@ -107,7 +109,10 @@ async function stageTransaction(writes, failureInjector) {
         throw error("apply-rolled-back", "Map editor Apply failed and restored the previous files.");
     } finally {
         await Promise.all(
-            staged.flatMap(({ temporaryPath, backupPath }) => [rm(temporaryPath, { force: true }), rm(backupPath, { force: true })])
+            staged.flatMap(({ temporaryPath, backupPath }) => [
+                rm(temporaryPath, { force: true }),
+                rm(backupPath, { force: true })
+            ])
         );
     }
 }
@@ -194,7 +199,7 @@ export async function createMapEditorAuthoringServer({
             revision: stage.revision,
             spec: structuredClone(stage.spec),
             moduleUrl: `/${stage.entry.outputPath.replaceAll("\\", "/")}`,
-            outputRevision: revisionFor(stage.specification ?? stableJson(stage.spec))
+            outputRevision: revisionFor(stableJson(stage.spec))
         });
     }
 
@@ -252,16 +257,30 @@ export async function createMapEditorAuthoringServer({
     };
 
     const staticHandler = createStaticRequestHandler(root);
+    const editorStaticHandler = createStaticRequestHandler(resolve(root, "tools"));
     server.requestHandler = async (request, response) => {
         const url = new URL(request.url ?? "/", "http://127.0.0.1");
+        if (url.pathname === "/map-editor" || url.pathname.startsWith("/map-editor/")) {
+            const originalUrl = request.url;
+            if (url.pathname === "/map-editor" || url.pathname === "/map-editor/") {
+                request.url = `/map-editor/index.html${url.search}`;
+            }
+            try {
+                return await editorStaticHandler(request, response);
+            } finally {
+                request.url = originalUrl;
+            }
+        }
         if (!url.pathname.startsWith("/api/map-editor/")) return staticHandler(request, response);
         try {
             if (url.pathname === "/api/map-editor/stages" && request.method === "GET") {
                 return json(response, 200, { stages: server.stageSummary() });
             }
             const route = requestRoute(url);
-            if (!route) return json(response, 404, { code: "route-not-found", message: "Map editor API route was not found." });
-            if (route.action === "read" && request.method === "GET") return json(response, 200, await server.readStage(route.stageId));
+            if (!route)
+                return json(response, 404, { code: "route-not-found", message: "Map editor API route was not found." });
+            if (route.action === "read" && request.method === "GET")
+                return json(response, 200, await server.readStage(route.stageId));
             if (route.action === "preview" && request.method === "GET") {
                 const stage = await server.readStage(route.stageId);
                 return json(response, 200, {
@@ -281,10 +300,17 @@ export async function createMapEditorAuthoringServer({
                 return json(
                     response,
                     200,
-                    await server.applyStage({ stageId: route.stageId, spec: body.spec, baseRevision: body.baseRevision })
+                    await server.applyStage({
+                        stageId: route.stageId,
+                        spec: body.spec,
+                        baseRevision: body.baseRevision
+                    })
                 );
             }
-            return json(response, 405, { code: "method-not-allowed", message: "Map editor API method is not allowed." });
+            return json(response, 405, {
+                code: "method-not-allowed",
+                message: "Map editor API method is not allowed."
+            });
         } catch (cause) {
             const payload = errorPayload(cause);
             const status = payload.code === "internal-error" ? 500 : payload.code === "revision-conflict" ? 409 : 400;

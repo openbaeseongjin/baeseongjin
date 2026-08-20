@@ -4,10 +4,10 @@ function finitePoint(value) {
 
 function centerOfVertices(vertices) {
     if (!Array.isArray(vertices) || vertices.length === 0) return null;
-    const total = vertices.reduce(
-        (result, point) => ({ x: result.x + point.x, y: result.y + point.y }),
-        { x: 0, y: 0 }
-    );
+    const total = vertices.reduce((result, point) => ({ x: result.x + point.x, y: result.y + point.y }), {
+        x: 0,
+        y: 0
+    });
     return { x: total.x / vertices.length, y: total.y / vertices.length };
 }
 
@@ -68,7 +68,15 @@ export function collectEditorEntities(spec) {
     for (const [index, surface] of (definition.surfaces ?? []).entries()) {
         const point = finitePoint(surface.position) ? surface.position : centerOfVertices(surface.vertices);
         if (!point) continue;
-        result.push(entity({ domain: "surfaces", id: surface.id, kind: "surface", point, path: `/definition/surfaces/${index}` }));
+        result.push(
+            entity({
+                domain: "surfaces",
+                id: surface.id,
+                kind: "surface",
+                point,
+                path: `/definition/surfaces/${index}`
+            })
+        );
     }
     for (const [index, anchor] of (spec?.anchors ?? []).entries()) {
         if (!finitePoint(anchor.target) || !finitePoint(anchor.landmark)) continue;
@@ -166,7 +174,11 @@ export function hitTestEditorEntity(entities, point, radius) {
         throw new TypeError("editor-hit-test-invalid");
     }
     const candidates = entities
-        .map((entry, index) => ({ entry, index, distance: Math.hypot(entry.point.x - point.x, entry.point.y - point.y) }))
+        .map((entry, index) => ({
+            entry,
+            index,
+            distance: Math.hypot(entry.point.x - point.x, entry.point.y - point.y)
+        }))
         .filter(({ distance }) => distance <= radius)
         .sort((left, right) => left.distance - right.distance || left.index - right.index);
     return candidates[0]?.entry ?? null;
