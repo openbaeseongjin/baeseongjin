@@ -1,19 +1,19 @@
 # DESIGN DECISION RESOLUTION PACKAGE
 
-> **CURRENT GROWTH OVERRIDE:** 이 문서의 Foundation/Specialization 세부 계약은 0.26.0 generic Augment v1으로 대체됐다. 현재 성장 계약은 `docs/augment-v1.md`, 획득 source는 `1-4 → 2-3 → 3-5` explicit Node를 따른다. 아래 Specialization catalog·pair pool·별도 상태는 이력으로만 보존하며 구현 입력으로 사용하지 않는다.
+> **CURRENT GROWTH CONTRACT:** 성장 계약은 `docs/augment-v1.md`, 획득 source는 `1-4 → 2-3 → 3-5` explicit Node가 소유한다. 고정 Foundation/Specialization tier는 사용하지 않는다.
 
-*SPECIALIZATION / BOSS / TIMER / NPC / ENDING · IMPLEMENTABLE PLANNING CONTRACT · REV 1.0 REVIEWED*
+*BOSS / TIMER / NPC / ENDING · IMPLEMENTABLE PLANNING CONTRACT · CURRENT*
 
 | 항목 | 기준 |
 |---|---|
 | Repository | `openbaeseongjin/baeseongjin` |
-| Decision Source Snapshot | `bd5be25b900b65f3ab42eeb4ee5ff45f2052a06b` |
+| Authoring Snapshot | `bd5be25b900b65f3ab42eeb4ee5ff45f2052a06b` |
 | Scenario Scope | `1-1 → 6-8`, 48/48 detailed general stages |
 | Current Connected Runtime | Sector01→03 = 24 areas |
 | Sector04 | standalone authored |
 | Sector05/06 | Runtime not authored |
 | Purpose | `docs/design-decision-requests.md` P1~P5를 구현 가능한 계약으로 해소하는 확정 기획 |
-| Status | **APPROVED PLANNING CONTRACT — RUNTIME NOT YET IMPLEMENTED** |
+| Status | **APPROVED PLANNING CONTRACT — PARTIAL RUNTIME; CURRENT STATUS IN SCENARIO INTEGRATION** |
 
 ---
 
@@ -36,10 +36,10 @@ CONTAINMENT GANTRY C-01
 
 P3 TIMER
 LOCK PROTOTYPE BASELINE
-960 sec / sector
-+45 sec internal Gate
-cap 960 sec
-collapse 80 px/s
+60 sec / sector
++10 sec progress reward
+cap 60 sec
+Purge 240 px/s
 final tuning after playtest
 
 P4 NPC
@@ -63,475 +63,9 @@ LOCK NOW
 
 ---
 
-## 1. P1 — FIRST SPECIALIZATION RULE
+## 1. P1 — GENERIC AUGMENT V1
 
-## 1-1. Final Recommendation
-
-```text
-FOUNDATION
-=
-PLAYSTYLE DIRECTION
-
-SPECIALIZATION
-=
-ONE DEEPER COMMITMENT INSIDE THAT DIRECTION
-```
-
-2-3에서 Player는 자기 Foundation에 맞는 **2개 카드 중 1개**를 선택한다.
-
-### 선택 Pool
-
-```text
-IMPULSE COIL
-→ OVERDRIVE COIL
-or
-→ INERTIA COUPLER
-
-RELAY LINK
-→ CASCADE LINK
-or
-→ WIDE-BAND LINK
-
-SHEAR CURRENT
-→ DEEP CURRENT
-or
-→ BACKFEED LOOP
-```
-
-총 6종.
-
-### Why 2-per-Foundation
-
-- 1-4의 3개 Foundation을 다시 고르는 느낌을 피한다.
-- Foundation을 바꾸지 않고 “깊게 민다.”
-- 9종 이상보다 구현·밸런스 비용이 낮다.
-- 1종 고정 업그레이드보다 선택의 의미가 있다.
-- 첫 Specialization에서 Random pool까지 넣지 않아 재현성과 테스트가 좋다.
-- 향후 콘텐츠가 늘면 3-of-N random pool로 확장 가능하다.
-
----
-
-## 1-2. Specialization Catalog
-
-### IMPULSE — OVERDRIVE COIL
-
-Identity:
-
-```text
-DISTANCE / SPEED
-```
-
-Current Impulse:
-
-```text
-qualifying release impulse
-+180
-```
-
-Specialized candidate:
-
-```text
-+260
-```
-
-Rules:
-
-- 기존 qualifying Impulse Release에서만 동작.
-- 상시 Speed 증가 없음.
-- 새 입력 없음.
-- Rope reach 자체는 증가하지 않음.
-- Mandatory geometry는 이 효과에 의존하지 않음.
-
-Role:
-
-> 한 번의 좋은 Release로 위험 구간 체류시간을 더 크게 압축.
-
-Status:
-
-```text
-PROTOTYPE VALUE
-```
-
----
-
-### IMPULSE — INERTIA COUPLER
-
-Identity:
-
-```text
-ARC CARRY / MOMENTUM PRESERVATION
-```
-
-Current:
-
-```text
-releaseAngularTransfer
-0.55
-```
-
-Specialized candidate for qualifying Impulse Release:
-
-```text
-effective releaseAngularTransfer
-0.72
-```
-
-Rules:
-
-- Impulse qualifying Release에만 Player-local effective value 적용.
-- global Rope config를 mutation하지 않음.
-- Rope length / Hook reach 변경 없음.
-
-Difference from Overdrive:
-
-```text
-OVERDRIVE
-more raw push
-
-INERTIA COUPLER
-better carry of the arc you already created
-```
-
----
-
-### RELAY — CASCADE LINK
-
-Identity:
-
-```text
-CHAIN DEPTH
-```
-
-Current Relay:
-
-```text
-window
-0.65 sec
-
-attach buffer
-0.16 sec
-
-aim tolerance
-108
-```
-
-Specialized rule:
-
-```text
-successful assisted Relay Attach
-→ Relay Window reopens once
-```
-
-Maximum:
-
-```text
-one additional assisted attach
-per original release chain
-```
-
-State:
-
-```text
-relayCascadeCharges
-1
-```
-
-Flow:
-
-```text
-normal Release
-→ Relay window
-→ assisted Attach
-→ consume cascade charge
-→ reopen one Relay window
-→ second assisted Attach
-→ no more refresh
-```
-
-No infinite chain.
-
----
-
-### RELAY — WIDE-BAND LINK
-
-Identity:
-
-```text
-FORGIVENESS / STABILITY
-```
-
-Candidate:
-
-```text
-relayWindowSeconds
-0.85
-
-relayAttachBufferSeconds
-0.20
-
-relayAimTolerance
-124
-```
-
-Rules:
-
-- no window refresh
-- no auto-target
-- no Hook reach extension
-- first assisted re-attach becomes more forgiving
-
-Difference:
-
-```text
-CASCADE
-more chain depth
-
-WIDE-BAND
-easier single handoff
-```
-
----
-
-### SHEAR — DEEP CURRENT
-
-Identity:
-
-```text
-DAMAGE COMMITMENT
-```
-
-Current:
-
-```text
-shearDamage
-20
-```
-
-Candidate:
-
-```text
-shearDamage
-35
-```
-
-Keep:
-
-```text
-shearSegmentTolerance
-4
-```
-
-No:
-- projectile cut
-- wall cut
-- passive contact damage
-- automatic Rope damage
-
-Role:
-
-> Rope Geometry를 전투에 적극적으로 쓰는 Player에게 더 큰 payoff.
-
----
-
-### SHEAR — BACKFEED LOOP
-
-Identity:
-
-```text
-OFFENSE → MOVEMENT CONTINUITY
-```
-
-Trigger:
-
-```text
-successful Shear hit
-```
-
-Effect:
-
-```text
-open 0.45 sec BACKFEED WINDOW
-
-during this window:
-the next Hook fire ignores remaining Hook reload once
-```
-
-Rules:
-
-- one-shot.
-- no aim assist.
-- no reach increase.
-- no Relay Window creation.
-- if no Attach is attempted within 0.45 sec, expires.
-- multiple enemies in one Shear Release do not stack charges.
-
-Difference:
-
-```text
-DEEP CURRENT
-kill pressure
-
-BACKFEED LOOP
-combat success feeds back into movement
-```
-
----
-
-## 1-3. Selection Rule
-
-2-3 Node:
-
-```text
-requiresFoundation
-true
-
-perPlayerSelection
-true
-```
-
-Pool:
-
-```text
-selected Foundation
-→ exact fixed pair
-```
-
-No RNG for REV 1.
-
-Reason:
-
-- test determinism
-- player can learn relationship
-- content count remains six
-- easier multiplayer sync
-
-Future:
-
-```text
-3+ per Foundation
-→ show 2-of-N
-```
-
-may be reopened later.
-
----
-
-## 1-4. Persistence
-
-```text
-death
-KEEP
-
-checkpoint respawn
-KEEP
-
-area transition
-KEEP
-
-sector transition
-KEEP
-
-boss retry
-KEEP
-
-run reset / new run
-CLEAR
-```
-
-No respec in current run.
-
-No checkpoint reroll.
-
-Foundation and Specialization are separate IDs.
-
-Recommended Player state:
-
-```text
-foundationAugment
-impulse-coil | relay-link | shear-current
-
-specialization
-overdrive-coil
-inertia-coupler
-cascade-link
-wide-band-link
-deep-current
-backfeed-loop
-null
-```
-
----
-
-## 1-5. UI Contract
-
-Reuse current Foundation selection primitive.
-
-2 cards only.
-
-Header:
-
-```text
-SPECIALIZATION AVAILABLE
-```
-
-Subheader example:
-
-```text
-FOUNDATION
-RELAY LINK
-```
-
-Cards show:
-
-```text
-NAME
-one-line behavior
-one icon
-```
-
-No long numeric stat sheet during run.
-
-Example:
-
-```text
-CASCADE LINK
-Chain one more assisted re-attach.
-
-WIDE-BAND LINK
-Make the next assisted re-attach more forgiving.
-```
-
-Confirm:
-
-```text
-SPECIALIZATION ACCEPTED
-[NAME]
-ONLINE
-```
-
----
-
-## 1-6. 2-3 Progression
-
-Current placeholder:
-
-```text
-interact
-```
-
-becomes actual:
-
-```text
-interact-choice
-→ personal choice
-→ personal specialization stored
-→ shared specialization-selected objective can resolve
-→ exit panel
-```
-
-Calibration remains non-blocking.
-
-No Foundation / Specialization can be mandatory for geometry.
+과거 Foundation별 Specialization catalog, pair pool, 별도 선택·저장·UI 계약은 폐기됐다. 현재 성장 계약은 [`augment-v1.md`](./augment-v1.md), 획득 source는 `1-4 → 2-3 → 3-5` explicit Node가 소유한다. 고정 Specialization tier를 구현하지 않는다.
 
 ---
 
@@ -862,136 +396,20 @@ Health restoration:
 
 ---
 
-## 4. P3 — GENERAL TIMER / COLLAPSE PROTOTYPE BASELINE
+## 4. P3 — GENERAL TIMER / CONTAINMENT PURGE FIELD
 
-## 4-1. Why Prototype, Not “Final”
-
-There is still no complete 48-stage physical playtest.
-
-Therefore exact values must be labeled:
+현재 prototype 계약:
 
 ```text
-PROTOTYPE BASELINE
+SECTOR GENERAL TIMER: 60 sec
+PROGRESS REWARD: +10 sec
+TIMER CAP: 60 sec
+CONTAINMENT PURGE FIELD: 240 world px/sec
+PURGE CONTACT: lethal
+BOSS ENTRY: general Timer/Purge 종료, 잔여 시간 폐기
 ```
 
-not final balance truth.
-
-But implementation no longer needs arbitrary developer-picked values.
-
----
-
-## 4-2. Recommended Baseline
-
-```text
-SECTOR GENERAL TIMER
-960 sec
-16:00
-
-INTERNAL GATE REPLENISH
-+45 sec
-
-TIMER CAP
-960 sec
-
-COLLAPSE SPEED
-80 world px/sec
-2.5 base tiles/sec
-```
-
-Stage08→Boss entry:
-
-```text
-NO REPLENISH
-
-general timer / collapse ends
-remaining time discarded
-boss timer begins
-```
-
-With seven internal Gate bonuses:
-
-```text
-960 + (45 × 7)
-=
-1275 sec
-
-21:15 maximum effective general-section budget
-```
-
-This keeps the timer as:
-- anti-stall pressure
-- not speedrun score
-
----
-
-## 4-3. Warning Cue
-
-Recommended:
-
-```text
-120 sec
-LOW TIME warning
-
-30 sec
-CRITICAL warning
-
-0 sec
-COLLAPSE RISING
-```
-
-Do not create damage at 0.
-
----
-
-## 4-4. Collapse Elimination Text
-
-Keep existing product wording:
-
-```text
-붕괴에 휩쓸림
-```
-
-Secondary:
-
-```text
-다음 Gate에서 합류
-```
-
-If English UI is required:
-
-```text
-CAUGHT BY COLLAPSE
-REJOIN AT NEXT GATE
-```
-
----
-
-## 4-5. Playtest Adjustment Rule
-
-After representative-stage Graybox:
-
-Capture:
-
-```text
-P50 first clear
-P80 first clear
-skilled clear
-failure count
-recovery time
-2-player clear
-```
-
-Adjust timer only after this.
-
-First tuning target:
-
-```text
-normal first-clear team
-should usually reach Boss before collapse
-
-repeated stalls / repeated failures
-should experience collapse pressure
-```
+Field는 보상 중 현재 높이에서 멈추고 다음 0초부터 같은 위치에서 재상승하며 후퇴·Player 추적·순간이동을 하지 않는다. 전멸은 current Sector만 reset하고 Player별 증강과 이전 Sector 진행을 보존한다. 정확한 +10초 landmark/objective, 최초 Field origin, 개인 Purge 사망 복귀 방식은 HOLD이며 Stage ID·legacy Gate·Area 하단에서 추정하지 않는다. 단일 현재 기준은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)다.
 
 ---
 
@@ -1490,12 +908,12 @@ This preserves the complete design while protecting submission quality.
 
 ## 11. `design-decision-requests.md` Status
 
-After approval, recommended state:
+Current state:
 
 ```text
 P1
-답변됨
-Specialization catalog / selection / persistence locked
+구현 완료
+generic Augment v1 / deterministic 3-card offer / no fixed Specialization tier
 
 P2
 답변됨
@@ -1503,8 +921,8 @@ global boss boundary + Boss01 locked
 Sector02~05 detailed boss mechanics still follow-up
 
 P3
-답변됨 — PROTOTYPE BASELINE
-final tuning remains playtest-dependent
+core 계약 확정 — topology mapping HOLD
+60 sec / +10 sec / cap 60 sec / Purge 240 px/s
 
 P4
 답변됨

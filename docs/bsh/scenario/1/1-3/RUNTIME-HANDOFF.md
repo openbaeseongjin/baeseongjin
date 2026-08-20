@@ -23,7 +23,7 @@ If main changed, re-audit before edits.
 - Carrier Module A
 - standard projectile / no Rope cut / Cover LOS
 - Story wording/order
-- 2-of-3 Sector Access rule
+- 3-of-3 Sector Access rule
 
 ## Re-author Annex
 

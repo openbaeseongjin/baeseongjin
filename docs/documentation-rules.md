@@ -7,7 +7,8 @@
 - `docs/README.md`는 문서 인덱스다. 각 문서의 링크와 역할을 한 줄로 안내하고 주제별 상세 설명을 직접 담지 않는다.
 - 한 주제에는 현재 기준 문서를 하나만 둔다. 설명이 길어지거나 독립된 관점이 생기면 별도 문서로 분리하고 인덱스에서 연결한다.
 - 새 문서를 추가하거나 문서의 역할을 바꾸면 같은 작업에서 `docs/README.md`의 분류와 설명을 갱신한다.
-- `SESSION-HANDOFF.md`에는 현재 결론과 기준 문서 위치만 남기고 상세 규칙을 복제하지 않는다.
+- 완료된 patch package, migration plan, 보조 검증 가이드는 현재 기준 문서와 역할을 중복한 채 인덱스에 남기지 않는다. 아직 필요한 결정만 기준 문서에 흡수하고, 대체 관계가 필요하면 `decision-history.md`에 한 항목으로 요약한 뒤 원문 파일과 인덱스 링크를 제거한다.
+- `SESSION-HANDOFF.md`는 아직 기준 문서에 흡수되지 않은 결정·진행 중 전환·문서화되지 않은 blocker만 임시로 기록한다. 기준 문서가 내용을 충분히 소유하면 링크 요약도 남기지 않고 같은 작업에서 핸드오프 항목을 제거한다.
 - 최신 사용자 결정이 기존 문서와 충돌하면 기준 문서를 현행화하고, 완전히 대체된 결정은 [`decision-history.md`](./decision-history.md)로 이동한다.
 
 ## 2. 작성 위치
@@ -20,7 +21,7 @@
 
 - `docs/bsh/scenario/`의 Sector·Stage 문서는 해당 기획과 제작 기준을 소유한다.
 - [`scenario-development-integration.md`](./scenario-development-integration.md)는 여러 Sector에 걸친 상세 Stage 목록, 현재 authored Runtime 연결 상태, 열린 차단 요소와 마지막 확인 근거를 소유한다.
-- `SESSION-HANDOFF.md`와 `implementation-roadmap.md`에는 현재 요약과 통합 현황 링크만 남긴다. 날짜별 Stage 개수나 Runtime 상태를 별도 기준처럼 복제하지 않는다.
+- `implementation-roadmap.md`는 구현 우선순위, `scenario-development-integration.md`는 시나리오·Runtime 현재 상태를 소유한다. `SESSION-HANDOFF.md`는 두 문서의 요약이나 날짜별 Stage 개수·Runtime 상태를 복제하지 않는다.
 - Stage 문서의 고정 Git SHA는 작성 당시 근거인 `AUTHORING SNAPSHOT`으로 표시하고 현재 상태는 통합 현황에서 확인한다.
 
 ## 4. 파일 형식
@@ -33,7 +34,7 @@
 ## 5. 이미지 첨부
 
 - 이미지는 문서가 있는 작업 폴더의 `images/` 하위에 저장한다. `docs/` 문서의 이미지는 `docs/images/`, `docs/bsh/` 문서의 이미지는 `docs/bsh/images/`에 둔다.
-- Markdown에서는 `![이미지 설명](./images/file-name.png)`처럼 상대 경로로 연결한다.
+- Markdown 이미지는 문서 기준 상대 경로 `./images/<file-name>.png`를 사용한다.
 - HTML 자료에서는 `<img src="./images/file-name.png" alt="이미지 설명">`처럼 같은 상대 경로를 사용한다.
 - 로컬 컴퓨터의 절대 경로나 임시 첨부 URL을 문서에 연결하지 않는다.
 - 시나리오용 `Scenario Art Reference`의 생성·상태·검수는 [`bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`](./bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md)를 따른다. 생성 전에 현재 Stage 문서와 Runtime을 확인하고 `RETIRED`·`PENDING REGENERATION` 이미지를 새 생성 입력으로 사용하지 않는다.

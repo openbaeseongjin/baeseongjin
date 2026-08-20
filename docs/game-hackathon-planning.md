@@ -15,7 +15,7 @@
 | 공간 경험   | 하나의 붕괴 도시 안에서 48개 진행 영역을 아래에서 위로 연속 돌파 | 점프킹, 할로우 나이트 |
 | 성장 구조   | 플레이 외 시간에도 누적되는 자동 성장                            | 팰월드, OpenFront     |
 
-장르 중심은 **로프 액션 로그라이크**로 확정한다. 한 런은 하나의 붕괴 도시 월드 안에서 계속되며, 시나리오의 `맵`은 별도 월드가 아니라 Sector 안의 landmark·objective·encounter를 뜻한다. 실패하면 현재 Sector entry에서 다시 합류하고 개인 사망은 공용 진행을 되돌리지 않는다.
+장르 중심은 **로프 액션 로그라이크**로 확정한다. 한 런은 하나의 붕괴 도시 월드 안에서 계속되며, 시나리오의 `맵`은 별도 월드가 아니라 Sector 안의 landmark·objective·encounter를 뜻한다. 개인 사망은 최근 접촉한 Stage 세이브 포인트에서 즉시 재개하고 공용 진행을 되돌리지 않는다.
 
 ## 3. 핵심 플레이 경험
 
@@ -107,13 +107,13 @@
 
 전문 작업물의 완료는 메인 개발, 플레이테스트, 최종 스퍼트와 예선 제출의 선행 조건이 아니다. 정해진 통합 마감까지 validator와 실제 화면·청취 검증을 통과한 결과만 제출 빌드에 반영하고, 준비되지 않았거나 통합 위험이 큰 영역은 검증된 mock을 유지한다. 다만 공개 manifest·loader·이벤트 binding처럼 전문 작업과 메인 개발이 함께 사용하는 계약 변경은 양쪽 작업 전에 먼저 합의한다.
 
-제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 player-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관한 migration alias**다. 0.29.0 기본 Runtime에서 Sector 01~~03은 강제 Gate 포탈과 Stage별 문 없이 가로 4,800px의 하나의 물리 공간이며, 기존 아래→위 콘텐츠 순서를 local vertical stack으로 보존한다. 넓어진 양옆은 실제 exploration·combat·recovery wing이고 진행을 좌우 지그재그로 바꾸지 않는다. future Boss room은 Sector transition slot에 삽입해 downstream Stage local 좌표를 다시 쓰지 않는다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. Sector 04~~06은 아직 migration input이며 Runtime 구현 완료가 아니다.
+제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. 다만 `1-1`, `1-2` 같은 Stage는 player-facing Runtime 진행 단위가 아니라 **연속 Sector의 landmark·objective·encounter로 이관한 migration alias**다. 현재 기본 Runtime에서 Sector 01~~03은 강제 Gate 포탈과 Stage별 문 없이 가로 4,800px의 하나의 물리 공간이며, 기존 아래→위 콘텐츠 순서를 local vertical stack으로 보존한다. 넓어진 양옆은 실제 exploration·combat·recovery wing이고 진행을 좌우 지그재그로 바꾸지 않는다. future Boss room은 Sector transition slot에 삽입해 downstream Stage local 좌표를 다시 쓰지 않는다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. Sector 04~~06은 아직 migration input이며 Runtime 구현 완료가 아니다.
 
 ### 월드와 진행 영역 기준
 
 - #622의 Phase 1~2는 `SectorDefinition`, Sector validator와 build/startup-only legacy preview adapter를 canonical authoring 경계로 둔다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`이고 `legacyStageAlias`는 문서·migration metadata일 뿐이다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
-- #625/#637은 Sector 01~~03 preview를 seamless 기본 Runtime으로 전환했고, #642의 0.30.0은 이를 `seamless-sector-runtime-v3`로 확장했다. Stage 정의는 local vertical stack으로 보존하고, compiler가 actual lateral city wing과 future Boss room용 transition slot을 조립한다. Sector 04~~06은 alias input으로만 남고 legacy Area/Gate catalog는 이전 revision compatibility 검증에 사용한다.
-- Sector 01 access vertical slice는 1-3·1-6·1-7 Carrier 후보 중 아무 2곳을 골라 Access Module을 얻는 objective를 유지한다. 현재는 Sector Transit Lock이나 party-wipe reset을 만들지 않는다.
+- 현재 `seamless-sector-runtime-v9`은 Sector 01~~03 Stage 정의를 local vertical stack으로 보존하고 compiler가 actual lateral city wing과 future Boss room용 transition slot을 조립한다. Sector 04~~06은 alias input으로만 남고 legacy Area/Gate catalog는 이전 revision compatibility 검증에 사용한다.
+- Sector 01~03은 각 Sector의 정확히 세 Carrier를 모두 처리해 Access Module 3/3을 모은 뒤 다음 Sector transit device를 연다. Sector 01은 1-3·1-6·1-7, Sector 02는 2-2·2-5·2-7, Sector 03은 3-2·3-5·3-7의 기존 경비 slot을 사용한다. 같은 Sector 안의 Stage 이동은 잠그지 않고 개인·전원 사망 뒤에도 module·objective 진행을 보존한다.
 - 0.32.0은 Sector 01~03을 authored safe slot과 결정적 enemy pool로 채운다. 1-1·1-2는 비전투, 이후는 화면당 약 1기와 후반 역할 중첩을 기준으로 하며 exact slot 예산과 보존 계약은 [`enemy-density-composition.md`](./enemy-density-composition.md)를 따른다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.
@@ -124,20 +124,19 @@
 - Timer 0초부터 `CONTAINMENT PURGE FIELD`가 `240px/s`로 상승한다. 시간 보상 중에는 현재 높이에서 멈추고 다음 0초부터 같은 위치에서 재상승하며 후퇴·Player 추적·순간이동은 없다.
 - Purge 접촉은 lethal이고 전멸은 current Sector objective·route·enemy·Timer·Field만 reset한다. Player별 증강과 이전 Sector 진행은 보존한다.
 - 각 Sector에는 보스가 1개씩 있으며, 기획자가 정할 transition slot에서 일반 Timer·Purge와 잔여 시간을 끝낸 뒤 별도의 **보스 전투 타이머**와 Arena 위험을 시작한다.
-- `1-8 CONTAINMENT GATE`에는 보스를 넣지 않으며 기존 `Lower Grid Shutdown → Worker District Reveal → 일반 구간 종료 Checkpoint`를 유지한다. Sector 01 보스의 위치·전환 순서·시나리오는 기획자가 별도로 확정한다.
+- `1-8 CONTAINMENT GATE`에는 보스를 넣지 않으며 기존 `Lower Grid Shutdown → Worker District Reveal → 일반 구간 종료 Checkpoint`를 유지한다. Boss01 `CONTAINMENT GANTRY C-01`은 그 체크포인트 뒤의 sealed transfer vestibule에 별도 transition encounter로 배치하고, 승리 후 `2-1`로 이동한다. 상세 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다.
 - 수치와 core 의미는 확정됐지만 seamless topology의 정확한 `+10초` trigger, 최초 Field origin과 개인 Purge 사망 복귀는 후속 결정 전 구현 금지 HOLD다. 상세 계약은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
 - 현재 시드 기반 48단계 절차 생성 월드는 코어 조작을 검증한 프로토타입이다. 목표 시나리오 월드는 저자가 정한 48개 진행 영역을 기본으로 하며, 영역 내부의 시드 변형 허용 범위는 경로·완료 조건·출구를 훼손하지 않는 별도 기획으로 확정한다.
-- 섹터 1의 legacy 내부 콘텐츠와 완료 조건은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md)를 migration input으로 사용하고, topology·진행·부활은 0.25.0 seamless Sector 계약을 따른다.
 
 ## 9. 일정과 목표
 
 - 정기 회의: 매일 22:00~23:00, Discord
-- 장르·핵심 조작·전체 진행 같은 게임 기획은 완료 상태이며 `SECTOR 01`의 `1-1`~`1-8` 시나리오가 모두 작성됐다. 전체 48개 중 나머지 40개 맵의 시나리오와 레벨 디자인은 아직 없으며 새로 만들어야 한다.
-- 나머지 40개 맵 시나리오와 레벨 디자인은 섹터 순서대로 작성해 8월 19일까지 확정한다. 메인 개발은 전체 완료를 기다리지 않고 `SECTOR 01`부터 mock으로 구현하며, 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름과 오브젝트 요구가 모두 필요하다.
+- `SECTOR 01`~`06`의 상세 Stage 문서는 48/48 작성됐다. 문서 작성과 Runtime 연결은 별도 상태이며, 현재 연결 수·차단 요소·마지막 확인 근거는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
+- 메인 개발은 문서 수를 완료 수치로 사용하지 않고 섹터 순서대로 mock Runtime을 연결한다. 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름·오브젝트 요구·전환 계약과 실제 검증이 모두 필요하다.
 - 증강 v1 기획과 topology-independent Runtime은 0.26.0에 완료됐고 0.28.0에서 현재 Runtime Sector 01~~03의 명시적 장비 Node를 `1-4 → 2-3 → 3-5` 순서의 Player별 획득원으로 연결한다. Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer와 Player별 최대 6장을 사용한다. Sector 04~~06 획득 Node, Quest·순수 이동 카드·Specialization은 별도 확장이다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
 - 0.31.0 모바일 조작은 우측 토글로 Rope Aim과 Action Aim을 분리한다. Action Aim의 월드 터치는 실제 접촉 위치로 방향을 정하고 Rope를 발사하지 않으며, 유효 Action 시작은 적 명중 여부와 별개로 잔상·mock SFX를 먼저 제공한다.
-- NPC 역할·배치·대사와 대화 진행 규칙, 관련 상호작용 UI·게임 요소는 8월 15일까지 확정한다. 이 기획은 NPC가 처음 등장하는 섹터와 공용 대화 시스템 구현의 선행 조건이다.
-- 엔딩 내용, 진입 조건, 최종 Encounter 이후 흐름과 관련 UI·게임 요소는 8월 19일까지 확정한다. 이 기획은 `SECTOR 06`과 최종 완료 상태 구현의 선행 조건이다.
+- NPC는 온라인 예선 핵심 범위에서 제외한다. 코어 완료 뒤 여유가 있을 때만 2-6의 선택지 없는 3줄 stationary NPC를 검토한다.
+- Ending은 Final Security 처치 뒤 개별 Boarding, 전원 준비, Door Close, City Pullback, Run Complete 순서로 확정됐으며 상세 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)가 소유한다.
 - 그래픽·오디오 담당자는 메인 개발자가 맵별로 정리한 오브젝트·cue 목록을 받아 8월 19일에 정식 리소스 1차 생산분을 인계한다. 1차 생산분은 전체 자산 완료가 아니라 앞서 정리된 우선 오브젝트의 교체 가능한 첫 묶음이다.
 - 메인 개발자는 8월 21일까지 6개 섹터의 48개 맵과 오브젝트 동작을 섹터 순서대로 mock으로 연결하고, 준비된 1차 정식 리소스만 검증해 선택 통합한다. 8월 22~23일은 전체 섹터 플레이 흐름의 마지막 스퍼트로 사용한다.
 - 8월 14~17일 가족여행 전까지 완료할 항목:

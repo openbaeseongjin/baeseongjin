@@ -16,17 +16,15 @@
 - 손에서 실제 비행하는 Hook과 `1200px/s × 1/3초 = 400px`, 기본 0.5초 재발사 대기
 - 모든 암석 표면 부착과 수평 발판의 아래→위 통과
 - 시드 기반 48단계 수직 월드와 카메라 추적 프로토타입
-- 사거리 기반 자동 공격과 적 1종의 원거리 공격
+- 기본 자동 공격은 비활성화하고 로프 부착 중 고속 몸체 충돌을 기본 공격으로 사용한다. `AutomaticWeaponObject`는 후속 기능용으로 보존한다.
 - authored activation·Cover LOS를 유지한 체력 100·인식 760px·탄속 520px/s·재사격 1.0초 Sentry
-- 적 투사체의 로프 절단, 본체 피해, 넉백과 무적 시간. 적 위치 넉백은 직접 추격·돌진형만 허용하고 Turret·고정 Patrol 경로형은 피해만 받는다.
+- 적 투사체의 본체 피해·무적 시간과 `cutter-fire` opt-in 로프 절단. 적 위치 넉백은 직접 추격·돌진형만 허용하고 Turret·고정 Patrol 경로형은 피해만 받는다.
 - 체력, 사망·낙사와 플레이어별 활성 체크포인트 즉시 부활
 - 전투 HUD, 피해 숫자, 충격파, 파편과 화면 흔들림
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
 - [과거 절차 프로토타입] 마지막 암석의 정상 목표와 최종 완료 상태
 - [과거 절차 프로토타입] 8레벨 간격 체크포인트 생성·활성화·시각 표시. 현재 기본 Runtime은 24개 Stage마다 진입 세이브 포인트를 사용한다.
 - [0.26.0] Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer, Player별 최대 6장, owner-first damage/movement claim
-- [과거 절차 프로토타입] 연속 1,000개 시드의 상승·로프 사거리 통과 가능성 자동 검사
-- [과거 절차 프로토타입] 경계값·기본값·발견된 문제 시드의 고정 회귀 목록
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 generic Augment 선택 지표 수집
 - 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
 - 첫 화면의 싱글·멀티 선택, 고정 게임 서버 연결과 모바일 4자리 채널 생성·참가
@@ -42,12 +40,12 @@
 
 ### 아직 없음
 
-- 실제 플레이에서 새로 발견된 실패 시드 사례와 초반 2분 지표 표본(현재는 경계·기본 회귀 시드 5개만 고정)
-- 실제 조작 기반 전체 등반 자동 검증
+- 실제 플레이에서 새로 발견된 실패 사례와 초반 2분 지표 표본
+- 실제 조작 기반 전체 등반 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
-- Sector 03~06의 나머지 저작 진행 영역과 Sector 02 이후 content boundary 연결
+- Sector 03 REV8 topology·Direction migration, Sector 04~06 Runtime 연결과 각 Post-Sector Boss transition
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
-- 섹터별 보스 1개의 위치·전투 시나리오와 확정된 보스 타이머·Arena 붕괴·다음 섹터 전환 구현
+- Boss01 physical Arena·Breaker/Core/Emitter/Wind·피해/사망·`2-1` 전환과 Sector 02~05 보스 상세 계약·구현
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
 ## 구현 순서
@@ -56,7 +54,7 @@
 
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
-3. **Phase 3 · #625 / #637 / savepoint-only progression:** Sector 01~03을 4,800px seamless world와 Player별 active Stage checkpoint로 전환했다. 현재 Runtime은 Stage cursor와 물리 route lock 없이 정적 geometry를 사용하고 objective는 자기 trigger/prerequisite로 판정한다. Timer·Purge와 Boss 전환 제약은 미정이다.
+3. **Phase 3 · #625 / #637 / savepoint-only progression:** Sector 01~03을 4,800px seamless world와 Player별 active Stage checkpoint로 전환했다. 현재 Runtime은 Stage cursor와 물리 route lock 없이 정적 geometry를 사용하고 objective는 자기 trigger/prerequisite로 판정한다. Boss01 위치·전투 core는 확정됐고 physical transition wiring이 남았으며, Timer·Purge의 topology mapping은 HOLD다.
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
 5. **Sector Access 3-of-3 · 0.43.2:** Sector 01의 1-3·1-6·1-7, Sector 02의 2-2·2-5·2-7, Sector 03의 3-2·3-5·3-7 기존 경비 slot을 공용 Module source로 연결했다. 각 Sector는 세 개 전부를 요구하며 outgoing 경계의 transit device가 중앙과 Grapple budget 내 좌우 우회 crossing을 같은 visual/collision segments로 막고, unlock 시 blocker만 제거하며 모든 Player에게 camera scene을 재생한다. 같은 Sector 안의 Stage surface는 잠그지 않고 개인·전원 사망 뒤 module·route 상태를 보존한다. 위치 문자열은 제거하고 거리순 최대 3개 미수집 Carrier를 viewport 밖 edge arrow와 화면 안 diamond marker로 동시에 안내하며 가까운 대상일수록 크게 표시한다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
@@ -64,11 +62,11 @@
 
 ### 제출 전 시나리오 구현 트랙
 
-이하 Area/Gate 구현 순서는 0.24.0 이전 Runtime과 48개 migration source의 상태 기록이다. 0.29.0 기본 Runtime은 위 연속 Sector 계약을 사용하며 Stage 문서를 별도 Runtime 진행 단위로 다시 확장하지 않는다. 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)의 콘텐츠를 섹터·번호 순서로 흡수하되 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 stable ID와 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
+48개 Stage 문서는 migration source이자 제작 계약이며 별도 Runtime 진행 단위가 아니다. 현재 기본 Runtime은 위 연속 Sector 계약을 사용한다. 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)의 콘텐츠를 섹터·번호 순서로 흡수하되 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 stable ID와 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
 
-상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~~`06`의 `1-1`~~`6-8` 상세 Stage 문서는 48/48 작성됐다. 0.29.0 기본 Runtime은 `1-1 → 3-8` 24개 alias를 3개 4,800px seamless Sector의 local vertical landmark stack으로 compile하고, 실제 lateral city wing을 더한다. Sector 04 `4-1 → 4-8`은 standalone migration catalog, Sector 05·06은 문서/alias input으로 남는다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
+상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~~`06`의 `1-1`~~`6-8` 상세 Stage 문서는 48/48 작성됐다. 현재 `seamless-sector-runtime-v9`은 `1-1 → 3-8` 24개 alias를 3개 4,800px seamless Sector의 local vertical landmark stack으로 compile하고, 실제 lateral city wing을 더한다. Sector 04 `4-1 → 4-8`은 standalone migration catalog, Sector 05·06은 문서/alias input으로 남는다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
 
-Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했고 Camera·Story 인계 범위도 반영했다. 남은 것은 Post-Sector 03 Boss→`4-1` 전환 사용자 검토다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
+Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. 이후 병합된 REV8/REV8.1 package의 대형 topology와 Direction track은 아직 future migration이며 현재 mock geometry를 바꾸지 않았다. 남은 것은 REV8 Runtime migration과 Post-Sector 03 Boss→`4-1` 전환 사용자 검토다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
 
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
@@ -77,29 +75,6 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 월드 선택도 실행 방식별로 나누지 않는다. 로컬 실행과 네트워크 서버·예측은 하나의 `GameSimulationFactory`와 현재 authored catalog를 공유한다. 네트워크는 같은 world revision과 진행 상태를 복제할 뿐 별도 맵을 생성하지 않는다. 맵 definition은 stable object/state/event/presentation/cue ID만 소유하고 이미지·atlas·음원 경로는 소유하지 않는다. 현재 표현은 environment/audio runtime catalog와 world-object mock presentation catalog를 통해 연결하며 정식 package가 준비되면 같은 ID의 표현만 교체한다.
 
 P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 제외·개별 Boarding·Ending 계약은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다. 과거 Specialization 6종은 generic 증강 v1로 대체됐다. 구현은 `P0 Alignment → Boss primitive/Boss01 → Timer/Purge topology mapping → Sector04/05/06 Runtime 확장 → Final Security/Ending → Playtest` 순서이며, Sector02~~05 개별 Boss 상세와 Timer/Purge HOLD 세 항목은 후속 기획으로 남긴다. NPC는 핵심 범위 완료 뒤 여유가 있을 때만 2-6 최소안으로 검토한다.
-
-### 섹터 1 legacy authoring migration 기록
-
-세부 흐름, 영역별 완료 조건과 검증 기준은 [`sector-01-world-structure-plan.md`](./sector-01-world-structure-plan.md)에 남아 있다. 다음 순서는 0.24.0 이전 Area/Gate 구현의 기록이다. 0.25.0 이후에는 Gate portal과 legacy per-Area Checkpoint claim을 다시 만들지 않지만, 각 landmark entry의 `respawnAnchor`는 명시적인 Stage 세이브 포인트 구조물과 활성화 피드백으로 표현한다.
-
-1. 하나의 월드에 여러 진행 영역을 담는 공용 정의와 연결 검증을 먼저 만든다. 기존 시드 월드가 제공하던 지형·적·체크포인트 소비 계약은 호환 경계를 두어 한 번에 전부 교체하지 않는다.
-2. 영역 완료 조건과 출구 상태를 공용 진행 흐름으로 만든다. 출구를 통과해도 월드·런·플레이어·generic Augment loadout·체크포인트를 재생성하지 않는다.
-3. `1-1`을 첫 수직 절편으로 연결해 선행 목표 전의 잠긴 Gate, 이후 활성화된 Gate 패널 조작, 열린 문을 통한 `1-2` 진입을 검증한다.
-4. `1-2`·`1-3`을 이어 붙여 이동 달성형과 우회·패널 상호작용형 완료 조건이 같은 진행 흐름에서 작동하는지 검증한다.
-5. `1-4`~`1-7`을 순서대로 연결한다. 증강·Wind·Sentry·Manual Bypass는 각 시스템의 기존 또는 별도 구현을 사용하고, 맵 구조가 구체 오브젝트 동작을 중앙 분기로 소유하지 않는다.
-6. `1-8`의 T1 단독 Phase, T2+Pulsed Wind Phase, Containment Gate Override, Lower Grid Shutdown, Worker District Preview와 Sector-end Checkpoint를 연결한다. 실제 `2-1` 진입 영역은 해당 시나리오 확정 뒤 이어 붙인다.
-7. Timer/Purge 구현 전에 seamless Sector의 physical landmark/objective 중 +10초 trigger, 최초 Field origin과 개인 Purge 사망 복귀를 후속 결정으로 확정한다. Stage ID·Gate portal·Area 하단을 자동 매핑하지 않는다.
-8. 확정 mapping 위에 `60초 / +10초 / cap 60초 / Purge 240px/s`, 정지·재상승·no-retreat, lethal·전멸 current Sector reset을 연결한다. 증강과 이전 Sector 진행 보존, 10초·3초·0초 경고와 owner-first Purge claim을 검증한다.
-9. Sector 01 보스의 위치·전투 시나리오가 확정되면 transition slot에서 일반 Timer·Purge와 잔여 시간을 종료한 뒤 별도 Boss Timer·Arena 위험을 연결한다. `1-8` legacy 콘텐츠와 downstream Sector local 좌표는 이동하지 않는다. 상세 계약은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
-
-10. `SECTOR 01`: `1-1 → 1-8`
-11. `SECTOR 02`: `2-1 → 2-8`
-12. `SECTOR 03`: `3-1 → 3-8`
-13. `SECTOR 04`: `4-1 → 4-8`
-14. `SECTOR 05`: `5-1 → 5-8`
-15. `SECTOR 06`: `6-1 → 6-8` — 상세 기획 8개가 모두 작성됐다. Runtime 저작 전 Sector 01~06 Full Game Audit으로 전환·반복·content boundary를 정렬하고, 6-8 뒤 Final Security Encounter는 별도 상세 계약이 확정될 때까지 추정 구현하지 않는다.
-
-각 섹터의 오브젝트 목록은 다음 영역 구현과 전문 리소스 제작의 입력이지만, 정식 리소스 납품은 다음 영역 구현의 선행 조건이 아니다. 메인 개발은 달력상 예정 수량을 채우기보다 현재 실제 시나리오가 있는 영역을 끝까지 mock으로 연결하고, 새 시나리오는 Git 변경을 확인해 이어서 흡수한다. 맵 순서·핵심 기믹·완료 조건·Gate 연결·공개 asset 경계가 바뀌는 변경은 구현 전에 사용자 검토를 받는다.
 
 ### P0. 로그라이크 한 판의 순환 완성
 
