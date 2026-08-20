@@ -29,6 +29,7 @@ export const withEnemyRenderSnapshot = createRenderSnapshotCapabilityMixin({
             attackState: this.attackState,
             attackStateRemaining: this.attackStateRemaining,
             aimDirection: snapshotVector(this.aimDirection),
+            presentationAimDirection: snapshotVector(this.presentationAimDirection),
             rules: [...this.rules],
             radius: this.radius,
             health: this.health,

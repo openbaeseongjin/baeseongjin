@@ -76,7 +76,7 @@ function hasLineOfSight(enemy, target, surfaces) {
     );
 }
 
-function selectLockedTarget(enemy, targets, range, canAcquireTarget, surfaces) {
+function visibleTargetsForEnemy(enemy, targets, surfaces) {
     const eligibleTargets = enemy.activation
         ? targets.filter(
               ({ physics }) =>
@@ -86,7 +86,10 @@ function selectLockedTarget(enemy, targets, range, canAcquireTarget, surfaces) {
                   physics.position.y <= enemy.activation.y + enemy.activation.height
           )
         : targets;
-    const visibleTargets = eligibleTargets.filter((target) => hasLineOfSight(enemy, target, surfaces));
+    return eligibleTargets.filter((target) => hasLineOfSight(enemy, target, surfaces));
+}
+
+function selectLockedTarget(enemy, visibleTargets, range, canAcquireTarget) {
     const lockedTarget =
         enemy.lockedTargetId === null
             ? null
@@ -102,14 +105,38 @@ function selectLockedTarget(enemy, targets, range, canAcquireTarget, surfaces) {
     return selectNearestPlayer(enemy.position, visibleTargets, range);
 }
 
-function aimAt(enemy, target) {
+function directionTo(enemy, target) {
     const dx = target.physics.position.x - enemy.position.x;
     const dy = target.physics.position.y - enemy.position.y;
     const distance = Math.hypot(dx, dy);
-    if (distance <= 0) return false;
-    enemy.aimDirection = Object.freeze({ x: dx / distance, y: dy / distance });
+    if (distance <= 0) return null;
+    return Object.freeze({ x: dx / distance, y: dy / distance });
+}
+
+function aimAt(enemy, target) {
+    const direction = directionTo(enemy, target);
+    if (!direction) return false;
+    enemy.aimDirection = direction;
     return true;
 }
+
+function updatePresentationAimDirection(enemy, visibleTargets, range) {
+    if (enemy.enemyType !== "sentry" && enemy.enemyType !== "sentry-t1") {
+        enemy.presentationAimDirection = null;
+        return;
+    }
+    const nearestTarget = selectNearestPlayer(enemy.position, visibleTargets, range);
+    enemy.presentationAimDirection = nearestTarget ? directionTo(enemy, nearestTarget) : null;
+}
+
+const withEnemyPresentationAimSimulation = createSimulationCapabilityMixin({
+    id: "enemy-presentation-aim",
+    order: 9,
+    apply({ targets, range, surfaces = [] }) {
+        updatePresentationAimDirection(this, visibleTargetsForEnemy(this, targets, surfaces), range);
+        return this.presentationAimDirection;
+    }
+});
 
 function transitionAttack(enemy, state, durationSeconds = 0, { restart = false } = {}) {
     const result = enemy.attackStateController.transition(state, { durationSeconds, restart });
@@ -132,18 +159,13 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
     order: 10,
     apply({ targets, collisionActors = targets, projectiles, registry, config, surfaces = [], dt }) {
         this.beginSurfacePhysicsStep();
+        const visibleTargets = visibleTargetsForEnemy(this, targets, surfaces);
         if (this.rules.includes("no-projectile-attack")) {
             resetAttack(this);
             this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors);
             return null;
         }
-        const target = selectLockedTarget(
-            this,
-            targets,
-            config.enemyAttackRange,
-            this.attackState === "idle",
-            surfaces
-        );
+        const target = selectLockedTarget(this, visibleTargets, config.enemyAttackRange, this.attackState === "idle");
         if (!target) {
             resetAttack(this);
             advanceEnemyPatrol(this, dt);
@@ -223,7 +245,7 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
 });
 
 export class EnemyObject extends withSurfacePhysics(
-    withEnemyRenderSnapshot(withEnemyWeaponSimulation(SimulationDrivenObject))
+    withEnemyRenderSnapshot(withEnemyWeaponSimulation(withEnemyPresentationAimSimulation(SimulationDrivenObject)))
 ) {
     constructor({
         id,
@@ -245,6 +267,7 @@ export class EnemyObject extends withSurfacePhysics(
         attackState = "idle",
         attackStateRemaining = 0,
         aimDirection = null,
+        presentationAimDirection = null,
         lockedTargetId = null,
         impactDisplacementEnabled = null,
         knockbackState = null
@@ -279,6 +302,9 @@ export class EnemyObject extends withSurfacePhysics(
             writable: false
         });
         this.aimDirection = aimDirection ? Object.freeze({ x: aimDirection.x, y: aimDirection.y }) : null;
+        this.presentationAimDirection = presentationAimDirection
+            ? Object.freeze({ x: presentationAimDirection.x, y: presentationAimDirection.y })
+            : null;
         this.fireCooldown =
             this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, fireCooldown ?? 0) : 0;
         this.impactDisplacementEnabled =
@@ -358,6 +384,12 @@ export class EnemyObject extends withSurfacePhysics(
             ? Object.freeze({
                   x: assertFinite(state.aimDirection.x, "enemy.aimDirection.x"),
                   y: assertFinite(state.aimDirection.y, "enemy.aimDirection.y")
+              })
+            : null;
+        this.presentationAimDirection = state.presentationAimDirection
+            ? Object.freeze({
+                  x: assertFinite(state.presentationAimDirection.x, "enemy.presentationAimDirection.x"),
+                  y: assertFinite(state.presentationAimDirection.y, "enemy.presentationAimDirection.y")
               })
             : null;
         this.fireCooldown =

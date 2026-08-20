@@ -40,6 +40,7 @@
 | [`graphics-asset-guide.md`](./graphics-asset-guide.md) | 그래픽 자산 공통 작업 안내 |
 | [`pixel-graphics-design-guide.md`](./pixel-graphics-design-guide.md) | 픽셀 자산의 제작 크기, 타일 격자와 화면 위계 |
 | [`sprite-asset-format.md`](./sprite-asset-format.md) | 캐릭터 스프라이트 교환 형식 |
+| [`enemy-sprite-asset-format.md`](./enemy-sprite-asset-format.md) | 몹 스프라이트 manifest·fallback 교환 형식 |
 | [`environment-asset-format.md`](./environment-asset-format.md) | 환경 자산 교환 형식 |
 | [`audio-asset-guide.md`](./audio-asset-guide.md) | 오디오 작업자의 제작·인계 안내 |
 | [`audio-asset-format.md`](./audio-asset-format.md) | 오디오 package·manifest 교환 형식 |

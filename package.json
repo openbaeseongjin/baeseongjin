@@ -1,6 +1,6 @@
 {
     "name": "baeseongjin-rope-roguelike",
-    "version": "0.46.0",
+    "version": "0.47.0",
     "private": true,
     "type": "module",
     "scripts": {
@@ -14,6 +14,7 @@
         "check:scenario-integration": "node scripts/checkScenarioIntegration.mjs",
         "validate:area-specs": "node scripts/validateAreaSpecs.mjs",
         "validate:sprite-assets": "node scripts/validateSpriteAssets.mjs",
+        "validate:enemy-sprite-assets": "node scripts/validateEnemySpriteAssets.mjs",
         "validate:environment-assets": "node scripts/validateEnvironmentAssets.mjs",
         "validate:audio-assets": "node scripts/validateAudioAssets.mjs",
         "validate:direction-specs": "node scripts/validateDirectionSpecs.mjs",

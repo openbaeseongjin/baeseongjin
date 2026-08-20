@@ -224,7 +224,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 렌더 프로필은 bootstrap factory 경계에서만 선택한다. 앱·시뮬레이션·네트워크 snapshot에 프로필별 타입 분기나 스프라이트 자산 계약을 추가하지 않는다.
 - 현재 기본 프로필은 `sprite`다. 기존 표현은 `?renderer=polygon`으로 유지하며 두 프로필은 같은 읽기 전용 scene snapshot을 소비하고 polygon renderer를 내부 모드 분기로 확장하지 않는다.
 - 시각 효과에 시간 상태가 필요하면 렌더러가 임의로 게임 시간을 만들지 않고 명시적인 render clock 또는 snapshot 값을 받는다.
-- 스프라이트 애니메이션은 불변 clip 데이터와 외부 phase 입력을 분리한다. 순간 상태는 표현 경과 시간을 사용하고 player 달리기처럼 보폭이 이동량과 맞아야 하는 반복 상태는 실제 수평 이동 거리로 phase를 진행한다. Canvas painter는 보간을 끈 그리기만 담당하고 이미지 로딩·캐시·게임 시간·이동 거리 진행을 함께 소유하지 않는다.
+- 스프라이트 애니메이션은 불변 clip 데이터와 외부 phase 입력을 분리한다. Player와 일반 몹은 상태 coverage와 manifest를 분리하되 정규화 뒤에는 공용 `SpriteAnimation`의 `frames + duration + loop + frameAt(elapsed)` clip을 사용한다. 순간 상태는 표현 경과 시간을 사용하고 player 달리기처럼 보폭이 이동량과 맞아야 하는 반복 상태는 실제 수평 이동 거리로 phase를 진행한다. Animation state나 frame index를 gameplay·network snapshot에 추가하지 않으며 Canvas painter는 보간을 끈 그리기만 담당하고 이미지 로딩·캐시·게임 시간·이동 거리 진행을 함께 소유하지 않는다.
 - 상태 머신은 현재 상태·경과 시간·허용 전이만 아는 순수 조합 컴포넌트로 만들고, 도메인 snapshot·사건을 상태 전이 입력으로 바꾸는 resolver와 분리한다. 재사용성을 이유로 의미와 수명이 다른 기존 도메인 상태를 한 FSM으로 강제 이전하지 않는다.
 - 여러 actor의 순간 애니메이션은 사건 대상 ID로 각 표현 FSM에 전달한다. animation state나 frame index를 게임·네트워크 권위 snapshot에 저장해 동기화하지 않는다.
 - 로컬 예측 사건과 서버 확정 사건이 같은 화면 전이를 뜻하면 causal object ID를 같은 presentation ID로 정규화한다. 서버 receipt 때문에 이미 시작한 `hit`·`death`·`respawn`이나 로컬 death 카메라 hold를 다시 재생하지 않는다.
@@ -329,7 +329,7 @@ class Player extends RopeAttachable(GameObject) {}
 - Canvas 변경은 시작·동작 중·종료 또는 해제 상태를 실제 화면으로 검증한다.
 - 렌더 최적화는 실제 브라우저에서 보이는 결과가 같은지와 화면 안/밖 객체를 함께 둔 draw 감소를 증명한다. 설정 버튼 길게 누르기로 디버그 수치 표시를 켜고 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
 - 스프라이트 clip은 자산이 실제로 표현하는 행동 의미와 일치해야 한다. 지원하지 않는 행동을 방향 전환용 프레임 등 무관한 프레임에 임의 대응하지 않고, 불가피한 대체는 definition에 명시적 fallback으로 선언한다.
-- player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 자산 로더도 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다. 정식 입력은 `sprite-asset-format.md`의 PNG 묶음과 도구 중립 manifest로 정규화한다.
+- player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 일반 몹은 별도 `enemy-sprite-asset-format.md` 계약으로 타입별 presentation state coverage·alias, clip frame 순서·양수 duration·loop와 fallback 순환을 검증한다. 자산 로더는 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다.
 - PixelLab·SpriteCook 같은 생성 도구의 ZIP·metadata·개별 frame은 import 입력으로만 다룬다. 도구별 adapter가 표준 manifest를 만들고 renderer와 gameplay에는 도구 이름 분기를 추가하지 않는다. GIF·WebP는 미리보기로만 사용한다.
 - sprite manifest는 frame 순서·duration·loop·fallback과 표현 cue만 소유한다. collider·hitbox·피해량·무적 시간·물리·네트워크 권위 상태를 넣지 않으며 생성 도구 keypoint를 collider로 자동 변환하지 않는다.
 - 스프라이트 관련 개발·에셋 작업은 루트 `AGENTS.md`에서 `sprite-asset-format.md`의 JSON Schema·example manifest·표준 validator 명령으로 진입하게 한다. loader, schema, example, validator 중 하나를 바꾸면 같은 계약 변경으로 함께 갱신하며 새 결과물은 validator 통과 전 완료로 보지 않는다.
@@ -341,6 +341,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 오디오 scene·binding처럼 120Hz 고정 스텝에서 호출될 수 있는 경로는 같은 lifecycle key·cue·gain·pan 입력을 멱등 처리한다. 값이 같을 때 Web Audio automation을 추가하지 않고, 값이 변할 때는 해당 `AudioParam`의 기존 예약을 취소·교체한다. 앱별 호출 빈도 제한으로 우회하지 말고 공용 voice/adapter 진단으로 확인한다.
 - emitter cooldown, causal ID, runtime failure처럼 사건 수에 따라 늘 수 있는 오디오 기록은 명시적 상한을 가진다. buffer source 시작 실패는 생성한 handle·node·voice를 즉시 정리한다. `stopAll`은 one-shot·loop를, `suspend`는 one-shot을, `release`는 남은 voice·loop와 cooldown·variation·causal 추적 Map까지 결정적으로 비워야 한다.
 - 스프라이트 화면 변경은 데스크톱과 모바일 크기에서 상태의 자세·실루엣·동작을 비교한다. 색 변화만을 상태 구분의 유일한 근거로 사용하지 않는다.
+- 정식 actor sprite가 준비된 경로에는 fallback mock의 본체 보조선·센서 블록을 중복 합성하지 않는다. gameplay 의미가 있는 telegraph·상태 bar는 공용 표현으로 유지하며, 실제 적이 화면에 들어오는 재현 가능한 Stage·seed에서 정식 frame draw와 fallback 비활성을 함께 검증한다.
 
 ## 11. 코드 스타일과 파일 관리
 

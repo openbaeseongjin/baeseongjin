@@ -90,21 +90,18 @@ export function updatePlayerProjectiles({
     return Object.freeze({ hits, resolutions: Object.freeze(resolutions) });
 }
 
+export function updateEnemyPresentationAim({ enemies, targets, range, surfaces = [] }) {
+    for (const enemy of enemies) {
+        advanceSimulationObject(enemy, "enemy-presentation-aim", { targets, range, surfaces });
+    }
+}
+
 export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, surfaces = [], dt }) {
     return Object.freeze(
         enemies
             .map((enemy) => {
-                const eligibleTargets = enemy.activation
-                    ? targets.filter(
-                          ({ physics }) =>
-                              physics.position.x >= enemy.activation.x &&
-                              physics.position.x <= enemy.activation.x + enemy.activation.width &&
-                              physics.position.y >= enemy.activation.y &&
-                              physics.position.y <= enemy.activation.y + enemy.activation.height
-                      )
-                    : targets;
                 return advanceSimulationObject(enemy, "enemy-weapon", {
-                    targets: eligibleTargets,
+                    targets,
                     collisionActors: targets,
                     projectiles,
                     registry,

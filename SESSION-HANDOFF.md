@@ -408,6 +408,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 정식 픽셀 그래픽은 `docs/pixel-graphics-design-guide.md`의 `32×32` 기본 격자, 자산 종류별 제작 크기와 화면 위계를 따른다. 작은 캐릭터와 거대한 다층 배경의 대비를 사용하고 플레이 영역은 밝고 선명하게, 배경은 깊어질수록 명도 대비·채도·도트 밀도를 낮춘다.
 - 현재 24×24 player mock과 production starter는 렌더러·manifest 연결 검증 자료이며 정식 캐릭터 크기 기준이 아니다. 정식 player는 32×32~~48×48 셀을 사용하고 액션 확장은 48×48~~64×64까지 허용하되 실제 셀 크기를 manifest에 기록한다.
 - 전용 template이 없는 자산에 player나 environment manifest를 억지로 재사용하지 않는다. 담당 개발자가 자산 종류에 맞는 공개 계약을 만든 뒤 runtime 경로로 승격하며, 충돌·물리·전투·네트워크 값은 그래픽 리소스와 분리한다.
+- 2026-08-20 사용자 최종 검수로 Sector 01의 `sentry-t1`과 `pursuit-drone-t1` 이미지·애니메이션을 완료 처리한다. Sentry는 후보 `06` 기반 고정 베이스와 upright 회전 머리·단일 포신, Pursuit는 후보 `09` 기반 기본 이미지와 `seek/windup/dash/recover/knockback` 각 4프레임이 승인 범위다. 현재 Runtime 기준과 검증 기록은 `assets/runtime/characters/sector-01-enemies/README.md`가 소유하며, 명시적인 새 사용자 결정 전에는 두 자산을 재생성·교체 대상으로 취급하지 않는다. Shield·Artillery 및 다른 몬스터는 이번 최종 승인에 포함하지 않는다.
 - 기본 player의 일곱 상태는 48×48 출력과 모바일 화면에서 자세·실루엣만으로 구분할 수 있게 제작한다. 다른 actor의 상태 목록은 플레이어 계약을 복사하지 않고 작업 요청에서 별도로 정한다.
 - `assets/runtime/characters/player-mock/player-action-mock.svg`는 manifest 로딩 실패 시 사용하는 내장 복구 자료이며 정식 납품 형식은 여러 PNG atlas와 `sprite-manifest.json`이다. 그래픽 담당자에게 SVG mock이나 validator fixture를 직접 출발점으로 주지 않는다.
 - `assets/runtime/characters/player-production-template/`은 현재 mock의 일곱 상태·프레임·재생 설정을 실제 납품 형식으로 옮긴 개발 연결용 starter다. 그래픽 담당자는 배치만 참고해 `assets/artwork/characters/player-main/`에 납품하고, 담당 개발자가 starter를 `assets/runtime/characters/player-main/`으로 복사해 PNG와 manifest를 정규화한다.
