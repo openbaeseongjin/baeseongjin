@@ -6,4 +6,4 @@ Because this repository and `docs/` GitHub Pages site are public, GitHub publica
 
 `transcripts/<date>.md` holds the unedited, per-speaker conversation record captured between `/meeting start` and `/meeting end` (every text message and voice transcript line, verbatim, in order) — not just the classified minutes above. It is written in the same commit and is subject to the same `ALLOW_PUBLIC_GITHUB_MINUTES` gate and team-approval expectation.
 
-Meeting minutes are evidence for decisions, not the current product or architecture specification. Promote confirmed rules to the relevant canonical document and `SESSION-HANDOFF.md` before treating them as active project guidance.
+Meeting minutes are evidence for decisions, not the current product or architecture specification. Promote confirmed rules to the relevant canonical document before treating them as active project guidance; use `SESSION-HANDOFF.md` only while that promotion is still pending.

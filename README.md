@@ -53,7 +53,7 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 - [아키텍처](docs/architecture.md) — 초기 모듈 경계와 런타임 흐름
 - [싱글·협동 동기화 설계](docs/multiplayer-synchronization.md) — 권위 서버, 입력 예측, 스냅샷과 상태 소유권
 - [개발 규칙](docs/development-rules.md) — 객체 설계, 시뮬레이션, 의존성, 구현 및 검증 기준
-- [세션 핸드오프](SESSION-HANDOFF.md) — 현재 유효한 결정과 다음 작업
+- [세션 핸드오프](SESSION-HANDOFF.md) — 아직 기준 문서에 흡수되지 않은 결정·전환·blocker
 - [결정 이력](docs/decision-history.md) — 반영 또는 대체된 제품·아키텍처 결정
 - [개발 환경](docs/dev-environment-setup.md) — 로컬 실행 명령과 문제 해결
 - [기술 스택](docs/tech-stack.md) — 언어, UI, 렌더링, 검증, 배포 기반
