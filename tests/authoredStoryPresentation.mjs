@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { localTriggerObjects } from "../src/game/camera/AuthoredCameraDirector.js";
+import { compileDirectionAuthoring } from "../src/game/direction/DirectionDefinition.js";
+import { createLocalDirectionRuntime } from "../src/game/direction/DirectionProductionAdapters.js";
 import { AuthoredStoryPresentation } from "../src/game/presentation/AuthoredStoryPresentation.js";
 import { GameSimulation } from "../src/game/simulation/GameSimulation.js";
 import { createLegacyAuthoredGameSimulation as createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
@@ -9,83 +13,129 @@ function triggerWithCue(triggers, cueId) {
     return triggers.find(({ cueIds }) => cueIds.includes(cueId));
 }
 
+function directionDefinition(stageAlias) {
+    return compileDirectionAuthoring(
+        JSON.parse(readFileSync(resolve(`docs/bsh/scenario/1/${stageAlias}/DIRECTION-SPEC.json`), "utf8"))
+    );
+}
+
+function directionHarness() {
+    const bundle = createLocalDirectionRuntime({
+        viewerId: "player-local",
+        definitions: [directionDefinition("1-1"), directionDefinition("1-2")]
+    });
+    return {
+        ...bundle,
+        update(dt, { areaId, zoneId, localX = 0, localY = 0, events = [] }) {
+            bundle.runtime.update(dt, {
+                areaId,
+                cameraZoneId: zoneId,
+                localX,
+                localY,
+                events,
+                audioContext: null
+            });
+            return bundle.storyPresentation.update(dt, {
+                currentAreaId: areaId,
+                currentAreaLocalX: localX,
+                currentAreaLocalY: localY,
+                events
+            });
+        }
+    };
+}
+
 export function run() {
     const currentWorld = createCurrentGameSimulation({ worldSeed: 42 }).world;
     const sector04World = new GameSimulation({ worldSeed: 42, worldCatalog: SECTOR_04_AREA_CATALOG }).world;
-    const presentation = new AuthoredStoryPresentation();
-    assert.equal(presentation.update(0.1, { currentAreaId: "sector-01-01" }).title, "GROUND SERVICE ACCESS");
-    assert.equal(presentation.snapshot().detail, "LOCKDOWN");
-    assert.equal(presentation.update(1.7, { currentAreaId: "sector-01-01" }), null);
+    const direction = directionHarness();
+    assert.equal(
+        direction.update(0.1, { areaId: "sector-01-01", zoneId: "intro", localY: -32 }).title,
+        "GROUND SERVICE ACCESS"
+    );
+    assert.equal(direction.storyPresentation.snapshot().detail, "LOCKDOWN");
+    assert.equal(direction.update(1.7, { areaId: "sector-01-01", zoneId: "intro", localY: -32 }), null);
 
-    const started = presentation.update(0, {
-        currentAreaId: "sector-01-01",
-        events: [
-            {
-                eventType: "objective-sequence-started",
-                objectiveId: "sector-01-01:terminal-read"
-            }
-        ]
+    const terminalEvent = {
+        eventType: "objective-sequence-started",
+        objectiveId: "sector-01-01:terminal-read"
+    };
+    const started = direction.update(0, {
+        areaId: "sector-01-01",
+        zoneId: "terminal",
+        localY: -900,
+        events: [terminalEvent]
     });
     assert.deepEqual([started.title, started.detail], ["VERTICAL GRID", "CASCADE FAILURE"]);
-    assert.equal(presentation.update(0.9, { currentAreaId: "sector-01-01" }).title, "LOWER TRANSIT");
-    assert.equal(presentation.update(0.9, { currentAreaId: "sector-01-01" }).title, "ROOFTOP PAD 03");
+    assert.equal(
+        direction.update(0.9, { areaId: "sector-01-01", zoneId: "terminal", localY: -900 }).title,
+        "LOWER TRANSIT"
+    );
+    assert.equal(
+        direction.update(0.9, { areaId: "sector-01-01", zoneId: "terminal", localY: -900 }).title,
+        "ROOFTOP PAD 03"
+    );
 
-    const gateQueued = presentation.update(0, {
-        currentAreaId: "sector-01-01",
-        events: [{ eventType: "gate-unlocked", gateId: "sector-01-01:gate" }]
+    const gateEvent = { eventType: "gate-unlocked", gateId: "sector-01-01:gate" };
+    const gateQueued = direction.update(0, {
+        areaId: "sector-01-01",
+        zoneId: "terminal",
+        localY: -900,
+        events: [gateEvent]
     });
     assert.equal(gateQueued.title, "ROOFTOP PAD 03");
     assert.deepEqual(
-        [presentation.update(0.9, { currentAreaId: "sector-01-01" }).title, presentation.snapshot().detail],
+        [
+            direction.update(0.9, { areaId: "sector-01-01", zoneId: "terminal", localY: -900 }).title,
+            direction.storyPresentation.snapshot().detail
+        ],
         ["SERVICE SHAFT 02", "ACCESS OPEN"]
     );
-    assert.equal(presentation.update(1.2, { currentAreaId: "sector-01-01" }), null);
-
-    presentation.update(0, {
-        currentAreaId: "sector-01-01",
-        events: [{ eventType: "gate-unlocked", gateId: "sector-01-01:gate" }]
+    assert.equal(direction.update(1.2, { areaId: "sector-01-01", zoneId: "terminal", localY: -900 }), null);
+    direction.update(0, {
+        areaId: "sector-01-01",
+        zoneId: "terminal",
+        localY: -900,
+        events: [gateEvent]
     });
-    assert.equal(presentation.snapshot(), null, "replayed network events must not repeat a story cue");
+    assert.equal(direction.storyPresentation.snapshot(), null, "replayed network events must not repeat a story cue");
 
-    const secondAreaPresentation = new AuthoredStoryPresentation();
+    const secondArea = directionHarness();
     assert.deepEqual(
         [
-            secondAreaPresentation.update(0, {
-                currentAreaId: "sector-01-02",
-                currentAreaLocalY: -32
+            secondArea.update(0, {
+                areaId: "sector-01-02",
+                zoneId: "lift-failure",
+                localY: -32
             }).title,
-            secondAreaPresentation.snapshot().detail
+            secondArea.storyPresentation.snapshot().detail
         ],
         ["LIFT CONTROL", "OFFLINE"]
     );
-    const waitingAtEntry = new AuthoredStoryPresentation();
-    waitingAtEntry.update(0, { currentAreaId: "sector-01-02", currentAreaLocalY: -32 });
+    const waitingAtEntry = directionHarness();
+    waitingAtEntry.update(0, { areaId: "sector-01-02", zoneId: "lift-failure", localY: -32 });
     assert.equal(
-        waitingAtEntry.update(1.6, { currentAreaId: "sector-01-02", currentAreaLocalY: -32 }),
+        waitingAtEntry.update(1.6, { areaId: "sector-01-02", zoneId: "lift-failure", localY: -32 }),
         null,
         "manual access guidance must wait for the player's first ascent"
     );
-    secondAreaPresentation.update(0, {
-        currentAreaId: "sector-01-02",
-        currentAreaLocalY: -96
+    secondArea.update(0, {
+        areaId: "sector-01-02",
+        zoneId: "left-cross",
+        localY: -96
     });
     assert.deepEqual(
         [
-            secondAreaPresentation.update(1.6, {
-                currentAreaId: "sector-01-02",
-                currentAreaLocalY: -96
+            secondArea.update(1.6, {
+                areaId: "sector-01-02",
+                zoneId: "left-cross",
+                localY: -96
             }).title,
-            secondAreaPresentation.snapshot().detail
+            secondArea.storyPresentation.snapshot().detail
         ],
         ["AUTOMATIC LIFT SERVICE", "SUSPENDED · MANUAL ACCESS ONLY"]
     );
-    assert.equal(
-        secondAreaPresentation.update(1.8, {
-            currentAreaId: "sector-01-02",
-            currentAreaLocalY: -300
-        }),
-        null
-    );
+    assert.equal(secondArea.update(1.8, { areaId: "sector-01-02", zoneId: "left-cross", localY: -300 }), null);
 
     const finalDeckReached = {
         eventType: "objective-completed",
@@ -93,29 +143,28 @@ export function run() {
     };
     assert.deepEqual(
         [
-            secondAreaPresentation.update(0, {
-                currentAreaId: "sector-01-02",
-                currentAreaLocalY: -960,
+            secondArea.update(0, {
+                areaId: "sector-01-02",
+                zoneId: "exit",
+                localY: -960,
                 events: [finalDeckReached]
             }).title,
-            secondAreaPresentation.snapshot().detail
+            secondArea.storyPresentation.snapshot().detail
         ],
         ["POWER REDUCTION", "STAGE 2"]
     );
     assert.deepEqual(
         [
-            secondAreaPresentation.update(1.2, {
-                currentAreaId: "sector-01-02",
-                currentAreaLocalY: -960
-            }).title,
-            secondAreaPresentation.snapshot().detail
+            secondArea.update(1.2, { areaId: "sector-01-02", zoneId: "exit", localY: -960 }).title,
+            secondArea.storyPresentation.snapshot().detail
         ],
         ["SECURITY ACCESS", "CHECK"]
     );
     assert.equal(
-        secondAreaPresentation.update(1.2, {
-            currentAreaId: "sector-01-02",
-            currentAreaLocalY: -960,
+        secondArea.update(1.2, {
+            areaId: "sector-01-02",
+            zoneId: "exit",
+            localY: -960,
             events: [finalDeckReached]
         }),
         null,

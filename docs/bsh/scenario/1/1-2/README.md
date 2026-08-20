@@ -4,7 +4,7 @@
 > Runtime audit baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 > 1-1 approved scale baseline: `1280×1024`
 > 1-2 target core: `1664×960`
-> Full implementation status: **NOT IMPLEMENTED / MAJOR BLOCKOUT DELTA**
+> Direction implementation coverage: `npm run validate:direction-specs`
 
 ## 1. One-line experience
 
@@ -218,7 +218,7 @@ DESIGN LOCKED Player Bark:
 `…리프트도?`
 
 Status:
-`NOT IMPLEMENTED — PLAYER BARK LAYER`
+`npm run validate:direction-specs`에서 자동 산출
 
 Only Player text in Stage.
 
@@ -310,7 +310,7 @@ HYPOTHESIS PASS
 - mastered 0:25–0:42
 
 CURRENT GITHUB RUNTIME:
-MAJOR DELTA / NOT IMPLEMENTED
+SEE GENERATED DIRECTION COVERAGE — `npm run validate:direction-specs`
 
 ## 14. Do not do
 

@@ -31,7 +31,11 @@ export function run() {
     const second = assembleAuthoredWorld(SECTOR_01_AREA_CATALOG, { seed: 9182, floorY: 320 });
     const currentWorld = assembleAuthoredWorld(CURRENT_AUTHORED_AREA_CATALOG, { seed: 9182, floorY: 320 });
 
-    assert.ok(SECTOR_01_AREA_CATALOG.areas[0].storyTriggers.length > 0, "scenario plans retain story inventory");
+    assert.deepEqual(
+        SECTOR_01_AREA_CATALOG.areas.slice(0, 2).map(({ storyTriggers }) => storyTriggers),
+        [[], []],
+        "migrated Stage story inventory must live in DirectionDefinition authoring data"
+    );
     assert.equal(
         Object.hasOwn(currentWorld.areas[0], "storyTriggers"),
         false,

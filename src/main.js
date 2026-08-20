@@ -22,6 +22,7 @@ import { DebugPanel } from "./game/ui/DebugPanel.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "./render/environment/AuthoredAreaEnvironmentCatalog.js";
+import { loadDefaultDirectionDefinitions } from "./game/direction/DirectionCatalog.js";
 
 const canvas = document.getElementById("game-canvas");
 if (!canvas) {
@@ -30,6 +31,7 @@ if (!canvas) {
 const rendererProfile = resolveRendererProfile(globalThis.location.search);
 let playerDefinition = null;
 let authoredAreaEnvironmentDefinitions = Object.freeze({});
+let directionDefinitions = Object.freeze([]);
 
 let app = null;
 let hudVisible = true;
@@ -159,7 +161,8 @@ function createSingleGameApp(debug) {
         metricsVisible: debug.metrics,
         hudVisible,
         ropeTuning: debug.ropeTuning,
-        debugAugmentIds: debug.debugAugmentIds
+        debugAugmentIds: debug.debugAugmentIds,
+        directionDefinitions
     });
 }
 
@@ -236,7 +239,8 @@ async function launch() {
                     onDisconnect: returnToMenu,
                     onDiagnostics: updateDiagnostics,
                     metricsVisible: debug.metrics,
-                    hudVisible
+                    hudVisible,
+                    directionDefinitions
                 });
                 channelBadge.textContent = `채널 ${authority.channelId}`;
                 channelBadge.hidden = false;
@@ -270,9 +274,10 @@ async function bootstrap() {
     startupLoadingScreen.show();
     await serviceWorkerUpdater.ready;
     if (pageClosing) return;
-    [playerDefinition, authoredAreaEnvironmentDefinitions] = await Promise.all([
+    [playerDefinition, authoredAreaEnvironmentDefinitions, directionDefinitions] = await Promise.all([
         loadDefaultPlayerSpriteDefinition(),
-        loadAuthoredAreaEnvironmentDefinitions()
+        loadAuthoredAreaEnvironmentDefinitions(),
+        loadDefaultDirectionDefinitions()
     ]);
     if (pageClosing) return;
     startupLoadingScreen.hide();

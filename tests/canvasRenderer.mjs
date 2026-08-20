@@ -291,6 +291,23 @@ export function run() {
         durationSeconds: 0.9
     });
     assert.deepEqual(textCalls, ["VERTICAL GRID", "CASCADE FAILURE"]);
+    const directionFillCount = fillCalls.length;
+    renderer.drawDirectionLighting(
+        { presetId: "maintenance-white-local-amber", age: 0.4 },
+        {
+            player: { id: "player-local", position: { x: 422, y: 260 }, collider: { radius: 18 } },
+            camera: { x: 0, y: 0, zoom: 1 }
+        }
+    );
+    assert.ok(fillCalls.length > directionFillCount);
+    renderer.drawDirectionCharacter(
+        { kind: "exhale", speakerId: "player-local", age: 0.2, durationSeconds: 0.8 },
+        {
+            player: { id: "player-local", position: { x: 422, y: 260 }, collider: { radius: 18 } },
+            otherPlayers: [],
+            camera: { x: 0, y: 0, zoom: 1 }
+        }
+    );
     textCalls.length = 0;
     renderer.drawPlayerMessagePresentation(
         {

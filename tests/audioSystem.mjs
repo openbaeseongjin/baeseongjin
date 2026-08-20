@@ -340,11 +340,18 @@ class FakeElement {
 async function testManifestAndValidator() {
     const definition = loadMockDefinition();
     assert.equal(Object.keys(definition.packages).length, 4);
-    assert.equal(Object.keys(definition.clips).length, 9);
+    assert.equal(Object.keys(definition.clips).length, 15);
     assert.deepEqual(Object.keys(definition.cues).sort(), [
         "ambience-altitude-wind",
         "bgm-climb",
         "bgm-run-complete",
+        "direction-air-rope-landing",
+        "direction-cable-brake-settle",
+        "direction-free-air-attach",
+        "direction-relay-trip-settle",
+        "direction-rope-air-priority",
+        "direction-rope-priority",
+        "direction-security-beep-servo",
         "gameplay-action-swing",
         "gameplay-checkpoint-reached",
         "gameplay-player-hit",
@@ -354,8 +361,8 @@ async function testManifestAndValidator() {
     ]);
     const result = validateAudioPackDirectory("assets/runtime/audio/packs/default-mock");
     assert.equal(result.packageCount, 4);
-    assert.equal(result.sourceCount, 9);
-    assert.equal(result.cueCount, 9);
+    assert.equal(result.sourceCount, 15);
+    assert.equal(result.cueCount, 16);
 
     const invalid = readJson("assets/runtime/audio/gameplay/default-mock/audio-manifest.json");
     invalid.clips["rope-attach"].sources[0].path = "../escape.wav";
@@ -721,6 +728,12 @@ function testMixerVoicePolicyAndBindings() {
         calls.filter(({ key }) => key === "bgm:main").map(({ cueId }) => cueId),
         ["bgm-climb", "bgm-run-complete"]
     );
+    bindings.playDirectionCue("direction-free-air-attach", {
+        ...world,
+        emitterId: "player-1",
+        causalId: "direction:free-air"
+    });
+    assert.equal(calls.at(-1).cueId, "direction-free-air-attach");
     bindings.stopScene();
     assert.equal(calls.at(-1).cueId, "stop-all");
     manager.release();

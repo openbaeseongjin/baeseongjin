@@ -1,0 +1,144 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "direction-spec.schema.json",
+    "title": "Stage Direction Authoring Spec",
+    "type": "object",
+    "required": ["schemaVersion", "directionStatus", "stage", "globalControl", "beats"],
+    "properties": {
+        "schemaVersion": { "const": "direction-spec-v1" },
+        "directionStatus": { "enum": ["DRAFT", "REVIEW", "DESIGN LOCKED"] },
+        "stage": {
+            "type": "object",
+            "required": ["legacyStageAlias", "sourceAreaId", "name"],
+            "properties": {
+                "sector": { "type": "integer", "minimum": 1 },
+                "stage": { "type": "integer", "minimum": 1 },
+                "legacyStageAlias": { "type": "string", "minLength": 1 },
+                "sourceAreaId": { "type": "string", "pattern": "^sector-[0-9]{2}-[0-9]{2}$" },
+                "name": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+        },
+        "baselineCommit": { "type": "string" },
+        "globalControl": {
+            "type": "object",
+            "properties": {
+                "worldPause": { "type": "boolean" },
+                "movement": { "type": "boolean" },
+                "aim": { "type": "boolean" },
+                "rope": { "type": "boolean" },
+                "action": { "type": "boolean" },
+                "interaction": { "type": "boolean" }
+            },
+            "additionalProperties": false
+        },
+        "psychology": { "type": "object" },
+        "beats": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/beat" }
+        },
+        "validation": { "type": "array", "items": { "type": "string" } }
+    },
+    "$defs": {
+        "beat": {
+            "type": "object",
+            "required": ["beatId", "status", "trigger", "scope", "replayPolicy", "dedupeToken", "tracks"],
+            "properties": {
+                "beatId": { "type": "string", "minLength": 1 },
+                "status": { "enum": ["DRAFT", "REVIEW", "DESIGN LOCKED"] },
+                "purpose": { "type": "string" },
+                "trigger": { "$ref": "#/$defs/trigger" },
+                "scope": { "enum": ["local-player", "owner-player", "party", "shared-world", "server"] },
+                "replayPolicy": { "type": "string", "minLength": 1 },
+                "dedupeToken": { "type": "string", "minLength": 1 },
+                "worldPause": { "type": "boolean" },
+                "playerControl": { "enum": ["ON", "OFF", "LIMITED"] },
+                "camera": {
+                    "type": "object",
+                    "required": ["zoneId", "forcedPan"],
+                    "properties": {
+                        "zoneId": { "type": "string", "minLength": 1 },
+                        "forcedPan": { "type": "boolean" }
+                    },
+                    "additionalProperties": false
+                },
+                "tracks": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/track" }
+                }
+            },
+            "additionalProperties": false
+        },
+        "trigger": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+                "type": {
+                    "enum": [
+                        "area-enter",
+                        "position-threshold",
+                        "camera-zone",
+                        "position-zone",
+                        "objective-started",
+                        "objective-completed",
+                        "gate-unlocked"
+                    ]
+                },
+                "zoneId": { "type": "string" },
+                "objectiveId": { "type": "string" },
+                "gateId": { "type": "string" },
+                "minLocalX": { "type": "number" },
+                "maxLocalX": { "type": "number" },
+                "minLocalY": { "type": "number" },
+                "maxLocalY": { "type": "number" }
+            },
+            "additionalProperties": false
+        },
+        "track": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+                "type": {
+                    "enum": [
+                        "systemText",
+                        "dialogue",
+                        "audio",
+                        "lighting",
+                        "character",
+                        "object",
+                        "player",
+                        "enemy",
+                        "collision",
+                        "objective",
+                        "gate"
+                    ]
+                },
+                "action": { "type": "string" },
+                "target": { "type": "string" },
+                "content": { "type": "object" },
+                "timing": { "type": "object" },
+                "items": { "type": "array", "items": { "type": "object" } },
+                "priority": { "type": "number" },
+                "optional": { "type": "boolean" },
+                "scope": { "enum": ["local-player", "owner-player", "party", "shared-world", "server"] },
+                "authority": { "enum": ["local", "owner", "server"] },
+                "payload": { "type": "object" },
+                "fallbackPolicy": {
+                    "type": "object",
+                    "required": ["approval", "approvedBy", "originalIntent", "replacementAction", "lostMeaning"],
+                    "properties": {
+                        "approval": { "const": "approved" },
+                        "approvedBy": { "type": "string", "minLength": 1 },
+                        "originalIntent": { "type": "string", "minLength": 1 },
+                        "replacementAction": { "type": "string", "minLength": 1 },
+                        "lostMeaning": { "type": "string", "minLength": 1 }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

@@ -482,14 +482,23 @@ git diff --check
 
 각 결정은 맥락, 결정, 영향, 검증 상태를 포함한다.
 
-## 15. 보안과 외부 변경
+## 15. Stage direction 저작과 개발자 검토
+
+- Stage 연출은 `DIRECTION-SPEC.json`을 기획 원본으로 사용하고 공용 `direction-spec.schema.json`·normalizer/compiler·validator를 통해 immutable `DirectionDefinition`으로 변환한다. Runtime owner나 renderer에 Stage별 문자열·trigger 분기를 새로 추가하지 않는다.
+- 기획 의도와 게임 품질이 시스템 편의보다 우선한다. 의미를 보존할 수 없는 action, 새 authority가 필요한 command, 큰 성능·멀티 동기화·asset 위험은 자동 근사하지 않고 `review-required`로 개발자에게 원본 의도·차단 근거·대안·비용/위험·추천안을 전달한다.
+- 개발자는 기획 의도를 유지하는 adapter·시스템 확장과 최적화를 직접 결정할 수 있다. 효과를 축소·변형하는 fallback은 기획자 승인을 받고 `fallbackPolicy`에 승인자·원본 의도·대체 action·손실 의미를 기록한다.
+- `DirectionRuntime`은 Beat timeline·dedupe·replay·cancellation과 command dispatch만 소유한다. Camera·Text·Bark·Audio·Lighting·Character는 local, Player state는 owner, Enemy·Collision·Objective·Gate·공용 world는 server authority adapter가 실행하며 scope/authority mismatch는 compile 실패다.
+- `DESIGN LOCKED`와 `optional`은 사람이 결정한다. `unsupported/compile-failed/review-required/unbound/implemented/verified`는 compiler·adapter coverage·acceptance test에서 산출하며 README에 구현 상태를 별도 수동 복제하지 않는다.
+- 필수 track이 `verified`가 아니면 Stage release를 차단한다. `optional: true`만 손실을 노출한 상태로 release할 수 있다. schema나 command 계약을 바꾸면 compiler, validator, migrated fixtures, domain adapter coverage, architecture와 scenario integration 문서를 같은 변경에서 갱신한다.
+
+## 16. 보안과 외부 변경
 
 - 자격 증명, 개인 정보, 토큰을 코드·로그·문서에 남기지 않는다.
 - 파괴적 명령, 데이터 삭제, 권한 변경, 라이선스 변경은 명시적 승인을 받는다.
 - 외부 계정 연결, 배포, 공개 범위 변경은 요청된 범위에서만 수행한다.
 - 의심스러운 비밀 파일을 발견하면 값을 출력하지 않고 위치와 유형만 보고한다.
 
-## 16. Windows와 도구 시행착오 방지
+## 17. Windows와 도구 시행착오 방지
 
 - PowerShell과 Bash 문법을 섞지 않는다.
 - 검색은 `rg`와 구조화된 파서를 우선한다.

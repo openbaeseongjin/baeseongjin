@@ -125,7 +125,7 @@ const area01 = defineArea({
         }
     ],
     gate: block01.gate,
-    storyTriggers: ["lockdown", "terminal-read", "gate-open"],
+    storyTriggers: [],
     cameraZones: [
         cameraZone("intro", -192, 0, 1.25, 0.82, { verticalPlayerRatio: 0.46 }),
         cameraZone("first-hook", -384, -192, 1.16, 0.79),
@@ -231,7 +231,7 @@ const area02 = defineArea({
         }
     ],
     gate: block02.gate,
-    storyTriggers: ["lift-offline", "manual-access-only", "power-reduction-stage-2", "security-access-check"],
+    storyTriggers: [],
     cameraZones: [
         cameraZone("lift-failure", -224, 0, 1.15, 0.79, { horizontalPlayerRatio: 0.75 }),
         cameraZone("left-cross", -448, -224, 0.94, 0.7, { horizontalPlayerRatio: 0.68 }),

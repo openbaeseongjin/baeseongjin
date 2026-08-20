@@ -96,6 +96,59 @@ const definitions = [
         }
     },
     {
+        path: "assets/runtime/audio/gameplay/default-mock/direction-relay-trip-settle.wav",
+        duration: 0.48,
+        channels: 1,
+        sample: (time, _channel, duration) =>
+            0.24 *
+            envelope(time, duration, 0.004, 0.18) *
+            (sine(time < 0.12 ? 96 : 54, time) + sine(310, time) * Math.max(0, 1 - time * 4) * 0.32)
+    },
+    {
+        path: "assets/runtime/audio/gameplay/default-mock/direction-air-rope-landing.wav",
+        duration: 0.45,
+        channels: 1,
+        sample: (time, _channel, duration) => {
+            const frequency = time < 0.24 ? 210 + time * 380 : 92;
+            return 0.2 * envelope(time, duration, 0.008, 0.14) * (sine(frequency, time) + sine(37, time) * 0.28);
+        }
+    },
+    {
+        path: "assets/runtime/audio/gameplay/default-mock/direction-cable-brake-settle.wav",
+        duration: 0.55,
+        channels: 1,
+        sample: (time, _channel, duration) =>
+            0.2 *
+            envelope(time, duration, 0.01, 0.2) *
+            (sine(74 - time * 28, time) + sine(228, time) * Math.max(0, 0.7 - time) * 0.24)
+    },
+    {
+        path: "assets/runtime/audio/gameplay/default-mock/direction-free-air-attach.wav",
+        duration: 0.38,
+        channels: 1,
+        sample: (time, _channel, duration) => {
+            const frequency = time < 0.18 ? 135 + time * 520 : 760;
+            return 0.23 * envelope(time, duration, 0.004, 0.11) * sine(frequency, time);
+        }
+    },
+    {
+        path: "assets/runtime/audio/gameplay/default-mock/direction-rope-air-priority.wav",
+        duration: 0.28,
+        channels: 1,
+        sample: (time, _channel, duration) =>
+            0.16 * envelope(time, duration, 0.006, 0.1) * (sine(170 + time * 180, time) + sine(52, time) * 0.22)
+    },
+    {
+        path: "assets/runtime/audio/gameplay/default-mock/direction-security-beep-servo.wav",
+        duration: 0.6,
+        channels: 1,
+        sample: (time, _channel, duration) => {
+            const beep = time < 0.18 ? sine(880, time) : 0;
+            const servo = time >= 0.16 ? sine(118 - (time - 0.16) * 48, time) : 0;
+            return 0.2 * envelope(time, duration, 0.004, 0.16) * (beep + servo * 0.55);
+        }
+    },
+    {
         path: "assets/runtime/audio/ambience/default-mock/altitude-wind.wav",
         duration: 2,
         channels: 2,

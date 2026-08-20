@@ -144,6 +144,11 @@ export class AudioEventBindings {
         });
     }
 
+    playDirectionCue(cueId, request) {
+        if (typeof cueId !== "string" || !cueId) return false;
+        return this.host.play(cueId, request);
+    }
+
     handleEvents(events, context) {
         for (const event of events) {
             for (const handler of this.eventHandlers) {

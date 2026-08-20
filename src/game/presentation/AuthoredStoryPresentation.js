@@ -1,22 +1,6 @@
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 
 const ENTRY_PRESENTATIONS = Object.freeze({
-    "sector-01-01": Object.freeze([
-        Object.freeze({
-            id: "sector-01-01:lockdown",
-            title: "GROUND SERVICE ACCESS",
-            detail: "LOCKDOWN",
-            durationSeconds: 1.8
-        })
-    ]),
-    "sector-01-02": Object.freeze([
-        Object.freeze({
-            id: "sector-01-02:lift-offline",
-            title: "LIFT CONTROL",
-            detail: "OFFLINE",
-            durationSeconds: 1.6
-        })
-    ]),
     "sector-01-04": Object.freeze([
         Object.freeze({
             id: "sector-01-04:grapple-detected",
@@ -188,20 +172,6 @@ const ENTRY_PRESENTATIONS = Object.freeze({
 });
 
 const POSITION_PRESENTATIONS = Object.freeze({
-    "sector-01-02": Object.freeze([
-        Object.freeze({
-            token: "manual-access-only",
-            maxLocalY: -96,
-            presentations: Object.freeze([
-                Object.freeze({
-                    id: "sector-01-02:manual-access-only",
-                    title: "AUTOMATIC LIFT SERVICE",
-                    detail: "SUSPENDED · MANUAL ACCESS ONLY",
-                    durationSeconds: 1.8
-                })
-            ])
-        })
-    ]),
     "sector-01-03": Object.freeze([
         Object.freeze({
             token: "return-warning",
@@ -1165,40 +1135,6 @@ const TRIGGER_CUE_PRESENTATIONS = Object.freeze({
 });
 
 const OBJECTIVE_PRESENTATIONS = Object.freeze({
-    "sector-01-01:terminal-read": Object.freeze([
-        Object.freeze({
-            id: "sector-01-01:terminal-grid",
-            title: "VERTICAL GRID",
-            detail: "CASCADE FAILURE",
-            durationSeconds: 0.9
-        }),
-        Object.freeze({
-            id: "sector-01-01:terminal-transit",
-            title: "LOWER TRANSIT",
-            detail: "OFFLINE",
-            durationSeconds: 0.9
-        }),
-        Object.freeze({
-            id: "sector-01-01:terminal-shuttle",
-            title: "ROOFTOP PAD 03",
-            detail: "MAINTENANCE SHUTTLE · STANDBY",
-            durationSeconds: 0.9
-        })
-    ]),
-    "sector-01-02:final-deck-reached": Object.freeze([
-        Object.freeze({
-            id: "sector-01-02:power-reduction-stage-2",
-            title: "POWER REDUCTION",
-            detail: "STAGE 2",
-            durationSeconds: 1.2
-        }),
-        Object.freeze({
-            id: "sector-01-02:security-access-check",
-            title: "SECURITY ACCESS",
-            detail: "CHECK",
-            durationSeconds: 1.2
-        })
-    ]),
     "sector-01-03:maintenance-override": Object.freeze([
         Object.freeze({
             id: "sector-01-03:maintenance-override",
@@ -1312,14 +1248,6 @@ const OBJECTIVE_PRESENTATIONS = Object.freeze({
 });
 
 const GATE_PRESENTATIONS = Object.freeze({
-    "sector-01-01:gate": Object.freeze([
-        Object.freeze({
-            id: "sector-01-01:gate-open",
-            title: "SERVICE SHAFT 02",
-            detail: "ACCESS OPEN",
-            durationSeconds: 1.2
-        })
-    ]),
     "sector-01-03:gate": Object.freeze([
         Object.freeze({
             id: "sector-01-03:violation-logged",
@@ -1413,12 +1341,25 @@ function foundationSelectionPresentations(foundationId) {
 }
 
 export class AuthoredStoryPresentation {
-    constructor() {
+    constructor({ managedAreaIds = [] } = {}) {
         this.currentAreaId = null;
         this.queue = [];
         this.current = null;
         this.age = 0;
         this.seenTokens = new Set();
+        this.managedAreaIds = new Set(managedAreaIds);
+    }
+
+    enqueue(token, presentations) {
+        const before = this.queue.length + (this.current ? 1 : 0);
+        this.#enqueue(token, presentations);
+        return this.queue.length + (this.current ? 1 : 0) > before;
+    }
+
+    #managedIdentifier(identifier) {
+        return (
+            typeof identifier === "string" && [...this.managedAreaIds].some((areaId) => identifier.startsWith(areaId))
+        );
     }
 
     #enqueue(token, presentations) {
@@ -1448,14 +1389,18 @@ export class AuthoredStoryPresentation {
     ) {
         if (currentAreaId !== this.currentAreaId) {
             this.currentAreaId = currentAreaId;
-            this.#enqueue(`area:${currentAreaId}`, ENTRY_PRESENTATIONS[currentAreaId]);
+            if (!this.managedAreaIds.has(currentAreaId)) {
+                this.#enqueue(`area:${currentAreaId}`, ENTRY_PRESENTATIONS[currentAreaId]);
+            }
         }
-        for (const trigger of POSITION_PRESENTATIONS[currentAreaId] ?? []) {
+        for (const trigger of this.managedAreaIds.has(currentAreaId)
+            ? []
+            : (POSITION_PRESENTATIONS[currentAreaId] ?? [])) {
             if (positionMatches(trigger, currentAreaLocalX, currentAreaLocalY)) {
                 this.#enqueue(`position:${currentAreaId}:${trigger.token}`, trigger.presentations);
             }
         }
-        for (const triggerObject of triggers) {
+        for (const triggerObject of this.managedAreaIds.has(currentAreaId) ? [] : triggers) {
             if (triggerInsideBounds(triggerObject, currentAreaLocalX, currentAreaLocalY)) {
                 for (const cueId of triggerObject.cueIds ?? []) {
                     this.#enqueue(`trigger:${cueId}`, TRIGGER_CUE_PRESENTATIONS[cueId]);
@@ -1464,13 +1409,19 @@ export class AuthoredStoryPresentation {
         }
         for (const event of events) {
             if (event.eventType === "objective-sequence-started") {
-                this.#enqueue(`objective:${event.objectiveId}`, OBJECTIVE_PRESENTATIONS[event.objectiveId]);
+                if (!this.#managedIdentifier(event.objectiveId)) {
+                    this.#enqueue(`objective:${event.objectiveId}`, OBJECTIVE_PRESENTATIONS[event.objectiveId]);
+                }
             }
             if (event.eventType === "objective-completed") {
-                this.#enqueue(`objective:${event.objectiveId}`, OBJECTIVE_PRESENTATIONS[event.objectiveId]);
+                if (!this.#managedIdentifier(event.objectiveId)) {
+                    this.#enqueue(`objective:${event.objectiveId}`, OBJECTIVE_PRESENTATIONS[event.objectiveId]);
+                }
             }
             if (event.eventType === "gate-unlocked") {
-                this.#enqueue(`gate:${event.gateId}`, GATE_PRESENTATIONS[event.gateId]);
+                if (!this.#managedIdentifier(event.gateId)) {
+                    this.#enqueue(`gate:${event.gateId}`, GATE_PRESENTATIONS[event.gateId]);
+                }
             }
             if (event.eventType === "foundation-selected" || event.eventType === "predicted-foundation-selected") {
                 this.#enqueue(

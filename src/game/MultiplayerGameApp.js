@@ -22,8 +22,7 @@ import {
     localTriggerObjects,
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
-import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
-import { PlayerMessagePresentation } from "./presentation/PlayerMessagePresentation.js";
+import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
 
@@ -62,7 +61,8 @@ export class MultiplayerGameApp {
         audioBindings = null,
         metricsVisible = false,
         hudVisible = true,
-        playerDefinition = null
+        playerDefinition = null,
+        directionDefinitions = []
     }) {
         this.renderer = renderer
             ? assertGameRenderer(renderer)
@@ -107,8 +107,17 @@ export class MultiplayerGameApp {
             spriteSize: deathPresentation.size
         });
         this.worldUnlockPresentation = new WorldUnlockPresentation();
-        this.storyPresentation = new AuthoredStoryPresentation();
-        this.playerMessagePresentation = new PlayerMessagePresentation({ viewerId: this.authority.playerId });
+        const direction = createLocalDirectionRuntime({
+            viewerId: this.authority.playerId,
+            definitions: directionDefinitions,
+            audioBindings
+        });
+        this.directionRuntime = direction.runtime;
+        this.storyPresentation = direction.storyPresentation;
+        this.playerMessagePresentation = direction.messagePresentation;
+        this.directionLightingPresentation = direction.lightingPresentation;
+        this.directionCharacterPresentation = direction.characterPresentation;
+        this.directionCoverage = direction.coverage;
         this.localRunCompleted = false;
         this.localFoundationReward = null;
         this.pendingFoundationSelection = null;
@@ -442,6 +451,19 @@ export class MultiplayerGameApp {
         const player = this.authority.presentationState();
         const authoredWorld = this.authority.worldSnapshot();
         const cameraShot = this.updatePresentationCamera(dt, player, authoredWorld);
+        const directionAudioContext = this.createAudioContext(
+            player.position,
+            player.tick,
+            this.localRunCompleted ? "completed" : current.state.runState
+        );
+        this.directionRuntime.update(dt, {
+            areaId: cameraShot.areaId,
+            cameraZoneId: cameraShot.zoneId,
+            localX: cameraShot.localX,
+            localY: cameraShot.localY,
+            events: [...events, ...predictedEvents],
+            audioContext: directionAudioContext
+        });
         const storyPresentation = this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
@@ -453,12 +475,10 @@ export class MultiplayerGameApp {
             currentAreaId: cameraShot.areaId,
             storyPresentation
         });
+        this.directionLightingPresentation.update(dt, { areaId: cameraShot.areaId });
+        this.directionCharacterPresentation.update(dt);
         this.audioBindings?.presentFrame({
-            scene: this.createAudioContext(
-                player.position,
-                player.tick,
-                this.localRunCompleted ? "completed" : current.state.runState
-            )
+            scene: directionAudioContext
         });
     }
 
@@ -547,6 +567,8 @@ export class MultiplayerGameApp {
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
             playerMessagePresentation: this.playerMessagePresentation.snapshot(),
+            directionLightingPresentation: this.directionLightingPresentation.snapshot(),
+            directionCharacterPresentation: this.directionCharacterPresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ??
                 this.foundationFeedback ??
@@ -580,7 +602,8 @@ export class MultiplayerGameApp {
                 metrics: remote.state.metrics,
                 networkMetrics,
                 renderMetrics,
-                worldSeed: base.world.seed
+                worldSeed: base.world.seed,
+                directionCoverage: this.directionCoverage
             });
         }
     }
