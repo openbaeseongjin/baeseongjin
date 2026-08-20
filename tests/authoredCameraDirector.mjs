@@ -88,13 +88,13 @@ export function run() {
     // 960 (was 1088), zones renamed first-handoff->left-cross, direction-reversal->airborne-reattach,
     // flow-test->roof-wrap, and zoom values rescaled.
     const area02Cases = [
-        [-32, "lift-failure", 1.15, 0.79],
-        [-300, "left-cross", 0.94, 0.7],
-        [-600, "airborne-reattach", 0.9, 0.68],
-        [-700, "roof-wrap", 0.96, 0.71],
-        [-880, "exit", 1.1, 0.76]
+        [-32, "lift-failure", 1.15, 0.79, 0.75],
+        [-300, "left-cross", 0.94, 0.7, 0.68],
+        [-600, "airborne-reattach", 0.9, 0.68, 0.38],
+        [-700, "roof-wrap", 0.96, 0.71, 0.38],
+        [-880, "exit", 1.1, 0.76, 0.38]
     ];
-    for (const [localY, zoneId, desktopZoom, mobileZoom] of area02Cases) {
+    for (const [localY, zoneId, desktopZoom, mobileZoom, horizontalPlayerRatio] of area02Cases) {
         const player = playerAt(area02, localY, -320);
         assert.deepEqual(resolveAuthoredCameraShot({ world, player, defaultZoom: 1 }), {
             areaId: "sector-01-02",
@@ -104,7 +104,7 @@ export function run() {
             zoom: desktopZoom,
             localX: player.position.x,
             localY,
-            horizontalPlayerRatio: 0.38,
+            horizontalPlayerRatio,
             verticalPlayerRatio: 0.58
         });
         assert.equal(
@@ -112,6 +112,13 @@ export function run() {
             resolveMobileCameraZoom(mobileZoom, mobileViewport)
         );
     }
+    const anchorAPlayer = playerAt(area02, -192, 224);
+    const anchorAShot = resolveAuthoredCameraShot({ world, player: anchorAPlayer, defaultZoom: 1 });
+    const anchorAViewportLeft =
+        anchorAPlayer.position.x - (1280 / anchorAShot.zoom) * anchorAShot.horizontalPlayerRatio;
+    const anchorAViewportRight = anchorAViewportLeft + 1280 / anchorAShot.zoom;
+    assert.ok(anchorAViewportLeft <= -592, "Anchor A framing must reveal the Counterweight and Service Slot");
+    assert.ok(anchorAViewportLeft <= -320 && anchorAViewportRight >= -320, "Anchor C must be visible before release");
 
     const area03 = world.areas[2];
     const area03Cases = [

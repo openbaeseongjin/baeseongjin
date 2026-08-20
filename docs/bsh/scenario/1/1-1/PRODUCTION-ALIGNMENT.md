@@ -6,6 +6,10 @@ Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 
 `MAP-PREVIEW.html`의 ENTRY→A→P1→P2→Structural Grip→C→P3→Final Deck endpoint 전체를 Runtime `routePoints`와 seamless `world.route`에 반영했다. Collision 좌표는 이미 REV8과 일치해 변경하지 않았다.
 
+## Player Bark rollout — 0.44.0
+
+`뭐야…?`는 entry System cue `GROUND SERVICE ACCESS / LOCKDOWN` 뒤, `…일단 위로.`는 `SERVICE SHAFT 02 / ACCESS OPEN` 뒤 local Player 머리 위 말풍선에서 글자가 차례로 나타나며 한 번 표시한다. 두 Bark는 System Story·objective·network state와 분리된 공용 message catalog/queue를 사용한다.
+
 ## Current Runtime vs target
 
 | Item | Current | REV8 Target | Status |

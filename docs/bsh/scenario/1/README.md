@@ -55,6 +55,8 @@
 
 1-1~1-3은 증강 없는 기본 Rope와 Telemetry 축적 구간, 1-4는 첫 Foundation Augment 선택, 1-5~1-8은 같은 공간을 선택한 증강에 따라 다르게 해석하는 검증 구간이다. Checkpoint는 진행 저장과 개인 부활만 소유하며 Foundation 선택은 authored Node에서 연다.
 
+0.44.0부터 시설 System Story와 분리된 local Player Bark layer를 사용한다. 첫 rollout은 1-1 `뭐야…?`·`…일단 위로.`, 1-2 `…리프트도?` 세 줄이며 각 플레이어 자기 화면의 캐릭터 머리 위 말풍선에서 글자가 차례로 나타난다. message catalog와 queue는 표시 속도와 future party-chat audience를 수용할 수 있지만 현재 Sector 문구를 네트워크로 복제하지 않는다.
+
 ## 자산 상태
 
 - 제공 이미지 크기: `1672 × 941 px`

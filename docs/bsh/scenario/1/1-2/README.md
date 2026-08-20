@@ -128,8 +128,8 @@ P1 is a failure catch, not the intended success route.
 Static A→C ≈657px:
 impossible as a direct stationary Hook link.
 
-Desired release arc passes approximately around `(0,-350)`.
-From there to C ≈383px:
+Desired release arc passes approximately around `(-208,-350)` inside the open Service Slot, left of the Dead Lift.
+From there to C ≈240px:
 inside current 400px Hook Reach.
 
 Therefore the lesson is:

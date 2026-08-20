@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: a67895cdad10f626ce0f1b39611a8a4a97c554359bb945e855e2faef7ca012ed
-authored-area-sha256: ae67f4d1128bd56fa7a06eeffae7bfb3275327546a047f50d8cea95785028518
+scenario-source-sha256: 5e931d26441cf34efabfee36f8cbef54556ef74e658eb0355e86667ad97cfa2e
+authored-area-sha256: e5a2d8527d5846666596666bf456de80955eee74cdc7fc47cd11f256943308a6
 authored-sector-sha256: 0ba1ad8cbc7e5b1bfaa345a8cd14faabd9ee5e4195c9b97803afec365bccbff2
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: e123a04f30fd7769a5d98dbdda8e6dd84d02b78f
+reviewed-upstream: d588aa041a350cab198cd187d8dccbe3b3a244dd
 -->
 
 ## 상태를 읽는 법
@@ -179,6 +179,8 @@ reviewed-upstream: e123a04f30fd7769a5d98dbdda8e6dd84d02b78f
 94. **71의 단일 source 안내를 대체한다.** 0.43.2 `seamless-sector-runtime-v8`은 transit barrier 가로 범위를 source bounds 양끝에서 기본 Grapple budget 600px만큼 확장해 실제 도달 가능한 좌우 우회를 막는다. 중앙·lateral collider sweep은 잠금 중 같은 `barrierSegments` surface에서 멈추고 3/3 뒤 `blockedByRouteId` barrier만 제거됨을 검증한다. 현재 Sector의 미수집 Module은 거리·Stable ID 순 최대 3개를 edge arrow와 in-world diamond의 공통 대상/scale resolver로 표시하고 같은 edge는 safe inset 안에서 분산한다. seamless `landmarks` 전체 bounds를 사용해 Sector 01 far/mid/near climb parallax도 복구했다. Enemy slot·Stage geometry·Access source topology·20Hz wire/권위는 바꾸지 않았으며, 56 Enemy 축약 snapshot은 정적 authored lookup을 재사용해 hydration runtime을 0개, prediction runtime을 snapshot당 56개만 만든다. detached render DTO와 polygon fallback의 plain velocity 계약도 회귀로 고정했다.
 
 95. 0.43.3은 사용자의 최신 정정에 따라 Sector 01 `MAP-PREVIEW.html`을 핵심 맵 flow 권위로 승격했다. 1-1~1-4의 A/C 중심 축약 route와 1-5~1-8의 어긋난 final deck/checkpoint route를 각 HTML 첫 primary SVG path endpoint 전체로 교체해 P1/P2/structural grip, airborne C window, Annex main spine, calibration, horseshoe/drop/relaunch, 양방향 cross-flow, chambered S-curve, counterflow/security/checkpoint 순서를 `Sector01AreaCatalog.routePoints`에 보존한다. seamless compiler가 route의 `topY`를 world offset으로 옮기지 않던 결함도 수정했으며, 자동 회귀가 HTML → Area Catalog → compiled `world.route`를 직접 비교한다. Collision·Enemy·Wind·Access topology와 outside-core city wing은 바꾸지 않았다.
+
+96. 0.44.0은 1-2 Dead Lift만 화면을 지배해 A→C 경로가 읽히지 않던 문제를 camera framing과 MAP HTML flow 수정으로 복구했다. Entry/A에서는 local player를 오른쪽에 두고 Counterweight·Service Slot·Anchor C를 선행 노출하며, A→C 정적 657px 직접 부착은 계속 금지한다. 기존 free-air sample `(0,-350)`이 Dead Lift 내부였던 모순을 제거하고 왼쪽 Service Slot의 `(-208,-350)`에서만 400px attach window가 생기도록 HTML·catalog·회귀를 정렬했다. 동시에 System Story와 분리된 `PlayerMessagePresentation`·data catalog·speaker 머리 위 타이핑 말풍선을 추가해 1-1 `뭐야…?`/`…일단 위로.`, 1-2 `…리프트도?`를 causal System cue 뒤 자기 화면에만 표시한다. message envelope는 표시 속도와 future party-chat audience를 수용하지만 network transport·입력·moderation은 구현하지 않았다.
 
 ## 열린 기획·구현 게이트
 

@@ -19,6 +19,7 @@ import {
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
 import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
+import { PlayerMessagePresentation } from "./presentation/PlayerMessagePresentation.js";
 import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
@@ -77,6 +78,7 @@ export class GameApp {
         });
         this.worldUnlockPresentation = new WorldUnlockPresentation();
         this.storyPresentation = new AuthoredStoryPresentation();
+        this.playerMessagePresentation = new PlayerMessagePresentation({ viewerId: this.authority.playerId });
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: (alpha) => this.render(alpha)
@@ -159,12 +161,16 @@ export class GameApp {
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
         const cameraShot = this.updatePresentationCamera(dt, state.player, state.world);
-        this.storyPresentation.update(dt, {
+        const storyPresentation = this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
             currentAreaLocalY: cameraShot.localY,
             events: authorityEvents,
             triggers: localTriggerObjects(state.world, cameraShot.areaId)
+        });
+        this.playerMessagePresentation.update(dt, {
+            currentAreaId: cameraShot.areaId,
+            storyPresentation
         });
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
         this.audioBindings?.presentFrame({
@@ -262,6 +268,7 @@ export class GameApp {
             localPlayerId: this.authority.playerId,
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
+            playerMessagePresentation: this.playerMessagePresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ??
                 this.statusFeedback.snapshot() ??

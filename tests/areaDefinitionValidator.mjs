@@ -24,6 +24,58 @@ export function run() {
         }),
         "the runtime Rope resolver must return an attachment point on dead-lift-cage"
     );
+    const area02 = SECTOR_01_AREA_CATALOG.areas[1];
+    const anchorCSurface = area02.surfaces.find(({ id }) => id === "sector-01-02:anchor-c-surface");
+    assert.equal(
+        findRopeAttachment({
+            aimPoint: { x: -320, y: -560 },
+            origin: { x: 224, y: -192 },
+            surfaces: [anchorCSurface],
+            maxAttachDistance: 400
+        }),
+        null,
+        "Anchor C must require an airborne release instead of a static A-to-C attach"
+    );
+    const airborneAttachment = findRopeAttachment({
+        aimPoint: { x: -320, y: -560 },
+        origin: { x: -208, y: -350 },
+        surfaces: [anchorCSurface],
+        maxAttachDistance: 400
+    });
+    const freeAirPoint = { x: -208, y: -350 };
+    for (const obstacleId of ["sector-01-02:dead-lift-cage", "sector-01-02:counterweight-tower"]) {
+        const obstacle = area02.surfaces.find(({ id }) => id === obstacleId);
+        const xs = obstacle.vertices.map(({ x }) => x);
+        const ys = obstacle.vertices.map(({ y }) => y);
+        assert.equal(
+            freeAirPoint.x >= Math.min(...xs) &&
+                freeAirPoint.x <= Math.max(...xs) &&
+                freeAirPoint.y >= Math.min(...ys) &&
+                freeAirPoint.y <= Math.max(...ys),
+            false,
+            `the MAP-PREVIEW free-air sample must stay outside ${obstacleId}`
+        );
+    }
+    assert.ok(airborneAttachment, "the MAP-PREVIEW free-air sample must expose an Anchor C attach window");
+    assert.ok(
+        Math.hypot(airborneAttachment.x + 208, airborneAttachment.y + 350) <= 400,
+        "the airborne Anchor C contact must stay inside the effective Hook Reach"
+    );
+    for (const surfaceId of [
+        "sector-01-02:p0",
+        "sector-01-02:p1",
+        "sector-01-02:r2",
+        "sector-01-02:p2",
+        "sector-01-02:p3",
+        "sector-01-02:counterweight-tower",
+        "sector-01-02:exit-deck"
+    ]) {
+        assert.notEqual(
+            area02.surfaces.find(({ id }) => id === surfaceId)?.renderable,
+            false,
+            `${surfaceId} must remain visible around the Dead Lift`
+        );
+    }
     const invalidSolidPlatform = mutableCatalog();
     invalidSolidPlatform.areas[0].surfaces[0].oneWay = false;
     invalidSolidPlatform.areas[0].surfaces[0].grappleable = false;
