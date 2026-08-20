@@ -204,6 +204,6 @@ P1~P5 확정 답변과 구현 상태는 [`design-decision-requests.md`](./design
 4. 좌표·문구·cue처럼 기존 계약 안에서 흡수할 변경과, 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계처럼 사용자 검토가 필요한 변경을 분리한다.
 5. 구현을 시작하면 Stage `PRODUCTION-ALIGNMENT.md`에 정확한 좌표·Camera·Stable ID·상태·사건·asset 인계 차이를 기록하고 gameplay→mock 표현→검증 순서로 연결한다.
 6. `MOCK INTEGRATED`는 catalog·진행·validator 또는 실제 실행 증거가 있을 때만, `PLAYTEST VERIFIED`는 요구된 실제 브라우저·기기 결과를 남겼을 때만 사용한다.
-7. 같은 작업에서 이 문서, [`implementation-roadmap.md`](./implementation-roadmap.md)와 [`../SESSION-HANDOFF.md`](../SESSION-HANDOFF.md)의 현재 요약을 맞춘 뒤 전체 검사를 통과시킨다.
+7. 같은 작업에서 이 문서와 [`implementation-roadmap.md`](./implementation-roadmap.md)를 맞추고, 아직 기준 문서에 흡수되지 않은 blocker가 있을 때만 [`../SESSION-HANDOFF.md`](../SESSION-HANDOFF.md)에 임시 기록한다. 기준 문서로 승격한 요약은 핸드오프에 중복하지 않으며 전체 검사를 통과시킨다.
 
 fingerprint는 의미 검토를 대신하지 않는다. 변경 누락을 발견하는 경보다. `reviewed-upstream`은 마지막 대조 기준 SHA를 보존하는 사람이 읽는 증거이며, 검사기는 source fingerprint와 Stage 목록의 일치 여부를 자동 검증한다.

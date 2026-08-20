@@ -2,12 +2,12 @@
 
 이 규칙은 이 저장소에서 작업하는 모든 자동화 에이전트에 적용한다.
 
-1. 구현 전에 `SESSION-HANDOFF.md`와 `docs/development-rules.md`를 읽고 현재 결정, 다음 작업, 반복 규칙을 확인한다. 관련 주제의 기준 문서도 함께 읽는다.
-2. 사용자가 대화에서 향후 작업에 영향을 주는 제품·조작·아키텍처·워크플로 결정을 명시하면, 별도 요청을 기다리지 말고 같은 작업에서 먼저 `SESSION-HANDOFF.md`에 반영한다. 최신 명시적 결정이 이전 결정보다 우선하며 서로 모순되는 활성 항목을 남기지 않는다.
-3. 한 번의 작업을 넘어서 반복 적용할 내용은 `docs/development-rules.md`의 결정 흡수 절차에 따라 해당 기준 문서에도 승격한다. `SESSION-HANDOFF.md`에는 현재 결론과 기준 문서 위치만 남겨 다음 에이전트가 같은 질문을 다시 하지 않게 한다.
+1. 구현 전에 `SESSION-HANDOFF.md`와 `docs/development-rules.md`를 읽고 아직 기준 문서에 흡수되지 않은 상태와 반복 규칙을 확인한다. 현재 구현 순서와 시나리오 상태는 각각 `docs/implementation-roadmap.md`, `docs/scenario-development-integration.md`에서 확인하고 관련 주제의 기준 문서도 함께 읽는다.
+2. 사용자가 대화에서 향후 작업에 영향을 주는 제품·조작·아키텍처·워크플로 결정을 명시하면, 별도 요청을 기다리지 말고 같은 작업에서 먼저 `SESSION-HANDOFF.md`에 임시 기록한다. 최신 명시적 결정이 이전 결정보다 우선하며 서로 모순되는 활성 항목을 남기지 않는다.
+3. 한 번의 작업을 넘어서 반복 적용할 내용은 `docs/development-rules.md`의 결정 흡수 절차에 따라 같은 작업에서 해당 기준 문서로 승격한다. 기준 문서가 결정과 실행 방법을 충분히 소유하면 `SESSION-HANDOFF.md`의 임시 항목은 링크 요약도 남기지 않고 제거한다. 핸드오프에는 아직 승격되지 않은 결정·진행 중 전환·기준 문서에 없는 blocker만 남긴다.
 4. 에이전트의 추정은 사용자 결정처럼 기록하지 않는다. 일회성 실행 요청, 임시 디버깅 값, 비밀 정보도 영구 규칙으로 승격하지 않는다.
 5. 완전히 반영되었거나 다른 결정으로 대체된 항목만 대체 관계를 보존한 채 `docs/decision-history.md`로 이동한다.
-6. 코드·설정 변경을 끝내기 전에 이번 대화의 명시적 결정이 핸드오프와 기준 문서에 반영됐는지 검색하고, 누락된 문서를 같은 Issue와 커밋에 포함한다.
+6. 코드·설정 변경을 끝내기 전에 이번 대화의 명시적 결정이 기준 문서에 반영됐는지 검색하고, 누락된 문서를 같은 Issue와 커밋에 포함한다. 기준 문서로 승격을 마친 항목이 `SESSION-HANDOFF.md`에 중복으로 남지 않았는지도 함께 확인한다.
 7. 자동 CI를 전제로 하지 않는다. 최종 candidate의 단일 검증 소유자는 병합 전에 `npm run check`, `npm run format:check`, `git diff --check`를 각각 한 번 통과시키고 ledger에 base SHA·diff fingerprint와 함께 기록한다. 자동 테스트 suite는 유지하지 않으며 사용자가 해당 작업에서 명시적으로 요청한 테스트만 추가·실행한다. 같은 candidate의 fresh PASS를 executor·부모·verifier가 반복하지 않는다. 화면 변경은 브라우저에서 직접 검증한 뒤 Pull Request에 결과를 기록한다. 버전 또는 멀티플레이 서버 코드가 바뀐 작업은 PR 병합만으로 완료 처리하지 않고 `docs/version-management.md`의 기존 필수 변경·완료 절차까지 수행한다.
 8. 독립 작업은 기존 Git object database를 공유하는 별도 worktree와 branch를 기본으로 사용한다. 같은 저장소라는 이유로 직렬 대기하지 않으며, worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 shared checkout을 직렬화한다. 독립 검증 lane은 준비되는 대로 한 wave에서 병렬 실행한다.
 9. 같은 증상군의 버그가 이전 수정 뒤 다시 요청되면 새 예외 처리를 추가하기 전에 반복 유사 버그 모순 감사를 수행한다. 이전 수정 이력과 대체된 결정, 같은 의미를 소유하는 상태 필드·controller·protocol 중복, client/server와 collision/renderer predicate 차이를 먼저 확인하고 재현 가능한 시뮬레이션·validator·수동 검증으로 근본 불변식을 확인한다. 상세 절차는 `docs/development-rules.md`의 **반복 유사 버그 모순 감사**를 따른다.
