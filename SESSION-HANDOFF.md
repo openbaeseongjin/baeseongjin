@@ -182,6 +182,24 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 ## 활성 결정
 
+### [L1] 맵 에디터는 통합 제작 에디터로 설계한다
+
+- 사용자는 기존 Stage를 불러와 지형·Anchor·Recovery·Enemy·Wind·Camera를 시각적으로 편집하고, 저장 결과로 Runtime JS Catalog를 생성·검증하는 통합 제작 에디터 방향을 선택했다.
+- 장기 목표는 맵 저작 데이터의 단일 권위를 세우고 `README → AREA-SPEC.json → JS Catalog → PRODUCTION-ALIGNMENT` 사이의 수동 중복과 drift를 줄이는 것이다. 이를 위해 기존 Stage 데이터의 명시적인 migration을 설계 범위에 포함한다.
+- canonical 저작 원본은 `AREA-SPEC v2`로 승격하고 48개 Stage를 명시적으로 migration한다. 에디터는 이 JSON을 편집해 Runtime JS Catalog를 생성·검증하며, JSON에 내장하지 않을 특수 동작은 Stable ID로 수기 Runtime 모듈을 참조한다.
+- 첫 마일스톤은 기반 파이프라인 우선으로 한다. 단순 Stage `1-1`과 Enemy·Wind·Camera를 포함하는 복합 Stage `1-7`을 대표 표본으로 삼아 v2 schema·validator·결정적 generator·cutover manifest composer·수기 Behavior Registry를 만들고, 두 Stage를 원자적으로 generated로 전환해 기존 Runtime 의미 동등성을 검증한다. 시각 편집기 UI는 이 기반이 안정화된 다음 마일스톤에서 시작한다.
+- Runtime JS Catalog는 완전 생성 전용 모듈로 분리한다. `generated/` 아래의 결정적 출력은 수기 편집을 금지하고 항상 재생성하며, 수기 특수 동작은 별도 Registry가 Stable ID로 해석한다. 기존 Sector Catalog는 migration 동안 생성 catalog를 노출하는 얇은 진입점으로 축소한다.
+- 편집기는 filesystem과 실행 중인 world를 직접 수정하지 않는 in-memory Draft를 소유한다. Apply는 v2 JSON 저장·생성 JS 갱신·validation을 모두 통과한 경우에만 성공하며, 그 뒤 선택한 Stage에서 새 싱글플레이 Run으로 미리보기한다. 실행 중인 Run과 멀티플레이에는 hot-swap을 제공하지 않는다.
+- 첫 시각 에디터는 Bounds·Entry, terrain surface, Anchor(표식+24×24 부착 target), Recovery·Route, 기존 Enemy slot/activation·허용 적, Wind source/zone/cycle와 Camera zone을 편집한다. Objective·Progression·Story·Scanner와 수기 Behavior Registry는 현재 상태를 표시하되 편집을 허용하지 않는다.
+- migration은 Stage 단위 cutover를 사용한다. migration을 마친 Stage는 generated Catalog로 즉시 전환하고, 아직 migration하지 않은 Stage는 기존 JS Catalog를 유지한다. 같은 Sector 안에는 전환 완료·미완료 Stage의 두 저작 경로가 한시적으로 공존할 수 있다.
+- Stage 단위 cutover는 원자적이다. 각 Stage는 `legacy` 또는 `generated` source 하나만 사용하며, generated Stage의 모든 편집 대상 필드는 v2가 소유한다. composer는 Stage의 source 중복·누락을 validation 오류로 막고 legacy/generated 필드 overlay나 예외 수기 값을 허용하지 않는다.
+- Stage별 cutover 선택의 단일 권위는 v2 catalog의 명시적 manifest다. manifest는 stable Stage ID, `source: legacy | generated`, source 원본 경로를 선언하며 composer는 이 manifest만 사용한다. generated 파일 존재 여부나 Sector Catalog의 수기 import로 source를 추론·선택하지 않는다.
+- 맵 에디터 인터뷰는 위 사용자·저작 규칙의 확정으로 종료한다. schema, module wiring, validation 명령과 test 구성 같은 개발 세부사항은 [`docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md`](docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md) 및 `docs/development-rules.md`에 따라 결정하며, 새 제품·조작 요구가 충돌할 때만 사용자에게 다시 확인한다.
+- **[최우선 협업 제약]** 메인 개발자와 병렬 개발할 때 source 분리가 다른 구현 편의보다 우선한다. 이 작업은 새 `area-authoring-v2` source·`generated/` output·focused test·Stage v2 spec만 소유한다. 기존 Sector facade, legacy provider, seamless Runtime, root script와 shared test-runner wiring은 메인 개발자 소유이며, 이 작업은 manifest와 `composeSectorCatalog`의 검증된 integration contract만 인계한다. live cutover 완료·최종 suite·통합 현황 갱신은 그 연결 변경을 소유한 메인 개발자가 증명한다.
+- **source lane 인계 완료:** `docs/bsh/scenario/AREA-CATALOG.json`은 Sector 01 여덟 Stage를 명시하고 `1-1`·`1-7`만 generated로 선택한다. 두 후보는 각각 `docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json`, `docs/bsh/scenario/1/1-7/AREA-SPEC.v2.json`에 있고, 결정적 출력은 `src/game/world/areas/generated/sector01/Sector01Stage01.generated.js`, `Sector01Stage07.generated.js`다. `node tests/areaAuthoringV2.mjs`는 후보·생성물·합성 결과가 현재 legacy Catalog와 깊게 동등함을 확인하고, `node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check`는 둘의 최신성을 확인했다.
+- **메인 개발자 통합 순서:** root v1 validator에 v2를 추가한 뒤 두 sidecar를 canonical `AREA-SPEC.json`으로 원자 승격하고, legacy Sector 01 Stage provider를 분리한 다음 `composeSectorCatalog({ id, revision, manifest, legacyAreas, generatedAreas, expectedStageIds })`를 얇은 `Sector01AreaCatalog` facade에 연결한다. 이어 root command/shared test runner를 등록하고 seamless Runtime에서 live cutover를 증명한다. 이 변경이 새 scenario 문서와 authoring source를 함께 소유하므로 `docs/scenario-development-integration.md`의 실제 영향·검증 근거와 checkpoint marker 갱신, 최종 `npm test`·`npm run check`·`npm run format:check` ledger 기록도 메인 개발자가 수행한다. source lane은 marker hash만 갱신해 검사를 우회하지 않는다.
+- 설계 승인과 migration 전에는 현재 `area-spec-v1`·JS Catalog Runtime 계약을 유지하고 새 schema·codegen·에디터 구현을 시작하지 않는다.
+
 ### [L1] 적 roster는 행동 계열 기본형과 topology 독립 encounter slot으로 확장한다
 
 - 기존 기본형은 고정 원거리 `경계 포탑`과 지정 경로 이동 `순찰 드론`이며 `절단 포탑`은 경계 포탑 확장형이다. 신규 기본형은 `추격 드론`, `방패 드론`, `포격 드론`, `지원 드론`, `군집 드론`의 5종이다. 기획·플레이어 표시 이름은 한글이고 Runtime ID는 한글 이름과 1:1 대응하는 영어 식별자를 사용한다.
