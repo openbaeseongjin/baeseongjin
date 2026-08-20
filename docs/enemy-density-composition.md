@@ -35,5 +35,6 @@
 - `accessModuleId`, Sector당 Carrier 3기 처치와 3-of-3 Transit Lock. Carrier 지정은 기존 slot 수·위치·activation을 바꾸지 않는다.
 - Carrier 위치는 authored 글자 hint를 소유하지 않는다. Runtime은 stable module world position만 전달하고 거리순 최대 3개를 화면 밖 edge arrow 또는 화면 안 무문자 diamond marker로 같은 scale 규칙에 따라 안내한다.
 - 개인·전원 사망 모두 shared progress/처치/module/route를 보존하고 각 Player의 마지막 Stage savepoint에서 부활한다.
+- 모든 적 이동은 행동·돌진·Patrol 종류와 무관하게 Player와 같은 원형 physics/collider 경계로 현재 활성 collision surface와 Player body를 해결한다. Player↔Enemy도 Player↔Player와 같은 actor collision을 사용하며, 고정 적의 이동 없음이나 위치 넉백 면역은 벽·Player 통과 예외가 아니다.
 - 고정·고정경로·제자리 지원형의 위치 넉백 면역, Pursuit/Swarm의 직접 추격형 displacement.
 - Boss·Timer/Purge·Sector 04~06과 새 enemy behavior는 이 범위 밖이다.

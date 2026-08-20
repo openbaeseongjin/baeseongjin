@@ -119,6 +119,8 @@ export function restoreEnemyPatrolState(target, snapshot) {
 
 export function advanceEnemyPatrol(enemy, dt) {
     if (!enemy.patrol || !Number.isFinite(dt) || dt <= 0) return false;
+    const origin = enemy.predictedSurfacePosition(dt);
+    const position = origin.clone();
     let remainingTime = dt;
     let moved = false;
     let stepsRemaining = enemy.patrol.points.length * 4;
@@ -132,10 +134,10 @@ export function advanceEnemyPatrol(enemy, dt) {
             continue;
         }
         const target = enemy.patrol.points[enemy.patrol.targetIndex];
-        const delta = new Vector2(target.x - enemy.position.x, target.y - enemy.position.y);
+        const delta = new Vector2(target.x - position.x, target.y - position.y);
         const distance = delta.length();
         if (distance <= ARRIVAL_EPSILON) {
-            enemy.position.set(target.x, target.y);
+            position.set(target.x, target.y);
             const next = nextPatrolTarget(enemy.patrol);
             if (!next) break;
             enemy.patrol.targetIndex = next.targetIndex;
@@ -146,7 +148,7 @@ export function advanceEnemyPatrol(enemy, dt) {
         moved = true;
         const travelTime = distance / enemy.patrol.speed;
         if (travelTime <= remainingTime) {
-            enemy.position.set(target.x, target.y);
+            position.set(target.x, target.y);
             remainingTime -= travelTime;
             const next = nextPatrolTarget(enemy.patrol);
             if (!next) break;
@@ -155,10 +157,11 @@ export function advanceEnemyPatrol(enemy, dt) {
             enemy.patrol.waitRemaining = enemy.patrol.waitSeconds;
             continue;
         }
-        enemy.position.add(delta.scale((enemy.patrol.speed * remainingTime) / distance));
+        position.add(delta.scale((enemy.patrol.speed * remainingTime) / distance));
         remainingTime = 0;
     }
 
-    clampToActivation(enemy.position, enemy.activation);
+    clampToActivation(position, enemy.activation);
+    enemy.queueSurfaceDisplacement(position.subtract(origin), dt);
     return moved;
 }

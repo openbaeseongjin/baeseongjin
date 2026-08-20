@@ -105,6 +105,7 @@ export function updateEnemyWeapons({ enemies, targets, projectiles, registry, co
                     : targets;
                 return advanceSimulationObject(enemy, "enemy-weapon", {
                     targets: eligibleTargets,
+                    collisionActors: targets,
                     projectiles,
                     registry,
                     config,

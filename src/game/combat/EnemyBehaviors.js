@@ -85,11 +85,13 @@ function directionBetween(from, to) {
     return new Vector2(to.x - from.x, to.y - from.y).normalize();
 }
 
-function moveInDirection(enemy, direction, distance) {
-    if (!Number.isFinite(distance) || distance <= 0 || direction.length() === 0) return false;
-    enemy.position.add(direction.clone().scale(distance));
-    clampToActivation(enemy.position, enemy.activation);
-    return true;
+function moveInDirection(enemy, direction, distance, dt) {
+    if (!Number.isFinite(distance) || distance <= 0 || !Number.isFinite(dt) || dt <= 0) return false;
+    if (direction.length() === 0) return false;
+    const start = enemy.predictedSurfacePosition(dt);
+    const destination = start.clone().add(direction.clone().scale(distance));
+    clampToActivation(destination, enemy.activation);
+    return enemy.queueSurfaceDisplacement(destination.subtract(start), dt);
 }
 
 function frozenDirection(direction) {
@@ -147,7 +149,8 @@ export class PursuitEnemyBehavior {
                 moveInDirection(
                     enemy,
                     direction,
-                    Math.min(distance - this.triggerDistance, this.moveSpeed * remainingDt)
+                    Math.min(distance - this.triggerDistance, this.moveSpeed * remainingDt),
+                    dt
                 );
                 return outcome;
             }
@@ -167,7 +170,7 @@ export class PursuitEnemyBehavior {
             if (this.state === "dash") {
                 const consumed = consumeTimer(this, remainingDt);
                 remainingDt -= consumed;
-                moveInDirection(enemy, this.dashDirection, this.dashSpeed * consumed);
+                moveInDirection(enemy, this.dashDirection, this.dashSpeed * consumed, dt);
                 if (this.remainingSeconds > 0) return outcome;
                 transitionState(this, "recover", this.recoverySeconds);
                 outcome = Object.freeze({ type: "pursuit-recovery-started" });
@@ -424,7 +427,7 @@ export class SwarmEnemyBehavior {
         }
         if (this.state === "dive") {
             const consumed = consumeTimer(this, dt);
-            moveInDirection(enemy, this.diveDirection, this.diveSpeed * consumed);
+            moveInDirection(enemy, this.diveDirection, this.diveSpeed * consumed, dt);
             if (this.remainingSeconds <= 0) {
                 transitionState(this, "recover", this.recoverySeconds);
                 return Object.freeze({ type: "swarm-recovery-started" });
