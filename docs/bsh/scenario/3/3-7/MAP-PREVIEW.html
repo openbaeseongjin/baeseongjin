@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-7 REV8 Gameplay Map REV2</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--outer:#8bc8ff;--priority:#ffe16c;--service:#e6b875}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:555px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:86vh;min-height:830px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.void{fill:#050b10;stroke:#243b47;stroke-width:3;stroke-dasharray:16 12}.core{fill:#17242b;stroke:#7d929b;stroke-width:4}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:3}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.scanner{fill:#5de8ff;stroke:#fff;stroke-width:4}.patrol{fill:#8d4b3f;stroke:#ffba92;stroke-width:3}.support{fill:#553b68;stroke:#caa7ff;stroke-width:3}.late{fill:#4f2b52;stroke:#f1a8e8;stroke-width:3}.story{fill:#786a37;stroke:#efd989;stroke-width:2}.outerRoute{fill:none;stroke:#8bc8ff;stroke-width:5;stroke-dasharray:14 9}.priorityRoute{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.serviceRoute{fill:none;stroke:#e6b875;stroke-width:5;stroke-dasharray:14 9}.commonRoute{fill:none;stroke:#b6d7a8;stroke-width:5;stroke-dasharray:14 9}.patrolPath{fill:none;stroke:#ffba92;stroke-width:3;stroke-dasharray:10 8}.presentation{fill:#79d9ff0d;stroke:#79d9ff;stroke-width:2;stroke-dasharray:9 8}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.phase{font-size:13px}.outerText{fill:#8bc8ff}.priorityText{fill:#ffe16c}.serviceText{fill:#e6b875}.storyText{fill:#efd989}
+@media(max-width:1160px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-7 TRANSFER MEZZANINE · REV8 DRAFT REV2</h1><div class="sub">GAMEPLAY + PRESENTATION GATES · 3840×1792 · EXPERIENCE FIRST → SYSTEM REVEAL AFTER</div></header>
+<div class="layout"><aside>
+<div class="card"><b>STORY ORDER</b><br>Route 이름 확인 → 실제 Route 선택/통과 → M2 안전 도착 → Route Control / Priority Route 정보 공개 → <b>`…우선 통로가 따로 있었네.`</b> → 짧은 여백 → Access C 전투.</div>
+<div class="card"><b>M1 INFO LIMIT</b><br>여기서는 `OUTER GALLERY / PRIORITY SPINE / FACILITY SERVICE`만 보임. A/B/C 기록은 아직 나오지 않음.</div>
+<div class="card"><b>M2 REVEAL</b><br>`UPPER CONCOURSE ROUTE CONTROL → PUBLIC / SERVICE ROUTES ACTIVE → PRIORITY ROUTE ACTIVE` 순차 표시.</div>
+<div class="card"><b>NO PLAYER BARK</b><br>플레이어 해석을 대사로 확정하지 않음.</div>
+<div class="card"><b>ACCESS C</b><br>M2 Story 완료 후 안전구역을 떠날 때만 common Upper Guard pressure.</div>
+</aside><main>
+<svg viewBox="-2000 -1860 4000 1940">
+<rect class="bounds" x="-1920" y="-1792" width="3840" height="1792"/>
+<rect class="void" x="-1500" y="-1320" width="2600" height="800" rx="90"/>
+
+<!-- Entry -->
+<rect class="safe" x="-1792" y="0" width="256" height="32"/><text class="tiny" x="-1775" y="-16">ENTRY FROM 3-6</text>
+<circle class="anchor" cx="-1472" cy="-192" r="13"/>
+<rect class="surface" x="-1344" y="-256" width="320" height="28"/><text class="phase" x="-1325" y="-276">ENTRY CONCOURSE</text>
+<circle class="support" cx="-1184" cy="-256" r="20"/><text class="tiny" x="-1295" y="-300">COMMON SUPPORT GUARD</text>
+<circle class="anchor" cx="-864" cy="-416" r="13"/>
+
+<!-- M1 -->
+<rect class="presentation" x="-830" y="-670" width="520" height="170" rx="18"/>
+<text class="storyText" x="-805" y="-640">M1 PRESENTATION LIMIT</text>
+<text class="tiny" x="-805" y="-616">ROUTE NAMES ONLY · NO A/B/C RECORD</text>
+<rect class="safe" x="-768" y="-544" width="384" height="30"/><text class="phase" x="-748" y="-565">M1 · FULL SAFE OVERVIEW</text>
+<rect class="story" x="-650" y="-650" width="170" height="60" rx="6"/><text class="tiny" x="-690" y="-667">ROUTE SIGN</text>
+
+<!-- route separation -->
+<rect class="core" x="-1010" y="-820" width="90" height="250" rx="8"/>
+<rect class="core" x="-20" y="-875" width="90" height="250" rx="8"/>
+
+<!-- Outer -->
+<text class="outerText" x="-1740" y="-680">OUTER GALLERY · C1+C2 · LONG / NO ENEMY</text>
+<circle class="anchor" cx="-1056" cy="-704" r="13"/>
+<circle class="scanner" cx="-1344" cy="-832" r="16"/><text class="tiny" x="-1322" y="-820">C1</text>
+<circle class="anchor" cx="-1600" cy="-960" r="13"/>
+<circle class="scanner" cx="-1280" cy="-1088" r="16"/><text class="tiny" x="-1258" y="-1076">C2</text>
+<circle class="anchor" cx="-928" cy="-1168" r="13"/><circle class="anchor" cx="-576" cy="-1216" r="13"/><circle class="anchor" cx="-224" cy="-1240" r="13"/><circle class="anchor" cx="128" cy="-1256" r="13"/>
+<path class="outerRoute" d="M-768,-544 L-1056,-704 L-1344,-832 L-1600,-960 L-1280,-1088 L-928,-1168 L-576,-1216 L-224,-1240 L128,-1256 L448,-1264"/>
+
+<!-- Priority -->
+<text class="priorityText" x="-360" y="-690">PRIORITY SPINE · C3 + PATROL · SHORTEST</text>
+<circle class="scanner" cx="-192" cy="-800" r="16"/><text class="tiny" x="-170" y="-788">C3</text>
+<circle class="anchor" cx="96" cy="-944" r="13"/><circle class="anchor" cx="384" cy="-1088" r="13"/>
+<path class="patrolPath" d="M-64,-864 L448,-1080"/>
+<circle class="patrol" cx="-64" cy="-864" r="20"/><text class="tiny" x="-160" y="-905">PATROL</text>
+<path class="priorityRoute" d="M-384,-544 L-192,-800 L96,-944 L384,-1088 L448,-1264"/>
+
+<!-- Service -->
+<text class="serviceText" x="440" y="-650">FACILITY SERVICE · NO SCANNER / MORE ROPE + GUARD</text>
+<circle class="anchor" cx="-64" cy="-656" r="13"/><circle class="anchor" cx="256" cy="-720" r="13"/><circle class="anchor" cx="576" cy="-800" r="13"/><circle class="anchor" cx="864" cy="-928" r="13"/>
+<circle class="late" cx="704" cy="-864" r="20"/><text class="tiny" x="590" y="-905">ROUTE LATE GUARD</text>
+<circle class="anchor" cx="800" cy="-1088" r="13"/>
+<path class="serviceRoute" d="M-384,-544 L-64,-656 L256,-720 L576,-800 L864,-928 L800,-1088 L832,-1264"/>
+
+<!-- M2 -->
+<rect class="presentation" x="370" y="-1435" width="565" height="230" rx="18"/>
+<text class="storyText" x="400" y="-1405">M2 STORY GATE · ONLY AFTER ROUTE TRAVERSAL</text>
+<text class="tiny" x="400" y="-1377">1 SERVICE CLASS CONTROL</text>
+<text class="tiny" x="400" y="-1357">2 PUBLIC / SERVICE ROUTES · ACTIVE</text>
+<text class="tiny" x="400" y="-1337">3 PRIORITY ROUTE · ACTIVE</text>
+<text class="tiny" x="400" y="-1317">PLAYER · …우선 통로가 따로 있었네.</text>
+<text class="tiny" x="400" y="-1297">NO ROUTE↔PROFILE MAPPING · PRIORITY ROUTE BARK AFTER SYSTEM LINE</text>
+<rect class="safe" x="448" y="-1264" width="384" height="30"/><text class="phase" x="470" y="-1285">M2 · FULL SAFE ACCESS CONTROL DECK</text>
+<rect class="story" x="555" y="-1385" width="180" height="72" rx="6"/>
+
+<!-- Post story -->
+<path class="commonRoute" d="M448,-1264 L256,-1408 L320,-1472 L-64,-1472 L-256,-1600 L-320,-1696"/>
+<circle class="anchor" cx="256" cy="-1408" r="13"/>
+<rect class="surface" x="-64" y="-1472" width="384" height="28"/><text class="phase" x="-45" y="-1493">POST-STORY UPPER TRANSFER THRESHOLD</text>
+<circle class="late" cx="96" cy="-1472" r="20"/><text class="tiny" x="-40" y="-1515">ACCESS C CARRIER · ACTIVATES AFTER M2</text>
+<circle class="anchor" cx="-256" cy="-1600" r="13"/>
+<rect class="safe" x="-640" y="-1696" width="320" height="30"/><text class="phase" x="-620" y="-1717">EXIT → 3-8</text>
+<rect class="story" x="-575" y="-1790" width="180" height="54" rx="6"/><text class="tiny" x="-610" y="-1806">UPPER MARKET GATE / TRANSFER CONTROL</text>
+
+<path class="commonRoute" d="M-1664,-64 L-1472,-192 L-1344,-256 L-1024,-256 L-864,-416 L-768,-544"/>
+</svg></main></div></body></html>

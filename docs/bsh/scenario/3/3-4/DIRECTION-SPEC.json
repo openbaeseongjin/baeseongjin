@@ -1,0 +1,376 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "d588aa041a350cab198cd187d8dccbe3b3a244dd",
+  "stage": {
+    "sector": 3,
+    "stage": 4,
+    "sourceAreaId": "sector-03-04",
+    "name": "RETAIL SERVICE SPINE"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-route-split",
+      "status": "DESIGN LOCKED",
+      "purpose": "present two physical architectural routes without a menu",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-04:route-split"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-04:route-split",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "items": [
+            {
+              "title": "PUBLIC PROMENADE",
+              "detail": "←"
+            },
+            {
+              "title": "FACILITY SERVICE",
+              "detail": "→"
+            }
+          ]
+        },
+        {
+          "type": "route",
+          "action": "both-route-open-and-readable"
+        },
+        {
+          "type": "enemy",
+          "action": "none-at-split"
+        }
+      ],
+      "completion": "Player commits to a physical route",
+      "validation": "No UI choice modal, no route vote, no pressure at split."
+    },
+    {
+      "beatId": "s1-public-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "make Public cost visible before first scanner commit",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-04:public-route"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-04:public-route",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "PUBLIC ROUTE",
+            "detail": "AUTHORIZATION INVALID"
+          }
+        },
+        {
+          "type": "scanner",
+          "action": "C1/C2-readable"
+        },
+        {
+          "type": "patrol",
+          "target": "sector-03-04:drone-1",
+          "action": "readable-before-exposure"
+        }
+      ],
+      "completion": "Player proceeds or backtracks to split",
+      "validation": "Invalid status is not an invisible hard lock."
+    },
+    {
+      "beatId": "s2-public-commit",
+      "status": "DESIGN LOCKED",
+      "purpose": "pay public timing/exposure cost",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "public"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-4:public",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "scanner",
+          "target": "sector-03-04:scanner-service-arcade-public",
+          "action": "control-c1-c2"
+        },
+        {
+          "type": "patrol",
+          "target": "sector-03-04:drone-1",
+          "action": "public-band-only"
+        },
+        {
+          "type": "route",
+          "action": "wide-fewer-inputs"
+        }
+      ],
+      "completion": "High Merge reached",
+      "validation": "No service guard exposure; route remains Base-Rope clear."
+    },
+    {
+      "beatId": "s3-service-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "confirm maintenance clearance works locally",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-04:service-route"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-04:service-route",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "items": [
+            {
+              "title": "FACILITY SERVICE ACCESS",
+              "detail": "MAINTENANCE CLEARANCE RECOGNIZED"
+            },
+            {
+              "title": "LOCAL SERVICE ROUTE",
+              "detail": "AVAILABLE"
+            }
+          ]
+        },
+        {
+          "type": "scanner",
+          "action": "none-on-service"
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-04:service-route-guard",
+          "action": "inactive-until-after-story"
+        }
+      ],
+      "completion": "presentation complete",
+      "validation": "No implication of Priority/public authorization."
+    },
+    {
+      "beatId": "s4-service-bark",
+      "status": "DESIGN LOCKED",
+      "purpose": "short experiential recognition of local clearance",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-03-04:local-route-available"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-4:service-bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…이쪽은 열리네."
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-bark-with-toast"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No explanatory permission theory."
+    },
+    {
+      "beatId": "s5-service-commit",
+      "status": "DESIGN LOCKED",
+      "purpose": "pay service execution-density/local-combat cost",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "service"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-4:service",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "narrow-more-inputs-static-anchors"
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-04:service-route-guard",
+          "action": "activate-support-pool-slot"
+        },
+        {
+          "type": "scanner",
+          "action": "none"
+        },
+        {
+          "type": "patrol",
+          "action": "none"
+        }
+      ],
+      "completion": "High Merge reached",
+      "validation": "No mid-route switch, no Scanner/Patrol overlap, kill optional."
+    },
+    {
+      "beatId": "s6-high-merge",
+      "status": "DESIGN LOCKED",
+      "purpose": "converge both cost profiles at one safe node",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-04:service-node-upper"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-04:service-node-upper",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "COMMERCIAL SERVICE NODE",
+            "detail": "UPPER LEVEL"
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "lower-route-pressure-zero"
+        },
+        {
+          "type": "multiplayer",
+          "action": "independent-route-arrivals-no-sync-gate"
+        }
+      ],
+      "completion": "Player continues upward",
+      "validation": "Merge is full safe; neither route becomes canon."
+    },
+    {
+      "beatId": "s7-upper-guard",
+      "status": "DESIGN LOCKED",
+      "purpose": "apply one shared cost after the route decision",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "common-upper-arcade"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-4:upper-guard",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "sector-03-04:upper-arcade-guard",
+          "action": "activate-late-pool-slot"
+        },
+        {
+          "type": "scanner",
+          "action": "none"
+        },
+        {
+          "type": "patrol",
+          "action": "none"
+        }
+      ],
+      "completion": "Final deck reached",
+      "validation": "Cannot pressure split, public route, service route or high merge; kill optional."
+    },
+    {
+      "beatId": "s8-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "hand off route-choice lesson to Building Services Hub",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-03-04:final-deck-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-4:exit",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "easy-g10-to-exit"
+        },
+        {
+          "type": "enemy",
+          "action": "final-frame-safe"
+        }
+      ],
+      "completion": "exit-panel-engaged → physical crossing → sector-03-05",
+      "validation": "No final combat pressure."
+    }
+  ],
+  "validation": [
+    "physical route choice no menu",
+    "independent multiplayer choice",
+    "one scanner group C1/C2 public only",
+    "Patrol public only",
+    "Support Guard service only",
+    "Late Guard common only",
+    "exactly 3 slots",
+    "Story copy exact",
+    "service Bark not Toast",
+    "all mandatory links <=400px",
+    "no mid-route casual switching",
+    "maximum meaningful similarity overlap <=1",
+    "exit → 3-5"
+  ]
+}

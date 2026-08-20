@@ -1,0 +1,378 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "d39cbb49d3d8247caf2542393994704292dd5002",
+  "stage": {
+    "sector": 3,
+    "stage": 6,
+    "sourceAreaId": "sector-03-06",
+    "name": "GRAND CENTRAL ATRIUM"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-atrium-reveal",
+      "status": "DESIGN LOCKED",
+      "purpose": "explode scale immediately after 3-5 compression",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "lower-grand-balcony"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-6:reveal:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "wide-reveal",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "PREMIUM ATRIUM",
+            "detail": ""
+          }
+        },
+        {
+          "type": "playerBark",
+          "runtimeCapability": "VERIFIED",
+          "stageAuthoredStatus": "NOT IMPLEMENTED",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…잠깐, 위가 어디까지야."
+          },
+          "presentation": "speaker-head local typing bubble"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "scanner",
+          "action": "none"
+        }
+      ],
+      "completion": "Player commits to lower flight",
+      "validation": "3-6 scale difference from 3-5 is obvious without a cutscene."
+    },
+    {
+      "beatId": "s1-lower-long-flight",
+      "status": "DESIGN LOCKED",
+      "purpose": "use known Scanner timing inside sustained large-space Flow",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "lower-long-flight"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-6:lower-flight",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "horizontal-lead",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "scanner",
+          "target": "sector-03-06:scanner-premium-atrium-A",
+          "action": "C1 only in this phase"
+        },
+        {
+          "type": "route",
+          "action": "long up-right chain"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "East Event Balcony reached",
+      "validation": "No Patrol/Guard pressure before landing; Base Rope clear."
+    },
+    {
+      "beatId": "s2-event-balcony",
+      "status": "DESIGN LOCKED",
+      "purpose": "confirm the commercial Atrium remains operational and insert short local pressure",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-06:power-state"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-06:power-state",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "items": [
+            {
+              "title": "LOCAL POWER BUS",
+              "detail": "ACTIVE"
+            },
+            {
+              "title": "COMMERCIAL SERVICE NETWORK",
+              "detail": "ONLINE"
+            }
+          ]
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-06:atrium-lower-guard",
+          "action": "Support Pool / Event Balcony only"
+        }
+      ],
+      "completion": "Player leaves Event Balcony",
+      "validation": "System text does not convert architecture into infrastructure identity."
+    },
+    {
+      "beatId": "s3-east-sky-rise",
+      "status": "DESIGN LOCKED",
+      "purpose": "change movement axis and reach a true observation balcony",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "east-sky-lobby-rise"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-6:east-rise",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "vertical-lead",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "mostly vertical V1/V2 rise"
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-06:atrium-lower-guard",
+          "action": "pressure ends before P3"
+        }
+      ],
+      "completion": "P3 East Sky Lobby reached",
+      "validation": "P3 full safe."
+    },
+    {
+      "beatId": "s4-security-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "make the leftward crossing decision fully readable before commitment",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "p3-east-sky-lobby"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-6:p3-read",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "wide-observation",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "scanner",
+          "action": "C2 visible"
+        },
+        {
+          "type": "patrol",
+          "target": "sector-03-06:drone-1",
+          "action": "full path readable"
+        },
+        {
+          "type": "route",
+          "action": "West Upper Gallery destination visible"
+        }
+      ],
+      "completion": "Player commits left",
+      "validation": "No incoming fire; next movement direction unmistakably left."
+    },
+    {
+      "beatId": "s5-central-security-crossing",
+      "status": "DESIGN LOCKED",
+      "purpose": "stage gameplay peak: combine Scanner phase, Patrol position and current build in one long aerial commit",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "central-security-crossing"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-6:security-crossing",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "cross-void-wide",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "scanner",
+          "target": "sector-03-06:scanner-premium-atrium-A",
+          "action": "C2 only in crossing"
+        },
+        {
+          "type": "patrol",
+          "target": "sector-03-06:drone-1",
+          "action": "shallow diagonal path across crossing"
+        },
+        {
+          "type": "route",
+          "action": "long leftward chain"
+        }
+      ],
+      "completion": "West Upper Gallery reached",
+      "validation": "No second Scanner group; current rope persists through LOCK; Patrol no Rope Cut."
+    },
+    {
+      "beatId": "s6-west-upper-gallery",
+      "status": "DESIGN LOCKED",
+      "purpose": "insert a short local Late Pool pressure beat after the security peak",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "p4-west-upper-gallery"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-6:west-gallery",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "sourceObjectId": "sector-03-06:upper-concourse",
+          "content": {
+            "title": "UPPER CONCOURSE",
+            "detail": ""
+          }
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-06:atrium-upper-guard",
+          "action": "Late Pool / local gallery only"
+        },
+        {
+          "type": "scanner",
+          "action": "none"
+        },
+        {
+          "type": "patrol",
+          "action": "none after landing"
+        }
+      ],
+      "completion": "Player starts final free-flow arc",
+      "validation": "Upper Guard cannot overlap C2 crossing."
+    },
+    {
+      "beatId": "s7-upper-free-flow",
+      "status": "DESIGN LOCKED",
+      "purpose": "end the Stage with pure movement payoff after system reading",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "upper-free-flow-arc"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-6:free-flow",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "forward-lead",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "long up-right F1-F4 arc"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "scanner",
+          "action": "none"
+        },
+        {
+          "type": "patrol",
+          "action": "none"
+        }
+      ],
+      "completion": "Final deck reached",
+      "validation": "Final arc has zero security pressure."
+    },
+    {
+      "beatId": "s8-exit-preview",
+      "status": "DESIGN LOCKED",
+      "purpose": "hand off from open Atrium to 3-7 access-pressure space",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-06:access-control-ahead"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-06:access-control-ahead",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "ACCESS CONTROL AHEAD",
+            "detail": ""
+          }
+        },
+        {
+          "type": "story",
+          "action": "do not reveal 3-7 Priority hierarchy yet"
+        }
+      ],
+      "completion": "exit-panel-engaged → physical crossing → sector-03-07",
+      "validation": "No future truth leaked."
+    }
+  ],
+  "validation": [
+    "one monumental public Atrium",
+    "4352×2176",
+    "direction ↗ LONG → ↑ → ← LONG → ↗ LONG",
+    "one Scanner group only",
+    "C1 no enemy overlap",
+    "C2 + Patrol only at central crossing",
+    "exactly 3 enemy slots",
+    "Support Guard lower local only",
+    "Late Guard upper local only",
+    "final free-flow pressure-free",
+    "all mandatory Rope links <=400px",
+    "max meaningful similarity overlap <=1",
+    "Exit → 3-7"
+  ]
+}

@@ -1,0 +1,580 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED",
+  "baselineCommit": "d588aa041a350cab198cd187d8dccbe3b3a244dd",
+  "revision": {
+    "final": "REV8.0",
+    "designIteration": "REV3",
+    "supersedes": [
+      "REV1 linear crescent/chord",
+      "REV2 mostly one-way atrium ascent",
+      "legacy compact retail security walk"
+    ]
+  },
+  "stage": {
+    "sector": 3,
+    "stage": 3,
+    "sourceAreaId": "sector-03-03",
+    "canonicalName": "CENTRAL RETAIL WALK",
+    "runtimeCurrentName": "RETAIL SECURITY WALK",
+    "subtitle": "SCANNER + PATROL",
+    "role": "FIRST SCANNER + PATROL SYNTHESIS / TRUE DIRECTION-CHANGE STAGE"
+  },
+  "bounds": {
+    "width": 3712,
+    "height": 1792
+  },
+  "directionSignature": [
+    "UP_RIGHT",
+    "UP_LEFT",
+    "DOWN_RIGHT",
+    "UP_LEFT",
+    "UP_RIGHT"
+  ],
+  "entry": {
+    "id": "sector-03-03:entry",
+    "x": -1680,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0-entry",
+      "kind": "platform",
+      "x": -1680,
+      "y": 0,
+      "width": 224,
+      "height": 32
+    },
+    {
+      "id": "p1-lower-retail",
+      "kind": "safe-deck",
+      "x": -1296,
+      "y": -256,
+      "width": 352,
+      "height": 26
+    },
+    {
+      "id": "p2-east-mid",
+      "kind": "safe-deck",
+      "x": -352,
+      "y": -544,
+      "width": 384,
+      "height": 28
+    },
+    {
+      "id": "p3-west-observation",
+      "kind": "safe-deck",
+      "x": -1024,
+      "y": -768,
+      "width": 384,
+      "height": 28
+    },
+    {
+      "id": "recovery-a",
+      "kind": "recovery",
+      "x": -224,
+      "y": -768,
+      "width": 256,
+      "height": 18
+    },
+    {
+      "id": "p4-central-gantry",
+      "kind": "safe-deck",
+      "x": 256,
+      "y": -1120,
+      "width": 320,
+      "height": 28
+    },
+    {
+      "id": "p5-west-upper",
+      "kind": "platform",
+      "x": -672,
+      "y": -1408,
+      "width": 320,
+      "height": 26
+    },
+    {
+      "id": "exit-deck",
+      "kind": "safe-deck",
+      "x": 704,
+      "y": -1696,
+      "width": 320,
+      "height": 28
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "g1",
+      "x": -1376,
+      "y": -224,
+      "role": "entry-first-escalator"
+    },
+    {
+      "id": "g1b",
+      "x": -960,
+      "y": -352,
+      "role": "first-escalator-mid"
+    },
+    {
+      "id": "g2",
+      "x": -768,
+      "y": -480,
+      "role": "east-mid-approach"
+    },
+    {
+      "id": "g3",
+      "x": -832,
+      "y": -704,
+      "role": "reverse-to-west-observation"
+    },
+    {
+      "id": "c1",
+      "x": -608,
+      "y": -896,
+      "scannerControlled": true,
+      "role": "descending-security-1"
+    },
+    {
+      "id": "c2",
+      "x": -256,
+      "y": -1024,
+      "scannerControlled": true,
+      "role": "descending-security-2"
+    },
+    {
+      "id": "g4",
+      "x": 96,
+      "y": -1088,
+      "role": "central-gantry-exit"
+    },
+    {
+      "id": "g5",
+      "x": -128,
+      "y": -1248,
+      "role": "reverse-to-west-upper-1"
+    },
+    {
+      "id": "g6a",
+      "x": -352,
+      "y": -1328,
+      "role": "reverse-to-west-upper-mid"
+    },
+    {
+      "id": "g6",
+      "x": -512,
+      "y": -1376,
+      "role": "west-upper-landing"
+    },
+    {
+      "id": "g7",
+      "x": -160,
+      "y": -1536,
+      "role": "final-up-right-1"
+    },
+    {
+      "id": "g8",
+      "x": 192,
+      "y": -1624,
+      "role": "final-up-right-2"
+    }
+  ],
+  "scannerGroups": [
+    {
+      "id": "sector-03-03:scanner-retail-A",
+      "cycleSeconds": {
+        "available": 1.5,
+        "warning": 0.6,
+        "locked": 1.1,
+        "reset": 0.3
+      },
+      "phaseOffsetSeconds": 0,
+      "controlledTargetIds": [
+        "c1",
+        "c2"
+      ],
+      "contract": {
+        "newAttachAllowed": [
+          "AVAILABLE",
+          "WARNING"
+        ],
+        "newAttachDenied": [
+          "LOCKED",
+          "RESET"
+        ],
+        "currentRopePersistsThroughLocked": true,
+        "damage": 0,
+        "knockback": 0,
+        "ropeCut": false,
+        "forcedDetach": false
+      }
+    }
+  ],
+  "mainRoute": [
+    {
+      "id": "entry",
+      "x": -1680,
+      "y": -32
+    },
+    {
+      "id": "g1",
+      "x": -1376,
+      "y": -224
+    },
+    {
+      "id": "p1-right-edge",
+      "x": -1120,
+      "y": -256
+    },
+    {
+      "id": "g1b",
+      "x": -960,
+      "y": -352
+    },
+    {
+      "id": "g2",
+      "x": -768,
+      "y": -480
+    },
+    {
+      "id": "p2-left-edge",
+      "x": -544,
+      "y": -544
+    },
+    {
+      "id": "g3",
+      "x": -832,
+      "y": -704
+    },
+    {
+      "id": "p3-right-edge",
+      "x": -832,
+      "y": -768
+    },
+    {
+      "id": "c1",
+      "x": -608,
+      "y": -896
+    },
+    {
+      "id": "c2",
+      "x": -256,
+      "y": -1024
+    },
+    {
+      "id": "g4",
+      "x": 96,
+      "y": -1088
+    },
+    {
+      "id": "p4-center",
+      "x": 256,
+      "y": -1120
+    },
+    {
+      "id": "g5",
+      "x": -128,
+      "y": -1248
+    },
+    {
+      "id": "g6a",
+      "x": -352,
+      "y": -1328
+    },
+    {
+      "id": "g6",
+      "x": -512,
+      "y": -1376
+    },
+    {
+      "id": "p5-center",
+      "x": -672,
+      "y": -1408
+    },
+    {
+      "id": "g7",
+      "x": -160,
+      "y": -1536
+    },
+    {
+      "id": "g8",
+      "x": 192,
+      "y": -1624
+    },
+    {
+      "id": "exit-left-edge",
+      "x": 544,
+      "y": -1696
+    },
+    {
+      "id": "exit",
+      "x": 704,
+      "y": -1696
+    }
+  ],
+  "recoveryPoints": [
+    {
+      "id": "recovery-a",
+      "x": -224,
+      "y": -786,
+      "retrySecondsTarget": [
+        4,
+        6
+      ],
+      "cannotBypass": [
+        "p4-central-gantry"
+      ],
+      "mustExitPatrolPressure": true
+    }
+  ],
+  "safeZones": [
+    {
+      "id": "west-observation",
+      "contract": [
+        "no enemy pressure",
+        "C1/C2 visible",
+        "Patrol path visible",
+        "central gantry visible"
+      ]
+    },
+    {
+      "id": "central-gantry-safe-after-cross",
+      "contract": [
+        "combined pressure ends on landing",
+        "next route points up-left"
+      ]
+    },
+    {
+      "id": "exit-safe",
+      "contract": [
+        "no enemy pressure",
+        "no scanner",
+        "no patrol"
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "retail-security",
+      "stableRuntimeId": "sector-03-03:retail-security",
+      "kind": "story-display",
+      "properties": {
+        "presentation": [
+          {
+            "title": "RETAIL SECURITY",
+            "detail": "ACTIVE",
+            "status": "VERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-state",
+      "stableRuntimeId": "sector-03-03:route-state",
+      "kind": "story-display",
+      "properties": {
+        "presentation": [
+          {
+            "title": "VERTICAL SERVICE ROUTE",
+            "detail": "AUTHORIZATION INVALID",
+            "status": "VERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "patrol-status",
+      "stableRuntimeId": "sector-03-03:patrol-status",
+      "kind": "story-display",
+      "properties": {
+        "presentation": [
+          {
+            "title": "AUTOMATED PATROL",
+            "detail": "ONLINE",
+            "status": "VERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "drone-1",
+      "stableRuntimeId": "sector-03-03:drone-1",
+      "kind": "patrol-drone",
+      "x": -384,
+      "y": -976,
+      "properties": {
+        "enemyType": "patrol-drone-t1",
+        "patrol": {
+          "points": [
+            {
+              "x": -384,
+              "y": -976
+            },
+            {
+              "x": 352,
+              "y": -976
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ],
+        "activationIntent": "descending security dip only"
+      }
+    },
+    {
+      "id": "retail-support-guard",
+      "stableRuntimeId": "sector-03-03:retail-support-guard",
+      "kind": "sentry-slot",
+      "x": -672,
+      "y": -1408,
+      "properties": {
+        "enemySelection": {
+          "authority": "SECTOR_03_SUPPORT_POOL",
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "activationIntent": "west upper bridge only after combined band",
+        "cannotOverlap": [
+          "scanner-retail-A",
+          "drone-1"
+        ]
+      }
+    },
+    {
+      "id": "exit-panel",
+      "stableRuntimeId": "sector-03-03:exit-panel",
+      "kind": "interaction",
+      "properties": {
+        "objectiveId": "sector-03-03:exit-panel-engaged",
+        "requiredObjectiveIds": [
+          "sector-03-03:final-deck-reached"
+        ]
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "id": "sector-03-03:final-deck-reached",
+      "type": "reach",
+      "target": "exit-deck"
+    },
+    {
+      "id": "sector-03-03:exit-panel-engaged",
+      "type": "interact",
+      "sourceObjectId": "sector-03-03:exit-panel",
+      "requiredObjectiveIds": [
+        "sector-03-03:final-deck-reached"
+      ]
+    }
+  ],
+  "gate": {
+    "completionMode": "physical-crossing",
+    "nextAreaId": "sector-03-04",
+    "requiredObjectiveIds": [
+      "sector-03-03:exit-panel-engaged"
+    ]
+  },
+  "patrol": {
+    "count": 1,
+    "scannerOverlapPolicy": "only descending security dip"
+  },
+  "supportGuard": {
+    "count": 1,
+    "scannerOverlap": false,
+    "patrolOverlap": false
+  },
+  "accessModule": {
+    "present": false
+  },
+  "wind": {
+    "active": false
+  },
+  "ropeCut": {
+    "active": false
+  },
+  "playerDialogue": {
+    "default": "NONE"
+  },
+  "augment": {
+    "currentContract": "generic Augment v1 carry",
+    "requiresSpecificCard": false,
+    "baseRopeClearable": true
+  },
+  "uniqueness": {
+    "directionRhythm": "↗ → ↖ → ↘ → ↖ → ↗",
+    "maximumMeaningfulOverlap": 1,
+    "signature": "ALTERNATING ESCALATOR ATRIUM / SWITCHBACK CROSSING WITH CENTRAL SECURITY DIP",
+    "comparisons": {
+      "3-1": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "large commercial void"
+        ]
+      },
+      "3-2": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "direction reversal"
+        ]
+      },
+      "2-2": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "Patrol timing"
+        ]
+      },
+      "2-8": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "controlled height change"
+        ]
+      },
+      "1-5": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "route reversal impression"
+        ]
+      },
+      "1-7": {
+        "verdict": "PASS",
+        "overlapCount": 1,
+        "overlap": [
+          "multiple direction changes"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    "global one-direction ascent",
+    "scanner repeated outside central dip",
+    "support guard overlap with patrol",
+    "support guard overlap with scanner",
+    "third enemy",
+    "Access Module",
+    "Wind",
+    "Rope Cut",
+    "kill gate",
+    "Player dialogue by default",
+    "arbitrary zigzag not explained by escalator circulation"
+  ]
+}

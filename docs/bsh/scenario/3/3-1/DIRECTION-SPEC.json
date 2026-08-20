@@ -1,0 +1,311 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "c1f9cd7f0362de7f7a3065a34e7ea9d35927a934",
+  "stage": {
+    "sector": 3,
+    "stage": 1,
+    "sourceAreaId": "sector-03-01",
+    "name": "LOWER MARKET PROMENADE"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-sector-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "mark Sector 03 opening with scale and surviving commercial power",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "left-market-threshold"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-1:bark-a:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "environment",
+          "action": "show-powered-daily-market-and-high-central-island"
+        },
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…여긴 아직 불이 들어와 있어."
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-player-bark-with-toast"
+        }
+      ],
+      "completion": "local observation only",
+      "validation": "Physical surprise precedes interpretation; no Priority/C-cause theory."
+    },
+    {
+      "beatId": "s1-district-sign",
+      "status": "DESIGN LOCKED",
+      "purpose": "establish ordinary daily commercial use",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-01:district-sign"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-01:district-sign",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "COMMERCIAL DISTRICT",
+            "detail": "PROMENADE 06"
+          }
+        }
+      ],
+      "completion": "presentation duration",
+      "validation": "No enemy pressure reaches P1."
+    },
+    {
+      "beatId": "s2-island-ascent",
+      "status": "DESIGN LOCKED",
+      "purpose": "make the first Sector 03 Rope movement about scale rather than hazard",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "left-market-to-island"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-1:island-ascent",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "p1-edge-to-g2-to-island"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "recovery",
+          "target": "recovery-a",
+          "action": "3-5-second-retry"
+        }
+      ],
+      "completion": "Suspended Market Island reached",
+      "validation": "No mandatory relation >400px; island reads as large destination, not small platform."
+    },
+    {
+      "beatId": "s3-welcome-kiosk",
+      "status": "DESIGN LOCKED",
+      "purpose": "show that ordinary automated service is still operating without people",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-01:welcome-kiosk"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-01:welcome-kiosk",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "WELCOME",
+            "detail": "PUBLIC SERVICE ONLINE"
+          }
+        },
+        {
+          "type": "audio",
+          "action": "ordinary-kiosk-chime-no-horror-sting"
+        }
+      ],
+      "completion": "presentation duration",
+      "validation": "Island remains safe; Scanner remains off."
+    },
+    {
+      "beatId": "s4-recognition-bark",
+      "status": "DESIGN LOCKED",
+      "purpose": "advance emotion from surprise to recognition",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-03-01:public-service-online"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-1:bark-b:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "사람은 없는데… 기계들만 계속 일하고 있네."
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-player-bark-with-toast"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No explanation of why systems survived."
+    },
+    {
+      "beatId": "s5-island-descent",
+      "status": "DESIGN LOCKED",
+      "purpose": "cross the same giant market void from a new elevation without using a drop/bypass grammar",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "island-to-right-market"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-1:island-descent",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "island-right-edge-to-g3-to-right-market-forward-swing"
+        },
+        {
+          "type": "recovery",
+          "target": "recovery-b",
+          "action": "3-5-second-retry"
+        },
+        {
+          "type": "enemy",
+          "target": "promenade-guard",
+          "action": "remain-inactive-until-right-market-landing"
+        }
+      ],
+      "completion": "Right Market reached",
+      "validation": "Movement reads as forward descending swing, not controlled vertical Drop."
+    },
+    {
+      "beatId": "s6-late-guard",
+      "status": "DESIGN LOCKED",
+      "purpose": "reintroduce one residual security pressure only after Sector opening is understood",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "right-market-guard-band"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-1:promenade-guard",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "sector-03-01:promenade-guard",
+          "action": "activate-standard-pool-slot"
+        },
+        {
+          "type": "route",
+          "action": "right-market-to-g4-end-lift"
+        }
+      ],
+      "completion": "Exit Deck reached",
+      "validation": "Exactly one slot; kill optional; Story zones never under pressure."
+    },
+    {
+      "beatId": "s7-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "hand off public market space to technical facade/service space without previewing active Scanner",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-03-01:final-deck-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable-no-new-story",
+      "dedupeToken": "3-1:exit",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "environment",
+          "action": "inactive-service-mount-housing-foreshadow-only"
+        },
+        {
+          "type": "scanner",
+          "action": "off"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → physical crossing → sector-03-02",
+      "validation": "No Scanner state/beam/alarm appears in 3-1."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "Story system copy verified",
+    "Player Bark layer treated as not implemented",
+    "one enemy slot exactly",
+    "Standard Pool preserved",
+    "Scanner off",
+    "Patrol off",
+    "Wind off",
+    "Rope Cut off",
+    "kill optional",
+    "Story zones safe",
+    "Base Rope mandatory clear",
+    "all critical Rope relations <=400px",
+    "maximum meaningful overlap <=1",
+    "exit panel + physical crossing contract preserved",
+    "3-2 owns first active Scanner"
+  ]
+}

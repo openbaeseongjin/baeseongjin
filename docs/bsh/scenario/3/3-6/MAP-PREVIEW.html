@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-6 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--y:#ffe16c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:520px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}
+.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}
+label{display:block;margin:5px 0}button{padding:6px 8px;margin:3px;border:1px solid var(--l);border-radius:6px;background:#132027;color:var(--t);cursor:pointer}.statebtn.active{border-color:var(--c);color:var(--c)}
+svg{width:100%;height:86vh;min-height:830px;background:#061019;border:1px solid var(--l);border-radius:8px}
+.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.void{fill:#050b10;stroke:#243b47;stroke-width:3;stroke-dasharray:16 12}
+.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:3}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}
+.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.scanner{fill:#5de8ff;stroke:#fff;stroke-width:4}.scanner.warning{fill:#efb75b}.scanner.locked{fill:#632d2d;stroke:#ef7664}.scanner.reset{fill:#4a5357;stroke:#a3adb1}
+.patrol{fill:#8d4b3f;stroke:#ffba92;stroke-width:3}.support{fill:#553b68;stroke:#caa7ff;stroke-width:3}.late{fill:#4f2b52;stroke:#f1a8e8;stroke-width:3}.story{fill:#786a37;stroke:#efd989;stroke-width:2}
+.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.patrolPath{fill:none;stroke:#ffba92;stroke-width:3;stroke-dasharray:10 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.07}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.phase{font-size:13px}.big{font-size:17px;fill:#91a6ae}.dir{font-size:21px;fill:#ffe16c}
+@media(max-width:1120px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-6 GRAND CENTRAL ATRIUM · REV8 DRAFT</h1><div class="sub">GAMEPLAY ONLY · 4352×2176 · GRAND ATRIUM FLIGHT CIRCUIT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>SECTOR 03 SCALE CLIMAX</b><br>3-5의 압축된 Back-of-House 직후 하나의 거대한 Public Atrium이 열린다.</div>
+<div class="card"><b>MACRO DIRECTION</b><br><span style="font-size:22px">↗ LONG → ↑ → ← LONG → ↗ LONG</span></div>
+<div class="card"><b>SCANNER</b><br>1 Group / C1 + C2<br>C1 = long-flow timing<br>C2 = Patrol synthesis</div>
+<div class="card"><b>ENEMY = 3</b><br>East Event Balcony = Support Guard<br>Central Crossing = Patrol<br>West Upper Gallery = Late Guard</div>
+<div class="card"><b>SCANNER STATE</b><br><button class="statebtn active" data-state="available">AVAILABLE</button><button class="statebtn" data-state="warning">WARNING</button><button class="statebtn" data-state="locked">LOCKED</button><button class="statebtn" data-state="reset">RESET</button></div>
+<div class="card"><label><input id="routeToggle" type="checkbox" checked> Main Flight Route</label><label><input id="reachToggle" type="checkbox"> 400px Reach</label><label><input id="storyToggle" type="checkbox" checked> Story Points</label></div>
+<div class="card"><b>MAP RULE</b><br>배경 광고·매장·가구·조명은 숨김. 실제 발판, Grapple, Scanner, Enemy, Recovery, Story point, Void만 표시.</div>
+</aside><main>
+<svg viewBox="-2260 -2240 4520 2320">
+<rect class="bounds" x="-2176" y="-2176" width="4352" height="2176"/>
+<rect class="void" x="-1350" y="-1260" width="2450" height="990" rx="140"/>
+<text class="big" x="-420" y="-790">GRAND ATRIUM VOID</text>
+
+<!-- Entry/reveal -->
+<rect class="safe" x="-2048" y="0" width="256" height="32"/><text class="tiny" x="-2028" y="-16">ENTRY FROM 3-5</text>
+<rect class="safe" x="-1904" y="-192" width="448" height="30"/><text class="phase" x="-1880" y="-213">LOWER GRAND BALCONY · REVEAL</text>
+<g id="storyPoints">
+<rect class="story" x="-1780" y="-300" width="150" height="54" rx="6"/><text class="tiny" x="-1810" y="-316">PREMIUM ATRIUM</text>
+</g>
+
+<!-- Long lower flight -->
+<circle class="anchor" cx="-1280" cy="-320" r="13"/><text class="tiny" x="-1258" y="-308">G1</text>
+<circle class="scanner" data-scanner cx="-920" cy="-448" r="16"/><text class="tiny" x="-898" y="-436">C1</text>
+<circle class="anchor" cx="-560" cy="-576" r="13"/><text class="tiny" x="-538" y="-564">G2</text>
+<circle class="anchor" cx="-200" cy="-704" r="13"/><text class="tiny" x="-178" y="-692">G3</text>
+<circle class="anchor" cx="160" cy="-832" r="13"/><text class="tiny" x="182" y="-820">G4</text>
+<circle class="anchor" cx="520" cy="-900" r="13"/><text class="tiny" x="542" y="-888">G4B</text>
+<circle class="anchor" cx="880" cy="-928" r="13"/><text class="tiny" x="902" y="-916">G4C</text>
+<text class="dir" x="-610" y="-760">↗ LONG FLIGHT</text>
+
+<!-- East balcony -->
+<rect class="surface" x="1024" y="-928" width="448" height="30"/><text class="phase" x="1042" y="-950">EAST EVENT BALCONY</text>
+<circle class="support" cx="1280" cy="-928" r="20"/><text class="tiny" x="1165" y="-972">SUPPORT GUARD</text>
+<g id="storyPower">
+<rect class="story" x="1090" y="-1040" width="160" height="58" rx="6"/><text class="tiny" x="1050" y="-1056">POWER / NETWORK STATUS</text>
+</g>
+
+<!-- East vertical rise -->
+<circle class="anchor" cx="1480" cy="-1120" r="13"/><text class="tiny" x="1502" y="-1108">V1</text>
+<circle class="anchor" cx="1440" cy="-1320" r="13"/><text class="tiny" x="1462" y="-1308">V2</text>
+<text class="dir" x="1510" y="-1230">↑</text>
+<rect class="safe" x="1216" y="-1408" width="384" height="30"/><text class="phase" x="1235" y="-1430">EAST SKY LOBBY · FULL SAFE READ</text>
+
+<!-- Central security crossing -->
+<circle class="scanner" data-scanner cx="1184" cy="-1496" r="16"/><text class="tiny" x="1206" y="-1484">C2</text>
+<circle class="anchor" cx="832" cy="-1536" r="13"/><text class="tiny" x="854" y="-1524">G7</text>
+<circle class="anchor" cx="480" cy="-1576" r="13"/><text class="tiny" x="502" y="-1564">G8</text>
+<circle class="anchor" cx="128" cy="-1616" r="13"/><text class="tiny" x="150" y="-1604">G9</text>
+<circle class="anchor" cx="-224" cy="-1656" r="13"/><text class="tiny" x="-202" y="-1644">G10</text>
+<path class="patrolPath" d="M960,-1512 L240,-1600"/>
+<circle class="patrol" cx="960" cy="-1512" r="20"/><text class="tiny" x="900" y="-1550">PATROL</text>
+<text class="dir" x="280" y="-1460">← LONG SECURITY CROSSING</text>
+
+<!-- West upper -->
+<rect class="surface" x="-960" y="-1680" width="384" height="30"/><text class="phase" x="-940" y="-1702">WEST UPPER GALLERY</text>
+<circle class="late" cx="-768" cy="-1680" r="20"/><text class="tiny" x="-880" y="-1725">LATE GUARD</text>
+<g id="storyUpper">
+<rect class="story" x="-725" y="-1800" width="150" height="54" rx="6"/><text class="tiny" x="-745" y="-1816">UPPER CONCOURSE</text>
+</g>
+
+<!-- Final free flow -->
+<circle class="anchor" cx="-320" cy="-1800" r="13"/><text class="tiny" x="-298" y="-1788">F1</text>
+<circle class="anchor" cx="32" cy="-1880" r="13"/><text class="tiny" x="54" y="-1868">F2</text>
+<circle class="anchor" cx="384" cy="-1960" r="13"/><text class="tiny" x="406" y="-1948">F3</text>
+<circle class="anchor" cx="736" cy="-2040" r="13"/><text class="tiny" x="758" y="-2028">F4</text>
+<text class="dir" x="100" y="-2045">↗ UPPER FREE FLOW</text>
+<rect class="safe" x="1024" y="-2070" width="320" height="30"/><text class="phase" x="1042" y="-2092">EXIT → 3-7</text>
+<g id="storyExit">
+<rect class="story" x="1100" y="-2170" width="170" height="54" rx="6"/><text class="tiny" x="1070" y="-2186">ACCESS CONTROL AHEAD</text>
+</g>
+
+<!-- Recovery -->
+<rect class="recovery" x="-1240" y="-690" width="256" height="20"/><text class="tiny" x="-1220" y="-706">RECOVERY A → LOWER SETUP</text>
+<rect class="recovery" x="1040" y="-1725" width="256" height="20"/><text class="tiny" x="1058" y="-1741">RECOVERY B → P3 SETUP</text>
+
+<g id="route">
+<path class="route" d="M-1456,-192 L-1280,-320 L-920,-448 L-560,-576 L-200,-704 L160,-832 L520,-900 L880,-928 L1024,-928"/>
+<path class="route" d="M1472,-928 L1480,-1120 L1440,-1320 L1600,-1408"/>
+<path class="route" d="M1216,-1408 L1184,-1496 L832,-1536 L480,-1576 L128,-1616 L-224,-1656 L-576,-1680"/>
+<path class="route" d="M-576,-1680 L-320,-1800 L32,-1880 L384,-1960 L736,-2040 L1024,-2070"/>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-1280" cy="-320" r="400"/><circle class="reach" cx="-920" cy="-448" r="400"/><circle class="reach" cx="-560" cy="-576" r="400"/><circle class="reach" cx="-200" cy="-704" r="400"/><circle class="reach" cx="160" cy="-832" r="400"/><circle class="reach" cx="520" cy="-900" r="400"/><circle class="reach" cx="880" cy="-928" r="400"/>
+<circle class="reach" cx="1480" cy="-1120" r="400"/><circle class="reach" cx="1440" cy="-1320" r="400"/>
+<circle class="reach" cx="1184" cy="-1496" r="400"/><circle class="reach" cx="832" cy="-1536" r="400"/><circle class="reach" cx="480" cy="-1576" r="400"/><circle class="reach" cx="128" cy="-1616" r="400"/><circle class="reach" cx="-224" cy="-1656" r="400"/>
+<circle class="reach" cx="-320" cy="-1800" r="400"/><circle class="reach" cx="32" cy="-1880" r="400"/><circle class="reach" cx="384" cy="-1960" r="400"/><circle class="reach" cx="736" cy="-2040" r="400"/>
+</g>
+</svg></main></div>
+<script>
+const btns=[...document.querySelectorAll('.statebtn')];
+function scannerState(s){document.querySelectorAll('[data-scanner]').forEach(x=>x.setAttribute('class','scanner '+s));btns.forEach(b=>b.classList.toggle('active',b.dataset.state===s))}
+btns.forEach(b=>b.onclick=()=>scannerState(b.dataset.state));
+routeToggle.onchange=()=>route.classList.toggle('hidden',!routeToggle.checked);
+reachToggle.onchange=()=>reach.classList.toggle('hidden',!reachToggle.checked);
+storyToggle.onchange=()=>[storyPoints,storyPower,storyUpper,storyExit].forEach(x=>x.classList.toggle('hidden',!storyToggle.checked));
+</script></body></html>

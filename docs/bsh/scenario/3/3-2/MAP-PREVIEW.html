@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-2 REV8 REV2 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--r:#df7669;--y:#ffe16c;--amber:#efb75b;--lock:#ef7664;--reset:#a3adb1;--purple:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:510px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+button{padding:6px 8px;margin:3px;border:1px solid var(--l);border-radius:6px;background:#132027;color:var(--t);cursor:pointer}.statebtn.active{border-color:var(--c);color:var(--c)}
+svg{width:100%;height:86vh;min-height:790px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.media{fill:#111a20;stroke:#607884;stroke-width:5}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.scanner{stroke-width:4}.scanner.available{fill:#5de8ff;stroke:#fff}.scanner.warning{fill:#efb75b;stroke:#fff}.scanner.locked{fill:#632d2d;stroke:#ef7664}.scanner.reset{fill:#4a5357;stroke:#a3adb1}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.accessEnemy{fill:#553b68;stroke:#caa7ff;stroke-width:3}.story{fill:#786a37;stroke:#efd989;stroke-width:2}.route1{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.route2{fill:none;stroke:#8ad9ac;stroke-width:5;stroke-dasharray:14 9}.route3{fill:none;stroke:#8fc4ff;stroke-width:5;stroke-dasharray:14 9}.branch{fill:none;stroke:#caa7ff;stroke-width:4;stroke-dasharray:9 8}.zone{fill:#80d39a10;stroke:#80d39a;stroke-width:2;stroke-dasharray:8 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.08}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.mid{font-size:12px}.layerlabel{font-size:15px;fill:#dbe9ee}
+@media(max-width:1120px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-2 FACADE SERVICE GALLERY · REV8 DRAFT REV2</h1><div class="sub">GAMEPLAY ONLY · 3200×1472 · THREE-LAYER MEDIA WALL SERVICE WRAP</div></header>
+<div class="layout"><aside>
+<div class="card"><b>WHY REV2</b><br>REV1의 대각선 한 줄 구조 폐기. 하나의 Media Wall을 아래/오른쪽/뒤/상부에서 여러 번 읽는 Stage.</div>
+<div class="card"><b>3 LAYERS</b><br>
+1. UNDERFRAME · L→R · Scanner Tutorial<br>
+2. BACKSIDE RETURN · R→L · Static Rope<br>
+3. CROWN DEPARTURE · L→R · Recall + Access A + Exit</div>
+<div class="card"><b>DIALOGUE</b><br>
+A. “…인증은 됐는데, 왜 막히는 거지?”<br><br>
+B. “…이미 붙은 건 그대로네.”</div>
+<div class="card"><b>SCANNER STATE</b><br>
+<button class="statebtn active" data-state="available">AVAILABLE</button>
+<button class="statebtn" data-state="warning">WARNING</button>
+<button class="statebtn" data-state="locked">LOCKED</button>
+<button class="statebtn" data-state="reset">RESET</button></div>
+<div class="card"><b>PRESSURE</b><br>Scanner Tutorial = enemy 0.<br>Lower Guard after tutorial.<br>Access A Carrier only after deliberate branch.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> 3-layer Main Route</label>
+<label><input id="showBranch" type="checkbox" checked> Access A Branch</label>
+<label><input id="showSafe" type="checkbox" checked> Safe Tutorial / Crown</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+</aside><main>
+<svg viewBox="-1680 -1540 3360 1610">
+<rect class="bounds" x="-1600" y="-1472" width="3200" height="1472"/>
+<text class="tiny" x="-1570" y="-1438">REV2 · 3200×1472</text>
+
+<!-- central media wall gameplay blocker/landmark -->
+<rect class="media" x="-960" y="-1100" width="1920" height="720" rx="12"/>
+<text class="layerlabel" x="-165" y="-1065">GIANT MEDIA WALL BODY</text>
+
+<!-- ENTRY -->
+<rect class="surface" x="-1568" y="0" width="224" height="32"/><text class="tiny" x="-1550" y="-14">ENTRY</text>
+<circle class="anchor" cx="-1280" cy="-128" r="13"/><text class="tiny" x="-1258" y="-116">G0</text>
+<rect class="safe" x="-1360" y="-160" width="320" height="26"/><text class="tiny" x="-1345" y="-177">ACCESS CONTROL · SAFE</text>
+<rect class="story" x="-1260" y="-250" width="126" height="62" rx="6"/><text class="tiny" x="-1283" y="-266">ACCESS CONTROL</text>
+<rect class="story" x="-1060" y="-242" width="116" height="56" rx="6"/><text class="tiny" x="-1075" y="-258">SERVICE MOUNT</text>
+
+<!-- layer 1 scanner sweep -->
+<text class="layerlabel" x="-790" y="-260">LAYER 1 · UNDERFRAME SWEEP →</text>
+<circle class="scanner available" data-scanner cx="-896" cy="-304" r="15"/><text class="tiny" x="-874" y="-292">C1</text>
+<circle class="scanner available" data-scanner cx="-544" cy="-384" r="15"/><text class="tiny" x="-522" y="-372">C2</text>
+<circle class="scanner available" data-scanner cx="-192" cy="-432" r="15"/><text class="tiny" x="-170" y="-420">C3</text>
+<rect class="recovery" x="-620" y="-160" width="256" height="18"/><text class="tiny" x="-606" y="-174">TUTORIAL RECOVERY</text>
+<rect class="safe" x="128" y="-464" width="384" height="26"/><text class="tiny" x="144" y="-480">RIGHT SERVICE CRADLE · SAFE</text>
+
+<g id="safeZone">
+<rect class="zone" x="-1570" y="-530" width="2100" height="495" rx="10"/>
+<text class="tiny" x="-1540" y="-505">ACCESS CONTROL + UNDERFRAME TUTORIAL · NO ENEMY PRESSURE</text>
+</g>
+
+<!-- guard shelf -->
+<rect class="surface" x="704" y="-560" width="320" height="26"/><text class="tiny" x="720" y="-576">LOWER SECURITY SHELF</text>
+<circle class="enemy" cx="864" cy="-560" r="19"/><text class="tiny" x="775" y="-600">LOWER GUARD · STANDARD POOL</text>
+
+<!-- far-right cradle -->
+<circle class="anchor" cx="1216" cy="-640" r="13"/><text class="tiny" x="1238" y="-628">G1</text>
+<rect class="safe" x="1152" y="-704" width="320" height="28"/><text class="tiny" x="1168" y="-720">FAR-RIGHT SERVICE CRADLE</text>
+
+<!-- layer 2 backside return -->
+<text class="layerlabel" x="430" y="-755">← LAYER 2 · BACKSIDE RETURN</text>
+<circle class="anchor" cx="832" cy="-800" r="13"/><text class="tiny" x="852" y="-788">G2</text>
+<circle class="anchor" cx="448" cy="-896" r="13"/><text class="tiny" x="468" y="-884">G3</text>
+<circle class="anchor" cx="64" cy="-960" r="13"/><text class="tiny" x="84" y="-948">G4</text>
+<rect class="recovery" x="320" y="-704" width="256" height="18"/><text class="tiny" x="334" y="-718">RECOVERY B</text>
+<rect class="recovery" x="-48" y="-800" width="224" height="18"/><text class="tiny" x="-36" y="-814">RECOVERY C</text>
+<rect class="safe" x="-320" y="-992" width="384" height="28"/><text class="tiny" x="-304" y="-1008">BACKSIDE SAFE GALLERY</text>
+
+<!-- crown recall -->
+<circle class="scanner available" data-scanner cx="-256" cy="-1184" r="15"/><text class="tiny" x="-234" y="-1172">C4 RECALL</text>
+<rect class="safe" x="-448" y="-1248" width="320" height="28"/><text class="tiny" x="-432" y="-1264">CROWN DECK · SAFE</text>
+
+<!-- access A -->
+<circle class="anchor" cx="-736" cy="-1280" r="13"/><text class="tiny" x="-715" y="-1268">ACCESS ANCHOR</text>
+<rect class="surface" x="-1040" y="-1248" width="160" height="24"/><text class="tiny" x="-1032" y="-1264">ACCESS A CASSETTE</text>
+<circle class="accessEnemy" cx="-960" cy="-1248" r="19"/><text class="tiny" x="-1060" y="-1292">ACCESS A CARRIER · SUPPORT POOL</text>
+
+<!-- layer 3 departure -->
+<text class="layerlabel" x="40" y="-1225">LAYER 3 · CROWN DEPARTURE →</text>
+<circle class="anchor" cx="224" cy="-1280" r="13"/><text class="tiny" x="244" y="-1268">G5</text>
+<circle class="anchor" cx="576" cy="-1344" r="13"/><text class="tiny" x="596" y="-1332">G6</text>
+<rect class="safe" x="800" y="-1408" width="320" height="28"/><text class="tiny" x="816" y="-1424">EXIT → 3-3</text>
+<rect class="story" x="850" y="-1490" width="170" height="60" rx="6"/><text class="tiny" x="830" y="-1505">RETAIL SECURITY / ACTIVE</text>
+
+<g id="route">
+<path class="route1" d="M-1456,-32 Q-1360,-80 -1280,-128 L-1040,-160 Q-970,-230 -896,-304 Q-720,-345 -544,-384 Q-365,-415 -192,-432 Q-35,-455 128,-464 L512,-464 Q610,-520 704,-560 L1024,-560 Q1125,-605 1216,-640 Q1180,-675 1152,-704"/>
+<path class="route2" d="M1152,-704 Q995,-765 832,-800 Q642,-855 448,-896 Q255,-930 64,-960 Q-125,-985 -320,-992"/>
+<path class="route3" d="M-320,-992 Q-300,-1085 -256,-1184 Q-210,-1225 -128,-1248 Q45,-1265 224,-1280 Q395,-1315 576,-1344 Q688,-1380 800,-1408"/>
+</g>
+<g id="accessBranch"><path class="branch" d="M-448,-1248 Q-585,-1265 -736,-1280 Q-850,-1260 -960,-1248 Q-850,-1260 -736,-1280 Q-585,-1265 -448,-1248"/></g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-1280" cy="-128" r="400"/>
+<circle class="reach" cx="-896" cy="-304" r="400"/>
+<circle class="reach" cx="-544" cy="-384" r="400"/>
+<circle class="reach" cx="-192" cy="-432" r="400"/>
+<circle class="reach" cx="1216" cy="-640" r="400"/>
+<circle class="reach" cx="832" cy="-800" r="400"/>
+<circle class="reach" cx="448" cy="-896" r="400"/>
+<circle class="reach" cx="64" cy="-960" r="400"/>
+<circle class="reach" cx="-256" cy="-1184" r="400"/>
+<circle class="reach" cx="-736" cy="-1280" r="400"/>
+<circle class="reach" cx="224" cy="-1280" r="400"/>
+<circle class="reach" cx="576" cy="-1344" r="400"/>
+</g>
+</svg></main></div>
+<script>
+const btns=[...document.querySelectorAll('.statebtn')];
+function state(s){document.querySelectorAll('[data-scanner]').forEach(x=>x.setAttribute('class','scanner '+s));btns.forEach(b=>b.classList.toggle('active',b.dataset.state===s))}
+btns.forEach(b=>b.onclick=()=>state(b.dataset.state));
+showRoute.onchange=()=>document.querySelectorAll('.route1,.route2,.route3').forEach(x=>x.classList.toggle("hidden",!showRoute.checked));
+showBranch.onchange=()=>accessBranch.classList.toggle("hidden",!showBranch.checked);
+showSafe.onchange=()=>safeZone.classList.toggle("hidden",!showSafe.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

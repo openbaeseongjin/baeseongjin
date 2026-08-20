@@ -1,43 +1,80 @@
-# SECTOR 03-1 — PRODUCTION ALIGNMENT
+# 3-1 PRODUCTION ALIGNMENT — REV8.0
 
-*RUNTIME · CAMERA · STORY · REV 1.0*
+Baseline:
+`c1f9cd7f0362de7f7a3065a34e7ea9d35927a934`
 
-본 문서는 [3-1 시나리오](./README.md)와 현재 `Sector03AreaCatalog` 구현을 연결한다. 3-1은 Sector 03 첫 진입 Stage이며 현재 메인 authored world에 `MOCK INTEGRATED` 상태로 연결돼 있다.
+## Current Runtime truth
 
-## 1. 현재 판정
+Current `sector-03-01` still owns:
+- Runtime name `POWERED PROMENADE`
+- subtitle `COMMERCIAL THRESHOLD`
+- bounds `1280×1088`
+- Story objects:
+  - `sector-03-01:district-sign`
+  - `sector-03-01:welcome-kiosk`
+- verified Story presentations:
+  - `COMMERCIAL DISTRICT / PROMENADE 06`
+  - `WELCOME / PUBLIC SERVICE ONLINE`
+- exactly one pooled sentry:
+  - `sector-03-01:promenade-guard`
+  - Standard Pool
+- Scanner Groups: none
+- Patrol: none
+- objective chain:
+  `final-deck-reached → exit-panel-engaged → physical crossing`
+- next area:
+  `sector-03-02`
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `MOCK INTEGRATED` | `CurrentAuthoredAreaCatalog`가 `2-8 → 3-1`을 연결한다 |
-| Geometry / Gate | `IMPLEMENTED` | bounds `1280×1088`, Gate Panel → Gate open → physical crossing 계약이 들어가 있다 |
-| Camera | `IMPLEMENTED BY DEFAULT CAMERA` | `cameraZones` 없음, README §14 `Custom Pan 없음`과 일치 |
-| Story | `IMPLEMENTED (text binding)` | `story-display` 2개와 `storyTriggers` 3개가 연결돼 있다 |
-| Threat | `IMPLEMENTED AS NONE` | README 요구대로 Drone / Scanner Active / Wind / Trap이 없다 |
+## Stale documentation corrected
 
-## 2. Runtime 좌표 / Stable ID 요약
+Legacy 3-1 README says:
+`Enemy NONE`
 
-- Area: `sector-03-01`, entry `(-432,-32)`, exit `(400,-1056)`, next `sector-03-02`
-- Grapple: `G1(-320,-256)`, `G2(-32,-448)`, `G3(96,-672)`, `G4(-96,-800)`, `G5(128,-960)`
-- Recovery: `R1(288,-632)`, `R2(352,-888)`
-- Story display: `district-sign(-320,-184)`, `welcome-kiosk(-416,-184)`
-- Gate set(exitBlock 표준): `exit-deck(336,-963,288)`, `exit-gate(448,-963)`, `exit-panel(336,-963)`, exit `(448,-995)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
-- Objectives: `final-deck-reached bounds (192,-1056,288×96)`, `exit-panel-engaged`
+Actual Runtime says:
+one `promenade-guard`.
 
-## 3. Camera · Story 상태
+REV8 follows Runtime:
+**1 late slot**.
 
-- Camera는 baseline follow만 사용한다. README §14의 `Custom Pan 없음`과 일치하며 별도 `cameraZones`는 없다.
-- Story cue는 `sector-03-01:district-sign`, `sector-03-01:welcome-kiosk`를 직접 바인딩한다.
-- `storyTriggers`: `district-sign`, `powered-environment`, `automated-welcome`
+Legacy wording:
+`Foundation + Specialization`
 
-## 4. 검증 근거
+REV8:
+**generic Augment v1 carry / no specific-card lock**.
 
-- Source: `src/game/world/areas/sector03/Sector03AreaCatalog.js`
-- Tests: `tests/sector03AreaCatalog.mjs`, `tests/currentAuthoredWorld.mjs`
-- Integration status: `docs/scenario-development-integration.md`의 Sector 03 `MOCK INTEGRATED`
-- 미확인: 실제 브라우저 / 기기 플레이테스트, 정식 art / audio 자산
+## REV8 topology
 
-## 5. 남은 blocker / asset handoff
+`3072×1088`
 
-- README OPEN QUESTIONS의 `Sector 02 Boss → 3-1` 정확한 진입 연출은 아직 미확정이다.
-- 비활성 Scanner Housing은 README가 optional foreshadow로 남겨 두며 현재 runtime에는 직접 배치하지 않았다.
-- `images/`와 Sector 03 근경 / 배경 / 사운드 자산 인계는 아직 없다.
+`LEFT MARKET → HIGH SUSPENDED MARKET ISLAND → RIGHT MARKET → SHORT SERVICE LIFT`
+
+This replaces:
+- old compact vertical promenade
+- superseded REV2 twin-void terrace repetition
+
+## Story
+
+System Story is already bound in Runtime.
+
+Player Bark A:
+`…여긴 아직 불이 들어와 있어.`
+
+Player Bark B:
+`사람은 없는데… 기계들만 계속 일하고 있네.`
+
+Both:
+**NOT IMPLEMENTED — PLAYER BARK LAYER**
+
+Do not fake them as System Toast.
+
+## 3-2 boundary
+
+3-1 may show only inactive service/maintenance housing as atmospheric foreshadow.
+
+Forbidden in 3-1:
+- Scanner AVAILABLE/WARNING/LOCKED/RESET
+- scanner beam
+- attach denial
+- scanner alarm
+
+3-2 owns the first active Scanner lesson.

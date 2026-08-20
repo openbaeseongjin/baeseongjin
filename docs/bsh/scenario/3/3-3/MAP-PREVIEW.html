@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-3 REV8 REV3 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--y:#ffe16c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}.layout{display:grid;grid-template-columns:500px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}button{padding:6px 8px;margin:3px;border:1px solid var(--l);border-radius:6px;background:#132027;color:var(--t);cursor:pointer}.statebtn.active{border-color:var(--c);color:var(--c)}input[type=range]{width:100%}svg{width:100%;height:86vh;min-height:820px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.atrium{fill:#081116;stroke:#516873;stroke-width:3;stroke-dasharray:12 9}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.scanner{stroke-width:4}.scanner.available{fill:#5de8ff;stroke:#fff}.scanner.warning{fill:#efb75b;stroke:#fff}.scanner.locked{fill:#632d2d;stroke:#ef7664}.scanner.reset{fill:#4a5357;stroke:#a3adb1}.patrol{fill:#8d4b3f;stroke:#ffba92;stroke-width:3}.support{fill:#553b68;stroke:#caa7ff;stroke-width:3}.story{fill:#786a37;stroke:#efd989;stroke-width:2}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.patrolPath{fill:none;stroke:#ffba92;stroke-width:3;stroke-dasharray:10 8}.activation{fill:#b6573010;stroke:#cc775b;stroke-width:2;stroke-dasharray:8 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.08}.hidden{display:none}text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.phase{font-size:13px;fill:#dbe9ee}.dir{font-size:22px;fill:#ffe16c}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-3 CENTRAL RETAIL WALK · REV8 DRAFT REV3</h1><div class="sub">GAMEPLAY ONLY · 3712×1792 · TRUE DIRECTION RHYTHM ↗ → ↖ → ↘ → ↖ → ↗</div></header>
+<div class="layout"><aside>
+<div class="card"><b>핵심 수정</b><br>구조물 개수가 아니라 <b>플레이 방향</b>을 수정. 한쪽으로만 상승하지 않음.</div>
+<div class="card"><b>DIRECTION RHYTHM</b><br><span style="font-size:24px">↗ → ↖ → ↘ → ↖ → ↗</span></div>
+<div class="card"><b>ARCHITECTURAL CAUSE</b><br>교차 배치된 mall escalator bank + central service gantry + upper retail bridge.</div>
+<div class="card"><b>SCANNER + PATROL</b><br>중앙의 <b>descending security dip</b> 한 구간에서만 합성.</div>
+<div class="card"><b>SCANNER STATE</b><br><button class="statebtn active" data-state="available">AVAILABLE</button><button class="statebtn" data-state="warning">WARNING</button><button class="statebtn" data-state="locked">LOCKED</button><button class="statebtn" data-state="reset">RESET</button></div>
+<div class="card"><b>PATROL</b><br><input id="patrolSlider" type="range" min="-384" max="352" value="-384" step="16"><span id="patrolValue">-384</span></div>
+<div class="card"><label><input id="showRoute" type="checkbox" checked> Main Route</label><label><input id="showActivation" type="checkbox" checked> Security Band</label><label><input id="showReach" type="checkbox"> 400px Reach</label></div>
+</aside><main>
+<svg viewBox="-1950 -1870 3900 1940">
+<rect class="bounds" x="-1856" y="-1792" width="3712" height="1792"/>
+<path class="atrium" d="M-1120,-350 C-600,-260 690,-330 1160,-690 C1390,-900 1280,-1390 720,-1540 C160,-1690 -770,-1530 -1200,-1130 C-1430,-910 -1410,-550 -1120,-350 Z"/>
+<text class="phase" x="-170" y="-1510">CENTRAL RETAIL ATRIUM</text>
+
+<!-- Entry -->
+<rect class="surface" x="-1792" y="0" width="224" height="32"/><text class="tiny" x="-1775" y="-14">ENTRY</text>
+<circle class="anchor" cx="-1376" cy="-224" r="13"/><text class="tiny" x="-1354" y="-212">G1</text>
+<rect class="safe" x="-1472" y="-256" width="352" height="26"/><text class="phase" x="-1456" y="-276">LOWER RETAIL</text>
+<text class="dir" x="-1320" y="-330">↗</text>
+
+<!-- East Mid -->
+<circle class="anchor" cx="-960" cy="-352" r="13"/><text class="tiny" x="-938" y="-340">G1B</text>
+<circle class="anchor" cx="-768" cy="-480" r="13"/><text class="tiny" x="-746" y="-468">G2</text>
+<rect class="safe" x="-544" y="-544" width="384" height="28"/><text class="phase" x="-525" y="-564">EAST MID LANDING</text>
+<text class="dir" x="-690" y="-590">↖</text>
+
+<!-- West Observation -->
+<circle class="anchor" cx="-832" cy="-704" r="13"/><text class="tiny" x="-810" y="-692">G3</text>
+<rect class="safe" x="-1216" y="-768" width="384" height="28"/><text class="phase" x="-1197" y="-788">WEST OBSERVATION · SAFE</text>
+<rect class="story" x="-1130" y="-860" width="150" height="58" rx="6"/><text class="tiny" x="-1152" y="-875">ROUTE / INVALID</text>
+<rect class="story" x="-955" y="-860" width="140" height="58" rx="6"/><text class="tiny" x="-974" y="-875">PATROL / ONLINE</text>
+<text class="dir" x="-700" y="-850">↘</text>
+
+<!-- Security dip -->
+<g id="activationBand"><rect class="activation" x="-512" y="-1160" width="1024" height="340" rx="12"/><text class="tiny" x="-490" y="-1136">DESCENDING SECURITY DIP · SCANNER + PATROL</text></g>
+<circle class="scanner available" data-scanner cx="-608" cy="-896" r="15"/><text class="tiny" x="-586" y="-884">C1</text>
+<circle class="scanner available" data-scanner cx="-256" cy="-1024" r="15"/><text class="tiny" x="-234" y="-1012">C2</text>
+<circle class="anchor" cx="96" cy="-1088" r="13"/><text class="tiny" x="118" y="-1076">G4</text>
+<rect class="safe" x="96" y="-1120" width="320" height="28"/><text class="phase" x="112" y="-1140">CENTRAL GANTRY · SAFE AFTER CROSS</text>
+<path class="patrolPath" d="M-384,-976 L352,-976"/>
+<circle id="patrolDrone" class="patrol" cx="-384" cy="-976" r="20"/>
+<rect class="recovery" x="-352" y="-768" width="256" height="18"/><text class="tiny" x="-338" y="-782">RECOVERY A</text>
+<text class="dir" x="-20" y="-1220">↖</text>
+
+<!-- West Upper -->
+<circle class="anchor" cx="-128" cy="-1248" r="13"/><text class="tiny" x="-106" y="-1236">G5</text>
+<circle class="anchor" cx="-352" cy="-1328" r="13"/><text class="tiny" x="-330" y="-1316">G6A</text>
+<circle class="anchor" cx="-512" cy="-1376" r="13"/><text class="tiny" x="-490" y="-1364">G6</text>
+<rect class="surface" x="-832" y="-1408" width="320" height="26"/><text class="phase" x="-815" y="-1428">WEST UPPER BRIDGE</text>
+<circle class="support" cx="-672" cy="-1408" r="19"/><text class="tiny" x="-775" y="-1450">SUPPORT GUARD</text>
+<text class="dir" x="-390" y="-1470">↗</text>
+
+<!-- Exit -->
+<circle class="anchor" cx="-160" cy="-1536" r="13"/><text class="tiny" x="-138" y="-1524">G7</text>
+<circle class="anchor" cx="192" cy="-1624" r="13"/><text class="tiny" x="214" y="-1612">G8</text>
+<rect class="safe" x="544" y="-1696" width="320" height="28"/><text class="phase" x="560" y="-1716">EXIT MEZZANINE → 3-4</text>
+
+<g id="route">
+<path class="route" d="
+M-1680,-32
+Q-1515,-135 -1376,-224
+Q-1250,-245 -1120,-256
+Q-1040,-305 -960,-352
+Q-860,-420 -768,-480
+Q-625,-520 -544,-544
+Q-675,-620 -832,-704
+Q-980,-740 -1216,-768
+Q-900,-835 -608,-896
+Q-430,-955 -256,-1024
+Q-80,-1060 96,-1088
+Q10,-1175 -128,-1248
+Q-230,-1290 -352,-1328
+Q-420,-1355 -512,-1376
+Q-650,-1400 -832,-1408
+Q-480,-1465 -160,-1536
+Q25,-1580 192,-1624
+Q365,-1660 544,-1696"/>
+</g>
+<g id="reach" class="hidden">
+<circle class="reach" cx="-1376" cy="-224" r="400"/><circle class="reach" cx="-960" cy="-352" r="400"/><circle class="reach" cx="-768" cy="-480" r="400"/><circle class="reach" cx="-832" cy="-704" r="400"/><circle class="reach" cx="-608" cy="-896" r="400"/><circle class="reach" cx="-256" cy="-1024" r="400"/><circle class="reach" cx="96" cy="-1088" r="400"/><circle class="reach" cx="-128" cy="-1248" r="400"/><circle class="reach" cx="-512" cy="-1376" r="400"/><circle class="reach" cx="-160" cy="-1536" r="400"/><circle class="reach" cx="192" cy="-1624" r="400"/>
+</g>
+</svg></main></div>
+<script>
+const btns=[...document.querySelectorAll('.statebtn')];function state(s){document.querySelectorAll('[data-scanner]').forEach(x=>x.setAttribute('class','scanner '+s));btns.forEach(b=>b.classList.toggle('active',b.dataset.state===s))}btns.forEach(b=>b.onclick=()=>state(b.dataset.state));patrolSlider.oninput=()=>{patrolDrone.setAttribute('cx',patrolSlider.value);patrolValue.textContent=patrolSlider.value};showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);showActivation.onchange=()=>activationBand.classList.toggle("hidden",!showActivation.checked);showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

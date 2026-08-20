@@ -1,0 +1,428 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "d588aa041a350cab198cd187d8dccbe3b3a244dd",
+  "stage": {
+    "sector": 3,
+    "stage": 2,
+    "sourceAreaId": "sector-03-02",
+    "name": "FACADE SERVICE GALLERY"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-access-control",
+      "status": "DESIGN LOCKED",
+      "purpose": "show recognized identity but blocked route",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-02:access-control"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-02:access-control",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "items": [
+            {
+              "title": "COMMERCIAL ACCESS CONTROL",
+              "detail": "EMPLOYEE VERIFIED"
+            },
+            {
+              "title": "ROUTE AUTHORIZATION",
+              "detail": "INVALID"
+            }
+          ]
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "scanner",
+          "action": "observe-only"
+        }
+      ],
+      "completion": "presentation complete",
+      "validation": "No enemy or attach pressure during Story."
+    },
+    {
+      "beatId": "s1-bark-a",
+      "status": "DESIGN LOCKED",
+      "purpose": "natural confusion after contradictory access result",
+      "trigger": {
+        "type": "presentation-complete",
+        "presentationId": "sector-03-02:route-invalid"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-2:bark-a:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…인증은 됐는데, 왜 막히는 거지?"
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-bark-with-toast"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "No Priority/class explanation."
+    },
+    {
+      "beatId": "s2-service-mount",
+      "status": "DESIGN LOCKED",
+      "purpose": "introduce cycling mount safely",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-02:service-mount"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-02:service-mount",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "SERVICE MOUNT ACCESS",
+            "detail": "CYCLING"
+          }
+        },
+        {
+          "type": "scanner",
+          "target": "sector-03-02:scanner-A",
+          "action": "full-cycle-readable"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "Player may commit after observation",
+      "validation": "Scanner is not visually framed as damage laser."
+    },
+    {
+      "beatId": "s3-underframe-tutorial",
+      "status": "DESIGN LOCKED",
+      "purpose": "teach attach timing and persistence through LOCK",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "underframe-sweep"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-2:underframe",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "scanner",
+          "target": "sector-03-02:scanner-A",
+          "action": "control-c1-c2-c3"
+        },
+        {
+          "type": "route",
+          "action": "c1-to-c2-to-c3-to-safe-cradle"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "recovery",
+          "target": "tutorial-recovery",
+          "action": "3-5-second-retry"
+        }
+      ],
+      "completion": "P2 cradle reached",
+      "validation": "Current Rope persists through LOCK; no enemy pressure."
+    },
+    {
+      "beatId": "s4-bark-b",
+      "status": "DESIGN LOCKED",
+      "purpose": "confirm directly experienced rule without tutorial prose",
+      "trigger": {
+        "type": "scanner-experience",
+        "condition": "player-remained-attached-through-locked"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-2:bark-b:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…이미 붙은 건 그대로네."
+          }
+        },
+        {
+          "type": "systemText",
+          "action": "do-not-replace-bark-with-toast"
+        }
+      ],
+      "completion": "local presentation only",
+      "validation": "If trigger/layer unavailable, leave NOT IMPLEMENTED."
+    },
+    {
+      "beatId": "s5-lower-guard",
+      "status": "DESIGN LOCKED",
+      "purpose": "reintroduce ordinary security only after Scanner learning",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "right-service-security-shelf"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-2:lower-guard",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "sector-03-02:scanner-lower-guard",
+          "action": "activate-standard-pool-slot"
+        },
+        {
+          "type": "scanner",
+          "action": "tutorial-mounts-out-of-pressure"
+        }
+      ],
+      "completion": "far-right cradle reached",
+      "validation": "No sustained scanner+enemy synthesis."
+    },
+    {
+      "beatId": "s6-backside-return",
+      "status": "DESIGN LOCKED",
+      "purpose": "turn around the Media Wall and reset scanner attention with static Rope flow",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "backside-return"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-2:backside",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "g2-to-g3-to-g4-static-return"
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-02:scanner-lower-guard",
+          "action": "inactive-before-return"
+        },
+        {
+          "type": "recovery",
+          "targets": [
+            "recovery-b",
+            "recovery-c"
+          ],
+          "action": "4-7-second-retry"
+        }
+      ],
+      "completion": "P4 backside gallery reached",
+      "validation": "Route reads as architectural return, not arbitrary S-curve."
+    },
+    {
+      "beatId": "s7-crown-recall",
+      "status": "DESIGN LOCKED",
+      "purpose": "recall Scanner knowledge without new tutorial",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "crown-slot"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-2:crown-recall",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "scanner",
+          "target": "sector-03-02:scanner-A",
+          "action": "control-c4-recall-mount"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "Crown Deck reached",
+      "validation": "C4 uses same scanner group/cycle; no new system."
+    },
+    {
+      "beatId": "s8-access-a",
+      "status": "DESIGN LOCKED",
+      "purpose": "offer optional Access Module A collection without relocking mainline",
+      "trigger": {
+        "type": "branch-commit",
+        "branchId": "access-a-cassette"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-2:access-a",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "sector-03-02:scanner-upper-guard",
+          "action": "activate-support-pool-carrier"
+        },
+        {
+          "type": "access",
+          "moduleId": "sector-03:access-module:a",
+          "action": "grant-on-carrier-kill"
+        },
+        {
+          "type": "scanner",
+          "action": "none-in-carrier-bay"
+        }
+      ],
+      "completion": "module collected or Player returns to Crown",
+      "validation": "No third enemy; mainline exit never requires local carrier kill."
+    },
+    {
+      "beatId": "s9-crown-departure",
+      "status": "DESIGN LOCKED",
+      "purpose": "finish with clean upper Rope flow",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "crown-departure"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-2:crown-departure",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "g5-to-g6-to-exit"
+        },
+        {
+          "type": "enemy",
+          "action": "mainline-pressure-zero"
+        }
+      ],
+      "completion": "Final deck reached",
+      "validation": "No combat or new tutorial on final flow."
+    },
+    {
+      "beatId": "s10-exit-story",
+      "status": "DESIGN LOCKED",
+      "purpose": "hand Scanner-only lesson to 3-3 security synthesis",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-02:retail-security-ahead"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-02:retail-security-ahead",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "RETAIL SECURITY",
+            "detail": "ACTIVE"
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "exit-panel-engaged → physical crossing → sector-03-03",
+      "validation": "Final Story frame is safe."
+    }
+  ],
+  "validation": [
+    "worldPause false",
+    "same deterministic scanner group",
+    "Scanner values 1.5/.6/1.1/.3",
+    "current Rope persists through LOCK",
+    "first scanner lesson enemy-free",
+    "exactly 2 enemy slots",
+    "Access A optional local branch",
+    "no Patrol/Wind/Rope Cut",
+    "Story copy exact",
+    "Barks not Toast",
+    "all critical mandatory Rope relations <=400px",
+    "maximum meaningful overlap <=1",
+    "3-3 owns first true scanner+enemy synthesis"
+  ]
+}

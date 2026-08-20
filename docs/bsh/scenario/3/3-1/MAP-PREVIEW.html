@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-1 REV8 REV3 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--r:#df7669;--y:#ffe16c;--s:#ead174}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:485px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:82vh;min-height:720px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.island{fill:#426070;stroke:#a9d4e5;stroke-width:3}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.enemy{fill:#6e2424;stroke:#ff8e7c;stroke-width:3}.story{fill:#786a37;stroke:#efd989;stroke-width:2}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.void{fill:#081116;stroke:#45616c;stroke-width:2;stroke-dasharray:9 8}.zone{fill:#80d39a10;stroke:#80d39a;stroke-width:2;stroke-dasharray:8 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.09}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.mid{font-size:12px}
+@media(max-width:1080px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-1 LOWER MARKET PROMENADE · REV8 DRAFT REV3</h1><div class="sub">GAMEPLAY ONLY · 3072×1088 · PANORAMIC MARKET VOID / SUSPENDED MARKET ISLAND ARCH</div></header>
+<div class="layout"><aside>
+<div class="card"><b>NEW BODY</b><br>LOW LEFT ↗ HIGH CENTRAL ISLAND ↘ RIGHT MARKET ↗ SHORT SERVICE LIFT</div>
+<div class="card"><b>WHAT CHANGED</b><br>REV2의 Void A / Terrace / Void B 반복 폐기. 하나의 거대한 Market Void를 중앙 Hanging Island를 통해 가로지름.</div>
+<div class="card"><b>DIALOGUE</b><br>A: “…여긴 아직 불이 들어와 있어.”<br><br>B: “사람은 없는데… 기계들만 계속 일하고 있네.”</div>
+<div class="card"><b>PRESSURE</b><br>Scanner OFF · Patrol OFF · Guard 1 slot only.<br>Central Story Island까지 Enemy pressure 0.</div>
+<div class="card">
+<label><input id="showRoute" type="checkbox" checked> Main Route</label>
+<label><input id="showSafe" type="checkbox" checked> No-pressure Story Region</label>
+<label><input id="showReach" type="checkbox"> 400px Hook Reach</label>
+</div>
+<div class="card"><b>MAP RULE</b><br>배경 상점/간판/제품/에스컬레이터/조명은 숨김. 실제 collision / story / enemy만 표시.</div>
+</aside><main>
+<svg viewBox="-1620 -1160 3240 1230">
+<rect class="bounds" x="-1536" y="-1088" width="3072" height="1088"/>
+<text class="tiny" x="-1508" y="-1055">REV3 · 3072×1088</text>
+
+<!-- single huge market void -->
+<rect class="void" x="-1260" y="-760" width="2340" height="650" rx="12"/>
+<text class="mid" x="-310" y="-725">ONE PANORAMIC MARKET VOID</text>
+
+<!-- entry -->
+<rect class="surface" x="-1504" y="0" width="224" height="32"/>
+<text class="tiny" x="-1488" y="-14">ENTRY</text>
+<circle class="anchor" cx="-1184" cy="-192" r="13"/>
+<text class="tiny" x="-1163" y="-180">G1</text>
+
+<!-- P1 -->
+<rect class="safe" x="-1248" y="-224" width="384" height="26"/>
+<text class="tiny" x="-1232" y="-240">LEFT MARKET TERRACE · STORY A</text>
+<rect class="story" x="-1080" y="-310" width="108" height="58" rx="6"/>
+<text class="tiny" x="-1097" y="-324">DISTRICT SIGN</text>
+
+<!-- ascent -->
+<circle class="anchor" cx="-640" cy="-416" r="13"/>
+<text class="tiny" x="-619" y="-404">G2 · ISLAND APPROACH</text>
+<rect class="recovery" x="-704" y="-176" width="256" height="18"/>
+<text class="tiny" x="-690" y="-190">RECOVERY A</text>
+
+<!-- central island -->
+<rect class="island" x="-384" y="-544" width="512" height="30"/>
+<text class="tiny" x="-368" y="-561">SUSPENDED MARKET ISLAND · SAFE STORY CORE</text>
+<rect class="story" x="-170" y="-642" width="116" height="66" rx="6"/>
+<text class="tiny" x="-183" y="-656">WELCOME KIOSK</text>
+
+<!-- descent -->
+<circle class="anchor" cx="416" cy="-640" r="13"/>
+<text class="tiny" x="437" y="-628">G3 · DESCENT ARC</text>
+<rect class="recovery" x="256" y="-304" width="256" height="18"/>
+<text class="tiny" x="270" y="-318">RECOVERY B</text>
+
+<!-- right terrace -->
+<rect class="surface" x="704" y="-416" width="384" height="26"/>
+<text class="tiny" x="720" y="-432">RIGHT MARKET TERRACE · LATE PRESSURE</text>
+<circle class="enemy" cx="944" cy="-416" r="19"/>
+<text class="tiny" x="846" y="-455">PROMENADE GUARD · STANDARD POOL</text>
+
+<!-- end lift -->
+<circle class="anchor" cx="1184" cy="-672" r="13"/>
+<text class="tiny" x="1205" y="-660">G4 · SERVICE LIFT</text>
+<rect class="safe" x="1152" y="-800" width="320" height="28"/>
+<text class="tiny" x="1168" y="-816">EXIT → 3-2 FACADE SERVICE GALLERY</text>
+
+<!-- no pressure -->
+<g id="safeZone">
+<rect class="zone" x="-1510" y="-690" width="1675" height="650" rx="10"/>
+<text class="tiny" x="-1480" y="-665">ENTRY → CENTRAL ISLAND · NO AUTHORED ENEMY PRESSURE</text>
+</g>
+
+<!-- route -->
+<g id="route">
+<path class="route" d="
+M-1392,-32
+Q-1280,-105 -1184,-192
+Q-1055,-220 -864,-224
+Q-760,-325 -640,-416
+Q-510,-500 -384,-544
+L128,-544
+Q270,-600 416,-640
+Q560,-520 704,-416
+L1088,-416
+Q1150,-540 1184,-672
+Q1270,-750 1320,-800"/>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-1184" cy="-192" r="400"/>
+<circle class="reach" cx="-640" cy="-416" r="400"/>
+<circle class="reach" cx="416" cy="-640" r="400"/>
+<circle class="reach" cx="1184" cy="-672" r="400"/>
+</g>
+</svg></main></div>
+<script>
+showRoute.onchange=()=>route.classList.toggle("hidden",!showRoute.checked);
+showSafe.onchange=()=>safeZone.classList.toggle("hidden",!showSafe.checked);
+showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>
