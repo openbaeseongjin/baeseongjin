@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-5 REV8 REV3 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--y:#ffe16c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:520px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}
+svg{width:100%;height:84vh;min-height:760px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.divider{fill:#17242b;stroke:#7d929b;stroke-width:4}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:3}.recovery{fill:#315944;stroke:#80d39a;stroke-width:2}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.entryEnemy{fill:#553b68;stroke:#caa7ff;stroke-width:3}.exitEnemy{fill:#4f2b52;stroke:#f1a8e8;stroke-width:3}.node{fill:#244f59;stroke:#77efff;stroke-width:4}.story{fill:#786a37;stroke:#efd989;stroke-width:2}.route{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.safeZone{fill:#80d39a0e;stroke:#80d39a;stroke-width:2;stroke-dasharray:8 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.08}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.phase{font-size:13px;fill:#dbe9ee}.dir{font-size:20px;fill:#ffe16c}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-5 COMMERCIAL OPERATIONS HUB · REV8 DRAFT REV3</h1><div class="sub">GAMEPLAY ONLY · 2688×1248 · COMMERCIAL BACK-OF-HOUSE VERTICAL INTERCHANGE</div></header>
+<div class="layout"><aside>
+<div class="card"><b>SECTOR 03 IDENTITY</b><br>CENTRAL EXCHANGE COMPLEX. 기계실/전력실이 아니라 <b>상업복합시설의 직원·점포 운영 Back-of-House</b>.</div>
+<div class="card"><b>SPATIAL RHYTHM</b><br><span style="font-size:22px">↘ → ↑ → ↗ → ↘ → ↗</span></div>
+<div class="card"><b>4 COMMERCIAL LAYERS</b><br>1. Tenant Delivery Passage<br>2. Operations Control Balcony<br>3. Atrium Signage Access Catwalk<br>4. Tenant Transfer Deck</div>
+<div class="card"><b>AUGMENT #3</b><br>Staff Equipment Calibration Frame. Operations Balcony는 완전 안전.</div>
+<div class="card"><b>ENEMY = 2</b><br>Delivery Passage = Support Pool<br>Tenant Transfer Deck = Late Pool + Access B</div>
+<div class="card"><label><input id="routeToggle" type="checkbox" checked> Main Route</label><label><input id="safeToggle" type="checkbox" checked> Safe Operations Zone</label><label><input id="reachToggle" type="checkbox"> 400px Reach</label></div>
+<div class="card"><b>GAMEPLAY-ONLY</b><br>매장 장식, 광고, 박스, 조명 등 배경요소는 표시하지 않음. Staff Partition은 실제 LOS/collision이라 표시.</div>
+</aside><main>
+<svg viewBox="-1420 -1320 2840 1390">
+<rect class="bounds" x="-1344" y="-1248" width="2688" height="1248"/>
+<rect class="divider" x="-455" y="-835" width="80" height="420" rx="8"/><text class="tiny" x="-530" y="-850">STAFF ACCESS / FIRE PARTITION</text>
+
+<!-- Tenant delivery -->
+<rect class="safe" x="-1296" y="0" width="224" height="32"/><text class="tiny" x="-1278" y="-14">ENTRY FROM 3-4</text>
+<circle class="anchor" cx="-960" cy="-224" r="13"/><text class="tiny" x="-938" y="-212">G1</text>
+<rect class="surface" x="-800" y="-288" width="256" height="26"/><text class="phase" x="-790" y="-307">TENANT DELIVERY APPROACH</text>
+<circle class="entryEnemy" cx="-672" cy="-288" r="19"/><text class="tiny" x="-770" y="-332">ENTRY GUARD · SUPPORT POOL</text>
+<circle class="anchor" cx="-640" cy="-448" r="13"/><text class="tiny" x="-618" y="-436">G2</text>
+<rect class="surface" x="-768" y="-544" width="256" height="26"/><text class="phase" x="-765" y="-563">TENANT DELIVERY PASSAGE</text>
+<text class="dir" x="-610" y="-610">↑</text>
+
+<!-- Ops balcony -->
+<circle class="anchor" cx="-512" cy="-736" r="13"/><text class="tiny" x="-490" y="-724">G3</text>
+<g id="safeZone"><rect class="safeZone" x="-455" y="-900" width="570" height="145" rx="15"/><text class="tiny" x="-430" y="-875">TRUE SAFE OPERATIONS ZONE</text></g>
+<rect class="safe" x="-384" y="-800" width="448" height="30"/><text class="phase" x="-360" y="-819">OPERATIONS CONTROL BALCONY</text>
+<rect class="node" x="-218" y="-920" width="116" height="120" rx="10"/><text class="tiny" x="-263" y="-938">STAFF EQUIPMENT CALIBRATION FRAME</text>
+<rect class="story" x="-355" y="-980" width="120" height="48" rx="6"/><text class="tiny" x="-378" y="-994">NODE ID</text>
+<rect class="story" x="-88" y="-980" width="150" height="48" rx="6"/><text class="tiny" x="-125" y="-994">ACCESS SUMMARY</text>
+
+<!-- Signage catwalk -->
+<circle class="anchor" cx="192" cy="-928" r="13"/><text class="tiny" x="214" y="-916">G4</text>
+<rect class="safe" x="256" y="-960" width="320" height="28"/><text class="phase" x="273" y="-979">ATRIUM SIGNAGE ACCESS CATWALK</text>
+<rect class="recovery" x="320" y="-768" width="256" height="18"/><text class="tiny" x="334" y="-782">RECOVERY B</text>
+
+<!-- Tenant transfer deck -->
+<circle class="anchor" cx="768" cy="-832" r="13"/><text class="tiny" x="790" y="-820">G5</text>
+<rect class="surface" x="832" y="-864" width="256" height="28"/><text class="phase" x="850" y="-883">TENANT TRANSFER DECK</text>
+<circle class="exitEnemy" cx="960" cy="-864" r="20"/><text class="tiny" x="840" y="-907">LATE GUARD · ACCESS B</text>
+
+<!-- Upper retail link -->
+<circle class="anchor" cx="1120" cy="-1056" r="13"/><text class="tiny" x="1142" y="-1044">G6</text>
+<rect class="safe" x="1248" y="-1152" width="256" height="28"/><text class="phase" x="1248" y="-1172">UPPER RETAIL LINK → 3-6</text>
+<rect class="recovery" x="-384" y="-624" width="256" height="18"/><text class="tiny" x="-370" y="-638">RECOVERY A</text>
+
+<g id="route"><path class="route" d="M-1184,-64 Q-1060,-145 -960,-224 Q-875,-262 -800,-288 L-544,-288 Q-590,-370 -640,-448 Q-700,-500 -768,-544 L-512,-544 L-512,-736 Q-450,-780 -384,-800 L64,-800 Q130,-865 192,-928 L576,-960 Q675,-895 768,-832 Q800,-848 832,-864 L1088,-864 Q1108,-960 1120,-1056 Q1180,-1105 1248,-1152"/></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-960" cy="-224" r="400"/><circle class="reach" cx="-640" cy="-448" r="400"/><circle class="reach" cx="-512" cy="-736" r="400"/><circle class="reach" cx="192" cy="-928" r="400"/><circle class="reach" cx="768" cy="-832" r="400"/><circle class="reach" cx="1120" cy="-1056" r="400"/></g>
+</svg></main></div>
+<script>
+routeToggle.onchange=()=>route.classList.toggle('hidden',!routeToggle.checked);
+safeToggle.onchange=()=>safeZone.classList.toggle('hidden',!safeToggle.checked);
+reachToggle.onchange=()=>reach.classList.toggle('hidden',!reachToggle.checked);
+</script></body></html>

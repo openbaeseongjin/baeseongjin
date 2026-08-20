@@ -1,0 +1,288 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "d588aa041a350cab198cd187d8dccbe3b3a244dd",
+  "stage": {
+    "sector": 3,
+    "stage": 3,
+    "sourceAreaId": "sector-03-03",
+    "name": "CENTRAL RETAIL WALK"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-lower-retail",
+      "status": "DESIGN LOCKED",
+      "purpose": "enter public retail space and establish first up-right vector",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "lower-retail"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-3:lower-retail",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "RETAIL SECURITY",
+            "detail": "ACTIVE"
+          }
+        },
+        {
+          "type": "route",
+          "action": "up-right-first-escalator-bank"
+        }
+      ],
+      "completion": "P2 east-mid reached",
+      "validation": "No enemy pressure; direction reads ↗."
+    },
+    {
+      "beatId": "s1-east-mid-reversal",
+      "status": "DESIGN LOCKED",
+      "purpose": "make first explicit direction reversal",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "east-mid"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-3:east-mid",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "up-left-to-west-observation"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        }
+      ],
+      "completion": "West Observation reached",
+      "validation": "Next destination clearly appears upper-left before commit."
+    },
+    {
+      "beatId": "s2-observation",
+      "status": "DESIGN LOCKED",
+      "purpose": "show scanner and patrol together before entering risk",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "west-observation"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "3-3:observation",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "items": [
+            {
+              "title": "VERTICAL SERVICE ROUTE",
+              "detail": "AUTHORIZATION INVALID"
+            },
+            {
+              "title": "AUTOMATED PATROL",
+              "detail": "ONLINE"
+            }
+          ]
+        },
+        {
+          "type": "scanner",
+          "action": "C1/C2 fully readable"
+        },
+        {
+          "type": "patrol",
+          "action": "path fully readable"
+        },
+        {
+          "type": "enemy",
+          "action": "no incoming pressure"
+        }
+      ],
+      "completion": "Player chooses commit",
+      "validation": "P3 remains safe; destination lower-right is visually intentional."
+    },
+    {
+      "beatId": "s3-security-dip",
+      "status": "DESIGN LOCKED",
+      "purpose": "first scanner+patrol synthesis through a deliberate descending commit",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "descending-security-dip"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-3:security-dip",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "scanner",
+          "target": "sector-03-03:scanner-retail-A",
+          "action": "control-c1-c2"
+        },
+        {
+          "type": "patrol",
+          "target": "sector-03-03:drone-1",
+          "action": "sweep-then-target-lock"
+        },
+        {
+          "type": "route",
+          "action": "p3-to-c1-to-c2-to-g4"
+        },
+        {
+          "type": "recovery",
+          "target": "recovery-a",
+          "action": "4-6-second-retry"
+        }
+      ],
+      "completion": "Central Gantry reached",
+      "validation": "Direction reads ↘; no support guard overlap; no forced detach."
+    },
+    {
+      "beatId": "s4-central-reversal",
+      "status": "DESIGN LOCKED",
+      "purpose": "end synthesis cleanly and reverse back up-left",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "central-gantry"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-3:central-reversal",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "sector-03-03:drone-1",
+          "action": "leave-sustained-pressure"
+        },
+        {
+          "type": "scanner",
+          "action": "no-further-controlled-targets"
+        },
+        {
+          "type": "route",
+          "action": "up-left-g5-g6a-g6"
+        }
+      ],
+      "completion": "West Upper Bridge reached",
+      "validation": "Next direction reads ↖ immediately after landing."
+    },
+    {
+      "beatId": "s5-support-guard",
+      "status": "DESIGN LOCKED",
+      "purpose": "use second slot as separate local pressure after synthesis",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "west-upper-bridge"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-3:support-guard",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "sector-03-03:retail-support-guard",
+          "action": "activate-support-pool-slot"
+        },
+        {
+          "type": "scanner",
+          "action": "none"
+        },
+        {
+          "type": "patrol",
+          "action": "none"
+        }
+      ],
+      "completion": "Player clears/leaves local band",
+      "validation": "Kill optional; no Scanner/Patrol overlap."
+    },
+    {
+      "beatId": "s6-final-reversal",
+      "status": "DESIGN LOCKED",
+      "purpose": "finish with final up-right change toward 3-4",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "final-up-right"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-3:final",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "p5-to-g7-to-g8-to-exit"
+        },
+        {
+          "type": "enemy",
+          "action": "pressure-zero"
+        }
+      ],
+      "completion": "final-deck-reached → exit-panel → physical crossing → 3-4",
+      "validation": "Direction reads ↗; exit is safe."
+    }
+  ],
+  "validation": [
+    "direction rhythm ↗→↖→↘→↖→↗",
+    "one scanner group only",
+    "scanner cycle unchanged",
+    "current Rope persists through LOCK",
+    "Patrol speed/wait/pingpong unchanged",
+    "exactly 2 enemy slots",
+    "support guard separate",
+    "Story copy exact",
+    "no Player dialogue by default",
+    "all mandatory links <=400px",
+    "maximum meaningful similarity overlap <=1",
+    "3-4 handoff preserved"
+  ]
+}

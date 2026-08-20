@@ -1,50 +1,34 @@
-# SECTOR 03-7 — PRODUCTION ALIGNMENT
+# 3-7 PRODUCTION ALIGNMENT — REV8.1
 
-*ACCESS TIER REVEAL · SCANNER + PATROL · REV 1.0*
+Baseline: `cb4f690ac180a04868322e9c4cfe1384897c348b`
 
-본 문서는 [3-7 시나리오](./README.md)와 현재 `Sector03AreaCatalog` 구현을 연결한다. 3-7은 Access Tier story pressure와 static cost profile 분기를 도입하는 Stage이며 현재 메인 authored world에 `MOCK INTEGRATED` 상태로 연결돼 있다.
+## Runtime VERIFIED
+- area `sector-03-07`
+- current name `PRIORITY CONCOURSE`
+- 4 enemy slots
+- one Scanner group controlling C1/C2/C3
+- upper guard carries `sector-03:access-module:c`
+- local exit crosses to `sector-03-08`
 
-## 0. CURRENT RUNTIME OVERRIDE — 2026-08-19
+## Direction Runtime VERIFIED
+Main now includes Direction Runtime v1:
+`DIRECTION-SPEC → compiler → DirectionRuntime → domain adapter`.
 
-- 0.32.0 enemy density 이후 Patrol 한 기와 pooled Sentry 세 기가 존재하며, 0.41.0부터 `concourse-upper-guard(0,-1056)`가 `sector-03:access-module:c` Carrier다.
-- 적 수·위치·activation·pool과 Scanner cycle은 바꾸지 않고 Sector 03의 세 번째 3-of-3 source만 부여한다. 아래 Patrol 한 기만 존재한다는 서술은 이 override로 대체한다.
-- 0.42.0부터 Carrier 위치 문자열은 제거하고 화면 밖 edge arrow와 화면 안 diamond marker를 같은 module world position에서 전환한다.
+Only migrated Stage coverage is currently limited; 3-7 is NOT IMPLEMENTED in Direction Runtime.
 
-## 1. 현재 판정
+## Planning delta
+- bounds `3840×1792`
+- three-band commercial transfer braid
+- Priority Spine / Outer Gallery / Facility Service gameplay retained
+- Story simplified:
+  - remove Player-facing Service Class / Standard-Premium / Access Tier
+  - retain Priority Route as the only late-3-7 reveal
+- Bark:
+  `…우선 통로가 따로 있었네.`
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `MOCK INTEGRATED` | 메인 authored chain의 `3-7`으로 연결돼 있다 |
-| Geometry / Gate | `IMPLEMENTED` | bounds `1280×1344`, upper market approach와 exit contract 구현 |
-| Scanner | `IMPLEMENTED PROTOTYPE` | `scanner-priority-concourse-A`가 `C1/C2/C3`를 제어한다 |
-| Patrol Drone | `IMPLEMENTED` | `drone-1` 한 기체만 배치돼 README의 “2대 금지”와 일치한다 |
-| Story | `IMPLEMENTED` | `story-display` 3개로 concourse / directory / next gate를 표시한다 |
-
-## 2. Runtime 좌표 / Stable ID 요약
-
-- Area: `sector-03-07`, entry `(-512,-32)`, exit `(448,-1312)`, next `sector-03-08`
-- Grapple: `C1(-192,-320)`, `S1(-32,-288)`, `S2(288,-416)`, `C2(-288,-864)`, `C3(64,-736)`, `G4(128,-896)`, `S3(352,-736)`, `S4(384,-896)`, `G5(192,-1184)`
-- Recovery: 없음
-- Drone: `drone-1(-64,-800)`, activation `(-160,-976,704×336)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
-- Story display: `concourse-sign(-352,-184)`, `access-directory(0,-1080)`, `upper-market-gate-ahead(384,-1336)`
-- Scanner group: `sector-03-07:scanner-priority-concourse-A`, controlled surfaces `c1-surface`, `c2-surface`, `c3-surface`
-- Gate set(exitBlock 표준): `exit-deck(384,-1219,320)`, `exit-gate(512,-1219)`, `exit-panel(400,-1219)`, exit `(512,-1251)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
-
-## 3. Camera · Story 상태
-
-- Camera는 README §14 `Custom Pan 없음`대로 baseline follow만 사용한다.
-- Story cue는 `sector-03-07:concourse-sign`, `access-directory`, `upper-market-gate-ahead`
-- `storyTriggers`: `priority-concourse`, `access-tier`, `service-class`
-
-## 4. 검증 근거
-
-- Source: `src/game/world/areas/sector03/Sector03AreaCatalog.js`
-- Tests: `tests/sector03AreaCatalog.mjs`, `tests/currentAuthoredWorld.mjs`
-- Integration recent change #25가 story signage 28개 반영 완료를 기록한다
-- 미확인: 실제 플레이에서 3개의 cost profile이 구분되는지, directory story가 과설명으로 느껴지지 않는지
-
-## 5. 남은 blocker / asset handoff
-
-- README가 강조한 Access Tier 구조의 체감 검증이 남아 있다.
-- Concourse signage / directory / background props / ambience 자산이 아직 없다.
-- 3-8과 차별화되는 pre-finale 압박으로 읽히는지 실제 플레이 기반 검증이 필요하다.
+## Critical migration rule
+When 3-7 moves to Direction Runtime:
+- update/remove legacy 3-7 `access-directory` Story copy
+- do not let both legacy AuthoredStoryPresentation and DIRECTION-SPEC fire
+- systemText + Bark must compile from DIRECTION-SPEC
+- required track coverage must be implemented/verified before release

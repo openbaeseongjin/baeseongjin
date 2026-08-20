@@ -1,0 +1,654 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED",
+  "baselineCommit": "d588aa041a350cab198cd187d8dccbe3b3a244dd",
+  "revision": {
+    "final": "REV8.0",
+    "designIteration": "REV1",
+    "supersedes": [
+      "legacy compact service arcade"
+    ]
+  },
+  "stage": {
+    "sector": 3,
+    "stage": 4,
+    "sourceAreaId": "sector-03-04",
+    "canonicalName": "RETAIL SERVICE SPINE",
+    "runtimeCurrentName": "SERVICE ARCADE",
+    "subtitle": "PUBLIC VS SERVICE",
+    "role": "FIRST TRUE COST-PROFILE ROUTE CHOICE"
+  },
+  "bounds": {
+    "width": 3584,
+    "height": 1664
+  },
+  "entry": {
+    "id": "sector-03-04:entry",
+    "x": 0,
+    "y": -32
+  },
+  "surfaces": [
+    {
+      "id": "p0-entry",
+      "kind": "safe-deck",
+      "x": 0,
+      "y": 0,
+      "width": 256,
+      "height": 32
+    },
+    {
+      "id": "p1-split",
+      "kind": "safe-deck",
+      "x": 0,
+      "y": -192,
+      "width": 512,
+      "height": 28
+    },
+    {
+      "id": "p2-public-lobby",
+      "kind": "safe-deck",
+      "x": -640,
+      "y": -384,
+      "width": 384,
+      "height": 26
+    },
+    {
+      "id": "p3-public-main",
+      "kind": "safe-deck",
+      "x": -1184,
+      "y": -640,
+      "width": 448,
+      "height": 28
+    },
+    {
+      "id": "p4-public-upper",
+      "kind": "safe-deck",
+      "x": -608,
+      "y": -896,
+      "width": 448,
+      "height": 28
+    },
+    {
+      "id": "p5-service-bay",
+      "kind": "safe-deck",
+      "x": 576,
+      "y": -448,
+      "width": 256,
+      "height": 26
+    },
+    {
+      "id": "p6-service-shelf",
+      "kind": "platform",
+      "x": 816,
+      "y": -672,
+      "width": 224,
+      "height": 26
+    },
+    {
+      "id": "p7-service-return",
+      "kind": "safe-deck",
+      "x": 1248,
+      "y": -992,
+      "width": 320,
+      "height": 28
+    },
+    {
+      "id": "p8-high-merge",
+      "kind": "safe-deck",
+      "x": 160,
+      "y": -1120,
+      "width": 384,
+      "height": 30
+    },
+    {
+      "id": "p9-upper-arcade",
+      "kind": "platform",
+      "x": 768,
+      "y": -1312,
+      "width": 384,
+      "height": 28
+    },
+    {
+      "id": "exit-deck",
+      "kind": "safe-deck",
+      "x": 1312,
+      "y": -1536,
+      "width": 320,
+      "height": 28
+    },
+    {
+      "id": "double-skin-divider",
+      "kind": "solid-architectural-blocker",
+      "x": 80,
+      "y": -690,
+      "width": 800,
+      "height": 760,
+      "properties": {
+        "purpose": "prevents mid-route switching and makes Public Front / Service Back a real architectural choice",
+        "grappleable": false,
+        "damage": false
+      }
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "g0",
+      "x": 0,
+      "y": -128
+    },
+    {
+      "id": "g1",
+      "x": -544,
+      "y": -320,
+      "role": "public-approach"
+    },
+    {
+      "id": "c1",
+      "x": -1088,
+      "y": -544,
+      "scannerControlled": true
+    },
+    {
+      "id": "c2",
+      "x": -992,
+      "y": -800,
+      "scannerControlled": true
+    },
+    {
+      "id": "g3",
+      "x": -160,
+      "y": -1056,
+      "role": "public-merge"
+    },
+    {
+      "id": "g4",
+      "x": 512,
+      "y": -352,
+      "role": "service-entry"
+    },
+    {
+      "id": "g5",
+      "x": 768,
+      "y": -608
+    },
+    {
+      "id": "g6",
+      "x": 1088,
+      "y": -768
+    },
+    {
+      "id": "g7",
+      "x": 1280,
+      "y": -928
+    },
+    {
+      "id": "g8",
+      "x": 736,
+      "y": -1056,
+      "role": "service-merge"
+    },
+    {
+      "id": "g9",
+      "x": 512,
+      "y": -1248
+    },
+    {
+      "id": "g10",
+      "x": 1088,
+      "y": -1440
+    }
+  ],
+  "scannerGroups": [
+    {
+      "id": "sector-03-04:scanner-service-arcade-public",
+      "cycleSeconds": {
+        "available": 1.5,
+        "warning": 0.6,
+        "locked": 1.1,
+        "reset": 0.3
+      },
+      "phaseOffsetSeconds": 0,
+      "controlledTargetIds": [
+        "c1",
+        "c2"
+      ],
+      "contract": {
+        "newAttachAllowed": [
+          "AVAILABLE",
+          "WARNING"
+        ],
+        "newAttachDenied": [
+          "LOCKED",
+          "RESET"
+        ],
+        "currentRopePersistsThroughLocked": true,
+        "damage": 0,
+        "knockback": 0,
+        "ropeCut": false,
+        "forcedDetach": false
+      }
+    }
+  ],
+  "routeSplit": {
+    "id": "public-vs-service",
+    "splitSurfaceId": "p1-split",
+    "routes": [
+      {
+        "id": "public",
+        "label": "PUBLIC PROMENADE",
+        "direction": "LEFT",
+        "formalAuthorization": "INVALID",
+        "costProfile": {
+          "ropeInputs": "LOWER",
+          "landingWidth": "WIDER",
+          "scannerTiming": true,
+          "patrolExposure": true,
+          "localCombat": "PATROL"
+        },
+        "midRouteSwitching": false
+      },
+      {
+        "id": "service",
+        "label": "FACILITY SERVICE",
+        "direction": "RIGHT",
+        "formalAuthorization": "MAINTENANCE CLEARANCE RECOGNIZED",
+        "costProfile": {
+          "ropeInputs": "HIGHER",
+          "landingWidth": "NARROWER",
+          "scannerTiming": false,
+          "patrolExposure": false,
+          "localCombat": "SUPPORT_GUARD"
+        },
+        "midRouteSwitching": false
+      }
+    ],
+    "mergeSurfaceId": "p8-high-merge",
+    "sharedGateDependency": false,
+    "multiplayerIndependentChoice": true
+  },
+  "publicRoute": [
+    {
+      "x": -256,
+      "y": -192
+    },
+    {
+      "x": -544,
+      "y": -320
+    },
+    {
+      "x": -448,
+      "y": -384
+    },
+    {
+      "x": -832,
+      "y": -384
+    },
+    {
+      "x": -1088,
+      "y": -544
+    },
+    {
+      "x": -960,
+      "y": -640
+    },
+    {
+      "x": -992,
+      "y": -800
+    },
+    {
+      "x": -832,
+      "y": -896
+    },
+    {
+      "x": -384,
+      "y": -896
+    },
+    {
+      "x": -160,
+      "y": -1056
+    },
+    {
+      "x": -32,
+      "y": -1120
+    }
+  ],
+  "serviceRoute": [
+    {
+      "x": 256,
+      "y": -192
+    },
+    {
+      "x": 512,
+      "y": -352
+    },
+    {
+      "x": 448,
+      "y": -448
+    },
+    {
+      "x": 704,
+      "y": -448
+    },
+    {
+      "x": 768,
+      "y": -608
+    },
+    {
+      "x": 704,
+      "y": -672
+    },
+    {
+      "x": 928,
+      "y": -672
+    },
+    {
+      "x": 1088,
+      "y": -768
+    },
+    {
+      "x": 1280,
+      "y": -928
+    },
+    {
+      "x": 1408,
+      "y": -992
+    },
+    {
+      "x": 1088,
+      "y": -992
+    },
+    {
+      "x": 736,
+      "y": -1056
+    },
+    {
+      "x": 352,
+      "y": -1120
+    }
+  ],
+  "commonRoute": [
+    {
+      "x": 352,
+      "y": -1120
+    },
+    {
+      "x": 512,
+      "y": -1248
+    },
+    {
+      "x": 576,
+      "y": -1312
+    },
+    {
+      "x": 960,
+      "y": -1312
+    },
+    {
+      "x": 1088,
+      "y": -1440
+    },
+    {
+      "x": 1152,
+      "y": -1536
+    }
+  ],
+  "objects": [
+    {
+      "id": "route-split",
+      "stableRuntimeId": "sector-03-04:route-split",
+      "kind": "story-display",
+      "properties": {
+        "presentation": [
+          {
+            "title": "PUBLIC PROMENADE",
+            "detail": "←",
+            "status": "VERIFIED"
+          },
+          {
+            "title": "FACILITY SERVICE",
+            "detail": "→",
+            "status": "VERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "public-route",
+      "stableRuntimeId": "sector-03-04:public-route",
+      "kind": "story-display",
+      "properties": {
+        "presentation": [
+          {
+            "title": "PUBLIC ROUTE",
+            "detail": "AUTHORIZATION INVALID",
+            "status": "VERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "service-route",
+      "stableRuntimeId": "sector-03-04:service-route",
+      "kind": "story-display",
+      "properties": {
+        "presentation": [
+          {
+            "title": "FACILITY SERVICE ACCESS",
+            "detail": "MAINTENANCE CLEARANCE RECOGNIZED",
+            "status": "VERIFIED"
+          },
+          {
+            "title": "LOCAL SERVICE ROUTE",
+            "detail": "AVAILABLE",
+            "status": "VERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "service-node-upper",
+      "stableRuntimeId": "sector-03-04:service-node-upper",
+      "kind": "story-display",
+      "properties": {
+        "presentation": [
+          {
+            "title": "COMMERCIAL SERVICE NODE",
+            "detail": "UPPER LEVEL",
+            "status": "VERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "drone-1",
+      "stableRuntimeId": "sector-03-04:drone-1",
+      "kind": "patrol-drone",
+      "x": -1376,
+      "y": -704,
+      "properties": {
+        "enemyType": "patrol-drone-t1",
+        "patrol": {
+          "points": [
+            {
+              "x": -1376,
+              "y": -704
+            },
+            {
+              "x": -768,
+              "y": -704
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ],
+        "routeOwnership": "public"
+      }
+    },
+    {
+      "id": "service-route-guard",
+      "stableRuntimeId": "sector-03-04:service-route-guard",
+      "kind": "sentry-slot",
+      "x": 816,
+      "y": -672,
+      "properties": {
+        "enemySelection": {
+          "authority": "SECTOR_03_SUPPORT_POOL",
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "routeOwnership": "service",
+        "scannerOverlap": false,
+        "patrolOverlap": false
+      }
+    },
+    {
+      "id": "upper-arcade-guard",
+      "stableRuntimeId": "sector-03-04:upper-arcade-guard",
+      "kind": "sentry-slot",
+      "x": 768,
+      "y": -1312,
+      "properties": {
+        "enemySelection": {
+          "authority": "SECTOR_03_LATE_POOL",
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1",
+            "swarm-drone-t1"
+          ]
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "routeOwnership": "common",
+        "cannotPressure": [
+          "public-route",
+          "service-route",
+          "high-merge"
+        ]
+      }
+    },
+    {
+      "id": "exit-panel",
+      "stableRuntimeId": "sector-03-04:exit-panel",
+      "kind": "interaction",
+      "properties": {
+        "objectiveId": "sector-03-04:exit-panel-engaged",
+        "requiredObjectiveIds": [
+          "sector-03-04:final-deck-reached"
+        ]
+      }
+    }
+  ],
+  "story": {
+    "serviceBark": {
+      "text": "…이쪽은 열리네.",
+      "status": "NOT IMPLEMENTED — PLAYER BARK LAYER",
+      "triggerIntent": "after LOCAL SERVICE ROUTE / AVAILABLE"
+    },
+    "publicBark": null
+  },
+  "objectives": [
+    {
+      "id": "sector-03-04:final-deck-reached",
+      "type": "reach",
+      "target": "exit-deck"
+    },
+    {
+      "id": "sector-03-04:exit-panel-engaged",
+      "type": "interact",
+      "sourceObjectId": "sector-03-04:exit-panel",
+      "requiredObjectiveIds": [
+        "sector-03-04:final-deck-reached"
+      ]
+    }
+  ],
+  "gate": {
+    "completionMode": "physical-crossing",
+    "nextAreaId": "sector-03-05",
+    "requiredObjectiveIds": [
+      "sector-03-04:exit-panel-engaged"
+    ]
+  },
+  "accessModule": {
+    "present": false
+  },
+  "wind": {
+    "active": false
+  },
+  "ropeCut": {
+    "active": false
+  },
+  "augment": {
+    "currentContract": "generic Augment v1 carry",
+    "requiresSpecificCard": false,
+    "baseRopeClearable": true
+  },
+  "uniqueness": {
+    "signature": "DOUBLE-SKIN COMMERCIAL SECTION / PUBLIC FRONT vs SERVICE BACK → HIGH MERGE",
+    "maximumMeaningfulOverlap": 1,
+    "comparisons": {
+      "3-3": {
+        "overlapCount": 0,
+        "verdict": "PASS"
+      },
+      "2-4": {
+        "overlapCount": 1,
+        "verdict": "PASS",
+        "overlap": [
+          "route multiplicity"
+        ]
+      },
+      "3-2": {
+        "overlapCount": 1,
+        "verdict": "PASS",
+        "overlap": [
+          "front/back-of-house identity"
+        ]
+      },
+      "1-5": {
+        "overlapCount": 0,
+        "verdict": "PASS"
+      },
+      "2-8": {
+        "overlapCount": 0,
+        "verdict": "PASS"
+      }
+    }
+  },
+  "forbidden": [
+    "fake UI choice menu",
+    "mid-route casual switching",
+    "one route clearly mandatory/canon",
+    "global route vote",
+    "multiplayer synchronization gate",
+    "scanner on service route",
+    "service guard on public route",
+    "lower-route pressure from upper guard",
+    "fourth enemy",
+    "Access Module",
+    "Wind",
+    "Rope Cut",
+    "Public AUTHORIZATION INVALID as invisible hard wall",
+    "Player Bark as System Toast"
+  ]
+}

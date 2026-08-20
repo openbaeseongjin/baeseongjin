@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-4 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--y:#ffe16c;--pub:#83c8ff;--svc:#e6b875;--purple:#caa7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}.layout{display:grid;grid-template-columns:520px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}button{padding:6px 8px;margin:3px;border:1px solid var(--l);border-radius:6px;background:#132027;color:var(--t);cursor:pointer}.statebtn.active{border-color:var(--c);color:var(--c)}svg{width:100%;height:86vh;min-height:810px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:2}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.scanner{fill:#5de8ff;stroke:#fff;stroke-width:4}.scanner.warning{fill:#efb75b}.scanner.locked{fill:#632d2d;stroke:#ef7664}.scanner.reset{fill:#4a5357;stroke:#a3adb1}.patrol{fill:#8d4b3f;stroke:#ffba92;stroke-width:3}.support{fill:#553b68;stroke:#caa7ff;stroke-width:3}.late{fill:#4f2b52;stroke:#f1a8e8;stroke-width:3}.story{fill:#786a37;stroke:#efd989;stroke-width:2}.publicRoute{fill:none;stroke:#83c8ff;stroke-width:5;stroke-dasharray:14 9}.serviceRoute{fill:none;stroke:#e6b875;stroke-width:5;stroke-dasharray:14 9}.commonRoute{fill:none;stroke:#ffe16c;stroke-width:5;stroke-dasharray:14 9}.patrolPath{fill:none;stroke:#ffba92;stroke-width:3;stroke-dasharray:10 8}.divider{fill:#111a20;stroke:#607884;stroke-width:4}.zonePub{fill:#83c8ff0e;stroke:#83c8ff;stroke-width:2;stroke-dasharray:8 8}.zoneSvc{fill:#e6b8750e;stroke:#e6b875;stroke-width:2;stroke-dasharray:8 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.07}.hidden{display:none}text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.phase{font-size:13px}.pubText{fill:#83c8ff}.svcText{fill:#e6b875}
+@media(max-width:1130px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-4 RETAIL SERVICE SPINE · REV8 DRAFT</h1><div class="sub">GAMEPLAY ONLY · 3584×1664 · DOUBLE-SKIN COMMERCIAL SECTION</div></header>
+<div class="layout"><aside>
+<div class="card"><b>CORE CHOICE</b><br><span class="pubText">PUBLIC FRONT</span> = fewer Rope inputs / Scanner + Patrol<br><span class="svcText">SERVICE BACK</span> = more Rope inputs / no Scanner / cramped Support Guard</div>
+<div class="card"><b>NOT FREE CHOICE</b><br>두 경로는 하나의 상업 건물에서 실제 Public Front와 Service Back으로 갈라지고, High Merge 전까지 서로 교차하지 않음.</div>
+<div class="card"><b>ENEMY = 3</b><br>Public Patrol ×1<br>Service Support Guard ×1<br>Common Late Guard ×1</div>
+<div class="card"><b>SCANNER STATE</b><br><button class="statebtn active" data-state="available">AVAILABLE</button><button class="statebtn" data-state="warning">WARNING</button><button class="statebtn" data-state="locked">LOCKED</button><button class="statebtn" data-state="reset">RESET</button></div>
+<div class="card"><label><input id="showPublic" type="checkbox" checked> Public Route</label><label><input id="showService" type="checkbox" checked> Service Route</label><label><input id="showReach" type="checkbox"> 400px Reach</label></div>
+<div class="card"><b>MAP RULE</b><br>배경 매장/덕트/벽체 장식은 숨김. 중앙 Double-Skin Divider는 두 route 사이 실제 이동 차단 구조라 표시.</div>
+</aside><main>
+<svg viewBox="-1880 -1740 3760 1810">
+<rect class="bounds" x="-1792" y="-1664" width="3584" height="1664"/>
+<!-- divider -->
+<path class="divider" d="M-320,-300 L160,-300 L480,-1020 L240,-1080 L-80,-1040 L-320,-300 Z"/>
+<text class="tiny" x="-125" y="-550">PUBLIC / SERVICE SOLID SEPARATION</text>
+
+<!-- entry/split -->
+<rect class="safe" x="-128" y="0" width="256" height="32"/><text class="tiny" x="-110" y="-14">ENTRY</text>
+<circle class="anchor" cx="0" cy="-128" r="13"/><text class="tiny" x="20" y="-116">G0</text>
+<rect class="safe" x="-256" y="-192" width="512" height="28"/><text class="phase" x="-225" y="-212">ROUTE SPLIT · SAFE</text>
+<rect class="story" x="-85" y="-282" width="170" height="58" rx="6"/><text class="tiny" x="-105" y="-298">PUBLIC ← / SERVICE →</text>
+
+<!-- PUBLIC -->
+<g id="publicRouteGroup">
+<text class="phase pubText" x="-1510" y="-310">PUBLIC FRONT</text>
+<circle class="anchor" cx="-544" cy="-320" r="13"/><text class="tiny" x="-522" y="-308">G1</text>
+<rect class="safe" x="-832" y="-384" width="384" height="26"/><text class="tiny" x="-815" y="-401">PUBLIC LOBBY</text>
+<rect class="story" x="-720" y="-474" width="150" height="58" rx="6"/><text class="tiny" x="-748" y="-490">PUBLIC ROUTE / INVALID</text>
+<circle class="scanner" data-scanner cx="-1088" cy="-544" r="15"/><text class="tiny" x="-1066" y="-532">C1</text>
+<rect class="safe" x="-1408" y="-640" width="448" height="28"/><text class="tiny" x="-1390" y="-657">PUBLIC MAIN DECK</text>
+<path class="patrolPath" d="M-1376,-704 L-768,-704"/>
+<circle class="patrol" cx="-1376" cy="-704" r="19"/><text class="tiny" x="-1430" y="-740">PATROL</text>
+<circle class="scanner" data-scanner cx="-992" cy="-800" r="15"/><text class="tiny" x="-970" y="-788">C2</text>
+<rect class="safe" x="-832" y="-896" width="448" height="28"/><text class="tiny" x="-815" y="-913">PUBLIC UPPER DECK</text>
+<circle class="anchor" cx="-160" cy="-1056" r="13"/><text class="tiny" x="-138" y="-1044">G3</text>
+<path class="publicRoute" d="M-256,-192 Q-395,-255 -544,-320 Q-620,-350 -448,-384 Q-800,-455 -1088,-544 Q-1240,-600 -1408,-640 L-960,-640 Q-980,-720 -992,-800 Q-920,-855 -832,-896 L-384,-896 Q-265,-985 -160,-1056 Q-95,-1095 -32,-1120"/>
+</g>
+
+<!-- SERVICE -->
+<g id="serviceRouteGroup">
+<text class="phase svcText" x="920" y="-310">SERVICE BACK</text>
+<circle class="anchor" cx="512" cy="-352" r="13"/><text class="tiny" x="534" y="-340">G4</text>
+<rect class="safe" x="448" y="-448" width="256" height="26"/><text class="tiny" x="465" y="-465">SERVICE BAY</text>
+<rect class="story" x="505" y="-548" width="170" height="62" rx="6"/><text class="tiny" x="460" y="-564">MAINTENANCE CLEARANCE</text>
+<circle class="anchor" cx="768" cy="-608" r="13"/><text class="tiny" x="790" y="-596">G5</text>
+<rect class="surface" x="704" y="-672" width="224" height="26"/><text class="tiny" x="718" y="-689">NARROW SERVICE SHELF</text>
+<circle class="support" cx="816" cy="-672" r="19"/><text class="tiny" x="735" y="-710">SERVICE GUARD</text>
+<circle class="anchor" cx="1088" cy="-768" r="13"/><text class="tiny" x="1110" y="-756">G6</text>
+<circle class="anchor" cx="1280" cy="-928" r="13"/><text class="tiny" x="1302" y="-916">G7</text>
+<rect class="safe" x="1088" y="-992" width="320" height="28"/><text class="tiny" x="1104" y="-1009">SERVICE RETURN</text>
+<circle class="anchor" cx="736" cy="-1056" r="13"/><text class="tiny" x="758" y="-1044">G8</text>
+<path class="serviceRoute" d="M256,-192 Q385,-275 512,-352 Q480,-405 448,-448 L704,-448 Q735,-525 768,-608 Q735,-645 704,-672 L928,-672 Q1010,-720 1088,-768 Q1185,-845 1280,-928 Q1340,-960 1408,-992 L1088,-992 Q900,-1025 736,-1056 Q545,-1095 352,-1120"/>
+</g>
+
+<!-- MERGE / COMMON -->
+<rect class="safe" x="-32" y="-1120" width="384" height="30"/><text class="phase" x="0" y="-1140">HIGH MERGE · SAFE</text>
+<rect class="story" x="75" y="-1215" width="170" height="58" rx="6"/><text class="tiny" x="52" y="-1231">SERVICE NODE / UPPER LEVEL</text>
+<circle class="anchor" cx="512" cy="-1248" r="13"/><text class="tiny" x="534" y="-1236">G9</text>
+<rect class="surface" x="576" y="-1312" width="384" height="28"/><text class="tiny" x="592" y="-1329">COMMON UPPER ARCADE</text>
+<circle class="late" cx="768" cy="-1312" r="19"/><text class="tiny" x="682" y="-1352">LATE POOL GUARD</text>
+<circle class="anchor" cx="1088" cy="-1440" r="13"/><text class="tiny" x="1110" y="-1428">G10</text>
+<rect class="safe" x="1152" y="-1536" width="320" height="28"/><text class="phase" x="1170" y="-1556">EXIT → 3-5</text>
+<path class="commonRoute" d="M352,-1120 Q435,-1185 512,-1248 Q545,-1280 576,-1312 L960,-1312 Q1025,-1380 1088,-1440 Q1125,-1490 1152,-1536"/>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-544" cy="-320" r="400"/><circle class="reach" cx="-1088" cy="-544" r="400"/><circle class="reach" cx="-992" cy="-800" r="400"/><circle class="reach" cx="-160" cy="-1056" r="400"/>
+<circle class="reach" cx="512" cy="-352" r="400"/><circle class="reach" cx="768" cy="-608" r="400"/><circle class="reach" cx="1088" cy="-768" r="400"/><circle class="reach" cx="1280" cy="-928" r="400"/><circle class="reach" cx="736" cy="-1056" r="400"/><circle class="reach" cx="512" cy="-1248" r="400"/><circle class="reach" cx="1088" cy="-1440" r="400"/>
+</g>
+</svg></main></div>
+<script>
+const btns=[...document.querySelectorAll('.statebtn')];function state(s){document.querySelectorAll('[data-scanner]').forEach(x=>{x.setAttribute('class','scanner '+s)});btns.forEach(b=>b.classList.toggle('active',b.dataset.state===s))}btns.forEach(b=>b.onclick=()=>state(b.dataset.state));showPublic.onchange=()=>publicRouteGroup.classList.toggle("hidden",!showPublic.checked);showService.onchange=()=>serviceRouteGroup.classList.toggle("hidden",!showService.checked);showReach.onchange=()=>reach.classList.toggle("hidden",!showReach.checked);
+</script></body></html>

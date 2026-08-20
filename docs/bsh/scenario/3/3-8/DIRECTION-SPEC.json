@@ -1,0 +1,256 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 3,
+    "stage": 8,
+    "legacyStageAlias": "3-8",
+    "sourceAreaId": "sector-03-08",
+    "name": "UPPER EXCHANGE GATE"
+  },
+  "baselineCommit": "cb4f690ac180a04868322e9c4cfe1384897c348b",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "psychology": {
+    "start": {
+      "unease": 62,
+      "understanding": 52
+    },
+    "exit": {
+      "unease": 78,
+      "understanding": 66
+    }
+  },
+  "beats": [
+    {
+      "beatId": "s0-upper-gate-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "Finale의 보안 상태만 설정하고 Story 결론을 미룬다.",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-8:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "upper-gate-entry",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER MARKET GATE",
+            "detail": "ACCESS CONTROL ACTIVE"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        },
+        {
+          "type": "audio",
+          "action": "commercial-gate-security-ambience",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s1-records-bay-arrival",
+      "status": "DESIGN LOCKED",
+      "purpose": "Gameplay pressure를 끝내고 records bay를 한 프레임으로 읽힌다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -448,
+        "maxLocalX": 448,
+        "minLocalY": -1952,
+        "maxLocalY": -1840
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-8:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "records-bay-wide",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "audio",
+          "action": "threat-cues-drop-to-neutral-records-room",
+          "optional": true
+        },
+        {
+          "type": "lighting",
+          "action": "neutral-even-records-bay-lighting",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s2-left-evacuation-record",
+      "status": "DESIGN LOCKED",
+      "purpose": "Sector02 대피 결과를 official incident record로 다시 확인한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -384,
+        "maxLocalX": -48,
+        "minLocalY": -1944,
+        "maxLocalY": -1840
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-8:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "records-bay-wide",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "sequence",
+          "items": [
+            {
+              "atSeconds": 0.5,
+              "title": "EVACUATION TRANSFER RECORD",
+              "detail": ""
+            },
+            {
+              "atSeconds": 1.7,
+              "title": "GROUP A",
+              "detail": "TRANSFER COMPLETE"
+            },
+            {
+              "atSeconds": 2.8,
+              "title": "GROUP B",
+              "detail": "TRANSFER COMPLETE"
+            },
+            {
+              "atSeconds": 3.9,
+              "title": "GROUP C",
+              "detail": "TRANSFER SUSPENDED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beatId": "s3-right-route-status",
+      "status": "DESIGN LOCKED",
+      "purpose": "Player가 직접 오른쪽으로 이동한 뒤 Priority Route ACTIVE를 확인한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 48,
+        "maxLocalX": 384,
+        "minLocalY": -1944,
+        "maxLocalY": -1840
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-8:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "records-bay-wide",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "sequence",
+          "items": [
+            {
+              "atSeconds": 0,
+              "title": "UPPER TRANSFER ROUTE STATUS",
+              "detail": ""
+            },
+            {
+              "atSeconds": 1.2,
+              "title": "PUBLIC / SERVICE ROUTES",
+              "detail": "ACTIVE"
+            },
+            {
+              "atSeconds": 2.4,
+              "title": "PRIORITY ROUTE",
+              "detail": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…C는 멈췄는데, 우선 통로는 열려 있었네."
+          },
+          "timing": {
+            "minDelaySeconds": 3.5
+          }
+        },
+        {
+          "type": "audio",
+          "action": "neutral-record-confirmation-no-stinger",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s4-final-control",
+      "status": "DESIGN LOCKED",
+      "purpose": "답을 주지 않고 unresolved content boundary로 끝낸다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 768,
+        "maxLocalX": 1152,
+        "minLocalY": -2140,
+        "maxLocalY": -2024
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-8:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "final-control",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER CONTROL",
+            "detail": "ROUTE STATUS PENDING"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        },
+        {
+          "type": "audio",
+          "action": "neutral-pending-status",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No world pause / no forced pan",
+    "LEFT before RIGHT discovery",
+    "No Group C↔Priority causal mapping",
+    "Exact Bark: …C는 멈췄는데, 우선 통로는 열려 있었네.",
+    "No Access A/B/C completion gate",
+    "No direct sector-04-01 transition",
+    "Direction migration implemented/verified before release"
+  ]
+}

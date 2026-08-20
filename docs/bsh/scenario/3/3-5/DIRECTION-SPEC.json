@@ -1,0 +1,348 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "d39cbb49d3d8247caf2542393994704292dd5002",
+  "stage": {
+    "sector": 3,
+    "stage": 5,
+    "sourceAreaId": "sector-03-05",
+    "name": "COMMERCIAL OPERATIONS HUB"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-delivery-entry",
+      "status": "DESIGN LOCKED",
+      "purpose": "enter the commercial back-of-house through tenant delivery/staff circulation",
+      "trigger": {
+        "type": "position-region",
+        "regionId": "tenant-delivery-approach"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-5:delivery-entry",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "enemy",
+          "target": "sector-03-05:node-entry-guard",
+          "action": "activate-support-pool-slot"
+        },
+        {
+          "type": "route",
+          "action": "down-right into compact tenant delivery passage"
+        }
+      ],
+      "completion": "Lower delivery passage reached",
+      "validation": "Entry Guard cannot pressure Operations Balcony."
+    },
+    {
+      "beatId": "s1-operations-rise",
+      "status": "DESIGN LOCKED",
+      "purpose": "change section from delivery circulation to protected staff operations level",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "vertical-operations-rise"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-5:operations-rise",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "near-vertical rise via G3"
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-05:node-entry-guard",
+          "action": "leave activation/LOS band"
+        },
+        {
+          "type": "environment",
+          "action": "staff partition clearly blocks lower LOS"
+        }
+      ],
+      "completion": "Operations Control Balcony reached",
+      "validation": "Safe-zone transition is obvious before Node interaction."
+    },
+    {
+      "beatId": "s2-node-id",
+      "status": "DESIGN LOCKED",
+      "purpose": "identify the protected commercial facility service node",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-05:node-id"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-05:node-id",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "content": {
+            "title": "COMMERCIAL FACILITY SERVICE NODE",
+            "detail": ""
+          }
+        },
+        {
+          "type": "enemy",
+          "action": "none in safe balcony"
+        }
+      ],
+      "completion": "presentation complete",
+      "validation": "No industrial plant-room framing."
+    },
+    {
+      "beatId": "s3-access-summary",
+      "status": "DESIGN LOCKED",
+      "purpose": "consolidate local-maintenance vs vertical-route authorization distinction",
+      "trigger": {
+        "type": "story-display",
+        "sourceObjectId": "sector-03-05:access-summary"
+      },
+      "scope": "local-player",
+      "replayPolicy": "runtime-story-owned",
+      "dedupeToken": "sector-03-05:access-summary",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "status": "VERIFIED",
+          "items": [
+            {
+              "title": "EMPLOYEE CLASS",
+              "detail": "VERTICAL MAINTENANCE"
+            },
+            {
+              "title": "LOCAL SERVICE CHANNEL",
+              "detail": "AVAILABLE"
+            },
+            {
+              "title": "VERTICAL ROUTE AUTHORIZATION",
+              "detail": "INVALID"
+            }
+          ]
+        }
+      ],
+      "completion": "presentation sequence complete",
+      "validation": "No Priority/Group-C causal inference."
+    },
+    {
+      "beatId": "s4-player-bark",
+      "status": "DESIGN LOCKED",
+      "purpose": "let the Player recognize the permission boundary without explaining it",
+      "trigger": {
+        "type": "presentation-complete",
+        "sourceObjectId": "sector-03-05:access-summary"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-5:access-bark:<player>",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "playerBark",
+          "runtimeCapability": "VERIFIED",
+          "stageAuthoredStatus": "NOT IMPLEMENTED",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…내 구역 안에서는 통하는데."
+          },
+          "presentation": "speaker-head local typing bubble"
+        },
+        {
+          "type": "systemText",
+          "action": "never substitute Bark with System Toast"
+        }
+      ],
+      "completion": "local bark completes",
+      "validation": "Bark remains experiential, not tutorial exposition."
+    },
+    {
+      "beatId": "s5-augment-offer",
+      "status": "DESIGN LOCKED",
+      "purpose": "deliver generic Augment offer #3 in a genuinely safe commercial operations pocket",
+      "trigger": {
+        "type": "interact",
+        "sourceObjectId": "sector-03-05:service-calibration-frame"
+      },
+      "scope": "per-player",
+      "replayPolicy": "augment-v1-source-contract",
+      "dedupeToken": "3-5:augment-source:<player>",
+      "worldPause": false,
+      "playerControl": "CHOOSER_ONLY_FOR_SELECTING_PLAYER",
+      "camera": {
+        "mode": "node-local",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "augment",
+          "action": "3 distinct compatible cards / generic Augment v1"
+        },
+        {
+          "type": "enemy",
+          "action": "none can hit chooser"
+        },
+        {
+          "type": "multiplayer",
+          "action": "other players/world continue"
+        }
+      ],
+      "completion": "sector-03-05:augment-selected per current source contract",
+      "validation": "No invulnerability dependency; no kill/access prerequisite; no specific card required."
+    },
+    {
+      "beatId": "s6-signage-catwalk",
+      "status": "DESIGN LOCKED",
+      "purpose": "reopen the space above the retail volume after the protected balcony",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "signage-catwalk"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-5:signage-catwalk",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "up-right to atrium signage access catwalk"
+        },
+        {
+          "type": "enemy",
+          "action": "none"
+        },
+        {
+          "type": "environment",
+          "action": "hint larger public atrium volume without fully revealing 3-6"
+        }
+      ],
+      "completion": "Catwalk traversed",
+      "validation": "Reads as commercial signage/wayfinding access, not power busway."
+    },
+    {
+      "beatId": "s7-tenant-transfer-drop",
+      "status": "DESIGN LOCKED",
+      "purpose": "create a deliberate down-right section change into upper tenant operations circulation",
+      "trigger": {
+        "type": "route-commit",
+        "routeId": "tenant-transfer-drop"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-5:tenant-transfer-drop",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "down-right from catwalk to tenant transfer deck"
+        },
+        {
+          "type": "enemy",
+          "target": "sector-03-05:node-exit-guard",
+          "action": "activate-late-pool-slot only on transfer deck"
+        },
+        {
+          "type": "accessModule",
+          "target": "sector-03:access-module:b",
+          "action": "carrier reward if guard defeated"
+        }
+      ],
+      "completion": "Player leaves transfer deck toward final rise",
+      "validation": "Access B optional for local exit; Guard cannot pressure Node."
+    },
+    {
+      "beatId": "s8-exit",
+      "status": "DESIGN LOCKED",
+      "purpose": "hand off from commercial back-of-house compression to Grand Central Atrium expansion",
+      "trigger": {
+        "type": "exit-ready",
+        "objectiveId": "sector-03-05:final-deck-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "gameplay-repeatable",
+      "dedupeToken": "3-5:exit",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "mode": "default",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "route",
+          "action": "short up-right final rise"
+        },
+        {
+          "type": "enemy",
+          "action": "final frame safe"
+        },
+        {
+          "type": "gate",
+          "action": "requires augment-selected + final-deck + panel, then physical crossing"
+        }
+      ],
+      "completion": "sector-03-06 entered",
+      "validation": "Access B not required for gate; 3-6 larger/open feel hinted."
+    }
+  ],
+  "validation": [
+    "Sector03 commercial identity preserved",
+    "REV1/REV2 industrial terms retired",
+    "exactly 2 enemy slots",
+    "Augment Node true safe zone",
+    "Entry Guard Support Pool only",
+    "Exit Guard Late Pool + Access B only",
+    "no Scanner/Patrol/Wind/Rope Cut",
+    "Player Bark uses local speaker-head capability",
+    "all mandatory Rope links <=400",
+    "maximum meaningful similarity overlap <=1",
+    "Exit → sector-03-06"
+  ]
+}

@@ -1,1502 +1,926 @@
-# SECTOR 03-1 — POWERED PROMENADE
+# ONE ROPE — SECTOR 03-1 LOWER MARKET PROMENADE — REV8 STAGE DRAFT REV3
 
-*BLOCKOUT CANDIDATE · REV 1.1 — GATE CONTRACT SYNC*
-
-◀ PREV — POST-SECTOR 02 BOSS / TRANSITION TBD · NEXT — [SECTOR 03-2 / SCANNER GALLERY](../3-2/README.md) ▶
-
-`SECTOR 03 COMMERCIAL DISTRICT` · `STAGE 01` · `POWERED UPPER-CITY REVEAL` · `LOW-PRESSURE TRANSITION`
-
-| 항목 | 기준 |
-|---|---|
-| Status | HYPOTHESIS — BLOCKOUT CANDIDATE |
-| Difficulty | ★★ |
-| Expected First Playtime | 80–125 sec |
-| Expected Skilled Clear | 35–55 sec |
-| Enemy | NONE |
-| New Mechanic | NONE |
-| New Enemy Behavior | NONE |
-| New Augment | NONE |
-| Wind | NONE |
-| Rope Cut | NONE |
-| Damage Hazard | NONE |
-| Checkpoint | NONE |
-| Required Build | Foundation + Specialization carried, but no Build Lock |
-| Primary Role | Worker District → Commercial District Contrast |
-| Primary Space | Powered Vertical Shopping Promenade / Atrium Edge |
+> Status: DESIGN LOCKED  
+> Runtime audit baseline: `c1f9cd7f0362de7f7a3065a34e7ea9d35927a934`  
+> Sector 03 Master Plan: REV3  
+> Previous REV2 `2816×960`: **HOLD / SUPERSEDED — TOO REPETITIVE**  
+> Proposed REV3: **`3072×1088`**  
+> Spatial Signature: **PANORAMIC MARKET VOID / SUSPENDED MARKET ISLAND ARCH**  
+> Dominant body: **`LOW LEFT → LONG UP-RIGHT → HIGH CENTRAL ISLAND → LONG DOWN-RIGHT → SHORT SERVICE LIFT`**  
+> Stage role: **SECTOR 03 OPENING / SCALE REVEAL / POWERED DAILY-LIFE CONTRAST**  
+> Full package: CREATED — REV8.0 GITHUB-READY
 
 ---
 
-## 0. 기획 기준
+# 0. REV3 수정 이유
 
-### LOCKED
+REV2의 문제:
 
-3-1은 다음 조건을 지킨다.
+```text
+TERRACE
+→ VOID A
+→ TERRACE
+→ VOID B
+→ TERRACE
+```
 
-- Sector 03의 첫 authored progression region
-- 정확한 Sector 02 Boss → Sector 03 진입 연출은 아직 확정하지 않음
-- Sector 03 진입 이후 첫 플레이 공간으로 설계
-- Difficulty ★★
-- Enemy 없음
-- Patrol Drone 없음
-- Scanner 작동 없음
-- Security Shutter 작동 없음
-- Trap 없음
-- Wind 없음
-- Damage Hazard 없음
-- Rope Cut 없음
-- 새 Rope Input 없음
-- 새 Rope Mode 없음
-- 새 Augment 없음
-- Foundation KEEP
-- Specialization KEEP
-- Checkpoint 없음
-- Commercial District의 전력이 살아 있다는 사실을 먼저 시각적으로 전달
-- “Priority가 누구에게 주어졌는가”는 아직 답하지 않음
-- Group A / B의 정체를 설명하지 않음
-- 3-2의 Scanner Tutorial 역할을 침범하지 않음
-- 3-4의 Front-of-House vs Service Route 구조를 본격 도입하지 않음
-- 3-1은 하나의 명확한 진행축 + Optional Movement Shortcut 중심
-- 살아 있는 NPC 없음
-- 사람 실루엣 없음
-- 시체 없음
+이 구조는 규모는 커졌지만 Player movement가 기존 Sector의:
 
-### 핵심 질문
+- 긴 수평 Bridge
+- 긴 Courtyard Rim
+- Long Walkway
 
-> **“Worker District와 달리, 왜 이곳은 아직 이렇게 정상적으로 켜져 있지?”**
+와 비슷하게 읽힐 수 있었다.
 
-3-1은 Gameplay 질문보다
-**공간 대비를 몸으로 느끼게 하는 Stage**다.
+Sector 03 첫 Stage는 단순히 “더 긴 길”이면 안 된다.
+
+REV3는 하나의 거대한 Market 공간을 중심으로 한다.
+
+> **ONE HUGE VOID + ONE SUSPENDED MARKET ISLAND**
+
+Player는 같은 공간을:
+
+1. 아래에서 올려다보고
+2. 중앙 Island 위에서 전체를 내려다보고
+3. 반대편으로 내려가며 다시 읽는다.
+
+즉 공간 자체가 Stage의 주인공이다.
 
 ---
 
-## 0-1. Reference / Transfer 기준
+# 1. LATEST RUNTIME CONTRACT
 
-### SANABI — TRANSFER
+Current 3-1 authority:
 
-새로운 환경으로 넘어가더라도
-Rope가 여전히 이동의 중심이어야 한다.
+- `sector-03-01`
+- Runtime name `POWERED PROMENADE`
+- subtitle `COMMERCIAL THRESHOLD`
+- current bounds `1280×1088`
+- `district-sign`
+- `welcome-kiosk`
+- exactly one `promenade-guard`
+- Standard Pool
+- Scanner Groups NONE
+- Patrol NONE
+- no Wind
+- no Rope Cut
+- final deck → exit panel → physical crossing
+- next `sector-03-02`
 
-Commercial District라고 해서:
-
-```text
-걷기
-→ 컷신
-→ 설명
-```
-
-만으로 Sector를 소개하지 않는다.
-
-Player가 직접 Rope로
-밝고 넓은 Atrium을 통과하며 환경 차이를 체감한다.
-
-### Rusted Moss — TRANSFER
-
-같은 Grapple을 계속 사용하되
-환경의 구조가 새로운 이동 느낌을 만들어야 한다.
-
-3-1은 새 능력이 아니라:
-
-```text
-POLISHED OPEN ATRIUM
-+
-LONGER VISUAL SIGHTLINE
-+
-CLEANER GAMEPLAY SURFACE
-```
-
-로 이동 감각을 바꾼다.
-
-### Celeste — TRANSFER
-
-Sector 전환 첫 Stage에서
-정밀 Timing을 요구하지 않는다.
-
-```text
-Wide Landing
-+
-Readable Target
-+
-Fast Recovery
-```
-
-를 유지한다.
-
-### Metanet N — TRANSFER
-
-Commercial Detail이 많더라도
-Collision은 단순하고 예측 가능해야 한다.
-
-```text
-VISUAL COMPLEXITY
-≠
-PHYSICAL COMPLEXITY
-```
+REV3 keeps those system/story contracts and re-authors scale/topology.
 
 ---
 
-## 0-2. VERIFIED — Gate / Exit Contract Sync
+# 2. SCALE
 
-현재 authored Stage Exit는:
+Target:
 
-```text
-objective
-→ Gate Panel interaction
-→ Gate open
-→ Player physically crosses
-```
+> **`3072×1088`**
 
-구조다.
+Local:
 
-별도 `E` Key를 추가하지 않고 현재 contextual interaction 문법을 유지한다.
+- X `-1536..+1536`
+- Y `0..-1088`
 
-3-1 최초 작성 시점에는 이 계약이 확정되기 전이라 Exit가 단순 `EXIT → next stage`로만 표현돼 있었다. Sector 03 Integration Cross-Validation Audit(PATCH 03)에 따라 Gameplay / Geometry 변경 없이 Exit 표현만 동기화한다.
+Actual Player traversal:
 
----
+approximately:
 
-## 1. 한 줄 정의
+`X -1392 → +1450`
 
-Sector 02 이후 Commercial District에 진입한 플레이어가,
-사람은 없지만 조명·광고·자동 키오스크·상업 설비가 여전히 작동하는 **Powered Vertical Promenade**를 안전한 Rope 이동으로 올라가며,
-Worker District와 달리 상부 도시의 전력과 서비스가 살아 있다는 사실을 처음 체감하는 저압 전환 Stage.
+= **~2840px lateral travel**
 
----
+Height variation:
 
-## 2. 전체 게임에서의 역할
+approximately:
 
-직전 Sector가 남긴 질문:
+`0 → -544 → -416 → -800`
 
-```text
-GROUP A — COMPLETE
-GROUP B — COMPLETE
-GROUP C — SUSPENDED
-
-PRIORITY ACCESS: ACTIVE
-```
-
-그리고:
-
-> “왜 C만 멈췄지?”
-
-3-1은 이 질문에 답하지 않는다.
-
-대신 새로운 관찰을 하나 추가한다.
-
-```text
-WORKER DISTRICT
-mostly dark / worn / reduced power
-
-↓
-
-COMMERCIAL DISTRICT
-bright / powered / automated systems active
-```
-
-따라서 Player의 질문이:
-
-> “왜 C만 멈췄지?”
-
-에서:
-
-> **“그리고 왜 위쪽은 아직 이렇게 멀쩡하지?”**
-
-로 확장된다.
+The expanded space is actually used.
 
 ---
 
-## 3. Story 역할
+# 3. NEW SPATIAL SIGNATURE
 
-### 3-1에서 보여줄 것
-
-- 상업 조명이 여전히 켜짐
-- 일부 광고 Display 정상 재생
-- 자동 안내 Panel 정상 작동
-- 상품 Display는 남아 있음
-- 에스컬레이터 / 승강설비는 Background에서 일부 powered 상태 가능
-- 청소 / 서비스 자동화 흔적
-- 비교적 깨끗한 표면
-- 사람 없음
-
-### 핵심
-
-사람이 없는데:
-
-```text
-SYSTEMS ARE STILL SERVING
-```
-
-이라는 느낌.
-
-### 아직 보여주지 않을 것
-
-- Group A/B = 특정 계층
-- 고객 등급과 Group A/B 직접 연결
-- Priority 대상 정체
-- Group C 중단 원인
-- 기업 책임자
-- 고의적 희생
-- Sector 05 Corporate 내부 정보
-
-### 직접 대사
-
-권장:
-
-```text
-NONE
-```
-
-Player가 먼저 시각적으로 알아차리게 한다.
-
----
-
-## 4. 공간 콘셉트
-
-**POWERED VERTICAL SHOPPING PROMENADE**
-
-Sector 02의 Architecture:
-
-```text
-WORN
-DENSE
-RESIDENTIAL
-PATCHED
-```
-
-3-1:
-
-```text
-OPEN
-POLISHED
-LIT
-COMMERCIAL
-EMPTY
-```
-
-### 공간 구성
-
-큰 중앙 Void 한쪽에
-여러 층의 Retail Balcony가 계단식으로 배치된다.
-
-```text
-                   UPPER PROMENADE
-                       EXIT
-                        ▲
-
-                 █████████████
-                     ● G5
-                    ╱
-
-          █████ P4
-                ▲
-              ● G4
-
-                CENTRAL
-                 VOID
-
-           ● G3
-          ╱
-   █████ P3
-
-                ● G2
-               ╱
-         █████ P2
-
-       ● G1
-      ╱
-████ P1
-
-P0 ENTRY
-```
-
-### 중요한 차이
-
-2-4의 Residential Stack처럼
-세 개의 큰 Route를 한 번에 제시하지 않는다.
-
-3-1은:
-
-```text
-ONE CLEAR ASCENT
-+
-OPTIONAL FLOW SKIPS
-```
-
-구조다.
-
----
-
-## 5. Pixel / Grid 기준
-
-### VERIFIED — current `main`
-
-```text
-Player Radius            15
-Gravity                  1250
-Max Horizontal Speed     360
-Jump Speed               440
-
-Rope Max Attach Distance 400
-Attach Buffer            0.1 sec
-Swing Impulse            780
-
-Camera Desktop Zoom      1
-Camera Mobile Zoom       0.72
-```
-
-현재 Runtime의 `swingImpulse = 780`은 구현 사실이다.
-
-하지만 Stage mandatory geometry는
-780에 의존하지 않는다.
-
-### HYPOTHESIS — BLOCKOUT
-
-```text
-BASE GRID     32 px
-
-WIDTH         1216 px
-              38 tiles
-
-HEIGHT        1088 px
-              34 tiles
-
-X             -608 ~ +608
-Y                0 ~ -1088
-```
-
-### 필수 Grapple 목표 거리
-
-```text
-200–350 px
-```
-
-Max Range 400을
-필수 Challenge로 사용하지 않는다.
-
----
-
-## 6. 전체 맵 구조
+## PANORAMIC MARKET VOID / SUSPENDED MARKET ISLAND ARCH
 
 ```text
 Y -1088
 
-┌──────────────────────────────────────────────────────────┐
-│                                  GATE → 3-2              │
-│                            P5 ███████████                 │
-│                                   ▲                      │
-│                              G5 ●                        │
-│                                ╱                         │
-│                   P4 █████████                           │
-│                       ▲                                  │
-│                    G4 ●                                  │
-│                      ╲                                   │
-│                       ╲                                  │
-│              LARGE COMMERCIAL VOID                       │
-│                                                         │
-│                    ● G3                                  │
-│                   ╱                                      │
-│         P3 █████████                                     │
-│                ▲                                         │
-│             G2 ●                                         │
-│               ╲                                          │
-│                ╲                                         │
-│         P2 █████████████                                 │
-│              ▲                                           │
-│           G1 ●                                           │
-│             ╲                                            │
-│        P1 ███████████                                    │
-│             ▲                                            │
-│        P0 ENTRY                                           │
-└──────────────────────────────────────────────────────────┘
+                                                     EXIT → 3-2
+                                                        █████
+                                                           ▲
+                                                        G4 ●
+                                                          /
+                                       LATE GUARD     ███████
+                                                     P3
+                                                  ↙
+                                               G3 ●
+                                            ↙
+                         █████████████████
+                         SUSPENDED MARKET ISLAND
+                         DISTRICT / KIOSK
+                                 ▲
+                              G2 ●
+                            ↗
+                         ↗
+              ███████████
+              LEFT MARKET TERRACE
+                   ▲
+                G1 ●
+              ↗
+ENTRY █████
 
 Y 0
 ```
 
----
+Overall body:
 
-## 7. Zone 구성
+> **`↗ BIG ASCENT ARC → CENTRAL HIGH ISLAND → ↘ BIG DESCENT ARC → ↗ SHORT EXIT LIFT`**
 
-### ZONE A — COMMERCIAL THRESHOLD
-
-```text
-Y 0 ~ -192
-```
-
-목적:
-
-Worker District의 색과 재질을
-화면 아래쪽에 마지막으로 조금 남기고,
-Commercial Lighting이 위쪽에서 들어오게 한다.
-
-Enemy / Hazard 없음.
-
-### ZONE B — FIRST POWERED PROMENADE
-
-```text
-Y -192 ~ -448
-```
-
-Player가 처음으로:
-
-- active advertisement
-- storefront lighting
-- powered kiosk
-- polished railing
-
-을 가까이에서 본다.
-
-### ZONE C — ATRIUM OPENING
-
-```text
-Y -448 ~ -768
-```
-
-Near Detail을 줄이고
-큰 Commercial Void를 보여준다.
-
-Rope Arc를 즐기는 구간.
-
-### ZONE D — UPPER RETAIL TERRACE
-
-```text
-Y -768 ~ -960
-```
-
-다시 Retail Architecture가 가까워진다.
-
-### ZONE E — SECURITY GALLERY APPROACH
-
-```text
-Y -960 ~ -1088
-```
-
-3-2 방향에
-**비활성 Scanner Housing** 정도만 Preview 가능.
-
-Scanner Beam은 아직 작동하지 않는다.
+이 Stage는 수평 Corridor가 아니다.
 
 ---
 
-## 8. 좌표 / 오브젝트
+# 4. ARCHITECTURAL CAUSALITY
 
-### HYPOTHESIS — BLOCKOUT CANDIDATE
+Lower Market는 하나의 거대한 Commercial Concourse Void를 가진다.
 
-| ID | X | Y | Width | 역할 |
-|---|---:|---:|---:|---|
-| P0 | -544~-320 | 0 | 224 | Entry |
-| P1 | -480~-160 | -160 | 320 | Commercial Threshold Deck |
-| G1 | -384~-256 | -256 | 128 | First Pivot |
-| P2 | -288~+96 | -352 | 384 | First Promenade |
-| G2 | -96~+32 | -448 | 128 | Atrium Entry Pivot |
-| P3 | -224~+64 | -576 | 288 | Mid Atrium Landing |
-| R1 | +160~+416 | -608 | 256 | Flow Recovery / Alternate Landing |
-| G3 | +32~+160 | -672 | 128 | Central Arc Pivot |
-| G4 | -160~-32 | -800 | 128 | Upper Return Pivot |
-| P4 | -256~+64 | -864 | 320 | Upper Retail Terrace |
-| R2 | +224~+480 | -864 | 256 | Upper Recovery |
-| G5 | +64~+192 | -960 | 128 | Final Pivot |
-| P5 | +192~+480 | -1024 | 288 | Exit / 3-2 Approach |
-| Exit / Gate Panel | +288~+544 | -1056 | 256 | Objective → Gate Panel → Gate open → physical crossing → 3-2 |
+중앙에는:
 
-### Scanner Preview
+> **Suspended Market Island / Hanging Concourse**
 
-Zone E 오른쪽 wall / ceiling에:
+가 존재한다.
+
+평상시:
+
+- skybridge
+- escalator
+- balcony
+- suspended concourse
+
+등으로 접근했지만 사고로 연결부가 끊겼다.
+
+남은 Maintenance / Canopy structural joint를 Rope가 사용한다.
+
+따라서 Player route는:
 
 ```text
-INACTIVE SCANNER HOUSING
-```
-
-을 장식으로 둘 수 있다.
-
-상태:
-
-```text
-OFF
-```
-
-또는 단순 Idle Light.
-
-3-1에서는:
-
-```text
-NO SWEEP
-NO DETECTION
-NO DAMAGE
-NO ALARM
-```
-
----
-
-## 9. Safe Route
-
-```text
-P0
-→ P1
-→ G1
-→ P2
-→ G2
-→ P3
-→ G3
-→ G4
-→ P4
-→ G5
-→ P5
-→ Gate Panel
-→ Gate open
-→ EXIT (3-2)
-```
-
-### 특징
-
-- 넓은 Landing
-- Enemy 없음
-- Hazard 없음
-- 빠른 재시도
-- `swingImpulse = 0`에서도 통과 가능해야 함
-- Mobile에서도 다음 Target이 읽혀야 함
-
-### 역할
-
-3-1은:
-
-```text
-새 규칙을 시험하는 곳
-```
-
-이 아니라:
-
-```text
-새 Sector의 공간을 즐기는 곳
+LEFT MARKET EDGE
+→ SUSPENDED CENTRAL ISLAND
+→ RIGHT MARKET EDGE
 ```
 
 이다.
 
----
-
-## 10. Flow Route
-
-숙련자는 일부 Landing을 줄일 수 있다.
-
-예:
-
-```text
-P2
-→ G2
-→ Release
-→ G3
-→ R1 / G4
-→ G5
-→ P5
-```
-
-### 목적
-
-Commercial Atrium의
-긴 Sightline과 개방감을
-Rope Flow로 체감.
-
-### 규칙
-
-Shortcut은 허용하지만:
-
-```text
-3-2 Exit
-Commercial Reveal
-```
-
-을 통째로 Skip하면 안 된다.
+Floating platform chain가 아니라
+실제 public-commercial architecture를 통과한다.
 
 ---
 
-## 11. Build Route
+# 5. ENTRY
 
-### NO DEDICATED BUILD ROUTE
+Entry:
 
-3-1은 Build Test Stage가 아니다.
+`(-1392,-32)`
 
-Foundation + Specialization은 유지되지만,
-Build별 전용 Route를 만들지 않는다.
+P0:
 
-### IMPULSE
+- X `-1504..-1280`
+- W224
+- Y `0`
 
-큰 Atrium에서
-Arc / Landing Skip이 자연스럽게 돋보일 수 있다.
+First G1:
 
-### RELAY
+`(-1184,-192)`
 
-G2 → G3 → G4 → G5
-연속 연결에서 Rhythm 이점.
+Entry edge → G1:
 
-### SHEAR
+~205px class.
 
-Enemy 없음.
+No challenge.
 
-공격 기회를 억지로 만들지 않는다.
+첫 Frame에서 보여줘야 하는 것:
 
-### 중요
-
-SHEAR Player가:
-
-```text
-“이 Stage에서 내 공격 Augment를 쓸 곳이 없다.”
-```
-
-고 느끼는 것은 허용된다.
-
-3-1의 역할은 Sector Reveal이기 때문이다.
+- 큰 중앙 Void
+- 높은 곳에 떠 있는 Market Island
+- 오른쪽 먼 Terrace는 부분적으로만 보임
+- Exit는 보이지 않음
 
 ---
 
-## 12. Recovery
+# 6. DIALOGUE BEAT A — SECTOR ENTRY
 
-### R1
+P1에 올라온 직후.
 
-G2 / G3 Flow 실패 시 Catch.
+Environment first:
 
-목표:
+- lights
+- storefront standby
+- powered ventilation
+- signage
 
-```text
-3–5 sec
-```
+그다음 Player:
 
-안에 해당 Arc 재진입.
+> **`…여긴 아직 불이 들어와 있어.`**
 
-### R2
+이게 Sector 03의 첫 Character line.
 
-G4 / G5 Overshoot를 받는 Upper Recovery.
+목적:
 
-### 하단
+- Sector 시작 감정 표시
+- Worker District와 즉각 비교
+- 설명하지 않음
+- 단순한 물리적 놀람
 
-각 주요 Arc 아래에는
-완전한 낙하 대신
-Promenade / decorative service floor에 해당하는
-Recovery Surface를 배치할 수 있다.
+Status:
 
-단 Gameplay Route처럼 보이지 않게 정리.
-
-### 금지
-
-```text
-NO DAMAGE
-NO DEATH FLOOR
-NO START RESET
-NO FULL-STAGE DROP
-```
+**NOT IMPLEMENTED — PLAYER BARK LAYER**
 
 ---
 
-## 13. Enemy / Hazard
+# 7. LEFT MARKET TERRACE / DISTRICT SIGN
 
-```text
-ENEMY              NONE
-PATROL DRONE       NONE
-SCANNER ACTIVE     NONE
-SECURITY SHUTTER   NONE
-WIND               NONE
-TRAP               NONE
-ROPE CUT           NONE
-DAMAGE FLOOR       NONE
-```
+P1:
 
-### 이유
+- X `-1248..-864`
+- W384
+- Y `-224`
 
-3-1의 새로운 정보는 이미 충분하다.
+Stable Story Object:
 
-```text
-NEW SECTOR
-+
-NEW COLOR / MATERIAL
-+
-POWERED SPACE
-+
-COMMERCIAL SCALE
-```
+`sector-03-01:district-sign`
 
-여기에 새 Threat까지 넣으면
-환경 Contrast가 묻힌다.
-
----
-
-## 14. Camera
-
-### VERIFIED
-
-현재 Camera는 Player를 대략:
-
-```text
-38% from left
-58% from top
-```
-
-위치에 두고 추적한다.
-
-### Zone A
-
-화면 하단에는
-Worker District 계열의 어두운 구조가 일부 남고,
-상단에는 Commercial White / Gold / Magenta 계열 빛이 들어오는 구성을 권장.
-
-### P2
-
-처음 큰 Atrium이 열리는 지점.
-
-보여야 하는 것:
-
-- Player
-- G2 / G3
-- 반대편 Retail Balcony
-- active lights
-- empty commercial void
-
-### Custom Pan
-
-없음.
-
-환경 규모와 조명 대비로 Reveal한다.
-
----
-
-## 15. Story Trigger
-
-### TRIGGER A — DISTRICT SIGN
-
-Zone A / P1:
+Current copy:
 
 ```text
 COMMERCIAL DISTRICT
-
 PROMENADE 06
 ```
 
-정도.
+이 Text는 유지.
 
-### TRIGGER B — POWERED ENVIRONMENT
+P1은 완전 Safe.
 
-텍스트보다 환경.
+---
 
-- storefront display ON
-- advertisement loop ON
-- kiosk idle screen ON
-- ceiling guide lights ON
-- cleaning indicator ON
+# 8. GRAND VOID ASCENT → CENTRAL ISLAND
 
-### TRIGGER C — AUTOMATED WELCOME
+P1 right edge:
 
-Optional.
+`X -864`
 
-작은 Kiosk:
+G2:
+
+`(-640,-416)`
+
+Central Island left edge:
+
+`X -384`
+
+Island deck:
+
+- X `-384..+128`
+- W512
+- Y `-544`
+
+Relations:
+
+P1 edge → G2:
+
+~295px
+
+G2 → Island edge:
+
+~286px
+
+Visually:
+
+Player는 큰 Void를 약 **480px 높이 상승**하며 중앙 Island로 올라간다.
+
+Mechanically:
+
+Hook relation은 normal.
+
+이게 Sector-scale rule:
+
+> **Large Architecture ≠ Max Reach Fishing**
+
+---
+
+# 9. CENTRAL SUSPENDED MARKET ISLAND
+
+P2:
+
+- X `-384..+128`
+- W512
+- Y `-544`
+
+이 Stage의 중심.
+
+Player가 충분히 걸을 수 있는 큰 안전 Island.
+
+여기서 Camera / composition은:
+
+- 방금 건너온 Left Market
+- 아래 여러 commercial floor depth
+- 앞으로 내려갈 Right Market
+- powered signage
+
+를 한 번에 느끼게 한다.
+
+하지만 Stage 전체를 한 화면에 넣지는 않는다.
+
+Enemy 0.
+
+Scanner 0.
+
+---
+
+# 10. WELCOME KIOSK
+
+Stable Story Object:
+
+`sector-03-01:welcome-kiosk`
+
+Central Island에 배치.
+
+Current copy:
 
 ```text
 WELCOME
-
-PUBLIC SERVICE
-ONLINE
+PUBLIC SERVICE ONLINE
 ```
 
-정도의 중립적 문구.
+Ordinary kiosk chime.
 
-### 중요한 금지
-
-3-1에서:
-
-```text
-PRIORITY CUSTOMER
-TIER A
-TIER B
-EXECUTIVE ACCESS
-GROUP A
-GROUP B
-```
-
-같은 정보를 새로 주지 않는다.
-
-Priority / Access Tier는 Sector 후반 Story의 재료다.
+Horror alarm 금지.
 
 ---
 
-## 16. Pixel Art Asset Spec
+# 11. DIALOGUE BEAT B — RECOGNITION
 
-### Storefront Module
+Kiosk가 정상 작동하는 것을 본 뒤:
 
-```text
-96×96
-128×96
-```
+> **`사람은 없는데… 기계들만 계속 일하고 있네.`**
 
-### Advertisement Lightbox
+Beat A:
 
-```text
-64×64
-96×64
-```
+> 불이 들어와 있다.
 
-### Kiosk
+Beat B:
+
+> 사람은 없는데 시스템은 계속 일한다.
+
+따라서 감정이:
 
 ```text
-32×64
-64×64
+SURPRISE
+→
+RECOGNITION
 ```
 
-### Retail Balcony
+으로 발전한다.
+
+아직:
 
 ```text
-128×32
-256×32
+WHY?
+WHO?
+PRIORITY?
 ```
 
-### Polished Rail
+로 가지 않는다.
 
-```text
-32×16
-64×16
-```
+Status:
 
-기본 Non-Collision Decoration.
-
-### Hanging Sign
-
-```text
-32×32
-64×32
-```
-
-### Display Table / Chair
-
-```text
-32×32
-64×32
-```
-
-Non-Collision.
-
-### Scanner Housing Preview
-
-```text
-32×32
-64×32
-```
-
-3-1에서는 비활성.
-
-### Grapple Readability Cue
-
-```text
-24×24
-```
-
-기존 Cyan 우선권 유지.
+**NOT IMPLEMENTED — PLAYER BARK LAYER**
 
 ---
 
-## 17. Background
+# 12. CENTRAL ISLAND → RIGHT MARKET DESCENT ARC
 
-### Production Direction
+Island right edge:
 
-Sector 03 전용 Far / Mid Visual Family가 필요하다.
+`X +128`
 
-3-1은 그 첫 공개 Stage.
+G3:
 
-### FAR
+`(+416,-640)`
+
+Right Market left edge:
+
+`X +704`
+
+P3:
+
+- X `+704..+1088`
+- W384
+- Y `-416`
+
+Relations:
+
+Island edge → G3:
+
+~304px
+
+G3 → P3 edge:
+
+~363px
+
+Movement:
+
+> **high central Island → long down-right swing → lower right Market**
+
+이 Descending Rope arc가 3-1의 두 번째 signature movement다.
+
+중요:
+
+- controlled vertical Drop 아님
+- maintenance bypass 아님
+- lower recovery loop 아님
+
+한 번의 큰 forward swing이다.
+
+---
+
+# 13. RECOVERY
+
+## Recovery A
+
+under Left→Island ascent.
+
+Approx:
+
+`(-576,-176)`
+
+W256.
+
+Retry:
+`3–5s`
+
+## Recovery B
+
+under Island→Right descent.
+
+Approx:
+
+`(+384,-304)`
+
+W256.
+
+Retry:
+`3–5s`
+
+Recovery에서 Story Island / Right Terrace를 걸어서 bypass 불가.
+
+---
+
+# 14. RIGHT MARKET TERRACE / SINGLE LATE GUARD
+
+P3:
+
+`+704..+1088`
+Y `-416`
+
+Only now:
+
+`promenade-guard`
+
+activates.
+
+Target:
+
+around:
+
+`(+944,-416)`
+
+Authority:
+
+`SECTOR_03_STANDARD_POOL`
+
+Current possible types:
+
+- pursuit
+- shield
+- artillery
+
+Rules:
+
+- exactly 1 slot
+- no Patrol
+- kill optional
+- no Rope Cut
+- no kill gate
+- cannot pressure Left Terrace
+- cannot pressure Central Story Island
+- activation only after Player lands on Right Market
+
+This keeps:
+
+> **roughly first 75–80% Stage = no enemy pressure**
+
+---
+
+# 15. FINAL SERVICE LIFT
+
+G4:
+
+`(+1184,-672)`
+
+Exit Deck:
+
+- X `+1152..+1472`
+- W320
+- Y `-800`
+
+P3 → G4:
+
+~280px class.
+
+G4 → Exit:
+
+comfort.
+
+Purpose:
+
+> Lower Market public space → Facade Service Gallery.
+
+Scanner remains OFF.
+
+At final art level:
+one inactive Service Mount housing may appear.
+
+No active cycle.
+
+---
+
+# 16. PLAYER EXPERIENCE
+
+The five remembered moments should be:
+
+1. **새 Sector에 들어오자 공간이 갑자기 커진다.**
+2. **아직 불이 켜져 있다는 것을 알아차린다.**
+3. **거대한 Void 위 중앙 Hanging Market Island로 올라간다.**
+4. **사람은 없는데 Kiosk와 기계가 계속 일한다.**
+5. **반대편 Market으로 길게 내려간 뒤 처음으로 Security 1기를 만난다.**
+
+If Player remembers:
+
+> `긴 플랫폼 두 번 건넌 Stage`
+
+REDESIGN.
+
+---
+
+# 17. DIALOGUE MASTER
+
+## Bark A
+
+Trigger:
+
+first powered-safe terrace after Sector entry.
+
+Text:
+
+> **`…여긴 아직 불이 들어와 있어.`**
+
+Purpose:
+
+physical surprise.
+
+## Bark B
+
+Trigger:
+
+after `WELCOME / PUBLIC SERVICE ONLINE`.
+
+Text:
+
+> **`사람은 없는데… 기계들만 계속 일하고 있네.`**
+
+Purpose:
+
+emotional recognition.
+
+No third Bark.
+
+No tutorial speech.
+
+No Scanner mention.
+
+---
+
+# 18. STORY FUNCTION
+
+Sector 02 question:
+
+> 왜 C만 멈췄지?
+
+3-1 new evidence:
+
+> 이곳의 생활 서비스는 더 많이 살아 있다.
+
+3-1 does NOT conclude:
+
+- 상층부는 사고 피해가 없었다
+- Priority 대상은 이곳 주민이었다
+- Group A/B가 이곳에 살았다
+- Group C는 Worker였기 때문에 중단됐다
+
+Story progression:
 
 ```text
-vertical commercial atrium
-powered upper terraces
-distant advertisement blocks
-active service lighting
-deep city void
-```
+DIFFERENCE IN EVACUATION
++
+DIFFERENCE IN SURVIVING INFRASTRUCTURE
 
-### MID
+but
 
-```text
-retail balcony
-food-service shell
-large sign
-storefront modules
-atrium bridge
-service structure
-```
-
-### NEAR
-
-Gameplay 주변은 절제.
-
-```text
-trim
-kiosk
-rail
-display
-lightbox
-storefront edge
-```
-
-### Layer Priority
-
-```text
-PLAYER / ROPE
->
-GAMEPLAY SURFACE
->
-FUTURE SECURITY CUE
->
-COMMERCIAL NEAR
->
-MID
->
-FAR
+NO CAUSAL LINK YET
 ```
 
 ---
 
-## 18. Sound / VFX
+# 19. MAP SIMILARITY
 
-### Ambient
+## vs 2-2
 
-Sector 02보다 더 “정상 작동”하는 소리.
+2-2:
+single horizontal Patrol walkway.
 
-- clean ventilation hum
-- escalator / lift motor in distance
-- advertisement electrical tone
-- kiosk idle chime at long interval
-- distant refrigeration / service machinery
-- spacious indoor atrium reverb
+3-1:
+large arch-shaped two-height Market crossing,
+no Patrol,
+central hanging Island.
 
-### 사용하지 않음
+PASS.
 
-- Alarm loop
-- Drone servo
-- Gunfire
-- Scanner warning
-- Human chatter
-- Crowd ambience
+## vs 2-6
 
-### 이유
+2-6:
+short vertical → hard 90° turn → long rim.
 
-사람이 없는 것이 중요하다.
+3-1:
+long up-right → high Island → long down-right.
 
-Commercial System은 살아 있는데
-**고객의 소리는 없다.**
+PASS.
 
-### VFX
+## vs 2-8
 
-- stable light panels
-- restrained advertisement animation
-- reflective floor highlights
-- distant active signage
-- occasional automated cleaning indicator
+2-8:
+Dead Lip → controlled Drop → lower Ring → relaunch upper opposite Arm.
 
----
+3-1:
+smooth ascent to high central Island → smooth forward descent.
 
-## 19. Implementation Notes
+Overlap:
+large central landmark / elevation change.
 
-### 19-1. Current Runtime Geometry
+Meaningful overlap = 1.
 
-현재 `main` 기준:
+PASS.
 
-```text
-Rope Max Attach Distance = 400
-Swing Impulse = 780
-```
+## vs 1-5
 
-Mandatory Safe Route는 `780`을 요구하지 않는다.
+1-5:
+Horseshoe / drop-through / low test slot / return.
 
-### 19-2. Commercial Decoration
+3-1:
+no loop, no return, no low test slot.
 
-현재 환경 가이드의 원칙을 그대로 사용.
+PASS.
 
-```text
-Backdrop
-Collision-aligned Terrain
-Non-collision Decoration
-```
+## vs 1-6
 
-분리.
+1-6:
+wide open horizontal Plenum + Wind.
 
-기본 Non-Collision:
+3-1:
+arched commercial Void traversal,
+large central collision Island,
+no Wind.
 
-- glass frame
-- storefront trim
-- advertisement
-- chair
-- table
-- kiosk trim
-- rail decoration
-- sign
-- cable
-- escalator shell
+Overlap:
+large open space only.
 
-### 19-3. Scanner Preview
+PASS.
 
-3-2의 학습을 침범하지 않기 위해
-3-1 Scanner Housing은:
+## vs 1-7
 
-```text
-visual foreshadow only
-```
+1-7:
+enclosed multi-turn S curve.
 
-다.
+3-1:
+one arch with no reversal.
 
-Runtime Security Mechanic이 아직 없어도
-3-1 Blockout 자체는 완성 가능해야 한다.
+PASS.
 
-### 19-4. Sector Entry Dependency
+## vs planned 3-3
 
-공통 Boss Flow가 미확정이므로
-3-1 시작점에서:
+3-3 owns:
+Half-Orbit Retail Balcony around Central Atrium.
 
-```text
-“방금 어떤 Boss를 죽였다.”
-```
+3-1 does NOT orbit a Void.
 
-같은 Story Beat를 넣지 않는다.
+It crosses straight through one:
+Left edge → central Island → right edge.
 
-Stage Entry는:
+PASS.
 
-```text
-Commercial District authored progression begins here
-```
-
-까지만 정의.
-
-### 19-5. General Timer
-
-Sector 03 진입 후
-공통 계약에 따라 새 General Timer가 시작되어야 하지만,
-그 시작 Event는 Boss / Sector Transition Flow가 소유한다.
-
-3-1 자체가 Timer를 초기화하지 않는다.
-
-### 19-6. Multiplayer
-
-필수:
-
-- P2 / P3 / R1 / P4 / R2 / P5에 두 Player 착지 가능
-- Flow Shortcut Player가 Safe Player를 막지 않음
-- Exit Choke 없음
-- 한 Player가 앞서가도 다른 Player가 독립적으로 Safe Route 진행 가능
+Maximum meaningful overlap:
+**1**
 
 ---
 
-## 20. Playtest Metrics
+# 20. OBSTACLE FUNCTION
 
-### 기본
+Primary obstacle:
 
-```text
-first clear time
-skilled clear time
-falls
-recovery time
-landing skips
-airborne re-attach count
-wrong attach
-route deviation
-```
+> **BROKEN ACCESS TO A SUSPENDED MARKET CONCOURSE**
 
-### Sector Contrast
+Architectural cause:
 
-질문:
+- central Market Island originally connected by public bridge/escalator
+- those links are damaged
+- overhead maintenance joints remain
+- Rope reaches Island
+- opposite public connection is also damaged
 
-> “이전 Worker District와 가장 크게 달라진 점은 무엇이었나요?”
-
-기대 답변:
-
-- 훨씬 밝다
-- 전력이 살아 있다
-- 더 깨끗하다
-- 상업시설처럼 보인다
-- 시스템은 작동하는데 사람이 없다
-
-### Story Question
-
-질문:
-
-> “이 Stage를 보고 새로 궁금해진 점이 있나요?”
-
-좋은 상태:
-
-> 왜 여긴 전력이 살아 있는지 궁금하다.
-
-너무 빠른 해석:
-
-> 부자들만 살아서 전기를 몰아줬다.
-
-후자가 게임이 확정해준 사실처럼 느껴지면
-환경 대비가 과도하게 계급 암시로 읽히는지 점검.
-
-### Movement
-
-질문:
-
-> “적 없이도 Commercial Atrium을 Rope로 통과하는 게 재미있었나요?”
-
-목표:
-
-YES.
-
-### Wrong Attach
-
-Commercial Decoration 적용 후:
+Therefore:
 
 ```text
-평균 < 1회 / first clear
+LEFT PUBLIC TERRACE
+→ Rope
+→ CENTRAL PUBLIC ISLAND
+→ Rope
+→ RIGHT PUBLIC TERRACE
 ```
 
-목표.
+The map topology comes from real Commercial circulation damage.
+
+PASS.
 
 ---
 
-## 21. PASS Criteria
+# 21. SCALE GATE
 
-### Gameplay
+Target:
 
-- ★★ 체감
-- Enemy 없음
-- New Mechanic 없음
-- Scanner 활성 없음
-- New Augment 없음
-- Safe Route 존재
-- Optional Flow Shortcut 존재
-- Build Lock 없음
-- `swingImpulse = 0` Safe Route 통과
-- 주요 실패 후 5초 이내 재시도
-- 3-2 Tutorial을 선행하지 않음
+`3072×1088`
 
-### Story
+Meaningful traversal width:
 
-- Commercial District 전력 유지가 명확함
-- 사람이 없다는 공허함 유지
-- Priority 대상 정체 미공개
-- Group A/B 정체 미공개
-- Group C 중단 원인 미공개
-- Player가 “왜 여긴 살아 있지?” 질문을 갖게 됨
+~2840px.
 
-### Visual
+One central Void composition uses most of Stage width.
 
-- Sector 02와 즉시 구분
-- Neon Spam 아님
-- Rope Cyan 가독성 유지
-- Danger Color를 광고가 선점하지 않음
-- Commercial이 Corporate Office처럼 보이지 않음
+No repeated identical 600px gaps.
 
-### Multiplayer
+No empty filler rooms.
 
-- 두 Player 동시 이동 가능
-- Recovery / Landing Choke 없음
-- 앞선 Player가 뒤 Player 진행을 방해하지 않음
+No Player-visible full map from Entry.
+
+PASS.
 
 ---
 
-## 22. FAIL Conditions
+# 22. PACING
 
-### FAIL — Gameplay
+First play:
 
-- 첫 Stage부터 Scanner 작동
-- Drone 추가
-- Turret 추가
-- Damage Hazard 추가
-- 3-4 수준의 복잡한 Front/Service Route Split 도입
-- Safe Route에 공중 Chain 강제
-- IMPULSE만으로 통과 가능한 Gap
-- 한 번 실패로 Stage 시작점 복귀
+**1:50–2:30**
 
-### FAIL — Story
+Mastered:
 
-- Group A/B 정체 설명
-- Priority 대상 설명
-- Worker 희생 원인 확정
-- “Upper District got all power” 같은 직접 문구
-- Corporate 책임자 등장
-- 자동 광고가 사회 비판 대사를 직접 말함
+**0:55–1:20**
 
-### FAIL — Visual
+Dialogue / observation included.
 
-- 화면 대부분이 Cyan Neon
-- 광고 Red/Orange가 Enemy Telegraph 색을 선점
-- Glass / Sign이 Grapple Surface로 오해됨
-- Worker District와 재질 차이가 약함
-- Corporate Sector처럼 과도하게 무채색·보안 중심
+Difficulty:
+
+★★
+
+REDESIGN if:
+
+- Central Island feels like just another small platform
+- Right descent reads like 2-8 Drop
+- Guard fires into Story Island
+- Player sees Exit from Entry
+- Bark B sounds like exposition rather than observation
+- Stage reads as a horizontal bridge
+- Stage mastered path consistently >1:30
+- mobile Camera cannot read G3 + Right Market landing
 
 ---
 
-## 23. 개발 구현 우선순위
+# 23. CURRENT RUNTIME GATE
 
-### P0 — PURE GRAYBOX
+## KEEP
 
-먼저:
+- source Area ID
+- current Story stable IDs
+- exact Story copy
+- 1 pooled Guard slot
+- Standard Pool
+- Scanner OFF
+- Patrol OFF
+- Wind OFF
+- no Rope Cut
+- exit objective / panel / physical crossing
+- nextArea 3-2
 
-```text
-P0
-P1
-G1
-P2
-G2
-P3
-R1
-G3
-G4
-P4
-R2
-G5
-P5
-Exit
-```
+## RE-AUTHOR
 
-만 구현.
-
-### P1 — RANGE / FLOW VALIDATION
-
-다음 Profile 검증:
-
-```text
-780
-Reduced
-0
-```
-
-Safe Route는 `0` 통과 필수.
-
-### P2 — TWO-PLAYER TEST
-
-- simultaneous landing
-- flow/safe split
+- name → `LOWER MARKET PROMENADE`
+- bounds `1280×1088 → 3072×1088`
+- vertical compact climb → panoramic arch crossing
+- Grapple layout
 - recovery
-- exit merge
+- Story positions
+- Guard activation
+- Exit position
 
-검증.
+## STALE
 
-### P3 — LIGHTING / MATERIAL MOCK
+Old `Threat NONE`.
 
-Worker District와 다른 Commercial Palette 적용.
+Actual Runtime:
+one pooled Guard.
 
-### P4 — POWERED ENVIRONMENT PROPS
-
-- kiosk
-- storefront
-- advertisement
-- guide light
-
-추가.
-
-### P5 — READABILITY
-
-Commercial Detail 적용 후 Wrong Attach / Collision 오해 검사.
-
-### P6 — SCANNER HOUSING FORESHADOW
-
-3-2 설계 확정 뒤
-필요할 경우 비활성 Housing만 추가.
-
-### P7 — AUDIO / VFX
-
-Gameplay / Visual Contrast PASS 후.
+REV3:
+one late Guard.
 
 ---
 
-## 24. Stage Data Concept
+# 24. FIVE GATES
 
-**HYPOTHESIS — Runtime Schema 아님**
+MAP SCALE:
+**PASS**
 
-```js
-{
-    id: "sector-03-1-powered-promenade",
+MAP SIMILARITY:
+**PASS**
 
-    sector: 3,
-    region: 1,
+OBSTACLE FUNCTION:
+**PASS**
 
-    role: "commercial-sector-transition",
+STAGE LENGTH / PACING:
+**HYPOTHESIS PASS**
 
-    gameplay: {
-        enemies: [],
-        hazards: [],
-        newMechanic: null,
-        wind: false,
-        ropeCut: false,
-        requiredBuild: false
-    },
-
-    securityPreview: {
-        scannerHousing: "optional-inactive",
-        activeScanner: false
-    },
-
-    environment: {
-        powerState: "active",
-        primarySpace: "vertical-commercial-promenade",
-        crowd: "none"
-    },
-
-    story: {
-        explicitPriorityInfo: false,
-        purpose: "show-powered-commercial-contrast"
-    },
-
-    completion: {
-        type: "gate-panel-objective",
-        gatePanel: "contextual-interaction",
-        physicalCrossing: true
-    },
-
-    exit: {
-        nextRegion: "sector-03-2-scanner-gallery"
-    }
-}
-```
+CURRENT RUNTIME:
+**1 SLOT + 2 STORY OBJECTS + SCANNER OFF + EXIT CONTRACT MATCH / MAJOR TOPOLOGY RE-AUTHOR**
 
 ---
 
-## 25. 아트 담당자 전달문
-
-### POWERED PROMENADE
-
-핵심 이미지:
-
-> **사람은 한 명도 없는데,
-> 거대한 상업 Atrium의 조명과 광고, 안내 시스템은 정상적으로 켜져 있다.
-> 어두운 Worker District에서 올라온 Player가 그 밝은 공간 안에서 오히려 더 외롭게 보인다.**
-
-### 필요한 Near Assets
-
-1. Storefront Module
-2. Advertisement Lightbox
-3. Kiosk
-4. Retail Balcony Trim
-5. Hanging Sign
-6. Table / Chair Cluster
-7. Polished Rail
-8. Active Guide Light
-9. Optional Inactive Scanner Housing
-
-### Palette
+# 25. STATUS
 
 ```text
-Base:
-Deep Navy
-Graphite
-Polished Gray
+REV2
+HOLD / SUPERSEDED
 
-Commercial:
-Warm White
-Muted Gold
-Muted Magenta
-Desaturated Teal
+REV3
+3072×1088
+PANORAMIC MARKET VOID
+SUSPENDED MARKET ISLAND ARCH
+TWO PLAYER DIALOGUE BEATS
 
-Gameplay:
-Rope Cyan
-Player Scarf Red
-
-Danger:
-Red / Orange reserved
+USER APPROVED / DESIGN LOCKED
 ```
 
-### 가장 중요한 제한
-
-Commercial = Neon Spam이 아니다.
-
-광고는:
-
-```text
-background information
-```
-
-이고,
-
-```text
-Rope / Anchor / Player
-```
-
-가 항상 먼저 읽혀야 한다.
 
 ---
 
-## 26. 개발자 최종 전달 요약
+# 26. PACKAGING-TIME RE-AUDIT
 
-### SECTOR 03-1 — POWERED PROMENADE
+Final packaging baseline:
 
-핵심:
+`c1f9cd7f0362de7f7a3065a34e7ea9d35927a934`
 
-```text
-NO ENEMY
-NO NEW MECHANIC
-NO SCANNER ACTIVE
+Verified against latest `main`:
 
-POWERED COMMERCIAL REVEAL
-+
-SAFE ROPE FLOW
-```
+- `sector-03-01` still exists as current Runtime source area
+- current Runtime name remains `POWERED PROMENADE`
+- current subtitle remains `COMMERCIAL THRESHOLD`
+- current bounds remain `1280×1088`
+- current Story object IDs remain:
+  - `sector-03-01:district-sign`
+  - `sector-03-01:welcome-kiosk`
+- current Story Presentation binds:
+  - `COMMERCIAL DISTRICT / PROMENADE 06`
+  - `WELCOME / PUBLIC SERVICE ONLINE`
+- current enemy remains exactly one pooled sentry:
+  - `sector-03-01:promenade-guard`
+  - `SECTOR_03_STANDARD_POOL`
+- current Standard Pool remains:
+  - `pursuit-drone-t1`
+  - `shield-drone-t1`
+  - `artillery-drone-t1`
+- current Scanner Groups remain absent
+- current Patrol Drone remains absent
+- current Exit contract remains:
+  `final deck reached → exit panel engaged → physical crossing`
+- nextArea remains `sector-03-02`
 
-Player가 알아야 하는 것:
+Player Bark layer remains separate from current System Story presentation and is not treated as implemented.
 
-> **“Worker District와 달리 여기는 아직 전력이 살아 있다.”**
-
-아직 몰라야 하는 것:
-
-```text
-WHY
-WHO HAS PRIORITY
-WHO A/B ARE
-WHY C STOPPED
-```
-
-### Gameplay
-
-```text
-ONE CLEAR ASCENT
-+
-OPTIONAL FLOW SHORTCUT
-```
-
-3-1에서 Multi-Route를 다시 크게 복잡하게 만들지 않는다.
-
-### 다음 Stage
-
-3-2에서 처음:
-
-```text
-ACTIVE SECURITY STATE
-```
-
-후보를 배운다.
-
-3-1에서는 그 역할을 절대 선행하지 않는다.
-
----
-
-## OPEN QUESTIONS
-
-### 1. Exact Sector Entry
-
-Sector 02 Boss / Transition이 아직 미확정이다.
-
-따라서 P0 이전의 문 / Lift / Gate / Boss Exit는
-3-1 상세 Geometry에서 확정하지 않는다.
-
-### 2. Scanner Housing Foreshadow
-
-3-2 Scanner Mechanic이 최종 채택될 때만
-3-1 마지막에 비활성 Housing을 배치한다.
-
-Scanner 대신 다른 Primary Security System이 채택되면 삭제한다.
-
-### 3. Powered Escalator / Moving Object
-
-Sector 04가 Transit / Infrastructure를 담당하므로,
-3-1에서는 움직이는 승강설비를 Gameplay Platform으로 사용하지 않는다.
-
-Background Animation 정도만 허용.
-
-### 4. Commercial Advertising Copy
-
-브랜드 / 상품 문구는
-World tone을 풍부하게 할 수 있지만
-직접적인 정치·계급 설명이나 풍자 대사처럼 쓰지 않는다.
-
-3-1 Blockout에서는 Generic signage로 충분하다.
-
-### 5. 3-2 Primary Security Mechanic
-
-현재 Master Plan 후보는 Scanner State다.
-
-3-1 완료 후
-3-2 상세 설계 시작 전에 다시 Reference / 구현 비용 검토를 진행한다.
-
----
-
-SECTOR 03-1 / POWERED PROMENADE — REV 1.1
+Therefore the approved REV3 topology remains valid as REV8.0 final planning authority.

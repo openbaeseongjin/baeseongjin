@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 3-8 REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--p:#0e1820;--l:#314954;--t:#eef5f6;--m:#91a6ae;--c:#5de8ff;--g:#80d39a;--y:#ffe16c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.45 ui-monospace,Consolas,monospace}header{padding:14px 18px;border-bottom:1px solid var(--l)}h1{margin:0;font-size:18px}.sub{color:var(--m)}
+.layout{display:grid;grid-template-columns:560px 1fr}aside{padding:11px;background:var(--p);border-right:1px solid var(--l);max-height:100vh;overflow:auto}main{padding:11px}.card{padding:9px;border:1px solid var(--l);border-radius:8px;background:#09141a;margin-bottom:8px}.card b{color:var(--c)}label{display:block;margin:5px 0}button{padding:6px 8px;margin:3px;border:1px solid var(--l);border-radius:6px;background:#132027;color:var(--t);cursor:pointer}.active{border-color:var(--c);color:var(--c)}
+svg{width:100%;height:86vh;min-height:850px;background:#061019;border:1px solid var(--l);border-radius:8px}.bounds{fill:#0b1820;stroke:#4c6977;stroke-width:3}.void{fill:#050b10;stroke:#243b47;stroke-width:3;stroke-dasharray:16 12}.surface{fill:#536b78;stroke:#aabcc4;stroke-width:2}.safe{fill:#34584b;stroke:#80d39a;stroke-width:3}.anchor{fill:#5de8ff;stroke:#fff;stroke-width:2}.scanner{fill:#5de8ff;stroke:#fff;stroke-width:4}.scanner.warning{fill:#efb75b}.scanner.locked{fill:#632d2d;stroke:#ef7664}.scanner.reset{fill:#4a5357;stroke:#a3adb1}.patrol{fill:#8d4b3f;stroke:#ffba92;stroke-width:3}.support{fill:#553b68;stroke:#caa7ff;stroke-width:3}.late{fill:#4f2b52;stroke:#f1a8e8;stroke-width:3}.story{fill:#786a37;stroke:#efd989;stroke-width:2}.route{fill:none;stroke:#ffe16c;stroke-width:4;stroke-dasharray:12 8}.west{stroke:#8bc8ff}.east{stroke:#e6b875}.central{stroke:#ffe16c}.patrolPath{fill:none;stroke:#ffba92;stroke-width:3;stroke-dasharray:10 8}.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.07}.hidden{display:none}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a8bbc3}.phase{font-size:13px}.big{font-size:17px;fill:#91a6ae}.hub{fill:#80d39a}.centralText{fill:#ffe16c}.westText{fill:#8bc8ff}.eastText{fill:#e6b875}
+@media(max-width:1180px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--l)}}
+</style></head><body>
+<header><h1>3-8 UPPER EXCHANGE GATE · REV8 DRAFT REV3</h1><div class="sub">GAMEPLAY ONLY · 4608×2176 · FREE-WEAVE SECURITY FIELD</div></header>
+<div class="layout"><aside>
+<div class="card"><b>FREE-WEAVE</b><br>고정 Route 선택이 아니다. M0 / MX / M1에서 Scanner 상태와 적 위치를 보고 매번 중앙 또는 측면으로 다시 엮는다.</div>
+<div class="card"><b>LAYER 1</b><br><span class="centralText">CENTRAL C2 = Scanner</span><br><span class="westText">WEST = Patrol 1</span><br><span class="eastText">EAST = Support Guard</span></div>
+<div class="card"><b>LAYER 2</b><br><span class="centralText">CENTRAL C3 = Scanner</span><br><span class="westText">WEST = longer / no enemy</span><br><span class="eastText">EAST = Patrol 2</span></div>
+<div class="card"><b>LAYER 3</b><br><span class="centralText">CENTRAL C4 = Scanner</span><br><span class="westText">WEST = Late Guard</span><br><span class="eastText">EAST = Late Guard</span></div>
+<div class="card"><b>ENEMY = 5</b><br>Patrol ×2 / Support ×1 / Late ×2. Activation territories do not overlap Safe Hubs.</div>
+<div class="card"><b>ACCESS</b><br>현재 Runtime에서 Access A/B/C는 3-8 진입/완료 조건이 아님.</div>
+<div class="card"><b>SCANNER STATE</b><br><button class="statebtn active" data-state="available">AVAILABLE</button><button class="statebtn" data-state="warning">WARNING</button><button class="statebtn" data-state="locked">LOCKED</button><button class="statebtn" data-state="reset">RESET</button></div>
+<div class="card"><label><input id="routeToggle" type="checkbox" checked> Weave Routes</label><label><input id="reachToggle" type="checkbox"> 400px Reach</label><label><input id="storyToggle" type="checkbox" checked> Story Deck</label></div>
+<div class="card"><b>MAP RULE</b><br>배경 매장/간판/조명/구조장식 제외. 실제 gameplay object만 표시.</div>
+</aside><main>
+<svg viewBox="-2380 -2240 4760 2320">
+<rect class="bounds" x="-2304" y="-2176" width="4608" height="2176"/>
+<rect class="void" x="-1750" y="-1780" width="3400" height="1110" rx="120"/>
+<text class="big" x="-470" y="-970">UPPER MARKET FREE-WEAVE FIELD</text>
+
+<!-- entry -->
+<rect class="safe" x="-2048" y="0" width="256" height="32"/><text class="tiny" x="-2025" y="-18">ENTRY FROM 3-7</text>
+<circle class="anchor" cx="-1664" cy="-192" r="13"/><text class="tiny" x="-1642" y="-180">G0</text>
+<circle class="scanner" data-scanner cx="-1376" cy="-384" r="16"/><text class="tiny" x="-1354" y="-372">C1</text>
+<rect class="surface" x="-1280" y="-512" width="320" height="28"/><text class="tiny" x="-1260" y="-535">UPPER GATE ENTRY</text>
+<rect class="story" x="-1260" y="-625" width="180" height="62" rx="6"/><text class="tiny" x="-1305" y="-641">UPPER MARKET GATE / ACCESS ACTIVE</text>
+<rect class="safe" x="-896" y="-640" width="384" height="30"/><text class="phase hub" x="-875" y="-663">M0 · SAFE HUB 1</text>
+
+<!-- layer 1 central -->
+<circle class="scanner" data-scanner cx="-416" cy="-832" r="16"/><text class="tiny" x="-394" y="-820">C2</text>
+<circle class="anchor" cx="-128" cy="-1000" r="13"/>
+<!-- west lower -->
+<circle class="anchor" cx="-1152" cy="-768" r="13"/><circle class="anchor" cx="-1472" cy="-896" r="13"/><circle class="anchor" cx="-1152" cy="-1024" r="13"/><circle class="anchor" cx="-800" cy="-1104" r="13"/><circle class="anchor" cx="-448" cy="-1120" r="13"/>
+<path class="patrolPath" d="M-1504,-896 L-1056,-1024"/><circle class="patrol" cx="-1504" cy="-896" r="20"/><text class="tiny" x="-1600" y="-935">PATROL 1</text>
+<!-- east lower -->
+<circle class="anchor" cx="-192" cy="-736" r="13"/><circle class="anchor" cx="160" cy="-832" r="13"/><circle class="anchor" cx="480" cy="-944" r="13"/><circle class="anchor" cx="320" cy="-1088" r="13"/>
+<circle class="support" cx="240" cy="-864" r="20"/><text class="tiny" x="120" y="-905">LOWER SUPPORT</text>
+
+<rect class="safe" x="-64" y="-1120" width="384" height="30"/><text class="phase hub" x="-42" y="-1143">MX · SAFE HUB 2</text>
+
+<!-- layer 2 -->
+<circle class="scanner" data-scanner cx="128" cy="-1304" r="16"/><text class="tiny" x="150" y="-1292">C3</text>
+<!-- west -->
+<circle class="anchor" cx="-352" cy="-1232" r="13"/><circle class="anchor" cx="-704" cy="-1344" r="13"/><circle class="anchor" cx="-384" cy="-1456" r="13"/>
+<!-- east -->
+<circle class="anchor" cx="640" cy="-1216" r="13"/><circle class="anchor" cx="992" cy="-1344" r="13"/><circle class="anchor" cx="640" cy="-1464" r="13"/>
+<path class="patrolPath" d="M720,-1264 L1088,-1408"/><circle class="patrol" cx="1088" cy="-1408" r="20"/><text class="tiny" x="1010" y="-1448">PATROL 2</text>
+
+<rect class="safe" x="-64" y="-1488" width="384" height="30"/><text class="phase hub" x="-42" y="-1511">M1 · SAFE HUB 3</text>
+
+<!-- final layer -->
+<circle class="scanner" data-scanner cx="128" cy="-1656" r="16"/><text class="tiny" x="150" y="-1644">C4</text>
+<circle class="anchor" cx="128" cy="-1784" r="13"/>
+<!-- west -->
+<circle class="anchor" cx="-352" cy="-1600" r="13"/><circle class="anchor" cx="-704" cy="-1712" r="13"/><circle class="late" cx="-704" cy="-1712" r="20"/><text class="tiny" x="-840" y="-1750">UPPER LATE GUARD</text><circle class="anchor" cx="-384" cy="-1840" r="13"/>
+<!-- east -->
+<circle class="anchor" cx="608" cy="-1600" r="13"/><circle class="anchor" cx="960" cy="-1712" r="13"/><circle class="late" cx="960" cy="-1712" r="20"/><text class="tiny" x="835" y="-1750">FINAL CONTROL GUARD</text><circle class="anchor" cx="608" cy="-1840" r="13"/>
+
+<!-- archive -->
+<g id="storyDeck">
+<rect class="safe" x="-384" y="-1888" width="768" height="34"/><text class="phase hub" x="-350" y="-1913">ARCHIVE DECK · FULL SAFE</text>
+<rect x="-360" y="-2055" width="720" height="145" rx="12" fill="#172126" stroke="#91a6ae" stroke-width="4"/>
+<text class="tiny" x="-130" y="-2072">INCIDENT TRANSFER CONTROL RECORDS BAY</text>
+<rect class="story" x="-330" y="-2030" width="270" height="100" rx="8"/><text class="tiny" x="-300" y="-2000">LEFT · EVACUATION TRANSFER RECORD</text><text class="tiny" x="-300" y="-1978">GROUP A COMPLETE / GROUP B COMPLETE / GROUP C SUSPENDED</text>
+<rect class="story" x="60" y="-2030" width="270" height="100" rx="8"/><text class="tiny" x="88" y="-2000">RIGHT · UPPER TRANSFER ROUTE STATUS</text><text class="tiny" x="88" y="-1978">PUBLIC / SERVICE ROUTES / PRIORITY ROUTE ACTIVE</text>
+<path d="M-110,-1890 L120,-1890" stroke="#80d39a" stroke-width="3" stroke-dasharray="8 8"/>
+<text class="tiny" x="-95" y="-1870">PLAYER WALKS LEFT → RIGHT TO CHECK ROUTE STATUS</text>
+</g>
+
+<!-- final control -->
+<circle class="anchor" cx="672" cy="-1984" r="13"/><text class="tiny" x="694" y="-1972">G5</text>
+<rect class="safe" x="800" y="-2070" width="320" height="30"/><text class="phase" x="820" y="-2093">UPPER CONTROL · CONTENT BOUNDARY</text>
+<rect class="story" x="850" y="-2170" width="220" height="55" rx="6"/><text class="tiny" x="840" y="-2187">ROUTE STATUS PENDING</text>
+
+<g id="routes">
+<path class="route central" d="M-1920,-64 L-1664,-192 L-1376,-384 L-1152,-512 L-896,-640"/>
+<path class="route central" d="M-512,-640 L-416,-832 L-128,-1000 L-64,-1120"/>
+<path class="route west" d="M-896,-640 L-1152,-768 L-1472,-896 L-1152,-1024 L-800,-1104 L-448,-1120 L-64,-1120"/>
+<path class="route east" d="M-512,-640 L-192,-736 L160,-832 L480,-944 L320,-1088 L320,-1120"/>
+<path class="route central" d="M320,-1120 L128,-1304 L128,-1488"/>
+<path class="route west" d="M-64,-1120 L-352,-1232 L-704,-1344 L-384,-1456 L-64,-1488"/>
+<path class="route east" d="M320,-1120 L640,-1216 L992,-1344 L640,-1464 L320,-1488"/>
+<path class="route central" d="M320,-1488 L128,-1656 L128,-1784 L384,-1888"/>
+<path class="route west" d="M-64,-1488 L-352,-1600 L-704,-1712 L-384,-1840 L-384,-1888"/>
+<path class="route east" d="M320,-1488 L608,-1600 L960,-1712 L608,-1840 L384,-1888"/>
+<path class="route central" d="M384,-1888 L672,-1984 L800,-2070"/>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-1664" cy="-192" r="400"/><circle class="reach" cx="-1376" cy="-384" r="400"/><circle class="reach" cx="-416" cy="-832" r="400"/><circle class="reach" cx="-1472" cy="-896" r="400"/><circle class="reach" cx="160" cy="-832" r="400"/><circle class="reach" cx="128" cy="-1304" r="400"/><circle class="reach" cx="-704" cy="-1344" r="400"/><circle class="reach" cx="992" cy="-1344" r="400"/><circle class="reach" cx="128" cy="-1656" r="400"/><circle class="reach" cx="-704" cy="-1712" r="400"/><circle class="reach" cx="960" cy="-1712" r="400"/>
+</g>
+</svg></main></div>
+<script>
+const btns=[...document.querySelectorAll('.statebtn')];function state(s){document.querySelectorAll('[data-scanner]').forEach(x=>x.setAttribute('class','scanner '+s));btns.forEach(b=>b.classList.toggle('active',b.dataset.state===s))}btns.forEach(b=>b.onclick=()=>state(b.dataset.state));
+routeToggle.onchange=()=>routes.classList.toggle('hidden',!routeToggle.checked);
+reachToggle.onchange=()=>reach.classList.toggle('hidden',!reachToggle.checked);
+storyToggle.onchange=()=>storyDeck.classList.toggle('hidden',!storyToggle.checked);
+</script></body></html>

@@ -1,0 +1,183 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 3,
+    "stage": 7,
+    "legacyStageAlias": "3-7",
+    "sourceAreaId": "sector-03-07",
+    "name": "TRANSFER MEZZANINE"
+  },
+  "baselineCommit": "cb4f690ac180a04868322e9c4cfe1384897c348b",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "psychology": {
+    "start": {
+      "unease": 45,
+      "understanding": 38
+    },
+    "exit": {
+      "unease": 62,
+      "understanding": 52
+    }
+  },
+  "beats": [
+    {
+      "beatId": "s0-m1-route-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "세 cost profile을 설명보다 공간으로 먼저 읽힌다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -800,
+        "maxLocalX": -352,
+        "minLocalY": -608,
+        "maxLocalY": -496
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "3-7:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "m1-route-overview",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "sequence",
+          "items": [
+            {
+              "atSeconds": 0,
+              "title": "UPPER CONCOURSE",
+              "detail": "OUTER GALLERY"
+            },
+            {
+              "atSeconds": 1.0,
+              "title": "PRIORITY SPINE",
+              "detail": "FACILITY SERVICE"
+            }
+          ]
+        },
+        {
+          "type": "audio",
+          "action": "commercial-concourse-route-read",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s1-m2-route-control",
+      "status": "DESIGN LOCKED",
+      "purpose": "Route 경험 뒤 Priority Route의 별도 존재만 확정한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 448,
+        "maxLocalX": 832,
+        "minLocalY": -1328,
+        "maxLocalY": -1216
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-7:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "m2-story-safe",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "sequence",
+          "items": [
+            {
+              "atSeconds": 0.5,
+              "title": "UPPER CONCOURSE ROUTE CONTROL",
+              "detail": ""
+            },
+            {
+              "atSeconds": 1.6,
+              "title": "PUBLIC / SERVICE ROUTES",
+              "detail": "ACTIVE"
+            },
+            {
+              "atSeconds": 2.7,
+              "title": "PRIORITY ROUTE",
+              "detail": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…우선 통로가 따로 있었네."
+          },
+          "timing": {
+            "minDelaySeconds": 3.8
+          }
+        },
+        {
+          "type": "audio",
+          "action": "neutral-route-control-confirmation",
+          "optional": true
+        },
+        {
+          "type": "lighting",
+          "action": "normal-upper-concourse-control-lighting",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s2-upper-gate-preview",
+      "status": "DESIGN LOCKED",
+      "purpose": "3-8 Transfer Control만 예고한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -128,
+        "maxLocalX": 384,
+        "minLocalY": -1544,
+        "maxLocalY": -1408
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "3-7:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "upper-gate-preview",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER MARKET GATE",
+            "detail": "TRANSFER CONTROL"
+          },
+          "timing": {
+            "durationSeconds": 1.1
+          }
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No control lock",
+    "M2 safe during Story",
+    "Priority Route existence only",
+    "Exact Bark: …우선 통로가 따로 있었네.",
+    "Legacy Access Tier story superseded",
+    "Direction migration implemented/verified before release"
+  ]
+}
