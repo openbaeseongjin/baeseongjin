@@ -3,7 +3,18 @@ import {
     AreaBehaviorReferenceError,
     validateBehaviorRefs
 } from "./AreaBehaviorRegistry.js";
-import { AREA_SPEC_V2, EDITOR_EDITABLE_DOMAINS, EDITOR_READ_ONLY_DOMAINS } from "./AreaSpecV2.js";
+import { validateAreaCatalog } from "../AreaDefinitionValidator.js";
+import { resolveEnemySlot } from "../EnemyEncounterSelection.js";
+import { evaluateWindZone } from "../WorldForceField.js";
+import { isKnownEnemyType } from "../../combat/EnemyArchetypeCatalog.js";
+import { resolveObjectTriggerBounds } from "../areas/AreaDefinition.js";
+import {
+    AREA_SPEC_V2,
+    EDITOR_EDITABLE_DOMAINS,
+    EDITOR_READ_ONLY_DOMAINS,
+    canonicalizeAreaSpecV2,
+    createAreaDefinitionFromV2
+} from "./AreaSpecV2.js";
 
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
@@ -21,6 +32,286 @@ function issue(issues, file, code, details = {}) {
 
 function finitePoint(value) {
     return Number.isFinite(value?.x) && Number.isFinite(value?.y);
+}
+
+function boundsInsideArea(areaBounds, bounds) {
+    return (
+        Number.isFinite(bounds?.x) &&
+        Number.isFinite(bounds?.y) &&
+        Number.isFinite(bounds?.width) &&
+        Number.isFinite(bounds?.height) &&
+        bounds.width > 0 &&
+        bounds.height > 0 &&
+        bounds.x >= -areaBounds.width * 0.5 &&
+        bounds.x + bounds.width <= areaBounds.width * 0.5 &&
+        bounds.y >= -areaBounds.height &&
+        bounds.y + bounds.height <= 0
+    );
+}
+
+function validateEditableEnemy(issues, file, object, areaBounds) {
+    if (typeof object.enemyType !== "string" || !isKnownEnemyType(object.enemyType)) {
+        issue(issues, file, "enemy-type-invalid", { id: object.id ?? null, enemyType: object.enemyType ?? null });
+    }
+    if (object.enemySelection !== undefined) {
+        try {
+            const resolved = resolveEnemySlot(
+                { id: object.id, ...object.enemySelection },
+                { runSeed: 1, worldRevision: "area-spec-v2-validation" }
+            );
+            const candidates = resolved.allowedEnemyTypes ?? [resolved.enemyType];
+            for (const enemyType of candidates) {
+                if (!isKnownEnemyType(enemyType)) {
+                    issue(issues, file, "enemy-selection-type-invalid", { id: object.id, enemyType });
+                }
+            }
+        } catch (cause) {
+            issue(issues, file, "enemy-selection-invalid", {
+                id: object.id ?? null,
+                message: cause instanceof Error ? cause.message : String(cause)
+            });
+        }
+    }
+    if (object.activationSpec !== undefined) {
+        try {
+            const activation = resolveObjectTriggerBounds(object.position, object.activationSpec);
+            if (!boundsInsideArea(areaBounds, activation)) {
+                issue(issues, file, "object-activation-bounds", { id: object.id ?? null });
+            }
+        } catch (cause) {
+            issue(issues, file, "object-activation-spec-invalid", {
+                id: object.id ?? null,
+                message: cause instanceof Error ? cause.message : String(cause)
+            });
+        }
+    }
+}
+
+function validateEditableWind(issues, file, zone) {
+    if (!finitePoint(zone.direction) || Math.hypot(zone.direction.x, zone.direction.y) <= 0) {
+        issue(issues, file, "wind-direction-invalid", { id: zone.id ?? null });
+    }
+    if (!Number.isFinite(zone.strength) || zone.strength < 0) {
+        issue(issues, file, "wind-strength-invalid", { id: zone.id ?? null, strength: zone.strength ?? null });
+    }
+    if (zone.falloff !== undefined && (!Number.isFinite(zone.falloff) || zone.falloff < 0)) {
+        issue(issues, file, "wind-falloff-invalid", { id: zone.id ?? null, falloff: zone.falloff ?? null });
+    }
+    if (zone.mode === "pulsed") {
+        const cycle = zone.cycle;
+        if (
+            !cycle ||
+            !["lull", "warning", "active", "decay"].every((key) => Number.isFinite(cycle[key]) && cycle[key] >= 0) ||
+            cycle.active <= 0 ||
+            cycle.decay <= 0
+        ) {
+            issue(issues, file, "wind-cycle-invalid", { id: zone.id ?? null });
+        }
+    }
+    try {
+        evaluateWindZone(zone, 0);
+    } catch (cause) {
+        issue(issues, file, "wind-mode-invalid", {
+            id: zone.id ?? null,
+            mode: zone.mode ?? null,
+            message: cause instanceof Error ? cause.message : String(cause)
+        });
+    }
+}
+
+function validateEditableRuntimeFields(issues, file, definition) {
+    const bounds = definition?.bounds;
+    if (!bounds || !Number.isFinite(bounds.width) || !Number.isFinite(bounds.height)) return;
+    for (const object of definition.objects ?? []) {
+        if (isEditableEnemyObject(object)) validateEditableEnemy(issues, file, object, bounds);
+    }
+    for (const zone of definition.windZones ?? []) validateEditableWind(issues, file, zone);
+}
+
+function specDomainValue(spec, domain) {
+    const definition = spec?.definition ?? {};
+    switch (domain) {
+        case "bounds":
+            return definition.bounds;
+        case "entry":
+            return definition.entry;
+        case "surfaces":
+            return definition.surfaces;
+        case "anchors":
+            return spec?.anchors;
+        case "recoveryRoute":
+            return {
+                routePoints: definition.routePoints,
+                recoveryPoints: definition.recoveryPoints
+            };
+        case "enemySlots":
+            return (definition.objects ?? []).filter(isEditableEnemyObject);
+        case "wind":
+            return {
+                windZones: definition.windZones,
+                sources: (definition.objects ?? []).filter((object) => object?.kind === "wind-source")
+            };
+        case "camera":
+            return definition.cameraZones;
+        case "objectives":
+            return definition.objectives;
+        case "progression":
+            return {
+                checkpoints: definition.checkpoints,
+                exit: definition.exit,
+                gate: definition.gate,
+                nextAreaId: definition.nextAreaId,
+                routes: definition.routes
+            };
+        case "story":
+            return definition.storyTriggers;
+        case "scanner":
+            return definition.scannerGroups;
+        case "behaviorRegistry":
+            return spec?.behaviorRefs;
+        case "identity":
+            return {
+                schemaVersion: spec?.schemaVersion,
+                stage: spec?.stage,
+                editor: spec?.editor,
+                definition: {
+                    id: definition.id,
+                    sectorId: definition.sectorId,
+                    order: definition.order,
+                    name: definition.name,
+                    subtitle: definition.subtitle,
+                    cueIds: definition.cueIds
+                }
+            };
+        case "worldObjects":
+            return (definition.objects ?? []).filter(
+                (object) => !isEditableEnemyObject(object) && object?.kind !== "wind-source"
+            );
+        case "objectLayout":
+            return (definition.objects ?? []).map((object) => ({
+                id: object?.id ?? null,
+                domain:
+                    object?.kind === "wind-source"
+                        ? "wind"
+                        : isEditableEnemyObject(object)
+                          ? "enemySlots"
+                          : "worldObjects"
+            }));
+        default:
+            throw new TypeError(`area-spec-domain-unknown:${domain}`);
+    }
+}
+
+function domainEquals(leftSpec, rightSpec, domain) {
+    return (
+        JSON.stringify(canonicalizeAreaSpecV2(specDomainValue(leftSpec, domain))) ===
+        JSON.stringify(canonicalizeAreaSpecV2(specDomainValue(rightSpec, domain)))
+    );
+}
+
+function isEditableEnemyObject(object) {
+    return Boolean(object?.enemyType || object?.enemySelection || object?.kind === "sentry");
+}
+
+function placeholderArea(nextAreaId, bounds, order) {
+    const width = Math.max(256, bounds?.width ?? 256);
+    const height = Math.max(256, bounds?.height ?? 256);
+    return {
+        id: nextAreaId,
+        order,
+        bounds: { width, height },
+        entry: { id: `${nextAreaId}:entry`, x: -64, y: -32 },
+        exit: { id: `${nextAreaId}:exit`, x: 64, y: -32 },
+        nextAreaId: null,
+        surfaces: [
+            {
+                id: `${nextAreaId}:preview-floor`,
+                kind: "platform",
+                oneWay: true,
+                grappleable: true,
+                coordinateAnchor: "top-center",
+                position: { x: 0, y: 0 },
+                vertices: [
+                    { x: -96, y: 0 },
+                    { x: 96, y: 0 },
+                    { x: 96, y: 32 },
+                    { x: -96, y: 32 }
+                ]
+            }
+        ],
+        routePoints: [],
+        recoveryPoints: [],
+        checkpoints: [],
+        objects: [],
+        objectives: [],
+        windZones: [],
+        cameraZones: [],
+        gate: {
+            id: `${nextAreaId}:gate`,
+            nextAreaId: null,
+            requiredObjectiveIds: [],
+            trigger: {
+                x: -26,
+                y: -64,
+                width: 52,
+                height: 64
+            }
+        }
+    };
+}
+
+function validateRuntimeAreaSemantics(spec, issues, file) {
+    try {
+        const area = { ...createAreaDefinitionFromV2(spec), order: 1 };
+        const catalog = {
+            id: `preview:${area.id}`,
+            revision: 0,
+            areas: area.nextAreaId ? [area, placeholderArea(area.nextAreaId, area.bounds, 2)] : [area]
+        };
+        const runtime = validateAreaCatalog(catalog);
+        for (const runtimeIssue of runtime.issues) {
+            const { code, ...details } = runtimeIssue;
+            issue(issues, file, code, details);
+        }
+    } catch (cause) {
+        issue(issues, file, "runtime-area-build-invalid", {
+            message: cause instanceof Error ? cause.message : String(cause)
+        });
+    }
+}
+
+export const AREA_SPEC_EDITOR_CONTRACT = Object.freeze({
+    editableDomains: Object.freeze(EDITOR_EDITABLE_DOMAINS.map((domain) => Object.freeze({ domain, editable: true }))),
+    lockedDomains: Object.freeze(
+        [
+            "identity",
+            "objectLayout",
+            "worldObjects",
+            "objectives",
+            "progression",
+            "story",
+            "scanner",
+            "behaviorRegistry"
+        ].map((domain) => Object.freeze({ domain, editable: false }))
+    )
+});
+
+export function validateAreaSpecEditorMutation(
+    baseline,
+    candidate,
+    { file = "AREA-SPEC.v2.json", contract = AREA_SPEC_EDITOR_CONTRACT } = {}
+) {
+    const issues = [];
+    if (!isPlainObject(baseline) || !isPlainObject(candidate)) {
+        issue(issues, file, "editor-contract-spec-invalid");
+        return freezeValue({ valid: false, issues });
+    }
+    for (const { domain } of contract.lockedDomains) {
+        if (!domainEquals(baseline, candidate, domain)) {
+            issue(issues, file, "editor-read-only-changed", { domain });
+        }
+    }
+    return freezeValue({ valid: issues.length === 0, issues });
 }
 
 function validateDomainList(issues, file, values, allowed, missingCode, invalidCode) {
@@ -171,6 +462,9 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
         const code = error instanceof AreaBehaviorReferenceError ? error.code : "behavior-reference-invalid";
         issue(issues, file, code, error instanceof AreaBehaviorReferenceError ? error.details : {});
     }
+
+    if (isPlainObject(definition)) validateEditableRuntimeFields(issues, file, definition);
+    if (issues.length === 0) validateRuntimeAreaSemantics(spec, issues, file);
 
     return freezeValue({ valid: issues.length === 0, issues });
 }

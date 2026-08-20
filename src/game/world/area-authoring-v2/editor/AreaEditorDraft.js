@@ -3,6 +3,16 @@ import { validateAreaSpecV2 } from "../AreaSpecV2Validator.js";
 
 const HISTORY_LIMIT = 80;
 const MISSING = Symbol("missing-draft-value");
+const EDITABLE_POINTER_ROOTS = Object.freeze({
+    bounds: Object.freeze(["/definition/bounds"]),
+    entry: Object.freeze(["/definition/entry"]),
+    surfaces: Object.freeze(["/definition/surfaces"]),
+    anchors: Object.freeze(["/anchors"]),
+    recoveryRoute: Object.freeze(["/definition/recoveryPoints", "/definition/routePoints"]),
+    enemySlots: Object.freeze(["/definition/objects"]),
+    wind: Object.freeze(["/definition/objects", "/definition/windZones"]),
+    camera: Object.freeze(["/definition/cameraZones"])
+});
 
 function stableValue(value) {
     if (Array.isArray(value)) return value.map((entry) => stableValue(entry));
@@ -70,6 +80,19 @@ function applyChanges(spec, changes, side) {
     return next;
 }
 
+function pointerWithinRoot(pointer, root) {
+    return pointer === root || pointer.startsWith(`${root}/`);
+}
+
+function editableRoots(domain) {
+    return EDITABLE_POINTER_ROOTS[domain] ?? [];
+}
+
+function changesRespectDomain(domain, changes) {
+    const roots = editableRoots(domain);
+    return roots.length > 0 && changes.every(({ pointer }) => roots.some((root) => pointerWithinRoot(pointer, root)));
+}
+
 function cloneSelection(selection) {
     return selection ? Object.freeze({ ...selection }) : null;
 }
@@ -96,15 +119,27 @@ export class AreaEditorDraft {
         this.selection = null;
         this.history = [];
         this.redoHistory = [];
+        this.bufferedMutation = null;
+    }
+
+    currentSpec() {
+        return this.bufferedMutation?.spec ?? this.spec;
+    }
+
+    pushHistoryEntry(domain, label, changes) {
+        if (!changesRespectDomain(domain, changes)) throw new Error("editor-draft-pointer-forbidden");
+        this.history.push(Object.freeze({ domain, label: label.trim(), changes: Object.freeze(changes) }));
+        if (this.history.length > HISTORY_LIMIT) this.history.shift();
+        this.redoHistory = [];
     }
 
     snapshot() {
         const validation = this.validate();
         return Object.freeze({
-            spec: structuredClone(this.spec),
+            spec: structuredClone(this.currentSpec()),
             revision: this.serverRevision,
             selection: cloneSelection(this.selection),
-            dirty: !sameValue(this.spec, this.appliedSpec),
+            dirty: !sameValue(this.currentSpec(), this.appliedSpec),
             valid: validation.valid,
             issues: validation.issues,
             canUndo: this.history.length > 0,
@@ -113,7 +148,7 @@ export class AreaEditorDraft {
     }
 
     specification() {
-        return structuredClone(this.spec);
+        return structuredClone(this.currentSpec());
     }
 
     revision() {
@@ -131,20 +166,23 @@ export class AreaEditorDraft {
         return this.selection;
     }
 
+    selected() {
+        return cloneSelection(this.selection);
+    }
+
     mutate({ domain, label, apply } = {}) {
         if (!EDITOR_EDITABLE_DOMAINS.includes(domain)) return false;
         if (typeof label !== "string" || label.trim() === "" || typeof apply !== "function") {
             throw new TypeError("editor-draft-mutation-invalid");
         }
-        const before = structuredClone(this.spec);
-        const next = structuredClone(this.spec);
+        if (this.bufferedMutation) throw new Error("editor-draft-buffered-mutation-active");
+        const before = structuredClone(this.currentSpec());
+        const next = structuredClone(this.currentSpec());
         if (apply(next) === false) return false;
         const changes = collectChanges(before, next);
         if (changes.length === 0) return false;
         this.spec = next;
-        this.history.push(Object.freeze({ domain, label: label.trim(), changes: Object.freeze(changes) }));
-        if (this.history.length > HISTORY_LIMIT) this.history.shift();
-        this.redoHistory = [];
+        this.pushHistoryEntry(domain, label, changes);
         return true;
     }
 
@@ -170,7 +208,47 @@ export class AreaEditorDraft {
         });
     }
 
+    beginBufferedMutation({ domain, label } = {}) {
+        if (!EDITOR_EDITABLE_DOMAINS.includes(domain)) return false;
+        if (typeof label !== "string" || label.trim() === "") throw new TypeError("editor-draft-mutation-invalid");
+        if (this.bufferedMutation) throw new Error("editor-draft-buffered-mutation-active");
+        this.bufferedMutation = {
+            domain,
+            label: label.trim(),
+            baseSpec: structuredClone(this.spec),
+            spec: structuredClone(this.spec)
+        };
+        return true;
+    }
+
+    updateBufferedMutation(apply) {
+        if (!this.bufferedMutation) throw new Error("editor-draft-buffered-mutation-missing");
+        if (typeof apply !== "function") throw new TypeError("editor-draft-mutation-invalid");
+        const next = structuredClone(this.bufferedMutation.spec);
+        if (apply(next) === false) return false;
+        this.bufferedMutation.spec = next;
+        return true;
+    }
+
+    commitBufferedMutation() {
+        const entry = this.bufferedMutation;
+        if (!entry) return false;
+        this.bufferedMutation = null;
+        const changes = collectChanges(entry.baseSpec, entry.spec);
+        if (changes.length === 0) return false;
+        this.spec = entry.spec;
+        this.pushHistoryEntry(entry.domain, entry.label, changes);
+        return true;
+    }
+
+    cancelBufferedMutation() {
+        if (!this.bufferedMutation) return false;
+        this.bufferedMutation = null;
+        return true;
+    }
+
     undo() {
+        if (this.bufferedMutation) return false;
         const entry = this.history.pop();
         if (!entry) return false;
         this.spec = applyChanges(this.spec, entry.changes, "before");
@@ -179,6 +257,7 @@ export class AreaEditorDraft {
     }
 
     redo() {
+        if (this.bufferedMutation) return false;
         const entry = this.redoHistory.pop();
         if (!entry) return false;
         this.spec = applyChanges(this.spec, entry.changes, "after");
@@ -187,17 +266,20 @@ export class AreaEditorDraft {
     }
 
     validate() {
-        return this.validateFn(this.spec);
+        return this.validateFn(this.currentSpec());
     }
 
     markApplied(revision) {
+        if (this.bufferedMutation) throw new Error("editor-draft-buffered-mutation-active");
         if (!Number.isInteger(revision) || revision < this.serverRevision) {
             throw new TypeError("editor-draft-applied-revision-invalid");
         }
         const validation = this.validate();
         if (!validation.valid) return false;
+        const current = this.currentSpec();
         this.serverRevision = revision;
-        this.appliedSpec = structuredClone(this.spec);
+        this.appliedSpec = structuredClone(current);
+        this.spec = structuredClone(current);
         return true;
     }
 }

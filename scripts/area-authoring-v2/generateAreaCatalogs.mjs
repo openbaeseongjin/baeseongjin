@@ -44,6 +44,9 @@ export function collectAreaCatalogGeneration({ check = false } = {}) {
         requireGeneratedOutputs: false
     });
     const issues = [...manifestValidation.issues];
+    if (!outputPathIsSafe(manifest.catalogOutputPath ?? "")) {
+        issues.push({ code: "generated-catalog-output-path-unsafe", outputPath: manifest.catalogOutputPath ?? null });
+    }
     const specsByStageId = new Map();
     for (const entry of manifest.stageSources ?? []) {
         if (entry.source !== "generated" || !entry.sourcePath) continue;

@@ -7,6 +7,18 @@ function stableJson(value) {
     return JSON.stringify(value, null, 2).replaceAll("\n", "\r\n");
 }
 
+function directoryPath(path) {
+    return path.slice(0, path.lastIndexOf("/") + 1);
+}
+
+function fileName(path) {
+    return path.slice(path.lastIndexOf("/") + 1);
+}
+
+function generatedImportName(stageId) {
+    return `STAGE_${stageId.replaceAll(/[^A-Za-z0-9]/g, "_")}`;
+}
+
 export function generatedModulePath(entry) {
     if (typeof entry?.outputPath !== "string" || !entry.outputPath.startsWith(GENERATED_OUTPUT_ROOT)) {
         throw new TypeError("generated-output-path-invalid");
@@ -39,6 +51,35 @@ export function renderGeneratedAreaModule(spec) {
     ].join("\r\n");
 }
 
+export function renderGeneratedCatalogModule(manifest) {
+    const outputPath = generatedModulePath({ outputPath: manifest?.catalogOutputPath });
+    const outputDirectory = directoryPath(outputPath);
+    const generatedEntries = (manifest.stageSources ?? []).filter(({ source }) => source === "generated");
+    const imports = generatedEntries.map((entry) => {
+        const areaOutputPath = generatedModulePath(entry);
+        if (directoryPath(areaOutputPath) !== outputDirectory) {
+            throw new TypeError(`generated-catalog-output-directory-mismatch:${entry.stageId}`);
+        }
+        return `import { GENERATED_AREA as ${generatedImportName(entry.stageId)} } from "./${fileName(areaOutputPath)}";`;
+    });
+    const canonicalManifest = canonicalizeAreaSpecV2(manifest);
+    return [
+        "// GENERATED FILE - DO NOT EDIT",
+        "// Source: docs/bsh/scenario/AREA-CATALOG.json",
+        ...imports,
+        "",
+        "// JSON ordering and formatting are deterministic generator output.",
+        "// prettier-ignore",
+        `const MANIFEST = ${stableJson(canonicalManifest)};`,
+        "",
+        "export const GENERATED_AREA_CATALOG_MANIFEST = Object.freeze(MANIFEST);",
+        `export const GENERATED_AREAS = Object.freeze([${generatedEntries
+            .map(({ stageId }) => generatedImportName(stageId))
+            .join(", ")}]);`,
+        ""
+    ].join("\r\n");
+}
+
 export function collectGeneratedOutputs({ manifest, specsByStageId }) {
     if (!(specsByStageId instanceof Map)) throw new TypeError("generated-spec-map-invalid");
     const outputs = [];
@@ -53,5 +94,11 @@ export function collectGeneratedOutputs({ manifest, specsByStageId }) {
             Object.freeze({ outputPath: generatedModulePath(entry), content: renderGeneratedAreaModule(spec) })
         );
     }
+    outputs.push(
+        Object.freeze({
+            outputPath: generatedModulePath({ outputPath: manifest.catalogOutputPath }),
+            content: renderGeneratedCatalogModule(manifest)
+        })
+    );
     return Object.freeze(outputs);
 }

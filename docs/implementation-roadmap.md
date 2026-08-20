@@ -35,6 +35,7 @@
 - 1-1/1-2 local Player Bark data catalog·queue·causal dedupe·speaker 머리 위 타이핑 말풍선과 future party-chat audience 확장 seam
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
+- Sector 01 `1-1`·`1-7` AREA-SPEC v2 Map Editor와 manifest 기반 generated/legacy 합성 facade live cutover. Route·Enemy activation 편집, Runtime semantic Validate, read-only 보호, Drag 단일 Undo와 Apply 직전 현재 Stage source hash 확인을 포함한다. 해커톤 중 에디터는 한 번에 한 명만 사용하며 다중 사용자 mutex·crash-safe 원자 저장은 후속 범위다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
 - 생성·해결 이벤트만 공유하고 클라이언트에서 재생하는 플레이어·적 투사체
 - 네트워크 설정을 변경하지 않는 Cloudflare Quick Tunnel 임시 공유 명령

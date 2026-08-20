@@ -3,6 +3,10 @@
 Baseline:
 `ea9c4438c0f106474baa09621bfb42ae5876b86e`
 
+## AREA-SPEC v2 live cutover — 2026-08-20
+
+`docs/bsh/scenario/AREA-CATALOG.json`은 `1-7`을 `source: generated`로 선택한다. 최신 chambered S-curve route의 middle/upper turn과 final deck을 `AREA-SPEC.v2.json`에 다시 흡수했고, generated Stage와 legacy provider의 Area definition deep parity를 확인했다. 일반 seamless 싱글·멀티 Runtime은 `Sector01AreaCatalog` 합성 facade를 통해 이 generated Stage를 사용하며 Wind·Enemy·Access C·Camera 의미는 변경하지 않았다.
+
 ## MAP-PREVIEW primary route sync — 2026-08-20
 
 `MAP-PREVIEW.html`의 Lower Left→Right→Middle Right→Left→Safe Shadow→Upper Left→Right→Bypass endpoint 전체를 Runtime `routePoints`와 seamless `world.route`에 반영했다. 같은 Pulse·Access pocket·Collision은 변경하지 않았다.

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-import { SECTOR_01_AREA_CATALOG } from "../../src/game/world/areas/sector01/Sector01AreaCatalog.js";
+import { SECTOR_01_LEGACY_AREA_CATALOG } from "../../src/game/world/areas/sector01/Sector01LegacyAreaCatalog.js";
 import { validateAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
 
 const projectRoot = resolve(import.meta.dirname, "../..");
@@ -75,7 +75,7 @@ function extractAreaSpec(area, stageId) {
 }
 
 for (const candidate of selectedStages) {
-    const area = SECTOR_01_AREA_CATALOG.areas.find((entry) => entry.id === candidate.areaId);
+    const area = SECTOR_01_LEGACY_AREA_CATALOG.areas.find((entry) => entry.id === candidate.areaId);
     if (!area) {
         throw new Error(`legacy-area-missing:${candidate.areaId}`);
     }

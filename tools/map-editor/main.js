@@ -47,7 +47,8 @@ const state = {
     view: { x: 0, y: 0, zoom: 1 },
     message: { kind: "", text: "Stage를 불러오는 중입니다.", issues: [] },
     pointer: null,
-    spaceDown: false
+    spaceDown: false,
+    applyPending: false
 };
 
 function clear(node) {
@@ -71,7 +72,7 @@ function button({ text, className = "", disabled = false, onClick, title = "" })
 }
 
 function selectedMatches(entity) {
-    const selected = state.draft?.snapshot().selection;
+    const selected = state.draft?.selected();
     return selected?.domain === entity.domain && selected.id === entity.id;
 }
 
@@ -136,7 +137,14 @@ function resizeCanvas() {
 
 function currentWorldAtCanvasCenter() {
     const rect = dom.canvas.getBoundingClientRect();
-    return screenToWorld({ x: rect.width * 0.5, y: rect.height * 0.5 }, state.view);
+    const point = screenToWorld({ x: rect.width * 0.5, y: rect.height * 0.5 }, state.view);
+    const bounds = state.draft.specification().definition.bounds;
+    const insetX = Math.min(96, bounds.width * 0.5);
+    const insetY = Math.min(96, bounds.height * 0.5);
+    return {
+        x: Math.max(-bounds.width * 0.5 + insetX, Math.min(bounds.width * 0.5 - insetX, point.x)),
+        y: Math.max(-bounds.height + insetY, Math.min(-insetY, point.y))
+    };
 }
 
 function nextStableId(prefix) {
@@ -159,6 +167,21 @@ function nextStableId(prefix) {
 function replaceSpec(target, next) {
     for (const key of Object.keys(target)) delete target[key];
     Object.assign(target, next);
+}
+
+function draftSnapshot() {
+    return state.draft?.snapshot() ?? null;
+}
+
+function draftIsDirty() {
+    return Boolean(draftSnapshot()?.dirty);
+}
+
+function confirmDiscardDirtyDraft() {
+    return (
+        !draftIsDirty() ||
+        globalThis.confirm("Apply되지 않은 Draft 변경사항이 있습니다. 현재 변경을 버리고 계속하시겠습니까?")
+    );
 }
 
 function applyMutation({ domain, label, apply }) {
@@ -209,7 +232,7 @@ function addPreset(kind) {
         });
         state.draft.select({ domain: "anchors", id, kind: "anchor" });
     }
-    if (kind === "route") {
+    if (kind === "recovery") {
         const id = nextStableId("recovery");
         applyMutation({
             domain: "recoveryRoute",
@@ -220,6 +243,18 @@ function addPreset(kind) {
             }
         });
         state.draft.select({ domain: "recoveryRoute", id, kind: "recovery" });
+    }
+    if (kind === "route") {
+        const id = nextStableId("route");
+        applyMutation({
+            domain: "recoveryRoute",
+            label: "Add route point",
+            apply: (spec) => {
+                spec.definition.routePoints.push({ id, x: point.x, y: point.y });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "recoveryRoute", id, kind: "route" });
     }
     if (kind === "wind") {
         const id = nextStableId("wind");
@@ -279,8 +314,14 @@ function renderLayers() {
         const heading = element("div", { className: "panel-heading", text: label });
         const count = all.filter((entry) => entry.domain === domain).length;
         heading.append(element("span", { className: "layer-badge", text: String(count) }));
-        if (preset)
+        if (domain === "recoveryRoute") {
+            heading.append(
+                button({ text: "+ Recovery", className: "add-button", onClick: () => addPreset("recovery") })
+            );
+            heading.append(button({ text: "+ Route", className: "add-button", onClick: () => addPreset("route") }));
+        } else if (preset) {
             heading.append(button({ text: "+ Add", className: "add-button", onClick: () => addPreset(preset) }));
+        }
         group.append(heading);
         const list = element("div", { className: "layer-list" });
         for (const entry of all.filter((candidate) => candidate.domain === domain)) {
@@ -356,18 +397,16 @@ function replacePointer(domain, label, pointer, value) {
     }
 }
 
-function updateEntityPosition(selected, nextPoint) {
+function updateEntityPosition(selected, nextPoint, { buffered = false } = {}) {
     const current = entities().find((entry) => entry.domain === selected.domain && entry.id === selected.id);
     if (!current) return;
     const delta = { x: nextPoint.x - current.point.x, y: nextPoint.y - current.point.y };
-    applyMutation({
-        domain: selected.domain,
-        label: "Move map object",
-        apply: (spec) => {
-            replaceSpec(spec, translateEditorEntity(spec, current, delta));
-            return true;
-        }
-    });
+    const apply = (spec) => {
+        replaceSpec(spec, translateEditorEntity(spec, current, delta));
+        return true;
+    };
+    if (buffered) return state.draft.updateBufferedMutation(apply);
+    applyMutation({ domain: selected.domain, label: "Move map object", apply });
 }
 
 function renderInspector() {
@@ -522,6 +561,90 @@ function renderInspector() {
                     });
                 }
             });
+            if (enemy.activationSpec) {
+                appendField(fields, {
+                    label: "ACTIVATION ANCHOR",
+                    type: "text",
+                    value: enemy.activationSpec.anchor ?? "center",
+                    onChange: (value) =>
+                        replacePointer(
+                            "enemySlots",
+                            "Set activation anchor",
+                            `${entity.path}/activationSpec/anchor`,
+                            value
+                        )
+                });
+                appendField(fields, {
+                    label: "ACTIVATION OFFSET X",
+                    value: enemy.activationSpec.offset?.x ?? 0,
+                    onChange: (value) =>
+                        replacePointer(
+                            "enemySlots",
+                            "Set activation offset x",
+                            `${entity.path}/activationSpec/offset/x`,
+                            value
+                        )
+                });
+                appendField(fields, {
+                    label: "ACTIVATION OFFSET Y",
+                    value: enemy.activationSpec.offset?.y ?? 0,
+                    onChange: (value) =>
+                        replacePointer(
+                            "enemySlots",
+                            "Set activation offset y",
+                            `${entity.path}/activationSpec/offset/y`,
+                            value
+                        )
+                });
+                appendField(fields, {
+                    label: "ACTIVATION WIDTH",
+                    value: enemy.activationSpec.size?.width ?? 0,
+                    onChange: (value) =>
+                        replacePointer(
+                            "enemySlots",
+                            "Set activation width",
+                            `${entity.path}/activationSpec/size/width`,
+                            value
+                        )
+                });
+                appendField(fields, {
+                    label: "ACTIVATION HEIGHT",
+                    value: enemy.activationSpec.size?.height ?? 0,
+                    onChange: (value) =>
+                        replacePointer(
+                            "enemySlots",
+                            "Set activation height",
+                            `${entity.path}/activationSpec/size/height`,
+                            value
+                        )
+                });
+            } else if (enemy.activation) {
+                for (const [label, key] of [
+                    ["ACTIVATION X", "x"],
+                    ["ACTIVATION Y", "y"],
+                    ["ACTIVATION WIDTH", "width"],
+                    ["ACTIVATION HEIGHT", "height"]
+                ]) {
+                    appendField(fields, {
+                        label,
+                        value: enemy.activation[key],
+                        onChange: (value) =>
+                            replacePointer(
+                                "enemySlots",
+                                `Set activation ${key}`,
+                                `${entity.path}/activation/${key}`,
+                                value
+                            )
+                    });
+                }
+            } else {
+                fields.append(
+                    element("p", {
+                        className: "inspector-subtitle",
+                        text: "이 Enemy slot에는 activation bounds/spec가 없습니다."
+                    })
+                );
+            }
         }
     }
     dom.inspector.append(fields);
@@ -568,7 +691,7 @@ function drawCanvas() {
     context.clearRect(0, 0, rect.width, rect.height);
     if (!state.draft) return;
     const spec = state.draft.specification();
-    const selected = state.draft.snapshot().selection;
+    const selected = state.draft.selected();
     const isSelected = (domain, id) => selected?.domain === domain && selected.id === id;
     const bounds = spec.definition.bounds;
     context.setLineDash([7, 6]);
@@ -608,6 +731,11 @@ function drawCanvas() {
         drawMarker(point, "#b4ced7", "diamond", isSelected("recoveryRoute", point.id));
     for (const point of spec.definition.recoveryPoints)
         drawMarker(point, "#b4ced7", "square", isSelected("recoveryRoute", point.id));
+    for (const enemy of entities().filter((entry) => entry.domain === "enemySlots" && entry.bounds)) {
+        context.setLineDash([6, 4]);
+        drawRect(enemy.bounds, isSelected("enemySlots", enemy.id) ? "#ffcb78" : "#8f6a31");
+        context.setLineDash([]);
+    }
     for (const object of spec.definition.objects) {
         if (!object.position) continue;
         if (object.kind === "wind-source")
@@ -637,7 +765,7 @@ function drawCanvas() {
 }
 
 function renderStatus() {
-    const snapshot = state.draft?.snapshot();
+    const snapshot = draftSnapshot();
     const validation = snapshot
         ? `${snapshot.valid ? "VALID" : "INVALID"} · ${snapshot.issues.length} issues`
         : "LOADING";
@@ -648,11 +776,12 @@ function renderStatus() {
         .join(", ");
     dom.status.textContent = [dirty, validation, state.message.text, issues].filter(Boolean).join("  /  ");
     dom.status.className = `draft-status${state.message.kind ? ` is-${state.message.kind}` : ""}`;
-    dom.undo.disabled = !snapshot?.canUndo;
-    dom.redo.disabled = !snapshot?.canRedo;
-    dom.validate.disabled = !snapshot;
-    dom.apply.disabled = !snapshot || !snapshot.valid || !snapshot.dirty;
-    dom.preview.disabled = !snapshot || snapshot.dirty;
+    dom.stageSelect.disabled = state.applyPending;
+    dom.undo.disabled = state.applyPending || !snapshot?.canUndo;
+    dom.redo.disabled = state.applyPending || !snapshot?.canRedo;
+    dom.validate.disabled = state.applyPending || !snapshot;
+    dom.apply.disabled = state.applyPending || !snapshot || !snapshot.valid || !snapshot.dirty;
+    dom.preview.disabled = state.applyPending || !snapshot || snapshot.dirty;
 }
 
 function render() {
@@ -699,7 +828,15 @@ async function initialize() {
     }
 }
 
-dom.stageSelect.addEventListener("change", () => loadStage(dom.stageSelect.value));
+dom.stageSelect.addEventListener("change", () => {
+    const nextStageId = dom.stageSelect.value;
+    if (nextStageId === state.stageId) return;
+    if (!confirmDiscardDirtyDraft()) {
+        dom.stageSelect.value = state.stageId ?? nextStageId;
+        return;
+    }
+    loadStage(nextStageId);
+});
 dom.undo.addEventListener("click", () => {
     if (state.draft.undo()) {
         setMessage("dirty", "이전 Draft 변경으로 되돌렸습니다.");
@@ -726,8 +863,12 @@ dom.validate.addEventListener("click", async () => {
     }
 });
 dom.apply.addEventListener("click", async () => {
+    if (state.applyPending) return;
     const local = state.draft.validate();
     if (!local.valid) return setMessage("invalid", "Apply 전에 v2 오류를 해결하세요.", local.issues);
+    state.applyPending = true;
+    setMessage("valid", "Apply 요청을 전송 중입니다.");
+    renderStatus();
     try {
         const payload = await api(stageEndpoint(state.stageId), {
             method: "PUT",
@@ -740,6 +881,9 @@ dom.apply.addEventListener("click", async () => {
         render();
     } catch (cause) {
         errorMessage(cause);
+    } finally {
+        state.applyPending = false;
+        renderStatus();
     }
 });
 dom.preview.addEventListener("click", () => {
@@ -777,7 +921,12 @@ dom.canvas.addEventListener("pointerdown", (event) => {
     } else {
         const selected = hitTestEditorEntity(entities(), world, 28 / state.view.zoom);
         state.draft.select(selected);
-        state.pointer = selected && selected.domain !== "bounds" ? { mode: "drag", selected, world } : null;
+        if (selected && selected.domain !== "bounds") {
+            state.draft.beginBufferedMutation({ domain: selected.domain, label: "Move map object" });
+            state.pointer = { mode: "drag", selected, world };
+        } else {
+            state.pointer = null;
+        }
         render();
     }
     dom.canvas.setPointerCapture(event.pointerId);
@@ -796,18 +945,34 @@ dom.canvas.addEventListener("pointermove", (event) => {
     const world = screenToWorld(screen, state.view);
     const delta = { x: world.x - state.pointer.world.x, y: world.y - state.pointer.world.y };
     if (Math.abs(delta.x) + Math.abs(delta.y) < 0.01) return;
-    updateEntityPosition(state.pointer.selected, {
-        x: state.pointer.selected.point.x + delta.x,
-        y: state.pointer.selected.point.y + delta.y
-    });
+    updateEntityPosition(
+        state.pointer.selected,
+        {
+            x: state.pointer.selected.point.x + delta.x,
+            y: state.pointer.selected.point.y + delta.y
+        },
+        { buffered: true }
+    );
     state.pointer.selected = entities().find(
         (entry) => entry.domain === state.pointer.selected.domain && entry.id === state.pointer.selected.id
     );
     state.pointer.world = world;
+    drawCanvas();
 });
 
 function finishPointer(event) {
     if (!state.pointer) return;
+    if (state.pointer.mode === "drag") {
+        try {
+            if (event.type === "pointercancel") state.draft.cancelBufferedMutation();
+            else if (state.draft.commitBufferedMutation())
+                setMessage("dirty", "Draft 변경사항이 있습니다. Validate 후 Apply하세요.");
+        } catch (cause) {
+            state.draft.cancelBufferedMutation();
+            errorMessage(cause);
+        }
+        render();
+    }
     state.pointer = null;
     dom.canvas.classList.remove("is-panning");
     if (dom.canvas.hasPointerCapture(event.pointerId)) dom.canvas.releasePointerCapture(event.pointerId);
@@ -824,6 +989,11 @@ globalThis.addEventListener("keyup", (event) => {
 });
 globalThis.addEventListener("resize", () => {
     if (state.draft) drawCanvas();
+});
+globalThis.addEventListener("beforeunload", (event) => {
+    if (!draftIsDirty()) return;
+    event.preventDefault();
+    event.returnValue = "";
 });
 
 await initialize();
