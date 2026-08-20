@@ -40,7 +40,6 @@ import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPlayerImpactStateDigest } from "../network/PlayerImpactClaim.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
-import { CircleCollider } from "../physics/colliders/CircleCollider.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
@@ -1243,6 +1242,7 @@ export class GameSimulation {
                 owner: player,
                 ropeConfig: effectiveRopeConfig,
                 surfaces: this.activeCollisionSurfaces,
+                collisionActors: this.enemies.filter(({ health }) => health > 0),
                 canAttachToSurface: this.#accessScanPredicate(),
                 getRopeInputModifiers: () => player.foundation.ropeInputModifiers(effectiveRopeConfig),
                 onAttach: () => {},
@@ -1399,19 +1399,8 @@ export class GameSimulation {
             const state = enemy.knockbackSnapshot();
             if (!state) continue;
             const previousPosition = enemy.position.clone();
-            enemy.advanceImpactKnockback(dt);
-            const movedPosition = enemy.position.clone();
-            const velocity = new Vector2(
-                state.direction.x * (state.distance / state.durationSeconds),
-                state.direction.y * (state.distance / state.durationSeconds)
-            );
-            new CircleCollider({ radius: enemy.radius }).resolveSurfaces({
-                position: enemy.position,
-                velocity,
-                surfaces: this.activeCollisionSurfaces,
-                previousPosition
-            });
-            const collided = enemy.position.distanceTo(movedPosition) > 0.01;
+            const movement = enemy.advanceImpactKnockback(dt, this.activeCollisionSurfaces);
+            const collided = movement.collided;
             if (
                 !emitWallImpacts ||
                 !collided ||

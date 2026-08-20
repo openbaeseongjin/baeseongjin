@@ -29,4 +29,16 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         this.respawnAnchorId = respawnAnchorId;
         this.calibrationVerifiedSourceIds = [];
     }
+
+    get position() {
+        return this.physics.position;
+    }
+
+    get velocity() {
+        return this.physics.velocity;
+    }
+
+    get collider() {
+        return this.physics.collider;
+    }
 }

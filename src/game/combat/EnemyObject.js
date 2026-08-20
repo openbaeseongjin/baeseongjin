@@ -1,6 +1,8 @@
 import { SimulationDrivenObject } from "../objects/SimulationDrivenObject.js";
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
 import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
+import { CircleCollider } from "../physics/colliders/CircleCollider.js";
+import { withSurfacePhysics } from "../physics/SurfacePhysicsMixin.js";
 import { selectNearestPlayer } from "./CombatTargeting.js";
 import { ENEMY_BEHAVIOR_CAPABILITY } from "./EnemyBehaviors.js";
 import { advanceEnemyPatrol, createEnemyPatrolState, restoreEnemyPatrolState } from "./EnemyPatrol.js";
@@ -128,9 +130,11 @@ function consumeStateTime(enemy, remainingDt) {
 const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
     id: "enemy-weapon",
     order: 10,
-    apply({ targets, projectiles, registry, config, surfaces = [], dt }) {
+    apply({ targets, collisionActors = targets, projectiles, registry, config, surfaces = [], dt }) {
+        this.beginSurfacePhysicsStep();
         if (this.rules.includes("no-projectile-attack")) {
             resetAttack(this);
+            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors);
             return null;
         }
         const target = selectLockedTarget(
@@ -143,6 +147,7 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
         if (!target) {
             resetAttack(this);
             advanceEnemyPatrol(this, dt);
+            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors);
             return null;
         }
         this.lockedTargetId = target.id;
@@ -212,11 +217,14 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
             }
             break;
         }
+        this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors);
         return spawnedProjectile;
     }
 });
 
-export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulation(SimulationDrivenObject)) {
+export class EnemyObject extends withSurfacePhysics(
+    withEnemyRenderSnapshot(withEnemyWeaponSimulation(SimulationDrivenObject))
+) {
     constructor({
         id,
         position,
@@ -242,7 +250,11 @@ export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulati
         knockbackState = null
     }) {
         super({ id });
-        this.position = position;
+        this.initializeSurfacePhysics({
+            position,
+            velocity: new Vector2(),
+            collider: new CircleCollider({ radius })
+        });
         this.level = level;
         this.areaId = areaId;
         this.objectId = objectId;
@@ -284,7 +296,10 @@ export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulati
             this.registerSimulationCapability({
                 id: ENEMY_BEHAVIOR_CAPABILITY,
                 order: 5,
-                apply: (context) => behavior.advance(this, context)
+                apply: (context) => {
+                    this.beginSurfacePhysicsStep();
+                    return behavior.advance(this, context);
+                }
             });
         }
     }
@@ -297,8 +312,21 @@ export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulati
         return this.attackStateController.remainingSeconds;
     }
 
+    get lifeState() {
+        return this.health > 0 ? "active" : "inactive";
+    }
+
     enemyBehaviorSnapshot() {
         return this.behavior?.snapshot() ?? null;
+    }
+
+    advanceEnemyPhysicsStep(dt, surfaces, collisionActors = []) {
+        const resolution = this.advanceSurfacePhysics(dt, surfaces, {
+            actorId: this.id,
+            actors: collisionActors
+        });
+        this.velocity.set(0, 0);
+        return resolution;
     }
 
     restoreNetworkState(state) {
@@ -317,6 +345,8 @@ export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulati
             assertFinite(state.position?.x, "enemy.position.x"),
             assertFinite(state.position?.y, "enemy.position.y")
         );
+        this.velocity.set(0, 0);
+        this.surfacePhysicsStepPending = false;
         this.health = assertFinite(state.health, "enemy.health", { minimum: 0 });
         this.maxHealth = assertFinite(state.maxHealth, "enemy.maxHealth", { minimum: 0, exclusiveMinimum: true });
         this.lockedTargetId = state.lockedTargetId ?? null;
@@ -360,16 +390,18 @@ export class EnemyObject extends withEnemyRenderSnapshot(withEnemyWeaponSimulati
         return true;
     }
 
-    advanceImpactKnockback(dt) {
-        if (!this.knockbackState) return false;
+    advanceImpactKnockback(dt, surfaces = []) {
+        if (!this.knockbackState) return Object.freeze({ moved: false, collided: false });
         const stepDt = assertFinite(dt, "dt", { minimum: 0 });
-        if (stepDt <= 0) return false;
+        if (stepDt <= 0) return Object.freeze({ moved: false, collided: false });
         const state = this.knockbackState;
         const appliedSeconds = Math.min(stepDt, state.remainingSeconds);
         const speed = state.distance / state.durationSeconds;
-        this.position.add(state.direction.clone().scale(speed * appliedSeconds));
+        this.beginSurfacePhysicsStep();
+        this.queueSurfaceDisplacement(state.direction.clone().scale(speed * appliedSeconds), appliedSeconds);
+        const resolution = this.advanceEnemyPhysicsStep(appliedSeconds, surfaces);
         state.remainingSeconds = Math.max(0, state.remainingSeconds - appliedSeconds);
         if (state.remainingSeconds <= 0) this.knockbackState = null;
-        return true;
+        return Object.freeze({ moved: true, collided: resolution.collisionNormals.length > 0 });
     }
 }

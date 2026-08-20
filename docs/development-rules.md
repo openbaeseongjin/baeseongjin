@@ -241,6 +241,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
 - 시나리오 문서용 이미지는 `bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`의 생성 전 Runtime 확인, 대표 Camera Shot, Player 상대 크기, 한 줄 live Rope, 정확한 오브젝트 수와 상태 검수를 통과해야 한다. 전체 경로·좌표의 권위는 Approved Blockout이 소유하지만 선택한 Camera Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 이미지에서도 보존한다. 생성 구도를 위해 Gameplay Geometry를 이동·확대·병합하지 않으며 `RETIRED`·`PENDING REGENERATION` 이미지를 다음 생성의 Style Anchor로 연쇄 사용하지 않는다.
 - collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
+- Player와 Enemy 같은 이동 actor의 controller·행동·Patrol은 Runtime 좌표를 직접 변경하지 않는다. 속도·displacement intent를 공용 surface physics step에 전달하고, 그 step만 위치 적분, 활성 collision surface와 Player↔Player·Player↔Enemy body 해결을 수행한다. spawn·reset·권위 snapshot restore는 이동이 아닌 명시적 상태 전이로 분리한다.
 - 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 진단 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
 - 렌더러 변경은 실제 브라우저에서 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 확인한다.
 - 멀티플레이 파티클·VFX·화면 흔들림은 권위 판정 이벤트를 받아 각 클라이언트가 로컬로 생성·진행한다. 서버 시뮬레이션과 네트워크 스냅샷에 표현 객체나 효과 수명을 넣지 않는다.

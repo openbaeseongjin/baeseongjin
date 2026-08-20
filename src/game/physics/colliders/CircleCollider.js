@@ -183,6 +183,49 @@ export class CircleCollider {
     resolveSurfaces({ position, velocity, surfaces, previousPosition }) {
         let isGrounded = false;
         const collisionNormals = [];
+        const movementX = position.x - previousPosition.x;
+        const movementY = position.y - previousPosition.y;
+        const movementDistance = Math.hypot(movementX, movementY);
+        if (movementDistance > SWEEP_EPSILON) {
+            const direction = { x: movementX / movementDistance, y: movementY / movementDistance };
+            let firstHit = null;
+            let hitSurface = null;
+            for (const surface of surfaces) {
+                if (surface.collision === false) continue;
+                const hit = surface.oneWay
+                    ? firstOneWayHitDistance(previousPosition, direction, movementDistance, this.radius, surface)
+                    : firstSolidHitDistance(previousPosition, direction, movementDistance, this.radius, surface);
+                if (hit !== null && (firstHit === null || hit < firstHit)) {
+                    firstHit = hit;
+                    hitSurface = surface;
+                }
+            }
+            if (firstHit !== null && hitSurface) {
+                const safeDistance = Math.max(0, firstHit - SWEEP_SAFETY_MARGIN);
+                position.set(
+                    previousPosition.x + direction.x * safeDistance,
+                    previousPosition.y + direction.y * safeDistance
+                );
+                const closest = hitSurface.oneWay ? null : closestPointOnPolygon(position, hitSurface.vertices);
+                let normalX = hitSurface.oneWay ? 0 : position.x - closest.x;
+                let normalY = hitSurface.oneWay ? -1 : position.y - closest.y;
+                const normalLength = Math.hypot(normalX, normalY);
+                if (normalLength > SWEEP_EPSILON) {
+                    normalX /= normalLength;
+                    normalY /= normalLength;
+                } else {
+                    normalX = -direction.x;
+                    normalY = -direction.y;
+                }
+                const inwardSpeed = velocity.x * normalX + velocity.y * normalY;
+                if (inwardSpeed < 0) {
+                    velocity.x -= normalX * inwardSpeed;
+                    velocity.y -= normalY * inwardSpeed;
+                }
+                if (normalY < -0.55) isGrounded = true;
+                collisionNormals.push(Object.freeze({ x: normalX, y: normalY }));
+            }
+        }
         for (let pass = 0; pass < 3; pass += 1) {
             let resolved = false;
             for (const surface of surfaces) {
@@ -233,7 +276,9 @@ export class CircleCollider {
 
     resolveActor({ actorId, position, velocity, other, isGrounded }) {
         if (!other?.position || other.id === actorId) return Object.freeze({ collided: false, isGrounded });
-        const otherCollider = assertColliderSnapshot(other.collider);
+        const otherCollider = assertColliderSnapshot(
+            typeof other.collider?.snapshot === "function" ? other.collider.snapshot() : other.collider
+        );
         if (otherCollider.type !== "circle") {
             throw new Error(`CircleCollider cannot resolve actor collider '${otherCollider.type}'`);
         }
