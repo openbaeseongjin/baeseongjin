@@ -299,7 +299,7 @@ REV 1.1부터는 `runtimeLandmarks` 자신도 §3 base referencable set(실제 `
 
 `type`은 다음 enum으로 제한한다: `schema | geometry | traversal | runtime | story | camera | multiplayer | regression`.
 
-`automation`은 `AUTOMATED`(스크립트/테스트로 검증 가능) 또는 `MANUAL`(인간 Playtest 필요)만 허용한다.
+`automation`은 `AUTOMATED`(validator로 검증 가능) 또는 `MANUAL`(인간 Playtest 필요)만 허용한다.
 
 ## 12. Rope/Player/Combat 공통 수치 — 중복 기록 금지 재확인
 
@@ -324,12 +324,11 @@ Canonical landmark ID를 JSON에 수동으로 중복 기록하지 않는다 (§2
 ```bash
 npm run validate:area-specs   # AREA-SPEC.json 단독 스키마/참조 검증
 npm run check                 # syntax -> area-spec -> scenario-integration 순으로 실행
-npm test                      # tests/areaSpecValidator.mjs, tests/scenarioIntegrationStaleCheck.mjs 포함 전체 회귀
 ```
 
 검증기는 **AREA-SPEC.json이 스스로 일관된지**만 확인한다. AREA-SPEC.json이 실제 `SectorXXAreaCatalog.js`/Seamless Sector Runtime과 일치하는지는 사람이 `PRODUCTION-ALIGNMENT.md`에서 판정한다 — 두 계층을 자동으로 동기화하는 codegen은 이번 REV의 범위가 아니다.
 
-`docs/bsh/scenario/**/AREA-SPEC.json`의 변경은 `scripts/checkScenarioIntegration.mjs`의 `scenario-source-sha256`에 포함된다. `src/game/world/sectors/**`(및 `SectorDefinitionValidator.js`/`SectorProgressController.js`/`SectorProgressState.js`)의 변경은 별도의 `authored-sector-sha256`에 포함된다. 두 fingerprint는 서로 독립적이다 — AREA-SPEC만 바뀌었는데 `authored-sector-sha256`만 확인하거나, Sector Runtime만 바뀌었는데 `scenario-source-sha256`만 확인해서 stale-check를 통과시키는 상황은 금지한다. Regression test: [`tests/scenarioIntegrationStaleCheck.mjs`](../../../tests/scenarioIntegrationStaleCheck.mjs).
+`docs/bsh/scenario/**/AREA-SPEC.json`의 변경은 `scripts/checkScenarioIntegration.mjs`의 `scenario-source-sha256`에 포함된다. `src/game/world/sectors/**`(및 `SectorDefinitionValidator.js`/`SectorProgressController.js`/`SectorProgressState.js`)의 변경은 별도의 `authored-sector-sha256`에 포함된다. 두 fingerprint는 서로 독립적이다 — AREA-SPEC만 바뀌었는데 `authored-sector-sha256`만 확인하거나, Sector Runtime만 바뀌었는데 `scenario-source-sha256`만 확인해서 stale-check를 통과시키는 상황은 금지한다.
 
 ## 15. 마이그레이션 범위
 

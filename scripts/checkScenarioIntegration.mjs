@@ -218,9 +218,7 @@ function main() {
     );
 }
 
-// This module is imported by tests/scenarioIntegrationStaleCheck.mjs (regression coverage for the
-// AREA-SPEC / Sector-runtime fingerprint independence — see item 6/11 of the PR #630 follow-up), so the
-// CLI body must not run on import — only when invoked directly, same convention as the other scripts/*.mjs.
+// Keep the CLI body behind a direct-entry guard so the checkpoint logic remains reusable by tooling.
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
     main();
 }

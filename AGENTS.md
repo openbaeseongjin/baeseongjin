@@ -8,10 +8,10 @@
 4. 에이전트의 추정은 사용자 결정처럼 기록하지 않는다. 일회성 실행 요청, 임시 디버깅 값, 비밀 정보도 영구 규칙으로 승격하지 않는다.
 5. 완전히 반영되었거나 다른 결정으로 대체된 항목만 대체 관계를 보존한 채 `docs/decision-history.md`로 이동한다.
 6. 코드·설정 변경을 끝내기 전에 이번 대화의 명시적 결정이 핸드오프와 기준 문서에 반영됐는지 검색하고, 누락된 문서를 같은 Issue와 커밋에 포함한다.
-7. 자동 CI를 전제로 하지 않는다. 최종 candidate의 단일 검증 소유자는 병합 전에 `npm test`, `npm run check`, `npm run format:check`를 각각 한 번 통과시키고 ledger에 base SHA·diff fingerprint와 함께 기록한다. 같은 candidate의 fresh PASS를 executor·부모·verifier가 반복하지 않는다. 관련 입력이 바뀌면 focused test를 먼저 실행하고 필요한 final-suite 항목만 무효화한다. 화면 변경은 브라우저에서 직접 검증한 뒤 Pull Request에 결과를 기록한다. 버전 또는 멀티플레이 서버 코드가 바뀐 작업은 PR 병합만으로 완료 처리하지 않고 `docs/version-management.md`의 기존 필수 변경·완료 절차까지 수행한다.
+7. 자동 CI를 전제로 하지 않는다. 최종 candidate의 단일 검증 소유자는 병합 전에 `npm run check`, `npm run format:check`, `git diff --check`를 각각 한 번 통과시키고 ledger에 base SHA·diff fingerprint와 함께 기록한다. 자동 테스트 suite는 유지하지 않으며 사용자가 해당 작업에서 명시적으로 요청한 테스트만 추가·실행한다. 같은 candidate의 fresh PASS를 executor·부모·verifier가 반복하지 않는다. 화면 변경은 브라우저에서 직접 검증한 뒤 Pull Request에 결과를 기록한다. 버전 또는 멀티플레이 서버 코드가 바뀐 작업은 PR 병합만으로 완료 처리하지 않고 `docs/version-management.md`의 기존 필수 변경·완료 절차까지 수행한다.
 8. 독립 작업은 기존 Git object database를 공유하는 별도 worktree와 branch를 기본으로 사용한다. 같은 저장소라는 이유로 직렬 대기하지 않으며, worktree를 만들 수 없거나 실제 같은 hunk·public contract에 순서 의존성이 있을 때만 shared checkout을 직렬화한다. 독립 검증 lane은 준비되는 대로 한 wave에서 병렬 실행한다.
-9. 같은 증상군의 버그가 이전 수정 뒤 다시 요청되면 새 예외 처리를 추가하기 전에 반복 유사 버그 모순 감사를 수행한다. 이전 수정 이력과 대체된 결정, 같은 의미를 소유하는 상태 필드·controller·protocol 중복, client/server와 collision/renderer predicate 차이를 먼저 확인하고 근본 불변식을 회귀 테스트로 고정한다. 상세 절차는 `docs/development-rules.md`의 **반복 유사 버그 모순 감사**를 따른다.
-10. 에이전트는 보조 패치 작성자가 아니라 현재 작업의 메인 개발자로서 결과 전체를 책임진다. 최소 diff 자체를 목표로 증상을 덮지 않고, 사용자 의도를 만족하는 단일 권위·공개 계약·모든 호출자·멀티 동기화·표현·테스트·문서·migration까지 필요한 범위를 완결한다. 단, 책임 있는 완결성과 무관한 기능 추가나 전면 재작성은 만들지 않는다.
+9. 같은 증상군의 버그가 이전 수정 뒤 다시 요청되면 새 예외 처리를 추가하기 전에 반복 유사 버그 모순 감사를 수행한다. 이전 수정 이력과 대체된 결정, 같은 의미를 소유하는 상태 필드·controller·protocol 중복, client/server와 collision/renderer predicate 차이를 먼저 확인하고 재현 가능한 시뮬레이션·validator·수동 검증으로 근본 불변식을 확인한다. 상세 절차는 `docs/development-rules.md`의 **반복 유사 버그 모순 감사**를 따른다.
+10. 에이전트는 보조 패치 작성자가 아니라 현재 작업의 메인 개발자로서 결과 전체를 책임진다. 최소 diff 자체를 목표로 증상을 덮지 않고, 사용자 의도를 만족하는 단일 권위·공개 계약·모든 호출자·멀티 동기화·표현·문서·migration까지 필요한 범위를 완결한다. 자동 테스트는 사용자가 명시적으로 요청한 경우에만 범위에 포함한다. 단, 책임 있는 완결성과 무관한 기능 추가나 전면 재작성은 만들지 않는다.
 
 ## Scenario planning and integration
 
@@ -25,7 +25,7 @@
 - PixelLab·SpriteCook의 원본 export 형식을 런타임 계약으로 사용하지 않는다. 도구별 입력은 여러 PNG atlas와 `sprite-manifest.json`으로 정규화하고 renderer·gameplay에 도구별 분기를 추가하지 않는다.
 - 새 player runtime 리소스는 `assets/runtime/characters/fixtures/player-multi-atlas/sprite-manifest.json`을 공개 계약으로 사용하고 `assets/runtime/characters/player-production-template/`에서 시작해 `npm run validate:sprite-assets -- <directory>`를 통과시킨다. 문서 예제를 기억으로 다시 쓰거나 별도 manifest 변형을 만들지 않는다.
 - 스프라이트 작업 결과에는 생성·변환한 파일 경로, 사용 도구와 원본 형식, 실제 validator 결과를 기록한다. collider·hitbox·피해량·물리 설정은 스프라이트 manifest에 넣지 않는다.
-- `assets/runtime/characters/sprite-manifest.schema.json`, fixture manifest, `PlayerSpriteManifest.js`와 validator는 하나의 공개 계약이다. 어느 하나를 변경하면 나머지와 `docs/sprite-asset-format.md`를 같은 변경에서 갱신하고 multi-atlas 회귀 테스트를 실행한다.
+- `assets/runtime/characters/sprite-manifest.schema.json`, fixture manifest, `PlayerSpriteManifest.js`와 validator는 하나의 공개 계약이다. 어느 하나를 변경하면 나머지와 `docs/sprite-asset-format.md`를 같은 변경에서 갱신하고 multi-atlas validator를 실행한다.
 
 ## Environment asset work
 

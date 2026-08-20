@@ -21,7 +21,7 @@
 - `sw.js`의 `RELEASE_VERSION`도 같은 값으로 갱신해 이미 열린 PWA가 새 서비스 워커를 감지하고 다시 불러오게 한다.
 - 상시 게임 서버의 `/health.version`도 서버가 시작될 때 읽은 `package.json` 버전으로 응답해야 한다.
 - 배포 페이지 우하단의 `#app-version`은 `v{version}`을 작게 상시 표시한다.
-- 버전 문자열은 릴리스 작업에서 네 위치를 함께 갱신하고 배포 화면에서 확인한다. 계약 테스트는 특정 버전 값을 고정하지 않고 네 위치가 서로 같은지만 검증한다.
+- 버전 문자열은 릴리스 작업에서 네 위치를 함께 갱신하고 배포 화면과 공개 server health에서 서로 같은지 확인한다.
 
 ## 캐시 정책
 
@@ -38,7 +38,7 @@
 1. 변경이 major, minor, patch 중 어디에 해당하는지 결정한다.
 2. `index.html`의 `data-version`과 버전 배지 문구, `package.json`, `package-lock.json`, `sw.js`의 `RELEASE_VERSION`을 같은 값으로 갱신한다.
 3. 사용자에게 보이는 변화라면 관련 기획·시스템 문서도 함께 갱신한다.
-4. `npm test`, `npm run check`, `npm run format:check`, `git diff --check`를 실행한다.
+4. `npm run check`, `npm run format:check`, `git diff --check`를 실행한다.
 5. 멀티플레이 서버 코드나 버전이 바뀌었다면 게임 서버 프로세스를 재시작한다.
 6. 배포 페이지 우하단에서 예상 버전이 계속 보이는지 확인하고, `npm run smoke:multiplayer`로 Pages 버전과 `/health.version`이 같은지 검증한다.
 

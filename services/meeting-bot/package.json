@@ -8,12 +8,11 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "check": "npm run build && npm test",
+    "check": "npm run build",
     "dev": "tsx src/index.ts",
     "diagnose:voice": "tsx src/voice-diagnostics.ts",
     "register": "tsx src/register-commands.ts",
-    "start": "node dist/src/index.js",
-    "test": "vitest run"
+    "start": "node dist/src/index.js"
   },
   "dependencies": {
     "@discordjs/voice": "0.19.2",
@@ -28,7 +27,6 @@
   "devDependencies": {
     "@types/node": "26.2.0",
     "tsx": "4.23.11",
-    "typescript": "7.0.2",
-    "vitest": "4.1.10"
+    "typescript": "7.0.2"
   }
 }

@@ -43,7 +43,7 @@
 8. 저장 지점은 Player별 Stage 세이브 포인트다. 싱글·멀티와 현재 접속 인원 수에 관계없이 각 Player는 자기가 마지막으로 접촉한 지점에서 부활하며 다른 Player의 저장 위치를 공유하지 않는다. Timer·Purge가 미정인 동안 전원 실패도 current Sector baseline을 초기화하지 않는다.
 9. 각 Node는 `runSeed + stablePlayerId + selectionIndex`로 서로 다른 호환 카드 3장을 제시하며 reroll·rarity·동일 Player 카드 중복은 없다.
 10. Augment 선택은 공통 피드백으로 알리고, 데스크톱은 선택한 generic loadout을 상시 HUD에 표시한다.
-11. 배포 전 `npm test`로 정적 Sector geometry·독립 objective·Player별 save·content boundary와 싱글·멀티 공용 진행을 검증한다.
+11. 배포 전 `npm run check`와 실제 브라우저·멀티플레이 smoke로 정적 Sector geometry·독립 objective·Player별 save·content boundary와 싱글·멀티 공용 진행을 검증한다.
 12. 활성 플레이 시간·처치·피해·로프 절단·영역 완료·첫 Augment 선택 시간은 `RunMetrics`에서 수집해 난이도 조정 근거로 사용한다.
 13. 발견된 문제 영역은 현재 시나리오의 관련 회귀 테스트에 이유와 함께 추가해 같은 영역·진행 계약에서 우선 재현한다.
 14. 원격 플레이테스트는 설정 버튼을 1초 길게 눌러 디버그 수치 표시를 켜고 현재 런 지표를 확인한다.

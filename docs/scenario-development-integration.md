@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 26eb3bc2cea1760421bd2f89c360e78839f2a00a7ba652b27bb94e96e009dc4d
+scenario-source-sha256: ffd34337547867af801a0400d6cd5c2f61db4e4418246fcecd1db49df6829747
 authored-area-sha256: 62373de9c519985c265d6a028063af80b0de8aea3758ad82838a4c44c42d784e
 authored-sector-sha256: 0ba1ad8cbc7e5b1bfaa345a8cd14faabd9ee5e4195c9b97803afec365bccbff2
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: cb4f690ac180a04868322e9c4cfe1384897c348b
+reviewed-upstream: 4551798860193a16e53814aae5c3a42022b4e1cf
 -->
 
 ## 상태를 읽는 법
@@ -183,6 +183,8 @@ reviewed-upstream: cb4f690ac180a04868322e9c4cfe1384897c348b
 98. 0.45.0은 Stage별 연출 hardcode를 공용 Direction Runtime v1로 전환했다. 1-1/1-2 `DIRECTION-SPEC.json`이 canonical schema와 authoring adapter를 거쳐 immutable definition으로 compile되고, timeline owner가 Camera·System Text·Bark·Audio·Lighting·Character command를 local authority adapter로 전달한다. Player·Enemy·Collision·Objective·Gate도 owner/server scope가 고정된 typed command 계약과 fake-adapter 회귀를 제공하지만 현재 Stage에 없는 gameplay mutation은 추가하지 않았다. unsupported action은 silent fallback 없이 `review-required`, 승인된 `fallbackPolicy`만 손실 의미와 승인자를 보존하며, 필수 track이 `verified`가 아니면 `validate:direction-specs` release gate가 실패한다. 1-1/1-2 문자열과 trigger의 `AuthoredStoryPresentation`·Bark catalog·Area `storyTriggers` 중복을 제거했고, Direction 전용 procedural mock cue 7개와 1-1 local Amber lighting·open-swing exhale을 연결했다. 다른 Stage는 migration 전까지 legacy Story 경로를 유지한다.
 99. Issue #730은 사용자가 제공한 Sector 03 REV8/REV8.1 package를 master REV3와 함께 병합했다. Stage package가 정확한 authored topology(3-1 3072×1088부터 3-8 4608×2176), route·story·validation·handoff를 소유하고, Master와 shared scale/uniqueness gate는 교차 Stage intent를 소유한다. 여러 package의 공통 gate는 3-1~3-8의 서명을 모두 보존하는 단일 문서로 정리했다. 이 변경은 Runtime code·current mock geometry·Access module carrier·content boundary를 바꾸지 않으며, 각 Production Alignment가 이 authoring boundary와 Runtime의 차이를 명시한다.
 
+100. 2026-08-20 사용자의 자동 테스트 제거 결정에 따라 `AREA-SPEC-AUTHORING-STANDARD.md`의 검증 명령을 `validate:area-specs`와 `npm run check`로 정리했다. Stage topology·Runtime catalog·Direction data·scenario 상태는 바꾸지 않았고 authored area/sector fingerprint도 그대로다. 이 항목은 검증 방식만 바꾸며 기존 `MOCK INTEGRATED`·열린 브라우저 플레이테스트 상태를 승격하지 않는다.
+
 ## 열린 기획·구현 게이트
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.
@@ -207,7 +209,7 @@ P1~P5 확정 답변과 구현 상태는 [`design-decision-requests.md`](./design
 3. 시나리오 변경을 현재 Runtime과 대조해 최근 변경, 영향을 받는 영역, 열린 게이트와 검증 증거를 이 문서에 갱신한다. hash만 새 값으로 바꿔 검사를 우회하지 않는다.
 4. 좌표·문구·cue처럼 기존 계약 안에서 흡수할 변경과, 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계처럼 사용자 검토가 필요한 변경을 분리한다.
 5. 구현을 시작하면 Stage `PRODUCTION-ALIGNMENT.md`에 정확한 좌표·Camera·Stable ID·상태·사건·asset 인계 차이를 기록하고 gameplay→mock 표현→검증 순서로 연결한다.
-6. `MOCK INTEGRATED`는 catalog·진행·테스트가 연결된 증거가 있을 때만, `PLAYTEST VERIFIED`는 요구된 실제 브라우저·기기 결과를 남겼을 때만 사용한다.
+6. `MOCK INTEGRATED`는 catalog·진행·validator 또는 실제 실행 증거가 있을 때만, `PLAYTEST VERIFIED`는 요구된 실제 브라우저·기기 결과를 남겼을 때만 사용한다.
 7. 같은 작업에서 이 문서, [`implementation-roadmap.md`](./implementation-roadmap.md)와 [`../SESSION-HANDOFF.md`](../SESSION-HANDOFF.md)의 현재 요약을 맞춘 뒤 전체 검사를 통과시킨다.
 
 fingerprint는 의미 검토를 대신하지 않는다. 변경 누락을 발견하는 경보다. `reviewed-upstream`은 마지막 대조 기준 SHA를 보존하는 사람이 읽는 증거이며, 검사기는 source fingerprint와 Stage 목록의 일치 여부를 자동 검증한다.

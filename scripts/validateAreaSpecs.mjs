@@ -165,7 +165,7 @@ function rectInsideBounds(bounds, rect, { allowFloorOverlap = false } = {}) {
 // src/game/world/AuthoredCoordinateAnchor.js's anchoredRectangleBounds() semantics for the anchor a
 // given preset's Runtime helper actually uses (see KNOWN_SURFACE_PRESETS). A surface only inside
 // `bounds` at its (x, y) center point can still extend outside the Area — this computes the real
-// footprint so that case is caught (regression: see tests/areaSpecValidator.mjs).
+// footprint so that case is rejected by the production validator.
 function rectExtentFromAnchor(x, y, width, height, anchorKey) {
     const anchor = ANCHOR_FRACTIONS[anchorKey] ?? ANCHOR_FRACTIONS.center;
     return {

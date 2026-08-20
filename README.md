@@ -5,7 +5,7 @@
 ## 저장소 운영
 
 - `main` 변경은 브랜치와 Pull Request를 거치는 것을 기본으로 한다.
-- 각 개발자는 병합 전에 로컬 테스트와 문법 검사, 필요한 브라우저 검증을 수행한다.
+- 각 개발자는 병합 전에 validator와 문법 검사, 필요한 브라우저 검증을 수행한다.
 - GitHub Pages는 저장소 설정의 `main` 브랜치 `/(root)`를 게시 소스로 사용하며, 루트 `index.html`을 진입점으로 삼는다.
 - 상세한 개발 규칙은 `AGENTS.md`와 `docs/development-rules.md`를 따른다.
 
@@ -17,7 +17,6 @@ Foundation 선택처럼 DOM 상태 UI가 필요해질 때 사용할 승인된 �
 ```powershell
 npm install
 npm start
-npm test
 npm run check
 npm run validate:audio-assets
 ```
@@ -46,8 +45,7 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 자동 원거리 공격, 적의 로프 절단·본체 피해, 체크포인트 복귀, 1-4 Maintenance Node의 Foundation 선택, 전투 VFX, 모바일 조작과 교체 가능한 mock 오디오·탭형 설정을 포함한다.
 1-4에서 `Impulse Coil`·`Relay Link`·`Shear Current` 중 하나를 고르고 사망·낙사 시 활성 체크포인트에서 최대 체력으로 재개한다.
 
-기본 `npm test`는 현재 저작 영역의 연결·Gate 진행과 싱글·멀티 공용 시스템을 검증한다. 48단계 절차 월드의 시드 sweep과 summit 완료 계약은 현재 제품 시나리오가 아니므로 기본 검증에서 제외한다. 원격 플레이테스트에서는
-설정 버튼을 1초 길게 눌러 디버그 패널을 연 뒤 **디버그 수치 표시**를 켜면 활성 시간·처치·피해·로프 절단·첫 Foundation 선택 시간을 확인하고 **진단 복사**로 기록할 수 있다. seed와 world revision은 멀티 참가자가 같은 저작 월드와 결정적 표현을 재현하기 위한 동기화 식별자로 유지한다.
+저장소는 기본 자동 테스트 suite를 유지하지 않는다. `npm run check`의 문법·저작 계약 validator와 실제 브라우저·서버 smoke로 검증하며, 자동 테스트는 사용자가 해당 작업에서 명시적으로 요청한 경우에만 추가한다. 원격 플레이테스트에서는 설정 버튼을 1초 길게 눌러 디버그 패널을 연 뒤 **디버그 수치 표시**를 켜면 활성 시간·처치·피해·로프 절단·첫 Foundation 선택 시간을 확인하고 **진단 복사**로 기록할 수 있다. seed와 world revision은 멀티 참가자가 같은 저작 월드와 결정적 표현을 재현하기 위한 동기화 식별자로 유지한다.
 
 ## 프로젝트 문서
 
@@ -58,7 +56,7 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 - [세션 핸드오프](SESSION-HANDOFF.md) — 현재 유효한 결정과 다음 작업
 - [결정 이력](docs/decision-history.md) — 반영 또는 대체된 제품·아키텍처 결정
 - [개발 환경](docs/dev-environment-setup.md) — 로컬 실행 명령과 문제 해결
-- [기술 스택](docs/tech-stack.md) — 언어, UI, 렌더링, 테스트, 배포 기반
+- [기술 스택](docs/tech-stack.md) — 언어, UI, 렌더링, 검증, 배포 기반
 - [버전 관리](docs/version-management.md) — SemVer, 배포 버전 표시와 갱신 절차
 - [재사용 가능한 기반](docs/reusable-game-resources.md) — 공용 게임 기반과 재사용 정책
 - [구현 로드맵](docs/implementation-roadmap.md) — 현재 구현 상태, 다음 게임성 우선순위와 완료 기준

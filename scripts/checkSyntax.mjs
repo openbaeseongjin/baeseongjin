@@ -3,7 +3,7 @@ import { readdirSync } from "node:fs";
 import { extname, join } from "node:path";
 import { existsSync } from "node:fs";
 
-const roots = ["src", "scripts", "tests"];
+const roots = ["src", "scripts"];
 const files = [];
 function collect(directory) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {

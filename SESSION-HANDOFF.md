@@ -5,7 +5,7 @@
 - 프로젝트: Canvas 기반 2D 고정 길이 로프 액션 로그라이크
 - 브랜치: `main`
 - 현재 단계: Boss01 Has-A runtime primitive 완료, Sector 01 기획 Anchor 맵 재구성 완료
-- 실행 기반: 브라우저 ES Module, Canvas 2D, Node.js 로컬 서버와 무번들 테스트
+- 실행 기반: 브라우저 ES Module, Canvas 2D, Node.js 로컬 서버와 무번들 validator
 - 제품 기준: `docs/game-hackathon-planning.md`
 - 개발 일정: `docs/development-schedule.md`
 - 구현 순서: `docs/implementation-roadmap.md`
@@ -14,16 +14,17 @@
 
 ## 현재 구현
 
+- **[L1] 기본 자동 테스트를 유지하지 않는다 (2026-08-20):** 테스트 코드가 제품과 별도 권위·버그 대상이 되는 것을 막기 위해 루트와 meeting-bot의 자동 테스트 suite를 제거했다. schema·asset·scenario validator, 문법·형식 검사, 실제 브라우저·서버 smoke는 유지한다. 테스트는 사용자가 해당 작업에서 명시적으로 요청한 경우에만 추가하며 에이전트 판단이나 관례로 만들지 않는다. 반복 기준은 `docs/development-rules.md`의 **자동 테스트 금지와 명시 요청 예외**를 따른다.
 - `$github-task-flow`가 만드는 Lore 커밋은 제목·본문·검증 설명을 한국어로 작성한다. trailer 키와 규약상 고정 열거 값만 원문을 유지하며, 상세 규칙은 `.codex/skills/github-task-flow/SKILL.md`를 따른다. 개발 효율 우선순위는 `중복 전체 테스트 제거 → 독립 검증 병렬화 → shared checkout 대기 제거 → 범위 팽창 억제 → 실행기 라우팅 조정`이다. 검증은 base SHA·diff fingerprint ledger의 단일 소유자가 수행하고 같은 candidate의 fresh PASS를 역할별로 반복하지 않는다. 같은 저장소의 독립 작업은 별도 Git worktree를 기본으로 즉시 병렬 진행하며, 실제 같은 hunk·public contract dependency가 있을 때만 직렬화한다. `$coordinate-github-tasks`는 두 활성 대화가 실제 구현 소스를 동시에 수정해 충돌할 때만 사용하고 계획 분배에는 사용하지 않으며, 완료된 대화를 재활성화하지 않는다. 새 구현은 새 대화에서 시작한다. 범위·검증·worktree 반복 기준은 `docs/development-rules.md`의 **효율 우선 실행과 검증 예산**, **동시 Codex 작업과 GitHub 범위 조정** 및 관련 Skill을 따른다.
 - 고정 길이 로프: Grapple Hook 발사 후 비행해 부착(기본 속도 1200px/s × 수명 1/3초 = 400px 도달), 재발사 0.50초 대기, 화면 짧은 변의 11% 접선 드래그, 0.08초 최소 홀드, 부착당 한 번 780 임펄스
 - 기본 런은 Sector 01·02·03의 24개 legacy Stage 정의를 수정하지 않고 각 Sector local 좌표 안에서 세로 등반 spine으로 compile한다. landmark 양옆에는 실제 city wing을 붙여 Sector 폭은 4,800px로 유지한다. 같은 Sector 안의 Stage·층간에는 Gate·exit panel·포탈·문 visual과 물리 route lock을 두지 않고 모든 authored surface와 `sector-seam`은 Run 시작부터 collision/renderer에 같은 정적 집합으로 존재한다. 이 층간 자유 이동 결정을 Sector 경계 자유 이동으로 확대하지 않는다. Sector 경계는 `access-transit-lock` 장치와 같은 geometry에서 파생한 T자형 force-field collider가 요구 모듈 전부를 모으기 전 통과를 막고, 개방 시 blocker만 비활성화한다. future Boss room의 추가 제약은 Boss 구현 시 별도 계약으로 더한다.
 - #622 City Phase 1~~2의 `SectorDefinition`·validator·canonical encounter 계약과 #624 Enemy Phase 6을 #625 Runtime cutover가 소비한다. 진행 권위는 `SectorProgressState`, 부활 권위는 각 Player state의 `respawnAnchorId`가 소유한다. `partyWipeBaseline`은 제거됐고 Sector 04~~06 Runtime과 Timer/Purge·증강 topology mapping은 HOLD다.
-- **Sector 03 REV8 authoring packages (2026-08-20):** 3-1~3-8의 REV8/REV8.1 AREA-SPEC-REV8-DESIGN.json·DIRECTION-SPEC.json·preview·handoff와 REV3 master를 병합했다. Sector master는 교차 Stage 의도와 scale/uniqueness를, 각 Stage spec은 정확한 future topology를 소유한다. 현재 MOCK INTEGRATED Runtime geometry·stable ID·Access 3-of-3·3-8 content boundary는 바꾸지 않았으며 실제 geometry/Direction migration·browser/multiplayer playtest와 Post-Sector 03 Boss/Transition은 후속 게이트다. **검증 ledger:** base `cb4f690ac180a04868322e9c4cfe1384897c348b`, content candidate tree `09560c4d0e6b44fad56d7e550923e1c81f29d9b8`, binary diff fingerprint `b92cc6e5fe8fa22ca16f27ae897f03792179f667`, Node `v24.14.0` / npm `11.9.0`; `npm test`, `npm run check`, `npm run format:check`와 16개 preview의 HTTP 200·page error 없음이 PASS했다. source/Runtime/검증 설정 또는 base가 바뀌면 관련 검증을 재실행한다.
+- **Sector 03 REV8 authoring packages (2026-08-20):** 3-1~3-8의 REV8/REV8.1 AREA-SPEC-REV8-DESIGN.json·DIRECTION-SPEC.json·preview·handoff와 REV3 master를 병합했다. Sector master는 교차 Stage 의도와 scale/uniqueness를, 각 Stage spec은 정확한 future topology를 소유한다. 현재 MOCK INTEGRATED Runtime geometry·stable ID·Access 3-of-3·3-8 content boundary는 바꾸지 않았으며 실제 geometry/Direction migration·browser/multiplayer playtest와 Post-Sector 03 Boss/Transition은 후속 게이트다. **검증 ledger:** base `cb4f690ac180a04868322e9c4cfe1384897c348b`, content candidate tree `09560c4d0e6b44fad56d7e550923e1c81f29d9b8`, binary diff fingerprint `b92cc6e5fe8fa22ca16f27ae897f03792179f667`, Node `v24.14.0` / npm `11.9.0`; 당시 정적 검사와 16개 preview의 HTTP 200·page error 없음이 PASS했다. 자동 테스트 파일은 이후 사용자 결정으로 제거했으며 source/Runtime/검증 설정 또는 base가 바뀌면 현재 validator와 실제 preview를 다시 확인한다.
 
 ### [L2] Sector 01 MAP-PREVIEW의 primary route가 핵심 맵 흐름 권위다
 
 - Sector 01 `1-1`~`1-8`은 각 Stage `MAP-PREVIEW.html`의 첫 `class="route"` 또는 `class="flow"` SVG path endpoint 순서를 핵심 이동 흐름으로 사용한다. `Sector01AreaCatalog.routePoints`와 seamless compiler의 `world.route`는 이 순서를 전부 보존하며 중간 발판·구조 Grip·controlled drop·relaunch·counterflow·checkpoint를 과거 A/C 중심 축약 경로로 줄이지 않는다.
-- MAP HTML은 Runtime 이미지나 collision source로 직접 로드하지 않는다. 실제 Collision·Grapple·Enemy·Wind·Cover 좌표는 AREA-SPEC과 Area Catalog가 소유하되, 자동 회귀가 HTML primary route와 Area/compiled route의 좌표를 직접 대조한다. 4,800px Sector와 outside-core city wing은 유지하지만 authored core 흐름을 대체하거나 우회 경로로 해석하지 않는다.
+- MAP HTML은 Runtime 이미지나 collision source로 직접 로드하지 않는다. 실제 Collision·Grapple·Enemy·Wind·Cover 좌표는 AREA-SPEC과 Area Catalog가 소유하며, 맵 에디터와 실제 브라우저 검증에서 HTML primary route와 Area/compiled route의 좌표를 대조한다. 4,800px Sector와 outside-core city wing은 유지하지만 authored core 흐름을 대체하거나 우회 경로로 해석하지 않는다.
 
 ### [L1] 개인 사망은 최근 도달 Stage 체크포인트에서 재개한다
 
@@ -40,7 +41,7 @@
 - 렌더되는 단단한 수평 플랫폼은 명시적인 별도 봉쇄 장치가 아닌 한 Rope 부착 가능해야 한다. 1-2 `crossbeam-x1`은 `oneWay=false`, `grappleable=true`이며 validator가 같은 종류의 숨은 충돌/Rope 불일치를 거부한다. 수직 column과 시각·collision이 일치하는 Sector transit blockade는 이 수평 플랫폼 계약의 대상이 아니다.
 - 적 사격과 시간 기반 Pursuit·Artillery·Swarm 행동은 별도 타이머/FSM을 복제하지 않고 순수 `StateMachine`을 Has-A로 소유하는 `TimedStateController`를 공유하며, 비시간형 Support는 `StateMachine`을 직접 조합한다. gameplay snapshot의 기존 `attackState/attackStateRemaining/behaviorState` 계약은 유지한다. `EnemyStateCatalog`가 공통·몹별 상태와 허용 전이를 공개하고, 그래픽 계층은 `EnemyPresentationState`의 타입별 상태 목록과 `knockback → active behavior → attack → stance/patrol` 우선순위를 단일 인계 계약으로 사용한다. 기본 적 mock은 아직 정적 sprite지만 `SpriteEnemyRenderer`의 presentation/sprite resolver 주입 경계에서 상태별 정식 리소스로 교체한다.
 - seamless Runtime에는 Stage 진입 cursor가 없다. savepoint collider 접촉은 Player checkpoint만 갱신하고, 모든 objective와 `augment-node`는 자기 trigger/source와 `requiredObjectiveIds`만으로 판정한다. 현재 Stage 표시는 Player 좌표에서 계산하는 UI·계측용 파생값이다.
-- seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 필수 테스트에서 제외한다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
+- seed와 world revision은 싱글·멀티가 같은 저작 월드 정의와 결정적 표현을 재현하는 식별자다. 48단계 절차 경로 생성과 summit 완료는 현재 기본 제품 시나리오가 아니며 자동 sweep을 만들지 않는다. `GameSimulation`은 첫 플레이어 호환 별칭 없이 플레이어 상태 쓰기를 소유하고, 서버 세션·로컬 예측·멀티 앱은 `docs/architecture.md`의 snapshot·공개 명령 경계만 사용한다.
 - PC와 모바일 공용 이동·점프·로프·Action 명령, 모바일 중앙 `좌 · 점프 · 우` 조작 바와 멀티터치. 0.31.0부터 우측 상단 조작 버튼은 `로프 조준 ↔ 액션 조준` 토글이며, 액션 조준 상태의 월드 터치는 같은 실제 접촉 지점을 `aimWorld`로 사용하면서 로프를 발사하지 않고 Action을 시작한다.
 - 모바일 coarse pointer 카메라는 작은 화면에서 오브젝트를 확대하는 대신 Full HD `1920×1080` 데스크톱 브라우저가 보여 주는 월드 범위를 한눈에 담도록 viewport 가로·세로 비율 중 작은 값으로 줌아웃한다. 기존 authored `mobileZoom`은 `0.72 = 기준 Shot 1.0`인 상대 비율로 해석해 구간별 구도 차이를 보존하며, 싱글·멀티와 화면→월드 조준 변환이 같은 최종 camera zoom을 사용한다.
 - 0.32.1은 위 모바일 Full HD viewport-fit 카메라와 seamless landmark의 `legacyAreaId` 환경 package 조회를 patch 릴리스로 묶는다. Sector 01 정식 far/mid/near 배경이 fallback 대신 다시 표시되며 `sw.js` 릴리스 신호와 Pages·게임 서버 버전을 함께 갱신한다.
@@ -53,7 +54,7 @@
 
 - 증강 선택 패널의 좌우 이동과 확정 입력은 서로의 해제를 기다리지 않는다. 패널을 연 입력이 같은 프레임에 카드를 확정하는 일만 막고, 각 입력은 자기 키가 한 번 해제된 뒤 다른 키의 hold 상태와 무관하게 동작한다.
 - 증강 선택을 완료한 Player의 클라이언트에서는 해당 `augment-node`의 전원이 꺼진 상태가 즉시 보여야 한다. 다른 Player가 아직 소비하지 않았다면 그 Player 화면에서는 계속 활성 상태로 보여야 하며, 공용 objective 완료 여부를 개인 소비 표시로 대신 사용하지 않는다.
-- 싱글·멀티 렌더 scene은 로컬 Player의 `consumedSourceIds`를 사용하고, 회귀 테스트는 교차 입력 hold와 같은 Node가 클라이언트별로 서로 다른 활성/소비 표현을 갖는 경우를 검증한다. 상세 기준은 `docs/augment-v1.md`가 소유한다.
+- 싱글·멀티 렌더 scene은 로컬 Player의 `consumedSourceIds`를 사용하고, 실제 클라이언트 검증은 교차 입력 hold와 같은 Node가 클라이언트별로 서로 다른 활성/소비 표현을 갖는 경우를 확인한다. 상세 기준은 `docs/augment-v1.md`가 소유한다.
 - 디버그 설정의 Rope tuning은 `ROPE_CONFIG` 전 항목과 절단 후 차단 시간을 부분 override로 저장하고, 같은 effective config에서 비행 시간·도달 거리를 파생한다. 싱글에서 `적용`을 누르면 현재 Run을 hot swap하지 않고 종료한 뒤 저장된 시작 맵·Rope base로 새 Run을 즉시 생성한다. selected Rope 증강의 percentage 계산도 이 effective base를 소비한다. 멀티에서는 공용 override 협상 protocol 전까지 입력을 비활성화한다.
 - 전투 HUD·VFX·파티클과 Android PWA 설치·자동 최신 배포 적용
 - 고정 HUD는 데스크톱·모바일 모두 기본 표시하고 공통 `HUD 숨김/표시` 버튼으로 좌표 기반 Stage·HP·Action cooldown·증강·Access 패널과 하단 조작 안내를 한 번에 토글한다. coarse pointer 또는 900×500 이하의 짧은 가로 viewport는 240×92px 축소 포맷을 사용하며 모바일에서는 중복 조작 안내를 기본적으로 감춘다. 토글은 로컬 표현 상태이며 싱글·멀티 게임 규칙이나 네트워크 snapshot에 넣지 않고, 생존 가독성을 위해 local/remote Player의 머리 위 HP+cooldown과 Enemy 머리 위 HP는 항상 유지한다.
@@ -75,9 +76,9 @@
 - 1-1 최하층 P0는 Stage Local `X=-448~448`의 `896×32` one-way Collision으로 좌우 authored 경계벽 사이를 전부 채우며, 같은 폭의 `terrain:ground-foundation` 기초 슬래브·세로 지지대·하부 패널이 화면 아래까지 이어지는 Ground Service Access 바닥으로 표현한다. 이는 이전의 `256×32 Collision 유지 + 시각 기초만 추가` 결정을 대체한다. Spawn·Anchor·상부 발판·Recovery 위치는 유지하며 반복 기준은 `docs/bsh/scenario/1/1-1/PRODUCTION-ALIGNMENT.md`의 Collision Surface 절을 따른다.
 - authored 사각 surface와 world object는 저작 좌표가 시각/충돌 사각형의 어느 점인지 `coordinateAnchor`로 명시한다. 수평 보행 발판·천장 부착 구조는 `top-center`, 바닥에 선 Gate·패널과 수직 바닥 고정 구조는 `bottom-center`, 자유 배치 표식은 `center`를 사용한다. `AuthoredCoordinateAnchor`가 꼭짓점과 렌더 bounds를 같은 기준점에서 계산하고 assembler가 기준점도 함께 이동시킨다. 층별 렌더 오프셋으로 바닥 접촉을 보정하지 않으며 상세 계약은 `docs/architecture.md`의 저작 좌표 기준점 규칙을 따른다.
 - 모든 authored 영역의 출구 조작은 `영역별 선행 목표 달성 → 문 옆 Gate 패널 활성화 → 패널 조작 → Gate 개방`으로 통일한다. 목표 종류는 시나리오별로 달라도 실제 문을 여는 입력은 바꾸지 않는다. 패널 조작은 별도 PC 키를 추가하지 않고 PC `W/↑`와 모바일 점프 버튼을 가까운 패널의 문맥 상호작용으로 함께 사용한다. 각 영역의 좌우 경계는 고정 충돌 벽으로 닫고, 층 경계는 개구부 없는 전폭 고정 충돌 격벽으로 완전히 봉쇄한다(층별 격리). Gate 잠금은 물리 barrier 없이 공용 진행 상태로만 적용되며, 잠금 중에는 crossing·포탈 전이가 일어나지 않는다. 상세 구조는 `docs/architecture.md`의 저작 영역 Gate 계약과 `docs/sector-01-world-structure-plan.md`를 따른다.
-- 32개 authored Area의 출구 지오메트리는 하나의 표준으로 통일한다. 문은 폭 64에 출구 데크 상단에 서는 문 visual(lock 상태 표현)과 바닥 하단 중앙의 `52×62` aperture trigger로만 존재하며, 층 격벽은 개구부 없이 전폭 봉쇄된다. 출구 데크는 모든 Area에서 영역 상단 경계 아래 정확히 125px에 놓여 문 상단이 천장 밴드 아래 5px에서 일정하다. 각 Stage의 출구 좌표(데크·exit·route-exit·패널·게이트 오브젝트·reach bounds·체크포인트)는 함께 이동하며, Assembler 회귀(`tests/authoredWorldAssembler.mjs`)와 전수 감사가 표준 이탈을 거부한다. Stage README의 출구 좌표가 이 표준과 다르면 Runtime 표준을 기준으로 Production Alignment에 이동 내용을 남긴다. 통합 catalog(`connectArea`)가 `nextAreaId`를 재배선하면 content-boundary형 trigger 대신 exit point에서 파생한 표준 aperture(`gatePortalBounds(exit.x, exit.y + 32)`)로 다시 계산한다. Gate의 보이는 문 오브젝트(kind `gate`)는 `bottom-center`로 실제 문 바닥 좌표와 같아야 하고, 회귀 테스트가 섹터 catalog와 통합 catalog 모두를 검사한다.
+- 32개 authored Area의 출구 지오메트리는 하나의 표준으로 통일한다. 문은 폭 64에 출구 데크 상단에 서는 문 visual(lock 상태 표현)과 바닥 하단 중앙의 `52×62` aperture trigger로만 존재하며, 층 격벽은 개구부 없이 전폭 봉쇄된다. 출구 데크는 모든 Area에서 영역 상단 경계 아래 정확히 125px에 놓여 문 상단이 천장 밴드 아래 5px에서 일정하다. 각 Stage의 출구 좌표(데크·exit·route-exit·패널·게이트 오브젝트·reach bounds·체크포인트)는 함께 이동하며, Area validator와 전수 감사가 표준 이탈을 거부한다. Stage README의 출구 좌표가 이 표준과 다르면 Runtime 표준을 기준으로 Production Alignment에 이동 내용을 남긴다. 통합 catalog(`connectArea`)가 `nextAreaId`를 재배선하면 content-boundary형 trigger 대신 exit point에서 파생한 표준 aperture(`gatePortalBounds(exit.x, exit.y + 32)`)로 다시 계산한다. Gate의 보이는 문 오브젝트(kind `gate`)는 `bottom-center`로 실제 문 바닥 좌표와 같아야 한다.
 - 출구는 모두 `AreaDefinition.exitBlock` 세트 블록으로 저작한다. 블록은 데크 위치·폭만 받아 데크(기본 320×32), 문(aperture trigger `52×62` + 문 visual), 문 왼쪽 112px의 exit-panel, exit point(문 x, 데크 위 32px), route-exit(문 왼쪽 64px), reach bounds를 생성한다. 출구 데크는 영역 상단 아래 125px에 놓아 문 상단이 천장 밴드(48px) 아래 정확히 5px 여유를 둔다. 층간 격벽은 전폭 solid 밴드 1개로 완전히 봉쇄한다(개구부 없음 — 이전 층의 문 구멍으로 되돌아가는 경로 차단). 라우트는 `... → route-exit`으로 끝나며 수치 감사가 ① 트리거⊆데크 ② 모든 연속 라우트 링크 ≤600px ③ route-exit on deck ④ 문 상단↔밴드 갭 5px ⑤ 격벽 전폭 봉쇄를 전 Area에서 검증한다. 새 Area 저작 시에도 이 블록과 감사를 사용한다.
-- 오브젝트에 붙는 트리거는 하드코딩 좌표가 아니라 오브젝트 상대 파생 스펙으로 저작한다. `objectTriggerSpec(anchor, width, height, offset)`으로 선언하고 `resolveObjectTriggerBounds(position, spec)` 하나가 bounds를 계산하며, assembler가 조립 시 확정 bounds를 stamping한다. 오브젝트 위치를 옮기면 트리거가 자동으로 따라가고, 검증기가 스펙+하드코딩 동시 존재를 거부해 drift를 `npm test`에서 잡는다. 대상: 오브젝트 `trigger`(bounds), 적 `activationSpec`(activation), wind-source `zone`(windZone bounds). wind-source가 없는 Zone은 Area 수준 특징이므로 저작 bounds를 유지한다.
+- 오브젝트에 붙는 트리거는 하드코딩 좌표가 아니라 오브젝트 상대 파생 스펙으로 저작한다. `objectTriggerSpec(anchor, width, height, offset)`으로 선언하고 `resolveObjectTriggerBounds(position, spec)` 하나가 bounds를 계산하며, assembler가 조립 시 확정 bounds를 stamping한다. 오브젝트 위치를 옮기면 트리거가 자동으로 따라가고, Area validator가 스펙+하드코딩 동시 존재를 거부한다. 대상: 오브젝트 `trigger`(bounds), 적 `activationSpec`(activation), wind-source `zone`(windZone bounds). wind-source가 없는 Zone은 Area 수준 특징이므로 저작 bounds를 유지한다.
 - 연쇄 링크 허용치는 600px(한 반동 포함)이고 런타임 물리 hook reach 400px(속도×수명)는 그대로다. 다만 2026-08-19 사용자의 Sector 01 기획 문서 기반 맵 재구성 결정에 따라, 순차 그리디 축소가 삭제한 1-1~1-8의 기획 gameplay Anchor A~H를 복원했다. Sector 01은 gameplay Anchor 43개와 Access Anchor 6개의 target/랜드마크 1:1 쌍을 사용하며 600px 검증 예산은 이 Stable ID를 삭제하는 근거가 아니다. Sector 02~04의 기존 축소 결과는 이 변경에서 건드리지 않는다.
 - Exit Beacon(summit ▼ 마커)은 절차형 48단계 월드의 완주 목표 표식이며 authored 월드에는 그리지 않는다(`drawSummit`이 `world.areas` 존재 시 skip). authored의 마지막 Area(3-8/4-8) 출구는 content boundary지 게임의 끝이 아니므로 beacon을 띄우지 않는다.
 - 싱글도 `PlayerCommand → LocalAuthority → GameSimulation` 공용 경계를 사용하며, 로컬 `PlayerPhysics`의 prototype getter를 복제하지 않고 하위 player renderer에 전달해 sprite·polygon 모두 같은 강체 각도를 그린다. ID 선택과 상태 보존 계약은 `docs/architecture.md`의 **렌더링 프로필 경계**를 따른다.
@@ -100,7 +101,7 @@
 - 투사체는 같은 `projectile-motion`·`client-projectile-collision` capability ID에 종류별 믹스인을 조합한다. 운동·충돌·claim 거부 뒤 수명 정책과 복제 상태는 객체가 소유하며 `PredictableProjectileStore`와 `GameSimulation`은 종류별 분기 없이 등록·식별자 대응·단계 실행·사건 연결만 담당한다. 상세 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - 정적 파일을 노출하지 않는 상시 게임 서버 실행 모드와 `/health` 상태 확인
 - game-only 서버는 기본적으로 공식 GitHub Pages Origin만 WebSocket에 허용하며 개발용 정적 통합 서버는 이 제한을 강제하지 않는다.
-- 게임 서버의 운영 배포는 `docs/multiplayer-sharing.md`를 따른다. 개발 정적 서버(`serve.mjs`·`start:multiplayer`·`share:multiplayer`의 `staticHandler`)는 응답하는 `index.html`에서 `meta[name="multiplayer-server"]`를 제거해, 클라이언트가 serving origin(통합 개발 WebSocket 서버)으로 폴백하게 한다. 운영 엔드포인트는 저장소 파일·Pages에만 남고 개발 페이지에는 노출하지 않는다. 로컬 멀티 테스트는 `npm start`가 아니라 `npm run start:multiplayer`(정적+WS 통합)로 한다.
+- 게임 서버의 운영 배포는 `docs/multiplayer-sharing.md`를 따른다. 개발 정적 서버(`serve.mjs`·`start:multiplayer`·`share:multiplayer`의 `staticHandler`)는 응답하는 `index.html`에서 `meta[name="multiplayer-server"]`를 제거해, 클라이언트가 serving origin(통합 개발 WebSocket 서버)으로 폴백하게 한다. 운영 엔드포인트는 저장소 파일·Pages에만 남고 개발 페이지에는 노출하지 않는다. 로컬 멀티 검증은 `npm start`가 아니라 `npm run start:multiplayer`(정적+WS 통합)로 한다.
 - 0.36.0 client-first claim·WorldSnapshot v9·Shear 전용 전송 제거는 Issue #669 / PR #670의 Lore 커밋 `8e4c3b5`, merge commit `a6a1c7e`로 main에 반영됐다. 운영 endpoint 커밋 `773666f` 뒤 Pages와 게임 서버 `/health.version`이 0.36.0으로 일치했고 공개 WSS의 채널 생성·2인 합류·퇴장·빈 방 제거 smoke를 통과했다. Quick Tunnel URL 자체는 재시작 때 바뀌므로 영구 결정으로 기록하지 않고 `index.html`의 현재 meta를 따른다.
 - AI 도구 설정 동기화는 `vsync`(`@nicepkg/vsync`)를 사용한다. 스킬·MCP의 단일 소스는 `.codex/skills/`와 `.codex/config.toml`이며 `vsync sync`가 `.opencode/skills/`, `.cursor/skills/`, `opencode.json`, `.cursor/mcp.json`을 포맷 변환과 함께 생성·갱신한다. 대상 도구 파일은 직접 편집하지 않는다. 반복 규칙은 `docs/development-rules.md`의 **AI 도구 설정 동기화(vsync)**를 따른다. opencode는 재시작하면 `opencode.json`의 Discord MCP와 `.opencode/skills/`를 읽는다.
 - 싱글 `GameApp` 렌더는 `FixedStepRunner`가 계산한 alpha로 이전·현재 권위 스냅샷을 보간해 표시한다(`src/render/interpolateRenderSnapshot.js`). 디스플레이 재생률과 120Hz 시뮬레이션 단계가 어긋나도 미세 저더 없이 표시되며, 리셋·런 상태 전이·96px 초과 순간이동(Stage 세이브 포인트 부활·디버그 이동)은 보간하지 않고 최신 상태를 그린다. 멀티 로컬 플레이어는 소유자 예측·보정 계약이 있으므로 이 보간을 적용하지 않는다.
@@ -119,9 +120,9 @@
 
 Sector 01~06 상세 시나리오 48개(`1-1 → 6-8`)가 모두 작성됐다. P0 Alignment는 1-7 보안 상승 문구, Cutter positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약까지 정렬해 완료했다. Boss01 `CONTAINMENT GANTRY C-01`은 별도 `BossEncounterRuntime`에서 360 HP·3×120 phase·Breaker 8초 노출·210초 Boss Timer·80px/s collapse·Player별 active/spectating·전원 탈락 시 Boss attempt만 reset하는 중립 월드 상태로 구현됐다. top-level `bossRuntime` snapshot은 싱글·서버·소유자 예측에서 같은 상태를 복원하며 `SectorProgressState`를 바꾸지 않는다. 다음 Boss01 범위는 1-8 Checkpoint 뒤 physical Arena·Breaker/Core/Emitter/Wind mock, 자동 진입, 피해/사망 연결과 승리 후 2-1 전이다. 6-8 `ROOFTOP PAD 03`은 `ACCESS DENIED / CONTAINMENT VIOLATION`을 확인하고 별도 Final Security 앞 content boundary로 끝난다. Final Security는 `PAD SECURITY WARDEN P-03 → ACCESS RESTORED → 개별 Boarding → 전원 준비 → ESCAPE`로 확정됐으며 Runtime은 미구현이다. 과거 Specialization 단계는 generic 증강 v1과 #633 획득 Node로 대체됐다. 현재 상태 기준은 `docs/scenario-development-integration.md`다.
 
-Gate/출구 표준화(전 32 Area), 포탈 위치 전수 감사·수정(connectArea trigger 재계산·1-8 게이트 시각 정렬), 멀티 탄환 소멸 근본 수정(발사 claim 재유도 검증 제거)은 코드·테스트·문서 반영까지 완료됐다. 남은 단계는 병합 뒤 `docs/version-management.md` 절차(멀티 서버 코드 변경이므로 서버 재시작·버전 올림·공개 smoke)와 브라우저 화면 확인 결과를 PR에 기록하는 것이다.
+Gate/출구 표준화(전 32 Area), 포탈 위치 전수 감사·수정(connectArea trigger 재계산·1-8 게이트 시각 정렬), 멀티 탄환 소멸 근본 수정(발사 claim 재유도 검증 제거)은 코드·문서 반영까지 완료됐다. 남은 단계는 병합 뒤 `docs/version-management.md` 절차(멀티 서버 코드 변경이므로 서버 재시작·버전 올림·공개 smoke)와 브라우저 화면 확인 결과를 PR에 기록하는 것이다.
 
-과거 600px 순차 그리디 축소는 Sector 01에서 A/B/C/D 기획 Stable ID·Camera Shot·Approved Blockout 계약까지 삭제해 맵 의미를 훼손했다. 현재 Sector 01은 1-1 A~C, 1-2 A~D, 1-3 A~D, 1-4 A~C, 1-5 A~H, 1-6 A~F, 1-7 A~G, 1-8 A~H를 문서 좌표로 복원했다. 플랫폼·Recovery·Enemy·Wind·Access annex·Stage 경계 하강 개구부는 변경하지 않았고, 별도 회귀 테스트가 43개 gameplay Anchor의 target·object·route 1:1 정합과 600px 예산을 고정한다.
+과거 600px 순차 그리디 축소는 Sector 01에서 A/B/C/D 기획 Stable ID·Camera Shot·Approved Blockout 계약까지 삭제해 맵 의미를 훼손했다. 현재 Sector 01은 1-1 A~C, 1-2 A~D, 1-3 A~D, 1-4 A~C, 1-5 A~H, 1-6 A~F, 1-7 A~G, 1-8 A~H를 문서 좌표로 복원했다. 플랫폼·Recovery·Enemy·Wind·Access annex·Stage 경계 하강 개구부는 변경하지 않았고, Area validator와 맵 브라우저 검증이 43개 gameplay Anchor의 target·object·route 1:1 정합과 600px 예산을 확인한다.
 
 1-6 fan-b·1-7 main-pressure-vent·1-8 final-vent의 팬 바람 미발생 근본 수정과 디버그 Rope tuning 패널 구현이 완료됐다. 싱글은 적용 버튼에서 새 Run으로 즉시 재시작하고 멀티는 비활성이다. Sector 01~~03 증강 획득 Node mapping도 완료됐으며 다음 기획 의존 작업은 Sector 04~~06 증강 Node, Timer +10 trigger, Purge origin/rejoin의 physical topology mapping이다. 공용 멀티 Rope override 협상과 살아 있는 Run의 config hot swap은 별도 후속 Issue다.
 
@@ -176,10 +177,10 @@ Sector 02의 Patrol Drone은 별도 적·별도 전투 FSM으로 만들지 않�
 
 멀티 접속 중 설정 버튼을 1초 길게 눌러 디버그 패널의 **디버그 수치 표시**를 켜면 RTT·스냅샷 간격·대기 명령 수·명령 거부율과 보정 거리 p50/p95·하드 스냅·외삽 시간·탄환 예측 취소를 확인할 수 있다. 같은 패널과 **진단 복사**는 frame interval·draw duration p50/p95/max, 최근·누적 dropped steps, CSS/backing 크기, 실제·유효 DPR과 collection별 `drawn/total`도 제공한다. 이 값은 게임 규칙이나 물리 120Hz를 자동 조정하지 않으며 실제 기기 플레이테스트에서 체감 문제와 함께 기록한다.
 
-태블릿 클라이언트 렉 최적화의 자동 회귀와 데스크톱 브라우저 확인은 완료했지만 실제 문제가 발생한 태블릿과 비교 휴대폰의 수치는 아직 수집하지 않았다. 다음 두 기기 테스트에서는 같은 채널·같은 시점의 네트워크 지표와 렌더 지표를 함께 복사해 RTT 문제와 로컬 draw/backing-store 문제를 분리한다.
+태블릿 클라이언트 렉 최적화의 데스크톱 브라우저 확인은 완료했지만 실제 문제가 발생한 태블릿과 비교 휴대폰의 수치는 아직 수집하지 않았다. 다음 두 기기 검증에서는 같은 채널·같은 시점의 네트워크 지표와 렌더 지표를 함께 복사해 RTT 문제와 로컬 draw/backing-store 문제를 분리한다.
 
-`npm run smoke:multiplayer`는 Pages 표시 버전과 게임 서버 `/health.version`이 같은지 먼저 확인한 뒤, Pages의 서버 설정을 읽어 공개 WSS에서 새 채널 생성, 2인 합류, 퇴장 반영, 빈 방 제거와 권위 RunMetrics 수신을 검증한다. 멀티플레이 코드나 버전 변경을 배포한 뒤에는 상시 게임 서버 프로세스를 재시작해야 하며, 버전 불일치는 이전 서버 코드가 실행 중인 배포 오류로 취급한다. PR 병합은 이 작업의 완료가 아니며 서버 재시작과 공개 smoke 통과까지가 완료 조건이다. 외부 네트워크 검사이므로 3분 제한의 기본 `npm test`와 분리하며, 기준 절차는 `docs/version-management.md`의 **필수 변경·완료 절차**를 따른다.
-자동 멀티 시나리오는 OS 네트워크 설정을 바꾸지 않고 테스트 WebSocket 경계에서 왕복 지연 0/50/100/200ms와 송신 명령 손실 0/2/5%의 모든 조합을 재현한다. 세 경로의 로프·HP·생명·선택 증강·Action state와 공용 진행이 각 권한 원점의 승인 결과에 수렴하는지 검증한다.
+`npm run smoke:multiplayer`는 Pages 표시 버전과 게임 서버 `/health.version`이 같은지 먼저 확인한 뒤, Pages의 서버 설정을 읽어 공개 WSS에서 새 채널 생성, 2인 합류, 퇴장 반영, 빈 방 제거와 권위 RunMetrics 수신을 검증한다. 멀티플레이 코드나 버전 변경을 배포한 뒤에는 상시 게임 서버 프로세스를 재시작해야 하며, 버전 불일치는 이전 서버 코드가 실행 중인 배포 오류로 취급한다. PR 병합은 이 작업의 완료가 아니며 서버 재시작과 공개 smoke 통과까지가 완료 조건이다. 기준 절차는 `docs/version-management.md`의 **필수 변경·완료 절차**를 따른다.
+자동 멀티 시나리오는 제거했다. 네트워크 지연·손실과 세 경로의 로프·HP·생명·선택 증강·Action state·공용 진행 수렴은 `docs/two-device-playtest-protocol.md`의 실제 두 기기 검증과 진단 복사로 확인한다.
 RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK가 유실되더라도 최근 2,048개만 유지해 장시간 손실 세션의 클라이언트 메모리를 제한한다.
 멀티 연결 종료 시 오프라인 진행이나 자동 세션 복원은 하지 않고 메뉴로 돌아간다. 연결 후 권위 메시지의 프로토콜·JSON·계약 오류가 발생해 더 이상 상태 수렴을 보장할 수 없어도 마지막 정상 상태에 머물지 않고 구체적인 `closeReason`을 보존해 세션을 종료한다. 마지막 4자리 채널 번호를 참가 입력에 보존하며, 동료가 남아 월드가 유지된 경우 사용자가 같은 번호로 새 플레이어 연결을 명시적으로 시작한다. 0명이 된 채널 월드는 즉시 삭제한다.
 
@@ -199,13 +200,13 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - Stage별 cutover 선택의 단일 권위는 v2 catalog의 명시적 manifest다. manifest는 stable Stage ID, `source: legacy | generated`, source 원본 경로를 선언하며 composer는 이 manifest만 사용한다. generated 파일 존재 여부나 Sector Catalog의 수기 import로 source를 추론·선택하지 않는다.
 - 맵 에디터 인터뷰는 위 사용자·저작 규칙의 확정으로 종료한다. schema, module wiring, validation 명령과 test 구성 같은 개발 세부사항은 [`docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md`](docs/superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md) 및 `docs/development-rules.md`에 따라 결정하며, 새 제품·조작 요구가 충돌할 때만 사용자에게 다시 확인한다.
 - **[최우선 협업 제약]** 메인 개발자와 병렬 개발할 때 source 분리가 다른 구현 편의보다 우선한다. 이 작업은 새 `area-authoring-v2` source·`generated/` output·focused test·Stage v2 spec만 소유한다. 기존 Sector facade, legacy provider, seamless Runtime, root script와 shared test-runner wiring은 메인 개발자 소유이며, 이 작업은 manifest와 `composeSectorCatalog`의 검증된 integration contract만 인계한다. live cutover 완료·최종 suite·통합 현황 갱신은 그 연결 변경을 소유한 메인 개발자가 증명한다.
-- **source lane 인계 완료:** `docs/bsh/scenario/AREA-CATALOG.json`은 Sector 01 여덟 Stage를 명시하고 `1-1`·`1-7`만 generated로 선택한다. 두 후보는 각각 `docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json`, `docs/bsh/scenario/1/1-7/AREA-SPEC.v2.json`에 있고, 결정적 출력은 `src/game/world/areas/generated/sector01/Sector01Stage01.generated.js`, `Sector01Stage07.generated.js`다. `node tests/areaAuthoringV2.mjs`는 후보·생성물·합성 결과가 현재 legacy Catalog와 깊게 동등함을 확인하고, `node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check`는 둘의 최신성을 확인했다.
-- **메인 개발자 통합 순서:** root v1 validator에 v2를 추가한 뒤 두 sidecar를 canonical `AREA-SPEC-REV8-DESIGN.json`으로 원자 승격하고, legacy Sector 01 Stage provider를 분리한 다음 `composeSectorCatalog({ id, revision, manifest, legacyAreas, generatedAreas, expectedStageIds })`를 얇은 `Sector01AreaCatalog` facade에 연결한다. 이어 root command/shared test runner를 등록하고 seamless Runtime에서 live cutover를 증명한다. 이 변경이 새 scenario 문서와 authoring source를 함께 소유하므로 `docs/scenario-development-integration.md`의 실제 영향·검증 근거와 checkpoint marker 갱신, 최종 `npm test`·`npm run check`·`npm run format:check` ledger 기록도 메인 개발자가 수행한다. source lane은 marker hash만 갱신해 검사를 우회하지 않는다.
+- **source lane 인계 상태:** `docs/bsh/scenario/AREA-CATALOG.json`은 Sector 01 여덟 Stage를 명시하고 `1-1`·`1-7`만 generated로 선택한다. 두 후보는 각각 `docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json`, `docs/bsh/scenario/1/1-7/AREA-SPEC.v2.json`에 있고, 결정적 출력은 `src/game/world/areas/generated/sector01/Sector01Stage01.generated.js`, `Sector01Stage07.generated.js`다. `node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check`는 생성물 최신성만 확인한다. 2026-08-20 감사에서 v2 1-1/1-7 route와 현재 legacy Runtime이 달라졌음이 확인됐으므로 live cutover 전에는 실제 Runtime 대조와 브라우저 검증이 필요하다.
+- **메인 개발자 통합 순서:** root v1 validator에 v2를 추가한 뒤 두 sidecar를 canonical `AREA-SPEC-REV8-DESIGN.json`으로 원자 승격하고, legacy Sector 01 Stage provider를 분리한 다음 `composeSectorCatalog({ id, revision, manifest, legacyAreas, generatedAreas, expectedStageIds })`를 얇은 `Sector01AreaCatalog` facade에 연결한다. 이어 root validator command를 등록하고 seamless Runtime에서 live cutover를 실제 브라우저로 증명한다. 이 변경이 새 scenario 문서와 authoring source를 함께 소유하므로 `docs/scenario-development-integration.md`의 실제 영향·검증 근거와 checkpoint marker 갱신, 최종 `npm run check`·`npm run format:check` ledger 기록도 메인 개발자가 수행한다. source lane은 marker hash만 갱신해 검사를 우회하지 않는다.
 - **시각 에디터 UI 기준:** 첫 UI는 승인된 Sector 01 레퍼런스의 저대비 Navy/Charcoal 작업 공간을 기본으로 하며, Cyan은 선택·Anchor·연결 상태에만, Amber는 Draft 변경·경고·검증 오류에만 사용한다. 중앙 Canvas와 좌측 계층 목록·우측 Inspector·하단 validation/action strip의 저작 도구 위계를 사용하고, 에디터·local authoring server·preview adapter는 별도 source lane으로 둔다. 기존 Sector facade·legacy provider·seamless Runtime·root entrypoint는 계속 메인 개발자 소유다.
 - **시각 에디터 구현 승인(2026-08-20):** 사용자가 [UI 설계](docs/superpowers/specs/2026-08-20-map-editor-ui-design.md)를 승인했다. 별도 UI worktree/source lane에서 Draft·검증/Apply server·isolated preview를 구현한다. 이 lane은 `main.js`, `index.html`, 기존 Catalog facade, legacy provider, seamless Runtime, root script와 shared runner를 수정하지 않으며, 최종 live cutover·full-suite ledger와 scenario-integration marker는 계속 메인 개발자가 소유한다.
 - **시각 에디터 UI source lane 구현(2026-08-20):** `AreaEditorDraft`/`AreaEditorProjection`, manifest allowlist·rollback transaction을 가진 `MapEditorAuthoringServer`, `AreaPreviewGameApp`, `tools/map-editor/` Canvas workspace와 fresh preview page를 추가했다. 실행은 `node scripts/map-editor/serveMapEditor.mjs --port=4178` 후 `http://127.0.0.1:4178/map-editor/`이며, `1-1`·`1-7`만 선택할 수 있다. Canvas/Inspector는 같은 Draft mutation 경로를 사용하고, Objective·Progression·Story·Scanner·Behavior Registry는 표시 전용이다. Preview는 generated Area 하나의 새 local `GameSimulation`만 만들며 normal Catalog·실행 중 Run·multiplayer를 바꾸지 않는다.
-- **UI lane 초기 검증 ledger:** candidate `7ff38863cd195c6612796ac516780bfd62bef1ce` (base `5c4db080ee015914672aec6bb8a1c4b0ea69cbd8`, Node 24.14.0 / npm ci 환경)에서 `node tests/areaAuthoringV2.mjs`, `node tests/areaEditorDraft.mjs`, `node tests/mapEditorAuthoringServer.mjs`, `node tests/areaPreviewGameApp.mjs`, generated-output check, `npm test`, `npm run format:check`, `git diff --check`가 PASS했다. 이어 최신 `origin/main` rebase 뒤 실제 브라우저에서 `1-7` Anchor 선택·Inspector Draft 변경·Validate·Apply·fresh Preview를 확인했고 원래 좌표로 되돌려 source 의미 변경은 남기지 않았다. Map editor는 `1-1`·`1-7` generated source만 편집하며 normal Catalog·실행 중 Run·multiplayer를 바꾸지 않는다.
-- **main 병합 candidate 최종 ledger (2026-08-20):** base `d39cbb49d3d8247caf2542393994704292dd5002`, candidate `9742bd41c883361ba9c462f8f06599655c9404b9`, binary diff fingerprint `f45bb67e16a23733b0599bb6f2efd562f924bb17`, Node `v24.14.0` / npm `11.9.0`. `npm test`, `npm run check`(Syntax 359, AREA-SPEC 18, scenario checkpoint 48), `npm run format:check`, generated-output check, `git diff --check`가 fresh PASS했다. 해당 candidate는 README 사용 진입점과 `docs/map-editor.md`를 포함하며 v2 live cutover를 주장하지 않는다.
+- **UI lane 초기 검증 기록:** candidate `7ff38863cd195c6612796ac516780bfd62bef1ce`에서 생성물 검사와 실제 브라우저의 `1-7` Anchor 선택·Inspector Draft 변경·Validate·Apply·fresh Preview를 확인했고 원래 좌표로 되돌려 source 의미 변경은 남기지 않았다. 당시 실행한 자동 테스트 파일은 2026-08-20 사용자 결정으로 제거했다. Map editor는 `1-1`·`1-7` generated source만 편집하며 normal Catalog·실행 중 Run·multiplayer를 바꾸지 않는다.
+- **main 병합 candidate 최종 ledger (2026-08-20):** base `d39cbb49d3d8247caf2542393994704292dd5002`, candidate `9742bd41c883361ba9c462f8f06599655c9404b9`, binary diff fingerprint `f45bb67e16a23733b0599bb6f2efd562f924bb17`, Node `v24.14.0` / npm `11.9.0`. 당시 `npm run check`, `npm run format:check`, generated-output check와 `git diff --check`가 PASS했다. 해당 candidate는 v2 live cutover를 주장하지 않는다.
 
 ### [L1] 적 roster는 행동 계열 기본형과 topology 독립 encounter slot으로 확장한다
 
@@ -214,7 +215,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - enemy slot은 Stage ID가 아니라 topology 독립 `slotId`를 권위 식별자로 사용한다. canonical encounter는 `encounterId/slotId/position/activation`과 nested `enemySelection.fixedEnemyType|allowedEnemyTypes`, 선택형 `legacyStageAlias`만 소유하며 `areaId`를 Runtime encounter 권위로 사용하지 않는다. pool 선택은 `slotId + run seed + world revision`으로 결정한다.
 - 현재 Runtime에는 pure fixed/pool selector, 다섯 기본형의 `enemy-behavior` capability, 서버 fixed-step 진행, snapshot 복원, 포격의 중립 투사체 재사용, 방패의 Rope 충돌 방향 방어가 구현됐다. #625 seamless Sector compiler가 canonical encounter를 실제 world spawn으로 공급하면서 legacy Patrol route와 Cutter rules도 함께 보존한다.
 - 보스·위치·activation·배치 수는 random pool 대상이 아니며 여러 확장형 무작위 중첩, 필수 Anchor 봉쇄, 연속 조작 불가, 예고 없는 공격과 단순 수치형 신규 계열을 만들지 않는다.
-- 자동 검증은 fixed 우선, seed 결정성, 위치·activation·Stable ID 보존, 잘못된 slot 거부, 행동 불변식, 싱글·멀티 공용 조립과 중립 서버 권위 같은 안정적인 코드 계약만 고정한다. roster 목록·가중치·수치·Stage 배치·표시 색은 테스트 snapshot으로 만들지 않으며 사용자 결정에 따라 이 범위의 브라우저 검증을 요구하지 않는다.
+- validator는 위치·activation·Stable ID 보존과 잘못된 slot 거부 같은 저작 계약만 고정한다. roster 목록·가중치·수치·Stage 배치·표시 색은 snapshot으로 만들지 않으며 사용자 결정에 따라 이 범위의 브라우저 검증을 요구하지 않는다.
 
 ### [L1] 대화에서 확정된 결정을 문서 계층에 즉시 흡수한다
 
@@ -242,13 +243,13 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 ### [L1] 버그 수정은 증상 완화가 아니라 근본 불변식을 복구한다
 
-- 자동화 에이전트는 보조 패치 작성자가 아니라 해당 작업의 메인 개발자로서 결과 전체를 책임진다. 최소 diff로 관측 증상만 덮지 않고 단일 권위·공개 계약·모든 호출자·싱글/멀티·표현·저장/복원·migration·테스트·기준 문서까지 필요한 범위를 완결하되, 무관한 기능 추가와 전면 재작성은 하지 않는다.
+- 자동화 에이전트는 보조 패치 작성자가 아니라 해당 작업의 메인 개발자로서 결과 전체를 책임진다. 최소 diff로 관측 증상만 덮지 않고 단일 권위·공개 계약·모든 호출자·싱글/멀티·표현·저장/복원·migration·기준 문서까지 필요한 범위를 완결하되, 무관한 기능 추가와 전면 재작성은 하지 않는다.
 - 같은 기능이나 책임 경계에서 유사 수정이 계속되거나 수정 뒤 연관 버그가 이어지면 근본 구조 검증 트리거로 취급한다. 다음 국소 패치 전에 Is-A·Has-A·Can-Do, 상태의 단일 쓰기 주체, 클라이언트·서버 사건 흐름과 최종 수렴 경계를 확인한다.
 - 사용자가 버그를 고치라고 하면 관측된 한 증상만 예외 처리하지 않고 잘못된 상태 소유권, 식별자, 데이터 흐름 또는 공개 계약을 찾아 복구한다.
 - 최소 diff는 목표가 아니라 제약이다. 같은 원인에서 파생될 수 있는 연관 문제를 막는 데 필요한 모듈 경계와 불변조건까지 수정한다.
-- 회귀 테스트는 보이는 증상뿐 아니라 근본 불변식이 깨진 입력을 재현하고, 잘못 구성된 상태가 사건을 만들기 전에 실패하는지도 검증한다.
+- 반복 버그 검증은 보이는 증상뿐 아니라 근본 불변식이 깨진 입력을 실제 재현하고, 잘못 구성된 상태가 사건을 만들기 전에 validator 또는 공개 명령에서 거부되는지도 확인한다.
 - 구조가 정상이고 결함 원인이 서로 독립적이라는 근거가 있으면 국소 수정으로 끝내며, 반복 발생만을 이유로 불필요한 대규모 리팩터링을 만들지 않는다.
-- 상세 실행 기준은 `docs/development-rules.md`의 **구조적 버그의 책임 경계 복구**와 **테스트와 회귀 방지**를 따른다.
+- 상세 실행 기준은 `docs/development-rules.md`의 **구조적 버그의 책임 경계 복구**와 **검증과 회귀 방지**를 따른다.
 
 ### [L1] 로프 숙련과 Player별 증강 빌드를 핵심 경험으로 둔다
 
@@ -289,7 +290,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 새 싱글 실행과 새 멀티 채널의 seed·revision은 모든 클라이언트가 같은 저작 월드 정의와 결정적 표현을 재현하는 계약으로 유지한다. seed를 절차 경로 통과성 검증 대상으로 사용하지 않는다.
 - 체크포인트 위치는 저작 영역과 섹터 흐름에 맞춰 다시 배치하되, 한번 활성화한 진행 지점은 아래로 내려가도 후퇴하지 않는다.
 - 현재 구현된 최종 연결 영역 `sector-03-08`의 출구는 아직 전체 게임 완료가 아니라 Post-Sector 03 Boss와 Sector 04 연결이 결정되지 않았음을 나타내는 content boundary다.
-- 기본 `npm test`는 정적 Sector geometry, 위치 기반 objective, Player별 Stage 세이브 부활, 전원 사망 공용 진행 보존과 content boundary를 제품 시나리오로 검증한다.
+- 정적 Sector geometry와 저작 계약은 validator로, 위치 기반 objective·Player별 Stage 세이브 부활·전원 사망 공용 진행 보존과 content boundary는 실제 브라우저·멀티플레이 경로로 검증한다.
 - `RunMetrics`가 활성 플레이 시간·체크포인트·처치·피해·로프 절단·사망·첫 generic Augment 선택 시간과 현재 저작 영역 체류 시간·영역별 클리어 시간을 권위 시뮬레이션에서 수집하며, 멀티는 이 값을 서버 snapshot으로 전달해 HUD와 진단 복사에 사용한다. 기존 metric 필드의 Foundation 명칭은 wire 호환 이름이다.
 - 설정 버튼을 1초 길게 눌러 디버그 패널의 **디버그 수치 표시**를 켜면 일반 게임 규칙을 바꾸지 않고 현재 RunMetrics를 표시한다.
 - 메트로배니아식 자유 역주행과 능력 잠금은 초기 범위에서 제외한다. 현재 기준의 상세 구현 흐름은 `docs/sector-01-world-structure-plan.md`를 따른다.
@@ -315,7 +316,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 플레이어는 물리·체력·generic Augment loadout·Action/Rope effect runtime을 Has-A로 소유하고 로프는 별도 `InputDrivenObject`로 둔다. 이동·점프, 로프 포인터, Action 계산의 상태 소유권을 서로 합치지 않는다.
 - `InputDispatcher`는 구체 클래스나 `instanceof` 분기 없이 capability 존재 여부로 입력을 전달한다. 싱글·클라이언트 예측·서버 검증은 같은 디스패처와 믹스인을 사용하며 전송 계층은 이를 재구현하지 않는다.
 - 적 공격·자동 무기와 투사체 운동·클라이언트 충돌도 각 `SimulationDrivenObject`의 Can-Do capability 한 곳에 구현한다. 유도탄과 직선탄은 동일한 `projectile-motion`·`client-projectile-collision` capability ID 아래 서로 다른 믹스인을 조합한다. 월드 단계는 `SimulationDispatcher`에 capability ID를 지정해 같은 객체의 무관한 능력을 실행하지 않으며, 구체 클래스 분기를 중앙 스케줄러·예측 저장소·receipt 처리기에 추가하지 않는다.
-- Player·Rope·Enemy·Projectile처럼 화면에 전달되는 gameplay object는 종류별 `render-snapshot` capability mixin을 조립한다. 각 mixin이 자기 소유 상태를 detached DTO로 만들고 `GameSimulation`은 결과를 scene으로 합성만 하며, live domain object·prototype getter·종류별 `instanceof`/필드 복사 분기를 snapshot 중앙에 두지 않는다. 싱글 보간·오디오 전이와 멀티 hydration은 같은 DTO 계약을 사용하고, 새 renderable object는 capability 누락·중첩 alias·싱글/멀티 parity 회귀 테스트 없이 추가하지 않는다. 상세 기준은 `docs/architecture.md`와 `docs/development-rules.md`다.
+- Player·Rope·Enemy·Projectile처럼 화면에 전달되는 gameplay object는 종류별 `render-snapshot` capability mixin을 조립한다. 각 mixin이 자기 소유 상태를 detached DTO로 만들고 `GameSimulation`은 결과를 scene으로 합성만 하며, live domain object·prototype getter·종류별 `instanceof`/필드 복사 분기를 snapshot 중앙에 두지 않는다. 싱글 보간·오디오 전이와 멀티 hydration은 같은 DTO 계약을 사용하고, 새 renderable object는 capability 누락·중첩 alias·싱글/멀티 화면 parity를 실제 브라우저에서 확인한다. 상세 기준은 `docs/architecture.md`와 `docs/development-rules.md`다.
 - 시뮬레이션 capability 디스패치는 실행 구조만 정리하며 분할 권한을 바꾸지 않는다. 중립 객체는 서버가 진행하고 플레이어 당사자 피격·적중은 소유자 또는 피해 클라이언트가 먼저 claim하는 기존 계약을 유지한다. 상세 구현 규칙은 `docs/architecture.md`와 `docs/development-rules.md`를 따른다.
 - `PlayerRuntimeFactory`는 `PlayerObject`, 별도 `RopeObject`, `AutomaticWeaponObject`와 Has-A 컴포넌트를 조립하고 소유자 입력 객체 목록을 반환한다. `GameSimulation`은 객체 등록·고정 tick·단계 실행·사건 연결을 조정하는 월드 스케줄러로 유지한다.
 - `GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 다음 틱의 입력 capability를 실행한다. 멀티 서버 fixed tick은 같은 스케줄러의 입력 주도 객체 단계를 끄고 플레이어 타이머·무기 쿨다운과 중립 월드만 진행한다.
@@ -441,7 +442,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 - 첫 mock cue ID는 `ui-confirm`, `gameplay-rope-attach`, `gameplay-weapon-fire`, `gameplay-player-hit`, `gameplay-checkpoint-reached`, `ambience-altitude-wind`, `bgm-climb`, `bgm-run-complete`의 8개다. 현재 UI 확인, 로컬 로프 부착, 예측·공유 투사체 생성, 피해 클라이언트의 즉시 피격과 서버 공유, 체크포인트 진행, 실행 중 환경 loop, 등반 BGM과 완료 상태 전환에 각각 binding한다. causal ID가 있는 로컬 예측과 서버 확정은 한 번만 재생하며 이 mock ID 집합은 최종 시나리오 cue 목록이 아니다.
 - 각 clip은 `playback: buffer|stream`을 명시하고 MIME이 포함된 source 배열 순서대로 fallback한다. `buffer`는 fetch 성공과 길이가 0보다 큰 `AudioBuffer` decode 완료, `stream`은 지원 source 선택·metadata 로드·`canplay` 도달·`MediaElementAudioSourceNode` graph 연결 완료를 준비 상태로 본다. source 하나당 timeout은 15초이며 모든 source가 실패한 필수 clip은 시작을 차단하고 선택 clip은 제외한 뒤 진단한다.
 - 준비 뒤 media `play()` 거부도 adapter 내부에 숨기지 않고 실패 voice를 정리해 host snapshot과 진단 복사에 남긴다. 사용자 활성화 제약은 `suspended`로 전이해 다음 입력에서 재시도하고 그 밖의 필수·선택 runtime 실패는 각각 `failed`·`degraded`로 전이한다.
-- buffer source가 graph 연결 뒤 `start()`에 실패해도 최초 오류를 보존하면서 active handle과 node를 즉시 해제한다. `stopAll`은 one-shot·loop를, `suspend`는 재생이 끝난 것으로 간주할 one-shot을 정리하고, `release`는 남은 voice·loop와 cooldown·variation·causal 추적 상태까지 결정적으로 비운다. 동일 loop 72,000회 스트레스 확인과 고유 emitter 1,024개·buffer 시작 실패 자동 회귀는 완료했으며 실제 두 모바일 기기의 장시간 frame·heap 계측은 플레이테스트에 남아 있다. 상세 불변식은 `docs/architecture.md`, `docs/development-rules.md`와 `docs/audio-asset-format.md`를 따른다.
+- buffer source가 graph 연결 뒤 `start()`에 실패해도 최초 오류를 보존하면서 active handle과 node를 즉시 해제한다. `stopAll`은 one-shot·loop를, `suspend`는 재생이 끝난 것으로 간주할 one-shot을 정리하고, `release`는 남은 voice·loop와 cooldown·variation·causal 추적 상태까지 결정적으로 비운다. 과거 자동 스트레스 검증 파일은 제거했으며 실제 두 모바일 기기의 장시간 frame·heap 계측은 플레이테스트에 남아 있다. 상세 불변식은 `docs/architecture.md`, `docs/development-rules.md`와 `docs/audio-asset-format.md`를 따른다.
 - 오디오 resource package category 허용 목록은 `gameplay`, `ui`, `ambience`, `bgm`이다. 각 package는 `assets/runtime/audio/<category>/<asset-id>/audio-manifest.json`에 두고, `assets/runtime/audio/packs/<pack-id>/audio-pack.json`이 category와 stable asset ID로 하나 이상의 package를 조합한다. pack은 package 참조만 소유하고 cue·clip 또는 gameplay binding을 중복 소유하지 않는다. aggregate validator는 알 수 없는 category·package, 중복 참조와 pack 전체 cue ID 충돌을 거부한다. 향후 디버그 선택은 전체 pack 또는 특정 category package를 교체해 새 immutable definition을 조립한다.
 - 일반 UI와 개발 진단을 분리한다. 시작 화면에는 준비 진행률과 필수 실패의 원인·재시도·메뉴 복귀만 표시한다. 선택 자산 실패는 게임을 계속하되 오디오 설정 탭에 `일부 음원 사용 불가` 상태만 작게 표시한다. 설정 버튼 길게 누르기로 여는 디버그 수치와 기존 진단 복사에는 pack/package ID, `loading|ready|degraded|suspended|failed`, AudioContext 상태, clip별 선택 source·MIME·실패 코드, 필수/선택 준비 수, 그룹별 활성 voice 수와 cooldown drop·voice stealing 누계를 포함한다.
 - 필수 stream이 모든 source fallback과 timeout 뒤에도 `canplay`에 도달하지 못하면 다른 gameplay 음원이 준비됐어도 자동 degraded 시작을 허용하지 않는다. `failed`로 시작을 차단하고 재시도·메뉴 복귀를 제공한다. 제작자가 해당 항목을 `required: false`로 명시한 경우에만 제외 후 시작할 수 있다.
@@ -451,9 +452,9 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 ### [L1] 오디오와 그래픽 runtime package는 디버그 선택 가능한 경계를 가진다
 
 - 오디오와 스프라이트가 어느 정도 갖춰지면 디버그 모드에서 여러 작업물을 바꿔가며 같은 게임 동작을 비교 검증할 수 있어야 한다.
-- 최초 오디오 기반과 이후 그래픽 연결은 안정적인 asset ID, catalog와 주입 가능한 definition 선택 경계를 두어 package가 기본 구현에 하드코딩되지 않게 한다. 오디오는 공개 pack/category override와 bootstrap definition loader를 회귀 테스트한다.
+- 최초 오디오 기반과 이후 그래픽 연결은 안정적인 asset ID, catalog와 주입 가능한 definition 선택 경계를 두어 package가 기본 구현에 하드코딩되지 않게 한다. 오디오는 공개 pack/category override와 bootstrap definition loader를 validator와 실제 로딩 경로에서 확인한다.
 - package 선택은 표현 자료만 바꾸며 물리·충돌·전투·네트워크 권위와 시뮬레이션 상태를 바꾸지 않는다.
-- 이번 오디오 작업은 실제 디버그 선택 UI·URL·hot-swap을 구현하지 않는다. stable ID·catalog·definition 주입과 서로 다른 가짜 package 교체 테스트까지 만들고, 실제 선택 UX는 작업물이 쌓인 뒤 추가한다.
+- 이번 오디오 작업은 실제 디버그 선택 UI·URL·hot-swap을 구현하지 않는다. stable ID·catalog·definition 주입 경계까지만 유지하고, 실제 선택 UX는 작업물이 쌓인 뒤 추가한다.
 
 ### [L1] mock 기반 개발은 전문 제작물을 기다리지 않는다
 
@@ -506,7 +507,7 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 - `/codex plan/status/result/cancel`만 V1에 포함하고 실제 코드 수정, 설치, GitHub 게시와 병합은 제외한다.
 - Discord 내용은 비신뢰 데이터 경계와 입력 상한을 적용하고 `meeting-to-game-plan`, `repo-task-plan`, `discord-repo-cross-reference` Skill만 선택할 수 있다.
-- `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·테스트·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.codex/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
+- `discord-repo-cross-reference`는 Discord 주장·결정·작업과 저장소 코드·문서·validator·결정 기록을 양방향으로 대응시키되 어느 쪽도 자동 승인이나 수정 권한으로 취급하지 않는다. 실행 계약은 `.codex/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Discord 자유 조회·공유는 브라우저 자동화나 meeting-bot 내부 구현이 아니라 저장소의 `.codex/config.toml`에서 범용 `@discord-mcp/cli` stdio MCP를 직접 실행한다. 자격 증명은 저장소에 두지 않고 로컬에서는 `DISCORD_TOKEN`, Codex Cloud에서는 별도 Secret으로 관리한다. 서버·채널은 봇이 볼 수 있는 목록에서 대화 중 선택을 재사용하되 복수이거나 모호하면 질문한다. MCP는 `users,messages,channels`만 노출하고, 쓰기는 사용자가 승인한 문구의 메시지 전송만 허용하며 편집·삭제·반응·관리 작업은 금지한다. 실행 계약은 `.codex/skills/discord-repo-cross-reference/SKILL.md`를 따른다.
 - Discord의 공개 `/codex` 게이트웨이는 고정 loopback Ollama와 허용 Skill만 사용하고 구조화 출력을 검증하며 애플리케이션 비밀을 전달하지 않는다. 인증된 Codex CLI와 LM Studio 공급자는 공개 게이트웨이에서 거부하여 서버 멤버가 Codex 계정 할당량이나 더 넓은 로컬 엔드포인트를 소비하지 못하게 한다.
 - `/codex` 출력은 신뢰된 instruction에 한글이 있으면 한국어, 없으면 영어를 요청한다. 결과의 모든 표시 필드는 Latin·Hangul 문자 체계만 허용하고 저장·게시 전에 재검증한다. 한자·가나 등 비허용 문자가 나오면 로컬 Ollama로 1회만 교정하며, 반복 실패와 기존 비호환 결과는 원문을 게시하지 않는다.
@@ -517,4 +518,4 @@ RTT 측정용 명령 송신 시각은 권위 snapshot ACK로 정리하고, ACK�
 
 - 현재 구현과 다음 작업에 영향을 주는 결정만 이 문서에 유지한다.
 - 완전히 흡수되거나 대체된 결정은 대체 이유와 함께 `docs/decision-history.md`로 이동한다.
-- 수치와 구현 사실은 코드·테스트와 일치시킨다.
+- 수치와 구현 사실은 코드·validator·실제 실행 결과와 일치시킨다.
