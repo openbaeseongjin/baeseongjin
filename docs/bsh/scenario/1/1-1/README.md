@@ -153,7 +153,7 @@ S0 VERIFIED system:
 
 DESIGN LOCKED local Player Bark:
 `뭐야…?`
-Status: `NOT IMPLEMENTED — PLAYER BARK LAYER`
+Implementation coverage: `npm run validate:direction-specs`
 
 S1 First Rope:
 no Player text
@@ -176,7 +176,7 @@ S5 VERIFIED gate:
 
 DESIGN LOCKED local Player Bark:
 `…일단 위로.`
-Status: `NOT IMPLEMENTED — PLAYER BARK LAYER`
+Implementation coverage: `npm run validate:direction-specs`
 
 ## 10. Camera target
 

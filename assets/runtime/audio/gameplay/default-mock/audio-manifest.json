@@ -34,6 +34,42 @@
             "channels": "mono",
             "durationSeconds": 0.42,
             "sources": [{ "path": "checkpoint-reached.wav", "mimeType": "audio/wav" }]
+        },
+        "direction-relay-trip-settle": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.48,
+            "sources": [{ "path": "direction-relay-trip-settle.wav", "mimeType": "audio/wav" }]
+        },
+        "direction-air-rope-landing": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.45,
+            "sources": [{ "path": "direction-air-rope-landing.wav", "mimeType": "audio/wav" }]
+        },
+        "direction-cable-brake-settle": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.55,
+            "sources": [{ "path": "direction-cable-brake-settle.wav", "mimeType": "audio/wav" }]
+        },
+        "direction-free-air-attach": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.38,
+            "sources": [{ "path": "direction-free-air-attach.wav", "mimeType": "audio/wav" }]
+        },
+        "direction-rope-air-priority": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.28,
+            "sources": [{ "path": "direction-rope-air-priority.wav", "mimeType": "audio/wav" }]
+        },
+        "direction-security-beep-servo": {
+            "playback": "buffer",
+            "channels": "mono",
+            "durationSeconds": 0.6,
+            "sources": [{ "path": "direction-security-beep-servo.wav", "mimeType": "audio/wav" }]
         }
     },
     "cues": {
@@ -97,6 +133,71 @@
             "maxVoices": 1,
             "retriggerCooldownMs": 500,
             "priority": 80
+        },
+        "direction-relay-trip-settle": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-relay-trip-settle" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 500,
+            "priority": 70
+        },
+        "direction-rope-priority": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "rope-attach" }],
+            "spatial": "world",
+            "gainDb": -5,
+            "maxVoices": 1,
+            "retriggerCooldownMs": 350,
+            "priority": 58
+        },
+        "direction-air-rope-landing": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-air-rope-landing" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 500,
+            "priority": 62
+        },
+        "direction-cable-brake-settle": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-cable-brake-settle" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 800,
+            "priority": 66
+        },
+        "direction-free-air-attach": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-free-air-attach" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 500,
+            "priority": 74
+        },
+        "direction-rope-air-priority": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-rope-air-priority" }],
+            "spatial": "world",
+            "gainDb": -3,
+            "maxVoices": 1,
+            "retriggerCooldownMs": 500,
+            "priority": 60
+        },
+        "direction-security-beep-servo": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-security-beep-servo" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 1000,
+            "priority": 78
         }
     }
 }

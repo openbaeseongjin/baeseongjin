@@ -38,27 +38,4 @@ export function definePlayerMessage({
     });
 }
 
-function bark(messageId, areaId, afterStoryId, text, properties = {}) {
-    return Object.freeze({
-        ...definePlayerMessage({
-            messageId,
-            channel: "player-bark",
-            audience: "local-player",
-            speakerId: "local-player",
-            text,
-            ...properties
-        }),
-        areaId,
-        trigger: Object.freeze({ kind: "after-story", storyId: afterStoryId })
-    });
-}
-
-export const DEFAULT_PLAYER_MESSAGE_DEFINITIONS = Object.freeze([
-    bark("sector-01-01:first-reaction", "sector-01-01", "sector-01-01:lockdown", "뭐야…?", { priority: 20 }),
-    bark("sector-01-01:temporary-goal", "sector-01-01", "sector-01-01:gate-open", "…일단 위로.", {
-        priority: 10
-    }),
-    bark("sector-01-02:lift-reaction", "sector-01-02", "sector-01-02:lift-offline", "…리프트도?", {
-        priority: 20
-    })
-]);
+export const DEFAULT_PLAYER_MESSAGE_DEFINITIONS = Object.freeze([]);

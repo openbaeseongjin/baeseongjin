@@ -40,7 +40,7 @@ category는 `gameplay`, `ui`, `ambience`, `bgm`만 사용한다. asset ID와 파
 - 참고 자료와 금지할 표현
 - 정식 작업인지 구조 검증용 mock인지
 
-현재 `default-mock`의 9개 cue는 시스템 검증 자료다. 최종 시나리오의 음향 방향이나 전체 cue 목록으로 간주하지 않는다.
+현재 `default-mock`의 16개 cue는 시스템 검증 자료다. 이 중 일곱 Direction cue는 1-1/1-2의 relay·rope/air·cable/brake·free-air attach·security 전환 adapter를 검증하는 procedural mock이며 최종 시나리오 음향 방향으로 간주하지 않는다.
 
 ## 완료 체크리스트
 

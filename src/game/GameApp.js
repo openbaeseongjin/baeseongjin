@@ -18,8 +18,7 @@ import {
     localTriggerObjects,
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
-import { AuthoredStoryPresentation } from "./presentation/AuthoredStoryPresentation.js";
-import { PlayerMessagePresentation } from "./presentation/PlayerMessagePresentation.js";
+import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
@@ -37,7 +36,8 @@ export class GameApp {
         hudVisible = true,
         ropeTuning = null,
         debugAugmentIds = [],
-        playerDefinition = null
+        playerDefinition = null,
+        directionDefinitions = []
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = renderer
@@ -77,8 +77,17 @@ export class GameApp {
             spriteSize: deathPresentation.size
         });
         this.worldUnlockPresentation = new WorldUnlockPresentation();
-        this.storyPresentation = new AuthoredStoryPresentation();
-        this.playerMessagePresentation = new PlayerMessagePresentation({ viewerId: this.authority.playerId });
+        const direction = createLocalDirectionRuntime({
+            viewerId: this.authority.playerId,
+            definitions: directionDefinitions,
+            audioBindings
+        });
+        this.directionRuntime = direction.runtime;
+        this.storyPresentation = direction.storyPresentation;
+        this.playerMessagePresentation = direction.messagePresentation;
+        this.directionLightingPresentation = direction.lightingPresentation;
+        this.directionCharacterPresentation = direction.characterPresentation;
+        this.directionCoverage = direction.coverage;
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: (alpha) => this.render(alpha)
@@ -161,6 +170,15 @@ export class GameApp {
         this.combatFeedback.update(dt);
         state = this.authority.snapshot();
         const cameraShot = this.updatePresentationCamera(dt, state.player, state.world);
+        const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
+        this.directionRuntime.update(dt, {
+            areaId: cameraShot.areaId,
+            cameraZoneId: cameraShot.zoneId,
+            localX: cameraShot.localX,
+            localY: cameraShot.localY,
+            events: authorityEvents,
+            audioContext: audioScene
+        });
         const storyPresentation = this.storyPresentation.update(dt, {
             currentAreaId: cameraShot.areaId,
             currentAreaLocalX: cameraShot.localX,
@@ -172,7 +190,8 @@ export class GameApp {
             currentAreaId: cameraShot.areaId,
             storyPresentation
         });
-        const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
+        this.directionLightingPresentation.update(dt, { areaId: cameraShot.areaId });
+        this.directionCharacterPresentation.update(dt);
         this.audioBindings?.presentFrame({
             events: [...authorityEvents, ...predictedImpacts],
             context: audioScene,
@@ -269,6 +288,8 @@ export class GameApp {
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
             playerMessagePresentation: this.playerMessagePresentation.snapshot(),
+            directionLightingPresentation: this.directionLightingPresentation.snapshot(),
+            directionCharacterPresentation: this.directionCharacterPresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ??
                 this.statusFeedback.snapshot() ??
@@ -284,7 +305,12 @@ export class GameApp {
             }
         });
         if (this.metricsVisible) {
-            this.onDiagnostics({ metrics: state.metrics, renderMetrics, worldSeed: state.world.seed });
+            this.onDiagnostics({
+                metrics: state.metrics,
+                renderMetrics,
+                worldSeed: state.world.seed,
+                directionCoverage: this.directionCoverage
+            });
         }
     }
 }

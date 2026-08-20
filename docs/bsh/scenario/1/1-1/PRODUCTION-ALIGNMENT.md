@@ -6,9 +6,9 @@ Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 
 `MAP-PREVIEW.html`의 ENTRY→A→P1→P2→Structural Grip→C→P3→Final Deck endpoint 전체를 Runtime `routePoints`와 seamless `world.route`에 반영했다. Collision 좌표는 이미 REV8과 일치해 변경하지 않았다.
 
-## Player Bark rollout — 0.44.0
+## Direction Runtime migration — 0.45.0
 
-`뭐야…?`는 entry System cue `GROUND SERVICE ACCESS / LOCKDOWN` 뒤, `…일단 위로.`는 `SERVICE SHAFT 02 / ACCESS OPEN` 뒤 local Player 머리 위 말풍선에서 글자가 차례로 나타나며 한 번 표시한다. 두 Bark는 System Story·objective·network state와 분리된 공용 message catalog/queue를 사용한다.
+`DIRECTION-SPEC.json`이 `DirectionDefinition`으로 compile되어 Camera·System Text·Bark·Audio·Lighting·비언어 track을 실행한다. `뭐야…?`는 entry System cue `GROUND SERVICE ACCESS / LOCKDOWN` 뒤, `…일단 위로.`는 `SERVICE SHAFT 02 / ACCESS OPEN` 뒤 local Player 머리 위 말풍선에서 글자가 차례로 나타나며 한 번 표시한다. Stage 문자열을 `AuthoredStoryPresentation`이나 Bark catalog에 중복하지 않는다.
 
 ## Current Runtime vs target
 
@@ -26,7 +26,7 @@ Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 | Casing | `shaft-shell-left/right`, ±624, 32×1024, `grappleable:false`, spans full room height (center-anchor formula: `topY = centerY - height/2`) | ±624, 32×1024 | VERIFIED |
 | Anchor B | removed (matches `forbidden: "dedicated grapple anchor B"`) | not present | VERIFIED |
 | Story sequence | current verified | preserve exact | VERIFIED / PRESERVE (trigger ids only, no text changed this pass) |
-| Player Bark | absent | two local barks | NOT IMPLEMENTED (no Bark layer exists anywhere in the codebase) |
+| Direction tracks | compiled source | Camera·Story·Bark·Audio·Lighting·nonverbal | AUTO: `npm run validate:direction-specs` |
 
 ## Runtime implementation note (2026-08-19)
 

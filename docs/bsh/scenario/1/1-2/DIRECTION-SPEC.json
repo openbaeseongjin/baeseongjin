@@ -1,4 +1,5 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
   "stage": {
@@ -49,7 +50,6 @@
       "tracks": [
         {
           "type": "systemText",
-          "status": "VERIFIED",
           "content": {
             "title": "LIFT CONTROL",
             "detail": "OFFLINE"
@@ -60,7 +60,6 @@
         },
         {
           "type": "dialogue",
-          "status": "NOT IMPLEMENTED",
           "content": {
             "speaker": "PLAYER",
             "text": "…리프트도?"
@@ -69,7 +68,6 @@
         },
         {
           "type": "audio",
-          "status": "NOT IMPLEMENTED",
           "action": "dead-motor-silence-plus-cable-brake-settle"
         }
       ]
@@ -94,7 +92,6 @@
       "tracks": [
         {
           "type": "systemText",
-          "status": "VERIFIED",
           "content": {
             "title": "AUTOMATIC LIFT SERVICE",
             "detail": "SUSPENDED · MANUAL ACCESS ONLY"
@@ -137,7 +134,6 @@
         },
         {
           "type": "audio",
-          "status": "NOT IMPLEMENTED",
           "action": "release-free-air-clear-c-attach"
         }
       ]
@@ -170,7 +166,6 @@
         },
         {
           "type": "audio",
-          "status": "NOT IMPLEMENTED",
           "action": "rope-air-priority-lift-remains-silent"
         }
       ]
@@ -223,7 +218,6 @@
       "tracks": [
         {
           "type": "systemText",
-          "status": "VERIFIED",
           "action": "sequence",
           "items": [
             {
@@ -244,7 +238,6 @@
         },
         {
           "type": "audio",
-          "status": "NOT IMPLEMENTED",
           "action": "dead-machinery-to-clean-security-beep-servo"
         }
       ]

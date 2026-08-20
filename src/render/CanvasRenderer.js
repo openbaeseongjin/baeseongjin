@@ -89,6 +89,8 @@ export class CanvasRenderer {
             renderStats,
             presentationTimeSeconds: this.now()
         });
+        this.drawDirectionLighting(scene.directionLightingPresentation, scene);
+        this.drawDirectionCharacter(scene.directionCharacterPresentation, scene);
         if (scene.hudVisible !== false) {
             this.drawAccessGuide(scene);
             this.drawLocalStatusHud(scene);
@@ -174,6 +176,54 @@ export class CanvasRenderer {
             this.cssWidth * 0.5,
             Math.min(this.cssHeight - 18, startY + cardHeight + 28)
         );
+        ctx.restore();
+    }
+
+    drawDirectionLighting(presentation, scene) {
+        if (!presentation || presentation.presetId !== "maintenance-white-local-amber") return;
+        const ctx = this.context;
+        const fadeIn = Math.min(1, presentation.age / 0.4);
+        ctx.save();
+        ctx.globalAlpha = fadeIn;
+        ctx.fillStyle = "rgba(226, 232, 240, 0.035)";
+        ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
+        if (scene.player?.position && scene.camera && typeof ctx.createRadialGradient === "function") {
+            const screen = projectWorldToScreen(scene.player.position, scene.camera);
+            const gradient = ctx.createRadialGradient(screen.x, screen.y, 12, screen.x, screen.y, 190);
+            gradient.addColorStop(0, "rgba(251, 191, 36, 0.13)");
+            gradient.addColorStop(1, "rgba(251, 191, 36, 0)");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(screen.x - 190, screen.y - 190, 380, 380);
+        }
+        ctx.restore();
+    }
+
+    drawDirectionCharacter(presentation, scene) {
+        if (!presentation || presentation.kind !== "exhale" || !scene.camera) return;
+        const speaker =
+            [scene.player, ...(scene.otherPlayers ?? [])].find((player) => player?.id === presentation.speakerId) ??
+            scene.player;
+        if (!speaker?.position) return;
+        const ctx = this.context;
+        const screen = projectWorldToScreen(speaker.position, scene.camera);
+        const progress = presentation.age / presentation.durationSeconds;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, 1 - progress));
+        ctx.strokeStyle = "rgba(226, 232, 240, 0.72)";
+        ctx.lineWidth = 2;
+        for (const [index, delay] of [0, 0.16].entries()) {
+            const localProgress = Math.max(0, Math.min(1, progress - delay));
+            ctx.globalAlpha = Math.max(0, Math.min(1, 1 - localProgress)) * (index === 0 ? 1 : 0.58);
+            ctx.beginPath();
+            ctx.arc(
+                screen.x + 18 + localProgress * 18,
+                screen.y - 23 - index * 7 - localProgress * 10,
+                6 + localProgress * 4,
+                Math.PI * 0.88,
+                Math.PI * 1.82
+            );
+            ctx.stroke();
+        }
         ctx.restore();
     }
 

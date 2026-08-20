@@ -51,11 +51,11 @@
 | [1-7](./1-7/README.md) · [제작 정렬](./1-7/PRODUCTION-ALIGNMENT.md) | PRESSURE BYPASS | Rope·Build·Wind·Sentry 조합 · Camera와 핵심 Story binding 구현 |
 | [1-8](./1-8/README.md) · [제작 정렬](./1-8/PRODUCTION-ALIGNMENT.md) | CONTAINMENT GATE | 일반 구간 최종 종합·Camera와 핵심 Story binding 구현 · Shutdown/정식 Prop 미구현 |
 
-1-5~1-8의 Camera Zone과 핵심 Story binding은 [Camera/Story Implementation Handoff](./CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)를 기준으로 Runtime에 반영됐다. Area의 `storyTriggers`는 시나리오 기획 인벤토리이며 구현 완료 근거가 아니다. 실제 표시는 `AuthoredStoryPresentation`의 area entry·position·`story-display` cue·objective/gate event binding이 소유한다.
+1-1/1-2는 `DIRECTION-SPEC.json`을 공용 compiler가 실행 definition으로 변환하고 coverage validator가 구현 상태를 산출한다. 1-3~1-8의 Camera Zone과 핵심 Story binding은 아직 [Camera/Story Implementation Handoff](./CAMERA-STORY-IMPLEMENTATION-HANDOFF.md)와 legacy `AuthoredStoryPresentation` 경로를 사용하며, 후속 migration 전까지 Area의 `storyTriggers`는 기획 인벤토리일 뿐 구현 완료 근거가 아니다.
 
 1-1~1-3은 증강 없는 기본 Rope와 Telemetry 축적 구간, 1-4는 첫 Foundation Augment 선택, 1-5~1-8은 같은 공간을 선택한 증강에 따라 다르게 해석하는 검증 구간이다. Checkpoint는 진행 저장과 개인 부활만 소유하며 Foundation 선택은 authored Node에서 연다.
 
-0.44.0부터 시설 System Story와 분리된 local Player Bark layer를 사용한다. 첫 rollout은 1-1 `뭐야…?`·`…일단 위로.`, 1-2 `…리프트도?` 세 줄이며 각 플레이어 자기 화면의 캐릭터 머리 위 말풍선에서 글자가 차례로 나타난다. message catalog와 queue는 표시 속도와 future party-chat audience를 수용할 수 있지만 현재 Sector 문구를 네트워크로 복제하지 않는다.
+0.45.0부터 1-1/1-2의 System Story와 Player Bark는 별도 Stage 문자열 catalog가 아니라 Direction compiler가 같은 Beat 원본에서 인과 순서대로 만든다. 세 Bark는 각 플레이어 자기 화면의 캐릭터 머리 위에서 타이핑되며, message queue는 future party-chat audience를 수용하지만 현재 Sector 문구를 네트워크로 복제하지 않는다.
 
 ## 자산 상태
 

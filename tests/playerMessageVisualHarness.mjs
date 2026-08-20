@@ -1,32 +1,51 @@
-import { PlayerMessagePresentation } from "../src/game/presentation/PlayerMessagePresentation.js";
+import { loadDefaultDirectionDefinitions } from "../src/game/direction/DirectionCatalog.js";
+import { createLocalDirectionRuntime } from "../src/game/direction/DirectionProductionAdapters.js";
 import { CanvasRenderer } from "../src/render/CanvasRenderer.js";
 
 const canvas = document.getElementById("preview");
 const context = canvas.getContext("2d");
 const mobile = new URLSearchParams(globalThis.location.search).get("viewport") === "mobile";
 const expected = Object.freeze({
-    messageId: "sector-01-02:lift-reaction",
+    messageId: "1-2:s0:dialogue",
     channel: "player-bark",
     audience: "local-player",
     speakerId: "player-local",
     text: "…리프트도?",
     durationSeconds: 1.8,
     revealCharactersPerSecond: 18,
-    priority: 20,
-    causalId: "sector-01-02:lift-reaction",
+    priority: 0,
+    causalId: "1-2:s0:dialogue",
     visibleText: "…리프",
     revealComplete: false,
     age: 0.2
 });
 
-const presentation = new PlayerMessagePresentation({ viewerId: "player-local" });
-presentation.update(0, {
-    currentAreaId: "sector-01-02",
-    storyPresentation: { id: "sector-01-02:lift-offline" }
+const direction = createLocalDirectionRuntime({
+    viewerId: "player-local",
+    definitions: await loadDefaultDirectionDefinitions()
 });
-presentation.update(0, { currentAreaId: "sector-01-02" });
-presentation.update(0.2, { currentAreaId: "sector-01-02" });
-const actual = presentation.snapshot();
+direction.runtime.update(0, {
+    areaId: "sector-01-02",
+    cameraZoneId: "lift-failure",
+    localX: 448,
+    localY: -32,
+    events: [],
+    audioContext: null
+});
+direction.storyPresentation.update(0, { currentAreaId: "sector-01-02" });
+direction.messagePresentation.update(0, { storyPresentation: direction.storyPresentation.snapshot() });
+direction.runtime.update(1.6, {
+    areaId: "sector-01-02",
+    cameraZoneId: "lift-failure",
+    localX: 448,
+    localY: -32,
+    events: [],
+    audioContext: null
+});
+direction.storyPresentation.update(1.6, { currentAreaId: "sector-01-02" });
+direction.messagePresentation.update(0, { storyPresentation: direction.storyPresentation.snapshot() });
+direction.messagePresentation.update(0.2);
+const actual = direction.messagePresentation.snapshot();
 
 function drawBackdrop(offsetX, width) {
     context.save();

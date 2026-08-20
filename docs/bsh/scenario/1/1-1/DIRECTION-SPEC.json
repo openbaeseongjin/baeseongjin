@@ -1,4 +1,5 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
   "stage": {
@@ -48,7 +49,6 @@
       "tracks": [
         {
           "type": "systemText",
-          "status": "VERIFIED",
           "content": {
             "title": "GROUND SERVICE ACCESS",
             "detail": "LOCKDOWN"
@@ -59,7 +59,6 @@
         },
         {
           "type": "dialogue",
-          "status": "NOT IMPLEMENTED",
           "content": {
             "speaker": "PLAYER",
             "text": "뭐야…?"
@@ -68,12 +67,10 @@
         },
         {
           "type": "audio",
-          "status": "NOT IMPLEMENTED",
           "action": "normal-hum-relay-trip-shutter-settle"
         },
         {
           "type": "lighting",
-          "status": "NOT IMPLEMENTED",
           "action": "maintenance-white-plus-local-amber"
         }
       ]
@@ -105,7 +102,6 @@
         },
         {
           "type": "audio",
-          "status": "NOT IMPLEMENTED",
           "action": "rope-priority"
         }
       ]
@@ -165,12 +161,10 @@
         },
         {
           "type": "character",
-          "status": "NOT IMPLEMENTED",
           "action": "optional-nonverbal-exhale"
         },
         {
           "type": "audio",
-          "status": "NOT IMPLEMENTED",
           "action": "air-rope-landing-priority"
         }
       ]
@@ -194,7 +188,6 @@
       "tracks": [
         {
           "type": "systemText",
-          "status": "VERIFIED",
           "action": "sequence",
           "items": [
             {
@@ -238,7 +231,6 @@
       "tracks": [
         {
           "type": "systemText",
-          "status": "VERIFIED",
           "content": {
             "title": "SERVICE SHAFT 02",
             "detail": "ACCESS OPEN"
@@ -249,7 +241,6 @@
         },
         {
           "type": "dialogue",
-          "status": "NOT IMPLEMENTED",
           "content": {
             "speaker": "PLAYER",
             "text": "…일단 위로."

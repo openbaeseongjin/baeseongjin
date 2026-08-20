@@ -1,4 +1,4 @@
-import { DEFAULT_PLAYER_MESSAGE_DEFINITIONS, definePlayerMessage } from "./PlayerMessageCatalog.js";
+import { definePlayerMessage } from "./PlayerMessageCatalog.js";
 
 const graphemeSegmenter =
     typeof Intl.Segmenter === "function" ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : null;
@@ -9,22 +9,12 @@ function messageCharacters(text) {
 }
 
 export class PlayerMessagePresentation {
-    constructor({ viewerId, definitions = DEFAULT_PLAYER_MESSAGE_DEFINITIONS } = {}) {
+    constructor({ viewerId } = {}) {
         if (typeof viewerId !== "string" || viewerId.length === 0) throw new Error("viewerId must be non-empty");
         this.viewerId = viewerId;
-        this.definitions = Object.freeze([...definitions]);
-        this.definitionsByStoryId = new Map();
-        for (const definition of this.definitions) {
-            const storyId = definition.trigger?.kind === "after-story" ? definition.trigger.storyId : null;
-            if (!storyId) continue;
-            this.definitionsByStoryId.set(storyId, [...(this.definitionsByStoryId.get(storyId) ?? []), definition]);
-        }
         this.queue = [];
         this.current = null;
         this.currentAge = 0;
-        this.observedStory = false;
-        this.lastStoryId = null;
-        this.lastStoryAreaId = null;
         this.seenCausalIds = new Set();
         this.blocked = false;
     }
@@ -37,27 +27,8 @@ export class PlayerMessagePresentation {
         return true;
     }
 
-    enqueueDefinition(definition) {
-        return this.enqueue({
-            ...definition,
-            speakerId: definition.speakerId === "local-player" ? this.viewerId : definition.speakerId
-        });
-    }
-
-    update(dt, { currentAreaId = null, storyPresentation = null, incomingMessages = [] } = {}) {
+    update(dt, { storyPresentation = null, incomingMessages = [] } = {}) {
         if (!Number.isFinite(dt) || dt < 0) throw new Error("PlayerMessagePresentation dt must be non-negative");
-        const storyId = storyPresentation?.id ?? null;
-        if (this.observedStory && this.lastStoryId && storyId !== this.lastStoryId) {
-            const definitions = [...(this.definitionsByStoryId.get(this.lastStoryId) ?? [])].sort(
-                (left, right) => right.priority - left.priority
-            );
-            for (const definition of definitions) {
-                if (definition.areaId === this.lastStoryAreaId) this.enqueueDefinition(definition);
-            }
-        }
-        this.observedStory = true;
-        if (storyId !== this.lastStoryId) this.lastStoryAreaId = currentAreaId;
-        this.lastStoryId = storyId;
         const prioritizedIncomingMessages = incomingMessages
             .map((message) => definePlayerMessage(message))
             .sort((left, right) => right.priority - left.priority);

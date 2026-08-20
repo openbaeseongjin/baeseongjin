@@ -9,6 +9,8 @@
 
 `default-mock` WAV는 `scripts/generateAudioMockAssets.mjs`가 만든 48 kHz PCM 구조 검증 자료이며 정식 음향 방향이 아닙니다. 다시 만들려면 generator를 실행하고 pack validator를 통과시킵니다.
 
+0.45.0 gameplay package의 `direction-*` cue 일곱 개는 1-1/1-2 Direction Runtime의 relay, rope/air, cable/brake, free-air attach와 security 전환 adapter를 검증하는 procedural mock이다. 기획 action token은 `DirectionDefinition` authoring adapter가 cue ID로 변환하며 gameplay trigger를 manifest에 넣지 않는다.
+
 현재 gameplay package의 `gameplay-action-swing`은 Action 시작 연결을 검증하기 위해 기존 짧은 mock 변형을 재사용한다. 이는 정식 주먹·Action 음색이 아니며, 후속 오디오 작업자는 stable cue ID를 유지한 채 전용 48 kHz master와 runtime source로 교체한다.
 
 ```powershell
