@@ -156,11 +156,11 @@ export class InputSampler {
         this.target.addEventListener("keydown", this.onKeyDown);
         this.target.addEventListener("keyup", this.onKeyUp);
         this.target.addEventListener("blur", this.onInterrupted);
+        this.target.addEventListener("pointerup", this.onPointerUp, true);
+        this.target.addEventListener("pointercancel", this.onPointerCancel, true);
         this.documentTarget?.addEventListener?.("visibilitychange", this.onVisibilityChange);
         this.surface.addEventListener("pointermove", this.onPointerMove);
         this.surface.addEventListener("pointerdown", this.onPointerDown);
-        this.surface.addEventListener("pointerup", this.onPointerUp);
-        this.surface.addEventListener("pointercancel", this.onPointerCancel);
         this.surface.addEventListener("pointerleave", this.onPointerLeave);
         this.surface.addEventListener("contextmenu", this.onContextMenu);
         this.attached = true;
@@ -171,11 +171,11 @@ export class InputSampler {
         this.target.removeEventListener("keydown", this.onKeyDown);
         this.target.removeEventListener("keyup", this.onKeyUp);
         this.target.removeEventListener("blur", this.onInterrupted);
+        this.target.removeEventListener("pointerup", this.onPointerUp, true);
+        this.target.removeEventListener("pointercancel", this.onPointerCancel, true);
         this.documentTarget?.removeEventListener?.("visibilitychange", this.onVisibilityChange);
         this.surface.removeEventListener("pointermove", this.onPointerMove);
         this.surface.removeEventListener("pointerdown", this.onPointerDown);
-        this.surface.removeEventListener("pointerup", this.onPointerUp);
-        this.surface.removeEventListener("pointercancel", this.onPointerCancel);
         this.surface.removeEventListener("pointerleave", this.onPointerLeave);
         this.surface.removeEventListener("contextmenu", this.onContextMenu);
         this.clearTransientInput();
