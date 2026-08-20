@@ -249,9 +249,9 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 각 사망자는 자기 Player state의 `respawnAnchorId`가 가리키는 최근 접촉 landmark(Stage)의 안전한 entry에서 독립 부활한다. 아직 직접 접촉하지 않은 landmark anchor는 그 Player에게 복원할 수 없다. 다른 Player의 전진·부활과 같은 tick 전원 사망은 이 값을 바꾸지 않으며 공용 reset은 향후 Timer/Purge의 명시적 사건으로만 추가한다.
 - 적은 사거리 안의 살아 있는 플레이어 중 최근접 대상을 선택하고 거리 동률은 ID로 결정한다. 적 투사체의 생성·직선 궤적·8초 수명은 서버가 진행한다. 각 피해 클라이언트가 자기 예측 위치에서 로프를 몸체보다 먼저 판정해 playerId가 있는 claim을 보내며, 서버 고정 스텝은 지연된 플레이어 위치로 충돌을 먼저 만들지 않는다.
 - 현재 구현된 마지막 영역 `sector-03-08`은 다음 시나리오가 아직 연결되지 않은 content boundary이며 `completed` 전체 게임 종료로 판정하지 않는다.
-- `GameSimulation`이 플레이어·로프·적·투사체·체력·낙하 피해·사망·플레이어별 active Stage checkpoint 부활을 소유한다. legacy 메서드명 `respawnPlayerAtCheckpoint()`는 대상 Player state의 `respawnAnchorId`를 소비한다. `PlayerPhysics`는 공중→접지 전이와 충돌 보정 전 속도만 보고하고, `FallDamage`가 순수 피해량을 계산하며 `GameSimulation`이 HP·지표·피드백·부활을 한 번 전이한다.
-- `AutomaticWeaponObject`와 플레이어 투사체 spawn/hit claim은 보존하지만 기본 플레이어에서는 `isEnabled = false`다. 현재 기본 공격은 플레이어 Has-A `RopeImpactAttack`이 로프 부착·최소 속도·적 원형 겹침의 새 진입을 감지하고, 싱글은 즉시 적 HP를 적용하며 멀티는 공격자 예측 피드백 뒤 `rope-impact` claim으로 서버 소유 적 HP와 resolve 사건을 확정한다.
-- `RopeImpactAttack`은 소유 클라이언트에서 현재 겹친 적 ID 집합을 소유해 같은 접촉의 반복 피해를 막고, 분리 뒤 재진입 때만 새 prediction ID를 만든다. 서버는 claim 소유권·tick·prediction ID 중복·공식 피해와 대상 생존/tombstone을 검증하며 로프 부착·속도·적 위치·접촉 집합을 지연된 복제 상태로 다시 만들지 않는다.
+- `GameSimulation`이 플레이어·로프·적·투사체·체력·낙하 피해·사망·플레이어별 active Stage checkpoint 부활을 소유한다. legacy 메서드명 `respawnPlayerAtCheckpoint()`는 대상 Player state의 `respawnAnchorId`를 소비한다. `PlayerPhysics`는 공중→접지 전이와 충돌 보정 전 속도만 보고하고, `FallDamage`가 `800~1400px/s` 구간을 최대 체력 `0~50%`로 선형 계산하며 `GameSimulation`이 HP·지표·피드백·부활을 한 번 전이한다.
+- `AutomaticWeaponObject`와 플레이어 투사체 spawn/hit claim은 보존하지만 기본 플레이어에서는 `isEnabled = false`다. 현재 기본 공격은 플레이어 Has-A `RopeImpactAttack`이 로프 부착·최소 속도·적 원형 겹침의 새 진입을 감지하고, 충돌 속력 `1000px/s → 100 피해` 비례식을 적용한다. 싱글은 즉시 적 HP를 적용하며 멀티는 공격자 예측 피드백 뒤 `rope-impact` claim으로 서버 소유 적 HP와 resolve 사건을 확정한다.
+- `RopeImpactAttack`은 소유 클라이언트에서 현재 겹친 적 ID 집합을 소유해 같은 접촉의 반복 피해를 막고, 분리 뒤 재진입 때만 새 prediction ID를 만든다. 서버는 claim 소유권·tick·prediction ID 중복·claim 속력으로 재계산한 공식 피해와 대상 생존/tombstone을 검증하며 로프 부착·적 위치·접촉 집합을 지연된 복제 상태로 다시 만들지 않는다.
 - 적은 플레이어를 향해 투사체를 발사한다. 적 탄환의 플레이어 피해와 아래의 플레이어 impact 수렴 계약은 유지한다.
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.
 - `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.

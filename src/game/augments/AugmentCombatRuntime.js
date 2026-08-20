@@ -1,6 +1,6 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { distancePointToSegment } from "../combat/CombatSystems.js";
-import { ROPE_IMPACT_CONFIG } from "../config.js";
+import { AUGMENT_IMPACT_CONFIG } from "../config.js";
 import { ropeAttachmentPoint } from "../rope/RopeAttachment.js";
 import { pointInPolygon } from "../world/PolygonGeometry.js";
 import { ActionAugmentState } from "./actions/ActionAugmentState.js";
@@ -9,7 +9,7 @@ import { selectNearestActionTarget } from "./actions/ActionTargeting.js";
 import { ElectrifiedRopeContactState } from "./rope/ElectrifiedRopeContactState.js";
 import { resolveCollisionExplosion } from "./rope/CollisionExplosionState.js";
 
-const IMPACT_DAMAGE = ROPE_IMPACT_CONFIG.damage;
+const IMPACT_DAMAGE = AUGMENT_IMPACT_CONFIG.baseDamage;
 
 function directionBetween(from, to, fallback = { x: 1, y: 0 }) {
     const x = to.x - from.x;
@@ -39,6 +39,7 @@ function impactEvent({
     effectId,
     sourceKind,
     damage,
+    impactSpeed,
     sourcePosition = player.physics.position,
     contactPosition = enemy.position,
     knockback = null
@@ -55,6 +56,7 @@ function impactEvent({
         contactPosition: Object.freeze({ x: contactPosition.x, y: contactPosition.y }),
         position: Object.freeze({ x: contactPosition.x, y: contactPosition.y }),
         damage,
+        ...(impactSpeed === undefined ? {} : { impactSpeed }),
         ...(knockback ? { knockback: Object.freeze(knockback) } : {}),
         predictedResolution: enemy.blocksImpactFrom?.(sourcePosition)
             ? "shield-blocked"
@@ -104,7 +106,10 @@ export class AugmentCombatRuntime {
         this.actionState = null;
         this.actionLoadoutKey = "";
         this.wasActionDown = false;
-        this.electrified = new ElectrifiedRopeContactState({ impactDamage: IMPACT_DAMAGE });
+        this.electrified = new ElectrifiedRopeContactState({
+            damagePerSecond: AUGMENT_IMPACT_CONFIG.electrifiedDamagePerSecond,
+            pulseSeconds: AUGMENT_IMPACT_CONFIG.electrifiedPulseSeconds
+        });
         this.actionProjectiles = [];
         this.hitIdsByActivation = new Map();
         this.maxHealth = maxHealth;
@@ -270,7 +275,7 @@ export class AugmentCombatRuntime {
                 primaryTarget,
                 playerPosition: player.physics.position,
                 enemies,
-                impactDamage: IMPACT_DAMAGE
+                impactDamage: baseImpact.damage
             })) {
                 const enemy = enemies.find(({ id }) => id === outcome.targetId);
                 if (!enemy) continue;
@@ -286,6 +291,7 @@ export class AugmentCombatRuntime {
                                 : "collision-explosion-splash",
                         sourceKind: "rope-collision-explosion",
                         damage: outcome.damage,
+                        impactSpeed: baseImpact.impactSpeed,
                         sourcePosition:
                             outcome.targetId === primaryTarget.id ? player.physics.position : primaryTarget.position,
                         contactPosition: outcome.position,

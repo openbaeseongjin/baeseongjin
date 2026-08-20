@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 1;
+export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 2;
 
 const ACCEPTED_RESOLUTIONS = new Set(["applied", "shield-blocked", "target-already-dead", "duplicate"]);
 const REJECTED_REASONS = new Set(["target-missing", "invalid"]);
@@ -52,6 +52,7 @@ export function createAugmentImpactClaim({
     sourcePosition,
     contactPosition,
     damage,
+    impactSpeed,
     knockback
 }) {
     return Object.freeze({
@@ -66,6 +67,7 @@ export function createAugmentImpactClaim({
         sourcePosition: requireVector(sourcePosition, "sourcePosition"),
         contactPosition: requireVector(contactPosition, "contactPosition"),
         damage: requireNonNegativeNumber(damage, "damage"),
+        ...(impactSpeed === undefined ? {} : { impactSpeed: requireNonNegativeNumber(impactSpeed, "impactSpeed") }),
         ...(knockback === undefined ? {} : { knockback: requireKnockback(knockback) })
     });
 }

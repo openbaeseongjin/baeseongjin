@@ -174,12 +174,20 @@ export function normalizeRopeTuningOverride(value) {
 
 export const FALL_DAMAGE_CONFIG = Object.freeze({
     safeImpactSpeed: 800,
-    lethalImpactSpeed: 1400
+    maximumDamageImpactSpeed: 1400,
+    damageScale: 0.5
 });
 
 export const ROPE_IMPACT_CONFIG = Object.freeze({
     minimumSpeed: 620,
-    damage: 25
+    referenceSpeed: 1000,
+    referenceDamage: 100
+});
+
+export const AUGMENT_IMPACT_CONFIG = Object.freeze({
+    baseDamage: 25,
+    electrifiedDamagePerSecond: 100,
+    electrifiedPulseSeconds: 0.1
 });
 
 export const WIND_CONFIG = Object.freeze({

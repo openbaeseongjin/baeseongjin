@@ -42,11 +42,10 @@ export function ropeTouchesEnemy({ segments, enemy, contactBandPadding = 10 }) {
 }
 
 export class ElectrifiedRopeContactState {
-    constructor({ impactDamage, contactBandPadding = 10, pulseSeconds = 0.1, damagePerSecond = null } = {}) {
+    constructor({ contactBandPadding = 10, pulseSeconds, damagePerSecond } = {}) {
         this.contactBandPadding = requirePositiveNumber(contactBandPadding, "contactBandPadding");
         this.pulseSeconds = requirePositiveNumber(pulseSeconds, "pulseSeconds");
-        this.damagePerSecond = damagePerSecond ?? requirePositiveNumber(impactDamage, "impactDamage") * 0.8;
-        requirePositiveNumber(this.damagePerSecond, "damagePerSecond");
+        this.damagePerSecond = requirePositiveNumber(damagePerSecond, "damagePerSecond");
         this.unsettledContactSecondsByEnemyId = new Map();
         this.currentlyTouchingEnemyIds = new Set();
         this.eventSequence = 0;
