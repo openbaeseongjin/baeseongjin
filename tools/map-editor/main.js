@@ -8,30 +8,63 @@ import {
 } from "../../src/game/world/area-authoring-v2/editor/AreaEditorProjection.js";
 
 const EDITABLE_GROUPS = Object.freeze([
-    ["bounds", "Bounds", null],
-    ["entry", "Entry", null],
-    ["surfaces", "Terrain surfaces", "surface"],
-    ["anchors", "Anchors", "anchor"],
-    ["recoveryRoute", "Recovery / Route", "route"],
-    ["enemySlots", "Enemy slots", null],
-    ["wind", "Wind", "wind"],
-    ["camera", "Camera zones", "camera"]
+    ["bounds", "맵 경계", null],
+    ["entry", "시작 지점", null],
+    ["surfaces", "지형 표면", "surface"],
+    ["anchors", "앵커", "anchor"],
+    ["recoveryRoute", "복구 / 경로", "route"],
+    ["enemySlots", "적 슬롯", null],
+    ["wind", "바람", "wind"],
+    ["camera", "카메라 구역", "camera"]
 ]);
 const READ_ONLY_GROUPS = Object.freeze([
-    ["objectives", "Objectives", "objectives"],
-    ["progression", "Progression", "routes"],
-    ["story", "Story", "storyTriggers"],
-    ["scanner", "Scanner", "scannerGroups"],
-    ["behaviorRegistry", "Behavior registry", "behaviorRefs"]
+    ["objectives", "목표", "objectives"],
+    ["progression", "진행", "routes"],
+    ["story", "스토리", "storyTriggers"],
+    ["scanner", "스캐너", "scannerGroups"],
+    ["behaviorRegistry", "행동 레지스트리", "behaviorRefs"]
 ]);
+const DOMAIN_LABELS = Object.freeze({
+    bounds: "맵 경계",
+    entry: "시작 지점",
+    surfaces: "지형 표면",
+    anchors: "앵커",
+    recoveryRoute: "복구 / 경로",
+    enemySlots: "적 슬롯",
+    wind: "바람",
+    camera: "카메라 구역",
+    objectives: "목표",
+    progression: "진행",
+    story: "스토리",
+    scanner: "스캐너",
+    behaviorRegistry: "행동 레지스트리"
+});
+const KIND_LABELS = Object.freeze({
+    bounds: "맵 경계",
+    entry: "시작 지점",
+    surface: "지형",
+    anchor: "앵커",
+    recovery: "복구 지점",
+    route: "경로 지점",
+    enemy: "적 슬롯",
+    "wind-source": "바람원",
+    "wind-zone": "바람 구역",
+    "camera-zone": "카메라 구역"
+});
 const MAX_ZOOM = 2.4;
 const MIN_ZOOM = 0.08;
 
 const dom = {
     stageSelect: document.querySelector("#stage-select"),
+    stageScope: document.querySelector("#stage-scope"),
+    layerFilter: document.querySelector("#layer-filter"),
     layerPanel: document.querySelector("#layer-panel"),
     inspector: document.querySelector("#inspector-panel"),
     canvas: document.querySelector("#editor-canvas"),
+    fitStage: document.querySelector("#fit-stage"),
+    focusSelection: document.querySelector("#focus-selection"),
+    clearSelection: document.querySelector("#clear-selection"),
+    selectionReadout: document.querySelector("#selection-readout"),
     status: document.querySelector("#draft-status"),
     undo: document.querySelector("#undo-draft"),
     redo: document.querySelector("#redo-draft"),
@@ -44,11 +77,15 @@ const state = {
     draft: null,
     stages: [],
     stageId: null,
+    authoringMode: null,
+    runtimePromotion: null,
+    previewAvailable: false,
     view: { x: 0, y: 0, zoom: 1 },
-    message: { kind: "", text: "Stage를 불러오는 중입니다.", issues: [] },
+    message: { kind: "", text: "스테이지를 불러오는 중입니다.", issues: [] },
     pointer: null,
     spaceDown: false,
-    applyPending: false
+    applyPending: false,
+    layerFilter: ""
 };
 
 function clear(node) {
@@ -78,6 +115,103 @@ function selectedMatches(entity) {
 
 function entities() {
     return state.draft ? collectEditorEntities(state.draft.specification()) : [];
+}
+
+function selectedEntity() {
+    const selected = state.draft?.selected();
+    if (!selected) return null;
+    return entities().find((entity) => entity.domain === selected.domain && entity.id === selected.id) ?? null;
+}
+
+function entityLabel(entity) {
+    return entity?.id?.replace(`${state.draft?.specification().definition.id ?? ""}:`, "") ?? "선택 없음";
+}
+
+function domainLabel(domain) {
+    return DOMAIN_LABELS[domain] ?? domain;
+}
+
+function kindLabel(kind) {
+    return KIND_LABELS[kind] ?? kind;
+}
+
+function authoringModeLabel(mode) {
+    if (mode === "runtime-generated") return "Runtime 적용";
+    if (mode === "runtime-staged") return "Runtime 준비";
+    if (mode === "scenario-only") return "시나리오 전용";
+    return "저작 원본";
+}
+
+function authoringModeDescription(mode) {
+    if (mode === "runtime-generated") return "저장 적용 시 생성 JS와 현재 Sector Catalog를 함께 갱신합니다.";
+    if (mode === "runtime-staged") return "생성 JS를 갱신하지만 현재 게임 Catalog 전환은 메인 개발자 통합 범위입니다.";
+    return "시나리오 원본만 편집합니다. 게임 Runtime과 멀티플레이에는 적용되지 않습니다.";
+}
+
+function runtimePromotionDescription(promotion) {
+    if (!promotion || promotion.status === "live") return "";
+    if (promotion.status === "ready")
+        return "Runtime 승격 검증은 통과했지만 manifest와 facade 전환은 아직 적용되지 않았습니다.";
+    const labels = {
+        "gate-not-authored": "진행 Gate 미저작",
+        "next-area-not-authored": "다음 스테이지 전환 미정",
+        "terrain-not-authored": "충돌 지형 미저작",
+        "enemy-type-unmapped": "적 Runtime 타입 미연결",
+        "runtime-contract-invalid": "Runtime 계약 불일치"
+    };
+    const blockers = promotion.blockers?.map((blocker) => labels[blocker] ?? blocker) ?? [];
+    return `Runtime 승격 보류: ${blockers.join(" · ")}.`;
+}
+
+function stageOptionLabel(stage) {
+    const promotion = runtimePromotionDescription(stage.runtimePromotion);
+    return `${stage.stageId} · ${stage.name} · ${authoringModeLabel(stage.authoringMode)}${
+        promotion ? " · Runtime 보류" : ""
+    }`;
+}
+
+function roundedValue(value) {
+    return Number.isFinite(value) ? Math.round(value * 10) / 10 : "-";
+}
+
+function entityAnnotation(entity, spec) {
+    const id = entityLabel(entity);
+    if (entity.domain === "bounds") return { name: "맵 경계", effect: "플레이 가능 범위" };
+    if (entity.domain === "entry") return { name: "시작 지점", effect: "플레이어 시작 위치" };
+    if (entity.domain === "surfaces") {
+        const surface = spec.definition.surfaces.find(({ id: surfaceId }) => surfaceId === entity.id);
+        const effects = [
+            surface?.oneWay ? "아래에서 통과" : "충돌 표면",
+            surface?.grappleable ? "갈고리 부착" : "부착 불가"
+        ];
+        return { name: `지형 · ${id}`, effect: effects.join(" · ") };
+    }
+    if (entity.domain === "anchors") {
+        const anchor = spec.anchors.find(({ landmark }) => landmark.id === entity.id);
+        return { name: `앵커 · ${anchor?.landmark.properties?.label ?? id}`, effect: "갈고리 부착 지점" };
+    }
+    if (entity.kind === "recovery") return { name: `복구 · ${id}`, effect: "낙하 시 복귀 위치" };
+    if (entity.kind === "route") return { name: `경로 · ${id}`, effect: "진행 경로 표시" };
+    if (entity.domain === "enemySlots") {
+        const enemy = spec.definition.objects.find(({ id: objectId }) => objectId === entity.id);
+        return { name: `적 · ${id}`, effect: enemy?.enemyType ? `${enemy.enemyType} 생성` : "적 생성 지점" };
+    }
+    if (entity.kind === "wind-source") return { name: `바람원 · ${id}`, effect: "바람 구역 발생점" };
+    if (entity.kind === "wind-zone") {
+        const zone = spec.definition.windZones.find(({ id: zoneId }) => zoneId === entity.id);
+        return { name: `바람 구역 · ${id}`, effect: `바람 세기 ${roundedValue(zone?.strength)}` };
+    }
+    if (entity.domain === "camera") {
+        const zone = spec.definition.cameraZones.find(({ id: zoneId }) => zoneId === entity.id);
+        return { name: `카메라 · ${id}`, effect: `데스크톱 배율 ${roundedValue(zone?.desktopZoom)}` };
+    }
+    return { name: kindLabel(entity.kind), effect: domainLabel(entity.domain) };
+}
+
+function matchesLayerFilter(entity, label = "") {
+    const query = state.layerFilter.trim().toLocaleLowerCase();
+    if (!query) return true;
+    return [entity.id, entity.kind, entity.domain, label].join(" ").toLocaleLowerCase().includes(query);
 }
 
 async function api(path, options = {}) {
@@ -120,6 +254,24 @@ function fitView() {
     );
     state.view.x = rect.width * 0.5;
     state.view.y = rect.height * 0.87;
+}
+
+function focusSelection() {
+    const entity = selectedEntity();
+    if (!entity?.point) return setMessage("info", "위치가 있는 오브젝트를 먼저 선택하세요.");
+    const rect = dom.canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    state.view.x = rect.width * 0.5 - entity.point.x * state.view.zoom;
+    state.view.y = rect.height * 0.5 - entity.point.y * state.view.zoom;
+    setMessage("info", `${entityLabel(entity)} 항목을 캔버스 중앙에 표시했습니다.`);
+    render();
+}
+
+function clearSelection() {
+    if (!state.draft?.selected()) return;
+    state.draft.select(null);
+    setMessage("info", "선택을 해제했습니다.");
+    render();
 }
 
 function resizeCanvas() {
@@ -180,13 +332,13 @@ function draftIsDirty() {
 function confirmDiscardDirtyDraft() {
     return (
         !draftIsDirty() ||
-        globalThis.confirm("Apply되지 않은 Draft 변경사항이 있습니다. 현재 변경을 버리고 계속하시겠습니까?")
+        globalThis.confirm("저장 적용되지 않은 초안 변경사항이 있습니다. 현재 변경을 버리고 계속하시겠습니까?")
     );
 }
 
 function applyMutation({ domain, label, apply }) {
     if (!state.draft?.mutate({ domain, label, apply })) return render();
-    setMessage("dirty", "Draft 변경사항이 있습니다. Validate 후 Apply하세요.");
+    setMessage("dirty", "저장되지 않은 초안 변경사항이 있습니다. 검증 후 저장 적용하세요.");
     render();
 }
 
@@ -196,7 +348,7 @@ function addPreset(kind) {
         const id = nextStableId("surface");
         applyMutation({
             domain: "surfaces",
-            label: "Add surface",
+            label: "지형 표면 추가",
             apply: (spec) => {
                 spec.definition.surfaces.push({
                     id,
@@ -221,7 +373,7 @@ function addPreset(kind) {
         const id = nextStableId("editor-anchor");
         applyMutation({
             domain: "anchors",
-            label: "Add anchor",
+            label: "앵커 추가",
             apply: (spec) => {
                 spec.anchors.push({
                     target: { id: `${id}-surface`, x: point.x, y: point.y, properties: {} },
@@ -236,7 +388,7 @@ function addPreset(kind) {
         const id = nextStableId("recovery");
         applyMutation({
             domain: "recoveryRoute",
-            label: "Add recovery point",
+            label: "복구 지점 추가",
             apply: (spec) => {
                 spec.definition.recoveryPoints.push({ id, x: point.x, y: point.y });
                 return true;
@@ -248,7 +400,7 @@ function addPreset(kind) {
         const id = nextStableId("route");
         applyMutation({
             domain: "recoveryRoute",
-            label: "Add route point",
+            label: "경로 지점 추가",
             apply: (spec) => {
                 spec.definition.routePoints.push({ id, x: point.x, y: point.y });
                 return true;
@@ -260,7 +412,7 @@ function addPreset(kind) {
         const id = nextStableId("wind");
         applyMutation({
             domain: "wind",
-            label: "Add wind source and zone",
+            label: "바람원과 구역 추가",
             apply: (spec) => {
                 spec.definition.windZones.push({
                     id: `${id}-zone`,
@@ -288,7 +440,7 @@ function addPreset(kind) {
         const id = nextStableId("camera");
         applyMutation({
             domain: "camera",
-            label: "Add camera zone",
+            label: "카메라 구역 추가",
             apply: (spec) => {
                 spec.definition.cameraZones.push({
                     id,
@@ -309,22 +461,31 @@ function renderLayers() {
     clear(dom.layerPanel);
     const all = entities();
     const snapshot = state.draft.snapshot();
+    let hasFilterMatch = false;
     for (const [domain, label, preset] of EDITABLE_GROUPS) {
+        const entries = all.filter((entry) => entry.domain === domain);
+        const visibleEntries = entries.filter((entry) => matchesLayerFilter(entry, label));
+        const count = entries.length;
+        const groupMatches = matchesLayerFilter({ domain, id: label, kind: label }, label);
+        if (state.layerFilter && visibleEntries.length === 0 && !groupMatches) continue;
+        if (visibleEntries.length > 0 || groupMatches) hasFilterMatch = true;
         const group = element("section", { className: "layer-group" });
         const heading = element("div", { className: "panel-heading", text: label });
-        const count = all.filter((entry) => entry.domain === domain).length;
-        heading.append(element("span", { className: "layer-badge", text: String(count) }));
+        heading.append(
+            element("span", {
+                className: "layer-badge",
+                text: state.layerFilter ? `${visibleEntries.length}/${count}` : String(count)
+            })
+        );
         if (domain === "recoveryRoute") {
-            heading.append(
-                button({ text: "+ Recovery", className: "add-button", onClick: () => addPreset("recovery") })
-            );
-            heading.append(button({ text: "+ Route", className: "add-button", onClick: () => addPreset("route") }));
+            heading.append(button({ text: "+ 복구", className: "add-button", onClick: () => addPreset("recovery") }));
+            heading.append(button({ text: "+ 경로", className: "add-button", onClick: () => addPreset("route") }));
         } else if (preset) {
-            heading.append(button({ text: "+ Add", className: "add-button", onClick: () => addPreset(preset) }));
+            heading.append(button({ text: "+ 추가", className: "add-button", onClick: () => addPreset(preset) }));
         }
         group.append(heading);
         const list = element("div", { className: "layer-list" });
-        for (const entry of all.filter((candidate) => candidate.domain === domain)) {
+        for (const entry of visibleEntries) {
             const row = button({
                 text: entry.id.replace(`${snapshot.spec.definition.id}:`, ""),
                 className: `layer-item${selectedMatches(entry) ? " is-selected" : ""}`,
@@ -333,36 +494,47 @@ function renderLayers() {
                     render();
                 }
             });
-            row.append(element("span", { className: "layer-badge", text: entry.kind }));
+            row.append(element("span", { className: "layer-badge", text: kindLabel(entry.kind) }));
             list.append(row);
         }
-        if (domain === "enemySlots" && count === 0)
+        if (state.layerFilter && groupMatches && count > 0 && visibleEntries.length === 0)
+            list.append(element("p", { className: "layer-empty", text: "이 레이어에는 일치하는 항목이 없습니다." }));
+        if (domain === "enemySlots" && count === 0 && !state.layerFilter)
             list.append(
-                element("p", { className: "inspector-subtitle", text: "이 Stage에는 기존 Enemy slot이 없습니다." })
+                element("p", { className: "inspector-subtitle", text: "이 스테이지에는 기존 적 슬롯이 없습니다." })
             );
         group.append(list);
         dom.layerPanel.append(group);
     }
     const readOnly = element("section", { className: "layer-group" });
-    readOnly.append(element("div", { className: "panel-heading", text: "READ-ONLY" }));
+    readOnly.append(element("div", { className: "panel-heading", text: "읽기 전용" }));
     const list = element("div", { className: "layer-list" });
+    let hasReadOnlyMatch = false;
     for (const [domain, label, collection] of READ_ONLY_GROUPS) {
         const value = collection === "behaviorRefs" ? snapshot.spec.behaviorRefs : snapshot.spec.definition[collection];
         const count = Array.isArray(value) ? value.length : 0;
         const entry = { domain, id: domain, kind: "read-only" };
-        const row = button({
-            text: label,
-            className: `layer-item is-read-only${selectedMatches(entry) ? " is-selected" : ""}`,
-            onClick: () => {
-                state.draft.select(entry);
-                render();
-            }
-        });
-        row.append(element("span", { className: "layer-badge", text: `LOCK ${count}` }));
-        list.append(row);
+        if (matchesLayerFilter(entry, label)) {
+            hasReadOnlyMatch = true;
+            hasFilterMatch = true;
+            const row = button({
+                text: label,
+                className: `layer-item is-read-only${selectedMatches(entry) ? " is-selected" : ""}`,
+                onClick: () => {
+                    state.draft.select(entry);
+                    render();
+                }
+            });
+            row.append(element("span", { className: "layer-badge", text: `잠김 ${count}` }));
+            list.append(row);
+        }
     }
     readOnly.append(list);
-    dom.layerPanel.append(readOnly);
+    if (!state.layerFilter || hasReadOnlyMatch) dom.layerPanel.append(readOnly);
+    if (state.layerFilter && !hasFilterMatch)
+        dom.layerPanel.append(
+            element("p", { className: "layer-search-empty", text: "검색 결과가 없습니다. Esc를 눌러 검색을 지우세요." })
+        );
 }
 
 function appendField(container, { label, value, type = "number", disabled = false, onChange, step = "any" }) {
@@ -389,7 +561,7 @@ function appendCheck(container, { label, checked, onChange, disabled = false }) 
 function replacePointer(domain, label, pointer, value) {
     try {
         if (state.draft.replaceAtPointer({ domain, label, pointer, value })) {
-            setMessage("dirty", "Draft 변경사항이 있습니다. Validate 후 Apply하세요.");
+            setMessage("dirty", "저장되지 않은 초안 변경사항이 있습니다. 검증 후 저장 적용하세요.");
             render();
         }
     } catch (cause) {
@@ -417,13 +589,13 @@ function renderInspector() {
         dom.inspector.append(
             element("p", {
                 className: "inspector-empty",
-                text: "Canvas 또는 왼쪽 목록에서 편집할 오브젝트를 선택하세요."
+                text: "왼쪽에서 ID를 검색하거나 캔버스에서 편집할 오브젝트를 선택하세요."
             })
         );
         return;
     }
     const title = element("h2", { className: "inspector-title", text: selected.id });
-    dom.inspector.append(title, element("p", { className: "inspector-subtitle", text: selected.domain }));
+    dom.inspector.append(title, element("p", { className: "inspector-subtitle", text: domainLabel(selected.domain) }));
     if (READ_ONLY_GROUPS.some(([domain]) => domain === selected.domain)) {
         const [, label, collection] = READ_ONLY_GROUPS.find(([domain]) => domain === selected.domain);
         const value = collection === "behaviorRefs" ? snapshot.spec.behaviorRefs : snapshot.spec.definition[collection];
@@ -432,14 +604,14 @@ function renderInspector() {
             text: `${label}은 현재 표시 전용입니다. 해당 Runtime 계약은 맵 에디터에서 변경하지 않습니다.`
         });
         const fields = element("div", { className: "inspector-fields" });
-        appendField(fields, { label: "ENTRIES", value: Array.isArray(value) ? value.length : 0, disabled: true });
+        appendField(fields, { label: "항목 수", value: Array.isArray(value) ? value.length : 0, disabled: true });
         dom.inspector.append(note, fields);
         return;
     }
     const entity = entities().find((entry) => entry.domain === selected.domain && entry.id === selected.id);
     if (!entity) {
         dom.inspector.append(
-            element("p", { className: "inspector-empty", text: "선택한 오브젝트가 현재 Draft에 없습니다." })
+            element("p", { className: "inspector-empty", text: "선택한 오브젝트가 현재 초안에 없습니다." })
         );
         return;
     }
@@ -447,22 +619,22 @@ function renderInspector() {
     const spec = snapshot.spec;
     if (selected.domain === "bounds") {
         appendField(fields, {
-            label: "WIDTH",
+            label: "너비",
             value: spec.definition.bounds.width,
             onChange: (value) => replacePointer("bounds", "Set bounds width", "/definition/bounds/width", value)
         });
         appendField(fields, {
-            label: "HEIGHT",
+            label: "높이",
             value: spec.definition.bounds.height,
             onChange: (value) => replacePointer("bounds", "Set bounds height", "/definition/bounds/height", value)
         });
     } else if (selected.domain === "camera") {
         const zone = spec.definition.cameraZones.find(({ id }) => id === selected.id);
         for (const [label, key] of [
-            ["MIN Y", "minY"],
-            ["MAX Y", "maxY"],
-            ["DESKTOP ZOOM", "desktopZoom"],
-            ["MOBILE ZOOM", "mobileZoom"]
+            ["최소 Y", "minY"],
+            ["최대 Y", "maxY"],
+            ["데스크톱 배율", "desktopZoom"],
+            ["모바일 배율", "mobileZoom"]
         ]) {
             appendField(fields, {
                 label,
@@ -483,28 +655,28 @@ function renderInspector() {
             onChange: (value) => updateEntityPosition(selected, { x: entity.point.x, y: value })
         });
         appendField(fields, {
-            label: "WIDTH",
+            label: "너비",
             value: zone.bounds.width,
             onChange: (value) => replacePointer("wind", "Set zone width", `${entity.path}/bounds/width`, value)
         });
         appendField(fields, {
-            label: "HEIGHT",
+            label: "높이",
             value: zone.bounds.height,
             onChange: (value) => replacePointer("wind", "Set zone height", `${entity.path}/bounds/height`, value)
         });
         appendField(fields, {
-            label: "MODE",
+            label: "모드",
             type: "text",
             value: zone.mode,
             onChange: (value) => replacePointer("wind", "Set wind mode", `${entity.path}/mode`, value)
         });
         appendField(fields, {
-            label: "STRENGTH",
+            label: "세기",
             value: zone.strength,
             onChange: (value) => replacePointer("wind", "Set wind strength", `${entity.path}/strength`, value)
         });
         appendField(fields, {
-            label: "FALLOFF",
+            label: "감쇠",
             value: zone.falloff,
             onChange: (value) => replacePointer("wind", "Set wind falloff", `${entity.path}/falloff`, value)
         });
@@ -522,12 +694,12 @@ function renderInspector() {
         if (selected.domain === "surfaces") {
             const surface = spec.definition.surfaces.find(({ id }) => id === selected.id);
             appendCheck(fields, {
-                label: "ONE WAY",
+                label: "한 방향 통과",
                 checked: surface.oneWay,
                 onChange: (value) => replacePointer("surfaces", "Set one-way surface", `${entity.path}/oneWay`, value)
             });
             appendCheck(fields, {
-                label: "GRAPPLEABLE",
+                label: "갈고리 부착 가능",
                 checked: surface.grappleable,
                 onChange: (value) =>
                     replacePointer("surfaces", "Set grapple surface", `${entity.path}/grappleable`, value)
@@ -536,13 +708,13 @@ function renderInspector() {
         if (selected.domain === "enemySlots") {
             const enemy = spec.definition.objects.find(({ id }) => id === selected.id);
             appendField(fields, {
-                label: "ENEMY TYPE",
+                label: "적 종류",
                 type: "text",
                 value: enemy.enemyType,
                 onChange: (value) => replacePointer("enemySlots", "Set enemy type", `${entity.path}/enemyType`, value)
             });
             appendField(fields, {
-                label: "ALLOWED ENEMIES",
+                label: "허용 적 목록",
                 type: "text",
                 value: enemy.enemySelection?.allowedEnemyTypes?.join(", ") ?? "",
                 onChange: (value) => {
@@ -563,7 +735,7 @@ function renderInspector() {
             });
             if (enemy.activationSpec) {
                 appendField(fields, {
-                    label: "ACTIVATION ANCHOR",
+                    label: "활성화 기준점",
                     type: "text",
                     value: enemy.activationSpec.anchor ?? "center",
                     onChange: (value) =>
@@ -575,7 +747,7 @@ function renderInspector() {
                         )
                 });
                 appendField(fields, {
-                    label: "ACTIVATION OFFSET X",
+                    label: "활성화 X 오프셋",
                     value: enemy.activationSpec.offset?.x ?? 0,
                     onChange: (value) =>
                         replacePointer(
@@ -586,7 +758,7 @@ function renderInspector() {
                         )
                 });
                 appendField(fields, {
-                    label: "ACTIVATION OFFSET Y",
+                    label: "활성화 Y 오프셋",
                     value: enemy.activationSpec.offset?.y ?? 0,
                     onChange: (value) =>
                         replacePointer(
@@ -597,7 +769,7 @@ function renderInspector() {
                         )
                 });
                 appendField(fields, {
-                    label: "ACTIVATION WIDTH",
+                    label: "활성화 너비",
                     value: enemy.activationSpec.size?.width ?? 0,
                     onChange: (value) =>
                         replacePointer(
@@ -608,7 +780,7 @@ function renderInspector() {
                         )
                 });
                 appendField(fields, {
-                    label: "ACTIVATION HEIGHT",
+                    label: "활성화 높이",
                     value: enemy.activationSpec.size?.height ?? 0,
                     onChange: (value) =>
                         replacePointer(
@@ -620,10 +792,10 @@ function renderInspector() {
                 });
             } else if (enemy.activation) {
                 for (const [label, key] of [
-                    ["ACTIVATION X", "x"],
-                    ["ACTIVATION Y", "y"],
-                    ["ACTIVATION WIDTH", "width"],
-                    ["ACTIVATION HEIGHT", "height"]
+                    ["활성화 X", "x"],
+                    ["활성화 Y", "y"],
+                    ["활성화 너비", "width"],
+                    ["활성화 높이", "height"]
                 ]) {
                     appendField(fields, {
                         label,
@@ -641,7 +813,7 @@ function renderInspector() {
                 fields.append(
                     element("p", {
                         className: "inspector-subtitle",
-                        text: "이 Enemy slot에는 activation bounds/spec가 없습니다."
+                        text: "이 적 슬롯에는 활성화 영역 설정이 없습니다."
                     })
                 );
             }
@@ -686,6 +858,55 @@ function drawMarker(point, color, shape = "circle", selected = false) {
     context.stroke();
 }
 
+function annotationPoint(entity, spec) {
+    if (entity.domain === "bounds") return { x: -spec.definition.bounds.width * 0.5 + 72, y: -16 };
+    if (entity.domain === "camera") return { x: -spec.definition.bounds.width * 0.5 + 72, y: entity.bounds.y + 16 };
+    return entity.point;
+}
+
+function rectanglesOverlap(first, second) {
+    return (
+        first.x < second.x + second.width &&
+        first.x + first.width > second.x &&
+        first.y < second.y + second.height &&
+        first.y + first.height > second.y
+    );
+}
+
+function drawAnnotation(entity, spec, rect, selected, occupied) {
+    if (state.view.zoom < 0.14) return;
+    const annotation = entityAnnotation(entity, spec);
+    const point = worldToScreen(annotationPoint(entity, spec), state.view);
+    context.save();
+    context.font = "600 11px system-ui, sans-serif";
+    const width =
+        Math.max(
+            context.measureText(`이름 · ${annotation.name}`).width,
+            context.measureText(`효과 · ${annotation.effect}`).width
+        ) + 14;
+    const height = 34;
+    const x = Math.max(4, Math.min(rect.width - width - 4, point.x - width * 0.5));
+    const preferredY = point.y - height - 13 < 4 ? point.y + 13 : point.y - height - 13;
+    const y = Math.max(4, Math.min(rect.height - height - 54, preferredY));
+    const box = { x, y, width, height };
+    if (!selected && occupied.some((placed) => rectanglesOverlap(box, placed))) {
+        context.restore();
+        return;
+    }
+    occupied.push(box);
+    context.fillStyle = "rgba(7, 16, 24, 0.86)";
+    context.fillRect(x, y, width, height);
+    context.strokeStyle = selected ? "#66e6ff" : "rgba(134, 176, 190, 0.42)";
+    context.lineWidth = selected ? 1.4 : 1;
+    context.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+    context.fillStyle = selected ? "#66e6ff" : "#e6f2f5";
+    context.fillText(`이름 · ${annotation.name}`, x + 7, y + 13);
+    context.fillStyle = "#83a1b1";
+    context.font = "10px system-ui, sans-serif";
+    context.fillText(`효과 · ${annotation.effect}`, x + 7, y + 27);
+    context.restore();
+}
+
 function drawCanvas() {
     const rect = resizeCanvas();
     context.clearRect(0, 0, rect.width, rect.height);
@@ -693,6 +914,7 @@ function drawCanvas() {
     const spec = state.draft.specification();
     const selected = state.draft.selected();
     const isSelected = (domain, id) => selected?.domain === domain && selected.id === id;
+    const canvasEntities = entities();
     const bounds = spec.definition.bounds;
     context.setLineDash([7, 6]);
     drawRect({ x: -bounds.width * 0.5, y: -bounds.height, width: bounds.width, height: bounds.height }, "#5a7d89");
@@ -731,7 +953,7 @@ function drawCanvas() {
         drawMarker(point, "#b4ced7", "diamond", isSelected("recoveryRoute", point.id));
     for (const point of spec.definition.recoveryPoints)
         drawMarker(point, "#b4ced7", "square", isSelected("recoveryRoute", point.id));
-    for (const enemy of entities().filter((entry) => entry.domain === "enemySlots" && entry.bounds)) {
+    for (const enemy of canvasEntities.filter((entry) => entry.domain === "enemySlots" && entry.bounds)) {
         context.setLineDash([6, 4]);
         drawRect(enemy.bounds, isSelected("enemySlots", enemy.id) ? "#ffcb78" : "#8f6a31");
         context.setLineDash([]);
@@ -753,35 +975,47 @@ function drawCanvas() {
         context.stroke();
         const size = 24 * state.view.zoom;
         context.strokeRect(screen.x - size * 0.5, screen.y - size * 0.5, size, size);
-        if (active || state.view.zoom > 0.28) {
-            context.fillStyle = active ? "#66e6ff" : "#8ec4d0";
-            context.font = "11px ui-monospace, Consolas, monospace";
-            context.fillText(anchor.landmark.properties?.label ?? "ANCHOR", screen.x + 14, screen.y - 12);
-        }
     }
     context.fillStyle = "rgba(230,242,245,0.7)";
     context.font = "11px ui-monospace, Consolas, monospace";
     context.fillText(`${spec.stage.legacyStageAlias} · ${spec.definition.name}`, 12, 20);
+    const occupiedAnnotations = [];
+    const annotatedEntities = [...canvasEntities].sort(
+        (left, right) => Number(isSelected(right.domain, right.id)) - Number(isSelected(left.domain, left.id))
+    );
+    for (const entity of annotatedEntities)
+        drawAnnotation(entity, spec, rect, isSelected(entity.domain, entity.id), occupiedAnnotations);
 }
 
 function renderStatus() {
     const snapshot = draftSnapshot();
     const validation = snapshot
-        ? `${snapshot.valid ? "VALID" : "INVALID"} · ${snapshot.issues.length} issues`
-        : "LOADING";
-    const dirty = snapshot?.dirty ? "DRAFT" : "APPLIED";
+        ? `${snapshot.valid ? "검증 통과" : "검증 오류"} · ${snapshot.issues.length}개`
+        : "불러오는 중";
+    const saveState = snapshot?.dirty ? "저장되지 않은 초안" : "저장됨";
     const issues = state.message.issues
         ?.slice(0, 3)
         .map(({ code }) => code)
         .join(", ");
-    dom.status.textContent = [dirty, validation, state.message.text, issues].filter(Boolean).join("  /  ");
-    dom.status.className = `draft-status${state.message.kind ? ` is-${state.message.kind}` : ""}`;
+    dom.status.textContent = [saveState, validation, state.message.text, issues].filter(Boolean).join("  /  ");
+    dom.status.className = `draft-status${snapshot?.dirty ? " is-dirty" : ""}${state.message.kind ? ` is-${state.message.kind}` : ""}`;
     dom.stageSelect.disabled = state.applyPending;
     dom.undo.disabled = state.applyPending || !snapshot?.canUndo;
     dom.redo.disabled = state.applyPending || !snapshot?.canRedo;
     dom.validate.disabled = state.applyPending || !snapshot;
     dom.apply.disabled = state.applyPending || !snapshot || !snapshot.valid || !snapshot.dirty;
-    dom.preview.disabled = state.applyPending || !snapshot || snapshot.dirty;
+    dom.preview.disabled = state.applyPending || !snapshot || snapshot.dirty || !state.previewAvailable;
+    const entity = selectedEntity();
+    const selected = snapshot?.selection;
+    dom.focusSelection.disabled = state.applyPending || !entity?.point;
+    dom.clearSelection.disabled = state.applyPending || !selected;
+    const annotation = entity ? entityAnnotation(entity, snapshot.spec) : null;
+    dom.selectionReadout.textContent = entity?.point
+        ? `${annotation.name} · ${annotation.effect} · X ${Math.round(entity.point.x)} / Y ${Math.round(entity.point.y)}`
+        : selected
+          ? `${domainLabel(selected.domain)} · ${selected.id}`
+          : "선택 없음 · 목록 또는 캔버스에서 선택";
+    dom.selectionReadout.className = `selection-readout${selected ? " has-selection" : ""}`;
 }
 
 function render() {
@@ -796,10 +1030,18 @@ async function loadStage(stageId, { fit = true } = {}) {
     try {
         const payload = await api(stageEndpoint(stageId));
         state.stageId = payload.stageId;
+        state.authoringMode = payload.authoringMode;
+        state.runtimePromotion = payload.runtimePromotion;
+        state.previewAvailable = payload.previewAvailable;
         state.draft = new AreaEditorDraft({ spec: payload.spec, revision: payload.revision });
         state.draft.select(null);
+        const sector = payload.stageId.split("-")[0].padStart(2, "0");
+        dom.stageScope.textContent = `SECTOR ${sector} / ${authoringModeLabel(payload.authoringMode)}`;
         if (fit) fitView();
-        setMessage("valid", `${payload.stageId} Draft를 불러왔습니다.`);
+        setMessage(
+            "valid",
+            `${payload.stageId} 초안을 불러왔습니다. ${authoringModeDescription(payload.authoringMode)} ${runtimePromotionDescription(payload.runtimePromotion)}`
+        );
         render();
     } catch (cause) {
         errorMessage(cause);
@@ -813,14 +1055,14 @@ async function initialize() {
         clear(dom.stageSelect);
         for (const stage of state.stages) {
             const option = element("option", {
-                text: `${stage.stageId} · ${stage.name}`,
+                text: stageOptionLabel(stage),
                 attributes: { value: stage.stageId }
             });
             dom.stageSelect.append(option);
         }
         const requested = new URLSearchParams(globalThis.location.search).get("stage");
         const initial = state.stages.find(({ stageId }) => stageId === requested) ?? state.stages[0];
-        if (!initial) throw new Error("편집 가능한 generated Stage가 없습니다.");
+        if (!initial) throw new Error("편집 가능한 스테이지가 없습니다.");
         dom.stageSelect.value = initial.stageId;
         await loadStage(initial.stageId);
     } catch (cause) {
@@ -837,15 +1079,33 @@ dom.stageSelect.addEventListener("change", () => {
     }
     loadStage(nextStageId);
 });
+dom.layerFilter.addEventListener("input", () => {
+    state.layerFilter = dom.layerFilter.value;
+    if (state.draft) renderLayers();
+});
+dom.layerFilter.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !dom.layerFilter.value) return;
+    event.preventDefault();
+    dom.layerFilter.value = "";
+    state.layerFilter = "";
+    renderLayers();
+});
+dom.fitStage.addEventListener("click", () => {
+    fitView();
+    setMessage("info", "전체 스테이지를 화면에 맞췄습니다.");
+    render();
+});
+dom.focusSelection.addEventListener("click", focusSelection);
+dom.clearSelection.addEventListener("click", clearSelection);
 dom.undo.addEventListener("click", () => {
     if (state.draft.undo()) {
-        setMessage("dirty", "이전 Draft 변경으로 되돌렸습니다.");
+        setMessage("dirty", "이전 초안 변경으로 되돌렸습니다.");
         render();
     }
 });
 dom.redo.addEventListener("click", () => {
     if (state.draft.redo()) {
-        setMessage("dirty", "다음 Draft 변경을 다시 적용했습니다.");
+        setMessage("dirty", "다음 초안 변경을 다시 적용했습니다.");
         render();
     }
 });
@@ -857,7 +1117,7 @@ dom.validate.addEventListener("click", async () => {
             method: "POST",
             body: JSON.stringify({ spec: state.draft.specification() })
         });
-        setMessage("valid", "Validate 완료: 파일을 변경하지 않았습니다.");
+        setMessage("valid", "초안 검증 완료: 파일을 변경하지 않았습니다.");
     } catch (cause) {
         errorMessage(cause);
     }
@@ -865,9 +1125,9 @@ dom.validate.addEventListener("click", async () => {
 dom.apply.addEventListener("click", async () => {
     if (state.applyPending) return;
     const local = state.draft.validate();
-    if (!local.valid) return setMessage("invalid", "Apply 전에 v2 오류를 해결하세요.", local.issues);
+    if (!local.valid) return setMessage("invalid", "저장 적용 전에 v2 오류를 해결하세요.", local.issues);
     state.applyPending = true;
-    setMessage("valid", "Apply 요청을 전송 중입니다.");
+    setMessage("valid", "저장 적용 요청을 전송 중입니다.");
     renderStatus();
     try {
         const payload = await api(stageEndpoint(state.stageId), {
@@ -875,9 +1135,20 @@ dom.apply.addEventListener("click", async () => {
             body: JSON.stringify({ spec: state.draft.specification(), baseRevision: state.draft.revision() })
         });
         state.draft.markApplied(payload.revision);
+        state.runtimePromotion = payload.runtimePromotion;
         const stage = state.stages.find(({ stageId }) => stageId === payload.stageId);
-        if (stage) Object.assign(stage, { name: payload.name, revision: payload.revision });
-        setMessage("valid", `Apply 완료: revision ${payload.revision} generated JS를 갱신했습니다.`);
+        if (stage)
+            Object.assign(stage, {
+                name: payload.name,
+                revision: payload.revision,
+                runtimePromotion: payload.runtimePromotion
+            });
+        setMessage(
+            "valid",
+            state.authoringMode === "scenario-only"
+                ? `저장 적용 완료: revision ${payload.revision} 시나리오 v2 원본을 갱신했습니다. ${runtimePromotionDescription(state.runtimePromotion)}`
+                : `저장 적용 완료: revision ${payload.revision} 생성 JS를 갱신했습니다.`
+        );
         render();
     } catch (cause) {
         errorMessage(cause);
@@ -887,10 +1158,13 @@ dom.apply.addEventListener("click", async () => {
     }
 });
 dom.preview.addEventListener("click", () => {
-    if (state.draft.snapshot().dirty) return setMessage("dirty", "현재 Draft를 Apply한 뒤 Preview를 시작하세요.");
+    if (!state.previewAvailable) {
+        return setMessage("info", "시나리오 전용 Stage는 게임 Runtime 미리보기를 제공하지 않습니다.");
+    }
+    if (state.draft.snapshot().dirty) return setMessage("dirty", "현재 초안을 저장 적용한 뒤 미리보기를 시작하세요.");
     const url = `./preview.html?stage=${encodeURIComponent(state.stageId)}`;
     const opened = globalThis.open(url, "map-editor-preview", "noopener");
-    if (!opened) setMessage("error", "브라우저가 Preview 창을 차단했습니다. 팝업을 허용한 뒤 다시 시도하세요.");
+    if (!opened) setMessage("error", "브라우저가 미리보기 창을 차단했습니다. 팝업을 허용한 뒤 다시 시도하세요.");
 });
 
 dom.canvas.addEventListener(
@@ -903,7 +1177,7 @@ dom.canvas.addEventListener(
         const world = screenToWorld(pointer, state.view);
         state.view.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, state.view.zoom * (event.deltaY > 0 ? 0.88 : 1.14)));
         state.view.x = pointer.x - world.x * state.view.zoom;
-        state.view.y = pointer.y + world.y * state.view.zoom;
+        state.view.y = pointer.y - world.y * state.view.zoom;
         drawCanvas();
     },
     { passive: false }
@@ -966,7 +1240,7 @@ function finishPointer(event) {
         try {
             if (event.type === "pointercancel") state.draft.cancelBufferedMutation();
             else if (state.draft.commitBufferedMutation())
-                setMessage("dirty", "Draft 변경사항이 있습니다. Validate 후 Apply하세요.");
+                setMessage("dirty", "저장되지 않은 초안 변경사항이 있습니다. 검증 후 저장 적용하세요.");
         } catch (cause) {
             state.draft.cancelBufferedMutation();
             errorMessage(cause);
@@ -981,8 +1255,26 @@ function finishPointer(event) {
 dom.canvas.addEventListener("pointerup", finishPointer);
 dom.canvas.addEventListener("pointercancel", finishPointer);
 globalThis.addEventListener("keydown", (event) => {
-    if (event.code === "Space" && event.target instanceof HTMLInputElement) return;
-    if (event.code === "Space") state.spaceDown = true;
+    const typingField =
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLSelectElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        (event.target instanceof HTMLElement && event.target.isContentEditable);
+    if (event.code === "Space") {
+        if (!typingField && !(event.target instanceof HTMLButtonElement)) state.spaceDown = true;
+        return;
+    }
+    if (typingField || event.altKey) return;
+    if ((event.ctrlKey || event.metaKey) && event.code === "KeyZ") {
+        event.preventDefault();
+        if (event.shiftKey) dom.redo.click();
+        else dom.undo.click();
+        return;
+    }
+    if (event.ctrlKey || event.metaKey || event.repeat) return;
+    if (event.code === "Digit0") dom.fitStage.click();
+    if (event.code === "KeyF") dom.focusSelection.click();
+    if (event.code === "Escape") dom.clearSelection.click();
 });
 globalThis.addEventListener("keyup", (event) => {
     if (event.code === "Space") state.spaceDown = false;

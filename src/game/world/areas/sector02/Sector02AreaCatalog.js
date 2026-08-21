@@ -9,6 +9,8 @@ import {
     triggerBounds,
     worldObject
 } from "../AreaDefinition.js";
+import { composeSectorCatalog } from "../../area-authoring-v2/AreaCatalogComposer.js";
+import { GENERATED_AREAS, GENERATED_AREA_CATALOG_MANIFEST } from "../generated/sector02/Sector02Catalog.generated.js";
 
 const interactionRadius = 72;
 
@@ -1025,8 +1027,17 @@ const area08 = defineArea({
     ]
 });
 
-export const SECTOR_02_AREA_CATALOG = defineAreaCatalog({
+const SECTOR_02_LEGACY_AREA_CATALOG = defineAreaCatalog({
     id: "sector-02-authored-mock",
     revision: "sector-02-scenarios-rev1-v2",
     areas: [area01, area02, area03, area04, area05, area06, area07, area08]
+});
+
+export const SECTOR_02_AREA_CATALOG = composeSectorCatalog({
+    id: SECTOR_02_LEGACY_AREA_CATALOG.id,
+    revision: `${SECTOR_02_LEGACY_AREA_CATALOG.revision}-v2-generated`,
+    manifest: GENERATED_AREA_CATALOG_MANIFEST,
+    legacyAreas: SECTOR_02_LEGACY_AREA_CATALOG.areas,
+    generatedAreas: GENERATED_AREAS,
+    expectedStageIds: GENERATED_AREA_CATALOG_MANIFEST.expectedStageIds
 });

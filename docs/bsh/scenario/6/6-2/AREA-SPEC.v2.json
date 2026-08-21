@@ -1,0 +1,616 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 6,
+    "stage": 2,
+    "legacyStageAlias": "6-2",
+    "sourceAreaId": "sector-06-02"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-06-02",
+    "sectorId": "sector-06",
+    "order": 2,
+    "name": "CROSSWIND MASTS",
+    "subtitle": "HORIZONTAL CROSSWIND GANTRY / VARIED-HEIGHT MAST RHYTHM",
+    "bounds": {
+      "width": 2784,
+      "height": 896
+    },
+    "entry": {
+      "id": "sector-06-02:entry",
+      "x": 0,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-06-02:scenario-exit",
+      "x": -1260,
+      "y": -620
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-06-02:route-h00",
+        "x": 1250,
+        "y": -300,
+        "sourceId": "h00"
+      },
+      {
+        "id": "sector-06-02:route-h01",
+        "x": 1050,
+        "y": -420,
+        "sourceId": "h01"
+      },
+      {
+        "id": "sector-06-02:route-h02",
+        "x": 760,
+        "y": -500,
+        "sourceId": "h02"
+      },
+      {
+        "id": "sector-06-02:route-h03",
+        "x": 470,
+        "y": -430,
+        "sourceId": "h03"
+      },
+      {
+        "id": "sector-06-02:route-h04",
+        "x": 150,
+        "y": -560,
+        "sourceId": "h04"
+      },
+      {
+        "id": "sector-06-02:route-h05",
+        "x": -160,
+        "y": -500,
+        "sourceId": "h05"
+      },
+      {
+        "id": "sector-06-02:route-h06",
+        "x": -350,
+        "y": -290,
+        "sourceId": "h06"
+      },
+      {
+        "id": "sector-06-02:route-h07",
+        "x": -180,
+        "y": -410,
+        "sourceId": "h07"
+      },
+      {
+        "id": "sector-06-02:route-h08",
+        "x": -70,
+        "y": -510,
+        "sourceId": "h08"
+      },
+      {
+        "id": "sector-06-02:route-h09",
+        "x": -390,
+        "y": -470,
+        "sourceId": "h09"
+      },
+      {
+        "id": "sector-06-02:route-h10",
+        "x": -700,
+        "y": -600,
+        "sourceId": "h10"
+      },
+      {
+        "id": "sector-06-02:route-h11",
+        "x": -1030,
+        "y": -520,
+        "sourceId": "h11"
+      },
+      {
+        "id": "sector-06-02:route-h12",
+        "x": -1260,
+        "y": -620,
+        "sourceId": "h12"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "h00-surface",
+        "x": 1250,
+        "y": -300,
+        "properties": {
+          "sourceId": "h00"
+        }
+      },
+      "landmark": {
+        "id": "h00",
+        "x": 1250,
+        "y": -300,
+        "properties": {
+          "label": "h00",
+          "coordinateAnchor": "center",
+          "sourceId": "h00"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h01-surface",
+        "x": 1050,
+        "y": -420,
+        "properties": {
+          "sourceId": "h01"
+        }
+      },
+      "landmark": {
+        "id": "h01",
+        "x": 1050,
+        "y": -420,
+        "properties": {
+          "label": "h01",
+          "coordinateAnchor": "center",
+          "sourceId": "h01"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h02-surface",
+        "x": 760,
+        "y": -500,
+        "properties": {
+          "sourceId": "h02"
+        }
+      },
+      "landmark": {
+        "id": "h02",
+        "x": 760,
+        "y": -500,
+        "properties": {
+          "label": "h02",
+          "coordinateAnchor": "center",
+          "sourceId": "h02"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h03-surface",
+        "x": 470,
+        "y": -430,
+        "properties": {
+          "sourceId": "h03"
+        }
+      },
+      "landmark": {
+        "id": "h03",
+        "x": 470,
+        "y": -430,
+        "properties": {
+          "label": "h03",
+          "coordinateAnchor": "center",
+          "sourceId": "h03"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h04-surface",
+        "x": 150,
+        "y": -560,
+        "properties": {
+          "sourceId": "h04"
+        }
+      },
+      "landmark": {
+        "id": "h04",
+        "x": 150,
+        "y": -560,
+        "properties": {
+          "label": "h04",
+          "coordinateAnchor": "center",
+          "sourceId": "h04"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h05-surface",
+        "x": -160,
+        "y": -500,
+        "properties": {
+          "sourceId": "h05"
+        }
+      },
+      "landmark": {
+        "id": "h05",
+        "x": -160,
+        "y": -500,
+        "properties": {
+          "label": "h05",
+          "coordinateAnchor": "center",
+          "sourceId": "h05"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h06-surface",
+        "x": -350,
+        "y": -290,
+        "properties": {
+          "sourceId": "h06"
+        }
+      },
+      "landmark": {
+        "id": "h06",
+        "x": -350,
+        "y": -290,
+        "properties": {
+          "label": "h06",
+          "coordinateAnchor": "center",
+          "sourceId": "h06"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h07-surface",
+        "x": -180,
+        "y": -410,
+        "properties": {
+          "sourceId": "h07"
+        }
+      },
+      "landmark": {
+        "id": "h07",
+        "x": -180,
+        "y": -410,
+        "properties": {
+          "label": "h07",
+          "coordinateAnchor": "center",
+          "sourceId": "h07"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h08-surface",
+        "x": -70,
+        "y": -510,
+        "properties": {
+          "sourceId": "h08"
+        }
+      },
+      "landmark": {
+        "id": "h08",
+        "x": -70,
+        "y": -510,
+        "properties": {
+          "label": "h08",
+          "coordinateAnchor": "center",
+          "sourceId": "h08"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h09-surface",
+        "x": -390,
+        "y": -470,
+        "properties": {
+          "sourceId": "h09"
+        }
+      },
+      "landmark": {
+        "id": "h09",
+        "x": -390,
+        "y": -470,
+        "properties": {
+          "label": "h09",
+          "coordinateAnchor": "center",
+          "sourceId": "h09"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h10-surface",
+        "x": -700,
+        "y": -600,
+        "properties": {
+          "sourceId": "h10"
+        }
+      },
+      "landmark": {
+        "id": "h10",
+        "x": -700,
+        "y": -600,
+        "properties": {
+          "label": "h10",
+          "coordinateAnchor": "center",
+          "sourceId": "h10"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h11-surface",
+        "x": -1030,
+        "y": -520,
+        "properties": {
+          "sourceId": "h11"
+        }
+      },
+      "landmark": {
+        "id": "h11",
+        "x": -1030,
+        "y": -520,
+        "properties": {
+          "label": "h11",
+          "coordinateAnchor": "center",
+          "sourceId": "h11"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h12-surface",
+        "x": -1260,
+        "y": -620,
+        "properties": {
+          "sourceId": "h12"
+        }
+      },
+      "landmark": {
+        "id": "h12",
+        "x": -1260,
+        "y": -620,
+        "properties": {
+          "label": "h12",
+          "coordinateAnchor": "center",
+          "sourceId": "h12"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/6/6-2/AREA-SPEC-REV3-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "inferred-editor-viewport",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV3.1 · NOT IMPLEMENTED",
+      "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+      "stage": {
+        "sector": 6,
+        "stage": 2,
+        "legacyStageAlias": "6-2",
+        "sourceAreaId": "sector-06-02",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "CROSSWIND MASTS",
+        "subtitle": "HORIZONTAL CROSSWIND GANTRY / VARIED-HEIGHT MAST RHYTHM"
+      },
+      "wind": {
+        "count": 1,
+        "mode": "continuous",
+        "direction": [
+          -1,
+          0
+        ],
+        "strength": 500,
+        "falloff": 80,
+        "bounds": {
+          "xMin": -1120,
+          "xMax": 920,
+          "yMin": -900,
+          "yMax": -450
+        },
+        "rules": [
+          "no-pulse",
+          "no-lull",
+          "no-reversal",
+          "no-damage",
+          "no-moving-volume",
+          "no-mandatory-wind-shadow"
+        ]
+      },
+      "grappleTargets": [
+        {
+          "id": "h00",
+          "x": 1250,
+          "y": -300
+        },
+        {
+          "id": "h01",
+          "x": 1050,
+          "y": -420
+        },
+        {
+          "id": "h02",
+          "x": 760,
+          "y": -500
+        },
+        {
+          "id": "h03",
+          "x": 470,
+          "y": -430
+        },
+        {
+          "id": "h04",
+          "x": 150,
+          "y": -560
+        },
+        {
+          "id": "h05",
+          "x": -160,
+          "y": -500
+        },
+        {
+          "id": "h06",
+          "x": -350,
+          "y": -290
+        },
+        {
+          "id": "h07",
+          "x": -180,
+          "y": -410
+        },
+        {
+          "id": "h08",
+          "x": -70,
+          "y": -510
+        },
+        {
+          "id": "h09",
+          "x": -390,
+          "y": -470
+        },
+        {
+          "id": "h10",
+          "x": -700,
+          "y": -600
+        },
+        {
+          "id": "h11",
+          "x": -1030,
+          "y": -520
+        },
+        {
+          "id": "h12",
+          "x": -1260,
+          "y": -620
+        }
+      ],
+      "route": {
+        "ordered": [
+          "h00",
+          "h01",
+          "h02",
+          "h03",
+          "h04",
+          "h05",
+          "h06",
+          "h07",
+          "h08",
+          "h09",
+          "h10",
+          "h11",
+          "h12"
+        ],
+        "maxAuthoredRelationPx": 345.4,
+        "baseHookReachPx": 400,
+        "macroDirection": "RIGHT_TO_LEFT",
+        "localHeightRhythm": [
+          "SAFE",
+          "HIGH",
+          "LOW",
+          "HIGH",
+          "LOW",
+          "LEE",
+          "HOOK",
+          "LOW",
+          "HIGH",
+          "LOW",
+          "EXIT"
+        ]
+      },
+      "safeZones": [
+        {
+          "id": "P0",
+          "role": "entry",
+          "windState": "OUT"
+        },
+        {
+          "id": "P1",
+          "role": "safe-wind-preview",
+          "windState": "OUT"
+        },
+        {
+          "id": "P2",
+          "role": "lee-pocket",
+          "position": {
+            "x": -350,
+            "y": -290
+          },
+          "windState": "OUT"
+        },
+        {
+          "id": "P3",
+          "role": "exit",
+          "windState": "OUT"
+        }
+      ],
+      "recovery": [
+        {
+          "id": "R1",
+          "role": "gantry-recovery",
+          "targetRetrySecondsMax": 5
+        },
+        {
+          "id": "R2",
+          "role": "final-run-recovery",
+          "targetRetrySecondsMax": 5
+        }
+      ],
+      "enemies": [],
+      "story": {
+        "languagePolicy": "ko-first",
+        "entrySystem": [
+          "CROSSWIND MASTS",
+          "EXTERIOR SERVICE ROUTE / OPEN"
+        ],
+        "playerBark": "…바람이 계속 한쪽으로 미네.",
+        "exitSystem": [
+          "PERIMETER SIGNAL DECK",
+          "SECURITY / ACTIVE"
+        ]
+      },
+      "forbidden": [
+        "second wind zone",
+        "pulsed wind",
+        "wind reversal",
+        "moving wind",
+        "wind damage",
+        "enemy",
+        "scanner",
+        "cutter",
+        "patrol",
+        "new rope mode",
+        "new input",
+        "long rightward reversal",
+        "continuous lower recovery catwalk",
+        "Lee Pocket inside Wind Zone"
+      ]
+    }
+  }
+}

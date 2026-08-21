@@ -1,0 +1,472 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 4,
+    "stage": 1,
+    "legacyStageAlias": "4-1",
+    "sourceAreaId": "sector-04-01"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-04-01",
+    "sectorId": "sector-04",
+    "order": 1,
+    "name": "UPPER RESIDENTIAL ARRIVAL",
+    "subtitle": "SUNKEN SKY-GARDEN BASIN / CROSS-VALLEY RESIDENTIAL ASCENT",
+    "bounds": {
+      "width": 4992,
+      "height": 2208
+    },
+    "entry": {
+      "id": "sector-04-01:entry",
+      "x": -2240,
+      "y": -448
+    },
+    "exit": {
+      "id": "sector-04-01:scenario-exit",
+      "x": 2208,
+      "y": -1952
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-04-01:route-ENTRY",
+        "x": -2240,
+        "y": -448,
+        "sourceId": "ENTRY"
+      },
+      {
+        "id": "sector-04-01:route-A1",
+        "x": -1952,
+        "y": -320,
+        "sourceId": "A1"
+      },
+      {
+        "id": "sector-04-01:route-M0",
+        "x": -1664,
+        "y": -256,
+        "sourceId": "M0"
+      },
+      {
+        "id": "sector-04-01:route-D1",
+        "x": -1376,
+        "y": -160,
+        "sourceId": "D1"
+      },
+      {
+        "id": "sector-04-01:route-B0",
+        "x": -1088,
+        "y": -96,
+        "sourceId": "B0"
+      },
+      {
+        "id": "sector-04-01:route-B1",
+        "x": -736,
+        "y": -128,
+        "sourceId": "B1"
+      },
+      {
+        "id": "sector-04-01:route-B2",
+        "x": -384,
+        "y": -80,
+        "sourceId": "B2"
+      },
+      {
+        "id": "sector-04-01:route-B3",
+        "x": -32,
+        "y": -144,
+        "sourceId": "B3"
+      },
+      {
+        "id": "sector-04-01:route-B4",
+        "x": 320,
+        "y": -96,
+        "sourceId": "B4"
+      },
+      {
+        "id": "sector-04-01:route-B5",
+        "x": 672,
+        "y": -160,
+        "sourceId": "B5"
+      },
+      {
+        "id": "sector-04-01:route-B6",
+        "x": 1024,
+        "y": -224,
+        "sourceId": "B6"
+      },
+      {
+        "id": "sector-04-01:route-R1",
+        "x": 1280,
+        "y": -416,
+        "sourceId": "R1"
+      },
+      {
+        "id": "sector-04-01:route-A2",
+        "x": 1440,
+        "y": -736,
+        "sourceId": "A2"
+      },
+      {
+        "id": "sector-04-01:route-A3",
+        "x": 1248,
+        "y": -1024,
+        "sourceId": "A3"
+      },
+      {
+        "id": "sector-04-01:route-A4",
+        "x": 1504,
+        "y": -1280,
+        "sourceId": "A4"
+      },
+      {
+        "id": "sector-04-01:route-A5",
+        "x": 1760,
+        "y": -1536,
+        "sourceId": "A5"
+      },
+      {
+        "id": "sector-04-01:route-A6",
+        "x": 2016,
+        "y": -1760,
+        "sourceId": "A6"
+      },
+      {
+        "id": "sector-04-01:route-EXIT",
+        "x": 2208,
+        "y": -1952,
+        "sourceId": "EXIT"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [
+      {
+        "id": "sector-04-01:residential-basin-patrol",
+        "kind": "scenario-enemy-slot",
+        "enemyType": "patrol-drone-t1",
+        "position": {
+          "x": -288,
+          "y": -176
+        },
+        "coordinateAnchor": "center",
+        "sourceId": "sector-04-01:residential-basin-patrol"
+      }
+    ],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/4/4-1/AREA-SPEC-REV1-DESIGN.json",
+    "sourceSchemaVersion": "one-rope-area-design-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "one-rope-area-design-v1",
+      "designStatus": "DESIGN LOCKED",
+      "baselineCommit": "4551798860193a16e53814aae5c3a42022b4e1cf",
+      "stage": {
+        "sector": 4,
+        "stage": 1,
+        "legacyStageAlias": "4-1",
+        "sourceAreaId": "sector-04-01",
+        "canonicalName": "UPPER RESIDENTIAL ARRIVAL",
+        "legacyRuntimeName": "TRANSIT INTAKE",
+        "legacyRuntimeStatus": "SUPERSEDED FOR NEW AUTHORING",
+        "newRuntimeStatus": "NOT IMPLEMENTED",
+        "bounds": {
+          "width": 4992,
+          "height": 2112
+        },
+        "localBounds": {
+          "xMin": -2496,
+          "xMax": 2496,
+          "yMin": -2112,
+          "yMax": 0
+        },
+        "signature": "SUNKEN SKY-GARDEN BASIN / CROSS-VALLEY RESIDENTIAL ASCENT",
+        "role": "SECTOR CONTRAST / FIRST UPPER RESIDENTIAL REVEAL",
+        "emotion": "CONTRAST"
+      },
+      "entry": {
+        "x": -2240,
+        "y": -448
+      },
+      "mandatoryRoute": [
+        {
+          "id": "ENTRY",
+          "x": -2240,
+          "y": -448,
+          "kind": "safe-deck"
+        },
+        {
+          "id": "A1",
+          "x": -1952,
+          "y": -320,
+          "kind": "grapple"
+        },
+        {
+          "id": "M0",
+          "x": -1664,
+          "y": -256,
+          "kind": "full-safe-story"
+        },
+        {
+          "id": "D1",
+          "x": -1376,
+          "y": -160,
+          "kind": "grapple"
+        },
+        {
+          "id": "B0",
+          "x": -1088,
+          "y": -96,
+          "kind": "basin-recovery"
+        },
+        {
+          "id": "B1",
+          "x": -736,
+          "y": -128,
+          "kind": "grapple"
+        },
+        {
+          "id": "B2",
+          "x": -384,
+          "y": -80,
+          "kind": "grapple"
+        },
+        {
+          "id": "B3",
+          "x": -32,
+          "y": -144,
+          "kind": "grapple"
+        },
+        {
+          "id": "B4",
+          "x": 320,
+          "y": -96,
+          "kind": "grapple"
+        },
+        {
+          "id": "B5",
+          "x": 672,
+          "y": -160,
+          "kind": "grapple"
+        },
+        {
+          "id": "B6",
+          "x": 1024,
+          "y": -224,
+          "kind": "grapple"
+        },
+        {
+          "id": "R1",
+          "x": 1280,
+          "y": -416,
+          "kind": "ascent-recovery"
+        },
+        {
+          "id": "A2",
+          "x": 1440,
+          "y": -736,
+          "kind": "grapple"
+        },
+        {
+          "id": "A3",
+          "x": 1248,
+          "y": -1024,
+          "kind": "grapple-recess"
+        },
+        {
+          "id": "A4",
+          "x": 1504,
+          "y": -1280,
+          "kind": "grapple"
+        },
+        {
+          "id": "A5",
+          "x": 1760,
+          "y": -1536,
+          "kind": "grapple"
+        },
+        {
+          "id": "A6",
+          "x": 2016,
+          "y": -1760,
+          "kind": "grapple"
+        },
+        {
+          "id": "EXIT",
+          "x": 2208,
+          "y": -1952,
+          "kind": "full-safe-lobby"
+        }
+      ],
+      "functionalZones": [
+        {
+          "id": "high-arrival",
+          "purpose": "sector scale reveal",
+          "safe": true
+        },
+        {
+          "id": "m0-story",
+          "purpose": "environment normality read",
+          "safe": true
+        },
+        {
+          "id": "sunken-basin",
+          "purpose": "playable low crossing / downward recovery",
+          "safe": false,
+          "lethalVoid": false
+        },
+        {
+          "id": "basin-patrol",
+          "purpose": "first moving upper-residential security read",
+          "safe": false
+        },
+        {
+          "id": "far-side-ascent",
+          "purpose": "recessed façade Rope ascent",
+          "safe": false
+        },
+        {
+          "id": "private-lobby",
+          "purpose": "4-2 handoff",
+          "safe": true
+        }
+      ],
+      "enemySlots": [
+        {
+          "designId": "sector-04-01:residential-basin-patrol",
+          "enemyType": "patrol-drone-t1",
+          "count": 1,
+          "killRequired": false,
+          "ropeCut": false,
+          "patrol": {
+            "mode": "loop",
+            "speed": 48,
+            "waitSeconds": 0.4,
+            "points": [
+              {
+                "x": -288,
+                "y": -176
+              },
+              {
+                "x": 96,
+                "y": -256
+              },
+              {
+                "x": 480,
+                "y": -176
+              },
+              {
+                "x": 96,
+                "y": -96
+              }
+            ]
+          },
+          "activationIntent": "B2 through B5 only; must not pressure M0, descent, R1, far-side ascent safe transition, or final lobby"
+        }
+      ],
+      "mechanics": {
+        "pursuit": false,
+        "cutter": false,
+        "scanner": false,
+        "wind": false,
+        "overrideSource": false,
+        "augmentSource": false,
+        "killGate": false
+      },
+      "story": {
+        "m0System": [
+          {
+            "title": "UPPER RESIDENTIAL DISTRICT",
+            "detail": "ENVIRONMENTAL SERVICE / NORMAL"
+          }
+        ],
+        "m0PlayerBark": "…여긴 아직 다 돌아가고 있네.",
+        "securitySystem": [
+          {
+            "title": "RESIDENTIAL SECURITY",
+            "detail": "ACTIVE"
+          }
+        ],
+        "exitPreview": [
+          {
+            "title": "RESIDENT COURTYARD",
+            "detail": "SECURITY CONTROL"
+          }
+        ],
+        "doNotReveal": [
+          "who lived here",
+          "who used Priority Route",
+          "Group C causality",
+          "why upper residential services remained active",
+          "Resident Security Override A",
+          "Sector05 continuity decision"
+        ]
+      },
+      "failureDirection": {
+        "primary": "downward recovery into playable basin",
+        "bottomlessCentralVoid": false
+      },
+      "pacing": {
+        "difficulty": "★★☆",
+        "firstPlay": "2:15–3:05",
+        "mastered": "1:10–1:40"
+      },
+      "ropeAudit": {
+        "effectiveBaseReachPx": 400,
+        "maxMandatoryLinkPx": 362.04,
+        "result": "PASS"
+      },
+      "similarity": {
+        "rule": "0-1 PASS / 2 REVIEW / 3+ REDESIGN",
+        "maxKnownOverlap": 1,
+        "result": "PASS"
+      },
+      "exit": {
+        "nextPlanningStage": "4-2 RESIDENT COURTYARD",
+        "runtimeTransitionStatus": "NOT IMPLEMENTED / post-Sector03 entry contract TBD"
+      },
+      "forbidden": [
+        "legacy transit/infrastructure identity",
+        "rim traversal around decorative courtyard void",
+        "late-stage-only security reveal",
+        "Pursuit in 4-1",
+        "Resident Security Override A in 4-1",
+        "Cutter/Scanner/Wind",
+        "bottomless central garden void",
+        "direct Group C explanation",
+        "background decoration in gameplay map"
+      ]
+    }
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 3,
+    "stage": 7,
+    "legacyStageAlias": "3-7",
+    "sourceAreaId": "sector-03-07"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-03-07",
+    "sectorId": "sector-03",
+    "order": 7,
+    "name": "TRANSFER MEZZANINE",
+    "subtitle": "THREE-BAND COMMERCIAL TRANSFER BRAID",
+    "bounds": {
+      "width": 3840,
+      "height": 1792
+    },
+    "entry": {
+      "id": "sector-03-07:entry",
+      "x": -1664,
+      "y": -64
+    },
+    "exit": {
+      "id": "sector-03-07:scenario-exit",
+      "x": -1664,
+      "y": -64
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-03-07:route-entry",
+        "x": -1664,
+        "y": -64,
+        "sourceId": "entry"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [
+      {
+        "id": "sector-03-07:scanner-priority-concourse-A",
+        "targets": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "cycle": {
+          "available": 1.5,
+          "warning": 0.6,
+          "locked": 1.1,
+          "reset": 0.3
+        },
+        "currentRopePersists": true,
+        "damage": 0,
+        "forcedDetach": false
+      }
+    ],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/3/3-7/AREA-SPEC-REV8-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "authored",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED",
+      "baselineCommit": "cb4f690ac180a04868322e9c4cfe1384897c348b",
+      "stage": {
+        "sector": 3,
+        "stage": 7,
+        "sourceAreaId": "sector-03-07",
+        "canonicalName": "TRANSFER MEZZANINE",
+        "runtimeCurrentName": "PRIORITY CONCOURSE",
+        "bounds": {
+          "width": 3840,
+          "height": 1792
+        },
+        "signature": "THREE-BAND COMMERCIAL TRANSFER BRAID"
+      },
+      "entry": {
+        "x": -1664,
+        "y": -64
+      },
+      "safeHubs": {
+        "m1": {
+          "xMin": -768,
+          "xMax": -384,
+          "y": -544
+        },
+        "m2": {
+          "xMin": 448,
+          "xMax": 832,
+          "y": -1264
+        }
+      },
+      "routes": [
+        {
+          "id": "outer-gallery",
+          "path": [
+            [
+              -768,
+              -544
+            ],
+            [
+              -1056,
+              -704
+            ],
+            [
+              -1344,
+              -832
+            ],
+            [
+              -1600,
+              -960
+            ],
+            [
+              -1280,
+              -1088
+            ],
+            [
+              -928,
+              -1168
+            ],
+            [
+              -576,
+              -1216
+            ],
+            [
+              -224,
+              -1240
+            ],
+            [
+              128,
+              -1256
+            ],
+            [
+              448,
+              -1264
+            ]
+          ],
+          "cost": [
+            "longest",
+            "C1+C2 Scanner"
+          ],
+          "pressure": [
+            "no route Guard",
+            "no Patrol acquire"
+          ]
+        },
+        {
+          "id": "priority-spine",
+          "path": [
+            [
+              -384,
+              -544
+            ],
+            [
+              -192,
+              -800
+            ],
+            [
+              96,
+              -944
+            ],
+            [
+              384,
+              -1088
+            ],
+            [
+              448,
+              -1264
+            ]
+          ],
+          "cost": [
+            "C3 Scanner",
+            "Patrol"
+          ],
+          "benefit": [
+            "shortest",
+            "fewest landings"
+          ],
+          "keyGate": false
+        },
+        {
+          "id": "facility-service",
+          "path": [
+            [
+              -384,
+              -544
+            ],
+            [
+              -64,
+              -656
+            ],
+            [
+              256,
+              -720
+            ],
+            [
+              576,
+              -800
+            ],
+            [
+              864,
+              -928
+            ],
+            [
+              800,
+              -1088
+            ],
+            [
+              832,
+              -1264
+            ]
+          ],
+          "cost": [
+            "more Rope chaining",
+            "centre Late Guard"
+          ],
+          "benefit": [
+            "no Scanner",
+            "no Patrol"
+          ]
+        }
+      ],
+      "scannerGroups": [
+        {
+          "id": "sector-03-07:scanner-priority-concourse-A",
+          "targets": [
+            "C1",
+            "C2",
+            "C3"
+          ],
+          "cycle": {
+            "available": 1.5,
+            "warning": 0.6,
+            "locked": 1.1,
+            "reset": 0.3
+          },
+          "currentRopePersists": true,
+          "damage": 0,
+          "forcedDetach": false
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-03-07:drone-1",
+          "role": "Patrol",
+          "patrol": [
+            [
+              -64,
+              -864
+            ],
+            [
+              448,
+              -1080
+            ]
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong",
+          "activation": "Priority Spine only",
+          "ropeCut": false
+        },
+        {
+          "id": "sector-03-07:concourse-lower-guard",
+          "role": "Support Pool",
+          "activation": "common entry only"
+        },
+        {
+          "id": "sector-03-07:concourse-centre-guard",
+          "role": "Late Pool",
+          "activation": "Facility Service only"
+        },
+        {
+          "id": "sector-03-07:concourse-upper-guard",
+          "role": "Late Pool",
+          "activation": "post-M2 common band",
+          "accessModuleId": "sector-03:access-module:c"
+        }
+      ],
+      "storyObjects": [
+        {
+          "id": "sector-03-07:concourse-sign",
+          "use": "route names"
+        },
+        {
+          "id": "sector-03-07:access-directory",
+          "use": "REV8.1 route-control terminal; replace legacy Access Tier copy"
+        },
+        {
+          "id": "sector-03-07:upper-market-gate-ahead",
+          "use": "3-8 preview"
+        }
+      ],
+      "story": {
+        "approvedCopy": [
+          [
+            "UPPER CONCOURSE ROUTE CONTROL",
+            ""
+          ],
+          [
+            "PUBLIC / SERVICE ROUTES",
+            "ACTIVE"
+          ],
+          [
+            "PRIORITY ROUTE",
+            "ACTIVE"
+          ]
+        ],
+        "playerBark": "…우선 통로가 따로 있었네.",
+        "legacyRuntimeCopyStatus": "SUPERSEDED FOR IMPLEMENTATION"
+      },
+      "accessC": {
+        "requiredForLocalExit": false,
+        "downstream3_8Requirement": false
+      },
+      "exit": {
+        "mode": "physical-crossing",
+        "nextAreaId": "sector-03-08"
+      },
+      "forbidden": [
+        "Access Tier as core story",
+        "Standard/Premium as core story",
+        "A/B/C reveal",
+        "Group C cause",
+        "Priority key gate",
+        "industrial Facility Service",
+        "Wind",
+        "Rope Cut",
+        "fifth enemy"
+      ]
+    }
+  }
+}

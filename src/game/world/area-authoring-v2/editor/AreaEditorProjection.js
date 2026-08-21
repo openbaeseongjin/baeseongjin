@@ -168,14 +168,14 @@ export function worldToScreen(point, view) {
     if (!finitePoint(point) || !finitePoint(view) || !Number.isFinite(view.zoom) || view.zoom <= 0) {
         throw new TypeError("editor-projection-invalid-world-point");
     }
-    return Object.freeze({ x: view.x + point.x * view.zoom, y: view.y - point.y * view.zoom });
+    return Object.freeze({ x: view.x + point.x * view.zoom, y: view.y + point.y * view.zoom });
 }
 
 export function screenToWorld(point, view) {
     if (!finitePoint(point) || !finitePoint(view) || !Number.isFinite(view.zoom) || view.zoom <= 0) {
         throw new TypeError("editor-projection-invalid-screen-point");
     }
-    return Object.freeze({ x: (point.x - view.x) / view.zoom, y: (view.y - point.y) / view.zoom });
+    return Object.freeze({ x: (point.x - view.x) / view.zoom, y: (point.y - view.y) / view.zoom });
 }
 
 export function hitTestEditorEntity(entities, point, radius) {

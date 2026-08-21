@@ -1,0 +1,847 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 5,
+    "stage": 8,
+    "legacyStageAlias": "5-8",
+    "sourceAreaId": "sector-05-08"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-05-08",
+    "sectorId": "sector-05",
+    "order": 8,
+    "name": "CONTINUITY COMMAND SPINE",
+    "subtitle": "BRAIDED TWIN-SPINE / SECTOR05 FINALE / AUTHORITY CONVERGENCE",
+    "bounds": {
+      "width": 1560,
+      "height": 3328
+    },
+    "entry": {
+      "id": "sector-05-08:entry",
+      "x": 0,
+      "y": -100
+    },
+    "exit": {
+      "id": "sector-05-08:scenario-exit",
+      "x": 0,
+      "y": -3060
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-05-08:route-h00",
+        "x": 0,
+        "y": -100,
+        "sourceId": "h00"
+      },
+      {
+        "id": "sector-05-08:route-h01",
+        "x": -220,
+        "y": -300,
+        "sourceId": "h01"
+      },
+      {
+        "id": "sector-05-08:route-h02",
+        "x": -320,
+        "y": -580,
+        "sourceId": "h02"
+      },
+      {
+        "id": "sector-05-08:route-h03",
+        "x": -320,
+        "y": -850,
+        "sourceId": "h03"
+      },
+      {
+        "id": "sector-05-08:route-h06",
+        "x": 320,
+        "y": -1120,
+        "sourceId": "h06"
+      },
+      {
+        "id": "sector-05-08:route-h09",
+        "x": 320,
+        "y": -1430,
+        "sourceId": "h09"
+      },
+      {
+        "id": "sector-05-08:route-h10",
+        "x": 320,
+        "y": -1740,
+        "sourceId": "h10"
+      },
+      {
+        "id": "sector-05-08:route-h10",
+        "x": 320,
+        "y": -1740,
+        "sourceId": "h10"
+      },
+      {
+        "id": "sector-05-08:route-h11",
+        "x": 80,
+        "y": -1840,
+        "sourceId": "h11"
+      },
+      {
+        "id": "sector-05-08:route-h12",
+        "x": -160,
+        "y": -1880,
+        "sourceId": "h12"
+      },
+      {
+        "id": "sector-05-08:route-h13",
+        "x": -320,
+        "y": -1980,
+        "sourceId": "h13"
+      },
+      {
+        "id": "sector-05-08:route-h13",
+        "x": -320,
+        "y": -1980,
+        "sourceId": "h13"
+      },
+      {
+        "id": "sector-05-08:route-h14",
+        "x": -320,
+        "y": -2280,
+        "sourceId": "h14"
+      },
+      {
+        "id": "sector-05-08:route-h15",
+        "x": -140,
+        "y": -2470,
+        "sourceId": "h15"
+      },
+      {
+        "id": "sector-05-08:route-h16",
+        "x": 80,
+        "y": -2600,
+        "sourceId": "h16"
+      },
+      {
+        "id": "sector-05-08:route-h16",
+        "x": 80,
+        "y": -2600,
+        "sourceId": "h16"
+      },
+      {
+        "id": "sector-05-08:route-h17",
+        "x": 300,
+        "y": -2750,
+        "sourceId": "h17"
+      },
+      {
+        "id": "sector-05-08:route-h18",
+        "x": 120,
+        "y": -2910,
+        "sourceId": "h18"
+      },
+      {
+        "id": "sector-05-08:route-h19",
+        "x": 0,
+        "y": -3060,
+        "sourceId": "h19"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "h00-surface",
+        "x": 0,
+        "y": -100,
+        "properties": {
+          "sourceId": "h00"
+        }
+      },
+      "landmark": {
+        "id": "h00",
+        "x": 0,
+        "y": -100,
+        "properties": {
+          "label": "h00",
+          "coordinateAnchor": "center",
+          "sourceId": "h00"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h01-surface",
+        "x": -220,
+        "y": -300,
+        "properties": {
+          "sourceId": "h01"
+        }
+      },
+      "landmark": {
+        "id": "h01",
+        "x": -220,
+        "y": -300,
+        "properties": {
+          "label": "h01",
+          "coordinateAnchor": "center",
+          "sourceId": "h01"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h02-surface",
+        "x": -320,
+        "y": -580,
+        "properties": {
+          "sourceId": "h02"
+        }
+      },
+      "landmark": {
+        "id": "h02",
+        "x": -320,
+        "y": -580,
+        "properties": {
+          "label": "h02",
+          "coordinateAnchor": "center",
+          "sourceId": "h02"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h03-surface",
+        "x": -320,
+        "y": -850,
+        "properties": {
+          "sourceId": "h03"
+        }
+      },
+      "landmark": {
+        "id": "h03",
+        "x": -320,
+        "y": -850,
+        "properties": {
+          "label": "h03",
+          "coordinateAnchor": "center",
+          "sourceId": "h03"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h04-surface",
+        "x": -120,
+        "y": -980,
+        "properties": {
+          "sourceId": "h04"
+        }
+      },
+      "landmark": {
+        "id": "h04",
+        "x": -120,
+        "y": -980,
+        "properties": {
+          "label": "h04",
+          "coordinateAnchor": "center",
+          "sourceId": "h04"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h05-surface",
+        "x": 100,
+        "y": -1030,
+        "properties": {
+          "sourceId": "h05"
+        }
+      },
+      "landmark": {
+        "id": "h05",
+        "x": 100,
+        "y": -1030,
+        "properties": {
+          "label": "h05",
+          "coordinateAnchor": "center",
+          "sourceId": "h05"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h06-surface",
+        "x": 320,
+        "y": -1120,
+        "properties": {
+          "sourceId": "h06"
+        }
+      },
+      "landmark": {
+        "id": "h06",
+        "x": 320,
+        "y": -1120,
+        "properties": {
+          "label": "h06",
+          "coordinateAnchor": "center",
+          "sourceId": "h06"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h07-surface",
+        "x": -80,
+        "y": -1120,
+        "properties": {
+          "sourceId": "h07"
+        }
+      },
+      "landmark": {
+        "id": "h07",
+        "x": -80,
+        "y": -1120,
+        "properties": {
+          "label": "h07",
+          "coordinateAnchor": "center",
+          "sourceId": "h07"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h08-surface",
+        "x": 140,
+        "y": -1180,
+        "properties": {
+          "sourceId": "h08"
+        }
+      },
+      "landmark": {
+        "id": "h08",
+        "x": 140,
+        "y": -1180,
+        "properties": {
+          "label": "h08",
+          "coordinateAnchor": "center",
+          "sourceId": "h08"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h09-surface",
+        "x": 320,
+        "y": -1430,
+        "properties": {
+          "sourceId": "h09"
+        }
+      },
+      "landmark": {
+        "id": "h09",
+        "x": 320,
+        "y": -1430,
+        "properties": {
+          "label": "h09",
+          "coordinateAnchor": "center",
+          "sourceId": "h09"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h10-surface",
+        "x": 320,
+        "y": -1740,
+        "properties": {
+          "sourceId": "h10"
+        }
+      },
+      "landmark": {
+        "id": "h10",
+        "x": 320,
+        "y": -1740,
+        "properties": {
+          "label": "h10",
+          "coordinateAnchor": "center",
+          "sourceId": "h10"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h11-surface",
+        "x": 80,
+        "y": -1840,
+        "properties": {
+          "sourceId": "h11"
+        }
+      },
+      "landmark": {
+        "id": "h11",
+        "x": 80,
+        "y": -1840,
+        "properties": {
+          "label": "h11",
+          "coordinateAnchor": "center",
+          "sourceId": "h11"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h12-surface",
+        "x": -160,
+        "y": -1880,
+        "properties": {
+          "sourceId": "h12"
+        }
+      },
+      "landmark": {
+        "id": "h12",
+        "x": -160,
+        "y": -1880,
+        "properties": {
+          "label": "h12",
+          "coordinateAnchor": "center",
+          "sourceId": "h12"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h13-surface",
+        "x": -320,
+        "y": -1980,
+        "properties": {
+          "sourceId": "h13"
+        }
+      },
+      "landmark": {
+        "id": "h13",
+        "x": -320,
+        "y": -1980,
+        "properties": {
+          "label": "h13",
+          "coordinateAnchor": "center",
+          "sourceId": "h13"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h14-surface",
+        "x": -320,
+        "y": -2280,
+        "properties": {
+          "sourceId": "h14"
+        }
+      },
+      "landmark": {
+        "id": "h14",
+        "x": -320,
+        "y": -2280,
+        "properties": {
+          "label": "h14",
+          "coordinateAnchor": "center",
+          "sourceId": "h14"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h15-surface",
+        "x": -140,
+        "y": -2470,
+        "properties": {
+          "sourceId": "h15"
+        }
+      },
+      "landmark": {
+        "id": "h15",
+        "x": -140,
+        "y": -2470,
+        "properties": {
+          "label": "h15",
+          "coordinateAnchor": "center",
+          "sourceId": "h15"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h16-surface",
+        "x": 80,
+        "y": -2600,
+        "properties": {
+          "sourceId": "h16"
+        }
+      },
+      "landmark": {
+        "id": "h16",
+        "x": 80,
+        "y": -2600,
+        "properties": {
+          "label": "h16",
+          "coordinateAnchor": "center",
+          "sourceId": "h16"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h17-surface",
+        "x": 300,
+        "y": -2750,
+        "properties": {
+          "sourceId": "h17"
+        }
+      },
+      "landmark": {
+        "id": "h17",
+        "x": 300,
+        "y": -2750,
+        "properties": {
+          "label": "h17",
+          "coordinateAnchor": "center",
+          "sourceId": "h17"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h18-surface",
+        "x": 120,
+        "y": -2910,
+        "properties": {
+          "sourceId": "h18"
+        }
+      },
+      "landmark": {
+        "id": "h18",
+        "x": 120,
+        "y": -2910,
+        "properties": {
+          "label": "h18",
+          "coordinateAnchor": "center",
+          "sourceId": "h18"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h19-surface",
+        "x": 0,
+        "y": -3060,
+        "properties": {
+          "sourceId": "h19"
+        }
+      },
+      "landmark": {
+        "id": "h19",
+        "x": 0,
+        "y": -3060,
+        "properties": {
+          "label": "h19",
+          "coordinateAnchor": "center",
+          "sourceId": "h19"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/5/5-8/AREA-SPEC-REV4-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV2.1 · NOT IMPLEMENTED",
+      "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+      "stage": {
+        "sector": 5,
+        "stage": 8,
+        "legacyStageAlias": "5-8",
+        "sourceAreaId": "sector-05-08",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "CONTINUITY COMMAND SPINE",
+        "subtitle": "BRAIDED TWIN-SPINE / SECTOR05 FINALE / AUTHORITY CONVERGENCE"
+      },
+      "bounds": {
+        "width": 1560,
+        "height": 3120
+      },
+      "entry": {
+        "id": "h00",
+        "x": 0,
+        "y": -100,
+        "fromStageAlias": "5-7"
+      },
+      "grappleTargets": [
+        {
+          "id": "h00",
+          "x": 0,
+          "y": -100
+        },
+        {
+          "id": "h01",
+          "x": -220,
+          "y": -300
+        },
+        {
+          "id": "h02",
+          "x": -320,
+          "y": -580
+        },
+        {
+          "id": "h03",
+          "x": -320,
+          "y": -850
+        },
+        {
+          "id": "h04",
+          "x": -120,
+          "y": -980
+        },
+        {
+          "id": "h05",
+          "x": 100,
+          "y": -1030
+        },
+        {
+          "id": "h06",
+          "x": 320,
+          "y": -1120
+        },
+        {
+          "id": "h07",
+          "x": -80,
+          "y": -1120
+        },
+        {
+          "id": "h08",
+          "x": 140,
+          "y": -1180
+        },
+        {
+          "id": "h09",
+          "x": 320,
+          "y": -1430
+        },
+        {
+          "id": "h10",
+          "x": 320,
+          "y": -1740
+        },
+        {
+          "id": "h11",
+          "x": 80,
+          "y": -1840
+        },
+        {
+          "id": "h12",
+          "x": -160,
+          "y": -1880
+        },
+        {
+          "id": "h13",
+          "x": -320,
+          "y": -1980
+        },
+        {
+          "id": "h14",
+          "x": -320,
+          "y": -2280
+        },
+        {
+          "id": "h15",
+          "x": -140,
+          "y": -2470
+        },
+        {
+          "id": "h16",
+          "x": 80,
+          "y": -2600
+        },
+        {
+          "id": "h17",
+          "x": 300,
+          "y": -2750
+        },
+        {
+          "id": "h18",
+          "x": 120,
+          "y": -2910
+        },
+        {
+          "id": "h19",
+          "x": 0,
+          "y": -3060
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-05-08:aegis-a",
+          "enemyType": "shield-drone-t1",
+          "role": "ANGLE RECALL",
+          "rules": [
+            "kill-optional",
+            "no-kill-gate",
+            "exclusive-special-band"
+          ]
+        },
+        {
+          "id": "sector-05-08:jammer-a",
+          "enemyType": "hardpoint-jammer-v1",
+          "status": "NEW_SYSTEM_NOT_IMPLEMENTED",
+          "role": "NEXT-ATTACHMENT RECALL",
+          "maxSimultaneousTargets": 1,
+          "rules": [
+            "never-jam-attached-hardpoint",
+            "preserve-one-base-clear-crosslink",
+            "no-damage",
+            "no-force-release",
+            "no-rope-cut",
+            "exclusive-special-band"
+          ]
+        },
+        {
+          "id": "sector-05-08:cutter-a",
+          "enemyType": "sentry-t1",
+          "role": "CURRENT-ROPE RECALL",
+          "rules": [
+            "cutter-fire",
+            "targets-player-not-rope",
+            "kill-optional",
+            "no-kill-gate",
+            "exclusive-special-band"
+          ]
+        },
+        {
+          "id": "sector-05-08:artillery-a",
+          "enemyType": "artillery-drone-t1",
+          "role": "DWELL RECALL",
+          "rules": [
+            "stored-position-strike-only",
+            "kill-optional",
+            "no-kill-gate",
+            "exclusive-special-band"
+          ]
+        }
+      ],
+      "route": {
+        "entryLeftBus": [
+          "h00",
+          "h01",
+          "h02",
+          "h03"
+        ],
+        "crossLink1Choices": [
+          [
+            "h03",
+            "h04",
+            "h05",
+            "h06"
+          ],
+          [
+            "h03",
+            "h07",
+            "h08",
+            "h06"
+          ]
+        ],
+        "rightBus": [
+          "h06",
+          "h09",
+          "h10"
+        ],
+        "crossLink2": [
+          "h10",
+          "h11",
+          "h12",
+          "h13"
+        ],
+        "upperLeftBus": [
+          "h13",
+          "h14",
+          "h15",
+          "h16"
+        ],
+        "finalConvergence": [
+          "h16",
+          "h17",
+          "h18",
+          "h19"
+        ],
+        "maxAuthoredRelationPx": 361.25,
+        "baseHookReachPx": 400
+      },
+      "story": {
+        "dialogueLanguagePolicy": "ko-first",
+        "spokenDialogueEnglishForbidden": true,
+        "authorityRecord": [
+          "POST-CASCADE CONTINUITY DIRECTIVE",
+          "AUTHORITY / INCIDENT CONTINUITY CONTROL",
+          "BASIS / CRITICAL CAPACITY DEFICIT",
+          "UPPER CORE CONTROL / PRESERVE",
+          "UPPER EVACUATION CAPACITY / PRESERVE",
+          "LOWER ASCENT / SUSPEND",
+          "LOWER-SECTOR EVACUATION / SUSPENDED"
+        ],
+        "approvedPlayerBarkKo": "…무엇을 계속 돌릴지 정했고, 그 선택 때문에 아래 대피가 멈춘 거네.",
+        "escapeGoal": [
+          "ROOFTOP PAD 03",
+          "MAINTENANCE SHUTTLE / STANDBY",
+          "ROOFTOP SERVICE ACCESS / ROUTE AVAILABLE"
+        ]
+      },
+      "progression": {
+        "nextBoundary": "POST-SECTOR05 BOSS / TRANSITION TBD",
+        "directSector06Wiring": false,
+        "notes": "Do not wire directly to sector-06-01."
+      },
+      "forbidden": [
+        "simultaneous special-threat bands",
+        "Patrol",
+        "Standard Sentry",
+        "Pursuit",
+        "mandatory enemy kill",
+        "named executive villain",
+        "planned Cascade claim",
+        "intentional casualty directive",
+        "everyone-below-died claim",
+        "direct 5-8 to 6-1 wiring",
+        "English spoken Player dialogue"
+      ]
+    }
+  }
+}

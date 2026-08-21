@@ -1,0 +1,1519 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 3,
+    "stage": 2,
+    "legacyStageAlias": "3-2",
+    "sourceAreaId": "sector-03-02"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-03-02",
+    "sectorId": "sector-03",
+    "order": 2,
+    "name": "FACADE SERVICE GALLERY",
+    "subtitle": "FIRST ACCESS SCAN",
+    "bounds": {
+      "width": 3200,
+      "height": 1664
+    },
+    "entry": {
+      "id": "sector-03-02:entry",
+      "x": -1456,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-03-02:scenario-exit",
+      "x": 960,
+      "y": -1408
+    },
+    "nextAreaId": null,
+    "surfaces": [
+      {
+        "id": "p0-entry",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1456,
+          "y": 0
+        },
+        "vertices": [
+          {
+            "x": -1568,
+            "y": 0
+          },
+          {
+            "x": -1344,
+            "y": 0
+          },
+          {
+            "x": -1344,
+            "y": 32
+          },
+          {
+            "x": -1568,
+            "y": 32
+          }
+        ],
+        "sourceId": "p0-entry"
+      },
+      {
+        "id": "p1-access-control",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1200,
+          "y": -160
+        },
+        "vertices": [
+          {
+            "x": -1360,
+            "y": -160
+          },
+          {
+            "x": -1040,
+            "y": -160
+          },
+          {
+            "x": -1040,
+            "y": -134
+          },
+          {
+            "x": -1360,
+            "y": -134
+          }
+        ],
+        "sourceId": "p1-access-control"
+      },
+      {
+        "id": "tutorial-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -492,
+          "y": -160
+        },
+        "vertices": [
+          {
+            "x": -620,
+            "y": -160
+          },
+          {
+            "x": -364,
+            "y": -160
+          },
+          {
+            "x": -364,
+            "y": -142
+          },
+          {
+            "x": -620,
+            "y": -142
+          }
+        ],
+        "sourceId": "tutorial-recovery"
+      },
+      {
+        "id": "p2-right-service-cradle",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 320,
+          "y": -464
+        },
+        "vertices": [
+          {
+            "x": 128,
+            "y": -464
+          },
+          {
+            "x": 512,
+            "y": -464
+          },
+          {
+            "x": 512,
+            "y": -438
+          },
+          {
+            "x": 128,
+            "y": -438
+          }
+        ],
+        "sourceId": "p2-right-service-cradle"
+      },
+      {
+        "id": "lower-security-shelf",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 864,
+          "y": -560
+        },
+        "vertices": [
+          {
+            "x": 704,
+            "y": -560
+          },
+          {
+            "x": 1024,
+            "y": -560
+          },
+          {
+            "x": 1024,
+            "y": -534
+          },
+          {
+            "x": 704,
+            "y": -534
+          }
+        ],
+        "sourceId": "lower-security-shelf"
+      },
+      {
+        "id": "p3-far-right-cradle",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1312,
+          "y": -704
+        },
+        "vertices": [
+          {
+            "x": 1152,
+            "y": -704
+          },
+          {
+            "x": 1472,
+            "y": -704
+          },
+          {
+            "x": 1472,
+            "y": -676
+          },
+          {
+            "x": 1152,
+            "y": -676
+          }
+        ],
+        "sourceId": "p3-far-right-cradle"
+      },
+      {
+        "id": "recovery-b",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 448,
+          "y": -704
+        },
+        "vertices": [
+          {
+            "x": 320,
+            "y": -704
+          },
+          {
+            "x": 576,
+            "y": -704
+          },
+          {
+            "x": 576,
+            "y": -686
+          },
+          {
+            "x": 320,
+            "y": -686
+          }
+        ],
+        "sourceId": "recovery-b"
+      },
+      {
+        "id": "recovery-c",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 64,
+          "y": -800
+        },
+        "vertices": [
+          {
+            "x": -48,
+            "y": -800
+          },
+          {
+            "x": 176,
+            "y": -800
+          },
+          {
+            "x": 176,
+            "y": -782
+          },
+          {
+            "x": -48,
+            "y": -782
+          }
+        ],
+        "sourceId": "recovery-c"
+      },
+      {
+        "id": "p4-backside-safe-gallery",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -128,
+          "y": -992
+        },
+        "vertices": [
+          {
+            "x": -320,
+            "y": -992
+          },
+          {
+            "x": 64,
+            "y": -992
+          },
+          {
+            "x": 64,
+            "y": -964
+          },
+          {
+            "x": -320,
+            "y": -964
+          }
+        ],
+        "sourceId": "p4-backside-safe-gallery"
+      },
+      {
+        "id": "p5-crown-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -288,
+          "y": -1248
+        },
+        "vertices": [
+          {
+            "x": -448,
+            "y": -1248
+          },
+          {
+            "x": -128,
+            "y": -1248
+          },
+          {
+            "x": -128,
+            "y": -1220
+          },
+          {
+            "x": -448,
+            "y": -1220
+          }
+        ],
+        "sourceId": "p5-crown-deck"
+      },
+      {
+        "id": "access-a-cassette",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -960,
+          "y": -1248
+        },
+        "vertices": [
+          {
+            "x": -1040,
+            "y": -1248
+          },
+          {
+            "x": -880,
+            "y": -1248
+          },
+          {
+            "x": -880,
+            "y": -1224
+          },
+          {
+            "x": -1040,
+            "y": -1224
+          }
+        ],
+        "sourceId": "access-a-cassette"
+      },
+      {
+        "id": "exit-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 960,
+          "y": -1408
+        },
+        "vertices": [
+          {
+            "x": 800,
+            "y": -1408
+          },
+          {
+            "x": 1120,
+            "y": -1408
+          },
+          {
+            "x": 1120,
+            "y": -1380
+          },
+          {
+            "x": 800,
+            "y": -1380
+          }
+        ],
+        "sourceId": "exit-deck"
+      },
+      {
+        "id": "media-wall-body",
+        "kind": "solid-architectural-blocker",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": -740
+        },
+        "vertices": [
+          {
+            "x": -960,
+            "y": -740
+          },
+          {
+            "x": 960,
+            "y": -740
+          },
+          {
+            "x": 960,
+            "y": -20
+          },
+          {
+            "x": -960,
+            "y": -20
+          }
+        ],
+        "damage": false,
+        "purpose": "causes underframe/backside/crown wrap",
+        "sourceId": "media-wall-body"
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-03-02:route-entry",
+        "x": -1456,
+        "y": -32,
+        "sourceId": "entry"
+      },
+      {
+        "id": "sector-03-02:route-g0",
+        "x": -1280,
+        "y": -128,
+        "sourceId": "g0"
+      },
+      {
+        "id": "sector-03-02:route-p1-right-edge",
+        "x": -1040,
+        "y": -160,
+        "sourceId": "p1-right-edge"
+      },
+      {
+        "id": "sector-03-02:route-c1",
+        "x": -896,
+        "y": -304,
+        "sourceId": "c1"
+      },
+      {
+        "id": "sector-03-02:route-c2",
+        "x": -544,
+        "y": -384,
+        "sourceId": "c2"
+      },
+      {
+        "id": "sector-03-02:route-c3",
+        "x": -192,
+        "y": -432,
+        "sourceId": "c3"
+      },
+      {
+        "id": "sector-03-02:route-p2-left-edge",
+        "x": 128,
+        "y": -464,
+        "sourceId": "p2-left-edge"
+      },
+      {
+        "id": "sector-03-02:route-p2-right-edge",
+        "x": 512,
+        "y": -464,
+        "sourceId": "p2-right-edge"
+      },
+      {
+        "id": "sector-03-02:route-lower-shelf-left",
+        "x": 704,
+        "y": -560,
+        "sourceId": "lower-shelf-left"
+      },
+      {
+        "id": "sector-03-02:route-lower-shelf-right",
+        "x": 1024,
+        "y": -560,
+        "sourceId": "lower-shelf-right"
+      },
+      {
+        "id": "sector-03-02:route-g1",
+        "x": 1216,
+        "y": -640,
+        "sourceId": "g1"
+      },
+      {
+        "id": "sector-03-02:route-p3-left-edge",
+        "x": 1152,
+        "y": -704,
+        "sourceId": "p3-left-edge"
+      },
+      {
+        "id": "sector-03-02:route-g2",
+        "x": 832,
+        "y": -800,
+        "sourceId": "g2"
+      },
+      {
+        "id": "sector-03-02:route-g3",
+        "x": 448,
+        "y": -896,
+        "sourceId": "g3"
+      },
+      {
+        "id": "sector-03-02:route-g4",
+        "x": 64,
+        "y": -960,
+        "sourceId": "g4"
+      },
+      {
+        "id": "sector-03-02:route-p4",
+        "x": -128,
+        "y": -992,
+        "sourceId": "p4"
+      },
+      {
+        "id": "sector-03-02:route-c4",
+        "x": -256,
+        "y": -1184,
+        "sourceId": "c4"
+      },
+      {
+        "id": "sector-03-02:route-p5-right-edge",
+        "x": -128,
+        "y": -1248,
+        "sourceId": "p5-right-edge"
+      },
+      {
+        "id": "sector-03-02:route-g5",
+        "x": 224,
+        "y": -1280,
+        "sourceId": "g5"
+      },
+      {
+        "id": "sector-03-02:route-g6",
+        "x": 576,
+        "y": -1344,
+        "sourceId": "g6"
+      },
+      {
+        "id": "sector-03-02:route-exit-left-edge",
+        "x": 800,
+        "y": -1408,
+        "sourceId": "exit-left-edge"
+      },
+      {
+        "id": "sector-03-02:route-exit",
+        "x": 960,
+        "y": -1408,
+        "sourceId": "exit"
+      }
+    ],
+    "recoveryPoints": [
+      {
+        "id": "sector-03-02:recovery-tutorial-recovery",
+        "x": -492,
+        "y": -160,
+        "sourceId": "tutorial-recovery"
+      },
+      {
+        "id": "sector-03-02:recovery-recovery-b",
+        "x": 448,
+        "y": -704,
+        "sourceId": "recovery-b"
+      },
+      {
+        "id": "sector-03-02:recovery-recovery-c",
+        "x": 64,
+        "y": -800,
+        "sourceId": "recovery-c"
+      }
+    ],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [
+      {
+        "id": "sector-03-02:final-deck-reached",
+        "type": "reach",
+        "target": "exit-deck"
+      },
+      {
+        "id": "sector-03-02:exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-03-02:exit-panel",
+        "requiredObjectiveIds": [
+          "sector-03-02:final-deck-reached"
+        ]
+      }
+    ],
+    "windZones": [],
+    "scannerGroups": [
+      {
+        "id": "sector-03-02:scanner-A",
+        "cycleSeconds": {
+          "available": 1.5,
+          "warning": 0.6,
+          "locked": 1.1,
+          "reset": 0.3
+        },
+        "phaseOffsetSeconds": 0,
+        "controlledTargetIds": [
+          "c1",
+          "c2",
+          "c3",
+          "c4"
+        ],
+        "contract": {
+          "newAttachAllowed": [
+            "AVAILABLE",
+            "WARNING"
+          ],
+          "newAttachDenied": [
+            "LOCKED",
+            "RESET"
+          ],
+          "currentRopePersistsThroughLocked": true,
+          "damage": 0,
+          "knockback": 0,
+          "ropeCut": false,
+          "forcedDetach": false
+        }
+      }
+    ],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "g0-surface",
+        "x": -1280,
+        "y": -128,
+        "properties": {
+          "sourceId": "g0"
+        }
+      },
+      "landmark": {
+        "id": "g0",
+        "x": -1280,
+        "y": -128,
+        "properties": {
+          "label": "g0",
+          "coordinateAnchor": "center",
+          "sourceId": "g0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c1-surface",
+        "x": -896,
+        "y": -304,
+        "properties": {
+          "sourceId": "c1"
+        }
+      },
+      "landmark": {
+        "id": "c1",
+        "x": -896,
+        "y": -304,
+        "properties": {
+          "label": "c1",
+          "coordinateAnchor": "center",
+          "sourceId": "c1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c2-surface",
+        "x": -544,
+        "y": -384,
+        "properties": {
+          "sourceId": "c2"
+        }
+      },
+      "landmark": {
+        "id": "c2",
+        "x": -544,
+        "y": -384,
+        "properties": {
+          "label": "c2",
+          "coordinateAnchor": "center",
+          "sourceId": "c2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c3-surface",
+        "x": -192,
+        "y": -432,
+        "properties": {
+          "sourceId": "c3"
+        }
+      },
+      "landmark": {
+        "id": "c3",
+        "x": -192,
+        "y": -432,
+        "properties": {
+          "label": "c3",
+          "coordinateAnchor": "center",
+          "sourceId": "c3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "g1-surface",
+        "x": 1216,
+        "y": -640,
+        "properties": {
+          "sourceId": "g1"
+        }
+      },
+      "landmark": {
+        "id": "g1",
+        "x": 1216,
+        "y": -640,
+        "properties": {
+          "label": "g1",
+          "coordinateAnchor": "center",
+          "sourceId": "g1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "g2-surface",
+        "x": 832,
+        "y": -800,
+        "properties": {
+          "sourceId": "g2"
+        }
+      },
+      "landmark": {
+        "id": "g2",
+        "x": 832,
+        "y": -800,
+        "properties": {
+          "label": "g2",
+          "coordinateAnchor": "center",
+          "sourceId": "g2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "g3-surface",
+        "x": 448,
+        "y": -896,
+        "properties": {
+          "sourceId": "g3"
+        }
+      },
+      "landmark": {
+        "id": "g3",
+        "x": 448,
+        "y": -896,
+        "properties": {
+          "label": "g3",
+          "coordinateAnchor": "center",
+          "sourceId": "g3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "g4-surface",
+        "x": 64,
+        "y": -960,
+        "properties": {
+          "sourceId": "g4"
+        }
+      },
+      "landmark": {
+        "id": "g4",
+        "x": 64,
+        "y": -960,
+        "properties": {
+          "label": "g4",
+          "coordinateAnchor": "center",
+          "sourceId": "g4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c4-surface",
+        "x": -256,
+        "y": -1184,
+        "properties": {
+          "sourceId": "c4"
+        }
+      },
+      "landmark": {
+        "id": "c4",
+        "x": -256,
+        "y": -1184,
+        "properties": {
+          "label": "c4",
+          "coordinateAnchor": "center",
+          "sourceId": "c4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "access-anchor-surface",
+        "x": -736,
+        "y": -1280,
+        "properties": {
+          "sourceId": "access-anchor"
+        }
+      },
+      "landmark": {
+        "id": "access-anchor",
+        "x": -736,
+        "y": -1280,
+        "properties": {
+          "label": "access-anchor",
+          "coordinateAnchor": "center",
+          "sourceId": "access-anchor"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "g5-surface",
+        "x": 224,
+        "y": -1280,
+        "properties": {
+          "sourceId": "g5"
+        }
+      },
+      "landmark": {
+        "id": "g5",
+        "x": 224,
+        "y": -1280,
+        "properties": {
+          "label": "g5",
+          "coordinateAnchor": "center",
+          "sourceId": "g5"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "g6-surface",
+        "x": 576,
+        "y": -1344,
+        "properties": {
+          "sourceId": "g6"
+        }
+      },
+      "landmark": {
+        "id": "g6",
+        "x": 576,
+        "y": -1344,
+        "properties": {
+          "label": "g6",
+          "coordinateAnchor": "center",
+          "sourceId": "g6"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC-REV8-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED",
+      "baselineCommit": "d588aa041a350cab198cd187d8dccbe3b3a244dd",
+      "revision": {
+        "final": "REV8.0",
+        "designIteration": "REV2",
+        "supersedes": [
+          "REV1 linear scanner draft",
+          "legacy compact scanner gallery"
+        ]
+      },
+      "stage": {
+        "sector": 3,
+        "stage": 2,
+        "sourceAreaId": "sector-03-02",
+        "canonicalName": "FACADE SERVICE GALLERY",
+        "runtimeCurrentName": "SCANNER GALLERY",
+        "subtitle": "FIRST ACCESS SCAN",
+        "role": "FIRST ACTIVE SCANNER TUTORIAL / ARCHITECTURAL WRAP / ACCESS MODULE A"
+      },
+      "bounds": {
+        "width": 3200,
+        "height": 1472
+      },
+      "entry": {
+        "id": "sector-03-02:entry",
+        "x": -1456,
+        "y": -32
+      },
+      "surfaces": [
+        {
+          "id": "p0-entry",
+          "kind": "platform",
+          "x": -1456,
+          "y": 0,
+          "width": 224,
+          "height": 32
+        },
+        {
+          "id": "p1-access-control",
+          "kind": "safe-deck",
+          "x": -1200,
+          "y": -160,
+          "width": 320,
+          "height": 26
+        },
+        {
+          "id": "tutorial-recovery",
+          "kind": "recovery",
+          "x": -492,
+          "y": -160,
+          "width": 256,
+          "height": 18
+        },
+        {
+          "id": "p2-right-service-cradle",
+          "kind": "safe-deck",
+          "x": 320,
+          "y": -464,
+          "width": 384,
+          "height": 26
+        },
+        {
+          "id": "lower-security-shelf",
+          "kind": "platform",
+          "x": 864,
+          "y": -560,
+          "width": 320,
+          "height": 26
+        },
+        {
+          "id": "p3-far-right-cradle",
+          "kind": "safe-deck",
+          "x": 1312,
+          "y": -704,
+          "width": 320,
+          "height": 28
+        },
+        {
+          "id": "recovery-b",
+          "kind": "recovery",
+          "x": 448,
+          "y": -704,
+          "width": 256,
+          "height": 18
+        },
+        {
+          "id": "recovery-c",
+          "kind": "recovery",
+          "x": 64,
+          "y": -800,
+          "width": 224,
+          "height": 18
+        },
+        {
+          "id": "p4-backside-safe-gallery",
+          "kind": "safe-deck",
+          "x": -128,
+          "y": -992,
+          "width": 384,
+          "height": 28
+        },
+        {
+          "id": "p5-crown-deck",
+          "kind": "safe-deck",
+          "x": -288,
+          "y": -1248,
+          "width": 320,
+          "height": 28
+        },
+        {
+          "id": "access-a-cassette",
+          "kind": "platform",
+          "x": -960,
+          "y": -1248,
+          "width": 160,
+          "height": 24
+        },
+        {
+          "id": "exit-deck",
+          "kind": "safe-deck",
+          "x": 960,
+          "y": -1408,
+          "width": 320,
+          "height": 28
+        },
+        {
+          "id": "media-wall-body",
+          "kind": "solid-architectural-blocker",
+          "x": 0,
+          "y": -740,
+          "width": 1920,
+          "height": 720,
+          "properties": {
+            "grappleable": false,
+            "damage": false,
+            "purpose": "causes underframe/backside/crown wrap"
+          }
+        }
+      ],
+      "grappleTargets": [
+        {
+          "id": "g0",
+          "x": -1280,
+          "y": -128,
+          "role": "entry-to-access"
+        },
+        {
+          "id": "c1",
+          "x": -896,
+          "y": -304,
+          "scannerControlled": true
+        },
+        {
+          "id": "c2",
+          "x": -544,
+          "y": -384,
+          "scannerControlled": true
+        },
+        {
+          "id": "c3",
+          "x": -192,
+          "y": -432,
+          "scannerControlled": true
+        },
+        {
+          "id": "g1",
+          "x": 1216,
+          "y": -640,
+          "role": "right-cradle-turn"
+        },
+        {
+          "id": "g2",
+          "x": 832,
+          "y": -800
+        },
+        {
+          "id": "g3",
+          "x": 448,
+          "y": -896
+        },
+        {
+          "id": "g4",
+          "x": 64,
+          "y": -960
+        },
+        {
+          "id": "c4",
+          "x": -256,
+          "y": -1184,
+          "scannerControlled": true,
+          "role": "crown-recall"
+        },
+        {
+          "id": "access-anchor",
+          "x": -736,
+          "y": -1280
+        },
+        {
+          "id": "g5",
+          "x": 224,
+          "y": -1280
+        },
+        {
+          "id": "g6",
+          "x": 576,
+          "y": -1344
+        }
+      ],
+      "scannerGroups": [
+        {
+          "id": "sector-03-02:scanner-A",
+          "cycleSeconds": {
+            "available": 1.5,
+            "warning": 0.6,
+            "locked": 1.1,
+            "reset": 0.3
+          },
+          "phaseOffsetSeconds": 0,
+          "controlledTargetIds": [
+            "c1",
+            "c2",
+            "c3",
+            "c4"
+          ],
+          "contract": {
+            "newAttachAllowed": [
+              "AVAILABLE",
+              "WARNING"
+            ],
+            "newAttachDenied": [
+              "LOCKED",
+              "RESET"
+            ],
+            "currentRopePersistsThroughLocked": true,
+            "damage": 0,
+            "knockback": 0,
+            "ropeCut": false,
+            "forcedDetach": false
+          }
+        }
+      ],
+      "mainRoute": [
+        {
+          "id": "entry",
+          "x": -1456,
+          "y": -32
+        },
+        {
+          "id": "g0",
+          "x": -1280,
+          "y": -128
+        },
+        {
+          "id": "p1-right-edge",
+          "x": -1040,
+          "y": -160
+        },
+        {
+          "id": "c1",
+          "x": -896,
+          "y": -304
+        },
+        {
+          "id": "c2",
+          "x": -544,
+          "y": -384
+        },
+        {
+          "id": "c3",
+          "x": -192,
+          "y": -432
+        },
+        {
+          "id": "p2-left-edge",
+          "x": 128,
+          "y": -464
+        },
+        {
+          "id": "p2-right-edge",
+          "x": 512,
+          "y": -464
+        },
+        {
+          "id": "lower-shelf-left",
+          "x": 704,
+          "y": -560
+        },
+        {
+          "id": "lower-shelf-right",
+          "x": 1024,
+          "y": -560
+        },
+        {
+          "id": "g1",
+          "x": 1216,
+          "y": -640
+        },
+        {
+          "id": "p3-left-edge",
+          "x": 1152,
+          "y": -704
+        },
+        {
+          "id": "g2",
+          "x": 832,
+          "y": -800
+        },
+        {
+          "id": "g3",
+          "x": 448,
+          "y": -896
+        },
+        {
+          "id": "g4",
+          "x": 64,
+          "y": -960
+        },
+        {
+          "id": "p4",
+          "x": -128,
+          "y": -992
+        },
+        {
+          "id": "c4",
+          "x": -256,
+          "y": -1184
+        },
+        {
+          "id": "p5-right-edge",
+          "x": -128,
+          "y": -1248
+        },
+        {
+          "id": "g5",
+          "x": 224,
+          "y": -1280
+        },
+        {
+          "id": "g6",
+          "x": 576,
+          "y": -1344
+        },
+        {
+          "id": "exit-left-edge",
+          "x": 800,
+          "y": -1408
+        },
+        {
+          "id": "exit",
+          "x": 960,
+          "y": -1408
+        }
+      ],
+      "accessBranch": {
+        "moduleId": "sector-03:access-module:a",
+        "carrierObjectId": "sector-03-02:scanner-upper-guard",
+        "mainlineRequired": false,
+        "route": [
+          {
+            "x": -448,
+            "y": -1248
+          },
+          {
+            "x": -736,
+            "y": -1280
+          },
+          {
+            "x": -960,
+            "y": -1248
+          },
+          {
+            "x": -736,
+            "y": -1280
+          },
+          {
+            "x": -448,
+            "y": -1248
+          }
+        ]
+      },
+      "recoveryPoints": [
+        {
+          "id": "tutorial-recovery",
+          "retrySecondsTarget": [
+            3,
+            5
+          ],
+          "cannotBypass": [
+            "p2-right-service-cradle"
+          ]
+        },
+        {
+          "id": "recovery-b",
+          "retrySecondsTarget": [
+            4,
+            7
+          ],
+          "cannotBypass": [
+            "p4-backside-safe-gallery"
+          ]
+        },
+        {
+          "id": "recovery-c",
+          "retrySecondsTarget": [
+            4,
+            7
+          ],
+          "cannotBypass": [
+            "p4-backside-safe-gallery"
+          ]
+        }
+      ],
+      "safeZones": [
+        {
+          "id": "scanner-tutorial-safe",
+          "contract": [
+            "no enemy pressure",
+            "full scanner cycle observable",
+            "C1/C2/C3 learnable"
+          ]
+        },
+        {
+          "id": "backside-safe-gallery",
+          "contract": [
+            "lower guard inactive",
+            "no enemy pressure",
+            "C4 readable"
+          ]
+        },
+        {
+          "id": "crown-mainline-safe",
+          "contract": [
+            "mainline enemy pressure zero",
+            "Access A activates only after branch commit",
+            "Exit Story safe"
+          ]
+        }
+      ],
+      "objects": [
+        {
+          "id": "access-control",
+          "stableRuntimeId": "sector-03-02:access-control",
+          "kind": "story-display",
+          "properties": {
+            "presentation": [
+              {
+                "title": "COMMERCIAL ACCESS CONTROL",
+                "detail": "EMPLOYEE VERIFIED",
+                "status": "VERIFIED"
+              },
+              {
+                "title": "ROUTE AUTHORIZATION",
+                "detail": "INVALID",
+                "status": "VERIFIED"
+              }
+            ]
+          }
+        },
+        {
+          "id": "service-mount",
+          "stableRuntimeId": "sector-03-02:service-mount",
+          "kind": "story-display",
+          "properties": {
+            "presentation": [
+              {
+                "title": "SERVICE MOUNT ACCESS",
+                "detail": "CYCLING",
+                "status": "VERIFIED"
+              }
+            ]
+          }
+        },
+        {
+          "id": "scanner-lower-guard",
+          "stableRuntimeId": "sector-03-02:scanner-lower-guard",
+          "kind": "sentry-slot",
+          "x": 864,
+          "y": -560,
+          "properties": {
+            "enemySelection": {
+              "authority": "SECTOR_03_STANDARD_POOL",
+              "allowedEnemyTypes": [
+                "pursuit-drone-t1",
+                "shield-drone-t1",
+                "artillery-drone-t1"
+              ]
+            },
+            "rules": [
+              "kill-optional",
+              "no-rope-cut",
+              "activation-band-only"
+            ],
+            "activationPolicy": "after scanner tutorial"
+          }
+        },
+        {
+          "id": "scanner-upper-guard",
+          "stableRuntimeId": "sector-03-02:scanner-upper-guard",
+          "kind": "sentry-slot",
+          "x": -960,
+          "y": -1248,
+          "properties": {
+            "enemySelection": {
+              "authority": "SECTOR_03_SUPPORT_POOL",
+              "allowedEnemyTypes": [
+                "pursuit-drone-t1",
+                "shield-drone-t1",
+                "artillery-drone-t1",
+                "support-drone-t1"
+              ]
+            },
+            "accessModuleId": "sector-03:access-module:a",
+            "rules": [
+              "kill-optional-for-stage",
+              "kill-required-for-module-a",
+              "no-rope-cut",
+              "activation-band-only"
+            ],
+            "mainlineGateDependency": false
+          }
+        },
+        {
+          "id": "retail-security-ahead",
+          "stableRuntimeId": "sector-03-02:retail-security-ahead",
+          "kind": "story-display",
+          "properties": {
+            "presentation": [
+              {
+                "title": "RETAIL SECURITY",
+                "detail": "ACTIVE",
+                "status": "VERIFIED"
+              }
+            ]
+          }
+        },
+        {
+          "id": "exit-panel",
+          "stableRuntimeId": "sector-03-02:exit-panel",
+          "kind": "interaction",
+          "properties": {
+            "objectiveId": "sector-03-02:exit-panel-engaged",
+            "requiredObjectiveIds": [
+              "sector-03-02:final-deck-reached"
+            ]
+          }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "sector-03-02:final-deck-reached",
+          "type": "reach",
+          "target": "exit-deck"
+        },
+        {
+          "id": "sector-03-02:exit-panel-engaged",
+          "type": "interact",
+          "sourceObjectId": "sector-03-02:exit-panel",
+          "requiredObjectiveIds": [
+            "sector-03-02:final-deck-reached"
+          ]
+        }
+      ],
+      "gate": {
+        "completionMode": "physical-crossing",
+        "nextAreaId": "sector-03-03",
+        "requiredObjectiveIds": [
+          "sector-03-02:exit-panel-engaged"
+        ]
+      },
+      "story": {
+        "barkA": {
+          "text": "…인증은 됐는데, 왜 막히는 거지?",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER"
+        },
+        "barkB": {
+          "text": "…이미 붙은 건 그대로네.",
+          "status": "NOT IMPLEMENTED — PLAYER BARK LAYER"
+        }
+      },
+      "patrol": {
+        "active": false
+      },
+      "wind": {
+        "active": false
+      },
+      "ropeCut": {
+        "active": false
+      },
+      "augment": {
+        "currentContract": "generic Augment v1 carry",
+        "requiresSpecificCard": false,
+        "baseRopeClearable": true
+      },
+      "uniqueness": {
+        "signature": "THREE-LAYER MEDIA WALL SERVICE WRAP",
+        "dominantBody": "LOWER L→R → MID R→L → UPPER L→R",
+        "maximumMeaningfulOverlap": 1
+      },
+      "forbidden": [
+        "enemy pressure during first Scanner tutorial",
+        "forced detach on LOCK",
+        "Scanner damage/laser",
+        "second Scanner system",
+        "third enemy",
+        "Patrol",
+        "Wind",
+        "Rope Cut",
+        "mainline kill gate",
+        "Access A relock",
+        "Player Bark as System Toast",
+        "full Scanner+enemy synthesis before 3-3",
+        "linear REV1 topology"
+      ]
+    }
+  }
+}

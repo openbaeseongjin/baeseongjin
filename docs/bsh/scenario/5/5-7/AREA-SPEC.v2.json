@@ -1,0 +1,887 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 5,
+    "stage": 7,
+    "legacyStageAlias": "5-7",
+    "sourceAreaId": "sector-05-07"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-05-07",
+    "sectorId": "sector-05",
+    "order": 7,
+    "name": "EVACUATION CONSEQUENCE ARCHIVE",
+    "subtitle": "ASYMMETRIC THREE-TIER SWITCHBACK / ARTILLERY → CUTTER → STORY SAFE",
+    "bounds": {
+      "width": 2496,
+      "height": 2560
+    },
+    "entry": {
+      "id": "sector-05-07:entry",
+      "x": -980,
+      "y": -180
+    },
+    "exit": {
+      "id": "sector-05-07:scenario-exit",
+      "x": -220,
+      "y": -2280
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-05-07:route-h00",
+        "x": -980,
+        "y": -180,
+        "sourceId": "h00"
+      },
+      {
+        "id": "sector-05-07:route-h01",
+        "x": -660,
+        "y": -240,
+        "sourceId": "h01"
+      },
+      {
+        "id": "sector-05-07:route-h02",
+        "x": -320,
+        "y": -240,
+        "sourceId": "h02"
+      },
+      {
+        "id": "sector-05-07:route-h03",
+        "x": 20,
+        "y": -240,
+        "sourceId": "h03"
+      },
+      {
+        "id": "sector-05-07:route-h04",
+        "x": 360,
+        "y": -300,
+        "sourceId": "h04"
+      },
+      {
+        "id": "sector-05-07:route-h04",
+        "x": 360,
+        "y": -300,
+        "sourceId": "h04"
+      },
+      {
+        "id": "sector-05-07:route-h05",
+        "x": 500,
+        "y": -560,
+        "sourceId": "h05"
+      },
+      {
+        "id": "sector-05-07:route-h06",
+        "x": 500,
+        "y": -820,
+        "sourceId": "h06"
+      },
+      {
+        "id": "sector-05-07:route-h06",
+        "x": 500,
+        "y": -820,
+        "sourceId": "h06"
+      },
+      {
+        "id": "sector-05-07:route-h07",
+        "x": 180,
+        "y": -880,
+        "sourceId": "h07"
+      },
+      {
+        "id": "sector-05-07:route-h08",
+        "x": -160,
+        "y": -880,
+        "sourceId": "h08"
+      },
+      {
+        "id": "sector-05-07:route-h09",
+        "x": -500,
+        "y": -920,
+        "sourceId": "h09"
+      },
+      {
+        "id": "sector-05-07:route-h10",
+        "x": -840,
+        "y": -980,
+        "sourceId": "h10"
+      },
+      {
+        "id": "sector-05-07:route-h11",
+        "x": -1120,
+        "y": -1080,
+        "sourceId": "h11"
+      },
+      {
+        "id": "sector-05-07:route-h11",
+        "x": -1120,
+        "y": -1080,
+        "sourceId": "h11"
+      },
+      {
+        "id": "sector-05-07:route-h12",
+        "x": -1120,
+        "y": -1360,
+        "sourceId": "h12"
+      },
+      {
+        "id": "sector-05-07:route-h13",
+        "x": -1120,
+        "y": -1600,
+        "sourceId": "h13"
+      },
+      {
+        "id": "sector-05-07:route-h13",
+        "x": -1120,
+        "y": -1600,
+        "sourceId": "h13"
+      },
+      {
+        "id": "sector-05-07:route-h14",
+        "x": -820,
+        "y": -1660,
+        "sourceId": "h14"
+      },
+      {
+        "id": "sector-05-07:route-h15",
+        "x": -520,
+        "y": -1660,
+        "sourceId": "h15"
+      },
+      {
+        "id": "sector-05-07:route-h16",
+        "x": -220,
+        "y": -1660,
+        "sourceId": "h16"
+      },
+      {
+        "id": "sector-05-07:route-h17",
+        "x": 80,
+        "y": -1700,
+        "sourceId": "h17"
+      },
+      {
+        "id": "sector-05-07:route-h17",
+        "x": 80,
+        "y": -1700,
+        "sourceId": "h17"
+      },
+      {
+        "id": "sector-05-07:route-h18",
+        "x": 240,
+        "y": -1940,
+        "sourceId": "h18"
+      },
+      {
+        "id": "sector-05-07:route-h19",
+        "x": 80,
+        "y": -2140,
+        "sourceId": "h19"
+      },
+      {
+        "id": "sector-05-07:route-h20",
+        "x": -220,
+        "y": -2280,
+        "sourceId": "h20"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "h00-surface",
+        "x": -980,
+        "y": -180,
+        "properties": {
+          "sourceId": "h00"
+        }
+      },
+      "landmark": {
+        "id": "h00",
+        "x": -980,
+        "y": -180,
+        "properties": {
+          "label": "h00",
+          "coordinateAnchor": "center",
+          "sourceId": "h00"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h01-surface",
+        "x": -660,
+        "y": -240,
+        "properties": {
+          "sourceId": "h01"
+        }
+      },
+      "landmark": {
+        "id": "h01",
+        "x": -660,
+        "y": -240,
+        "properties": {
+          "label": "h01",
+          "coordinateAnchor": "center",
+          "sourceId": "h01"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h02-surface",
+        "x": -320,
+        "y": -240,
+        "properties": {
+          "sourceId": "h02"
+        }
+      },
+      "landmark": {
+        "id": "h02",
+        "x": -320,
+        "y": -240,
+        "properties": {
+          "label": "h02",
+          "coordinateAnchor": "center",
+          "sourceId": "h02"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h03-surface",
+        "x": 20,
+        "y": -240,
+        "properties": {
+          "sourceId": "h03"
+        }
+      },
+      "landmark": {
+        "id": "h03",
+        "x": 20,
+        "y": -240,
+        "properties": {
+          "label": "h03",
+          "coordinateAnchor": "center",
+          "sourceId": "h03"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h04-surface",
+        "x": 360,
+        "y": -300,
+        "properties": {
+          "sourceId": "h04"
+        }
+      },
+      "landmark": {
+        "id": "h04",
+        "x": 360,
+        "y": -300,
+        "properties": {
+          "label": "h04",
+          "coordinateAnchor": "center",
+          "sourceId": "h04"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h05-surface",
+        "x": 500,
+        "y": -560,
+        "properties": {
+          "sourceId": "h05"
+        }
+      },
+      "landmark": {
+        "id": "h05",
+        "x": 500,
+        "y": -560,
+        "properties": {
+          "label": "h05",
+          "coordinateAnchor": "center",
+          "sourceId": "h05"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h06-surface",
+        "x": 500,
+        "y": -820,
+        "properties": {
+          "sourceId": "h06"
+        }
+      },
+      "landmark": {
+        "id": "h06",
+        "x": 500,
+        "y": -820,
+        "properties": {
+          "label": "h06",
+          "coordinateAnchor": "center",
+          "sourceId": "h06"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h07-surface",
+        "x": 180,
+        "y": -880,
+        "properties": {
+          "sourceId": "h07"
+        }
+      },
+      "landmark": {
+        "id": "h07",
+        "x": 180,
+        "y": -880,
+        "properties": {
+          "label": "h07",
+          "coordinateAnchor": "center",
+          "sourceId": "h07"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h08-surface",
+        "x": -160,
+        "y": -880,
+        "properties": {
+          "sourceId": "h08"
+        }
+      },
+      "landmark": {
+        "id": "h08",
+        "x": -160,
+        "y": -880,
+        "properties": {
+          "label": "h08",
+          "coordinateAnchor": "center",
+          "sourceId": "h08"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h09-surface",
+        "x": -500,
+        "y": -920,
+        "properties": {
+          "sourceId": "h09"
+        }
+      },
+      "landmark": {
+        "id": "h09",
+        "x": -500,
+        "y": -920,
+        "properties": {
+          "label": "h09",
+          "coordinateAnchor": "center",
+          "sourceId": "h09"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h10-surface",
+        "x": -840,
+        "y": -980,
+        "properties": {
+          "sourceId": "h10"
+        }
+      },
+      "landmark": {
+        "id": "h10",
+        "x": -840,
+        "y": -980,
+        "properties": {
+          "label": "h10",
+          "coordinateAnchor": "center",
+          "sourceId": "h10"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h11-surface",
+        "x": -1120,
+        "y": -1080,
+        "properties": {
+          "sourceId": "h11"
+        }
+      },
+      "landmark": {
+        "id": "h11",
+        "x": -1120,
+        "y": -1080,
+        "properties": {
+          "label": "h11",
+          "coordinateAnchor": "center",
+          "sourceId": "h11"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h12-surface",
+        "x": -1120,
+        "y": -1360,
+        "properties": {
+          "sourceId": "h12"
+        }
+      },
+      "landmark": {
+        "id": "h12",
+        "x": -1120,
+        "y": -1360,
+        "properties": {
+          "label": "h12",
+          "coordinateAnchor": "center",
+          "sourceId": "h12"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h13-surface",
+        "x": -1120,
+        "y": -1600,
+        "properties": {
+          "sourceId": "h13"
+        }
+      },
+      "landmark": {
+        "id": "h13",
+        "x": -1120,
+        "y": -1600,
+        "properties": {
+          "label": "h13",
+          "coordinateAnchor": "center",
+          "sourceId": "h13"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h14-surface",
+        "x": -820,
+        "y": -1660,
+        "properties": {
+          "sourceId": "h14"
+        }
+      },
+      "landmark": {
+        "id": "h14",
+        "x": -820,
+        "y": -1660,
+        "properties": {
+          "label": "h14",
+          "coordinateAnchor": "center",
+          "sourceId": "h14"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h15-surface",
+        "x": -520,
+        "y": -1660,
+        "properties": {
+          "sourceId": "h15"
+        }
+      },
+      "landmark": {
+        "id": "h15",
+        "x": -520,
+        "y": -1660,
+        "properties": {
+          "label": "h15",
+          "coordinateAnchor": "center",
+          "sourceId": "h15"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h16-surface",
+        "x": -220,
+        "y": -1660,
+        "properties": {
+          "sourceId": "h16"
+        }
+      },
+      "landmark": {
+        "id": "h16",
+        "x": -220,
+        "y": -1660,
+        "properties": {
+          "label": "h16",
+          "coordinateAnchor": "center",
+          "sourceId": "h16"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h17-surface",
+        "x": 80,
+        "y": -1700,
+        "properties": {
+          "sourceId": "h17"
+        }
+      },
+      "landmark": {
+        "id": "h17",
+        "x": 80,
+        "y": -1700,
+        "properties": {
+          "label": "h17",
+          "coordinateAnchor": "center",
+          "sourceId": "h17"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h18-surface",
+        "x": 240,
+        "y": -1940,
+        "properties": {
+          "sourceId": "h18"
+        }
+      },
+      "landmark": {
+        "id": "h18",
+        "x": 240,
+        "y": -1940,
+        "properties": {
+          "label": "h18",
+          "coordinateAnchor": "center",
+          "sourceId": "h18"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h19-surface",
+        "x": 80,
+        "y": -2140,
+        "properties": {
+          "sourceId": "h19"
+        }
+      },
+      "landmark": {
+        "id": "h19",
+        "x": 80,
+        "y": -2140,
+        "properties": {
+          "label": "h19",
+          "coordinateAnchor": "center",
+          "sourceId": "h19"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h20-surface",
+        "x": -220,
+        "y": -2280,
+        "properties": {
+          "sourceId": "h20"
+        }
+      },
+      "landmark": {
+        "id": "h20",
+        "x": -220,
+        "y": -2280,
+        "properties": {
+          "label": "h20",
+          "coordinateAnchor": "center",
+          "sourceId": "h20"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/5/5-7/AREA-SPEC-REV4-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV1.1 · NOT IMPLEMENTED",
+      "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+      "stage": {
+        "sector": 5,
+        "stage": 7,
+        "legacyStageAlias": "5-7",
+        "sourceAreaId": "sector-05-07",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "EVACUATION CONSEQUENCE ARCHIVE",
+        "subtitle": "ASYMMETRIC THREE-TIER SWITCHBACK / ARTILLERY → CUTTER → STORY SAFE"
+      },
+      "bounds": {
+        "width": 2050,
+        "height": 2320
+      },
+      "entry": {
+        "id": "h00",
+        "x": -980,
+        "y": -180,
+        "fromStageAlias": "5-6"
+      },
+      "grappleTargets": [
+        {
+          "id": "h00",
+          "x": -980,
+          "y": -180
+        },
+        {
+          "id": "h01",
+          "x": -660,
+          "y": -240
+        },
+        {
+          "id": "h02",
+          "x": -320,
+          "y": -240
+        },
+        {
+          "id": "h03",
+          "x": 20,
+          "y": -240
+        },
+        {
+          "id": "h04",
+          "x": 360,
+          "y": -300
+        },
+        {
+          "id": "h05",
+          "x": 500,
+          "y": -560
+        },
+        {
+          "id": "h06",
+          "x": 500,
+          "y": -820
+        },
+        {
+          "id": "h07",
+          "x": 180,
+          "y": -880
+        },
+        {
+          "id": "h08",
+          "x": -160,
+          "y": -880
+        },
+        {
+          "id": "h09",
+          "x": -500,
+          "y": -920
+        },
+        {
+          "id": "h10",
+          "x": -840,
+          "y": -980
+        },
+        {
+          "id": "h11",
+          "x": -1120,
+          "y": -1080
+        },
+        {
+          "id": "h12",
+          "x": -1120,
+          "y": -1360
+        },
+        {
+          "id": "h13",
+          "x": -1120,
+          "y": -1600
+        },
+        {
+          "id": "h14",
+          "x": -820,
+          "y": -1660
+        },
+        {
+          "id": "h15",
+          "x": -520,
+          "y": -1660
+        },
+        {
+          "id": "h16",
+          "x": -220,
+          "y": -1660
+        },
+        {
+          "id": "h17",
+          "x": 80,
+          "y": -1700
+        },
+        {
+          "id": "h18",
+          "x": 240,
+          "y": -1940
+        },
+        {
+          "id": "h19",
+          "x": 80,
+          "y": -2140
+        },
+        {
+          "id": "h20",
+          "x": -220,
+          "y": -2280
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-05-07:artillery-a",
+          "enemyType": "artillery-drone-t1",
+          "role": "LOWER DWELL CONTROL",
+          "rules": [
+            "kill-optional",
+            "no-kill-gate",
+            "stored-position-strike-only"
+          ]
+        },
+        {
+          "id": "sector-05-07:cutter-a",
+          "enemyType": "sentry-t1",
+          "role": "MIDDLE CURRENT-ROPE DENIAL",
+          "rules": [
+            "cutter-fire",
+            "targets-player-not-rope",
+            "kill-optional",
+            "no-kill-gate"
+          ]
+        }
+      ],
+      "route": {
+        "lowerEventSpine": [
+          "h00",
+          "h01",
+          "h02",
+          "h03",
+          "h04"
+        ],
+        "riser1": [
+          "h04",
+          "h05",
+          "h06"
+        ],
+        "middleRouteStatusSpine": [
+          "h06",
+          "h07",
+          "h08",
+          "h09",
+          "h10",
+          "h11"
+        ],
+        "riser2": [
+          "h11",
+          "h12",
+          "h13"
+        ],
+        "upperEvidenceDeck": [
+          "h13",
+          "h14",
+          "h15",
+          "h16",
+          "h17"
+        ],
+        "finalRise": [
+          "h17",
+          "h18",
+          "h19",
+          "h20"
+        ],
+        "maxAuthoredRelationPx": 345.25,
+        "baseHookReachPx": 400
+      },
+      "story": {
+        "evidenceA": [
+          "POST-CASCADE EVACUATION LOG",
+          "LOWER-SECTOR TRANSFER / ROUTING INTERRUPTED",
+          "LOWER ASCENT / SUSPENSION IN EFFECT"
+        ],
+        "evidenceB": [
+          "LOWER SECTORS",
+          "EVACUATION STATUS / SUSPENDED"
+        ],
+        "approvedPlayerBark": "…승인한 대로, 실제 대피까지 멈췄어.",
+        "exit": [
+          "CONTINUITY COMMAND SPINE",
+          "AUTHORITY RECORDS / AHEAD"
+        ]
+      },
+      "runtimeDependencies": {
+        "existingSystems": [
+          {
+            "id": "artillery-drone-t1",
+            "status": "CURRENT_RUNTIME"
+          },
+          {
+            "id": "sentry-t1+cutter-fire",
+            "status": "CURRENT_RUNTIME_BASIS"
+          }
+        ]
+      },
+      "forbidden": [
+        "Jammer",
+        "AEGIS",
+        "Patrol",
+        "Pursuit",
+        "Standard Sentry",
+        "Artillery+Cutter overlapping bands",
+        "enemy after upper evidence entry",
+        "casualty count",
+        "everyone died claim",
+        "permanent impossibility claim",
+        "named executive",
+        "final responsibility"
+      ]
+    }
+  }
+}

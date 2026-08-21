@@ -1,0 +1,1368 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 5,
+    "stage": 5,
+    "legacyStageAlias": "5-5",
+    "sourceAreaId": "sector-05-05"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-05-05",
+    "sectorId": "sector-05",
+    "order": 5,
+    "name": "PRIORITY ROUTING HALL",
+    "subtitle": "VISIBLE LOCKED ASCENT / LEFT CONTROL BYPASS / PRIORITY DIRECTIVE 02 OF 03",
+    "bounds": {
+      "width": 2350,
+      "height": 2688
+    },
+    "entry": {
+      "id": "sector-05-05:entry",
+      "x": 0,
+      "y": -100
+    },
+    "exit": {
+      "id": "sector-05-05:scenario-exit",
+      "x": 400,
+      "y": -2400
+    },
+    "nextAreaId": null,
+    "surfaces": [
+      {
+        "id": "entry-deck",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -180,
+          "y": -120
+        },
+        "vertices": [
+          {
+            "x": -360,
+            "y": -120
+          },
+          {
+            "x": 0,
+            "y": -120
+          },
+          {
+            "x": 0,
+            "y": -92
+          },
+          {
+            "x": -360,
+            "y": -92
+          }
+        ],
+        "sourceId": "entry-deck"
+      },
+      {
+        "id": "hub-deck",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -220,
+          "y": -420
+        },
+        "vertices": [
+          {
+            "x": -440,
+            "y": -420
+          },
+          {
+            "x": 0,
+            "y": -420
+          },
+          {
+            "x": 0,
+            "y": -388
+          },
+          {
+            "x": -440,
+            "y": -388
+          }
+        ],
+        "sourceId": "hub-deck"
+      },
+      {
+        "id": "authorized-ascent-front-lock",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 360,
+          "y": -720
+        },
+        "vertices": [
+          {
+            "x": 110,
+            "y": -720
+          },
+          {
+            "x": 610,
+            "y": -720
+          },
+          {
+            "x": 610,
+            "y": -390
+          },
+          {
+            "x": 110,
+            "y": -390
+          }
+        ],
+        "sourceId": "authorized-ascent-front-lock"
+      },
+      {
+        "id": "priority-routing-matrix",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1020,
+          "y": -1180
+        },
+        "vertices": [
+          {
+            "x": -1270,
+            "y": -1180
+          },
+          {
+            "x": -770,
+            "y": -1180
+          },
+          {
+            "x": -770,
+            "y": -640
+          },
+          {
+            "x": -1270,
+            "y": -640
+          }
+        ],
+        "sourceId": "priority-routing-matrix"
+      },
+      {
+        "id": "directive-deck",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -320,
+          "y": -1690
+        },
+        "vertices": [
+          {
+            "x": -500,
+            "y": -1690
+          },
+          {
+            "x": -140,
+            "y": -1690
+          },
+          {
+            "x": -140,
+            "y": -1662
+          },
+          {
+            "x": -500,
+            "y": -1662
+          }
+        ],
+        "sourceId": "directive-deck"
+      },
+      {
+        "id": "backside-service-bridge",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -80,
+          "y": -1735
+        },
+        "vertices": [
+          {
+            "x": -475,
+            "y": -1735
+          },
+          {
+            "x": 315,
+            "y": -1735
+          },
+          {
+            "x": 315,
+            "y": -1575
+          },
+          {
+            "x": -475,
+            "y": -1575
+          }
+        ],
+        "sourceId": "backside-service-bridge"
+      },
+      {
+        "id": "ascent-shelf-0",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 560,
+          "y": -1490
+        },
+        "vertices": [
+          {
+            "x": 430,
+            "y": -1490
+          },
+          {
+            "x": 690,
+            "y": -1490
+          },
+          {
+            "x": 690,
+            "y": -1466
+          },
+          {
+            "x": 430,
+            "y": -1466
+          }
+        ],
+        "sourceId": "ascent-shelf-0"
+      },
+      {
+        "id": "ascent-shelf-1",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 540,
+          "y": -1800
+        },
+        "vertices": [
+          {
+            "x": 400,
+            "y": -1800
+          },
+          {
+            "x": 680,
+            "y": -1800
+          },
+          {
+            "x": 680,
+            "y": -1776
+          },
+          {
+            "x": 400,
+            "y": -1776
+          }
+        ],
+        "sourceId": "ascent-shelf-1"
+      },
+      {
+        "id": "ascent-shelf-2",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 410,
+          "y": -2020
+        },
+        "vertices": [
+          {
+            "x": 280,
+            "y": -2020
+          },
+          {
+            "x": 540,
+            "y": -2020
+          },
+          {
+            "x": 540,
+            "y": -1996
+          },
+          {
+            "x": 280,
+            "y": -1996
+          }
+        ],
+        "sourceId": "ascent-shelf-2"
+      },
+      {
+        "id": "ascent-shelf-3",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 540,
+          "y": -2260
+        },
+        "vertices": [
+          {
+            "x": 400,
+            "y": -2260
+          },
+          {
+            "x": 680,
+            "y": -2260
+          },
+          {
+            "x": 680,
+            "y": -2236
+          },
+          {
+            "x": 400,
+            "y": -2236
+          }
+        ],
+        "sourceId": "ascent-shelf-3"
+      },
+      {
+        "id": "exit-deck",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 260,
+          "y": -2430
+        },
+        "vertices": [
+          {
+            "x": 100,
+            "y": -2430
+          },
+          {
+            "x": 420,
+            "y": -2430
+          },
+          {
+            "x": 420,
+            "y": -2402
+          },
+          {
+            "x": 100,
+            "y": -2402
+          }
+        ],
+        "sourceId": "exit-deck"
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-05-05:route-entry",
+        "x": 0,
+        "y": -100,
+        "sourceId": "entry"
+      },
+      {
+        "id": "sector-05-05:route-hub",
+        "x": 0,
+        "y": -380,
+        "sourceId": "hub"
+      },
+      {
+        "id": "sector-05-05:route-hub",
+        "x": 0,
+        "y": -380,
+        "sourceId": "hub"
+      },
+      {
+        "id": "sector-05-05:route-c1",
+        "x": -300,
+        "y": -500,
+        "sourceId": "c1"
+      },
+      {
+        "id": "sector-05-05:route-c2",
+        "x": -620,
+        "y": -500,
+        "sourceId": "c2"
+      },
+      {
+        "id": "sector-05-05:route-c3",
+        "x": -900,
+        "y": -650,
+        "sourceId": "c3"
+      },
+      {
+        "id": "sector-05-05:route-c4",
+        "x": -1020,
+        "y": -900,
+        "sourceId": "c4"
+      },
+      {
+        "id": "sector-05-05:route-p1",
+        "x": -900,
+        "y": -1150,
+        "sourceId": "p1"
+      },
+      {
+        "id": "sector-05-05:route-directive",
+        "x": -150,
+        "y": -1650,
+        "sourceId": "directive"
+      },
+      {
+        "id": "sector-05-05:route-bridge-1",
+        "x": 160,
+        "y": -1650,
+        "sourceId": "bridge-1"
+      },
+      {
+        "id": "sector-05-05:route-bridge-2",
+        "x": 420,
+        "y": -1550,
+        "sourceId": "bridge-2"
+      },
+      {
+        "id": "sector-05-05:route-ascent-entry",
+        "x": 650,
+        "y": -1450,
+        "sourceId": "ascent-entry"
+      },
+      {
+        "id": "sector-05-05:route-ascent-entry",
+        "x": 650,
+        "y": -1450,
+        "sourceId": "ascent-entry"
+      },
+      {
+        "id": "sector-05-05:route-ascent-1",
+        "x": 650,
+        "y": -1750,
+        "sourceId": "ascent-1"
+      },
+      {
+        "id": "sector-05-05:route-ascent-2",
+        "x": 500,
+        "y": -1950,
+        "sourceId": "ascent-2"
+      },
+      {
+        "id": "sector-05-05:route-ascent-3",
+        "x": 650,
+        "y": -2200,
+        "sourceId": "ascent-3"
+      },
+      {
+        "id": "sector-05-05:route-exit",
+        "x": 400,
+        "y": -2400,
+        "sourceId": "exit"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [
+      {
+        "id": "sector-05-05:jammer-a",
+        "kind": "scenario-enemy-slot",
+        "enemyType": "hardpoint-jammer-v1",
+        "position": {
+          "x": -945,
+          "y": -1435
+        },
+        "coordinateAnchor": "center",
+        "sourceId": "sector-05-05:jammer-a"
+      },
+      {
+        "id": "sector-05-05:aegis-a",
+        "kind": "scenario-enemy-slot",
+        "enemyType": "shield-drone-t1",
+        "position": {
+          "x": -365,
+          "y": -1460
+        },
+        "coordinateAnchor": "center",
+        "sourceId": "sector-05-05:aegis-a"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "priority-directive",
+        "type": "interact",
+        "preset": "corporate-proof-terminal-v1",
+        "location": "directive-deck",
+        "notes": [
+          "Mandatory story proof on the physically mandatory control route.",
+          "Does NOT remotely unlock authorized-ascent-front-lock."
+        ]
+      },
+      {
+        "id": "final-deck-reached",
+        "type": "reach",
+        "preset": "reach-deck",
+        "requiredObjectiveIds": [
+          "priority-directive"
+        ]
+      },
+      {
+        "id": "exit-panel-engaged",
+        "type": "interact",
+        "preset": "exit-panel",
+        "requiredObjectiveIds": [
+          "final-deck-reached"
+        ]
+      }
+    ],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "entry-surface",
+        "x": 0,
+        "y": -100,
+        "properties": {
+          "sourceId": "entry"
+        }
+      },
+      "landmark": {
+        "id": "entry",
+        "x": 0,
+        "y": -100,
+        "properties": {
+          "label": "entry",
+          "coordinateAnchor": "center",
+          "sourceId": "entry"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "hub-surface",
+        "x": 0,
+        "y": -380,
+        "properties": {
+          "sourceId": "hub"
+        }
+      },
+      "landmark": {
+        "id": "hub",
+        "x": 0,
+        "y": -380,
+        "properties": {
+          "label": "hub",
+          "coordinateAnchor": "center",
+          "sourceId": "hub"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c1-surface",
+        "x": -300,
+        "y": -500,
+        "properties": {
+          "sourceId": "c1"
+        }
+      },
+      "landmark": {
+        "id": "c1",
+        "x": -300,
+        "y": -500,
+        "properties": {
+          "label": "c1",
+          "coordinateAnchor": "center",
+          "sourceId": "c1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c2-surface",
+        "x": -620,
+        "y": -500,
+        "properties": {
+          "sourceId": "c2"
+        }
+      },
+      "landmark": {
+        "id": "c2",
+        "x": -620,
+        "y": -500,
+        "properties": {
+          "label": "c2",
+          "coordinateAnchor": "center",
+          "sourceId": "c2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c3-surface",
+        "x": -900,
+        "y": -650,
+        "properties": {
+          "sourceId": "c3"
+        }
+      },
+      "landmark": {
+        "id": "c3",
+        "x": -900,
+        "y": -650,
+        "properties": {
+          "label": "c3",
+          "coordinateAnchor": "center",
+          "sourceId": "c3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "c4-surface",
+        "x": -1020,
+        "y": -900,
+        "properties": {
+          "sourceId": "c4"
+        }
+      },
+      "landmark": {
+        "id": "c4",
+        "x": -1020,
+        "y": -900,
+        "properties": {
+          "label": "c4",
+          "coordinateAnchor": "center",
+          "sourceId": "c4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "p1-surface",
+        "x": -900,
+        "y": -1150,
+        "properties": {
+          "sourceId": "p1"
+        }
+      },
+      "landmark": {
+        "id": "p1",
+        "x": -900,
+        "y": -1150,
+        "properties": {
+          "label": "p1",
+          "coordinateAnchor": "center",
+          "sourceId": "p1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "upper-1-surface",
+        "x": -650,
+        "y": -1300,
+        "properties": {
+          "sourceId": "upper-1"
+        }
+      },
+      "landmark": {
+        "id": "upper-1",
+        "x": -650,
+        "y": -1300,
+        "properties": {
+          "label": "upper-1",
+          "coordinateAnchor": "center",
+          "sourceId": "upper-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "upper-2-surface",
+        "x": -400,
+        "y": -1500,
+        "properties": {
+          "sourceId": "upper-2"
+        }
+      },
+      "landmark": {
+        "id": "upper-2",
+        "x": -400,
+        "y": -1500,
+        "properties": {
+          "label": "upper-2",
+          "coordinateAnchor": "center",
+          "sourceId": "upper-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "lower-1-surface",
+        "x": -760,
+        "y": -1450,
+        "properties": {
+          "sourceId": "lower-1"
+        }
+      },
+      "landmark": {
+        "id": "lower-1",
+        "x": -760,
+        "y": -1450,
+        "properties": {
+          "label": "lower-1",
+          "coordinateAnchor": "center",
+          "sourceId": "lower-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "lower-2-surface",
+        "x": -500,
+        "y": -1600,
+        "properties": {
+          "sourceId": "lower-2"
+        }
+      },
+      "landmark": {
+        "id": "lower-2",
+        "x": -500,
+        "y": -1600,
+        "properties": {
+          "label": "lower-2",
+          "coordinateAnchor": "center",
+          "sourceId": "lower-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "directive-surface",
+        "x": -150,
+        "y": -1650,
+        "properties": {
+          "sourceId": "directive"
+        }
+      },
+      "landmark": {
+        "id": "directive",
+        "x": -150,
+        "y": -1650,
+        "properties": {
+          "label": "directive",
+          "coordinateAnchor": "center",
+          "sourceId": "directive"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "bridge-1-surface",
+        "x": 160,
+        "y": -1650,
+        "properties": {
+          "sourceId": "bridge-1"
+        }
+      },
+      "landmark": {
+        "id": "bridge-1",
+        "x": 160,
+        "y": -1650,
+        "properties": {
+          "label": "bridge-1",
+          "coordinateAnchor": "center",
+          "sourceId": "bridge-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "bridge-2-surface",
+        "x": 420,
+        "y": -1550,
+        "properties": {
+          "sourceId": "bridge-2"
+        }
+      },
+      "landmark": {
+        "id": "bridge-2",
+        "x": 420,
+        "y": -1550,
+        "properties": {
+          "label": "bridge-2",
+          "coordinateAnchor": "center",
+          "sourceId": "bridge-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "ascent-entry-surface",
+        "x": 650,
+        "y": -1450,
+        "properties": {
+          "sourceId": "ascent-entry"
+        }
+      },
+      "landmark": {
+        "id": "ascent-entry",
+        "x": 650,
+        "y": -1450,
+        "properties": {
+          "label": "ascent-entry",
+          "coordinateAnchor": "center",
+          "sourceId": "ascent-entry"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "ascent-1-surface",
+        "x": 650,
+        "y": -1750,
+        "properties": {
+          "sourceId": "ascent-1"
+        }
+      },
+      "landmark": {
+        "id": "ascent-1",
+        "x": 650,
+        "y": -1750,
+        "properties": {
+          "label": "ascent-1",
+          "coordinateAnchor": "center",
+          "sourceId": "ascent-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "ascent-2-surface",
+        "x": 500,
+        "y": -1950,
+        "properties": {
+          "sourceId": "ascent-2"
+        }
+      },
+      "landmark": {
+        "id": "ascent-2",
+        "x": 500,
+        "y": -1950,
+        "properties": {
+          "label": "ascent-2",
+          "coordinateAnchor": "center",
+          "sourceId": "ascent-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "ascent-3-surface",
+        "x": 650,
+        "y": -2200,
+        "properties": {
+          "sourceId": "ascent-3"
+        }
+      },
+      "landmark": {
+        "id": "ascent-3",
+        "x": 650,
+        "y": -2200,
+        "properties": {
+          "label": "ascent-3",
+          "coordinateAnchor": "center",
+          "sourceId": "ascent-3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "exit-surface",
+        "x": 400,
+        "y": -2400,
+        "properties": {
+          "sourceId": "exit"
+        }
+      },
+      "landmark": {
+        "id": "exit",
+        "x": 400,
+        "y": -2400,
+        "properties": {
+          "label": "exit",
+          "coordinateAnchor": "center",
+          "sourceId": "exit"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/5/5-5/AREA-SPEC-REV4-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV4.0 · NOT IMPLEMENTED",
+      "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+      "stage": {
+        "sector": 5,
+        "stage": 5,
+        "legacyStageAlias": "5-5",
+        "sourceAreaId": "sector-05-05",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "PRIORITY ROUTING HALL",
+        "subtitle": "VISIBLE LOCKED ASCENT / LEFT CONTROL BYPASS / PRIORITY DIRECTIVE 02 OF 03",
+        "supersedes": "REV3.8 remote proof-unlock interpretation"
+      },
+      "bounds": {
+        "width": 2350,
+        "height": 2470
+      },
+      "entry": {
+        "id": "entry",
+        "x": 0,
+        "y": -100,
+        "fromStageAlias": "5-4"
+      },
+      "surfaces": [
+        {
+          "id": "entry-deck",
+          "preset": "safe-deck",
+          "x": -180,
+          "y": -120,
+          "width": 360,
+          "height": 28
+        },
+        {
+          "id": "hub-deck",
+          "preset": "safe-deck",
+          "x": -220,
+          "y": -420,
+          "width": 440,
+          "height": 32
+        },
+        {
+          "id": "authorized-ascent-front-lock",
+          "preset": "sealed-corporate-surface-v1",
+          "x": 360,
+          "y": -720,
+          "width": 500,
+          "height": 330,
+          "grappleable": false,
+          "role": "VISIBLE FRONT-LOCKED AUTHORIZED ACCESS; NOT REMOTELY UNLOCKED BY DIRECTIVE"
+        },
+        {
+          "id": "priority-routing-matrix",
+          "preset": "sealed-corporate-surface-v1",
+          "x": -1020,
+          "y": -1180,
+          "width": 500,
+          "height": 540,
+          "grappleable": false
+        },
+        {
+          "id": "directive-deck",
+          "preset": "safe-deck",
+          "x": -320,
+          "y": -1690,
+          "width": 360,
+          "height": 28
+        },
+        {
+          "id": "backside-service-bridge",
+          "preset": "service-bridge",
+          "x": -80,
+          "y": -1735,
+          "width": 790,
+          "height": 160
+        },
+        {
+          "id": "ascent-shelf-0",
+          "preset": "safe-deck",
+          "x": 560,
+          "y": -1490,
+          "width": 260,
+          "height": 24
+        },
+        {
+          "id": "ascent-shelf-1",
+          "preset": "safe-deck",
+          "x": 540,
+          "y": -1800,
+          "width": 280,
+          "height": 24
+        },
+        {
+          "id": "ascent-shelf-2",
+          "preset": "safe-deck",
+          "x": 410,
+          "y": -2020,
+          "width": 260,
+          "height": 24
+        },
+        {
+          "id": "ascent-shelf-3",
+          "preset": "safe-deck",
+          "x": 540,
+          "y": -2260,
+          "width": 280,
+          "height": 24
+        },
+        {
+          "id": "exit-deck",
+          "preset": "safe-deck",
+          "x": 260,
+          "y": -2430,
+          "width": 320,
+          "height": 28
+        }
+      ],
+      "grappleTargets": [
+        {
+          "id": "entry",
+          "x": 0,
+          "y": -100
+        },
+        {
+          "id": "hub",
+          "x": 0,
+          "y": -380
+        },
+        {
+          "id": "c1",
+          "x": -300,
+          "y": -500
+        },
+        {
+          "id": "c2",
+          "x": -620,
+          "y": -500
+        },
+        {
+          "id": "c3",
+          "x": -900,
+          "y": -650
+        },
+        {
+          "id": "c4",
+          "x": -1020,
+          "y": -900
+        },
+        {
+          "id": "p1",
+          "x": -900,
+          "y": -1150
+        },
+        {
+          "id": "upper-1",
+          "x": -650,
+          "y": -1300
+        },
+        {
+          "id": "upper-2",
+          "x": -400,
+          "y": -1500
+        },
+        {
+          "id": "lower-1",
+          "x": -760,
+          "y": -1450
+        },
+        {
+          "id": "lower-2",
+          "x": -500,
+          "y": -1600
+        },
+        {
+          "id": "directive",
+          "x": -150,
+          "y": -1650
+        },
+        {
+          "id": "bridge-1",
+          "x": 160,
+          "y": -1650
+        },
+        {
+          "id": "bridge-2",
+          "x": 420,
+          "y": -1550
+        },
+        {
+          "id": "ascent-entry",
+          "x": 650,
+          "y": -1450
+        },
+        {
+          "id": "ascent-1",
+          "x": 650,
+          "y": -1750
+        },
+        {
+          "id": "ascent-2",
+          "x": 500,
+          "y": -1950
+        },
+        {
+          "id": "ascent-3",
+          "x": 650,
+          "y": -2200
+        },
+        {
+          "id": "exit",
+          "x": 400,
+          "y": -2400
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-05-05:jammer-a",
+          "enemyType": "hardpoint-jammer-v1",
+          "status": "NEW_SYSTEM_NOT_IMPLEMENTED",
+          "role": "NEXT-ROUTE DENIAL",
+          "position": {
+            "x": -945,
+            "y": -1435
+          },
+          "activation": {
+            "x": -980,
+            "y": -1730,
+            "width": 950,
+            "height": 680
+          },
+          "maxSimultaneousTargets": 1,
+          "eligibleTargetIds": [
+            "upper-1",
+            "lower-1"
+          ],
+          "rules": [
+            "never-jam-attached-hardpoint",
+            "preserve-one-base-clear-flank",
+            "no-damage",
+            "no-force-release",
+            "no-rope-cut",
+            "already-launched-hook-resolves-in-v1"
+          ]
+        },
+        {
+          "id": "sector-05-05:aegis-a",
+          "enemyType": "shield-drone-t1",
+          "role": "DIRECT-ANGLE DENIAL",
+          "position": {
+            "x": -365,
+            "y": -1460
+          },
+          "activation": {
+            "x": -820,
+            "y": -1760,
+            "width": 900,
+            "height": 620
+          },
+          "rules": [
+            "kill-optional",
+            "no-kill-gate",
+            "reuse-current-shield-behavior",
+            "side-or-rear-angle-or-bypass"
+          ]
+        }
+      ],
+      "objectives": [
+        {
+          "id": "priority-directive",
+          "type": "interact",
+          "preset": "corporate-proof-terminal-v1",
+          "location": "directive-deck",
+          "notes": [
+            "Mandatory story proof on the physically mandatory control route.",
+            "Does NOT remotely unlock authorized-ascent-front-lock."
+          ]
+        },
+        {
+          "id": "final-deck-reached",
+          "type": "reach",
+          "preset": "reach-deck",
+          "requiredObjectiveIds": [
+            "priority-directive"
+          ]
+        },
+        {
+          "id": "exit-panel-engaged",
+          "type": "interact",
+          "preset": "exit-panel",
+          "requiredObjectiveIds": [
+            "final-deck-reached"
+          ]
+        }
+      ],
+      "route": {
+        "entryToHub": [
+          "entry",
+          "hub"
+        ],
+        "controlApproach": [
+          "hub",
+          "c1",
+          "c2",
+          "c3",
+          "c4",
+          "p1"
+        ],
+        "combinedFlankChoices": [
+          [
+            "p1",
+            "upper-1",
+            "upper-2",
+            "directive"
+          ],
+          [
+            "p1",
+            "lower-1",
+            "lower-2",
+            "directive"
+          ]
+        ],
+        "backsideCrossing": [
+          "directive",
+          "bridge-1",
+          "bridge-2",
+          "ascent-entry"
+        ],
+        "rightAscent": [
+          "ascent-entry",
+          "ascent-1",
+          "ascent-2",
+          "ascent-3",
+          "exit"
+        ],
+        "maxAuthoredRelationPx": 353.55,
+        "baseHookReachPx": 400,
+        "forbiddenBypasses": [
+          {
+            "from": "hub",
+            "to": [
+              "ascent-entry",
+              "ascent-1",
+              "ascent-2",
+              "ascent-3",
+              "exit"
+            ],
+            "reason": "Front authorized ascent is architecturally sealed from Hub."
+          },
+          {
+            "from": "p1",
+            "to": [
+              "directive"
+            ],
+            "reason": "Combined Jammer + AEGIS flank lesson must be traversed."
+          }
+        ]
+      },
+      "sourceExit": {
+        "deckX": 260,
+        "deckTopY": -2430,
+        "deckWidth": 320,
+        "panelObjectiveId": "exit-panel-engaged"
+      },
+      "progression": {
+        "targetStageAlias": "5-6",
+        "mode": "objective-gated-connector",
+        "requiredObjectiveIds": [
+          "priority-directive",
+          "exit-panel-engaged"
+        ]
+      },
+      "story": {
+        "systemFacts": [
+          "PRIORITY ROUTING HALL",
+          "EVACUATION ASCENT / AUTHORIZED ACCESS ONLY",
+          "ROUTING CONTROL / SERVICE ACCESS",
+          "PRIORITY ROUTING DIRECTIVE / 02 OF 03",
+          "UPPER CORE CONTROL / MAINTAIN",
+          "UPPER EVACUATION CAPACITY / MAINTAIN",
+          "GENERAL DISTRIBUTION / CAPACITY HOLD",
+          "INCIDENT AUTHORIZATION ANNEX / ACCESS AHEAD"
+        ],
+        "approvedPlayerBark": "…부족한 데서, 뭘 남길지 골랐던 거네."
+      },
+      "runtimeDependencies": {
+        "newSystems": [
+          {
+            "id": "hardpoint-jammer-v1",
+            "status": "NOT_IMPLEMENTED"
+          },
+          {
+            "id": "corporate-proof-terminal-v1",
+            "status": "NOT_IMPLEMENTED"
+          }
+        ],
+        "existingSystems": [
+          {
+            "id": "shield-drone-t1",
+            "status": "CURRENT_RUNTIME"
+          },
+          {
+            "id": "surface.grappleable=false",
+            "status": "CURRENT_RUNTIME"
+          },
+          {
+            "id": "canAttachToSurface(surface)",
+            "status": "CURRENT_RUNTIME_HOOK"
+          }
+        ],
+        "explicitlyNotRequired": [
+          "priority-route-lock-v1 remote unlock behavior",
+          "standard-sentry-area-spec-v1"
+        ]
+      },
+      "forbidden": [
+        "Standard Sentry",
+        "Artillery",
+        "Cutter",
+        "Pursuit",
+        "Patrol",
+        "Jammer cutting current Rope",
+        "Jammer forced release",
+        "Jammer damage",
+        "mandatory Jammer kill",
+        "mandatory AEGIS kill",
+        "remote magical front-door unlock on Directive pickup",
+        "LOWER ASCENT / SUSPENSION AUTHORIZED",
+        "Group C sacrifice conclusion",
+        "named executive authorization",
+        "final organizational responsibility"
+      ]
+    }
+  }
+}

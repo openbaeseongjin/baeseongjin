@@ -77,6 +77,7 @@ select:focus {
     display: grid;
     grid-template-columns: minmax(190px, 0.75fr) minmax(420px, 2fr) minmax(230px, 0.95fr);
     grid-template-rows: auto minmax(500px, 1fr) auto;
+    height: 100vh;
     gap: 10px;
     min-height: 100vh;
     padding: 10px;
@@ -127,9 +128,29 @@ h1 {
     background: color-mix(in srgb, var(--panel) 91%, transparent);
     box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
 }
-.layer-panel {
+.layer-sidebar {
     grid-column: 1;
     grid-row: 2;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    gap: 7px;
+}
+.layer-filter {
+    display: grid;
+    gap: 4px;
+    color: var(--muted);
+    font:
+        700 0.65rem/1 ui-monospace,
+        Consolas,
+        monospace;
+    letter-spacing: 0.1em;
+}
+.layer-filter input {
+    font-size: 0.76rem;
+    letter-spacing: normal;
+}
+.layer-panel {
     padding: 10px;
 }
 .inspector-panel {
@@ -192,6 +213,17 @@ h1 {
     color: var(--muted);
     font-size: 0.65rem;
 }
+.layer-empty,
+.layer-search-empty {
+    margin: 5px 2px;
+    color: var(--muted);
+    font-size: 0.73rem;
+    line-height: 1.4;
+}
+.layer-search-empty {
+    border-left: 2px solid var(--muted);
+    padding-left: 8px;
+}
 .add-button {
     min-height: 25px;
     padding: 2px 6px;
@@ -253,6 +285,57 @@ h1 {
         Consolas,
         monospace;
     pointer-events: none;
+}
+.canvas-tools {
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    gap: 4px;
+    max-width: calc(100% - 20px);
+    border: 1px solid rgba(134, 176, 190, 0.18);
+    background: rgba(7, 16, 24, 0.8);
+    padding: 4px;
+}
+.canvas-tools button {
+    min-height: 27px;
+    padding: 3px 6px;
+    font:
+        700 0.66rem/1 ui-monospace,
+        Consolas,
+        monospace;
+}
+kbd {
+    margin-left: 3px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--muted);
+    background: rgba(7, 16, 24, 0.7);
+    padding: 1px 3px;
+    font: inherit;
+}
+.selection-readout {
+    position: absolute;
+    z-index: 1;
+    left: 10px;
+    bottom: 8px;
+    max-width: calc(100% - 350px);
+    margin: 0;
+    border-left: 2px solid var(--muted);
+    background: rgba(7, 16, 24, 0.72);
+    padding: 4px 7px;
+    color: var(--muted);
+    font:
+        0.65rem/1.3 ui-monospace,
+        Consolas,
+        monospace;
+}
+.selection-readout.has-selection {
+    border-left-color: var(--cyan);
+    color: var(--text);
 }
 
 .inspector-title {
@@ -327,6 +410,10 @@ h1 {
 .draft-status.is-invalid {
     color: var(--amber);
 }
+.draft-status.is-dirty {
+    border-left: 2px solid var(--amber);
+    padding-left: 8px;
+}
 .draft-status.is-valid {
     color: var(--good);
 }
@@ -344,11 +431,16 @@ h1 {
     .editor-shell {
         grid-template-columns: minmax(170px, 0.8fr) minmax(0, 2fr);
         grid-template-rows: auto minmax(440px, 1fr) auto auto;
+        height: auto;
     }
     .inspector-panel {
         grid-column: 1 / -1;
         grid-row: 3;
         min-height: 170px;
+    }
+    .layer-sidebar {
+        grid-column: 1;
+        grid-row: 2;
     }
     .draft-strip {
         grid-row: 4;
@@ -371,10 +463,14 @@ h1 {
         align-items: start;
         flex-direction: column;
     }
-    .layer-panel {
+    .layer-sidebar {
         grid-column: 1;
         grid-row: 2;
         max-height: 200px;
+    }
+    .selection-readout {
+        bottom: 38px;
+        max-width: calc(100% - 20px);
     }
     .canvas-workspace {
         grid-column: 1;

@@ -2,16 +2,29 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 import { SECTOR_01_LEGACY_AREA_CATALOG } from "../../src/game/world/areas/sector01/Sector01LegacyAreaCatalog.js";
+import { SECTOR_02_AREA_CATALOG } from "../../src/game/world/areas/sector02/Sector02AreaCatalog.js";
 import { validateAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
 
 const projectRoot = resolve(import.meta.dirname, "../..");
 const writeCandidates = process.argv.includes("--write");
 const editableDomains = ["bounds", "entry", "surfaces", "anchors", "recoveryRoute", "enemySlots", "wind", "camera"];
 const readOnlyDomains = ["objectives", "progression", "story", "scanner", "behaviorRegistry"];
-const selectedStages = [
-    { stageId: "1-1", areaId: "sector-01-01", outputPath: "docs/bsh/scenario/1/1-1/AREA-SPEC.v2.json" },
-    { stageId: "1-7", areaId: "sector-01-07", outputPath: "docs/bsh/scenario/1/1-7/AREA-SPEC.v2.json" }
-];
+const runtimeCatalogs = new Map([
+    [1, SECTOR_01_LEGACY_AREA_CATALOG],
+    [2, SECTOR_02_AREA_CATALOG]
+]);
+const requestedSector = Number(process.argv.find((argument) => argument.startsWith("--sector="))?.slice(9) ?? 0);
+const selectedSectors = requestedSector ? [requestedSector] : [1, 2];
+const selectedStages = selectedSectors.flatMap((sector) => {
+    const catalog = runtimeCatalogs.get(sector);
+    if (!catalog) throw new Error(`runtime-catalog-unavailable:sector-${String(sector).padStart(2, "0")}`);
+    return catalog.areas.map((area) => ({
+        stageId: `${sector}-${area.order}`,
+        areaId: area.id,
+        outputPath: `docs/bsh/scenario/${sector}/${sector}-${area.order}/AREA-SPEC.v2.json`,
+        catalog
+    }));
+});
 
 function toAnchor(area, landmark) {
     const { id, kind, position, coordinateAnchor, ...properties } = landmark;
@@ -75,7 +88,7 @@ function extractAreaSpec(area, stageId) {
 }
 
 for (const candidate of selectedStages) {
-    const area = SECTOR_01_LEGACY_AREA_CATALOG.areas.find((entry) => entry.id === candidate.areaId);
+    const area = candidate.catalog.areas.find((entry) => entry.id === candidate.areaId);
     if (!area) {
         throw new Error(`legacy-area-missing:${candidate.areaId}`);
     }

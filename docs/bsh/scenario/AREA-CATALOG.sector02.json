@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "area-catalog-v2",
+  "catalogId": "sector-02",
+  "catalogOutputPath": "src/game/world/areas/generated/sector02/Sector02Catalog.generated.js",
+  "expectedStageIds": ["2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "2-7", "2-8"],
+  "stageSources": [
+    {"stageId": "2-1", "areaId": "sector-02-01", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-1/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage01.generated.js"},
+    {"stageId": "2-2", "areaId": "sector-02-02", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-2/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage02.generated.js"},
+    {"stageId": "2-3", "areaId": "sector-02-03", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-3/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage03.generated.js"},
+    {"stageId": "2-4", "areaId": "sector-02-04", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-4/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage04.generated.js"},
+    {"stageId": "2-5", "areaId": "sector-02-05", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-5/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage05.generated.js"},
+    {"stageId": "2-6", "areaId": "sector-02-06", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-6/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage06.generated.js"},
+    {"stageId": "2-7", "areaId": "sector-02-07", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-7/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage07.generated.js"},
+    {"stageId": "2-8", "areaId": "sector-02-08", "sectorId": "sector-02", "source": "generated", "sourcePath": "docs/bsh/scenario/2/2-8/AREA-SPEC.v2.json", "outputPath": "src/game/world/areas/generated/sector02/Sector02Stage08.generated.js"}
+  ]
+}
