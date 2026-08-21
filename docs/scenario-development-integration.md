@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: a8c84df91eb6e876e52f47103ad468ca8e2f3764834bc50c0f690819362760aa
+scenario-source-sha256: 787cf64d56bf4a178e9ece3db4dac391b543f2f32c913abe363dfff21bf010d5
 authored-area-sha256: 48ea494e945fd5847dd556613d93ec1e215623abd0c3fcfaf8f484eb08251ee9
 authored-sector-sha256: 3129e29b1ea699cc91bf98432c1c955c31f9c81278586c1b0e7b801e0c96fe2b
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 8b344f0f7a2309bfb316655668ed180718db7781
+reviewed-upstream: c2026697dd7471a143d3831125f7daf1b672ed7b
 -->
 
 ## 상태를 읽는 법
@@ -184,6 +184,8 @@ reviewed-upstream: 8b344f0f7a2309bfb316655668ed180718db7781
 104. Issue #754는 사용자가 제공한 Sector 05 5-1 REV8.0·5-2 REV1.0·5-3/5-4 REV2.0·5-5 REV4.0·5-6 REV1.1·5-7 REV1.1·5-8 REV2.1 package와 external Master REV4를 authoring 기준 문서에 반영했다. 각 Stage의 topology·story·validation·handoff·MAP/STORY preview와 shared scale/uniqueness gate를 보존했고, 모두 같은 현행 Runtime `area-spec-v1` 구현 계약으로 가장하지 않도록 `AREA-SPEC-REV4-DESIGN.json`으로 분리했다. 이 문서 병합은 Master가 요구하는 Runtime migration approval이나 post-Sector transition 결정을 승인하지 않으며, Hardpoint Jammer·Corporate Authorization 3/3·새 geometry·Direction migration·multiplayer ownership을 구현하지 않았다. 검증 ledger: base `1009af0ef14ec9f64af891833156e6af8a1abdc1`, 내용 candidate tree `952daaef8119fa82ee87d0a14fd071f753233312`, binary diff fingerprint `5340870c4bb759e81ca7095d0647b5059326a920`, Node `v24.14.0`. `npm run check`, `npm run format:check`, `npm run check:scenario-integration`과 `git diff --check`을 PASS했고, 로컬 정적 서버에서 16개 MAP/STORY preview를 Playwright로 열어 HTTP 200·visible root·Map SVG/canvas 8/8·page error 0을 확인했다. 저장소 기본 자동 테스트 suite는 사용자 결정으로 제공되지 않으며, metadata 문서만 후속 추가했으므로 같은 candidate의 suite를 반복하지 않았다.
 
 105. Issue #756은 사용자가 제공한 Sector 06 6-1 REV2.0·6-2 REV3.1·6-3 REV3.0·6-4/6-5 REV2.1·6-6 REV2.2·6-7 REV2.1·6-8 REV3.0 package를 authoring 기준 문서에 반영했다. 각 Stage의 topology·story·validation·handoff와 MAP/STORY preview를 보존했고, package의 `AREA-SPEC.json`은 현행 Runtime `area-spec-v1` 구현 계약으로 가장하지 않도록 모두 `AREA-SPEC-REV3-DESIGN.json`으로 분리했다. 함께 제공된 `SECTOR-06-MASTERPLAN-REV2-MAP-SCALE.md`는 파일명과 달리 본문이 `SECTOR 06-1 SKYBREAK ACCESS — REV2 PLANNING DRAFT`라고 명시하므로 `6-1/`의 reference-only 초안으로 보존하며, Sector Master나 6-1 REV3.0 package를 대체하지 않는다. 이 문서 병합은 Sector 06 Runtime geometry·story·Direction·Timer·Final Security·multiplayer, Post-Sector 05 Boss→6-1 전환, 6-8 뒤의 `PAD SECURITY WARDEN P-03`·Access Restored·개별 Boarding·Escape를 구현하거나 승인하지 않는다. 5-8→6-1 직접 wiring은 계속 금지한다. 검증 ledger: base `8b344f0f7a2309bfb316655668ed180718db7781`, 내용 candidate tree `f871519a288cef9ae1f814561c9325ae0dad2025`, binary diff fingerprint `71d134d118e6d618850cc82e5eb1a6ac28bf0ff0`, Node `v24.14.0`. `npm run check`, `npm run format:check`, `npm run check:scenario-integration`과 staged `git diff --check`을 PASS했고, package-to-repository semantic parity 104/104와 JSON 16/16 parse를 확인했다. 로컬 정적 서버에서 16개 MAP/STORY preview를 Playwright로 열어 HTTP 200·visible root·Map SVG/canvas 8/8·page error 0을 확인했다. 첫 navigation의 `/favicon.ico` 404 하나는 preview page script error가 아니며 import 범위 밖이다. 저장소 기본 자동 테스트 suite는 사용자 결정으로 제공되지 않으며, 이 metadata 문서만 후속 추가했으므로 같은 candidate의 suite를 반복하지 않았다.
+
+106. Issue #758은 사용자가 제공한 `1672×941` Sector 02 Worker District PNG(SHA-256 `bdcd39c2ccec7de6964b9241754a23980e8508b27ee432678354bfb732eb78e5)로 공용 문서 레퍼런스 `2/images/sector-02-background-reference.png`를 교체했다. 새 이미지는 lived-in·patched Worker housing, vertical courtyard, low-density warm windows와 far·mid·near blue-haze 환경 방향을 제공하지만, 이미지 자체의 제목·팔레트·레이어 안내 텍스트는 제작용 편집 정보다. 원본 생성 도구·사용권은 `UNVERIFIED`이므로 상태는 `TEMPORARY MOOD REFERENCE`로 유지하며, 통이미지 Runtime 배경·UI·collision·Gameplay terrain으로 사용하지 않는다. Runtime 전환은 출처·사용권 확인 뒤 별도 environment PNG atlas·manifest·validator 작업으로만 수행한다. 검증 ledger: base `c2026697dd7471a143d3831125f7daf1b672ed7b`, 내용 candidate tree `628766b2e771ebf4df4ff390a6c0bd9438876a19`, binary diff fingerprint `d77b85e6212f2078f0c911379c3274928a4465fd`, Node `v24.14.0`. PNG signature·`1672×941` 치수·SHA-256을 확인했고, 대상 파일을 직접 시각 검토했다. `npm run check`, `npm run format:check`, `npm run check:scenario-integration`과 staged `git diff --check`을 PASS했다. 저장소 기본 자동 테스트 suite는 사용자 결정으로 제공되지 않으며, 이 metadata 문서만 후속 추가했으므로 같은 candidate의 suite를 반복하지 않았다.
 
 ## 열린 기획·구현 게이트
 
