@@ -1,0 +1,307 @@
+{
+  "schemaVersion": "one-rope-area-design-v1",
+  "designStatus": "DESIGN LOCKED",
+  "baselineCommit": "4551798860193a16e53814aae5c3a42022b4e1cf",
+  "stage": {
+    "sector": 4,
+    "stage": 2,
+    "legacyStageAlias": "4-2",
+    "sourceAreaId": "sector-04-02",
+    "canonicalName": "RESIDENT COURTYARD",
+    "legacyRuntimeName": "CUTTER LINE",
+    "legacyRuntimeStatus": "SUPERSEDED FOR NEW AUTHORING",
+    "newRuntimeStatus": "NOT IMPLEMENTED",
+    "bounds": {
+      "width": 4480,
+      "height": 2112
+    },
+    "localBounds": {
+      "xMin": -2240,
+      "xMax": 2240,
+      "yMin": -2112,
+      "yMax": 0
+    },
+    "signature": "DOUBLE-CRESCENT COURTYARD / PURSUIT ARC → INTERIOR CUT-THROUGH → SAFE OVERRIDE VESTIBULE",
+    "role": "FIRST LIMITED PURSUIT + RESIDENT SECURITY OVERRIDE A",
+    "emotion": "PROTECTION"
+  },
+  "entry": {
+    "x": -1984,
+    "y": -256
+  },
+  "mandatoryRoute": [
+    {
+      "id": "ENTRY",
+      "x": -1984,
+      "y": -256,
+      "kind": "safe-entry"
+    },
+    {
+      "id": "A1",
+      "x": -1696,
+      "y": -384,
+      "kind": "grapple"
+    },
+    {
+      "id": "M0",
+      "x": -1408,
+      "y": -480,
+      "kind": "full-safe-story"
+    },
+    {
+      "id": "C1",
+      "x": -1120,
+      "y": -640,
+      "kind": "grapple"
+    },
+    {
+      "id": "C2",
+      "x": -800,
+      "y": -736,
+      "kind": "grapple"
+    },
+    {
+      "id": "C3",
+      "x": -448,
+      "y": -800,
+      "kind": "grapple"
+    },
+    {
+      "id": "C4",
+      "x": -96,
+      "y": -736,
+      "kind": "grapple"
+    },
+    {
+      "id": "C5",
+      "x": 256,
+      "y": -640,
+      "kind": "grapple"
+    },
+    {
+      "id": "C6",
+      "x": 576,
+      "y": -512,
+      "kind": "grapple"
+    },
+    {
+      "id": "CUT1",
+      "x": 832,
+      "y": -704,
+      "kind": "grapple"
+    },
+    {
+      "id": "R1",
+      "x": 640,
+      "y": -992,
+      "kind": "arcade-recovery"
+    },
+    {
+      "id": "CUT2",
+      "x": 896,
+      "y": -1248,
+      "kind": "grapple"
+    },
+    {
+      "id": "V0",
+      "x": 1184,
+      "y": -1408,
+      "kind": "safe-vestibule"
+    },
+    {
+      "id": "OVR",
+      "x": 1456,
+      "y": -1504,
+      "kind": "override-source"
+    },
+    {
+      "id": "A7",
+      "x": 1728,
+      "y": -1696,
+      "kind": "grapple"
+    },
+    {
+      "id": "EXIT",
+      "x": 1984,
+      "y": -1856,
+      "kind": "safe-exit"
+    }
+  ],
+  "functionalZones": [
+    {
+      "id": "m0-overlook",
+      "purpose": "courtyard/security read",
+      "safe": true
+    },
+    {
+      "id": "exposed-crescent",
+      "purpose": "limited pursuit lesson",
+      "safe": false
+    },
+    {
+      "id": "pursuit-territory",
+      "purpose": "bounded chase area",
+      "safe": false,
+      "bounds": {
+        "xMin": -1280,
+        "xMax": 720,
+        "yMin": -940,
+        "yMax": -360
+      }
+    },
+    {
+      "id": "interior-arcade-cut",
+      "purpose": "architectural pursuit break",
+      "safe": true
+    },
+    {
+      "id": "override-vestibule",
+      "purpose": "safe optional Override A interaction",
+      "safe": true
+    },
+    {
+      "id": "exit",
+      "purpose": "4-3 handoff",
+      "safe": true
+    }
+  ],
+  "enemySlots": [
+    {
+      "designId": "sector-04-02:resident-courtyard-pursuit",
+      "enemyType": "pursuit-drone-t1",
+      "count": 1,
+      "killRequired": false,
+      "ropeCut": false,
+      "activationIntent": "eligible and movable only inside authored courtyard pursuit territory",
+      "runtimeVerifiedDefaults": {
+        "moveSpeed": 160,
+        "acquireRange": 640,
+        "triggerDistance": 96,
+        "windupSeconds": 0.25,
+        "dashSpeed": 640,
+        "dashSeconds": 0.2,
+        "recoverySeconds": 0.5
+      }
+    }
+  ],
+  "mechanics": {
+    "limitedPursuit": true,
+    "persistentStageWidePursuit": false,
+    "patrolCompanion": false,
+    "cutter": false,
+    "scanner": false,
+    "wind": false,
+    "augmentSource": false,
+    "killGate": false
+  },
+  "sectorProgression": {
+    "system": "resident-security-override",
+    "sourceId": "sector-04:resident-security-override:a",
+    "sourceLabel": "A",
+    "sourceStage": "4-2",
+    "sourceOptionalForLocalExit": true,
+    "collectionMode": "shared-world-progression",
+    "sectorSources": [
+      {
+        "id": "sector-04:resident-security-override:a",
+        "stage": "4-2"
+      },
+      {
+        "id": "sector-04:resident-security-override:b",
+        "stage": "4-5"
+      },
+      {
+        "id": "sector-04:resident-security-override:c",
+        "stage": "4-7"
+      }
+    ],
+    "requiredCount": 2,
+    "sourceCount": 3,
+    "quorumOwnerStage": "4-8",
+    "validCompletionSets": [
+      [
+        "A",
+        "B"
+      ],
+      [
+        "A",
+        "C"
+      ],
+      [
+        "B",
+        "C"
+      ],
+      [
+        "A",
+        "B",
+        "C"
+      ]
+    ],
+    "localExitRequiresCurrentSource": false,
+    "runtimeStatus": "NOT IMPLEMENTED"
+  },
+  "story": {
+    "entry": [
+      {
+        "title": "RESIDENT COURTYARD",
+        "detail": "SECURITY CONTROL / ACTIVE"
+      }
+    ],
+    "pursuitAcquire": [
+      {
+        "title": "RESIDENTIAL SECURITY",
+        "detail": "TRACKING"
+      }
+    ],
+    "contactBreak": [
+      {
+        "title": "SECURITY CONTACT",
+        "detail": "LOST"
+      }
+    ],
+    "overrideRead": [
+      {
+        "title": "RESIDENT SECURITY OVERRIDE",
+        "detail": "SOURCE A"
+      }
+    ],
+    "overrideAcquire": [
+      {
+        "title": "RESIDENT SECURITY OVERRIDE",
+        "detail": "ACQUIRED"
+      }
+    ],
+    "exitPreview": [
+      {
+        "title": "RESIDENTIAL SKYBRIDGE",
+        "detail": "SECURITY PATROL"
+      }
+    ],
+    "doNotReveal": [
+      "2-of-3 final quorum explanation as mandatory tutorial",
+      "who upper residents were",
+      "Priority Route user identity",
+      "Group C causality",
+      "Sector05 continuity decision"
+    ]
+  },
+  "pacing": {
+    "difficulty": "★★★",
+    "firstPlay": "2:20–3:15",
+    "mastered": "1:05–1:40"
+  },
+  "ropeAudit": {
+    "effectiveBaseReachPx": 400,
+    "maxMandatoryLinkPx": 364.86,
+    "result": "PASS"
+  },
+  "similarity": {
+    "rule": "0-1 PASS / 2 REVIEW / 3+ REDESIGN",
+    "maxKnownOverlap": 1,
+    "result": "PASS"
+  },
+  "exit": {
+    "nextPlanningStage": "4-3 RESIDENTIAL SKYBRIDGE",
+    "localExitRequiresOverrideA": false
+  }
+}

@@ -1,0 +1,397 @@
+{
+  "schemaVersion": "one-rope-area-design-v1",
+  "designStatus": "DESIGN LOCKED",
+  "canonicalAreaSpecStatus": "BLOCKED UNTIL NEW RESIDENTIAL SECTOR04 + OVERRIDE B ACCESS-MODULE MAPPING IS IMPLEMENTED",
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "stage": {
+    "sector": 4,
+    "stage": 5,
+    "legacyStageAlias": "4-5",
+    "sourceAreaId": "sector-04-05",
+    "canonicalName": "AMENITY ATRIUM",
+    "legacyRuntimeName": "EXPRESS SHAFT / TRANSIT VERSION",
+    "legacyRuntimeStatus": "SUPERSEDED FOR NEW AUTHORING",
+    "newRuntimeStatus": "NOT IMPLEMENTED",
+    "bounds": {
+      "width": 5376,
+      "height": 2432
+    },
+    "localBounds": {
+      "xMin": -2688,
+      "xMax": 2688,
+      "yMin": -2432,
+      "yMax": 0
+    },
+    "signature": "RISING AMENITY SPIRAL / THREE LONG CROSS-ATRIUM SWEEPS / OPTIONAL SECURITY OVERLOOK POD",
+    "role": "SECTOR04 LARGE ROPE EXPRESSION + PATROL READ → PURSUIT + OPTIONAL OVERRIDE B",
+    "emotion": "PRIVILEGE / DISCOMFORT"
+  },
+  "entry": {
+    "x": -2368,
+    "y": -320,
+    "fromStage": "4-4",
+    "label": "HIGH AMENITY ACCESS"
+  },
+  "mandatoryRoute": [
+    {
+      "id": "ENTRY",
+      "x": -2368,
+      "y": -320,
+      "kind": "safe-entry"
+    },
+    {
+      "id": "L1",
+      "x": -2080,
+      "y": -480,
+      "kind": "grapple"
+    },
+    {
+      "id": "L2",
+      "x": -1720,
+      "y": -560,
+      "kind": "grapple"
+    },
+    {
+      "id": "L3",
+      "x": -1360,
+      "y": -640,
+      "kind": "grapple"
+    },
+    {
+      "id": "L4",
+      "x": -1000,
+      "y": -720,
+      "kind": "grapple"
+    },
+    {
+      "id": "L5",
+      "x": -640,
+      "y": -800,
+      "kind": "grapple"
+    },
+    {
+      "id": "L6",
+      "x": -280,
+      "y": -880,
+      "kind": "grapple"
+    },
+    {
+      "id": "L7",
+      "x": 80,
+      "y": -960,
+      "kind": "grapple"
+    },
+    {
+      "id": "L8",
+      "x": 440,
+      "y": -1040,
+      "kind": "grapple"
+    },
+    {
+      "id": "L9",
+      "x": 800,
+      "y": -1120,
+      "kind": "grapple"
+    },
+    {
+      "id": "EAST-MID",
+      "x": 1160,
+      "y": -1200,
+      "kind": "safe-read"
+    },
+    {
+      "id": "H1",
+      "x": 960,
+      "y": -1330,
+      "kind": "grapple"
+    },
+    {
+      "id": "H2",
+      "x": 600,
+      "y": -1410,
+      "kind": "grapple"
+    },
+    {
+      "id": "H3",
+      "x": 240,
+      "y": -1490,
+      "kind": "grapple"
+    },
+    {
+      "id": "H4",
+      "x": -120,
+      "y": -1570,
+      "kind": "grapple"
+    },
+    {
+      "id": "H5",
+      "x": -480,
+      "y": -1650,
+      "kind": "grapple"
+    },
+    {
+      "id": "H6",
+      "x": -840,
+      "y": -1730,
+      "kind": "grapple"
+    },
+    {
+      "id": "WEST-UPPER",
+      "x": -1200,
+      "y": -1810,
+      "kind": "safe-read"
+    },
+    {
+      "id": "J1",
+      "x": -880,
+      "y": -1930,
+      "kind": "grapple"
+    },
+    {
+      "id": "J2",
+      "x": -520,
+      "y": -2010,
+      "kind": "grapple"
+    },
+    {
+      "id": "J3",
+      "x": -160,
+      "y": -2090,
+      "kind": "grapple"
+    },
+    {
+      "id": "J4",
+      "x": 200,
+      "y": -2130,
+      "kind": "grapple"
+    },
+    {
+      "id": "J5",
+      "x": 560,
+      "y": -2170,
+      "kind": "grapple"
+    },
+    {
+      "id": "J6",
+      "x": 920,
+      "y": -2130,
+      "kind": "grapple"
+    },
+    {
+      "id": "J7",
+      "x": 1280,
+      "y": -2170,
+      "kind": "grapple"
+    },
+    {
+      "id": "EXIT",
+      "x": 1660,
+      "y": -2140,
+      "kind": "safe-exit"
+    }
+  ],
+  "functionalZones": [
+    {
+      "id": "west-lower-entry",
+      "purpose": "4-4 handoff + giant Atrium reveal",
+      "safe": true
+    },
+    {
+      "id": "lower-service-sweep",
+      "purpose": "first long rising cross-Atrium maintenance sweep",
+      "safe": false
+    },
+    {
+      "id": "east-mid-wellness-balcony",
+      "purpose": "stable story read + Patrol timing read",
+      "safe": true
+    },
+    {
+      "id": "upper-canopy-sweep",
+      "purpose": "reverse-side rising sweep under Pursuit",
+      "safe": false
+    },
+    {
+      "id": "west-upper-garden-club",
+      "purpose": "recompose / see final high sweep",
+      "safe": false
+    },
+    {
+      "id": "final-high-sweep",
+      "purpose": "third rising sweep to 4-6",
+      "safe": false
+    },
+    {
+      "id": "security-overlook-pod",
+      "purpose": "optional Override B branch in a physically justified monitoring location",
+      "safe": false
+    },
+    {
+      "id": "east-high-refuge-access",
+      "purpose": "Pursuit boundary end + 4-6 handoff",
+      "safe": true
+    }
+  ],
+  "enemySlots": [
+    {
+      "designId": "sector-04-05:wellness-patrol",
+      "enemyType": "patrol-drone-t1",
+      "count": 1,
+      "killRequired": false,
+      "ropeCut": false,
+      "placementIntent": "East Mid Wellness Balcony timing read; no overlap with entry story"
+    },
+    {
+      "designId": "sector-04-05:upper-pursuit",
+      "enemyType": "pursuit-drone-t1",
+      "count": 1,
+      "killRequired": false,
+      "ropeCut": false,
+      "placementIntent": "Upper Spiral territory after Patrol read; direct-player pursuit across central airspace, no invented pathfinding"
+    }
+  ],
+  "overrideB": {
+    "designId": "sector-04:resident-security-override:b",
+    "label": "RESIDENT SECURITY OVERRIDE B",
+    "location": {
+      "x": 640,
+      "y": -1790,
+      "architecturalObject": "ATRIUM SECURITY OVERLOOK POD"
+    },
+    "branchFrom": "J5",
+    "branchDistancePx": 388.33,
+    "optional": true,
+    "requiredForLocalExit": false,
+    "sectorRequirementIntent": {
+      "availableSources": [
+        "A@4-2",
+        "B@4-5",
+        "C@4-7"
+      ],
+      "requiredCount": 2
+    },
+    "runtimeMappingIntent": "map to SectorProgressState access-module pattern or equivalent data-driven count when new Sector04 is implemented",
+    "runtimeStatus": "NOT IMPLEMENTED FOR NEW RESIDENTIAL SECTOR04"
+  },
+  "recovery": [
+    {
+      "id": "lower-amenity-recovery",
+      "intent": "fall below first sweep; return to same spiral problem",
+      "deathVoid": false
+    },
+    {
+      "id": "upper-garden-recovery",
+      "intent": "fall during upper sweep; rejoin same route without bypassing security",
+      "deathVoid": false
+    }
+  ],
+  "story": {
+    "systemFacts": [
+      "PRIVATE AMENITY ATRIUM / ENVIRONMENTAL SERVICE NORMAL",
+      "PRIVATE AMENITY SERVICE / CLIMATE NORMAL",
+      "WELLNESS WATER SYSTEM / NORMAL",
+      "AMENITY SECURITY / PATROL ACTIVE",
+      "AMENITY SECURITY / INTRUSION RESPONSE ACTIVE",
+      "RESIDENT SECURITY OVERRIDE B / OPTIONAL SERVICE CONTROL",
+      "RESIDENT REFUGE ROUTE / ACTIVE"
+    ],
+    "playerBark": {
+      "text": "…이런 데까지.",
+      "count": 1,
+      "triggerIntent": "East Mid safe-read after operational amenity evidence; >=0.5s stable; delay while Rope attached or enemy acquired",
+      "runtimeStatus": "MAPPING REQUIRED"
+    },
+    "forbiddenReveals": [
+      "resource allocation cause",
+      "Group C causal mapping",
+      "corporate selection policy",
+      "who ordered protection"
+    ]
+  },
+  "mechanics": {
+    "baseRopeRequired": true,
+    "mainRouteMaxAdjacentPx": 381.182,
+    "overrideBranchMaxAdjacentPx": 388.33,
+    "patrol": true,
+    "pursuit": true,
+    "optionalOverride": true,
+    "forcedKeyDetour": false,
+    "relay": false,
+    "cutter": false,
+    "scanner": false,
+    "wind": false,
+    "augmentRequired": false,
+    "killGate": false
+  },
+  "runtimeDependencies": {
+    "verifiedCurrent": [
+      "Base Rope Hook Reach 400px",
+      "patrol-drone legacy family",
+      "pursuit-drone-t1",
+      "SectorProgressState supports accessModules + requiredAccessModuleCount concept"
+    ],
+    "newSystemsOrMigration": [
+      {
+        "id": "residential-sector04-migration",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "resident-security-override-b-mapping",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "player-bark-stage-trigger-mapping",
+        "status": "NOT_VERIFIED"
+      }
+    ]
+  },
+  "forbidden": [
+    "Override B required for 4-5 local exit",
+    "forced drop to collect B",
+    "Relay/key detour",
+    "complete Atrium orbit",
+    "free-weave alternate main routes",
+    "Cutter",
+    "Scanner",
+    "Wind",
+    "Augment-gated geometry",
+    "kill gate",
+    "Pursuit pathfinding fiction",
+    "dialogue during Patrol/Pursuit/Rope commit",
+    "Sector05 causal explanation"
+  ],
+  "acceptanceTests": [
+    {
+      "id": "bounds",
+      "requirement": "5376×2432."
+    },
+    {
+      "id": "main-rope",
+      "requirement": "Max mandatory relation 381.18px <= 400px."
+    },
+    {
+      "id": "override-rope",
+      "requirement": "Optional J5↔Overlook relation 388.33px <= 400px."
+    },
+    {
+      "id": "continuous-ascent",
+      "requirement": "Main route memory is WEST LOWER → EAST MID → WEST UPPER → EAST HIGH with net ascent."
+    },
+    {
+      "id": "security-order",
+      "requirement": "Patrol read precedes Pursuit territory."
+    },
+    {
+      "id": "override-optional",
+      "requirement": "4-5 exit works without Override B; collecting B does not create a local mandatory gate."
+    },
+    {
+      "id": "dialogue",
+      "requirement": "Exactly one core Bark at safe East Mid evidence beat; no Bark during combat/Rope commits."
+    },
+    {
+      "id": "similarity",
+      "requirement": "Not 4-3 Relay descent, not 4-4 stepped truss, not 3-8 Free-Weave."
+    }
+  ]
+}

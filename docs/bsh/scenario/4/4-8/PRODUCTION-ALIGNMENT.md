@@ -1,45 +1,63 @@
 # SECTOR 04-8 — PRODUCTION ALIGNMENT
 
-*GENERAL FINALE · CUTTER + PATROL + WAKE · REV 1.0*
+## Checked source
 
-본 문서는 [4-8 시나리오](./README.md)와 현재 `Sector04AreaCatalog` 구현을 연결한다. 4-8은 Sector 04 일반 구간 finale이며 현재 standalone catalog에서 `GRAYBOX READY` 상태로 존재하고 `Post-Sector 04 Boss / Transition` 전까지 `content-boundary`를 유지한다.
+Latest checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`.
 
-## 1. 현재 판정
+Current repository 4-8 is still legacy:
+- `TRANSIT CONTROL TRUNK`
+- Cutter + Patrol
+- Pulsed Wake/Wind
+- old Transit/Infrastructure story
+- old `UPPER EXPRESS TRUNK / LIMITED OPERATION` juxtaposition
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `GRAYBOX READY / STANDALONE ONLY` | 메인 authored chain 미연결 |
-| Finale boundary | `IMPLEMENTED AS CONTENT-BOUNDARY` | `nextAreaId: null`, gate `completionMode: content-boundary` |
-| Cutter / Patrol | `IMPLEMENTED` | lower `cutter-sentry-01` + upper `patrol-drone-01` 분리 배치 |
-| Wake | `IMPLEMENTED` | `control-trunk-wake` 하나의 긴 중앙 zone으로 구현 |
-| Story | `IMPLEMENTED` | `final-status-display`, `post-sector-access` 두 object가 finale juxtaposition을 담당한다 |
+That creative authority is superseded by this package for `sector-04-08`.
 
-## 2. Runtime 좌표 / Stable ID 요약
+## New 4-8 authority
 
-- Area: `sector-04-08`, entry `(-448,-32)`, exit `(560,-1824)`, next `null`
-- Grapple: `A0(-320,-160)`, `C1(-96,-448)`, `C2(96,-736)`, `W3(-96,-960)`, `A3(96,-1024)`, `A4(96,-1216)`, `A5(-160,-1344)`, `W6(-96,-1536)`, `A6(128,-1640)`
-- Recovery: `R1(-256,-856)`, `R2(-320,-1432)`
-- Cutter: `cutter-sentry-01(448,-640)`, activation `(-192,-800,384×400)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
-- Patrol: `patrol-drone-01(176,-1280)`, patrol `(-208,-1280) ↔ (208,-1280)`, activation `(-208,-1392,416×240)`, rules `kill-optional / no-rope-cut / target-lock-cycle / activation-band-only`
-- Wake: `sector-04-08:control-trunk-wake`, bounds `(-192,-1664,384×1264)`, direction `(0,-1)`, cycle `1.75 / 0.7 / 1.4 / 0.3`
-- Story display: `final-status-display(64,-1792)`, `post-sector-access(352,-1728)`, gate set `exit-panel(432,-1792)`, `service-gate(560,-1792)` — 출구 표준화(offset 64)로 32px 상승
+- `PROTECTED ASCENT GATEHOUSE`
+- 3328×2720 approved map hypothesis
+- Resident Security Override quorum: **2 of 3**
+- no enemy/wind/scanner/moving-platform pressure
+- alternating east/west maintenance-gallery ascent
+- final `PROTECTED ASCENT / POWER NORMAL`
+- final `ASCENT CONTROL / READY`
+- one Bark: `…여긴 아직도 정상이라고?`
 
-## 3. Camera · Story 상태
+## Override source contract
 
-- Camera zones: `entry-scale`, `cutter-band`, `re-acceleration`, `patrol-band`, `final-flow`, `final-deck`
-- Story cue는 `sector-04-08:upper-trunk-limited`, `lower-feeder-isolated`, `transit-core-access-pending`
-- `storyTriggers`: `trunk-entry`, `upper-trunk-limited`, `final-status-juxtaposition`
-- 현재 runtime은 README 금지 조건대로 internal boss와 Sector 05 direct link를 추가하지 않는다
+Expected semantic progression IDs:
+- `sector-04:resident-security-override:a` — earlier Sector04 source / 4-2
+- `sector-04:resident-security-override:b` — earlier Sector04 source / 4-5
+- `sector-04:resident-security-override:c` — 4-7
 
-## 4. 검증 근거
+Before coding, inspect actual latest main and the implementation produced by the approved 4-7 package. Reuse the actual persistent-state representation if it differs syntactically while preserving these semantics.
 
-- Source: `src/game/world/areas/sector04/Sector04AreaCatalog.js`
-- Tests: `tests/sector04AreaCatalog.mjs`, `tests/worldForceField.mjs`, `tests/combatSystems.mjs`, `tests/renderPerformance.mjs`
-- Integration recent change #24, #27이 4-8 runtime / camera / story 반영을 기록한다
-- 미확인: finale 전체 브라우저 플레이, 2인 분리 band, post-sector visual hold 체감
+## Preserve Runtime capabilities, not retired content
 
-## 5. 남은 blocker / asset handoff
+Reuse:
+- surfaces/collision
+- grapple targets
+- reach objectives
+- interaction/state checks
+- Direction Runtime / Player Bark capability
+- camera zones
+- gate/interlock presentation primitives if available
 
-- Post-Sector 04 Boss / Transition, Boss timer, Sector 05 연결은 여전히 미확정이다.
-- Finale trunk / cutter / patrol / wake / final summary 자산과 오디오 / VFX가 아직 없다.
-- README가 요구한 “4-8 ≠ 3-8” finale 기억점이 실제 플레이에서 살아 있는지 검증이 남아 있다.
+Remove from 4-8 authored content:
+- Cutter
+- Patrol
+- Wake/Wind
+- old Transit status cues
+- old `Momentum → interruption → recovery` finale
+
+## Post-sector boundary
+
+Do not invent:
+- Sector05 direct wiring
+- boss arena
+- boss entry trigger
+- timer transition
+- corporate continuity reveal
+
+The final control is a **content boundary** until downstream planning is separately approved.

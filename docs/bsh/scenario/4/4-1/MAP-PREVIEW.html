@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4-1 REV3 Gameplay Map</title>
+<style>
+:root{--bg:#061016;--panel:#0b161d;--line:#304a55;--text:#eef5f5;--muted:#9fb3b9;--safe:#3b6753;--recover:#42616a;--anchor:#5de8ff;--route:#ffe173;--patrol:#a26149;--story:#897740;--basin:#15252b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:13px 17px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:18px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:500px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);max-height:100vh;overflow:auto}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--anchor)}
+svg{width:100%;height:87vh;min-height:840px;background:#040b10;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#09171e;stroke:#587581;stroke-width:3}.basin{fill:var(--basin);stroke:#46636d;stroke-width:3;stroke-dasharray:16 10}
+.platform{fill:#596e78;stroke:#acbec5;stroke-width:2}.safe{fill:var(--safe);stroke:#88d8ab;stroke-width:3}.recovery{fill:var(--recover);stroke:#84a3ad;stroke-width:2}
+.anchor{fill:var(--anchor);stroke:white;stroke-width:2}.route{fill:none;stroke:var(--route);stroke-width:4;stroke-dasharray:13 9}
+.patrol{fill:var(--patrol);stroke:#ffc09c;stroke-width:3}.patrolpath{fill:none;stroke:#ffc09c;stroke-width:3;stroke-dasharray:10 8}.zone{fill:#a2614920;stroke:#c98164;stroke-width:2;stroke-dasharray:12 8}
+.story{fill:var(--story);stroke:#ead98d;stroke-width:2}
+text{fill:var(--text);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#b6c6ca}.label{font-size:16px;fill:#91dfb0}.dim{font-size:11px;fill:#79a7b6}.hidden{display:none}
+button{background:#142229;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:3px}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>4-1 UPPER RESIDENTIAL ARRIVAL · REV3</h1><div class="sub">GAMEPLAY ONLY · 4992×2112 · HIGH TERRACE → SUNKEN BASIN → MID PATROL → FAR-SIDE ASCENT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>REV3 IDENTITY</b><br>SUNKEN SKY-GARDEN BASIN / CROSS-VALLEY RESIDENTIAL ASCENT.</div>
+<div class="card"><b>SIMILARITY FIX</b><br>2-6의 Void Rim / Reveal Turn / Long Upper Rim을 제거. 실제로 Basin으로 <b>내려가서</b> 중앙을 통과한 후 반대편으로 올라간다.</div>
+<div class="card"><b>FAILURE DIRECTION</b><br>아래로 떨어져도 Basin recovery. 중앙은 death void가 아니다.</div>
+<div class="card"><b>SECURITY</b><br>Patrol ×1이 <b>중앙 Basin에서 loop</b>. 후반 Security가 아님. Pursuit 없음.</div>
+<div class="card"><b>SCALE</b><br>4992×2112. Entry X -2240 → Exit X +2208. 실제 X span 4448px.</div>
+<div class="card"><b>MAP RULE</b><br>배경 주택/물/나무 장식은 표시하지 않는다. Gameplay collision, basin, Rope, Patrol, safe/story, exit만 표시.</div>
+<button id="rbtn">Route</button><button id="zbtn">Patrol Zone</button>
+</aside><main>
+<svg viewBox="-2560 -2170 5120 2240">
+<rect class="bounds" x="-2496" y="-2112" width="4992" height="2112"/>
+<text class="dim" x="-2440" y="-2050">4992 W × 2112 H</text>
+
+<!-- playable basin -->
+<path class="basin" d="M-1540,-390 Q-1250,-20 -980,-20 L1060,-20 Q1290,-60 1480,-390 L1480,-20 L-1540,-20 Z"/>
+<text class="label" x="-370" y="-44">PLAYABLE SUNKEN GARDEN BASIN</text>
+
+<!-- high arrival -->
+<rect class="safe" x="-2380" y="-448" width="320" height="30"/>
+<text class="label" x="-2360" y="-474">HIGH ARRIVAL</text>
+<circle class="anchor" cx="-1952" cy="-320" r="13"/><text class="tiny" x="-1932" y="-306">A1</text>
+<rect class="safe" x="-1810" y="-256" width="292" height="30"/>
+<text class="label" x="-1795" y="-282">M0 FULL SAFE</text>
+<rect class="story" x="-1800" y="-390" width="300" height="74" rx="8"/>
+<text class="tiny" x="-1766" y="-360">UPPER RESIDENTIAL DISTRICT</text>
+<text class="tiny" x="-1757" y="-336">ENVIRONMENTAL SERVICE / NORMAL</text>
+
+<!-- descent -->
+<circle class="anchor" cx="-1376" cy="-160" r="13"/><text class="tiny" x="-1355" y="-146">D1</text>
+<rect class="recovery" x="-1180" y="-96" width="184" height="24"/>
+<text class="tiny" x="-1160" y="-120">B0 BASIN LANDING</text>
+
+<!-- low basin chain -->
+<circle class="anchor" cx="-736" cy="-128" r="13"/><text class="tiny" x="-716" y="-114">B1</text>
+<circle class="anchor" cx="-384" cy="-80" r="13"/><text class="tiny" x="-364" y="-66">B2</text>
+<circle class="anchor" cx="-32" cy="-144" r="13"/><text class="tiny" x="-12" y="-130">B3</text>
+<circle class="anchor" cx="320" cy="-96" r="13"/><text class="tiny" x="340" y="-82">B4</text>
+<circle class="anchor" cx="672" cy="-160" r="13"/><text class="tiny" x="692" y="-146">B5</text>
+<circle class="anchor" cx="1024" cy="-224" r="13"/><text class="tiny" x="1044" y="-210">B6</text>
+
+<!-- mid patrol loop -->
+<rect id="zone" class="zone" x="-470" y="-350" width="1040" height="330" rx="45"/>
+<path class="patrolpath" d="M-288,-176 L96,-256 L480,-176 L96,-96 Z"/>
+<circle class="patrol" cx="-288" cy="-176" r="20"/>
+<text class="tiny" x="-360" y="-215">PATROL ×1 · LOOP</text>
+<rect class="story" x="30" y="-350" width="230" height="60" rx="8"/>
+<text class="tiny" x="65" y="-322">RESIDENTIAL SECURITY</text>
+<text class="tiny" x="125" y="-300">ACTIVE</text>
+
+<!-- far-side ascent -->
+<rect class="recovery" x="1184" y="-416" width="192" height="26"/>
+<text class="tiny" x="1204" y="-442">R1 ASCENT BASE</text>
+<circle class="anchor" cx="1440" cy="-736" r="13"/><text class="tiny" x="1460" y="-722">A2</text>
+<circle class="anchor" cx="1248" cy="-1024" r="13"/><text class="tiny" x="1268" y="-1010">A3 · RECESSED</text>
+<circle class="anchor" cx="1504" cy="-1280" r="13"/><text class="tiny" x="1524" y="-1266">A4</text>
+<circle class="anchor" cx="1760" cy="-1536" r="13"/><text class="tiny" x="1780" y="-1522">A5</text>
+<circle class="anchor" cx="2016" cy="-1760" r="13"/><text class="tiny" x="2036" y="-1746">A6</text>
+
+<!-- exit -->
+<rect class="safe" x="2060" y="-1952" width="296" height="30"/>
+<text class="label" x="2072" y="-1978">PRIVATE LOBBY · SAFE</text>
+<rect class="story" x="2040" y="-2080" width="320" height="72" rx="8"/>
+<text class="tiny" x="2095" y="-2050">RESIDENT COURTYARD</text>
+<text class="tiny" x="2120" y="-2028">SECURITY CONTROL</text>
+
+<g id="routes">
+<path class="route" d="M-2240,-448 L-1952,-320 L-1664,-256 L-1376,-160 L-1088,-96 L-736,-128 L-384,-80 L-32,-144 L320,-96 L672,-160 L1024,-224 L1280,-416 L1440,-736 L1248,-1024 L1504,-1280 L1760,-1536 L2016,-1760 L2208,-1952"/>
+</g>
+</svg></main></div>
+<script>
+rbtn.onclick=()=>routes.classList.toggle('hidden');
+zbtn.onclick=()=>zone.classList.toggle('hidden');
+</script></body></html>

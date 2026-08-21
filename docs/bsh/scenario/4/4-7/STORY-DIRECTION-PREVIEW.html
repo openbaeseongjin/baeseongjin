@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4-7 Refuge Terrace Story Direction Preview REV1</title>
+<style>
+:root{--bg:#071016;--panel:#0b171d;--line:#304955;--text:#eef5f5;--muted:#9fb0b6;--cyan:#5de8ff;--gold:#ffe173;--safe:#72c99a;--danger:#ff9c8c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.5 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.wrap{padding:12px}.buttons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer}
+button.on{border-color:var(--cyan);color:var(--cyan)}
+.grid{display:grid;grid-template-columns:minmax(620px,1.25fr) minmax(430px,.75fr);gap:12px}
+.stage{position:relative;height:610px;background:#040b10;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.stage svg{width:100%;height:100%}.toast{position:absolute;left:24px;top:24px;background:#07131ccc;border:1px solid #536d78;border-radius:8px;padding:9px 12px;min-width:240px}
+.toast b{color:var(--cyan)}.bark{position:absolute;left:50%;bottom:42px;transform:translateX(-50%);background:#02070ccc;border:1px solid #7b8990;border-radius:8px;padding:10px 18px;min-width:380px;text-align:center}
+.bark .kr{font-family:system-ui,sans-serif;font-weight:700;font-size:22px}.caption{position:absolute;right:18px;bottom:15px;color:#9fb1b7;font-size:11px}
+.hidden{display:none}.card{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:11px;margin-bottom:9px}.card h2{font-size:12px;color:var(--cyan);margin:0 0 7px}
+.voice{border-color:#6d623d}.voice h2{color:var(--gold)}.compare{display:grid;grid-template-columns:1fr 1fr;gap:9px}.good,.bad{border-radius:7px;padding:9px}.good{border:1px solid #3f725b}.bad{border:1px solid #754b4b}
+.shell{fill:#0e1b21;stroke:#49636f;stroke-width:3}.terrace{fill:#556b75;stroke:#a9bec6;stroke-width:2}.safe{fill:#365e4d;stroke:#7ed0a4;stroke-width:2}.core{fill:#202e35;stroke:#738d98;stroke-width:3}.glass{fill:#14303c;stroke:#507988;stroke-width:2}.panel{fill:#8a743a;stroke:#ffe173;stroke-width:2}.player{fill:#dce8eb}.enemy{fill:#8f483f;stroke:#ffb28e;stroke-width:3}.ghost{fill:none;stroke:#ffe173;stroke-width:4;stroke-dasharray:10 8}.door{fill:#384c54;stroke:#91aab4;stroke-width:3}.light{fill:#9fe7d3}.dark{fill:#071014}.arrow{fill:none;stroke:#78cda0;stroke-width:5;stroke-dasharray:10 8}
+@media(max-width:1120px){.grid{grid-template-columns:1fr}.stage{height:540px}}
+</style>
+</head>
+<body>
+<header><h1>4-7 REFUGE TERRACE · STORY / DIRECTION PREVIEW · REV1 DRAFT</h1>
+<div class="sub">SYSTEM = FACT · PLAYER = REACTION · PURSUIT/ROPE = SILENCE · 1 CORE BARK ONLY · USER APPROVAL REQUIRED</div></header>
+
+<div class="wrap">
+<div id="buttons" class="buttons"><button id="dialogueToggle" class="on">주인공 대사 ON</button></div>
+<div class="grid">
+<div class="stage">
+<svg viewBox="0 0 960 540"><rect width="960" height="540" fill="#040b10"/><g id="visual"></g></svg>
+<div id="toast" class="toast hidden"></div>
+<div id="bark" class="bark hidden"><div class="kr"></div><div style="color:#9fb1b7;font-size:11px">주인공 반응 · 안전 지점에서만</div></div>
+<div id="caption" class="caption"></div>
+</div>
+<div>
+<div class="card"><h2>STORY PURPOSE</h2><p id="purpose"></p></div>
+<div class="card voice"><h2>PROTAGONIST VOICE</h2><p id="voice"></p></div>
+<div class="card"><h2>WHY THIS LINE / SILENCE</h2><p id="why"></p></div>
+<div class="card"><h2>TRIGGER / CAMERA</h2><p id="timing"></p></div>
+<div class="card"><h2>AUDIO / MOTION</h2><p id="audio"></p></div>
+<div class="card"><h2>PLAYER INTERPRETATION</h2><p id="emotion"></p></div>
+<div class="card"><h2>STORY BOUNDARY</h2><p id="boundary"></p></div>
+</div>
+</div>
+
+<div class="card" style="margin-top:12px">
+<h2>4-7 VOICE RULE</h2>
+<div class="compare">
+<div class="good"><b>DO</b><br>“…대피로까지 따로 지키고 있네.”<br><span style="color:#9fb1b7">보이는 사실에 대한 짧은 불쾌감. 원인 해설 없음.</span></div>
+<div class="bad"><b>DON'T</b><br>“상층 주민을 위한 전용 대피로였군.”<br>“누군가 이쪽을 우선 보호했어.”<br><span style="color:#9fb1b7">Sector 05의 대상·우선순위·명령 주체를 선점하므로 금지.</span></div>
+</div>
+</div>
+</div>
+
+<script>
+const beats=[
+{
+id:'S0',title:'REFUGE TERRACE REVEAL',
+purpose:'4-6의 통제된 Access Gallery를 빠져나오자마자, 중앙의 거대한 Protected Ascent Core와 이를 둘러싼 열린 Refuge Terrace를 한 프레임에 읽힌다.',
+bark:null,
+voice:'NONE. 첫 인상은 공간이 먼저 말한다.',
+why:'들어오자마자 대사를 붙이면 “보호된 상층 피난구역”의 물리적 대비보다 설명이 앞선다.',
+timing:'입장 후 0.8~1.2초 동안 카메라를 약간 풀어 중앙 Core와 상부 목적지를 동시에 보여준다. 입력 잠금은 하지 않는다.',
+audio:'4-6의 실내 기계음을 줄이고, 바람 소리보다 멀리서 들리는 정숙한 환기·비상전원 hum을 강조한다.',
+emotion:'“여기는 붕괴 현장이라기보다 아직 관리되는 피난구역처럼 보인다.”',
+boundary:'누가 이용하는 피난구역인지, 누구에게 허용되는지 설명하지 않는다.',
+toast:[['UPPER REFUGE','TERRACE ACCESS / OPEN']],caption:'SPACE FIRST. NO EXPLANATION.',
+scene:`<rect class="shell" x="45" y="60" width="870" height="420"/><rect class="core" x="390" y="105" width="220" height="300"/><rect class="terrace" x="80" y="405" width="260" height="24"/><rect class="terrace" x="650" y="280" width="200" height="24"/><rect class="safe" x="680" y="130" width="190" height="24"/><path class="arrow" d="M180 390 Q330 300 420 260 Q590 210 740 150"/><g transform="translate(165 370)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`
+},
+{
+id:'S1',title:'SECURITY READ',
+purpose:'P1에서 Pursuit를 만나기 전에 “이 구역이 아직 보안 운영 중”이라는 사실을 먼저 읽힌다.',
+bark:null,
+voice:'NONE. 아직 판단을 유도하지 않는다.',
+why:'보안 드론이 먼저 덮치면 플레이어는 이를 일반 적 배치로만 읽는다. 시스템 상태를 먼저 보여줘야 “보호되는 공간”이라는 의미가 생긴다.',
+timing:'P1 안정 착지 시 0.5초 뒤 시스템 표시. 동시에 멀리 있는 Patrol/Pursuit 실루엣이 Core 뒤를 한 번 통과한다. 아직 Activation 안.',
+audio:'짧은 security chirp. 전투음은 아직 시작하지 않는다.',
+emotion:'“사람은 안 보이는데 보안은 살아 있다.”',
+boundary:'‘왜’ 보안이 살아 있는지는 말하지 않는다.',
+toast:[['UPPER REFUGE','SECURITY ACTIVE']],caption:'FACT BEFORE THREAT.',
+scene:`<rect class="terrace" x="70" y="400" width="820" height="22"/><rect class="core" x="390" y="105" width="220" height="285"/><circle class="enemy" cx="725" cy="225" r="22"/><g transform="translate(220 365)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g><rect class="glass" x="650" y="120" width="170" height="70"/>`
+},
+{
+id:'S2',title:'PURSUIT ASCENT',
+purpose:'Lower/Main Terrace를 실제로 쫓기며 올라가게 해 “Protected”가 추상 상태가 아니라 플레이어를 배제하는 물리 압력임을 체감시킨다.',
+bark:null,
+voice:'NONE. Rope/Pursuit 구간은 완전 무대사.',
+why:'추격 중 대사는 입력과 위험 판단을 방해한다. 또한 주인공이 보안의 의미를 설명하면 플레이어 경험을 빼앗는다.',
+timing:'P1을 지나 첫 상승 Hook에 진입하면 Pursuit Activation. 카메라는 진행 방향보다 약간 위를 보여 다음 Terrace를 계속 읽게 한다.',
+audio:'경고음 + Pursuit motor tone. 음악은 박자 밀도를 올리되 새로운 멜로디를 만들지 않는다.',
+emotion:'“이 구역은 비어 있는데도 접근자를 계속 밀어낸다.”',
+boundary:'주민 전용/계급 전용이라는 단정 금지.',
+toast:null,caption:'HIGH-INPUT PURSUIT = SILENCE.',
+scene:`<rect class="core" x="390" y="100" width="220" height="330"/><rect class="terrace" x="80" y="420" width="210" height="18"/><rect class="terrace" x="310" y="335" width="180" height="18"/><rect class="terrace" x="620" y="230" width="190" height="18"/><path class="ghost" d="M180 390 Q300 320 390 310 Q560 235 720 200"/><circle class="enemy" cx="250" cy="330" r="23"/><g transform="translate(500 270)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`
+},
+{
+id:'S3',title:'AIRLOCK BREAK',
+purpose:'M0 Refuge Airlock에서 Pursuit를 완전히 끊고 리듬을 재설정한다. 4-7의 전반 “도주”와 후반 “선택”을 분리하는 연출 기준점.',
+bark:null,
+voice:'NONE. 숨을 돌리는 침묵을 준다.',
+why:'여기서 감정 대사를 쓰면 후반 Final Deck Bark와 경쟁한다. 안전 자체가 보상처럼 느껴져야 한다.',
+timing:'Player가 Airlock 내부 Safe volume에 완전히 들어오면 외부 문이 닫히고 Pursuit target clear. 내부 조명은 0.3초 후 정상등으로 전환.',
+audio:'외부 Pursuit motor가 문 닫힘과 함께 low-pass로 급격히 줄고, 내부 환기음만 남는다.',
+emotion:'“이곳은 피난시설인데 동시에 경계가 명확한 보안 구획이다.”',
+boundary:'Airlock을 누가 통제하는지는 말하지 않는다.',
+toast:[['REFUGE AIRLOCK','SEAL / NORMAL']],caption:'FULL SAFE RESET.',
+scene:`<rect class="shell" x="140" y="100" width="680" height="340"/><rect class="door" x="180" y="140" width="70" height="250"/><rect class="door" x="710" y="140" width="70" height="250"/><rect class="safe" x="270" y="375" width="420" height="24"/><circle class="enemy" cx="105" cy="285" r="23"/><g transform="translate(480 340)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`
+},
+{
+id:'S4',title:'OVERRIDE C CHOICE READ',
+purpose:'Airlock을 빠져나오면 Outer Bypass와 Inner Security Spur가 동시에 보이고, Override C는 보상방이 아니라 실제 Security Control Booth 안의 optional control임을 읽힌다.',
+bark:null,
+voice:'NONE. 메타게임 설명을 캐릭터가 하지 않는다.',
+why:'“세 번째 키다” 같은 대사는 시스템 수집품을 세계 밖 정보처럼 만든다. 공간과 UI로만 전달한다.',
+timing:'M0 출구에서 카메라를 약간 넓혀 두 경로를 동시에 노출. Inner Spur Panel emissive만 강조하고 이동은 막지 않는다.',
+audio:'Outer route는 ambient 유지. Inner Spur 쪽에서만 짧은 static security ping.',
+emotion:'“C를 얻으려면 마지막 보안 구획으로 들어가야 하지만, 그냥 지나갈 수도 있다.”',
+boundary:'4-8의 2-of-3 요구를 여기서 대사로 선공개하지 않는다.',
+toast:[['RESIDENT SECURITY','OVERRIDE C / AVAILABLE']],caption:'OPTIONAL RISK, NO ROUTE LOCK.',
+scene:`<rect class="core" x="365" y="80" width="230" height="360"/><rect class="terrace" x="90" y="385" width="250" height="20"/><rect class="terrace" x="630" y="250" width="230" height="20"/><rect class="panel" x="250" y="185" width="140" height="90" rx="8"/><path class="ghost" d="M290 365 Q460 315 705 235"/><path class="ghost" d="M290 365 Q300 260 320 215"/><g transform="translate(290 330)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`
+},
+{
+id:'S5',title:'INNER SECURITY SPUR',
+purpose:'Override C를 선택한 경우에만 짧고 명확한 추가 위험을 준다. 전반 Pursuit와 겹치지 않는다.',
+bark:null,
+voice:'NONE. 전투/회피 중 무대사.',
+why:'C 획득의 비용은 “또 다른 긴 전투”가 아니라 짧은 추가 보안 리스크여야 한다.',
+timing:'Inner Spur 진입 후에만 Static Security 활성. Control Booth threshold에 들어오면 즉시 threat 종료.',
+audio:'짧은 lock tone과 firing telegraph. Pursuit 음악은 재사용하지 않는다.',
+emotion:'“보호 구역의 제어점은 한 단계 더 안쪽에 있다.”',
+boundary:'적을 제거해야만 상호작용할 수 있는 Kill Gate 금지.',
+toast:null,caption:'OPTIONAL SECURITY COST.',
+scene:`<rect class="core" x="500" y="80" width="260" height="370"/><rect class="terrace" x="120" y="400" width="230" height="18"/><rect class="safe" x="330" y="210" width="200" height="22"/><rect class="panel" x="385" y="95" width="120" height="80" rx="8"/><circle class="enemy" cx="230" cy="260" r="23"/><path class="ghost" d="M220 380 Q250 300 360 235"/><g transform="translate(360 185)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`
+},
+{
+id:'S6',title:'OVERRIDE C',
+purpose:'획득 시 짧은 시스템 확인만 하고 즉시 이동권을 돌려준다. 획득하지 않은 경우 아무 이벤트도 강제하지 않는다.',
+bark:null,
+voice:'NONE. 성공 Bark 없음.',
+why:'Stage의 감정적 한 문장은 Final Deck에 남겨야 한다. 수집 성공을 감정 climax로 만들지 않는다.',
+timing:'Interact 시 패널 emissive 전환 + 0.4초 확인. World pause 없음.',
+audio:'짧은 confirmation tone. 음악 변환 없음.',
+emotion:'“하나의 보안 override를 확보했다.”',
+boundary:'새 플랫폼·새 문·즉시 보상 동선 개방 없음.',
+toast:[['ACCESS OVERRIDE C','ACQUIRED · SECTOR ACCESS +1']],caption:'COLLECT OR PASS.',
+scene:`<rect class="safe" x="160" y="380" width="640" height="24"/><rect class="panel" x="420" y="190" width="140" height="105" rx="8"/><circle class="light" cx="490" cy="222" r="12"/><g transform="translate(390 345)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`
+},
+{
+id:'S7',title:'FINAL REFUGE CONTROL',
+purpose:'두 경로가 합쳐진 뒤 완전 안전한 상부 Deck에서 “이 피난구역과 그 위의 보호 상승로가 아직 운영·보안 중”이라는 사실을 최종 확인한다.',
+bark:'…대피로까지 따로 지키고 있네.',
+voice:'낮고 짧게. 놀람보다 불쾌함과 의심이 섞이지만 분석하지 않는다.',
+why:'Player가 직접 Pursuit와 보안 구획을 지나고, 마지막 시스템 Fact까지 본 뒤에야 반응한다. 그래서 대사가 설명이 아니라 경험의 압축이 된다.',
+timing:'Final Deck 두 발 착지 → 0.4초 후 첫 시스템 표시 → 0.7초 후 두 번째 표시 → 그 뒤 0.5~0.9초에 Bark. Rope 연결 상태에서는 재생 금지.',
+audio:'Threat music 완전히 종료. 시스템 fan/hum만 남긴 뒤 Bark 직전 0.2초 정도 공간음을 살짝 비운다.',
+emotion:'“아래는 붕괴했는데, 이 피난 동선은 기능과 보안이 동시에 유지되고 있다.”',
+boundary:'누가 보호받는지, 누가 명령했는지, 하층 붕괴와 직접 인과가 있는지는 말하지 않는다.',
+toast:[['UPPER REFUGE','SECURITY ACTIVE'],['PROTECTED ASCENT','AVAILABLE']],caption:'FACT → ONE HUMAN REACTION.',
+scene:`<rect class="shell" x="80" y="80" width="800" height="360"/><rect class="safe" x="115" y="390" width="730" height="24"/><rect class="core" x="590" y="125" width="210" height="230"/><rect class="glass" x="120" y="135" width="300" height="160"/><circle class="light" cx="680" cy="180" r="8"/><circle class="light" cx="720" cy="180" r="8"/><g transform="translate(500 355)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`
+},
+{
+id:'S8',title:'4-8 HANDOFF',
+purpose:'상부 Gate를 보여주되 4-8의 실제 quorum 검사와 결과를 미리 처리하지 않는다.',
+bark:null,
+voice:'NONE. 4-7의 한 문장을 마지막 기억으로 남긴다.',
+why:'Exit에서 추가 설명을 붙이면 4-8의 Gate 의미가 약해진다.',
+timing:'Final Deck에서 이동 가능 상태 유지. 카메라는 Gate를 화면 상단 1/3에 잡고 다음 공간은 일부만 보여준다.',
+audio:'보안 hum과 gate idle tone. 새로운 threat cue 없음.',
+emotion:'“다음은 이 보호 상승로의 실제 접근 검사다.”',
+boundary:'2-of-3 성공/실패 결과는 4-8에서만 처리.',
+toast:[['PROTECTED ASCENT GATE','SECURITY CHECK / AHEAD']],caption:'SILENT HANDOFF TO 4-8.',
+scene:`<rect class="safe" x="80" y="410" width="800" height="22"/><rect class="core" x="560" y="90" width="250" height="300"/><rect class="door" x="625" y="135" width="120" height="210"/><g transform="translate(470 375)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g><path class="arrow" d="M500 350 Q610 280 680 190"/>`
+}
+];
+
+let idx=0, dialogue=true;
+const buttons=document.getElementById('buttons');
+beats.forEach((b,i)=>{const bt=document.createElement('button');bt.textContent=`${b.id} · ${b.title}`;bt.onclick=()=>show(i);buttons.insertBefore(bt,dialogueToggle)});
+dialogueToggle.onclick=()=>{dialogue=!dialogue;dialogueToggle.classList.toggle('on',dialogue);dialogueToggle.textContent=dialogue?'주인공 대사 ON':'주인공 대사 OFF';show(idx)};
+function show(i){
+ idx=i; const b=beats[i];
+ purpose.textContent=b.purpose; voice.textContent=b.voice; why.textContent=b.why; timing.textContent=b.timing; audio.textContent=b.audio; emotion.textContent=b.emotion; boundary.textContent=b.boundary; visual.innerHTML=b.scene; caption.textContent=b.caption;
+ [...buttons.querySelectorAll('button')].filter(x=>x.id!=='dialogueToggle').forEach((x,j)=>x.classList.toggle('on',i===j));
+ if(b.toast){toast.classList.remove('hidden');toast.innerHTML=b.toast.map(x=>'<b>'+x[0]+'</b><br>'+x[1]).join('<br><br>')} else toast.classList.add('hidden');
+ if(dialogue&&b.bark){bark.classList.remove('hidden');bark.querySelector('.kr').textContent=b.bark} else bark.classList.add('hidden');
+}
+show(0);
+</script>
+</body></html>

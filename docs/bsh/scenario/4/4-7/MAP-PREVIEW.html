@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE 4-7 REFUGE TERRACE REV1 Map Preview</title>
+<style>
+:root{
+  --bg:#061018;--panel:#0c171f;--line:#304955;--text:#eef5f6;--muted:#9eb1b8;
+  --safe:#38604f;--safe-stroke:#81cda5;--surface:#566c76;--surface-stroke:#adbec5;
+  --core:#202d35;--core-stroke:#6f8792;--anchor:#5de8ff;--route:#ffe173;
+  --branch:#eab976;--recovery:#3d5964;--pursuit:#8d4b3f;--sentry:#5f355f;
+  --story:#796b39;--override:#9a7a30;--zone:#9a4a3922;--branch-zone:#87528722;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:19px}.sub{color:var(--muted);margin-top:4px}
+.layout{display:grid;grid-template-columns:520px 1fr;min-height:calc(100vh - 72px)}
+aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto;max-height:100vh}
+main{padding:12px;min-width:0}
+.card{border:1px solid var(--line);border-radius:8px;background:#08131a;padding:9px;margin-bottom:8px}
+.card b{color:var(--anchor)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 9px;margin:3px;cursor:pointer}
+button.on{border-color:var(--anchor);color:var(--anchor)}
+svg{width:100%;height:88vh;min-height:850px;background:#040b10;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#09171f;stroke:#52717e;stroke-width:3}
+.core{fill:var(--core);stroke:var(--core-stroke);stroke-width:4}
+.surface{fill:var(--surface);stroke:var(--surface-stroke);stroke-width:2}
+.safe{fill:var(--safe);stroke:var(--safe-stroke);stroke-width:3}
+.recovery{fill:var(--recovery);stroke:#7f9da8;stroke-width:2}
+.anchor{fill:var(--anchor);stroke:white;stroke-width:2}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:14 9}
+.branch{fill:none;stroke:var(--branch);stroke-width:5;stroke-dasharray:10 8}
+.zone{fill:var(--zone);stroke:#b76454;stroke-width:2;stroke-dasharray:12 9}
+.branchZone{fill:var(--branch-zone);stroke:#b88bc3;stroke-width:2;stroke-dasharray:12 9}
+.pursuit{fill:var(--pursuit);stroke:#ffb18c;stroke-width:4}
+.sentry{fill:var(--sentry);stroke:#f0a9e6;stroke-width:4}
+.story{fill:var(--story);stroke:#ead98d;stroke-width:2}
+.override{fill:var(--override);stroke:#ffe173;stroke-width:3}
+.reach{fill:none;stroke:#5de8ff;stroke-width:1.5;opacity:.13}
+.arrow{fill:none;stroke:#82d9a5;stroke-width:3;stroke-dasharray:12 8}
+.hidden{display:none!important}
+text{fill:var(--text);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5;stroke-linejoin:round}
+.tiny{font-size:10px;fill:#b5c5ca}.label{font-size:15px}.safeText{fill:#8fe0b2}.warn{fill:#ffd97b}.branchText{fill:#eab976}.dim{fill:#79a1ae;font-size:11px}
+@media(max-width:1080px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}svg{height:72vh}}
+</style>
+</head>
+<body>
+<header>
+<h1>4-7 REFUGE TERRACE · REV1 PLANNING DRAFT</h1>
+<div class="sub">5440×2816 · OPEN REFUGE TERRACE LOOP + PROTECTED ASCENT CORE + OPTIONAL OVERRIDE C SECURITY SPUR · USER APPROVAL REQUIRED</div>
+</header>
+<div class="layout">
+<aside>
+<div class="card"><b>AUTHORITY</b><br>새 Sector04 UPPER RESIDENTIAL / AMENITY 기획축. 기존 GitHub 4-7 `ISOLATION JUNCTION`은 이번 authoring에서 사용하지 않음.</div>
+<div class="card"><b>SPATIAL SIGNATURE</b><br>큰 외부 Refuge Terrace가 중앙의 <b>SEALED PROTECTED ASCENT CORE</b>를 감싸며 계속 위로 올라간다. M0 이후에만 짧은 Inner Security Spur가 갈라진다.</div>
+<div class="card"><b>MAIN QUESTION</b><br>지속 Pursuit 압박 속에서 높이를 잃지 않고 Refuge Core를 감싸 올라간 뒤, Override C를 위해 마지막 Security Spur 위험을 추가로 감수할 것인가?</div>
+<div class="card"><b>PRESSURE</b><br>Pursuit ×1은 Lower/Main ascent에만. M0에서 완전 종료. Static Sentry ×1은 Override C Inner Spur에만. 둘은 절대 동시 Activation하지 않는다.</div>
+<div class="card"><b>OVERRIDE C</b><br>Mainline exit에 필수 아님. 이미 A/B로 2-of-3를 만족했다면 Outer Bypass로 지나갈 수 있다. C를 원하면 더 짧지만 위험한 Inner Spur를 탄다.</div>
+<div class="card"><b>STORY</b><br>Final Full-Safe Deck에서만:<br><code>UPPER REFUGE / SECURITY ACTIVE</code><br><code>PROTECTED ASCENT / AVAILABLE</code><br>Candidate Bark: <b>“…대피로까지 따로 지키고 있네.”</b></div>
+<div class="card"><b>NO</b><br>Cutter · Wind · Scanner · New Input · New Rope Mode · Kill Gate · Group C causal explanation 없음.</div>
+<div class="card"><b>REACH</b><br>Mainline max ≈ <b>394.46px</b>. 모든 mandatory / C-branch relation &lt; 400px.</div>
+<div>
+<button id="routeBtn" class="on">Main Route</button>
+<button id="branchBtn" class="on">Override C Spur</button>
+<button id="enemyBtn" class="on">Enemy Zones</button>
+<button id="recoveryBtn" class="on">Recovery</button>
+<button id="reachBtn">400px Reach</button>
+<button id="labelBtn" class="on">Labels</button>
+</div>
+</aside>
+<main>
+<svg viewBox="-2780 -2860 5560 2920">
+  <rect class="bounds" x="-2720" y="-2816" width="5440" height="2816"/>
+  <text class="dim labels" x="-2650" y="-2760">5440 W × 2816 H</text>
+
+  <!-- protected central core -->
+  <rect class="core" x="-520" y="-2460" width="840" height="1880" rx="28"/>
+  <text class="label labels" x="-450" y="-2350">SEALED PROTECTED ASCENT CORE</text>
+  <text class="tiny labels" x="-450" y="-2318">PRESSURIZED REFUGE / SECURITY / VERTICAL ASCENT</text>
+
+  <!-- entry + lower terraces -->
+  <rect class="safe" x="-2580" y="-150" width="360" height="30"/>
+  <text class="safeText labels" x="-2540" y="-176">FROM 4-6 · REFUGE ACCESS GALLERY</text>
+
+  <rect class="surface" x="-2180" y="-390" width="420" height="26"/>
+  <rect class="safe" x="-1900" y="-550" width="360" height="30"/>
+  <text class="safeText labels" x="-1870" y="-578">P1 · SECURITY READ</text>
+
+  <rect class="surface" x="-1610" y="-765" width="360" height="24"/>
+  <rect class="surface" x="-1310" y="-965" width="360" height="24"/>
+  <rect class="surface" x="-1010" y="-1165" width="360" height="24"/>
+  <rect class="surface" x="-710" y="-1365" width="360" height="24"/>
+
+  <!-- pursuit break airlock -->
+  <rect class="safe" x="-430" y="-1515" width="440" height="32"/>
+  <text class="safeText labels" x="-400" y="-1545">M0 · REFUGE AIRLOCK · FULL SAFE / PURSUIT BREAK</text>
+
+  <!-- outer bypass / right terrace -->
+  <rect class="surface" x="-10" y="-1650" width="320" height="22"/>
+  <rect class="surface" x="300" y="-1810" width="320" height="22"/>
+  <rect class="surface" x="420" y="-2010" width="340" height="22"/>
+  <text class="branchText labels" x="520" y="-1850">OUTER REFUGE BYPASS</text>
+  <text class="tiny labels" x="520" y="-1825">LONGER · NO ADDITIONAL ENEMY · SKIP C</text>
+
+  <!-- override C branch -->
+  <rect class="surface" x="-340" y="-1780" width="240" height="22"/>
+  <rect class="safe" x="-650" y="-1950" width="300" height="30"/>
+  <rect class="override" x="-610" y="-2105" width="220" height="110" rx="9"/>
+  <text class="warn labels" x="-575" y="-2065">OVERRIDE C</text>
+  <text class="tiny labels" x="-575" y="-2038">RESIDENT SECURITY</text>
+  <text class="tiny labels" x="-575" y="-2015">OPTIONAL INTERACT</text>
+  <rect class="surface" x="-290" y="-2110" width="260" height="22"/>
+  <text class="branchText labels" x="-850" y="-1740">INNER SECURITY SPUR</text>
+  <text class="tiny labels" x="-850" y="-1717">SHORTER · LATE STATIC SECURITY</text>
+
+  <!-- merge + upper return -->
+  <rect class="safe" x="20" y="-2200" width="360" height="30"/>
+  <text class="safeText labels" x="55" y="-2230">M1 · FULL SAFE MERGE</text>
+  <rect class="surface" x="-300" y="-2360" width="320" height="22"/>
+  <rect class="surface" x="-620" y="-2520" width="320" height="22"/>
+
+  <!-- final story deck -->
+  <rect class="safe" x="-980" y="-2680" width="460" height="32"/>
+  <text class="safeText labels" x="-945" y="-2710">FINAL REFUGE CONTROL · FULL SAFE</text>
+  <rect class="story" x="-940" y="-2800" width="300" height="90" rx="8"/>
+  <text class="tiny labels" x="-900" y="-2765">UPPER REFUGE</text>
+  <text class="tiny labels" x="-900" y="-2740">SECURITY ACTIVE</text>
+  <rect class="story" x="-610" y="-2800" width="300" height="90" rx="8"/>
+  <text class="tiny labels" x="-570" y="-2765">PROTECTED ASCENT</text>
+  <text class="tiny labels" x="-570" y="-2740">AVAILABLE</text>
+
+  <rect class="safe" x="-1260" y="-2790" width="320" height="28"/>
+  <text class="safeText labels" x="-1240" y="-2820">→ 4-8 PROTECTED ASCENT GATE</text>
+
+  <!-- recovery layers -->
+  <g id="recovery">
+    <rect class="recovery" x="-1800" y="-920" width="500" height="22"/>
+    <text class="tiny labels" x="-1730" y="-945">RECOVERY R1 · LOWER TERRACE SERVICE LEDGE</text>
+    <rect class="recovery" x="-950" y="-1530" width="360" height="22"/>
+    <text class="tiny labels" x="-915" y="-1555">RECOVERY R2 · CORE MAINTENANCE LEDGE</text>
+    <rect class="recovery" x="-860" y="-2290" width="360" height="22"/>
+    <text class="tiny labels" x="-825" y="-2315">RECOVERY R3 · UPPER TERRACE LEDGE</text>
+  </g>
+
+  <!-- enemy territories -->
+  <g id="enemies">
+    <rect class="zone" x="-1780" y="-1460" width="1540" height="850" rx="80"/>
+    <circle class="pursuit" cx="-1510" cy="-690" r="24"/>
+    <text class="tiny labels" x="-1615" y="-735">PERSISTENT PURSUIT ×1</text>
+    <text class="tiny labels" x="-1580" y="-710">TARGET CLEARS AT M0 AIRLOCK</text>
+
+    <rect class="branchZone" x="-760" y="-2140" width="640" height="500" rx="55"/>
+    <circle class="sentry" cx="-230" cy="-1845" r="24"/>
+    <text class="tiny labels" x="-355" y="-1885">LATE STATIC SECURITY ×1</text>
+    <text class="tiny labels" x="-360" y="-1862">INNER SPUR ONLY · NO KILL GATE</text>
+  </g>
+
+  <!-- anchors -->
+  <g class="labels">
+    <circle class="anchor" cx="-2400" cy="-160" r="13"/><text class="tiny" x="-2378" y="-145">E</text>
+    <circle class="anchor" cx="-2080" cy="-340" r="13"/><text class="tiny" x="-2058" y="-325">A0</text>
+    <circle class="anchor" cx="-1780" cy="-520" r="13"/><text class="tiny" x="-1758" y="-505">P1</text>
+    <circle class="anchor" cx="-1480" cy="-720" r="13"/><text class="tiny" x="-1458" y="-705">A1</text>
+    <circle class="anchor" cx="-1180" cy="-920" r="13"/><text class="tiny" x="-1158" y="-905">A2</text>
+    <circle class="anchor" cx="-880" cy="-1120" r="13"/><text class="tiny" x="-858" y="-1105">P2</text>
+    <circle class="anchor" cx="-580" cy="-1320" r="13"/><text class="tiny" x="-558" y="-1305">A3</text>
+    <circle class="anchor" cx="-280" cy="-1500" r="13"/><text class="tiny" x="-258" y="-1485">M0</text>
+    <circle class="anchor" cx="60" cy="-1620" r="13"/><text class="tiny" x="82" y="-1605">B1</text>
+    <circle class="anchor" cx="380" cy="-1780" r="13"/><text class="tiny" x="402" y="-1765">B2</text>
+    <circle class="anchor" cx="500" cy="-1980" r="13"/><text class="tiny" x="522" y="-1965">B3</text>
+    <circle class="anchor" cx="160" cy="-2180" r="13"/><text class="tiny" x="182" y="-2165">M1</text>
+    <circle class="anchor" cx="-160" cy="-2340" r="13"/><text class="tiny" x="-138" y="-2325">U1</text>
+    <circle class="anchor" cx="-480" cy="-2500" r="13"/><text class="tiny" x="-458" y="-2485">U2</text>
+    <circle class="anchor" cx="-800" cy="-2660" r="13"/><text class="tiny" x="-778" y="-2645">F</text>
+    <circle class="anchor" cx="-1120" cy="-2760" r="13"/><text class="tiny" x="-1098" y="-2745">X</text>
+
+    <circle class="anchor" cx="-220" cy="-1760" r="13"/><text class="tiny" x="-198" y="-1745">C1</text>
+    <circle class="anchor" cx="-500" cy="-1920" r="13"/><text class="tiny" x="-478" y="-1905">C</text>
+    <circle class="anchor" cx="-180" cy="-2080" r="13"/><text class="tiny" x="-158" y="-2065">C2</text>
+  </g>
+
+  <!-- route -->
+  <g id="mainRoute">
+    <path class="route" d="M-2400,-160 L-2080,-340 L-1780,-520 L-1480,-720 L-1180,-920 L-880,-1120 L-580,-1320 L-280,-1500 L60,-1620 L380,-1780 L500,-1980 L160,-2180 L-160,-2340 L-480,-2500 L-800,-2660 L-1120,-2760"/>
+  </g>
+  <g id="branchRoute">
+    <path class="branch" d="M-280,-1500 L-220,-1760 L-500,-1920 L-180,-2080 L160,-2180"/>
+  </g>
+
+  <!-- upward intent -->
+  <path class="arrow labels" d="M-2450,-300 Q-1750,-900 -1050,-1320 Q-200,-1750 750,-2140 Q100,-2520 -1100,-2785"/>
+  <text class="tiny labels" x="890" y="-2180">ALL MAJOR PHASES KEEP GAINING HEIGHT</text>
+
+  <!-- 400 reach circles -->
+  <g id="reach" class="hidden">
+    <circle class="reach" cx="-2080" cy="-340" r="400"/>
+    <circle class="reach" cx="-1480" cy="-720" r="400"/>
+    <circle class="reach" cx="-880" cy="-1120" r="400"/>
+    <circle class="reach" cx="-280" cy="-1500" r="400"/>
+    <circle class="reach" cx="380" cy="-1780" r="400"/>
+    <circle class="reach" cx="160" cy="-2180" r="400"/>
+    <circle class="reach" cx="-480" cy="-2500" r="400"/>
+    <circle class="reach" cx="-500" cy="-1920" r="400"/>
+  </g>
+</svg>
+</main>
+</div>
+<script>
+const toggle=(btn,id)=>{const b=document.getElementById(btn),g=document.getElementById(id);b.onclick=()=>{g.classList.toggle('hidden');b.classList.toggle('on',!g.classList.contains('hidden'));}};
+toggle('routeBtn','mainRoute');
+toggle('branchBtn','branchRoute');
+toggle('enemyBtn','enemies');
+toggle('recoveryBtn','recovery');
+toggle('reachBtn','reach');
+document.getElementById('labelBtn').onclick=()=>{
+  document.querySelectorAll('.labels').forEach(x=>x.classList.toggle('hidden'));
+  document.getElementById('labelBtn').classList.toggle('on');
+};
+</script>
+</body>
+</html>

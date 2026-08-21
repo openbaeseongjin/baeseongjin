@@ -1,0 +1,630 @@
+{
+  "schemaVersion": "one-rope-area-spec-1.0",
+  "areaId": "sector-04-07",
+  "sectorId": "sector-04",
+  "order": 7,
+  "name": "REFUGE TERRACE",
+  "subtitle": "PURSUIT ASCENT / OPTIONAL OVERRIDE C",
+  "status": "APPROVED-DESIGN / RUNTIME-MIGRATION-REQUIRED",
+  "authority": {
+    "sector": "UPPER RESIDENTIAL / AMENITY",
+    "theme": "PRIVILEGE IS PROTECTED",
+    "supersedesLegacyAreaName": "ISOLATION JUNCTION",
+    "latestCheckedMain": "3c9f661bba58af6f7351e00754c12aef86575a12",
+    "approvedMapSha256": "808a571482a628e3768318cf59ab302fe552cb537d008197842975b03f93a247",
+    "approvedStorySha256": "7a7852f8d37430cdd3a4817be524bf9c3bd01ff2aa09be483116898a90f8002c"
+  },
+  "bounds": {
+    "width": 5440,
+    "height": 2816,
+    "xMin": -2720,
+    "xMax": 2720,
+    "yMin": -2816,
+    "yMax": 0
+  },
+  "entry": {
+    "id": "sector-04-07:entry",
+    "x": -2400,
+    "y": -160,
+    "from": "sector-04-06"
+  },
+  "exit": {
+    "id": "sector-04-07:exit",
+    "x": -1120,
+    "y": -2760,
+    "nextAreaId": "sector-04-08",
+    "localRequirement": "final-refuge-control-reached",
+    "overrideCRequired": false,
+    "note": "Preserve chain handoff only. Do not redesign current 4-8 in this package."
+  },
+  "collisionAuthority": {
+    "rule": "Platforms/decks/recovery/airlock partitions below are gameplay collision. The large central core silhouette in MAP-PREVIEW is architectural cutaway/backdrop, not one monolithic solid rectangle.",
+    "centralCoreVisual": {
+      "x": -100,
+      "topY": -2460,
+      "width": 840,
+      "height": 1880,
+      "gameplayCollision": false
+    }
+  },
+  "surfaces": [
+    {
+      "id": "entry-refuge-terrace",
+      "kind": "safe-deck",
+      "x": -2400,
+      "topY": -150,
+      "width": 360,
+      "height": 30
+    },
+    {
+      "id": "lower-terrace-01",
+      "kind": "platform",
+      "x": -1970,
+      "topY": -390,
+      "width": 420,
+      "height": 26
+    },
+    {
+      "id": "p1-security-read",
+      "kind": "safe-deck",
+      "x": -1720,
+      "topY": -550,
+      "width": 360,
+      "height": 30
+    },
+    {
+      "id": "lower-terrace-02",
+      "kind": "platform",
+      "x": -1430,
+      "topY": -765,
+      "width": 360,
+      "height": 24
+    },
+    {
+      "id": "lower-terrace-03",
+      "kind": "platform",
+      "x": -1130,
+      "topY": -965,
+      "width": 360,
+      "height": 24
+    },
+    {
+      "id": "lower-terrace-04",
+      "kind": "platform",
+      "x": -830,
+      "topY": -1165,
+      "width": 360,
+      "height": 24
+    },
+    {
+      "id": "lower-terrace-05",
+      "kind": "platform",
+      "x": -530,
+      "topY": -1365,
+      "width": 360,
+      "height": 24
+    },
+    {
+      "id": "m0-refuge-airlock",
+      "kind": "safe-deck",
+      "x": -210,
+      "topY": -1515,
+      "width": 440,
+      "height": 32,
+      "properties": {
+        "fullSafe": true,
+        "pursuitBreak": true
+      }
+    },
+    {
+      "id": "outer-bypass-01",
+      "kind": "platform",
+      "x": 150,
+      "topY": -1650,
+      "width": 320,
+      "height": 22
+    },
+    {
+      "id": "outer-bypass-02",
+      "kind": "platform",
+      "x": 460,
+      "topY": -1810,
+      "width": 320,
+      "height": 22
+    },
+    {
+      "id": "outer-bypass-03",
+      "kind": "platform",
+      "x": 590,
+      "topY": -2010,
+      "width": 340,
+      "height": 22
+    },
+    {
+      "id": "inner-spur-01",
+      "kind": "platform",
+      "x": -220,
+      "topY": -1780,
+      "width": 240,
+      "height": 22
+    },
+    {
+      "id": "override-c-booth",
+      "kind": "safe-deck",
+      "x": -500,
+      "topY": -1950,
+      "width": 300,
+      "height": 30,
+      "properties": {
+        "fullSafe": true,
+        "enemyTargetClear": true
+      }
+    },
+    {
+      "id": "inner-spur-02",
+      "kind": "platform",
+      "x": -160,
+      "topY": -2110,
+      "width": 260,
+      "height": 22
+    },
+    {
+      "id": "m1-safe-merge",
+      "kind": "safe-deck",
+      "x": 200,
+      "topY": -2200,
+      "width": 360,
+      "height": 30,
+      "properties": {
+        "fullSafe": true
+      }
+    },
+    {
+      "id": "upper-return-01",
+      "kind": "platform",
+      "x": -140,
+      "topY": -2360,
+      "width": 320,
+      "height": 22
+    },
+    {
+      "id": "upper-return-02",
+      "kind": "platform",
+      "x": -460,
+      "topY": -2520,
+      "width": 320,
+      "height": 22
+    },
+    {
+      "id": "final-refuge-control",
+      "kind": "safe-deck",
+      "x": -750,
+      "topY": -2680,
+      "width": 460,
+      "height": 32,
+      "properties": {
+        "fullSafe": true,
+        "storySafe": true
+      }
+    },
+    {
+      "id": "exit-protected-ascent-gate-deck",
+      "kind": "safe-deck",
+      "x": -1100,
+      "topY": -2790,
+      "width": 320,
+      "height": 28
+    },
+    {
+      "id": "recovery-r1",
+      "kind": "recovery",
+      "x": -1550,
+      "topY": -920,
+      "width": 500,
+      "height": 22
+    },
+    {
+      "id": "recovery-r2",
+      "kind": "recovery",
+      "x": -770,
+      "topY": -1530,
+      "width": 360,
+      "height": 22
+    },
+    {
+      "id": "recovery-r3",
+      "kind": "recovery",
+      "x": -680,
+      "topY": -2290,
+      "width": 360,
+      "height": 22
+    }
+  ],
+  "architecturalCollision": [
+    {
+      "id": "m0-airlock-left-jamb",
+      "kind": "solid",
+      "x": -480,
+      "topY": -1610,
+      "width": 32,
+      "height": 192,
+      "grappleable": false,
+      "losBlocker": true,
+      "note": "Static threshold/jamb. Do not create unsupported dynamic door gameplay dependency."
+    },
+    {
+      "id": "override-booth-partition",
+      "kind": "solid",
+      "x": -350,
+      "topY": -2030,
+      "width": 28,
+      "height": 190,
+      "grappleable": false,
+      "losBlocker": true,
+      "note": "Separates late static security line from the Override C safe booth."
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "E",
+      "x": -2400,
+      "y": -160
+    },
+    {
+      "id": "A0",
+      "x": -2080,
+      "y": -340
+    },
+    {
+      "id": "P1",
+      "x": -1780,
+      "y": -520
+    },
+    {
+      "id": "A1",
+      "x": -1480,
+      "y": -720
+    },
+    {
+      "id": "A2",
+      "x": -1180,
+      "y": -920
+    },
+    {
+      "id": "P2",
+      "x": -880,
+      "y": -1120
+    },
+    {
+      "id": "A3",
+      "x": -580,
+      "y": -1320
+    },
+    {
+      "id": "M0",
+      "x": -280,
+      "y": -1500
+    },
+    {
+      "id": "B1",
+      "x": 60,
+      "y": -1620
+    },
+    {
+      "id": "B2",
+      "x": 380,
+      "y": -1780
+    },
+    {
+      "id": "B3",
+      "x": 500,
+      "y": -1980
+    },
+    {
+      "id": "M1",
+      "x": 160,
+      "y": -2180
+    },
+    {
+      "id": "U1",
+      "x": -160,
+      "y": -2340
+    },
+    {
+      "id": "U2",
+      "x": -480,
+      "y": -2500
+    },
+    {
+      "id": "F",
+      "x": -800,
+      "y": -2660
+    },
+    {
+      "id": "X",
+      "x": -1120,
+      "y": -2760
+    },
+    {
+      "id": "C1",
+      "x": -220,
+      "y": -1760,
+      "optionalBranch": "override-c"
+    },
+    {
+      "id": "C",
+      "x": -500,
+      "y": -1920,
+      "optionalBranch": "override-c"
+    },
+    {
+      "id": "C2",
+      "x": -180,
+      "y": -2080,
+      "optionalBranch": "override-c"
+    }
+  ],
+  "routes": {
+    "main": [
+      {
+        "x": -2400,
+        "y": -160
+      },
+      {
+        "x": -2080,
+        "y": -340
+      },
+      {
+        "x": -1780,
+        "y": -520
+      },
+      {
+        "x": -1480,
+        "y": -720
+      },
+      {
+        "x": -1180,
+        "y": -920
+      },
+      {
+        "x": -880,
+        "y": -1120
+      },
+      {
+        "x": -580,
+        "y": -1320
+      },
+      {
+        "x": -280,
+        "y": -1500
+      },
+      {
+        "x": 60,
+        "y": -1620
+      },
+      {
+        "x": 380,
+        "y": -1780
+      },
+      {
+        "x": 500,
+        "y": -1980
+      },
+      {
+        "x": 160,
+        "y": -2180
+      },
+      {
+        "x": -160,
+        "y": -2340
+      },
+      {
+        "x": -480,
+        "y": -2500
+      },
+      {
+        "x": -800,
+        "y": -2660
+      },
+      {
+        "x": -1120,
+        "y": -2760
+      }
+    ],
+    "overrideCSpur": [
+      {
+        "x": -280,
+        "y": -1500
+      },
+      {
+        "x": -220,
+        "y": -1760
+      },
+      {
+        "x": -500,
+        "y": -1920
+      },
+      {
+        "x": -180,
+        "y": -2080
+      },
+      {
+        "x": 160,
+        "y": -2180
+      }
+    ],
+    "mainLinkDistancesPx": [
+      367.15,
+      349.86,
+      360.56,
+      360.56,
+      360.56,
+      360.56,
+      349.86,
+      360.56,
+      357.77,
+      233.24,
+      394.46,
+      357.77,
+      357.77,
+      357.77,
+      335.26
+    ],
+    "overrideCLinkDistancesPx": [
+      266.83,
+      322.49,
+      357.77,
+      354.4
+    ],
+    "mainMaxLinkPx": 394.46,
+    "overrideCMaxLinkPx": 357.77,
+    "baseHookReachPx": 400
+  },
+  "recoveryPoints": [
+    {
+      "id": "R1",
+      "x": -1550,
+      "y": -942,
+      "targetRetrySecondsMax": 5
+    },
+    {
+      "id": "R2",
+      "x": -770,
+      "y": -1552,
+      "targetRetrySecondsMax": 5
+    },
+    {
+      "id": "R3",
+      "x": -680,
+      "y": -2312,
+      "targetRetrySecondsMax": 5
+    }
+  ],
+  "enemySlots": [
+    {
+      "id": "persistent-pursuit-01",
+      "role": "lower-main-ascent-pursuit",
+      "runtimeEnemyType": "pursuit-drone-t1",
+      "spawn": {
+        "x": -1510,
+        "y": -690
+      },
+      "activationBounds": {
+        "x": -1780,
+        "y": -1460,
+        "width": 1540,
+        "height": 850
+      },
+      "rules": [
+        "kill-optional",
+        "no-rope-cut",
+        "activation-band-only"
+      ],
+      "mustClearAt": "m0-refuge-airlock",
+      "simultaneousWithLateSecurity": false,
+      "implementationNote": "Use current pursuit-drone behavior already present in enemy pools. Do not invent a new AI type."
+    },
+    {
+      "id": "inner-spur-security-01",
+      "role": "override-c-optional-security-cost",
+      "runtimeObjectType": "sentry",
+      "runtimeEnemyType": "sentry-t1",
+      "spawn": {
+        "x": -230,
+        "y": -1845
+      },
+      "activationBounds": {
+        "x": -360,
+        "y": -1900,
+        "width": 360,
+        "height": 300
+      },
+      "rules": [
+        "kill-optional",
+        "no-rope-cut",
+        "target-lock-cycle",
+        "activation-band-only"
+      ],
+      "mustClearAt": "override-c-booth",
+      "simultaneousWithPursuit": false
+    }
+  ],
+  "objects": [
+    {
+      "id": "sector-04-07:override-c-panel",
+      "type": "resident-access-override",
+      "x": -500,
+      "y": -2050,
+      "interactionRadius": 72,
+      "objectiveId": "sector-04-07:override-c-acquired",
+      "moduleId": "sector-04:resident-security-override:c",
+      "localExitRequired": false,
+      "note": "If this object type does not exist, adapt the existing interact/panel path minimally; do not fake acquisition with a story toast only."
+    },
+    {
+      "id": "sector-04-07:upper-refuge-status",
+      "type": "story-display",
+      "x": -820,
+      "y": -2755,
+      "cueIds": [
+        "sector-04-07:upper-refuge-security-active"
+      ]
+    },
+    {
+      "id": "sector-04-07:protected-ascent-status",
+      "type": "story-display",
+      "x": -470,
+      "y": -2755,
+      "cueIds": [
+        "sector-04-07:protected-ascent-available"
+      ]
+    },
+    {
+      "id": "sector-04-07:exit-panel",
+      "type": "gate-panel",
+      "x": -1210,
+      "y": -2760,
+      "requiredObjectiveIds": [
+        "sector-04-07:final-refuge-control-reached"
+      ]
+    }
+  ],
+  "objectives": [
+    {
+      "id": "sector-04-07:override-c-acquired",
+      "type": "interact",
+      "sourceObjectId": "sector-04-07:override-c-panel",
+      "requiredForLocalExit": false
+    },
+    {
+      "id": "sector-04-07:final-refuge-control-reached",
+      "type": "reach",
+      "bounds": {
+        "x": -980,
+        "y": -2720,
+        "width": 460,
+        "height": 96
+      }
+    },
+    {
+      "id": "sector-04-07:exit-panel-engaged",
+      "type": "interact",
+      "sourceObjectId": "sector-04-07:exit-panel",
+      "requiredObjectiveIds": [
+        "sector-04-07:final-refuge-control-reached"
+      ]
+    }
+  ],
+  "forbidden": [
+    "cutter",
+    "wind",
+    "scanner",
+    "moving-platform",
+    "new-player-input",
+    "new-rope-mode",
+    "kill-gate",
+    "pursuit+sentry-overlap",
+    "group-c-causal-explanation",
+    "sector-05-causal-explanation"
+  ]
+}

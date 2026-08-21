@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "one-rope-direction-spec-1.0",
+  "areaId": "sector-04-07",
+  "status": "APPROVED-DIRECTION",
+  "voiceRules": {
+    "system": "objective fact only",
+    "player": "reaction/emotion/judgment only",
+    "hardRopeOrCombatDialogue": false,
+    "corePlayerBarkCount": 1,
+    "coreBark": "…대피로까지 따로 지키고 있네."
+  },
+  "beats": [
+    {
+      "id": "S0",
+      "name": "REFUGE TERRACE REVEAL",
+      "trigger": "area-entry",
+      "purpose": "Reveal the central protected ascent core and the rising terrace loop before explanation.",
+      "system": [
+        [
+          "UPPER REFUGE",
+          "TERRACE ACCESS / OPEN"
+        ]
+      ],
+      "playerBark": null,
+      "camera": {
+        "mode": "reveal",
+        "zoom": "slightly-wide",
+        "inputLock": false,
+        "show": [
+          "central-core",
+          "upper-destination"
+        ]
+      },
+      "audio": "reduce enclosed machinery; emphasize quiet ventilation/emergency-power hum",
+      "storyBoundary": "Do not identify who the refuge is for."
+    },
+    {
+      "id": "S1",
+      "name": "SECURITY READ",
+      "trigger": "stable-on-p1-security-read",
+      "purpose": "Establish security operation before threat activation.",
+      "system": [
+        [
+          "UPPER REFUGE",
+          "SECURITY ACTIVE"
+        ]
+      ],
+      "playerBark": null,
+      "enemy": "show pursuit silhouette once; activation still OUT",
+      "camera": {
+        "mode": "read",
+        "show": [
+          "security-silhouette",
+          "next-terrace"
+        ]
+      },
+      "audio": "short security chirp; no combat cue",
+      "storyBoundary": "No reason/priority explanation."
+    },
+    {
+      "id": "S2",
+      "name": "PURSUIT ASCENT",
+      "trigger": "leave-p1-into-first-ascent-hook",
+      "purpose": "Turn protected security into physical exclusion pressure.",
+      "system": [],
+      "playerBark": null,
+      "enemy": "persistent-pursuit-01 active",
+      "camera": {
+        "mode": "forward-up",
+        "biasY": "up",
+        "inputLock": false
+      },
+      "audio": "pursuit motor + denser rhythm",
+      "silence": true
+    },
+    {
+      "id": "S3",
+      "name": "AIRLOCK BREAK",
+      "trigger": "fully-inside-m0-refuge-airlock",
+      "purpose": "Hard-separate pursuit phase from optional-access phase.",
+      "system": [
+        [
+          "REFUGE AIRLOCK",
+          "SEAL / NORMAL"
+        ]
+      ],
+      "playerBark": null,
+      "enemy": "persistent-pursuit-01 target clear / activation OUT",
+      "camera": {
+        "mode": "stable-reset"
+      },
+      "audio": "pursuit motor low-pass/fade; interior ventilation only",
+      "implementationFallback": "If dynamic closing doors are not supported, preserve gameplay safety through activation boundary + LOS partition and present the seal through audio/light only."
+    },
+    {
+      "id": "S4",
+      "name": "OVERRIDE C CHOICE READ",
+      "trigger": "m0-exit-threshold",
+      "purpose": "Show outer bypass and inner security spur at the same time.",
+      "system": [
+        [
+          "RESIDENT SECURITY",
+          "OVERRIDE C / AVAILABLE"
+        ]
+      ],
+      "playerBark": null,
+      "camera": {
+        "mode": "choice-wide",
+        "show": [
+          "outer-bypass",
+          "inner-security-spur",
+          "override-c-panel"
+        ]
+      },
+      "audio": "ambient on outer route; short security ping from inner spur",
+      "storyBoundary": "Do not announce 4-8 2-of-3 rule through character dialogue."
+    },
+    {
+      "id": "S5",
+      "name": "INNER SECURITY SPUR",
+      "trigger": "enter-inner-security-spur",
+      "purpose": "Optional compact security cost for C.",
+      "system": [],
+      "playerBark": null,
+      "enemy": "inner-spur-security-01 active; pursuit remains OUT",
+      "camera": {
+        "mode": "tight-branch",
+        "inputLock": false
+      },
+      "audio": "lock/firing telegraph only",
+      "silence": true
+    },
+    {
+      "id": "S6",
+      "name": "OVERRIDE C",
+      "trigger": "sector-04-07:override-c-acquired",
+      "purpose": "Confirm optional acquisition without stopping the stage.",
+      "system": [
+        [
+          "ACCESS OVERRIDE C",
+          "ACQUIRED · SECTOR ACCESS +1"
+        ]
+      ],
+      "playerBark": null,
+      "camera": {
+        "mode": "no-cut",
+        "worldPause": false
+      },
+      "audio": "short confirmation tone",
+      "storyBoundary": "No new door/platform opens as a local reward."
+    },
+    {
+      "id": "S7",
+      "name": "FINAL REFUGE CONTROL",
+      "trigger": "stable-on-final-refuge-control",
+      "purpose": "Confirm that refuge security and protected ascent remain available after the player has experienced the security pressure.",
+      "sequence": [
+        {
+          "t": 0.4,
+          "system": [
+            "UPPER REFUGE",
+            "SECURITY ACTIVE"
+          ]
+        },
+        {
+          "t": 1.1,
+          "system": [
+            "PROTECTED ASCENT",
+            "AVAILABLE"
+          ]
+        },
+        {
+          "t": "after-second-fact+0.5~0.9",
+          "playerBark": "…대피로까지 따로 지키고 있네."
+        }
+      ],
+      "camera": {
+        "mode": "stable-story",
+        "inputLock": false
+      },
+      "audio": "threat music off; slight ambience dip before bark",
+      "barkGuard": "Do not play while Rope attached or while player is in active threat state.",
+      "storyBoundary": "Do not say who is protected, who ordered it, or that lower-sector collapse was intentional."
+    },
+    {
+      "id": "S8",
+      "name": "4-8 HANDOFF",
+      "trigger": "approach-exit-protected-ascent-gate",
+      "purpose": "Preview the access check without resolving it in 4-7.",
+      "system": [
+        [
+          "PROTECTED ASCENT GATE",
+          "SECURITY CHECK / AHEAD"
+        ]
+      ],
+      "playerBark": null,
+      "camera": {
+        "mode": "handoff",
+        "gateScreenY": "upper-third",
+        "showNextSpace": "partial"
+      },
+      "audio": "gate idle tone only",
+      "storyBoundary": "Do not evaluate 2-of-3 quorum in 4-7."
+    }
+  ],
+  "cameraZones": [
+    {
+      "id": "terrace-reveal",
+      "yTop": 0,
+      "yBottom": -520,
+      "zoom": 0.9
+    },
+    {
+      "id": "pursuit-ascent",
+      "yTop": -520,
+      "yBottom": -1460,
+      "zoom": 0.86
+    },
+    {
+      "id": "airlock-reset",
+      "yTop": -1460,
+      "yBottom": -1600,
+      "zoom": 0.96
+    },
+    {
+      "id": "choice-read",
+      "yTop": -1600,
+      "yBottom": -1740,
+      "zoom": 0.9
+    },
+    {
+      "id": "override-spur",
+      "yTop": -1740,
+      "yBottom": -2140,
+      "zoom": 0.92
+    },
+    {
+      "id": "upper-return",
+      "yTop": -2140,
+      "yBottom": -2600,
+      "zoom": 0.88
+    },
+    {
+      "id": "final-refuge-control",
+      "yTop": -2600,
+      "yBottom": -2816,
+      "zoom": 0.98
+    }
+  ]
+}

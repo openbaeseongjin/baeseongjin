@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "runtimeStatus": "NOT IMPLEMENTED",
+  "stage": {
+    "sector": 4,
+    "stage": 4,
+    "legacyStageAlias": "4-4",
+    "sourceAreaId": "sector-04-04",
+    "name": "RESIDENT REFUGE HALL"
+  },
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "globalControl": {
+    "worldPause": false,
+    "playerControl": "ON",
+    "forcedCinematicCamera": false
+  },
+  "voiceProfile": {
+    "system": "objective operational fact only",
+    "player": "short emotional reaction; no causal explanation",
+    "maxCoreBarks": 1
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "purpose": "QUIET RESET",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Block C entry"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT REFUGE",
+            "detail": "PRESSURIZATION / NORMAL"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s1-door-a",
+      "purpose": "READ THE STRUCTURE",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Fire Compartment A read"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "FIRE COMPARTMENT A",
+            "detail": "SEALED / PRESSURE HOLD"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s2-first-stable-landing",
+      "purpose": "SYSTEM FACT → HUMAN REACTION",
+      "trigger": {
+        "type": "stable-grounded-zone",
+        "intent": "first stable MEP landing after initial ascent"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT REFUGE",
+            "detail": "LIFE-SUPPORT / NORMAL"
+          },
+          "durationSeconds": 1.1
+        },
+        {
+          "type": "playerBark",
+          "content": {
+            "text": "…아래는 저 꼴인데."
+          },
+          "runtimeMapping": "NOT IMPLEMENTED / player-bark-layer",
+          "triggerGuards": [
+            "player grounded and stable",
+            "rope not attached",
+            "no active Patrol acquire/pressure"
+          ],
+          "replay": "once-per-stage-attempt"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-patrol-a",
+      "purpose": "SILENT PRESSURE",
+      "trigger": {
+        "type": "runtime-enemy-state",
+        "intent": "Patrol A acquire/active"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENTIAL SECURITY",
+            "detail": "REFUGE PATROL / ACTIVE"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s4-chamber-b",
+      "purpose": "KEEP CLIMBING",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Chamber B / Door B read"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "REFUGE CHAMBER B",
+            "detail": "AIR QUALITY / NORMAL"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s5-patrol-b",
+      "purpose": "SECOND SILENT PRESSURE",
+      "trigger": {
+        "type": "runtime-enemy-state",
+        "intent": "Patrol B acquire/active"
+      },
+      "tracks": []
+    },
+    {
+      "beatId": "s6-high-refuge",
+      "purpose": "LET THE SPACE SPEAK",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "High Refuge Chamber"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT REFUGE",
+            "detail": "LIFE-SUPPORT SERVICE / NORMAL"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s7-exit",
+      "purpose": "QUIET HANDOFF",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Amenity Access exit"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER AMENITY ACCESS",
+            "detail": "OPEN"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    }
+  ],
+  "rules": [
+    "No world pause",
+    "No player-control lock",
+    "SYSTEM states facts; PLAYER owns reaction only",
+    "Exactly one core Player Bark: …아래는 저 꼴인데.",
+    "No Bark while Rope is attached/actively controlled",
+    "No Bark during Patrol acquire/pressure",
+    "No explanation of protected-person selection, priority tiers, capacity allocation, or Sector05 continuity logic",
+    "No Override B reveal before 4-5"
+  ]
+}

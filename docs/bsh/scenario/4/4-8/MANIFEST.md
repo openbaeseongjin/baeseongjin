@@ -1,0 +1,29 @@
+# SECTOR 04-8 — PACKAGE MANIFEST
+
+- Package: `ONE-ROPE-SECTOR-04-08-REV2.0-GITHUB-READY`
+- Checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`
+- MAP SHA-256: `938fb1c3f7915b9ba213fda260dd430573a2d09e954e339259b622c136e14a52`
+- STORY SHA-256: `f844a680dc8bdddca7fc74c00d68f5a0cd6cbc4c14e9ada57d38309a42d6eff6`
+- Max mandatory Rope link: `386.26px`
+
+| Path | SHA-256 |
+|---|---|
+| `CLAUDECODE-IMPLEMENT-4-8-REV2.0.md` | `45076b19b10c7c38700d50f0d24edc6b22bac7fae9f38dffb0085aab9fbc9ead` |
+| `INSTALL-MAP.md` | `55f2359f530c7e9bfc69266797319428fe8670f89b922a5aed9fc056a17a3de4` |
+| `PACKAGE-README.md` | `bef3b7012de236c451a9e55c81c3226d2cda75a5f5db5de632d53a424006b39f` |
+| `POST-SECTOR-04-BOUNDARY.md` | `2d11da7c2c2ad9469de00431cb29f796b637764c7a829b1d64f2ee15854adccd` |
+| `SOURCE-LOCK.json` | `abe57a072747a90c7dba97310191eeaa19bbfcee23650f3167202850c9f12596` |
+| `docs/bsh/scenario/4/4-8/AREA-SPEC-REV1-DESIGN.json` | `283c6b2f4cbc060bbc5680f421890230f5fca29034a39f9a5f51e628f333eca8` |
+| `docs/bsh/scenario/4/4-8/ASSET-REQUIREMENTS.md` | `ef605a0678e287ce7ee40ca038b1e59aca667bab9010c7b704f64a69ad5ce715` |
+| `docs/bsh/scenario/4/4-8/DIRECTION-SPEC.json` | `1496751774186c9d6da86050b06e8a366404a8d921c5496791f88103ec6b6f26` |
+| `docs/bsh/scenario/4/4-8/MAP-PREVIEW.html` | `938fb1c3f7915b9ba213fda260dd430573a2d09e954e339259b622c136e14a52` |
+| `docs/bsh/scenario/4/4-8/MAP-SIMILARITY-AUDIT.md` | `484d1d17fe9308a2f88350a8d875b32c93963e205672554390fed1e6a951957c` |
+| `docs/bsh/scenario/4/4-8/PLANNING-APPROVAL.md` | `6589e76424fa72c1fae776b6e47cf42e138f976e4eeb097ff59a4edf1d2fad52` |
+| `docs/bsh/scenario/4/4-8/PRODUCTION-ALIGNMENT.md` | `9b903f6da98cbf99c3c7282a2cf3bf1c46a8c646f448d48ff5906d6e31f20b38` |
+| `docs/bsh/scenario/4/4-8/README.md` | `e9e4b6d5a607c4f72b3b02ac9bb8e8f2795dcfbe7dce5913923828d7142d42ae` |
+| `docs/bsh/scenario/4/4-8/REVISION-HISTORY.md` | `b1f0bd9f64ea30c2ae7e066b667c95544a961fe2a439ac3f6ab8ee8a732c6336` |
+| `docs/bsh/scenario/4/4-8/RUNTIME-HANDOFF.md` | `22b43b12498a77b2b4c9bf45cfd1368f5be149a6a0ff59c547f319ca06afdc80` |
+| `docs/bsh/scenario/4/4-8/STORY-DIRECTION-PREVIEW.html` | `f844a680dc8bdddca7fc74c00d68f5a0cd6cbc4c14e9ada57d38309a42d6eff6` |
+| `docs/bsh/scenario/4/4-8/VALIDATION.md` | `bbf8544e7fddc006ab62bcd0782b9fb60df55ad28cae89cb4402dc14ad238fba` |
+| `docs/bsh/scenario/4/SECTOR-04-AUTHORITY-DELTA-4-8.md` | `d61ff1a59ac3ce9816fdf85183ed221f6bf0c0f02e6aff6c06192ba470a68f5f` |
+| `docs/bsh/scenario/4/SECTOR-04-OVERRIDE-QUORUM-CONTRACT.md` | `b2907cd55dc65574e59b12979c4c849ff961c99644ab90f180dec137ce67d067` |

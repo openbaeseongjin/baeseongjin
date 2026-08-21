@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "runtimeStatus": "RUNTIME MAPPING REQUIRED",
+  "stage": {
+    "sector": 4,
+    "stage": 6,
+    "legacyStageAlias": "4-6",
+    "sourceAreaId": "sector-04-06",
+    "name": "REFUGE ACCESS GALLERY"
+  },
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "globalControl": {
+    "worldPause": false,
+    "playerControl": "ON",
+    "forcedCinematicCamera": false
+  },
+  "voiceProfile": {
+    "system": "operational fact only",
+    "player": "short human reaction; no causal explanation",
+    "maxCoreBarks": 1
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "purpose": "REFUGE INFRASTRUCTURE REVEAL",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Lower Pressure Gallery entry"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT REFUGE ROUTE",
+            "detail": "ACTIVE"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s1-lower-pursuit",
+      "purpose": "SILENT PURSUIT PRESSURE",
+      "trigger": {
+        "type": "runtime-enemy-state",
+        "intent": "Lower Pursuit active"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "REFUGE ACCESS",
+            "detail": "PRESSURE ZONE A / STABLE"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s2-smoke-lock-lower",
+      "purpose": "READ VERTICAL TRANSFER",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Smoke-Lock lower landing"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "SMOKE-LOCK TRANSFER",
+            "detail": "READY"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s3-upper-safe-read",
+      "purpose": "SYSTEM FACT → HUMAN REACTION",
+      "trigger": {
+        "type": "stable-grounded-zone",
+        "intent": "Upper Smoke-Lock landing after Pursuit contact end"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER REFUGE ROUTE",
+            "detail": "ACTIVE"
+          },
+          "durationSeconds": 1.1
+        },
+        {
+          "type": "playerBark",
+          "content": {
+            "text": "…대피로는 멀쩡하네."
+          },
+          "triggerGuards": [
+            "player grounded and stable",
+            "rope not attached",
+            "Pursuit contact ended",
+            "Cutter not yet acquiring"
+          ],
+          "replay": "once-per-stage-attempt"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-cutter-reveal",
+      "purpose": "FIXED REFUGE DEFENSE REVEAL",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "first upper baffle read"
+      },
+      "tracks": []
+    },
+    {
+      "beatId": "s5-cutter-rhythm",
+      "purpose": "SILENT CUTTER PLAY",
+      "trigger": {
+        "type": "runtime-enemy-state",
+        "intent": "Cutter acquire/active"
+      },
+      "tracks": []
+    },
+    {
+      "beatId": "s6-exit",
+      "purpose": "4-7 HANDOFF",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Refuge Terrace threshold"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "REFUGE TERRACE",
+            "detail": "ACCESS / OPEN"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    }
+  ],
+  "rules": [
+    "No world pause",
+    "No player-control lock",
+    "Exactly one core Bark: …대피로는 멀쩡하네.",
+    "No Bark during Pursuit, active Rope control, Cutter telegraph or exposed Cutter crossing",
+    "SYSTEM states facts; PLAYER only reacts",
+    "Do not reveal Group C causality, Priority Route user identity, protected-person selection, or Sector05 Continuity",
+    "No Resident Security Override in 4-6"
+  ]
+}
