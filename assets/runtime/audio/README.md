@@ -5,6 +5,7 @@
 - `audio-manifest.schema.json`: category package 공개 계약
 - `audio-pack.schema.json`: category package 조합 계약
 - `<category>/default-mock/`: 현재 구조 검증용 package
+- `bgm/main-theme/`: 등반 중 `bgm-climb`을 정식 후보로 교체하고 완료 cue는 기존 mock을 유지하는 package
 - `packs/default-mock/`: 네 mock category를 조합하는 기본 pack
 
 `default-mock` WAV는 `scripts/generateAudioMockAssets.mjs`가 만든 48 kHz PCM 구조 검증 자료이며 정식 음향 방향이 아닙니다. 다시 만들려면 generator를 실행하고 pack validator를 통과시킵니다.
@@ -19,3 +20,5 @@ npm run validate:audio-assets -- assets/runtime/audio/packs/default-mock
 ```
 
 새 package는 같은 category의 mock manifest를 복사해 시작합니다. schema·parser·mock·validator는 하나의 공개 계약이므로 함께 변경합니다. 자세한 필드는 `docs/audio-asset-format.md`를 따릅니다.
+
+현재 bootstrap은 `default-mock` pack의 `bgm` category만 `main-theme`으로 override합니다. UI·gameplay·ambience mock과 pack fallback은 그대로 두고, 게임 완료 상태는 `main-theme` package 안에 보존한 `bgm-run-complete` mock source를 사용합니다. 메인 테마의 공개 배포 권리와 사람의 loop seam·mix 청취 승인 전에는 최종 release-ready로 보지 않습니다.
