@@ -53,8 +53,18 @@ Confirmed: the real Sector 01->02 handoff is NOT owned by this legacy Area's `ga
 any per-Area `nextAreaId`/`gate` field, and the actual Sector-boundary lock/unlock now runs entirely
 through the `access-transit-lock` system (see entries #70-71 in `docs/scenario-development-integration.md`).
 `nextAreaId: null` here is therefore already correct and was left unchanged - setting it to
-`sector-02-01` would not create a Boss (`CONTAINMENT GANTRY C-01`, per the open gate list) that does not
-exist yet, and risks fighting whatever the real transition owner does when the Boss is eventually built.
+`sector-02-01` would not create the separate `CONTAINMENT GANTRY C-01` physical Boss slot, and risks
+fighting the real transition owner. `BossEncounterRuntime` now exists as an independent Has-A runtime,
+but it is not yet connected to a physical Arena, automatic entry, combat damage, or the Sector handoff.
+
+## Boss 01 REV2.1 handoff boundary — 2026-08-21
+
+[`../../../../boss/01/`](../../../../boss/01/) preserves the supplied REV2.1 Boss 01 planning handoff. It is a
+reference-only authoring package, not an implementation of this legacy Area or a change to the current
+`access-transit-lock` owner. Its proposed `1-8 Maintenance Override → Boss 01 → Worker District` causal
+sequence must be reconciled through the separate Post-Sector Boss slot before any transition wiring is
+changed. In particular, its historical `210s` timer and `80px/s` collapse are not current Boss inputs;
+the initial Boss contract has no timer or time-expiry Arena collapse.
 
 ## Story strength
 

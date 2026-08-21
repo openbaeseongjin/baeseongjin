@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 59b9a5f611639e51f9704a212b44c2fd34d3202fb69910c3db9200135720c451
+scenario-source-sha256: c867aed64b4622864da1f04fff733871c389542e6ce975bd1cc560b75bc8b8ea
 authored-area-sha256: 640c9268e9006ee2c7a774def8ecfb0cdd1c1163fa9a725a88fd1969af09e8cf
 authored-sector-sha256: 3129e29b1ea699cc91bf98432c1c955c31f9c81278586c1b0e7b801e0c96fe2b
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 1fa55c6a75f6b198e13d9f424df2d1160c160788
+reviewed-upstream: a04e70e1514da2da249b4bdf3f55fd21ab854471
 -->
 
 ## 상태를 읽는 법
@@ -190,6 +190,8 @@ reviewed-upstream: 1fa55c6a75f6b198e13d9f424df2d1160c160788
     Sector 03~06은 Runtime source가 아직 아니다. 32개 scenario v2 source를 가상 `runtime` 모드로 검증한 결과 0/32가 Runtime Area 생성 계약을 통과하지 못했다. 모든 Stage에 runtime gate와 다음 Stage 연결이 없고, 14개는 collision surface도 없다. `5-5`는 기획용 `hardpoint-jammer-v1` 적 type이 Runtime registry에 연결되지 않았다. Sector Master도 Sector 03 이후 Boss/transition, Sector 04~06 Runtime과 Sector 06 final security/boarding multiplayer 계약을 별도 승인·구현 범위로 보류한다. editor는 이 상태를 `Runtime 보류` 및 Gate·전환·지형·적 type의 구체적 사유로 표시한다. 이를 generated manifest나 seamless world에 억지로 연결하지 않으며, Stage별 Runtime 계약이 완결된 뒤에만 `runtime` source·generated manifest·Sector facade를 같은 변경에서 추가한다.
 
     최신 main rebase 직전 검증 ledger: base/merge-base/origin `1fa55c6a75f6b198e13d9f424df2d1160c160788`, binary diff fingerprint `c9620a9c7f01ab6994759be9215c4a63453ef638`, candidate commit `c6d6ab684b80f46b53d673429c0092fcfb9c9f3a`, Node `v24.14.0`. `npm run check`, `npm run format:check`, `npm run check:scenario-integration`, `git diff --check origin/main...HEAD`을 PASS했다. loopback Map Editor에서 48개 목록, Sector 02의 `Runtime 적용`, Sector 04 4-1의 `Runtime 보류` 선택지와 Gate·전환·충돌 지형 사유, 비활성 새 미리보기 버튼, Korean 이름·효과 UI를 직접 확인했다. 저장소 기본 자동 테스트 suite는 사용자 결정으로 제공되지 않는다.
+
+102. Issue #764는 사용자가 제공한 Boss 01 REV2.1 developer handoff ZIP(SHA-256 `42e949499fb46526677a0f250b5232f47d308497fddfb44f4ac7fe472943a21`)의 25개 기획·정적 미리보기·spec·reference-code 파일을 `docs/boss/01/`에 보존했다. `README-FIRST.md`의 Markdown 줄바꿈용 후행 공백 4개만 `git diff --check` 정책에 맞게 정규화했고, 나머지 24개는 원본과 바이트 단위로 일치한다. 첨부물의 `12-CLAUDECODE-IMPLEMENT.md`는 사용자 요청이 아닌 실행 지침이므로 제외하고 실행하지 않았다. 이 인계는 `e1c558e` authoring snapshot에서 작성됐으며 현행 `a04e70e`에서 이미 존재하는 Boss01 Has-A runtime/top-level snapshot을 덮어쓰지 않는다. 현행 계약과 충돌하는 210초 Timer·80px/s 시간 만료 Arena collapse는 reference-only 과거 입력으로 명시했고, 1-8 Override 뒤 Boss를 시작하자는 제안도 별도 Post-Sector Boss slot·실제 transition owner를 구현·승인하기 전에는 wiring으로 해석하지 않는다. Runtime source, physical Arena, collision, Breaker/Core/Emitter/Wind, damage·전멸 재시도, 자동 진입, 승리 뒤 `2-1` 전환, presentation/VFX는 이번 문서 병합에서 구현하지 않았다. 1-8 `PRODUCTION-ALIGNMENT.md`의 transition audit은 Boss runtime의 현재 존재와 아직 연결되지 않은 범위를 반영하되 `nextAreaId: null`을 유지한다. 검증 ledger: base `a04e70e1514da2da249b4bdf3f55fd21ab854471`, pre-ledger content candidate tree `d1066569311eb6c0a8c91307e26a62ac1489f60a`, binary diff fingerprint `85b2b0df3bb781c266c9df581399ef2ea527a4f6`, Node `v24.14.0`. ZIP semantic parity 25/25(24 byte-identical, 1 policy-normalized), `npm run check`, `npm run format:check`, staged `git diff --check`을 PASS했고, loopback 정적 미리보기에서 SVG 1개와 browser error 0개를 직접 확인했다. 저장소 기본 자동 테스트 suite는 사용자 결정으로 제공되지 않는다.
 
 ## 열린 기획·구현 게이트
 
