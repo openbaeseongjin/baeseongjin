@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6-4 Rooftop Service Shelter REV2.1 Compact Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--safe:#70cf9a;--recover:#d5b45e;--goal:#8fdcff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:760px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}
+.shelter{fill:#31434b;stroke:#9bb0b8;stroke-width:4}
+.roof{fill:#465a63;stroke:#b3c3c9;stroke-width:3}
+.eave{fill:#3b4f57;stroke:#879da6;stroke-width:3}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}
+.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.hp{fill:var(--cyan);stroke:#fff;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+.goalLine{fill:none;stroke:var(--goal);stroke-width:2;stroke-dasharray:9 7;opacity:.75}
+.pad{fill:#223b45;stroke:var(--goal);stroke-width:3}
+.shuttle{fill:#3b5965;stroke:#d8f7ff;stroke-width:3}
+.occlusion{fill:#06101599;stroke:#5f727a;stroke-width:1;stroke-dasharray:6 6}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}
+.phase{font-size:15px;fill:#9db4bd}.tiny{font-size:10px;fill:#bdcdd2}.goalText{fill:#b8f0ff}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>6-4 ROOFTOP SERVICE SHELTER · REV2.1 COMPACT MAP</h1><div class="sub">6 LINKS · 1563.56px ROUTE · +800px ASCENT · THREAT-FREE GOAL REVEAL</div></header>
+<div class="layout"><aside>
+<div class="card"><b>DIFFICULTY</b><br>★☆☆☆ · REST / LOW</div>
+<div class="card"><b>SIZE</b><br>Mandatory links 6 · route 1563.56px · vertical gain 800px · max link 294.11px.</div>
+<div class="card"><b>PLAYTIME TARGET</b><br>First 45–70 sec · Skilled 20–30 sec.</div>
+<div class="card"><b>SPATIAL SIGNATURE</b><br>One compact Shelter Wrap: RIGHT → UP → LEFT → UP-RIGHT.</div>
+<div class="card"><b>GOAL REVEAL</b><br>P2 Roof = Pad signal. P3 Observation Lip = Pad03 + Shuttle direct visual.</div>
+<div>
+<button id="routeB" class="on">Main Route</button><button id="goalB" class="on">Goal Visual</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-780 -1010 1700 1090">
+<rect class="bounds" x="-750" y="-980" width="1640" height="980"/>
+
+<!-- DISTANT GOAL -->
+<g id="goal">
+<ellipse class="pad" cx="650" cy="-780" rx="190" ry="48"/>
+<rect class="shuttle" x="580" y="-850" width="160" height="58" rx="24"/>
+<path class="shuttle" d="M740,-838 L815,-810 L740,-800 Z"/>
+<text class="goalText" x="565" y="-900">ROOFTOP PAD 03</text>
+<text class="goalText" x="585" y="-755">MAINTENANCE SHUTTLE / STANDBY</text>
+<path class="goalLine" d="M-320,-760 L560,-800"/>
+</g>
+
+<!-- ONE COMPACT SHELTER -->
+<rect class="shelter" x="-260" y="-650" width="350" height="390" rx="16"/>
+<rect class="eave" x="-480" y="-285" width="550" height="40"/>
+<text class="phase" x="-235" y="-685">SERVICE SHELTER</text>
+
+<!-- Entry / quiet deck -->
+<rect class="safe" x="-720" y="-150" width="250" height="30"/><text class="tiny" x="-695" y="-175">ENTRY FROM 6-3</text>
+<rect class="eave" x="-470" y="-215" width="210" height="25"/>
+<rect class="safe" x="-250" y="-290" width="260" height="30"/><text class="tiny" x="-225" y="-315">QUIET SERVICE DECK</text>
+
+<!-- Roof access -->
+<rect class="roof" x="-25" y="-495" width="100" height="26"/>
+<text class="tiny" x="90" y="-475">ROOF ACCESS</text>
+
+<!-- Roof -->
+<rect class="safe" x="-170" y="-700" width="320" height="32"/>
+<text class="tiny" x="-145" y="-725">SHELTER ROOF / PAD SIGNAL ACQUIRED</text>
+
+<!-- Observation lip -->
+<rect class="safe" x="-470" y="-790" width="300" height="32"/>
+<text class="tiny" x="-445" y="-815">OBSERVATION LIP / PRIMARY REVEAL</text>
+
+<!-- Upper exit -->
+<rect class="safe" x="-210" y="-950" width="310" height="32"/>
+<text class="tiny" x="-185" y="-975">EXIT → 6-5 PAD ACCESS ARRAY</text>
+
+<!-- Entry direct-view occlusion -->
+<path class="occlusion" d="M-620,-120 L90,-260 L90,-650 L-260,-650 Z"/>
+<text class="tiny" x="-705" y="-90">ENTRY: SHELTER MASS BLOCKS DIRECT PAD VIEW</text>
+
+<!-- recovery -->
+<g id="recovery">
+<rect class="recover" x="-160" y="-405" width="250" height="18"/>
+<text class="tiny" x="-135" y="-430">R1 OPTIONAL AWNING</text>
+</g>
+
+<g><circle class="hp" cx="-620" cy="-120" r="13"/><circle class="hp" cx="-380" cy="-200" r="13"/><circle class="hp" cx="-120" cy="-260" r="13"/><circle class="hp" cx="20" cy="-470" r="13"/><circle class="hp" cx="-40" cy="-670" r="13"/><circle class="hp" cx="-320" cy="-760" r="13"/><circle class="hp" cx="-80" cy="-920" r="13"/></g>
+<g id="route"><path class="route" d="M-620,-120 L-380,-200 L-120,-260 L20,-470 L-40,-670 L-320,-760 L-80,-920"/></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-620" cy="-120" r="400"/><circle class="reach" cx="-380" cy="-200" r="400"/><circle class="reach" cx="-120" cy="-260" r="400"/><circle class="reach" cx="20" cy="-470" r="400"/><circle class="reach" cx="-40" cy="-670" r="400"/><circle class="reach" cx="-320" cy="-760" r="400"/><circle class="reach" cx="-80" cy="-920" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('goalB','goal');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

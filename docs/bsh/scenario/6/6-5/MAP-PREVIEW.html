@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6-5 Pad Access Array REV2.1 Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--safe:#70cf9a;--recover:#d5b45e;--scan:#bd79ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:790px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}
+.terrace{fill:#364a53;stroke:#94a8b0;stroke-width:3}
+.support{fill:#283b43;stroke:#6c8792;stroke-width:3}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}
+.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.hp{fill:var(--cyan);stroke:#fff;stroke-width:2.5}
+.controlled{fill:var(--scan);stroke:#fff;stroke-width:3}
+.scanRing{fill:none;stroke:var(--scan);stroke-width:3;stroke-dasharray:9 6}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+.bypass{fill:none;stroke:#ff7f7f;stroke-width:2;stroke-dasharray:7 6;opacity:.65}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}
+.phase{font-size:15px;fill:#9db4bd}.tiny{font-size:10px;fill:#bdcdd2}.ctext{font-size:12px;fill:#e9cbff;font-weight:800}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>6-5 PAD ACCESS ARRAY · REV2.1 MAP PREVIEW</h1><div class="sub">QA PASSED · STACKED ACCESS TERRACES · C1/C2/C3 REQUIRED · CONTINUOUS ASCENT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>DIFFICULTY</b><br>★★★★ · Scanner mastery recall</div>
+<div class="card"><b>SIZE</b><br>8 links · route 2308.9px · vertical gain 1480px · max 372.02px.</div>
+<div class="card"><b>PLAYTIME TARGET</b><br>First 105–155 sec · Skilled 40–60 sec.</div>
+<div class="card"><b>SCANNER</b><br>C1/C2/C3 exactly three · one shared phase · AVAILABLE/WARNING attach allowed.</div>
+<div class="card"><b>ANTI-BYPASS QA</b><br>C2→P2 441.81px · C1→C3 440.11px · R1 edge→C3 442.04px. All &gt;400px.</div>
+<div class="card"><b>SURFACE RULE</b><br>Terraces + R1 = landing-only / non-grappleable.</div>
+<div>
+<button id="routeB" class="on">Main Route</button>
+<button id="scanB" class="on">Scanner Mounts</button>
+<button id="recB" class="on">Recovery</button>
+<button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-650 -1640 1350 1720">
+<rect class="bounds" x="-600" y="-1610" width="1250" height="1610"/>
+
+<!-- ENTRY / PREVIEW -->
+<rect class="safe" x="390" y="-115" width="240" height="30"/><text class="tiny" x="415" y="-140">ENTRY FROM 6-4</text>
+<rect class="terrace" x="270" y="-250" width="260" height="28"/>
+<rect class="safe" x="300" y="-390" width="260" height="30"/><text class="tiny" x="325" y="-415">SAFE PREVIEW / ACCESS CYCLING</text>
+
+<!-- LANDING-ONLY TERRACES -->
+<rect class="support" x="30" y="-640" width="55" height="240"/>
+<rect class="terrace" x="-30" y="-540" width="330" height="30"/>
+<text class="phase" x="-5" y="-565">TERRACE A · LANDING ONLY</text>
+
+<rect class="support" x="-260" y="-860" width="55" height="250"/>
+<rect class="terrace" x="-320" y="-760" width="330" height="30"/>
+<text class="phase" x="-295" y="-785">TERRACE B · LANDING ONLY</text>
+
+<rect class="support" x="60" y="-1080" width="55" height="250"/>
+<rect class="terrace" x="0" y="-980" width="330" height="30"/>
+<text class="phase" x="25" y="-1005">TERRACE C · LANDING ONLY</text>
+
+<!-- SAFE TOP / EXIT -->
+<rect class="safe" x="-300" y="-1190" width="300" height="30"/><text class="tiny" x="-275" y="-1215">P2 FULL SAFE / C3 REQUIRED</text>
+<rect class="terrace" x="-40" y="-1410" width="250" height="28"/>
+<rect class="safe" x="-240" y="-1590" width="300" height="30"/><text class="tiny" x="-215" y="-1615">EXIT → 6-6 BEACON SPAN</text>
+
+<!-- SHARED SCANNER FAMILY -->
+<g id="scanner">
+<circle class="scanRing" cx="130" cy="-500" r="43"/>
+<circle class="scanRing" cx="-120" cy="-720" r="43"/>
+<circle class="scanRing" cx="140" cy="-940" r="43"/>
+<path class="scanRing" d="M130,-500 L-120,-720 L140,-940"/>
+<text class="ctext" x="-20" y="-875">ONE SHARED ACCESS PHASE</text>
+</g>
+
+<!-- RECOVERY — MOVED LEFT, LANDING ONLY -->
+<g id="recovery">
+<rect class="recover" x="-350" y="-600" width="220" height="18"/>
+<text class="tiny" x="-330" y="-625">R1 · LANDING ONLY · C2 RETURN</text>
+</g>
+
+<!-- HARDPOINTS -->
+<g><circle class="hp" cx="520" cy="-80" r="13"/><circle class="hp" cx="340" cy="-220" r="13"/><circle class="hp" cx="420" cy="-360" r="13"/><circle class="controlled" cx="130" cy="-500" r="14"/><text class="ctext" x="130" y="-524" text-anchor="middle">C1</text><circle class="controlled" cx="-120" cy="-720" r="14"/><text class="ctext" x="-120" y="-744" text-anchor="middle">C2</text><circle class="controlled" cx="140" cy="-940" r="14"/><text class="ctext" x="140" y="-964" text-anchor="middle">C3</text><circle class="hp" cx="-160" cy="-1160" r="13"/><circle class="hp" cx="60" cy="-1380" r="13"/><circle class="hp" cx="-100" cy="-1560" r="13"/></g>
+
+<!-- ROUTE -->
+<g id="route">
+<path class="route" d="M520,-80 L340,-220 L420,-360 L130,-500 L-120,-720 L140,-940 L-160,-1160 L60,-1380 L-100,-1560"/>
+</g>
+
+<g id="reach" class="hidden"><circle class="reach" cx="520" cy="-80" r="400"/><circle class="reach" cx="340" cy="-220" r="400"/><circle class="reach" cx="420" cy="-360" r="400"/><circle class="reach" cx="130" cy="-500" r="400"/><circle class="reach" cx="-120" cy="-720" r="400"/><circle class="reach" cx="140" cy="-940" r="400"/><circle class="reach" cx="-160" cy="-1160" r="400"/><circle class="reach" cx="60" cy="-1380" r="400"/><circle class="reach" cx="-100" cy="-1560" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('scanB','scanner');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

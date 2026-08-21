@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 8,
+    "legacyStageAlias": "6-8",
+    "sourceAreaId": "sector-06-08",
+    "name": "ROOFTOP PAD 03"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticSystemText": "en-allowed"
+  },
+  "beats": [
+    {
+      "beatId": "entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP PAD 03",
+            "detail": "FINAL APPROACH / OPEN"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "gantry",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P1"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "MAINTENANCE SHUTTLE",
+            "detail": "STANDBY"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "perimeter",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P2"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP PAD 03",
+            "detail": "PERIMETER / REACHED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "access-deck",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P3"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PAD ACCESS",
+            "detail": "AVAILABLE FOR REQUEST"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "interact-denial",
+      "trigger": {
+        "type": "existing-interact",
+        "target": "pad-access-console"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP PAD 03",
+            "detail": "ACCESS DENIED / CONTAINMENT VIOLATION"
+          }
+        },
+        {
+          "type": "playerBark",
+          "content": "…여기까지 왔는데."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,304 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED · REV3.0 · NOT IMPLEMENTED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 8,
+    "legacyStageAlias": "6-8",
+    "sourceAreaId": "sector-06-08",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "ROOFTOP PAD 03",
+    "subtitle": "FINAL CROWN WEAVE / ARRIVAL / ACCESS DENIAL"
+  },
+  "metrics": {
+    "movementDifficulty": "★★★★☆",
+    "failurePunishment": "★★☆☆☆",
+    "narrativeTension": "★★★★★",
+    "firstPlaySecondsTarget": [
+      105,
+      145
+    ],
+    "skilledSecondsTarget": [
+      40,
+      55
+    ],
+    "mandatoryLinks": 12,
+    "approxRouteLengthPx": 3144.23,
+    "verticalGainPx": 1570,
+    "maxAuthoredRelationPx": 312.57,
+    "baseHookReachPx": 400
+  },
+  "grappleTargets": [
+    {
+      "id": "sector-06-08:p0",
+      "label": "P0",
+      "x": -760,
+      "y": -100,
+      "role": "entry"
+    },
+    {
+      "id": "sector-06-08:h1",
+      "label": "H1",
+      "x": -540,
+      "y": -250,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:h2",
+      "label": "H2",
+      "x": -430,
+      "y": -520,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:h3",
+      "label": "H3",
+      "x": -120,
+      "y": -560,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:h4",
+      "label": "H4",
+      "x": 100,
+      "y": -760,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:h5",
+      "label": "H5",
+      "x": 390,
+      "y": -780,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:h6",
+      "label": "H6",
+      "x": 650,
+      "y": -940,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:p1",
+      "label": "P1",
+      "x": 900,
+      "y": -940,
+      "role": "service-gantry"
+    },
+    {
+      "id": "sector-06-08:h7",
+      "label": "H7",
+      "x": 1080,
+      "y": -1130,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:h8",
+      "label": "H8",
+      "x": 1260,
+      "y": -1280,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:p2",
+      "label": "P2",
+      "x": 1450,
+      "y": -1370,
+      "role": "pad-perimeter"
+    },
+    {
+      "id": "sector-06-08:h9",
+      "label": "H9",
+      "x": 1600,
+      "y": -1520,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-08:p3",
+      "label": "P3",
+      "x": 1750,
+      "y": -1670,
+      "role": "access-deck"
+    }
+  ],
+  "mainRoute": [
+    "sector-06-08:p0",
+    "sector-06-08:h1",
+    "sector-06-08:h2",
+    "sector-06-08:h3",
+    "sector-06-08:h4",
+    "sector-06-08:h5",
+    "sector-06-08:h6",
+    "sector-06-08:p1",
+    "sector-06-08:h7",
+    "sector-06-08:h8",
+    "sector-06-08:p2",
+    "sector-06-08:h9",
+    "sector-06-08:p3"
+  ],
+  "surfaces": [
+    {
+      "id": "final-mast",
+      "kind": "mast",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "crown-rib-a",
+      "kind": "open-rib",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "lighting-bridge",
+      "kind": "bridge",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "crown-rib-b",
+      "kind": "open-rib",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "pad-ring",
+      "kind": "perimeter-ring",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "access-spur",
+      "kind": "access-spur",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "R1",
+      "kind": "recovery",
+      "x": -40,
+      "y": -350,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "disconnected": true,
+        "retrySecondsTargetMax": 5
+      }
+    },
+    {
+      "id": "R2",
+      "kind": "recovery",
+      "x": 500,
+      "y": -600,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "disconnected": true,
+        "retrySecondsTargetMax": 5
+      }
+    },
+    {
+      "id": "R3",
+      "kind": "recovery",
+      "x": 1350,
+      "y": -950,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "disconnected": true,
+        "retrySecondsTargetMax": 5
+      }
+    }
+  ],
+  "antiBypass": {
+    "exhaustiveNonAdjacentForwardPairsWithin400": []
+  },
+  "recoveryReachWithin400": {
+    "R1": {
+      "H3": 224.72
+    },
+    "R2": {
+      "H5": 210.95,
+      "H6": 371.62
+    },
+    "R3": {
+      "H7": 324.5,
+      "H8": 342.05
+    }
+  },
+  "threat": {
+    "enemy": 0,
+    "wind": 0,
+    "scanner": 0,
+    "cutter": 0,
+    "patrol": 0,
+    "damageHazard": 0
+  },
+  "goalLandmark": {
+    "id": "rooftop-pad-03",
+    "visibleFromStart": true,
+    "becomesPlayable": true,
+    "shuttleVisible": true,
+    "finalInteractRequired": true
+  },
+  "endingState": {
+    "arrival": true,
+    "boardingAllowed": false,
+    "accessGranted": false,
+    "denialSystemText": [
+      "ROOFTOP PAD 03",
+      "ACCESS DENIED",
+      "CONTAINMENT VIOLATION"
+    ]
+  },
+  "story": {
+    "entrySystem": [
+      "ROOFTOP PAD 03",
+      "FINAL APPROACH / OPEN"
+    ],
+    "gantrySystem": [
+      "MAINTENANCE SHUTTLE",
+      "STANDBY"
+    ],
+    "perimeterSystem": [
+      "ROOFTOP PAD 03",
+      "PERIMETER / REACHED"
+    ],
+    "accessDeckPrompt": [
+      "PAD ACCESS",
+      "AVAILABLE FOR REQUEST"
+    ],
+    "denialSystem": [
+      "ROOFTOP PAD 03",
+      "ACCESS DENIED",
+      "CONTAINMENT VIOLATION"
+    ],
+    "playerBark": "…여기까지 왔는데."
+  },
+  "forbidden": [
+    "enemy",
+    "wind",
+    "scanner",
+    "cutter",
+    "patrol",
+    "moving-platform",
+    "route-fork",
+    "direction-reversal",
+    "mandatory-descent",
+    "blind-leap",
+    "giant-flat-rooftop",
+    "walk-only-finish",
+    "new-rope-mode",
+    "new-input",
+    "final-boss-inside-6-8",
+    "boarding-before-final-security",
+    "access-granted-before-final-security"
+  ]
+}

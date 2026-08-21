@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6-6 Beacon Span REV2.2 Approved Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--safe:#70cf9a;--recover:#d5b45e;--enemy:#ff7066;--patrol:#ffb36a;--goal:#8fdcff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:820px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}
+.mast{fill:#30424a;stroke:#a8bbc3;stroke-width:4}
+.cantilever{fill:#3d515a;stroke:#90a7b0;stroke-width:3}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}
+.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.activation{fill:#ff706612;stroke:#ff7066;stroke-width:2;stroke-dasharray:10 7}
+.enemy{fill:var(--enemy);stroke:#fff;stroke-width:3}
+.patrol{fill:none;stroke:var(--patrol);stroke-width:4;stroke-dasharray:10 7;marker-end:url(#arr)}
+.hp{fill:var(--cyan);stroke:#fff;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+.pad{fill:#223b45;stroke:var(--goal);stroke-width:3}
+.shuttle{fill:#3b5965;stroke:#d8f7ff;stroke-width:3}
+.goalLine{fill:none;stroke:var(--goal);stroke-width:2;stroke-dasharray:9 7;opacity:.6}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}
+.phase{font-size:15px;fill:#9db4bd}.tiny{font-size:10px;fill:#bdcdd2}.danger{fill:#ff9e96}.goalText{fill:#b8f0ff}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>6-6 BEACON SPAN · REV2.2 APPROVED MAP</h1><div class="sub">MANDATORY 5-BEAT COMBAT · ANTI-SKIP QA PASSED · PAD03 VISIBLE</div></header>
+<div class="layout"><aside>
+<div class="card"><b>DIFFICULTY</b><br>★★★★ · sustained Patrol body-path pressure</div>
+<div class="card"><b>SIZE</b><br>10 links · route 2439.03px · vertical gain 1600px · max 290.69px.</div>
+<div class="card"><b>PLAYTIME TARGET</b><br>First 120–170 sec · Skilled 50–70 sec.</div>
+<div class="card"><b>COMBAT</b><br>H2→H3→H4→H5→H6. Every-other skip distances are all &gt;400px.</div>
+<div class="card"><b>SPATIAL SIGNATURE</b><br><b>UP → RIGHT → UP</b>. Two Beacon Needles + one long exposed Cantilever.</div>
+<div class="card"><b>RECOVERY</b><br>R0 early / R1 late. Landing-only, non-grappleable, disconnected.</div>
+<div class="card"><b>GOAL CONTINUITY</b><br>Pad03 remains visible upper-right, outside authored 6-6 bounds.</div>
+<div>
+<button id="routeB" class="on">Main Route</button><button id="patrolB" class="on">Patrol</button><button id="actB" class="on">Activation</button><button id="recB" class="on">Recovery</button><button id="padB" class="on">Pad03</button><button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-720 -2180 1900 2260">
+<defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#ffb36a"/></marker></defs>
+
+<rect class="bounds" x="-680" y="-1830" width="1500" height="1830"/>
+<text class="tiny" x="-650" y="-1800">6-6 AUTHORED BOUNDS</text>
+
+<g id="pad">
+<ellipse class="pad" cx="970" cy="-2020" rx="180" ry="45"/>
+<rect class="shuttle" x="910" y="-2090" width="150" height="55" rx="22"/>
+<path class="shuttle" d="M1060,-2080 L1130,-2055 L1060,-2045 Z"/>
+<text class="goalText" x="860" y="-2140">DISTANT ROOFTOP PAD 03</text>
+<text class="goalText" x="880" y="-1985">OUTSIDE 6-6 BOUNDS</text>
+<path class="goalLine" d="M660,-1680 L860,-1960"/>
+</g>
+
+<!-- LEFT NEEDLE -->
+<rect class="mast" x="-600" y="-690" width="160" height="650" rx="14"/>
+<text class="phase" x="-650" y="-720">LEFT BEACON NEEDLE</text>
+<rect class="safe" x="-650" y="-115" width="260" height="30"/><text class="tiny" x="-625" y="-140">ENTRY FROM 6-5</text>
+<rect class="cantilever" x="-620" y="-330" width="200" height="26"/>
+<rect class="safe" x="-660" y="-535" width="280" height="30"/><text class="tiny" x="-635" y="-560">P1 SAFE PATROL PREVIEW</text>
+
+<!-- LONG CANTILEVER -->
+<rect class="cantilever" x="-320" y="-660" width="180" height="28"/>
+<rect class="cantilever" x="-100" y="-690" width="180" height="28"/>
+<rect class="cantilever" x="120" y="-730" width="180" height="28"/>
+<rect class="cantilever" x="340" y="-780" width="180" height="28"/>
+<rect class="cantilever" x="540" y="-910" width="160" height="28"/>
+<text class="phase" x="-100" y="-990">LONG OPEN BEACON CANTILEVER · H2–H6</text>
+
+<!-- RIGHT RISE -->
+<rect class="mast" x="550" y="-1500" width="150" height="610" rx="14"/>
+<text class="phase" x="520" y="-1530">RIGHT BEACON RISE</text>
+<rect class="safe" x="490" y="-1195" width="280" height="30"/><text class="tiny" x="515" y="-1220">P2 FULL SAFE / PATROL ENDS</text>
+<rect class="cantilever" x="550" y="-1450" width="220" height="26"/>
+<rect class="safe" x="520" y="-1710" width="280" height="30"/><text class="tiny" x="545" y="-1735">EXIT → 6-7 CONTAINMENT LATTICE</text>
+
+<g id="activation">
+<rect class="activation" x="-320" y="-950" width="1010" height="400" rx="12"/>
+<text class="danger" x="-300" y="-975">PATROL COMBAT BAND · H2–H6</text>
+</g>
+
+<g id="patrol">
+<path class="patrol" d="M420,-600 L-100,-870"/>
+<path class="patrol" d="M-100,-870 L420,-600"/>
+<circle class="enemy" cx="420" cy="-600" r="24"/>
+<text class="danger" x="450" y="-625">D1 PATROL DRONE T1</text>
+<text class="tiny" x="-80" y="-900">B</text><text class="tiny" x="435" y="-570">A</text>
+</g>
+
+<g id="recovery">
+<rect class="recover" x="-290" y="-490" width="220" height="18"/>
+<text class="tiny" x="-270" y="-515">R0 EARLY · LANDING ONLY</text>
+<rect class="recover" x="250" y="-510" width="220" height="18"/>
+<text class="tiny" x="270" y="-535">R1 LATE · LANDING ONLY</text>
+</g>
+
+<g><circle class="hp" cx="-520" cy="-80" r="13"/><circle class="hp" cx="-520" cy="-300" r="13"/><circle class="hp" cx="-520" cy="-500" r="13"/><circle class="hp" cx="-260" cy="-630" r="13"/><circle class="hp" cx="-40" cy="-660" r="13"/><circle class="hp" cx="180" cy="-700" r="13"/><circle class="hp" cx="400" cy="-750" r="13"/><circle class="hp" cx="620" cy="-880" r="13"/><circle class="hp" cx="620" cy="-1160" r="13"/><circle class="hp" cx="640" cy="-1420" r="13"/><circle class="hp" cx="660" cy="-1680" r="13"/></g>
+<g id="route"><path class="route" d="M-520,-80 L-520,-300 L-520,-500 L-260,-630 L-40,-660 L180,-700 L400,-750 L620,-880 L620,-1160 L640,-1420 L660,-1680"/></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-520" cy="-80" r="400"/><circle class="reach" cx="-520" cy="-300" r="400"/><circle class="reach" cx="-520" cy="-500" r="400"/><circle class="reach" cx="-260" cy="-630" r="400"/><circle class="reach" cx="-40" cy="-660" r="400"/><circle class="reach" cx="180" cy="-700" r="400"/><circle class="reach" cx="400" cy="-750" r="400"/><circle class="reach" cx="620" cy="-880" r="400"/><circle class="reach" cx="620" cy="-1160" r="400"/><circle class="reach" cx="640" cy="-1420" r="400"/><circle class="reach" cx="660" cy="-1680" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('patrolB','patrol');tg('actB','activation');tg('recB','recovery');tg('padB','pad');tg('reachB','reach');
+</script></body></html>

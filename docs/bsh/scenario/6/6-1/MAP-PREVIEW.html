@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6-1 Skybreak Access REV3 Map</title>
+<style>
+:root{--bg:#06131c;--panel:#0b1b25;--line:#36525f;--text:#edf6f7;--muted:#a2b6be;--cyan:#5de8ff;--route:#ffe16f;--safe:#73d4a2;--recover:#d5b45e;--steel:#4b5f69}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:460px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#091721;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#132631;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:900px;background:linear-gradient(#0d293c,#061019);border:1px solid var(--line);border-radius:8px}
+.roof{fill:#465963;stroke:#98a9b0;stroke-width:3}.island{fill:#455963;stroke:#94a6ae;stroke-width:3}.mast{fill:#2e414b;stroke:#a5b4ba;stroke-width:3}
+.safe{fill:#365f4e;stroke:var(--safe);stroke-width:3}.recover{fill:#60532d;stroke:var(--recover);stroke-width:3}
+.hp{fill:var(--cyan);stroke:#fff;stroke-width:2.5}.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.recoveryGuide{fill:none;stroke:var(--recover);stroke-width:2;stroke-dasharray:6 7;opacity:.8}.reach{fill:none;stroke:var(--cyan);stroke-width:1.4;opacity:.08}
+text{fill:#edf6f7;font-size:12px;paint-order:stroke;stroke:#07131d;stroke-width:5}.phase{font-size:14px;fill:#b5c7cd}.tiny{font-size:10px;fill:#c6d4d9}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>6-1 SKYBREAK ACCESS · REV3</h1><div class="sub">HIGH ROOF HATCH → SKYBREAK DROP → LOWER SKY ISLAND → FREESTANDING MAST → CROWN</div></header>
+<div class="layout"><aside>
+<div class="card"><b>REV3 IDENTITY</b><br>좌우 V자 왕복 삭제. 높은 건물 외피에서 실제로 아래/바깥 구조물로 내려간 뒤 독립 Mast를 다시 오른다.</div>
+<div class="card"><b>SPACE GIMMICK</b><br>SKYBREAK DROP + RECOVERY SHADOW + FREESTANDING MAST.</div>
+<div class="card"><b>THREAT</b><br>Enemy 0 · Wind 0 · Scanner 0 · Cutter 0.</div>
+<div class="card"><b>RECOVERY SHADOW</b><br>Main Route 아래 maintenance layer. 일반 miss를 받아주고 5초 이내 복귀.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>324.5px</b> &lt; 400px.</div>
+<div><button id="routeB" class="on">Route</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button></div>
+</aside><main>
+<svg viewBox="-1200 -2550 2150 2600">
+
+<!-- High roof shell -->
+<rect class="roof" x="430" y="-2210" width="520" height="220" rx="14"/>
+<rect class="safe" x="500" y="-2135" width="350" height="28"/>
+<text class="phase" x="475" y="-2250">0 · HIGH ROOF HATCH</text>
+<text class="tiny" x="525" y="-2160">FIRST OPEN SKY</text>
+
+<!-- Drop frames -->
+<rect class="island" x="300" y="-1980" width="190" height="70" rx="10"/>
+<rect class="island" x="40" y="-1810" width="180" height="65" rx="10"/>
+<rect class="island" x="-250" y="-1620" width="180" height="65" rx="10"/>
+<rect class="island" x="-520" y="-1440" width="180" height="65" rx="10"/>
+<text class="phase" x="-220" y="-1880">1 · SKYBREAK DROP ↙</text>
+
+<!-- Lower island -->
+<rect class="safe" x="-1010" y="-1020" width="430" height="38" rx="8"/>
+<rect class="island" x="-990" y="-1160" width="390" height="130" rx="14"/>
+<text class="phase" x="-1110" y="-1210">2 · LOWER SKY ISLAND</text>
+
+<!-- Freestanding mast -->
+<rect class="mast" x="-825" y="-2260" width="145" height="1110" rx="12"/>
+<rect class="island" x="-940" y="-1510" width="240" height="38" rx="8"/>
+<rect class="island" x="-900" y="-1780" width="220" height="36" rx="8"/>
+<rect class="island" x="-850" y="-2040" width="220" height="36" rx="8"/>
+<text class="phase" x="-1020" y="-2290">3 · FREESTANDING MAST ↑</text>
+
+<!-- Crown -->
+<rect class="island" x="-560" y="-2310" width="230" height="55" rx="8"/>
+<rect class="island" x="-250" y="-2410" width="230" height="55" rx="8"/>
+<rect class="island" x="60" y="-2450" width="230" height="55" rx="8"/>
+<rect class="safe" x="390" y="-2490" width="430" height="32" rx="8"/>
+<text class="phase" x="-180" y="-2520">4 · SHORT CROWN CROSS →</text>
+<text class="tiny" x="415" y="-2515">EXIT → CROSSWIND MASTS</text>
+
+<!-- Recovery Shadow -->
+<g id="recovery">
+<rect class="recover" x="-150" y="-1270" width="420" height="20"/>
+<text class="tiny" x="-125" y="-1295">R1 · DROP SHADOW MESH</text>
+
+<rect class="recover" x="-1020" y="-1320" width="320" height="20"/>
+<text class="tiny" x="-995" y="-1345">R2 · ISLAND UNDERSIDE</text>
+
+<rect class="recover" x="-1040" y="-1600" width="300" height="18"/>
+<text class="tiny" x="-1015" y="-1625">R3 · LOWER MAST RING</text>
+
+<rect class="recover" x="-1020" y="-1900" width="300" height="18"/>
+<text class="tiny" x="-995" y="-1925">R4 · MID MAST RING</text>
+
+<rect class="recover" x="-210" y="-2190" width="360" height="18"/>
+<text class="tiny" x="-185" y="-2215">R5 · CROWN UNDERSIDE LIP</text>
+
+<path class="recoveryGuide" d="M-100,-1270 Q-250,-1400 -350,-1360"/>
+<path class="recoveryGuide" d="M-860,-1600 Q-780,-1530 -760,-1460"/>
+<path class="recoveryGuide" d="M-850,-1900 Q-720,-1830 -650,-1720"/>
+</g>
+
+<!-- Hardpoints -->
+<g>
+<circle class="hp" cx="-830" cy="-980" r="13"/><circle class="hp" cx="-760" cy="-1460" r="13"/><circle class="hp" cx="-760" cy="-1180" r="13"/><circle class="hp" cx="-650" cy="-2000" r="13"/><circle class="hp" cx="-650" cy="-1720" r="13"/><circle class="hp" cx="-620" cy="-1180" r="13"/><circle class="hp" cx="-520" cy="-2240" r="13"/><circle class="hp" cx="-350" cy="-1360" r="13"/><circle class="hp" cx="-240" cy="-2330" r="13"/><circle class="hp" cx="-90" cy="-1540" r="13"/><circle class="hp" cx="60" cy="-2370" r="13"/><circle class="hp" cx="170" cy="-1730" r="13"/><circle class="hp" cx="330" cy="-2310" r="13"/><circle class="hp" cx="420" cy="-1910" r="13"/><circle class="hp" cx="570" cy="-2440" r="13"/><circle class="hp" cx="620" cy="-2100" r="13"/>
+</g>
+
+<!-- Main route -->
+<g id="route">
+<path class="route" d="M620,-2100 L420,-1910 L170,-1730 L-90,-1540 L-350,-1360 L-620,-1180 L-830,-980"/>
+<path class="route" d="M-830,-980 L-760,-1180 L-760,-1460 L-650,-1720 L-650,-2000 L-520,-2240"/>
+<path class="route" d="M-520,-2240 L-240,-2330 L60,-2370 L330,-2310 L570,-2440"/>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-830" cy="-980" r="400"/><circle class="reach" cx="-760" cy="-1460" r="400"/><circle class="reach" cx="-760" cy="-1180" r="400"/><circle class="reach" cx="-650" cy="-2000" r="400"/><circle class="reach" cx="-650" cy="-1720" r="400"/><circle class="reach" cx="-620" cy="-1180" r="400"/><circle class="reach" cx="-520" cy="-2240" r="400"/><circle class="reach" cx="-350" cy="-1360" r="400"/><circle class="reach" cx="-240" cy="-2330" r="400"/><circle class="reach" cx="-90" cy="-1540" r="400"/><circle class="reach" cx="60" cy="-2370" r="400"/><circle class="reach" cx="170" cy="-1730" r="400"/><circle class="reach" cx="330" cy="-2310" r="400"/><circle class="reach" cx="420" cy="-1910" r="400"/><circle class="reach" cx="570" cy="-2440" r="400"/><circle class="reach" cx="620" cy="-2100" r="400"/>
+</g>
+
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

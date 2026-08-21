@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6-8 Rooftop Pad 03 REV3 Final Crown Weave</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--safe:#70cf9a;--recover:#d5b45e;--goal:#8fdcff;--deny:#ff7197}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:460px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:850px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}
+.mast{fill:#30424a;stroke:#a8bbc3;stroke-width:4}
+.rib{fill:none;stroke:#8199a4;stroke-width:8}
+.ribThin{fill:none;stroke:#566e79;stroke-width:4}
+.bridge{fill:#3d515a;stroke:#91a8b1;stroke-width:4}
+.light{fill:#b7f3ff;stroke:#fff;stroke-width:2}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}
+.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.pad{fill:#263e49;stroke:var(--goal);stroke-width:4}
+.padRing{fill:none;stroke:#7fcfe8;stroke-width:8}
+.padInner{fill:none;stroke:#547f90;stroke-width:3;stroke-dasharray:11 8}
+.shuttle{fill:#46616d;stroke:#e3f9ff;stroke-width:3}
+.console{fill:#314550;stroke:#e9fbff;stroke-width:3}
+.hp{fill:var(--cyan);stroke:#fff;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}
+.phase{font-size:15px;fill:#a9c3cd}.tiny{font-size:10px;fill:#bdcdd2}.goalText{fill:#b8f0ff}.deny{fill:var(--deny)}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>6-8 ROOFTOP PAD 03 · REV3 FINAL CROWN WEAVE</h1><div class="sub">THREAT-FREE ≠ SIMPLE · CROWN RIBS → LIGHTING BRIDGE → PAD RING ASCENT → ACCESS DENIAL</div></header>
+<div class="layout"><aside>
+<div class="card"><b>MOVEMENT</b><br>★★★★☆ · Failure punishment ★★☆☆☆ · Narrative tension ★★★★★</div>
+<div class="card"><b>SIZE</b><br>12 links · route 3144.23px · ascent 1570px · max 312.57px.</div>
+<div class="card"><b>PLAYTIME</b><br>First 105–145 sec · Skilled 40–55 sec.</div>
+<div class="card"><b>THREAT</b><br>Enemy/Wind/Scanner/Cutter/Patrol = 0.</div>
+<div class="card"><b>SPATIAL SIGNATURE</b><br>Final Mast → Crown Rib A → Lighting Bridge → Crown Rib B → Service Gantry → Pad Ring → Access Spur.</div>
+<div class="card"><b>ANTI-SKIP</b><br>Exhaustive non-adjacent Base-Reach skips: <b>0</b>.</div>
+<div class="card"><b>RECOVERY</b><br>3 isolated local lips. No continuous safety floor.</div>
+<div class="card"><b>FINAL BEAT</b><br><span class="deny">ACCESS DENIED / CONTAINMENT VIOLATION</span> only after physical arrival.</div>
+<div>
+<button id="routeB" class="on">Main Route</button>
+<button id="recB" class="on">Recovery</button>
+<button id="padB" class="on">Pad/Shuttle</button>
+<button id="structureB" class="on">Crown Structure</button>
+<button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-850 -1810 2850 1890">
+<rect class="bounds" x="-810" y="-1740" width="2700" height="1740"/>
+<text class="tiny" x="-780" y="-1710">6-8 AUTHORED BOUNDS</text>
+
+<!-- CROWN STRUCTURE -->
+<g id="structure">
+<!-- Entry mast -->
+<rect class="mast" x="-600" y="-550" width="120" height="390" rx="12"/>
+<path class="ribThin" d="M-540,-520 L-720,-370 M-540,-520 L-300,-390"/>
+<text class="phase" x="-690" y="-580">FINAL MAST / CROWN BASE</text>
+
+<!-- Crown Rib A -->
+<path class="rib" d="M-430,-500 Q-130,-900 120,-740"/>
+<path class="ribThin" d="M-350,-570 L-120,-560 L100,-760"/>
+<path class="ribThin" d="M-300,-610 L-80,-710 M-160,-650 L40,-760"/>
+<text class="phase" x="-260" y="-910">CROWN RIB A</text>
+
+<!-- Suspended Lighting Bridge -->
+<rect class="bridge" x="60" y="-805" width="390" height="34" rx="8"/>
+<circle class="light" cx="125" cy="-788" r="8"/><circle class="light" cx="220" cy="-788" r="8"/><circle class="light" cx="315" cy="-788" r="8"/><circle class="light" cx="410" cy="-788" r="8"/>
+<text class="phase" x="145" y="-840">SUSPENDED LIGHTING BRIDGE</text>
+
+<!-- Crown Rib B -->
+<path class="rib" d="M390,-780 Q610,-1090 900,-930"/>
+<path class="ribThin" d="M470,-820 L650,-940 L860,-940"/>
+<path class="ribThin" d="M520,-860 L690,-980 M650,-940 L810,-980"/>
+<text class="phase" x="520" y="-1100">CROWN RIB B</text>
+
+<!-- Service gantry -->
+<rect class="safe" x="790" y="-970" width="260" height="32"/>
+<text class="tiny" x="820" y="-995">P1 SERVICE GANTRY / SHUTTLE CONFIRM</text>
+</g>
+
+<!-- PAD / RING -->
+<g id="pad">
+<ellipse class="pad" cx="1510" cy="-1340" rx="420" ry="210"/>
+<ellipse class="padRing" cx="1510" cy="-1340" rx="355" ry="160"/>
+<ellipse class="padInner" cx="1510" cy="-1340" rx="270" ry="110"/>
+<path class="rib" d="M1000,-970 Q1160,-1180 1260,-1280"/>
+<path class="rib" d="M1260,-1280 Q1370,-1410 1450,-1370"/>
+<text class="goalText" x="1230" y="-1590">ROOFTOP PAD 03 · PHYSICAL DESTINATION</text>
+
+<!-- Shuttle -->
+<rect class="shuttle" x="1530" y="-1590" width="280" height="105" rx="42"/>
+<path class="shuttle" d="M1810,-1570 L1920,-1535 L1810,-1510 Z"/>
+<text class="goalText" x="1570" y="-1635">MAINTENANCE SHUTTLE / STANDBY</text>
+
+<!-- Pad perimeter / access -->
+<rect class="safe" x="1360" y="-1405" width="260" height="32"/>
+<text class="tiny" x="1380" y="-1430">P2 PAD PERIMETER</text>
+<path class="rib" d="M1450,-1370 L1600,-1520 L1750,-1670"/>
+<rect class="safe" x="1640" y="-1705" width="240" height="32"/>
+<rect class="console" x="1750" y="-1760" width="60" height="80" rx="7"/>
+<text class="tiny" x="1645" y="-1730">P3 ACCESS DECK</text>
+<text class="deny" x="1690" y="-1790">PAD ACCESS CONSOLE</text>
+</g>
+
+<!-- ENTRY -->
+<rect class="safe" x="-805" y="-130" width="230" height="30"/>
+<text class="tiny" x="-780" y="-155">ENTRY FROM 6-7</text>
+
+<!-- RECOVERY -->
+<g id="recovery">
+<rect class="recover" x="-150" y="-360" width="220" height="18"/>
+<text class="tiny" x="-130" y="-385">R1 CROWN CATCH</text>
+
+<rect class="recover" x="390" y="-610" width="220" height="18"/>
+<text class="tiny" x="410" y="-635">R2 LIGHTING CATCH</text>
+
+<rect class="recover" x="1240" y="-960" width="220" height="18"/>
+<text class="tiny" x="1260" y="-985">R3 PAD RING CATCH</text>
+</g>
+
+<!-- HARDPOINTS + ROUTE -->
+<g><circle class="hp" cx="-760" cy="-100" r="13"/><circle class="hp" cx="-540" cy="-250" r="13"/><circle class="hp" cx="-430" cy="-520" r="13"/><circle class="hp" cx="-120" cy="-560" r="13"/><circle class="hp" cx="100" cy="-760" r="13"/><circle class="hp" cx="390" cy="-780" r="13"/><circle class="hp" cx="650" cy="-940" r="13"/><circle class="hp" cx="900" cy="-940" r="13"/><circle class="hp" cx="1080" cy="-1130" r="13"/><circle class="hp" cx="1260" cy="-1280" r="13"/><circle class="hp" cx="1450" cy="-1370" r="13"/><circle class="hp" cx="1600" cy="-1520" r="13"/><circle class="hp" cx="1750" cy="-1670" r="13"/></g>
+<g id="route"><path class="route" d="M-760,-100 L-540,-250 L-430,-520 L-120,-560 L100,-760 L390,-780 L650,-940 L900,-940 L1080,-1130 L1260,-1280 L1450,-1370 L1600,-1520 L1750,-1670"/></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-760" cy="-100" r="400"/><circle class="reach" cx="-540" cy="-250" r="400"/><circle class="reach" cx="-430" cy="-520" r="400"/><circle class="reach" cx="-120" cy="-560" r="400"/><circle class="reach" cx="100" cy="-760" r="400"/><circle class="reach" cx="390" cy="-780" r="400"/><circle class="reach" cx="650" cy="-940" r="400"/><circle class="reach" cx="900" cy="-940" r="400"/><circle class="reach" cx="1080" cy="-1130" r="400"/><circle class="reach" cx="1260" cy="-1280" r="400"/><circle class="reach" cx="1450" cy="-1370" r="400"/><circle class="reach" cx="1600" cy="-1520" r="400"/><circle class="reach" cx="1750" cy="-1670" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('recB','recovery');tg('padB','pad');tg('structureB','structure');tg('reachB','reach');
+</script></body></html>

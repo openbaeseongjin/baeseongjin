@@ -1,0 +1,282 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED · REV2.1 · NOT IMPLEMENTED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 7,
+    "legacyStageAlias": "6-7",
+    "sourceAreaId": "sector-06-07",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "CONTAINMENT LATTICE",
+    "subtitle": "RISING LATTICE / CUTTER / OFFSET RECOVERY"
+  },
+  "metrics": {
+    "difficulty": "★★★★☆",
+    "firstPlaySecondsTarget": [
+      145,
+      195
+    ],
+    "skilledSecondsTarget": [
+      60,
+      80
+    ],
+    "mandatoryLinks": 11,
+    "approxRouteLengthPx": 2801.71,
+    "verticalGainPx": 2060,
+    "maxAuthoredRelationPx": 322.49,
+    "baseHookReachPx": 400
+  },
+  "grappleTargets": [
+    {
+      "id": "sector-06-07:p0",
+      "label": "P0",
+      "x": -420,
+      "y": -80,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-07:h1",
+      "label": "H1",
+      "x": -420,
+      "y": -300,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-07:p1",
+      "label": "P1",
+      "x": -420,
+      "y": -500,
+      "role": "safe-preview"
+    },
+    {
+      "id": "sector-06-07:h2",
+      "label": "H2",
+      "x": -180,
+      "y": -680,
+      "role": "cutter-band"
+    },
+    {
+      "id": "sector-06-07:h3",
+      "label": "H3",
+      "x": 80,
+      "y": -820,
+      "role": "cutter-band"
+    },
+    {
+      "id": "sector-06-07:h4",
+      "label": "H4",
+      "x": 80,
+      "y": -1050,
+      "role": "cutter-band"
+    },
+    {
+      "id": "sector-06-07:h5",
+      "label": "H5",
+      "x": -160,
+      "y": -1210,
+      "role": "cutter-band"
+    },
+    {
+      "id": "sector-06-07:h6",
+      "label": "H6",
+      "x": -160,
+      "y": -1440,
+      "role": "cutter-band"
+    },
+    {
+      "id": "sector-06-07:h7",
+      "label": "H7",
+      "x": 120,
+      "y": -1600,
+      "role": "cutter-band"
+    },
+    {
+      "id": "sector-06-07:p2",
+      "label": "P2",
+      "x": 120,
+      "y": -1810,
+      "role": "full-safe"
+    },
+    {
+      "id": "sector-06-07:h8",
+      "label": "H8",
+      "x": 340,
+      "y": -1970,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-07:p3",
+      "label": "P3",
+      "x": 500,
+      "y": -2140,
+      "role": "route"
+    }
+  ],
+  "mainRoute": [
+    "sector-06-07:p0",
+    "sector-06-07:h1",
+    "sector-06-07:p1",
+    "sector-06-07:h2",
+    "sector-06-07:h3",
+    "sector-06-07:h4",
+    "sector-06-07:h5",
+    "sector-06-07:h6",
+    "sector-06-07:h7",
+    "sector-06-07:p2",
+    "sector-06-07:h8",
+    "sector-06-07:p3"
+  ],
+  "enemy": {
+    "id": "sector-06-07:S1",
+    "enemyType": "sentry-t1",
+    "x": 360,
+    "y": -1160,
+    "rules": [
+      "standard-projectile",
+      "cutter-fire",
+      "kill-optional"
+    ],
+    "stationary": true,
+    "requiredKill": false,
+    "activation": {
+      "x": -300,
+      "y": -1680,
+      "width": 600,
+      "height": 1030
+    }
+  },
+  "surfaces": [
+    {
+      "id": "lattice-bay-a",
+      "kind": "open-truss",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "lattice-bay-b",
+      "kind": "open-truss",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "lattice-bay-c",
+      "kind": "open-truss",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "R0",
+      "kind": "recovery",
+      "x": -330,
+      "y": -600,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "activation": "OUT",
+        "retrySecondsTargetMax": 5
+      }
+    },
+    {
+      "id": "R1",
+      "kind": "recovery",
+      "x": 330,
+      "y": -1000,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "activation": "OUT",
+        "retrySecondsTargetMax": 5
+      }
+    },
+    {
+      "id": "R2",
+      "kind": "recovery",
+      "x": -330,
+      "y": -1420,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "activation": "OUT",
+        "retrySecondsTargetMax": 5
+      }
+    }
+  ],
+  "antiBypass": {
+    "exhaustiveNonAdjacentForwardPairsWithin400": []
+  },
+  "recoveryReachWithin400": {
+    "R0": {
+      "H1": 313.21,
+      "P1": 134.54,
+      "H2": 170.0
+    },
+    "R1": {
+      "H3": 308.06,
+      "H4": 254.95
+    },
+    "R2": {
+      "H5": 270.19,
+      "H6": 171.17
+    }
+  },
+  "goalLandmark": {
+    "id": "rooftop-pad-03-near",
+    "visible": true,
+    "outsideStageBounds": true,
+    "relativeVisualScale": "larger-than-6-6",
+    "storyState": "NO_DENIAL_YET"
+  },
+  "mechanics": {
+    "cutter": true,
+    "forcedScriptedCut": false,
+    "patrol": false,
+    "wind": false,
+    "scanner": false,
+    "movingPlatform": false,
+    "newInput": false,
+    "newRopeMode": false
+  },
+  "story": {
+    "entrySystem": [
+      "CONTAINMENT LATTICE",
+      "SECURITY / ACTIVE"
+    ],
+    "previewSystem": [
+      "ROPE INTERDICTION",
+      "ACTIVE"
+    ],
+    "fullSafeSystem": [
+      "ROOFTOP PAD 03",
+      "FINAL APPROACH / AHEAD"
+    ],
+    "exitSystem": [
+      "ROOFTOP PAD 03",
+      "FINAL APPROACH / OPEN"
+    ],
+    "playerBark": null
+  },
+  "forbidden": [
+    "forced-scripted-rope-cut",
+    "second-cutter",
+    "patrol",
+    "wind",
+    "scanner",
+    "cover-solution",
+    "moving-lattice",
+    "moving-platform",
+    "kill-gate",
+    "new-input",
+    "new-rope-mode",
+    "new-growth",
+    "route-choice-fork",
+    "continuous-lower-catwalk",
+    "ACCESS DENIED",
+    "CONTAINMENT VIOLATION",
+    "final-security-activation",
+    "shuttle-boarding"
+  ]
+}

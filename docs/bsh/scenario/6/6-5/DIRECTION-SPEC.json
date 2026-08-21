@@ -1,0 +1,126 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 5,
+    "legacyStageAlias": "6-5",
+    "sourceAreaId": "sector-06-05",
+    "name": "PAD ACCESS ARRAY"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticSystemText": "en-allowed"
+  },
+  "beats": [
+    {
+      "beatId": "entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PAD ACCESS ARRAY",
+            "detail": "CONTROL / ONLINE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "safe-preview",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P1"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PAD SERVICE MOUNTS",
+            "detail": "ACCESS / CYCLING"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "controlled-chain",
+      "trigger": {
+        "type": "route-band",
+        "targetIds": [
+          "sector-06-05:c1",
+          "sector-06-05:c2",
+          "sector-06-05:c3"
+        ]
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "full-safe",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P2"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "beacon-handoff",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P4"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "BEACON SPAN",
+            "detail": "SERVICE PATH / AVAILABLE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "C1/C2/C3 use one shared phase.",
+    "No dialogue during timing traversal.",
+    "C1/C2/C3 cannot be skipped via Base Reach geometry.",
+    "R1 cannot be used to bypass directly to C3.",
+    "P2 is full safe after C3.",
+    "ACCESS DENIED and CONTAINMENT VIOLATION remain withheld."
+  ]
+}
