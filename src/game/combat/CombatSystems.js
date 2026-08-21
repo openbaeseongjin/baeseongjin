@@ -2,6 +2,7 @@ import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 import { PROJECTILE_MOTION_CAPABILITY } from "./ProjectileObject.js";
 
 const simulationDispatcher = new SimulationDispatcher();
+const EMPTY_COLLISION_ACTORS = Object.freeze([]);
 
 function advanceSimulationObject(object, capabilityId, context) {
     const outcomes = simulationDispatcher.dispatch({ objects: [object], capabilityId, context });
@@ -98,15 +99,25 @@ export function updateEnemyPresentationAim({ enemies, targets, range, surfaces =
     }
 }
 
-export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, surfaces = [], dt }) {
+export function updateEnemyWeapons({
+    enemies,
+    targets,
+    projectiles,
+    registry,
+    config,
+    surfaces = [],
+    collisionBroadPhase = null,
+    dt
+}) {
     const liveEnemies = enemies.filter(({ health }) => health > 0);
-    const collisionActors = Object.freeze([...targets, ...liveEnemies]);
+    const collisionActors = collisionBroadPhase ? EMPTY_COLLISION_ACTORS : Object.freeze([...targets, ...liveEnemies]);
     return Object.freeze(
         liveEnemies
             .map((enemy) => {
                 return advanceSimulationObject(enemy, "enemy-weapon", {
                     targets,
                     collisionActors,
+                    collisionBroadPhase,
                     projectiles,
                     registry,
                     config,

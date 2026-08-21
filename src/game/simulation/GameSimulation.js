@@ -25,6 +25,7 @@ import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { BallisticProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
 import {
     COMBAT_CONFIG,
+    COLLISION_BROAD_PHASE_CONFIG,
     FALL_DAMAGE_CONFIG,
     PLAYER_CONFIG,
     ROPE_CONFIG,
@@ -41,6 +42,7 @@ import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPlayerImpactStateDigest } from "../network/PlayerImpactClaim.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
+import { CollisionBroadPhase } from "../physics/spatial/CollisionBroadPhase.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
@@ -147,6 +149,7 @@ export class GameSimulation {
         startLandmarkId = null,
         ropeConfig = ROPE_CONFIG,
         ropeDisabledSeconds = COMBAT_CONFIG.ropeDisabledSeconds,
+        collisionBroadPhaseConfig = COLLISION_BROAD_PHASE_CONFIG,
         debugAugmentIds = []
     } = {}) {
         if (!Array.isArray(debugAugmentIds)) throw new Error("debugAugmentIds must be an array");
@@ -174,6 +177,9 @@ export class GameSimulation {
         this.activeCollisionSurfaces = this.isSeamlessSectorWorld
             ? collisionSurfacesForSectorProgress(this.world, this.worldProgress)
             : collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.collisionBroadPhase = new CollisionBroadPhase(collisionBroadPhaseConfig);
+        this.collisionBroadPhase.setSurfaces(this.activeCollisionSurfaces);
+        this.activeSimulationEnemies = Object.freeze([]);
         this.windOccluders = windOccludingSurfaces(this.world.surfaces);
         this.elapsedSeconds = 0;
         this.metrics = new RunMetrics({ progressKind: this.isSeamlessSectorWorld ? "sector" : "area" });
@@ -257,6 +263,7 @@ export class GameSimulation {
         runtime.entity.augmentCombat.syncLoadout(runtime.entity.foundation, runtime.entity.maxHealth);
         this.players.push(runtime.entity);
         this.#inputDrivenObjectsByOwner.set(runtime.entity.id, runtime.inputDrivenObjects);
+        this.collisionBroadPhase.invalidateFrame();
         return runtime;
     }
 
@@ -268,6 +275,7 @@ export class GameSimulation {
         this.portalTransitions.delete(playerId);
         this.foundationRewards.delete(playerId);
         if (removed.id === this.#primaryPlayerId) this.#primaryPlayerId = this.players[0]?.id ?? null;
+        this.collisionBroadPhase.invalidateFrame();
         this.#advanceCalibrationVerification();
         this.#completeEligibleAugmentObjectivesForCurrentRoster();
         return true;
@@ -499,6 +507,34 @@ export class GameSimulation {
         return this.foundationRewards.get(playerId) ?? null;
     }
 
+    #setActiveCollisionSurfaces(surfaces) {
+        this.activeCollisionSurfaces = surfaces;
+        this.collisionBroadPhase?.setSurfaces(surfaces);
+        return surfaces;
+    }
+
+    #prepareCollisionFrame() {
+        this.activeSimulationEnemies = this.collisionBroadPhase.beginFrame({
+            tick: this.tick,
+            surfaces: this.activeCollisionSurfaces,
+            players: this.players,
+            enemies: this.enemies
+        });
+        const activeEnemyIds = new Set(this.activeSimulationEnemies.map(({ id }) => id));
+        for (const enemy of this.enemies) {
+            if (activeEnemyIds.has(enemy.id)) continue;
+            enemy.velocity.set(0, 0);
+            enemy.actorCollisionVelocity?.set(0, 0);
+            enemy.surfaceControlVelocity?.set(0, 0);
+            enemy.surfacePhysicsStepPending = false;
+        }
+        return this.activeSimulationEnemies;
+    }
+
+    collisionBroadPhaseSnapshot() {
+        return this.collisionBroadPhase.snapshot();
+    }
+
     advanceWorldProgressToArea(areaId) {
         if (!this.worldProgress || this.isSeamlessSectorWorld) return false;
         const target = this.world.areas.find(({ id }) => id === areaId);
@@ -511,7 +547,7 @@ export class GameSimulation {
             for (const objectiveId of area.objectiveIds) this.worldProgress.completeObjective(objectiveId);
             this.worldProgress.crossGate(area.gateId);
         }
-        this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.#setActiveCollisionSurfaces(collisionSurfacesForProgress(this.world, this.worldProgress));
         return true;
     }
 
@@ -541,7 +577,7 @@ export class GameSimulation {
                 if (module.sectorId === source.sectorId) this.worldProgress.collectAccessModule(module.id);
             }
         }
-        this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+        this.#setActiveCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress));
         return true;
     }
 
@@ -591,6 +627,7 @@ export class GameSimulation {
         if (stillAtPredictedArrival) {
             player.physics.position.set(position.x, position.y);
             player.ropeObject.aimWorld = Object.freeze({ x: position.x, y: position.y });
+            this.collisionBroadPhase.invalidateFrame();
         }
         this.portalTransitions.set(playerId, Object.freeze({ gateId, position, tick }));
         return true;
@@ -615,6 +652,7 @@ export class GameSimulation {
         player.foundation.resetRuntime();
         player.augmentCombat.resetForRespawn(player.foundation, player.maxHealth);
         this.portalTransitions.set(player.id, Object.freeze({ gateId, position, tick }));
+        this.collisionBroadPhase.invalidateFrame();
         return this.ownerPredictionState(player.id);
     }
 
@@ -653,6 +691,7 @@ export class GameSimulation {
         this.#advanceSweptOwnerGate(player, state.position);
         player.physics.position.set(state.position.x, state.position.y);
         player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        this.collisionBroadPhase.invalidateFrame();
         player.physics.setAngularState(state.angle, state.angularVelocity);
         player.physics.isGrounded = state.isGrounded;
         if (
@@ -724,6 +763,7 @@ export class GameSimulation {
         });
         this.projectiles = [];
         this.enemyProjectiles = [];
+        this.collisionBroadPhase.invalidateFrame();
     }
 
     restoreWorldProgress(snapshot, elapsedSeconds = this.elapsedSeconds) {
@@ -737,9 +777,11 @@ export class GameSimulation {
         if (snapshot) this.worldProgress.restore(snapshot);
         if (this.isSeamlessSectorWorld) this.contentBoundaryAnnounced = snapshot?.contentBoundaryReached === true;
         this.elapsedSeconds = elapsedSeconds;
-        this.activeCollisionSurfaces = this.isSeamlessSectorWorld
-            ? collisionSurfacesForSectorProgress(this.world, this.worldProgress)
-            : collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.#setActiveCollisionSurfaces(
+            this.isSeamlessSectorWorld
+                ? collisionSurfacesForSectorProgress(this.world, this.worldProgress)
+                : collisionSurfacesForProgress(this.world, this.worldProgress)
+        );
         return this.worldProgress.snapshot();
     }
 
@@ -817,16 +859,18 @@ export class GameSimulation {
         const player = this.#requirePlayer(ownerId);
         this.tick = tick;
         this.elapsedSeconds += dt;
+        this.#prepareCollisionFrame();
         this.#prepareOwnerStep(player, dt);
         const wallImpactEvents = this.#advanceEnemyImpactKnockbacks(dt, { emitWallImpacts: true });
         this.#applyWorldForce(player, dt);
         const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt, { replicateLandingImpacts: false });
+        if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const ropeImpactEvents = this.#advanceRopeImpactAttacks(player, { commit: false });
         const collisionExplosionEvents = player.augmentCombat.collisionExplosionEvents({
             player,
             foundation: player.foundation,
             baseImpactEvents: ropeImpactEvents,
-            enemies: this.enemies,
+            enemies: this.activeSimulationEnemies,
             tick
         });
         const augmentImpactEvents = Object.freeze([
@@ -958,6 +1002,7 @@ export class GameSimulation {
         }
         player.physics.position.set(state.position.x, state.position.y);
         player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        this.collisionBroadPhase.invalidateFrame();
         player.physics.setAngularState(state.angle, state.angularVelocity);
         player.physics.isGrounded = state.isGrounded;
         if (state.rope.isAttached) {
@@ -1090,6 +1135,7 @@ export class GameSimulation {
             this.metrics.recordProgressTime(progressId, dt);
         }
         this.elapsedSeconds += dt;
+        this.#prepareCollisionFrame();
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
             this.#prepareOwnerStep(player, dt);
@@ -1102,7 +1148,7 @@ export class GameSimulation {
                     player,
                     foundation: player.foundation,
                     baseImpactEvents: ropeImpactEvents,
-                    enemies: this.enemies,
+                    enemies: this.activeSimulationEnemies,
                     tick: this.tick
                 });
                 if (collisionExplosionEvents === null) {
@@ -1120,6 +1166,7 @@ export class GameSimulation {
         if (this.worldProgress) {
             this.#advanceAuthoredWorldProgress(gameplayCommands, { dt, resolveInteractChoice });
         }
+        if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const wallImpactEvents = this.#advanceEnemyImpactKnockbacks(dt, {
             emitWallImpacts: advanceInputDrivenObjects
         });
@@ -1134,18 +1181,19 @@ export class GameSimulation {
             maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds
         });
         updateEnemyPresentationAim({
-            enemies: this.enemies,
+            enemies: this.activeSimulationEnemies,
             targets: this.players,
             range: COMBAT_CONFIG.enemyAttackRange,
             surfaces: this.activeCollisionSurfaces
         });
         const enemyProjectileSpawns = updateEnemyWeapons({
-            enemies: this.enemies.filter(({ knockbackState }) => !knockbackState),
+            enemies: this.activeSimulationEnemies.filter(({ knockbackState }) => !knockbackState),
             targets: this.players,
             projectiles: this.enemyProjectiles,
             registry: this.registry,
             config: COMBAT_CONFIG,
             surfaces: this.activeCollisionSurfaces,
+            collisionBroadPhase: this.collisionBroadPhase,
             dt
         });
         for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile);
@@ -1225,6 +1273,8 @@ export class GameSimulation {
 
     dispatchOwnerInput(ownerId, command, dt, { replicateLandingImpacts = true } = {}) {
         const player = this.#requirePlayer(ownerId);
+        if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
+        const collisionEnemies = this.activeSimulationEnemies;
         const foundationEvents = [];
         const fallImpactEvents = [];
         const augmentImpactEvents = [];
@@ -1254,7 +1304,8 @@ export class GameSimulation {
                 owner: player,
                 ropeConfig: effectiveRopeConfig,
                 surfaces: this.activeCollisionSurfaces,
-                collisionActors: this.enemies.filter(({ health }) => health > 0),
+                collisionActors: collisionEnemies,
+                collisionBroadPhase: this.collisionBroadPhase,
                 canAttachToSurface: this.#accessScanPredicate(),
                 getRopeInputModifiers: () => player.foundation.ropeInputModifiers(effectiveRopeConfig),
                 onAttach: () => {},
@@ -1299,15 +1350,16 @@ export class GameSimulation {
             foundation: player.foundation,
             command: effectiveCommand,
             dt,
-            enemies: this.enemies,
+            enemies: collisionEnemies,
             surfaces: this.activeCollisionSurfaces,
+            collisionBroadPhase: this.collisionBroadPhase,
             tick: this.tick
         });
         augmentImpactEvents.push(
             ...player.augmentCombat.observeAttachedRope({
                 player,
                 foundation: player.foundation,
-                enemies: this.enemies,
+                enemies: collisionEnemies,
                 dt,
                 tick: this.tick
             }),
@@ -1351,7 +1403,7 @@ export class GameSimulation {
     }
 
     #advanceRopeImpactAttacks(player, { commit = true } = {}) {
-        const events = player.ropeImpactAttack.advance(player, this.enemies, this.tick);
+        const events = player.ropeImpactAttack.advance(player, this.activeSimulationEnemies, this.tick);
         if (commit) {
             for (const event of events) this.#commitRopeImpact(event);
         }
@@ -1407,15 +1459,16 @@ export class GameSimulation {
 
     #advanceEnemyImpactKnockbacks(dt, { emitWallImpacts = false } = {}) {
         const events = [];
-        for (const enemy of this.enemies) {
+        for (const enemy of this.activeSimulationEnemies) {
             const state = enemy.knockbackSnapshot();
             if (!state) continue;
             const previousPosition = enemy.position.clone();
-            const collisionActors = [
-                ...this.players,
-                ...this.enemies.filter(({ id, health }) => id !== enemy.id && health > 0)
-            ];
-            const movement = enemy.advanceImpactKnockback(dt, this.activeCollisionSurfaces, collisionActors);
+            const movement = enemy.advanceImpactKnockback(
+                dt,
+                this.activeCollisionSurfaces,
+                this.activeSimulationEnemies,
+                this.collisionBroadPhase
+            );
             const collided = movement.collided;
             if (
                 !emitWallImpacts ||
@@ -1450,7 +1503,7 @@ export class GameSimulation {
 
     #advanceEnemyBehaviorSimulation(dt) {
         const outcomes = advanceEnemyBehaviors({
-            enemies: this.enemies.filter(({ knockbackState }) => !knockbackState),
+            enemies: this.activeSimulationEnemies.filter(({ knockbackState }) => !knockbackState),
             targets: this.players,
             dt
         });
@@ -1667,7 +1720,7 @@ export class GameSimulation {
             if (replicate) this.recordReplicationEvent(type, payload);
             this.eventFlash = { type, age: 0, ...payload };
             if (type === "gate-unlocked" || type === "route-unlocked") {
-                this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+                this.#setActiveCollisionSurfaces(collisionSurfacesForProgress(this.world, this.worldProgress));
             }
             if (type === "gate-crossed" && event.nextAreaId) {
                 this.metrics.recordAreaClear(event.areaId);
@@ -1688,7 +1741,7 @@ export class GameSimulation {
         this.#advanceCalibrationVerification();
         this.#completeEligibleAugmentObjectivesForCurrentRoster();
         if (this.isSeamlessSectorWorld) {
-            this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+            this.#setActiveCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress));
             if (stageSaveEvent) {
                 const { type: _type, ...payload } = stageSaveEvent;
                 this.eventFlash = { type: "stage-saved", age: 0, ...payload };
@@ -1787,7 +1840,7 @@ export class GameSimulation {
     }
 
     #advanceAutomaticWeapon(player, dt, allowFire = true) {
-        const enemies = this.enemies.filter(
+        const enemies = this.activeSimulationEnemies.filter(
             (enemy) =>
                 !enemy.activation ||
                 (player.physics.position.x >= enemy.activation.x &&
@@ -2028,7 +2081,7 @@ export class GameSimulation {
                     });
                 }
             }
-            this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+            this.#setActiveCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress));
             return true;
         }
 
@@ -2044,7 +2097,7 @@ export class GameSimulation {
             const { type, ...payload } = event;
             if (replicate) this.recordReplicationEvent(type, payload);
             if (type === "gate-unlocked") {
-                this.activeCollisionSurfaces = collisionSurfacesForProgress(this.world, this.worldProgress);
+                this.#setActiveCollisionSurfaces(collisionSurfacesForProgress(this.world, this.worldProgress));
             }
         }
         return completed;
@@ -2280,7 +2333,9 @@ export class GameSimulation {
                     requiredCount: collection.access.requiredCount
                 };
                 if (collection.routeChanged) {
-                    this.activeCollisionSurfaces = collisionSurfacesForSectorProgress(this.world, this.worldProgress);
+                    this.#setActiveCollisionSurfaces(
+                        collisionSurfacesForSectorProgress(this.world, this.worldProgress)
+                    );
                 }
             }
         }
@@ -2536,6 +2591,7 @@ export class GameSimulation {
             y: 500
         };
         player.physics.reset(respawnPosition);
+        this.collisionBroadPhase.invalidateFrame();
         player.ropeObject.rope.detach();
         player.ropeObject.attachmentCandidate = null;
         player.ropeObject.wasPointerDown = false;

@@ -106,6 +106,13 @@ export const CAMERA_CONFIG = Object.freeze({
     referenceViewport: Object.freeze({ width: 1920, height: 1080 })
 });
 
+export const COLLISION_BROAD_PHASE_CONFIG = Object.freeze({
+    quadtreeCapacity: 8,
+    quadtreeMaxDepth: 8,
+    interestHalfWidth: CAMERA_CONFIG.referenceViewport.width + 256,
+    interestHalfHeight: CAMERA_CONFIG.referenceViewport.height + 256
+});
+
 export function resolveMobileCameraZoom(
     authoredMobileZoom = CAMERA_CONFIG.authoredMobileBaselineZoom,
     { cssWidth = CAMERA_CONFIG.referenceViewport.width, cssHeight = CAMERA_CONFIG.referenceViewport.height } = {}
