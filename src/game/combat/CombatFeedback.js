@@ -1,18 +1,20 @@
-const EFFECT_LIFETIME = Object.freeze({ particle: 0.42, ring: 0.3, text: 0.72 });
+import { appendParticlePreset, updateParticlePresentation } from "./ParticlePresentation.js";
 
-function particleVelocity(index, count, speed, phase = 0) {
-    const angle = phase + (Math.PI * 2 * index) / count;
-    return { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
-}
+const EFFECT_LIFETIME = Object.freeze({ ring: 0.3, text: 0.72 });
 
-export function appendCombatFeedback(effects, event) {
+export function appendCombatFeedback(effects, event, { visibleWorldBounds = null } = {}) {
     const defeated = event.type === "enemy-defeated";
     const playerHit = event.type === "player-hit";
     const fallDamage = event.type === "fall-damage";
     const ropeCut = event.type === "rope-cut";
     const color = playerHit || fallDamage || ropeCut ? "#fb7185" : defeated ? "#fde68a" : "#67e8f9";
-    const count = defeated ? 12 : playerHit || fallDamage ? 9 : ropeCut ? 8 : 7;
-    const speed = defeated ? 190 : 130;
+    const particlePresetId = ropeCut
+        ? "rope-cut"
+        : defeated
+          ? "enemy-defeat"
+          : playerHit || fallDamage
+            ? "enemy-impact"
+            : "impact";
 
     effects.push({
         type: "ring",
@@ -22,17 +24,13 @@ export function appendCombatFeedback(effects, event) {
         lifetime: EFFECT_LIFETIME.ring,
         strength: defeated ? 1.45 : 1
     });
-    for (let index = 0; index < count; index += 1) {
-        effects.push({
-            type: "particle",
-            position: { x: event.position.x, y: event.position.y },
-            velocity: particleVelocity(index, count, speed * (0.72 + (index % 3) * 0.14), playerHit ? 0.2 : 0),
-            color,
-            age: 0,
-            lifetime: EFFECT_LIFETIME.particle,
-            size: defeated ? 5 : 3.5
-        });
-    }
+    appendParticlePreset(effects, {
+        presetId: particlePresetId,
+        position: event.position,
+        direction: event.direction,
+        identity: event.id ?? `${event.type}:${event.position.x}:${event.position.y}`,
+        visibleWorldBounds
+    });
     if (!ropeCut) {
         effects.push({
             type: "text",
@@ -49,16 +47,13 @@ export function appendCombatFeedback(effects, event) {
 
 export function updateCombatFeedback(effects, dt) {
     for (const effect of effects) {
+        if (effect.type === "particle") continue;
         effect.age += dt;
         if (!effect.velocity) continue;
         effect.position.x += effect.velocity.x * dt;
         effect.position.y += effect.velocity.y * dt;
-        if (effect.type === "particle") {
-            effect.velocity.x *= Math.max(0, 1 - dt * 4.5);
-            effect.velocity.y = effect.velocity.y * Math.max(0, 1 - dt * 4.5) + 210 * dt;
-        }
     }
-    effects.splice(0, effects.length, ...effects.filter((effect) => effect.age < effect.lifetime).slice(-96));
+    updateParticlePresentation(effects, dt);
 }
 
 export function createImpactState(events) {

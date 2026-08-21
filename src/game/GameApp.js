@@ -135,6 +135,11 @@ export class GameApp {
 
     update(dt, input) {
         this.latestInput = input;
+        const particleBounds = createRenderViewport({
+            camera: this.camera,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
+        }).worldBounds;
         const before = this.authority.snapshot();
         this.previousRenderSnapshot = before;
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
@@ -166,10 +171,11 @@ export class GameApp {
             this.predictableProjectiles.applyImpactReceipts([this.authority.submitImpactClaim(impact)]);
         }
         this.queuePlayerPresentationEvents(predictedImpacts);
-        this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts]);
-        this.combatFeedback.update(dt);
+        this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts], { visibleWorldBounds: particleBounds });
         state = this.authority.snapshot();
         const cameraShot = this.updatePresentationCamera(dt, state.player, state.world);
+        this.combatFeedback.syncContinuous({ ...state, players: [state.player] }, dt, particleBounds);
+        this.combatFeedback.update(dt);
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
         this.directionRuntime.update(dt, {
             areaId: cameraShot.areaId,

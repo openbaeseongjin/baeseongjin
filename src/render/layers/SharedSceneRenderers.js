@@ -197,8 +197,6 @@ export class WorldGeometryRenderer {
 }
 
 const FAN_BLADE_SPEED = Math.PI * 2 * 3;
-const WIND_PARTICLE_SPEED_FACTOR = 0.2;
-const WIND_PARTICLE_BASE_SPEED = 30;
 
 function windVisualIntensity(zone, state) {
     if (!zone) return 0;
@@ -216,62 +214,6 @@ function windVisualIntensity(zone, state) {
             return Math.max(0, 1 - state.phaseTime / Math.max(cycle.decay, 0.001));
         default:
             return 0;
-    }
-}
-
-function drawWindStreaks(context, zone, intensity, timeSeconds) {
-    if (!zone || intensity <= 0) return;
-    const { bounds, direction } = zone;
-    const horizontal = Math.abs(direction.x) >= Math.abs(direction.y);
-    const sign = horizontal ? Math.sign(direction.x) || 1 : Math.sign(direction.y) || 1;
-    const span = horizontal ? bounds.width : bounds.height;
-    const crossSpan = horizontal ? bounds.height : bounds.width;
-    const alongEdge = horizontal ? bounds.x : bounds.y;
-    const crossEdge = horizontal ? bounds.y : bounds.x;
-    if (span <= 0) return;
-    const speed = WIND_PARTICLE_BASE_SPEED + zone.strength * intensity * WIND_PARTICLE_SPEED_FACTOR;
-    const count = Math.round(3 + intensity * 6);
-    const length = 10 + intensity * 14 + Math.min(1, zone.strength / 800) * 6;
-    context.save();
-    context.lineCap = "round";
-    for (let index = 0; index < count; index += 1) {
-        const seed = (((index * 0.37 + 0.13) % 1) + 1) % 1;
-        const progress = (((seed + (timeSeconds * speed) / span) % 1) + 1) % 1;
-        const alongPos = alongEdge + (sign > 0 ? progress * span : (1 - progress) * span);
-        const crossPos = crossEdge + ((index * 0.61 + 0.29) % 1) * crossSpan;
-        const alpha = (0.1 + 0.26 * intensity) * (0.5 + 0.5 * ((index % 3) / 3));
-        const x = horizontal ? alongPos : crossPos;
-        const y = horizontal ? crossPos : alongPos;
-        const dx = horizontal ? sign * length : 0;
-        const dy = horizontal ? 0 : sign * length;
-        context.strokeStyle = `rgba(226, 232, 240, ${alpha})`;
-        context.lineWidth = 1.5;
-        context.beginPath();
-        context.moveTo(x, y);
-        context.lineTo(x + dx, y + dy);
-        context.stroke();
-    }
-    context.restore();
-}
-
-export class WindParticleRenderer {
-    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
-        const windZones = scene.world.windZones ?? [];
-        const visibleZones = windZones.filter((zone) =>
-            isVisible(viewport, {
-                minX: zone.bounds.x,
-                minY: zone.bounds.y,
-                maxX: zone.bounds.x + zone.bounds.width,
-                maxY: zone.bounds.y + zone.bounds.height
-            })
-        );
-        const windStates = scene.windStates ?? [];
-        const stateById = new Map(windStates.map((state) => [state.id, state]));
-        for (const zone of visibleZones) {
-            const intensity = windVisualIntensity(zone, stateById.get(zone.id) ?? null);
-            drawWindStreaks(context, zone, intensity, presentationTimeSeconds);
-        }
-        renderStats?.recordCollection("windZones", windZones.length, visibleZones.length);
     }
 }
 
@@ -1157,10 +1099,31 @@ export class CombatEffectRenderer {
                 context.arc(effect.position.x, effect.position.y, 8 + progress * 34 * effect.strength, 0, Math.PI * 2);
                 context.stroke();
             } else if (effect.type === "particle") {
-                context.fillStyle = effect.color;
+                const fadeStart = Math.max(0, Math.min(0.95, effect.fadeStart ?? 0));
+                const fadeProgress = Math.max(0, (progress - fadeStart) / (1 - fadeStart));
+                context.globalAlpha = Math.max(0, 1 - fadeProgress) * (effect.material?.opacity ?? 1);
+                context.fillStyle = effect.material?.color ?? effect.color;
+                context.globalCompositeOperation = effect.material?.blend === "additive" ? "lighter" : "source-over";
+                if (effect.material?.glow) {
+                    context.shadowColor = effect.material.color;
+                    context.shadowBlur = effect.material.glow * 12;
+                }
                 context.translate(effect.position.x, effect.position.y);
                 context.rotate(Math.atan2(effect.velocity.y, effect.velocity.x));
-                context.fillRect(-effect.size, -effect.size * 0.45, effect.size * 2, effect.size * 0.9);
+                if (effect.shape === "dot") {
+                    context.beginPath();
+                    context.arc(0, 0, effect.size, 0, Math.PI * 2);
+                    context.fill();
+                } else if (effect.shape === "streak") {
+                    context.fillRect(-effect.size * 2.4, -effect.size * 0.35, effect.size * 4.8, effect.size * 0.7);
+                } else {
+                    context.beginPath();
+                    context.moveTo(effect.size * 1.4, 0);
+                    context.lineTo(-effect.size * 0.8, -effect.size * 0.7);
+                    context.lineTo(-effect.size * 0.8, effect.size * 0.7);
+                    context.closePath();
+                    context.fill();
+                }
             } else if (effect.type === "text") {
                 context.textAlign = "center";
                 context.textBaseline = "middle";
@@ -1228,9 +1191,8 @@ export class EventEffectRenderer {
             context.lineWidth = 2;
             context.fillRect(distance, -8, 18, 16);
             context.strokeRect(distance, -8, 18, 16);
-            for (let knuckle = 0; knuckle < 3; knuckle += 1) {
-                context.fillRect(distance + 15 + knuckle * 5, -7 + knuckle * 2, 5, 5);
-            }
+            context.fillStyle = "rgba(255, 255, 255, 0.32)";
+            for (let knuckle = 0; knuckle < 3; knuckle += 1) context.fillRect(distance + 5 + knuckle * 4, -6, 3, 4);
             context.beginPath();
             context.moveTo(distance - 16, -6);
             context.lineTo(distance, -4);
