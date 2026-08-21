@@ -123,7 +123,7 @@
 - 각 Sector의 일반 구간은 `60초`를 공유하고 진행 보상은 한 번에 `+10초`, cap은 `60초`다. 같은 Sector 안에서 landmark가 바뀌어도 시간을 초기화하지 않는다.
 - Timer 0초부터 `CONTAINMENT PURGE FIELD`가 `240px/s`로 상승한다. 시간 보상 중에는 현재 높이에서 멈추고 다음 0초부터 같은 위치에서 재상승하며 후퇴·Player 추적·순간이동은 없다.
 - Purge 접촉은 lethal이고 전멸은 current Sector objective·route·enemy·Timer·Field만 reset한다. Player별 증강과 이전 Sector 진행은 보존한다.
-- 각 Sector에는 보스가 1개씩 있으며, 기획자가 정할 transition slot에서 일반 Timer·Purge와 잔여 시간을 끝낸 뒤 별도의 **보스 전투 타이머**와 Arena 위험을 시작한다.
+- 각 Sector에는 보스가 1개씩 있으며, 기획자가 정할 transition slot에서 일반 Timer·Purge와 잔여 시간을 끝낸다. 초기 Boss01과 Final Security는 시간 제한 없이 구현하고 별도 **보스 전투 타이머**와 Arena 위험은 후속 작업으로 남긴다.
 - `1-8 CONTAINMENT GATE`에는 보스를 넣지 않으며 기존 `Lower Grid Shutdown → Worker District Reveal → 일반 구간 종료 Checkpoint`를 유지한다. Boss01 `CONTAINMENT GANTRY C-01`은 그 체크포인트 뒤의 sealed transfer vestibule에 별도 transition encounter로 배치하고, 승리 후 `2-1`로 이동한다. 상세 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다.
 - 수치와 core 의미는 확정됐지만 seamless topology의 정확한 `+10초` trigger, 최초 Field origin과 개인 Purge 사망 복귀는 후속 결정 전 구현 금지 HOLD다. 상세 계약은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
 - 현재 시드 기반 48단계 절차 생성 월드는 코어 조작을 검증한 프로토타입이다. 목표 시나리오 월드는 저자가 정한 48개 진행 영역을 기본으로 하며, 영역 내부의 시드 변형 허용 범위는 경로·완료 조건·출구를 훼손하지 않는 별도 기획으로 확정한다.
@@ -224,7 +224,8 @@
 - [ ] 저작 영역 내부에서 허용할 절차 변형 범위
 - [x] 일반 Timer `60/+10/cap60`, 0초 Purge 240px/s, lethal·전멸 Sector reset·Boss 분리
 - [ ] seamless topology의 +10 trigger·Field origin·개인 Purge 사망 복귀
-- [x] 일반 타이머와 보스 타이머의 완전 분리·잔여 시간 폐기·보스 Arena 붕괴
+- [x] Boss 진입 시 일반 Timer·Purge·잔여 시간 폐기 경계
+- [ ] **후속** Boss Timer·시간 만료 Arena collapse; 초기 Boss01 구현에는 포함하지 않는다.
 - [x] 섹터별 보스 1개
 - [ ] Timer/Purge의 재접속과 최종 UI/오디오 cue
 - [ ] 8개 진행 영역과 섹터 보스의 위치 관계

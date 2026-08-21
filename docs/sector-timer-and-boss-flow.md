@@ -10,7 +10,8 @@
 | Purge 동작 | 확정 | Timer 0초부터 `240px/s`, 보상 중 정지, 다음 0초 재상승, 후퇴 없음 |
 | Purge 접촉 | 확정 | lethal |
 | 전멸 | 확정 | current Sector reset, 보유 성장과 이전 Sector 진행 보존 |
-| Boss 경계 | 확정 | 일반 Timer·Purge·잔여 시간 종료, 별도 Boss Timer·Arena 계약 시작 |
+| Boss 경계 | 확정 | 일반 Timer·Purge·잔여 시간 종료, 초기 Boss 전투는 시간 제한 없이 시작 |
+| Boss Timer·Arena collapse | **DEFERRED** | 초기 Boss01/Post-Sector Boss Slot 범위에서 구현·snapshot·HUD·위험 판정 금지 |
 | `+10초` trigger | **HOLD** | seamless landmark/objective 중 어떤 physical transition인지 후속 결정 |
 | 최초 Field origin | **HOLD** | 연속 Sector geometry 안의 시작 위치 후속 결정 |
 | 개인 Purge 사망 복귀 | **HOLD** | Sector-entry 즉시 복귀와 관전·후속 전이 합류 중 후속 결정 |
@@ -56,8 +57,9 @@ Timer는 speedrun 점수가 아니라 안전한 하층 정체를 막는 상승 �
 
 - 기획자가 확정할 Sector transition slot의 Boss 진입에서 일반 Timer와 Purge를 종료한다.
 - 남은 일반 시간은 Boss 시간에 더하지 않고 폐기한다.
-- Boss는 별도 전투 Timer와 Arena 위험을 사용한다.
+- 초기 Boss 전투는 별도 Timer나 시간 만료 Arena 위험 없이 진행한다.
 - 일반 `60초 / +10초 / Purge Field`를 Boss에 이어 붙이지 않는다.
+- 과거 Boss01 `210초 / collapse 80px/s`와 Final Security `240초 / collapse 80px/s`는 후속 Timer 작업 전까지 구현 입력으로 사용하지 않는다.
 - Boss 전원 탈락은 Boss 시도만 재시작하고, 처치 뒤 다음 Sector의 일반 Timer를 새로 시작한다.
 
 `1-8` 같은 legacy Stage alias는 migration 주소다. Boss room은 Sector transition slot에 삽입하며 downstream Sector local 좌표와 콘텐츠 ID를 다시 쓰지 않는다.
@@ -93,7 +95,7 @@ Timer는 speedrun 점수가 아니라 안전한 하층 정체를 막는 상승 �
 6. 10초·3초·0초 경고가 시각·문구·음향으로 구분된다.
 7. Purge 접촉은 피해 클라이언트에서 서버 receipt보다 먼저 lethal 반응을 만든다.
 8. 전멸은 current Sector만 reset하고 증강과 이전 Sector 진행을 보존한다.
-9. Boss 진입은 일반 Timer·Purge·잔여 시간을 종료하고 별도 Boss 계약을 시작한다.
+9. Boss 진입은 일반 Timer·Purge·잔여 시간을 종료하고 시간 제한 없는 초기 Boss 계약을 시작한다.
 10. HOLD 세 항목은 별도 제품 결정 전 Runtime·validator·snapshot에 들어가지 않는다.
 
 ## 대체된 계약

@@ -9,8 +9,6 @@ export const BOSS_01_DEFINITION = Object.freeze({
     phaseCount: 3,
     phaseHealth: 120,
     exposureSeconds: 8,
-    timerSeconds: 210,
-    collapseSpeed: 80,
     breakerIds: Object.freeze(["boss-01:breaker:phase-1", "boss-01:breaker:phase-2", "boss-01:breaker:phase-3"]),
     phases: Object.freeze([
         freezePhase({ phase: 1, threats: ["standard-emitter"] }),

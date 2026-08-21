@@ -479,7 +479,13 @@ export class AugmentCombatRuntime {
         const currentContacts = new Set();
         for (const enemy of enemies) {
             if (enemy.health <= 0) continue;
-            if (!player.physics.collider.overlapsCircle(player.physics.position, enemy.position, enemy.radius))
+            if (
+                !player.physics.collider.overlapsCollider(
+                    player.physics.position,
+                    enemy.position,
+                    enemy.collider ?? { type: "circle", radius: enemy.radius }
+                )
+            )
                 continue;
             currentContacts.add(enemy.id);
             if (tracker.contacts.has(enemy.id)) continue;

@@ -45,7 +45,7 @@
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
 - Sector 03 REV8 topology·Direction migration, Sector 04~06 Runtime 연결과 각 Post-Sector Boss transition
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
-- Boss01 physical Arena·Breaker/Core/Emitter/Wind·피해/사망·`2-1` 전환과 Sector 02~05 보스 상세 계약·구현
+- Boss01 physical Arena·Breaker/Core/Emitter/Wind·일반 전투 피해/전멸 재시도·`2-1` 전환과 Sector 02~05 보스 상세 계약·구현. Boss Timer·시간 만료 Arena collapse는 후속 범위다.
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
 ## 구현 순서

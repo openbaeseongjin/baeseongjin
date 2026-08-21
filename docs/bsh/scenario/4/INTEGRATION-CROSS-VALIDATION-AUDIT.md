@@ -1331,7 +1331,7 @@ DESIGNER-DEFINED BOSS ENTRY
 → general timer STOP
 → general collapse STOP
 → remaining general time DISCARD
-→ separate boss timer START
+→ initial Boss START without a timer; separate Boss Timer DEFERRED
 ```
 
 ### 4-8 Current

@@ -85,11 +85,10 @@ Human villain 아님.
 HP 360
 3 phases × 120
 
-Boss Timer
-210 sec
-
-Timer 0
-→ arena collapse 80 px/s prototype
+Boss Timer / Arena collapse
+→ DEFERRED
+→ 초기 Boss01 구현에서 제외
+→ 과거 210 sec / 80 px/s는 후속 Timer 작업 전까지 구현 입력 아님
 ```
 
 Core는 기본 Shielded.
@@ -150,7 +149,7 @@ Artifact 없음.
 
 - 일반 잔여 Timer는 Boss 진입 때 폐기.
 - Boss 전원 탈락 → Boss만 재시작.
-- 한 명 붕괴 탈락 → Survivor spectate.
+- 시간 만료 붕괴·한 명 탈락 관전은 후속 Boss Timer 범위.
 - Survivor Boss 처치 → 다음 Sector safe entry에서 active session players 재합류.
 
 ---
@@ -285,8 +284,7 @@ Prototype:
 ```text
 HP 450
 3 phases × 150
-Boss Timer 240 sec
-Arena collapse 80 px/s after timer 0
+Boss Timer / Arena collapse DEFERRED
 ```
 
 각 Phase:

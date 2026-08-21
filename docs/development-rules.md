@@ -240,8 +240,8 @@ class Player extends RopeAttachable(GameObject) {}
 - 여러 환경 atlas는 캐릭터와 분리된 `environment-asset-format.md` 계약으로 로드한다. atlas 실패는 backdrop·terrain·decoration 단위로만 fallback하고 pending을 실패로 고정하지 않으며, loader·schema·example·validator 중 하나를 바꾸면 나머지 계약과 component별 실패 진단을 함께 갱신한다.
 - 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
 - 시나리오 문서용 이미지는 `bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`의 생성 전 Runtime 확인, 대표 Camera Shot, Player 상대 크기, 한 줄 live Rope, 정확한 오브젝트 수와 상태 검수를 통과해야 한다. 전체 경로·좌표의 권위는 Approved Blockout이 소유하지만 선택한 Camera Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 이미지에서도 보존한다. 생성 구도를 위해 Gameplay Geometry를 이동·확대·병합하지 않으며 `RETIRED`·`PENDING REGENERATION` 이미지를 다음 생성의 Style Anchor로 연쇄 사용하지 않는다.
-- collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. 앱·renderer·충돌 함수가 전역 플레이어 반지름을 따로 가져와 같은 shape 규칙을 다시 해석하지 않는다.
-- Player와 Enemy 같은 이동 actor의 controller·행동·Patrol은 Runtime 좌표를 직접 변경하지 않는다. 속도·displacement intent를 공용 surface physics step에 전달하고, 그 step만 위치 적분, 활성 collision surface와 Player↔Player·Player↔Enemy body 해결을 수행한다. spawn·reset·권위 snapshot restore는 이동이 아닌 명시적 상태 전이로 분리한다.
+- collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. `CircleCollider`와 convex `PolygonCollider` snapshot을 공용 판정이 직접 소비하며 box는 중심 기준 네 꼭짓점을 가진 polygon 편의 생성자다. 앱·renderer·충돌·전투 함수가 전역 반지름이나 별도 사각형 판정을 가져와 같은 shape 규칙을 다시 해석하지 않는다. concave 외곽은 여러 convex collider로 분해하는 별도 compound 계약 전에는 단일 polygon으로 넣지 않는다.
+- Player와 Enemy 같은 이동 actor의 controller·행동·Patrol은 Runtime 좌표를 직접 변경하지 않는다. 속도·displacement intent를 공용 surface physics step에 전달하고, 그 step만 위치 적분, 활성 collision surface와 Player↔Player·Player↔Enemy·Enemy↔Enemy body 해결을 수행한다. circle↔circle, circle↔polygon, polygon↔polygon은 같은 contact normal·penetration 결과를 사용한다. 동적 body 접촉은 법선 속도를 0으로 자르는 벽 처리로 대체하지 않고 collider bounding size 기반 질량, 상대 속도와 반발 계수로 자기 권위 body의 위치 보정·impulse를 계산한다. `sentry` 고정형 Turret만 inverse mass 0의 정적 body이며 다른 Enemy는 authored 이동 방식과 무관하게 동적 body다. spawn·reset·권위 snapshot restore는 이동이 아닌 명시적 상태 전이로 분리한다.
 - 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 진단 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
 - 렌더러 변경은 실제 브라우저에서 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 확인한다.
 - 멀티플레이 파티클·VFX·화면 흔들림은 권위 판정 이벤트를 받아 각 클라이언트가 로컬로 생성·진행한다. 서버 시뮬레이션과 네트워크 스냅샷에 표현 객체나 효과 수명을 넣지 않는다.
@@ -249,6 +249,7 @@ class Player extends RopeAttachable(GameObject) {}
 ### 모바일 우선 분할 권한 규칙
 
 - 플레이어·로프처럼 특정 소유자가 있는 입력 주도 사건은 소유 클라이언트가, 충돌·피격은 피해 클라이언트가 최초 트리거한다. 서버 응답을 받은 뒤 이동, 넉백, 로프 해제, UI 전환 또는 VFX를 처음 시작하면 안 된다.
+- 동적 actor 충돌은 각 권위가 자기 body에만 같은 질량·상대 속도 공식을 적용한다. Player는 소유 클라이언트가 즉시 반응하고 최신 owner motion으로 공유하며, Enemy와 Enemy↔Enemy 응답은 중립 서버가 진행한다. 서버가 Player를 대신 밀거나 소유 클라이언트가 Enemy 권위 위치를 확정하지 않는다.
 - 몹·적 투사체 생성과 궤적처럼 어느 한 클라이언트에 맡길 수 없는 중립 시뮬레이션 사건은 서버가 진행한다. 대상 없는 중립 사건을 임의의 대표 클라이언트에게 위임하지 않는다.
 - 클라이언트는 트리거 프레임에 로컬 상태와 피드백을 적용하고, `eventKey`, `clientTick`, 관련 객체 ID와 최소 판정 자료만 서버에 보낸다. 일반 claim은 서버가 자체 중립 객체·규칙으로 검증할 수 있는 결과값을 신뢰 입력으로 보내지 않는다. 피해자 최종 판정인 impact는 예외적으로 관측 대미지와 결과 상태 지문을 보내며, 전체 소유자 상태는 지문 불일치 복구 때만 보낸다.
 - 즉시 사건 경로와 지속 상태 수렴 경로를 분리한다. 사건을 클라이언트가 먼저 트리거했다는 이유로 장기 상태 동기화를 생략하지 않는다.

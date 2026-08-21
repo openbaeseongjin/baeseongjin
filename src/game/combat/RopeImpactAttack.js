@@ -34,7 +34,11 @@ export class RopeImpactAttack {
         const overlaps = enemies.filter(
             (enemy) =>
                 enemy.health > 0 &&
-                owner.physics.collider.overlapsCircle(owner.physics.position, enemy.position, enemy.radius)
+                owner.physics.collider.overlapsCollider(
+                    owner.physics.position,
+                    enemy.position,
+                    enemy.collider ?? { type: "circle", radius: enemy.radius }
+                )
         );
         const speed = Math.hypot(owner.physics.velocity.x, owner.physics.velocity.y);
         const canHit = owner.ropeObject.rope.isAttached && speed >= this.minimumSpeed;
