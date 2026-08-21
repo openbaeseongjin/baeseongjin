@@ -6,6 +6,16 @@
 
 이 마일스톤은 Stage `1-1`과 `1-7`만 migration한다. 48개 Stage 전체에 반복 적용할 migration 경로를 확립하며, 시각 에디터는 아직 만들지 않는다.
 
+## 2026-08-21 범위 확장 기록
+
+사용자 승인으로 v2 저작 목록을 Sector 01~06의 48개 Stage로 확장했다. 초기 두 Stage만을 다루는 위 마일스톤의 검증 순서와 source-isolated 원칙은 유지하되, 현재 편집기는 명시적 `AREA-EDITOR-CATALOG.json`의 저작 모드에 따라 다음 경계를 표시·강제한다.
+
+- **`runtime-generated`**: Sector 01의 8개 Stage. legacy definition과 deep parity를 확인한 뒤 generated output을 현재 manifest 선택으로 사용한다.
+- **`runtime-staged`**: Sector 02의 8개 Stage. v2/generated output과 parity는 준비하지만, 메인 개발자 소유 facade의 선택을 이 lane이 바꾸지 않는다.
+- **`scenario-only`**: Sector 03~06의 32개 Stage. 각 `AREA-SPEC-REV*-DESIGN.json`을 v2 편집 투영과 immutable source snapshot으로 보존하며, Apply는 v2 source만 바꾼다. Boss·전환·새 기믹·진행·멀티플레이 Runtime 연결은 별도 승인 없이는 만들지 않는다.
+
+따라서 Sector 02 facade와 Sector 03~06의 gameplay·progression·multiplayer source는 이 확장의 수정 대상이 아니다. 이 구분은 메인 개발자와 동시 작업할 때 generated output이 존재한다는 사실만으로 live Runtime source를 바꾸지 않게 하는 최우선 협업 경계다.
+
 ## 제품 계약
 
 - 장기 canonical 저작 원본은 `AREA-SPEC v2`다. 모든 Stage를 명시적으로 migration하며, 생성 파일의 존재만으로 Runtime source를 추론하지 않는다.

@@ -1,0 +1,894 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "sector": 2,
+    "stage": 7,
+    "legacyStageAlias": "2-7",
+    "sourceAreaId": "sector-02-07"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "subtitle": "EVACUATION TRANSFER SUSPENDED",
+    "surfaces": [
+      {
+        "id": "sector-02-07:p0",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -736,
+          "y": 0
+        },
+        "vertices": [
+          {
+            "x": -896,
+            "y": 0
+          },
+          {
+            "x": -576,
+            "y": 0
+          },
+          {
+            "x": -576,
+            "y": 32
+          },
+          {
+            "x": -896,
+            "y": 32
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:buttress-a",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -480,
+          "y": -320
+        },
+        "vertices": [
+          {
+            "x": -568,
+            "y": -320
+          },
+          {
+            "x": -392,
+            "y": -320
+          },
+          {
+            "x": -392,
+            "y": -298
+          },
+          {
+            "x": -568,
+            "y": -298
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:buttress-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -128,
+          "y": -288
+        },
+        "vertices": [
+          {
+            "x": -256,
+            "y": -288
+          },
+          {
+            "x": 0,
+            "y": -288
+          },
+          {
+            "x": 0,
+            "y": -270
+          },
+          {
+            "x": -256,
+            "y": -270
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:buttress-b",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -144,
+          "y": -480
+        },
+        "vertices": [
+          {
+            "x": -224,
+            "y": -480
+          },
+          {
+            "x": -64,
+            "y": -480
+          },
+          {
+            "x": -64,
+            "y": -458
+          },
+          {
+            "x": -224,
+            "y": -458
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:shelter-core",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 160,
+          "y": -672
+        },
+        "vertices": [
+          {
+            "x": -32,
+            "y": -672
+          },
+          {
+            "x": 352,
+            "y": -672
+          },
+          {
+            "x": 352,
+            "y": -646
+          },
+          {
+            "x": -32,
+            "y": -646
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:carrier-alcove",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -256,
+          "y": -768
+        },
+        "vertices": [
+          {
+            "x": -336,
+            "y": -768
+          },
+          {
+            "x": -176,
+            "y": -768
+          },
+          {
+            "x": -176,
+            "y": -748
+          },
+          {
+            "x": -336,
+            "y": -748
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:mast-landing-a",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 448,
+          "y": -864
+        },
+        "vertices": [
+          {
+            "x": 376,
+            "y": -864
+          },
+          {
+            "x": 520,
+            "y": -864
+          },
+          {
+            "x": 520,
+            "y": -842
+          },
+          {
+            "x": 376,
+            "y": -842
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:low-mast-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 512,
+          "y": -736
+        },
+        "vertices": [
+          {
+            "x": 432,
+            "y": -736
+          },
+          {
+            "x": 592,
+            "y": -736
+          },
+          {
+            "x": 592,
+            "y": -718
+          },
+          {
+            "x": 432,
+            "y": -718
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:upper-mast-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -32,
+          "y": -896
+        },
+        "vertices": [
+          {
+            "x": -112,
+            "y": -896
+          },
+          {
+            "x": 48,
+            "y": -896
+          },
+          {
+            "x": 48,
+            "y": -878
+          },
+          {
+            "x": -112,
+            "y": -878
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:shelter-core-wall",
+        "kind": "solid",
+        "oneWay": false,
+        "grappleable": false,
+        "coordinateAnchor": "bottom-center",
+        "position": {
+          "x": 376,
+          "y": -560
+        },
+        "vertices": [
+          {
+            "x": 360,
+            "y": -816
+          },
+          {
+            "x": 392,
+            "y": -816
+          },
+          {
+            "x": 392,
+            "y": -560
+          },
+          {
+            "x": 360,
+            "y": -560
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:exit-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 640,
+          "y": -1248
+        },
+        "vertices": [
+          {
+            "x": 512,
+            "y": -1248
+          },
+          {
+            "x": 768,
+            "y": -1248
+          },
+          {
+            "x": 768,
+            "y": -1216
+          },
+          {
+            "x": 512,
+            "y": -1216
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:g1-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": -576,
+          "y": -240
+        },
+        "vertices": [
+          {
+            "x": -588,
+            "y": -252
+          },
+          {
+            "x": -564,
+            "y": -252
+          },
+          {
+            "x": -564,
+            "y": -228
+          },
+          {
+            "x": -588,
+            "y": -228
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:g2-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": -256,
+          "y": -416
+        },
+        "vertices": [
+          {
+            "x": -268,
+            "y": -428
+          },
+          {
+            "x": -244,
+            "y": -428
+          },
+          {
+            "x": -244,
+            "y": -404
+          },
+          {
+            "x": -268,
+            "y": -404
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:g3-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 64,
+          "y": -592
+        },
+        "vertices": [
+          {
+            "x": 52,
+            "y": -604
+          },
+          {
+            "x": 76,
+            "y": -604
+          },
+          {
+            "x": 76,
+            "y": -580
+          },
+          {
+            "x": 52,
+            "y": -580
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:access-anchor-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": -64,
+          "y": -736
+        },
+        "vertices": [
+          {
+            "x": -76,
+            "y": -748
+          },
+          {
+            "x": -52,
+            "y": -748
+          },
+          {
+            "x": -52,
+            "y": -724
+          },
+          {
+            "x": -76,
+            "y": -724
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:g4-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 416,
+          "y": -800
+        },
+        "vertices": [
+          {
+            "x": 404,
+            "y": -812
+          },
+          {
+            "x": 428,
+            "y": -812
+          },
+          {
+            "x": 428,
+            "y": -788
+          },
+          {
+            "x": 404,
+            "y": -788
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:g5-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 128,
+          "y": -1056
+        },
+        "vertices": [
+          {
+            "x": 116,
+            "y": -1068
+          },
+          {
+            "x": 140,
+            "y": -1068
+          },
+          {
+            "x": 140,
+            "y": -1044
+          },
+          {
+            "x": 116,
+            "y": -1044
+          }
+        ]
+      },
+      {
+        "id": "sector-02-07:g6-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 448,
+          "y": -1216
+        },
+        "vertices": [
+          {
+            "x": 436,
+            "y": -1228
+          },
+          {
+            "x": 460,
+            "y": -1228
+          },
+          {
+            "x": 460,
+            "y": -1204
+          },
+          {
+            "x": 436,
+            "y": -1204
+          }
+        ]
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-02-07:route-entry",
+        "x": -768,
+        "y": -32
+      },
+      {
+        "id": "sector-02-07:route-g1",
+        "x": -576,
+        "y": -240
+      },
+      {
+        "id": "sector-02-07:route-buttress-a",
+        "x": -480,
+        "y": -320
+      },
+      {
+        "id": "sector-02-07:route-g2",
+        "x": -256,
+        "y": -416
+      },
+      {
+        "id": "sector-02-07:route-buttress-b",
+        "x": -144,
+        "y": -480
+      },
+      {
+        "id": "sector-02-07:route-g3",
+        "x": 64,
+        "y": -592
+      },
+      {
+        "id": "sector-02-07:route-shelter-core",
+        "x": 160,
+        "y": -672
+      },
+      {
+        "id": "sector-02-07:route-story-core-right-edge",
+        "x": 352,
+        "y": -672
+      },
+      {
+        "id": "sector-02-07:route-g4",
+        "x": 416,
+        "y": -800
+      },
+      {
+        "id": "sector-02-07:route-mast-landing-a",
+        "x": 448,
+        "y": -864
+      },
+      {
+        "id": "sector-02-07:route-g5",
+        "x": 128,
+        "y": -1056
+      },
+      {
+        "id": "sector-02-07:route-g6",
+        "x": 448,
+        "y": -1216
+      },
+      {
+        "id": "sector-02-07:route-exit",
+        "x": 672,
+        "y": -1280
+      }
+    ],
+    "recoveryPoints": [
+      {
+        "id": "sector-02-07:recovery-point-buttress",
+        "x": -128,
+        "y": -306
+      },
+      {
+        "id": "sector-02-07:recovery-point-low-mast",
+        "x": 512,
+        "y": -754
+      },
+      {
+        "id": "sector-02-07:recovery-point-upper-mast",
+        "x": -32,
+        "y": -914
+      }
+    ],
+    "checkpoints": [],
+    "objects": [
+      {
+        "id": "sector-02-07:drone-1",
+        "kind": "patrol-drone",
+        "presentationId": "world-object:patrol-drone",
+        "position": {
+          "x": -320,
+          "y": -394
+        },
+        "enemyType": "patrol-drone-t1",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 80,
+            "y": -38
+          },
+          "size": {
+            "width": 928,
+            "height": 448
+          }
+        },
+        "patrol": {
+          "points": [
+            {
+              "x": -512,
+              "y": -304
+            },
+            {
+              "x": 32,
+              "y": -560
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-07:drone-2",
+        "kind": "patrol-drone",
+        "presentationId": "world-object:patrol-drone",
+        "position": {
+          "x": 272,
+          "y": -992
+        },
+        "enemyType": "patrol-drone-t1",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 16,
+            "y": 0
+          },
+          "size": {
+            "width": 704,
+            "height": 288
+          }
+        },
+        "patrol": {
+          "points": [
+            {
+              "x": 32,
+              "y": -992
+            },
+            {
+              "x": 448,
+              "y": -992
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-07:shelter-centre-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": -256,
+          "y": -768
+        },
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "support-drone-t1",
+            "artillery-drone-t1"
+          ]
+        },
+        "accessModuleId": "sector-02:access-module:c",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 320,
+            "height": 288
+          }
+        },
+        "rules": [
+          "kill-optional-for-stage-exit",
+          "kill-required-for-access-module",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-07:shelter-status",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 96,
+          "y": -736
+        },
+        "cueIds": [
+          "shelter-capacity-full",
+          "evacuation-transfer-suspended",
+          "remain-designated-area"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-07:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 624,
+          "y": -1248
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-02-07:exit-panel-engaged",
+        "gateId": "sector-02-07:gate",
+        "requiredObjectiveIds": [
+          "sector-02-07:exit-reached"
+        ]
+      },
+      {
+        "id": "sector-02-07:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 736,
+          "y": -1248
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-02-07:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "sector-02-07:exit-reached",
+        "type": "reach",
+        "bounds": {
+          "x": 672,
+          "y": -1312,
+          "width": 128,
+          "height": 96
+        }
+      },
+      {
+        "id": "sector-02-07:exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-02-07:exit-panel",
+        "requiredObjectiveIds": [
+          "sector-02-07:exit-reached"
+        ]
+      }
+    ],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [
+      "shelter-capacity-full",
+      "transfer-suspended",
+      "evacuation-platform-preview"
+    ],
+    "routes": [
+      "main",
+      "access",
+      "recovery"
+    ],
+    "cameraZones": [],
+    "cueIds": [
+      "shelter-access",
+      "two-patrol-bands",
+      "no-crossfire",
+      "transfer-suspended"
+    ],
+    "id": "sector-02-07",
+    "sectorId": "sector-02",
+    "order": 7,
+    "name": "SHELTER ACCESS",
+    "bounds": {
+      "width": 1792,
+      "height": 1312
+    },
+    "entry": {
+      "id": "sector-02-07:entry",
+      "x": -768,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-02-07:exit",
+      "x": 736,
+      "y": -1280
+    },
+    "nextAreaId": "sector-02-08",
+    "gate": {
+      "id": "sector-02-07:gate",
+      "nextAreaId": "sector-02-08",
+      "requiredObjectiveIds": [
+        "sector-02-07:exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 710,
+        "y": -1310,
+        "width": 52,
+        "height": 62
+      }
+    }
+  },
+  "anchors": [],
+  "behaviorRefs": []
+}

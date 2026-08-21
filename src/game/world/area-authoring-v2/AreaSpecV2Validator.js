@@ -10,6 +10,7 @@ import { isKnownEnemyType } from "../../combat/EnemyArchetypeCatalog.js";
 import { resolveObjectTriggerBounds } from "../areas/AreaDefinition.js";
 import {
     AREA_SPEC_V2,
+    AREA_SPEC_V2_AUTHORING_MODES,
     EDITOR_EDITABLE_DOMAINS,
     EDITOR_READ_ONLY_DOMAINS,
     canonicalizeAreaSpecV2,
@@ -50,8 +51,14 @@ function boundsInsideArea(areaBounds, bounds) {
 }
 
 function validateEditableEnemy(issues, file, object, areaBounds) {
-    if (typeof object.enemyType !== "string" || !isKnownEnemyType(object.enemyType)) {
+    if (
+        object.enemyType !== undefined &&
+        (typeof object.enemyType !== "string" || !isKnownEnemyType(object.enemyType))
+    ) {
         issue(issues, file, "enemy-type-invalid", { id: object.id ?? null, enemyType: object.enemyType ?? null });
+    }
+    if (object.enemyType === undefined && object.enemySelection === undefined) {
+        issue(issues, file, "enemy-type-missing", { id: object.id ?? null });
     }
     if (object.enemySelection !== undefined) {
         try {
@@ -172,6 +179,7 @@ function specDomainValue(spec, domain) {
         case "identity":
             return {
                 schemaVersion: spec?.schemaVersion,
+                authoringMode: spec?.authoringMode ?? "runtime",
                 stage: spec?.stage,
                 editor: spec?.editor,
                 definition: {
@@ -183,6 +191,8 @@ function specDomainValue(spec, domain) {
                     cueIds: definition.cueIds
                 }
             };
+        case "scenarioMetadata":
+            return spec?.scenario ?? null;
         case "worldObjects":
             return (definition.objects ?? []).filter(
                 (object) => !isEditableEnemyObject(object) && object?.kind !== "wind-source"
@@ -285,6 +295,7 @@ export const AREA_SPEC_EDITOR_CONTRACT = Object.freeze({
     lockedDomains: Object.freeze(
         [
             "identity",
+            "scenarioMetadata",
             "objectLayout",
             "worldObjects",
             "objectives",
@@ -388,6 +399,19 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
     }
     if (spec.schemaVersion !== AREA_SPEC_V2)
         issue(issues, file, "schema-version-invalid", { schemaVersion: spec.schemaVersion });
+    const authoringMode = spec.authoringMode ?? "runtime";
+    if (!AREA_SPEC_V2_AUTHORING_MODES.includes(authoringMode)) {
+        issue(issues, file, "authoring-mode-invalid", { authoringMode });
+    }
+    if (
+        authoringMode === "scenario" &&
+        (!isPlainObject(spec.scenario) ||
+            typeof spec.scenario.sourcePath !== "string" ||
+            typeof spec.scenario.sourceSchemaVersion !== "string" ||
+            spec.scenario.status !== "scenario-only")
+    ) {
+        issue(issues, file, "scenario-metadata-invalid");
+    }
 
     const stage = spec.stage;
     const definition = spec.definition;
@@ -463,8 +487,10 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
         issue(issues, file, code, error instanceof AreaBehaviorReferenceError ? error.details : {});
     }
 
-    if (isPlainObject(definition)) validateEditableRuntimeFields(issues, file, definition);
-    if (issues.length === 0) validateRuntimeAreaSemantics(spec, issues, file);
+    if (isPlainObject(definition) && authoringMode === "runtime") {
+        validateEditableRuntimeFields(issues, file, definition);
+    }
+    if (issues.length === 0 && authoringMode === "runtime") validateRuntimeAreaSemantics(spec, issues, file);
 
     return freezeValue({ valid: issues.length === 0, issues });
 }

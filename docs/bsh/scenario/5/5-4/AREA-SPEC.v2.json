@@ -1,0 +1,950 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 5,
+    "stage": 4,
+    "legacyStageAlias": "5-4",
+    "sourceAreaId": "sector-05-04"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-05-04",
+    "sectorId": "sector-05",
+    "order": 4,
+    "name": "CAPACITY ALLOCATION CORE",
+    "subtitle": "HORIZONTAL ALLOCATION ISLAND FIELD / RIGHT-SIDE BUS RISER",
+    "bounds": {
+      "width": 4512,
+      "height": 2464
+    },
+    "entry": {
+      "id": "sector-05-04:entry",
+      "x": -2120,
+      "y": -260
+    },
+    "exit": {
+      "id": "sector-05-04:scenario-exit",
+      "x": 220,
+      "y": -2140
+    },
+    "nextAreaId": null,
+    "surfaces": [
+      {
+        "id": "island-a",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1980,
+          "y": -390
+        },
+        "vertices": [
+          {
+            "x": -2195,
+            "y": -390
+          },
+          {
+            "x": -1765,
+            "y": -390
+          },
+          {
+            "x": -1765,
+            "y": -270
+          },
+          {
+            "x": -2195,
+            "y": -270
+          }
+        ],
+        "sourceId": "island-a"
+      },
+      {
+        "id": "island-b",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1260,
+          "y": -500
+        },
+        "vertices": [
+          {
+            "x": -1475,
+            "y": -500
+          },
+          {
+            "x": -1045,
+            "y": -500
+          },
+          {
+            "x": -1045,
+            "y": -370
+          },
+          {
+            "x": -1475,
+            "y": -370
+          }
+        ],
+        "sourceId": "island-b"
+      },
+      {
+        "id": "island-c",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -550,
+          "y": -410
+        },
+        "vertices": [
+          {
+            "x": -765,
+            "y": -410
+          },
+          {
+            "x": -335,
+            "y": -410
+          },
+          {
+            "x": -335,
+            "y": -290
+          },
+          {
+            "x": -765,
+            "y": -290
+          }
+        ],
+        "sourceId": "island-c"
+      },
+      {
+        "id": "island-d",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 160,
+          "y": -500
+        },
+        "vertices": [
+          {
+            "x": -55,
+            "y": -500
+          },
+          {
+            "x": 375,
+            "y": -500
+          },
+          {
+            "x": 375,
+            "y": -375
+          },
+          {
+            "x": -55,
+            "y": -375
+          }
+        ],
+        "sourceId": "island-d"
+      },
+      {
+        "id": "bus-riser",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 690,
+          "y": -1880
+        },
+        "vertices": [
+          {
+            "x": 610,
+            "y": -1880
+          },
+          {
+            "x": 770,
+            "y": -1880
+          },
+          {
+            "x": 770,
+            "y": -560
+          },
+          {
+            "x": 610,
+            "y": -560
+          }
+        ],
+        "sourceId": "bus-riser"
+      },
+      {
+        "id": "capacity-record-deck",
+        "kind": "scenario-surface",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 80,
+          "y": -2180
+        },
+        "vertices": [
+          {
+            "x": -130,
+            "y": -2180
+          },
+          {
+            "x": 290,
+            "y": -2180
+          },
+          {
+            "x": 290,
+            "y": -2150
+          },
+          {
+            "x": -130,
+            "y": -2150
+          }
+        ],
+        "sourceId": "capacity-record-deck"
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-05-04:route-h00",
+        "x": -2120,
+        "y": -260,
+        "sourceId": "h00"
+      },
+      {
+        "id": "sector-05-04:route-h01",
+        "x": -1840,
+        "y": -300,
+        "sourceId": "h01"
+      },
+      {
+        "id": "sector-05-04:route-h02",
+        "x": -1520,
+        "y": -360,
+        "sourceId": "h02"
+      },
+      {
+        "id": "sector-05-04:route-h03",
+        "x": -1220,
+        "y": -420,
+        "sourceId": "h03"
+      },
+      {
+        "id": "sector-05-04:route-h04",
+        "x": -900,
+        "y": -360,
+        "sourceId": "h04"
+      },
+      {
+        "id": "sector-05-04:route-h05",
+        "x": -580,
+        "y": -300,
+        "sourceId": "h05"
+      },
+      {
+        "id": "sector-05-04:route-h06",
+        "x": -260,
+        "y": -380,
+        "sourceId": "h06"
+      },
+      {
+        "id": "sector-05-04:route-h07",
+        "x": 60,
+        "y": -440,
+        "sourceId": "h07"
+      },
+      {
+        "id": "sector-05-04:route-h08",
+        "x": 360,
+        "y": -420,
+        "sourceId": "h08"
+      },
+      {
+        "id": "sector-05-04:route-h09",
+        "x": 640,
+        "y": -520,
+        "sourceId": "h09"
+      },
+      {
+        "id": "sector-05-04:route-h10",
+        "x": 760,
+        "y": -800,
+        "sourceId": "h10"
+      },
+      {
+        "id": "sector-05-04:route-h11",
+        "x": 760,
+        "y": -1120,
+        "sourceId": "h11"
+      },
+      {
+        "id": "sector-05-04:route-h12",
+        "x": 760,
+        "y": -1440,
+        "sourceId": "h12"
+      },
+      {
+        "id": "sector-05-04:route-h13",
+        "x": 760,
+        "y": -1760,
+        "sourceId": "h13"
+      },
+      {
+        "id": "sector-05-04:route-h14",
+        "x": 500,
+        "y": -1960,
+        "sourceId": "h14"
+      },
+      {
+        "id": "sector-05-04:route-h15",
+        "x": 220,
+        "y": -2140,
+        "sourceId": "h15"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "h00-surface",
+        "x": -2120,
+        "y": -260,
+        "properties": {
+          "sourceId": "h00"
+        }
+      },
+      "landmark": {
+        "id": "h00",
+        "x": -2120,
+        "y": -260,
+        "properties": {
+          "label": "h00",
+          "coordinateAnchor": "center",
+          "sourceId": "h00"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h01-surface",
+        "x": -1840,
+        "y": -300,
+        "properties": {
+          "sourceId": "h01"
+        }
+      },
+      "landmark": {
+        "id": "h01",
+        "x": -1840,
+        "y": -300,
+        "properties": {
+          "label": "h01",
+          "coordinateAnchor": "center",
+          "sourceId": "h01"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h02-surface",
+        "x": -1520,
+        "y": -360,
+        "properties": {
+          "sourceId": "h02"
+        }
+      },
+      "landmark": {
+        "id": "h02",
+        "x": -1520,
+        "y": -360,
+        "properties": {
+          "label": "h02",
+          "coordinateAnchor": "center",
+          "sourceId": "h02"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h03-surface",
+        "x": -1220,
+        "y": -420,
+        "properties": {
+          "sourceId": "h03"
+        }
+      },
+      "landmark": {
+        "id": "h03",
+        "x": -1220,
+        "y": -420,
+        "properties": {
+          "label": "h03",
+          "coordinateAnchor": "center",
+          "sourceId": "h03"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h04-surface",
+        "x": -900,
+        "y": -360,
+        "properties": {
+          "sourceId": "h04"
+        }
+      },
+      "landmark": {
+        "id": "h04",
+        "x": -900,
+        "y": -360,
+        "properties": {
+          "label": "h04",
+          "coordinateAnchor": "center",
+          "sourceId": "h04"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h05-surface",
+        "x": -580,
+        "y": -300,
+        "properties": {
+          "sourceId": "h05"
+        }
+      },
+      "landmark": {
+        "id": "h05",
+        "x": -580,
+        "y": -300,
+        "properties": {
+          "label": "h05",
+          "coordinateAnchor": "center",
+          "sourceId": "h05"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h06-surface",
+        "x": -260,
+        "y": -380,
+        "properties": {
+          "sourceId": "h06"
+        }
+      },
+      "landmark": {
+        "id": "h06",
+        "x": -260,
+        "y": -380,
+        "properties": {
+          "label": "h06",
+          "coordinateAnchor": "center",
+          "sourceId": "h06"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h07-surface",
+        "x": 60,
+        "y": -440,
+        "properties": {
+          "sourceId": "h07"
+        }
+      },
+      "landmark": {
+        "id": "h07",
+        "x": 60,
+        "y": -440,
+        "properties": {
+          "label": "h07",
+          "coordinateAnchor": "center",
+          "sourceId": "h07"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h08-surface",
+        "x": 360,
+        "y": -420,
+        "properties": {
+          "sourceId": "h08"
+        }
+      },
+      "landmark": {
+        "id": "h08",
+        "x": 360,
+        "y": -420,
+        "properties": {
+          "label": "h08",
+          "coordinateAnchor": "center",
+          "sourceId": "h08"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h09-surface",
+        "x": 640,
+        "y": -520,
+        "properties": {
+          "sourceId": "h09"
+        }
+      },
+      "landmark": {
+        "id": "h09",
+        "x": 640,
+        "y": -520,
+        "properties": {
+          "label": "h09",
+          "coordinateAnchor": "center",
+          "sourceId": "h09"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h10-surface",
+        "x": 760,
+        "y": -800,
+        "properties": {
+          "sourceId": "h10"
+        }
+      },
+      "landmark": {
+        "id": "h10",
+        "x": 760,
+        "y": -800,
+        "properties": {
+          "label": "h10",
+          "coordinateAnchor": "center",
+          "sourceId": "h10"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h11-surface",
+        "x": 760,
+        "y": -1120,
+        "properties": {
+          "sourceId": "h11"
+        }
+      },
+      "landmark": {
+        "id": "h11",
+        "x": 760,
+        "y": -1120,
+        "properties": {
+          "label": "h11",
+          "coordinateAnchor": "center",
+          "sourceId": "h11"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h12-surface",
+        "x": 760,
+        "y": -1440,
+        "properties": {
+          "sourceId": "h12"
+        }
+      },
+      "landmark": {
+        "id": "h12",
+        "x": 760,
+        "y": -1440,
+        "properties": {
+          "label": "h12",
+          "coordinateAnchor": "center",
+          "sourceId": "h12"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h13-surface",
+        "x": 760,
+        "y": -1760,
+        "properties": {
+          "sourceId": "h13"
+        }
+      },
+      "landmark": {
+        "id": "h13",
+        "x": 760,
+        "y": -1760,
+        "properties": {
+          "label": "h13",
+          "coordinateAnchor": "center",
+          "sourceId": "h13"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h14-surface",
+        "x": 500,
+        "y": -1960,
+        "properties": {
+          "sourceId": "h14"
+        }
+      },
+      "landmark": {
+        "id": "h14",
+        "x": 500,
+        "y": -1960,
+        "properties": {
+          "label": "h14",
+          "coordinateAnchor": "center",
+          "sourceId": "h14"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h15-surface",
+        "x": 220,
+        "y": -2140,
+        "properties": {
+          "sourceId": "h15"
+        }
+      },
+      "landmark": {
+        "id": "h15",
+        "x": 220,
+        "y": -2140,
+        "properties": {
+          "label": "h15",
+          "coordinateAnchor": "center",
+          "sourceId": "h15"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/5/5-4/AREA-SPEC-REV4-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV2.0 · NOT IMPLEMENTED",
+      "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+      "stage": {
+        "sector": 5,
+        "stage": 4,
+        "legacyStageAlias": "5-4",
+        "sourceAreaId": "sector-05-04",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "CAPACITY ALLOCATION CORE",
+        "subtitle": "HORIZONTAL ALLOCATION ISLAND FIELD / RIGHT-SIDE BUS RISER",
+        "supersedesLegacyDesign": "CONTINUITY SERVICE NODE / REST"
+      },
+      "bounds": {
+        "width": 3420,
+        "height": 2240
+      },
+      "entry": {
+        "id": "entry",
+        "x": -2120,
+        "y": -260,
+        "fromStageAlias": "5-3"
+      },
+      "grappleTargets": [
+        {
+          "id": "h00",
+          "x": -2120,
+          "y": -260
+        },
+        {
+          "id": "h01",
+          "x": -1840,
+          "y": -300
+        },
+        {
+          "id": "h02",
+          "x": -1520,
+          "y": -360
+        },
+        {
+          "id": "h03",
+          "x": -1220,
+          "y": -420
+        },
+        {
+          "id": "h04",
+          "x": -900,
+          "y": -360
+        },
+        {
+          "id": "h05",
+          "x": -580,
+          "y": -300
+        },
+        {
+          "id": "h06",
+          "x": -260,
+          "y": -380
+        },
+        {
+          "id": "h07",
+          "x": 60,
+          "y": -440
+        },
+        {
+          "id": "h08",
+          "x": 360,
+          "y": -420
+        },
+        {
+          "id": "h09",
+          "x": 640,
+          "y": -520
+        },
+        {
+          "id": "h10",
+          "x": 760,
+          "y": -800
+        },
+        {
+          "id": "h11",
+          "x": 760,
+          "y": -1120
+        },
+        {
+          "id": "h12",
+          "x": 760,
+          "y": -1440
+        },
+        {
+          "id": "h13",
+          "x": 760,
+          "y": -1760
+        },
+        {
+          "id": "h14",
+          "x": 500,
+          "y": -1960
+        },
+        {
+          "id": "h15",
+          "x": 220,
+          "y": -2140
+        }
+      ],
+      "surfaces": [
+        {
+          "id": "island-a",
+          "preset": "allocation-console-island",
+          "x": -1980,
+          "y": -390,
+          "width": 430,
+          "height": 120
+        },
+        {
+          "id": "island-b",
+          "preset": "allocation-console-island",
+          "x": -1260,
+          "y": -500,
+          "width": 430,
+          "height": 130
+        },
+        {
+          "id": "island-c",
+          "preset": "allocation-console-island",
+          "x": -550,
+          "y": -410,
+          "width": 430,
+          "height": 120
+        },
+        {
+          "id": "island-d",
+          "preset": "allocation-console-island",
+          "x": 160,
+          "y": -500,
+          "width": 430,
+          "height": 125
+        },
+        {
+          "id": "bus-riser",
+          "preset": "sealed-corporate-riser",
+          "x": 690,
+          "y": -1880,
+          "width": 160,
+          "height": 1320
+        },
+        {
+          "id": "capacity-record-deck",
+          "preset": "safe-deck",
+          "x": 80,
+          "y": -2180,
+          "width": 420,
+          "height": 30
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-05-04:artillery-a",
+          "enemyType": "artillery-drone-t1",
+          "role": "FIRST ARTILLERY / ALLOCATION FIELD",
+          "activation": {
+            "x": -2050,
+            "y": -820,
+            "width": 2450,
+            "height": 650
+          },
+          "rules": [
+            "kill-optional",
+            "no-kill-gate",
+            "activation-band-only"
+          ]
+        },
+        {
+          "id": "sector-05-04:artillery-b",
+          "enemyType": "artillery-drone-t1",
+          "role": "RISER REINFORCEMENT",
+          "activation": {
+            "x": 500,
+            "y": -1840,
+            "width": 700,
+            "height": 1250
+          },
+          "rules": [
+            "kill-optional",
+            "no-kill-gate",
+            "activation-band-only"
+          ],
+          "mustNotOverlapWith": "sector-05-04:artillery-a"
+        }
+      ],
+      "route": {
+        "mandatory": [
+          "h00",
+          "h01",
+          "h02",
+          "h03",
+          "h04",
+          "h05",
+          "h06",
+          "h07",
+          "h08",
+          "h09",
+          "h10",
+          "h11",
+          "h12",
+          "h13",
+          "h14",
+          "h15"
+        ],
+        "neighborDistancesPx": [
+          282.84,
+          325.58,
+          305.94,
+          325.58,
+          325.58,
+          329.85,
+          325.58,
+          300.67,
+          297.32,
+          304.63,
+          320,
+          320,
+          320,
+          328.02,
+          332.87
+        ],
+        "maxAuthoredRelationPx": 332.87,
+        "baseHookReachPx": 400
+      },
+      "recovery": [
+        {
+          "id": "r1",
+          "role": "under-void-1",
+          "maxRetrySeconds": 5
+        },
+        {
+          "id": "r2",
+          "role": "under-void-2",
+          "maxRetrySeconds": 5
+        },
+        {
+          "id": "r3",
+          "role": "under-void-3",
+          "maxRetrySeconds": 5
+        },
+        {
+          "id": "r4",
+          "role": "riser-mid",
+          "maxRetrySeconds": 5
+        },
+        {
+          "id": "r5",
+          "role": "riser-upper",
+          "maxRetrySeconds": 5
+        }
+      ],
+      "story": {
+        "systemFacts": [
+          "CAPACITY ALLOCATION CORE / OPERATIONS ACTIVE",
+          "CAPACITY ALLOCATION RECORD / 01 OF 03",
+          "AVAILABLE CAPACITY / CRITICAL DEFICIT",
+          "SIMULTANEOUS STABLE OPERATION / UNAVAILABLE",
+          "PRIORITY ROUTING HALL / ACCESS AHEAD"
+        ],
+        "approvedPlayerBark": "…전부 살릴 수는 없었던 거네."
+      },
+      "forbidden": [
+        "Jammer",
+        "AEGIS",
+        "Cutter",
+        "Pursuit",
+        "Patrol",
+        "Standard Sentry",
+        "Priority Directive content",
+        "Routing Authorization content",
+        "explanation of which group was sacrificed",
+        "named decision-maker"
+      ]
+    }
+  }
+}

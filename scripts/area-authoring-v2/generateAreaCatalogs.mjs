@@ -7,7 +7,8 @@ import { validateAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaS
 import { collectGeneratedOutputs } from "../../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
 
 const projectRoot = resolve(process.cwd());
-const manifestPath = "docs/bsh/scenario/AREA-CATALOG.json";
+const defaultManifestPath = "docs/bsh/scenario/AREA-CATALOG.json";
+const manifestIndexPath = "docs/bsh/scenario/AREA-CATALOGS.json";
 const generatedRoot = "src/game/world/areas/generated";
 
 function normalizePath(path) {
@@ -33,7 +34,7 @@ function printIssues(issues) {
     for (const issue of issues) console.error(`- ${issue.code}: ${JSON.stringify(issue)}`);
 }
 
-export function collectAreaCatalogGeneration({ check = false } = {}) {
+export function collectAreaCatalogGeneration({ check = false, manifestPath = defaultManifestPath } = {}) {
     const manifestResult = readJson(manifestPath);
     if (manifestResult.issues.length > 0) return { valid: false, issues: manifestResult.issues, outputs: [] };
     const manifest = manifestResult.value;
@@ -84,9 +85,47 @@ export function collectAreaCatalogGeneration({ check = false } = {}) {
     }
 }
 
+function readManifestPaths() {
+    if (!existsSync(resolve(projectRoot, manifestIndexPath))) return [defaultManifestPath];
+    const result = readJson(manifestIndexPath);
+    if (result.issues.length > 0) return { issues: result.issues, paths: [] };
+    const paths = result.value?.manifestPaths;
+    if (!Array.isArray(paths) || paths.length === 0 || paths.some((path) => typeof path !== "string")) {
+        return { issues: [{ code: "manifest-index-invalid", path: manifestIndexPath }], paths: [] };
+    }
+    if (new Set(paths).size !== paths.length) {
+        return { issues: [{ code: "manifest-index-duplicate", path: manifestIndexPath }], paths: [] };
+    }
+    return { issues: [], paths };
+}
+
+export function collectAllAreaCatalogGeneration({ check = false } = {}) {
+    const indexed = readManifestPaths();
+    if (Array.isArray(indexed)) {
+        return collectAreaCatalogGeneration({ check, manifestPath: indexed[0] });
+    }
+    if (indexed.issues.length > 0) return { valid: false, issues: indexed.issues, outputs: [] };
+    const outputs = [];
+    const issues = [];
+    const outputPaths = new Set();
+    for (const manifestPath of indexed.paths) {
+        const result = collectAreaCatalogGeneration({ check, manifestPath });
+        issues.push(...result.issues);
+        for (const output of result.outputs) {
+            if (outputPaths.has(output.outputPath)) {
+                issues.push({ code: "generated-output-duplicate", outputPath: output.outputPath, manifestPath });
+                continue;
+            }
+            outputPaths.add(output.outputPath);
+            outputs.push(output);
+        }
+    }
+    return { valid: issues.length === 0, issues, outputs };
+}
+
 export function main() {
     const check = process.argv.includes("--check");
-    const result = collectAreaCatalogGeneration({ check });
+    const result = collectAllAreaCatalogGeneration({ check });
     if (!result.valid) {
         printIssues(result.issues);
         process.exitCode = 1;

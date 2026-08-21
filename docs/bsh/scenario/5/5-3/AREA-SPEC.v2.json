@@ -1,0 +1,867 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 5,
+    "stage": 3,
+    "legacyStageAlias": "5-3",
+    "sourceAreaId": "sector-05-03"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-05-03",
+    "sectorId": "sector-05",
+    "order": 3,
+    "name": "SECURITY REVIEW GALLERY",
+    "subtitle": "CENTRAL SPINE / DUAL ARCHIVE BYPASS / HARDPOINT JAMMER",
+    "bounds": {
+      "width": 3000,
+      "height": 3136
+    },
+    "entry": {
+      "id": "sector-05-03:entry",
+      "x": 0,
+      "y": -100
+    },
+    "exit": {
+      "id": "sector-05-03:scenario-exit",
+      "x": -720,
+      "y": -2860
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-05-03:route-e",
+        "x": 0,
+        "y": -100,
+        "sourceId": "e"
+      },
+      {
+        "id": "sector-05-03:route-h1",
+        "x": 0,
+        "y": -400,
+        "sourceId": "h1"
+      },
+      {
+        "id": "sector-05-03:route-p0",
+        "x": 0,
+        "y": -650,
+        "sourceId": "p0"
+      },
+      {
+        "id": "sector-05-03:route-m0",
+        "x": 0,
+        "y": -1400,
+        "sourceId": "m0"
+      },
+      {
+        "id": "sector-05-03:route-t1",
+        "x": 320,
+        "y": -1510,
+        "sourceId": "t1"
+      },
+      {
+        "id": "sector-05-03:route-t2",
+        "x": 640,
+        "y": -1600,
+        "sourceId": "t2"
+      },
+      {
+        "id": "sector-05-03:route-p1",
+        "x": 900,
+        "y": -1700,
+        "sourceId": "p1"
+      },
+      {
+        "id": "sector-05-03:route-m1",
+        "x": -180,
+        "y": -2300,
+        "sourceId": "m1"
+      },
+      {
+        "id": "sector-05-03:route-f1",
+        "x": -180,
+        "y": -2520,
+        "sourceId": "f1"
+      },
+      {
+        "id": "sector-05-03:route-f2",
+        "x": -480,
+        "y": -2700,
+        "sourceId": "f2"
+      },
+      {
+        "id": "sector-05-03:route-x",
+        "x": -720,
+        "y": -2860,
+        "sourceId": "x"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "e-surface",
+        "x": 0,
+        "y": -100,
+        "properties": {
+          "sourceId": "e"
+        }
+      },
+      "landmark": {
+        "id": "e",
+        "x": 0,
+        "y": -100,
+        "properties": {
+          "label": "e",
+          "coordinateAnchor": "center",
+          "sourceId": "e"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "h1-surface",
+        "x": 0,
+        "y": -400,
+        "properties": {
+          "sourceId": "h1"
+        }
+      },
+      "landmark": {
+        "id": "h1",
+        "x": 0,
+        "y": -400,
+        "properties": {
+          "label": "h1",
+          "coordinateAnchor": "center",
+          "sourceId": "h1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "p0-surface",
+        "x": 0,
+        "y": -650,
+        "properties": {
+          "sourceId": "p0"
+        }
+      },
+      "landmark": {
+        "id": "p0",
+        "x": 0,
+        "y": -650,
+        "properties": {
+          "label": "p0",
+          "coordinateAnchor": "center",
+          "sourceId": "p0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "a-left-1-surface",
+        "x": -320,
+        "y": -780,
+        "properties": {
+          "sourceId": "a-left-1"
+        }
+      },
+      "landmark": {
+        "id": "a-left-1",
+        "x": -320,
+        "y": -780,
+        "properties": {
+          "label": "a-left-1",
+          "coordinateAnchor": "center",
+          "sourceId": "a-left-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "a-left-2-surface",
+        "x": -560,
+        "y": -1030,
+        "properties": {
+          "sourceId": "a-left-2"
+        }
+      },
+      "landmark": {
+        "id": "a-left-2",
+        "x": -560,
+        "y": -1030,
+        "properties": {
+          "label": "a-left-2",
+          "coordinateAnchor": "center",
+          "sourceId": "a-left-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "a-left-3-surface",
+        "x": -300,
+        "y": -1260,
+        "properties": {
+          "sourceId": "a-left-3"
+        }
+      },
+      "landmark": {
+        "id": "a-left-3",
+        "x": -300,
+        "y": -1260,
+        "properties": {
+          "label": "a-left-3",
+          "coordinateAnchor": "center",
+          "sourceId": "a-left-3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "a-right-1-surface",
+        "x": 320,
+        "y": -780,
+        "properties": {
+          "sourceId": "a-right-1"
+        }
+      },
+      "landmark": {
+        "id": "a-right-1",
+        "x": 320,
+        "y": -780,
+        "properties": {
+          "label": "a-right-1",
+          "coordinateAnchor": "center",
+          "sourceId": "a-right-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "a-right-2-surface",
+        "x": 560,
+        "y": -1030,
+        "properties": {
+          "sourceId": "a-right-2"
+        }
+      },
+      "landmark": {
+        "id": "a-right-2",
+        "x": 560,
+        "y": -1030,
+        "properties": {
+          "label": "a-right-2",
+          "coordinateAnchor": "center",
+          "sourceId": "a-right-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "a-right-3-surface",
+        "x": 300,
+        "y": -1260,
+        "properties": {
+          "sourceId": "a-right-3"
+        }
+      },
+      "landmark": {
+        "id": "a-right-3",
+        "x": 300,
+        "y": -1260,
+        "properties": {
+          "label": "a-right-3",
+          "coordinateAnchor": "center",
+          "sourceId": "a-right-3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "m0-surface",
+        "x": 0,
+        "y": -1400,
+        "properties": {
+          "sourceId": "m0"
+        }
+      },
+      "landmark": {
+        "id": "m0",
+        "x": 0,
+        "y": -1400,
+        "properties": {
+          "label": "m0",
+          "coordinateAnchor": "center",
+          "sourceId": "m0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "t1-surface",
+        "x": 320,
+        "y": -1510,
+        "properties": {
+          "sourceId": "t1"
+        }
+      },
+      "landmark": {
+        "id": "t1",
+        "x": 320,
+        "y": -1510,
+        "properties": {
+          "label": "t1",
+          "coordinateAnchor": "center",
+          "sourceId": "t1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "t2-surface",
+        "x": 640,
+        "y": -1600,
+        "properties": {
+          "sourceId": "t2"
+        }
+      },
+      "landmark": {
+        "id": "t2",
+        "x": 640,
+        "y": -1600,
+        "properties": {
+          "label": "t2",
+          "coordinateAnchor": "center",
+          "sourceId": "t2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "p1-surface",
+        "x": 900,
+        "y": -1700,
+        "properties": {
+          "sourceId": "p1"
+        }
+      },
+      "landmark": {
+        "id": "p1",
+        "x": 900,
+        "y": -1700,
+        "properties": {
+          "label": "p1",
+          "coordinateAnchor": "center",
+          "sourceId": "p1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "b-upper-1-surface",
+        "x": 660,
+        "y": -1920,
+        "properties": {
+          "sourceId": "b-upper-1"
+        }
+      },
+      "landmark": {
+        "id": "b-upper-1",
+        "x": 660,
+        "y": -1920,
+        "properties": {
+          "label": "b-upper-1",
+          "coordinateAnchor": "center",
+          "sourceId": "b-upper-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "b-upper-2-surface",
+        "x": 340,
+        "y": -2040,
+        "properties": {
+          "sourceId": "b-upper-2"
+        }
+      },
+      "landmark": {
+        "id": "b-upper-2",
+        "x": 340,
+        "y": -2040,
+        "properties": {
+          "label": "b-upper-2",
+          "coordinateAnchor": "center",
+          "sourceId": "b-upper-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "b-upper-3-surface",
+        "x": 80,
+        "y": -2200,
+        "properties": {
+          "sourceId": "b-upper-3"
+        }
+      },
+      "landmark": {
+        "id": "b-upper-3",
+        "x": 80,
+        "y": -2200,
+        "properties": {
+          "label": "b-upper-3",
+          "coordinateAnchor": "center",
+          "sourceId": "b-upper-3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "b-lower-1-surface",
+        "x": 580,
+        "y": -1800,
+        "properties": {
+          "sourceId": "b-lower-1"
+        }
+      },
+      "landmark": {
+        "id": "b-lower-1",
+        "x": 580,
+        "y": -1800,
+        "properties": {
+          "label": "b-lower-1",
+          "coordinateAnchor": "center",
+          "sourceId": "b-lower-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "b-lower-2-surface",
+        "x": 300,
+        "y": -1980,
+        "properties": {
+          "sourceId": "b-lower-2"
+        }
+      },
+      "landmark": {
+        "id": "b-lower-2",
+        "x": 300,
+        "y": -1980,
+        "properties": {
+          "label": "b-lower-2",
+          "coordinateAnchor": "center",
+          "sourceId": "b-lower-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "b-lower-3-surface",
+        "x": 20,
+        "y": -2180,
+        "properties": {
+          "sourceId": "b-lower-3"
+        }
+      },
+      "landmark": {
+        "id": "b-lower-3",
+        "x": 20,
+        "y": -2180,
+        "properties": {
+          "label": "b-lower-3",
+          "coordinateAnchor": "center",
+          "sourceId": "b-lower-3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "m1-surface",
+        "x": -180,
+        "y": -2300,
+        "properties": {
+          "sourceId": "m1"
+        }
+      },
+      "landmark": {
+        "id": "m1",
+        "x": -180,
+        "y": -2300,
+        "properties": {
+          "label": "m1",
+          "coordinateAnchor": "center",
+          "sourceId": "m1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "f1-surface",
+        "x": -180,
+        "y": -2520,
+        "properties": {
+          "sourceId": "f1"
+        }
+      },
+      "landmark": {
+        "id": "f1",
+        "x": -180,
+        "y": -2520,
+        "properties": {
+          "label": "f1",
+          "coordinateAnchor": "center",
+          "sourceId": "f1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "f2-surface",
+        "x": -480,
+        "y": -2700,
+        "properties": {
+          "sourceId": "f2"
+        }
+      },
+      "landmark": {
+        "id": "f2",
+        "x": -480,
+        "y": -2700,
+        "properties": {
+          "label": "f2",
+          "coordinateAnchor": "center",
+          "sourceId": "f2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "x-surface",
+        "x": -720,
+        "y": -2860,
+        "properties": {
+          "sourceId": "x"
+        }
+      },
+      "landmark": {
+        "id": "x",
+        "x": -720,
+        "y": -2860,
+        "properties": {
+          "label": "x",
+          "coordinateAnchor": "center",
+          "sourceId": "x"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/5/5-3/AREA-SPEC-REV4-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV2.0 · NOT IMPLEMENTED",
+      "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+      "stage": {
+        "sector": 5,
+        "stage": 3,
+        "legacyStageAlias": "5-3",
+        "sourceAreaId": "sector-05-03",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "SECURITY REVIEW GALLERY",
+        "subtitle": "CENTRAL SPINE / DUAL ARCHIVE BYPASS / HARDPOINT JAMMER",
+        "supersedesLegacyDesign": "SECURITY REVIEW FLOOR / CUTTER RECOVERY PLANNING"
+      },
+      "bounds": {
+        "width": 3000,
+        "height": 3000
+      },
+      "entry": {
+        "id": "entry",
+        "x": 0,
+        "y": -100,
+        "fromStageAlias": "5-2"
+      },
+      "grappleTargets": [
+        {
+          "id": "e",
+          "x": 0,
+          "y": -100
+        },
+        {
+          "id": "h1",
+          "x": 0,
+          "y": -400
+        },
+        {
+          "id": "p0",
+          "x": 0,
+          "y": -650
+        },
+        {
+          "id": "a-left-1",
+          "x": -320,
+          "y": -780
+        },
+        {
+          "id": "a-left-2",
+          "x": -560,
+          "y": -1030
+        },
+        {
+          "id": "a-left-3",
+          "x": -300,
+          "y": -1260
+        },
+        {
+          "id": "a-right-1",
+          "x": 320,
+          "y": -780
+        },
+        {
+          "id": "a-right-2",
+          "x": 560,
+          "y": -1030
+        },
+        {
+          "id": "a-right-3",
+          "x": 300,
+          "y": -1260
+        },
+        {
+          "id": "m0",
+          "x": 0,
+          "y": -1400
+        },
+        {
+          "id": "t1",
+          "x": 320,
+          "y": -1510
+        },
+        {
+          "id": "t2",
+          "x": 640,
+          "y": -1600
+        },
+        {
+          "id": "p1",
+          "x": 900,
+          "y": -1700
+        },
+        {
+          "id": "b-upper-1",
+          "x": 660,
+          "y": -1920
+        },
+        {
+          "id": "b-upper-2",
+          "x": 340,
+          "y": -2040
+        },
+        {
+          "id": "b-upper-3",
+          "x": 80,
+          "y": -2200
+        },
+        {
+          "id": "b-lower-1",
+          "x": 580,
+          "y": -1800
+        },
+        {
+          "id": "b-lower-2",
+          "x": 300,
+          "y": -1980
+        },
+        {
+          "id": "b-lower-3",
+          "x": 20,
+          "y": -2180
+        },
+        {
+          "id": "m1",
+          "x": -180,
+          "y": -2300
+        },
+        {
+          "id": "f1",
+          "x": -180,
+          "y": -2520
+        },
+        {
+          "id": "f2",
+          "x": -480,
+          "y": -2700
+        },
+        {
+          "id": "x",
+          "x": -720,
+          "y": -2860
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-05-03:jammer-a",
+          "enemyType": "hardpoint-jammer-v1",
+          "status": "NEW_SYSTEM_NOT_IMPLEMENTED",
+          "activationBand": "bay-a",
+          "maxSimultaneousTargets": 1,
+          "eligibleTargetIds": [
+            "a-left-1",
+            "a-right-1"
+          ],
+          "rules": [
+            "never-jam-attached-hardpoint",
+            "preserve-one-base-clear-route",
+            "no-damage",
+            "no-force-release",
+            "no-rope-cut"
+          ]
+        },
+        {
+          "id": "sector-05-03:jammer-b",
+          "enemyType": "hardpoint-jammer-v1",
+          "status": "NEW_SYSTEM_NOT_IMPLEMENTED",
+          "activationBand": "bay-b",
+          "maxSimultaneousTargets": 1,
+          "eligibleTargetIds": [
+            "b-upper-1",
+            "b-lower-1"
+          ],
+          "rules": [
+            "never-jam-attached-hardpoint",
+            "preserve-one-base-clear-route",
+            "no-damage",
+            "no-force-release",
+            "no-rope-cut"
+          ]
+        }
+      ],
+      "route": {
+        "entrySpine": [
+          "e",
+          "h1",
+          "p0"
+        ],
+        "bayAChoices": [
+          [
+            "p0",
+            "a-left-1",
+            "a-left-2",
+            "a-left-3",
+            "m0"
+          ],
+          [
+            "p0",
+            "a-right-1",
+            "a-right-2",
+            "a-right-3",
+            "m0"
+          ]
+        ],
+        "transfer": [
+          "m0",
+          "t1",
+          "t2",
+          "p1"
+        ],
+        "bayBChoices": [
+          [
+            "p1",
+            "b-upper-1",
+            "b-upper-2",
+            "b-upper-3",
+            "m1"
+          ],
+          [
+            "p1",
+            "b-lower-1",
+            "b-lower-2",
+            "b-lower-3",
+            "m1"
+          ]
+        ],
+        "final": [
+          "m1",
+          "f1",
+          "f2",
+          "x"
+        ],
+        "maxAuthoredRelationPx": 349.86,
+        "baseHookReachPx": 400
+      },
+      "story": {
+        "systemFacts": [
+          "SECURITY REVIEW GALLERY / ACCESS RESTRICTED",
+          "INCIDENT REVIEW ARCHIVE / RECORD SET AVAILABLE / ACCESS RESTRICTED",
+          "CAPACITY ALLOCATION CORE / ACCESS AHEAD"
+        ],
+        "approvedPlayerBark": "…기록까지 잠가놨네."
+      },
+      "runtimeDependencies": {
+        "newSystems": [
+          {
+            "id": "hardpoint-jammer-v1",
+            "status": "NOT_IMPLEMENTED",
+            "basis": "existing canAttachToSurface(surface) eligibility hook"
+          }
+        ]
+      },
+      "forbidden": [
+        "Cutter",
+        "AEGIS",
+        "Artillery",
+        "Pursuit",
+        "Patrol",
+        "Standard Sentry",
+        "Wind",
+        "Scanner",
+        "all Base-clear options jammed simultaneously",
+        "forced wait puzzle",
+        "Jammer damage",
+        "Jammer forced release",
+        "Jammer rope cut",
+        "Capacity Record content",
+        "Priority Directive",
+        "Routing Authorization"
+      ]
+    }
+  }
+}

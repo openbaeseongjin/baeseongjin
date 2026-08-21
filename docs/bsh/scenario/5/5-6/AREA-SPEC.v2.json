@@ -1,0 +1,931 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 5,
+    "stage": 6,
+    "legacyStageAlias": "5-6",
+    "sourceAreaId": "sector-05-06"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-05-06",
+    "sectorId": "sector-05",
+    "order": 6,
+    "name": "INCIDENT AUTHORIZATION ANNEX",
+    "subtitle": "ACTUAL RISE → DROP → LOWER TRENCH → RE-ASCENT → SIGN-OFF",
+    "bounds": {
+      "width": 1950,
+      "height": 2464
+    },
+    "entry": {
+      "id": "sector-05-06:entry",
+      "x": 720,
+      "y": -100
+    },
+    "exit": {
+      "id": "sector-05-06:scenario-exit",
+      "x": -520,
+      "y": -2200
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-05-06:route-entry",
+        "x": 720,
+        "y": -100,
+        "sourceId": "entry"
+      },
+      {
+        "id": "sector-05-06:route-r0",
+        "x": 720,
+        "y": -400,
+        "sourceId": "r0"
+      },
+      {
+        "id": "sector-05-06:route-r1",
+        "x": 720,
+        "y": -700,
+        "sourceId": "r1"
+      },
+      {
+        "id": "sector-05-06:route-p0",
+        "x": 720,
+        "y": -980,
+        "sourceId": "p0"
+      },
+      {
+        "id": "sector-05-06:route-merge-a",
+        "x": 160,
+        "y": -1080,
+        "sourceId": "merge-a"
+      },
+      {
+        "id": "sector-05-06:route-drop-1",
+        "x": -80,
+        "y": -900,
+        "sourceId": "drop-1"
+      },
+      {
+        "id": "sector-05-06:route-drop-2",
+        "x": -160,
+        "y": -650,
+        "sourceId": "drop-2"
+      },
+      {
+        "id": "sector-05-06:route-trench-entry",
+        "x": -120,
+        "y": -420,
+        "sourceId": "trench-entry"
+      },
+      {
+        "id": "sector-05-06:route-trench-entry",
+        "x": -120,
+        "y": -420,
+        "sourceId": "trench-entry"
+      },
+      {
+        "id": "sector-05-06:route-trench-1",
+        "x": 180,
+        "y": -360,
+        "sourceId": "trench-1"
+      },
+      {
+        "id": "sector-05-06:route-trench-2",
+        "x": 500,
+        "y": -360,
+        "sourceId": "trench-2"
+      },
+      {
+        "id": "sector-05-06:route-trench-exit",
+        "x": 800,
+        "y": -420,
+        "sourceId": "trench-exit"
+      },
+      {
+        "id": "sector-05-06:route-trench-exit",
+        "x": 800,
+        "y": -420,
+        "sourceId": "trench-exit"
+      },
+      {
+        "id": "sector-05-06:route-riser-1",
+        "x": 800,
+        "y": -720,
+        "sourceId": "riser-1"
+      },
+      {
+        "id": "sector-05-06:route-riser-2",
+        "x": 800,
+        "y": -1020,
+        "sourceId": "riser-2"
+      },
+      {
+        "id": "sector-05-06:route-riser-top",
+        "x": 800,
+        "y": -1320,
+        "sourceId": "riser-top"
+      },
+      {
+        "id": "sector-05-06:route-riser-top",
+        "x": 800,
+        "y": -1320,
+        "sourceId": "riser-top"
+      },
+      {
+        "id": "sector-05-06:route-aegis-1",
+        "x": 520,
+        "y": -1480,
+        "sourceId": "aegis-1"
+      },
+      {
+        "id": "sector-05-06:route-aegis-2",
+        "x": 240,
+        "y": -1580,
+        "sourceId": "aegis-2"
+      },
+      {
+        "id": "sector-05-06:route-aegis-safe",
+        "x": 0,
+        "y": -1700,
+        "sourceId": "aegis-safe"
+      },
+      {
+        "id": "sector-05-06:route-aegis-safe",
+        "x": 0,
+        "y": -1700,
+        "sourceId": "aegis-safe"
+      },
+      {
+        "id": "sector-05-06:route-record-1",
+        "x": -260,
+        "y": -1840,
+        "sourceId": "record-1"
+      },
+      {
+        "id": "sector-05-06:route-record-2",
+        "x": -260,
+        "y": -2080,
+        "sourceId": "record-2"
+      },
+      {
+        "id": "sector-05-06:route-exit",
+        "x": -520,
+        "y": -2200,
+        "sourceId": "exit"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "entry-surface",
+        "x": 720,
+        "y": -100,
+        "properties": {
+          "sourceId": "entry"
+        }
+      },
+      "landmark": {
+        "id": "entry",
+        "x": 720,
+        "y": -100,
+        "properties": {
+          "label": "entry",
+          "coordinateAnchor": "center",
+          "sourceId": "entry"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "r0-surface",
+        "x": 720,
+        "y": -400,
+        "properties": {
+          "sourceId": "r0"
+        }
+      },
+      "landmark": {
+        "id": "r0",
+        "x": 720,
+        "y": -400,
+        "properties": {
+          "label": "r0",
+          "coordinateAnchor": "center",
+          "sourceId": "r0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "r1-surface",
+        "x": 720,
+        "y": -700,
+        "properties": {
+          "sourceId": "r1"
+        }
+      },
+      "landmark": {
+        "id": "r1",
+        "x": 720,
+        "y": -700,
+        "properties": {
+          "label": "r1",
+          "coordinateAnchor": "center",
+          "sourceId": "r1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "p0-surface",
+        "x": 720,
+        "y": -980,
+        "properties": {
+          "sourceId": "p0"
+        }
+      },
+      "landmark": {
+        "id": "p0",
+        "x": 720,
+        "y": -980,
+        "properties": {
+          "label": "p0",
+          "coordinateAnchor": "center",
+          "sourceId": "p0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "jam-a1-surface",
+        "x": 430,
+        "y": -1120,
+        "properties": {
+          "sourceId": "jam-a1"
+        }
+      },
+      "landmark": {
+        "id": "jam-a1",
+        "x": 430,
+        "y": -1120,
+        "properties": {
+          "label": "jam-a1",
+          "coordinateAnchor": "center",
+          "sourceId": "jam-a1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "jam-b1-surface",
+        "x": 500,
+        "y": -1230,
+        "properties": {
+          "sourceId": "jam-b1"
+        }
+      },
+      "landmark": {
+        "id": "jam-b1",
+        "x": 500,
+        "y": -1230,
+        "properties": {
+          "label": "jam-b1",
+          "coordinateAnchor": "center",
+          "sourceId": "jam-b1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "merge-a-surface",
+        "x": 160,
+        "y": -1080,
+        "properties": {
+          "sourceId": "merge-a"
+        }
+      },
+      "landmark": {
+        "id": "merge-a",
+        "x": 160,
+        "y": -1080,
+        "properties": {
+          "label": "merge-a",
+          "coordinateAnchor": "center",
+          "sourceId": "merge-a"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "drop-1-surface",
+        "x": -80,
+        "y": -900,
+        "properties": {
+          "sourceId": "drop-1"
+        }
+      },
+      "landmark": {
+        "id": "drop-1",
+        "x": -80,
+        "y": -900,
+        "properties": {
+          "label": "drop-1",
+          "coordinateAnchor": "center",
+          "sourceId": "drop-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "drop-2-surface",
+        "x": -160,
+        "y": -650,
+        "properties": {
+          "sourceId": "drop-2"
+        }
+      },
+      "landmark": {
+        "id": "drop-2",
+        "x": -160,
+        "y": -650,
+        "properties": {
+          "label": "drop-2",
+          "coordinateAnchor": "center",
+          "sourceId": "drop-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "trench-entry-surface",
+        "x": -120,
+        "y": -420,
+        "properties": {
+          "sourceId": "trench-entry"
+        }
+      },
+      "landmark": {
+        "id": "trench-entry",
+        "x": -120,
+        "y": -420,
+        "properties": {
+          "label": "trench-entry",
+          "coordinateAnchor": "center",
+          "sourceId": "trench-entry"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "trench-1-surface",
+        "x": 180,
+        "y": -360,
+        "properties": {
+          "sourceId": "trench-1"
+        }
+      },
+      "landmark": {
+        "id": "trench-1",
+        "x": 180,
+        "y": -360,
+        "properties": {
+          "label": "trench-1",
+          "coordinateAnchor": "center",
+          "sourceId": "trench-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "trench-2-surface",
+        "x": 500,
+        "y": -360,
+        "properties": {
+          "sourceId": "trench-2"
+        }
+      },
+      "landmark": {
+        "id": "trench-2",
+        "x": 500,
+        "y": -360,
+        "properties": {
+          "label": "trench-2",
+          "coordinateAnchor": "center",
+          "sourceId": "trench-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "trench-exit-surface",
+        "x": 800,
+        "y": -420,
+        "properties": {
+          "sourceId": "trench-exit"
+        }
+      },
+      "landmark": {
+        "id": "trench-exit",
+        "x": 800,
+        "y": -420,
+        "properties": {
+          "label": "trench-exit",
+          "coordinateAnchor": "center",
+          "sourceId": "trench-exit"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "riser-1-surface",
+        "x": 800,
+        "y": -720,
+        "properties": {
+          "sourceId": "riser-1"
+        }
+      },
+      "landmark": {
+        "id": "riser-1",
+        "x": 800,
+        "y": -720,
+        "properties": {
+          "label": "riser-1",
+          "coordinateAnchor": "center",
+          "sourceId": "riser-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "riser-2-surface",
+        "x": 800,
+        "y": -1020,
+        "properties": {
+          "sourceId": "riser-2"
+        }
+      },
+      "landmark": {
+        "id": "riser-2",
+        "x": 800,
+        "y": -1020,
+        "properties": {
+          "label": "riser-2",
+          "coordinateAnchor": "center",
+          "sourceId": "riser-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "riser-top-surface",
+        "x": 800,
+        "y": -1320,
+        "properties": {
+          "sourceId": "riser-top"
+        }
+      },
+      "landmark": {
+        "id": "riser-top",
+        "x": 800,
+        "y": -1320,
+        "properties": {
+          "label": "riser-top",
+          "coordinateAnchor": "center",
+          "sourceId": "riser-top"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "aegis-1-surface",
+        "x": 520,
+        "y": -1480,
+        "properties": {
+          "sourceId": "aegis-1"
+        }
+      },
+      "landmark": {
+        "id": "aegis-1",
+        "x": 520,
+        "y": -1480,
+        "properties": {
+          "label": "aegis-1",
+          "coordinateAnchor": "center",
+          "sourceId": "aegis-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "aegis-2-surface",
+        "x": 240,
+        "y": -1580,
+        "properties": {
+          "sourceId": "aegis-2"
+        }
+      },
+      "landmark": {
+        "id": "aegis-2",
+        "x": 240,
+        "y": -1580,
+        "properties": {
+          "label": "aegis-2",
+          "coordinateAnchor": "center",
+          "sourceId": "aegis-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "aegis-safe-surface",
+        "x": 0,
+        "y": -1700,
+        "properties": {
+          "sourceId": "aegis-safe"
+        }
+      },
+      "landmark": {
+        "id": "aegis-safe",
+        "x": 0,
+        "y": -1700,
+        "properties": {
+          "label": "aegis-safe",
+          "coordinateAnchor": "center",
+          "sourceId": "aegis-safe"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "record-1-surface",
+        "x": -260,
+        "y": -1840,
+        "properties": {
+          "sourceId": "record-1"
+        }
+      },
+      "landmark": {
+        "id": "record-1",
+        "x": -260,
+        "y": -1840,
+        "properties": {
+          "label": "record-1",
+          "coordinateAnchor": "center",
+          "sourceId": "record-1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "record-2-surface",
+        "x": -260,
+        "y": -2080,
+        "properties": {
+          "sourceId": "record-2"
+        }
+      },
+      "landmark": {
+        "id": "record-2",
+        "x": -260,
+        "y": -2080,
+        "properties": {
+          "label": "record-2",
+          "coordinateAnchor": "center",
+          "sourceId": "record-2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "exit-surface",
+        "x": -520,
+        "y": -2200,
+        "properties": {
+          "sourceId": "exit"
+        }
+      },
+      "landmark": {
+        "id": "exit",
+        "x": -520,
+        "y": -2200,
+        "properties": {
+          "label": "exit",
+          "coordinateAnchor": "center",
+          "sourceId": "exit"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/5/5-6/AREA-SPEC-REV4-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "expanded-for-authored-points",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV1.1 · NOT IMPLEMENTED",
+      "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+      "stage": {
+        "sector": 5,
+        "stage": 6,
+        "legacyStageAlias": "5-6",
+        "sourceAreaId": "sector-05-06",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "INCIDENT AUTHORIZATION ANNEX",
+        "subtitle": "ACTUAL RISE → DROP → LOWER TRENCH → RE-ASCENT → SIGN-OFF"
+      },
+      "bounds": {
+        "width": 1950,
+        "height": 2230
+      },
+      "entry": {
+        "id": "entry",
+        "x": 720,
+        "y": -100,
+        "fromStageAlias": "5-5"
+      },
+      "grappleTargets": [
+        {
+          "id": "entry",
+          "x": 720,
+          "y": -100
+        },
+        {
+          "id": "r0",
+          "x": 720,
+          "y": -400
+        },
+        {
+          "id": "r1",
+          "x": 720,
+          "y": -700
+        },
+        {
+          "id": "p0",
+          "x": 720,
+          "y": -980
+        },
+        {
+          "id": "jam-a1",
+          "x": 430,
+          "y": -1120
+        },
+        {
+          "id": "jam-b1",
+          "x": 500,
+          "y": -1230
+        },
+        {
+          "id": "merge-a",
+          "x": 160,
+          "y": -1080
+        },
+        {
+          "id": "drop-1",
+          "x": -80,
+          "y": -900
+        },
+        {
+          "id": "drop-2",
+          "x": -160,
+          "y": -650
+        },
+        {
+          "id": "trench-entry",
+          "x": -120,
+          "y": -420
+        },
+        {
+          "id": "trench-1",
+          "x": 180,
+          "y": -360
+        },
+        {
+          "id": "trench-2",
+          "x": 500,
+          "y": -360
+        },
+        {
+          "id": "trench-exit",
+          "x": 800,
+          "y": -420
+        },
+        {
+          "id": "riser-1",
+          "x": 800,
+          "y": -720
+        },
+        {
+          "id": "riser-2",
+          "x": 800,
+          "y": -1020
+        },
+        {
+          "id": "riser-top",
+          "x": 800,
+          "y": -1320
+        },
+        {
+          "id": "aegis-1",
+          "x": 520,
+          "y": -1480
+        },
+        {
+          "id": "aegis-2",
+          "x": 240,
+          "y": -1580
+        },
+        {
+          "id": "aegis-safe",
+          "x": 0,
+          "y": -1700
+        },
+        {
+          "id": "record-1",
+          "x": -260,
+          "y": -1840
+        },
+        {
+          "id": "record-2",
+          "x": -260,
+          "y": -2080
+        },
+        {
+          "id": "exit",
+          "x": -520,
+          "y": -2200
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-05-06:jammer-a",
+          "enemyType": "hardpoint-jammer-v1",
+          "status": "NEW_SYSTEM_NOT_IMPLEMENTED",
+          "role": "NEXT-ROUTE DENIAL",
+          "eligibleTargetIds": [
+            "jam-a1",
+            "jam-b1"
+          ],
+          "maxSimultaneousTargets": 1,
+          "rules": [
+            "never-jam-attached-hardpoint",
+            "preserve-one-base-clear-route",
+            "no-damage",
+            "no-force-release",
+            "no-rope-cut",
+            "launched-before-active-hook-resolves"
+          ]
+        },
+        {
+          "id": "sector-05-06:cutter-a",
+          "enemyType": "sentry-t1",
+          "role": "CURRENT-ROPE DENIAL",
+          "rules": [
+            "cutter-fire",
+            "targets-player-not-rope",
+            "kill-optional",
+            "no-kill-gate"
+          ]
+        },
+        {
+          "id": "sector-05-06:aegis-a",
+          "enemyType": "shield-drone-t1",
+          "role": "FINAL ANGLE GATE",
+          "rules": [
+            "kill-optional",
+            "no-kill-gate",
+            "reuse-current-shield-behavior"
+          ]
+        }
+      ],
+      "route": {
+        "entryRise": [
+          "entry",
+          "r0",
+          "r1",
+          "p0"
+        ],
+        "jammerChoices": [
+          [
+            "p0",
+            "jam-a1",
+            "merge-a"
+          ],
+          [
+            "p0",
+            "jam-b1",
+            "merge-a"
+          ]
+        ],
+        "controlDrop": [
+          "merge-a",
+          "drop-1",
+          "drop-2",
+          "trench-entry"
+        ],
+        "credentialTrench": [
+          "trench-entry",
+          "trench-1",
+          "trench-2",
+          "trench-exit"
+        ],
+        "verificationRiser": [
+          "trench-exit",
+          "riser-1",
+          "riser-2",
+          "riser-top"
+        ],
+        "aegisGate": [
+          "riser-top",
+          "aegis-1",
+          "aegis-2",
+          "aegis-safe"
+        ],
+        "final": [
+          "aegis-safe",
+          "record-1",
+          "record-2",
+          "exit"
+        ],
+        "maxAuthoredRelationPx": 371.62,
+        "baseHookReachPx": 400
+      },
+      "story": {
+        "systemFacts": [
+          "INCIDENT AUTHORIZATION ANNEX / RESPONSE CONTROL ACTIVE",
+          "ROUTING AUTHORIZATION / 03 OF 03",
+          "INCIDENT RESPONSE / POST-CASCADE",
+          "LOWER ASCENT ROUTING / SUSPENSION AUTHORIZED",
+          "EVACUATION CONSEQUENCE ARCHIVE / POST-INCIDENT RECORDS AHEAD"
+        ],
+        "approvedPlayerBark": "…고장이 아니라, 멈추라고 승인한 거였네."
+      },
+      "runtimeDependencies": {
+        "existingSystems": [
+          {
+            "id": "sentry-t1+cutter-fire",
+            "status": "CURRENT_RUNTIME_BASIS"
+          },
+          {
+            "id": "shield-drone-t1",
+            "status": "CURRENT_RUNTIME"
+          }
+        ],
+        "newSystems": [
+          {
+            "id": "hardpoint-jammer-v1",
+            "status": "NOT_IMPLEMENTED"
+          },
+          {
+            "id": "corporate-proof-terminal-v1",
+            "status": "NOT_IMPLEMENTED"
+          }
+        ]
+      },
+      "forbidden": [
+        "Artillery",
+        "Pursuit",
+        "Patrol",
+        "Standard Sentry without cutter role",
+        "three-special-threat full overlap",
+        "Cutter homing to Rope",
+        "scripted automatic Rope cut",
+        "5-7 evacuation outcome reveal",
+        "named authorizer",
+        "final responsibility"
+      ]
+    }
+  }
+}

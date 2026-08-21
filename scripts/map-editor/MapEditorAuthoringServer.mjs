@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve, sep } from "node:path";
+import { dirname, relative, resolve, sep } from "node:path";
 import { validateAreaCatalogManifest } from "../../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
 import { canonicalizeAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaSpecV2.js";
 import { collectGeneratedOutputs } from "../../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
@@ -87,6 +87,38 @@ function validateSpec(entry, spec) {
     return canonicalizeAreaSpecV2(spec);
 }
 
+function runtimePromotionReadiness(entry, spec) {
+    if (entry.authoringMode !== "scenario-only") {
+        return Object.freeze({ status: "live", blockers: Object.freeze([]) });
+    }
+
+    const definition = spec.definition ?? {};
+    const blockers = [];
+    if (!definition.gate || typeof definition.gate !== "object" || Array.isArray(definition.gate)) {
+        blockers.push("gate-not-authored");
+    }
+    if (typeof definition.nextAreaId !== "string" || definition.nextAreaId.length === 0) {
+        blockers.push("next-area-not-authored");
+    }
+    if (!Array.isArray(definition.surfaces) || definition.surfaces.length === 0) {
+        blockers.push("terrain-not-authored");
+    }
+
+    const runtimeCandidate = { ...spec, authoringMode: "runtime" };
+    const validation = validateAreaSpecV2(runtimeCandidate, { file: entry.sourcePath });
+    for (const issue of validation.issues) {
+        if (issue.code === "enemy-type-invalid") blockers.push("enemy-type-unmapped");
+        if (issue.code === "runtime-area-build-invalid" && !blockers.includes("gate-not-authored")) {
+            blockers.push("runtime-contract-invalid");
+        }
+    }
+
+    return Object.freeze({
+        status: validation.valid ? "ready" : "blocked",
+        blockers: Object.freeze([...new Set(blockers)])
+    });
+}
+
 function assertEditableDraft(entry, baselineSpec, candidateSpec) {
     const mutation = validateAreaSpecEditorMutation(baselineSpec, candidateSpec, { file: entry.sourcePath });
     if (!mutation.valid) {
@@ -135,39 +167,76 @@ function requestRoute(url) {
 
 export async function createMapEditorAuthoringServer({
     projectRoot,
-    manifestPath = "docs/bsh/scenario/AREA-CATALOG.json"
+    editorCatalogPath = "docs/bsh/scenario/AREA-EDITOR-CATALOG.json"
 } = {}) {
     const root = resolve(projectRoot ?? "");
-    const manifestFile = safeProjectPath(root, manifestPath);
-    const manifest = await readJson(manifestFile, "manifest-invalid-json");
-    const manifestResult = validateAreaCatalogManifest(manifest, {
-        expectedStageIds: manifest.expectedStageIds ?? manifest.stageSources?.map(({ stageId }) => stageId) ?? [],
-        sourcePathExists: (relativePath) => existsSync(safeProjectPath(root, relativePath)),
-        requireGeneratedOutputs: true
-    });
-    if (!manifestResult.valid) {
-        throw error("manifest-invalid", "Map editor manifest validation failed.", { issues: manifestResult.issues });
+    const editorCatalog = await readJson(safeProjectPath(root, editorCatalogPath), "editor-catalog-invalid-json");
+    if (editorCatalog?.schemaVersion !== "area-editor-catalog-v2" || !Array.isArray(editorCatalog.stages)) {
+        throw error("editor-catalog-invalid", "Map editor stage catalog is invalid.");
     }
-    const generatedCatalogPath = safeProjectPath(root, manifest.catalogOutputPath);
-    await readText(generatedCatalogPath, "generated-output-missing", "Map editor generated output could not be read.");
-
+    const manifests = new Map();
+    async function manifestFor(entry) {
+        if (!entry.manifestPath) return null;
+        if (manifests.has(entry.manifestPath)) return manifests.get(entry.manifestPath);
+        const manifest = await readJson(safeProjectPath(root, entry.manifestPath), "manifest-invalid-json");
+        const validation = validateAreaCatalogManifest(manifest, {
+            expectedStageIds: manifest.expectedStageIds ?? manifest.stageSources?.map(({ stageId }) => stageId) ?? [],
+            sourcePathExists: (relativePath) => existsSync(safeProjectPath(root, relativePath)),
+            requireGeneratedOutputs: true
+        });
+        if (!validation.valid) {
+            throw error("manifest-invalid", "Map editor manifest validation failed.", { issues: validation.issues });
+        }
+        await readText(
+            safeProjectPath(root, manifest.catalogOutputPath),
+            "generated-output-missing",
+            "Map editor generated catalog could not be read."
+        );
+        manifests.set(entry.manifestPath, manifest);
+        return manifest;
+    }
     const stages = new Map();
-    for (const entry of manifest.stageSources) {
-        if (entry.source !== "generated") continue;
+    for (const entry of editorCatalog.stages) {
+        if (!/^\d+-\d+$/.test(entry?.stageId ?? "") || typeof entry?.areaId !== "string") {
+            throw error("editor-catalog-stage-invalid", "Map editor stage catalog contains an invalid identity.");
+        }
+        if (stages.has(entry.stageId))
+            throw error("editor-catalog-stage-duplicate", "Map editor stage catalog has duplicates.");
+        if (!["runtime-generated", "runtime-staged", "scenario-only"].includes(entry.authoringMode)) {
+            throw error("editor-catalog-mode-invalid", "Map editor stage catalog contains an unknown authoring mode.");
+        }
         const sourcePath = safeProjectPath(root, entry.sourcePath);
-        const outputPath = safeProjectPath(root, entry.outputPath);
         const spec = validateSpec(entry, await readJson(sourcePath, "spec-invalid-json"));
+        const expectedSpecMode = entry.authoringMode === "scenario-only" ? "scenario" : "runtime";
+        if ((spec.authoringMode ?? "runtime") !== expectedSpecMode) {
+            throw error("stage-mode-invalid", "Map editor stage source does not match its authoring mode.");
+        }
+        const manifest = await manifestFor(entry);
+        const manifestEntry = manifest?.stageSources?.find(({ stageId }) => stageId === entry.stageId) ?? null;
+        if (
+            manifest &&
+            (!manifestEntry || manifestEntry.source !== "generated" || manifestEntry.areaId !== entry.areaId)
+        ) {
+            throw error(
+                "stage-manifest-selection-invalid",
+                "Map editor generated stage is not selected by its manifest."
+            );
+        }
+        const outputPath = manifestEntry ? safeProjectPath(root, manifestEntry.outputPath) : null;
         const sourceContent = await readText(
             sourcePath,
             "spec-invalid-json",
             "Map editor spec source could not be read."
         );
-        await readText(outputPath, "generated-output-missing", "Map editor generated output could not be read.");
+        if (outputPath)
+            await readText(outputPath, "generated-output-missing", "Map editor generated output could not be read.");
         stages.set(entry.stageId, {
             entry: Object.freeze({ ...entry }),
+            manifest,
             sourcePath,
             outputPath,
             spec,
+            runtimePromotion: runtimePromotionReadiness(entry, spec),
             sourceHash: revisionFor(sourceContent),
             revision: 0
         });
@@ -175,7 +244,7 @@ export async function createMapEditorAuthoringServer({
 
     function currentStage(stageId) {
         const stage = stages.get(stageId);
-        if (!stage) throw error("stage-not-generated", "Map editor can only open generated catalog stages.");
+        if (!stage) throw error("stage-not-found", "Map editor stage was not found.");
         return stage;
     }
 
@@ -184,10 +253,17 @@ export async function createMapEditorAuthoringServer({
             stageId: stage.entry.stageId,
             areaId: stage.entry.areaId,
             name: stage.spec.definition.name,
+            authoringMode: stage.entry.authoringMode,
+            runtimePromotion: stage.runtimePromotion,
             revision: stage.revision,
             spec: structuredClone(stage.spec),
-            moduleUrl: `/${stage.entry.outputPath.replaceAll("\\", "/")}`,
-            outputRevision: revisionFor(stableJson(stage.spec))
+            previewAvailable: Boolean(stage.outputPath),
+            ...(stage.outputPath
+                ? {
+                      moduleUrl: `/${relative(root, stage.outputPath).replaceAll("\\", "/")}`,
+                      outputRevision: revisionFor(stableJson(stage.spec))
+                  }
+                : {})
         });
     }
 
@@ -201,10 +277,17 @@ export async function createMapEditorAuthoringServer({
             stageId: stage.entry.stageId,
             areaId: stage.entry.areaId,
             name: spec.definition.name,
+            authoringMode: stage.entry.authoringMode,
+            runtimePromotion: runtimePromotionReadiness(stage.entry, spec),
             revision: stage.revision,
             spec: structuredClone(spec),
-            moduleUrl: `/${stage.entry.outputPath.replaceAll("\\", "/")}`,
-            outputRevision: revisionFor(stableJson(spec))
+            previewAvailable: Boolean(stage.outputPath),
+            ...(stage.outputPath
+                ? {
+                      moduleUrl: `/${relative(root, stage.outputPath).replaceAll("\\", "/")}`,
+                      outputRevision: revisionFor(stableJson(spec))
+                  }
+                : {})
         });
     }
 
@@ -227,6 +310,24 @@ export async function createMapEditorAuthoringServer({
         });
     }
 
+    async function generatedWrites(stage, replacement) {
+        if (!stage.manifest) return [];
+        const specsByStageId = new Map();
+        for (const entry of stage.manifest.stageSources) {
+            if (entry.source !== "generated") continue;
+            const candidate = stages.get(entry.stageId);
+            if (!candidate) throw error("stage-generated-source-missing", "Map editor generated source is missing.");
+            specsByStageId.set(
+                entry.stageId,
+                entry.stageId === stage.entry.stageId ? replacement : await readStageSpecFromDisk(candidate)
+            );
+        }
+        return collectGeneratedOutputs({ manifest: stage.manifest, specsByStageId }).map(({ outputPath, content }) => ({
+            path: safeProjectPath(root, outputPath),
+            content
+        }));
+    }
+
     const server = {
         stageSummary() {
             return Object.freeze(
@@ -235,6 +336,8 @@ export async function createMapEditorAuthoringServer({
                         stageId: stage.entry.stageId,
                         areaId: stage.entry.areaId,
                         name: stage.spec.definition.name,
+                        authoringMode: stage.entry.authoringMode,
+                        runtimePromotion: stage.runtimePromotion,
                         revision: stage.revision
                     })
                 )
@@ -266,24 +369,15 @@ export async function createMapEditorAuthoringServer({
             const baselineSpec = stage.spec;
             const canonical = validateSpec(stage.entry, spec);
             assertEditableDraft(stage.entry, baselineSpec, canonical);
-            const specsByStageId = new Map(
-                [...stages.values()].map((candidate) => [
-                    candidate.entry.stageId,
-                    candidate.entry.stageId === stageId ? canonical : candidate.spec
-                ])
-            );
-            const generated = collectGeneratedOutputs({ manifest, specsByStageId });
             const sourceContent = stableJson(canonical);
             const writes = [
                 { path: stage.sourcePath, content: sourceContent },
-                ...generated.map(({ outputPath, content }) => ({
-                    path: safeProjectPath(root, outputPath),
-                    content
-                }))
+                ...(await generatedWrites(stage, canonical))
             ];
             await assertSourceUnchanged(stage);
             for (const write of writes) await writeFile(write.path, write.content, "utf8");
             stage.spec = canonical;
+            stage.runtimePromotion = runtimePromotionReadiness(stage.entry, canonical);
             stage.sourceHash = revisionFor(sourceContent);
             stage.revision += 1;
             return stageValue(stage);
@@ -317,6 +411,12 @@ export async function createMapEditorAuthoringServer({
                 return json(response, 200, await server.readStage(route.stageId));
             if (route.action === "preview" && request.method === "GET") {
                 const stage = await server.readStage(route.stageId);
+                if (!stage.previewAvailable) {
+                    throw error(
+                        "preview-unavailable",
+                        "Scenario-only stages are not connected to a game Runtime preview."
+                    );
+                }
                 return json(response, 200, {
                     stageId: stage.stageId,
                     areaId: stage.areaId,

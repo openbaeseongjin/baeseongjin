@@ -1,0 +1,713 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 6,
+    "stage": 6,
+    "legacyStageAlias": "6-6",
+    "sourceAreaId": "sector-06-06"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-06-06",
+    "sectorId": "sector-06",
+    "order": 6,
+    "name": "BEACON SPAN",
+    "subtitle": "BEACON NEEDLE / LONG CANTILEVER / PATROL POSITION READ",
+    "bounds": {
+      "width": 1600,
+      "height": 1952
+    },
+    "entry": {
+      "id": "sector-06-06:entry",
+      "x": 0,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-06-06:scenario-exit",
+      "x": 660,
+      "y": -1680
+    },
+    "nextAreaId": null,
+    "surfaces": [
+      {
+        "id": "R0",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -180,
+          "y": -480
+        },
+        "vertices": [
+          {
+            "x": -244,
+            "y": -480
+          },
+          {
+            "x": -116,
+            "y": -480
+          },
+          {
+            "x": -116,
+            "y": -448
+          },
+          {
+            "x": -244,
+            "y": -448
+          }
+        ],
+        "landingOnly": true,
+        "activation": "OUT",
+        "retrySecondsTargetMax": 5,
+        "sourceId": "R0"
+      },
+      {
+        "id": "R1",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 360,
+          "y": -500
+        },
+        "vertices": [
+          {
+            "x": 296,
+            "y": -500
+          },
+          {
+            "x": 424,
+            "y": -500
+          },
+          {
+            "x": 424,
+            "y": -468
+          },
+          {
+            "x": 296,
+            "y": -468
+          }
+        ],
+        "landingOnly": true,
+        "activation": "OUT",
+        "retrySecondsTargetMax": 5,
+        "sourceId": "R1"
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-06-06:route-sector-06-06:p0",
+        "x": -520,
+        "y": -80,
+        "sourceId": "sector-06-06:p0"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:h1",
+        "x": -520,
+        "y": -300,
+        "sourceId": "sector-06-06:h1"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:p1",
+        "x": -520,
+        "y": -500,
+        "sourceId": "sector-06-06:p1"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:h2",
+        "x": -260,
+        "y": -630,
+        "sourceId": "sector-06-06:h2"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:h3",
+        "x": -40,
+        "y": -660,
+        "sourceId": "sector-06-06:h3"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:h4",
+        "x": 180,
+        "y": -700,
+        "sourceId": "sector-06-06:h4"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:h5",
+        "x": 400,
+        "y": -750,
+        "sourceId": "sector-06-06:h5"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:h6",
+        "x": 620,
+        "y": -880,
+        "sourceId": "sector-06-06:h6"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:p2",
+        "x": 620,
+        "y": -1160,
+        "sourceId": "sector-06-06:p2"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:h7",
+        "x": 640,
+        "y": -1420,
+        "sourceId": "sector-06-06:h7"
+      },
+      {
+        "id": "sector-06-06:route-sector-06-06:p3",
+        "x": 660,
+        "y": -1680,
+        "sourceId": "sector-06-06:p3"
+      }
+    ],
+    "recoveryPoints": [
+      {
+        "id": "sector-06-06:recovery-R0",
+        "x": -180,
+        "y": -480,
+        "sourceId": "R0"
+      },
+      {
+        "id": "sector-06-06:recovery-R1",
+        "x": 360,
+        "y": -500,
+        "sourceId": "R1"
+      }
+    ],
+    "checkpoints": [],
+    "objects": [
+      {
+        "id": "sector-06-06:D1",
+        "kind": "scenario-enemy-slot",
+        "enemyType": "patrol-drone-t1",
+        "position": {
+          "x": 420,
+          "y": -600
+        },
+        "coordinateAnchor": "center",
+        "sourceId": "sector-06-06:D1"
+      }
+    ],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "sector-06-06:p0-surface",
+        "x": -520,
+        "y": -80,
+        "properties": {
+          "sourceId": "sector-06-06:p0"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:p0",
+        "x": -520,
+        "y": -80,
+        "properties": {
+          "label": "P0",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:p0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:h1-surface",
+        "x": -520,
+        "y": -300,
+        "properties": {
+          "sourceId": "sector-06-06:h1"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:h1",
+        "x": -520,
+        "y": -300,
+        "properties": {
+          "label": "H1",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:h1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:p1-surface",
+        "x": -520,
+        "y": -500,
+        "properties": {
+          "sourceId": "sector-06-06:p1"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:p1",
+        "x": -520,
+        "y": -500,
+        "properties": {
+          "label": "P1",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:p1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:h2-surface",
+        "x": -260,
+        "y": -630,
+        "properties": {
+          "sourceId": "sector-06-06:h2"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:h2",
+        "x": -260,
+        "y": -630,
+        "properties": {
+          "label": "H2",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:h2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:h3-surface",
+        "x": -40,
+        "y": -660,
+        "properties": {
+          "sourceId": "sector-06-06:h3"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:h3",
+        "x": -40,
+        "y": -660,
+        "properties": {
+          "label": "H3",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:h3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:h4-surface",
+        "x": 180,
+        "y": -700,
+        "properties": {
+          "sourceId": "sector-06-06:h4"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:h4",
+        "x": 180,
+        "y": -700,
+        "properties": {
+          "label": "H4",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:h4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:h5-surface",
+        "x": 400,
+        "y": -750,
+        "properties": {
+          "sourceId": "sector-06-06:h5"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:h5",
+        "x": 400,
+        "y": -750,
+        "properties": {
+          "label": "H5",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:h5"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:h6-surface",
+        "x": 620,
+        "y": -880,
+        "properties": {
+          "sourceId": "sector-06-06:h6"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:h6",
+        "x": 620,
+        "y": -880,
+        "properties": {
+          "label": "H6",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:h6"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:p2-surface",
+        "x": 620,
+        "y": -1160,
+        "properties": {
+          "sourceId": "sector-06-06:p2"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:p2",
+        "x": 620,
+        "y": -1160,
+        "properties": {
+          "label": "P2",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:p2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:h7-surface",
+        "x": 640,
+        "y": -1420,
+        "properties": {
+          "sourceId": "sector-06-06:h7"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:h7",
+        "x": 640,
+        "y": -1420,
+        "properties": {
+          "label": "H7",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:h7"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-06:p3-surface",
+        "x": 660,
+        "y": -1680,
+        "properties": {
+          "sourceId": "sector-06-06:p3"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-06:p3",
+        "x": 660,
+        "y": -1680,
+        "properties": {
+          "label": "P3",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-06:p3"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/6/6-6/AREA-SPEC-REV3-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "inferred-editor-viewport",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV2.2 · NOT IMPLEMENTED",
+      "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+      "stage": {
+        "sector": 6,
+        "stage": 6,
+        "legacyStageAlias": "6-6",
+        "sourceAreaId": "sector-06-06",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "BEACON SPAN",
+        "subtitle": "BEACON NEEDLE / LONG CANTILEVER / PATROL POSITION READ"
+      },
+      "metrics": {
+        "difficulty": "★★★★",
+        "firstPlaySecondsTarget": [
+          120,
+          170
+        ],
+        "skilledSecondsTarget": [
+          50,
+          70
+        ],
+        "mandatoryLinks": 10,
+        "approxRouteLengthPx": 2439.03,
+        "verticalGainPx": 1600,
+        "maxAuthoredRelationPx": 290.69,
+        "baseHookReachPx": 400
+      },
+      "grappleTargets": [
+        {
+          "id": "sector-06-06:p0",
+          "label": "P0",
+          "x": -520,
+          "y": -80,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-06:h1",
+          "label": "H1",
+          "x": -520,
+          "y": -300,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-06:p1",
+          "label": "P1",
+          "x": -520,
+          "y": -500,
+          "role": "safe-preview"
+        },
+        {
+          "id": "sector-06-06:h2",
+          "label": "H2",
+          "x": -260,
+          "y": -630,
+          "role": "combat"
+        },
+        {
+          "id": "sector-06-06:h3",
+          "label": "H3",
+          "x": -40,
+          "y": -660,
+          "role": "combat"
+        },
+        {
+          "id": "sector-06-06:h4",
+          "label": "H4",
+          "x": 180,
+          "y": -700,
+          "role": "combat"
+        },
+        {
+          "id": "sector-06-06:h5",
+          "label": "H5",
+          "x": 400,
+          "y": -750,
+          "role": "combat"
+        },
+        {
+          "id": "sector-06-06:h6",
+          "label": "H6",
+          "x": 620,
+          "y": -880,
+          "role": "combat"
+        },
+        {
+          "id": "sector-06-06:p2",
+          "label": "P2",
+          "x": 620,
+          "y": -1160,
+          "role": "full-safe"
+        },
+        {
+          "id": "sector-06-06:h7",
+          "label": "H7",
+          "x": 640,
+          "y": -1420,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-06:p3",
+          "label": "P3",
+          "x": 660,
+          "y": -1680,
+          "role": "route"
+        }
+      ],
+      "mainRoute": [
+        "sector-06-06:p0",
+        "sector-06-06:h1",
+        "sector-06-06:p1",
+        "sector-06-06:h2",
+        "sector-06-06:h3",
+        "sector-06-06:h4",
+        "sector-06-06:h5",
+        "sector-06-06:h6",
+        "sector-06-06:p2",
+        "sector-06-06:h7",
+        "sector-06-06:p3"
+      ],
+      "enemy": {
+        "id": "sector-06-06:D1",
+        "enemyType": "patrol-drone-t1",
+        "rules": [
+          "standard-projectile",
+          "no-rope-cut"
+        ],
+        "killRequired": false,
+        "patrol": {
+          "mode": "pingpong",
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "points": [
+            {
+              "x": 420,
+              "y": -600
+            },
+            {
+              "x": -100,
+              "y": -870
+            }
+          ]
+        },
+        "activation": {
+          "role": "combat-band-H2-H6",
+          "contract": "P1 and R0/R1 outside; H2-H6 inside"
+        }
+      },
+      "surfaces": [
+        {
+          "id": "left-beacon-needle",
+          "kind": "architectural-structure",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "cantilever-body",
+          "kind": "architectural-structure",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "right-beacon-rise",
+          "kind": "architectural-structure",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "R0",
+          "kind": "recovery",
+          "x": -180,
+          "y": -480,
+          "properties": {
+            "grappleable": false,
+            "landingOnly": true,
+            "activation": "OUT",
+            "retrySecondsTargetMax": 5
+          }
+        },
+        {
+          "id": "R1",
+          "kind": "recovery",
+          "x": 360,
+          "y": -500,
+          "properties": {
+            "grappleable": false,
+            "landingOnly": true,
+            "activation": "OUT",
+            "retrySecondsTargetMax": 5
+          }
+        }
+      ],
+      "antiBypass": {
+        "H1_to_H2": 420.12,
+        "P1_to_H3": 505.96,
+        "H2_to_H4": 445.53,
+        "H3_to_H5": 449.11,
+        "H4_to_H6": 475.39,
+        "H5_to_P2": 465.3
+      },
+      "recoveryDistances": {
+        "R0_to_H2": 170,
+        "R0_to_H3": 228.04,
+        "R0_to_H4": 421.9,
+        "R1_to_H4": 269.07,
+        "R1_to_H5": 253.18,
+        "R1_to_H6": 460.43
+      },
+      "goalLandmark": {
+        "id": "rooftop-pad-03-distant",
+        "visible": true,
+        "outsideStageBounds": true,
+        "storyState": "NO_NEW_REVEAL",
+        "shuttleState": "DISTANT_STANDBY_SILHOUETTE_ONLY"
+      },
+      "mechanics": {
+        "patrol": true,
+        "standardProjectile": true,
+        "cutter": false,
+        "wind": false,
+        "scanner": false,
+        "movingPlatform": false,
+        "newInput": false,
+        "newRopeMode": false
+      },
+      "story": {
+        "entrySystem": [
+          "BEACON SPAN",
+          "PAD APPROACH SIGNAL / ACTIVE"
+        ],
+        "fullSafeSystem": [
+          "PAD 03 BEACON",
+          "APPROACH LINK / ACTIVE"
+        ],
+        "exitSystem": [
+          "CONTAINMENT LATTICE",
+          "SECURITY / ACTIVE"
+        ],
+        "playerBark": null
+      },
+      "forbidden": [
+        "second-patrol",
+        "mandatory-endpoint-wait",
+        "cutter-fire",
+        "wind",
+        "scanner",
+        "moving-platform",
+        "continuous-lower-catwalk",
+        "kill-gate",
+        "new-input",
+        "new-rope-mode",
+        "new-growth",
+        "ACCESS DENIED",
+        "CONTAINMENT VIOLATION",
+        "final-security-reveal",
+        "shuttle-boarding"
+      ]
+    }
+  }
+}

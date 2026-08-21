@@ -1,0 +1,628 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 6,
+    "stage": 5,
+    "legacyStageAlias": "6-5",
+    "sourceAreaId": "sector-06-05"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-06-05",
+    "sectorId": "sector-06",
+    "order": 5,
+    "name": "PAD ACCESS ARRAY",
+    "subtitle": "STACKED ACCESS TERRACES / THREE CONTROLLED MOUNTS",
+    "bounds": {
+      "width": 1312,
+      "height": 1824
+    },
+    "entry": {
+      "id": "sector-06-05:entry",
+      "x": 0,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-06-05:scenario-exit",
+      "x": -100,
+      "y": -1560
+    },
+    "nextAreaId": null,
+    "surfaces": [
+      {
+        "id": "recovery-r1",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -240,
+          "y": -590
+        },
+        "vertices": [
+          {
+            "x": -350,
+            "y": -590
+          },
+          {
+            "x": -130,
+            "y": -590
+          },
+          {
+            "x": -130,
+            "y": -572
+          },
+          {
+            "x": -350,
+            "y": -572
+          }
+        ],
+        "role": "landing-only",
+        "cannotBypass": [
+          "C2",
+          "C3"
+        ],
+        "sourceId": "recovery-r1"
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-06-05:route-sector-06-05:p0",
+        "x": 520,
+        "y": -80,
+        "sourceId": "sector-06-05:p0"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:h1",
+        "x": 340,
+        "y": -220,
+        "sourceId": "sector-06-05:h1"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:p1",
+        "x": 420,
+        "y": -360,
+        "sourceId": "sector-06-05:p1"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:c1",
+        "x": 130,
+        "y": -500,
+        "sourceId": "sector-06-05:c1"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:c2",
+        "x": -120,
+        "y": -720,
+        "sourceId": "sector-06-05:c2"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:c3",
+        "x": 140,
+        "y": -940,
+        "sourceId": "sector-06-05:c3"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:p2",
+        "x": -160,
+        "y": -1160,
+        "sourceId": "sector-06-05:p2"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:h4",
+        "x": 60,
+        "y": -1380,
+        "sourceId": "sector-06-05:h4"
+      },
+      {
+        "id": "sector-06-05:route-sector-06-05:p4",
+        "x": -100,
+        "y": -1560,
+        "sourceId": "sector-06-05:p4"
+      }
+    ],
+    "recoveryPoints": [
+      {
+        "id": "sector-06-05:recovery-recovery-r1",
+        "x": -240,
+        "y": -590,
+        "sourceId": "recovery-r1"
+      }
+    ],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [
+      {
+        "id": "sector-06-05:scanner-A",
+        "cycleSeconds": {
+          "available": 1.5,
+          "warning": 0.6,
+          "locked": 1.1,
+          "reset": 0.3
+        },
+        "phaseOffsetSeconds": 0,
+        "controlledTargetIds": [
+          "sector-06-05:c1",
+          "sector-06-05:c2",
+          "sector-06-05:c3"
+        ],
+        "contract": {
+          "newAttachAllowed": [
+            "AVAILABLE",
+            "WARNING"
+          ],
+          "newAttachDenied": [
+            "LOCKED",
+            "RESET"
+          ],
+          "currentRopePersistsThroughLocked": true,
+          "damage": 0,
+          "knockback": 0,
+          "ropeCut": false,
+          "forcedDetach": false
+        }
+      }
+    ],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "sector-06-05:p0-surface",
+        "x": 520,
+        "y": -80,
+        "properties": {
+          "sourceId": "sector-06-05:p0"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:p0",
+        "x": 520,
+        "y": -80,
+        "properties": {
+          "label": "P0",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:p0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:h1-surface",
+        "x": 340,
+        "y": -220,
+        "properties": {
+          "sourceId": "sector-06-05:h1"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:h1",
+        "x": 340,
+        "y": -220,
+        "properties": {
+          "label": "H1",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:h1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:p1-surface",
+        "x": 420,
+        "y": -360,
+        "properties": {
+          "sourceId": "sector-06-05:p1"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:p1",
+        "x": 420,
+        "y": -360,
+        "properties": {
+          "label": "P1",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:p1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:c1-surface",
+        "x": 130,
+        "y": -500,
+        "properties": {
+          "sourceId": "sector-06-05:c1"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:c1",
+        "x": 130,
+        "y": -500,
+        "properties": {
+          "label": "C1",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:c1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:c2-surface",
+        "x": -120,
+        "y": -720,
+        "properties": {
+          "sourceId": "sector-06-05:c2"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:c2",
+        "x": -120,
+        "y": -720,
+        "properties": {
+          "label": "C2",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:c2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:c3-surface",
+        "x": 140,
+        "y": -940,
+        "properties": {
+          "sourceId": "sector-06-05:c3"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:c3",
+        "x": 140,
+        "y": -940,
+        "properties": {
+          "label": "C3",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:c3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:p2-surface",
+        "x": -160,
+        "y": -1160,
+        "properties": {
+          "sourceId": "sector-06-05:p2"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:p2",
+        "x": -160,
+        "y": -1160,
+        "properties": {
+          "label": "P2",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:p2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:h4-surface",
+        "x": 60,
+        "y": -1380,
+        "properties": {
+          "sourceId": "sector-06-05:h4"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:h4",
+        "x": 60,
+        "y": -1380,
+        "properties": {
+          "label": "H4",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:h4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-05:p4-surface",
+        "x": -100,
+        "y": -1560,
+        "properties": {
+          "sourceId": "sector-06-05:p4"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-05:p4",
+        "x": -100,
+        "y": -1560,
+        "properties": {
+          "label": "P4",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-05:p4"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/6/6-5/AREA-SPEC-REV3-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "inferred-editor-viewport",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV2.1 · NOT IMPLEMENTED",
+      "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+      "stage": {
+        "sector": 6,
+        "stage": 5,
+        "legacyStageAlias": "6-5",
+        "sourceAreaId": "sector-06-05",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "PAD ACCESS ARRAY",
+        "subtitle": "STACKED ACCESS TERRACES / THREE CONTROLLED MOUNTS"
+      },
+      "metrics": {
+        "difficulty": "★★★★",
+        "firstPlaySecondsTarget": [
+          105,
+          155
+        ],
+        "skilledSecondsTarget": [
+          40,
+          60
+        ],
+        "mandatoryLinks": 8,
+        "approxRouteLengthPx": 2308.9,
+        "verticalGainPx": 1480,
+        "maxAuthoredRelationPx": 372.02,
+        "baseHookReachPx": 400
+      },
+      "surfaces": [
+        {
+          "id": "terrace-a",
+          "kind": "platform",
+          "properties": {
+            "grappleable": false,
+            "role": "landing-only"
+          }
+        },
+        {
+          "id": "terrace-b",
+          "kind": "platform",
+          "properties": {
+            "grappleable": false,
+            "role": "landing-only"
+          }
+        },
+        {
+          "id": "terrace-c",
+          "kind": "platform",
+          "properties": {
+            "grappleable": false,
+            "role": "landing-only"
+          }
+        },
+        {
+          "id": "recovery-r1",
+          "kind": "recovery",
+          "center": {
+            "x": -240,
+            "y": -590
+          },
+          "width": 220,
+          "height": 18,
+          "properties": {
+            "grappleable": false,
+            "role": "landing-only",
+            "cannotBypass": [
+              "C2",
+              "C3"
+            ]
+          }
+        }
+      ],
+      "grappleTargets": [
+        {
+          "id": "sector-06-05:p0",
+          "label": "P0",
+          "x": 520,
+          "y": -80,
+          "scannerControlled": false
+        },
+        {
+          "id": "sector-06-05:h1",
+          "label": "H1",
+          "x": 340,
+          "y": -220,
+          "scannerControlled": false
+        },
+        {
+          "id": "sector-06-05:p1",
+          "label": "P1",
+          "x": 420,
+          "y": -360,
+          "scannerControlled": false
+        },
+        {
+          "id": "sector-06-05:c1",
+          "label": "C1",
+          "x": 130,
+          "y": -500,
+          "scannerControlled": true
+        },
+        {
+          "id": "sector-06-05:c2",
+          "label": "C2",
+          "x": -120,
+          "y": -720,
+          "scannerControlled": true
+        },
+        {
+          "id": "sector-06-05:c3",
+          "label": "C3",
+          "x": 140,
+          "y": -940,
+          "scannerControlled": true
+        },
+        {
+          "id": "sector-06-05:p2",
+          "label": "P2",
+          "x": -160,
+          "y": -1160,
+          "scannerControlled": false
+        },
+        {
+          "id": "sector-06-05:h4",
+          "label": "H4",
+          "x": 60,
+          "y": -1380,
+          "scannerControlled": false
+        },
+        {
+          "id": "sector-06-05:p4",
+          "label": "P4",
+          "x": -100,
+          "y": -1560,
+          "scannerControlled": false
+        }
+      ],
+      "mainRoute": [
+        "sector-06-05:p0",
+        "sector-06-05:h1",
+        "sector-06-05:p1",
+        "sector-06-05:c1",
+        "sector-06-05:c2",
+        "sector-06-05:c3",
+        "sector-06-05:p2",
+        "sector-06-05:h4",
+        "sector-06-05:p4"
+      ],
+      "scannerGroups": [
+        {
+          "id": "sector-06-05:scanner-A",
+          "cycleSeconds": {
+            "available": 1.5,
+            "warning": 0.6,
+            "locked": 1.1,
+            "reset": 0.3
+          },
+          "phaseOffsetSeconds": 0,
+          "controlledTargetIds": [
+            "sector-06-05:c1",
+            "sector-06-05:c2",
+            "sector-06-05:c3"
+          ],
+          "contract": {
+            "newAttachAllowed": [
+              "AVAILABLE",
+              "WARNING"
+            ],
+            "newAttachDenied": [
+              "LOCKED",
+              "RESET"
+            ],
+            "currentRopePersistsThroughLocked": true,
+            "damage": 0,
+            "knockback": 0,
+            "ropeCut": false,
+            "forcedDetach": false
+          }
+        }
+      ],
+      "antiBypass": {
+        "P1_to_C2_px": 649,
+        "C1_to_C3_px": 440.11,
+        "C2_to_P2_px": 441.81,
+        "C3_to_P2_px": 372.02,
+        "R1_center_to_C2_px": 176.92,
+        "R1_nearest_edge_to_C3_px": 442.04
+      },
+      "safeZones": [
+        {
+          "id": "P1",
+          "role": "safe-preview",
+          "scannerPressure": "OBSERVE_ONLY"
+        },
+        {
+          "id": "P2",
+          "role": "full-safe",
+          "scannerPressure": "ENDED"
+        }
+      ],
+      "mechanics": {
+        "enemy": false,
+        "patrol": false,
+        "cutter": false,
+        "wind": false,
+        "movingPlatform": false,
+        "newInput": false,
+        "newRopeMode": false
+      },
+      "story": {
+        "entrySystem": [
+          "PAD ACCESS ARRAY",
+          "CONTROL / ONLINE"
+        ],
+        "previewSystem": [
+          "PAD SERVICE MOUNTS",
+          "ACCESS / CYCLING"
+        ],
+        "exitSystem": [
+          "BEACON SPAN",
+          "SERVICE PATH / AVAILABLE"
+        ],
+        "playerBark": null
+      },
+      "forbidden": [
+        "scanner-damage",
+        "scanner-knockback",
+        "forced-rope-detach",
+        "second-scanner-group",
+        "phase-offset-puzzle",
+        "faster-scanner-cycle",
+        "moving-scanner",
+        "enemy",
+        "patrol",
+        "cutter",
+        "wind",
+        "moving-platform",
+        "kill-gate",
+        "new-input",
+        "new-rope-mode",
+        "new-growth",
+        "always-grappleable-bypass",
+        "ACCESS DENIED",
+        "CONTAINMENT VIOLATION"
+      ]
+    }
+  }
+}

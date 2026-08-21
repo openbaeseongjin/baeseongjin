@@ -1,4 +1,4 @@
-import { canonicalizeAreaSpecV2 } from "./AreaSpecV2.js";
+import { areaSpecV2AuthoringMode, canonicalizeAreaSpecV2 } from "./AreaSpecV2.js";
 
 const GENERATED_OUTPUT_ROOT = "src/game/world/areas/generated/";
 const GENERATED_RUNTIME_IMPORT = "../../../area-authoring-v2/AreaSpecV2.js";
@@ -31,6 +31,9 @@ export function generatedModulePath(entry) {
 
 export function renderGeneratedAreaModule(spec) {
     const canonical = canonicalizeAreaSpecV2(spec);
+    if (areaSpecV2AuthoringMode(canonical) !== "runtime") {
+        throw new TypeError("scenario-area-spec-cannot-generate-runtime-module");
+    }
     const stageId = canonical.stage?.legacyStageAlias;
     const areaId = canonical.definition?.id;
     if (typeof stageId !== "string" || typeof areaId !== "string")
@@ -63,6 +66,11 @@ export function renderGeneratedCatalogModule(manifest) {
         return `import { GENERATED_AREA as ${generatedImportName(entry.stageId)} } from "./${fileName(areaOutputPath)}";`;
     });
     const canonicalManifest = canonicalizeAreaSpecV2(manifest);
+    const generatedAreaValues = generatedEntries.map(({ stageId }) => generatedImportName(stageId));
+    const generatedAreas =
+        generatedAreaValues.length <= 2
+            ? `[${generatedAreaValues.join(", ")}]`
+            : `[\r\n    ${generatedAreaValues.join(",\r\n    ")}\r\n]`;
     return [
         "// GENERATED FILE - DO NOT EDIT",
         "// Source: docs/bsh/scenario/AREA-CATALOG.json",
@@ -73,9 +81,7 @@ export function renderGeneratedCatalogModule(manifest) {
         `const MANIFEST = ${stableJson(canonicalManifest)};`,
         "",
         "export const GENERATED_AREA_CATALOG_MANIFEST = Object.freeze(MANIFEST);",
-        `export const GENERATED_AREAS = Object.freeze([${generatedEntries
-            .map(({ stageId }) => generatedImportName(stageId))
-            .join(", ")}]);`,
+        `export const GENERATED_AREAS = Object.freeze(${generatedAreas});`,
         ""
     ].join("\r\n");
 }

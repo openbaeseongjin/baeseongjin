@@ -1,0 +1,989 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "sector": 2,
+    "stage": 5,
+    "legacyStageAlias": "2-5",
+    "sourceAreaId": "sector-02-05"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "subtitle": "UPPER TRANSIT RESTRICTED",
+    "surfaces": [
+      {
+        "id": "sector-02-05:p0",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -832,
+          "y": 0
+        },
+        "vertices": [
+          {
+            "x": -992,
+            "y": 0
+          },
+          {
+            "x": -672,
+            "y": 0
+          },
+          {
+            "x": -672,
+            "y": 32
+          },
+          {
+            "x": -992,
+            "y": 32
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:assembly-concourse",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -640,
+          "y": -128
+        },
+        "vertices": [
+          {
+            "x": -832,
+            "y": -128
+          },
+          {
+            "x": -448,
+            "y": -128
+          },
+          {
+            "x": -448,
+            "y": -104
+          },
+          {
+            "x": -832,
+            "y": -104
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:queue-shelf-a",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -448,
+          "y": -256
+        },
+        "vertices": [
+          {
+            "x": -544,
+            "y": -256
+          },
+          {
+            "x": -352,
+            "y": -256
+          },
+          {
+            "x": -352,
+            "y": -236
+          },
+          {
+            "x": -544,
+            "y": -236
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:public-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -96,
+          "y": -192
+        },
+        "vertices": [
+          {
+            "x": -224,
+            "y": -192
+          },
+          {
+            "x": 32,
+            "y": -192
+          },
+          {
+            "x": 32,
+            "y": -174
+          },
+          {
+            "x": -224,
+            "y": -174
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:transit-neck",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 160,
+          "y": -416
+        },
+        "vertices": [
+          {
+            "x": 96,
+            "y": -416
+          },
+          {
+            "x": 224,
+            "y": -416
+          },
+          {
+            "x": 224,
+            "y": -396
+          },
+          {
+            "x": 96,
+            "y": -396
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:story-forecourt",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 576,
+          "y": -480
+        },
+        "vertices": [
+          {
+            "x": 448,
+            "y": -480
+          },
+          {
+            "x": 704,
+            "y": -480
+          },
+          {
+            "x": 704,
+            "y": -456
+          },
+          {
+            "x": 448,
+            "y": -456
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:service-hatch-lip",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 720,
+          "y": -576
+        },
+        "vertices": [
+          {
+            "x": 672,
+            "y": -576
+          },
+          {
+            "x": 768,
+            "y": -576
+          },
+          {
+            "x": 768,
+            "y": -558
+          },
+          {
+            "x": 672,
+            "y": -558
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:maintenance-shelf",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 432,
+          "y": -272
+        },
+        "vertices": [
+          {
+            "x": 368,
+            "y": -272
+          },
+          {
+            "x": 496,
+            "y": -272
+          },
+          {
+            "x": 496,
+            "y": -252
+          },
+          {
+            "x": 368,
+            "y": -252
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:drop1-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 688,
+          "y": -160
+        },
+        "vertices": [
+          {
+            "x": 592,
+            "y": -160
+          },
+          {
+            "x": 784,
+            "y": -160
+          },
+          {
+            "x": 784,
+            "y": -142
+          },
+          {
+            "x": 592,
+            "y": -142
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:drop1-divider",
+        "kind": "solid",
+        "oneWay": false,
+        "grappleable": false,
+        "coordinateAnchor": "bottom-center",
+        "position": {
+          "x": 532,
+          "y": -64
+        },
+        "vertices": [
+          {
+            "x": 520,
+            "y": -336
+          },
+          {
+            "x": 544,
+            "y": -336
+          },
+          {
+            "x": 544,
+            "y": -64
+          },
+          {
+            "x": 520,
+            "y": -64
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:carrier-alcove",
+        "kind": "platform",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 208,
+          "y": -272
+        },
+        "vertices": [
+          {
+            "x": 128,
+            "y": -272
+          },
+          {
+            "x": 288,
+            "y": -272
+          },
+          {
+            "x": 288,
+            "y": -252
+          },
+          {
+            "x": 128,
+            "y": -252
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:drop2-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 384,
+          "y": -80
+        },
+        "vertices": [
+          {
+            "x": 304,
+            "y": -80
+          },
+          {
+            "x": 464,
+            "y": -80
+          },
+          {
+            "x": 464,
+            "y": -64
+          },
+          {
+            "x": 304,
+            "y": -64
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:drop2-divider",
+        "kind": "solid",
+        "oneWay": false,
+        "grappleable": false,
+        "coordinateAnchor": "bottom-center",
+        "position": {
+          "x": 244,
+          "y": 0
+        },
+        "vertices": [
+          {
+            "x": 232,
+            "y": -176
+          },
+          {
+            "x": 256,
+            "y": -176
+          },
+          {
+            "x": 256,
+            "y": 0
+          },
+          {
+            "x": 232,
+            "y": 0
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:exit-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 80,
+          "y": -64
+        },
+        "vertices": [
+          {
+            "x": -48,
+            "y": -64
+          },
+          {
+            "x": 208,
+            "y": -64
+          },
+          {
+            "x": 208,
+            "y": -32
+          },
+          {
+            "x": -48,
+            "y": -32
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:g1-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": -560,
+          "y": -224
+        },
+        "vertices": [
+          {
+            "x": -572,
+            "y": -236
+          },
+          {
+            "x": -548,
+            "y": -236
+          },
+          {
+            "x": -548,
+            "y": -212
+          },
+          {
+            "x": -572,
+            "y": -212
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:g2-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": -192,
+          "y": -320
+        },
+        "vertices": [
+          {
+            "x": -204,
+            "y": -332
+          },
+          {
+            "x": -180,
+            "y": -332
+          },
+          {
+            "x": -180,
+            "y": -308
+          },
+          {
+            "x": -204,
+            "y": -308
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:g3-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 160,
+          "y": -384
+        },
+        "vertices": [
+          {
+            "x": 148,
+            "y": -396
+          },
+          {
+            "x": 172,
+            "y": -396
+          },
+          {
+            "x": 172,
+            "y": -372
+          },
+          {
+            "x": 148,
+            "y": -372
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:g4-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 512,
+          "y": -448
+        },
+        "vertices": [
+          {
+            "x": 500,
+            "y": -460
+          },
+          {
+            "x": 524,
+            "y": -460
+          },
+          {
+            "x": 524,
+            "y": -436
+          },
+          {
+            "x": 500,
+            "y": -436
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:g5-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 464,
+          "y": -336
+        },
+        "vertices": [
+          {
+            "x": 452,
+            "y": -348
+          },
+          {
+            "x": 476,
+            "y": -348
+          },
+          {
+            "x": 476,
+            "y": -324
+          },
+          {
+            "x": 452,
+            "y": -324
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:access-anchor-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 320,
+          "y": -320
+        },
+        "vertices": [
+          {
+            "x": 308,
+            "y": -332
+          },
+          {
+            "x": 332,
+            "y": -332
+          },
+          {
+            "x": 332,
+            "y": -308
+          },
+          {
+            "x": 308,
+            "y": -308
+          }
+        ]
+      },
+      {
+        "id": "sector-02-05:g6-surface",
+        "kind": "structural-grapple-target",
+        "oneWay": false,
+        "grappleable": true,
+        "collision": false,
+        "renderable": false,
+        "coordinateAnchor": "center",
+        "position": {
+          "x": 96,
+          "y": -96
+        },
+        "vertices": [
+          {
+            "x": 84,
+            "y": -108
+          },
+          {
+            "x": 108,
+            "y": -108
+          },
+          {
+            "x": 108,
+            "y": -84
+          },
+          {
+            "x": 84,
+            "y": -84
+          }
+        ]
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-02-05:route-entry",
+        "x": -864,
+        "y": -32
+      },
+      {
+        "id": "sector-02-05:route-assembly",
+        "x": -640,
+        "y": -128
+      },
+      {
+        "id": "sector-02-05:route-g1",
+        "x": -560,
+        "y": -224
+      },
+      {
+        "id": "sector-02-05:route-queue-a",
+        "x": -448,
+        "y": -256
+      },
+      {
+        "id": "sector-02-05:route-g2",
+        "x": -192,
+        "y": -320
+      },
+      {
+        "id": "sector-02-05:route-g3",
+        "x": 160,
+        "y": -384
+      },
+      {
+        "id": "sector-02-05:route-g4",
+        "x": 512,
+        "y": -448
+      },
+      {
+        "id": "sector-02-05:route-story-forecourt",
+        "x": 576,
+        "y": -480
+      },
+      {
+        "id": "sector-02-05:route-service-hatch",
+        "x": 720,
+        "y": -558
+      },
+      {
+        "id": "sector-02-05:route-g5",
+        "x": 464,
+        "y": -336
+      },
+      {
+        "id": "sector-02-05:route-maintenance-shelf",
+        "x": 432,
+        "y": -272
+      },
+      {
+        "id": "sector-02-05:route-g6",
+        "x": 96,
+        "y": -96
+      },
+      {
+        "id": "sector-02-05:route-exit",
+        "x": 112,
+        "y": -96
+      }
+    ],
+    "recoveryPoints": [
+      {
+        "id": "sector-02-05:recovery-point-public",
+        "x": -96,
+        "y": -210
+      },
+      {
+        "id": "sector-02-05:recovery-point-drop1",
+        "x": 688,
+        "y": -178
+      },
+      {
+        "id": "sector-02-05:recovery-point-drop2",
+        "x": 384,
+        "y": -96
+      }
+    ],
+    "checkpoints": [],
+    "objects": [
+      {
+        "id": "sector-02-05:drone-1",
+        "kind": "patrol-drone",
+        "presentationId": "world-object:patrol-drone",
+        "position": {
+          "x": -288,
+          "y": -264
+        },
+        "enemyType": "patrol-drone-t1",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 320,
+            "height": 464
+          }
+        },
+        "patrol": {
+          "points": [
+            {
+              "x": -288,
+              "y": -160
+            },
+            {
+              "x": -288,
+              "y": -368
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-05:assembly-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 288,
+          "y": -416
+        },
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "patrol-drone-t1",
+            "shield-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 320,
+            "height": 320
+          }
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-05:upper-transit-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 208,
+          "y": -272
+        },
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "support-drone-t1",
+            "artillery-drone-t1"
+          ]
+        },
+        "accessModuleId": "sector-02:access-module:b",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 320,
+            "height": 288
+          }
+        },
+        "rules": [
+          "kill-optional-for-stage-exit",
+          "kill-required-for-access-module",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-05:upper-transit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 788,
+          "y": -480
+        },
+        "coordinateAnchor": "center",
+        "narrativeLock": true,
+        "grappleable": false,
+        "opensInStage": false,
+        "cueIds": [
+          "upper-transit-restricted",
+          "transfer-authorization-pending"
+        ]
+      },
+      {
+        "id": "sector-02-05:evacuation-status",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 608,
+          "y": -544
+        },
+        "cueIds": [
+          "assembly-complete",
+          "transfer-authorization-pending",
+          "upper-transit-restricted"
+        ],
+        "coordinateAnchor": "center"
+      },
+      {
+        "id": "sector-02-05:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 64,
+          "y": -64
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-02-05:exit-panel-engaged",
+        "gateId": "sector-02-05:gate",
+        "requiredObjectiveIds": [
+          "sector-02-05:exit-reached"
+        ]
+      },
+      {
+        "id": "sector-02-05:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 176,
+          "y": -64
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-02-05:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "sector-02-05:exit-reached",
+        "type": "reach",
+        "bounds": {
+          "x": 112,
+          "y": -128,
+          "width": 128,
+          "height": 96
+        }
+      },
+      {
+        "id": "sector-02-05:exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-02-05:exit-panel",
+        "requiredObjectiveIds": [
+          "sector-02-05:exit-reached"
+        ]
+      }
+    ],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [
+      "assembly-complete",
+      "upper-transit-restricted",
+      "maintenance-bypass"
+    ],
+    "routes": [
+      "main",
+      "access",
+      "recovery"
+    ],
+    "cameraZones": [],
+    "cueIds": [
+      "evacuation-walkway",
+      "assembly-complete",
+      "upper-transit-restricted",
+      "maintenance-bypass"
+    ],
+    "id": "sector-02-05",
+    "sectorId": "sector-02",
+    "order": 5,
+    "name": "EVACUATION WALKWAY",
+    "bounds": {
+      "width": 1984,
+      "height": 704
+    },
+    "entry": {
+      "id": "sector-02-05:entry",
+      "x": -864,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-02-05:exit",
+      "x": 176,
+      "y": -96
+    },
+    "nextAreaId": "sector-02-06",
+    "gate": {
+      "id": "sector-02-05:gate",
+      "nextAreaId": "sector-02-06",
+      "requiredObjectiveIds": [
+        "sector-02-05:exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 150,
+        "y": -126,
+        "width": 52,
+        "height": 62
+      }
+    }
+  },
+  "anchors": [],
+  "behaviorRefs": []
+}

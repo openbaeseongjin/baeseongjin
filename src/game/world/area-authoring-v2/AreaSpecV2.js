@@ -1,6 +1,7 @@
 import { defineArea, grappleTarget, worldObject } from "../areas/AreaDefinition.js";
 
 export const AREA_SPEC_V2 = "area-spec-v2";
+export const AREA_SPEC_V2_AUTHORING_MODES = Object.freeze(["runtime", "scenario"]);
 export const EDITOR_EDITABLE_DOMAINS = Object.freeze([
     "bounds",
     "entry",
@@ -53,6 +54,9 @@ function anchorLandmark(anchor) {
 }
 
 export function createAreaDefinitionFromV2(spec) {
+    if (spec?.authoringMode === "scenario") {
+        throw new TypeError("scenario-area-spec-cannot-create-runtime-area");
+    }
     const definition = structuredClone(spec.definition);
     const anchors = spec.anchors ?? [];
     return defineArea({
@@ -60,6 +64,14 @@ export function createAreaDefinitionFromV2(spec) {
         surfaces: insertAnchors(definition.surfaces ?? [], anchors, "surfaceIndex", anchorTarget),
         objects: insertAnchors(definition.objects ?? [], anchors, "objectIndex", anchorLandmark)
     });
+}
+
+export function areaSpecV2AuthoringMode(spec) {
+    const mode = spec?.authoringMode ?? "runtime";
+    if (!AREA_SPEC_V2_AUTHORING_MODES.includes(mode)) {
+        throw new TypeError("area-spec-v2-authoring-mode-invalid");
+    }
+    return mode;
 }
 
 export function canonicalizeAreaSpecV2(spec) {

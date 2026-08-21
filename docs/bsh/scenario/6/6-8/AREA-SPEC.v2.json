@@ -1,0 +1,834 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 6,
+    "stage": 8,
+    "legacyStageAlias": "6-8",
+    "sourceAreaId": "sector-06-08"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-06-08",
+    "sectorId": "sector-06",
+    "order": 8,
+    "name": "ROOFTOP PAD 03",
+    "subtitle": "FINAL CROWN WEAVE / ARRIVAL / ACCESS DENIAL",
+    "bounds": {
+      "width": 3776,
+      "height": 1952
+    },
+    "entry": {
+      "id": "sector-06-08:entry",
+      "x": 0,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-06-08:scenario-exit",
+      "x": 1750,
+      "y": -1670
+    },
+    "nextAreaId": null,
+    "surfaces": [
+      {
+        "id": "R1",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -40,
+          "y": -350
+        },
+        "vertices": [
+          {
+            "x": -104,
+            "y": -350
+          },
+          {
+            "x": 24,
+            "y": -350
+          },
+          {
+            "x": 24,
+            "y": -318
+          },
+          {
+            "x": -104,
+            "y": -318
+          }
+        ],
+        "landingOnly": true,
+        "disconnected": true,
+        "retrySecondsTargetMax": 5,
+        "sourceId": "R1"
+      },
+      {
+        "id": "R2",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 500,
+          "y": -600
+        },
+        "vertices": [
+          {
+            "x": 436,
+            "y": -600
+          },
+          {
+            "x": 564,
+            "y": -600
+          },
+          {
+            "x": 564,
+            "y": -568
+          },
+          {
+            "x": 436,
+            "y": -568
+          }
+        ],
+        "landingOnly": true,
+        "disconnected": true,
+        "retrySecondsTargetMax": 5,
+        "sourceId": "R2"
+      },
+      {
+        "id": "R3",
+        "kind": "recovery",
+        "oneWay": true,
+        "grappleable": false,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1350,
+          "y": -950
+        },
+        "vertices": [
+          {
+            "x": 1286,
+            "y": -950
+          },
+          {
+            "x": 1414,
+            "y": -950
+          },
+          {
+            "x": 1414,
+            "y": -918
+          },
+          {
+            "x": 1286,
+            "y": -918
+          }
+        ],
+        "landingOnly": true,
+        "disconnected": true,
+        "retrySecondsTargetMax": 5,
+        "sourceId": "R3"
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-06-08:route-sector-06-08:p0",
+        "x": -760,
+        "y": -100,
+        "sourceId": "sector-06-08:p0"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h1",
+        "x": -540,
+        "y": -250,
+        "sourceId": "sector-06-08:h1"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h2",
+        "x": -430,
+        "y": -520,
+        "sourceId": "sector-06-08:h2"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h3",
+        "x": -120,
+        "y": -560,
+        "sourceId": "sector-06-08:h3"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h4",
+        "x": 100,
+        "y": -760,
+        "sourceId": "sector-06-08:h4"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h5",
+        "x": 390,
+        "y": -780,
+        "sourceId": "sector-06-08:h5"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h6",
+        "x": 650,
+        "y": -940,
+        "sourceId": "sector-06-08:h6"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:p1",
+        "x": 900,
+        "y": -940,
+        "sourceId": "sector-06-08:p1"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h7",
+        "x": 1080,
+        "y": -1130,
+        "sourceId": "sector-06-08:h7"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h8",
+        "x": 1260,
+        "y": -1280,
+        "sourceId": "sector-06-08:h8"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:p2",
+        "x": 1450,
+        "y": -1370,
+        "sourceId": "sector-06-08:p2"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:h9",
+        "x": 1600,
+        "y": -1520,
+        "sourceId": "sector-06-08:h9"
+      },
+      {
+        "id": "sector-06-08:route-sector-06-08:p3",
+        "x": 1750,
+        "y": -1670,
+        "sourceId": "sector-06-08:p3"
+      }
+    ],
+    "recoveryPoints": [
+      {
+        "id": "sector-06-08:recovery-R1",
+        "x": -40,
+        "y": -350,
+        "sourceId": "R1"
+      },
+      {
+        "id": "sector-06-08:recovery-R2",
+        "x": 500,
+        "y": -600,
+        "sourceId": "R2"
+      },
+      {
+        "id": "sector-06-08:recovery-R3",
+        "x": 1350,
+        "y": -950,
+        "sourceId": "R3"
+      }
+    ],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [
+    {
+      "target": {
+        "id": "sector-06-08:p0-surface",
+        "x": -760,
+        "y": -100,
+        "properties": {
+          "sourceId": "sector-06-08:p0"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:p0",
+        "x": -760,
+        "y": -100,
+        "properties": {
+          "label": "P0",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:p0"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h1-surface",
+        "x": -540,
+        "y": -250,
+        "properties": {
+          "sourceId": "sector-06-08:h1"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h1",
+        "x": -540,
+        "y": -250,
+        "properties": {
+          "label": "H1",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h2-surface",
+        "x": -430,
+        "y": -520,
+        "properties": {
+          "sourceId": "sector-06-08:h2"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h2",
+        "x": -430,
+        "y": -520,
+        "properties": {
+          "label": "H2",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h3-surface",
+        "x": -120,
+        "y": -560,
+        "properties": {
+          "sourceId": "sector-06-08:h3"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h3",
+        "x": -120,
+        "y": -560,
+        "properties": {
+          "label": "H3",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h4-surface",
+        "x": 100,
+        "y": -760,
+        "properties": {
+          "sourceId": "sector-06-08:h4"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h4",
+        "x": 100,
+        "y": -760,
+        "properties": {
+          "label": "H4",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h5-surface",
+        "x": 390,
+        "y": -780,
+        "properties": {
+          "sourceId": "sector-06-08:h5"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h5",
+        "x": 390,
+        "y": -780,
+        "properties": {
+          "label": "H5",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h5"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h6-surface",
+        "x": 650,
+        "y": -940,
+        "properties": {
+          "sourceId": "sector-06-08:h6"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h6",
+        "x": 650,
+        "y": -940,
+        "properties": {
+          "label": "H6",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h6"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:p1-surface",
+        "x": 900,
+        "y": -940,
+        "properties": {
+          "sourceId": "sector-06-08:p1"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:p1",
+        "x": 900,
+        "y": -940,
+        "properties": {
+          "label": "P1",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:p1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h7-surface",
+        "x": 1080,
+        "y": -1130,
+        "properties": {
+          "sourceId": "sector-06-08:h7"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h7",
+        "x": 1080,
+        "y": -1130,
+        "properties": {
+          "label": "H7",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h7"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h8-surface",
+        "x": 1260,
+        "y": -1280,
+        "properties": {
+          "sourceId": "sector-06-08:h8"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h8",
+        "x": 1260,
+        "y": -1280,
+        "properties": {
+          "label": "H8",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h8"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:p2-surface",
+        "x": 1450,
+        "y": -1370,
+        "properties": {
+          "sourceId": "sector-06-08:p2"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:p2",
+        "x": 1450,
+        "y": -1370,
+        "properties": {
+          "label": "P2",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:p2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:h9-surface",
+        "x": 1600,
+        "y": -1520,
+        "properties": {
+          "sourceId": "sector-06-08:h9"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:h9",
+        "x": 1600,
+        "y": -1520,
+        "properties": {
+          "label": "H9",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:h9"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "sector-06-08:p3-surface",
+        "x": 1750,
+        "y": -1670,
+        "properties": {
+          "sourceId": "sector-06-08:p3"
+        }
+      },
+      "landmark": {
+        "id": "sector-06-08:p3",
+        "x": 1750,
+        "y": -1670,
+        "properties": {
+          "label": "P3",
+          "coordinateAnchor": "center",
+          "sourceId": "sector-06-08:p3"
+        }
+      }
+    }
+  ],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/6/6-8/AREA-SPEC-REV3-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "inferred-editor-viewport",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED · REV3.0 · NOT IMPLEMENTED",
+      "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+      "stage": {
+        "sector": 6,
+        "stage": 8,
+        "legacyStageAlias": "6-8",
+        "sourceAreaId": "sector-06-08",
+        "runtimeModel": "seamless-sector-landmark-v1",
+        "name": "ROOFTOP PAD 03",
+        "subtitle": "FINAL CROWN WEAVE / ARRIVAL / ACCESS DENIAL"
+      },
+      "metrics": {
+        "movementDifficulty": "★★★★☆",
+        "failurePunishment": "★★☆☆☆",
+        "narrativeTension": "★★★★★",
+        "firstPlaySecondsTarget": [
+          105,
+          145
+        ],
+        "skilledSecondsTarget": [
+          40,
+          55
+        ],
+        "mandatoryLinks": 12,
+        "approxRouteLengthPx": 3144.23,
+        "verticalGainPx": 1570,
+        "maxAuthoredRelationPx": 312.57,
+        "baseHookReachPx": 400
+      },
+      "grappleTargets": [
+        {
+          "id": "sector-06-08:p0",
+          "label": "P0",
+          "x": -760,
+          "y": -100,
+          "role": "entry"
+        },
+        {
+          "id": "sector-06-08:h1",
+          "label": "H1",
+          "x": -540,
+          "y": -250,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:h2",
+          "label": "H2",
+          "x": -430,
+          "y": -520,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:h3",
+          "label": "H3",
+          "x": -120,
+          "y": -560,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:h4",
+          "label": "H4",
+          "x": 100,
+          "y": -760,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:h5",
+          "label": "H5",
+          "x": 390,
+          "y": -780,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:h6",
+          "label": "H6",
+          "x": 650,
+          "y": -940,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:p1",
+          "label": "P1",
+          "x": 900,
+          "y": -940,
+          "role": "service-gantry"
+        },
+        {
+          "id": "sector-06-08:h7",
+          "label": "H7",
+          "x": 1080,
+          "y": -1130,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:h8",
+          "label": "H8",
+          "x": 1260,
+          "y": -1280,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:p2",
+          "label": "P2",
+          "x": 1450,
+          "y": -1370,
+          "role": "pad-perimeter"
+        },
+        {
+          "id": "sector-06-08:h9",
+          "label": "H9",
+          "x": 1600,
+          "y": -1520,
+          "role": "route"
+        },
+        {
+          "id": "sector-06-08:p3",
+          "label": "P3",
+          "x": 1750,
+          "y": -1670,
+          "role": "access-deck"
+        }
+      ],
+      "mainRoute": [
+        "sector-06-08:p0",
+        "sector-06-08:h1",
+        "sector-06-08:h2",
+        "sector-06-08:h3",
+        "sector-06-08:h4",
+        "sector-06-08:h5",
+        "sector-06-08:h6",
+        "sector-06-08:p1",
+        "sector-06-08:h7",
+        "sector-06-08:h8",
+        "sector-06-08:p2",
+        "sector-06-08:h9",
+        "sector-06-08:p3"
+      ],
+      "surfaces": [
+        {
+          "id": "final-mast",
+          "kind": "mast",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "crown-rib-a",
+          "kind": "open-rib",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "lighting-bridge",
+          "kind": "bridge",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "crown-rib-b",
+          "kind": "open-rib",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "pad-ring",
+          "kind": "perimeter-ring",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "access-spur",
+          "kind": "access-spur",
+          "properties": {
+            "grappleable": false
+          }
+        },
+        {
+          "id": "R1",
+          "kind": "recovery",
+          "x": -40,
+          "y": -350,
+          "properties": {
+            "grappleable": false,
+            "landingOnly": true,
+            "disconnected": true,
+            "retrySecondsTargetMax": 5
+          }
+        },
+        {
+          "id": "R2",
+          "kind": "recovery",
+          "x": 500,
+          "y": -600,
+          "properties": {
+            "grappleable": false,
+            "landingOnly": true,
+            "disconnected": true,
+            "retrySecondsTargetMax": 5
+          }
+        },
+        {
+          "id": "R3",
+          "kind": "recovery",
+          "x": 1350,
+          "y": -950,
+          "properties": {
+            "grappleable": false,
+            "landingOnly": true,
+            "disconnected": true,
+            "retrySecondsTargetMax": 5
+          }
+        }
+      ],
+      "antiBypass": {
+        "exhaustiveNonAdjacentForwardPairsWithin400": []
+      },
+      "recoveryReachWithin400": {
+        "R1": {
+          "H3": 224.72
+        },
+        "R2": {
+          "H5": 210.95,
+          "H6": 371.62
+        },
+        "R3": {
+          "H7": 324.5,
+          "H8": 342.05
+        }
+      },
+      "threat": {
+        "enemy": 0,
+        "wind": 0,
+        "scanner": 0,
+        "cutter": 0,
+        "patrol": 0,
+        "damageHazard": 0
+      },
+      "goalLandmark": {
+        "id": "rooftop-pad-03",
+        "visibleFromStart": true,
+        "becomesPlayable": true,
+        "shuttleVisible": true,
+        "finalInteractRequired": true
+      },
+      "endingState": {
+        "arrival": true,
+        "boardingAllowed": false,
+        "accessGranted": false,
+        "denialSystemText": [
+          "ROOFTOP PAD 03",
+          "ACCESS DENIED",
+          "CONTAINMENT VIOLATION"
+        ]
+      },
+      "story": {
+        "entrySystem": [
+          "ROOFTOP PAD 03",
+          "FINAL APPROACH / OPEN"
+        ],
+        "gantrySystem": [
+          "MAINTENANCE SHUTTLE",
+          "STANDBY"
+        ],
+        "perimeterSystem": [
+          "ROOFTOP PAD 03",
+          "PERIMETER / REACHED"
+        ],
+        "accessDeckPrompt": [
+          "PAD ACCESS",
+          "AVAILABLE FOR REQUEST"
+        ],
+        "denialSystem": [
+          "ROOFTOP PAD 03",
+          "ACCESS DENIED",
+          "CONTAINMENT VIOLATION"
+        ],
+        "playerBark": "…여기까지 왔는데."
+      },
+      "forbidden": [
+        "enemy",
+        "wind",
+        "scanner",
+        "cutter",
+        "patrol",
+        "moving-platform",
+        "route-fork",
+        "direction-reversal",
+        "mandatory-descent",
+        "blind-leap",
+        "giant-flat-rooftop",
+        "walk-only-finish",
+        "new-rope-mode",
+        "new-input",
+        "final-boss-inside-6-8",
+        "boarding-before-final-security",
+        "access-granted-before-final-security"
+      ]
+    }
+  }
+}

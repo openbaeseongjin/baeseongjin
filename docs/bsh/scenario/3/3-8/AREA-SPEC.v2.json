@@ -1,0 +1,528 @@
+{
+  "schemaVersion": "area-spec-v2",
+  "authoringMode": "scenario",
+  "stage": {
+    "sector": 3,
+    "stage": 8,
+    "legacyStageAlias": "3-8",
+    "sourceAreaId": "sector-03-08"
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "definition": {
+    "id": "sector-03-08",
+    "sectorId": "sector-03",
+    "order": 8,
+    "name": "UPPER EXCHANGE GATE",
+    "subtitle": "OPEN MARKET SECURITY WEAVE",
+    "bounds": {
+      "width": 4608,
+      "height": 2176
+    },
+    "entry": {
+      "id": "sector-03-08:entry",
+      "x": -1920,
+      "y": -64
+    },
+    "exit": {
+      "id": "sector-03-08:scenario-exit",
+      "x": -1920,
+      "y": -64
+    },
+    "nextAreaId": null,
+    "surfaces": [],
+    "routePoints": [
+      {
+        "id": "sector-03-08:route-entry",
+        "x": -1920,
+        "y": -64,
+        "sourceId": "entry"
+      }
+    ],
+    "recoveryPoints": [],
+    "checkpoints": [],
+    "objects": [],
+    "objectives": [],
+    "windZones": [],
+    "scannerGroups": [
+      {
+        "id": "sector-03-08:scanner-upper-market-A",
+        "targets": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "cycle": {
+          "available": 1.5,
+          "warning": 0.6,
+          "locked": 1.1,
+          "reset": 0.3
+        },
+        "currentRopePersists": true,
+        "damage": 0,
+        "forcedDetach": false
+      }
+    ],
+    "storyTriggers": [],
+    "routes": [],
+    "cameraZones": [],
+    "cueIds": []
+  },
+  "anchors": [],
+  "behaviorRefs": [],
+  "scenario": {
+    "status": "scenario-only",
+    "sourcePath": "docs/bsh/scenario/3/3-8/AREA-SPEC-REV8-DESIGN.json",
+    "sourceSchemaVersion": "area-spec-v1",
+    "boundsProvenance": "authored",
+    "sourceSnapshot": {
+      "schemaVersion": "area-spec-v1",
+      "status": "DESIGN LOCKED",
+      "baselineCommit": "cb4f690ac180a04868322e9c4cfe1384897c348b",
+      "stage": {
+        "sector": 3,
+        "stage": 8,
+        "sourceAreaId": "sector-03-08",
+        "canonicalName": "UPPER EXCHANGE GATE",
+        "runtimeCurrentName": "UPPER MARKET GATE",
+        "bounds": {
+          "width": 4608,
+          "height": 2176
+        },
+        "signature": "OPEN MARKET SECURITY WEAVE"
+      },
+      "entry": {
+        "x": -1920,
+        "y": -64
+      },
+      "safeHubs": {
+        "m0": {
+          "xMin": -896,
+          "xMax": -512,
+          "y": -640
+        },
+        "mx": {
+          "xMin": -64,
+          "xMax": 320,
+          "y": -1120
+        },
+        "m1": {
+          "xMin": -64,
+          "xMax": 320,
+          "y": -1488
+        },
+        "recordsBay": {
+          "xMin": -384,
+          "xMax": 384,
+          "y": -1888
+        }
+      },
+      "weaves": [
+        {
+          "from": "M0",
+          "to": "MX",
+          "central": {
+            "path": [
+              [
+                -512,
+                -640
+              ],
+              [
+                -416,
+                -832
+              ],
+              [
+                -128,
+                -1000
+              ],
+              [
+                -64,
+                -1120
+              ]
+            ],
+            "cost": "C2 Scanner"
+          },
+          "west": {
+            "path": [
+              [
+                -896,
+                -640
+              ],
+              [
+                -1152,
+                -768
+              ],
+              [
+                -1472,
+                -896
+              ],
+              [
+                -1152,
+                -1024
+              ],
+              [
+                -800,
+                -1104
+              ],
+              [
+                -448,
+                -1120
+              ],
+              [
+                -64,
+                -1120
+              ]
+            ],
+            "cost": "Patrol 1"
+          },
+          "east": {
+            "path": [
+              [
+                -512,
+                -640
+              ],
+              [
+                -192,
+                -736
+              ],
+              [
+                160,
+                -832
+              ],
+              [
+                480,
+                -944
+              ],
+              [
+                320,
+                -1088
+              ],
+              [
+                320,
+                -1120
+              ]
+            ],
+            "cost": "Support Guard"
+          }
+        },
+        {
+          "from": "MX",
+          "to": "M1",
+          "central": {
+            "path": [
+              [
+                320,
+                -1120
+              ],
+              [
+                128,
+                -1304
+              ],
+              [
+                128,
+                -1488
+              ]
+            ],
+            "cost": "C3 Scanner"
+          },
+          "west": {
+            "path": [
+              [
+                -64,
+                -1120
+              ],
+              [
+                -352,
+                -1232
+              ],
+              [
+                -704,
+                -1344
+              ],
+              [
+                -384,
+                -1456
+              ],
+              [
+                -64,
+                -1488
+              ]
+            ],
+            "cost": "long safe arc"
+          },
+          "east": {
+            "path": [
+              [
+                320,
+                -1120
+              ],
+              [
+                640,
+                -1216
+              ],
+              [
+                992,
+                -1344
+              ],
+              [
+                640,
+                -1464
+              ],
+              [
+                320,
+                -1488
+              ]
+            ],
+            "cost": "Patrol 2"
+          }
+        },
+        {
+          "from": "M1",
+          "to": "RecordsBay",
+          "central": {
+            "path": [
+              [
+                320,
+                -1488
+              ],
+              [
+                128,
+                -1656
+              ],
+              [
+                128,
+                -1784
+              ],
+              [
+                384,
+                -1888
+              ]
+            ],
+            "cost": "C4 Scanner"
+          },
+          "west": {
+            "path": [
+              [
+                -64,
+                -1488
+              ],
+              [
+                -352,
+                -1600
+              ],
+              [
+                -704,
+                -1712
+              ],
+              [
+                -384,
+                -1840
+              ],
+              [
+                -384,
+                -1888
+              ]
+            ],
+            "cost": "Late Guard"
+          },
+          "east": {
+            "path": [
+              [
+                320,
+                -1488
+              ],
+              [
+                608,
+                -1600
+              ],
+              [
+                960,
+                -1712
+              ],
+              [
+                608,
+                -1840
+              ],
+              [
+                384,
+                -1888
+              ]
+            ],
+            "cost": "Late Guard"
+          }
+        }
+      ],
+      "scannerGroups": [
+        {
+          "id": "sector-03-08:scanner-upper-market-A",
+          "targets": [
+            "C1",
+            "C2",
+            "C3",
+            "C4"
+          ],
+          "cycle": {
+            "available": 1.5,
+            "warning": 0.6,
+            "locked": 1.1,
+            "reset": 0.3
+          },
+          "currentRopePersists": true,
+          "damage": 0,
+          "forcedDetach": false
+        }
+      ],
+      "enemies": [
+        {
+          "id": "sector-03-08:drone-1",
+          "role": "Patrol",
+          "patrol": [
+            [
+              -1504,
+              -896
+            ],
+            [
+              -1056,
+              -1024
+            ]
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong",
+          "activation": "west lower pocket",
+          "ropeCut": false
+        },
+        {
+          "id": "sector-03-08:drone-2",
+          "role": "Patrol",
+          "patrol": [
+            [
+              720,
+              -1264
+            ],
+            [
+              1088,
+              -1408
+            ]
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong",
+          "activation": "east upper pocket",
+          "ropeCut": false
+        },
+        {
+          "id": "sector-03-08:market-lower-guard",
+          "role": "Support Pool",
+          "activation": "east lower pocket"
+        },
+        {
+          "id": "sector-03-08:market-upper-guard",
+          "role": "Late Pool",
+          "activation": "west final pocket"
+        },
+        {
+          "id": "sector-03-08:final-control-guard",
+          "role": "Late Pool",
+          "activation": "east final pocket"
+        }
+      ],
+      "storyObjects": [
+        {
+          "id": "sector-03-08:market-gate",
+          "use": "entry status"
+        },
+        {
+          "id": "sector-03-08:market-directory",
+          "use": "environment status"
+        },
+        {
+          "id": "sector-03-08:evacuation-archive",
+          "use": "LEFT evacuation transfer record"
+        },
+        {
+          "id": "sector-03-08:access-archive",
+          "use": "RIGHT route-status terminal; stable ID preserved"
+        },
+        {
+          "id": "sector-03-08:final-control",
+          "use": "content-boundary status"
+        }
+      ],
+      "story": {
+        "recordsBay": "INCIDENT TRANSFER CONTROL RECORDS BAY",
+        "left": [
+          [
+            "EVACUATION TRANSFER RECORD",
+            ""
+          ],
+          [
+            "GROUP A",
+            "TRANSFER COMPLETE"
+          ],
+          [
+            "GROUP B",
+            "TRANSFER COMPLETE"
+          ],
+          [
+            "GROUP C",
+            "TRANSFER SUSPENDED"
+          ]
+        ],
+        "right": [
+          [
+            "UPPER TRANSFER ROUTE STATUS",
+            ""
+          ],
+          [
+            "PUBLIC / SERVICE ROUTES",
+            "ACTIVE"
+          ],
+          [
+            "PRIORITY ROUTE",
+            "ACTIVE"
+          ]
+        ],
+        "bark": "…C는 멈췄는데, 우선 통로는 열려 있었네.",
+        "causality": "UNKNOWN"
+      },
+      "accessModulesRequired": false,
+      "requiredKills": 0,
+      "exit": {
+        "nextAreaId": null,
+        "completionMode": "content-boundary"
+      },
+      "forbidden": [
+        "Access Tier as core story",
+        "Standard/Premium as core story",
+        "A/B/C↔Priority mapping",
+        "Priority caused C suspension",
+        "direct Sector04 link",
+        "Boss inside stage",
+        "sixth enemy",
+        "Wind",
+        "Rope Cut",
+        "kill gate",
+        "forced Archive camera pan"
+      ]
+    }
+  }
+}
