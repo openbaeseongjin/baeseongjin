@@ -508,6 +508,12 @@ export class GameSimulation {
     }
 
     #setActiveCollisionSurfaces(surfaces) {
+        if (
+            this.activeCollisionSurfaces.length === surfaces.length &&
+            this.activeCollisionSurfaces.every((surface, index) => surface === surfaces[index])
+        ) {
+            return this.activeCollisionSurfaces;
+        }
         this.activeCollisionSurfaces = surfaces;
         this.collisionBroadPhase?.setSurfaces(surfaces);
         return surfaces;
@@ -1719,8 +1725,11 @@ export class GameSimulation {
             }
             if (replicate) this.recordReplicationEvent(type, payload);
             this.eventFlash = { type, age: 0, ...payload };
-            if (type === "gate-unlocked" || type === "route-unlocked") {
+            if (type === "gate-unlocked") {
                 this.#setActiveCollisionSurfaces(collisionSurfacesForProgress(this.world, this.worldProgress));
+            }
+            if (type === "route-unlocked") {
+                this.#setActiveCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress));
             }
             if (type === "gate-crossed" && event.nextAreaId) {
                 this.metrics.recordAreaClear(event.areaId);
@@ -1741,7 +1750,6 @@ export class GameSimulation {
         this.#advanceCalibrationVerification();
         this.#completeEligibleAugmentObjectivesForCurrentRoster();
         if (this.isSeamlessSectorWorld) {
-            this.#setActiveCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress));
             if (stageSaveEvent) {
                 const { type: _type, ...payload } = stageSaveEvent;
                 this.eventFlash = { type: "stage-saved", age: 0, ...payload };
