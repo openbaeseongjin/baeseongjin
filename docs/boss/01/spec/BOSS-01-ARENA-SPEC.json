@@ -1,0 +1,374 @@
+{
+  "schemaVersion": "boss-arena-spec-v1",
+  "status": "IMPLEMENTATION AUTHORITY / REV2.1",
+  "baselineCommit": "e1c558ef9e09ecbc09254cb3fc45306186755570",
+  "boss": {
+    "id": "boss-01:containment-gantry-c-01",
+    "name": "CONTAINMENT GANTRY C-01",
+    "playerFacingNameKo": "C-01 비상 격리구동계",
+    "maxHealth": 360,
+    "phaseCount": 3,
+    "phaseHealth": 120,
+    "exposureSeconds": 8,
+    "timerSeconds": 210,
+    "collapseSpeed": 80
+  },
+  "route": {
+    "baseHookReachPx": 400,
+    "nodes": [
+      {
+        "id": "P0",
+        "x": -720,
+        "y": -80
+      },
+      {
+        "id": "H1",
+        "x": -520,
+        "y": -224
+      },
+      {
+        "id": "H2",
+        "x": -247,
+        "y": -302
+      },
+      {
+        "id": "M1",
+        "x": 102,
+        "y": -322
+      },
+      {
+        "id": "T1",
+        "x": 313,
+        "y": -389
+      },
+      {
+        "id": "L1",
+        "x": 394,
+        "y": -633
+      },
+      {
+        "id": "H3",
+        "x": 56,
+        "y": -736
+      },
+      {
+        "id": "H4",
+        "x": -222,
+        "y": -756
+      },
+      {
+        "id": "M2",
+        "x": -448,
+        "y": -909
+      },
+      {
+        "id": "T2",
+        "x": -388,
+        "y": -1133
+      },
+      {
+        "id": "L2",
+        "x": -48,
+        "y": -1167
+      },
+      {
+        "id": "H5",
+        "x": 154,
+        "y": -1187
+      },
+      {
+        "id": "M3",
+        "x": 417,
+        "y": -1233
+      },
+      {
+        "id": "T3",
+        "x": 300,
+        "y": -1580
+      },
+      {
+        "id": "P4",
+        "x": 0,
+        "y": -1600
+      }
+    ],
+    "mainRoute": [
+      "P0",
+      "H1",
+      "H2",
+      "M1",
+      "T1",
+      "L1",
+      "H3",
+      "H4",
+      "M2",
+      "T2",
+      "L2",
+      "H5",
+      "M3",
+      "T3",
+      "P4"
+    ],
+    "adjacentDistancesPx": [
+      246.45,
+      283.92,
+      349.57,
+      221.38,
+      257.09,
+      353.35,
+      278.72,
+      272.92,
+      231.9,
+      341.7,
+      202.99,
+      266.99,
+      366.19,
+      300.67
+    ],
+    "maxAdjacentDistancePx": 366.19,
+    "routeLengthPx": 3973.84,
+    "nonAdjacentPairsWithin400": []
+  },
+  "breakers": [
+    {
+      "phase": 1,
+      "id": "boss-01:breaker:phase-1",
+      "nameKo": "클램프 압력 해제",
+      "pointId": "M1",
+      "interactionRadius": 72,
+      "position": {
+        "x": 102,
+        "y": -322
+      }
+    },
+    {
+      "phase": 2,
+      "id": "boss-01:breaker:phase-2",
+      "nameKo": "환기 역압 차단",
+      "pointId": "M2",
+      "interactionRadius": 72,
+      "position": {
+        "x": -448,
+        "y": -909
+      }
+    },
+    {
+      "phase": 3,
+      "id": "boss-01:breaker:phase-3",
+      "nameKo": "게이트 브레이크 수동 해제",
+      "pointId": "M3",
+      "interactionRadius": 72,
+      "position": {
+        "x": 417,
+        "y": -1233
+      }
+    }
+  ],
+  "phaseTargets": [
+    {
+      "phase": 1,
+      "id": "boss-01:target:clamp-drive",
+      "nameKo": "격리 클램프 구동축",
+      "kind": "clamp-drive",
+      "assembly": {
+        "x": 430,
+        "y": -520,
+        "radius": 64
+      },
+      "weakPoint": {
+        "x": 452,
+        "y": -507,
+        "radius": 24,
+        "damageMultiplier": 1.5
+      },
+      "attackAnchorId": "T1",
+      "exitCatchId": "L1"
+    },
+    {
+      "phase": 2,
+      "id": "boss-01:target:vent-bearing",
+      "nameKo": "환기 팬 주베어링",
+      "kind": "vent-bearing",
+      "assembly": {
+        "x": -120,
+        "y": -1080,
+        "radius": 64
+      },
+      "weakPoint": {
+        "x": -142,
+        "y": -1100,
+        "radius": 22,
+        "damageMultiplier": 1.5
+      },
+      "attackAnchorId": "T2",
+      "exitCatchId": "L2"
+    },
+    {
+      "phase": 3,
+      "id": "boss-01:target:gate-lock-pin",
+      "nameKo": "상부 게이트 잠금핀 하우징",
+      "kind": "gate-lock-pin",
+      "assembly": {
+        "x": 80,
+        "y": -1500,
+        "radius": 64
+      },
+      "weakPoint": {
+        "x": 92,
+        "y": -1528,
+        "radius": 20,
+        "damageMultiplier": 1.5
+      },
+      "attackAnchorId": "T3",
+      "exitCatchId": "P4"
+    }
+  ],
+  "phaseThreats": {
+    "phase1": {
+      "enemies": [
+        {
+          "id": "boss-01:p1:sentry",
+          "type": "sentry-t1",
+          "position": {
+            "x": -560,
+            "y": -520
+          },
+          "activation": {
+            "x": -650,
+            "y": -650,
+            "width": 1220,
+            "height": 390
+          },
+          "rules": [
+            "standard-projectile"
+          ]
+        }
+      ],
+      "windZones": []
+    },
+    "phase2": {
+      "enemies": [
+        {
+          "id": "boss-01:p2:sentry",
+          "type": "sentry-t1",
+          "position": {
+            "x": 520,
+            "y": -990
+          },
+          "activation": {
+            "x": -620,
+            "y": -1230,
+            "width": 1180,
+            "height": 520
+          },
+          "rules": [
+            "standard-projectile"
+          ]
+        }
+      ],
+      "windZones": [
+        {
+          "id": "boss-01:p2:wind",
+          "bounds": {
+            "x": -600,
+            "y": -1220,
+            "width": 1000,
+            "height": 500
+          },
+          "direction": {
+            "x": 1,
+            "y": 0
+          },
+          "strength": 800,
+          "falloff": 80,
+          "damage": false,
+          "cycle": {
+            "lull": 1.75,
+            "warning": 0.7,
+            "active": 1.4,
+            "decay": 0.3
+          }
+        }
+      ]
+    },
+    "phase3": {
+      "enemies": [
+        {
+          "id": "boss-01:p3:left",
+          "type": "sentry-t1",
+          "position": {
+            "x": -560,
+            "y": -1380
+          },
+          "activation": {
+            "x": -640,
+            "y": -1630,
+            "width": 600,
+            "height": 450
+          },
+          "rules": [
+            "standard-projectile",
+            "alternating-emitter-a"
+          ]
+        },
+        {
+          "id": "boss-01:p3:right",
+          "type": "sentry-t1",
+          "position": {
+            "x": 560,
+            "y": -1380
+          },
+          "activation": {
+            "x": 40,
+            "y": -1630,
+            "width": 600,
+            "height": 450
+          },
+          "rules": [
+            "standard-projectile",
+            "alternating-emitter-b"
+          ]
+        }
+      ],
+      "windZones": [
+        {
+          "id": "boss-01:p3:wind",
+          "bounds": {
+            "x": -620,
+            "y": -1620,
+            "width": 1200,
+            "height": 500
+          },
+          "direction": {
+            "x": 1,
+            "y": 0
+          },
+          "strength": 800,
+          "falloff": 80,
+          "damage": false,
+          "cycle": {
+            "lull": 1.75,
+            "warning": 0.7,
+            "active": 1.4,
+            "decay": 0.3
+          }
+        }
+      ],
+      "constraints": {
+        "noCrossfire": true,
+        "oneDominantThreat": true
+      }
+    }
+  },
+  "damage": {
+    "minimumRopeImpactSpeedPxPerSec": "USE CURRENT ROPE_IMPACT_CONFIG.minimumSpeed",
+    "normalMultiplier": 1.0,
+    "weakPointMultiplier": 1.5,
+    "contactRule": "outside-to-inside edge only"
+  },
+  "storyBoundary": {
+    "triggerAfter": "sector-01-08 maintenance override",
+    "unlockAfter": "boss-01 victory",
+    "next": "Worker District access"
+  }
+}
