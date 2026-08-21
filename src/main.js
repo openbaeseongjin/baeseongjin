@@ -43,7 +43,10 @@ let audioHost = null;
 let audioBindings = null;
 let audioLifecycle = null;
 let audioLifecycleAttached = false;
-const DEFAULT_GAME_AUDIO_SELECTION = Object.freeze({ packId: "default-mock", packageOverrides: Object.freeze({}) });
+const DEFAULT_GAME_AUDIO_SELECTION = Object.freeze({
+    packId: "default-mock",
+    packageOverrides: Object.freeze({ bgm: "main-theme" })
+});
 const modeMenu = new GameModeMenu(document.getElementById("game-mode-menu"));
 const startupLoadingScreen = new StartupUpdateLoadingScreen(document.getElementById("startup-update-loading"));
 const channelBadge = document.getElementById("channel-badge");
