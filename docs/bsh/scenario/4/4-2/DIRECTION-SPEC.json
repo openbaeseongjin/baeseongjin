@@ -1,0 +1,226 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 4,
+    "stage": 2,
+    "legacyStageAlias": "4-2",
+    "sourceAreaId": "sector-04-02",
+    "name": "RESIDENT COURTYARD"
+  },
+  "baselineCommit": "4551798860193a16e53814aae5c3a42022b4e1cf",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-courtyard-security-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "Courtyard Security가 정상 가동 중임을 Gameplay 전에 읽힌다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -1540,
+        "maxLocalX": -1280,
+        "minLocalY": -560,
+        "maxLocalY": -420
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-2:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "courtyard-overlook",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT COURTYARD",
+            "detail": "SECURITY CONTROL / ACTIVE"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s1-pursuit-acquire",
+      "status": "DESIGN LOCKED",
+      "purpose": "Patrol과 다른 실제 추적 behavior가 시작됐음을 짧게 확인한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -1200,
+        "maxLocalX": -760,
+        "minLocalY": -840,
+        "maxLocalY": -520
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-2:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "limited-pursuit-read",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENTIAL SECURITY",
+            "detail": "TRACKING"
+          },
+          "timing": {
+            "durationSeconds": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s2-contact-break",
+      "status": "DESIGN LOCKED",
+      "purpose": "Interior Arcade가 Pursuit Territory를 끊는다는 것을 공간 경험 뒤 확인한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 520,
+        "maxLocalX": 980,
+        "minLocalY": -1300,
+        "maxLocalY": -900
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-2:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "arcade-contact-break",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "SECURITY CONTACT",
+            "detail": "LOST"
+          },
+          "timing": {
+            "durationSeconds": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s3-override-source-a",
+      "status": "DESIGN LOCKED",
+      "purpose": "첫 Resident Security Override source를 안전하게 발견한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 1060,
+        "maxLocalX": 1540,
+        "minLocalY": -1600,
+        "maxLocalY": -1340
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-2:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "override-a-safe",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT SECURITY OVERRIDE",
+            "detail": "SOURCE A"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s4-override-a-acquired",
+      "status": "DESIGN LOCKED",
+      "purpose": "Override A 획득을 모든 진행 상태와 일치하게 확인한다.",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "sector-04:resident-security-override:a"
+      },
+      "scope": "party",
+      "replayPolicy": "once-per-source-state",
+      "dedupeToken": "sector-04:override:a:acquired",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "override-a-safe",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT SECURITY OVERRIDE",
+            "detail": "ACQUIRED"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s5-skybridge-handoff",
+      "status": "DESIGN LOCKED",
+      "purpose": "4-3을 Security escalation으로 예고한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 1810,
+        "maxLocalX": 2150,
+        "minLocalY": -1940,
+        "maxLocalY": -1780
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-2:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "exit-skybridge-preview",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENTIAL SKYBRIDGE",
+            "detail": "SECURITY PATROL"
+          },
+          "timing": {
+            "durationSeconds": 1.1
+          }
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No world pause or player control lock",
+    "Pursuit cannot acquire in M0 or Override Vestibule",
+    "Contact break corresponds to actual Runtime activation boundary",
+    "Override A acquisition is shared progression state",
+    "4-2 local exit remains valid without Override A",
+    "No 2-of-3 fake-choice caused by local exit gating",
+    "Required Direction tracks must reach implemented/verified before release"
+  ]
+}

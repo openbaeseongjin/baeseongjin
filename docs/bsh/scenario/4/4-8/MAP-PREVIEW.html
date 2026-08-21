@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4-8 Protected Ascent Gatehouse REV2 Map Preview</title>
+<style>
+:root{--bg:#061018;--panel:#0b171d;--line:#304955;--text:#eef5f6;--muted:#9fb1b7;
+--safe:#31594a;--safe2:#7ed0a4;--surf:#566d77;--surf2:#afc1c7;--core:#202d35;--core2:#718993;
+--anchor:#5de8ff;--route:#ffe173;--gate:#75633f;--return:#d48c7c;--phase:#9ec9db;}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted);margin-top:4px}
+.layout{display:grid;grid-template-columns:500px 1fr;min-height:calc(100vh - 72px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}
+main{padding:12px}.card{border:1px solid var(--line);border-radius:8px;padding:9px;background:#08131a;margin-bottom:8px}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 9px;margin:3px;cursor:pointer}
+button.on{border-color:var(--anchor);color:var(--anchor)}svg{width:100%;height:88vh;min-height:850px;background:#040b10;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08161d;stroke:#52717e;stroke-width:3}.core{fill:var(--core);stroke:var(--core2);stroke-width:4}
+.surface{fill:var(--surf);stroke:var(--surf2);stroke-width:2}.safe{fill:var(--safe);stroke:var(--safe2);stroke-width:3}
+.gate{fill:var(--gate);stroke:#dfcb88;stroke-width:3}.anchor{fill:var(--anchor);stroke:white;stroke-width:2}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:14 9}.return{fill:none;stroke:var(--return);stroke-width:4;stroke-dasharray:10 8}
+.reach{fill:none;stroke:var(--anchor);stroke-width:1.1;opacity:.13}.phase{fill:none;stroke:var(--phase);stroke-width:2;stroke-dasharray:6 7;opacity:.55}
+text{fill:var(--text);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#bdcbd0}.safeText{fill:#8fe0b2}.warn{fill:#ffe173}.dim{font-size:11px;fill:#95b6c3}.hidden{display:none!important}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head>
+<body>
+<header><h1>4-8 PROTECTED ASCENT GATEHOUSE · REV2 MAP</h1>
+<div class="sub">ALTERNATING MAINTENANCE GALLERIES · MULTIPLE DIRECTION CHANGES · ALWAYS ASCENDING · USER APPROVAL REQUIRED</div></header>
+<div class="layout">
+<aside>
+<div class="card"><b>REV1 문제</b><br>왼쪽 아래 → 오른쪽 위로 거의 한 번에 읽히는 대각선 진행이라 Finale치고 동선 변화가 부족했다.</div>
+<div class="card"><b>REV2 건축 이유</b><br>Gatehouse의 두 Pressure/Smoke Lock은 actuator·vent·inspection equipment가 층마다 반대편 설비면에 배치된다. 시설관리자는 <b>alternating maintenance gallery</b>를 따라 좌우를 바꿔가며 위로 올라간다.</div>
+<div class="card"><b>새 리듬</b><br>
+① Lower Security Landing<br>
+② East Mechanical Face<br>
+③ Center Crossover<br>
+④ West Lower Gallery<br>
+⑤ Mid Interlock / FULL SAFE<br>
+⑥ East Upper Gallery<br>
+⑦ West Return Gallery<br>
+⑧ Final Control
+</div>
+<div class="card"><b>이동 벡터</b><br><code>↗ → ↗ → ↖ → ↖ → ↗ → ↗ → ↖ → ↖</code><br>방향은 여러 번 바뀌지만 모든 Phase의 평균 Y는 계속 상승.</div>
+<div class="card"><b>Pressure</b><br>Enemy / Pursuit / Cutter / Scanner / Wind = NONE. Finale는 Access 판정과 구조적 상승 자체가 Gameplay.</div>
+<div class="card"><b>Rope</b><br>Mandatory 최대 <b>386.26px</b> &lt; 400px.</div>
+<div class="card"><b>Under Quorum</b><br>2-of-3 미달 시 Gate는 닫히고 좌하단 Return Access로 복귀. 죽이거나 임시 자격을 주지 않음.</div>
+<button id="routeBtn" class="on">Main Route</button>
+<button id="phaseBtn" class="on">Architecture Phases</button>
+<button id="returnBtn" class="on">Under-Quorum Return</button>
+<button id="reachBtn">400px Reach</button>
+</aside>
+<main>
+<svg viewBox="-1720 -2760 3440 2820">
+<rect class="bounds" x="-1664" y="-2720" width="3328" height="2720"/>
+<text class="tiny" x="-1600" y="-2665">3328 W × 2720 H</text>
+
+<!-- central pressure core -->
+<rect class="core" x="-520" y="-2550" width="1040" height="2180" rx="32"/>
+<text x="-430" y="-2488">PROTECTED ASCENT PRESSURE CORE</text>
+<text class="tiny" x="-430" y="-2458">alternating service faces / redundant actuator + vent access</text>
+
+<!-- lower entry -->
+<rect class="safe" x="-1390" y="-170" width="420" height="30"/>
+<text class="safeText" x="-1360" y="-202">FROM 4-7 · PROTECTED ASCENT GATE</text>
+
+<!-- quorum -->
+<rect class="safe" x="-1070" y="-395" width="420" height="30"/>
+<rect class="gate" x="-1010" y="-545" width="300" height="110" rx="9"/>
+<text class="warn" x="-970" y="-505">A / B / C</text>
+<text class="tiny" x="-970" y="-477">2 OF 3 REQUIRED</text>
+
+<!-- lower east face -->
+<rect class="surface" x="-730" y="-560" width="320" height="22"/>
+<rect class="surface" x="-390" y="-690" width="320" height="22"/>
+<rect class="surface" x="-40" y="-830" width="330" height="22"/>
+<rect class="surface" x="300" y="-1020" width="340" height="22"/>
+<text class="dim" x="300" y="-1050">EAST LOWER MECHANICAL FACE</text>
+
+<!-- cross back -->
+<rect class="surface" x="40" y="-1200" width="300" height="22"/>
+<rect class="surface" x="-300" y="-1360" width="300" height="22"/>
+<text class="dim" x="-300" y="-1390">CENTER CROSSOVER</text>
+
+<!-- west lower gallery -->
+<rect class="surface" x="-600" y="-1570" width="340" height="22"/>
+<text class="dim" x="-670" y="-1600">WEST LOWER INSPECTION GALLERY</text>
+
+<!-- mid lock -->
+<rect class="safe" x="-330" y="-1765" width="420" height="32"/>
+<text class="safeText" x="-290" y="-1795">MID INTERLOCK · FULL SAFE</text>
+<rect class="gate" x="-250" y="-1850" width="580" height="44"/>
+<text class="tiny" x="-200" y="-1875">UPPER PRESSURE / SMOKE INTERLOCK</text>
+
+<!-- east upper -->
+<rect class="surface" x="20" y="-1920" width="310" height="22"/>
+<rect class="surface" x="330" y="-2080" width="320" height="22"/>
+<text class="dim" x="360" y="-2110">EAST UPPER SERVICE FACE</text>
+
+<!-- west return -->
+<rect class="surface" x="90" y="-2290" width="320" height="22"/>
+<rect class="surface" x="-230" y="-2450" width="320" height="22"/>
+<rect class="surface" x="-550" y="-2580" width="320" height="22"/>
+<text class="dim" x="-680" y="-2608">WEST FINAL RETURN GALLERY</text>
+
+<!-- final -->
+<rect class="safe" x="-820" y="-2690" width="430" height="30"/>
+<text class="safeText" x="-790" y="-2718">FINAL ASCENT CONTROL · FULL SAFE</text>
+
+<!-- architecture guides -->
+<g id="phases">
+<path class="phase" d="M-1020,-260 L-250,-950"/>
+<text class="tiny" x="-720" y="-890">PHASE A · east-side equipment access</text>
+<path class="phase" d="M420,-1030 L-500,-1580"/>
+<text class="tiny" x="-350" y="-1485">PHASE B · crossover to opposite service face</text>
+<path class="phase" d="M-220,-1750 L540,-2080"/>
+<text class="tiny" x="50" y="-1995">PHASE C · upper lock / east service face</text>
+<path class="phase" d="M520,-2100 L-690,-2660"/>
+<text class="tiny" x="-480" y="-2490">PHASE D · final return to control side</text>
+</g>
+
+<!-- main route -->
+<g id="route">
+<path class="route" d="M-1120,-160 L-860,-350 L-540,-520 L-200,-650 L160,-790 L460,-980 L180,-1160 L-160,-1320 L-430,-1530 L-130,-1730 L190,-1880 L500,-2040 L250,-2250 L-70,-2410 L-390,-2540 L-650,-2650"/>
+</g>
+
+<!-- under quorum return -->
+<g id="returnRoute">
+<path class="return" d="M-860,-350 Q-1120,-520 -1360,-700 Q-1510,-820 -1480,-1020"/>
+<text class="tiny" x="-1580" y="-1055">RETURN ACCESS → earlier override routes</text>
+</g>
+
+<!-- anchors -->
+<g>
+<circle class="anchor" cx="-1120" cy="-160" r="12"/><text class="tiny" x="-1097" y="-145">E</text>
+<circle class="anchor" cx="-860" cy="-350" r="12"/><text class="tiny" x="-837" y="-335">Q</text>
+<circle class="anchor" cx="-540" cy="-520" r="12"/><text class="tiny" x="-517" y="-505">A1</text>
+<circle class="anchor" cx="-200" cy="-650" r="12"/><text class="tiny" x="-177" y="-635">A2</text>
+<circle class="anchor" cx="160" cy="-790" r="12"/><text class="tiny" x="183" y="-775">A3</text>
+<circle class="anchor" cx="460" cy="-980" r="12"/><text class="tiny" x="483" y="-965">E1</text>
+<circle class="anchor" cx="180" cy="-1160" r="12"/><text class="tiny" x="203" y="-1145">C1</text>
+<circle class="anchor" cx="-160" cy="-1320" r="12"/><text class="tiny" x="-137" y="-1305">C2</text>
+<circle class="anchor" cx="-430" cy="-1530" r="12"/><text class="tiny" x="-407" y="-1515">W1</text>
+<circle class="anchor" cx="-130" cy="-1730" r="12"/><text class="tiny" x="-107" y="-1715">M</text>
+<circle class="anchor" cx="190" cy="-1880" r="12"/><text class="tiny" x="213" y="-1865">U1</text>
+<circle class="anchor" cx="500" cy="-2040" r="12"/><text class="tiny" x="523" y="-2025">E2</text>
+<circle class="anchor" cx="250" cy="-2250" r="12"/><text class="tiny" x="273" y="-2235">R1</text>
+<circle class="anchor" cx="-70" cy="-2410" r="12"/><text class="tiny" x="-47" y="-2395">R2</text>
+<circle class="anchor" cx="-390" cy="-2540" r="12"/><text class="tiny" x="-367" y="-2525">R3</text>
+<circle class="anchor" cx="-650" cy="-2650" r="12"/><text class="tiny" x="-627" y="-2635">F</text>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-860" cy="-350" r="400"/>
+<circle class="reach" cx="-200" cy="-650" r="400"/>
+<circle class="reach" cx="460" cy="-980" r="400"/>
+<circle class="reach" cx="-160" cy="-1320" r="400"/>
+<circle class="reach" cx="-130" cy="-1730" r="400"/>
+<circle class="reach" cx="500" cy="-2040" r="400"/>
+<circle class="reach" cx="-70" cy="-2410" r="400"/>
+</g>
+</svg></main></div>
+<script>
+const tg=(b,g)=>{const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}};
+tg('routeBtn','route');tg('phaseBtn','phases');tg('returnBtn','returnRoute');tg('reachBtn','reach');
+</script>
+</body></html>

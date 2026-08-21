@@ -1,0 +1,196 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 4,
+    "stage": 1,
+    "legacyStageAlias": "4-1",
+    "sourceAreaId": "sector-04-01",
+    "name": "UPPER RESIDENTIAL ARRIVAL"
+  },
+  "baselineCommit": "4551798860193a16e53814aae5c3a42022b4e1cf",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "psychology": {
+    "start": {
+      "unease": 55,
+      "understanding": 38
+    },
+    "exit": {
+      "unease": 62,
+      "understanding": 45
+    }
+  },
+  "beats": [
+    {
+      "beatId": "s0-high-arrival-scale-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "Sector03의 조밀함에서 벗어나 상층 주거가 소비하는 넓은 면적을 환경으로 먼저 읽힌다.",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-1:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "high-arrival-wide",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "audio",
+          "action": "upper-residential-ambient-wide",
+          "optional": true
+        },
+        {
+          "type": "lighting",
+          "action": "maintained-residential-daylight-and-landscape",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s1-m0-environment-normal",
+      "status": "DESIGN LOCKED",
+      "purpose": "시각적으로 정상 가동을 먼저 본 뒤 System이 최소한의 사실만 확인한다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -1810,
+        "maxLocalX": -1518,
+        "minLocalY": -320,
+        "maxLocalY": -210
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-1:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "m0-basin-overlook",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER RESIDENTIAL DISTRICT",
+            "detail": "ENVIRONMENTAL SERVICE / NORMAL"
+          },
+          "timing": {
+            "durationSeconds": 1.4
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…여긴 아직 다 돌아가고 있네."
+          },
+          "timing": {
+            "minDelaySeconds": 1.9
+          }
+        },
+        {
+          "type": "audio",
+          "action": "water-and-residential-service-normal",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s2-basin-security-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "Basin 중앙에서 이동형 Security의 존재만 확인하고 Pursuit는 가르치지 않는다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -480,
+        "maxLocalX": 560,
+        "minLocalY": -340,
+        "maxLocalY": -20
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-1:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "basin-patrol-read",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENTIAL SECURITY",
+            "detail": "ACTIVE"
+          },
+          "timing": {
+            "durationSeconds": 1.1
+          }
+        },
+        {
+          "type": "audio",
+          "action": "patrol-positional-security-read",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s3-private-lobby-handoff",
+      "status": "DESIGN LOCKED",
+      "purpose": "4-2 Courtyard와 Security Control만 예고하고 Override는 공개하지 않는다.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 2040,
+        "maxLocalX": 2360,
+        "minLocalY": -2020,
+        "maxLocalY": -1860
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-1:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "private-lobby-safe",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENT COURTYARD",
+            "detail": "SECURITY CONTROL"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        },
+        {
+          "type": "audio",
+          "action": "security-motor-fade-to-private-lobby",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No world pause or player control lock",
+    "M0 is spatially safe from Patrol acquire",
+    "Exact Bark: …여긴 아직 다 돌아가고 있네.",
+    "Patrol read happens in the basin, not only at the end",
+    "No Pursuit / Cutter / Scanner / Wind / Override / Augment",
+    "No Group C or Priority causality explanation",
+    "Required Direction tracks must reach implemented/verified before release"
+  ]
+}

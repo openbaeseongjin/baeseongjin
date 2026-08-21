@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4-2 Resident Courtyard REV1 Map</title>
+<style>
+:root{--bg:#061016;--panel:#0b161d;--line:#304a55;--text:#eef5f5;--muted:#a4b5ba;--safe:#3b6753;--anchor:#5de8ff;--route:#ffe173;--pursuit:#b85e52;--territory:#9f4a4328;--cut:#3d5661;--story:#88763f;--override:#8c67c9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:13px 17px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:18px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:500px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);max-height:100vh;overflow:auto}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--anchor)}
+svg{width:100%;height:87vh;min-height:840px;background:#040b10;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#09171e;stroke:#587581;stroke-width:3}.court{fill:#13242a;stroke:#48636b;stroke-width:3;stroke-dasharray:14 10}
+.platform{fill:#596e78;stroke:#acbec5;stroke-width:2}.safe{fill:var(--safe);stroke:#88d8ab;stroke-width:3}.cut{fill:var(--cut);stroke:#8da5ad;stroke-width:3}
+.anchor{fill:var(--anchor);stroke:#fff;stroke-width:2}.route{fill:none;stroke:var(--route);stroke-width:4;stroke-dasharray:13 9}.pursuit{fill:var(--pursuit);stroke:#ffb0a6;stroke-width:3}.territory{fill:var(--territory);stroke:#d26d63;stroke-width:3;stroke-dasharray:14 10}.story{fill:var(--story);stroke:#ead98d;stroke-width:2}.override{fill:var(--override);stroke:#dbc8ff;stroke-width:3}
+text{fill:var(--text);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#b7c7cb}.label{font-size:16px;fill:#91dfb0}.warn{font-size:15px;fill:#ffaaa0}.hidden{display:none}
+button{background:#142229;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:3px}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>4-2 RESIDENT COURTYARD · REV1 DRAFT</h1><div class="sub">GAMEPLAY ONLY · 4480×2112 · EXPOSED CRESCENT → LIMITED PURSUIT → INTERIOR CUT → SAFE OVERRIDE</div></header>
+<div class="layout"><aside>
+<div class="card"><b>CORE</b><br>첫 Pursuit. 하지만 Stage 전체가 아니라 <b>한 개 Territory</b> 안에서만 쫓긴다.</div>
+<div class="card"><b>ARCHITECTURAL LESSON</b><br>Courtyard exposed crescent를 달리다가 Interior Arcade로 들어가면 Pursuit가 끊긴다.</div>
+<div class="card"><b>OVERRIDE A</b><br>Safe Vestibule에서 획득 가능. <b>4-2 local exit에는 필수 아님.</b></div>
+<div class="card"><b>ENEMY</b><br>Pursuit Drone ×1 only. Patrol companion 없음.</div>
+<div class="card"><b>NO</b><br>Cutter · Scanner · Wind · Augment · kill gate.</div>
+<button id="rbtn">Route</button><button id="tbtn">Pursuit Territory</button>
+</aside><main>
+<svg viewBox="-2300 -2160 4600 2230">
+<rect class="bounds" x="-2240" y="-2112" width="4480" height="2112"/>
+<!-- courtyard functional open area -->
+<path class="court" d="M-1480,-560 Q-520,-1080 640,-560 L760,-900 Q-460,-1460 -1620,-820 Z"/>
+<text class="tiny" x="-650" y="-930">EXPOSED COURTYARD CRESCENT</text>
+
+<!-- entry -->
+<rect class="safe" x="-2100" y="-256" width="260" height="30"/><text class="label" x="-2070" y="-282">ENTRY</text>
+<circle class="anchor" cx="-1696" cy="-384" r="13"/><text class="tiny" x="-1676" y="-370">A1</text>
+<rect class="safe" x="-1530" y="-480" width="244" height="30"/><text class="label" x="-1510" y="-506">M0 SAFE</text>
+<rect class="story" x="-1545" y="-610" width="280" height="72" rx="8"/><text class="tiny" x="-1500" y="-580">RESIDENT COURTYARD</text><text class="tiny" x="-1488" y="-556">SECURITY CONTROL / ACTIVE</text>
+
+<!-- pursuit territory -->
+<rect id="territory" class="territory" x="-1280" y="-940" width="2000" height="580" rx="70"/>
+<text class="warn" x="-1100" y="-890">LIMITED PURSUIT TERRITORY</text>
+<circle class="anchor" cx="-1120" cy="-640" r="13"/><text class="tiny" x="-1100" y="-626">C1</text>
+<circle class="anchor" cx="-800" cy="-736" r="13"/><text class="tiny" x="-780" y="-722">C2</text>
+<circle class="anchor" cx="-448" cy="-800" r="13"/><text class="tiny" x="-428" y="-786">C3</text>
+<circle class="anchor" cx="-96" cy="-736" r="13"/><text class="tiny" x="-76" y="-722">C4</text>
+<circle class="anchor" cx="256" cy="-640" r="13"/><text class="tiny" x="276" y="-626">C5</text>
+<circle class="anchor" cx="576" cy="-512" r="13"/><text class="tiny" x="596" y="-498">C6</text>
+<circle class="pursuit" cx="-880" cy="-610" r="22"/><text class="tiny" x="-970" y="-650">PURSUIT ×1</text>
+<rect class="story" x="-520" y="-520" width="220" height="58" rx="8"/><text class="tiny" x="-480" y="-492">RESIDENTIAL SECURITY</text><text class="tiny" x="-430" y="-470">TRACKING</text>
+
+<!-- cut-through -->
+<rect class="cut" x="720" y="-770" width="250" height="110" rx="10"/><text class="tiny" x="748" y="-720">INTERIOR ARCADE CUT</text>
+<circle class="anchor" cx="832" cy="-704" r="13"/><text class="tiny" x="852" y="-690">CUT1</text>
+<rect class="cut" x="520" y="-1020" width="240" height="70" rx="10"/><text class="tiny" x="565" y="-980">R1 RECOVERY</text>
+<circle class="anchor" cx="896" cy="-1248" r="13"/><text class="tiny" x="916" y="-1234">CUT2</text>
+<rect class="story" x="760" y="-1135" width="235" height="58" rx="8"/><text class="tiny" x="800" y="-1107">SECURITY CONTACT</text><text class="tiny" x="846" y="-1085">LOST</text>
+
+<!-- vestibule -->
+<rect class="safe" x="1060" y="-1408" width="250" height="30"/><text class="label" x="1075" y="-1435">SAFE VESTIBULE</text>
+<rect class="override" x="1375" y="-1560" width="160" height="110" rx="12"/>
+<text class="tiny" x="1390" y="-1520">OVERRIDE A</text><text class="tiny" x="1395" y="-1498">OPTIONAL</text>
+<circle class="anchor" cx="1728" cy="-1696" r="13"/><text class="tiny" x="1748" y="-1682">A7</text>
+<rect class="safe" x="1855" y="-1856" width="258" height="30"/><text class="label" x="1880" y="-1882">EXIT → 4-3</text>
+
+<g id="route">
+<path class="route" d="M-1984,-256 L-1696,-384 L-1408,-480 L-1120,-640 L-800,-736 L-448,-800 L-96,-736 L256,-640 L576,-512 L832,-704 L640,-992 L896,-1248 L1184,-1408 L1456,-1504 L1728,-1696 L1984,-1856"/>
+</g>
+</svg></main></div>
+<script>rbtn.onclick=()=>route.classList.toggle('hidden');tbtn.onclick=()=>territory.classList.toggle('hidden');</script>
+</body></html>

@@ -1,45 +1,66 @@
 # SECTOR 04-7 — PRODUCTION ALIGNMENT
 
-*CUTTER + WAKE SYNTHESIS · STORY REVEAL · REV 1.0*
+## Current source-of-truth split
 
-본 문서는 [4-7 시나리오](./README.md)와 현재 `Sector04AreaCatalog` 구현을 연결한다. 4-7은 Lower Ascent Feeder reveal과 Cutter + Wake 합성을 담당하는 Stage이며 현재 standalone catalog에서 `GRAYBOX READY` 상태다.
+Latest checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`.
 
-## 1. 현재 판정
+Current repository `Sector04AreaCatalog.js` still contains the **legacy**:
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `GRAYBOX READY / STANDALONE ONLY` | 메인 authored chain 미연결 |
-| Geometry / Gate | `IMPLEMENTED` | bounds `1472×1536`, junction flow / recovery / exit 구현 |
-| Cutter | `IMPLEMENTED` | `cutter-sentry-01` 한 기체가 lower band를 차단한다 |
-| Wake | `IMPLEMENTED` | `junction-wake` pulsed zone이 route 전체를 관통한다 |
-| Story | `IMPLEMENTED` | `routing-status-display`, `feeder-status-display` 두 object로 reveal을 노출한다 |
+- name: `ISOLATION JUNCTION`
+- subtitle: `CUTTER + WAKE SYNTHESIS`
+- bounds: `1472×1536`
+- Cutter ×1
+- pulsed Wake ×1
+- `LOWER ASCENT FEEDER / ISOLATED` story
 
-## 2. Runtime 좌표 / Stable ID 요약
+That runtime block is **not the approved creative authority anymore**.
 
-- Area: `sector-04-07`, entry `(-480,-32)`, exit `(544,-1504)`, next `sector-04-08`
-- Grapple: `A0(-352,-128)`, `W1(-160,-416)`, `W2(160,-576)`, `W3(160,-800)`, `W4(-160,-960)`, `A5(-96,-1152)`, `A6(224,-1344)`
-- Recovery: `R1(320,-536)`, `R2(-320,-920)`
-- Cutter: `cutter-sentry-01(480,-640)`, activation `(-240,-1008,480×624)`, rules `cutter-fire / kill-optional / target-lock-cycle / activation-band-only`
-- Wake: `sector-04-07:junction-wake`, bounds `(-224,-1008,448×688)`, direction `(+1,0)`, cycle `1.75 / 0.7 / 1.4 / 0.3`
-- Story display: `routing-status-display(-128,-256)`, `feeder-status-display(96,-1248)`
-- Gate set(exitBlock 표준): `exit-deck(352,-1411,416)`, `exit-gate(528,-1411)`, `exit-panel(416,-1411)`, exit `(528,-1443)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
+## New approved authority
 
-## 3. Camera · Story 상태
+This package replaces only the 4-7 authored design with:
 
-- Camera zones: `junction-read`, `lower-assist`, `center-turn`, `upper-opposed-return`, `story-deck`, `exit`
-- Story cue는 `sector-04-07:containment-routing-active`, `lower-feeder-isolated`, `route-telemetry-offline`
-- `storyTriggers`: `junction-entry`, `feeder-isolated`, `trunk-access-ahead`
-- README 기준으로 `LOWER ASCENT FEEDER ISOLATED` reveal은 4-7에서 처음 노출되며, 현재 runtime도 그 경계를 지킨다
+- name: `REFUGE TERRACE`
+- bounds hypothesis: `5440×2816`
+- Pursuit ×1 on the main lower ascent
+- full-safe M0 Refuge Airlock
+- optional Inner Security Spur
+- Static Security ×1 on that spur
+- Resident Security Override C
+- final fact: `UPPER REFUGE / SECURITY ACTIVE`
+- final fact: `PROTECTED ASCENT / AVAILABLE`
+- one bark: `…대피로까지 따로 지키고 있네.`
 
-## 4. 검증 근거
+## Preserve from current Runtime
 
-- Source: `src/game/world/areas/sector04/Sector04AreaCatalog.js`
-- Tests: `tests/sector04AreaCatalog.mjs`, `tests/worldForceField.mjs`, `tests/combatSystems.mjs`
-- Integration recent change #27이 4-7 story binding 반영을 기록한다
-- 미확인: 실제 reveal 타이밍, wake + cutter 합성 난이도, 브라우저 플레이
+Reuse existing Runtime primitives whenever possible:
 
-## 5. 남은 blocker / asset handoff
+- area definitions / surfaces / grapple targets
+- `pursuit-drone-t1` enemy behavior already present in current enemy pools
+- `sentry-t1` static security behavior
+- `no-rope-cut`
+- activation-band-only targeting
+- gate panel / reach objective pattern
+- camera zone infrastructure
+- authored story presentation / Direction Runtime capability already present elsewhere in main
 
-- Junction reveal용 signage / backdrop / wake VFX / story audio 자산이 아직 없다.
-- README가 요구한 lower assist vs upper opposed return 리듬이 실제 플레이에서 구분되는지 검증이 필요하다.
-- 4-8로 이어지는 continuity는 현재 standalone 수준으로만 확인됐다.
+## Runtime dependency: Resident Security Override C
+
+The new Sector04 A/B/C override progression is later planning authority and is not represented by the current legacy 4-7.
+
+Implementation rule:
+
+1. First inspect current main for an existing reusable access/override progression state.
+2. Reuse it if semantically compatible.
+3. If absent, add the **smallest general persistent module/flag path** necessary for Sector04 `resident-security-override:a|b|c`.
+4. Do not implement 4-8 quorum logic in this PR unless required solely to keep existing tests compiling.
+5. Never replace actual acquisition state with a Story Toast.
+
+## Downstream boundary
+
+Current 4-8 is still legacy `TRANSIT CONTROL TRUNK`.
+
+This package may preserve `nextAreaId: sector-04-08` for continuity, but it does **not** authorize:
+- rewriting 4-8,
+- implementing its future 2-of-3 design,
+- restoring old 4-7 `LOWER FEEDER ISOLATED` story,
+- inventing Sector05 causal explanation.

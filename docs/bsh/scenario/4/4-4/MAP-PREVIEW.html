@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4-4 Resident Refuge Hall REV2 Map</title>
+<style>
+:root{--bg:#061016;--panel:#0b161d;--line:#304a55;--text:#eef5f5;--muted:#a4b5ba;--safe:#3b6753;--recover:#42616a;--anchor:#5de8ff;--route:#ffe173;--patrol:#a26149;--zone:#a2614926;--story:#88763f;--hall:#122229;--platform:#5c717b;--platformStroke:#b5c6cc;--door:#6b4f59;--truss:#38515b;--reach:#5de8ff22}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:13px 17px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:18px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:500px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);max-height:100vh;overflow:auto}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--anchor)}
+svg{width:100%;height:87vh;min-height:840px;background:#040b10;border:1px solid var(--line);border-radius:8px}.bounds{fill:#09171e;stroke:#587581;stroke-width:3}.hall{fill:var(--hall);stroke:#46636d;stroke-width:3;stroke-dasharray:16 10}.platform{fill:var(--platform);stroke:var(--platformStroke);stroke-width:2}.safe{fill:var(--safe);stroke:#88d8ab;stroke-width:3}.recovery{fill:var(--recover);stroke:#84a3ad;stroke-width:2}.door{fill:var(--door);stroke:#df9ead;stroke-width:3}.truss{fill:var(--truss);stroke:#88aab4;stroke-width:2}.anchor{fill:var(--anchor);stroke:#fff;stroke-width:2}.route{fill:none;stroke:var(--route);stroke-width:4;stroke-dasharray:13 9}.patrol{fill:var(--patrol);stroke:#ffc09c;stroke-width:3}.patrolpath{fill:none;stroke:#ffc09c;stroke-width:3;stroke-dasharray:10 8}.zone{fill:var(--zone);stroke:#c98164;stroke-width:2;stroke-dasharray:12 8}.story{fill:var(--story);stroke:#ead98d;stroke-width:2}.reach{fill:var(--reach);stroke:#5de8ff88;stroke-width:1.5;stroke-dasharray:7 7}
+text{fill:var(--text);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#b7c7cb}.label{font-size:16px;fill:#91dfb0}.warn{font-size:15px;fill:#ffaaa0}.dim{font-size:11px;fill:#79a7b6}.hidden{display:none}button{background:#142229;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:3px}@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>4-4 RESIDENT REFUGE HALL · REV2 DRAFT</h1><div class="sub">GAMEPLAY ONLY · 5376×2240 · LOW REFUGE ENTRY → RISING COMPARTMENTS → OVERHEAD MEP CROSSINGS → HIGH AMENITY ACCESS</div></header>
+<div class="layout"><aside>
+<div class="card"><b>REV2 FIX</b><br>방화구획은 유지하되, Stage 전체를 <b>수평 횡단</b>하지 않는다. Refuge Hall 자체가 상부 주거단지 경사를 따라 <b>세 단계로 상승</b>한다.</div>
+<div class="card"><b>WHY UPWARD</b><br>다음 목적지 <b>AMENITY ACCESS</b>가 상부 레벨에 있다. 각 Refuge Chamber는 이전 Chamber보다 높은 대피 Deck을 가지며, 방화문 때문에 바닥 연결은 끊겨 있다. 따라서 Player는 천장 <b>MEP Maintenance Truss</b>를 타고 다음 높은 구획으로 넘어간다.</div>
+<div class="card"><b>CORE IDENTITY</b><br><b>STEPPED PRESSURIZED REFUGE HALL.</b> `낮은 Refuge Deck → 높은 Truss → 다음 Refuge Deck → 더 높은 Truss`가 반복되며 전체 진행 방향은 끝까지 상승.</div>
+<div class="card"><b>SECURITY</b><br><b>Patrol ×2</b>. Pursuit 없음. Patrol은 Chamber A와 B의 recovery floor를 압박한다. 위로 잘 타면 피하고, 떨어지면 재상승을 방해한다.</div>
+<div class="card"><b>FAILURE</b><br>낙하는 death가 아니라 각 Refuge Deck recovery. 하지만 각 구획은 <b>sealed compartment</b>라 바닥으로 다음 구획까지 우회할 수 없다. 실패해도 같은 상승 문제를 다시 푼다.</div>
+<div class="card"><b>NO</b><br>Override · Relay/Key · Pursuit · Cutter · Wind · Scanner · Augment 없음. 4-3의 Local Objective 구조 반복 금지.</div>
+<div class="card"><b>REACH CHECK</b><br>Mandatory preview chain 최대 인접거리 <b>390.61px</b>. Base Hook Reach 400px 이하.</div>
+<button id="rbtn">Route</button><button id="pbtn">Patrol Zones</button><button id="gbtn">400px Reach</button>
+</aside><main>
+<svg viewBox="-2750 -2300 5500 2370">
+<rect class="bounds" x="-2688" y="-2240" width="5376" height="2240"/><text class="dim" x="-2630" y="-2180">5376 W × 2240 H</text>
+
+<!-- rising refuge hall shell -->
+<path class="hall" d="M-2540,-80 L-2540,-820 L-980,-820 L-980,-1280 L760,-1280 L760,-1760 L2540,-1760 L2540,-2180 L-2540,-2180 Z"/>
+<text class="label" x="-420" y="-2125">STEPPED PRESSURIZED RESIDENT REFUGE HALL</text>
+
+<!-- chamber A floor -->
+<rect class="recovery" x="-2440" y="-256" width="1400" height="30"/>
+<text class="tiny" x="-2250" y="-282">CHAMBER A · LOW REFUGE DECK / RECOVERY</text>
+<rect class="safe" x="-2520" y="-320" width="320" height="30"/><text class="label" x="-2492" y="-346">BLOCK C · ENTRY</text>
+<rect class="story" x="-2380" y="-480" width="340" height="82" rx="8"/><text class="tiny" x="-2325" y="-448">REFUGE PRESSURIZATION</text><text class="tiny" x="-2278" y="-424">NORMAL</text><text class="tiny" x="-2300" y="-400">WATER RESERVE / STANDBY</text>
+
+<!-- door A -->
+<rect class="door" x="-1040" y="-900" width="96" height="644" rx="8"/>
+<text class="tiny" x="-1112" y="-930">FIRE / SMOKE DOOR A · SEALED</text>
+
+<!-- chamber B floor elevated -->
+<rect class="recovery" x="-864" y="-736" width="1500" height="30"/>
+<text class="tiny" x="-600" y="-762">CHAMBER B · MID REFUGE DECK / RECOVERY</text>
+
+<!-- door B -->
+<rect class="door" x="712" y="-1408" width="96" height="672" rx="8"/>
+<text class="tiny" x="640" y="-1438">FIRE / SMOKE DOOR B · SEALED</text>
+
+<!-- chamber C floor elevated again -->
+<rect class="recovery" x="872" y="-1248" width="1420" height="30"/>
+<text class="tiny" x="1130" y="-1274">CHAMBER C · HIGH REFUGE DECK / RECOVERY</text>
+
+<!-- truss chain, always trending upward -->
+<rect class="truss" x="-2196" y="-544" width="232" height="22"/>
+<rect class="truss" x="-1860" y="-736" width="232" height="22"/>
+<rect class="truss" x="-1524" y="-928" width="232" height="22"/>
+<rect class="truss" x="-1188" y="-1120" width="232" height="22"/>
+<rect class="safe" x="-852" y="-930" width="280" height="26"/><text class="label" x="-842" y="-956">M1 MID SERVICE LEDGE</text>
+<rect class="truss" x="-532" y="-1152" width="232" height="22"/>
+<rect class="truss" x="-212" y="-1344" width="232" height="22"/>
+<rect class="truss" x="108" y="-1536" width="232" height="22"/>
+<rect class="safe" x="428" y="-1320" width="280" height="26"/><text class="label" x="438" y="-1346">M2 HIGH SERVICE LEDGE</text>
+<rect class="truss" x="748" y="-1536" width="232" height="22"/>
+<rect class="truss" x="1068" y="-1728" width="232" height="22"/>
+<rect class="truss" x="1388" y="-1920" width="232" height="22"/>
+<rect class="safe" x="1708" y="-1728" width="280" height="26"/><text class="label" x="1718" y="-1754">M3 FINAL LEDGE</text>
+<rect class="truss" x="2028" y="-1952" width="232" height="22"/>
+<rect class="safe" x="2200" y="-2144" width="320" height="30"/><text class="label" x="2216" y="-2170">HIGH AMENITY ACCESS → 4-5</text>
+<text class="label" x="-690" y="-1985">RISING OVERHEAD MEP MAINTENANCE TRUSS</text>
+
+<!-- anchors -->
+<circle class="anchor" cx="-2080" cy="-480" r="13"/><text class="tiny" x="-2060" y="-466">T1</text>
+<circle class="anchor" cx="-1744" cy="-672" r="13"/><text class="tiny" x="-1724" y="-658">T2</text>
+<circle class="anchor" cx="-1408" cy="-864" r="13"/><text class="tiny" x="-1388" y="-850">T3</text>
+<circle class="anchor" cx="-1072" cy="-1056" r="13"/><text class="tiny" x="-1052" y="-1042">T4</text>
+<circle class="anchor" cx="-736" cy="-896" r="13"/><text class="tiny" x="-716" y="-882">M1</text>
+<circle class="anchor" cx="-416" cy="-1088" r="13"/><text class="tiny" x="-396" y="-1074">T5</text>
+<circle class="anchor" cx="-96" cy="-1280" r="13"/><text class="tiny" x="-76" y="-1266">T6</text>
+<circle class="anchor" cx="224" cy="-1472" r="13"/><text class="tiny" x="244" y="-1458">T7</text>
+<circle class="anchor" cx="544" cy="-1280" r="13"/><text class="tiny" x="564" y="-1266">M2</text>
+<circle class="anchor" cx="864" cy="-1472" r="13"/><text class="tiny" x="884" y="-1458">T8</text>
+<circle class="anchor" cx="1184" cy="-1664" r="13"/><text class="tiny" x="1204" y="-1650">T9</text>
+<circle class="anchor" cx="1504" cy="-1856" r="13"/><text class="tiny" x="1524" y="-1842">T10</text>
+<circle class="anchor" cx="1824" cy="-1664" r="13"/><text class="tiny" x="1844" y="-1650">M3</text>
+<circle class="anchor" cx="2144" cy="-1888" r="13"/><text class="tiny" x="2164" y="-1874">T11</text>
+
+<!-- patrol zones -->
+<g id="patrols">
+<rect class="zone" x="-2240" y="-650" width="1050" height="390" rx="60"/><path class="patrolpath" d="M-2040,-388 L-1640,-470 L-1280,-388"/><circle class="patrol" cx="-1880" cy="-405" r="21"/><text class="tiny" x="-2050" y="-548">PATROL ×1 · CHAMBER A</text>
+<rect class="zone" x="-620" y="-1110" width="1080" height="370" rx="60"/><path class="patrolpath" d="M-500,-858 L-160,-940 L330,-858"/><circle class="patrol" cx="-320" cy="-874" r="21"/><text class="tiny" x="-430" y="-1010">PATROL ×1 · CHAMBER B</text>
+</g>
+
+<!-- reach circles -->
+<g id="reach" class="hidden"><circle class="reach" cx="-1744" cy="-672" r="400"/><circle class="reach" cx="-736" cy="-896" r="400"/><circle class="reach" cx="224" cy="-1472" r="400"/><circle class="reach" cx="1184" cy="-1664" r="400"/><circle class="reach" cx="2144" cy="-1888" r="400"/></g>
+
+<!-- route -->
+<g id="route"><path class="route" d="M-2360,-256 L-2080,-480 L-1744,-672 L-1408,-864 L-1072,-1056 L-736,-896 L-416,-1088 L-96,-1280 L224,-1472 L544,-1280 L864,-1472 L1184,-1664 L1504,-1856 L1824,-1664 L2144,-1888 L2360,-2080"/></g>
+</svg></main></div>
+<script>rbtn.onclick=()=>route.classList.toggle('hidden');pbtn.onclick=()=>patrols.classList.toggle('hidden');gbtn.onclick=()=>reach.classList.toggle('hidden');</script>
+</body></html>

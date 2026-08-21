@@ -1,43 +1,41 @@
-# SECTOR 04-3 — PRODUCTION ALIGNMENT
+# 4-3 PRODUCTION ALIGNMENT — REV1.0
 
-*CUTTER + WAKE · CAMERA · REV 1.0*
+Baseline: `3c9f661bba58af6f7351e00754c12aef86575a12`
 
-본 문서는 [4-3 시나리오](./README.md)와 현재 `Sector04AreaCatalog` 구현을 연결한다. 4-3은 첫 Transit Wake + Cutter 결합 Stage이며 현재 standalone catalog에서 `GRAYBOX READY` 상태다.
+## Current Runtime — VERIFIED
 
-## 1. 현재 판정
+At the audited main:
+- Rope hookSpeed = `1200`
+- hookFlightRatio = `1/3`
+- base Hook Reach = `400px`
+- Pursuit defaults: move `160`, acquire `640`, trigger `96`, windup `.25`, dashSpeed `640`, dash `.2`, recovery `.5`
+- Pursuit movement is direct toward eligible Player target and clamps to activation when authored.
 
-| 항목 | 상태 | 판정 |
-| --- | --- | --- |
-| Runtime 연결 | `GRAYBOX READY / STANDALONE ONLY` | 메인 authored chain 미연결 |
-| Geometry / Gate | `IMPLEMENTED` | bounds `1472×1472`, route / recovery / gate 구현 |
-| Cutter | `IMPLEMENTED` | `cutter-sentry-01` 한 기체가 `cutter-fire` 규칙으로 배치돼 있다 |
-| Wake | `IMPLEMENTED` | `freight-wake` pulsed zone이 들어가 있다 |
-| Camera | `IMPLEMENTED` | `cameraZones` 5개 구현 |
+Approved design max mandatory relation:
+`396.02px` — PASS against 400px.
 
-## 2. Runtime 좌표 / Stable ID 요약
+## Legacy 4-3 — SUPERSEDED
 
-- Area: `sector-04-03`, entry `(-560,-32)`, exit `(-80,-1440)`, next `sector-04-04`
-- Grapple: `A0(-432,-128)`, `W1(-176,-384)`, `W2(96,-544)`, `W3(256,-736)`, `A4(96,-992)`, `A5(-160,-1184)`, `A6(-320,-1312)`
-- Recovery: `R1(-240,-664)`, `R2(64,-1112)`
-- Cutter: `cutter-sentry-01(448,-640)`, activation `(-128,-832,704×480)`
-- Wake: `sector-04-03:freight-wake`, bounds `(-208,-832,560×544)`, direction `(+1,0)`, cycle `1.75 / 0.7 / 1.4 / 0.3`, strength `360`
-- Gate set(exitBlock 표준): `exit-deck(-288,-1347,416)`, `exit-gate(-112,-1347)`, `exit-panel(-224,-1347)`, exit `(-112,-1379)` — 층간 격벽 전폭 봉쇄, 문 상단은 천장 아래 5px
+Current legacy Sector04 authoring still represents old Transit/Infrastructure identity (`FREIGHT BYPASS / CUTTER + TRANSIT WAKE`).
+The new Residential 4-3 is a major re-author, not a small patch.
 
-## 3. Camera · Story 상태
+## Local Relay capability — GAP / DO NOT FAKE
 
-- Camera zones: `entry-wake-read`, `combined-freight`, `cutter-exit`, `upper-decompression`, `gate`
-- Zone 값: `(-352~0,0.95/0.72)`, `(-736~-352,0.88/0.7)`, `(-992~-736,0.9/0.7)`, `(-1184~-992,0.95/0.72)`, `(-1472~-1184,1/0.72)`
-- `storyTriggers`: `freight-entry`, `wake-warning`, `combined-commit`, `decompression`
-- `cueIds`: `freight-bypass`, `transit-wake`, `cutter-fire`
+The current canonical AREA-SPEC authoring standard has a finite validator registry for objective presets.
+A dedicated `service-relay` preset was not verified during this package audit.
+Repository code search also did not establish an existing Relay B-03 interaction implementation.
 
-## 4. 검증 근거
+Therefore:
+- `AREA-SPEC-REV1-DESIGN.json` is design authority only,
+- canonical `AREA-SPEC-REV1-DESIGN.json` must wait until implementation maps Relay B-03 to an actual Runtime capability and current validator schema,
+- do not pretend a design JSON proves Runtime behavior.
 
-- Source: `src/game/world/areas/sector04/Sector04AreaCatalog.js`
-- Tests: `tests/sector04AreaCatalog.mjs`, `tests/worldForceField.mjs`, `tests/combatSystems.mjs`
-- 미확인: wake + cutter 동시 체감, 브라우저 플레이, 메인 world 연결
+## Dynamic geometry caution
 
-## 5. 남은 blocker / asset handoff
+Current AREA-SPEC standard says same-Sector Stage geometry is static by default; logical objectives are not authority to create/delete surfaces.
+Relay completion should therefore prefer a verified state/presentation/interaction contract rather than unsupported large geometry mutation.
 
-- Wake source / warning lamp / cutter audiovisual presentation은 아직 mock 수준이다.
-- README가 요구한 first combination fairness는 실제 플레이에서 확인이 필요하다.
-- 4-3 이후 4-4 rest 대비가 충분한지 standalone playtest가 남아 있다.
+## Progression separation
+
+Relay B-03 is local.
+Resident Security Override remains A=4-2, B=4-5, C=4-7, any 2-of-3 at 4-8.

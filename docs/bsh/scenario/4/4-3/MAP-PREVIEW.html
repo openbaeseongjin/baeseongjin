@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4-3 Residential Skybridge REV1.0 Map</title>
+<style>
+:root{
+  --bg:#061016;--panel:#0b161d;--line:#304a55;--text:#eef5f5;--muted:#a4b5ba;
+  --safe:#3b6753;--recover:#42616a;--anchor:#5de8ff;--route:#ffe173;
+  --pursuit:#b85e52;--territory:#9f4a4328;--story:#88763f;--mass:#253741;
+  --bridge:#647982;--service:#3e5963;--relay:#b68843;--offline:#8d4c57;--online:#4b8b69;
+  --objective:#ffca63;--air:#101d24;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:13px 17px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:18px}.sub{color:var(--muted);margin-top:3px}
+.layout{display:grid;grid-template-columns:510px 1fr}
+aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);max-height:100vh;overflow:auto}
+main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}
+.card b{color:var(--anchor)}
+.card.objective{border-color:#9a763d;background:#17150d}.card.objective b{color:var(--objective)}
+.flow{font-size:14px;color:#ffe59a;font-weight:700;letter-spacing:.2px}
+button{background:#142229;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:3px;cursor:pointer}
+button:hover{background:#1a2d36}
+svg{width:100%;height:87vh;min-height:860px;background:#040b10;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#09171e;stroke:#587581;stroke-width:3}
+.air{fill:var(--air);stroke:#405e68;stroke-width:2;stroke-dasharray:16 11}
+.mass{fill:var(--mass);stroke:#6c858e;stroke-width:3}
+.bridge{fill:var(--bridge);stroke:#c0d0d5;stroke-width:2}
+.service{fill:var(--service);stroke:#91aeb6;stroke-width:2}
+.safe{fill:var(--safe);stroke:#88d8ab;stroke-width:3}
+.recovery{fill:var(--recover);stroke:#84a3ad;stroke-width:2}
+.offline{fill:var(--offline);stroke:#ffc0ca;stroke-width:3}
+.onlineGhost{fill:#4b8b6922;stroke:#7dd1a1;stroke-width:3;stroke-dasharray:12 8}
+.relay{fill:var(--relay);stroke:#ffe2a0;stroke-width:3}
+.anchor{fill:var(--anchor);stroke:#fff;stroke-width:2}
+.route{fill:none;stroke:var(--route);stroke-width:4;stroke-dasharray:13 9}
+.returnRoute{fill:none;stroke:#8ed7ff;stroke-width:3;stroke-dasharray:9 9}
+.pursuit{fill:var(--pursuit);stroke:#ffb0a6;stroke-width:3}
+.territory{fill:var(--territory);stroke:#d26d63;stroke-width:3;stroke-dasharray:14 10}
+.story{fill:var(--story);stroke:#ead98d;stroke-width:2}
+.objectiveLine{fill:none;stroke:var(--objective);stroke-width:4;stroke-dasharray:6 7}
+.reach{fill:none;stroke:#5de8ff66;stroke-width:2;stroke-dasharray:8 8}
+text{fill:var(--text);font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}
+.tiny{font-size:10px;fill:#b7c7cb}.label{font-size:16px;fill:#91dfb0}.warn{font-size:15px;fill:#ffaaa0}.dim{font-size:11px;fill:#79a7b6}.objectiveText{fill:#ffd985;font-size:15px}.offlineText{fill:#ffabb7;font-size:14px}.serviceText{fill:#b9d4dd;font-size:14px}.hidden{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>4-3 RESIDENTIAL SKYBRIDGE · REV1.0 DESIGN LOCKED</h1>
+  <div class="sub">GAMEPLAY ONLY · 5376×2432 · SEE BLOCK C → LINK OFFLINE → DESCEND FOR RELAY B-03 → RESET → UTILITY RISER → BLOCK C</div>
+</header>
+<div class="layout">
+<aside>
+  <div class="card objective"><b>STAGE OBJECTIVE</b><br><b>RESTORE BLOCK C LINK</b><br>Block C가 처음부터 보이지만 연결 상태가 OFFLINE이다. 하부 Maintenance Level의 <b>SERVICE RELAY B-03</b>을 수동 복구해야 다음 동선이 열린다.</div>
+  <div class="card"><b>WHY GO DOWN?</b><br>아래는 우회용 발판이 아니다. <b>Relay B-03 자체가 Stage 목표물</b>이다. Player는 Relay를 켜기 위해 내려간다.</div>
+  <div class="card"><b>WHY GO LEFT AFTER RELAY?</b><br>Relay 복구 후 <b>Shared Utility Riser B-C</b>가 ONLINE 된다. 이 Riser가 Block C의 Service Edge로 이어지는 다음 진행 동선이다.</div>
+  <div class="card"><b>PLAYER READ</b><br><span class="flow">BLOCK C 보임 → OFFLINE 확인 → RELAY 위치 확인 → 하강 → RESET → RISER ONLINE → 상승 → BLOCK C</span></div>
+  <div class="card"><b>PURSUIT</b><br>Pursuit Drone ×1. 목적을 만드는 적이 아니라 <b>Relay까지 가는 과정과 Reset 직후 복귀를 압박</b>한다. Kill Gate 아님.</div>
+  <div class="card"><b>LOCAL ONLY</b><br><b>Relay B-03은 4-3 Local Objective.</b> 4-2 Override A, 4-5/4-7의 Sector progression key와 별개.</div>
+  <div class="card"><b>MAP RULE</b><br>Gameplay에 필요한 건물 Mass / Bridge / Service Deck / Relay / Riser / Pursuit / Rope Anchor / Recovery만 표시.</div>
+  <button id="rbtn">Route</button><button id="obtn">Objective</button><button id="tbtn">Pursuit Territory</button><button id="reachbtn">400px Reach</button>
+</aside>
+<main>
+<svg viewBox="-2750 -2490 5500 2560" aria-label="Sector 04-03 gameplay map">
+  <rect class="bounds" x="-2688" y="-2432" width="5376" height="2432"/>
+  <text class="dim" x="-2620" y="-2370">5376 W × 2432 H</text>
+
+  <!-- readable central airspace -->
+  <path class="air" d="M-1200,-1740 Q-520,-2150 620,-2000 Q1540,-1880 1900,-1180 Q2110,-700 1730,-300 L-620,-300 Q-1760,-350 -1840,-1050 Q-1880,-1440 -1200,-1740 Z"/>
+  <text class="tiny" x="-165" y="-2040">RESIDENTIAL COURTYARD / SECURITY AIRSPACE</text>
+
+  <!-- BLOCK A -->
+  <rect class="mass" x="-2640" y="-1560" width="860" height="1560"/>
+  <text class="label" x="-2540" y="-1490">BLOCK A</text>
+  <rect class="safe" x="-2496" y="-512" width="320" height="30"/>
+  <text class="label" x="-2468" y="-540">ENTRY TERRACE</text>
+  <rect class="bridge" x="-2180" y="-650" width="280" height="24"/>
+  <rect class="bridge" x="-1840" y="-848" width="240" height="24"/>
+  <rect class="bridge" x="-1510" y="-1028" width="250" height="24"/>
+  <circle class="anchor" cx="-2080" cy="-544" r="13"/><text class="tiny" x="-2060" y="-530">A1</text>
+  <circle class="anchor" cx="-1760" cy="-704" r="13"/><text class="tiny" x="-1740" y="-690">A2</text>
+  <circle class="anchor" cx="-1440" cy="-896" r="13"/><text class="tiny" x="-1420" y="-882">A3</text>
+  <rect class="story" x="-2300" y="-430" width="300" height="76" rx="8"/>
+  <text class="tiny" x="-2245" y="-400">UPPER RESIDENTIAL ACCESS</text>
+  <text class="tiny" x="-2218" y="-376">NORMAL CIRCULATION</text>
+
+  <!-- GARDEN SKYBRIDGE -->
+  <rect class="bridge" x="-1260" y="-1110" width="2850" height="46" rx="8"/>
+  <text class="label" x="-580" y="-1150">GARDEN SKYBRIDGE · NORMAL RESIDENT ROUTE</text>
+  <circle class="anchor" cx="-1120" cy="-1024" r="13"/><text class="tiny" x="-1100" y="-1010">G1</text>
+  <circle class="anchor" cx="-768" cy="-960" r="13"/><text class="tiny" x="-748" y="-946">G2</text>
+  <circle class="anchor" cx="-416" cy="-1024" r="13"/><text class="tiny" x="-396" y="-1010">G3</text>
+  <circle class="anchor" cx="-64" cy="-960" r="13"/><text class="tiny" x="-44" y="-946">G4</text>
+  <circle class="anchor" cx="288" cy="-1024" r="13"/><text class="tiny" x="308" y="-1010">G5</text>
+  <circle class="anchor" cx="640" cy="-960" r="13"/><text class="tiny" x="660" y="-946">G6</text>
+  <circle class="anchor" cx="992" cy="-1024" r="13"/><text class="tiny" x="1012" y="-1010">G7</text>
+  <circle class="anchor" cx="1344" cy="-960" r="13"/><text class="tiny" x="1364" y="-946">G8</text>
+
+  <!-- BLOCK C visible from start / desired destination -->
+  <rect class="mass" x="1820" y="-2432" width="780" height="2432"/>
+  <text class="label" x="1960" y="-2290">BLOCK C · TARGET</text>
+  <rect class="safe" x="1900" y="-2060" width="360" height="30"/>
+  <text class="label" x="1916" y="-2088">PRIVATE TERRACE / EXIT</text>
+  <rect class="offline" x="1660" y="-1165" width="235" height="92" rx="10"/>
+  <text class="offlineText" x="1692" y="-1128">BLOCK C LINK</text>
+  <text class="offlineText" x="1714" y="-1102">OFFLINE</text>
+  <line x1="1590" y1="-1087" x2="1660" y2="-1087" stroke="#ff9aaa" stroke-width="8" stroke-dasharray="10 8"/>
+
+  <!-- BLOCK B / source of the fault -->
+  <rect class="mass" x="1480" y="-1740" width="420" height="690"/>
+  <text class="label" x="1522" y="-1680">BLOCK B</text>
+  <text class="tiny" x="1518" y="-1652">PRIVATE RESIDENT CORE</text>
+  <rect class="offline" x="1460" y="-1122" width="390" height="66" rx="8"/>
+  <text class="offlineText" x="1515" y="-1081">LINK CONTROL · NO POWER</text>
+
+  <!-- objective hint from the blocked point -->
+  <path id="objective" class="objectiveLine" d="M1630,-1050 C1680,-900 1580,-730 1390,-620 C1190,-505 930,-472 720,-470"/>
+  <text id="objectiveLabel" class="objectiveText" x="880" y="-520">LOCAL SERVICE RELAY B-03 ↓</text>
+
+  <!-- service drop -->
+  <rect class="service" x="1420" y="-930" width="230" height="30"/>
+  <text class="serviceText" x="1430" y="-954">SERVICE HATCH</text>
+  <circle class="anchor" cx="1568" cy="-832" r="13"/><text class="tiny" x="1588" y="-818">D1</text>
+  <circle class="anchor" cx="1280" cy="-576" r="13"/><text class="tiny" x="1300" y="-562">D2</text>
+  <rect class="recovery" x="1380" y="-690" width="160" height="22"/>
+  <text class="tiny" x="1400" y="-714">DROP RECOVERY</text>
+
+  <!-- LOWER MAINTENANCE LEVEL -->
+  <rect class="service" x="-990" y="-520" width="2390" height="58" rx="8"/>
+  <text class="serviceText" x="300" y="-552">LOWER MAINTENANCE LEVEL / BRIDGE UNDERSIDE GANTRY</text>
+  <circle class="anchor" cx="1280" cy="-576" r="13"/>
+  <circle class="anchor" cx="928" cy="-512" r="13"/><text class="tiny" x="948" y="-498">S1</text>
+  <circle class="anchor" cx="576" cy="-576" r="13"/><text class="tiny" x="596" y="-562">S2</text>
+  <circle class="anchor" cx="224" cy="-512" r="13"/><text class="tiny" x="244" y="-498">S3</text>
+  <circle class="anchor" cx="-128" cy="-576" r="13"/><text class="tiny" x="-108" y="-562">S4</text>
+  <circle class="anchor" cx="-480" cy="-512" r="13"/><text class="tiny" x="-460" y="-498">S5</text>
+  <circle class="anchor" cx="-832" cy="-576" r="13"/><text class="tiny" x="-812" y="-562">S6</text>
+
+  <!-- RELAY B-03 : actual reason to descend -->
+  <rect class="relay" x="420" y="-690" width="315" height="165" rx="12"/>
+  <text class="objectiveText" x="463" y="-646">SERVICE RELAY B-03</text>
+  <text class="tiny" x="478" y="-618">MANUAL RESET REQUIRED</text>
+  <text class="tiny" x="492" y="-592">LOCAL OBJECTIVE</text>
+  <circle cx="577" cy="-554" r="12" fill="#ffd36e" stroke="white" stroke-width="2"/>
+
+  <!-- pursuit territory -->
+  <rect id="territory" class="territory" x="-1160" y="-1540" width="3020" height="1330" rx="110"/>
+  <text class="warn" x="-1050" y="-1488">PURSUIT TERRITORY · RELAY RUN</text>
+  <circle class="pursuit" cx="-160" cy="-900" r="22"/>
+  <text class="tiny" x="-300" y="-938">PURSUIT DRONE ×1</text>
+
+  <!-- Utility Riser B-C: becomes online after relay -->
+  <rect class="onlineGhost" x="-1120" y="-1980" width="178" height="1410" rx="12"/>
+  <text class="serviceText" x="-1325" y="-2010">SHARED UTILITY RISER B-C</text>
+  <text class="tiny" x="-1304" y="-1986">ONLINE AFTER RELAY RESET</text>
+  <rect class="service" x="-920" y="-820" width="210" height="22"/>
+  <rect class="service" x="-680" y="-1080" width="210" height="22"/>
+  <rect class="service" x="-400" y="-1340" width="210" height="22"/>
+  <rect class="service" x="-80" y="-1575" width="210" height="22"/>
+  <circle class="anchor" cx="-896" cy="-768" r="13"/><text class="tiny" x="-876" y="-754">U1</text>
+  <circle class="anchor" cx="-624" cy="-1024" r="13"/><text class="tiny" x="-604" y="-1010">U2</text>
+  <circle class="anchor" cx="-336" cy="-1280" r="13"/><text class="tiny" x="-316" y="-1266">U3</text>
+  <circle class="anchor" cx="-16" cy="-1504" r="13"/><text class="tiny" x="20" y="-1490">U4</text>
+
+  <!-- Service connector to Block C after riser -->
+  <rect class="onlineGhost" x="120" y="-1610" width="1560" height="54" rx="8"/>
+  <text class="serviceText" x="600" y="-1640">B-C SERVICE CONNECTOR · ONLINE AFTER RESET</text>
+  <circle class="anchor" cx="320" cy="-1568" r="13"/><text class="tiny" x="340" y="-1554">C1</text>
+  <circle class="anchor" cx="672" cy="-1632" r="13"/><text class="tiny" x="692" y="-1618">C2</text>
+  <circle class="anchor" cx="1024" cy="-1696" r="13"/><text class="tiny" x="1044" y="-1682">C3</text>
+  <circle class="anchor" cx="1376" cy="-1760" r="13"/><text class="tiny" x="1396" y="-1746">C4</text>
+  <circle class="anchor" cx="1696" cy="-1904" r="13"/><text class="tiny" x="1716" y="-1890">C5</text>
+  <rect class="story" x="1840" y="-2210" width="350" height="80" rx="8"/>
+  <text class="tiny" x="1900" y="-2178">BLOCK C LINK / RESTORED</text>
+  <text class="tiny" x="1900" y="-2154">SECURITY CONTACT / LOST</text>
+
+  <!-- routes -->
+  <g id="routes">
+    <path class="route" d="M-2432,-512 L-2080,-544 L-1760,-704 L-1440,-896 L-1120,-1024 L-768,-960 L-416,-1024 L-64,-960 L288,-1024 L640,-960 L992,-1024 L1344,-960 L1568,-832 L1280,-576 L928,-512 L576,-576"/>
+    <path class="returnRoute" d="M576,-576 L224,-512 L-128,-576 L-480,-512 L-832,-576 L-896,-768 L-624,-1024 L-336,-1280 L-16,-1504 L320,-1568 L672,-1632 L1024,-1696 L1376,-1760 L1696,-1904 L2060,-2060"/>
+  </g>
+
+  <!-- reach overlays at the two critical commits -->
+  <g id="reach" class="hidden">
+    <circle class="reach" cx="1344" cy="-960" r="400"/><text class="tiny" x="1390" y="-1320">400px Reach · Drop Read</text>
+    <circle class="reach" cx="-832" cy="-576" r="400"/><text class="tiny" x="-760" y="-930">400px Reach · Riser Re-attach</text>
+  </g>
+</svg>
+</main>
+</div>
+<script>
+const routes=document.getElementById('routes');
+const territory=document.getElementById('territory');
+const objective=document.getElementById('objective');
+const objectiveLabel=document.getElementById('objectiveLabel');
+const reach=document.getElementById('reach');
+rbtn.onclick=()=>routes.classList.toggle('hidden');
+tbtn.onclick=()=>territory.classList.toggle('hidden');
+obtn.onclick=()=>{objective.classList.toggle('hidden');objectiveLabel.classList.toggle('hidden');};
+reachbtn.onclick=()=>reach.classList.toggle('hidden');
+</script>
+</body>
+</html>

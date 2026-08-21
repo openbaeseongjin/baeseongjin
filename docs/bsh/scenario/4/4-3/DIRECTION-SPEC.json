@@ -1,0 +1,135 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "runtimeStatus": "NOT IMPLEMENTED",
+  "stage": {
+    "sector": 4,
+    "stage": 3,
+    "legacyStageAlias": "4-3",
+    "sourceAreaId": "sector-04-03",
+    "name": "RESIDENTIAL SKYBRIDGE"
+  },
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "globalControl": {
+    "worldPause": false,
+    "playerControl": "ON",
+    "forcedCinematicCamera": false
+  },
+  "beats": [
+    {
+      "beatId": "s1-entry-normal",
+      "purpose": "Establish maintained upper residential circulation.",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "entry terrace"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER RESIDENTIAL ACCESS",
+            "detail": "NORMAL CIRCULATION"
+          },
+          "durationSeconds": 1.1
+        }
+      ]
+    },
+    {
+      "beatId": "s2-link-offline",
+      "purpose": "Make the destination and fault readable before descent.",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "far Garden Skybridge / Block B fault read"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "BLOCK C LINK",
+            "detail": "OFFLINE"
+          },
+          "durationSeconds": 1.2
+        },
+        {
+          "type": "systemText",
+          "content": {
+            "title": "LOCAL SERVICE RELAY B-03",
+            "detail": "MANUAL RESET REQUIRED"
+          },
+          "durationSeconds": 1.3
+        }
+      ]
+    },
+    {
+      "beatId": "s3-pursuit-track",
+      "purpose": "Confirm actual Pursuit acquire without explaining AI.",
+      "trigger": {
+        "type": "runtime-enemy-state",
+        "intent": "pursuit acquired player"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "RESIDENTIAL SECURITY",
+            "detail": "TRACKING"
+          },
+          "durationSeconds": 1.0
+        }
+      ]
+    },
+    {
+      "beatId": "s4-relay-reset",
+      "purpose": "Confirm actual local objective completion.",
+      "trigger": {
+        "type": "runtime-objective-completed",
+        "objectiveId": "sector-04-03:service-relay-b03",
+        "runtimeMapping": "REQUIRED / NOT VERIFIED"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "SERVICE RELAY B-03",
+            "detail": "RESET COMPLETE"
+          },
+          "durationSeconds": 1.0
+        },
+        {
+          "type": "systemText",
+          "content": {
+            "title": "BLOCK C LINK",
+            "detail": "RESTORED"
+          },
+          "durationSeconds": 1.15
+        }
+      ]
+    },
+    {
+      "beatId": "s5-exit-contact-lost",
+      "purpose": "End chase pressure and return to protected residential calm.",
+      "trigger": {
+        "type": "position-zone",
+        "intent": "Block C private terrace / exit"
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "SECURITY CONTACT",
+            "detail": "LOST"
+          },
+          "durationSeconds": 1.0
+        }
+      ]
+    }
+  ],
+  "rules": [
+    "No world pause",
+    "No player-control lock",
+    "OFFLINE and Relay objective must be readable before descent",
+    "TRACKING must correspond to real Pursuit state",
+    "RESET COMPLETE must correspond to real objective state",
+    "No Sector05 explanatory dialogue"
+  ]
+}
