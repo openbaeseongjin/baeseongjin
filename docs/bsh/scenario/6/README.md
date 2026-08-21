@@ -1,13 +1,13 @@
 # SECTOR 06 — ROOFTOP / EVACUATION MASTER PLAN
 
-*MASTER PLAN CANDIDATE · REV 1.0*
+*AUTHORED PACKAGE MERGED · RUNTIME MIGRATION APPROVAL REQUIRED*
 
 `SECTOR 06 ROOFTOP / EVACUATION` · `THE GOAL IS VISIBLE; THE ROOM IS GONE` · `OPEN SKY / STRUCTURAL ISLANDS` · `FINAL BUILD EXAM` · `ESCAPE`
 
 | 항목 | REV 1.0 기준 |
 |---|---|
-| Status | HYPOTHESIS — MASTER PLAN CANDIDATE |
-| Authoring Snapshot | `28d99edd464c66ca5be37bc1708e9e4d7d61ae14` |
+| Status | AUTHORED PACKAGE MERGED — Runtime not implemented |
+| Authoring Snapshot | `8b344f0f7a2309bfb316655668ed180718db7781` |
 | Sector Role | Corporate Continuity Zone 이후 최종 Rooftop / Pad 03 접근 |
 | Core Gameplay Shift | Sparse Corporate Hardpoint Commitment → Open-Sky Structural-Island Execution |
 | Core Story Shift | “왜 Lower evacuation이 중단됐는가?” → “진실을 안 상태에서 실제 탈출 지점까지 도달할 수 있는가?” |
@@ -34,23 +34,30 @@
 
 ## 0. Source-of-Truth / 작성 기준
 
-### CURRENT MAIN
+### Authoring Package Boundary
+
+This Master owns the cross-stage Rooftop / Evacuation direction. The detailed
+topology, story, validation, handoff, and preview sources for 6-1 through 6-8
+are the authored package files in their Stage directories. The separately
+supplied `6-1/MASTERPLAN-REV2-MAP-SCALE.md` identifies itself as a 6-1 planning
+draft, so it is retained as reference-only material and does not override this
+Master or the 6-1 REV3.0 package.
+
+Importing these sources does not create Runtime geometry, a Sector transition,
+the Final Security encounter, a general timer, or multiplayer behavior. Current
+main and Runtime integration status are owned by
+[`scenario-development-integration.md`](../../../scenario-development-integration.md).
+
+### Authoring Snapshot
 
 작성 시작·최종 검토 기준:
 
 ```text
-28d99edd464c66ca5be37bc1708e9e4d7d61ae14
+8b344f0f7a2309bfb316655668ed180718db7781
 ```
 
-통합 시점 재확인 기준(Sector 04/05 Alignment 반영 이후):
-
-```text
-5255f90b69788bf8f59b1d0aeaa7f6eb490e563d
-```
-
-최근 변경은 debug / multiplayer / deployment 계열과
-Sector 04 Alignment Patch Package(#576)·Sector 05 Master+8 Stage 추가(#577)이며
-Sector06 authored Runtime은 여전히 없다.
+This is an authoring snapshot, not a statement that the packages are connected
+to the current Runtime.
 
 ### Current Scenario / Runtime Integration
 
@@ -58,9 +65,9 @@ GitHub 통합 문서 기준:
 
 ```text
 Detailed Scenario Docs
-1-1 ~ 5-8
-= 40 stages
-= CROSS-REVIEWED
+1-1 ~ 6-8
+= 48 stages
+= Sector 06 authored package merged; Runtime status remains separate
 
 Default Authored World
 1-1 → 3-8
@@ -77,7 +84,8 @@ Master + 5-1~5-8 merged (#577)
 runtime not authored
 
 Sector06
-THIS MASTER
+Master + 6-1~6-8 authored packages
+runtime not authored
 ```
 
 ### Current Planning Priority
@@ -2763,6 +2771,6 @@ Runtime / Graybox로 전환.
 
 ---
 
-SECTOR 06 — ROOFTOP / EVACUATION MASTER PLAN · REV 1.0
+SECTOR 06 — ROOFTOP / EVACUATION MASTER PLAN · AUTHORED PACKAGE MERGED
 
-**STATUS: MASTER PLAN CANDIDATE — READY FOR 6-1 DETAILED AUTHORING / RUNTIME WORK HELD UNTIL SECTOR06 SCENARIO COMPLETION**
+**STATUS: 6-1~6-8 AUTHORING SOURCES MERGED / RUNTIME WORK REMAINS HELD PENDING SEPARATE APPROVAL**

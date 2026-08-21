@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 2,
+    "legacyStageAlias": "6-2",
+    "sourceAreaId": "sector-06-02",
+    "name": "CROSSWIND MASTS"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticSystemText": "en-allowed"
+  },
+  "beats": [
+    {
+      "beatId": "entry-preview",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CROSSWIND MASTS",
+            "detail": "EXTERIOR SERVICE ROUTE / OPEN"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "language": "ko",
+            "text": "…바람이 계속 한쪽으로 미네."
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "wind-gantry",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "long-crosswind-gantry"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "lee-pocket",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "lee-maintenance-pocket"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "hook-back",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "short-hook-back"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "exit",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "signal-deck-exit"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PERIMETER SIGNAL DECK",
+            "detail": "SECURITY / ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "One static continuous Wind zone only.",
+    "Lee Pocket is geometrically outside Wind zone.",
+    "Rightward hook-back remains local and short.",
+    "Macro route remains leftward while local heights vary.",
+    "No dialogue during high-input Wind traversal."
+  ]
+}

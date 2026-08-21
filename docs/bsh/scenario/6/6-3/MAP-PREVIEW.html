@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6-3 Perimeter Signal Deck REV3 Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--safe:#70cf9a;--recover:#d5b45e;--enemy:#ff7066;--active:#ff706622}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:800px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}
+.frame{fill:#3b4d55;stroke:#90a5ae;stroke-width:3}
+.tower{fill:#30424a;stroke:#a8bbc3;stroke-width:4}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}
+.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.activation{fill:var(--active);stroke:var(--enemy);stroke-width:2;stroke-dasharray:10 7}
+.enemy{fill:var(--enemy);stroke:#fff;stroke-width:3}
+.enemyRange{fill:none;stroke:var(--enemy);stroke-width:1.5;stroke-dasharray:8 8;opacity:.22}
+.hp{fill:var(--cyan);stroke:#fff;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.recoveryRoute{fill:none;stroke:var(--recover);stroke-width:3;stroke-dasharray:7 7}
+.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}
+.phase{font-size:15px;fill:#9db4bd}.tiny{font-size:10px;fill:#bdcdd2}.danger{fill:#ff938b}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>6-3 PERIMETER SIGNAL DECK · REV3 MAP PREVIEW</h1><div class="sub">CONTINUOUS ASCENT · CENTRAL SIGNAL FRAME · BODY-ARC UNDER FIRE</div></header>
+<div class="layout"><aside>
+<div class="card"><b>ASCENT RULE</b><br>전체 진행은 계속 상승. 큰 하강 없음. x축만 좌우로 흔들며 Sentry 조준선을 벗어남.</div>
+<div class="card"><b>MACRO</b><br>Left Entry → Center Preview → Rising Signal Frame → Upper Safe Deck → Shelter Exit.</div>
+<div class="card"><b>SENTRY</b><br>Standard Sentry T1 ×1. Cover 없음. Rope Cut 없음. Kill optional.</div>
+<div class="card"><b>RECOVERY</b><br>하부 작은 bracket만. 실패해도 Stage 하단까지 다시 떨어지지 않음.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>340.0px</b> &lt; 400px.</div>
+<div>
+<button id="routeB" class="on">Main Route</button><button id="actB" class="on">Sentry Band</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-1300 -1900 1900 1950">
+<rect class="bounds" x="-1250" y="-1870" width="1800" height="1870"/>
+
+<!-- architecture: rising signal frame -->
+<rect class="safe" x="-1200" y="-155" width="260" height="30"/><text class="tiny" x="-1175" y="-180">ENTRY FROM 6-2</text>
+<rect class="frame" x="-920" y="-260" width="210" height="26"/>
+<rect class="safe" x="-720" y="-355" width="300" height="30"/><text class="tiny" x="-695" y="-380">SAFE SENTRY PREVIEW</text>
+
+<rect class="tower" x="-470" y="-760" width="130" height="250" rx="10"/>
+<rect class="frame" x="-500" y="-565" width="210" height="25"/>
+<rect class="tower" x="-180" y="-930" width="130" height="260" rx="10"/>
+<rect class="frame" x="-210" y="-725" width="210" height="25"/>
+<rect class="tower" x="110" y="-1100" width="130" height="270" rx="10"/>
+<rect class="frame" x="80" y="-885" width="210" height="25"/>
+
+<!-- central sentry pylon -->
+<rect class="tower" x="-30" y="-1170" width="140" height="330" rx="12"/>
+<circle class="enemy" cx="40" cy="-980" r="24"/>
+<text class="danger" x="90" y="-1005">S1 STANDARD SENTRY</text>
+
+<rect class="tower" x="-80" y="-1260" width="120" height="220" rx="10"/>
+<rect class="frame" x="-110" y="-1085" width="190" height="25"/>
+<rect class="tower" x="200" y="-1440" width="120" height="230" rx="10"/>
+<rect class="frame" x="170" y="-1265" width="190" height="25"/>
+
+<!-- upper safe / exit -->
+<rect class="safe" x="-10" y="-1475" width="300" height="30"/><text class="tiny" x="15" y="-1500">UPPER SIGNAL DECK / FULL SAFE</text>
+<rect class="frame" x="40" y="-1665" width="190" height="25"/>
+<rect class="safe" x="-250" y="-1840" width="320" height="32"/><text class="tiny" x="-225" y="-1865">EXIT → 6-4 ROOFTOP SERVICE SHELTER</text>
+
+<!-- activation -->
+<g id="activation">
+<rect class="activation" x="-520" y="-1360" width="940" height="860" rx="12"/>
+<circle class="enemyRange" cx="40" cy="-980" r="760"/>
+<text class="danger" x="-500" y="-1385">ASCENT FIRING BAND / NO COVER</text>
+</g>
+
+<!-- recovery brackets -->
+<g id="recovery">
+<rect class="recover" x="-430" y="-420" width="220" height="18"/><text class="tiny" x="-410" y="-445">R1</text>
+<rect class="recover" x="-30" y="-820" width="220" height="18"/><text class="tiny" x="-10" y="-845">R2</text>
+<rect class="recover" x="60" y="-1190" width="220" height="18"/><text class="tiny" x="80" y="-1215">R3</text>
+<path class="recoveryRoute" d="M-320,-420 L-420,-540"/>
+<path class="recoveryRoute" d="M80,-820 L-20,-1060"/>
+<path class="recoveryRoute" d="M170,-1190 L260,-1240"/>
+</g>
+
+<g><circle class="hp" cx="-1100" cy="-120" r="13"/><circle class="hp" cx="-850" cy="-220" r="13"/><circle class="hp" cx="-600" cy="-320" r="13"/><circle class="hp" cx="-420" cy="-540" r="13"/><circle class="hp" cx="-120" cy="-700" r="13"/><circle class="hp" cx="180" cy="-860" r="13"/><circle class="hp" cx="-20" cy="-1060" r="13"/><circle class="hp" cx="260" cy="-1240" r="13"/><circle class="hp" cx="120" cy="-1440" r="13"/><circle class="hp" cx="120" cy="-1640" r="13"/><circle class="hp" cx="-120" cy="-1810" r="13"/></g>
+<g id="route"><path class="route" d="M-1100,-120 L-850,-220 L-600,-320 L-420,-540 L-120,-700 L180,-860 L-20,-1060 L260,-1240 L120,-1440 L120,-1640 L-120,-1810"/></g>
+<g id="reach" class="hidden"><circle class="reach" cx="-1100" cy="-120" r="400"/><circle class="reach" cx="-850" cy="-220" r="400"/><circle class="reach" cx="-600" cy="-320" r="400"/><circle class="reach" cx="-420" cy="-540" r="400"/><circle class="reach" cx="-120" cy="-700" r="400"/><circle class="reach" cx="180" cy="-860" r="400"/><circle class="reach" cx="-20" cy="-1060" r="400"/><circle class="reach" cx="260" cy="-1240" r="400"/><circle class="reach" cx="120" cy="-1440" r="400"/><circle class="reach" cx="120" cy="-1640" r="400"/><circle class="reach" cx="-120" cy="-1810" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('actB','activation');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

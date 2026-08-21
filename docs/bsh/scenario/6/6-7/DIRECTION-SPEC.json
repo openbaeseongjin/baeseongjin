@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 7,
+    "legacyStageAlias": "6-7",
+    "sourceAreaId": "sector-06-07",
+    "name": "CONTAINMENT LATTICE"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticSystemText": "en-allowed"
+  },
+  "beats": [
+    {
+      "beatId": "entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTAINMENT LATTICE",
+            "detail": "SECURITY / ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "safe-preview",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P1"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROPE INTERDICTION",
+            "detail": "ACTIVE"
+          }
+        },
+        {
+          "type": "camera",
+          "action": "show-cutter-three-bays-three-recovery-tiers-pad03"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "cutter-band",
+      "trigger": {
+        "type": "route-band",
+        "targetIds": [
+          "sector-06-07:h2",
+          "sector-06-07:h3",
+          "sector-06-07:h4",
+          "sector-06-07:h5",
+          "sector-06-07:h6",
+          "sector-06-07:h7"
+        ]
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "gameplay",
+          "action": "real-projectile-rope-intersection-only"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "full-safe",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P2"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP PAD 03",
+            "detail": "FINAL APPROACH / AHEAD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "exit",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P3"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP PAD 03",
+            "detail": "FINAL APPROACH / OPEN"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ]
+}

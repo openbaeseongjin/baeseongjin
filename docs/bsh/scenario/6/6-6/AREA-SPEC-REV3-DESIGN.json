@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED · REV2.2 · NOT IMPLEMENTED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 6,
+    "legacyStageAlias": "6-6",
+    "sourceAreaId": "sector-06-06",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "BEACON SPAN",
+    "subtitle": "BEACON NEEDLE / LONG CANTILEVER / PATROL POSITION READ"
+  },
+  "metrics": {
+    "difficulty": "★★★★",
+    "firstPlaySecondsTarget": [
+      120,
+      170
+    ],
+    "skilledSecondsTarget": [
+      50,
+      70
+    ],
+    "mandatoryLinks": 10,
+    "approxRouteLengthPx": 2439.03,
+    "verticalGainPx": 1600,
+    "maxAuthoredRelationPx": 290.69,
+    "baseHookReachPx": 400
+  },
+  "grappleTargets": [
+    {
+      "id": "sector-06-06:p0",
+      "label": "P0",
+      "x": -520,
+      "y": -80,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-06:h1",
+      "label": "H1",
+      "x": -520,
+      "y": -300,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-06:p1",
+      "label": "P1",
+      "x": -520,
+      "y": -500,
+      "role": "safe-preview"
+    },
+    {
+      "id": "sector-06-06:h2",
+      "label": "H2",
+      "x": -260,
+      "y": -630,
+      "role": "combat"
+    },
+    {
+      "id": "sector-06-06:h3",
+      "label": "H3",
+      "x": -40,
+      "y": -660,
+      "role": "combat"
+    },
+    {
+      "id": "sector-06-06:h4",
+      "label": "H4",
+      "x": 180,
+      "y": -700,
+      "role": "combat"
+    },
+    {
+      "id": "sector-06-06:h5",
+      "label": "H5",
+      "x": 400,
+      "y": -750,
+      "role": "combat"
+    },
+    {
+      "id": "sector-06-06:h6",
+      "label": "H6",
+      "x": 620,
+      "y": -880,
+      "role": "combat"
+    },
+    {
+      "id": "sector-06-06:p2",
+      "label": "P2",
+      "x": 620,
+      "y": -1160,
+      "role": "full-safe"
+    },
+    {
+      "id": "sector-06-06:h7",
+      "label": "H7",
+      "x": 640,
+      "y": -1420,
+      "role": "route"
+    },
+    {
+      "id": "sector-06-06:p3",
+      "label": "P3",
+      "x": 660,
+      "y": -1680,
+      "role": "route"
+    }
+  ],
+  "mainRoute": [
+    "sector-06-06:p0",
+    "sector-06-06:h1",
+    "sector-06-06:p1",
+    "sector-06-06:h2",
+    "sector-06-06:h3",
+    "sector-06-06:h4",
+    "sector-06-06:h5",
+    "sector-06-06:h6",
+    "sector-06-06:p2",
+    "sector-06-06:h7",
+    "sector-06-06:p3"
+  ],
+  "enemy": {
+    "id": "sector-06-06:D1",
+    "enemyType": "patrol-drone-t1",
+    "rules": [
+      "standard-projectile",
+      "no-rope-cut"
+    ],
+    "killRequired": false,
+    "patrol": {
+      "mode": "pingpong",
+      "speed": 48,
+      "waitSeconds": 0.45,
+      "points": [
+        {
+          "x": 420,
+          "y": -600
+        },
+        {
+          "x": -100,
+          "y": -870
+        }
+      ]
+    },
+    "activation": {
+      "role": "combat-band-H2-H6",
+      "contract": "P1 and R0/R1 outside; H2-H6 inside"
+    }
+  },
+  "surfaces": [
+    {
+      "id": "left-beacon-needle",
+      "kind": "architectural-structure",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "cantilever-body",
+      "kind": "architectural-structure",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "right-beacon-rise",
+      "kind": "architectural-structure",
+      "properties": {
+        "grappleable": false
+      }
+    },
+    {
+      "id": "R0",
+      "kind": "recovery",
+      "x": -180,
+      "y": -480,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "activation": "OUT",
+        "retrySecondsTargetMax": 5
+      }
+    },
+    {
+      "id": "R1",
+      "kind": "recovery",
+      "x": 360,
+      "y": -500,
+      "properties": {
+        "grappleable": false,
+        "landingOnly": true,
+        "activation": "OUT",
+        "retrySecondsTargetMax": 5
+      }
+    }
+  ],
+  "antiBypass": {
+    "H1_to_H2": 420.12,
+    "P1_to_H3": 505.96,
+    "H2_to_H4": 445.53,
+    "H3_to_H5": 449.11,
+    "H4_to_H6": 475.39,
+    "H5_to_P2": 465.3
+  },
+  "recoveryDistances": {
+    "R0_to_H2": 170.0,
+    "R0_to_H3": 228.04,
+    "R0_to_H4": 421.9,
+    "R1_to_H4": 269.07,
+    "R1_to_H5": 253.18,
+    "R1_to_H6": 460.43
+  },
+  "goalLandmark": {
+    "id": "rooftop-pad-03-distant",
+    "visible": true,
+    "outsideStageBounds": true,
+    "storyState": "NO_NEW_REVEAL",
+    "shuttleState": "DISTANT_STANDBY_SILHOUETTE_ONLY"
+  },
+  "mechanics": {
+    "patrol": true,
+    "standardProjectile": true,
+    "cutter": false,
+    "wind": false,
+    "scanner": false,
+    "movingPlatform": false,
+    "newInput": false,
+    "newRopeMode": false
+  },
+  "story": {
+    "entrySystem": [
+      "BEACON SPAN",
+      "PAD APPROACH SIGNAL / ACTIVE"
+    ],
+    "fullSafeSystem": [
+      "PAD 03 BEACON",
+      "APPROACH LINK / ACTIVE"
+    ],
+    "exitSystem": [
+      "CONTAINMENT LATTICE",
+      "SECURITY / ACTIVE"
+    ],
+    "playerBark": null
+  },
+  "forbidden": [
+    "second-patrol",
+    "mandatory-endpoint-wait",
+    "cutter-fire",
+    "wind",
+    "scanner",
+    "moving-platform",
+    "continuous-lower-catwalk",
+    "kill-gate",
+    "new-input",
+    "new-rope-mode",
+    "new-growth",
+    "ACCESS DENIED",
+    "CONTAINMENT VIOLATION",
+    "final-security-reveal",
+    "shuttle-boarding"
+  ]
+}

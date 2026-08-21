@@ -1,0 +1,152 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 6,
+    "legacyStageAlias": "6-6",
+    "sourceAreaId": "sector-06-06",
+    "name": "BEACON SPAN"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticSystemText": "en-allowed"
+  },
+  "beats": [
+    {
+      "beatId": "entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "BEACON SPAN",
+            "detail": "PAD APPROACH SIGNAL / ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "safe-preview",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P1"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "camera",
+          "action": "show-patrol-path-cantilever-recovery-pad-landmark"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "commit",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "H2"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "gameplay",
+          "action": "patrol-position-becomes-fixed-firing-origin"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "combat-span",
+      "trigger": {
+        "type": "route-band",
+        "targetIds": [
+          "sector-06-06:h2",
+          "sector-06-06:h3",
+          "sector-06-06:h4",
+          "sector-06-06:h5",
+          "sector-06-06:h6"
+        ]
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "full-safe",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P2"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PAD 03 BEACON",
+            "detail": "APPROACH LINK / ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "exit",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "P3"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTAINMENT LATTICE",
+            "detail": "SECURITY / ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "P1 remains threat-free preview outside activation.",
+    "H2-H6 are all mandatory at 400px Base Reach.",
+    "Patrol position freezes when valid target is acquired.",
+    "Any Patrol path position must be clearable.",
+    "R0/R1 are local recovery only and cannot replace main progression.",
+    "Pad03 remains a distant visible goal but receives no new reveal.",
+    "No ACCESS DENIED or CONTAINMENT VIOLATION."
+  ]
+}

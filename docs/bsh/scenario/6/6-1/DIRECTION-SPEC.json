@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+  "stage": {
+    "sector": 6,
+    "stage": 1,
+    "legacyStageAlias": "6-1",
+    "sourceAreaId": "sector-06-01",
+    "name": "SKYBREAK ACCESS"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticSystemText": "en-allowed"
+  },
+  "beats": [
+    {
+      "beatId": "roof-hatch",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP ZONE",
+            "detail": "EXTERIOR SERVICE ACCESS"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "language": "ko",
+            "text": "…이제 진짜 밖이네."
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "skybreak-drop",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "skybreak-drop"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "lower-island",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "lower-sky-island"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "mast",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "freestanding-mast"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "crown-exit",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "crown-deck"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CROSSWIND MASTS",
+            "detail": "AHEAD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "Skybreak Drop is visually downward/outward.",
+    "Lower Sky Island visible before drop commitment.",
+    "Recovery Shadow never becomes mandatory shortcut.",
+    "Freestanding Mast has no large enclosing wall.",
+    "No Wind force in 6-1."
+  ]
+}

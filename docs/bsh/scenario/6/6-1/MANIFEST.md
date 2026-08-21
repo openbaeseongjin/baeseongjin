@@ -1,0 +1,19 @@
+# 6-1 PACKAGE MANIFEST — REV3.0
+
+| Path | SHA-256 |
+|---|---|
+| `CLAUDECODE-IMPLEMENT-6-1-REV3.0.md` | `6cb99e4b6e710c9d44666c38aad612815336c7370a36c01ad32f45a918af3ac6` |
+| `PACKAGE-README.md` | `c8985a2c167352e7bf0e8005e20790c176d0db35f279c218b75095683c95f461` |
+| `SOURCE-LOCK.json` | `e8a143e8a0266685cd2bff85c75c637491031ad01c1226527b21f419235f1c2c` |
+| `docs/bsh/scenario/6/6-1/AREA-SPEC-REV3-DESIGN.json` | `4f0a6cb68810f12e3c3878c16bf2eb112456362bea064f4f3aa8e691ed291754` |
+| `docs/bsh/scenario/6/6-1/ASSET-REQUIREMENTS.md` | `b35ce98b7a5b04e4c6297edbb2a5b2d45bc5a850296214ba2d659c6337420695` |
+| `docs/bsh/scenario/6/6-1/DIRECTION-SPEC.json` | `9a5cff5f5141811a074b583e79afd54aa842bd50272dc7b59bd6b22d7ed3c226` |
+| `docs/bsh/scenario/6/6-1/MAP-PREVIEW.html` | `7e9796c3410f2b0853a8614d3950441247369fd85e5141f2adca1fa9dbe44c57` |
+| `docs/bsh/scenario/6/6-1/MAP-SIMILARITY-AUDIT.md` | `f202820c2aee1de40e79b8ed78df6a46f2600c8f3fb35bb1cd1bf8a282378b3e` |
+| `docs/bsh/scenario/6/6-1/PLANNING-APPROVAL.md` | `99559accbee27dc96c107efe2b4f7d8b5f9187878d73428e9787e77cdde72a46` |
+| `docs/bsh/scenario/6/6-1/PRODUCTION-ALIGNMENT.md` | `7a478960fa550f11dc5e9cf670a8f29747ae3bee7b6947a1599e0b9e69871644` |
+| `docs/bsh/scenario/6/6-1/README.md` | `0efcebc5fef1c6c3b7eeb6793cbad24adfae37f577534e90700976d0eb4c68f2` |
+| `docs/bsh/scenario/6/6-1/REVISION-HISTORY.md` | `f960a2524699f0791fb60e0de8bfbea66aafc6d228130909ebdf4844eb6cd16d` |
+| `docs/bsh/scenario/6/6-1/RUNTIME-HANDOFF.md` | `636cb502f5c86ac2a405435181603a0e44bc862466f6cd85121bc14428f8a1b1` |
+| `docs/bsh/scenario/6/6-1/STORY-DIRECTION-PREVIEW.html` | `9e5bdeb5adf4414da38e63d2fc6871d760b44cda9c7cdff781770c38caae7910` |
+| `docs/bsh/scenario/6/6-1/VALIDATION.md` | `82d64950c848e6aace97c771ba040a599df834b55501ed14dabe1e5a0836a292` |

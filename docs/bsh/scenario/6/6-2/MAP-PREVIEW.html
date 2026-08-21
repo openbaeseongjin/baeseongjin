@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6-2 Crosswind Masts REV3.1 Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--safe:#70cf9a;--recover:#d5b45e;--wind:#62c8ff;--lee:#89e0bd}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:760px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}
+.gantry{fill:#45545d;stroke:#87989f;stroke-width:3}
+.glass{fill:#76a9b522;stroke:#9ec7d2;stroke-width:3}
+.mast{fill:#344650;stroke:#a8bbc3;stroke-width:4}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}
+.lee{fill:#315b4f;stroke:var(--lee);stroke-width:4}
+.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.windZone{fill:#62c8ff0c;stroke:var(--wind);stroke-width:3;stroke-dasharray:12 8}
+.windArrow{stroke:var(--wind);stroke-width:4;marker-end:url(#arr)}
+.hp{fill:var(--cyan);stroke:white;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}
+.phase{font-size:15px;fill:#9db4bd}.tiny{font-size:10px;fill:#bdcdd2}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>6-2 CROSSWIND MASTS · REV3.1 MAP PREVIEW</h1><div class="sub">LEFTWARD MACRO FLOW · LOCAL HEIGHT RHYTHM · BAFFLE MAST · RECESSED LEE POCKET</div></header>
+<div class="layout"><aside>
+<div class="card"><b>STAGE QUESTION</b><br>계속 부는 횡풍을 기다리지 않고, 긴 이동에서는 이용하고 한 번의 짧은 재진입에서는 거슬러 나올 수 있는가?</div>
+<div class="card"><b>MACRO FLOW</b><br>큰 진행축은 계속 왼쪽. 대신 Mast 높이와 Hardpoint 고도를 흔들어 평평한 일자감을 없앰.</div>
+<div class="card"><b>HEIGHT RHYTHM</b><br>Preview → high → low → high → low → Lee Pocket → short hook-back → low/high/low final assist.</div>
+<div class="card"><b>LEE POCKET</b><br>Baffle Mast 하부 maintenance recess. <b>Wind Rectangle 바깥</b>이라 실제 Full Safe.</div>
+<div class="card"><b>WIND</b><br>Continuous ×1 · direction (-1,0) · strength 500 · falloff 80.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>345.4px</b> &lt; 400px.</div>
+<div>
+<button id="routeB" class="on">Main Route</button><button id="windB" class="on">Wind Zone</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-1450 -980 2900 1080">
+<defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#62c8ff"/></marker></defs>
+<rect class="bounds" x="-1400" y="-940" width="2800" height="940"/>
+
+<!-- ARCHITECTURE FIRST -->
+<rect class="glass" x="-1320" y="-760" width="2580" height="430" rx="22"/>
+<text class="phase" x="720" y="-800">OPEN-SKY CROSSWIND GANTRY</text>
+
+<!-- entry / preview -->
+<rect class="safe" x="1120" y="-330" width="280" height="28"/><text class="tiny" x="1145" y="-355">ENTRY FROM 6-1 / FULL SAFE</text>
+<rect class="safe" x="930" y="-450" width="280" height="28"/><text class="tiny" x="955" y="-475">SAFE WIND PREVIEW / WIND OUT</text>
+
+<!-- varied-height masts -->
+<rect class="mast" x="690" y="-800" width="140" height="350" rx="12"/>
+<rect class="gantry" x="650" y="-525" width="220" height="26"/><text class="tiny" x="700" y="-825">MAST A / HIGH</text>
+
+<rect class="mast" x="400" y="-730" width="140" height="340" rx="12"/>
+<rect class="gantry" x="370" y="-455" width="220" height="26"/><text class="tiny" x="410" y="-755">MAST B / LOW</text>
+
+<rect class="mast" x="80" y="-850" width="150" height="390" rx="12"/>
+<rect class="gantry" x="40" y="-585" width="230" height="26"/><text class="tiny" x="90" y="-875">MAST C / HIGH</text>
+
+<!-- BAFFLE MAST -->
+<rect class="mast" x="-260" y="-820" width="180" height="410" rx="14"/>
+<rect class="gantry" x="-300" y="-525" width="250" height="26"/>
+<text class="phase" x="-475" y="-850">BAFFLE MAST</text>
+
+<!-- LEE POCKET lower/forward recess -->
+<rect class="glass" x="-560" y="-390" width="470" height="180" rx="20"/>
+<rect class="lee" x="-500" y="-315" width="310" height="30"/>
+<text class="phase" x="-535" y="-175">LEE MAINTENANCE POCKET</text>
+<text class="tiny" x="-475" y="-340">FULL SAFE / WIND OUT</text>
+
+<!-- local hook-back -->
+<rect class="gantry" x="-245" y="-440" width="150" height="22"/>
+<rect class="gantry" x="-125" y="-535" width="150" height="22"/>
+<text class="phase" x="-250" y="-455">SHORT HOOK-BACK ↗</text>
+
+<!-- final varied-height masts -->
+<rect class="mast" x="-450" y="-770" width="120" height="340" rx="10"/>
+<rect class="gantry" x="-500" y="-495" width="220" height="24"/><text class="tiny" x="-455" y="-795">FINAL A / LOW</text>
+
+<rect class="mast" x="-760" y="-890" width="120" height="350" rx="10"/>
+<rect class="gantry" x="-810" y="-625" width="220" height="24"/><text class="tiny" x="-765" y="-915">FINAL B / HIGH</text>
+
+<rect class="mast" x="-1090" y="-820" width="120" height="340" rx="10"/>
+<rect class="gantry" x="-1140" y="-545" width="220" height="24"/><text class="tiny" x="-1095" y="-845">FINAL C / LOW</text>
+
+<rect class="safe" x="-1370" y="-655" width="270" height="30"/><text class="tiny" x="-1345" y="-680">EXIT → 6-3 PERIMETER SIGNAL DECK</text>
+
+<!-- one static Wind rectangle -->
+<g id="wind">
+<rect class="windZone" x="-1120" y="-900" width="2040" height="450" rx="10"/>
+<line class="windArrow" x1="820" y1="-700" x2="380" y2="-700"/>
+<line class="windArrow" x1="500" y1="-700" x2="60" y2="-700"/>
+<line class="windArrow" x1="180" y1="-700" x2="-260" y2="-700"/>
+<line class="windArrow" x1="-180" y1="-700" x2="-620" y2="-700"/>
+<line class="windArrow" x1="-520" y1="-700" x2="-960" y2="-700"/>
+<text class="phase" x="200" y="-870">CONTINUOUS CROSSWIND ← ← ←</text>
+</g>
+
+<!-- recovery -->
+<g id="recovery">
+<rect class="recover" x="260" y="-330" width="300" height="18"/><text class="tiny" x="285" y="-355">R1 · GANTRY RECOVERY</text>
+<rect class="recover" x="-900" y="-390" width="280" height="18"/><text class="tiny" x="-875" y="-415">R2 · FINAL RUN RECOVERY</text>
+</g>
+
+<g><circle class="hp" cx="1250" cy="-300" r="13"/><circle class="hp" cx="1050" cy="-420" r="13"/><circle class="hp" cx="760" cy="-500" r="13"/><circle class="hp" cx="470" cy="-430" r="13"/><circle class="hp" cx="150" cy="-560" r="13"/><circle class="hp" cx="-160" cy="-500" r="13"/><circle class="hp" cx="-350" cy="-290" r="13"/><circle class="hp" cx="-180" cy="-410" r="13"/><circle class="hp" cx="-70" cy="-510" r="13"/><circle class="hp" cx="-390" cy="-470" r="13"/><circle class="hp" cx="-700" cy="-600" r="13"/><circle class="hp" cx="-1030" cy="-520" r="13"/><circle class="hp" cx="-1260" cy="-620" r="13"/></g>
+
+<g id="route">
+<path class="route" d="M1250,-300 L1050,-420 L760,-500 L470,-430 L150,-560 L-160,-500 L-350,-290"/>
+<path class="route" d="M-350,-290 L-180,-410 L-70,-510"/>
+<path class="route" d="M-70,-510 L-390,-470 L-700,-600 L-1030,-520 L-1260,-620"/>
+</g>
+
+<g id="reach" class="hidden"><circle class="reach" cx="1250" cy="-300" r="400"/><circle class="reach" cx="1050" cy="-420" r="400"/><circle class="reach" cx="760" cy="-500" r="400"/><circle class="reach" cx="470" cy="-430" r="400"/><circle class="reach" cx="150" cy="-560" r="400"/><circle class="reach" cx="-160" cy="-500" r="400"/><circle class="reach" cx="-350" cy="-290" r="400"/><circle class="reach" cx="-180" cy="-410" r="400"/><circle class="reach" cx="-70" cy="-510" r="400"/><circle class="reach" cx="-390" cy="-470" r="400"/><circle class="reach" cx="-700" cy="-600" r="400"/><circle class="reach" cx="-1030" cy="-520" r="400"/><circle class="reach" cx="-1260" cy="-620" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('windB','wind');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

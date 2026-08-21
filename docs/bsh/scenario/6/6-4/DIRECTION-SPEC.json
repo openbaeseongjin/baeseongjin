@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "stage": {
+    "sector": 6,
+    "stage": 4,
+    "legacyStageAlias": "6-4",
+    "sourceAreaId": "sector-06-04",
+    "name": "ROOFTOP SERVICE SHELTER"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticSystemText": "en-allowed"
+  },
+  "beats": [
+    {
+      "beatId": "pressure-release",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP SERVICE SHELTER",
+            "detail": "LOCAL ACCESS / AVAILABLE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "roof-signal",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "shelter-roof"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP PAD 03",
+            "detail": "SIGNAL / ACQUIRED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "observation-reveal",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "observation-lip"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "MAINTENANCE SHUTTLE",
+            "detail": "STANDBY"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "language": "ko",
+            "text": "…저기 있다."
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "upper-exit",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "exit"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PAD ACCESS ARRAY",
+            "detail": "CONTROL / ONLINE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "Route remains short and low-pressure.",
+    "No enemies or threat systems.",
+    "Upward continuity remains visible.",
+    "Pad direct view is occluded at entry and revealed later.",
+    "Observation Lip is the first direct Pad03 + Shuttle co-visibility point.",
+    "No ACCESS DENIED or CONTAINMENT VIOLATION at this stage."
+  ]
+}
