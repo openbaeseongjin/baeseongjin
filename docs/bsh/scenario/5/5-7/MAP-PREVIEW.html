@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-7 Evacuation Consequence Archive REV1.1 Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--safe:#70cf9a;--recover:#d5b45e;--art:#ff9a78;--cut:#ff6e68}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:450px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:860px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}.glass{fill:#76a9b522;stroke:#9ec7d2;stroke-width:3}.archive{fill:#45545d;stroke:#87989f;stroke-width:3}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}.hp{fill:var(--cyan);stroke:white;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}.artillery{fill:#d66852;stroke:#ffd3c9;stroke-width:3}.cutter{fill:#d94d48;stroke:#ffd3d1;stroke-width:3}
+.artZone{fill:#ff9a7810;stroke:#ff9a78;stroke-width:2;stroke-dasharray:10 7}.cutZone{fill:#ff6e6810;stroke:#ff6e68;stroke-width:2;stroke-dasharray:10 7}
+.tele{fill:#ffd16a22;stroke:#ffd16a;stroke-width:4}.cutLine{stroke:#ff6e68;stroke-width:3;stroke-dasharray:7 5}.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}.phase{font-size:14px;fill:#a4bac3}.tiny{font-size:10px;fill:#bdcdd2}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>5-7 EVACUATION CONSEQUENCE ARCHIVE · REV1.1</h1><div class="sub">ASYMMETRIC SWITCHBACK · MEDIUM LOWER → LONGEST MIDDLE → SHORT WIDE UPPER</div></header>
+<div class="layout"><aside>
+<div class="card"><b>REV1.1</b><br>세 층 길이를 다르게 조정. Middle을 가장 길게, Upper를 가장 짧고 넓은 Story Deck으로 변경.</div>
+<div class="card"><b>LOWER</b><br>중간 길이. Artillery ×1.</div>
+<div class="card"><b>MIDDLE</b><br>가장 긴 gameplay band. Cutter ×1 + visible recovery.</div>
+<div class="card"><b>UPPER</b><br>짧고 넓은 Evidence Deck. 완전 무위협.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>345.25px</b> &lt; 400px.</div>
+<div><button id="routeB" class="on">Route</button><button id="secB" class="on">Security</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button></div>
+</aside><main>
+<svg viewBox="-1300 -2350 2150 2350">
+<rect class="bounds" x="-1260" y="-2320" width="2050" height="2320"/>
+
+<!-- LOWER: medium -->
+<rect class="glass" x="-1040" y="-380" width="1510" height="210" rx="15"/>
+<text class="phase" x="-970" y="-420">1 · LOWER EVENT SPINE → / MEDIUM</text>
+<rect class="archive" x="-720" y="-500" width="250" height="110" rx="8"/>
+<rect class="archive" x="-160" y="-500" width="250" height="110" rx="8"/>
+<rect class="safe" x="-1080" y="-210" width="300" height="26"/><text class="tiny" x="-1055" y="-235">ENTRY FROM 5-6</text>
+<rect class="safe" x="280" y="-330" width="300" height="26"/><text class="tiny" x="305" y="-355">RISER 1 / SAFE</text>
+
+<!-- Riser 1 -->
+<rect class="glass" x="410" y="-870" width="180" height="520" rx="12"/>
+<rect class="safe" x="340" y="-850" width="320" height="26"/><text class="tiny" x="365" y="-875">ARCHIVE INDEX / FULL SAFE</text>
+
+<!-- MIDDLE: longest -->
+<rect class="glass" x="-1180" y="-1120" width="1790" height="220" rx="15"/>
+<text class="phase" x="-1080" y="-1160">← 2 · MIDDLE ROUTE-STATUS SPINE / LONGEST</text>
+<rect class="archive" x="220" y="-1240" width="250" height="110" rx="8"/>
+<rect class="archive" x="-300" y="-1240" width="250" height="110" rx="8"/>
+<rect class="archive" x="-820" y="-1240" width="250" height="110" rx="8"/>
+<rect class="safe" x="-1180" y="-1110" width="310" height="26"/><text class="tiny" x="-1155" y="-1135">RISER 2 / SAFE</text>
+
+<!-- Riser 2 -->
+<rect class="glass" x="-1200" y="-1640" width="180" height="500" rx="12"/>
+<rect class="safe" x="-1230" y="-1630" width="360" height="26"/><text class="tiny" x="-1205" y="-1655">UPPER EVIDENCE ENTRY</text>
+
+<!-- UPPER: short + wide -->
+<rect class="glass" x="-1160" y="-1810" width="1370" height="270" rx="18"/>
+<text class="phase" x="-1040" y="-1850">3 · UPPER EVIDENCE DECK → / SHORT + WIDE / NO THREAT</text>
+<rect class="safe" x="-900" y="-1695" width="390" height="30"/><text class="tiny" x="-875" y="-1720">EVIDENCE A</text>
+<rect class="safe" x="-390" y="-1695" width="470" height="30"/><text class="tiny" x="-365" y="-1720">EVIDENCE B · OUTCOME DECK</text>
+<rect class="archive" x="-870" y="-1990" width="300" height="140" rx="9"/>
+<rect class="archive" x="-300" y="-1990" width="320" height="140" rx="9"/>
+
+<!-- final rise -->
+<rect class="glass" x="120" y="-2200" width="190" height="390" rx="12"/>
+<rect class="safe" x="-400" y="-2310" width="360" height="28"/><text class="tiny" x="-375" y="-2335">EXIT → 5-8</text>
+
+<!-- Recovery -->
+<g id="recovery">
+<rect class="recover" x="-540" y="-650" width="330" height="18"/><text class="tiny" x="-515" y="-675">R1</text>
+<rect class="recover" x="30" y="-650" width="330" height="18"/><text class="tiny" x="55" y="-675">R2</text>
+<rect class="recover" x="230" y="-960" width="310" height="18"/><text class="tiny" x="255" y="-985">R3</text>
+<rect class="recover" x="-260" y="-1400" width="430" height="18"/><text class="tiny" x="-235" y="-1425">R4 · CUTTER CATWALK</text>
+<rect class="recover" x="-860" y="-1400" width="430" height="18"/><text class="tiny" x="-835" y="-1425">R5 · CUTTER CATWALK</text>
+</g>
+
+<!-- Security -->
+<g id="security">
+<rect class="artZone" x="-900" y="-700" width="1250" height="560"/>
+<circle class="artillery" cx="-260" cy="-650" r="27"/><text x="-215" y="-645">ARTILLERY</text>
+
+<rect class="cutZone" x="-1100" y="-1460" width="1550" height="560"/>
+<circle class="cutter" cx="-240" cy="-1370" r="27"/><text x="-195" y="-1365">CUTTER</text>
+</g>
+
+<!-- Hardpoints + Route -->
+<g><circle class="hp" cx="-1120" cy="-1600" r="13"/><circle class="hp" cx="-1120" cy="-1360" r="13"/><circle class="hp" cx="-1120" cy="-1080" r="13"/><circle class="hp" cx="-980" cy="-180" r="13"/><circle class="hp" cx="-840" cy="-980" r="13"/><circle class="hp" cx="-820" cy="-1660" r="13"/><circle class="hp" cx="-660" cy="-240" r="13"/><circle class="hp" cx="-520" cy="-1660" r="13"/><circle class="hp" cx="-500" cy="-920" r="13"/><circle class="hp" cx="-320" cy="-240" r="13"/><circle class="hp" cx="-220" cy="-2280" r="13"/><circle class="hp" cx="-220" cy="-1660" r="13"/><circle class="hp" cx="-160" cy="-880" r="13"/><circle class="hp" cx="20" cy="-240" r="13"/><circle class="hp" cx="80" cy="-2140" r="13"/><circle class="hp" cx="80" cy="-1700" r="13"/><circle class="hp" cx="180" cy="-880" r="13"/><circle class="hp" cx="240" cy="-1940" r="13"/><circle class="hp" cx="360" cy="-300" r="13"/><circle class="hp" cx="500" cy="-820" r="13"/><circle class="hp" cx="500" cy="-560" r="13"/></g>
+<g id="route">
+<path class="route" d="M-980,-180 L-660,-240 L-320,-240 L20,-240 L360,-300"/>
+<path class="route" d="M360,-300 L500,-560 L500,-820"/>
+<path class="route" d="M500,-820 L180,-880 L-160,-880 L-500,-920 L-840,-980 L-1120,-1080"/>
+<path class="route" d="M-1120,-1080 L-1120,-1360 L-1120,-1600"/>
+<path class="route" d="M-1120,-1600 L-820,-1660 L-520,-1660 L-220,-1660 L80,-1700"/>
+<path class="route" d="M80,-1700 L240,-1940 L80,-2140 L-220,-2280"/>
+</g>
+<g id="reach" class="hidden"><circle class="reach" cx="-1120" cy="-1600" r="400"/><circle class="reach" cx="-1120" cy="-1360" r="400"/><circle class="reach" cx="-1120" cy="-1080" r="400"/><circle class="reach" cx="-980" cy="-180" r="400"/><circle class="reach" cx="-840" cy="-980" r="400"/><circle class="reach" cx="-820" cy="-1660" r="400"/><circle class="reach" cx="-660" cy="-240" r="400"/><circle class="reach" cx="-520" cy="-1660" r="400"/><circle class="reach" cx="-500" cy="-920" r="400"/><circle class="reach" cx="-320" cy="-240" r="400"/><circle class="reach" cx="-220" cy="-2280" r="400"/><circle class="reach" cx="-220" cy="-1660" r="400"/><circle class="reach" cx="-160" cy="-880" r="400"/><circle class="reach" cx="20" cy="-240" r="400"/><circle class="reach" cx="80" cy="-2140" r="400"/><circle class="reach" cx="80" cy="-1700" r="400"/><circle class="reach" cx="180" cy="-880" r="400"/><circle class="reach" cx="240" cy="-1940" r="400"/><circle class="reach" cx="360" cy="-300" r="400"/><circle class="reach" cx="500" cy="-820" r="400"/><circle class="reach" cx="500" cy="-560" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('secB','security');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

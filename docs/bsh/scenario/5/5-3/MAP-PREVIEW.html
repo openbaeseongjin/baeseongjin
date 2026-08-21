@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-3 Security Review Gallery REV2 Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--base:#ffe16f;--left:#78d6a8;--right:#f0ae70;--archive:#697881;--jam:#c56cff;--warn:#ffc35c;--safe:#6dcf98;--recover:#d3b35d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:860px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}.archive{fill:#45545d;stroke:#83949c;stroke-width:3}.glass{fill:#76a9b522;stroke:#9ec7d2;stroke-width:3}.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}.hp{fill:var(--cyan);stroke:white;stroke-width:2.5}
+.base{fill:none;stroke:var(--base);stroke-width:5;stroke-dasharray:12 8}.left{fill:none;stroke:var(--left);stroke-width:5;stroke-dasharray:10 7}.right{fill:none;stroke:var(--right);stroke-width:5;stroke-dasharray:10 7}
+.jamZone{fill:#c56cff10;stroke:var(--jam);stroke-width:2;stroke-dasharray:11 7}.jammer{fill:#9f4cc8;stroke:#eed4ff;stroke-width:3}.warn{fill:none;stroke:var(--warn);stroke-width:4;stroke-dasharray:5 4}.jammed{fill:#b856de;stroke:#ffdcff;stroke-width:4}.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+.phase{fill:#89a4ae;font-size:14px;opacity:.72}text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}.tiny{font-size:10px;fill:#bdcdd2}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>5-3 SECURITY REVIEW GALLERY · REV2 MAP PREVIEW</h1><div class="sub">VERTICAL SPINE → BYPASS → RIGHT TRANSFER → REVERSE RETURN → FINAL CLIMB</div></header>
+<div class="layout"><aside>
+<div class="card"><b>REV2 SILHOUETTE</b><br>대각선 한 방향 상승 폐기.<br>중앙 수직 → 좌/우 분기 → 오른쪽 이동 → 왼쪽으로 복귀 → 다시 수직 상승.</div>
+<div class="card"><b>BAY A</b><br>Central Archive Wall 좌/우 Rail 중 하나를 Jam. 둘 다 Base-clear.</div>
+<div class="card"><b>TRANSFER</b><br>Wall A 위에서 far-right Review Bay로 긴 수평 이동. 단순 filler가 아니라 data/cable bridge.</div>
+<div class="card"><b>BAY B</b><br>오른쪽에서 시작해 왼쪽으로 되돌아오는 Upper/Lower Rail. 상승하면서 진행축 반전.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>349.86px</b> &lt; 400px.</div>
+<div>
+<button id="baseB" class="on">Base/Transfer</button><button id="leftB" class="on">Left/Upper Routes</button><button id="rightB" class="on">Right/Lower Routes</button><button id="jamB" class="on">Jammer Zones</button><button id="stateB">Jam Demo</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-1400 -3020 3000 3060">
+<rect class="bounds" x="-1280" y="-3000" width="3000" height="3000"/>
+
+<!-- entry / spine -->
+<rect class="safe" x="-170" y="-120" width="340" height="28"/><text class="tiny" x="-145" y="-145">ENTRY FROM 5-2</text>
+<rect class="safe" x="-180" y="-670" width="360" height="30"/><text class="tiny" x="-155" y="-695">P0 · BAY A PREVIEW / FULL SAFE</text>
+<rect class="safe" x="-170" y="-1420" width="340" height="28"/><text class="tiny" x="-145" y="-1445">M0 · BAY A MERGE / FULL SAFE</text>
+
+<!-- archive A -->
+<rect class="glass" x="-270" y="-1230" width="540" height="500" rx="18"/>
+<rect class="archive" x="-225" y="-1180" width="450" height="400" rx="14"/>
+<text x="-120" y="-985">ARCHIVE WALL A</text>
+
+<!-- transfer -->
+<rect class="safe" x="760" y="-1720" width="330" height="28"/><text class="tiny" x="785" y="-1745">P1 · BAY B PREVIEW / FULL SAFE</text>
+<path class="glass" d="M120 -1450 L980 -1745" stroke-width="28"/><text class="phase" x="330" y="-1575">LATERAL DATA / CABLE TRANSFER</text>
+
+<!-- archive B -->
+<rect class="glass" x="80" y="-2240" width="720" height="430" rx="18"/>
+<rect class="archive" x="130" y="-2190" width="620" height="330" rx="14"/>
+<text x="330" y="-2020">ARCHIVE WALL B</text>
+<rect class="safe" x="-330" y="-2320" width="320" height="28"/><text class="tiny" x="-305" y="-2345">M1 · BAY B MERGE / FULL SAFE</text>
+
+<!-- final -->
+<rect class="safe" x="-610" y="-2730" width="320" height="28"/><text class="tiny" x="-585" y="-2755">FINAL ARCHIVE DECK</text>
+<rect class="safe" x="-850" y="-2890" width="310" height="28"/><text class="tiny" x="-825" y="-2915">EXIT → 5-4</text>
+
+<!-- recovery -->
+<g id="recovery">
+<rect class="recover" x="-300" y="-1360" width="600" height="18"/><text class="tiny" x="-275" y="-1385">R1 · BAY A</text>
+<rect class="recover" x="510" y="-1860" width="380" height="18"/><text class="tiny" x="535" y="-1885">R2 · TRANSFER / BAY B</text>
+<rect class="recover" x="-110" y="-2450" width="360" height="18"/><text class="tiny" x="-85" y="-2475">R3 · BAY B / FINAL</text>
+</g>
+
+<!-- jammer booths -->
+<rect class="glass" x="420" y="-930" width="210" height="160" rx="10"/><circle class="jammer" cx="525" cy="-850" r="24"/><text x="565" y="-845">JAMMER A</text>
+<rect class="glass" x="900" y="-2040" width="210" height="160" rx="10"/><circle class="jammer" cx="1005" cy="-1960" r="24"/><text x="1045" y="-1955">JAMMER B</text>
+
+<g id="jamZones">
+<rect class="jamZone" x="-700" y="-1320" width="1400" height="720"/>
+<rect class="jamZone" x="-300" y="-2360" width="1350" height="720"/>
+</g>
+
+<!-- hardpoints -->
+<g>
+<circle class="hp" cx="0" cy="-100" r="13"/><text x="22" y="-85">E</text>
+<circle class="hp" cx="0" cy="-400" r="13"/><text x="22" y="-385">H1</text>
+<circle class="hp" cx="0" cy="-650" r="13"/><text x="22" y="-635">P0</text>
+
+<circle class="hp" cx="-320" cy="-780" r="13"/><text x="-395" y="-765">A-L1</text>
+<circle class="hp" cx="-560" cy="-1030" r="13"/><text x="-650" y="-1015">A-L2</text>
+<circle class="hp" cx="-300" cy="-1260" r="13"/><text x="-385" y="-1245">A-L3</text>
+
+<circle class="hp" cx="320" cy="-780" r="13"/><text x="342" y="-765">A-R1</text>
+<circle class="hp" cx="560" cy="-1030" r="13"/><text x="582" y="-1015">A-R2</text>
+<circle class="hp" cx="300" cy="-1260" r="13"/><text x="322" y="-1245">A-R3</text>
+<circle class="hp" cx="0" cy="-1400" r="13"/><text x="22" y="-1385">M0</text>
+
+<circle class="hp" cx="320" cy="-1510" r="13"/><text x="342" y="-1495">T1</text>
+<circle class="hp" cx="640" cy="-1600" r="13"/><text x="662" y="-1585">T2</text>
+<circle class="hp" cx="900" cy="-1700" r="13"/><text x="922" y="-1685">P1</text>
+
+<circle class="hp" cx="660" cy="-1920" r="13"/><text x="682" y="-1905">B-U1</text>
+<circle class="hp" cx="340" cy="-2040" r="13"/><text x="362" y="-2025">B-U2</text>
+<circle class="hp" cx="80" cy="-2200" r="13"/><text x="102" y="-2185">B-U3</text>
+
+<circle class="hp" cx="580" cy="-1800" r="13"/><text x="602" y="-1785">B-L1</text>
+<circle class="hp" cx="300" cy="-1980" r="13"/><text x="322" y="-1965">B-L2</text>
+<circle class="hp" cx="20" cy="-2180" r="13"/><text x="42" y="-2165">B-L3</text>
+<circle class="hp" cx="-180" cy="-2300" r="13"/><text x="-158" y="-2285">M1</text>
+
+<circle class="hp" cx="-180" cy="-2520" r="13"/><text x="-158" y="-2505">F1</text>
+<circle class="hp" cx="-480" cy="-2700" r="13"/><text x="-458" y="-2685">F2</text>
+<circle class="hp" cx="-720" cy="-2860" r="13"/><text x="-698" y="-2845">X</text>
+</g>
+
+<!-- routes -->
+<g id="baseRoute">
+<path class="base" d="M0,-100 L0,-400 L0,-650"/>
+<path class="base" d="M0,-1400 L320,-1510 L640,-1600 L900,-1700"/>
+<path class="base" d="M-180,-2300 L-180,-2520 L-480,-2700 L-720,-2860"/>
+</g>
+<g id="leftRoute">
+<path class="left" d="M0,-650 L-320,-780 L-560,-1030 L-300,-1260 L0,-1400"/>
+<path class="left" d="M900,-1700 L660,-1920 L340,-2040 L80,-2200 L-180,-2300"/>
+</g>
+<g id="rightRoute">
+<path class="right" d="M0,-650 L320,-780 L560,-1030 L300,-1260 L0,-1400"/>
+<path class="right" d="M900,-1700 L580,-1800 L300,-1980 L20,-2180 L-180,-2300"/>
+</g>
+
+<g id="jamState" class="hidden">
+<circle class="warn" cx="-320" cy="-780" r="28"/><text x="-430" y="-815">A WARNING</text>
+<circle class="jammed" cx="580" cy="-1800" r="18"/><text x="610" y="-1830">B JAM ACTIVE</text>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="0" cy="-100" r="400"/><circle class="reach" cx="0" cy="-400" r="400"/><circle class="reach" cx="0" cy="-650" r="400"/><circle class="reach" cx="-320" cy="-780" r="400"/><circle class="reach" cx="-560" cy="-1030" r="400"/><circle class="reach" cx="-300" cy="-1260" r="400"/><circle class="reach" cx="0" cy="-1400" r="400"/><circle class="reach" cx="320" cy="-780" r="400"/><circle class="reach" cx="560" cy="-1030" r="400"/><circle class="reach" cx="300" cy="-1260" r="400"/><circle class="reach" cx="0" cy="-1400" r="400"/><circle class="reach" cx="320" cy="-1510" r="400"/><circle class="reach" cx="640" cy="-1600" r="400"/><circle class="reach" cx="900" cy="-1700" r="400"/><circle class="reach" cx="660" cy="-1920" r="400"/><circle class="reach" cx="340" cy="-2040" r="400"/><circle class="reach" cx="80" cy="-2200" r="400"/><circle class="reach" cx="-180" cy="-2300" r="400"/><circle class="reach" cx="580" cy="-1800" r="400"/><circle class="reach" cx="300" cy="-1980" r="400"/><circle class="reach" cx="20" cy="-2180" r="400"/><circle class="reach" cx="-180" cy="-2300" r="400"/><circle class="reach" cx="-180" cy="-2520" r="400"/><circle class="reach" cx="-480" cy="-2700" r="400"/><circle class="reach" cx="-720" cy="-2860" r="400"/>
+</g>
+
+<text class="phase" x="-180" y="-500">1 · VERTICAL SPINE</text>
+<text class="phase" x="-720" y="-1160">2 · DUAL-SIDED BYPASS</text>
+<text class="phase" x="350" y="-1490">3 · RIGHT TRANSFER</text>
+<text class="phase" x="460" y="-2260">4 · REVERSE RETURN</text>
+<text class="phase" x="-600" y="-2500">5 · FINAL CLIMB</text>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('baseB','baseRoute');tg('leftB','leftRoute');tg('rightB','rightRoute');tg('jamB','jamZones');tg('stateB','jamState');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

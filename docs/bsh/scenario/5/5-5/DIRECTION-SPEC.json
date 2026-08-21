@@ -1,0 +1,182 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 5,
+    "stage": 5,
+    "legacyStageAlias": "5-5",
+    "sourceAreaId": "sector-05-05",
+    "name": "PRIORITY ROUTING HALL"
+  },
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-hub-visible-lock",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "central-routing-hub"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PRIORITY ROUTING HALL",
+            "detail": "EVACUATION ASCENT / AUTHORIZED ACCESS ONLY · ROUTING CONTROL / SERVICE ACCESS"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-control-arc-read",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "combined-security-read"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-combined-flank",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "jammer-aegis-chamber"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-priority-directive",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "priority-directive"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PRIORITY ROUTING DIRECTIVE · 02 / 03",
+            "detail": "UPPER CORE CONTROL / MAINTAIN · UPPER EVACUATION CAPACITY / MAINTAIN · GENERAL DISTRIBUTION / CAPACITY HOLD"
+          },
+          "timing": {
+            "durationSeconds": 2.0
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…부족한 데서, 뭘 남길지 골랐던 거네."
+          },
+          "timing": {
+            "minDelaySeconds": 2.3
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s4-backside-crossing",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "backside-service-bridge"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s5-right-ascent",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "right-evacuation-ascent"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s6-5-6-handoff",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "exit-panel-engaged"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "INCIDENT AUTHORIZATION ANNEX",
+            "detail": "ACCESS AHEAD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No Player Bark during Jam Warning/Active or AEGIS engagement",
+    "Directive Bark only on full-safe Directive Deck",
+    "Directive does not remotely unlock front geometry",
+    "No LOWER ASCENT suspension authorization reveal",
+    "No third security actor"
+  ]
+}

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-1 CONTINUITY RECEPTION REV8 Gameplay Map</title>
+<style>
+:root{--bg:#071017;--panel:#0d171d;--line:#334b57;--txt:#edf5f6;--muted:#9aadb5;--cyan:#5de8ff;--safe:#79d59b;--recover:#d9b764;--sealed:#59636a;--route:#ffe16c;--flow:#f0a768}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:410px 1fr;min-height:calc(100vh - 70px)}
+aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}
+main{padding:12px}.card{border:1px solid var(--line);border-radius:8px;padding:9px;margin-bottom:8px;background:#091218}.card b{color:var(--cyan)}
+label{display:block;margin:6px 0}button{border:1px solid var(--line);background:#142129;color:var(--txt);border-radius:6px;padding:6px 8px;margin:2px;cursor:pointer}
+svg{width:100%;height:88vh;min-height:840px;background:#050b10;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#09151b;stroke:#4a6876;stroke-width:4}.sealed{fill:#566169;stroke:#8b979d;stroke-width:3}.surface{fill:#62747e;stroke:#b4c4cb;stroke-width:2}
+.safe{fill:#34584b;stroke:#79d59b;stroke-width:3}.recover{fill:#5e5230;stroke:#d9b764;stroke-width:3}
+.hp{fill:#5de8ff;stroke:white;stroke-width:3}.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:13 9}
+.flow{fill:none;stroke:var(--flow);stroke-width:5;stroke-dasharray:8 8}.voidLabel{fill:#6f8790;font-size:24px;opacity:.5}
+text{fill:#eef5f6;font-size:13px;paint-order:stroke;stroke:#051018;stroke-width:5}.tiny{font-size:10px;fill:#a9bbc2}.title{font-size:16px}.hidden{display:none}
+.reach{fill:none;stroke:#5de8ff;stroke-width:2;opacity:.08}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header>
+<h1>5-1 CONTINUITY RECEPTION · REV8.0 · DESIGN LOCKED</h1>
+<div class="sub">GAMEPLAY-RELEVANT OBJECTS ONLY · 4608×2432 · ENEMY 0 · STORY CONTINUITY REV2</div>
+</header>
+<div class="layout">
+<aside>
+<div class="card"><b>CORE LESSON</b><br>회색 Sealed Core = collision YES / grapple NO.<br>청록 Service Hardpoint만 Rope target.</div>
+<div class="card"><b>MACRO</b><br>ENTRY LEFT → GAP1 → RIGHT → GAP2 → LEFT → SAFE/FLOW → RIGHT FINAL.</div>
+<div class="card"><b>MAP SIZE</b><br>4608×2432<br>Safe route travel ≈ 7.0–7.5k px<br>Max authored relation &lt; 400px.</div>
+<div class="card"><b>NO THREAT</b><br>Enemy 0 · Scanner 0 · Wind 0 · Cutter 0 · Jammer 0.</div>
+<div class="card"><b>STORY CONTINUITY</b><br>Player는 이미 Lower Feeder가 <b>ISOLATED</b>였음을 알고 있음.<br>5-1에서는 사고 당시에도 이 Control Complex가 작동했다는 사실만 추가.</div>
+<div class="card"><b>FINAL CHOICE</b><br><span style="color:#ffe16c">SAFE</span>: more read/landing.<br><span style="color:#f0a768">FLOW</span>: fewer stable pauses / momentum.</div>
+<div class="card"><label><input id="safeToggle" type="checkbox" checked> Safe Route</label><label><input id="flowToggle" type="checkbox" checked> Flow Route</label><label><input id="reachToggle" type="checkbox"> 400px Reach Audit</label></div>
+<div class="card"><b>MAP RULE</b><br>장식 벽/조명/가구는 표시하지 않음. Collision, Hardpoint, Safe/Recovery, Route, Exit만 표시.</div>
+</aside>
+<main>
+<svg viewBox="-2350 -2460 4700 2520">
+<rect class="bounds" x="-2304" y="-2432" width="4608" height="2432"/>
+
+<!-- monumental sealed segments -->
+<rect class="sealed" x="-480" y="-620" width="960" height="320" rx="18"/>
+<text class="title" x="-135" y="-465">SEALED CORE A</text>
+<rect class="sealed" x="-650" y="-1110" width="1300" height="280" rx="18"/>
+<text class="title" x="-135" y="-965">SEALED CORE B</text>
+<rect class="sealed" x="-520" y="-1580" width="1040" height="250" rx="18"/>
+<text class="title" x="-135" y="-1450">SEALED CORE C</text>
+<rect class="sealed" x="-700" y="-2080" width="1400" height="240" rx="18"/>
+<text class="title" x="-135" y="-1950">SEALED CORE D</text>
+
+<!-- decks -->
+<rect class="safe" x="-2050" y="-64" width="330" height="32"/><text class="tiny" x="-2020" y="-82">ENTRY</text>
+<rect class="safe" x="-1430" y="-420" width="400" height="30"/><text class="tiny" x="-1400" y="-443">RECEPTION · TRUE SAFE</text>
+<rect class="safe" x="780" y="-960" width="420" height="30"/><text class="tiny" x="810" y="-983">CONTROL VOID · TRUE SAFE</text>
+<rect class="safe" x="-1180" y="-1460" width="400" height="30"/><text class="tiny" x="-1150" y="-1483">INSPECTION · TRUE SAFE</text>
+<rect class="recover" x="-250" y="-1810" width="320" height="18"/><text class="tiny" x="-230" y="-1828">R3 SAFE READ / RECOVERY</text>
+<rect class="safe" x="1280" y="-2220" width="400" height="30"/><text class="tiny" x="1310" y="-2243">FINAL DECK / EXIT PANEL</text>
+
+<!-- recovery -->
+<rect class="recover" x="-1720" y="-500" width="230" height="18"/><text class="tiny" x="-1700" y="-518">R1</text>
+<rect class="recover" x="210" y="-1170" width="260" height="18"/><text class="tiny" x="230" y="-1188">R2</text>
+
+<!-- hardpoints -->
+<g id="hardpoints">
+<circle class="hp" cx="-1600" cy="-240" r="14"/><text class="tiny" x="-1575" y="-228">H1</text>
+
+<circle class="hp" cx="-940" cy="-620" r="14"/><text class="tiny" x="-920" y="-608">H2A</text>
+<circle class="hp" cx="-580" cy="-700" r="14"/><text class="tiny" x="-560" y="-688">H2B</text>
+<circle class="hp" cx="-200" cy="-760" r="14"/><text class="tiny" x="-180" y="-748">H2C</text>
+<circle class="hp" cx="180" cy="-800" r="14"/><text class="tiny" x="200" y="-788">H2D</text>
+<circle class="hp" cx="560" cy="-840" r="14"/><text class="tiny" x="580" y="-828">H2E</text>
+
+<circle class="hp" cx="760" cy="-1140" r="14"/><text class="tiny" x="780" y="-1128">H3A</text>
+<circle class="hp" cx="400" cy="-1220" r="14"/><text class="tiny" x="420" y="-1208">H3B</text>
+<circle class="hp" cx="20" cy="-1260" r="14"/><text class="tiny" x="40" y="-1248">H3C</text>
+<circle class="hp" cx="-360" cy="-1300" r="14"/><text class="tiny" x="-340" y="-1288">H3D</text>
+<circle class="hp" cx="-740" cy="-1340" r="14"/><text class="tiny" x="-720" y="-1328">H3E</text>
+
+<!-- safe -->
+<circle class="hp" cx="-820" cy="-1630" r="14"/><text class="tiny" x="-800" y="-1618">HS-A</text>
+<circle class="hp" cx="-460" cy="-1710" r="14"/><text class="tiny" x="-440" y="-1698">HS-B</text>
+<circle class="hp" cx="-100" cy="-1750" r="14"/><text class="tiny" x="-80" y="-1738">HS-C</text>
+<circle class="hp" cx="260" cy="-1760" r="14"/><text class="tiny" x="280" y="-1748">HS-D</text>
+<circle class="hp" cx="620" cy="-1780" r="14"/><text class="tiny" x="640" y="-1768">HS-E</text>
+
+<!-- flow -->
+<circle class="hp" cx="-700" cy="-1660" r="14"/><text class="tiny" x="-680" y="-1648">HF-A</text>
+<circle class="hp" cx="-320" cy="-1720" r="14"/><text class="tiny" x="-300" y="-1708">HF-B</text>
+<circle class="hp" cx="60" cy="-1740" r="14"/><text class="tiny" x="80" y="-1728">HF-C</text>
+<circle class="hp" cx="440" cy="-1760" r="14"/><text class="tiny" x="460" y="-1748">HF-D</text>
+<circle class="hp" cx="800" cy="-1840" r="14"/><text class="tiny" x="820" y="-1828">HF-E</text>
+
+<circle class="hp" cx="900" cy="-1940" r="14"/><text class="tiny" x="920" y="-1928">H5</text>
+<circle class="hp" cx="1160" cy="-2100" r="14"/><text class="tiny" x="1180" y="-2088">H6</text>
+</g>
+
+<!-- main common routes -->
+<path class="route" d="M-1900,-64 L-1600,-240 L-1260,-420"/>
+<path class="route" d="M-1260,-420 L-940,-620 L-580,-700 L-200,-760 L180,-800 L560,-840 L900,-960"/>
+<path class="route" d="M900,-960 L760,-1140 L400,-1220 L20,-1260 L-360,-1300 L-740,-1340 L-1040,-1460"/>
+<path class="route" d="M620,-1780 L900,-1940 L1160,-2100 L1440,-2220"/>
+
+<g id="safeRoute">
+<path class="route" d="M-1040,-1460 L-820,-1630 L-460,-1710 L-100,-1750 L260,-1760 L620,-1780"/>
+</g>
+<g id="flowRoute">
+<path class="flow" d="M-1040,-1460 L-700,-1660 L-320,-1720 L60,-1740 L440,-1760 L800,-1840 L900,-1940"/>
+</g>
+
+<text class="voidLabel" x="-2050" y="-900">MONUMENTAL LEFT VOID</text>
+<text class="voidLabel" x="1020" y="-1450">RIGHT CONTROL VOID</text>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-1600" cy="-240" r="400"/>
+<circle class="reach" cx="-940" cy="-620" r="400"/>
+<circle class="reach" cx="-580" cy="-700" r="400"/>
+<circle class="reach" cx="-200" cy="-760" r="400"/>
+<circle class="reach" cx="180" cy="-800" r="400"/>
+<circle class="reach" cx="560" cy="-840" r="400"/>
+<circle class="reach" cx="760" cy="-1140" r="400"/>
+<circle class="reach" cx="400" cy="-1220" r="400"/>
+<circle class="reach" cx="20" cy="-1260" r="400"/>
+<circle class="reach" cx="-360" cy="-1300" r="400"/>
+<circle class="reach" cx="-740" cy="-1340" r="400"/>
+<circle class="reach" cx="-820" cy="-1630" r="400"/>
+<circle class="reach" cx="-460" cy="-1710" r="400"/>
+<circle class="reach" cx="-100" cy="-1750" r="400"/>
+<circle class="reach" cx="260" cy="-1760" r="400"/>
+<circle class="reach" cx="620" cy="-1780" r="400"/>
+<circle class="reach" cx="900" cy="-1940" r="400"/>
+<circle class="reach" cx="1160" cy="-2100" r="400"/>
+</g>
+</svg>
+</main>
+</div>
+<script>
+const safeToggle=document.getElementById('safeToggle');
+const flowToggle=document.getElementById('flowToggle');
+const reachToggle=document.getElementById('reachToggle');
+safeToggle.onchange=()=>document.getElementById('safeRoute').classList.toggle('hidden',!safeToggle.checked);
+flowToggle.onchange=()=>document.getElementById('flowRoute').classList.toggle('hidden',!flowToggle.checked);
+reachToggle.onchange=()=>document.getElementById('reach').classList.toggle('hidden',!reachToggle.checked);
+</script>
+</body>
+</html>

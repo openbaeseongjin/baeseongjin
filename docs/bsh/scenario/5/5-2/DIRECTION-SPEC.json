@@ -1,0 +1,211 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 5,
+    "stage": 2,
+    "legacyStageAlias": "5-2",
+    "sourceAreaId": "sector-05-02",
+    "name": "CONTROL ATRIUM"
+  },
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-control-atrium-arrival",
+      "purpose": "Reveal active continuity security and the first directional AEGIS before combat starts.",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "p0-aegis-preview"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-2:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "p0-aegis-preview",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTROL ATRIUM",
+            "detail": "CONTINUITY SECURITY / ACTIVE"
+          },
+          "timing": {
+            "durationSeconds": 1.4
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-aegis-a",
+      "purpose": "First AEGIS lesson: frontal pressure, side/rear approach through partition-maintenance geometry.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -1400,
+        "maxLocalX": -760,
+        "minLocalY": -1100,
+        "maxLocalY": -500
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "5-2:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-upper-control-powered",
+      "purpose": "After the first AEGIS band, confirm that the upper control layer itself remains powered.",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "upper-control-read"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-2:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "upper-control-read",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "UPPER CONTROL",
+            "detail": "POWERED"
+          },
+          "timing": {
+            "durationSeconds": 1.3
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-aegis-b",
+      "purpose": "Reinforce angle control from the opposite partition orientation without introducing another mechanic.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": 180,
+        "maxLocalX": 780,
+        "minLocalY": -1920,
+        "maxLocalY": -1310
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "5-2:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-final-security",
+      "purpose": "Confirm the upper control complex is both powered and actively secured.",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "final-control-deck-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-2:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "final-control",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTINUITY SECURITY",
+            "detail": "ACTIVE"
+          },
+          "timing": {
+            "durationSeconds": 1.3
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s5-5-3-handoff",
+      "purpose": "Preview restricted access to Security Review Gallery without consuming Jammer or record content.",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "exit-panel-engaged"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-2:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "SECURITY REVIEW GALLERY",
+            "detail": "ACCESS RESTRICTED"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No Player Bark in 5-2",
+    "No world pause or control lock",
+    "AEGIS A and B are never simultaneously active",
+    "No Jammer/Cutter/Artillery/Pursuit tracks",
+    "No Capacity/Priority/Authorization reveal",
+    "5-3 record content remains deferred"
+  ]
+}

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-8 Continuity Command Spine REV2 Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--alt:#78d6a8;--safe:#70cf9a;--recover:#d5b45e;--aegis:#70a8ff;--jam:#c56cff;--cut:#ff6e68;--art:#ff9a78}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:460px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:900px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}.bus{fill:#45545d;stroke:#87989f;stroke-width:3}.glass{fill:#76a9b522;stroke:#9ec7d2;stroke-width:3}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}.hp{fill:var(--cyan);stroke:white;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}.alt{fill:none;stroke:var(--alt);stroke-width:5;stroke-dasharray:10 7}
+.aegis{fill:#507fd7;stroke:#d9e8ff;stroke-width:3}.jammer{fill:#a751cf;stroke:#f0d8ff;stroke-width:3}.cutter{fill:#d94d48;stroke:#ffd3d1;stroke-width:3}.artillery{fill:#d66852;stroke:#ffd3c9;stroke-width:3}
+.bandA{fill:#70a8ff10;stroke:#70a8ff;stroke-width:2;stroke-dasharray:10 7}.bandJ{fill:#c56cff10;stroke:#c56cff;stroke-width:2;stroke-dasharray:10 7}.bandC{fill:#ff6e6810;stroke:#ff6e68;stroke-width:2;stroke-dasharray:10 7}.bandR{fill:#ff9a7810;stroke:#ff9a78;stroke-width:2;stroke-dasharray:10 7}
+.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}.phase{font-size:14px;fill:#a4bac3}.tiny{font-size:10px;fill:#bdcdd2}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>5-8 CONTINUITY COMMAND SPINE · REV2 MAP PREVIEW</h1><div class="sub">BRAIDED TWIN-SPINE · AEGIS → JAMMER → CUTTER → ARTILLERY → AUTHORITY</div></header>
+<div class="layout"><aside>
+<div class="card"><b>SPATIAL IDENTITY</b><br>PRIMARY / REDUNDANT 두 개의 평행 Command Bus를 Cross-link로 번갈아 타는 사다리형/브레이드형 상승.</div>
+<div class="card"><b>AXIS</b><br>UP → RIGHT → UP → LEFT → UP → CENTER.</div>
+<div class="card"><b>SECURITY</b><br>AEGIS → Jammer → Cutter → Artillery. 네 Band는 서로 겹치지 않음.</div>
+<div class="card"><b>FINAL</b><br>두 Bus가 중앙 Authority Deck으로 합쳐지며 Capacity→Priority→Authorization→Consequence→Responsibility 종합.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>361.25px</b> &lt; 400px.</div>
+<div><button id="routeB" class="on">Route</button><button id="altB" class="on">Jam Alt</button><button id="secB" class="on">Security Bands</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button></div>
+</aside><main>
+<svg viewBox="-820 -3160 1650 3160">
+<rect class="bounds" x="-780" y="-3120" width="1560" height="3120"/>
+
+<!-- twin buses -->
+<rect class="bus" x="-420" y="-2640" width="200" height="2440" rx="16"/>
+<rect class="bus" x="220" y="-2640" width="200" height="2440" rx="16"/>
+<text class="phase" x="-520" y="-2350" transform="rotate(-90 -520 -2350)">PRIMARY CONTINUITY BUS</text>
+<text class="phase" x="525" y="-2350" transform="rotate(90 525 -2350)">REDUNDANT CONTINUITY BUS</text>
+
+<!-- crosslinks -->
+<rect class="glass" x="-360" y="-1220" width="720" height="240" rx="14"/>
+<text class="phase" x="-180" y="-1255">CROSS-LINK 1 · AUTHENTICATED TRANSFER</text>
+
+<rect class="glass" x="-360" y="-2050" width="720" height="230" rx="14"/>
+<text class="phase" x="-150" y="-2085">CROSS-LINK 2 · SAFE TRANSFER</text>
+
+<!-- entry / final -->
+<rect class="safe" x="-150" y="-140" width="300" height="28"/><text class="tiny" x="-125" y="-165">ENTRY FROM 5-7</text>
+<rect class="safe" x="-440" y="-890" width="300" height="26"/><text class="tiny" x="-415" y="-915">AEGIS BAND EXIT / SAFE</text>
+<rect class="safe" x="190" y="-1170" width="300" height="26"/><text class="tiny" x="215" y="-1195">RIGHT BUS ENTRY / SAFE</text>
+<rect class="safe" x="190" y="-1790" width="300" height="26"/><text class="tiny" x="215" y="-1815">CUTTER BAND EXIT / SAFE</text>
+<rect class="safe" x="-450" y="-2020" width="300" height="26"/><text class="tiny" x="-425" y="-2045">LEFT BUS RETURN / SAFE</text>
+<rect class="safe" x="-430" y="-2640" width="330" height="28"/><text class="tiny" x="-405" y="-2665">ARTILLERY BAND EXIT / SAFE</text>
+
+<rect class="glass" x="-330" y="-3090" width="660" height="360" rx="20"/>
+<rect class="safe" x="-250" y="-3000" width="500" height="34"/><text class="tiny" x="-225" y="-3025">FINAL AUTHORITY RECORD / FULL SAFE</text>
+<text class="phase" x="-200" y="-3070">CENTRAL AUTHORITY CONVERGENCE</text>
+
+<!-- recovery -->
+<g id="recovery">
+<rect class="recover" x="-590" y="-620" width="270" height="18"/><text class="tiny" x="-565" y="-645">R1</text>
+<rect class="recover" x="-90" y="-1340" width="260" height="18"/><text class="tiny" x="-65" y="-1365">R2</text>
+<rect class="recover" x="70" y="-1510" width="270" height="18"/><text class="tiny" x="95" y="-1535">R3</text>
+<rect class="recover" x="70" y="-1720" width="270" height="18"/><text class="tiny" x="95" y="-1745">R4</text>
+<rect class="recover" x="-90" y="-2170" width="270" height="18"/><text class="tiny" x="-65" y="-2195">R5</text>
+<rect class="recover" x="-570" y="-2380" width="280" height="18"/><text class="tiny" x="-545" y="-2405">R6</text>
+</g>
+
+<!-- security bands -->
+<g id="security">
+<rect class="bandA" x="-610" y="-930" width="560" height="800"/>
+<circle class="aegis" cx="-70" cy="-620" r="28"/><text x="-25" y="-615">AEGIS</text>
+
+<rect class="bandJ" x="-430" y="-1310" width="850" height="420"/>
+<circle class="jammer" cx="0" cy="-1270" r="25"/><text x="45" y="-1265">JAMMER</text>
+
+<rect class="bandC" x="80" y="-1810" width="520" height="760"/>
+<circle class="cutter" cx="590" cy="-1500" r="27"/><text x="520" y="-1455">CUTTER</text>
+
+<rect class="bandR" x="-610" y="-2660" width="620" height="660"/>
+<circle class="artillery" cx="-610" cy="-2280" r="27"/><text x="-565" y="-2275">ARTILLERY</text>
+</g>
+
+<!-- hardpoints -->
+<g><circle class="hp" cx="-320" cy="-2280" r="13"/><circle class="hp" cx="-320" cy="-1980" r="13"/><circle class="hp" cx="-320" cy="-850" r="13"/><circle class="hp" cx="-320" cy="-580" r="13"/><circle class="hp" cx="-220" cy="-300" r="13"/><circle class="hp" cx="-160" cy="-1880" r="13"/><circle class="hp" cx="-140" cy="-2470" r="13"/><circle class="hp" cx="-120" cy="-980" r="13"/><circle class="hp" cx="-80" cy="-1120" r="13"/><circle class="hp" cx="0" cy="-3060" r="13"/><circle class="hp" cx="0" cy="-100" r="13"/><circle class="hp" cx="80" cy="-2600" r="13"/><circle class="hp" cx="80" cy="-1840" r="13"/><circle class="hp" cx="100" cy="-1030" r="13"/><circle class="hp" cx="120" cy="-2910" r="13"/><circle class="hp" cx="140" cy="-1180" r="13"/><circle class="hp" cx="300" cy="-2750" r="13"/><circle class="hp" cx="320" cy="-1740" r="13"/><circle class="hp" cx="320" cy="-1430" r="13"/><circle class="hp" cx="320" cy="-1120" r="13"/></g>
+
+<!-- main route -->
+<g id="route">
+<path class="route" d="M0,-100 L-220,-300 L-320,-580 L-320,-850"/>
+<path class="route" d="M-320,-850 L-120,-980 L100,-1030 L320,-1120"/>
+<path class="route" d="M320,-1120 L320,-1430 L320,-1740"/>
+<path class="route" d="M320,-1740 L80,-1840 L-160,-1880 L-320,-1980"/>
+<path class="route" d="M-320,-1980 L-320,-2280 L-140,-2470 L80,-2600"/>
+<path class="route" d="M80,-2600 L300,-2750 L120,-2910 L0,-3060"/>
+</g>
+<g id="altRoute">
+<path class="alt" d="M-320,-850 L-80,-1120 L140,-1180 L320,-1120"/>
+</g>
+
+<g id="reach" class="hidden"><circle class="reach" cx="-320" cy="-2280" r="400"/><circle class="reach" cx="-320" cy="-1980" r="400"/><circle class="reach" cx="-320" cy="-850" r="400"/><circle class="reach" cx="-320" cy="-580" r="400"/><circle class="reach" cx="-220" cy="-300" r="400"/><circle class="reach" cx="-160" cy="-1880" r="400"/><circle class="reach" cx="-140" cy="-2470" r="400"/><circle class="reach" cx="-120" cy="-980" r="400"/><circle class="reach" cx="-80" cy="-1120" r="400"/><circle class="reach" cx="0" cy="-3060" r="400"/><circle class="reach" cx="0" cy="-100" r="400"/><circle class="reach" cx="80" cy="-2600" r="400"/><circle class="reach" cx="80" cy="-1840" r="400"/><circle class="reach" cx="100" cy="-1030" r="400"/><circle class="reach" cx="120" cy="-2910" r="400"/><circle class="reach" cx="140" cy="-1180" r="400"/><circle class="reach" cx="300" cy="-2750" r="400"/><circle class="reach" cx="320" cy="-1740" r="400"/><circle class="reach" cx="320" cy="-1430" r="400"/><circle class="reach" cx="320" cy="-1120" r="400"/></g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('routeB','route');tg('altB','altRoute');tg('secB','security');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

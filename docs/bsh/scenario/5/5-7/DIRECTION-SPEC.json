@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+  "stage": {
+    "sector": 5,
+    "stage": 7,
+    "legacyStageAlias": "5-7",
+    "sourceAreaId": "sector-05-07",
+    "name": "EVACUATION CONSEQUENCE ARCHIVE"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "EVACUATION CONSEQUENCE ARCHIVE",
+            "detail": "POST-INCIDENT RECORDS / AVAILABLE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "artillery",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "lower-event-spine"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "archive-index",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "riser1-safe"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "EVACUATION ARCHIVE",
+            "detail": "POST-CASCADE RECORDS / INDEXED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "cutter",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "middle-route-status-spine"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "evidence-a",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "upper-evidence-a"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "POST-CASCADE EVACUATION LOG",
+            "detail": "LOWER-SECTOR TRANSFER / ROUTING INTERRUPTED · LOWER ASCENT / SUSPENSION IN EFFECT"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "evidence-b",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "upper-evidence-b"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "LOWER SECTORS",
+            "detail": "EVACUATION STATUS / SUSPENDED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…승인한 대로, 실제 대피까지 멈췄어."
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "exit",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "exit-panel-engaged"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTINUITY COMMAND SPINE",
+            "detail": "AUTHORITY RECORDS / AHEAD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "Artillery only on lower tier",
+    "Cutter only on middle tier",
+    "Upper evidence tier fully threat-free",
+    "No final responsibility reveal"
+  ]
+}

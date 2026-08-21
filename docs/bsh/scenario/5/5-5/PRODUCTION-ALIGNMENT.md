@@ -1,19 +1,27 @@
-# 5-5 PRODUCTION ALIGNMENT
+# 5-5 PRODUCTION ALIGNMENT — REV4.0
 
-Snapshot: `34c5e2025697984855833e11484dc3a36617ec52`
+Checked current main: `3c9f661bba58af6f7351e00754c12aef86575a12`.
 
-## LOCKED
-- Key Branch and Ascent have different functions.
-- Priority Directive doubles as the route-access proof.
-- No unrelated key inventory.
+## Current GitHub authority reviewed
 
-## NEW / NOT IMPLEMENTED
-- `priority-route-lock-v1`
-- Sector05 proof rollout
-- stable Jammer / Shield / Sentry AREA-SPEC helpers
-- sealed corporate surface helper
+REV3.8 already established:
+- visible locked right ascent
+- left Priority Control branch
+- Priority Directive 02/03
+- Jammer + AEGIS
+- formal Lower Ascent authorization deferred to 5-6
 
-## CAMERA
-Initial decision shot must show left key branch and right locked ascent together.
+## REV4 changes
 
-Scenario Art HOLD until source geometry and lock presentation are stable.
+1. Standard Sentry removed.
+2. Jammer + AEGIS becomes the only synthesis pressure.
+3. `priority-route-lock-v1` remote-unlock behavior is no longer creative authority.
+4. Priority Control branch physically connects to the backside of the authorized ascent.
+5. Story wording remains within current causal ladder.
+
+## Runtime status
+
+- AEGIS basis: available in current Runtime.
+- Jammer: new/not implemented.
+- corporate proof interaction: may require production implementation.
+- approved geometry: not implemented.

@@ -1,0 +1,280 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED · REV2.0 · NOT IMPLEMENTED",
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "stage": {
+    "sector": 5,
+    "stage": 4,
+    "legacyStageAlias": "5-4",
+    "sourceAreaId": "sector-05-04",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "CAPACITY ALLOCATION CORE",
+    "subtitle": "HORIZONTAL ALLOCATION ISLAND FIELD / RIGHT-SIDE BUS RISER",
+    "supersedesLegacyDesign": "CONTINUITY SERVICE NODE / REST"
+  },
+  "bounds": {
+    "width": 3420,
+    "height": 2240
+  },
+  "entry": {
+    "id": "entry",
+    "x": -2120,
+    "y": -260,
+    "fromStageAlias": "5-3"
+  },
+  "grappleTargets": [
+    {
+      "id": "h00",
+      "x": -2120,
+      "y": -260
+    },
+    {
+      "id": "h01",
+      "x": -1840,
+      "y": -300
+    },
+    {
+      "id": "h02",
+      "x": -1520,
+      "y": -360
+    },
+    {
+      "id": "h03",
+      "x": -1220,
+      "y": -420
+    },
+    {
+      "id": "h04",
+      "x": -900,
+      "y": -360
+    },
+    {
+      "id": "h05",
+      "x": -580,
+      "y": -300
+    },
+    {
+      "id": "h06",
+      "x": -260,
+      "y": -380
+    },
+    {
+      "id": "h07",
+      "x": 60,
+      "y": -440
+    },
+    {
+      "id": "h08",
+      "x": 360,
+      "y": -420
+    },
+    {
+      "id": "h09",
+      "x": 640,
+      "y": -520
+    },
+    {
+      "id": "h10",
+      "x": 760,
+      "y": -800
+    },
+    {
+      "id": "h11",
+      "x": 760,
+      "y": -1120
+    },
+    {
+      "id": "h12",
+      "x": 760,
+      "y": -1440
+    },
+    {
+      "id": "h13",
+      "x": 760,
+      "y": -1760
+    },
+    {
+      "id": "h14",
+      "x": 500,
+      "y": -1960
+    },
+    {
+      "id": "h15",
+      "x": 220,
+      "y": -2140
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "island-a",
+      "preset": "allocation-console-island",
+      "x": -1980,
+      "y": -390,
+      "width": 430,
+      "height": 120
+    },
+    {
+      "id": "island-b",
+      "preset": "allocation-console-island",
+      "x": -1260,
+      "y": -500,
+      "width": 430,
+      "height": 130
+    },
+    {
+      "id": "island-c",
+      "preset": "allocation-console-island",
+      "x": -550,
+      "y": -410,
+      "width": 430,
+      "height": 120
+    },
+    {
+      "id": "island-d",
+      "preset": "allocation-console-island",
+      "x": 160,
+      "y": -500,
+      "width": 430,
+      "height": 125
+    },
+    {
+      "id": "bus-riser",
+      "preset": "sealed-corporate-riser",
+      "x": 690,
+      "y": -1880,
+      "width": 160,
+      "height": 1320
+    },
+    {
+      "id": "capacity-record-deck",
+      "preset": "safe-deck",
+      "x": 80,
+      "y": -2180,
+      "width": 420,
+      "height": 30
+    }
+  ],
+  "enemies": [
+    {
+      "id": "sector-05-04:artillery-a",
+      "enemyType": "artillery-drone-t1",
+      "role": "FIRST ARTILLERY / ALLOCATION FIELD",
+      "activation": {
+        "x": -2050,
+        "y": -820,
+        "width": 2450,
+        "height": 650
+      },
+      "rules": [
+        "kill-optional",
+        "no-kill-gate",
+        "activation-band-only"
+      ]
+    },
+    {
+      "id": "sector-05-04:artillery-b",
+      "enemyType": "artillery-drone-t1",
+      "role": "RISER REINFORCEMENT",
+      "activation": {
+        "x": 500,
+        "y": -1840,
+        "width": 700,
+        "height": 1250
+      },
+      "rules": [
+        "kill-optional",
+        "no-kill-gate",
+        "activation-band-only"
+      ],
+      "mustNotOverlapWith": "sector-05-04:artillery-a"
+    }
+  ],
+  "route": {
+    "mandatory": [
+      "h00",
+      "h01",
+      "h02",
+      "h03",
+      "h04",
+      "h05",
+      "h06",
+      "h07",
+      "h08",
+      "h09",
+      "h10",
+      "h11",
+      "h12",
+      "h13",
+      "h14",
+      "h15"
+    ],
+    "neighborDistancesPx": [
+      282.84,
+      325.58,
+      305.94,
+      325.58,
+      325.58,
+      329.85,
+      325.58,
+      300.67,
+      297.32,
+      304.63,
+      320.0,
+      320.0,
+      320.0,
+      328.02,
+      332.87
+    ],
+    "maxAuthoredRelationPx": 332.87,
+    "baseHookReachPx": 400
+  },
+  "recovery": [
+    {
+      "id": "r1",
+      "role": "under-void-1",
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "r2",
+      "role": "under-void-2",
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "r3",
+      "role": "under-void-3",
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "r4",
+      "role": "riser-mid",
+      "maxRetrySeconds": 5
+    },
+    {
+      "id": "r5",
+      "role": "riser-upper",
+      "maxRetrySeconds": 5
+    }
+  ],
+  "story": {
+    "systemFacts": [
+      "CAPACITY ALLOCATION CORE / OPERATIONS ACTIVE",
+      "CAPACITY ALLOCATION RECORD / 01 OF 03",
+      "AVAILABLE CAPACITY / CRITICAL DEFICIT",
+      "SIMULTANEOUS STABLE OPERATION / UNAVAILABLE",
+      "PRIORITY ROUTING HALL / ACCESS AHEAD"
+    ],
+    "approvedPlayerBark": "…전부 살릴 수는 없었던 거네."
+  },
+  "forbidden": [
+    "Jammer",
+    "AEGIS",
+    "Cutter",
+    "Pursuit",
+    "Patrol",
+    "Standard Sentry",
+    "Priority Directive content",
+    "Routing Authorization content",
+    "explanation of which group was sacrificed",
+    "named decision-maker"
+  ]
+}

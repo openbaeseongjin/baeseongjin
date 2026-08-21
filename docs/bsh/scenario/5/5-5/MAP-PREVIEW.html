@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-5 Priority Routing Hall REV4 Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--route:#ffe16f;--alt:#76d6aa;--safe:#70cf9a;--recover:#d5b45e;--matrix:#596971;--jam:#c56cff;--aegis:#70a8ff;--lock:#ffba66}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:440px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:850px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}.matrix{fill:#45545d;stroke:#87989f;stroke-width:3}.glass{fill:#76a9b522;stroke:#9ec7d2;stroke-width:3}.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.hp{fill:var(--cyan);stroke:white;stroke-width:2.5}.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}.alt{fill:none;stroke:var(--alt);stroke-width:5;stroke-dasharray:10 7}
+.jammer{fill:#a751cf;stroke:#f0d8ff;stroke-width:3}.aegis{fill:#507fd7;stroke:#d9e8ff;stroke-width:3}.shield{fill:#70a8ff18;stroke:#70a8ff;stroke-width:3}.jamZone{fill:#c56cff10;stroke:#c56cff;stroke-width:2;stroke-dasharray:10 7}
+.lock{fill:#ffba661a;stroke:#ffba66;stroke-width:4;stroke-dasharray:8 6}.reach{fill:none;stroke:var(--cyan);stroke-width:1.5;opacity:.08}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}.phase{font-size:15px;fill:#9db4bd}.tiny{font-size:10px;fill:#bdcdd2}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>5-5 PRIORITY ROUTING HALL · REV4 MAP PREVIEW</h1><div class="sub">VISIBLE LOCKED ASCENT → LEFT CONTROL ARC → COMBINED JAMMER/AEGIS → BACKSIDE BRIDGE → RIGHT ASCENT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>STAGE QUESTION</b><br>다음 선택 하나가 Jammed되고 정면은 AEGIS가 막을 때, 남아 있는 route로 angle을 바꿀 수 있는가?</div>
+<div class="card"><b>ARCHITECTURE</b><br>오른쪽 Authorized Evacuation Ascent는 Hub에서 보이지만 front-locked. 왼쪽 Routing Control maintenance path가 그 잠금구조의 뒤쪽으로 연결됨.</div>
+<div class="card"><b>NO MAGIC UNLOCK</b><br>Directive를 줍자 문이 순간적으로 열리는 구조가 아니라, Control branch를 통과해 물리적으로 gate 뒤쪽 Service Bridge로 넘어감.</div>
+<div class="card"><b>SECURITY</b><br>Hardpoint Jammer ×1 + AEGIS ×1. Standard Sentry 삭제. Kill optional.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>353.55px</b> &lt; 400px.</div>
+<div>
+<button id="mainB" class="on">Main Route</button><button id="altB" class="on">Flank Alt</button><button id="secB" class="on">Security</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button>
+</div></aside><main>
+<svg viewBox="-1350 -2500 2450 2500">
+<rect class="bounds" x="-1300" y="-2470" width="2350" height="2470"/>
+
+<!-- entry / hub -->
+<rect class="safe" x="-180" y="-120" width="360" height="28"/><text class="tiny" x="-155" y="-145">ENTRY FROM 5-4</text>
+<rect class="safe" x="-220" y="-420" width="440" height="32"/><text class="tiny" x="-195" y="-445">CENTRAL ROUTING HUB / FULL SAFE</text>
+
+<!-- visible locked right route -->
+<rect class="glass" x="350" y="-1200" width="520" height="850" rx="18"/>
+<rect class="lock" x="360" y="-720" width="500" height="330" rx="14"/>
+<text x="430" y="-545">EVACUATION ASCENT</text><text x="450" y="-510">AUTHORIZED ACCESS ONLY</text>
+<text class="phase" x="500" y="-760">VISIBLE FROM HUB · FRONT LOCKED</text>
+
+<!-- routing matrix left -->
+<rect class="glass" x="-1080" y="-1240" width="620" height="670" rx="18"/>
+<rect class="matrix" x="-1020" y="-1180" width="500" height="540" rx="14"/>
+<text x="-900" y="-900">PRIORITY ROUTING MATRIX</text>
+<text class="phase" x="-1120" y="-1280">1 · LEFT CONTROL ARC</text>
+
+<!-- combined chamber / directive -->
+<rect class="glass" x="-780" y="-1780" width="780" height="500" rx="18"/>
+<rect class="safe" x="-320" y="-1690" width="360" height="28"/><text class="tiny" x="-295" y="-1715">DIRECTIVE DECK / FULL SAFE</text>
+<text class="phase" x="-720" y="-1820">2 · ROUTE + ANGLE SYNTHESIS</text>
+
+<!-- backside bridge -->
+<rect class="glass" x="-80" y="-1735" width="790" height="160" rx="12"/>
+<text class="phase" x="110" y="-1780">3 · BACKSIDE SERVICE BRIDGE</text>
+
+<!-- right ascent -->
+<rect class="safe" x="560" y="-1490" width="260" height="24"/>
+<rect class="safe" x="540" y="-1800" width="280" height="24"/>
+<rect class="safe" x="410" y="-2020" width="260" height="24"/>
+<rect class="safe" x="540" y="-2260" width="280" height="24"/>
+<rect class="safe" x="260" y="-2430" width="320" height="28"/><text class="tiny" x="285" y="-2455">EXIT → 5-6</text>
+<text class="phase" x="860" y="-1960" transform="rotate(90 860 -1960)">4 · RIGHT EVACUATION ASCENT</text>
+
+<!-- recovery -->
+<g id="recovery">
+<rect class="recover" x="-990" y="-1360" width="300" height="18"/><text class="tiny" x="-965" y="-1385">R1</text>
+<rect class="recover" x="-650" y="-1900" width="320" height="18"/><text class="tiny" x="-625" y="-1925">R2</text>
+<rect class="recover" x="100" y="-1900" width="300" height="18"/><text class="tiny" x="125" y="-1925">R3</text>
+<rect class="recover" x="330" y="-2130" width="260" height="18"/><text class="tiny" x="355" y="-2155">R4</text>
+</g>
+
+<!-- security -->
+<g id="security">
+<rect class="jamZone" x="-980" y="-1730" width="950" height="680"/>
+<rect class="glass" x="-1040" y="-1510" width="190" height="150" rx="9"/>
+<circle class="jammer" cx="-945" cy="-1435" r="24"/><text x="-905" y="-1430">JAMMER</text>
+<circle class="aegis" cx="-365" cy="-1460" r="28"/><text x="-320" y="-1455">AEGIS</text>
+<path class="shield" d="M-365,-1460 L-560,-1545 A215,215 0 0 1 -560,-1375 Z"/>
+</g>
+
+<!-- hardpoints -->
+<g>
+<circle class="hp" cx="-1020" cy="-900" r="13"/><circle class="hp" cx="-900" cy="-1150" r="13"/><circle class="hp" cx="-900" cy="-650" r="13"/><circle class="hp" cx="-760" cy="-1450" r="13"/><circle class="hp" cx="-650" cy="-1300" r="13"/><circle class="hp" cx="-620" cy="-500" r="13"/><circle class="hp" cx="-500" cy="-1600" r="13"/><circle class="hp" cx="-400" cy="-1500" r="13"/><circle class="hp" cx="-300" cy="-500" r="13"/><circle class="hp" cx="-150" cy="-1650" r="13"/><circle class="hp" cx="0" cy="-380" r="13"/><circle class="hp" cx="0" cy="-100" r="13"/><circle class="hp" cx="160" cy="-1650" r="13"/><circle class="hp" cx="400" cy="-2400" r="13"/><circle class="hp" cx="420" cy="-1550" r="13"/><circle class="hp" cx="500" cy="-1950" r="13"/><circle class="hp" cx="650" cy="-2200" r="13"/><circle class="hp" cx="650" cy="-1750" r="13"/><circle class="hp" cx="650" cy="-1450" r="13"/>
+</g>
+
+<!-- routes -->
+<g id="mainRoute">
+<path class="route" d="M0,-100 L0,-380 L-300,-500 L-620,-500 L-900,-650 L-1020,-900 L-900,-1150"/>
+<path class="route" d="M-900,-1150 L-650,-1300 L-400,-1500 L-150,-1650"/>
+<path class="route" d="M-150,-1650 L160,-1650 L420,-1550 L650,-1450 L650,-1750 L500,-1950 L650,-2200 L400,-2400"/>
+</g>
+<g id="altRoute">
+<path class="alt" d="M-900,-1150 L-760,-1450 L-500,-1600 L-150,-1650"/>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-1020" cy="-900" r="400"/><circle class="reach" cx="-900" cy="-1150" r="400"/><circle class="reach" cx="-900" cy="-650" r="400"/><circle class="reach" cx="-760" cy="-1450" r="400"/><circle class="reach" cx="-650" cy="-1300" r="400"/><circle class="reach" cx="-620" cy="-500" r="400"/><circle class="reach" cx="-500" cy="-1600" r="400"/><circle class="reach" cx="-400" cy="-1500" r="400"/><circle class="reach" cx="-300" cy="-500" r="400"/><circle class="reach" cx="-150" cy="-1650" r="400"/><circle class="reach" cx="0" cy="-380" r="400"/><circle class="reach" cx="0" cy="-100" r="400"/><circle class="reach" cx="160" cy="-1650" r="400"/><circle class="reach" cx="400" cy="-2400" r="400"/><circle class="reach" cx="420" cy="-1550" r="400"/><circle class="reach" cx="500" cy="-1950" r="400"/><circle class="reach" cx="650" cy="-2200" r="400"/><circle class="reach" cx="650" cy="-1750" r="400"/><circle class="reach" cx="650" cy="-1450" r="400"/>
+</g>
+</svg></main></div>
+<script>
+function tg(b,g){const B=document.getElementById(b),G=document.getElementById(g);B.onclick=()=>{G.classList.toggle('hidden');B.classList.toggle('on',!G.classList.contains('hidden'));}}
+tg('mainB','mainRoute');tg('altB','altRoute');tg('secB','security');tg('recB','recovery');tg('reachB','reach');
+</script></body></html>

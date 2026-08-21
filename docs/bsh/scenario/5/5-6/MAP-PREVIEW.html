@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-6 Incident Authorization Annex REV1.1 Corrected Map</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--cyan:#5de8ff;--route:#ffe16f;--alt:#78d6a8;--safe:#70cf9a;--recover:#d5b45e;--jam:#c56cff;--cut:#ff6e68;--aegis:#70a8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:#9fb0b6}
+.layout{display:grid;grid-template-columns:450px 1fr}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:880px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}.glass{fill:#76a9b522;stroke:#9ec7d2;stroke-width:3}.wall{fill:#45545d;stroke:#87989f;stroke-width:3}
+.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}.recover{fill:#5c512e;stroke:var(--recover);stroke-width:3}.hp{fill:var(--cyan);stroke:white;stroke-width:2.5}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}.alt{fill:none;stroke:var(--alt);stroke-width:5;stroke-dasharray:10 7}
+.jammer{fill:#a751cf;stroke:#f0d8ff;stroke-width:3}.cutter{fill:#d94d48;stroke:#ffd3d1;stroke-width:3}.aegis{fill:#507fd7;stroke:#d9e8ff;stroke-width:3}
+text{fill:#eef5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}.phase{font-size:14px;fill:#a4bac3}.tiny{font-size:10px;fill:#bdcdd2}
+</style></head><body>
+<header><h1>5-6 INCIDENT AUTHORIZATION ANNEX · REV1.1 CORRECTED MAP</h1>
+<div class="sub">SVG Y-DIRECTION FIX · ACTUAL RISE → DROP → LOWER TRENCH → RE-ASCENT</div></header>
+<div class="layout"><aside>
+<div class="card"><b>CORRECTION</b><br>REV1에서 `DROP` 라벨과 실제 SVG 좌표 방향이 반대였음. REV1.1에서 화면상 실제 하강으로 수정.</div>
+<div class="card"><b>AUTHORITY UNCHANGED</b><br>Jammer → Cutter → Safe Handoff → AEGIS, Authorization 03/03 그대로.</div>
+<div class="card"><b>ROPE</b><br>Max relation = <b>371.62px</b> &lt; 400px.</div>
+</aside><main>
+<svg viewBox="-850 -2260 2050 2260">
+<rect class="bounds" x="-820" y="-2230" width="1950" height="2230"/>
+
+<!-- Entry / rise -->
+<rect class="glass" x="500" y="-1050" width="420" height="950" rx="18"/>
+<text class="phase" x="540" y="-1085">1 · ENTRY RISE ↑</text>
+<rect class="safe" x="560" y="-130" width="320" height="28"/><text class="tiny" x="585" y="-155">ENTRY FROM 5-5</text>
+<rect class="safe" x="550" y="-1010" width="340" height="28"/><text class="tiny" x="575" y="-1035">P0 · JAM READ</text>
+
+<!-- Actual drop -->
+<rect class="wall" x="-260" y="-1090" width="300" height="720" rx="14"/>
+<text class="phase" x="-470" y="-710" transform="rotate(-90 -470 -710)">2 · ACTUAL CONTROL DROP ↓</text>
+
+<!-- Lower trench -->
+<rect class="glass" x="-250" y="-520" width="1150" height="250" rx="16"/>
+<text class="phase" x="160" y="-555">3 · LOWER CREDENTIAL TRENCH →</text>
+<rect class="safe" x="-230" y="-450" width="300" height="24"/><text class="tiny" x="-205" y="-475">TRENCH ENTRY</text>
+<rect class="safe" x="660" y="-450" width="310" height="24"/><text class="tiny" x="685" y="-475">TRENCH EXIT / SAFE</text>
+
+<!-- Re-ascent -->
+<rect class="wall" x="700" y="-1360" width="250" height="940" rx="14"/>
+<text class="phase" x="1005" y="-920" transform="rotate(90 1005 -920)">4 · VERIFICATION RE-ASCENT ↑</text>
+<rect class="safe" x="650" y="-1360" width="300" height="26"/><text class="tiny" x="675" y="-1385">RISER TOP / FULL SAFE</text>
+
+<!-- Upper signoff -->
+<rect class="glass" x="-600" y="-1770" width="1500" height="390" rx="18"/>
+<text class="phase" x="-340" y="-1810">5 · AEGIS / SIGN-OFF GALLERY</text>
+<rect class="safe" x="-120" y="-1740" width="300" height="26"/><text class="tiny" x="-95" y="-1765">AEGIS GATE SAFE</text>
+<rect class="safe" x="-650" y="-1870" width="350" height="28"/><text class="tiny" x="-625" y="-1895">AUTHORIZATION RECORD</text>
+<rect class="safe" x="-670" y="-2230" width="310" height="28"/><text class="tiny" x="-645" y="-2255">EXIT → 5-7</text>
+
+<!-- Security -->
+<circle class="jammer" cx="145" cy="-1110" r="24"/><text x="185" y="-1105">JAMMER</text>
+<circle class="cutter" cx="470" cy="-620" r="26"/><text x="510" y="-615">CUTTER</text>
+<circle class="aegis" cx="300" cy="-1570" r="28"/><text x="345" y="-1565">AEGIS</text>
+
+<!-- Route -->
+<g><circle class="hp" cx="-520" cy="-2200" r="13"/><circle class="hp" cx="-260" cy="-2080" r="13"/><circle class="hp" cx="-260" cy="-1840" r="13"/><circle class="hp" cx="-160" cy="-650" r="13"/><circle class="hp" cx="-120" cy="-420" r="13"/><circle class="hp" cx="-80" cy="-900" r="13"/><circle class="hp" cx="0" cy="-1700" r="13"/><circle class="hp" cx="160" cy="-1080" r="13"/><circle class="hp" cx="180" cy="-360" r="13"/><circle class="hp" cx="240" cy="-1580" r="13"/><circle class="hp" cx="430" cy="-1120" r="13"/><circle class="hp" cx="500" cy="-1230" r="13"/><circle class="hp" cx="500" cy="-360" r="13"/><circle class="hp" cx="520" cy="-1480" r="13"/><circle class="hp" cx="720" cy="-980" r="13"/><circle class="hp" cx="720" cy="-700" r="13"/><circle class="hp" cx="720" cy="-400" r="13"/><circle class="hp" cx="720" cy="-100" r="13"/><circle class="hp" cx="800" cy="-1320" r="13"/><circle class="hp" cx="800" cy="-1020" r="13"/><circle class="hp" cx="800" cy="-720" r="13"/><circle class="hp" cx="800" cy="-420" r="13"/></g>
+<path class="route" d="M720,-100 L720,-400 L720,-700 L720,-980 L430,-1120 L160,-1080 L-80,-900 L-160,-650 L-120,-420 L180,-360 L500,-360 L800,-420 L800,-720 L800,-1020 L800,-1320 L520,-1480 L240,-1580 L0,-1700 L-260,-1840 L-260,-2080 L-520,-2200"/>
+<path class="alt" d="M720,-980 L500,-1230 L160,-1080"/>
+</svg></main></div></body></html>

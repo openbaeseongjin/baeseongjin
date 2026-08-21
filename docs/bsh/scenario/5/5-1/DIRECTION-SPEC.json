@@ -1,0 +1,272 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 5,
+    "stage": 1,
+    "legacyStageAlias": "5-1",
+    "sourceAreaId": "sector-05-01",
+    "name": "CONTINUITY RECEPTION"
+  },
+  "baselineCommit": "4551798860193a16e53814aae5c3a42022b4e1cf",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "psychology": {
+    "start": {
+      "unease": 56,
+      "understanding": 46,
+      "control": 68
+    },
+    "exit": {
+      "unease": 68,
+      "understanding": 58,
+      "control": 76
+    }
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry-scale-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "Sector05 scale and Sealed-vs-Hardpoint language are experienced before Story exposition.",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-sector-attempt",
+      "dedupeToken": "5-1:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "entry-establish",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "action": "large-clean-control-complex-hum",
+          "optional": true
+        },
+        {
+          "type": "lighting",
+          "action": "clean-corporate-continuity-white",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s1-reception-incident-operations",
+      "status": "DESIGN LOCKED",
+      "purpose": "After the first Hardpoint read, identify the place as active incident operations.",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "gap-1-read"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-1:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "gap-1-read",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTINUITY CONTROL",
+            "detail": "INCIDENT OPERATIONS ACTIVE"
+          },
+          "timing": {
+            "durationSeconds": 1.6
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "audio",
+          "action": "neutral-system-confirmation",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s2-control-void-city-status",
+      "status": "DESIGN LOCKED",
+      "purpose": "Establish that the city is degraded while this facility remains operational.",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "control-void-read"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-1:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "control-void-read",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CITY SYSTEM STATUS",
+            "detail": "DEGRADED"
+          },
+          "timing": {
+            "durationSeconds": 1.5
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-inspection-network-online",
+      "status": "DESIGN LOCKED",
+      "purpose": "Connect previous lower isolation memory to the newly observed live control network without claiming causality.",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "inspection-choice"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-1:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "inspection-choice",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTROL NETWORK",
+            "detail": "ONLINE"
+          },
+          "timing": {
+            "durationSeconds": 1.4
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…아래쪽은 끊겼는데, 여긴 사고 때도 돌아가고 있었네."
+          },
+          "timing": {
+            "minDelaySeconds": 1.9
+          }
+        },
+        {
+          "type": "audio",
+          "action": "neutral-network-confirmation-no-stinger",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "beatId": "s4-safe-flow-read",
+      "status": "DESIGN LOCKED",
+      "purpose": "Let the Player compare Safe and Flow Hardpoint chains without verbal explanation.",
+      "trigger": {
+        "type": "position-zone",
+        "minLocalX": -1200,
+        "maxLocalX": -760,
+        "minLocalY": -1540,
+        "maxLocalY": -1400
+      },
+      "scope": "local-player",
+      "replayPolicy": "repeatable-gameplay-no-story-replay",
+      "dedupeToken": "5-1:s4",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "inspection-choice",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        },
+        {
+          "type": "object",
+          "target": "h4-safe-a+h4-flow-a",
+          "action": "normal-visible-hardpoint-affordance"
+        }
+      ]
+    },
+    {
+      "beatId": "s5-exit-preview",
+      "status": "DESIGN LOCKED",
+      "purpose": "Preview 5-2 without consuming the AEGIS lesson or later story.",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "final-deck-reached"
+      },
+      "scope": "local-player",
+      "replayPolicy": "once-per-run",
+      "dedupeToken": "5-1:s5",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": {
+        "zoneId": "final-core",
+        "forcedPan": false
+      },
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTROL ATRIUM",
+            "detail": "ACCESS AHEAD"
+          },
+          "timing": {
+            "durationSeconds": 1.2
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No world pause or control lock",
+    "Only S3 contains Player text",
+    "Exact Bark: …아래쪽은 끊겼는데, 여긴 사고 때도 돌아가고 있었네.",
+    "S3 fires only after CONTROL NETWORK / ONLINE is readable",
+    "No causal claim about lower feeder isolation",
+    "No Capacity/Priority/Authorization reveal",
+    "No enemy/threat track",
+    "400px Base Rope budget used for geometry review",
+    "Direction Runtime migration must remove duplicate legacy Story/Bark presentation"
+  ]
+}

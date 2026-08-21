@@ -1,0 +1,24 @@
+# 5-2 PACKAGE MANIFEST — REV1.0
+
+- Package: `ONE-ROPE-SECTOR-05-02-REV1.0-GITHUB-READY`
+- Checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`
+- Approved MAP SHA-256: `180450d70990496f7cde98acc39e309f73c4030c0c8e056d6ba040a7adfe42b8`
+- Approved STORY SHA-256: `55c8df11e4b302e07b092dca6de37221d02b1144cbaf56c6cd68963349eb7710`
+
+| Path | SHA-256 |
+|---|---|
+| `CLAUDECODE-IMPLEMENT-5-2-REV1.0.md` | `863682ab87075c08735ef9934ef2a3d523cb49060afffee9fc8a9a31a9b08c81` |
+| `PACKAGE-README.md` | `3db548c7774cf9ebec7cb59ce4ae75b6b17690ab91b7cd33380a3cb371fa2bc2` |
+| `SOURCE-LOCK.json` | `4e2d2f2bf7ed747c0f2a26f1ba1a4e077d9ec235cff99e1b7fb41ae130223bb4` |
+| `docs/bsh/scenario/5/5-2/AREA-SPEC-REV4-DESIGN.json` | `e3f50d1f4f6e4576d143f4ee51064c220fbf0df24cb5667c25a70eb3c1670b69` |
+| `docs/bsh/scenario/5/5-2/ASSET-REQUIREMENTS.md` | `e5061ec83b4d5df09dbc0bc36da2d35a9014cc81d43cf169772004b284af43d8` |
+| `docs/bsh/scenario/5/5-2/DIRECTION-SPEC.json` | `f3edba89c531df83f0a301c142d5a3d077b428ecd462f44737563af5f17457a4` |
+| `docs/bsh/scenario/5/5-2/MAP-PREVIEW.html` | `180450d70990496f7cde98acc39e309f73c4030c0c8e056d6ba040a7adfe42b8` |
+| `docs/bsh/scenario/5/5-2/MAP-SIMILARITY-AUDIT.md` | `112a0134a0ac1e7f92345ac2528989d6dd907d14f1f7a43c768b557744ef3089` |
+| `docs/bsh/scenario/5/5-2/PLANNING-APPROVAL.md` | `a897143641a4fec3a5029bcc3e621fb0344e2690412be62e3ab455e1cd71a25b` |
+| `docs/bsh/scenario/5/5-2/PRODUCTION-ALIGNMENT.md` | `4e15bca76ca042977041134d69c920c7879d39a9096ab74998e0726113f85553` |
+| `docs/bsh/scenario/5/5-2/README.md` | `0533fa2bcee41c723be5c3cca8c7b5ccc597e5fd7bb411608b2e809d1473e92f` |
+| `docs/bsh/scenario/5/5-2/REVISION-HISTORY.md` | `9aa0c6986b96a9243329648eceb9d9d9dcbc1777bef4bbad27c1d567a0479c37` |
+| `docs/bsh/scenario/5/5-2/RUNTIME-HANDOFF.md` | `0aa0d139d9cefcee8118bf023efd8452fea1d37f0b5ed1d426049372b5fef3ff` |
+| `docs/bsh/scenario/5/5-2/STORY-DIRECTION-PREVIEW.html` | `55c8df11e4b302e07b092dca6de37221d02b1144cbaf56c6cd68963349eb7710` |
+| `docs/bsh/scenario/5/5-2/VALIDATION.md` | `40c25333c7c6fd69bb310c5ab87f26cfb67d26735310b0675e2196b241ba4d87` |
