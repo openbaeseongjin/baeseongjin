@@ -442,6 +442,8 @@ export class GameSimulation {
                 id: enemy.id,
                 objectId: enemy.objectId,
                 position: enemy.position,
+                velocity: enemy.velocity,
+                collider: enemy.collider,
                 patrol: enemy.patrol,
                 behaviorState: enemy.behaviorState,
                 knockbackState: enemy.knockbackState,
@@ -478,6 +480,7 @@ export class GameSimulation {
                     : spawn;
                 staticStateByObjectId.set(state.objectId, definition);
             }
+            const collider = state.collider ?? definition.collider ?? null;
             return {
                 ...definition,
                 ...state,
@@ -485,7 +488,8 @@ export class GameSimulation {
                 areaId: definition.areaId ?? null,
                 objectId: state.objectId,
                 swarmGroupId: definition.swarmGroupId ?? definition.slotId,
-                radius: COMBAT_CONFIG.enemyRadius,
+                collider,
+                radius: definition.radius ?? (collider ? null : COMBAT_CONFIG.enemyRadius),
                 maxHealth: COMBAT_CONFIG.enemyHealth
             };
         });
@@ -1407,7 +1411,11 @@ export class GameSimulation {
             const state = enemy.knockbackSnapshot();
             if (!state) continue;
             const previousPosition = enemy.position.clone();
-            const movement = enemy.advanceImpactKnockback(dt, this.activeCollisionSurfaces);
+            const collisionActors = [
+                ...this.players,
+                ...this.enemies.filter(({ id, health }) => id !== enemy.id && health > 0)
+            ];
+            const movement = enemy.advanceImpactKnockback(dt, this.activeCollisionSurfaces, collisionActors);
             const collided = movement.collided;
             if (
                 !emitWallImpacts ||
@@ -2116,7 +2124,8 @@ export class GameSimulation {
                 patrol: definition.patrol,
                 swarmGroupId: definition.swarmGroupId ?? definition.slotId,
                 rules: definition.rules,
-                radius: COMBAT_CONFIG.enemyRadius,
+                collider: definition.collider ?? null,
+                radius: definition.radius ?? (definition.collider ? null : COMBAT_CONFIG.enemyRadius),
                 health: COMBAT_CONFIG.enemyHealth,
                 maxHealth: COMBAT_CONFIG.enemyHealth,
                 fireCooldown: COMBAT_CONFIG.enemyFireInterval

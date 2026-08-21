@@ -23,8 +23,12 @@ export const withEnemyHitPrediction = createSimulationCapabilityMixin({
         const target = state?.enemies?.find(({ id }) => id === this.targetId);
         const isOverlapping = Boolean(
             target &&
-            Math.hypot(this.position.x - target.position.x, this.position.y - target.position.y) <=
-                this.radius + target.radius
+            colliderSnapshotOverlapsCircle(
+                target.collider ?? { type: "circle", radius: target.radius },
+                target.position,
+                this.position,
+                this.radius
+            )
         );
         if (!this.observeClientCollision(isOverlapping) || !target || !this.predictionId) return null;
         this.beginClientCollision();

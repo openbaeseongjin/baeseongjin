@@ -14,6 +14,8 @@ export const withEnemyRenderSnapshot = createRenderSnapshotCapabilityMixin({
         return {
             id: this.id,
             position: snapshotVector(this.position),
+            velocity: snapshotVector(this.velocity),
+            collider: this.collider.snapshot(),
             level: this.level,
             areaId: this.areaId,
             objectId: this.objectId,
@@ -24,6 +26,7 @@ export const withEnemyRenderSnapshot = createRenderSnapshotCapabilityMixin({
             swarmGroupId: this.swarmGroupId,
             behaviorState: this.enemyBehaviorSnapshot(),
             impactDisplacementEnabled: this.impactDisplacementEnabled,
+            motionType: this.motionType,
             knockbackState: this.knockbackSnapshot(),
             lockedTargetId: this.lockedTargetId,
             attackState: this.attackState,

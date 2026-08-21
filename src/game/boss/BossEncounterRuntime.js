@@ -51,8 +51,6 @@ function validateDefinition(definition) {
         throw new Error("Boss maxHealth must equal phaseCount × phaseHealth");
     }
     assertPositive(definition.exposureSeconds, "Boss exposureSeconds");
-    assertPositive(definition.timerSeconds, "Boss timerSeconds");
-    assertPositive(definition.collapseSpeed, "Boss collapseSpeed");
     if (!Array.isArray(definition.breakerIds) || definition.breakerIds.length !== definition.phaseCount) {
         throw new Error("Boss breakerIds must match phaseCount");
     }
@@ -67,9 +65,6 @@ export class BossEncounterRuntime {
         this.attempt = 0;
         this.phaseIndex = 0;
         this.health = definition.maxHealth;
-        this.timerRemainingSeconds = definition.timerSeconds;
-        this.collapseActive = false;
-        this.collapseDistance = 0;
         this.participants = new Map();
         this.eventSequence = 0;
         this.events = [];
@@ -110,9 +105,6 @@ export class BossEncounterRuntime {
         this.attempt += 1;
         this.phaseIndex = 0;
         this.health = this.definition.maxHealth;
-        this.timerRemainingSeconds = this.definition.timerSeconds;
-        this.collapseActive = false;
-        this.collapseDistance = 0;
         this.shield = this.#createShield("closed", 0);
         for (const playerId of this.participants.keys()) this.participants.set(playerId, "active");
         this.#emit("boss-attempt-started", { attempt: this.attempt, phase: 1 });
@@ -197,18 +189,6 @@ export class BossEncounterRuntime {
             return result({ accepted: this.status === "active", changed: false });
         }
         let changed = false;
-        const timerBefore = this.timerRemainingSeconds;
-        this.timerRemainingSeconds = Math.max(0, this.timerRemainingSeconds - step);
-        if (this.timerRemainingSeconds !== timerBefore) changed = true;
-        if (timerBefore > 0 && this.timerRemainingSeconds === 0) {
-            this.collapseActive = true;
-            this.#emit("boss-collapse-started", { speed: this.definition.collapseSpeed });
-        }
-        const collapseSeconds = timerBefore === 0 ? step : Math.max(0, step - timerBefore);
-        if (this.collapseActive && collapseSeconds > 0) {
-            this.collapseDistance += collapseSeconds * this.definition.collapseSpeed;
-            changed = true;
-        }
         if (this.shield.state === "exposed") {
             this.shield.consume(step);
             changed = true;
@@ -263,9 +243,6 @@ export class BossEncounterRuntime {
             shieldState: this.shield.state,
             exposureRemainingSeconds: this.shield.remainingSeconds,
             currentBreakerId: this.#currentBreakerId(),
-            timerRemainingSeconds: this.timerRemainingSeconds,
-            collapseActive: this.collapseActive,
-            collapseDistance: this.collapseDistance,
             participantStates: Object.freeze(
                 [...this.participants.entries()].map(([playerId, status]) => result({ playerId, status }))
             ),
@@ -353,18 +330,6 @@ export class BossEncounterRuntime {
         this.attempt = snapshot.attempt;
         this.phaseIndex = snapshot.phase - 1;
         this.health = snapshot.health;
-        this.timerRemainingSeconds = assertNonNegative(
-            snapshot.timerRemainingSeconds,
-            "Boss encounter timerRemainingSeconds"
-        );
-        if (this.timerRemainingSeconds > this.definition.timerSeconds) {
-            throw new Error("Boss encounter timerRemainingSeconds exceeds the definition");
-        }
-        this.collapseActive = snapshot.collapseActive === true;
-        this.collapseDistance = assertNonNegative(snapshot.collapseDistance, "Boss encounter collapseDistance");
-        if (this.timerRemainingSeconds > 0 && (this.collapseActive || this.collapseDistance > 0)) {
-            throw new Error("Boss encounter collapse cannot precede timer expiry");
-        }
         this.participants = new Map(participants);
         this.eventSequence = snapshot.eventSequence;
         this.events = [];

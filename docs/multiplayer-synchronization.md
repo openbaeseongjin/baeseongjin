@@ -169,14 +169,14 @@
 | 상태                                   | 최종 소유자                                       | 클라이언트 처리                                                                                                               |
 | -------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | 자기 이동·속도·로프                    | 입력한 클라이언트                                 | 로컬 시뮬레이션 후 최신 상태 전송                                                                                             |
-| 플레이어 간 바디 충돌                  | 각 소유 클라이언트, 서버 공유                     | 겹침 절반씩 즉시 해소 후 최신 상태 전송                                                                                       |
+| 동적 actor 바디 충돌                   | Player는 각 소유 클라이언트, Enemy는 서버         | inverse-mass 겹침 보정과 질량·상대 속도 impulse를 자기 권위 body에 즉시 적용 후 최신 상태 전송                                |
 | 플레이어 위치·속도                     | 소유 클라이언트, 서버 공유                        | 즉시 적용 후 최신 상태 전송                                                                                                   |
 | 로프 부착점·길이·절단                  | 소유·피해 클라이언트, 서버 검증                   | 즉시 적용 후 claim 전송                                                                                                       |
 | 적 상태·HP 최종값                      | 서버                                              | 권위 스냅샷 적용                                                                                                              |
 | 자기 피격·로프 절단                    | 피해 클라이언트, 서버 검증·공유                   | 즉시 로컬 적용 후 검증 claim                                                                                                  |
 | 예측 가능한 투사체·낙하물              | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                         |
 | 자기 사망·active Stage checkpoint 부활 | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                                  |
-| 월드 시드·지형·Sector entry            | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v11 검증                                                              |
+| 월드 시드·지형·Sector entry            | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v12 검증                                                              |
 | Sector objective                       | 서버                                              | 독립 trigger/source/prerequisite 결과와 `foundationRewards`를 공유하며 마지막 objective는 content boundary 유지               |
 | 플레이어별 generic Augment 선택·효과   | 행동 클라이언트 선행, 서버 검증·공유              | 개인 chooser와 효과를 즉시 적용하고 호환 `foundation-selection`·generic `augment-impact` 뒤 개인 상태와 공용 objective를 수렴 |
 | 카메라·HUD·파티클                      | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                         |
@@ -208,7 +208,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
 - `owner-motion` protocol v5는 `angle`, `angularVelocity`, 부착 중인 `rope.attachmentOffset`, launcher, owner Action runtime과 개인 `respawnAnchorId`를 위치·속도·anchor와 함께 보낸다. 서버는 인증·프로토콜 형식·유한값·최신 tick을 확인하고, checkpoint 변경은 방문 가능한 Stage의 실제 trigger 겹침일 때만 수용한다.
-- `WorldSnapshot` protocol v11의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`, `launcher`(발사 shot/cooldown), `foundationAugment`, non-null `actionState`, `augmentRuntimeState`, `respawnAnchorId`를 포함한다. authored enemy는 `worldRevision + objectId`로 정적 정의를 복원하고 20Hz에는 동적 상태만 보낸다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
+- `WorldSnapshot` protocol v12의 각 player는 `angle`, `angularVelocity`, `rope.attachmentOffset`, `launcher`(발사 shot/cooldown), `foundationAugment`, non-null `actionState`, `augmentRuntimeState`, `respawnAnchorId`를 포함한다. authored enemy는 `worldRevision + objectId`로 정적 정의를 복원하고 20Hz에는 위치·선속도·collider snapshot·행동·전투 같은 동적 상태만 보낸다. collider snapshot은 circle radius 또는 중심 기준 convex polygon local vertices이며 owner prediction과 서버가 같은 shape를 복원한다. 원격 플레이어 위치와 같은 `ownerMotionTick` 시간축에서 각도는 ±π 경계를 가로지르는 최단 방향으로 보간하고, 스냅샷이 잠시 없을 때는 승인된 각속도로 제한 외삽한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
 - 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
 - `player-impact` protocol v9의 `recovery-required` 전체 상태에는 angle·angularVelocity·attachmentOffset·로프 발사 shot/cooldown·개인 `respawnAnchorId`와 generic Augment 선택·순간 상태가 포함된다. 부활 결과 지문에도 회전·부착 손·Augment·checkpoint 상태를 포함하지만, 정상 비치명 impact마다 전체 상태를 별도 전송하지 않는다.
@@ -344,7 +344,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 `MultiplayerGameServer`의 snapshot 전송 창은 위 수렴 규칙 앞단의 흐름 제어다. 몹 HP처럼 서버가 소유하는 최신 지속 상태는 ACK 창이 열릴 때 가장 최근 값으로 건너뛰고, 탄환 생성·적중·해결 사건은 합쳐진 봉투에서도 빠지지 않는다. 따라서 느린 수신자가 과거 위치와 HP snapshot을 계속 재생해 겉보기 되감김을 만들지 않으며, 기존 `RemoteWorldStateBuffer`와 `OwnerPredictionRuntime`의 권한별 수렴 원점은 바꾸지 않는다.
 
-`RemoteWorldStateBuffer`는 최대 8개 공유 스냅샷을 보관하고 추정 서버 현재보다 100ms 과거의 목표 tick을 계산한다. 같은 serverTick의 새 sequence는 시간 표본을 중복 추가하지 않고 해당 tick의 최신 표본으로 교체하며 새 사건은 별도 대기열에 추가한다. 추정 서버 시계는 첫 표본에 고정하지 않고 serverTick이 전진한 스냅샷마다 최신 오차의 12.5%를 흡수하되 한 번의 지연 스파이크가 시간축을 크게 꺾지 않도록 보정량을 50ms로 제한한다. 동료와 적 위치는 목표 tick 앞뒤의 두 표본 사이에서 보간하고, 패킷 공백으로 목표가 최신 표본을 넘을 때만 최대 120ms 외삽한다. 원격 플레이어 HP·`lifeState`·로프 부착과 중립 Sector 진행·런 상태는 최신 검증 공유값을 사용한다. 자기 소유 객체는 `OwnerPredictionRuntime`이 담당하며 이 버퍼의 일반 위치·HP·생명·로프 값을 적용하지 않는다. 새로 생성되거나 제거된 엔티티는 최신 목록을 따르고 스냅샷 사건은 별도 대기열에서 정확히 한 번만 drain한다.
+`RemoteWorldStateBuffer`는 최대 8개 공유 스냅샷을 보관하고 추정 서버 현재보다 100ms 과거의 목표 tick을 계산한다. 같은 serverTick의 새 sequence는 시간 표본을 중복 추가하지 않고 해당 tick의 최신 표본으로 교체하며 새 사건은 별도 대기열에 추가한다. 추정 서버 시계는 첫 표본에 고정하지 않고 serverTick이 전진한 스냅샷마다 최신 오차의 12.5%를 흡수하되 한 번의 지연 스파이크가 시간축을 크게 꺾지 않도록 보정량을 50ms로 제한한다. 동료와 적 위치는 목표 tick 앞뒤의 두 표본 사이에서 보간하고, 패킷 공백으로 목표가 최신 표본을 넘을 때만 최대 120ms 외삽한다. Enemy snapshot은 actor collision 직후 선속도를 함께 보내 외삽과 Player 소유 충돌 응답이 같은 중립 운동 표본을 사용한다. 원격 플레이어 HP·`lifeState`·로프 부착과 중립 Sector 진행·런 상태는 최신 검증 공유값을 사용한다. 자기 소유 객체는 `OwnerPredictionRuntime`이 담당하며 이 버퍼의 일반 위치·HP·생명·로프 값을 적용하지 않는다. 새로 생성되거나 제거된 엔티티는 최신 목록을 따르고 스냅샷 사건은 별도 대기열에서 정확히 한 번만 drain한다.
 
 연결 완료 뒤 받은 권위 메시지를 역직렬화하거나 적용하지 못하면 그 세션은 더 이상 수렴할 수 없는 상태다. `RemoteGameAuthority`는 마지막 정상 스냅샷을 계속 렌더링하지 않고 구체적인 처리 오류를 `closeReason`에 보존한 뒤 소켓을 프로토콜 오류로 닫는다. 앱은 기존 연결 종료 경계로 메뉴에 돌아가며 자동 오프라인 진행이나 묵시적 재접속을 시작하지 않는다.
 

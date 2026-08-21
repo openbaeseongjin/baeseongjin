@@ -2292,7 +2292,7 @@ Final Boss detailed spec에서 정식 Entry로 확정되면:
 general timer stop
 collapse stop
 remaining time discard
-boss timer start
+Boss Timer deferred; 초기 Final Security는 시간 제한 없이 시작
 ```
 
 ### Boss Failure

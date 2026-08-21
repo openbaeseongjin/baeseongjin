@@ -348,29 +348,13 @@ Specialization not required.
 
 ## 3-9. Boss Timer
 
-Prototype:
+**DEFERRED — 초기 Boss01 구현 입력 아님.**
 
-```text
-210 sec
-```
-
-At 0:
-
-```text
-Arena collapse begins
-80 px/s prototype
-```
-
-No instant game over.
-
-One player caught:
-- spectates survivor
-
-All players caught:
-- Boss retry only
-
-Survivor wins:
-- all active session players reunite at post-boss safe transition.
+- 초기 Boss01/Post-Sector Boss Slot은 시간 제한과 시간 만료 Arena collapse 없이 구현한다.
+- 과거 `210 sec / 80 px/s prototype`은 후속 Boss timer 작업에서 다시 검토할 보류 값이며 Runtime·snapshot·HUD·탈락 판정에 연결하지 않는다.
+- 현재 재시도는 일반 전투 피해로 모든 참가자가 탈락했을 때 Boss 시도만 초기화한다.
+- Survivor 관전·시간 만료 탈락·붕괴 전선은 후속 Timer 계약과 함께 구현한다.
+- Boss 처치 뒤에는 모든 세션 Player를 post-boss safe transition에서 합류시킨다.
 
 ---
 
@@ -692,22 +676,11 @@ No alternate always-grappleable bypass adjacent to controlled hardpoints.
 
 ## 7-7. Final Boss Timer
 
-Prototype:
+**DEFERRED — 초기 Final Security 구현 입력 아님.**
 
-```text
-240 sec
-```
-
-At 0:
-
-```text
-Pad arena collapse
-80 px/s prototype
-```
-
-All-out:
-- retry Final Security only
-- not Sector06 general run
+- 과거 `240 sec / Pad arena collapse 80 px/s`는 후속 Boss Timer 작업 전까지 Runtime에 연결하지 않는다.
+- 초기 Final Security는 시간 제한 없이 구현하며 일반 전투 피해 전멸 시 Final Security만 재시작한다.
+- 시간 만료 탈락·관전·붕괴 cue는 후속 Timer 범위다.
 
 ---
 

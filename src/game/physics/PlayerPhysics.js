@@ -35,6 +35,8 @@ export class PlayerPhysics extends withSurfacePhysics(class {}) {
     reset(position = { x: 120, y: 500 }) {
         this.position.set(position.x, position.y);
         this.velocity.set(0, 0);
+        this.actorCollisionVelocity.set(0, 0);
+        this.surfaceControlVelocity.set(0, 0);
         this.angularMotion.reset();
         this.isGrounded = false;
         this.lastSurfaceCollisionNormals = Object.freeze([]);

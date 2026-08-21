@@ -1,14 +1,15 @@
 import { SimulationDrivenObject } from "../objects/SimulationDrivenObject.js";
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
 import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
-import { CircleCollider } from "../physics/colliders/CircleCollider.js";
+import { colliderSnapshotBoundingRadius, colliderSnapshotsEqual } from "../physics/colliders/Collider.js";
+import { createCollider } from "../physics/colliders/ColliderFactory.js";
 import { withSurfacePhysics } from "../physics/SurfacePhysicsMixin.js";
 import { selectNearestPlayer } from "./CombatTargeting.js";
 import { ENEMY_BEHAVIOR_CAPABILITY } from "./EnemyBehaviors.js";
 import { advanceEnemyPatrol, createEnemyPatrolState, restoreEnemyPatrolState } from "./EnemyPatrol.js";
 import { BallisticProjectileObject } from "./ProjectileObject.js";
 import { Vector2 } from "../../game-kit/index.js";
-import { enemyImpactDisplacementEnabled } from "./EnemyMobility.js";
+import { enemyCollisionMotionType, enemyImpactDisplacementEnabled } from "./EnemyMobility.js";
 import { TimedStateController } from "../../core/state/TimedStateController.js";
 import { ENEMY_ATTACK_STATES, ENEMY_ATTACK_TRANSITIONS, normalizeEnemyState } from "./EnemyStateCatalog.js";
 import { withEnemyRenderSnapshot } from "./EnemyRenderSnapshot.js";
@@ -261,6 +262,7 @@ export class EnemyObject extends withSurfacePhysics(
         swarmGroupId = null,
         rules = [],
         radius,
+        collider = null,
         health,
         maxHealth,
         fireCooldown,
@@ -270,13 +272,16 @@ export class EnemyObject extends withSurfacePhysics(
         presentationAimDirection = null,
         lockedTargetId = null,
         impactDisplacementEnabled = null,
-        knockbackState = null
+        knockbackState = null,
+        velocity = null
     }) {
         super({ id });
+        const resolvedCollider = createCollider(collider, { fallbackRadius: radius });
         this.initializeSurfacePhysics({
             position,
-            velocity: new Vector2(),
-            collider: new CircleCollider({ radius })
+            velocity: velocity ? new Vector2(velocity.x, velocity.y) : new Vector2(),
+            collider: resolvedCollider,
+            motionType: enemyCollisionMotionType(enemyType)
         });
         this.level = level;
         this.areaId = areaId;
@@ -288,7 +293,10 @@ export class EnemyObject extends withSurfacePhysics(
         this.swarmGroupId = swarmGroupId;
         this.lockedTargetId = lockedTargetId;
         this.rules = Object.freeze([...rules]);
-        this.radius = radius;
+        this.radius =
+            Number.isFinite(radius) && radius > 0
+                ? radius
+                : colliderSnapshotBoundingRadius(resolvedCollider.snapshot());
         this.health = health;
         this.maxHealth = maxHealth;
         Object.defineProperty(this, "attackStateController", {
@@ -351,7 +359,13 @@ export class EnemyObject extends withSurfacePhysics(
             actorId: this.id,
             actors: collisionActors
         });
-        this.velocity.set(0, 0);
+        this.carryActorCollisionVelocity(
+            {
+                x: this.velocity.x - this.surfaceControlVelocity.x,
+                y: this.velocity.y - this.surfaceControlVelocity.y
+            },
+            dt
+        );
         return resolution;
     }
 
@@ -361,6 +375,10 @@ export class EnemyObject extends withSurfacePhysics(
             state?.id !== this.id ||
             state.objectId !== this.objectId ||
             state.enemyType !== this.enemyType ||
+            !colliderSnapshotsEqual(
+                this.collider.snapshot(),
+                state.collider ?? { type: "circle", radius: state.radius ?? this.radius }
+            ) ||
             !restoreEnemyPatrolState(this.patrol, state.patrol ?? null) ||
             (this.behavior === null) !== (behaviorState === null)
         ) {
@@ -371,7 +389,12 @@ export class EnemyObject extends withSurfacePhysics(
             assertFinite(state.position?.x, "enemy.position.x"),
             assertFinite(state.position?.y, "enemy.position.y")
         );
-        this.velocity.set(0, 0);
+        this.velocity.set(
+            assertFinite(state.velocity?.x ?? 0, "enemy.velocity.x"),
+            assertFinite(state.velocity?.y ?? 0, "enemy.velocity.y")
+        );
+        this.actorCollisionVelocity.set(0, 0);
+        this.surfaceControlVelocity.set(0, 0);
         this.surfacePhysicsStepPending = false;
         this.health = assertFinite(state.health, "enemy.health", { minimum: 0 });
         this.maxHealth = assertFinite(state.maxHealth, "enemy.maxHealth", { minimum: 0, exclusiveMinimum: true });
@@ -422,7 +445,7 @@ export class EnemyObject extends withSurfacePhysics(
         return true;
     }
 
-    advanceImpactKnockback(dt, surfaces = []) {
+    advanceImpactKnockback(dt, surfaces = [], collisionActors = []) {
         if (!this.knockbackState) return Object.freeze({ moved: false, collided: false });
         const stepDt = assertFinite(dt, "dt", { minimum: 0 });
         if (stepDt <= 0) return Object.freeze({ moved: false, collided: false });
@@ -431,7 +454,7 @@ export class EnemyObject extends withSurfacePhysics(
         const speed = state.distance / state.durationSeconds;
         this.beginSurfacePhysicsStep();
         this.queueSurfaceDisplacement(state.direction.clone().scale(speed * appliedSeconds), appliedSeconds);
-        const resolution = this.advanceEnemyPhysicsStep(appliedSeconds, surfaces);
+        const resolution = this.advanceEnemyPhysicsStep(appliedSeconds, surfaces, collisionActors);
         state.remainingSeconds = Math.max(0, state.remainingSeconds - appliedSeconds);
         if (state.remainingSeconds <= 0) this.knockbackState = null;
         return Object.freeze({ moved: true, collided: resolution.collisionNormals.length > 0 });

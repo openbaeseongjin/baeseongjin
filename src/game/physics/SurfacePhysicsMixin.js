@@ -1,5 +1,5 @@
 import { Vector2 } from "../../game-kit/index.js";
-import { assertCollider } from "./colliders/Collider.js";
+import { assertCollider, colliderSnapshotBoundingRadius } from "./colliders/Collider.js";
 
 function requireFiniteVector(vector, label) {
     if (!vector || !Number.isFinite(vector.x) || !Number.isFinite(vector.y)) {
@@ -10,30 +10,72 @@ function requireFiniteVector(vector, label) {
 
 export function withSurfacePhysics(Base) {
     return class extends Base {
-        initializeSurfacePhysics({ position, velocity = new Vector2(), collider }) {
+        initializeSurfacePhysics({
+            position,
+            velocity = new Vector2(),
+            collider,
+            mass = null,
+            motionType = "dynamic"
+        }) {
             this.position = requireFiniteVector(position, "surface physics position");
             this.velocity = requireFiniteVector(velocity, "surface physics velocity");
             this.collider = assertCollider(collider);
+            const colliderRadius = colliderSnapshotBoundingRadius(this.collider.snapshot());
+            this.mass =
+                Number.isFinite(mass) && mass > 0
+                    ? mass
+                    : Math.max(0.25, (Number.isFinite(colliderRadius) ? colliderRadius / 15 : 1) ** 2);
+            this.motionType = motionType === "static" ? "static" : "dynamic";
             Object.defineProperty(this, "surfacePhysicsStepPending", {
                 value: false,
                 enumerable: false,
                 writable: true
             });
+            Object.defineProperty(this, "actorCollisionVelocity", {
+                value: new Vector2(),
+                enumerable: false,
+                writable: false
+            });
+            Object.defineProperty(this, "surfaceControlVelocity", {
+                value: new Vector2(),
+                enumerable: false,
+                writable: false
+            });
         }
 
         beginSurfacePhysicsStep() {
             if (this.surfacePhysicsStepPending) return false;
-            this.velocity.set(0, 0);
+            this.velocity.set(this.actorCollisionVelocity.x, this.actorCollisionVelocity.y);
+            this.actorCollisionVelocity.set(0, 0);
+            this.surfaceControlVelocity.set(0, 0);
             this.surfacePhysicsStepPending = true;
             return true;
+        }
+
+        carryActorCollisionVelocity(velocityDelta, dt, damping = 6) {
+            requireFiniteVector(velocityDelta, "actor collision velocity delta");
+            if (!Number.isFinite(dt) || dt < 0) throw new Error("actor collision dt must be non-negative");
+            if (!Number.isFinite(damping) || damping < 0)
+                throw new Error("actor collision damping must be non-negative");
+            if (this.motionType === "static") {
+                this.actorCollisionVelocity.set(0, 0);
+                return false;
+            }
+            const retention = Math.exp(-damping * dt);
+            this.actorCollisionVelocity.set(velocityDelta.x * retention, velocityDelta.y * retention);
+            return velocityDelta.x !== 0 || velocityDelta.y !== 0;
         }
 
         queueSurfaceDisplacement(displacement, dt) {
             requireFiniteVector(displacement, "surface physics displacement");
             if (!Number.isFinite(dt) || dt <= 0) return false;
             this.beginSurfacePhysicsStep();
-            this.velocity.x += displacement.x / dt;
-            this.velocity.y += displacement.y / dt;
+            const velocityX = displacement.x / dt;
+            const velocityY = displacement.y / dt;
+            this.surfaceControlVelocity.x += velocityX;
+            this.surfaceControlVelocity.y += velocityY;
+            this.velocity.x += velocityX;
+            this.velocity.y += velocityY;
             return displacement.x !== 0 || displacement.y !== 0;
         }
 
@@ -45,20 +87,28 @@ export function withSurfacePhysics(Base) {
         resolveSurfaceActors({ actorId, actors = [], isGrounded = false }) {
             const collidedActorIds = [];
             let grounded = isGrounded;
+            const velocityDelta = new Vector2();
             for (const other of actors) {
                 const result = this.collider.resolveActor({
                     actorId,
                     position: this.position,
                     velocity: this.velocity,
+                    mass: this.mass,
+                    motionType: this.motionType,
                     other,
                     isGrounded: grounded
                 });
                 grounded = result.isGrounded;
-                if (result.collided) collidedActorIds.push(other.id);
+                if (result.collided) {
+                    collidedActorIds.push(other.id);
+                    velocityDelta.x += result.velocityDelta.x;
+                    velocityDelta.y += result.velocityDelta.y;
+                }
             }
             return Object.freeze({
                 isGrounded: grounded,
-                collidedActorIds: Object.freeze(collidedActorIds)
+                collidedActorIds: Object.freeze(collidedActorIds),
+                velocityDelta: Object.freeze({ x: velocityDelta.x, y: velocityDelta.y })
             });
         }
 
@@ -75,7 +125,11 @@ export function withSurfacePhysics(Base) {
             });
             const actorResolution =
                 actorId === null
-                    ? Object.freeze({ isGrounded, collidedActorIds: Object.freeze([]) })
+                    ? Object.freeze({
+                          isGrounded,
+                          collidedActorIds: Object.freeze([]),
+                          velocityDelta: Object.freeze({ x: 0, y: 0 })
+                      })
                     : this.resolveSurfaceActors({
                           actorId,
                           actors,
@@ -100,7 +154,8 @@ export function withSurfacePhysics(Base) {
                     ...surfaceResolution.collisionNormals,
                     ...(finalSurfaceResolution === surfaceResolution ? [] : finalSurfaceResolution.collisionNormals)
                 ]),
-                collidedActorIds: actorResolution.collidedActorIds
+                collidedActorIds: actorResolution.collidedActorIds,
+                actorVelocityDelta: actorResolution.velocityDelta
             });
         }
     };

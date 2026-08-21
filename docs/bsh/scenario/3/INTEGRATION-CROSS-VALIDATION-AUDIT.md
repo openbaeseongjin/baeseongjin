@@ -1095,7 +1095,7 @@ nextAreaId: sector-04-01
 planner-defined boss entry
 → general timer / collapse ends
 → remaining time discarded
-→ boss timer starts
+→ 초기 Boss는 시간 제한 없이 시작(Boss Timer 후속)
 → boss defeat
 → next sector
 ```

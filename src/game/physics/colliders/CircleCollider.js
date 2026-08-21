@@ -1,5 +1,10 @@
 import { closestPointOnPolygon, pointInPolygon } from "../../world/PolygonGeometry.js";
-import { assertColliderSnapshot, colliderSnapshotOverlapsCircle } from "./Collider.js";
+import {
+    assertColliderSnapshot,
+    colliderSnapshotOverlapsCircle,
+    colliderSnapshotsOverlap,
+    resolveActorCollider
+} from "./Collider.js";
 
 const SWEEP_EPSILON = 1e-7;
 const SWEEP_SAFETY_MARGIN = 1e-4;
@@ -103,11 +108,6 @@ function firstOneWayHitDistance(start, direction, distance, radius, surface) {
     return Math.max(0, Math.min(distance, candidate));
 }
 
-function collisionNormal(actorId, otherId, dx, dy, distance) {
-    if (distance > 0.0001) return { x: dx / distance, y: dy / distance };
-    return actorId.localeCompare(otherId) <= 0 ? { x: -1, y: 0 } : { x: 1, y: 0 };
-}
-
 export class CircleCollider {
     constructor({ radius }) {
         if (!Number.isFinite(radius) || radius <= 0) throw new Error("CircleCollider requires a positive radius");
@@ -123,6 +123,14 @@ export class CircleCollider {
             throw new Error("overlapsCircle requires a positive circleRadius");
         }
         return Math.hypot(center.x - circlePosition.x, center.y - circlePosition.y) <= this.radius + circleRadius;
+    }
+
+    overlapsCollider(center, otherCenter, otherCollider) {
+        const otherSnapshot =
+            typeof otherCollider?.snapshot === "function"
+                ? otherCollider.snapshot()
+                : assertColliderSnapshot(otherCollider);
+        return colliderSnapshotsOverlap(this.snapshot(), center, otherSnapshot, otherCenter);
     }
 
     outsidePointToward(center, target, clearance = 0) {
@@ -284,29 +292,17 @@ export class CircleCollider {
         return Object.freeze({ isGrounded, collisionNormals: Object.freeze(collisionNormals) });
     }
 
-    resolveActor({ actorId, position, velocity, other, isGrounded }) {
-        if (!other?.position || other.id === actorId) return Object.freeze({ collided: false, isGrounded });
-        const otherCollider = assertColliderSnapshot(
-            typeof other.collider?.snapshot === "function" ? other.collider.snapshot() : other.collider
-        );
-        if (otherCollider.type !== "circle") {
-            throw new Error(`CircleCollider cannot resolve actor collider '${otherCollider.type}'`);
-        }
-        const dx = position.x - other.position.x;
-        const dy = position.y - other.position.y;
-        const distance = Math.hypot(dx, dy);
-        const minimumDistance = this.radius + otherCollider.radius;
-        if (distance >= minimumDistance) return Object.freeze({ collided: false, isGrounded });
-        const normal = collisionNormal(actorId, other.id, dx, dy, distance);
-        const penetration = (minimumDistance - distance) * (other.lifeState === "active" ? 0.5 : 1);
-        position.x += normal.x * penetration;
-        position.y += normal.y * penetration;
-        const inwardSpeed = velocity.x * normal.x + velocity.y * normal.y;
-        if (inwardSpeed < 0) {
-            velocity.x -= normal.x * inwardSpeed;
-            velocity.y -= normal.y * inwardSpeed;
-        }
-        return Object.freeze({ collided: true, isGrounded: isGrounded || normal.y < -0.55 });
+    resolveActor({ actorId, position, velocity, mass, motionType, other, isGrounded }) {
+        return resolveActorCollider({
+            selfCollider: this,
+            actorId,
+            position,
+            velocity,
+            mass,
+            motionType,
+            other,
+            isGrounded
+        });
     }
 
     static snapshotOverlapsCircle(snapshot, center, circlePosition, circleRadius) {

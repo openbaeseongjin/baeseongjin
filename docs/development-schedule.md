@@ -12,7 +12,7 @@
 - 그래픽·오디오 담당자는 메인 개발자가 공개한 목록과 mock 배치를 이어받아 정식 리소스를 병행 제작한다. 정식 리소스는 메인 개발의 선행 조건이 아니며 검증된 결과만 선택 통합한다.
 - 과거 Specialization은 generic 증강 v1로 대체됐다. Boss·Timer·NPC 범위·Ending 기획은 P1~P5 답변으로 확정됐고 NPC는 예선 핵심 범위에서 제외한다.
 - 각 섹터 일반 구간은 하나의 60초 Timer를 공유한다. 확정될 progress trigger가 +10초를 보충하고 0초부터 Containment Purge Field가 240px/s로 상승한다. 정확한 trigger·origin·개인 사망 복귀는 HOLD다.
-- 기획자 지정 보스 진입 때 일반 타이머·붕괴와 잔여 시간을 끝내고 별도 보스 타이머를 시작한다. 보스 타이머 0초부터 Arena가 붕괴하며 전원 탈락은 보스 시도만 재시작한다.
+- 기획자 지정 보스 진입 때 일반 타이머·Purge와 잔여 시간을 끝낸다. 초기 Boss01은 시간 제한 없이 진행하고 일반 전투 피해로 전원 탈락하면 보스 시도만 재시작한다. 별도 Boss Timer와 시간 만료 Arena collapse는 후속 구현이다.
 - 메인 개발자는 `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s` 계약의 HOLD 세 mapping을 먼저 확정한 뒤 구현하고 공동 플레이로 최종 수치를 조정한다. Boss01·Final Security는 확정 계약을 사용하고 Sector02~05 Boss만 상세 기획을 기다린다.
 - 8월 22~23일을 마지막 전체 스퍼트, 8월 24일을 기능·콘텐츠 동결일로 둔다.
 
@@ -61,7 +61,7 @@
 4. 엔딩 기획은 확정됐다. 6-8 Denial 뒤 Final Security·개별 Boarding·Escape 순서로 구현한다.
 5. 정식 그래픽·오디오 리소스는 필수 선행 조건이 아니다. mock 빌드를 기준으로 개발과 검증을 계속하고 준비된 결과만 교체한다.
 6. 일반 타이머·Gate 보충·상승 붕괴·최소 관전 흐름은 확정됐으므로 메인 개발자가 mock 수치로 구현한다. 정확한 수치는 구현 선행 조건이 아니며 공동 플레이 뒤 조정한다.
-7. 섹터별 보스 1개의 위치·전투 시나리오는 해당 보스 구현의 필수 선행이다. 일반·보스 타이머의 전환과 보스 만료 흐름은 확정됐지만 개발자가 보스 위치나 전투 내용을 추정하지 않는다.
+7. 섹터별 보스 1개의 위치·전투 시나리오는 해당 보스 구현의 필수 선행이다. 초기 보스 구현은 진입 시 일반 Timer/Purge 종료만 지키고 Boss Timer·시간 만료 흐름은 후속 결정 전 연결하지 않으며, 개발자가 보스 위치나 전투 내용을 추정하지 않는다.
 
 ## 확정 상태와 남은 조정
 
@@ -69,7 +69,7 @@
 | --- | --- | --- | --- |
 | 섹터 일반 구간 타이머 | 섹터 전체 공유, progress reward `+10초`, cap `60초`, 0초부터 Purge `240px/s`, 다음 섹터에서 새 Timer | reward trigger·Field origin·개인 사망 복귀, 최종 cue | HOLD 세 mapping이 Runtime 구현을 차단 |
 | 섹터 보스 | 섹터당 1개, `1-8`에는 Boss 없음; Boss01은 1-8 Checkpoint 뒤 `CONTAINMENT GANTRY C-01`; Final Security는 `PAD SECURITY WARDEN P-03` | Sector02~05 Boss 상세, 최종 수치 | Boss01·Final Security는 구현 가능, 중간 섹터 Boss는 상세 계약 대기 |
-| 보스 전투 타이머 | 일반 시간 폐기 뒤 별도 시작, 0초 Arena 붕괴, 전원 탈락 시 보스 시도 재시작 | 최종 시간·붕괴 속도, 보스 시나리오, 최종 cue | 보스 전투 구현·다음 섹터 전환 |
+| 보스 전투 타이머 | **후속 범위**; 초기 Boss01에는 Timer·시간 만료 Arena collapse 없음 | 최종 시간·붕괴 속도, 관전·탈락·cue | 초기 보스 전투·다음 섹터 전환 뒤 별도 구현 |
 
 일반 타이머는 Prototype baseline으로 구현한 뒤 Q1 누적 플레이테스트에서 팀과 기획자가 함께 조정한다. Boss01과 Final Security는 확정 계약으로 구현할 수 있고 Sector02~05 Boss는 상세 계약 전 추정하지 않는다. 상세 흐름은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)와 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다.
 

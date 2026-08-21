@@ -62,8 +62,10 @@ export function updatePlayerProjectiles({
             );
             continue;
         }
-        const hitDistance = projectile.position.distanceTo(target.position);
-        if (resolveHits && hitDistance <= projectile.radius + target.radius) {
+        const targetHit = target.collider
+            ? target.collider.overlapsCircle(target.position, projectile.position, projectile.radius)
+            : projectile.position.distanceTo(target.position) <= projectile.radius + target.radius;
+        if (resolveHits && targetHit) {
             target.health -= projectile.damage;
             hits.push(
                 Object.freeze({
@@ -97,12 +99,14 @@ export function updateEnemyPresentationAim({ enemies, targets, range, surfaces =
 }
 
 export function updateEnemyWeapons({ enemies, targets, projectiles, registry, config, surfaces = [], dt }) {
+    const liveEnemies = enemies.filter(({ health }) => health > 0);
+    const collisionActors = Object.freeze([...targets, ...liveEnemies]);
     return Object.freeze(
-        enemies
+        liveEnemies
             .map((enemy) => {
                 return advanceSimulationObject(enemy, "enemy-weapon", {
                     targets,
-                    collisionActors: targets,
+                    collisionActors,
                     projectiles,
                     registry,
                     config,

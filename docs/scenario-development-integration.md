@@ -3,7 +3,7 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 787cf64d56bf4a178e9ece3db4dac391b543f2f32c913abe363dfff21bf010d5
+scenario-source-sha256: 01db2a178390cc196de9e2c50ce6f96485ca2338dff8d2984603b4f87cb175d3
 authored-area-sha256: 48ea494e945fd5847dd556613d93ec1e215623abd0c3fcfaf8f484eb08251ee9
 authored-sector-sha256: 3129e29b1ea699cc91bf98432c1c955c31f9c81278586c1b0e7b801e0c96fe2b
 stage-count: 48
@@ -187,11 +187,13 @@ reviewed-upstream: c2026697dd7471a143d3831125f7daf1b672ed7b
 
 106. Issue #758은 사용자가 제공한 `1672×941` Sector 02 Worker District PNG(SHA-256 `bdcd39c2ccec7de6964b9241754a23980e8508b27ee432678354bfb732eb78e5)로 공용 문서 레퍼런스 `2/images/sector-02-background-reference.png`를 교체했다. 새 이미지는 lived-in·patched Worker housing, vertical courtyard, low-density warm windows와 far·mid·near blue-haze 환경 방향을 제공하지만, 이미지 자체의 제목·팔레트·레이어 안내 텍스트는 제작용 편집 정보다. 원본 생성 도구·사용권은 `UNVERIFIED`이므로 상태는 `TEMPORARY MOOD REFERENCE`로 유지하며, 통이미지 Runtime 배경·UI·collision·Gameplay terrain으로 사용하지 않는다. Runtime 전환은 출처·사용권 확인 뒤 별도 environment PNG atlas·manifest·validator 작업으로만 수행한다. 검증 ledger: base `c2026697dd7471a143d3831125f7daf1b672ed7b`, 내용 candidate tree `628766b2e771ebf4df4ff390a6c0bd9438876a19`, binary diff fingerprint `d77b85e6212f2078f0c911379c3274928a4465fd`, Node `v24.14.0`. PNG signature·`1672×941` 치수·SHA-256을 확인했고, 대상 파일을 직접 시각 검토했다. `npm run check`, `npm run format:check`, `npm run check:scenario-integration`과 staged `git diff --check`을 PASS했다. 저장소 기본 자동 테스트 suite는 사용자 결정으로 제공되지 않으며, 이 metadata 문서만 후속 추가했으므로 같은 candidate의 suite를 반복하지 않았다.
 
+107. 2026-08-21 사용자의 최신 Boss 범위 결정에 따라 초기 Boss01·Final Security에서 Boss Timer와 시간 만료 Arena collapse를 제외했다. 과거 Boss01 `210초/80px/s`, Final Security `240초/80px/s`는 후속 Timer 작업 전까지 구현 입력이 아니며 `BossEncounterRuntime` definition·advance·snapshot에서도 timer/collapse 필드를 제거했다. 초기 Boss01 남은 범위는 1-8 Checkpoint 뒤 별도 Post-Sector Boss Slot의 physical Arena·Breaker/Core·Emitter/Wind·일반 전투 피해/전멸 재시도·승리 후 `2-1` 전환이다. 이 결정은 최신 Sector 04~06 authoring package, 1-1~1-8 geometry·Story·Enemy·Wind·Access topology와 일반 Sector Timer HOLD 세 mapping을 바꾸지 않는다.
+
 ## 열린 기획·구현 게이트
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.
 2. [완료 #633] 과거 2-3 Foundation별 Specialization skeleton을 두 번째 generic offer로 대체하고 3-5에 세 번째 explicit source를 연결했다. 고정 Specialization tier를 복구하지 않는다.
-3. [진행] Boss01 `CONTAINMENT GANTRY C-01`의 별도 Has-A runtime과 top-level snapshot을 구현했다. 남은 범위는 1-8 Checkpoint 뒤 physical Arena·Breaker/Core/Emitter/Wind mock, 자동 진입, 피해/사망 연결과 승리 후 `2-1` 전이다. 1-8 내부에는 Boss를 넣지 않는다.
+3. [진행] Boss01 `CONTAINMENT GANTRY C-01`의 별도 Has-A runtime과 top-level snapshot을 구현했다. 남은 범위는 1-8 Checkpoint 뒤 physical Arena·Breaker/Core/Emitter/Wind mock, 자동 진입, 일반 전투 피해/전멸 재시도 연결과 승리 후 `2-1` 전환이다. 1-8 내부에는 Boss를 넣지 않으며 Boss Timer·시간 만료 Arena collapse는 후속 범위다.
 4. 일반 Timer Prototype `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s`는 HOLD 세 physical mapping이 확정된 뒤 연결한다. 과거 `960/+45/80px/s` baseline은 복구하지 않는다.
 5. Sector 02~05 Boss의 identity·arena·phase·보상과 각 `n-8 → Boss → 다음 Sector` 상세 계약은 후속 기획으로 남는다.
 6. Sector 04를 메인 월드에 연결하고 Sector 05·06 Runtime을 저작한다. 상세 시나리오 48/48 완료를 Runtime 완료로 해석하지 않는다.
