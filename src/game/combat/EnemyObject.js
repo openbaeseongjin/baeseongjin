@@ -158,19 +158,28 @@ function consumeStateTime(enemy, remainingDt) {
 const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
     id: "enemy-weapon",
     order: 10,
-    apply({ targets, collisionActors = targets, projectiles, registry, config, surfaces = [], dt }) {
+    apply({
+        targets,
+        collisionActors = targets,
+        collisionBroadPhase = null,
+        projectiles,
+        registry,
+        config,
+        surfaces = [],
+        dt
+    }) {
         this.beginSurfacePhysicsStep();
         const visibleTargets = visibleTargetsForEnemy(this, targets, surfaces);
         if (this.rules.includes("no-projectile-attack")) {
             resetAttack(this);
-            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors);
+            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors, collisionBroadPhase);
             return null;
         }
         const target = selectLockedTarget(this, visibleTargets, config.enemyAttackRange, this.attackState === "idle");
         if (!target) {
             resetAttack(this);
             advanceEnemyPatrol(this, dt);
-            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors);
+            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors, collisionBroadPhase);
             return null;
         }
         this.lockedTargetId = target.id;
@@ -240,7 +249,7 @@ const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
             }
             break;
         }
-        this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors);
+        this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors, collisionBroadPhase);
         return spawnedProjectile;
     }
 });
@@ -354,10 +363,12 @@ export class EnemyObject extends withSurfacePhysics(
         return this.behavior?.snapshot() ?? null;
     }
 
-    advanceEnemyPhysicsStep(dt, surfaces, collisionActors = []) {
+    advanceEnemyPhysicsStep(dt, surfaces, collisionActors = [], collisionBroadPhase = null) {
         const resolution = this.advanceSurfacePhysics(dt, surfaces, {
             actorId: this.id,
-            actors: collisionActors
+            actorRef: this,
+            actors: collisionActors,
+            broadPhase: collisionBroadPhase
         });
         this.carryActorCollisionVelocity(
             {
@@ -445,7 +456,7 @@ export class EnemyObject extends withSurfacePhysics(
         return true;
     }
 
-    advanceImpactKnockback(dt, surfaces = [], collisionActors = []) {
+    advanceImpactKnockback(dt, surfaces = [], collisionActors = [], collisionBroadPhase = null) {
         if (!this.knockbackState) return Object.freeze({ moved: false, collided: false });
         const stepDt = assertFinite(dt, "dt", { minimum: 0 });
         if (stepDt <= 0) return Object.freeze({ moved: false, collided: false });
@@ -454,7 +465,7 @@ export class EnemyObject extends withSurfacePhysics(
         const speed = state.distance / state.durationSeconds;
         this.beginSurfacePhysicsStep();
         this.queueSurfaceDisplacement(state.direction.clone().scale(speed * appliedSeconds), appliedSeconds);
-        const resolution = this.advanceEnemyPhysicsStep(appliedSeconds, surfaces, collisionActors);
+        const resolution = this.advanceEnemyPhysicsStep(appliedSeconds, surfaces, collisionActors, collisionBroadPhase);
         state.remainingSeconds = Math.max(0, state.remainingSeconds - appliedSeconds);
         if (state.remainingSeconds <= 0) this.knockbackState = null;
         return Object.freeze({ moved: true, collided: resolution.collisionNormals.length > 0 });

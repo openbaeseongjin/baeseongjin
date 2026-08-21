@@ -187,7 +187,7 @@ export class AugmentCombatRuntime {
         return events;
     }
 
-    advance({ player, foundation, command, dt, enemies, surfaces, tick }) {
+    advance({ player, foundation, command, dt, enemies, surfaces, collisionBroadPhase = null, tick }) {
         this.syncLoadout(foundation, player.maxHealth);
         const impactEvents = [];
         const presentationEvents = [];
@@ -227,9 +227,28 @@ export class AugmentCombatRuntime {
         });
 
         const pressed = command.action && !this.wasActionDown;
-        if (pressed) this.#beginAction({ player, enemies, surfaces, tick, impactEvents, presentationEvents });
+        if (pressed) {
+            this.#beginAction({
+                player,
+                enemies,
+                surfaces,
+                collisionBroadPhase,
+                tick,
+                impactEvents,
+                presentationEvents
+            });
+        }
         this.wasActionDown = command.action;
-        this.#advanceActionProjectiles({ player, enemies, surfaces, dt, tick, impactEvents, presentationEvents });
+        this.#advanceActionProjectiles({
+            player,
+            enemies,
+            surfaces,
+            collisionBroadPhase,
+            dt,
+            tick,
+            impactEvents,
+            presentationEvents
+        });
         return Object.freeze({
             impactEvents: Object.freeze(impactEvents),
             presentationEvents: Object.freeze(presentationEvents)
@@ -369,7 +388,7 @@ export class AugmentCombatRuntime {
         return id;
     }
 
-    #beginAction({ player, enemies, surfaces, tick, impactEvents, presentationEvents }) {
+    #beginAction({ player, enemies, surfaces, collisionBroadPhase, tick, impactEvents, presentationEvents }) {
         const direction = directionBetween(player.physics.position, player.ropeObject.aimWorld, {
             x: Math.sign(player.physics.velocity.x) || 1,
             y: 0
@@ -414,13 +433,25 @@ export class AugmentCombatRuntime {
             }
         } else if (activation.baseActionId === "direction-dash") {
             const start = { x: player.physics.position.x, y: player.physics.position.y };
+            const intendedEnd = {
+                x: start.x + direction.x * activation.distance,
+                y: start.y + direction.y * activation.distance
+            };
+            const collisionSurfaces = collisionBroadPhase
+                ? collisionBroadPhase.querySurfaces({
+                      collider: player.physics.collider,
+                      start,
+                      end: intendedEnd
+                  })
+                : surfaces;
             const destination = player.physics.collider.farthestSafePositionAlong({
                 start,
                 direction,
                 distance: activation.distance,
-                surfaces
+                surfaces: collisionSurfaces
             });
             player.physics.position.set(destination.position.x, destination.position.y);
+            collisionBroadPhase?.updateActor(player);
             if (activation.trailEffect) {
                 this.actionState.setExplosiveTrailPath(activation.activationId, start, destination.position);
             }
@@ -572,7 +603,16 @@ export class AugmentCombatRuntime {
         }
     }
 
-    #advanceActionProjectiles({ player, enemies, surfaces, dt, tick, impactEvents, presentationEvents }) {
+    #advanceActionProjectiles({
+        player,
+        enemies,
+        surfaces,
+        collisionBroadPhase,
+        dt,
+        tick,
+        impactEvents,
+        presentationEvents
+    }) {
         const survivors = [];
         for (const projectile of this.actionProjectiles) {
             const start = { ...projectile.position };
@@ -583,7 +623,14 @@ export class AugmentCombatRuntime {
             };
             const delta = { x: end.x - start.x, y: end.y - start.y };
             const lengthSquared = delta.x * delta.x + delta.y * delta.y;
-            const wallRatio = firstSurfaceHitRatio(start, end, surfaces);
+            const collisionSurfaces = collisionBroadPhase
+                ? collisionBroadPhase.querySurfaces({
+                      collider: { type: "circle", radius: projectile.radius },
+                      start,
+                      end
+                  })
+                : surfaces;
+            const wallRatio = firstSurfaceHitRatio(start, end, collisionSurfaces);
             const contacts = enemies
                 .filter(
                     (enemy) =>

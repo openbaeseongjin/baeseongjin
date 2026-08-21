@@ -112,15 +112,41 @@ export function withSurfacePhysics(Base) {
             });
         }
 
-        advanceSurfacePhysics(dt, surfaces, { actorId = null, actors = [], isGrounded = false } = {}) {
+        advanceSurfacePhysics(
+            dt,
+            surfaces,
+            {
+                actorId = null,
+                actorRef = null,
+                actors = [],
+                actorKinds = null,
+                broadPhase = null,
+                isGrounded = false
+            } = {}
+        ) {
             if (!Number.isFinite(dt) || dt < 0) throw new Error("surface physics dt must be finite and non-negative");
             const previousPosition = this.position.clone();
             const incomingVelocity = this.velocity.clone();
-            if (dt > 0) this.position.add(this.velocity.clone().scale(dt));
+            const destination = this.position.clone();
+            if (dt > 0) destination.add(this.velocity.clone().scale(dt));
+            const candidateSurfaces = broadPhase
+                ? broadPhase.querySurfaces({ collider: this.collider, start: previousPosition, end: destination })
+                : surfaces;
+            const candidateActors =
+                broadPhase && actorId !== null
+                    ? broadPhase.queryActors({
+                          actorId,
+                          collider: this.collider,
+                          start: previousPosition,
+                          end: destination,
+                          kinds: actorKinds
+                      })
+                    : actors;
+            this.position.set(destination.x, destination.y);
             const surfaceResolution = this.collider.resolveSurfaces({
                 position: this.position,
                 velocity: this.velocity,
-                surfaces,
+                surfaces: candidateSurfaces,
                 previousPosition
             });
             const actorResolution =
@@ -132,7 +158,7 @@ export function withSurfacePhysics(Base) {
                       })
                     : this.resolveSurfaceActors({
                           actorId,
-                          actors,
+                          actors: candidateActors,
                           isGrounded: isGrounded || surfaceResolution.isGrounded
                       });
             const finalSurfaceResolution =
@@ -141,10 +167,11 @@ export function withSurfacePhysics(Base) {
                     : this.collider.resolveSurfaces({
                           position: this.position,
                           velocity: this.velocity,
-                          surfaces,
+                          surfaces: candidateSurfaces,
                           previousPosition
                       });
             this.surfacePhysicsStepPending = false;
+            if (broadPhase && actorRef) broadPhase.updateActor(actorRef);
             return Object.freeze({
                 previousPosition,
                 incomingVelocity,

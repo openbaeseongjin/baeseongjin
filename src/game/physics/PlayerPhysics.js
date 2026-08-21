@@ -3,6 +3,8 @@ import { AngularMotion } from "./AngularMotion.js";
 import { CircleCollider } from "./colliders/CircleCollider.js";
 import { withSurfacePhysics } from "./SurfacePhysicsMixin.js";
 
+const ENEMY_ACTOR_KINDS = Object.freeze(["enemy"]);
+
 export class PlayerPhysics extends withSurfacePhysics(class {}) {
     constructor(config, { collider = new CircleCollider({ radius: config.radius }) } = {}) {
         super();
@@ -96,7 +98,10 @@ export class PlayerPhysics extends withSurfacePhysics(class {}) {
         this.integrateAngularMotion(dt);
         const surfaceResolution = this.advanceSurfacePhysics(dt, surfaces, {
             actorId: collision.actorId ?? null,
+            actorRef: collision.actorRef ?? null,
             actors: collision.actors ?? [],
+            actorKinds: ENEMY_ACTOR_KINDS,
+            broadPhase: collision.broadPhase ?? null,
             isGrounded: this.isGrounded
         });
         const impactVelocity = surfaceResolution.incomingVelocity;
