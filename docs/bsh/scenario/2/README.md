@@ -654,24 +654,27 @@ Sector 마지막에 Player가 가져야 할 질문은 **"왜 이 구역 사람�
 
 ### 적용 범위
 
-이 이미지는 `2-1`부터 `2-8`까지 이어지는 Sector 02 Worker District 전체의 공용 배경 아트 레퍼런스다. 노동자 주거 구역이 수직으로 겹겹이 쌓인 인상, 색과 조명, Community Notice·Shelter Access·Evacuation Walkway·Transfer Platform 같은 반복 표지판의 정보 밀도, 공간의 깊이를 정하는 기준으로 사용한다.
+이 이미지는 사용자가 제공한 `2-1`부터 `2-8`까지 이어지는 Sector 02 Worker District 전체의 공용 배경 아트 레퍼런스다. 마모되고 덧댄 주거 모듈, 수직 Courtyard, sparse warm window light, blue-haze depth, far·mid·near의 겹침과 사람이 떠난 뒤 남은 생활 흔적을 정하는 기준으로 사용한다.
 
-이미지 속 다리·발판·표지판 배치를 그대로 레벨 지형으로 복제하지 않는다. 실제 이동 경로, 충돌, Anchor, Patrol Drone, Recovery 배치는 각 Stage README의 Blockout 규격을 우선한다.
+이미지 속 다리·발판·표지판 배치를 그대로 레벨 지형으로 복제하지 않는다. 실제 이동 경로, 충돌, Anchor, Patrol Drone, Recovery 배치는 각 Stage README의 Blockout 규격을 우선한다. 이미지 왼쪽의 제목·팔레트·레이어 설명과 `NO UI / NO TEXT IN GAME VIEW` 표기는 제작용 안내이며, 게임 화면의 UI·표지판 문구·Gameplay terrain으로 가져오지 않는다.
 
 ### 핵심 시각 방향
 
-- Dark Navy·Charcoal을 바탕으로 반복되는 Housing Module, 다리, 배관, 체인이 겹친 노동자 주거 구조물을 만든다.
-- 중앙에 크고 밝은 Vertical Void(폭포/역광)를 두어 Rope 이동 궤적을 위한 여백과 수직 깊이를 동시에 확보한다.
-- Community Notice, Shelter Capacity, Evacuation Walkway, Upper Transit, Priority Access 같은 표지판·배너는 Sector 02 Story Beat(2-1 Community Notice → 2-5/2-7 Evacuation·Shelter 상태 → 2-8 Priority Access)를 한 이미지 안에 압축해서 보여주는 참고 자료다. 개별 Stage에서 정확히 같은 문구·순서로 재현할 필요는 없다.
-- Cyan은 Rope·Anchor 언어로 보호하고, 배경 표지판·배너의 정보색(White/Red/Warm)이 Cyan과 경쟁하지 않게 배치한다.
-- 창문 조명 같은 작은 온기(Warm Yellow)를 낮은 밀도로 남겨 "사람이 살았던 공간"이라는 인상을 유지한다.
+- Dark Navy·Charcoal을 바탕으로 반복되는 Housing Module, 다리, 배관, 케이블과 계단이 겹친 노동자 주거 구조물을 만든다.
+- 중앙 Vertical Courtyard는 저채도 blue haze로 깊이를 만들며, 강한 spotlight 없이 Rope 이동과 다음 행동을 읽을 여백을 남긴다.
+- far는 desaturated distant housing mass, mid는 apartment facade·balcony·stairs·pipes, near는 structural frame·pipe·cable·dark wall로 분리한다. 이 레이어 구분은 분위기 참고일 뿐 Stage geometry나 collision 권위가 아니다.
+- Cyan은 Rope·Anchor 언어로 보호하고, 배경 케이블·빨랫줄·표지판의 색이 Cyan과 경쟁하거나 Grapple target처럼 보이지 않게 한다.
+- 창문 조명 같은 작은 온기(Warm Yellow)를 낮은 밀도로 남겨 "사람이 살았던 공간"이라는 인상을 유지한다. 사람과 적은 이 공용 배경 레퍼런스에 포함하지 않는다.
 
 ### 자산 상태
 
-- 제공 이미지 크기: `1536 × 1024 px`
+- 제공 이미지 크기: `1672 × 941 px`
 - 저장 위치: `docs/bsh/scenario/2/images/sector-02-background-reference.png`
-- 현재 용도: 기획·아트 방향을 맞추기 위한 문서용 레퍼런스
-- 런타임 적용: 원본 출처, 사용권, 최종 제작 규격을 확인한 뒤 별도 환경 자산으로 전환한다.
+- SHA-256: `bdcd39c2ccec7de6964b9241754a23980e8508b27ee432678354bfb732eb78e5`
+- 출처: 사용자가 Codex 대화에 제공한 PNG. 원본 생성 도구·사용권은 `UNVERIFIED`다.
+- 현재 상태: `TEMPORARY MOOD REFERENCE`
+- 현재 용도: 기획·아트 방향을 맞추기 위한 문서용 레퍼런스. 이미지 자체를 통이미지 배경, UI, collision 또는 Gameplay terrain으로 사용하지 않는다.
+- 런타임 적용: 원본 출처·사용권을 확인한 뒤 far·mid·near PNG atlas와 `sprite-manifest.json`으로 정규화하고 `npm run validate:environment-assets`를 통과한 별도 환경 자산으로 전환한다.
 
 ---
 
