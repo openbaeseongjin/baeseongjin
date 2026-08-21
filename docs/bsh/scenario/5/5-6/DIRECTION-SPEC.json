@@ -1,0 +1,141 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+  "stage": {
+    "sector": 5,
+    "stage": 6,
+    "legacyStageAlias": "5-6",
+    "sourceAreaId": "sector-05-06",
+    "name": "INCIDENT AUTHORIZATION ANNEX"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "INCIDENT AUTHORIZATION ANNEX",
+            "detail": "RESPONSE CONTROL / ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "jammer",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "jammer-read"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "cutter",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "credential-trench"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "aegis",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "aegis-signoff-gate"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "authorization",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "routing-authorization"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROUTING AUTHORIZATION · 03 / 03",
+            "detail": "INCIDENT RESPONSE / POST-CASCADE · LOWER ASCENT ROUTING / SUSPENSION AUTHORIZED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…고장이 아니라, 멈추라고 승인한 거였네."
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "exit",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "exit-panel-engaged"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "EVACUATION CONSEQUENCE ARCHIVE",
+            "detail": "POST-INCIDENT RECORDS / AHEAD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "Coordinate correction must visually show real descent into trench and real re-ascent",
+    "No dialogue during security pressure",
+    "No 5-7 outcome reveal"
+  ]
+}

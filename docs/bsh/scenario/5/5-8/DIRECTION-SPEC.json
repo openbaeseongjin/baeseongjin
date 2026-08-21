@@ -1,0 +1,209 @@
+{
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+  "stage": {
+    "sector": 5,
+    "stage": 8,
+    "legacyStageAlias": "5-8",
+    "sourceAreaId": "sector-05-08",
+    "name": "CONTINUITY COMMAND SPINE"
+  },
+  "languagePolicy": {
+    "playerDialogue": "ko",
+    "directionNotes": "ko-first",
+    "diegeticCorporateSystemText": "en-allowed",
+    "implementationIdentifiers": "en-allowed"
+  },
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTINUITY COMMAND SPINE",
+            "detail": "AUTHORITY RECORDS / AVAILABLE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-aegis",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "lower-left-bus-aegis"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-jammer",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "cross-link-1"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-cutter",
+      "trigger": {
+        "type": "position-zone",
+        "zoneId": "right-bus-cutter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-cross2",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "cross-link-2"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTINUITY BUS CROSS-CONNECT",
+            "detail": "CONTROL RELAY / SYNCHRONIZED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s5-artillery",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "upper-left-bus-artillery"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s6-authority",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "authority-record-reached"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "POST-CASCADE CONTINUITY DIRECTIVE",
+            "detail": "AUTHORITY / INCIDENT CONTINUITY CONTROL · BASIS / CRITICAL CAPACITY DEFICIT"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s7-full-chain",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "authority-record-read"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CONTINUITY PRIORITY",
+            "detail": "UPPER CORE CONTROL / PRESERVE · UPPER EVACUATION CAPACITY / PRESERVE · LOWER ASCENT / SUSPEND · LOWER-SECTOR EVACUATION / SUSPENDED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "language": "ko",
+            "text": "…무엇을 계속 돌릴지 정했고, 그 선택 때문에 아래 대피가 멈춘 거네."
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s8-escape-goal",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "escape-record-read"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "ROOFTOP PAD 03",
+            "detail": "MAINTENANCE SHUTTLE / STANDBY · ROOFTOP SERVICE ACCESS / ROUTE AVAILABLE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "All Player spoken dialogue is Korean.",
+    "No special-threat overlap.",
+    "No dialogue during high-input security bands.",
+    "Authority/WHY only after all security ends.",
+    "No direct sector-06-01 wiring."
+  ]
+}

@@ -1,0 +1,432 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED · REV4.0 · NOT IMPLEMENTED",
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "stage": {
+    "sector": 5,
+    "stage": 5,
+    "legacyStageAlias": "5-5",
+    "sourceAreaId": "sector-05-05",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "PRIORITY ROUTING HALL",
+    "subtitle": "VISIBLE LOCKED ASCENT / LEFT CONTROL BYPASS / PRIORITY DIRECTIVE 02 OF 03",
+    "supersedes": "REV3.8 remote proof-unlock interpretation"
+  },
+  "bounds": {
+    "width": 2350,
+    "height": 2470
+  },
+  "entry": {
+    "id": "entry",
+    "x": 0,
+    "y": -100,
+    "fromStageAlias": "5-4"
+  },
+  "surfaces": [
+    {
+      "id": "entry-deck",
+      "preset": "safe-deck",
+      "x": -180,
+      "y": -120,
+      "width": 360,
+      "height": 28
+    },
+    {
+      "id": "hub-deck",
+      "preset": "safe-deck",
+      "x": -220,
+      "y": -420,
+      "width": 440,
+      "height": 32
+    },
+    {
+      "id": "authorized-ascent-front-lock",
+      "preset": "sealed-corporate-surface-v1",
+      "x": 360,
+      "y": -720,
+      "width": 500,
+      "height": 330,
+      "grappleable": false,
+      "role": "VISIBLE FRONT-LOCKED AUTHORIZED ACCESS; NOT REMOTELY UNLOCKED BY DIRECTIVE"
+    },
+    {
+      "id": "priority-routing-matrix",
+      "preset": "sealed-corporate-surface-v1",
+      "x": -1020,
+      "y": -1180,
+      "width": 500,
+      "height": 540,
+      "grappleable": false
+    },
+    {
+      "id": "directive-deck",
+      "preset": "safe-deck",
+      "x": -320,
+      "y": -1690,
+      "width": 360,
+      "height": 28
+    },
+    {
+      "id": "backside-service-bridge",
+      "preset": "service-bridge",
+      "x": -80,
+      "y": -1735,
+      "width": 790,
+      "height": 160
+    },
+    {
+      "id": "ascent-shelf-0",
+      "preset": "safe-deck",
+      "x": 560,
+      "y": -1490,
+      "width": 260,
+      "height": 24
+    },
+    {
+      "id": "ascent-shelf-1",
+      "preset": "safe-deck",
+      "x": 540,
+      "y": -1800,
+      "width": 280,
+      "height": 24
+    },
+    {
+      "id": "ascent-shelf-2",
+      "preset": "safe-deck",
+      "x": 410,
+      "y": -2020,
+      "width": 260,
+      "height": 24
+    },
+    {
+      "id": "ascent-shelf-3",
+      "preset": "safe-deck",
+      "x": 540,
+      "y": -2260,
+      "width": 280,
+      "height": 24
+    },
+    {
+      "id": "exit-deck",
+      "preset": "safe-deck",
+      "x": 260,
+      "y": -2430,
+      "width": 320,
+      "height": 28
+    }
+  ],
+  "grappleTargets": [
+    {
+      "id": "entry",
+      "x": 0,
+      "y": -100
+    },
+    {
+      "id": "hub",
+      "x": 0,
+      "y": -380
+    },
+    {
+      "id": "c1",
+      "x": -300,
+      "y": -500
+    },
+    {
+      "id": "c2",
+      "x": -620,
+      "y": -500
+    },
+    {
+      "id": "c3",
+      "x": -900,
+      "y": -650
+    },
+    {
+      "id": "c4",
+      "x": -1020,
+      "y": -900
+    },
+    {
+      "id": "p1",
+      "x": -900,
+      "y": -1150
+    },
+    {
+      "id": "upper-1",
+      "x": -650,
+      "y": -1300
+    },
+    {
+      "id": "upper-2",
+      "x": -400,
+      "y": -1500
+    },
+    {
+      "id": "lower-1",
+      "x": -760,
+      "y": -1450
+    },
+    {
+      "id": "lower-2",
+      "x": -500,
+      "y": -1600
+    },
+    {
+      "id": "directive",
+      "x": -150,
+      "y": -1650
+    },
+    {
+      "id": "bridge-1",
+      "x": 160,
+      "y": -1650
+    },
+    {
+      "id": "bridge-2",
+      "x": 420,
+      "y": -1550
+    },
+    {
+      "id": "ascent-entry",
+      "x": 650,
+      "y": -1450
+    },
+    {
+      "id": "ascent-1",
+      "x": 650,
+      "y": -1750
+    },
+    {
+      "id": "ascent-2",
+      "x": 500,
+      "y": -1950
+    },
+    {
+      "id": "ascent-3",
+      "x": 650,
+      "y": -2200
+    },
+    {
+      "id": "exit",
+      "x": 400,
+      "y": -2400
+    }
+  ],
+  "enemies": [
+    {
+      "id": "sector-05-05:jammer-a",
+      "enemyType": "hardpoint-jammer-v1",
+      "status": "NEW_SYSTEM_NOT_IMPLEMENTED",
+      "role": "NEXT-ROUTE DENIAL",
+      "position": {
+        "x": -945,
+        "y": -1435
+      },
+      "activation": {
+        "x": -980,
+        "y": -1730,
+        "width": 950,
+        "height": 680
+      },
+      "maxSimultaneousTargets": 1,
+      "eligibleTargetIds": [
+        "upper-1",
+        "lower-1"
+      ],
+      "rules": [
+        "never-jam-attached-hardpoint",
+        "preserve-one-base-clear-flank",
+        "no-damage",
+        "no-force-release",
+        "no-rope-cut",
+        "already-launched-hook-resolves-in-v1"
+      ]
+    },
+    {
+      "id": "sector-05-05:aegis-a",
+      "enemyType": "shield-drone-t1",
+      "role": "DIRECT-ANGLE DENIAL",
+      "position": {
+        "x": -365,
+        "y": -1460
+      },
+      "activation": {
+        "x": -820,
+        "y": -1760,
+        "width": 900,
+        "height": 620
+      },
+      "rules": [
+        "kill-optional",
+        "no-kill-gate",
+        "reuse-current-shield-behavior",
+        "side-or-rear-angle-or-bypass"
+      ]
+    }
+  ],
+  "objectives": [
+    {
+      "id": "priority-directive",
+      "type": "interact",
+      "preset": "corporate-proof-terminal-v1",
+      "location": "directive-deck",
+      "notes": [
+        "Mandatory story proof on the physically mandatory control route.",
+        "Does NOT remotely unlock authorized-ascent-front-lock."
+      ]
+    },
+    {
+      "id": "final-deck-reached",
+      "type": "reach",
+      "preset": "reach-deck",
+      "requiredObjectiveIds": [
+        "priority-directive"
+      ]
+    },
+    {
+      "id": "exit-panel-engaged",
+      "type": "interact",
+      "preset": "exit-panel",
+      "requiredObjectiveIds": [
+        "final-deck-reached"
+      ]
+    }
+  ],
+  "route": {
+    "entryToHub": [
+      "entry",
+      "hub"
+    ],
+    "controlApproach": [
+      "hub",
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "p1"
+    ],
+    "combinedFlankChoices": [
+      [
+        "p1",
+        "upper-1",
+        "upper-2",
+        "directive"
+      ],
+      [
+        "p1",
+        "lower-1",
+        "lower-2",
+        "directive"
+      ]
+    ],
+    "backsideCrossing": [
+      "directive",
+      "bridge-1",
+      "bridge-2",
+      "ascent-entry"
+    ],
+    "rightAscent": [
+      "ascent-entry",
+      "ascent-1",
+      "ascent-2",
+      "ascent-3",
+      "exit"
+    ],
+    "maxAuthoredRelationPx": 353.55,
+    "baseHookReachPx": 400,
+    "forbiddenBypasses": [
+      {
+        "from": "hub",
+        "to": [
+          "ascent-entry",
+          "ascent-1",
+          "ascent-2",
+          "ascent-3",
+          "exit"
+        ],
+        "reason": "Front authorized ascent is architecturally sealed from Hub."
+      },
+      {
+        "from": "p1",
+        "to": [
+          "directive"
+        ],
+        "reason": "Combined Jammer + AEGIS flank lesson must be traversed."
+      }
+    ]
+  },
+  "sourceExit": {
+    "deckX": 260,
+    "deckTopY": -2430,
+    "deckWidth": 320,
+    "panelObjectiveId": "exit-panel-engaged"
+  },
+  "progression": {
+    "targetStageAlias": "5-6",
+    "mode": "objective-gated-connector",
+    "requiredObjectiveIds": [
+      "priority-directive",
+      "exit-panel-engaged"
+    ]
+  },
+  "story": {
+    "systemFacts": [
+      "PRIORITY ROUTING HALL",
+      "EVACUATION ASCENT / AUTHORIZED ACCESS ONLY",
+      "ROUTING CONTROL / SERVICE ACCESS",
+      "PRIORITY ROUTING DIRECTIVE / 02 OF 03",
+      "UPPER CORE CONTROL / MAINTAIN",
+      "UPPER EVACUATION CAPACITY / MAINTAIN",
+      "GENERAL DISTRIBUTION / CAPACITY HOLD",
+      "INCIDENT AUTHORIZATION ANNEX / ACCESS AHEAD"
+    ],
+    "approvedPlayerBark": "…부족한 데서, 뭘 남길지 골랐던 거네."
+  },
+  "runtimeDependencies": {
+    "newSystems": [
+      {
+        "id": "hardpoint-jammer-v1",
+        "status": "NOT_IMPLEMENTED"
+      },
+      {
+        "id": "corporate-proof-terminal-v1",
+        "status": "NOT_IMPLEMENTED"
+      }
+    ],
+    "existingSystems": [
+      {
+        "id": "shield-drone-t1",
+        "status": "CURRENT_RUNTIME"
+      },
+      {
+        "id": "surface.grappleable=false",
+        "status": "CURRENT_RUNTIME"
+      },
+      {
+        "id": "canAttachToSurface(surface)",
+        "status": "CURRENT_RUNTIME_HOOK"
+      }
+    ],
+    "explicitlyNotRequired": [
+      "priority-route-lock-v1 remote unlock behavior",
+      "standard-sentry-area-spec-v1"
+    ]
+  },
+  "forbidden": [
+    "Standard Sentry",
+    "Artillery",
+    "Cutter",
+    "Pursuit",
+    "Patrol",
+    "Jammer cutting current Rope",
+    "Jammer forced release",
+    "Jammer damage",
+    "mandatory Jammer kill",
+    "mandatory AEGIS kill",
+    "remote magical front-door unlock on Directive pickup",
+    "LOWER ASCENT / SUSPENSION AUTHORIZED",
+    "Group C sacrifice conclusion",
+    "named executive authorization",
+    "final organizational responsibility"
+  ]
+}

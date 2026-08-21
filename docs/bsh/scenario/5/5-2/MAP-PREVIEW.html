@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-2 Control Atrium REV1 Map Preview</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#334d58;--text:#eef5f6;--muted:#9fb0b6;--cyan:#5de8ff;--safe:#70cf9a;--route:#ffe16f;--glass:#9dc8d4;--aegis:#8ab9ff;--danger:#ff9a8b;--recover:#d3b35d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:430px 1fr;min-height:calc(100vh - 65px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line)}main{padding:12px}
+.card{border:1px solid var(--line);background:#081219;border-radius:8px;padding:9px;margin-bottom:8px}.card b{color:var(--cyan)}
+button{background:#13232b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin:2px;cursor:pointer}button.on{border-color:var(--cyan);color:var(--cyan)}
+svg{width:100%;height:88vh;min-height:800px;background:#03090d;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08151b;stroke:#4f6b78;stroke-width:4}.glass{fill:#6d9cad22;stroke:var(--glass);stroke-width:4}.bridge{fill:#566a74;stroke:#afc0c6;stroke-width:2}.safe{fill:#345c4a;stroke:var(--safe);stroke-width:3}.recovery{fill:#5c512e;stroke:var(--recover);stroke-width:3}
+.hp{fill:var(--cyan);stroke:white;stroke-width:2.5}.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}
+.zone{fill:#ff8b7a12;stroke:#ff9a8b;stroke-width:2;stroke-dasharray:12 8}.shield{fill:#76a8ff22;stroke:#8ab9ff;stroke-width:3}.enemy{fill:#91baff;stroke:white;stroke-width:3}.reach{fill:none;stroke:#5de8ff;stroke-width:1.5;opacity:.08}
+text{fill:#edf5f6;font-size:12px;paint-order:stroke;stroke:#061015;stroke-width:5}.tiny{font-size:10px;fill:#bbccd2}.hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>5-2 CONTROL ATRIUM · REV1 MAP PREVIEW</h1><div class="sub">STAGGERED GLASS PARTITION FLANKS · FIRST AEGIS LESSON · USER APPROVAL REQUIRED</div></header>
+<div class="layout"><aside>
+<div class="card"><b>WHY</b><br>Authorized route is a straight security bridge. Maintenance route wraps the partition frame, naturally changing the attack angle.</div>
+<div class="card"><b>LESSON</b><br>5-1 = WHERE CAN I ATTACH?<br>5-2 = FROM WHICH ANGLE SHOULD I APPROACH?</div>
+<div class="card"><b>AEGIS</b><br>A ×1 lower band → safe reset → B ×1 upper band. Never simultaneous. Kill optional.</div>
+<div class="card"><b>RUNTIME</b><br>Shield rotates toward target. Frontal ~120° Rope Impact protection. Side/rear opening must be earned by movement.</div>
+<div class="card"><b>ROPE</b><br>Max intended relation = <b>367.15px</b> &lt; 400px.</div>
+<div class="card"><b>NO</b><br>Jammer · Cutter · Artillery · Pursuit · Wind · Scanner · Kill Gate.</div>
+<div>
+<button id="routeB" class="on">Route</button><button id="zoneB" class="on">AEGIS Zones</button><button id="shieldB" class="on">Shield Read</button><button id="recB" class="on">Recovery</button><button id="reachB">400px Reach</button><button id="labelB" class="on">Labels</button>
+</div>
+</aside><main>
+<svg viewBox="-2304 -2640 4608 2700">
+<rect class="bounds" x="-2304" y="-2624" width="4608" height="2624"/>
+
+<!-- architectural partitions -->
+<rect class="glass" x="-1120" y="-1120" width="150" height="650" rx="10"/>
+<rect class="glass" x="-920" y="-950" width="710" height="95" rx="10"/>
+<text class="labels" x="-1080" y="-1080">LOWER SECURITY PARTITION</text>
+<rect class="glass" x="480" y="-1950" width="150" height="700" rx="10"/>
+<rect class="glass" x="30" y="-1450" width="600" height="95" rx="10"/>
+<text class="labels" x="650" y="-1910">UPPER SECURITY PARTITION</text>
+
+<!-- bridges and safe decks -->
+<rect class="safe" x="-2220" y="-120" width="330" height="28"/><text class="tiny labels" x="-2190" y="-145">ENTRY FROM 5-1</text>
+<rect class="safe" x="-1710" y="-440" width="360" height="30"/><text class="tiny labels" x="-1680" y="-465">P0 · AEGIS PREVIEW / FULL SAFE</text>
+<rect class="bridge" x="-1110" y="-840" width="560" height="24"/><text class="tiny labels" x="-1060" y="-865">REVIEW BRIDGE A</text>
+<rect class="safe" x="-760" y="-980" width="330" height="30"/><text class="tiny labels" x="-730" y="-1005">M0 · POST-AEGIS SAFE</text>
+<rect class="safe" x="-180" y="-1290" width="360" height="30"/><text class="tiny labels" x="-150" y="-1315">P1 · UPPER CONTROL READ</text>
+<rect class="bridge" x="350" y="-1680" width="600" height="24"/><text class="tiny labels" x="390" y="-1705">REVIEW BRIDGE B</text>
+<rect class="safe" x="790" y="-1810" width="340" height="30"/><text class="tiny labels" x="820" y="-1835">M1 · POST-AEGIS SAFE</text>
+<rect class="safe" x="-220" y="-2350" width="400" height="30"/><text class="tiny labels" x="-190" y="-2375">FINAL CONTROL DECK / FULL SAFE</text>
+<rect class="safe" x="-480" y="-2510" width="330" height="28"/><text class="tiny labels" x="-450" y="-2535">EXIT → 5-3 SECURITY REVIEW</text>
+
+<!-- recovery -->
+<g id="recovery">
+<rect class="recovery" x="-1450" y="-930" width="320" height="18"/><text class="tiny labels" x="-1425" y="-955">R1</text>
+<rect class="recovery" x="20" y="-1600" width="320" height="18"/><text class="tiny labels" x="45" y="-1625">R2</text>
+<rect class="recovery" x="390" y="-2180" width="320" height="18"/><text class="tiny labels" x="415" y="-2205">R3</text>
+</g>
+
+<!-- hardpoints / route -->
+<g id="labelsGroup" class="labels">
+<circle class="hp" cx="-2100" cy="-100" r="13"/><text x="-2075" y="-85">E</text>
+<circle class="hp" cx="-1800" cy="-260" r="13"/><text x="-1775" y="-245">H1</text>
+<circle class="hp" cx="-1540" cy="-420" r="13"/><text x="-1515" y="-405">P0</text>
+<circle class="hp" cx="-1240" cy="-600" r="13"/><text x="-1215" y="-585">H2</text>
+<circle class="hp" cx="-920" cy="-780" r="13"/><text x="-895" y="-765">H3</text>
+<circle class="hp" cx="-650" cy="-960" r="13"/><text x="-625" y="-945">M0</text>
+<circle class="hp" cx="-330" cy="-1120" r="13"/><text x="-305" y="-1105">H4</text>
+<circle class="hp" cx="-20" cy="-1270" r="13"/><text x="5" y="-1255">P1</text>
+<circle class="hp" cx="300" cy="-1440" r="13"/><text x="325" y="-1425">H5</text>
+<circle class="hp" cx="620" cy="-1620" r="13"/><text x="645" y="-1605">H6</text>
+<circle class="hp" cx="900" cy="-1790" r="13"/><text x="925" y="-1775">M1</text>
+<circle class="hp" cx="620" cy="-1970" r="13"/><text x="645" y="-1955">H7</text>
+<circle class="hp" cx="300" cy="-2150" r="13"/><text x="325" y="-2135">H8</text>
+<circle class="hp" cx="-20" cy="-2320" r="13"/><text x="5" y="-2305">F</text>
+<circle class="hp" cx="-340" cy="-2480" r="13"/><text x="-315" y="-2465">X</text>
+</g>
+<g id="route"><path class="route" d="M-2100,-100 L-1800,-260 L-1540,-420 L-1240,-600 L-920,-780 L-650,-960 L-330,-1120 L-20,-1270 L300,-1440 L620,-1620 L900,-1790 L620,-1970 L300,-2150 L-20,-2320 L-340,-2480"/></g>
+
+<!-- aegis zones -->
+<g id="zones">
+<rect class="zone" x="-1400" y="-1100" width="640" height="600"/>
+<rect class="zone" x="180" y="-1920" width="600" height="610"/>
+</g>
+
+<!-- AEGIS & shield arcs -->
+<g id="shieldRead">
+<circle class="enemy" cx="-900" cy="-820" r="24"/><path class="shield" d="M-900,-820 L-1120,-960 A260,260 0 0 1 -1120,-680 Z"/><text class="labels" x="-865" y="-825">AEGIS A</text>
+<circle class="enemy" cx="650" cy="-1660" r="24"/><path class="shield" d="M650,-1660 L430,-1800 A260,260 0 0 1 430,-1520 Z"/><text class="labels" x="685" y="-1665">AEGIS B</text>
+</g>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="-2100" cy="-100" r="400"/><circle class="reach" cx="-1800" cy="-260" r="400"/><circle class="reach" cx="-1540" cy="-420" r="400"/><circle class="reach" cx="-1240" cy="-600" r="400"/><circle class="reach" cx="-920" cy="-780" r="400"/><circle class="reach" cx="-650" cy="-960" r="400"/><circle class="reach" cx="-330" cy="-1120" r="400"/><circle class="reach" cx="-20" cy="-1270" r="400"/><circle class="reach" cx="300" cy="-1440" r="400"/><circle class="reach" cx="620" cy="-1620" r="400"/><circle class="reach" cx="900" cy="-1790" r="400"/><circle class="reach" cx="620" cy="-1970" r="400"/><circle class="reach" cx="300" cy="-2150" r="400"/><circle class="reach" cx="-20" cy="-2320" r="400"/><circle class="reach" cx="-340" cy="-2480" r="400"/>
+</g>
+
+<text class="tiny labels" x="-2240" y="-2580">AEGIS ARC IS A READABILITY DIAGRAM; RUNTIME SHIELD DIRECTION TRACKS PLAYER.</text>
+</svg></main></div>
+<script>
+function toggle(btn, target){const b=document.getElementById(btn),t=document.getElementById(target);b.onclick=()=>{t.classList.toggle('hidden');b.classList.toggle('on',!t.classList.contains('hidden'));}}
+toggle('routeB','route');toggle('zoneB','zones');toggle('shieldB','shieldRead');toggle('recB','recovery');toggle('reachB','reach');
+labelB.onclick=()=>{document.querySelectorAll('.labels').forEach(x=>x.classList.toggle('hidden'));labelB.classList.toggle('on')}
+</script></body></html>

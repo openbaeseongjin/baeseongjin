@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5-1 CONTINUITY RECEPTION Story / Atmosphere REV8</title>
+<style>
+body{margin:0;background:#090b0d;color:#f2f3f1;font-family:system-ui,sans-serif}
+.wrap{max-width:1480px;margin:auto;padding:16px}h1{font-size:21px}.note,.card{background:#13171a;border:1px solid #454d52;border-radius:9px;padding:11px;margin-bottom:10px}.note{background:#151716;border-color:#65706e}
+.buttons{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}button{background:#18211f;color:#eee;border:1px solid #4d5c58;border-radius:7px;padding:7px 10px;cursor:pointer}
+.grid{display:grid;grid-template-columns:1.55fr .85fr;gap:12px}.scene{position:relative;background:#0a1014;border:1px solid #454d52;border-radius:9px;aspect-ratio:16/9;overflow:hidden}.scene svg{width:100%;height:100%}
+.caption{position:absolute;bottom:10px;left:10px;right:10px;background:#05090bdc;border-left:3px solid #8ed0c1;padding:9px}
+.toast{position:absolute;top:5%;left:50%;transform:translateX(-50%);background:#071116e8;border:1px solid #71817d;border-radius:6px;padding:8px 14px;text-align:center;min-width:360px}
+.bark{position:absolute;bottom:13%;left:7%;background:#111b19ed;border:1px solid #758d87;border-radius:7px;padding:8px 12px}.hidden{display:none}
+.core{fill:#dfe5e6;opacity:.16;stroke:#9aa7aa;stroke-width:3}.hp{fill:#5de8ff;stroke:white;stroke-width:3}.safe{fill:#34584b}.player{fill:#edf5f6}.glass{fill:#b8dbe0;opacity:.09}.line{fill:none;stroke:#5de8ff;stroke-width:2;stroke-dasharray:8 8;opacity:.55}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>5-1 CONTINUITY RECEPTION · STORY / ATMOSPHERE REV8.0 · DESIGN LOCKED</h1>
+<div class="note"><b>PREV STORY:</b> Sector04에서 이미 <code>LOWER ASCENT FEEDER / ISOLATED</code>와 <code>UPPER EXPRESS TRUNK / LIMITED OPERATION</code>을 확인했다. 5-1은 이 기억을 유지한다.</div>
+<div class="note"><b>연출 목표:</b> Story를 먼저 설명하지 않는다. Player가 거대한 Sealed Core와 작은 Service Hardpoint의 대비를 직접 경험한 뒤, 시스템 상태를 통해 <b>“아래쪽은 이미 격리됐는데, 이 통제시설은 사고 당시에도 살아 있었다”</b>는 사실까지만 확인한다.</div>
+<div id="buttons" class="buttons"></div>
+<div class="grid">
+<div class="scene">
+<svg viewBox="0 0 960 540"><rect width="960" height="540" fill="#0a1014"/><g id="visual"></g></svg>
+<div id="toast" class="toast hidden"></div>
+<div id="bark" class="bark hidden"></div>
+<div id="caption" class="caption"></div>
+</div>
+<div>
+<div class="card"><b>Purpose</b><p id="purpose"></p></div>
+<div class="card"><b>Player Sees</b><p id="sees"></p></div>
+<div class="card"><b>Camera</b><p id="camera"></p></div>
+<div class="card"><b>Audio</b><p id="audio"></p></div>
+<div class="card"><b>Story Boundary</b><p id="boundary"></p></div>
+</div>
+</div>
+</div>
+<script>
+const beats=[
+["S0 Arrival","Sector05의 크기와 새로운 Rope 시각언어를 Story보다 먼저 체감시킨다.","거대한 매끈한 Core 표면과, 그 옆에 작게 돌출된 cyan Service Hardpoint H1.","Player + H1 + Core의 일부만 잡는다. Stage 전체를 한 번에 보여주지 않는다.","넓은 실내 잔향, 낮은 ventilation/control hum. 경보음 없음.","Capacity / Priority / Authorization 정보 없음.",null,null,`<rect class="safe" x="80" y="420" width="270" height="22"/><rect class="core" x="450" y="80" width="390" height="300" rx="12"/><circle class="hp" cx="395" cy="275" r="15"/><g transform="translate(220 385)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`],
+["S1 First Hardpoint Read","Player가 Core 표면이 아니라 Service Hardpoint를 직접 사용한 직후 이곳의 정체를 알려준다.","Reception Deck, 뒤쪽의 거대한 Sealed Core, 정상 작동하는 시설 표기.","Camera는 Reception과 다음 Core Gap 방향을 같이 읽을 수 있게 유지.","짧고 평범한 시스템 확인음.","이 시설이 Incident Operations 상태라는 사실만 확정.",[["CONTINUITY CONTROL","INCIDENT OPERATIONS ACTIVE"]],null,`<rect class="safe" x="100" y="420" width="340" height="22"/><rect class="core" x="470" y="80" width="360" height="285" rx="12"/><circle class="hp" cx="445" cy="310" r="14"/><g transform="translate(300 385)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`],
+["S2 Core Gap Crossing","거대한 Core segment 사이의 유지보수 Gap을 Hardpoint chain으로 가로지르면서 Sector05의 공간 문법을 확실히 학습한다.","회색 Sealed 표면은 계속 이어지고, cyan Hardpoint만 Gap을 따라 드문드문 존재.","현재 + 다음 Hardpoint가 읽히되 모든 Chain을 한 화면에 다 보여주지 않는다.","Rope 이동음과 큰 Void 잔향. 적/경보 없음.","Story Toast 없음.",null,null,`<rect class="core" x="120" y="80" width="720" height="135" rx="10"/><rect class="core" x="105" y="350" width="750" height="115" rx="10"/><circle class="hp" cx="230" cy="290" r="13"/><circle class="hp" cx="390" cy="275" r="13"/><circle class="hp" cx="550" cy="270" r="13"/><circle class="hp" cx="710" cy="265" r="13"/><path class="line" d="M230 290 L390 275 L550 270 L710 265"/><g transform="translate(390 325)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`],
+["S3 City Status","첫 대형 횡단 뒤 도시 전체 상태와 이 시설의 상태가 다름을 느끼게 한다.","Right Control Void와 단순한 상태 display.","Wide void를 남기고 Player를 작게 잡아 규모를 유지.","중립적인 UI tone. 불길한 sting 없음.","도시 상태가 DEGRADED라는 사실만 제시.",[["CITY SYSTEM STATUS","DEGRADED"]],null,`<rect class="safe" x="560" y="420" width="300" height="22"/><rect class="core" x="100" y="90" width="400" height="280" rx="12"/><g transform="translate(690 385)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`],
+["S4 Network Online","두 번째 횡단 후, Continuity Control의 통제망 자체는 여전히 ONLINE임을 확인한다.","Inspection Deck, 다음 Safe/Flow 두 Hardpoint 후보, 정상 상태 display.","Player와 두 후보를 동시에 보여준다. 이후 선택을 Story가 막지 않는다.","Control hum이 조금 명확해지고, 확인음 한 번.","왜 온라인인지/무엇을 살렸는지는 아직 UNKNOWN.",[["CONTROL NETWORK","ONLINE"]],null,`<rect class="safe" x="100" y="420" width="360" height="22"/><circle class="hp" cx="590" cy="290" r="15"/><circle class="hp" cx="725" cy="250" r="15"/><path class="line" d="M450 395 Q560 330 590 290 M450 395 Q620 300 725 250"/><g transform="translate(310 385)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`],
+["S5 Player Reaction","이전 Sector에서 본 하부 격리와 지금 확인한 Control Network Online을 연결하되 원인은 결론내리지 않는다.","Inspection Deck + ONLINE display. Player의 기억 속 사실은 LOWER ASCENT FEEDER / ISOLATED.","Camera unchanged. Player control 유지.","0.4–0.7초 ambience → Bark. 이후 1.0–1.5초 clean space.","말할 수 있는 것: 아래쪽은 끊겼다 / 여기는 사고 당시에도 작동했다. 말할 수 없는 것: 여기가 아래쪽을 끊었다.",null,"…아래쪽은 끊겼는데, 여긴 사고 때도 돌아가고 있었네.",`<rect class="safe" x="100" y="420" width="360" height="22"/><circle class="hp" cx="590" cy="290" r="15"/><circle class="hp" cx="725" cy="250" r="15"/><g transform="translate(310 385)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`],
+["S6 Exit Preview","Safe/Flow 선택과 마지막 Core edge 상승을 끝낸 뒤 다음 공간만 예고한다.","Final Deck와 멀리 이어지는 CONTROL ATRIUM 접근구.","Player + exit direction. 5-2 AEGIS는 아직 보여주지 않아도 됨.","정상 출입 시스템 tone.","5-2의 존재만 예고. Upper control power Story는 5-2가 소유.",[["CONTROL ATRIUM","ACCESS AHEAD"]],null,`<rect class="safe" x="100" y="405" width="420" height="22"/><rect class="glass" x="650" y="90" width="190" height="270"/><g transform="translate(370 370)"><circle class="player" r="14"/><rect class="player" x="-10" y="12" width="20" height="38"/></g>`]
+];
+const bs=document.getElementById("buttons");
+beats.forEach((b,i)=>{const x=document.createElement("button");x.textContent=b[0];x.onclick=()=>show(i);bs.appendChild(x)});
+function show(i){
+ const b=beats[i];
+ purpose.textContent=b[1];sees.textContent=b[2];camera.textContent=b[3];audio.textContent=b[4];boundary.textContent=b[5];
+ visual.innerHTML=b[8];caption.textContent=b[1];
+ if(b[6]){toast.classList.remove("hidden");toast.innerHTML=b[6].map(x=>"<b>"+x[0]+"</b><br>"+x[1]).join("<br><br>")}else toast.classList.add("hidden");
+ if(b[7]){bark.classList.remove("hidden");bark.textContent=b[7]}else bark.classList.add("hidden");
+}
+show(0);
+</script>
+</body>
+</html>

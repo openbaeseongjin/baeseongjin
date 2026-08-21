@@ -1,0 +1,238 @@
+{
+  "schemaVersion": "area-spec-v1",
+  "status": "DESIGN LOCKED · REV1.1 · NOT IMPLEMENTED",
+  "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+  "stage": {
+    "sector": 5,
+    "stage": 7,
+    "legacyStageAlias": "5-7",
+    "sourceAreaId": "sector-05-07",
+    "runtimeModel": "seamless-sector-landmark-v1",
+    "name": "EVACUATION CONSEQUENCE ARCHIVE",
+    "subtitle": "ASYMMETRIC THREE-TIER SWITCHBACK / ARTILLERY → CUTTER → STORY SAFE"
+  },
+  "bounds": {
+    "width": 2050,
+    "height": 2320
+  },
+  "entry": {
+    "id": "h00",
+    "x": -980,
+    "y": -180,
+    "fromStageAlias": "5-6"
+  },
+  "grappleTargets": [
+    {
+      "id": "h00",
+      "x": -980,
+      "y": -180
+    },
+    {
+      "id": "h01",
+      "x": -660,
+      "y": -240
+    },
+    {
+      "id": "h02",
+      "x": -320,
+      "y": -240
+    },
+    {
+      "id": "h03",
+      "x": 20,
+      "y": -240
+    },
+    {
+      "id": "h04",
+      "x": 360,
+      "y": -300
+    },
+    {
+      "id": "h05",
+      "x": 500,
+      "y": -560
+    },
+    {
+      "id": "h06",
+      "x": 500,
+      "y": -820
+    },
+    {
+      "id": "h07",
+      "x": 180,
+      "y": -880
+    },
+    {
+      "id": "h08",
+      "x": -160,
+      "y": -880
+    },
+    {
+      "id": "h09",
+      "x": -500,
+      "y": -920
+    },
+    {
+      "id": "h10",
+      "x": -840,
+      "y": -980
+    },
+    {
+      "id": "h11",
+      "x": -1120,
+      "y": -1080
+    },
+    {
+      "id": "h12",
+      "x": -1120,
+      "y": -1360
+    },
+    {
+      "id": "h13",
+      "x": -1120,
+      "y": -1600
+    },
+    {
+      "id": "h14",
+      "x": -820,
+      "y": -1660
+    },
+    {
+      "id": "h15",
+      "x": -520,
+      "y": -1660
+    },
+    {
+      "id": "h16",
+      "x": -220,
+      "y": -1660
+    },
+    {
+      "id": "h17",
+      "x": 80,
+      "y": -1700
+    },
+    {
+      "id": "h18",
+      "x": 240,
+      "y": -1940
+    },
+    {
+      "id": "h19",
+      "x": 80,
+      "y": -2140
+    },
+    {
+      "id": "h20",
+      "x": -220,
+      "y": -2280
+    }
+  ],
+  "enemies": [
+    {
+      "id": "sector-05-07:artillery-a",
+      "enemyType": "artillery-drone-t1",
+      "role": "LOWER DWELL CONTROL",
+      "rules": [
+        "kill-optional",
+        "no-kill-gate",
+        "stored-position-strike-only"
+      ]
+    },
+    {
+      "id": "sector-05-07:cutter-a",
+      "enemyType": "sentry-t1",
+      "role": "MIDDLE CURRENT-ROPE DENIAL",
+      "rules": [
+        "cutter-fire",
+        "targets-player-not-rope",
+        "kill-optional",
+        "no-kill-gate"
+      ]
+    }
+  ],
+  "route": {
+    "lowerEventSpine": [
+      "h00",
+      "h01",
+      "h02",
+      "h03",
+      "h04"
+    ],
+    "riser1": [
+      "h04",
+      "h05",
+      "h06"
+    ],
+    "middleRouteStatusSpine": [
+      "h06",
+      "h07",
+      "h08",
+      "h09",
+      "h10",
+      "h11"
+    ],
+    "riser2": [
+      "h11",
+      "h12",
+      "h13"
+    ],
+    "upperEvidenceDeck": [
+      "h13",
+      "h14",
+      "h15",
+      "h16",
+      "h17"
+    ],
+    "finalRise": [
+      "h17",
+      "h18",
+      "h19",
+      "h20"
+    ],
+    "maxAuthoredRelationPx": 345.25,
+    "baseHookReachPx": 400
+  },
+  "story": {
+    "evidenceA": [
+      "POST-CASCADE EVACUATION LOG",
+      "LOWER-SECTOR TRANSFER / ROUTING INTERRUPTED",
+      "LOWER ASCENT / SUSPENSION IN EFFECT"
+    ],
+    "evidenceB": [
+      "LOWER SECTORS",
+      "EVACUATION STATUS / SUSPENDED"
+    ],
+    "approvedPlayerBark": "…승인한 대로, 실제 대피까지 멈췄어.",
+    "exit": [
+      "CONTINUITY COMMAND SPINE",
+      "AUTHORITY RECORDS / AHEAD"
+    ]
+  },
+  "runtimeDependencies": {
+    "existingSystems": [
+      {
+        "id": "artillery-drone-t1",
+        "status": "CURRENT_RUNTIME"
+      },
+      {
+        "id": "sentry-t1+cutter-fire",
+        "status": "CURRENT_RUNTIME_BASIS"
+      }
+    ]
+  },
+  "forbidden": [
+    "Jammer",
+    "AEGIS",
+    "Patrol",
+    "Pursuit",
+    "Standard Sentry",
+    "Artillery+Cutter overlapping bands",
+    "enemy after upper evidence entry",
+    "casualty count",
+    "everyone died claim",
+    "permanent impossibility claim",
+    "named executive",
+    "final responsibility"
+  ]
+}

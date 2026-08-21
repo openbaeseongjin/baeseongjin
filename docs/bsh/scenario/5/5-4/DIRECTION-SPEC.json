@@ -1,0 +1,160 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 5,
+    "stage": 4,
+    "legacyStageAlias": "5-4",
+    "sourceAreaId": "sector-05-04",
+    "name": "CAPACITY ALLOCATION CORE"
+  },
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CAPACITY ALLOCATION CORE",
+            "detail": "OPERATIONS ACTIVE"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-artillery-a",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "allocation-island-preview"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-riser-turn",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "bus-riser-base"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-artillery-b",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "bus-riser-band"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-capacity-record",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "capacity-record-deck-reached"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CAPACITY ALLOCATION RECORD · 01 / 03",
+            "detail": "AVAILABLE CAPACITY / CRITICAL DEFICIT · SIMULTANEOUS STABLE OPERATION / UNAVAILABLE"
+          },
+          "timing": {
+            "durationSeconds": 1.8
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…전부 살릴 수는 없었던 거네."
+          },
+          "timing": {
+            "minDelaySeconds": 2.2
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s5-exit",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "exit-panel-engaged"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "PRIORITY ROUTING HALL",
+            "detail": "ACCESS AHEAD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No dialogue during Artillery telegraph/strike/high-input Rope movement",
+    "Capacity Record only after both Artillery bands end",
+    "No Priority or Authorization reveal in 5-4"
+  ]
+}

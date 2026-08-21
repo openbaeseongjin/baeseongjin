@@ -1,41 +1,13 @@
-# SECTOR 05 — CONTINUITY CONTROL MASTER PLAN REV 3.0
+# SECTOR 05 — CONTINUITY CONTROL MASTER PLAN REV4
 
-**MASTER DESIGN LOCKED · STAGE BLOCKOUTS NOT IMPLEMENTED**
-
-Latest checked `main`:
-
-```text
-c7b2bd582cf35d140dccba8c83b5732a3527c5ac
-```
-
-Current relevant Runtime facts:
-
-- `shield-drone-t1` exists as an official Runtime enemy archetype.
-- `artillery-drone-t1` exists as an official Runtime enemy archetype.
-- Cutter behavior already exists through current Sentry + `cutter-fire` Rope-cut rule.
-- Rope target selection already supports `surface.grappleable === false`.
-- Rope target selection also exposes `canAttachToSurface(surface)`, which can support a future authoritative Hardpoint Jam state.
-- `support-drone-t1` and `pursuit-drone-t1` exist in Runtime but are **intentionally excluded from Sector05** by this Master decision.
+> **AUTHORED PACKAGE MERGED — RUNTIME MIGRATION APPROVAL REQUIRED**<br>
+> Authoring snapshot: `3c9f661bba58af6f7351e00754c12aef86575a12`<br>
+> Sector04 handoff authority: `UPPER RESIDENTIAL / AMENITY — PRIVILEGE IS PROTECTED`<br>
+> Sector05 theme: `THE SYSTEM CHOOSES WHAT CONTINUES`
 
 ---
 
-## 마이그레이션 상태 — Stage 문서 동기화
-
-이 Master Plan은 REV 3.0(Continuity Control)이다. Stage 문서 동기화 현재 상태:
-
-```text
-5-1  CONTINUITY RECEPTION       REV 3.1 동기화 완료 (AREA-SPEC.json 포함)
-5-5  PRIORITY ROUTING HALL      REV 3.8 동기화 완료 (AREA-SPEC.json 포함)
-5-2, 5-3, 5-4, 5-8              PLANNING-DRAFT만 존재, AREA-SPEC 미작성 (별도 후속 작업)
-5-6  INCIDENT AUTHORIZATION     초안 AREA-SPEC 패키지 있으나 route/sourceExit 블록 누락으로 미반영
-5-7  EVACUATION CONSEQUENCE     초안 AREA-SPEC 패키지 있으나 route/sourceExit 블록 누락·surface bounds 오류로 미반영
-```
-
-`5-1`/`5-5`는 area-spec-v1 REV 1.1 스키마로 검증을 통과했다. `5-6`/`5-7`은 원본 패키지 자체가 mandatory route를 명시하지 않아, 임의로 추론해 채우지 않고 이번 반영에서 제외했다.
-
----
-
-# 0. FINAL MASTER DECISIONS
+# 0. MASTER STATUS
 
 ## Sector Name
 
@@ -45,140 +17,147 @@ SECTOR 05 — CONTINUITY CONTROL
 
 ## Theme
 
-> **THE SYSTEM CHOOSES WHAT CONTINUES.**  
+> **THE SYSTEM CHOOSES WHAT CONTINUES.**<br>
 > **시스템은 무엇을 계속 유지할지 선택한다.**
 
-Sector04:
+Sector04가 보여준 것은:
 
 ```text
 PRIVILEGE IS PROTECTED
 ```
 
-Sector05:
+Sector05가 밝히는 것은:
 
 ```text
 THE SYSTEM CHOOSES
 WHAT CONTINUES
 ```
 
-즉:
+즉 서사 연결은 다음과 같다.
 
 ```text
-Sector04
-"왜 상층은 이렇게 보호되고 있었지?"
+SECTOR 04
+"왜 상층 주거·피난 구역은 이렇게까지 보호되고 있었지?"
         ↓
-Sector05
-"그 보호와 하층 중단은 어디에서 결정됐지?"
+SECTOR 05
+"그 보호와 다른 구역의 중단은 어디에서 결정됐지?"
 ```
 
-## Gameplay Identity
+Sector05는 단순한 회사 사무실이 아니다.
 
-```text
-MORE SECURITY
-+
-MORE CONTROL OBSTACLES
-+
-FEWER VALID HARDPOINTS
-+
-SPECIALIZED SECURITY ABILITIES
-=
-CONTROLLED COMMITMENT
-```
+이곳은 도시 위기 상황에서:
 
-## Selected Special Security
+- 무엇에 전력을 계속 공급할지,
+- 어떤 대피 동선을 유지할지,
+- 어떤 네트워크를 계속 운영할지,
+- 어떤 구역을 제한하거나 중단할지,
 
-```text
-AEGIS
-HARDPOINT JAMMER
-ARTILLERY
-CUTTER
-```
-
-## Explicitly Excluded
-
-```text
-SUPPORT / HEALING SECURITY
-INTERCEPTOR / PURSUIT DRONE
-SWARM AS SECTOR05 CORE
-SECTOR04-STYLE PERSISTENT PURSUIT AS PRIMARY IDENTITY
-```
-
-Standard Sentry / Patrol may remain as baseline security actors.
+결정하는 **CORPORATE CONTINUITY COMMAND COMPLEX**다.
 
 ---
 
-# 1. SECTOR FANTASY
+# 1. SECTOR FUNCTION
 
-Sector05 is not simply a clean corporate office.
+Sector05의 기능은 Sector04에서 보여준 결과의 **원인 구조**를 추적하게 하는 것이다.
 
-It is:
-
-```text
-CORPORATE CONTINUITY COMMAND COMPLEX
-```
-
-A crisis-control complex that decides:
-
-- which infrastructure remains powered,
-- which evacuation route remains open,
-- which control layer remains operational,
-- which systems are suspended under capacity shortage.
-
-Representative spaces:
+Sector04:
 
 ```text
-CONTINUITY RECEPTION
-CONTROL ATRIUM
-SECURITY REVIEW GALLERY
-CAPACITY ALLOCATION CORE
-PRIORITY ROUTING HALL
-INCIDENT AUTHORIZATION ANNEX
-EVACUATION CONSEQUENCE ARCHIVE
-CONTINUITY COMMAND SPINE
+보호가 존재한다.
 ```
 
-The architecture is not a place that directly operates pumps, shops, homes or shelters.
+Sector05:
 
-It is a place that:
+```text
+보호는 우연히 존재한 것이 아니다.
+누군가의 판단과 시스템의 절차를 거쳐 유지되었다.
+```
 
-> **decides what those systems are allowed to keep doing.**
+하지만 Sector05에서도 처음부터 모든 진실을 한 번에 공개하지 않는다.
+
+Story progression은:
+
+```text
+SYSTEM ACTIVE
+→ CAPACITY
+→ PRIORITY
+→ AUTHORIZATION
+→ CONSEQUENCE
+→ RESPONSIBILITY
+```
+
+순서로 올라간다.
 
 ---
 
-# 2. ARCHITECTURAL CONTRAST
+# 2. PLAYER EMOTION CURVE
 
-Previous Sectors exposed their systems.
-
-```text
-Sector01
-pipes / machinery / maintenance
-
-Sector02
-homes / shelter / worker life
-
-Sector03
-transfer / commerce / routing
-
-Sector04
-residential / amenity / refuge security
-```
-
-Sector05 hides systems behind controlled finishes.
+Sector05의 감정 흐름:
 
 ```text
-clean wall
-glass partition
-sealed ceiling
-flush panel
-control console
-large void
+5-1
+"여기는 아직 도시 전체를 보고 있다."
+
+5-2
+"여긴 단순히 살아 있는 게 아니라 통제되고 있다."
+
+5-3
+"기록조차 접근이 제한되어 있다."
+
+5-4
+"무엇을 유지할지 용량 단위로 선택했다."
+
+5-5
+"그 선택에는 우선순위가 있었다."
+
+5-6
+"그 우선순위는 승인된 결정이었다."
+
+5-7
+"그 결정 때문에 실제로 멈춘 곳이 있었다."
+
+5-8
+"이건 사고의 부산물이 아니라 조직적인 의사결정 구조였다."
 ```
 
-Visible machinery decreases.
+---
 
-Decision infrastructure increases.
+# 3. ARCHITECTURAL FANTASY
 
-The space should feel:
+Previous Sectors exposed physical infrastructure.
+
+```text
+SECTOR 01
+MAINTENANCE / MACHINE / PIPE
+
+SECTOR 02
+WORKER HOUSING / SHELTER / DAILY LIFE
+
+SECTOR 03
+TRANSFER / COMMERCE / ROUTING
+
+SECTOR 04
+UPPER RESIDENTIAL / AMENITY / REFUGE SECURITY
+
+SECTOR 05
+DECISION INFRASTRUCTURE
+```
+
+Sector05에서는 기계 설비가 보이지 않는다.
+
+대신 시스템은 다음 뒤에 숨는다.
+
+```text
+CLEAN WALL
+GLASS PARTITION
+SEALED CEILING
+FLUSH PANEL
+CONTROL CONSOLE
+SECURITY REVIEW BOX
+LARGE CONTROL VOID
+```
+
+Target atmosphere:
 
 ```text
 CLEAN
@@ -192,9 +171,11 @@ HOSTILE TO IMPROVISED MOVEMENT
 
 ---
 
-# 3. CORE ROPE LANGUAGE
+# 4. CORE ROPE LANGUAGE
 
-## SEALED CORPORATE SURFACE
+Sector05의 가장 중요한 공간 문법:
+
+## 4.1 SEALED CORPORATE SURFACE
 
 ```text
 collision    YES
@@ -203,35 +184,49 @@ grappleable  NO
 
 Examples:
 
-- glass curtain wall,
-- polished composite cladding,
-- sealed control-room partition,
-- finished ceiling plate,
-- flush executive bulkhead.
+- glass curtain wall
+- polished composite cladding
+- sealed control-room partition
+- finished ceiling plate
+- executive bulkhead
+- large control console casing
 
-## SERVICE HARDPOINT
+Player는 그 표면 위를 밟거나 충돌할 수 있지만 Rope를 걸 수 없다.
+
+---
+
+## 4.2 SERVICE HARDPOINT
 
 ```text
-grappleable YES
+grappleable  YES
 ```
 
 Examples:
 
-- maintenance lug,
-- inspection bracket,
-- structural service joint,
-- emergency access mount,
-- relay support frame.
+- maintenance lug
+- inspection bracket
+- structural service joint
+- emergency access mount
+- relay support frame
 
-Player-facing rule:
+Visual rule:
+
+```text
+SEALED SURFACE
+= smooth / pale / flush / no cyan affordance
+
+SERVICE HARDPOINT
+= cyan / mechanical projection / clear depth / strong silhouette
+```
+
+Player-facing lesson:
 
 > **READ THE HIDDEN INFRASTRUCTURE.**
 
-The protagonist is a facilities-maintenance worker.
+주인공은 시설 유지관리자다.
 
-Other people see a finished Corporate wall.
-
-The protagonist reads:
+일반 이용자가 완성된 벽을 볼 때,
+주인공은 그 뒤의:
 
 ```text
 service joint
@@ -239,75 +234,63 @@ inspection lug
 maintenance bracket
 ```
 
-and uses those hidden structures to climb through a space designed to exclude them.
+를 읽는다.
 
 ---
 
-# 4. HARDPOINT FAIRNESS
+# 5. HARDPOINT FAIRNESS
 
-Hardpoint scarcity is not hidden-answer design.
+Hardpoint scarcity must never become hidden-answer design.
 
-## Sealed
-
-```text
-large uninterrupted pale/glass surface
-no cyan affordance
-flush silhouette
-```
-
-## Hardpoint
+At every mandatory launch/read point:
 
 ```text
-cyan/cool-tech ring
-mechanical projection
-clear depth
-strong silhouette
-```
-
-At any mandatory launch/read point:
-
-```text
-current usable Hardpoint
+CURRENT USABLE HARDPOINT
 +
-next route information
+NEXT ROUTE INFORMATION
 ```
 
 must remain readable.
 
-In Jammer encounters:
+## Base Hook Reach
+
+Current planning authority:
 
 ```text
-at least 2 meaningful visible route choices
+BASE HOOK REACH = 400px
 ```
 
-are preferred.
+Rules:
 
-The Jammer may change which choice is available.
-
-It must not turn the Stage into guessing.
+- mandatory relation < 400px
+- intended flow relation < 400px
+- optional route intended as Base-clear < 400px
+- Long Rope/Augment may add expression but must not be required
+- no invisible grapple denial
 
 ---
 
-# 5. CONTROL OBSTACLE GRAMMAR
+# 6. CONTROL OBSTACLE GRAMMAR
 
-Sector05 has **more obstacles**, but not visual clutter.
+Sector05 has more control obstacles, but not more visual clutter.
 
-Forbidden identity:
+Forbidden:
 
 ```text
 boxes everywhere
-broken pipes everywhere
 debris everywhere
+pipes everywhere
+random blockers
 ```
 
-Target identity:
+Target:
 
 ```text
 MANY CONTROL ELEMENTS
 IN A CLEAN SPACE
 ```
 
-## 5.1 SEALED WALL
+## 6.1 SEALED WALL
 
 Purpose:
 
@@ -315,67 +298,55 @@ Purpose:
 removes broad Rope freedom
 ```
 
-Player must read Hardpoints.
+Player must read actual Hardpoints.
 
-## 5.2 SECURITY PARTITION
-
-Glass / composite vertical fins.
+## 6.2 SECURITY PARTITION
 
 Purpose:
 
-```text
-blocks Rope angle
-blocks direct shooting angle
-splits sightline
-```
+- blocks Rope angle
+- blocks attack angle
+- splits sightline
+- creates a reason to reposition
 
-Should create a spatial reason to reposition.
-
-## 5.3 CONTROL CONSOLE ISLAND
-
-Large floor or suspended console mass.
+## 6.3 CONTROL CONSOLE ISLAND
 
 Purpose:
 
-- movement obstruction,
-- firing cover,
-- release trajectory constraint,
-- route-reading landmark.
+- movement obstruction
+- projectile cover
+- release trajectory constraint
+- spatial landmark
 
-## 5.4 OVERHEAD BULKHEAD
+## 6.4 OVERHEAD BULKHEAD
 
 Purpose:
 
 ```text
 prevents generic high swing
-forces lateral/diagonal Hardpoint read
+forces lateral / diagonal Hardpoint read
 ```
 
-## 5.5 CONTROL VOID
+## 6.5 CONTROL VOID
 
-Large clean negative space with very few valid Hardpoints.
+Large clean negative space with few valid Hardpoints.
 
 Purpose:
 
-```text
-COMMITMENT
-```
+> **COMMITMENT**
 
-Not every Void needs enemy pressure.
+## 6.6 SECURITY BOOTH / REVIEW BOX
 
-## 5.6 SECURITY BOOTH / REVIEW BOX
+Architectural placement for:
 
-Good placement for:
-
-- Jammer,
-- Artillery,
-- Cutter.
-
-It makes the enemy's control function architectural rather than arbitrary.
+- Jammer
+- Artillery
+- Cutter
+- static security control
 
 ---
 
-# 6. SECURITY PHILOSOPHY
+# 7. SECURITY PHILOSOPHY
 
 Sector04 security asked:
 
@@ -385,46 +356,46 @@ Sector05 security asks:
 
 > **“Which action is the system denying right now?”**
 
-The four special abilities control different parts of Rope play.
+Selected specialized security:
+
+```text
+AEGIS
+HARDPOINT JAMMER
+ARTILLERY
+CUTTER
+```
+
+Each controls a different Rope decision.
 
 ```text
 AEGIS
 → denies direct attack angle
 
 JAMMER
-→ denies next attachment choice
+→ denies the planned next attachment
 
 ARTILLERY
-→ denies staying in one place
+→ denies staying at one position
 
 CUTTER
-→ denies the current attached Rope
+→ denies the currently attached Rope
 ```
 
-This separation is mandatory.
-
-Abilities must not overlap into indistinguishable punishment.
+These functions must remain visually and mechanically distinct.
 
 ---
 
-# 7. AEGIS GUARD
+# 8. AEGIS GUARD
 
 Runtime basis:
 
 ```text
 shield-drone-t1
-CURRENT RUNTIME ARCHETYPE
 ```
 
-Current behavior already turns its shield direction toward a target and blocks impacts from a frontal arc.
-
-## Sector05 Role
+Sector05 role:
 
 > **ANGLE CONTROL**
-
-AEGIS is not just a high-HP enemy.
-
-It should make the Player use Rope movement to change attack angle.
 
 Desired interaction:
 
@@ -437,339 +408,180 @@ ROPE OVER / AROUND
 → DAMAGE WINDOW
 ```
 
-## Good Placement
+Good placements:
 
-- narrow control gallery,
-- below a Service Hardpoint,
-- between two partitions,
-- near a high/low route split.
+- narrow control gallery
+- below a Service Hardpoint
+- between partitions
+- high/low route split
 
-## Do Not
+Do not:
 
-- give omnidirectional shield,
-- make shield visually ambiguous,
-- combine first AEGIS lesson with Cutter or Jammer.
+- use omnidirectional shield
+- hide the shield direction
+- teach first AEGIS together with Cutter/Jammer
+
+First dedicated Stage:
+
+```text
+5-2 CONTROL ATRIUM
+```
 
 ---
 
-# 8. HARDPOINT JAMMER — SECTOR05 SIGNATURE
+# 9. HARDPOINT JAMMER
 
 Status:
 
 ```text
-NEW SYSTEM
-NOT IMPLEMENTED
+SECTOR05 SIGNATURE SYSTEM
+NEW RUNTIME SUPPORT REQUIRED
 ```
 
-Candidate Runtime identity:
+Candidate identity:
 
 ```text
 hardpoint-jammer-v1
 ```
 
-This is Sector05's signature security ability.
-
-## Role
+Role:
 
 > **ROUTE CONTROL**
 
-CUTTER says:
+Difference from Cutter:
 
 ```text
-your current Rope is unsafe
+JAMMER
+blocks the next Rope attachment
+
+CUTTER
+cuts the current attached Rope
 ```
 
-JAMMER says:
+## Jam Flow
 
 ```text
-your planned next Rope is unavailable
-```
-
-They are different.
-
----
-
-## 8.1 Basic Jam Flow
-
-```text
-SELECT HARDPOINT
+HARDPOINT SELECTED BY JAMMER
 ↓
-WARNING / TARGET MARK
+WARNING
 ↓
 JAM ACTIVE
 ↓
-HARDPOINT CANNOT BE SELECTED FOR NEW ATTACHMENT
+NEW ATTACHMENT TO THAT HARDPOINT DISABLED
 ↓
 JAM EXPIRES
 ↓
-CYAN HARDPOINT RETURNS
+HARDPOINT RESTORED
 ```
 
-### Visual
-
-Normal:
+Visual:
 
 ```text
-CYAN
+NORMAL   = CYAN
+WARNING  = AMBER
+JAMMED   = VIOLET / MAGENTA
 ```
 
-Warning:
+Do not use Cutter-red as primary Jam color.
 
-```text
-AMBER SCAN BRACKETS
-```
+## Jammer MUST NOT
 
-Jammed:
+- cut an already attached Rope
+- force release
+- damage the Player
+- move the Hardpoint
+- change Rope length
 
-```text
-VIOLET / MAGENTA INTERFERENCE
-```
-
-Do not use Cutter red as the primary Jam color.
-
----
-
-## 8.2 Rope Contract
-
-Current Rope input already calls:
-
-```text
-canAttachToSurface(surface)
-```
-
-before selecting an attachment candidate.
-
-Target implementation:
-
-```text
-jammed hardpoint id
-→ canAttachToSurface(surface) = false
-```
-
-for new candidate selection.
-
-### Jammer MUST NOT
-
-```text
-cut an already-attached Rope
-force release
-damage the Player
-move the Hardpoint
-change Rope length
-```
-
-Those belong to other systems.
-
----
-
-## 8.3 First Implementation Rule
-
-If a Hook is already launched before Jam becomes ACTIVE:
-
-```text
-allow that launch to resolve normally
-```
-
-Do not require dynamic in-flight target invalidation in V1.
-
-This makes the warning phase meaningful:
-
-```text
-commit before lock
-OR
-choose another Hardpoint
-```
-
----
-
-## 8.4 Attached Hardpoint Rule
-
-Initial recommended rule:
-
-```text
-Hardpoint with an active Player Rope
-= not eligible as a new Jam target
-```
-
-Reason:
-
-- avoids teammate ambiguity,
-- avoids Cutter-role overlap,
-- simplifies multiplayer,
-- preserves clear visual semantics.
-
----
-
-## 8.5 Fairness Invariant
-
-A Jammer encounter must NEVER create:
-
-```text
-all Base-clear options jammed simultaneously
-```
+## Fairness invariant
 
 At every Jam-active moment:
 
 ```text
-at least one authored Base Rope route remains
+AT LEAST ONE AUTHORED BASE-CLEAR ROUTE REMAINS
 ```
 
-unless the Player is currently transitioning through a clearly recoverable optional challenge path.
-
-No specific Augment may be required to escape a Jam state.
-
----
-
-## 8.6 Candidate Tuning — PLAYTEST ONLY
-
-Not final constants:
+Prefer:
 
 ```text
-warning         ~0.45s
-jam active      ~1.10s
-cooldown        ~2.20s
-target range    authored per encounter
-max targets     1 per Jammer
+2 visible meaningful Hardpoint choices
 ```
 
-Values are candidates, not Runtime baseline.
+before Jam selection.
 
-Tune visibility before duration.
-
----
-
-## 8.7 Death / Disable
-
-If Jammer is killed:
+First dedicated Stage:
 
 ```text
-active Jam ends
-Hardpoint restores
+5-3 SECURITY REVIEW GALLERY
 ```
-
-within a short deterministic transition.
-
-No lingering invisible Jam.
 
 ---
 
-## 8.8 Multiplayer
-
-Jam state is shared authoritative world state.
-
-```text
-one Hardpoint
-one Jam state
-all Players see same state
-```
-
-Required eventual tests:
-
-- two Players aiming same Hardpoint,
-- one attached before warning,
-- Jammer dies during Warning,
-- Jammer dies during Active,
-- reconnect during Active Jam,
-- no duplicate client-local Jam timers.
-
----
-
-# 9. ARTILLERY CONTROLLER
+# 10. ARTILLERY CONTROLLER
 
 Runtime basis:
 
 ```text
 artillery-drone-t1
-CURRENT RUNTIME ARCHETYPE
 ```
 
-Current Runtime behavior already:
-
-```text
-locks a target position
-→ telegraphs
-→ strikes that stored position
-```
-
-## Sector05 Role
+Role:
 
 > **POSITION / DWELL CONTROL**
-
-It prevents:
-
-```text
-sit on one deck
-sit on one Hardpoint
-wait forever
-```
 
 Desired loop:
 
 ```text
 LAND
-→ TELEGRAPH APPEARS
-→ MOVE / COMMIT
+→ TELEGRAPH
+→ MOVE
 → STRIKE HITS OLD POSITION
 ```
 
-## Good Placement
+Good placements:
 
-- broad control floor,
-- suspended console deck,
-- archive approach,
-- long negative-space transition.
+- broad control floor
+- suspended console deck
+- archive approach
+- long negative-space transition
 
-## Do Not
+Do not:
 
-- track the Player continuously after telegraph,
-- overlap the first Artillery lesson with Jammer,
-- place strike radius so every valid landing is covered simultaneously.
+- continuously track after telegraph lock
+- cover every valid landing simultaneously
+- teach first Artillery together with Jammer
+
+First dedicated Stage:
+
+```text
+5-4 CAPACITY ALLOCATION CORE
+```
 
 ---
 
-# 10. CUTTER
+# 11. CUTTER
 
 Runtime basis:
 
 ```text
-CURRENT SENTRY + cutter-fire
+current Sentry + cutter-fire
 ```
 
-## Sector05 Role
+Role:
 
 > **CURRENT ROPE CONTROL**
 
-The Player already learned Cutter in Sector04.
+Sector04 already introduced Rope interruption.
 
-Sector05 does not need a tutorial repeat.
+Therefore Sector05:
 
-It uses Cutter later in combinations with sparse Hardpoints.
-
-Target relation:
-
-```text
-few valid Hardpoints
-+
-Cutter pressure
-=
-high commitment
-```
-
-## Cutter vs Jammer
-
-```text
-JAMMER
-blocks next attachment
-
-CUTTER
-cuts current attached Rope
-```
-
-Never merge them into one enemy in the first Sector05 implementation.
+- does not repeat the tutorial
+- uses Cutter later
+- combines it with sparse Hardpoints
+- does not merge Cutter and Jammer into one ambiguous enemy
 
 ---
 
-# 11. BASELINE SECURITY
+# 12. BASELINE / EXCLUDED SECURITY
 
 Allowed as supporting pressure:
 
@@ -778,493 +590,288 @@ STANDARD SENTRY
 PATROL DRONE
 ```
 
-They are not the Sector identity.
+They are not Sector05 identity.
 
-They provide:
-
-- movement,
-- basic projectile pressure,
-- sightline occupation,
-- background security density.
-
-They should not steal focus from the special ability being taught in a Stage.
-
----
-
-# 12. EXCLUDED SECURITY
-
-## SUPPORT / HEALING
+Explicitly excluded as Sector05 core:
 
 ```text
-support-drone-t1
-NOT USED IN SECTOR05
+PURSUIT / INTERCEPTOR
+SUPPORT / HEALING
+SWARM
 ```
 
 Reason:
 
-- creates HP attrition / kill-order emphasis,
-- weak relation to Rope-route control,
-- can make already dense Corporate encounters feel grindy.
+- Pursuit belongs strongly to Sector04's chase identity
+- Support creates HP attrition / kill-order gameplay
+- Swarm muddies the clean control-space readability
 
-## INTERCEPTOR / PURSUIT
+Sector05 is about:
 
 ```text
-pursuit-drone-t1
-NOT USED IN SECTOR05
+ROUTE
+ANGLE
+POSITION
+CURRENT ROPE
 ```
 
-Reason:
-
-- Sector04 already owns extended pursuit pressure,
-- Sector05 should control route/angle/position rather than repeat chase identity.
-
-## SWARM
-
-Not part of the selected Sector05 special roster.
-
-May be reconsidered only through a separate explicit design decision.
+not enemy quantity.
 
 ---
 
-# 13. SECURITY DENSITY RULE
+# 13. SECURITY DENSITY
 
-Sector05 visibly contains more security than Sector04.
+Sector05 may visibly contain more security than Sector04.
 
 But:
 
 ```text
-TOTAL ENEMIES ↑
-SIMULTANEOUS COGNITIVE PRESSURE ≤ 3 PRIMARY ACTORS
+TOTAL SECURITY ↑
+SIMULTANEOUS PRIMARY COGNITIVE PRESSURE ≤ 3
 ```
 
-Recommended:
+Recommended rule:
 
-```text
-2 enemies
-= common
-
-3 enemies
-= major encounter
-
-4–5 total authored enemies
-= acceptable in late Stage
-if activation is staged
-```
-
-Do not solve difficulty by firing 5 different special abilities simultaneously.
+- first teaching encounter = one special mechanic
+- later synthesis = two mechanics
+- finale may present several security actors, but no more than ~3 primary pressures active simultaneously
 
 ---
 
-# 14. ABILITY COMBINATION RULES
+# 14. STORY INFORMATION LADDER
 
-## Good
+Sector05 Story must reveal evidence in stages.
 
-```text
-AEGIS + STANDARD SENTRY
-```
+## 5-1
 
-Angle + basic pressure.
+Allowed:
 
 ```text
-JAMMER + PATROL
+CONTINUITY CONTROL
+INCIDENT OPERATIONS ACTIVE
+CITY SYSTEM STATUS DEGRADED
+CONTROL NETWORK ONLINE
 ```
 
-Route choice changes while firing origin moves.
+Forbidden:
+
+- Capacity decision
+- Priority decision
+- authorization
+- Group C causal explanation
+- responsible organization/person
+
+## 5-2
+
+Allowed:
 
 ```text
-ARTILLERY + AEGIS
+UPPER CONTROL REMAINS POWERED
+SECURITY OPERATIONS ACTIVE
 ```
 
-Move from marked position, then solve angle.
+Still no causal chain.
+
+## 5-3
+
+Allowed:
 
 ```text
-JAMMER + CUTTER
+INCIDENT RECORDS EXIST
+REVIEW ACCESS RESTRICTED
 ```
 
-Late Sector only:
-next Rope denied + current Rope threatened.
+The player knows the information exists but cannot yet reconstruct the decision.
 
-## Avoid
+## 5-4
 
-First introduction of:
-
-```text
-JAMMER + CUTTER + ARTILLERY
-```
-
-all at once.
-
-Also avoid:
-
-```text
-2 Jammers
-```
-
-until final-stage validation proves at least one Base-clear option always survives.
-
----
-
-# 15. CORPORATE AUTHORIZATION — 3 OF 3
-
-Sector04:
-
-```text
-ANY 2 OF 3
-PLAYER CHOICE
-```
-
-Sector05:
-
-```text
-ALL 3 OF 3
-STORY CONVERGENCE
-```
-
-The three proofs reconstruct the organization's decision logic.
-
----
-
-## 15.1 5-4 — CAPACITY RECORD
-
-```text
-GRID CAPACITY
-CRITICAL DEFICIT
-```
-
-Meaning:
-
-> The post-cascade system could not keep every sector fully operational.
-
-Proof:
-
-```text
-CAPACITY RECORD
-1 / 3
-```
-
----
-
-## 15.2 5-5 — PRIORITY DIRECTIVE
-
-```text
-CONTINUITY PRIORITY
-
-UPPER CONTROL
-MAINTAIN
-
-UPPER EVACUATION TRUNK
-MAINTAIN
-```
-
-Meaning:
-
-> Limited capacity was deliberately prioritized.
-
-Proof:
-
-```text
-PRIORITY DIRECTIVE
-2 / 3
-```
-
----
-
-## 15.3 5-6 — ROUTING AUTHORIZATION
-
-```text
-LOWER ASCENT ROUTING
-SUSPENSION AUTHORIZED
-```
-
-Meaning:
-
-> Lower ascent was not merely broken; suspension was an authorized response.
-
-Proof:
-
-```text
-ROUTING AUTHORIZATION
-3 / 3
-```
-
----
-
-# 16. CANONICAL STORY STATEMENT
-
-Sector05 confirms:
-
-```text
-VERTICAL GRID CASCADE
-= REAL ACCIDENT
-
-POST-CASCADE CAPACITY SHORTAGE
-= REAL
-
-CONTINUITY PRIORITIZATION
-= ORGANIZATIONAL DECISION
-
-LOWER ASCENT / EVACUATION SUSPENSION
-= AUTHORIZED RESPONSE
-```
-
-Sector05 does NOT claim:
-
-```text
-THE ACCIDENT WAS PLANNED
-THE COMPANY WANTED WORKERS TO DIE
-A NAMED CEO PERSONALLY ORDERED MURDER
-```
-
-The moral revelation is:
-
-> **사고 자체만으로 현재의 격차가 생긴 것이 아니라, 사고 이후 무엇을 계속 살릴지 결정하는 조직적 선택이 있었다.**
-
-Player objective remains:
-
-```text
-ESCAPE
-```
-
-not revenge.
-
----
-
-# 17. STAGE PROGRESSION — REV3
-
-| Stage | Name | Spatial Lesson | Special Security | Total Security Target | Story / Access |
-|---|---|---|---|---:|---|
-| **5-1** | **CONTINUITY RECEPTION** | Sealed Surface vs Service Hardpoint | NONE | 0 | Continuity Complex ACTIVE |
-| **5-2** | **CONTROL ATRIUM** | Hardpoint + partition flank | **AEGIS** | 2 | Upper control remains powered |
-| **5-3** | **SECURITY REVIEW GALLERY** | two-choice Hardpoint routing | **JAMMER** | 2–3 | Incident records restricted |
-| **5-4** | **CAPACITY ALLOCATION CORE** | move after landing / broad control deck | **ARTILLERY** | 2 | **CAPACITY RECORD 1/3** |
-| **5-5** | **PRIORITY ROUTING HALL** | route denial + angle control | **JAMMER + AEGIS** | 3–4 | **PRIORITY DIRECTIVE 2/3** |
-| **5-6** | **INCIDENT AUTHORIZATION ANNEX** | sparse commitment under Rope denial | **JAMMER + CUTTER + AEGIS** staged | 4–5 | **ROUTING AUTHORIZATION 3/3** |
-| **5-7** | **EVACUATION CONSEQUENCE ARCHIVE** | must keep moving through archive spine | **ARTILLERY + CUTTER** staged | 3–4 | Lower evacuation suspension consequence |
-| **5-8** | **CONTINUITY COMMAND SPINE** | full controlled-route synthesis | **selected AEGIS / JAMMER / ARTILLERY / CUTTER bands** | ~5 total, max3 active | organizational responsibility + Sector06 route |
-
----
-
-# 18. STAGE DETAIL INTENT
-
-## 5-1 — CONTINUITY RECEPTION
-
-Question:
-
-> **“What can I actually attach to here?”**
-
-No enemy.
-
-Teach:
-
-```text
-SEALED SURFACE
-vs
-SERVICE HARDPOINT
-```
-
-Entry spawn remains provisional until Post-Sector04 transition is authored.
-
----
-
-## 5-2 — CONTROL ATRIUM
-
-Question:
-
-> **“Can I use Rope movement to attack around a protected front?”**
-
-First AEGIS.
-
-Use:
-
-- partitions,
-- two elevations,
-- Hardpoint above/behind Guard.
-
-No Jammer yet.
-
----
-
-## 5-3 — SECURITY REVIEW GALLERY
-
-Question:
-
-> **“If the route I planned becomes unavailable, can I immediately read another?”**
-
-First Jammer.
-
-Mandatory authoring:
-
-```text
-2 visible meaningful Hardpoint choices
-```
-
-Jammer may disable one.
-
-At least one Base-clear option remains.
-
----
-
-## 5-4 — CAPACITY ALLOCATION CORE
-
-Question:
-
-> **“Can I keep moving while the space attacks the place I just occupied?”**
-
-First Artillery.
-
-After the major movement beat, Player reaches the Capacity terminal.
-
-No arbitrary REST room.
-
-Acquire:
+Reveal:
 
 ```text
 CAPACITY RECORD 1/3
 ```
 
----
+Meaning:
 
-## 5-5 — PRIORITY ROUTING HALL
+> capacity was explicitly allocated.
 
-Question:
+## 5-5
 
-> **“Which route and angle remain when the system controls both?”**
-
-Combine:
-
-```text
-JAMMER
-+
-AEGIS
-```
-
-This is the first Stage where two Sector05 special abilities intentionally interact.
-
-Acquire:
+Reveal:
 
 ```text
 PRIORITY DIRECTIVE 2/3
 ```
 
----
+Meaning:
 
-## 5-6 — INCIDENT AUTHORIZATION ANNEX
+> allocation followed a priority structure.
 
-Sector05 security peak before story consequence.
+## 5-6
 
-Question:
-
-> **“Can I make a commitment when both my current Rope and next Rope choice are under control?”**
-
-Use staged composition:
-
-```text
-BAND A
-AEGIS
-
-BAND B
-JAMMER + baseline security
-
-BAND C
-CUTTER + JAMMER
-```
-
-Do not start all 4–5 enemies together.
-
-Acquire:
+Reveal:
 
 ```text
 ROUTING AUTHORIZATION 3/3
 ```
 
-This is the moment Player reconstructs the full decision chain.
+Meaning:
+
+> the priority was approved and operationalized.
+
+This is where the Player reconstructs the decision chain.
+
+## 5-7
+
+Reveal:
+
+```text
+EVACUATION CONSEQUENCE
+```
+
+Meaning:
+
+> the decision had a concrete downstream consequence.
+
+## 5-8
+
+Reveal:
+
+```text
+ORGANIZATIONAL RESPONSIBILITY
+```
+
+Meaning:
+
+> this was a continuity-control decision structure, not a random technical accident.
+
+Sector06 route is introduced only after this point.
 
 ---
 
-## 5-7 — EVACUATION CONSEQUENCE ARCHIVE
+# 15. STAGE PROGRESSION — REV4
 
-Question:
-
-> **“Now that I know the decision, can I keep moving through its evidence?”**
-
-Use:
-
-```text
-ARTILLERY
-+
-CUTTER
-```
-
-but staged so Player is not permanently denied both landing and Rope.
-
-Story:
-
-```text
-LOWER SECTORS
-EVACUATION SUSPENDED
-```
-
-The human consequence becomes explicit.
+| Stage | Name | Primary Spatial Lesson | Special Security | Story Function | Current Planning Status |
+|---|---|---|---|---|---|
+| **5-1** | **CONTINUITY RECEPTION** | Sealed Surface vs Service Hardpoint | NONE | Continuity Complex ACTIVE | AUTHORED PACKAGE MERGED · Runtime not implemented |
+| **5-2** | **CONTROL ATRIUM** | Hardpoint + partition flank | **AEGIS** | Upper control remains powered | AUTHORED PACKAGE MERGED · Runtime not implemented |
+| **5-3** | **SECURITY REVIEW GALLERY** | Two-choice Hardpoint routing | **JAMMER** | Incident records restricted | AUTHORED PACKAGE MERGED · Runtime not implemented |
+| **5-4** | **CAPACITY ALLOCATION CORE** | Move after landing / broad control floor | **ARTILLERY** | **CAPACITY RECORD 1/3** | AUTHORED PACKAGE MERGED · Runtime not implemented |
+| **5-5** | **PRIORITY ROUTING HALL** | Route denial + angle control | **JAMMER + AEGIS** | **PRIORITY DIRECTIVE 2/3** | AUTHORED PACKAGE MERGED · Runtime not implemented |
+| **5-6** | **INCIDENT AUTHORIZATION ANNEX** | Sparse commitment / next route + current Rope | **JAMMER + CUTTER + AEGIS** staged | **ROUTING AUTHORIZATION 3/3** | AUTHORED PACKAGE MERGED · Runtime not implemented |
+| **5-7** | **EVACUATION CONSEQUENCE ARCHIVE** | Keep moving through evidence spine | **ARTILLERY + CUTTER** staged | Lower evacuation consequence | AUTHORED PACKAGE MERGED · Runtime not implemented |
+| **5-8** | **CONTINUITY COMMAND SPINE** | Selected synthesis | **AEGIS / JAMMER / ARTILLERY / CUTTER** | Responsibility + Sector06 route | AUTHORED PACKAGE MERGED · Runtime not implemented |
 
 ---
 
-## 5-8 — CONTINUITY COMMAND SPINE
+# 16. STAGE 5-1 — CURRENT REV4 WORKING AUTHORITY
 
-No new ability.
-
-Final exam through separated control bands.
-
-Example:
+## Name
 
 ```text
-BAND A
-AEGIS + JAMMER
-
-BAND B
-ARTILLERY + STANDARD SECURITY
-
-BAND C
-CUTTER + JAMMER
+CONTINUITY RECEPTION
 ```
 
-Max active primary pressure:
+## Core question
+
+> **“What can I actually attach to here?”**
+
+## Purpose
+
+Sector05 begins without an enemy.
+
+The Player must first understand:
 
 ```text
-3
+CORPORATE FINISH ≠ GRAPPLE SURFACE
 ```
 
-Final story:
+and:
 
 ```text
-INCIDENT RESPONSE DIRECTIVE
-POST-CASCADE
+SERVICE HARDPOINT = VALID ROPE STRUCTURE
+```
+
+## REV4 Flow
+
+```text
+ENTRY
+→ H1
+→ CONTINUITY RECEPTION
+→ H2
+→ CONTROL VOID
+→ H3
+→ SERVICE INSPECTION
+→ SAFE LEFT or FLOW RIGHT
+→ FINAL CONTROL VESTIBULE
+→ 5-2
+```
+
+## Route choice
+
+SAFE LEFT:
+
+- lower maintenance brackets
+- easier release timing
+- better recovery
+- slower
+
+FLOW RIGHT:
+
+- higher service joints
+- faster
+- larger void commitment
+- more momentum expression
+
+Both are intended Base-clear choices.
+
+## Reach correction
+
+Previous REV3.1 had an optional H4 FLOW relation exceeding Base Hook Reach.
+
+REV4 corrects this.
+
+```text
+MAX AUTHORED RELATION = 390px
+BASE HOOK REACH       = 400px
+```
+
+## Enemy
+
+```text
+NONE
+```
+
+## Story
+
+```text
 CONTINUITY CONTROL
+INCIDENT OPERATIONS ACTIVE
 ```
 
-Player now understands:
+then:
 
 ```text
-CAPACITY
-→ PRIORITY
-→ AUTHORIZATION
-→ CONSEQUENCE
-→ RESPONSIBILITY
+CITY SYSTEM STATUS
+DEGRADED
 ```
 
-Then:
+then at the final safe vestibule:
 
 ```text
-3/3 CORPORATE AUTHORIZATION
-+
-5-8 FINAL OBJECTIVE
-→ POST-SECTOR05 TRANSITION READY
+CONTROL NETWORK
+ONLINE
 ```
 
-Destination remains subject to the future Sector05→06 transition/Boss slot.
+Candidate Player Bark:
+
+> **“…여긴 아직 도시를 보고 있어.”**
+
+This Bark is still **REV4 planning**, not final authority until user approval.
 
 ---
 
-# 19. DIFFICULTY CURVE
+# 17. DIFFICULTY CURVE
 
 ```text
 5-1
@@ -1274,10 +881,10 @@ READ SURFACE
 READ ANGLE
 
 5-3
-READ ALTERNATE ROUTE
+READ NEXT ROUTE
 
 5-4
-READ TIME / DWELL
+MOVE AFTER LANDING
 
 5-5
 ROUTE + ANGLE
@@ -1292,330 +899,287 @@ DWELL + CURRENT ROPE
 SELECTED SYNTHESIS
 ```
 
-The difficulty increase comes from:
+---
+
+# 18. PLAYER BARK RULE
+
+Global rule:
 
 ```text
-RELATIONSHIP COMPLEXITY
+SYSTEM = FACT
+PLAYER = HUMAN REACTION
 ```
 
-not just:
+System text:
+
+- status
+- operational condition
+- record
+- authorization
+- routing state
+
+Player Bark:
+
+- surprise
+- doubt
+- anger
+- recognition
+
+Do not use Player Bark to explain the plot.
+
+Never play explanatory dialogue during:
+
+- hard Rope traversal
+- active Jam
+- Cutter pressure
+- Artillery evasion
+- multi-enemy combat
+
+Story belongs primarily at:
 
 ```text
-HP ↑
-DAMAGE ↑
-ENEMY COUNT ↑
+SAFE LANDING
+CONTROL VESTIBULE
+REVIEW ROOM
+ARCHIVE DECK
+POST-ENCOUNTER SPACE
 ```
 
 ---
 
-# 20. AUGMENT POLICY
+# 19. MAP AUTHORING RULES
 
-No Augment is mandatory.
+Every Stage must follow:
 
-### Long Rope
+```text
+REASON / PURPOSE
+↓
+ARCHITECTURAL SPACE
+↓
+PLAYER ROUTE
+↓
+MAP PREVIEW
+↓
+STORY / DIRECTION PREVIEW
+↓
+USER APPROVAL
+↓
+FINAL PACKAGE
+```
 
-Can expand optional Hardpoint choices.
+Never:
 
-Must not bypass sealed-surface logic or entire security bands.
+```text
+make an interesting detour first
+→ invent a reason afterward
+```
 
-### Fast Launch
+Every:
 
-Reduces exposure while committing.
+- descent
+- ascent
+- route change
+- backtrack
+- bypass
 
-### Fast Recover
-
-Improves failed Rope retry.
-
-### Release Propulsion
-
-Improves large Void traversal.
-
-### Direction Dash
-
-Landing correction.
-
-### Combat Actions
-
-Can change whether the Player kills or bypasses a security actor.
-
-None may become the only answer to Jammer/Aegis/Cutter/Artillery.
+must have a physical architectural reason before gameplay geometry is authored.
 
 ---
 
-# 21. JAMMER × AUGMENT FAIRNESS
+# 20. RECOVERY RULE
 
-Jammer authoring is validated against:
-
-```text
-BASE REACH
-```
-
-not Long Rope.
-
-At Jam active:
-
-```text
-Base Player must retain at least one valid clear option.
-```
-
-Long Rope may create an extra route.
-
-It must never be the required rescue from a Jam.
-
----
-
-# 22. MULTIPLAYER
-
-## AEGIS
-
-Target orientation must use authoritative target selection.
-
-## ARTILLERY
-
-Telegraph/strike target position is authoritative.
-
-## CUTTER
-
-One Player's Rope Cut must not detach another Player's Rope.
-
-## JAMMER
-
-Jam is shared world state.
-
-```text
-same Hardpoint
-same Warning
-same Active window
-same restoration
-```
-
-Do not run independent client Jam timers.
-
----
-
-# 23. VISUAL SECURITY LANGUAGE
-
-All special security must be readable before mechanics.
-
-## AEGIS
-
-```text
-broad frontal shield silhouette
-cool white / blue defensive plane
-```
-
-## JAMMER
-
-```text
-antenna / interference emitter
-amber warning
-violet/magenta Hardpoint interference
-```
-
-## ARTILLERY
-
-```text
-target projection / ground reticle
-clear delayed strike line
-```
-
-## CUTTER
-
-```text
-existing Rope-cut identity
-distinct red cut telegraph
-```
-
-The Player should identify the security role from silhouette + VFX before reading text.
-
----
-
-# 24. AUDIO LANGUAGE
-
-Suggested:
-
-## AEGIS
-short shield rotate / lock tone.
-
-## JAMMER
-three-step electronic sequence:
-
-```text
-SCAN
-→ LOCK
-→ INTERFERENCE
-```
-
-## ARTILLERY
-
-```text
-TARGET ACQUIRED
-→ delayed charge
-→ strike
-```
-
-## CUTTER
-
-retain distinct Rope-threat sound.
-
-Do not reuse the same warning beep for every ability.
-
----
-
-# 25. RECOVERY
-
-Corporate recovery geometry is subtle:
-
-- maintenance lip,
-- inspection balcony,
-- service bridge,
-- recessed access shelf.
-
-It should look subordinate to polished architecture.
+Failure should not become long replay.
 
 Target:
 
 ```text
-most failure recovery ≤ 5 seconds
+RECOVERY → RECENT CHALLENGE
+≤ ~5 sec retry
 ```
 
-Special cases:
+Recovery must:
 
-### Cutter
-nearby drop catch.
-
-### Jammer
-failure should route to another Hardpoint/recovery, not death because one route disappeared.
-
-### Artillery
-strike should punish camping, not launch Player into unrecoverable void by default.
+- preserve the same challenge
+- not bypass the lesson
+- not drop the Player back multiple encounters
+- remain readable
 
 ---
 
-# 26. CAMERA
+# 21. STAGE UNIQUENESS RULE
 
-Sector05 Camera must show **decision information**.
+Before approving each map, compare against:
 
-For Jammer:
+- Sector01
+- Sector02
+- Sector03
+- Sector04
+- previous Sector05 Stages
 
-```text
-Jammer
-+
-jam target
-+
-alternative Hardpoint
-```
+Check at minimum:
 
-For AEGIS:
+1. silhouette
+2. primary movement axis
+3. Rope rhythm
+4. failure pattern
+5. enemy pressure
+6. route-choice grammar
+7. Story-safe location
 
-```text
-Guard facing
-+
-flank route
-```
-
-For Artillery:
-
-```text
-telegraph
-+
-next movement destination
-```
-
-For Cutter:
-
-```text
-Cutter source
-+
-current Rope line
-+
-recovery
-```
-
-Camera cannot hide the answer to a control mechanic.
+A Stage should differ meaningfully in at least several of these categories.
 
 ---
 
-# 27. RUNTIME / AUTHORING STATUS
+# 22. RUNTIME ALIGNMENT
 
-## CURRENT RUNTIME
+Current known reusable Runtime basis:
 
 ```text
 shield-drone-t1
-IMPLEMENTED
-
 artillery-drone-t1
-IMPLEMENTED
-
-cutter-fire
-IMPLEMENTED
-
-surface.grappleable=false
-IMPLEMENTED
-
+Sentry + cutter-fire
+surface.grappleable === false
 canAttachToSurface(surface)
-IMPLEMENTED HOOK
 ```
 
-## NEW / NOT IMPLEMENTED
+Sector05 new Runtime requirement:
 
 ```text
-hardpoint-jammer-v1
-sealed-corporate-surface AREA-SPEC authoring preset
-Sector05 3-of-3 Corporate Authorization rollout
-Sector05 source Area/Catalog migration
+HARDPOINT JAMMER
 ```
 
-Important:
+Target implementation principle:
 
-Existing low-level capability does not mean the Stage/AREA-SPEC contract is already authored.
+```text
+jammed hardpoint
+→ canAttachToSurface(surface) = false
+for NEW attachments only
+```
+
+Initial Jammer V1 should not require:
+
+- forced Rope release
+- mid-flight target invalidation
+- new Rope physics
+- damage
+- new player input
 
 ---
 
-# 28. SECTOR05 DO NOT
+# 23. MULTIPLAYER RULES
+
+Any Sector05 world-state mechanic must be authoritative and shared.
+
+Especially Jammer:
 
 ```text
-NO Support / healing enemy
-NO Interceptor / pursuit-drone
-NO Sector04-style endless chase as core identity
-NO invisible grapple denial
-NO Jam that cuts attached Rope
-NO Cutter that also Jams
-NO mandatory enemy kill
-NO mandatory Augment
-NO all Hardpoints jammed
-NO five simultaneous special abilities
-NO random Jam duration/target without deterministic authority
-NO generic office-space visual identity
-NO arbitrary REST stage
-NO direct revenge-story turn
+ONE HARDPOINT
+ONE SHARED JAM STATE
+ALL PLAYERS SEE THE SAME STATE
 ```
+
+Required eventual tests:
+
+- two Players target the same Hardpoint
+- one is already attached before Jam warning
+- Jammer dies during Warning
+- Jammer dies during Active
+- reconnect during active Jam
+- no duplicate client-local timers
 
 ---
 
-# 29. MASTER ACCEPTANCE
+# 24. FORBIDDEN SECTOR05 FAILURE MODES
 
-Sector05 succeeds if a Player can describe it as:
-
-> **“여기는 붙을 곳도 통제되고, 공격 각도도 통제되고, 가만히 있을 곳도 통제되는 공간이다.”**
-
-and the story can be summarized:
-
-> **“사고 뒤 시스템 용량이 부족해졌고, Corporate Continuity가 상층 시스템을 유지하기 위해 하층 상승과 대피를 후순위화·중단하는 결정을 승인했다.”**
-
-Gameplay and Story must express the same idea:
+Do not allow Sector05 to become:
 
 ```text
-CONTROL
+generic office tileset
+combat gauntlet
+random enemy density
+hidden grapple guessing
+all-white unreadable walls
+purple = arbitrary disabled
+Jammer = Cutter clone
+AEGIS = HP sponge
+Artillery = unavoidable floor damage
+story exposition hallway
 ```
+
+Sector identity is:
+
+> **A clean command complex that restricts movement by controlling which structural choices remain available.**
 
 ---
 
-# 30. NEXT AUTHORING ORDER
+# 25. MASTER STORY BOUNDARY
 
-1. Rebuild **5-1 CONTINUITY RECEPTION** from the current Hardpoint study.
-2. 5-1 package approval.
-3. Design **5-2 CONTROL ATRIUM** with first AEGIS.
-4. Design **5-3 SECURITY REVIEW GALLERY** with first HARDPOINT JAMMER.
-5. Recheck Runtime before every Stage.
-6. Do not produce Scenario Art until each Stage blockout/package is approved.
+Sector05 may reveal:
+
+- capacity allocation existed
+- priority routing existed
+- authorization existed
+- those decisions caused downstream operational consequences
+- an organizational continuity-control structure was responsible
+
+Do not jump ahead into Sector06 content before 5-8 establishes the handoff.
+
+Sector05 should answer:
+
+> **“Where was the decision made, and how did the system formalize it?”**
+
+Sector06 should answer the next larger question, not Sector05.
+
+---
+
+# 26. NEXT INTEGRATION ORDER
+
+The authoring checklist above predates this package merge. All eight supplied Stage packages, including their MAP and STORY/DIRECTION previews, are now preserved in this repository; that does not approve Runtime migration or change the current Runtime.
+
+1. Review each packaged Stage against the Runtime boundary before implementation.
+2. Decide the post-Sector 04 Boss → 5-1 transition; do not create a direct 4-8 → 5-1 connection.
+3. Define the shared, authoritative Hardpoint Jammer contract before any Stage depends on it.
+4. Implement geometry, Stable IDs, Camera, Story, progression, and multiplayer ownership only after that decision.
+5. Collect desktop/mobile browser and multiplayer play evidence before declaring a Stage Runtime integrated.
+
+---
+
+# 27. CURRENT AUTHORITY SUMMARY
+
+```text
+SECTOR 05
+CONTINUITY CONTROL
+
+THE SYSTEM CHOOSES
+WHAT CONTINUES
+```
+
+Gameplay progression:
+
+```text
+READ SURFACE
+→ CONTROL ANGLE
+→ CONTROL NEXT ROUTE
+→ CONTROL POSITION
+→ COMBINE ROUTE + ANGLE
+→ COMBINE NEXT ROUTE + CURRENT ROPE
+→ MOVE THROUGH CONSEQUENCE
+→ SYNTHESIZE CONTROL SYSTEM
+```
+
+Story progression:
+
+```text
+ACTIVE
+→ RECORD
+→ CAPACITY
+→ PRIORITY
+→ AUTHORIZATION
+→ CONSEQUENCE
+→ RESPONSIBILITY
+```
+
+The Player should leave Sector05 understanding:
+
+> **상층의 보호는 단순히 남아 있었던 것이 아니다.<br>
+> 도시가 무너지는 동안에도 어떤 시스템은 무엇을 계속 유지할지 선택하고 있었다.**

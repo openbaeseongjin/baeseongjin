@@ -1,0 +1,161 @@
+{
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "DESIGN LOCKED",
+  "stage": {
+    "sector": 5,
+    "stage": 3,
+    "legacyStageAlias": "5-3",
+    "sourceAreaId": "sector-05-03",
+    "name": "SECURITY REVIEW GALLERY"
+  },
+  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
+  },
+  "beats": [
+    {
+      "beatId": "s0-entry",
+      "trigger": {
+        "type": "area-enter"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "SECURITY REVIEW GALLERY",
+            "detail": "ACCESS RESTRICTED"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s1-bay-a",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "bay-a-preview"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s2-transfer",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "lateral-transfer"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s3-bay-b",
+      "trigger": {
+        "type": "camera-zone",
+        "zoneId": "bay-b-preview"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "dialogue",
+          "action": "none"
+        },
+        {
+          "type": "systemText",
+          "action": "none"
+        }
+      ]
+    },
+    {
+      "beatId": "s4-archive-fact",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "final-archive-deck-reached"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "INCIDENT REVIEW ARCHIVE",
+            "detail": "RECORD SET / AVAILABLE · ACCESS / RESTRICTED"
+          },
+          "timing": {
+            "durationSeconds": 1.6
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "local-bark-after-system-read",
+          "content": {
+            "speaker": "PLAYER",
+            "text": "…기록까지 잠가놨네."
+          },
+          "timing": {
+            "minDelaySeconds": 2.0
+          }
+        }
+      ]
+    },
+    {
+      "beatId": "s5-exit",
+      "trigger": {
+        "type": "objective-completed",
+        "objectiveId": "exit-panel-engaged"
+      },
+      "worldPause": false,
+      "playerControl": "ON",
+      "tracks": [
+        {
+          "type": "systemText",
+          "content": {
+            "title": "CAPACITY ALLOCATION CORE",
+            "detail": "ACCESS AHEAD"
+          }
+        },
+        {
+          "type": "dialogue",
+          "action": "none"
+        }
+      ]
+    }
+  ],
+  "validation": [
+    "No dialogue during Jam warning/active/high-input Rope movement",
+    "Only final full-safe Archive Deck contains Player Bark",
+    "No Capacity Record content in 5-3",
+    "Jammer does not share Cutter semantics"
+  ]
+}
