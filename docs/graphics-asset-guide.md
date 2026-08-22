@@ -59,6 +59,9 @@ category는 아래 이름을 사용한다.
 ### 배경과 지형
 
 - 배경은 far·mid·near 깊이와 반복 경계를 구분한다.
+- 새 파라락스 배경 생성의 기본 제작 입력은 같은 캔버스의 `불투명 통이미지 master + 8-bit grayscale depth map`이다. 흰색은 가까운 구조, 검은색은 먼 구조로 통일하고, 자동 추출할 근경은 큰 깊이 차이를 가진 연결된 구조물 최대 2개로 설계한다. 작은 장식·간판·케이블이 별도 근경 조각으로 흩어지지 않게 하며 중앙 이동 여백을 가로질러 두 구조를 연결하지 않는다.
+- 근경 구조가 가리던 영역은 import 단계에서 fixed background에 미리 복원한다. 파라락스 이동 시 투명 구멍, 가장자리 늘어짐과 복제 seam이 보이지 않아야 하며 좌우 가장자리에는 작은 이동량을 감당하는 overscan을 둔다.
+- Runtime은 정규화된 fixed background와 최대 2개 RGBA island만 nearest sampling·정수 좌표·작은 최대 변위로 그린다. 매 프레임 depth pixel 읽기, `getImageData`, pixel loop, mask 생성, texture 재생성과 이 목적만을 위한 WebGL 도입은 금지한다. depth 분리가 불안정하면 fixed background 단독 또는 검수된 수동 far/mid/near 분리를 사용한다.
 - 서로 다른 authored 환경 package가 맞닿는 경계는 한 프레임에 교체하지 않는다. 짧은 경계 구간에서 양쪽 backdrop과 sky를 같은 비율로 opacity 교차 합성하고, mid·near의 큰 구조물은 공용 far 공간으로 수렴시켜 거대한 구조물이 화면 전체에서 겹치지 않게 한다. 이 전환 자산은 collision, 가짜 발판, Gate 또는 Rope 부착 후보를 만들지 않는다.
 - 지형 이미지는 기존 collision surface 위에 입히는 표면이다. PNG 모양으로 충돌 지형을 새로 결정하지 않는다.
 - 환경 장식은 이동 경로 밖이나 배경에 두며 충돌을 추가하지 않는다.

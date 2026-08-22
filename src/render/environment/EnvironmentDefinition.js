@@ -50,6 +50,7 @@ const VALID_ZONE_IDS = Object.freeze([
 ]);
 
 const VALID_DEPTHS = Object.freeze(["far", "mid", "near", "foreground"]);
+const BACKDROP_LAYER_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export class EnvironmentDefinition {
     constructor({ id, atlases, zones, backdrop, terrain, decoration } = {}) {
@@ -271,8 +272,8 @@ function normalizeFrame(frame, label, atlases) {
 function normalizeBackdrop(backdrop, atlases) {
     const obj = plainObject(backdrop, "backdrop");
     knownKeys(obj, ["layers"], "backdrop");
-    if (!Array.isArray(obj.layers) || obj.layers.length === 0) {
-        throw new Error("backdrop requires at least one layer");
+    if (!Array.isArray(obj.layers) || obj.layers.length === 0 || obj.layers.length > 6) {
+        throw new Error("backdrop requires between one and six layers");
     }
     const layers = obj.layers.map((layer, index) => {
         const item = plainObject(layer, `backdrop layer ${index}`);
@@ -281,8 +282,8 @@ function normalizeBackdrop(backdrop, atlases) {
             ["id", "depth", "parallaxX", "parallaxY", "frames", "tileWidth", "baselineRatio", "peakHeight"],
             `backdrop layer ${index}`
         );
-        if (!["far", "mid", "near"].includes(item.id)) {
-            throw new Error(`backdrop layer ${index} has invalid id '${item.id}'`);
+        if (typeof item.id !== "string" || !BACKDROP_LAYER_ID_PATTERN.test(item.id)) {
+            throw new Error(`backdrop layer ${index} id '${item.id}' must be stable kebab-case`);
         }
         if (!Array.isArray(item.frames) || item.frames.length === 0) {
             throw new Error(`backdrop layer ${index} requires at least one frame`);
@@ -304,6 +305,10 @@ function normalizeBackdrop(backdrop, atlases) {
             peakHeight: finiteNumber(item.peakHeight ?? 200, `backdrop layer ${index} peakHeight`, { min: 0 })
         });
     });
+    const layerIds = new Set(layers.map(({ id }) => id));
+    if (layerIds.size !== layers.length) {
+        throw new Error("backdrop layer ids must be unique");
+    }
     return Object.freeze({ layers: Object.freeze(layers) });
 }
 

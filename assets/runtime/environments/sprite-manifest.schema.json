@@ -125,7 +125,7 @@
       "additionalProperties": false,
       "required": ["id", "depth", "parallaxX", "parallaxY", "frames"],
       "properties": {
-        "id": { "type": "string", "enum": ["far", "mid", "near"] },
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
         "depth": { "type": "number" },
         "parallaxX": { "type": "number" },
         "parallaxY": { "type": "number" },

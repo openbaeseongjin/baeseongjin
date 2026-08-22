@@ -3,23 +3,23 @@
     "formatVersion": 1,
     "id": "environment-sector-02-worker-district",
     "generator": {
-        "tool": "openai-imagegen-normalization-and-runtime-seam-fade",
+        "tool": "openai-imagegen-depth-islands-and-adjacent-runtime-seams",
         "exportVersion": "2026-08-22",
-        "sourceExport": "assets/artwork/environments/sector-01-02-runtime-seam/export/sector-02-worker-district"
+        "sourceExport": "assets/artwork/environments/sector-02-03-runtime-seam/export/sector-02-worker-district"
     },
     "atlases": {
-        "sector-02-worker-district-backdrop-far": {
-            "image": "backdrop-far.png",
+        "sector-02-worker-district-backdrop-fixed": {
+            "image": "backdrop-fixed.png",
             "size": { "width": 1024, "height": 2176 },
             "frameSize": { "width": 1024, "height": 2176 }
         },
-        "sector-02-worker-district-backdrop-mid": {
-            "image": "backdrop-mid.png",
+        "sector-02-worker-district-parallax-island-left": {
+            "image": "parallax-island-left.png",
             "size": { "width": 1024, "height": 2176 },
             "frameSize": { "width": 1024, "height": 2176 }
         },
-        "sector-02-worker-district-backdrop-near": {
-            "image": "backdrop-near.png",
+        "sector-02-worker-district-parallax-island-right": {
+            "image": "parallax-island-right.png",
             "size": { "width": 1024, "height": 2176 },
             "frameSize": { "width": 1024, "height": 2176 }
         },
@@ -139,31 +139,31 @@
     "backdrop": {
         "layers": [
             {
-                "id": "far",
+                "id": "fixed-background",
                 "depth": 0,
                 "parallaxX": 0.02,
                 "parallaxY": 0.035,
-                "frames": [{ "atlas": "sector-02-worker-district-backdrop-far", "cell": { "column": 0, "row": 0 } }],
+                "frames": [{ "atlas": "sector-02-worker-district-backdrop-fixed", "cell": { "column": 0, "row": 0 } }],
                 "tileWidth": 1024,
                 "baselineRatio": 1,
                 "peakHeight": 2176
             },
             {
-                "id": "mid",
+                "id": "near-island-left",
                 "depth": 1,
-                "parallaxX": 0.05,
-                "parallaxY": 0.07,
-                "frames": [{ "atlas": "sector-02-worker-district-backdrop-mid", "cell": { "column": 0, "row": 0 } }],
+                "parallaxX": 0.08,
+                "parallaxY": 0.1,
+                "frames": [{ "atlas": "sector-02-worker-district-parallax-island-left", "cell": { "column": 0, "row": 0 } }],
                 "tileWidth": 1024,
                 "baselineRatio": 1,
                 "peakHeight": 2176
             },
             {
-                "id": "near",
+                "id": "near-island-right",
                 "depth": 2,
-                "parallaxX": 0.09,
-                "parallaxY": 0.12,
-                "frames": [{ "atlas": "sector-02-worker-district-backdrop-near", "cell": { "column": 0, "row": 0 } }],
+                "parallaxX": 0.08,
+                "parallaxY": 0.1,
+                "frames": [{ "atlas": "sector-02-worker-district-parallax-island-right", "cell": { "column": 0, "row": 0 } }],
                 "tileWidth": 1024,
                 "baselineRatio": 1,
                 "peakHeight": 2176

@@ -1,0 +1,201 @@
+{
+  "$schema": "../sprite-manifest.schema.json",
+  "formatVersion": 1,
+  "id": "environment-sector-03-central-exchange",
+  "generator": {
+    "tool": "openai-imagegen-depth-islands-and-adjacent-runtime-seams",
+    "exportVersion": "2026-08-22",
+    "sourceExport": "assets/artwork/environments/sector-02-03-runtime-seam/export/sector-03-central-exchange"
+  },
+  "atlases": {
+    "sector-03-central-exchange-backdrop-fixed": {
+      "image": "backdrop-fixed.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-03-central-exchange-parallax-island-left": {
+      "image": "parallax-island-left.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-03-central-exchange-parallax-island-right": {
+      "image": "parallax-island-right.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-03-central-exchange-terrain-fill": {
+      "image": "terrain-fill.png",
+      "size": { "width": 48, "height": 48 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "sector-03-central-exchange-terrain-edge": {
+      "image": "terrain-edge.png",
+      "size": { "width": 48, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "sector-03-central-exchange-decoration": {
+      "image": "decoration.png",
+      "size": { "width": 96, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    }
+  },
+  "zones": [
+    {
+      "id": "waste",
+      "label": "Sector 03 하부 상업 아트리움",
+      "minAltitude": 0,
+      "palette": {
+        "skyTop": "#17162c",
+        "skyBottom": "#090a16",
+        "silhouetteFar": "#25284a",
+        "silhouetteMid": "#303252",
+        "silhouetteNear": "#0b0d18",
+        "terrainFill": "#282838",
+        "terrainEdge": "#5b5d78",
+        "oneWayEdge": "#82d7e8",
+        "accent": "#c084fc"
+      },
+      "backdropVariant": "sector-03-lower",
+      "terrainMaterial": "sector-03-commercial",
+      "decorationGroup": "sector-03-commercial"
+    },
+    {
+      "id": "industrial-maintenance",
+      "label": "Sector 03 서비스 갤러리",
+      "minAltitude": 1800,
+      "palette": {
+        "skyTop": "#1a1932",
+        "skyBottom": "#0b0c19",
+        "silhouetteFar": "#292d50",
+        "silhouetteMid": "#363958",
+        "silhouetteNear": "#0c0f1c",
+        "terrainFill": "#2b2b3b",
+        "terrainEdge": "#60627d",
+        "oneWayEdge": "#82d7e8",
+        "accent": "#c084fc"
+      },
+      "backdropVariant": "sector-03-service",
+      "terrainMaterial": "sector-03-commercial",
+      "decorationGroup": "sector-03-commercial"
+    },
+    {
+      "id": "residential-commercial",
+      "label": "Sector 03 중앙 리테일",
+      "minAltitude": 3600,
+      "palette": {
+        "skyTop": "#1d1c38",
+        "skyBottom": "#0d0e1d",
+        "silhouetteFar": "#2e3358",
+        "silhouetteMid": "#3b3f60",
+        "silhouetteNear": "#0e1120",
+        "terrainFill": "#2f2f40",
+        "terrainEdge": "#686985",
+        "oneWayEdge": "#82d7e8",
+        "accent": "#f4c27a"
+      },
+      "backdropVariant": "sector-03-retail",
+      "terrainMaterial": "sector-03-commercial",
+      "decorationGroup": "sector-03-commercial"
+    },
+    {
+      "id": "corporate-security",
+      "label": "Sector 03 그랜드 아트리움",
+      "minAltitude": 5400,
+      "palette": {
+        "skyTop": "#212040",
+        "skyBottom": "#101120",
+        "silhouetteFar": "#343960",
+        "silhouetteMid": "#424668",
+        "silhouetteNear": "#101322",
+        "terrainFill": "#333344",
+        "terrainEdge": "#70718c",
+        "oneWayEdge": "#82d7e8",
+        "accent": "#f4c27a"
+      },
+      "backdropVariant": "sector-03-atrium",
+      "terrainMaterial": "sector-03-commercial",
+      "decorationGroup": "sector-03-commercial"
+    },
+    {
+      "id": "landing-pad",
+      "label": "Sector 03 상부 익스체인지",
+      "minAltitude": 7200,
+      "palette": {
+        "skyTop": "#252348",
+        "skyBottom": "#121424",
+        "silhouetteFar": "#3a4068",
+        "silhouetteMid": "#494d70",
+        "silhouetteNear": "#121626",
+        "terrainFill": "#373748",
+        "terrainEdge": "#787994",
+        "oneWayEdge": "#82d7e8",
+        "accent": "#d8b4fe"
+      },
+      "backdropVariant": "sector-03-upper",
+      "terrainMaterial": "sector-03-commercial",
+      "decorationGroup": "sector-03-commercial"
+    }
+  ],
+  "backdrop": {
+    "layers": [
+      {
+        "id": "fixed-background",
+        "depth": 0,
+        "parallaxX": 0.018,
+        "parallaxY": 0.03,
+        "frames": [
+          { "atlas": "sector-03-central-exchange-backdrop-fixed", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      },
+      {
+        "id": "near-island-left",
+        "depth": 1,
+        "parallaxX": 0.08,
+        "parallaxY": 0.1,
+        "frames": [
+          { "atlas": "sector-03-central-exchange-parallax-island-left", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      },
+      {
+        "id": "near-island-right",
+        "depth": 2,
+        "parallaxX": 0.08,
+        "parallaxY": 0.1,
+        "frames": [
+          { "atlas": "sector-03-central-exchange-parallax-island-right", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      }
+    ]
+  },
+  "terrain": {
+    "materials": {
+      "sector-03-commercial": {
+        "fill": { "atlas": "sector-03-central-exchange-terrain-fill", "cell": { "column": 1, "row": 0 } },
+        "edge": { "atlas": "sector-03-central-exchange-terrain-edge", "cell": { "column": 0, "row": 0 } },
+        "oneWayColor": "#82d7e8"
+      }
+    }
+  },
+  "decoration": {
+    "groups": {
+      "sector-03-commercial": {
+        "items": [
+          {
+            "frame": { "atlas": "sector-03-central-exchange-decoration", "cell": { "column": 1, "row": 0 } },
+            "placement": { "depth": "mid", "surfaceLevelOffset": 0, "avoidPlayPath": true },
+            "size": { "width": 14, "height": 14 }
+          }
+        ]
+      }
+    }
+  }
+}

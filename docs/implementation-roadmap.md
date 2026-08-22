@@ -67,7 +67,7 @@
 
 상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~~`06`의 `1-1`~~`6-8` 상세 Stage 문서는 48/48 작성됐다. 현재 `seamless-sector-runtime-v9`은 `1-1 → 3-8` 24개 alias를 3개 4,800px seamless Sector의 local vertical landmark stack으로 compile하고, 실제 lateral city wing을 더한다. Sector 04 `4-1 → 4-8`은 standalone migration catalog, Sector 05·06은 문서/alias input으로 남는다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
 
-Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. 이후 병합된 REV8/REV8.1 package의 대형 topology와 Direction track은 아직 future migration이며 현재 mock geometry를 바꾸지 않았다. 남은 것은 REV8 Runtime migration과 Post-Sector 03 Boss→`4-1` 전환 사용자 검토다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
+Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. Issue #790에서 offline depth map 기반 fixed background + 좌·우 parallax island 공용 backdrop과 2→3 교차 전환을 표현 계층에 연결했으며 geometry·Collision·Scanner·진행은 바꾸지 않았다. 이후 병합된 REV8/REV8.1 package의 대형 topology와 Direction track은 아직 future migration이며 현재 mock geometry를 바꾸지 않았다. 남은 것은 REV8 Runtime migration과 Post-Sector 03 Boss→`4-1` 전환 사용자 검토다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
 
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 

@@ -7,7 +7,11 @@ import {
     sceneEnvironmentZone
 } from "../AltitudeZoneResolver.js";
 
-const SECTOR_01_TO_02_CROSSFADE_WORLD_SPAN = 1024;
+const AUTHORED_SECTOR_CROSSFADE_WORLD_SPAN = 1024;
+const AUTHORED_SECTOR_CROSSFADE_PAIRS = Object.freeze([
+    Object.freeze(["sector-01", "sector-02"]),
+    Object.freeze(["sector-02", "sector-03"])
+]);
 
 export class PixelBackdropRenderer {
     constructor({ definition, assets, authoredAreaEnvironmentDefinitions = Object.freeze({}) }) {
@@ -23,7 +27,7 @@ export class PixelBackdropRenderer {
         const camera = scene.camera;
         const playerAltitude = scene.player?.position?.y ?? 0;
         const area = currentAuthoredArea(scene);
-        const authoredTransition = sector01To02BackdropTransition(scene);
+        const authoredTransition = authoredSectorBackdropTransition(scene);
         const zone = sceneEnvironmentZone(this.definition, scene);
         const palette = authoredTransition
             ? blendedTransitionPalette(this.definition, authoredTransition, -playerAltitude)
@@ -173,7 +177,7 @@ export class PixelBackdropRenderer {
                 size: { width: destWidth, height: destHeight },
                 anchor: { x: 0, y: 1 },
                 offset: { x: 0, y: 0 },
-                opacity: layer.id === "far" ? 0.48 : layer.id === "mid" ? 0.62 : 0.74,
+                opacity: layer.id.startsWith("far") ? 0.48 : layer.id.startsWith("mid") ? 0.62 : 0.74,
                 pixelSnap: true,
                 flipX: false,
                 rotation: 0
@@ -199,26 +203,31 @@ function authoredDefinitionForArea(definitions, area) {
     return definitions[area?.legacyAreaId] ?? definitions[area?.id];
 }
 
-function sector01To02BackdropTransition(scene) {
+function authoredSectorBackdropTransition(scene) {
     if (!scene?.world?.landmarks?.length) return null;
     const playerY = scene.player?.position?.y;
     if (!Number.isFinite(playerY)) return null;
     const regions = authoredRegions(scene.world);
-    const fromArea = endpointRegion(regions, "sector-01", "last");
-    const toArea = endpointRegion(regions, "sector-02", "first");
-    if (!fromArea || !toArea) return null;
-    const fromBoundaryY = Number.isFinite(fromArea.exit?.y) ? fromArea.exit.y : fromArea.bounds?.y;
-    const toBoundaryY = Number.isFinite(toArea.entry?.y) ? toArea.entry.y : toArea.bounds?.y + toArea.bounds?.height;
-    if (!Number.isFinite(fromBoundaryY) || !Number.isFinite(toBoundaryY)) return null;
-    const boundaryY = (fromBoundaryY + toBoundaryY) * 0.5;
-    const halfSpan = SECTOR_01_TO_02_CROSSFADE_WORLD_SPAN * 0.5;
-    if (playerY > boundaryY + halfSpan || playerY < boundaryY - halfSpan) return null;
-    const linearProgress = clamp((boundaryY + halfSpan - playerY) / (halfSpan * 2), 0, 1);
-    return {
-        fromArea,
-        toArea,
-        progress: smoothstep(linearProgress)
-    };
+    for (const [fromSectorId, toSectorId] of AUTHORED_SECTOR_CROSSFADE_PAIRS) {
+        const fromArea = endpointRegion(regions, fromSectorId, "last");
+        const toArea = endpointRegion(regions, toSectorId, "first");
+        if (!fromArea || !toArea) continue;
+        const fromBoundaryY = Number.isFinite(fromArea.exit?.y) ? fromArea.exit.y : fromArea.bounds?.y;
+        const toBoundaryY = Number.isFinite(toArea.entry?.y)
+            ? toArea.entry.y
+            : toArea.bounds?.y + toArea.bounds?.height;
+        if (!Number.isFinite(fromBoundaryY) || !Number.isFinite(toBoundaryY)) continue;
+        const boundaryY = (fromBoundaryY + toBoundaryY) * 0.5;
+        const halfSpan = AUTHORED_SECTOR_CROSSFADE_WORLD_SPAN * 0.5;
+        if (playerY > boundaryY + halfSpan || playerY < boundaryY - halfSpan) continue;
+        const linearProgress = clamp((boundaryY + halfSpan - playerY) / (halfSpan * 2), 0, 1);
+        return {
+            fromArea,
+            toArea,
+            progress: smoothstep(linearProgress)
+        };
+    }
+    return null;
 }
 
 function authoredRegions(world) {

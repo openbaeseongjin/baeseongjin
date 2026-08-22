@@ -8,7 +8,8 @@
 - Runtime 상태: `assets/runtime/environments/sector-02-worker-district/`에서 Sector 02 전용 비충돌 backdrop으로 연결
 - 기준 문서: `docs/bsh/scenario/2/README.md`, `docs/bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`
 - 현재 추천 검토본: `export/sector-01-to-02-transition-background-v3.png`
-- 현재 추천 패럴랙스 검토본: `preview/sector-02-worker-district-parallax-composite-v1.png`
+- 현재 추천 패럴랙스 검토본: `preview/depth-islands-v2/master-neutral-pair.png`
+- 현재 추천 Sector 02→03 접점 검토본: `assets/artwork/environments/sector-02-03-runtime-seam/preview/sector-02-03-boundary.png`
 
 이 이미지는 Sector 02 전체의 `VERTICAL · DENSE · MODULAR · WORN · LIVED-IN` 분위기를 검토하기 위한 공용 배경 후보다. 특정 Stage의 Gameplay Camera Shot, Approved Blockout, Collision Surface 또는 전체 이동 경로를 결정하지 않는다. 2-1~2-8에는 아직 Approved Blockout이 없으므로 Stage별 Scenario Art Reference로 사용하지 않는다.
 
@@ -142,3 +143,16 @@ v2는 첫 전이 구도 기록으로 보존하지만, 하단 횡단 Pipe와 접�
 - Runtime package `assets/runtime/environments/sector-02-worker-district/`가 `sprite-manifest.json` validator를 통과했다.
 - 실제 게임의 `sector-02-01`에서 Desktop `1280×720`과 mobile landscape `844×390` Canvas를 확인했고, 세 레이어·Gameplay surface·HUD의 합성 순서와 중앙 이동 여백이 유지된다.
 - 비교 실행한 `sector-01-01`에는 이 package가 선택되지 않았고 브라우저 console warn/error는 없었다.
+
+## Depth Islands V2와 Sector 02→03 접점
+
+- 입력: 사용자가 프로젝트의 Sector 02 배경으로 제공한 `1024×2176` 불투명 RGB PNG
+- 제작 입력: 같은 캔버스의 8-bit grayscale depth map과 ImageGen fixed-background inpaint
+- 정규화: `source/depth-islands-v2/normalize_depth_islands.py`
+- 추출 계약: threshold `160`, 8-connectivity, 500px 이상 좌·우 connected component 정확히 2개
+- 출력: `export/depth-islands-v2/backdrop-fixed.png`, `parallax-island-left.png`, `parallax-island-right.png`
+- 중립 합성: fixed + left + right가 master와 픽셀 단위로 동일
+- 현재 Runtime export: `assets/artwork/environments/sector-02-03-runtime-seam/export/sector-02-worker-district/`
+- 현재 추천 검토본: `preview/depth-islands-v2/master-neutral-pair.png`, `assets/artwork/environments/sector-02-03-runtime-seam/preview/sector-02-03-boundary.png`
+
+Sector 02의 하단과 상단 `512px`에서는 좌·우 island가 16단계 smoothstep alpha로 공용 원경에 수렴한다. fixed plate는 하단에서 Sector 01 far 상단, 상단에서 Sector 03 fixed 하단과 만나며, 이 표현은 기존 Collision·Terrain·Camera·Gameplay·Network authority를 바꾸지 않는다. 제작 프롬프트와 입력은 `source/depth-islands-v2/`가, 양쪽 접점의 결정적 빌드는 `assets/artwork/environments/sector-02-03-runtime-seam/`이 소유한다.
