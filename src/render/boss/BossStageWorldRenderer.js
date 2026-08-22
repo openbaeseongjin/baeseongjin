@@ -11,6 +11,7 @@ export class BossStageWorldRenderer {
     draw({ context, scene, renderStats }) {
         const presentation = scene.bossStagePresentation?.world;
         if (!presentation) return;
+        let drawn = 0;
         for (const object of presentation.objects) {
             if (object.active === false) continue;
             const style = OBJECT_STYLE[object.kind] ?? DEFAULT_STYLE;
@@ -33,7 +34,8 @@ export class BossStageWorldRenderer {
                 context.stroke();
             }
             context.restore();
-            renderStats?.record("bossStageObjects");
+            drawn += 1;
         }
+        renderStats?.recordCollection("bossStageObjects", presentation.objects.length, drawn);
     }
 }
