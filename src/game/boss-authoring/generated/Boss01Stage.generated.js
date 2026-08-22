@@ -201,6 +201,7 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
     },
     combat: {
         additionalPlayerMultiplier: 0.5,
+        closedBodyDamageMultiplier: 0.25,
         generalDamageMode: "standard-combat",
         lateJoinPolicy: "join-current-attempt-without-rescale",
         participantCountSnapshot: "boss-stage-start",
@@ -261,7 +262,9 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             id: "boss-01:beam-failure",
             parameters: {
                 armorOpenSeconds: 0.6,
-                telegraphSeconds: 1
+                failureProgress: 0.5,
+                telegraphSeconds: 1,
+                travelSpeed: 420
             },
             position: {
                 x: 2600,
@@ -341,7 +344,7 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             }
         }
     ],
-    schemaVersion: "boss-stage-spec-v1",
+    schemaVersion: "boss-stage-spec-v2",
     sourceAreaId: "sector-01-08",
     specType: "boss-stage",
     subtitle: "WORKER DISTRICT / BLOCK 12",

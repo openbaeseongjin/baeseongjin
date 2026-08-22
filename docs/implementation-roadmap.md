@@ -21,6 +21,7 @@
 - 적 투사체의 본체 피해·무적 시간과 `cutter-fire` opt-in 로프 절단. 적 위치 넉백은 직접 추격·돌진형만 허용하고 Turret·고정 Patrol 경로형은 피해만 받는다.
 - 체력, 사망·낙사와 플레이어별 활성 체크포인트 즉시 부활
 - 전투 HUD, 피해 숫자, 충격파, 파편과 화면 흔들림
+- [0.55.0 / #858] Boss01의 kinematic Carriage·공유 Beam collider, 끝점 Telegraph→Sweep→약점 loop, P3 50% 파손→Ram, 닫힌 몸체 25%·반복 약점 보너스, owner-first Boss hazard claim과 mock audio
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
 - [과거 절차 프로토타입] 마지막 암석의 정상 목표와 최종 완료 상태
 - [과거 절차 프로토타입] 8레벨 간격 체크포인트 생성·활성화·시각 표시. 현재 기본 Runtime은 24개 Stage마다 진입 세이브 포인트를 사용한다.
@@ -46,7 +47,6 @@
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
 - Sector 03 REV8의 3-3~3-8 topology·Direction migration, Sector 04~06 Runtime 연결과 각 Post-Sector Boss transition (Stage별 Runtime 승격 계약 확정 뒤 진행)
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
-- [구현 #816] Boss01 `GATE LOCKING CARRIAGE`의 Map Editor BossStageSpec·generated Definition·actual Preview, physical Rail Arena·Beam/Ram 피해·Rear Drive/Side Gearbox/Central Core·일반/약점 피해·roster HP scaling·retry/late join·segmented HUD·1-8→Boss→2-1 전환을 연결한다. Boss02~06 concrete Runtime과 Timer·collapse는 후속 범위다.
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
 ## 구현 순서

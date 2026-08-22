@@ -252,6 +252,10 @@ export class RemoteGameAuthority {
         return this.ownerRuntime?.worldSnapshot() ?? null;
     }
 
+    bossStageSnapshot() {
+        return this.ownerRuntime?.bossStageSnapshot() ?? null;
+    }
+
     ownerState() {
         return this.ownerRuntime?.state() ?? null;
     }
@@ -301,6 +305,19 @@ export class RemoteGameAuthority {
         return this.submitImpactClaim(event, outcome);
     }
 
+    submitPredictedBossImpact(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (!this.submitOwnerMotion()) return false;
+        const state = this.ownerRuntime.impactClaimState();
+        const respawned = event.respawned === true;
+        const outcome = {
+            respawned,
+            digest: createPlayerImpactStateDigest(state, { impactType: "player-hit", respawned })
+        };
+        this.pendingImpactClaims.set(event.impactId, { event, outcome });
+        return this.submitImpactClaim(event, outcome);
+    }
+
     submitHitClaim(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         const claim = createProjectileHitClaim({
@@ -342,6 +359,10 @@ export class RemoteGameAuthority {
             position: event.position,
             velocity: event.velocity,
             damage: event.damage ?? event.parameters?.damage ?? 0,
+            sourceKind: event.parameters?.sourceKind ?? null,
+            sourceId: event.parameters?.bossStageId ?? null,
+            sourceType: event.parameters?.hazardKind ?? null,
+            sourceSequence: event.parameters?.hazardSequence ?? null,
             outcome
         });
         this.socket.send(

@@ -70,6 +70,33 @@ function playerHitBinding(event, context) {
     });
 }
 
+const BOSS_CUE_BY_EVENT_TYPE = Object.freeze({
+    "boss-full-beam-sweep-telegraphed": "gameplay-boss-beam-telegraph",
+    "boss-directional-beam-sweep-telegraphed": "gameplay-boss-beam-telegraph",
+    "boss-beam-failure-telegraphed": "gameplay-boss-beam-telegraph",
+    "boss-full-beam-sweep-started": "gameplay-boss-beam-sweep",
+    "boss-directional-beam-sweep-started": "gameplay-boss-beam-sweep",
+    "boss-beam-failure-sweep-started": "gameplay-boss-beam-sweep",
+    "boss-beam-failed": "gameplay-boss-beam-break",
+    "boss-rail-ram-telegraphed": "gameplay-boss-ram-telegraph"
+});
+
+function bossEventBinding(event, context) {
+    const cueId =
+        BOSS_CUE_BY_EVENT_TYPE[event.eventType] ??
+        (event.eventType === "boss-player-hit" && event.hazardKind === "rail-ram" ? "gameplay-boss-ram-impact" : null);
+    if (!cueId) return null;
+    return Object.freeze({
+        cueId,
+        request: Object.freeze({
+            ...context,
+            emitterId: event.bossStageId ?? "boss-01",
+            causalId: eventCausalId("boss", event),
+            position: eventPosition(event) ?? context.listener
+        })
+    });
+}
+
 function checkpointBinding(event, context) {
     if (event.eventType !== "checkpoint-reached" && event.eventType !== "stage-savepoint-reached") return null;
     if (event.playerId && context.localPlayerId && event.playerId !== context.localPlayerId) return null;
@@ -112,6 +139,7 @@ export const DEFAULT_AUDIO_EVENT_HANDLERS = Object.freeze([
     actionStartBinding,
     projectileSpawnBinding,
     playerHitBinding,
+    bossEventBinding,
     checkpointBinding,
     authoredProgressBinding
 ]);

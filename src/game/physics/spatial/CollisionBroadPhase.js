@@ -21,6 +21,7 @@ function surfaceBounds(surface) {
 }
 
 function actorKind(actor) {
+    if (typeof actor?.physicsActorKind === "string") return actor.physicsActorKind;
     return typeof actor?.enemyType === "string" ? "enemy" : "player";
 }
 
@@ -105,7 +106,7 @@ export class CollisionBroadPhase {
         return true;
     }
 
-    beginFrame({ tick, surfaces, players, enemies }) {
+    beginFrame({ tick, surfaces, players, enemies, neutralActors = [] }) {
         this.setSurfaces(surfaces);
         this.resetFrameMetrics();
         this.frameTick = tick;
@@ -115,9 +116,14 @@ export class CollisionBroadPhase {
             const bounds = actorBounds(enemy);
             return this.interestBounds.some((interest) => boundsIntersect(bounds, interest));
         });
+        const activeNeutralActors = neutralActors.filter((actor) => {
+            const bounds = actorBounds(actor);
+            return this.interestBounds.some((interest) => boundsIntersect(bounds, interest));
+        });
         const actors = [
             ...players.filter(({ lifeState }) => lifeState === undefined || lifeState === "active"),
-            ...activeEnemies
+            ...activeEnemies,
+            ...activeNeutralActors
         ];
         this.indexedActorIds = new Set(actors.map(({ id }) => id));
         this.actorOrder = new Map(actors.map(({ id }, index) => [id, index]));

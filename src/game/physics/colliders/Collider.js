@@ -11,6 +11,7 @@ const STATIC_ENEMY_TYPE = Object.freeze({
 });
 const VALID_SURFACE_MOTION_TYPE = Object.freeze({
     [SURFACE_MOTION_TYPE.STATIC]: true,
+    [SURFACE_MOTION_TYPE.KINEMATIC]: true,
     [SURFACE_MOTION_TYPE.DYNAMIC]: true
 });
 
@@ -261,8 +262,15 @@ function actorMass(actor, snapshot) {
 }
 
 function inverseMass(actor, snapshot, fallbackMotionType = SURFACE_MOTION_TYPE.DYNAMIC) {
-    if (actorMotionType(actor, fallbackMotionType) === SURFACE_MOTION_TYPE.STATIC) return 0;
+    if (actorMotionType(actor, fallbackMotionType) !== SURFACE_MOTION_TYPE.DYNAMIC) return 0;
     return 1 / actorMass(actor, snapshot);
+}
+
+function actorRestitution(actor, inverseMassValue) {
+    if (Number.isFinite(actor?.collisionRestitution)) {
+        return Math.max(0, Math.min(1, actor.collisionRestitution));
+    }
+    return inverseMassValue === 0 ? 0 : DYNAMIC_ACTOR_RESTITUTION;
 }
 
 export function resolveActorCollider({
@@ -309,7 +317,7 @@ export function resolveActorCollider({
         const relativeVelocityY = velocity.y - (otherVelocity.y ?? 0);
         const approachSpeed = relativeVelocityX * normal.x + relativeVelocityY * normal.y;
         if (approachSpeed < 0) {
-            const restitution = otherInverseMass === 0 ? 0 : DYNAMIC_ACTOR_RESTITUTION;
+            const restitution = actorRestitution(other, otherInverseMass);
             const impulseMagnitude = (-(1 + restitution) * approachSpeed) / combinedInverseMass;
             velocityDeltaX = normal.x * impulseMagnitude * selfInverseMass;
             velocityDeltaY = normal.y * impulseMagnitude * selfInverseMass;
@@ -319,7 +327,7 @@ export function resolveActorCollider({
     }
     return Object.freeze({
         collided: true,
-        isGrounded: isGrounded || normal.y < -0.55,
+        isGrounded: isGrounded || (other.canGroundActors !== false && normal.y < -0.55),
         velocityDelta: Object.freeze({ x: velocityDeltaX, y: velocityDeltaY })
     });
 }

@@ -1,5 +1,7 @@
 export const PHYSICS_ACTOR_KIND = Object.freeze({
-    ENEMY: "enemy"
+    ENEMY: "enemy",
+    BOSS: "boss",
+    BOSS_HAZARD: "boss-hazard"
 });
 
 export const PLAYER_PHYSICS = Object.freeze({

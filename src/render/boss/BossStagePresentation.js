@@ -9,6 +9,12 @@ function freezeWorldObject(object) {
         state: object.state ?? object.beamState ?? (object.telegraphing ? "telegraph" : "idle"),
         variant: object.variant ?? null,
         actionState: object.actionState ?? null,
+        damaging: object.damaging === true,
+        movementProgress: finite(object.movementProgress),
+        velocity: Object.freeze({ x: finite(object.velocity?.x), y: finite(object.velocity?.y) }),
+        path: object.path
+            ? Object.freeze({ startX: finite(object.path.startX), targetX: finite(object.path.targetX) })
+            : null,
         active: object.active !== false,
         position: Object.freeze({ x: finite(object.position?.x), y: finite(object.position?.y) }),
         ...((object.size ?? object.bounds)
@@ -72,6 +78,8 @@ function stageSpecWorldObjects(stageSpec, snapshot) {
                 variant: mechanic.type,
                 state: mechanicStateById[mechanic.id]?.state ?? mechanism.state ?? "idle",
                 actionState: mechanism.state ?? "idle",
+                damaging: mechanism.state === "sweep",
+                movementProgress: finite(mechanism.movementProgress),
                 position: mechanicStateById[mechanic.id]?.position ?? mechanic.position,
                 size: mechanic.bounds ? { width: mechanic.bounds.width, height: mechanic.bounds.height } : undefined,
                 direction:

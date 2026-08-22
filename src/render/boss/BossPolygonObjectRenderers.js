@@ -68,6 +68,19 @@ class CarriageRenderer extends BossPolygonObjectRenderer {
         context.closePath();
         context.fill();
         context.stroke();
+        if (object.state === "ram") {
+            context.fillStyle = "rgba(251, 113, 133, 0.18)";
+            context.strokeStyle = COLOR.HAZARD;
+            context.lineWidth = 4;
+            context.fillRect(-width * 0.5, -height * 0.5, width, height);
+            context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+            for (const y of [-height * 0.25, 0, height * 0.25]) {
+                context.beginPath();
+                context.moveTo(-direction(object) * width * 0.48, y);
+                context.lineTo(direction(object) * width * 0.32, y);
+                context.stroke();
+            }
+        }
         for (const x of [-width * 0.28, width * 0.28]) {
             context.fillStyle = COLOR.DARK;
             context.beginPath();
@@ -79,6 +92,17 @@ class CarriageRenderer extends BossPolygonObjectRenderer {
         context.strokeStyle = object.state === "beam-failure-telegraph" ? COLOR.WARNING : COLOR.EDGE;
         context.fillRect(-width * 0.1, -height * 0.2, width * 0.2, height * 0.35);
         context.strokeRect(-width * 0.1, -height * 0.2, width * 0.2, height * 0.35);
+        if (object.state === "beam-failure") {
+            context.strokeStyle = COLOR.WARNING;
+            context.lineWidth = 3;
+            for (const offset of [-0.12, 0, 0.12]) {
+                context.beginPath();
+                context.moveTo(width * offset - 18, -height * 0.18);
+                context.lineTo(width * offset + 8, -height * 0.02);
+                context.lineTo(width * offset - 4, height * 0.14);
+                context.stroke();
+            }
+        }
         chevron(context, 0, 0, direction(object), height * 0.14, COLOR.WARNING);
     }
 }
@@ -88,14 +112,29 @@ class BeamRenderer extends BossPolygonObjectRenderer {
         const { width, height } = size(object, 1200, 120);
         const sign = direction(object);
         const directional = object.variant === "directional" || object.state === "directional";
-        const x = directional && sign < 0 ? -width : directional ? 0 : -width * 0.5;
+        const x = -width * 0.5;
         const telegraph = String(object.actionState ?? "").includes("telegraph");
         context.globalAlpha = telegraph ? 0.45 : 0.82;
         context.fillStyle = COLOR.HAZARD;
         context.strokeStyle = telegraph ? COLOR.WARNING : "#fecdd3";
         context.lineWidth = 3;
-        context.fillRect(x, -height * 0.4, width, height * 0.8);
-        context.strokeRect(x, -height * 0.4, width, height * 0.8);
+        context.fillRect(x, -height * 0.5, width, height);
+        context.strokeRect(x, -height * 0.5, width, height);
+        if (telegraph && object.path) {
+            const start = object.path.startX - object.position.x;
+            const target = object.path.targetX - object.position.x;
+            context.save();
+            context.globalAlpha = 0.45;
+            context.setLineDash([24, 16]);
+            context.strokeStyle = COLOR.WARNING;
+            context.strokeRect(
+                Math.min(start, target) - width * 0.5,
+                -height * 0.62,
+                Math.abs(target - start) + width,
+                height * 1.24
+            );
+            context.restore();
+        }
         context.strokeStyle = COLOR.DARK;
         for (let offset = height; offset < width; offset += Math.max(height * 1.5, 180)) {
             const braceX = x + offset;
@@ -105,7 +144,7 @@ class BeamRenderer extends BossPolygonObjectRenderer {
             context.stroke();
         }
         context.globalAlpha = 1;
-        if (directional) chevron(context, sign * width * 0.72, 0, sign, height * 0.35, "#fff1f2");
+        if (directional) chevron(context, sign * width * 0.35, 0, sign, height * 0.35, "#fff1f2");
     }
 }
 

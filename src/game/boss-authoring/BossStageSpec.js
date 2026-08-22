@@ -1,4 +1,4 @@
-export const BOSS_STAGE_SPEC_VERSION = "boss-stage-spec-v1";
+export const BOSS_STAGE_SPEC_VERSION = "boss-stage-spec-v2";
 export const BOSS_STAGE_SPEC_TYPE = "boss-stage";
 
 export const BOSS_MECHANIC_TYPE = Object.freeze({
@@ -91,6 +91,9 @@ export function bossStageDerivedPreview(spec, participantCounts = [1, 2, 3, 4]) 
         });
         return { participantCount, totalHealth, phases };
     });
-    return freezeBossStageValue({ participants });
+    return freezeBossStageValue({
+        closedBodyDamageMultiplier: spec.combat.closedBodyDamageMultiplier,
+        participants
+    });
 }
 import { scaledBossPhaseHealth as scaledRuntimeBossPhaseHealth } from "../boss/BossStageDefinition.js";

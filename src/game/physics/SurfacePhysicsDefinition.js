@@ -1,5 +1,6 @@
 export const SURFACE_MOTION_TYPE = Object.freeze({
     STATIC: "static",
+    KINEMATIC: "kinematic",
     DYNAMIC: "dynamic"
 });
 
@@ -18,4 +19,10 @@ export const SURFACE_PHYSICS = Object.freeze({
 export const SURFACE_MOTION_TYPE_BY_STATIC = Object.freeze({
     true: SURFACE_MOTION_TYPE.STATIC,
     false: SURFACE_MOTION_TYPE.DYNAMIC
+});
+
+export const VALID_SURFACE_MOTION_TYPE = Object.freeze({
+    [SURFACE_MOTION_TYPE.STATIC]: true,
+    [SURFACE_MOTION_TYPE.KINEMATIC]: true,
+    [SURFACE_MOTION_TYPE.DYNAMIC]: true
 });

@@ -8,7 +8,7 @@ authored-area-sha256: c48a4a420de072181d9eb23587eae0c169e32e3830898067896f458fb7
 authored-sector-sha256: 5d6a9f4df482b345829a4be8efe322e52a8a6b63149f5c8aaa7c040874b44f3a
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: df0fc161cdbe0bac8a59dada32e56b910a6a62b2
+reviewed-upstream: 9e09fd524d12b0be02e3344497ef54e212a8e4f2
 -->
 
 ## 상태를 읽는 법
@@ -213,7 +213,7 @@ reviewed-upstream: df0fc161cdbe0bac8a59dada32e56b910a6a62b2
 
 109.  2026-08-22 Map Editor 출구 정합 복구는 출구 데크 위치를 단일 이동 권위로 두고 출구점·Gate trigger·Gate panel·Gate visual·출구 route point를 `AreaExitEditorComponent`가 같은 delta로 파생·동기화하게 했다. 48개 v2 source는 `exit` 편집 도메인을 선언하며 브라우저 Draft와 서버 Apply가 모두 컴포넌트 단위로 재구성하므로 구성요소의 독립 좌표 변경과 사후 divergence 오류를 공개 계약으로 두지 않는다. `1-1`은 사용자가 옮긴 새 출구 데크 `(360,-730)`를 기준으로 출구점 `(520,-762)`, panel `(408,-730)`, Gate visual `(520,-730)`, trigger `(494,-792,52×62)`, 마지막 route point `(360,-730)`를 정렬했고 authored `nextAreaId: sector-01-02`는 유지했다. 단일 Stage Preview만 출구를 content boundary로 격리한다. loopback Editor에서 출구 X를 `360→365`로 바꾼 초안이 서버 검증을 통과하고 Undo 뒤 `360`으로 복구됐으며, 복구된 1-1 Preview는 지형 16개로 browser error 없이 시작했다. 최신 main의 3-1·3-2 Runtime 승격을 보존해 Runtime 적용 Stage는 Sector 01~~02의 16개와 3-1·3-2이며, 3-3~~3-8·Sector 04~~06은 기존처럼 Runtime 보류다.
 
-110. Issue #816은 최신 `GATE LOCKING CARRIAGE`를 일반 Stage와 분리된 canonical `boss-01` Stage로 구현한다. Map Editor는 `specType: boss-stage` source·validator·generated definition·실제 GameSimulation Preview를 사용해 Arena·Carriage·Phase·mechanic·Phase base HP·인원 배율·약점 고정 비율·HUD·전환을 편집하고, 1~4인 derived HP/floor/약점 피해를 읽기 전용으로 표시한다. Runtime은 1-8의 Worker District reveal과 `nextAreaId:null`을 유지한 채 source→Boss→2-1 connector·완료 전 route barrier를 조립하며, Stage 시작 roster로 HP를 고정하고 일반 공격 피해+약점 25% 보너스·Phase floor·late join·전멸 retry·snapshot 수렴을 소유한다. Carriage의 Full/Broken Beam과 Rail Ram은 server-owned timing과 실제 Player 피해를 가지며 P1 Rear Drive·P2 Side Gearbox·P3 Central Lock Core를 공략한다. Boss Timer·Arena collapse·Boss02~06 Runtime은 추가하지 않는다.
+110. Issue #816은 `GATE LOCKING CARRIAGE`를 독립 `boss-01` Stage로 연결했고 Issue #858은 단일 [`boss/01/README.md`](./boss/01/README.md) 계약에 맞춰 Runtime을 정렬한다. BossStageSpec v2는 닫힌 몸체 25%·반복 약점 25%·P3 failureProgress를 저작하고, kinematic Carriage와 Beam body가 화면·collider·상대 속도 impulse의 단일 권위다. 끝점 안전 대기→Telegraph→반대편 Sweep→약점→방향 반전, P2 진행 방향 Beam, P3 실제 Full-Speed Sweep 50% 파손→Core 상시 노출→Ram만 남는 흐름을 사용한다. 피해 클라이언트는 Boss snapshot을 로컬 진행해 body/Beam collision과 HP를 먼저 적용하고 서버 state digest claim으로 수렴한다. Boss Timer·Arena collapse·Boss02~06 Runtime은 추가하지 않는다.
 
 112.  2026-08-22 Map Editor 편집 완결은 48개 v2 Stage의 Entry를 진입점+지지 플랫폼 복합 객체로 만들고 플랫폼 상단 32px 위에 정렬했다. 기존 지지 지형이 없던 Scenario-only 19개에는 표준 Entry deck을 추가했지만 Runtime 승격 상태와 Sector 연결은 바꾸지 않았다. Entry·Exit는 각각 최대 1개이며 삭제 시 전체 구성요소를 제거하고 같은 위치에 재추가하거나 Undo할 수 있다. 불완전한 Scenario Exit는 새 Gate/deck/panel/visual/route 묶음으로 보완할 수 있고, Enemy는 새 Stable ID·activation spec과 실제 `AUTHORABLE_ENEMY_TYPE_IDS` 다중 select로 추가한다. Enemy 종류 한 개는 고정, 복수는 run seed 결정 pool이며 단일 Area Preview도 같은 선택기를 사용한다. Wind mode·activation anchor·Boss mechanic/phase/transition 등 닫힌 값도 Runtime const·Registry·현재 Spec ID select로 바꿨다. Surface·Anchor·Recovery/Route·Enemy·Wind·Camera 삭제는 Draft Undo를 지원하며 Anchor/Wind는 쌍 전체를 제거한다. `초안 검증`은 `메모리 초안 저장`으로 바뀌어 파일 쓰기 없이 현재 Area/Boss Spec을 서버 메모리에 보관하고 dirty Draft Preview를 연다. 일반 Area Preview의 저사양 비행 패널은 Rope 입력 없이 WASD/방향키 이동을 제공하며 일반 게임·Boss·멀티 권위에는 포함되지 않는다. 브라우저에서 6-4 누락 Exit 추가→memory Preview, 1-1 Enemy memory Preview, Entry/Exit 삭제·재추가·최대 1개, Boss memory Preview와 Area 비행 토글을 확인했고 console error는 0이었다.
 
@@ -223,7 +223,7 @@ reviewed-upstream: df0fc161cdbe0bac8a59dada32e56b910a6a62b2
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.
 2. [완료 #633] 과거 2-3 Foundation별 Specialization skeleton을 두 번째 generic offer로 대체하고 3-5에 세 번째 explicit source를 연결했다. 고정 Specialization tier를 복구하지 않는다.
-3. [구현 #816] Boss01 `GATE LOCKING CARRIAGE`는 Map Editor 저작 source와 generated Boss Stage Definition, physical Rail Arena, Full/Broken Beam·Rear Drive/Side Gearbox/Central Lock Core·Rail Ram, 일반/약점 피해·전멸 retry·segmented HUD·1-8 뒤 자동 진입·2-1 전환으로 연결했다. 실제 browser·single/multiplayer 최종 candidate 검증을 통과해야 완료하며 Timer·시간 만료 collapse는 후속 범위다.
+3. [구현 #816, 정렬 #858] Boss01 `GATE LOCKING CARRIAGE`는 Map Editor BossStageSpec v2, kinematic Carriage/Beam physics, P1/P2 Sweep·P3 failure/Ram, 일반/약점 피해, owner-first hazard claim, HUD·mock cue, 1-8→Boss→2-1 전환으로 연결했다. 실제 browser·single/multiplayer final candidate 검증 뒤 완료하며 Timer·시간 만료 collapse는 후속 범위다.
 4. 일반 Timer Prototype `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s`는 HOLD 세 physical mapping이 확정된 뒤 연결한다. 과거 `960/+45/80px/s` baseline은 복구하지 않는다.
 5. Sector 02~05 Boss authored handoff는 [`boss/README.md`](./boss/README.md)에 기록됐지만, identity·arena·phase·보상과 각 `n-8 → Boss → 다음 Sector` Runtime 상세 계약은 후속 기획으로 남는다. Boss 02 REV5-C는 DRAFT이며 구현 근거가 아니다.
 6. Sector 04를 메인 월드에 연결하고 Sector 05·06 Runtime을 저작한다. 상세 시나리오 48/48 완료를 Runtime 완료로 해석하지 않는다.

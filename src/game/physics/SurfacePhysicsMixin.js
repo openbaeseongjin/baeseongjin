@@ -1,6 +1,6 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { requireFinitePhysicsVector, withPhysics } from "./PhysicsMixin.js";
-import { SURFACE_MOTION_TYPE, SURFACE_MOTION_TYPE_BY_STATIC, SURFACE_PHYSICS } from "./SurfacePhysicsDefinition.js";
+import { SURFACE_MOTION_TYPE, SURFACE_PHYSICS, VALID_SURFACE_MOTION_TYPE } from "./SurfacePhysicsDefinition.js";
 import { assertCollider, colliderSnapshotBoundingRadius } from "./colliders/Collider.js";
 
 export function withSurfacePhysics(Base) {
@@ -25,7 +25,7 @@ export function withSurfacePhysics(Base) {
                               ? colliderRadius / SURFACE_PHYSICS.MASS_RADIUS_DIVISOR
                               : SURFACE_PHYSICS.DEFAULT_MASS) ** SURFACE_PHYSICS.MASS_EXPONENT
                       );
-            this.motionType = SURFACE_MOTION_TYPE_BY_STATIC[motionType === SURFACE_MOTION_TYPE.STATIC];
+            this.motionType = VALID_SURFACE_MOTION_TYPE[motionType] ? motionType : SURFACE_MOTION_TYPE.DYNAMIC;
             Object.defineProperty(this, "surfacePhysicsStepPending", {
                 value: false,
                 enumerable: false,
@@ -69,7 +69,7 @@ export function withSurfacePhysics(Base) {
                 throw new Error("actor collision dt must be non-negative");
             if (!Number.isFinite(damping) || damping < SURFACE_PHYSICS.MINIMUM_DT)
                 throw new Error("actor collision damping must be non-negative");
-            if (this.motionType === SURFACE_MOTION_TYPE.STATIC) {
+            if (this.motionType !== SURFACE_MOTION_TYPE.DYNAMIC) {
                 this.actorCollisionVelocity.set(SURFACE_PHYSICS.ZERO_VECTOR.x, SURFACE_PHYSICS.ZERO_VECTOR.y);
                 return false;
             }

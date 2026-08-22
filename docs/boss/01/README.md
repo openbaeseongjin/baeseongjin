@@ -1,6 +1,6 @@
 # Boss 01 — 게이트 잠금 운반기
 
-상태: **DESIGN LOCKED / 구현 정렬 필요**
+상태: **DESIGN LOCKED / RUNTIME ALIGNED IN #858 / BROWSER·OWNER/SERVER VERIFIED**
 
 이 문서는 Boss01의 유일한 현행 기획 기준이다. `legacy/`의 문서는 결정 과정과 이전 인계 원문을 보존할 뿐 구현·검수·Map Editor 비교의 권위가 아니다.
 

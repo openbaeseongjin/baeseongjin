@@ -6,7 +6,11 @@ import { PHYSICS_ACTOR_KIND, PLAYER_PHYSICS } from "./PlayerPhysicsDefinition.js
 import { CircleCollider } from "./colliders/CircleCollider.js";
 import { withSurfacePhysics } from "./SurfacePhysicsMixin.js";
 
-const ENEMY_ACTOR_KINDS = Object.freeze([PHYSICS_ACTOR_KIND.ENEMY]);
+const PLAYER_COLLISION_ACTOR_KINDS = Object.freeze([
+    PHYSICS_ACTOR_KIND.ENEMY,
+    PHYSICS_ACTOR_KIND.BOSS,
+    PHYSICS_ACTOR_KIND.BOSS_HAZARD
+]);
 
 export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSurfacePhysics(class {}))) {
     constructor(config, { collider = new CircleCollider({ radius: config.radius }) } = {}) {
@@ -27,6 +31,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
         this.isGrounded = false;
         this.lastSurfaceCollisionNormals = Object.freeze([]);
         this.lastSurfaceCollisionIncomingVelocity = PLAYER_PHYSICS.ZERO_VECTOR;
+        this.lastActorCollisionIds = Object.freeze([]);
     }
 
     reset(position = PLAYER_PHYSICS.INITIAL_POSITION) {
@@ -37,6 +42,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
         this.isGrounded = false;
         this.lastSurfaceCollisionNormals = Object.freeze([]);
         this.lastSurfaceCollisionIncomingVelocity = PLAYER_PHYSICS.ZERO_VECTOR;
+        this.lastActorCollisionIds = Object.freeze([]);
     }
 
     step(dt, input, surfaces, rope, collision = {}) {
@@ -86,7 +92,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
             actorId: collision.actorId ?? null,
             actorRef: collision.actorRef ?? null,
             actors: collision.actors ?? [],
-            actorKinds: ENEMY_ACTOR_KINDS,
+            actorKinds: PLAYER_COLLISION_ACTOR_KINDS,
             broadPhase: collision.broadPhase ?? null,
             isGrounded: this.isGrounded
         });
@@ -94,6 +100,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
         this.isGrounded = surfaceResolution.isGrounded;
         this.lastSurfaceCollisionNormals = surfaceResolution.collisionNormals;
         this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: impactVelocity.x, y: impactVelocity.y });
+        this.lastActorCollisionIds = surfaceResolution.collidedActorIds;
         rope.apply(this, dt);
         const landed = !wasGrounded && this.isGrounded;
         return Object.freeze({
@@ -106,5 +113,9 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
                 ? Object.freeze({ x: impactVelocity.x, y: impactVelocity.y })
                 : PLAYER_PHYSICS.ZERO_VECTOR
         });
+    }
+
+    collidedWithActor(actorId) {
+        return this.lastActorCollisionIds.includes(actorId);
     }
 }
