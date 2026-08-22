@@ -55,6 +55,17 @@ that. `docs/bsh/scenario/1/1-5/AREA-SPEC.json` was given five equal-ish sequenti
 of the described intent, not a value taken directly from the package, and should be revisited by a human
 with the actual play-tested camera framing in mind.
 
+## 맵 에디터 점검 — 2026-08-22
+
+Map Editor에서 `1-5`의 저장됨/검증 통과 상태(오류 0)를 직접 확인했다. v2 source에는 지형 9개,
+Anchor 8개, Recovery/Route 18개, Low/Upper Guard 2슬롯, Wind 0개, Camera Zone 5개가 있으며,
+모두 기존 Runtime 적용 source에서 읽혔다. 시나리오의 Horseshoe→Long Right Span→Controlled
+Drop→Re-launch→Upper Return→Final Deck 구조와 충돌하는 데이터는 발견하지 못했다.
+
+이번 audit은 source 적합성 확인만 수행했으므로 `저장 적용`을 실행하지 않았고, v2 JSON·generated JS·Camera
+수치를 바꾸지 않았다. 실제 넓은 route를 끝까지 통과하며 모든 Camera Zone 전환과 Cover LOS를 보는 검증은
+기존 `PARTIAL` 상태를 유지한다.
+
 ## Important correction to old docs
 
 Old Production Alignment history mentions A~H Anchors / fixed Foundation expression.

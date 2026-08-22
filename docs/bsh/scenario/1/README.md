@@ -57,6 +57,27 @@
 
 0.45.0부터 1-1/1-2의 System Story와 Player Bark는 별도 Stage 문자열 catalog가 아니라 Direction compiler가 같은 Beat 원본에서 인과 순서대로 만든다. 세 Bark는 각 플레이어 자기 화면의 캐릭터 머리 위에서 타이핑되며, message queue는 future party-chat audience를 수용하지만 현재 Sector 문구를 네트워크로 복제하지 않는다.
 
+## 맵 에디터 전 Stage 정합 감사 — 2026-08-22
+
+**결론: map-editable 범위에서 불일치는 발견되지 않아 저장 적용을 실행하지 않았다.** Sector 01의 여덟 Stage는 모두 `AREA-SPEC.v2.json`을 canonical 원본으로, `AREA-CATALOG.json`의 명시적 `source: "generated"` 선택을 통해 generated Runtime으로 사용한다. 각 Stage는 legacy와 generated를 섞지 않고 하나의 source만 사용한다.
+
+| Stage | 지형 | Anchor | 복구/경로 | 적 슬롯 | 바람원/구역 | Camera Zone | 에디터·생성 Runtime 판정 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| 1-1 | 11 | 2 | 10 | 0 | 0 | 5 | 일치 |
+| 1-2 | 10 | 2 | 9 | 0 | 0 | 5 | 일치 |
+| 1-3 | 14 | 4 | 9 | 3 | 0 | 6 | 일치 |
+| 1-4 | 10 | 0 | 7 | 1 | 0 | 4 | 일치 |
+| 1-5 | 9 | 8 | 18 | 2 | 0 | 5 | 일치 |
+| 1-6 | 11 | 8 | 15 | 3 | 4 | 6 | 일치 |
+| 1-7 | 10 | 11 | 19 | 3 | 3 | 8 | 일치 |
+| 1-8 | 10 | 9 | 20 | 4 | 2 | 9 | 일치 |
+
+- Map Editor에서 모든 Stage의 `저장됨 / 검증 통과`와 오류 0을 직접 확인했다. `바람원/구역`은 source와 zone을 합산한 editor 레이어 수다.
+- v2 원본을 `createAreaDefinitionFromV2`로 다시 compile한 결과와 `Sector01Stage01~08.generated.js`를 키 순서와 무관하게 비교해 Area definition 의미 동등성을 확인했다.
+- 새 로컬 싱글플레이 Preview는 1-6 desktop 및 1-7 `390×844` mobile에서 정상 시작했다. 이는 초기 render·camera framing smoke이며, 전체 경로 traversal, 1-3 Cover LOS, 모든 Camera Zone 전환과 Wind 체감은 별도 수동 gameplay 검증으로 남긴다.
+- 목표·진행·Story·Scanner·수기 Behavior Registry는 editor의 읽기 전용 영역이므로 이 감사에서 편집하거나 구현 완료로 승격하지 않았다. 1-8의 Shutdown/정식 Prop 미구현 상태도 바꾸지 않는다.
+- **병행 개발 보호:** 이 감사와 후속 통합은 main 개발자의 seamless facade·진행·멀티플레이 공개 계약과 분리된 source-isolated branch/worktree에서 수행한다. 맵 원본 수정이 필요할 때에도 Draft → Validate → Apply를 거쳐 해당 Stage의 v2 JSON과 generated JS만 원자적으로 갱신한다.
+
 ## 자산 상태
 
 - 제공 이미지 크기: `1672 × 941 px`

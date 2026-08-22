@@ -21,6 +21,7 @@ import {
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
+import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
 
@@ -88,6 +89,7 @@ export class GameApp {
         this.directionLightingPresentation = direction.lightingPresentation;
         this.directionCharacterPresentation = direction.characterPresentation;
         this.directionCoverage = direction.coverage;
+        this.calibrationPresentation = new CalibrationPresentation({ viewerId: this.authority.playerId });
         this.runner = new FixedStepRunner({
             step: (dt, input) => this.update(dt, input),
             render: (alpha) => this.render(alpha)
@@ -198,6 +200,11 @@ export class GameApp {
         });
         this.directionLightingPresentation.update(dt, { areaId: cameraShot.areaId });
         this.directionCharacterPresentation.update(dt);
+        this.calibrationPresentation.update(dt, {
+            currentAreaId: cameraShot.areaId,
+            player: state.player,
+            events: authorityEvents
+        });
         this.audioBindings?.presentFrame({
             events: [...authorityEvents, ...predictedImpacts],
             context: audioScene,
@@ -293,6 +300,7 @@ export class GameApp {
             localPlayerId: this.authority.playerId,
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
+            calibrationPresentation: this.calibrationPresentation.snapshot(),
             playerMessagePresentation: this.playerMessagePresentation.snapshot(),
             directionLightingPresentation: this.directionLightingPresentation.snapshot(),
             directionCharacterPresentation: this.directionCharacterPresentation.snapshot(),
