@@ -10,6 +10,8 @@ import {
     triggerBounds,
     worldObject
 } from "../AreaDefinition.js";
+import { composeSectorCatalog } from "../../area-authoring-v2/AreaCatalogComposer.js";
+import { GENERATED_AREAS, GENERATED_AREA_CATALOG_MANIFEST } from "../generated/sector03/Sector03Catalog.generated.js";
 
 const interactionRadius = 72;
 
@@ -879,8 +881,17 @@ const area08 = defineArea({
     cueIds: ["upper-market-gate", "free-weave-finale"]
 });
 
-export const SECTOR_03_AREA_CATALOG = defineAreaCatalog({
+const SECTOR_03_LEGACY_AREA_CATALOG = defineAreaCatalog({
     id: "sector-03-authored-mock",
     revision: "sector-03-scenarios-rev1-v1",
     areas: [area01, area02, area03, area04, area05, area06, area07, area08]
+});
+
+export const SECTOR_03_AREA_CATALOG = composeSectorCatalog({
+    id: SECTOR_03_LEGACY_AREA_CATALOG.id,
+    revision: `${SECTOR_03_LEGACY_AREA_CATALOG.revision}-v2-stage01`,
+    manifest: GENERATED_AREA_CATALOG_MANIFEST,
+    legacyAreas: SECTOR_03_LEGACY_AREA_CATALOG.areas,
+    generatedAreas: GENERATED_AREAS,
+    expectedStageIds: GENERATED_AREA_CATALOG_MANIFEST.expectedStageIds
 });

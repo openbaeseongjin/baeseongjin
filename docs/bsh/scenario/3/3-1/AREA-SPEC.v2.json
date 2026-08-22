@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "sector": 3,
     "stage": 1,
@@ -42,11 +42,11 @@
       "y": -32
     },
     "exit": {
-      "id": "sector-03-01:scenario-exit",
-      "x": 1312,
-      "y": -800
+      "id": "sector-03-01:exit",
+      "x": 1440,
+      "y": -832
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-03-02",
     "surfaces": [
       {
         "id": "p0",
@@ -328,8 +328,8 @@
       },
       {
         "id": "sector-03-01:route-exit",
-        "x": 1312,
-        "y": -800,
+        "x": 1376,
+        "y": -832,
         "sourceId": "exit"
       }
     ],
@@ -348,12 +348,102 @@
       }
     ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-03-01:district-sign",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -1026,
+          "y": -286
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-01:district-sign"
+        ]
+      },
+      {
+        "id": "sector-03-01:welcome-kiosk",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -112,
+          "y": -610
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-01:welcome-kiosk"
+        ]
+      },
+      {
+        "id": "sector-03-01:promenade-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 944,
+          "y": -416
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 384,
+            "height": 192
+          }
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "id": "sector-03-01:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 1360,
+          "y": -800
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-03-01:exit-panel-engaged",
+        "gateId": "sector-03-01:gate"
+      },
+      {
+        "id": "sector-03-01:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 1440,
+          "y": -800
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-03-01:gate"
+      }
+    ],
     "objectives": [
       {
         "id": "sector-03-01:final-deck-reached",
         "type": "reach",
-        "target": "exit-deck"
+        "bounds": {
+          "x": 1152,
+          "y": -832,
+          "width": 320,
+          "height": 96
+        }
       },
       {
         "id": "sector-03-01:exit-panel-engaged",
@@ -366,15 +456,39 @@
     ],
     "windZones": [],
     "scannerGroups": [],
-    "storyTriggers": [],
-    "routes": [],
+    "gate": {
+      "id": "sector-03-01:gate",
+      "nextAreaId": "sector-03-02",
+      "requiredObjectiveIds": [
+        "sector-03-01:exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 1414,
+        "y": -862,
+        "width": 52,
+        "height": 62
+      }
+    },
+    "storyTriggers": [
+      "district-sign",
+      "powered-environment",
+      "automated-welcome"
+    ],
+    "routes": [
+      "safe",
+      "flow",
+      "recovery"
+    ],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [
+      "powered-promenade",
+      "commercial-threshold"
+    ]
   },
   "anchors": [
     {
       "target": {
-        "id": "g1-surface",
+        "id": "sector-03-01:g1-surface",
         "x": -1184,
         "y": -192,
         "properties": {
@@ -382,11 +496,12 @@
         }
       },
       "landmark": {
-        "id": "g1",
+        "id": "sector-03-01:g1",
         "x": -1184,
         "y": -192,
         "properties": {
-          "label": "g1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G1",
           "coordinateAnchor": "center",
           "sourceId": "g1"
         }
@@ -394,7 +509,7 @@
     },
     {
       "target": {
-        "id": "g2-surface",
+        "id": "sector-03-01:g2-surface",
         "x": -640,
         "y": -416,
         "properties": {
@@ -402,11 +517,12 @@
         }
       },
       "landmark": {
-        "id": "g2",
+        "id": "sector-03-01:g2",
         "x": -640,
         "y": -416,
         "properties": {
-          "label": "g2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G2",
           "coordinateAnchor": "center",
           "sourceId": "g2"
         }
@@ -414,7 +530,7 @@
     },
     {
       "target": {
-        "id": "g3-surface",
+        "id": "sector-03-01:g3-surface",
         "x": 416,
         "y": -640,
         "properties": {
@@ -422,11 +538,12 @@
         }
       },
       "landmark": {
-        "id": "g3",
+        "id": "sector-03-01:g3",
         "x": 416,
         "y": -640,
         "properties": {
-          "label": "g3",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G3",
           "coordinateAnchor": "center",
           "sourceId": "g3"
         }
@@ -434,7 +551,7 @@
     },
     {
       "target": {
-        "id": "g4-surface",
+        "id": "sector-03-01:g4-surface",
         "x": 1184,
         "y": -672,
         "properties": {
@@ -442,11 +559,12 @@
         }
       },
       "landmark": {
-        "id": "g4",
+        "id": "sector-03-01:g4",
         "x": 1184,
         "y": -672,
         "properties": {
-          "label": "g4",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G4",
           "coordinateAnchor": "center",
           "sourceId": "g4"
         }
@@ -454,7 +572,7 @@
     }
   ],
   "behaviorRefs": [],
-  "scenario": {
+  "provenance": {
     "status": "scenario-only",
     "sourcePath": "docs/bsh/scenario/3/3-1/AREA-SPEC-REV8-DESIGN.json",
     "sourceSchemaVersion": "area-spec-v1",
