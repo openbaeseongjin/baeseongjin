@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const CHECKPOINT_CLAIM_PROTOCOL_VERSION = 1;
+export const CHECKPOINT_CLAIM_PROTOCOL_VERSION = 2;
 
 function requireId(value, label) {
     if (typeof value !== "string" || value.length === 0) throw new Error(`${label} must be non-empty`);
@@ -17,11 +17,12 @@ function requirePosition(value) {
     return normalizeNetworkJson(value, "position");
 }
 
-export function createCheckpointClaim({ checkpointId, clientTick, position }) {
+export function createCheckpointClaim({ checkpointId, clientTick, authorityTick, position }) {
     return Object.freeze({
         protocolVersion: CHECKPOINT_CLAIM_PROTOCOL_VERSION,
         checkpointId: requireId(checkpointId, "checkpointId"),
         clientTick: requireTick(clientTick, "clientTick"),
+        authorityTick: requireTick(authorityTick, "authorityTick"),
         position: requirePosition(position)
     });
 }

@@ -18,6 +18,7 @@ import {
 } from "./enemy-weapon/EnemyWeaponDefinition.js";
 import { withEnemyPhysicsSimulation, withEnemyWeaponSimulation } from "./enemy-weapon/EnemyWeaponSimulation.js";
 import { directionFromEnemyToTarget, visibleEnemyTargets } from "./enemy-weapon/EnemyWeaponTargeting.js";
+import { EnemyActivationState } from "./EnemyActivationState.js";
 
 function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -101,6 +102,7 @@ class EnemyBodyObject extends withSurfacePhysics(
         enemyType = ENEMY_TYPE.SENTRY_T1,
         displayName = enemyType,
         activation = null,
+        awakened = false,
         patrol = null,
         behavior = null,
         swarmGroupId = null,
@@ -133,7 +135,12 @@ class EnemyBodyObject extends withSurfacePhysics(
         this.objectId = objectId;
         this.enemyType = enemyType;
         this.displayName = displayName;
-        this.activation = activation ? Object.freeze({ ...activation }) : null;
+        Object.defineProperty(this, "activationState", {
+            value: new EnemyActivationState(activation, awakened),
+            enumerable: false,
+            writable: false
+        });
+        this.activation = this.activationState.bounds;
         this.patrol = createEnemyPatrolState({
             patrol,
             activation: this.activation,
@@ -204,6 +211,14 @@ class EnemyBodyObject extends withSurfacePhysics(
         return this.health > 0 ? "active" : "inactive";
     }
 
+    observeActivation(targets) {
+        return this.activationState.observe(targets);
+    }
+
+    get awakened() {
+        return this.activationState.awakened;
+    }
+
     enemyBehaviorSnapshot() {
         return this.behavior?.snapshot() ?? null;
     }
@@ -246,6 +261,7 @@ class EnemyBodyObject extends withSurfacePhysics(
             return false;
         }
         if (this.behavior && typeof this.behavior.restore !== "function") return false;
+        if (!this.activationState.restore(state.awakened ?? this.activation === null)) return false;
         this.setPhysicsPosition({
             x: assertFinite(state.position?.x, "enemy.position.x"),
             y: assertFinite(state.position?.y, "enemy.position.y")

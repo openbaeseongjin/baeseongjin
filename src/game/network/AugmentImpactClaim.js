@@ -1,9 +1,9 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 2;
+export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 3;
 
 const ACCEPTED_RESOLUTIONS = new Set(["applied", "shield-blocked", "target-already-dead", "duplicate"]);
-const REJECTED_REASONS = new Set(["target-missing", "invalid"]);
+const REJECTED_REASONS = new Set(["target-missing", "tick-window", "invalid"]);
 
 function requireId(value, label) {
     if (typeof value !== "string" || value.length === 0) throw new Error(`${label} must be non-empty`);
@@ -47,6 +47,7 @@ export function createAugmentImpactClaim({
     sourcePlayerId,
     targetId,
     clientTick,
+    authorityTick,
     effectId,
     sourceKind,
     sourcePosition,
@@ -62,6 +63,7 @@ export function createAugmentImpactClaim({
         sourcePlayerId: requireId(sourcePlayerId, "sourcePlayerId"),
         targetId: requireId(targetId, "targetId"),
         clientTick: requireNonNegativeSafeInteger(clientTick, "clientTick"),
+        authorityTick: requireNonNegativeSafeInteger(authorityTick, "authorityTick"),
         effectId: requireId(effectId, "effectId"),
         sourceKind: requireId(sourceKind, "sourceKind"),
         sourcePosition: requireVector(sourcePosition, "sourcePosition"),

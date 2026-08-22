@@ -22,6 +22,7 @@ export const withEnemyRenderSnapshot = createRenderSnapshotCapabilityMixin({
             enemyType: this.enemyType,
             displayName: this.displayName,
             activation: this.activation ? { ...this.activation } : null,
+            awakened: this.awakened,
             patrol: patrolState(this.patrol),
             swarmGroupId: this.swarmGroupId,
             behaviorState: this.enemyBehaviorSnapshot(),

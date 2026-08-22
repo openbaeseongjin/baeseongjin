@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const ROPE_IMPACT_CLAIM_PROTOCOL_VERSION = 1;
+export const ROPE_IMPACT_CLAIM_PROTOCOL_VERSION = 2;
 const ROPE_IMPACT_TARGET_KIND = Object.freeze({ enemy: true, boss: true });
 
 function requireId(value, label) {
@@ -25,11 +25,15 @@ export function createRopeImpactClaim({
     targetId,
     targetKind = "enemy",
     clientTick,
+    authorityTick,
     position,
     velocity
 }) {
     if (!Number.isSafeInteger(clientTick) || clientTick < 0) {
         throw new Error("clientTick must be a non-negative safe integer");
+    }
+    if (!Number.isSafeInteger(authorityTick) || authorityTick < 0) {
+        throw new Error("authorityTick must be a non-negative safe integer");
     }
     return Object.freeze({
         protocolVersion: ROPE_IMPACT_CLAIM_PROTOCOL_VERSION,
@@ -37,6 +41,7 @@ export function createRopeImpactClaim({
         targetId: requireId(targetId, "targetId"),
         targetKind: requireTargetKind(targetKind),
         clientTick,
+        authorityTick,
         position: requireVector(position, "position"),
         velocity: requireVector(velocity, "velocity")
     });

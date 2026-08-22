@@ -49,6 +49,7 @@ export class AuthorityServerSession {
         this.resolvedCheckpointClaims = new Map();
         this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
+        this.lastOwnerMotionClientTicks = new Map();
         this.nextImpactRecoverySequence = 0;
         this.nextSnapshotSequence = 0;
     }
@@ -69,7 +70,7 @@ export class AuthorityServerSession {
         const minimumTick =
             this.simulation.getTick() - Math.round(COMBAT_CONFIG.playerProjectileLifetimeSeconds / this.fixedDt);
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return createProjectileHitReceipt({
                 predictionId: claim.predictionId,
                 accepted: false,
@@ -97,7 +98,7 @@ export class AuthorityServerSession {
         if (existing) return existing.receipt;
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return createPlayerProjectileSpawnReceipt({
                 predictionId: claim.predictionId,
                 accepted: false,
@@ -141,7 +142,7 @@ export class AuthorityServerSession {
                     reason: "recovery-player-mismatch"
                 });
             }
-            const previousOwnerTick = this.lastOwnerMotionTicks.get(authenticatedPlayerId) ?? -1;
+            const previousOwnerTick = this.lastOwnerMotionClientTicks.get(authenticatedPlayerId) ?? -1;
             if (claim.outcome.stateTick < previousOwnerTick) {
                 return createPlayerImpactReceipt({
                     impactId: claim.impactId,
@@ -149,7 +150,7 @@ export class AuthorityServerSession {
                     reason: "stale-recovery-state"
                 });
             }
-            if (claim.outcome.stateTick > this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks) {
+            if (claim.authorityTick > this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks) {
                 return createPlayerImpactReceipt({
                     impactId: claim.impactId,
                     accepted: false,
@@ -161,7 +162,8 @@ export class AuthorityServerSession {
                 ...this.simulation.resolvePlayerImpactRecovery(authenticatedPlayerId, claim)
             });
             if (recoveryResult.accepted) {
-                this.lastOwnerMotionTicks.set(authenticatedPlayerId, claim.outcome.stateTick);
+                this.lastOwnerMotionTicks.set(authenticatedPlayerId, claim.authorityTick);
+                this.lastOwnerMotionClientTicks.set(authenticatedPlayerId, claim.outcome.stateTick);
                 this.pendingImpactRecoveries.delete(recoveryKey);
                 this.resolvedImpactClaims.set(claim.impactId, {
                     receipt: recoveryResult,
@@ -216,7 +218,7 @@ export class AuthorityServerSession {
         }
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return Object.freeze({
                 sourceId: claim.sourceId,
                 foundationId: claim.foundationId,
@@ -243,7 +245,7 @@ export class AuthorityServerSession {
         if (existing) return existing.receipt;
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return createRopeImpactReceipt({
                 predictionId: claim.predictionId,
                 accepted: false,
@@ -267,7 +269,7 @@ export class AuthorityServerSession {
         }
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return Object.freeze({ sourceId: claim.sourceId, accepted: false, reason: "tick-window" });
         }
         const source = this.simulation.world.objects?.find(({ id }) => id === claim.sourceId);
@@ -293,8 +295,8 @@ export class AuthorityServerSession {
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.inputLeadTicks;
         const simulationResult =
-            claim.clientTick < minimumTick || claim.clientTick > maximumTick
-                ? Object.freeze({ accepted: false, reason: "invalid" })
+            claim.authorityTick < minimumTick || claim.authorityTick > maximumTick
+                ? Object.freeze({ accepted: false, reason: "tick-window" })
                 : this.simulation.resolveAugmentImpactClaim(authenticatedPlayerId, claim, {
                       positionTolerance: MULTIPLAYER_TIMING.hitClaimPositionTolerance
                   });
@@ -310,14 +312,21 @@ export class AuthorityServerSession {
             accepted: simulationResult.accepted,
             ...(simulationResult.accepted
                 ? { resolution: acceptedResolution }
-                : { reason: simulationResult.reason === "target-missing" ? "target-missing" : "invalid" }),
+                : {
+                      reason:
+                          simulationResult.reason === "target-missing" || simulationResult.reason === "tick-window"
+                              ? simulationResult.reason
+                              : "invalid"
+                  }),
             damage: simulationResult.damage ?? 0,
             knockbackApplied: simulationResult.knockbackApplied === true
         });
-        this.resolvedAugmentImpactClaims.set(claimKey, {
-            receipt,
-            resolvedAtTick: this.simulation.getTick()
-        });
+        if (receipt.accepted || receipt.reason !== "tick-window") {
+            this.resolvedAugmentImpactClaims.set(claimKey, {
+                receipt,
+                resolvedAtTick: this.simulation.getTick()
+            });
+        }
         return receipt;
     }
 
@@ -329,7 +338,7 @@ export class AuthorityServerSession {
         if (existing) return existing;
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return createCheckpointClaimReceipt({
                 checkpointId: claim.checkpointId,
                 accepted: false,
@@ -353,7 +362,7 @@ export class AuthorityServerSession {
         if (this.resolvedSummitClaim) return this.resolvedSummitClaim;
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
-        if (claim.clientTick < minimumTick || claim.clientTick > maximumTick) {
+        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return createSummitClaimReceipt({ accepted: false, reason: "tick-window" });
         }
         const receipt = createSummitClaimReceipt(
@@ -386,7 +395,7 @@ export class AuthorityServerSession {
     submitOwnerMotion(authenticatedPlayerId, state) {
         const player = this.simulation.playerState(authenticatedPlayerId);
         if (!player) throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
-        const previousTick = this.lastOwnerMotionTicks.get(authenticatedPlayerId) ?? -1;
+        const previousTick = this.lastOwnerMotionClientTicks.get(authenticatedPlayerId) ?? -1;
         if (state.clientTick <= previousTick) {
             return createOwnerMotionReceipt({
                 clientTick: state.clientTick,
@@ -396,11 +405,11 @@ export class AuthorityServerSession {
         }
         const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
         const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
-        if (state.clientTick < minimumTick || state.clientTick > maximumTick) {
+        if (state.authorityTick < minimumTick || state.authorityTick > maximumTick) {
             return createOwnerMotionReceipt({
                 clientTick: state.clientTick,
-                accepted: true,
-                resolution: "ignored-tick-window"
+                accepted: false,
+                reason: "tick-window"
             });
         }
         if (this.simulation.runState !== "playing") {
@@ -419,7 +428,8 @@ export class AuthorityServerSession {
         }
         if (state.position.y > WORLD_CONFIG.floorY + 780) {
             this.simulation.resolvePlayerFall(authenticatedPlayerId);
-            this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
+            this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.authorityTick);
+            this.lastOwnerMotionClientTicks.set(authenticatedPlayerId, state.clientTick);
             return createOwnerMotionReceipt({
                 clientTick: state.clientTick,
                 accepted: true,
@@ -427,7 +437,8 @@ export class AuthorityServerSession {
             });
         }
         this.simulation.applyOwnerMotion(authenticatedPlayerId, state);
-        this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.clientTick);
+        this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.authorityTick);
+        this.lastOwnerMotionClientTicks.set(authenticatedPlayerId, state.clientTick);
         return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: true });
     }
 
@@ -533,6 +544,7 @@ export class AuthorityServerSession {
     removePlayer(playerId) {
         this.inbox.removePlayer(playerId);
         this.lastOwnerMotionTicks.delete(playerId);
+        this.lastOwnerMotionClientTicks.delete(playerId);
         for (const key of this.pendingImpactRecoveries.keys()) {
             if (key.startsWith(`${playerId}\u0000`)) this.pendingImpactRecoveries.delete(key);
         }

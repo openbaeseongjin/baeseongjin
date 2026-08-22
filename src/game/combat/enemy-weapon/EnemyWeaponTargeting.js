@@ -19,16 +19,7 @@ function hasLineOfSight(enemy, target, surfaces) {
 }
 
 export function visibleEnemyTargets(enemy, targets, surfaces) {
-    const eligibleTargets = enemy.activation
-        ? targets.filter(
-              ({ physics }) =>
-                  physics.position.x >= enemy.activation.x &&
-                  physics.position.x <= enemy.activation.x + enemy.activation.width &&
-                  physics.position.y >= enemy.activation.y &&
-                  physics.position.y <= enemy.activation.y + enemy.activation.height
-          )
-        : targets;
-    return eligibleTargets.filter((target) => hasLineOfSight(enemy, target, surfaces));
+    return targets.filter((target) => hasLineOfSight(enemy, target, surfaces));
 }
 
 export function selectEnemyWeaponTarget({ enemy, visibleTargets, range, lockedTargetId, canAcquireTarget }) {

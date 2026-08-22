@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const SUMMIT_CLAIM_PROTOCOL_VERSION = 1;
+export const SUMMIT_CLAIM_PROTOCOL_VERSION = 2;
 
 function requireTick(value, label) {
     if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${label} must be a non-negative safe integer`);
@@ -12,10 +12,11 @@ function requirePosition(value) {
     return normalizeNetworkJson(value, "position");
 }
 
-export function createSummitClaim({ clientTick, position }) {
+export function createSummitClaim({ clientTick, authorityTick, position }) {
     return Object.freeze({
         protocolVersion: SUMMIT_CLAIM_PROTOCOL_VERSION,
         clientTick: requireTick(clientTick, "clientTick"),
+        authorityTick: requireTick(authorityTick, "authorityTick"),
         position: requirePosition(position)
     });
 }
