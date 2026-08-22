@@ -5,6 +5,7 @@ import { dirname, relative, resolve, sep } from "node:path";
 import { validateAreaCatalogManifest } from "../../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
 import {
     canonicalizeAreaSpecV2,
+    createAreaDefinitionFromV2,
     createScenarioPreviewAreaDefinitionFromV2
 } from "../../src/game/world/area-authoring-v2/AreaSpecV2.js";
 import { collectGeneratedOutputs } from "../../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
@@ -13,6 +14,7 @@ import {
     validateAreaSpecV2
 } from "../../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
 import { synchronizeExitEditorDefinition } from "../../src/game/world/area-authoring-v2/editor/AreaExitEditorComponent.js";
+import { synchronizeEntryEditorDefinition } from "../../src/game/world/area-authoring-v2/editor/AreaEntryEditorComponent.js";
 import { bossStageDerivedPreview, canonicalizeBossStageSpec } from "../../src/game/boss-authoring/BossStageSpec.js";
 import { bossStageGeneratedModule } from "../../src/game/boss-authoring/BossStageSpecGenerator.js";
 import {
@@ -155,11 +157,16 @@ function assertEditableDraft(entry, baselineSpec, candidateSpec) {
 }
 
 function validateEditableSpec(entry, baselineSpec, candidateSpec) {
-    const validated = validateSpec(entry, candidateSpec);
-    if (entry.specType === "boss-stage") return validated;
+    if (entry.specType === "boss-stage") return validateSpec(entry, candidateSpec);
+    if (containsExecutableValue(candidateSpec)) {
+        throw error("spec-executable-value", "Map editor specs cannot contain executable values.");
+    }
+    assertStageIdentity(entry, candidateSpec);
+    const synchronized = structuredClone(candidateSpec);
+    const entrySynchronized = synchronizeEntryEditorDefinition(baselineSpec.definition, synchronized.definition);
     return validateSpec(entry, {
-        ...validated,
-        definition: synchronizeExitEditorDefinition(baselineSpec.definition, validated.definition)
+        ...synchronized,
+        definition: synchronizeExitEditorDefinition(baselineSpec.definition, entrySynchronized)
     });
 }
 
@@ -309,6 +316,8 @@ export async function createMapEditorAuthoringServer({
             sourcePath,
             outputPath,
             spec,
+            memorySpec: null,
+            memoryRevision: 0,
             runtimePromotion: runtimePromotionReadiness(entry, spec),
             sourceHash: revisionFor(sourceContent),
             revision: 0
@@ -322,24 +331,29 @@ export async function createMapEditorAuthoringServer({
     }
 
     function previewAvailable(stage) {
+        const spec = stage.memorySpec ?? stage.spec;
         return Boolean(
-            stage.outputPath || (stage.entry.authoringMode === "scenario-only" && stage.spec.definition.surfaces.length)
+            stage.outputPath || (stage.entry.authoringMode === "scenario-only" && spec.definition.surfaces.length)
         );
     }
 
     function stageValue(stage) {
+        const activeSpec = stage.memorySpec ?? stage.spec;
         return Object.freeze({
             stageId: stage.entry.stageId,
             specType: stage.entry.specType ?? "area",
             areaId: stage.entry.areaId ?? null,
             bossStageId: stage.entry.bossStageId ?? null,
-            name: stage.entry.specType === "boss-stage" ? stage.spec.name : stage.spec.definition.name,
+            name: stage.entry.specType === "boss-stage" ? activeSpec.name : activeSpec.definition.name,
             authoringMode: stage.entry.authoringMode,
             runtimePromotion: stage.runtimePromotion,
             revision: stage.revision,
-            spec: structuredClone(stage.spec),
+            spec: structuredClone(activeSpec),
+            ...(stage.memorySpec ? { sourceSpec: structuredClone(stage.spec) } : {}),
+            memoryStored: Boolean(stage.memorySpec),
+            memoryRevision: stage.memoryRevision,
             previewAvailable: previewAvailable(stage),
-            ...(stage.entry.specType === "boss-stage" ? { derivedPreview: bossStageDerivedPreview(stage.spec) } : {}),
+            ...(stage.entry.specType === "boss-stage" ? { derivedPreview: bossStageDerivedPreview(activeSpec) } : {}),
             ...(stage.outputPath
                 ? {
                       moduleUrl: `/${relative(root, stage.outputPath).replaceAll("\\", "/")}`,
@@ -453,7 +467,15 @@ export async function createMapEditorAuthoringServer({
             const baselineSpec = await readStageSpecFromDisk(stage);
             const canonical = validateEditableSpec(stage.entry, baselineSpec, spec);
             assertEditableDraft(stage.entry, baselineSpec, canonical);
-            return Object.freeze({ valid: true, issues: [], spec: structuredClone(canonical) });
+            stage.memorySpec = canonical;
+            stage.memoryRevision += 1;
+            return Object.freeze({
+                valid: true,
+                issues: [],
+                spec: structuredClone(canonical),
+                memoryStored: true,
+                memoryRevision: stage.memoryRevision
+            });
         },
 
         async applyStage({ stageId, spec, baseRevision } = {}) {
@@ -477,6 +499,7 @@ export async function createMapEditorAuthoringServer({
             await assertSourceUnchanged(stage);
             for (const write of writes) await writeFile(write.path, write.content, "utf8");
             stage.spec = canonical;
+            stage.memorySpec = null;
             stage.runtimePromotion = runtimePromotionReadiness(stage.entry, canonical);
             stage.sourceHash = revisionFor(sourceContent);
             stage.revision += 1;
@@ -515,25 +538,22 @@ export async function createMapEditorAuthoringServer({
                 if (!previewAvailable(stageRecord)) {
                     throw error("preview-unavailable", "This stage does not have authored terrain for a game preview.");
                 }
-                if (stageRecord.entry.authoringMode === "scenario-only") {
-                    return json(response, 200, {
-                        stageId: stage.stageId,
-                        areaId: stage.areaId,
-                        revision: stage.revision,
-                        previewArea: createScenarioPreviewAreaDefinitionFromV2(stageRecord.spec)
-                    });
-                }
+                const previewSpec = stageRecord.memorySpec ?? stageRecord.spec;
                 return json(response, 200, {
                     stageId: stage.stageId,
                     areaId: stage.areaId,
                     specType: stage.specType,
                     bossStageId: stage.bossStageId,
-                    revision: stage.revision,
-                    moduleUrl: stage.moduleUrl,
-                    outputRevision: stage.outputRevision,
+                    revision: stageRecord.memorySpec ? `memory-${stageRecord.memoryRevision}` : String(stage.revision),
+                    memoryStored: Boolean(stageRecord.memorySpec),
                     ...(stage.specType === "boss-stage"
                         ? { spec: stage.spec, derivedPreview: stage.derivedPreview }
-                        : {})
+                        : {
+                              previewArea:
+                                  stageRecord.entry.authoringMode === "scenario-only"
+                                      ? createScenarioPreviewAreaDefinitionFromV2(previewSpec)
+                                      : createAreaDefinitionFromV2(previewSpec)
+                          })
                 });
             }
             if (route.action === "reference" && request.method === "GET") {

@@ -181,6 +181,12 @@ function createEnemyRuntime(properties) {
     throw new Error(`unknown enemy type: ${properties.enemyType}`);
 }
 
+function resolveEnemySpawnDefinition(spawn, context) {
+    if (!spawn.enemySelection) return spawn;
+    const { areaId, ...encounter } = spawn;
+    return { ...spawn, ...resolveEnemyEncounter(encounter, context), areaId: areaId ?? null };
+}
+
 function cloneSwingDrag(swingDrag) {
     if (!swingDrag) return null;
     return {
@@ -991,15 +997,10 @@ export class GameSimulation {
             if (!spawn) throw new Error(`unknown enemy network objectId: ${state.objectId}`);
             let definition = staticStateByObjectId.get(state.objectId);
             if (!definition) {
-                definition = spawn.enemySelection
-                    ? {
-                          ...spawn,
-                          ...resolveEnemyEncounter(spawn, {
-                              runSeed: this.world.seed,
-                              worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
-                          })
-                      }
-                    : spawn;
+                definition = resolveEnemySpawnDefinition(spawn, {
+                    runSeed: this.world.seed,
+                    worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
+                });
                 staticStateByObjectId.set(state.objectId, definition);
             }
             const collider = state.collider ?? definition.collider ?? null;
@@ -2898,15 +2899,10 @@ export class GameSimulation {
 
     createEnemies() {
         return this.world.enemySpawns.map((spawn) => {
-            const definition = spawn.enemySelection
-                ? {
-                      ...spawn,
-                      ...resolveEnemyEncounter(spawn, {
-                          runSeed: this.world.seed,
-                          worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
-                      })
-                  }
-                : spawn;
+            const definition = resolveEnemySpawnDefinition(spawn, {
+                runSeed: this.world.seed,
+                worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
+            });
             const position = definition.position ?? definition;
             this.enemyRuntimeCreations += 1;
             return createEnemyRuntime({

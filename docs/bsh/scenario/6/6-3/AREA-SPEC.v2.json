@@ -48,7 +48,37 @@
       "y": -1810
     },
     "nextAreaId": null,
-    "surfaces": [],
+    "surfaces": [
+      {
+        "id": "sector-06-03:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1100,
+          "y": -88
+        },
+        "vertices": [
+          {
+            "x": -1196,
+            "y": -88
+          },
+          {
+            "x": -1004,
+            "y": -88
+          },
+          {
+            "x": -1004,
+            "y": -56
+          },
+          {
+            "x": -1196,
+            "y": -56
+          }
+        ]
+      }
+    ],
     "routePoints": [
       {
         "id": "sector-06-03:route-h00",

@@ -1,26 +1,43 @@
 import { AreaEditorDraft } from "../../src/game/world/area-authoring-v2/editor/AreaEditorDraft.js";
+import { AREA_ENTRY_EDITOR_DEFINITION } from "../../src/game/world/area-authoring-v2/editor/AreaEntryEditorComponent.js";
+import { AREA_ENEMY_EDITOR_DEFINITION } from "../../src/game/world/area-authoring-v2/editor/AreaEnemyEditorDefinition.js";
+import { AREA_EXIT_EDITOR_DEFINITION } from "../../src/game/world/area-authoring-v2/editor/AreaExitEditorComponent.js";
 import {
+    canRemoveEditorEntity,
     collectEditorEntities,
     hitTestEditorEntity,
+    removeEditorEntity,
     screenToWorld,
     translateEditorEntity,
     worldToScreen
 } from "../../src/game/world/area-authoring-v2/editor/AreaEditorProjection.js";
-import { bossStageDerivedPreview } from "../../src/game/boss-authoring/BossStageSpec.js";
 import { BossStageEditorDraft } from "../../src/game/boss-authoring/editor/BossStageEditorDraft.js";
 import {
     collectBossStageEditorEntities,
     translateBossStageEditorEntity
 } from "../../src/game/boss-authoring/editor/BossStageEditorProjection.js";
+import { AUTHORABLE_ENEMY_TYPE_IDS } from "../../src/game/EnemyType.js";
+import { enemyDisplayName } from "../../src/game/combat/EnemyArchetypeCatalog.js";
+import { AUTHORED_COORDINATE_ANCHORS } from "../../src/game/world/AuthoredCoordinateAnchor.js";
+import { WIND_MODE } from "../../src/game/world/WindPhase.js";
+import {
+    BOSS_MECHANIC_TYPE,
+    BOSS_TRANSITION_TRIGGER,
+    BOSS_VICTORY_PRESENTATION_ID,
+    BOSS_VISUAL_PRESET_ID,
+    BOSS_VULNERABILITY_TARGET_ID,
+    BOSS_VULNERABILITY_TRIGGER,
+    bossStageDerivedPreview
+} from "../../src/game/boss-authoring/BossStageSpec.js";
 
 const EDITABLE_GROUPS = Object.freeze([
     ["bounds", "맵 경계", null],
-    ["entry", "시작 지점", null],
-    ["exit", "출구", null],
+    ["entry", "시작 지점", "entry"],
+    ["exit", "출구", "exit"],
     ["surfaces", "지형 표면", "surface"],
     ["anchors", "앵커", "anchor"],
     ["recoveryRoute", "복구 / 경로", "route"],
-    ["enemySlots", "적 슬롯", null],
+    ["enemySlots", "적 슬롯", "enemy"],
     ["wind", "바람", "wind"],
     ["camera", "카메라 구역", "camera"]
 ]);
@@ -134,6 +151,9 @@ const state = {
     pointer: null,
     spaceDown: false,
     applyPending: false,
+    validationPending: false,
+    memoryPreviewReady: false,
+    replacementPoints: { entry: null, exit: null },
     layerFilter: "",
     scenarioReferenceOpen: false
 };
@@ -484,12 +504,13 @@ function confirmDiscardDirtyDraft() {
 
 function applyMutation({ domain, label, apply }) {
     if (!state.draft?.mutate({ domain, label, apply })) return render();
-    setMessage("dirty", "저장되지 않은 초안 변경사항이 있습니다. 검증 후 저장 적용하세요.");
+    state.memoryPreviewReady = false;
+    setMessage("dirty", "변경사항이 있습니다. 메모리 초안 저장으로 미리보거나 저장 적용하세요.");
     render();
 }
 
 function addPreset(kind) {
-    const point = currentWorldAtCanvasCenter();
+    const point = state.replacementPoints[kind] ?? currentWorldAtCanvasCenter();
     if (kind === "boss-phase") {
         const id = nextStableId("phase");
         applyMutation({
@@ -528,6 +549,32 @@ function addPreset(kind) {
         });
         state.draft.select({ domain: "mechanics", id, kind: "rail-ram" });
         return render();
+    }
+    if (kind === "entry") {
+        const id = `${state.draft.specification().definition.id}:entry`;
+        applyMutation({
+            domain: "entry",
+            label: "시작 지점 추가",
+            apply: (spec) => {
+                AREA_ENTRY_EDITOR_DEFINITION.install(spec.definition, point);
+                return true;
+            }
+        });
+        state.draft.select({ domain: "entry", id, kind: "entry" });
+        state.replacementPoints.entry = null;
+    }
+    if (kind === "exit") {
+        const id = `${state.draft.specification().definition.id}:exit`;
+        applyMutation({
+            domain: "exit",
+            label: "출구 추가",
+            apply: (spec) => {
+                AREA_EXIT_EDITOR_DEFINITION.install(spec.definition, point);
+                return true;
+            }
+        });
+        state.draft.select({ domain: "exit", id, kind: "exit" });
+        state.replacementPoints.exit = null;
     }
     if (kind === "surface") {
         const id = nextStableId("surface");
@@ -592,6 +639,18 @@ function addPreset(kind) {
             }
         });
         state.draft.select({ domain: "recoveryRoute", id, kind: "route" });
+    }
+    if (kind === "enemy") {
+        const id = nextStableId("enemy");
+        applyMutation({
+            domain: "enemySlots",
+            label: "적 슬롯 추가",
+            apply: (spec) => {
+                spec.definition.objects.push(AREA_ENEMY_EDITOR_DEFINITION.create({ id, position: point }));
+                return true;
+            }
+        });
+        state.draft.select({ domain: "enemySlots", id, kind: "enemy" });
     }
     if (kind === "wind") {
         const id = nextStableId("wind");
@@ -673,7 +732,7 @@ function renderLayers() {
         } else if (domain === "recoveryRoute") {
             heading.append(button({ text: "+ 복구", className: "add-button", onClick: () => addPreset("recovery") }));
             heading.append(button({ text: "+ 경로", className: "add-button", onClick: () => addPreset("route") }));
-        } else if (preset) {
+        } else if (preset && (!["entry", "exit"].includes(domain) || count === 0)) {
             heading.append(button({ text: "+ 추가", className: "add-button", onClick: () => addPreset(preset) }));
         }
         group.append(heading);
@@ -751,6 +810,30 @@ function appendField(container, { label, value, type = "number", disabled = fals
     container.append(wrapper);
 }
 
+function appendSelect(container, { label, value, options, multiple = false, disabled = false, onChange }) {
+    const wrapper = element("label", { className: "field", text: label });
+    const select = element("select");
+    select.multiple = multiple;
+    select.disabled = disabled;
+    if (multiple) select.size = Math.min(7, Math.max(3, options.length));
+    const selected = new Set(multiple ? (value ?? []) : [value]);
+    for (const option of options) {
+        const descriptor = typeof option === "string" ? { value: option, label: option } : option;
+        const node = element("option", { text: descriptor.label, attributes: { value: descriptor.value } });
+        node.selected = selected.has(descriptor.value);
+        select.append(node);
+    }
+    if (onChange) {
+        select.addEventListener("change", () => {
+            const nextValue = multiple ? [...select.selectedOptions].map(({ value }) => value) : select.value;
+            onChange(nextValue);
+        });
+    }
+    wrapper.append(select);
+    container.append(wrapper);
+    return select;
+}
+
 function appendPositionField(container, { label, value, disabled = false, onChange }) {
     appendField(container, {
         label: `${label} (5px)`,
@@ -774,7 +857,7 @@ function appendCheck(container, { label, checked, onChange, disabled = false }) 
 function replacePointer(domain, label, pointer, value) {
     try {
         if (state.draft.replaceAtPointer({ domain, label, pointer, value })) {
-            setMessage("dirty", "저장되지 않은 초안 변경사항이 있습니다. 검증 후 저장 적용하세요.");
+            setMessage("dirty", "변경사항이 있습니다. 메모리 초안 저장으로 미리보거나 저장 적용하세요.");
             render();
         }
     } catch (cause) {
@@ -898,19 +981,19 @@ function renderBossInspector(snapshot, selected, entity) {
             value: spec.boss.collider.height,
             onChange: (value) => replacePointer("boss", "Set Boss height", "/boss/collider/height", value)
         });
-        appendField(fields, {
+        appendSelect(fields, {
             label: "표현 Preset",
-            type: "text",
             value: spec.boss.visualPresetId,
+            options: Object.values(BOSS_VISUAL_PRESET_ID),
             onChange: (value) => replacePointer("boss", "Set Boss preset", "/boss/visualPresetId", value)
         });
     }
     if (selected.domain === "mechanics") {
         const mechanic = spec.mechanics.find(({ id }) => id === selected.id);
-        appendField(fields, {
+        appendSelect(fields, {
             label: "등록 Mechanic 종류",
-            type: "text",
             value: mechanic.type,
+            options: Object.values(BOSS_MECHANIC_TYPE),
             onChange: (value) => replacePointer("mechanics", "Set mechanic type", `${entity.path}/type`, value)
         });
         for (const [key, value] of Object.entries(mechanic.parameters)) {
@@ -941,32 +1024,24 @@ function renderBossInspector(snapshot, selected, entity) {
             value: phase.basePhaseHealth,
             onChange: (value) => replacePointer("phases", "Set Phase HP", `${entity.path}/basePhaseHealth`, value)
         });
-        appendField(fields, {
-            label: "Mechanic ID (쉼표 구분)",
-            type: "text",
-            value: phase.mechanicIds.join(", "),
-            onChange: (value) =>
-                replacePointer(
-                    "phases",
-                    "Set Phase mechanics",
-                    `${entity.path}/mechanicIds`,
-                    value
-                        .split(",")
-                        .map((entry) => entry.trim())
-                        .filter(Boolean)
-                )
+        appendSelect(fields, {
+            label: "Mechanic",
+            value: phase.mechanicIds,
+            options: spec.mechanics.map(({ id, type }) => ({ value: id, label: `${type} · ${id}` })),
+            multiple: true,
+            onChange: (value) => replacePointer("phases", "Set Phase mechanics", `${entity.path}/mechanicIds`, value)
         });
-        appendField(fields, {
+        appendSelect(fields, {
             label: "약점 Target ID",
-            type: "text",
             value: phase.vulnerability.targetId,
+            options: Object.values(BOSS_VULNERABILITY_TARGET_ID),
             onChange: (value) =>
                 replacePointer("phases", "Set weak target", `${entity.path}/vulnerability/targetId`, value)
         });
-        appendField(fields, {
+        appendSelect(fields, {
             label: "약점 개방 조건",
-            type: "text",
             value: phase.vulnerability.trigger,
+            options: Object.values(BOSS_VULNERABILITY_TRIGGER),
             onChange: (value) =>
                 replacePointer("phases", "Set weak trigger", `${entity.path}/vulnerability/trigger`, value)
         });
@@ -1042,16 +1117,32 @@ function renderBossInspector(snapshot, selected, entity) {
         });
     }
     if (selected.domain === "transition") {
+        const areaOptions = [
+            ...new Map(
+                state.stages
+                    .filter(({ specType, areaId }) => (specType ?? "area") === "area" && areaId)
+                    .map(({ areaId, stageId, name }) => [
+                        areaId,
+                        { value: areaId, label: `${stageId} · ${name} · ${areaId}` }
+                    ])
+            ).values()
+        ];
+        const optionsByKey = {
+            entryTrigger: [BOSS_TRANSITION_TRIGGER.CHECKPOINT_COMPLETE],
+            victoryTrigger: [BOSS_TRANSITION_TRIGGER.ALL_PHASES_DEPLETED],
+            nextAreaId: areaOptions,
+            victoryPresentationId: Object.values(BOSS_VICTORY_PRESENTATION_ID)
+        };
         for (const [label, key] of [
             ["진입 조건", "entryTrigger"],
             ["승리 조건", "victoryTrigger"],
             ["다음 Area", "nextAreaId"],
             ["승리 표현 ID", "victoryPresentationId"]
         ]) {
-            appendField(fields, {
+            appendSelect(fields, {
                 label,
-                type: "text",
                 value: spec.transition[key],
+                options: optionsByKey[key],
                 onChange: (value) => {
                     if (key !== "nextAreaId") {
                         replacePointer("transition", `Set ${key}`, `/transition/${key}`, value);
@@ -1071,6 +1162,27 @@ function renderBossInspector(snapshot, selected, entity) {
         }
     }
     dom.inspector.append(fields);
+}
+
+function removeSelectedEntity() {
+    const selected = selectedEntity();
+    if (!canRemoveEditorEntity(selected)) return;
+    const removed = state.draft.mutate({
+        domain: selected.domain,
+        label: "맵 요소 삭제",
+        apply: (spec) => {
+            replaceSpec(spec, removeEditorEntity(spec, selected));
+            return true;
+        }
+    });
+    if (!removed) return;
+    state.memoryPreviewReady = false;
+    if (selected.domain === "entry" || selected.domain === "exit") {
+        state.replacementPoints[selected.domain] = { ...selected.point };
+    }
+    state.draft.select(null);
+    setMessage("dirty", `${selected.id} 요소를 초안에서 삭제했습니다. 되돌리기로 복구할 수 있습니다.`);
+    render();
 }
 
 function renderInspector() {
@@ -1163,10 +1275,13 @@ function renderInspector() {
             value: zone.bounds.height,
             onChange: (value) => replacePointer("wind", "Set zone height", `${entity.path}/bounds/height`, value)
         });
-        appendField(fields, {
+        appendSelect(fields, {
             label: "모드",
-            type: "text",
             value: zone.mode,
+            options: [
+                { value: WIND_MODE.CONTINUOUS, label: "연속 · continuous" },
+                { value: WIND_MODE.PULSED, label: "주기 · pulsed" }
+            ],
             onChange: (value) => replacePointer("wind", "Set wind mode", `${entity.path}/mode`, value)
         });
         appendField(fields, {
@@ -1206,37 +1321,40 @@ function renderInspector() {
         }
         if (selected.domain === "enemySlots") {
             const enemy = spec.definition.objects.find(({ id }) => id === selected.id);
-            appendField(fields, {
-                label: "적 종류",
-                type: "text",
-                value: enemy.enemyType,
-                onChange: (value) => replacePointer("enemySlots", "Set enemy type", `${entity.path}/enemyType`, value)
-            });
-            appendField(fields, {
-                label: "허용 적 목록",
-                type: "text",
-                value: enemy.enemySelection?.allowedEnemyTypes?.join(", ") ?? "",
-                onChange: (value) => {
-                    const allowedEnemyTypes = value
-                        .split(",")
-                        .map((entry) => entry.trim())
-                        .filter(Boolean);
+            const selectedEnemyTypes =
+                enemy.enemySelection?.allowedEnemyTypes ??
+                [enemy.enemySelection?.fixedEnemyType ?? enemy.enemyType].filter(Boolean);
+            appendSelect(fields, {
+                label: "적 종류 · 1개=고정 / 복수=seed 선택",
+                value: selectedEnemyTypes,
+                options: AUTHORABLE_ENEMY_TYPE_IDS.map((enemyType) => ({
+                    value: enemyType,
+                    label: `${enemyDisplayName(enemyType)} · ${enemyType}`
+                })),
+                multiple: true,
+                onChange: (allowedEnemyTypes) => {
+                    if (allowedEnemyTypes.length === 0) {
+                        setMessage("invalid", "적 종류는 최소 1개를 선택해야 합니다.");
+                        renderInspector();
+                        return;
+                    }
                     applyMutation({
                         domain: "enemySlots",
-                        label: "Set allowed enemies",
+                        label: "Set enemy types",
                         apply: (next) => {
                             const object = next.definition.objects.find(({ id }) => id === selected.id);
-                            object.enemySelection = { ...(object.enemySelection ?? {}), allowedEnemyTypes };
+                            delete object.enemyType;
+                            object.enemySelection = { allowedEnemyTypes };
                             return true;
                         }
                     });
                 }
             });
             if (enemy.activationSpec) {
-                appendField(fields, {
+                appendSelect(fields, {
                     label: "활성화 기준점",
-                    type: "text",
                     value: enemy.activationSpec.anchor ?? "center",
+                    options: AUTHORED_COORDINATE_ANCHORS,
                     onChange: (value) =>
                         replacePointer(
                             "enemySlots",
@@ -1319,6 +1437,16 @@ function renderInspector() {
         }
     }
     dom.inspector.append(fields);
+    if (canRemoveEditorEntity(entity)) {
+        dom.inspector.append(
+            button({
+                text: "선택 요소 삭제",
+                className: "delete-button",
+                onClick: removeSelectedEntity,
+                title: "초안에서 삭제합니다. 되돌리기로 복구할 수 있습니다."
+            })
+        );
+    }
 }
 
 function drawRect(bounds, style, fill = false) {
@@ -1500,6 +1628,7 @@ function drawCanvas() {
     const selected = state.draft.selected();
     const isSelected = (domain, id) => selected?.domain === domain && selected.id === id;
     const canvasEntities = entities();
+    const entryEntity = canvasEntities.find(({ domain }) => domain === "entry");
     const exitEntity = canvasEntities.find(({ domain }) => domain === "exit");
     const bounds = spec.definition.bounds;
     context.setLineDash([7, 6]);
@@ -1520,10 +1649,12 @@ function drawCanvas() {
     for (const surface of spec.definition.surfaces) {
         if (!surface.vertices?.length) continue;
         const selectedSurface =
-            isSelected("surfaces", surface.id) || (selected?.domain === "exit" && surface.id === exitEntity?.sourceId);
+            isSelected("surfaces", surface.id) ||
+            (selected?.domain === "entry" && surface.id === entryEntity?.sourceId) ||
+            (selected?.domain === "exit" && surface.id === exitEntity?.sourceId);
         drawSurface(surface, selectedSurface);
     }
-    drawMarker(spec.definition.entry, "#e6f2f5", "triangle", isSelected("entry", spec.definition.entry.id));
+    if (entryEntity) drawMarker(entryEntity.point, "#e6f2f5", "triangle", isSelected("entry", entryEntity.id));
     if (exitEntity) drawMarker(exitEntity.point, "#66e6ff", "diamond", isSelected("exit", exitEntity.id));
     for (const point of spec.definition.routePoints)
         drawMarker(point, "#b4ced7", "diamond", isSelected("recoveryRoute", point.id));
@@ -1568,19 +1699,29 @@ function renderStatus() {
     const validation = snapshot
         ? `${snapshot.valid ? "검증 통과" : "검증 오류"} · ${snapshot.issues.length}개`
         : "불러오는 중";
-    const saveState = snapshot?.dirty ? "저장되지 않은 초안" : "저장됨";
+    const saveState = snapshot?.dirty
+        ? state.memoryPreviewReady
+            ? "메모리 초안 저장됨"
+            : "저장되지 않은 초안"
+        : "저장됨";
     const issues = state.message.issues
         ?.slice(0, 3)
         .map(({ code }) => code)
         .join(", ");
     dom.status.textContent = [saveState, validation, state.message.text, issues].filter(Boolean).join("  /  ");
     dom.status.className = `draft-status${snapshot?.dirty ? " is-dirty" : ""}${state.message.kind ? ` is-${state.message.kind}` : ""}`;
-    dom.stageSelect.disabled = state.applyPending;
-    dom.undo.disabled = state.applyPending || !snapshot?.canUndo;
-    dom.redo.disabled = state.applyPending || !snapshot?.canRedo;
-    dom.validate.disabled = state.applyPending || !snapshot;
-    dom.apply.disabled = state.applyPending || !snapshot || !snapshot.valid || !snapshot.dirty;
-    dom.preview.disabled = state.applyPending || !snapshot || snapshot.dirty || !state.previewAvailable;
+    dom.stageSelect.disabled = state.applyPending || state.validationPending;
+    dom.undo.disabled = state.applyPending || state.validationPending || !snapshot?.canUndo;
+    dom.redo.disabled = state.applyPending || state.validationPending || !snapshot?.canRedo;
+    dom.validate.disabled = state.applyPending || state.validationPending || !snapshot;
+    dom.apply.disabled =
+        state.applyPending || state.validationPending || !snapshot || !snapshot.valid || !snapshot.dirty;
+    dom.preview.disabled =
+        state.applyPending ||
+        state.validationPending ||
+        !snapshot ||
+        (snapshot.dirty && !state.memoryPreviewReady) ||
+        !state.previewAvailable;
     const entity = selectedEntity();
     const selected = snapshot?.selection;
     dom.focusSelection.disabled = state.applyPending || !entity?.point;
@@ -1615,7 +1756,13 @@ async function loadStage(stageId, { fit = true } = {}) {
         state.draft =
             state.specType === "boss-stage"
                 ? new BossStageEditorDraft({ spec: payload.spec, revision: payload.revision })
-                : new AreaEditorDraft({ spec: payload.spec, revision: payload.revision });
+                : new AreaEditorDraft({
+                      spec: payload.spec,
+                      appliedSpec: payload.sourceSpec ?? payload.spec,
+                      revision: payload.revision
+                  });
+        state.memoryPreviewReady = state.specType === "area" && Boolean(payload.memoryStored);
+        state.replacementPoints = { entry: null, exit: null };
         state.draft.select(null);
         const scope =
             state.specType === "boss-stage"
@@ -1693,27 +1840,41 @@ dom.focusSelection.addEventListener("click", focusSelection);
 dom.clearSelection.addEventListener("click", clearSelection);
 dom.undo.addEventListener("click", () => {
     if (state.draft.undo()) {
+        state.memoryPreviewReady = false;
         setMessage("dirty", "이전 초안 변경으로 되돌렸습니다.");
         render();
     }
 });
 dom.redo.addEventListener("click", () => {
     if (state.draft.redo()) {
+        state.memoryPreviewReady = false;
         setMessage("dirty", "다음 초안 변경을 다시 적용했습니다.");
         render();
     }
 });
 dom.validate.addEventListener("click", async () => {
+    if (state.validationPending) return;
     const local = state.draft.validate();
-    if (!local.valid) return setMessage("invalid", "로컬 v2 검증에 실패했습니다.", local.issues);
+    if (!local.valid) {
+        state.memoryPreviewReady = false;
+        return setMessage("invalid", "메모리 저장 전에 v2 오류를 해결하세요.", local.issues);
+    }
+    state.validationPending = true;
+    state.memoryPreviewReady = false;
+    setMessage("info", "서버 메모리에 저장할 초안을 검증하는 중입니다.");
+    renderStatus();
     try {
-        await api(stageEndpoint(state.stageId, "/validate"), {
+        const payload = await api(stageEndpoint(state.stageId, "/validate"), {
             method: "POST",
             body: JSON.stringify({ spec: state.draft.specification() })
         });
-        setMessage("valid", "초안 검증 완료: 파일을 변경하지 않았습니다.");
+        state.memoryPreviewReady = Boolean(payload.memoryStored);
+        setMessage("valid", "메모리 초안 저장 완료: 파일은 변경하지 않았으며 새 미리보기를 열 수 있습니다.");
     } catch (cause) {
         errorMessage(cause);
+    } finally {
+        state.validationPending = false;
+        renderStatus();
     }
 });
 dom.apply.addEventListener("click", async () => {
@@ -1729,6 +1890,7 @@ dom.apply.addEventListener("click", async () => {
             body: JSON.stringify({ spec: state.draft.specification(), baseRevision: state.draft.revision() })
         });
         state.draft.markApplied(payload.revision);
+        state.memoryPreviewReady = false;
         state.runtimePromotion = payload.runtimePromotion;
         state.derivedPreview = payload.derivedPreview ?? state.derivedPreview;
         const stage = state.stages.find(({ stageId }) => stageId === payload.stageId);
@@ -1756,7 +1918,9 @@ dom.preview.addEventListener("click", () => {
     if (!state.previewAvailable) {
         return setMessage("info", "시나리오 전용 Stage는 게임 Runtime 미리보기를 제공하지 않습니다.");
     }
-    if (state.draft.snapshot().dirty) return setMessage("dirty", "현재 초안을 저장 적용한 뒤 미리보기를 시작하세요.");
+    if (state.draft.snapshot().dirty && !state.memoryPreviewReady) {
+        return setMessage("dirty", "현재 변경을 메모리 초안으로 저장한 뒤 미리보기를 시작하세요.");
+    }
     const url = `./preview.html?stage=${encodeURIComponent(state.stageId)}`;
     const opened = globalThis.open(url, "map-editor-preview", "noopener");
     if (!opened) setMessage("error", "브라우저가 미리보기 창을 차단했습니다. 팝업을 허용한 뒤 다시 시도하세요.");
@@ -1825,8 +1989,10 @@ function finishPointer(event) {
     if (state.pointer.mode === "drag") {
         try {
             if (event.type === "pointercancel") state.draft.cancelBufferedMutation();
-            else if (state.draft.commitBufferedMutation())
-                setMessage("dirty", "저장되지 않은 초안 변경사항이 있습니다. 검증 후 저장 적용하세요.");
+            else if (state.draft.commitBufferedMutation()) {
+                state.memoryPreviewReady = false;
+                setMessage("dirty", "변경사항이 있습니다. 메모리 초안 저장으로 미리보거나 저장 적용하세요.");
+            }
         } catch (cause) {
             state.draft.cancelBufferedMutation();
             errorMessage(cause);
@@ -1862,6 +2028,7 @@ globalThis.addEventListener("keydown", (event) => {
     if (event.code === "KeyC") dom.scenarioReferenceToggle.click();
     if (event.code === "KeyF") dom.focusSelection.click();
     if (event.code === "Escape") dom.clearSelection.click();
+    if (event.code === "Delete") removeSelectedEntity();
 });
 globalThis.addEventListener("keyup", (event) => {
     if (event.code === "Space") state.spaceDown = false;

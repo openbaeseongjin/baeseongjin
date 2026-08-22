@@ -14,6 +14,14 @@
                 <p id="preview-label">실제 게임 화면의 새 싱글플레이 실행을 준비하는 중입니다.</p>
                 <button id="reload-preview" type="button">새 실행 다시 시작</button>
             </header>
+            <aside class="preview-tools" aria-label="미리보기 테스트 도구">
+                <label>
+                    <input id="preview-flight-mode" type="checkbox" />
+                    저사양 비행 테스트
+                </label>
+                <p>로프 없이 WASD·방향키로 이동합니다.</p>
+                <output id="preview-flight-status">꺼짐</output>
+            </aside>
             <canvas id="preview-canvas" aria-label="맵 에디터 실제 게임 화면 미리보기"></canvas>
             <output id="preview-status" aria-live="polite"></output>
         </main>

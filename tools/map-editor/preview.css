@@ -15,11 +15,42 @@ body.is-loading {
     cursor: progress;
 }
 .preview-shell {
+    position: relative;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     min-height: 100vh;
     padding: 10px;
     gap: 10px;
+}
+.preview-tools {
+    position: absolute;
+    z-index: 2;
+    top: 66px;
+    right: 18px;
+    display: grid;
+    gap: 6px;
+    width: min(250px, calc(100vw - 36px));
+    border: 1px solid rgba(102, 230, 255, 0.38);
+    background: rgba(7, 16, 24, 0.9);
+    padding: 10px;
+    font:
+        0.72rem/1.35 ui-monospace,
+        Consolas,
+        monospace;
+}
+.preview-tools label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e6f2f5;
+    font-weight: 800;
+}
+.preview-tools p {
+    margin: 0;
+    color: #a9c3cc;
+}
+#preview-flight-status {
+    color: #83d8e9;
 }
 .preview-header {
     display: flex;
@@ -87,6 +118,13 @@ button:focus-visible {
     color: #ff796a;
 }
 @media (max-width: 620px) {
+    .preview-shell {
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+    }
+    .preview-tools {
+        position: static;
+        width: 100%;
+    }
     .preview-header {
         align-items: start;
         flex-direction: column;

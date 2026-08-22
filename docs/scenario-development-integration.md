@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: b05d50d075401fc964464ad708aa64dfc8987261ec9d54c48fe19772b5d86cf2
-authored-area-sha256: 86a6c218229de98b0f99aac340f09d147222a9f15b9c252ae211d318cb2498bb
+scenario-source-sha256: c1c5b0ba0f4acdbce3cb998401ecd6ff038d7fe14cf07648eac9a687af977c84
+authored-area-sha256: c48a4a420de072181d9eb23587eae0c169e32e3830898067896f458fb746d3c8
 authored-sector-sha256: 33201fc43c5002ef3d4754212e47bfc37da7e2eafc3ba71f2f843fba2115ab12
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 3a4cbe62940f4a9b03f09f63b0b08bb2b085b23a
+reviewed-upstream: 6dfad354c4eb141b54d4bdddc2a447e9a7bfefa7
 -->
 
 ## 상태를 읽는 법
@@ -214,6 +214,8 @@ reviewed-upstream: 3a4cbe62940f4a9b03f09f63b0b08bb2b085b23a
 109.  2026-08-22 Map Editor 출구 정합 복구는 출구 데크 위치를 단일 이동 권위로 두고 출구점·Gate trigger·Gate panel·Gate visual·출구 route point를 `AreaExitEditorComponent`가 같은 delta로 파생·동기화하게 했다. 48개 v2 source는 `exit` 편집 도메인을 선언하며 브라우저 Draft와 서버 Apply가 모두 컴포넌트 단위로 재구성하므로 구성요소의 독립 좌표 변경과 사후 divergence 오류를 공개 계약으로 두지 않는다. `1-1`은 사용자가 옮긴 새 출구 데크 `(360,-730)`를 기준으로 출구점 `(520,-762)`, panel `(408,-730)`, Gate visual `(520,-730)`, trigger `(494,-792,52×62)`, 마지막 route point `(360,-730)`를 정렬했고 authored `nextAreaId: sector-01-02`는 유지했다. 단일 Stage Preview만 출구를 content boundary로 격리한다. loopback Editor에서 출구 X를 `360→365`로 바꾼 초안이 서버 검증을 통과하고 Undo 뒤 `360`으로 복구됐으며, 복구된 1-1 Preview는 지형 16개로 browser error 없이 시작했다. 최신 main의 3-1·3-2 Runtime 승격을 보존해 Runtime 적용 Stage는 Sector 01~~02의 16개와 3-1·3-2이며, 3-3~~3-8·Sector 04~~06은 기존처럼 Runtime 보류다.
 
 110. Issue #816은 최신 `GATE LOCKING CARRIAGE`를 일반 Stage와 분리된 canonical `boss-01` Stage로 구현한다. Map Editor는 `specType: boss-stage` source·validator·generated definition·실제 GameSimulation Preview를 사용해 Arena·Carriage·Phase·mechanic·Phase base HP·인원 배율·약점 고정 비율·HUD·전환을 편집하고, 1~4인 derived HP/floor/약점 피해를 읽기 전용으로 표시한다. Runtime은 1-8의 Worker District reveal과 `nextAreaId:null`을 유지한 채 source→Boss→2-1 connector·완료 전 route barrier를 조립하며, Stage 시작 roster로 HP를 고정하고 일반 공격 피해+약점 25% 보너스·Phase floor·late join·전멸 retry·snapshot 수렴을 소유한다. Carriage의 Full/Broken Beam과 Rail Ram은 server-owned timing과 실제 Player 피해를 가지며 P1 Rear Drive·P2 Side Gearbox·P3 Central Lock Core를 공략한다. Boss Timer·Arena collapse·Boss02~06 Runtime은 추가하지 않는다.
+
+112.  2026-08-22 Map Editor 편집 완결은 48개 v2 Stage의 Entry를 진입점+지지 플랫폼 복합 객체로 만들고 플랫폼 상단 32px 위에 정렬했다. 기존 지지 지형이 없던 Scenario-only 19개에는 표준 Entry deck을 추가했지만 Runtime 승격 상태와 Sector 연결은 바꾸지 않았다. Entry·Exit는 각각 최대 1개이며 삭제 시 전체 구성요소를 제거하고 같은 위치에 재추가하거나 Undo할 수 있다. 불완전한 Scenario Exit는 새 Gate/deck/panel/visual/route 묶음으로 보완할 수 있고, Enemy는 새 Stable ID·activation spec과 실제 `AUTHORABLE_ENEMY_TYPE_IDS` 다중 select로 추가한다. Enemy 종류 한 개는 고정, 복수는 run seed 결정 pool이며 단일 Area Preview도 같은 선택기를 사용한다. Wind mode·activation anchor·Boss mechanic/phase/transition 등 닫힌 값도 Runtime const·Registry·현재 Spec ID select로 바꿨다. Surface·Anchor·Recovery/Route·Enemy·Wind·Camera 삭제는 Draft Undo를 지원하며 Anchor/Wind는 쌍 전체를 제거한다. `초안 검증`은 `메모리 초안 저장`으로 바뀌어 파일 쓰기 없이 현재 Area/Boss Spec을 서버 메모리에 보관하고 dirty Draft Preview를 연다. 일반 Area Preview의 저사양 비행 패널은 Rope 입력 없이 WASD/방향키 이동을 제공하며 일반 게임·Boss·멀티 권위에는 포함되지 않는다. 브라우저에서 6-4 누락 Exit 추가→memory Preview, 1-1 Enemy memory Preview, Entry/Exit 삭제·재추가·최대 1개, Boss memory Preview와 Area 비행 토글을 확인했고 console error는 0이었다.
 
 ## 열린 기획·구현 게이트
 

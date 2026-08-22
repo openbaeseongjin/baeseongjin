@@ -172,6 +172,35 @@
         ],
         "sourceId": "recordsBay",
         "inferredFrom": "safeHubs"
+      },
+      {
+        "id": "sector-03-08:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1920,
+          "y": -32
+        },
+        "vertices": [
+          {
+            "x": -2016,
+            "y": -32
+          },
+          {
+            "x": -1824,
+            "y": -32
+          },
+          {
+            "x": -1824,
+            "y": 0
+          },
+          {
+            "x": -2016,
+            "y": 0
+          }
+        ]
       }
     ],
     "routePoints": [

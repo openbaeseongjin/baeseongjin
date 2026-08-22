@@ -212,8 +212,12 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
                         y: object.position.y,
                         level: index,
                         areaId: definition.id,
+                        encounterId: object.id,
+                        slotId: object.id,
                         objectId: object.id,
+                        position: object.position,
                         enemyType: object.enemyType ?? object.kind,
+                        enemySelection: object.enemySelection ?? null,
                         activation: object.activation ?? null,
                         patrol: object.patrol ?? null,
                         rules: object.rules ?? Object.freeze([])

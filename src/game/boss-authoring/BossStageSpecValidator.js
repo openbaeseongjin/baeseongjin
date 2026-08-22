@@ -3,11 +3,19 @@ import {
     BOSS_MECHANIC_TYPE,
     BOSS_STAGE_SPEC_TYPE,
     BOSS_STAGE_SPEC_VERSION,
+    BOSS_TRANSITION_TRIGGER,
+    BOSS_VICTORY_PRESENTATION_ID,
+    BOSS_VISUAL_PRESET_ID,
+    BOSS_VULNERABILITY_TARGET_ID,
+    BOSS_VULNERABILITY_TRIGGER,
     canonicalizeBossStageSpec,
     freezeBossStageValue
 } from "./BossStageSpec.js";
 
 const MECHANIC_TYPES = Object.freeze(Object.values(BOSS_MECHANIC_TYPE));
+const VISUAL_PRESET_IDS = Object.freeze(Object.values(BOSS_VISUAL_PRESET_ID));
+const VULNERABILITY_TARGET_IDS = Object.freeze(Object.values(BOSS_VULNERABILITY_TARGET_ID));
+const VULNERABILITY_TRIGGERS = Object.freeze(Object.values(BOSS_VULNERABILITY_TRIGGER));
 const EDITABLE_ROOTS = Object.freeze([
     "arena",
     "combat",
@@ -187,8 +195,16 @@ function validatePhases(spec, mechanicIds, issues, file) {
         }
         if (!isObject(phase.vulnerability) || typeof phase.vulnerability.targetId !== "string") {
             issue(issues, file, "phase-vulnerability-invalid", { id: phase.id });
-        } else if (!positive(phase.vulnerability.durationSeconds)) {
-            issue(issues, file, "phase-vulnerability-duration-invalid", { id: phase.id });
+        } else {
+            if (!VULNERABILITY_TARGET_IDS.includes(phase.vulnerability.targetId)) {
+                issue(issues, file, "phase-vulnerability-target-invalid", { id: phase.id });
+            }
+            if (!VULNERABILITY_TRIGGERS.includes(phase.vulnerability.trigger)) {
+                issue(issues, file, "phase-vulnerability-trigger-invalid", { id: phase.id });
+            }
+            if (!positive(phase.vulnerability.durationSeconds)) {
+                issue(issues, file, "phase-vulnerability-duration-invalid", { id: phase.id });
+            }
         }
         if (!isObject(phase.hud) || typeof phase.hud.objective !== "string") {
             issue(issues, file, "phase-hud-invalid", { id: phase.id });
@@ -211,7 +227,12 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
     }
     validateArena(spec, issues, file);
     validateCombat(spec, issues, file);
-    if (!isObject(spec.boss) || typeof spec.boss.actorId !== "string" || !validBounds(spec.boss.collider)) {
+    if (
+        !isObject(spec.boss) ||
+        typeof spec.boss.actorId !== "string" ||
+        !validBounds(spec.boss.collider) ||
+        !VISUAL_PRESET_IDS.includes(spec.boss.visualPresetId)
+    ) {
         issue(issues, file, "boss-actor-invalid");
     }
     const mechanicIds = validateMechanics(spec, issues, file);
@@ -222,7 +243,10 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
     if (
         !isObject(spec.transition) ||
         spec.transition.sourceAreaId !== spec.sourceAreaId ||
-        spec.transition.nextAreaId !== spec.nextAreaId
+        spec.transition.nextAreaId !== spec.nextAreaId ||
+        spec.transition.entryTrigger !== BOSS_TRANSITION_TRIGGER.CHECKPOINT_COMPLETE ||
+        spec.transition.victoryTrigger !== BOSS_TRANSITION_TRIGGER.ALL_PHASES_DEPLETED ||
+        spec.transition.victoryPresentationId !== BOSS_VICTORY_PRESENTATION_ID.POWER_LOSS_FULL_STOP
     ) {
         issue(issues, file, "boss-transition-invalid");
     }

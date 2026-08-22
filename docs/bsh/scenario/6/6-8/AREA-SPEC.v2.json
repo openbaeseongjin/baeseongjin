@@ -147,6 +147,35 @@
         "disconnected": true,
         "retrySecondsTargetMax": 5,
         "sourceId": "R3"
+      },
+      {
+        "id": "sector-06-08:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "vertices": [
+          {
+            "x": -96,
+            "y": 0
+          },
+          {
+            "x": 96,
+            "y": 0
+          },
+          {
+            "x": 96,
+            "y": 32
+          },
+          {
+            "x": -96,
+            "y": 32
+          }
+        ]
       }
     ],
     "routePoints": [
