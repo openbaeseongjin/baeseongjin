@@ -47,6 +47,7 @@ export function encounterSlot({
     position,
     activation = null,
     enemySelection = null,
+    swarmMemberCount,
     accessModuleId = null,
     legacyStageAlias
 } = {}) {
@@ -56,6 +57,7 @@ export function encounterSlot({
         position,
         activation,
         ...(enemySelection ? { enemySelection } : {}),
+        ...(swarmMemberCount !== undefined ? { swarmMemberCount } : {}),
         ...(accessModuleId ? { accessModuleId } : {}),
         ...(legacyStageAlias ? { legacyStageAlias } : {})
     });

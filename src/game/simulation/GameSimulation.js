@@ -23,6 +23,9 @@ import {
 import {
     createEnemyArchetype,
     enemyDisplayName,
+    enemyInitialHealth,
+    enemyInitialRadius,
+    enemySpawnMembers,
     isEnemyArchetype,
     isKnownEnemyType
 } from "../combat/EnemyArchetypeCatalog.js";
@@ -889,7 +892,8 @@ export class GameSimulation {
             return Object.freeze({ created: false, reason: "현재 화면의 안전한 배치 지점을 확인할 수 없습니다." });
         }
 
-        const radius = COMBAT_CONFIG.enemyRadius;
+        const radius = enemyInitialRadius(enemyType, COMBAT_CONFIG.enemyRadius);
+        const health = enemyInitialHealth(enemyType, COMBAT_CONFIG.enemyHealth);
         const padding = radius + 8;
         const facing = directionX < 0 ? -1 : 1;
         const playerPosition = player.physics.position;
@@ -942,8 +946,8 @@ export class GameSimulation {
             objectId: null,
             enemyType,
             radius,
-            health: COMBAT_CONFIG.enemyHealth,
-            maxHealth: COMBAT_CONFIG.enemyHealth,
+            health,
+            maxHealth: health,
             fireCooldown: COMBAT_CONFIG.enemyFireInterval
         });
         this.enemies.push(enemy);
@@ -2200,7 +2204,18 @@ export class GameSimulation {
             playerId: player.id,
             damage,
             health: player.health,
-            position: vectorState(player.physics.position)
+            position: vectorState(player.physics.position),
+            impactPosition: vectorState(result.position ?? player.physics.position),
+            ...(Number.isFinite(result.radius)
+                ? {
+                      bounds: Object.freeze({
+                          minX: result.position.x - result.radius,
+                          minY: result.position.y - result.radius,
+                          maxX: result.position.x + result.radius,
+                          maxY: result.position.y + result.radius
+                      })
+                  }
+                : {})
         });
         this.recordReplicationEvent(ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE.PLAYER_HIT, event);
         this.eventFlash = { type: "player-hit", age: 0, ...event };
@@ -2909,30 +2924,37 @@ export class GameSimulation {
     }
 
     createEnemies() {
-        return this.world.enemySpawns.map((spawn) => {
+        return this.world.enemySpawns.flatMap((spawn) => {
             const definition = resolveEnemySpawnDefinition(spawn, {
                 runSeed: this.world.seed,
                 worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
             });
-            const position = definition.position ?? definition;
-            this.enemyRuntimeCreations += 1;
-            return createEnemyRuntime({
-                id: this.registry.createId("enemy"),
-                position: new Vector2(position.x, position.y),
-                level: definition.level,
-                areaId: definition.areaId ?? null,
+            const members = enemySpawnMembers({
+                ...definition,
                 objectId: definition.objectId ?? definition.encounterId ?? definition.slotId,
-                enemyType: definition.enemyType,
-                activation: definition.activation,
-                patrol: definition.patrol,
                 swarmGroupId: definition.swarmGroupId ?? definition.slotId,
-                rules: definition.rules,
-                collider: definition.collider ?? null,
-                radius: definition.radius ?? (definition.collider ? null : COMBAT_CONFIG.enemyRadius),
-                health: COMBAT_CONFIG.enemyHealth,
-                maxHealth: COMBAT_CONFIG.enemyHealth,
-                fireCooldown: COMBAT_CONFIG.enemyFireInterval
+                position: definition.position ?? definition
             });
+            this.enemyRuntimeCreations += members.length;
+            return members.map((member) =>
+                createEnemyRuntime({
+                    id: this.registry.createId("enemy"),
+                    position: new Vector2(member.position.x, member.position.y),
+                    level: member.level,
+                    areaId: member.areaId ?? null,
+                    objectId: member.objectId,
+                    enemyType: member.enemyType,
+                    activation: member.activation,
+                    patrol: member.patrol,
+                    swarmGroupId: member.swarmGroupId,
+                    rules: member.rules,
+                    collider: member.collider ?? null,
+                    radius: member.radius ?? (member.collider ? null : COMBAT_CONFIG.enemyRadius),
+                    health: member.health ?? COMBAT_CONFIG.enemyHealth,
+                    maxHealth: member.maxHealth ?? COMBAT_CONFIG.enemyHealth,
+                    fireCooldown: COMBAT_CONFIG.enemyFireInterval
+                })
+            );
         });
     }
 

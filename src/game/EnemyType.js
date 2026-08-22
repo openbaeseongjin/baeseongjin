@@ -20,3 +20,5 @@ export const AUTHORABLE_ENEMY_TYPE_IDS = Object.freeze([
     ENEMY_TYPE.SUPPORT_DRONE_T1,
     ENEMY_TYPE.SWARM_DRONE_T1
 ]);
+
+export const SWARM_MEMBER_COUNT = Object.freeze({ MINIMUM: 2, DEFAULT: 10, MAXIMUM: 20 });

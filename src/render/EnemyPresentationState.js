@@ -80,10 +80,11 @@ const SENSOR_COLOR_BY_CUTTER = Object.freeze({
     false: Object.freeze({ idle: "#3f1d2b", cooldown: "#7f1d1d", fire: "#ffb347", lock: "#ff5a36", default: "#dc263f" })
 });
 
-function definition({ behaviorKind = null, usesProjectileAttack = true, patrol = false } = {}) {
+function definition({ behaviorKind = null, usesProjectileAttack = true, patrol = false, renderSize = null } = {}) {
     return Object.freeze({
         behaviorKind,
         usesProjectileAttack,
+        renderSize: renderSize ? Object.freeze({ ...renderSize }) : null,
         states: Object.freeze([
             ...COMMON_STATES.filter(
                 (state) => patrol || (state !== PRESENTATION.PATROL_MOVE && state !== PRESENTATION.PATROL_WAIT)
@@ -113,7 +114,8 @@ export const ENEMY_PRESENTATION_DEFINITIONS = Object.freeze({
     }),
     [ENEMY_TYPE.SWARM_DRONE_T1]: definition({
         behaviorKind: ENEMY_BEHAVIOR_KIND.SWARM,
-        usesProjectileAttack: false
+        usesProjectileAttack: false,
+        renderSize: { width: 18, height: 18 }
     })
 });
 
@@ -260,6 +262,7 @@ export function resolveEnemyPresentationState(enemy, enemies = []) {
         facingDirection,
         aimLayerDirection,
         guardLayerDirection,
+        renderSize: declared.renderSize,
         pursuitTransform: pursuitDirection ? resolveUprightAimTransform(pursuitDirection) : null
     });
 }

@@ -490,6 +490,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                     y: encounter.position.y + dy,
                     activation: encounter.activation ? shiftBounds(encounter.activation, dx, dy) : null,
                     enemySelection: encounter.enemySelection,
+                    swarmMemberCount: encounter.swarmMemberCount,
                     accessModuleId: encounter.accessModuleId,
                     patrol: source.patrol ? shiftPatrol(source.patrol, dx, dy) : null,
                     rules: source.rules ?? Object.freeze([]),

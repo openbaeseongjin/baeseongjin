@@ -7,16 +7,17 @@ export function clamp(value, minimum, maximum) {
     return Math.max(minimum, Math.min(maximum, value));
 }
 
-export function eligibleTargets(enemy, targets, range = Number.POSITIVE_INFINITY) {
-    const insideActivation = enemy.activation
-        ? targets.filter(
-              ({ physics }) =>
-                  physics.position.x >= enemy.activation.x &&
-                  physics.position.x <= enemy.activation.x + enemy.activation.width &&
-                  physics.position.y >= enemy.activation.y &&
-                  physics.position.y <= enemy.activation.y + enemy.activation.height
-          )
-        : targets;
+export function eligibleTargets(enemy, targets, range = Number.POSITIVE_INFINITY, { respectActivation = true } = {}) {
+    const insideActivation =
+        respectActivation && enemy.activation
+            ? targets.filter(
+                  ({ physics }) =>
+                      physics.position.x >= enemy.activation.x &&
+                      physics.position.x <= enemy.activation.x + enemy.activation.width &&
+                      physics.position.y >= enemy.activation.y &&
+                      physics.position.y <= enemy.activation.y + enemy.activation.height
+              )
+            : targets;
     return insideActivation.filter(
         (target) =>
             target.health > ENEMY_BEHAVIOR_CONFIG.ZERO &&
@@ -25,8 +26,8 @@ export function eligibleTargets(enemy, targets, range = Number.POSITIVE_INFINITY
     );
 }
 
-export function nearestTarget(enemy, targets, range) {
-    return selectNearestPlayer(enemy.position, eligibleTargets(enemy, targets, range), range);
+export function nearestTarget(enemy, targets, range, options) {
+    return selectNearestPlayer(enemy.position, eligibleTargets(enemy, targets, range, options), range);
 }
 
 export function directionBetween(from, to) {

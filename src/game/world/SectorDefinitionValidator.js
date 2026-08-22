@@ -1,4 +1,5 @@
 import { PREVIEW_SECTOR_WIDTH_RANGE } from "./sectors/SectorDefinition.js";
+import { SWARM_MEMBER_COUNT } from "../EnemyType.js";
 
 const ACCESS_MODULES_PER_SECTOR = 3;
 
@@ -207,6 +208,16 @@ export function validateSectorCatalog(catalog) {
                 }
                 if (encounter.enemySelection && "areaId" in encounter.enemySelection) {
                     issues.push(issue("encounter-area-authority", sector.id, { encounterId: encounter.encounterId }));
+                }
+                if (
+                    encounter.swarmMemberCount !== undefined &&
+                    (!Number.isSafeInteger(encounter.swarmMemberCount) ||
+                        encounter.swarmMemberCount < SWARM_MEMBER_COUNT.MINIMUM ||
+                        encounter.swarmMemberCount > SWARM_MEMBER_COUNT.MAXIMUM)
+                ) {
+                    issues.push(
+                        issue("encounter-swarm-member-count", sector.id, { encounterId: encounter.encounterId })
+                    );
                 }
                 if (encounterIds.has(encounter.encounterId)) {
                     issues.push(issue("encounter-id-duplicate", sector.id, { encounterId: encounter.encounterId }));

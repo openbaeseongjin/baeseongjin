@@ -459,6 +459,23 @@ kbd {
     display: grid;
     gap: 9px;
 }
+.enemy-additional-info {
+    display: grid;
+    gap: 9px;
+    margin: 4px 0;
+    border: 1px solid var(--line);
+    background: rgba(102, 230, 255, 0.045);
+    padding: 9px;
+}
+.enemy-additional-info legend {
+    color: var(--cyan);
+    padding: 0 5px;
+    font:
+        700 0.68rem/1 ui-monospace,
+        Consolas,
+        monospace;
+    letter-spacing: 0.08em;
+}
 .inspector-actions {
     display: flex;
     flex-wrap: wrap;

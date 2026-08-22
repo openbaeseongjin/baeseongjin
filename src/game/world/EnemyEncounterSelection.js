@@ -1,3 +1,5 @@
+import { SWARM_MEMBER_COUNT } from "../EnemyType.js";
+
 const MAX_WORLD_SEED = 0xffffffff;
 const FNV_OFFSET = 2166136261;
 const FNV_PRIME = 16777619;
@@ -80,6 +82,16 @@ function normalizeActivation(value) {
     return Object.freeze({ ...value });
 }
 
+function normalizeSwarmMemberCount(value) {
+    if (value === undefined || value === null) return null;
+    if (!Number.isSafeInteger(value) || value < SWARM_MEMBER_COUNT.MINIMUM || value > SWARM_MEMBER_COUNT.MAXIMUM) {
+        throw new Error(
+            `swarmMemberCount must be an integer between ${SWARM_MEMBER_COUNT.MINIMUM} and ${SWARM_MEMBER_COUNT.MAXIMUM}`
+        );
+    }
+    return value;
+}
+
 export function resolveEnemyEncounter(encounter, context) {
     if (!encounter || typeof encounter !== "object" || Array.isArray(encounter)) {
         throw new Error("enemy encounter must be an object");
@@ -91,6 +103,7 @@ export function resolveEnemyEncounter(encounter, context) {
     const slotId = requireNonEmptyString(encounter.slotId, "slot id");
     const position = requireFinitePoint(encounter.position, "encounter position");
     const activation = normalizeActivation(encounter.activation);
+    const swarmMemberCount = normalizeSwarmMemberCount(encounter.swarmMemberCount);
     const selection = resolveEnemySlot(
         {
             id: slotId,
@@ -104,6 +117,7 @@ export function resolveEnemyEncounter(encounter, context) {
         slotId,
         position,
         activation,
+        ...(swarmMemberCount !== null ? { swarmMemberCount } : {}),
         enemyType: selection.enemyType,
         selectionKind: selection.selectionKind,
         ...(encounter.legacyStageAlias ? { legacyStageAlias: encounter.legacyStageAlias } : {})

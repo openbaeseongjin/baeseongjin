@@ -6,6 +6,7 @@ import {
     CLIENT_FEEDBACK_KEY,
     createClientFeedbackEvent,
     eventEffectId,
+    mergeImpactState,
     personalFeedbackVisible
 } from "./ClientFeedbackEventDefinition.js";
 import { createClientFeedbackEventRules } from "./ClientFeedbackEventRules.js";
@@ -89,7 +90,12 @@ export class ClientFeedbackEventInterpreter {
 
     appendParticle(event, request, effectBuffer, visibleWorldBounds) {
         const causalId =
-            event.eventId ?? event.predictionId ?? event.activationId ?? event.objectId ?? event.projectileId;
+            event.eventId ??
+            event.impactId ??
+            event.predictionId ??
+            event.activationId ??
+            event.objectId ??
+            event.projectileId;
         if (!causalId || this.seenParticleCausalIds.has(causalId)) return;
         const position = request.position ?? event.position ?? event.parameters?.position;
         if (!position) return;
@@ -106,6 +112,7 @@ export class ClientFeedbackEventInterpreter {
                 directionTo(position, targetPosition) ??
                 this.config.DEFAULT_DIRECTION,
             targetPosition,
+            bounds: request.bounds ?? event.bounds ?? null,
             identity: CLIENT_FEEDBACK_KEY.particle(
                 event.playerId ?? event.ownerId ?? event.parameters?.sourcePlayerId,
                 causalId
@@ -129,7 +136,7 @@ export class ClientFeedbackEventInterpreter {
     appendPersonalFeedback(feedbackEvents) {
         const context = {
             setImpact: (impact) => {
-                this.impact = impact;
+                this.impact = mergeImpactState(this.impact, impact);
             },
             setRopeCut: (ropeCutEvent) => {
                 this.ropeCutFeedback = {

@@ -115,6 +115,7 @@ class EnemyBodyObject extends withSurfacePhysics(
         aimDirection = null,
         presentationAimDirection = null,
         lockedTargetId = null,
+        weaponRange = null,
         impactDisplacementEnabled = null,
         knockbackState = null,
         velocity = null
@@ -150,6 +151,7 @@ class EnemyBodyObject extends withSurfacePhysics(
         this.presentationAimDirection = presentationAimDirection
             ? Object.freeze({ x: presentationAimDirection.x, y: presentationAimDirection.y })
             : null;
+        this.weaponRange = Number.isFinite(weaponRange) && weaponRange > 0 ? weaponRange : null;
         this.impactDisplacementEnabled =
             enemyImpactDisplacementEnabled(enemyType) && impactDisplacementEnabled !== false;
         this.knockbackState = createKnockbackState(knockbackState);
