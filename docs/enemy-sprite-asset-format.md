@@ -28,6 +28,8 @@ v4의 선택적 `render.aimLayer`는 고정 본체 clip 위에 별도 frame을 �
 
 게임 bootstrap은 기본 enemy manifest를 player와 독립적으로 읽어 `SpriteSceneRenderer`에 주입한다. manifest 또는 atlas가 실패하면 앱이나 player를 polygon profile로 내리지 않고 적 단위 built-in pixel mock을 사용한다. package가 지원하지 않는 다른 Sector 몹도 같은 mock을 유지한다.
 
+싱글 디버그 패널의 `몬스터 모션 더미`는 bootstrap이 검증해 주입한 현재 package만 사용한다. 타입을 선택해 현재 화면의 안전 발판에 실제 피격 가능한 더미 하나를 생성하거나 교체하고, 화면 도구에서 이전 상태·실전 상태·다음 상태·자동 순환을 검사한다. 고정·자동 상태는 표현 검수를 위해 AI를 잠시 멈추며 실전으로 돌아가면 실제 상태 판정과 AI가 다시 진행된다. 임의 PNG나 authoring export를 직접 선택하는 우회 경로는 제공하지 않는다.
+
 Built-in mock의 센서 사각형과 드론 실루엣 선은 fallback sprite 자체의 일부다. 정식 package가 준비된 적에는 이를 다시 덧그리지 않고 manifest frame만 본체로 그린다. 공격 조준선, 행동 telegraph와 상태 bar처럼 gameplay 의미가 있는 공용 표현은 package 교체와 무관하게 유지한다.
 
 Manifest에는 collider, hitbox, hurtbox, damage, health, physics, AI behavior, 네트워크 권위를 넣지 않는다. Renderer는 presentation state, 외부 presentation time, 불변 clip과 snapshot의 `presentationAimDirection`·`aimDirection`·`behaviorState.guardDirection`만 소비하며 생성 도구 형식이나 gameplay 규칙을 추측하지 않는다. Manifest의 frame duration 합은 시각 재생 길이일 뿐 gameplay state 전이 시간이 아니다. PNG나 frame timing·`aimLayer`·`guardLayer` 변경으로 collider·AI·피해·물리·네트워크 상태를 바꾸지 않는다.
@@ -38,3 +40,4 @@ Manifest에는 collider, hitbox, hurtbox, damage, health, physics, AI behavior, 
 2. 모든 지원 타입과 `EnemyPresentationState` 상태 coverage, 양수 duration, atlas cell 범위와 fallback 순환 부재를 확인한다.
 3. `npm run validate:enemy-sprite-assets -- <directory>`를 통과한다.
 4. 데스크톱과 모바일 viewport에서 nearest-neighbor 실루엣, 역할 구분, telegraph·Rope·Anchor 가독성과 적 단위 fallback을 직접 확인한다.
+5. 싱글 디버그의 몬스터 모션 더미에서 지원 타입을 하나씩 생성하고 실전·이전·다음·자동 순환 상태를 확인한다. 더미 공격이 Player를 손상하지 않고, Player 공격으로 HP 0이 되면 즉시 제거되며 authored 진행·보상·저장·멀티 상태가 바뀌지 않는지 확인한다.

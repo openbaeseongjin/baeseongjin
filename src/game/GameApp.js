@@ -24,6 +24,7 @@ import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSprite
 import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
+import { resolveEnemyPresentationState } from "../render/EnemyPresentationState.js";
 
 export class GameApp {
     constructor({
@@ -39,7 +40,9 @@ export class GameApp {
         ropeTuning = null,
         debugAugmentIds = [],
         playerDefinition = null,
-        directionDefinitions = []
+        directionDefinitions = [],
+        enemyDefinition = null,
+        onDebugTrainingDummyChange = () => {}
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
         this.renderer = renderer
@@ -64,6 +67,10 @@ export class GameApp {
         this.hudVisible = hudVisible !== false;
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
+        this.enemyDefinition = enemyDefinition ?? this.renderer.sceneRenderer?.enemyDefinition ?? null;
+        this.onDebugTrainingDummyChange = onDebugTrainingDummyChange;
+        this.debugTrainingDummyControl = null;
+        this.debugTrainingDummySignature = "";
         this.camera = this.createCamera();
         this.stats = { totalSteps: 0, droppedSteps: 0, resets: 0 };
         this.frameId = null;
@@ -120,6 +127,137 @@ export class GameApp {
         }
     }
 
+    debugTrainingDummyStateOptions(enemyType) {
+        if (!this.enemyDefinition?.supports(enemyType)) return Object.freeze([]);
+        const canonicalEnemyType = this.enemyDefinition.canonicalEnemyType(enemyType);
+        return Object.freeze(Object.keys(this.enemyDefinition.enemies[canonicalEnemyType].states));
+    }
+
+    spawnDebugTrainingDummy(enemyType) {
+        const states = this.debugTrainingDummyStateOptions(enemyType);
+        if (states.length === 0) {
+            return Object.freeze({ created: false, reason: `Runtime package가 '${enemyType}'을 지원하지 않습니다.` });
+        }
+        const visibleWorldBounds = createRenderViewport({
+            camera: this.camera,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
+        }).visibleWorldBounds;
+        const inputDirection = this.latestInput?.horizontal;
+        const playerDirection = this.authority.ownerState()?.velocity?.x;
+        const result = this.authority.spawnDebugTrainingDummy({
+            enemyType,
+            visibleWorldBounds,
+            directionX:
+                Number.isFinite(inputDirection) && Math.abs(inputDirection) > Number.EPSILON
+                    ? inputDirection
+                    : playerDirection
+        });
+        if (!result.created) return result;
+        this.debugTrainingDummyControl = {
+            enemyType,
+            states,
+            mode: "actual",
+            forcedState: null,
+            autoElapsedSeconds: 0
+        };
+        this.authority.setDebugTrainingDummyPresentationControlled(false);
+        this.emitDebugTrainingDummyChange(true);
+        return Object.freeze({ ...result, state: this.debugTrainingDummyUiState() });
+    }
+
+    setDebugTrainingDummyActualMode() {
+        if (!this.debugTrainingDummyControl || !this.authority.debugTrainingDummySnapshot()) return null;
+        this.debugTrainingDummyControl.mode = "actual";
+        this.debugTrainingDummyControl.forcedState = null;
+        this.debugTrainingDummyControl.autoElapsedSeconds = 0;
+        this.authority.setDebugTrainingDummyPresentationControlled(false);
+        return this.emitDebugTrainingDummyChange(true);
+    }
+
+    stepDebugTrainingDummyState(offset) {
+        const control = this.debugTrainingDummyControl;
+        const dummy = this.authority.debugTrainingDummySnapshot();
+        if (!control || !dummy) return null;
+        const current = control.forcedState ?? resolveEnemyPresentationState(dummy).primaryState;
+        const currentIndex = Math.max(0, control.states.indexOf(current));
+        const nextIndex = (currentIndex + offset + control.states.length) % control.states.length;
+        control.mode = "forced";
+        control.forcedState = control.states[nextIndex];
+        control.autoElapsedSeconds = 0;
+        this.authority.setDebugTrainingDummyPresentationControlled(true);
+        return this.emitDebugTrainingDummyChange(true);
+    }
+
+    toggleDebugTrainingDummyAuto() {
+        const control = this.debugTrainingDummyControl;
+        const dummy = this.authority.debugTrainingDummySnapshot();
+        if (!control || !dummy) return null;
+        if (control.mode === "auto") return this.setDebugTrainingDummyActualMode();
+        control.mode = "auto";
+        control.forcedState = control.forcedState ?? resolveEnemyPresentationState(dummy).primaryState;
+        control.autoElapsedSeconds = 0;
+        this.authority.setDebugTrainingDummyPresentationControlled(true);
+        return this.emitDebugTrainingDummyChange(true);
+    }
+
+    removeDebugTrainingDummy() {
+        const removed = this.authority.removeDebugTrainingDummy();
+        this.debugTrainingDummyControl = null;
+        this.emitDebugTrainingDummyChange(true);
+        return removed;
+    }
+
+    debugTrainingDummyUiState() {
+        const dummy = this.authority.debugTrainingDummySnapshot();
+        const control = this.debugTrainingDummyControl;
+        if (!dummy || !control) return null;
+        const actualState = resolveEnemyPresentationState(dummy).primaryState;
+        return Object.freeze({
+            packageId: this.enemyDefinition?.id ?? "built-in-mock",
+            enemyType: dummy.enemyType,
+            mode: control.mode,
+            currentState: control.forcedState ?? actualState,
+            actualState,
+            health: dummy.health,
+            maxHealth: dummy.maxHealth,
+            states: control.states
+        });
+    }
+
+    advanceDebugTrainingDummy(dt) {
+        const control = this.debugTrainingDummyControl;
+        const dummy = this.authority.debugTrainingDummySnapshot();
+        if (!dummy) {
+            if (control) {
+                this.debugTrainingDummyControl = null;
+                this.emitDebugTrainingDummyChange(true);
+            }
+            return;
+        }
+        if (control?.mode === "auto") {
+            control.autoElapsedSeconds += dt;
+            const presentation = this.enemyDefinition?.presentationFor(dummy.enemyType, control.forcedState);
+            const holdSeconds = Math.max(0.8, presentation?.clip.totalDurationSeconds ?? 0.8);
+            if (control.autoElapsedSeconds >= holdSeconds) {
+                const currentIndex = Math.max(0, control.states.indexOf(control.forcedState));
+                control.forcedState = control.states[(currentIndex + 1) % control.states.length];
+                control.autoElapsedSeconds = 0;
+                this.emitDebugTrainingDummyChange(true);
+            }
+        }
+        this.emitDebugTrainingDummyChange();
+    }
+
+    emitDebugTrainingDummyChange(force = false) {
+        const state = this.debugTrainingDummyUiState();
+        const signature = JSON.stringify(state);
+        if (!force && signature === this.debugTrainingDummySignature) return state;
+        this.debugTrainingDummySignature = signature;
+        this.onDebugTrainingDummyChange(state);
+        return state;
+    }
+
     flushInterruptedRopeRelease(input, reason) {
         if (reason === "pointerup") return false;
         this.update(this.runner.dt, input);
@@ -136,6 +274,7 @@ export class GameApp {
         if (this.frameId !== null) cancelAnimationFrame(this.frameId);
         this.input.detach();
         this.frameId = null;
+        this.onDebugTrainingDummyChange(null);
     }
 
     update(dt, input) {
@@ -149,6 +288,7 @@ export class GameApp {
         this.previousRenderSnapshot = before;
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
+        this.advanceDebugTrainingDummy(dt);
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
         this.statusFeedback.update(dt);
@@ -292,13 +432,24 @@ export class GameApp {
 
     render(alpha = 0) {
         const state = interpolateRenderSnapshot(this.previousRenderSnapshot, this.authority.snapshot(), alpha);
+        const dummy = this.authority.debugTrainingDummySnapshot();
+        const forcedState = this.debugTrainingDummyControl?.forcedState ?? null;
+        const renderState =
+            dummy && forcedState
+                ? {
+                      ...state,
+                      enemies: state.enemies.map((enemy) =>
+                          enemy.id === dummy.enemyId ? { ...enemy, debugPresentationState: forcedState } : enemy
+                      )
+                  }
+                : state;
         const combatFeedback = this.combatFeedback.snapshot();
         this.statusFeedback.apply([state.eventFlash]);
         this.stats.resets = state.resets;
         this.queuePlayerPresentationEvents([state.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         const renderMetrics = this.renderer.draw({
-            ...state,
+            ...renderState,
             ...combatFeedback,
             localPlayerId: this.authority.playerId,
             playerPresentationEvents,

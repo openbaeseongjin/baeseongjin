@@ -37,6 +37,7 @@ import {
     resolveEffectiveRopeDisabledSeconds
 } from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";
+import { DebugEnemyTrainingDummy } from "../debug/DebugEnemyTrainingDummy.js";
 import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPlayerImpactStateDigest } from "../network/PlayerImpactClaim.js";
@@ -105,6 +106,40 @@ function eventFlashState(eventFlash) {
         if (eventFlash[key]) snapshot[key] = vectorState(eventFlash[key]);
     }
     return snapshot;
+}
+
+function finiteViewportBounds(bounds) {
+    if (
+        !bounds ||
+        !Number.isFinite(bounds.minX) ||
+        !Number.isFinite(bounds.minY) ||
+        !Number.isFinite(bounds.maxX) ||
+        !Number.isFinite(bounds.maxY) ||
+        bounds.maxX <= bounds.minX ||
+        bounds.maxY <= bounds.minY
+    ) {
+        return null;
+    }
+    return bounds;
+}
+
+function horizontalSurfaceSpan(surface) {
+    const vertices = surface?.vertices ?? [];
+    const fallbackTop = vertices.length > 0 ? Math.min(...vertices.map(({ y }) => y)) : surface?.bounds?.y;
+    const topY = Number.isFinite(surface?.topY) ? surface.topY : fallbackTop;
+    if (!Number.isFinite(topY)) return null;
+    const topVertices = vertices.filter(({ y }) => Math.abs(y - topY) <= 0.01);
+    const spanVertices = topVertices.length >= 2 ? topVertices : vertices;
+    const xs =
+        spanVertices.length > 0
+            ? spanVertices.map(({ x }) => x)
+            : [surface?.bounds?.x, surface?.bounds?.x + surface?.bounds?.width];
+    if (xs.some((value) => !Number.isFinite(value))) return null;
+    return Object.freeze({ minX: Math.min(...xs), maxX: Math.max(...xs), topY });
+}
+
+function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
 }
 
 function createEnemyRuntime(properties) {
@@ -218,6 +253,7 @@ export class GameSimulation {
         }
         this.enemyRuntimeCreations = 0;
         this.enemyRuntimeReconciliations = 0;
+        this.debugTrainingDummy = new DebugEnemyTrainingDummy();
         this.enemies = this.createEnemies();
         this.enemyImpactTombstones = new Map();
         this.projectiles = [];
@@ -440,30 +476,125 @@ export class GameSimulation {
         return this.enemies.map((enemy) => enemy.renderSnapshot());
     }
 
+    debugTrainingDummySnapshot() {
+        const enemy = this.enemies.find((candidate) => this.debugTrainingDummy.matches(candidate)) ?? null;
+        if (!enemy) this.debugTrainingDummy.clear();
+        return this.debugTrainingDummy.snapshot(enemy);
+    }
+
+    spawnDebugTrainingDummy({ enemyType, visibleWorldBounds, directionX = 1 } = {}) {
+        if (!isKnownEnemyType(enemyType)) {
+            return Object.freeze({ created: false, reason: "지원하지 않는 몬스터 종류입니다." });
+        }
+        const viewport = finiteViewportBounds(visibleWorldBounds);
+        const player = this.#primaryPlayer();
+        if (!viewport || !player) {
+            return Object.freeze({ created: false, reason: "현재 화면의 안전한 배치 지점을 확인할 수 없습니다." });
+        }
+
+        const radius = COMBAT_CONFIG.enemyRadius;
+        const padding = radius + 8;
+        const facing = directionX < 0 ? -1 : 1;
+        const playerPosition = player.physics.position;
+        const previousDummyId = this.debugTrainingDummy.enemyId;
+        const blockers = this.enemies.filter(({ id, health }) => id !== previousDummyId && health > 0);
+        const candidates = [];
+        for (const surface of this.activeCollisionSurfaces) {
+            if (surface.collision === false || surface.oneWay === true || surface.kind === "cover") continue;
+            const span = horizontalSurfaceSpan(surface);
+            if (!span) continue;
+            const minimumX = Math.max(span.minX + padding, viewport.minX + padding);
+            const maximumX = Math.min(span.maxX - padding, viewport.maxX - padding);
+            if (maximumX < minimumX || span.topY < viewport.minY + padding || span.topY > viewport.maxY) continue;
+            const preferredX = clamp(playerPosition.x + facing * 104, minimumX, maximumX);
+            for (const x of new Set([preferredX, minimumX, maximumX, (minimumX + maximumX) * 0.5])) {
+                const y = span.topY - radius - 2;
+                const playerDistance = Math.hypot(x - playerPosition.x, y - playerPosition.y);
+                if (playerDistance < radius + PLAYER_CONFIG.radius + 18) continue;
+                if (
+                    blockers.some(
+                        (enemy) => Math.hypot(x - enemy.position.x, y - enemy.position.y) < radius + enemy.radius + 10
+                    )
+                ) {
+                    continue;
+                }
+                const forwardDistance = (x - playerPosition.x) * facing;
+                candidates.push({
+                    x,
+                    y,
+                    score:
+                        (forwardDistance >= 0 ? 0 : 10000) +
+                        Math.abs(forwardDistance - 104) +
+                        Math.abs(y - playerPosition.y)
+                });
+            }
+        }
+        candidates.sort((left, right) => left.score - right.score);
+        const placement = candidates[0];
+        if (!placement) {
+            return Object.freeze({ created: false, reason: "현재 화면 안에 더미를 놓을 안전한 발판이 없습니다." });
+        }
+
+        this.removeDebugTrainingDummy();
+        const region = authoredRegionForPosition(this.world, playerPosition);
+        const enemy = createEnemyRuntime({
+            id: this.registry.createId("debug-enemy-training-dummy"),
+            position: new Vector2(placement.x, placement.y),
+            level: region?.level ?? 0,
+            areaId: region?.id ?? null,
+            objectId: null,
+            enemyType,
+            radius,
+            health: COMBAT_CONFIG.enemyHealth,
+            maxHealth: COMBAT_CONFIG.enemyHealth,
+            fireCooldown: COMBAT_CONFIG.enemyFireInterval
+        });
+        this.enemies.push(enemy);
+        this.debugTrainingDummy.assign(enemy);
+        this.collisionBroadPhase.invalidateFrame();
+        return Object.freeze({ created: true, enemy: enemy.renderSnapshot() });
+    }
+
+    setDebugTrainingDummyPresentationControlled(controlled) {
+        return this.debugTrainingDummy.setPresentationControlled(controlled);
+    }
+
+    removeDebugTrainingDummy() {
+        const enemyId = this.debugTrainingDummy.clear();
+        if (!enemyId) return false;
+        this.enemies = this.enemies.filter(({ id }) => id !== enemyId);
+        this.enemyProjectiles = this.enemyProjectiles.filter(({ ownerId }) => ownerId !== enemyId);
+        this.enemyImpactTombstones.delete(enemyId);
+        this.collisionBroadPhase.invalidateFrame();
+        return true;
+    }
+
     enemyNetworkStates() {
         const authoredObjectIds = new Set(
             this.world.enemySpawns.map(({ objectId, encounterId, slotId }) => objectId ?? encounterId ?? slotId)
         );
-        return this.enemyStates().map((enemy) => {
-            if (!enemy.objectId || !authoredObjectIds.has(enemy.objectId)) return enemy;
-            return {
-                id: enemy.id,
-                objectId: enemy.objectId,
-                position: enemy.position,
-                velocity: enemy.velocity,
-                collider: enemy.collider,
-                patrol: enemy.patrol,
-                behaviorState: enemy.behaviorState,
-                knockbackState: enemy.knockbackState,
-                lockedTargetId: enemy.lockedTargetId,
-                attackState: enemy.attackState,
-                attackStateRemaining: enemy.attackStateRemaining,
-                aimDirection: enemy.aimDirection,
-                presentationAimDirection: enemy.presentationAimDirection,
-                health: enemy.health,
-                fireCooldown: enemy.fireCooldown
-            };
-        });
+        return this.enemyStates()
+            .filter((enemy) => !this.debugTrainingDummy.matches(enemy))
+            .map((enemy) => {
+                if (!enemy.objectId || !authoredObjectIds.has(enemy.objectId)) return enemy;
+                return {
+                    id: enemy.id,
+                    objectId: enemy.objectId,
+                    position: enemy.position,
+                    velocity: enemy.velocity,
+                    collider: enemy.collider,
+                    patrol: enemy.patrol,
+                    behaviorState: enemy.behaviorState,
+                    knockbackState: enemy.knockbackState,
+                    lockedTargetId: enemy.lockedTargetId,
+                    attackState: enemy.attackState,
+                    attackStateRemaining: enemy.attackStateRemaining,
+                    aimDirection: enemy.aimDirection,
+                    presentationAimDirection: enemy.presentationAimDirection,
+                    health: enemy.health,
+                    fireCooldown: enemy.fireCooldown
+                };
+            });
     }
 
     hydrateEnemyNetworkStates(states) {
@@ -1187,13 +1318,15 @@ export class GameSimulation {
             maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds
         });
         updateEnemyPresentationAim({
-            enemies: this.activeSimulationEnemies,
+            enemies: this.activeSimulationEnemies.filter((enemy) => this.debugTrainingDummy.canSimulate(enemy)),
             targets: this.players,
             range: COMBAT_CONFIG.enemyAttackRange,
             surfaces: this.activeCollisionSurfaces
         });
         const enemyProjectileSpawns = updateEnemyWeapons({
-            enemies: this.activeSimulationEnemies.filter(({ knockbackState }) => !knockbackState),
+            enemies: this.activeSimulationEnemies.filter(
+                (enemy) => !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
+            ),
             targets: this.players,
             projectiles: this.enemyProjectiles,
             registry: this.registry,
@@ -1220,7 +1353,10 @@ export class GameSimulation {
         for (const resolution of playerProjectileEvents.resolutions) {
             this.recordProjectileResolution(resolution, hitByProjectileId.get(resolution.projectileId));
         }
-        this.metrics.recordEnemyOutcomes(playerProjectileEvents);
+        this.metrics.recordEnemyOutcomes({
+            ...playerProjectileEvents,
+            hits: playerProjectileEvents.hits.filter((event) => !this.debugTrainingDummy.matches(event.targetId))
+        });
         this.#removeDefeatedEnemies();
         if (recoverPlayerDeaths) {
             for (const player of this.players) {
@@ -1436,7 +1572,9 @@ export class GameSimulation {
         }
         if (!result.accepted || !result.emitEffects) return result;
         const resolution = result.resolution;
-        if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
+        if (resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(event.targetId)) {
+            this.metrics.enemyDefeats += 1;
+        }
         this.recordReplicationEvent("resolve", {
             objectId: event.predictionId,
             resolution,
@@ -1466,6 +1604,7 @@ export class GameSimulation {
     #advanceEnemyImpactKnockbacks(dt, { emitWallImpacts = false } = {}) {
         const events = [];
         for (const enemy of this.activeSimulationEnemies) {
+            if (!this.debugTrainingDummy.canSimulate(enemy)) continue;
             const state = enemy.knockbackSnapshot();
             if (!state) continue;
             const previousPosition = enemy.position.clone();
@@ -1509,7 +1648,9 @@ export class GameSimulation {
 
     #advanceEnemyBehaviorSimulation(dt) {
         const outcomes = advanceEnemyBehaviors({
-            enemies: this.activeSimulationEnemies.filter(({ knockbackState }) => !knockbackState),
+            enemies: this.activeSimulationEnemies.filter(
+                (enemy) => !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
+            ),
             targets: this.players,
             dt
         });
@@ -1594,7 +1735,9 @@ export class GameSimulation {
             target.knockbackState.wallImpactTriggered = false;
         }
         if (!result.accepted || !result.emitEffects) return result;
-        if (result.resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
+        if (result.resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(claim.targetId)) {
+            this.metrics.enemyDefeats += 1;
+        }
         if (replicate)
             this.recordReplicationEvent("resolve", {
                 objectId: claim.predictionId,
@@ -2295,13 +2438,18 @@ export class GameSimulation {
             { projectileId: projectile?.id ?? claim.predictionId, resolution, position: target.position },
             { damage, sourcePlayerId: authenticatedPlayerId, targetId: claim.targetId }
         );
-        if (resolution === "enemy-defeated") this.metrics.enemyDefeats += 1;
+        if (resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(claim.targetId)) {
+            this.metrics.enemyDefeats += 1;
+        }
         this.#removeDefeatedEnemies();
         return Object.freeze({ accepted: true, resolution, damage });
     }
 
     #removeDefeatedEnemies() {
+        const defeatedTrainingDummyId =
+            this.enemies.find((enemy) => this.debugTrainingDummy.matches(enemy) && enemy.health <= 0)?.id ?? null;
         for (const enemy of this.enemies) {
+            if (this.debugTrainingDummy.matches(enemy)) continue;
             if (enemy.health > 0 || this.enemyImpactTombstones.has(enemy.id)) continue;
             recordEnemyImpactTombstone(this.enemyImpactTombstones, {
                 targetId: enemy.id,
@@ -2348,6 +2496,11 @@ export class GameSimulation {
             }
         }
         this.enemies = this.enemies.filter(({ health }) => health > 0);
+        if (defeatedTrainingDummyId) {
+            this.enemyProjectiles = this.enemyProjectiles.filter(({ ownerId }) => ownerId !== defeatedTrainingDummyId);
+            this.debugTrainingDummy.clear();
+            this.collisionBroadPhase.invalidateFrame();
+        }
     }
 
     resolveEnemyProjectileClaim(authenticatedPlayerId, claim) {
@@ -2372,6 +2525,20 @@ export class GameSimulation {
         const impactId = claim.impactId ?? claim.projectileId;
         const isFallDamage = claim.impactType === "fall-damage";
         const projectile = isFallDamage ? null : this.enemyProjectiles.find(({ id }) => id === impactId);
+        if (projectile && this.debugTrainingDummy.ownsProjectile(projectile)) {
+            this.enemyProjectiles = this.enemyProjectiles.filter(({ id }) => id !== projectile.id);
+            this.recordProjectileResolution({
+                projectileId: projectile.id,
+                resolution: claim.impactType,
+                position: new Vector2(claim.position.x, claim.position.y)
+            });
+            return Object.freeze({
+                accepted: true,
+                resolution: claim.impactType,
+                damage: 0,
+                safeTraining: true
+            });
+        }
         if (projectile && claim.impactType === "rope-cut" && !projectile.canCutRope) {
             return Object.freeze({ accepted: false, reason: "rope-cut-disallowed" });
         }

@@ -341,7 +341,8 @@
             }
             .settings-dialog[hidden],
             .settings-panel[hidden],
-            .audio-resume-notice[hidden] {
+            .audio-resume-notice[hidden],
+            .debug-enemy-toolbar[hidden] {
                 display: none;
             }
             .debug-panel-body {
@@ -372,6 +373,86 @@
                 margin: 0;
                 color: #94a3b8;
                 font-weight: 700;
+            }
+            .debug-enemy-training {
+                display: grid;
+                gap: 10px;
+                padding: 12px;
+                border: 1px solid rgba(251, 191, 36, 0.36);
+                border-radius: 12px;
+            }
+            .debug-enemy-training legend {
+                padding: 0 8px;
+                color: #fbbf24;
+                font-weight: 900;
+            }
+            .debug-enemy-training:disabled {
+                opacity: 0.5;
+            }
+            .debug-enemy-package {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                color: #cbd5e1;
+                font-size: 12px;
+                font-weight: 800;
+            }
+            .debug-enemy-training-actions {
+                display: flex;
+                justify-content: flex-end;
+            }
+            .debug-enemy-toolbar {
+                position: fixed;
+                z-index: 32;
+                top: 72px;
+                right: 14px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                max-width: calc(100vw - 28px);
+                padding: 7px;
+                border: 1px solid rgba(251, 191, 36, 0.52);
+                border-radius: 12px;
+                background: rgba(15, 23, 42, 0.9);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+                backdrop-filter: blur(8px);
+            }
+            .debug-enemy-toolbar button {
+                min-height: 36px;
+                padding: 0 10px;
+                border: 1px solid rgba(148, 163, 184, 0.4);
+                border-radius: 8px;
+                color: #e2e8f0;
+                background: #1e293b;
+                font:
+                    800 11px system-ui,
+                    sans-serif;
+            }
+            .debug-enemy-toolbar [data-debug-enemy-actual] {
+                min-width: 150px;
+                color: #fef3c7;
+                border-color: rgba(251, 191, 36, 0.55);
+            }
+            .debug-enemy-toolbar[data-mode="auto"] [data-debug-enemy-auto] {
+                color: #082f49;
+                background: #67e8f9;
+            }
+            @media (max-width: 900px), (max-height: 500px) {
+                .debug-enemy-toolbar {
+                    top: 56px;
+                    right: 8px;
+                    gap: 4px;
+                    max-width: calc(100vw - 16px);
+                    padding: 5px;
+                }
+                .debug-enemy-toolbar button {
+                    min-height: 32px;
+                    padding: 0 7px;
+                    font-size: 10px;
+                }
+                .debug-enemy-toolbar [data-debug-enemy-actual] {
+                    min-width: 112px;
+                }
             }
             .rope-tuning-fieldset {
                 display: grid;
@@ -818,6 +899,23 @@
                                 </div>
                             </fieldset>
                             <p class="debug-note" data-debug-augment-mode role="status"></p>
+                            <fieldset class="debug-enemy-training" data-debug-enemy-training>
+                                <legend>몬스터 모션 더미</legend>
+                                <p class="debug-enemy-package">
+                                    <span>Runtime package</span>
+                                    <output data-debug-enemy-package>불러오는 중</output>
+                                </p>
+                                <label class="debug-select-row">
+                                    <span>몬스터</span>
+                                    <select data-debug-enemy-type></select>
+                                </label>
+                                <div class="debug-enemy-training-actions">
+                                    <button class="audio-reset" type="button" data-debug-enemy-spawn>
+                                        현재 화면에 생성 / 교체
+                                    </button>
+                                </div>
+                                <p class="debug-note" data-debug-enemy-status role="status"></p>
+                            </fieldset>
                             <fieldset class="rope-tuning-fieldset" data-debug-rope-tuning>
                                 <legend>로프 수치</legend>
                                 <label class="rope-tuning-row">
@@ -899,6 +997,13 @@
                 PC: A/D 이동 · W 점프/Node · 좌클릭 로프 · 우클릭 Action / 모바일: 조준 토글 · 화면 Rope/Action
             </p>
             <output class="channel-badge" id="channel-badge" hidden></output>
+            <section class="debug-enemy-toolbar" data-debug-enemy-toolbar aria-label="몬스터 모션 더미 검수" hidden>
+                <button type="button" data-debug-enemy-previous aria-label="이전 상태">◀</button>
+                <button type="button" data-debug-enemy-actual>실전</button>
+                <button type="button" data-debug-enemy-next aria-label="다음 상태">▶</button>
+                <button type="button" data-debug-enemy-auto aria-pressed="false">자동 순환</button>
+                <button type="button" data-debug-enemy-remove>제거</button>
+            </section>
             <button class="copy-diagnostics" id="copy-diagnostics" type="button" hidden>진단 복사</button>
             <p class="orientation-notice" role="status">
                 로프 액션은 가로 화면에 맞춰져 있습니다.<br />기기를 가로로 돌려주세요.

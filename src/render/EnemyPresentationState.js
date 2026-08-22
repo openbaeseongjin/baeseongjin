@@ -69,11 +69,13 @@ export function resolveEnemyPresentationState(enemy) {
     const attackState = enemy?.attackState && enemy.attackState !== "idle" ? `attack-${enemy.attackState}` : null;
     const baseState =
         behaviorState && !ACTIVE_BEHAVIOR_STATES.has(behaviorState) ? behaviorState : patrolPresentationState(enemy);
-    const primaryState = enemy?.knockbackState
-        ? "knockback"
-        : behaviorState && ACTIVE_BEHAVIOR_STATES.has(behaviorState)
-          ? behaviorState
-          : (attackState ?? baseState);
+    const primaryState =
+        enemy?.debugPresentationState ??
+        (enemy?.knockbackState
+            ? "knockback"
+            : behaviorState && ACTIVE_BEHAVIOR_STATES.has(behaviorState)
+              ? behaviorState
+              : (attackState ?? baseState));
     if (!definition.states.includes(primaryState)) {
         throw new Error(
             `enemy presentation state '${primaryState}' is not declared for '${enemy?.enemyType ?? "sentry-t1"}'`
