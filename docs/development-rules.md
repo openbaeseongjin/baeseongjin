@@ -396,6 +396,7 @@ git diff --check
 ## 13. Git 운영
 
 - `main` 변경은 짧은 브랜치와 PR을 기본으로 한다.
+- 사용자가 `main` 병합을 요청하거나 병합까지 완료하라고 명시한 작업은 예외 없이 [`.codex/skills/github-task-flow/SKILL.md`](../.codex/skills/github-task-flow/SKILL.md)를 적용한다. 사용자가 skill 이름을 다시 입력할 필요는 없으며, Issue·전용 worktree·단일 Lore 커밋·PR·최신 `main` rebase·재검증·일반 merge commit·Issue 종료의 전체 절차를 외부 blocker가 없는 한 완료한다.
 - 모든 PR은 병합 직전에 `git fetch origin main`과 `git rebase origin/main`으로 전용 작업 브랜치를 최신 `main` 위에 올린다. 검증 뒤 `origin/main`이 다시 전진했으면 리베이스하되 변경된 입력과 연결된 ledger 항목만 무효화한다.
 - 최종 리베이스 뒤 final candidate의 필수 검사 ledger를 완성하고, `git merge-base HEAD origin/main`과 `git rev-parse origin/main`이 같은 SHA인지 확인한다. rebase가 no-op이고 candidate fingerprint와 환경이 같으면 같은 전체 suite를 반복하지 않는다. 충돌은 작업 브랜치에서만 해결하며 PR이 mergeable인지 다시 확인한다.
 - 이미 push한 단일 소유 전용 작업 브랜치의 리베이스 결과만 `git push --force-with-lease`로 갱신할 수 있다. `--force`는 사용하지 않는다.
