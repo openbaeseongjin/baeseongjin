@@ -1,4 +1,6 @@
-# 초기 컨셉 기준 구현 로드맵
+# ONE ROPE 구현 로드맵
+
+> 로프로 붕괴 도시를 올라가는 액션 로그라이크.
 
 실제 두 기기 검증의 실행 순서와 증거 형식은 `two-device-playtest-protocol.md`를 기준으로 한다. 절차 문서 작성과 플레이테스트 통과는 별도 상태로 관리한다.
 
@@ -29,6 +31,7 @@
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 generic Augment 선택 지표 수집
 - 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
 - 첫 화면의 싱글·멀티 선택, 고정 게임 서버 연결과 모바일 4자리 채널 생성·참가
+- 시작 화면·설정에서 여는 통합 Help: 세계관·목표·진행·PC/모바일 조작키·로프 이동·전투·액션과 증강·저장·협동을 한 화면 한 주제의 7장 SVG 카드로 제공하고 이전·다음·번호·좌우 방향키로 이동한다. 플레이어용 문구는 가능한 한 한글을 우선해 구현 용어 `Node` 대신 강화 장비·상호작용, 공중 재부착 대신 연속 로프 액션을 사용한다. 전투는 적의 공격과 일정 속도 이상 로프 스윙 충돌의 속도 비례 데미지를, 액션은 우클릭 기본 펀치와 모바일 액션 조준 및 증강에 따른 교체·강화를 설명한다. 설정의 도움말은 같은 페이지의 embedded 모드를 인게임 모달로 열고 닫을 때 설정 초점을 복구하며, 오프라인 멀티 사유는 공용 오류 대신 멀티 플레이 버튼 hover·focus 도움말로 표시한다.
 - 2인 권위 서버의 명령 receipt, 20Hz 스냅샷, 자기 예측과 동료 보간
 - 1인·2인 멀티 공통 Enemy stable-ID in-place prediction restore, indexed history sampling과 fixed-step 단일 remote sample
 - 1-1/1-2 local Player Bark data catalog·queue·causal dedupe·speaker 머리 위 타이핑 말풍선과 future party-chat audience 확장 seam

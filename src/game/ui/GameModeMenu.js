@@ -11,6 +11,7 @@ export class GameModeMenu {
         this.channelForm = root.querySelector("[data-channel-form]");
         this.channelInput = root.querySelector("[data-channel-input]");
         this.multiplayerButton = root.querySelector('[data-game-mode="multiplayer"]');
+        this.multiplayerTooltip = root.querySelector("[data-multiplayer-tooltip]");
         this.controls = [...root.querySelectorAll("button, input")];
         this.busy = false;
         this.multiplayerAvailable = true;
@@ -71,10 +72,7 @@ export class GameModeMenu {
 
     setBusy(busy, mode = null) {
         this.busy = Boolean(busy);
-        this.controls.forEach(
-            (control) =>
-                (control.disabled = this.busy || (control === this.multiplayerButton && !this.multiplayerAvailable))
-        );
+        this.controls.forEach((control) => (control.disabled = this.busy));
         if (busy && mode) this.setStatus(`${MODE_LABELS[mode]}에 연결하는 중…`);
     }
 
@@ -82,11 +80,13 @@ export class GameModeMenu {
         const next = Boolean(available);
         const changed = next !== this.multiplayerAvailable;
         this.multiplayerAvailable = next;
-        this.multiplayerButton.disabled = this.busy || !next;
+        this.multiplayerButton.disabled = this.busy;
+        this.multiplayerButton.setAttribute("aria-disabled", String(!next));
+        if (this.multiplayerTooltip) this.multiplayerTooltip.hidden = next;
         if (!next) {
             this.channelPanel.hidden = true;
             this.modeActions.hidden = false;
-            this.setStatus("멀티 서버가 꺼져 있어 멀티 플레이를 사용할 수 없습니다.", true);
+            this.setStatus("플레이 방식을 선택하세요.");
         } else if (changed && !this.root.hidden) {
             this.setStatus("플레이 방식을 선택하세요.");
         }
