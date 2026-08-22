@@ -35,6 +35,8 @@ import { EnvironmentRendererComposer } from "./environment/EnvironmentRendererCo
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
 import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
+import { DEFAULT_ENEMY_SPRITE_SECTOR_ID } from "./sprites/EnemySpriteCatalog.js";
+import { EnemySpritePackageCatalog } from "./sprites/EnemySpritePackageCatalog.js";
 
 export class SpriteAssetFallbackRenderer {
     constructor({ asset, spriteRenderer, polygonRenderer }) {
@@ -55,6 +57,9 @@ export class SpriteSceneRenderer {
         playerAssets = null,
         enemyDefinition = null,
         enemyAssets = null,
+        enemyDefinitionsBySectorId = null,
+        enemyAssetsBySectorId = null,
+        enemySpritePackages = null,
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
         authoredAreaEnvironmentDefinitions = Object.freeze({})
@@ -62,15 +67,23 @@ export class SpriteSceneRenderer {
         this.profile = "sprite";
         this.playerDefinition = playerDefinition;
         this.playerAssets = playerAssets ?? new SpriteImageAssetSet({ atlases: playerDefinition.atlases });
-        this.enemyDefinition = enemyDefinition;
-        this.enemyAssets =
-            enemyDefinition === null
-                ? null
-                : (enemyAssets ??
-                  new SpriteImageAssetSet({
-                      atlases: enemyDefinition.atlases,
-                      fallbackLabel: "built-in enemy mock sprites"
-                  }));
+        const resolvedEnemyDefinitions =
+            enemyDefinitionsBySectorId ??
+            (enemyDefinition
+                ? Object.freeze({ [DEFAULT_ENEMY_SPRITE_SECTOR_ID]: enemyDefinition })
+                : Object.freeze({}));
+        const resolvedEnemyAssets =
+            enemyAssetsBySectorId ??
+            (enemyAssets ? Object.freeze({ [DEFAULT_ENEMY_SPRITE_SECTOR_ID]: enemyAssets }) : Object.freeze({}));
+        this.enemySpritePackages =
+            enemySpritePackages ??
+            new EnemySpritePackageCatalog({
+                definitionsBySectorId: resolvedEnemyDefinitions,
+                defaultSectorId: DEFAULT_ENEMY_SPRITE_SECTOR_ID,
+                assetsBySectorId: resolvedEnemyAssets
+            });
+        this.enemyDefinition = this.enemySpritePackages.defaultDefinition;
+        this.enemyAssets = this.enemySpritePackages.defaultAssets;
         this.environmentDefinition = environmentDefinition;
         this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
         const authoredAreaEnvironmentAtlases = Object.fromEntries(
@@ -109,7 +122,7 @@ export class SpriteSceneRenderer {
             new RopeShotRenderer(remoteShots),
             new SpriteRemotePlayerRenderer({ assets: this.playerAssets, definition: playerDefinition }),
             new SwingRenderer(),
-            new SpriteEnemyRenderer({ assets: this.enemyAssets, definition: this.enemyDefinition }),
+            new SpriteEnemyRenderer({ packageCatalog: this.enemySpritePackages }),
             new SpriteProjectileRenderer({
                 selectProjectiles: (scene) => scene.projectiles ?? [],
                 sprite: playerProjectileSprite,
