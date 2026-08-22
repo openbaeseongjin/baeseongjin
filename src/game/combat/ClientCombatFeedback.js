@@ -15,6 +15,41 @@ function directionTo(from, to) {
     return { x: to.x - from.x, y: to.y - from.y };
 }
 
+function finiteVector(value) {
+    return Number.isFinite(value?.x) && Number.isFinite(value?.y) ? value : null;
+}
+
+function ropeAttachmentPosition(player, rope) {
+    if (!finiteVector(player?.position) || !finiteVector(rope?.attachmentOffset)) return player?.position ?? null;
+    const angle = Number.isFinite(player.angle) ? player.angle : 0;
+    const cosine = Math.cos(angle);
+    const sine = Math.sin(angle);
+    const offset = rope.attachmentOffset;
+    return {
+        x: player.position.x + offset.x * cosine - offset.y * sine,
+        y: player.position.y + offset.x * sine + offset.y * cosine
+    };
+}
+
+function hookTip(shot) {
+    if (!finiteVector(shot?.origin) || !finiteVector(shot?.direction) || !Number.isFinite(shot.traveled)) return null;
+    return {
+        x: shot.origin.x + shot.direction.x * shot.traveled,
+        y: shot.origin.y + shot.direction.y * shot.traveled
+    };
+}
+
+function playerSampleId(player) {
+    if (Number.isSafeInteger(player.ownerMotionTick)) return `motion:${player.ownerMotionTick}`;
+    const position = player.position ?? {};
+    const velocity = player.velocity ?? {};
+    return `frame:${position.x}:${position.y}:${velocity.x}:${velocity.y}:${player.rope?.isAttached}:${player.launcher?.shot?.elapsed ?? "-"}`;
+}
+
+function hasAugment(player, id) {
+    return (player.selectedAugmentIds ?? player.augmentRuntimeState?.selectedAugmentIds ?? []).includes(id);
+}
+
 function particlePresetForAction(actionId) {
     if (actionId === "default-punch") return "player-punch";
     if (actionId === "straight-shot") return "player-shot";
@@ -57,12 +92,22 @@ export class ClientCombatFeedback {
         this.continuousEmitterElapsed = new Map();
         this.continuousEmitterSequence = new Map();
         this.lastActionSequenceByPlayerId = new Map();
+        this.previousPlayerPresentation = new Map();
+        this.suppressedRopeDetaches = new Map();
         this.visibleWorldBounds = null;
     }
 
     apply(events, { visibleWorldBounds = null } = {}) {
         this.visibleWorldBounds = visibleWorldBounds;
         for (const event of events) {
+            if (
+                event.eventType === "player-respawned" ||
+                ((event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
+                    (event.resolution === "rope-cut" || event.parameters?.sourceKind === "rope-impact"))
+            ) {
+                const playerId = event.targetId ?? event.playerId ?? event.parameters?.targetId;
+                if (playerId) this.suppressedRopeDetaches.set(playerId, 0.8);
+            }
             this.appendEventParticles(event);
             if (
                 event.eventType === "augment-action-started" ||
@@ -168,6 +213,8 @@ export class ClientCombatFeedback {
             presetId = "damage-reflect";
             sourcePosition = event.sourcePosition ?? event.parameters?.sourcePosition ?? position;
             targetPosition = position;
+        } else if ((event.effectId ?? event.parameters?.effectId) === "electrified-rope") {
+            presetId = "rope-contact";
         }
         if (!presetId) return;
         this.seenParticleCausalIds.add(causalId);
@@ -317,6 +364,7 @@ export class ClientCombatFeedback {
             );
         }
         for (const player of players) {
+            this.syncPlayerRopeAndMotion(player, dt, emit, visibleWorldBounds);
             const activeAction = player.actionState?.activeAction;
             if (activeAction) {
                 emit(
@@ -348,6 +396,167 @@ export class ClientCombatFeedback {
         const activePlayerIds = new Set(players.map(({ id }) => id));
         for (const playerId of this.lastActionSequenceByPlayerId.keys())
             if (!activePlayerIds.has(playerId)) this.lastActionSequenceByPlayerId.delete(playerId);
+        for (const playerId of this.previousPlayerPresentation.keys())
+            if (!activePlayerIds.has(playerId)) this.previousPlayerPresentation.delete(playerId);
+    }
+
+    syncPlayerRopeAndMotion(player, dt, emit, visibleWorldBounds) {
+        if (!player?.id || !finiteVector(player.position)) return;
+        const rope = player.rope ?? {};
+        const shot = player.launcher?.shot ?? null;
+        const swing = player.control?.swingDrag ?? player.swingDrag ?? null;
+        const sampleId = playerSampleId(player);
+        const previous = this.previousPlayerPresentation.get(player.id);
+        const velocity = finiteVector(player.velocity) ?? { x: 0, y: 0 };
+        const current = {
+            sampleId,
+            velocity: { ...velocity },
+            position: { ...player.position },
+            lifeState: player.lifeState,
+            attached: rope.isAttached === true,
+            shot: shot ? { ...shot, origin: { ...shot.origin }, direction: { ...shot.direction } } : null,
+            swingUsed: swing?.used === true,
+            pointerKnown: typeof player.control?.lastPointer?.down === "boolean",
+            pointerDown: player.control?.lastPointer?.down === true,
+            transition: (previous?.transition ?? 0) + 1
+        };
+        if (!previous) {
+            this.previousPlayerPresentation.set(player.id, current);
+            return;
+        }
+        const transitionIdentity = `${player.id}:${current.transition}`;
+        const attachment = ropeAttachmentPosition(player, rope);
+        const anchor = finiteVector(rope.anchor);
+        const direction = directionTo(attachment, anchor) ?? velocity;
+        const positionJump =
+            Math.hypot(player.position.x - previous.position.x, player.position.y - previous.position.y) > 160;
+        const suppressDetach =
+            this.suppressedRopeDetaches.has(player.id) ||
+            player.lifeState !== "active" ||
+            previous.lifeState !== "active" ||
+            positionJump;
+        if (!previous.shot && shot) {
+            appendParticlePreset(this.effects, {
+                presetId: "rope-launch",
+                position: shot.origin,
+                direction: shot.direction,
+                identity: `${transitionIdentity}:launch`,
+                visibleWorldBounds
+            });
+        }
+        if (shot) {
+            const tip = hookTip(shot);
+            if (tip) emit(`rope-flight:${player.id}`, "rope-flight", tip, shot.direction, { density: 0.42 });
+        }
+        if (previous.shot && !shot && !previous.attached && current.attached && anchor) {
+            appendParticlePreset(this.effects, {
+                presetId: "rope-attach",
+                position: anchor,
+                direction: directionTo(anchor, attachment),
+                identity: `${transitionIdentity}:attach`,
+                visibleWorldBounds
+            });
+            appendParticlePreset(this.effects, {
+                presetId: "rope-pulse",
+                position: anchor,
+                targetPosition: attachment,
+                direction: directionTo(anchor, attachment),
+                identity: `${transitionIdentity}:pulse`,
+                visibleWorldBounds
+            });
+        } else if (previous.shot && !shot && !current.attached && !suppressDetach) {
+            const tip = hookTip(previous.shot);
+            if (tip)
+                appendParticlePreset(this.effects, {
+                    presetId: "rope-dissipate",
+                    position: tip,
+                    direction: previous.shot.direction,
+                    identity: `${transitionIdentity}:dissipate`,
+                    visibleWorldBounds
+                });
+        }
+        const releaseTransition =
+            previous.pointerKnown && current.pointerKnown ? previous.pointerDown && !current.pointerDown : true;
+        if (previous.attached && !current.attached && releaseTransition && !suppressDetach) {
+            const releaseDensity = hasAugment(player, "release-propulsion") ? 1.45 : 1;
+            appendParticlePreset(this.effects, {
+                presetId: "rope-release",
+                position: player.position,
+                direction: velocity,
+                identity: `${transitionIdentity}:release`,
+                density: releaseDensity,
+                visibleWorldBounds
+            });
+            appendParticlePreset(this.effects, {
+                presetId: "player-impulse",
+                position: player.position,
+                direction: velocity,
+                identity: `${transitionIdentity}:release-impulse`,
+                density: releaseDensity,
+                visibleWorldBounds
+            });
+            if (hasAugment(player, "rope-link") && (player.actionState?.ropeLinkWindowRemaining ?? 0) > 0) {
+                appendParticlePreset(this.effects, {
+                    presetId: "rope-link",
+                    position: player.position,
+                    direction: previous.shot?.direction ?? velocity,
+                    identity: `${transitionIdentity}:link`,
+                    visibleWorldBounds
+                });
+            }
+        }
+        if (!previous.swingUsed && current.swingUsed) {
+            appendParticlePreset(this.effects, {
+                presetId: "player-impulse",
+                position: player.position,
+                direction: swing?.direction ?? velocity,
+                identity: `${transitionIdentity}:swing`,
+                visibleWorldBounds
+            });
+        }
+        if (current.attached && anchor && attachment) {
+            const tension = Number.isFinite(rope.tension) ? rope.tension : 0;
+            const tensionDensity = Math.max(0, Math.min(0.8, (tension - 180) / 820));
+            if (tensionDensity > 0)
+                emit(
+                    `rope-tension:${player.id}`,
+                    hasAugment(player, "electrified-rope") ? "rope-tension-electric" : "rope-tension",
+                    anchor,
+                    directionTo(anchor, attachment),
+                    { targetPosition: attachment, density: tensionDensity }
+                );
+        }
+        const speed = Math.hypot(velocity.x, velocity.y);
+        if (speed > 350)
+            emit(
+                `player-motion:${player.id}`,
+                "player-motion",
+                player.position,
+                { x: -velocity.x, y: -velocity.y },
+                { density: Math.min(0.85, 0.3 + (speed - 350) / 900) }
+            );
+        if (previous.sampleId !== sampleId) {
+            const safeDt = Math.max(1 / 120, Math.min(0.12, Number.isFinite(dt) ? dt : 1 / 60));
+            const acceleration = {
+                x: (velocity.x - previous.velocity.x) / safeDt,
+                y: (velocity.y - previous.velocity.y) / safeDt
+            };
+            const accelerationMagnitude = Math.min(4200, Math.hypot(acceleration.x, acceleration.y));
+            const speedGain = speed - Math.hypot(previous.velocity.x, previous.velocity.y);
+            const attachedImpulse = previous.attached && current.attached;
+            const accelerationThreshold = attachedImpulse ? 2600 : 1800;
+            const speedGainThreshold = attachedImpulse ? 100 : 55;
+            if (accelerationMagnitude > accelerationThreshold && speedGain > speedGainThreshold && !current.swingUsed) {
+                appendParticlePreset(this.effects, {
+                    presetId: "player-impulse",
+                    position: player.position,
+                    direction: acceleration,
+                    identity: `${transitionIdentity}:acceleration:${sampleId}`,
+                    visibleWorldBounds
+                });
+            }
+        }
+        this.previousPlayerPresentation.set(player.id, current);
     }
 
     update(dt) {
@@ -363,6 +572,11 @@ export class ClientCombatFeedback {
         if (this.ropeCutFeedback) {
             this.ropeCutFeedback.age += dt;
             if (this.ropeCutFeedback.age >= 0.8) this.ropeCutFeedback = null;
+        }
+        for (const [playerId, remaining] of this.suppressedRopeDetaches) {
+            const next = remaining - dt;
+            if (next <= 0) this.suppressedRopeDetaches.delete(playerId);
+            else this.suppressedRopeDetaches.set(playerId, next);
         }
     }
 

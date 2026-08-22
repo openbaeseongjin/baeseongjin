@@ -83,6 +83,8 @@ Reload는 정상 해제·비행 만료·입력 취소에 공통 적용한다. �
 - 진입·재진입 burst가 없고 짧은 접촉의 미정산 시간은 보존한다.
 - VFX는 로컬 `C:\projects\ball-fight-simulator`의 전기 표현 문법을 의존성 없이 이식한다. endpoint 고정 wavering polyline에 반투명 청록 glow, 청색 본선, 백색 core를 additive로 겹친다.
 
+Rope presentation은 기본 lifecycle emitter를 카드별 full-density emitter로 복제하지 않는다. 빠른 발사·긴 로프·빠른 회수는 실제 launcher 수치가 base trail/timing에 반영되고, 해제 추진은 base release/body impulse만 강화한다. 감전 로프는 base tension flow material을 electric cyan/blue로 override하고 실제 contact pulse만 추가한다. 충돌 폭발은 유효 impact accent만 사용하며, 로프 연동은 실제 `ropeLinkWindowRemaining` 동안 release transfer pulse 하나만 만든다.
+
 ### 충돌 폭발
 
 - 기존 유효 고속 Rope 몸체 충돌을 trigger로 사용한다.

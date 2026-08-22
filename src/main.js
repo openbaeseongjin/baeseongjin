@@ -2,7 +2,11 @@ import { GameApp } from "./game/GameApp.js";
 import { MultiplayerGameApp } from "./game/MultiplayerGameApp.js";
 import { RemoteGameAuthority } from "./game/runtime/RemoteGameAuthority.js";
 import { restartSingleGameForDebugSettings } from "./game/runtime/SingleGameDebugRestart.js";
-import { channelSocketUrl, configuredMultiplayerServer } from "./game/runtime/MultiplayerServerEndpoint.js";
+import {
+    channelSocketUrl,
+    configuredMultiplayerServer,
+    probeMultiplayerServer
+} from "./game/runtime/MultiplayerServerEndpoint.js";
 import { GameModeMenu } from "./game/ui/GameModeMenu.js";
 import { setupInstallPrompt } from "./pwa/InstallPrompt.js";
 import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
@@ -43,6 +47,9 @@ let audioHost = null;
 let audioBindings = null;
 let audioLifecycle = null;
 let audioLifecycleAttached = false;
+let multiplayerProbeTimer = null;
+let multiplayerProbeSequence = 0;
+const MULTIPLAYER_PROBE_INTERVAL_MS = 5000;
 const DEFAULT_GAME_AUDIO_SELECTION = Object.freeze({
     packId: "default-mock",
     packageOverrides: Object.freeze({ bgm: "main-theme" })
@@ -151,6 +158,22 @@ function updateDiagnostics(snapshot) {
     diagnostics.update({ ...snapshot, audioDiagnostics: audioHost?.snapshot() ?? null });
 }
 
+async function refreshMultiplayerAvailability() {
+    const sequence = ++multiplayerProbeSequence;
+    const serverUrl = configuredMultiplayerServer();
+    const available = await probeMultiplayerServer(serverUrl);
+    if (pageClosing || sequence !== multiplayerProbeSequence) return false;
+    modeMenu.setMultiplayerAvailable(available);
+    return available;
+}
+
+function startMultiplayerAvailabilityMonitor() {
+    if (multiplayerProbeTimer !== null) return;
+    multiplayerProbeTimer = globalThis.setInterval(() => {
+        if (!app && !modeMenu.busy) void refreshMultiplayerAvailability();
+    }, MULTIPLAYER_PROBE_INTERVAL_MS);
+}
+
 function createSingleGameApp(debug) {
     return new GameApp({
         canvas,
@@ -257,6 +280,7 @@ async function launch() {
             debugPanel.setRopeTuningEnabled(true);
             modeMenu.setStatus(error.message, true);
             modeMenu.setBusy(false);
+            if (choice.mode === "multiplayer") void refreshMultiplayerAvailability();
         }
     }
     launching = false;
@@ -286,6 +310,8 @@ async function bootstrap() {
         loadDefaultDirectionDefinitions()
     ]);
     if (pageClosing) return;
+    await refreshMultiplayerAvailability();
+    startMultiplayerAvailabilityMonitor();
     startupLoadingScreen.hide();
     launch();
 }
@@ -295,6 +321,8 @@ globalThis.addEventListener(
     "pagehide",
     () => {
         pageClosing = true;
+        multiplayerProbeSequence += 1;
+        if (multiplayerProbeTimer !== null) globalThis.clearInterval(multiplayerProbeTimer);
         releaseInstallPrompt();
         serviceWorkerUpdater.release();
         diagnostics.release();

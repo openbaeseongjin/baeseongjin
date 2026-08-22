@@ -21,6 +21,8 @@ Renderer는 effect/enemy ID를 해석하지 않고 particle DTO의 `shape`와 `m
 | Sentry·Patrol                                                 | `track/lock`, aim direction, enemy projectile DTO                                                                | 낮은 밀도 aim 축적, muzzle, flight trail, impact                         |
 | Pursuit·Shield·Artillery·Support·Swarm                        | behavior state의 `dashDirection`, `guardDirection`, `targetPosition + strikeRadius`, `targetId`, `diveDirection` | converge/dash, guard flow/block, warning/strike, link stream, orbit/dive |
 | Wind source                                                   | 복제 `multiplier + phase`, zone bounds/direction                                                                 | warning/active/decay 밀도의 area drift                                   |
+| Rope launch/flight/attach/tension/swing/release/miss          | Player `launcher`, `rope`, `control.swingDrag`의 이전/현재 detached sample                                      | launch burst, sparse tip trail, anchor pulse, tension flow, release/dissipate |
+| Player high-speed/positive impulse                             | Player velocity와 새 `ownerMotionTick` 또는 presentation sample                                                   | low-priority rear streak, one-shot impulse burst                         |
 
 원격 Player의 별도 action event가 없는 경우에는 `playerId + actionSequence`와 `control.aimWorld`를 관찰한다. 첫 sequence는 baseline으로 기록만 하고 증가한 sequence만 한 번 재생한다. owner는 predicted action event가 우선이므로 자기 snapshot action one-shot을 만들지 않으며, duration이 있는 action의 trail/guard flow만 `activeAction.activationId` emitter로 유지한다.
 
@@ -28,6 +30,9 @@ Renderer는 effect/enemy ID를 해석하지 않고 particle DTO의 `shape`와 `m
 - one-shot은 기존 action, `spawn`, `predicted-spawn`, `resolve`, `predicted-resolve`와 impact 사건의 stable causal ID를 소비한다. 소유자의 predicted ID와 공유 receipt/event ID는 기존 authority dedupe가 한 번만 전달한다. tick별 particle event를 보내지 않는다.
 - shared particle은 모든 viewer가 보며, player-hit/rope-cut 같은 개인 강조는 기존 `ClientFeedbackEventObject` personal capability를 유지한다.
 - snapshot envelope, claim, projectile snapshot에는 particle 배열·위치·난수·수명을 넣지 않는다.
+- Rope와 Player motion은 `ClientCombatFeedback`의 Player ID별 bounded previous-state projection을 공용으로 사용한다. 첫 sample은 baseline만 기록하며, 같은 remote `ownerMotionTick`을 반복 수신해도 acceleration one-shot을 다시 만들지 않는다. Player가 사라지면 previous-state와 continuous emitter를 함께 정리한다.
+- Rope launch/attach/swing/release/miss는 state edge에서 한 번만, tension/flight/body streak는 low-priority continuous emitter에서만 만든다. rope-cut·impact·respawn처럼 stable causal event가 이미 있는 detach는 generic release/dissipate를 억제한다. `attachmentCandidate`, idle·저속 이동, ordinary jump와 ordinary deceleration은 particle source가 아니다.
+- `release-propulsion`은 release/body impulse의 strength만 높이고, `electrified-rope`는 tension material을 override하며 실제 contact event에만 pulse를 더한다. `fast-launch`/`long-rope`/`fast-recover`는 실제 launcher timing·distance·cooldown을 그대로 소비하고, `rope-link`는 실제 action link window에서 release transfer pulse 하나만 만든다. base와 Augment full-density emitter를 중복하지 않는다.
 
 ## 예산과 시각 기준
 
