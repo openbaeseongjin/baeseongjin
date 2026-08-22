@@ -23,6 +23,9 @@ export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
 export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
     ENEMY_HIT: ACTION_PREDICTED_RESOLUTION.ENEMY_HIT,
     ENEMY_DEFEATED: ACTION_PREDICTED_RESOLUTION.ENEMY_DEFEATED,
+    BOSS_HIT: "boss-hit",
+    BOSS_PHASE_COMPLETED: "boss-phase-completed",
+    BOSS_DEFEATED: "boss-defeated",
     PLAYER_HIT: "player-hit",
     ROPE_CUT: "rope-cut",
     FALL_DAMAGE: "fall-damage",
@@ -110,6 +113,9 @@ const EVENT_GROUP = Object.freeze({
 const COMBAT_RESOLUTIONS = Object.freeze([
     CLIENT_FEEDBACK_RESOLUTION.ENEMY_HIT,
     CLIENT_FEEDBACK_RESOLUTION.ENEMY_DEFEATED,
+    CLIENT_FEEDBACK_RESOLUTION.BOSS_HIT,
+    CLIENT_FEEDBACK_RESOLUTION.BOSS_PHASE_COMPLETED,
+    CLIENT_FEEDBACK_RESOLUTION.BOSS_DEFEATED,
     CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT,
     CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT,
     CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE
@@ -127,6 +133,8 @@ const IMPACT_STATE = Object.freeze({
     [CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT]: Object.freeze({ lifetime: 0.24, strength: 9 }),
     [CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE]: Object.freeze({ lifetime: 0.24, strength: 9 }),
     [CLIENT_FEEDBACK_RESOLUTION.ENEMY_DEFEATED]: Object.freeze({ lifetime: 0.2, strength: 6 }),
+    [CLIENT_FEEDBACK_RESOLUTION.BOSS_DEFEATED]: Object.freeze({ lifetime: 0.2, strength: 6 }),
+    [CLIENT_FEEDBACK_RESOLUTION.BOSS_PHASE_COMPLETED]: Object.freeze({ lifetime: 0.16, strength: 4 }),
     DEFAULT: Object.freeze({ lifetime: 0.12, strength: 2.5 })
 });
 

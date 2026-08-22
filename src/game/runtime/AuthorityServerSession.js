@@ -254,12 +254,10 @@ export class AuthorityServerSession {
             predictionId: claim.predictionId,
             ...this.simulation.resolveRopeImpactClaim(authenticatedPlayerId, claim)
         });
-        if (receipt.accepted) {
-            this.resolvedRopeImpactClaims.set(claim.predictionId, {
-                receipt,
-                resolvedAtTick: this.simulation.getTick()
-            });
-        }
+        this.resolvedRopeImpactClaims.set(claim.predictionId, {
+            receipt,
+            resolvedAtTick: this.simulation.getTick()
+        });
         return receipt;
     }
 

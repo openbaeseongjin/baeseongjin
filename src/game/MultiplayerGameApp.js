@@ -6,6 +6,8 @@ import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, resolveMobileCameraZoom } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { createBossStagePresentation } from "../render/boss/BossStagePresentation.js";
+import { bossStageSpecById } from "./boss-authoring/BossStageCatalog.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import {
@@ -581,6 +583,11 @@ export class MultiplayerGameApp {
             ) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
+        const bossStageSnapshot = remote.state.bossStage ?? remote.state.bossStageRuntime ?? remote.state.bossRuntime;
+        const bossStagePresentation = createBossStagePresentation(
+            bossStageSnapshot,
+            bossStageSpecById(bossStageSnapshot?.stageId ?? bossStageSnapshot?.id ?? bossStageSnapshot?.encounterId)
+        );
         this.statusFeedback.apply([base.eventFlash]);
         this.queuePlayerPresentationEvents([base.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
@@ -598,6 +605,7 @@ export class MultiplayerGameApp {
             ...predictableProjectiles,
             ...combatFeedback,
             localPlayerId: this.authority.playerId,
+            bossStagePresentation,
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
             calibrationPresentation: this.calibrationPresentation.snapshot(),

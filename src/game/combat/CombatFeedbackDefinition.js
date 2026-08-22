@@ -32,6 +32,22 @@ const DEFAULT_DEFINITION = Object.freeze({
 });
 
 const COMBAT_FEEDBACK_BY_RESOLUTION = Object.freeze({
+    [CLIENT_FEEDBACK_RESOLUTION.BOSS_DEFEATED]: Object.freeze({
+        color: "#fde68a",
+        presetId: CLIENT_FEEDBACK_PRESET_ID.ENEMY_DEFEAT,
+        strength: 1.45,
+        textSign: 1,
+        showText: true,
+        emphasis: true
+    }),
+    [CLIENT_FEEDBACK_RESOLUTION.BOSS_PHASE_COMPLETED]: Object.freeze({
+        color: "#fde68a",
+        presetId: CLIENT_FEEDBACK_PRESET_ID.IMPACT,
+        strength: 1.2,
+        textSign: 1,
+        showText: true,
+        emphasis: true
+    }),
     [CLIENT_FEEDBACK_RESOLUTION.ENEMY_DEFEATED]: Object.freeze({
         color: "#fde68a",
         presetId: CLIENT_FEEDBACK_PRESET_ID.ENEMY_DEFEAT,

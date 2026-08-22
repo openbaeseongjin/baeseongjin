@@ -1,4 +1,5 @@
 import { AreaPreviewGameApp } from "../../src/game/runtime/AreaPreviewGameApp.js";
+import { BossStagePreviewGameApp } from "../../src/game/boss-authoring/editor/BossStagePreviewGameApp.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../../src/render/GameRendererFactory.js";
 import { loadDefaultPlayerSpriteDefinition } from "../../src/render/sprites/PlayerSpriteCatalog.js";
 import { loadDefaultEnemySpriteDefinition } from "../../src/render/sprites/EnemySpriteCatalog.js";
@@ -52,7 +53,7 @@ function setStatus(text, kind = "") {
 }
 
 async function requestPreview() {
-    if (!/^\d+-\d+$/.test(stageId ?? "")) {
+    if (!/^(?:\d+-\d+|boss-\d+)$/.test(stageId ?? "")) {
         throw new Error("미리보기에는 생성된 Stage ID가 필요합니다.");
     }
     const response = await fetch(`/api/map-editor/stages/${encodeURIComponent(stageId)}/preview`);
@@ -99,6 +100,30 @@ async function createPreview() {
         setStatus("실제 게임 화면 리소스를 준비하는 중입니다.");
         const [preview, presentation] = await Promise.all([requestPreview(), runtimePresentationPromise]);
         const { areaId, moduleUrl, outputRevision, revision, previewArea } = preview;
+        if (preview.specType === "boss-stage") {
+            const generated = await loadGeneratedArea(moduleUrl, outputRevision);
+            const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(
+                preview.spec.sourceAreaId
+            );
+            currentApp = new BossStagePreviewGameApp({
+                canvas,
+                renderer: rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions }),
+                bossStageSpec: generated.BOSS_01_STAGE_SPEC,
+                revision,
+                playerDefinition: presentation.playerDefinition,
+                directionDefinitions: presentation.directionDefinitions
+            });
+            const previewScope = currentApp.previewScope();
+            if (previewScope.bossStageId !== preview.bossStageId || previewScope.status !== "active") {
+                throw new Error("선택한 Boss Stage 하나를 활성 전투로 시작할 수 없습니다.");
+            }
+            currentApp.start();
+            label.textContent = `${stageId} · ${preview.spec.name} · 실제 게임 화면의 Boss Stage 실행`;
+            setStatus(
+                `미리보기 리비전 ${revision} 실행 중 · Boss 전용 지형 ${previewScope.surfaceCount}개 · 이동·Rope·일반 공격·Boss HUD 입력을 실제 GameSimulation에서 처리합니다.`
+            );
+            return;
+        }
         const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(areaId);
         const generatedArea = previewArea ?? (await loadGeneratedArea(moduleUrl, outputRevision)).GENERATED_AREA;
         currentApp = new AreaPreviewGameApp({

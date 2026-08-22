@@ -8,6 +8,8 @@ import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore
 import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.js";
 import { CAMERA_CONFIG, resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { createBossStagePresentation } from "../render/boss/BossStagePresentation.js";
+import { bossStageSpecById } from "./boss-authoring/BossStageCatalog.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
@@ -42,6 +44,7 @@ export class GameApp {
         playerDefinition = null,
         directionDefinitions = [],
         enemyDefinition = null,
+        bossStageSpecResolver = bossStageSpecById,
         onDebugTrainingDummyChange = () => {}
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
@@ -69,6 +72,7 @@ export class GameApp {
         this.audioBindings = audioBindings;
         this.enemyDefinition = enemyDefinition ?? this.renderer.sceneRenderer?.enemyDefinition ?? null;
         this.onDebugTrainingDummyChange = onDebugTrainingDummyChange;
+        this.bossStageSpecResolver = bossStageSpecResolver;
         this.debugTrainingDummyControl = null;
         this.debugTrainingDummySignature = "";
         this.camera = this.createCamera();
@@ -448,10 +452,18 @@ export class GameApp {
         this.stats.resets = state.resets;
         this.queuePlayerPresentationEvents([state.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
+        const bossStageSnapshot = renderState.bossStage ?? renderState.bossStageRuntime ?? renderState.bossRuntime;
+        const bossStagePresentation = createBossStagePresentation(
+            bossStageSnapshot,
+            this.bossStageSpecResolver(
+                bossStageSnapshot?.stageId ?? bossStageSnapshot?.id ?? bossStageSnapshot?.encounterId
+            )
+        );
         const renderMetrics = this.renderer.draw({
             ...renderState,
             ...combatFeedback,
             localPlayerId: this.authority.playerId,
+            bossStagePresentation,
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
             calibrationPresentation: this.calibrationPresentation.snapshot(),

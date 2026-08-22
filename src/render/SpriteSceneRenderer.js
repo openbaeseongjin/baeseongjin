@@ -34,6 +34,7 @@ import { EnvironmentAssetSet } from "./environment/EnvironmentAssetSet.js";
 import { EnvironmentRendererComposer } from "./environment/EnvironmentRendererComposer.js";
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
 import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
+import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
 
 export class SpriteAssetFallbackRenderer {
     constructor({ asset, spriteRenderer, polygonRenderer }) {
@@ -98,6 +99,7 @@ export class SpriteSceneRenderer {
         const actorRenderers = new CameraWorldRenderer([
             new AuthoredAreaStructureRenderer(),
             new AuthoredWorldObjectRenderer(),
+            new BossStageWorldRenderer(),
             new AccessScanSurfaceRenderer(),
             new AccessModuleSignalRenderer(),
             new AttachRangeRenderer(),

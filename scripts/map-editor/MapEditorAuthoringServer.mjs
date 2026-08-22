@@ -13,6 +13,12 @@ import {
     validateAreaSpecV2
 } from "../../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
 import { synchronizeExitEditorDefinition } from "../../src/game/world/area-authoring-v2/editor/AreaExitEditorComponent.js";
+import { bossStageDerivedPreview, canonicalizeBossStageSpec } from "../../src/game/boss-authoring/BossStageSpec.js";
+import { bossStageGeneratedModule } from "../../src/game/boss-authoring/BossStageSpecGenerator.js";
+import {
+    validateBossStageEditorMutation,
+    validateBossStageSpec
+} from "../../src/game/boss-authoring/BossStageSpecValidator.js";
 import { createStaticRequestHandler } from "../staticHandler.mjs";
 
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -43,8 +49,9 @@ function safeProjectPath(projectRoot, relativePath) {
     return target;
 }
 
-function stableJson(value) {
-    return `${JSON.stringify(canonicalizeAreaSpecV2(value), null, 2)}\n`;
+function stableJson(value, specType = "area") {
+    const canonical = specType === "boss-stage" ? canonicalizeBossStageSpec(value) : canonicalizeAreaSpecV2(value);
+    return `${JSON.stringify(canonical, null, 2)}\n`;
 }
 
 function revisionFor(content) {
@@ -74,6 +81,12 @@ async function readText(filePath, code, message) {
 }
 
 function assertStageIdentity(entry, spec) {
+    if (entry.specType === "boss-stage") {
+        if (spec?.id !== entry.stageId || spec?.specType !== "boss-stage") {
+            throw error("stage-identity-invalid", "Map editor Boss Stage identity does not match the catalog.");
+        }
+        return;
+    }
     if (spec?.stage?.legacyStageAlias !== entry.stageId || spec?.definition?.id !== entry.areaId) {
         throw error("stage-identity-invalid", "Map editor stage identity does not match the catalog manifest.");
     }
@@ -84,14 +97,20 @@ function validateSpec(entry, spec) {
         throw error("spec-executable-value", "Map editor specs cannot contain executable values.");
     }
     assertStageIdentity(entry, spec);
-    const result = validateAreaSpecV2(spec, { file: entry.sourcePath });
+    const result =
+        entry.specType === "boss-stage"
+            ? validateBossStageSpec(spec, { file: entry.sourcePath })
+            : validateAreaSpecV2(spec, { file: entry.sourcePath });
     if (!result.valid) {
         throw error("spec-invalid", "Map editor spec validation failed.", { issues: result.issues });
     }
-    return canonicalizeAreaSpecV2(spec);
+    return entry.specType === "boss-stage" ? canonicalizeBossStageSpec(spec) : canonicalizeAreaSpecV2(spec);
 }
 
 function runtimePromotionReadiness(entry, spec) {
+    if (entry.specType === "boss-stage") {
+        return Object.freeze({ status: "live", blockers: Object.freeze([]) });
+    }
     if (entry.authoringMode !== "scenario-only") {
         return Object.freeze({ status: "live", blockers: Object.freeze([]) });
     }
@@ -124,7 +143,10 @@ function runtimePromotionReadiness(entry, spec) {
 }
 
 function assertEditableDraft(entry, baselineSpec, candidateSpec) {
-    const mutation = validateAreaSpecEditorMutation(baselineSpec, candidateSpec, { file: entry.sourcePath });
+    const mutation =
+        entry.specType === "boss-stage"
+            ? validateBossStageEditorMutation(baselineSpec, candidateSpec, { file: entry.sourcePath })
+            : validateAreaSpecEditorMutation(baselineSpec, candidateSpec, { file: entry.sourcePath });
     if (!mutation.valid) {
         throw error("editor-read-only-changed", "Map editor draft modified a read-only stage subtree.", {
             issues: mutation.issues
@@ -134,6 +156,7 @@ function assertEditableDraft(entry, baselineSpec, candidateSpec) {
 
 function validateEditableSpec(entry, baselineSpec, candidateSpec) {
     const validated = validateSpec(entry, candidateSpec);
+    if (entry.specType === "boss-stage") return validated;
     return validateSpec(entry, {
         ...validated,
         definition: synchronizeExitEditorDefinition(baselineSpec.definition, validated.definition)
@@ -186,7 +209,9 @@ function requestRoute(url) {
     return match ? { stageId: decodeURIComponent(match[1]), action: match[2] ?? "read" } : null;
 }
 
-function scenarioMapPreviewPath(stageId) {
+function scenarioMapPreviewPath(stageId, specType = "area") {
+    if (specType === "boss-stage")
+        return `docs/boss/${stageId.slice(5).padStart(2, "0")}/final-content/MAP-PREVIEW.html`;
     const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
     if (!match) throw error("stage-identity-invalid", "Map editor stage identity is invalid.");
     return `docs/bsh/scenario/${match[1]}/${stageId}/MAP-PREVIEW.html`;
@@ -236,7 +261,12 @@ export async function createMapEditorAuthoringServer({
     }
     const stages = new Map();
     for (const entry of editorCatalog.stages) {
-        if (!/^\d+-\d+$/.test(entry?.stageId ?? "") || typeof entry?.areaId !== "string") {
+        const specType = entry?.specType ?? "area";
+        const validIdentity =
+            specType === "boss-stage"
+                ? /^boss-\d+$/.test(entry?.stageId ?? "") && typeof entry?.bossStageId === "string"
+                : /^\d+-\d+$/.test(entry?.stageId ?? "") && typeof entry?.areaId === "string";
+        if (!validIdentity || !["area", "boss-stage"].includes(specType)) {
             throw error("editor-catalog-stage-invalid", "Map editor stage catalog contains an invalid identity.");
         }
         if (stages.has(entry.stageId))
@@ -247,10 +277,10 @@ export async function createMapEditorAuthoringServer({
         const sourcePath = safeProjectPath(root, entry.sourcePath);
         const spec = validateSpec(entry, await readJson(sourcePath, "spec-invalid-json"));
         const expectedSpecMode = entry.authoringMode === "scenario-only" ? "scenario" : "runtime";
-        if ((spec.authoringMode ?? "runtime") !== expectedSpecMode) {
+        if (specType === "area" && (spec.authoringMode ?? "runtime") !== expectedSpecMode) {
             throw error("stage-mode-invalid", "Map editor stage source does not match its authoring mode.");
         }
-        const manifest = await manifestFor(entry);
+        const manifest = specType === "area" ? await manifestFor(entry) : null;
         const manifestEntry = manifest?.stageSources?.find(({ stageId }) => stageId === entry.stageId) ?? null;
         if (
             manifest &&
@@ -261,7 +291,11 @@ export async function createMapEditorAuthoringServer({
                 "Map editor generated stage is not selected by its manifest."
             );
         }
-        const outputPath = manifestEntry ? safeProjectPath(root, manifestEntry.outputPath) : null;
+        const outputPath = manifestEntry
+            ? safeProjectPath(root, manifestEntry.outputPath)
+            : entry.outputPath
+              ? safeProjectPath(root, entry.outputPath)
+              : null;
         const sourceContent = await readText(
             sourcePath,
             "spec-invalid-json",
@@ -296,17 +330,20 @@ export async function createMapEditorAuthoringServer({
     function stageValue(stage) {
         return Object.freeze({
             stageId: stage.entry.stageId,
-            areaId: stage.entry.areaId,
-            name: stage.spec.definition.name,
+            specType: stage.entry.specType ?? "area",
+            areaId: stage.entry.areaId ?? null,
+            bossStageId: stage.entry.bossStageId ?? null,
+            name: stage.entry.specType === "boss-stage" ? stage.spec.name : stage.spec.definition.name,
             authoringMode: stage.entry.authoringMode,
             runtimePromotion: stage.runtimePromotion,
             revision: stage.revision,
             spec: structuredClone(stage.spec),
             previewAvailable: previewAvailable(stage),
+            ...(stage.entry.specType === "boss-stage" ? { derivedPreview: bossStageDerivedPreview(stage.spec) } : {}),
             ...(stage.outputPath
                 ? {
                       moduleUrl: `/${relative(root, stage.outputPath).replaceAll("\\", "/")}`,
-                      outputRevision: revisionFor(stableJson(stage.spec))
+                      outputRevision: revisionFor(stableJson(stage.spec, stage.entry.specType))
                   }
                 : {})
         });
@@ -320,17 +357,20 @@ export async function createMapEditorAuthoringServer({
         const spec = await readStageSpecFromDisk(stage);
         return Object.freeze({
             stageId: stage.entry.stageId,
-            areaId: stage.entry.areaId,
-            name: spec.definition.name,
+            specType: stage.entry.specType ?? "area",
+            areaId: stage.entry.areaId ?? null,
+            bossStageId: stage.entry.bossStageId ?? null,
+            name: stage.entry.specType === "boss-stage" ? spec.name : spec.definition.name,
             authoringMode: stage.entry.authoringMode,
             runtimePromotion: runtimePromotionReadiness(stage.entry, spec),
             revision: stage.revision,
             spec: structuredClone(spec),
             previewAvailable: previewAvailable(stage),
+            ...(stage.entry.specType === "boss-stage" ? { derivedPreview: bossStageDerivedPreview(spec) } : {}),
             ...(stage.outputPath
                 ? {
                       moduleUrl: `/${relative(root, stage.outputPath).replaceAll("\\", "/")}`,
-                      outputRevision: revisionFor(stableJson(spec))
+                      outputRevision: revisionFor(stableJson(spec, stage.entry.specType))
                   }
                 : {})
         });
@@ -356,6 +396,9 @@ export async function createMapEditorAuthoringServer({
     }
 
     async function generatedWrites(stage, replacement) {
+        if (stage.entry.specType === "boss-stage") {
+            return [{ path: stage.outputPath, content: await bossStageGeneratedModule(replacement) }];
+        }
         if (!stage.manifest) return [];
         const specsByStageId = new Map();
         for (const entry of stage.manifest.stageSources) {
@@ -379,8 +422,10 @@ export async function createMapEditorAuthoringServer({
                 [...stages.values()].map((stage) =>
                     Object.freeze({
                         stageId: stage.entry.stageId,
-                        areaId: stage.entry.areaId,
-                        name: stage.spec.definition.name,
+                        specType: stage.entry.specType ?? "area",
+                        areaId: stage.entry.areaId ?? null,
+                        bossStageId: stage.entry.bossStageId ?? null,
+                        name: stage.entry.specType === "boss-stage" ? stage.spec.name : stage.spec.definition.name,
                         authoringMode: stage.entry.authoringMode,
                         runtimePromotion: stage.runtimePromotion,
                         revision: stage.revision
@@ -396,7 +441,7 @@ export async function createMapEditorAuthoringServer({
         async readScenarioMapPreview(stageId) {
             const stage = currentStage(stageId);
             const source = await readText(
-                safeProjectPath(root, scenarioMapPreviewPath(stage.entry.stageId)),
+                safeProjectPath(root, scenarioMapPreviewPath(stage.entry.stageId, stage.entry.specType)),
                 "scenario-map-preview-missing",
                 "Map editor scenario map preview could not be read."
             );
@@ -424,7 +469,7 @@ export async function createMapEditorAuthoringServer({
             const baselineSpec = stage.spec;
             const canonical = validateEditableSpec(stage.entry, baselineSpec, spec);
             assertEditableDraft(stage.entry, baselineSpec, canonical);
-            const sourceContent = stableJson(canonical);
+            const sourceContent = stableJson(canonical, stage.entry.specType);
             const writes = [
                 { path: stage.sourcePath, content: sourceContent },
                 ...(await generatedWrites(stage, canonical))
@@ -481,9 +526,14 @@ export async function createMapEditorAuthoringServer({
                 return json(response, 200, {
                     stageId: stage.stageId,
                     areaId: stage.areaId,
+                    specType: stage.specType,
+                    bossStageId: stage.bossStageId,
                     revision: stage.revision,
                     moduleUrl: stage.moduleUrl,
-                    outputRevision: stage.outputRevision
+                    outputRevision: stage.outputRevision,
+                    ...(stage.specType === "boss-stage"
+                        ? { spec: stage.spec, derivedPreview: stage.derivedPreview }
+                        : {})
                 });
             }
             if (route.action === "reference" && request.method === "GET") {

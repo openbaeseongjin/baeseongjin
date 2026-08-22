@@ -13,6 +13,22 @@ import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus }
 import { layoutAccessEdgeGuides, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
 
+const BOSS_HUD_BLOCKING_STATUS = Object.freeze({
+    "checkpoint-respawn": true,
+    "sector-respawn": true,
+    "stage-saved": true,
+    "foundation-selected": true
+});
+
+function bossHudBlocked(scene) {
+    const statusVisible =
+        BOSS_HUD_BLOCKING_STATUS[scene.eventFlash?.type] === true &&
+        (scene.eventFlash?.age ?? CLIENT_STATUS_FEEDBACK_SECONDS) < CLIENT_STATUS_FEEDBACK_SECONDS;
+    return Boolean(
+        scene.foundationReward || scene.storyPresentation || scene.runState === "completed" || statusVisible
+    );
+}
+
 export class CanvasRenderer {
     constructor(
         canvas,
@@ -94,6 +110,7 @@ export class CanvasRenderer {
         this.drawDirectionLighting(scene.directionLightingPresentation, scene);
         this.drawDirectionCharacter(scene.directionCharacterPresentation, scene);
         if (scene.hudVisible !== false) {
+            if (!bossHudBlocked(scene)) this.drawBossHud(scene.bossStagePresentation?.hud, scene);
             this.drawAccessGuide(scene);
             this.drawLocalStatusHud(scene);
             this.drawCalibrationHud(scene.calibrationPresentation?.hud, scene);
@@ -118,6 +135,81 @@ export class CanvasRenderer {
         this.drawMetricsPanel(scene.metrics, scene.networkMetrics, renderMetrics);
         this.drawEnvironmentMetrics(this.sceneRenderer.environmentDiagnostics);
         return renderMetrics;
+    }
+
+    drawBossHud(hud, { mobileView = false } = {}) {
+        if (!hud) return;
+        const ctx = this.context;
+        const compact = mobileView || this.cssWidth < 680;
+        const reservedLeft = compact ? 12 : 396;
+        const availableWidth = Math.max(1, this.cssWidth - reservedLeft - 12);
+        const width = Math.min(compact ? this.cssWidth - 24 : 720, availableWidth);
+        const height = compact ? 72 : 82;
+        const x = compact ? 12 : reservedLeft + (availableWidth - width) * 0.5;
+        const y = 12;
+        const padding = compact ? 10 : 14;
+        const gap = hud.showPhaseBreaks ? 3 : 0;
+        const barY = y + (compact ? 31 : 35);
+        const barHeight = compact ? 10 : 13;
+        const phaseHealths =
+            hud.phaseHealths?.length === hud.phaseCount
+                ? hud.phaseHealths
+                : Array.from({ length: hud.phaseCount }, () => hud.maxHealth / hud.phaseCount);
+        const phaseFloors =
+            hud.phaseFloors?.length === hud.phaseCount
+                ? hud.phaseFloors
+                : phaseHealths.map((_, index) =>
+                      phaseHealths.slice(index + 1).reduce((total, value) => total + value, 0)
+                  );
+        const barWidth = width - padding * 2 - gap * (hud.phaseCount - 1);
+
+        ctx.save();
+        ctx.fillStyle = "rgba(5, 10, 16, 0.92)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = hud.weakpointExposed ? "#facc15" : "rgba(148, 163, 184, 0.65)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = `900 ${compact ? 10 : 13}px ui-monospace, monospace`;
+        ctx.fillText(hud.name, x + padding, y + (compact ? 17 : 20), width * 0.64);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#a9bed0";
+        ctx.fillText(hud.phaseLabel, x + width - padding, y + (compact ? 17 : 20));
+
+        let segmentX = x + padding;
+        for (let index = 0; index < hud.phaseCount; index += 1) {
+            const phaseHealth = phaseHealths[index];
+            const fillRatio = Math.max(0, Math.min(1, (hud.health - phaseFloors[index]) / phaseHealth));
+            const segmentWidth = barWidth * (phaseHealth / hud.maxHealth);
+            ctx.fillStyle = "rgba(30, 41, 59, 0.96)";
+            ctx.fillRect(segmentX, barY, segmentWidth, barHeight);
+            ctx.fillStyle = index === hud.phase - 1 ? "#f59e0b" : "#ef4444";
+            ctx.fillRect(segmentX, barY, segmentWidth * fillRatio, barHeight);
+            segmentX += segmentWidth + gap;
+        }
+        if (hud.showNumbers) {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#f8fafc";
+            ctx.font = `900 ${compact ? 8 : 10}px ui-monospace, monospace`;
+            ctx.fillText(
+                `${Math.ceil(hud.health)} / ${Math.ceil(hud.maxHealth)}`,
+                x + width * 0.5,
+                barY + barHeight - 2
+            );
+        }
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = `800 ${compact ? 8 : 10}px system-ui, sans-serif`;
+        ctx.fillText(hud.objective, x + padding, y + height - (compact ? 10 : 12), width * 0.58);
+        ctx.textAlign = "right";
+        ctx.fillStyle = hud.weakpointExposed ? "#fde047" : "#94a3b8";
+        const timer =
+            hud.showVulnerabilityCountdown && hud.weakpointExposed && hud.vulnerabilityRemainingSeconds > 0
+                ? ` · ${hud.vulnerabilityRemainingSeconds.toFixed(1)}s`
+                : "";
+        ctx.fillText(`${hud.vulnerabilityLabel}${timer}`, x + width - padding, y + height - (compact ? 10 : 12));
+        ctx.restore();
     }
 
     drawRewardSelectionOverlay(reward) {
@@ -298,13 +390,14 @@ export class CanvasRenderer {
         playerMaxHealth,
         actionState,
         selectedAugmentIds = [],
-        mobileView = false
+        mobileView = false,
+        bossStagePresentation = null
     }) {
         const ctx = this.context;
         const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
         const width = compactView ? Math.min(240, this.cssWidth - 36) : 360;
         const x = 18;
-        const y = 54;
+        const y = compactView && bossStagePresentation?.hud ? 94 : 54;
         const height = compactView ? 92 : 112;
         const innerWidth = width - 28;
         const stageY = y + (compactView ? 16 : 19);
@@ -317,7 +410,8 @@ export class CanvasRenderer {
         const health = resolveHealthStatus(playerHealth, playerMaxHealth);
         const action = resolveActionCooldownStatus(actionState);
         const region = authoredRegionForPosition(world, player?.position);
-        const stage = region?.legacyStageAlias ?? region?.legacyAreaId ?? region?.id ?? "-";
+        const stage =
+            bossStagePresentation?.stageId ?? region?.legacyStageAlias ?? region?.legacyAreaId ?? region?.id ?? "-";
         const augmentNames = selectedAugmentIds
             .map((id) => foundationAugmentById(id)?.name)
             .filter(Boolean)
@@ -362,13 +456,13 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawCalibrationHud(presentation, { mobileView = false } = {}) {
+    drawCalibrationHud(presentation, { mobileView = false, bossStagePresentation = null } = {}) {
         if (!presentation) return;
         const ctx = this.context;
         const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
         const width = compactView ? Math.min(240, this.cssWidth - 36) : 360;
         const x = 18;
-        const y = compactView ? 154 : 174;
+        const y = compactView ? (bossStagePresentation?.hud ? 196 : 154) : 174;
         const height = compactView ? 44 : 50;
         const status = presentation.verified ? "검증 완료" : "대기 중";
 

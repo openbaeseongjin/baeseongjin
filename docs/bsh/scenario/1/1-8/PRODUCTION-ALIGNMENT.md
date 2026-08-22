@@ -55,13 +55,15 @@ through the `access-transit-lock` system (see entries #70-71 in `docs/scenario-d
 `nextAreaId: null` here is therefore already correct and was left unchanged - setting it to
 `sector-02-01` would not create the separate `GATE LOCKING CARRIAGE` physical Boss slot, and risks
 fighting the real transition owner. Existing `CONTAINMENT GANTRY C-01` Has-A runtime is a legacy prototype;
-the current authored Boss has no physical Arena, automatic entry, combat damage, or Sector handoff yet.
+Issue #816 connects the authored Boss through a separate physical Arena, automatic entry, combat damage,
+retry/snapshot state, and the Sector 02 handoff while leaving this Area's `nextAreaId: null` unchanged.
 
 ## Boss 01 authored handoff boundary — 2026-08-22
 
 [`../../../../boss/01/`](../../../../boss/01/) preserves the current `GATE LOCKING CARRIAGE` authored content
 and the earlier REV2.1 material as historical reference. It is not an implementation of this legacy Area or
-a change to the current `access-transit-lock` owner. The current authored order preserves the open Gate and
+a change to this Area's local Gate owner. Issue #816 extends the Sector transition compiler with the separate
+Boss Stage connector and completion barrier. The current authored order preserves the open Gate and
 Worker District first Reveal before the separate Post-Sector Boss slot; any transition wiring must still be
 implemented separately. In particular, its historical `210s` timer and `80px/s` collapse are not current Boss inputs;
 the initial Boss contract has no timer or time-expiry Arena collapse.
