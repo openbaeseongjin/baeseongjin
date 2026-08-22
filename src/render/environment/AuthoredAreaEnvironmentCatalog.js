@@ -32,7 +32,13 @@ export const AUTHORED_AREA_ENVIRONMENT_SELECTIONS = Object.freeze(
     ])
 );
 
-export async function loadAuthoredAreaEnvironmentDefinitions({ fetchFn = globalThis.fetch, warn = console.warn } = {}) {
+export async function loadAuthoredAreaEnvironmentDefinitions({
+    areaIds = null,
+    fetchFn = globalThis.fetch,
+    warn = console.warn
+} = {}) {
+    const selectedAreaIds = areaIds === null ? Object.keys(AUTHORED_AREA_ENVIRONMENT_SELECTIONS) : areaIds;
+    if (!Array.isArray(selectedAreaIds)) throw new Error("authored area environment areaIds must be an array or null");
     const definitionsByUrl = new Map();
     const loadOnce = (manifestUrl) => {
         if (!definitionsByUrl.has(manifestUrl)) {
@@ -41,7 +47,9 @@ export async function loadAuthoredAreaEnvironmentDefinitions({ fetchFn = globalT
         return definitionsByUrl.get(manifestUrl);
     };
     const definitions = await Promise.all(
-        Object.entries(AUTHORED_AREA_ENVIRONMENT_SELECTIONS).map(async ([areaId, selection]) => {
+        [...new Set(selectedAreaIds)].map(async (areaId) => {
+            const selection = AUTHORED_AREA_ENVIRONMENT_SELECTIONS[areaId];
+            if (!selection) return null;
             try {
                 const definition = await loadOnce(selection.manifestUrl);
                 return [areaId, definition];

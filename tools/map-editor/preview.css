@@ -11,6 +11,9 @@ body {
     margin: 0;
     background: radial-gradient(circle at 50% 0, #153544, #071018 65%);
 }
+body.is-loading {
+    cursor: progress;
+}
 .preview-shell {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;

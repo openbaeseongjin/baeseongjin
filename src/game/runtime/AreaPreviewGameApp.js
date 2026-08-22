@@ -1,8 +1,5 @@
 import { GameApp } from "../GameApp.js";
-import { ClientCombatFeedback } from "../combat/ClientCombatFeedback.js";
-import { ClientStatusFeedback } from "../combat/ClientStatusFeedback.js";
 import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../config.js";
-import { PlayerRespawnPresentation } from "../presentation/PlayerRespawnPresentation.js";
 import { LocalAuthority } from "./LocalAuthority.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
 import { defineAreaCatalog } from "../world/areas/AreaDefinition.js";
@@ -25,14 +22,12 @@ export class AreaPreviewGameApp extends GameApp {
     constructor({ generatedArea, revision, ...options } = {}) {
         const area = assertGeneratedArea(generatedArea);
         const previewRevision = assertPreviewRevision(revision);
-        super({ ...options, startAreaId: area.id });
         const worldCatalog = defineAreaCatalog({
             id: "map-editor-preview",
             revision: previewRevision,
             areas: [area]
         });
-        this.previewAreaId = area.id;
-        this.authority = new LocalAuthority(
+        const authority = new LocalAuthority(
             new GameSimulation({
                 worldCatalog,
                 startAreaId: area.id,
@@ -42,15 +37,25 @@ export class AreaPreviewGameApp extends GameApp {
                 debugAugmentIds: options.debugAugmentIds ?? []
             })
         );
-        this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
-        this.statusFeedback = new ClientStatusFeedback({ viewerId: this.authority.playerId });
-        this.respawnPresentation = new PlayerRespawnPresentation({
-            playerId: this.authority.playerId,
-            deathDurationSeconds: this.respawnPresentation.deathDurationSeconds,
-            spriteSize: this.respawnPresentation.spriteSize
+        const previewWorld = authority.snapshot().world;
+        if (
+            previewWorld.layout === "seamless-sectors" ||
+            previewWorld.areas?.length !== 1 ||
+            previewWorld.areas[0]?.id !== area.id
+        ) {
+            throw new Error("map-editor-preview-scope-invalid");
+        }
+        super({ ...options, startAreaId: area.id, authority });
+        this.previewAreaId = area.id;
+    }
+
+    previewScope() {
+        const world = this.authority.snapshot().world;
+        return Object.freeze({
+            areaId: world.areas?.[0]?.id ?? null,
+            areaCount: world.areas?.length ?? 0,
+            surfaceCount: world.surfaces?.length ?? 0
         });
-        this.previousRenderSnapshot = null;
-        this.camera = this.createCamera();
     }
 
     applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {

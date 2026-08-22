@@ -133,6 +133,15 @@ function json(response, status, payload) {
     response.end(JSON.stringify(payload));
 }
 
+function html(response, status, content) {
+    response.writeHead(status, {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+        "x-content-type-options": "nosniff"
+    });
+    response.end(content);
+}
+
 function errorPayload(cause) {
     if (cause instanceof MapEditorAuthoringError) {
         return {
@@ -161,8 +170,26 @@ async function requestJson(request) {
 }
 
 function requestRoute(url) {
-    const match = /^\/api\/map-editor\/stages\/([^/]+)(?:\/(validate|preview))?$/.exec(url.pathname);
+    const match = /^\/api\/map-editor\/stages\/([^/]+)(?:\/(validate|preview|reference))?$/.exec(url.pathname);
     return match ? { stageId: decodeURIComponent(match[1]), action: match[2] ?? "read" } : null;
+}
+
+function scenarioMapPreviewPath(stageId) {
+    const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
+    if (!match) throw error("stage-identity-invalid", "Map editor stage identity is invalid.");
+    return `docs/bsh/scenario/${match[1]}/${stageId}/MAP-PREVIEW.html`;
+}
+
+function mapPreviewReferenceDocument(source) {
+    const override = `<style id="map-editor-reference-style">
+html, body, .layout, main { width: 100%; height: 100%; overflow: hidden; }
+body { background: #061019; }
+body > header, .layout > aside { display: none !important; }
+.layout { display: block !important; }
+main { display: grid; place-items: stretch; padding: 0 !important; }
+svg { width: 100% !important; height: 100% !important; min-height: 0 !important; border: 0 !important; border-radius: 0 !important; }
+</style>`;
+    return source.includes("</head>") ? source.replace("</head>", `${override}</head>`) : `${override}${source}`;
 }
 
 export async function createMapEditorAuthoringServer({
@@ -348,6 +375,16 @@ export async function createMapEditorAuthoringServer({
             return stageValue(currentStage(stageId));
         },
 
+        async readScenarioMapPreview(stageId) {
+            const stage = currentStage(stageId);
+            const source = await readText(
+                safeProjectPath(root, scenarioMapPreviewPath(stage.entry.stageId)),
+                "scenario-map-preview-missing",
+                "Map editor scenario map preview could not be read."
+            );
+            return mapPreviewReferenceDocument(source);
+        },
+
         async validateStage({ stageId, spec } = {}) {
             const stage = currentStage(stageId);
             const baselineSpec = await readStageSpecFromDisk(stage);
@@ -424,6 +461,9 @@ export async function createMapEditorAuthoringServer({
                     moduleUrl: stage.moduleUrl,
                     outputRevision: stage.outputRevision
                 });
+            }
+            if (route.action === "reference" && request.method === "GET") {
+                return html(response, 200, await server.readScenarioMapPreview(route.stageId));
             }
             if (route.action === "validate" && request.method === "POST") {
                 const body = await requestJson(request);

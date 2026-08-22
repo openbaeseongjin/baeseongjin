@@ -53,8 +53,10 @@ const KIND_LABELS = Object.freeze({
 });
 const MAX_ZOOM = 2.4;
 const MIN_ZOOM = 0.08;
+const POSITION_GRID_SIZE = 5;
 
 const dom = {
+    editorShell: document.querySelector(".editor-shell"),
     stageSelect: document.querySelector("#stage-select"),
     stageScope: document.querySelector("#stage-scope"),
     layerFilter: document.querySelector("#layer-filter"),
@@ -62,6 +64,10 @@ const dom = {
     inspector: document.querySelector("#inspector-panel"),
     canvas: document.querySelector("#editor-canvas"),
     fitStage: document.querySelector("#fit-stage"),
+    scenarioReferenceToggle: document.querySelector("#toggle-scenario-reference"),
+    scenarioReferencePanel: document.querySelector("#scenario-reference-panel"),
+    scenarioReferenceStage: document.querySelector("#scenario-reference-stage"),
+    scenarioReferenceFrame: document.querySelector("#scenario-reference-frame"),
     focusSelection: document.querySelector("#focus-selection"),
     clearSelection: document.querySelector("#clear-selection"),
     selectionReadout: document.querySelector("#selection-readout"),
@@ -85,7 +91,8 @@ const state = {
     pointer: null,
     spaceDown: false,
     applyPending: false,
-    layerFilter: ""
+    layerFilter: "",
+    scenarioReferenceOpen: false
 };
 
 function clear(node) {
@@ -174,6 +181,14 @@ function roundedValue(value) {
     return Number.isFinite(value) ? Math.round(value * 10) / 10 : "-";
 }
 
+function snapPosition(value) {
+    return Number.isFinite(value) ? Math.round(value / POSITION_GRID_SIZE) * POSITION_GRID_SIZE : value;
+}
+
+function snapPoint(point) {
+    return { x: snapPosition(point.x), y: snapPosition(point.y) };
+}
+
 function entityAnnotation(entity, spec) {
     const id = entityLabel(entity);
     if (entity.domain === "bounds") return { name: "맵 경계", effect: "플레이 가능 범위" };
@@ -232,6 +247,38 @@ async function api(path, options = {}) {
 
 function stageEndpoint(stageId, suffix = "") {
     return `/api/map-editor/stages/${encodeURIComponent(stageId)}${suffix}`;
+}
+
+function scenarioReferenceUrl(stageId) {
+    const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
+    if (!match) return null;
+    return stageEndpoint(stageId, "/reference");
+}
+
+function renderScenarioReference() {
+    const source = scenarioReferenceUrl(state.stageId);
+    const open = Boolean(state.scenarioReferenceOpen && source);
+    dom.scenarioReferenceToggle.disabled = !source;
+    dom.scenarioReferenceToggle.setAttribute("aria-pressed", String(open));
+    dom.scenarioReferenceToggle.title = open
+        ? "시나리오 MAP-PREVIEW.html 비교 닫기 (C)"
+        : "시나리오 MAP-PREVIEW.html과 비교 (C)";
+    dom.scenarioReferencePanel.hidden = !open;
+    dom.editorShell.classList.toggle("is-comparing", open);
+    if (!open) return;
+    dom.scenarioReferenceStage.textContent = `${state.stageId} · MAP-PREVIEW.html`;
+    if (dom.scenarioReferenceFrame.dataset.source === source) return;
+    dom.scenarioReferenceFrame.dataset.source = source;
+    dom.scenarioReferenceFrame.src = source;
+}
+
+function setScenarioReferenceOpen(open) {
+    state.scenarioReferenceOpen = Boolean(open);
+    renderScenarioReference();
+    globalThis.requestAnimationFrame(() => {
+        fitView();
+        drawCanvas();
+    });
 }
 
 function setMessage(kind, text, issues = []) {
@@ -293,10 +340,10 @@ function currentWorldAtCanvasCenter() {
     const bounds = state.draft.specification().definition.bounds;
     const insetX = Math.min(96, bounds.width * 0.5);
     const insetY = Math.min(96, bounds.height * 0.5);
-    return {
+    return snapPoint({
         x: Math.max(-bounds.width * 0.5 + insetX, Math.min(bounds.width * 0.5 - insetX, point.x)),
         y: Math.max(-bounds.height + insetY, Math.min(-insetY, point.y))
-    };
+    });
 }
 
 function nextStableId(prefix) {
@@ -548,6 +595,16 @@ function appendField(container, { label, value, type = "number", disabled = fals
     container.append(wrapper);
 }
 
+function appendPositionField(container, { label, value, disabled = false, onChange }) {
+    appendField(container, {
+        label: `${label} (5px)`,
+        value: snapPosition(value),
+        disabled,
+        step: POSITION_GRID_SIZE,
+        onChange: (nextValue) => onChange(snapPosition(nextValue))
+    });
+}
+
 function appendCheck(container, { label, checked, onChange, disabled = false }) {
     const wrapper = element("label", { className: "field checkbox" });
     const input = element("input", { attributes: { type: "checkbox" } });
@@ -572,7 +629,9 @@ function replacePointer(domain, label, pointer, value) {
 function updateEntityPosition(selected, nextPoint, { buffered = false } = {}) {
     const current = entities().find((entry) => entry.domain === selected.domain && entry.id === selected.id);
     if (!current) return;
-    const delta = { x: nextPoint.x - current.point.x, y: nextPoint.y - current.point.y };
+    const snappedPoint = snapPoint(nextPoint);
+    const delta = { x: snappedPoint.x - current.point.x, y: snappedPoint.y - current.point.y };
+    if (delta.x === 0 && delta.y === 0) return;
     const apply = (spec) => {
         replaceSpec(spec, translateEditorEntity(spec, current, delta));
         return true;
@@ -630,13 +689,14 @@ function renderInspector() {
         });
     } else if (selected.domain === "camera") {
         const zone = spec.definition.cameraZones.find(({ id }) => id === selected.id);
-        for (const [label, key] of [
-            ["최소 Y", "minY"],
-            ["최대 Y", "maxY"],
-            ["데스크톱 배율", "desktopZoom"],
-            ["모바일 배율", "mobileZoom"]
+        for (const [label, key, isPosition] of [
+            ["최소 Y", "minY", true],
+            ["최대 Y", "maxY", true],
+            ["데스크톱 배율", "desktopZoom", false],
+            ["모바일 배율", "mobileZoom", false]
         ]) {
-            appendField(fields, {
+            const append = isPosition ? appendPositionField : appendField;
+            append(fields, {
                 label,
                 value: zone[key],
                 onChange: (value) => replacePointer("camera", `Set ${key}`, `${entity.path}/${key}`, value)
@@ -644,12 +704,12 @@ function renderInspector() {
         }
     } else if (entity.kind === "wind-zone") {
         const zone = spec.definition.windZones.find(({ id }) => id === selected.id);
-        appendField(fields, {
+        appendPositionField(fields, {
             label: "X",
             value: entity.point.x,
             onChange: (value) => updateEntityPosition(selected, { x: value, y: entity.point.y })
         });
-        appendField(fields, {
+        appendPositionField(fields, {
             label: "Y",
             value: entity.point.y,
             onChange: (value) => updateEntityPosition(selected, { x: entity.point.x, y: value })
@@ -681,12 +741,12 @@ function renderInspector() {
             onChange: (value) => replacePointer("wind", "Set wind falloff", `${entity.path}/falloff`, value)
         });
     } else {
-        appendField(fields, {
+        appendPositionField(fields, {
             label: "X",
             value: entity.point.x,
             onChange: (value) => updateEntityPosition(selected, { x: value, y: entity.point.y })
         });
-        appendField(fields, {
+        appendPositionField(fields, {
             label: "Y",
             value: entity.point.y,
             onChange: (value) => updateEntityPosition(selected, { x: entity.point.x, y: value })
@@ -1020,6 +1080,7 @@ function renderStatus() {
 
 function render() {
     if (!state.draft) return renderStatus();
+    renderScenarioReference();
     renderLayers();
     renderInspector();
     drawCanvas();
@@ -1094,6 +1155,15 @@ dom.fitStage.addEventListener("click", () => {
     fitView();
     setMessage("info", "전체 스테이지를 화면에 맞췄습니다.");
     render();
+});
+dom.scenarioReferenceToggle.addEventListener("click", () => {
+    setScenarioReferenceOpen(!state.scenarioReferenceOpen);
+    setMessage(
+        "info",
+        state.scenarioReferenceOpen
+            ? "시나리오 MAP HTML을 읽기 전용 비교 화면으로 열었습니다."
+            : "시나리오 MAP HTML 비교 화면을 닫았습니다."
+    );
 });
 dom.focusSelection.addEventListener("click", focusSelection);
 dom.clearSelection.addEventListener("click", clearSelection);
@@ -1197,7 +1267,7 @@ dom.canvas.addEventListener("pointerdown", (event) => {
         state.draft.select(selected);
         if (selected && selected.domain !== "bounds") {
             state.draft.beginBufferedMutation({ domain: selected.domain, label: "Move map object" });
-            state.pointer = { mode: "drag", selected, world };
+            state.pointer = { mode: "drag", selected, originPoint: { ...selected.point }, originWorld: world };
         } else {
             state.pointer = null;
         }
@@ -1217,20 +1287,11 @@ dom.canvas.addEventListener("pointermove", (event) => {
         return drawCanvas();
     }
     const world = screenToWorld(screen, state.view);
-    const delta = { x: world.x - state.pointer.world.x, y: world.y - state.pointer.world.y };
-    if (Math.abs(delta.x) + Math.abs(delta.y) < 0.01) return;
-    updateEntityPosition(
-        state.pointer.selected,
-        {
-            x: state.pointer.selected.point.x + delta.x,
-            y: state.pointer.selected.point.y + delta.y
-        },
-        { buffered: true }
-    );
-    state.pointer.selected = entities().find(
-        (entry) => entry.domain === state.pointer.selected.domain && entry.id === state.pointer.selected.id
-    );
-    state.pointer.world = world;
+    const nextPoint = snapPoint({
+        x: state.pointer.originPoint.x + world.x - state.pointer.originWorld.x,
+        y: state.pointer.originPoint.y + world.y - state.pointer.originWorld.y
+    });
+    updateEntityPosition(state.pointer.selected, nextPoint, { buffered: true });
     drawCanvas();
 });
 
@@ -1273,6 +1334,7 @@ globalThis.addEventListener("keydown", (event) => {
     }
     if (event.ctrlKey || event.metaKey || event.repeat) return;
     if (event.code === "Digit0") dom.fitStage.click();
+    if (event.code === "KeyC") dom.scenarioReferenceToggle.click();
     if (event.code === "KeyF") dom.focusSelection.click();
     if (event.code === "Escape") dom.clearSelection.click();
 });

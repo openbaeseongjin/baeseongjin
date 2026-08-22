@@ -1,6 +1,8 @@
 export const DEFAULT_CANVAS_PERFORMANCE_POLICY = Object.freeze({
+    minPixelRatio: 1,
     maxPixelRatio: 2,
     maxBackingPixels: 3 * 1024 * 1024,
+    enforceBackingPixelLimit: false,
     sampleSize: 180
 });
 
@@ -28,16 +30,20 @@ export function resolveCanvasBackingStore({
     cssWidth,
     cssHeight,
     devicePixelRatio,
+    minPixelRatio = DEFAULT_CANVAS_PERFORMANCE_POLICY.minPixelRatio,
     maxPixelRatio = DEFAULT_CANVAS_PERFORMANCE_POLICY.maxPixelRatio,
-    maxBackingPixels = DEFAULT_CANVAS_PERFORMANCE_POLICY.maxBackingPixels
+    maxBackingPixels = DEFAULT_CANVAS_PERFORMANCE_POLICY.maxBackingPixels,
+    enforceBackingPixelLimit = DEFAULT_CANVAS_PERFORMANCE_POLICY.enforceBackingPixelLimit
 }) {
     const width = finitePositive(cssWidth, 1);
     const height = finitePositive(cssHeight, 1);
     const deviceRatio = finitePositive(devicePixelRatio, 1);
+    const ratioFloor = finitePositive(minPixelRatio, 1);
     const ratioLimit = finitePositive(maxPixelRatio, 1);
     const pixelLimit = finitePositive(maxBackingPixels, width * height);
     const pixelBudgetRatio = Math.sqrt(pixelLimit / (width * height));
-    const effectivePixelRatio = Math.max(1, Math.min(deviceRatio, ratioLimit, pixelBudgetRatio));
+    const minimumRatio = enforceBackingPixelLimit ? Math.min(ratioFloor, pixelBudgetRatio) : ratioFloor;
+    const effectivePixelRatio = Math.max(minimumRatio, Math.min(deviceRatio, ratioLimit, pixelBudgetRatio));
     return Object.freeze({
         cssWidth: width,
         cssHeight: height,

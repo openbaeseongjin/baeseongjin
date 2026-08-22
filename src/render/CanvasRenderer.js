@@ -49,8 +49,10 @@ export class CanvasRenderer {
             cssWidth: this.cssWidth,
             cssHeight: this.cssHeight,
             devicePixelRatio: this.pixelRatio(),
+            minPixelRatio: this.performancePolicy.minPixelRatio,
             maxPixelRatio: this.performancePolicy.maxPixelRatio,
-            maxBackingPixels: this.performancePolicy.maxBackingPixels
+            maxBackingPixels: this.performancePolicy.maxBackingPixels,
+            enforceBackingPixelLimit: this.performancePolicy.enforceBackingPixelLimit
         });
         if (
             this.canvas.width !== this.resolution.backingWidth ||
