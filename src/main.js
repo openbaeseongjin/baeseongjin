@@ -27,7 +27,7 @@ import { DebugEnemyTrainingControls } from "./game/ui/DebugEnemyTrainingControls
 import { HelpDialog } from "./game/ui/HelpDialog.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
-import { loadDefaultEnemySpriteDefinition } from "./render/sprites/EnemySpriteCatalog.js";
+import { DEFAULT_ENEMY_SPRITE_SECTOR_ID, loadEnemySpriteDefinitions } from "./render/sprites/EnemySpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "./render/environment/AuthoredAreaEnvironmentCatalog.js";
 import { loadDefaultDirectionDefinitions } from "./game/direction/DirectionCatalog.js";
 
@@ -38,6 +38,7 @@ if (!canvas) {
 const rendererProfile = resolveRendererProfile(globalThis.location.search);
 let playerDefinition = null;
 let enemyDefinition = null;
+let enemyDefinitionsBySectorId = Object.freeze({});
 let authoredAreaEnvironmentDefinitions = Object.freeze({});
 let directionDefinitions = Object.freeze([]);
 
@@ -196,7 +197,11 @@ function createSingleGameApp(debug) {
         renderer: createGameRenderer({
             canvas,
             profile: rendererProfile,
-            sceneRendererOptions: { playerDefinition, enemyDefinition, authoredAreaEnvironmentDefinitions }
+            sceneRendererOptions: {
+                playerDefinition,
+                enemyDefinitionsBySectorId,
+                authoredAreaEnvironmentDefinitions
+            }
         }),
         audioBindings,
         playerDefinition,
@@ -279,7 +284,11 @@ async function launch() {
                     renderer: createGameRenderer({
                         canvas,
                         profile: rendererProfile,
-                        sceneRendererOptions: { playerDefinition, enemyDefinition, authoredAreaEnvironmentDefinitions }
+                        sceneRendererOptions: {
+                            playerDefinition,
+                            enemyDefinitionsBySectorId,
+                            authoredAreaEnvironmentDefinitions
+                        }
                     }),
                     authority,
                     audioBindings,
@@ -325,12 +334,14 @@ async function bootstrap() {
     startupLoadingScreen.show();
     await serviceWorkerUpdater.ready;
     if (pageClosing) return;
-    [playerDefinition, enemyDefinition, authoredAreaEnvironmentDefinitions, directionDefinitions] = await Promise.all([
-        loadDefaultPlayerSpriteDefinition(),
-        loadDefaultEnemySpriteDefinition(),
-        loadAuthoredAreaEnvironmentDefinitions(),
-        loadDefaultDirectionDefinitions()
-    ]);
+    [playerDefinition, enemyDefinitionsBySectorId, authoredAreaEnvironmentDefinitions, directionDefinitions] =
+        await Promise.all([
+            loadDefaultPlayerSpriteDefinition(),
+            loadEnemySpriteDefinitions(),
+            loadAuthoredAreaEnvironmentDefinitions(),
+            loadDefaultDirectionDefinitions()
+        ]);
+    enemyDefinition = enemyDefinitionsBySectorId[DEFAULT_ENEMY_SPRITE_SECTOR_ID] ?? null;
     debugEnemyTrainingControls.setDefinition(enemyDefinition);
     if (pageClosing) return;
     await refreshMultiplayerAvailability();

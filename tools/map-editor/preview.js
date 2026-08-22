@@ -2,7 +2,7 @@ import { AreaPreviewGameApp } from "../../src/game/runtime/AreaPreviewGameApp.js
 import { BossStagePreviewGameApp } from "../../src/game/boss-authoring/editor/BossStagePreviewGameApp.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../../src/render/GameRendererFactory.js";
 import { loadDefaultPlayerSpriteDefinition } from "../../src/render/sprites/PlayerSpriteCatalog.js";
-import { loadDefaultEnemySpriteDefinition } from "../../src/render/sprites/EnemySpriteCatalog.js";
+import { loadEnemySpriteDefinitions } from "../../src/render/sprites/EnemySpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "../../src/render/environment/AuthoredAreaEnvironmentCatalog.js";
 import { loadDefaultDirectionDefinitions } from "../../src/game/direction/DirectionCatalog.js";
 
@@ -26,13 +26,13 @@ const PREVIEW_CANVAS_OPTIONS = Object.freeze({
 });
 const runtimePresentationPromise = Promise.all([
     loadDefaultPlayerSpriteDefinition(),
-    loadDefaultEnemySpriteDefinition(),
+    loadEnemySpriteDefinitions(),
     loadDefaultDirectionDefinitions().catch((cause) => {
         console.warn(`[map-editor-preview] 방향 연출을 불러오지 못했습니다: ${cause.message}`);
         return Object.freeze([]);
     })
-]).then(([playerDefinition, enemyDefinition, directionDefinitions]) =>
-    Object.freeze({ playerDefinition, enemyDefinition, directionDefinitions })
+]).then(([playerDefinition, enemyDefinitionsBySectorId, directionDefinitions]) =>
+    Object.freeze({ playerDefinition, enemyDefinitionsBySectorId, directionDefinitions })
 );
 const environmentDefinitionsByAreaId = new Map();
 
@@ -82,7 +82,7 @@ function rendererForPreview(presentation) {
         canvasOptions: PREVIEW_CANVAS_OPTIONS,
         sceneRendererOptions: {
             playerDefinition: presentation.playerDefinition,
-            enemyDefinition: presentation.enemyDefinition,
+            enemyDefinitionsBySectorId: presentation.enemyDefinitionsBySectorId,
             authoredAreaEnvironmentDefinitions: presentation.authoredAreaEnvironmentDefinitions
         }
     });

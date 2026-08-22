@@ -21,6 +21,8 @@ This mock is not the final interchange format. Production PixelLab, SpriteCook, 
 
 게임 bootstrap은 [`player-main/sprite-manifest.json`](./player-main/sprite-manifest.json)을 기본 플레이어 리소스로 읽어 싱글·멀티 renderer에 주입합니다. 사용자가 제공한 최종 캐릭터 외형의 원본과 생성·정규화 기록은 `assets/artwork/characters/player-main/`에 있습니다.
 
+일반 몹은 Map Editor에서 gameplay 종류만 저작하고 Area의 `sectorId`로 `sector-<nn>-enemies` package를 자동 선택합니다. 새 섹터 package는 기존 [`sector-01-enemies`](./sector-01-enemies)의 상태·atlas 계약을 기준으로 만들고 validator를 통과시킨 뒤 `EnemySpriteCatalog`의 고정 selection에 등록합니다. 섹터별 팔레트 변형은 런타임 filter가 아니라 최종 투명 PNG에 반영하며, 미납품 타입은 기본 package와 built-in mock 순으로 복구됩니다.
+
 manifest를 가져오거나 파싱하지 못하면 이 SVG mock definition으로 복구합니다. manifest가 정상이어도 atlas 이미지 하나라도 준비되지 않으면 기존 polygon scene fallback을 사용합니다.
 
 ## Production starter and validator fixture

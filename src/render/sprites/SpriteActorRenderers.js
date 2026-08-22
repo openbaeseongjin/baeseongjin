@@ -5,6 +5,7 @@ import { paintSpriteFrame } from "./SpriteCanvasPainter.js";
 import { centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
 import { drawEnemyBehaviorTelegraph } from "../EnemyTelegraphPresentation.js";
 import { resolveEnemyPresentationState, resolveUprightAimTransform } from "../EnemyPresentationState.js";
+import { enemySectorIdBySourceId } from "./EnemySpritePackageCatalog.js";
 
 const ENEMY_SPRITE = Object.freeze({
     rows: Object.freeze(["......aa", "..aaaaaa", "abbbccca", "abccccba", "..aaaaaa", "......aa"])
@@ -134,14 +135,13 @@ export class SpriteRemotePlayerRenderer extends PlayerSpriteRendererBase {
 
 export class SpriteEnemyRenderer {
     constructor({
-        assets = null,
-        definition = null,
+        packageCatalog,
         size = { width: 36, height: 36 },
         presentationResolver = resolveEnemyPresentationState,
         spriteResolver = () => ENEMY_SPRITE
     } = {}) {
-        this.assets = assets;
-        this.definition = definition;
+        if (!packageCatalog) throw new Error("SpriteEnemyRenderer requires an enemy sprite package catalog");
+        this.packageCatalog = packageCatalog;
         this.size = Object.freeze({ ...size });
         this.presentationResolver = presentationResolver;
         this.spriteResolver = spriteResolver;
@@ -155,13 +155,17 @@ export class SpriteEnemyRenderer {
         const dt = this.previousTime === null ? 0 : Math.min(0.1, Math.max(0, currentTime - this.previousTime));
         this.previousTime = currentTime;
         const activeAnimationIds = new Set();
+        const sectorIdBySourceId = enemySectorIdBySourceId(scene.world);
         let drawn = 0;
         for (const enemy of enemies) {
             const presentation = this.presentationResolver(enemy);
-            const spritePresentation = this.definition?.presentationFor(
-                presentation.enemyType,
-                presentation.primaryState
-            );
+            const spritePackage = this.packageCatalog.packageFor({
+                sectorId:
+                    enemy.sectorId ?? sectorIdBySourceId[enemy.objectId] ?? sectorIdBySourceId[enemy.areaId] ?? null,
+                enemyType: presentation.enemyType
+            });
+            const spritePresentation =
+                spritePackage?.definition.presentationFor(presentation.enemyType, presentation.primaryState) ?? null;
             const renderSize = presentation.renderSize ?? spritePresentation?.size ?? this.size;
             const radius = Math.max(renderSize.width, renderSize.height, (enemy.radius ?? 0) * 2) * 0.5 + 14;
             if (!isVisible(viewport, circleBounds(enemy.position, radius))) continue;
@@ -178,12 +182,13 @@ export class SpriteEnemyRenderer {
                 context.restore();
             }
             drawEnemyBehaviorTelegraph(context, enemy, enemies, presentation);
-            const usesProductionSprite = Boolean(spritePresentation && this.assets?.status === "ready");
+            const usesProductionSprite = Boolean(spritePackage);
             if (usesProductionSprite) {
                 const animationId = typeof enemy.id === "string" && enemy.id ? enemy.id : enemy;
                 activeAnimationIds.add(animationId);
                 const controller = this.controllerFor(
                     animationId,
+                    spritePackage,
                     presentation.enemyType,
                     spritePresentation.clipState
                 );
@@ -199,7 +204,7 @@ export class SpriteEnemyRenderer {
                 const frame = spritePresentation.clip.frameAt(animation.elapsedSeconds);
                 paintSpriteFrame({
                     context,
-                    image: this.assets.imageFor(frame.atlasId),
+                    image: spritePackage.assets.imageFor(frame.atlasId),
                     frame,
                     position: enemy.position,
                     size: renderSize,
@@ -219,7 +224,7 @@ export class SpriteEnemyRenderer {
                     const aimTransform = resolveUprightAimTransform(presentation.aimLayerDirection);
                     paintSpriteFrame({
                         context,
-                        image: this.assets.imageFor(spritePresentation.aimLayer.frame.atlasId),
+                        image: spritePackage.assets.imageFor(spritePresentation.aimLayer.frame.atlasId),
                         frame: spritePresentation.aimLayer.frame,
                         position: enemy.position,
                         size: renderSize,
@@ -236,7 +241,7 @@ export class SpriteEnemyRenderer {
                     const guardFrame = spritePresentation.guardLayer.frames[directionIndex];
                     paintSpriteFrame({
                         context,
-                        image: this.assets.imageFor(guardFrame.atlasId),
+                        image: spritePackage.assets.imageFor(guardFrame.atlasId),
                         frame: guardFrame,
                         position: enemy.position,
                         size: renderSize,
@@ -286,12 +291,13 @@ export class SpriteEnemyRenderer {
         renderStats?.recordCollection("enemies", enemies.length, drawn);
     }
 
-    controllerFor(animationId, enemyType, initialState) {
-        const canonicalEnemyType = this.definition.canonicalEnemyType(enemyType);
+    controllerFor(animationId, spritePackage, enemyType, initialState) {
+        const canonicalEnemyType = spritePackage.definition.canonicalEnemyType(enemyType);
         let entry = this.controllers.get(animationId);
-        if (!entry || entry.enemyType !== canonicalEnemyType) {
-            const states = Object.keys(this.definition.enemies[canonicalEnemyType].clips);
+        if (!entry || entry.enemyType !== canonicalEnemyType || entry.packageId !== spritePackage.id) {
+            const states = Object.keys(spritePackage.definition.enemies[canonicalEnemyType].clips);
             entry = {
+                packageId: spritePackage.id,
                 enemyType: canonicalEnemyType,
                 controller: new EnemyAnimationController({ states, initialState })
             };

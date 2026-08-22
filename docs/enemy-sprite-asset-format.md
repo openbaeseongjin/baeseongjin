@@ -8,6 +8,8 @@
 - 현재 package: [`assets/runtime/characters/sector-01-enemies/`](../assets/runtime/characters/sector-01-enemies/)
 - Loader: [`src/render/sprites/EnemySpriteManifest.js`](../src/render/sprites/EnemySpriteManifest.js)
 - Definition: [`src/render/sprites/EnemySpriteDefinition.js`](../src/render/sprites/EnemySpriteDefinition.js)
+- Sector package selection: [`src/render/sprites/EnemySpriteCatalog.js`](../src/render/sprites/EnemySpriteCatalog.js)
+- Runtime package resolver: [`src/render/sprites/EnemySpritePackageCatalog.js`](../src/render/sprites/EnemySpritePackageCatalog.js)
 - Validator: `npm run validate:enemy-sprite-assets -- <directory>`
 
 Manifest v4는 atlas별 상대 PNG 경로, 실제 크기, 셀 크기와 몹 타입별 출력 크기·anchor·offset·기본 방향을 선언한다. 각 몹은 `EnemyPresentationState`가 공개하는 모든 상태를 빠짐없이 가져야 하며, 상태는 `loop + frames` clip 또는 같은 몹 안의 다른 상태로 가는 명시적 `fallback` 중 하나만 가진다. 각 frame은 atlas ID, 0부터 시작하는 cell과 양의 정수 `durationMs`를 가지며 배열 순서가 재생 순서다. `loop: false`인 clip은 마지막 frame에서 고정된다. Alias는 legacy runtime ID를 package 안의 정식 타입으로 연결한다.
@@ -26,7 +28,13 @@ v4의 선택적 `render.aimLayer`는 고정 본체 clip 위에 별도 frame을 �
 
 ## Runtime과 fallback
 
-게임 bootstrap은 기본 enemy manifest를 player와 독립적으로 읽어 `SpriteSceneRenderer`에 주입한다. manifest 또는 atlas가 실패하면 앱이나 player를 polygon profile로 내리지 않고 적 단위 built-in pixel mock을 사용한다. package가 지원하지 않는 다른 Sector 몹도 같은 mock을 유지한다.
+게임 bootstrap은 `EnemySpriteCatalog`의 고정 `sectorId → package` 대응표에 등록된 manifest를 player와 독립적으로 읽어 `SpriteSceneRenderer`에 주입한다. `SpriteEnemyRenderer`는 Area Preview의 `enemy.areaId → world.areas[].sectorId`와 연속 Sector Runtime의 `enemy.objectId → world.enemySpawns[].sectorId`를 하나의 저작 identity index로 해석하고, snapshot에 `sectorId`가 직접 있으면 이를 우선해 해당 package를 자동 선택한다. 카메라나 Player 위치로 package를 바꾸지 않으므로 Sector 경계에서도 한 몹의 외형이 이동 중 바뀌지 않는다.
+
+Map Editor와 Scenario source는 gameplay `enemyType` 또는 `allowedEnemyTypes`만 저작한다. 섹터별 skin·palette·package 필드를 추가하거나 선택 목록을 복제하지 않으며, 실제 게임과 Editor Preview는 같은 `EnemySpritePackageCatalog` resolver를 사용한다. 새 package는 `assets/runtime/characters/sector-<nn>-enemies/`에 두고 validator를 통과시킨 뒤 `ENEMY_SPRITE_SELECTION_BY_SECTOR_ID`의 immutable selection에 등록한다.
+
+섹터 package가 해당 타입을 지원하고 atlas가 준비됐으면 그 표현을 사용한다. package가 없거나 타입·atlas를 사용할 수 없으면 Sector 01 기본 package, 그마저 사용할 수 없으면 적 단위 built-in pixel mock 순으로 복구한다. 이 fallback은 package를 대표 몹부터 점진적으로 납품할 수 있게 하며 앱이나 player renderer 전체를 polygon profile로 내리지 않는다.
+
+섹터별 색상 변형은 제작 단계에서 팔레트를 바꾼 투명 PNG atlas로 export한다. 런타임 color filter나 indexed palette swap은 기본 계약이 아니며, 역할을 구분하는 포구·방패·센서와 gameplay telegraph 색을 단순 색조 변환으로 훼손하지 않는다.
 
 싱글 디버그 패널의 `몬스터 모션 더미`는 `EnemyArchetypeCatalog`의 정식 Runtime 타입 전체를 표시한다. 현재 package가 지원하는 타입은 검증된 atlas와 clip을, 미지원 타입은 built-in pixel mock과 `EnemyPresentationState`의 상태 목록을 사용한다. 타입을 선택해 현재 화면의 안전 발판에 실제 피격 가능한 더미 하나를 생성하거나 교체하고, 화면 도구에서 이전 상태·실전 상태·다음 상태·자동 순환을 검사한다. 고정·자동 상태는 표현 검수를 위해 AI를 잠시 멈추며 실전으로 돌아가면 실제 상태 판정과 AI가 다시 진행된다. 임의 PNG나 authoring export를 직접 선택하는 우회 경로는 제공하지 않는다.
 
