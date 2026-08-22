@@ -533,6 +533,35 @@
         "fullSafe": true,
         "storySafe": true,
         "sourceId": "final-ascent-control"
+      },
+      {
+        "id": "sector-04-08:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1120,
+          "y": -128
+        },
+        "vertices": [
+          {
+            "x": -1216,
+            "y": -128
+          },
+          {
+            "x": -1024,
+            "y": -128
+          },
+          {
+            "x": -1024,
+            "y": -96
+          },
+          {
+            "x": -1216,
+            "y": -96
+          }
+        ]
       }
     ],
     "routePoints": [

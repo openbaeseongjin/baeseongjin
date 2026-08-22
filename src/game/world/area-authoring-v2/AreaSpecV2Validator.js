@@ -16,6 +16,7 @@ import {
     canonicalizeAreaSpecV2,
     createAreaDefinitionFromV2
 } from "./AreaSpecV2.js";
+import { AreaEntryEditorComponent } from "./editor/AreaEntryEditorComponent.js";
 
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
@@ -133,6 +134,16 @@ function validateEditableRuntimeFields(issues, file, definition) {
         if (isEditableEnemyObject(object)) validateEditableEnemy(issues, file, object, bounds);
     }
     for (const zone of definition.windZones ?? []) validateEditableWind(issues, file, zone);
+    const entry = AreaEntryEditorComponent.from(definition);
+    if (!entry) {
+        issue(issues, file, "entry-support-platform-missing", { id: definition.entry?.id ?? null });
+    } else if (!entry.isGrounded()) {
+        issue(issues, file, "entry-support-gap-invalid", {
+            id: definition.entry.id,
+            entryY: definition.entry.y,
+            supportTopY: entry.supportTopY
+        });
+    }
 }
 
 function specDomainValue(spec, domain) {
@@ -169,12 +180,8 @@ function specDomainValue(spec, domain) {
         case "objectives":
             return definition.objectives;
         case "progression":
-            const { x: _exitX, y: _exitY, ...exitContract } = definition.exit ?? {};
-            const { trigger: _gateTrigger, ...gateContract } = definition.gate ?? {};
             return {
                 checkpoints: definition.checkpoints,
-                exit: exitContract,
-                gate: gateContract,
                 nextAreaId: definition.nextAreaId,
                 routes: definition.routes
             };
@@ -202,23 +209,21 @@ function specDomainValue(spec, domain) {
         case "scenarioMetadata":
             return spec?.scenario ?? null;
         case "worldObjects":
-            return (definition.objects ?? [])
-                .filter((object) => !isEditableEnemyObject(object) && object?.kind !== "wind-source")
-                .map((object) => {
-                    if (object.gateId !== definition.gate?.id) return object;
-                    const { position: _position, ...contract } = object;
-                    return contract;
-                });
+            return (definition.objects ?? []).filter(
+                (object) =>
+                    !isEditableEnemyObject(object) &&
+                    object?.kind !== "wind-source" &&
+                    object.gateId !== definition.gate?.id
+            );
         case "objectLayout":
-            return (definition.objects ?? []).map((object) => ({
-                id: object?.id ?? null,
-                domain:
-                    object?.kind === "wind-source"
-                        ? "wind"
-                        : isEditableEnemyObject(object)
-                          ? "enemySlots"
-                          : "worldObjects"
-            }));
+            return (definition.objects ?? [])
+                .filter(
+                    (object) =>
+                        !isEditableEnemyObject(object) &&
+                        object?.kind !== "wind-source" &&
+                        object.gateId !== definition.gate?.id
+                )
+                .map((object) => ({ id: object?.id ?? null, domain: "worldObjects" }));
         default:
             throw new TypeError(`area-spec-domain-unknown:${domain}`);
     }
@@ -229,6 +234,13 @@ function domainEquals(leftSpec, rightSpec, domain) {
         JSON.stringify(canonicalizeAreaSpecV2(specDomainValue(leftSpec, domain))) ===
         JSON.stringify(canonicalizeAreaSpecV2(specDomainValue(rightSpec, domain)))
     );
+}
+
+function exitProgressionContract(definition) {
+    if (!definition?.exit || !definition?.gate) return null;
+    const { x: _exitX, y: _exitY, ...exit } = definition.exit;
+    const { trigger: _trigger, ...gate } = definition.gate;
+    return canonicalizeAreaSpecV2({ exit, gate });
 }
 
 function isEditableEnemyObject(object) {
@@ -333,6 +345,11 @@ export function validateAreaSpecEditorMutation(
         if (!domainEquals(baseline, candidate, domain)) {
             issue(issues, file, "editor-read-only-changed", { domain });
         }
+    }
+    const baselineExit = exitProgressionContract(baseline.definition);
+    const candidateExit = exitProgressionContract(candidate.definition);
+    if (baselineExit && candidateExit && JSON.stringify(baselineExit) !== JSON.stringify(candidateExit)) {
+        issue(issues, file, "editor-read-only-changed", { domain: "progression" });
     }
     return freezeValue({ valid: issues.length === 0, issues });
 }

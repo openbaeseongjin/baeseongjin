@@ -10,10 +10,12 @@ const canvas = document.querySelector("#preview-canvas");
 const label = document.querySelector("#preview-label");
 const status = document.querySelector("#preview-status");
 const reloadButton = document.querySelector("#reload-preview");
+const flightMode = document.querySelector("#preview-flight-mode");
+const flightStatus = document.querySelector("#preview-flight-status");
 const stageId = new URLSearchParams(globalThis.location.search).get("stage");
 let currentApp = null;
 let previewRenderer = null;
-const generatedAreaModulePromises = new Map();
+let flightEnabled = false;
 const PREVIEW_CANVAS_OPTIONS = Object.freeze({
     performancePolicy: Object.freeze({
         minPixelRatio: 0.5,
@@ -52,6 +54,16 @@ function setStatus(text, kind = "") {
     status.className = kind ? `is-${kind}` : "";
 }
 
+function syncFlightMode() {
+    flightEnabled = flightMode.checked;
+    currentApp?.setPreviewFlightEnabled?.(flightEnabled);
+    flightStatus.textContent = flightMode.disabled
+        ? "Boss Preview에서는 사용하지 않음"
+        : flightEnabled
+          ? "켜짐 · 로프 입력 비활성"
+          : "꺼짐";
+}
+
 async function requestPreview() {
     if (!/^(?:\d+-\d+|boss-\d+)$/.test(stageId ?? "")) {
         throw new Error("미리보기에는 생성된 Stage ID가 필요합니다.");
@@ -60,20 +72,6 @@ async function requestPreview() {
     const payload = await response.json().catch(() => ({ message: "Preview 응답을 읽을 수 없습니다." }));
     if (!response.ok) throw new Error(`${payload.code ?? "preview-failed"}: ${payload.message}`);
     return payload;
-}
-
-async function loadGeneratedArea(moduleUrl, outputRevision) {
-    const key = `${moduleUrl}?revision=${encodeURIComponent(outputRevision)}`;
-    if (!generatedAreaModulePromises.has(key)) {
-        generatedAreaModulePromises.set(
-            key,
-            import(key).catch((cause) => {
-                generatedAreaModulePromises.delete(key);
-                throw cause;
-            })
-        );
-    }
-    return generatedAreaModulePromises.get(key);
 }
 
 function rendererForPreview(presentation) {
@@ -99,16 +97,17 @@ async function createPreview() {
     try {
         setStatus("실제 게임 화면 리소스를 준비하는 중입니다.");
         const [preview, presentation] = await Promise.all([requestPreview(), runtimePresentationPromise]);
-        const { areaId, moduleUrl, outputRevision, revision, previewArea } = preview;
+        const { areaId, revision, previewArea } = preview;
+        flightMode.disabled = preview.specType === "boss-stage";
+        syncFlightMode();
         if (preview.specType === "boss-stage") {
-            const generated = await loadGeneratedArea(moduleUrl, outputRevision);
             const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(
                 preview.spec.sourceAreaId
             );
             currentApp = new BossStagePreviewGameApp({
                 canvas,
                 renderer: rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions }),
-                bossStageSpec: generated.BOSS_01_STAGE_SPEC,
+                bossStageSpec: preview.spec,
                 revision,
                 playerDefinition: presentation.playerDefinition,
                 directionDefinitions: presentation.directionDefinitions
@@ -125,15 +124,15 @@ async function createPreview() {
             return;
         }
         const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(areaId);
-        const generatedArea = previewArea ?? (await loadGeneratedArea(moduleUrl, outputRevision)).GENERATED_AREA;
         currentApp = new AreaPreviewGameApp({
             canvas,
             renderer: rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions }),
-            generatedArea,
+            generatedArea: previewArea,
             revision,
             playerDefinition: presentation.playerDefinition,
             directionDefinitions: presentation.directionDefinitions
         });
+        currentApp.setPreviewFlightEnabled(flightEnabled);
         const previewScope = currentApp.previewScope();
         if (previewScope.areaId !== areaId || previewScope.areaCount !== 1) {
             throw new Error("선택한 Stage 하나만 미리보기로 실행할 수 있습니다.");
@@ -153,5 +152,7 @@ async function createPreview() {
 }
 
 reloadButton.addEventListener("click", createPreview);
+flightMode.addEventListener("change", syncFlightMode);
 globalThis.addEventListener("beforeunload", () => currentApp?.stop());
+syncFlightMode();
 await createPreview();

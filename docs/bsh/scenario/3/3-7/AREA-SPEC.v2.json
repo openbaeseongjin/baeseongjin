@@ -110,6 +110,35 @@
         ],
         "sourceId": "m2",
         "inferredFrom": "safeHubs"
+      },
+      {
+        "id": "sector-03-07:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1664,
+          "y": -32
+        },
+        "vertices": [
+          {
+            "x": -1760,
+            "y": -32
+          },
+          {
+            "x": -1568,
+            "y": -32
+          },
+          {
+            "x": -1568,
+            "y": 0
+          },
+          {
+            "x": -1760,
+            "y": 0
+          }
+        ]
       }
     ],
     "routePoints": [

@@ -8,6 +8,31 @@ export const BOSS_MECHANIC_TYPE = Object.freeze({
     RAIL_RAM: "rail-ram"
 });
 
+export const BOSS_VISUAL_PRESET_ID = Object.freeze({
+    GATE_LOCKING_CARRIAGE: "gate-locking-carriage"
+});
+
+export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
+    REAR_DRIVE: "boss-01:rear-drive",
+    SIDE_GEARBOX: "boss-01:side-gearbox",
+    CENTRAL_LOCK_CORE: "boss-01:central-lock-core"
+});
+
+export const BOSS_VULNERABILITY_TRIGGER = Object.freeze({
+    MAX_EXTENSION: "max-extension",
+    SWEEP_COMPLETE: "sweep-complete",
+    BEAM_FAILURE: "beam-failure"
+});
+
+export const BOSS_TRANSITION_TRIGGER = Object.freeze({
+    CHECKPOINT_COMPLETE: "checkpoint-complete",
+    ALL_PHASES_DEPLETED: "all-phases-depleted"
+});
+
+export const BOSS_VICTORY_PRESENTATION_ID = Object.freeze({
+    POWER_LOSS_FULL_STOP: "boss-01:power-loss-full-stop"
+});
+
 export const BOSS_DAMAGE_MODE = Object.freeze({
     STANDARD_COMBAT: "standard-combat"
 });

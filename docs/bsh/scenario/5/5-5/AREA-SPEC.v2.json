@@ -378,6 +378,35 @@
           }
         ],
         "sourceId": "exit-deck"
+      },
+      {
+        "id": "sector-05-05:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": -68
+        },
+        "vertices": [
+          {
+            "x": -96,
+            "y": -68
+          },
+          {
+            "x": 96,
+            "y": -68
+          },
+          {
+            "x": 96,
+            "y": -36
+          },
+          {
+            "x": -96,
+            "y": -36
+          }
+        ]
       }
     ],
     "routePoints": [

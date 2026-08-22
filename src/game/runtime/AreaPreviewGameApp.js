@@ -3,8 +3,20 @@ import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from 
 import { LocalAuthority } from "./LocalAuthority.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
 import { defineArea, defineAreaCatalog } from "../world/areas/AreaDefinition.js";
+import { PreviewFlightController } from "./PreviewFlightController.js";
 
 const PREVIEW_COMPLETION_MODE = "content-boundary";
+
+class AreaPreviewAuthority extends LocalAuthority {
+    applyFlightMotion(position) {
+        this.simulation.applyOwnerMotion(this.playerId, {
+            ...this.ownerState(),
+            position,
+            velocity: { x: 0, y: 0 },
+            isGrounded: false
+        });
+    }
+}
 
 function assertGeneratedArea(generatedArea) {
     if (!generatedArea || typeof generatedArea.id !== "string" || generatedArea.id.trim() === "") {
@@ -41,7 +53,7 @@ export class AreaPreviewGameApp extends GameApp {
             revision: previewRevision,
             areas: [area]
         });
-        const authority = new LocalAuthority(
+        const authority = new AreaPreviewAuthority(
             new GameSimulation({
                 worldCatalog,
                 startAreaId: area.id,
@@ -61,6 +73,7 @@ export class AreaPreviewGameApp extends GameApp {
         }
         super({ ...options, startAreaId: area.id, authority });
         this.previewAreaId = area.id;
+        this.previewFlight = new PreviewFlightController();
     }
 
     previewScope() {
@@ -75,5 +88,18 @@ export class AreaPreviewGameApp extends GameApp {
     applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
         this.setMetricsVisible(metrics);
         return startAreaId === null || startAreaId === this.previewAreaId;
+    }
+
+    setPreviewFlightEnabled(enabled) {
+        return this.previewFlight.setEnabled(enabled);
+    }
+
+    update(dt, input) {
+        if (!this.previewFlight.enabled) return super.update(dt, input);
+        const owner = this.authority.ownerState();
+        const area = this.authority.snapshot().world.areas[0];
+        const nextPosition = this.previewFlight.nextPosition(owner.position, area.bounds, dt, input);
+        super.update(dt, this.previewFlight.neutralInput(input));
+        this.authority.applyFlightMotion(nextPosition);
     }
 }

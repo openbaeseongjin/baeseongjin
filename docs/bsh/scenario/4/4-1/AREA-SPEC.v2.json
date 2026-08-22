@@ -40,7 +40,7 @@
     "entry": {
       "id": "sector-04-01:entry",
       "x": -2240,
-      "y": -448
+      "y": -480
     },
     "exit": {
       "id": "sector-04-01:scenario-exit",

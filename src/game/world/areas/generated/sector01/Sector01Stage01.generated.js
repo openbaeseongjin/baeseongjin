@@ -103,7 +103,7 @@ const SPEC = {
     "entry": {
       "id": "sector-01-01:entry",
       "x": 485,
-      "y": -65
+      "y": -32
     },
     "exit": {
       "id": "sector-01-01:exit",

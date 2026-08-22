@@ -5,10 +5,10 @@ const HISTORY_LIMIT = 80;
 const MISSING = Symbol("missing-draft-value");
 const EDITABLE_POINTER_ROOTS = Object.freeze({
     bounds: Object.freeze(["/definition/bounds"]),
-    entry: Object.freeze(["/definition/entry"]),
+    entry: Object.freeze(["/definition/entry", "/definition/surfaces"]),
     exit: Object.freeze([
         "/definition/exit",
-        "/definition/gate/trigger",
+        "/definition/gate",
         "/definition/objects",
         "/definition/routePoints",
         "/definition/surfaces"
@@ -115,12 +115,13 @@ function moveAnchorPair(spec, landmarkId, delta) {
 }
 
 export class AreaEditorDraft {
-    constructor({ spec, revision = 0, validate = validateAreaSpecV2 } = {}) {
+    constructor({ spec, appliedSpec = spec, revision = 0, validate = validateAreaSpecV2 } = {}) {
         if (!spec || typeof spec !== "object") throw new TypeError("editor-draft-spec-required");
+        if (!appliedSpec || typeof appliedSpec !== "object") throw new TypeError("editor-draft-applied-spec-required");
         if (!Number.isInteger(revision) || revision < 0) throw new TypeError("editor-draft-revision-invalid");
         if (typeof validate !== "function") throw new TypeError("editor-draft-validate-required");
         this.spec = structuredClone(spec);
-        this.appliedSpec = structuredClone(spec);
+        this.appliedSpec = structuredClone(appliedSpec);
         this.serverRevision = revision;
         this.validateFn = validate;
         this.selection = null;

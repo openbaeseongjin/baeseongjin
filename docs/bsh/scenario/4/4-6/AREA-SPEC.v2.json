@@ -288,6 +288,35 @@
           }
         ],
         "sourceId": "baffle-c"
+      },
+      {
+        "id": "sector-04-06:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1980,
+          "y": -388
+        },
+        "vertices": [
+          {
+            "x": 1884,
+            "y": -388
+          },
+          {
+            "x": 2076,
+            "y": -388
+          },
+          {
+            "x": 2076,
+            "y": -356
+          },
+          {
+            "x": 1884,
+            "y": -356
+          }
+        ]
       }
     ],
     "routePoints": [

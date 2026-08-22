@@ -1,4 +1,5 @@
 import { resolveObjectTriggerBounds } from "../../areas/AreaDefinition.js";
+import { AreaEntryEditorComponent } from "./AreaEntryEditorComponent.js";
 import { AreaExitEditorComponent } from "./AreaExitEditorComponent.js";
 
 function finitePoint(value) {
@@ -63,14 +64,16 @@ export function collectEditorEntities(spec) {
             })
         );
     }
-    if (finitePoint(definition.entry)) {
+    const entryComponent = AreaEntryEditorComponent.from(definition);
+    if (entryComponent) {
         result.push(
             entity({
                 domain: "entry",
-                id: definition.entry.id,
+                id: entryComponent.id,
                 kind: "entry",
-                point: definition.entry,
-                path: "/definition/entry"
+                point: entryComponent.point,
+                path: "/definition/entry",
+                sourceId: entryComponent.supportSurface.id
             })
         );
     }
@@ -88,7 +91,7 @@ export function collectEditorEntities(spec) {
         );
     }
     for (const [index, surface] of (definition.surfaces ?? []).entries()) {
-        if (exitComponent?.ownsSurface(surface.id)) continue;
+        if (entryComponent?.ownsSurface(surface.id) || exitComponent?.ownsSurface(surface.id)) continue;
         const point = finitePoint(surface.position) ? surface.position : centerOfVertices(surface.vertices);
         if (!point) continue;
         result.push(
@@ -239,8 +242,9 @@ export function translateEditorEntity(spec, selected, delta) {
         return next;
     }
     if (selected.domain === "entry") {
-        definition.entry.x += delta.x;
-        definition.entry.y += delta.y;
+        const entry = AreaEntryEditorComponent.from(definition);
+        if (!entry || entry.id !== selected.id) throw new TypeError("editor-entity-not-found");
+        entry.translate(delta);
         return next;
     }
     if (selected.domain === "exit") {
@@ -285,4 +289,61 @@ export function translateEditorEntity(spec, selected, delta) {
         return next;
     }
     throw new TypeError("editor-entity-translation-forbidden");
+}
+
+const REMOVABLE_EDITOR_DOMAINS = Object.freeze([
+    "entry",
+    "exit",
+    "surfaces",
+    "anchors",
+    "recoveryRoute",
+    "enemySlots",
+    "wind",
+    "camera"
+]);
+
+export function canRemoveEditorEntity(selected) {
+    return Boolean(selected && REMOVABLE_EDITOR_DOMAINS.includes(selected.domain));
+}
+
+export function removeEditorEntity(spec, selected) {
+    if (!canRemoveEditorEntity(selected)) throw new TypeError("editor-entity-removal-forbidden");
+    const next = structuredClone(spec);
+    const definition = next.definition;
+    if (selected.domain === "entry") {
+        const entry = AreaEntryEditorComponent.from(definition);
+        if (entry) definition.surfaces = definition.surfaces.filter(({ id }) => id !== entry.supportSurface.id);
+        definition.entry = null;
+    } else if (selected.domain === "exit") {
+        const exit = AreaExitEditorComponent.from(definition);
+        const gateId = definition.gate?.id;
+        if (exit) {
+            definition.surfaces = definition.surfaces.filter(({ id }) => id !== exit.deck.id);
+            definition.routePoints = definition.routePoints.filter(({ id }) => id !== exit.routePoint.id);
+        }
+        definition.objects = definition.objects.filter(({ gateId: objectGateId }) => objectGateId !== gateId);
+        definition.exit = null;
+        definition.gate = null;
+    } else if (selected.domain === "surfaces") {
+        definition.surfaces = definition.surfaces.filter(({ id }) => id !== selected.id);
+    } else if (selected.domain === "anchors") {
+        next.anchors = next.anchors.filter(({ landmark }) => landmark.id !== selected.id);
+    } else if (selected.domain === "recoveryRoute") {
+        definition.recoveryPoints = definition.recoveryPoints.filter(({ id }) => id !== selected.id);
+        definition.routePoints = definition.routePoints.filter(({ id }) => id !== selected.id);
+    } else if (selected.domain === "enemySlots") {
+        definition.objects = definition.objects.filter(({ id }) => id !== selected.id);
+    } else if (selected.domain === "wind") {
+        const zoneId =
+            selected.kind === "wind-source"
+                ? definition.objects.find(({ id }) => id === selected.id)?.windZoneId
+                : selected.id;
+        definition.objects = definition.objects.filter(
+            (object) => object.id !== selected.id && object.windZoneId !== zoneId
+        );
+        definition.windZones = definition.windZones.filter(({ id }) => id !== zoneId);
+    } else if (selected.domain === "camera") {
+        definition.cameraZones = definition.cameraZones.filter(({ id }) => id !== selected.id);
+    }
+    return next;
 }

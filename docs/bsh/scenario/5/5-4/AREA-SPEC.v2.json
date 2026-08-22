@@ -228,6 +228,35 @@
           }
         ],
         "sourceId": "capacity-record-deck"
+      },
+      {
+        "id": "sector-05-04:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -2120,
+          "y": -228
+        },
+        "vertices": [
+          {
+            "x": -2216,
+            "y": -228
+          },
+          {
+            "x": -2024,
+            "y": -228
+          },
+          {
+            "x": -2024,
+            "y": -196
+          },
+          {
+            "x": -2216,
+            "y": -196
+          }
+        ]
       }
     ],
     "routePoints": [
