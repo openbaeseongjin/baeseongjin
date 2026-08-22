@@ -50,221 +50,424 @@
     "nextAreaId": null,
     "surfaces": [
       {
-        "id": "sector-04-03:inferred-surface-ENTRY",
-        "kind": "scenario-safe-entry",
+        "id": "entry-terrace",
+        "kind": "safe-entry",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": -2432,
+          "x": -2336,
           "y": -512
         },
         "vertices": [
           {
-            "x": -2528,
+            "x": -2496,
             "y": -512
           },
           {
-            "x": -2336,
+            "x": -2176,
             "y": -512
           },
           {
-            "x": -2336,
-            "y": -488
+            "x": -2176,
+            "y": -482
           },
           {
-            "x": -2528,
-            "y": -488
+            "x": -2496,
+            "y": -482
           }
         ],
-        "sourceId": "ENTRY",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "entry-terrace"
       },
       {
-        "id": "sector-04-03:inferred-surface-C1",
-        "kind": "scenario-block-c-reentry-grapple",
+        "id": "block-a-bridge-1",
+        "kind": "residential-bridge",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 320,
-          "y": -1568
+          "x": -2040,
+          "y": -650
         },
         "vertices": [
           {
-            "x": 224,
-            "y": -1568
+            "x": -2180,
+            "y": -650
           },
           {
-            "x": 416,
-            "y": -1568
+            "x": -1900,
+            "y": -650
           },
           {
-            "x": 416,
-            "y": -1544
+            "x": -1900,
+            "y": -626
           },
           {
-            "x": 224,
-            "y": -1544
+            "x": -2180,
+            "y": -626
           }
         ],
-        "sourceId": "C1",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "block-a-bridge-1"
       },
       {
-        "id": "sector-04-03:inferred-surface-C2",
-        "kind": "scenario-block-c-reentry-grapple",
+        "id": "block-a-bridge-2",
+        "kind": "residential-bridge",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 672,
-          "y": -1632
+          "x": -1720,
+          "y": -848
         },
         "vertices": [
           {
-            "x": 576,
-            "y": -1632
+            "x": -1840,
+            "y": -848
           },
           {
-            "x": 768,
-            "y": -1632
+            "x": -1600,
+            "y": -848
           },
           {
-            "x": 768,
-            "y": -1608
+            "x": -1600,
+            "y": -824
           },
           {
-            "x": 576,
-            "y": -1608
+            "x": -1840,
+            "y": -824
           }
         ],
-        "sourceId": "C2",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "block-a-bridge-2"
       },
       {
-        "id": "sector-04-03:inferred-surface-C3",
-        "kind": "scenario-block-c-reentry-grapple",
+        "id": "block-a-bridge-3",
+        "kind": "residential-bridge",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 1024,
-          "y": -1696
+          "x": -1385,
+          "y": -1028
         },
         "vertices": [
           {
-            "x": 928,
-            "y": -1696
+            "x": -1510,
+            "y": -1028
           },
           {
-            "x": 1120,
-            "y": -1696
+            "x": -1260,
+            "y": -1028
           },
           {
-            "x": 1120,
-            "y": -1672
+            "x": -1260,
+            "y": -1004
           },
           {
-            "x": 928,
-            "y": -1672
+            "x": -1510,
+            "y": -1004
           }
         ],
-        "sourceId": "C3",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "block-a-bridge-3"
       },
       {
-        "id": "sector-04-03:inferred-surface-C4",
-        "kind": "scenario-block-c-reentry-grapple",
+        "id": "garden-skybridge",
+        "kind": "garden-skybridge",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 1376,
-          "y": -1760
+          "x": 165,
+          "y": -1110
         },
         "vertices": [
           {
-            "x": 1280,
-            "y": -1760
+            "x": -1260,
+            "y": -1110
           },
           {
-            "x": 1472,
-            "y": -1760
+            "x": 1590,
+            "y": -1110
           },
           {
-            "x": 1472,
-            "y": -1736
+            "x": 1590,
+            "y": -1064
           },
           {
-            "x": 1280,
-            "y": -1736
+            "x": -1260,
+            "y": -1064
           }
         ],
-        "sourceId": "C4",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "garden-skybridge"
       },
       {
-        "id": "sector-04-03:inferred-surface-C5",
-        "kind": "scenario-block-c-reentry-grapple",
+        "id": "service-drop-deck",
+        "kind": "service-deck",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 1696,
-          "y": -1904
+          "x": 1535,
+          "y": -930
         },
         "vertices": [
           {
-            "x": 1600,
-            "y": -1904
+            "x": 1420,
+            "y": -930
           },
           {
-            "x": 1792,
-            "y": -1904
+            "x": 1650,
+            "y": -930
           },
           {
-            "x": 1792,
-            "y": -1880
+            "x": 1650,
+            "y": -900
           },
           {
-            "x": 1600,
-            "y": -1880
+            "x": 1420,
+            "y": -900
           }
         ],
-        "sourceId": "C5",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "service-drop-deck"
       },
       {
-        "id": "sector-04-03:inferred-surface-EXIT",
-        "kind": "scenario-safe-exit",
+        "id": "service-drop-recovery",
+        "kind": "service-recovery",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 2060,
+          "x": 1460,
+          "y": -690
+        },
+        "vertices": [
+          {
+            "x": 1380,
+            "y": -690
+          },
+          {
+            "x": 1540,
+            "y": -690
+          },
+          {
+            "x": 1540,
+            "y": -668
+          },
+          {
+            "x": 1380,
+            "y": -668
+          }
+        ],
+        "sourceId": "service-drop-recovery"
+      },
+      {
+        "id": "lower-maintenance-deck",
+        "kind": "service-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 205,
+          "y": -520
+        },
+        "vertices": [
+          {
+            "x": -990,
+            "y": -520
+          },
+          {
+            "x": 1400,
+            "y": -520
+          },
+          {
+            "x": 1400,
+            "y": -462
+          },
+          {
+            "x": -990,
+            "y": -462
+          }
+        ],
+        "sourceId": "lower-maintenance-deck"
+      },
+      {
+        "id": "utility-riser-1",
+        "kind": "utility-riser",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -815,
+          "y": -820
+        },
+        "vertices": [
+          {
+            "x": -920,
+            "y": -820
+          },
+          {
+            "x": -710,
+            "y": -820
+          },
+          {
+            "x": -710,
+            "y": -798
+          },
+          {
+            "x": -920,
+            "y": -798
+          }
+        ],
+        "sourceId": "utility-riser-1"
+      },
+      {
+        "id": "utility-riser-2",
+        "kind": "utility-riser",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -575,
+          "y": -1080
+        },
+        "vertices": [
+          {
+            "x": -680,
+            "y": -1080
+          },
+          {
+            "x": -470,
+            "y": -1080
+          },
+          {
+            "x": -470,
+            "y": -1058
+          },
+          {
+            "x": -680,
+            "y": -1058
+          }
+        ],
+        "sourceId": "utility-riser-2"
+      },
+      {
+        "id": "utility-riser-3",
+        "kind": "utility-riser",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -295,
+          "y": -1340
+        },
+        "vertices": [
+          {
+            "x": -400,
+            "y": -1340
+          },
+          {
+            "x": -190,
+            "y": -1340
+          },
+          {
+            "x": -190,
+            "y": -1318
+          },
+          {
+            "x": -400,
+            "y": -1318
+          }
+        ],
+        "sourceId": "utility-riser-3"
+      },
+      {
+        "id": "utility-riser-4",
+        "kind": "utility-riser",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 25,
+          "y": -1575
+        },
+        "vertices": [
+          {
+            "x": -80,
+            "y": -1575
+          },
+          {
+            "x": 130,
+            "y": -1575
+          },
+          {
+            "x": 130,
+            "y": -1553
+          },
+          {
+            "x": -80,
+            "y": -1553
+          }
+        ],
+        "sourceId": "utility-riser-4"
+      },
+      {
+        "id": "block-c-reentry-deck",
+        "kind": "block-c-reentry",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 900,
+          "y": -1610
+        },
+        "vertices": [
+          {
+            "x": 120,
+            "y": -1610
+          },
+          {
+            "x": 1680,
+            "y": -1610
+          },
+          {
+            "x": 1680,
+            "y": -1556
+          },
+          {
+            "x": 120,
+            "y": -1556
+          }
+        ],
+        "sourceId": "block-c-reentry-deck"
+      },
+      {
+        "id": "block-c-exit-terrace",
+        "kind": "safe-exit",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 2080,
           "y": -2060
         },
         "vertices": [
           {
-            "x": 1964,
+            "x": 1900,
             "y": -2060
           },
           {
-            "x": 2156,
+            "x": 2260,
             "y": -2060
           },
           {
-            "x": 2156,
-            "y": -2036
+            "x": 2260,
+            "y": -2030
           },
           {
-            "x": 1964,
-            "y": -2036
+            "x": 1900,
+            "y": -2030
           }
         ],
-        "sourceId": "EXIT",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "block-c-exit-terrace"
       }
     ],
     "routePoints": [
@@ -1040,6 +1243,120 @@
         "x": -2432,
         "y": -512
       },
+      "mapEditorSurfaces": [
+        {
+          "id": "entry-terrace",
+          "kind": "safe-entry",
+          "x": -2336,
+          "y": -512,
+          "width": 320,
+          "height": 30
+        },
+        {
+          "id": "block-a-bridge-1",
+          "kind": "residential-bridge",
+          "x": -2040,
+          "y": -650,
+          "width": 280,
+          "height": 24
+        },
+        {
+          "id": "block-a-bridge-2",
+          "kind": "residential-bridge",
+          "x": -1720,
+          "y": -848,
+          "width": 240,
+          "height": 24
+        },
+        {
+          "id": "block-a-bridge-3",
+          "kind": "residential-bridge",
+          "x": -1385,
+          "y": -1028,
+          "width": 250,
+          "height": 24
+        },
+        {
+          "id": "garden-skybridge",
+          "kind": "garden-skybridge",
+          "x": 165,
+          "y": -1110,
+          "width": 2850,
+          "height": 46
+        },
+        {
+          "id": "service-drop-deck",
+          "kind": "service-deck",
+          "x": 1535,
+          "y": -930,
+          "width": 230,
+          "height": 30
+        },
+        {
+          "id": "service-drop-recovery",
+          "kind": "service-recovery",
+          "x": 1460,
+          "y": -690,
+          "width": 160,
+          "height": 22
+        },
+        {
+          "id": "lower-maintenance-deck",
+          "kind": "service-deck",
+          "x": 205,
+          "y": -520,
+          "width": 2390,
+          "height": 58
+        },
+        {
+          "id": "utility-riser-1",
+          "kind": "utility-riser",
+          "x": -815,
+          "y": -820,
+          "width": 210,
+          "height": 22
+        },
+        {
+          "id": "utility-riser-2",
+          "kind": "utility-riser",
+          "x": -575,
+          "y": -1080,
+          "width": 210,
+          "height": 22
+        },
+        {
+          "id": "utility-riser-3",
+          "kind": "utility-riser",
+          "x": -295,
+          "y": -1340,
+          "width": 210,
+          "height": 22
+        },
+        {
+          "id": "utility-riser-4",
+          "kind": "utility-riser",
+          "x": 25,
+          "y": -1575,
+          "width": 210,
+          "height": 22
+        },
+        {
+          "id": "block-c-reentry-deck",
+          "kind": "block-c-reentry",
+          "x": 900,
+          "y": -1610,
+          "width": 1560,
+          "height": 54
+        },
+        {
+          "id": "block-c-exit-terrace",
+          "kind": "safe-exit",
+          "x": 2080,
+          "y": -2060,
+          "width": 360,
+          "height": 30
+        }
+      ],
       "mandatoryRoute": [
         {
           "id": "ENTRY",

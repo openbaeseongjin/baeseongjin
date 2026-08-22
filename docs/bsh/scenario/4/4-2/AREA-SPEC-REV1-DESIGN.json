@@ -29,6 +29,14 @@
     "x": -1984,
     "y": -256
   },
+  "mapEditorSurfaces": [
+    { "id": "entry-terrace", "kind": "safe-entry", "x": -1970, "y": -256, "width": 260, "height": 30 },
+    { "id": "courtyard-safe-deck", "kind": "safe-courtyard", "x": -1408, "y": -480, "width": 244, "height": 30 },
+    { "id": "interior-arcade-cut", "kind": "interior-arcade-deck", "x": 845, "y": -770, "width": 250, "height": 110 },
+    { "id": "arcade-recovery", "kind": "arcade-recovery", "x": 640, "y": -1020, "width": 240, "height": 70 },
+    { "id": "safe-vestibule", "kind": "safe-vestibule", "x": 1185, "y": -1408, "width": 250, "height": 30 },
+    { "id": "exit-terrace", "kind": "safe-exit", "x": 1984, "y": -1856, "width": 258, "height": 30 }
+  ],
   "mandatoryRoute": [
     {
       "id": "ENTRY",

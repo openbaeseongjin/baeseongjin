@@ -180,7 +180,7 @@
             "areaId": "sector-04-01",
             "authoringMode": "scenario-only",
             "sourcePath": "docs/bsh/scenario/4/4-1/AREA-SPEC.v2.json",
-            "sourcePathHash": "d9469de9a8c3f4bf0d4321c3eb62171e1b37b0429c11a7a586dc5a3e3e0a983a",
+            "sourcePathHash": "09469c2e93eb5c4d668ec220acaedf13ca9e644c77cb6c701a3f63b7be236e7a",
             "designSourcePath": "docs/bsh/scenario/4/4-1/AREA-SPEC-REV1-DESIGN.json"
         },
         {
@@ -188,7 +188,7 @@
             "areaId": "sector-04-02",
             "authoringMode": "scenario-only",
             "sourcePath": "docs/bsh/scenario/4/4-2/AREA-SPEC.v2.json",
-            "sourcePathHash": "e14c265b8488fa5165efea43f1f40286cc1afe67bd50f103723f1ecce9634114",
+            "sourcePathHash": "1e7c1259702617bf4eb5f95e8f865e49b11de5bb283d62e7ba89eecc6b7f45e3",
             "designSourcePath": "docs/bsh/scenario/4/4-2/AREA-SPEC-REV1-DESIGN.json"
         },
         {
@@ -196,7 +196,7 @@
             "areaId": "sector-04-03",
             "authoringMode": "scenario-only",
             "sourcePath": "docs/bsh/scenario/4/4-3/AREA-SPEC.v2.json",
-            "sourcePathHash": "4bc2e8afd7bca26610b4439013acbad56157fa6af3574698730dd712cf90deb2",
+            "sourcePathHash": "de9477643eb1d68d75b1f1a91025fa71831a0f77eec0739a803ac0785ccc6200",
             "designSourcePath": "docs/bsh/scenario/4/4-3/AREA-SPEC-REV1-DESIGN.json"
         },
         {
@@ -212,7 +212,7 @@
             "areaId": "sector-04-05",
             "authoringMode": "scenario-only",
             "sourcePath": "docs/bsh/scenario/4/4-5/AREA-SPEC.v2.json",
-            "sourcePathHash": "7bca1037a6f88b923732bb17126c2a898698ac6fa5798d27d630348574306abb",
+            "sourcePathHash": "84b37a8f7df272017f7098b0d85e4cf3daed9402a851271e75c83020a836aba1",
             "designSourcePath": "docs/bsh/scenario/4/4-5/AREA-SPEC-REV1-DESIGN.json"
         },
         {

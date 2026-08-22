@@ -32,6 +32,16 @@
     "fromStage": "4-4",
     "label": "HIGH AMENITY ACCESS"
   },
+  "mapEditorSurfaces": [
+    { "id": "high-amenity-entry", "kind": "safe-entry", "x": -2305, "y": -352, "width": 430, "height": 32 },
+    { "id": "west-lower-service-edge", "kind": "amenity-service-deck", "x": -1990, "y": -320, "width": 1100, "height": 30 },
+    { "id": "lower-amenity-recovery", "kind": "amenity-recovery", "x": -1630, "y": -520, "width": 500, "height": 22 },
+    { "id": "east-mid-wellness-balcony", "kind": "wellness-balcony", "x": 1740, "y": -1180, "width": 1320, "height": 30 },
+    { "id": "east-mid-safe-read", "kind": "safe-read", "x": 1390, "y": -1260, "width": 420, "height": 28 },
+    { "id": "west-upper-garden-balcony", "kind": "garden-balcony", "x": -1750, "y": -1790, "width": 1260, "height": 30 },
+    { "id": "upper-garden-recovery", "kind": "amenity-recovery", "x": -1525, "y": -1600, "width": 430, "height": 22 },
+    { "id": "east-high-refuge-access", "kind": "safe-exit", "x": 1860, "y": -2170, "width": 720, "height": 32 }
+  ],
   "mandatoryRoute": [
     {
       "id": "ENTRY",
