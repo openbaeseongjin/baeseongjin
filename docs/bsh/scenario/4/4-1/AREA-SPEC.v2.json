@@ -50,39 +50,38 @@
     "nextAreaId": null,
     "surfaces": [
       {
-        "id": "sector-04-01:inferred-surface-ENTRY",
-        "kind": "scenario-safe-deck",
+        "id": "arrival-terrace",
+        "kind": "arrival-terrace",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": -2240,
+          "x": -2220,
           "y": -448
         },
         "vertices": [
           {
-            "x": -2336,
+            "x": -2380,
             "y": -448
           },
           {
-            "x": -2144,
+            "x": -2060,
             "y": -448
           },
           {
-            "x": -2144,
-            "y": -424
+            "x": -2060,
+            "y": -418
           },
           {
-            "x": -2336,
-            "y": -424
+            "x": -2380,
+            "y": -418
           }
         ],
-        "sourceId": "ENTRY",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "arrival-terrace"
       },
       {
-        "id": "sector-04-01:inferred-surface-M0",
-        "kind": "scenario-full-safe-story",
+        "id": "story-terrace",
+        "kind": "story-terrace",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
@@ -92,28 +91,27 @@
         },
         "vertices": [
           {
-            "x": -1760,
+            "x": -1810,
             "y": -256
           },
           {
-            "x": -1568,
+            "x": -1518,
             "y": -256
           },
           {
-            "x": -1568,
-            "y": -232
+            "x": -1518,
+            "y": -226
           },
           {
-            "x": -1760,
-            "y": -232
+            "x": -1810,
+            "y": -226
           }
         ],
-        "sourceId": "M0",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "story-terrace"
       },
       {
-        "id": "sector-04-01:inferred-surface-B0",
-        "kind": "scenario-basin-recovery",
+        "id": "basin-landing",
+        "kind": "basin-recovery",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
@@ -123,28 +121,27 @@
         },
         "vertices": [
           {
-            "x": -1184,
+            "x": -1180,
             "y": -96
           },
           {
-            "x": -992,
+            "x": -996,
             "y": -96
           },
           {
-            "x": -992,
+            "x": -996,
             "y": -72
           },
           {
-            "x": -1184,
+            "x": -1180,
             "y": -72
           }
         ],
-        "sourceId": "B0",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "basin-landing"
       },
       {
-        "id": "sector-04-01:inferred-surface-R1",
-        "kind": "scenario-ascent-recovery",
+        "id": "far-side-ascent",
+        "kind": "ascent-recovery",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
@@ -163,19 +160,18 @@
           },
           {
             "x": 1376,
-            "y": -392
+            "y": -390
           },
           {
             "x": 1184,
-            "y": -392
+            "y": -390
           }
         ],
-        "sourceId": "R1",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "far-side-ascent"
       },
       {
-        "id": "sector-04-01:inferred-surface-EXIT",
-        "kind": "scenario-full-safe-lobby",
+        "id": "private-lobby",
+        "kind": "private-lobby",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
@@ -185,24 +181,23 @@
         },
         "vertices": [
           {
-            "x": 2112,
+            "x": 2060,
             "y": -1952
           },
           {
-            "x": 2304,
+            "x": 2356,
             "y": -1952
           },
           {
-            "x": 2304,
-            "y": -1928
+            "x": 2356,
+            "y": -1922
           },
           {
-            "x": 2112,
-            "y": -1928
+            "x": 2060,
+            "y": -1922
           }
         ],
-        "sourceId": "EXIT",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "private-lobby"
       }
     ],
     "routePoints": [
@@ -637,6 +632,48 @@
         "x": -2240,
         "y": -448
       },
+      "mapEditorSurfaces": [
+        {
+          "id": "arrival-terrace",
+          "kind": "arrival-terrace",
+          "x": -2220,
+          "y": -448,
+          "width": 320,
+          "height": 30
+        },
+        {
+          "id": "story-terrace",
+          "kind": "story-terrace",
+          "x": -1664,
+          "y": -256,
+          "width": 292,
+          "height": 30
+        },
+        {
+          "id": "basin-landing",
+          "kind": "basin-recovery",
+          "x": -1088,
+          "y": -96,
+          "width": 184,
+          "height": 24
+        },
+        {
+          "id": "far-side-ascent",
+          "kind": "ascent-recovery",
+          "x": 1280,
+          "y": -416,
+          "width": 192,
+          "height": 26
+        },
+        {
+          "id": "private-lobby",
+          "kind": "private-lobby",
+          "x": 2208,
+          "y": -1952,
+          "width": 296,
+          "height": 30
+        }
+      ],
       "mandatoryRoute": [
         {
           "id": "ENTRY",

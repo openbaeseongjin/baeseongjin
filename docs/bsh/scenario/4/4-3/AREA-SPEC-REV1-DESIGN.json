@@ -30,6 +30,22 @@
     "x": -2432,
     "y": -512
   },
+  "mapEditorSurfaces": [
+    { "id": "entry-terrace", "kind": "safe-entry", "x": -2336, "y": -512, "width": 320, "height": 30 },
+    { "id": "block-a-bridge-1", "kind": "residential-bridge", "x": -2040, "y": -650, "width": 280, "height": 24 },
+    { "id": "block-a-bridge-2", "kind": "residential-bridge", "x": -1720, "y": -848, "width": 240, "height": 24 },
+    { "id": "block-a-bridge-3", "kind": "residential-bridge", "x": -1385, "y": -1028, "width": 250, "height": 24 },
+    { "id": "garden-skybridge", "kind": "garden-skybridge", "x": 165, "y": -1110, "width": 2850, "height": 46 },
+    { "id": "service-drop-deck", "kind": "service-deck", "x": 1535, "y": -930, "width": 230, "height": 30 },
+    { "id": "service-drop-recovery", "kind": "service-recovery", "x": 1460, "y": -690, "width": 160, "height": 22 },
+    { "id": "lower-maintenance-deck", "kind": "service-deck", "x": 205, "y": -520, "width": 2390, "height": 58 },
+    { "id": "utility-riser-1", "kind": "utility-riser", "x": -815, "y": -820, "width": 210, "height": 22 },
+    { "id": "utility-riser-2", "kind": "utility-riser", "x": -575, "y": -1080, "width": 210, "height": 22 },
+    { "id": "utility-riser-3", "kind": "utility-riser", "x": -295, "y": -1340, "width": 210, "height": 22 },
+    { "id": "utility-riser-4", "kind": "utility-riser", "x": 25, "y": -1575, "width": 210, "height": 22 },
+    { "id": "block-c-reentry-deck", "kind": "block-c-reentry", "x": 900, "y": -1610, "width": 1560, "height": 54 },
+    { "id": "block-c-exit-terrace", "kind": "safe-exit", "x": 2080, "y": -2060, "width": 360, "height": 30 }
+  ],
   "mandatoryRoute": [
     {
       "id": "ENTRY",

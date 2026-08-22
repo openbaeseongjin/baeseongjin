@@ -82,10 +82,26 @@ function isGrappleRoutePoint(entry) {
 }
 
 function isSurfaceRoutePoint(entry) {
-    const kind = routePointKind(entry);
-    return /safe|deck|platform|landing|recovery|hub|lobby|observation|basin|island|floor|entry|exit|control|bay/.test(
-        kind
-    );
+    const surfaceTerms = new Set([
+        "safe",
+        "deck",
+        "platform",
+        "landing",
+        "recovery",
+        "hub",
+        "lobby",
+        "observation",
+        "basin",
+        "island",
+        "floor",
+        "entry",
+        "exit",
+        "control",
+        "bay"
+    ]);
+    return routePointKind(entry)
+        .split(/[^a-z0-9]+/)
+        .some((term) => surfaceTerms.has(term));
 }
 
 function collectPoints(value, result = []) {
@@ -196,7 +212,7 @@ function routePointEntries(raw, sourceAreaId) {
 }
 
 function surfaceEntries(raw, sourceAreaId) {
-    const result = (raw.surfaces ?? [])
+    const result = (raw.mapEditorSurfaces ?? raw.surfaces ?? [])
         .map((surface, index) => {
             const point = asPoint(surface);
             if (!point) return null;
@@ -225,6 +241,9 @@ function surfaceEntries(raw, sourceAreaId) {
             };
         })
         .filter(Boolean);
+    // A scenario map that supplies mapEditorSurfaces owns its complete platform
+    // layer. Do not add generic route-node decks on top of that authored layout.
+    if (Array.isArray(raw.mapEditorSurfaces)) return result;
     const sourceIds = new Set(result.map(({ sourceId }) => sourceId).filter(Boolean));
     for (const entry of asEntries(raw.mandatoryRoute)) {
         const point = asPoint(entry);

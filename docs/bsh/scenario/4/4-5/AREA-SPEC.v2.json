@@ -50,128 +50,244 @@
     "nextAreaId": null,
     "surfaces": [
       {
-        "id": "sector-04-05:inferred-surface-ENTRY",
-        "kind": "scenario-safe-entry",
+        "id": "high-amenity-entry",
+        "kind": "safe-entry",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": -2368,
+          "x": -2305,
+          "y": -352
+        },
+        "vertices": [
+          {
+            "x": -2520,
+            "y": -352
+          },
+          {
+            "x": -2090,
+            "y": -352
+          },
+          {
+            "x": -2090,
+            "y": -320
+          },
+          {
+            "x": -2520,
+            "y": -320
+          }
+        ],
+        "sourceId": "high-amenity-entry"
+      },
+      {
+        "id": "west-lower-service-edge",
+        "kind": "amenity-service-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1990,
           "y": -320
         },
         "vertices": [
           {
-            "x": -2464,
+            "x": -2540,
             "y": -320
           },
           {
-            "x": -2272,
+            "x": -1440,
             "y": -320
           },
           {
-            "x": -2272,
-            "y": -296
+            "x": -1440,
+            "y": -290
           },
           {
-            "x": -2464,
-            "y": -296
+            "x": -2540,
+            "y": -290
           }
         ],
-        "sourceId": "ENTRY",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "west-lower-service-edge"
       },
       {
-        "id": "sector-04-05:inferred-surface-EAST-MID",
-        "kind": "scenario-safe-read",
+        "id": "lower-amenity-recovery",
+        "kind": "amenity-recovery",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 1160,
-          "y": -1200
+          "x": -1630,
+          "y": -520
         },
         "vertices": [
           {
-            "x": 1064,
-            "y": -1200
+            "x": -1880,
+            "y": -520
           },
           {
-            "x": 1256,
-            "y": -1200
+            "x": -1380,
+            "y": -520
           },
           {
-            "x": 1256,
-            "y": -1176
+            "x": -1380,
+            "y": -498
           },
           {
-            "x": 1064,
-            "y": -1176
+            "x": -1880,
+            "y": -498
           }
         ],
-        "sourceId": "EAST-MID",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "lower-amenity-recovery"
       },
       {
-        "id": "sector-04-05:inferred-surface-WEST-UPPER",
-        "kind": "scenario-safe-read",
+        "id": "east-mid-wellness-balcony",
+        "kind": "wellness-balcony",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": -1200,
-          "y": -1810
+          "x": 1740,
+          "y": -1180
         },
         "vertices": [
           {
-            "x": -1296,
-            "y": -1810
+            "x": 1080,
+            "y": -1180
           },
           {
-            "x": -1104,
-            "y": -1810
+            "x": 2400,
+            "y": -1180
           },
           {
-            "x": -1104,
-            "y": -1786
+            "x": 2400,
+            "y": -1150
           },
           {
-            "x": -1296,
-            "y": -1786
+            "x": 1080,
+            "y": -1150
           }
         ],
-        "sourceId": "WEST-UPPER",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "east-mid-wellness-balcony"
       },
       {
-        "id": "sector-04-05:inferred-surface-EXIT",
-        "kind": "scenario-safe-exit",
+        "id": "east-mid-safe-read",
+        "kind": "safe-read",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 1660,
-          "y": -2140
+          "x": 1390,
+          "y": -1260
         },
         "vertices": [
           {
-            "x": 1564,
-            "y": -2140
+            "x": 1180,
+            "y": -1260
           },
           {
-            "x": 1756,
-            "y": -2140
+            "x": 1600,
+            "y": -1260
           },
           {
-            "x": 1756,
-            "y": -2116
+            "x": 1600,
+            "y": -1232
           },
           {
-            "x": 1564,
-            "y": -2116
+            "x": 1180,
+            "y": -1232
           }
         ],
-        "sourceId": "EXIT",
-        "inferredFrom": "mandatoryRoute"
+        "sourceId": "east-mid-safe-read"
+      },
+      {
+        "id": "west-upper-garden-balcony",
+        "kind": "garden-balcony",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1750,
+          "y": -1790
+        },
+        "vertices": [
+          {
+            "x": -2380,
+            "y": -1790
+          },
+          {
+            "x": -1120,
+            "y": -1790
+          },
+          {
+            "x": -1120,
+            "y": -1760
+          },
+          {
+            "x": -2380,
+            "y": -1760
+          }
+        ],
+        "sourceId": "west-upper-garden-balcony"
+      },
+      {
+        "id": "upper-garden-recovery",
+        "kind": "amenity-recovery",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1525,
+          "y": -1600
+        },
+        "vertices": [
+          {
+            "x": -1740,
+            "y": -1600
+          },
+          {
+            "x": -1310,
+            "y": -1600
+          },
+          {
+            "x": -1310,
+            "y": -1578
+          },
+          {
+            "x": -1740,
+            "y": -1578
+          }
+        ],
+        "sourceId": "upper-garden-recovery"
+      },
+      {
+        "id": "east-high-refuge-access",
+        "kind": "safe-exit",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1860,
+          "y": -2170
+        },
+        "vertices": [
+          {
+            "x": 1500,
+            "y": -2170
+          },
+          {
+            "x": 2220,
+            "y": -2170
+          },
+          {
+            "x": 2220,
+            "y": -2138
+          },
+          {
+            "x": 1500,
+            "y": -2138
+          }
+        ],
+        "sourceId": "east-high-refuge-access"
       }
     ],
     "routePoints": [
@@ -825,6 +941,72 @@
         "fromStage": "4-4",
         "label": "HIGH AMENITY ACCESS"
       },
+      "mapEditorSurfaces": [
+        {
+          "id": "high-amenity-entry",
+          "kind": "safe-entry",
+          "x": -2305,
+          "y": -352,
+          "width": 430,
+          "height": 32
+        },
+        {
+          "id": "west-lower-service-edge",
+          "kind": "amenity-service-deck",
+          "x": -1990,
+          "y": -320,
+          "width": 1100,
+          "height": 30
+        },
+        {
+          "id": "lower-amenity-recovery",
+          "kind": "amenity-recovery",
+          "x": -1630,
+          "y": -520,
+          "width": 500,
+          "height": 22
+        },
+        {
+          "id": "east-mid-wellness-balcony",
+          "kind": "wellness-balcony",
+          "x": 1740,
+          "y": -1180,
+          "width": 1320,
+          "height": 30
+        },
+        {
+          "id": "east-mid-safe-read",
+          "kind": "safe-read",
+          "x": 1390,
+          "y": -1260,
+          "width": 420,
+          "height": 28
+        },
+        {
+          "id": "west-upper-garden-balcony",
+          "kind": "garden-balcony",
+          "x": -1750,
+          "y": -1790,
+          "width": 1260,
+          "height": 30
+        },
+        {
+          "id": "upper-garden-recovery",
+          "kind": "amenity-recovery",
+          "x": -1525,
+          "y": -1600,
+          "width": 430,
+          "height": 22
+        },
+        {
+          "id": "east-high-refuge-access",
+          "kind": "safe-exit",
+          "x": 1860,
+          "y": -2170,
+          "width": 720,
+          "height": 32
+        }
+      ],
       "mandatoryRoute": [
         {
           "id": "ENTRY",

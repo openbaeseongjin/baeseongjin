@@ -29,6 +29,13 @@
     "x": -2240,
     "y": -448
   },
+  "mapEditorSurfaces": [
+    { "id": "arrival-terrace", "kind": "arrival-terrace", "x": -2220, "y": -448, "width": 320, "height": 30 },
+    { "id": "story-terrace", "kind": "story-terrace", "x": -1664, "y": -256, "width": 292, "height": 30 },
+    { "id": "basin-landing", "kind": "basin-recovery", "x": -1088, "y": -96, "width": 184, "height": 24 },
+    { "id": "far-side-ascent", "kind": "ascent-recovery", "x": 1280, "y": -416, "width": 192, "height": 26 },
+    { "id": "private-lobby", "kind": "private-lobby", "x": 2208, "y": -1952, "width": 296, "height": 30 }
+  ],
   "mandatoryRoute": [
     {
       "id": "ENTRY",
