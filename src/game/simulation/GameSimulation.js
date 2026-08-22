@@ -2159,6 +2159,9 @@ export class GameSimulation {
     }
 
     #applyEnemyBehaviorPlayerHit(enemyId, player, result) {
+        if (this.debugTrainingDummy.matches(enemyId)) {
+            return Object.freeze({ safeTraining: true, damage: 0 });
+        }
         if (player.hitInvulnerabilityRemaining > 0) return null;
         const protection = player.augmentCombat.absorbPlayerDamage({
             amount: result.damage,
