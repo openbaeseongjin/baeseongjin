@@ -8,21 +8,31 @@ import {
 } from "../../src/game/boss-authoring/BossStageSpec.js";
 import { validateBossStageSpec } from "../../src/game/boss-authoring/BossStageSpecValidator.js";
 import { BOSS_01_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss01Stage.generated.js";
+import { BOSS_02_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss02Stage.generated.js";
 
 const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
-const sourcePath = resolve(projectRoot, "src/game/boss-authoring/specs/boss-01.json");
-const source = JSON.parse(await readFile(sourcePath, "utf8"));
-const validation = validateBossStageSpec(source, { file: "src/game/boss-authoring/specs/boss-01.json" });
+const definitions = Object.freeze([
+    Object.freeze({ id: "boss-01", generated: BOSS_01_STAGE_SPEC }),
+    Object.freeze({ id: "boss-02", generated: BOSS_02_STAGE_SPEC })
+]);
 
-if (!validation.valid) {
-    for (const issue of validation.issues) console.error(`[BOSS-STAGE] ${issue.file}: ${issue.code}`);
-    process.exitCode = 1;
-} else if (
-    JSON.stringify(canonicalizeBossStageSpec(source)) !== JSON.stringify(canonicalizeBossStageSpec(BOSS_01_STAGE_SPEC))
-) {
-    console.error("[BOSS-STAGE] generated Boss01 definition is stale.");
-    process.exitCode = 1;
-} else {
+for (const definition of definitions) {
+    const relativePath = `src/game/boss-authoring/specs/${definition.id}.json`;
+    const source = JSON.parse(await readFile(resolve(projectRoot, relativePath), "utf8"));
+    const validation = validateBossStageSpec(source, { file: relativePath });
+    if (!validation.valid) {
+        for (const issue of validation.issues) console.error(`[BOSS-STAGE] ${issue.file}: ${issue.code}`);
+        process.exitCode = 1;
+        continue;
+    }
+    if (
+        JSON.stringify(canonicalizeBossStageSpec(source)) !==
+        JSON.stringify(canonicalizeBossStageSpec(definition.generated))
+    ) {
+        console.error(`[BOSS-STAGE] generated ${definition.id} definition is stale.`);
+        process.exitCode = 1;
+        continue;
+    }
     const preview = bossStageDerivedPreview(source);
     const summary = preview.participants
         .map(
@@ -30,16 +40,16 @@ if (!validation.valid) {
                 `${participantCount}p=${totalHealth}[${phases.map(({ maxHealth, healthFloor, weakFixedDamage }) => `${maxHealth}/${healthFloor}/${weakFixedDamage}`).join(",")}]`
         )
         .join(" ");
-    let invalidCountRejected = false;
-    try {
-        scaledBossPhaseHealth({ base: 120, additionalPlayerMultiplier: source.combat.additionalPlayerMultiplier }, 5);
-    } catch (cause) {
-        invalidCountRejected = cause instanceof RangeError;
-    }
-    if (!invalidCountRejected) {
-        console.error("[BOSS-STAGE] participant counts outside 1..4 must be rejected.");
-        process.exitCode = 1;
-    } else {
-        console.log(`[BOSS-STAGE] PASS boss-01 ${summary}`);
-    }
+    console.log(`[BOSS-STAGE] PASS ${definition.id} ${summary}`);
+}
+
+let invalidCountRejected = false;
+try {
+    scaledBossPhaseHealth({ base: 1000, additionalPlayerMultiplier: 0.5 }, 5);
+} catch (cause) {
+    invalidCountRejected = cause instanceof RangeError;
+}
+if (!invalidCountRejected) {
+    console.error("[BOSS-STAGE] participant counts outside 1..4 must be rejected.");
+    process.exitCode = 1;
 }

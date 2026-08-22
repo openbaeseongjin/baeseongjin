@@ -162,6 +162,7 @@ export class CanvasRenderer {
                       phaseHealths.slice(index + 1).reduce((total, value) => total + value, 0)
                   );
         const barWidth = width - padding * 2 - gap * (hud.phaseCount - 1);
+        const currentPhaseOnly = hud.healthBarStyle === "current-phase-progress";
 
         ctx.save();
         ctx.fillStyle = "rgba(5, 10, 16, 0.92)";
@@ -177,23 +178,46 @@ export class CanvasRenderer {
         ctx.fillStyle = "#a9bed0";
         ctx.fillText(hud.phaseLabel, x + width - padding, y + (compact ? 17 : 20));
 
-        let segmentX = x + padding;
-        for (let index = 0; index < hud.phaseCount; index += 1) {
-            const phaseHealth = phaseHealths[index];
-            const fillRatio = Math.max(0, Math.min(1, (hud.health - phaseFloors[index]) / phaseHealth));
-            const segmentWidth = barWidth * (phaseHealth / hud.maxHealth);
+        const currentPhaseIndex = Math.max(0, Math.min(hud.phaseCount - 1, hud.phase - 1));
+        if (currentPhaseOnly) {
+            const phaseHealth = phaseHealths[currentPhaseIndex];
+            const phaseHealthRemaining = Math.max(0, hud.health - phaseFloors[currentPhaseIndex]);
+            const fillRatio = Math.max(0, Math.min(1, phaseHealthRemaining / phaseHealth));
             ctx.fillStyle = "rgba(30, 41, 59, 0.96)";
-            ctx.fillRect(segmentX, barY, segmentWidth, barHeight);
-            ctx.fillStyle = index === hud.phase - 1 ? "#f59e0b" : "#ef4444";
-            ctx.fillRect(segmentX, barY, segmentWidth * fillRatio, barHeight);
-            segmentX += segmentWidth + gap;
+            ctx.fillRect(x + padding, barY, width - padding * 2, barHeight);
+            ctx.fillStyle = hud.weakpointExposed ? "#facc15" : "#f59e0b";
+            ctx.fillRect(x + padding, barY, (width - padding * 2) * fillRatio, barHeight);
+            const markerCount = Math.max(1, hud.phaseMarkerCount ?? hud.phaseCount);
+            const markerWidth = compact ? 12 : 18;
+            const markerHeight = 3;
+            const markerGap = markerWidth + 4;
+            const markerStartX = x + padding;
+            for (let index = 0; index < markerCount; index += 1) {
+                ctx.fillStyle =
+                    index < currentPhaseIndex ? "#475569" : index === currentPhaseIndex ? "#f59e0b" : "#ef4444";
+                ctx.fillRect(markerStartX + index * markerGap, barY - markerHeight - 4, markerWidth, markerHeight);
+            }
+        } else {
+            let segmentX = x + padding;
+            for (let index = 0; index < hud.phaseCount; index += 1) {
+                const phaseHealth = phaseHealths[index];
+                const fillRatio = Math.max(0, Math.min(1, (hud.health - phaseFloors[index]) / phaseHealth));
+                const segmentWidth = barWidth * (phaseHealth / hud.maxHealth);
+                ctx.fillStyle = "rgba(30, 41, 59, 0.96)";
+                ctx.fillRect(segmentX, barY, segmentWidth, barHeight);
+                ctx.fillStyle = index === currentPhaseIndex ? "#f59e0b" : "#ef4444";
+                ctx.fillRect(segmentX, barY, segmentWidth * fillRatio, barHeight);
+                segmentX += segmentWidth + gap;
+            }
         }
         if (hud.showNumbers) {
             ctx.textAlign = "center";
             ctx.fillStyle = "#f8fafc";
             ctx.font = `900 ${compact ? 8 : 10}px ui-monospace, monospace`;
             ctx.fillText(
-                `${Math.ceil(hud.health)} / ${Math.ceil(hud.maxHealth)}`,
+                currentPhaseOnly
+                    ? `${Math.ceil(Math.max(0, hud.health - phaseFloors[currentPhaseIndex]))} / ${Math.ceil(phaseHealths[currentPhaseIndex])}`
+                    : `${Math.ceil(hud.health)} / ${Math.ceil(hud.maxHealth)}`,
                 x + width * 0.5,
                 barY + barHeight - 2
             );
@@ -204,8 +228,28 @@ export class CanvasRenderer {
         ctx.fillText(hud.objective, x + padding, y + height - (compact ? 10 : 12), width * 0.58);
         ctx.textAlign = "right";
         ctx.fillStyle = hud.weakpointExposed ? "#fde047" : "#94a3b8";
+        if (hud.showVulnerabilityCountdown && hud.weakpointExposed && hud.vulnerabilityDurationSeconds > 0) {
+            const countdownRatio = Math.max(
+                0,
+                Math.min(1, hud.vulnerabilityRemainingSeconds / hud.vulnerabilityDurationSeconds)
+            );
+            const ringX = x + width - padding - (compact ? 6 : 8);
+            const ringY = barY + barHeight * 0.5;
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(250, 204, 21, 0.25)";
+            ctx.lineWidth = 2;
+            ctx.arc(ringX, ringY, compact ? 4 : 5, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.strokeStyle = "#fde047";
+            ctx.arc(ringX, ringY, compact ? 4 : 5, -Math.PI * 0.5, -Math.PI * 0.5 + Math.PI * 2 * countdownRatio);
+            ctx.stroke();
+        }
         const timer =
-            hud.showVulnerabilityCountdown && hud.weakpointExposed && hud.vulnerabilityRemainingSeconds > 0
+            !currentPhaseOnly &&
+            hud.showVulnerabilityCountdown &&
+            hud.weakpointExposed &&
+            hud.vulnerabilityRemainingSeconds > 0
                 ? ` · ${hud.vulnerabilityRemainingSeconds.toFixed(1)}s`
                 : "";
         ctx.fillText(`${hud.vulnerabilityLabel}${timer}`, x + width - padding, y + height - (compact ? 10 : 12));

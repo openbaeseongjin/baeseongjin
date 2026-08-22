@@ -1,5 +1,7 @@
 # 3-1 PRODUCTION ALIGNMENT — REV8.0
 
+> **CURRENT RUNTIME OVERRIDE:** 3-1의 진입 source는 2-8 직접 전환이 아니라 독립 `boss-02` Stage 승리다. 3-1 내부 REV8 geometry·Story·Enemy·3-2 exit 계약은 바뀌지 않는다.
+
 Baseline:
 `c1f9cd7f0362de7f7a3065a34e7ea9d35927a934`
 

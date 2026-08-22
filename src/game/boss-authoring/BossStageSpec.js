@@ -5,23 +5,32 @@ export const BOSS_MECHANIC_TYPE = Object.freeze({
     FULL_CROSSBEAM_SWEEP: "full-crossbeam-sweep",
     DIRECTIONAL_BROKEN_BEAM_SWEEP: "directional-broken-beam-sweep",
     BEAM_FAILURE: "beam-failure",
-    RAIL_RAM: "rail-ram"
+    RAIL_RAM: "rail-ram",
+    SIMPLE_LOCK_CHARGE: "simple-lock-charge",
+    ROTATING_GROUND_SLAM: "rotating-ground-slam",
+    DIAGONAL_DIVE: "diagonal-dive",
+    PHASE_REPOSITION: "phase-reposition"
 });
 
 export const BOSS_VISUAL_PRESET_ID = Object.freeze({
-    GATE_LOCKING_CARRIAGE: "gate-locking-carriage"
+    GATE_LOCKING_CARRIAGE: "gate-locking-carriage",
+    RESIDENTIAL_SECURITY_PURSUER: "residential-security-pursuer"
 });
 
 export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
     REAR_DRIVE: "boss-01:rear-drive",
     SIDE_GEARBOX: "boss-01:side-gearbox",
-    CENTRAL_LOCK_CORE: "boss-01:central-lock-core"
+    CENTRAL_LOCK_CORE: "boss-01:central-lock-core",
+    REAR_THRUSTER: "boss-02:rear-thruster",
+    LOWER_STABILIZER: "boss-02:lower-stabilizer",
+    CENTRAL_SENSOR: "boss-02:central-sensor"
 });
 
 export const BOSS_VULNERABILITY_TRIGGER = Object.freeze({
     MAX_EXTENSION: "max-extension",
     SWEEP_COMPLETE: "sweep-complete",
-    BEAM_FAILURE: "beam-failure"
+    BEAM_FAILURE: "beam-failure",
+    VALID_ARCHITECTURE_IMPACT: "valid-architecture-impact"
 });
 
 export const BOSS_TRANSITION_TRIGGER = Object.freeze({
@@ -30,7 +39,13 @@ export const BOSS_TRANSITION_TRIGGER = Object.freeze({
 });
 
 export const BOSS_VICTORY_PRESENTATION_ID = Object.freeze({
-    POWER_LOSS_FULL_STOP: "boss-01:power-loss-full-stop"
+    POWER_LOSS_FULL_STOP: "boss-01:power-loss-full-stop",
+    PURSUER_SHUTDOWN: "boss-02:pursuer-shutdown"
+});
+
+export const BOSS_HEALTH_BAR_STYLE = Object.freeze({
+    SEGMENTED_TOTAL: "segmented-total",
+    CURRENT_PHASE_PROGRESS: "current-phase-progress"
 });
 
 export const BOSS_DAMAGE_MODE = Object.freeze({

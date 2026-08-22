@@ -6,8 +6,9 @@ import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js
 import { AUTHORED_SECTOR_CATALOG, buildAuthoredSectorCatalog } from "./AuthoredSectorCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 import { GRAPPLE_LINK_BUDGET } from "../../config.js";
+import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v10";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v11-multi-boss-stage";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
@@ -16,6 +17,7 @@ const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_02_AREA_CATALOG,
     SECTOR_03_AREA_CATALOG
 ]);
+const BOSS_ARENA_ISOLATION_X = 7000;
 export const SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID = Object.freeze({
     "sector-01": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
     "sector-02": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
@@ -382,18 +384,81 @@ function authoredAreaCatalogsWithOverrides(areaOverrides) {
     return Object.freeze(areaCatalogs);
 }
 
+function bossStageSurface(surface, dx, dy, stageId) {
+    const bounds = shiftBounds(surface.bounds, dx, dy);
+    return freezeValue({
+        id: surface.id,
+        kind: surface.kind,
+        bossStageId: stageId,
+        oneWay: surface.oneWay === true,
+        oneWayEdgeEnd: surface.oneWay === true ? 1 : undefined,
+        grappleable: surface.grappleable !== false,
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        topY: bounds.y,
+        position: { x: bounds.x + bounds.width * 0.5, y: bounds.y },
+        vertices: rectangleVertices(bounds)
+    });
+}
+
+function createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, entryRouteId) {
+    const dx = BOSS_ARENA_ISOLATION_X - spec.arena.entry.x;
+    const dy = sourceLandmark.exit.y - spec.arena.entry.y;
+    const bounds = shiftBounds(spec.arena.bounds, dx, dy);
+    const entry = shiftPoint(spec.arena.entry, dx, dy);
+    const exit = shiftPoint(spec.arena.exit, dx, dy);
+    return freezeValue({
+        id: spec.id,
+        specRevision: spec.schemaVersion,
+        sourceLandmarkId: sourceLandmark.id,
+        targetLandmarkId: targetLandmark.id,
+        entryRouteId,
+        bounds,
+        sourceTrigger: routeMouthBounds(sourceLandmark.exit),
+        entry,
+        exit,
+        exitTrigger: routeMouthBounds(exit),
+        targetEntry: targetLandmark.entry,
+        surfaces: spec.arena.surfaces.map((surface) => bossStageSurface(surface, dx, dy, spec.id)),
+        mechanics: spec.mechanics.map((mechanic) =>
+            freezeValue({
+                ...mechanic,
+                position: shiftPoint(mechanic.position, dx, dy),
+                ...(mechanic.bounds ? { bounds: shiftBounds(mechanic.bounds, dx, dy) } : {})
+            })
+        ),
+        route: spec.arena.anchors.map((anchor) => shiftPoint(anchor, dx, dy)),
+        recoveryPoints: spec.arena.recoveryPoints.map((point) => shiftPoint(point, dx, dy)),
+        presentationOrigin: shiftPoint(spec.boss.position, dx, dy),
+        localBossPosition: spec.boss.position,
+        bossCollider: spec.boss.collider
+    });
+}
+
+function bossAreaMatches(landmark, areaId) {
+    const stageId = /^sector-0*(\d+)-0*(\d+)$/.exec(areaId)?.slice(1).join("-") ?? areaId;
+    return landmark.stageId === stageId || landmark.id === areaId;
+}
+
 export function createAuthoredSeamlessSectorRuntimeWorld({
     seed,
     floorY = 320,
     summitRadius = 42,
     interSectorRiseById = {},
-    areaOverrides = null
+    areaOverrides = null,
+    bossStageSpec = null,
+    bossStageSpecs = null
 } = {}) {
     const authoredAreaCatalogs = authoredAreaCatalogsWithOverrides(areaOverrides);
     const authoredSectorCatalog =
         authoredAreaCatalogs === DEFAULT_AUTHORED_AREA_CATALOGS
             ? AUTHORED_SECTOR_CATALOG
             : buildAuthoredSectorCatalog({ areaCatalogs: authoredAreaCatalogs });
+    const configuredBossStageSpecs = Object.freeze(
+        bossStageSpec ? [bossStageSpec] : (bossStageSpecs ?? Object.values(BOSS_STAGE_CATALOG))
+    );
     const surfaces = [];
     const route = [];
     const enemySpawns = [];
@@ -409,6 +474,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
     const connectors = [];
     const routeLocks = [];
     const sectorTransitions = [];
+    const bossStages = [];
     let previousLandmark = null;
     let previousOutboundObjectiveIds = Object.freeze([]);
     let sectorWorldOriginY = floorY;
@@ -700,6 +766,10 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         const sourceLandmark = landmarks.find(({ id }) => id === lock.sourceLandmarkId);
         const targetLandmark = landmarks.find(({ id }) => id === lock.targetLandmarkId);
         const barrier = transitBarrierGeometry(lock, sourceLandmark, targetLandmark);
+        const matchingBossStageSpec = configuredBossStageSpecs.find(
+            (spec) =>
+                bossAreaMatches(sourceLandmark, spec.sourceAreaId) && bossAreaMatches(targetLandmark, spec.nextAreaId)
+        );
         surfaces.push(...barrier.surfaces);
         objects.push(
             freezeValue({
@@ -718,6 +788,17 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 label: "SECTOR TRANSIT"
             })
         );
+        if (matchingBossStageSpec) {
+            const bossStage = createBossStageRuntimeDefinition(
+                matchingBossStageSpec,
+                sourceLandmark,
+                targetLandmark,
+                lock.id
+            );
+            bossStages.push(bossStage);
+            surfaces.push(...bossStage.surfaces);
+            route.push(...bossStage.route);
+        }
     }
 
     const finalLandmark = landmarks.at(-1);
@@ -742,6 +823,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         connectors,
         routeLocks,
         sectorTransitions,
+        bossStages,
         objects,
         objectives,
         gates: [],

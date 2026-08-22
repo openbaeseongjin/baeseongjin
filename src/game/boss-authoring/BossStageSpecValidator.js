@@ -1,5 +1,6 @@
 import {
     BOSS_DAMAGE_MODE,
+    BOSS_HEALTH_BAR_STYLE,
     BOSS_MECHANIC_TYPE,
     BOSS_STAGE_SPEC_TYPE,
     BOSS_STAGE_SPEC_VERSION,
@@ -16,6 +17,12 @@ const MECHANIC_TYPES = Object.freeze(Object.values(BOSS_MECHANIC_TYPE));
 const VISUAL_PRESET_IDS = Object.freeze(Object.values(BOSS_VISUAL_PRESET_ID));
 const VULNERABILITY_TARGET_IDS = Object.freeze(Object.values(BOSS_VULNERABILITY_TARGET_ID));
 const VULNERABILITY_TRIGGERS = Object.freeze(Object.values(BOSS_VULNERABILITY_TRIGGER));
+const HEALTH_BAR_STYLES = Object.freeze(Object.values(BOSS_HEALTH_BAR_STYLE));
+const ARCHITECTURE_IMPACT_MECHANIC_TYPES = Object.freeze([
+    BOSS_MECHANIC_TYPE.SIMPLE_LOCK_CHARGE,
+    BOSS_MECHANIC_TYPE.ROTATING_GROUND_SLAM,
+    BOSS_MECHANIC_TYPE.DIAGONAL_DIVE
+]);
 const EDITABLE_ROOTS = Object.freeze([
     "arena",
     "combat",
@@ -110,25 +117,88 @@ function validateArena(spec, issues, file) {
         }
     }
     if (!positive(arena?.baseHookReach)) issue(issues, file, "arena-hook-reach-invalid");
-    for (let index = 0; index < (arena?.anchors?.length ?? 0); index += 1) {
-        for (let targetIndex = index + 1; targetIndex < arena.anchors.length; targetIndex += 1) {
-            const distance = Math.hypot(
-                arena.anchors[index].x - arena.anchors[targetIndex].x,
-                arena.anchors[index].y - arena.anchors[targetIndex].y
-            );
-            if (targetIndex === index + 1 && distance > arena.baseHookReach) {
-                issue(issues, file, "arena-route-relation-out-of-reach", {
-                    from: arena.anchors[index].id,
-                    to: arena.anchors[targetIndex].id,
-                    distance
-                });
+    if (arena?.routeEdges !== undefined) {
+        if (!Array.isArray(arena.routeEdges)) {
+            issue(issues, file, "arena-route-edges-invalid");
+        } else {
+            const anchorIds = new Set((arena.anchors ?? []).map(({ id }) => id));
+            const edgeIds = validateIds(arena.routeEdges, issues, file, "arena-route-edge");
+            for (const edge of arena.routeEdges) {
+                if (
+                    !edgeIds.has(edge.id) ||
+                    !anchorIds.has(edge.from) ||
+                    !anchorIds.has(edge.to) ||
+                    edge.from === edge.to
+                ) {
+                    issue(issues, file, "arena-route-edge-reference-invalid", { id: edge.id ?? null });
+                    continue;
+                }
+                const from = arena.anchors.find(({ id }) => id === edge.from);
+                const to = arena.anchors.find(({ id }) => id === edge.to);
+                const distance = Math.hypot(from.x - to.x, from.y - to.y);
+                if (distance > arena.baseHookReach) {
+                    issue(issues, file, "arena-route-relation-out-of-reach", {
+                        from: edge.from,
+                        to: edge.to,
+                        distance
+                    });
+                }
             }
-            if (targetIndex > index + 1 && distance <= arena.baseHookReach) {
-                issue(issues, file, "arena-route-unintended-shortcut", {
-                    from: arena.anchors[index].id,
-                    to: arena.anchors[targetIndex].id,
-                    distance
-                });
+            const adjacency = Object.fromEntries((arena.anchors ?? []).map(({ id }) => [id, []]));
+            for (const edge of arena.routeEdges) {
+                if (!adjacency[edge.from] || !adjacency[edge.to] || edge.from === edge.to) continue;
+                adjacency[edge.from].push(edge.to);
+                adjacency[edge.to].push(edge.from);
+            }
+            const startId = arena.anchors?.[0]?.id;
+            const visited = new Set(startId ? [startId] : []);
+            const queue = startId ? [startId] : [];
+            while (queue.length > 0) {
+                const current = queue.shift();
+                for (const next of adjacency[current] ?? []) {
+                    if (visited.has(next)) continue;
+                    visited.add(next);
+                    queue.push(next);
+                }
+            }
+            if (visited.size !== (arena.anchors?.length ?? 0)) {
+                issue(issues, file, "arena-route-disconnected");
+            }
+        }
+    } else
+        for (let index = 0; index < (arena?.anchors?.length ?? 0); index += 1) {
+            for (let targetIndex = index + 1; targetIndex < arena.anchors.length; targetIndex += 1) {
+                const distance = Math.hypot(
+                    arena.anchors[index].x - arena.anchors[targetIndex].x,
+                    arena.anchors[index].y - arena.anchors[targetIndex].y
+                );
+                if (targetIndex === index + 1 && distance > arena.baseHookReach) {
+                    issue(issues, file, "arena-route-relation-out-of-reach", {
+                        from: arena.anchors[index].id,
+                        to: arena.anchors[targetIndex].id,
+                        distance
+                    });
+                }
+                if (targetIndex > index + 1 && distance <= arena.baseHookReach) {
+                    issue(issues, file, "arena-route-unintended-shortcut", {
+                        from: arena.anchors[index].id,
+                        to: arena.anchors[targetIndex].id,
+                        distance
+                    });
+                }
+            }
+        }
+    if (arena?.phaseZones !== undefined) {
+        if (!Array.isArray(arena.phaseZones)) issue(issues, file, "arena-phase-zones-invalid");
+        else {
+            validateIds(arena.phaseZones, issues, file, "arena-phase-zone");
+            for (const zone of arena.phaseZones) {
+                if (!validBounds(zone.bounds) || !boundsInside(arena.bounds, zone.bounds)) {
+                    issue(issues, file, "arena-phase-zone-bounds-invalid", { id: zone.id ?? null });
+                }
+                if (typeof zone.phaseId !== "string") {
+                    issue(issues, file, "arena-phase-zone-reference-invalid", { id: zone.id ?? null });
+                }
             }
         }
     }
@@ -164,6 +234,17 @@ function validateCombat(spec, issues, file) {
     if (combat.participantCountSnapshot !== "boss-stage-start") {
         issue(issues, file, "combat-participant-snapshot-invalid");
     }
+    if (
+        combat.weakNormalDamageMultiplier !== undefined &&
+        (!Number.isFinite(combat.weakNormalDamageMultiplier) ||
+            combat.weakNormalDamageMultiplier < 0 ||
+            combat.weakNormalDamageMultiplier > 10)
+    ) {
+        issue(issues, file, "combat-weak-normal-multiplier-invalid");
+    }
+    if (combat.architectureImpactBossDamage !== undefined && combat.architectureImpactBossDamage !== 0) {
+        issue(issues, file, "combat-architecture-impact-damage-invalid");
+    }
 }
 
 function validateMechanics(spec, issues, file) {
@@ -172,6 +253,10 @@ function validateMechanics(spec, issues, file) {
         return new Set();
     }
     const ids = validateIds(spec.mechanics, issues, file, "mechanic");
+    const validArchitectureIds = new Set(
+        (spec.arena?.surfaces ?? []).filter(({ validArchitecture }) => validArchitecture === true).map(({ id }) => id)
+    );
+    const phaseZoneIds = new Set((spec.arena?.phaseZones ?? []).map(({ id }) => id));
     for (const mechanic of spec.mechanics) {
         if (!MECHANIC_TYPES.includes(mechanic.type)) {
             issue(issues, file, "mechanic-type-unregistered", { id: mechanic.id, type: mechanic.type ?? null });
@@ -190,6 +275,22 @@ function validateMechanics(spec, issues, file) {
         ) {
             issue(issues, file, "beam-failure-parameters-invalid", { id: mechanic.id });
         }
+        if (ARCHITECTURE_IMPACT_MECHANIC_TYPES.includes(mechanic.type)) {
+            const surfaceIds = mechanic.parameters?.validArchitectureSurfaceIds;
+            if (
+                !Array.isArray(surfaceIds) ||
+                surfaceIds.length === 0 ||
+                surfaceIds.some((id) => !validArchitectureIds.has(id))
+            ) {
+                issue(issues, file, "mechanic-valid-architecture-reference-invalid", { id: mechanic.id });
+            }
+        }
+        if (
+            mechanic.type === BOSS_MECHANIC_TYPE.PHASE_REPOSITION &&
+            !phaseZoneIds.has(mechanic.parameters?.targetZoneId)
+        ) {
+            issue(issues, file, "mechanic-phase-zone-reference-invalid", { id: mechanic.id });
+        }
     }
     return ids;
 }
@@ -200,12 +301,21 @@ function validatePhases(spec, mechanicIds, issues, file) {
         return;
     }
     validateIds(spec.phases, issues, file, "phase");
+    const phaseIds = new Set(spec.phases.map(({ id }) => id));
+    for (const zone of spec.arena?.phaseZones ?? []) {
+        if (!phaseIds.has(zone.phaseId)) {
+            issue(issues, file, "arena-phase-zone-reference-invalid", { id: zone.id });
+        }
+    }
     const orders = spec.phases.map(({ order }) => order);
     if (orders.some((order, index) => order !== index + 1)) {
         issue(issues, file, "phase-order-invalid");
     }
     for (const phase of spec.phases) {
         if (!positive(phase.basePhaseHealth)) issue(issues, file, "phase-base-health-invalid", { id: phase.id });
+        if (phase.startPosition !== undefined && !finitePoint(phase.startPosition)) {
+            issue(issues, file, "phase-start-position-invalid", { id: phase.id });
+        }
         if (!Array.isArray(phase.mechanicIds) || phase.mechanicIds.some((id) => !mechanicIds.has(id))) {
             issue(issues, file, "phase-mechanic-reference-invalid", { id: phase.id });
         }
@@ -220,6 +330,12 @@ function validatePhases(spec, mechanicIds, issues, file) {
             }
             if (!positive(phase.vulnerability.durationSeconds)) {
                 issue(issues, file, "phase-vulnerability-duration-invalid", { id: phase.id });
+            }
+            if (phase.vulnerability.offset !== undefined && !finitePoint(phase.vulnerability.offset)) {
+                issue(issues, file, "phase-vulnerability-offset-invalid", { id: phase.id });
+            }
+            if (phase.vulnerability.radius !== undefined && !positive(phase.vulnerability.radius)) {
+                issue(issues, file, "phase-vulnerability-radius-invalid", { id: phase.id });
             }
         }
         if (!isObject(phase.hud) || typeof phase.hud.objective !== "string") {
@@ -253,7 +369,7 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
     }
     const mechanicIds = validateMechanics(spec, issues, file);
     validatePhases(spec, mechanicIds, issues, file);
-    if (!isObject(spec.hud) || spec.hud.healthBar?.style !== "segmented-total") {
+    if (!isObject(spec.hud) || !HEALTH_BAR_STYLES.includes(spec.hud.healthBar?.style)) {
         issue(issues, file, "boss-hud-invalid");
     }
     if (
@@ -262,7 +378,7 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
         spec.transition.nextAreaId !== spec.nextAreaId ||
         spec.transition.entryTrigger !== BOSS_TRANSITION_TRIGGER.CHECKPOINT_COMPLETE ||
         spec.transition.victoryTrigger !== BOSS_TRANSITION_TRIGGER.ALL_PHASES_DEPLETED ||
-        spec.transition.victoryPresentationId !== BOSS_VICTORY_PRESENTATION_ID.POWER_LOSS_FULL_STOP
+        !Object.values(BOSS_VICTORY_PRESENTATION_ID).includes(spec.transition.victoryPresentationId)
     ) {
         issue(issues, file, "boss-transition-invalid");
     }
@@ -283,7 +399,9 @@ export function validateBossStageEditorMutation(baseline, candidate, { file = "b
     const editableCombatKeys = Object.freeze([
         "additionalPlayerMultiplier",
         "weakFixedPercent",
-        "closedBodyDamageMultiplier"
+        "closedBodyDamageMultiplier",
+        "weakNormalDamageMultiplier",
+        "architectureImpactBossDamage"
     ]);
     const baselineLockedCombat = Object.fromEntries(
         Object.entries(baseline?.combat ?? {}).filter(([key]) => !editableCombatKeys.includes(key))

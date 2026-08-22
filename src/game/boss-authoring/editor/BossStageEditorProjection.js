@@ -75,6 +75,18 @@ export function collectBossStageEditorEntities(spec) {
             })
         );
     }
+    for (const [index, zone] of (spec.arena.phaseZones ?? []).entries()) {
+        result.push(
+            entity({
+                domain: "zones",
+                id: zone.id,
+                kind: "phase-zone",
+                point: center(zone.bounds),
+                bounds: zone.bounds,
+                path: `/arena/phaseZones/${index}`
+            })
+        );
+    }
     for (const [index, mechanic] of spec.mechanics.entries()) {
         result.push(
             entity({
@@ -117,6 +129,10 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
         const point = next.arena.recoveryPoints.find(({ id }) => id === selected.id);
         if (!point) throw new TypeError("boss-editor-entity-not-found");
         move(point);
+    } else if (selected.domain === "zones") {
+        const zone = next.arena.phaseZones?.find(({ id }) => id === selected.id);
+        if (!zone) throw new TypeError("boss-editor-entity-not-found");
+        move(zone.bounds);
     } else if (selected.domain === "mechanics") {
         const mechanic = next.mechanics.find(({ id }) => id === selected.id);
         if (!mechanic) throw new TypeError("boss-editor-entity-not-found");

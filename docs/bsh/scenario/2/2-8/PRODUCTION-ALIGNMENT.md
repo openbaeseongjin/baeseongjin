@@ -1,5 +1,7 @@
 # 2-8 PRODUCTION ALIGNMENT — REV8.0
 
+> **CURRENT RUNTIME OVERRIDE:** Sector-end Checkpoint와 Transfer Control 완료 뒤 직접 3-1로 가지 않고 독립 `boss-02` Stage에 진입한다. Boss02 승리 뒤에만 3-1 route가 열린다. 2-8 내부 geometry·Enemy·Story objective는 바꾸지 않는다.
+
 Baseline: `4fce8a27bc6cb7b4141735dec6c8e56cb9f88b5b`
 
 ## Current Runtime truth

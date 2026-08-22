@@ -132,12 +132,17 @@ export class BossEncounterRuntime {
         if (sourcePlayerId !== null && this.participants.get(sourcePlayerId) !== PARTICIPANT_STATUS.ACTIVE) {
             return freeze({ accepted: false, changed: false, reason: "participant-not-active", appliedDamage: 0 });
         }
+        if (this.mechanism.isCombatActive?.() === false) {
+            return freeze({ accepted: false, changed: false, reason: "phase-transition-active", appliedDamage: 0 });
+        }
         if (this.processedImpactIds.has(impactId)) {
             return freeze({ accepted: true, changed: false, reason: "impact-already-processed", appliedDamage: 0 });
         }
         this.processedImpactIds.add(impactId);
         const weakpointHit = targetId !== null && this.mechanism.isWeakpointActive(targetId);
-        const normalDamage = baseDamage * (weakpointHit ? 1 : this.definition.closedBodyDamageMultiplier);
+        const normalDamage =
+            baseDamage *
+            (weakpointHit ? this.definition.weakNormalDamageMultiplier : this.definition.closedBodyDamageMultiplier);
         const weakBonus = weakpointHit
             ? this.scaledHealth.phaseHealths[this.phaseIndex] * this.definition.weakFixedPercent
             : 0;
@@ -221,12 +226,12 @@ export class BossEncounterRuntime {
         return freeze({ accepted: false, changed: false, reason: "boss-mechanic-not-interactive" });
     }
 
-    advance(dt) {
+    advance(dt, context = null) {
         if (!Number.isFinite(dt) || dt < 0) throw new Error("BossEncounterRuntime dt must be non-negative");
         if (this.status !== STAGE_STATUS.ACTIVE || dt === 0) {
             return freeze({ accepted: this.status === STAGE_STATUS.ACTIVE, changed: false });
         }
-        const outcome = this.mechanism.advance(dt);
+        const outcome = this.mechanism.advance(dt, context);
         if (outcome.eventType) {
             this.#emit(outcome.eventType, {
                 phase: this.phaseIndex + 1,
@@ -288,7 +293,8 @@ export class BossEncounterRuntime {
     snapshot() {
         const phase = this.definition.phases[this.phaseIndex];
         const mechanism = this.mechanism.snapshot();
-        const persistentWeakpoint = this.phaseIndex === 2 && mechanism.beamFailed;
+        const persistentWeakpoint =
+            mechanism.persistentWeakpoint === true || (this.phaseIndex === 2 && mechanism.beamFailed === true);
         return freeze({
             snapshotRevision: BOSS_STAGE_SNAPSHOT_REVISION,
             specRevision: this.definition.revision,
@@ -305,6 +311,7 @@ export class BossEncounterRuntime {
             phaseHealths: this.scaledHealth?.phaseHealths ?? Object.freeze([]),
             phaseFloors: this.scaledHealth?.phaseFloors ?? Object.freeze([]),
             weakFixedPercent: this.definition.weakFixedPercent,
+            weakNormalDamageMultiplier: this.definition.weakNormalDamageMultiplier,
             closedBodyDamageMultiplier: this.definition.closedBodyDamageMultiplier,
             scalingRoster: this.scalingRoster,
             participantStates: [...this.participants.entries()].map(([playerId, status]) => ({ playerId, status })),
@@ -312,6 +319,7 @@ export class BossEncounterRuntime {
             processedHazardContactIds: [...this.processedHazardContactIds].sort(),
             currentTargetId: this.status === STAGE_STATUS.ACTIVE ? phase.weakTargetId : null,
             currentObjective: this.status === STAGE_STATUS.ACTIVE ? (phase.objective ?? null) : null,
+            phaseTransitioning: this.mechanism.isCombatActive?.() === false && this.status === STAGE_STATUS.ACTIVE,
             vulnerability: {
                 active: mechanism.weakpointExposed,
                 targetId: mechanism.activeTargetId,

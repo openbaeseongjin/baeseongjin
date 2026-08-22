@@ -8,9 +8,14 @@ function freezeWorldObject(object) {
         kind: PRESENTATION_KIND[object.kind] ?? object.kind,
         state: object.state ?? object.beamState ?? (object.telegraphing ? "telegraph" : "idle"),
         variant: object.variant ?? null,
+        physicsBody: object.physicsBody === true,
+        hazardKind: object.hazardKind ?? null,
         actionState: object.actionState ?? null,
         damaging: object.damaging === true,
         movementProgress: finite(object.movementProgress),
+        rotation: finite(object.rotation),
+        remainingSeconds: Math.max(0, finite(object.remainingSeconds)),
+        surfaceId: object.surfaceId ?? null,
         velocity: Object.freeze({ x: finite(object.velocity?.x), y: finite(object.velocity?.y) }),
         path: object.path
             ? Object.freeze({ startX: finite(object.path.startX), targetX: finite(object.path.targetX) })
@@ -25,7 +30,15 @@ function freezeWorldObject(object) {
                   })
               }
             : {}),
-        ...(object.direction ? { direction: directionLabel(object.direction) ?? object.direction } : {})
+        ...(object.direction
+            ? {
+                  direction:
+                      directionLabel(object.direction) ??
+                      (Number.isFinite(object.direction.x) && Number.isFinite(object.direction.y)
+                          ? Object.freeze({ x: object.direction.x, y: object.direction.y })
+                          : object.direction)
+              }
+            : {})
     });
 }
 
@@ -39,7 +52,12 @@ const PRESENTATION_KIND = Object.freeze({
     "boss-carriage": "carriage",
     "boss-beam": "beam",
     "boss-rail-ram": "ram",
-    "boss-weakpoint": "weakpoint"
+    "boss-weakpoint": "weakpoint",
+    "boss-residential-pursuer": "residential-pursuer",
+    "boss-charge-line": "charge-line",
+    "boss-slam-zone": "slam-zone",
+    "boss-dive-line": "dive-line",
+    "boss-architecture-impact": "architecture-impact"
 });
 const DIRECTION_LABEL = Object.freeze({ "-1": "left", 1: "right" });
 
@@ -57,7 +75,7 @@ function stageSpecWorldObjects(stageSpec, snapshot) {
     const objects = [
         {
             id: stageSpec.boss.actorId,
-            kind: "carriage",
+            kind: stageSpec.boss.visualPresetId === "residential-security-pursuer" ? "residential-pursuer" : "carriage",
             variant: stageSpec.boss.visualPresetId,
             state: snapshot.status === "completed" ? "disabled" : "active",
             position: snapshot.bossPosition ?? {
@@ -113,7 +131,9 @@ function stageSpecWorldObjects(stageSpec, snapshot) {
 function enrichRuntimeWorldObject(object, stageSpec, phase) {
     if (object.size || object.bounds || !stageSpec) return object;
     const kind = PRESENTATION_KIND[object.kind] ?? object.kind;
-    if (kind === "carriage") return { ...object, size: stageSpec.boss?.collider };
+    if (kind === "carriage" || kind === "residential-pursuer") {
+        return { ...object, size: stageSpec.boss?.collider };
+    }
     if (kind === "weakpoint") return { ...object, size: { width: 96, height: 96 } };
     if (kind !== "beam") return object;
     const currentMechanicIds = stageSpec.phases?.[phase - 1]?.mechanicIds ?? [];
@@ -150,14 +170,17 @@ export function createBossStagePresentation(snapshot, stageSpec = null) {
         stageId: snapshot.stageId ?? stageSpec?.id ?? null,
         hud: Object.freeze({
             name: hud.title ?? hud.name ?? presentation.name ?? snapshot.name ?? "BOSS",
-            phaseLabel: hud.phaseLabel ?? `PHASE ${phase} / ${phaseCount}`,
-            objective:
-                snapshot.objectiveLabel ??
-                snapshot.currentObjective ??
-                currentPhase.hud?.objective ??
-                hud.objective ??
-                presentation.objective ??
-                "ENGAGE TARGET",
+            phaseLabel: snapshot.phaseTransitioning
+                ? "TRANSITION"
+                : (hud.phaseLabel ?? `PHASE ${phase} / ${phaseCount}`),
+            objective: snapshot.phaseTransitioning
+                ? "다음 전투 구역으로 이동"
+                : (snapshot.objectiveLabel ??
+                  snapshot.currentObjective ??
+                  currentPhase.hud?.objective ??
+                  hud.objective ??
+                  presentation.objective ??
+                  "ENGAGE TARGET"),
             vulnerabilityLabel:
                 snapshot.vulnerabilityLabel ??
                 hud.vulnerabilityLabel ??
@@ -170,9 +193,12 @@ export function createBossStagePresentation(snapshot, stageSpec = null) {
             phaseCount,
             showNumbers: hud.healthBar?.showNumbers === true,
             showPhaseBreaks: hud.healthBar?.showPhaseBreaks !== false,
+            healthBarStyle: hud.healthBar?.style ?? "segmented-total",
+            phaseMarkerCount: hud.healthBar?.phaseMarkerCount ?? phaseCount,
             showVulnerabilityCountdown: hud.showVulnerabilityCountdown !== false,
             weakpointExposed,
-            vulnerabilityRemainingSeconds
+            vulnerabilityRemainingSeconds,
+            vulnerabilityDurationSeconds: finite(currentPhase.vulnerability?.durationSeconds)
         }),
         world: Object.freeze({
             name: presentation.name ?? snapshot.name ?? hud.title ?? hud.name ?? "GATE LOCKING CARRIAGE",

@@ -2,7 +2,13 @@ import { canonicalizeBossStageSpec } from "./BossStageSpec.js";
 import { validateBossStageSpec } from "./BossStageSpecValidator.js";
 import { format } from "prettier";
 
-export async function bossStageGeneratedModule(spec, { exportName = "BOSS_01_STAGE_SPEC" } = {}) {
+function generatedExportName(spec) {
+    const number = /^boss-(\d+)$/.exec(spec?.id ?? "")?.[1];
+    if (!number) throw new Error("boss-stage-generated-export-id-invalid");
+    return `BOSS_${number.padStart(2, "0")}_STAGE_SPEC`;
+}
+
+export async function bossStageGeneratedModule(spec, { exportName = generatedExportName(spec) } = {}) {
     const validation = validateBossStageSpec(spec);
     if (!validation.valid) throw new Error(`boss-stage-spec-invalid:${validation.issues[0]?.code ?? "unknown"}`);
     const serialized = JSON.stringify(canonicalizeBossStageSpec(spec), null, 4);
