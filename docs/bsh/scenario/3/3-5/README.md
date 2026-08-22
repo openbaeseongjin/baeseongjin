@@ -1,6 +1,7 @@
 # ONE ROPE — SECTOR 03-5 COMMERCIAL OPERATIONS HUB — REV8 STAGE DRAFT REV3
 
 > Status: DESIGN LOCKED  
+> Runtime: **GENERATED — canonical `AREA-SPEC.v2.json` is the sole Stage authority**
 > Runtime audit baseline: `d39cbb49d3d8247caf2542393994704292dd5002`  
 > Sector 03 identity: **CENTRAL EXCHANGE COMPLEX — 수직 상업·환승 복합시설**  
 > REV1: HOLD — short Z around Plant Core  

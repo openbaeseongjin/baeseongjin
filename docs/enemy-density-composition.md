@@ -36,9 +36,9 @@
 
 ## Authoring 계약
 
-- legacy Stage source의 `sentry`/`patrol-drone` object가 slot 위치·activation·patrol·rules를 소유한다.
+- canonical generated Stage의 `sentry`/`patrol-drone` object가 slot 위치·activation·patrol·rules를 소유한다.
 - object의 `enemySelection.allowedEnemyTypes`가 있으면 preview adapter가 이를 canonical encounter로 보존한다. 없으면 기존 `enemyType`/kind fixed fallback을 사용한다.
-- `LegacyAreaSeamlessSectorRuntime`은 canonical slot을 world 좌표로 translate할 뿐 위치나 pool을 다시 저작하지 않는다.
+- `AuthoredSeamlessSectorRuntime`은 canonical slot을 world 좌표로 translate할 뿐 위치나 pool을 다시 저작하지 않는다.
 - `GameSimulation.createEnemies()`는 모든 world slot을 생성하며 type만 selector 결과로 조립한다.
 - encounter Runtime 권위에 `areaId`를 넣지 않는다.
 

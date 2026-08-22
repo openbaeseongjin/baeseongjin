@@ -17,76 +17,79 @@ import {
     PREVIEW_SECTOR_WIDTH_RANGE,
     sectorEntry,
     sectorObjective,
-    stageAliasRecord,
+    stageIdentityRecord,
     subregionBounds
 } from "./SectorDefinition.js";
 
 export const PREVIEW_SECTOR_WIDTH = PREVIEW_SECTOR_WIDTH_RANGE.max;
 const PREVIEW_LANDMARK_WIDTH = PREVIEW_SECTOR_WIDTH / 8;
 
-function legacyStageAliasFromArea(area) {
-    return `${Number.parseInt(area.sectorId.slice(-2), 10)}-${area.order}`;
+function stageIdFromArea(area) {
+    if (typeof area.stageId !== "string" || area.stageId.length === 0) {
+        throw new TypeError(`authored-area-stage-id-missing:${area.id}`);
+    }
+    return area.stageId;
 }
 
-function legacyLocalId(id) {
+function localId(id) {
     return id.split(":").at(-1);
 }
 
-function importObjectives(area, landmarkId, legacyStageAlias) {
-    const objectiveIdMap = new Map(
-        area.objectives.map((objective) => [
-            objective.id,
-            canonicalObjectiveId(landmarkId, legacyLocalId(objective.id))
-        ])
+function encounterActivation(object) {
+    if (object.activation) return object.activation;
+    if (object.activationSpec) return resolveObjectTriggerBounds(object.position, object.activationSpec);
+    return null;
+}
+
+function importObjectives(area, landmarkId, stageId) {
+    const objectiveIdBySourceId = Object.freeze(
+        Object.fromEntries(
+            area.objectives.map((objective) => [objective.id, canonicalObjectiveId(landmarkId, localId(objective.id))])
+        )
     );
     return area.objectives.map((objective) =>
         sectorObjective({
-            id: objectiveIdMap.get(objective.id),
+            id: objectiveIdBySourceId[objective.id],
             type: objective.type,
             bounds: objective.bounds ?? null,
-            requiredObjectiveIds: (objective.requiredObjectiveIds ?? []).map((requiredId) =>
-                objectiveIdMap.get(requiredId)
+            requiredObjectiveIds: (objective.requiredObjectiveIds ?? []).map(
+                (requiredId) => objectiveIdBySourceId[requiredId]
             ),
             completionDelaySeconds: objective.completionDelaySeconds,
             sourceObjectId: objective.sourceObjectId,
-            legacyStageAlias
+            stageId
         })
     );
 }
 
-function importEncounters(area, landmarkId, legacyStageAlias) {
+function importEncounters(area, landmarkId, stageId) {
     return area.objects
         .filter(({ kind }) => kind === "sentry" || kind === "patrol-drone")
         .map((object) => {
-            const localId = legacyLocalId(object.id);
+            const objectLocalId = localId(object.id);
             return encounterSlot({
-                encounterId: canonicalEncounterId(landmarkId, localId),
-                slotId: canonicalEncounterSlotId(landmarkId, localId),
+                encounterId: canonicalEncounterId(landmarkId, objectLocalId),
+                slotId: canonicalEncounterSlotId(landmarkId, objectLocalId),
                 position: object.position,
-                activation: object.activation
-                    ? object.activation
-                    : object.activationSpec
-                      ? resolveObjectTriggerBounds(object.position, object.activationSpec)
-                      : null,
+                activation: encounterActivation(object),
                 enemySelection: object.enemySelection ?? {
                     fixedEnemyType: object.enemyType ?? object.kind
                 },
-                swarmMemberCount: object.swarmMemberCount,
                 accessModuleId: object.accessModuleId,
-                legacyStageAlias
+                stageId
             });
         });
 }
 
 function importLandmark(area, landmarkIndex) {
-    const legacyStageAlias = legacyStageAliasFromArea(area);
+    const stageId = stageIdFromArea(area);
     const landmarkId = canonicalLandmarkId(area.sectorId, landmarkIndex + 1);
     return landmark({
         id: landmarkId,
         order: landmarkIndex + 1,
         name: area.name,
         subtitle: area.subtitle,
-        legacyStageAlias,
+        stageId,
         localBounds: localBounds(area.bounds.width, area.bounds.height),
         subregionBounds: subregionBounds(
             landmarkIndex * PREVIEW_LANDMARK_WIDTH,
@@ -96,8 +99,8 @@ function importLandmark(area, landmarkIndex) {
         ),
         entry: area.entry,
         exit: area.exit,
-        objectives: importObjectives(area, landmarkId, legacyStageAlias),
-        encounters: importEncounters(area, landmarkId, legacyStageAlias)
+        objectives: importObjectives(area, landmarkId, stageId),
+        encounters: importEncounters(area, landmarkId, stageId)
     });
 }
 
@@ -110,16 +113,16 @@ function importPreviewSector(areaCatalog, sectorIndex) {
         width: PREVIEW_SECTOR_WIDTH,
         runtimePreview: true,
         sectorEntry: sectorEntry(`${sectorId}:entry`, landmarks[0].id, landmarks[0].entry, {
-            legacyStageAlias: landmarks[0].legacyStageAlias
+            stageId: landmarks[0].stageId
         }),
         landmarks
     });
 }
 
-function previewStageAliasesFromSector(sector) {
+function previewStageIdentitiesFromSector(sector) {
     return sector.landmarks.map((landmark) =>
-        stageAliasRecord({
-            legacyStageAlias: landmark.legacyStageAlias,
+        stageIdentityRecord({
+            stageId: landmark.stageId,
             sectorId: sector.id,
             landmarkId: landmark.id,
             objectiveIds: landmark.objectives.map(({ id }) => id),
@@ -129,14 +132,14 @@ function previewStageAliasesFromSector(sector) {
     );
 }
 
-function futureStageAliases() {
-    const aliases = [];
+function scenarioStageIdentities() {
+    const stageIdentities = [];
     for (let sectorNumber = 4; sectorNumber <= 6; sectorNumber += 1) {
         const sectorId = canonicalSectorId(sectorNumber);
         for (let stageOrder = 1; stageOrder <= 8; stageOrder += 1) {
-            aliases.push(
-                stageAliasRecord({
-                    legacyStageAlias: `${sectorNumber}-${stageOrder}`,
+            stageIdentities.push(
+                stageIdentityRecord({
+                    stageId: `${sectorNumber}-${stageOrder}`,
                     sectorId,
                     landmarkId: canonicalLandmarkId(sectorId, stageOrder),
                     objectiveIds: [],
@@ -146,29 +149,33 @@ function futureStageAliases() {
             );
         }
     }
-    return aliases;
+    return stageIdentities;
 }
 
-export function buildLegacyAreaSectorPreviewCatalog() {
-    const previewSectors = [SECTOR_01_AREA_CATALOG, SECTOR_02_AREA_CATALOG, SECTOR_03_AREA_CATALOG].map(
-        (catalog, sectorIndex) => importPreviewSector(catalog, sectorIndex)
-    );
+const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
+    SECTOR_01_AREA_CATALOG,
+    SECTOR_02_AREA_CATALOG,
+    SECTOR_03_AREA_CATALOG
+]);
+
+export function buildAuthoredSectorCatalog({ areaCatalogs = DEFAULT_AUTHORED_AREA_CATALOGS } = {}) {
+    const previewSectors = areaCatalogs.map((catalog, sectorIndex) => importPreviewSector(catalog, sectorIndex));
     return defineSectorCatalog({
-        id: "legacy-area-sector-preview",
-        revision: "sector-preview-v2",
+        id: "authored-sector-catalog",
+        revision: "authored-sector-catalog-v2",
         sectors: previewSectors,
-        stageAliases: [
-            ...previewSectors.flatMap((sector) => previewStageAliasesFromSector(sector)),
-            ...futureStageAliases()
+        stageIdentities: [
+            ...previewSectors.flatMap((sector) => previewStageIdentitiesFromSector(sector)),
+            ...scenarioStageIdentities()
         ]
     });
 }
 
-export const LEGACY_AREA_SECTOR_PREVIEW_CATALOG = buildLegacyAreaSectorPreviewCatalog();
+export const AUTHORED_SECTOR_CATALOG = buildAuthoredSectorCatalog();
 
-export function resolveLegacyAreaSectorPreviewEnemyEncounters({
+export function resolveAuthoredSectorEnemyEncounters({
     runSeed,
-    worldRevision = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.revision
+    worldRevision = AUTHORED_SECTOR_CATALOG.revision
 } = {}) {
-    return resolveSectorEnemyEncounters(LEGACY_AREA_SECTOR_PREVIEW_CATALOG, { runSeed, worldRevision });
+    return resolveSectorEnemyEncounters(AUTHORED_SECTOR_CATALOG, { runSeed, worldRevision });
 }

@@ -1,10 +1,10 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
+    "id": "3-3",
     "sector": 3,
     "stage": 3,
-    "legacyStageAlias": "3-3",
     "sourceAreaId": "sector-03-03"
   },
   "editor": {
@@ -43,11 +43,11 @@
       "y": -32
     },
     "exit": {
-      "id": "sector-03-03:scenario-exit",
+      "id": "sector-03-03:exit",
       "x": 704,
       "y": -1696
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-03-04",
     "surfaces": [
       {
         "id": "p0-entry",
@@ -421,12 +421,175 @@
       }
     ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-03-03:retail-security",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -1296,
+          "y": -282
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:retail-security"
+        ]
+      },
+      {
+        "id": "sector-03-03:route-state",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -1024,
+          "y": -794
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:route-state"
+        ]
+      },
+      {
+        "id": "sector-03-03:patrol-status",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 256,
+          "y": -1146
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:patrol-status"
+        ]
+      },
+      {
+        "id": "sector-03-03:service-arcade-next",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 704,
+          "y": -1754
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:service-arcade-next"
+        ]
+      },
+      {
+        "id": "sector-03-03:drone-1",
+        "kind": "patrol-drone",
+        "presentationId": "world-object:patrol-drone",
+        "position": {
+          "x": -384,
+          "y": -976
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "patrol-drone-t1",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 960,
+            "height": 448
+          }
+        },
+        "patrol": {
+          "points": [
+            {
+              "x": -384,
+              "y": -976
+            },
+            {
+              "x": 352,
+              "y": -976
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ]
+      },
+      {
+        "id": "sector-03-03:retail-support-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": -672,
+          "y": -1408
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 640,
+            "height": 448
+          }
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "id": "sector-03-03:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 624,
+          "y": -1696
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-03-03:exit-panel-engaged",
+        "gateId": "sector-03-03:gate",
+        "requiredObjectiveIds": [
+          "sector-03-03:final-deck-reached"
+        ]
+      },
+      {
+        "id": "sector-03-03:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 704,
+          "y": -1696
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-03-03:gate"
+      }
+    ],
     "objectives": [
       {
         "id": "sector-03-03:final-deck-reached",
         "type": "reach",
-        "target": "exit-deck"
+        "bounds": {
+          "x": 544,
+          "y": -1728,
+          "width": 320,
+          "height": 96
+        }
       },
       {
         "id": "sector-03-03:exit-panel-engaged",
@@ -441,16 +604,16 @@
     "scannerGroups": [
       {
         "id": "sector-03-03:scanner-retail-A",
-        "cycleSeconds": {
+        "cycle": {
           "available": 1.5,
           "warning": 0.6,
           "locked": 1.1,
           "reset": 0.3
         },
         "phaseOffsetSeconds": 0,
-        "controlledTargetIds": [
-          "c1",
-          "c2"
+        "controlledSurfaceIds": [
+          "sector-03-03:c1-surface",
+          "sector-03-03:c2-surface"
         ],
         "contract": {
           "newAttachAllowed": [
@@ -469,15 +632,39 @@
         }
       }
     ],
-    "storyTriggers": [],
-    "routes": [],
+    "storyTriggers": [
+      "retail-security",
+      "scanner-reminder",
+      "patrol-reveal"
+    ],
+    "routes": [
+      "safe",
+      "flow",
+      "recovery"
+    ],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [
+      "retail-security-walk",
+      "scanner-patrol-synthesis"
+    ],
+    "gate": {
+      "id": "sector-03-03:gate",
+      "nextAreaId": "sector-03-04",
+      "requiredObjectiveIds": [
+        "sector-03-03:exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 678,
+        "y": -1758,
+        "width": 52,
+        "height": 62
+      }
+    }
   },
   "anchors": [
     {
       "target": {
-        "id": "g1-surface",
+        "id": "sector-03-03:g1-surface",
         "x": -1376,
         "y": -224,
         "properties": {
@@ -485,11 +672,12 @@
         }
       },
       "landmark": {
-        "id": "g1",
+        "id": "sector-03-03:g1",
         "x": -1376,
         "y": -224,
         "properties": {
-          "label": "g1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G1",
           "coordinateAnchor": "center",
           "sourceId": "g1"
         }
@@ -497,7 +685,7 @@
     },
     {
       "target": {
-        "id": "g1b-surface",
+        "id": "sector-03-03:g1b-surface",
         "x": -960,
         "y": -352,
         "properties": {
@@ -505,11 +693,12 @@
         }
       },
       "landmark": {
-        "id": "g1b",
+        "id": "sector-03-03:g1b",
         "x": -960,
         "y": -352,
         "properties": {
-          "label": "g1b",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G1B",
           "coordinateAnchor": "center",
           "sourceId": "g1b"
         }
@@ -517,7 +706,7 @@
     },
     {
       "target": {
-        "id": "g2-surface",
+        "id": "sector-03-03:g2-surface",
         "x": -768,
         "y": -480,
         "properties": {
@@ -525,11 +714,12 @@
         }
       },
       "landmark": {
-        "id": "g2",
+        "id": "sector-03-03:g2",
         "x": -768,
         "y": -480,
         "properties": {
-          "label": "g2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G2",
           "coordinateAnchor": "center",
           "sourceId": "g2"
         }
@@ -537,7 +727,7 @@
     },
     {
       "target": {
-        "id": "g3-surface",
+        "id": "sector-03-03:g3-surface",
         "x": -832,
         "y": -704,
         "properties": {
@@ -545,11 +735,12 @@
         }
       },
       "landmark": {
-        "id": "g3",
+        "id": "sector-03-03:g3",
         "x": -832,
         "y": -704,
         "properties": {
-          "label": "g3",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G3",
           "coordinateAnchor": "center",
           "sourceId": "g3"
         }
@@ -557,19 +748,21 @@
     },
     {
       "target": {
-        "id": "c1-surface",
+        "id": "sector-03-03:c1-surface",
         "x": -608,
         "y": -896,
         "properties": {
-          "sourceId": "c1"
+          "sourceId": "c1",
+          "scannerControlled": true
         }
       },
       "landmark": {
-        "id": "c1",
+        "id": "sector-03-03:c1",
         "x": -608,
         "y": -896,
         "properties": {
-          "label": "c1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "C1",
           "coordinateAnchor": "center",
           "sourceId": "c1"
         }
@@ -577,19 +770,21 @@
     },
     {
       "target": {
-        "id": "c2-surface",
+        "id": "sector-03-03:c2-surface",
         "x": -256,
         "y": -1024,
         "properties": {
-          "sourceId": "c2"
+          "sourceId": "c2",
+          "scannerControlled": true
         }
       },
       "landmark": {
-        "id": "c2",
+        "id": "sector-03-03:c2",
         "x": -256,
         "y": -1024,
         "properties": {
-          "label": "c2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "C2",
           "coordinateAnchor": "center",
           "sourceId": "c2"
         }
@@ -597,7 +792,7 @@
     },
     {
       "target": {
-        "id": "g4-surface",
+        "id": "sector-03-03:g4-surface",
         "x": 96,
         "y": -1088,
         "properties": {
@@ -605,11 +800,12 @@
         }
       },
       "landmark": {
-        "id": "g4",
+        "id": "sector-03-03:g4",
         "x": 96,
         "y": -1088,
         "properties": {
-          "label": "g4",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G4",
           "coordinateAnchor": "center",
           "sourceId": "g4"
         }
@@ -617,7 +813,7 @@
     },
     {
       "target": {
-        "id": "g5-surface",
+        "id": "sector-03-03:g5-surface",
         "x": -128,
         "y": -1248,
         "properties": {
@@ -625,11 +821,12 @@
         }
       },
       "landmark": {
-        "id": "g5",
+        "id": "sector-03-03:g5",
         "x": -128,
         "y": -1248,
         "properties": {
-          "label": "g5",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G5",
           "coordinateAnchor": "center",
           "sourceId": "g5"
         }
@@ -637,7 +834,7 @@
     },
     {
       "target": {
-        "id": "g6a-surface",
+        "id": "sector-03-03:g6a-surface",
         "x": -352,
         "y": -1328,
         "properties": {
@@ -645,11 +842,12 @@
         }
       },
       "landmark": {
-        "id": "g6a",
+        "id": "sector-03-03:g6a",
         "x": -352,
         "y": -1328,
         "properties": {
-          "label": "g6a",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G6A",
           "coordinateAnchor": "center",
           "sourceId": "g6a"
         }
@@ -657,7 +855,7 @@
     },
     {
       "target": {
-        "id": "g6-surface",
+        "id": "sector-03-03:g6-surface",
         "x": -512,
         "y": -1376,
         "properties": {
@@ -665,11 +863,12 @@
         }
       },
       "landmark": {
-        "id": "g6",
+        "id": "sector-03-03:g6",
         "x": -512,
         "y": -1376,
         "properties": {
-          "label": "g6",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G6",
           "coordinateAnchor": "center",
           "sourceId": "g6"
         }
@@ -677,7 +876,7 @@
     },
     {
       "target": {
-        "id": "g7-surface",
+        "id": "sector-03-03:g7-surface",
         "x": -160,
         "y": -1536,
         "properties": {
@@ -685,11 +884,12 @@
         }
       },
       "landmark": {
-        "id": "g7",
+        "id": "sector-03-03:g7",
         "x": -160,
         "y": -1536,
         "properties": {
-          "label": "g7",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G7",
           "coordinateAnchor": "center",
           "sourceId": "g7"
         }
@@ -697,7 +897,7 @@
     },
     {
       "target": {
-        "id": "g8-surface",
+        "id": "sector-03-03:g8-surface",
         "x": 192,
         "y": -1624,
         "properties": {
@@ -705,602 +905,17 @@
         }
       },
       "landmark": {
-        "id": "g8",
+        "id": "sector-03-03:g8",
         "x": 192,
         "y": -1624,
         "properties": {
-          "label": "g8",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G8",
           "coordinateAnchor": "center",
           "sourceId": "g8"
         }
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "sourcePath": "docs/bsh/scenario/3/3-3/AREA-SPEC-REV8-DESIGN.json",
-    "sourceSchemaVersion": "area-spec-v1",
-    "boundsProvenance": "expanded-for-authored-points",
-    "sourceSnapshot": {
-      "schemaVersion": "area-spec-v1",
-      "status": "DESIGN LOCKED",
-      "baselineCommit": "d588aa041a350cab198cd187d8dccbe3b3a244dd",
-      "revision": {
-        "final": "REV8.0",
-        "designIteration": "REV3",
-        "supersedes": [
-          "REV1 linear crescent/chord",
-          "REV2 mostly one-way atrium ascent",
-          "legacy compact retail security walk"
-        ]
-      },
-      "stage": {
-        "sector": 3,
-        "stage": 3,
-        "sourceAreaId": "sector-03-03",
-        "canonicalName": "CENTRAL RETAIL WALK",
-        "runtimeCurrentName": "RETAIL SECURITY WALK",
-        "subtitle": "SCANNER + PATROL",
-        "role": "FIRST SCANNER + PATROL SYNTHESIS / TRUE DIRECTION-CHANGE STAGE"
-      },
-      "bounds": {
-        "width": 3712,
-        "height": 1792
-      },
-      "directionSignature": [
-        "UP_RIGHT",
-        "UP_LEFT",
-        "DOWN_RIGHT",
-        "UP_LEFT",
-        "UP_RIGHT"
-      ],
-      "entry": {
-        "id": "sector-03-03:entry",
-        "x": -1680,
-        "y": -32
-      },
-      "surfaces": [
-        {
-          "id": "p0-entry",
-          "kind": "platform",
-          "x": -1680,
-          "y": 0,
-          "width": 224,
-          "height": 32
-        },
-        {
-          "id": "p1-lower-retail",
-          "kind": "safe-deck",
-          "x": -1296,
-          "y": -256,
-          "width": 352,
-          "height": 26
-        },
-        {
-          "id": "p2-east-mid",
-          "kind": "safe-deck",
-          "x": -352,
-          "y": -544,
-          "width": 384,
-          "height": 28
-        },
-        {
-          "id": "p3-west-observation",
-          "kind": "safe-deck",
-          "x": -1024,
-          "y": -768,
-          "width": 384,
-          "height": 28
-        },
-        {
-          "id": "recovery-a",
-          "kind": "recovery",
-          "x": -224,
-          "y": -768,
-          "width": 256,
-          "height": 18
-        },
-        {
-          "id": "p4-central-gantry",
-          "kind": "safe-deck",
-          "x": 256,
-          "y": -1120,
-          "width": 320,
-          "height": 28
-        },
-        {
-          "id": "p5-west-upper",
-          "kind": "platform",
-          "x": -672,
-          "y": -1408,
-          "width": 320,
-          "height": 26
-        },
-        {
-          "id": "exit-deck",
-          "kind": "safe-deck",
-          "x": 704,
-          "y": -1696,
-          "width": 320,
-          "height": 28
-        }
-      ],
-      "grappleTargets": [
-        {
-          "id": "g1",
-          "x": -1376,
-          "y": -224,
-          "role": "entry-first-escalator"
-        },
-        {
-          "id": "g1b",
-          "x": -960,
-          "y": -352,
-          "role": "first-escalator-mid"
-        },
-        {
-          "id": "g2",
-          "x": -768,
-          "y": -480,
-          "role": "east-mid-approach"
-        },
-        {
-          "id": "g3",
-          "x": -832,
-          "y": -704,
-          "role": "reverse-to-west-observation"
-        },
-        {
-          "id": "c1",
-          "x": -608,
-          "y": -896,
-          "scannerControlled": true,
-          "role": "descending-security-1"
-        },
-        {
-          "id": "c2",
-          "x": -256,
-          "y": -1024,
-          "scannerControlled": true,
-          "role": "descending-security-2"
-        },
-        {
-          "id": "g4",
-          "x": 96,
-          "y": -1088,
-          "role": "central-gantry-exit"
-        },
-        {
-          "id": "g5",
-          "x": -128,
-          "y": -1248,
-          "role": "reverse-to-west-upper-1"
-        },
-        {
-          "id": "g6a",
-          "x": -352,
-          "y": -1328,
-          "role": "reverse-to-west-upper-mid"
-        },
-        {
-          "id": "g6",
-          "x": -512,
-          "y": -1376,
-          "role": "west-upper-landing"
-        },
-        {
-          "id": "g7",
-          "x": -160,
-          "y": -1536,
-          "role": "final-up-right-1"
-        },
-        {
-          "id": "g8",
-          "x": 192,
-          "y": -1624,
-          "role": "final-up-right-2"
-        }
-      ],
-      "scannerGroups": [
-        {
-          "id": "sector-03-03:scanner-retail-A",
-          "cycleSeconds": {
-            "available": 1.5,
-            "warning": 0.6,
-            "locked": 1.1,
-            "reset": 0.3
-          },
-          "phaseOffsetSeconds": 0,
-          "controlledTargetIds": [
-            "c1",
-            "c2"
-          ],
-          "contract": {
-            "newAttachAllowed": [
-              "AVAILABLE",
-              "WARNING"
-            ],
-            "newAttachDenied": [
-              "LOCKED",
-              "RESET"
-            ],
-            "currentRopePersistsThroughLocked": true,
-            "damage": 0,
-            "knockback": 0,
-            "ropeCut": false,
-            "forcedDetach": false
-          }
-        }
-      ],
-      "mainRoute": [
-        {
-          "id": "entry",
-          "x": -1680,
-          "y": -32
-        },
-        {
-          "id": "g1",
-          "x": -1376,
-          "y": -224
-        },
-        {
-          "id": "p1-right-edge",
-          "x": -1120,
-          "y": -256
-        },
-        {
-          "id": "g1b",
-          "x": -960,
-          "y": -352
-        },
-        {
-          "id": "g2",
-          "x": -768,
-          "y": -480
-        },
-        {
-          "id": "p2-left-edge",
-          "x": -544,
-          "y": -544
-        },
-        {
-          "id": "g3",
-          "x": -832,
-          "y": -704
-        },
-        {
-          "id": "p3-right-edge",
-          "x": -832,
-          "y": -768
-        },
-        {
-          "id": "c1",
-          "x": -608,
-          "y": -896
-        },
-        {
-          "id": "c2",
-          "x": -256,
-          "y": -1024
-        },
-        {
-          "id": "g4",
-          "x": 96,
-          "y": -1088
-        },
-        {
-          "id": "p4-center",
-          "x": 256,
-          "y": -1120
-        },
-        {
-          "id": "g5",
-          "x": -128,
-          "y": -1248
-        },
-        {
-          "id": "g6a",
-          "x": -352,
-          "y": -1328
-        },
-        {
-          "id": "g6",
-          "x": -512,
-          "y": -1376
-        },
-        {
-          "id": "p5-center",
-          "x": -672,
-          "y": -1408
-        },
-        {
-          "id": "g7",
-          "x": -160,
-          "y": -1536
-        },
-        {
-          "id": "g8",
-          "x": 192,
-          "y": -1624
-        },
-        {
-          "id": "exit-left-edge",
-          "x": 544,
-          "y": -1696
-        },
-        {
-          "id": "exit",
-          "x": 704,
-          "y": -1696
-        }
-      ],
-      "recoveryPoints": [
-        {
-          "id": "recovery-a",
-          "x": -224,
-          "y": -786,
-          "retrySecondsTarget": [
-            4,
-            6
-          ],
-          "cannotBypass": [
-            "p4-central-gantry"
-          ],
-          "mustExitPatrolPressure": true
-        }
-      ],
-      "safeZones": [
-        {
-          "id": "west-observation",
-          "contract": [
-            "no enemy pressure",
-            "C1/C2 visible",
-            "Patrol path visible",
-            "central gantry visible"
-          ]
-        },
-        {
-          "id": "central-gantry-safe-after-cross",
-          "contract": [
-            "combined pressure ends on landing",
-            "next route points up-left"
-          ]
-        },
-        {
-          "id": "exit-safe",
-          "contract": [
-            "no enemy pressure",
-            "no scanner",
-            "no patrol"
-          ]
-        }
-      ],
-      "objects": [
-        {
-          "id": "retail-security",
-          "stableRuntimeId": "sector-03-03:retail-security",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "RETAIL SECURITY",
-                "detail": "ACTIVE",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "route-state",
-          "stableRuntimeId": "sector-03-03:route-state",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "VERTICAL SERVICE ROUTE",
-                "detail": "AUTHORIZATION INVALID",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "patrol-status",
-          "stableRuntimeId": "sector-03-03:patrol-status",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "AUTOMATED PATROL",
-                "detail": "ONLINE",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "drone-1",
-          "stableRuntimeId": "sector-03-03:drone-1",
-          "kind": "patrol-drone",
-          "x": -384,
-          "y": -976,
-          "properties": {
-            "enemyType": "patrol-drone-t1",
-            "patrol": {
-              "points": [
-                {
-                  "x": -384,
-                  "y": -976
-                },
-                {
-                  "x": 352,
-                  "y": -976
-                }
-              ],
-              "speed": 48,
-              "waitSeconds": 0.45,
-              "mode": "pingpong"
-            },
-            "rules": [
-              "kill-optional",
-              "no-rope-cut",
-              "target-lock-cycle",
-              "activation-band-only"
-            ],
-            "activationIntent": "descending security dip only"
-          }
-        },
-        {
-          "id": "retail-support-guard",
-          "stableRuntimeId": "sector-03-03:retail-support-guard",
-          "kind": "sentry-slot",
-          "x": -672,
-          "y": -1408,
-          "properties": {
-            "enemySelection": {
-              "authority": "SECTOR_03_SUPPORT_POOL",
-              "allowedEnemyTypes": [
-                "pursuit-drone-t1",
-                "shield-drone-t1",
-                "artillery-drone-t1",
-                "support-drone-t1"
-              ]
-            },
-            "rules": [
-              "kill-optional",
-              "no-rope-cut",
-              "activation-band-only"
-            ],
-            "activationIntent": "west upper bridge only after combined band",
-            "cannotOverlap": [
-              "scanner-retail-A",
-              "drone-1"
-            ]
-          }
-        },
-        {
-          "id": "exit-panel",
-          "stableRuntimeId": "sector-03-03:exit-panel",
-          "kind": "interaction",
-          "properties": {
-            "objectiveId": "sector-03-03:exit-panel-engaged",
-            "requiredObjectiveIds": [
-              "sector-03-03:final-deck-reached"
-            ]
-          }
-        }
-      ],
-      "objectives": [
-        {
-          "id": "sector-03-03:final-deck-reached",
-          "type": "reach",
-          "target": "exit-deck"
-        },
-        {
-          "id": "sector-03-03:exit-panel-engaged",
-          "type": "interact",
-          "sourceObjectId": "sector-03-03:exit-panel",
-          "requiredObjectiveIds": [
-            "sector-03-03:final-deck-reached"
-          ]
-        }
-      ],
-      "gate": {
-        "completionMode": "physical-crossing",
-        "nextAreaId": "sector-03-04",
-        "requiredObjectiveIds": [
-          "sector-03-03:exit-panel-engaged"
-        ]
-      },
-      "patrol": {
-        "count": 1,
-        "scannerOverlapPolicy": "only descending security dip"
-      },
-      "supportGuard": {
-        "count": 1,
-        "scannerOverlap": false,
-        "patrolOverlap": false
-      },
-      "accessModule": {
-        "present": false
-      },
-      "wind": {
-        "active": false
-      },
-      "ropeCut": {
-        "active": false
-      },
-      "playerDialogue": {
-        "default": "NONE"
-      },
-      "augment": {
-        "currentContract": "generic Augment v1 carry",
-        "requiresSpecificCard": false,
-        "baseRopeClearable": true
-      },
-      "uniqueness": {
-        "directionRhythm": "↗ → ↖ → ↘ → ↖ → ↗",
-        "maximumMeaningfulOverlap": 1,
-        "signature": "ALTERNATING ESCALATOR ATRIUM / SWITCHBACK CROSSING WITH CENTRAL SECURITY DIP",
-        "comparisons": {
-          "3-1": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "large commercial void"
-            ]
-          },
-          "3-2": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "direction reversal"
-            ]
-          },
-          "2-2": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "Patrol timing"
-            ]
-          },
-          "2-8": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "controlled height change"
-            ]
-          },
-          "1-5": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "route reversal impression"
-            ]
-          },
-          "1-7": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "multiple direction changes"
-            ]
-          }
-        }
-      },
-      "forbidden": [
-        "global one-direction ascent",
-        "scanner repeated outside central dip",
-        "support guard overlap with patrol",
-        "support guard overlap with scanner",
-        "third enemy",
-        "Access Module",
-        "Wind",
-        "Rope Cut",
-        "kill gate",
-        "Player dialogue by default",
-        "arbitrary zigzag not explained by escalator circulation"
-      ]
-    }
-  }
+  "behaviorRefs": []
 }

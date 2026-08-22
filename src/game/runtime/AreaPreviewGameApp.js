@@ -1,11 +1,10 @@
 import { GameApp } from "../GameApp.js";
 import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../config.js";
-import { LocalAuthority } from "./LocalAuthority.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
-import { defineArea, defineAreaCatalog } from "../world/areas/AreaDefinition.js";
+import { createAuthoredSeamlessSectorRuntimeWorld } from "../world/sectors/AuthoredSeamlessSectorRuntime.js";
+import { selectWorldSeed } from "../world/WorldSeed.js";
+import { LocalAuthority } from "./LocalAuthority.js";
 import { PreviewFlightController } from "./PreviewFlightController.js";
-
-const PREVIEW_COMPLETION_MODE = "content-boundary";
 
 class AreaPreviewAuthority extends LocalAuthority {
     applyFlightMotion(position) {
@@ -18,70 +17,67 @@ class AreaPreviewAuthority extends LocalAuthority {
     }
 }
 
-function assertGeneratedArea(generatedArea) {
-    if (!generatedArea || typeof generatedArea.id !== "string" || generatedArea.id.trim() === "") {
+function assertPreviewAreaId(areaId) {
+    if (typeof areaId !== "string" || areaId.trim() === "") {
         throw new TypeError("map-editor-preview-area-required");
     }
-    return generatedArea;
+    return areaId;
 }
 
-function assertPreviewRevision(revision) {
-    if ((typeof revision !== "string" && !Number.isInteger(revision)) || String(revision).trim() === "") {
-        throw new TypeError("map-editor-preview-revision-required");
+function productionLandmarkForArea(world, areaId) {
+    if (world?.layout !== "seamless-sectors") {
+        throw new Error("map-editor-preview-production-world-required");
     }
-    return String(revision);
+    const landmark = world.landmarks?.find(
+        ({ id, areaId: sourceAreaId, stageId }) => id === areaId || sourceAreaId === areaId || stageId === areaId
+    );
+    if (!landmark) throw new Error(`map-editor-preview-area-not-in-production-world: ${areaId}`);
+    return landmark;
 }
 
-function isolatePreviewArea(generatedArea) {
-    return defineArea({
-        ...generatedArea,
-        nextAreaId: null,
-        gate: {
-            ...generatedArea.gate,
-            nextAreaId: null,
-            completionMode: PREVIEW_COMPLETION_MODE
-        }
-    });
+function productionWorldFactory(previewArea, areaId) {
+    if (!previewArea) return createAuthoredSeamlessSectorRuntimeWorld;
+    if (previewArea.id !== areaId) throw new Error(`map-editor-preview-area-id-mismatch: ${areaId}`);
+    const areaOverrides = Object.freeze({ [areaId]: previewArea });
+    return (options) => createAuthoredSeamlessSectorRuntimeWorld({ ...options, areaOverrides });
 }
 
 export class AreaPreviewGameApp extends GameApp {
-    constructor({ generatedArea, revision, ...options } = {}) {
-        const area = isolatePreviewArea(assertGeneratedArea(generatedArea));
-        const previewRevision = assertPreviewRevision(revision);
-        const worldCatalog = defineAreaCatalog({
-            id: "map-editor-preview",
-            revision: previewRevision,
-            areas: [area]
+    constructor({
+        areaId,
+        previewArea = null,
+        worldSeed = selectWorldSeed(globalThis.location?.search),
+        ...options
+    } = {}) {
+        const previewAreaId = assertPreviewAreaId(areaId);
+        const simulation = new GameSimulation({
+            worldSeed,
+            startAreaId: previewAreaId,
+            worldFactory: productionWorldFactory(previewArea, previewAreaId),
+            ropeConfig: resolveEffectiveRopeConfig(options.ropeTuning),
+            ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(options.ropeTuning),
+            debugAugmentIds: options.debugAugmentIds ?? []
         });
-        const authority = new AreaPreviewAuthority(
-            new GameSimulation({
-                worldCatalog,
-                startAreaId: area.id,
-                worldSeed: options.worldSeed,
-                ropeConfig: resolveEffectiveRopeConfig(options.ropeTuning),
-                ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(options.ropeTuning),
-                debugAugmentIds: options.debugAugmentIds ?? []
-            })
-        );
-        const previewWorld = authority.snapshot().world;
-        if (
-            previewWorld.layout === "seamless-sectors" ||
-            previewWorld.areas?.length !== 1 ||
-            previewWorld.areas[0]?.id !== area.id
-        ) {
-            throw new Error("map-editor-preview-scope-invalid");
-        }
-        super({ ...options, startAreaId: area.id, authority });
-        this.previewAreaId = area.id;
+        const previewLandmark = productionLandmarkForArea(simulation.world, previewAreaId);
+        const authority = new AreaPreviewAuthority(simulation);
+        super({ ...options, worldSeed, startAreaId: previewAreaId, authority });
+        this.previewAreaId = previewAreaId;
+        this.previewLandmarkId = previewLandmark.id;
         this.previewFlight = new PreviewFlightController();
     }
 
     previewScope() {
         const world = this.authority.snapshot().world;
+        const landmark = world.landmarks.find(({ id }) => id === this.previewLandmarkId);
+        const surfaceIdLookup = Object.freeze(Object.fromEntries(landmark.surfaceIds.map((id) => [id, true])));
+        const landmarkSurfaces = world.surfaces.filter(({ id }) => surfaceIdLookup[id]);
         return Object.freeze({
-            areaId: world.areas?.[0]?.id ?? null,
-            areaCount: world.areas?.length ?? 0,
-            surfaceCount: world.surfaces?.length ?? 0
+            layout: world.layout,
+            areaId: this.previewAreaId,
+            landmarkId: landmark.id,
+            surfaceCount: landmarkSurfaces.length,
+            visibleSurfaceCount: landmarkSurfaces.filter(({ renderable }) => renderable !== false).length,
+            worldSurfaceCount: world.surfaces.length
         });
     }
 
@@ -97,8 +93,9 @@ export class AreaPreviewGameApp extends GameApp {
     update(dt, input) {
         if (!this.previewFlight.enabled) return super.update(dt, input);
         const owner = this.authority.ownerState();
-        const area = this.authority.snapshot().world.areas[0];
-        const nextPosition = this.previewFlight.nextPosition(owner.position, area.bounds, dt, input);
+        const world = this.authority.snapshot().world;
+        const landmark = world.landmarks.find(({ id }) => id === this.previewLandmarkId);
+        const nextPosition = this.previewFlight.nextPosition(owner.position, landmark.bounds, dt, input);
         super.update(dt, this.previewFlight.neutralInput(input));
         this.authority.applyFlightMotion(nextPosition);
     }

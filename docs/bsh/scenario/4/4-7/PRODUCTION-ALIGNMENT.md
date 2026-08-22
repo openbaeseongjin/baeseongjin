@@ -4,7 +4,7 @@
 
 Latest checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`.
 
-Current repository `Sector04AreaCatalog.js` still contains the **legacy**:
+The deleted legacy `Sector04AreaCatalog.js` contained:
 
 - name: `ISOLATION JUNCTION`
 - subtitle: `CUTTER + WAKE SYNTHESIS`
@@ -13,7 +13,7 @@ Current repository `Sector04AreaCatalog.js` still contains the **legacy**:
 - pulsed Wake ×1
 - `LOWER ASCENT FEEDER / ISOLATED` story
 
-That runtime block is **not the approved creative authority anymore**.
+That retired runtime block is **not the approved creative authority anymore**.
 
 ## New approved authority
 

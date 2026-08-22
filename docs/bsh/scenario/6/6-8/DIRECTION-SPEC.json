@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 8,
-    "legacyStageAlias": "6-8",
     "sourceAreaId": "sector-06-08",
-    "name": "ROOFTOP PAD 03"
+    "name": "ROOFTOP PAD 03",
+    "id": "6-8"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

@@ -5,9 +5,9 @@
   "stage": {
     "sector": 1,
     "stage": 2,
-    "legacyStageAlias": "1-2",
     "sourceAreaId": "sector-01-02",
-    "name": "DOUBLE ANCHOR SHAFT"
+    "name": "DOUBLE ANCHOR SHAFT",
+    "id": "1-2"
   },
   "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
   "globalControl": {

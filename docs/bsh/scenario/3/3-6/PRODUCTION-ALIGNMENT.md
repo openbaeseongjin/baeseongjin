@@ -2,7 +2,9 @@
 
 Baseline: `d39cbb49d3d8247caf2542393994704292dd5002`
 
-## Current Runtime truth
+Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage06.generated.js`; the generated Stage uses `GRAND CENTRAL ATRIUM`, `4352×2336`, the approved atrium topology, 3 enemy slots, C1/C2 Scanner, physical exit panel/gate, and `sector-03-07` next.
+
+## Pre-cutover legacy baseline
 - `sector-03-06`
 - `PREMIUM ATRIUM / LARGE MOVEMENT`
 - current bounds `1280×1440`
@@ -18,7 +20,7 @@ Baseline: `d39cbb49d3d8247caf2542393994704292dd5002`
 
 ## REV8.0 authored delta
 - canonical name `GRAND CENTRAL ATRIUM`
-- bounds `4352×2176`
+- bounds `4352×2336`
 - one continuous monumental public-commercial Atrium
 - macro direction `↗ LONG → ↑ → ← LONG → ↗ LONG`
 - C1 becomes lower long-flight timing

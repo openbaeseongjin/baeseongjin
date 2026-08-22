@@ -10,7 +10,7 @@ Sector 04는 Sector 02·03과 달리 8개 Stage 전부 **per-zone zoom 제안이
 
 | Stage | 문서 zone 제안                              | Runtime 상태                                 |
 | ----- | ------------------------------------------- | -------------------------------------------- |
-| 4-1   | C0~~C4(0.95~~1.00/0.72), localY band 명시   | `Sector04AreaCatalog`에 동일 zoom으로 구현됨 |
+| 4-1   | C0~~C4(0.95~~1.00/0.72), localY band 명시   | 삭제된 legacy catalog에 동일 zoom으로 구현됐음 |
 | 4-2   | C0~~C4(0.92~~1.00/0.70~0.72), **band 없음** | band는 Geometry에서 파생해 구현됨            |
 | 4-3   | C0~~C4(0.88~~1.00/0.70~0.72), **band 없음** | 동일                                         |
 | 4-4   | C0~~C3(0.92~~1.00/0.70~0.72), **band 없음** | 동일                                         |
@@ -22,7 +22,8 @@ Sector 04는 Sector 02·03과 달리 8개 Stage 전부 **per-zone zoom 제안이
 4-2~4-4는 문서가 localY band를 주지 않아 Runtime은 Stage Geometry(데크·위협
 경계)에서 band를 파생했다. 문서의 "Must show" 목록(예: 4-2 C1은 P1/C1/S1/R1
 동시 가시, 4-4 C1은 N1 텍스트와 Player/Hook 동시 가독)은 Camera 코드가
-아니라 Geometry 좌표 계약으로 남는다. **Camera Zone 구현 작업은 필요 없다.**
+아니라 Geometry 좌표 계약으로 남는다. 이 표는 삭제된 legacy catalog의 과거
+구현 기록이며, 새 Sector04 Runtime의 구현 완료 근거가 아니다.
 
 ## Part 1 — Story Presentation 반영
 

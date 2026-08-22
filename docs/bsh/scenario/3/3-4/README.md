@@ -1,6 +1,7 @@
 # ONE ROPE — SECTOR 03-4 RETAIL SERVICE SPINE — REV8 STAGE DRAFT
 
 > Status: DESIGN LOCKED  
+> Runtime: **GENERATED — canonical `AREA-SPEC.v2.json` is the sole Stage authority**
 > Runtime audit baseline: `d588aa041a350cab198cd187d8dccbe3b3a244dd`  
 > Sector 03 Master Plan: REV3  
 > Current Runtime name: `SERVICE ARCADE`  
@@ -14,7 +15,7 @@
 
 ---
 
-# 0. LATEST RUNTIME — VERIFIED
+# 0. PRE-CUTOVER LEGACY BASELINE
 
 Current `sector-03-04` keeps:
 

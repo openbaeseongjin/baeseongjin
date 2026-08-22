@@ -750,35 +750,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-01-06:final-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 1392,
-          "y": -1088
-        },
-        "vertices": [
-          {
-            "x": 1184,
-            "y": -1088
-          },
-          {
-            "x": 1600,
-            "y": -1088
-          },
-          {
-            "x": 1600,
-            "y": -1056
-          },
-          {
-            "x": 1184,
-            "y": -1056
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-01-06:access-intake-deck",
         "kind": "safe-deck",
         "oneWay": true,
@@ -898,7 +869,7 @@ const SPEC = {
   },
   "schemaVersion": "area-spec-v2",
   "stage": {
-    "legacyStageAlias": "1-6",
+    "id": "1-6",
     "sector": 1,
     "sourceAreaId": "sector-01-06",
     "stage": 6

@@ -1083,22 +1083,9 @@ const SPEC = {
       "behaviorRegistry"
     ]
   },
-  "provenance": {
-    "designSourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC-REV8-DESIGN.json",
-    "revision": {
-      "designIteration": "REV2",
-      "final": "REV8.0",
-      "supersedes": [
-        "REV1 linear scanner draft",
-        "legacy compact scanner gallery"
-      ]
-    },
-    "sourceSchemaVersion": "area-spec-v1",
-    "status": "runtime-generated"
-  },
   "schemaVersion": "area-spec-v2",
   "stage": {
-    "legacyStageAlias": "3-2",
+    "id": "3-2",
     "sector": 3,
     "sourceAreaId": "sector-03-02",
     "stage": 2

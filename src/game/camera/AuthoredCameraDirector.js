@@ -19,7 +19,7 @@ export function authoredAreaForPosition(world, position) {
 
 export function localTriggerObjects(world, areaId) {
     const regions = world?.landmarks?.length ? world.landmarks : world?.areas;
-    const area = regions?.find(({ id, legacyAreaId }) => id === areaId || legacyAreaId === areaId);
+    const area = regions?.find(({ id, areaId: sourceAreaId }) => id === areaId || sourceAreaId === areaId);
     if (!area) return Object.freeze([]);
     const originX = area.bounds.x + area.bounds.width * 0.5;
     const originY = area.bounds.y + area.bounds.height;
@@ -72,8 +72,8 @@ export function resolveAuthoredCameraShot({ world, player, mobileView = false, d
     const localY = player.position.y - areaOriginY;
     const zone = cameraZoneForLocalY(area, localY);
     return Object.freeze({
-        areaId: area.legacyAreaId ?? area.id,
-        landmarkId: area.legacyAreaId ? area.id : null,
+        areaId: area.areaId ?? area.id,
+        landmarkId: area.areaId ? area.id : null,
         sectorId: area.sectorId ?? null,
         zoneId: zone?.id ?? null,
         zoom: zone

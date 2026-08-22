@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 4,
-    "legacyStageAlias": "6-4",
     "sourceAreaId": "sector-06-04",
-    "name": "ROOFTOP SERVICE SHELTER"
+    "name": "ROOFTOP SERVICE SHELTER",
+    "id": "6-4"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

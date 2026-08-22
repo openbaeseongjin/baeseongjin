@@ -5,9 +5,9 @@
   "stage": {
     "sector": 3,
     "stage": 8,
-    "legacyStageAlias": "3-8",
     "sourceAreaId": "sector-03-08",
-    "name": "UPPER EXCHANGE GATE"
+    "name": "UPPER EXCHANGE GATE",
+    "id": "3-8"
   },
   "baselineCommit": "cb4f690ac180a04868322e9c4cfe1384897c348b",
   "globalControl": {

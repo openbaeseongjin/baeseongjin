@@ -2,7 +2,9 @@
 
 Baseline: `cb4f690ac180a04868322e9c4cfe1384897c348b`
 
-## Runtime VERIFIED
+Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage07.generated.js`; the generated Stage uses `TRANSFER MEZZANINE`, `3840×1792`, explicit Preview platform/Anchor topology, 4 enemy slots including Access C carrier, C1/C2/C3 Scanner, physical exit panel/gate, and `sector-03-08` next.
+
+## Pre-cutover legacy baseline
 - area `sector-03-07`
 - current name `PRIORITY CONCOURSE`
 - 4 enemy slots

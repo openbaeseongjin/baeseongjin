@@ -1,6 +1,7 @@
 # SECTOR 03-8 — UPPER EXCHANGE GATE REV8.0
 
 > Status: **DESIGN LOCKED**  
+> Runtime: **GENERATED — Preview platform/Anchor topology is materialized in canonical `AREA-SPEC.v2.json`**
 > Latest audited main: `cb4f690ac180a04868322e9c4cfe1384897c348b`  
 > Runtime id: `sector-03-08`  
 > Runtime current name: `UPPER MARKET GATE`  

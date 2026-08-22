@@ -5,7 +5,7 @@ Baseline: `4551798860193a16e53814aae5c3a42022b4e1cf`
 ## Before implementation
 
 1. Fetch/rebase latest `main`.
-2. Re-read `Sector04AreaCatalog.js`.
+2. Confirm the obsolete Transit catalog remains deleted and read canonical `AREA-SPEC.v2.json`.
 3. Re-read `EnemyPatrol.js`, enemy archetype/runtime ownership.
 4. Re-read Direction Runtime v1 compiler/catalog/validator.
 5. Re-check latest post-Sector03 Boss/Transition contract.

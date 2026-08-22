@@ -444,15 +444,16 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
     if (!AREA_SPEC_V2_AUTHORING_MODES.includes(authoringMode)) {
         issue(issues, file, "authoring-mode-invalid", { authoringMode });
     }
-    if (
-        authoringMode === "scenario" &&
-        (!isPlainObject(spec.scenario) ||
-            typeof spec.scenario.sourcePath !== "string" ||
-            typeof spec.scenario.sourceSchemaVersion !== "string" ||
-            spec.scenario.status !== "scenario-only")
-    ) {
+    if (authoringMode === "scenario" && (!isPlainObject(spec.scenario) || spec.scenario.status !== "scenario-only")) {
         issue(issues, file, "scenario-metadata-invalid");
     }
+    if (
+        isPlainObject(spec.scenario) &&
+        ["sourcePath", "designSourcePath", "sourceSchemaVersion", "sourceSnapshot"].some((key) => key in spec.scenario)
+    ) {
+        issue(issues, file, "scenario-migration-provenance-forbidden");
+    }
+    if ("provenance" in spec) issue(issues, file, "migration-provenance-forbidden");
 
     const stage = spec.stage;
     const definition = spec.definition;
@@ -460,9 +461,14 @@ export function validateAreaSpecV2(spec, { file = "AREA-SPEC.v2.json", registry 
         issue(issues, file, "stage-block-invalid");
     } else {
         const expectedAreaId = `sector-${String(stage.sector).padStart(2, "0")}-${String(stage.stage).padStart(2, "0")}`;
-        if (!/^\d+-\d+$/.test(stage.legacyStageAlias ?? "")) issue(issues, file, "stage-alias-invalid");
+        const expectedStageId = `${stage.sector}-${stage.stage}`;
+        const expectedSectorId = `sector-${String(stage.sector).padStart(2, "0")}`;
+        if (stage.id !== expectedStageId) issue(issues, file, "stage-id-invalid", { expected: expectedStageId });
         if (stage.sourceAreaId !== expectedAreaId)
             issue(issues, file, "stage-source-area-id", { expected: expectedAreaId });
+        if (definition?.sectorId !== expectedSectorId)
+            issue(issues, file, "definition-sector-id", { expected: expectedSectorId });
+        if (definition?.order !== stage.stage) issue(issues, file, "definition-stage-order", { expected: stage.stage });
     }
     if (!isPlainObject(definition)) {
         issue(issues, file, "definition-block-invalid");

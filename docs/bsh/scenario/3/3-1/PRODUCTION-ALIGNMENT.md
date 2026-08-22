@@ -5,7 +5,7 @@ Baseline:
 
 ## Current Runtime truth
 
-`sector-03-01`은 `AREA-SPEC.v2.json`의 `authoringMode: "runtime"`에서 생성한 모듈을 `AREA-CATALOG.sector03.json` manifest가 선택한다. Sector 03 facade는 3-1만 generated로 교체하고, 3-2~3-8 legacy Area를 그대로 합성한다.
+`sector-03-01`은 `AREA-SPEC.v2.json`의 `authoringMode: "runtime"`에서 생성한 모듈을 `AREA-CATALOG.sector03.json` manifest가 선택한다. Sector 03의 3-1~3-8은 모두 같은 generated catalog에서 production Runtime으로 합성된다.
 
 Current `sector-03-01` owns:
 - Runtime name `LOWER MARKET PROMENADE`
@@ -32,7 +32,7 @@ Current `sector-03-01` owns:
 ## Cutover boundary
 
 - v2 원본과 `src/game/world/areas/generated/sector03/`의 결정적 생성 파일은 이 Stage의 유일한 지형·Anchor·Recovery·적 슬롯·출구 권위다.
-- 기존 `Sector03AreaCatalog.js`의 3-1 수기 definition은 composer가 선택하지 않는다. 3-2~3-8은 다음 Stage별 cutover 전까지 legacy definition을 계속 사용한다.
+- 수기 Sector 03 definition과 Stage별 fallback은 없으며 canonical v2와 generated output만 Runtime 지형·Stable ID·진행 의미를 소유한다.
 - Player Bark는 이 변경에 포함하지 않는다. System Story presentation과 혼용하지 않는다.
 
 ## Stale documentation corrected

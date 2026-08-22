@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 6,
-    "legacyStageAlias": "6-6",
     "sourceAreaId": "sector-06-06",
-    "name": "BEACON SPAN"
+    "name": "BEACON SPAN",
+    "id": "6-6"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

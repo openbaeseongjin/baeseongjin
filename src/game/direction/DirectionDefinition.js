@@ -471,7 +471,7 @@ export function compileDirectionAuthoring(source) {
         definitionId: `direction:${areaId}`,
         schemaVersion: 1,
         areaId,
-        legacyStageAlias: source.stage.legacyStageAlias,
+        stageId: source.stage.id,
         designStatus: source.directionStatus,
         globalControl: structuredClone(source.globalControl ?? {}),
         beats

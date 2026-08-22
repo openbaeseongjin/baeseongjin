@@ -410,8 +410,7 @@ export class CanvasRenderer {
         const health = resolveHealthStatus(playerHealth, playerMaxHealth);
         const action = resolveActionCooldownStatus(actionState);
         const region = authoredRegionForPosition(world, player?.position);
-        const stage =
-            bossStagePresentation?.stageId ?? region?.legacyStageAlias ?? region?.legacyAreaId ?? region?.id ?? "-";
+        const stage = bossStagePresentation?.stageId ?? region?.stageId ?? region?.areaId ?? region?.id ?? "-";
         const augmentNames = selectedAugmentIds
             .map((id) => foundationAugmentById(id)?.name)
             .filter(Boolean)
@@ -602,7 +601,7 @@ export class CanvasRenderer {
             color = "#67e8f9";
         } else if (eventFlash.type === "stage-saved") {
             title = "STAGE SAVE";
-            detail = `${eventFlash.stageAlias ?? "새 Stage"} · 부활 지점 저장 완료`;
+            detail = `${eventFlash.stageId ?? "새 Stage"} · 부활 지점 저장 완료`;
             color = "#d9f4ff";
         } else if (eventFlash.type === "foundation-selected") {
             const foundation = foundationAugmentById(eventFlash.foundationId);

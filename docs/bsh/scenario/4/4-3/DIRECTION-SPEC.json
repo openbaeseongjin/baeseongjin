@@ -5,9 +5,9 @@
   "stage": {
     "sector": 4,
     "stage": 3,
-    "legacyStageAlias": "4-3",
     "sourceAreaId": "sector-04-03",
-    "name": "RESIDENTIAL SKYBRIDGE"
+    "name": "RESIDENTIAL SKYBRIDGE",
+    "id": "4-3"
   },
   "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
   "globalControl": {
@@ -74,7 +74,7 @@
             "title": "RESIDENTIAL SECURITY",
             "detail": "TRACKING"
           },
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         }
       ]
     },
@@ -93,7 +93,7 @@
             "title": "SERVICE RELAY B-03",
             "detail": "RESET COMPLETE"
           },
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         },
         {
           "type": "systemText",
@@ -119,7 +119,7 @@
             "title": "SECURITY CONTACT",
             "detail": "LOST"
           },
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         }
       ]
     }

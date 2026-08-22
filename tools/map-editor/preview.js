@@ -1,6 +1,6 @@
 import { AreaPreviewGameApp } from "../../src/game/runtime/AreaPreviewGameApp.js";
 import { BossStagePreviewGameApp } from "../../src/game/boss-authoring/editor/BossStagePreviewGameApp.js";
-import { createGameRenderer, DEFAULT_RENDERER_PROFILE } from "../../src/render/GameRendererFactory.js";
+import { createGameRenderer, resolveRendererProfile } from "../../src/render/GameRendererFactory.js";
 import { loadDefaultPlayerSpriteDefinition } from "../../src/render/sprites/PlayerSpriteCatalog.js";
 import { loadEnemySpriteDefinitions } from "../../src/render/sprites/EnemySpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "../../src/render/environment/AuthoredAreaEnvironmentCatalog.js";
@@ -78,7 +78,7 @@ function rendererForPreview(presentation) {
     if (previewRenderer) return previewRenderer;
     previewRenderer = createGameRenderer({
         canvas,
-        profile: DEFAULT_RENDERER_PROFILE,
+        profile: resolveRendererProfile(globalThis.location.search),
         canvasOptions: PREVIEW_CANVAS_OPTIONS,
         sceneRendererOptions: {
             playerDefinition: presentation.playerDefinition,
@@ -127,20 +127,20 @@ async function createPreview() {
         currentApp = new AreaPreviewGameApp({
             canvas,
             renderer: rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions }),
-            generatedArea: previewArea,
-            revision,
+            areaId,
+            previewArea,
             playerDefinition: presentation.playerDefinition,
             directionDefinitions: presentation.directionDefinitions
         });
         currentApp.setPreviewFlightEnabled(flightEnabled);
         const previewScope = currentApp.previewScope();
-        if (previewScope.areaId !== areaId || previewScope.areaCount !== 1) {
-            throw new Error("선택한 Stage 하나만 미리보기로 실행할 수 있습니다.");
+        if (previewScope.layout !== "seamless-sectors" || previewScope.areaId !== areaId) {
+            throw new Error("선택한 Stage를 production seamless world에서 찾을 수 없습니다.");
         }
         currentApp.start();
-        label.textContent = `${stageId} · ${areaId} · 실제 게임 화면의 새 로컬 싱글플레이 실행`;
+        label.textContent = `${stageId} · ${previewScope.landmarkId} · production Gameplay View`;
         setStatus(
-            `미리보기 리비전 ${revision} 실행 중 · ${previewScope.areaId} 맵 하나(지형 ${previewScope.surfaceCount}개)만 로드하며 멀티플레이에는 영향을 주지 않습니다.`
+            `리비전 ${revision} · production seamless compiler/renderer · Stage 지형 ${previewScope.surfaceCount}개(표시 ${previewScope.visibleSurfaceCount}개) · 전체 world 지형 ${previewScope.worldSurfaceCount}개`
         );
     } catch (cause) {
         label.textContent = "미리보기를 시작할 수 없습니다.";

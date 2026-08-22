@@ -1734,7 +1734,7 @@ function drawCanvas() {
     }
     context.fillStyle = "rgba(230,242,245,0.7)";
     context.font = "11px ui-monospace, Consolas, monospace";
-    context.fillText(`${spec.stage.legacyStageAlias} · ${spec.definition.name}`, 12, 20);
+    context.fillText(`${spec.stage.id} · ${spec.definition.name}`, 12, 20);
     const occupiedAnnotations = [];
     const annotatedEntities = [...canvasEntities].sort(
         (left, right) => Number(isSelected(right.domain, right.id)) - Number(isSelected(left.domain, left.id))

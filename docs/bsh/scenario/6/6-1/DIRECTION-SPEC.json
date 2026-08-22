@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 1,
-    "legacyStageAlias": "6-1",
     "sourceAreaId": "sector-06-01",
-    "name": "SKYBREAK ACCESS"
+    "name": "SKYBREAK ACCESS",
+    "id": "6-1"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

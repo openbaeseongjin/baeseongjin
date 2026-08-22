@@ -17,16 +17,16 @@ export function canonicalLandmarkId(sectorId, order) {
     return `${sectorId}:landmark:${String(order).padStart(2, "0")}`;
 }
 
-export function canonicalEncounterId(landmarkId, legacyLocalId) {
-    return `${landmarkId}:encounter:${legacyLocalId}`;
+export function canonicalEncounterId(landmarkId, localId) {
+    return `${landmarkId}:encounter:${localId}`;
 }
 
-export function canonicalEncounterSlotId(landmarkId, legacyLocalId) {
-    return `${landmarkId}:slot:${legacyLocalId}`;
+export function canonicalEncounterSlotId(landmarkId, localId) {
+    return `${landmarkId}:slot:${localId}`;
 }
 
-export function canonicalObjectiveId(landmarkId, legacyLocalId) {
-    return `${landmarkId}:objective:${legacyLocalId}`;
+export function canonicalObjectiveId(landmarkId, localId) {
+    return `${landmarkId}:objective:${localId}`;
 }
 
 export function localBounds(width, height) {
@@ -49,7 +49,7 @@ export function encounterSlot({
     enemySelection = null,
     swarmMemberCount,
     accessModuleId = null,
-    legacyStageAlias
+    stageId
 } = {}) {
     return freezeValue({
         encounterId,
@@ -59,7 +59,7 @@ export function encounterSlot({
         ...(enemySelection ? { enemySelection } : {}),
         ...(swarmMemberCount !== undefined ? { swarmMemberCount } : {}),
         ...(accessModuleId ? { accessModuleId } : {}),
-        ...(legacyStageAlias ? { legacyStageAlias } : {})
+        ...(stageId ? { stageId } : {})
     });
 }
 
@@ -70,7 +70,7 @@ export function sectorObjective({
     requiredObjectiveIds = [],
     completionDelaySeconds,
     sourceObjectId,
-    legacyStageAlias
+    stageId
 } = {}) {
     return freezeValue({
         id,
@@ -79,7 +79,7 @@ export function sectorObjective({
         ...(bounds ? { bounds } : {}),
         ...(completionDelaySeconds !== undefined ? { completionDelaySeconds } : {}),
         ...(sourceObjectId ? { sourceObjectId } : {}),
-        ...(legacyStageAlias ? { legacyStageAlias } : {})
+        ...(stageId ? { stageId } : {})
     });
 }
 
@@ -88,7 +88,7 @@ export function landmark({
     order,
     name = "",
     subtitle = "",
-    legacyStageAlias,
+    stageId,
     localBounds: stageLocalBounds,
     subregionBounds: previewBounds,
     entry,
@@ -101,7 +101,7 @@ export function landmark({
         order,
         name,
         subtitle,
-        legacyStageAlias,
+        stageId,
         localBounds: stageLocalBounds,
         subregionBounds: previewBounds,
         entry,
@@ -122,8 +122,8 @@ export function defineSector({ id, order, width, runtimePreview = false, sectorE
     });
 }
 
-export function stageAliasRecord({
-    legacyStageAlias,
+export function stageIdentityRecord({
+    stageId,
     sectorId,
     landmarkId,
     objectiveIds = [],
@@ -131,7 +131,7 @@ export function stageAliasRecord({
     runtimePreview = false
 } = {}) {
     return freezeValue({
-        legacyStageAlias,
+        stageId,
         sectorId,
         landmarkId,
         objectiveIds,
@@ -140,6 +140,6 @@ export function stageAliasRecord({
     });
 }
 
-export function defineSectorCatalog({ id, revision, sectors = [], stageAliases = [] } = {}) {
-    return freezeValue({ id, revision, sectors, stageAliases });
+export function defineSectorCatalog({ id, revision, sectors = [], stageIdentities = [] } = {}) {
+    return freezeValue({ id, revision, sectors, stageIdentities });
 }

@@ -2,9 +2,9 @@
 
 Baseline: `4551798860193a16e53814aae5c3a42022b4e1cf`
 
-## Current Runtime — VERIFIED
+## Current Runtime — NOT IMPLEMENTED
 
-`sector-04-01` currently exists only as the legacy standalone Sector04 implementation:
+The deleted legacy standalone Sector04 implementation contained:
 
 - name: `TRANSIT INTAKE`
 - subtitle: `SPEED SPACE REVEAL`
@@ -37,5 +37,5 @@ The new Upper Residential 4-1 is **NOT IMPLEMENTED**.
 
 Do not interpret this documentation package as an already migrated Runtime.
 
-The old Transit catalog and its stable IDs may require explicit retirement/migration work.
+The old Transit catalog has been retired. `AREA-SPEC.v2.json` remains scenario-only until an explicit Runtime migration is approved.
 Post-Sector03 Boss/Transition remains TBD, so do not directly wire 3-8 into this Stage without the transition contract.

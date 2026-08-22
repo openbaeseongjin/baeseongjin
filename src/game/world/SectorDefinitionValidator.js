@@ -37,14 +37,14 @@ function boundsInsideLocalBounds(localBounds, bounds) {
     );
 }
 
-function expectedLegacyStageAliases() {
-    const aliases = [];
+function expectedStageIds() {
+    const stageIds = [];
     for (let sector = 1; sector <= 6; sector += 1) {
         for (let stage = 1; stage <= 8; stage += 1) {
-            aliases.push(`${sector}-${stage}`);
+            stageIds.push(`${sector}-${stage}`);
         }
     }
-    return aliases;
+    return stageIds;
 }
 
 function isNonEmptyString(value) {
@@ -81,10 +81,10 @@ export function validateSectorCatalog(catalog) {
             issues: Object.freeze([issue("sector-catalog-missing")])
         });
     }
-    if (!Array.isArray(catalog.sectors) || !Array.isArray(catalog.stageAliases)) {
+    if (!Array.isArray(catalog.sectors) || !Array.isArray(catalog.stageIdentities)) {
         const issues = [];
         if (!Array.isArray(catalog.sectors)) issues.push(issue("sector-catalog-sectors-missing"));
-        if (!Array.isArray(catalog.stageAliases)) issues.push(issue("sector-catalog-stage-aliases-missing"));
+        if (!Array.isArray(catalog.stageIdentities)) issues.push(issue("sector-catalog-stage-identities-missing"));
         return Object.freeze({
             valid: false,
             issues: Object.freeze(issues)
@@ -299,53 +299,47 @@ export function validateSectorCatalog(catalog) {
         }
     }
 
-    const expectedAliases = expectedLegacyStageAliases();
-    const expectedAliasSet = new Set(expectedAliases);
-    const seenAliases = new Set();
-    for (const aliasRecord of catalog.stageAliases) {
-        if (seenAliases.has(aliasRecord.legacyStageAlias)) {
-            issues.push(
-                issue("stage-alias-duplicate", aliasRecord.sectorId, { legacyStageAlias: aliasRecord.legacyStageAlias })
-            );
+    const expectedIds = expectedStageIds();
+    const expectedIdSet = new Set(expectedIds);
+    const seenIds = new Set();
+    for (const identity of catalog.stageIdentities) {
+        if (seenIds.has(identity.stageId)) {
+            issues.push(issue("stage-id-duplicate", identity.sectorId, { stageId: identity.stageId }));
         }
-        seenAliases.add(aliasRecord.legacyStageAlias);
-        if (!expectedAliasSet.has(aliasRecord.legacyStageAlias)) {
-            issues.push(
-                issue("stage-alias-unknown", aliasRecord.sectorId, {
-                    legacyStageAlias: aliasRecord.legacyStageAlias
-                })
-            );
+        seenIds.add(identity.stageId);
+        if (!expectedIdSet.has(identity.stageId)) {
+            issues.push(issue("stage-id-unknown", identity.sectorId, { stageId: identity.stageId }));
         }
-        if (aliasRecord.runtimePreview) {
-            if (!previewSectorIds.has(aliasRecord.sectorId)) {
+        if (identity.runtimePreview) {
+            if (!previewSectorIds.has(identity.sectorId)) {
                 issues.push(
-                    issue("stage-alias-preview-sector-missing", aliasRecord.sectorId, {
-                        legacyStageAlias: aliasRecord.legacyStageAlias
+                    issue("stage-id-preview-sector-missing", identity.sectorId, {
+                        stageId: identity.stageId
                     })
                 );
             }
-            if (!landmarkIds.has(aliasRecord.landmarkId)) {
+            if (!landmarkIds.has(identity.landmarkId)) {
                 issues.push(
-                    issue("stage-alias-landmark-missing", aliasRecord.sectorId, {
-                        legacyStageAlias: aliasRecord.legacyStageAlias
+                    issue("stage-id-landmark-missing", identity.sectorId, {
+                        stageId: identity.stageId
                     })
                 );
             }
-            for (const objectiveId of aliasRecord.objectiveIds ?? []) {
+            for (const objectiveId of identity.objectiveIds ?? []) {
                 if (!objectiveIds.has(objectiveId)) {
                     issues.push(
-                        issue("stage-alias-objective-missing", aliasRecord.sectorId, {
-                            legacyStageAlias: aliasRecord.legacyStageAlias,
+                        issue("stage-id-objective-missing", identity.sectorId, {
+                            stageId: identity.stageId,
                             objectiveId
                         })
                     );
                 }
             }
-            for (const encounterId of aliasRecord.encounterIds ?? []) {
+            for (const encounterId of identity.encounterIds ?? []) {
                 if (!encounterIds.has(encounterId)) {
                     issues.push(
-                        issue("stage-alias-encounter-missing", aliasRecord.sectorId, {
-                            legacyStageAlias: aliasRecord.legacyStageAlias,
+                        issue("stage-id-encounter-missing", identity.sectorId, {
+                            stageId: identity.stageId,
                             encounterId
                         })
                     );
@@ -354,14 +348,14 @@ export function validateSectorCatalog(catalog) {
         }
     }
 
-    for (const expectedAlias of expectedAliases) {
-        if (!seenAliases.has(expectedAlias)) {
-            issues.push(issue("stage-alias-coverage-missing", null, { legacyStageAlias: expectedAlias }));
+    for (const expectedId of expectedIds) {
+        if (!seenIds.has(expectedId)) {
+            issues.push(issue("stage-id-coverage-missing", null, { stageId: expectedId }));
         }
     }
-    if (catalog.stageAliases.length !== expectedAliases.length) {
+    if (catalog.stageIdentities.length !== expectedIds.length) {
         issues.push(
-            issue("stage-alias-count", null, { expected: expectedAliases.length, actual: catalog.stageAliases.length })
+            issue("stage-id-count", null, { expected: expectedIds.length, actual: catalog.stageIdentities.length })
         );
     }
 

@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 5,
-    "legacyStageAlias": "6-5",
     "sourceAreaId": "sector-06-05",
-    "name": "PAD ACCESS ARRAY"
+    "name": "PAD ACCESS ARRAY",
+    "id": "6-5"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

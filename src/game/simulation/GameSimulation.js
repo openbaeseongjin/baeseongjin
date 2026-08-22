@@ -302,10 +302,10 @@ export class GameSimulation {
         const startArea = this.world.areas?.find(({ id }) => id === startAreaId) ?? this.world.areas?.[0];
         const startLandmark = this.isSeamlessSectorWorld
             ? (this.world.landmarks.find(
-                  ({ id, legacyAreaId, legacyStageAlias }) =>
+                  ({ id, areaId, stageId }) =>
                       id === (startLandmarkId ?? startAreaId) ||
-                      legacyAreaId === (startLandmarkId ?? startAreaId) ||
-                      legacyStageAlias === (startLandmarkId ?? startAreaId)
+                      areaId === (startLandmarkId ?? startAreaId) ||
+                      stageId === (startLandmarkId ?? startAreaId)
               ) ?? this.world.landmarks[0])
             : null;
         if (this.isSeamlessSectorWorld && startLandmark.order > 1) {
@@ -953,7 +953,7 @@ export class GameSimulation {
             playerId,
             respawnAnchorId: anchor.id,
             landmarkId: anchor.landmarkId,
-            stageAlias: anchor.legacyStageAlias,
+            stageId: anchor.stageId,
             position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
         });
         if (present) this.eventFlash = { type: "stage-saved", age: 0, ...event };
@@ -1175,8 +1175,7 @@ export class GameSimulation {
     advanceSectorProgressToLandmark(landmarkId) {
         if (!this.isSeamlessSectorWorld) return false;
         const target = this.world.landmarks.find(
-            ({ id, legacyAreaId, legacyStageAlias }) =>
-                id === landmarkId || legacyAreaId === landmarkId || legacyStageAlias === landmarkId
+            ({ id, areaId, stageId }) => id === landmarkId || areaId === landmarkId || stageId === landmarkId
         );
         if (!target) return false;
         this.worldProgress = new SectorProgressState(this.world);
@@ -1208,8 +1207,8 @@ export class GameSimulation {
         const player = this.#requirePlayer(playerId);
         if (this.isSeamlessSectorWorld) {
             const landmark = this.world.landmarks.find(
-                ({ id, legacyAreaId, legacyStageAlias }) =>
-                    id === areaId || legacyAreaId === areaId || legacyStageAlias === areaId
+                ({ id, areaId: sourceAreaId, stageId }) =>
+                    id === areaId || sourceAreaId === areaId || stageId === areaId
             );
             if (!landmark || !this.advanceSectorProgressToLandmark(landmark.id)) return null;
             this.setPlayerRespawnAnchor(playerId, landmark.respawnAnchorId);

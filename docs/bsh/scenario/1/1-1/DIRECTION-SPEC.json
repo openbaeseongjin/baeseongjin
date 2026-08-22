@@ -5,9 +5,9 @@
   "stage": {
     "sector": 1,
     "stage": 1,
-    "legacyStageAlias": "1-1",
     "sourceAreaId": "sector-01-01",
-    "name": "SERVICE SHAFT"
+    "name": "SERVICE SHAFT",
+    "id": "1-1"
   },
   "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
   "globalControl": {

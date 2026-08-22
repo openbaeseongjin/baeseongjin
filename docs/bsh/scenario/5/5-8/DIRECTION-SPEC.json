@@ -5,9 +5,9 @@
   "stage": {
     "sector": 5,
     "stage": 8,
-    "legacyStageAlias": "5-8",
     "sourceAreaId": "sector-05-08",
-    "name": "CONTINUITY COMMAND SPINE"
+    "name": "CONTINUITY COMMAND SPINE",
+    "id": "5-8"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

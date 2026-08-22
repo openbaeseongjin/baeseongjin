@@ -2,9 +2,9 @@
   "schemaVersion": "area-spec-v2",
   "authoringMode": "runtime",
   "stage": {
+    "id": "3-2",
     "sector": 3,
     "stage": 2,
-    "legacyStageAlias": "3-2",
     "sourceAreaId": "sector-03-02"
   },
   "editor": {
@@ -1081,18 +1081,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "provenance": {
-    "status": "runtime-generated",
-    "designSourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC-REV8-DESIGN.json",
-    "sourceSchemaVersion": "area-spec-v1",
-    "revision": {
-      "final": "REV8.0",
-      "designIteration": "REV2",
-      "supersedes": [
-        "REV1 linear scanner draft",
-        "legacy compact scanner gallery"
-      ]
-    }
-  }
+  "behaviorRefs": []
 }

@@ -1,10 +1,10 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
+    "id": "3-5",
     "sector": 3,
     "stage": 5,
-    "legacyStageAlias": "3-5",
     "sourceAreaId": "sector-03-05"
   },
   "editor": {
@@ -43,11 +43,11 @@
       "y": -32
     },
     "exit": {
-      "id": "sector-03-05:scenario-exit",
+      "id": "sector-03-05:exit",
       "x": 1376,
       "y": -1152
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-03-06",
     "surfaces": [
       {
         "id": "p0-entry",
@@ -423,17 +423,176 @@
       }
     ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-03-05:service-calibration-frame",
+        "kind": "augment-node",
+        "presentationId": "world-object:augment-node",
+        "position": {
+          "x": -160,
+          "y": -800
+        },
+        "coordinateAnchor": "center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-03-05:augment-selected",
+        "offerContract": "generic Augment v1"
+      },
+      {
+        "id": "sector-03-05:node-entry-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": -672,
+          "y": -288
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 512,
+            "height": 384
+          }
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "id": "sector-03-05:node-exit-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 960,
+          "y": -864
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1",
+            "swarm-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 512,
+            "height": 384
+          }
+        },
+        "rules": [
+          "kill-optional-for-stage",
+          "kill-required-for-access-module-b",
+          "no-rope-cut",
+          "activation-band-only"
+        ],
+        "accessModuleId": "sector-03:access-module:b"
+      },
+      {
+        "id": "sector-03-05:node-id",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -160,
+          "y": -826
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-05:node-id"
+        ]
+      },
+      {
+        "id": "sector-03-05:access-summary",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 416,
+          "y": -986
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-05:access-summary"
+        ]
+      },
+      {
+        "id": "sector-03-05:premium-atrium-ahead",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 1376,
+          "y": -1210
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-05:premium-atrium-ahead"
+        ]
+      },
+      {
+        "id": "sector-03-05:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 1296,
+          "y": -1152
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-03-05:exit-panel-engaged",
+        "gateId": "sector-03-05:gate",
+        "requiredObjectiveIds": [
+          "sector-03-05:final-deck-reached",
+          "sector-03-05:augment-selected"
+        ]
+      },
+      {
+        "id": "sector-03-05:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 1376,
+          "y": -1152
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-03-05:gate"
+      }
+    ],
     "objectives": [
+      {
+        "id": "sector-03-05:final-deck-reached",
+        "type": "reach",
+        "bounds": {
+          "x": 1216,
+          "y": -1184,
+          "width": 288,
+          "height": 96
+        }
+      },
       {
         "id": "sector-03-05:augment-selected",
         "type": "interact-choice",
         "sourceObjectId": "sector-03-05:service-calibration-frame"
-      },
-      {
-        "id": "sector-03-05:final-deck-reached",
-        "type": "reach",
-        "target": "exit-deck"
       },
       {
         "id": "sector-03-05:exit-panel-engaged",
@@ -447,15 +606,40 @@
     ],
     "windZones": [],
     "scannerGroups": [],
-    "storyTriggers": [],
-    "routes": [],
+    "storyTriggers": [
+      "commercial-service-node",
+      "augment-available",
+      "authority-scope",
+      "calibration"
+    ],
+    "routes": [
+      "safe",
+      "flow",
+      "recovery"
+    ],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [
+      "commercial-service-node",
+      "rest"
+    ],
+    "gate": {
+      "id": "sector-03-05:gate",
+      "nextAreaId": "sector-03-06",
+      "requiredObjectiveIds": [
+        "sector-03-05:exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 1350,
+        "y": -1214,
+        "width": 52,
+        "height": 62
+      }
+    }
   },
   "anchors": [
     {
       "target": {
-        "id": "g1-surface",
+        "id": "sector-03-05:g1-surface",
         "x": -960,
         "y": -224,
         "properties": {
@@ -463,11 +647,12 @@
         }
       },
       "landmark": {
-        "id": "g1",
+        "id": "sector-03-05:g1",
         "x": -960,
         "y": -224,
         "properties": {
-          "label": "g1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G1",
           "coordinateAnchor": "center",
           "sourceId": "g1"
         }
@@ -475,7 +660,7 @@
     },
     {
       "target": {
-        "id": "g2-surface",
+        "id": "sector-03-05:g2-surface",
         "x": -640,
         "y": -448,
         "properties": {
@@ -483,11 +668,12 @@
         }
       },
       "landmark": {
-        "id": "g2",
+        "id": "sector-03-05:g2",
         "x": -640,
         "y": -448,
         "properties": {
-          "label": "g2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G2",
           "coordinateAnchor": "center",
           "sourceId": "g2"
         }
@@ -495,7 +681,7 @@
     },
     {
       "target": {
-        "id": "g3-surface",
+        "id": "sector-03-05:g3-surface",
         "x": -512,
         "y": -736,
         "properties": {
@@ -503,11 +689,12 @@
         }
       },
       "landmark": {
-        "id": "g3",
+        "id": "sector-03-05:g3",
         "x": -512,
         "y": -736,
         "properties": {
-          "label": "g3",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G3",
           "coordinateAnchor": "center",
           "sourceId": "g3"
         }
@@ -515,7 +702,7 @@
     },
     {
       "target": {
-        "id": "g4-surface",
+        "id": "sector-03-05:g4-surface",
         "x": 192,
         "y": -928,
         "properties": {
@@ -523,11 +710,12 @@
         }
       },
       "landmark": {
-        "id": "g4",
+        "id": "sector-03-05:g4",
         "x": 192,
         "y": -928,
         "properties": {
-          "label": "g4",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G4",
           "coordinateAnchor": "center",
           "sourceId": "g4"
         }
@@ -535,7 +723,7 @@
     },
     {
       "target": {
-        "id": "g5-surface",
+        "id": "sector-03-05:g5-surface",
         "x": 768,
         "y": -832,
         "properties": {
@@ -543,11 +731,12 @@
         }
       },
       "landmark": {
-        "id": "g5",
+        "id": "sector-03-05:g5",
         "x": 768,
         "y": -832,
         "properties": {
-          "label": "g5",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G5",
           "coordinateAnchor": "center",
           "sourceId": "g5"
         }
@@ -555,7 +744,7 @@
     },
     {
       "target": {
-        "id": "g6-surface",
+        "id": "sector-03-05:g6-surface",
         "x": 1120,
         "y": -1056,
         "properties": {
@@ -563,584 +752,17 @@
         }
       },
       "landmark": {
-        "id": "g6",
+        "id": "sector-03-05:g6",
         "x": 1120,
         "y": -1056,
         "properties": {
-          "label": "g6",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G6",
           "coordinateAnchor": "center",
           "sourceId": "g6"
         }
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "sourcePath": "docs/bsh/scenario/3/3-5/AREA-SPEC-REV8-DESIGN.json",
-    "sourceSchemaVersion": "area-spec-v1",
-    "boundsProvenance": "expanded-for-authored-points",
-    "sourceSnapshot": {
-      "schemaVersion": "area-spec-v1",
-      "status": "DESIGN LOCKED",
-      "baselineCommit": "d39cbb49d3d8247caf2542393994704292dd5002",
-      "revision": {
-        "final": "REV8.0",
-        "designIteration": "REV3",
-        "supersedes": [
-          "REV1 plant-core Z",
-          "REV2 industrial lower-trench / calibration-pod / busway identity",
-          "legacy compact commercial service node"
-        ]
-      },
-      "stage": {
-        "sector": 3,
-        "stage": 5,
-        "sourceAreaId": "sector-03-05",
-        "canonicalName": "COMMERCIAL OPERATIONS HUB",
-        "runtimeCurrentName": "COMMERCIAL SERVICE NODE",
-        "subtitle": "REST / AUGMENT SERVICE",
-        "role": "INTENTIONAL COMPRESSION / AUGMENT OFFER #3 / ACCESS MODULE B",
-        "sectorIdentity": "CENTRAL EXCHANGE COMPLEX — vertical commercial / exchange complex"
-      },
-      "bounds": {
-        "width": 2688,
-        "height": 1248
-      },
-      "directionSignature": [
-        "DOWN_RIGHT",
-        "UP",
-        "UP_RIGHT",
-        "DOWN_RIGHT",
-        "UP_RIGHT"
-      ],
-      "entry": {
-        "id": "sector-03-05:entry",
-        "x": -1184,
-        "y": -64
-      },
-      "surfaces": [
-        {
-          "id": "p0-entry",
-          "kind": "safe-deck",
-          "x": -1184,
-          "y": 0,
-          "width": 224,
-          "height": 32
-        },
-        {
-          "id": "p1-delivery-approach",
-          "kind": "platform",
-          "x": -672,
-          "y": -288,
-          "width": 256,
-          "height": 26
-        },
-        {
-          "id": "p2-tenant-delivery-passage",
-          "kind": "platform",
-          "x": -640,
-          "y": -544,
-          "width": 256,
-          "height": 26
-        },
-        {
-          "id": "p3-operations-control-balcony",
-          "kind": "safe-deck",
-          "x": -160,
-          "y": -800,
-          "width": 448,
-          "height": 30
-        },
-        {
-          "id": "p4-signage-access-catwalk",
-          "kind": "safe-deck",
-          "x": 416,
-          "y": -960,
-          "width": 320,
-          "height": 28
-        },
-        {
-          "id": "p5-tenant-transfer-deck",
-          "kind": "platform",
-          "x": 960,
-          "y": -864,
-          "width": 256,
-          "height": 28
-        },
-        {
-          "id": "exit-deck",
-          "kind": "safe-deck",
-          "x": 1376,
-          "y": -1152,
-          "width": 256,
-          "height": 28
-        },
-        {
-          "id": "staff-partition",
-          "kind": "solid-los-blocker",
-          "x": -415,
-          "y": -625,
-          "width": 80,
-          "height": 420,
-          "properties": {
-            "role": "staff-access / fire partition separating delivery circulation from protected operations balcony",
-            "gameplayRelevant": true
-          }
-        }
-      ],
-      "grappleTargets": [
-        {
-          "id": "g1",
-          "x": -960,
-          "y": -224,
-          "role": "delivery-approach"
-        },
-        {
-          "id": "g2",
-          "x": -640,
-          "y": -448,
-          "role": "delivery-passage-entry"
-        },
-        {
-          "id": "g3",
-          "x": -512,
-          "y": -736,
-          "role": "vertical-rise-to-operations"
-        },
-        {
-          "id": "g4",
-          "x": 192,
-          "y": -928,
-          "role": "operations-to-signage-catwalk"
-        },
-        {
-          "id": "g5",
-          "x": 768,
-          "y": -832,
-          "role": "deliberate-side-drop-to-transfer"
-        },
-        {
-          "id": "g6",
-          "x": 1120,
-          "y": -1056,
-          "role": "final-rise-to-upper-retail-link"
-        }
-      ],
-      "mainRoute": [
-        {
-          "id": "entry",
-          "x": -1184,
-          "y": -64
-        },
-        {
-          "id": "g1",
-          "x": -960,
-          "y": -224
-        },
-        {
-          "id": "p1-left",
-          "x": -800,
-          "y": -288
-        },
-        {
-          "id": "p1-right",
-          "x": -544,
-          "y": -288
-        },
-        {
-          "id": "g2",
-          "x": -640,
-          "y": -448
-        },
-        {
-          "id": "p2-left",
-          "x": -768,
-          "y": -544
-        },
-        {
-          "id": "p2-right",
-          "x": -512,
-          "y": -544
-        },
-        {
-          "id": "g3",
-          "x": -512,
-          "y": -736
-        },
-        {
-          "id": "p3-left",
-          "x": -384,
-          "y": -800
-        },
-        {
-          "id": "p3-right",
-          "x": 64,
-          "y": -800
-        },
-        {
-          "id": "g4",
-          "x": 192,
-          "y": -928
-        },
-        {
-          "id": "p4-left",
-          "x": 256,
-          "y": -960
-        },
-        {
-          "id": "p4-right",
-          "x": 576,
-          "y": -960
-        },
-        {
-          "id": "g5",
-          "x": 768,
-          "y": -832
-        },
-        {
-          "id": "p5-left",
-          "x": 832,
-          "y": -864
-        },
-        {
-          "id": "p5-right",
-          "x": 1088,
-          "y": -864
-        },
-        {
-          "id": "g6",
-          "x": 1120,
-          "y": -1056
-        },
-        {
-          "id": "exit-left",
-          "x": 1248,
-          "y": -1152
-        },
-        {
-          "id": "exit",
-          "x": 1376,
-          "y": -1152
-        }
-      ],
-      "safeZones": [
-        {
-          "id": "operations-control-balcony",
-          "surfaceId": "p3-operations-control-balcony",
-          "contract": [
-            "node immediately usable",
-            "entry guard no LOS",
-            "exit guard no LOS",
-            "no Scanner",
-            "no Patrol",
-            "no environmental hazard",
-            "no kill prerequisite",
-            "supports multiple players standing around node"
-          ]
-        },
-        {
-          "id": "exit-safe",
-          "surfaceId": "exit-deck",
-          "contract": [
-            "no final pressure",
-            "3-6 threshold readable"
-          ]
-        }
-      ],
-      "recoveryPoints": [
-        {
-          "id": "recovery-a",
-          "x": -256,
-          "y": -624,
-          "width": 256,
-          "retrySecondsTarget": [
-            3,
-            5
-          ],
-          "cannotBypass": [
-            "operations-control-balcony"
-          ]
-        },
-        {
-          "id": "recovery-b",
-          "x": 448,
-          "y": -768,
-          "width": 256,
-          "retrySecondsTarget": [
-            3,
-            5
-          ],
-          "cannotBypass": [
-            "tenant-transfer-deck",
-            "exit-deck"
-          ]
-        }
-      ],
-      "objects": [
-        {
-          "id": "service-calibration-frame",
-          "stableRuntimeId": "sector-03-05:service-calibration-frame",
-          "kind": "augment-node",
-          "x": -160,
-          "y": -800,
-          "worldFacingName": "STAFF EQUIPMENT CALIBRATION FRAME",
-          "properties": {
-            "objectiveId": "sector-03-05:augment-selected",
-            "objectiveType": "interact-choice",
-            "interactionRadius": 72,
-            "sourceAdapter": "authored augment-node only",
-            "offerContract": "generic Augment v1",
-            "killRequired": false,
-            "accessModuleRequired": false,
-            "worldPause": false,
-            "invulnerabilityGranted": false
-          }
-        },
-        {
-          "id": "node-entry-guard",
-          "stableRuntimeId": "sector-03-05:node-entry-guard",
-          "kind": "sentry-slot",
-          "x": -672,
-          "y": -288,
-          "properties": {
-            "enemySelection": {
-              "authority": "SECTOR_03_SUPPORT_POOL",
-              "allowedEnemyTypes": [
-                "pursuit-drone-t1",
-                "shield-drone-t1",
-                "artillery-drone-t1",
-                "support-drone-t1"
-              ]
-            },
-            "rules": [
-              "kill-optional",
-              "no-rope-cut",
-              "activation-band-only"
-            ],
-            "activationIntent": "tenant delivery passage only",
-            "cannotPressure": [
-              "operations-control-balcony",
-              "signage-access-catwalk"
-            ]
-          }
-        },
-        {
-          "id": "node-exit-guard",
-          "stableRuntimeId": "sector-03-05:node-exit-guard",
-          "kind": "sentry-slot",
-          "x": 960,
-          "y": -864,
-          "properties": {
-            "enemySelection": {
-              "authority": "SECTOR_03_LATE_POOL",
-              "allowedEnemyTypes": [
-                "pursuit-drone-t1",
-                "shield-drone-t1",
-                "artillery-drone-t1",
-                "support-drone-t1",
-                "swarm-drone-t1"
-              ]
-            },
-            "accessModuleId": "sector-03:access-module:b",
-            "rules": [
-              "kill-optional-for-stage",
-              "kill-required-for-access-module-b",
-              "no-rope-cut",
-              "activation-band-only"
-            ],
-            "activationIntent": "tenant transfer deck only",
-            "cannotPressure": [
-              "operations-control-balcony",
-              "signage-access-catwalk"
-            ]
-          }
-        },
-        {
-          "id": "node-id",
-          "stableRuntimeId": "sector-03-05:node-id",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "COMMERCIAL FACILITY SERVICE NODE",
-                "detail": "",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "access-summary",
-          "stableRuntimeId": "sector-03-05:access-summary",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "EMPLOYEE CLASS",
-                "detail": "VERTICAL MAINTENANCE",
-                "status": "VERIFIED"
-              },
-              {
-                "title": "LOCAL SERVICE CHANNEL",
-                "detail": "AVAILABLE",
-                "status": "VERIFIED"
-              },
-              {
-                "title": "VERTICAL ROUTE AUTHORIZATION",
-                "detail": "INVALID",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "exit-panel",
-          "stableRuntimeId": "sector-03-05:exit-panel",
-          "kind": "interaction",
-          "properties": {
-            "objectiveId": "sector-03-05:exit-panel-engaged",
-            "requiredObjectiveIds": [
-              "sector-03-05:final-deck-reached",
-              "sector-03-05:augment-selected"
-            ]
-          }
-        }
-      ],
-      "story": {
-        "function": "consolidate maintenance-local vs vertical-route authorization distinction while resting/building",
-        "bark": {
-          "text": "…내 구역 안에서는 통하는데.",
-          "runtimeCapability": "VERIFIED — local Player Bark presentation exists",
-          "stageAuthoredStatus": "NOT IMPLEMENTED — 3-5 bark not yet authored",
-          "presentation": "speaker-head local bark, never System Toast"
-        }
-      },
-      "objectives": [
-        {
-          "id": "sector-03-05:augment-selected",
-          "type": "interact-choice",
-          "sourceObjectId": "sector-03-05:service-calibration-frame"
-        },
-        {
-          "id": "sector-03-05:final-deck-reached",
-          "type": "reach",
-          "target": "exit-deck"
-        },
-        {
-          "id": "sector-03-05:exit-panel-engaged",
-          "type": "interact",
-          "sourceObjectId": "sector-03-05:exit-panel",
-          "requiredObjectiveIds": [
-            "sector-03-05:final-deck-reached",
-            "sector-03-05:augment-selected"
-          ]
-        }
-      ],
-      "gate": {
-        "completionMode": "physical-crossing",
-        "nextAreaId": "sector-03-06",
-        "requiredObjectiveIds": [
-          "sector-03-05:exit-panel-engaged"
-        ]
-      },
-      "scanner": {
-        "active": false
-      },
-      "patrol": {
-        "active": false
-      },
-      "wind": {
-        "active": false
-      },
-      "ropeCut": {
-        "active": false
-      },
-      "accessModule": {
-        "id": "sector-03:access-module:b",
-        "carrierStableRuntimeId": "sector-03-05:node-exit-guard",
-        "requiredForLocalExit": false
-      },
-      "augment": {
-        "sourceStableRuntimeId": "sector-03-05:service-calibration-frame",
-        "offerNumber": 3,
-        "catalog": "generic Augment v1 — 22 cards",
-        "requiresSpecificCard": false,
-        "baseRopeClearable": true,
-        "multiplayerIndependentSelection": true
-      },
-      "sectorIdentity": {
-        "allowed": [
-          "tenant delivery/staff passage",
-          "commercial operations balcony",
-          "atrium signage/lighting maintenance catwalk",
-          "tenant/staff transfer deck",
-          "upper retail back-of-house link"
-        ],
-        "forbidden": [
-          "plant room as dominant identity",
-          "busway/power-distribution identity",
-          "switchgear deck",
-          "industrial service trench",
-          "Sector04 infrastructure language"
-        ]
-      },
-      "uniqueness": {
-        "signature": "COMMERCIAL BACK-OF-HOUSE VERTICAL INTERCHANGE",
-        "directionRhythm": "↘ → ↑ → ↗ → ↘ → ↗",
-        "maximumMeaningfulOverlap": 1,
-        "comparisons": {
-          "3-4": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "commercial back-of-house identity"
-            ]
-          },
-          "3-3": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "direction change"
-            ]
-          },
-          "3-2": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "maintenance access to commercial architecture"
-            ]
-          },
-          "1-4": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "safe Augment node"
-            ]
-          },
-          "2-3": {
-            "verdict": "PASS",
-            "overlapCount": 1,
-            "overlap": [
-              "Augment service function"
-            ]
-          }
-        }
-      },
-      "forbidden": [
-        "industrial/facility sector visual identity",
-        "third enemy",
-        "Scanner",
-        "Patrol",
-        "Wind",
-        "Rope Cut",
-        "entry guard kill gate for Node",
-        "Access B required for local exit",
-        "enemy fire into Operations Balcony",
-        "world pause during chooser",
-        "specific Augment required for mandatory route",
-        "System Toast substitute for Player Bark"
-      ]
-    }
-  }
+  "behaviorRefs": []
 }

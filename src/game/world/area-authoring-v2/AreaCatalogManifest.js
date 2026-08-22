@@ -57,8 +57,11 @@ export function validateAreaCatalogManifest(
             catalogOutputPath: manifest.catalogOutputPath ?? null
         });
     }
-    if (typeof manifest.catalogId !== "string" || !/^sector-\d{2}$/.test(manifest.catalogId)) {
+    if (typeof manifest.catalogId !== "string" || manifest.catalogId.length === 0) {
         issue(issues, "manifest-catalog-id");
+    }
+    if (typeof manifest.catalogRevision !== "string" || manifest.catalogRevision.length === 0) {
+        issue(issues, "manifest-catalog-revision");
     }
     if (!Array.isArray(manifest.stageSources)) {
         issue(issues, "manifest-stage-sources-invalid");
@@ -88,7 +91,7 @@ export function validateAreaCatalogManifest(
                 expectedSectorId: identity.sectorId
             });
         }
-        if (entry.source !== "legacy" && entry.source !== "generated") {
+        if (entry.source !== "generated") {
             issue(issues, "manifest-source-invalid", { stageId: entry.stageId, source: entry.source ?? null });
         }
         if (!validPath(entry.sourcePath)) {
@@ -96,14 +99,9 @@ export function validateAreaCatalogManifest(
         } else if (sourcePathExists && !sourcePathExists(entry.sourcePath)) {
             issue(issues, "manifest-source-path-missing", { stageId: entry.stageId, sourcePath: entry.sourcePath });
         }
-        if (entry.source === "generated" && !validPath(entry.outputPath)) {
+        if (!validPath(entry.outputPath)) {
             issue(issues, "manifest-generated-output-path-invalid", { stageId: entry.stageId });
-        } else if (
-            entry.source === "generated" &&
-            requireGeneratedOutputs &&
-            sourcePathExists &&
-            !sourcePathExists(entry.outputPath)
-        ) {
+        } else if (requireGeneratedOutputs && sourcePathExists && !sourcePathExists(entry.outputPath)) {
             issue(issues, "manifest-generated-output-missing", {
                 stageId: entry.stageId,
                 outputPath: entry.outputPath

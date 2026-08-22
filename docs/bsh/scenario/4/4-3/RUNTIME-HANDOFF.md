@@ -8,7 +8,7 @@ Before code changes, re-read latest main and inspect:
 - `src/game/config.js`
 - current `PursuitEnemyBehavior`
 - `EnemyMobility.js`
-- current `Sector04AreaCatalog`
+- canonical `AREA-SPEC.v2.json` and current generated-area migration contract
 - current objective/interactable helpers
 - current Direction Runtime/compiler/validator
 - latest AREA-SPEC standard + validator registry

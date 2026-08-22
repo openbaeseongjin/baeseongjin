@@ -85,7 +85,7 @@ function stageSavepointEvents(world, players, respawnAnchorIdByPlayerId) {
                 playerId: player.id,
                 respawnAnchorId: anchor.id,
                 landmarkId: anchor.landmarkId,
-                stageAlias: anchor.legacyStageAlias,
+                stageId: anchor.stageId,
                 position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
             })
         );
