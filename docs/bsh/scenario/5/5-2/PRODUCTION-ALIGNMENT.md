@@ -15,7 +15,7 @@ That older creative direction is superseded for current authoring by:
 - `shield-drone-t1` exists.
 - `ShieldEnemyBehavior` turns guardDirection toward the nearest target.
 - Default guardHalfAngle is `π/3`, producing ~120° total frontal guarded arc.
-- Default turnSpeed is `π × 1.5 rad/s`.
+- Default guard tracking uses maximum angular acceleration `0.6 rad/s²`, maximum angular speed `0.55 rad/s`, damping `1.4`, and tracking response `0.9`; angular velocity is part of the behavior snapshot.
 - Rope Impact checks `enemy.blocksImpactFrom(owner.physics.position)` before creating an impact.
 - `shield-drone-t1` also uses projectile attack.
 
@@ -26,7 +26,7 @@ Do not implement AEGIS as a static shield prop.
 The Stage must be tuned around:
 - dynamic shield turn,
 - visible partition flank,
-- quick angle change,
+- a readable side/rear window created by deliberately slow shield acceleration,
 - optional immediate side/rear impact or bypass.
 
 ## Not required

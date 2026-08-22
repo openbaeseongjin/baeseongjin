@@ -799,10 +799,15 @@ function renderLayers() {
         );
 }
 
-function appendField(container, { label, value, type = "number", disabled = false, onChange, step = "any" }) {
+function appendField(
+    container,
+    { label, value, type = "number", disabled = false, onChange, step = "any", minimum = null, maximum = null }
+) {
     const wrapper = element("label", { className: "field", text: label });
     const input = element("input", { attributes: { type, step } });
     input.value = String(value ?? "");
+    if (Number.isFinite(minimum)) input.min = String(minimum);
+    if (Number.isFinite(maximum)) input.max = String(maximum);
     input.disabled = disabled;
     if (onChange)
         input.addEventListener("change", () => onChange(type === "number" ? Number(input.value) : input.value));
@@ -852,6 +857,37 @@ function appendCheck(container, { label, checked, onChange, disabled = false }) 
     input.addEventListener("change", () => onChange(input.checked));
     wrapper.append(input, element("span", { text: label }));
     container.append(wrapper);
+}
+
+function appendEnemyAdditionalInfo(container, enemy, selectedId) {
+    const definitions = AREA_ENEMY_EDITOR_DEFINITION.additionalFields(enemy);
+    if (definitions.length === 0) return false;
+    const panel = element("fieldset", { className: "enemy-additional-info" });
+    panel.append(element("legend", { text: "추가 정보" }));
+    for (const definition of definitions) {
+        appendField(panel, {
+            label: definition.label,
+            value: enemy[definition.key] ?? definition.defaultValue,
+            step: definition.step,
+            minimum: definition.minimum,
+            maximum: definition.maximum,
+            onChange: (value) =>
+                applyMutation({
+                    domain: "enemySlots",
+                    label: `Set enemy ${definition.key}`,
+                    apply: (next) => {
+                        const object = next.definition.objects.find(({ id }) => id === selectedId);
+                        object[definition.key] = Math.max(
+                            definition.minimum,
+                            Math.min(definition.maximum, Math.round(value))
+                        );
+                        return true;
+                    }
+                })
+        });
+    }
+    container.append(panel);
+    return true;
 }
 
 function replacePointer(domain, label, pointer, value) {
@@ -1350,6 +1386,7 @@ function renderInspector() {
                     });
                 }
             });
+            appendEnemyAdditionalInfo(fields, enemy, selected.id);
             if (enemy.activationSpec) {
                 appendSelect(fields, {
                     label: "활성화 기준점",

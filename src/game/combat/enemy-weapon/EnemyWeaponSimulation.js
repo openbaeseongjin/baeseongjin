@@ -10,7 +10,7 @@ const withWeaponCapability = createSimulationCapabilityMixin({
     apply({ targets, projectiles, registry, config, surfaces = [], dt }) {
         const result = this.weaponState.advance(this, {
             visibleTargets: visibleEnemyTargets(this, targets, surfaces),
-            range: config.enemyAttackRange,
+            range: this.weaponRange ?? config.enemyAttackRange,
             projectiles,
             registry,
             config,

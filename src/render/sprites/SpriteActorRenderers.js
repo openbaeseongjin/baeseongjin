@@ -162,7 +162,7 @@ export class SpriteEnemyRenderer {
                 presentation.enemyType,
                 presentation.primaryState
             );
-            const renderSize = spritePresentation?.size ?? this.size;
+            const renderSize = presentation.renderSize ?? spritePresentation?.size ?? this.size;
             const radius = Math.max(renderSize.width, renderSize.height, (enemy.radius ?? 0) * 2) * 0.5 + 14;
             if (!isVisible(viewport, circleBounds(enemy.position, radius))) continue;
             drawn += 1;
@@ -202,7 +202,7 @@ export class SpriteEnemyRenderer {
                     image: this.assets.imageFor(frame.atlasId),
                     frame,
                     position: enemy.position,
-                    size: spritePresentation.size,
+                    size: renderSize,
                     anchor: spritePresentation.anchor,
                     offset: spritePresentation.offset,
                     opacity: spritePresentation.opacity,
@@ -222,7 +222,7 @@ export class SpriteEnemyRenderer {
                         image: this.assets.imageFor(spritePresentation.aimLayer.frame.atlasId),
                         frame: spritePresentation.aimLayer.frame,
                         position: enemy.position,
-                        size: spritePresentation.size,
+                        size: renderSize,
                         anchor: spritePresentation.anchor,
                         offset: spritePresentation.offset,
                         opacity: spritePresentation.opacity,
@@ -239,7 +239,7 @@ export class SpriteEnemyRenderer {
                         image: this.assets.imageFor(guardFrame.atlasId),
                         frame: guardFrame,
                         position: enemy.position,
-                        size: spritePresentation.size,
+                        size: renderSize,
                         anchor: spritePresentation.anchor,
                         offset: spritePresentation.offset,
                         opacity: spritePresentation.opacity,
@@ -256,20 +256,28 @@ export class SpriteEnemyRenderer {
                         ? { a: "#78350f", b: "#fbbf24", c: "#fef3c7" }
                         : { a: "#881337", b: "#fb7185", c: "#fecdd3" },
                     position: enemy.position,
-                    size: this.size
+                    size: renderSize
                 });
             }
             if (!usesProductionSprite && presentation.drone) {
+                const halfWidth = renderSize.width * 0.5;
+                const halfHeight = renderSize.height * 0.5;
                 context.strokeStyle = "#94a3b8";
                 context.lineWidth = 2;
                 context.beginPath();
-                context.moveTo(enemy.position.x - 20, enemy.position.y - 12);
-                context.lineTo(enemy.position.x + 20, enemy.position.y - 12);
+                context.moveTo(enemy.position.x - halfWidth, enemy.position.y - halfHeight * 0.7);
+                context.lineTo(enemy.position.x + halfWidth, enemy.position.y - halfHeight * 0.7);
                 context.stroke();
             }
             if (!usesProductionSprite) {
+                const sensorSize = Math.max(3, renderSize.width / 6);
                 context.fillStyle = presentation.sensorColor;
-                context.fillRect(enemy.position.x - 11, enemy.position.y - 3, 6, 6);
+                context.fillRect(
+                    enemy.position.x - renderSize.width * 0.3,
+                    enemy.position.y - sensorSize * 0.5,
+                    sensorSize,
+                    sensorSize
+                );
             }
         }
         for (const animationId of this.controllers.keys()) {

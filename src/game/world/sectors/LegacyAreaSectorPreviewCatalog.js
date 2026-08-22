@@ -71,6 +71,7 @@ function importEncounters(area, landmarkId, legacyStageAlias) {
                 enemySelection: object.enemySelection ?? {
                     fixedEnemyType: object.enemyType ?? object.kind
                 },
+                swarmMemberCount: object.swarmMemberCount,
                 accessModuleId: object.accessModuleId,
                 legacyStageAlias
             });

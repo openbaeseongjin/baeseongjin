@@ -17,7 +17,9 @@ export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     AUGMENT_SHOT_ENDED: ACTION_EVENT_TYPE.SHOT_ENDED,
     PREDICTED_AUGMENT_SHOT_ENDED: "predicted-augment-shot-ended",
     PLAYER_FALL_DAMAGED: "player-fall-damaged",
-    PREDICTED_PLAYER_FALL_DAMAGED: "predicted-player-fall-damaged"
+    PREDICTED_PLAYER_FALL_DAMAGED: "predicted-player-fall-damaged",
+    BOSS_PLAYER_HIT: "boss-player-hit",
+    ENEMY_BEHAVIOR_PLAYER_HIT: "enemy-behavior-player-hit"
 });
 
 export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
@@ -107,6 +109,10 @@ const EVENT_GROUP = Object.freeze({
     FALL_DAMAGE: Object.freeze([
         CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_FALL_DAMAGED,
         CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_FALL_DAMAGED
+    ]),
+    DIRECT_PLAYER_HIT: Object.freeze([
+        CLIENT_FEEDBACK_EVENT_TYPE.BOSS_PLAYER_HIT,
+        CLIENT_FEEDBACK_EVENT_TYPE.ENEMY_BEHAVIOR_PLAYER_HIT
     ])
 });
 
@@ -169,6 +175,17 @@ export function impactState(resolution) {
     return { age: 0, lifetime: definition.lifetime, strength: definition.strength };
 }
 
+export function mergeImpactState(current, incoming) {
+    if (!current) return incoming;
+    const lifetime = Math.max(current.lifetime, incoming.lifetime);
+    const remaining = Math.max(current.lifetime - current.age, incoming.lifetime - incoming.age);
+    return {
+        age: Math.max(0, lifetime - remaining),
+        lifetime,
+        strength: Math.max(current.strength, incoming.strength)
+    };
+}
+
 export function augmentEffectLifetime(effectId) {
     return AUGMENT_EFFECT_LIFETIME[effectId] ?? AUGMENT_EFFECT_LIFETIME.DEFAULT;
 }
@@ -183,7 +200,7 @@ export function eventSourceKind(event) {
 
 export function createClientFeedbackEvent(event, resolution, index = 0) {
     const parameters = event.parameters ?? {};
-    const targetId = event.targetId ?? parameters.targetId ?? null;
+    const targetId = event.targetId ?? event.playerId ?? parameters.targetId ?? null;
     const sourcePlayerId = event.sourcePlayerId ?? parameters.sourcePlayerId ?? null;
     const personalViewerId = [
         CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT,
@@ -283,6 +300,17 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
         predicate: (event) => eventEffectId(event) === CLIENT_FEEDBACK_EFFECT_ID.ELECTRIFIED_ROPE,
         present: (event, context) => context.appendParticle(event, { presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_CONTACT })
     }),
+    ARTILLERY_HIT_PARTICLE: new ClientFeedbackEventDefinition({
+        predicate: (event) =>
+            event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.ENEMY_BEHAVIOR_PLAYER_HIT &&
+            event.sourceKind === CLIENT_FEEDBACK_PRESET_ID.ARTILLERY_STRIKE,
+        present: (event, context) =>
+            context.appendParticle(event, {
+                presetId: CLIENT_FEEDBACK_PRESET_ID.ARTILLERY_STRIKE,
+                position: event.impactPosition ?? event.position,
+                bounds: event.bounds ?? null
+            })
+    }),
     FALL_DAMAGE_COMBAT: new ClientFeedbackEventDefinition({
         predicate: (event) => EVENT_GROUP.FALL_DAMAGE.includes(event.eventType),
         present: (event, context) => context.appendCombatEvent(event, CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE)
@@ -291,6 +319,10 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
         predicate: (event) =>
             EVENT_GROUP.RESOLVE.includes(event.eventType) && COMBAT_RESOLUTIONS.includes(event.resolution),
         present: (event, context) => context.appendCombatEvent(event, event.resolution)
+    }),
+    DIRECT_PLAYER_HIT_COMBAT: new ClientFeedbackEventDefinition({
+        predicate: (event) => EVENT_GROUP.DIRECT_PLAYER_HIT.includes(event.eventType),
+        present: (event, context) => context.appendCombatEvent(event, CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT)
     }),
     PERSONAL_IMPACT: new ClientFeedbackEventDefinition({
         predicate: () => true,

@@ -45,11 +45,17 @@ function actionStartBinding(event, context) {
 
 function playerHitBinding(event, context) {
     const isFallDamage =
-        event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged";
+        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_FALL_DAMAGED ||
+        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_FALL_DAMAGED;
+    const isDirectPlayerHit =
+        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.BOSS_PLAYER_HIT ||
+        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.ENEMY_BEHAVIOR_PLAYER_HIT;
     if (
         !isFallDamage &&
-        ((event.eventType !== "resolve" && event.eventType !== "predicted-resolve") ||
-            event.resolution !== "player-hit")
+        !isDirectPlayerHit &&
+        ((event.eventType !== CLIENT_FEEDBACK_EVENT_TYPE.RESOLVE &&
+            event.eventType !== CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_RESOLVE) ||
+            event.resolution !== CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT)
     ) {
         return null;
     }
@@ -198,3 +204,7 @@ export class AudioEventBindings {
         this.host.stopAll();
     }
 }
+import {
+    CLIENT_FEEDBACK_EVENT_TYPE,
+    CLIENT_FEEDBACK_RESOLUTION
+} from "../game/combat/ClientFeedbackEventDefinition.js";

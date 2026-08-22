@@ -7,6 +7,7 @@ import { validateAreaCatalog } from "../AreaDefinitionValidator.js";
 import { resolveEnemySlot } from "../EnemyEncounterSelection.js";
 import { evaluateWindZone } from "../WorldForceField.js";
 import { isKnownEnemyType } from "../../combat/EnemyArchetypeCatalog.js";
+import { SWARM_MEMBER_COUNT } from "../../EnemyType.js";
 import { resolveObjectTriggerBounds } from "../areas/AreaDefinition.js";
 import {
     AREA_SPEC_V2,
@@ -79,6 +80,17 @@ function validateEditableEnemy(issues, file, object, areaBounds) {
                 message: cause instanceof Error ? cause.message : String(cause)
             });
         }
+    }
+    if (
+        object.swarmMemberCount !== undefined &&
+        (!Number.isSafeInteger(object.swarmMemberCount) ||
+            object.swarmMemberCount < SWARM_MEMBER_COUNT.MINIMUM ||
+            object.swarmMemberCount > SWARM_MEMBER_COUNT.MAXIMUM)
+    ) {
+        issue(issues, file, "enemy-swarm-member-count-invalid", {
+            id: object.id ?? null,
+            swarmMemberCount: object.swarmMemberCount
+        });
     }
     if (object.activationSpec !== undefined) {
         try {

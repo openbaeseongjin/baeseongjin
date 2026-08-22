@@ -68,7 +68,7 @@ Player Bark: **NONE**
 Current main already contains:
 - `shield-drone-t1`
 - directional `ShieldEnemyBehavior`
-- shield turn toward nearest target
+- slow angular-acceleration shield tracking toward the nearest target within the extended guard range
 - frontal Rope Impact blocking through `blocksImpactFrom`
 
 The Stage must use the existing behavior before inventing new AEGIS logic.

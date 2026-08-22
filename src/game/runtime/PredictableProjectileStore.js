@@ -82,7 +82,10 @@ export class PredictableProjectileStore {
                 feedbackEvents.push(event);
                 continue;
             }
-            if (event.eventType !== "spawn") continue;
+            if (event.eventType !== "spawn") {
+                feedbackEvents.push(event);
+                continue;
+            }
             const authorityPredictionId = event.parameters.predictionId;
             let predictedObjectId = authorityPredictionId
                 ? this.objectIdByPredictionId.get(authorityPredictionId)

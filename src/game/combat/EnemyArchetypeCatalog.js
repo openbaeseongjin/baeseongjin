@@ -7,8 +7,56 @@ import {
     SwarmEnemyBehavior
 } from "./EnemyBehaviors.js";
 import { ENEMY_BEHAVIOR_STATES } from "./EnemyStateCatalog.js";
-import { ENEMY_TYPE } from "../EnemyType.js";
+import { ENEMY_TYPE, SWARM_MEMBER_COUNT } from "../EnemyType.js";
 import { ENEMY_BEHAVIOR_KIND } from "./enemy-behavior/EnemyBehaviorDefinition.js";
+
+const SWARM_MEMBER_RADIUS = 7;
+const SWARM_MEMBER_HEALTH = 10;
+const SWARM_MEMBER_SPACING = 18;
+
+function swarmMemberOffsets(count) {
+    const columns = Math.ceil(Math.sqrt(count));
+    const rows = Math.ceil(count / columns);
+    const offsets = [];
+    for (let row = 0; row < rows; row += 1) {
+        const rowCount = Math.min(columns, count - row * columns);
+        for (let column = 0; column < rowCount; column += 1) {
+            offsets.push(
+                Object.freeze({
+                    x: (column - (rowCount - 1) * 0.5) * SWARM_MEMBER_SPACING,
+                    y: (row - (rows - 1) * 0.5) * SWARM_MEMBER_SPACING
+                })
+            );
+        }
+    }
+    return Object.freeze(offsets);
+}
+
+function swarmMemberObjectId(objectId, index) {
+    return index === 0 ? objectId : `${objectId}:swarm-member:${index + 1}`;
+}
+
+function expandSwarmSpawn(properties) {
+    const objectId = properties.objectId ?? properties.encounterId ?? properties.slotId;
+    const groupId = properties.swarmGroupId ?? properties.slotId ?? objectId;
+    const memberCount = properties.swarmMemberCount ?? SWARM_MEMBER_COUNT.DEFAULT;
+    return Object.freeze(
+        swarmMemberOffsets(memberCount).map((offset, index) =>
+            Object.freeze({
+                ...properties,
+                objectId: swarmMemberObjectId(objectId, index),
+                swarmGroupId: groupId,
+                position: Object.freeze({
+                    x: properties.position.x + offset.x,
+                    y: properties.position.y + offset.y
+                }),
+                radius: SWARM_MEMBER_RADIUS,
+                health: SWARM_MEMBER_HEALTH,
+                maxHealth: SWARM_MEMBER_HEALTH
+            })
+        )
+    );
+}
 
 const DEFINITIONS = Object.freeze([
     Object.freeze({
@@ -25,6 +73,7 @@ const DEFINITIONS = Object.freeze([
         behaviorKind: ENEMY_BEHAVIOR_KIND.SHIELD,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SHIELD],
         usesProjectileAttack: true,
+        weaponRange: 1440,
         createBehavior: (state) => new ShieldEnemyBehavior(state)
     }),
     Object.freeze({
@@ -49,6 +98,9 @@ const DEFINITIONS = Object.freeze([
         behaviorKind: ENEMY_BEHAVIOR_KIND.SWARM,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SWARM],
         usesProjectileAttack: false,
+        radius: SWARM_MEMBER_RADIUS,
+        maxHealth: SWARM_MEMBER_HEALTH,
+        expandSpawn: expandSwarmSpawn,
         resolveSwarmGroupId: swarmGroupId,
         createBehavior: (state) => new SwarmEnemyBehavior(state)
     })
@@ -104,6 +156,19 @@ export function enemyDisplayName(enemyType) {
     return DEFINITIONS_BY_ID[enemyType]?.displayName ?? LEGACY_DISPLAY_NAMES[enemyType] ?? enemyType;
 }
 
+export function enemySpawnMembers(properties) {
+    const definition = DEFINITIONS_BY_ID[properties.enemyType];
+    return definition?.expandSpawn?.(properties) ?? Object.freeze([Object.freeze({ ...properties })]);
+}
+
+export function enemyInitialRadius(enemyType, fallback) {
+    return DEFINITIONS_BY_ID[enemyType]?.radius ?? fallback;
+}
+
+export function enemyInitialHealth(enemyType, fallback) {
+    return DEFINITIONS_BY_ID[enemyType]?.maxHealth ?? fallback;
+}
+
 export function createEnemyArchetype({ enemyType, behaviorState = null, rules = [], ...properties }) {
     const definition = enemyArchetypeDefinition(enemyType);
     return createEnemyObject({
@@ -111,7 +176,9 @@ export function createEnemyArchetype({ enemyType, behaviorState = null, rules = 
         enemyType,
         displayName: definition.displayName,
         behavior: definition.createBehavior(behaviorState ?? {}),
+        weaponRange: definition.weaponRange ?? properties.weaponRange ?? null,
         swarmGroupId: definition.resolveSwarmGroupId?.(properties) ?? properties.swarmGroupId ?? null,
+        radius: definition.radius ?? properties.radius,
         rules,
         usesProjectileAttack: definition.usesProjectileAttack
     });
