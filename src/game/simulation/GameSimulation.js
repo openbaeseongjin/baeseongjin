@@ -515,6 +515,7 @@ export class GameSimulation {
             x: carriagePosition.x + weakpointOffset.x,
             y: carriagePosition.y + weakpointOffset.y
         });
+        const phaseDefinition = this.bossRuntime.definition.phases[runtime.phase - 1];
         return Object.freeze({
             ...runtime,
             arena: Object.freeze({
@@ -529,6 +530,7 @@ export class GameSimulation {
                     Object.freeze({
                         id: this.bossRuntime.definition.arena.boss?.actorId ?? `${stage.id}:carriage`,
                         kind: "boss-carriage",
+                        variant: this.bossRuntime.definition.arena.boss?.visualPresetId,
                         position: carriagePosition,
                         bounds: stage.bossCollider,
                         state: runtime.mechanism.state,
@@ -537,25 +539,31 @@ export class GameSimulation {
                     Object.freeze({
                         id: `${stage.id}:beam`,
                         kind: "boss-beam",
+                        variant: runtime.mechanism.beamState,
                         position: carriagePosition,
                         bounds: activeMechanic?.bounds ?? null,
                         beamState: runtime.mechanism.beamState,
+                        actionState: runtime.mechanism.state,
                         direction: runtime.mechanism.beamDirection,
                         active: runtime.mechanism.beamState !== "broken"
                     }),
                     Object.freeze({
                         id: `${stage.id}:rail-ram`,
                         kind: "boss-rail-ram",
+                        variant: "rail-ram",
                         position: carriagePosition,
                         bounds: runtime.phase === 3 ? (activeMechanic?.bounds ?? null) : null,
                         active: runtime.phase === 3 && runtime.status === "active",
+                        state: runtime.mechanism.state,
                         telegraphing: runtime.mechanism.state === "ram-telegraph"
                     }),
                     Object.freeze({
                         id: targetId,
                         kind: "boss-weakpoint",
+                        variant: phaseDefinition?.vulnerability?.visualPresetId,
                         position: weakpointPosition,
-                        active: runtime.vulnerability.active,
+                        active: true,
+                        state: runtime.vulnerability.active ? "exposed" : "secured",
                         phase: runtime.phase
                     })
                 ])

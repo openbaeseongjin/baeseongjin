@@ -5,6 +5,9 @@ import { LocalAuthority } from "../../runtime/LocalAuthority.js";
 import { GameSimulation } from "../../simulation/GameSimulation.js";
 import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../../world/sectors/LegacyAreaSeamlessSectorRuntime.js";
 
+const BOSS_PREVIEW_VERTICAL_OFFSET_RATIO = 0.1;
+const BOSS_PREVIEW_CAMERA_BOSS_WEIGHT = 0.72;
+
 function requireBossStageSpec(spec) {
     if (spec?.specType !== "boss-stage" || typeof spec.id !== "string") {
         throw new TypeError("map-editor-preview-boss-stage-required");
@@ -17,6 +20,16 @@ function requirePreviewRevision(revision) {
         throw new TypeError("map-editor-preview-revision-required");
     }
     return String(revision);
+}
+
+function bossPreviewStartPosition(simulation, stage) {
+    const carriage = simulation.bossStageSnapshot()?.presentation?.objects.find(({ kind }) => kind === "boss-carriage");
+    return Object.freeze({
+        x: carriage?.position.x ?? stage.presentationOrigin.x,
+        y:
+            (carriage?.position.y ?? stage.presentationOrigin.y) +
+            stage.bossCollider.height * BOSS_PREVIEW_VERTICAL_OFFSET_RATIO
+    });
 }
 
 export class BossStagePreviewGameApp extends GameApp {
@@ -40,7 +53,12 @@ export class BossStagePreviewGameApp extends GameApp {
         const outcome = simulation.startBossEncounter(simulation.playerIds());
         if (!outcome.accepted) throw new Error(`map-editor-preview-boss-start-failed:${outcome.reason ?? "unknown"}`);
         const playerId = simulation.getPrimaryPlayerId();
-        simulation.applyPortalTransition(playerId, stage.entry, simulation.getTick(), `${stage.id}:preview-entry`);
+        simulation.applyPortalTransition(
+            playerId,
+            bossPreviewStartPosition(simulation, stage),
+            simulation.getTick(),
+            `${stage.id}:preview-entry`
+        );
         const authority = new LocalAuthority(simulation);
         super({
             ...options,
@@ -50,6 +68,28 @@ export class BossStagePreviewGameApp extends GameApp {
         });
         this.previewBossStageId = spec.id;
         this.previewRevision = previewRevision;
+    }
+
+    updateCamera(dt, player, world) {
+        const carriage = this.authority
+            .snapshot()
+            .bossStage?.presentation?.objects.find(({ kind }) => kind === "boss-carriage");
+        if (!carriage) return super.updateCamera(dt, player, world);
+        return super.updateCamera(
+            dt,
+            {
+                ...player,
+                position: {
+                    x:
+                        player.position.x * (1 - BOSS_PREVIEW_CAMERA_BOSS_WEIGHT) +
+                        carriage.position.x * BOSS_PREVIEW_CAMERA_BOSS_WEIGHT,
+                    y:
+                        player.position.y * (1 - BOSS_PREVIEW_CAMERA_BOSS_WEIGHT) +
+                        carriage.position.y * BOSS_PREVIEW_CAMERA_BOSS_WEIGHT
+                }
+            },
+            world
+        );
     }
 
     previewScope() {

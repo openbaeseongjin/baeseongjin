@@ -7,6 +7,8 @@ function freezeWorldObject(object) {
         id: object.id,
         kind: PRESENTATION_KIND[object.kind] ?? object.kind,
         state: object.state ?? object.beamState ?? (object.telegraphing ? "telegraph" : "idle"),
+        variant: object.variant ?? null,
+        actionState: object.actionState ?? null,
         active: object.active !== false,
         position: Object.freeze({ x: finite(object.position?.x), y: finite(object.position?.y) }),
         ...((object.size ?? object.bounds)
@@ -50,6 +52,7 @@ function stageSpecWorldObjects(stageSpec, snapshot) {
         {
             id: stageSpec.boss.actorId,
             kind: "carriage",
+            variant: stageSpec.boss.visualPresetId,
             state: snapshot.status === "completed" ? "disabled" : "active",
             position: snapshot.bossPosition ?? {
                 x: Number.isFinite(mechanism.positionX) ? mechanism.positionX : stageSpec.boss.position.x,
@@ -66,7 +69,9 @@ function stageSpecWorldObjects(stageSpec, snapshot) {
             .map((mechanic) => ({
                 id: mechanic.id,
                 kind: MECHANIC_PRESENTATION_KIND[mechanic.type] ?? "mechanism",
+                variant: mechanic.type,
                 state: mechanicStateById[mechanic.id]?.state ?? mechanism.state ?? "idle",
+                actionState: mechanism.state ?? "idle",
                 position: mechanicStateById[mechanic.id]?.position ?? mechanic.position,
                 size: mechanic.bounds ? { width: mechanic.bounds.width, height: mechanic.bounds.height } : undefined,
                 direction:
@@ -80,6 +85,7 @@ function stageSpecWorldObjects(stageSpec, snapshot) {
         objects.push({
             id: activeTargetId,
             kind: "weakpoint",
+            variant: stageSpec.phases?.[Math.max(0, (snapshot.phase ?? 1) - 1)]?.vulnerability?.visualPresetId,
             state:
                 snapshot.weakpointExposed || snapshot.vulnerability?.active || mechanism.weakpointExposed
                     ? "exposed"
@@ -89,7 +95,8 @@ function stageSpecWorldObjects(stageSpec, snapshot) {
                     x: Number.isFinite(mechanism.positionX) ? mechanism.positionX : stageSpec.boss.position.x,
                     y: stageSpec.boss.position.y
                 },
-            size: snapshot.activeTargetSize ?? { width: 96, height: 96 }
+            size: snapshot.activeTargetSize ?? { width: 96, height: 96 },
+            active: true
         });
     }
     return objects;
