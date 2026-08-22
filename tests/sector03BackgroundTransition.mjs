@@ -43,11 +43,11 @@ function pngHeader(path) {
 }
 
 function packageDefinition(prefix) {
-    const layers = ["fixed", "left", "right"].map((suffix, index) => ({
+    const layers = ["far", "mid", "near"].map((suffix, index) => ({
         id: `${prefix}-${suffix}`,
         depth: index,
-        parallaxX: index === 0 ? 0.018 : 0.08,
-        parallaxY: index === 0 ? 0.03 : 0.1,
+        parallaxX: [0.018, 0.05, 0.08][index],
+        parallaxY: [0.03, 0.065, 0.1][index],
         frames: [
             {
                 atlasId: `${prefix}-${suffix}`,
@@ -147,20 +147,20 @@ for (const [name, expectedHash] of Object.entries(APPROVED_SECTOR_02_HASHES)) {
 }
 
 const sector03Manifest = JSON.parse(readFileSync(resolve(SECTOR_03_PACKAGE, "sprite-manifest.json"), "utf8"));
-assert.equal(sector03Manifest.generator.exportVersion, "2026-08-22-v4");
+assert.equal(sector03Manifest.generator.exportVersion, "2026-08-22-v8-depth-fmn");
 assert.deepEqual(
     sector03Manifest.backdrop.layers.map(({ id }) => id),
-    ["fixed-background", "near-island-left", "near-island-right"]
+    ["far-background", "mid-structure", "near-frame"]
 );
 assert.equal(JSON.stringify(sector03Manifest).includes("depth-map"), false, "runtime manifest must not load depth data");
 
-assert.deepEqual(pngHeader(resolve(SECTOR_03_PACKAGE, "backdrop-fixed.png")), {
+assert.deepEqual(pngHeader(resolve(SECTOR_03_PACKAGE, "backdrop-v8-far.png")), {
     width: 1024,
     height: 1536,
     bitDepth: 8,
     colorType: 2
 });
-for (const name of ["parallax-island-left.png", "parallax-island-right.png"]) {
+for (const name of ["backdrop-v8-mid.png", "backdrop-v8-near.png"]) {
     assert.deepEqual(pngHeader(resolve(SECTOR_03_PACKAGE, name)), {
         width: 1024,
         height: 1536,
@@ -189,4 +189,4 @@ assert.deepEqual(packageAlphas(below, "sector03"), [0.15625, 0.15625, 0.15625]);
 assert.deepEqual(packageAlphas(above, "sector02"), [0.15625, 0.15625, 0.15625]);
 assert.deepEqual(packageAlphas(above, "sector03"), [0.84375, 0.84375, 0.84375]);
 
-console.log("Sector 03 V4 Runtime transition focused test passed");
+console.log("Sector 03 V8 far/mid/near Runtime transition focused test passed");

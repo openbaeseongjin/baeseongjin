@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-22 — Sector 03 기본 배경에 seam-match V4 depth-islands package를 사용한다
+
+- 맥락: Sector 02→03 경계를 기존 package 단위 crossfade로 연결하면서 Sector 03 상업 Atrium에 작은 시차를 적용할 첫 승인 배경이 필요했다.
+- 결정: 승인된 seam-match V4 master를 fixed background와 좌·우 parallax island 2개로 추출해 `sector-03-01`~`sector-03-08`의 기본 authored backdrop으로 사용한다.
+- 영향: depth map은 offline 추출 근거로만 남고 Runtime은 캐시된 PNG 3장을 같은 package alpha로 렌더링했다.
+- 대체: Sector 02 비중을 하단 약 15%로 제한한 seam-match V8 master를 far·mid·near 3개 layer로 추출한 package가 Sector 03 기본 배경을 소유한다.
+- 검증 상태: 현재 계약은 `SESSION-HANDOFF.md`와 Sector 03 authoring·Runtime README가 소유하며 Issue #827에서 전환·자산 검증을 수행한다.
+
 ## [L1] 2026-08-17 — 960초 Timer와 다음 Gate 자동 합류를 일반 구간 기준으로 사용한다
 
 - 맥락: 하층 정체를 억제하면서 0초 뒤에도 협동 진행을 이어 갈 첫 Timer prototype이 필요했다.
