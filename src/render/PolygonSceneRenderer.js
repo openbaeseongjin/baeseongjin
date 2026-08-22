@@ -26,6 +26,7 @@ import {
 } from "./polygon/PolygonActorRenderers.js";
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
 import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
+import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
 
 export class PolygonSceneRenderer {
     constructor() {
@@ -38,6 +39,7 @@ export class PolygonSceneRenderer {
                     new WorldGeometryRenderer(),
                     new AuthoredAreaStructureRenderer(),
                     new AuthoredWorldObjectRenderer(),
+                    new BossStageWorldRenderer(),
                     new AccessScanSurfaceRenderer(),
                     new AccessModuleSignalRenderer(),
                     new AttachRangeRenderer(),

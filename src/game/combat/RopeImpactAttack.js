@@ -1,3 +1,20 @@
+import { createImpactDamage } from "./ImpactTarget.js";
+
+function predictedResolution(target, normalDamage) {
+    if (target.impactTargetKind !== "boss") {
+        return target.health <= normalDamage ? "enemy-defeated" : "enemy-hit";
+    }
+    const totalDamage = createImpactDamage({
+        normalDamage,
+        weakpointExposed: target.weakpointExposed === true,
+        phaseMaxHealth: target.phaseMaxHealth ?? 0,
+        weakpointRatio: target.weakpointDamageRatio ?? 0.25
+    }).totalDamage;
+    const remainingInPhase = Math.max(0, target.health - (target.phaseFloor ?? 0));
+    if (totalDamage < remainingInPhase) return "boss-hit";
+    return target.phase >= target.phaseCount ? "boss-defeated" : "boss-phase-completed";
+}
+
 export function ropeImpactDamageForSpeed(speed, config) {
     if (!Number.isFinite(speed) || speed < 0) {
         throw new Error("rope impact speed must be non-negative and finite");
@@ -21,23 +38,24 @@ export class RopeImpactAttack {
         ropeImpactDamageForSpeed(config.minimumSpeed, config);
         this.minimumSpeed = config.minimumSpeed;
         this.config = config;
-        this.overlappingEnemyIds = new Set();
-        this.pendingImpactsByEnemyId = new Map();
+        this.overlappingTargetIds = new Set();
+        this.pendingImpactsByTargetId = new Map();
     }
 
     reset() {
-        this.overlappingEnemyIds.clear();
-        this.pendingImpactsByEnemyId.clear();
+        this.overlappingTargetIds.clear();
+        this.pendingImpactsByTargetId.clear();
     }
 
-    advance(owner, enemies, tick) {
-        const overlaps = enemies.filter(
-            (enemy) =>
-                enemy.health > 0 &&
+    advance(owner, targets, tick) {
+        const overlaps = targets.filter(
+            (target) =>
+                target.active !== false &&
+                (target.health === undefined || target.health > 0) &&
                 owner.physics.collider.overlapsCollider(
                     owner.physics.position,
-                    enemy.position,
-                    enemy.collider ?? { type: "circle", radius: enemy.radius }
+                    target.position,
+                    target.collider ?? { type: "circle", radius: target.radius }
                 )
         );
         const speed = Math.hypot(owner.physics.velocity.x, owner.physics.velocity.y);
@@ -46,40 +64,42 @@ export class RopeImpactAttack {
         const impacts = canHit
             ? overlaps
                   .filter(
-                      (enemy) =>
-                          !this.overlappingEnemyIds.has(enemy.id) && !enemy.blocksImpactFrom?.(owner.physics.position)
+                      (target) =>
+                          !this.overlappingTargetIds.has(target.id) &&
+                          !target.blocksImpactFrom?.(owner.physics.position)
                   )
-                  .map((enemy) =>
+                  .map((target) =>
                       Object.freeze({
-                          predictionId: `${owner.id}:rope-impact:${tick}:${enemy.id}`,
+                          predictionId: `${owner.id}:rope-impact:${tick}:${target.id}`,
                           clientTick: tick,
                           sourcePlayerId: owner.id,
-                          targetId: enemy.id,
-                          position: Object.freeze({ x: enemy.position.x, y: enemy.position.y }),
+                          targetId: target.id,
+                          targetKind: target.impactTargetKind ?? "enemy",
+                          position: Object.freeze({ x: target.position.x, y: target.position.y }),
                           velocity: Object.freeze({ x: owner.physics.velocity.x, y: owner.physics.velocity.y }),
                           impactSpeed: speed,
                           damage,
-                          predictedResolution: enemy.health <= damage ? "enemy-defeated" : "enemy-hit"
+                          predictedResolution: predictedResolution(target, damage)
                       })
                   )
             : [];
-        this.overlappingEnemyIds = new Set(overlaps.map(({ id }) => id));
+        this.overlappingTargetIds = new Set(overlaps.map(({ id }) => id));
         return Object.freeze(impacts);
     }
 
-    observe(owner, enemies, tick) {
-        const impacts = this.advance(owner, enemies, tick);
-        for (const targetId of this.pendingImpactsByEnemyId.keys()) {
-            if (!this.overlappingEnemyIds.has(targetId)) this.pendingImpactsByEnemyId.delete(targetId);
+    observe(owner, targets, tick) {
+        const impacts = this.advance(owner, targets, tick);
+        for (const targetId of this.pendingImpactsByTargetId.keys()) {
+            if (!this.overlappingTargetIds.has(targetId)) this.pendingImpactsByTargetId.delete(targetId);
         }
-        for (const impact of impacts) this.pendingImpactsByEnemyId.set(impact.targetId, impact);
+        for (const impact of impacts) this.pendingImpactsByTargetId.set(impact.targetId, impact);
         return impacts;
     }
 
     consume(predictionId, targetId) {
-        const pending = this.pendingImpactsByEnemyId.get(targetId);
+        const pending = this.pendingImpactsByTargetId.get(targetId);
         if (!pending || pending.predictionId !== predictionId) return null;
-        this.pendingImpactsByEnemyId.delete(targetId);
+        this.pendingImpactsByTargetId.delete(targetId);
         return pending;
     }
 }

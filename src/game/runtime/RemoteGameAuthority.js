@@ -356,6 +356,7 @@ export class RemoteGameAuthority {
         const claim = createRopeImpactClaim({
             predictionId: event.predictionId,
             targetId: event.parameters.targetId,
+            targetKind: event.parameters.targetKind ?? "enemy",
             clientTick: event.clientTick,
             position: event.position,
             velocity: event.velocity

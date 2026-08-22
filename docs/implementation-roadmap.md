@@ -46,7 +46,7 @@
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
 - Sector 03 REV8의 3-3~3-8 topology·Direction migration, Sector 04~06 Runtime 연결과 각 Post-Sector Boss transition (Stage별 Runtime 승격 계약 확정 뒤 진행)
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
-- Boss01 physical Arena·Breaker/Core/Emitter/Wind·일반 전투 피해/전멸 재시도·`2-1` 전환과 Sector 02~05 보스 상세 계약·구현. Boss Timer·시간 만료 Arena collapse는 후속 범위다.
+- [구현 #816] Boss01 `GATE LOCKING CARRIAGE`의 Map Editor BossStageSpec·generated Definition·actual Preview, physical Rail Arena·Beam/Ram 피해·Rear Drive/Side Gearbox/Central Core·일반/약점 피해·roster HP scaling·retry/late join·segmented HUD·1-8→Boss→2-1 전환을 연결한다. Boss02~06 concrete Runtime과 Timer·collapse는 후속 범위다.
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
 ## 구현 순서
@@ -55,7 +55,7 @@
 
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
-3. **Phase 3 · #625 / #637 / savepoint-only progression:** Sector 01~03을 4,800px seamless world와 Player별 active Stage checkpoint로 전환했다. 현재 Runtime은 Stage cursor와 물리 route lock 없이 정적 geometry를 사용하고 objective는 자기 trigger/prerequisite로 판정한다. Boss01 위치·전투 core는 확정됐고 physical transition wiring이 남았으며, Timer·Purge의 topology mapping은 HOLD다.
+3. **Phase 3 · #625 / #637 / #816:** Sector 01~03의 4,800px seamless world와 Player별 checkpoint를 유지하고, Sector 01→02 connector에 독립 `boss-01` Stage와 완료 barrier를 삽입한다. 일반 intra-Sector geometry/progression은 바꾸지 않으며 Timer·Purge mapping은 HOLD다.
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
 5. **Sector Access 3-of-3 · 0.43.2:** Sector 01의 1-3·1-6·1-7, Sector 02의 2-2·2-5·2-7, Sector 03의 3-2·3-5·3-7 기존 경비 slot을 공용 Module source로 연결했다. 각 Sector는 세 개 전부를 요구하며 outgoing 경계의 transit device가 중앙과 Grapple budget 내 좌우 우회 crossing을 같은 visual/collision segments로 막고, unlock 시 blocker만 제거하며 모든 Player에게 camera scene을 재생한다. 같은 Sector 안의 Stage surface는 잠그지 않고 개인·전원 사망 뒤 module·route 상태를 보존한다. 위치 문자열은 제거하고 거리순 최대 3개 미수집 Carrier를 viewport 밖 edge arrow와 화면 안 diamond marker로 동시에 안내하며 가까운 대상일수록 크게 표시한다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
@@ -77,7 +77,7 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 
 재사용 Canvas particle/VFX foundation은 완료됐다. Player action/shot/impact와 Enemy one-shot, Shield·Support·Swarm·Pursuit·Artillery 및 Wind의 복제 상태 기반 continuous 표현에 더해 Rope launch·flight·attach·tension·swing·release·miss와 Player high-speed/impulse 표현도 동일 preset DTO와 Polygon/Sprite 공통 renderer를 사용한다. Rope Augment는 resolved material/actual-event accent로 합성하고 particle state는 multiplayer protocol에 추가하지 않는다. 기준은 [`particle-system.md`](./particle-system.md)다.
 
-P1~~P5 기획 게이트의 Boss01·Final Security·Timer/Purge core·예선 NPC 제외·개별 Boarding·Ending 계약은 [`design-decision-requests.md`](./design-decision-requests.md)에 유지한다. 과거 Specialization 6종은 generic 증강 v1로 대체됐다. 구현은 `P0 Alignment → Boss primitive/Boss01 → Timer/Purge topology mapping → Sector04/05/06 Runtime 확장 → Final Security/Ending → Playtest` 순서이며, Sector02~~05 개별 Boss 상세와 Timer/Purge HOLD 세 항목은 후속 기획으로 남긴다. NPC는 핵심 범위 완료 뒤 여유가 있을 때만 2-6 최소안으로 검토한다.
+P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI + Boss01 → Timer/Purge mapping → Sector04/05/06 Runtime → Final Security/Ending → Playtest`다. Boss03~06은 Phase base HP 1000과 공용 0.5 인원 multiplier·25% 약점 고정 보너스를 authoring 기준으로 사용하되 concrete Runtime은 별도 Issue로 구현한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 AI 개발로 확장한다. 나머지 HOLD와 NPC 우선순위는 기존 기준을 유지한다.
 
 ### P0. 로그라이크 한 판의 순환 완성
 

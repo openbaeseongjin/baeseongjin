@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 49f1da5b96b09e8a98a7616e08bb9fe3ad98f2ff2c0ea33e8f4b016bd73e9121
+scenario-source-sha256: b05d50d075401fc964464ad708aa64dfc8987261ec9d54c48fe19772b5d86cf2
 authored-area-sha256: 86a6c218229de98b0f99aac340f09d147222a9f15b9c252ae211d318cb2498bb
-authored-sector-sha256: 3129e29b1ea699cc91bf98432c1c955c31f9c81278586c1b0e7b801e0c96fe2b
+authored-sector-sha256: 33201fc43c5002ef3d4754212e47bfc37da7e2eafc3ba71f2f843fba2115ab12
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 6703d30169568fc32f241dc781932374564d6fbb
+reviewed-upstream: 3a4cbe62940f4a9b03f09f63b0b08bb2b085b23a
 -->
 
 ## 상태를 읽는 법
@@ -213,11 +213,13 @@ reviewed-upstream: 6703d30169568fc32f241dc781932374564d6fbb
 
 109.  2026-08-22 Map Editor 출구 정합 복구는 출구 데크 위치를 단일 이동 권위로 두고 출구점·Gate trigger·Gate panel·Gate visual·출구 route point를 `AreaExitEditorComponent`가 같은 delta로 파생·동기화하게 했다. 48개 v2 source는 `exit` 편집 도메인을 선언하며 브라우저 Draft와 서버 Apply가 모두 컴포넌트 단위로 재구성하므로 구성요소의 독립 좌표 변경과 사후 divergence 오류를 공개 계약으로 두지 않는다. `1-1`은 사용자가 옮긴 새 출구 데크 `(360,-730)`를 기준으로 출구점 `(520,-762)`, panel `(408,-730)`, Gate visual `(520,-730)`, trigger `(494,-792,52×62)`, 마지막 route point `(360,-730)`를 정렬했고 authored `nextAreaId: sector-01-02`는 유지했다. 단일 Stage Preview만 출구를 content boundary로 격리한다. loopback Editor에서 출구 X를 `360→365`로 바꾼 초안이 서버 검증을 통과하고 Undo 뒤 `360`으로 복구됐으며, 복구된 1-1 Preview는 지형 16개로 browser error 없이 시작했다. 최신 main의 3-1·3-2 Runtime 승격을 보존해 Runtime 적용 Stage는 Sector 01~~02의 16개와 3-1·3-2이며, 3-3~~3-8·Sector 04~~06은 기존처럼 Runtime 보류다.
 
+110. Issue #816은 최신 `GATE LOCKING CARRIAGE`를 일반 Stage와 분리된 canonical `boss-01` Stage로 구현한다. Map Editor는 `specType: boss-stage` source·validator·generated definition·실제 GameSimulation Preview를 사용해 Arena·Carriage·Phase·mechanic·Phase base HP·인원 배율·약점 고정 비율·HUD·전환을 편집하고, 1~4인 derived HP/floor/약점 피해를 읽기 전용으로 표시한다. Runtime은 1-8의 Worker District reveal과 `nextAreaId:null`을 유지한 채 source→Boss→2-1 connector·완료 전 route barrier를 조립하며, Stage 시작 roster로 HP를 고정하고 일반 공격 피해+약점 25% 보너스·Phase floor·late join·전멸 retry·snapshot 수렴을 소유한다. Carriage의 Full/Broken Beam과 Rail Ram은 server-owned timing과 실제 Player 피해를 가지며 P1 Rear Drive·P2 Side Gearbox·P3 Central Lock Core를 공략한다. Boss Timer·Arena collapse·Boss02~06 Runtime은 추가하지 않는다.
+
 ## 열린 기획·구현 게이트
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.
 2. [완료 #633] 과거 2-3 Foundation별 Specialization skeleton을 두 번째 generic offer로 대체하고 3-5에 세 번째 explicit source를 연결했다. 고정 Specialization tier를 복구하지 않는다.
-3. [진행] Boss01의 현재 authored content는 `GATE LOCKING CARRIAGE`다. 기존 `CONTAINMENT GANTRY C-01` Has-A runtime/top-level snapshot은 legacy prototype이며 새 authored design을 구현하지 않는다. 남은 범위는 1-8 Checkpoint 뒤 physical Rail Arena·Full/Broken Beam·Rear Drive/Side Gearbox/Central Lock Core·Rail Ram, 자동 진입, 일반 전투 피해/전멸 재시도 연결과 승리 후 `2-1` 전환이다. 1-8 내부에는 Boss를 넣지 않으며 Boss Timer·시간 만료 Arena collapse는 후속 범위다.
+3. [구현 #816] Boss01 `GATE LOCKING CARRIAGE`는 Map Editor 저작 source와 generated Boss Stage Definition, physical Rail Arena, Full/Broken Beam·Rear Drive/Side Gearbox/Central Lock Core·Rail Ram, 일반/약점 피해·전멸 retry·segmented HUD·1-8 뒤 자동 진입·2-1 전환으로 연결했다. 실제 browser·single/multiplayer 최종 candidate 검증을 통과해야 완료하며 Timer·시간 만료 collapse는 후속 범위다.
 4. 일반 Timer Prototype `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s`는 HOLD 세 physical mapping이 확정된 뒤 연결한다. 과거 `960/+45/80px/s` baseline은 복구하지 않는다.
 5. Sector 02~05 Boss authored handoff는 [`boss/README.md`](./boss/README.md)에 기록됐지만, identity·arena·phase·보상과 각 `n-8 → Boss → 다음 Sector` Runtime 상세 계약은 후속 기획으로 남는다. Boss 02 REV5-C는 DRAFT이며 구현 근거가 아니다.
 6. Sector 04를 메인 월드에 연결하고 Sector 05·06 Runtime을 저작한다. 상세 시나리오 48/48 완료를 Runtime 완료로 해석하지 않는다.

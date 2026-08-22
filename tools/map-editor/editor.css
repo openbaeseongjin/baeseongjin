@@ -58,6 +58,11 @@ button.preview {
     border-color: #4c8465;
     background: #173b2a;
 }
+button.danger {
+    border-color: #884b48;
+    color: #ffaaa2;
+    background: #3b1d1b;
+}
 input,
 select {
     width: 100%;
@@ -453,6 +458,11 @@ kbd {
 .inspector-fields {
     display: grid;
     gap: 9px;
+}
+.inspector-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 .field {
     display: grid;

@@ -6,8 +6,9 @@ import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js
 import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 import { GRAPPLE_LINK_BUDGET } from "../../config.js";
+import { BOSS_01_STAGE_SPEC } from "../../boss-authoring/generated/Boss01Stage.generated.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v9";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v10-boss-stage";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
@@ -22,6 +23,7 @@ const TRANSIT_BARRIER_LATERAL_MARGIN = GRAPPLE_LINK_BUDGET;
 const LEGACY_BOUNDARY_KINDS = new Set(["area-boundary-wall", "inter-floor-divider"]);
 const LEGACY_ENEMY_KINDS = new Set(["sentry", "patrol-drone"]);
 const LEGACY_STAGE_DOOR_KINDS = new Set(["gate", "gate-panel"]);
+const BOSS_ARENA_ISOLATION_X = 7000;
 
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
@@ -341,11 +343,67 @@ function interSectorRise(interSectorRiseById, sourceSectorId, targetSectorId) {
     return rise;
 }
 
+function bossStageSurface(surface, dx, dy, stageId) {
+    const bounds = shiftBounds(surface.bounds, dx, dy);
+    return freezeValue({
+        id: surface.id,
+        kind: surface.kind,
+        bossStageId: stageId,
+        oneWay: surface.oneWay === true,
+        oneWayEdgeEnd: surface.oneWay === true ? 1 : undefined,
+        grappleable: surface.grappleable !== false,
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        topY: bounds.y,
+        position: { x: bounds.x + bounds.width * 0.5, y: bounds.y },
+        vertices: rectangleVertices(bounds)
+    });
+}
+
+function createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, entryRouteId) {
+    const dx = BOSS_ARENA_ISOLATION_X - spec.arena.entry.x;
+    const dy = sourceLandmark.exit.y - spec.arena.entry.y;
+    const bounds = shiftBounds(spec.arena.bounds, dx, dy);
+    const entry = shiftPoint(spec.arena.entry, dx, dy);
+    const exit = shiftPoint(spec.arena.exit, dx, dy);
+    const sourceTrigger = routeMouthBounds(sourceLandmark.exit);
+    const exitTrigger = routeMouthBounds(exit);
+    return freezeValue({
+        id: spec.id,
+        specRevision: spec.schemaVersion,
+        sourceLandmarkId: sourceLandmark.id,
+        targetLandmarkId: targetLandmark.id,
+        entryRouteId,
+        bounds,
+        sourceTrigger,
+        entry,
+        exit,
+        exitTrigger,
+        targetEntry: targetLandmark.entry,
+        surfaces: spec.arena.surfaces.map((surface) => bossStageSurface(surface, dx, dy, spec.id)),
+        mechanics: spec.mechanics.map((mechanic) =>
+            freezeValue({
+                ...mechanic,
+                position: shiftPoint(mechanic.position, dx, dy),
+                ...(mechanic.bounds ? { bounds: shiftBounds(mechanic.bounds, dx, dy) } : {})
+            })
+        ),
+        route: spec.arena.anchors.map((anchor) => shiftPoint(anchor, dx, dy)),
+        recoveryPoints: spec.arena.recoveryPoints.map((point) => shiftPoint(point, dx, dy)),
+        presentationOrigin: shiftPoint(spec.boss.position, dx, dy),
+        localBossPosition: spec.boss.position,
+        bossCollider: spec.boss.collider
+    });
+}
+
 export function createLegacyAreaSeamlessSectorRuntimeWorld({
     seed,
     floorY = 320,
     summitRadius = 42,
-    interSectorRiseById = {}
+    interSectorRiseById = {},
+    bossStageSpec = BOSS_01_STAGE_SPEC
 } = {}) {
     const surfaces = [];
     const route = [];
@@ -362,6 +420,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
     const connectors = [];
     const routeLocks = [];
     const sectorTransitions = [];
+    const bossStages = [];
     let previousLandmark = null;
     let previousOutboundObjectiveIds = Object.freeze([]);
     let sectorWorldOriginY = floorY;
@@ -662,6 +721,26 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 label: "SECTOR TRANSIT"
             })
         );
+        if (
+            sourceLandmark.legacyAreaId === bossStageSpec.sourceAreaId &&
+            targetLandmark.legacyAreaId === bossStageSpec.nextAreaId
+        ) {
+            const bossStage = createBossStageRuntimeDefinition(bossStageSpec, sourceLandmark, targetLandmark, lock.id);
+            bossStages.push(bossStage);
+            surfaces.push(...bossStage.surfaces);
+            route.push(...bossStage.route);
+            for (const barrierSurface of barrier.surfaces) {
+                surfaces.push(
+                    freezeValue({
+                        ...barrierSurface,
+                        id: `${bossStageSpec.id}:${barrierSurface.id}`,
+                        kind: "boss-stage-transit-barrier",
+                        blockedByRouteId: undefined,
+                        blockedByBossStageId: bossStageSpec.id
+                    })
+                );
+            }
+        }
     }
 
     const finalLandmark = landmarks.at(-1);
@@ -686,6 +765,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
         connectors,
         routeLocks,
         sectorTransitions,
+        bossStages,
         objects,
         objectives,
         gates: [],

@@ -1,0 +1,358 @@
+{
+  "arena": {
+    "anchors": [
+      {
+        "id": "boss-01:route-entry",
+        "x": 420,
+        "y": -540
+      },
+      {
+        "id": "boss-01:route-l0",
+        "x": 720,
+        "y": -620
+      },
+      {
+        "id": "boss-01:route-l1",
+        "x": 980,
+        "y": -810
+      },
+      {
+        "id": "boss-01:route-l2",
+        "x": 1200,
+        "y": -1060
+      },
+      {
+        "id": "boss-01:route-l3",
+        "x": 1360,
+        "y": -1380
+      },
+      {
+        "id": "boss-01:route-u0",
+        "x": 1510,
+        "y": -1690
+      },
+      {
+        "id": "boss-01:route-u1",
+        "x": 1760,
+        "y": -1920
+      },
+      {
+        "id": "boss-01:route-u2",
+        "x": 2070,
+        "y": -2040
+      },
+      {
+        "id": "boss-01:route-u3",
+        "x": 2400,
+        "y": -2100
+      },
+      {
+        "id": "boss-01:route-u4",
+        "x": 2730,
+        "y": -2100
+      },
+      {
+        "id": "boss-01:route-u5",
+        "x": 3060,
+        "y": -2040
+      },
+      {
+        "id": "boss-01:route-u6",
+        "x": 3370,
+        "y": -1910
+      },
+      {
+        "id": "boss-01:route-u7",
+        "x": 3610,
+        "y": -1680
+      },
+      {
+        "id": "boss-01:route-r3",
+        "x": 3760,
+        "y": -1370
+      },
+      {
+        "id": "boss-01:route-r2",
+        "x": 3920,
+        "y": -1060
+      },
+      {
+        "id": "boss-01:route-r1",
+        "x": 4140,
+        "y": -810
+      },
+      {
+        "id": "boss-01:route-r0",
+        "x": 4400,
+        "y": -620
+      },
+      {
+        "id": "boss-01:route-exit",
+        "x": 4700,
+        "y": -540
+      }
+    ],
+    "baseHookReach": 400,
+    "bounds": {
+      "height": 2800,
+      "width": 5200,
+      "x": 0,
+      "y": -2800
+    },
+    "entry": {
+      "id": "boss-01:entry",
+      "x": 420,
+      "y": -540
+    },
+    "exit": {
+      "id": "boss-01:exit",
+      "x": 4700,
+      "y": -540
+    },
+    "recoveryPoints": [
+      {
+        "id": "boss-01:recovery-left",
+        "x": 720,
+        "y": -670
+      },
+      {
+        "id": "boss-01:recovery-center",
+        "x": 2600,
+        "y": -670
+      },
+      {
+        "id": "boss-01:recovery-right",
+        "x": 4400,
+        "y": -670
+      }
+    ],
+    "surfaces": [
+      {
+        "bounds": {
+          "height": 350,
+          "width": 4200,
+          "x": 300,
+          "y": -2320
+        },
+        "grappleable": true,
+        "id": "boss-01:upper-maintenance-frame",
+        "kind": "platform",
+        "oneWay": false
+      },
+      {
+        "bounds": {
+          "height": 80,
+          "width": 3990,
+          "x": 500,
+          "y": -1390
+        },
+        "grappleable": true,
+        "id": "boss-01:main-locking-rail",
+        "kind": "rail",
+        "oneWay": false
+      },
+      {
+        "bounds": {
+          "height": 100,
+          "width": 4180,
+          "x": 340,
+          "y": -650
+        },
+        "grappleable": true,
+        "id": "boss-01:lower-catwalk",
+        "kind": "platform",
+        "oneWay": true
+      },
+      {
+        "bounds": {
+          "height": 130,
+          "width": 520,
+          "x": 4020,
+          "y": -770
+        },
+        "grappleable": true,
+        "id": "boss-01:open-gate-deck",
+        "kind": "platform",
+        "oneWay": true
+      }
+    ]
+  },
+  "boss": {
+    "actorId": "boss-01:gate-locking-carriage",
+    "collider": {
+      "height": 430,
+      "width": 980,
+      "x": 2110,
+      "y": -1610
+    },
+    "mechanicId": "rail-carriage",
+    "position": {
+      "x": 2600,
+      "y": -1395
+    },
+    "rail": {
+      "maxX": 4490,
+      "minX": 500,
+      "y": -1390
+    },
+    "visualPresetId": "gate-locking-carriage"
+  },
+  "combat": {
+    "additionalPlayerMultiplier": 0.5,
+    "generalDamageMode": "standard-combat",
+    "lateJoinPolicy": "join-current-attempt-without-rescale",
+    "participantCountSnapshot": "boss-stage-start",
+    "phaseOverflowPolicy": "discard-at-floor",
+    "weakFixedPercent": 0.25
+  },
+  "hud": {
+    "healthBar": {
+      "showNumbers": true,
+      "showPhaseBreaks": true,
+      "style": "segmented-total"
+    },
+    "objectivePlacement": "below-health",
+    "showVulnerabilityCountdown": true,
+    "title": "GATE LOCKING CARRIAGE"
+  },
+  "id": "boss-01",
+  "mechanics": [
+    {
+      "bounds": {
+        "height": 120,
+        "width": 2190,
+        "x": 1510,
+        "y": -1250
+      },
+      "id": "boss-01:full-crossbeam-sweep",
+      "parameters": {
+        "recoverySeconds": 2.5,
+        "telegraphSeconds": 0.8,
+        "travelSpeed": 240
+      },
+      "position": {
+        "x": 2600,
+        "y": -1190
+      },
+      "type": "full-crossbeam-sweep"
+    },
+    {
+      "bounds": {
+        "height": 115,
+        "width": 1120,
+        "x": 2600,
+        "y": -1265
+      },
+      "id": "boss-01:directional-broken-beam-sweep",
+      "parameters": {
+        "recoverySeconds": 2,
+        "telegraphSeconds": 0.65,
+        "travelSpeed": 300
+      },
+      "position": {
+        "x": 3160,
+        "y": -1207.5
+      },
+      "type": "directional-broken-beam-sweep"
+    },
+    {
+      "id": "boss-01:beam-failure",
+      "parameters": {
+        "armorOpenSeconds": 0.6,
+        "telegraphSeconds": 1
+      },
+      "position": {
+        "x": 2600,
+        "y": -1395
+      },
+      "type": "beam-failure"
+    },
+    {
+      "bounds": {
+        "height": 330,
+        "width": 2300,
+        "x": 1450,
+        "y": -1560
+      },
+      "id": "boss-01:rail-ram",
+      "parameters": {
+        "recoverySeconds": 1.4,
+        "telegraphSeconds": 0.55,
+        "travelSpeed": 420
+      },
+      "position": {
+        "x": 2600,
+        "y": -1395
+      },
+      "type": "rail-ram"
+    }
+  ],
+  "name": "GATE LOCKING CARRIAGE",
+  "nextAreaId": "sector-02-01",
+  "phases": [
+    {
+      "basePhaseHealth": 120,
+      "hud": {
+        "objective": "SWEEP을 피해 후방 REAR DRIVE를 공략"
+      },
+      "id": "boss-01:phase-1",
+      "mechanicIds": [
+        "boss-01:full-crossbeam-sweep"
+      ],
+      "name": "FULL CROSSBEAM",
+      "order": 1,
+      "vulnerability": {
+        "durationSeconds": 3,
+        "targetId": "boss-01:rear-drive",
+        "trigger": "max-extension"
+      }
+    },
+    {
+      "basePhaseHealth": 120,
+      "hud": {
+        "objective": "진행 방향 반대편 SIDE GEARBOX를 공략"
+      },
+      "id": "boss-01:phase-2",
+      "mechanicIds": [
+        "boss-01:directional-broken-beam-sweep"
+      ],
+      "name": "DIRECTIONAL BROKEN BEAM",
+      "order": 2,
+      "vulnerability": {
+        "durationSeconds": 3,
+        "targetId": "boss-01:side-gearbox",
+        "trigger": "sweep-complete"
+      }
+    },
+    {
+      "basePhaseHealth": 120,
+      "hud": {
+        "objective": "RAM을 피하며 CENTRAL LOCK CORE를 추적"
+      },
+      "id": "boss-01:phase-3",
+      "mechanicIds": [
+        "boss-01:beam-failure",
+        "boss-01:rail-ram"
+      ],
+      "name": "CENTRAL LOCK CORE",
+      "order": 3,
+      "vulnerability": {
+        "durationSeconds": 4,
+        "targetId": "boss-01:central-lock-core",
+        "trigger": "beam-failure"
+      }
+    }
+  ],
+  "schemaVersion": "boss-stage-spec-v1",
+  "sourceAreaId": "sector-01-08",
+  "specType": "boss-stage",
+  "subtitle": "WORKER DISTRICT / BLOCK 12",
+  "transition": {
+    "entryTrigger": "checkpoint-complete",
+    "nextAreaId": "sector-02-01",
+    "retainPlayerControl": true,
+    "sourceAreaId": "sector-01-08",
+    "victoryPresentationId": "boss-01:power-loss-full-stop",
+    "victoryTrigger": "all-phases-depleted"
+  }
+}

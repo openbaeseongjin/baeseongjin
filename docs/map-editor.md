@@ -8,10 +8,11 @@
 node scripts/map-editor/serveMapEditor.mjs --port=4178
 ```
 
-브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 Stage를 모두 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
+브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 일반 Stage와 독립 `boss-01` Stage를 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
 
 - `Runtime 적용`: Sector 01~02의 16개 Stage다. 저장 적용은 v2 JSON과 generated JS를 갱신하고, manifest가 선택하는 현재 Sector Catalog에도 반영된다.
 - `시나리오 전용`: Sector 03~06의 32개 Stage다. 승인된 시나리오 맵을 v2 원본으로 편집하며 게임 Runtime·진행·멀티플레이에는 적용하지 않는다.
+- `boss-01`: `specType: "boss-stage"`인 Post-Sector Boss Stage다. 일반 Area와 섞지 않고 Boss 전용 JSON과 generated 정의를 함께 갱신한다.
 
 ## 저작 흐름
 
@@ -22,6 +23,8 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 5. **초안 검증**으로 파일을 쓰지 않는 v2 검증을 실행한다.
 6. **저장 적용**으로 v2 JSON을 갱신한다. Runtime Stage는 결정적 generated JS도 함께 갱신한다. stale revision, 읽기 전용 영역, 2 MiB 초과 요청은 거부된다.
 7. **새 미리보기**는 `Runtime 적용`과 `Runtime 준비` Stage에서만 선택된 generated Area 하나의 새 로컬 싱글플레이 run을 실제 게임의 sprite renderer·환경 표현·HUD·입력 경로로 연다. 시나리오 전용 Stage에는 의도적으로 제공하지 않는다.
+
+Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor·등록된 Mechanic·Phase 순서와 수·전환·HUD를 편집한다. `phases[].basePhaseHealth`, `combat.additionalPlayerMultiplier`, `combat.weakFixedPercent`가 HP 저작 권위이며, Inspector의 1~4인 총 HP·Phase HP·floor·약점 고정 피해는 저장되지 않는 읽기 전용 파생값이다. Boss Preview는 저장된 generated revision을 주입한 독립 `GameSimulation`을 Boss 전투 시작 상태로 열어 이동·Rope·일반 공격·Boss HUD를 실제 게임 입력으로 확인한다. 새 mechanic 종류는 Editor 텍스트만으로 만들 수 없고 먼저 코드 Registry와 validator를 추가해야 한다.
 
 맵 경계·시작 지점·출구·지형 표면·앵커·복구/경로·기존 적 슬롯·바람·카메라 구역은 편집 가능하다. 목표·출구의 목적지/해제 조건·스토리·스캐너·행동 레지스트리는 표시 전용이며 초안과 서버가 모두 변경을 거부한다. 위치가 있는 편집 요소는 드래그와 X/Y 수치 입력 모두 가장 가까운 5px 격자로 스냅하며, 카메라 구역의 최소/최대 Y도 같은 규칙을 따른다. 캔버스 드래그는 이동 중 임시 상태만 갱신하고 pointer release에서 되돌리기 한 건으로 확정한다.
 
@@ -42,6 +45,7 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 - 출구 데크 위치가 복합 객체 이동의 단일 권위다. 출구점·Gate trigger·Gate panel·Gate visual·출구 route point는 에디터와 서버가 데크 이동량에서 다시 구성하며 독립 좌표로 편집하지 않는다. `nextAreaId`, Gate ID와 해제 조건은 이동 대상이 아니며 일반 Runtime의 Stage 전환 계약을 유지한다.
 - 해커톤 운영에서는 맵 에디터를 한 번에 한 명만 사용한다. 다중 사용자 mutex와 서버 crash까지 견디는 완전한 다중 파일 원자 저장은 후속 범위다.
 - generated output은 수기 편집하지 않는다. 특수 동작은 Stable ID를 수기 Behavior Registry에서 해석한다.
+- Boss Stage Apply도 진행 중 전투를 hot reload하지 않는다. 저장된 Spec은 다음 Boss Stage 시작 또는 새 게임에서만 읽으며, 참가자 수와 scaled Phase HP는 최초 Boss Stage 시작에서 고정한다.
 - Preview는 선택한 Stage 하나만 가진 새 single-player `GameSimulation`을 만들고, 시작 시 Area 수와 ID를 다시 확인해 상태 줄에 표시한다. 프리뷰 복제본의 출구는 content boundary로 끝내지만 Apply된 Area의 `nextAreaId`는 바꾸지 않는다. 정상 Catalog, 실행 중인 Run, multiplayer에는 hot-swap하지 않는다.
 - Preview는 에디터 전용 polygon renderer를 쓰지 않고 실제 게임 renderer를 쓴다. Stage API 응답과 player/enemy/direction 리소스는 병렬로 준비하고, 선택 Area의 환경 정의만 추가로 불러온다. isolated Area `GameSimulation`을 먼저 만든 뒤 `GameApp`에 주입하므로 전체 Seamless Runtime을 만들었다가 교체하지 않는다. 같은 Preview 창에서 다시 시작할 때는 renderer와 같은 generated revision 모듈을 재사용해 시작 지연을 줄인다. 고해상도 화면에서는 Preview 전용 backing canvas를 최대 2M 화소·최대 1배, 최저 0.5배로 제한해 과도한 GPU/Canvas 작업을 피하며, 일반 게임의 해상도 정책은 바꾸지 않는다.
 - Sector 01~02의 16개 Stage는 manifest의 `source: generated` 선택과 각 `composeSectorCatalog` facade를 통해 일반 seamless 싱글·멀티 Runtime에서도 generated Area를 사용한다. 각 v2 source는 cutover 시점의 legacy Runtime과 의미 동등하게 추출했다. 메인 개발자와의 분리 경계는 facade·진행·멀티플레이 권위에 남기고, 에디터는 v2 source·generator·generated module만 소유한다.
@@ -65,5 +69,6 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 
 ```powershell
 node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check
+node -e "import {createMapEditorAuthoringServer} from './scripts/map-editor/MapEditorAuthoringServer.mjs'; const server=await createMapEditorAuthoringServer({projectRoot:process.cwd()}); console.log((await server.readStage('boss-01')).derivedPreview);"
 npm run check
 ```

@@ -6,6 +6,12 @@ import {
     translateEditorEntity,
     worldToScreen
 } from "../../src/game/world/area-authoring-v2/editor/AreaEditorProjection.js";
+import { bossStageDerivedPreview } from "../../src/game/boss-authoring/BossStageSpec.js";
+import { BossStageEditorDraft } from "../../src/game/boss-authoring/editor/BossStageEditorDraft.js";
+import {
+    collectBossStageEditorEntities,
+    translateBossStageEditorEntity
+} from "../../src/game/boss-authoring/editor/BossStageEditorProjection.js";
 
 const EDITABLE_GROUPS = Object.freeze([
     ["bounds", "맵 경계", null],
@@ -25,6 +31,20 @@ const READ_ONLY_GROUPS = Object.freeze([
     ["scanner", "스캐너", "scannerGroups"],
     ["behaviorRegistry", "행동 레지스트리", "behaviorRefs"]
 ]);
+const BOSS_EDITABLE_GROUPS = Object.freeze([
+    ["arena", "Arena 경계", null],
+    ["entry", "시작 지점", null],
+    ["exit", "출구", null],
+    ["surfaces", "Arena 표면", null],
+    ["anchors", "Rope 경로", null],
+    ["recovery", "복구 지점", null],
+    ["boss", "Boss Actor", null],
+    ["mechanics", "Mechanic", null],
+    ["phases", "Phase", null],
+    ["combat", "HP / 피해", null],
+    ["hud", "Boss HUD", null],
+    ["transition", "진입 / 승리 전환", null]
+]);
 const DOMAIN_LABELS = Object.freeze({
     bounds: "맵 경계",
     entry: "시작 지점",
@@ -39,7 +59,15 @@ const DOMAIN_LABELS = Object.freeze({
     progression: "진행",
     story: "스토리",
     scanner: "스캐너",
-    behaviorRegistry: "행동 레지스트리"
+    behaviorRegistry: "행동 레지스트리",
+    arena: "Arena 경계",
+    recovery: "복구 지점",
+    boss: "Boss Actor",
+    mechanics: "Mechanic",
+    phases: "Phase",
+    combat: "HP / 피해",
+    hud: "Boss HUD",
+    transition: "진입 / 승리 전환"
 });
 const KIND_LABELS = Object.freeze({
     bounds: "맵 경계",
@@ -52,7 +80,17 @@ const KIND_LABELS = Object.freeze({
     enemy: "적 슬롯",
     "wind-source": "바람원",
     "wind-zone": "바람 구역",
-    "camera-zone": "카메라 구역"
+    "camera-zone": "카메라 구역",
+    "arena-bounds": "Arena 경계",
+    boss: "Boss Actor",
+    combat: "HP / 피해",
+    hud: "Boss HUD",
+    transition: "전환",
+    phase: "Phase",
+    "full-crossbeam-sweep": "Full Crossbeam",
+    "directional-broken-beam-sweep": "Directional Beam",
+    "beam-failure": "Beam Failure",
+    "rail-ram": "Rail Ram"
 });
 const MAX_ZOOM = 2.4;
 const MIN_ZOOM = 0.08;
@@ -87,6 +125,8 @@ const state = {
     stages: [],
     stageId: null,
     authoringMode: null,
+    specType: "area",
+    derivedPreview: null,
     runtimePromotion: null,
     previewAvailable: false,
     view: { x: 0, y: 0, zoom: 1 },
@@ -124,7 +164,10 @@ function selectedMatches(entity) {
 }
 
 function entities() {
-    return state.draft ? collectEditorEntities(state.draft.specification()) : [];
+    if (!state.draft) return [];
+    return state.specType === "boss-stage"
+        ? collectBossStageEditorEntities(state.draft.specification())
+        : collectEditorEntities(state.draft.specification());
 }
 
 function selectedEntity() {
@@ -134,7 +177,21 @@ function selectedEntity() {
 }
 
 function entityLabel(entity) {
-    return entity?.id?.replace(`${state.draft?.specification().definition.id ?? ""}:`, "") ?? "선택 없음";
+    const spec = state.draft?.specification();
+    const prefix = state.specType === "boss-stage" ? spec?.id : spec?.definition.id;
+    return entity?.id?.replace(`${prefix ?? ""}:`, "") ?? "선택 없음";
+}
+
+function editableGroups() {
+    return state.specType === "boss-stage" ? BOSS_EDITABLE_GROUPS : EDITABLE_GROUPS;
+}
+
+function stageBounds(spec = state.draft?.specification()) {
+    return state.specType === "boss-stage" ? spec?.arena.bounds : spec?.definition.bounds;
+}
+
+function stageIdentity(spec = state.draft?.specification()) {
+    return state.specType === "boss-stage" ? spec?.id : spec?.definition.id;
 }
 
 function domainLabel(domain) {
@@ -153,7 +210,11 @@ function authoringModeLabel(mode) {
 }
 
 function authoringModeDescription(mode) {
-    if (mode === "runtime-generated") return "저장 적용 시 생성 JS와 현재 Sector Catalog를 함께 갱신합니다.";
+    if (mode === "runtime-generated") {
+        return state.specType === "boss-stage"
+            ? "저장 적용 시 Boss Stage JSON과 생성 Runtime 정의를 함께 갱신합니다. 현재 전투는 hot reload하지 않습니다."
+            : "저장 적용 시 생성 JS와 현재 Sector Catalog를 함께 갱신합니다.";
+    }
     if (mode === "runtime-staged") return "생성 JS를 갱신하지만 현재 게임 Catalog 전환은 메인 개발자 통합 범위입니다.";
     return "시나리오 원본만 편집합니다. 게임 Runtime과 멀티플레이에는 적용되지 않습니다.";
 }
@@ -194,6 +255,18 @@ function snapPoint(point) {
 
 function entityAnnotation(entity, spec) {
     const id = entityLabel(entity);
+    if (state.specType === "boss-stage") {
+        if (entity.domain === "arena") return { name: "Boss Arena", effect: "전용 Stage 플레이 범위" };
+        if (entity.domain === "entry") return { name: "Boss 진입", effect: "1-8 Checkpoint 이후 시작 위치" };
+        if (entity.domain === "exit") return { name: "열린 Gate", effect: "승리 뒤 Sector 02 진입" };
+        if (entity.domain === "boss") return { name: spec.name, effect: "Rail 위 중립 Boss Actor" };
+        if (entity.domain === "surfaces") return { name: `Arena · ${id}`, effect: "충돌 / Rope 이동 표면" };
+        if (entity.domain === "anchors") return { name: `Rope · ${id}`, effect: "400px authored 이동 관계" };
+        if (entity.domain === "recovery") return { name: `복구 · ${id}`, effect: "실패 후 지역 복귀" };
+        if (entity.domain === "mechanics") return { name: `Mechanic · ${id}`, effect: kindLabel(entity.kind) };
+        if (entity.domain === "phases") return { name: `Phase · ${id}`, effect: "HP floor / 약점 공략" };
+        return { name: kindLabel(entity.kind), effect: domainLabel(entity.domain) };
+    }
     if (entity.domain === "bounds") return { name: "맵 경계", effect: "플레이 가능 범위" };
     if (entity.domain === "entry") return { name: "시작 지점", effect: "플레이어 시작 위치" };
     if (entity.domain === "surfaces") {
@@ -253,6 +326,7 @@ function stageEndpoint(stageId, suffix = "") {
 }
 
 function scenarioReferenceUrl(stageId) {
+    if (/^boss-\d+$/.test(stageId ?? "")) return stageEndpoint(stageId, "/reference");
     const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
     if (!match) return null;
     return stageEndpoint(stageId, "/reference");
@@ -295,15 +369,22 @@ function errorMessage(cause) {
 }
 
 function fitView() {
-    const bounds = state.draft?.snapshot().spec.definition.bounds;
+    const bounds = stageBounds(state.draft?.snapshot().spec);
     const rect = dom.canvas.getBoundingClientRect();
     if (!bounds || rect.width === 0 || rect.height === 0) return;
     state.view.zoom = Math.max(
         MIN_ZOOM,
         Math.min(MAX_ZOOM, Math.min(rect.width / (bounds.width * 1.16), rect.height / (bounds.height * 1.16)))
     );
-    state.view.x = rect.width * 0.5;
-    state.view.y = rect.height * 0.87;
+    if (state.specType === "area") {
+        state.view.x = rect.width * 0.5;
+        state.view.y = rect.height * 0.87;
+        return;
+    }
+    const left = Number.isFinite(bounds.x) ? bounds.x : -bounds.width * 0.5;
+    const top = Number.isFinite(bounds.y) ? bounds.y : -bounds.height;
+    state.view.x = rect.width * 0.5 - (left + bounds.width * 0.5) * state.view.zoom;
+    state.view.y = rect.height * 0.5 - (top + bounds.height * 0.5) * state.view.zoom;
 }
 
 function focusSelection() {
@@ -340,17 +421,32 @@ function resizeCanvas() {
 function currentWorldAtCanvasCenter() {
     const rect = dom.canvas.getBoundingClientRect();
     const point = screenToWorld({ x: rect.width * 0.5, y: rect.height * 0.5 }, state.view);
-    const bounds = state.draft.specification().definition.bounds;
+    const bounds = stageBounds();
+    const left = Number.isFinite(bounds.x) ? bounds.x : -bounds.width * 0.5;
+    const top = Number.isFinite(bounds.y) ? bounds.y : -bounds.height;
     const insetX = Math.min(96, bounds.width * 0.5);
     const insetY = Math.min(96, bounds.height * 0.5);
     return snapPoint({
-        x: Math.max(-bounds.width * 0.5 + insetX, Math.min(bounds.width * 0.5 - insetX, point.x)),
-        y: Math.max(-bounds.height + insetY, Math.min(-insetY, point.y))
+        x: Math.max(left + insetX, Math.min(left + bounds.width - insetX, point.x)),
+        y: Math.max(top + insetY, Math.min(top + bounds.height - insetY, point.y))
     });
 }
 
 function nextStableId(prefix) {
     const spec = state.draft.specification();
+    if (state.specType === "boss-stage") {
+        const ids = new Set([
+            spec.id,
+            ...spec.arena.surfaces.map(({ id }) => id),
+            ...spec.arena.anchors.map(({ id }) => id),
+            ...spec.arena.recoveryPoints.map(({ id }) => id),
+            ...spec.mechanics.map(({ id }) => id),
+            ...spec.phases.map(({ id }) => id)
+        ]);
+        let index = 1;
+        while (ids.has(`${spec.id}:${prefix}-${index}`)) index += 1;
+        return `${spec.id}:${prefix}-${index}`;
+    }
     const ids = new Set([
         spec.definition.id,
         ...spec.definition.surfaces.map(({ id }) => id),
@@ -394,6 +490,45 @@ function applyMutation({ domain, label, apply }) {
 
 function addPreset(kind) {
     const point = currentWorldAtCanvasCenter();
+    if (kind === "boss-phase") {
+        const id = nextStableId("phase");
+        applyMutation({
+            domain: "phases",
+            label: "Boss Phase 추가",
+            apply: (spec) => {
+                spec.phases.push({
+                    id,
+                    order: spec.phases.length + 1,
+                    name: "NEW PHASE",
+                    basePhaseHealth: 120,
+                    mechanicIds: [],
+                    vulnerability: { targetId: `${id}:weakpoint`, trigger: "mechanic-complete", durationSeconds: 3 },
+                    hud: { objective: "새 Phase 목표" }
+                });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "phases", id, kind: "phase" });
+        return render();
+    }
+    if (kind === "boss-mechanic") {
+        const id = nextStableId("mechanic");
+        applyMutation({
+            domain: "mechanics",
+            label: "Boss Mechanic 추가",
+            apply: (spec) => {
+                spec.mechanics.push({
+                    id,
+                    type: "rail-ram",
+                    position: point,
+                    parameters: { travelSpeed: 300, telegraphSeconds: 0.5, recoverySeconds: 1.5 }
+                });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "mechanics", id, kind: "rail-ram" });
+        return render();
+    }
     if (kind === "surface") {
         const id = nextStableId("surface");
         applyMutation({
@@ -512,7 +647,7 @@ function renderLayers() {
     const all = entities();
     const snapshot = state.draft.snapshot();
     let hasFilterMatch = false;
-    for (const [domain, label, preset] of EDITABLE_GROUPS) {
+    for (const [domain, label, preset] of editableGroups()) {
         const entries = all.filter((entry) => entry.domain === domain);
         const visibleEntries = entries.filter((entry) => matchesLayerFilter(entry, label));
         const count = entries.length;
@@ -527,7 +662,15 @@ function renderLayers() {
                 text: state.layerFilter ? `${visibleEntries.length}/${count}` : String(count)
             })
         );
-        if (domain === "recoveryRoute") {
+        if (state.specType === "boss-stage" && domain === "phases") {
+            heading.append(
+                button({ text: "+ Phase", className: "add-button", onClick: () => addPreset("boss-phase") })
+            );
+        } else if (state.specType === "boss-stage" && domain === "mechanics") {
+            heading.append(
+                button({ text: "+ Mechanic", className: "add-button", onClick: () => addPreset("boss-mechanic") })
+            );
+        } else if (domain === "recoveryRoute") {
             heading.append(button({ text: "+ 복구", className: "add-button", onClick: () => addPreset("recovery") }));
             heading.append(button({ text: "+ 경로", className: "add-button", onClick: () => addPreset("route") }));
         } else if (preset) {
@@ -537,7 +680,7 @@ function renderLayers() {
         const list = element("div", { className: "layer-list" });
         for (const entry of visibleEntries) {
             const row = button({
-                text: entry.id.replace(`${snapshot.spec.definition.id}:`, ""),
+                text: entry.id.replace(`${stageIdentity(snapshot.spec)}:`, ""),
                 className: `layer-item${selectedMatches(entry) ? " is-selected" : ""}`,
                 onClick: () => {
                     state.draft.select(entry);
@@ -555,6 +698,16 @@ function renderLayers() {
             );
         group.append(list);
         dom.layerPanel.append(group);
+    }
+    if (state.specType === "boss-stage") {
+        if (state.layerFilter && !hasFilterMatch)
+            dom.layerPanel.append(
+                element("p", {
+                    className: "layer-search-empty",
+                    text: "검색 결과가 없습니다. Esc를 눌러 검색을 지우세요."
+                })
+            );
+        return;
     }
     const readOnly = element("section", { className: "layer-group" });
     readOnly.append(element("div", { className: "panel-heading", text: "읽기 전용" }));
@@ -636,11 +789,288 @@ function updateEntityPosition(selected, nextPoint, { buffered = false } = {}) {
     const delta = { x: snappedPoint.x - current.point.x, y: snappedPoint.y - current.point.y };
     if (delta.x === 0 && delta.y === 0) return;
     const apply = (spec) => {
-        replaceSpec(spec, translateEditorEntity(spec, current, delta));
+        replaceSpec(
+            spec,
+            state.specType === "boss-stage"
+                ? translateBossStageEditorEntity(spec, current, delta)
+                : translateEditorEntity(spec, current, delta)
+        );
         return true;
     };
     if (buffered) return state.draft.updateBufferedMutation(apply);
     applyMutation({ domain: selected.domain, label: "Move map object", apply });
+}
+
+function removeBossEntry(domain, id) {
+    applyMutation({
+        domain,
+        label: `Remove ${domain}`,
+        apply: (spec) => {
+            if (domain === "phases") {
+                spec.phases = spec.phases.filter((phase) => phase.id !== id);
+                spec.phases.forEach((phase, index) => (phase.order = index + 1));
+            } else if (domain === "mechanics") {
+                spec.mechanics = spec.mechanics.filter((mechanic) => mechanic.id !== id);
+                for (const phase of spec.phases) {
+                    phase.mechanicIds = phase.mechanicIds.filter((mechanicId) => mechanicId !== id);
+                }
+            }
+            return true;
+        }
+    });
+    state.draft.select(null);
+}
+
+function moveBossPhase(id, delta) {
+    applyMutation({
+        domain: "phases",
+        label: "Reorder Boss Phase",
+        apply: (spec) => {
+            const index = spec.phases.findIndex((phase) => phase.id === id);
+            const nextIndex = index + delta;
+            if (index < 0 || nextIndex < 0 || nextIndex >= spec.phases.length) return false;
+            const [phase] = spec.phases.splice(index, 1);
+            spec.phases.splice(nextIndex, 0, phase);
+            spec.phases.forEach((entry, order) => (entry.order = order + 1));
+            return true;
+        }
+    });
+}
+
+function renderBossInspector(snapshot, selected, entity) {
+    const fields = element("div", { className: "inspector-fields" });
+    const spec = snapshot.spec;
+    if (entity?.point) {
+        appendPositionField(fields, {
+            label: "X",
+            value: entity.point.x,
+            onChange: (value) => updateEntityPosition(selected, { x: value, y: entity.point.y })
+        });
+        appendPositionField(fields, {
+            label: "Y",
+            value: entity.point.y,
+            onChange: (value) => updateEntityPosition(selected, { x: entity.point.x, y: value })
+        });
+    }
+    if (selected.domain === "arena") {
+        appendField(fields, {
+            label: "Arena 너비",
+            value: spec.arena.bounds.width,
+            onChange: (value) => replacePointer("arena", "Set Arena width", "/arena/bounds/width", value)
+        });
+        appendField(fields, {
+            label: "Arena 높이",
+            value: spec.arena.bounds.height,
+            onChange: (value) => replacePointer("arena", "Set Arena height", "/arena/bounds/height", value)
+        });
+    }
+    if (selected.domain === "surfaces") {
+        const surface = spec.arena.surfaces.find(({ id }) => id === selected.id);
+        appendField(fields, {
+            label: "너비",
+            value: surface.bounds.width,
+            onChange: (value) => replacePointer("surfaces", "Set surface width", `${entity.path}/bounds/width`, value)
+        });
+        appendField(fields, {
+            label: "높이",
+            value: surface.bounds.height,
+            onChange: (value) => replacePointer("surfaces", "Set surface height", `${entity.path}/bounds/height`, value)
+        });
+        appendCheck(fields, {
+            label: "한 방향 통과",
+            checked: surface.oneWay,
+            onChange: (value) => replacePointer("surfaces", "Set one-way", `${entity.path}/oneWay`, value)
+        });
+        appendCheck(fields, {
+            label: "갈고리 부착 가능",
+            checked: surface.grappleable,
+            onChange: (value) => replacePointer("surfaces", "Set grappleable", `${entity.path}/grappleable`, value)
+        });
+    }
+    if (selected.domain === "boss") {
+        appendField(fields, {
+            label: "Collider 너비",
+            value: spec.boss.collider.width,
+            onChange: (value) => replacePointer("boss", "Set Boss width", "/boss/collider/width", value)
+        });
+        appendField(fields, {
+            label: "Collider 높이",
+            value: spec.boss.collider.height,
+            onChange: (value) => replacePointer("boss", "Set Boss height", "/boss/collider/height", value)
+        });
+        appendField(fields, {
+            label: "표현 Preset",
+            type: "text",
+            value: spec.boss.visualPresetId,
+            onChange: (value) => replacePointer("boss", "Set Boss preset", "/boss/visualPresetId", value)
+        });
+    }
+    if (selected.domain === "mechanics") {
+        const mechanic = spec.mechanics.find(({ id }) => id === selected.id);
+        appendField(fields, {
+            label: "등록 Mechanic 종류",
+            type: "text",
+            value: mechanic.type,
+            onChange: (value) => replacePointer("mechanics", "Set mechanic type", `${entity.path}/type`, value)
+        });
+        for (const [key, value] of Object.entries(mechanic.parameters)) {
+            appendField(fields, {
+                label: key,
+                value,
+                onChange: (next) => replacePointer("mechanics", `Set ${key}`, `${entity.path}/parameters/${key}`, next)
+            });
+        }
+        fields.append(
+            button({
+                text: "Mechanic 삭제",
+                className: "danger",
+                onClick: () => removeBossEntry("mechanics", selected.id)
+            })
+        );
+    }
+    if (selected.domain === "phases") {
+        const phase = spec.phases.find(({ id }) => id === selected.id);
+        appendField(fields, {
+            label: "Phase 이름",
+            type: "text",
+            value: phase.name,
+            onChange: (value) => replacePointer("phases", "Set Phase name", `${entity.path}/name`, value)
+        });
+        appendField(fields, {
+            label: "기본 Phase HP",
+            value: phase.basePhaseHealth,
+            onChange: (value) => replacePointer("phases", "Set Phase HP", `${entity.path}/basePhaseHealth`, value)
+        });
+        appendField(fields, {
+            label: "Mechanic ID (쉼표 구분)",
+            type: "text",
+            value: phase.mechanicIds.join(", "),
+            onChange: (value) =>
+                replacePointer(
+                    "phases",
+                    "Set Phase mechanics",
+                    `${entity.path}/mechanicIds`,
+                    value
+                        .split(",")
+                        .map((entry) => entry.trim())
+                        .filter(Boolean)
+                )
+        });
+        appendField(fields, {
+            label: "약점 Target ID",
+            type: "text",
+            value: phase.vulnerability.targetId,
+            onChange: (value) =>
+                replacePointer("phases", "Set weak target", `${entity.path}/vulnerability/targetId`, value)
+        });
+        appendField(fields, {
+            label: "약점 개방 조건",
+            type: "text",
+            value: phase.vulnerability.trigger,
+            onChange: (value) =>
+                replacePointer("phases", "Set weak trigger", `${entity.path}/vulnerability/trigger`, value)
+        });
+        appendField(fields, {
+            label: "약점 개방 시간 (초)",
+            value: phase.vulnerability.durationSeconds,
+            onChange: (value) =>
+                replacePointer("phases", "Set weak duration", `${entity.path}/vulnerability/durationSeconds`, value)
+        });
+        appendField(fields, {
+            label: "HUD 목표",
+            type: "text",
+            value: phase.hud.objective,
+            onChange: (value) => replacePointer("phases", "Set HUD objective", `${entity.path}/hud/objective`, value)
+        });
+        const actions = element("div", { className: "inspector-actions" });
+        actions.append(
+            button({ text: "위로", disabled: phase.order === 1, onClick: () => moveBossPhase(selected.id, -1) }),
+            button({
+                text: "아래로",
+                disabled: phase.order === spec.phases.length,
+                onClick: () => moveBossPhase(selected.id, 1)
+            }),
+            button({ text: "Phase 삭제", className: "danger", onClick: () => removeBossEntry("phases", selected.id) })
+        );
+        fields.append(actions);
+    }
+    if (selected.domain === "combat") {
+        appendField(fields, {
+            label: "추가 Player HP 배율",
+            value: spec.combat.additionalPlayerMultiplier,
+            step: 0.05,
+            onChange: (value) =>
+                replacePointer("combat", "Set player HP multiplier", "/combat/additionalPlayerMultiplier", value)
+        });
+        appendField(fields, {
+            label: "약점 고정 추가 피해 비율",
+            value: spec.combat.weakFixedPercent,
+            step: 0.05,
+            onChange: (value) => replacePointer("combat", "Set weak fixed percent", "/combat/weakFixedPercent", value)
+        });
+        const derived = bossStageDerivedPreview(spec);
+        for (const entry of derived.participants) {
+            appendField(fields, {
+                label: `${entry.participantCount}인 총 HP / Phase / Floor / 약점`,
+                type: "text",
+                value: `${entry.totalHealth} / ${entry.phases.map(({ maxHealth }) => maxHealth).join("+")} / ${entry.phases.map(({ healthFloor }) => healthFloor).join(",")} / ${entry.phases.map(({ weakFixedDamage }) => weakFixedDamage).join(",")}`,
+                disabled: true
+            });
+        }
+    }
+    if (selected.domain === "hud") {
+        appendField(fields, {
+            label: "Boss UI 제목",
+            type: "text",
+            value: spec.hud.title,
+            onChange: (value) => replacePointer("hud", "Set Boss HUD title", "/hud/title", value)
+        });
+        appendCheck(fields, {
+            label: "Phase 구간 표시",
+            checked: spec.hud.healthBar.showPhaseBreaks,
+            onChange: (value) => replacePointer("hud", "Set Phase breaks", "/hud/healthBar/showPhaseBreaks", value)
+        });
+        appendCheck(fields, {
+            label: "HP 수치 표시",
+            checked: spec.hud.healthBar.showNumbers,
+            onChange: (value) => replacePointer("hud", "Set HP numbers", "/hud/healthBar/showNumbers", value)
+        });
+        appendCheck(fields, {
+            label: "약점 잔여 시간 표시",
+            checked: spec.hud.showVulnerabilityCountdown,
+            onChange: (value) => replacePointer("hud", "Set countdown", "/hud/showVulnerabilityCountdown", value)
+        });
+    }
+    if (selected.domain === "transition") {
+        for (const [label, key] of [
+            ["진입 조건", "entryTrigger"],
+            ["승리 조건", "victoryTrigger"],
+            ["다음 Area", "nextAreaId"],
+            ["승리 표현 ID", "victoryPresentationId"]
+        ]) {
+            appendField(fields, {
+                label,
+                type: "text",
+                value: spec.transition[key],
+                onChange: (value) => {
+                    if (key !== "nextAreaId") {
+                        replacePointer("transition", `Set ${key}`, `/transition/${key}`, value);
+                        return;
+                    }
+                    applyMutation({
+                        domain: "transition",
+                        label: "Set nextAreaId",
+                        apply: (next) => {
+                            next.nextAreaId = value;
+                            next.transition.nextAreaId = value;
+                            return true;
+                        }
+                    });
+                }
+            });
+        }
+    }
+    dom.inspector.append(fields);
 }
 
 function renderInspector() {
@@ -658,6 +1088,12 @@ function renderInspector() {
     }
     const title = element("h2", { className: "inspector-title", text: selected.id });
     dom.inspector.append(title, element("p", { className: "inspector-subtitle", text: domainLabel(selected.domain) }));
+    if (state.specType === "boss-stage") {
+        const entity = entities().find((entry) => entry.domain === selected.domain && entry.id === selected.id);
+        if (!entity) return;
+        renderBossInspector(snapshot, selected, entity);
+        return;
+    }
     if (READ_ONLY_GROUPS.some(([domain]) => domain === selected.domain)) {
         const [, label, collection] = READ_ONLY_GROUPS.find(([domain]) => domain === selected.domain);
         const value = collection === "behaviorRefs" ? snapshot.spec.behaviorRefs : snapshot.spec.definition[collection];
@@ -989,7 +1425,7 @@ function rectanglesOverlap(first, second) {
 }
 
 function drawAnnotation(entity, spec, rect, selected, occupied) {
-    if (state.view.zoom < 0.14) return;
+    if (state.view.zoom < 0.14 || !entity.point) return;
     const annotation = entityAnnotation(entity, spec);
     const point = worldToScreen(annotationPoint(entity, spec), state.view);
     context.save();
@@ -1022,11 +1458,45 @@ function drawAnnotation(entity, spec, rect, selected, occupied) {
     context.restore();
 }
 
+function drawBossCanvas(rect, spec) {
+    const selected = state.draft.selected();
+    const isSelected = (domain, id) => selected?.domain === domain && selected.id === id;
+    context.setLineDash([7, 6]);
+    drawRect(spec.arena.bounds, "#5a7d89");
+    context.setLineDash([]);
+    for (const surface of spec.arena.surfaces) {
+        drawRect(surface.bounds, isSelected("surfaces", surface.id) ? "#66e6ff" : "#789dab", true);
+    }
+    for (const mechanic of spec.mechanics) {
+        if (mechanic.bounds) {
+            context.setLineDash([5, 4]);
+            drawRect(mechanic.bounds, isSelected("mechanics", mechanic.id) ? "#ffcb78" : "#9d6734", true);
+            context.setLineDash([]);
+        }
+        drawMarker(mechanic.position, "#f4ae4b", "diamond", isSelected("mechanics", mechanic.id));
+    }
+    drawRect(spec.boss.collider, isSelected("boss", spec.boss.actorId) ? "#ff796a" : "#b94c4c", true);
+    drawMarker(spec.boss.position, "#ff796a", "square", isSelected("boss", spec.boss.actorId));
+    drawMarker(spec.arena.entry, "#e6f2f5", "triangle", isSelected("entry", spec.arena.entry.id));
+    drawMarker(spec.arena.exit, "#66e6ff", "diamond", isSelected("exit", spec.arena.exit.id));
+    for (const anchor of spec.arena.anchors) drawMarker(anchor, "#33889d", "circle", isSelected("anchors", anchor.id));
+    for (const point of spec.arena.recoveryPoints)
+        drawMarker(point, "#86c99d", "square", isSelected("recovery", point.id));
+    context.fillStyle = "rgba(230,242,245,0.7)";
+    context.font = "11px ui-monospace, Consolas, monospace";
+    context.fillText(`${spec.id} · ${spec.name}`, 12, 20);
+    const occupied = [];
+    for (const entity of entities()) {
+        drawAnnotation(entity, spec, rect, isSelected(entity.domain, entity.id), occupied);
+    }
+}
+
 function drawCanvas() {
     const rect = resizeCanvas();
     context.clearRect(0, 0, rect.width, rect.height);
     if (!state.draft) return;
     const spec = state.draft.specification();
+    if (state.specType === "boss-stage") return drawBossCanvas(rect, spec);
     const selected = state.draft.selected();
     const isSelected = (domain, id) => selected?.domain === domain && selected.id === id;
     const canvasEntities = entities();
@@ -1137,13 +1607,21 @@ async function loadStage(stageId, { fit = true } = {}) {
     try {
         const payload = await api(stageEndpoint(stageId));
         state.stageId = payload.stageId;
+        state.specType = payload.specType ?? "area";
         state.authoringMode = payload.authoringMode;
         state.runtimePromotion = payload.runtimePromotion;
         state.previewAvailable = payload.previewAvailable;
-        state.draft = new AreaEditorDraft({ spec: payload.spec, revision: payload.revision });
+        state.derivedPreview = payload.derivedPreview ?? null;
+        state.draft =
+            state.specType === "boss-stage"
+                ? new BossStageEditorDraft({ spec: payload.spec, revision: payload.revision })
+                : new AreaEditorDraft({ spec: payload.spec, revision: payload.revision });
         state.draft.select(null);
-        const sector = payload.stageId.split("-")[0].padStart(2, "0");
-        dom.stageScope.textContent = `SECTOR ${sector} / ${authoringModeLabel(payload.authoringMode)}`;
+        const scope =
+            state.specType === "boss-stage"
+                ? "POST-SECTOR BOSS / 독립 Boss Stage"
+                : `SECTOR ${payload.stageId.split("-")[0].padStart(2, "0")}`;
+        dom.stageScope.textContent = `${scope} / ${authoringModeLabel(payload.authoringMode)}`;
         if (fit) fitView();
         setMessage(
             "valid",
@@ -1252,6 +1730,7 @@ dom.apply.addEventListener("click", async () => {
         });
         state.draft.markApplied(payload.revision);
         state.runtimePromotion = payload.runtimePromotion;
+        state.derivedPreview = payload.derivedPreview ?? state.derivedPreview;
         const stage = state.stages.find(({ stageId }) => stageId === payload.stageId);
         if (stage)
             Object.assign(stage, {
@@ -1311,7 +1790,7 @@ dom.canvas.addEventListener("pointerdown", (event) => {
     } else {
         const selected = hitTestEditorEntity(entities(), world, 28 / state.view.zoom);
         state.draft.select(selected);
-        if (selected && selected.domain !== "bounds") {
+        if (selected?.point && !["bounds", "arena"].includes(selected.domain)) {
             state.draft.beginBufferedMutation({ domain: selected.domain, label: "Move map object" });
             state.pointer = { mode: "drag", selected, originPoint: { ...selected.point }, originWorld: world };
         } else {

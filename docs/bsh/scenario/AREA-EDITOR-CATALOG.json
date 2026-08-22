@@ -2,6 +2,14 @@
     "schemaVersion": "area-editor-catalog-v2",
     "stages": [
         {
+            "stageId": "boss-01",
+            "bossStageId": "boss-01",
+            "specType": "boss-stage",
+            "authoringMode": "runtime-generated",
+            "sourcePath": "src/game/boss-authoring/specs/boss-01.json",
+            "outputPath": "src/game/boss-authoring/generated/Boss01Stage.generated.js"
+        },
+        {
             "stageId": "1-1",
             "areaId": "sector-01-01",
             "authoringMode": "runtime-generated",
