@@ -97,16 +97,14 @@ async function createPreview() {
     currentApp = null;
     try {
         setStatus("실제 게임 화면 리소스를 준비하는 중입니다.");
-        const [{ areaId, moduleUrl, outputRevision, revision }, presentation] = await Promise.all([
-            requestPreview(),
-            runtimePresentationPromise
-        ]);
+        const [preview, presentation] = await Promise.all([requestPreview(), runtimePresentationPromise]);
+        const { areaId, moduleUrl, outputRevision, revision, previewArea } = preview;
         const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(areaId);
-        const { GENERATED_AREA } = await loadGeneratedArea(moduleUrl, outputRevision);
+        const generatedArea = previewArea ?? (await loadGeneratedArea(moduleUrl, outputRevision)).GENERATED_AREA;
         currentApp = new AreaPreviewGameApp({
             canvas,
             renderer: rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions }),
-            generatedArea: GENERATED_AREA,
+            generatedArea,
             revision,
             playerDefinition: presentation.playerDefinition,
             directionDefinitions: presentation.directionDefinitions

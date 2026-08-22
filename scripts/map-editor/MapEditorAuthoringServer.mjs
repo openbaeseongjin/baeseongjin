@@ -3,7 +3,10 @@ import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { validateAreaCatalogManifest } from "../../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
-import { canonicalizeAreaSpecV2 } from "../../src/game/world/area-authoring-v2/AreaSpecV2.js";
+import {
+    canonicalizeAreaSpecV2,
+    createScenarioPreviewAreaDefinitionFromV2
+} from "../../src/game/world/area-authoring-v2/AreaSpecV2.js";
 import { collectGeneratedOutputs } from "../../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
 import {
     validateAreaSpecEditorMutation,
@@ -284,6 +287,12 @@ export async function createMapEditorAuthoringServer({
         return stage;
     }
 
+    function previewAvailable(stage) {
+        return Boolean(
+            stage.outputPath || (stage.entry.authoringMode === "scenario-only" && stage.spec.definition.surfaces.length)
+        );
+    }
+
     function stageValue(stage) {
         return Object.freeze({
             stageId: stage.entry.stageId,
@@ -293,7 +302,7 @@ export async function createMapEditorAuthoringServer({
             runtimePromotion: stage.runtimePromotion,
             revision: stage.revision,
             spec: structuredClone(stage.spec),
-            previewAvailable: Boolean(stage.outputPath),
+            previewAvailable: previewAvailable(stage),
             ...(stage.outputPath
                 ? {
                       moduleUrl: `/${relative(root, stage.outputPath).replaceAll("\\", "/")}`,
@@ -317,7 +326,7 @@ export async function createMapEditorAuthoringServer({
             runtimePromotion: runtimePromotionReadiness(stage.entry, spec),
             revision: stage.revision,
             spec: structuredClone(spec),
-            previewAvailable: Boolean(stage.outputPath),
+            previewAvailable: previewAvailable(stage),
             ...(stage.outputPath
                 ? {
                       moduleUrl: `/${relative(root, stage.outputPath).replaceAll("\\", "/")}`,
@@ -456,12 +465,18 @@ export async function createMapEditorAuthoringServer({
             if (route.action === "read" && request.method === "GET")
                 return json(response, 200, await server.readStage(route.stageId));
             if (route.action === "preview" && request.method === "GET") {
+                const stageRecord = currentStage(route.stageId);
                 const stage = await server.readStage(route.stageId);
-                if (!stage.previewAvailable) {
-                    throw error(
-                        "preview-unavailable",
-                        "Scenario-only stages are not connected to a game Runtime preview."
-                    );
+                if (!previewAvailable(stageRecord)) {
+                    throw error("preview-unavailable", "This stage does not have authored terrain for a game preview.");
+                }
+                if (stageRecord.entry.authoringMode === "scenario-only") {
+                    return json(response, 200, {
+                        stageId: stage.stageId,
+                        areaId: stage.areaId,
+                        revision: stage.revision,
+                        previewArea: createScenarioPreviewAreaDefinitionFromV2(stageRecord.spec)
+                    });
                 }
                 return json(response, 200, {
                     stageId: stage.stageId,
