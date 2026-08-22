@@ -217,8 +217,9 @@ function requestRoute(url) {
 }
 
 function scenarioMapPreviewPath(stageId, specType = "area") {
-    if (specType === "boss-stage")
-        return `docs/boss/${stageId.slice(5).padStart(2, "0")}/final-content/MAP-PREVIEW.html`;
+    if (specType === "boss-stage") {
+        throw error("scenario-map-preview-unavailable", "Boss Stage legacy map previews are not active references.");
+    }
     const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
     if (!match) throw error("stage-identity-invalid", "Map editor stage identity is invalid.");
     return `docs/bsh/scenario/${match[1]}/${stageId}/MAP-PREVIEW.html`;
