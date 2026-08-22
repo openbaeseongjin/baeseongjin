@@ -132,7 +132,25 @@
     "checkpoints": [],
     "objects": [],
     "objectives": [],
-    "windZones": [],
+    "windZones": [
+      {
+        "id": "sector-06-02:scenario-wind-1",
+        "bounds": {
+          "x": -1120,
+          "y": -900,
+          "width": 2040,
+          "height": 450
+        },
+        "direction": {
+          "x": -1,
+          "y": 0
+        },
+        "mode": "continuous",
+        "strength": 500,
+        "falloff": 80,
+        "sourceId": "wind"
+      }
+    ],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],

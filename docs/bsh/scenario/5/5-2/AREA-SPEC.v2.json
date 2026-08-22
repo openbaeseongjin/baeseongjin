@@ -43,8 +43,8 @@
     },
     "exit": {
       "id": "sector-05-02:scenario-exit",
-      "x": -340,
-      "y": -2480
+      "x": 340,
+      "y": 305.29
     },
     "nextAreaId": null,
     "surfaces": [
@@ -619,6 +619,12 @@
         "x": -340,
         "y": -2480,
         "sourceId": "x"
+      },
+      {
+        "id": "sector-05-02:route-route-3-neighborDistancesPx-16",
+        "x": 340,
+        "y": 305.29,
+        "sourceId": "route-3-neighborDistancesPx-16"
       }
     ],
     "recoveryPoints": [],

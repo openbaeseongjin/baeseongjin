@@ -43,17 +43,400 @@
     },
     "exit": {
       "id": "sector-03-08:scenario-exit",
-      "x": -1920,
-      "y": -64
+      "x": 384,
+      "y": -1888
     },
     "nextAreaId": null,
-    "surfaces": [],
+    "surfaces": [
+      {
+        "id": "sector-03-08:safe-hub-m0",
+        "kind": "scenario-safe-hub",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -704,
+          "y": -640
+        },
+        "vertices": [
+          {
+            "x": -896,
+            "y": -640
+          },
+          {
+            "x": -512,
+            "y": -640
+          },
+          {
+            "x": -512,
+            "y": -616
+          },
+          {
+            "x": -896,
+            "y": -616
+          }
+        ],
+        "sourceId": "m0",
+        "inferredFrom": "safeHubs"
+      },
+      {
+        "id": "sector-03-08:safe-hub-mx",
+        "kind": "scenario-safe-hub",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 128,
+          "y": -1120
+        },
+        "vertices": [
+          {
+            "x": -64,
+            "y": -1120
+          },
+          {
+            "x": 320,
+            "y": -1120
+          },
+          {
+            "x": 320,
+            "y": -1096
+          },
+          {
+            "x": -64,
+            "y": -1096
+          }
+        ],
+        "sourceId": "mx",
+        "inferredFrom": "safeHubs"
+      },
+      {
+        "id": "sector-03-08:safe-hub-m1",
+        "kind": "scenario-safe-hub",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 128,
+          "y": -1488
+        },
+        "vertices": [
+          {
+            "x": -64,
+            "y": -1488
+          },
+          {
+            "x": 320,
+            "y": -1488
+          },
+          {
+            "x": 320,
+            "y": -1464
+          },
+          {
+            "x": -64,
+            "y": -1464
+          }
+        ],
+        "sourceId": "m1",
+        "inferredFrom": "safeHubs"
+      },
+      {
+        "id": "sector-03-08:safe-hub-recordsBay",
+        "kind": "scenario-safe-hub",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": -1888
+        },
+        "vertices": [
+          {
+            "x": -384,
+            "y": -1888
+          },
+          {
+            "x": 384,
+            "y": -1888
+          },
+          {
+            "x": 384,
+            "y": -1864
+          },
+          {
+            "x": -384,
+            "y": -1864
+          }
+        ],
+        "sourceId": "recordsBay",
+        "inferredFrom": "safeHubs"
+      }
+    ],
     "routePoints": [
       {
-        "id": "sector-03-08:route-entry",
-        "x": -1920,
-        "y": -64,
-        "sourceId": "entry"
+        "id": "sector-03-08:route-route-5-1-central-path-1-3",
+        "x": -512,
+        "y": -640,
+        "sourceId": "route-5-1-central-path-1-3"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-central-path-2-4",
+        "x": -416,
+        "y": -832,
+        "sourceId": "route-5-1-central-path-2-4"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-central-path-3-5",
+        "x": -128,
+        "y": -1000,
+        "sourceId": "route-5-1-central-path-3-5"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-central-path-4-6",
+        "x": -64,
+        "y": -1120,
+        "sourceId": "route-5-1-central-path-4-6"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-west-path-1-7",
+        "x": -896,
+        "y": -640,
+        "sourceId": "route-5-1-west-path-1-7"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-west-path-2-8",
+        "x": -1152,
+        "y": -768,
+        "sourceId": "route-5-1-west-path-2-8"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-west-path-3-9",
+        "x": -1472,
+        "y": -896,
+        "sourceId": "route-5-1-west-path-3-9"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-west-path-4-10",
+        "x": -1152,
+        "y": -1024,
+        "sourceId": "route-5-1-west-path-4-10"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-west-path-5-11",
+        "x": -800,
+        "y": -1104,
+        "sourceId": "route-5-1-west-path-5-11"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-west-path-6-12",
+        "x": -448,
+        "y": -1120,
+        "sourceId": "route-5-1-west-path-6-12"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-west-path-7-13",
+        "x": -64,
+        "y": -1120,
+        "sourceId": "route-5-1-west-path-7-13"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-east-path-1-14",
+        "x": -512,
+        "y": -640,
+        "sourceId": "route-5-1-east-path-1-14"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-east-path-2-15",
+        "x": -192,
+        "y": -736,
+        "sourceId": "route-5-1-east-path-2-15"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-east-path-3-16",
+        "x": 160,
+        "y": -832,
+        "sourceId": "route-5-1-east-path-3-16"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-east-path-4-17",
+        "x": 480,
+        "y": -944,
+        "sourceId": "route-5-1-east-path-4-17"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-east-path-5-18",
+        "x": 320,
+        "y": -1088,
+        "sourceId": "route-5-1-east-path-5-18"
+      },
+      {
+        "id": "sector-03-08:route-route-5-1-east-path-6-19",
+        "x": 320,
+        "y": -1120,
+        "sourceId": "route-5-1-east-path-6-19"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-central-path-1-22",
+        "x": 320,
+        "y": -1120,
+        "sourceId": "route-5-2-central-path-1-22"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-central-path-2-23",
+        "x": 128,
+        "y": -1304,
+        "sourceId": "route-5-2-central-path-2-23"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-central-path-3-24",
+        "x": 128,
+        "y": -1488,
+        "sourceId": "route-5-2-central-path-3-24"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-west-path-1-25",
+        "x": -64,
+        "y": -1120,
+        "sourceId": "route-5-2-west-path-1-25"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-west-path-2-26",
+        "x": -352,
+        "y": -1232,
+        "sourceId": "route-5-2-west-path-2-26"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-west-path-3-27",
+        "x": -704,
+        "y": -1344,
+        "sourceId": "route-5-2-west-path-3-27"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-west-path-4-28",
+        "x": -384,
+        "y": -1456,
+        "sourceId": "route-5-2-west-path-4-28"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-west-path-5-29",
+        "x": -64,
+        "y": -1488,
+        "sourceId": "route-5-2-west-path-5-29"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-east-path-1-30",
+        "x": 320,
+        "y": -1120,
+        "sourceId": "route-5-2-east-path-1-30"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-east-path-2-31",
+        "x": 640,
+        "y": -1216,
+        "sourceId": "route-5-2-east-path-2-31"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-east-path-3-32",
+        "x": 992,
+        "y": -1344,
+        "sourceId": "route-5-2-east-path-3-32"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-east-path-4-33",
+        "x": 640,
+        "y": -1464,
+        "sourceId": "route-5-2-east-path-4-33"
+      },
+      {
+        "id": "sector-03-08:route-route-5-2-east-path-5-34",
+        "x": 320,
+        "y": -1488,
+        "sourceId": "route-5-2-east-path-5-34"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-central-path-1-37",
+        "x": 320,
+        "y": -1488,
+        "sourceId": "route-5-3-central-path-1-37"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-central-path-2-38",
+        "x": 128,
+        "y": -1656,
+        "sourceId": "route-5-3-central-path-2-38"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-central-path-3-39",
+        "x": 128,
+        "y": -1784,
+        "sourceId": "route-5-3-central-path-3-39"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-central-path-4-40",
+        "x": 384,
+        "y": -1888,
+        "sourceId": "route-5-3-central-path-4-40"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-west-path-1-41",
+        "x": -64,
+        "y": -1488,
+        "sourceId": "route-5-3-west-path-1-41"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-west-path-2-42",
+        "x": -352,
+        "y": -1600,
+        "sourceId": "route-5-3-west-path-2-42"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-west-path-3-43",
+        "x": -704,
+        "y": -1712,
+        "sourceId": "route-5-3-west-path-3-43"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-west-path-4-44",
+        "x": -384,
+        "y": -1840,
+        "sourceId": "route-5-3-west-path-4-44"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-west-path-5-45",
+        "x": -384,
+        "y": -1888,
+        "sourceId": "route-5-3-west-path-5-45"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-east-path-1-46",
+        "x": 320,
+        "y": -1488,
+        "sourceId": "route-5-3-east-path-1-46"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-east-path-2-47",
+        "x": 608,
+        "y": -1600,
+        "sourceId": "route-5-3-east-path-2-47"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-east-path-3-48",
+        "x": 960,
+        "y": -1712,
+        "sourceId": "route-5-3-east-path-3-48"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-east-path-4-49",
+        "x": 608,
+        "y": -1840,
+        "sourceId": "route-5-3-east-path-4-49"
+      },
+      {
+        "id": "sector-03-08:route-route-5-3-east-path-5-50",
+        "x": 384,
+        "y": -1888,
+        "sourceId": "route-5-3-east-path-5-50"
       }
     ],
     "recoveryPoints": [],

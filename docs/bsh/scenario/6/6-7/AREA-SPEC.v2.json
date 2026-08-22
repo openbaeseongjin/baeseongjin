@@ -243,19 +243,7 @@
       }
     ],
     "checkpoints": [],
-    "objects": [
-      {
-        "id": "sector-06-07:S1",
-        "kind": "scenario-enemy-slot",
-        "enemyType": "sentry-t1",
-        "position": {
-          "x": 360,
-          "y": -1160
-        },
-        "coordinateAnchor": "center",
-        "sourceId": "sector-06-07:S1"
-      }
-    ],
+    "objects": [],
     "objectives": [],
     "windZones": [],
     "scannerGroups": [],

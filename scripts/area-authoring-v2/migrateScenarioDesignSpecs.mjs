@@ -19,10 +19,10 @@ function readJson(path) {
     return JSON.parse(readFileSync(resolve(projectRoot, path), "utf8"));
 }
 
-function writeJson(path, value) {
+function writeJson(path, value, { indent = 2 } = {}) {
     const target = resolve(projectRoot, path);
     mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+    writeFileSync(target, `${JSON.stringify(value, null, indent)}\n`, "utf8");
 }
 
 function finitePoint(value) {
@@ -30,12 +30,62 @@ function finitePoint(value) {
 }
 
 function asPoint(value) {
+    if (Array.isArray(value) && value.length >= 2 && Number.isFinite(value[0]) && Number.isFinite(value[1])) {
+        return { x: value[0], y: value[1] };
+    }
     if (finitePoint(value)) return { x: value.x, y: value.y };
     if (Number.isFinite(value?.x) && Number.isFinite(value?.topY)) return { x: value.x, y: value.topY };
     if (Number.isFinite(value?.cx) && Number.isFinite(value?.topY)) return { x: value.cx, y: value.topY };
     if (finitePoint(value?.position)) return { x: value.position.x, y: value.position.y };
     if (finitePoint(value?.center)) return { x: value.center.x, y: value.center.y };
     return null;
+}
+
+function asEntries(value) {
+    if (Array.isArray(value)) return value;
+    if (!value || typeof value !== "object") return [];
+    return Object.values(value).filter((entry) => entry && typeof entry === "object");
+}
+
+function routeCandidates(value, candidates = [], path = "route") {
+    if (typeof value === "string") {
+        candidates.push({ id: value, point: null });
+        return candidates;
+    }
+    const point = asPoint(value);
+    if (point) {
+        candidates.push({ id: value?.id ?? `${path}-${candidates.length + 1}`, point });
+        return candidates;
+    }
+    if (Array.isArray(value)) {
+        value.forEach((entry, index) => routeCandidates(entry, candidates, `${path}-${index + 1}`));
+        return candidates;
+    }
+    if (!value || typeof value !== "object") return candidates;
+    for (const [key, entry] of Object.entries(value)) {
+        if (["maxAuthoredRelationPx", "baseHookReachPx", "cost", "benefit", "pressure", "rules"].includes(key))
+            continue;
+        routeCandidates(entry, candidates, `${path}-${key}`);
+    }
+    return candidates;
+}
+
+function routePointKind(entry) {
+    return [entry?.kind, entry?.role, entry?.purpose, entry?.label]
+        .filter((value) => typeof value === "string")
+        .join(" ")
+        .toLowerCase();
+}
+
+function isGrappleRoutePoint(entry) {
+    return /grapple|hardpoint|anchor|hook/.test(routePointKind(entry));
+}
+
+function isSurfaceRoutePoint(entry) {
+    const kind = routePointKind(entry);
+    return /safe|deck|platform|landing|recovery|hub|lobby|observation|basin|island|floor|entry|exit|control|bay/.test(
+        kind
+    );
 }
 
 function collectPoints(value, result = []) {
@@ -115,6 +165,9 @@ function sourceTargetPoints(raw) {
         const point = asPoint(routePoint);
         if (typeof routePoint?.id === "string" && point) map.set(routePoint.id, point);
     }
+    for (const candidate of routeCandidates([raw.route, raw.routes, raw.weaves])) {
+        if (candidate.point) map.set(candidate.id, candidate.point);
+    }
     const entry = asPoint(raw.entry);
     if (entry) map.set(raw.entry?.id ?? "entry", entry);
     return map;
@@ -122,21 +175,16 @@ function sourceTargetPoints(raw) {
 
 function routePointEntries(raw, sourceAreaId) {
     const pointsById = sourceTargetPoints(raw);
-    const rawRoutes = [raw.mandatoryRoute, raw.mainRoute, raw.route].filter(Boolean);
-    const candidates = [];
-    for (const route of rawRoutes) {
-        if (Array.isArray(route)) candidates.push(...route);
-        else if (route && typeof route === "object")
-            candidates.push(...Object.values(route).flatMap((value) => (Array.isArray(value) ? value : [])));
-    }
+    const candidates = routeCandidates([raw.mandatoryRoute, raw.mainRoute, raw.route, raw.routes, raw.weaves]);
     const result = [];
+    const seen = new Set();
     for (const candidate of candidates) {
-        const point =
-            typeof candidate === "string"
-                ? pointsById.get(candidate)
-                : (asPoint(candidate) ?? pointsById.get(candidate?.id));
+        const point = candidate.point ?? pointsById.get(candidate.id);
         if (!point) continue;
-        const id = typeof candidate === "string" ? candidate : (candidate.id ?? `point-${result.length + 1}`);
+        const id = candidate.id ?? `point-${result.length + 1}`;
+        const stableId = `${sourceAreaId}:route-${id}`;
+        if (seen.has(stableId)) continue;
+        seen.add(stableId);
         result.push({ id: `${sourceAreaId}:route-${id}`, x: point.x, y: point.y, sourceId: id });
     }
     if (result.length > 0) return result;
@@ -148,7 +196,7 @@ function routePointEntries(raw, sourceAreaId) {
 }
 
 function surfaceEntries(raw, sourceAreaId) {
-    return (raw.surfaces ?? [])
+    const result = (raw.surfaces ?? [])
         .map((surface, index) => {
             const point = asPoint(surface);
             if (!point) return null;
@@ -177,11 +225,58 @@ function surfaceEntries(raw, sourceAreaId) {
             };
         })
         .filter(Boolean);
+    const sourceIds = new Set(result.map(({ sourceId }) => sourceId).filter(Boolean));
+    for (const entry of asEntries(raw.mandatoryRoute)) {
+        const point = asPoint(entry);
+        if (!point || !isSurfaceRoutePoint(entry) || sourceIds.has(entry.id)) continue;
+        sourceIds.add(entry.id);
+        result.push({
+            id: `${sourceAreaId}:inferred-surface-${entry.id}`,
+            kind: `scenario-${entry.kind ?? "landing"}`,
+            oneWay: true,
+            grappleable: true,
+            coordinateAnchor: "top-center",
+            position: point,
+            vertices: [
+                { x: point.x - 96, y: point.y },
+                { x: point.x + 96, y: point.y },
+                { x: point.x + 96, y: point.y + 24 },
+                { x: point.x - 96, y: point.y + 24 }
+            ],
+            sourceId: entry.id,
+            inferredFrom: "mandatoryRoute"
+        });
+    }
+    for (const [id, hub] of Object.entries(raw.safeHubs ?? {})) {
+        if (!Number.isFinite(hub?.xMin) || !Number.isFinite(hub?.xMax) || !Number.isFinite(hub?.y)) continue;
+        const x = (hub.xMin + hub.xMax) * 0.5;
+        result.push({
+            id: `${sourceAreaId}:safe-hub-${id}`,
+            kind: "scenario-safe-hub",
+            oneWay: true,
+            grappleable: true,
+            coordinateAnchor: "top-center",
+            position: { x, y: hub.y },
+            vertices: [
+                { x: hub.xMin, y: hub.y },
+                { x: hub.xMax, y: hub.y },
+                { x: hub.xMax, y: hub.y + 24 },
+                { x: hub.xMin, y: hub.y + 24 }
+            ],
+            sourceId: id,
+            inferredFrom: "safeHubs"
+        });
+    }
+    return result;
 }
 
 function anchorEntries(raw) {
     const seen = new Set();
-    return (raw.grappleTargets ?? [])
+    const targets = [
+        ...(raw.grappleTargets ?? []),
+        ...asEntries(raw.mandatoryRoute).filter((entry) => isGrappleRoutePoint(entry))
+    ];
+    return targets
         .map((target, index) => {
             const point = asPoint(target);
             const id = target?.id ?? `anchor-${index + 1}`;
@@ -201,7 +296,7 @@ function anchorEntries(raw) {
 
 function recoveryEntries(raw, sourceAreaId) {
     const recovery = [
-        ...(raw.recoveryPoints ?? raw.recovery ?? []),
+        ...asEntries(raw.recoveryPoints ?? raw.recovery),
         ...(raw.surfaces ?? []).filter((surface) => surface?.kind === "recovery")
     ];
     const seen = new Set();
@@ -218,7 +313,7 @@ function recoveryEntries(raw, sourceAreaId) {
 }
 
 function enemyEntries(raw, sourceAreaId) {
-    const source = raw.enemies ?? raw.enemySlots ?? (raw.enemy ? [raw.enemy] : []);
+    const source = asEntries(raw.enemies ?? raw.enemySlots ?? raw.enemy ?? raw.objects);
     return source
         .map((entry, index) => {
             const point = asPoint(entry) ?? asPoint(entry?.patrol?.points?.[0]);
@@ -235,8 +330,8 @@ function enemyEntries(raw, sourceAreaId) {
         .filter(Boolean);
 }
 
-function windEntries(raw) {
-    return (raw.windZones ?? []).filter(
+function windEntries(raw, sourceAreaId) {
+    const authoredZones = (raw.windZones ?? []).filter(
         (zone) =>
             Number.isFinite(zone?.strength) &&
             finitePoint(zone?.direction) &&
@@ -246,6 +341,36 @@ function windEntries(raw) {
             Number.isFinite(zone.bounds.width) &&
             Number.isFinite(zone.bounds.height)
     );
+    if (authoredZones.length > 0) return authoredZones;
+    const wind = raw.wind;
+    const direction = asPoint(wind?.direction);
+    const bounds = wind?.bounds;
+    if (
+        !Number.isFinite(wind?.strength) ||
+        !direction ||
+        !Number.isFinite(bounds?.xMin) ||
+        !Number.isFinite(bounds?.xMax) ||
+        !Number.isFinite(bounds?.yMin) ||
+        !Number.isFinite(bounds?.yMax)
+    ) {
+        return [];
+    }
+    return [
+        {
+            id: `${sourceAreaId}:scenario-wind-1`,
+            bounds: {
+                x: bounds.xMin,
+                y: bounds.yMin,
+                width: bounds.xMax - bounds.xMin,
+                height: bounds.yMax - bounds.yMin
+            },
+            direction,
+            mode: wind.mode ?? "continuous",
+            strength: wind.strength,
+            falloff: wind.falloff ?? 0,
+            sourceId: "wind"
+        }
+    ];
 }
 
 function cameraEntries(raw) {
@@ -276,7 +401,7 @@ function scenarioSpec({ raw, sourcePath, sector, stage }) {
         checkpoints: [],
         objects: enemyEntries(raw, identity.stage.sourceAreaId),
         objectives: Array.isArray(raw.objectives) ? raw.objectives : [],
-        windZones: windEntries(raw),
+        windZones: windEntries(raw, identity.stage.sourceAreaId),
         scannerGroups: Array.isArray(raw.scannerGroups) ? raw.scannerGroups : [],
         storyTriggers: Array.isArray(raw.story?.planningTriggers) ? raw.story.planningTriggers : [],
         routes: [],
@@ -303,11 +428,12 @@ function scenarioSpec({ raw, sourcePath, sector, stage }) {
 
 function stageEntries() {
     return [...DESIGN_SOURCE_BY_SECTOR.entries()].flatMap(([sector, fileName]) =>
-        Array.from({ length: 8 }, (_, stage) => {
-            const stageId = `${sector}-${stage + 1}`;
+        Array.from({ length: sector === 3 ? 6 : 8 }, (_, index) => {
+            const stage = sector === 3 ? index + 3 : index + 1;
+            const stageId = `${sector}-${stage}`;
             const sourcePath = `docs/bsh/scenario/${sector}/${stageId}/${fileName}`;
             const outputPath = `docs/bsh/scenario/${sector}/${stageId}/AREA-SPEC.v2.json`;
-            return { sector, stage: stage + 1, stageId, sourcePath, outputPath };
+            return { sector, stage, stageId, sourcePath, outputPath };
         })
     );
 }
@@ -329,9 +455,16 @@ const editorCatalog = {
         ...Array.from({ length: 8 }, (_, index) => ({
             stageId: `2-${index + 1}`,
             areaId: `sector-02-${String(index + 1).padStart(2, "0")}`,
-            authoringMode: "runtime-staged",
+            authoringMode: "runtime-generated",
             sourcePath: `docs/bsh/scenario/2/2-${index + 1}/AREA-SPEC.v2.json`,
             manifestPath: "docs/bsh/scenario/AREA-CATALOG.sector02.json"
+        })),
+        ...Array.from({ length: 2 }, (_, index) => ({
+            stageId: `3-${index + 1}`,
+            areaId: `sector-03-${String(index + 1).padStart(2, "0")}`,
+            authoringMode: "runtime-generated",
+            sourcePath: `docs/bsh/scenario/3/3-${index + 1}/AREA-SPEC.v2.json`,
+            manifestPath: "docs/bsh/scenario/AREA-CATALOG.sector03.json"
         }))
     ]
 };
@@ -358,6 +491,6 @@ for (const entry of stageEntries()) {
 }
 
 if (writeCandidates) {
-    writeJson("docs/bsh/scenario/AREA-EDITOR-CATALOG.json", editorCatalog);
+    writeJson("docs/bsh/scenario/AREA-EDITOR-CATALOG.json", editorCatalog, { indent: 4 });
     console.log(`Wrote ${stageEntries().length} scenario v2 sources and AREA-EDITOR-CATALOG.json`);
 }

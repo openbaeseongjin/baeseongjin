@@ -118,19 +118,7 @@
     ],
     "recoveryPoints": [],
     "checkpoints": [],
-    "objects": [
-      {
-        "id": "S1",
-        "kind": "scenario-enemy-slot",
-        "enemyType": "sentry-t1",
-        "position": {
-          "x": 40,
-          "y": -980
-        },
-        "coordinateAnchor": "center",
-        "sourceId": "S1"
-      }
-    ],
+    "objects": [],
     "objectives": [],
     "windZones": [],
     "scannerGroups": [],

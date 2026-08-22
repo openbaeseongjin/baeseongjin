@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: c3b31b16c8a3d5c2ec19bd86892e9b81a3d0a7ae5b6dcbf23e1646e778967b2f
+scenario-source-sha256: 347b7586b91f1012162defa392ffbb10e5443e90139cfba2821c4d8a972a4b64
 authored-area-sha256: 8f685b26213b163e19fb6409e559fa940f569e063b5f24cdb9863c44fcf09dd6
 authored-sector-sha256: 3129e29b1ea699cc91bf98432c1c955c31f9c81278586c1b0e7b801e0c96fe2b
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 9f317f2af296eee5f383e0f807224c7617fb470c
+reviewed-upstream: a8ad8658cc94df4f766a0da5ff921a2e77e96300
 -->
 
 ## 상태를 읽는 법
@@ -46,6 +46,8 @@ reviewed-upstream: 9f317f2af296eee5f383e0f807224c7617fb470c
 | Sector 06 / 6-1~6-8 | `ROOFTOP / EVACUATION` Master와 8개 REV2/REV3 package가 `AREA-SPEC-REV3-DESIGN.json`·`DIRECTION-SPEC.json`·preview·validation·handoff를 포함해 `AUTHORED`; 이전 상세 Blockout Candidate는 package source로 대체됨                                                                        | `NOT CONNECTED`. Package가 인용한 Hook Reach·Cutter·기존 threat Runtime은 재사용 가능 근거일 뿐, Sector 06 geometry·story·Direction·Timer·Final Security·multiplayer는 구현하거나 연결하지 않았다                                                                                                                                                                                                                                                                                                                                                               | Post-Sector 05 Boss→6-1 전환 계약과 Stage Runtime 저작을 별도 승인한다. 5-8→6-1 직접 wiring은 금지한다. 6-8은 Pad 03에 물리적으로 도달한 뒤 `ACCESS DENIED / CONTAINMENT VIOLATION`을 보이고 Final Security 앞 content boundary로 끝나며, `PAD SECURITY WARDEN P-03`·Access Restored·개별 Boarding·전원 준비·Escape는 모두 미구현이다 |
 
 ## 최근 반영된 시나리오 변화
+
+109. Issue #804는 메인 개발자와 별도 worktree에서 Sector 03~06의 30개 Scenario v2 source를 원본 설계 데이터로 재구성했다. `surface`·`grapple`·`safe/recovery`·route·적·Wind·Camera 좌표가 제공된 경우에는 각각 editor의 지형·Anchor·Recovery/Route·적 슬롯·Wind·Camera 레이어로 보존하고, 원본에 충돌 표면 또는 적 좌표가 없는 경우에는 route/Anchor와 원본 `sourceSnapshot`만 표시한다. 이 staging은 `scenario-only`를 유지하므로 generated catalog·seamless Runtime·멀티플레이 권위·보스와 Sector 간 전환을 변경하지 않는다. 특히 Resident Security Override 2-of-3, Hardpoint Jammer, 3-8/4-8/5-8 이후 전환, Final Security/Boarding은 미구현 상태를 그대로 노출하며 임의 Runtime 행동을 만들지 않는다.
 
 3.   #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Foundation ID와 Specialization ID의 의미 체계는 계속 분리한다.
 4.   #478은 1-1 C04와 1-2 C02에서 보이는 발판·Anchor의 좌우·상하 관계와 상대 폭을 Approved Blockout·Area Catalog에 맞춘 구조 가이드로 다시 생성했다. 이전 구조 불일치 이미지는 `RETIRED / STRUCTURE MISMATCH`로 보존하고 새 이미지를 현재 승인 기준으로 전환했다. Runtime Geometry와 Collision은 변경하지 않았다.

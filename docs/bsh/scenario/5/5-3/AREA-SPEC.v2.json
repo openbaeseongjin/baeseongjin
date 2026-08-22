@@ -68,10 +68,46 @@
         "sourceId": "p0"
       },
       {
+        "id": "sector-05-03:route-a-left-1",
+        "x": -320,
+        "y": -780,
+        "sourceId": "a-left-1"
+      },
+      {
+        "id": "sector-05-03:route-a-left-2",
+        "x": -560,
+        "y": -1030,
+        "sourceId": "a-left-2"
+      },
+      {
+        "id": "sector-05-03:route-a-left-3",
+        "x": -300,
+        "y": -1260,
+        "sourceId": "a-left-3"
+      },
+      {
         "id": "sector-05-03:route-m0",
         "x": 0,
         "y": -1400,
         "sourceId": "m0"
+      },
+      {
+        "id": "sector-05-03:route-a-right-1",
+        "x": 320,
+        "y": -780,
+        "sourceId": "a-right-1"
+      },
+      {
+        "id": "sector-05-03:route-a-right-2",
+        "x": 560,
+        "y": -1030,
+        "sourceId": "a-right-2"
+      },
+      {
+        "id": "sector-05-03:route-a-right-3",
+        "x": 300,
+        "y": -1260,
+        "sourceId": "a-right-3"
       },
       {
         "id": "sector-05-03:route-t1",
@@ -92,10 +128,46 @@
         "sourceId": "p1"
       },
       {
+        "id": "sector-05-03:route-b-upper-1",
+        "x": 660,
+        "y": -1920,
+        "sourceId": "b-upper-1"
+      },
+      {
+        "id": "sector-05-03:route-b-upper-2",
+        "x": 340,
+        "y": -2040,
+        "sourceId": "b-upper-2"
+      },
+      {
+        "id": "sector-05-03:route-b-upper-3",
+        "x": 80,
+        "y": -2200,
+        "sourceId": "b-upper-3"
+      },
+      {
         "id": "sector-05-03:route-m1",
         "x": -180,
         "y": -2300,
         "sourceId": "m1"
+      },
+      {
+        "id": "sector-05-03:route-b-lower-1",
+        "x": 580,
+        "y": -1800,
+        "sourceId": "b-lower-1"
+      },
+      {
+        "id": "sector-05-03:route-b-lower-2",
+        "x": 300,
+        "y": -1980,
+        "sourceId": "b-lower-2"
+      },
+      {
+        "id": "sector-05-03:route-b-lower-3",
+        "x": 20,
+        "y": -2180,
+        "sourceId": "b-lower-3"
       },
       {
         "id": "sector-05-03:route-f1",
