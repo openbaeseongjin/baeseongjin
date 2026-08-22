@@ -26,7 +26,8 @@ import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSprite
 import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
-import { resolveEnemyPresentationState } from "../render/EnemyPresentationState.js";
+import { enemyPresentationDefinition, resolveEnemyPresentationState } from "../render/EnemyPresentationState.js";
+import { isCanonicalEnemyType } from "./combat/EnemyArchetypeCatalog.js";
 
 export class GameApp {
     constructor({
@@ -132,15 +133,14 @@ export class GameApp {
     }
 
     debugTrainingDummyStateOptions(enemyType) {
-        if (!this.enemyDefinition?.supports(enemyType)) return Object.freeze([]);
-        const canonicalEnemyType = this.enemyDefinition.canonicalEnemyType(enemyType);
-        return Object.freeze(Object.keys(this.enemyDefinition.enemies[canonicalEnemyType].states));
+        if (!isCanonicalEnemyType(enemyType)) return Object.freeze([]);
+        return enemyPresentationDefinition(enemyType).states;
     }
 
     spawnDebugTrainingDummy(enemyType) {
         const states = this.debugTrainingDummyStateOptions(enemyType);
         if (states.length === 0) {
-            return Object.freeze({ created: false, reason: `Runtime package가 '${enemyType}'을 지원하지 않습니다.` });
+            return Object.freeze({ created: false, reason: `Runtime catalog가 '${enemyType}'을 지원하지 않습니다.` });
         }
         const visibleWorldBounds = createRenderViewport({
             camera: this.camera,
@@ -218,7 +218,9 @@ export class GameApp {
         if (!dummy || !control) return null;
         const actualState = resolveEnemyPresentationState(dummy).primaryState;
         return Object.freeze({
-            packageId: this.enemyDefinition?.id ?? "built-in-mock",
+            packageId: this.enemyDefinition?.supports(dummy.enemyType)
+                ? this.enemyDefinition.id
+                : "built-in-enemy-mock",
             enemyType: dummy.enemyType,
             mode: control.mode,
             currentState: control.forcedState ?? actualState,

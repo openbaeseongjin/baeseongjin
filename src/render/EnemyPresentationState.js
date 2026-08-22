@@ -225,10 +225,19 @@ export function resolveEnemyPresentationState(enemy, enemies = []) {
             ? behavior.dashDirection
             : null;
     const pursuitFacing = behavior?.kind === ENEMY_BEHAVIOR_KIND.PURSUIT ? behavior.dashDirection : null;
+    const aimFacing = enemy?.aimDirection ?? null;
+    const patrolTarget = enemy?.patrol?.points?.[enemy.patrol.targetIndex];
+    const patrolFacingX = patrolTarget?.x - enemy?.position?.x;
+    const patrolFacing =
+        Number.isFinite(patrolFacingX) && Math.abs(patrolFacingX) > Number.EPSILON
+            ? Object.freeze({ x: patrolFacingX, y: 0 })
+            : null;
     const facingDirection =
         Number.isFinite(pursuitFacing?.x) && Math.abs(pursuitFacing.x) > Number.EPSILON
             ? pursuitFacing
-            : (enemy?.aimDirection ?? null);
+            : Number.isFinite(aimFacing?.x) && Math.abs(aimFacing.x) > Number.EPSILON
+              ? aimFacing
+              : patrolFacing;
     const aimLayerDirection =
         [ENEMY_ATTACK_STATE.TRACK, ENEMY_ATTACK_STATE.LOCK, ENEMY_ATTACK_STATE.FIRE].includes(enemy?.attackState) &&
         enemy.aimDirection

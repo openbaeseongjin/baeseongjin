@@ -1,4 +1,4 @@
-import { enemyDisplayName } from "../combat/EnemyArchetypeCatalog.js";
+import { ENEMY_TYPE_IDS, enemyDisplayName } from "../combat/EnemyArchetypeCatalog.js";
 
 export class DebugEnemyTrainingControls {
     constructor({
@@ -84,30 +84,33 @@ export class DebugEnemyTrainingControls {
     }
 
     renderDefinition() {
-        this.packageOutput.textContent = this.definition?.id ?? "사용 불가";
+        const usesBuiltInFallback = ENEMY_TYPE_IDS.some((enemyType) => !this.definition?.supports(enemyType));
+        this.packageOutput.textContent = this.definition
+            ? `${this.definition.id}${usesBuiltInFallback ? " + 내장 대체 표현" : ""}`
+            : "내장 대체 표현";
         this.enemySelect.textContent = "";
-        for (const enemyType of Object.keys(this.definition?.enemies ?? {})) {
+        for (const enemyType of ENEMY_TYPE_IDS) {
             const option = this.documentTarget.createElement("option");
             option.value = enemyType;
-            option.textContent = `${enemyDisplayName(enemyType)} · ${enemyType}`;
+            const sourceLabel = this.definition?.supports(enemyType) ? "" : " · 내장 대체";
+            option.textContent = `${enemyDisplayName(enemyType)} · ${enemyType}${sourceLabel}`;
             this.enemySelect.append(option);
         }
         this.renderAvailability();
     }
 
     renderAvailability() {
-        const ready = this.enabled && Boolean(this.definition) && this.enemySelect.options.length > 0;
+        const ready = this.enabled && this.enemySelect.options.length > 0;
         this.fieldset.disabled = !this.enabled;
         this.spawnButton.disabled = !ready;
         if (!this.enabled) this.statusOutput.textContent = "싱글플레이 전용 기능입니다.";
-        else if (!this.definition) this.statusOutput.textContent = "몬스터 Runtime package를 불러오지 못했습니다.";
         else if (this.enemySelect.options.length === 0)
             this.statusOutput.textContent = "검수 가능한 몬스터가 없습니다.";
         else this.statusOutput.textContent = "현재 화면의 가까운 안전한 발판에 더미 하나를 생성합니다.";
     }
 
     spawnSelected() {
-        if (!this.enabled || !this.definition || !this.enemySelect.value) return null;
+        if (!this.enabled || !this.enemySelect.value) return null;
         const result = this.onSpawn(this.enemySelect.value);
         if (!result?.created) {
             this.statusOutput.textContent = result?.reason ?? "더미를 생성하지 못했습니다.";

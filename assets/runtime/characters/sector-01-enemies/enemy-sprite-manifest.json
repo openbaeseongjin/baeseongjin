@@ -32,10 +32,21 @@
             "image": "shield-directions.png",
             "size": { "width": 256, "height": 32 },
             "frameSize": { "width": 32, "height": 32 }
+        },
+        "patrol-motion-attack": {
+            "image": "patrol-motion-attack.png",
+            "size": { "width": 128, "height": 192 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "support-motion": {
+            "image": "support-motion.png",
+            "size": { "width": 128, "height": 64 },
+            "frameSize": { "width": 32, "height": 32 }
         }
     },
     "aliases": {
-        "sentry": "sentry-t1"
+        "sentry": "sentry-t1",
+        "patrol-drone": "patrol-drone-t1"
     },
     "enemies": {
         "sentry-t1": {
@@ -256,6 +267,99 @@
                         { "atlas": "shield-body", "cell": { "column": 1, "row": 0 }, "durationMs": 140 },
                         { "atlas": "shield-body", "cell": { "column": 2, "row": 0 }, "durationMs": 180 },
                         { "atlas": "shield-body", "cell": { "column": 3, "row": 0 }, "durationMs": 140 }
+                    ]
+                }
+            }
+        },
+        "patrol-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "patrol-wait" },
+                "patrol-move": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 0 }, "durationMs": 140 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 0 }, "durationMs": 140 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 0 }, "durationMs": 180 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 0 }, "durationMs": 140 }
+                    ]
+                },
+                "patrol-wait": { "fallback": "patrol-move" },
+                "knockback": { "fallback": "patrol-wait" },
+                "attack-acquire": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 2 }, "durationMs": 130 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 2 }, "durationMs": 120 }
+                    ]
+                },
+                "attack-track": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 3 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 3 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 3 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 3 }, "durationMs": 200 }
+                    ]
+                },
+                "attack-lock": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 4 }, "durationMs": 100 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 4 }, "durationMs": 100 }
+                    ]
+                },
+                "attack-fire": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 4 }, "durationMs": 40 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 4 }, "durationMs": 40 }
+                    ]
+                },
+                "attack-cooldown": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 5 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 5 }, "durationMs": 250 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 5 }, "durationMs": 250 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 5 }, "durationMs": 300 }
+                    ]
+                }
+            }
+        },
+        "support-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "support-idle" },
+                "knockback": { "fallback": "support-idle" },
+                "support-idle": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "support-motion", "cell": { "column": 0, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "support-motion", "cell": { "column": 1, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "support-motion", "cell": { "column": 2, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "support-motion", "cell": { "column": 3, "row": 0 }, "durationMs": 200 }
+                    ]
+                },
+                "support-link": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "support-motion", "cell": { "column": 0, "row": 1 }, "durationMs": 160 },
+                        { "atlas": "support-motion", "cell": { "column": 1, "row": 1 }, "durationMs": 160 },
+                        { "atlas": "support-motion", "cell": { "column": 2, "row": 1 }, "durationMs": 160 },
+                        { "atlas": "support-motion", "cell": { "column": 3, "row": 1 }, "durationMs": 160 }
                     ]
                 }
             }

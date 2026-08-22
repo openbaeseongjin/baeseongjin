@@ -1,6 +1,6 @@
 # Patrol Drone T1 Low-Resolution Exploration
 
-- Status: `AUTHORING MOTION CANDIDATE / NOT RUNTIME-INTEGRATED`
+- Status: `RUNTIME APPROVED`
 - Asset ID: `patrol-drone-t1-lowres-exploration`
 - Runtime target: `patrol-drone-t1` (순찰 드론)
 - Logical export: transparent RGBA `32×32`, opaque bounds `28×15`; intended world output approximately `56×56`
@@ -44,9 +44,10 @@ ImageGen source output is `1536×1024` RGBA with soft alpha at the generated sil
 
 공격은 `acquire` 2프레임/250ms, `track` 4프레임/800ms, `lock` 2프레임/200ms, `fire` 2프레임/80ms, `cooldown` 4프레임/1000ms의 총 14프레임/2.33초다. 이 timing은 현재 gameplay 상태 길이에 맞춘 표현용 기준이며 gameplay 권위는 아니다. 중앙 센서의 개방·scan bar·압축 lock 뒤 하부 emitter만 짧게 연장 및 점화한다. 발사 방향과 실제 투사체 궤적은 gameplay가 소유하며 이 atlas에는 projectile을 그리지 않는다.
 
-통합 atlas 행은 위에서부터 `move-right`, `move-left`, `acquire`, `track`, `lock+fire`, `cooldown`이다. `acquire` 행은 2프레임만 사용하고 뒤 2셀은 투명하다. 현재 Runtime의 공개 상태는 단일 `patrol-move`이므로 좌우 atlas 선택 또는 flip 정책은 Runtime 통합 시 enemy manifest와 renderer의 공개 계약 안에서 결정한다. 이번 범위에 없는 `idle`, `patrol-wait`, `knockback`은 기존 fallback 또는 후속 제작 대상으로 남는다.
+통합 atlas 행은 위에서부터 `move-right`, `move-left`, `acquire`, `track`, `lock+fire`, `cooldown`이다. `acquire` 행은 2프레임만 사용하고 뒤 2셀은 투명하다. Runtime `patrol-move`는 right-facing 첫 행을 사용하고 현재 authored route 목표점의 좌우 차이로 renderer가 전체 frame을 반전한다. `idle → patrol-wait → patrol-move`와 `knockback → patrol-wait` fallback을 명시했고, 공격 상태는 각 authored row에 직접 연결했다. 둘째 `move-left` 행은 authoring 비교·원본으로 보존하지만 Runtime clip은 중복 frame을 등록하지 않는다.
 
-## Non-scope and integration needs
+## Runtime integration
 
-- `assets/runtime/`, enemy manifest, renderer, gameplay, collider, damage, projectile, AI, patrol speed·route와 network authority를 변경하지 않는다.
-- 이 authoring PNG를 Runtime에 직접 복사하지 않는다. 남은 state/fallback과 좌우 선택 계약을 정한 뒤 enemy package로 정규화하고 `npm run validate:enemy-sprite-assets -- <directory>` 및 데스크톱·모바일 실제 화면 검수를 통과해야 Runtime-ready다.
+- `export/patrol-motion-attack.png`를 [`assets/runtime/characters/sector-01-enemies/patrol-motion-attack.png`](../../../runtime/characters/sector-01-enemies/patrol-motion-attack.png)로 정규화하고 enemy manifest v4의 `patrol-drone-t1`과 legacy alias `patrol-drone`에 등록했다.
+- Gameplay collider, damage, projectile, AI, patrol speed·route와 network authority는 변경하지 않았다.
+- 2026-08-22 사용자는 이미지와 애니메이션을 완료 자산으로 확정했다. Runtime validator와 몬스터 모션 더미의 데스크톱·모바일 검증 결과는 package README가 소유한다.
