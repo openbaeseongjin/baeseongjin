@@ -4,6 +4,12 @@
 
 ## 현재 미흡수 항목
 
+### [L2] Sector 03 기본 배경은 승인된 seam-match V4 depth-islands package를 사용한다
+
+- `sector-03-01`~`sector-03-08`의 기본 authored backdrop은 `assets/runtime/environments/sector-03-central-exchange/`의 fixed background와 좌·우 island 2개다.
+- depth map은 offline 추출 근거로만 보존하고 Runtime은 캐시된 PNG 3장을 기존 Sector 01→02와 같은 package 단위 crossfade 권위로 그린다. Sector 02 package와 gameplay geometry는 변경하지 않는다.
+- 제작·Runtime·검증 기준은 `assets/artwork/environments/sector-03-central-exchange-background/README.md`, `assets/artwork/environments/sector-02-03-runtime-seam/README.md`, `assets/runtime/environments/sector-03-central-exchange/README.md`가 소유한다.
+
 ### [L2] 192 kbps 사용자 제공 메인 테마를 기본 등반 BGM으로 사용한다
 
 - 사용자 제공 `main theme 192kbps.mp3`를 `main-theme` 원본으로 보존하고 48 kHz/24-bit PCM WAV master, OGG 우선·MP3 fallback runtime source로 정규화한다.
