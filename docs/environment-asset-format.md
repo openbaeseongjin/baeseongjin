@@ -41,7 +41,7 @@ environment-pack/
 | frame 수·순서 | backdrop layer와 decoration item 배열에서 가변 |
 | 출력 크기 | backdrop의 `tileWidth`·`peakHeight`, decoration item의 `size`로 원본 셀과 분리 |
 | 고도 구역 | 실제 8,880m 월드 범위 안의 `waste` 0m, `industrial-maintenance` 1,800m, `residential-commercial` 3,600m, `corporate-security` 5,400m, `landing-pad` 7,200m |
-| 배경 | far·mid·near layer의 atlas, frame 배열, 수평·수직 parallax, 기준선과 높이 |
+| 배경 | package별 1~6개 layer의 atlas, frame 배열, 수평·수직 parallax, 기준선과 높이 |
 | 지형 | 구역별 fill·edge frame과 one-way edge 색 |
 | 장식 | 구역별 item 배열, frame, depth, 표면 기준 offset, 출력 크기 |
 | 진단 | backdrop·terrain·decoration별 독립 준비/실패 상태와 실패 atlas ID |
@@ -49,6 +49,19 @@ environment-pack/
 현재 runtime 입력으로 GIF·WebP·PSD·ASE·프로그램 고유 프로젝트 파일은 지원하지 않는다. 이 형식들은 제작 원본이나 미리보기로만 보관하고 최종 입력을 PNG와 표준 JSON으로 내보낸다. frame duration과 상태 전이는 캐릭터 애니메이션 계약이며 환경 manifest에는 넣지 않는다.
 
 배열 길이와 atlas 분할 방식은 바꿀 수 있다. 다만 새 field나 component 종류를 추가하면 loader, JSON Schema, example, validator, 이 문서를 같은 변경으로 갱신해야 한다. renderer가 PixelLab·SpriteCook 같은 도구 이름이나 파일명 규칙을 분기해서는 안 된다.
+
+## 통이미지 + Depth Map 기본 배경 제작 계약
+
+새 파라락스 배경은 기본적으로 같은 캔버스에 정렬된 두 authoring 입력을 만든다.
+
+1. 모든 색과 구도를 가진 불투명 RGB master
+2. 흰색이 가까움, 검은색이 멀어짐인 8-bit grayscale depth map
+
+자동 import는 depth map의 큰 차이를 이용해 가까운 연결 구조를 최대 2개의 좌·우 RGBA island로 추출한다. 작은 간판·창·배선이 독립 component로 흩어지거나 두 island가 중앙 이동 여백을 가로질러 연결되면 검수 실패다. island가 가리던 영역은 별도 inpaint 입력으로 fixed background에 미리 복원하고, mask 밖 master pixel은 보존한다. 중립 위치에서 `fixed + islands`는 master와 픽셀 단위로 같아야 하며 작은 정수 이동 preview에서 투명 구멍이나 복제 seam이 없어야 한다.
+
+depth map과 추출 threshold·component 최소 크기·재현 스크립트는 `assets/artwork/environments/<asset-id>/`에 보관한다. Runtime package에는 정규화가 끝난 fixed RGB PNG와 RGBA island PNG만 넣고 depth map을 매 프레임 해석하지 않는다. `getImageData`, per-frame pixel loop·mask 생성·texture 재생성이나 이 기능만을 위한 WebGL 경로는 지원 계약이 아니다. 추출이 불안정하면 fixed 단독 또는 검수된 수동 layer 분리로 fallback한다.
+
+backdrop은 1~6개 layer를 허용한다. 각 layer `id`는 package 안에서 유일한 kebab-case 안정 ID이며 합성 순서는 배열 위치가 아니라 숫자 `depth`가 소유한다. `far/mid/near`는 default mock의 최소 예제일 뿐 필수 ID 집합이 아니다.
 
 ## manifest 구조
 
@@ -71,6 +84,7 @@ environment-pack/
 - `formatVersion`은 현재 `1`이다. 알 수 없는 버전과 알 수 없는 field는 거부한다.
 - `generator`는 추적용 정보일 뿐 runtime 분기 조건이 아니다.
 - `atlases` key가 안정적인 atlas ID다. frame은 파일 경로가 아니라 이 ID를 참조한다.
+- backdrop layer `id`는 package 안에서 유일한 kebab-case이고 layer 수는 1~6개다. renderer는 숫자 `depth` 오름차순으로 합성한다.
 - backdrop layer나 decoration group에 atlas를 중복 지정하지 않는다. 각 frame이 자기 atlas ID를 가지므로 한 component와 한 배열 안에서도 여러 atlas를 섞을 수 있다.
 - `size`는 실제 PNG 전체 크기, `frameSize`는 균일 grid 셀 크기다. 모두 양의 정수이고 전체 크기는 셀 크기로 나누어떨어져야 한다.
 - frame의 `column`과 `row`는 왼쪽 위부터 시작하는 0 기반 좌표이며 선언된 grid 밖을 참조할 수 없다.
@@ -85,7 +99,7 @@ environment-pack/
 - 투명 배경 PNG atlas 또는 순서가 명확한 개별 PNG frame
 - 각 이미지의 실제 가로·세로와, atlas인 경우 한 셀의 가로·세로
 - frame이 들어 있는 0 기반 행·열 또는 원본 frame 순서
-- far·mid·near, terrain fill·edge, decoration 중 각 리소스의 역할
+- backdrop layer, terrain fill·edge, decoration 중 각 리소스의 역할
 - 원하는 월드 출력 크기와 parallax·기준선 정보
 - 도구가 내보낸 JSON이나 프로젝트 파일은 선택 자료로 포함
 - 사용한 생성 도구와 버전, 라이선스·출처 정보
