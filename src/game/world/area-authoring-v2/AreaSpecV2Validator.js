@@ -142,6 +142,12 @@ function specDomainValue(spec, domain) {
             return definition.bounds;
         case "entry":
             return definition.entry;
+        case "exit":
+            return {
+                exit: definition.exit,
+                gateTrigger: definition.gate?.trigger,
+                gateObjects: (definition.objects ?? []).filter(({ gateId }) => gateId === definition.gate?.id)
+            };
         case "surfaces":
             return definition.surfaces;
         case "anchors":
@@ -163,10 +169,12 @@ function specDomainValue(spec, domain) {
         case "objectives":
             return definition.objectives;
         case "progression":
+            const { x: _exitX, y: _exitY, ...exitContract } = definition.exit ?? {};
+            const { trigger: _gateTrigger, ...gateContract } = definition.gate ?? {};
             return {
                 checkpoints: definition.checkpoints,
-                exit: definition.exit,
-                gate: definition.gate,
+                exit: exitContract,
+                gate: gateContract,
                 nextAreaId: definition.nextAreaId,
                 routes: definition.routes
             };
@@ -194,9 +202,13 @@ function specDomainValue(spec, domain) {
         case "scenarioMetadata":
             return spec?.scenario ?? null;
         case "worldObjects":
-            return (definition.objects ?? []).filter(
-                (object) => !isEditableEnemyObject(object) && object?.kind !== "wind-source"
-            );
+            return (definition.objects ?? [])
+                .filter((object) => !isEditableEnemyObject(object) && object?.kind !== "wind-source")
+                .map((object) => {
+                    if (object.gateId !== definition.gate?.id) return object;
+                    const { position: _position, ...contract } = object;
+                    return contract;
+                });
         case "objectLayout":
             return (definition.objects ?? []).map((object) => ({
                 id: object?.id ?? null,

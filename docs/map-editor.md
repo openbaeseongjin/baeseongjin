@@ -18,12 +18,12 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 1. 스테이지를 고르고 왼쪽 `오브젝트 찾기`에서 Stable ID 또는 종류로 오브젝트를 찾는다.
 2. 먼저 `0` 또는 `전체 보기`로 선택한 Stage의 전체 Bounds를 화면에 맞춘다. 시나리오 기준과 비교할 때는 `C` 또는 `시나리오 비교`를 열어 Runtime/v2 캔버스와 같은 Stage의 `MAP-PREVIEW.html`을 함께 본다.
 3. 목록이나 캔버스에서 오브젝트를 선택한 뒤, 필요하면 `선택 집중`으로 화면 중앙에 가져온다.
-4. 캔버스 또는 속성 패널에서 초안을 편집한다. 앵커 표식과 24×24 갈고리 부착 대상은 항상 함께 이동하며, 복구·경로 지점은 각각 추가할 수 있다. 적 슬롯은 위치·종류·허용 목록과 활성화 영역/설정을 편집한다.
+4. 캔버스 또는 속성 패널에서 초안을 편집한다. 앵커 표식과 24×24 갈고리 부착 대상은 항상 함께 이동한다. 출구는 데크·출구점·Gate trigger·Gate panel·Gate visual·마지막 route point가 하나의 복합 객체로 이동한다. 복구·일반 경로 지점은 각각 추가할 수 있으며 적 슬롯은 위치·종류·허용 목록과 활성화 영역/설정을 편집한다.
 5. **초안 검증**으로 파일을 쓰지 않는 v2 검증을 실행한다.
 6. **저장 적용**으로 v2 JSON을 갱신한다. Runtime Stage는 결정적 generated JS도 함께 갱신한다. stale revision, 읽기 전용 영역, 2 MiB 초과 요청은 거부된다.
 7. **새 미리보기**는 `Runtime 적용`과 `Runtime 준비` Stage에서만 선택된 generated Area 하나의 새 로컬 싱글플레이 run을 실제 게임의 sprite renderer·환경 표현·HUD·입력 경로로 연다. 시나리오 전용 Stage에는 의도적으로 제공하지 않는다.
 
-맵 경계·시작 지점·지형 표면·앵커·복구/경로·기존 적 슬롯·바람·카메라 구역은 편집 가능하다. 목표·진행·스토리·스캐너·행동 레지스트리는 표시 전용이며 초안과 서버가 모두 변경을 거부한다. 위치가 있는 편집 요소는 드래그와 X/Y 수치 입력 모두 가장 가까운 5px 격자로 스냅하며, 카메라 구역의 최소/최대 Y도 같은 규칙을 따른다. 캔버스 드래그는 이동 중 임시 상태만 갱신하고 pointer release에서 되돌리기 한 건으로 확정한다.
+맵 경계·시작 지점·출구·지형 표면·앵커·복구/경로·기존 적 슬롯·바람·카메라 구역은 편집 가능하다. 목표·출구의 목적지/해제 조건·스토리·스캐너·행동 레지스트리는 표시 전용이며 초안과 서버가 모두 변경을 거부한다. 위치가 있는 편집 요소는 드래그와 X/Y 수치 입력 모두 가장 가까운 5px 격자로 스냅하며, 카메라 구역의 최소/최대 Y도 같은 규칙을 따른다. 캔버스 드래그는 이동 중 임시 상태만 갱신하고 pointer release에서 되돌리기 한 건으로 확정한다.
 
 ## 빠른 조작
 
@@ -39,9 +39,10 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 
 - 초안은 메모리 안에서만 바뀐다. 초안 검증은 파일을 변경하지 않으며, **저장 적용**을 누르기 전에는 v2 JSON·generated JS가 갱신되지 않는다.
 - 저장 적용은 v2 구조와 실제 Runtime Area 불변식, 읽기 전용 경계를 확인하고 저장 직전에 현재 스테이지 source hash가 초안을 연 시점과 같은지 검사한다. 브라우저는 요청 중 저장 적용을 비활성화한다.
+- 출구 데크 위치가 복합 객체 이동의 단일 권위다. 출구점·Gate trigger·Gate panel·Gate visual·출구 route point는 에디터와 서버가 데크 이동량에서 다시 구성하며 독립 좌표로 편집하지 않는다. `nextAreaId`, Gate ID와 해제 조건은 이동 대상이 아니며 일반 Runtime의 Stage 전환 계약을 유지한다.
 - 해커톤 운영에서는 맵 에디터를 한 번에 한 명만 사용한다. 다중 사용자 mutex와 서버 crash까지 견디는 완전한 다중 파일 원자 저장은 후속 범위다.
 - generated output은 수기 편집하지 않는다. 특수 동작은 Stable ID를 수기 Behavior Registry에서 해석한다.
-- Preview는 선택한 Stage 하나만 가진 새 single-player `GameSimulation`을 만들고, 시작 시 Area 수와 ID를 다시 확인해 상태 줄에 표시한다. 정상 Catalog, 실행 중인 Run, multiplayer에는 hot-swap하지 않는다.
+- Preview는 선택한 Stage 하나만 가진 새 single-player `GameSimulation`을 만들고, 시작 시 Area 수와 ID를 다시 확인해 상태 줄에 표시한다. 프리뷰 복제본의 출구는 content boundary로 끝내지만 Apply된 Area의 `nextAreaId`는 바꾸지 않는다. 정상 Catalog, 실행 중인 Run, multiplayer에는 hot-swap하지 않는다.
 - Preview는 에디터 전용 polygon renderer를 쓰지 않고 실제 게임 renderer를 쓴다. Stage API 응답과 player/enemy/direction 리소스는 병렬로 준비하고, 선택 Area의 환경 정의만 추가로 불러온다. isolated Area `GameSimulation`을 먼저 만든 뒤 `GameApp`에 주입하므로 전체 Seamless Runtime을 만들었다가 교체하지 않는다. 같은 Preview 창에서 다시 시작할 때는 renderer와 같은 generated revision 모듈을 재사용해 시작 지연을 줄인다. 고해상도 화면에서는 Preview 전용 backing canvas를 최대 2M 화소·최대 1배, 최저 0.5배로 제한해 과도한 GPU/Canvas 작업을 피하며, 일반 게임의 해상도 정책은 바꾸지 않는다.
 - Sector 01~02의 16개 Stage는 manifest의 `source: generated` 선택과 각 `composeSectorCatalog` facade를 통해 일반 seamless 싱글·멀티 Runtime에서도 generated Area를 사용한다. 각 v2 source는 cutover 시점의 legacy Runtime과 의미 동등하게 추출했다. 메인 개발자와의 분리 경계는 facade·진행·멀티플레이 권위에 남기고, 에디터는 v2 source·generator·generated module만 소유한다.
 - Sector 03~06의 `AREA-SPEC.v2.json`은 각 `AREA-SPEC-REV*-DESIGN.json`의 지도 편집 투영과 원본 snapshot을 보존하는 `scenario-only` source다. 기존 design JSON은 migration 입력/근거이며, Editor Apply는 v2 source만 갱신한다.

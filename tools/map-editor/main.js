@@ -10,6 +10,7 @@ import {
 const EDITABLE_GROUPS = Object.freeze([
     ["bounds", "맵 경계", null],
     ["entry", "시작 지점", null],
+    ["exit", "출구", null],
     ["surfaces", "지형 표면", "surface"],
     ["anchors", "앵커", "anchor"],
     ["recoveryRoute", "복구 / 경로", "route"],
@@ -27,6 +28,7 @@ const READ_ONLY_GROUPS = Object.freeze([
 const DOMAIN_LABELS = Object.freeze({
     bounds: "맵 경계",
     entry: "시작 지점",
+    exit: "출구",
     surfaces: "지형 표면",
     anchors: "앵커",
     recoveryRoute: "복구 / 경로",
@@ -42,6 +44,7 @@ const DOMAIN_LABELS = Object.freeze({
 const KIND_LABELS = Object.freeze({
     bounds: "맵 경계",
     entry: "시작 지점",
+    exit: "출구 복합 객체",
     surface: "지형",
     anchor: "앵커",
     recovery: "복구 지점",
@@ -975,6 +978,7 @@ function drawCanvas() {
     const selected = state.draft.selected();
     const isSelected = (domain, id) => selected?.domain === domain && selected.id === id;
     const canvasEntities = entities();
+    const exitEntity = canvasEntities.find(({ domain }) => domain === "exit");
     const bounds = spec.definition.bounds;
     context.setLineDash([7, 6]);
     drawRect({ x: -bounds.width * 0.5, y: -bounds.height, width: bounds.width, height: bounds.height }, "#5a7d89");
@@ -1000,15 +1004,16 @@ function drawCanvas() {
             else context.lineTo(screen.x, screen.y);
         });
         context.closePath();
-        context.fillStyle = isSelected("surfaces", surface.id)
-            ? "rgba(102, 230, 255, 0.2)"
-            : "rgba(89, 121, 137, 0.35)";
-        context.strokeStyle = isSelected("surfaces", surface.id) ? "#66e6ff" : "#789dab";
-        context.lineWidth = isSelected("surfaces", surface.id) ? 2.5 : 1.2;
+        const selectedSurface =
+            isSelected("surfaces", surface.id) || (selected?.domain === "exit" && surface.id === exitEntity?.sourceId);
+        context.fillStyle = selectedSurface ? "rgba(102, 230, 255, 0.2)" : "rgba(89, 121, 137, 0.35)";
+        context.strokeStyle = selectedSurface ? "#66e6ff" : "#789dab";
+        context.lineWidth = selectedSurface ? 2.5 : 1.2;
         context.fill();
         context.stroke();
     }
     drawMarker(spec.definition.entry, "#e6f2f5", "triangle", isSelected("entry", spec.definition.entry.id));
+    if (exitEntity) drawMarker(exitEntity.point, "#66e6ff", "diamond", isSelected("exit", exitEntity.id));
     for (const point of spec.definition.routePoints)
         drawMarker(point, "#b4ced7", "diamond", isSelected("recoveryRoute", point.id));
     for (const point of spec.definition.recoveryPoints)

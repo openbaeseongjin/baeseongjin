@@ -5,6 +5,7 @@ export const AREA_SPEC_V2_AUTHORING_MODES = Object.freeze(["runtime", "scenario"
 export const EDITOR_EDITABLE_DOMAINS = Object.freeze([
     "bounds",
     "entry",
+    "exit",
     "surfaces",
     "anchors",
     "recoveryRoute",

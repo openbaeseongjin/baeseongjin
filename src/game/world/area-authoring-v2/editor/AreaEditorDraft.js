@@ -6,6 +6,13 @@ const MISSING = Symbol("missing-draft-value");
 const EDITABLE_POINTER_ROOTS = Object.freeze({
     bounds: Object.freeze(["/definition/bounds"]),
     entry: Object.freeze(["/definition/entry"]),
+    exit: Object.freeze([
+        "/definition/exit",
+        "/definition/gate/trigger",
+        "/definition/objects",
+        "/definition/routePoints",
+        "/definition/surfaces"
+    ]),
     surfaces: Object.freeze(["/definition/surfaces"]),
     anchors: Object.freeze(["/anchors"]),
     recoveryRoute: Object.freeze(["/definition/recoveryPoints", "/definition/routePoints"]),
