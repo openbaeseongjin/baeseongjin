@@ -1,10 +1,9 @@
-# ONE ROPE — BOSS 01 REV2.1 개발자 전달 패키지
+# ONE ROPE — BOSS 01 REV2.1 역사적 개발자 전달 참조
 
-> **목적:** 게임 개발자가 이 ZIP만 보고 BOSS 01을 현재 Runtime에 연결할 수 있게 한다.
-> **기준 GitHub main:** `e1c558ef9e09ecbc09254cb3fc45306186755570`
-> **디자인 상태:** REV2 사용자 방향 승인 후 개발 전달용으로 구체화
-> **구현 상태:** 아직 미구현
-> **중요:** 이 패키지는 저장소를 직접 수정한 결과물이 아니라 **구현 권위 문서 + 참조 코드**다.
+> **상태:** `LEGACY REFERENCE ONLY`
+> **원본 snapshot:** `e1c558ef9e09ecbc09254cb3fc45306186755570`
+> **현재 기준:** [`README.md`](./README.md), [`../../scenario-development-integration.md`](../../scenario-development-integration.md), [`../../sector-timer-and-boss-flow.md`](../../sector-timer-and-boss-flow.md)
+> **중요:** 이 REV2.1 패키지는 현재 Runtime·기획·구현의 권위가 아니다. Boss 01의 최신 authored content와 현재 Runtime 경계는 상위 기준 문서를 따른다.
 
 ## 보스 한 줄 정의
 

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE BOSS 02 REV5-C HYBRID MAP DRAFT</title>
+<style>
+:root{--bg:#061018;--panel:#0b171e;--line:#29404d;--txt:#edf5f6;--muted:#9aadb5;--cyan:#5de8ff;--route:#ffe16c;--boss:#ff6c99;--safe:#79d59b;--recover:#d9b764;--new:#ffb45e;--reuse:#7bd99b}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)} h1{margin:0;font-size:20px} .sub{color:var(--muted)}
+.layout{display:grid;grid-template-columns:455px 1fr;min-height:calc(100vh - 72px)} aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}
+main{padding:12px} .card{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;background:#08131a}
+.card b{color:var(--cyan)} .reuseText{color:var(--reuse)} .newText{color:var(--new)} label{display:block;margin:5px 0}
+svg{width:100%;height:88vh;min-height:840px;background:#040a0f;border:1px solid var(--line);border-radius:8px}
+.bounds{fill:#08141b;stroke:#3c5b68;stroke-width:4} .building{fill:#25343c;stroke:#647783;stroke-width:3}
+.roof{fill:#344650;stroke:#93a7b1;stroke-width:3} .safe{fill:#2f5847;stroke:var(--safe);stroke-width:3}
+.recover{fill:#5a4e2e;stroke:var(--recover);stroke-width:3} .hp{fill:var(--cyan);stroke:white;stroke-width:3}
+.route{fill:none;stroke:var(--route);stroke-width:6;stroke-dasharray:14 10;stroke-linecap:round;stroke-linejoin:round}
+.bosslane{fill:none;stroke:var(--boss);stroke-width:10;stroke-dasharray:18 12;opacity:.82}
+.capture{fill:#ff6c9914;stroke:var(--boss);stroke-width:4;stroke-dasharray:10 8} .newzone{fill:#ffb45e12;stroke:var(--new);stroke-width:4;stroke-dasharray:8 7}
+.weak{fill:#ff4d5c;stroke:white;stroke-width:3} text{fill:#eef5f6;font-size:15px;paint-order:stroke;stroke:#051018;stroke-width:6}
+.tiny{font-size:11px;fill:#b8c8cf} .phase{font-size:24px;font-weight:700} .note{font-size:13px;fill:#ffc987}
+.reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.08} .hidden{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr} aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header>
+<h1>BOSS 02 · 옥상 봉쇄 · REV5-C HYBRID MAP DRAFT</h1>
+<div class="sub">AUTHORING SNAPSHOT 239377d90387029e362f23ef75bd037f82baa420 · MAP 4400×1800 · DRAFT AUTHORING REFERENCE / RUNTIME NOT IMPLEMENTED</div>
+</header>
+<div class="layout">
+<aside>
+<div class="card"><b>C안 핵심</b><br>
+P1은 Player와 Boss가 같은 메인골목에서 직접 마주친다.<br>
+Player가 발코니/샛길로 빠지면 Boss는 옆의 넓은 추격축으로 병행한다.<br>
+P2는 중정 중앙축, P3는 옥상 공중축으로 분리한다.</div>
+<div class="card"><b>현재 Runtime 재사용</b><br>
+<span class="reuseText">● Pursuit seek → windup → 직선 dash → recover</span><br>
+<span class="reuseText">● polygon/box actor collision</span><br>
+<span class="reuseText">● Rope Impact damage 기반 약점 타격</span><br>
+<span class="reuseText">● BossEncounterRuntime phase / exposure / phase floor</span></div>
+<div class="card"><b>신규 Boss 구성요소</b><br>
+<span class="newText">▲ P1: 구조물 충돌 감지 → 약점 노출</span><br>
+<span class="newText">▲ P2: 회전 몸통박치기 → 중정 바닥 충돌</span><br>
+<span class="newText">▲ P3: 상승 → 대각선 급강하 → 옥상 구조물 충돌</span><br>
+<span class="newText">▲ Boss02 정의 선택/등록 + moving Boss controller</span></div>
+<div class="card"><b>Rope 정적 검증</b><br>
+노드 25개 · authored edge 27개<br>
+최대 edge <b>384.71px</b> / Base 400px<br>
+의도하지 않은 non-edge ≤400px = <b>0</b></div>
+<div class="card"><b>Boss 공격/노출</b><br>
+P1 직선 Dash는 기존 Pursuit 재사용.<br>
+P2/P3 공격은 새 Boss 구성요소.<br>
+모든 Phase에서 <b>충돌 성공 → 8초 약점 노출 → Rope Impact</b>로 통일.</div>
+<div class="card"><label><input id="routeToggle" type="checkbox" checked> Player Route</label>
+<label><input id="bossToggle" type="checkbox" checked> Boss 추격축</label>
+<label><input id="newToggle" type="checkbox" checked> 신규 구성요소 Zone</label>
+<label><input id="reachToggle" type="checkbox"> 400px Reach</label></div>
+<div class="card"><b>주의</b><br>이 MAP은 최종 콘텐츠/공간 권위다. 구현 방식은 규정하지 않는다. 현재 게임 기반 요소와 Boss02 신규 구성요소는 좌측 범례로 구분한다.</div>
+</aside>
+<main>
+<svg viewBox="0 0 4400 1800">
+<rect class="bounds" x="20" y="20" width="4360" height="1740"/>
+
+<!-- P1 architecture -->
+<text class="phase" x="160" y="130">P1 · 생활골목 / 발코니</text>
+<rect class="building" x="650" y="760" width="780" height="270" rx="14"/>
+<text x="870" y="900">주거동 상부 발코니</text>
+<rect class="building" x="720" y="1510" width="760" height="180" rx="14"/>
+<text x="930" y="1630">1층 상가·생활골목</text>
+<rect class="safe" x="1260" y="1188" width="250" height="28"/>
+<text class="tiny" x="1280" y="1172">P1 충돌 유도 벽/계단실</text>
+
+<!-- P2 architecture -->
+<text class="phase" x="1810" y="150">P2 · 공동주택 중정</text>
+<rect class="building" x="1970" y="480" width="880" height="170" rx="14"/>
+<rect class="building" x="1970" y="1260" width="880" height="170" rx="14"/>
+<rect class="building" x="1820" y="650" width="150" height="610" rx="14"/>
+<text x="2250" y="575">U자형 공동주택</text>
+<rect class="safe" x="2340" y="1030" width="310" height="28"/>
+<text class="tiny" x="2380" y="1012">중정 바닥 충돌 지점</text>
+
+<!-- P3 architecture -->
+<text class="phase" x="3090" y="150">P3 · 저층 옥상군</text>
+<rect class="building" x="3230" y="1020" width="430" height="500" rx="14"/>
+<rect class="building" x="3700" y="1080" width="500" height="440" rx="14"/>
+<rect class="roof" x="3210" y="1000" width="470" height="35"/>
+<rect class="roof" x="3680" y="1060" width="540" height="35"/>
+<rect class="building" x="3750" y="790" width="130" height="210" rx="8"/>
+<text class="tiny" x="3740" y="770">옥상 계단실 / 물탱크 충돌 구조물</text>
+
+<!-- capture/new zones -->
+<g id="newZones">
+<rect class="newzone" x="1120" y="1180" width="410" height="210" rx="18"/>
+<text class="note" x="1145" y="1210">NEW: 벽 충돌 → 노출</text>
+<rect class="newzone" x="2220" y="860" width="520" height="300" rx="18"/>
+<text class="note" x="2260" y="895">NEW: 회전 몸통박치기</text>
+<rect class="newzone" x="3510" y="250" width="650" height="630" rx="18"/>
+<text class="note" x="3560" y="285">NEW: 상승 → 대각선 급강하</text>
+</g>
+
+<!-- Boss lanes -->
+<g id="bossLanes">
+<path class="bosslane" d="M330 1490 C650 1450 1050 1400 1500 1280"/>
+<text x="420" y="1425">BOSS 직접 추격축</text>
+<path class="bosslane" d="M900 1340 C1130 1270 1400 1240 1660 1120"/>
+<text class="tiny" x="1060" y="1315">Player가 발코니로 빠지면 Boss는 넓은 축으로 병행</text>
+
+<path class="bosslane" d="M1960 1030 C2200 900 2520 900 2860 1030"/>
+<text x="2190" y="945">BOSS 중정 중앙축</text>
+
+<path class="bosslane" d="M3140 690 C3420 500 3790 500 4140 700"/>
+<text x="3430" y="520">BOSS 공중 추격축</text>
+</g>
+
+<!-- weak points / collision targets -->
+<circle class="weak" cx="1450" cy="1275" r="22"/><text class="tiny" x="1480" y="1260">P1 후방 추진기</text>
+<circle class="weak" cx="2500" cy="1035" r="22"/><text class="tiny" x="2530" y="1020">P2 하부 안정화 장치</text>
+<circle class="weak" cx="3850" cy="820" r="20"/><text class="tiny" x="3880" y="805">P3 상부 센서</text>
+
+<!-- Player routes -->
+<g id="playerRoute">
+<polyline class="route" points="180,1570 500,1500 820,1440"/>
+<polyline class="route" points="820,1440 1000,1100 1260,1030 1420,1250"/>
+<polyline class="route" points="820,1440 1100,1540 1360,1480 1420,1250"/>
+<polyline class="route" points="1420,1250 1670,1110 1880,960"/>
+<polyline class="route" points="1880,960 2120,700 2450,660 2750,760 2950,910"/>
+<polyline class="route" points="1880,960 2140,1190 2470,1260 2780,1170 2950,910"/>
+<polyline class="route" points="2950,910 3150,680"/>
+<polyline class="route" points="3150,680 3380,420 3700,360 4000,480 4250,680"/>
+<polyline class="route" points="3150,680 3380,920 3700,1000 4010,920 4250,680"/>
+</g>
+<circle class="hp" cx="180" cy="1570" r="16"/><text class="tiny" x="200" y="1558">ENTRY</text>
+<circle class="hp" cx="500" cy="1500" r="16"/><text class="tiny" x="520" y="1488">P1-A</text>
+<circle class="hp" cx="820" cy="1440" r="16"/><text class="tiny" x="840" y="1428">P1-B</text>
+<circle class="hp" cx="1000" cy="1100" r="16"/><text class="tiny" x="1020" y="1088">P1-U1</text>
+<circle class="hp" cx="1260" cy="1030" r="16"/><text class="tiny" x="1280" y="1018">P1-U2</text>
+<circle class="hp" cx="1100" cy="1540" r="16"/><text class="tiny" x="1120" y="1528">P1-L1</text>
+<circle class="hp" cx="1360" cy="1480" r="16"/><text class="tiny" x="1380" y="1468">P1-L2</text>
+<circle class="hp" cx="1420" cy="1250" r="16"/><text class="tiny" x="1440" y="1238">P1-D</text>
+<circle class="hp" cx="1670" cy="1110" r="16"/><text class="tiny" x="1690" y="1098">P1-EXIT</text>
+<circle class="hp" cx="1880" cy="960" r="16"/><text class="tiny" x="1900" y="948">P2-A</text>
+<circle class="hp" cx="2120" cy="700" r="16"/><text class="tiny" x="2140" y="688">P2-U1</text>
+<circle class="hp" cx="2450" cy="660" r="16"/><text class="tiny" x="2470" y="648">P2-U2</text>
+<circle class="hp" cx="2750" cy="760" r="16"/><text class="tiny" x="2770" y="748">P2-U3</text>
+<circle class="hp" cx="2140" cy="1190" r="16"/><text class="tiny" x="2160" y="1178">P2-L1</text>
+<circle class="hp" cx="2470" cy="1260" r="16"/><text class="tiny" x="2490" y="1248">P2-L2</text>
+<circle class="hp" cx="2780" cy="1170" r="16"/><text class="tiny" x="2800" y="1158">P2-L3</text>
+<circle class="hp" cx="2950" cy="910" r="16"/><text class="tiny" x="2970" y="898">P2-EXIT</text>
+<circle class="hp" cx="3150" cy="680" r="16"/><text class="tiny" x="3170" y="668">P3-A</text>
+<circle class="hp" cx="3380" cy="420" r="16"/><text class="tiny" x="3400" y="408">P3-U1</text>
+<circle class="hp" cx="3700" cy="360" r="16"/><text class="tiny" x="3720" y="348">P3-U2</text>
+<circle class="hp" cx="4000" cy="480" r="16"/><text class="tiny" x="4020" y="468">P3-U3</text>
+<circle class="hp" cx="3380" cy="920" r="16"/><text class="tiny" x="3400" y="908">P3-L1</text>
+<circle class="hp" cx="3700" cy="1000" r="16"/><text class="tiny" x="3720" y="988">P3-L2</text>
+<circle class="hp" cx="4010" cy="920" r="16"/><text class="tiny" x="4030" y="908">P3-L3</text>
+<circle class="hp" cx="4250" cy="680" r="16"/><text class="tiny" x="4270" y="668">EXIT</text>
+
+<text x="110" y="1635">ENTRY</text>
+<text x="4170" y="640">CENTRAL EXCHANGE →</text>
+
+<g id="reach" class="hidden">
+<circle class="reach" cx="180" cy="1570" r="400"/>
+<circle class="reach" cx="500" cy="1500" r="400"/>
+<circle class="reach" cx="820" cy="1440" r="400"/>
+<circle class="reach" cx="1000" cy="1100" r="400"/>
+<circle class="reach" cx="1260" cy="1030" r="400"/>
+<circle class="reach" cx="1100" cy="1540" r="400"/>
+<circle class="reach" cx="1360" cy="1480" r="400"/>
+<circle class="reach" cx="1420" cy="1250" r="400"/>
+<circle class="reach" cx="1670" cy="1110" r="400"/>
+<circle class="reach" cx="1880" cy="960" r="400"/>
+<circle class="reach" cx="2120" cy="700" r="400"/>
+<circle class="reach" cx="2450" cy="660" r="400"/>
+<circle class="reach" cx="2750" cy="760" r="400"/>
+<circle class="reach" cx="2140" cy="1190" r="400"/>
+<circle class="reach" cx="2470" cy="1260" r="400"/>
+<circle class="reach" cx="2780" cy="1170" r="400"/>
+<circle class="reach" cx="2950" cy="910" r="400"/>
+<circle class="reach" cx="3150" cy="680" r="400"/>
+<circle class="reach" cx="3380" cy="420" r="400"/>
+<circle class="reach" cx="3700" cy="360" r="400"/>
+<circle class="reach" cx="4000" cy="480" r="400"/>
+<circle class="reach" cx="3380" cy="920" r="400"/>
+<circle class="reach" cx="3700" cy="1000" r="400"/>
+<circle class="reach" cx="4010" cy="920" r="400"/>
+<circle class="reach" cx="4250" cy="680" r="400"/>
+</g>
+</svg>
+</main>
+</div>
+<script>
+const t=(id,on)=>document.getElementById(id).classList.toggle('hidden',!on);
+routeToggle.onchange=()=>t('playerRoute',routeToggle.checked);
+bossToggle.onchange=()=>t('bossLanes',bossToggle.checked);
+newToggle.onchange=()=>t('newZones',newToggle.checked);
+reachToggle.onchange=()=>t('reach',reachToggle.checked);
+</script>
+</body>
+</html>
