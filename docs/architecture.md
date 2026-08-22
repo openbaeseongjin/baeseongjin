@@ -251,7 +251,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 멀티 연결 종료는 게임을 멈추고 모드 메뉴로 돌아가며 마지막 4자리 채널을 입력란에 보존한다. 자동 오프라인 진행이나 플레이어 런타임 복원은 하지 않는다.
 - `PlayerRuntimeFactory`는 `PlayerObject`, 별도 `RopeObject`, `AutomaticWeaponObject`와 Has-A 컴포넌트를 조립하고 소유자별 `InputDrivenObject` 등록 목록을 반환한다. 객체 종류별 규칙을 팩토리에 넣지 않는다.
 - `GameSimulation.addPlayer()`는 같은 팩토리 결과를 공용 `players` 배열에 등록한다. 생성자의 첫 플레이어도 이 경로를 사용하고 그 ID만 비공개 기본 플레이어 식별자로 보존한다.
-- 조준점, 부착 후보, 포인터 전이, 부착 버퍼, 로프 발사 shot/cooldown과 스윙 드래그는 `RopeObject`가 소유한다. 첫 플레이어의 컴포넌트를 중복 가리키는 싱글 호환 필드는 두지 않는다.
+- 조준점, 부착 후보, 포인터 전이, 부착 버퍼, 로프 발사 shot/cooldown과 스윙 드래그는 `RopeObject`가 소유한다. 발사 실패·취소 뒤 재발사 대기는 `hookReloadSeconds` 기본 1초이고, 부착 로프의 사용자 해제 뒤 대기는 별도 `releaseReloadSeconds` 기본 0.1초다. 해제 경로에 발사 재사용 대기를 재사용하지 않는다. 첫 플레이어의 컴포넌트를 중복 가리키는 싱글 호환 필드는 두지 않는다.
 - 외부 실행 계층은 `getPrimaryPlayerId()`, `playerState()`·`playerStates()`, `applyOwnerMotion()`, 예측 복원·진행·피격·충돌 명령을 사용한다. 서버 세션과 로컬 예측기는 `players` 배열이나 플레이어 컴포넌트를 직접 수정하지 않는다.
 - 이동·점프와 로프 입력은 각각 `LocomotionInput`, `RopePointerInput` capability로 전달한다. 적 공격·자동 무기·양측 투사체 운동과 클라이언트 충돌도 각 `SimulationDrivenObject`의 capability로 한 번만 구현하며, `GameSimulation`은 소유자 입력 그룹과 이름 있는 시뮬레이션 단계를 일정 순서로 실행한다. 실행 위치는 Is-A 정체성과 별개이므로 서버가 궤적을 진행하는 투사체도 피해·공격 클라이언트에서 `client-projectile-collision` capability를 실행할 수 있다.
 - `stepCommandBatch`는 싱글과 소유 클라이언트 예측에서 정확히 다음 틱의 플레이어별 명령을 같은 `players` 배열에 적용한다. 로컬 예측은 `InputStateSimulator`로 마지막 입력을 제한된 틱 동안 유지하고, 만료 뒤에는 이동 축을 중립화하되 마지막 포인터·viewport·조준 상태를 보존한다. 멀티 서버는 같은 스케줄러를 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 입력 물리를 다시 적분하지 않고 최신 적용 `owner-motion`을 연속 상태 원점으로 유지한다.

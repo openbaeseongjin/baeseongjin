@@ -88,7 +88,7 @@ export class RopeLauncher {
         }
         if (this.shot.elapsed >= this.flightSeconds) {
             this.shot = null;
-            this.cooldownRemaining = this.ropeConfig.hookReloadSeconds;
+            this.startLaunchReload();
             return Object.freeze({ status: "expired" });
         }
         return Object.freeze({ status: "flying" });
@@ -97,7 +97,7 @@ export class RopeLauncher {
     cancel() {
         if (!this.shot) return false;
         this.shot = null;
-        this.cooldownRemaining = this.ropeConfig.hookReloadSeconds;
+        this.startLaunchReload();
         return true;
     }
 
@@ -106,8 +106,12 @@ export class RopeLauncher {
         this.cooldownRemaining = 0;
     }
 
-    startReload() {
+    startLaunchReload() {
         this.cooldownRemaining = this.ropeConfig.hookReloadSeconds;
+    }
+
+    startReleaseReload() {
+        this.cooldownRemaining = this.ropeConfig.releaseReloadSeconds;
     }
 
     update(dt) {
