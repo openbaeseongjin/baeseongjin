@@ -16,8 +16,9 @@
       "stageId": "3-2",
       "areaId": "sector-03-02",
       "sectorId": "sector-03",
-      "source": "legacy",
-      "sourcePath": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
+      "source": "generated",
+      "sourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC.v2.json",
+      "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage02.generated.js"
     },
     {
       "stageId": "3-3",

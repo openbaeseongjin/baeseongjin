@@ -3,31 +3,19 @@
 Baseline: `d588aa041a350cab198cd187d8dccbe3b3a244dd`
 
 ## Current Runtime truth
-- `sector-03-02`
-- `SCANNER GALLERY / FIRST ACCESS SCAN`
-- current bounds `1280×1184`
-- one Scanner Group `sector-03-02:scanner-A`
-- cycle `1.5 / .6 / 1.1 / .3`
-- old controlled blockout C1/C2/C3
-- two enemy slots:
-  - lower Standard Pool
-  - upper Support Pool + Access A
-- Story:
-  - Access Control
-  - Service Mount
-  - Retail Security
-- no Patrol / Wind / Rope Cut
-- Exit → 3-3
+- `AREA-SPEC.v2.json → Sector03Stage02.generated.js → AREA-CATALOG.sector03.json → Sector03AreaCatalog composer`의 명시적 generated source
+- `sector-03-02 / FACADE SERVICE GALLERY / FIRST ACCESS SCAN`, bounds `3200×1472`
+- topology: Underframe L→R / Backside R→L / Crown L→R, center-anchored `media-wall-body`는 실제 collision surface이며 기존 물리 계약에 따라 Rope 부착 가능
+- 하나의 Scanner Group `sector-03-02:scanner-A`: C1/C2/C3/C4, cycle `1.5 / .6 / 1.1 / .3`; LOCK/RESET은 새 부착만 거부하고 이미 부착된 Rope는 보존
+- 첫 Scanner tutorial과 Right Service Cradle은 적 압력 없이 유지한다. Lower Standard Pool Guard는 tutorial 뒤 shelf에만, Support Pool Access A Carrier는 optional Crown cassette에만 둔다.
+- Story stable ID: `access-control`, `service-mount`, `retail-security-ahead`; Player Bark 두 줄은 기존 Bark layer가 없으므로 NOT IMPLEMENTED
+- Patrol·Wind·Rope Cut·추가 Scanner cycle은 없다. custom Camera Zone은 저작 수치가 없어 기본 authored camera를 사용한다.
+- final deck → exit panel → physical crossing → `3-3`를 보존한다.
 
-## REV8 delta
-- canonical name → `FACADE SERVICE GALLERY`
-- bounds → `3200×1472`
-- topology → Underframe L→R / Backside R→L / Crown L→R
-- C4 added as recall mount in the same Scanner Group
-- first Scanner lesson made explicitly enemy-free
-- Lower Guard isolated after tutorial
-- Access A Carrier moved into optional Crown cassette
-- final upper departure pressure-free
+## Cutover boundary
+- 이 Stage만 `source: "generated"`이며 3-3~3-8은 legacy provider를 유지한다. 한 Stage 안에 legacy/generated 정의를 섞지 않는다.
+- 기존 seamless progression·Access 3-of-3 권위·multiplayer 권위와 Sector 03 이후 Boss/4-1 전환은 이 cutover가 소유하지 않는다.
+- Map Editor의 Draft → Validate → Apply → 새 로컬 Preview는 generated v2 source만 대상으로 하며 활성 Run·정상 seamless Catalog·multiplayer를 hot-swap하지 않는다.
 
 ## Stale docs
 Legacy `Enemy NONE` is superseded by current Runtime's two slots.

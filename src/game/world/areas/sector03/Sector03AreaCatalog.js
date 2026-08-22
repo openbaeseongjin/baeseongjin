@@ -889,7 +889,7 @@ const SECTOR_03_LEGACY_AREA_CATALOG = defineAreaCatalog({
 
 export const SECTOR_03_AREA_CATALOG = composeSectorCatalog({
     id: SECTOR_03_LEGACY_AREA_CATALOG.id,
-    revision: `${SECTOR_03_LEGACY_AREA_CATALOG.revision}-v2-stage01`,
+    revision: `${SECTOR_03_LEGACY_AREA_CATALOG.revision}-v2-stage02`,
     manifest: GENERATED_AREA_CATALOG_MANIFEST,
     legacyAreas: SECTOR_03_LEGACY_AREA_CATALOG.areas,
     generatedAreas: GENERATED_AREAS,

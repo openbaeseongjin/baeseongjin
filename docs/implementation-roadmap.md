@@ -34,7 +34,7 @@
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
-- Sector 01~~06 48개 Stage를 여는 AREA-SPEC v2 Map Editor. Sector 01~~02의 16개와 Sector 03의 3-1은 manifest 기반 generated facade live cutover다. Sector 03의 3-2~3-8 및 Sector 04~06의 31개는 Scenario v2 원본을 Runtime으로 승격하는 별도 구현 단위이며, 위치·충돌·보스·진행·멀티플레이 계약이 완결된 Stage만 명시적 manifest와 facade로 전환한다. 이 순서는 메인 개발자와 병행하도록 editor/v2 source·generator와 facade·진행·멀티플레이 권위를 분리한다. Route·Enemy activation 편집, Runtime semantic Validate, read-only 보호, Drag 단일 Undo와 Apply 직전 현재 Stage source hash 확인을 포함한다. 해커톤 중 에디터는 한 번에 한 명만 사용하며 다중 사용자 mutex·crash-safe 원자 저장은 후속 범위다.
+- Sector 01~~06 48개 Stage를 여는 AREA-SPEC v2 Map Editor. Sector 01~~02의 16개와 Sector 03의 3-1·3-2는 manifest 기반 generated facade live cutover다. Sector 03의 3-3~3-8 및 Sector 04~06의 30개는 Scenario v2 원본을 Runtime으로 승격하는 별도 구현 단위이며, 위치·충돌·보스·진행·멀티플레이 계약이 완결된 Stage만 명시적 manifest와 facade로 전환한다. 이 순서는 메인 개발자와 병행하도록 editor/v2 source·generator와 facade·진행·멀티플레이 권위를 분리한다. Route·Enemy activation 편집, Runtime semantic Validate, read-only 보호, Drag 단일 Undo와 Apply 직전 현재 Stage source hash 확인을 포함한다. 해커톤 중 에디터는 한 번에 한 명만 사용하며 다중 사용자 mutex·crash-safe 원자 저장은 후속 범위다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
 - 생성·해결 이벤트만 공유하고 클라이언트에서 재생하는 플레이어·적 투사체
 - 네트워크 설정을 변경하지 않는 Cloudflare Quick Tunnel 임시 공유 명령
@@ -44,7 +44,7 @@
 - 실제 플레이에서 새로 발견된 실패 사례와 초반 2분 지표 표본
 - 실제 조작 기반 전체 등반 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
-- Sector 03 REV8의 3-2~3-8 topology·Direction migration, Sector 04~06 Runtime 연결과 각 Post-Sector Boss transition (Stage별 Runtime 승격 계약 확정 뒤 진행)
+- Sector 03 REV8의 3-3~3-8 topology·Direction migration, Sector 04~06 Runtime 연결과 각 Post-Sector Boss transition (Stage별 Runtime 승격 계약 확정 뒤 진행)
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
 - Boss01 physical Arena·Breaker/Core/Emitter/Wind·일반 전투 피해/전멸 재시도·`2-1` 전환과 Sector 02~05 보스 상세 계약·구현. Boss Timer·시간 만료 Arena collapse는 후속 범위다.
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
@@ -67,7 +67,7 @@
 
 상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~~`06`의 `1-1`~~`6-8` 상세 Stage 문서는 48/48 작성됐다. 현재 `seamless-sector-runtime-v9`은 `1-1 → 3-8` 24개 alias를 3개 4,800px seamless Sector의 local vertical landmark stack으로 compile하고, 실제 lateral city wing을 더한다. Sector 04 `4-1 → 4-8`은 standalone migration catalog, Sector 05·06은 문서/alias input으로 남는다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
 
-Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. Issue #790에서 offline depth map 기반 fixed background + 좌·우 parallax island 공용 backdrop과 2→3 교차 전환을 표현 계층에 연결했다. Issue #797은 3-1을 REV8 `3072×1088` Market Island topology의 v2 generated Stage로 원자 전환하고 기존 Story·Enemy·Exit·`3-2` 연결을 보존한다. 3-2~3-8의 REV8/REV8.1 topology와 Direction track은 다음 Stage별 migration이다. 사용자는 Sector 03을 먼저 Runtime으로 승격하고, Sector 04~06은 Post-Sector Boss 전환 계약을 우회하지 않는 순서로 진행하기로 결정했다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
+Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. Issue #790에서 offline depth map 기반 fixed background + 좌·우 parallax island 공용 backdrop과 2→3 교차 전환을 표현 계층에 연결했다. Issue #797은 3-1을 REV8 `3072×1088` Market Island topology의 v2 generated Stage로 원자 전환했고, Issue #801은 3-2를 REV8 `3200×1472` Facade Service Gallery의 single Scanner Group·C1~C4·선택 Access A·`3-3` exit 계약으로 원자 전환한다. 3-3~3-8의 REV8/REV8.1 topology와 Direction track은 다음 Stage별 migration이다. 사용자는 Sector 03을 먼저 Runtime으로 승격하고, Sector 04~06은 Post-Sector Boss 전환 계약을 우회하지 않는 순서로 진행하기로 결정했다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
 
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
