@@ -77,6 +77,10 @@ Stage README와 과거 제작 자료에는 0.26.0 이전 Foundation·Impulse·Re
 | 문서 | 역할 |
 | --- | --- |
 | [`bsh/scenario-skeleton-v0.1.html`](./bsh/scenario-skeleton-v0.1.html) | `bsh` 시나리오 발표 자료 |
+| [`bsh/direction-bible/README.md`](./bsh/direction-bible/README.md) | `bsh` 게임 전체 단위 연출/서사 draft 인덱스 — 아직 미승인(`HYPOTHESIS`/`DRAFT`), Sector 04 재정의 제안 충돌 경고 포함 |
+| [`bsh/direction-bible/protagonist-voice-arc-rev1.md`](./bsh/direction-bible/protagonist-voice-arc-rev1.md) | `HYPOTHESIS` — Sector 01~06 주인공 대사 톤 변화 draft |
+| [`bsh/direction-bible/world-master-structure-snowpiercer-draft.md`](./bsh/direction-bible/world-master-structure-snowpiercer-draft.md) | `DRAFT` — 6-Sector 수직 사회 단면도 구조 제안, Sector 04 재정의 포함 |
+| [`bsh/direction-bible/global-atmosphere-arc-rev2.md`](./bsh/direction-bible/global-atmosphere-arc-rev2.md) | `HYPOTHESIS` — Sector 01~06 공간/카메라/음향/UI 감정 아크 draft |
 | [`bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`](./bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md) | 현재 Runtime을 확인한 뒤 일관된 Scenario Art Reference를 생성·검수하는 공통 규격 |
 | [`bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md`](./bsh/scenario/AREA-SPEC-AUTHORING-STANDARD.md) | Stage별 `AREA-SPEC.json`(구현 계약) 스키마·Local ID·preset·검증 규칙을 정의하는 공통 규격 |
 | [`bsh/scenario/AREA-SPEC-TEMPLATE.json`](./bsh/scenario/AREA-SPEC-TEMPLATE.json) | `AREA-SPEC.json` 작성용 template — 실제 Stage로 집계되지 않음 |
