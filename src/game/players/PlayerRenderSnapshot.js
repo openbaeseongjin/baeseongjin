@@ -24,6 +24,7 @@ export const withPlayerRenderSnapshot = createRenderSnapshotCapabilityMixin({
             },
             foundationAugment: this.foundation.selectedId,
             selectedAugmentIds: this.foundation.selectedIds,
+            calibrationVerifiedSourceIds: Object.freeze([...this.calibrationVerifiedSourceIds]),
             augmentRuntimeState: Object.freeze({
                 ...this.foundation.snapshot(),
                 combat: this.augmentCombat.snapshot()

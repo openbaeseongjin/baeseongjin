@@ -74,3 +74,15 @@ The tactical inversion must come from geometry.
 (one windZones entry, "opposes"/"assists" is purely which direction the Player is moving through it).
 Remaining gap: Pressure Limit/Containment Violation Story text and the one designed Player Bark are
 NOT IMPLEMENTED (bark acceptance test explicitly allows this).`
+
+## 맵 에디터 및 모바일 미리보기 점검 — 2026-08-22
+
+Map Editor에서 `1-7`의 저장됨/검증 통과 상태(오류 0)를 직접 확인했다. 지형 10개, Anchor 11개,
+Recovery/Route 19개, Access C Carrier+Guard+Guard 3슬롯, 바람원/구역 3개, Camera Zone 8개가
+Runtime 적용 source에서 읽혔다. `pressure-preview` Zone은 `minY -352`, `maxY -176`, desktop zoom
+`1.02`, mobile zoom `0.72`로 표시돼 기존 authoring 값을 보존한다.
+
+390×844 mobile loopback의 새 싱글플레이 미리보기는 1-7 초기 scene을 browser error 없이 그렸다. 이 확인은
+초기 Camera framing과 generated source 로드만 다루며, 모든 chamber의 실제 traversal·Wind 체감·8개 Zone
+전환을 새로 완료 처리하지 않는다. 시나리오 불일치가 없었으므로 `저장 적용`을 실행하지 않았고 v2 JSON,
+generated JS, Camera 수치는 변경하지 않았다.

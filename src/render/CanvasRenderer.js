@@ -94,11 +94,13 @@ export class CanvasRenderer {
         if (scene.hudVisible !== false) {
             this.drawAccessGuide(scene);
             this.drawLocalStatusHud(scene);
+            this.drawCalibrationHud(scene.calibrationPresentation?.hud, scene);
             this.drawAccessHud(scene);
         }
         this.drawRewardSelectionOverlay(scene.foundationReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawStoryPresentation(scene.storyPresentation);
+        this.drawCalibrationToast(scene.calibrationPresentation?.toast);
         this.drawPlayerMessagePresentation(scene.playerMessagePresentation, scene);
         this.drawStatusFeedback(scene.eventFlash);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
@@ -355,6 +357,61 @@ export class CanvasRenderer {
         ctx.font = `700 ${compactView ? 8 : 9}px system-ui, sans-serif`;
         const augmentText = augmentNames || "없음";
         ctx.fillText(`증강 ${augmentText}`, x + 14, augmentY, innerWidth);
+        ctx.restore();
+    }
+
+    drawCalibrationHud(presentation, { mobileView = false } = {}) {
+        if (!presentation) return;
+        const ctx = this.context;
+        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+        const width = compactView ? Math.min(240, this.cssWidth - 36) : 360;
+        const x = 18;
+        const y = compactView ? 154 : 174;
+        const height = compactView ? 44 : 50;
+        const status = presentation.verified ? "검증 완료" : "대기 중";
+
+        ctx.save();
+        ctx.fillStyle = "rgba(8, 22, 32, 0.92)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = presentation.verified ? "rgba(52, 211, 153, 0.82)" : "rgba(103, 232, 249, 0.72)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#9fb7c7";
+        ctx.font = `900 ${compactView ? 8 : 9}px ui-monospace, monospace`;
+        ctx.fillText("CALIBRATION", x + 12, y + (compactView ? 14 : 16));
+        ctx.fillStyle = "#e0f2fe";
+        ctx.font = `800 ${compactView ? 10 : 11}px system-ui, sans-serif`;
+        ctx.fillText(`${presentation.family} · ${presentation.name}`, x + 12, y + (compactView ? 31 : 35), width - 100);
+        ctx.textAlign = "right";
+        ctx.fillStyle = presentation.verified ? "#6ee7b7" : "#fde68a";
+        ctx.fillText(status, x + width - 12, y + (compactView ? 31 : 35));
+        ctx.restore();
+    }
+
+    drawCalibrationToast(toast) {
+        if (!toast) return;
+        const ctx = this.context;
+        const margin = 12;
+        const compactView = this.cssWidth <= 900 && this.cssHeight <= 500;
+        const width = Math.min(compactView ? 320 : 440, this.cssWidth - margin * 2);
+        const height = compactView ? 38 : 42;
+        const x = (this.cssWidth - width) * 0.5;
+        const y = 92;
+        const fadeIn = Math.min(1, toast.age / 0.12);
+        const fadeOut = Math.min(1, (toast.durationSeconds - toast.age) / 0.16);
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(fadeIn, fadeOut));
+        ctx.fillStyle = "rgba(7, 17, 30, 0.9)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = "rgba(103, 232, 249, 0.72)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#d9f4ff";
+        ctx.font = `900 ${compactView ? 10 : 12}px ui-monospace, monospace`;
+        ctx.fillText(toast.text, this.cssWidth * 0.5, y + (compactView ? 24 : 26), width - 20);
         ctx.restore();
     }
 

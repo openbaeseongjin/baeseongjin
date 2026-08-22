@@ -15,7 +15,7 @@ function setStatus(text, kind = "") {
 
 async function requestPreview() {
     if (!/^\d+-\d+$/.test(stageId ?? "")) {
-        throw new Error("Preview에는 generated Stage ID가 필요합니다.");
+        throw new Error("미리보기에는 생성된 Stage ID가 필요합니다.");
     }
     const response = await fetch(`/api/map-editor/stages/${encodeURIComponent(stageId)}/preview`);
     const payload = await response.json().catch(() => ({ message: "Preview 응답을 읽을 수 없습니다." }));
@@ -33,10 +33,10 @@ async function createPreview() {
         const renderer = createGameRenderer({ canvas, profile: "polygon" });
         currentApp = new AreaPreviewGameApp({ canvas, renderer, generatedArea: GENERATED_AREA, revision });
         currentApp.start();
-        label.textContent = `${stageId} · ${areaId} · fresh local single-player run`;
-        setStatus(`Preview revision ${revision} 실행 중 · normal runtime / multiplayer에는 영향을 주지 않습니다.`);
+        label.textContent = `${stageId} · ${areaId} · 새 로컬 싱글플레이 실행`;
+        setStatus(`미리보기 리비전 ${revision} 실행 중 · 일반 런타임과 멀티플레이에는 영향을 주지 않습니다.`);
     } catch (cause) {
-        label.textContent = "Preview를 시작할 수 없습니다.";
+        label.textContent = "미리보기를 시작할 수 없습니다.";
         setStatus(cause.message, "error");
     } finally {
         reloadButton.disabled = false;

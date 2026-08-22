@@ -23,6 +23,7 @@ import {
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
+import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
 
@@ -118,6 +119,7 @@ export class MultiplayerGameApp {
         this.directionLightingPresentation = direction.lightingPresentation;
         this.directionCharacterPresentation = direction.characterPresentation;
         this.directionCoverage = direction.coverage;
+        this.calibrationPresentation = new CalibrationPresentation({ viewerId: this.authority.playerId });
         this.localRunCompleted = false;
         this.localFoundationReward = null;
         this.pendingFoundationSelection = null;
@@ -504,6 +506,11 @@ export class MultiplayerGameApp {
         });
         this.directionLightingPresentation.update(dt, { areaId: cameraShot.areaId });
         this.directionCharacterPresentation.update(dt);
+        this.calibrationPresentation.update(dt, {
+            currentAreaId: cameraShot.areaId,
+            player,
+            events: [...events, ...predictedEvents]
+        });
         this.audioBindings?.presentFrame({
             scene: directionAudioContext
         });
@@ -593,6 +600,7 @@ export class MultiplayerGameApp {
             localPlayerId: this.authority.playerId,
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
+            calibrationPresentation: this.calibrationPresentation.snapshot(),
             playerMessagePresentation: this.playerMessagePresentation.snapshot(),
             directionLightingPresentation: this.directionLightingPresentation.snapshot(),
             directionCharacterPresentation: this.directionCharacterPresentation.snapshot(),
