@@ -19,9 +19,15 @@ const allowedOriginsArgument = process.argv
     .find((argument) => argument.startsWith("--allowed-origins="))
     ?.slice("--allowed-origins=".length);
 const defaultAllowedOrigins = gameOnly ? "https://openbaeseongjin.github.io" : "";
+const gameRequestHandler = createGameServerRequestHandler({ version: packageJson.version });
+const staticRequestHandler = createStaticRequestHandler(root);
 const requestHandler = gameOnly
-    ? createGameServerRequestHandler({ version: packageJson.version })
-    : createStaticRequestHandler(root);
+    ? gameRequestHandler
+    : (request, response) => {
+          const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
+          if (pathname === "/health") gameRequestHandler(request, response);
+          else staticRequestHandler(request, response);
+      };
 const server = createServer(requestHandler);
 const multiplayer = new MultiplayerGameServer(server, {
     allowedOrigins: (allowedOriginsArgument ?? process.env.BAESEONGJIN_ALLOWED_ORIGINS ?? defaultAllowedOrigins)

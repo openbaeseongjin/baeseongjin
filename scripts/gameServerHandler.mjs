@@ -1,4 +1,5 @@
 const JSON_HEADERS = {
+    "access-control-allow-origin": "*",
     "cache-control": "no-store",
     "content-type": "application/json; charset=utf-8"
 };

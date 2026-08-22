@@ -243,7 +243,7 @@ events[]
 
 `events`에는 피격, 로프 절단, Augment 선택처럼 한 번만 보여야 하는 사건의 고유 ID가 포함된다. 연결 재전송이나 스냅샷 중복 수신이 같은 효과를 두 번 재생하지 않도록 클라이언트가 최근 이벤트 ID를 기억한다.
 
-서버는 파티클, 타격 VFX, 피해 숫자, 화면 흔들림의 위치 변화나 남은 수명을 계산·전송하지 않는다. 권위 판정 이벤트는 결과·위치·피해량과 `sourcePlayerId`·`targetId`만 제공한다. 각 클라이언트는 같은 피드백 사건 객체의 공용 capability로 월드 링·파티클을 한 번 생성하고, 개인 capability로 현재 viewer가 공격자 또는 피해자인 경우에만 화면 흔들림·피해 강조·로프 절단 경고를 생성한다. owner-predicted one-shot은 prediction/event causal ID로 receipt와 중복되지 않으며, Enemy/Wind의 지속 파티클은 이미 복제되는 attack/behavior/wind state만 관찰한다. 효과는 로컬 렌더 시간으로 진행·소멸하며 싱글도 같은 사건 객체와 capability 경계를 사용한다. 상세 preset·cap 계약은 [`particle-system.md`](./particle-system.md)다.
+서버는 파티클, 타격 VFX, 피해 숫자, 화면 흔들림의 위치 변화나 남은 수명을 계산·전송하지 않는다. 권위 판정 이벤트는 결과·위치·피해량과 `sourcePlayerId`·`targetId`만 제공한다. 각 클라이언트는 같은 피드백 사건 객체의 공용 capability로 월드 링·파티클을 한 번 생성하고, 개인 capability로 현재 viewer가 공격자 또는 피해자인 경우에만 화면 흔들림·피해 강조·로프 절단 경고를 생성한다. owner-predicted one-shot은 prediction/event causal ID로 receipt와 중복되지 않으며, Enemy/Wind의 지속 파티클은 이미 복제되는 attack/behavior/wind state만 관찰한다. Rope lifecycle과 Player motion도 owner의 즉시 predicted Player state와 peer의 owner-motion Player snapshot을 같은 이전→현재 projection으로 관찰한다. 첫 sample은 baseline이고 repeated `ownerMotionTick`은 acceleration burst를 재발화하지 않으며, cut/impact/respawn causal event는 generic detach 효과보다 우선한다. 효과는 로컬 렌더 시간으로 진행·소멸하며 싱글도 같은 사건 객체와 capability 경계를 사용한다. 상세 preset·cap 계약은 [`particle-system.md`](./particle-system.md)다.
 
 투사체처럼 시작 틱, 초기 위치·속도와 결정적 파라미터로 이후 움직임을 계산할 수 있는 객체는 전체 상태를 스냅샷마다 반복하지 않는다. 서버가 고유 이벤트 ID, 객체 ID·종류, 생성 틱, 초기 위치·속도와 반경·피해·소유자 같은 파라미터를 `spawn` 이벤트로 한 번 보낸다. 각 클라이언트는 같은 고정 틱으로 객체를 진행시킨다. 서버 권위 궤적과 클라이언트 예측 궤적은 모두 구체 투사체의 motion capability를 통해 공용 `ProjectileMotion` 적분식을 사용하며, 전송 계층에 별도 이동 공식을 복제하지 않는다. capability 디스패치는 이 공유 운동 구현을 선택할 뿐 생성·피격·claim의 분할 권한을 바꾸지 않는다. 파편, 낙하물 등 같은 성질의 객체도 이 계약을 재사용한다.
 
@@ -339,6 +339,8 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 `npm run start:multiplayer`는 개발 환경에서 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 서버 프로세스는 여러 4자리 채널을 동시에 소유하고 각 채널마다 새 32비트 시드의 독립된 `GameSimulation`, 명령 큐, 120Hz 시계와 최대 2명의 연결을 둔다. 클라이언트 예측은 welcome snapshot의 서버 시드로 동일한 지형을 생성한다. 한 명이 나가면 해당 플레이어만 제거하고 남은 유저는 같은 채널 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간 해당 채널과 월드를 폐기하며, 다음 새 채널은 새 시드의 절차 생성 월드를 만든다.
 
 브라우저 첫 화면은 싱글과 멀티를 선택한다. GitHub Pages의 `index.html`에 있는 `meta[name="multiplayer-server"]`가 항상 실행 중인 게임 서버의 HTTPS/WSS 주소를 제공하고, 클라이언트는 이를 `/multiplayer?channel=...`로 정규화한다. 서버 주소는 배포 설정이며 플레이어가 입력하지 않는다. 방장은 **새 채널 만들기**로 4자리 번호를 받고, 참가자는 모바일 숫자 키패드로 그 번호만 입력한다.
+
+모드 메뉴는 같은 서버의 공개 `/health`를 시작 시점과 메뉴 대기 중 5초 간격으로 확인한다. 응답이 없거나 `status: "ok"`가 아니면 **멀티 플레이** 버튼과 채널 입력 경로만 비활성화하고 이유를 표시하며, 싱글 플레이는 계속 사용할 수 있다. 서버가 다시 정상 응답하면 페이지를 새로고침하지 않아도 버튼을 다시 활성화한다. 개발 통합 서버와 운영 game-only 서버는 같은 health 계약을 제공하고, health 응답은 연결 복구나 세션 권위 판정에 사용하지 않는다.
 
 `npm run share:multiplayer`는 상시 서버를 대신하는 운영 경로가 아니라 개발 중 외부 연결을 확인하는 임시 도구다. 운영 Pages는 고정 게임 서버를 사용하며 Quick Tunnel 주소를 플레이어에게 입력시키지 않는다. 상세 실행 경계는 `multiplayer-sharing.md`를 따른다.
 
