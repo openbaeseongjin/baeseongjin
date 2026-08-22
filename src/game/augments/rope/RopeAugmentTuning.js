@@ -41,7 +41,7 @@ export const ROPE_AUGMENT_PERCENTAGES = Object.freeze({
 export const ROPE_AUGMENT_STATIC_VALUES = Object.freeze({
     baseHookSpeed: 1200,
     baseReach: 400,
-    baseReloadSeconds: 0.5,
+    baseReloadSeconds: 1,
     contactBandPadding: 10,
     collisionExplosionRadius: 120,
     collisionExplosionKnockbackDistance: 100,

@@ -130,7 +130,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
                     this.attachBufferRemaining = 0;
                     onAttach({ relayAssisted: inputModifiers.relayActive });
                 } else {
-                    this.launcher.startReload();
+                    this.launcher.startLaunchReload();
                 }
             }
         }
@@ -184,7 +184,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
             onRelease(release);
             onFlash({ type: "release", age: 0 });
             this.swingDrag = null;
-            this.launcher.startReload();
+            this.launcher.startReleaseReload();
         }
         this.launcher.update(dt);
         if (this.launcher.cooldownRemaining <= 0) {

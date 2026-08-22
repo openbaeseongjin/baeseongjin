@@ -16,7 +16,8 @@ export const PLAYER_CONFIG = Object.freeze({
 export const ROPE_CONFIG = Object.freeze({
     hookSpeed: 1200,
     hookFlightRatio: Object.freeze({ numerator: 1, denominator: 3 }),
-    hookReloadSeconds: 0.5,
+    hookReloadSeconds: 1,
+    releaseReloadSeconds: 0.1,
     attachBufferSeconds: 0.1,
     swingDragThresholdViewportRatio: 0.11,
     swingDragMinHoldSeconds: 0.08,
@@ -31,6 +32,7 @@ export const ROPE_TUNING_FIELDS = Object.freeze(
         { path: "hookFlightRatio.numerator", min: 1, max: 7, step: 1 },
         { path: "hookFlightRatio.denominator", min: 2, max: 10, step: 1 },
         { path: "hookReloadSeconds", min: 0, max: 1, step: 0.05 },
+        { path: "releaseReloadSeconds", min: 0, max: 1, step: 0.05 },
         { path: "attachBufferSeconds", min: 0, max: 0.5, step: 0.02 },
         { path: "swingDragThresholdViewportRatio", min: 0.02, max: 0.3, step: 0.01 },
         { path: "swingDragMinHoldSeconds", min: 0, max: 0.5, step: 0.01 },
@@ -74,6 +76,7 @@ export function resolveEffectiveRopeConfig(override = null, baseConfig = ROPE_CO
             denominator: clampedOverride(source, "hookFlightRatio.denominator", baseConfig.hookFlightRatio.denominator)
         }),
         hookReloadSeconds: clampedOverride(source, "hookReloadSeconds", baseConfig.hookReloadSeconds),
+        releaseReloadSeconds: clampedOverride(source, "releaseReloadSeconds", baseConfig.releaseReloadSeconds),
         attachBufferSeconds: clampedOverride(source, "attachBufferSeconds", baseConfig.attachBufferSeconds),
         swingDragThresholdViewportRatio: clampedOverride(
             source,
