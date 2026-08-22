@@ -123,10 +123,9 @@
         {
             "stageId": "3-2",
             "areaId": "sector-03-02",
-            "authoringMode": "scenario-only",
+            "authoringMode": "runtime-generated",
             "sourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC.v2.json",
-            "sourcePathHash": "2e72bfbf6572b635d7a6568d244db8e94006a35a442b24394a4218b6fcd1d2e9",
-            "designSourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC-REV8-DESIGN.json"
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector03.json"
         },
         {
             "stageId": "3-3",
