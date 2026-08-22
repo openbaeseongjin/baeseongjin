@@ -1,9 +1,10 @@
 import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { AUGMENT_IMPACT_CONFIG, ROPE_IMPACT_CONFIG } from "../config.js";
 import { actionAugmentById } from "./actions/ActionAugmentCatalog.js";
+import { ACTION_SIGNATURE_ID, BASE_ACTION_ID } from "./actions/ActionAugmentDefinition.js";
 
 const IMPACT = AUGMENT_IMPACT_CONFIG.baseDamage;
-const DEFAULT_PUNCH = actionAugmentById("default-punch").effect;
+const DEFAULT_PUNCH = actionAugmentById(BASE_ACTION_ID.DEFAULT_PUNCH).effect;
 
 function formula({
     cardId = null,
@@ -23,73 +24,81 @@ function formula({
     });
 }
 
-const FORMULAS = new Map([
-    ["rope-impact", formula({ damageMultiplier: 0, ropeImpactDamageMultiplier: 1, range: 80 })],
-    [
-        "default-punch",
-        formula({
-            damageMultiplier: DEFAULT_PUNCH.damageMultiplier,
-            range: DEFAULT_PUNCH.range,
-            knockback: { distance: DEFAULT_PUNCH.knockbackDistance, duration: DEFAULT_PUNCH.knockbackSeconds }
-        })
-    ],
-    [
-        "electrified-rope",
-        Object.freeze({
-            cardId: "electrified-rope",
-            damage: AUGMENT_IMPACT_CONFIG.electrifiedDamagePerSecond * AUGMENT_IMPACT_CONFIG.electrifiedPulseSeconds,
-            dynamicDamage: false,
-            ropeImpactDamageMultiplier: null,
-            range: 500,
-            knockback: null
-        })
-    ],
-    [
-        "collision-explosion-direct",
-        formula({
-            cardId: "collision-explosion",
-            damageMultiplier: 0,
-            ropeImpactDamageMultiplier: 1,
-            range: 80,
-            knockback: { distance: 100, duration: 0.25 }
-        })
-    ],
-    [
-        "collision-explosion-splash",
-        formula({
-            cardId: "collision-explosion",
-            damageMultiplier: 0,
-            ropeImpactDamageMultiplier: 0.5,
-            range: 120,
-            knockback: { distance: 100, duration: 0.25 }
-        })
-    ],
-    ["explosive-trail", formula({ cardId: "explosive-trail", damageMultiplier: 0.8, range: 80 })],
-    [
-        "dash-strike",
-        formula({ cardId: "dash-strike", damageMultiplier: 1, range: 100, knockback: { distance: 75, duration: 0.25 } })
-    ],
-    ["damage-reflect", formula({ cardId: "damage-reflect", dynamicDamage: true, damageMultiplier: 0, range: 3000 })],
-    [
-        "push-away",
-        formula({
-            cardId: "push-away",
-            damageMultiplier: 0.2,
-            range: 140,
-            knockback: { distance: 175, duration: 0.25 }
-        })
-    ],
-    ["wall-impact", formula({ cardId: "wall-impact", damageMultiplier: 0.8, range: 3000 })],
-    ["straight-shot", formula({ cardId: "straight-shot", damageMultiplier: 0.8, range: 3000 })],
-    ["end-wave", formula({ cardId: "end-wave", damageMultiplier: 0.8, range: 120 })]
-]);
+const FORMULAS = Object.freeze({
+    "rope-impact": formula({ damageMultiplier: 0, ropeImpactDamageMultiplier: 1, range: 80 }),
+    [BASE_ACTION_ID.DEFAULT_PUNCH]: formula({
+        damageMultiplier: DEFAULT_PUNCH.damageMultiplier,
+        range: DEFAULT_PUNCH.range,
+        knockback: { distance: DEFAULT_PUNCH.knockbackDistance, duration: DEFAULT_PUNCH.knockbackSeconds }
+    }),
+    "electrified-rope": Object.freeze({
+        cardId: "electrified-rope",
+        damage: AUGMENT_IMPACT_CONFIG.electrifiedDamagePerSecond * AUGMENT_IMPACT_CONFIG.electrifiedPulseSeconds,
+        dynamicDamage: false,
+        ropeImpactDamageMultiplier: null,
+        range: 500,
+        knockback: null
+    }),
+    "collision-explosion-direct": formula({
+        cardId: "collision-explosion",
+        damageMultiplier: 0,
+        ropeImpactDamageMultiplier: 1,
+        range: 80,
+        knockback: { distance: 100, duration: 0.25 }
+    }),
+    "collision-explosion-splash": formula({
+        cardId: "collision-explosion",
+        damageMultiplier: 0,
+        ropeImpactDamageMultiplier: 0.5,
+        range: 120,
+        knockback: { distance: 100, duration: 0.25 }
+    }),
+    [ACTION_SIGNATURE_ID.EXPLOSIVE_TRAIL]: formula({
+        cardId: ACTION_SIGNATURE_ID.EXPLOSIVE_TRAIL,
+        damageMultiplier: 0.8,
+        range: 80
+    }),
+    [BASE_ACTION_ID.DASH_STRIKE]: formula({
+        cardId: BASE_ACTION_ID.DASH_STRIKE,
+        damageMultiplier: 1,
+        range: 100,
+        knockback: { distance: 75, duration: 0.25 }
+    }),
+    [ACTION_SIGNATURE_ID.DAMAGE_REFLECT]: formula({
+        cardId: ACTION_SIGNATURE_ID.DAMAGE_REFLECT,
+        dynamicDamage: true,
+        damageMultiplier: 0,
+        range: 3000
+    }),
+    [BASE_ACTION_ID.PUSH_AWAY]: formula({
+        cardId: BASE_ACTION_ID.PUSH_AWAY,
+        damageMultiplier: 0.2,
+        range: 140,
+        knockback: { distance: 175, duration: 0.25 }
+    }),
+    [ACTION_SIGNATURE_ID.WALL_IMPACT]: formula({
+        cardId: ACTION_SIGNATURE_ID.WALL_IMPACT,
+        damageMultiplier: 0.8,
+        range: 3000
+    }),
+    [BASE_ACTION_ID.STRAIGHT_SHOT]: formula({
+        cardId: BASE_ACTION_ID.STRAIGHT_SHOT,
+        damageMultiplier: 0.8,
+        range: 3000
+    }),
+    [ACTION_SIGNATURE_ID.END_WAVE]: formula({
+        cardId: ACTION_SIGNATURE_ID.END_WAVE,
+        damageMultiplier: 0.8,
+        range: 120
+    })
+});
 
 function nearlyEqual(left, right, tolerance = 1e-6) {
     return Math.abs(left - right) <= tolerance;
 }
 
 export function augmentImpactFormula(effectId) {
-    return FORMULAS.get(effectId) ?? null;
+    return FORMULAS[effectId] ?? null;
 }
 
 export function playerHasAugment(player, cardId) {
@@ -102,7 +111,7 @@ export function playerHasAugment(player, cardId) {
 export function validateAugmentImpactFormula(player, claim, target = null, { positionTolerance = 40 } = {}) {
     const resolved = augmentImpactFormula(claim.effectId);
     if (!resolved || !playerHasAugment(player, resolved.cardId)) return Object.freeze({ valid: false });
-    if (claim.effectId === "default-punch" && player.foundation?.baseActionId) {
+    if (claim.effectId === BASE_ACTION_ID.DEFAULT_PUNCH && player.foundation?.baseActionId) {
         return Object.freeze({ valid: false });
     }
     if (resolved.ropeImpactDamageMultiplier !== null) {

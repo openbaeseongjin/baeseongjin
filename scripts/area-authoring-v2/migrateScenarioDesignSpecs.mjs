@@ -8,12 +8,29 @@ const projectRoot = resolve(import.meta.dirname, "../..");
 const writeCandidates = process.argv.includes("--write");
 const EDITABLE_DOMAINS = ["bounds", "entry", "surfaces", "anchors", "recoveryRoute", "enemySlots", "wind", "camera"];
 const READ_ONLY_DOMAINS = ["objectives", "progression", "story", "scanner", "behaviorRegistry"];
-const DESIGN_SOURCE_BY_SECTOR = new Map([
-    [3, "AREA-SPEC-REV8-DESIGN.json"],
-    [4, "AREA-SPEC-REV1-DESIGN.json"],
-    [5, "AREA-SPEC-REV4-DESIGN.json"],
-    [6, "AREA-SPEC-REV3-DESIGN.json"]
-]);
+const DESIGN_SOURCE_BY_SECTOR = Object.freeze({
+    3: "AREA-SPEC-REV8-DESIGN.json",
+    4: "AREA-SPEC-REV1-DESIGN.json",
+    5: "AREA-SPEC-REV4-DESIGN.json",
+    6: "AREA-SPEC-REV3-DESIGN.json"
+});
+const SURFACE_ROUTE_TERM = Object.freeze({
+    safe: true,
+    deck: true,
+    platform: true,
+    landing: true,
+    recovery: true,
+    hub: true,
+    lobby: true,
+    observation: true,
+    basin: true,
+    island: true,
+    floor: true,
+    entry: true,
+    exit: true,
+    control: true,
+    bay: true
+});
 
 function readJson(path) {
     return JSON.parse(readFileSync(resolve(projectRoot, path), "utf8"));
@@ -82,26 +99,9 @@ function isGrappleRoutePoint(entry) {
 }
 
 function isSurfaceRoutePoint(entry) {
-    const surfaceTerms = new Set([
-        "safe",
-        "deck",
-        "platform",
-        "landing",
-        "recovery",
-        "hub",
-        "lobby",
-        "observation",
-        "basin",
-        "island",
-        "floor",
-        "entry",
-        "exit",
-        "control",
-        "bay"
-    ]);
     return routePointKind(entry)
         .split(/[^a-z0-9]+/)
-        .some((term) => surfaceTerms.has(term));
+        .some((term) => SURFACE_ROUTE_TERM[term] === true);
 }
 
 function collectPoints(value, result = []) {
@@ -446,15 +446,16 @@ function scenarioSpec({ raw, sourcePath, sector, stage }) {
 }
 
 function stageEntries() {
-    return [...DESIGN_SOURCE_BY_SECTOR.entries()].flatMap(([sector, fileName]) =>
-        Array.from({ length: sector === 3 ? 6 : 8 }, (_, index) => {
+    return Object.entries(DESIGN_SOURCE_BY_SECTOR).flatMap(([sectorId, fileName]) => {
+        const sector = Number(sectorId);
+        return Array.from({ length: sector === 3 ? 6 : 8 }, (_, index) => {
             const stage = sector === 3 ? index + 3 : index + 1;
             const stageId = `${sector}-${stage}`;
             const sourcePath = `docs/bsh/scenario/${sector}/${stageId}/${fileName}`;
             const outputPath = `docs/bsh/scenario/${sector}/${stageId}/AREA-SPEC.v2.json`;
             return { sector, stage, stageId, sourcePath, outputPath };
-        })
-    );
+        });
+    });
 }
 
 function sourceHash(raw) {

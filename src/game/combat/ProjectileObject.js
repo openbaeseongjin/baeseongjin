@@ -1,31 +1,26 @@
-import { SimulationDrivenObject } from "../objects/SimulationDrivenObject.js";
 import { defineObjectOwner } from "../objects/GameObject.js";
-import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
+import { SimulationDrivenObject } from "../objects/SimulationDrivenObject.js";
+import { PROJECTILE_MOTION } from "../physics/ProjectileMotionDefinition.js";
+import {
+    withHomingProjectileSteering,
+    withProjectileLifetime,
+    withProjectileMotionSimulation
+} from "../physics/ProjectileMotionMixin.js";
 import { withEnemyHitPrediction, withPlayerImpactPrediction } from "./ProjectileClientCollision.js";
-import { advanceHomingProjectileMotion, advanceProjectileMotion } from "./ProjectileMotion.js";
+import {
+    PROJECTILE_COLLISION_STATE,
+    PROJECTILE_DEFINITION,
+    PROJECTILE_INITIAL_COLLISION_STATE,
+    PROJECTILE_INVISIBLE_COLLISION_STATES,
+    PROJECTILE_KEY,
+    PROJECTILE_REJECTED_COLLISION_STATE,
+    PROJECTILE_TYPE
+} from "./ProjectileDefinition.js";
 import { withProjectileRenderSnapshot } from "./ProjectileRenderSnapshot.js";
 
-export const PROJECTILE_MOTION_CAPABILITY = "projectile-motion";
+export const PROJECTILE_MOTION_CAPABILITY = PROJECTILE_MOTION.CAPABILITY;
 
-const withHomingProjectileMotion = createSimulationCapabilityMixin({
-    id: PROJECTILE_MOTION_CAPABILITY,
-    order: 20,
-    apply({ dt, state = null, targetPosition = null, speed = this.speed }) {
-        targetPosition ??= state?.enemies?.find(({ id }) => id === this.targetId)?.position ?? null;
-        if (targetPosition) advanceHomingProjectileMotion(this, targetPosition, speed, dt);
-        else advanceProjectileMotion(this, dt);
-    }
-});
-
-const withBallisticProjectileMotion = createSimulationCapabilityMixin({
-    id: PROJECTILE_MOTION_CAPABILITY,
-    order: 20,
-    apply({ dt }) {
-        advanceProjectileMotion(this, dt);
-    }
-});
-
-class ProjectileObject extends withProjectileRenderSnapshot(SimulationDrivenObject) {
+class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapshot(SimulationDrivenObject)) {
     #clientCollisionState;
     #collisionRejectionPolicy;
     #renderCollection;
@@ -50,12 +45,10 @@ class ProjectileObject extends withProjectileRenderSnapshot(SimulationDrivenObje
     }) {
         super({ id });
         defineObjectOwner(this, ownerId);
+        this.initializeProjectileMotion({ position, velocity });
         this.targetId = targetId;
-        this.position = position;
-        this.velocity = velocity;
         this.damage = damage;
         this.radius = radius;
-        this.ageSeconds = 0;
         this.speed = speed;
         this.objectType = objectType;
         this.canCutRope = canCutRope;
@@ -63,7 +56,7 @@ class ProjectileObject extends withProjectileRenderSnapshot(SimulationDrivenObje
         this.#renderCollection = renderCollection;
         this.#collisionRejectionPolicy = collisionRejectionPolicy;
         this.#usesOwnerPredictionId = usesOwnerPredictionId;
-        this.#clientCollisionState = predictCollision ? "ready" : "disabled";
+        this.#clientCollisionState = PROJECTILE_INITIAL_COLLISION_STATE[Boolean(predictCollision)];
     }
 
     get renderCollection() {
@@ -71,36 +64,35 @@ class ProjectileObject extends withProjectileRenderSnapshot(SimulationDrivenObje
     }
 
     isClientCollisionPredictionEnabled() {
-        return this.#clientCollisionState !== "disabled";
+        return this.#clientCollisionState !== PROJECTILE_COLLISION_STATE.DISABLED;
     }
 
     observeClientCollision(isOverlapping) {
-        if (this.#clientCollisionState === "waiting-separation") {
-            if (!isOverlapping) this.#clientCollisionState = "ready";
+        if (this.#clientCollisionState === PROJECTILE_COLLISION_STATE.WAITING_SEPARATION) {
+            if (!isOverlapping) this.#clientCollisionState = PROJECTILE_COLLISION_STATE.READY;
             return false;
         }
-        return this.#clientCollisionState === "ready" && isOverlapping;
+        return this.#clientCollisionState === PROJECTILE_COLLISION_STATE.READY && isOverlapping;
     }
 
     beginClientCollision() {
-        if (this.#clientCollisionState !== "ready") return false;
-        this.#clientCollisionState = "pending";
+        if (this.#clientCollisionState !== PROJECTILE_COLLISION_STATE.READY) return false;
+        this.#clientCollisionState = PROJECTILE_COLLISION_STATE.PENDING;
         return true;
     }
 
     rejectClientCollision() {
-        if (this.#clientCollisionState !== "pending") return false;
-        this.#clientCollisionState =
-            this.#collisionRejectionPolicy === "retry-after-separation" ? "waiting-separation" : "consumed";
+        if (this.#clientCollisionState !== PROJECTILE_COLLISION_STATE.PENDING) return false;
+        this.#clientCollisionState = PROJECTILE_REJECTED_COLLISION_STATE[this.#collisionRejectionPolicy];
         return true;
     }
 
     isClientVisible() {
-        return this.#clientCollisionState !== "pending" && this.#clientCollisionState !== "consumed";
+        return !PROJECTILE_INVISIBLE_COLLISION_STATES.includes(this.#clientCollisionState);
     }
 
     replicationState(tick) {
-        if (this.#usesOwnerPredictionId) this.predictionId ??= `${this.ownerId}:${tick}`;
+        if (this.#usesOwnerPredictionId) this.predictionId ??= PROJECTILE_KEY.prediction(this.ownerId, tick);
         return Object.freeze({
             objectType: this.objectType,
             ownerId: this.ownerId,
@@ -114,47 +106,31 @@ class ProjectileObject extends withProjectileRenderSnapshot(SimulationDrivenObje
     }
 }
 
-export class HomingProjectileObject extends withEnemyHitPrediction(withHomingProjectileMotion(ProjectileObject)) {
+export class HomingProjectileObject extends withEnemyHitPrediction(
+    withProjectileMotionSimulation(withHomingProjectileSteering(ProjectileObject))
+) {
     constructor(options) {
-        super({
-            ...options,
-            objectType: "player-projectile",
-            renderCollection: "projectiles",
-            collisionRejectionPolicy: "consume",
-            usesOwnerPredictionId: true
-        });
+        super({ ...options, ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.PLAYER] });
     }
 }
 
 export class BallisticProjectileObject extends withPlayerImpactPrediction(
-    withBallisticProjectileMotion(ProjectileObject)
+    withProjectileMotionSimulation(ProjectileObject)
 ) {
     constructor(options) {
-        super({
-            ...options,
-            objectType: "enemy-projectile",
-            renderCollection: "enemyProjectiles",
-            collisionRejectionPolicy: "retry-after-separation",
-            usesOwnerPredictionId: false
-        });
+        super({ ...options, ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.ENEMY] });
     }
 }
 
-const PROJECTILE_FACTORIES = new Map([
-    [
-        "player-projectile",
-        ({ hadLocalPrediction = false, ...state }) =>
-            new HomingProjectileObject({ ...state, predictCollision: hadLocalPrediction })
-    ],
-    [
-        "enemy-projectile",
-        ({ hadLocalPrediction: _hadLocalPrediction, ...state }) =>
-            new BallisticProjectileObject({ ...state, predictCollision: true })
-    ]
-]);
+const PROJECTILE_FACTORIES = Object.freeze({
+    [PROJECTILE_TYPE.PLAYER]: ({ hadLocalPrediction = false, ...state }) =>
+        new HomingProjectileObject({ ...state, predictCollision: hadLocalPrediction }),
+    [PROJECTILE_TYPE.ENEMY]: ({ hadLocalPrediction: _hadLocalPrediction, ...state }) =>
+        new BallisticProjectileObject({ ...state, predictCollision: true })
+});
 
 export function createProjectileObject({ objectType, ...state }) {
-    const create = PROJECTILE_FACTORIES.get(objectType);
+    const create = PROJECTILE_FACTORIES[objectType];
     if (!create) throw new Error(`unsupported projectile object type: ${objectType}`);
     return create(state);
 }

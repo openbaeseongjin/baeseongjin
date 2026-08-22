@@ -358,7 +358,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 로프 입력은 누르는 순간과 해제 전이, 짧은 부착 버퍼, 부착당 한 번인 스윙 드래그 진행에 상태가 있다. 자기 플레이어 재적용은 승인 틱의 `aimWorld`, 마지막 pointer·viewport, `wasPointerDown`, `attachBufferRemaining`, `swingDrag`에서 시작한다. `attachmentCandidate`는 정적 월드와 aim으로 다시 계산하며 전송하지 않는다.
 
-`PredictableProjectileStore`는 최근 이벤트를 명시적으로 drain해 `spawn`을 투사체 팩토리에 전달하고 `resolve`에서 제거한다. 저장소는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 소유하며 투사체 종류를 보고 운동·충돌 정책을 분기하지 않는다. 늦게 받은 생성 이벤트는 현재 serverTick과 생성 tick의 차이만큼 먼저 진행한다. 적 투사체와 플레이어 투사체는 같은 `projectile-motion` ID의 서로 다른 믹스인을, 클라이언트 충돌은 같은 `client-projectile-collision` ID의 서로 다른 믹스인을 사용한다. 두 궤적은 서버와 같은 `ProjectileMotion` 함수를 호출하며 동일 초기 상태·tick의 위치와 속도가 정확히 일치하는 테스트로 잠근다. claim 대기 객체의 표시와 재충돌 가능 여부도 객체 수명주기가 결정한다. 자기 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 적중으로 소비되며 receipt 거절로 되살리지 않는다. 투사체 매 틱 좌표 배열은 스냅샷에 추가하지 않는다.
+`PredictableProjectileStore`는 최근 이벤트를 명시적으로 drain해 `spawn`을 투사체 팩토리에 전달하고 `resolve`에서 제거한다. 저장소는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 소유하며 투사체 종류를 보고 운동·충돌 정책을 분기하지 않는다. 늦게 받은 생성 이벤트는 현재 serverTick과 생성 tick의 차이만큼 먼저 진행한다. 적·플레이어 투사체는 Player·Enemy와 같은 공통 `PhysicsMixin` 및 단일 `projectile-motion` capability를 사용하고 lifetime과 Homing steering만 선택 mixin으로 조합한다. 클라이언트 충돌은 같은 `client-projectile-collision` ID의 서로 다른 믹스인을 사용한다. 서버와 클라이언트는 동일 초기 상태·tick의 위치와 속도가 정확히 일치하는 진단으로 잠근다. claim 대기 객체의 표시와 재충돌 가능 여부도 객체 수명주기가 결정한다. 자기 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 적중으로 소비되며 receipt 거절로 되살리지 않는다. 투사체 매 틱 좌표 배열은 스냅샷에 추가하지 않는다.
 
 - `snapshot()`은 화면이 읽을 소유자 로컬 상태와 원격·중립 공유 상태를 구분해 반환한다.
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.

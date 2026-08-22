@@ -135,6 +135,12 @@ class Player extends RopeAttachable(GameObject) {}
 4. 여러 정체성에 붙는 작고 무상태에 가까운 능력인가? → Can-Do 믹스인
 5. 두 믹스인이 서로의 내부를 알아야 하는가? → 믹스인을 중단하고 명시적인 조합 객체로 재설계
 
+### 고정 대응표와 동적 membership
+
+- enum·state·definition에서 값·resolver·구체 구현을 고르는 고정 대응표는 `Object.freeze({ [key]: value })`와 property lookup으로 소유한다.
+- 고정 key를 `Map`·`Set`으로 감싸지 않는다. `Map`·`Set`은 실행 중 key가 추가·삭제되는 객체 수명주기, contact, dedupe와 membership 상태에만 사용한다.
+- 일회성 중복 검사와 module-load catalog index는 객체 lookup을 사용한다. 동적 상태가 아니라는 근거가 없으면 편의상 `Map`·`Set`을 선택하지 않는다.
+
 ### 구조적 버그의 책임 경계 복구
 
 같은 기능이나 책임 경계에서 유사 결함이 재발하거나, 한 수정 뒤 같은 데이터·사건 경로의 연관 결함이 이어지면 이를 개별 버그의 우연한 연속이 아니라 **근본 구조 검증 트리거**로 취급한다. 다음 국소 패치 전에 현재 구조가 아래 계약을 지키는지 확인하고, 어긋난 경계가 원인이면 그 경계를 먼저 복구한다. 이 기준은 투사체뿐 아니라 플레이어, 로프, 적, 보상과 앞으로 추가할 모든 게임 객체에 적용한다.
@@ -241,7 +247,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 모든 그래픽 작업의 공통 진입점과 인계 경로는 `graphics-asset-guide.md`와 `assets/artwork/<category>/<asset-id>/`를 따른다. 담당 개발자가 검증된 export를 `assets/runtime/<category>/<asset-id>/`로 승격하고 `RuntimeAssetCatalog`의 category·asset ID 경계로 참조하며, 전용 계약이 없는 자산에 의미가 다른 player·environment manifest를 임시로 재사용하지 않는다.
 - 시나리오 문서용 이미지는 `bsh/scenario/SCENARIO-ART-GENERATION-STANDARD.md`의 생성 전 Runtime 확인, 대표 Camera Shot, Player 상대 크기, 한 줄 live Rope, 정확한 오브젝트 수와 상태 검수를 통과해야 한다. 전체 경로·좌표의 권위는 Approved Blockout이 소유하지만 선택한 Camera Shot에 보이는 발판·장애물·Cover의 좌우·상하 관계와 상대 폭은 이미지에서도 보존한다. 생성 구도를 위해 Gameplay Geometry를 이동·확대·병합하지 않으며 `RETIRED`·`PENDING REGENERATION` 이미지를 다음 생성의 Style Anchor로 연쇄 사용하지 않는다.
 - collider는 공개 계약과 shape별 클래스로 만들고 런타임 factory에서 조립한다. `CircleCollider`와 convex `PolygonCollider` snapshot을 공용 판정이 직접 소비하며 box는 중심 기준 네 꼭짓점을 가진 polygon 편의 생성자다. 앱·renderer·충돌·전투 함수가 전역 반지름이나 별도 사각형 판정을 가져와 같은 shape 규칙을 다시 해석하지 않는다. concave 외곽은 여러 convex collider로 분해하는 별도 compound 계약 전에는 단일 polygon으로 넣지 않는다.
-- Player와 Enemy 같은 이동 actor의 controller·행동·Patrol은 Runtime 좌표를 직접 변경하지 않는다. 속도·displacement intent를 공용 surface physics step에 전달하고, 그 step만 위치 적분, 활성 collision surface와 Player↔Player·Player↔Enemy·Enemy↔Enemy body 해결을 수행한다. circle↔circle, circle↔polygon, polygon↔polygon은 같은 contact normal·penetration 결과를 사용한다. 동적 body 접촉은 법선 속도를 0으로 자르는 벽 처리로 대체하지 않고 collider bounding size 기반 질량, 상대 속도와 반발 계수로 자기 권위 body의 위치 보정·impulse를 계산한다. `sentry` 고정형 Turret만 inverse mass 0의 정적 body이며 다른 Enemy는 authored 이동 방식과 무관하게 동적 body다. spawn·reset·권위 snapshot restore는 이동이 아닌 명시적 상태 전이로 분리한다.
+- Player·Enemy·Projectile의 공통 Physics는 `position`·`velocity`·`acceleration` 세 벡터를 소유한다. gameplay `applyImpulse()`는 velocity를 직접 바꾸지 않고 현재 tick의 acceleration에 누적하며, 공용 tick은 acceleration → velocity → position 순서로 한 번 적분한 뒤 acceleration을 초기화한다. 회전 객체는 별도 `AngularPhysicsMixin`을 조합해 angular acceleration → angular velocity → angle을 같은 순서로 적분하고, 회전하지 않는 객체는 이 capability를 갖지 않는다. Player와 Enemy 같은 이동 actor의 controller·행동·Patrol은 Runtime 좌표를 직접 변경하지 않는다. 속도·displacement intent를 공용 surface physics step에 전달하고, 그 step만 위치 적분, 활성 collision surface와 Player↔Player·Player↔Enemy·Enemy↔Enemy body 해결을 수행한다. collider는 복제한 working velocity를 해결하고 surface physics가 그 차이를 acceleration에 누적·반영한다. circle↔circle, circle↔polygon, polygon↔polygon은 같은 contact normal·penetration 결과를 사용한다. 동적 body 접촉은 법선 속도를 0으로 자르는 벽 처리로 대체하지 않고 collider bounding size 기반 질량, 상대 속도와 반발 계수로 자기 권위 body의 위치 보정·impulse를 계산한다. `sentry` 고정형 Turret만 inverse mass 0의 정적 body이며 다른 Enemy는 authored 이동 방식과 무관하게 동적 body다. spawn·reset·권위 snapshot restore는 이동이 아닌 명시적 상태 전이로 분리한다.
 - 충돌 최적화는 Quadtree broad phase가 swept collider AABB와 교차하는 후보만 고르고 기존 narrow phase가 최종 판정한다. camera visibility나 Player와의 단순 거리로 surface를 제거하지 않으며 정적 surface index는 월드 전체를 유지한다. 화면 기반 관심 영역 밖 Enemy를 쉬게 할 때는 충돌만 끄지 않고 해당 Enemy의 행동·Patrol·넉백·공격·물리 step 전체를 동결한다. 멀티 서버는 특정 대표 Player가 아니라 모든 active Player 관심 영역의 합집합을 사용하고, 같은 입력·Player 상태에서는 싱글과 서버가 동일한 활성 집합을 계산해야 한다.
 - 기본 renderer profile과 query override는 bootstrap 한 곳에서 결정한다. asset load 실패 fallback은 명시적이고 진단 가능해야 하며 선택 실패를 조용히 삼키지 않는다.
 - 렌더러 변경은 실제 브라우저에서 기본 프로필 보존, 사용자 정의 프로필 위임, 잘못된 프로필 거부, 애니메이션 loop/clamp 경계와 좌우 반전 목적 영역을 확인한다.
@@ -461,10 +467,10 @@ git diff --check
 | 시나리오 Stage 목록, Runtime 연결 상태, 차단 요소와 마지막 확인 근거 | `docs/scenario-development-integration.md`                          |
 | 모듈 책임, 상태 소유권, 의존 방향                                    | `docs/architecture.md`                                              |
 | 멀티 권위, 전송, 채널과 세션 정책                                    | `docs/multiplayer-synchronization.md`                               |
-| 클래스·믹스인·컴포넌트·검증·Git과 대화 결정 흡수 절차              | `docs/development-rules.md`                                         |
+| 클래스·믹스인·컴포넌트·검증·Git과 대화 결정 흡수 절차                | `docs/development-rules.md`                                         |
 | 문서 인덱스, 작성 위치, 파일 형식과 이미지 첨부                      | `docs/documentation-rules.md`                                       |
 | Pages, PWA, 서버 실행, 버전 운영                                     | 해당 배포·버전 문서                                                 |
-| 아직 승격되지 않은 결정·진행 중 전환·문서화되지 않은 blocker        | `SESSION-HANDOFF.md`                                                |
+| 아직 승격되지 않은 결정·진행 중 전환·문서화되지 않은 blocker         | `SESSION-HANDOFF.md`                                                |
 | 대체되거나 종료된 결정과 이유                                        | `docs/decision-history.md`                                          |
 
 다음 내용은 영구 결정으로 승격하지 않는다.

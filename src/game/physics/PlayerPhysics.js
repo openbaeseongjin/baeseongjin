@@ -1,20 +1,23 @@
 import { Vector2 } from "../../game-kit/index.js";
-import { AngularMotion } from "./AngularMotion.js";
+import { withAngularPhysics } from "./AngularPhysicsMixin.js";
+import { PHYSICS } from "./PhysicsDefinition.js";
+import { withGravityPhysics } from "./PhysicsMixin.js";
+import { PHYSICS_ACTOR_KIND, PLAYER_PHYSICS } from "./PlayerPhysicsDefinition.js";
 import { CircleCollider } from "./colliders/CircleCollider.js";
 import { withSurfacePhysics } from "./SurfacePhysicsMixin.js";
 
-const ENEMY_ACTOR_KINDS = Object.freeze(["enemy"]);
+const ENEMY_ACTOR_KINDS = Object.freeze([PHYSICS_ACTOR_KIND.ENEMY]);
 
-export class PlayerPhysics extends withSurfacePhysics(class {}) {
+export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSurfacePhysics(class {}))) {
     constructor(config, { collider = new CircleCollider({ radius: config.radius }) } = {}) {
         super();
         this.config = config;
         this.initializeSurfacePhysics({
-            position: new Vector2(120, 500),
+            position: new Vector2(PLAYER_PHYSICS.INITIAL_POSITION.x, PLAYER_PHYSICS.INITIAL_POSITION.y),
             velocity: new Vector2(),
             collider
         });
-        this.angularMotion = new AngularMotion({
+        this.initializeAngularPhysics({
             inertia: config.angularInertia,
             maxSpeed: config.maxAngularSpeed,
             airDamping: config.airAngularDamping,
@@ -23,79 +26,62 @@ export class PlayerPhysics extends withSurfacePhysics(class {}) {
         });
         this.isGrounded = false;
         this.lastSurfaceCollisionNormals = Object.freeze([]);
-        this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: 0, y: 0 });
+        this.lastSurfaceCollisionIncomingVelocity = PLAYER_PHYSICS.ZERO_VECTOR;
     }
 
-    get angle() {
-        return this.angularMotion.angle;
-    }
-
-    get angularVelocity() {
-        return this.angularMotion.velocity;
-    }
-
-    reset(position = { x: 120, y: 500 }) {
-        this.position.set(position.x, position.y);
-        this.velocity.set(0, 0);
-        this.actorCollisionVelocity.set(0, 0);
-        this.surfaceControlVelocity.set(0, 0);
-        this.angularMotion.reset();
+    reset(position = PLAYER_PHYSICS.INITIAL_POSITION) {
+        this.setPhysicsPosition(position);
+        this.setPhysicsVelocity(PLAYER_PHYSICS.ZERO_VECTOR);
+        this.clearSurfacePhysicsStep();
+        this.resetAngularPhysics();
         this.isGrounded = false;
         this.lastSurfaceCollisionNormals = Object.freeze([]);
-        this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: 0, y: 0 });
-    }
-
-    setAngularState(angle, angularVelocity) {
-        this.angularMotion.set(angle, angularVelocity);
-    }
-
-    applyAngularForces(dt, isGrounded) {
-        this.angularMotion.applyForces(dt, isGrounded);
-    }
-
-    integrateAngularMotion(dt) {
-        this.angularMotion.integrate(dt);
-    }
-
-    addImpulse(direction, magnitude) {
-        this.velocity.x += direction.x * magnitude;
-        this.velocity.y += direction.y * magnitude;
-    }
-
-    addImpulseAtLocalPoint(direction, magnitude, localOffset) {
-        const impulse = { x: direction.x * magnitude, y: direction.y * magnitude };
-        this.velocity.x += impulse.x;
-        this.velocity.y += impulse.y;
-        this.angularMotion.applyImpulseAtWorldOffset(impulse, this.angularMotion.worldOffset(localOffset));
+        this.lastSurfaceCollisionIncomingVelocity = PLAYER_PHYSICS.ZERO_VECTOR;
     }
 
     step(dt, input, surfaces, rope, collision = {}) {
         const wasGrounded = this.isGrounded;
         if (!rope.isAttached) {
             const acceleration = this.isGrounded ? this.config.groundAcceleration : this.config.airAcceleration;
-            this.velocity.x += input.horizontal * acceleration * dt;
-            if (input.horizontal === 0 && this.isGrounded && !input.preserveActionImpulse) {
-                this.velocity.x *= Math.exp(-this.config.groundDrag * dt);
+            this.applyAcceleration({ x: input.horizontal * acceleration, y: PHYSICS.ZERO_VECTOR.y }, dt);
+            if (
+                input.horizontal === PLAYER_PHYSICS.IDLE_HORIZONTAL_INPUT &&
+                this.isGrounded &&
+                !input.preserveActionImpulse
+            ) {
+                const stepVelocity = this.physicsStepVelocity();
+                this.applyImpulse({
+                    x: stepVelocity.x * Math.exp(-this.config.groundDrag * dt) - stepVelocity.x,
+                    y: PHYSICS.ZERO_VECTOR.y
+                });
             }
             if (!input.preserveActionImpulse) {
-                this.velocity.x = Math.max(
+                const stepVelocity = this.physicsStepVelocity();
+                const limitedVelocityX = Math.max(
                     -this.config.maxHorizontalSpeed,
-                    Math.min(this.config.maxHorizontalSpeed, this.velocity.x)
+                    Math.min(this.config.maxHorizontalSpeed, stepVelocity.x)
                 );
+                this.applyImpulse({ x: limitedVelocityX - stepVelocity.x, y: PHYSICS.ZERO_VECTOR.y });
             }
         }
 
-        if (this.isGrounded && input.vertical < 0) {
-            this.velocity.y = -this.config.jumpSpeed;
+        if (this.isGrounded && input.vertical < PLAYER_PHYSICS.JUMP_VERTICAL_THRESHOLD) {
+            const stepVelocity = this.physicsStepVelocity();
+            this.applyImpulse({
+                x: PHYSICS.ZERO_VECTOR.x,
+                y: -this.config.jumpSpeed - stepVelocity.y
+            });
             this.isGrounded = false;
         }
 
-        const gravityScale = Number.isFinite(input.gravityScale) ? Math.max(0, input.gravityScale) : 1;
-        this.velocity.y += this.config.gravity * gravityScale * dt;
+        const gravityScale = Number.isFinite(input.gravityScale)
+            ? Math.max(PHYSICS.MINIMUM_GRAVITY_SCALE, input.gravityScale)
+            : PHYSICS.DEFAULT_GRAVITY_SCALE;
+        this.applyGravity(dt, this.config.gravity, gravityScale);
         this.applyAngularForces(dt, this.isGrounded);
-        rope.apply(this.position, this.velocity, this.angularMotion, dt);
+        rope.apply(this, dt);
 
-        this.integrateAngularMotion(dt);
+        this.integrateAngularPhysics(dt);
         const surfaceResolution = this.advanceSurfacePhysics(dt, surfaces, {
             actorId: collision.actorId ?? null,
             actorRef: collision.actorRef ?? null,
@@ -108,15 +94,17 @@ export class PlayerPhysics extends withSurfacePhysics(class {}) {
         this.isGrounded = surfaceResolution.isGrounded;
         this.lastSurfaceCollisionNormals = surfaceResolution.collisionNormals;
         this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: impactVelocity.x, y: impactVelocity.y });
-        rope.apply(this.position, this.velocity, this.angularMotion, dt);
+        rope.apply(this, dt);
         const landed = !wasGrounded && this.isGrounded;
         return Object.freeze({
             landed,
             collidedActorIds: surfaceResolution.collidedActorIds,
-            impactSpeed: landed ? Math.max(0, impactVelocity.y) : 0,
+            impactSpeed: landed
+                ? Math.max(PLAYER_PHYSICS.MINIMUM_IMPACT_SPEED, impactVelocity.y)
+                : PLAYER_PHYSICS.MINIMUM_IMPACT_SPEED,
             impactVelocity: landed
                 ? Object.freeze({ x: impactVelocity.x, y: impactVelocity.y })
-                : Object.freeze({ x: 0, y: 0 })
+                : PLAYER_PHYSICS.ZERO_VECTOR
         });
     }
 }

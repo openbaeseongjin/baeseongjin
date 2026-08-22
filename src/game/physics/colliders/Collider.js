@@ -1,9 +1,18 @@
 import { closestPointOnPolygon, pointInPolygon, polygonBounds } from "../../world/PolygonGeometry.js";
+import { ENEMY_TYPE } from "../../EnemyType.js";
+import { SURFACE_MOTION_TYPE } from "../SurfacePhysicsDefinition.js";
 
 const COLLIDER_EPSILON = 1e-7;
 const DYNAMIC_ACTOR_RESTITUTION = 0.25;
 const PLAYER_REFERENCE_RADIUS = 15;
-const STATIC_ENEMY_TYPES = new Set(["sentry", "sentry-t1"]);
+const STATIC_ENEMY_TYPE = Object.freeze({
+    [ENEMY_TYPE.SENTRY]: true,
+    [ENEMY_TYPE.SENTRY_T1]: true
+});
+const VALID_SURFACE_MOTION_TYPE = Object.freeze({
+    [SURFACE_MOTION_TYPE.STATIC]: true,
+    [SURFACE_MOTION_TYPE.DYNAMIC]: true
+});
 
 const REQUIRED_METHODS = Object.freeze([
     "snapshot",
@@ -240,9 +249,9 @@ export function colliderSnapshotsEqual(left, right) {
     );
 }
 
-function actorMotionType(actor, fallback = "dynamic") {
-    if (actor?.motionType === "static" || actor?.motionType === "dynamic") return actor.motionType;
-    if (STATIC_ENEMY_TYPES.has(actor?.enemyType)) return "static";
+function actorMotionType(actor, fallback = SURFACE_MOTION_TYPE.DYNAMIC) {
+    if (VALID_SURFACE_MOTION_TYPE[actor?.motionType] === true) return actor.motionType;
+    if (STATIC_ENEMY_TYPE[actor?.enemyType] === true) return SURFACE_MOTION_TYPE.STATIC;
     return fallback;
 }
 
@@ -251,8 +260,8 @@ function actorMass(actor, snapshot) {
     return Math.max(0.25, (colliderSnapshotBoundingRadius(snapshot) / PLAYER_REFERENCE_RADIUS) ** 2);
 }
 
-function inverseMass(actor, snapshot, fallbackMotionType = "dynamic") {
-    if (actorMotionType(actor, fallbackMotionType) === "static") return 0;
+function inverseMass(actor, snapshot, fallbackMotionType = SURFACE_MOTION_TYPE.DYNAMIC) {
+    if (actorMotionType(actor, fallbackMotionType) === SURFACE_MOTION_TYPE.STATIC) return 0;
     return 1 / actorMass(actor, snapshot);
 }
 

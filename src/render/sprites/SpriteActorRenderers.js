@@ -3,59 +3,29 @@ import { EnemyAnimationController } from "./EnemyAnimationController.js";
 import { PlayerAnimationController } from "./PlayerAnimationController.js";
 import { paintSpriteFrame } from "./SpriteCanvasPainter.js";
 import { centeredBounds, circleBounds, isVisible } from "../RenderViewport.js";
-import {
-    drawEnemyBehaviorTelegraph,
-    enemyAimLine,
-    enemySensorColor,
-    isDroneEnemy
-} from "../EnemyTelegraphPresentation.js";
-import { resolveEnemyPresentationState } from "../EnemyPresentationState.js";
+import { drawEnemyBehaviorTelegraph } from "../EnemyTelegraphPresentation.js";
+import { resolveEnemyPresentationState, resolveUprightAimTransform } from "../EnemyPresentationState.js";
 
 const ENEMY_SPRITE = Object.freeze({
     rows: Object.freeze(["......aa", "..aaaaaa", "abbbccca", "abccccba", "..aaaaaa", "......aa"])
 });
 const PLAYER_PROJECTILE_SPRITE = Object.freeze({ rows: Object.freeze([".a.", "aba", ".a."]) });
 const ENEMY_PROJECTILE_SPRITE = Object.freeze({ rows: Object.freeze(["..a..", ".aba.", "abcba", ".aba.", "..a.."]) });
-const PURSUIT_DIRECTIONAL_STATES = Object.freeze(["pursuit-windup", "pursuit-dash"]);
 
 function eventsForPlayer(scene, playerId) {
     return (scene.playerPresentationEvents ?? []).filter((event) => event.playerId === playerId);
 }
 
-function enemyFacingX(enemy) {
-    const pursuitFacing = enemy.behaviorState?.kind === "pursuit" ? enemy.behaviorState.dashDirection?.x : null;
-    if (Number.isFinite(pursuitFacing) && Math.abs(pursuitFacing) > Number.EPSILON) return pursuitFacing;
-    return enemy.aimDirection?.x ?? null;
-}
-
-export function resolveUprightAimTransform(aimDirection) {
-    const x = aimDirection?.x;
-    const y = aimDirection?.y;
-    if (!Number.isFinite(x) || !Number.isFinite(y) || Math.hypot(x, y) <= Number.EPSILON) {
-        return Object.freeze({ flipX: false, rotation: 0 });
-    }
-    const aimAngle = Math.atan2(y, x);
-    if (x < 0) {
-        return Object.freeze({
-            flipX: true,
-            rotation: aimAngle < 0 ? aimAngle + Math.PI : aimAngle - Math.PI
-        });
-    }
-    return Object.freeze({ flipX: false, rotation: aimAngle });
-}
+export { resolveUprightAimTransform };
 
 export function resolveEnemyAimLayerDirection(enemy) {
-    if (["track", "lock", "fire"].includes(enemy?.attackState) && enemy.aimDirection) {
-        return enemy.aimDirection;
-    }
-    return enemy?.presentationAimDirection ?? enemy?.aimDirection ?? null;
+    return resolveEnemyPresentationState(enemy).aimLayerDirection;
 }
 
 export function resolvePursuitDirectionTransform(enemy, presentationState) {
-    if (enemy?.behaviorState?.kind !== "pursuit" || !PURSUIT_DIRECTIONAL_STATES.includes(presentationState)) {
-        return null;
-    }
-    return resolveUprightAimTransform(enemy.behaviorState.dashDirection);
+    return resolveEnemyPresentationState(enemy).primaryState === presentationState
+        ? resolveEnemyPresentationState(enemy).pursuitTransform
+        : null;
 }
 
 export function resolveGuardOctant(guardDirection) {
@@ -66,8 +36,7 @@ export function resolveGuardOctant(guardDirection) {
 }
 
 export function resolveEnemyGuardLayerDirection(enemy) {
-    if (enemy?.behaviorState?.kind !== "shield") return null;
-    return enemy.behaviorState.guardDirection ?? null;
+    return resolveEnemyPresentationState(enemy).guardLayerDirection;
 }
 
 class PlayerSpriteRendererBase {
@@ -197,7 +166,7 @@ export class SpriteEnemyRenderer {
             const radius = Math.max(renderSize.width, renderSize.height, (enemy.radius ?? 0) * 2) * 0.5 + 14;
             if (!isVisible(viewport, circleBounds(enemy.position, radius))) continue;
             drawn += 1;
-            const aimLine = enemyAimLine(enemy);
+            const aimLine = presentation.aimLine;
             if (aimLine) {
                 context.save();
                 context.strokeStyle = aimLine.color;
@@ -208,7 +177,7 @@ export class SpriteEnemyRenderer {
                 context.stroke();
                 context.restore();
             }
-            drawEnemyBehaviorTelegraph(context, enemy, enemies);
+            drawEnemyBehaviorTelegraph(context, enemy, enemies, presentation);
             const usesProductionSprite = Boolean(spritePresentation && this.assets?.status === "ready");
             if (usesProductionSprite) {
                 const animationId = typeof enemy.id === "string" && enemy.id ? enemy.id : enemy;
@@ -218,11 +187,14 @@ export class SpriteEnemyRenderer {
                     presentation.enemyType,
                     spritePresentation.clipState
                 );
-                const pursuitDirectionTransform = resolvePursuitDirectionTransform(enemy, spritePresentation.clipState);
+                const pursuitDirectionTransform = presentation.pursuitTransform;
                 const animation = controller.update({
                     state: spritePresentation.clipState,
                     dt,
-                    facingX: spritePresentation.guardLayer || pursuitDirectionTransform ? null : enemyFacingX(enemy)
+                    facingX:
+                        spritePresentation.guardLayer || pursuitDirectionTransform
+                            ? null
+                            : (presentation.facingDirection?.x ?? null)
                 });
                 const frame = spritePresentation.clip.frameAt(animation.elapsedSeconds);
                 paintSpriteFrame({
@@ -244,7 +216,7 @@ export class SpriteEnemyRenderer {
                         : (pursuitDirectionTransform?.rotation ?? enemy.angle ?? 0)
                 });
                 if (spritePresentation.aimLayer) {
-                    const aimTransform = resolveUprightAimTransform(resolveEnemyAimLayerDirection(enemy));
+                    const aimTransform = resolveUprightAimTransform(presentation.aimLayerDirection);
                     paintSpriteFrame({
                         context,
                         image: this.assets.imageFor(spritePresentation.aimLayer.frame.atlasId),
@@ -260,7 +232,7 @@ export class SpriteEnemyRenderer {
                     });
                 }
                 if (spritePresentation.guardLayer) {
-                    const directionIndex = resolveGuardOctant(resolveEnemyGuardLayerDirection(enemy));
+                    const directionIndex = resolveGuardOctant(presentation.guardLayerDirection);
                     const guardFrame = spritePresentation.guardLayer.frames[directionIndex];
                     paintSpriteFrame({
                         context,
@@ -280,14 +252,14 @@ export class SpriteEnemyRenderer {
                 paintPixelSprite({
                     context,
                     sprite: this.spriteResolver(presentation, enemy),
-                    palette: isDroneEnemy(enemy)
+                    palette: presentation.drone
                         ? { a: "#78350f", b: "#fbbf24", c: "#fef3c7" }
                         : { a: "#881337", b: "#fb7185", c: "#fecdd3" },
                     position: enemy.position,
                     size: this.size
                 });
             }
-            if (!usesProductionSprite && isDroneEnemy(enemy)) {
+            if (!usesProductionSprite && presentation.drone) {
                 context.strokeStyle = "#94a3b8";
                 context.lineWidth = 2;
                 context.beginPath();
@@ -296,7 +268,7 @@ export class SpriteEnemyRenderer {
                 context.stroke();
             }
             if (!usesProductionSprite) {
-                context.fillStyle = enemySensorColor(enemy);
+                context.fillStyle = presentation.sensorColor;
                 context.fillRect(enemy.position.x - 11, enemy.position.y - 3, 6, 6);
             }
         }

@@ -3,12 +3,13 @@ import { createRenderSnapshotCapabilityMixin, snapshotVector } from "../objects/
 export const withPlayerRenderSnapshot = createRenderSnapshotCapabilityMixin({
     kind: "player",
     snapshot() {
+        const velocity = this.physics.physicsStepVelocity();
         return {
             id: this.id,
             position: snapshotVector(this.physics.position),
-            velocity: snapshotVector(this.physics.velocity),
+            velocity: snapshotVector(velocity),
             angle: this.physics.angle,
-            angularVelocity: this.physics.angularVelocity,
+            angularVelocity: this.physics.angularStepVelocity(),
             isGrounded: this.physics.isGrounded,
             collider: this.physics.collider.snapshot(),
             health: this.health,

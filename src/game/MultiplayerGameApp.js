@@ -7,7 +7,7 @@ import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, resolveMobileCameraZoom } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
-import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
+import { selectClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import {
     advanceFoundationRewardSelection,
     createFoundationRewardSelection,
