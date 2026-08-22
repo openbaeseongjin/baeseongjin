@@ -5,7 +5,7 @@ function predictedResolution(target, normalDamage) {
         return target.health <= normalDamage ? "enemy-defeated" : "enemy-hit";
     }
     const totalDamage = createImpactDamage({
-        normalDamage,
+        normalDamage: normalDamage * (target.normalDamageMultiplier ?? 1),
         weakpointExposed: target.weakpointExposed === true,
         phaseMaxHealth: target.phaseMaxHealth ?? 0,
         weakpointRatio: target.weakpointDamageRatio ?? 0.25

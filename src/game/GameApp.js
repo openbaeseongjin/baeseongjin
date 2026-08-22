@@ -20,6 +20,22 @@ import {
     localTriggerObjects,
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
+
+const BOSS_CAMERA_FOCUS_WEIGHT = 0.65;
+const BOSS_CAMERA_ZOOM_RATIO = 0.72;
+
+function bossCameraPlayer(player, bossStage) {
+    if (bossStage?.status !== "active") return player;
+    const carriage = bossStage.presentation?.objects?.find(({ kind }) => kind === "boss-carriage");
+    if (!carriage?.position) return player;
+    return {
+        ...player,
+        position: {
+            x: player.position.x * (1 - BOSS_CAMERA_FOCUS_WEIGHT) + carriage.position.x * BOSS_CAMERA_FOCUS_WEIGHT,
+            y: player.position.y * (1 - BOSS_CAMERA_FOCUS_WEIGHT) + carriage.position.y * BOSS_CAMERA_FOCUS_WEIGHT
+        }
+    };
+}
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
@@ -324,7 +340,12 @@ export class GameApp {
         this.queuePlayerPresentationEvents(predictedImpacts);
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts], { visibleWorldBounds: particleBounds });
         state = this.authority.snapshot();
-        const cameraShot = this.updatePresentationCamera(dt, state.player, state.world);
+        const cameraShot = this.updatePresentationCamera(
+            dt,
+            state.player,
+            state.world,
+            state.bossStage ?? state.bossStageRuntime ?? state.bossRuntime
+        );
         this.combatFeedback.syncContinuous({ ...state, players: [state.player] }, dt, particleBounds);
         this.combatFeedback.update(dt);
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
@@ -376,13 +397,17 @@ export class GameApp {
         });
     }
 
-    updateCamera(dt, player, world) {
+    updateCamera(dt, player, world, bossStage = null) {
+        const focusPlayer = bossCameraPlayer(player, bossStage);
         return advanceAuthoredCamera({
             camera: this.camera,
             world,
-            player,
+            player: focusPlayer,
             mobileView: this.mobileView,
-            defaultZoom: CAMERA_CONFIG.desktopZoom,
+            defaultZoom:
+                bossStage?.status === "active"
+                    ? CAMERA_CONFIG.desktopZoom * BOSS_CAMERA_ZOOM_RATIO
+                    : CAMERA_CONFIG.desktopZoom,
             cssWidth: this.renderer.cssWidth,
             cssHeight: this.renderer.cssHeight,
             dt
@@ -399,7 +424,7 @@ export class GameApp {
         return prepared;
     }
 
-    updatePresentationCamera(dt, player, world) {
+    updatePresentationCamera(dt, player, world, bossStage = null) {
         const unlockPhase = this.worldUnlockPresentation.advance(dt, this.camera);
         if (unlockPhase.holding) {
             return resolveAuthoredCameraShot({
@@ -412,7 +437,7 @@ export class GameApp {
             });
         }
         const phase = this.respawnPresentation.advance(dt, this.camera);
-        if (!phase.holding) return this.updateCamera(dt, player, world);
+        if (!phase.holding) return this.updateCamera(dt, player, world, bossStage);
         return resolveAuthoredCameraShot({
             world,
             player: { position: phase.deathPosition },

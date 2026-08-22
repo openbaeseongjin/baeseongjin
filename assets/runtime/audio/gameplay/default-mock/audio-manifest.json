@@ -125,6 +125,54 @@
                 { "group": "ambience", "gainDb": -3, "attackMs": 50, "releaseMs": 400 }
             ]
         },
+        "gameplay-boss-beam-telegraph": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-security-beep-servo" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 350,
+            "priority": 82
+        },
+        "gameplay-boss-beam-sweep": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-cable-brake-settle" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 350,
+            "priority": 84
+        },
+        "gameplay-boss-beam-break": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-relay-trip-settle" }],
+            "spatial": "world",
+            "maxVoices": 1,
+            "retriggerCooldownMs": 1000,
+            "priority": 92
+        },
+        "gameplay-boss-ram-telegraph": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "direction-security-beep-servo" }],
+            "spatial": "world",
+            "gainDb": -1,
+            "maxVoices": 1,
+            "retriggerCooldownMs": 350,
+            "priority": 86
+        },
+        "gameplay-boss-ram-impact": {
+            "group": "gameplay",
+            "kind": "one-shot",
+            "clips": [{ "clip": "player-hit" }],
+            "spatial": "world",
+            "gainDb": 1,
+            "maxVoices": 2,
+            "retriggerCooldownMs": 120,
+            "priority": 95,
+            "minGainDb": -18
+        },
         "gameplay-checkpoint-reached": {
             "group": "gameplay",
             "kind": "one-shot",

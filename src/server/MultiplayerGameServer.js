@@ -119,7 +119,10 @@ export class MultiplayerGameServer {
     }
 
     createRoom(channelId) {
-        const simulation = this.createSimulation({ worldSeed: this.worldSeed() });
+        const simulation = this.createSimulation({
+            worldSeed: this.worldSeed(),
+            victimImpactAuthority: "claim"
+        });
         const session = new AuthorityServerSession({ simulation });
         const room = {
             channelId,

@@ -151,6 +151,13 @@ function validateCombat(spec, issues, file) {
     if (!Number.isFinite(combat.weakFixedPercent) || combat.weakFixedPercent < 0 || combat.weakFixedPercent > 1) {
         issue(issues, file, "combat-weak-bonus-invalid");
     }
+    if (
+        !Number.isFinite(combat.closedBodyDamageMultiplier) ||
+        combat.closedBodyDamageMultiplier < 0 ||
+        combat.closedBodyDamageMultiplier > 1
+    ) {
+        issue(issues, file, "combat-closed-body-multiplier-invalid");
+    }
     if (combat.generalDamageMode !== BOSS_DAMAGE_MODE.STANDARD_COMBAT) {
         issue(issues, file, "combat-general-damage-mode-invalid");
     }
@@ -174,6 +181,15 @@ function validateMechanics(spec, issues, file) {
             issue(issues, file, "mechanic-bounds-invalid", { id: mechanic.id });
         }
         if (!isObject(mechanic.parameters)) issue(issues, file, "mechanic-parameters-invalid", { id: mechanic.id });
+        if (
+            mechanic.type === BOSS_MECHANIC_TYPE.BEAM_FAILURE &&
+            (!Number.isFinite(mechanic.parameters?.failureProgress) ||
+                mechanic.parameters.failureProgress <= 0 ||
+                mechanic.parameters.failureProgress >= 1 ||
+                !positive(mechanic.parameters.travelSpeed))
+        ) {
+            issue(issues, file, "beam-failure-parameters-invalid", { id: mechanic.id });
+        }
     }
     return ids;
 }
@@ -264,7 +280,11 @@ export function validateBossStageEditorMutation(baseline, candidate, { file = "b
             issue(issues, file, "editor-read-only-changed", { domain: key });
         }
     }
-    const editableCombatKeys = Object.freeze(["additionalPlayerMultiplier", "weakFixedPercent"]);
+    const editableCombatKeys = Object.freeze([
+        "additionalPlayerMultiplier",
+        "weakFixedPercent",
+        "closedBodyDamageMultiplier"
+    ]);
     const baselineLockedCombat = Object.fromEntries(
         Object.entries(baseline?.combat ?? {}).filter(([key]) => !editableCombatKeys.includes(key))
     );

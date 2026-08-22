@@ -1119,6 +1119,18 @@ function renderBossInspector(snapshot, selected, entity) {
             step: 0.05,
             onChange: (value) => replacePointer("combat", "Set weak fixed percent", "/combat/weakFixedPercent", value)
         });
+        appendField(fields, {
+            label: "닫힌 몸체 일반 피해 배율",
+            value: spec.combat.closedBodyDamageMultiplier,
+            step: 0.05,
+            onChange: (value) =>
+                replacePointer(
+                    "combat",
+                    "Set closed body damage multiplier",
+                    "/combat/closedBodyDamageMultiplier",
+                    value
+                )
+        });
         const derived = bossStageDerivedPreview(spec);
         for (const entry of derived.participants) {
             appendField(fields, {

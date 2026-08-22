@@ -6,7 +6,6 @@ import { GameSimulation } from "../../simulation/GameSimulation.js";
 import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../../world/sectors/LegacyAreaSeamlessSectorRuntime.js";
 
 const BOSS_PREVIEW_VERTICAL_OFFSET_RATIO = 0.1;
-const BOSS_PREVIEW_CAMERA_BOSS_WEIGHT = 0.72;
 
 function requireBossStageSpec(spec) {
     if (spec?.specType !== "boss-stage" || typeof spec.id !== "string") {
@@ -68,28 +67,6 @@ export class BossStagePreviewGameApp extends GameApp {
         });
         this.previewBossStageId = spec.id;
         this.previewRevision = previewRevision;
-    }
-
-    updateCamera(dt, player, world) {
-        const carriage = this.authority
-            .snapshot()
-            .bossStage?.presentation?.objects.find(({ kind }) => kind === "boss-carriage");
-        if (!carriage) return super.updateCamera(dt, player, world);
-        return super.updateCamera(
-            dt,
-            {
-                ...player,
-                position: {
-                    x:
-                        player.position.x * (1 - BOSS_PREVIEW_CAMERA_BOSS_WEIGHT) +
-                        carriage.position.x * BOSS_PREVIEW_CAMERA_BOSS_WEIGHT,
-                    y:
-                        player.position.y * (1 - BOSS_PREVIEW_CAMERA_BOSS_WEIGHT) +
-                        carriage.position.y * BOSS_PREVIEW_CAMERA_BOSS_WEIGHT
-                }
-            },
-            world
-        );
     }
 
     previewScope() {

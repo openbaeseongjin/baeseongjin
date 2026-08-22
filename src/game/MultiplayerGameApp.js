@@ -19,11 +19,7 @@ import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
-import {
-    advanceAuthoredCamera,
-    localTriggerObjects,
-    resolveAuthoredCameraShot
-} from "./camera/AuthoredCameraDirector.js";
+import { localTriggerObjects, resolveAuthoredCameraShot } from "./camera/AuthoredCameraDirector.js";
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
@@ -412,6 +408,9 @@ export class MultiplayerGameApp {
         for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-player-fall-damaged")) {
             this.authority.submitPredictedFallImpact(event);
         }
+        for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "boss-hazard")) {
+            this.authority.submitPredictedBossImpact(event);
+        }
         this.predictableProjectiles.predict(predictedSpawns);
         for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);
         const predictedPlayer = this.authority.ownerState();
@@ -481,7 +480,15 @@ export class MultiplayerGameApp {
         }
         const player = this.authority.presentationState();
         const authoredWorld = this.authority.worldSnapshot();
-        const cameraShot = this.updatePresentationCamera(dt, player, authoredWorld);
+        const cameraShot = this.updatePresentationCamera(
+            dt,
+            player,
+            authoredWorld,
+            this.authority.bossStageSnapshot() ??
+                current.state.bossStage ??
+                current.state.bossStageRuntime ??
+                current.state.bossRuntime
+        );
         const directionAudioContext = this.createAudioContext(
             player.position,
             player.tick,
@@ -528,7 +535,7 @@ export class MultiplayerGameApp {
         return prepared;
     }
 
-    updatePresentationCamera(dt, player, world) {
+    updatePresentationCamera(dt, player, world, bossStage = null) {
         const unlockPhase = this.worldUnlockPresentation.advance(dt, this.camera);
         if (unlockPhase.holding) {
             return resolveAuthoredCameraShot({
@@ -551,16 +558,7 @@ export class MultiplayerGameApp {
                 cssHeight: this.renderer.cssHeight
             });
         }
-        return advanceAuthoredCamera({
-            camera: this.camera,
-            world,
-            player,
-            mobileView: this.mobileView,
-            defaultZoom: CAMERA_CONFIG.desktopZoom,
-            cssWidth: this.renderer.cssWidth,
-            cssHeight: this.renderer.cssHeight,
-            dt
-        });
+        return this.updateCamera(dt, player, world, bossStage);
     }
 
     render() {
@@ -583,7 +581,11 @@ export class MultiplayerGameApp {
             ) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
-        const bossStageSnapshot = remote.state.bossStage ?? remote.state.bossStageRuntime ?? remote.state.bossRuntime;
+        const bossStageSnapshot =
+            this.authority.bossStageSnapshot() ??
+            remote.state.bossStage ??
+            remote.state.bossStageRuntime ??
+            remote.state.bossRuntime;
         const bossStagePresentation = createBossStagePresentation(
             bossStageSnapshot,
             bossStageSpecById(bossStageSnapshot?.stageId ?? bossStageSnapshot?.id ?? bossStageSnapshot?.encounterId)

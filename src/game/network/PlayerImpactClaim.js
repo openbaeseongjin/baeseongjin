@@ -2,8 +2,9 @@ import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 9;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 10;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit", "fall-damage"]);
+export const PLAYER_IMPACT_SOURCE_KIND = Object.freeze({ BOSS_HAZARD: "boss-hazard" });
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
@@ -133,7 +134,9 @@ function normalizeImpactRecoveryState(state) {
     if (normalized.respawnAnchorId !== undefined && normalized.respawnAnchorId !== null) {
         assertId(normalized.respawnAnchorId, "outcome.state.respawnAnchorId");
     }
-    if (normalized.lifeState !== "active") throw new Error("outcome.state.lifeState must be active");
+    if (normalized.lifeState !== "active" && normalized.lifeState !== "spectating") {
+        throw new Error("outcome.state.lifeState must be active or spectating");
+    }
 
     assertBoolean(normalized.rope?.isAttached, "outcome.state.rope.isAttached");
     if (normalized.rope.isAttached) {
@@ -226,7 +229,8 @@ function impactStateProjection(state, { impactType, respawned }) {
     const projection = {
         health: quantized(state.health, 0.001),
         velocity: quantizedVector(state.velocity, 0.1),
-        hitInvulnerabilityTicks: quantized(state.hitInvulnerabilityRemaining, 1 / 120)
+        hitInvulnerabilityTicks: quantized(state.hitInvulnerabilityRemaining, 1 / 120),
+        lifeState: state.lifeState
     };
     if (!respawned) return projection;
     return {
@@ -278,6 +282,10 @@ export function createPlayerImpactClaim({
     position,
     velocity,
     damage = 0,
+    sourceKind = null,
+    sourceId = null,
+    sourceType = null,
+    sourceSequence = null,
     outcome
 }) {
     if (impactId !== undefined && projectileId !== undefined && impactId !== projectileId) {
@@ -294,6 +302,16 @@ export function createPlayerImpactClaim({
         throw new Error("velocity must contain finite x and y");
     }
     if (!Number.isFinite(damage) || damage < 0) throw new Error("damage must be non-negative and finite");
+    if (sourceKind !== null && sourceKind !== PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD) {
+        throw new Error(`unsupported impact sourceKind: ${sourceKind}`);
+    }
+    if (sourceKind === PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD) {
+        assertId(sourceId, "sourceId");
+        assertId(sourceType, "sourceType");
+        assertTick(sourceSequence, "sourceSequence");
+    } else if (sourceId !== null || sourceType !== null || sourceSequence !== null) {
+        throw new Error("impact source metadata requires sourceKind");
+    }
     if (!outcome || Array.isArray(outcome) || typeof outcome !== "object") {
         throw new Error("outcome must be an object");
     }
@@ -336,6 +354,10 @@ export function createPlayerImpactClaim({
         position: normalizeNetworkJson(position, "position"),
         velocity: normalizeNetworkJson(velocity, "velocity"),
         damage,
+        sourceKind,
+        sourceId,
+        sourceType,
+        sourceSequence,
         outcome: normalizedOutcome
     });
 }

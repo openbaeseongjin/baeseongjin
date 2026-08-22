@@ -14,6 +14,8 @@
 
 현재 gameplay package의 `gameplay-action-swing`은 Action 시작 연결을 검증하기 위해 기존 짧은 mock 변형을 재사용한다. 이는 정식 주먹·Action 음색이 아니며, 후속 오디오 작업자는 stable cue ID를 유지한 채 전용 48 kHz master와 runtime source로 교체한다.
 
+Boss01은 기존 procedural clip을 재사용한 `gameplay-boss-beam-telegraph`, `gameplay-boss-beam-sweep`, `gameplay-boss-beam-break`, `gameplay-boss-ram-telegraph`, `gameplay-boss-ram-impact` mock cue를 사용한다. 이는 상태 구분 검증용이며 최종 음원은 같은 cue ID로 교체한다.
+
 ```powershell
 node scripts/generateAudioMockAssets.mjs
 npm run validate:audio-assets -- assets/runtime/audio/packs/default-mock

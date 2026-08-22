@@ -522,6 +522,10 @@ export class OwnerPredictionRuntime {
         return this.initialized ? this.simulation.world : null;
     }
 
+    bossStageSnapshot() {
+        return this.initialized ? this.simulation.bossStageSnapshot() : null;
+    }
+
     impactClaimState() {
         return this.initialized ? this.simulation.playerState(this.ownerId) : null;
     }
@@ -539,6 +543,7 @@ export class OwnerPredictionRuntime {
             projectile,
             foundationEvents = [],
             fallImpactEvents = [],
+            bossImpactEvents = [],
             ropeImpactEvents = [],
             augmentImpactEvents = [],
             augmentEvents = []
@@ -548,6 +553,7 @@ export class OwnerPredictionRuntime {
     ) {
         this.recordPredictedFoundationEvents(foundationEvents, tick);
         this.recordPredictedFallImpacts(fallImpactEvents);
+        this.recordPredictedBossImpacts(bossImpactEvents, tick, previous);
         this.recordPredictedRopeImpacts(ropeImpactEvents);
         this.recordPredictedAugmentImpacts(augmentImpactEvents);
         this.recordPredictedAugmentEvents(augmentEvents, tick);
@@ -565,6 +571,22 @@ export class OwnerPredictionRuntime {
                     eventType: "predicted-player-fall-damaged"
                 })
             );
+        }
+    }
+
+    recordPredictedBossImpacts(events, tick, previous) {
+        for (const event of events) {
+            const eventKey = `boss-hazard:${event.impactId}`;
+            if (this.emittedPredictionTicks.has(eventKey)) continue;
+            this.emittedPredictionTicks.set(eventKey, event.clientTick);
+            this.pendingImpacts.set(event.impactId, {
+                before: previous,
+                tick,
+                order: this.nextImpactPredictionOrder++,
+                status: "pending",
+                event: copyPredictedImpact(event)
+            });
+            this.predictedEvents.push(Object.freeze({ ...event, eventType: "predicted-resolve" }));
         }
     }
 

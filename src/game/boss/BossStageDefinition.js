@@ -1,6 +1,7 @@
 const BOSS_STAGE_SPEC_TYPE = "boss-stage";
 const DEFAULT_ADDITIONAL_PLAYER_MULTIPLIER = 0.5;
 const DEFAULT_WEAK_FIXED_PERCENT = 0.25;
+const DEFAULT_CLOSED_BODY_DAMAGE_MULTIPLIER = 0.25;
 const MIN_PARTICIPANTS = 1;
 const MAX_PARTICIPANTS = 4;
 
@@ -85,6 +86,11 @@ export class BossStageDefinition {
         this.weakFixedPercent = requireNumber(
             spec.combat?.weakFixedPercent ?? spec.weakFixedPercent ?? DEFAULT_WEAK_FIXED_PERCENT,
             "Boss weakFixedPercent",
+            { minimum: 0, maximum: 1 }
+        );
+        this.closedBodyDamageMultiplier = requireNumber(
+            spec.combat?.closedBodyDamageMultiplier ?? DEFAULT_CLOSED_BODY_DAMAGE_MULTIPLIER,
+            "Boss closedBodyDamageMultiplier",
             { minimum: 0, maximum: 1 }
         );
         this.phases = Object.freeze(spec.phases.map((phase, index) => normalizePhase(phase, index)));
