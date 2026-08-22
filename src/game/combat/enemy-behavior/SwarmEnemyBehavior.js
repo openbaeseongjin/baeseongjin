@@ -13,8 +13,14 @@ export class SwarmEnemyBehavior extends TimedEnemyBehavior {
         recoilSpeed = 360,
         recoverySeconds = 0.45,
         acquireRange = 900,
-        cohesionDistance = 72,
-        cohesionWeight = 0.45,
+        neighborRadius = 80,
+        separationDistance = 40,
+        separationWeight = 7.5,
+        alignmentWeight = 2,
+        cohesionWeight = 2,
+        targetWeight = 1.5,
+        maneuverWeight = 5,
+        maximumTurnRadiansPerSecond = 20,
         contactDamage = 14
     } = {}) {
         const normalizedState = state === SWARM_BEHAVIOR_STATE.RECOIL ? state : SWARM_BEHAVIOR_STATE.CHASE;
@@ -31,13 +37,23 @@ export class SwarmEnemyBehavior extends TimedEnemyBehavior {
         this.recoilSpeed = recoilSpeed;
         this.recoverySeconds = recoverySeconds;
         this.acquireRange = acquireRange;
-        this.cohesionDistance = cohesionDistance;
+        this.neighborRadius = neighborRadius;
+        this.separationDistance = separationDistance;
+        this.separationWeight = separationWeight;
+        this.alignmentWeight = alignmentWeight;
         this.cohesionWeight = cohesionWeight;
+        this.targetWeight = targetWeight;
+        this.maneuverWeight = maneuverWeight;
+        this.maximumTurnRadiansPerSecond = maximumTurnRadiansPerSecond;
         this.contactDamage = contactDamage;
     }
-    advance(enemy, { enemies = [], targets = [], dt = ENEMY_BEHAVIOR_CONFIG.ZERO } = {}) {
+    advance(enemy, { targets = [], swarmFlocks = null, dt = ENEMY_BEHAVIOR_CONFIG.ZERO } = {}) {
         validateBehaviorDt(dt);
-        return SWARM_BEHAVIOR_STATE_DEFINITION[this.state].advance(this, enemy, { enemies, targets, dt });
+        return SWARM_BEHAVIOR_STATE_DEFINITION[this.state].advance(this, enemy, {
+            targets,
+            swarmFlocks,
+            dt
+        });
     }
     snapshot() {
         return Object.freeze({
