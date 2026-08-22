@@ -31,6 +31,22 @@ export class LocalAuthority {
         return this.simulation.debugTeleportPlayer(this.playerId, areaId);
     }
 
+    spawnDebugTrainingDummy(options) {
+        return this.simulation.spawnDebugTrainingDummy(options);
+    }
+
+    setDebugTrainingDummyPresentationControlled(controlled) {
+        return this.simulation.setDebugTrainingDummyPresentationControlled(controlled);
+    }
+
+    debugTrainingDummySnapshot() {
+        return this.simulation.debugTrainingDummySnapshot();
+    }
+
+    removeDebugTrainingDummy() {
+        return this.simulation.removeDebugTrainingDummy();
+    }
+
     drainEvents() {
         return this.simulation.drainReplicationEvents();
     }

@@ -23,6 +23,7 @@ import { SettingsMenu } from "./game/ui/SettingsMenu.js";
 import { AudioSettingsPanel } from "./game/ui/AudioSettingsPanel.js";
 import { DebugSettings } from "./game/metrics/DebugSettings.js";
 import { DebugPanel } from "./game/ui/DebugPanel.js";
+import { DebugEnemyTrainingControls } from "./game/ui/DebugEnemyTrainingControls.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
 import { loadDefaultEnemySpriteDefinition } from "./render/sprites/EnemySpriteCatalog.js";
@@ -99,6 +100,14 @@ const debugPanel = new DebugPanel({
         settingsMenu.activate("debug", { focus: true });
     }
 });
+const debugEnemyTrainingControls = new DebugEnemyTrainingControls({
+    onSpawn: (enemyType) => app?.spawnDebugTrainingDummy?.(enemyType),
+    onPrevious: () => app?.stepDebugTrainingDummyState?.(-1),
+    onActual: () => app?.setDebugTrainingDummyActualMode?.(),
+    onNext: () => app?.stepDebugTrainingDummyState?.(1),
+    onAuto: () => app?.toggleDebugTrainingDummyAuto?.(),
+    onRemove: () => app?.removeDebugTrainingDummy?.()
+});
 debugPanel.onApply = () => {
     const debug = debugSettings.snapshot();
     if (app instanceof GameApp) {
@@ -125,6 +134,7 @@ settingsMenu.registerTab({
 });
 audioSettingsPanel.attach();
 debugPanel.attach();
+debugEnemyTrainingControls.attach();
 const loadSelectedAudioDefinition = createAudioDefinitionLoader(DEFAULT_GAME_AUDIO_SELECTION);
 const diagnosticsOptions = {
     root: document.getElementById("copy-diagnostics"),
@@ -184,6 +194,8 @@ function createSingleGameApp(debug) {
         }),
         audioBindings,
         playerDefinition,
+        enemyDefinition,
+        onDebugTrainingDummyChange: (state) => debugEnemyTrainingControls.render(state),
         onDiagnostics: updateDiagnostics,
         startAreaId: debug.startAreaId ?? undefined,
         metricsVisible: debug.metrics,
@@ -244,10 +256,12 @@ async function launch() {
             if (choice.mode === "single") {
                 activeChannelId = null;
                 debugPanel.setRopeTuningEnabled(true);
+                debugEnemyTrainingControls.setEnabled(true);
                 const debug = debugSettings.snapshot();
                 app = createSingleGameApp(debug);
             } else {
                 debugPanel.setRopeTuningEnabled(false);
+                debugEnemyTrainingControls.setEnabled(false);
                 const serverUrl = configuredMultiplayerServer();
                 if (!serverUrl) throw new Error("고정 멀티 서버 주소가 아직 설정되지 않았습니다.");
                 authority = new RemoteGameAuthority({ url: channelSocketUrl(serverUrl, choice.channelId) });
@@ -278,6 +292,7 @@ async function launch() {
         } catch (error) {
             authority?.close();
             debugPanel.setRopeTuningEnabled(true);
+            debugEnemyTrainingControls.setEnabled(true);
             modeMenu.setStatus(error.message, true);
             modeMenu.setBusy(false);
             if (choice.mode === "multiplayer") void refreshMultiplayerAvailability();
@@ -293,6 +308,7 @@ function returnToMenu(message) {
     modeMenu.rememberChannel(stoppedApp?.authority?.channelId);
     stoppedApp?.stop();
     debugPanel.setRopeTuningEnabled(true);
+    debugEnemyTrainingControls.setEnabled(true);
     audioBindings?.stopScene();
     channelBadge.hidden = true;
     modeMenu.setStatus(message, true);
@@ -309,6 +325,7 @@ async function bootstrap() {
         loadAuthoredAreaEnvironmentDefinitions(),
         loadDefaultDirectionDefinitions()
     ]);
+    debugEnemyTrainingControls.setDefinition(enemyDefinition);
     if (pageClosing) return;
     await refreshMultiplayerAvailability();
     startMultiplayerAvailabilityMonitor();
@@ -332,6 +349,7 @@ globalThis.addEventListener(
         audioSettingsPanel.detach();
         settingsMenu.detach();
         debugPanel.detach();
+        debugEnemyTrainingControls.detach();
         app?.stop();
     },
     { once: true }
