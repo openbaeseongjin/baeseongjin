@@ -6,20 +6,34 @@ import { SWARM_BEHAVIOR_STATE_DEFINITION } from "./states/SwarmEnemyBehaviorStat
 
 export class SwarmEnemyBehavior extends TimedEnemyBehavior {
     constructor({
-        state = SWARM_BEHAVIOR_STATE.ORBIT,
+        state = SWARM_BEHAVIOR_STATE.CHASE,
         remainingSeconds = 0,
-        diveDirection = null,
-        diveSpeed = 520,
-        diveSeconds = 0.24,
-        recoverySeconds = 0.65,
-        acquireRange = 560
+        recoilDirection = null,
+        chaseSpeed = 210,
+        recoilSpeed = 360,
+        recoverySeconds = 0.45,
+        acquireRange = 900,
+        cohesionDistance = 72,
+        cohesionWeight = 0.45,
+        contactDamage = 14
     } = {}) {
-        super({ kind: ENEMY_BEHAVIOR_KIND.SWARM, initialState: SWARM_BEHAVIOR_STATE.ORBIT, state, remainingSeconds });
-        this.diveDirection = diveDirection ? new Vector2(diveDirection.x, diveDirection.y).normalize() : new Vector2();
-        this.diveSpeed = diveSpeed;
-        this.diveSeconds = diveSeconds;
+        const normalizedState = state === SWARM_BEHAVIOR_STATE.RECOIL ? state : SWARM_BEHAVIOR_STATE.CHASE;
+        super({
+            kind: ENEMY_BEHAVIOR_KIND.SWARM,
+            initialState: SWARM_BEHAVIOR_STATE.CHASE,
+            state: normalizedState,
+            remainingSeconds
+        });
+        this.recoilDirection = recoilDirection
+            ? new Vector2(recoilDirection.x, recoilDirection.y).normalize()
+            : new Vector2();
+        this.chaseSpeed = chaseSpeed;
+        this.recoilSpeed = recoilSpeed;
         this.recoverySeconds = recoverySeconds;
         this.acquireRange = acquireRange;
+        this.cohesionDistance = cohesionDistance;
+        this.cohesionWeight = cohesionWeight;
+        this.contactDamage = contactDamage;
     }
     advance(enemy, { enemies = [], targets = [], dt = ENEMY_BEHAVIOR_CONFIG.ZERO } = {}) {
         validateBehaviorDt(dt);
@@ -30,11 +44,13 @@ export class SwarmEnemyBehavior extends TimedEnemyBehavior {
             kind: this.kind,
             state: this.state,
             remainingSeconds: this.remainingSeconds,
-            diveDirection: frozenDirection(this.diveDirection)
+            recoilDirection: frozenDirection(this.recoilDirection)
         });
     }
     restore(snapshot = {}) {
-        this.restoreState(snapshot.state, snapshot.remainingSeconds ?? 0, SWARM_BEHAVIOR_STATE.ORBIT);
-        this.diveDirection.set(snapshot.diveDirection?.x ?? 0, snapshot.diveDirection?.y ?? 0).normalize();
+        const state = snapshot.state === SWARM_BEHAVIOR_STATE.RECOIL ? snapshot.state : SWARM_BEHAVIOR_STATE.CHASE;
+        this.restoreState(state, snapshot.remainingSeconds ?? 0, SWARM_BEHAVIOR_STATE.CHASE);
+        const direction = snapshot.recoilDirection ?? snapshot.diveDirection;
+        this.recoilDirection.set(direction?.x ?? 0, direction?.y ?? 0).normalize();
     }
 }

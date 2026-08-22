@@ -13,7 +13,7 @@ export class PursuitEnemyBehavior extends TimedEnemyBehavior {
         moveSpeed = 160,
         dashSpeed = 640,
         triggerDistance = 96,
-        acquireRange = 640,
+        acquireRange = 960,
         windupSeconds = 0.25,
         dashSeconds = 0.2,
         recoverySeconds = 0.5

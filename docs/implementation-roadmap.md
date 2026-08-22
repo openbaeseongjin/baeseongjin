@@ -153,7 +153,7 @@ P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI + Boss0
 
 1. [완료] Stage ID에 의존하지 않는 stable enemy slot의 `고정 계열/type` 또는 `허용 pool` 선택과 `slotId + run seed + world revision` 결정성을 pure resolver로 구현한다.
 2. [완료] 기존 `경계 포탑`·`순찰 드론`과 분리된 신규 기본형 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`을 Has-A behavior와 공용 `enemy-behavior` capability로 조립한다.
-3. [완료] 신규 행동을 서버 fixed step·snapshot/prediction 복원에 연결하고 포격은 기존 중립 적 투사체, 방패는 #611 Rope 충돌 claim 경계를 재사용한다.
+3. [완료 #829] 신규 행동의 서버 fixed step·snapshot/prediction 복원을 유지하면서 순찰·포격·지원·군집을 `enemy-density-composition.md`의 확정 TO-BE로 정렬했다. 포격은 즉시 끝나는 영역 판정, 군집은 비투사체 접촉형이며 공용 사격과 행동 인식 범위는 reference viewport에 맞춘다. 방패는 #611 Rope 충돌 claim 경계를 유지한다.
 4. [완료] #623 `SectorDefinition`의 `encounterId/slotId/position/activation/enemySelection/legacyStageAlias` 계약과 build/startup preview adapter를 selector에 연결하고, `areaId` 없이 Sector 01~03 preview encounter 전체를 결정적으로 resolve한다.
 5. [완료 #625] City Phase 3 wide Runtime compiler가 canonical encounter를 실제 world spawn 입력으로 공급하고 legacy Patrol route·Cutter rules를 새 schema에 보존한다.
 6. [후속] 신규 기본형 단독 조정 뒤 계열별 확장형과 Sector 누적 해금·허용/금지 조합을 추가한다. 현재 roster 목록·가중치·수치·배치·표시 색은 테스트에 고정하지 않는다.

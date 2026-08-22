@@ -48,10 +48,20 @@ const DEFINITIONS = Object.freeze([
         displayName: "군집 드론",
         behaviorKind: ENEMY_BEHAVIOR_KIND.SWARM,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SWARM],
-        usesProjectileAttack: true,
+        usesProjectileAttack: false,
+        resolveSwarmGroupId: swarmGroupId,
         createBehavior: (state) => new SwarmEnemyBehavior(state)
     })
 ]);
+
+function swarmGroupId(properties) {
+    if (properties.swarmGroupId) return properties.swarmGroupId;
+    const activation = properties.activation;
+    if (activation && [activation.x, activation.y, activation.width, activation.height].every(Number.isFinite)) {
+        return `swarm-group:${activation.x}:${activation.y}:${activation.width}:${activation.height}`;
+    }
+    return properties.objectId ?? properties.id;
+}
 
 const DEFINITIONS_BY_ID = Object.freeze(
     Object.fromEntries(DEFINITIONS.map((definition) => [definition.id, definition]))
@@ -96,16 +106,12 @@ export function enemyDisplayName(enemyType) {
 
 export function createEnemyArchetype({ enemyType, behaviorState = null, rules = [], ...properties }) {
     const definition = enemyArchetypeDefinition(enemyType);
-    const swarmGroupId =
-        enemyType === ENEMY_TYPE.SWARM_DRONE_T1
-            ? (properties.swarmGroupId ?? properties.objectId ?? properties.id)
-            : (properties.swarmGroupId ?? null);
     return createEnemyObject({
         ...properties,
         enemyType,
         displayName: definition.displayName,
         behavior: definition.createBehavior(behaviorState ?? {}),
-        swarmGroupId,
+        swarmGroupId: definition.resolveSwarmGroupId?.(properties) ?? properties.swarmGroupId ?? null,
         rules,
         usesProjectileAttack: definition.usesProjectileAttack
     });

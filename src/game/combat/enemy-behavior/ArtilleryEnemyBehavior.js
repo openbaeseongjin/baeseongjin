@@ -13,7 +13,7 @@ export class ArtilleryEnemyBehavior extends TimedEnemyBehavior {
         cooldownSeconds = 1.4,
         strikeRadius = 72,
         damage = 20,
-        acquireRange = 760
+        acquireRange = 1080
     } = {}) {
         super({
             kind: ENEMY_BEHAVIOR_KIND.ARTILLERY,

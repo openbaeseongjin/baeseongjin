@@ -1,6 +1,16 @@
 import { Vector2 } from "../../game-kit/index.js";
+import { ENEMY_TYPE } from "../EnemyType.js";
 
 const ARRIVAL_EPSILON = 0.5;
+const DEFAULT_PATROL_POLICY = Object.freeze({ mode: null, waitSeconds: null });
+const PATROL_POLICY_BY_ENEMY_TYPE = Object.freeze({
+    [ENEMY_TYPE.PATROL_DRONE]: Object.freeze({ mode: "pingpong", waitSeconds: 0 }),
+    [ENEMY_TYPE.PATROL_DRONE_T1]: Object.freeze({ mode: "pingpong", waitSeconds: 0 })
+});
+
+function patrolPolicy(enemyType) {
+    return PATROL_POLICY_BY_ENEMY_TYPE[enemyType] ?? DEFAULT_PATROL_POLICY;
+}
 
 function clamp(value, minimum, maximum) {
     return Math.max(minimum, Math.min(maximum, value));
@@ -76,12 +86,13 @@ function clampToActivation(position, activation) {
     );
 }
 
-export function createEnemyPatrolState({ patrol = null, activation = null, origin }) {
+export function createEnemyPatrolState({ patrol = null, activation = null, origin, enemyType = null }) {
     const speed = patrol?.speed;
     if (!Number.isFinite(speed) || speed <= 0) return null;
     const points = dedupePoints(normalizePatrolPoints(patrol, activation));
     if (points.length < 2) return null;
-    const mode = patrol.mode === "loop" ? "loop" : "pingpong";
+    const policy = patrolPolicy(enemyType);
+    const mode = policy.mode ?? (patrol.mode === "loop" ? "loop" : "pingpong");
     const originPoint = normalizePoint(origin, activation) ?? points[0];
     let targetIndex = nearestPointIndex(points, originPoint);
     let direction = mode === "pingpong" && targetIndex === points.length - 1 ? -1 : 1;
@@ -96,7 +107,7 @@ export function createEnemyPatrolState({ patrol = null, activation = null, origi
         speed,
         mode,
         points: Object.freeze(points),
-        waitSeconds: Number.isFinite(patrol.waitSeconds) ? Math.max(0, patrol.waitSeconds) : 0,
+        waitSeconds: policy.waitSeconds ?? (Number.isFinite(patrol.waitSeconds) ? Math.max(0, patrol.waitSeconds) : 0),
         waitRemaining: 0,
         targetIndex,
         direction

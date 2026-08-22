@@ -25,15 +25,15 @@ class SupportLinkEnemyFeedbackState extends EnemyFeedbackState {
     }
 }
 
-class SwarmOrbitEnemyFeedbackState extends EnemyFeedbackState {
+class SwarmChaseEnemyFeedbackState extends EnemyFeedbackState {
     constructor() {
-        super(ENEMY_FEEDBACK.SWARM_ORBIT);
+        super(ENEMY_FEEDBACK.SWARM_CHASE);
     }
 }
 
-class SwarmDiveEnemyFeedbackState extends EnemyFeedbackState {
+class SwarmRecoilEnemyFeedbackState extends EnemyFeedbackState {
     constructor() {
-        super(ENEMY_FEEDBACK.SWARM_DIVE);
+        super(ENEMY_FEEDBACK.SWARM_RECOIL);
     }
 }
 
@@ -61,8 +61,8 @@ export function createEnemyFeedbackStates() {
         new LockEnemyFeedbackState(),
         new ShieldGuardEnemyFeedbackState(),
         new SupportLinkEnemyFeedbackState(),
-        new SwarmOrbitEnemyFeedbackState(),
-        new SwarmDiveEnemyFeedbackState(),
+        new SwarmChaseEnemyFeedbackState(),
+        new SwarmRecoilEnemyFeedbackState(),
         new PursuitWindupEnemyFeedbackState(),
         new PursuitDashEnemyFeedbackState(),
         new ArtilleryTelegraphEnemyFeedbackState()
