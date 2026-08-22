@@ -1,30 +1,14 @@
-import { Vector2 } from "../../../../game-kit/index.js";
 import { ENEMY_BEHAVIOR_CONFIG, ENEMY_BEHAVIOR_EVENT_TYPE, SWARM_BEHAVIOR_STATE } from "../EnemyBehaviorDefinition.js";
-import { directionBetween, eligibleTargets, moveInDirection, nearestTarget } from "../EnemyBehaviorSupport.js";
-
-function swarmGroup(enemy, enemies) {
-    return enemies.filter(
-        (candidate) =>
-            candidate.health > ENEMY_BEHAVIOR_CONFIG.ZERO &&
-            candidate.enemyType === enemy.enemyType &&
-            candidate.swarmGroupId === enemy.swarmGroupId
-    );
-}
-
-function groupCenter(group) {
-    const center = new Vector2();
-    for (const member of group) center.add(member.position);
-    return center.scale(ENEMY_BEHAVIOR_CONFIG.UNIT / Math.max(ENEMY_BEHAVIOR_CONFIG.UNIT, group.length));
-}
+import { directionBetween, eligibleTargets, moveInDirection } from "../EnemyBehaviorSupport.js";
 
 function contactTarget(behavior, enemy, targets) {
-    return eligibleTargets(enemy, targets, behavior.acquireRange)
+    return eligibleTargets(enemy, targets, behavior.acquireRange, { respectActivation: false })
         .filter(({ id }) => enemy.collidedWithActor(id))
         .sort((left, right) => left.id.localeCompare(right.id))[ENEMY_BEHAVIOR_CONFIG.ZERO];
 }
 
 export class SwarmChaseState {
-    advance(behavior, enemy, { enemies, targets, dt }) {
+    advance(behavior, enemy, { targets, swarmFlocks, dt }) {
         const contacted = contactTarget(behavior, enemy, targets);
         if (contacted) {
             behavior.recoilDirection = directionBetween(contacted.physics.position, enemy.position);
@@ -35,13 +19,19 @@ export class SwarmChaseState {
                 damage: behavior.contactDamage
             });
         }
-        const target = nearestTarget(enemy, targets, behavior.acquireRange);
+        const flock = swarmFlocks?.get(enemy.swarmGroupId);
+        const target = flock?.targetWithin(behavior.acquireRange) ?? null;
         if (!target) return null;
-        const center = groupCenter(swarmGroup(enemy, enemies));
-        const direction = directionBetween(enemy.position, target.physics.position);
-        if (enemy.position.distanceTo(center) > behavior.cohesionDistance) {
-            direction.add(directionBetween(enemy.position, center).scale(behavior.cohesionWeight)).normalize();
-        }
+        const direction = flock.chaseDirection(enemy.id, target, {
+            neighborRadius: behavior.neighborRadius,
+            separationDistance: behavior.separationDistance,
+            separationWeight: behavior.separationWeight,
+            alignmentWeight: behavior.alignmentWeight,
+            cohesionWeight: behavior.cohesionWeight,
+            targetWeight: behavior.targetWeight,
+            maneuverWeight: behavior.maneuverWeight,
+            maximumTurnRadians: behavior.maximumTurnRadiansPerSecond * dt
+        });
         moveInDirection(enemy, direction, behavior.chaseSpeed * dt, dt);
         return null;
     }

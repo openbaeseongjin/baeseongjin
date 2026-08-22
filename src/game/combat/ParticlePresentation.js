@@ -333,11 +333,11 @@ const PARTICLE_PRESET_DEFINITIONS = {
         motion: "orbit",
         shape: "dot",
         palette: ["#c084fc", "#e9d5ff"],
-        count: 3,
-        size: 2.5,
-        speed: 22,
+        count: 1,
+        size: 2,
+        speed: 10,
         spread: 3.14,
-        lifetime: 0.55
+        lifetime: 0.35
     },
     "swarm-recoil": {
         emission: "stream",
