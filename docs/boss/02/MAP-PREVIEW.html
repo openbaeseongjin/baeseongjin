@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONE ROPE BOSS 02 CURRENT-CODE AUDIT MAP PREVIEW</title>
+<style>
+:root{--bg:#050b10;--panel:#09151c;--line:#314955;--txt:#edf5f6;--muted:#9fb2ba;--cyan:#65e8ff;--yellow:#ffe36b;--green:#75d69a;--amber:#ffb66b;--red:#ff697b;--pink:#ff75b5;--violet:#b998ff;--steel:#263b44}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:12px 18px;border-bottom:1px solid var(--line)} h1{margin:0;font-size:20px} .sub{color:var(--muted);margin-top:3px}
+.layout{display:grid;grid-template-columns:460px 1fr;min-height:calc(100vh - 68px)} aside{padding:11px;background:var(--panel);border-right:1px solid var(--line);overflow:auto;max-height:calc(100vh - 68px)} main{padding:10px}
+.card{padding:9px;border:1px solid var(--line);border-radius:8px;background:#071117;margin-bottom:8px} .card b{color:var(--cyan)} .reuse{color:var(--green)} .new{color:var(--amber)} .warn{color:#ff9aa5}
+button{background:#11242c;color:var(--txt);border:1px solid #4e6a76;border-radius:6px;padding:6px 8px;margin:2px;cursor:pointer} button.active{outline:2px solid var(--cyan)} label{display:block;margin:5px 0}
+svg{width:100%;height:89vh;min-height:900px;background:#02080c;border:1px solid var(--line);border-radius:8px}
+text{fill:var(--txt);paint-order:stroke;stroke:#041018;stroke-width:5} .tiny{font-size:10px;fill:#c6d4d9} .phase{font-size:22px;font-weight:800} .label{font-size:14px;font-weight:700} .note{font-size:11px;fill:#ffd29b}
+.arch{fill:#1e3038;stroke:#68818c;stroke-width:4} .floor{fill:#273e47;stroke:#9ab0b9;stroke-width:3} .balcony{fill:#2c4650;stroke:#91b2bd;stroke-width:3} .recovery{fill:#4b4227;stroke:#d5b75f;stroke-width:4}
+.safe{fill:#24523c;stroke:var(--green);stroke-width:4} .impact{fill:#683637;stroke:var(--red);stroke-width:5} .impactNoBreak{fill:#673a2c;stroke:var(--amber);stroke-width:5}
+.anchor{fill:var(--cyan);stroke:#fff;stroke-width:2} .route{stroke:var(--yellow);stroke-width:5;stroke-dasharray:12 8} .reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.06}
+.bosslane{fill:none;stroke:var(--pink);stroke-width:9;stroke-dasharray:15 10} .attack{fill:none;stroke:var(--red);stroke-width:9;stroke-dasharray:18 10} .telegraph{fill:none;stroke:#ffb46a;stroke-width:5;stroke-dasharray:9 8}
+.weak{fill:#ff4f64;stroke:white;stroke-width:4} .phasebox{fill:none;stroke:#48616d;stroke-width:3;stroke-dasharray:10 8} .transition{fill:#162b2f;stroke:var(--green);stroke-width:3;stroke-dasharray:7 6}
+.hidden{display:none} .dim{opacity:.18}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header>
+<h1>BOSS 02 · 옥상 봉쇄 · CURRENT-CODE AUDIT MAP PREVIEW</h1>
+<div class="sub">GitHub main audit 91e7aa833eead7cd473ced39bf206d969ee98e42 · 5600×2800 · CENTRAL COURTYARD WRAP · DESIGN LOCKED VISUAL REFERENCE</div>
+</header>
+<div class="layout">
+<aside>
+<div class="card"><b>공간 구조</b><br>
+P1 Lower Alley + Upper Balcony → <b>3-step Fire-Escape Ascent</b> → P2 U-shaped Balcony Ring + Central Service Slab → <b>4-anchor safe Spiral Ascent</b> → P3 Three Roof Islands.</div>
+
+<div class="card"><b>핵심 규칙</b><br>
+Boss가 <b>Phase별 지정 맵 구조물</b>과 충돌해야 Weakpoint가 보인다.<br>
+<span class="warn">구조물은 절대 파괴되지 않는다.</span><br>
+Geometry / Collision / Grapple / Route는 충돌 전후 동일. Dust·shake·surface crack decal 등 시각 피드백만 허용.</div>
+
+<div class="card"><b>P1</b><br>
+SIMPLE LOCK CHARGE<br>
+Wall A 또는 Stairwell Wall B 앞에서 bait → direction lock → Rope evade → 구조물 충돌 → 진행 반대쪽 <b>Rear Thruster 6s</b>.</div>
+
+<div class="card"><b>P2</b><br>
+ROTATING GROUND SLAM<br>
+가장 가까운 Balcony segment가 접근 방향을 결정. Player가 bait position을 lock 시점까지 유지 → Boss가 inward spin → <b>Central Service Slab</b> 충돌 → 하부 중앙 <b>Lower Stabilizer 5s</b>.</div>
+
+<div class="card"><b>P3</b><br>
+CLASSIC DIAGONAL DIVE<br>
+0.75s Sensor Track → Dive Line Freeze → 0.25s Confirm → Dive.<br>
+Water Tank / Stairwell Head / Heavy Vent Housing 충돌 → 상부 중앙 <b>Central Sensor 4s</b>.</div>
+
+<div class="card"><b class="reuse">현재 GitHub 코드에서 직접 활용</b><br>
+<span class="reuse">● KinematicPhysicsBody — Boss body / moving hazard</span><br>
+<span class="reuse">● resolvePlayerCollisions + resolveActorCollider — Player↔Boss 물리 접촉</span><br>
+<span class="reuse">● PolygonCollider.firstSolidContactAlong — 구조물 최초 충돌 + surface.id</span><br>
+<span class="reuse">● Pursuit SEEK/WINDUP/DASH + nearestTarget/directionBetween — P1 추격·방향 고정</span><br>
+<span class="reuse">● Artillery locked targetPosition + TELEGRAPH — P2/P3 lock/confirm 문법</span><br>
+<span class="reuse">● BossEncounterRuntime + ImpactTargetRegistry — HP/약점/통합 공격</span></div>
+
+<div class="card"><b class="new">기존 코드 확장 / Boss02 전용 신규</b><br>
+<span class="new">▲ 확장: single Boss runtime/world assumption → stage별 Boss 선택</span><br>
+<span class="new">▲ 확장: mechanism-supplied 2D presentation / charge·slam·dive hazard</span><br>
+<span class="new">▲ 확장: routeEdges graph validator</span><br>
+<span class="new">▲ 신규: ResidentialSecurityPursuitRuntime</span><br>
+<span class="new">▲ 신규: valid surface-id gameplay rule</span><br>
+<span class="new">▲ 신규: P2 Slam / P3 Dive state sequence / safe reposition</span></div>
+
+<div class="card"><b>코드 활용 원칙</b><br>
+<span class="reuse">물리·충돌·피해·Rope·Augment는 현재 코드 재사용.</span><br>
+<span class="new">새 범용 physics/combat framework 없음.</span><br>
+Boss02 전용으로 새로 만드는 것은 mechanism state와 valid-surface gameplay rule뿐.</div>
+<div class="card"><b>Rope QA</b><br>
+Route points: <b>28</b><br>
+Authored relations: <b>28</b><br>
+Max relation: <b>350.14px</b> / Base 400px<br>
+Unintended non-edge ≤400px: <b>0</b></div>
+
+<div class="card">
+<button id="bo" class="active" onclick="phase('all')">ALL</button>
+<button id="b1" onclick="phase('p1')">P1</button>
+<button id="b2" onclick="phase('p2')">P2</button>
+<button id="b3" onclick="phase('p3')">P3</button>
+<button id="bt" onclick="phase('trans')">TRANSITIONS</button>
+<label><input id="routeT" type="checkbox" checked> Player authored route</label>
+<label><input id="bossT" type="checkbox" checked> Boss lane / attack</label>
+<label><input id="targetT" type="checkbox" checked> Valid impact structures</label>
+<label><input id="recoveryT" type="checkbox" checked> Recovery decks</label>
+<label><input id="reachT" type="checkbox"> 400px Reach circles</label>
+</div>
+</aside>
+
+<main>
+<svg viewBox="0 0 5600 2800">
+<rect x="20" y="20" width="5560" height="2760" rx="20" fill="#061018" stroke="#314955" stroke-width="4"/>
+
+<!-- phase zones -->
+<g id="zones">
+<rect class="phasebox" x="110" y="1700" width="1810" height="1010" rx="24"/>
+<rect class="phasebox" x="2000" y="560" width="1770" height="1270" rx="24"/>
+<rect class="phasebox" x="4050" y="360" width="1460" height="950" rx="24"/>
+<text class="phase" x="150" y="1760">P1 · LOWER ALLEY / UPPER BALCONY</text>
+<text class="phase" x="2040" y="620">P2 · CENTRAL COURTYARD</text>
+<text class="phase" x="4090" y="420">P3 · THREE ROOF ISLANDS</text>
+</g>
+
+<!-- architecture P1 -->
+<g id="p1">
+<rect class="floor" x="180" y="2540" width="1720" height="90" rx="12"/>
+<rect class="arch" x="650" y="1830" width="1020" height="300" rx="18"/>
+<rect class="balcony" x="760" y="2060" width="900" height="35" rx="8"/>
+<rect class="impactNoBreak" x="430" y="2220" width="130" height="330" rx="10"/>
+<text class="label" x="310" y="2190">VALID: WALL A</text>
+<text class="tiny" x="300" y="2215">NON-DESTRUCTIBLE</text>
+<rect class="impactNoBreak" x="1720" y="1980" width="170" height="570" rx="12"/>
+<text class="label" x="1600" y="1950">VALID: STAIRWELL WALL B</text>
+<text class="tiny" x="1650" y="1972">NON-DESTRUCTIBLE</text>
+
+<!-- P1 recovery -->
+<g id="rec-p1">
+<rect class="recovery" x="690" y="2640" width="250" height="35" rx="8"/><text class="tiny" x="715" y="2695">REC-P1-A</text>
+<rect class="recovery" x="1280" y="2640" width="250" height="35" rx="8"/><text class="tiny" x="1305" y="2695">REC-P1-B</text>
+</g>
+
+<!-- P1 boss / attacks -->
+<g id="boss-p1">
+<path class="bosslane" d="M620 2360 C900 2240 1250 2320 1670 2260"/>
+<text class="label" x="860" y="2280">P1 CHASE BAND</text>
+<path class="telegraph" d="M980 2310 L500 2350"/><text class="tiny" x="640" y="2320">LOCK → WALL A</text>
+<path class="telegraph" d="M1120 2290 L1775 2250"/><text class="tiny" x="1340" y="2225">LOCK → WALL B</text>
+<path class="attack" d="M980 2310 L500 2350"/>
+<path class="attack" d="M1120 2290 L1775 2250"/>
+<circle cx="1050" cy="2300" r="60" fill="#5b3048" stroke="#ff75b5" stroke-width="5"/>
+<circle class="weak" cx="990" cy="2325" r="22"/><text class="tiny" x="890" y="2370">Rear Thruster mirrors opposite travel</text>
+</g>
+</g>
+
+<!-- P1->P2 transition -->
+<g id="trans12">
+<rect class="transition" x="1810" y="1850" width="420" height="500" rx="24"/>
+<text class="label" x="1840" y="1880">SAFE FIRE-ESCAPE ASCENT</text>
+<rect class="balcony" x="1840" y="2070" width="180" height="28"/>
+<rect class="balcony" x="2000" y="1780" width="180" height="28"/>
+<rect class="balcony" x="2170" y="1510" width="190" height="28"/>
+<text class="tiny" x="1850" y="2140">No Boss attack during transition</text>
+</g>
+
+<!-- P2 architecture -->
+<g id="p2">
+<!-- U-shaped housing -->
+<rect class="arch" x="2050" y="690" width="300" height="1030" rx="16"/>
+<rect class="arch" x="2050" y="640" width="1650" height="230" rx="16"/>
+<rect class="arch" x="3470" y="690" width="300" height="1030" rx="16"/>
+<!-- balcony ring -->
+<rect class="balcony" x="2190" y="1450" width="80" height="300"/>
+<rect class="balcony" x="2220" y="1080" width="50" height="370"/>
+<rect class="balcony" x="2320" y="850" width="1180" height="34"/>
+<rect class="balcony" x="3480" y="880" width="50" height="570"/>
+<rect class="balcony" x="3520" y="1450" width="100" height="300"/>
+
+<!-- central slab -->
+<rect class="impactNoBreak" x="2720" y="1510" width="520" height="90" rx="14"/>
+<text class="label" x="2780" y="1490">VALID: CENTRAL SERVICE SLAB</text>
+<text class="tiny" x="2830" y="1625">NON-DESTRUCTIBLE / route geometry unchanged</text>
+
+<!-- P2 recovery -->
+<g id="rec-p2">
+<rect class="recovery" x="2400" y="1760" width="260" height="36" rx="8"/><text class="tiny" x="2440" y="1820">REC-P2-A</text>
+<rect class="recovery" x="3290" y="1760" width="260" height="36" rx="8"/><text class="tiny" x="3330" y="1820">REC-P2-B</text>
+</g>
+
+<!-- P2 boss -->
+<g id="boss-p2">
+<ellipse cx="2960" cy="1200" rx="430" ry="330" fill="none" stroke="#ff75b5" stroke-width="8" stroke-dasharray="16 12"/>
+<circle cx="2960" cy="1190" r="70" fill="#5b3048" stroke="#ff75b5" stroke-width="5"/>
+<text class="label" x="2780" y="1120">P2 CENTRAL ORBIT</text>
+<!-- proximity approach examples -->
+<path class="telegraph" d="M2320 1180 Q2600 1060 2860 1200"/>
+<path class="telegraph" d="M2920 860 Q2960 1040 2960 1260"/>
+<path class="telegraph" d="M3500 1180 Q3240 1050 3050 1200"/>
+<text class="tiny" x="2410" y="1020">Nearest occupied Balcony selects approach side</text>
+<!-- rotating ground slam -->
+<path class="attack" d="M2860 1200 Q3050 1280 2960 1510"/>
+<text class="label" x="3010" y="1370">ROTATE → SLAM</text>
+<circle class="weak" cx="2960" cy="1255" r="24"/><text class="tiny" x="3000" y="1285">Lower Stabilizer / underside / 5s</text>
+</g>
+</g>
+
+<!-- P2->P3 transition -->
+<g id="trans23">
+<rect class="transition" x="3550" y="620" width="650" height="900" rx="24"/>
+<text class="label" x="3610" y="650">SAFE 4-ANCHOR BALCONY SPIRAL ASCENT</text>
+<rect class="balcony" x="3710" y="1410" width="200" height="28"/>
+<rect class="balcony" x="3780" y="1090" width="190" height="28"/>
+<rect class="balcony" x="3920" y="830" width="190" height="28"/>
+<rect class="balcony" x="4070" y="670" width="200" height="28"/>
+<text class="tiny" x="3600" y="1510">Boss only repositions upward; no attack/hazard</text>
+</g>
+
+<!-- P3 -->
+<g id="p3">
+<!-- Roof islands -->
+<rect class="arch" x="4080" y="800" width="440" height="430" rx="14"/><rect class="floor" x="4060" y="770" width="480" height="35"/>
+<rect class="arch" x="4610" y="810" width="430" height="420" rx="14"/><rect class="floor" x="4590" y="780" width="470" height="35"/>
+<rect class="arch" x="5140" y="790" width="390" height="440" rx="14"/><rect class="floor" x="5120" y="760" width="430" height="35"/>
+
+<!-- impact objects -->
+<rect class="impactNoBreak" x="4240" y="630" width="130" height="140" rx="22"/>
+<text class="tiny" x="4190" y="600">VALID WATER TANK</text>
+<rect class="impactNoBreak" x="4750" y="610" width="150" height="170" rx="10"/>
+<text class="tiny" x="4680" y="580">VALID STAIRWELL HEAD</text>
+<rect class="impactNoBreak" x="5260" y="640" width="150" height="120" rx="10"/>
+<text class="tiny" x="5200" y="610">VALID HEAVY VENT</text>
+
+<!-- recovery -->
+<g id="rec-p3">
+<rect class="recovery" x="4460" y="1060" width="230" height="34" rx="8"/><text class="tiny" x="4495" y="1120">REC-P3-A</text>
+<rect class="recovery" x="5000" y="1060" width="230" height="34" rx="8"/><text class="tiny" x="5035" y="1120">REC-P3-B</text>
+</g>
+
+<!-- P3 boss -->
+<g id="boss-p3">
+<path class="bosslane" d="M4180 450 C4550 280 5000 300 5420 450"/>
+<text class="label" x="4580" y="340">P3 AERIAL PURSUIT AXIS</text>
+<!-- dive lines -->
+<path class="telegraph" d="M4440 390 L4300 690"/>
+<path class="telegraph" d="M4900 350 L4830 690"/>
+<path class="telegraph" d="M5350 390 L5330 690"/>
+<path class="attack" d="M4440 390 L4300 690"/>
+<path class="attack" d="M4900 350 L4830 690"/>
+<path class="attack" d="M5350 390 L5330 690"/>
+<circle cx="4900" cy="350" r="58" fill="#5b3048" stroke="#ff75b5" stroke-width="5"/>
+<circle class="weak" cx="4900" cy="292" r="22"/><text class="tiny" x="4935" y="295">Upper-center Central Sensor / 4s</text>
+<text class="tiny" x="4540" y="470">0.75s track → line freeze → 0.25s confirm → dive</text>
+</g>
+
+<rect class="safe" x="5350" y="520" width="210" height="55" rx="10"/><text class="tiny" x="5365" y="510">EXIT → SECTOR03</text>
+</g>
+
+<!-- route / nodes -->
+<g id="routeGroup"><line class="route" x1="300" y1="2520" x2="600" y2="2460"/>
+<line class="route" x1="600" y1="2460" x2="900" y2="2380"/>
+<line class="route" x1="900" y1="2380" x2="900" y2="2080"/>
+<line class="route" x1="900" y1="2080" x2="1200" y2="1920"/>
+<line class="route" x1="1200" y1="1920" x2="1510" y2="1970"/>
+<line class="route" x1="1510" y1="1970" x2="1770" y2="2200"/>
+<line class="route" x1="900" y1="2380" x2="1190" y2="2460"/>
+<line class="route" x1="1190" y1="2460" x2="1500" y2="2420"/>
+<line class="route" x1="1500" y1="2420" x2="1770" y2="2200"/>
+<line class="route" x1="1770" y1="2200" x2="1940" y2="1970"/>
+<line class="route" x1="1940" y1="1970" x2="2110" y2="1680"/>
+<line class="route" x1="2110" y1="1680" x2="2290" y2="1460"/>
+<line class="route" x1="2290" y1="1460" x2="2260" y2="1160"/>
+<line class="route" x1="2260" y1="1160" x2="2450" y2="900"/>
+<line class="route" x1="2450" y1="900" x2="2760" y2="780"/>
+<line class="route" x1="2760" y1="780" x2="3090" y2="780"/>
+<line class="route" x1="3090" y1="780" x2="3300" y2="900"/>
+<line class="route" x1="3300" y1="900" x2="3400" y2="1160"/>
+<line class="route" x1="3400" y1="1160" x2="3560" y2="1460"/>
+<line class="route" x1="3560" y1="1460" x2="3820" y2="1440"/>
+<line class="route" x1="3820" y1="1440" x2="3860" y2="1120"/>
+<line class="route" x1="3860" y1="1120" x2="3990" y2="860"/>
+<line class="route" x1="3990" y1="860" x2="4160" y2="650"/>
+<line class="route" x1="4160" y1="650" x2="4380" y2="650"/>
+<line class="route" x1="4380" y1="650" x2="4730" y2="660"/>
+<line class="route" x1="4730" y1="660" x2="4900" y2="660"/>
+<line class="route" x1="4900" y1="660" x2="5250" y2="650"/>
+<line class="route" x1="5250" y1="650" x2="5420" y2="650"/><circle class="anchor" cx="300" cy="2520" r="13"/><text class="tiny" x="316" y="2506">ENTRY</text>
+<circle class="anchor" cx="600" cy="2460" r="13"/><text class="tiny" x="616" y="2446">P1-G1</text>
+<circle class="anchor" cx="900" cy="2380" r="13"/><text class="tiny" x="916" y="2366">P1-G2</text>
+<circle class="anchor" cx="900" cy="2080" r="13"/><text class="tiny" x="916" y="2066">P1-G3</text>
+<circle class="anchor" cx="1200" cy="1920" r="13"/><text class="tiny" x="1216" y="1906">P1-G4</text>
+<circle class="anchor" cx="1510" cy="1970" r="13"/><text class="tiny" x="1526" y="1956">P1-G5</text>
+<circle class="anchor" cx="1190" cy="2460" r="13"/><text class="tiny" x="1206" y="2446">P1-G6</text>
+<circle class="anchor" cx="1500" cy="2420" r="13"/><text class="tiny" x="1516" y="2406">P1-G7</text>
+<circle class="anchor" cx="1770" cy="2200" r="13"/><text class="tiny" x="1786" y="2186">P1-G8</text>
+<circle class="anchor" cx="1940" cy="1970" r="13"/><text class="tiny" x="1956" y="1956">T12-A</text>
+<circle class="anchor" cx="2110" cy="1680" r="13"/><text class="tiny" x="2126" y="1666">T12-B</text>
+<circle class="anchor" cx="2290" cy="1460" r="13"/><text class="tiny" x="2306" y="1446">P2-G1</text>
+<circle class="anchor" cx="2260" cy="1160" r="13"/><text class="tiny" x="2276" y="1146">P2-G2</text>
+<circle class="anchor" cx="2450" cy="900" r="13"/><text class="tiny" x="2466" y="886">P2-G3</text>
+<circle class="anchor" cx="2760" cy="780" r="13"/><text class="tiny" x="2776" y="766">P2-G4</text>
+<circle class="anchor" cx="3090" cy="780" r="13"/><text class="tiny" x="3106" y="766">P2-G5</text>
+<circle class="anchor" cx="3300" cy="900" r="13"/><text class="tiny" x="3316" y="886">P2-G6</text>
+<circle class="anchor" cx="3400" cy="1160" r="13"/><text class="tiny" x="3416" y="1146">P2-G7</text>
+<circle class="anchor" cx="3560" cy="1460" r="13"/><text class="tiny" x="3576" y="1446">P2-G8</text>
+<circle class="anchor" cx="3820" cy="1440" r="13"/><text class="tiny" x="3836" y="1426">T23-A</text>
+<circle class="anchor" cx="3860" cy="1120" r="13"/><text class="tiny" x="3876" y="1106">T23-B</text>
+<circle class="anchor" cx="3990" cy="860" r="13"/><text class="tiny" x="4006" y="846">T23-C</text>
+<circle class="anchor" cx="4160" cy="650" r="13"/><text class="tiny" x="4176" y="636">P3-G1</text>
+<circle class="anchor" cx="4380" cy="650" r="13"/><text class="tiny" x="4396" y="636">P3-G2</text>
+<circle class="anchor" cx="4730" cy="660" r="13"/><text class="tiny" x="4746" y="646">P3-G3</text>
+<circle class="anchor" cx="4900" cy="660" r="13"/><text class="tiny" x="4916" y="646">P3-G4</text>
+<circle class="anchor" cx="5250" cy="650" r="13"/><text class="tiny" x="5266" y="636">P3-G5</text>
+<circle class="anchor" cx="5420" cy="650" r="13"/><text class="tiny" x="5436" y="636">P3-G6</text></g>
+<g id="reachGroup" class="hidden"><circle class="reach" cx="300" cy="2520" r="400"/>
+<circle class="reach" cx="600" cy="2460" r="400"/>
+<circle class="reach" cx="900" cy="2380" r="400"/>
+<circle class="reach" cx="900" cy="2080" r="400"/>
+<circle class="reach" cx="1200" cy="1920" r="400"/>
+<circle class="reach" cx="1510" cy="1970" r="400"/>
+<circle class="reach" cx="1190" cy="2460" r="400"/>
+<circle class="reach" cx="1500" cy="2420" r="400"/>
+<circle class="reach" cx="1770" cy="2200" r="400"/>
+<circle class="reach" cx="1940" cy="1970" r="400"/>
+<circle class="reach" cx="2110" cy="1680" r="400"/>
+<circle class="reach" cx="2290" cy="1460" r="400"/>
+<circle class="reach" cx="2260" cy="1160" r="400"/>
+<circle class="reach" cx="2450" cy="900" r="400"/>
+<circle class="reach" cx="2760" cy="780" r="400"/>
+<circle class="reach" cx="3090" cy="780" r="400"/>
+<circle class="reach" cx="3300" cy="900" r="400"/>
+<circle class="reach" cx="3400" cy="1160" r="400"/>
+<circle class="reach" cx="3560" cy="1460" r="400"/>
+<circle class="reach" cx="3820" cy="1440" r="400"/>
+<circle class="reach" cx="3860" cy="1120" r="400"/>
+<circle class="reach" cx="3990" cy="860" r="400"/>
+<circle class="reach" cx="4160" cy="650" r="400"/>
+<circle class="reach" cx="4380" cy="650" r="400"/>
+<circle class="reach" cx="4730" cy="660" r="400"/>
+<circle class="reach" cx="4900" cy="660" r="400"/>
+<circle class="reach" cx="5250" cy="650" r="400"/>
+<circle class="reach" cx="5420" cy="650" r="400"/></g>
+
+<!-- impact labels -->
+<g id="targetGroup">
+<text class="note" x="150" y="2650">Impact structures remain solid and reusable after every collision.</text>
+<text class="note" x="2050" y="1880">P2: weakpoint only appears after valid Service Slab collision.</text>
+<text class="note" x="4060" y="1280">P3: ordinary roof hit ≠ valid collision. Player must bait dive into an authored impact object.</text>
+</g>
+
+</svg>
+</main>
+</div>
+
+<script>
+const ids = ['p1','trans12','p2','trans23','p3'];
+function phase(name){
+  ids.forEach(id=>document.getElementById(id).classList.remove('dim'));
+  ['bo','b1','b2','b3','bt'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  if(name==='all'){document.getElementById('bo').classList.add('active');return;}
+  document.getElementById(name==='p1'?'b1':name==='p2'?'b2':name==='p3'?'b3':'bt').classList.add('active');
+  ids.forEach(id=>{
+    const keep = name==='trans' ? (id==='trans12'||id==='trans23') : id===name;
+    if(!keep) document.getElementById(id).classList.add('dim');
+  });
+}
+routeT.onchange=()=>routeGroup.classList.toggle('hidden',!routeT.checked);
+bossT.onchange=()=>['boss-p1','boss-p2','boss-p3'].forEach(id=>document.getElementById(id).classList.toggle('hidden',!bossT.checked));
+targetT.onchange=()=>targetGroup.classList.toggle('hidden',!targetT.checked);
+recoveryT.onchange=()=>['rec-p1','rec-p2','rec-p3'].forEach(id=>document.getElementById(id).classList.toggle('hidden',!recoveryT.checked));
+reachT.onchange=()=>reachGroup.classList.toggle('hidden',!reachT.checked);
+</script>
+</body>
+</html>
