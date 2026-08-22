@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 8ef2b1fcd4cda6fe1216f542caedf3d18401fd5aaeb180964a689f7adf099b5f
+scenario-source-sha256: 3bb305c65de5778106d47fda7a7e2667575e4bf8e38c068d4e104542b56c26a9
 authored-area-sha256: 86a6c218229de98b0f99aac340f09d147222a9f15b9c252ae211d318cb2498bb
 authored-sector-sha256: 3129e29b1ea699cc91bf98432c1c955c31f9c81278586c1b0e7b801e0c96fe2b
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 96932fc328c0339ee4ae123a34f2d48258017b04
+reviewed-upstream: 6703d30169568fc32f241dc781932374564d6fbb
 -->
 
 ## 상태를 읽는 법
@@ -47,9 +47,9 @@ reviewed-upstream: 96932fc328c0339ee4ae123a34f2d48258017b04
 
 ## 최근 반영된 시나리오 변화
 
-109. Issue #809는 원본 `MAP-PREVIEW.html`과 4-1·4-2·4-3·4-5 설계 좌표를 대조해, 안전 route node만 192px 기본 사각형으로 보이던 Scenario v2 지형 레이어를 실제 테라스·브리지·서비스 데크·Recovery·발코니 사각형으로 교체했다. `mapEditorSurfaces`가 있는 설계는 그 명시 지형만 소유하므로 generic route-node 발판을 중복 생성하지 않는다. 또한 `block-c-reentry-grapple`의 `reentry`를 `entry`로 잘못 해석해 C1~C5에 임의 발판을 만들던 substring 판정을 토큰 판정으로 바꿨다. 결과는 계속 `scenario-only`이며 Runtime collision, catalog cutover, progression, 멀티플레이와 Sector 전환은 변경하지 않는다.
+109. Issue #804는 메인 개발자와 별도 worktree에서 Sector 03~06의 30개 Scenario v2 source를 원본 설계 데이터로 재구성했다. `surface`·`grapple`·`safe/recovery`·route·적·Wind·Camera 좌표가 제공된 경우에는 각각 editor의 지형·Anchor·Recovery/Route·적 슬롯·Wind·Camera 레이어로 보존하고, 원본에 충돌 표면 또는 적 좌표가 없는 경우에는 route/Anchor와 원본 `sourceSnapshot`만 표시한다. 이 staging은 `scenario-only`를 유지하므로 generated catalog·seamless Runtime·멀티플레이 권위·보스와 Sector 간 전환을 변경하지 않는다. 특히 Resident Security Override 2-of-3, Hardpoint Jammer, 3-8/4-8/5-8 이후 전환, Final Security/Boarding은 미구현 상태를 그대로 노출하며 임의 Runtime 행동을 만들지 않는다.
 
-110. Issue #804는 메인 개발자와 별도 worktree에서 Sector 03~06의 30개 Scenario v2 source를 원본 설계 데이터로 재구성했다. `surface`·`grapple`·`safe/recovery`·route·적·Wind·Camera 좌표가 제공된 경우에는 각각 editor의 지형·Anchor·Recovery/Route·적 슬롯·Wind·Camera 레이어로 보존하고, 원본에 충돌 표면 또는 적 좌표가 없는 경우에는 route/Anchor와 원본 `sourceSnapshot`만 표시한다. 이 staging은 `scenario-only`를 유지하므로 generated catalog·seamless Runtime·멀티플레이 권위·보스와 Sector 간 전환을 변경하지 않는다. 특히 Resident Security Override 2-of-3, Hardpoint Jammer, 3-8/4-8/5-8 이후 전환, Final Security/Boarding은 미구현 상태를 그대로 노출하며 임의 Runtime 행동을 만들지 않는다.
+110. 사용자는 새 `ONE-ROPE-BOSS-01-FINAL-CONTENT-HANDOFF.zip`로 Boss 01 authored content를 `GATE LOCKING CARRIAGE`로 교체했다. 이 handoff는 1-8의 열린 Gate와 Worker District 첫 Reveal을 보존한 뒤 분리된 Locking Assembly가 단일 Rail에서 P1 Full Crossbeam/Rear Drive, P2 directional Broken Beam/Side Gearbox, P3 Central Lock Core/Rail Ram을 수행하는 기획이다. 기존 `CONTAINMENT GANTRY C-01` Has-A runtime은 이 authored design을 구현하지 않는 legacy prototype으로 보존하며 Runtime·Arena·전환·Timer·collapse·멀티플레이는 이번 문서 갱신에서 변경하지 않는다. Boss는 계속 1-8 내부가 아닌 checkpoint 뒤 Post-Sector slot에만 들어가며 `2-1` wiring은 미구현이다.
 
 3.   #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Foundation ID와 Specialization ID의 의미 체계는 계속 분리한다.
 4.   #478은 1-1 C04와 1-2 C02에서 보이는 발판·Anchor의 좌우·상하 관계와 상대 폭을 Approved Blockout·Area Catalog에 맞춘 구조 가이드로 다시 생성했다. 이전 구조 불일치 이미지는 `RETIRED / STRUCTURE MISMATCH`로 보존하고 새 이미지를 현재 승인 기준으로 전환했다. Runtime Geometry와 Collision은 변경하지 않았다.
@@ -215,7 +215,7 @@ reviewed-upstream: 96932fc328c0339ee4ae123a34f2d48258017b04
 
 1. [완료] P0 Alignment: 1-7 보안 상승 문구, Cutter `cutter-fire` positive opt-in, generic Augment 구현 상태, 1-8 Checkpoint 무보상, Scenario Art verified default-camera capture 계약을 최신 Runtime과 정렬했다. 고정 Specialization tier는 복구하지 않는다.
 2. [완료 #633] 과거 2-3 Foundation별 Specialization skeleton을 두 번째 generic offer로 대체하고 3-5에 세 번째 explicit source를 연결했다. 고정 Specialization tier를 복구하지 않는다.
-3. [진행] Boss01 `CONTAINMENT GANTRY C-01`의 별도 Has-A runtime과 top-level snapshot을 구현했다. 남은 범위는 1-8 Checkpoint 뒤 physical Arena·Breaker/Core/Emitter/Wind mock, 자동 진입, 일반 전투 피해/전멸 재시도 연결과 승리 후 `2-1` 전환이다. 1-8 내부에는 Boss를 넣지 않으며 Boss Timer·시간 만료 Arena collapse는 후속 범위다.
+3. [진행] Boss01의 현재 authored content는 `GATE LOCKING CARRIAGE`다. 기존 `CONTAINMENT GANTRY C-01` Has-A runtime/top-level snapshot은 legacy prototype이며 새 authored design을 구현하지 않는다. 남은 범위는 1-8 Checkpoint 뒤 physical Rail Arena·Full/Broken Beam·Rear Drive/Side Gearbox/Central Lock Core·Rail Ram, 자동 진입, 일반 전투 피해/전멸 재시도 연결과 승리 후 `2-1` 전환이다. 1-8 내부에는 Boss를 넣지 않으며 Boss Timer·시간 만료 Arena collapse는 후속 범위다.
 4. 일반 Timer Prototype `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s`는 HOLD 세 physical mapping이 확정된 뒤 연결한다. 과거 `960/+45/80px/s` baseline은 복구하지 않는다.
 5. Sector 02~05 Boss authored handoff는 [`boss/README.md`](./boss/README.md)에 기록됐지만, identity·arena·phase·보상과 각 `n-8 → Boss → 다음 Sector` Runtime 상세 계약은 후속 기획으로 남는다. Boss 02 REV5-C는 DRAFT이며 구현 근거가 아니다.
 6. Sector 04를 메인 월드에 연결하고 Sector 05·06 Runtime을 저작한다. 상세 시나리오 48/48 완료를 Runtime 완료로 해석하지 않는다.
