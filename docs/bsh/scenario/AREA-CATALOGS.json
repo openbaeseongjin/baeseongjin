@@ -2,6 +2,7 @@
   "schemaVersion": "area-catalog-index-v2",
   "manifestPaths": [
     "docs/bsh/scenario/AREA-CATALOG.json",
-    "docs/bsh/scenario/AREA-CATALOG.sector02.json"
+    "docs/bsh/scenario/AREA-CATALOG.sector02.json",
+    "docs/bsh/scenario/AREA-CATALOG.sector03.json"
   ]
 }

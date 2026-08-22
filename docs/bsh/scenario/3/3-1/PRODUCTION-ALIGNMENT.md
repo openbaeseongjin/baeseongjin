@@ -5,10 +5,13 @@ Baseline:
 
 ## Current Runtime truth
 
-Current `sector-03-01` still owns:
-- Runtime name `POWERED PROMENADE`
+`sector-03-01`은 `AREA-SPEC.v2.json`의 `authoringMode: "runtime"`에서 생성한 모듈을 `AREA-CATALOG.sector03.json` manifest가 선택한다. Sector 03 facade는 3-1만 generated로 교체하고, 3-2~3-8 legacy Area를 그대로 합성한다.
+
+Current `sector-03-01` owns:
+- Runtime name `LOWER MARKET PROMENADE`
 - subtitle `COMMERCIAL THRESHOLD`
-- bounds `1280×1088`
+- bounds `3072×1088`
+- entry `(-1392,-32)`, exit `(1440,-832)`와 기존 `sector-03-02` 연결
 - Story objects:
   - `sector-03-01:district-sign`
   - `sector-03-01:welcome-kiosk`
@@ -20,10 +23,17 @@ Current `sector-03-01` still owns:
   - Standard Pool
 - Scanner Groups: none
 - Patrol: none
+- Wind: none
+- Camera: authored default camera만 사용하며 별도 Camera Zone 수치는 저작하지 않는다. 이는 REV8의 `customZonesRequired: false` 계약을 따른다.
 - objective chain:
   `final-deck-reached → exit-panel-engaged → physical crossing`
-- next area:
-  `sector-03-02`
+- late activation sentry: `sector-03-01:promenade-guard`는 Right Market 착지 이후의 384×192 activation band에만 활성화되어 Left Market·Suspended Market Island Story safe zone을 침범하지 않는다.
+
+## Cutover boundary
+
+- v2 원본과 `src/game/world/areas/generated/sector03/`의 결정적 생성 파일은 이 Stage의 유일한 지형·Anchor·Recovery·적 슬롯·출구 권위다.
+- 기존 `Sector03AreaCatalog.js`의 3-1 수기 definition은 composer가 선택하지 않는다. 3-2~3-8은 다음 Stage별 cutover 전까지 legacy definition을 계속 사용한다.
+- Player Bark는 이 변경에 포함하지 않는다. System Story presentation과 혼용하지 않는다.
 
 ## Stale documentation corrected
 
