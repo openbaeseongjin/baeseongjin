@@ -3,7 +3,7 @@ import { defineBossStage } from "../../boss/BossStageDefinition.js";
 import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../../config.js";
 import { LocalAuthority } from "../../runtime/LocalAuthority.js";
 import { GameSimulation } from "../../simulation/GameSimulation.js";
-import { createLegacyAreaSeamlessSectorRuntimeWorld } from "../../world/sectors/LegacyAreaSeamlessSectorRuntime.js";
+import { createAuthoredSeamlessSectorRuntimeWorld } from "../../world/sectors/AuthoredSeamlessSectorRuntime.js";
 
 const BOSS_PREVIEW_VERTICAL_OFFSET_RATIO = 0.1;
 
@@ -22,7 +22,9 @@ function requirePreviewRevision(revision) {
 }
 
 function bossPreviewStartPosition(simulation, stage) {
-    const carriage = simulation.bossStageSnapshot()?.presentation?.objects.find(({ kind }) => kind === "boss-carriage");
+    const carriage = simulation
+        .bossStageSnapshot()
+        ?.presentation?.objects.find(({ kind, physicsBody }) => physicsBody === true || kind === "boss-carriage");
     return Object.freeze({
         x: carriage?.position.x ?? stage.presentationOrigin.x,
         y:
@@ -37,7 +39,7 @@ export class BossStagePreviewGameApp extends GameApp {
         const definition = defineBossStage(spec);
         const previewRevision = requirePreviewRevision(revision);
         const worldFactory = (worldOptions) =>
-            createLegacyAreaSeamlessSectorRuntimeWorld({ ...worldOptions, bossStageSpec: spec });
+            createAuthoredSeamlessSectorRuntimeWorld({ ...worldOptions, bossStageSpec: spec });
         const simulation = new GameSimulation({
             worldFactory,
             worldSeed: options.worldSeed,

@@ -10,6 +10,14 @@
             "outputPath": "src/game/boss-authoring/generated/Boss01Stage.generated.js"
         },
         {
+            "stageId": "boss-02",
+            "bossStageId": "boss-02",
+            "specType": "boss-stage",
+            "authoringMode": "runtime-generated",
+            "sourcePath": "src/game/boss-authoring/specs/boss-02.json",
+            "outputPath": "src/game/boss-authoring/generated/Boss02Stage.generated.js"
+        },
+        {
             "stageId": "1-1",
             "areaId": "sector-01-01",
             "authoringMode": "runtime-generated",

@@ -71,6 +71,8 @@ AS IS → Sector 01~~03의 24개 Stage는 canonical v2/generated catalog로 prod
 
 TO BE → Sector 04~~06은 Stage별 geometry·Gate·전환·적 type과 Post-Sector Boss 계약을 완결한 뒤에만 generated manifest와 facade를 추가한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 
+Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현했고, 현재 메인 진행은 `2-8 → boss-02 → 3-1 → … → 3-8`이다. Boss02는 Map Editor에서 수정 가능한 독립 Boss Stage로 골목·공동중정·옥상 추격, 지정 구조물 충돌 약점 개방, 3페이즈 HP와 polygon mock을 소유한다. Issue #790에서 offline depth map 기반 fixed background + 좌·우 parallax island 공용 backdrop과 2→3 교차 전환을 표현 계층에 연결했다. Issue #797은 3-1을 REV8 `3072×1088` Market Island topology의 v2 generated Stage로 원자 전환했고, Issue #801은 3-2를 REV8 `3200×1472` Facade Service Gallery의 single Scanner Group·C1~C4·선택 Access A·`3-3` exit 계약으로 원자 전환한다. 3-3~3-8의 REV8/REV8.1 topology와 Direction track은 다음 Stage별 migration이다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss03 전환 결정을 기다린다.
+
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
 Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합한다. 맵은 결정적인 corridor/route·activation band만 제공하고 공격 acquire·track·lock·fire·cooldown과 투사체 규칙은 재사용한다. Patrol 자료가 없는 Sentry는 정지 동작을 유지한다. 각 Drone은 자기 band 안에서만 이동·획득하고 공격 cycle 중 target을 유지해 다른 band 플레이어 때문에 재조준하거나 지속 crossfire를 만들지 않는다.

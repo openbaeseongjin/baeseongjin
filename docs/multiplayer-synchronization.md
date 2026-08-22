@@ -174,7 +174,7 @@
 | 로프 부착점·길이·절단                  | 소유·피해 클라이언트, 서버 검증                   | 즉시 적용 후 claim 전송                                                                                                       |
 | 적 상태·HP 최종값                      | 서버                                              | 권위 스냅샷 적용                                                                                                              |
 | 자기 피격·로프 절단                    | 피해 클라이언트, 서버 검증·공유                   | 즉시 로컬 적용 후 검증 claim                                                                                                  |
-| Boss kinematic body·Beam/Ram 피격       | Boss motion은 서버, Player 반응은 피해 클라이언트 | Boss snapshot을 결정적으로 진행해 공통 actor collision·피해를 즉시 적용하고 `boss-hazard` state digest claim으로 수렴          |
+| Boss kinematic body·Beam/Ram/Charge/Slam/Dive 피격 | Boss motion은 서버, Player 반응은 피해 클라이언트 | 활성 Boss Stage ID와 mechanism snapshot을 결정적으로 진행해 공통 actor collision·피해를 즉시 적용하고 `boss-hazard` state digest claim으로 수렴 |
 | 예측 가능한 투사체·낙하물              | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                         |
 | 자기 사망·active Stage checkpoint 부활 | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                                  |
 | 월드 시드·지형·Sector entry            | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v12 검증                                                              |

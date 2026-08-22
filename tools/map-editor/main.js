@@ -55,6 +55,7 @@ const BOSS_EDITABLE_GROUPS = Object.freeze([
     ["surfaces", "Arena 표면", null],
     ["anchors", "Rope 경로", null],
     ["recovery", "복구 지점", null],
+    ["zones", "Phase 구역", null],
     ["boss", "Boss Actor", null],
     ["mechanics", "Mechanic", null],
     ["phases", "Phase", null],
@@ -79,6 +80,7 @@ const DOMAIN_LABELS = Object.freeze({
     behaviorRegistry: "행동 레지스트리",
     arena: "Arena 경계",
     recovery: "복구 지점",
+    zones: "Phase 구역",
     boss: "Boss Actor",
     mechanics: "Mechanic",
     phases: "Phase",
@@ -93,6 +95,7 @@ const KIND_LABELS = Object.freeze({
     surface: "지형",
     anchor: "앵커",
     recovery: "복구 지점",
+    "phase-zone": "Phase 구역",
     route: "경로 지점",
     enemy: "적 슬롯",
     "wind-source": "바람원",
@@ -1005,6 +1008,31 @@ function renderBossInspector(snapshot, selected, entity) {
             checked: surface.grappleable,
             onChange: (value) => replacePointer("surfaces", "Set grappleable", `${entity.path}/grappleable`, value)
         });
+        appendCheck(fields, {
+            label: "Boss 유도 성공 구조물",
+            checked: surface.validArchitecture === true,
+            onChange: (value) =>
+                replacePointer("surfaces", "Set valid architecture", `${entity.path}/validArchitecture`, value)
+        });
+    }
+    if (selected.domain === "zones") {
+        const zone = spec.arena.phaseZones.find(({ id }) => id === selected.id);
+        appendField(fields, {
+            label: "너비",
+            value: zone.bounds.width,
+            onChange: (value) => replacePointer("zones", "Set Phase Zone width", `${entity.path}/bounds/width`, value)
+        });
+        appendField(fields, {
+            label: "높이",
+            value: zone.bounds.height,
+            onChange: (value) => replacePointer("zones", "Set Phase Zone height", `${entity.path}/bounds/height`, value)
+        });
+        appendSelect(fields, {
+            label: "Phase",
+            value: zone.phaseId,
+            options: spec.phases.map(({ id, name }) => ({ value: id, label: `${name} · ${id}` })),
+            onChange: (value) => replacePointer("zones", "Set Phase Zone phase", `${entity.path}/phaseId`, value)
+        });
     }
     if (selected.domain === "boss") {
         appendField(fields, {
@@ -1033,10 +1061,43 @@ function renderBossInspector(snapshot, selected, entity) {
             onChange: (value) => replacePointer("mechanics", "Set mechanic type", `${entity.path}/type`, value)
         });
         for (const [key, value] of Object.entries(mechanic.parameters)) {
+            const parameterPath = `${entity.path}/parameters/${key}`;
+            if (key === "validArchitectureSurfaceIds") {
+                appendSelect(fields, {
+                    label: "유도 성공 구조물",
+                    value,
+                    options: spec.arena.surfaces.map(({ id }) => ({ value: id, label: id })),
+                    multiple: true,
+                    onChange: (next) =>
+                        replacePointer("mechanics", "Set valid architecture surfaces", parameterPath, next)
+                });
+                continue;
+            }
+            if (typeof value === "boolean") {
+                appendCheck(fields, {
+                    label: key,
+                    checked: value,
+                    onChange: (next) => replacePointer("mechanics", `Set ${key}`, parameterPath, next)
+                });
+                continue;
+            }
+            if (value && typeof value === "object" && !Array.isArray(value)) {
+                for (const axis of ["x", "y"]) {
+                    if (!Number.isFinite(value[axis])) continue;
+                    appendField(fields, {
+                        label: `${key} ${axis.toUpperCase()}`,
+                        value: value[axis],
+                        onChange: (next) =>
+                            replacePointer("mechanics", `Set ${key} ${axis}`, `${parameterPath}/${axis}`, next)
+                    });
+                }
+                continue;
+            }
             appendField(fields, {
                 label: key,
+                ...(typeof value === "string" ? { type: "text" } : {}),
                 value,
-                onChange: (next) => replacePointer("mechanics", `Set ${key}`, `${entity.path}/parameters/${key}`, next)
+                onChange: (next) => replacePointer("mechanics", `Set ${key}`, parameterPath, next)
             });
         }
         fields.append(
@@ -1049,6 +1110,14 @@ function renderBossInspector(snapshot, selected, entity) {
     }
     if (selected.domain === "phases") {
         const phase = spec.phases.find(({ id }) => id === selected.id);
+        for (const axis of ["x", "y"]) {
+            appendField(fields, {
+                label: `Phase 시작 ${axis.toUpperCase()}`,
+                value: phase.startPosition?.[axis] ?? spec.boss.position[axis],
+                onChange: (value) =>
+                    replacePointer("phases", `Set Phase start ${axis}`, `${entity.path}/startPosition/${axis}`, value)
+            });
+        }
         appendField(fields, {
             label: "Phase 이름",
             type: "text",
@@ -1086,6 +1155,25 @@ function renderBossInspector(snapshot, selected, entity) {
             value: phase.vulnerability.durationSeconds,
             onChange: (value) =>
                 replacePointer("phases", "Set weak duration", `${entity.path}/vulnerability/durationSeconds`, value)
+        });
+        for (const axis of ["x", "y"]) {
+            appendField(fields, {
+                label: `약점 위치 ${axis.toUpperCase()}`,
+                value: phase.vulnerability.offset?.[axis] ?? 0,
+                onChange: (value) =>
+                    replacePointer(
+                        "phases",
+                        `Set weak offset ${axis}`,
+                        `${entity.path}/vulnerability/offset/${axis}`,
+                        value
+                    )
+            });
+        }
+        appendField(fields, {
+            label: "약점 반지름",
+            value: phase.vulnerability.radius ?? 45,
+            onChange: (value) =>
+                replacePointer("phases", "Set weak radius", `${entity.path}/vulnerability/radius`, value)
         });
         appendField(fields, {
             label: "HUD 목표",
@@ -1131,6 +1219,20 @@ function renderBossInspector(snapshot, selected, entity) {
                     value
                 )
         });
+        if (spec.combat.weakNormalDamageMultiplier !== undefined) {
+            appendField(fields, {
+                label: "약점 일반 피해 배율",
+                value: spec.combat.weakNormalDamageMultiplier,
+                step: 0.05,
+                onChange: (value) =>
+                    replacePointer(
+                        "combat",
+                        "Set weak normal damage multiplier",
+                        "/combat/weakNormalDamageMultiplier",
+                        value
+                    )
+            });
+        }
         const derived = bossStageDerivedPreview(spec);
         for (const entry of derived.participants) {
             appendField(fields, {
@@ -1643,6 +1745,11 @@ function drawBossCanvas(rect, spec) {
     context.setLineDash([]);
     for (const surface of spec.arena.surfaces) {
         drawRect(surface.bounds, isSelected("surfaces", surface.id) ? "#66e6ff" : "#789dab", true);
+    }
+    for (const zone of spec.arena.phaseZones ?? []) {
+        context.setLineDash([9, 6]);
+        drawRect(zone.bounds, isSelected("zones", zone.id) ? "#d8b4fe" : "#7e5aa6");
+        context.setLineDash([]);
     }
     for (const mechanic of spec.mechanics) {
         if (mechanic.bounds) {

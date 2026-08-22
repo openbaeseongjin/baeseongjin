@@ -1,7 +1,9 @@
 import { GateLockingCarriageRuntime } from "./GateLockingCarriageRuntime.js";
+import { ResidentialSecurityPursuitRuntime } from "./ResidentialSecurityPursuitRuntime.js";
 
 const MECHANISM_RUNTIME = Object.freeze({
-    "rail-carriage": GateLockingCarriageRuntime
+    "rail-carriage": GateLockingCarriageRuntime,
+    "residential-security-pursuit": ResidentialSecurityPursuitRuntime
 });
 
 export function createBossMechanismRuntime(definition, snapshot = null) {
