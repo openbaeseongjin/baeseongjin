@@ -10,6 +10,12 @@
 - depth map은 offline 추출 근거로만 보존하고 Runtime은 캐시된 PNG 3장을 기존 Sector 01→02와 같은 package 단위 crossfade 권위로 그린다. Sector 02 package와 gameplay geometry는 변경하지 않는다.
 - 제작·Runtime·검증 기준은 `assets/artwork/environments/sector-03-central-exchange-background/README.md`, `assets/artwork/environments/sector-02-03-runtime-seam/README.md`, `assets/runtime/environments/sector-03-central-exchange/README.md`가 소유한다.
 
+### [L1] 개발 규칙 미반영 코드를 대상 묶음별 검토 후 순차 리팩터링한다
+
+- 현재 `docs/development-rules.md`를 기준으로 저장소 전체의 미반영 코드를 단계별로 바로잡는다.
+- 각 실행 단위는 사용자 검토가 가능한 `문제 파일 + 실제 사용처` 묶음으로 제시하고, 계획 검토가 끝난 묶음만 순차 수정한다.
+- 저장소 전체 개발 규칙 정렬을 하나의 리팩터링으로 보고 전용 장기 branch 하나에서 수행한다. 승인된 리팩터링 step별 Lore commit으로 이력을 분리해 사용자가 순서대로 검토·복원할 수 있게 하며, 대상 묶음마다 새 branch를 만들거나 중간 병합하지 않는다.
+
 ### [L2] 192 kbps 사용자 제공 메인 테마를 기본 등반 BGM으로 사용한다
 
 - 사용자 제공 `main theme 192kbps.mp3`를 `main-theme` 원본으로 보존하고 48 kHz/24-bit PCM WAV master, OGG 우선·MP3 fallback runtime source로 정규화한다.

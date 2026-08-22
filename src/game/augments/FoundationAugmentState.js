@@ -5,6 +5,7 @@ import {
     selectedBaseActionId,
     selectedSignatureId
 } from "./FoundationAugmentCatalog.js";
+import { ACTION_MODIFIER_ID } from "./actions/ActionAugmentDefinition.js";
 
 function distinctIds(values, label) {
     const ids = [...values];
@@ -103,7 +104,7 @@ export class FoundationAugmentState {
     }
 
     onRopeReleased() {
-        return this.has("rope-link");
+        return this.has(ACTION_MODIFIER_ID.ROPE_LINK);
     }
 
     snapshot() {

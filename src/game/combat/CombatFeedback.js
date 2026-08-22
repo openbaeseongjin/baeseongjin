@@ -1,66 +1,56 @@
 import { appendParticlePreset, updateParticlePresentation } from "./ParticlePresentation.js";
-
-const EFFECT_LIFETIME = Object.freeze({ ring: 0.3, text: 0.72 });
+import {
+    COMBAT_EFFECT_LIFETIME,
+    COMBAT_EFFECT_TYPE,
+    COMBAT_FEEDBACK_KEY,
+    COMBAT_FEEDBACK_LAYOUT,
+    combatFeedbackDefinition
+} from "./CombatFeedbackDefinition.js";
 
 export function appendCombatFeedback(effects, event, { visibleWorldBounds = null } = {}) {
-    const defeated = event.type === "enemy-defeated";
-    const playerHit = event.type === "player-hit";
-    const fallDamage = event.type === "fall-damage";
-    const ropeCut = event.type === "rope-cut";
-    const color = playerHit || fallDamage || ropeCut ? "#fb7185" : defeated ? "#fde68a" : "#67e8f9";
-    const particlePresetId = ropeCut
-        ? "rope-cut"
-        : defeated
-          ? "enemy-defeat"
-          : playerHit || fallDamage
-            ? "enemy-impact"
-            : "impact";
+    const definition = combatFeedbackDefinition(event.type);
 
     effects.push({
-        type: "ring",
+        type: COMBAT_EFFECT_TYPE.RING,
         position: { x: event.position.x, y: event.position.y },
-        color,
-        age: 0,
-        lifetime: EFFECT_LIFETIME.ring,
-        strength: defeated ? 1.45 : 1
+        color: definition.color,
+        age: COMBAT_FEEDBACK_LAYOUT.INITIAL_AGE,
+        lifetime: COMBAT_EFFECT_LIFETIME[COMBAT_EFFECT_TYPE.RING],
+        strength: definition.strength
     });
     appendParticlePreset(effects, {
-        presetId: particlePresetId,
+        presetId: definition.presetId,
         position: event.position,
         direction: event.direction,
-        identity: event.id ?? `${event.type}:${event.position.x}:${event.position.y}`,
+        identity: COMBAT_FEEDBACK_KEY.effect(event),
         visibleWorldBounds
     });
-    if (!ropeCut) {
+    if (definition.showText) {
         effects.push({
-            type: "text",
-            position: { x: event.position.x, y: event.position.y - 24 },
-            velocity: { x: 0, y: -34 },
-            color,
-            text: playerHit || fallDamage ? `-${Math.round(event.damage)}` : `${Math.round(event.damage)}`,
-            age: 0,
-            lifetime: EFFECT_LIFETIME.text,
-            emphasis: defeated
+            type: COMBAT_EFFECT_TYPE.TEXT,
+            position: {
+                x: event.position.x,
+                y: event.position.y + COMBAT_FEEDBACK_LAYOUT.TEXT_OFFSET_Y
+            },
+            velocity: COMBAT_FEEDBACK_LAYOUT.TEXT_VELOCITY,
+            color: definition.color,
+            text: `${definition.textSign * Math.round(event.damage)}`,
+            age: COMBAT_FEEDBACK_LAYOUT.INITIAL_AGE,
+            lifetime: COMBAT_EFFECT_LIFETIME[COMBAT_EFFECT_TYPE.TEXT],
+            emphasis: definition.emphasis
         });
     }
 }
 
 export function updateCombatFeedback(effects, dt) {
     for (const effect of effects) {
-        if (effect.type === "particle") continue;
+        if (effect.type === COMBAT_EFFECT_TYPE.PARTICLE) continue;
         effect.age += dt;
         if (!effect.velocity) continue;
         effect.position.x += effect.velocity.x * dt;
         effect.position.y += effect.velocity.y * dt;
     }
     updateParticlePresentation(effects, dt);
-}
-
-export function createImpactState(events) {
-    if (events.some((event) => event.type === "player-hit" || event.type === "fall-damage")) {
-        return { age: 0, lifetime: 0.24, strength: 9 };
-    }
-    if (events.some((event) => event.type === "enemy-defeated")) return { age: 0, lifetime: 0.2, strength: 6 };
-    if (events.length > 0) return { age: 0, lifetime: 0.12, strength: 2.5 };
-    return null;
+    const activeEffects = effects.filter(({ age, lifetime }) => age < lifetime);
+    effects.splice(COMBAT_FEEDBACK_LAYOUT.FIRST_INDEX, effects.length, ...activeEffects);
 }

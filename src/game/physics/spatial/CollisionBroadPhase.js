@@ -1,6 +1,12 @@
 import { colliderSnapshotBoundingRadius, colliderSnapshotBounds } from "../colliders/Collider.js";
 import { Quadtree, boundsIntersect, expandBounds, unionBounds } from "./Quadtree.js";
 
+const COLLISION_SPATIAL_NODE_ID = Object.freeze({
+    surface(index) {
+        return `surface:${index}`;
+    }
+});
+
 function surfaceBounds(surface) {
     if ([surface?.x, surface?.y, surface?.width, surface?.height].every(Number.isFinite)) {
         return { x: surface.x, y: surface.y, width: surface.width, height: surface.height };
@@ -90,7 +96,7 @@ export class CollisionBroadPhase {
         this.surfaceCount = surfaces.length;
         this.surfaceTree.rebuild(
             surfaces.map((surface, index) => ({
-                id: `surface:${index}`,
+                id: COLLISION_SPATIAL_NODE_ID.surface(index),
                 bounds: surfaceBounds(surface),
                 value: surface
             }))

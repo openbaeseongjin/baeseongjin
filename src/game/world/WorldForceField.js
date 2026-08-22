@@ -1,5 +1,6 @@
 import { WIND_CONFIG } from "../config.js";
 import { segmentIntersectsSurface } from "./PolygonGeometry.js";
+import { WIND_MODE, WIND_PHASE } from "./WindPhase.js";
 
 export function pointInsideBounds(point, bounds) {
     return (
@@ -14,18 +15,19 @@ function pulsedWindState(zone, elapsedSeconds) {
     const { lull, warning, active, decay } = zone.cycle;
     const duration = lull + warning + active + decay;
     let phaseTime = ((elapsedSeconds % duration) + duration) % duration;
-    if (phaseTime < lull) return Object.freeze({ phase: "lull", multiplier: 0, phaseTime });
+    if (phaseTime < lull) return Object.freeze({ phase: WIND_PHASE.LULL, multiplier: 0, phaseTime });
     phaseTime -= lull;
-    if (phaseTime < warning) return Object.freeze({ phase: "warning", multiplier: 0, phaseTime });
+    if (phaseTime < warning) return Object.freeze({ phase: WIND_PHASE.WARNING, multiplier: 0, phaseTime });
     phaseTime -= warning;
-    if (phaseTime < active) return Object.freeze({ phase: "active", multiplier: 1, phaseTime });
+    if (phaseTime < active) return Object.freeze({ phase: WIND_PHASE.ACTIVE, multiplier: 1, phaseTime });
     phaseTime -= active;
-    return Object.freeze({ phase: "decay", multiplier: 1 - phaseTime / decay, phaseTime });
+    return Object.freeze({ phase: WIND_PHASE.DECAY, multiplier: 1 - phaseTime / decay, phaseTime });
 }
 
 export function evaluateWindZone(zone, elapsedSeconds) {
-    if (zone.mode === "continuous") return Object.freeze({ phase: "active", multiplier: 1, phaseTime: 0 });
-    if (zone.mode === "pulsed") return pulsedWindState(zone, elapsedSeconds);
+    if (zone.mode === WIND_MODE.CONTINUOUS)
+        return Object.freeze({ phase: WIND_PHASE.ACTIVE, multiplier: 1, phaseTime: 0 });
+    if (zone.mode === WIND_MODE.PULSED) return pulsedWindState(zone, elapsedSeconds);
     throw new Error(`Unknown wind mode '${zone.mode}'`);
 }
 

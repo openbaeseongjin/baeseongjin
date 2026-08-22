@@ -50,7 +50,7 @@ export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, 
     ropeObject.swingDrag.direction = evaluation.direction;
     ropeObject.swingDrag.progress = evaluation.progress;
     if (!evaluation.triggered || ropeObject.swingDrag.age < config.swingDragMinHoldSeconds) return;
-    owner.physics.addImpulseAtLocalPoint(evaluation.direction, config.swingImpulse, ropeObject.rope.attachmentOffset);
+    owner.physics.applyImpulseAtLocalPoint(evaluation.direction, ropeObject.rope.attachmentOffset, config.swingImpulse);
     ropeObject.swingDrag.used = true;
     onFlash({ type: "swing", age: 0 });
 }

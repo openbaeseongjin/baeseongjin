@@ -1,18 +1,23 @@
 import { SimulationDrivenObject } from "../objects/SimulationDrivenObject.js";
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
-import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { colliderSnapshotBoundingRadius, colliderSnapshotsEqual } from "../physics/colliders/Collider.js";
 import { createCollider } from "../physics/colliders/ColliderFactory.js";
 import { withSurfacePhysics } from "../physics/SurfacePhysicsMixin.js";
 import { selectNearestPlayer } from "./CombatTargeting.js";
 import { ENEMY_BEHAVIOR_CAPABILITY } from "./EnemyBehaviors.js";
-import { advanceEnemyPatrol, createEnemyPatrolState, restoreEnemyPatrolState } from "./EnemyPatrol.js";
-import { BallisticProjectileObject } from "./ProjectileObject.js";
+import { createEnemyPatrolState, restoreEnemyPatrolState } from "./EnemyPatrol.js";
 import { Vector2 } from "../../game-kit/index.js";
 import { enemyCollisionMotionType, enemyImpactDisplacementEnabled } from "./EnemyMobility.js";
-import { TimedStateController } from "../../core/state/TimedStateController.js";
-import { ENEMY_ATTACK_STATES, ENEMY_ATTACK_TRANSITIONS, normalizeEnemyState } from "./EnemyStateCatalog.js";
+import { ENEMY_TYPE } from "../EnemyType.js";
 import { withEnemyRenderSnapshot } from "./EnemyRenderSnapshot.js";
+import {
+    ENEMY_ATTACK_STATE,
+    ENEMY_RULE,
+    ENEMY_SIMULATION_CAPABILITY,
+    ENEMY_WEAPON_CONFIG
+} from "./enemy-weapon/EnemyWeaponDefinition.js";
+import { withEnemyPhysicsSimulation, withEnemyWeaponSimulation } from "./enemy-weapon/EnemyWeaponSimulation.js";
+import { directionFromEnemyToTarget, visibleEnemyTargets } from "./enemy-weapon/EnemyWeaponTargeting.js";
 
 function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -66,196 +71,26 @@ function createKnockbackState(knockbackState) {
         wallImpactTriggered: knockbackState.wallImpactTriggered === true
     };
 }
-function hasLineOfSight(enemy, target, surfaces) {
-    if (!enemy.rules.includes("cover-ends-los")) return true;
-    return !surfaces.some(
-        (surface) =>
-            surface.collision !== false &&
-            surface.kind === "cover" &&
-            (enemy.areaId === null || surface.areaId === enemy.areaId) &&
-            segmentIntersectsSurface(enemy.position, target.physics.position, surface)
-    );
-}
-
-function visibleTargetsForEnemy(enemy, targets, surfaces) {
-    const eligibleTargets = enemy.activation
-        ? targets.filter(
-              ({ physics }) =>
-                  physics.position.x >= enemy.activation.x &&
-                  physics.position.x <= enemy.activation.x + enemy.activation.width &&
-                  physics.position.y >= enemy.activation.y &&
-                  physics.position.y <= enemy.activation.y + enemy.activation.height
-          )
-        : targets;
-    return eligibleTargets.filter((target) => hasLineOfSight(enemy, target, surfaces));
-}
-
-function selectLockedTarget(enemy, visibleTargets, range, canAcquireTarget) {
-    const lockedTarget =
-        enemy.lockedTargetId === null
-            ? null
-            : (visibleTargets.find(
-                  (target) =>
-                      target.id === enemy.lockedTargetId &&
-                      target.health > 0 &&
-                      target.lifeState === "active" &&
-                      enemy.position.distanceTo(target.physics.position) <= range
-              ) ?? null);
-    if (lockedTarget) return lockedTarget;
-    if (!canAcquireTarget) return null;
-    return selectNearestPlayer(enemy.position, visibleTargets, range);
-}
-
-function directionTo(enemy, target) {
-    const dx = target.physics.position.x - enemy.position.x;
-    const dy = target.physics.position.y - enemy.position.y;
-    const distance = Math.hypot(dx, dy);
-    if (distance <= 0) return null;
-    return Object.freeze({ x: dx / distance, y: dy / distance });
-}
-
-function aimAt(enemy, target) {
-    const direction = directionTo(enemy, target);
-    if (!direction) return false;
-    enemy.aimDirection = direction;
-    return true;
-}
-
 function updatePresentationAimDirection(enemy, visibleTargets, range) {
-    if (enemy.enemyType !== "sentry" && enemy.enemyType !== "sentry-t1") {
+    if (enemy.enemyType !== ENEMY_TYPE.SENTRY && enemy.enemyType !== ENEMY_TYPE.SENTRY_T1) {
         enemy.presentationAimDirection = null;
         return;
     }
     const nearestTarget = selectNearestPlayer(enemy.position, visibleTargets, range);
-    enemy.presentationAimDirection = nearestTarget ? directionTo(enemy, nearestTarget) : null;
+    enemy.presentationAimDirection = nearestTarget ? directionFromEnemyToTarget(enemy, nearestTarget) : null;
 }
 
 const withEnemyPresentationAimSimulation = createSimulationCapabilityMixin({
-    id: "enemy-presentation-aim",
-    order: 9,
+    id: ENEMY_SIMULATION_CAPABILITY.PRESENTATION_AIM,
+    order: ENEMY_WEAPON_CONFIG.PRESENTATION_AIM_ORDER,
     apply({ targets, range, surfaces = [] }) {
-        updatePresentationAimDirection(this, visibleTargetsForEnemy(this, targets, surfaces), range);
+        updatePresentationAimDirection(this, visibleEnemyTargets(this, targets, surfaces), range);
         return this.presentationAimDirection;
     }
 });
 
-function transitionAttack(enemy, state, durationSeconds = 0, { restart = false } = {}) {
-    const result = enemy.attackStateController.transition(state, { durationSeconds, restart });
-    if (!result.accepted) throw new Error(`invalid enemy attack transition: ${result.from} -> ${result.to}`);
-}
-
-function resetAttack(enemy) {
-    enemy.lockedTargetId = null;
-    enemy.aimDirection = null;
-    enemy.fireCooldown = 0;
-    transitionAttack(enemy, "idle", 0, { restart: true });
-}
-
-function consumeStateTime(enemy, remainingDt) {
-    return enemy.attackStateController.consume(remainingDt);
-}
-
-const withEnemyWeaponSimulation = createSimulationCapabilityMixin({
-    id: "enemy-weapon",
-    order: 10,
-    apply({
-        targets,
-        collisionActors = targets,
-        collisionBroadPhase = null,
-        projectiles,
-        registry,
-        config,
-        surfaces = [],
-        dt
-    }) {
-        this.beginSurfacePhysicsStep();
-        const visibleTargets = visibleTargetsForEnemy(this, targets, surfaces);
-        if (this.rules.includes("no-projectile-attack")) {
-            resetAttack(this);
-            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors, collisionBroadPhase);
-            return null;
-        }
-        const target = selectLockedTarget(this, visibleTargets, config.enemyAttackRange, this.attackState === "idle");
-        if (!target) {
-            resetAttack(this);
-            advanceEnemyPatrol(this, dt);
-            this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors, collisionBroadPhase);
-            return null;
-        }
-        this.lockedTargetId = target.id;
-        if (this.attackState === "idle") transitionAttack(this, "acquire", config.enemyAcquireSeconds);
-
-        let remainingDt = Math.max(0, dt);
-        let spawnedProjectile = null;
-        for (let transitions = 0; transitions < 8; transitions += 1) {
-            if (this.attackState === "acquire") {
-                const consumed = consumeStateTime(this, remainingDt);
-                remainingDt -= consumed;
-                if (this.attackStateRemaining > 0) break;
-                transitionAttack(this, "track", config.enemyTrackSeconds);
-                if (!aimAt(this, target)) break;
-                continue;
-            }
-            if (this.attackState === "track") {
-                if (!aimAt(this, target)) break;
-                const consumed = consumeStateTime(this, remainingDt);
-                remainingDt -= consumed;
-                if (this.attackStateRemaining > 0) break;
-                transitionAttack(this, "lock", config.enemyLockSeconds);
-                continue;
-            }
-            if (this.attackState === "lock") {
-                const consumed = consumeStateTime(this, remainingDt);
-                remainingDt -= consumed;
-                if (this.attackStateRemaining > 0 || !this.aimDirection) break;
-                const direction = this.position.clone();
-                direction.set(
-                    this.aimDirection.x * config.enemyProjectileSpeed,
-                    this.aimDirection.y * config.enemyProjectileSpeed
-                );
-                spawnedProjectile = new BallisticProjectileObject({
-                    id: registry.createId("enemy-projectile"),
-                    ownerId: this.id,
-                    targetId: target.id,
-                    position: this.position.clone(),
-                    velocity: direction,
-                    radius: config.enemyProjectileRadius,
-                    damage: config.enemyProjectileDamage,
-                    canCutRope: this.rules.includes("cutter-fire")
-                });
-                projectiles.push(spawnedProjectile);
-                this.fireCooldown = config.enemyFireInterval;
-                transitionAttack(this, "fire", config.enemyFireFlashSeconds);
-                if (remainingDt <= 0) break;
-                continue;
-            }
-            if (this.attackState === "fire") {
-                const consumed = consumeStateTime(this, remainingDt);
-                remainingDt -= consumed;
-                if (this.attackStateRemaining > 0) break;
-                transitionAttack(this, "cooldown", this.fireCooldown);
-                this.aimDirection = null;
-                continue;
-            }
-            if (this.attackState === "cooldown") {
-                const consumed = consumeStateTime(this, remainingDt);
-                remainingDt -= consumed;
-                this.fireCooldown = this.attackStateRemaining;
-                if (this.attackStateRemaining > 0) break;
-                this.fireCooldown = 0;
-                transitionAttack(this, "track", config.enemyTrackSeconds);
-                if (!aimAt(this, target)) break;
-                continue;
-            }
-            break;
-        }
-        this.advanceEnemyPhysicsStep(dt, surfaces, collisionActors, collisionBroadPhase);
-        return spawnedProjectile;
-    }
-});
-
-export class EnemyObject extends withSurfacePhysics(
-    withEnemyRenderSnapshot(withEnemyWeaponSimulation(withEnemyPresentationAimSimulation(SimulationDrivenObject)))
+class EnemyBodyObject extends withSurfacePhysics(
+    withEnemyRenderSnapshot(withEnemyPhysicsSimulation(withEnemyPresentationAimSimulation(SimulationDrivenObject)))
 ) {
     constructor({
         id,
@@ -263,7 +98,7 @@ export class EnemyObject extends withSurfacePhysics(
         level,
         areaId = null,
         objectId = null,
-        enemyType = "sentry-t1",
+        enemyType = ENEMY_TYPE.SENTRY_T1,
         displayName = enemyType,
         activation = null,
         patrol = null,
@@ -275,8 +110,8 @@ export class EnemyObject extends withSurfacePhysics(
         health,
         maxHealth,
         fireCooldown,
-        attackState = "idle",
-        attackStateRemaining = 0,
+        attackState = ENEMY_ATTACK_STATE.IDLE,
+        attackStateRemaining = ENEMY_WEAPON_CONFIG.ZERO,
         aimDirection = null,
         presentationAimDirection = null,
         lockedTargetId = null,
@@ -300,7 +135,6 @@ export class EnemyObject extends withSurfacePhysics(
         this.activation = activation ? Object.freeze({ ...activation }) : null;
         this.patrol = createEnemyPatrolState({ patrol, activation: this.activation, origin: this.position });
         this.swarmGroupId = swarmGroupId;
-        this.lockedTargetId = lockedTargetId;
         this.rules = Object.freeze([...rules]);
         this.radius =
             Number.isFinite(radius) && radius > 0
@@ -308,22 +142,9 @@ export class EnemyObject extends withSurfacePhysics(
                 : colliderSnapshotBoundingRadius(resolvedCollider.snapshot());
         this.health = health;
         this.maxHealth = maxHealth;
-        Object.defineProperty(this, "attackStateController", {
-            value: new TimedStateController({
-                initialState: "idle",
-                transitions: ENEMY_ATTACK_TRANSITIONS,
-                state: normalizeEnemyState(attackState, ENEMY_ATTACK_STATES, "idle"),
-                remainingSeconds: Math.max(0, attackStateRemaining ?? 0)
-            }),
-            enumerable: false,
-            writable: false
-        });
-        this.aimDirection = aimDirection ? Object.freeze({ x: aimDirection.x, y: aimDirection.y }) : null;
         this.presentationAimDirection = presentationAimDirection
             ? Object.freeze({ x: presentationAimDirection.x, y: presentationAimDirection.y })
             : null;
-        this.fireCooldown =
-            this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, fireCooldown ?? 0) : 0;
         this.impactDisplacementEnabled =
             enemyImpactDisplacementEnabled(enemyType) && impactDisplacementEnabled !== false;
         this.knockbackState = createKnockbackState(knockbackState);
@@ -338,7 +159,7 @@ export class EnemyObject extends withSurfacePhysics(
             }
             this.registerSimulationCapability({
                 id: ENEMY_BEHAVIOR_CAPABILITY,
-                order: 5,
+                order: ENEMY_WEAPON_CONFIG.BEHAVIOR_ORDER,
                 apply: (context) => {
                     this.beginSurfacePhysicsStep();
                     return behavior.advance(this, context);
@@ -348,11 +169,23 @@ export class EnemyObject extends withSurfacePhysics(
     }
 
     get attackState() {
-        return this.attackStateController.state;
+        return this.weaponState?.state ?? ENEMY_ATTACK_STATE.IDLE;
     }
 
     get attackStateRemaining() {
-        return this.attackStateController.remainingSeconds;
+        return this.weaponState?.remainingSeconds ?? ENEMY_WEAPON_CONFIG.ZERO;
+    }
+
+    get lockedTargetId() {
+        return this.weaponState?.lockedTargetId ?? null;
+    }
+
+    get aimDirection() {
+        return this.weaponState?.aimDirection ?? null;
+    }
+
+    get fireCooldown() {
+        return this.weaponState?.fireCooldown ?? ENEMY_WEAPON_CONFIG.ZERO;
     }
 
     get lifeState() {
@@ -396,38 +229,42 @@ export class EnemyObject extends withSurfacePhysics(
             return false;
         }
         if (this.behavior && typeof this.behavior.restore !== "function") return false;
-        this.position.set(
-            assertFinite(state.position?.x, "enemy.position.x"),
-            assertFinite(state.position?.y, "enemy.position.y")
-        );
-        this.velocity.set(
-            assertFinite(state.velocity?.x ?? 0, "enemy.velocity.x"),
-            assertFinite(state.velocity?.y ?? 0, "enemy.velocity.y")
-        );
-        this.actorCollisionVelocity.set(0, 0);
-        this.surfaceControlVelocity.set(0, 0);
-        this.surfacePhysicsStepPending = false;
+        this.setPhysicsPosition({
+            x: assertFinite(state.position?.x, "enemy.position.x"),
+            y: assertFinite(state.position?.y, "enemy.position.y")
+        });
+        this.setPhysicsVelocity({
+            x: assertFinite(state.velocity?.x ?? 0, "enemy.velocity.x"),
+            y: assertFinite(state.velocity?.y ?? 0, "enemy.velocity.y")
+        });
+        this.clearSurfacePhysicsStep();
         this.health = assertFinite(state.health, "enemy.health", { minimum: 0 });
         this.maxHealth = assertFinite(state.maxHealth, "enemy.maxHealth", { minimum: 0, exclusiveMinimum: true });
-        this.lockedTargetId = state.lockedTargetId ?? null;
-        this.attackStateController.restore({
-            state: normalizeEnemyState(state.attackState, ENEMY_ATTACK_STATES, "idle"),
-            remainingSeconds: Math.max(0, state.attackStateRemaining ?? 0)
-        });
-        this.aimDirection = state.aimDirection
-            ? Object.freeze({
+        const aimDirection = state.aimDirection
+            ? {
                   x: assertFinite(state.aimDirection.x, "enemy.aimDirection.x"),
                   y: assertFinite(state.aimDirection.y, "enemy.aimDirection.y")
-              })
+              }
             : null;
+        this.weaponState?.restore({
+            attackState: state.attackState,
+            attackStateRemaining: assertFinite(
+                state.attackStateRemaining ?? ENEMY_WEAPON_CONFIG.ZERO,
+                "enemy.attackStateRemaining",
+                { minimum: ENEMY_WEAPON_CONFIG.ZERO }
+            ),
+            aimDirection,
+            lockedTargetId: state.lockedTargetId ?? null,
+            fireCooldown: assertFinite(state.fireCooldown ?? ENEMY_WEAPON_CONFIG.ZERO, "enemy.fireCooldown", {
+                minimum: ENEMY_WEAPON_CONFIG.ZERO
+            })
+        });
         this.presentationAimDirection = state.presentationAimDirection
             ? Object.freeze({
                   x: assertFinite(state.presentationAimDirection.x, "enemy.presentationAimDirection.x"),
                   y: assertFinite(state.presentationAimDirection.y, "enemy.presentationAimDirection.y")
               })
             : null;
-        this.fireCooldown =
-            this.attackState === "cooldown" || this.attackState === "fire" ? Math.max(0, state.fireCooldown ?? 0) : 0;
         this.knockbackState = createKnockbackState(state.knockbackState);
         this.behavior?.restore(behaviorState);
         return true;
@@ -470,4 +307,19 @@ export class EnemyObject extends withSurfacePhysics(
         if (state.remainingSeconds <= 0) this.knockbackState = null;
         return Object.freeze({ moved: true, collided: resolution.collisionNormals.length > 0 });
     }
+}
+
+export class EnemyObject extends withEnemyWeaponSimulation(EnemyBodyObject) {}
+
+export class UnarmedEnemyObject extends EnemyBodyObject {}
+
+const ENEMY_OBJECT_CLASS_BY_PROJECTILE_ATTACK = Object.freeze({
+    true: EnemyObject,
+    false: UnarmedEnemyObject
+});
+
+export function createEnemyObject({ usesProjectileAttack = null, ...options }) {
+    const enabled = usesProjectileAttack ?? !options.rules?.includes(ENEMY_RULE.NO_PROJECTILE_ATTACK);
+    const EnemyClass = ENEMY_OBJECT_CLASS_BY_PROJECTILE_ATTACK[Boolean(enabled)];
+    return new EnemyClass(options);
 }

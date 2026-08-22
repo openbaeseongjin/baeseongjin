@@ -1,6 +1,6 @@
 # 파티클 시스템
 
-`src/game/combat/ParticlePresentation.js`는 Canvas 로컬 표현용 재사용 파티클 계약을 소유한다. 파티클은 gameplay·충돌·네트워크 객체가 아니며, `ClientCombatFeedback`이 기존 사건과 복제 상태를 DTO로 바꿔 Polygon/Sprite 공통 `CombatEffectRenderer`에 전달한다.
+`src/game/combat/ParticlePresentation.js`는 Canvas 로컬 표현용 재사용 파티클 계약을 소유한다. 파티클은 gameplay·충돌·네트워크 객체가 아니며, `ClientCombatFeedback` facade와 factory가 조합한 구체 feedback 객체가 기존 사건과 복제 상태를 DTO로 바꿔 Polygon/Sprite 공통 `CombatEffectRenderer`에 전달한다.
 
 ## 조합 계약
 
@@ -26,11 +26,11 @@ Renderer는 effect/enemy ID를 해석하지 않고 particle DTO의 `shape`와 `m
 
 원격 Player의 별도 action event가 없는 경우에는 `playerId + actionSequence`와 `control.aimWorld`를 관찰한다. 첫 sequence는 baseline으로 기록만 하고 증가한 sequence만 한 번 재생한다. owner는 predicted action event가 우선이므로 자기 snapshot action one-shot을 만들지 않으며, duration이 있는 action의 trail/guard flow만 `activeAction.activationId` emitter로 유지한다.
 
-- Sentry/Patrol을 포함한 공통 발사 상태와 모든 projectile trail은 구체 renderer가 아니라 `ClientCombatFeedback`의 상태→preset projection에서 결정한다. renderer는 enemy/action/effect ID를 알지 않는다.
-- one-shot은 기존 action, `spawn`, `predicted-spawn`, `resolve`, `predicted-resolve`와 impact 사건의 stable causal ID를 소비한다. 소유자의 predicted ID와 공유 receipt/event ID는 기존 authority dedupe가 한 번만 전달한다. tick별 particle event를 보내지 않는다.
-- shared particle은 모든 viewer가 보며, player-hit/rope-cut 같은 개인 강조는 기존 `ClientFeedbackEventObject` personal capability를 유지한다.
+- Sentry/Patrol을 포함한 Enemy 상태는 상위 `EnemyFeedbackState.project()`가 definition predicate와 request 생성을 공통 처리하고 구체 상태 class는 `EnemyFeedbackDefinition`을 생성자로 받는다. Wind와 Projectile도 `ClientFeedbackObjectDefinition`을 사용하며 Wind phase별 density는 frozen object의 `WIND_PHASE → resolver` key-value로 선택한다. type·state·preset·emitter key raw 문자열과 재사용 수치는 definition에만 두고 기본 수치는 default parameter가 소유한다. `CombatEffectBuffer`는 effect collection, `ContinuousFeedbackEmitter`는 emitter cadence의 단일 쓰기 주체다. 실행 class에서 문자열을 조립하거나 `startsWith()`로 type을 추론하거나 raw 수치를 전달하지 않는다. `EnemyCombatFeedback`은 상태 class 순회만, `ClientCombatFeedback`은 factory가 만든 객체의 공통 호출 순서만 조정하며 renderer는 enemy/action/effect ID를 알지 않는다.
+- one-shot은 `ClientFeedbackEventInterpreter`가 enum/definition predicate로 기존 action, spawn, resolve와 impact 사건을 해석하고 stable causal ID를 소비한다. facade는 event type을 분기하지 않으며 소유자의 predicted ID와 공유 receipt/event ID는 기존 authority dedupe가 한 번만 전달한다. tick별 particle event를 보내지 않는다.
+- shared particle은 모든 viewer가 보며, player-hit/rope-cut 같은 개인 강조는 event definition의 `personalViewerId` predicate가 현재 viewer와 일치할 때만 생성한다. ephemeral event용 `SimulationDrivenObject`나 one-use capability는 두지 않는다.
 - snapshot envelope, claim, projectile snapshot에는 particle 배열·위치·난수·수명을 넣지 않는다.
-- Rope와 Player motion은 `ClientCombatFeedback`의 Player ID별 bounded previous-state projection을 공용으로 사용한다. 첫 sample은 baseline만 기록하며, 같은 remote `ownerMotionTick`을 반복 수신해도 acceleration one-shot을 다시 만들지 않는다. Player가 사라지면 previous-state와 continuous emitter를 함께 정리한다.
+- Rope와 Player motion은 별도 구체 객체 `RopeCombatFeedback`·`PlayerCombatFeedback`의 상태 class를 `PlayerRopeCombatFeedback`이 순서 조합하고, Has-A `PlayerRopeFeedbackLifecycle`의 Player ID별 bounded previous-state를 공용으로 사용한다. lifecycle은 previous/action/suppression Map의 단일 쓰기 주체다. 첫 sample은 baseline만 기록하며 같은 remote `ownerMotionTick`을 반복 수신해도 acceleration one-shot을 다시 만들지 않는다. Player가 사라지면 세 lifecycle Map과 `ContinuousFeedbackEmitter`의 cadence Map을 함께 정리한다.
 - Rope launch/attach/swing/release/miss는 state edge에서 한 번만, tension/flight/body streak는 low-priority continuous emitter에서만 만든다. rope-cut·impact·respawn처럼 stable causal event가 이미 있는 detach는 generic release/dissipate를 억제한다. `attachmentCandidate`, idle·저속 이동, ordinary jump와 ordinary deceleration은 particle source가 아니다.
 - `release-propulsion`은 release/body impulse의 strength만 높이고, `electrified-rope`는 tension material을 override하며 실제 contact event에만 pulse를 더한다. `fast-launch`/`long-rope`/`fast-recover`는 실제 launcher timing·distance·cooldown을 그대로 소비하고, `rope-link`는 실제 action link window에서 release transfer pulse 하나만 만든다. base와 Augment full-density emitter를 중복하지 않는다.
 

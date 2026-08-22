@@ -9,7 +9,7 @@ import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.
 import { CAMERA_CONFIG, resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
-import { selectClientStatusFeedback } from "./combat/ClientFeedbackEventObject.js";
+import { selectClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectWorldSeed } from "./world/WorldSeed.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { createRenderViewport } from "../render/RenderViewport.js";

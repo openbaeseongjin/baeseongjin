@@ -95,7 +95,7 @@ Rope presentation은 기본 lifecycle emitter를 카드별 full-density emitter�
 
 ## Action과 Signature
 
-PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 `로프 조준 ↔ 액션 조준` 토글 뒤 액션 조준 상태에서 월드를 누른 실제 지점을 방향으로 사용하며, 그 터치는 Rope 발사 입력을 만들지 않는다. `default-punch`는 증강 카드가 없는 별도 공격 예외가 아니라 모든 Player가 시작부터 가진 built-in 기본 Action이다. 주먹과 여섯 교체 Action은 같은 `ActionAugmentState`의 입력 edge·activation sequence·charge·recharge queue·snapshot/restore를 사용하고 유효 시작에서 `augment-action-started` presentation event를 만든다. 주먹/방향 잔상과 교체 가능한 `gameplay-action-swing` cue는 즉시 재생하며 predicted/confirmed 표현은 같은 `activationId`로 한 번만 보인다. 기본 주먹은 사거리 안 적이 없어도 charge를 소비하고 입력 피드백을 만들지만 피해와 넉백은 기존 유효 대상에게만 적용한다.
+PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 `로프 조준 ↔ 액션 조준` 토글 뒤 액션 조준 상태에서 월드를 누른 실제 지점을 방향으로 사용하며, 그 터치는 Rope 발사 입력을 만들지 않는다. `default-punch`는 증강 카드가 없는 별도 공격 예외가 아니라 모든 Player가 시작부터 가진 built-in 기본 Action이다. `ActionAugmentState`는 입력 edge·activation sequence·charge·recharge queue·snapshot/restore만 공통 소유하고, 주먹과 여섯 교체 Action의 activation·실행·종료는 각각의 구체 `ActionDefinition` 클래스가 override한다. Signature는 호환 Action에 선택 capability로 조합하며 Trail·Shield·Action projectile·접촉 추적처럼 독립 수명주기가 있는 상태는 Has-A 컴포넌트가 소유한다. 유효 시작은 `augment-action-started` presentation event를 만들고 주먹/방향 잔상과 교체 가능한 `gameplay-action-swing` cue는 즉시 재생하며 predicted/confirmed 표현은 같은 `activationId`로 한 번만 보인다. 기본 주먹은 사거리 안 적이 없어도 charge를 소비하고 입력 피드백을 만들지만 피해와 넉백은 기존 유효 대상에게만 적용한다.
 
 | Action                           | 기본 계약                                                                                                                             | Signature                                                                   |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -114,7 +114,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 - 로프 연동: Rope 해제 뒤 1초 안의 다음 Action cooldown `×0.50`; 빠른 재사용과 곱연산.
 - 사용 후 보호막: 유효 Action 종료 시 최대 HP 15%, 2초. 중첩하지 않고 양·시간을 갱신하며 HP 피해만 흡수한다.
 
-주먹의 수치 정의는 내부 Action Catalog가 소유하고 target resolver·owner prediction·서버 `augment-impact` formula가 같은 activation 값을 소비한다. 과거 `punchCooldownRemaining` snapshot은 restore 시 default-punch의 `chargesRemaining=0`과 recharge 상태로 한 번 migration하며 새 snapshot에는 별도 punch 필드를 쓰지 않는다. 점멸은 0.25초 분할 이동이나 impulse를 사용하지 않는다. Action 입력 상승 edge에서 한 번만 실행하며 hold 중 반복되지 않는다. Solid는 Player circle collider를 포함한 연속 경로로 검사하고, one-way는 위→아래 이동만 기존 PlayerPhysics 의미대로 차단한다. 내부 ID `direction-dash`와 `explosive-trail` 호환 관계는 저장·snapshot 호환을 위해 유지한다. `dash-strike`는 별도 속도 impulse와 0.50초 접촉 공격 창을 가진다.
+주먹의 수치 정의는 내부 Action Catalog가 소유하고 target resolver·owner prediction·서버 `augment-impact` formula가 같은 activation 값을 소비한다. Action·Signature·modifier ID와 event key는 단일 definition enum이 소유하며 고정 Catalog·formula·구체 class registry는 frozen object lookup을 사용한다. `Map`·`Set`은 activation별 contact와 projectile이 실제로 관통한 target처럼 실행 중 추가·삭제되는 membership에만 남긴다. 과거 `punchCooldownRemaining` snapshot은 전용 migration이 default-punch의 `chargesRemaining=0`과 recharge 상태로 한 번 변환하며 새 snapshot에는 별도 punch 필드를 쓰지 않는다. 점멸은 0.25초 분할 이동이나 impulse를 사용하지 않는다. Action 입력 상승 edge에서 한 번만 실행하며 hold 중 반복되지 않는다. Solid는 Player circle collider를 포함한 연속 경로로 검사하고, one-way는 위→아래 이동만 기존 PlayerPhysics 의미대로 차단한다. 내부 ID `direction-dash`와 `explosive-trail` 호환 관계는 저장·snapshot 호환을 위해 유지한다. `dash-strike`는 별도 속도 impulse와 0.50초 접촉 공격 창을 가진다.
 
 ## 피해·이동 권위
 

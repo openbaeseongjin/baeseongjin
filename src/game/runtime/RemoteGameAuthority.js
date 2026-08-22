@@ -1,54 +1,31 @@
-import { deserializeCommandReceipt } from "../network/CommandReceipt.js";
-import {
-    createAugmentImpactClaim,
-    createAugmentImpactReceipt,
-    serializeAugmentImpactClaim
-} from "../network/AugmentImpactClaim.js";
+import { createAugmentImpactClaim, serializeAugmentImpactClaim } from "../network/AugmentImpactClaim.js";
 import { createAugmentOfferClaim, serializeAugmentOfferClaim } from "../network/AugmentOfferClaim.js";
-import {
-    createCheckpointClaim,
-    createCheckpointClaimReceipt,
-    serializeCheckpointClaim
-} from "../network/CheckpointClaim.js";
+import { createCheckpointClaim, serializeCheckpointClaim } from "../network/CheckpointClaim.js";
 import {
     createFoundationSelectionClaim,
     serializeFoundationSelectionClaim
 } from "../network/FoundationSelectionClaim.js";
-import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
-import { createSummitClaim, createSummitClaimReceipt, serializeSummitClaim } from "../network/SummitClaim.js";
-import {
-    createProjectileHitClaim,
-    createProjectileHitReceipt,
-    serializeProjectileHitClaim
-} from "../network/ProjectileHitClaim.js";
+import { createSummitClaim, serializeSummitClaim } from "../network/SummitClaim.js";
+import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import {
     createPlayerImpactClaim,
-    createPlayerImpactReceipt,
     createPlayerImpactStateDigest,
     serializePlayerImpactClaim
 } from "../network/PlayerImpactClaim.js";
 import {
     createPlayerProjectileSpawnClaim,
-    createPlayerProjectileSpawnReceipt,
     serializePlayerProjectileSpawnClaim
 } from "../network/PlayerProjectileSpawnClaim.js";
-import {
-    createRopeImpactClaim,
-    createRopeImpactReceipt,
-    serializeRopeImpactClaim
-} from "../network/RopeImpactClaim.js";
-import {
-    createOwnerMotionReceipt,
-    createOwnerMotionState,
-    serializeOwnerMotionState
-} from "../network/OwnerMotionState.js";
+import { createRopeImpactClaim, serializeRopeImpactClaim } from "../network/RopeImpactClaim.js";
+import { createOwnerMotionState, serializeOwnerMotionState } from "../network/OwnerMotionState.js";
 import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
+import { MULTIPLAYER_MESSAGE_TYPE } from "../network/MultiplayerMessageDefinition.js";
 import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
-import { RemoteCommandStream } from "./RemoteCommandStream.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
 import { WORLD_CONFIG } from "../config.js";
 import { createGameSimulationForWorldRevision } from "../simulation/GameSimulationFactory.js";
+import { routeServerMessage } from "./RemoteServerMessageRouter.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
 
@@ -146,94 +123,15 @@ export class RemoteGameAuthority {
             socket.addEventListener("message", (event) => {
                 try {
                     const message = JSON.parse(event.data);
-                    if (message.type === "error") {
-                        const errors = {
-                            "channel-full": `채널 ${message.channelId ?? ""}의 인원이 가득 찼습니다.`,
-                            "channel-not-found": `채널 ${message.channelId ?? ""}을 찾을 수 없습니다.`
-                        };
-                        failSession(
-                            errors[message.code] ??
-                                message.message ??
-                                message.code ??
-                                "멀티 서버 요청이 거부되었습니다.",
-                            1008,
-                            "server rejected session"
-                        );
-                        return;
-                    }
-                    if (message.type === "welcome") {
-                        this.playerId = message.playerId;
-                        this.channelId = message.channelId;
-                        this.snapshotFlowControl = message.snapshotFlowControl === true;
-                        this.stream = new RemoteCommandStream({
-                            playerId: this.playerId,
-                            inputLeadTicks: MULTIPLAYER_TIMING.inputLeadTicks
-                        });
-                        this.acceptSnapshot(message.snapshot);
-                        if (!settled) {
+                    routeServerMessage(message, {
+                        authority: this,
+                        failSession,
+                        settle: () => {
+                            if (settled) return;
                             settled = true;
                             resolve(this);
                         }
-                    } else if (message.type === "snapshot") {
-                        this.acceptSnapshot(message.payload);
-                    } else if (message.type === "receipt" && this.stream) {
-                        const receipt = deserializeCommandReceipt(message.payload);
-                        this.recordReceipt(receipt);
-                        this.stream.acceptReceipt(receipt);
-                    } else if (message.type === "foundation-selection-receipt") {
-                        this.foundationSelectionReceipts.push(Object.freeze({ ...message.payload }));
-                    } else if (message.type === "augment-offer-receipt") {
-                        this.augmentOfferReceipts.push(Object.freeze({ ...message.payload }));
-                    } else if (message.type === "hit-claim-receipt") {
-                        this.recordHitClaimReceipt(createProjectileHitReceipt(message.payload));
-                    } else if (message.type === "projectile-spawn-claim-receipt") {
-                        const receipt = createPlayerProjectileSpawnReceipt(message.payload);
-                        this.projectileSpawnClaimReceipts.push(receipt);
-                        this.ownerRuntime?.recordProjectileSpawnReceipt(receipt);
-                    } else if (message.type === "impact-claim-receipt") {
-                        const receipt = createPlayerImpactReceipt(message.payload);
-                        const pending = this.pendingImpactClaims.get(receipt.impactId);
-                        if (receipt.accepted && receipt.resolution === "recovery-required" && pending) {
-                            const recovery = this.ownerRuntime?.impactRecoveryState();
-                            if (!recovery) throw new Error("impact recovery requires an owner state");
-                            const outcome = {
-                                ...pending.outcome,
-                                recoveryId: receipt.recoveryId,
-                                stateTick: recovery.stateTick,
-                                digest: createPlayerImpactStateDigest(recovery.state, {
-                                    impactType: pending.event.resolution,
-                                    respawned: pending.outcome.respawned
-                                }),
-                                state: recovery.state
-                            };
-                            this.submitImpactClaim(pending.event, outcome);
-                            return;
-                        }
-                        this.pendingImpactClaims.delete(receipt.impactId);
-                        this.impactClaimReceipts.push(receipt);
-                        this.ownerRuntime?.recordImpactReceipt(receipt, this.latestSnapshot);
-                    } else if (message.type === "rope-impact-receipt") {
-                        const receipt = createRopeImpactReceipt(message.payload);
-                        this.ropeImpactReceipts.push(receipt);
-                        if (!receipt.accepted) {
-                            this.locallyPredictedRopeImpactIds.delete(receipt.predictionId);
-                            this.predictedRopeImpactResolutions.delete(receipt.predictionId);
-                        }
-                    } else if (message.type === "augment-impact-receipt") {
-                        const receipt = createAugmentImpactReceipt(message.payload);
-                        this.augmentImpactReceipts.push(receipt);
-                        if (!receipt.accepted) this.locallyPredictedAugmentImpactIds.delete(receipt.eventId);
-                    } else if (message.type === "owner-motion-receipt") {
-                        this.recordOwnerMotionReceipt(createOwnerMotionReceipt(message.payload));
-                    } else if (message.type === "debug-teleport-receipt") {
-                        this.debugTeleportReceipts.push(Object.freeze({ ...message.payload }));
-                    } else if (message.type === "checkpoint-claim-receipt") {
-                        this.recordCheckpointClaimReceipt(createCheckpointClaimReceipt(message.payload));
-                    } else if (message.type === "summit-claim-receipt") {
-                        this.recordSummitClaimReceipt(createSummitClaimReceipt(message.payload));
-                    } else if (message.type !== "player-left") {
-                        throw new Error(`unsupported server message: ${message.type ?? "missing type"}`);
-                    }
+                    });
                 } catch (error) {
                     failSession(`서버 메시지를 처리하지 못했습니다: ${error.message}`);
                 }
@@ -282,7 +180,7 @@ export class RemoteGameAuthority {
 
     acknowledgeSnapshot(snapshotSequence) {
         if (!this.snapshotFlowControl || this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
-        this.socket.send(JSON.stringify({ type: "snapshot-ack", snapshotSequence }));
+        this.socket.send(JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT_ACK, snapshotSequence }));
         return true;
     }
 
@@ -297,7 +195,9 @@ export class RemoteGameAuthority {
         const batch = this.stream.createBatchAtTick(predictedTick, command);
         if (!batch) return false;
         this.trackSentCommand(batch.commands[0].sequence, this.now());
-        this.socket.send(JSON.stringify({ type: "command", payload: serializePlayerCommandBatch(batch) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.COMMAND, payload: serializePlayerCommandBatch(batch) })
+        );
         this.submitOwnerMotion();
         return true;
     }
@@ -327,7 +227,9 @@ export class RemoteGameAuthority {
 
     sendOwnerMotion(motion) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !motion) return false;
-        this.socket.send(JSON.stringify({ type: "owner-motion", payload: serializeOwnerMotionState(motion) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.OWNER_MOTION, payload: serializeOwnerMotionState(motion) })
+        );
         return true;
     }
 
@@ -407,7 +309,9 @@ export class RemoteGameAuthority {
             clientTick: event.clientTick,
             position: event.position
         });
-        this.socket.send(JSON.stringify({ type: "hit-claim", payload: serializeProjectileHitClaim(claim) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.HIT_CLAIM, payload: serializeProjectileHitClaim(claim) })
+        );
         return true;
     }
 
@@ -422,7 +326,7 @@ export class RemoteGameAuthority {
         });
         this.socket.send(
             JSON.stringify({
-                type: "projectile-spawn-claim",
+                type: MULTIPLAYER_MESSAGE_TYPE.PROJECTILE_SPAWN_CLAIM,
                 payload: serializePlayerProjectileSpawnClaim(claim)
             })
         );
@@ -440,7 +344,9 @@ export class RemoteGameAuthority {
             damage: event.damage ?? event.parameters?.damage ?? 0,
             outcome
         });
-        this.socket.send(JSON.stringify({ type: "impact-claim", payload: serializePlayerImpactClaim(claim) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.IMPACT_CLAIM, payload: serializePlayerImpactClaim(claim) })
+        );
         return true;
     }
 
@@ -462,7 +368,9 @@ export class RemoteGameAuthority {
             this.locallyPredictedRopeImpactIds.delete(expiredPredictionId);
             this.predictedRopeImpactResolutions.delete(expiredPredictionId);
         }
-        this.socket.send(JSON.stringify({ type: "rope-impact", payload: serializeRopeImpactClaim(claim) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.ROPE_IMPACT, payload: serializeRopeImpactClaim(claim) })
+        );
         return true;
     }
 
@@ -496,7 +404,12 @@ export class RemoteGameAuthority {
         while (this.locallyPredictedAugmentImpactOrder.length > MAX_TRACKED_COMMANDS) {
             this.locallyPredictedAugmentImpactIds.delete(this.locallyPredictedAugmentImpactOrder.shift());
         }
-        this.socket.send(JSON.stringify({ type: "augment-impact", payload: serializeAugmentImpactClaim(claim) }));
+        this.socket.send(
+            JSON.stringify({
+                type: MULTIPLAYER_MESSAGE_TYPE.AUGMENT_IMPACT,
+                payload: serializeAugmentImpactClaim(claim)
+            })
+        );
         return true;
     }
 
@@ -517,7 +430,9 @@ export class RemoteGameAuthority {
 
     requestDebugTeleport(areaId) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
-        this.socket.send(JSON.stringify({ type: "debug-teleport", payload: JSON.stringify({ areaId }) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.DEBUG_TELEPORT, payload: JSON.stringify({ areaId }) })
+        );
         return true;
     }
 
@@ -531,7 +446,7 @@ export class RemoteGameAuthority {
         });
         this.socket.send(
             JSON.stringify({
-                type: "foundation-selection",
+                type: MULTIPLAYER_MESSAGE_TYPE.FOUNDATION_SELECTION,
                 payload: serializeFoundationSelectionClaim(claim)
             })
         );
@@ -547,7 +462,12 @@ export class RemoteGameAuthority {
         if (!this.submitOwnerMotion() || !this.ownerRuntime.applyPredictedCheckpoint(candidate)) return null;
         const claim = createCheckpointClaim(candidate);
         this.pendingCheckpointId = claim.checkpointId;
-        this.socket.send(JSON.stringify({ type: "checkpoint-claim", payload: serializeCheckpointClaim(claim) }));
+        this.socket.send(
+            JSON.stringify({
+                type: MULTIPLAYER_MESSAGE_TYPE.CHECKPOINT_CLAIM,
+                payload: serializeCheckpointClaim(claim)
+            })
+        );
         return candidate;
     }
 
@@ -560,7 +480,9 @@ export class RemoteGameAuthority {
         this.submitOwnerMotion();
         const claim = createSummitClaim(candidate);
         this.pendingSummitClaim = true;
-        this.socket.send(JSON.stringify({ type: "summit-claim", payload: serializeSummitClaim(claim) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SUMMIT_CLAIM, payload: serializeSummitClaim(claim) })
+        );
         return candidate;
     }
 
@@ -683,7 +605,9 @@ export class RemoteGameAuthority {
             sourceId,
             clientTick: this.ownerRuntime.state().tick
         });
-        this.socket.send(JSON.stringify({ type: "augment-offer", payload: serializeAugmentOfferClaim(claim) }));
+        this.socket.send(
+            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.AUGMENT_OFFER, payload: serializeAugmentOfferClaim(claim) })
+        );
         return true;
     }
 

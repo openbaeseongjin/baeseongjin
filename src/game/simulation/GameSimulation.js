@@ -1,6 +1,16 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { FOUNDATION_AUGMENT_CATALOG, foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
-import { validateAugmentImpactFormula } from "../augments/AugmentImpactFormula.js";
+import { augmentImpactFormula, validateAugmentImpactFormula } from "../augments/AugmentImpactFormula.js";
+import {
+    ACTION_EVENT_TYPE,
+    ACTION_KEY,
+    ACTION_MODIFIER_ID,
+    ACTION_PREDICTED_RESOLUTION,
+    ACTION_SIGNATURE_ID,
+    ACTION_SOURCE_KIND,
+    ACTION_STATE_CONFIG,
+    BASE_ACTION_ID
+} from "../augments/actions/ActionAugmentDefinition.js";
 import { BOSS_01_DEFINITION } from "../boss/Boss01Definition.js";
 import { BossEncounterRuntime } from "../boss/BossEncounterRuntime.js";
 import {
@@ -17,7 +27,7 @@ import {
     isKnownEnemyType
 } from "../combat/EnemyArchetypeCatalog.js";
 import { advanceEnemyBehaviors } from "../combat/EnemyBehaviors.js";
-import { EnemyObject } from "../combat/EnemyObject.js";
+import { createEnemyObject } from "../combat/EnemyObject.js";
 import { recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
 import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js";
 import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
@@ -47,6 +57,7 @@ import { CollisionBroadPhase } from "../physics/spatial/CollisionBroadPhase.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
+import { ROPE_AUGMENT_PERCENTAGES } from "../augments/rope/RopeAugmentTuning.js";
 import {
     advanceFoundationRewardSelection,
     createDeterministicFoundationRewardSelection,
@@ -145,7 +156,7 @@ function clamp(value, minimum, maximum) {
 function createEnemyRuntime(properties) {
     if (isEnemyArchetype(properties.enemyType)) return createEnemyArchetype(properties);
     if (isKnownEnemyType(properties.enemyType)) {
-        return new EnemyObject({ ...properties, displayName: enemyDisplayName(properties.enemyType) });
+        return createEnemyObject({ ...properties, displayName: enemyDisplayName(properties.enemyType) });
     }
     throw new Error(`unknown enemy type: ${properties.enemyType}`);
 }
@@ -660,10 +671,7 @@ export class GameSimulation {
         const activeEnemyIds = new Set(this.activeSimulationEnemies.map(({ id }) => id));
         for (const enemy of this.enemies) {
             if (activeEnemyIds.has(enemy.id)) continue;
-            enemy.velocity.set(0, 0);
-            enemy.actorCollisionVelocity?.set(0, 0);
-            enemy.surfaceControlVelocity?.set(0, 0);
-            enemy.surfacePhysicsStepPending = false;
+            enemy.suspendSurfacePhysics();
         }
         return this.activeSimulationEnemies;
     }
@@ -762,7 +770,7 @@ export class GameSimulation {
                 player.physics.position.y - previous.position.y
             ) < 1e-6;
         if (stillAtPredictedArrival) {
-            player.physics.position.set(position.x, position.y);
+            player.physics.setPhysicsPosition(position);
             player.ropeObject.aimWorld = Object.freeze({ x: position.x, y: position.y });
             this.collisionBroadPhase.invalidateFrame();
         }
@@ -818,7 +826,7 @@ export class GameSimulation {
                   }
                 : null);
         if (!entry) return false;
-        player.physics.position.set(entry.x, entry.y);
+        player.physics.setPhysicsPosition(entry);
         this.#advanceAuthoredWorldProgress(new Map(), { dt: 0 });
         return this.worldProgress.isGateCrossed(gate.id);
     }
@@ -826,8 +834,8 @@ export class GameSimulation {
     applyOwnerMotion(playerId, state, { synchronizeRope = true } = {}) {
         const player = this.#requirePlayer(playerId);
         this.#advanceSweptOwnerGate(player, state.position);
-        player.physics.position.set(state.position.x, state.position.y);
-        player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        player.physics.setPhysicsPosition(state.position);
+        player.physics.setPhysicsVelocity(state.velocity);
         this.collisionBroadPhase.invalidateFrame();
         player.physics.setAngularState(state.angle, state.angularVelocity);
         player.physics.isGrounded = state.isGrounded;
@@ -1053,7 +1061,7 @@ export class GameSimulation {
         if (event.resolution !== "player-hit") return false;
         const speed = Math.hypot(event.velocity?.x ?? 0, event.velocity?.y ?? 0);
         if (speed > 0) {
-            player.physics.addImpulse(
+            player.physics.applyImpulse(
                 new Vector2(event.velocity.x / speed, event.velocity.y / speed),
                 COMBAT_CONFIG.playerHitKnockback
             );
@@ -1137,8 +1145,8 @@ export class GameSimulation {
             if (!anchor) throw new Error(`unknown restored respawn anchor: ${state.respawnAnchorId}`);
             player.respawnAnchorId = anchor.id;
         }
-        player.physics.position.set(state.position.x, state.position.y);
-        player.physics.velocity.set(state.velocity.x, state.velocity.y);
+        player.physics.setPhysicsPosition(state.position);
+        player.physics.setPhysicsVelocity(state.velocity);
         this.collisionBroadPhase.invalidateFrame();
         player.physics.setAngularState(state.angle, state.angularVelocity);
         player.physics.isGrounded = state.isGrounded;
@@ -1453,25 +1461,28 @@ export class GameSimulation {
                 onAttach: () => {},
                 onRelease: () => {
                     if (player.foundation.has("release-propulsion")) {
-                        player.physics.velocity.scale(1.25);
+                        const velocity = player.physics.physicsStepVelocity();
+                        player.physics.applyImpulse(
+                            velocity.clone().scale(ROPE_AUGMENT_PERCENTAGES.releasePropulsionVelocity)
+                        );
                         foundationEvents.push(
                             Object.freeze({
                                 eventType: "augment-release-propulsion",
                                 playerId: player.id,
                                 augmentId: "release-propulsion",
                                 position: vectorState(player.physics.position),
-                                velocity: vectorState(player.physics.velocity)
+                                velocity: vectorState(player.physics.physicsStepVelocity())
                             })
                         );
                     }
                     if (player.augmentCombat.onRopeReleased()) {
                         foundationEvents.push(
                             Object.freeze({
-                                eventType: "augment-rope-link-ready",
+                                eventType: ACTION_EVENT_TYPE.ROPE_LINK_READY,
                                 playerId: player.id,
-                                augmentId: "rope-link",
+                                augmentId: ACTION_MODIFIER_ID.ROPE_LINK,
                                 position: vectorState(player.physics.position),
-                                duration: 1
+                                duration: ACTION_STATE_CONFIG.ROPE_LINK_WINDOW_SECONDS
                             })
                         );
                     }
@@ -1603,6 +1614,7 @@ export class GameSimulation {
 
     #advanceEnemyImpactKnockbacks(dt, { emitWallImpacts = false } = {}) {
         const events = [];
+        const wallImpactDamage = augmentImpactFormula(ACTION_SIGNATURE_ID.WALL_IMPACT).damage;
         for (const enemy of this.activeSimulationEnemies) {
             if (!this.debugTrainingDummy.canSimulate(enemy)) continue;
             const state = enemy.knockbackSnapshot();
@@ -1627,19 +1639,31 @@ export class GameSimulation {
             if (enemy.knockbackState) enemy.knockbackState.wallImpactTriggered = true;
             events.push(
                 Object.freeze({
-                    eventId: `${state.sourcePlayerId}:wall-impact:${this.tick}:${enemy.id}`,
-                    predictionId: `${state.sourcePlayerId}:wall-impact:${this.tick}:${enemy.id}`,
+                    eventId: ACTION_KEY.impact(
+                        state.sourcePlayerId,
+                        ACTION_SIGNATURE_ID.WALL_IMPACT,
+                        this.tick,
+                        enemy.id
+                    ),
+                    predictionId: ACTION_KEY.impact(
+                        state.sourcePlayerId,
+                        ACTION_SIGNATURE_ID.WALL_IMPACT,
+                        this.tick,
+                        enemy.id
+                    ),
                     sourcePlayerId: state.sourcePlayerId,
                     targetId: enemy.id,
                     clientTick: this.tick,
-                    effectId: "wall-impact",
-                    sourceKind: "knockback-wall-contact",
+                    effectId: ACTION_SIGNATURE_ID.WALL_IMPACT,
+                    sourceKind: ACTION_SOURCE_KIND.KNOCKBACK_WALL_CONTACT,
                     sourcePosition: vectorState(previousPosition),
                     contactPosition: vectorState(enemy.position),
                     position: vectorState(enemy.position),
-                    damage: AUGMENT_IMPACT_CONFIG.baseDamage * 0.8,
+                    damage: wallImpactDamage,
                     predictedResolution:
-                        enemy.health <= AUGMENT_IMPACT_CONFIG.baseDamage * 0.8 ? "enemy-defeated" : "enemy-hit"
+                        enemy.health <= wallImpactDamage
+                            ? ACTION_PREDICTED_RESOLUTION.ENEMY_DEFEATED
+                            : ACTION_PREDICTED_RESOLUTION.ENEMY_HIT
                 })
             );
         }
@@ -1731,7 +1755,7 @@ export class GameSimulation {
             target.knockbackState.sourcePlayerId = authenticatedPlayerId;
             target.knockbackState.sourceEffectId = claim.effectId;
             target.knockbackState.wallImpactEligible =
-                claim.effectId === "push-away" && player.foundation.has("wall-impact");
+                claim.effectId === BASE_ACTION_ID.PUSH_AWAY && player.foundation.has(ACTION_SIGNATURE_ID.WALL_IMPACT);
             target.knockbackState.wallImpactTriggered = false;
         }
         if (!result.accepted || !result.emitEffects) return result;
@@ -1826,8 +1850,7 @@ export class GameSimulation {
             occluders: this.windOccluders
         });
         const groundedFactor = player.physics.isGrounded ? WIND_CONFIG.groundedFactor : 1;
-        player.physics.velocity.x += force.x * groundedFactor * dt;
-        player.physics.velocity.y += force.y * groundedFactor * dt;
+        player.physics.applyAcceleration({ x: force.x * groundedFactor, y: force.y * groundedFactor }, dt);
     }
 
     #accessScanPredicate() {
@@ -2599,7 +2622,7 @@ export class GameSimulation {
             player.health = Math.max(0, player.health - protection.appliedDamage);
             const speed = projectile.velocity.length();
             if (speed > 0) {
-                player.physics.addImpulse(
+                player.physics.applyImpulse(
                     projectile.velocity.clone().scale(1 / speed),
                     COMBAT_CONFIG.playerHitKnockback
                 );
@@ -2660,7 +2683,7 @@ export class GameSimulation {
         player.health = Math.max(0, player.health - protection.appliedDamage);
         const speed = Math.hypot(claim.velocity.x, claim.velocity.y);
         if (speed > 0) {
-            player.physics.addImpulse(
+            player.physics.applyImpulse(
                 new Vector2(claim.velocity.x / speed, claim.velocity.y / speed),
                 COMBAT_CONFIG.playerHitKnockback
             );

@@ -1,6 +1,6 @@
 export function resolvePlayerCollisions(player, otherPlayers) {
     if (!player?.physics?.collider) return false;
-    const result = player.physics.resolveSurfaceActors({
+    const result = player.physics.resolveActorPhysics({
         actorId: player.id,
         actors: otherPlayers,
         isGrounded: player.physics.isGrounded

@@ -1,4 +1,4 @@
-import { EnemyObject } from "./EnemyObject.js";
+import { createEnemyObject } from "./EnemyObject.js";
 import {
     ArtilleryEnemyBehavior,
     PursuitEnemyBehavior,
@@ -7,62 +7,66 @@ import {
     SwarmEnemyBehavior
 } from "./EnemyBehaviors.js";
 import { ENEMY_BEHAVIOR_STATES } from "./EnemyStateCatalog.js";
+import { ENEMY_TYPE } from "../EnemyType.js";
+import { ENEMY_BEHAVIOR_KIND } from "./enemy-behavior/EnemyBehaviorDefinition.js";
 
 const DEFINITIONS = Object.freeze([
     Object.freeze({
-        id: "pursuit-drone-t1",
+        id: ENEMY_TYPE.PURSUIT_DRONE_T1,
         displayName: "추격 드론",
-        behaviorKind: "pursuit",
-        behaviorStates: ENEMY_BEHAVIOR_STATES.pursuit,
+        behaviorKind: ENEMY_BEHAVIOR_KIND.PURSUIT,
+        behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.PURSUIT],
         usesProjectileAttack: true,
         createBehavior: (state) => new PursuitEnemyBehavior(state)
     }),
     Object.freeze({
-        id: "shield-drone-t1",
+        id: ENEMY_TYPE.SHIELD_DRONE_T1,
         displayName: "방패 드론",
-        behaviorKind: "shield",
-        behaviorStates: ENEMY_BEHAVIOR_STATES.shield,
+        behaviorKind: ENEMY_BEHAVIOR_KIND.SHIELD,
+        behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SHIELD],
         usesProjectileAttack: true,
         createBehavior: (state) => new ShieldEnemyBehavior(state)
     }),
     Object.freeze({
-        id: "artillery-drone-t1",
+        id: ENEMY_TYPE.ARTILLERY_DRONE_T1,
         displayName: "포격 드론",
-        behaviorKind: "artillery",
-        behaviorStates: ENEMY_BEHAVIOR_STATES.artillery,
+        behaviorKind: ENEMY_BEHAVIOR_KIND.ARTILLERY,
+        behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.ARTILLERY],
         usesProjectileAttack: false,
         createBehavior: (state) => new ArtilleryEnemyBehavior(state)
     }),
     Object.freeze({
-        id: "support-drone-t1",
+        id: ENEMY_TYPE.SUPPORT_DRONE_T1,
         displayName: "지원 드론",
-        behaviorKind: "support",
-        behaviorStates: ENEMY_BEHAVIOR_STATES.support,
+        behaviorKind: ENEMY_BEHAVIOR_KIND.SUPPORT,
+        behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SUPPORT],
         usesProjectileAttack: false,
         createBehavior: (state) => new SupportEnemyBehavior(state)
     }),
     Object.freeze({
-        id: "swarm-drone-t1",
+        id: ENEMY_TYPE.SWARM_DRONE_T1,
         displayName: "군집 드론",
-        behaviorKind: "swarm",
-        behaviorStates: ENEMY_BEHAVIOR_STATES.swarm,
+        behaviorKind: ENEMY_BEHAVIOR_KIND.SWARM,
+        behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SWARM],
         usesProjectileAttack: true,
         createBehavior: (state) => new SwarmEnemyBehavior(state)
     })
 ]);
 
-const DEFINITIONS_BY_ID = new Map(DEFINITIONS.map((definition) => [definition.id, definition]));
-const LEGACY_DISPLAY_NAMES = new Map([
-    ["sentry", "경계 포탑"],
-    ["sentry-t1", "경계 포탑"],
-    ["patrol-drone", "순찰 드론"],
-    ["patrol-drone-t1", "순찰 드론"]
-]);
+const DEFINITIONS_BY_ID = Object.freeze(
+    Object.fromEntries(DEFINITIONS.map((definition) => [definition.id, definition]))
+);
+const LEGACY_DISPLAY_NAMES = Object.freeze({
+    [ENEMY_TYPE.SENTRY]: "경계 포탑",
+    [ENEMY_TYPE.SENTRY_T1]: "경계 포탑",
+    [ENEMY_TYPE.PATROL_DRONE]: "순찰 드론",
+    [ENEMY_TYPE.PATROL_DRONE_T1]: "순찰 드론"
+});
 
 export const ENEMY_ARCHETYPE_IDS = Object.freeze(DEFINITIONS.map(({ id }) => id));
 
 export function isEnemyArchetype(enemyType) {
-    return DEFINITIONS_BY_ID.has(enemyType);
+    return Object.hasOwn(DEFINITIONS_BY_ID, enemyType);
 }
 
 export function isKnownEnemyType(enemyType) {
@@ -70,43 +74,34 @@ export function isKnownEnemyType(enemyType) {
         enemyType === undefined ||
         enemyType === null ||
         isEnemyArchetype(enemyType) ||
-        LEGACY_DISPLAY_NAMES.has(enemyType)
+        Object.hasOwn(LEGACY_DISPLAY_NAMES, enemyType)
     );
 }
 
 export function enemyArchetypeDefinition(enemyType) {
-    const definition = DEFINITIONS_BY_ID.get(enemyType);
+    const definition = DEFINITIONS_BY_ID[enemyType];
     if (!definition) throw new Error(`unknown enemy archetype: ${enemyType}`);
     return definition;
 }
 
 export function enemyDisplayName(enemyType) {
     if (enemyType === undefined || enemyType === null) return "경계 포탑";
-    return DEFINITIONS_BY_ID.get(enemyType)?.displayName ?? LEGACY_DISPLAY_NAMES.get(enemyType) ?? enemyType;
-}
-
-function mergeRules(rules = [], usesProjectileAttack) {
-    return Object.freeze([
-        ...new Set(
-            usesProjectileAttack
-                ? rules.filter((rule) => rule !== "no-projectile-attack")
-                : [...rules, "no-projectile-attack"]
-        )
-    ]);
+    return DEFINITIONS_BY_ID[enemyType]?.displayName ?? LEGACY_DISPLAY_NAMES[enemyType] ?? enemyType;
 }
 
 export function createEnemyArchetype({ enemyType, behaviorState = null, rules = [], ...properties }) {
     const definition = enemyArchetypeDefinition(enemyType);
     const swarmGroupId =
-        enemyType === "swarm-drone-t1"
+        enemyType === ENEMY_TYPE.SWARM_DRONE_T1
             ? (properties.swarmGroupId ?? properties.objectId ?? properties.id)
             : (properties.swarmGroupId ?? null);
-    return new EnemyObject({
+    return createEnemyObject({
         ...properties,
         enemyType,
         displayName: definition.displayName,
         behavior: definition.createBehavior(behaviorState ?? {}),
         swarmGroupId,
-        rules: mergeRules(rules, definition.usesProjectileAttack)
+        rules,
+        usesProjectileAttack: definition.usesProjectileAttack
     });
 }

@@ -1,5 +1,6 @@
 import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 import { PROJECTILE_MOTION_CAPABILITY } from "./ProjectileObject.js";
+import { ENEMY_SIMULATION_CAPABILITY } from "./enemy-weapon/EnemyWeaponDefinition.js";
 
 const simulationDispatcher = new SimulationDispatcher();
 const EMPTY_COLLISION_ACTORS = Object.freeze([]);
@@ -32,12 +33,12 @@ export function updatePlayerProjectiles({
     resolveHits = true,
     maxLifetimeSeconds = Number.POSITIVE_INFINITY
 }) {
-    const enemyById = new Map(enemies.map((enemy) => [enemy.id, enemy]));
+    const enemyById = Object.freeze(Object.fromEntries(enemies.map((enemy) => [enemy.id, enemy])));
     const survivors = [];
     const hits = [];
     const resolutions = [];
     for (const projectile of projectiles) {
-        const target = enemyById.get(projectile.targetId);
+        const target = enemyById[projectile.targetId];
         if (!target || target.health <= 0) {
             resolutions.push(
                 Object.freeze({
@@ -95,7 +96,7 @@ export function updatePlayerProjectiles({
 
 export function updateEnemyPresentationAim({ enemies, targets, range, surfaces = [] }) {
     for (const enemy of enemies) {
-        advanceSimulationObject(enemy, "enemy-presentation-aim", { targets, range, surfaces });
+        advanceSimulationObject(enemy, ENEMY_SIMULATION_CAPABILITY.PRESENTATION_AIM, { targets, range, surfaces });
     }
 }
 
@@ -114,16 +115,23 @@ export function updateEnemyWeapons({
     return Object.freeze(
         liveEnemies
             .map((enemy) => {
-                return advanceSimulationObject(enemy, "enemy-weapon", {
-                    targets,
+                const spawnedProjectile = enemy.hasSimulationCapability(ENEMY_SIMULATION_CAPABILITY.WEAPON)
+                    ? advanceSimulationObject(enemy, ENEMY_SIMULATION_CAPABILITY.WEAPON, {
+                          targets,
+                          projectiles,
+                          registry,
+                          config,
+                          surfaces,
+                          dt
+                      })
+                    : null;
+                advanceSimulationObject(enemy, ENEMY_SIMULATION_CAPABILITY.PHYSICS, {
                     collisionActors,
                     collisionBroadPhase,
-                    projectiles,
-                    registry,
-                    config,
                     surfaces,
                     dt
                 });
+                return spawnedProjectile;
             })
             .filter((projectile) => projectile !== null)
     );

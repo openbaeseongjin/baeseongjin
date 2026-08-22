@@ -1,15 +1,17 @@
+import { ACTION_MODIFIER_ID, ACTION_SIGNATURE_ID, BASE_ACTION_ID } from "./actions/ActionAugmentDefinition.js";
+
 const ACTION_SIGNATURE_BY_ACTION_ID = Object.freeze({
-    "direction-dash": "explosive-trail",
-    "dash-strike": "collision-rebound",
-    "instant-guard": "damage-reflect",
-    "push-away": "wall-impact",
-    "straight-shot": "piercing-shot",
-    "slow-fall": "end-wave"
+    [BASE_ACTION_ID.DIRECTION_DASH]: ACTION_SIGNATURE_ID.EXPLOSIVE_TRAIL,
+    [BASE_ACTION_ID.DASH_STRIKE]: ACTION_SIGNATURE_ID.COLLISION_REBOUND,
+    [BASE_ACTION_ID.INSTANT_GUARD]: ACTION_SIGNATURE_ID.DAMAGE_REFLECT,
+    [BASE_ACTION_ID.PUSH_AWAY]: ACTION_SIGNATURE_ID.WALL_IMPACT,
+    [BASE_ACTION_ID.STRAIGHT_SHOT]: ACTION_SIGNATURE_ID.PIERCING_SHOT,
+    [BASE_ACTION_ID.SLOW_FALL]: ACTION_SIGNATURE_ID.END_WAVE
 });
 
 const LEGACY_FOUNDATION_ID_MIGRATION = Object.freeze({
     "impulse-coil": "release-propulsion",
-    "relay-link": "rope-link",
+    "relay-link": ACTION_MODIFIER_ID.ROPE_LINK,
     "shear-current": "electrified-rope"
 });
 
@@ -70,115 +72,115 @@ const AUGMENT_DEFINITIONS = Object.freeze([
         category: "rope"
     }),
     createCard({
-        id: "direction-dash",
+        id: BASE_ACTION_ID.DIRECTION_DASH,
         name: "점멸",
         family: "기본 액션",
         tagline: "최대 150px 순간이동",
         description: "조준 방향의 가장 먼 안전 위치까지 즉시 점멸합니다.",
         category: "action",
-        actionId: "direction-dash"
+        actionId: BASE_ACTION_ID.DIRECTION_DASH
     }),
     createCard({
-        id: "dash-strike",
+        id: BASE_ACTION_ID.DASH_STRIKE,
         name: "돌진 타격",
         family: "기본 액션",
         tagline: "벡터 충격 타격",
         description: "현재 속도에 조준 방향 충격을 더하고 짧은 타격 창을 엽니다.",
         category: "action",
-        actionId: "dash-strike"
+        actionId: BASE_ACTION_ID.DASH_STRIKE
     }),
     createCard({
-        id: "instant-guard",
+        id: BASE_ACTION_ID.INSTANT_GUARD,
         name: "순간 방어",
         family: "기본 액션",
         tagline: "첫 HP 피해 무효",
         description: "짧은 시간 첫 전투 HP 피해를 0으로 막습니다.",
         category: "action",
-        actionId: "instant-guard"
+        actionId: BASE_ACTION_ID.INSTANT_GUARD
     }),
     createCard({
-        id: "push-away",
+        id: BASE_ACTION_ID.PUSH_AWAY,
         name: "밀쳐내기",
         family: "기본 액션",
         tagline: "주변 방사 넉백",
         description: "주변 적을 한 번에 밀쳐내고 피해를 줍니다.",
         category: "action",
-        actionId: "push-away"
+        actionId: BASE_ACTION_ID.PUSH_AWAY
     }),
     createCard({
-        id: "straight-shot",
+        id: BASE_ACTION_ID.STRAIGHT_SHOT,
         name: "직선 사격",
         family: "기본 액션",
         tagline: "2000px/s 직선탄",
         description: "고속 직선 탄환을 발사합니다.",
         category: "action",
-        actionId: "straight-shot"
+        actionId: BASE_ACTION_ID.STRAIGHT_SHOT
     }),
     createCard({
-        id: "slow-fall",
+        id: BASE_ACTION_ID.SLOW_FALL,
         name: "느린 낙하",
         family: "기본 액션",
         tagline: "공중 낙하 완화",
         description: "공중에서 중력을 약화시켜 천천히 내려옵니다.",
         category: "action",
-        actionId: "slow-fall"
+        actionId: BASE_ACTION_ID.SLOW_FALL
     }),
     createCard({
-        id: "explosive-trail",
+        id: ACTION_SIGNATURE_ID.EXPLOSIVE_TRAIL,
         name: "폭발 흔적",
         family: "시그니처",
         tagline: "점멸 전용",
         description: "점멸의 실제 이동 경로를 0.50초 뒤 폭발시키는 흔적을 남깁니다.",
         category: "signature",
-        actionId: "direction-dash"
+        actionId: BASE_ACTION_ID.DIRECTION_DASH
     }),
     createCard({
-        id: "collision-rebound",
+        id: ACTION_SIGNATURE_ID.COLLISION_REBOUND,
         name: "충돌 반동",
         family: "시그니처",
         tagline: "돌진 타격 전용",
         description: "돌진 타격 중 적과 장애물에 속도 손실 없이 반사됩니다.",
         category: "signature",
-        actionId: "dash-strike"
+        actionId: BASE_ACTION_ID.DASH_STRIKE
     }),
     createCard({
-        id: "damage-reflect",
+        id: ACTION_SIGNATURE_ID.DAMAGE_REFLECT,
         name: "피해 반사",
         family: "시그니처",
         tagline: "순간 방어 전용",
         description: "막은 HP 피해를 공격자에게 한 번 되돌립니다.",
         category: "signature",
-        actionId: "instant-guard"
+        actionId: BASE_ACTION_ID.INSTANT_GUARD
     }),
     createCard({
-        id: "wall-impact",
+        id: ACTION_SIGNATURE_ID.WALL_IMPACT,
         name: "벽 충돌",
         family: "시그니처",
         tagline: "밀쳐내기 전용",
         description: "밀쳐진 적이 벽이나 바닥에 부딪히면 추가 피해를 줍니다.",
         category: "signature",
-        actionId: "push-away"
+        actionId: BASE_ACTION_ID.PUSH_AWAY
     }),
     createCard({
-        id: "piercing-shot",
+        id: ACTION_SIGNATURE_ID.PIERCING_SHOT,
         name: "관통 사격",
         family: "시그니처",
         tagline: "직선 사격 전용",
         description: "직선 사격이 적을 관통하며 피해를 유지합니다.",
         category: "signature",
-        actionId: "straight-shot"
+        actionId: BASE_ACTION_ID.STRAIGHT_SHOT
     }),
     createCard({
-        id: "end-wave",
+        id: ACTION_SIGNATURE_ID.END_WAVE,
         name: "종료 파동",
         family: "시그니처",
         tagline: "느린 낙하 전용",
         description: "느린 낙하가 끝나는 지점에서 범위 파동을 방출합니다.",
         category: "signature",
-        actionId: "slow-fall"
+        actionId: BASE_ACTION_ID.SLOW_FALL
     }),
     createCard({
-        id: "fast-reuse",
+        id: ACTION_MODIFIER_ID.FAST_REUSE,
         name: "빠른 재사용",
         family: "범용 강화",
         tagline: "액션 쿨다운 ×0.60",
@@ -186,7 +188,7 @@ const AUGMENT_DEFINITIONS = Object.freeze([
         category: "modifier"
     }),
     createCard({
-        id: "extra-charge",
+        id: ACTION_MODIFIER_ID.EXTRA_CHARGE,
         name: "추가 충전",
         family: "범용 강화",
         tagline: "액션 최대 충전 +1",
@@ -194,7 +196,7 @@ const AUGMENT_DEFINITIONS = Object.freeze([
         category: "modifier"
     }),
     createCard({
-        id: "rope-link",
+        id: ACTION_MODIFIER_ID.ROPE_LINK,
         name: "로프 연동",
         family: "범용 강화",
         tagline: "해제 후 다음 액션 쿨다운 -50%",
@@ -202,7 +204,7 @@ const AUGMENT_DEFINITIONS = Object.freeze([
         category: "modifier"
     }),
     createCard({
-        id: "post-action-shield",
+        id: ACTION_MODIFIER_ID.POST_ACTION_SHIELD,
         name: "사용 후 보호막",
         family: "범용 강화",
         tagline: "액션 후 보호막 15%",
@@ -214,7 +216,7 @@ const AUGMENT_DEFINITIONS = Object.freeze([
 export const FOUNDATION_AUGMENT_CATALOG = AUGMENT_DEFINITIONS;
 export const AUGMENT_CATALOG = FOUNDATION_AUGMENT_CATALOG;
 
-const AUGMENT_BY_ID = new Map(AUGMENT_CATALOG.map((augment) => [augment.id, augment]));
+const AUGMENT_BY_ID = Object.freeze(Object.fromEntries(AUGMENT_CATALOG.map((augment) => [augment.id, augment])));
 
 export function normalizeLegacyFoundationAugmentId(id) {
     return LEGACY_FOUNDATION_ID_MIGRATION[id] ?? id ?? null;
@@ -222,7 +224,7 @@ export function normalizeLegacyFoundationAugmentId(id) {
 
 export function foundationAugmentById(id) {
     if (id === null || id === undefined) return null;
-    return AUGMENT_BY_ID.get(normalizeLegacyFoundationAugmentId(id)) ?? null;
+    return AUGMENT_BY_ID[normalizeLegacyFoundationAugmentId(id)] ?? null;
 }
 
 export function augmentById(id) {

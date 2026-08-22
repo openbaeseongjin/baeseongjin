@@ -11,6 +11,7 @@ import {
     worldObjectPresentation,
     worldObjectWorldBounds
 } from "../assets/WorldObjectPresentationCatalog.js";
+import { worldObjectRenderer } from "../world-object/WorldObjectRendererDefinition.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../world/WorldMarkerPrimitives.js";
 import { drawElectricArc } from "../effects/ElectricArc.js";
 
@@ -273,14 +274,16 @@ function drawAccessScanMarker(context, surface, state) {
 
 export class AccessScanSurfaceRenderer {
     draw({ context, scene, viewport, renderStats }) {
-        const stateById = new Map((scene.accessScanStates ?? []).map((state) => [state.id, state]));
+        const stateById = Object.freeze(
+            Object.fromEntries((scene.accessScanStates ?? []).map((state) => [state.id, state]))
+        );
         const surfaces = (scene.world.surfaces ?? []).filter(({ grappleAccessGroup }) => grappleAccessGroup);
         const visible = surfaces.filter(
             (surface) =>
-                stateById.has(surface.grappleAccessGroup) && isVisible(viewport, boundsForVertices(surface.vertices))
+                stateById[surface.grappleAccessGroup] && isVisible(viewport, boundsForVertices(surface.vertices))
         );
         for (const surface of visible) {
-            drawAccessScanMarker(context, surface, stateById.get(surface.grappleAccessGroup));
+            drawAccessScanMarker(context, surface, stateById[surface.grappleAccessGroup]);
         }
         renderStats?.recordCollection("accessScanSurfaces", surfaces.length, visible.length);
     }
@@ -340,8 +343,8 @@ export class AuthoredWorldObjectRenderer {
         const renderArgs = {
             presentationTimeSeconds,
             elapsedSeconds,
-            windZoneById: new Map(windZones.map((zone) => [zone.id, zone])),
-            windStateById: new Map(windStates.map((state) => [state.id, state]))
+            windZoneById: Object.freeze(Object.fromEntries(windZones.map((zone) => [zone.id, zone]))),
+            windStateById: Object.freeze(Object.fromEntries(windStates.map((state) => [state.id, state])))
         };
         for (const object of visible) this.drawObject(context, object, scene, renderArgs);
         const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
@@ -382,66 +385,26 @@ export class AuthoredWorldObjectRenderer {
         context.fillStyle = `${style.color}${objectiveComplete || gateUnlocked ? "66" : "22"}`;
         context.lineWidth = objectiveComplete || gateUnlocked ? 5 : 3;
 
-        if (object.kind === "gate-panel") {
-            this.drawGatePanel(context, style, bounds, {
-                blocked: !requirementsComplete,
-                ready: requirementsComplete && !objectiveComplete,
-                opened: gateUnlocked || objectiveComplete,
-                sectorId
-            });
-        } else if (object.kind === "gate") {
-            this.drawGate(context, style, bounds, gateUnlocked, { sectorId });
-        } else if (object.kind === "access-transit-lock") {
-            this.drawAccessTransitLock(context, object, scene, gateUnlocked, renderArgs.presentationTimeSeconds ?? 0);
-        } else {
-            context.translate(bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);
-            if (object.kind === "augment-node") {
-                const consumed = scene.player?.augmentRuntimeState?.consumedSourceIds?.includes(object.id) ?? false;
-                this.drawAugmentNode(context, style, bounds, consumed);
-            } else if (object.kind === "terminal") {
-                const width = style.radius * 1.7;
-                const height = style.radius * 1.25;
-                context.fillRect(-width, -height, width * 2, height * 2);
-                context.strokeRect(-width, -height, width * 2, height * 2);
-                context.fillStyle = objectiveComplete ? style.color : `${style.color}99`;
-                context.fillRect(-width + 7, -height + 7, width * 2 - 14, 5);
-                context.fillRect(-width + 7, -height + 17, width - 3, 4);
-            } else if (object.kind === "grapple-landmark") {
-                this.drawGrappleLandmark(context, style, { sectorId: this.sectorIdFor(object, scene) });
-            } else if (object.kind === "wind-source") {
-                this.drawWindSource(context, style, {
-                    zone: renderArgs.windZoneById?.get(object.windZoneId) ?? null,
-                    state: renderArgs.windStateById?.get(object.windZoneId) ?? null,
-                    elapsedSeconds: renderArgs.elapsedSeconds ?? 0
-                });
-            } else if (object.kind === "test-target") {
-                this.drawTestTarget(context, style, {
-                    contactRegistered:
-                        scene.eventFlash?.type === "foundation-shear-hit" && scene.eventFlash.targetId === object.id,
-                    age: scene.eventFlash?.age ?? 0
-                });
-            } else if (object.kind === "story-display") {
-                this.drawStoryDisplay(context, style);
-            } else if (object.kind === "maintenance-frame") {
-                this.drawMaintenanceFrame(context, style);
-            } else {
-                context.beginPath();
-                context.moveTo(0, -style.radius);
-                context.lineTo(style.radius, 0);
-                context.lineTo(0, style.radius);
-                context.lineTo(-style.radius, 0);
-                context.closePath();
-                context.fill();
-                context.stroke();
-            }
-
-            if (object.label) {
-                context.fillStyle = "#ecfeff";
-                context.font = "900 11px ui-monospace, monospace";
-                context.textAlign = "center";
-                context.textBaseline = "middle";
-                context.fillText(object.label, 0, -style.radius - 10);
-            }
+        const renderer = worldObjectRenderer(object.kind);
+        renderer.draw({
+            painter: this,
+            context,
+            object,
+            scene,
+            style,
+            bounds,
+            sectorId,
+            objectiveComplete,
+            gateUnlocked,
+            requirementsComplete,
+            renderArgs
+        });
+        if (renderer.drawsLabel && object.label) {
+            context.fillStyle = "#ecfeff";
+            context.font = "900 11px ui-monospace, monospace";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillText(object.label, 0, -style.radius - 10);
         }
         context.restore();
     }
@@ -449,8 +412,10 @@ export class AuthoredWorldObjectRenderer {
     drawAccessTransitLock(context, object, scene, unlocked, presentationTimeSeconds) {
         const sector = (scene.world.sectors ?? []).find(({ id }) => id === object.sectorId);
         const moduleIds = sector?.accessModuleIds ?? [];
-        const collected = new Set(scene.worldProgress?.collectedAccessModuleIds ?? []);
-        const collectedCount = moduleIds.filter((id) => collected.has(id)).length;
+        const collected = Object.freeze(
+            Object.fromEntries((scene.worldProgress?.collectedAccessModuleIds ?? []).map((id) => [id, true]))
+        );
+        const collectedCount = moduleIds.filter((id) => collected[id]).length;
         const requiredCount = object.requiredAccessModuleCount ?? sector?.accessModuleRequirement ?? 0;
         const remainingCount = Math.max(0, requiredCount - collectedCount);
         const routeObjectivesComplete = (object.requiredObjectiveIds ?? []).every((objectiveId) =>
@@ -1139,14 +1104,14 @@ export class CombatEffectRenderer {
     }
 }
 
-const LARGE_AUGMENT_EFFECTS = new Set([
-    "collision-explosion-direct",
-    "collision-explosion-splash",
-    "push-away",
-    "wall-impact",
-    "end-wave",
-    "explosive-trail"
-]);
+const LARGE_AUGMENT_EFFECTS = Object.freeze({
+    "collision-explosion-direct": true,
+    "collision-explosion-splash": true,
+    "push-away": true,
+    "wall-impact": true,
+    "end-wave": true,
+    "explosive-trail": true
+});
 
 export class EventEffectRenderer {
     draw({ context, scene }) {
@@ -1220,7 +1185,7 @@ export class EventEffectRenderer {
             context.lineTo(effect.position.x, effect.position.y);
             context.stroke();
         } else {
-            const large = LARGE_AUGMENT_EFFECTS.has(effect.type);
+            const large = Boolean(LARGE_AUGMENT_EFFECTS[effect.type]);
             const radius = (large ? 18 : 6) + progress * (large ? 92 : 24);
             context.strokeStyle = effect.type === "electrified-rope" ? "#a8e6ff" : "#fbbf24";
             context.shadowColor = context.strokeStyle;

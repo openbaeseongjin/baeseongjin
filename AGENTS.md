@@ -83,6 +83,88 @@ projectEnemy(enemy, byId, context) {
 이런거도 없고 enum 클래스에서 저런용 조합함수 지원하던가 생성자로 받던가해서 사실상 정의부 외에는 raw 문자열이 안보이는 수준이어야해'
 ```
 
+```text
+개인적으론 지금 투사체등에서 자꾸 따로 구현해둔 이동 처리로직등 이거도 다 피직스 믹스인으로 처리하고싶은데 그게 아니더라도, 저런 형태가 아니라 내가 말한 규칙 기반이어야해
+```
+
+```text
+아까 수정한거 보는데 내 기준은 수치도 바깥에서 raw 숫자로 넣으면 안되 재사용하는거면 상수로 하고, 기본값이면 기본값 파라미터로 하고 빼버리던가 해야해 사용하는 쪽에서는
+```
+
+```text
+export const CLIENT_FEEDBACK_OBJECT = Object.freeze({
+    WIND: new ClientFeedbackObjectDefinition({
+        predicate: ({ state }) => Boolean(state && state.phase !== "lull"),
+        request: ({ zone, state }) => ({
+            id: KEY.wind(zone.id),
+            presetId: "wind-flow",
+            position: { x: zone.bounds.x + zone.bounds.width / 2, y: zone.bounds.y + zone.bounds.height / 2 },
+            direction: zone.direction,
+            options: {
+                bounds: {
+                    minX: zone.bounds.x,
+                    minY: zone.bounds.y,
+                    maxX: zone.bounds.x + zone.bounds.width,
+                    maxY: zone.bounds.y + zone.bounds.height
+                },
+                density:
+                    state.phase === "warning"
+                        ? 0.25
+                        : state.phase === "decay"
+                          ? state.multiplier
+                          : Math.max(0.35, state.multiplier)
+            }
+        })
+    }),
+    PROJECTILE: Object.freeze([
+        projectileDefinition("projectiles", CLIENT_FEEDBACK_PRESET_ID.PLAYER_SHOT),
+        projectileDefinition("enemyProjectiles", CLIENT_FEEDBACK_PRESET_ID.ENEMY_MUZZLE),
+        projectileDefinition("augmentProjectiles", CLIENT_FEEDBACK_PRESET_ID.PLAYER_SHOT)
+    ])
+});
+
+여기서 wind가 좀 맘에 안드는 부분이 density 정의부가, state에 따라 바뀌는게 그냥 저렇게 옵션으로 정의되어있는데, 만약 저런 포맷이 필요하면 난 map 형태로 구현을 권장해
+```
+
+```text
+근데 내가 맵을 쓰라하긴 햇는데 저걸 말한건 아니고 object에서 Key value 형태로 하는거 말한거야, 지금은 map으로 감싸면서 오버헤드가 생겻어
+```
+
+```text
+map set도 내가 아까 말한 규칙대로 불필요한 경우에 그냥 객체로해줘
+```
+
+## 고정 상태 대응표 규칙
+
+- enum·state에서 값이나 resolver를 선택하는 고정 대응표는 `Object.freeze({ [key]: value })` 형태로 정의하고 property lookup으로 사용한다.
+- 고정 대응표를 `Map`이나 `Set`으로 감싸거나 중첩 조건문·삼항식으로 선택하지 않는다. `Map`·`Set`은 런타임에 key가 추가·삭제되는 동적 상태와 membership 추적에만 사용한다.
+- 대응표의 raw ID와 재사용 수치는 definition·상수가 소유하고, 기본값은 default parameter가 소유해 사용하는 쪽에서 반복하지 않는다.
+
+```text
+음 내말은 공통 physics 믹스인으로 하란거지, 지금은 유저 피직스가 분리되어있잖아 몹이랑 투사체랑
+```
+
+```text
+근데 물리 회전성분도 믹스인으로 빠진게 안보이는데?
+```
+
+```text
+그리고 지금 구조부터 잘못되었어, position velocity accelation 3벡터 기반으로 applyimpulse가 현재 가속도 변수인 accelation 에 더하고
+그값이 매 틱마다 합쳐져야지 이런 구조가 게임물리 엔진 기반 구조야 기본적으로
+```
+
+```text
+그 로컬레포 ballfightsimulator 구조 참고해
+```
+
+## 공통 Physics 조합 규칙
+
+- Player·Enemy·Projectile은 position·velocity·acceleration 세 벡터와 tick 적분을 하나의 공통 `PhysicsMixin`에서 사용한다.
+- `applyImpulse()`는 velocity를 직접 변경하지 않고 현재 tick의 acceleration에 누적한다. tick은 acceleration을 velocity에 합친 뒤 velocity를 position에 적분하고 acceleration을 초기화한다.
+- 회전 객체는 `AngularPhysicsMixin`을 조합하고 angular acceleration → angular velocity → angle 순서로 적분한다. 회전하지 않는 객체는 이 mixin을 조합하지 않는다.
+- Surface collision·Gravity·Homing steering·Projectile lifetime처럼 일부 객체만 필요한 행동은 공통 Physics 위에 선택 mixin으로 조합한다.
+- 객체 종류마다 별도 Physics 기반이나 적분 공식을 만들지 않고 구체 차이는 선택 mixin의 override로 구현한다.
+
 ## Scenario planning and integration
 
 - 시나리오 기획·authored area·관련 gameplay를 수정하기 전에 `docs/scenario-development-integration.md`, 해당 Sector·Stage README와 구현 중인 Stage의 `PRODUCTION-ALIGNMENT.md`를 읽는다.

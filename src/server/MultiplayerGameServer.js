@@ -9,6 +9,8 @@ import {
     deserializeWorldSnapshotEnvelope,
     serializeWorldSnapshotEnvelope
 } from "../game/network/WorldSnapshotEnvelope.js";
+import { routeClientMessage } from "./ClientMessageRouter.js";
+import { MULTIPLAYER_ERROR_CODE, MULTIPLAYER_MESSAGE_TYPE } from "../game/network/MultiplayerMessageDefinition.js";
 
 const CHANNEL_PATTERN = /^\d{4}$/;
 const DEFAULT_MAX_UNACKNOWLEDGED_SNAPSHOTS = 4;
@@ -19,7 +21,7 @@ function createSnapshotEntry(payload) {
     return Object.freeze({
         snapshot,
         payload,
-        message: JSON.stringify({ type: "snapshot", payload })
+        message: JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload })
     });
 }
 
@@ -131,7 +133,7 @@ export class MultiplayerGameServer {
         room.runner = new FixedStepRunner({
             step: () => {
                 const snapshot = room.adapter.advance();
-                if (snapshot) this.broadcast(room, { type: "snapshot", payload: snapshot });
+                if (snapshot) this.broadcast(room, { type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload: snapshot });
             },
             render: () => {}
         });
@@ -142,13 +144,25 @@ export class MultiplayerGameServer {
     accept(socket, channelId, createChannel, snapshotFlowControl = false) {
         let room = this.rooms.get(channelId);
         if (!room && !createChannel) {
-            socket.send(JSON.stringify({ type: "error", code: "channel-not-found", channelId }));
+            socket.send(
+                JSON.stringify({
+                    type: MULTIPLAYER_MESSAGE_TYPE.ERROR,
+                    code: MULTIPLAYER_ERROR_CODE.CHANNEL_NOT_FOUND,
+                    channelId
+                })
+            );
             socket.close(1008, "channel not found");
             return;
         }
         room ??= this.createRoom(channelId);
         if (room.sockets.size >= this.maxPlayers) {
-            socket.send(JSON.stringify({ type: "error", code: "channel-full", channelId }));
+            socket.send(
+                JSON.stringify({
+                    type: MULTIPLAYER_MESSAGE_TYPE.ERROR,
+                    code: MULTIPLAYER_ERROR_CODE.CHANNEL_FULL,
+                    channelId
+                })
+            );
             socket.close(1013, "channel full");
             return;
         }
@@ -190,7 +204,7 @@ export class MultiplayerGameServer {
         const welcomeSequence = deserializeWorldSnapshotEnvelope(welcomeSnapshot).snapshotSequence;
         socket.send(
             JSON.stringify({
-                type: "welcome",
+                type: MULTIPLAYER_MESSAGE_TYPE.WELCOME,
                 channelId,
                 playerId,
                 snapshotFlowControl: delivery.flowControlled,
@@ -198,7 +212,11 @@ export class MultiplayerGameServer {
             })
         );
         this.recordSentSnapshot(delivery, welcomeSequence);
-        this.broadcast(room, { type: "snapshot", payload: welcomeSnapshot }, { exclude: socket });
+        this.broadcast(
+            room,
+            { type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload: welcomeSnapshot },
+            { exclude: socket }
+        );
         this.startClock(room);
     }
 
@@ -208,73 +226,15 @@ export class MultiplayerGameServer {
             if (!room || binary) throw new Error("unsupported client message");
             const message = JSON.parse(data.toString());
             const playerId = room.sockets.get(socket);
-            if (message?.type === "command" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveCommand(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "hit-claim" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveHitClaim(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "hit-claim-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "projectile-spawn-claim" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveProjectileSpawnClaim(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "projectile-spawn-claim-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "impact-claim" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveImpactClaim(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "impact-claim-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "foundation-selection" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveFoundationSelection(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "foundation-selection-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "rope-impact" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveRopeImpact(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "rope-impact-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "augment-offer" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveAugmentOffer(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "augment-offer-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "augment-impact" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveAugmentImpact(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "augment-impact-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "checkpoint-claim" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveCheckpointClaim(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "checkpoint-claim-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "summit-claim" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveSummitClaim(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "summit-claim-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "owner-motion" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveOwnerMotion(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "owner-motion-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "debug-teleport" && typeof message.payload === "string") {
-                const receipt = room.adapter.receiveDebugTeleport(playerId, message.payload);
-                socket.send(JSON.stringify({ type: "debug-teleport-receipt", payload: receipt }));
-                return;
-            }
-            if (message?.type === "snapshot-ack") {
-                this.acknowledgeSnapshot(socket, message.snapshotSequence);
-                return;
-            }
-            throw new Error("unsupported client message");
+            routeClientMessage({ server: this, socket, room, playerId, message });
         } catch (error) {
-            socket.send(JSON.stringify({ type: "error", code: "invalid-message", message: error.message }));
+            socket.send(
+                JSON.stringify({
+                    type: MULTIPLAYER_MESSAGE_TYPE.ERROR,
+                    code: MULTIPLAYER_ERROR_CODE.INVALID_MESSAGE,
+                    message: error.message
+                })
+            );
             socket.close(1008, "invalid message");
         }
     }
@@ -343,7 +303,7 @@ export class MultiplayerGameServer {
     }
 
     broadcast(room, message, { exclude = null } = {}) {
-        if (message.type === "snapshot" && typeof message.payload === "string") {
+        if (message.type === MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT && typeof message.payload === "string") {
             const entry = createSnapshotEntry(message.payload);
             for (const socket of room.sockets.keys()) {
                 if (socket !== exclude) this.queueSnapshot(socket, entry);
@@ -366,8 +326,8 @@ export class MultiplayerGameServer {
         room.sockets.delete(socket);
         room.session.removePlayer(playerId);
         if (room.sockets.size > 0) {
-            this.broadcast(room, { type: "player-left", playerId });
-            this.broadcast(room, { type: "snapshot", payload: room.adapter.snapshot() });
+            this.broadcast(room, { type: MULTIPLAYER_MESSAGE_TYPE.PLAYER_LEFT, playerId });
+            this.broadcast(room, { type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload: room.adapter.snapshot() });
             return;
         }
         this.stopClock(room);
