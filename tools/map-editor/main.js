@@ -921,6 +921,58 @@ function drawMarker(point, color, shape = "circle", selected = false) {
     context.stroke();
 }
 
+function surfaceScreenPoints(surface) {
+    return surface.vertices.map((vertex) => worldToScreen(vertex, state.view));
+}
+
+function drawSurface(surface, selected) {
+    const points = surfaceScreenPoints(surface);
+    if (points.length === 0) return;
+    context.save();
+    context.beginPath();
+    points.forEach((point, index) => {
+        if (index === 0) context.moveTo(point.x, point.y);
+        else context.lineTo(point.x, point.y);
+    });
+    context.closePath();
+    context.fillStyle = selected ? "rgba(53, 177, 206, 0.72)" : "rgba(42, 115, 137, 0.76)";
+    context.strokeStyle = selected ? "#66e6ff" : "#a9e8f5";
+    context.lineWidth = selected ? 3 : 2;
+    context.fill();
+    context.stroke();
+
+    const topY = Math.min(...points.map(({ y }) => y));
+    const topPoints = points.filter(({ y }) => Math.abs(y - topY) < 0.5);
+    if (topPoints.length >= 2) {
+        const left = Math.min(...topPoints.map(({ x }) => x));
+        const right = Math.max(...topPoints.map(({ x }) => x));
+        context.strokeStyle = selected ? "#e7fdff" : "#d8f7fb";
+        context.lineWidth = selected ? 3.5 : 2.5;
+        context.beginPath();
+        context.moveTo(left, topY);
+        context.lineTo(right, topY);
+        context.stroke();
+    }
+
+    if (state.view.zoom >= 0.1) {
+        const left = Math.min(...points.map(({ x }) => x));
+        const right = Math.max(...points.map(({ x }) => x));
+        const label = `발판 · ${surface.id}`;
+        context.font = "700 10px ui-monospace, Consolas, monospace";
+        const width = context.measureText(label).width + 10;
+        const x = Math.max(4, Math.min(dom.canvas.clientWidth - width - 4, (left + right - width) * 0.5));
+        const y = Math.max(4, topY - 19);
+        context.fillStyle = "rgba(4, 21, 30, 0.92)";
+        context.fillRect(x, y, width, 15);
+        context.strokeStyle = selected ? "#66e6ff" : "rgba(169, 232, 245, 0.72)";
+        context.lineWidth = 1;
+        context.strokeRect(x + 0.5, y + 0.5, width - 1, 14);
+        context.fillStyle = "#e7fdff";
+        context.fillText(label, x + 5, y + 10.5);
+    }
+    context.restore();
+}
+
 function annotationPoint(entity, spec) {
     if (entity.domain === "bounds") return { x: -spec.definition.bounds.width * 0.5 + 72, y: -16 };
     if (entity.domain === "camera") return { x: -spec.definition.bounds.width * 0.5 + 72, y: entity.bounds.y + 16 };
@@ -997,20 +1049,9 @@ function drawCanvas() {
     }
     for (const surface of spec.definition.surfaces) {
         if (!surface.vertices?.length) continue;
-        context.beginPath();
-        surface.vertices.forEach((vertex, index) => {
-            const screen = worldToScreen(vertex, state.view);
-            if (index === 0) context.moveTo(screen.x, screen.y);
-            else context.lineTo(screen.x, screen.y);
-        });
-        context.closePath();
         const selectedSurface =
             isSelected("surfaces", surface.id) || (selected?.domain === "exit" && surface.id === exitEntity?.sourceId);
-        context.fillStyle = selectedSurface ? "rgba(102, 230, 255, 0.2)" : "rgba(89, 121, 137, 0.35)";
-        context.strokeStyle = selectedSurface ? "#66e6ff" : "#789dab";
-        context.lineWidth = selectedSurface ? 2.5 : 1.2;
-        context.fill();
-        context.stroke();
+        drawSurface(surface, selectedSurface);
     }
     drawMarker(spec.definition.entry, "#e6f2f5", "triangle", isSelected("entry", spec.definition.entry.id));
     if (exitEntity) drawMarker(exitEntity.point, "#66e6ff", "diamond", isSelected("exit", exitEntity.id));
