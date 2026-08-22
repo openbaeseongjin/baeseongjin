@@ -3,7 +3,7 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 3bb305c65de5778106d47fda7a7e2667575e4bf8e38c068d4e104542b56c26a9
+scenario-source-sha256: 49f1da5b96b09e8a98a7616e08bb9fe3ad98f2ff2c0ea33e8f4b016bd73e9121
 authored-area-sha256: 86a6c218229de98b0f99aac340f09d147222a9f15b9c252ae211d318cb2498bb
 authored-sector-sha256: 3129e29b1ea699cc91bf98432c1c955c31f9c81278586c1b0e7b801e0c96fe2b
 stage-count: 48
@@ -47,9 +47,11 @@ reviewed-upstream: 6703d30169568fc32f241dc781932374564d6fbb
 
 ## 최근 반영된 시나리오 변화
 
-109. Issue #804는 메인 개발자와 별도 worktree에서 Sector 03~06의 30개 Scenario v2 source를 원본 설계 데이터로 재구성했다. `surface`·`grapple`·`safe/recovery`·route·적·Wind·Camera 좌표가 제공된 경우에는 각각 editor의 지형·Anchor·Recovery/Route·적 슬롯·Wind·Camera 레이어로 보존하고, 원본에 충돌 표면 또는 적 좌표가 없는 경우에는 route/Anchor와 원본 `sourceSnapshot`만 표시한다. 이 staging은 `scenario-only`를 유지하므로 generated catalog·seamless Runtime·멀티플레이 권위·보스와 Sector 간 전환을 변경하지 않는다. 특히 Resident Security Override 2-of-3, Hardpoint Jammer, 3-8/4-8/5-8 이후 전환, Final Security/Boarding은 미구현 상태를 그대로 노출하며 임의 Runtime 행동을 만들지 않는다.
+109. Issue #814는 Scenario-only v2 Stage를 실제 게임 renderer·physics로 한 Area씩 실행하는 로컬 미리보기를 추가했다. 이 미리보기는 원본 지형·Anchor를 `defineArea`로 컴파일하고 content boundary gate로 격리하므로 4-1·4-2·4-3·4-5의 발판과 로프 부착 지점을 실제 게임 화면에서 확인할 수 있다. 기본 `CURRENT_AUTHORED_AREA_CATALOG`, 3-8→4-1 전환, Boss, Resident Security Override/Relay/Pursuit 특수 행동과 멀티플레이 권위는 변경하지 않는다.
 
-110. 사용자는 새 `ONE-ROPE-BOSS-01-FINAL-CONTENT-HANDOFF.zip`로 Boss 01 authored content를 `GATE LOCKING CARRIAGE`로 교체했다. 이 handoff는 1-8의 열린 Gate와 Worker District 첫 Reveal을 보존한 뒤 분리된 Locking Assembly가 단일 Rail에서 P1 Full Crossbeam/Rear Drive, P2 directional Broken Beam/Side Gearbox, P3 Central Lock Core/Rail Ram을 수행하는 기획이다. 기존 `CONTAINMENT GANTRY C-01` Has-A runtime은 이 authored design을 구현하지 않는 legacy prototype으로 보존하며 Runtime·Arena·전환·Timer·collapse·멀티플레이는 이번 문서 갱신에서 변경하지 않는다. Boss는 계속 1-8 내부가 아닌 checkpoint 뒤 Post-Sector slot에만 들어가며 `2-1` wiring은 미구현이다.
+110. Issue #804는 메인 개발자와 별도 worktree에서 Sector 03~06의 30개 Scenario v2 source를 원본 설계 데이터로 재구성했다. `surface`·`grapple`·`safe/recovery`·route·적·Wind·Camera 좌표가 제공된 경우에는 각각 editor의 지형·Anchor·Recovery/Route·적 슬롯·Wind·Camera 레이어로 보존하고, 원본에 충돌 표면 또는 적 좌표가 없는 경우에는 route/Anchor와 원본 `sourceSnapshot`만 표시한다. 이 staging은 `scenario-only`를 유지하므로 generated catalog·seamless Runtime·멀티플레이 권위·보스와 Sector 간 전환을 변경하지 않는다. 특히 Resident Security Override 2-of-3, Hardpoint Jammer, 3-8/4-8/5-8 이후 전환, Final Security/Boarding은 미구현 상태를 그대로 노출하며 임의 Runtime 행동을 만들지 않는다.
+
+111. 사용자는 새 `ONE-ROPE-BOSS-01-FINAL-CONTENT-HANDOFF.zip`로 Boss 01 authored content를 `GATE LOCKING CARRIAGE`로 교체했다. 이 handoff는 1-8의 열린 Gate와 Worker District 첫 Reveal을 보존한 뒤 분리된 Locking Assembly가 단일 Rail에서 P1 Full Crossbeam/Rear Drive, P2 directional Broken Beam/Side Gearbox, P3 Central Lock Core/Rail Ram을 수행하는 기획이다. 기존 `CONTAINMENT GANTRY C-01` Has-A runtime은 이 authored design을 구현하지 않는 legacy prototype으로 보존하며 Runtime·Arena·전환·Timer·collapse·멀티플레이는 이번 문서 갱신에서 변경하지 않는다. Boss는 계속 1-8 내부가 아닌 checkpoint 뒤 Post-Sector slot에만 들어가며 `2-1` wiring은 미구현이다.
 
 3.   #480은 1-4 Foundation 선택·세 효과·개인별 멀티·Story/UI·프로토콜을 구현했다. Foundation ID와 Specialization ID의 의미 체계는 계속 분리한다.
 4.   #478은 1-1 C04와 1-2 C02에서 보이는 발판·Anchor의 좌우·상하 관계와 상대 폭을 Approved Blockout·Area Catalog에 맞춘 구조 가이드로 다시 생성했다. 이전 구조 불일치 이미지는 `RETIRED / STRUCTURE MISMATCH`로 보존하고 새 이미지를 현재 승인 기준으로 전환했다. Runtime Geometry와 Collision은 변경하지 않았다.

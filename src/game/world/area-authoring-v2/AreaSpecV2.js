@@ -67,6 +67,31 @@ export function createAreaDefinitionFromV2(spec) {
     });
 }
 
+export function createScenarioPreviewAreaDefinitionFromV2(spec) {
+    if (spec?.authoringMode !== "scenario") {
+        throw new TypeError("scenario-preview-requires-scenario-area-spec");
+    }
+    const definition = structuredClone(spec.definition);
+    const anchors = spec.anchors ?? [];
+    const exit = definition.exit;
+    if (typeof definition.id !== "string" || !exit || !Number.isFinite(exit.x) || !Number.isFinite(exit.y)) {
+        throw new TypeError("scenario-preview-area-definition-invalid");
+    }
+    return defineArea({
+        ...definition,
+        order: 1,
+        nextAreaId: null,
+        gate: {
+            id: `${definition.id}:preview-boundary`,
+            nextAreaId: null,
+            requiredObjectiveIds: [],
+            trigger: { x: exit.x - 48, y: exit.y - 96, width: 96, height: 160 }
+        },
+        surfaces: insertAnchors(definition.surfaces ?? [], anchors, "surfaceIndex", anchorTarget),
+        objects: insertAnchors(definition.objects ?? [], anchors, "objectIndex", anchorLandmark)
+    });
+}
+
 export function areaSpecV2AuthoringMode(spec) {
     const mode = spec?.authoringMode ?? "runtime";
     if (!AREA_SPEC_V2_AUTHORING_MODES.includes(mode)) {
