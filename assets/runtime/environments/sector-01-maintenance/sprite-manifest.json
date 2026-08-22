@@ -3,9 +3,9 @@
   "formatVersion": 1,
   "id": "environment-sector-01-maintenance",
   "generator": {
-    "tool": "openai-imagegen-and-normalization",
-    "exportVersion": "2026-08-17",
-    "sourceExport": "assets/artwork/environments/sector-01-maintenance-vertical-backdrop/export/layers-v2"
+    "tool": "openai-imagegen-normalization-and-runtime-seam-fade",
+    "exportVersion": "2026-08-22",
+    "sourceExport": "assets/artwork/environments/sector-01-02-runtime-seam/export/sector-01-maintenance"
   },
   "atlases": {
     "sector-01-maintenance-backdrop-far": {

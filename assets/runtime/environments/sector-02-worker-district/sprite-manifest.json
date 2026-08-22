@@ -1,0 +1,195 @@
+{
+    "$schema": "../sprite-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "environment-sector-02-worker-district",
+    "generator": {
+        "tool": "openai-imagegen-normalization-and-runtime-seam-fade",
+        "exportVersion": "2026-08-22",
+        "sourceExport": "assets/artwork/environments/sector-01-02-runtime-seam/export/sector-02-worker-district"
+    },
+    "atlases": {
+        "sector-02-worker-district-backdrop-far": {
+            "image": "backdrop-far.png",
+            "size": { "width": 1024, "height": 2176 },
+            "frameSize": { "width": 1024, "height": 2176 }
+        },
+        "sector-02-worker-district-backdrop-mid": {
+            "image": "backdrop-mid.png",
+            "size": { "width": 1024, "height": 2176 },
+            "frameSize": { "width": 1024, "height": 2176 }
+        },
+        "sector-02-worker-district-backdrop-near": {
+            "image": "backdrop-near.png",
+            "size": { "width": 1024, "height": 2176 },
+            "frameSize": { "width": 1024, "height": 2176 }
+        },
+        "sector-02-worker-district-terrain-fill": {
+            "image": "terrain-fill.png",
+            "size": { "width": 48, "height": 48 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "sector-02-worker-district-terrain-edge": {
+            "image": "terrain-edge.png",
+            "size": { "width": 48, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "sector-02-worker-district-decoration": {
+            "image": "decoration.png",
+            "size": { "width": 96, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        }
+    },
+    "zones": [
+        {
+            "id": "waste",
+            "label": "Sector 02 하부 Worker Block",
+            "minAltitude": 0,
+            "palette": {
+                "skyTop": "#121b30",
+                "skyBottom": "#07101d",
+                "silhouetteFar": "#1b2b48",
+                "silhouetteMid": "#2a3547",
+                "silhouetteNear": "#090f19",
+                "terrainFill": "#303238",
+                "terrainEdge": "#66666a",
+                "oneWayEdge": "#8bb8c4",
+                "accent": "#d99a52"
+            },
+            "backdropVariant": "sector-02-lower",
+            "terrainMaterial": "sector-02-residential",
+            "decorationGroup": "sector-02-residential"
+        },
+        {
+            "id": "industrial-maintenance",
+            "label": "Sector 02 Residential Service",
+            "minAltitude": 1800,
+            "palette": {
+                "skyTop": "#17213a",
+                "skyBottom": "#091321",
+                "silhouetteFar": "#203250",
+                "silhouetteMid": "#303c4f",
+                "silhouetteNear": "#0a111c",
+                "terrainFill": "#34363c",
+                "terrainEdge": "#6b6b70",
+                "oneWayEdge": "#94bec8",
+                "accent": "#dfa158"
+            },
+            "backdropVariant": "sector-02-service",
+            "terrainMaterial": "sector-02-residential",
+            "decorationGroup": "sector-02-residential"
+        },
+        {
+            "id": "residential-commercial",
+            "label": "Sector 02 Worker District",
+            "minAltitude": 3600,
+            "palette": {
+                "skyTop": "#1b2742",
+                "skyBottom": "#0b1626",
+                "silhouetteFar": "#263958",
+                "silhouetteMid": "#374457",
+                "silhouetteNear": "#0c1420",
+                "terrainFill": "#393b41",
+                "terrainEdge": "#727277",
+                "oneWayEdge": "#9cc4cc",
+                "accent": "#e5aa62"
+            },
+            "backdropVariant": "sector-02-residential",
+            "terrainMaterial": "sector-02-residential",
+            "decorationGroup": "sector-02-residential"
+        },
+        {
+            "id": "corporate-security",
+            "label": "Sector 02 Shelter Access",
+            "minAltitude": 5400,
+            "palette": {
+                "skyTop": "#202d49",
+                "skyBottom": "#0d192a",
+                "silhouetteFar": "#2c405f",
+                "silhouetteMid": "#3e4c5f",
+                "silhouetteNear": "#0e1724",
+                "terrainFill": "#3e4046",
+                "terrainEdge": "#79797e",
+                "oneWayEdge": "#a5cbd2",
+                "accent": "#ebb16a"
+            },
+            "backdropVariant": "sector-02-shelter",
+            "terrainMaterial": "sector-02-residential",
+            "decorationGroup": "sector-02-residential"
+        },
+        {
+            "id": "landing-pad",
+            "label": "Sector 02 Evacuation Platform",
+            "minAltitude": 7200,
+            "palette": {
+                "skyTop": "#253450",
+                "skyBottom": "#101c2e",
+                "silhouetteFar": "#334766",
+                "silhouetteMid": "#455467",
+                "silhouetteNear": "#111a28",
+                "terrainFill": "#43454b",
+                "terrainEdge": "#808085",
+                "oneWayEdge": "#add1d7",
+                "accent": "#f0b873"
+            },
+            "backdropVariant": "sector-02-evacuation",
+            "terrainMaterial": "sector-02-residential",
+            "decorationGroup": "sector-02-residential"
+        }
+    ],
+    "backdrop": {
+        "layers": [
+            {
+                "id": "far",
+                "depth": 0,
+                "parallaxX": 0.02,
+                "parallaxY": 0.035,
+                "frames": [{ "atlas": "sector-02-worker-district-backdrop-far", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 2176
+            },
+            {
+                "id": "mid",
+                "depth": 1,
+                "parallaxX": 0.05,
+                "parallaxY": 0.07,
+                "frames": [{ "atlas": "sector-02-worker-district-backdrop-mid", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 2176
+            },
+            {
+                "id": "near",
+                "depth": 2,
+                "parallaxX": 0.09,
+                "parallaxY": 0.12,
+                "frames": [{ "atlas": "sector-02-worker-district-backdrop-near", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 2176
+            }
+        ]
+    },
+    "terrain": {
+        "materials": {
+            "sector-02-residential": {
+                "fill": { "atlas": "sector-02-worker-district-terrain-fill", "cell": { "column": 1, "row": 0 } },
+                "edge": { "atlas": "sector-02-worker-district-terrain-edge", "cell": { "column": 0, "row": 0 } },
+                "oneWayColor": "#9cc4cc"
+            }
+        }
+    },
+    "decoration": {
+        "groups": {
+            "sector-02-residential": {
+                "items": [
+                    {
+                        "frame": { "atlas": "sector-02-worker-district-decoration", "cell": { "column": 1, "row": 0 } },
+                        "placement": { "depth": "mid", "surfaceLevelOffset": 0, "avoidPlayPath": true },
+                        "size": { "width": 14, "height": 14 }
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -22,8 +22,8 @@ Sector 01 `1-1`~`1-8` 전체에서 선택하는 산업 정비 환경 package다.
 ## 파일
 
 - `backdrop-far.png`: 불투명 원경 샤프트
-- `backdrop-mid.png`: `mid-connected-v3`에서 정규화한 투명 중경 기계·지지 구조. 상단 허브↔팬 보조 배관, 하단 제어함 capped exhaust와 폐쇄 return loop를 포함하며 authoring export와 SHA-256이 같다.
-- `backdrop-near.png`: 투명 좌우 근경 프레임·배관
+- `backdrop-mid.png`: `mid-connected-v3`의 중경 기계·지지 구조를 유지하되 상단 `512px`에서 16단계 alpha로 공용 원경 샤프트에 수렴한다.
+- `backdrop-near.png`: 투명 좌우 근경 프레임·배관. 상단 `512px`은 같은 방식으로 점차 비워 Sector 02와 구조물이 겹치지 않게 한다.
 - `terrain-fill.png`, `terrain-edge.png`: collision-aligned surface skin 입력
 - `decoration.png`: 비충돌 장식 입력
 
@@ -65,7 +65,7 @@ Sector 01 좌우 경계벽은 기존 Area bounds에서 파생한 `44px` collisio
 
 ## Connected mid backdrop
 
-`backdrop-mid.png`는 `sector-01-maintenance-v2-mid-connected-v3.png`를 그대로 사용한다. 배관은 가까운 설비·서비스 레일·manifold로 이어지며, 연결이 필요 없는 배기구는 볼트 flange와 guard cap으로 의도적인 끝을 표시한다. 새 연결은 모두 비충돌 중경 장식이고 중앙 Rope 이동 여백, collision surface, one-way edge와 world object 좌표를 변경하지 않는다.
+`backdrop-mid.png`는 `sector-01-maintenance-v2-mid-connected-v3.png`의 구조를 유지하고 Sector 02 접점 상단 `512px`에 정적 seam alpha를 적용한다. 배관은 가까운 설비·서비스 레일·manifold로 이어지며, 연결이 필요 없는 배기구는 볼트 flange와 guard cap으로 의도적인 끝을 표시한다. Runtime은 접점을 중심으로 총 `1024 world px`에서 Sector 01·02 package와 sky gradient를 같은 smoothstep 비율로 교차 합성한다. 이 연결은 비충돌 표현이며 중앙 Rope 이동 여백, collision surface, one-way edge, camera, gameplay, network state와 world object 좌표를 변경하지 않는다.
 
 ## 검증
 
@@ -78,3 +78,5 @@ Validator 통과와 실제 게임의 데스크톱 화면 확인 전에는 최종
 2026-08-17 검수에서는 데스크톱 기본 viewport와 `390×844` 모바일 viewport의 1-1 C01을 직접 실행했다. 두 화면 모두 P0 하부 기초가 화면 아래까지 끊기지 않고 이어졌으며 Player·P0 상단 Collision Edge·Anchor A가 기초보다 먼저 읽혔다. 브라우저 console warning/error는 없었다.
 
 같은 날짜 `mid-connected-v3` 통합 후 데스크톱과 `390×844` 모바일 1-1을 다시 확인했다. 상단 허브↔팬 보조 배관, 하단 제어함의 capped exhaust와 폐쇄 return loop가 far·near 사이의 중경으로 자연스럽게 보였고 중앙 이동 여백, Player, 발판과 Anchor의 시각 우선순위를 침범하지 않았다.
+
+2026-08-22에는 정확한 Sector 01→02 경계를 데스크톱 `1280×720`과 모바일 가로 `844×390`에서 확인했다. 두 package는 접점에서 각각 50%로 합성됐고 terrain·HUD는 backdrop 위의 정상 순서를 유지했으며 브라우저 warning/error는 없었다.
