@@ -2,7 +2,9 @@ import { GameApp } from "../GameApp.js";
 import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../config.js";
 import { LocalAuthority } from "./LocalAuthority.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
-import { defineAreaCatalog } from "../world/areas/AreaDefinition.js";
+import { defineArea, defineAreaCatalog } from "../world/areas/AreaDefinition.js";
+
+const PREVIEW_COMPLETION_MODE = "content-boundary";
 
 function assertGeneratedArea(generatedArea) {
     if (!generatedArea || typeof generatedArea.id !== "string" || generatedArea.id.trim() === "") {
@@ -18,9 +20,21 @@ function assertPreviewRevision(revision) {
     return String(revision);
 }
 
+function isolatePreviewArea(generatedArea) {
+    return defineArea({
+        ...generatedArea,
+        nextAreaId: null,
+        gate: {
+            ...generatedArea.gate,
+            nextAreaId: null,
+            completionMode: PREVIEW_COMPLETION_MODE
+        }
+    });
+}
+
 export class AreaPreviewGameApp extends GameApp {
     constructor({ generatedArea, revision, ...options } = {}) {
-        const area = assertGeneratedArea(generatedArea);
+        const area = isolatePreviewArea(assertGeneratedArea(generatedArea));
         const previewRevision = assertPreviewRevision(revision);
         const worldCatalog = defineAreaCatalog({
             id: "map-editor-preview",

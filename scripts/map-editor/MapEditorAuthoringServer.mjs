@@ -9,6 +9,7 @@ import {
     validateAreaSpecEditorMutation,
     validateAreaSpecV2
 } from "../../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
+import { synchronizeExitEditorDefinition } from "../../src/game/world/area-authoring-v2/editor/AreaExitEditorComponent.js";
 import { createStaticRequestHandler } from "../staticHandler.mjs";
 
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -126,6 +127,14 @@ function assertEditableDraft(entry, baselineSpec, candidateSpec) {
             issues: mutation.issues
         });
     }
+}
+
+function validateEditableSpec(entry, baselineSpec, candidateSpec) {
+    const validated = validateSpec(entry, candidateSpec);
+    return validateSpec(entry, {
+        ...validated,
+        definition: synchronizeExitEditorDefinition(baselineSpec.definition, validated.definition)
+    });
 }
 
 function json(response, status, payload) {
@@ -388,7 +397,7 @@ export async function createMapEditorAuthoringServer({
         async validateStage({ stageId, spec } = {}) {
             const stage = currentStage(stageId);
             const baselineSpec = await readStageSpecFromDisk(stage);
-            const canonical = validateSpec(stage.entry, spec);
+            const canonical = validateEditableSpec(stage.entry, baselineSpec, spec);
             assertEditableDraft(stage.entry, baselineSpec, canonical);
             return Object.freeze({ valid: true, issues: [], spec: structuredClone(canonical) });
         },
@@ -404,7 +413,7 @@ export async function createMapEditorAuthoringServer({
                 });
             }
             const baselineSpec = stage.spec;
-            const canonical = validateSpec(stage.entry, spec);
+            const canonical = validateEditableSpec(stage.entry, baselineSpec, spec);
             assertEditableDraft(stage.entry, baselineSpec, canonical);
             const sourceContent = stableJson(canonical);
             const writes = [

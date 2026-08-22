@@ -102,13 +102,13 @@ const SPEC = {
     ],
     "entry": {
       "id": "sector-01-01:entry",
-      "x": -416,
-      "y": -32
+      "x": 485,
+      "y": -65
     },
     "exit": {
       "id": "sector-01-01:exit",
-      "x": 480,
-      "y": -979
+      "x": 520,
+      "y": -762
     },
     "gate": {
       "id": "sector-01-01:gate",
@@ -119,8 +119,8 @@ const SPEC = {
       "trigger": {
         "height": 62,
         "width": 52,
-        "x": 454,
-        "y": -1009
+        "x": 494,
+        "y": -792
       }
     },
     "id": "sector-01-01",
@@ -158,8 +158,8 @@ const SPEC = {
         "kind": "gate-panel",
         "objectiveId": "sector-01-01:terminal-read",
         "position": {
-          "x": 368,
-          "y": -947
+          "x": 408,
+          "y": -730
         },
         "presentationId": "world-object:gate-panel"
       },
@@ -169,8 +169,8 @@ const SPEC = {
         "id": "sector-01-01:exit-gate",
         "kind": "gate",
         "position": {
-          "x": 480,
-          "y": -947
+          "x": 520,
+          "y": -730
         },
         "presentationId": "world-object:gate"
       }
@@ -228,8 +228,8 @@ const SPEC = {
       },
       {
         "id": "sector-01-01:route-final-deck",
-        "x": 320,
-        "y": -947
+        "x": 360,
+        "y": -730
       }
     ],
     "routes": [
@@ -424,25 +424,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 256,
-          "y": -864
+          "x": 275,
+          "y": -645
         },
         "vertices": [
           {
-            "x": 128,
-            "y": -864
+            "x": 147,
+            "y": -645
           },
           {
-            "x": 384,
-            "y": -864
+            "x": 403,
+            "y": -645
           },
           {
-            "x": 384,
-            "y": -840
+            "x": 403,
+            "y": -621
           },
           {
-            "x": 128,
-            "y": -840
+            "x": 147,
+            "y": -621
           }
         ]
       },
@@ -453,25 +453,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 320,
-          "y": -947
+          "x": 360,
+          "y": -730
         },
         "vertices": [
           {
-            "x": 128,
-            "y": -947
+            "x": 168,
+            "y": -730
           },
           {
-            "x": 512,
-            "y": -947
+            "x": 552,
+            "y": -730
           },
           {
-            "x": 512,
-            "y": -915
+            "x": 552,
+            "y": -698
           },
           {
-            "x": 128,
-            "y": -915
+            "x": 168,
+            "y": -698
           }
         ]
       },
@@ -482,25 +482,25 @@ const SPEC = {
         "kind": "sealed-door",
         "oneWay": false,
         "position": {
-          "x": -560,
-          "y": 0
+          "x": -95,
+          "y": -330
         },
         "vertices": [
           {
-            "x": -624,
-            "y": -128
+            "x": -159,
+            "y": -458
           },
           {
-            "x": -496,
-            "y": -128
+            "x": -31,
+            "y": -458
           },
           {
-            "x": -496,
-            "y": 0
+            "x": -31,
+            "y": -330
           },
           {
-            "x": -624,
-            "y": 0
+            "x": -159,
+            "y": -330
           }
         ]
       },
@@ -569,6 +569,7 @@ const SPEC = {
     "editableDomains": [
       "bounds",
       "entry",
+      "exit",
       "surfaces",
       "anchors",
       "recoveryRoute",

@@ -558,6 +558,7 @@ const SPEC = {
     "editableDomains": [
       "bounds",
       "entry",
+      "exit",
       "surfaces",
       "anchors",
       "recoveryRoute",

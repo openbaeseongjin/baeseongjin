@@ -1,4 +1,5 @@
 import { resolveObjectTriggerBounds } from "../../areas/AreaDefinition.js";
+import { AreaExitEditorComponent } from "./AreaExitEditorComponent.js";
 
 function finitePoint(value) {
     return Number.isFinite(value?.x) && Number.isFinite(value?.y);
@@ -73,7 +74,21 @@ export function collectEditorEntities(spec) {
             })
         );
     }
+    const exitComponent = AreaExitEditorComponent.from(definition);
+    if (exitComponent) {
+        result.push(
+            entity({
+                domain: "exit",
+                id: exitComponent.id,
+                kind: "exit",
+                point: exitComponent.point,
+                path: "/definition/exit",
+                sourceId: exitComponent.deck.id
+            })
+        );
+    }
     for (const [index, surface] of (definition.surfaces ?? []).entries()) {
+        if (exitComponent?.ownsSurface(surface.id)) continue;
         const point = finitePoint(surface.position) ? surface.position : centerOfVertices(surface.vertices);
         if (!point) continue;
         result.push(
@@ -100,7 +115,13 @@ export function collectEditorEntities(spec) {
         );
     }
     addPointEntities(result, definition.recoveryPoints, "recoveryRoute", "recovery", "/definition/recoveryPoints");
-    addPointEntities(result, definition.routePoints, "recoveryRoute", "route", "/definition/routePoints");
+    addPointEntities(
+        result,
+        definition.routePoints?.filter(({ id }) => !exitComponent?.ownsRoutePoint(id)),
+        "recoveryRoute",
+        "route",
+        "/definition/routePoints"
+    );
     for (const [index, object] of (definition.objects ?? []).entries()) {
         if (!finitePoint(object.position)) continue;
         if (isEnemyObject(object)) {
@@ -220,6 +241,12 @@ export function translateEditorEntity(spec, selected, delta) {
     if (selected.domain === "entry") {
         definition.entry.x += delta.x;
         definition.entry.y += delta.y;
+        return next;
+    }
+    if (selected.domain === "exit") {
+        const exit = AreaExitEditorComponent.from(definition);
+        if (!exit || exit.id !== selected.id) throw new TypeError("editor-entity-not-found");
+        exit.translate(delta);
         return next;
     }
     if (selected.domain === "surfaces") {
