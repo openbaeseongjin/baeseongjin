@@ -64,6 +64,11 @@ const LEGACY_DISPLAY_NAMES = Object.freeze({
 });
 
 export const ENEMY_ARCHETYPE_IDS = Object.freeze(DEFINITIONS.map(({ id }) => id));
+export const ENEMY_TYPE_IDS = Object.freeze([ENEMY_TYPE.SENTRY_T1, ENEMY_TYPE.PATROL_DRONE_T1, ...ENEMY_ARCHETYPE_IDS]);
+
+export function isCanonicalEnemyType(enemyType) {
+    return ENEMY_TYPE_IDS.includes(enemyType);
+}
 
 export function isEnemyArchetype(enemyType) {
     return Object.hasOwn(DEFINITIONS_BY_ID, enemyType);

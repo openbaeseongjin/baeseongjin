@@ -1,10 +1,10 @@
 # Sector 01 Enemy Sprites
 
 - Asset ID: `sector-01-enemies`
-- Runtime atlases: animated `pursuit-motion.png` (`128x160`), layered Sentry `sentry-upright-aim.png` (`64x32`), Shield body `shield-body.png` (`128x32`), Shield direction layer `shield-directions.png` (`256x32`), and Artillery acquisition motion `artillery-acquisition-motion.png` (`384x32`), all RGBA
+- Runtime atlases: animated `pursuit-motion.png` (`128x160`), layered Sentry `sentry-upright-aim.png` (`64x32`), Shield body `shield-body.png` (`128x32`), Shield direction layer `shield-directions.png` (`256x32`), Artillery acquisition motion `artillery-acquisition-motion.png` (`384x32`), Patrol motion/attack `patrol-motion-attack.png` (`128x192`), and Support motion `support-motion.png` (`128x64`), all RGBA
 - Cell size: transparent `32x32`
-- World output: sentry/pursuit/artillery `56x56`, shield `60x60`
-- Selected sources: sentry `06`, pursuit `09`, the polygon Shield redesign, and the symmetric acquisition Artillery redesign from their authoring folders
+- World output: sentry/pursuit/artillery/patrol/support `56x56`, shield `60x60`
+- Selected sources: sentry `06`, pursuit `09`, the polygon Shield redesign, the symmetric acquisition Artillery redesign, the user-selected Patrol, and the green-core Support from their authoring folders
 - Tool: Codex built-in ImageGen sources, normalized with the package-local deterministic Pillow scripts
 
 Enemy manifest v4 keeps every legal `EnemyPresentationState` explicit while representing direct states as Player-compatible `frames + duration + loop` clips. The runtime still uses an enemy-specific manifest, loader, state coverage, aliases, and validator. The legacy `sentry` runtime ID aliases `sentry-t1`. Its optional `upright-aim` layer adds a presentation-only frame over the normal state clip.
@@ -15,22 +15,28 @@ The selected pursuit drone has four frames each for `pursuit-seek`, `pursuit-win
 
 The polygon shield drone uses a four-frame upright `shield-guard` body loop at `140/140/180/140 ms` plus a separate eight-frame physical shield layer ordered `E, SE, S, SW, W, NW, N, NE`. The compact clipped-octagonal body stays upright while only its lower hover cue pulses. The renderer selects the shield-only frame from the existing gameplay `behaviorState.guardDirection`, so the plate follows the same player-facing defense direction without rotating or mirroring the body. `idle`, `knockback`, and projectile attack presentation states explicitly fall back to this guard clip. Frame timing and direction quantization are presentation-only and do not change shield direction authority, blocking, attack timing, collision, or damage.
 
-The Artillery Drone uses one twelve-frame atlas and remains fixed upright without an `aimLayer`. Its three-frame idle pulse gives way to a five-frame symmetric shutter and belly-projector acquisition cue whose `650 ms` total matches the current gameplay telegraph reference. A four-frame `1400 ms` cooldown dims the sensor, retracts the projector and closes the shutters. The cue only communicates that one Player position was captured; the existing circular ground telegraph remains the sole strike-position indicator. Strike timing, damage, collision, AI and network authority remain unchanged. Other unsupported enemies retain the built-in mock renderer.
+The Artillery Drone uses one twelve-frame atlas and remains fixed upright without an `aimLayer`. Its three-frame idle pulse gives way to a five-frame symmetric shutter and belly-projector acquisition cue whose `650 ms` total matches the current gameplay telegraph reference. A four-frame `1400 ms` cooldown dims the sensor, retracts the projector and closes the shutters. The cue only communicates that one Player position was captured; the existing circular ground telegraph remains the sole strike-position indicator. Strike timing, damage, collision, AI and network authority remain unchanged.
+
+The Patrol Drone uses a four-frame `patrol-move` loop and authored `acquire`, `track`, `lock`, `fire`, and `cooldown` clips. The renderer derives horizontal facing from the current authored patrol target whenever gameplay aim is absent, so the upright right-facing frames mirror naturally on leftward route segments. `patrol-wait` and `knockback` explicitly fall back to the movement silhouette. The legacy `patrol-drone` ID aliases `patrol-drone-t1`; route, projectile trajectory, attack timing, damage, collision and network authority remain unchanged.
+
+The Support Drone uses four-frame `support-idle` and `support-link` loops. It has no projectile attack presentation states; common `idle` and `knockback` explicitly fall back to `support-idle`. The existing gameplay-owned green link still communicates the selected target. Healing cadence, amount, selection and network state remain unchanged. Other unsupported enemies retain the built-in mock renderer.
 
 This package contains presentation data only. Collider, hitbox, damage, health, physics, AI, and network authority stay in gameplay code. If this manifest or atlas cannot load, only enemies fall back to the built-in pixel mock.
 
 The normalized atlas lifts shadow values and uses a warm gunmetal rim so the silhouettes stay separate from the blue-black Sector 01 environment. When this package is ready, the renderer does not draw the old mock sensor block or drone silhouette line over it; gameplay telegraphs and health bars remain independent.
 
-Validation status (2026-08-22): manifest v4 validator PASS with five atlases, four enemies and 31 presentation states after the Artillery acquisition replacement. Direct `seed=1` Stage 1-8 review at desktop `1280x720` displayed the production Artillery frame without the removed rotating optic or fallback mock; mobile-landscape `844x390` startup and package loading also completed without browser warnings or errors. Direct mobile traversal to the Artillery encounter and final user play approval remain pending, so Shield and Artillery stay local Runtime review candidates.
+Validation status (2026-08-22): manifest v4 validator PASS with seven atlases, six enemies and 44 presentation states after Patrol and Support integration. The single-player debug dummy displayed Patrol `attack-fire` and Support `support-idle`/`support-link` with production sprites at desktop `1280x720` and mobile landscape `844x390`; the package loaded without browser warnings or errors.
 
 ## Final user approval
 
-2026-08-20 사용자 최종 검수로 아래 두 Runtime 자산의 이미지와 애니메이션을 완료 처리한다.
+사용자 최종 검수로 아래 네 Runtime 자산의 이미지와 애니메이션을 완료 처리한다.
 
 - `sentry-t1`: 후보 `06` 기반 고정 베이스와 가장 가까운 Player/발사 방향을 따르는 upright 회전 머리·단일 포신
 - `pursuit-drone-t1`: 후보 `09` 기반 기본 이미지와 `pursuit-seek`, `pursuit-windup`, `pursuit-dash`, `pursuit-recover`, `knockback` 각 4프레임
+- `patrol-drone-t1`: 좌우 순찰 이동과 `acquire → track → lock → fire → cooldown` 공격 animation
+- `support-drone-t1`: upright `support-idle`과 relay가 열리는 `support-link` animation
 
-명시적인 새 사용자 결정 전에는 두 자산을 재생성·교체 대상으로 취급하지 않는다. Shield와 Artillery는 현재 로컬 Runtime 검수 후보이며 아직 최종 완료 승인 범위에 포함하지 않는다. 다른 몬스터의 이미지·애니메이션 완료 여부도 이번 승인 범위에 포함하지 않는다.
+명시적인 새 사용자 결정 전에는 네 자산을 재생성·교체 대상으로 취급하지 않는다. Shield와 Artillery는 현재 로컬 Runtime 검수 후보이며 아직 최종 완료 승인 범위에 포함하지 않는다. 다른 몬스터의 이미지·애니메이션 완료 여부도 이번 승인 범위에 포함하지 않는다.
 
 Validate with:
 
