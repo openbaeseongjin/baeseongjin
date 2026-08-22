@@ -346,7 +346,7 @@ function stageEndpoint(stageId, suffix = "") {
 }
 
 function scenarioReferenceUrl(stageId) {
-    if (/^boss-\d+$/.test(stageId ?? "")) return stageEndpoint(stageId, "/reference");
+    if (/^boss-\d+$/.test(stageId ?? "")) return null;
     const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
     if (!match) return null;
     return stageEndpoint(stageId, "/reference");

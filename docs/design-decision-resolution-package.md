@@ -124,7 +124,7 @@ Sector02~05 names/mechanics remain later contracts.
 
 ## 3. BOSS 01 — GATE LOCKING CARRIAGE
 
-> **현재 authored content:** [`boss/01/README.md`](./boss/01/README.md)가 `GATE LOCKING CARRIAGE`의 유일한 authoring 기준이다. 아래 C-01 세부안과 기존 Has-A runtime은 historical prototype이며, 새 Boss Runtime·Arena·전환을 구현하거나 C-01을 삭제하는 범위가 아니다.
+> **현재 authored content:** [`boss/01/README.md`](./boss/01/README.md)가 `GATE LOCKING CARRIAGE`의 유일한 authoring 기준이다. 아래 C-01 세부안은 `legacy` 이전 전의 historical prototype이며 현행 구현 입력이 아니다.
 
 ## 3-1. Identity
 
