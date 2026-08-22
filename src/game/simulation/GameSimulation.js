@@ -1074,6 +1074,7 @@ export class GameSimulation {
                     collider: enemy.collider,
                     patrol: enemy.patrol,
                     behaviorState: enemy.behaviorState,
+                    awakened: enemy.awakened,
                     knockbackState: enemy.knockbackState,
                     lockedTargetId: enemy.lockedTargetId,
                     attackState: enemy.attackState,
@@ -1142,6 +1143,7 @@ export class GameSimulation {
             enemies: this.enemies,
             neutralActors: this.#bossCollisionActors()
         });
+        for (const enemy of this.activeSimulationEnemies) enemy.observeActivation(this.players);
         const activeEnemyIds = new Set(this.activeSimulationEnemies.map(({ id }) => id));
         for (const enemy of this.enemies) {
             if (activeEnemyIds.has(enemy.id)) continue;
@@ -1818,14 +1820,16 @@ export class GameSimulation {
             })
         );
         updateEnemyPresentationAim({
-            enemies: this.activeSimulationEnemies.filter((enemy) => this.debugTrainingDummy.canSimulate(enemy)),
+            enemies: this.activeSimulationEnemies.filter(
+                (enemy) => enemy.awakened && this.debugTrainingDummy.canSimulate(enemy)
+            ),
             targets: this.players,
             range: COMBAT_CONFIG.enemyAttackRange,
             surfaces: this.activeCollisionSurfaces
         });
         const enemyProjectileSpawns = updateEnemyWeapons({
             enemies: this.activeSimulationEnemies.filter(
-                (enemy) => !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
+                (enemy) => enemy.awakened && !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
             ),
             targets: this.players,
             projectiles: this.enemyProjectiles,
@@ -2250,7 +2254,7 @@ export class GameSimulation {
     #advanceEnemyBehaviorSimulation(dt) {
         const outcomes = advanceEnemyBehaviors({
             enemies: this.activeSimulationEnemies.filter(
-                (enemy) => !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
+                (enemy) => enemy.awakened && !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
             ),
             targets: this.players,
             dt

@@ -2,7 +2,7 @@ import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 10;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 11;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit", "fall-damage"]);
 export const PLAYER_IMPACT_SOURCE_KIND = Object.freeze({ BOSS_HAZARD: "boss-hazard" });
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
@@ -278,6 +278,7 @@ export function createPlayerImpactClaim({
     impactId,
     projectileId,
     clientTick,
+    authorityTick,
     impactType,
     position,
     velocity,
@@ -294,6 +295,7 @@ export function createPlayerImpactClaim({
     impactId ??= projectileId;
     assertId(impactId, "impactId");
     assertTick(clientTick, "clientTick");
+    assertTick(authorityTick, "authorityTick");
     if (!IMPACT_TYPES.has(impactType)) throw new Error(`unsupported impactType: ${impactType}`);
     if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
         throw new Error("position must contain finite x and y");
@@ -350,6 +352,7 @@ export function createPlayerImpactClaim({
         impactId,
         projectileId: impactId,
         clientTick,
+        authorityTick,
         impactType,
         position: normalizeNetworkJson(position, "position"),
         velocity: normalizeNetworkJson(velocity, "velocity"),

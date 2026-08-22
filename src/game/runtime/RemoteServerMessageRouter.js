@@ -85,8 +85,7 @@ const SERVER_MESSAGE_HANDLER = Object.freeze({
     [MULTIPLAYER_MESSAGE_TYPE.AUGMENT_IMPACT_RECEIPT]: (m, c) => {
         const a = c.authority;
         const receipt = createAugmentImpactReceipt(m.payload);
-        a.augmentImpactReceipts.push(receipt);
-        if (!receipt.accepted) a.locallyPredictedAugmentImpactIds.delete(receipt.eventId);
+        a.recordAugmentImpactReceipt(receipt);
     },
     [MULTIPLAYER_MESSAGE_TYPE.OWNER_MOTION_RECEIPT]: (m, c) =>
         c.authority.recordOwnerMotionReceipt(createOwnerMotionReceipt(m.payload)),

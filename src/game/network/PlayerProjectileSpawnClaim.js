@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const PLAYER_PROJECTILE_SPAWN_CLAIM_PROTOCOL_VERSION = 1;
+export const PLAYER_PROJECTILE_SPAWN_CLAIM_PROTOCOL_VERSION = 2;
 
 function assertId(value, label) {
     if (typeof value !== "string" || value.length === 0) throw new Error(`${label} must be non-empty`);
@@ -14,7 +14,7 @@ function assertTick(value) {
     return value;
 }
 
-export function createPlayerProjectileSpawnClaim({ predictionId, clientTick, targetId, position }) {
+export function createPlayerProjectileSpawnClaim({ predictionId, clientTick, authorityTick, targetId, position }) {
     if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
         throw new Error("position must contain finite x and y");
     }
@@ -22,6 +22,7 @@ export function createPlayerProjectileSpawnClaim({ predictionId, clientTick, tar
         protocolVersion: PLAYER_PROJECTILE_SPAWN_CLAIM_PROTOCOL_VERSION,
         predictionId: assertId(predictionId, "predictionId"),
         clientTick: assertTick(clientTick),
+        authorityTick: assertTick(authorityTick),
         targetId: assertId(targetId, "targetId"),
         position: normalizeNetworkJson(position, "position")
     });

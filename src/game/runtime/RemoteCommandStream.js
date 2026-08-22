@@ -49,6 +49,7 @@ export class RemoteCommandStream {
                 if (sequence <= acknowledgedSequence) this.pending.delete(sequence);
             }
         }
+        this.rebaseTargetTick(serverTick);
         this.latestServerTick = serverTick;
         this.latestSnapshotSequence = snapshotSequence;
         this.latestSnapshot = snapshot;
@@ -64,7 +65,15 @@ export class RemoteCommandStream {
             this.pending.delete(rejection.sequence);
             removed.push(rejection);
         }
+        this.rebaseTargetTick(receipt.serverTick);
         return Object.freeze(removed);
+    }
+
+    rebaseTargetTick(serverTick) {
+        assertTick(serverTick, "serverTick");
+        const pendingTargetTicks = [...this.pending.values()].map(({ tick }) => tick);
+        this.lastTargetTick = Math.max(serverTick + this.inputLeadTicks - 1, -1, ...pendingTargetTicks);
+        return this.lastTargetTick;
     }
 
     pendingBatches() {

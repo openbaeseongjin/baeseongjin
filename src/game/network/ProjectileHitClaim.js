@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const PROJECTILE_HIT_CLAIM_PROTOCOL_VERSION = 1;
+export const PROJECTILE_HIT_CLAIM_PROTOCOL_VERSION = 2;
 
 function assertId(value, label) {
     if (typeof value !== "string" || value.length === 0) throw new Error(`${label} must be non-empty`);
@@ -12,7 +12,7 @@ function assertTick(value) {
     return value;
 }
 
-export function createProjectileHitClaim({ predictionId, targetId, clientTick, position }) {
+export function createProjectileHitClaim({ predictionId, targetId, clientTick, authorityTick, position }) {
     if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
         throw new Error("position must contain finite x and y");
     }
@@ -21,6 +21,7 @@ export function createProjectileHitClaim({ predictionId, targetId, clientTick, p
         predictionId: assertId(predictionId, "predictionId"),
         targetId: assertId(targetId, "targetId"),
         clientTick: assertTick(clientTick),
+        authorityTick: assertTick(authorityTick),
         position: normalizeNetworkJson(position, "position")
     });
 }

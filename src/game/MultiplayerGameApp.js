@@ -395,7 +395,6 @@ export class MultiplayerGameApp {
         this.queuePlayerPresentationEvents(predictedEvents);
         this.applyFoundationFeedback([...events, ...predictedEvents], dt);
         this.authority.drainRopeImpactReceipts();
-        this.authority.drainAugmentImpactReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
         this.combatFeedback.apply(predictedEvents, { visibleWorldBounds: particleBounds });
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");

@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 5;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 6;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
@@ -58,6 +58,7 @@ function normalizeLauncher(launcher) {
 
 export function createOwnerMotionState({
     clientTick,
+    authorityTick,
     position,
     velocity,
     angle = 0,
@@ -78,6 +79,7 @@ export function createOwnerMotionState({
     return Object.freeze({
         protocolVersion: OWNER_MOTION_STATE_PROTOCOL_VERSION,
         clientTick: assertTick(clientTick, "clientTick"),
+        authorityTick: assertTick(authorityTick, "authorityTick"),
         position: finiteVector(position, "position"),
         velocity: finiteVector(velocity, "velocity"),
         angle,

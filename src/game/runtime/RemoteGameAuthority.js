@@ -26,6 +26,7 @@ import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
 import { WORLD_CONFIG } from "../config.js";
 import { createGameSimulationForWorldRevision } from "../simulation/GameSimulationFactory.js";
 import { routeServerMessage } from "./RemoteServerMessageRouter.js";
+import { ClientServerTickProjection } from "./ClientServerTickProjection.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
 
@@ -52,6 +53,7 @@ export class RemoteGameAuthority {
         this.stream = null;
         this.ownerRuntime = null;
         this.buffer = new RemoteWorldStateBuffer();
+        this.tickProjection = new ClientServerTickProjection();
         this.latestSnapshot = null;
         this.snapshotReceivedAt = 0;
         this.previousSnapshotReceivedAt = null;
@@ -65,6 +67,7 @@ export class RemoteGameAuthority {
         this.impactClaimReceipts = [];
         this.ropeImpactReceipts = [];
         this.augmentImpactReceipts = [];
+        this.pendingAugmentImpactClaims = new Map();
         this.augmentOfferReceipts = [];
         this.locallyPredictedAugmentImpactIds = new Set();
         this.locallyPredictedAugmentImpactOrder = [];
@@ -77,9 +80,11 @@ export class RemoteGameAuthority {
         this.checkpointClaimReceipts = [];
         this.debugTeleportReceipts = [];
         this.pendingCheckpointId = null;
+        this.pendingCheckpointClaim = null;
         this.summitClaimReceipts = [];
         this.pendingSummitClaim = false;
         this.latestOwnerMotionReceiptTick = -1;
+        this.recoveringOwnerMotionTick = false;
         this.networkMetrics = {
             roundTripMs: null,
             snapshotIntervalMs: null,
@@ -169,11 +174,13 @@ export class RemoteGameAuthority {
         this.latestSnapshot = snapshot;
         if (snapshot.state.progressKind === "area" && snapshot.state.activeCheckpointId === this.pendingCheckpointId) {
             this.pendingCheckpointId = null;
+            this.pendingCheckpointClaim = null;
         }
         if (snapshot.state.runState === "completed") this.pendingSummitClaim = false;
         this.snapshotReceivedAt = receivedAt;
         this.buffer.push(snapshot, receivedAt);
         this.reconcile();
+        this.reanchorTickProjection();
         this.acknowledgeSnapshot(snapshot.snapshotSequence);
         return true;
     }
@@ -191,8 +198,7 @@ export class RemoteGameAuthority {
 
     submit(command) {
         if (!this.latestSnapshot || this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
-        const predictedTick = this.ownerRuntime.state().tick;
-        const batch = this.stream.createBatchAtTick(predictedTick, command);
+        const batch = this.stream.createBatch(this.stream.latestServerTick, command);
         if (!batch) return false;
         this.trackSentCommand(batch.commands[0].sequence, this.now());
         this.socket.send(
@@ -213,6 +219,7 @@ export class RemoteGameAuthority {
         const predicted = this.ownerRuntime.state();
         return createOwnerMotionState({
             clientTick: predicted.tick,
+            authorityTick: this.tickProjection.project(predicted.tick),
             position: predicted.position,
             velocity: predicted.velocity,
             angle: predicted.angle,
@@ -324,6 +331,7 @@ export class RemoteGameAuthority {
             predictionId: event.predictionId,
             targetId: event.targetId,
             clientTick: event.clientTick,
+            authorityTick: this.tickProjection.project(event.clientTick),
             position: event.position
         });
         this.socket.send(
@@ -339,6 +347,7 @@ export class RemoteGameAuthority {
             predictionId: event.predictionId,
             targetId: event.targetId,
             clientTick: event.tick,
+            authorityTick: this.tickProjection.project(event.tick),
             position: event.position
         });
         this.socket.send(
@@ -355,6 +364,7 @@ export class RemoteGameAuthority {
         const claim = createPlayerImpactClaim({
             impactId: event.impactId ?? event.projectileId,
             clientTick: event.clientTick,
+            authorityTick: this.tickProjection.project(event.clientTick),
             impactType: event.resolution,
             position: event.position,
             velocity: event.velocity,
@@ -379,6 +389,7 @@ export class RemoteGameAuthority {
             targetId: event.parameters.targetId,
             targetKind: event.parameters.targetKind ?? "enemy",
             clientTick: event.clientTick,
+            authorityTick: this.tickProjection.project(event.clientTick),
             position: event.position,
             velocity: event.velocity
         });
@@ -405,6 +416,7 @@ export class RemoteGameAuthority {
             sourcePlayerId: event.sourcePlayerId ?? this.playerId,
             targetId: event.targetId,
             clientTick: event.clientTick ?? event.tick,
+            authorityTick: this.tickProjection.project(event.clientTick ?? event.tick),
             effectId: event.effectId,
             sourceKind: event.sourceKind ?? "augment-action",
             sourcePosition: event.sourcePosition,
@@ -422,10 +434,28 @@ export class RemoteGameAuthority {
                 : {})
         });
         this.locallyPredictedAugmentImpactIds.add(claim.eventId);
+        this.pendingAugmentImpactClaims.set(claim.eventId, { claim, retried: false });
         this.locallyPredictedAugmentImpactOrder.push(claim.eventId);
         while (this.locallyPredictedAugmentImpactOrder.length > MAX_TRACKED_COMMANDS) {
-            this.locallyPredictedAugmentImpactIds.delete(this.locallyPredictedAugmentImpactOrder.shift());
+            const expiredEventId = this.locallyPredictedAugmentImpactOrder.shift();
+            this.locallyPredictedAugmentImpactIds.delete(expiredEventId);
+            this.pendingAugmentImpactClaims.delete(expiredEventId);
         }
+        return this.sendAugmentImpactClaim(claim);
+    }
+
+    reanchorTickProjection() {
+        if (!this.latestSnapshot || !this.ownerRuntime) return false;
+        const sharedOwner = this.latestSnapshot.state.players.find(({ id }) => id === this.playerId);
+        this.tickProjection.observe({
+            clientTick: this.ownerRuntime.state().tick,
+            serverTick: Math.max(this.latestSnapshot.serverTick, sharedOwner?.ownerMotionTick ?? 0)
+        });
+        return true;
+    }
+
+    sendAugmentImpactClaim(claim) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
         this.socket.send(
             JSON.stringify({
                 type: MULTIPLAYER_MESSAGE_TYPE.AUGMENT_IMPACT,
@@ -464,7 +494,8 @@ export class RemoteGameAuthority {
         const claim = createFoundationSelectionClaim({
             sourceId,
             foundationId,
-            clientTick: this.ownerRuntime.state().tick
+            clientTick: this.ownerRuntime.state().tick,
+            authorityTick: this.tickProjection.project(this.ownerRuntime.state().tick)
         });
         this.socket.send(
             JSON.stringify({
@@ -482,8 +513,12 @@ export class RemoteGameAuthority {
         const candidate = this.ownerRuntime.checkpointClaimCandidate();
         if (!candidate) return null;
         if (!this.submitOwnerMotion() || !this.ownerRuntime.applyPredictedCheckpoint(candidate)) return null;
-        const claim = createCheckpointClaim(candidate);
+        const claim = createCheckpointClaim({
+            ...candidate,
+            authorityTick: this.tickProjection.project(candidate.clientTick)
+        });
         this.pendingCheckpointId = claim.checkpointId;
+        this.pendingCheckpointClaim = { claim, retried: false };
         this.socket.send(
             JSON.stringify({
                 type: MULTIPLAYER_MESSAGE_TYPE.CHECKPOINT_CLAIM,
@@ -500,7 +535,10 @@ export class RemoteGameAuthority {
         const candidate = this.ownerRuntime.summitClaimCandidate();
         if (!candidate) return null;
         this.submitOwnerMotion();
-        const claim = createSummitClaim(candidate);
+        const claim = createSummitClaim({
+            ...candidate,
+            authorityTick: this.tickProjection.project(candidate.clientTick)
+        });
         this.pendingSummitClaim = true;
         this.socket.send(
             JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SUMMIT_CLAIM, payload: serializeSummitClaim(claim) })
@@ -538,8 +576,35 @@ export class RemoteGameAuthority {
 
     recordCheckpointClaimReceipt(receipt) {
         this.checkpointClaimReceipts.push(receipt);
+        const pending = this.pendingCheckpointClaim;
+        if (
+            !receipt.accepted &&
+            receipt.reason === "tick-window" &&
+            pending?.claim.checkpointId === receipt.checkpointId &&
+            !pending.retried
+        ) {
+            this.reconcile();
+            this.reanchorTickProjection();
+            const retry = createCheckpointClaim({
+                ...pending.claim,
+                authorityTick: this.tickProjection.project(this.ownerRuntime.state().tick)
+            });
+            this.pendingCheckpointClaim = { claim: retry, retried: true };
+            this.submitOwnerMotion();
+            this.socket.send(
+                JSON.stringify({
+                    type: MULTIPLAYER_MESSAGE_TYPE.CHECKPOINT_CLAIM,
+                    payload: serializeCheckpointClaim(retry)
+                })
+            );
+            return true;
+        }
         this.ownerRuntime?.recordCheckpointReceipt(receipt, this.latestSnapshot);
-        if (!receipt.accepted && receipt.checkpointId === this.pendingCheckpointId) this.pendingCheckpointId = null;
+        if (receipt.checkpointId === this.pendingCheckpointId) {
+            if (!receipt.accepted) this.pendingCheckpointId = null;
+            this.pendingCheckpointClaim = null;
+        }
+        return true;
     }
 
     drainCheckpointClaimReceipts() {
@@ -560,12 +625,18 @@ export class RemoteGameAuthority {
     }
 
     recordOwnerMotionReceipt(receipt) {
-        if (receipt.clientTick <= this.latestOwnerMotionReceiptTick) return false;
-        this.latestOwnerMotionReceiptTick = receipt.clientTick;
+        this.latestOwnerMotionReceiptTick = Math.max(this.latestOwnerMotionReceiptTick, receipt.clientTick);
         if (receipt.accepted) {
             this.networkMetrics.acceptedOwnerMotions += 1;
+            this.recoveringOwnerMotionTick = false;
         } else {
             this.networkMetrics.rejectedOwnerMotions += 1;
+            if (receipt.reason === "tick-window" && !this.recoveringOwnerMotionTick) {
+                this.recoveringOwnerMotionTick = true;
+                this.reconcile();
+                this.reanchorTickProjection();
+                this.submitOwnerMotion();
+            }
         }
         return true;
     }
@@ -625,7 +696,8 @@ export class RemoteGameAuthority {
         if (!this.submitOwnerMotion()) return false;
         const claim = createAugmentOfferClaim({
             sourceId,
-            clientTick: this.ownerRuntime.state().tick
+            clientTick: this.ownerRuntime.state().tick,
+            authorityTick: this.tickProjection.project(this.ownerRuntime.state().tick)
         });
         this.socket.send(
             JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.AUGMENT_OFFER, payload: serializeAugmentOfferClaim(claim) })
@@ -637,6 +709,30 @@ export class RemoteGameAuthority {
         const receipts = Object.freeze([...this.augmentImpactReceipts]);
         this.augmentImpactReceipts.length = 0;
         return receipts;
+    }
+
+    recordAugmentImpactReceipt(receipt) {
+        this.augmentImpactReceipts.push(receipt);
+        if (this.augmentImpactReceipts.length > MAX_TRACKED_COMMANDS) this.augmentImpactReceipts.shift();
+        const pending = this.pendingAugmentImpactClaims.get(receipt.eventId);
+        if (receipt.accepted) {
+            this.pendingAugmentImpactClaims.delete(receipt.eventId);
+            return true;
+        }
+        if (receipt.reason === "tick-window" && pending && !pending.retried) {
+            this.reconcile();
+            this.reanchorTickProjection();
+            const retry = createAugmentImpactClaim({
+                ...pending.claim,
+                authorityTick: this.tickProjection.project(this.ownerRuntime.state().tick)
+            });
+            this.pendingAugmentImpactClaims.set(receipt.eventId, { claim: retry, retried: true });
+            this.submitOwnerMotion();
+            return this.sendAugmentImpactClaim(retry);
+        }
+        this.pendingAugmentImpactClaims.delete(receipt.eventId);
+        this.locallyPredictedAugmentImpactIds.delete(receipt.eventId);
+        return true;
     }
 
     recordReceipt(receipt) {
