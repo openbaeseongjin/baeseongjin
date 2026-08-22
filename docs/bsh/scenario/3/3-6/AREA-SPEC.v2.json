@@ -1,10 +1,10 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
+    "id": "3-6",
     "sector": 3,
     "stage": 6,
-    "legacyStageAlias": "3-6",
     "sourceAreaId": "sector-03-06"
   },
   "editor": {
@@ -43,11 +43,11 @@
       "y": -32
     },
     "exit": {
-      "id": "sector-03-06:scenario-exit",
-      "x": -1920,
-      "y": -64
+      "id": "sector-03-06:exit",
+      "x": 1184,
+      "y": -2070
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-03-07",
     "surfaces": [
       {
         "id": "p0-entry",
@@ -361,12 +361,211 @@
       }
     ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-03-06:drone-1",
+        "kind": "patrol-drone",
+        "presentationId": "world-object:patrol-drone",
+        "position": {
+          "x": 960,
+          "y": -1512
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "patrol-drone-t1",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 960,
+            "height": 448
+          }
+        },
+        "patrol": {
+          "points": [
+            {
+              "x": 960,
+              "y": -1512
+            },
+            {
+              "x": 240,
+              "y": -1600
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "mode": "pingpong"
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ]
+      },
+      {
+        "id": "sector-03-06:atrium-lower-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": 1280,
+          "y": -928
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 640,
+            "height": 448
+          }
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "id": "sector-03-06:atrium-upper-guard",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "position": {
+          "x": -768,
+          "y": -1680
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1",
+            "swarm-drone-t1"
+          ]
+        },
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 640,
+            "height": 448
+          }
+        },
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "id": "sector-03-06:atrium-id",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -1680,
+          "y": -218
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-06:atrium-id"
+        ]
+      },
+      {
+        "id": "sector-03-06:power-state",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 1248,
+          "y": -954
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-06:power-state"
+        ]
+      },
+      {
+        "id": "sector-03-06:upper-concourse",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -768,
+          "y": -1706
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-06:upper-concourse"
+        ]
+      },
+      {
+        "id": "sector-03-06:access-control-ahead",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 1184,
+          "y": -2128
+        },
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-06:access-control-ahead"
+        ]
+      },
+      {
+        "id": "sector-03-06:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 1104,
+          "y": -2070
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-03-06:exit-panel-engaged",
+        "gateId": "sector-03-06:gate",
+        "requiredObjectiveIds": [
+          "sector-03-06:final-deck-reached"
+        ]
+      },
+      {
+        "id": "sector-03-06:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 1184,
+          "y": -2070
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-03-06:gate"
+      }
+    ],
     "objectives": [
       {
         "id": "sector-03-06:final-deck-reached",
         "type": "reach",
-        "target": "p5-exit-deck"
+        "bounds": {
+          "x": 1024,
+          "y": -2102,
+          "width": 320,
+          "height": 96
+        }
       },
       {
         "id": "sector-03-06:exit-panel-engaged",
@@ -381,16 +580,16 @@
     "scannerGroups": [
       {
         "id": "sector-03-06:scanner-premium-atrium-A",
-        "cycleSeconds": {
+        "cycle": {
           "available": 1.5,
           "warning": 0.6,
           "locked": 1.1,
           "reset": 0.3
         },
         "phaseOffsetSeconds": 0,
-        "controlledTargetIds": [
-          "c1",
-          "c2"
+        "controlledSurfaceIds": [
+          "sector-03-06:c1-surface",
+          "sector-03-06:c2-surface"
         ],
         "contract": {
           "newAttachAllowed": [
@@ -409,15 +608,39 @@
         }
       }
     ],
-    "storyTriggers": [],
-    "routes": [],
+    "storyTriggers": [
+      "premium-atrium",
+      "local-power",
+      "security-timing"
+    ],
+    "routes": [
+      "safe",
+      "flow",
+      "recovery"
+    ],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [
+      "premium-atrium",
+      "large-movement"
+    ],
+    "gate": {
+      "id": "sector-03-06:gate",
+      "nextAreaId": "sector-03-07",
+      "requiredObjectiveIds": [
+        "sector-03-06:exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 1158,
+        "y": -2132,
+        "width": 52,
+        "height": 62
+      }
+    }
   },
   "anchors": [
     {
       "target": {
-        "id": "g1-surface",
+        "id": "sector-03-06:g1-surface",
         "x": -1280,
         "y": -320,
         "properties": {
@@ -425,11 +648,12 @@
         }
       },
       "landmark": {
-        "id": "g1",
+        "id": "sector-03-06:g1",
         "x": -1280,
         "y": -320,
         "properties": {
-          "label": "g1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G1",
           "coordinateAnchor": "center",
           "sourceId": "g1"
         }
@@ -437,19 +661,21 @@
     },
     {
       "target": {
-        "id": "c1-surface",
+        "id": "sector-03-06:c1-surface",
         "x": -920,
         "y": -448,
         "properties": {
-          "sourceId": "c1"
+          "sourceId": "c1",
+          "scannerControlled": true
         }
       },
       "landmark": {
-        "id": "c1",
+        "id": "sector-03-06:c1",
         "x": -920,
         "y": -448,
         "properties": {
-          "label": "c1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "C1",
           "coordinateAnchor": "center",
           "sourceId": "c1"
         }
@@ -457,7 +683,7 @@
     },
     {
       "target": {
-        "id": "g2-surface",
+        "id": "sector-03-06:g2-surface",
         "x": -560,
         "y": -576,
         "properties": {
@@ -465,11 +691,12 @@
         }
       },
       "landmark": {
-        "id": "g2",
+        "id": "sector-03-06:g2",
         "x": -560,
         "y": -576,
         "properties": {
-          "label": "g2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G2",
           "coordinateAnchor": "center",
           "sourceId": "g2"
         }
@@ -477,7 +704,7 @@
     },
     {
       "target": {
-        "id": "g3-surface",
+        "id": "sector-03-06:g3-surface",
         "x": -200,
         "y": -704,
         "properties": {
@@ -485,11 +712,12 @@
         }
       },
       "landmark": {
-        "id": "g3",
+        "id": "sector-03-06:g3",
         "x": -200,
         "y": -704,
         "properties": {
-          "label": "g3",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G3",
           "coordinateAnchor": "center",
           "sourceId": "g3"
         }
@@ -497,7 +725,7 @@
     },
     {
       "target": {
-        "id": "g4-surface",
+        "id": "sector-03-06:g4-surface",
         "x": 160,
         "y": -832,
         "properties": {
@@ -505,11 +733,12 @@
         }
       },
       "landmark": {
-        "id": "g4",
+        "id": "sector-03-06:g4",
         "x": 160,
         "y": -832,
         "properties": {
-          "label": "g4",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G4",
           "coordinateAnchor": "center",
           "sourceId": "g4"
         }
@@ -517,7 +746,7 @@
     },
     {
       "target": {
-        "id": "g4b-surface",
+        "id": "sector-03-06:g4b-surface",
         "x": 520,
         "y": -900,
         "properties": {
@@ -525,11 +754,12 @@
         }
       },
       "landmark": {
-        "id": "g4b",
+        "id": "sector-03-06:g4b",
         "x": 520,
         "y": -900,
         "properties": {
-          "label": "g4b",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G4B",
           "coordinateAnchor": "center",
           "sourceId": "g4b"
         }
@@ -537,7 +767,7 @@
     },
     {
       "target": {
-        "id": "g4c-surface",
+        "id": "sector-03-06:g4c-surface",
         "x": 880,
         "y": -928,
         "properties": {
@@ -545,11 +775,12 @@
         }
       },
       "landmark": {
-        "id": "g4c",
+        "id": "sector-03-06:g4c",
         "x": 880,
         "y": -928,
         "properties": {
-          "label": "g4c",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G4C",
           "coordinateAnchor": "center",
           "sourceId": "g4c"
         }
@@ -557,7 +788,7 @@
     },
     {
       "target": {
-        "id": "v1-surface",
+        "id": "sector-03-06:v1-surface",
         "x": 1480,
         "y": -1120,
         "properties": {
@@ -565,11 +796,12 @@
         }
       },
       "landmark": {
-        "id": "v1",
+        "id": "sector-03-06:v1",
         "x": 1480,
         "y": -1120,
         "properties": {
-          "label": "v1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "V1",
           "coordinateAnchor": "center",
           "sourceId": "v1"
         }
@@ -577,7 +809,7 @@
     },
     {
       "target": {
-        "id": "v2-surface",
+        "id": "sector-03-06:v2-surface",
         "x": 1440,
         "y": -1320,
         "properties": {
@@ -585,11 +817,12 @@
         }
       },
       "landmark": {
-        "id": "v2",
+        "id": "sector-03-06:v2",
         "x": 1440,
         "y": -1320,
         "properties": {
-          "label": "v2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "V2",
           "coordinateAnchor": "center",
           "sourceId": "v2"
         }
@@ -597,19 +830,21 @@
     },
     {
       "target": {
-        "id": "c2-surface",
+        "id": "sector-03-06:c2-surface",
         "x": 1184,
         "y": -1496,
         "properties": {
-          "sourceId": "c2"
+          "sourceId": "c2",
+          "scannerControlled": true
         }
       },
       "landmark": {
-        "id": "c2",
+        "id": "sector-03-06:c2",
         "x": 1184,
         "y": -1496,
         "properties": {
-          "label": "c2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "C2",
           "coordinateAnchor": "center",
           "sourceId": "c2"
         }
@@ -617,7 +852,7 @@
     },
     {
       "target": {
-        "id": "g7-surface",
+        "id": "sector-03-06:g7-surface",
         "x": 832,
         "y": -1536,
         "properties": {
@@ -625,11 +860,12 @@
         }
       },
       "landmark": {
-        "id": "g7",
+        "id": "sector-03-06:g7",
         "x": 832,
         "y": -1536,
         "properties": {
-          "label": "g7",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G7",
           "coordinateAnchor": "center",
           "sourceId": "g7"
         }
@@ -637,7 +873,7 @@
     },
     {
       "target": {
-        "id": "g8-surface",
+        "id": "sector-03-06:g8-surface",
         "x": 480,
         "y": -1576,
         "properties": {
@@ -645,11 +881,12 @@
         }
       },
       "landmark": {
-        "id": "g8",
+        "id": "sector-03-06:g8",
         "x": 480,
         "y": -1576,
         "properties": {
-          "label": "g8",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G8",
           "coordinateAnchor": "center",
           "sourceId": "g8"
         }
@@ -657,7 +894,7 @@
     },
     {
       "target": {
-        "id": "g9-surface",
+        "id": "sector-03-06:g9-surface",
         "x": 128,
         "y": -1616,
         "properties": {
@@ -665,11 +902,12 @@
         }
       },
       "landmark": {
-        "id": "g9",
+        "id": "sector-03-06:g9",
         "x": 128,
         "y": -1616,
         "properties": {
-          "label": "g9",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G9",
           "coordinateAnchor": "center",
           "sourceId": "g9"
         }
@@ -677,7 +915,7 @@
     },
     {
       "target": {
-        "id": "g10-surface",
+        "id": "sector-03-06:g10-surface",
         "x": -224,
         "y": -1656,
         "properties": {
@@ -685,11 +923,12 @@
         }
       },
       "landmark": {
-        "id": "g10",
+        "id": "sector-03-06:g10",
         "x": -224,
         "y": -1656,
         "properties": {
-          "label": "g10",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "G10",
           "coordinateAnchor": "center",
           "sourceId": "g10"
         }
@@ -697,7 +936,7 @@
     },
     {
       "target": {
-        "id": "f1-surface",
+        "id": "sector-03-06:f1-surface",
         "x": -320,
         "y": -1800,
         "properties": {
@@ -705,11 +944,12 @@
         }
       },
       "landmark": {
-        "id": "f1",
+        "id": "sector-03-06:f1",
         "x": -320,
         "y": -1800,
         "properties": {
-          "label": "f1",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "F1",
           "coordinateAnchor": "center",
           "sourceId": "f1"
         }
@@ -717,7 +957,7 @@
     },
     {
       "target": {
-        "id": "f2-surface",
+        "id": "sector-03-06:f2-surface",
         "x": 32,
         "y": -1880,
         "properties": {
@@ -725,11 +965,12 @@
         }
       },
       "landmark": {
-        "id": "f2",
+        "id": "sector-03-06:f2",
         "x": 32,
         "y": -1880,
         "properties": {
-          "label": "f2",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "F2",
           "coordinateAnchor": "center",
           "sourceId": "f2"
         }
@@ -737,7 +978,7 @@
     },
     {
       "target": {
-        "id": "f3-surface",
+        "id": "sector-03-06:f3-surface",
         "x": 384,
         "y": -1960,
         "properties": {
@@ -745,11 +986,12 @@
         }
       },
       "landmark": {
-        "id": "f3",
+        "id": "sector-03-06:f3",
         "x": 384,
         "y": -1960,
         "properties": {
-          "label": "f3",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "F3",
           "coordinateAnchor": "center",
           "sourceId": "f3"
         }
@@ -757,7 +999,7 @@
     },
     {
       "target": {
-        "id": "f4-surface",
+        "id": "sector-03-06:f4-surface",
         "x": 736,
         "y": -2040,
         "properties": {
@@ -765,621 +1007,17 @@
         }
       },
       "landmark": {
-        "id": "f4",
+        "id": "sector-03-06:f4",
         "x": 736,
         "y": -2040,
         "properties": {
-          "label": "f4",
+          "presentationId": "world-object:grapple-landmark",
+          "label": "F4",
           "coordinateAnchor": "center",
           "sourceId": "f4"
         }
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "sourcePath": "docs/bsh/scenario/3/3-6/AREA-SPEC-REV8-DESIGN.json",
-    "sourceSchemaVersion": "area-spec-v1",
-    "boundsProvenance": "expanded-for-authored-points",
-    "sourceSnapshot": {
-      "schemaVersion": "area-spec-v1",
-      "status": "DESIGN LOCKED",
-      "baselineCommit": "d39cbb49d3d8247caf2542393994704292dd5002",
-      "revision": {
-        "final": "REV8.0",
-        "designIteration": "REV1",
-        "supersedes": [
-          "legacy compact Premium Atrium blockout"
-        ]
-      },
-      "stage": {
-        "sector": 3,
-        "stage": 6,
-        "sourceAreaId": "sector-03-06",
-        "canonicalName": "GRAND CENTRAL ATRIUM",
-        "runtimeCurrentName": "PREMIUM ATRIUM",
-        "subtitle": "LARGE MOVEMENT",
-        "role": "SECTOR 03 SCALE CLIMAX / AWE + FLOW / BUILD EXPRESSION",
-        "sectorIdentity": "CENTRAL EXCHANGE COMPLEX — monumental public commercial atrium"
-      },
-      "bounds": {
-        "width": 4352,
-        "height": 2176
-      },
-      "directionSignature": [
-        "UP_RIGHT_LONG",
-        "UP",
-        "LEFT_LONG",
-        "UP_RIGHT_LONG"
-      ],
-      "entry": {
-        "id": "sector-03-06:entry",
-        "x": -1920,
-        "y": -64
-      },
-      "surfaces": [
-        {
-          "id": "p0-entry",
-          "kind": "safe-deck",
-          "x": -1920,
-          "y": 0,
-          "width": 256,
-          "height": 32
-        },
-        {
-          "id": "p1-lower-grand-balcony",
-          "kind": "safe-deck",
-          "x": -1680,
-          "y": -192,
-          "width": 448,
-          "height": 30
-        },
-        {
-          "id": "p2-east-event-balcony",
-          "kind": "platform",
-          "x": 1248,
-          "y": -928,
-          "width": 448,
-          "height": 30
-        },
-        {
-          "id": "p3-east-sky-lobby",
-          "kind": "safe-deck",
-          "x": 1408,
-          "y": -1408,
-          "width": 384,
-          "height": 30
-        },
-        {
-          "id": "p4-west-upper-gallery",
-          "kind": "platform",
-          "x": -768,
-          "y": -1680,
-          "width": 384,
-          "height": 30
-        },
-        {
-          "id": "p5-exit-deck",
-          "kind": "safe-deck",
-          "x": 1184,
-          "y": -2070,
-          "width": 320,
-          "height": 30
-        }
-      ],
-      "grappleTargets": [
-        {
-          "id": "g1",
-          "x": -1280,
-          "y": -320
-        },
-        {
-          "id": "c1",
-          "x": -920,
-          "y": -448,
-          "scannerControlled": true
-        },
-        {
-          "id": "g2",
-          "x": -560,
-          "y": -576
-        },
-        {
-          "id": "g3",
-          "x": -200,
-          "y": -704
-        },
-        {
-          "id": "g4",
-          "x": 160,
-          "y": -832
-        },
-        {
-          "id": "g4b",
-          "x": 520,
-          "y": -900
-        },
-        {
-          "id": "g4c",
-          "x": 880,
-          "y": -928
-        },
-        {
-          "id": "v1",
-          "x": 1480,
-          "y": -1120
-        },
-        {
-          "id": "v2",
-          "x": 1440,
-          "y": -1320
-        },
-        {
-          "id": "c2",
-          "x": 1184,
-          "y": -1496,
-          "scannerControlled": true
-        },
-        {
-          "id": "g7",
-          "x": 832,
-          "y": -1536
-        },
-        {
-          "id": "g8",
-          "x": 480,
-          "y": -1576
-        },
-        {
-          "id": "g9",
-          "x": 128,
-          "y": -1616
-        },
-        {
-          "id": "g10",
-          "x": -224,
-          "y": -1656
-        },
-        {
-          "id": "f1",
-          "x": -320,
-          "y": -1800
-        },
-        {
-          "id": "f2",
-          "x": 32,
-          "y": -1880
-        },
-        {
-          "id": "f3",
-          "x": 384,
-          "y": -1960
-        },
-        {
-          "id": "f4",
-          "x": 736,
-          "y": -2040
-        }
-      ],
-      "scannerGroups": [
-        {
-          "id": "sector-03-06:scanner-premium-atrium-A",
-          "cycleSeconds": {
-            "available": 1.5,
-            "warning": 0.6,
-            "locked": 1.1,
-            "reset": 0.3
-          },
-          "phaseOffsetSeconds": 0,
-          "controlledTargetIds": [
-            "c1",
-            "c2"
-          ],
-          "contract": {
-            "newAttachAllowed": [
-              "AVAILABLE",
-              "WARNING"
-            ],
-            "newAttachDenied": [
-              "LOCKED",
-              "RESET"
-            ],
-            "currentRopePersistsThroughLocked": true,
-            "damage": 0,
-            "knockback": 0,
-            "ropeCut": false,
-            "forcedDetach": false
-          }
-        }
-      ],
-      "objects": [
-        {
-          "id": "drone-1",
-          "stableRuntimeId": "sector-03-06:drone-1",
-          "kind": "patrol-drone",
-          "x": 960,
-          "y": -1512,
-          "properties": {
-            "enemyType": "patrol-drone-t1",
-            "patrol": {
-              "points": [
-                {
-                  "x": 960,
-                  "y": -1512
-                },
-                {
-                  "x": 240,
-                  "y": -1600
-                }
-              ],
-              "speed": 48,
-              "waitSeconds": 0.45,
-              "mode": "pingpong"
-            },
-            "rules": [
-              "kill-optional",
-              "no-rope-cut",
-              "target-lock-cycle",
-              "activation-band-only"
-            ],
-            "activationIntent": "central security crossing only",
-            "cannotPressure": [
-              "p3-east-sky-lobby",
-              "p4-west-upper-gallery"
-            ]
-          }
-        },
-        {
-          "id": "atrium-lower-guard",
-          "stableRuntimeId": "sector-03-06:atrium-lower-guard",
-          "kind": "sentry-slot",
-          "x": 1280,
-          "y": -928,
-          "properties": {
-            "enemySelection": {
-              "authority": "SECTOR_03_SUPPORT_POOL",
-              "allowedEnemyTypes": [
-                "pursuit-drone-t1",
-                "shield-drone-t1",
-                "artillery-drone-t1",
-                "support-drone-t1"
-              ]
-            },
-            "rules": [
-              "kill-optional",
-              "no-rope-cut",
-              "activation-band-only"
-            ],
-            "activationIntent": "East Event Balcony only",
-            "cannotPressure": [
-              "lower-long-flight",
-              "east-sky-lobby"
-            ]
-          }
-        },
-        {
-          "id": "atrium-upper-guard",
-          "stableRuntimeId": "sector-03-06:atrium-upper-guard",
-          "kind": "sentry-slot",
-          "x": -768,
-          "y": -1680,
-          "properties": {
-            "enemySelection": {
-              "authority": "SECTOR_03_LATE_POOL",
-              "allowedEnemyTypes": [
-                "pursuit-drone-t1",
-                "shield-drone-t1",
-                "artillery-drone-t1",
-                "support-drone-t1",
-                "swarm-drone-t1"
-              ]
-            },
-            "rules": [
-              "kill-optional",
-              "no-rope-cut",
-              "activation-band-only"
-            ],
-            "activationIntent": "West Upper Gallery only",
-            "cannotPressure": [
-              "p3-east-sky-lobby",
-              "central-security-crossing",
-              "final-free-flow"
-            ]
-          }
-        },
-        {
-          "id": "atrium-id",
-          "stableRuntimeId": "sector-03-06:atrium-id",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "PREMIUM ATRIUM",
-                "detail": "",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "power-state",
-          "stableRuntimeId": "sector-03-06:power-state",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "LOCAL POWER BUS",
-                "detail": "ACTIVE",
-                "status": "VERIFIED"
-              },
-              {
-                "title": "COMMERCIAL SERVICE NETWORK",
-                "detail": "ONLINE",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "upper-concourse",
-          "stableRuntimeId": "sector-03-06:upper-concourse",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "UPPER CONCOURSE",
-                "detail": "",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "access-control-ahead",
-          "stableRuntimeId": "sector-03-06:access-control-ahead",
-          "kind": "story-display",
-          "properties": {
-            "presentation": [
-              {
-                "title": "ACCESS CONTROL AHEAD",
-                "detail": "",
-                "status": "VERIFIED"
-              }
-            ]
-          }
-        },
-        {
-          "id": "exit-panel",
-          "stableRuntimeId": "sector-03-06:exit-panel",
-          "kind": "interaction",
-          "properties": {
-            "objectiveId": "sector-03-06:exit-panel-engaged",
-            "requiredObjectiveIds": [
-              "sector-03-06:final-deck-reached"
-            ]
-          }
-        }
-      ],
-      "routePhases": [
-        {
-          "id": "lower-long-flight",
-          "movement": "UP_RIGHT_LONG",
-          "from": "p1-lower-grand-balcony",
-          "to": "p2-east-event-balcony",
-          "scannerTargetIds": [
-            "c1"
-          ],
-          "enemyOverlap": false,
-          "purpose": "large-space Scanner timing + sustained Flow"
-        },
-        {
-          "id": "east-sky-lobby-rise",
-          "movement": "UP",
-          "from": "p2-east-event-balcony",
-          "to": "p3-east-sky-lobby",
-          "enemy": "atrium-lower-guard before ascent only",
-          "purpose": "vertical section change and safe observation setup"
-        },
-        {
-          "id": "central-security-crossing",
-          "movement": "LEFT_LONG",
-          "from": "p3-east-sky-lobby",
-          "to": "p4-west-upper-gallery",
-          "scannerTargetIds": [
-            "c2"
-          ],
-          "patrolId": "sector-03-06:drone-1",
-          "purpose": "stage gameplay peak: Scanner phase + Patrol position + current build"
-        },
-        {
-          "id": "upper-free-flow-arc",
-          "movement": "UP_RIGHT_LONG",
-          "from": "p4-west-upper-gallery",
-          "to": "p5-exit-deck",
-          "scannerTargetIds": [],
-          "enemyOverlap": false,
-          "purpose": "pure movement payoff"
-        }
-      ],
-      "safeZones": [
-        {
-          "id": "p1-reveal",
-          "surfaceId": "p1-lower-grand-balcony",
-          "contract": [
-            "no enemy pressure",
-            "no scanner pressure"
-          ]
-        },
-        {
-          "id": "p3-observation",
-          "surfaceId": "p3-east-sky-lobby",
-          "contract": [
-            "full safe",
-            "C2 visible",
-            "Patrol visible",
-            "leftward destination visible"
-          ]
-        },
-        {
-          "id": "p5-exit",
-          "surfaceId": "p5-exit-deck",
-          "contract": [
-            "no final pressure"
-          ]
-        }
-      ],
-      "recoveryPoints": [
-        {
-          "id": "recovery-a",
-          "x": -1112,
-          "y": -690,
-          "width": 256,
-          "retrySecondsTarget": [
-            5,
-            7
-          ],
-          "cannotBypass": [
-            "c1"
-          ]
-        },
-        {
-          "id": "recovery-b",
-          "x": 1168,
-          "y": -1725,
-          "width": 256,
-          "retrySecondsTarget": [
-            5,
-            7
-          ],
-          "cannotBypass": [
-            "c2",
-            "p4-west-upper-gallery"
-          ]
-        }
-      ],
-      "story": {
-        "function": "strengthen SYSTEM HEALTHY / PEOPLE ABSENT contrast through scale and continued commercial operation",
-        "bark": {
-          "text": "…잠깐, 위가 어디까지야.",
-          "runtimeCapability": "VERIFIED — local Player Bark presentation exists",
-          "stageAuthoredStatus": "NOT IMPLEMENTED — 3-6 bark not yet authored",
-          "presentation": "speaker-head local typing bubble"
-        },
-        "forbiddenReveals": [
-          "Priority recipient identity",
-          "Group A/B identity",
-          "Group C cause",
-          "class mapping",
-          "deliberate sacrifice",
-          "corporate decision-maker"
-        ]
-      },
-      "objectives": [
-        {
-          "id": "sector-03-06:final-deck-reached",
-          "type": "reach",
-          "target": "p5-exit-deck"
-        },
-        {
-          "id": "sector-03-06:exit-panel-engaged",
-          "type": "interact",
-          "sourceObjectId": "sector-03-06:exit-panel",
-          "requiredObjectiveIds": [
-            "sector-03-06:final-deck-reached"
-          ]
-        }
-      ],
-      "gate": {
-        "completionMode": "physical-crossing",
-        "nextAreaId": "sector-03-07",
-        "requiredObjectiveIds": [
-          "sector-03-06:exit-panel-engaged"
-        ]
-      },
-      "accessModule": {
-        "present": false
-      },
-      "wind": {
-        "active": false
-      },
-      "ropeCut": {
-        "active": false
-      },
-      "augment": {
-        "sourcePresent": false,
-        "requiresSpecificCard": false,
-        "baseRopeClearable": true
-      },
-      "sectorIdentity": {
-        "allowed": [
-          "public commercial atrium",
-          "grand balcony",
-          "event balcony",
-          "sky lobby",
-          "suspended public crossing",
-          "upper gallery",
-          "upper concourse"
-        ],
-        "forbidden": [
-          "industrial infrastructure identity",
-          "plant room",
-          "service shaft as dominant space",
-          "serial small rooms"
-        ]
-      },
-      "uniqueness": {
-        "signature": "GRAND ATRIUM FLIGHT CIRCUIT",
-        "directionRhythm": "↗ LONG → ↑ → ← LONG → ↗ LONG",
-        "maximumMeaningfulOverlap": 1,
-        "comparisons": {
-          "3-1": {
-            "overlapCount": 1,
-            "verdict": "PASS",
-            "overlap": [
-              "large commercial void"
-            ]
-          },
-          "3-2": {
-            "overlapCount": 0,
-            "verdict": "PASS"
-          },
-          "3-3": {
-            "overlapCount": 1,
-            "verdict": "PASS",
-            "overlap": [
-              "direction changes"
-            ]
-          },
-          "3-4": {
-            "overlapCount": 0,
-            "verdict": "PASS"
-          },
-          "3-5": {
-            "overlapCount": 0,
-            "verdict": "PASS"
-          }
-        }
-      },
-      "forbidden": [
-        "new Scanner group",
-        "faster Scanner variant",
-        "new enemy behavior",
-        "Security Shutter",
-        "Moving Platform",
-        "Wind",
-        "Turret",
-        "Damage Floor",
-        "build-locked route",
-        "new Augment",
-        "fourth enemy",
-        "Scanner overlap with lower Support Guard",
-        "Scanner overlap with upper Late Guard",
-        "Patrol pressure into p3 observation",
-        "security pressure on final free-flow arc",
-        "one diagonal staircase silhouette",
-        "3-7 Priority story reveal"
-      ]
-    }
-  }
+  "behaviorRefs": []
 }

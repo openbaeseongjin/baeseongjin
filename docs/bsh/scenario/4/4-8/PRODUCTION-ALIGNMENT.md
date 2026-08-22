@@ -4,7 +4,7 @@
 
 Latest checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`.
 
-Current repository 4-8 is still legacy:
+The deleted legacy repository 4-8 contained:
 - `TRANSIT CONTROL TRUNK`
 - Cutter + Patrol
 - Pulsed Wake/Wind

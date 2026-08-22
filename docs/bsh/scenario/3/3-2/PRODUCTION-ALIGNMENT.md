@@ -13,7 +13,7 @@ Baseline: `d588aa041a350cab198cd187d8dccbe3b3a244dd`
 - final deck → exit panel → physical crossing → `3-3`를 보존한다.
 
 ## Cutover boundary
-- 이 Stage만 `source: "generated"`이며 3-3~3-8은 legacy provider를 유지한다. 한 Stage 안에 legacy/generated 정의를 섞지 않는다.
+- Sector 03의 3-1~3-8은 모두 `source: "generated"`이며 수기 provider나 Stage별 fallback을 유지하지 않는다.
 - 기존 seamless progression·Access 3-of-3 권위·multiplayer 권위와 Sector 03 이후 Boss/4-1 전환은 이 cutover가 소유하지 않는다.
 - Map Editor의 Draft → Validate → Apply → 새 로컬 Preview는 generated v2 source만 대상으로 하며 활성 Run·정상 seamless Catalog·multiplayer를 hot-swap하지 않는다.
 

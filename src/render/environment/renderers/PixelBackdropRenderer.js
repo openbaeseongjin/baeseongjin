@@ -200,7 +200,7 @@ function sectorClimbProgress(scene, area) {
 }
 
 function authoredDefinitionForArea(definitions, area) {
-    return definitions[area?.legacyAreaId] ?? definitions[area?.id];
+    return definitions[area?.areaId] ?? definitions[area?.id];
 }
 
 function authoredSectorBackdropTransition(scene) {

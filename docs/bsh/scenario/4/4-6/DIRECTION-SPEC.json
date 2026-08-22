@@ -5,9 +5,9 @@
   "stage": {
     "sector": 4,
     "stage": 6,
-    "legacyStageAlias": "4-6",
     "sourceAreaId": "sector-04-06",
-    "name": "REFUGE ACCESS GALLERY"
+    "name": "REFUGE ACCESS GALLERY",
+    "id": "4-6"
   },
   "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
   "globalControl": {

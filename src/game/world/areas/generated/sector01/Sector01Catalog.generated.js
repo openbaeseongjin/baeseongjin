@@ -1,5 +1,6 @@
 // GENERATED FILE - DO NOT EDIT
 // Source: docs/bsh/scenario/AREA-CATALOG.json
+import { defineAreaCatalog } from "../../AreaDefinition.js";
 import { GENERATED_AREA as STAGE_1_1 } from "./Sector01Stage01.generated.js";
 import { GENERATED_AREA as STAGE_1_2 } from "./Sector01Stage02.generated.js";
 import { GENERATED_AREA as STAGE_1_3 } from "./Sector01Stage03.generated.js";
@@ -12,8 +13,9 @@ import { GENERATED_AREA as STAGE_1_8 } from "./Sector01Stage08.generated.js";
 // JSON ordering and formatting are deterministic generator output.
 // prettier-ignore
 const MANIFEST = {
-  "catalogId": "sector-01",
+  "catalogId": "sector-01-authored-mock",
   "catalogOutputPath": "src/game/world/areas/generated/sector01/Sector01Catalog.generated.js",
+  "catalogRevision": "sector-01-scenarios-rev3-v3-v2-stage01-stage07",
   "expectedStageIds": [
     "1-1",
     "1-2",
@@ -104,3 +106,8 @@ export const GENERATED_AREAS = Object.freeze([
     STAGE_1_7,
     STAGE_1_8
 ]);
+export const GENERATED_AREA_CATALOG = defineAreaCatalog({
+    id: GENERATED_AREA_CATALOG_MANIFEST.catalogId,
+    revision: GENERATED_AREA_CATALOG_MANIFEST.catalogRevision,
+    areas: GENERATED_AREAS
+});

@@ -1,6 +1,7 @@
 # SECTOR 03-7 — TRANSFER MEZZANINE REV8.1
 
 > Status: **DESIGN LOCKED**  
+> Runtime: **GENERATED — Preview platform/Anchor topology is materialized in canonical `AREA-SPEC.v2.json`**
 > Latest audited main: `cb4f690ac180a04868322e9c4cfe1384897c348b`  
 > Runtime current id: `sector-03-07`  
 > Runtime current name: `PRIORITY CONCOURSE`  

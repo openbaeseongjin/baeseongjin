@@ -120,7 +120,7 @@ export function resolveEnemyEncounter(encounter, context) {
         ...(swarmMemberCount !== null ? { swarmMemberCount } : {}),
         enemyType: selection.enemyType,
         selectionKind: selection.selectionKind,
-        ...(encounter.legacyStageAlias ? { legacyStageAlias: encounter.legacyStageAlias } : {})
+        ...(encounter.stageId ? { stageId: encounter.stageId } : {})
     });
 }
 

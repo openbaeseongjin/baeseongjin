@@ -5,9 +5,9 @@
   "stage": {
     "sector": 4,
     "stage": 1,
-    "legacyStageAlias": "4-1",
     "sourceAreaId": "sector-04-01",
-    "name": "UPPER RESIDENTIAL ARRIVAL"
+    "name": "UPPER RESIDENTIAL ARRIVAL",
+    "id": "4-1"
   },
   "baselineCommit": "4551798860193a16e53814aae5c3a42022b4e1cf",
   "globalControl": {

@@ -5,7 +5,7 @@
 Before editing:
 1. checkout/pull latest `main`;
 2. confirm HEAD is still compatible with checked source `3c9f661bba58af6f7351e00754c12aef86575a12`;
-3. inspect `src/game/world/areas/sector04/Sector04AreaCatalog.js`;
+3. confirm the obsolete Transit catalog remains deleted and inspect canonical `AREA-SPEC.v2.json`;
 4. inspect current enemy factory/selection path for `pursuit-drone-t1`;
 5. inspect interaction/progression state for reusable access-module semantics;
 6. inspect current Direction/Player Bark implementation.

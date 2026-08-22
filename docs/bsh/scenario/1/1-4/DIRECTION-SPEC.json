@@ -4,9 +4,9 @@
   "stage": {
     "sector": 1,
     "stage": 4,
-    "legacyStageAlias": "1-4",
     "sourceAreaId": "sector-01-04",
-    "name": "MAINTENANCE NODE"
+    "name": "MAINTENANCE NODE",
+    "id": "1-4"
   },
   "baselineCommit": "5ae6efca720720ee34f2a8b45daf1778fd206c1f",
   "globalControl": {
@@ -271,7 +271,7 @@
             "detail": "VERIFIED"
           },
           "timing": {
-            "durationSeconds": 1.0
+            "durationSeconds": 1
           }
         },
         {

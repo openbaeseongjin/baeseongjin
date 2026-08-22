@@ -5,9 +5,9 @@
   "stage": {
     "sector": 5,
     "stage": 7,
-    "legacyStageAlias": "5-7",
     "sourceAreaId": "sector-05-07",
-    "name": "EVACUATION CONSEQUENCE ARCHIVE"
+    "name": "EVACUATION CONSEQUENCE ARCHIVE",
+    "id": "5-7"
   },
   "globalControl": {
     "worldPause": false,

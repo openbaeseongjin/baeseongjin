@@ -2,6 +2,7 @@ import { areaSpecV2AuthoringMode, canonicalizeAreaSpecV2 } from "./AreaSpecV2.js
 
 const GENERATED_OUTPUT_ROOT = "src/game/world/areas/generated/";
 const GENERATED_RUNTIME_IMPORT = "../../../area-authoring-v2/AreaSpecV2.js";
+const GENERATED_CATALOG_IMPORT = "../../AreaDefinition.js";
 
 function stableJson(value) {
     return JSON.stringify(value, null, 2).replaceAll("\n", "\r\n");
@@ -34,7 +35,7 @@ export function renderGeneratedAreaModule(spec) {
     if (areaSpecV2AuthoringMode(canonical) !== "runtime") {
         throw new TypeError("scenario-area-spec-cannot-generate-runtime-module");
     }
-    const stageId = canonical.stage?.legacyStageAlias;
+    const stageId = canonical.stage?.id;
     const areaId = canonical.definition?.id;
     if (typeof stageId !== "string" || typeof areaId !== "string")
         throw new TypeError("generated-spec-identity-invalid");
@@ -57,7 +58,7 @@ export function renderGeneratedAreaModule(spec) {
 export function renderGeneratedCatalogModule(manifest) {
     const outputPath = generatedModulePath({ outputPath: manifest?.catalogOutputPath });
     const outputDirectory = directoryPath(outputPath);
-    const generatedEntries = (manifest.stageSources ?? []).filter(({ source }) => source === "generated");
+    const generatedEntries = manifest.stageSources ?? [];
     const imports = generatedEntries.map((entry) => {
         const areaOutputPath = generatedModulePath(entry);
         if (directoryPath(areaOutputPath) !== outputDirectory) {
@@ -74,6 +75,7 @@ export function renderGeneratedCatalogModule(manifest) {
     return [
         "// GENERATED FILE - DO NOT EDIT",
         "// Source: docs/bsh/scenario/AREA-CATALOG.json",
+        `import { defineAreaCatalog } from "${GENERATED_CATALOG_IMPORT}";`,
         ...imports,
         "",
         "// JSON ordering and formatting are deterministic generator output.",
@@ -82,6 +84,11 @@ export function renderGeneratedCatalogModule(manifest) {
         "",
         "export const GENERATED_AREA_CATALOG_MANIFEST = Object.freeze(MANIFEST);",
         `export const GENERATED_AREAS = Object.freeze(${generatedAreas});`,
+        "export const GENERATED_AREA_CATALOG = defineAreaCatalog({",
+        "    id: GENERATED_AREA_CATALOG_MANIFEST.catalogId,",
+        "    revision: GENERATED_AREA_CATALOG_MANIFEST.catalogRevision,",
+        "    areas: GENERATED_AREAS",
+        "});",
         ""
     ].join("\r\n");
 }
@@ -90,10 +97,9 @@ export function collectGeneratedOutputs({ manifest, specsByStageId }) {
     if (!(specsByStageId instanceof Map)) throw new TypeError("generated-spec-map-invalid");
     const outputs = [];
     for (const entry of manifest.stageSources ?? []) {
-        if (entry.source !== "generated") continue;
         const spec = specsByStageId.get(entry.stageId);
         if (!spec) throw new TypeError(`generated-spec-missing:${entry.stageId}`);
-        if (spec.stage?.legacyStageAlias !== entry.stageId || spec.definition?.id !== entry.areaId) {
+        if (spec.stage?.id !== entry.stageId || spec.definition?.id !== entry.areaId) {
             throw new TypeError(`generated-spec-identity-mismatch:${entry.stageId}`);
         }
         outputs.push(

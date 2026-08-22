@@ -24,8 +24,9 @@
 
 이 감사가 지적한 "4-1 reach drift"(§24 P0-A, 아래 본문의 `A3→A4 408.9px > 400px`)를
 실제로 고치려던 첫 patch 시도 중, **Sector 04 4-1~4-8이 이 감사 이후 별도
-세션에서 이미 `Sector04AreaCatalog.js`로 완전히 구현·validator 검증까지
-끝난 상태**임을 발견했다. 이 shipped 코드의 4-1 A4 좌표는 원래 값
+세션에서 당시 `Sector04AreaCatalog.js`로 완전히 구현·validator 검증까지
+끝난 상태**임을 발견했다. 이 legacy catalog는 이후 삭제되었으며 새 Sector04
+Runtime의 권위가 아니다. 당시 shipped 코드의 4-1 A4 좌표는 원래 값
 `(-64, -800)` 그대로였고, 이 감사가 제안한 "좌표 이동" 방향과 정면으로
 어긋났다.
 

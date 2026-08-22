@@ -4,14 +4,14 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="color-scheme" content="dark" />
-        <title>맵 에디터 미리보기</title>
+        <title>맵 에디터 Gameplay View</title>
         <link rel="stylesheet" href="./preview.css" />
     </head>
     <body>
         <main class="preview-shell">
             <header class="preview-header">
                 <a href="./">← 에디터로 돌아가기</a>
-                <p id="preview-label">실제 게임 화면의 새 싱글플레이 실행을 준비하는 중입니다.</p>
+                <p id="preview-label">Production Gameplay View를 준비하는 중입니다.</p>
                 <button id="reload-preview" type="button">새 실행 다시 시작</button>
             </header>
             <aside class="preview-tools" aria-label="미리보기 테스트 도구">
@@ -22,7 +22,7 @@
                 <p>로프 없이 WASD·방향키로 이동합니다.</p>
                 <output id="preview-flight-status">꺼짐</output>
             </aside>
-            <canvas id="preview-canvas" aria-label="맵 에디터 실제 게임 화면 미리보기"></canvas>
+            <canvas id="preview-canvas" aria-label="맵 에디터 production Gameplay View"></canvas>
             <output id="preview-status" aria-live="polite"></output>
         </main>
         <script type="module" src="./preview.js"></script>

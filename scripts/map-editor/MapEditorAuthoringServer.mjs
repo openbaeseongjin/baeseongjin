@@ -5,8 +5,7 @@ import { dirname, relative, resolve, sep } from "node:path";
 import { validateAreaCatalogManifest } from "../../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
 import {
     canonicalizeAreaSpecV2,
-    createAreaDefinitionFromV2,
-    createScenarioPreviewAreaDefinitionFromV2
+    createAreaDefinitionFromV2
 } from "../../src/game/world/area-authoring-v2/AreaSpecV2.js";
 import { collectGeneratedOutputs } from "../../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
 import {
@@ -89,7 +88,7 @@ function assertStageIdentity(entry, spec) {
         }
         return;
     }
-    if (spec?.stage?.legacyStageAlias !== entry.stageId || spec?.definition?.id !== entry.areaId) {
+    if (spec?.stage?.id !== entry.stageId || spec?.definition?.id !== entry.areaId) {
         throw error("stage-identity-invalid", "Map editor stage identity does not match the catalog manifest.");
     }
 }
@@ -332,10 +331,7 @@ export async function createMapEditorAuthoringServer({
     }
 
     function previewAvailable(stage) {
-        const spec = stage.memorySpec ?? stage.spec;
-        return Boolean(
-            stage.outputPath || (stage.entry.authoringMode === "scenario-only" && spec.definition.surfaces.length)
-        );
+        return Boolean(stage.outputPath);
     }
 
     function stageValue(stage) {
@@ -550,10 +546,7 @@ export async function createMapEditorAuthoringServer({
                     ...(stage.specType === "boss-stage"
                         ? { spec: stage.spec, derivedPreview: stage.derivedPreview }
                         : {
-                              previewArea:
-                                  stageRecord.entry.authoringMode === "scenario-only"
-                                      ? createScenarioPreviewAreaDefinitionFromV2(previewSpec)
-                                      : createAreaDefinitionFromV2(previewSpec)
+                              previewArea: createAreaDefinitionFromV2(previewSpec)
                           })
                 });
             }

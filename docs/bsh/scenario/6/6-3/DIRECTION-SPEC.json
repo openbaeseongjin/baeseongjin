@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 3,
-    "legacyStageAlias": "6-3",
     "sourceAreaId": "sector-06-03",
-    "name": "PERIMETER SIGNAL DECK"
+    "name": "PERIMETER SIGNAL DECK",
+    "id": "6-3"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

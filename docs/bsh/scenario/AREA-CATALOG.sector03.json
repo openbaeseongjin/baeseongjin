@@ -1,66 +1,73 @@
 {
-  "schemaVersion": "area-catalog-v2",
-  "catalogId": "sector-03",
-  "catalogOutputPath": "src/game/world/areas/generated/sector03/Sector03Catalog.generated.js",
-  "expectedStageIds": ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "3-7", "3-8"],
-  "stageSources": [
-    {
-      "stageId": "3-1",
-      "areaId": "sector-03-01",
-      "sectorId": "sector-03",
-      "source": "generated",
-      "sourcePath": "docs/bsh/scenario/3/3-1/AREA-SPEC.v2.json",
-      "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage01.generated.js"
-    },
-    {
-      "stageId": "3-2",
-      "areaId": "sector-03-02",
-      "sectorId": "sector-03",
-      "source": "generated",
-      "sourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC.v2.json",
-      "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage02.generated.js"
-    },
-    {
-      "stageId": "3-3",
-      "areaId": "sector-03-03",
-      "sectorId": "sector-03",
-      "source": "legacy",
-      "sourcePath": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
-    },
-    {
-      "stageId": "3-4",
-      "areaId": "sector-03-04",
-      "sectorId": "sector-03",
-      "source": "legacy",
-      "sourcePath": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
-    },
-    {
-      "stageId": "3-5",
-      "areaId": "sector-03-05",
-      "sectorId": "sector-03",
-      "source": "legacy",
-      "sourcePath": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
-    },
-    {
-      "stageId": "3-6",
-      "areaId": "sector-03-06",
-      "sectorId": "sector-03",
-      "source": "legacy",
-      "sourcePath": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
-    },
-    {
-      "stageId": "3-7",
-      "areaId": "sector-03-07",
-      "sectorId": "sector-03",
-      "source": "legacy",
-      "sourcePath": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
-    },
-    {
-      "stageId": "3-8",
-      "areaId": "sector-03-08",
-      "sectorId": "sector-03",
-      "source": "legacy",
-      "sourcePath": "src/game/world/areas/sector03/Sector03AreaCatalog.js"
-    }
-  ]
+    "schemaVersion": "area-catalog-v2",
+    "catalogId": "sector-03",
+    "catalogRevision": "sector-03-scenarios-rev3-v2-generated",
+    "catalogOutputPath": "src/game/world/areas/generated/sector03/Sector03Catalog.generated.js",
+    "expectedStageIds": ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "3-7", "3-8"],
+    "stageSources": [
+        {
+            "stageId": "3-1",
+            "areaId": "sector-03-01",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-1/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage01.generated.js"
+        },
+        {
+            "stageId": "3-2",
+            "areaId": "sector-03-02",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-2/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage02.generated.js"
+        },
+        {
+            "stageId": "3-3",
+            "areaId": "sector-03-03",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-3/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage03.generated.js"
+        },
+        {
+            "stageId": "3-4",
+            "areaId": "sector-03-04",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-4/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage04.generated.js"
+        },
+        {
+            "stageId": "3-5",
+            "areaId": "sector-03-05",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-5/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage05.generated.js"
+        },
+        {
+            "stageId": "3-6",
+            "areaId": "sector-03-06",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-6/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage06.generated.js"
+        },
+        {
+            "stageId": "3-7",
+            "areaId": "sector-03-07",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-7/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage07.generated.js"
+        },
+        {
+            "stageId": "3-8",
+            "areaId": "sector-03-08",
+            "sectorId": "sector-03",
+            "source": "generated",
+            "sourcePath": "docs/bsh/scenario/3/3-8/AREA-SPEC.v2.json",
+            "outputPath": "src/game/world/areas/generated/sector03/Sector03Stage08.generated.js"
+        }
+    ]
 }

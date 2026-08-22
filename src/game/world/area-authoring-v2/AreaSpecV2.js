@@ -62,6 +62,7 @@ export function createAreaDefinitionFromV2(spec) {
     const anchors = spec.anchors ?? [];
     return defineArea({
         ...definition,
+        stageId: spec.stage.id,
         surfaces: insertAnchors(definition.surfaces ?? [], anchors, "surfaceIndex", anchorTarget),
         objects: insertAnchors(definition.objects ?? [], anchors, "objectIndex", anchorLandmark)
     });

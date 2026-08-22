@@ -2,7 +2,9 @@
 
 Baseline: `cb4f690ac180a04868322e9c4cfe1384897c348b`
 
-## Runtime VERIFIED
+Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage08.generated.js`; the generated Stage uses `UPPER EXCHANGE GATE`, `4608×2176`, explicit Preview platform/Anchor topology, 5 enemy slots, C1/C2/C3/C4 Scanner, the existing exit-panel objective interaction, `nextAreaId: null`, and `content-boundary`. Sector 04 remains disconnected.
+
+## Pre-cutover legacy baseline
 - `sector-03-08`
 - 5 enemy slots
 - one Scanner group controlling C1/C2/C3/C4

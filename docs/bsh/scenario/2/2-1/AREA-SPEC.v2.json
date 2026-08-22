@@ -1,9 +1,9 @@
 {
   "schemaVersion": "area-spec-v2",
   "stage": {
+    "id": "2-1",
     "sector": 2,
     "stage": 1,
-    "legacyStageAlias": "2-1",
     "sourceAreaId": "sector-02-01"
   },
   "editor": {

@@ -2,7 +2,9 @@
 
 Baseline: `d588aa041a350cab198cd187d8dccbe3b3a244dd`
 
-## Current Runtime truth
+Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage03.generated.js`; the handwritten Sector 03 catalog is no longer a Runtime authority. The generated Stage uses `CENTRAL RETAIL WALK`, `3712×1952`, the approved switchback topology, 2 enemy slots, C1/C2 Scanner, physical exit panel/gate, and `sector-03-04` next.
+
+## Pre-cutover legacy baseline
 - `sector-03-03`
 - `RETAIL SECURITY WALK / SCANNER + PATROL`
 - bounds `1280×1184`
@@ -20,7 +22,7 @@ Baseline: `d588aa041a350cab198cd187d8dccbe3b3a244dd`
 
 ## REV8 delta
 - canonical name `CENTRAL RETAIL WALK`
-- bounds `3712×1792`
+- bounds `3712×1952`
 - direction rhythm `↗ → ↖ → ↘ → ↖ → ↗`
 - alternating broken escalator circulation
 - Scanner+Patrol only on descending central security dip

@@ -1,6 +1,7 @@
 # ONE ROPE — SECTOR 03-3 CENTRAL RETAIL WALK — REV8 STAGE DRAFT REV3
 
 > Status: DESIGN LOCKED  
+> Runtime: **GENERATED — canonical `AREA-SPEC.v2.json` is the sole Stage authority**
 > Runtime audit baseline: `d588aa041a350cab198cd187d8dccbe3b3a244dd`  
 > Sector 03 Master Plan: REV3  
 > REV1: HOLD — TOO LINEAR  

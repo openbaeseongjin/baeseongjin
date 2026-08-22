@@ -38,7 +38,8 @@
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
-- Sector 01~~06 48개 Stage를 여는 AREA-SPEC v2 Map Editor. Sector 01~~02의 16개와 Sector 03의 3-1·3-2는 manifest 기반 generated facade live cutover다. Sector 03의 3-3~3-8 및 Sector 04~06의 30개는 Scenario v2 원본을 Runtime으로 승격하는 별도 구현 단위이며, 위치·충돌·보스·진행·멀티플레이 계약이 완결된 Stage만 명시적 manifest와 facade로 전환한다. Scenario 설계가 `mapEditorSurfaces`를 명시하면 원본 지도상의 테라스·브리지·서비스 데크·Recovery·발코니 지형을 그대로 표시하며, generic route node 발판을 중복 생성하지 않는다. 전체 보기처럼 축소된 화면에서도 지형은 고대비 윤곽·상단선·`발판 · Stable ID` 라벨로 표시하되, 이 표현은 좌표·충돌 원본을 바꾸지 않는다. 지형이 있는 Scenario-only Stage는 같은 게임 renderer·physics를 쓰는 단일 Area 로컬 미리보기로 열 수 있지만, 기본 world catalog·진행·멀티플레이에는 포함하지 않는다. 이 순서는 메인 개발자와 병행하도록 editor/v2 source·generator와 facade·진행·멀티플레이 권위를 분리한다. Entry 지지 플랫폼과 Exit 구성요소의 복합 이동·최대 1개 교체, 실제 Runtime const/Registry 기반 Enemy·Wind·Boss select, Enemy 추가 배치, 편집 요소 삭제·Undo, Route·Enemy activation 편집, 메모리 초안 저장→Preview, 저사양 비행 테스트, read-only 보호, Drag 단일 Undo와 Apply 직전 현재 Stage source hash 확인을 포함한다. 해커톤 중 에디터는 한 번에 한 명만 사용하며 다중 사용자 mutex·crash-safe 원자 저장은 후속 범위다.
+- Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Sector 01~~03의 24개는 generated production Runtime이고 Sector 04~~06의 24개는 scenario-only다. Gameplay View는 production seamless compiler·renderer를 재사용하며 수기 catalog·v1 AREA-SPEC·migration provenance·fallback 실행 경로는 없다. Entry·Exit 복합 이동, Runtime Registry 기반 Enemy·Wind·Boss 선택, 추가·삭제·Undo, Route·Enemy activation, 메모리 초안, read-only 보호와 Apply 직전 source hash 확인을 지원한다.
+- `npm run check`의 production map parity gate는 Stage별 authored/derived/hidden/progress-gated surface, mismatch ID, 중복·퇴화 geometry, seam ownership, Sector 03 generated 의미 동등성과 `24 Runtime / 24 scenario-only` 분리를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
 - 생성·해결 이벤트만 공유하고 클라이언트에서 재생하는 플레이어·적 투사체
 - 네트워크 설정을 변경하지 않는 Cloudflare Quick Tunnel 임시 공유 명령
@@ -48,7 +49,7 @@
 - 실제 플레이에서 새로 발견된 실패 사례와 초반 2분 지표 표본
 - 실제 조작 기반 전체 등반 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
-- Sector 03 REV8의 3-3~3-8 topology·Direction migration, Sector 04~06 Runtime 연결과 각 Post-Sector Boss transition (Stage별 Runtime 승격 계약 확정 뒤 진행)
+- Sector 03 3-3~~3-8 Direction migration, Sector 04~~06 Runtime 연결과 각 Post-Sector Boss transition (Stage별 Runtime 승격 계약 확정 뒤 진행)
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
@@ -66,11 +67,9 @@
 
 ### 제출 전 시나리오 구현 트랙
 
-48개 Stage 문서는 migration source이자 제작 계약이며 별도 Runtime 진행 단위가 아니다. 현재 기본 Runtime은 위 연속 Sector 계약을 사용한다. 메인 개발자는 [`docs/bsh/scenario/`](./bsh/scenario/)의 콘텐츠를 섹터·번호 순서로 흡수하되 정식 그래픽·오디오를 기다리지 않고 `영역 흐름 확정 → 등장 오브젝트·상태·완료 조건·출구·표현 cue 목록화 → gameplay 구현 → mock 표현 연결 → 플레이 가능한 인계 빌드`까지 완료한다. 그래픽·오디오 담당자는 공개된 stable ID와 mock 배치를 기준으로 병행 제작하며, validator와 실제 화면·청취 검증을 통과한 결과만 나중에 교체한다.
+AS IS → Sector 01~~03의 24개 Stage는 canonical v2/generated catalog로 production seamless Runtime에 연결됐고 Sector 04~~06의 24개는 scenario-only다.
 
-상세 Stage 목록과 현재 Runtime 연결 상태의 기준은 [`scenario-development-integration.md`](./scenario-development-integration.md)다. `SECTOR 01`~~`06`의 `1-1`~~`6-8` 상세 Stage 문서는 48/48 작성됐다. 현재 `seamless-sector-runtime-v9`은 `1-1 → 3-8` 24개 alias를 3개 4,800px seamless Sector의 local vertical landmark stack으로 compile하고, 실제 lateral city wing을 더한다. Sector 04 `4-1 → 4-8`은 standalone migration catalog, Sector 05·06은 문서/alias input으로 남는다. 문서 수와 Runtime 연결 수를 같은 완료 수치로 취급하지 않는다.
-
-Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현해 메인 월드에 `2-8 → 3-1 → … → 3-8`로 연결했다. Issue #790에서 offline depth map 기반 fixed background + 좌·우 parallax island 공용 backdrop과 2→3 교차 전환을 표현 계층에 연결했다. Issue #797은 3-1을 REV8 `3072×1088` Market Island topology의 v2 generated Stage로 원자 전환했고, Issue #801은 3-2를 REV8 `3200×1472` Facade Service Gallery의 single Scanner Group·C1~C4·선택 Access A·`3-3` exit 계약으로 원자 전환한다. 3-3~3-8의 REV8/REV8.1 topology와 Direction track은 다음 Stage별 migration이다. 사용자는 Sector 03을 먼저 Runtime으로 승격하고, Sector 04~06은 Post-Sector Boss 전환 계약을 우회하지 않는 순서로 진행하기로 결정했다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss 전환 결정을 기다린다.
+TO BE → Sector 04~~06은 Stage별 geometry·Gate·전환·적 type과 Post-Sector Boss 계약을 완결한 뒤에만 generated manifest와 facade를 추가한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
@@ -157,8 +156,8 @@ P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI + Boss0
 1. [완료] Stage ID에 의존하지 않는 stable enemy slot의 `고정 계열/type` 또는 `허용 pool` 선택과 `slotId + run seed + world revision` 결정성을 pure resolver로 구현한다.
 2. [완료] 기존 `경계 포탑`·`순찰 드론`과 분리된 신규 기본형 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`을 Has-A behavior와 공용 `enemy-behavior` capability로 조립한다.
 3. [완료 #829, #844] 순찰·포격·지원·군집을 확정 TO-BE로 정렬했다. #844는 Player 기본 피격 shake, Artillery impact particle/hit cue, Shield 1440 사거리와 느린 angular acceleration, Swarm HP 10 기본 10기·Editor 추가 정보 2~20을 같은 behavior/presentation 계약에 연결한다.
-4. [완료] #623 `SectorDefinition`의 `encounterId/slotId/position/activation/enemySelection/legacyStageAlias` 계약과 build/startup preview adapter를 selector에 연결하고, `areaId` 없이 Sector 01~03 preview encounter 전체를 결정적으로 resolve한다.
-5. [완료 #625] City Phase 3 wide Runtime compiler가 canonical encounter를 실제 world spawn 입력으로 공급하고 legacy Patrol route·Cutter rules를 새 schema에 보존한다.
+4. [완료 #623] `SectorDefinition`의 `encounterId/slotId/position/activation/enemySelection/stageId` 계약을 selector에 연결하고, Area 별칭이나 `areaId` 없이 Sector 01~03 encounter 전체를 결정적으로 resolve한다.
+5. [완료 #625] City Phase 3 wide Runtime compiler가 canonical encounter를 실제 world spawn 입력으로 공급하고 기존 Patrol route·Cutter rules를 새 schema에 보존한다.
 6. [후속] 신규 기본형 단독 조정 뒤 계열별 확장형과 Sector 누적 해금·허용/금지 조합을 추가한다. 현재 roster 목록·가중치·수치·배치·표시 색은 테스트에 고정하지 않는다.
 
 P0~P2에서 로프 손맛과 한 판의 순환이 검증되기 전에는 착수하지 않는다.

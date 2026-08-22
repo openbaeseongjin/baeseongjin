@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 7,
-    "legacyStageAlias": "6-7",
     "sourceAreaId": "sector-06-07",
-    "name": "CONTAINMENT LATTICE"
+    "name": "CONTAINMENT LATTICE",
+    "id": "6-7"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

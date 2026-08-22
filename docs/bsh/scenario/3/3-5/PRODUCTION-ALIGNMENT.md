@@ -2,7 +2,9 @@
 
 Baseline: `d39cbb49d3d8247caf2542393994704292dd5002`
 
-## Current Runtime truth
+Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage05.generated.js`; the generated Stage uses `COMMERCIAL OPERATIONS HUB`, `3008×1408`, the approved commercial operations topology, Augment Offer #3, 2 enemy slots including Access B carrier, physical exit panel/gate, and `sector-03-06` next.
+
+## Pre-cutover legacy baseline
 - `sector-03-05`
 - `COMMERCIAL SERVICE NODE / REST / AUGMENT SERVICE`
 - current bounds `960×688`
@@ -19,7 +21,7 @@ Baseline: `d39cbb49d3d8247caf2542393994704292dd5002`
 
 ## REV8.0 authored delta
 - canonical name: `COMMERCIAL OPERATIONS HUB`
-- bounds: `2688×1248`
+- bounds: `3008×1408`
 - Sector identity corrected to CENTRAL EXCHANGE commercial back-of-house
 - industrial REV1/REV2 concepts retired
 - spatial layers:

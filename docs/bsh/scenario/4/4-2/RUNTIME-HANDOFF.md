@@ -5,7 +5,7 @@ Baseline: `4551798860193a16e53814aae5c3a42022b4e1cf`
 ## Mandatory preflight
 
 Re-read latest:
-- Sector04AreaCatalog
+- canonical `AREA-SPEC.v2.json` and current generated-area migration contract
 - PursuitEnemyBehavior
 - SectorProgressState / Controller
 - current Access Module 3-of-3 implementation

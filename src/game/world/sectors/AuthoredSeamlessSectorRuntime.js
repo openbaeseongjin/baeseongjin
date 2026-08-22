@@ -3,16 +3,24 @@ import { defineAreaCatalog } from "../areas/AreaDefinition.js";
 import { SECTOR_01_AREA_CATALOG } from "../areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js";
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
-import { LEGACY_AREA_SECTOR_PREVIEW_CATALOG } from "./LegacyAreaSectorPreviewCatalog.js";
+import { AUTHORED_SECTOR_CATALOG, buildAuthoredSectorCatalog } from "./AuthoredSectorCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 import { GRAPPLE_LINK_BUDGET } from "../../config.js";
-import { BOSS_01_STAGE_SPEC } from "../../boss-authoring/generated/Boss01Stage.generated.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v10-boss-stage";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v10";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
-const LEGACY_SECTOR_CATALOGS = Object.freeze([SECTOR_01_AREA_CATALOG, SECTOR_02_AREA_CATALOG, SECTOR_03_AREA_CATALOG]);
+const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
+    SECTOR_01_AREA_CATALOG,
+    SECTOR_02_AREA_CATALOG,
+    SECTOR_03_AREA_CATALOG
+]);
+export const SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID = Object.freeze({
+    "sector-01": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
+    "sector-02": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
+    "sector-03": 12416
+});
 const SECTOR_HALF_WIDTH = SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5;
 const CITY_WING_INSET = 96;
 const CITY_WING_CORE_GAP = 64;
@@ -20,10 +28,18 @@ const CITY_WING_THICKNESS = 32;
 const ACCESS_MODULES_PER_SECTOR = 3;
 const TRANSIT_BARRIER_THICKNESS = 24;
 const TRANSIT_BARRIER_LATERAL_MARGIN = GRAPPLE_LINK_BUDGET;
-const LEGACY_BOUNDARY_KINDS = new Set(["area-boundary-wall", "inter-floor-divider"]);
-const LEGACY_ENEMY_KINDS = new Set(["sentry", "patrol-drone"]);
-const LEGACY_STAGE_DOOR_KINDS = new Set(["gate", "gate-panel"]);
-const BOSS_ARENA_ISOLATION_X = 7000;
+const AREA_BOUNDARY_KIND_LOOKUP = Object.freeze({
+    "area-boundary-wall": true,
+    "inter-floor-divider": true
+});
+const ENEMY_OBJECT_KIND_LOOKUP = Object.freeze({
+    sentry: true,
+    "patrol-drone": true
+});
+const STAGE_DOOR_KIND_LOOKUP = Object.freeze({
+    gate: true,
+    "gate-panel": true
+});
 
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
@@ -61,10 +77,11 @@ function withoutAreaAuthority(value, properties) {
     return freezeValue({ ...rest, ...properties });
 }
 
-function shiftSurface(surface, dx, dy, landmark) {
+function shiftSurface(surface, dx, dy, landmark, sourceAreaId) {
     return withoutAreaAuthority(surface, {
+        id: surface.id.startsWith(`${sourceAreaId}:`) ? surface.id : `${sourceAreaId}:${surface.id}`,
         landmarkId: landmark.id,
-        legacyStageAlias: landmark.legacyStageAlias,
+        stageId: landmark.stageId,
         x: surface.x + dx,
         y: surface.y + dy,
         topY: surface.topY + dy,
@@ -73,17 +90,17 @@ function shiftSurface(surface, dx, dy, landmark) {
     });
 }
 
-function shiftObject(object, dx, dy, landmark, objectiveIdMap, routeLockId) {
+function shiftObject(object, dx, dy, landmark, objectiveIdBySourceId, routeLockId) {
     const { areaId: _areaId, gateId: _gateId, ...rest } = object;
     return freezeValue({
         ...rest,
         landmarkId: landmark.id,
-        legacyStageAlias: landmark.legacyStageAlias,
+        stageId: landmark.stageId,
         position: shiftPoint(object.position, dx, dy),
         ...(object.bounds ? { bounds: shiftBounds(object.bounds, dx, dy) } : {}),
         ...(object.activation ? { activation: shiftBounds(object.activation, dx, dy) } : {}),
         ...(object.patrol ? { patrol: shiftPatrol(object.patrol, dx, dy) } : {}),
-        ...(object.objectiveId ? { objectiveId: objectiveIdMap.get(object.objectiveId) ?? object.objectiveId } : {}),
+        ...(object.objectiveId ? { objectiveId: objectiveIdBySourceId[object.objectiveId] ?? object.objectiveId } : {}),
         ...(_gateId && routeLockId ? { routeLockId } : {})
     });
 }
@@ -214,7 +231,7 @@ function horizontalSurface(id, landmark, x, topY, width, kind) {
         id,
         kind,
         landmarkId: landmark.id,
-        legacyStageAlias: landmark.legacyStageAlias,
+        stageId: landmark.stageId,
         oneWay: true,
         oneWayEdgeEnd: 1,
         grappleable: true,
@@ -251,7 +268,11 @@ function routeMouthBounds(exit) {
     });
 }
 
-function cityWingSurfaces({ landmark, coreBounds, entry, exit, landmarkIndex }) {
+function sameSurfaceBounds(left, right) {
+    return left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height;
+}
+
+function cityWingSurfaces({ landmark, coreBounds, entry, exit, landmarkIndex, inheritedEntrySurfaces }) {
     const leftWingStart = -SECTOR_HALF_WIDTH + CITY_WING_INSET;
     const leftWingEnd = coreBounds.x - CITY_WING_CORE_GAP;
     const rightWingStart = coreBounds.x + coreBounds.width + CITY_WING_CORE_GAP;
@@ -260,54 +281,53 @@ function cityWingSurfaces({ landmark, coreBounds, entry, exit, landmarkIndex }) 
     const rightWingWidth = rightWingEnd - rightWingStart;
     const middleY = Math.round((coreBounds.y + coreBounds.height * 0.52) / 32) * 32;
     const leftMid = landmarkIndex % 2 === 0;
-    const midStart = leftMid ? leftWingStart + 256 : rightWingStart + 96;
-    const midWidth = leftMid ? Math.max(320, leftWingWidth - 512) : Math.max(320, rightWingWidth - 192);
-    return Object.freeze([
-        horizontalSurface(
-            `${landmark.id}:city-wing:left:entry`,
+    const surfaces = [];
+    for (const [side, start, width] of [
+        ["left", leftWingStart, leftWingWidth],
+        ["right", rightWingStart, rightWingWidth]
+    ]) {
+        if (width <= 0) continue;
+        const entrySurface = horizontalSurface(
+            `${landmark.id}:city-wing:${side}:entry`,
             landmark,
-            leftWingStart,
+            start,
             entry.y + 32,
-            leftWingWidth,
+            width,
             "safe-deck"
-        ),
-        horizontalSurface(
-            `${landmark.id}:city-wing:right:entry`,
-            landmark,
-            rightWingStart,
-            entry.y + 32,
-            rightWingWidth,
-            "safe-deck"
-        ),
-        horizontalSurface(
-            `${landmark.id}:city-wing:left:exit`,
-            landmark,
-            leftWingStart,
-            exit.y + 32,
-            leftWingWidth,
-            "recovery"
-        ),
-        horizontalSurface(
-            `${landmark.id}:city-wing:right:exit`,
-            landmark,
-            rightWingStart,
-            exit.y + 32,
-            rightWingWidth,
-            "recovery"
-        ),
-        horizontalSurface(
-            `${landmark.id}:city-wing:${leftMid ? "left" : "right"}:mid`,
-            landmark,
-            midStart,
-            middleY,
-            midWidth,
-            "safe-deck"
-        )
-    ]);
+        );
+        if (!inheritedEntrySurfaces.some((surface) => sameSurfaceBounds(surface, entrySurface))) {
+            surfaces.push(entrySurface);
+        }
+        surfaces.push(
+            horizontalSurface(`${landmark.id}:city-wing:${side}:exit`, landmark, start, exit.y + 32, width, "recovery")
+        );
+    }
+    const midInset = leftMid ? 256 : 96;
+    const midStart = (leftMid ? leftWingStart : rightWingStart) + midInset;
+    const midWidth = (leftMid ? leftWingWidth : rightWingWidth) - midInset * 2;
+    if (midWidth > 0) {
+        surfaces.push(
+            horizontalSurface(
+                `${landmark.id}:city-wing:${leftMid ? "left" : "right"}:mid`,
+                landmark,
+                midStart,
+                middleY,
+                midWidth,
+                "safe-deck"
+            )
+        );
+    }
+    return Object.freeze(surfaces);
 }
 
-function isLegacyStageDoorObjective(objective, sourceObjectsById) {
-    return LEGACY_STAGE_DOOR_KINDS.has(sourceObjectsById.get(objective.sourceObjectId)?.kind);
+function isStageDoorObjective(objective, sourceObjectById) {
+    return STAGE_DOOR_KIND_LOOKUP[sourceObjectById[objective.sourceObjectId]?.kind] === true;
+}
+
+function runtimeObjectiveBounds({ stageDoorObjective, objective, exit, dx, dy }) {
+    if (stageDoorObjective) return routeMouthBounds(exit);
+    if (objective.bounds) return shiftBounds(objective.bounds, dx, dy);
+    return undefined;
 }
 
 function isolatedAreaWorld(area, seed) {
@@ -343,68 +363,37 @@ function interSectorRise(interSectorRiseById, sourceSectorId, targetSectorId) {
     return rise;
 }
 
-function bossStageSurface(surface, dx, dy, stageId) {
-    const bounds = shiftBounds(surface.bounds, dx, dy);
-    return freezeValue({
-        id: surface.id,
-        kind: surface.kind,
-        bossStageId: stageId,
-        oneWay: surface.oneWay === true,
-        oneWayEdgeEnd: surface.oneWay === true ? 1 : undefined,
-        grappleable: surface.grappleable !== false,
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height,
-        topY: bounds.y,
-        position: { x: bounds.x + bounds.width * 0.5, y: bounds.y },
-        vertices: rectangleVertices(bounds)
+function authoredAreaCatalogsWithOverrides(areaOverrides) {
+    const overrideIds = Object.keys(areaOverrides ?? {});
+    if (overrideIds.length === 0) return DEFAULT_AUTHORED_AREA_CATALOGS;
+    const appliedIds = Object.create(null);
+    const areaCatalogs = DEFAULT_AUTHORED_AREA_CATALOGS.map((catalog) => {
+        const areas = catalog.areas.map((area) => {
+            const replacement = areaOverrides[area.id];
+            if (!replacement) return area;
+            if (replacement.id !== area.id) throw new Error(`authored-area-override-id-mismatch:${area.id}`);
+            appliedIds[area.id] = true;
+            return replacement;
+        });
+        return defineAreaCatalog({ id: catalog.id, revision: catalog.revision, areas });
     });
+    const unknownId = overrideIds.find((id) => appliedIds[id] !== true);
+    if (unknownId) throw new Error(`authored-area-override-not-found:${unknownId}`);
+    return Object.freeze(areaCatalogs);
 }
 
-function createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, entryRouteId) {
-    const dx = BOSS_ARENA_ISOLATION_X - spec.arena.entry.x;
-    const dy = sourceLandmark.exit.y - spec.arena.entry.y;
-    const bounds = shiftBounds(spec.arena.bounds, dx, dy);
-    const entry = shiftPoint(spec.arena.entry, dx, dy);
-    const exit = shiftPoint(spec.arena.exit, dx, dy);
-    const sourceTrigger = routeMouthBounds(sourceLandmark.exit);
-    const exitTrigger = routeMouthBounds(exit);
-    return freezeValue({
-        id: spec.id,
-        specRevision: spec.schemaVersion,
-        sourceLandmarkId: sourceLandmark.id,
-        targetLandmarkId: targetLandmark.id,
-        entryRouteId,
-        bounds,
-        sourceTrigger,
-        entry,
-        exit,
-        exitTrigger,
-        targetEntry: targetLandmark.entry,
-        surfaces: spec.arena.surfaces.map((surface) => bossStageSurface(surface, dx, dy, spec.id)),
-        mechanics: spec.mechanics.map((mechanic) =>
-            freezeValue({
-                ...mechanic,
-                position: shiftPoint(mechanic.position, dx, dy),
-                ...(mechanic.bounds ? { bounds: shiftBounds(mechanic.bounds, dx, dy) } : {})
-            })
-        ),
-        route: spec.arena.anchors.map((anchor) => shiftPoint(anchor, dx, dy)),
-        recoveryPoints: spec.arena.recoveryPoints.map((point) => shiftPoint(point, dx, dy)),
-        presentationOrigin: shiftPoint(spec.boss.position, dx, dy),
-        localBossPosition: spec.boss.position,
-        bossCollider: spec.boss.collider
-    });
-}
-
-export function createLegacyAreaSeamlessSectorRuntimeWorld({
+export function createAuthoredSeamlessSectorRuntimeWorld({
     seed,
     floorY = 320,
     summitRadius = 42,
     interSectorRiseById = {},
-    bossStageSpec = BOSS_01_STAGE_SPEC
+    areaOverrides = null
 } = {}) {
+    const authoredAreaCatalogs = authoredAreaCatalogsWithOverrides(areaOverrides);
+    const authoredSectorCatalog =
+        authoredAreaCatalogs === DEFAULT_AUTHORED_AREA_CATALOGS
+            ? AUTHORED_SECTOR_CATALOG
+            : buildAuthoredSectorCatalog({ areaCatalogs: authoredAreaCatalogs });
     const surfaces = [];
     const route = [];
     const enemySpawns = [];
@@ -420,18 +409,18 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
     const connectors = [];
     const routeLocks = [];
     const sectorTransitions = [];
-    const bossStages = [];
     let previousLandmark = null;
     let previousOutboundObjectiveIds = Object.freeze([]);
     let sectorWorldOriginY = floorY;
 
-    for (const [sectorIndex, sourceCatalog] of LEGACY_SECTOR_CATALOGS.entries()) {
-        const sectorDefinition = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex];
+    for (const [sectorIndex, sourceCatalog] of authoredAreaCatalogs.entries()) {
+        const sectorDefinition = authoredSectorCatalog.sectors[sectorIndex];
         const sectorLandmarks = [];
         let sectorLeftX = Number.POSITIVE_INFINITY;
         let sectorRightX = Number.NEGATIVE_INFINITY;
         let sectorLocalTopY = Number.POSITIVE_INFINITY;
         let sectorLocalBottomY = Number.NEGATIVE_INFINITY;
+        let previousCityWingExitSurfaces = Object.freeze([]);
 
         for (const [landmarkIndex, area] of sourceCatalog.areas.entries()) {
             const landmarkDefinition = sectorDefinition.landmarks[landmarkIndex];
@@ -451,27 +440,27 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
             const bounds = shiftBounds(localBounds, 0, sectorWorldOriginY);
             const nextLandmarkDefinition =
                 sectorDefinition.landmarks[landmarkIndex + 1] ??
-                LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex + 1]?.landmarks[0] ??
+                authoredSectorCatalog.sectors[sectorIndex + 1]?.landmarks[0] ??
                 null;
             const outboundRouteId = nextLandmarkDefinition
                 ? routeId(landmarkDefinition.id, nextLandmarkDefinition.id)
                 : null;
-            const objectiveIdMap = new Map(
-                area.objectives.map((objective, index) => [objective.id, landmarkDefinition.objectives[index]?.id])
+            const objectiveIdBySourceId = Object.freeze(
+                Object.fromEntries(
+                    area.objectives.map((objective, index) => [objective.id, landmarkDefinition.objectives[index]?.id])
+                )
             );
-            const sourceObjectsById = new Map(localWorld.objects.map((object) => [object.id, object]));
+            const sourceObjectById = Object.freeze(
+                Object.fromEntries(localWorld.objects.map((object) => [object.id, object]))
+            );
             const landmarkObjectives = landmarkDefinition.objectives.map((objective) => {
-                const sourceObjective = area.objectives.find(({ id }) => objectiveIdMap.get(id) === objective.id);
-                const stageDoorObjective = isLegacyStageDoorObjective(sourceObjective ?? objective, sourceObjectsById);
+                const sourceObjective = area.objectives.find(({ id }) => objectiveIdBySourceId[id] === objective.id);
+                const stageDoorObjective = isStageDoorObjective(sourceObjective ?? objective, sourceObjectById);
                 return freezeValue({
                     ...objective,
                     type: stageDoorObjective ? "reach" : objective.type,
                     landmarkId: landmarkDefinition.id,
-                    bounds: stageDoorObjective
-                        ? routeMouthBounds(exit)
-                        : objective.bounds
-                          ? shiftBounds(objective.bounds, dx, dy)
-                          : undefined,
+                    bounds: runtimeObjectiveBounds({ stageDoorObjective, objective, exit, dx, dy }),
                     sourceObjectId: stageDoorObjective ? undefined : objective.sourceObjectId
                 });
             });
@@ -484,13 +473,12 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                     objectId: encounter.encounterId,
                     landmarkId: landmarkDefinition.id,
                     sectorId: sectorDefinition.id,
-                    legacyStageAlias: landmarkDefinition.legacyStageAlias,
+                    stageId: landmarkDefinition.stageId,
                     position: shiftPoint(encounter.position, dx, dy),
                     x: encounter.position.x + dx,
                     y: encounter.position.y + dy,
                     activation: encounter.activation ? shiftBounds(encounter.activation, dx, dy) : null,
                     enemySelection: encounter.enemySelection,
-                    swarmMemberCount: encounter.swarmMemberCount,
                     accessModuleId: encounter.accessModuleId,
                     patrol: source.patrol ? shiftPatrol(source.patrol, dx, dy) : null,
                     rules: source.rules ?? Object.freeze([]),
@@ -510,36 +498,40 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 );
             }
             const landmarkSurfaces = localWorld.surfaces
-                .filter(({ kind }) => !LEGACY_BOUNDARY_KINDS.has(kind))
-                .map((surface) => shiftSurface(surface, dx, dy, landmarkDefinition));
+                .filter(({ kind }) => AREA_BOUNDARY_KIND_LOOKUP[kind] !== true)
+                .map((surface) => shiftSurface(surface, dx, dy, landmarkDefinition, area.id));
             const landmarkWingSurfaces = cityWingSurfaces({
                 landmark: landmarkDefinition,
                 coreBounds,
                 entry,
                 exit,
-                landmarkIndex
+                landmarkIndex,
+                inheritedEntrySurfaces: previousCityWingExitSurfaces
             });
+            previousCityWingExitSurfaces = Object.freeze(landmarkWingSurfaces.filter(({ id }) => id.endsWith(":exit")));
             const landmarkObjects = localWorld.objects
-                .filter(({ kind }) => !LEGACY_ENEMY_KINDS.has(kind) && !LEGACY_STAGE_DOOR_KINDS.has(kind))
-                .map((object) => shiftObject(object, dx, dy, landmarkDefinition, objectiveIdMap, outboundRouteId));
+                .filter(({ kind }) => ENEMY_OBJECT_KIND_LOOKUP[kind] !== true && STAGE_DOOR_KIND_LOOKUP[kind] !== true)
+                .map((object) =>
+                    shiftObject(object, dx, dy, landmarkDefinition, objectiveIdBySourceId, outboundRouteId)
+                );
             const landmarkRoute = localWorld.route.map((point) =>
                 withoutAreaAuthority(shiftPoint(point, dx, dy), {
                     landmarkId: landmarkDefinition.id,
-                    legacyStageAlias: landmarkDefinition.legacyStageAlias,
+                    stageId: landmarkDefinition.stageId,
                     topY: point.topY + dy
                 })
             );
             const landmarkWindZones = localWorld.windZones.map((zone) =>
                 withoutAreaAuthority(zone, {
                     landmarkId: landmarkDefinition.id,
-                    legacyStageAlias: landmarkDefinition.legacyStageAlias,
+                    stageId: landmarkDefinition.stageId,
                     bounds: shiftBounds(zone.bounds, dx, dy)
                 })
             );
             const landmarkScannerGroups = localWorld.scannerGroups.map((group) =>
                 withoutAreaAuthority(group, {
                     landmarkId: landmarkDefinition.id,
-                    legacyStageAlias: landmarkDefinition.legacyStageAlias
+                    stageId: landmarkDefinition.stageId
                 })
             );
             const respawnAnchorId =
@@ -548,8 +540,8 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 id: respawnAnchorId,
                 sectorId: sectorDefinition.id,
                 landmarkId: landmarkDefinition.id,
-                legacyStageAlias: landmarkDefinition.legacyStageAlias,
-                label: `STAGE ${landmarkDefinition.legacyStageAlias} SAVE`,
+                stageId: landmarkDefinition.stageId,
+                label: `STAGE ${landmarkDefinition.stageId} SAVE`,
                 level: landmarks.length,
                 radius: STAGE_SAVE_POINT_CULL_RADIUS,
                 triggerBounds: stageSavePointBounds(entry),
@@ -561,8 +553,8 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 sectorId: sectorDefinition.id,
                 sectorOrder: sectorIndex + 1,
                 landmarkOrder: landmarkIndex + 1,
-                legacyAreaId: area.id,
-                legacyStageAlias: landmarkDefinition.legacyStageAlias,
+                areaId: area.id,
+                stageId: landmarkDefinition.stageId,
                 name: landmarkDefinition.name,
                 subtitle: landmarkDefinition.subtitle,
                 origin: { x: dx, y: dy },
@@ -632,7 +624,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
             sectorLandmarks.push(runtimeLandmark);
             previousLandmark = runtimeLandmark;
             previousOutboundObjectiveIds = area.gate.requiredObjectiveIds.map(
-                (objectiveId) => objectiveIdMap.get(objectiveId) ?? objectiveId
+                (objectiveId) => objectiveIdBySourceId[objectiveId] ?? objectiveId
             );
             sectorLeftX = Math.min(sectorLeftX, bounds.x);
             sectorRightX = Math.max(sectorRightX, bounds.x + bounds.width);
@@ -649,7 +641,11 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
         if (sectorContentWidth > SEAMLESS_SECTOR_RUNTIME_WIDTH) {
             throw new Error(`${sectorDefinition.id} exceeds the seamless Sector width`);
         }
-        if (sectorHeight > SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT) {
+        const sectorHeightLimit = SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID[sectorDefinition.id];
+        if (!Number.isFinite(sectorHeightLimit)) {
+            throw new Error(`${sectorDefinition.id} has no seamless Sector height limit`);
+        }
+        if (sectorHeight > sectorHeightLimit) {
             throw new Error(`${sectorDefinition.id} exceeds the seamless Sector height`);
         }
         const sectorCenterX = (sectorLeftX + sectorRightX) * 0.5;
@@ -683,7 +679,7 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 accessModuleRequirement: ACCESS_MODULES_PER_SECTOR
             })
         );
-        const nextSectorDefinition = LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors[sectorIndex + 1];
+        const nextSectorDefinition = authoredSectorCatalog.sectors[sectorIndex + 1];
         if (nextSectorDefinition) {
             const rise = interSectorRise(interSectorRiseById, sectorDefinition.id, nextSectorDefinition.id);
             sectorTransitions.push(
@@ -722,32 +718,12 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
                 label: "SECTOR TRANSIT"
             })
         );
-        if (
-            sourceLandmark.legacyAreaId === bossStageSpec.sourceAreaId &&
-            targetLandmark.legacyAreaId === bossStageSpec.nextAreaId
-        ) {
-            const bossStage = createBossStageRuntimeDefinition(bossStageSpec, sourceLandmark, targetLandmark, lock.id);
-            bossStages.push(bossStage);
-            surfaces.push(...bossStage.surfaces);
-            route.push(...bossStage.route);
-            for (const barrierSurface of barrier.surfaces) {
-                surfaces.push(
-                    freezeValue({
-                        ...barrierSurface,
-                        id: `${bossStageSpec.id}:${barrierSurface.id}`,
-                        kind: "boss-stage-transit-barrier",
-                        blockedByRouteId: undefined,
-                        blockedByBossStageId: bossStageSpec.id
-                    })
-                );
-            }
-        }
     }
 
     const finalLandmark = landmarks.at(-1);
     return freezeValue({
         seed,
-        definitionId: "legacy-area-seamless-sector-runtime",
+        definitionId: "authored-seamless-sector-runtime",
         definitionRevision: SEAMLESS_SECTOR_RUNTIME_REVISION,
         layout: "seamless-sectors",
         surfaces,
@@ -759,14 +735,13 @@ export function createLegacyAreaSeamlessSectorRuntimeWorld({
         topY: Math.min(...landmarks.map(({ bounds }) => bounds.y)),
         areas: [],
         landmarks,
-        landmarkAliases: LEGACY_AREA_SECTOR_PREVIEW_CATALOG.stageAliases.filter(({ runtimePreview }) => runtimePreview),
+        stageIdentities: authoredSectorCatalog.stageIdentities.filter(({ runtimePreview }) => runtimePreview),
         sectors,
         sectorEntries,
         respawnAnchors,
         connectors,
         routeLocks,
         sectorTransitions,
-        bossStages,
         objects,
         objectives,
         gates: [],

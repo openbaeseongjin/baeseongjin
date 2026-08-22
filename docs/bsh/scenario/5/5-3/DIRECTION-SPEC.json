@@ -5,9 +5,9 @@
   "stage": {
     "sector": 5,
     "stage": 3,
-    "legacyStageAlias": "5-3",
     "sourceAreaId": "sector-05-03",
-    "name": "SECURITY REVIEW GALLERY"
+    "name": "SECURITY REVIEW GALLERY",
+    "id": "5-3"
   },
   "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
   "globalControl": {
@@ -124,7 +124,7 @@
             "text": "…기록까지 잠가놨네."
           },
           "timing": {
-            "minDelaySeconds": 2.0
+            "minDelaySeconds": 2
           }
         }
       ]

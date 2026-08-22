@@ -6,9 +6,9 @@
   "stage": {
     "sector": 4,
     "stage": 5,
-    "legacyStageAlias": "4-5",
     "sourceAreaId": "sector-04-05",
-    "name": "AMENITY ATRIUM"
+    "name": "AMENITY ATRIUM",
+    "id": "4-5"
   },
   "globalControl": {
     "worldPause": false,
@@ -68,13 +68,13 @@
           "type": "systemText",
           "title": "PRIVATE AMENITY SERVICE",
           "detail": "CLIMATE / NORMAL",
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         },
         {
           "type": "systemText",
           "title": "WELLNESS WATER SYSTEM",
           "detail": "NORMAL",
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         },
         {
           "type": "playerBark",
@@ -96,7 +96,7 @@
           "type": "systemText",
           "title": "AMENITY SECURITY",
           "detail": "PATROL / ACTIVE",
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         }
       ],
       "dialogue": null
@@ -112,7 +112,7 @@
           "type": "systemText",
           "title": "AMENITY SECURITY",
           "detail": "INTRUSION RESPONSE / ACTIVE",
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         }
       ],
       "dialogue": null,
@@ -146,7 +146,7 @@
           "type": "systemText",
           "title": "RESIDENT REFUGE ROUTE",
           "detail": "ACTIVE",
-          "durationSeconds": 1.0
+          "durationSeconds": 1
         },
         {
           "type": "systemText",

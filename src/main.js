@@ -25,7 +25,7 @@ import { DebugSettings } from "./game/metrics/DebugSettings.js";
 import { DebugPanel } from "./game/ui/DebugPanel.js";
 import { DebugEnemyTrainingControls } from "./game/ui/DebugEnemyTrainingControls.js";
 import { HelpDialog } from "./game/ui/HelpDialog.js";
-import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
+import { AUTHORED_SECTOR_CATALOG } from "./game/world/sectors/AuthoredSectorCatalog.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
 import { DEFAULT_ENEMY_SPRITE_SECTOR_ID, loadEnemySpriteDefinitions } from "./render/sprites/EnemySpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "./render/environment/AuthoredAreaEnvironmentCatalog.js";
@@ -86,7 +86,9 @@ function applyHudVisibility(visible) {
     hudToggle.setAttribute("aria-pressed", String(hudVisible));
 }
 hudToggle.addEventListener("click", () => applyHudVisibility(!hudVisible));
-const debugAreaIds = CURRENT_AUTHORED_AREA_CATALOG.areas.map(({ id }) => id);
+const debugAreaIds = AUTHORED_SECTOR_CATALOG.stageIdentities
+    .filter(({ runtimePreview }) => runtimePreview)
+    .map(({ stageId }) => stageId);
 const debugSettings = new DebugSettings({ storage: audioStorage, validAreaIds: debugAreaIds });
 let debugTabRegistered = false;
 const debugPanel = new DebugPanel({

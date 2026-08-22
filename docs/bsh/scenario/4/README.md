@@ -149,7 +149,7 @@ ISOLATION JUNCTION
 TRANSIT CONTROL TRUNK
 ```
 
-그리고 standalone `Sector04AreaCatalog`도 존재한다.
+standalone `Sector04AreaCatalog`는 과거 실행 코드였지만 현재는 삭제되었다.
 
 하지만 새 Sector04 Authoring에서는 이것을:
 
@@ -1224,11 +1224,11 @@ Available relevant systems include:
 - Stage Direction Runtime v1
 - Sector progress / current Sector01~03 access systems
 
-## LEGACY CURRENT CODE
+## RETIRED LEGACY CODE
 
-A standalone old Sector04 Transit catalog exists.
+The standalone old Sector04 Transit catalog has been deleted.
 
-It is implementation history, not new Sector04 design authority.
+Its design documents remain implementation history, not new Sector04 design authority.
 
 ## NOT IMPLEMENTED
 

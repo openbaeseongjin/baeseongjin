@@ -5,9 +5,9 @@
   "stage": {
     "sector": 5,
     "stage": 2,
-    "legacyStageAlias": "5-2",
     "sourceAreaId": "sector-05-02",
-    "name": "CONTROL ATRIUM"
+    "name": "CONTROL ATRIUM",
+    "id": "5-2"
   },
   "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
   "globalControl": {

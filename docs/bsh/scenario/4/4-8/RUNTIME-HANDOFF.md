@@ -5,7 +5,7 @@
 1. pull latest main;
 2. verify changes since `3c9f661bba58af6f7351e00754c12aef86575a12`;
 3. inspect actual post-4-7 override persistence implementation;
-4. inspect current `Sector04AreaCatalog.js`;
+4. confirm the obsolete Transit catalog remains deleted and inspect canonical `AREA-SPEC.v2.json`;
 5. inspect current gate/objective/state-check infrastructure;
 6. inspect Direction/Player Bark runtime;
 7. inspect Timer/Boss transition contracts.

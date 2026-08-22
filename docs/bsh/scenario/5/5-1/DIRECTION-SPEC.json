@@ -5,9 +5,9 @@
   "stage": {
     "sector": 5,
     "stage": 1,
-    "legacyStageAlias": "5-1",
     "sourceAreaId": "sector-05-01",
-    "name": "CONTINUITY RECEPTION"
+    "name": "CONTINUITY RECEPTION",
+    "id": "5-1"
   },
   "baselineCommit": "4551798860193a16e53814aae5c3a42022b4e1cf",
   "globalControl": {

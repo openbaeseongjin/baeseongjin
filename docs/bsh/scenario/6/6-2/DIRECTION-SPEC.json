@@ -5,9 +5,9 @@
   "stage": {
     "sector": 6,
     "stage": 2,
-    "legacyStageAlias": "6-2",
     "sourceAreaId": "sector-06-02",
-    "name": "CROSSWIND MASTS"
+    "name": "CROSSWIND MASTS",
+    "id": "6-2"
   },
   "languagePolicy": {
     "playerDialogue": "ko",

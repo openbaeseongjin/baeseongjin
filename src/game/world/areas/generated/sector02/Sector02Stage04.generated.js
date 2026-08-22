@@ -1096,7 +1096,7 @@ const SPEC = {
   },
   "schemaVersion": "area-spec-v2",
   "stage": {
-    "legacyStageAlias": "2-4",
+    "id": "2-4",
     "sector": 2,
     "sourceAreaId": "sector-02-04",
     "stage": 4

@@ -5,9 +5,9 @@
   "stage": {
     "sector": 3,
     "stage": 7,
-    "legacyStageAlias": "3-7",
     "sourceAreaId": "sector-03-07",
-    "name": "TRANSFER MEZZANINE"
+    "name": "TRANSFER MEZZANINE",
+    "id": "3-7"
   },
   "baselineCommit": "cb4f690ac180a04868322e9c4cfe1384897c348b",
   "globalControl": {
@@ -60,7 +60,7 @@
               "detail": "OUTER GALLERY"
             },
             {
-              "atSeconds": 1.0,
+              "atSeconds": 1,
               "title": "PRIORITY SPINE",
               "detail": "FACILITY SERVICE"
             }
