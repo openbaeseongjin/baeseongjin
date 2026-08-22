@@ -4,7 +4,7 @@
   "id": "environment-sector-03-central-exchange",
   "generator": {
     "tool": "openai-imagegen-depth-islands-and-adjacent-runtime-seams",
-    "exportVersion": "2026-08-22",
+    "exportVersion": "2026-08-22-v4",
     "sourceExport": "assets/artwork/environments/sector-02-03-runtime-seam/export/sector-03-central-exchange"
   },
   "atlases": {

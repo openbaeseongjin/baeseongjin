@@ -4,8 +4,8 @@
 
 - Package ID: `environment-sector-03-central-exchange`
 - 적용 범위: `sector-03-01`~`sector-03-08` 및 seamless Runtime의 대응 `legacyAreaId`
-- 상태: offline depth map 기반 fixed background + 2 parallax islands Runtime 통합
-- 원본: `assets/artwork/environments/sector-03-central-exchange-background/source/depth-islands-v2/`
+- 상태: 승인된 seam-match V4의 offline depth map 기반 fixed background + 2 parallax islands 기본 Runtime
+- 원본: `assets/artwork/environments/sector-03-central-exchange-background/source/seam-match-v4-depth-islands-v1/`
 - Runtime export: `assets/artwork/environments/sector-02-03-runtime-seam/export/sector-03-central-exchange/`
 - Runtime 크기: 세 backdrop layer 각각 `1024×1536`
 - 비범위: Collision, Terrain geometry, Camera, Enemy, Gameplay, Network authority
@@ -24,4 +24,4 @@ Sector 02→03 경계 중심 총 `1024 world px`에서는 Sector 02·03 package�
 npm run validate:environment-assets -- assets/runtime/environments/sector-03-central-exchange
 ```
 
-최종 검증의 base SHA, diff fingerprint, validator와 브라우저 결과는 같은 디렉터리의 `verification-ledger.md`가 소유한다.
+Issue #790의 기존 검증은 `verification-ledger.md`, V4 후보의 최종 검증은 `verification-ledger-issue-798.md`가 소유한다.

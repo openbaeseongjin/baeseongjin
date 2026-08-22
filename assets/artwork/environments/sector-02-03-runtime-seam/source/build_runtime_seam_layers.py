@@ -21,10 +21,9 @@ def stepped_smooth(value: float) -> float:
     return round(smooth * (STEPS - 1)) / (STEPS - 1)
 
 
-def blend_fixed_edges(source: Image.Image, bottom_target: Image.Image, top_target: Image.Image) -> Image.Image:
+def blend_fixed_bottom(source: Image.Image, bottom_target: Image.Image) -> Image.Image:
     pixels = np.asarray(source.convert("RGB"), dtype=np.float32).copy()
     bottom = np.asarray(bottom_target.convert("RGB"), dtype=np.float32)
-    top = np.asarray(top_target.convert("RGB"), dtype=np.float32)
     height = pixels.shape[0]
 
     for distance in range(BAND):
@@ -33,9 +32,6 @@ def blend_fixed_edges(source: Image.Image, bottom_target: Image.Image, top_targe
         pixels[bottom_y] = (
             pixels[bottom_y] * (1.0 - target_weight) + bottom[distance] * target_weight
         )
-        top_y = distance
-        target_y = top.shape[0] - 1 - distance
-        pixels[top_y] = pixels[top_y] * (1.0 - target_weight) + top[target_y] * target_weight
 
     return Image.fromarray(np.rint(pixels).astype(np.uint8), mode="RGB")
 
@@ -71,22 +67,19 @@ def main() -> None:
     PREVIEW.mkdir(parents=True, exist_ok=True)
 
     sector01_far = Image.open(REFERENCES / "sector-01-backdrop-far.png")
-    sector02_fixed_source = Image.open(REFERENCES / "sector-02-backdrop-fixed.png")
+    sector02_fixed = Image.open(EXPORT_02 / "backdrop-fixed.png").convert("RGB")
+    sector02_left = Image.open(EXPORT_02 / "parallax-island-left.png").convert("RGBA")
+    sector02_right = Image.open(EXPORT_02 / "parallax-island-right.png").convert("RGBA")
     sector03_fixed_source = Image.open(REFERENCES / "sector-03-backdrop-fixed.png")
 
-    if sector01_far.width != sector02_fixed_source.width or sector03_fixed_source.width != sector02_fixed_source.width:
+    if sector01_far.width != sector02_fixed.width or sector03_fixed_source.width != sector02_fixed.width:
         raise RuntimeError("all seam plates must share one pixel width")
-    if min(sector01_far.height, sector02_fixed_source.height, sector03_fixed_source.height) < BAND:
+    if min(sector01_far.height, sector02_fixed.height, sector03_fixed_source.height) < BAND:
         raise RuntimeError("all seam plates must contain the full transition band")
 
-    sector02_fixed = blend_fixed_edges(sector02_fixed_source, sector01_far, sector03_fixed_source)
-    sector02_left = fade_island_edges(
-        Image.open(REFERENCES / "sector-02-parallax-island-left.png"), True, True
-    )
-    sector02_right = fade_island_edges(
-        Image.open(REFERENCES / "sector-02-parallax-island-right.png"), True, True
-    )
-    sector03_fixed = sector03_fixed_source.convert("RGB")
+    # Sector 02 is an immutable approved Runtime endpoint. Only the new Sector
+    # 03 package converges toward its existing top band.
+    sector03_fixed = blend_fixed_bottom(sector03_fixed_source, sector02_fixed)
     sector03_left = fade_island_edges(
         Image.open(REFERENCES / "sector-03-parallax-island-left.png"), True, False
     )
@@ -94,9 +87,6 @@ def main() -> None:
         Image.open(REFERENCES / "sector-03-parallax-island-right.png"), True, False
     )
 
-    sector02_fixed.save(EXPORT_02 / "backdrop-fixed.png")
-    sector02_left.save(EXPORT_02 / "parallax-island-left.png")
-    sector02_right.save(EXPORT_02 / "parallax-island-right.png")
     sector03_fixed.save(EXPORT_03 / "backdrop-fixed.png")
     sector03_left.save(EXPORT_03 / "parallax-island-left.png")
     sector03_right.save(EXPORT_03 / "parallax-island-right.png")
@@ -111,24 +101,26 @@ def main() -> None:
     s01 = np.asarray(sector01_far.convert("RGB"))
     s02 = np.asarray(sector02_fixed)
     s03 = np.asarray(sector03_fixed)
+    s03_source = np.asarray(sector03_fixed_source.convert("RGB"))
     assertions = {
         "sector02BottomMatchesSector01Top": bool(np.array_equal(s02[-1], s01[0])),
         "sector02TopMatchesSector03Bottom": bool(np.array_equal(s02[0], s03[-1])),
-        "sector02IslandBoundaryAlpha": [
+        "sector02IslandTopAlpha": [
             int(np.asarray(sector02_left)[:, :, 3][0].max()),
-            int(np.asarray(sector02_left)[:, :, 3][-1].max()),
             int(np.asarray(sector02_right)[:, :, 3][0].max()),
-            int(np.asarray(sector02_right)[:, :, 3][-1].max()),
         ],
         "sector03IslandBottomAlpha": [
             int(np.asarray(sector03_left)[:, :, 3][-1].max()),
             int(np.asarray(sector03_right)[:, :, 3][-1].max()),
         ],
+        "sector03OutsideBandUnchanged": bool(np.array_equal(s03[:-BAND], s03_source[:-BAND])),
     }
     if not assertions["sector02BottomMatchesSector01Top"] or not assertions["sector02TopMatchesSector03Bottom"]:
         raise RuntimeError(f"fixed plates do not meet at seam: {assertions}")
-    if any(assertions["sector02IslandBoundaryAlpha"] + assertions["sector03IslandBottomAlpha"]):
+    if any(assertions["sector02IslandTopAlpha"] + assertions["sector03IslandBottomAlpha"]):
         raise RuntimeError(f"island alpha does not clear at seam: {assertions}")
+    if not assertions["sector03OutsideBandUnchanged"]:
+        raise RuntimeError(f"sector 03 changed outside the seam band: {assertions}")
     print("built", assertions)
 
 

@@ -10,6 +10,7 @@
         "share:multiplayer": "node scripts/share-multiplayer.mjs",
         "publish:multiplayer": "node scripts/publish-multiplayer.mjs",
         "smoke:multiplayer": "node scripts/smokeMultiplayer.mjs",
+        "test": "node tests/sector03BackgroundTransition.mjs",
         "check": "node scripts/checkSyntax.mjs && node scripts/validateAreaSpecs.mjs && node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check && node scripts/validateDirectionSpecs.mjs && node scripts/checkScenarioIntegration.mjs",
         "check:scenario-integration": "node scripts/checkScenarioIntegration.mjs",
         "validate:area-specs": "node scripts/validateAreaSpecs.mjs",
