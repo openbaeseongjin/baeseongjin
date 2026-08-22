@@ -259,7 +259,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `RopeImpactAttack`은 소유 클라이언트에서 현재 겹친 적 ID 집합을 소유해 같은 접촉의 반복 피해를 막고, 분리 뒤 재진입 때만 새 prediction ID를 만든다. 서버는 claim 소유권·tick·prediction ID 중복·claim 속력으로 재계산한 공식 피해와 대상 생존/tombstone을 검증하며 로프 부착·적 위치·접촉 집합을 지연된 복제 상태로 다시 만들지 않는다.
 - 적은 플레이어를 향해 투사체를 발사한다. 적 탄환의 플레이어 피해와 아래의 플레이어 impact 수렴 계약은 유지한다.
 - 적 투사체는 로프와 먼저 충돌해 로프를 끊고 재부착을 잠시 막으며, 본체에 맞으면 피해와 넉백을 준다.
-- `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다.
+- `CombatFeedback`은 판정 이벤트를 수명 기반 충격파·파편·피해 숫자·월드 흔들림으로 변환한다. 판정 시스템은 Canvas를 직접 참조하지 않는다. 재사용 파티클 preset·DTO와 renderer 경계는 [`particle-system.md`](./particle-system.md)가 소유하며, renderer는 particle shape/material만 해석한다.
 - 클라이언트 피드백 사건은 공용 월드 효과 capability와 개인 상태 효과 capability를 함께 가진다. 공용 capability는 타격·로프 절단 위치의 링·파티클과 원격 Player animation을 모든 참가자 화면에서 생성하고, 개인 capability는 `playerId/sourcePlayerId/targetId`가 현재 로컬 플레이어와 일치할 때만 화면 흔들림·피해 강조·로프 절단 경고·부활 상태 문구를 생성한다. `ClientStatusFeedback`은 `player-respawned`를 `sector-respawn | checkpoint-respawn` status DTO로 투영하고 causal ID 중복 제거·2.2초 수명을 로컬 소유한다. 렌더러와 앱은 사건 종류별 참가자 분기를 소유하지 않는다.
 - 첫 화면에서 싱글은 `PlayerCommand → LocalAuthority → GameSimulation`, 멀티는 `4자리 채널 → 고정 WebSocket 서버 → 채널별 AuthorityServerSession → GameSimulation` 경계를 선택한다. 두 경로는 입력 출처와 상태 전달만 다르고 게임 규칙을 공유한다.
 - 협동은 소유 클라이언트 권한과 서버 중립 월드 권한을 분할한다. 서버의 주역할은 소유 상태·사건 검증과 복제 공유이며, 시간 모델·상태 소유권·스냅샷과 거부 복구 계약은 `multiplayer-synchronization.md`를 기준으로 한다.

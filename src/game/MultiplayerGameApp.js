@@ -300,6 +300,11 @@ export class MultiplayerGameApp {
         this.stepCount += 1;
         const current = this.authority.snapshot(1);
         if (!current.predicted) return;
+        const particleBounds = createRenderViewport({
+            camera: this.camera,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight
+        }).worldBounds;
         const events = this.authority.drainEvents();
         this.statusFeedback.update(dt);
         this.statusFeedback.apply(events);
@@ -323,7 +328,7 @@ export class MultiplayerGameApp {
         this.predictableProjectiles.applyHitClaimReceipts(this.authority.drainHitClaimReceipts());
         this.predictableProjectiles.applyImpactReceipts(this.authority.drainImpactClaimReceipts());
         const authorityFeedback = this.predictableProjectiles.apply(events, current.serverTick, current.state);
-        this.combatFeedback.apply(authorityFeedback);
+        this.combatFeedback.apply(authorityFeedback, { visibleWorldBounds: particleBounds });
         if (current.state.runState === "completed") this.localRunCompleted = false;
         if (this.localRunCompleted || current.state.runState === "completed") {
             this.combatFeedback.update(dt);
@@ -392,7 +397,7 @@ export class MultiplayerGameApp {
         this.authority.drainRopeImpactReceipts();
         this.authority.drainAugmentImpactReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
-        this.combatFeedback.apply(predictedEvents);
+        this.combatFeedback.apply(predictedEvents, { visibleWorldBounds: particleBounds });
         const predictedSpawns = predictedEvents.filter(({ eventType }) => eventType === "predicted-spawn");
         for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "rope-impact")) {
             this.authority.submitRopeImpact(event);
@@ -442,7 +447,29 @@ export class MultiplayerGameApp {
             }
         }
         this.queuePlayerPresentationEvents(presentationResolutions);
-        this.combatFeedback.apply(predictedResolutions);
+        this.combatFeedback.apply(predictedResolutions, { visibleWorldBounds: particleBounds });
+        const presentationState = this.authority.renderSnapshot();
+        if (presentationState) {
+            const replicatedProjectiles = this.predictableProjectiles.snapshot();
+            this.combatFeedback.syncContinuous(
+                {
+                    ...presentationState,
+                    players: current.state.players.map((player) =>
+                        player.id === this.authority.playerId ? presentationState.player : player
+                    ),
+                    projectiles: replicatedProjectiles.projectiles,
+                    enemyProjectiles: replicatedProjectiles.enemyProjectiles,
+                    augmentProjectiles: [
+                        ...(presentationState.augmentProjectiles ?? []),
+                        ...current.state.players.flatMap(
+                            (player) => player.augmentRuntimeState?.combat?.actionProjectiles ?? []
+                        )
+                    ]
+                },
+                dt,
+                particleBounds
+            );
+        }
         this.combatFeedback.update(dt);
         this.updateCheckpointFeedback(dt);
         if (forceSubmit || this.stepCount % 2 === 0) {
