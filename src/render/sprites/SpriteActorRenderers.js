@@ -50,6 +50,18 @@ export function resolveEnemyAimLayerDirection(enemy) {
     return enemy?.presentationAimDirection ?? enemy?.aimDirection ?? null;
 }
 
+export function resolveGuardOctant(guardDirection) {
+    const x = guardDirection?.x;
+    const y = guardDirection?.y;
+    if (!Number.isFinite(x) || !Number.isFinite(y) || Math.hypot(x, y) <= Number.EPSILON) return 0;
+    return ((Math.round(Math.atan2(y, x) / (Math.PI / 4)) % 8) + 8) % 8;
+}
+
+export function resolveEnemyGuardLayerDirection(enemy) {
+    if (enemy?.behaviorState?.kind !== "shield") return null;
+    return enemy.behaviorState.guardDirection ?? null;
+}
+
 class PlayerSpriteRendererBase {
     constructor({ assets, definition, selectPlayers, selectPlayerId = (_scene, player) => player.id, markerColor }) {
         this.assets = assets;
@@ -201,7 +213,7 @@ export class SpriteEnemyRenderer {
                 const animation = controller.update({
                     state: spritePresentation.clipState,
                     dt,
-                    facingX: enemyFacingX(enemy)
+                    facingX: spritePresentation.guardLayer ? null : enemyFacingX(enemy)
                 });
                 const frame = spritePresentation.clip.frameAt(animation.elapsedSeconds);
                 paintSpriteFrame({
@@ -214,8 +226,8 @@ export class SpriteEnemyRenderer {
                     offset: spritePresentation.offset,
                     opacity: spritePresentation.opacity,
                     pixelSnap: spritePresentation.pixelSnap,
-                    flipX: spritePresentation.aimLayer ? false : animation.flipX,
-                    rotation: enemy.angle ?? 0
+                    flipX: spritePresentation.aimLayer || spritePresentation.guardLayer ? false : animation.flipX,
+                    rotation: spritePresentation.guardLayer ? 0 : (enemy.angle ?? 0)
                 });
                 if (spritePresentation.aimLayer) {
                     const aimTransform = resolveUprightAimTransform(resolveEnemyAimLayerDirection(enemy));
@@ -231,6 +243,23 @@ export class SpriteEnemyRenderer {
                         pixelSnap: spritePresentation.pixelSnap,
                         flipX: aimTransform.flipX,
                         rotation: aimTransform.rotation
+                    });
+                }
+                if (spritePresentation.guardLayer) {
+                    const directionIndex = resolveGuardOctant(resolveEnemyGuardLayerDirection(enemy));
+                    const guardFrame = spritePresentation.guardLayer.frames[directionIndex];
+                    paintSpriteFrame({
+                        context,
+                        image: this.assets.imageFor(guardFrame.atlasId),
+                        frame: guardFrame,
+                        position: enemy.position,
+                        size: spritePresentation.size,
+                        anchor: spritePresentation.anchor,
+                        offset: spritePresentation.offset,
+                        opacity: spritePresentation.opacity,
+                        pixelSnap: spritePresentation.pixelSnap,
+                        flipX: false,
+                        rotation: 0
                     });
                 }
             } else {

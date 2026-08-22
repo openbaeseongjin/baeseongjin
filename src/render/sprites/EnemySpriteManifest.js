@@ -1,7 +1,7 @@
 import { EnemySpriteDefinition } from "./EnemySpriteDefinition.js";
 import { assertSpriteAtlasImagePath, spriteAtlasSource } from "./SpriteManifestPath.js";
 
-export const ENEMY_SPRITE_MANIFEST_VERSION = 3;
+export const ENEMY_SPRITE_MANIFEST_VERSION = 4;
 
 function plainObject(value, label) {
     if (!value || Array.isArray(value) || typeof value !== "object") throw new Error(`${label} must be an object`);
@@ -101,6 +101,45 @@ function normalizeAimLayer(spec, enemyType, atlases) {
     });
 }
 
+function normalizeGuardLayer(spec, enemyType, atlases) {
+    if (spec === undefined) return undefined;
+    const label = `enemy sprite '${enemyType}' guardLayer`;
+    const layer = plainObject(spec, label);
+    knownKeys(layer, ["orientation", "frames"], label);
+    if (layer.orientation !== "guard-octants") {
+        throw new Error(`${label}.orientation must be 'guard-octants'`);
+    }
+    if (!Array.isArray(layer.frames) || layer.frames.length !== 8) {
+        throw new Error(`${label}.frames must contain exactly 8 direction frames`);
+    }
+    return Object.freeze({
+        orientation: layer.orientation,
+        frames: Object.freeze(
+            layer.frames.map((spec, index) => {
+                const frameLabel = `${label} frame ${index}`;
+                const frame = plainObject(spec, frameLabel);
+                knownKeys(frame, ["atlas", "cell"], frameLabel);
+                if (typeof frame.atlas !== "string" || !Object.hasOwn(atlases, frame.atlas)) {
+                    throw new Error(`${frameLabel} references unknown atlas '${frame.atlas}'`);
+                }
+                const cell = plainObject(frame.cell, `${frameLabel} cell`);
+                knownKeys(cell, ["column", "row"], `${frameLabel} cell`);
+                if (!Number.isInteger(cell.column) || cell.column < 0 || !Number.isInteger(cell.row) || cell.row < 0) {
+                    throw new Error(`${frameLabel} cell requires non-negative integers`);
+                }
+                const frameSize = atlases[frame.atlas].frameSize;
+                return Object.freeze({
+                    atlasId: frame.atlas,
+                    x: cell.column * frameSize.width,
+                    y: cell.row * frameSize.height,
+                    width: frameSize.width,
+                    height: frameSize.height
+                });
+            })
+        )
+    });
+}
+
 function normalizeState(spec, enemyType, state, atlases) {
     const label = `enemy sprite '${enemyType}' state '${state}'`;
     const item = plainObject(spec, label);
@@ -167,7 +206,7 @@ export function createEnemySpriteDefinitionFromManifest(manifest, { baseUrl } = 
             const render = plainObject(enemy.render, `enemy sprite '${enemyType}' render`);
             knownKeys(
                 render,
-                ["facing", "size", "anchor", "offset", "pixelSnap", "aimLayer"],
+                ["facing", "size", "anchor", "offset", "pixelSnap", "aimLayer", "guardLayer"],
                 `enemy sprite '${enemyType}' render`
             );
             size(render.size, `enemy sprite '${enemyType}' render.size`);
@@ -179,7 +218,8 @@ export function createEnemySpriteDefinitionFromManifest(manifest, { baseUrl } = 
                 {
                     render: {
                         ...render,
-                        aimLayer: normalizeAimLayer(render.aimLayer, enemyType, atlases)
+                        aimLayer: normalizeAimLayer(render.aimLayer, enemyType, atlases),
+                        guardLayer: normalizeGuardLayer(render.guardLayer, enemyType, atlases)
                     },
                     states: Object.fromEntries(
                         Object.entries(states).map(([state, stateSpec]) => [
