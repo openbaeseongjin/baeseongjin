@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOSS 04 FINAL MAP PREVIEW</title>
+<style>
+:root{--bg:#050d12;--panel:#0b171d;--line:#344b55;--txt:#eef5f6;--muted:#9dafb7;--route:#ffe06b;--anchor:#65e8ff;--safe:#73d39b;--a:#ff8fa3;--b:#ffb26f;--terr:#2c434d;--garden:#5d9c6d;--core:#d675ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:20px}.sub{color:var(--muted);margin-top:3px}
+.layout{display:grid;grid-template-columns:460px 1fr;min-height:calc(100vh - 70px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}main{padding:12px}
+.card{border:1px solid var(--line);background:#081218;border-radius:8px;padding:10px;margin-bottom:8px}.card b{color:var(--anchor)}.small{color:var(--muted);font-size:12px}label{display:block;margin:6px 0}
+svg{width:100%;height:88vh;min-height:860px;background:#02080c;border:1px solid var(--line);border-radius:8px}
+text{fill:var(--txt);paint-order:stroke;stroke:#041018;stroke-width:5}.tiny{font-size:10px;fill:#d2dde1}.phase{font-size:17px;font-weight:700}
+.route{stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}.anchor{fill:var(--anchor);stroke:white;stroke-width:2}.reach{fill:none;stroke:var(--anchor);stroke-width:2;opacity:.07}
+.building{fill:#1b2a31;stroke:#5d747e;stroke-width:4}.terrace{fill:var(--terr);stroke:#839aa3;stroke-width:3}.garden{fill:#234131;stroke:var(--garden);stroke-width:3}.void{fill:#061016;stroke:#213943;stroke-width:3;stroke-dasharray:12 10}.bridge{fill:#324851;stroke:#97abb3;stroke-width:3}.glass{fill:#62b8d322;stroke:#6db8d2;stroke-width:3}
+.safe{fill:#2f5c48;stroke:var(--safe);stroke-width:4}.guardA{fill:#7d3048;stroke:var(--a);stroke-width:4}.guardB{fill:#7c4b26;stroke:var(--b);stroke-width:4}.core{fill:#553367;stroke:var(--core);stroke-width:5}
+.territoryA{fill:#ff66851a;stroke:var(--a);stroke-width:3;stroke-dasharray:14 10}.territoryB{fill:#ffb26f12;stroke:var(--b);stroke-width:3;stroke-dasharray:14 10}.overlap{fill:#c06cff16;stroke:#d88cff;stroke-width:3;stroke-dasharray:10 8}
+.burst{stroke:var(--a);stroke-width:4;stroke-dasharray:6 8}.dash{stroke:var(--b);stroke-width:7;stroke-dasharray:14 8}.weak{fill:#ff5363;stroke:white;stroke-width:3}.final{stroke:#ffdf6b;stroke-width:8;stroke-dasharray:14 9;fill:none}.dock{stroke:#d18aff;stroke-width:8}.hidden{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head>
+<body>
+<header><h1>BOSS 04 · PROTECTED UPPER RESIDENCE · FINAL MAP PREVIEW</h1>
+<div class="sub">AUTHORING SNAPSHOT 6a8911d354df6b218a64970b5d35d41359ef62f2 · AUTHORED FINAL CONTENT / RUNTIME NOT IMPLEMENTED</div></header>
+<div class="layout">
+<aside>
+<div class="card"><b>정체성</b><br>Guard A + Guard B + Central Security Hub가 하나의 Boss Encounter.<br><span class="small">두 Guard는 같은 보호 시스템의 두 팔.</span></div>
+<div class="card"><b>핵심 문법</b><br>발각 → Pursuit → Territory Exit → LOS break → Return → 약점 노출 → Rope Impact</div>
+<div class="card"><b>P1 Guard A</b><br>Private Sky Garden / elevated pursuit / Burst landing pressure / rear thruster.</div>
+<div class="card"><b>SAFE</b><br>Refuge Landing. Guard A 진입 불가, Guard B 공간 즉시 가시.</div>
+<div class="card"><b>P2 Guard B</b><br>Upper/Lower Skybridge / landing-point intercept Dash / side controller.</div>
+<div class="card"><b>P3</b><br>A Return ↔ B Acquire 인계. 두 약점 재타격 → Link A/B OFF → Core Shield OFF.</div>
+<div class="card"><b>Final</b><br>좌/우 어느 쪽에서도 Central Core Rope Impact 가능. Guard docking → Protected Gate open → Sector05 sightline.</div>
+<div class="card"><b>Rope QA</b><br>Base 400px<br>Mandatory relations: 21<br>Max relation: <b>353.55px</b><br>Non-adjacent ≤400: <b>0</b></div>
+<div class="card">
+<label><input id="routeT" type="checkbox" checked> Player Route</label>
+<label><input id="territoryT" type="checkbox" checked> Pursuit Territories</label>
+<label><input id="threatT" type="checkbox" checked> Guard Pressure</label>
+<label><input id="finalT" type="checkbox" checked> Final Core Routes</label>
+<label><input id="reachT" type="checkbox"> 400px Reach</label>
+</div>
+</aside>
+
+<main><svg viewBox="0 0 5400 2500">
+<rect class="building" x="80" y="100" width="5240" height="2280" rx="30"/>
+<text class="phase" x="160" y="180">UPPER RESIDENTIAL / AMENITY · PRIVILEGE IS PROTECTED</text>
+
+<!-- P1 -->
+<rect class="garden" x="180" y="1380" width="1850" height="840" rx="28"/>
+<rect class="void" x="980" y="1560" width="700" height="450" rx="30"/>
+<rect class="terrace" x="250" y="2010" width="520" height="42"/>
+<rect class="terrace" x="430" y="1740" width="420" height="38"/>
+<rect class="terrace" x="1670" y="1450" width="300" height="38"/>
+<rect class="bridge" x="700" y="1470" width="350" height="32"/>
+<rect class="bridge" x="1330" y="1360" width="360" height="32"/>
+<text class="phase" x="260" y="1340">P1 · PRIVATE SKY GARDEN</text>
+<text class="tiny" x="1000" y="1810">LANDSCAPED VOID</text>
+
+<!-- Safe -->
+<rect class="safe" x="2070" y="970" width="420" height="120" rx="20"/>
+<text class="phase" x="2100" y="940">REFUGE LANDING · FULL SAFE</text>
+
+<!-- P2 -->
+<rect class="bridge" x="2480" y="1210" width="1480" height="50" rx="12"/>
+<rect class="bridge" x="2670" y="820" width="1320" height="50" rx="12"/>
+<rect class="terrace" x="3220" y="1040" width="360" height="55"/>
+<rect class="terrace" x="3440" y="1240" width="430" height="55"/>
+<text class="phase" x="2560" y="760">P2 · UPPER / LOWER SKYBRIDGE</text>
+<text class="tiny" x="3300" y="1015">REFUGE BALCONY</text>
+
+<!-- P3 -->
+<rect class="terrace" x="3480" y="250" width="520" height="105" rx="18"/>
+<rect class="terrace" x="4300" y="250" width="520" height="105" rx="18"/>
+<rect class="bridge" x="3600" y="135" width="1080" height="48" rx="12"/>
+<rect class="void" x="3820" y="500" width="720" height="500" rx="40"/>
+<text class="phase" x="3600" y="105">P3 · REFUGE TERRACES + HIGH SKYBRIDGE</text>
+
+<!-- Hub -->
+<rect class="core" x="3970" y="220" width="260" height="160" rx="50"/>
+<circle class="weak" cx="4100" cy="300" r="34"/>
+<line class="dock" x1="3985" y1="260" x2="3660" y2="205"/>
+<line class="dock" x1="4215" y1="260" x2="4540" y2="205"/>
+<text class="phase" x="3860" y="430">CENTRAL SECURITY HUB</text>
+
+<!-- Gate / Sector05 -->
+<rect class="glass" x="4860" y="180" width="360" height="560" rx="15"/>
+<text class="phase" x="4780" y="145">PROTECTED GATE</text>
+<text class="tiny" x="4900" y="775">Gate opens quietly → Sector05 sightline</text>
+
+<g id="territories">
+<rect class="territoryA" x="160" y="1300" width="2000" height="1000" rx="40"/>
+<text x="260" y="2290">GUARD A PURSUIT TERRITORY</text>
+<rect class="territoryB" x="2460" y="700" width="1500" height="700" rx="40"/>
+<text x="2580" y="1380">GUARD B PURSUIT TERRITORY</text>
+<rect class="overlap" x="3450" y="180" width="1300" height="650" rx="40"/>
+<text x="3540" y="470">P3 HANDOFF OVERLAP · A RETURN ↔ B ACQUIRE</text>
+</g>
+
+<g id="threats">
+<ellipse class="guardA" cx="1130" cy="1280" rx="78" ry="42"/>
+<circle class="weak" cx="1055" cy="1280" r="20"/>
+<text class="tiny" x="990" y="1220">GUARD A · elevated pursuit</text>
+<text class="tiny" x="960" y="1325">rear thruster</text>
+<line class="burst" x1="1130" y1="1320" x2="820" y2="1760"/>
+<line class="burst" x1="1140" y1="1320" x2="1350" y2="1650"/>
+<line class="burst" x1="1150" y1="1320" x2="1650" y2="1480"/>
+
+<ellipse class="guardB" cx="3250" cy="740" rx="82" ry="45"/>
+<circle class="weak" cx="3328" cy="740" r="20"/>
+<text class="tiny" x="3110" y="680">GUARD B · route-block pursuit</text>
+<text class="tiny" x="3150" y="800">side controller</text>
+<line class="dash" x1="3250" y1="790" x2="3550" y2="1110"/>
+
+<ellipse class="guardA" cx="3660" cy="205" rx="72" ry="40"/>
+<circle class="weak" cx="3590" cy="205" r="18"/>
+<ellipse class="guardB" cx="4540" cy="205" rx="72" ry="40"/>
+<circle class="weak" cx="4608" cy="205" r="18"/>
+</g>
+
+<g id="routeGroup">
+<line class="route" x1="260" y1="2210" x2="560" y2="2050"/>
+<line class="route" x1="560" y1="2050" x2="880" y2="1910"/>
+<line class="route" x1="880" y1="1910" x2="1180" y2="1730"/>
+<line class="route" x1="1180" y1="1730" x2="1450" y2="1510"/>
+<line class="route" x1="1450" y1="1510" x2="1740" y2="1310"/>
+<line class="route" x1="1740" y1="1310" x2="2030" y2="1170"/>
+<line class="route" x1="2030" y1="1170" x2="2290" y2="1040"/>
+<line class="route" x1="2290" y1="1040" x2="2570" y2="1160"/>
+<line class="route" x1="2570" y1="1160" x2="2870" y2="1030"/>
+<line class="route" x1="2870" y1="1030" x2="3170" y2="900"/>
+<line class="route" x1="3170" y1="900" x2="3370" y2="1140"/>
+<line class="route" x1="3370" y1="1140" x2="3500" y2="1260"/>
+<line class="route" x1="3500" y1="1260" x2="3850" y2="1260"/>
+<line class="route" x1="3850" y1="1260" x2="3850" y2="910"/>
+<line class="route" x1="3850" y1="910" x2="3650" y2="630"/>
+<line class="route" x1="3650" y1="630" x2="3750" y2="300"/>
+<line class="route" x1="3850" y1="1260" x2="4200" y2="1260"/>
+<line class="route" x1="4200" y1="1260" x2="4450" y2="1010"/>
+<line class="route" x1="4450" y1="1010" x2="4650" y2="720"/>
+<line class="route" x1="4650" y1="720" x2="4500" y2="430"/>
+<line class="route" x1="4500" y1="430" x2="4450" y2="300"/>
+<circle class="anchor" cx="260" cy="2210" r="14"/><text class="tiny" x="278" y="2196">ENTRY</text>
+<circle class="anchor" cx="560" cy="2050" r="14"/><text class="tiny" x="578" y="2036">A1</text>
+<circle class="anchor" cx="880" cy="1910" r="14"/><text class="tiny" x="898" y="1896">A2</text>
+<circle class="anchor" cx="1180" cy="1730" r="14"/><text class="tiny" x="1198" y="1716">A3</text>
+<circle class="anchor" cx="1450" cy="1510" r="14"/><text class="tiny" x="1468" y="1496">A4</text>
+<circle class="anchor" cx="1740" cy="1310" r="14"/><text class="tiny" x="1758" y="1296">A5</text>
+<circle class="anchor" cx="2030" cy="1170" r="14"/><text class="tiny" x="2048" y="1156">A-EXIT</text>
+<circle class="anchor" cx="2290" cy="1040" r="14"/><text class="tiny" x="2308" y="1026">SAFE</text>
+<circle class="anchor" cx="2570" cy="1160" r="14"/><text class="tiny" x="2588" y="1146">B1</text>
+<circle class="anchor" cx="2870" cy="1030" r="14"/><text class="tiny" x="2888" y="1016">B2</text>
+<circle class="anchor" cx="3170" cy="900" r="14"/><text class="tiny" x="3188" y="886">B3</text>
+<circle class="anchor" cx="3370" cy="1140" r="14"/><text class="tiny" x="3388" y="1126">B4</text>
+<circle class="anchor" cx="3500" cy="1260" r="14"/><text class="tiny" x="3518" y="1246">B5</text>
+<circle class="anchor" cx="3850" cy="1260" r="14"/><text class="tiny" x="3868" y="1246">B-EXIT</text>
+<circle class="anchor" cx="3850" cy="910" r="14"/><text class="tiny" x="3868" y="896">L0</text>
+<circle class="anchor" cx="3650" cy="630" r="14"/><text class="tiny" x="3668" y="616">L1</text>
+<circle class="anchor" cx="3750" cy="300" r="14"/><text class="tiny" x="3768" y="286">L2</text>
+<circle class="anchor" cx="4200" cy="1260" r="14"/><text class="tiny" x="4218" y="1246">R0</text>
+<circle class="anchor" cx="4450" cy="1010" r="14"/><text class="tiny" x="4468" y="996">R1</text>
+<circle class="anchor" cx="4650" cy="720" r="14"/><text class="tiny" x="4668" y="706">R2</text>
+<circle class="anchor" cx="4500" cy="430" r="14"/><text class="tiny" x="4518" y="416">R3</text>
+<circle class="anchor" cx="4450" cy="300" r="14"/><text class="tiny" x="4468" y="286">R4</text>
+</g>
+
+<g id="finalRoutes">
+<path class="final" d="M3750,300 Q3900,115 4100,300"/>
+<path class="final" d="M4450,300 Q4300,115 4100,300"/>
+<text class="tiny" x="3660" y="270">LEFT FINAL</text>
+<text class="tiny" x="4380" y="270">RIGHT FINAL</text>
+</g>
+
+<g id="reach" class="hidden"><circle class="reach" cx="260" cy="2210" r="400"/>
+<circle class="reach" cx="560" cy="2050" r="400"/>
+<circle class="reach" cx="880" cy="1910" r="400"/>
+<circle class="reach" cx="1180" cy="1730" r="400"/>
+<circle class="reach" cx="1450" cy="1510" r="400"/>
+<circle class="reach" cx="1740" cy="1310" r="400"/>
+<circle class="reach" cx="2030" cy="1170" r="400"/>
+<circle class="reach" cx="2290" cy="1040" r="400"/>
+<circle class="reach" cx="2570" cy="1160" r="400"/>
+<circle class="reach" cx="2870" cy="1030" r="400"/>
+<circle class="reach" cx="3170" cy="900" r="400"/>
+<circle class="reach" cx="3370" cy="1140" r="400"/>
+<circle class="reach" cx="3500" cy="1260" r="400"/>
+<circle class="reach" cx="3850" cy="1260" r="400"/>
+<circle class="reach" cx="3850" cy="910" r="400"/>
+<circle class="reach" cx="3650" cy="630" r="400"/>
+<circle class="reach" cx="3750" cy="300" r="400"/>
+<circle class="reach" cx="4200" cy="1260" r="400"/>
+<circle class="reach" cx="4450" cy="1010" r="400"/>
+<circle class="reach" cx="4650" cy="720" r="400"/>
+<circle class="reach" cx="4500" cy="430" r="400"/>
+<circle class="reach" cx="4450" cy="300" r="400"/></g>
+
+<text class="phase" x="130" y="2360">ENTRY FROM 4-8 · PROTECTED ASCENT</text>
+<text class="phase" x="4520" y="900">LINK A/B OFF → CORE SHIELD OFF → GATE OPEN</text>
+</svg></main>
+</div>
+<script>
+function bind(box,id){document.getElementById(box).addEventListener('change',e=>document.getElementById(id).classList.toggle('hidden',!e.target.checked));}
+bind('routeT','routeGroup');bind('territoryT','territories');bind('threatT','threats');bind('finalT','finalRoutes');bind('reachT','reach');
+</script>
+</body></html>

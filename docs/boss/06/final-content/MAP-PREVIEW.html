@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOSS 06 FINAL MAP PREVIEW — Shuttle Containment Clamps</title>
+<style>
+:root {
+ --bg:#050b11; --panel:#09141b; --line:#314955; --txt:#eef5f6; --muted:#9fb2ba;
+ --cyan:#63e8ff; --yellow:#ffe26a; --green:#74d69b; --red:#ff7d89; --pink:#ff77bb;
+ --amber:#ffb66a; --steel:#273b45; --sky:#0a1622; --violet:#b98bff; --blue:#71b8ff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:13px 18px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:20px} .sub{color:var(--muted);margin-top:3px}
+.layout{display:grid;grid-template-columns:460px 1fr;min-height:calc(100vh - 70px)}
+aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}
+main{padding:10px}
+.card{padding:10px;border:1px solid var(--line);border-radius:8px;background:#071117;margin-bottom:8px}
+.card b{color:var(--cyan)} .small{font-size:12px;color:var(--muted)} label{display:block;margin:6px 0}
+button{background:#12252e;color:var(--txt);border:1px solid #4d6975;border-radius:6px;padding:7px 9px;margin:3px;cursor:pointer}
+button.active{outline:2px solid var(--cyan)}
+svg{width:100%;height:89vh;min-height:880px;border:1px solid var(--line);background:linear-gradient(#081826,#03080c);border-radius:8px}
+text{fill:var(--txt);paint-order:stroke;stroke:#041018;stroke-width:5}
+.micro{font-size:10px;fill:#d3dfe3} .phase{font-size:18px;font-weight:700} .boss{font-size:22px;font-weight:800}
+.island{fill:#1b3039;stroke:#718a95;stroke-width:5} .deck{fill:#2b424c;stroke:#91a5ae;stroke-width:3}
+.hp{fill:var(--cyan);stroke:white;stroke-width:2} .route{stroke:var(--yellow);stroke-width:5;stroke-dasharray:13 8}
+.reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.07}
+.shuttle{fill:#d7e1e5;stroke:#ffffff;stroke-width:6} .window{fill:#274e67;stroke:#8fdcff;stroke-width:3}
+.clamp{fill:#3c4d56;stroke:#dce7eb;stroke-width:5} .joint{fill:#69391e;stroke:var(--amber);stroke-width:6}
+.jointHot{fill:#9b4e25;stroke:#ffd6a8;stroke-width:8}
+.sweepLow{fill:#ff59621a;stroke:var(--red);stroke-width:5;stroke-dasharray:14 9}
+.sweepHigh{fill:#ff8b4d17;stroke:var(--amber);stroke-width:5;stroke-dasharray:14 9}
+.tower{fill:#293944;stroke:#a8bac2;stroke-width:6} .interlock{fill:#4d3559;stroke:var(--violet);stroke-width:7}
+.lightArm{fill:#31464f;stroke:#ffdf74;stroke-width:4} .lightThreat{fill:#ff536318;stroke:var(--red);stroke-width:4;stroke-dasharray:12 8}
+.safe{fill:#27523e;stroke:var(--green);stroke-width:4} .off{opacity:.22}
+.beacon{fill:#ffef95;stroke:#fff;stroke-width:3}
+.finalPath{stroke:var(--green);stroke-width:9;fill:none;stroke-dasharray:15 10}
+.note{fill:#071219dd;stroke:#49616d;stroke-width:2}
+.hidden{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header>
+<h1>BOSS 06 · PAD 03 SHUTTLE CONTAINMENT SECURITY · FINAL MAP PREVIEW</h1>
+<div class="sub">AUTHORING SNAPSHOT 7e235084e86591adef107d84c9f527e5fadb2d3e · POST-6-8 FINAL SECURITY ENCOUNTER · AUTHORED FINAL CONTENT / RUNTIME NOT IMPLEMENTED</div>
+</header>
+<div class="layout">
+<aside>
+<div class="card">
+<b>Boss06 한 줄</b><br>
+실제 탈출선인 Maintenance Shuttle을 Containment Clamp System이 붙잡는다. Player는 Shuttle 주변의 삼각형 Structural Island를 순회하며 P1/P2의 두 Clamp를 서로 다른 방식으로 해제하고, P3에서 Shuttle 뒤쪽 Departure Tower의 Interlock을 파괴해 Pad03 출발 잠금을 푼다.
+</div>
+
+<div class="card">
+<b>Boss의 실체</b><br>
+Shuttle = 목표 / 파괴 대상 아님.<br>
+Boss = <b>Pad 03 Containment Clamp Security System</b>.<br>
+Arena = OPEN SKY + 3 STRUCTURAL ISLANDS + visible Shuttle.
+</div>
+
+<div class="card">
+<b>P1 · CLAMP A</b><br>
+LEFT ISLAND.<br>
+Low Clamp Arm Sweep → MAX EXTENSION → Rear Joint 노출 → Rope Impact.<br>
+첫 Phase는 가장 읽기 쉬운 해제법.
+</div>
+
+<div class="card">
+<b>P2 · CLAMP B</b><br>
+UPPER ISLAND.<br>
+High Clamp Arm Sweep → 짧은 <b>Counter-Window</b> 동안 Side Coupling 노출.<br>
+P1보다 Timing 비중이 높음.
+</div>
+
+<div class="card">
+<b>P3 · DEPARTURE TOWER</b><br>
+세 번째 Clamp가 아니라 <b>Shuttle 뒤쪽 대형 Departure Tower</b>.<br>
+Pad Lighting Arms가 Security Mode로 전환되어 Route 일부를 Sweep.<br>
+Tower Interlock이 최종 공격 대상.
+</div>
+
+<div class="card">
+<b>Victory</b><br>
+Interlock 파괴 → A/B Clamp가 기체에서 천천히 후퇴 → Pad Beacon 정상 점등 → Shuttle idle machinery 시작 → 추가 난이도 없는 안전 접근 → Boarding.
+</div>
+
+<div class="card">
+<b>Ending Boundary</b><br>
+Boss 승리 후:
+<pre>PAD SECURITY / OVERRIDDEN
+DEPARTURE INTERLOCK / RELEASED
+MAINTENANCE SHUTTLE / BOARDING AVAILABLE</pre>
+그 뒤 Shuttle 상승 → 도시 전체 shot → EVACUATION COMPLETE.
+</div>
+
+<div class="card">
+<b>Rope QA</b><br>
+Base Reach: 400px<br>
+Combat authored relations: 16<br>
+Max authored relation: <b>358.05px</b><br>
+Non-adjacent ≤400 combat shortcut candidates: <b>0</b><br>
+<span class="small">Final QA: non-adjacent ≤400 combat shortcut = 0.</span>
+</div>
+
+<div class="card">
+<b>Phase 보기</b><br>
+<button id="b1" class="active" onclick="showPhase(1)">P1 CLAMP A</button>
+<button id="b2" onclick="showPhase(2)">P2 CLAMP B</button>
+<button id="b3" onclick="showPhase(3)">P3 TOWER</button>
+<button id="bf" onclick="showPhase(4)">VICTORY</button>
+<label><input id="routeT" type="checkbox" checked> Structural Route</label>
+<label><input id="reachT" type="checkbox"> 400px Reach</label>
+</div>
+</aside>
+
+<main>
+<svg viewBox="0 0 5200 2800">
+<!-- skyline -->
+<rect x="0" y="0" width="5200" height="2800" fill="transparent"/>
+<text class="phase" x="260" y="220">OPEN SKY · ROOFTOP PAD 03</text>
+
+<!-- Three structural islands -->
+<path class="island" d="M420 2440 L720 1880 L1240 1460 L1790 930 L2180 760 L2130 1200 L1760 1610 L1480 2050 L980 2440 Z"/>
+<text class="phase" x="580" y="1800">ISLAND A · LEFT CLAMP</text>
+
+<path class="island" d="M2050 760 L2350 470 L3010 460 L3430 760 L3460 1190 L3110 980 L2730 880 L2310 980 Z"/>
+<text class="phase" x="2350" y="420">ISLAND B · UPPER CLAMP</text>
+
+<path class="island" d="M3370 1170 L3820 1450 L4200 1780 L4740 2240 L4590 2490 L4090 2240 L3650 1930 L3330 1560 Z"/>
+<text class="phase" x="3650" y="1350">ISLAND C · DEPARTURE TOWER</text>
+
+<!-- central pad -->
+<ellipse class="deck" cx="2600" cy="2050" rx="800" ry="470"/>
+<ellipse cx="2600" cy="2050" rx="570" ry="300" fill="#122128" stroke="#7a919b" stroke-width="4"/>
+<text class="boss" x="2240" y="2550">ROOFTOP PAD 03</text>
+
+<!-- Shuttle -->
+<path class="shuttle" d="M2220 1910 L2460 1730 L2820 1730 L3080 1920 L2930 2070 L2280 2070 Z"/>
+<rect class="window" x="2480" y="1780" width="330" height="110" rx="24"/>
+<path class="shuttle" d="M2350 2060 L2290 2210 L2390 2210 L2490 2070 Z"/>
+<path class="shuttle" d="M2870 2060 L2970 2210 L3070 2210 L2990 2070 Z"/>
+<text class="boss" x="2240" y="1690">MAINTENANCE SHUTTLE · STANDBY</text>
+
+<!-- Clamp A physical -->
+<rect class="clamp" x="1640" y="1780" width="500" height="140" rx="30"/>
+<rect class="clamp" x="1980" y="1840" width="320" height="100" rx="28"/>
+<circle class="joint" cx="1690" cy="1850" r="48"/>
+<text class="micro" x="1500" y="1740">CLAMP A / LOW ARM</text>
+
+<!-- Clamp B -->
+<rect class="clamp" x="2620" y="1110" width="160" height="500" rx="35"/>
+<rect class="clamp" x="2670" y="1500" width="140" height="300" rx="30"/>
+<circle class="joint" cx="2700" cy="1170" r="48"/>
+<text class="micro" x="2790" y="1190">CLAMP B / HIGH ARM</text>
+
+<!-- Departure Tower -->
+<rect class="tower" x="4070" y="1520" width="430" height="690" rx="34"/>
+<rect class="interlock" x="4170" y="1680" width="230" height="230" rx="45"/>
+<circle cx="4285" cy="1795" r="48" fill="#ff9871" stroke="white" stroke-width="4"/>
+<text class="phase" x="3930" y="1480">DEPARTURE TOWER</text>
+<text class="micro" x="4140" y="1950">DEPARTURE INTERLOCK</text>
+
+<!-- Pad lighting arms -->
+<rect class="lightArm" x="1860" y="2260" width="520" height="55" rx="12"/>
+<rect class="lightArm" x="2810" y="2280" width="520" height="55" rx="12"/>
+<circle class="beacon" cx="1940" cy="2288" r="20"/><circle class="beacon" cx="2290" cy="2288" r="20"/>
+<circle class="beacon" cx="2890" cy="2308" r="20"/><circle class="beacon" cx="3240" cy="2308" r="20"/>
+
+<!-- authored grapple scaffold -->
+<g id="routeGroup">
+<line class="route" x1="620" y1="2360" x2="900" y2="2240"/>
+<line class="route" x1="900" y1="2240" x2="1180" y2="2080"/>
+<line class="route" x1="1180" y1="2080" x2="1410" y2="1830"/>
+<line class="route" x1="1410" y1="1830" x2="1540" y2="1510"/>
+<line class="route" x1="1540" y1="1510" x2="1720" y2="1210"/>
+<line class="route" x1="1720" y1="1210" x2="1970" y2="980"/>
+<line class="route" x1="1970" y1="980" x2="2230" y2="790"/>
+<line class="route" x1="2230" y1="790" x2="2550" y2="680"/>
+<line class="route" x1="2550" y1="680" x2="2880" y2="700"/>
+<line class="route" x1="2880" y1="700" x2="3160" y2="850"/>
+<line class="route" x1="3160" y1="850" x2="3360" y2="1120"/>
+<line class="route" x1="3360" y1="1120" x2="3560" y2="1370"/>
+<line class="route" x1="3560" y1="1370" x2="3770" y2="1660"/>
+<line class="route" x1="3770" y1="1660" x2="3980" y2="1940"/>
+<line class="route" x1="3980" y1="1940" x2="4250" y2="2150"/>
+<line class="route" x1="4250" y1="2150" x2="4510" y2="2310"/>
+<circle class="hp" cx="620" cy="2360" r="14"/><text class="micro" x="638" y="2345">ENTRY</text>
+<circle class="hp" cx="900" cy="2240" r="14"/><text class="micro" x="918" y="2225">A0</text>
+<circle class="hp" cx="1180" cy="2080" r="14"/><text class="micro" x="1198" y="2065">A1</text>
+<circle class="hp" cx="1410" cy="1830" r="14"/><text class="micro" x="1428" y="1815">A2</text>
+<circle class="hp" cx="1540" cy="1510" r="14"/><text class="micro" x="1558" y="1495">A3</text>
+<circle class="hp" cx="1720" cy="1210" r="14"/><text class="micro" x="1738" y="1195">A4</text>
+<circle class="hp" cx="1970" cy="980" r="14"/><text class="micro" x="1988" y="965">A5</text>
+<circle class="hp" cx="2230" cy="790" r="14"/><text class="micro" x="2248" y="775">B0</text>
+<circle class="hp" cx="2550" cy="680" r="14"/><text class="micro" x="2568" y="665">B1</text>
+<circle class="hp" cx="2880" cy="700" r="14"/><text class="micro" x="2898" y="685">B2</text>
+<circle class="hp" cx="3160" cy="850" r="14"/><text class="micro" x="3178" y="835">B3</text>
+<circle class="hp" cx="3360" cy="1120" r="14"/><text class="micro" x="3378" y="1105">B4</text>
+<circle class="hp" cx="3560" cy="1370" r="14"/><text class="micro" x="3578" y="1355">C0</text>
+<circle class="hp" cx="3770" cy="1660" r="14"/><text class="micro" x="3788" y="1645">C1</text>
+<circle class="hp" cx="3980" cy="1940" r="14"/><text class="micro" x="3998" y="1925">C2</text>
+<circle class="hp" cx="4250" cy="2150" r="14"/><text class="micro" x="4268" y="2135">C3</text>
+<circle class="hp" cx="4510" cy="2310" r="14"/><text class="micro" x="4528" y="2295">C4</text>
+<circle class="hp" cx="2180" cy="2140" r="14"/><text class="micro" x="2198" y="2125">PADL</text>
+<circle class="hp" cx="3020" cy="2140" r="14"/><text class="micro" x="3038" y="2125">PADR</text>
+<circle class="hp" cx="2600" cy="1960" r="14"/><text class="micro" x="2618" y="1945">BOARD</text>
+</g>
+<g id="reachGroup" class="hidden"><circle class="reach" cx="620" cy="2360" r="400"/>
+<circle class="reach" cx="900" cy="2240" r="400"/>
+<circle class="reach" cx="1180" cy="2080" r="400"/>
+<circle class="reach" cx="1410" cy="1830" r="400"/>
+<circle class="reach" cx="1540" cy="1510" r="400"/>
+<circle class="reach" cx="1720" cy="1210" r="400"/>
+<circle class="reach" cx="1970" cy="980" r="400"/>
+<circle class="reach" cx="2230" cy="790" r="400"/>
+<circle class="reach" cx="2550" cy="680" r="400"/>
+<circle class="reach" cx="2880" cy="700" r="400"/>
+<circle class="reach" cx="3160" cy="850" r="400"/>
+<circle class="reach" cx="3360" cy="1120" r="400"/>
+<circle class="reach" cx="3560" cy="1370" r="400"/>
+<circle class="reach" cx="3770" cy="1660" r="400"/>
+<circle class="reach" cx="3980" cy="1940" r="400"/>
+<circle class="reach" cx="4250" cy="2150" r="400"/>
+<circle class="reach" cx="4510" cy="2310" r="400"/>
+<circle class="reach" cx="2180" cy="2140" r="400"/>
+<circle class="reach" cx="3020" cy="2140" r="400"/>
+<circle class="reach" cx="2600" cy="1960" r="400"/></g>
+
+<!-- P1 -->
+<g id="p1">
+<text class="phase" x="290" y="300">P1 · LOW SWEEP → REAR JOINT</text>
+<path class="sweepLow" d="M1450 1930 Q2050 2120 2480 2050 L2480 2260 Q1960 2300 1390 2070 Z"/>
+<text class="phase" x="800" y="2200">LOW SWEEP ZONE</text>
+<circle class="jointHot" cx="1690" cy="1850" r="60"/>
+<rect class="note" x="480" y="520" width="1360" height="320" rx="18"/>
+<text x="540" y="590">P1 Loop</text>
+<text class="micro" x="540" y="640">1. Clamp A sweeps low across pad-side route.</text>
+<text class="micro" x="540" y="680">2. MAX EXTENSION telegraph completes.</text>
+<text class="micro" x="540" y="720">3. REAR JOINT exposed on Island A side.</text>
+<text class="micro" x="540" y="760">4. Rope behind arm → Impact → CLAMP A RELEASE.</text>
+</g>
+
+<!-- P2 -->
+<g id="p2" class="hidden">
+<text class="phase" x="290" y="300">P2 · HIGH SWEEP → COUNTER-WINDOW</text>
+<path class="sweepHigh" d="M2160 1200 Q2690 890 3270 1160 L3160 1390 Q2680 1170 2240 1430 Z"/>
+<text class="phase" x="2380" y="1000">HIGH SWEEP BAND</text>
+<circle class="jointHot" cx="2700" cy="1170" r="60"/>
+<text class="phase" x="2850" y="1120">SIDE COUPLING · SHORT COUNTER-WINDOW</text>
+<rect class="note" x="520" y="520" width="1550" height="340" rx="18"/>
+<text x="580" y="590">P2 Loop</text>
+<text class="micro" x="580" y="640">1. Clamp B sweeps through upper Rope arc.</text>
+<text class="micro" x="580" y="680">2. Sweep clears → brief Counter-Window.</text>
+<text class="micro" x="580" y="720">3. Side Coupling opens only during that readable window.</text>
+<text class="micro" x="580" y="760">4. Commit through upper island → Impact → CLAMP B RELEASE.</text>
+<text class="micro" x="580" y="800">P1 = positional read / P2 = timing read.</text>
+</g>
+
+<!-- P3 -->
+<g id="p3" class="hidden">
+<text class="phase" x="290" y="300">P3 · DEPARTURE TOWER / PAD LIGHTING ARMS</text>
+<rect class="lightThreat" x="1760" y="2180" width="800" height="220" rx="24"/>
+<rect class="lightThreat" x="2680" y="2190" width="850" height="220" rx="24"/>
+<text class="phase" x="1810" y="2140">LIGHTING ARM SECURITY SWEEP</text>
+<text class="phase" x="3540" y="2050">FINAL TARGET → INTERLOCK</text>
+
+<circle cx="4285" cy="1795" r="62" fill="#ff613f" stroke="#ffd5ca" stroke-width="7"/>
+<rect class="note" x="530" y="520" width="1680" height="370" rx="18"/>
+<text x="590" y="590">P3 Loop</text>
+<text class="micro" x="590" y="640">1. Clamp A/B remain released — they do NOT reactivate.</text>
+<text class="micro" x="590" y="680">2. Pad Lighting Arms enter Security Mode.</text>
+<text class="micro" x="590" y="720">3. Their sweeps deny portions of the Pad approach, not the whole arena.</text>
+<text class="micro" x="590" y="760">4. Player completes final diagonal Structural-Island traverse.</text>
+<text class="micro" x="590" y="800">5. Reach Departure Tower → destroy DEPARTURE INTERLOCK.</text>
+<text class="micro" x="590" y="840">No third Clamp kill.</text>
+</g>
+
+<!-- Victory -->
+<g id="pf" class="hidden">
+<text class="phase" x="290" y="300">VICTORY · PAD SECURITY OVERRIDDEN</text>
+
+<!-- Clamp A/B shown withdrawn -->
+<g class="off">
+<rect class="clamp" x="1290" y="1780" width="420" height="140" rx="30"/>
+<rect class="clamp" x="2620" y="760" width="160" height="390" rx="35"/>
+</g>
+
+<!-- beacons bright -->
+<circle cx="1940" cy="2288" r="28" fill="#fff6ad" stroke="white" stroke-width="4"/>
+<circle cx="2290" cy="2288" r="28" fill="#fff6ad" stroke="white" stroke-width="4"/>
+<circle cx="2890" cy="2308" r="28" fill="#fff6ad" stroke="white" stroke-width="4"/>
+<circle cx="3240" cy="2308" r="28" fill="#fff6ad" stroke="white" stroke-width="4"/>
+
+<path class="finalPath" d="M4280 2140 Q3500 2380 3010 2160 Q2760 2070 2600 1980"/>
+<text class="phase" x="3280" y="2460">SAFE ACCESS → BOARDING</text>
+<text class="micro" x="3270" y="2510">No final hazard / no precision gate</text>
+
+<rect class="safe" x="2360" y="2070" width="480" height="110" rx="22"/>
+<text class="phase" x="2390" y="2230">BOARDING AVAILABLE</text>
+
+<rect class="note" x="520" y="500" width="1740" height="390" rx="18"/>
+<text x="580" y="570">Victory Presentation</text>
+<text class="micro" x="580" y="620">1. Clamp A/B physically retract away from Shuttle.</text>
+<text class="micro" x="580" y="660">2. Pad Beacon lights return in sequence.</text>
+<text class="micro" x="580" y="700">3. Shuttle idle machinery / engine tone begins.</text>
+<text class="micro" x="580" y="740">4. PAD SECURITY / OVERRIDDEN.</text>
+<text class="micro" x="580" y="780">5. DEPARTURE INTERLOCK / RELEASED.</text>
+<text class="micro" x="580" y="820">6. MAINTENANCE SHUTTLE / BOARDING AVAILABLE.</text>
+<text class="micro" x="580" y="860">7. Player safely approaches and boards.</text>
+</g>
+
+</svg>
+</main>
+</div>
+<script>
+function showPhase(n){
+  ['p1','p2','p3','pf'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  ['b1','b2','b3','bf'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  const id=n===1?'p1':n===2?'p2':n===3?'p3':'pf';
+  const bid=n===1?'b1':n===2?'b2':n===3?'b3':'bf';
+  document.getElementById(id).classList.remove('hidden');
+  document.getElementById(bid).classList.add('active');
+}
+document.getElementById('routeT').addEventListener('change',e=>document.getElementById('routeGroup').classList.toggle('hidden',!e.target.checked));
+document.getElementById('reachT').addEventListener('change',e=>document.getElementById('reachGroup').classList.toggle('hidden',!e.target.checked));
+</script>
+</body>
+</html>

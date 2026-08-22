@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOSS 01 FINAL MAP PREVIEW</title>
+<style>
+:root{--bg:#061015;--panel:#0b171d;--line:#344e59;--txt:#eef5f6;--muted:#a9bbc2;--route:#ffe16f;--cyan:#5de8ff;--orange:#ffb96a;--red:#ff8b82;--blue:#85a9ff;--green:#76d89f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 Consolas,ui-monospace,monospace}
+header{padding:13px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:20px}.sub{color:var(--muted)}
+.grid{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 68px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}main{padding:10px}
+.card{padding:9px;margin-bottom:8px;border:1px solid var(--line);border-radius:7px;background:#081219}.card b{color:var(--cyan)}label{display:block;margin:6px 0}
+svg{width:100%;height:90vh;min-height:850px;border:1px solid var(--line);background:#03090d;border-radius:8px}
+text{fill:var(--txt);paint-order:stroke;stroke:#061015;stroke-width:5}.tiny{font-size:10px;fill:#c6d5da}.phase{font-size:16px;font-weight:bold}
+.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}.anchor{fill:var(--cyan);stroke:white;stroke-width:2}
+.platform{fill:#354a53;stroke:#8199a4;stroke-width:3}.breaker{fill:#61401c;stroke:var(--orange);stroke-width:4}
+.target{fill:#3a4f57;stroke:var(--orange);stroke-width:4}.weak{fill:#ff8f43;stroke:#ffe6bd;stroke-width:3}
+.enemy{fill:#7b2525;stroke:var(--red);stroke-width:4}.wind{fill:#5e7fff16;stroke:var(--blue);stroke-width:3;stroke-dasharray:12 8}
+.gate{fill:#1d3038;stroke:#68838d;stroke-width:5}.safe{fill:#2f5b47;stroke:var(--green);stroke-width:3}
+.reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.08}.hidden{display:none}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head>
+<body>
+<header><h1>BOSS 01 · C-01 비상 격리구동계 · FINAL MAP PREVIEW</h1>
+<div class="sub">AUTHORING SNAPSHOT 6a8911d354df6b218a64970b5d35d41359ef62f2 · Post-Sector 01 Boss Slot · AUTHORED FINAL CONTENT / RUNTIME PARTIALLY IMPLEMENTED · Timer 없음 / Arena collapse 없음</div></header>
+<div class="grid">
+<aside>
+<div class="card"><b>정식 연결</b><br>
+1-8 Override → Worker District Reveal → <b>Post-Sector C-01 Lockdown</b> → Boss01 → Sector02 실제 진입</div>
+<div class="card"><b>3 Phase</b><br>
+P1 Clamp Drive<br>
+P2 Vent Fan Bearing<br>
+P3 Gate Lock Pin</div>
+<div class="card"><b>공통 문법</b><br>
+정비 Breaker → Core 8초 노출 → Rope Impact<br>
+노출 전 Boss damage 진행 없음.</div>
+<div class="card"><b>현재 Runtime</b><br>
+360 HP / 3 Phase / 120 HP per phase / Exposure 8 sec<br>
+Boss Timer: <b>없음</b><br>Arena Collapse: <b>없음</b></div>
+<div class="card"><b>Rope QA</b><br>
+Mandatory links: 14<br>
+Route length: 3973.83px<br>
+Max adjacent: <b>366.19px</b> / Base 400px<br>
+Non-adjacent ≤400: <b>0</b></div>
+<div class="card">
+<label><input id="routeT" type="checkbox" checked> Route</label>
+<label><input id="threatT" type="checkbox" checked> Threat / Wind</label>
+<label><input id="reachT" type="checkbox"> 400px Reach</label>
+</div>
+<div class="card">이 MAP은 authored 공간·전투 참조다. 현재 Runtime·전환·Timer 권위는 상위 기준 문서를 따른다.</div>
+</aside>
+<main>
+<svg viewBox="-820 -1720 1640 1760">
+<rect x="-790" y="-1680" width="1580" height="1680" fill="#08151b" stroke="#4f6b78" stroke-width="4"/>
+
+<!-- post-sector handoff -->
+<rect class="safe" x="-770" y="-110" width="300" height="28"/>
+<text class="tiny" x="-765" y="-130">POST-1-8 ENTRY · Worker District visible behind</text>
+<text class="phase" x="-760" y="-25">C-01 EMERGENCY CONTAINMENT / ACTIVE</text>
+
+<!-- architecture -->
+<rect class="gate" x="-180" y="-1680" width="360" height="190"/>
+<text class="phase" x="-160" y="-1690">GATE CROWN / SECTOR 02 PASSAGE</text>
+
+<rect class="platform" x="-580" y="-250" width="400" height="24"/>
+<rect class="platform" x="-330" y="-330" width="300" height="24"/>
+<rect class="platform" x="250" y="-650" width="260" height="24"/>
+<rect class="platform" x="-80" y="-770" width="260" height="24"/>
+<rect class="platform" x="-560" y="-935" width="260" height="24"/>
+<rect class="platform" x="-470" y="-1160" width="260" height="24"/>
+<rect class="platform" x="-130" y="-1195" width="260" height="24"/>
+<rect class="platform" x="300" y="-1260" width="260" height="24"/>
+<rect class="safe" x="-190" y="-835" width="380" height="28"/>
+<text class="tiny" x="-170" y="-850">LOCAL SAFE / PHASE READ</text>
+
+<!-- breakers -->
+<rect class="breaker" x="76" y="-360" width="52" height="76" rx="7"/><text x="-25" y="-375">M1 CLAMP RELEASE</text>
+<rect class="breaker" x="-474" y="-947" width="52" height="76" rx="7"/><text x="-595" y="-962">M2 BACKPRESSURE</text>
+<rect class="breaker" x="391" y="-1271" width="52" height="76" rx="7"/><text x="270" y="-1287">M3 GATE BRAKE</text>
+
+<!-- phase cores -->
+<circle class="target" cx="430" cy="-520" r="64"/><circle class="weak" cx="452" cy="-507" r="24"/>
+<text class="phase" x="320" y="-600">P1 · CLAMP DRIVE</text><text class="tiny" x="350" y="-620">8s CORE EXPOSURE</text>
+
+<circle class="target" cx="-120" cy="-1080" r="64"/><circle class="weak" cx="-142" cy="-1100" r="22"/>
+<text class="phase" x="-285" y="-1175">P2 · FAN BEARING</text><text class="tiny" x="-250" y="-1195">8s CORE EXPOSURE</text>
+
+<circle class="target" cx="80" cy="-1500" r="64"/><circle class="weak" cx="92" cy="-1528" r="20"/>
+<text class="phase" x="-40" y="-1430">P3 · LOCK PIN</text><text class="tiny" x="-15" y="-1410">8s CORE EXPOSURE</text>
+
+<g id="threats">
+<circle class="enemy" cx="-560" cy="-520" r="25"/><text class="tiny" x="-650" y="-555">P1 STANDARD</text>
+<rect class="wind" x="-600" y="-1220" width="1000" height="500"/><text x="-570" y="-1240">P2 PULSE WIND</text>
+<circle class="enemy" cx="520" cy="-990" r="25"/><text class="tiny" x="470" y="-1030">P2 STANDARD</text>
+<rect class="wind" x="-620" y="-1640" width="1200" height="500"/><text x="-590" y="-1610">P3 PULSE WIND</text>
+<circle class="enemy" cx="-560" cy="-1380" r="25"/><circle class="enemy" cx="560" cy="-1380" r="25"/>
+<text class="tiny" x="-175" y="-1360">P3 ALTERNATING / NO CROSSFIRE</text>
+</g>
+
+<g id="route">
+<polyline class="route" points="-720,-80 -520,-224 -247,-302 102,-322 313,-389 394,-633 56,-736 -222,-756 -448,-909 -388,-1133 -48,-1167 154,-1187 417,-1233 300,-1580 0,-1600"/>
+<circle class="anchor" cx="-720" cy="-80" r="11"/><text class="tiny" x="-704" y="-92">P0</text>
+<circle class="anchor" cx="-520" cy="-224" r="11"/><text class="tiny" x="-504" y="-236">H1</text>
+<circle class="anchor" cx="-247" cy="-302" r="11"/><text class="tiny" x="-231" y="-314">H2</text>
+<circle class="anchor" cx="102" cy="-322" r="11"/><text class="tiny" x="118" y="-334">M1</text>
+<circle class="anchor" cx="313" cy="-389" r="11"/><text class="tiny" x="329" y="-401">T1</text>
+<circle class="anchor" cx="394" cy="-633" r="11"/><text class="tiny" x="410" y="-645">L1</text>
+<circle class="anchor" cx="56" cy="-736" r="11"/><text class="tiny" x="72" y="-748">H3</text>
+<circle class="anchor" cx="-222" cy="-756" r="11"/><text class="tiny" x="-206" y="-768">H4</text>
+<circle class="anchor" cx="-448" cy="-909" r="11"/><text class="tiny" x="-432" y="-921">M2</text>
+<circle class="anchor" cx="-388" cy="-1133" r="11"/><text class="tiny" x="-372" y="-1145">T2</text>
+<circle class="anchor" cx="-48" cy="-1167" r="11"/><text class="tiny" x="-32" y="-1179">L2</text>
+<circle class="anchor" cx="154" cy="-1187" r="11"/><text class="tiny" x="170" y="-1199">H5</text>
+<circle class="anchor" cx="417" cy="-1233" r="11"/><text class="tiny" x="433" y="-1245">M3</text>
+<circle class="anchor" cx="300" cy="-1580" r="11"/><text class="tiny" x="316" y="-1592">T3</text>
+<circle class="anchor" cx="0" cy="-1600" r="11"/><text class="tiny" x="16" y="-1612">P4</text>
+</g>
+<g id="reach" class="hidden"><circle class="reach" cx="-720" cy="-80" r="400"/>
+<circle class="reach" cx="-520" cy="-224" r="400"/>
+<circle class="reach" cx="-247" cy="-302" r="400"/>
+<circle class="reach" cx="102" cy="-322" r="400"/>
+<circle class="reach" cx="313" cy="-389" r="400"/>
+<circle class="reach" cx="394" cy="-633" r="400"/>
+<circle class="reach" cx="56" cy="-736" r="400"/>
+<circle class="reach" cx="-222" cy="-756" r="400"/>
+<circle class="reach" cx="-448" cy="-909" r="400"/>
+<circle class="reach" cx="-388" cy="-1133" r="400"/>
+<circle class="reach" cx="-48" cy="-1167" r="400"/>
+<circle class="reach" cx="154" cy="-1187" r="400"/>
+<circle class="reach" cx="417" cy="-1233" r="400"/>
+<circle class="reach" cx="300" cy="-1580" r="400"/>
+<circle class="reach" cx="0" cy="-1600" r="400"/></g>
+
+<text class="phase" x="-160" y="-1640">C-01 OFFLINE → WORKER DISTRICT PASSAGE RESTORED</text>
+</svg>
+</main></div>
+<script>
+const bind=(box,id)=>document.getElementById(box).onchange=e=>document.getElementById(id).classList.toggle('hidden',!e.target.checked);
+bind('routeT','route');bind('threatT','threats');bind('reachT','reach');
+</script>
+</body></html>
