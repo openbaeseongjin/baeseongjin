@@ -100,6 +100,25 @@ function normalizeAimLayer(value, atlases, enemyType) {
     });
 }
 
+function normalizeGuardLayer(value, atlases, enemyType) {
+    if (value === undefined) return null;
+    if (!value || Array.isArray(value) || typeof value !== "object") {
+        throw new Error(`enemy sprite '${enemyType}' guardLayer must be an object`);
+    }
+    if (value.orientation !== "guard-octants") {
+        throw new Error(`enemy sprite '${enemyType}' guardLayer.orientation must be 'guard-octants'`);
+    }
+    if (!Array.isArray(value.frames) || value.frames.length !== 8) {
+        throw new Error(`enemy sprite '${enemyType}' guardLayer.frames must contain exactly 8 frames`);
+    }
+    return Object.freeze({
+        orientation: value.orientation,
+        frames: Object.freeze(
+            value.frames.map((frame, index) => normalizeFrame(frame, atlases, enemyType, `guardLayer:${index}`))
+        )
+    });
+}
+
 function normalizeEnemy(enemyType, spec, atlases) {
     if (!Object.hasOwn(ENEMY_PRESENTATION_DEFINITIONS, enemyType)) {
         throw new Error(`unknown enemy sprite type '${enemyType}'`);
@@ -160,6 +179,10 @@ function normalizeEnemy(enemyType, spec, atlases) {
     const anchor = finitePoint(render.anchor, `enemy sprite '${enemyType}' render.anchor`);
     const offset = finitePoint(render.offset, `enemy sprite '${enemyType}' render.offset`);
     const aimLayer = normalizeAimLayer(render.aimLayer, atlases, enemyType);
+    const guardLayer = normalizeGuardLayer(render.guardLayer, atlases, enemyType);
+    if (aimLayer && guardLayer) {
+        throw new Error(`enemy sprite '${enemyType}' cannot declare both aimLayer and guardLayer`);
+    }
     const clips = {};
     for (const state of expectedStates) {
         const stateSpec = stateSpecs[state];
@@ -186,7 +209,8 @@ function normalizeEnemy(enemyType, spec, atlases) {
                         offset,
                         opacity: 1,
                         pixelSnap: render.pixelSnap,
-                        aimLayer
+                        aimLayer,
+                        guardLayer
                     })
                 ];
             })
@@ -199,6 +223,7 @@ function normalizeEnemy(enemyType, spec, atlases) {
         offset,
         pixelSnap: render.pixelSnap,
         aimLayer,
+        guardLayer,
         states: stateSpecs,
         clips: Object.freeze({ ...clips }),
         presentations

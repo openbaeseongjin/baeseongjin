@@ -1,13 +1,13 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "enemy-sprite-manifest.schema.json",
-    "title": "Baeseongjin enemy sprite manifest v3",
+    "title": "Baeseongjin enemy sprite manifest v4",
     "type": "object",
     "additionalProperties": false,
     "required": ["formatVersion", "id", "atlases", "enemies"],
     "properties": {
         "$schema": { "type": "string" },
-        "formatVersion": { "const": 3 },
+        "formatVersion": { "const": 4 },
         "id": { "type": "string", "minLength": 1 },
         "generator": {
             "type": "object",
@@ -119,6 +119,37 @@
                 }
             }
         },
+        "layerFrame": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["atlas", "cell"],
+            "properties": {
+                "atlas": { "type": "string", "minLength": 1 },
+                "cell": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["column", "row"],
+                    "properties": {
+                        "column": { "type": "integer", "minimum": 0 },
+                        "row": { "type": "integer", "minimum": 0 }
+                    }
+                }
+            }
+        },
+        "guardLayer": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["orientation", "frames"],
+            "properties": {
+                "orientation": { "const": "guard-octants" },
+                "frames": {
+                    "type": "array",
+                    "minItems": 8,
+                    "maxItems": 8,
+                    "items": { "$ref": "#/$defs/layerFrame" }
+                }
+            }
+        },
         "enemy": {
             "type": "object",
             "additionalProperties": false,
@@ -127,6 +158,7 @@
                 "render": {
                     "type": "object",
                     "additionalProperties": false,
+                    "not": { "required": ["aimLayer", "guardLayer"] },
                     "required": ["facing", "size", "anchor", "offset", "pixelSnap"],
                     "properties": {
                         "facing": { "const": "right" },
@@ -134,7 +166,8 @@
                         "anchor": { "$ref": "#/$defs/point" },
                         "offset": { "$ref": "#/$defs/point" },
                         "pixelSnap": { "type": "boolean" },
-                        "aimLayer": { "$ref": "#/$defs/aimLayer" }
+                        "aimLayer": { "$ref": "#/$defs/aimLayer" },
+                        "guardLayer": { "$ref": "#/$defs/guardLayer" }
                     }
                 },
                 "states": {
