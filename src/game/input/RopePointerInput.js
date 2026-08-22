@@ -100,7 +100,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
         const reach = hookReach(ropeConfig);
         const launchOrigin = launchHandPosition(owner, ropeConfig, this.aimWorld);
         this.attachmentCandidate =
-            canControl && owner.ropeDisabledRemaining <= 0 && !this.launcher.inFlight
+            canControl && owner.ropeDisabledRemaining <= 0 && !this.launcher.inFlight && !this.rope.isAttached
                 ? findRopeAttachment({
                       aimPoint: this.aimWorld,
                       origin: launchOrigin,

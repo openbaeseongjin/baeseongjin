@@ -32,6 +32,15 @@
                 <canvas id="editor-canvas" aria-label="맵 편집 캔버스"></canvas>
                 <div class="canvas-tools" aria-label="캔버스 보기 조작">
                     <button id="fit-stage" type="button" title="전체 스테이지 보기 (0)">전체 보기 <kbd>0</kbd></button>
+                    <button
+                        id="toggle-scenario-reference"
+                        type="button"
+                        aria-controls="scenario-reference-panel"
+                        aria-pressed="false"
+                        title="시나리오 MAP-PREVIEW.html과 비교 (C)"
+                    >
+                        시나리오 비교 <kbd>C</kbd>
+                    </button>
                     <button id="focus-selection" type="button" title="선택 항목으로 이동 (F)">
                         선택 집중 <kbd>F</kbd>
                     </button>
@@ -39,9 +48,36 @@
                 </div>
                 <p id="selection-readout" class="selection-readout" aria-live="polite">선택 없음</p>
                 <p id="canvas-hint" class="canvas-hint">
-                    클릭: 선택 · 선택 항목 드래그: 이동 · 휠: 확대 · Space+드래그: 화면 이동
+                    클릭: 선택 · 선택 항목 드래그: 5px 단위 이동 · 휠: 확대 · Space+드래그: 화면 이동
                 </p>
             </section>
+            <aside
+                id="scenario-reference-panel"
+                class="scenario-reference panel"
+                aria-label="시나리오 맵 HTML 비교"
+                hidden
+            >
+                <header class="scenario-reference-header">
+                    <div>
+                        <p class="panel-kicker">읽기 전용 시나리오 참조</p>
+                        <h2>MAP HTML 비교</h2>
+                        <p id="scenario-reference-stage" class="scenario-reference-stage"></p>
+                    </div>
+                    <span class="reference-badge">참조 전용</span>
+                </header>
+                <p class="scenario-reference-note">
+                    이 HTML은 시나리오 구성을 비교하기 위한 자료입니다. 편집 원본은 왼쪽 AREA-SPEC 초안이며, 이 패널은
+                    저장 적용·Runtime·미리보기를 변경하지 않습니다.
+                </p>
+                <div class="scenario-reference-frame-wrap">
+                    <iframe
+                        id="scenario-reference-frame"
+                        title="선택한 스테이지의 시나리오 MAP-PREVIEW.html"
+                        sandbox="allow-same-origin"
+                        referrerpolicy="no-referrer"
+                    ></iframe>
+                </div>
+            </aside>
             <aside id="inspector-panel" class="panel inspector-panel" aria-label="선택한 오브젝트 속성"></aside>
             <footer class="draft-strip" aria-live="polite">
                 <div id="draft-status" class="draft-status">스테이지를 불러오는 중입니다.</div>

@@ -29,6 +29,7 @@ export class GameApp {
     constructor({
         canvas,
         renderer = null,
+        authority = null,
         onDiagnostics = () => {},
         audioBindings = null,
         worldSeed = selectWorldSeed(globalThis.location?.search),
@@ -47,15 +48,17 @@ export class GameApp {
         this.input = new InputSampler(globalThis.window, canvas, {
             onRopeRelease: (input, reason) => this.flushInterruptedRopeRelease(input, reason)
         });
-        this.authority = new LocalAuthority(
-            createCurrentGameSimulation({
-                worldSeed,
-                startAreaId,
-                ropeConfig: resolveEffectiveRopeConfig(ropeTuning),
-                ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(ropeTuning),
-                debugAugmentIds
-            })
-        );
+        this.authority =
+            authority ??
+            new LocalAuthority(
+                createCurrentGameSimulation({
+                    worldSeed,
+                    startAreaId,
+                    ropeConfig: resolveEffectiveRopeConfig(ropeTuning),
+                    ropeDisabledSeconds: resolveEffectiveRopeDisabledSeconds(ropeTuning),
+                    debugAugmentIds
+                })
+            );
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = metricsVisible;
         this.hudVisible = hudVisible !== false;
