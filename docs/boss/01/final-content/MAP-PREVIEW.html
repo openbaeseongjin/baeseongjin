@@ -1,140 +1,40 @@
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BOSS 01 FINAL MAP PREVIEW</title>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BOSS 01 GATE LOCKING CARRIAGE MAP PREVIEW</title>
 <style>
-:root{--bg:#061015;--panel:#0b171d;--line:#344e59;--txt:#eef5f6;--muted:#a9bbc2;--route:#ffe16f;--cyan:#5de8ff;--orange:#ffb96a;--red:#ff8b82;--blue:#85a9ff;--green:#76d89f}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 Consolas,ui-monospace,monospace}
-header{padding:13px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:20px}.sub{color:var(--muted)}
-.grid{display:grid;grid-template-columns:440px 1fr;min-height:calc(100vh - 68px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}main{padding:10px}
-.card{padding:9px;margin-bottom:8px;border:1px solid var(--line);border-radius:7px;background:#081219}.card b{color:var(--cyan)}label{display:block;margin:6px 0}
-svg{width:100%;height:90vh;min-height:850px;border:1px solid var(--line);background:#03090d;border-radius:8px}
-text{fill:var(--txt);paint-order:stroke;stroke:#061015;stroke-width:5}.tiny{font-size:10px;fill:#c6d5da}.phase{font-size:16px;font-weight:bold}
-.route{fill:none;stroke:var(--route);stroke-width:5;stroke-dasharray:12 8}.anchor{fill:var(--cyan);stroke:white;stroke-width:2}
-.platform{fill:#354a53;stroke:#8199a4;stroke-width:3}.breaker{fill:#61401c;stroke:var(--orange);stroke-width:4}
-.target{fill:#3a4f57;stroke:var(--orange);stroke-width:4}.weak{fill:#ff8f43;stroke:#ffe6bd;stroke-width:3}
-.enemy{fill:#7b2525;stroke:var(--red);stroke-width:4}.wind{fill:#5e7fff16;stroke:var(--blue);stroke-width:3;stroke-dasharray:12 8}
-.gate{fill:#1d3038;stroke:#68838d;stroke-width:5}.safe{fill:#2f5b47;stroke:var(--green);stroke-width:3}
-.reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.08}.hidden{display:none}
-@media(max-width:1000px){.grid{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
-</style></head>
-<body>
-<header><h1>BOSS 01 · C-01 비상 격리구동계 · FINAL MAP PREVIEW</h1>
-<div class="sub">AUTHORING SNAPSHOT 6a8911d354df6b218a64970b5d35d41359ef62f2 · Post-Sector 01 Boss Slot · AUTHORED FINAL CONTENT / RUNTIME PARTIALLY IMPLEMENTED · Timer 없음 / Arena collapse 없음</div></header>
-<div class="grid">
-<aside>
-<div class="card"><b>정식 연결</b><br>
-1-8 Override → Worker District Reveal → <b>Post-Sector C-01 Lockdown</b> → Boss01 → Sector02 실제 진입</div>
-<div class="card"><b>3 Phase</b><br>
-P1 Clamp Drive<br>
-P2 Vent Fan Bearing<br>
-P3 Gate Lock Pin</div>
-<div class="card"><b>공통 문법</b><br>
-정비 Breaker → Core 8초 노출 → Rope Impact<br>
-노출 전 Boss damage 진행 없음.</div>
-<div class="card"><b>현재 Runtime</b><br>
-360 HP / 3 Phase / 120 HP per phase / Exposure 8 sec<br>
-Boss Timer: <b>없음</b><br>Arena Collapse: <b>없음</b></div>
-<div class="card"><b>Rope QA</b><br>
-Mandatory links: 14<br>
-Route length: 3973.83px<br>
-Max adjacent: <b>366.19px</b> / Base 400px<br>
-Non-adjacent ≤400: <b>0</b></div>
-<div class="card">
-<label><input id="routeT" type="checkbox" checked> Route</label>
-<label><input id="threatT" type="checkbox" checked> Threat / Wind</label>
-<label><input id="reachT" type="checkbox"> 400px Reach</label>
-</div>
-<div class="card">이 MAP은 authored 공간·전투 참조다. 현재 Runtime·전환·Timer 권위는 상위 기준 문서를 따른다.</div>
-</aside>
-<main>
-<svg viewBox="-820 -1720 1640 1760">
-<rect x="-790" y="-1680" width="1580" height="1680" fill="#08151b" stroke="#4f6b78" stroke-width="4"/>
-
-<!-- post-sector handoff -->
-<rect class="safe" x="-770" y="-110" width="300" height="28"/>
-<text class="tiny" x="-765" y="-130">POST-1-8 ENTRY · Worker District visible behind</text>
-<text class="phase" x="-760" y="-25">C-01 EMERGENCY CONTAINMENT / ACTIVE</text>
-
-<!-- architecture -->
-<rect class="gate" x="-180" y="-1680" width="360" height="190"/>
-<text class="phase" x="-160" y="-1690">GATE CROWN / SECTOR 02 PASSAGE</text>
-
-<rect class="platform" x="-580" y="-250" width="400" height="24"/>
-<rect class="platform" x="-330" y="-330" width="300" height="24"/>
-<rect class="platform" x="250" y="-650" width="260" height="24"/>
-<rect class="platform" x="-80" y="-770" width="260" height="24"/>
-<rect class="platform" x="-560" y="-935" width="260" height="24"/>
-<rect class="platform" x="-470" y="-1160" width="260" height="24"/>
-<rect class="platform" x="-130" y="-1195" width="260" height="24"/>
-<rect class="platform" x="300" y="-1260" width="260" height="24"/>
-<rect class="safe" x="-190" y="-835" width="380" height="28"/>
-<text class="tiny" x="-170" y="-850">LOCAL SAFE / PHASE READ</text>
-
-<!-- breakers -->
-<rect class="breaker" x="76" y="-360" width="52" height="76" rx="7"/><text x="-25" y="-375">M1 CLAMP RELEASE</text>
-<rect class="breaker" x="-474" y="-947" width="52" height="76" rx="7"/><text x="-595" y="-962">M2 BACKPRESSURE</text>
-<rect class="breaker" x="391" y="-1271" width="52" height="76" rx="7"/><text x="270" y="-1287">M3 GATE BRAKE</text>
-
-<!-- phase cores -->
-<circle class="target" cx="430" cy="-520" r="64"/><circle class="weak" cx="452" cy="-507" r="24"/>
-<text class="phase" x="320" y="-600">P1 · CLAMP DRIVE</text><text class="tiny" x="350" y="-620">8s CORE EXPOSURE</text>
-
-<circle class="target" cx="-120" cy="-1080" r="64"/><circle class="weak" cx="-142" cy="-1100" r="22"/>
-<text class="phase" x="-285" y="-1175">P2 · FAN BEARING</text><text class="tiny" x="-250" y="-1195">8s CORE EXPOSURE</text>
-
-<circle class="target" cx="80" cy="-1500" r="64"/><circle class="weak" cx="92" cy="-1528" r="20"/>
-<text class="phase" x="-40" y="-1430">P3 · LOCK PIN</text><text class="tiny" x="-15" y="-1410">8s CORE EXPOSURE</text>
-
-<g id="threats">
-<circle class="enemy" cx="-560" cy="-520" r="25"/><text class="tiny" x="-650" y="-555">P1 STANDARD</text>
-<rect class="wind" x="-600" y="-1220" width="1000" height="500"/><text x="-570" y="-1240">P2 PULSE WIND</text>
-<circle class="enemy" cx="520" cy="-990" r="25"/><text class="tiny" x="470" y="-1030">P2 STANDARD</text>
-<rect class="wind" x="-620" y="-1640" width="1200" height="500"/><text x="-590" y="-1610">P3 PULSE WIND</text>
-<circle class="enemy" cx="-560" cy="-1380" r="25"/><circle class="enemy" cx="560" cy="-1380" r="25"/>
-<text class="tiny" x="-175" y="-1360">P3 ALTERNATING / NO CROSSFIRE</text>
-</g>
-
-<g id="route">
-<polyline class="route" points="-720,-80 -520,-224 -247,-302 102,-322 313,-389 394,-633 56,-736 -222,-756 -448,-909 -388,-1133 -48,-1167 154,-1187 417,-1233 300,-1580 0,-1600"/>
-<circle class="anchor" cx="-720" cy="-80" r="11"/><text class="tiny" x="-704" y="-92">P0</text>
-<circle class="anchor" cx="-520" cy="-224" r="11"/><text class="tiny" x="-504" y="-236">H1</text>
-<circle class="anchor" cx="-247" cy="-302" r="11"/><text class="tiny" x="-231" y="-314">H2</text>
-<circle class="anchor" cx="102" cy="-322" r="11"/><text class="tiny" x="118" y="-334">M1</text>
-<circle class="anchor" cx="313" cy="-389" r="11"/><text class="tiny" x="329" y="-401">T1</text>
-<circle class="anchor" cx="394" cy="-633" r="11"/><text class="tiny" x="410" y="-645">L1</text>
-<circle class="anchor" cx="56" cy="-736" r="11"/><text class="tiny" x="72" y="-748">H3</text>
-<circle class="anchor" cx="-222" cy="-756" r="11"/><text class="tiny" x="-206" y="-768">H4</text>
-<circle class="anchor" cx="-448" cy="-909" r="11"/><text class="tiny" x="-432" y="-921">M2</text>
-<circle class="anchor" cx="-388" cy="-1133" r="11"/><text class="tiny" x="-372" y="-1145">T2</text>
-<circle class="anchor" cx="-48" cy="-1167" r="11"/><text class="tiny" x="-32" y="-1179">L2</text>
-<circle class="anchor" cx="154" cy="-1187" r="11"/><text class="tiny" x="170" y="-1199">H5</text>
-<circle class="anchor" cx="417" cy="-1233" r="11"/><text class="tiny" x="433" y="-1245">M3</text>
-<circle class="anchor" cx="300" cy="-1580" r="11"/><text class="tiny" x="316" y="-1592">T3</text>
-<circle class="anchor" cx="0" cy="-1600" r="11"/><text class="tiny" x="16" y="-1612">P4</text>
-</g>
-<g id="reach" class="hidden"><circle class="reach" cx="-720" cy="-80" r="400"/>
-<circle class="reach" cx="-520" cy="-224" r="400"/>
-<circle class="reach" cx="-247" cy="-302" r="400"/>
-<circle class="reach" cx="102" cy="-322" r="400"/>
-<circle class="reach" cx="313" cy="-389" r="400"/>
-<circle class="reach" cx="394" cy="-633" r="400"/>
-<circle class="reach" cx="56" cy="-736" r="400"/>
-<circle class="reach" cx="-222" cy="-756" r="400"/>
-<circle class="reach" cx="-448" cy="-909" r="400"/>
-<circle class="reach" cx="-388" cy="-1133" r="400"/>
-<circle class="reach" cx="-48" cy="-1167" r="400"/>
-<circle class="reach" cx="154" cy="-1187" r="400"/>
-<circle class="reach" cx="417" cy="-1233" r="400"/>
-<circle class="reach" cx="300" cy="-1580" r="400"/>
-<circle class="reach" cx="0" cy="-1600" r="400"/></g>
-
-<text class="phase" x="-160" y="-1640">C-01 OFFLINE → WORKER DISTRICT PASSAGE RESTORED</text>
-</svg>
-</main></div>
+:root{--bg:#050b10;--panel:#09141a;--line:#314853;--txt:#edf5f6;--muted:#9fb2ba;--cyan:#63e8ff;--yellow:#ffe26a;--green:#73d59a;--red:#ff7884;--amber:#ffb36a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,Consolas,monospace}
+header{padding:13px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:20px}.sub{color:var(--muted);margin-top:3px}
+.layout{display:grid;grid-template-columns:460px 1fr;min-height:calc(100vh - 70px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}main{padding:10px}
+.card{padding:10px;border:1px solid var(--line);border-radius:8px;background:#071117;margin-bottom:8px}.card b{color:var(--cyan)}.small{font-size:12px;color:var(--muted)}button{background:#12252e;color:var(--txt);border:1px solid #4d6975;border-radius:6px;padding:7px 9px;margin:3px;cursor:pointer}button.active{outline:2px solid var(--cyan)}label{display:block;margin:6px 0}
+svg{width:100%;height:89vh;min-height:880px;border:1px solid var(--line);background:#02080c;border-radius:8px}text{fill:var(--txt);paint-order:stroke;stroke:#041018;stroke-width:5}.micro{font-size:10px;fill:#d5e0e3}.phase{font-size:18px;font-weight:700}.boss{font-size:22px;font-weight:800}
+.frame{fill:#1c2d34;stroke:#6d8792;stroke-width:5}.catwalk{fill:#263b44;stroke:#94a9b2;stroke-width:3}.rail{stroke:#a2b5bc;stroke-width:22}.rail2{stroke:#4f646d;stroke-width:5}
+.carriage{fill:#43535a;stroke:#e0eaed;stroke-width:6}.armor{fill:#5c6870;stroke:#c7d4d9;stroke-width:4}.core{fill:#ff966f;stroke:white;stroke-width:5}.beam{fill:#596a72;stroke:#e8f1f4;stroke-width:5}.broken{fill:#596a72;stroke:var(--amber);stroke-width:5}
+.gear{fill:#694221;stroke:var(--amber);stroke-width:5}.gearHot{fill:#9d5728;stroke:#ffd3a3;stroke-width:8}.hp{fill:var(--cyan);stroke:white;stroke-width:2}.route{stroke:var(--yellow);stroke-width:5;stroke-dasharray:13 8}.reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.07}
+.sweep{fill:#ff59621b;stroke:var(--red);stroke-width:4;stroke-dasharray:13 9}.ram{fill:#ff8b4d19;stroke:var(--amber);stroke-width:5;stroke-dasharray:14 9}.safe{fill:#27523e;stroke:var(--green);stroke-width:4}.district{fill:#16242c;stroke:#738894;stroke-width:4}.light{fill:#ffc76c;stroke:#fff0c4;stroke-width:2}.note{fill:#071219dd;stroke:#4a626d;stroke-width:2}.finalPath{stroke:var(--green);stroke-width:9;fill:none;stroke-dasharray:14 9}.hidden{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<header><h1>BOSS 01 · GATE LOCKING CARRIAGE · FINAL MAP PREVIEW</h1><div class="sub">AUTHORING SNAPSHOT a8ad8658cc94df4f766a0da5ff921a2e77e96300 · 1-8 Worker District Reveal preserved · AUTHORED FINAL CONTENT / RUNTIME NOT IMPLEMENTED</div></header>
+<div class="layout"><aside>
+<div class="card"><b>새 Boss01</b><br>1-8에서 Gate는 이미 열린다. Gate 상부 Locking Assembly가 비상 분리되어 <b>단일 수평 Rail</b>에 체결되고 Player를 공격한다.</div>
+<div class="card"><b>P1</b><br>Full Crossbeam Low Sweep → MAX EXTENSION → <b>Rear Drive</b> 노출 → 위/아래 Maintenance Frame으로 flank → Rope Impact.</div>
+<div class="card"><b>P2</b><br>Beam 일부 파손. <b>Carriage 진행 방향 쪽 Beam만 남음</b>. Sweep 직후 반대 측면 <b>Side Gearbox</b> 노출.</div>
+<div class="card"><b>P3</b><br>마지막 Full-Speed Sweep → Beam 완전 파손 → Armor 개방 → <b>Central Lock Core</b> 노출. 이후 <b>Ram only</b>.</div>
+<div class="card"><b>Victory</b><br>Final Core Impact → Carriage가 Rail 위에서 완전 정지. 조명 소등 + Worker District 생활광/생활소음 + 짧은 Camera framing.</div>
+<div class="card"><b>Arena</b><br>위: Upper Maintenance Frame<br>중앙: Carriage Rail<br>아래: Lower Catwalk / Recovery</div>
+<div class="card"><b>Rope QA</b><br>Base Reach 400px<br>Relations 17<br>Max <b>357.77px</b><br>Non-adjacent ≤400 <b>0</b></div>
+<div class="card"><button id="b1" class="active" onclick="showPhase(1)">P1 FULL BEAM</button><button id="b2" onclick="showPhase(2)">P2 BROKEN BEAM</button><button id="b3" onclick="showPhase(3)">P3 CORE/RAM</button><button id="bf" onclick="showPhase(4)">VICTORY</button><label><input id="routeT" type="checkbox" checked> Rope Route</label><label><input id="reachT" type="checkbox"> 400px Reach</label></div>
+</aside><main><svg viewBox="0 0 5200 2800">
+<rect class="district" x="4560" y="240" width="500" height="1750" rx="22"/><rect x="4620" y="500" width="100" height="200" fill="#243640"/><rect x="4780" y="600" width="120" height="260" fill="#243640"/><rect x="4650" y="980" width="160" height="230" fill="#243640"/><circle class="light" cx="4670" cy="560" r="12"/><circle class="light" cx="4830" cy="660" r="12"/><text class="phase" x="4470" y="205">OPEN GATE → WORKER DISTRICT</text><text class="micro" x="4580" y="1340">1-8 reveal already happened</text>
+<rect class="frame" x="300" y="480" width="4200" height="350" rx="24"/><rect class="catwalk" x="340" y="2150" width="4180" height="100" rx="16"/><text class="phase" x="360" y="445">UPPER MAINTENANCE FRAME</text><text class="phase" x="360" y="2320">LOWER CATWALK / RECOVERY</text>
+<line class="rail" x1="500" y1="1450" x2="4490" y2="1450"/><line class="rail2" x1="500" y1="1410" x2="4490" y2="1410"/><line class="rail2" x1="500" y1="1490" x2="4490" y2="1490"/><text class="phase" x="1820" y="1380">SINGLE HORIZONTAL LOCKING RAIL</text>
+<g id="carriageBody"><rect class="carriage" x="2110" y="1190" width="980" height="430" rx="35"/><rect class="armor" x="2290" y="1270" width="620" height="270" rx="25"/><circle class="gear" cx="2170" cy="1405" r="55"/><circle class="gear" cx="3030" cy="1405" r="55"/><text class="boss" x="2180" y="1140">GATE LOCKING CARRIAGE</text></g>
+<g id="routeGroup"><line class="route" x1="420" y1="2260" x2="720" y2="2180"/><line class="route" x1="720" y1="2180" x2="980" y2="1990"/><line class="route" x1="980" y1="1990" x2="1200" y2="1740"/><line class="route" x1="1200" y1="1740" x2="1360" y2="1420"/><line class="route" x1="1360" y1="1420" x2="1510" y2="1110"/><line class="route" x1="1510" y1="1110" x2="1760" y2="880"/><line class="route" x1="1760" y1="880" x2="2070" y2="760"/><line class="route" x1="2070" y1="760" x2="2400" y2="700"/><line class="route" x1="2400" y1="700" x2="2730" y2="700"/><line class="route" x1="2730" y1="700" x2="3060" y2="760"/><line class="route" x1="3060" y1="760" x2="3370" y2="890"/><line class="route" x1="3370" y1="890" x2="3610" y2="1120"/><line class="route" x1="3610" y1="1120" x2="3760" y2="1430"/><line class="route" x1="3760" y1="1430" x2="3920" y2="1740"/><line class="route" x1="3920" y1="1740" x2="4140" y2="1990"/><line class="route" x1="4140" y1="1990" x2="4400" y2="2180"/><line class="route" x1="4400" y1="2180" x2="4700" y2="2260"/><circle class="hp" cx="420" cy="2260" r="14"/><text class="micro" x="438" y="2246">ENTRY</text><circle class="hp" cx="720" cy="2180" r="14"/><text class="micro" x="738" y="2166">L0</text><circle class="hp" cx="980" cy="1990" r="14"/><text class="micro" x="998" y="1976">L1</text><circle class="hp" cx="1200" cy="1740" r="14"/><text class="micro" x="1218" y="1726">L2</text><circle class="hp" cx="1360" cy="1420" r="14"/><text class="micro" x="1378" y="1406">L3</text><circle class="hp" cx="1510" cy="1110" r="14"/><text class="micro" x="1528" y="1096">U0</text><circle class="hp" cx="1760" cy="880" r="14"/><text class="micro" x="1778" y="866">U1</text><circle class="hp" cx="2070" cy="760" r="14"/><text class="micro" x="2088" y="746">U2</text><circle class="hp" cx="2400" cy="700" r="14"/><text class="micro" x="2418" y="686">U3</text><circle class="hp" cx="2730" cy="700" r="14"/><text class="micro" x="2748" y="686">U4</text><circle class="hp" cx="3060" cy="760" r="14"/><text class="micro" x="3078" y="746">U5</text><circle class="hp" cx="3370" cy="890" r="14"/><text class="micro" x="3388" y="876">U6</text><circle class="hp" cx="3610" cy="1120" r="14"/><text class="micro" x="3628" y="1106">U7</text><circle class="hp" cx="3760" cy="1430" r="14"/><text class="micro" x="3778" y="1416">R3</text><circle class="hp" cx="3920" cy="1740" r="14"/><text class="micro" x="3938" y="1726">R2</text><circle class="hp" cx="4140" cy="1990" r="14"/><text class="micro" x="4158" y="1976">R1</text><circle class="hp" cx="4400" cy="2180" r="14"/><text class="micro" x="4418" y="2166">R0</text><circle class="hp" cx="4700" cy="2260" r="14"/><text class="micro" x="4718" y="2246">EXIT</text></g><g id="reachGroup" class="hidden"><circle class="reach" cx="420" cy="2260" r="400"/><circle class="reach" cx="720" cy="2180" r="400"/><circle class="reach" cx="980" cy="1990" r="400"/><circle class="reach" cx="1200" cy="1740" r="400"/><circle class="reach" cx="1360" cy="1420" r="400"/><circle class="reach" cx="1510" cy="1110" r="400"/><circle class="reach" cx="1760" cy="880" r="400"/><circle class="reach" cx="2070" cy="760" r="400"/><circle class="reach" cx="2400" cy="700" r="400"/><circle class="reach" cx="2730" cy="700" r="400"/><circle class="reach" cx="3060" cy="760" r="400"/><circle class="reach" cx="3370" cy="890" r="400"/><circle class="reach" cx="3610" cy="1120" r="400"/><circle class="reach" cx="3760" cy="1430" r="400"/><circle class="reach" cx="3920" cy="1740" r="400"/><circle class="reach" cx="4140" cy="1990" r="400"/><circle class="reach" cx="4400" cy="2180" r="400"/><circle class="reach" cx="4700" cy="2260" r="400"/></g>
+<g id="p1"><text class="phase" x="330" y="300">P1 · FULL CROSSBEAM SWEEP / REAR DRIVE</text><rect class="beam" x="1510" y="1550" width="2190" height="120" rx="22"/><path class="sweep" d="M1250 1670 Q2600 1960 3950 1670 L3950 1980 Q2600 2260 1250 1980 Z"/><text class="phase" x="2050" y="1910">LOW FULL-BEAM SWEEP</text><circle class="gearHot" cx="2170" cy="1405" r="67"/><text class="phase" x="1240" y="1350">MAX EXTENSION → REAR DRIVE</text></g>
+<g id="p2" class="hidden"><text class="phase" x="330" y="300">P2 · DIRECTIONAL BROKEN BEAM / SIDE GEARBOX</text><rect class="broken" x="2600" y="1535" width="1120" height="115" rx="20"/><path class="sweep" d="M2550 1650 Q3300 1840 4070 1650 L4070 1940 Q3300 2100 2550 1940 Z"/><text class="phase" x="2820" y="1860">RIGHTWARD TRAVEL → RIGHT BEAM REMAINS</text><circle class="gearHot" cx="2170" cy="1405" r="67"/><text class="phase" x="1220" y="1350">OPPOSITE SIDE GEARBOX EXPOSED</text></g>
+<g id="p3" class="hidden"><text class="phase" x="330" y="300">P3 · BEAM FAILURE → CENTRAL LOCK CORE / RAM ONLY</text><rect class="broken" x="1830" y="1560" width="360" height="90" rx="18" transform="rotate(-11 2010 1605)"/><rect class="broken" x="3020" y="1560" width="360" height="90" rx="18" transform="rotate(12 3200 1605)"/><rect x="2290" y="1270" width="230" height="270" fill="#5c687020" stroke="#ffb36a" stroke-width="4" transform="rotate(-10 2405 1405)"/><rect x="2680" y="1270" width="230" height="270" fill="#5c687020" stroke="#ffb36a" stroke-width="4" transform="rotate(10 2795 1405)"/><circle class="core" cx="2600" cy="1405" r="95"/><text class="boss" x="2260" y="1050">CENTRAL LOCK CORE EXPOSED</text><path class="ram" d="M1450 1240 L2050 1240 L2050 1570 L1450 1570 Z"/><path class="ram" d="M3150 1240 L3750 1240 L3750 1570 L3150 1570 Z"/><text class="phase" x="1850" y="1770">RAM TELEGRAPH — NO BEAM ATTACK</text></g>
+<g id="pf" class="hidden"><text class="phase" x="330" y="300">VICTORY · CARRIAGE STOPPED ON RAIL</text><g opacity=".35"><rect class="carriage" x="2110" y="1190" width="980" height="430" rx="35"/><rect class="armor" x="2290" y="1270" width="620" height="270" rx="25"/></g><circle cx="2600" cy="1405" r="95" fill="#241d1b" stroke="#5d5652" stroke-width="5"/><text class="phase" x="2220" y="1740">POWER LOSS · FULL STOP</text><path class="finalPath" d="M3100,2110 Q3800,2140 4550,2110"/><rect class="safe" x="4020" y="2030" width="520" height="130" rx="22"/><text class="phase" x="4080" y="2000">OPEN GATE ACCESS</text><rect class="note" x="520" y="820" width="1740" height="350" rx="18"/><text x="580" y="890">Post-Boss framing</text><text class="micro" x="580" y="940">Carriage lights OFF → District lights + ambient life sound remain.</text><text class="micro" x="580" y="980">Short frame: Player + stopped Carriage + open Gate + Worker District.</text><text class="micro" x="580" y="1020">Control returns immediately → Sector02.</text></g>
+</svg></main></div>
 <script>
-const bind=(box,id)=>document.getElementById(box).onchange=e=>document.getElementById(id).classList.toggle('hidden',!e.target.checked);
-bind('routeT','route');bind('threatT','threats');bind('reachT','reach');
-</script>
-</body></html>
+function showPhase(n){['p1','p2','p3','pf'].forEach(id=>document.getElementById(id).classList.add('hidden'));['b1','b2','b3','bf'].forEach(id=>document.getElementById(id).classList.remove('active'));const id=n===1?'p1':n===2?'p2':n===3?'p3':'pf';const bid=n===1?'b1':n===2?'b2':n===3?'b3':'bf';document.getElementById(id).classList.remove('hidden');document.getElementById(bid).classList.add('active')}
+document.getElementById('routeT').addEventListener('change',e=>document.getElementById('routeGroup').classList.toggle('hidden',!e.target.checked));
+document.getElementById('reachT').addEventListener('change',e=>document.getElementById('reachGroup').classList.toggle('hidden',!e.target.checked));
+</script></body></html>

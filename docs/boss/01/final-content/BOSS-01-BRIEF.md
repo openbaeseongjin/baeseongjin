@@ -1,261 +1,182 @@
-# BOSS 01 — C-01 비상 격리구동계
-## 핵심 브리프 + 스토리/연출
+# BOSS 01 — GATE LOCKING CARRIAGE
 
-> 상태: **AUTHORED FINAL CONTENT / RUNTIME PARTIALLY IMPLEMENTED**
-> AUTHORING SNAPSHOT: `6a8911d354df6b218a64970b5d35d41359ef62f2`
-> 위치: **Sector 01 완료 뒤 Post-Sector Boss Slot**
-> Player-facing name: **C-01 비상 격리구동계**
-> Internal: `CONTAINMENT GANTRY C-01`
+> 상태: **AUTHORED FINAL CONTENT / RUNTIME NOT IMPLEMENTED**
+> AUTHORING SNAPSHOT: `a8ad8658cc94df4f766a0da5ff921a2e77e96300`
+> 역할: Sector01 → Sector02 Transition Boss
 
-## 1. 한 줄 정의
+## 1. 핵심 정의
 
-**1-8의 Maintenance Override 이후 Worker District가 처음 드러난 직후, 정비시설 전체가 비상 격리 시스템으로 전환된다. Player는 격리 Clamp, 환기 Fan, Gate Lock의 세 실제 정비 조작점을 차례로 해제하고 각 설비의 Core가 8초간 노출되는 동안 Rope Impact로 파괴해 통과로를 다시 연다.**
+1-8의 `Maintenance Override`와 `WORKER DISTRICT / ACCESS OPEN`은 그대로 유지한다.
 
-Boss는 인간형/생물형 단일 기체가 아니다.
+Boss01은 Gate를 다시 잠그지 않는다.
 
-Boss는 다음 설비의 결합이다.
+Gate 상부의 거대한 Locking Assembly가 비상 분리되어 단일 수평 Rail에 체결되고,
+열린 Gate를 넘어가려는 Player를 공격한다.
 
-- 격리 Clamp
-- 환기 Fan
-- Gate Brake / Lock Pin
-- Security Emitter
-- Pulse Wind
-- Containment Gantry 구조물
+**Boss 본체 = GATE LOCKING CARRIAGE**
 
-## 2. TOP 3 우선순위
-
-### 1순위 — “정비공이 시설을 직접 해제한다”
-Boss01의 핵심은 적을 쓰러뜨리는 것보다:
+## 2. 1-8 연결
 
 ```text
-시설 상태 읽기
-→ 실제 정비 조작점 접근
-→ Breaker / Release 작동
-→ 해당 설비 Core 8초 노출
-→ Rope로 속도 확보
-→ Rope Impact
-```
-
-이다.
-
-### 2순위 — Sector 01에서 배운 것을 새 입력 없이 종합
-새 Rope 입력/모드가 없어야 한다.
-
-- Rope 이동
-- Security 읽기
-- Pulse Wind
-- local recovery
-- manual interaction
-- Rope Impact
-
-### 3순위 — 시설 전체가 Boss처럼 느껴져야 함
-Boss02처럼 한 기체가 쫓아오는 전투가 아니다.
-
-Phase가 바뀔수록:
-- 격리 압력
-- 환기 압력
-- Security 압력
-- Gate 잠금
-
-이 한 시설 안에서 겹쳐진다.
-
-## 3. 1-8과의 연결 — 수정된 정식 순서
-
-**1-8의 현재 Story/Stage 권위는 유지한다.**
-
-1-8 내부:
-```text
-MAINTENANCE OVERRIDE
-→ OVERRIDE LOCK / CONFIRM
+1-8 Maintenance Override
 → LOWER GRID CONNECTION / TERMINATING
 → WORKER DISTRICT / ACCESS OPEN
-→ WORKER DISTRICT / BLOCK 12
+→ WORKER DISTRICT / BLOCK 12 첫 Reveal
+→ Locking Assembly DETACH
+→ GATE LOCKING CARRIAGE
+→ Boss01
+→ Carriage 정지
+→ 열린 Gate 통과
+→ Sector02
 ```
 
-Player는 Worker District가 실제 생활권이라는 사실을 처음 인지한다.
+기존 Boss01의:
+`Boss 승리 → Worker District Access Open`
+구조는 폐기한다.
 
-그 직후 **Sector 02 playable area에 직접 진입하기 전에** Post-Sector Boss Slot에서:
+## 3. Arena
+
+하나의 단일 수평 Rail을 중심으로:
+
+- Upper Maintenance Frame
+- Carriage Rail
+- Lower Catwalk / Recovery
+- 열린 Gate
+- Gate 너머 Worker District
+
+를 동시에 읽게 한다.
+
+첫 Boss이므로 Rope 목표와 회복층이 명확해야 한다.
+
+## 4. P1 — FULL CROSSBEAM
+
+대표 문법:
 
 ```text
-C-01 EMERGENCY CONTAINMENT
-AUTOMATIC LOCKDOWN / ACTIVE
+CARRIAGE TRAVEL
+→ LOW FULL CROSSBEAM SWEEP
+→ MAX EXTENSION
+→ REAR DRIVE EXPOSED
+→ ROPE FLANK
+→ IMPACT
 ```
 
-가 발생한다.
+목적:
+- Sweep을 정면으로 버티는 것이 아니라 위/아래로 피한다.
+- Sweep이 끝나면 뒤를 잡는다.
+- Rope 이동 자체가 공격 준비다.
+
+P1 약점:
+**Rear Drive**
+
+## 5. P2 — DIRECTIONAL BROKEN BEAM
+
+P1 충격으로 Locking Beam 일부가 파손된다.
+
+규칙:
+
+```text
+Carriage moving RIGHT
+→ RIGHT Beam remains
+
+Carriage moving LEFT
+→ LEFT Beam remains
+```
 
 즉:
-> Worker District는 먼저 **보인다**.
-> 그러나 그곳으로 실제 넘어가기 직전에 시설의 비상 격리가 마지막으로 통로를 붙잡는다.
+**진행 방향 쪽 Beam이 위험 방향**이다.
 
-Boss 승리 후:
+Player는 진행 방향을 보고 반대 측면으로 flank한다.
+
+Sweep 종료 후:
+**Side Gearbox** 노출.
+
+P1과 차이:
+- P1 = 뒤를 잡는다.
+- P2 = 진행 방향을 읽고 반대 측면을 잡는다.
+
+## 6. P3 — CENTRAL LOCK CORE
+
+P2 이후 Carriage가 마지막 Full-Speed Sweep을 시도한다.
+
 ```text
-C-01 EMERGENCY CONTAINMENT
-OFFLINE
-
-WORKER DISTRICT
-PASSAGE RESTORED
+FULL-SPEED SWEEP ATTEMPT
+→ DAMAGED BEAM FAILURE
+→ BEAM FULL BREAK
+→ CENTRAL ARMOR TEARS OPEN
+→ CENTRAL LOCK CORE EXPOSED
 ```
 
-→ Sector 02 진입.
+이 시점부터 Beam 공격은 종료.
 
-중요:
-- 1-8의 `WORKER DISTRICT / ACCESS OPEN`을 삭제하거나 Boss 승리 뒤로 옮기지 않는다.
-- Boss는 1-8 안이 아니라 별도 Post-Sector transition encounter다.
+P3 공격:
+**Rail Ram only**
 
-## 4. Boss Runtime 권위
+Player는 움직이는 Carriage의 Core를 Rope로 추적해 최종 Impact한다.
 
-현재 Boss01:
-- HP **360**
-- Phase **3**
-- Phase HP **120**
-- Exposure **8 sec**
-- Boss Timer **없음**
-- Arena collapse **없음**
+## 7. Victory
 
-현재 공용 Boss Runtime은:
-- 현재 Phase Breaker 조작
-- Core exposed
-- 8초 노출
-- 노출 중에만 damage 적용
-- Phase floor
-- 3 Phase 완료
-- 전멸 시 attempt reset
+Final Core Impact:
 
-을 권위로 사용한다.
-
-따라서 옛 문서의:
-> “약점은 선택적 숙련 보상이며 일반 설비를 때려도 진행 가능”
-
-이라는 문구는 이번 최종본에서 폐기한다.
-
-Boss01의 정식 문법은:
-
-> **정비 조작점 → 8초 Core 노출 → Rope Impact**
-
-이다.
-
-## 5. Phase 요약
-
-| Phase | 실제 설비 | 정비 조작 | 노출 Core | 압박 |
-|---|---|---|---|---|
-| **P1** | 격리 Clamp 구동축 | Clamp Pressure Release | Stress Seam / Clamp Drive Core | Standard Emitter |
-| **P2** | 환기 Fan 주베어링 | Backpressure Isolation | Exposed Bearing | Standard Emitter + Pulse Wind |
-| **P3** | Gate Lock / Brake | Gate Brake Manual Release | Lock Pin Fracture | Alternating Emitters + Pulse Wind + No Crossfire |
-
-## 6. P1 — 격리 Clamp
-
-첫 질문:
-
-> **“정비 조작점까지 접근해 Clamp 압력을 풀 수 있는가?”**
-
-흐름:
 ```text
-ENTRY
-→ Security pressure
-→ M1 CLAMP PRESSURE RELEASE
-→ Clamp Core 8초 노출
-→ Rope Arc
-→ Rope Impact
-→ Phase 2
+CARRIAGE POWER LOSS
+→ FULL STOP ON RAIL
 ```
 
-연출:
-- Clamp가 양쪽에서 긴장
-- Release 성공 시 구동축이 순간 풀림
-- Stress Seam / Core가 드러남
-- 파손 후 Clamp 한쪽이 비활성화
+폭발하지 않는다.
+추락하지 않는다.
+Gate를 다시 닫지 않는다.
 
-## 7. P2 — 환기 Fan
+승리 후:
 
-두 번째 질문:
+1. Carriage 조명 순차 소등
+2. Worker District 생활광 유지
+3. Worker District 생활소음이 전면으로 남음
+4. 짧은 Camera framing
+   - Player
+   - 정지한 Carriage
+   - 열린 Gate
+   - Worker District 첫 건물층
+5. 즉시 Player control 유지
+6. Sector02 진입
 
-> **“Pulse Wind를 이동 방해가 아니라 접근 타이밍으로 읽을 수 있는가?”**
-
-흐름:
-```text
-P2 진입
-→ Standard pressure
-→ Pulse Wind cycle
-→ M2 BACKPRESSURE ISOLATION
-→ Fan Bearing 8초 노출
-→ Wind Lull / Carry 활용
-→ Rope Impact
-→ Phase 3
-```
-
-연출:
-- Fan 속도/진동 증가
-- Isolation 조작 후 Bearing Housing 개방
-- 파손 후 Fan 회전 불안정
-- Wind는 즉시 거대한 폭발로 끝나지 않고 감쇠
-
-## 8. P3 — Gate Lock Pin
-
-마지막 질문:
-
-> **“교대 Security와 Pulse Wind를 읽으면서 마지막 Gate Brake까지 도달할 수 있는가?”**
-
-흐름:
-```text
-P3
-→ Alternating Emitters
-→ No Crossfire
-→ Pulse Wind
-→ M3 GATE BRAKE MANUAL RELEASE
-→ Lock Pin 8초 노출
-→ 최종 Rope Impact
-→ C-01 OFFLINE
-```
-
-중요:
-- Security가 동시에 난사하지 않는다.
-- 한 순간의 dominant threat가 읽혀야 한다.
-- P3가 탄막 보스로 바뀌면 안 된다.
-
-## 9. 승리 연출
-
-최종 Lock Pin 파손:
-- Gate Brake가 풀림
-- Clamp 잔여 압력 해제
-- Fan이 안전 감속
-- Security Emitter OFF
-- Gate Crown의 비상등이 순차적으로 꺼짐
-- 거대 폭발 없음
-
-System:
-```text
-C-01 EMERGENCY CONTAINMENT
-OFFLINE
-
-WORKER DISTRICT
-PASSAGE RESTORED
-```
-
-그 뒤 실제 Sector02 진입.
-
-## 10. Story 제한
+## 8. Story Boundary
 
 Boss01은 다음을 설명하지 않는다.
 
-- 사고가 의도적이었다
-- 누가 Worker District를 희생시켰다
-- Group C가 왜 멈췄다
-- Corporate decision
-- Priority allocation
+- 누가 사고를 일으켰는지
+- Lower Grid termination의 실제 피해
+- 회사의 고의 여부
+- Worker District의 구체적 사회상
+- Group C의 의미
 
-Boss01이 보여주는 사실:
+1-8이 만든 첫 질문을 Boss01이 덮지 않는다.
 
-> **정비시설 하나의 Override가 사람이 사는 Worker District와 연결된 더 큰 시스템 상태를 건드렸고, 그 시스템은 마지막까지 자동 격리를 수행했다.**
+Boss01 역할은:
+**첫 Reveal 뒤 물리적 Transition obstacle**이다.
 
-## 11. 반드시 피할 것
+## 9. 전투 원칙
 
-- Boss Timer
-- 시간 만료 HeadHouse closure
-- Arena collapse
-- 중앙 거대 인간형 로봇
-- Breaker 없이 자동 약점 노출
-- 약점 노출 전 Boss damage 진행
-- 네 개 이상의 Phase
-- 새로운 Rope 입력
-- Cutter / Jammer / AEGIS / Artillery 추가
-- 장시간 컷신
+- Boss는 단일 명확한 산업기계
+- Human / creature boss 아님
+- Stationary shooting arena 금지
+- Rope flank가 핵심
+- P1/P2/P3 공격 의미가 서로 다름
+- Boss Timer 없음
+- Arena collapse 없음
+- 새 Rope input 없음
+- 새 Growth 없음
+- 실패 후 local recovery 우선
+
+## 10. Rope QA
+
+Base Hook Reach:
+**400px**
+
+Final authored route:
+- relations: **17**
+- max relation: **357.77px**
+- non-adjacent ≤400px shortcut: **0**
+
+모든 mandatory authored relation은 400px 이내이며,
+비의도 Base shortcut은 0이다.
