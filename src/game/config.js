@@ -145,7 +145,7 @@ export const COMBAT_CONFIG = Object.freeze({
     playerProjectileLifetimeSeconds: 8,
     enemyRadius: 18,
     enemyHealth: 100,
-    enemyAttackRange: 760,
+    enemyAttackRange: 1080,
     enemyAcquireSeconds: 0.25,
     enemyTrackSeconds: 0.8,
     enemyLockSeconds: 0.2,

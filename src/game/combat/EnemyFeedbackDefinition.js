@@ -77,24 +77,24 @@ export const ENEMY_FEEDBACK = Object.freeze({
             };
         }
     }),
-    SWARM_ORBIT: new EnemyFeedbackDefinition({
+    SWARM_CHASE: new EnemyFeedbackDefinition({
         predicate: (enemy, _byId, state) =>
-            enemy.enemyType === ENEMY_TYPE.SWARM_DRONE_T1 && state === SWARM_BEHAVIOR_STATE.ORBIT,
+            enemy.enemyType === ENEMY_TYPE.SWARM_DRONE_T1 && state === SWARM_BEHAVIOR_STATE.CHASE,
         request: (enemy) => ({
-            id: `swarm:${enemy.id}:orbit`,
-            presetId: "swarm-orbit",
+            id: `swarm:${enemy.id}:chase`,
+            presetId: "swarm-chase",
             position: enemy.position,
-            direction: enemy.behaviorState?.diveDirection
+            direction: null
         })
     }),
-    SWARM_DIVE: new EnemyFeedbackDefinition({
+    SWARM_RECOIL: new EnemyFeedbackDefinition({
         predicate: (enemy, _byId, state) =>
-            enemy.enemyType === ENEMY_TYPE.SWARM_DRONE_T1 && state === SWARM_BEHAVIOR_STATE.DIVE,
+            enemy.enemyType === ENEMY_TYPE.SWARM_DRONE_T1 && state === SWARM_BEHAVIOR_STATE.RECOIL,
         request: (enemy) => ({
-            id: `swarm:${enemy.id}:dive`,
-            presetId: "swarm-dive",
+            id: `swarm:${enemy.id}:recoil`,
+            presetId: "swarm-recoil",
             position: enemy.position,
-            direction: enemy.behaviorState?.diveDirection
+            direction: enemy.behaviorState?.recoilDirection
         })
     }),
     PURSUIT_WINDUP: new EnemyFeedbackDefinition({

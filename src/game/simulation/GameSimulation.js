@@ -27,6 +27,10 @@ import {
     isKnownEnemyType
 } from "../combat/EnemyArchetypeCatalog.js";
 import { advanceEnemyBehaviors } from "../combat/EnemyBehaviors.js";
+import {
+    ENEMY_BEHAVIOR_EVENT_TYPE,
+    ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE
+} from "../combat/enemy-behavior/EnemyBehaviorDefinition.js";
 import { createEnemyObject } from "../combat/EnemyObject.js";
 import { recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
 import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js";
@@ -34,7 +38,7 @@ import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
 import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { IMPACT_TARGET_KIND, ImpactTarget } from "../combat/ImpactTarget.js";
 import { ImpactTargetRegistry } from "../combat/ImpactTargetRegistry.js";
-import { BallisticProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
+import { HomingProjectileObject } from "../combat/ProjectileObject.js";
 import {
     COMBAT_CONFIG,
     COLLISION_BROAD_PHASE_CONFIG,
@@ -156,6 +160,18 @@ function horizontalSurfaceSpan(surface) {
 function clamp(value, minimum, maximum) {
     return Math.min(maximum, Math.max(minimum, value));
 }
+
+const ENEMY_BEHAVIOR_PLAYER_TARGETS = Object.freeze({
+    [ENEMY_BEHAVIOR_EVENT_TYPE.ARTILLERY_STRIKE]: ({ players, result }) =>
+        players.filter(
+            (player) =>
+                player.lifeState === "active" &&
+                player.health > 0 &&
+                player.physics.collider.overlapsCircle(player.physics.position, result.position, result.radius)
+        ),
+    [ENEMY_BEHAVIOR_EVENT_TYPE.SWARM_CONTACT]: ({ players, result }) =>
+        players.filter((player) => player.id === result.targetId && player.lifeState === "active" && player.health > 0)
+});
 
 function createEnemyRuntime(properties) {
     if (isEnemyArchetype(properties.enemyType)) return createEnemyArchetype(properties);
@@ -2131,22 +2147,52 @@ export class GameSimulation {
             targets: this.players,
             dt
         });
-        for (const { enemyId, outcome } of outcomes) {
-            if (outcome?.type !== "artillery-strike") continue;
-            const projectile = new BallisticProjectileObject({
-                id: this.registry.createId("enemy-projectile"),
-                ownerId: enemyId,
-                targetId: outcome.targetId,
-                position: new Vector2(outcome.position.x, outcome.position.y),
-                velocity: new Vector2(),
-                radius: outcome.radius,
-                damage: outcome.damage,
-                canCutRope: false
-            });
-            this.enemyProjectiles.push(projectile);
-            this.recordProjectileSpawn(projectile);
+        for (const { enemyId, result } of outcomes) {
+            const targetResolver = ENEMY_BEHAVIOR_PLAYER_TARGETS[result?.type];
+            if (!targetResolver) continue;
+            for (const player of targetResolver({ players: this.players, result })) {
+                this.#applyEnemyBehaviorPlayerHit(enemyId, player, result);
+            }
         }
         return outcomes;
+    }
+
+    #applyEnemyBehaviorPlayerHit(enemyId, player, result) {
+        if (player.hitInvulnerabilityRemaining > 0) return null;
+        const protection = player.augmentCombat.absorbPlayerDamage({
+            amount: result.damage,
+            type: "combat-hp",
+            sourceKind: result.type,
+            attackerId: enemyId
+        });
+        const damage = protection.appliedDamage;
+        player.health = Math.max(0, player.health - damage);
+        player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+        for (const reflected of protection.events) {
+            const attacker = this.enemies.find(({ id }) => id === reflected.attackerId);
+            if (!attacker) continue;
+            player.augmentCombat.queueDamageReflection({
+                player,
+                attacker,
+                damage: reflected.reflectedDamage,
+                tick: this.tick,
+                sourceKind: reflected.sourceKind
+            });
+        }
+        this.#commitAugmentImpactEvents(player.augmentCombat.drainQueuedImpactEvents());
+        this.metrics.recordPlayerImpact("player-hit", damage);
+        const event = Object.freeze({
+            impactId: `${enemyId}:${result.type}:${this.tick}:${player.id}`,
+            sourceId: enemyId,
+            sourceKind: result.type,
+            playerId: player.id,
+            damage,
+            health: player.health,
+            position: vectorState(player.physics.position)
+        });
+        this.recordReplicationEvent(ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE.PLAYER_HIT, event);
+        this.eventFlash = { type: "player-hit", age: 0, ...event };
+        return event;
     }
 
     resolveRopeImpactClaim(authenticatedPlayerId, claim) {

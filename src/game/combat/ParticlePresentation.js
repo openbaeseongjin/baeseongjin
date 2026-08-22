@@ -328,7 +328,7 @@ const PARTICLE_PRESET_DEFINITIONS = {
         spread: 0.18,
         lifetime: 0.42
     },
-    "swarm-orbit": {
+    "swarm-chase": {
         emission: "attached",
         motion: "orbit",
         shape: "dot",
@@ -339,7 +339,7 @@ const PARTICLE_PRESET_DEFINITIONS = {
         spread: 3.14,
         lifetime: 0.55
     },
-    "swarm-dive": {
+    "swarm-recoil": {
         emission: "stream",
         motion: "directional",
         shape: "streak",

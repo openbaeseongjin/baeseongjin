@@ -46,9 +46,8 @@ const BEHAVIOR_PRESENTATION_BY_STATE = Object.freeze({
         [SUPPORT_BEHAVIOR_STATE.LINK]: "support-link"
     }),
     [ENEMY_BEHAVIOR_KIND.SWARM]: Object.freeze({
-        [SWARM_BEHAVIOR_STATE.ORBIT]: "swarm-orbit",
-        [SWARM_BEHAVIOR_STATE.DIVE]: "swarm-dive",
-        [SWARM_BEHAVIOR_STATE.RECOVER]: "swarm-recover"
+        [SWARM_BEHAVIOR_STATE.CHASE]: "swarm-chase",
+        [SWARM_BEHAVIOR_STATE.RECOIL]: "swarm-recoil"
     })
 });
 const ACTIVE_BEHAVIOR_STATE = Object.freeze({
@@ -58,8 +57,7 @@ const ACTIVE_BEHAVIOR_STATE = Object.freeze({
     "artillery-telegraph": true,
     "artillery-cooldown": true,
     "support-link": true,
-    "swarm-dive": true,
-    "swarm-recover": true
+    "swarm-recoil": true
 });
 const COMMON_STATES = Object.freeze([
     PRESENTATION.IDLE,
@@ -113,7 +111,10 @@ export const ENEMY_PRESENTATION_DEFINITIONS = Object.freeze({
         behaviorKind: ENEMY_BEHAVIOR_KIND.SUPPORT,
         usesProjectileAttack: false
     }),
-    [ENEMY_TYPE.SWARM_DRONE_T1]: definition({ behaviorKind: ENEMY_BEHAVIOR_KIND.SWARM })
+    [ENEMY_TYPE.SWARM_DRONE_T1]: definition({
+        behaviorKind: ENEMY_BEHAVIOR_KIND.SWARM,
+        usesProjectileAttack: false
+    })
 });
 
 function line(enemy, direction, length, color, width) {
@@ -164,7 +165,7 @@ function behaviorTelegraph(enemy, behavior, enemies) {
               })
             : null;
     }
-    if (state === "swarm-dive") return line(enemy, behavior.diveDirection, 120, "#e879f9", 2);
+    if (state === "swarm-recoil") return line(enemy, behavior.recoilDirection, 80, "#e879f9", 2);
     return null;
 }
 

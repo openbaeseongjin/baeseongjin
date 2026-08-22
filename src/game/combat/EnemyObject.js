@@ -133,7 +133,12 @@ class EnemyBodyObject extends withSurfacePhysics(
         this.enemyType = enemyType;
         this.displayName = displayName;
         this.activation = activation ? Object.freeze({ ...activation }) : null;
-        this.patrol = createEnemyPatrolState({ patrol, activation: this.activation, origin: this.position });
+        this.patrol = createEnemyPatrolState({
+            patrol,
+            activation: this.activation,
+            origin: this.position,
+            enemyType
+        });
         this.swarmGroupId = swarmGroupId;
         this.rules = Object.freeze([...rules]);
         this.radius =
@@ -152,6 +157,11 @@ class EnemyBodyObject extends withSurfacePhysics(
             value: behavior,
             enumerable: false,
             writable: false
+        });
+        Object.defineProperty(this, "lastActorCollisionIds", {
+            value: Object.freeze([]),
+            enumerable: false,
+            writable: true
         });
         if (behavior !== null) {
             if (typeof behavior.advance !== "function" || typeof behavior.snapshot !== "function") {
@@ -196,6 +206,10 @@ class EnemyBodyObject extends withSurfacePhysics(
         return this.behavior?.snapshot() ?? null;
     }
 
+    collidedWithActor(actorId) {
+        return this.lastActorCollisionIds.includes(actorId);
+    }
+
     advanceEnemyPhysicsStep(dt, surfaces, collisionActors = [], collisionBroadPhase = null) {
         const resolution = this.advanceSurfacePhysics(dt, surfaces, {
             actorId: this.id,
@@ -203,6 +217,7 @@ class EnemyBodyObject extends withSurfacePhysics(
             actors: collisionActors,
             broadPhase: collisionBroadPhase
         });
+        this.lastActorCollisionIds = resolution.collidedActorIds;
         this.carryActorCollisionVelocity(
             {
                 x: this.velocity.x - this.surfaceControlVelocity.x,
@@ -238,6 +253,7 @@ class EnemyBodyObject extends withSurfacePhysics(
             y: assertFinite(state.velocity?.y ?? 0, "enemy.velocity.y")
         });
         this.clearSurfacePhysicsStep();
+        this.lastActorCollisionIds = Object.freeze([]);
         this.health = assertFinite(state.health, "enemy.health", { minimum: 0 });
         this.maxHealth = assertFinite(state.maxHealth, "enemy.maxHealth", { minimum: 0, exclusiveMinimum: true });
         const aimDirection = state.aimDirection

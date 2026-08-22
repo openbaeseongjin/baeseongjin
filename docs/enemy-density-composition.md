@@ -20,6 +20,17 @@
 
 정확한 pool 결과는 seed에 따라 바뀌지만 slot 수·위치·activation·Stable ID는 바뀌지 않는다. 전체 exact roster를 테스트 snapshot으로 고정하지 않고 안전 구간, Access 3기, Sector coarse tier, family 도달과 결정성을 검증한다.
 
+## 일반 몹 행동 AS-IS → TO-BE
+
+- AS-IS: 순찰·포격·지원·군집은 Runtime에 존재하지만 플레이 정체성과 맞지 않아 현재 행동을 최종 제품 계약으로 보호하지 않는다.
+- TO-BE 순찰: authored 경로 양 끝을 계속 왕복하고 전 방향 거리로 Player를 탐지하며, 발견 시 현재 위치에 정지해 사격한 뒤 경로로 복귀한다.
+- TO-BE 포격: 사거리 안에서 매번 현재 Player 위치를 고정해 예고·1회 영역 판정·cooldown을 반복하며 투사체나 잔류 타격 객체를 만들지 않는다.
+- TO-BE 메딕: 넓은 치료 인식 범위에서 자신을 제외한 모든 일반 몹을 찾고, 좁은 치료 연결 범위까지 가장 위급한 한 기를 따라가 자기 체력 1당 대상 체력 3을 회복한다. 메딕 자신은 초당 체력 2를 자연 회복한다.
+- TO-BE 메딕 전환: 새 대상이 definition 기준만큼 더 위급할 때만 연결을 바꾸고, Player 접근 시 치료 대상 주변에서 연결을 유지한 채 후퇴한다.
+- TO-BE 군집: 각 기체가 독립 체력·collider·피격·처치를 소유하고, 조밀한 무리로 함께 추격하며 공용 사격 없이 접촉 1회 피해 후 반동·회복·재합류한다.
+- TO-BE 공략: 특정 제거 수단은 몹 계약으로 정하지 않으며 Player가 로프·일반 공격·지형을 자유롭게 사용한다.
+- TO-BE 인식: 화면 안의 몹이 반응하지 않는 구간을 없애도록 공용 사격과 각 행동의 인식 범위를 reference viewport 기준으로 확장하되 authored activation 경계는 넘지 않는다.
+
 멀티 snapshot은 현재 56개 slot의 정적 authored 정의를 `world revision + objectId` 인덱스로 재사용한다. 축약 state hydration은 runtime을 만들거나 slot을 다시 선택하지 않고 동적 state만 합성한다. prediction 복원은 stable ID가 같은 기존 Enemy runtime에 동적 상태를 in-place restore하며 실제 spawn/despawn 또는 identity 변경에만 runtime을 만든다. 이 최적화는 20Hz snapshot·중립 Enemy 권위·slot 수와 pool 결과를 바꾸지 않는다.
 
 ## Authoring 계약
@@ -37,4 +48,4 @@
 - 개인·전원 사망 모두 shared progress/처치/module/route를 보존하고 각 Player의 마지막 Stage savepoint에서 부활한다.
 - 모든 적 이동은 행동·돌진·Patrol 종류와 무관하게 Player와 같은 공개 physics/collider 경계로 현재 활성 collision surface, Player body와 다른 Enemy body를 해결한다. 일반 몹은 circle, 대형·Boss형은 convex polygon 또는 box collider를 조립할 수 있으며 Player↔Enemy·Enemy↔Enemy도 Player↔Player와 같은 shape contact·질량·상대 속도 actor collision을 사용한다. `sentry`/`sentry-t1` 고정형 Turret만 inverse mass 0의 정적 body라 위치가 바뀌지 않으며, 다른 Enemy는 authored 경로나 위치 넉백 정책과 별개로 충돌 impulse를 받는 동적 body다. 정적 Turret도 collision body 자체를 제거하거나 Player 통과를 허용하지 않는다.
 - 고정·고정경로·제자리 지원형의 위치 넉백 면역, Pursuit/Swarm의 직접 추격형 displacement.
-- Boss·Timer/Purge·Sector 04~06과 새 enemy behavior는 이 범위 밖이다.
+- Boss·Timer/Purge·Sector 04~06은 이 범위 밖이다.

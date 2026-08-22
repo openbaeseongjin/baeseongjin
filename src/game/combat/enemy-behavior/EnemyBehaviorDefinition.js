@@ -15,7 +15,7 @@ export const PURSUIT_BEHAVIOR_STATE = Object.freeze({
 export const SHIELD_BEHAVIOR_STATE = Object.freeze({ GUARD: "guard" });
 export const ARTILLERY_BEHAVIOR_STATE = Object.freeze({ IDLE: "idle", TELEGRAPH: "telegraph", COOLDOWN: "cooldown" });
 export const SUPPORT_BEHAVIOR_STATE = Object.freeze({ IDLE: "idle", LINK: "link" });
-export const SWARM_BEHAVIOR_STATE = Object.freeze({ ORBIT: "orbit", DIVE: "dive", RECOVER: "recover" });
+export const SWARM_BEHAVIOR_STATE = Object.freeze({ CHASE: "chase", RECOIL: "recoil" });
 
 export const ENEMY_BEHAVIOR_EVENT_TYPE = Object.freeze({
     PURSUIT_WINDUP: "pursuit-windup",
@@ -25,8 +25,10 @@ export const ENEMY_BEHAVIOR_EVENT_TYPE = Object.freeze({
     ARTILLERY_STRIKE: "artillery-strike",
     SUPPORT_LINK: "support-link",
     SUPPORT_LINK_ENDED: "support-link-ended",
-    SWARM_DIVE_STARTED: "swarm-dive-started",
-    SWARM_RECOVERY_STARTED: "swarm-recovery-started"
+    SWARM_CONTACT: "swarm-contact",
+    SWARM_RECOIL_ENDED: "swarm-recoil-ended"
 });
+
+export const ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE = Object.freeze({ PLAYER_HIT: "enemy-behavior-player-hit" });
 
 export const ENEMY_BEHAVIOR_CONFIG = Object.freeze({ ZERO: 0, UNIT: 1, MAXIMUM_TRANSITIONS_PER_STEP: 8 });
