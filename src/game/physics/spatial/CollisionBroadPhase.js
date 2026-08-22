@@ -90,7 +90,7 @@ export class CollisionBroadPhase {
         this.surfaceCount = surfaces.length;
         this.surfaceTree.rebuild(
             surfaces.map((surface, index) => ({
-                id: surface.id ?? `surface:${index}`,
+                id: `surface:${index}`,
                 bounds: surfaceBounds(surface),
                 value: surface
             }))
