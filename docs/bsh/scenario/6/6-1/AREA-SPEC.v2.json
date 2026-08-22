@@ -68,12 +68,6 @@
         "sourceId": "h02"
       },
       {
-        "id": "sector-06-01:route-h02",
-        "x": 170,
-        "y": -1730,
-        "sourceId": "h02"
-      },
-      {
         "id": "sector-06-01:route-h03",
         "x": -90,
         "y": -1540,
@@ -98,18 +92,6 @@
         "sourceId": "h06"
       },
       {
-        "id": "sector-06-01:route-h06",
-        "x": -830,
-        "y": -980,
-        "sourceId": "h06"
-      },
-      {
-        "id": "sector-06-01:route-h07",
-        "x": -760,
-        "y": -1180,
-        "sourceId": "h07"
-      },
-      {
         "id": "sector-06-01:route-h07",
         "x": -760,
         "y": -1180,
@@ -132,12 +114,6 @@
         "x": -650,
         "y": -2000,
         "sourceId": "h10"
-      },
-      {
-        "id": "sector-06-01:route-h11",
-        "x": -520,
-        "y": -2240,
-        "sourceId": "h11"
       },
       {
         "id": "sector-06-01:route-h11",

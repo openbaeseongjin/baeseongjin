@@ -47,7 +47,225 @@
       "y": -2060
     },
     "nextAreaId": null,
-    "surfaces": [],
+    "surfaces": [
+      {
+        "id": "sector-04-03:inferred-surface-ENTRY",
+        "kind": "scenario-safe-entry",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -2432,
+          "y": -512
+        },
+        "vertices": [
+          {
+            "x": -2528,
+            "y": -512
+          },
+          {
+            "x": -2336,
+            "y": -512
+          },
+          {
+            "x": -2336,
+            "y": -488
+          },
+          {
+            "x": -2528,
+            "y": -488
+          }
+        ],
+        "sourceId": "ENTRY",
+        "inferredFrom": "mandatoryRoute"
+      },
+      {
+        "id": "sector-04-03:inferred-surface-C1",
+        "kind": "scenario-block-c-reentry-grapple",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 320,
+          "y": -1568
+        },
+        "vertices": [
+          {
+            "x": 224,
+            "y": -1568
+          },
+          {
+            "x": 416,
+            "y": -1568
+          },
+          {
+            "x": 416,
+            "y": -1544
+          },
+          {
+            "x": 224,
+            "y": -1544
+          }
+        ],
+        "sourceId": "C1",
+        "inferredFrom": "mandatoryRoute"
+      },
+      {
+        "id": "sector-04-03:inferred-surface-C2",
+        "kind": "scenario-block-c-reentry-grapple",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 672,
+          "y": -1632
+        },
+        "vertices": [
+          {
+            "x": 576,
+            "y": -1632
+          },
+          {
+            "x": 768,
+            "y": -1632
+          },
+          {
+            "x": 768,
+            "y": -1608
+          },
+          {
+            "x": 576,
+            "y": -1608
+          }
+        ],
+        "sourceId": "C2",
+        "inferredFrom": "mandatoryRoute"
+      },
+      {
+        "id": "sector-04-03:inferred-surface-C3",
+        "kind": "scenario-block-c-reentry-grapple",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1024,
+          "y": -1696
+        },
+        "vertices": [
+          {
+            "x": 928,
+            "y": -1696
+          },
+          {
+            "x": 1120,
+            "y": -1696
+          },
+          {
+            "x": 1120,
+            "y": -1672
+          },
+          {
+            "x": 928,
+            "y": -1672
+          }
+        ],
+        "sourceId": "C3",
+        "inferredFrom": "mandatoryRoute"
+      },
+      {
+        "id": "sector-04-03:inferred-surface-C4",
+        "kind": "scenario-block-c-reentry-grapple",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1376,
+          "y": -1760
+        },
+        "vertices": [
+          {
+            "x": 1280,
+            "y": -1760
+          },
+          {
+            "x": 1472,
+            "y": -1760
+          },
+          {
+            "x": 1472,
+            "y": -1736
+          },
+          {
+            "x": 1280,
+            "y": -1736
+          }
+        ],
+        "sourceId": "C4",
+        "inferredFrom": "mandatoryRoute"
+      },
+      {
+        "id": "sector-04-03:inferred-surface-C5",
+        "kind": "scenario-block-c-reentry-grapple",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 1696,
+          "y": -1904
+        },
+        "vertices": [
+          {
+            "x": 1600,
+            "y": -1904
+          },
+          {
+            "x": 1792,
+            "y": -1904
+          },
+          {
+            "x": 1792,
+            "y": -1880
+          },
+          {
+            "x": 1600,
+            "y": -1880
+          }
+        ],
+        "sourceId": "C5",
+        "inferredFrom": "mandatoryRoute"
+      },
+      {
+        "id": "sector-04-03:inferred-surface-EXIT",
+        "kind": "scenario-safe-exit",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 2060,
+          "y": -2060
+        },
+        "vertices": [
+          {
+            "x": 1964,
+            "y": -2060
+          },
+          {
+            "x": 2156,
+            "y": -2060
+          },
+          {
+            "x": 2156,
+            "y": -2036
+          },
+          {
+            "x": 1964,
+            "y": -2036
+          }
+        ],
+        "sourceId": "EXIT",
+        "inferredFrom": "mandatoryRoute"
+      }
+    ],
     "routePoints": [
       {
         "id": "sector-04-03:route-ENTRY",
@@ -241,7 +459,548 @@
     "cameraZones": [],
     "cueIds": []
   },
-  "anchors": [],
+  "anchors": [
+    {
+      "target": {
+        "id": "A1-surface",
+        "x": -2080,
+        "y": -544,
+        "properties": {
+          "sourceId": "A1"
+        }
+      },
+      "landmark": {
+        "id": "A1",
+        "x": -2080,
+        "y": -544,
+        "properties": {
+          "label": "A1",
+          "coordinateAnchor": "center",
+          "sourceId": "A1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "A2-surface",
+        "x": -1760,
+        "y": -704,
+        "properties": {
+          "sourceId": "A2"
+        }
+      },
+      "landmark": {
+        "id": "A2",
+        "x": -1760,
+        "y": -704,
+        "properties": {
+          "label": "A2",
+          "coordinateAnchor": "center",
+          "sourceId": "A2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "A3-surface",
+        "x": -1440,
+        "y": -896,
+        "properties": {
+          "sourceId": "A3"
+        }
+      },
+      "landmark": {
+        "id": "A3",
+        "x": -1440,
+        "y": -896,
+        "properties": {
+          "label": "A3",
+          "coordinateAnchor": "center",
+          "sourceId": "A3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G1-surface",
+        "x": -1120,
+        "y": -1024,
+        "properties": {
+          "sourceId": "G1"
+        }
+      },
+      "landmark": {
+        "id": "G1",
+        "x": -1120,
+        "y": -1024,
+        "properties": {
+          "label": "G1",
+          "coordinateAnchor": "center",
+          "sourceId": "G1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G2-surface",
+        "x": -768,
+        "y": -960,
+        "properties": {
+          "sourceId": "G2"
+        }
+      },
+      "landmark": {
+        "id": "G2",
+        "x": -768,
+        "y": -960,
+        "properties": {
+          "label": "G2",
+          "coordinateAnchor": "center",
+          "sourceId": "G2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G3-surface",
+        "x": -416,
+        "y": -1024,
+        "properties": {
+          "sourceId": "G3"
+        }
+      },
+      "landmark": {
+        "id": "G3",
+        "x": -416,
+        "y": -1024,
+        "properties": {
+          "label": "G3",
+          "coordinateAnchor": "center",
+          "sourceId": "G3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G4-surface",
+        "x": -64,
+        "y": -960,
+        "properties": {
+          "sourceId": "G4"
+        }
+      },
+      "landmark": {
+        "id": "G4",
+        "x": -64,
+        "y": -960,
+        "properties": {
+          "label": "G4",
+          "coordinateAnchor": "center",
+          "sourceId": "G4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G5-surface",
+        "x": 288,
+        "y": -1024,
+        "properties": {
+          "sourceId": "G5"
+        }
+      },
+      "landmark": {
+        "id": "G5",
+        "x": 288,
+        "y": -1024,
+        "properties": {
+          "label": "G5",
+          "coordinateAnchor": "center",
+          "sourceId": "G5"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G6-surface",
+        "x": 640,
+        "y": -960,
+        "properties": {
+          "sourceId": "G6"
+        }
+      },
+      "landmark": {
+        "id": "G6",
+        "x": 640,
+        "y": -960,
+        "properties": {
+          "label": "G6",
+          "coordinateAnchor": "center",
+          "sourceId": "G6"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G7-surface",
+        "x": 992,
+        "y": -1024,
+        "properties": {
+          "sourceId": "G7"
+        }
+      },
+      "landmark": {
+        "id": "G7",
+        "x": 992,
+        "y": -1024,
+        "properties": {
+          "label": "G7",
+          "coordinateAnchor": "center",
+          "sourceId": "G7"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "G8-surface",
+        "x": 1344,
+        "y": -960,
+        "properties": {
+          "sourceId": "G8"
+        }
+      },
+      "landmark": {
+        "id": "G8",
+        "x": 1344,
+        "y": -960,
+        "properties": {
+          "label": "G8",
+          "coordinateAnchor": "center",
+          "sourceId": "G8"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "D1-surface",
+        "x": 1568,
+        "y": -832,
+        "properties": {
+          "sourceId": "D1"
+        }
+      },
+      "landmark": {
+        "id": "D1",
+        "x": 1568,
+        "y": -832,
+        "properties": {
+          "label": "D1",
+          "coordinateAnchor": "center",
+          "sourceId": "D1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "D2-surface",
+        "x": 1280,
+        "y": -576,
+        "properties": {
+          "sourceId": "D2"
+        }
+      },
+      "landmark": {
+        "id": "D2",
+        "x": 1280,
+        "y": -576,
+        "properties": {
+          "label": "D2",
+          "coordinateAnchor": "center",
+          "sourceId": "D2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "S1-surface",
+        "x": 928,
+        "y": -512,
+        "properties": {
+          "sourceId": "S1"
+        }
+      },
+      "landmark": {
+        "id": "S1",
+        "x": 928,
+        "y": -512,
+        "properties": {
+          "label": "S1",
+          "coordinateAnchor": "center",
+          "sourceId": "S1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "S3-surface",
+        "x": 224,
+        "y": -512,
+        "properties": {
+          "sourceId": "S3"
+        }
+      },
+      "landmark": {
+        "id": "S3",
+        "x": 224,
+        "y": -512,
+        "properties": {
+          "label": "S3",
+          "coordinateAnchor": "center",
+          "sourceId": "S3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "S4-surface",
+        "x": -128,
+        "y": -576,
+        "properties": {
+          "sourceId": "S4"
+        }
+      },
+      "landmark": {
+        "id": "S4",
+        "x": -128,
+        "y": -576,
+        "properties": {
+          "label": "S4",
+          "coordinateAnchor": "center",
+          "sourceId": "S4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "S5-surface",
+        "x": -480,
+        "y": -512,
+        "properties": {
+          "sourceId": "S5"
+        }
+      },
+      "landmark": {
+        "id": "S5",
+        "x": -480,
+        "y": -512,
+        "properties": {
+          "label": "S5",
+          "coordinateAnchor": "center",
+          "sourceId": "S5"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "S6-surface",
+        "x": -832,
+        "y": -576,
+        "properties": {
+          "sourceId": "S6"
+        }
+      },
+      "landmark": {
+        "id": "S6",
+        "x": -832,
+        "y": -576,
+        "properties": {
+          "label": "S6",
+          "coordinateAnchor": "center",
+          "sourceId": "S6"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "U1-surface",
+        "x": -896,
+        "y": -768,
+        "properties": {
+          "sourceId": "U1"
+        }
+      },
+      "landmark": {
+        "id": "U1",
+        "x": -896,
+        "y": -768,
+        "properties": {
+          "label": "U1",
+          "coordinateAnchor": "center",
+          "sourceId": "U1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "U2-surface",
+        "x": -624,
+        "y": -1024,
+        "properties": {
+          "sourceId": "U2"
+        }
+      },
+      "landmark": {
+        "id": "U2",
+        "x": -624,
+        "y": -1024,
+        "properties": {
+          "label": "U2",
+          "coordinateAnchor": "center",
+          "sourceId": "U2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "U3-surface",
+        "x": -336,
+        "y": -1280,
+        "properties": {
+          "sourceId": "U3"
+        }
+      },
+      "landmark": {
+        "id": "U3",
+        "x": -336,
+        "y": -1280,
+        "properties": {
+          "label": "U3",
+          "coordinateAnchor": "center",
+          "sourceId": "U3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "U4-surface",
+        "x": -16,
+        "y": -1504,
+        "properties": {
+          "sourceId": "U4"
+        }
+      },
+      "landmark": {
+        "id": "U4",
+        "x": -16,
+        "y": -1504,
+        "properties": {
+          "label": "U4",
+          "coordinateAnchor": "center",
+          "sourceId": "U4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "C1-surface",
+        "x": 320,
+        "y": -1568,
+        "properties": {
+          "sourceId": "C1"
+        }
+      },
+      "landmark": {
+        "id": "C1",
+        "x": 320,
+        "y": -1568,
+        "properties": {
+          "label": "C1",
+          "coordinateAnchor": "center",
+          "sourceId": "C1"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "C2-surface",
+        "x": 672,
+        "y": -1632,
+        "properties": {
+          "sourceId": "C2"
+        }
+      },
+      "landmark": {
+        "id": "C2",
+        "x": 672,
+        "y": -1632,
+        "properties": {
+          "label": "C2",
+          "coordinateAnchor": "center",
+          "sourceId": "C2"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "C3-surface",
+        "x": 1024,
+        "y": -1696,
+        "properties": {
+          "sourceId": "C3"
+        }
+      },
+      "landmark": {
+        "id": "C3",
+        "x": 1024,
+        "y": -1696,
+        "properties": {
+          "label": "C3",
+          "coordinateAnchor": "center",
+          "sourceId": "C3"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "C4-surface",
+        "x": 1376,
+        "y": -1760,
+        "properties": {
+          "sourceId": "C4"
+        }
+      },
+      "landmark": {
+        "id": "C4",
+        "x": 1376,
+        "y": -1760,
+        "properties": {
+          "label": "C4",
+          "coordinateAnchor": "center",
+          "sourceId": "C4"
+        }
+      }
+    },
+    {
+      "target": {
+        "id": "C5-surface",
+        "x": 1696,
+        "y": -1904,
+        "properties": {
+          "sourceId": "C5"
+        }
+      },
+      "landmark": {
+        "id": "C5",
+        "x": 1696,
+        "y": -1904,
+        "properties": {
+          "label": "C5",
+          "coordinateAnchor": "center",
+          "sourceId": "C5"
+        }
+      }
+    }
+  ],
   "behaviorRefs": [],
   "scenario": {
     "status": "scenario-only",

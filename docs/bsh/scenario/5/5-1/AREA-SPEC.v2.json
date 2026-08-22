@@ -43,8 +43,8 @@
     },
     "exit": {
       "id": "sector-05-01:scenario-exit",
-      "x": 1160,
-      "y": -2100
+      "x": 800,
+      "y": -1840
     },
     "nextAreaId": null,
     "surfaces": [
@@ -525,118 +525,34 @@
         "sourceId": "h6"
       },
       {
-        "id": "sector-05-01:route-entry",
-        "x": -1900,
-        "y": -64,
-        "sourceId": "entry"
+        "id": "sector-05-01:route-h4-flow-a",
+        "x": -700,
+        "y": -1660,
+        "sourceId": "h4-flow-a"
       },
       {
-        "id": "sector-05-01:route-h1",
-        "x": -1600,
-        "y": -240,
-        "sourceId": "h1"
+        "id": "sector-05-01:route-h4-flow-b",
+        "x": -320,
+        "y": -1720,
+        "sourceId": "h4-flow-b"
       },
       {
-        "id": "sector-05-01:route-h2-a",
-        "x": -940,
-        "y": -620,
-        "sourceId": "h2-a"
+        "id": "sector-05-01:route-h4-flow-c",
+        "x": 60,
+        "y": -1740,
+        "sourceId": "h4-flow-c"
       },
       {
-        "id": "sector-05-01:route-h2-b",
-        "x": -580,
-        "y": -700,
-        "sourceId": "h2-b"
-      },
-      {
-        "id": "sector-05-01:route-h2-c",
-        "x": -200,
-        "y": -760,
-        "sourceId": "h2-c"
-      },
-      {
-        "id": "sector-05-01:route-h2-d",
-        "x": 180,
-        "y": -800,
-        "sourceId": "h2-d"
-      },
-      {
-        "id": "sector-05-01:route-h2-e",
-        "x": 560,
-        "y": -840,
-        "sourceId": "h2-e"
-      },
-      {
-        "id": "sector-05-01:route-h3-a",
-        "x": 760,
-        "y": -1140,
-        "sourceId": "h3-a"
-      },
-      {
-        "id": "sector-05-01:route-h3-b",
-        "x": 400,
-        "y": -1220,
-        "sourceId": "h3-b"
-      },
-      {
-        "id": "sector-05-01:route-h3-c",
-        "x": 20,
-        "y": -1260,
-        "sourceId": "h3-c"
-      },
-      {
-        "id": "sector-05-01:route-h3-d",
-        "x": -360,
-        "y": -1300,
-        "sourceId": "h3-d"
-      },
-      {
-        "id": "sector-05-01:route-h3-e",
-        "x": -740,
-        "y": -1340,
-        "sourceId": "h3-e"
-      },
-      {
-        "id": "sector-05-01:route-h4-safe-a",
-        "x": -820,
-        "y": -1630,
-        "sourceId": "h4-safe-a"
-      },
-      {
-        "id": "sector-05-01:route-h4-safe-b",
-        "x": -460,
-        "y": -1710,
-        "sourceId": "h4-safe-b"
-      },
-      {
-        "id": "sector-05-01:route-h4-safe-c",
-        "x": -100,
-        "y": -1750,
-        "sourceId": "h4-safe-c"
-      },
-      {
-        "id": "sector-05-01:route-h4-safe-d",
-        "x": 260,
+        "id": "sector-05-01:route-h4-flow-d",
+        "x": 440,
         "y": -1760,
-        "sourceId": "h4-safe-d"
+        "sourceId": "h4-flow-d"
       },
       {
-        "id": "sector-05-01:route-h4-safe-e",
-        "x": 620,
-        "y": -1780,
-        "sourceId": "h4-safe-e"
-      },
-      {
-        "id": "sector-05-01:route-h5",
-        "x": 900,
-        "y": -1940,
-        "sourceId": "h5"
-      },
-      {
-        "id": "sector-05-01:route-h6",
-        "x": 1160,
-        "y": -2100,
-        "sourceId": "h6"
+        "id": "sector-05-01:route-h4-flow-e",
+        "x": 800,
+        "y": -1840,
+        "sourceId": "h4-flow-e"
       }
     ],
     "recoveryPoints": [],

@@ -393,12 +393,6 @@
         "sourceId": "hub"
       },
       {
-        "id": "sector-05-05:route-hub",
-        "x": 0,
-        "y": -380,
-        "sourceId": "hub"
-      },
-      {
         "id": "sector-05-05:route-c1",
         "x": -300,
         "y": -500,
@@ -429,10 +423,34 @@
         "sourceId": "p1"
       },
       {
+        "id": "sector-05-05:route-upper-1",
+        "x": -650,
+        "y": -1300,
+        "sourceId": "upper-1"
+      },
+      {
+        "id": "sector-05-05:route-upper-2",
+        "x": -400,
+        "y": -1500,
+        "sourceId": "upper-2"
+      },
+      {
         "id": "sector-05-05:route-directive",
         "x": -150,
         "y": -1650,
         "sourceId": "directive"
+      },
+      {
+        "id": "sector-05-05:route-lower-1",
+        "x": -760,
+        "y": -1450,
+        "sourceId": "lower-1"
+      },
+      {
+        "id": "sector-05-05:route-lower-2",
+        "x": -500,
+        "y": -1600,
+        "sourceId": "lower-2"
       },
       {
         "id": "sector-05-05:route-bridge-1",
@@ -445,12 +463,6 @@
         "x": 420,
         "y": -1550,
         "sourceId": "bridge-2"
-      },
-      {
-        "id": "sector-05-05:route-ascent-entry",
-        "x": 650,
-        "y": -1450,
-        "sourceId": "ascent-entry"
       },
       {
         "id": "sector-05-05:route-ascent-entry",

@@ -198,19 +198,7 @@
       }
     ],
     "checkpoints": [],
-    "objects": [
-      {
-        "id": "sector-06-06:D1",
-        "kind": "scenario-enemy-slot",
-        "enemyType": "patrol-drone-t1",
-        "position": {
-          "x": 420,
-          "y": -600
-        },
-        "coordinateAnchor": "center",
-        "sourceId": "sector-06-06:D1"
-      }
-    ],
+    "objects": [],
     "objectives": [],
     "windZones": [],
     "scannerGroups": [],

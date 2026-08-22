@@ -80,22 +80,10 @@
         "sourceId": "h04"
       },
       {
-        "id": "sector-05-07:route-h04",
-        "x": 360,
-        "y": -300,
-        "sourceId": "h04"
-      },
-      {
         "id": "sector-05-07:route-h05",
         "x": 500,
         "y": -560,
         "sourceId": "h05"
-      },
-      {
-        "id": "sector-05-07:route-h06",
-        "x": 500,
-        "y": -820,
-        "sourceId": "h06"
       },
       {
         "id": "sector-05-07:route-h06",
@@ -134,22 +122,10 @@
         "sourceId": "h11"
       },
       {
-        "id": "sector-05-07:route-h11",
-        "x": -1120,
-        "y": -1080,
-        "sourceId": "h11"
-      },
-      {
         "id": "sector-05-07:route-h12",
         "x": -1120,
         "y": -1360,
         "sourceId": "h12"
-      },
-      {
-        "id": "sector-05-07:route-h13",
-        "x": -1120,
-        "y": -1600,
-        "sourceId": "h13"
       },
       {
         "id": "sector-05-07:route-h13",
@@ -174,12 +150,6 @@
         "x": -220,
         "y": -1660,
         "sourceId": "h16"
-      },
-      {
-        "id": "sector-05-07:route-h17",
-        "x": 80,
-        "y": -1700,
-        "sourceId": "h17"
       },
       {
         "id": "sector-05-07:route-h17",

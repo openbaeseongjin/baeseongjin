@@ -74,22 +74,40 @@
         "sourceId": "h03"
       },
       {
+        "id": "sector-05-08:route-h04",
+        "x": -120,
+        "y": -980,
+        "sourceId": "h04"
+      },
+      {
+        "id": "sector-05-08:route-h05",
+        "x": 100,
+        "y": -1030,
+        "sourceId": "h05"
+      },
+      {
         "id": "sector-05-08:route-h06",
         "x": 320,
         "y": -1120,
         "sourceId": "h06"
       },
       {
+        "id": "sector-05-08:route-h07",
+        "x": -80,
+        "y": -1120,
+        "sourceId": "h07"
+      },
+      {
+        "id": "sector-05-08:route-h08",
+        "x": 140,
+        "y": -1180,
+        "sourceId": "h08"
+      },
+      {
         "id": "sector-05-08:route-h09",
         "x": 320,
         "y": -1430,
         "sourceId": "h09"
-      },
-      {
-        "id": "sector-05-08:route-h10",
-        "x": 320,
-        "y": -1740,
-        "sourceId": "h10"
       },
       {
         "id": "sector-05-08:route-h10",
@@ -116,12 +134,6 @@
         "sourceId": "h13"
       },
       {
-        "id": "sector-05-08:route-h13",
-        "x": -320,
-        "y": -1980,
-        "sourceId": "h13"
-      },
-      {
         "id": "sector-05-08:route-h14",
         "x": -320,
         "y": -2280,
@@ -132,12 +144,6 @@
         "x": -140,
         "y": -2470,
         "sourceId": "h15"
-      },
-      {
-        "id": "sector-05-08:route-h16",
-        "x": 80,
-        "y": -2600,
-        "sourceId": "h16"
       },
       {
         "id": "sector-05-08:route-h16",

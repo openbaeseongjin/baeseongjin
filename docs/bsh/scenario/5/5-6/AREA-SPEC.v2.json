@@ -74,10 +74,22 @@
         "sourceId": "p0"
       },
       {
+        "id": "sector-05-06:route-jam-a1",
+        "x": 430,
+        "y": -1120,
+        "sourceId": "jam-a1"
+      },
+      {
         "id": "sector-05-06:route-merge-a",
         "x": 160,
         "y": -1080,
         "sourceId": "merge-a"
+      },
+      {
+        "id": "sector-05-06:route-jam-b1",
+        "x": 500,
+        "y": -1230,
+        "sourceId": "jam-b1"
       },
       {
         "id": "sector-05-06:route-drop-1",
@@ -90,12 +102,6 @@
         "x": -160,
         "y": -650,
         "sourceId": "drop-2"
-      },
-      {
-        "id": "sector-05-06:route-trench-entry",
-        "x": -120,
-        "y": -420,
-        "sourceId": "trench-entry"
       },
       {
         "id": "sector-05-06:route-trench-entry",
@@ -122,12 +128,6 @@
         "sourceId": "trench-exit"
       },
       {
-        "id": "sector-05-06:route-trench-exit",
-        "x": 800,
-        "y": -420,
-        "sourceId": "trench-exit"
-      },
-      {
         "id": "sector-05-06:route-riser-1",
         "x": 800,
         "y": -720,
@@ -146,12 +146,6 @@
         "sourceId": "riser-top"
       },
       {
-        "id": "sector-05-06:route-riser-top",
-        "x": 800,
-        "y": -1320,
-        "sourceId": "riser-top"
-      },
-      {
         "id": "sector-05-06:route-aegis-1",
         "x": 520,
         "y": -1480,
@@ -162,12 +156,6 @@
         "x": 240,
         "y": -1580,
         "sourceId": "aegis-2"
-      },
-      {
-        "id": "sector-05-06:route-aegis-safe",
-        "x": 0,
-        "y": -1700,
-        "sourceId": "aegis-safe"
       },
       {
         "id": "sector-05-06:route-aegis-safe",
