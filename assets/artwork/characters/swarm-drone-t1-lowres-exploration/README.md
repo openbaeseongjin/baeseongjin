@@ -2,7 +2,7 @@
 
 - Asset ID: `swarm-drone-t1-lowres-exploration`
 - Category: `characters`
-- Status: `AUTHORING ANIMATION CANDIDATE / NOT RUNTIME-INTEGRATED`
+- Status: `RUNTIME-INTEGRATED / DEBUG VERIFIED`
 - Purpose: Sector 01 군집 드론 단일 개체의 외형과 접촉 공격 동작 제작
 - Intended logical cell: transparent `24x24` to `32x32`
 - Intended opaque bounds: approximately `15x15` to `23x23` logical pixels
@@ -28,9 +28,12 @@
 - `source/imagegen-swarm-drone-animation-raw.png`: 4x3 동작 시트 첫 결과, `1448x1086`, 불투명 checkerboard가 포함된 보존 원본
 - `source/imagegen-swarm-drone-animation-aligned.png`: core 정렬을 요청한 ImageGen 수정 원본, `1447x1087` RGBA
 - `source/generation-prompt.md`: 생성·배경 추출 prompt와 정규화 조건
+- `source/normalize-runtime-assets.py`: 단독 이미지·재생 preview·32px Runtime atlas를 재생성하는 결정적 Pillow 정규화 도구
+- `export/swarm-drone-approved-still.png`: 승인 외형의 첫 `swarm-chase` frame을 분리한 `362x362` RGBA 단독 이미지
 - `export/swarm-drone-contact-animation-atlas-v3.png`: 최종 authoring atlas, `1448x1086` RGBA, 4x3 grid, cell `362x362`, core anchor `(181,181)`
 - `preview/swarm-drone-concept-sheet.png`: 앱에서 형상을 바로 비교하기 위한 불투명 checkerboard 미리보기
 - `preview/swarm-drone-contact-animation-atlas-v3.png`: 최종 투명 atlas 검토 미리보기
+- `preview/swarm-drone-contact-animation.webp`: 12개 authoring frame과 제안 timing을 그대로 재생하는 lossless WebP
 
 ## Candidate map
 
@@ -46,21 +49,30 @@
 | 1 | 0~3 | contact cue: 핀 수축 → 몸체 압축 → 짧은 우향 body-check | `45 / 55 / 70 / 90ms`, non-loop |
 | 2 | 0~3 | `swarm-recoil`: 좌향 반동 → 핀 전개 제동 → 추격 자세 복귀 | `100 / 110 / 120 / 120ms`, non-loop |
 
-contact row는 현재 gameplay presentation state가 아니라 `SWARM_CONTACT` 사건에 붙일 수 있는 authoring cue 후보다. Runtime 통합 시 새 gameplay state를 만들지 않고 기존 사건을 적 ID별 표현 controller에 전달하는 방식으로 검토한다. recoil timing 합계 `450ms`는 현재 gameplay recoil `0.45초`와 맞지만 manifest timing이 gameplay 상태 전이를 소유하지 않는다.
+contact row는 별도 gameplay presentation state가 아니라 실제 접촉 순간을 강조하는 authoring cue다. Runtime은 새 gameplay state를 만들지 않고 기존 `swarm-recoil` clip의 앞부분에 이 cue를 포함한다. 전체 clip을 현재 gameplay recoil `0.45초` 안에 맞추되 manifest timing은 gameplay 상태 전이를 소유하지 않는다.
+
+## Runtime normalization
+
+`source/normalize-runtime-assets.py`는 Pillow `12.3.0`으로 각 authoring cell에서 외곽 동작 전체가 들어오는 공통 `268x268` 영역을 잘라 nearest-neighbor로 `32x32`에 축소한다. 원본 core `(181,181)`은 Runtime cell `(13,16)`에 대응하며 manifest anchor `0.40625, 0.5`가 이 지점을 gameplay 위치에 맞춘다. Alpha는 `96`을 기준으로 hard-alpha 처리하고 모든 frame에 같은 16색 Sector 01 팔레트를 적용한다. 결과 `assets/runtime/characters/sector-01-enemies/swarm-motion.png`는 `128x96` RGBA, 4x3 grid다.
+
+Runtime `swarm-chase`는 첫 행 4 frame을 `90ms` loop로 사용한다. 접촉은 예측 가능한 사전 상태가 아니므로 별도 gameplay state를 만들지 않는다. 실제 body contact와 동시에 시작되는 기존 `swarm-recoil` 표현 clip 안에서 둘째 행의 압축·body-check 4 frame과 셋째 행의 반동 4 frame을 합계 `450ms`로 재생한다. 이는 기존 gameplay recoil `0.45초`에 맞춘 표현 정규화이며 행동 FSM·접촉 피해·collider·health·physics·network authority를 변경하지 않는다.
 
 ## Validation and next step
 
-현재 결과는 동작 검토용 고해상도 authoring source다. 최종 `v3` export는 RGBA이며 실제 alpha 범위 `0~255`, atlas `1448x1086`, 셀 `362x362`, 정확한 4x3 분할, 12개 frame의 공통 이동 기준점 `(181,181)`과 frame별 투명 padding을 확인했다. 독립적인 색상 중심 검사에서도 보라색 core 중심이 기준점 반경 `3px` 안에 유지된다. 정규화는 Node.js `v24.19.0`과 Sharp `0.35.3`으로 canvas 여백을 `1448x1086`에 맞추고 각 cell을 평행 이동했으며 sprite 색·크기·형상은 변경하지 않았다. 저해상도 runtime validator 대상은 아니며, Runtime 통합 전에는 같은 외형을 실제 `24x24`~`32x32` logical cell의 hard-alpha pixel art로 정규화하고 `1x`/정수 배율 family-scale preview를 별도로 검수해야 한다.
+최종 `v3` authoring export는 RGBA이며 실제 alpha 범위 `0~255`, atlas `1448x1086`, 셀 `362x362`, 정확한 4x3 분할, 12개 frame의 공통 이동 기준점 `(181,181)`과 frame별 투명 padding을 확인했다. 독립적인 색상 중심 검사에서도 보라색 core 중심이 기준점 반경 `3px` 안에 유지된다. Node.js `v24.19.0`과 Sharp `0.35.3` 정규화는 sprite 색·크기·형상을 변경하지 않았다. 이후 Pillow `12.3.0` 정규화로 실제 `32x32` logical cell의 hard-alpha Runtime atlas를 만들었고 `1x`·게임 정수 배율을 디버그 더미에서 검수했다.
 
-Runtime manifest, atlas, renderer, gameplay timing, collider, hitbox, damage, physics와 network authority는 이번 범위에 포함하지 않는다.
+Runtime atlas와 enemy manifest 등록, 기존 디버그 더미의 package 선택은 이번 통합 범위에 포함한다. Renderer 구조, gameplay timing, collider, hitbox, damage, health, physics와 network authority는 변경하지 않는다.
 
 ## Validation ledger
 
 - Owner: Codex
-- Base SHA: `28f684d42e695395cb2e975e457ac7e1c809279a`
-- Pre-ledger diff fingerprint: `9b7806459b9ae1d0a20409c02200a1d67d6a8b8c`
+- Base SHA: `650a5ef5f79ad0a655a989b6ff38da0ebc4f6fd8`
+- Pre-ledger diff fingerprint: `5190f3ce0b37e8c20ae876cb28c7e517830a6b76`
 - `npm run check`: PASS — syntax 401, AREA-SPEC 16, generated output 21, Boss Stage, Direction 2/33, scenario integration 48
 - `npm run format:check`: PASS
-- `git diff --check`: PASS, existing CRLF conversion warnings only
-- Manual image check: PASS — transparent RGBA, 4x3 cells, 12 non-empty frames, meaningful border alpha `0`, core color centroid within `3px` of `(181,181)`
-- Runtime enemy validator and browser gameplay check: not applicable to this authoring-only output; no runtime package or renderer changed
+- `git diff --check` and staged diff check: PASS
+- Deterministic normalization: PASS — standalone PNG, lossless 12-frame WebP and Runtime atlas SHA-256 reproduced exactly
+- Runtime image check: PASS — `128x96` RGBA, `32x32` 4x3 cells, 12 non-empty hard-alpha frames, transparent border padding, common core anchor `(13,16)`
+- `npm run validate:enemy-sprite-assets -- assets/runtime/characters/sector-01-enemies`: PASS — 8 atlases, 7 enemies, 48 states
+- Browser debug dummy: PASS — `sector-01-enemies`, fixed `swarm-chase`, fixed `swarm-recoil`, automatic cycle at `1280x720` and `844x390`, no browser warnings or errors
+- Automated test suite: not run; the user requested asset integration and interactive dummy verification, and repository policy does not add or run automatic tests without an explicit request

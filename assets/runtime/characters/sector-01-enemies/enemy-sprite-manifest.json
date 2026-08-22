@@ -42,6 +42,11 @@
             "image": "support-motion.png",
             "size": { "width": 128, "height": 64 },
             "frameSize": { "width": 32, "height": 32 }
+        },
+        "swarm-motion": {
+            "image": "swarm-motion.png",
+            "size": { "width": 128, "height": 96 },
+            "frameSize": { "width": 32, "height": 32 }
         }
     },
     "aliases": {
@@ -360,6 +365,41 @@
                         { "atlas": "support-motion", "cell": { "column": 1, "row": 1 }, "durationMs": 160 },
                         { "atlas": "support-motion", "cell": { "column": 2, "row": 1 }, "durationMs": 160 },
                         { "atlas": "support-motion", "cell": { "column": 3, "row": 1 }, "durationMs": 160 }
+                    ]
+                }
+            }
+        },
+        "swarm-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 18, "height": 18 },
+                "anchor": { "x": 0.40625, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "swarm-chase" },
+                "knockback": { "fallback": "swarm-recoil" },
+                "swarm-chase": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "swarm-motion", "cell": { "column": 0, "row": 0 }, "durationMs": 90 },
+                        { "atlas": "swarm-motion", "cell": { "column": 1, "row": 0 }, "durationMs": 90 },
+                        { "atlas": "swarm-motion", "cell": { "column": 2, "row": 0 }, "durationMs": 90 },
+                        { "atlas": "swarm-motion", "cell": { "column": 3, "row": 0 }, "durationMs": 90 }
+                    ]
+                },
+                "swarm-recoil": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "swarm-motion", "cell": { "column": 0, "row": 1 }, "durationMs": 30 },
+                        { "atlas": "swarm-motion", "cell": { "column": 1, "row": 1 }, "durationMs": 35 },
+                        { "atlas": "swarm-motion", "cell": { "column": 2, "row": 1 }, "durationMs": 45 },
+                        { "atlas": "swarm-motion", "cell": { "column": 3, "row": 1 }, "durationMs": 50 },
+                        { "atlas": "swarm-motion", "cell": { "column": 0, "row": 2 }, "durationMs": 55 },
+                        { "atlas": "swarm-motion", "cell": { "column": 1, "row": 2 }, "durationMs": 65 },
+                        { "atlas": "swarm-motion", "cell": { "column": 2, "row": 2 }, "durationMs": 80 },
+                        { "atlas": "swarm-motion", "cell": { "column": 3, "row": 2 }, "durationMs": 90 }
                     ]
                 }
             }
