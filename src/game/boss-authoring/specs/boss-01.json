@@ -304,7 +304,8 @@
       "vulnerability": {
         "durationSeconds": 3,
         "targetId": "boss-01:rear-drive",
-        "trigger": "max-extension"
+        "trigger": "max-extension",
+        "visualPresetId": "rear-drive"
       }
     },
     {
@@ -321,7 +322,8 @@
       "vulnerability": {
         "durationSeconds": 3,
         "targetId": "boss-01:side-gearbox",
-        "trigger": "sweep-complete"
+        "trigger": "sweep-complete",
+        "visualPresetId": "side-gearbox"
       }
     },
     {
@@ -339,7 +341,8 @@
       "vulnerability": {
         "durationSeconds": 4,
         "targetId": "boss-01:central-lock-core",
-        "trigger": "beam-failure"
+        "trigger": "beam-failure",
+        "visualPresetId": "central-lock-core"
       }
     }
   ],

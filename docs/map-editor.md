@@ -28,7 +28,7 @@ Enemy 종류·activation anchor·Wind mode·Boss visual preset/mechanic/vulnerab
 6. **저장 적용**으로 v2 JSON을 갱신한다. Runtime Stage는 결정적 generated JS도 함께 갱신한다. stale revision, 읽기 전용 영역, 2 MiB 초과 요청은 거부된다.
 7. **새 미리보기**는 `Runtime 적용`과 `Runtime 준비` Stage에서만 선택된 generated Area 하나의 새 로컬 싱글플레이 run을 실제 게임의 sprite renderer·환경 표현·HUD·입력 경로로 연다. 시나리오 전용 Stage에는 의도적으로 제공하지 않는다.
 
-Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor·등록된 Mechanic·Phase 순서와 수·전환·HUD를 편집한다. `phases[].basePhaseHealth`, `combat.additionalPlayerMultiplier`, `combat.weakFixedPercent`가 HP 저작 권위이며, Inspector의 1~4인 총 HP·Phase HP·floor·약점 고정 피해는 저장되지 않는 읽기 전용 파생값이다. Boss Preview는 메모리에 저장한 현재 Boss Stage Spec을 독립 `GameSimulation`의 전투 시작 상태로 열어 이동·Rope·일반 공격·Boss HUD를 실제 게임 입력으로 확인한다. 새 mechanic 종류는 Editor 텍스트만으로 만들 수 없고 먼저 코드 Registry와 validator를 추가해야 한다.
+Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor·등록된 Mechanic·Phase 순서와 수·전환·HUD를 편집한다. `phases[].basePhaseHealth`, `combat.additionalPlayerMultiplier`, `combat.weakFixedPercent`가 HP 저작 권위이며, Inspector의 1~4인 총 HP·Phase HP·floor·약점 고정 피해는 저장되지 않는 읽기 전용 파생값이다. Boss Preview는 메모리에 저장한 현재 Boss Stage Spec을 독립 `GameSimulation`의 전투 시작 상태로 열고 Player를 실제 Carriage 근처에 배치한 뒤 둘 사이를 framing해 Polygon mock·이동·Rope·일반 공격·Boss HUD를 즉시 확인한다. 실제 Stage 진입 위치와 진행 규칙은 바꾸지 않는다. 새 mechanic 종류는 Editor 텍스트만으로 만들 수 없고 먼저 코드 Registry와 validator를 추가해야 한다.
 
 맵 경계·시작 지점·출구·지형 표면·앵커·복구/경로·기존 적 슬롯·바람·카메라 구역은 편집 가능하다. 목표·출구의 목적지/해제 조건·스토리·스캐너·행동 레지스트리는 표시 전용이며 초안과 서버가 모두 변경을 거부한다. 위치가 있는 편집 요소는 드래그와 X/Y 수치 입력 모두 가장 가까운 5px 격자로 스냅하며, 카메라 구역의 최소/최대 Y도 같은 규칙을 따른다. 캔버스 드래그는 이동 중 임시 상태만 갱신하고 pointer release에서 되돌리기 한 건으로 확정한다.
 

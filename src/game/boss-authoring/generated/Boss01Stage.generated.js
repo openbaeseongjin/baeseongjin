@@ -304,7 +304,8 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             vulnerability: {
                 durationSeconds: 3,
                 targetId: "boss-01:rear-drive",
-                trigger: "max-extension"
+                trigger: "max-extension",
+                visualPresetId: "rear-drive"
             }
         },
         {
@@ -319,7 +320,8 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             vulnerability: {
                 durationSeconds: 3,
                 targetId: "boss-01:side-gearbox",
-                trigger: "sweep-complete"
+                trigger: "sweep-complete",
+                visualPresetId: "side-gearbox"
             }
         },
         {
@@ -334,7 +336,8 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             vulnerability: {
                 durationSeconds: 4,
                 targetId: "boss-01:central-lock-core",
-                trigger: "beam-failure"
+                trigger: "beam-failure",
+                visualPresetId: "central-lock-core"
             }
         }
     ],
