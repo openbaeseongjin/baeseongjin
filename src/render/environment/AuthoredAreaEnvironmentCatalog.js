@@ -6,13 +6,24 @@ const SECTOR_01_MAINTENANCE_SELECTION = Object.freeze({
     manifestUrl: runtimeAssetUrl("environments", "sector-01-maintenance", "sprite-manifest.json")
 });
 
+const SECTOR_02_WORKER_DISTRICT_SELECTION = Object.freeze({
+    packageId: "sector-02-worker-district",
+    manifestUrl: runtimeAssetUrl("environments", "sector-02-worker-district", "sprite-manifest.json")
+});
+
+function sectorAreaSelections(sectorNumber, selection) {
+    const sectorId = String(sectorNumber).padStart(2, "0");
+    return Array.from({ length: 8 }, (_, index) => [
+        `sector-${sectorId}-${String(index + 1).padStart(2, "0")}`,
+        selection
+    ]);
+}
+
 export const AUTHORED_AREA_ENVIRONMENT_SELECTIONS = Object.freeze(
-    Object.fromEntries(
-        Array.from({ length: 8 }, (_, index) => [
-            `sector-01-${String(index + 1).padStart(2, "0")}`,
-            SECTOR_01_MAINTENANCE_SELECTION
-        ])
-    )
+    Object.fromEntries([
+        ...sectorAreaSelections(1, SECTOR_01_MAINTENANCE_SELECTION),
+        ...sectorAreaSelections(2, SECTOR_02_WORKER_DISTRICT_SELECTION)
+    ])
 );
 
 export async function loadAuthoredAreaEnvironmentDefinitions({ fetchFn = globalThis.fetch, warn = console.warn } = {}) {

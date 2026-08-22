@@ -17,6 +17,8 @@ assets/runtime/environments/
 │     ├─ terrain-fill.png        # 지형 fill tile atlas
 │     ├─ terrain-edge.png        # 지형 edge tile atlas
 │     └─ decoration.png          # 장식 atlas
+├─ sector-01-maintenance/        # Sector 01 최종 authored package
+├─ sector-02-worker-district/    # Sector 02 최종 authored package
 └─ README.md
 ```
 
@@ -34,4 +36,6 @@ npm run validate:environment-assets -- assets/runtime/environments/default-mock
 - atlas 파일 수·크기와 frame 배열 길이는 바꿀 수 있지만 manifest field는 schema·loader·validator의 공개 계약을 따른다.
 - 상대 PNG 경로만 허용하고 asset directory 이탈을 거부한다.
 - `formatVersion: 1`, 5개 zone, backdrop layer, terrain material, decoration group을 필수로 요구한다.
+- authored package 선택은 `AuthoredAreaEnvironmentCatalog`의 stable Area ID가 소유한다.
+- Sector 01→02 전환은 `PixelBackdropRenderer`가 Player world Y에서만 파생한 비율로 두 backdrop과 sky를 교차 합성한다. gameplay·camera·network state나 collision을 추가하지 않는다.
 - player animation definition/schema에 환경 의미를 넣지 않는다.

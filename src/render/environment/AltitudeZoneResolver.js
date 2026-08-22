@@ -44,13 +44,17 @@ export function currentAuthoredArea(scene) {
     return authoredRegionForPosition(scene?.world, scene?.player?.position);
 }
 
-export function sceneEnvironmentZone(definition, scene) {
-    const area = currentAuthoredArea(scene);
+export function authoredEnvironmentZone(definition, area, fallbackAltitude = 0) {
     const authoredZoneId = AUTHORED_SECTOR_ZONE_IDS[area?.sectorId];
     if (authoredZoneId) {
         const authoredZone = definition.zones.find(({ id }) => id === authoredZoneId);
         if (authoredZone) return authoredZone;
     }
+    return definition.zoneAt(fallbackAltitude);
+}
+
+export function sceneEnvironmentZone(definition, scene) {
+    const area = currentAuthoredArea(scene);
     const playerAltitude = -(scene?.player?.position?.y ?? 0);
-    return definition.zoneAt(playerAltitude);
+    return authoredEnvironmentZone(definition, area, playerAltitude);
 }
