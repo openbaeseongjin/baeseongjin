@@ -24,6 +24,7 @@ import { AudioSettingsPanel } from "./game/ui/AudioSettingsPanel.js";
 import { DebugSettings } from "./game/metrics/DebugSettings.js";
 import { DebugPanel } from "./game/ui/DebugPanel.js";
 import { DebugEnemyTrainingControls } from "./game/ui/DebugEnemyTrainingControls.js";
+import { HelpDialog } from "./game/ui/HelpDialog.js";
 import { CURRENT_AUTHORED_AREA_CATALOG } from "./game/world/areas/CurrentAuthoredAreaCatalog.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
 import { loadDefaultEnemySpriteDefinition } from "./render/sprites/EnemySpriteCatalog.js";
@@ -71,6 +72,10 @@ const audioSettings = new AudioSettings({ storage: audioStorage });
 const settingsMenu = new SettingsMenu({
     root: document.getElementById("settings-dialog"),
     trigger: document.getElementById("settings-trigger")
+});
+const helpDialog = new HelpDialog({
+    root: document.getElementById("help-dialog"),
+    trigger: document.querySelector("[data-help-open]")
 });
 function applyHudVisibility(visible) {
     hudVisible = Boolean(visible);
@@ -127,6 +132,7 @@ const audioSettingsPanel = new AudioSettingsPanel({
     settings: audioSettings
 });
 settingsMenu.attach();
+helpDialog.attach();
 settingsMenu.registerTab({
     id: "audio",
     label: "오디오",
@@ -348,6 +354,7 @@ globalThis.addEventListener(
         audioHost?.suspend();
         audioSettingsPanel.detach();
         settingsMenu.detach();
+        helpDialog.detach();
         debugPanel.detach();
         debugEnemyTrainingControls.detach();
         app?.stop();

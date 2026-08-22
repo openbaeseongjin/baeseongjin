@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#061019" />
+        <meta name="application-name" content="ONE ROPE" />
+        <meta name="description" content="로프로 붕괴 도시를 올라가는 액션 로그라이크." />
+        <title>ONE ROPE</title>
+        <script>
+            if (new URLSearchParams(location.search).has("embedded")) {
+                document.documentElement.classList.add("embedded");
+            }
+        </script>
+        <style>
+            :root {
+                color-scheme: dark;
+                --bg: #061019;
+                --panel: #0c1821;
+                --panel-strong: #11222d;
+                --line: #314854;
+                --text: #edf5f8;
+                --muted: #9db0b9;
+                --cyan: #5de8ff;
+                --yellow: #ffe16c;
+                --green: #80d39a;
+                --red: #ef756d;
+                --amber: #efb75b;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+            }
+            body {
+                margin: 0;
+                overflow: hidden;
+                background: radial-gradient(circle at 78% 0%, rgba(30, 93, 112, 0.22), transparent 38rem), var(--bg);
+                color: var(--text);
+                font:
+                    15px/1.55 system-ui,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    sans-serif;
+            }
+            button,
+            a {
+                font: inherit;
+            }
+            .page-header {
+                height: 64px;
+                border-bottom: 1px solid rgba(93, 232, 255, 0.2);
+                background: rgba(6, 16, 25, 0.94);
+            }
+            .header-inner {
+                display: flex;
+                width: min(1180px, calc(100% - 28px));
+                height: 100%;
+                align-items: center;
+                justify-content: space-between;
+                gap: 18px;
+                margin: 0 auto;
+            }
+            .brand {
+                display: flex;
+                align-items: baseline;
+                gap: 12px;
+            }
+            .brand strong {
+                color: var(--cyan);
+                font:
+                    900 18px/1 ui-monospace,
+                    Consolas,
+                    monospace;
+                letter-spacing: 0.08em;
+            }
+            .brand span,
+            .slide-summary,
+            dd,
+            .growth-card p {
+                color: var(--muted);
+            }
+            .brand span {
+                font-size: 12px;
+            }
+            .back-link,
+            .deck-button {
+                display: inline-flex;
+                min-height: 40px;
+                align-items: center;
+                justify-content: center;
+                padding: 0 14px;
+                border: 1px solid rgba(93, 232, 255, 0.42);
+                border-radius: 9px;
+                color: var(--text);
+                background: #162b36;
+                text-decoration: none;
+                font-weight: 850;
+                cursor: pointer;
+            }
+            .back-link:hover,
+            .back-link:focus-visible,
+            .deck-button:hover:not(:disabled),
+            .deck-button:focus-visible,
+            .deck-dot:focus-visible {
+                outline: 2px solid var(--cyan);
+                outline-offset: 3px;
+            }
+            main {
+                display: grid;
+                width: min(1180px, calc(100% - 28px));
+                height: calc(100dvh - 64px);
+                grid-template-rows: minmax(0, 1fr) 72px;
+                margin: 0 auto;
+            }
+            .deck {
+                min-width: 0;
+                min-height: 0;
+                padding: 22px 0 14px;
+            }
+            .help-slide {
+                width: 100%;
+                min-width: 0;
+                height: 100%;
+                overflow: auto;
+                padding: clamp(20px, 3vw, 38px);
+                border: 1px solid var(--line);
+                border-radius: 18px;
+                background: linear-gradient(145deg, rgba(17, 34, 45, 0.98), rgba(9, 20, 26, 0.98));
+                box-shadow: 0 18px 54px rgba(0, 0, 0, 0.24);
+                scrollbar-color: #47616e transparent;
+            }
+            .help-slide[hidden] {
+                display: none;
+            }
+            .slide-heading {
+                display: flex;
+                align-items: end;
+                justify-content: space-between;
+                gap: 18px;
+                margin-bottom: 22px;
+            }
+            .eyebrow {
+                margin: 0 0 7px;
+                color: var(--cyan);
+                font:
+                    900 12px/1.2 ui-monospace,
+                    Consolas,
+                    monospace;
+                letter-spacing: 0.12em;
+            }
+            h1,
+            h2,
+            h3,
+            p {
+                margin-top: 0;
+            }
+            h1,
+            h2 {
+                margin-bottom: 0;
+                font-size: clamp(30px, 4.8vw, 54px);
+                line-height: 1.06;
+                letter-spacing: -0.035em;
+            }
+            h3 {
+                margin-bottom: 7px;
+                font-size: 18px;
+            }
+            .slide-summary {
+                max-width: 42ch;
+                margin: 0;
+            }
+            .mission-layout,
+            .controls,
+            .combat-layout,
+            .growth-grid {
+                display: grid;
+                gap: 14px;
+            }
+            .mission-layout {
+                grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+            }
+            .mission-copy {
+                display: flex;
+                min-height: 330px;
+                flex-direction: column;
+                justify-content: center;
+                padding: clamp(22px, 4vw, 48px);
+                border-left: 5px solid var(--cyan);
+                background: rgba(7, 17, 27, 0.58);
+            }
+            .mission-copy h1 {
+                max-width: 13ch;
+                margin-bottom: 18px;
+            }
+            .lead {
+                max-width: 58ch;
+                margin-bottom: 0;
+                color: #c9d8de;
+                font-size: 17px;
+            }
+            .goal-list,
+            .combat-rules {
+                display: grid;
+                gap: 10px;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+            .goal-list li {
+                display: grid;
+                grid-template-columns: 38px 1fr;
+                gap: 12px;
+                align-items: center;
+                min-height: 66px;
+                padding: 11px 14px;
+                border: 1px solid rgba(148, 163, 184, 0.2);
+                border-radius: 11px;
+                color: #cbd9df;
+                background: rgba(7, 17, 27, 0.68);
+            }
+            .goal-list b {
+                display: grid;
+                width: 36px;
+                height: 36px;
+                place-items: center;
+                border-radius: 50%;
+                color: #06212b;
+                background: var(--cyan);
+                font:
+                    900 13px/1 ui-monospace,
+                    Consolas,
+                    monospace;
+            }
+            .diagram {
+                overflow: hidden;
+                padding: 12px;
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                background: #07131c;
+            }
+            svg {
+                display: block;
+                width: 100%;
+                height: min(46vh, 400px);
+                min-height: 260px;
+            }
+            svg text {
+                fill: var(--text);
+                font:
+                    800 14px ui-monospace,
+                    Consolas,
+                    monospace;
+                paint-order: stroke;
+                stroke: #07131c;
+                stroke-width: 5px;
+            }
+            svg .small {
+                fill: #a9bbc3;
+                font-size: 11px;
+            }
+            .flow-strip {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                margin-top: 12px;
+            }
+            .flow-strip div,
+            .combat-rules li {
+                padding: 11px;
+                border: 1px solid rgba(148, 163, 184, 0.2);
+                border-radius: 9px;
+                color: #cbd9df;
+                background: rgba(7, 17, 27, 0.64);
+                text-align: center;
+                font-weight: 800;
+            }
+            .controls {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .control-card,
+            .growth-card {
+                padding: 20px;
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                background: rgba(7, 17, 27, 0.62);
+            }
+            .tag {
+                display: inline-flex;
+                margin-bottom: 10px;
+                padding: 3px 8px;
+                border-radius: 5px;
+                color: #08232c;
+                background: var(--cyan);
+                font:
+                    900 11px/1.4 ui-monospace,
+                    Consolas,
+                    monospace;
+            }
+            .tag.amber {
+                color: #271a04;
+                background: var(--amber);
+            }
+            .tag.green {
+                color: #092117;
+                background: var(--green);
+            }
+            .control-list {
+                display: grid;
+                margin: 0;
+            }
+            .control-row {
+                display: grid;
+                grid-template-columns: minmax(120px, 0.75fr) minmax(0, 1.25fr);
+                gap: 14px;
+                align-items: center;
+                padding: 9px 0;
+                border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            }
+            .control-row:last-child {
+                border-bottom: 0;
+            }
+            dt {
+                color: var(--text);
+                font-weight: 900;
+            }
+            dd {
+                margin: 0;
+            }
+            kbd {
+                display: inline-flex;
+                min-width: 27px;
+                min-height: 27px;
+                align-items: center;
+                justify-content: center;
+                margin: 1px;
+                padding: 0 7px;
+                border: 1px solid #526976;
+                border-bottom-width: 3px;
+                border-radius: 6px;
+                color: var(--text);
+                background: #172732;
+                font:
+                    800 12px/1 ui-monospace,
+                    Consolas,
+                    monospace;
+            }
+            .tip {
+                margin: 12px 0 0;
+                padding: 12px 14px;
+                border-left: 4px solid var(--yellow);
+                border-radius: 0 9px 9px 0;
+                color: #dbe6ea;
+                background: rgba(255, 225, 108, 0.08);
+            }
+            .combat-layout {
+                grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.5fr);
+            }
+            .combat-rules strong {
+                display: block;
+                margin-bottom: 3px;
+                color: var(--cyan);
+            }
+            .growth-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            .growth-card p {
+                margin-bottom: 0;
+            }
+            .deck-nav {
+                display: grid;
+                min-width: 0;
+                grid-template-columns: minmax(100px, 1fr) auto minmax(100px, 1fr);
+                gap: 18px;
+                align-items: center;
+                border-top: 1px solid rgba(148, 163, 184, 0.18);
+            }
+            .deck-nav .deck-button:first-child {
+                justify-self: start;
+            }
+            .deck-nav .deck-button:last-child {
+                justify-self: end;
+            }
+            .deck-button:disabled {
+                cursor: default;
+                opacity: 0.32;
+            }
+            .deck-index {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+            }
+            .deck-dot {
+                display: grid;
+                width: 32px;
+                height: 32px;
+                place-items: center;
+                border: 1px solid rgba(148, 163, 184, 0.3);
+                border-radius: 50%;
+                color: var(--muted);
+                background: transparent;
+                font:
+                    900 11px/1 ui-monospace,
+                    Consolas,
+                    monospace;
+                cursor: pointer;
+            }
+            .deck-dot[aria-current="step"] {
+                border-color: var(--cyan);
+                color: #06212b;
+                background: var(--cyan);
+            }
+            .deck-counter {
+                min-width: 48px;
+                color: var(--muted);
+                text-align: center;
+                font:
+                    800 12px/1 ui-monospace,
+                    Consolas,
+                    monospace;
+            }
+            .embedded .page-header {
+                display: none;
+            }
+            .embedded main {
+                width: min(calc(100% - 20px), 1180px);
+                height: 100dvh;
+            }
+            .embedded .deck {
+                padding-top: 10px;
+            }
+            @media (max-width: 820px) {
+                .mission-layout,
+                .controls,
+                .combat-layout,
+                .growth-grid {
+                    grid-template-columns: 1fr;
+                }
+                .mission-copy {
+                    min-height: 260px;
+                }
+                .slide-heading {
+                    align-items: start;
+                    flex-direction: column;
+                }
+                .slide-summary {
+                    max-width: none;
+                }
+            }
+            @media (max-width: 560px) {
+                .page-header {
+                    height: 58px;
+                }
+                .header-inner,
+                main {
+                    width: calc(100% - 16px);
+                    min-width: 0;
+                    max-width: 1180px;
+                }
+                .brand span,
+                .deck-counter {
+                    display: none;
+                }
+                .back-link,
+                .deck-button {
+                    min-height: 36px;
+                    padding: 0 10px;
+                    font-size: 13px;
+                }
+                main {
+                    height: calc(100dvh - 58px);
+                    grid-template-rows: minmax(0, 1fr) 62px;
+                }
+                .deck {
+                    padding: 10px 0 8px;
+                }
+                .help-slide {
+                    padding: 18px;
+                    border-radius: 13px;
+                }
+                .slide-heading {
+                    margin-bottom: 16px;
+                }
+                h1,
+                h2 {
+                    font-size: clamp(28px, 9vw, 39px);
+                }
+                .mission-copy {
+                    min-height: 0;
+                    padding: 20px;
+                }
+                .lead {
+                    font-size: 15px;
+                }
+                .flow-strip {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .control-row {
+                    grid-template-columns: 1fr;
+                    gap: 3px;
+                }
+                .deck-nav,
+                .deck-index {
+                    gap: 4px;
+                }
+                .deck-nav {
+                    grid-template-columns: auto minmax(0, 1fr) auto;
+                }
+                .deck-dot {
+                    width: 26px;
+                    height: 26px;
+                    font-size: 10px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header class="page-header">
+            <div class="header-inner">
+                <div class="brand">
+                    <strong>ONE ROPE</strong><span>로프로 붕괴 도시를 올라가는 액션 로그라이크.</span>
+                </div>
+                <a class="back-link" href="./">게임으로 돌아가기</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="deck" aria-live="polite">
+                <section
+                    class="help-slide"
+                    data-slide="mission"
+                    role="group"
+                    aria-roledescription="도움말 카드"
+                    aria-label="1 / 7 · ONE ROPE"
+                >
+                    <div class="mission-layout">
+                        <article class="mission-copy">
+                            <p class="eyebrow">01 · 게임 소개</p>
+                            <h1>ONE ROPE</h1>
+                            <p class="lead">로프로 붕괴 도시를 올라가는 액션 로그라이크.</p>
+                        </article>
+                        <ol class="goal-list" aria-label="게임 목표">
+                            <li><b>01</b><span>로프로 다음 안전 지점까지 이동합니다.</span></li>
+                            <li><b>02</b><span>각 구역의 방해요소를 돌파하고 액세스 모듈을 확보합니다.</span></li>
+                            <li><b>03</b><span>강화 장비에서 증강을 선택합니다.</span></li>
+                            <li><b>04</b><span>더 높은 구역과 최종 탈출 경로로 전진합니다.</span></li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section
+                    class="help-slide"
+                    data-slide="world"
+                    role="group"
+                    aria-roledescription="도움말 카드"
+                    aria-label="2 / 7 · 진행"
+                    hidden
+                >
+                    <div class="slide-heading">
+                        <div>
+                            <p class="eyebrow">02 · 진행</p>
+                            <h2>하나로 이어진 도시가 한 번의 원정입니다</h2>
+                        </div>
+                        <p class="slide-summary">
+                            현재 구역의 문제를 해결하고 명시적인 출구를 지나 다음 구역으로 올라가세요.
+                        </p>
+                    </div>
+                    <div class="diagram">
+                        <svg viewBox="0 0 980 330" role="img" aria-labelledby="world-title world-desc">
+                            <title id="world-title">도시 원정 진행 구조</title>
+                            <desc id="world-desc">
+                                정비 구역에서 시작해 방해요소를 처리하고 출구와 강화 장비를 거쳐 상층 구역으로
+                                이동합니다.
+                            </desc>
+                            <defs>
+                                <marker
+                                    id="arrow-world"
+                                    markerWidth="10"
+                                    markerHeight="10"
+                                    refX="7"
+                                    refY="3"
+                                    orient="auto"
+                                >
+                                    <path d="M0,0 L0,6 L8,3 z" fill="#5de8ff" />
+                                </marker>
+                            </defs>
+                            <path
+                                d="M95 252 C220 220 210 132 350 152 S515 247 625 168 S790 72 900 76"
+                                fill="none"
+                                stroke="#5de8ff"
+                                stroke-width="7"
+                                stroke-dasharray="14 10"
+                                marker-end="url(#arrow-world)"
+                            />
+                            <g fill="#536b78" stroke="#b1c0c6" stroke-width="3">
+                                <rect x="35" y="252" width="190" height="24" rx="4" />
+                                <rect x="270" y="176" width="180" height="24" rx="4" />
+                                <rect x="520" y="206" width="180" height="24" rx="4" />
+                                <rect x="765" y="98" width="180" height="24" rx="4" />
+                            </g>
+                            <g fill="#5de8ff" stroke="#fff" stroke-width="3">
+                                <circle cx="170" cy="184" r="11" />
+                                <circle cx="378" cy="104" r="11" />
+                                <circle cx="638" cy="130" r="11" />
+                                <circle cx="845" cy="48" r="11" />
+                            </g>
+                            <text x="55" y="304">정비 구역 시작</text>
+                            <text x="282" y="224">방해요소 처리</text>
+                            <text x="542" y="254">출구 · 강화 장비</text>
+                            <text x="786" y="147">상층 구역</text>
+                        </svg>
+                    </div>
+                    <div class="flow-strip">
+                        <div>탐색</div>
+                        <div>목표 해결</div>
+                        <div>출구 통과</div>
+                        <div>상층 전진</div>
+                    </div>
+                </section>
+
+                <section
+                    class="help-slide"
+                    data-slide="controls"
+                    role="group"
+                    aria-roledescription="도움말 카드"
+                    aria-label="3 / 7 · 조작키"
+                    hidden
+                >
+                    <div class="slide-heading">
+                        <div>
+                            <p class="eyebrow">03 · 조작키</p>
+                            <h2>조작키</h2>
+                        </div>
+                        <p class="slide-summary">점프 입력은 가까운 장비와 상호작용할 때도 사용합니다.</p>
+                    </div>
+                    <div class="controls">
+                        <article class="control-card">
+                            <span class="tag">PC</span>
+                            <h3>키보드 + 마우스</h3>
+                            <dl class="control-list">
+                                <div class="control-row">
+                                    <dt><kbd>A</kbd> <kbd>D</kbd> / 방향키</dt>
+                                    <dd>좌우 이동</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt><kbd>W</kbd> / ↑</dt>
+                                    <dd>점프 · 상호작용</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>마우스 왼쪽</dt>
+                                    <dd>지형 조준 후 누르고 유지해 로프 발사</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>누른 채 드래그</dt>
+                                    <dd>로프에 수직인 방향으로 스윙 충격</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>왼쪽 버튼 놓기</dt>
+                                    <dd>로프를 해제하고 현재 속도로 비행</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>마우스 오른쪽</dt>
+                                    <dd>조준 위치 방향으로 액션 사용</dd>
+                                </div>
+                            </dl>
+                        </article>
+                        <article class="control-card">
+                            <span class="tag amber">모바일</span>
+                            <h3>화면 버튼 + 터치 조준</h3>
+                            <dl class="control-list">
+                                <div class="control-row">
+                                    <dt>← / →</dt>
+                                    <dd>좌우 이동</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>점프</dt>
+                                    <dd>점프 · 상호작용</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>로프 조준</dt>
+                                    <dd>월드를 누르고 유지해 로프 발사</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>누른 채 드래그</dt>
+                                    <dd>로프에 수직인 방향으로 스윙 충격</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>손가락 놓기</dt>
+                                    <dd>로프를 해제하고 현재 속도로 비행</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>액션 조준</dt>
+                                    <dd>토글 후 월드를 눌러 액션 사용</dd>
+                                </div>
+                            </dl>
+                        </article>
+                    </div>
+                </section>
+
+                <section
+                    class="help-slide"
+                    data-slide="rope"
+                    role="group"
+                    aria-roledescription="도움말 카드"
+                    aria-label="4 / 7 · 로프 이동"
+                    hidden
+                >
+                    <div class="slide-heading">
+                        <div>
+                            <p class="eyebrow">04 · 핵심 이동</p>
+                            <h2>부착 → 스윙 → 해제 → 착지</h2>
+                        </div>
+                        <p class="slide-summary">
+                            로프는 붙인 순간의 길이를 유지합니다. 진자 운동과 해제 타이밍으로 이동하세요.
+                        </p>
+                    </div>
+                    <div class="diagram">
+                        <svg viewBox="0 0 1040 350" role="img" aria-labelledby="rope-title rope-desc">
+                            <title id="rope-title">로프 이동 네 단계</title>
+                            <desc id="rope-desc">
+                                지형에 로프를 붙이고 접선 방향으로 스윙한 다음 목표 방향에서 놓아 다음 발판에
+                                착지합니다.
+                            </desc>
+                            <defs>
+                                <marker
+                                    id="arrow-rope"
+                                    markerWidth="10"
+                                    markerHeight="10"
+                                    refX="7"
+                                    refY="3"
+                                    orient="auto"
+                                >
+                                    <path d="M0,0 L0,6 L8,3 z" fill="#ffe16c" />
+                                </marker>
+                            </defs>
+                            <g stroke="#314854" stroke-width="2">
+                                <line x1="260" y1="25" x2="260" y2="310" />
+                                <line x1="520" y1="25" x2="520" y2="310" />
+                                <line x1="780" y1="25" x2="780" y2="310" />
+                            </g>
+                            <g fill="#536b78" stroke="#b1c0c6" stroke-width="3">
+                                <rect x="25" y="265" width="210" height="24" rx="4" />
+                                <rect x="285" y="265" width="210" height="24" rx="4" />
+                                <rect x="545" y="265" width="210" height="24" rx="4" />
+                                <rect x="805" y="185" width="210" height="24" rx="4" />
+                            </g>
+                            <g fill="#5de8ff" stroke="#fff" stroke-width="3">
+                                <circle cx="145" cy="85" r="10" />
+                                <circle cx="405" cy="85" r="10" />
+                                <circle cx="665" cy="85" r="10" />
+                            </g>
+                            <g fill="none" stroke="#5de8ff" stroke-width="5">
+                                <line x1="145" y1="85" x2="105" y2="230" />
+                                <line x1="405" y1="85" x2="365" y2="230" />
+                            </g>
+                            <g fill="#ffe16c" stroke="#07131c" stroke-width="3">
+                                <circle cx="105" cy="230" r="15" />
+                                <circle cx="365" cy="230" r="15" />
+                                <circle cx="674" cy="165" r="15" />
+                                <circle cx="880" cy="160" r="15" />
+                            </g>
+                            <path
+                                d="M365 230 Q440 205 458 130"
+                                fill="none"
+                                stroke="#ffe16c"
+                                stroke-width="6"
+                                marker-end="url(#arrow-rope)"
+                            />
+                            <path
+                                d="M625 230 Q650 172 710 125"
+                                fill="none"
+                                stroke="#ffe16c"
+                                stroke-width="6"
+                                stroke-dasharray="11 8"
+                                marker-end="url(#arrow-rope)"
+                            />
+                            <path
+                                d="M674 165 Q775 90 880 160"
+                                fill="none"
+                                stroke="#ffe16c"
+                                stroke-width="6"
+                                stroke-dasharray="11 8"
+                                marker-end="url(#arrow-rope)"
+                            />
+                            <g text-anchor="middle">
+                                <text x="130" y="325">1 · 부착</text>
+                                <text x="390" y="325">2 · 스윙</text>
+                                <text x="650" y="325">3 · 해제</text>
+                                <text x="910" y="325">4 · 착지</text>
+                            </g>
+                        </svg>
+                    </div>
+                    <p class="tip">
+                        한 번에 닿지 않는 곳은 몸을 먼저 사거리 안으로 보낸 뒤 공중에서 다음 지형에 다시 부착해 연속
+                        로프 액션으로 이동하세요.
+                    </p>
+                </section>
+
+                <section
+                    class="help-slide"
+                    data-slide="combat"
+                    role="group"
+                    aria-roledescription="도움말 카드"
+                    aria-label="5 / 7 · 전투"
+                    hidden
+                >
+                    <div class="slide-heading">
+                        <div>
+                            <p class="eyebrow">05 · 전투</p>
+                            <h2>적은 플레이어를 발견하면 공격합니다</h2>
+                        </div>
+                        <p class="slide-summary">
+                            일정 속도 이상의 로프 스윙으로 적에게 데미지를 줄 수 있습니다. 데미지는 충돌 속도에
+                            비례합니다.
+                        </p>
+                    </div>
+                    <div class="combat-layout">
+                        <div class="diagram">
+                            <svg viewBox="0 0 760 330" role="img" aria-labelledby="combat-title combat-desc">
+                                <title id="combat-title">적의 공격과 로프 스윙 충돌 공격</title>
+                                <desc id="combat-desc">
+                                    적은 플레이어를 발견하면 공격하고, 플레이어는 일정 속도 이상의 로프 스윙 충돌로
+                                    적에게 속도 비례 데미지를 줍니다.
+                                </desc>
+                                <defs>
+                                    <marker
+                                        id="arrow-combat"
+                                        markerWidth="10"
+                                        markerHeight="10"
+                                        refX="7"
+                                        refY="3"
+                                        orient="auto"
+                                    >
+                                        <path d="M0,0 L0,6 L8,3 z" fill="#ffe16c" />
+                                    </marker>
+                                </defs>
+                                <rect
+                                    x="25"
+                                    y="276"
+                                    width="710"
+                                    height="24"
+                                    rx="4"
+                                    fill="#536b78"
+                                    stroke="#b1c0c6"
+                                    stroke-width="3"
+                                />
+                                <line x1="380" y1="35" x2="380" y2="300" stroke="#314854" stroke-width="2" />
+                                <g transform="translate(275 228)">
+                                    <path d="M-24 18 L0-18 L24 18 Z" fill="#ef756d" stroke="#fff" stroke-width="3" />
+                                    <circle cx="0" cy="4" r="6" fill="#07131c" />
+                                </g>
+                                <path d="M250 224 L95 224" stroke="#ef756d" stroke-width="8" stroke-dasharray="16 10" />
+                                <circle cx="75" cy="230" r="16" fill="#ffe16c" stroke="#07131c" stroke-width="3" />
+                                <circle cx="510" cy="72" r="11" fill="#5de8ff" stroke="#fff" stroke-width="3" />
+                                <line x1="510" y1="72" x2="455" y2="208" stroke="#5de8ff" stroke-width="5" />
+                                <circle cx="455" cy="208" r="16" fill="#ffe16c" stroke="#07131c" stroke-width="3" />
+                                <path
+                                    d="M455 208 Q535 140 650 214"
+                                    fill="none"
+                                    stroke="#ffe16c"
+                                    stroke-width="7"
+                                    marker-end="url(#arrow-combat)"
+                                />
+                                <g transform="translate(675 228)">
+                                    <path d="M-24 18 L0-18 L24 18 Z" fill="#ef756d" stroke="#fff" stroke-width="3" />
+                                    <circle cx="0" cy="4" r="6" fill="#07131c" />
+                                </g>
+                                <g stroke="#ffe16c" stroke-width="5">
+                                    <line x1="644" y1="190" x2="626" y2="174" />
+                                    <line x1="652" y1="178" x2="646" y2="154" />
+                                    <line x1="635" y1="202" x2="610" y2="198" />
+                                </g>
+                                <text x="55" y="54">적의 공격</text>
+                                <text x="438" y="54">고속 로프 스윙</text>
+                                <text class="small" x="535" y="315">충돌 속도에 비례한 데미지</text>
+                            </svg>
+                        </div>
+                        <ol class="combat-rules">
+                            <li><strong>적의 공격</strong>적은 플레이어를 발견하면 예고 후 공격합니다.</li>
+                            <li>
+                                <strong>로프 스윙 공격</strong>로프에 부착된 상태에서 일정 속도 이상으로 적과 충돌하면
+                                데미지를 줍니다.
+                            </li>
+                            <li><strong>속도 비례 데미지</strong>충돌 속도가 빠를수록 데미지가 증가합니다.</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section
+                    class="help-slide"
+                    data-slide="augment"
+                    role="group"
+                    aria-roledescription="도움말 카드"
+                    aria-label="6 / 7 · 액션과 증강"
+                    hidden
+                >
+                    <div class="slide-heading">
+                        <div>
+                            <p class="eyebrow">06 · 액션과 증강</p>
+                            <h2>기본 액션(펀치)과 증강</h2>
+                        </div>
+                        <p class="slide-summary">
+                            기본 액션은 증강에 따라 새로운 액션으로 교체하거나 효과를 강화할 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="controls">
+                        <article class="control-card">
+                            <span class="tag">액션</span>
+                            <h3>조준한 방향으로 즉시 사용</h3>
+                            <dl class="control-list">
+                                <div class="control-row">
+                                    <dt>PC</dt>
+                                    <dd>마우스 오른쪽 버튼으로 기본 액션(펀치) 사용</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>모바일</dt>
+                                    <dd>액션 조준으로 전환한 뒤 월드를 눌러 사용</dd>
+                                </div>
+                                <div class="control-row">
+                                    <dt>방향</dt>
+                                    <dd>마우스 또는 터치로 지정한 위치를 향해 실행</dd>
+                                </div>
+                            </dl>
+                        </article>
+                        <article class="control-card">
+                            <span class="tag amber">증강</span>
+                            <h3>강화 장비에서 3장 중 1장 선택</h3>
+                            <ol class="combat-rules">
+                                <li><strong>로프 강화</strong>발사·사거리·회수·해제·충돌 효과를 바꿉니다.</li>
+                                <li><strong>액션 교체</strong>기본 펀치를 이동·방어·원거리 액션으로 교체합니다.</li>
+                                <li><strong>액션 강화</strong>선택한 액션에 추가 효과와 연계 방식을 더합니다.</li>
+                            </ol>
+                        </article>
+                    </div>
+                    <div class="flow-strip">
+                        <div>우클릭 / 액션 조준</div>
+                        <div>기본 펀치</div>
+                        <div>증강 선택</div>
+                        <div>교체 · 강화</div>
+                    </div>
+                </section>
+
+                <section
+                    class="help-slide"
+                    data-slide="growth"
+                    role="group"
+                    aria-roledescription="도움말 카드"
+                    aria-label="7 / 7 · 저장과 협동"
+                    hidden
+                >
+                    <div class="slide-heading">
+                        <div>
+                            <p class="eyebrow">07 · 저장과 협동</p>
+                            <h2>저장 지점에서 다시 올라가세요</h2>
+                        </div>
+                        <p class="slide-summary">
+                            저장 위치와 증강 선택은 플레이어별이며, 열린 공용 진행은 협동 플레이어가 함께 사용합니다.
+                        </p>
+                    </div>
+                    <div class="growth-grid">
+                        <article class="growth-card">
+                            <span class="tag green">저장 지점</span>
+                            <h3>최근 저장 지점에서 재개</h3>
+                            <p>
+                                체력이 소진되거나 추락하면 자신이 마지막으로 활성화한 저장 지점에서 최대 체력으로
+                                돌아옵니다.
+                            </p>
+                        </article>
+                        <article class="growth-card">
+                            <span class="tag amber">공용 진행</span>
+                            <h3>완료한 목표와 열린 경로 유지</h3>
+                            <p>처리한 방해요소와 완료한 공용 목표, 열린 경로는 원정 진행으로 이어집니다.</p>
+                        </article>
+                        <article class="growth-card">
+                            <span class="tag">협동</span>
+                            <h3>각자 움직이고 진행은 공유</h3>
+                            <p>
+                                협동에서도 저장 위치와 선택은 Player별입니다. 열린 경로와 완료한 공용 목표는 함께
+                                이어집니다.
+                            </p>
+                        </article>
+                    </div>
+                    <p class="tip">직접 움직이며 익히고, 막힐 때 설정의 도움말로 다시 돌아오세요.</p>
+                </section>
+            </div>
+
+            <nav class="deck-nav" aria-label="도움말 카드 이동">
+                <button class="deck-button" type="button" data-deck-previous>← 이전</button>
+                <div class="deck-index">
+                    <span class="deck-counter" data-deck-counter>1 / 7</span>
+                    <button
+                        class="deck-dot"
+                        type="button"
+                        data-deck-slide="mission"
+                        aria-label="1. 임무"
+                        aria-current="step"
+                    >
+                        1
+                    </button>
+                    <button class="deck-dot" type="button" data-deck-slide="world" aria-label="2. 진행">2</button>
+                    <button class="deck-dot" type="button" data-deck-slide="controls" aria-label="3. 조작키">3</button>
+                    <button class="deck-dot" type="button" data-deck-slide="rope" aria-label="4. 로프 이동">4</button>
+                    <button class="deck-dot" type="button" data-deck-slide="combat" aria-label="5. 전투">5</button>
+                    <button class="deck-dot" type="button" data-deck-slide="augment" aria-label="6. 액션과 증강">
+                        6
+                    </button>
+                    <button class="deck-dot" type="button" data-deck-slide="growth" aria-label="7. 저장과 협동">
+                        7
+                    </button>
+                </div>
+                <button class="deck-button" type="button" data-deck-next>다음 →</button>
+            </nav>
+        </main>
+
+        <script>
+            const slides = [...document.querySelectorAll("[data-slide]")];
+            const previous = document.querySelector("[data-deck-previous]");
+            const next = document.querySelector("[data-deck-next]");
+            const counter = document.querySelector("[data-deck-counter]");
+            const dots = [...document.querySelectorAll("[data-deck-slide]")];
+            const slideIndexById = Object.freeze(
+                Object.fromEntries(slides.map((slide, index) => [slide.dataset.slide, index]))
+            );
+            let activeIndex = slideIndexById[location.hash.slice(1)] ?? 0;
+
+            function showSlide(index, { updateHash = true } = {}) {
+                activeIndex = Math.max(0, Math.min(index, slides.length - 1));
+                slides.forEach((slide, slideIndex) => (slide.hidden = slideIndex !== activeIndex));
+                dots.forEach((dot, dotIndex) => {
+                    if (dotIndex === activeIndex) dot.setAttribute("aria-current", "step");
+                    else dot.removeAttribute("aria-current");
+                });
+                previous.disabled = activeIndex === 0;
+                next.disabled = activeIndex === slides.length - 1;
+                counter.textContent = `${activeIndex + 1} / ${slides.length}`;
+                slides[activeIndex].scrollTop = 0;
+                if (updateHash) history.replaceState(null, "", `#${slides[activeIndex].dataset.slide}`);
+            }
+
+            previous.addEventListener("click", () => showSlide(activeIndex - 1));
+            next.addEventListener("click", () => showSlide(activeIndex + 1));
+            dots.forEach((dot) =>
+                dot.addEventListener("click", () => showSlide(slideIndexById[dot.dataset.deckSlide]))
+            );
+            window.addEventListener("hashchange", () =>
+                showSlide(slideIndexById[location.hash.slice(1)] ?? 0, { updateHash: false })
+            );
+            window.addEventListener("keydown", (event) => {
+                if (event.key === "ArrowLeft") showSlide(activeIndex - 1);
+                if (event.key === "ArrowRight") showSlide(activeIndex + 1);
+            });
+            showSlide(activeIndex, { updateHash: false });
+        </script>
+    </body>
+</html>

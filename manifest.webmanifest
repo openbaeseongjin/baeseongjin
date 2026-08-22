@@ -1,7 +1,7 @@
 {
-    "name": "Baeseongjin Rope Roguelike",
-    "short_name": "Rope Roguelike",
-    "description": "절차 생성 암석 지형을 로프로 등반하는 2D 액션 게임",
+    "name": "ONE ROPE",
+    "short_name": "ONE ROPE",
+    "description": "로프로 붕괴 도시를 올라가는 액션 로그라이크.",
     "lang": "ko",
     "start_url": "./",
     "scope": "./",

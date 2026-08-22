@@ -7,11 +7,13 @@
         <meta name="multiplayer-server" content="https://cardiovascular-pct-marina-antiques.trycloudflare.com" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="application-name" content="ONE ROPE" />
+        <meta name="apple-mobile-web-app-title" content="ONE ROPE" />
         <link rel="manifest" href="./manifest.webmanifest" />
         <link rel="icon" type="image/png" sizes="64x64" href="./assets/icons/favicon-64.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png" />
-        <meta name="description" content="절차 생성 월드를 로프로 등반하는 2D 액션 프로토타입" />
-        <title>Baeseongjin Rope Roguelike</title>
+        <meta name="description" content="로프로 붕괴 도시를 올라가는 액션 로그라이크." />
+        <title>ONE ROPE</title>
         <style>
             :root {
                 color-scheme: dark;
@@ -52,23 +54,6 @@
             #game-canvas:focus-visible {
                 outline: 2px solid #93c5fd;
                 outline-offset: -2px;
-            }
-            .controls-hint {
-                position: fixed;
-                left: max(8px, env(safe-area-inset-left));
-                bottom: max(8px, env(safe-area-inset-bottom));
-                margin: 0;
-                padding: 6px 10px;
-                border-radius: 6px;
-                background: rgba(15, 23, 42, 0.82);
-                color: #cbd5e1;
-                font-size: 12px;
-                line-height: 1.5;
-                pointer-events: none;
-                user-select: none;
-            }
-            .hud-hidden .controls-hint {
-                display: none;
             }
             .version-badge {
                 position: fixed;
@@ -164,16 +149,51 @@
                 margin: 0 0 8px;
                 font-size: 26px;
             }
+            .game-tagline {
+                margin-bottom: 8px !important;
+                color: #f8fafc !important;
+                font-weight: 800;
+            }
+            .game-mode-status {
+                font-size: 13px;
+            }
             .game-mode-card p {
                 margin: 0 0 18px;
                 color: #cbd5e1;
+            }
+            .game-help-prompt {
+                margin: 14px 0 0 !important;
+                padding-top: 14px;
+                border-top: 1px solid rgba(148, 163, 184, 0.22);
+                font-size: 13px;
+            }
+            .help-link {
+                color: #67e8f9;
+                font-weight: 900;
+                text-underline-offset: 3px;
+            }
+            .help-link:hover,
+            .help-link:focus-visible {
+                color: #cffafe;
+                outline: 2px solid #67e8f9;
+                outline-offset: 3px;
+            }
+            .help-link-button {
+                padding: 0;
+                border: 0;
+                background: transparent;
+                cursor: pointer;
             }
             .game-mode-actions {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
                 gap: 10px;
             }
+            .mode-option {
+                position: relative;
+            }
             .game-mode-actions button {
+                width: 100%;
                 min-height: 54px;
                 border: 1px solid rgba(148, 163, 184, 0.35);
                 border-radius: 12px;
@@ -182,13 +202,42 @@
                 font-weight: 800;
                 cursor: pointer;
             }
-            .game-mode-actions button:last-child {
+            .game-mode-actions [data-game-mode="multiplayer"] {
                 color: #082f49;
                 background: #67e8f9;
             }
-            .game-mode-actions button:disabled {
+            .game-mode-actions button:disabled,
+            .game-mode-actions button[aria-disabled="true"] {
                 cursor: wait;
                 opacity: 0.5;
+            }
+            .game-mode-actions button[aria-disabled="true"] {
+                cursor: not-allowed;
+            }
+            .mode-tooltip {
+                position: absolute;
+                z-index: 2;
+                top: calc(100% + 8px);
+                right: 0;
+                width: min(280px, calc(100vw - 48px));
+                padding: 9px 11px;
+                border: 1px solid rgba(148, 163, 184, 0.36);
+                border-radius: 8px;
+                color: #dbe7ec;
+                background: #101d27;
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.36);
+                font-size: 12px;
+                line-height: 1.45;
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(-3px);
+                visibility: hidden;
+            }
+            [data-game-mode="multiplayer"]:hover + .mode-tooltip,
+            [data-game-mode="multiplayer"]:focus-visible + .mode-tooltip {
+                opacity: 1;
+                transform: translateY(0);
+                visibility: visible;
             }
             .channel-panel {
                 display: grid;
@@ -309,9 +358,6 @@
                 border-color: rgba(103, 232, 249, 0.55);
             }
             @media (pointer: coarse) {
-                .controls-hint {
-                    display: none;
-                }
                 .settings-trigger {
                     min-height: 36px;
                     padding: 0 10px;
@@ -340,10 +386,51 @@
                 backdrop-filter: blur(8px);
             }
             .settings-dialog[hidden],
+            .help-dialog[hidden],
             .settings-panel[hidden],
             .audio-resume-notice[hidden],
             .debug-enemy-toolbar[hidden] {
                 display: none;
+            }
+            .help-dialog {
+                position: fixed;
+                z-index: 50;
+                inset: 0;
+                display: grid;
+                place-items: center;
+                padding: 18px;
+                background: rgba(5, 9, 17, 0.82);
+                backdrop-filter: blur(10px);
+            }
+            .help-dialog-card {
+                display: grid;
+                width: min(1180px, 100%);
+                height: min(820px, calc(100dvh - 36px));
+                grid-template-rows: auto minmax(0, 1fr);
+                overflow: hidden;
+                border: 1px solid rgba(103, 232, 249, 0.4);
+                border-radius: 18px;
+                background: #07111b;
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.58);
+            }
+            .help-dialog-header {
+                display: flex;
+                min-height: 58px;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 10px 14px 10px 18px;
+                border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+            }
+            .help-dialog-header h2 {
+                margin: 0;
+                font-size: 20px;
+            }
+            .help-dialog iframe {
+                width: 100%;
+                height: 100%;
+                border: 0;
+                background: #061019;
             }
             .debug-panel-body {
                 display: grid;
@@ -567,6 +654,11 @@
             .settings-header h2 {
                 margin: 0;
             }
+            .settings-header-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
             .settings-close,
             .audio-reset {
                 min-height: 40px;
@@ -749,12 +841,37 @@
             </section>
             <section class="game-mode-menu" id="game-mode-menu" aria-labelledby="game-mode-title" hidden>
                 <div class="game-mode-card">
-                    <h1 id="game-mode-title">로프 원정 시작</h1>
-                    <p data-mode-status aria-live="polite">플레이 방식을 선택하세요.</p>
+                    <h1 id="game-mode-title">ONE ROPE</h1>
+                    <p class="game-tagline">로프로 붕괴 도시를 올라가는 액션 로그라이크.</p>
+                    <p class="game-mode-status" data-mode-status aria-live="polite">플레이 방식을 선택하세요.</p>
                     <div class="game-mode-actions" data-mode-actions>
-                        <button type="button" data-game-mode="single">싱글 플레이</button>
-                        <button type="button" data-game-mode="multiplayer">멀티 플레이</button>
+                        <div class="mode-option">
+                            <button type="button" data-game-mode="single">싱글 플레이</button>
+                        </div>
+                        <div class="mode-option">
+                            <button
+                                type="button"
+                                data-game-mode="multiplayer"
+                                aria-describedby="multiplayer-unavailable-tooltip"
+                            >
+                                멀티 플레이
+                            </button>
+                            <span
+                                class="mode-tooltip"
+                                id="multiplayer-unavailable-tooltip"
+                                data-multiplayer-tooltip
+                                role="tooltip"
+                                hidden
+                            >
+                                멀티 서버가 꺼져 있어 멀티 플레이를 사용할 수 없습니다.
+                            </span>
+                        </div>
                     </div>
+                    <p class="game-help-prompt">
+                        처음 플레이하시나요? 세계관·게임 목표·조작법을
+                        <a class="help-link" href="./help.html" target="_blank" rel="noopener">도움말</a>에서 확인할 수
+                        있습니다.
+                    </p>
                     <div class="channel-panel" data-channel-panel hidden>
                         <button type="button" data-channel-create>새 채널 만들기</button>
                         <form data-channel-form>
@@ -780,7 +897,7 @@
                 id="game-canvas"
                 tabindex="0"
                 role="img"
-                aria-label="로프로 하나의 연속 붕괴 도시 월드를 탈출하는 액션 게임 화면"
+                aria-label="ONE ROPE — 로프로 붕괴 도시를 올라가는 액션 로그라이크."
                 aria-describedby="controls-description"
             ></canvas>
             <button class="settings-trigger" id="settings-trigger" type="button" aria-haspopup="dialog">설정</button>
@@ -798,9 +915,12 @@
                 <div class="settings-card">
                     <header class="settings-header">
                         <h2 id="settings-title">설정</h2>
-                        <button class="settings-close" type="button" data-settings-close aria-label="설정 닫기">
-                            닫기
-                        </button>
+                        <div class="settings-header-actions">
+                            <button class="help-link help-link-button" type="button" data-help-open>도움말</button>
+                            <button class="settings-close" type="button" data-settings-close aria-label="설정 닫기">
+                                닫기
+                            </button>
+                        </div>
                     </header>
                     <div class="settings-tabs" role="tablist" aria-label="설정 분류" data-settings-tabs></div>
                     <section class="settings-panel" id="settings-panel-audio" data-settings-panel="audio">
@@ -988,17 +1108,30 @@
                     </section>
                 </div>
             </section>
+            <section
+                class="help-dialog"
+                id="help-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="help-dialog-title"
+                hidden
+            >
+                <div class="help-dialog-card">
+                    <header class="help-dialog-header">
+                        <h2 id="help-dialog-title">ONE ROPE 도움말</h2>
+                        <button class="settings-close" type="button" data-help-close>닫기</button>
+                    </header>
+                    <iframe title="ONE ROPE 도움말" src="./help.html?embedded=1"></iframe>
+                </div>
+            </section>
             <p class="audio-resume-notice" id="audio-resume-notice" role="status" hidden>
                 화면을 누르면 오디오가 다시 시작됩니다.
             </p>
             <p class="sr-only" id="controls-description">
-                PC에서는 A와 D로 이동하고 W로 점프하며, 장비 Node 근처에서는 같은 점프 입력으로 상호작용합니다. 마우스로
-                지형을 누르면 로프를 부착하고 드래그하면 스윙하며 놓으면 해제하고, 우클릭 위치로 Action을 사용합니다.
-                모바일은 하단 점프 버튼으로 점프와 가까운 장비 Node 상호작용을 함께 수행하고, 우측 토글로 로프 조준과
-                액션 조준을 전환한 뒤 나머지 화면을 누릅니다.
-            </p>
-            <p class="controls-hint">
-                PC: A/D 이동 · W 점프/Node · 좌클릭 로프 · 우클릭 Action / 모바일: 조준 토글 · 화면 Rope/Action
+                PC에서는 A와 D로 이동하고 W로 점프하며, 가까운 장비에서는 같은 점프 입력으로 상호작용합니다. 마우스로
+                지형을 누르면 로프를 부착하고 드래그하면 스윙하며 놓으면 해제하고, 우클릭 위치로 액션을 사용합니다.
+                모바일은 하단 점프 버튼으로 점프와 상호작용을 함께 수행하고, 우측 토글로 로프 조준과 액션 조준을 전환한
+                뒤 나머지 화면을 누릅니다.
             </p>
             <output class="channel-badge" id="channel-badge" hidden></output>
             <section class="debug-enemy-toolbar" data-debug-enemy-toolbar aria-label="몬스터 모션 더미 검수" hidden>
@@ -1012,8 +1145,9 @@
             <p class="orientation-notice" role="status">
                 로프 액션은 가로 화면에 맞춰져 있습니다.<br />기기를 가로로 돌려주세요.
             </p>
-            <section class="install-prompt" id="install-prompt" aria-live="polite" hidden>
-                <strong>전체 화면으로 플레이</strong>
+            <section class="install-prompt" id="install-prompt" aria-label="ONE ROPE 설치" aria-live="polite" hidden>
+                <strong>ONE ROPE</strong>
+                <span>로프로 붕괴 도시를 올라가는 액션 로그라이크.</span>
                 <span data-install-message></span>
                 <div class="install-actions">
                     <button type="button" data-install-dismiss>나중에</button>

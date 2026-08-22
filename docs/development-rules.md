@@ -219,6 +219,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 다른 컴포넌트의 DOM이나 비공개 상태를 직접 탐색·수정하지 않는다.
 - 이벤트 listener, observer, timer는 `detach()`에서 모두 해제한다.
 - 버튼·대화상자 등은 키보드 조작, focus, `role`, `aria-*` 계약을 함께 구현한다.
+- 플레이어가 읽는 문구는 가능한 한 한글 용어를 우선하고 코드·프로토콜 식별자를 그대로 노출하지 않는다. `Action`·`Augment`·`Rope`·`Swing`·`Node` 같은 내부 용어는 각각 `액션`·`증강`·`로프`·`스윙`·`강화 장비` 또는 `상호작용`처럼 플레이어가 바로 이해하는 표현으로 바꾸며, 고유 이름과 의미 보존에 필요한 경우에만 영문을 사용한다.
 
 ### Canvas 렌더 컴포넌트
 
