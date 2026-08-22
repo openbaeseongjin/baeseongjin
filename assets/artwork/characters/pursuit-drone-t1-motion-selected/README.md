@@ -15,6 +15,8 @@ This package gives the selected Sector 01 pursuit drone a compact motion set wit
 
 2026-08-20 사용자 최종 검수에서 후보 `09` 기반 이미지와 `pursuit-seek`, `pursuit-windup`, `pursuit-dash`, `pursuit-recover`, `knockback` 애니메이션이 승인됐다. 이후 명시적인 새 결정 없이 후보 재생성이나 다른 실루엣·모션 세트로 교체하지 않는다.
 
+`pursuit-windup`과 `pursuit-dash`에서는 이 atlas의 현재 frame 전체를 새 이미지나 분리 layer 없이 회전·필요 시 수평 반전한다. Renderer는 gameplay가 Player 위치에서 확정해 실제 돌진에도 사용하는 `behaviorState.dashDirection`을 소비하므로 기존 전방 머리와 센서가 돌진 대상을 가리킨다. 나머지 상태는 기존 upright 방향 표현을 유지한다.
+
 ## State and frame map
 
 Every row contains four uniform `32 x 32` RGBA frames. The exported atlas is ordered top to bottom as listed here and left to right from frame `00` through `03`.

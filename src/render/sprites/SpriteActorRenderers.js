@@ -16,6 +16,7 @@ const ENEMY_SPRITE = Object.freeze({
 });
 const PLAYER_PROJECTILE_SPRITE = Object.freeze({ rows: Object.freeze([".a.", "aba", ".a."]) });
 const ENEMY_PROJECTILE_SPRITE = Object.freeze({ rows: Object.freeze(["..a..", ".aba.", "abcba", ".aba.", "..a.."]) });
+const PURSUIT_DIRECTIONAL_STATES = Object.freeze(["pursuit-windup", "pursuit-dash"]);
 
 function eventsForPlayer(scene, playerId) {
     return (scene.playerPresentationEvents ?? []).filter((event) => event.playerId === playerId);
@@ -48,6 +49,13 @@ export function resolveEnemyAimLayerDirection(enemy) {
         return enemy.aimDirection;
     }
     return enemy?.presentationAimDirection ?? enemy?.aimDirection ?? null;
+}
+
+export function resolvePursuitDirectionTransform(enemy, presentationState) {
+    if (enemy?.behaviorState?.kind !== "pursuit" || !PURSUIT_DIRECTIONAL_STATES.includes(presentationState)) {
+        return null;
+    }
+    return resolveUprightAimTransform(enemy.behaviorState.dashDirection);
 }
 
 export function resolveGuardOctant(guardDirection) {
@@ -210,10 +218,11 @@ export class SpriteEnemyRenderer {
                     presentation.enemyType,
                     spritePresentation.clipState
                 );
+                const pursuitDirectionTransform = resolvePursuitDirectionTransform(enemy, spritePresentation.clipState);
                 const animation = controller.update({
                     state: spritePresentation.clipState,
                     dt,
-                    facingX: spritePresentation.guardLayer ? null : enemyFacingX(enemy)
+                    facingX: spritePresentation.guardLayer || pursuitDirectionTransform ? null : enemyFacingX(enemy)
                 });
                 const frame = spritePresentation.clip.frameAt(animation.elapsedSeconds);
                 paintSpriteFrame({
@@ -226,8 +235,13 @@ export class SpriteEnemyRenderer {
                     offset: spritePresentation.offset,
                     opacity: spritePresentation.opacity,
                     pixelSnap: spritePresentation.pixelSnap,
-                    flipX: spritePresentation.aimLayer || spritePresentation.guardLayer ? false : animation.flipX,
-                    rotation: spritePresentation.guardLayer ? 0 : (enemy.angle ?? 0)
+                    flipX:
+                        spritePresentation.aimLayer || spritePresentation.guardLayer
+                            ? false
+                            : (pursuitDirectionTransform?.flipX ?? animation.flipX),
+                    rotation: spritePresentation.guardLayer
+                        ? 0
+                        : (pursuitDirectionTransform?.rotation ?? enemy.angle ?? 0)
                 });
                 if (spritePresentation.aimLayer) {
                     const aimTransform = resolveUprightAimTransform(resolveEnemyAimLayerDirection(enemy));
