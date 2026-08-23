@@ -503,24 +503,7 @@ const SPEC = {
       }
     },
     "id": "sector-05-03",
-    "jammerGroups": [
-      {
-        "eligibleSurfaceIds": [
-          "a-left-1-surface",
-          "a-right-1-surface"
-        ],
-        "id": "sector-05-03:jammer-a:field",
-        "sourceObjectId": "sector-05-03:jammer-a"
-      },
-      {
-        "eligibleSurfaceIds": [
-          "b-upper-1-surface",
-          "b-lower-1-surface"
-        ],
-        "id": "sector-05-03:jammer-b:field",
-        "sourceObjectId": "sector-05-03:jammer-b"
-      }
-    ],
+    "jammerGroups": [],
     "name": "SECURITY REVIEW GALLERY",
     "nextAreaId": "sector-05-04",
     "objectives": [
@@ -554,9 +537,6 @@ const SPEC = {
         "coordinateAnchor": "center",
         "enemyType": "hardpoint-jammer-v1",
         "id": "sector-05-03:jammer-a",
-        "jammer": {
-          "groupId": "sector-05-03:jammer-a:field"
-        },
         "kind": "sentry",
         "position": {
           "x": 0,
@@ -577,9 +557,6 @@ const SPEC = {
         "coordinateAnchor": "center",
         "enemyType": "hardpoint-jammer-v1",
         "id": "sector-05-03:jammer-b",
-        "jammer": {
-          "groupId": "sector-05-03:jammer-b:field"
-        },
         "kind": "sentry",
         "position": {
           "x": 450,

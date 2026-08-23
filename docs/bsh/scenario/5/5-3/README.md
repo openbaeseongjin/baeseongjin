@@ -10,16 +10,20 @@
 
 ## Core question
 
-> 다음 두 Hardpoint 중 하나가 잠기면 이미 읽어둔 다른 Base-clear route로 전환할 수 있는가?
+> 다음 두 Rope surface 중 하나가 감전되면 이미 읽어둔 Base-clear route로 전환하거나 위험을 감수할 수 있는가?
 
 ## Jammer contract
 
 - Normal: CYAN
 - Warning: AMBER
 - Active Jam: VIOLET/MAGENTA
-- New attachment eligibility only
-- Current attached Rope remains
-- Already launched Hook resolves normally in V1
+- Normal ropeable surfaces are queried automatically; no dedicated candidate Anchor list
+- Current attached Rope is excluded from target selection and remains
+- Already launched Hook continues flight; attaching while the target is Active triggers shock and cut
+- Attaching to the Active target cuts the new Rope and starts Electrified
+- Electrified: 2.5 damage every 0.05s for 0.5s, total 25
+- Reapplication refreshes duration without stacking
+- One shock-start network event; no per-pulse events
 - One target per Jammer
 - At least one Base-clear route always remains
 - Jammer A/B never overlap

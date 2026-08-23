@@ -242,8 +242,8 @@
     "newSystems": [
       {
         "id": "hardpoint-jammer-v1",
-        "status": "NOT_IMPLEMENTED",
-        "basis": "existing canAttachToSurface(surface) eligibility hook"
+        "status": "CURRENT_RUNTIME",
+        "basis": "HardpointJammerTargetSelector normal ropeable surface query"
       }
     ]
   },

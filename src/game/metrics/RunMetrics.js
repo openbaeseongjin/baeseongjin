@@ -1,3 +1,5 @@
+import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
+
 export class RunMetrics {
     constructor({ progressKind = "area" } = {}) {
         this.progressKind = progressKind;
@@ -49,8 +51,9 @@ export class RunMetrics {
     }
 
     recordPlayerImpact(impactType, damage = 0) {
-        if (impactType === "player-hit" || impactType === "fall-damage") this.damageTaken += damage;
-        if (impactType === "rope-cut") this.ropeCuts += 1;
+        if ([PLAYER_IMPACT_TYPE.PLAYER_HIT, PLAYER_IMPACT_TYPE.FALL_DAMAGE].includes(impactType))
+            this.damageTaken += damage;
+        if ([PLAYER_IMPACT_TYPE.ROPE_CUT, PLAYER_IMPACT_TYPE.JAMMER_SHOCK].includes(impactType)) this.ropeCuts += 1;
     }
 
     recordDefeat() {

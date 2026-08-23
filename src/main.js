@@ -109,7 +109,11 @@ const debugPanel = new DebugPanel({
     }
 });
 const debugEnemyTrainingControls = new DebugEnemyTrainingControls({
-    onSpawn: (enemyType) => app?.spawnDebugTrainingDummy?.(enemyType),
+    onSpawn: (enemyType) => {
+        const result = app?.spawnDebugTrainingDummy?.(enemyType);
+        if (result?.created) settingsMenu.hide();
+        return result;
+    },
     onPrevious: () => app?.stepDebugTrainingDummyState?.(-1),
     onActual: () => app?.setDebugTrainingDummyActualMode?.(),
     onNext: () => app?.stepDebugTrainingDummyState?.(1),

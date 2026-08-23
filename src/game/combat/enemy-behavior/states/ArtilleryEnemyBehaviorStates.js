@@ -6,9 +6,12 @@ import {
 import { nearestTarget } from "../EnemyBehaviorSupport.js";
 
 export class ArtilleryIdleState {
-    advance(behavior, enemy, { targets }) {
+    advance(behavior, enemy, { targets, dt }) {
         const target = nearestTarget(enemy, targets, behavior.acquireRange);
-        if (!target) return null;
+        if (!target) {
+            behavior.mobility.advance(enemy, { dt });
+            return null;
+        }
         behavior.transition(ARTILLERY_BEHAVIOR_STATE.TELEGRAPH, behavior.telegraphSeconds);
         behavior.targetId = target.id;
         behavior.targetPosition = { x: target.physics.position.x, y: target.physics.position.y };
@@ -38,7 +41,9 @@ export class ArtilleryTelegraphState {
 }
 
 export class ArtilleryCooldownState {
-    advance(behavior, _enemy, { dt }) {
+    advance(behavior, enemy, { targets, dt }) {
+        const target = nearestTarget(enemy, targets, behavior.acquireRange);
+        behavior.mobility.advance(enemy, { focusPosition: target?.physics.position ?? null, dt });
         behavior.consume(dt);
         if (behavior.remainingSeconds <= ENEMY_BEHAVIOR_CONFIG.ZERO) {
             behavior.transition(ARTILLERY_BEHAVIOR_STATE.IDLE);

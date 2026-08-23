@@ -73,6 +73,7 @@ export class RopeAttachmentTargetResolver {
         return Object.freeze({
             x: best.point.x,
             y: best.point.y,
+            surfaceId: best.surfaceId,
             anchorVelocity: best.anchorVelocity,
             ropeAttachment: best.ropeAttachment
         });
@@ -90,6 +91,7 @@ export class RopeAttachmentTargetResolver {
         const anchor = ropeAnchorState(target, localAnchor);
         return {
             ...candidate,
+            surfaceId: surface.id,
             anchorVelocity: anchor.velocity,
             ropeAttachment: Object.freeze({ ownerId: target.id, localAnchor: Object.freeze(localAnchor) })
         };
@@ -112,6 +114,7 @@ export class RopeAttachmentTargetResolver {
         return {
             kind,
             stableId,
+            surfaceId: surface.id,
             point,
             aimDistance,
             launchDistance,
@@ -137,6 +140,7 @@ export class RopeAttachmentTargetResolver {
         return {
             kind: TARGET_KIND.ASSISTED,
             stableId: attachment.ownerId,
+            surfaceId: null,
             point: anchor.position,
             aimDistance,
             launchDistance,

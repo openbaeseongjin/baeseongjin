@@ -107,7 +107,7 @@ LOWER OUTER SERVICE RAIL
 
 both move **back leftward while gaining height**.
 
-Jammer B temporarily denies one first candidate.
+Jammer B charges one automatically selected normal Rope surface while leaving another Hook-reachable route available.
 
 ## Final
 
@@ -117,19 +117,15 @@ After Bay B merge, the route becomes a short clean vertical ascent toward the fi
 
 # 3. Core question
 
-> **“두 개의 다음 선택 중 하나가 잠겼을 때, 지금 남아 있는 경로를 읽고 방향을 바꿀 수 있는가?”**
+> **“두 개의 다음 선택 중 하나가 감전됐을 때, 안전한 경로를 읽거나 위험을 감수할 수 있는가?”**
 
 Jammer still controls:
 
 ```text
-NEXT ATTACHMENT CHOICE
+NEXT ATTACHMENT RISK
 ```
 
-not:
-- current Rope
-- player HP
-- current position
-- Rope length
+It does not pre-block attachment or change Rope length. Attaching to the active target shocks the Player and cuts that newly attached Rope.
 
 ---
 
@@ -145,7 +141,7 @@ At P0:
 - merge direction visible
 - Jammer A visible
 
-One candidate receives Warning → Jam Active.
+One automatically selected candidate receives Warning → Jam Active. The other remains reachable; choosing the active target starts shock and Rope cut.
 
 Player takes the other.
 

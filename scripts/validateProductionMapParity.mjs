@@ -462,7 +462,7 @@ function validateAccessModuleAuthority(world, issues) {
     }
 }
 
-function validateSectorRecallContracts(world, surfaceIndex, issues) {
+function validateSectorRecallContracts(world, issues) {
     const jammerIndex = indexBy(world.jammerGroups, "id", issues, "jammer-group-duplicate");
     const encounterIndex = indexBy(world.enemySpawns, "encounterId", issues, "jammer-encounter-duplicate");
     if (JSON.stringify(Object.keys(jammerIndex).sort()) !== JSON.stringify([...EXPECTED_SECTOR_05_JAMMER_IDS].sort())) {
@@ -475,9 +475,6 @@ function validateSectorRecallContracts(world, surfaceIndex, issues) {
                 jammerId: jammer.id,
                 sourceObjectId: jammer.sourceObjectId
             });
-        }
-        for (const surfaceId of jammer.eligibleSurfaceIds) {
-            if (!surfaceIndex[surfaceId]) issue(issues, "jammer-surface-missing", { jammerId: jammer.id, surfaceId });
         }
     }
     const proof = world.objects.find(({ id }) => id === SECTOR_05_PROOF_OBJECT_ID);
@@ -945,7 +942,7 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
     for (const surface of world.surfaces) validateSurfaceGeometry(surface, "production-world", issues);
     validateCollisionFootprintDuplicates(world.surfaces, issues);
     validateAccessModuleAuthority(world, issues);
-    validateSectorRecallContracts(world, surfaceIndex, issues);
+    validateSectorRecallContracts(world, issues);
     const progressGateReports = validateProgressGates(world, areaIndex, issues);
 
     for (const entry of runtimeEntries) {

@@ -1,4 +1,5 @@
 import { defineArea, grappleTarget, worldObject } from "../areas/AreaDefinition.js";
+import { deriveHardpointJammerGroups } from "../HardpointJammerDefinition.js";
 
 export const AREA_SPEC_V2 = "area-spec-v2";
 export const AREA_SPEC_V2_AUTHORING_MODES = Object.freeze(["runtime", "scenario"]);
@@ -61,11 +62,13 @@ export function createAreaDefinitionFromV2(spec) {
     }
     const definition = structuredClone(spec.definition);
     const anchors = spec.anchors ?? [];
+    const objects = insertAnchors(definition.objects ?? [], anchors, "objectIndex", anchorLandmark);
     return defineArea({
         ...definition,
         stageId: spec.stage.id,
         surfaces: insertAnchors(definition.surfaces ?? [], anchors, "surfaceIndex", anchorTarget),
-        objects: insertAnchors(definition.objects ?? [], anchors, "objectIndex", anchorLandmark)
+        objects,
+        jammerGroups: deriveHardpointJammerGroups(objects, definition.jammerGroups)
     });
 }
 
@@ -75,6 +78,7 @@ export function createScenarioPreviewAreaDefinitionFromV2(spec) {
     }
     const definition = structuredClone(spec.definition);
     const anchors = spec.anchors ?? [];
+    const objects = insertAnchors(definition.objects ?? [], anchors, "objectIndex", anchorLandmark);
     const exit = definition.exit;
     if (typeof definition.id !== "string" || !exit || !Number.isFinite(exit.x) || !Number.isFinite(exit.y)) {
         throw new TypeError("scenario-preview-area-definition-invalid");
@@ -90,7 +94,8 @@ export function createScenarioPreviewAreaDefinitionFromV2(spec) {
             trigger: { x: exit.x - 48, y: exit.y - 96, width: 96, height: 160 }
         },
         surfaces: insertAnchors(definition.surfaces ?? [], anchors, "surfaceIndex", anchorTarget),
-        objects: insertAnchors(definition.objects ?? [], anchors, "objectIndex", anchorLandmark)
+        objects,
+        jammerGroups: deriveHardpointJammerGroups(objects, definition.jammerGroups)
     });
 }
 

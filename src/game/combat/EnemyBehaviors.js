@@ -4,6 +4,7 @@ import { ENEMY_SIMULATION_CAPABILITY } from "./enemy-weapon/EnemyWeaponDefinitio
 import { SwarmFlockRegistry } from "./enemy-behavior/SwarmFlock.js";
 
 export { ArtilleryEnemyBehavior } from "./enemy-behavior/ArtilleryEnemyBehavior.js";
+export { JammerEnemyBehavior } from "./enemy-behavior/JammerEnemyBehavior.js";
 export { PursuitEnemyBehavior } from "./enemy-behavior/PursuitEnemyBehavior.js";
 export { ShieldEnemyBehavior } from "./enemy-behavior/ShieldEnemyBehavior.js";
 export { SupportEnemyBehavior } from "./enemy-behavior/SupportEnemyBehavior.js";

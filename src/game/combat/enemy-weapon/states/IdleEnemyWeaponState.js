@@ -6,6 +6,10 @@ export class IdleEnemyWeaponState extends EnemyWeaponAttackState {
         return true;
     }
 
+    get canAdvancePatrol() {
+        return true;
+    }
+
     advance(weapon, { config, remainingDt }) {
         weapon.transition(ENEMY_ATTACK_STATE.ACQUIRE, config.enemyAcquireSeconds);
         return enemyWeaponStepResult(remainingDt, { continueState: true });

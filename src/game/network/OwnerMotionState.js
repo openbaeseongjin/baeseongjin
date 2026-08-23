@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 8;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 9;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
@@ -147,6 +147,10 @@ export function createOwnerMotionState({
         throw new Error("attached rope.attachmentId must be non-empty");
     }
     const anchorOwner = ropeAnchorOwner(rope);
+    const anchorSurfaceId = rope.anchorSurfaceId ?? null;
+    if (anchorSurfaceId !== null && (typeof anchorSurfaceId !== "string" || !anchorSurfaceId)) {
+        throw new Error("rope.anchorSurfaceId must be null or non-empty");
+    }
     if (!Number.isFinite(angle)) throw new Error("angle must be finite");
     if (!Number.isFinite(angularVelocity)) throw new Error("angularVelocity must be finite");
     if (respawnAnchorId !== null && (typeof respawnAnchorId !== "string" || respawnAnchorId.length === 0)) {
@@ -166,6 +170,7 @@ export function createOwnerMotionState({
             isAttached: rope.isAttached,
             anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null,
             attachmentId: rope.isAttached ? attachmentId : null,
+            anchorSurfaceId: rope.isAttached ? anchorSurfaceId : null,
             anchorOwnerId: rope.isAttached ? anchorOwner.ownerId : null,
             anchorLocalOffset: rope.isAttached ? anchorOwner.localOffset : null,
             attachmentOffset: rope.isAttached ? finiteVector(rope.attachmentOffset, "rope.attachmentOffset") : null,

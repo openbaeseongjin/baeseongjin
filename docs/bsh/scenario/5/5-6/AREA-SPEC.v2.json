@@ -399,10 +399,7 @@
         },
         "rules": [
           "no-projectile-attack"
-        ],
-        "jammer": {
-          "groupId": "sector-05-06:jammer-a:field"
-        }
+        ]
       },
       {
         "id": "sector-05-06:cutter-a",
@@ -520,16 +517,7 @@
     "routes": [],
     "cameraZones": [],
     "cueIds": [],
-    "jammerGroups": [
-      {
-        "id": "sector-05-06:jammer-a:field",
-        "sourceObjectId": "sector-05-06:jammer-a",
-        "eligibleSurfaceIds": [
-          "jam-a1-surface",
-          "jam-b1-surface"
-        ]
-      }
-    ],
+    "jammerGroups": [],
     "gate": {
       "id": "sector-05-06:gate",
       "nextAreaId": "sector-05-07",

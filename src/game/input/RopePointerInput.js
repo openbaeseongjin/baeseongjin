@@ -128,6 +128,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
                 if (
                     this.rope.attach(owner.physics.position, outcome.target, {
                         angle: owner.physics.angle,
+                        anchorSurfaceId: outcome.target.surfaceId,
                         anchorOwnerId: attachment?.ownerId ?? null,
                         anchorLocalOffset: attachment?.localAnchor ?? null,
                         anchorVelocity: outcome.target.anchorVelocity,
@@ -143,7 +144,12 @@ export const withRopePointerInput = createInputCapabilityMixin({
                         used: false
                     };
                     this.attachBufferRemaining = 0;
-                    onAttach({ relayAssisted: inputModifiers.relayActive });
+                    onAttach({
+                        relayAssisted: inputModifiers.relayActive,
+                        surfaceId: outcome.target.surfaceId,
+                        position: Object.freeze({ x: outcome.target.x, y: outcome.target.y }),
+                        attachmentId: this.rope.attachmentId
+                    });
                 } else {
                     this.launcher.startLaunchReload();
                 }

@@ -226,7 +226,7 @@ The objective is access to the Directive, not enemy extermination.
 
 # 6. Jammer fairness
 
-Jammer may target only one first flank candidate at once.
+Jammer may charge only one automatically selected first flank surface at once.
 
 Example eligible pair:
 
@@ -240,10 +240,10 @@ LOWER FLANK
 
 Rules:
 - attached Hardpoint cannot become a new Jam target
-- Jam does not cut Rope
-- Jam does not force release
-- Jam does not damage
-- already launched Hook resolves in V1
+- attachment is not pre-blocked
+- Active target attachment starts one shock and cuts the new Rope
+- Electrified applies 25 total damage over 0.5 seconds without pulse-level network events
+- already launched Hook continues flight and resolves against the phase active at attachment
 - at least one Base-clear flank remains
 
 ---

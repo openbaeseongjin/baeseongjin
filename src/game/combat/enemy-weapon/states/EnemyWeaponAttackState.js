@@ -3,6 +3,10 @@ export class EnemyWeaponAttackState {
         return false;
     }
 
+    get canAdvancePatrol() {
+        return false;
+    }
+
     advance() {
         throw new Error(`${this.constructor.name} must implement advance()`);
     }

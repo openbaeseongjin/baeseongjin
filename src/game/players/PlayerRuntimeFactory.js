@@ -9,6 +9,7 @@ import { CircleCollider } from "../physics/colliders/CircleCollider.js";
 import { FixedLengthRope } from "../rope/FixedLengthRope.js";
 import { RopeObject } from "../rope/RopeObject.js";
 import { PlayerObject } from "./PlayerObject.js";
+import { PlayerStatusEffects } from "../status-effects/PlayerStatusEffects.js";
 
 export function createPlayerRuntime({
     registry,
@@ -29,6 +30,7 @@ export function createPlayerRuntime({
     const rope = new FixedLengthRope(ropeConfig);
     const foundation = new FoundationAugmentState();
     const augmentCombat = new AugmentCombatRuntime({ maxHealth: combatConfig.playerMaxHealth });
+    const statusEffects = new PlayerStatusEffects();
     const ropeObject = new RopeObject({ id: `${id}:rope`, ownerId: id, rope });
     const weapon = new AutomaticWeaponObject({ id: `${id}:weapon`, ownerId: id, config: combatConfig });
     const ropeImpactAttack = new RopeImpactAttack(ROPE_IMPACT_CONFIG);
@@ -39,6 +41,7 @@ export function createPlayerRuntime({
         ropeObject,
         foundation,
         augmentCombat,
+        statusEffects,
         weapon,
         ropeImpactAttack,
         ropeImpactState,
@@ -53,6 +56,7 @@ export function createPlayerRuntime({
         ropeObject,
         foundation,
         augmentCombat,
+        statusEffects,
         weapon,
         ropeImpactAttack,
         ropeImpactState,

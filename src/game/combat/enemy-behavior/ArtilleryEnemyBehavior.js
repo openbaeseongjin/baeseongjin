@@ -1,5 +1,7 @@
 import { TimedEnemyBehavior } from "./EnemyBehaviorBase.js";
+import { COMBAT_CONFIG } from "../../config.js";
 import { ARTILLERY_BEHAVIOR_STATE, ENEMY_BEHAVIOR_CONFIG, ENEMY_BEHAVIOR_KIND } from "./EnemyBehaviorDefinition.js";
+import { EnemyRoamingMotion } from "./EnemyRoamingMotion.js";
 import { validateBehaviorDt } from "./EnemyBehaviorSupport.js";
 import { ARTILLERY_BEHAVIOR_STATE_DEFINITION } from "./states/ArtilleryEnemyBehaviorStates.js";
 
@@ -13,7 +15,11 @@ export class ArtilleryEnemyBehavior extends TimedEnemyBehavior {
         cooldownSeconds = 1.4,
         strikeRadius = 72,
         damage = 20,
-        acquireRange = 1080
+        acquireRange = COMBAT_CONFIG.enemyAttackRange,
+        moveSpeed = 90,
+        roamRadius = 120,
+        preferredRange = 360,
+        mobility = null
     } = {}) {
         super({
             kind: ENEMY_BEHAVIOR_KIND.ARTILLERY,
@@ -28,6 +34,12 @@ export class ArtilleryEnemyBehavior extends TimedEnemyBehavior {
         this.strikeRadius = strikeRadius;
         this.damage = damage;
         this.acquireRange = acquireRange;
+        this.mobility = new EnemyRoamingMotion({
+            speed: moveSpeed,
+            roamRadius,
+            preferredRange,
+            ...(mobility ?? {})
+        });
     }
     advance(enemy, { targets = [], dt = ENEMY_BEHAVIOR_CONFIG.ZERO } = {}) {
         validateBehaviorDt(dt);
@@ -40,12 +52,14 @@ export class ArtilleryEnemyBehavior extends TimedEnemyBehavior {
             remainingSeconds: this.remainingSeconds,
             targetId: this.targetId,
             targetPosition: this.targetPosition ? Object.freeze({ ...this.targetPosition }) : null,
-            strikeRadius: this.strikeRadius
+            strikeRadius: this.strikeRadius,
+            mobility: this.mobility.snapshot()
         });
     }
     restore(snapshot = {}) {
         this.restoreState(snapshot.state, snapshot.remainingSeconds ?? 0, ARTILLERY_BEHAVIOR_STATE.IDLE);
         this.targetId = snapshot.targetId ?? null;
         this.targetPosition = snapshot.targetPosition ? { ...snapshot.targetPosition } : null;
+        this.mobility.restore(snapshot.mobility);
     }
 }

@@ -2,10 +2,10 @@ import { Vector2 } from "../../game-kit/index.js";
 import { ENEMY_TYPE } from "../EnemyType.js";
 
 const ARRIVAL_EPSILON = 0.5;
-const DEFAULT_PATROL_POLICY = Object.freeze({ mode: null, waitSeconds: null });
+const DEFAULT_PATROL_POLICY = Object.freeze({ mode: null, waitSeconds: null, speed: null, radius: null });
 const PATROL_POLICY_BY_ENEMY_TYPE = Object.freeze({
-    [ENEMY_TYPE.PATROL_DRONE]: Object.freeze({ mode: "pingpong", waitSeconds: 0 }),
-    [ENEMY_TYPE.PATROL_DRONE_T1]: Object.freeze({ mode: "pingpong", waitSeconds: 0 })
+    [ENEMY_TYPE.PATROL_DRONE]: Object.freeze({ mode: "pingpong", waitSeconds: 0.45, speed: 48, radius: 96 }),
+    [ENEMY_TYPE.PATROL_DRONE_T1]: Object.freeze({ mode: "pingpong", waitSeconds: 0.45, speed: 48, radius: 96 })
 });
 
 function patrolPolicy(enemyType) {
@@ -25,13 +25,34 @@ function normalizePoint(point, activation = null) {
     });
 }
 
-function normalizePatrolPoints(patrol, activation) {
+function defaultPatrolPoints(origin, activation, radius) {
+    if (!Number.isFinite(radius) || radius <= 0) return [];
+    if (!activation) {
+        return [
+            Object.freeze({ x: origin.x - radius, y: origin.y }),
+            Object.freeze({ x: origin.x + radius, y: origin.y })
+        ];
+    }
+    const horizontalRadius = Math.min(radius, activation.width / 4);
+    const verticalRadius = Math.min(radius, activation.height / 4);
+    return activation.width >= activation.height
+        ? [
+              normalizePoint({ x: origin.x - horizontalRadius, y: origin.y }, activation),
+              normalizePoint({ x: origin.x + horizontalRadius, y: origin.y }, activation)
+          ]
+        : [
+              normalizePoint({ x: origin.x, y: origin.y - verticalRadius }, activation),
+              normalizePoint({ x: origin.x, y: origin.y + verticalRadius }, activation)
+          ];
+}
+
+function normalizePatrolPoints(patrol, activation, origin, policy) {
     if (Array.isArray(patrol?.points)) return patrol.points.map((point) => normalizePoint(point, activation));
     if (Array.isArray(patrol?.route)) return patrol.route.map((point) => normalizePoint(point, activation));
     if (patrol?.corridor) {
         return [normalizePoint(patrol.corridor.start, activation), normalizePoint(patrol.corridor.end, activation)];
     }
-    return [];
+    return defaultPatrolPoints(origin, activation, policy.radius);
 }
 
 function dedupePoints(points) {
@@ -87,15 +108,15 @@ function clampToActivation(position, activation) {
 }
 
 export function createEnemyPatrolState({ patrol = null, activation = null, origin, enemyType = null }) {
-    const speed = patrol?.speed;
-    if (!Number.isFinite(speed) || speed <= 0) return null;
-    const points = dedupePoints(normalizePatrolPoints(patrol, activation));
-    if (points.length < 2) return null;
     const policy = patrolPolicy(enemyType);
+    const speed = Number.isFinite(patrol?.speed) && patrol.speed > 0 ? patrol.speed : policy.speed;
+    if (!Number.isFinite(speed) || speed <= 0) return null;
+    const points = dedupePoints(normalizePatrolPoints(patrol, activation, origin, policy));
+    if (points.length < 2) return null;
     let mode = policy.mode ?? "pingpong";
-    if (patrol.mode === "loop" || patrol.mode === "pingpong") mode = patrol.mode;
+    if (patrol?.mode === "loop" || patrol?.mode === "pingpong") mode = patrol.mode;
     let waitSeconds = policy.waitSeconds ?? 0;
-    if (Number.isFinite(patrol.waitSeconds)) waitSeconds = Math.max(0, patrol.waitSeconds);
+    if (Number.isFinite(patrol?.waitSeconds)) waitSeconds = Math.max(0, patrol.waitSeconds);
     const originPoint = normalizePoint(origin, activation) ?? points[0];
     let targetIndex = nearestPointIndex(points, originPoint);
     let direction = mode === "pingpong" && targetIndex === points.length - 1 ? -1 : 1;

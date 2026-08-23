@@ -1,4 +1,5 @@
 import { circleBounds, isVisible } from "./RenderViewport.js";
+import { drawElectricArc } from "./effects/ElectricArc.js";
 
 const HEALTH_SAFE = "#22c55e";
 const HEALTH_DANGER = "#fb7185";
@@ -96,17 +97,56 @@ function drawEnemyStatus(context, enemy) {
     });
 }
 
+function scenePlayers(scene) {
+    const localActor = scene.player
+        ? {
+              ...scene.player,
+              health: scene.playerHealth,
+              maxHealth: scene.playerMaxHealth,
+              actionState: scene.actionState
+          }
+        : null;
+    return [localActor, ...(scene.otherPlayers ?? [])].filter(Boolean);
+}
+
+function drawElectrifiedStatus(context, player, time) {
+    const radius = colliderRadius(player) + 9;
+    for (let arc = 0; arc < 3; arc += 1) {
+        const startAngle = time * 9 + (arc * Math.PI * 2) / 3;
+        const endAngle = startAngle + Math.PI * 0.72;
+        drawElectricArc(
+            context,
+            {
+                x: player.position.x + Math.cos(startAngle) * radius,
+                y: player.position.y + Math.sin(startAngle) * radius
+            },
+            {
+                x: player.position.x + Math.cos(endAngle) * radius,
+                y: player.position.y + Math.sin(endAngle) * radius
+            },
+            { time: time + arc * 0.17 }
+        );
+    }
+}
+
+export class ElectrifiedStatusRenderer {
+    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
+        const actors = [...scenePlayers(scene), ...(scene.enemies ?? [])];
+        let drawn = 0;
+        for (const actor of actors) {
+            if (actor.statusEffects?.electrified?.active !== true) continue;
+            const radius = colliderRadius(actor) + 28;
+            if (viewport && !isVisible(viewport, circleBounds(actor.position, radius))) continue;
+            drawElectrifiedStatus(context, actor, presentationTimeSeconds);
+            drawn += 1;
+        }
+        renderStats?.recordCollection("electrifiedActors", actors.length, drawn);
+    }
+}
+
 export class ActorStatusRenderer {
     draw({ context, scene, viewport, renderStats }) {
-        const localActor = scene.player
-            ? {
-                  ...scene.player,
-                  health: scene.playerHealth,
-                  maxHealth: scene.playerMaxHealth,
-                  actionState: scene.actionState
-              }
-            : null;
-        const players = [localActor, ...(scene.otherPlayers ?? [])].filter(Boolean);
+        const players = scenePlayers(scene);
         let drawnPlayers = 0;
         for (const player of players) {
             const radius = colliderRadius(player) + 36;

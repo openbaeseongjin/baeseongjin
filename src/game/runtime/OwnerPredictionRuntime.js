@@ -578,6 +578,7 @@ export class OwnerPredictionRuntime {
             projectile,
             foundationEvents = [],
             fallImpactEvents = [],
+            jammerImpactEvents = [],
             bossImpactEvents = [],
             ropeImpactEvents = [],
             augmentImpactEvents = [],
@@ -588,6 +589,7 @@ export class OwnerPredictionRuntime {
     ) {
         this.recordPredictedFoundationEvents(foundationEvents, tick);
         this.recordPredictedFallImpacts(fallImpactEvents);
+        this.recordPredictedPlayerImpacts(jammerImpactEvents);
         this.recordPredictedBossImpacts(bossImpactEvents, tick, previous);
         this.recordPredictedRopeImpacts(ropeImpactEvents);
         this.recordPredictedAugmentImpacts(augmentImpactEvents);
@@ -607,6 +609,18 @@ export class OwnerPredictionRuntime {
                 })
             );
         }
+    }
+
+    recordPredictedPlayerImpacts(events) {
+        for (const event of events) {
+            if (!this.applyPredictedImpact(event)) continue;
+            this.predictedEvents.push(Object.freeze({ ...event, eventType: "predicted-resolve" }));
+        }
+    }
+
+    pendingImpactBefore(impactId) {
+        const pending = this.pendingImpacts.get(impactId);
+        return pending ? Object.freeze({ tick: pending.tick, state: pending.before }) : null;
     }
 
     recordPredictedBossImpacts(events, tick, previous) {

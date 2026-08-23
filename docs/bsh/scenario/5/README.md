@@ -454,22 +454,31 @@ Difference from Cutter:
 
 ```text
 JAMMER
-blocks the next Rope attachment
+predicts a likely next Rope surface
+electrifies and cuts a Rope attached there
 
 CUTTER
-cuts the current attached Rope
+fires a projectile that cuts the current attached Rope
 ```
 
 ## Jam Flow
 
 ```text
-HARDPOINT SELECTED BY JAMMER
+NORMAL ROPEABLE SURFACES QUERIED INSIDE HOOK REACH
+↓
+CURRENT ATTACHMENT / OCCLUDED / NO-ALTERNATIVE SURFACES EXCLUDED
+↓
+LIKELY NEXT SURFACE SELECTED BY MOVEMENT ALIGNMENT + DISTANCE
 ↓
 WARNING
 ↓
 JAM ACTIVE
 ↓
-NEW ATTACHMENT TO THAT HARDPOINT DISABLED
+PLAYER ATTACHES TO JAMMED SURFACE
+↓
+ROPE CUT + ELECTRIFIED STATUS START
+↓
+2.5 DAMAGE / 0.05s × 10 = 25 OVER 0.5s
 ↓
 JAM EXPIRES
 ↓
@@ -486,20 +495,22 @@ JAMMED   = VIOLET / MAGENTA
 
 Do not use Cutter-red as primary Jam color.
 
-## Jammer MUST NOT
+## Jammer status contract
 
-- cut an already attached Rope
-- force release
-- damage the Player
-- move the Hardpoint
-- change Rope length
+- Map authoring does not list dedicated `eligibleSurfaceIds`; normal ropeable collision surfaces are queried automatically.
+- Jam activation never cuts a Rope that was already attached before target selection.
+- Attaching a new Rope to the active target cuts that Rope and starts one shared Electrified status.
+- Electrified damage is one 0.5-second state: 2.5 damage every 0.05 seconds, total 25.
+- Reapplication refreshes remaining duration to 0.5 seconds without stacking another state or damage multiplier.
+- Network sends the shock-start event once; the ten damage pulses are fixed-step state progression, not ten events.
+- Jammer does not move the Hardpoint or change Rope length.
 
 ## Fairness invariant
 
 At every Jam-active moment:
 
 ```text
-AT LEAST ONE AUTHORED BASE-CLEAR ROUTE REMAINS
+AT LEAST ONE CURRENTLY REACHABLE BASE-CLEAR ROUTE REMAINS
 ```
 
 Prefer:
@@ -1041,7 +1052,8 @@ shield-drone-t1
 artillery-drone-t1
 Sentry + cutter-fire
 surface.grappleable === false
-canAttachToSurface(surface)
+surface spatial query + Hook reach
+owner-first player impact
 ```
 
 Sector05 new Runtime requirement:
@@ -1050,21 +1062,17 @@ Sector05 new Runtime requirement:
 HARDPOINT JAMMER
 ```
 
-Target implementation principle:
+Current implementation principle:
 
 ```text
-jammed hardpoint
-→ canAttachToSurface(surface) = false
-for NEW attachments only
+normal ropeable surface query
+→ likely next candidate selected automatically
+→ attach succeeds
+→ jammer-shock starts once
+→ Rope cut + shared Electrified state
 ```
 
-Initial Jammer V1 should not require:
-
-- forced Rope release
-- mid-flight target invalidation
-- new Rope physics
-- damage
-- new player input
+Jammer does not require dedicated map anchors, mid-flight target invalidation, new Rope physics or new player input.
 
 ---
 
@@ -1087,7 +1095,9 @@ Required eventual tests:
 - Jammer dies during Warning
 - Jammer dies during Active
 - reconnect during active Jam
-- no duplicate client-local timers
+- shock-start claim occurs once and pulse events remain zero
+- reapplication refreshes duration without effect stacking
+- owner/server/peer HP and Electrified state converge
 
 ---
 

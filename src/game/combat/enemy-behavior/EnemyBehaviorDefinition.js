@@ -2,6 +2,7 @@ export const ENEMY_BEHAVIOR_KIND = Object.freeze({
     PURSUIT: "pursuit",
     SHIELD: "shield",
     ARTILLERY: "artillery",
+    JAMMER: "jammer",
     SUPPORT: "support",
     SWARM: "swarm"
 });
@@ -14,6 +15,7 @@ export const PURSUIT_BEHAVIOR_STATE = Object.freeze({
 });
 export const SHIELD_BEHAVIOR_STATE = Object.freeze({ GUARD: "guard" });
 export const ARTILLERY_BEHAVIOR_STATE = Object.freeze({ IDLE: "idle", TELEGRAPH: "telegraph", COOLDOWN: "cooldown" });
+export const JAMMER_BEHAVIOR_STATE = Object.freeze({ ROAM: "roam" });
 export const SUPPORT_BEHAVIOR_STATE = Object.freeze({ IDLE: "idle", LINK: "link" });
 export const SWARM_BEHAVIOR_STATE = Object.freeze({ CHASE: "chase", RECOIL: "recoil" });
 
