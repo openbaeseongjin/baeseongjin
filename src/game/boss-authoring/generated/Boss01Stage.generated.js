@@ -6,7 +6,7 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             {
                 id: "boss-01:route-entry",
                 x: 420,
-                y: -540
+                y: -670
             },
             {
                 id: "boss-01:route-l0",
@@ -104,7 +104,7 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
         entry: {
             id: "boss-01:entry",
             x: 420,
-            y: -540
+            y: -670
         },
         exit: {
             id: "boss-01:exit",
