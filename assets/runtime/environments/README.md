@@ -39,5 +39,6 @@ npm run validate:environment-assets -- assets/runtime/environments/default-mock
 - 상대 PNG 경로만 허용하고 asset directory 이탈을 거부한다.
 - `formatVersion: 1`, 5개 zone, backdrop layer, terrain material, decoration group을 필수로 요구한다.
 - authored package 선택은 `AuthoredAreaEnvironmentCatalog`의 stable Area ID가 소유한다.
+- 일반 맵은 Player의 현재 Area package를 사용한다. Boss source Area는 Boss encounter가 `active`인 동안에만 같은 선택을 override한다.
 - Sector 01→02와 Sector 02→03 전환은 `PixelBackdropRenderer`가 Player world Y에서만 파생한 비율로 양쪽 backdrop과 sky를 교차 합성한다. gameplay·camera·network state나 collision을 추가하지 않는다.
 - player animation definition/schema에 환경 의미를 넣지 않는다.
