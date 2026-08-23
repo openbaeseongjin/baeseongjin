@@ -25,6 +25,7 @@ export class SectorProgressState {
         this.encountersById = new Map(world.enemySpawns.map((encounter) => [encounter.encounterId, encounter]));
         this.routesById = new Map(world.routeLocks.map((route) => [route.id, route]));
         this.accessModulesById = new Map((world.accessModules ?? []).map((module) => [module.id, module]));
+        this.bossStagesById = new Map((world.bossStages ?? []).map((stage) => [stage.id, stage]));
         this.contentBoundariesById = new Map(
             world.landmarks
                 .filter(({ contentBoundaryId }) => typeof contentBoundaryId === "string")
@@ -61,10 +62,12 @@ export class SectorProgressState {
             }
         }
         for (const accessModule of world.accessModules ?? []) this.idOrder.set(accessModule.id, order++);
+        for (const bossStage of world.bossStages ?? []) this.idOrder.set(bossStage.id, order++);
         this.completedObjectiveIds = new Set();
         this.resolvedEncounterIds = new Set();
         this.collectedAccessModuleIds = new Set();
         this.unlockedRouteIds = new Set();
+        this.completedBossStageIds = new Set();
         this.activeObjectiveSequences = new Map();
         this.reachedContentBoundaryIds = new Set();
         this.contentBoundaryId = null;
@@ -265,6 +268,21 @@ export class SectorProgressState {
         return this.unlockedRouteIds.has(routeId);
     }
 
+    completeBossStage(bossStageId) {
+        if (!this.bossStagesById.has(bossStageId)) {
+            return freezeResult({ accepted: false, changed: false, reason: "boss-stage-unknown" });
+        }
+        if (this.completedBossStageIds.has(bossStageId)) {
+            return freezeResult({ accepted: true, changed: false, reason: "boss-stage-already-complete" });
+        }
+        this.completedBossStageIds.add(bossStageId);
+        return freezeResult({ accepted: true, changed: true, bossStageId });
+    }
+
+    isBossStageComplete(bossStageId) {
+        return this.completedBossStageIds.has(bossStageId);
+    }
+
     resetContentBoundary() {
         this.contentBoundaryId = null;
         return this;
@@ -276,6 +294,7 @@ export class SectorProgressState {
             resolvedEncounterIds: sortedIds(this.resolvedEncounterIds, this.idOrder),
             collectedAccessModuleIds: sortedIds(this.collectedAccessModuleIds, this.idOrder),
             unlockedRouteIds: sortedIds(this.unlockedRouteIds, this.idOrder),
+            completedBossStageIds: sortedIds(this.completedBossStageIds, this.idOrder),
             activeObjectiveSequences: Object.freeze(
                 [...this.activeObjectiveSequences.values()].sort(
                     (left, right) => this.idOrder.get(left.objectiveId) - this.idOrder.get(right.objectiveId)
@@ -301,6 +320,9 @@ export class SectorProgressState {
             requireSnapshotArray(snapshot.collectedAccessModuleIds ?? [], "collectedAccessModuleIds")
         );
         const unlockedRouteIds = new Set(requireSnapshotArray(snapshot.unlockedRouteIds, "unlockedRouteIds"));
+        const completedBossStageIds = new Set(
+            requireSnapshotArray(snapshot.completedBossStageIds ?? [], "completedBossStageIds")
+        );
         const reachedContentBoundaryIds = new Set(
             requireSnapshotArray(snapshot.reachedContentBoundaryIds ?? [], "reachedContentBoundaryIds")
         );
@@ -313,6 +335,9 @@ export class SectorProgressState {
             throw new Error("unknown access module");
         }
         if ([...unlockedRouteIds].some((id) => !this.routesById.has(id))) throw new Error("unknown route");
+        if ([...completedBossStageIds].some((id) => !this.bossStagesById.has(id))) {
+            throw new Error("unknown Boss Stage");
+        }
         if ([...reachedContentBoundaryIds].some((id) => !this.contentBoundariesById.has(id))) {
             throw new Error("unknown content boundary");
         }
@@ -320,6 +345,7 @@ export class SectorProgressState {
         this.resolvedEncounterIds = resolvedEncounterIds;
         this.collectedAccessModuleIds = collectedAccessModuleIds;
         this.unlockedRouteIds = unlockedRouteIds;
+        this.completedBossStageIds = completedBossStageIds;
         this.reachedContentBoundaryIds = reachedContentBoundaryIds;
         this.activeObjectiveSequences = new Map(
             snapshot.activeObjectiveSequences.map((sequence) => {

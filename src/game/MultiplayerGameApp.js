@@ -19,11 +19,20 @@ import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { createRenderViewport } from "../render/RenderViewport.js";
-import { localTriggerObjects, resolveAuthoredCameraShot } from "./camera/AuthoredCameraDirector.js";
+import {
+    advanceAuthoredCamera,
+    localTriggerObjects,
+    resolveAuthoredCameraShot
+} from "./camera/AuthoredCameraDirector.js";
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
+import {
+    BOSS_CAMERA_ZOOM_RATIO,
+    bossCameraFocusPlayer,
+    localBossStageSnapshot
+} from "./presentation/BossStageLocalView.js";
 
 function renderPlayer(state, predicted = null) {
     const position = predicted?.position ?? state.position;
@@ -560,6 +569,23 @@ export class MultiplayerGameApp {
         return this.updateCamera(dt, player, world, bossStage);
     }
 
+    updateCamera(dt, player, world, bossStage = null) {
+        const localBossStage = localBossStageSnapshot(bossStage, player);
+        return advanceAuthoredCamera({
+            camera: this.camera,
+            world,
+            player: bossCameraFocusPlayer(player, localBossStage),
+            mobileView: this.mobileView,
+            defaultZoom:
+                localBossStage?.status === "active"
+                    ? CAMERA_CONFIG.desktopZoom * BOSS_CAMERA_ZOOM_RATIO
+                    : CAMERA_CONFIG.desktopZoom,
+            cssWidth: this.renderer.cssWidth,
+            cssHeight: this.renderer.cssHeight,
+            dt
+        });
+    }
+
     render() {
         const remote = this.authority.snapshot(1);
         if (!remote.state || !remote.predicted) return;
@@ -585,9 +611,10 @@ export class MultiplayerGameApp {
             remote.state.bossStage ??
             remote.state.bossStageRuntime ??
             remote.state.bossRuntime;
+        const localBossStage = localBossStageSnapshot(bossStageSnapshot, player);
         const bossStagePresentation = createBossStagePresentation(
-            bossStageSnapshot,
-            bossStageSpecById(bossStageSnapshot?.stageId ?? bossStageSnapshot?.id ?? bossStageSnapshot?.encounterId)
+            localBossStage,
+            bossStageSpecById(localBossStage?.stageId ?? localBossStage?.id ?? localBossStage?.encounterId)
         );
         this.statusFeedback.apply([base.eventFlash]);
         this.queuePlayerPresentationEvents([base.eventFlash]);

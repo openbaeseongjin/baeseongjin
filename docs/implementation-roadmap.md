@@ -39,7 +39,7 @@
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
 - Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display·Augment Node 위치, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
-- `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, authored Gate→Entry portal, content boundary 격리, Access/Jammer/proof 권위를 검증한다.
+- `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 gap-0 경계의 통과·하단 복구, authored Gate→Entry portal, Access/Jammer/proof 권위를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
 - 생성·해결 이벤트만 공유하고 클라이언트에서 재생하는 플레이어·적 투사체
 - 네트워크 설정을 변경하지 않는 Cloudflare Quick Tunnel 임시 공유 명령
@@ -59,11 +59,11 @@
 
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
-3. **Phase 3 · #625 / #637 / #816, 0.59.0에서 공간 계약 대체:** Player별 checkpoint와 독립 Boss Stage는 유지하되 4,800px city wing·connector collision은 제거했다. 일반 Stage는 Editor authored map 단위로 격리하고 Gate portal로 연결한다.
+3. **Phase 3 · #625 / #637 / #816 / #922, 0.60.0에서 공간 계약 완결:** Player별 checkpoint와 독립 Boss Stage는 유지하되 4,800px city wing·connector collision과 Stage 격리 gap을 제거했다. 일반 Stage authored Bounds는 위아래 edge가 맞닿고 Gate portal로 전진한다.
 4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
-5. **Sector Access 3-of-3 · 0.43.2 / portal 정렬 0.59.0:** Sector 01·02·03의 기존 Carrier와 공용 Module 진행은 유지한다. outgoing route가 잠긴 동안 authored Gate portal만 사용할 수 없으며 자동 transit barrier collision·visual은 생성하지 않는다. 수집 진행과 Player별 checkpoint는 보존한다.
+5. **Sector Access 3-of-3 · 0.43.2 / portal 정렬 0.60.0:** Sector 01·02·03의 기존 Carrier와 공용 Module 진행은 유지한다. outgoing route가 잠긴 동안 authored Gate portal만 사용할 수 없으며 자동 transit barrier collision·visual은 생성하지 않는다. 수집 진행과 Player별 checkpoint는 보존한다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
-7. **Stage 공간 권위 · 0.59.0:** 과거 합성 지형에 하강 개구부를 남기는 보정을 폐기했다. 일반 Stage surface·벽·격벽·world object 위치는 Editor source만 소유하고, 출구를 통과한 Player 한 명만 다음 authored Entry로 텔레포트한다. 현재 Stage ID는 저장하지 않는다.
+7. **Stage 공간 권위 · 0.60.0:** 일반 Stage surface·벽·격벽·world object 위치와 경계 개구부는 Editor source만 소유한다. Player는 아래 Stage들로 계속 낙하·착지·Rope 복구하고 전체 월드 하단 아래에서만 사망한다. Gate는 위치 기반 Player 한 명만 전진시키며 현재 Stage ID는 저장하지 않는다.
 
 ### 제출 전 시나리오 구현 트랙
 

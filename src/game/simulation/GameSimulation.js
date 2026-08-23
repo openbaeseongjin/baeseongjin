@@ -249,6 +249,11 @@ const BOSS_BEAM_DAMAGE_INTERVAL_SECONDS = 0.1;
 const BOSS_BEAM_DAMAGE_PER_PULSE = 3;
 const SIMULATION_TICKS_PER_SECOND = 120;
 const AUTHORED_STAGE_FALL_RECOVERY_MARGIN = 780;
+const BOSS_PARTICIPANT_STATUS = Object.freeze({
+    ACTIVE: "active",
+    SPECTATING: "spectating",
+    DISCONNECTED: "disconnected"
+});
 const VICTIM_IMPACT_AUTHORITY = Object.freeze({ LOCAL: "local", CLAIM: "claim" });
 
 function bossPhaseMechanics(stage, definition, phase) {
@@ -336,25 +341,16 @@ export class GameSimulation {
         this.landmarkById = Object.freeze(
             Object.fromEntries((this.world.landmarks ?? []).map((landmark) => [landmark.id, landmark]))
         );
-        this.respawnAnchorById = Object.freeze(
-            Object.fromEntries((this.world.respawnAnchors ?? []).map((anchor) => [anchor.id, anchor]))
-        );
-        this.stageTransitionBySourceLandmarkId = Object.freeze(
-            Object.fromEntries(
-                (this.world.stageTransitions ?? []).map((transition) => [transition.sourceLandmarkId, transition])
-            )
-        );
-        this.bossEntryRouteIdLookup = Object.freeze(
+        this.bossStageIdByEntryRouteId = Object.freeze(
             Object.fromEntries(
                 (this.world.bossStages ?? [])
                     .filter(({ entryRouteId }) => typeof entryRouteId === "string")
-                    .map(({ entryRouteId }) => [entryRouteId, true])
+                    .map(({ id, entryRouteId }) => [entryRouteId, id])
             )
         );
         this.bossDefinitions = this.isSeamlessSectorWorld
             ? normalizedBossDefinitions({ bossDefinition, bossDefinitions })
             : Object.freeze([]);
-        this.completedBossStageIds = new Set();
         this.bossHazardRecords = new Map();
         this.bossRuntime = this.isSeamlessSectorWorld ? createBossEncounterRuntime(this.bossDefinitions[0]) : null;
         this.worldProgress = this.isSeamlessSectorWorld
@@ -473,8 +469,6 @@ export class GameSimulation {
     }
 
     addPlayer(spawn, playerId = null, respawnAnchorId = null) {
-        const bossJoinStage = this.bossRuntime?.status === "active" ? this.#bossStageWorld() : null;
-        const resolvedSpawn = bossJoinStage?.entry ?? spawn;
         const primaryRegion = authoredRegionForPosition(
             this.world,
             this.#findPlayer(this.#primaryPlayerId)?.physics.position
@@ -492,13 +486,12 @@ export class GameSimulation {
             playerConfig: PLAYER_CONFIG,
             ropeConfig: this.ropeConfig,
             combatConfig: COMBAT_CONFIG,
-            spawn: resolvedSpawn,
+            spawn,
             playerId,
             respawnAnchorId: initialRespawnAnchorId
         });
         runtime.entity.augmentCombat.syncLoadout(runtime.entity.foundation, runtime.entity.maxHealth);
         this.objects.addPlayerRuntime(runtime);
-        if (this.bossRuntime?.status === "active") this.bossRuntime.addParticipant(runtime.entity.id);
         this.collisionBroadPhase.invalidateFrame();
         return runtime;
     }
@@ -580,13 +573,7 @@ export class GameSimulation {
         }
         const outcome = this.bossRuntime.applyDamage({ sourcePlayerId, damage });
         this.#commitBossEvents();
-        if (outcome.completed) {
-            this.completedBossStageIds.add(this.bossRuntime.definition.id);
-            this.#setActiveCollisionSurfaces(
-                this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
-            );
-            this.#recoverBossSpectatorsOnVictory();
-        }
+        if (outcome.completed) this.#completeBossStage(this.bossRuntime.definition.id);
         return outcome;
     }
 
@@ -615,13 +602,7 @@ export class GameSimulation {
             impactPosition
         });
         this.#commitBossEvents();
-        if (outcome.completed) {
-            this.completedBossStageIds.add(this.bossRuntime.definition.id);
-            this.#setActiveCollisionSurfaces(
-                this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
-            );
-            this.#recoverBossSpectatorsOnVictory();
-        }
+        if (outcome.completed) this.#completeBossStage(this.bossRuntime.definition.id);
         return outcome;
     }
 
@@ -648,7 +629,7 @@ export class GameSimulation {
             const stageId = snapshot.stageId ?? snapshot.encounterId;
             this.#selectBossRuntime(stageId);
             this.bossRuntime.restore(snapshot);
-            if (snapshot.status === "completed") this.completedBossStageIds.add(this.bossRuntime.definition.id);
+            if (snapshot.status === "completed") this.worldProgress?.completeBossStage(this.bossRuntime.definition.id);
         }
         this.collisionBroadPhase.invalidateFrame();
         this.#setActiveCollisionSurfaces(
@@ -949,14 +930,40 @@ export class GameSimulation {
         return this.world.bossStages?.find(({ id }) => id === this.bossRuntime?.definition.id) ?? null;
     }
 
+    #bossParticipantStatus(playerId) {
+        return this.bossRuntime?.participants?.get(playerId) ?? null;
+    }
+
+    #bossEntryPlayers(stage) {
+        return this.players.filter(
+            ({ lifeState, physics }) =>
+                lifeState === "active" && pointInsideBounds(physics.position, stage.sourceTrigger)
+        );
+    }
+
+    #activeBossParticipants() {
+        return this.players.filter(
+            ({ id, lifeState, health }) =>
+                lifeState === "active" &&
+                health > 0 &&
+                this.#bossParticipantStatus(id) === BOSS_PARTICIPANT_STATUS.ACTIVE
+        );
+    }
+
+    #completeBossStage(stageId) {
+        const completion = this.worldProgress?.completeBossStage(stageId);
+        if (!completion?.accepted || !completion.changed) return false;
+        this.#setActiveCollisionSurfaces(
+            this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
+        );
+        this.#recoverBossSpectatorsOnVictory();
+        return true;
+    }
+
     #selectBossRuntime(stageId) {
         if (this.bossRuntime?.definition.id === stageId) return this.bossRuntime;
         const definition = this.bossDefinitions.find(({ id }) => id === stageId);
         if (!definition) throw new Error(`unknown Boss Stage definition: ${stageId}`);
-        const stageIndex = this.world.bossStages?.findIndex(({ id }) => id === stageId) ?? -1;
-        for (const completedStage of this.world.bossStages?.slice(0, Math.max(0, stageIndex)) ?? []) {
-            this.completedBossStageIds.add(completedStage.id);
-        }
         this.bossRuntime = createBossEncounterRuntime(definition);
         this.collisionBroadPhase.invalidateFrame();
         this.#setActiveDynamicCollisionSurfaces();
@@ -973,12 +980,9 @@ export class GameSimulation {
                     : !sourceLandmark?.contentBoundaryId ||
                       progress?.reachedContentBoundaryIds?.includes(sourceLandmark.contentBoundaryId);
                 return (
-                    !this.completedBossStageIds.has(stage.id) &&
+                    !this.worldProgress?.isBossStageComplete(stage.id) &&
                     entryReady &&
-                    this.players.some(
-                        ({ lifeState, physics }) =>
-                            lifeState === "active" && pointInsideBounds(physics.position, stage.sourceTrigger)
-                    )
+                    this.#bossEntryPlayers(stage).length > 0
                 );
             }) ?? null
         );
@@ -1061,11 +1065,12 @@ export class GameSimulation {
     #advanceBossRuntime(dt) {
         if (!this.bossRuntime) return Object.freeze({ accepted: false, changed: false });
         const stage = this.#bossStageWorld();
+        const activeParticipants = this.#activeBossParticipants();
         const outcome = this.bossRuntime.advance(dt, {
             players: Object.freeze(
-                this.players
-                    .filter(({ lifeState, health }) => lifeState === "active" && health > 0)
-                    .map(({ id, physics }) => Object.freeze({ id, position: vectorState(physics.position) }))
+                activeParticipants.map(({ id, physics }) =>
+                    Object.freeze({ id, position: vectorState(physics.position) })
+                )
             ),
             surfaces: stage?.surfaces ?? Object.freeze([]),
             anchors: stage?.route ?? Object.freeze([]),
@@ -1074,7 +1079,7 @@ export class GameSimulation {
         this.#setActiveDynamicCollisionSurfaces();
         this.#syncAttachedActorRopes();
         const ropeCutSurfaces = this.bossRuntime?.ropeCutSurfaces?.(this.#bossWorldOffset()) ?? Object.freeze([]);
-        for (const player of this.players) {
+        for (const player of activeParticipants) {
             const anchor = player.ropeObject.rope.anchor;
             if (
                 !anchor ||
@@ -1096,8 +1101,8 @@ export class GameSimulation {
         }
         if (stage && this.bossRuntime?.recoverPlayer) {
             const recoveryThreshold = stage.bounds.y + stage.bounds.height + PLAYER_CONFIG.radius;
-            for (const player of this.players) {
-                if (player.lifeState !== "active" || player.physics.position.y <= recoveryThreshold) continue;
+            for (const player of activeParticipants) {
+                if (player.physics.position.y <= recoveryThreshold) continue;
                 const recoveryPosition = this.bossRuntime.recoverPlayer(
                     player.id,
                     this.#bossWorldOffset(),
@@ -1171,11 +1176,11 @@ export class GameSimulation {
     }
 
     #bossFilteredCollisionSurfaces(surfaces) {
-        if (this.completedBossStageIds.size === 0) return surfaces;
+        if (!this.worldProgress) return surfaces;
         return Object.freeze(
             surfaces.filter(
                 ({ blockedByBossStageId }) =>
-                    !blockedByBossStageId || !this.completedBossStageIds.has(blockedByBossStageId)
+                    !blockedByBossStageId || !this.worldProgress.isBossStageComplete(blockedByBossStageId)
             )
         );
     }
@@ -1191,11 +1196,12 @@ export class GameSimulation {
             if (!pendingStage) return false;
             this.#selectBossRuntime(pendingStage.id);
             const stage = pendingStage;
-            const outcome = this.startBossEncounter(this.playerIds());
+            const entering = this.#bossEntryPlayers(stage);
+            const outcome = this.startBossEncounter(entering.map(({ id }) => id));
             if (!outcome.accepted) return false;
-            for (const [index, player] of this.players.entries()) {
+            for (const [index, player] of entering.entries()) {
                 const gateId = `${stage.id}:entry`;
-                const position = portalArrivalPosition(stage.entry, index, this.players.length);
+                const position = portalArrivalPosition(stage.entry, index, entering.length);
                 this.applyPortalTransition(player.id, position, this.tick, gateId);
                 this.recordReplicationEvent("gate-portal-entered", { playerId: player.id, gateId, position });
             }
@@ -1203,6 +1209,23 @@ export class GameSimulation {
         }
         const stage = this.#bossStageWorld();
         if (!stage) return false;
+        if (this.bossRuntime.status === "active") {
+            const entering = this.#bossEntryPlayers(stage).filter(
+                ({ id }) => this.#bossParticipantStatus(id) !== BOSS_PARTICIPANT_STATUS.ACTIVE
+            );
+            let joined = false;
+            for (const [index, player] of entering.entries()) {
+                const outcome = this.bossRuntime.addParticipant(player.id);
+                if (!outcome.accepted) continue;
+                const gateId = `${stage.id}:entry`;
+                const position = portalArrivalPosition(stage.entry, index, entering.length);
+                this.applyPortalTransition(player.id, position, this.tick, gateId);
+                this.recordReplicationEvent("gate-portal-entered", { playerId: player.id, gateId, position });
+                joined = true;
+            }
+            if (joined) this.#commitBossEvents();
+            return joined;
+        }
         if (this.bossRuntime.status !== "completed") return false;
         if (stage.terminalCompletion) {
             const boardingZone = this.bossRuntime.boardingZone?.(this.#bossWorldOffset()) ?? null;
@@ -1240,7 +1263,7 @@ export class GameSimulation {
         if (activePlayersLeftArena) {
             this.worldProgress.resetContentBoundary();
             this.contentBoundaryAnnounced = false;
-            const nextStage = this.world.bossStages?.find(({ id }) => !this.completedBossStageIds.has(id));
+            const nextStage = this.world.bossStages?.find(({ id }) => !this.worldProgress.isBossStageComplete(id));
             if (nextStage) this.#selectBossRuntime(nextStage.id);
         }
         return transitioned;
@@ -1255,14 +1278,20 @@ export class GameSimulation {
             player.ropeObject.swingDrag = null;
             return defeat;
         }
-        for (const participant of this.players) this.respawnPlayerAtCheckpoint(participant, "boss-wipe");
+        for (const participant of this.players) {
+            if (this.#bossParticipantStatus(participant.id) !== BOSS_PARTICIPANT_STATUS.ACTIVE) continue;
+            this.respawnPlayerAtCheckpoint(participant, "boss-wipe");
+        }
         return defeat;
     }
 
     #recoverBossSpectatorsOnVictory() {
         const stage = this.#bossStageWorld();
         if (!stage) return;
-        const spectators = this.players.filter(({ lifeState }) => lifeState === "spectating");
+        const spectators = this.players.filter(
+            ({ id, lifeState }) =>
+                lifeState === "spectating" && this.#bossParticipantStatus(id) === BOSS_PARTICIPANT_STATUS.SPECTATING
+        );
         for (const [index, player] of spectators.entries()) {
             this.respawnPlayerAtCheckpoint(player, "boss-victory");
             this.applyPortalTransition(
@@ -1750,6 +1779,10 @@ export class GameSimulation {
                 if (module.sectorId === source.sectorId) this.worldProgress.collectAccessModule(module.id);
             }
         }
+        for (const bossStage of this.world.bossStages ?? []) {
+            const bossTarget = this.landmarkById[bossStage.targetLandmarkId];
+            if (bossTarget && bossTarget.order <= target.order) this.worldProgress.completeBossStage(bossStage.id);
+        }
         this.worldProgress.resetContentBoundary();
         this.#setActiveCollisionSurfaces(
             this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
@@ -1822,11 +1855,6 @@ export class GameSimulation {
         player.ropeObject.swingDrag = null;
         player.ropeObject.launcher.clear();
         player.ropeImpactAttack.reset();
-        player.weapon.cooldown = 0;
-        player.hitInvulnerabilityRemaining = 0;
-        player.ropeDisabledRemaining = 0;
-        player.foundation.resetRuntime();
-        player.augmentCombat.resetForRespawn(player.foundation, player.maxHealth);
         this.portalTransitions.set(player.id, Object.freeze({ gateId, position, tick }));
         this.collisionBroadPhase.invalidateFrame();
         return this.ownerPredictionState(player.id);
@@ -2451,7 +2479,10 @@ export class GameSimulation {
         if (recoverPlayerDeaths) {
             for (const player of this.players) {
                 if (player.health > 0 || player.lifeState !== "active") continue;
-                if (this.bossRuntime?.status === "active") {
+                if (
+                    this.bossRuntime?.status === "active" &&
+                    this.#bossParticipantStatus(player.id) === BOSS_PARTICIPANT_STATUS.ACTIVE
+                ) {
                     const defeat = this.#resolveBossParticipantDefeat(player, "health");
                     if (defeat.retryStarted) break;
                     continue;
@@ -2465,13 +2496,10 @@ export class GameSimulation {
 
     recoverFallenPlayers() {
         const fallenPlayerIds = [];
+        const worldBottomY = Number.isFinite(this.world.bottomY) ? this.world.bottomY : WORLD_CONFIG.floorY;
+        const recoveryY = worldBottomY + AUTHORED_STAGE_FALL_RECOVERY_MARGIN;
         for (const player of this.players) {
             if (player.lifeState !== "active") continue;
-            const respawnAnchor = this.respawnAnchorForPlayer(player.id);
-            const authoredStage = this.isSeamlessSectorWorld ? this.landmarkById[respawnAnchor?.landmarkId] : null;
-            const recoveryY = authoredStage
-                ? authoredStage.bounds.y + authoredStage.bounds.height + AUTHORED_STAGE_FALL_RECOVERY_MARGIN
-                : WORLD_CONFIG.floorY + AUTHORED_STAGE_FALL_RECOVERY_MARGIN;
             if (player.physics.position.isFinite() && player.physics.position.y <= recoveryY) {
                 continue;
             }
@@ -3333,37 +3361,31 @@ export class GameSimulation {
     #transferPlayersThroughStagePortals({ replicate }) {
         for (const player of this.players) {
             if (player.lifeState !== "active") continue;
-            const respawnAnchor = this.respawnAnchorById[player.respawnAnchorId];
-            const transition = this.stageTransitionBySourceLandmarkId[respawnAnchor?.landmarkId];
-            if (!transition) continue;
-            if (
-                this.bossEntryRouteIdLookup[transition.routeLockId] === true ||
-                !this.worldProgress.isRouteUnlocked(transition.routeLockId)
-            ) {
-                continue;
+            for (const transition of this.world.stageTransitions) {
+                if (!pointInsideBounds(player.physics.position, transition.trigger)) continue;
+                if (!this.worldProgress.isRouteUnlocked(transition.routeLockId)) continue;
+                const bossStageId = this.bossStageIdByEntryRouteId[transition.routeLockId];
+                if (bossStageId && !this.worldProgress.isBossStageComplete(bossStageId)) continue;
+                const targetLandmark = this.landmarkById[transition.targetLandmarkId];
+                if (!targetLandmark) {
+                    throw new Error(`Missing Stage portal destination '${transition.targetLandmarkId}'`);
+                }
+                const departure = Object.freeze({ x: player.physics.position.x, y: player.physics.position.y });
+                const position = Object.freeze({ x: targetLandmark.entry.x, y: targetLandmark.entry.y });
+                this.applyPortalTransition(player.id, position, this.tick, transition.gateId);
+                this.setPlayerRespawnAnchor(player.id, targetLandmark.respawnAnchorId);
+                const payload = Object.freeze({
+                    gateId: transition.gateId,
+                    areaId: transition.sourceAreaId,
+                    nextAreaId: transition.targetAreaId,
+                    playerId: player.id,
+                    departure,
+                    position
+                });
+                if (replicate) this.recordReplicationEvent("gate-portal-entered", payload);
+                this.eventFlash = { type: "gate-portal-entered", age: 0, ...payload };
+                break;
             }
-            const targetLandmark = this.landmarkById[transition.targetLandmarkId];
-            if (!targetLandmark) throw new Error(`Missing Stage portal destination '${transition.targetLandmarkId}'`);
-            if (
-                !pointInsideBounds(player.physics.position, transition.trigger) ||
-                this.portalTransitions.get(player.id)?.gateId === transition.gateId
-            ) {
-                continue;
-            }
-            const departure = Object.freeze({ x: player.physics.position.x, y: player.physics.position.y });
-            const position = Object.freeze({ x: targetLandmark.entry.x, y: targetLandmark.entry.y });
-            this.applyPortalTransition(player.id, position, this.tick, transition.gateId);
-            this.setPlayerRespawnAnchor(player.id, targetLandmark.respawnAnchorId);
-            const payload = Object.freeze({
-                gateId: transition.gateId,
-                areaId: transition.sourceAreaId,
-                nextAreaId: transition.targetAreaId,
-                playerId: player.id,
-                departure,
-                position
-            });
-            if (replicate) this.recordReplicationEvent("gate-portal-entered", payload);
-            this.eventFlash = { type: "gate-portal-entered", age: 0, ...payload };
         }
     }
 
@@ -4156,7 +4178,10 @@ export class GameSimulation {
         if (fatal) {
             const defeat = this.bossRuntime.handlePlayerDefeat(player.id, `boss-${claim.sourceType}`);
             if (defeat.retryStarted) {
-                for (const participant of this.players) this.respawnPlayerAtCheckpoint(participant, "boss-wipe");
+                for (const participant of this.players) {
+                    if (this.#bossParticipantStatus(participant.id) !== BOSS_PARTICIPANT_STATUS.ACTIVE) continue;
+                    this.respawnPlayerAtCheckpoint(participant, "boss-wipe");
+                }
             }
         }
         this.#restorePlayer(player, recoveredState);
