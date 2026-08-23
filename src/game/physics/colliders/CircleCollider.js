@@ -3,6 +3,7 @@ import {
     assertColliderSnapshot,
     colliderSnapshotOverlapsCircle,
     colliderSnapshotsOverlap,
+    isGravitySupportingContactNormal,
     resolveActorCollider
 } from "./Collider.js";
 
@@ -240,7 +241,7 @@ export class CircleCollider {
                     velocity.x -= normalX * inwardSpeed;
                     velocity.y -= normalY * inwardSpeed;
                 }
-                if (normalY < -0.55) isGrounded = true;
+                if (isGravitySupportingContactNormal({ x: normalX, y: normalY })) isGrounded = true;
                 collisionNormals.push(Object.freeze({ x: normalX, y: normalY }));
             }
         }
@@ -283,7 +284,7 @@ export class CircleCollider {
                     velocity.x -= normalX * inwardSpeed;
                     velocity.y -= normalY * inwardSpeed;
                 }
-                if (normalY < -0.55) isGrounded = true;
+                if (isGravitySupportingContactNormal({ x: normalX, y: normalY })) isGrounded = true;
                 collisionNormals.push(Object.freeze({ x: normalX, y: normalY }));
                 resolved = true;
             }

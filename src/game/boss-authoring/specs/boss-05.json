@@ -1,0 +1,301 @@
+{
+    "schemaVersion": "boss-stage-spec-v2",
+    "specType": "boss-stage",
+    "id": "boss-05",
+    "name": "CONTINUITY CONTROL CORE",
+    "subtitle": "CONTINUITY COMMAND CHAMBER / ROOFTOP ACCESS",
+    "sourceAreaId": "sector-05-08",
+    "nextAreaId": "sector-06-01",
+    "arena": {
+        "bounds": { "x": 0, "y": -2600, "width": 5200, "height": 2600 },
+        "baseHookReach": 400,
+        "entry": { "id": "boss-05:entry", "x": 2600, "y": -212 },
+        "exit": { "id": "boss-05:exit", "x": 2600, "y": -2420 },
+        "phaseZones": [
+            {
+                "id": "boss-05:zone-a",
+                "phaseId": "boss-05:phase-1",
+                "bounds": { "x": 900, "y": -2440, "width": 1700, "height": 2240 }
+            },
+            {
+                "id": "boss-05:zone-b",
+                "phaseId": "boss-05:phase-2",
+                "bounds": { "x": 2800, "y": -2440, "width": 1500, "height": 2200 }
+            },
+            {
+                "id": "boss-05:zone-main",
+                "phaseId": "boss-05:phase-3",
+                "bounds": { "x": 2100, "y": -2440, "width": 1000, "height": 2200 }
+            },
+            {
+                "id": "boss-05:zone-core",
+                "phaseId": "boss-05:phase-4",
+                "bounds": { "x": 2050, "y": -2440, "width": 1100, "height": 2200 }
+            }
+        ],
+        "surfaces": [
+            {
+                "id": "boss-05:entry-deck",
+                "kind": "platform",
+                "bounds": { "x": 2200, "y": -180, "width": 800, "height": 100 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-05:left-service-platform",
+                "kind": "platform",
+                "bounds": { "x": 1050, "y": -1240, "width": 850, "height": 90 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-05:right-service-platform",
+                "kind": "platform",
+                "bounds": { "x": 3300, "y": -1240, "width": 850, "height": 90 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-05:cross-platform",
+                "kind": "platform",
+                "bounds": { "x": 2240, "y": -760, "width": 720, "height": 80 },
+                "oneWay": true,
+                "grappleable": true
+            },
+            {
+                "id": "boss-05:top-left",
+                "kind": "platform",
+                "bounds": { "x": 2100, "y": -600, "width": 420, "height": 70 },
+                "oneWay": true,
+                "grappleable": true
+            },
+            {
+                "id": "boss-05:top-right",
+                "kind": "platform",
+                "bounds": { "x": 2680, "y": -600, "width": 420, "height": 70 },
+                "oneWay": true,
+                "grappleable": true
+            },
+            {
+                "id": "boss-05:rooftop-gate",
+                "kind": "architecture",
+                "bounds": { "x": 2440, "y": -2480, "width": 320, "height": 300 },
+                "oneWay": false,
+                "grappleable": false
+            }
+        ],
+        "anchors": [
+            { "id": "boss-05:entry", "x": 2600, "y": -160 },
+            { "id": "boss-05:left-1", "x": 2300, "y": -420 },
+            { "id": "boss-05:left-2", "x": 1980, "y": -610 },
+            { "id": "boss-05:a-bridge-1", "x": 1800, "y": -900 },
+            { "id": "boss-05:a-bridge-2", "x": 1650, "y": -1080 },
+            { "id": "boss-05:a-strike", "x": 1500, "y": -1230 },
+            { "id": "boss-05:left-3", "x": 1750, "y": -1420 },
+            { "id": "boss-05:a-cross-1", "x": 2050, "y": -1200 },
+            { "id": "boss-05:a-cross-2", "x": 2300, "y": -950 },
+            { "id": "boss-05:cross", "x": 2600, "y": -760 },
+            { "id": "boss-05:right-1", "x": 2900, "y": -420 },
+            { "id": "boss-05:right-2", "x": 3220, "y": -610 },
+            { "id": "boss-05:b-bridge-1", "x": 3400, "y": -900 },
+            { "id": "boss-05:b-bridge-2", "x": 3550, "y": -1080 },
+            { "id": "boss-05:b-strike", "x": 3700, "y": -1230 },
+            { "id": "boss-05:right-3", "x": 3450, "y": -1420 },
+            { "id": "boss-05:b-cross-1", "x": 3150, "y": -1200 },
+            { "id": "boss-05:b-cross-2", "x": 2900, "y": -950 },
+            { "id": "boss-05:p3-bridge", "x": 2600, "y": -900 },
+            { "id": "boss-05:p3-low-l", "x": 2380, "y": -1030 },
+            { "id": "boss-05:p3-low-r", "x": 2820, "y": -1030 },
+            { "id": "boss-05:main", "x": 2600, "y": -980 },
+            { "id": "boss-05:top-l", "x": 2380, "y": -650 },
+            { "id": "boss-05:top-r", "x": 2820, "y": -650 },
+            { "id": "boss-05:core", "x": 2600, "y": -450 },
+            { "id": "boss-05:exit-1", "x": 2600, "y": -400 },
+            { "id": "boss-05:exit-2", "x": 2600, "y": -180 }
+        ],
+        "routeEdges": [
+            { "id": "boss-05:edge-01", "from": "boss-05:entry", "to": "boss-05:left-1" },
+            { "id": "boss-05:edge-02", "from": "boss-05:left-1", "to": "boss-05:left-2" },
+            { "id": "boss-05:edge-03", "from": "boss-05:left-2", "to": "boss-05:a-bridge-1" },
+            { "id": "boss-05:edge-04", "from": "boss-05:a-bridge-1", "to": "boss-05:a-bridge-2" },
+            { "id": "boss-05:edge-05", "from": "boss-05:a-bridge-2", "to": "boss-05:a-strike" },
+            { "id": "boss-05:edge-06", "from": "boss-05:a-strike", "to": "boss-05:left-3" },
+            { "id": "boss-05:edge-07", "from": "boss-05:left-3", "to": "boss-05:a-cross-1" },
+            { "id": "boss-05:edge-08", "from": "boss-05:a-cross-1", "to": "boss-05:a-cross-2" },
+            { "id": "boss-05:edge-09", "from": "boss-05:a-cross-2", "to": "boss-05:cross" },
+            { "id": "boss-05:edge-10", "from": "boss-05:entry", "to": "boss-05:right-1" },
+            { "id": "boss-05:edge-11", "from": "boss-05:right-1", "to": "boss-05:right-2" },
+            { "id": "boss-05:edge-12", "from": "boss-05:right-2", "to": "boss-05:b-bridge-1" },
+            { "id": "boss-05:edge-13", "from": "boss-05:b-bridge-1", "to": "boss-05:b-bridge-2" },
+            { "id": "boss-05:edge-14", "from": "boss-05:b-bridge-2", "to": "boss-05:b-strike" },
+            { "id": "boss-05:edge-15", "from": "boss-05:b-strike", "to": "boss-05:right-3" },
+            { "id": "boss-05:edge-16", "from": "boss-05:right-3", "to": "boss-05:b-cross-1" },
+            { "id": "boss-05:edge-17", "from": "boss-05:b-cross-1", "to": "boss-05:b-cross-2" },
+            { "id": "boss-05:edge-18", "from": "boss-05:b-cross-2", "to": "boss-05:cross" },
+            { "id": "boss-05:edge-19", "from": "boss-05:cross", "to": "boss-05:p3-bridge" },
+            { "id": "boss-05:edge-20", "from": "boss-05:p3-bridge", "to": "boss-05:p3-low-l" },
+            { "id": "boss-05:edge-21", "from": "boss-05:p3-bridge", "to": "boss-05:p3-low-r" },
+            { "id": "boss-05:edge-22", "from": "boss-05:p3-low-l", "to": "boss-05:main" },
+            { "id": "boss-05:edge-23", "from": "boss-05:p3-low-r", "to": "boss-05:main" },
+            { "id": "boss-05:edge-24", "from": "boss-05:main", "to": "boss-05:top-l" },
+            { "id": "boss-05:edge-25", "from": "boss-05:main", "to": "boss-05:top-r" },
+            { "id": "boss-05:edge-26", "from": "boss-05:top-l", "to": "boss-05:core" },
+            { "id": "boss-05:edge-27", "from": "boss-05:top-r", "to": "boss-05:core" },
+            { "id": "boss-05:edge-28", "from": "boss-05:core", "to": "boss-05:exit-1" },
+            { "id": "boss-05:edge-29", "from": "boss-05:exit-1", "to": "boss-05:exit-2" }
+        ],
+        "recoveryPoints": [
+            { "id": "boss-05:recovery-entry", "x": 2600, "y": -220 },
+            { "id": "boss-05:recovery-cross", "x": 2600, "y": -820 },
+            { "id": "boss-05:recovery-main", "x": 2600, "y": -1080 }
+        ]
+    },
+    "boss": {
+        "actorId": "boss-05:continuity-core",
+        "mechanicId": "continuity-control-core",
+        "visualPresetId": "continuity-control-core",
+        "position": { "x": 2600, "y": -450 },
+        "collider": { "x": 2440, "y": -600, "width": 320, "height": 300 },
+        "impactTargetIds": [
+            "boss-05:aux-a:coupling",
+            "boss-05:aux-b:coupling",
+            "boss-05:main:coupling",
+            "boss-05:continuity-core"
+        ]
+    },
+    "combat": {
+        "additionalPlayerMultiplier": 0.5,
+        "closedBodyDamageMultiplier": 0,
+        "weakNormalDamageMultiplier": 1,
+        "weakFixedPercent": 0,
+        "generalDamageMode": "standard-combat",
+        "participantCountSnapshot": "boss-stage-start",
+        "lateJoinPolicy": "join-current-attempt-without-rescale",
+        "phaseOverflowPolicy": "discard-at-floor"
+    },
+    "mechanics": [
+        {
+            "id": "boss-05:aux-a-control",
+            "type": "continuity-control-core",
+            "position": { "x": 1800, "y": -1180 },
+            "bounds": { "x": 2020, "y": -2460, "width": 180, "height": 2360 },
+            "parameters": {
+                "role": "aux-a",
+                "warningSeconds": 0.8,
+                "moveSeconds": 0.8,
+                "exposureSeconds": 4,
+                "damage": 20
+            }
+        },
+        {
+            "id": "boss-05:aux-b-control",
+            "type": "continuity-control-core",
+            "position": { "x": 3400, "y": -1180 },
+            "bounds": { "x": 3070, "y": -2460, "width": 180, "height": 2360 },
+            "parameters": {
+                "role": "aux-b",
+                "warningSeconds": 0.8,
+                "moveSeconds": 0.8,
+                "exposureSeconds": 4,
+                "damage": 20
+            }
+        },
+        {
+            "id": "boss-05:main-control",
+            "type": "continuity-control-core",
+            "position": { "x": 2600, "y": -980 },
+            "bounds": { "x": 2510, "y": -2460, "width": 180, "height": 2360 },
+            "parameters": {
+                "role": "main",
+                "warningSeconds": 0.8,
+                "moveSeconds": 0.8,
+                "exposureSeconds": 4,
+                "damage": 25
+            }
+        },
+        {
+            "id": "boss-05:core-control",
+            "type": "continuity-control-core",
+            "position": { "x": 2600, "y": -450 },
+            "bounds": { "x": 2200, "y": -850, "width": 800, "height": 650 },
+            "parameters": { "role": "core", "exposureSeconds": 4 }
+        }
+    ],
+    "phases": [
+        {
+            "id": "boss-05:phase-1",
+            "name": "AUXILIARY A",
+            "order": 1,
+            "basePhaseHealth": 200,
+            "mechanicIds": ["boss-05:aux-a-control"],
+            "vulnerability": {
+                "targetId": "boss-05:aux-a:coupling",
+                "trigger": "sweep-complete",
+                "durationSeconds": 4,
+                "visualPresetId": "aux-coupling"
+            },
+            "hud": { "objective": "A Wall을 피하고 AUX A Coupling을 공격" }
+        },
+        {
+            "id": "boss-05:phase-2",
+            "name": "AUXILIARY B",
+            "order": 2,
+            "basePhaseHealth": 200,
+            "mechanicIds": ["boss-05:aux-b-control"],
+            "vulnerability": {
+                "targetId": "boss-05:aux-b:coupling",
+                "trigger": "sweep-complete",
+                "durationSeconds": 4,
+                "visualPresetId": "aux-coupling"
+            },
+            "hud": { "objective": "Control Pulse를 피하고 AUX B Coupling을 공격" }
+        },
+        {
+            "id": "boss-05:phase-3",
+            "name": "MAIN DRIVE",
+            "order": 3,
+            "basePhaseHealth": 260,
+            "mechanicIds": ["boss-05:main-control"],
+            "vulnerability": {
+                "targetId": "boss-05:main:coupling",
+                "trigger": "sweep-complete",
+                "durationSeconds": 4,
+                "visualPresetId": "main-coupling"
+            },
+            "hud": { "objective": "Emergency Wall 이후 MAIN Coupling을 공격" }
+        },
+        {
+            "id": "boss-05:phase-4",
+            "name": "CONTINUITY CORE",
+            "order": 4,
+            "basePhaseHealth": 320,
+            "mechanicIds": ["boss-05:core-control"],
+            "vulnerability": {
+                "targetId": "boss-05:continuity-core",
+                "trigger": "sweep-complete",
+                "durationSeconds": 4,
+                "visualPresetId": "continuity-core"
+            },
+            "hud": { "objective": "완전히 열린 Continuity Core를 정지" }
+        }
+    ],
+    "hud": {
+        "title": "CONTINUITY CONTROL CORE",
+        "healthBar": {
+            "style": "segmented-total",
+            "showNumbers": true,
+            "showPhaseBreaks": true,
+            "phaseMarkerCount": 4
+        },
+        "objectivePlacement": "below-health",
+        "showVulnerabilityCountdown": true
+    },
+    "transition": {
+        "sourceAreaId": "sector-05-08",
+        "nextAreaId": "sector-06-01",
+        "entryTrigger": "checkpoint-complete",
+        "victoryTrigger": "all-phases-depleted",
+        "victoryPresentationId": "boss-05:control-lost",
+        "retainPlayerControl": true
+    }
+}

@@ -8,11 +8,11 @@
 node scripts/map-editor/serveMapEditor.mjs --port=4178
 ```
 
-브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 일반 Stage와 독립 `boss-01` Stage를 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
+브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 일반 Stage와 독립 Boss01·02·04·05 Stage를 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
 
 - `Runtime 적용`: Sector 01~06의 48개 Stage다. 저장 적용은 canonical v2 JSON과 generated JS를 갱신하고, manifest가 선택하는 현재 Sector Catalog에도 반영된다.
 - `시나리오 전용`: 현재 0개다. 향후 Runtime 계약이 완결되지 않은 Stage를 추가할 때만 이 mode를 사용한다.
-- `boss-01`: `specType: "boss-stage"`인 Post-Sector Boss Stage다. 일반 Area와 섞지 않고 Boss 전용 JSON과 generated 정의를 함께 갱신한다.
+- `boss-01`·`boss-02`·`boss-04`·`boss-05`: `specType: "boss-stage"`인 Post-Sector Boss Stage다. 일반 Area와 섞지 않고 Boss 전용 JSON과 generated 정의를 함께 갱신한다.
 
 ## 저작 흐름
 
@@ -80,9 +80,9 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - `충돌 지형 미저작`: 좌표 없는 기획 설명을 collision으로 추정하지 않는다.
 - `적 Runtime 타입 미연결`: 기획용 적 ID가 Runtime Registry에 없다.
 
-현재 Sector 01~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 Stage source와 generated output을 함께 갱신하고 Gameplay View는 같은 production compiler·renderer로 결과를 표시한다. 1-1~3-7의 기존 연결과 4-1~4-7·5-1~5-7·6-1~6-7의 Sector 내부 연결만 만들며, 3-8·4-8·5-8·6-8은 `content-boundary`로 끝나 Post-Sector Boss나 다음 Sector를 직접 연결하지 않는다.
+현재 Sector 01~~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 Stage source와 generated output을 함께 갱신하고 Gameplay View는 같은 production compiler·renderer로 결과를 표시한다. 1-1~~3-7의 기존 연결과 4-1~~4-7·5-1~~5-7·6-1~6-7의 Sector 내부 연결만 만들며, 3-8·4-8·5-8·6-8은 `content-boundary`로 끝나 Post-Sector Boss나 다음 Sector를 직접 연결하지 않는다.
 
-Sector의 Access 해제 요구 수는 manifest의 `accessModuleRequirement`가 소유한다. 개별 module은 authored enemy의 `enemy-defeat` 또는 authored objective의 `objective-completion` source를 사용하며, 같은 module ID를 두 source가 가리켜도 shared progress에는 한 번만 수집된다. Sector 01~03은 기존 3-of-3 enemy-defeat, Sector 04는 세 Resident Security Override objective 중 두 개를 요구하는 2-of-3, Sector 05~06은 Access Module 없음이 현재 계약이다.
+Sector의 Access 해제 요구 수는 manifest의 `accessModuleRequirement`가 소유한다. 개별 module은 authored enemy의 `enemy-defeat` 또는 authored objective의 `objective-completion` source를 사용하며, 같은 module ID를 두 source가 가리켜도 shared progress에는 한 번만 수집된다. Sector 01~~03은 기존 3-of-3 enemy-defeat, Sector 04는 세 Resident Security Override objective 중 두 개를 요구하는 2-of-3, Sector 05~~06은 Access Module 없음이 현재 계약이다.
 
 ## 확인 명령
 

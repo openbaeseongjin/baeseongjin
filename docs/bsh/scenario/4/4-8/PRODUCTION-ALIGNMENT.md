@@ -5,6 +5,7 @@
 Latest checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`.
 
 The deleted legacy repository 4-8 contained:
+
 - `TRANSIT CONTROL TRUNK`
 - Cutter + Patrol
 - Pulsed Wake/Wind
@@ -27,6 +28,7 @@ That creative authority is superseded by this package for `sector-04-08`.
 ## Override source contract
 
 Expected semantic progression IDs:
+
 - `sector-04:resident-security-override:a` — earlier Sector04 source / 4-2
 - `sector-04:resident-security-override:b` — earlier Sector04 source / 4-5
 - `sector-04:resident-security-override:c` — 4-7
@@ -36,6 +38,7 @@ Before coding, inspect actual latest main and the implementation produced by the
 ## Preserve Runtime capabilities, not retired content
 
 Reuse:
+
 - surfaces/collision
 - grapple targets
 - reach objectives
@@ -45,6 +48,7 @@ Reuse:
 - gate/interlock presentation primitives if available
 
 Remove from 4-8 authored content:
+
 - Cutter
 - Patrol
 - Wake/Wind
@@ -53,13 +57,6 @@ Remove from 4-8 authored content:
 
 ## Post-sector boundary
 
-Do not invent:
-- Sector05 direct wiring
-- boss arena
-- boss entry trigger
-- timer transition
-- corporate continuity reveal
-
-The final control is a **content boundary** until downstream planning is separately approved.
+`4-8 완료 → Boss04 → Boss04 처치 → 5-1`을 사용한다. direct `4-8 → 5-1`, timer transition과 corporate continuity reveal은 4-8이 소유하지 않는다.
 
 Boss04의 최종 Guard A/B·Central Security Hub 인계는 [`../../../../boss/04/README.md`](../../../../boss/04/README.md)가 소유한다. 이는 authored content이며 Boss Runtime·전환·Timer를 구현하거나 `4-8` 경계를 연결하지 않는다.

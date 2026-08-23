@@ -4,6 +4,7 @@ import {
     colliderSnapshotBounds,
     colliderSnapshotOverlapsCircle,
     colliderSnapshotsOverlap,
+    isGravitySupportingContactNormal,
     normalizePolygonColliderVertices,
     resolveActorCollider,
     resolveColliderSnapshotContact
@@ -250,7 +251,7 @@ export class PolygonCollider {
                 velocity.x -= hit.contact.normal.x * inwardSpeed;
                 velocity.y -= hit.contact.normal.y * inwardSpeed;
             }
-            if (hit.contact.normal.y < -0.55) isGrounded = true;
+            if (isGravitySupportingContactNormal(hit.contact.normal)) isGrounded = true;
             collisionNormals.push(hit.contact.normal);
         }
 
@@ -285,7 +286,7 @@ export class PolygonCollider {
                     velocity.x -= contact.normal.x * inwardSpeed;
                     velocity.y -= contact.normal.y * inwardSpeed;
                 }
-                if (contact.normal.y < -0.55) isGrounded = true;
+                if (isGravitySupportingContactNormal(contact.normal)) isGrounded = true;
                 collisionNormals.push(contact.normal);
                 resolved = true;
             }

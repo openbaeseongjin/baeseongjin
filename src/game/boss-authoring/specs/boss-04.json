@@ -1,0 +1,283 @@
+{
+    "schemaVersion": "boss-stage-spec-v2",
+    "specType": "boss-stage",
+    "id": "boss-04",
+    "name": "UPPER RESIDENTIAL SECURITY SYSTEM",
+    "subtitle": "UPPER RESIDENCE / PROTECTED ASCENT",
+    "sourceAreaId": "sector-04-08",
+    "nextAreaId": "sector-05-01",
+    "arena": {
+        "bounds": { "x": 0, "y": -2500, "width": 5400, "height": 2500 },
+        "baseHookReach": 400,
+        "entry": { "id": "boss-04:entry", "x": 240, "y": -332 },
+        "exit": { "id": "boss-04:exit", "x": 5160, "y": -2220 },
+        "phaseZones": [
+            {
+                "id": "boss-04:zone-garden",
+                "phaseId": "boss-04:phase-1",
+                "bounds": { "x": 80, "y": -1180, "width": 1640, "height": 980 }
+            },
+            {
+                "id": "boss-04:zone-skybridge",
+                "phaseId": "boss-04:phase-2",
+                "bounds": { "x": 1700, "y": -1840, "width": 1840, "height": 1500 }
+            },
+            {
+                "id": "boss-04:zone-hub",
+                "phaseId": "boss-04:phase-3",
+                "bounds": { "x": 3520, "y": -2420, "width": 1760, "height": 1640 }
+            }
+        ],
+        "surfaces": [
+            {
+                "id": "boss-04:garden-deck",
+                "kind": "platform",
+                "bounds": { "x": 100, "y": -300, "width": 1580, "height": 100 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:pergola",
+                "kind": "architecture",
+                "bounds": { "x": 610, "y": -990, "width": 180, "height": 690 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:garden-terrace",
+                "kind": "platform",
+                "bounds": { "x": 1040, "y": -770, "width": 480, "height": 70 },
+                "oneWay": true,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:refuge-landing",
+                "kind": "platform",
+                "bounds": { "x": 1640, "y": -640, "width": 300, "height": 90 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:lower-skybridge",
+                "kind": "platform",
+                "bounds": { "x": 1920, "y": -720, "width": 1380, "height": 80 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:upper-skybridge",
+                "kind": "platform",
+                "bounds": { "x": 2050, "y": -1480, "width": 1180, "height": 70 },
+                "oneWay": true,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:refuge-balcony",
+                "kind": "platform",
+                "bounds": { "x": 2740, "y": -1080, "width": 400, "height": 70 },
+                "oneWay": true,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:left-refuge-terrace",
+                "kind": "platform",
+                "bounds": { "x": 3580, "y": -1550, "width": 580, "height": 90 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:right-refuge-terrace",
+                "kind": "platform",
+                "bounds": { "x": 4620, "y": -1550, "width": 580, "height": 90 },
+                "oneWay": false,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:high-refuge-skybridge",
+                "kind": "platform",
+                "bounds": { "x": 4040, "y": -2050, "width": 680, "height": 70 },
+                "oneWay": true,
+                "grappleable": true
+            },
+            {
+                "id": "boss-04:security-hub-deck",
+                "kind": "architecture",
+                "bounds": { "x": 4230, "y": -1830, "width": 300, "height": 280 },
+                "oneWay": false,
+                "grappleable": false
+            }
+        ],
+        "anchors": [
+            { "id": "boss-04:route-01", "x": 300, "y": -420 },
+            { "id": "boss-04:route-02", "x": 600, "y": -560 },
+            { "id": "boss-04:route-03", "x": 900, "y": -720 },
+            { "id": "boss-04:route-04", "x": 1220, "y": -860 },
+            { "id": "boss-04:route-05", "x": 1520, "y": -700 },
+            { "id": "boss-04:route-06", "x": 1780, "y": -820 },
+            { "id": "boss-04:route-07", "x": 2050, "y": -1040 },
+            { "id": "boss-04:route-08", "x": 2340, "y": -1260 },
+            { "id": "boss-04:route-09", "x": 2640, "y": -1460 },
+            { "id": "boss-04:route-10", "x": 2940, "y": -1240 },
+            { "id": "boss-04:route-11", "x": 3200, "y": -1060 },
+            { "id": "boss-04:route-12", "x": 3500, "y": -1260 },
+            { "id": "boss-04:route-13", "x": 3800, "y": -1500 },
+            { "id": "boss-04:route-14", "x": 4050, "y": -1760 },
+            { "id": "boss-04:route-15", "x": 4350, "y": -1990 },
+            { "id": "boss-04:route-16", "x": 4650, "y": -1760 },
+            { "id": "boss-04:route-17", "x": 4920, "y": -1510 },
+            { "id": "boss-04:route-18", "x": 5120, "y": -1820 },
+            { "id": "boss-04:route-19", "x": 5000, "y": -2120 },
+            { "id": "boss-04:route-20", "x": 5160, "y": -2300 }
+        ],
+        "routeEdges": [
+            { "id": "boss-04:edge-01", "from": "boss-04:route-01", "to": "boss-04:route-02" },
+            { "id": "boss-04:edge-02", "from": "boss-04:route-02", "to": "boss-04:route-03" },
+            { "id": "boss-04:edge-03", "from": "boss-04:route-03", "to": "boss-04:route-04" },
+            { "id": "boss-04:edge-04", "from": "boss-04:route-04", "to": "boss-04:route-05" },
+            { "id": "boss-04:edge-05", "from": "boss-04:route-05", "to": "boss-04:route-06" },
+            { "id": "boss-04:edge-06", "from": "boss-04:route-06", "to": "boss-04:route-07" },
+            { "id": "boss-04:edge-07", "from": "boss-04:route-07", "to": "boss-04:route-08" },
+            { "id": "boss-04:edge-08", "from": "boss-04:route-08", "to": "boss-04:route-09" },
+            { "id": "boss-04:edge-09", "from": "boss-04:route-09", "to": "boss-04:route-10" },
+            { "id": "boss-04:edge-10", "from": "boss-04:route-10", "to": "boss-04:route-11" },
+            { "id": "boss-04:edge-11", "from": "boss-04:route-11", "to": "boss-04:route-12" },
+            { "id": "boss-04:edge-12", "from": "boss-04:route-12", "to": "boss-04:route-13" },
+            { "id": "boss-04:edge-13", "from": "boss-04:route-13", "to": "boss-04:route-14" },
+            { "id": "boss-04:edge-14", "from": "boss-04:route-14", "to": "boss-04:route-15" },
+            { "id": "boss-04:edge-15", "from": "boss-04:route-15", "to": "boss-04:route-16" },
+            { "id": "boss-04:edge-16", "from": "boss-04:route-16", "to": "boss-04:route-17" },
+            { "id": "boss-04:edge-17", "from": "boss-04:route-17", "to": "boss-04:route-18" },
+            { "id": "boss-04:edge-18", "from": "boss-04:route-18", "to": "boss-04:route-19" },
+            { "id": "boss-04:edge-19", "from": "boss-04:route-19", "to": "boss-04:route-20" }
+        ],
+        "recoveryPoints": [
+            { "id": "boss-04:recovery-entry", "x": 300, "y": -350 },
+            { "id": "boss-04:recovery-refuge", "x": 1740, "y": -700 },
+            { "id": "boss-04:recovery-hub", "x": 3700, "y": -1600 }
+        ]
+    },
+    "boss": {
+        "actorId": "boss-04:security-hub",
+        "mechanicId": "residential-security-system",
+        "visualPresetId": "residential-security-hub",
+        "position": { "x": 4380, "y": -1740 },
+        "collider": { "x": 4230, "y": -1880, "width": 300, "height": 280 },
+        "impactTargetIds": [
+            "boss-04:guard-a:body",
+            "boss-04:guard-a:rear-thruster",
+            "boss-04:guard-b:body",
+            "boss-04:guard-b:side-controller",
+            "boss-04:security-hub:core"
+        ]
+    },
+    "combat": {
+        "additionalPlayerMultiplier": 0.5,
+        "closedBodyDamageMultiplier": 0.25,
+        "weakNormalDamageMultiplier": 1,
+        "weakFixedPercent": 0.25,
+        "generalDamageMode": "standard-combat",
+        "participantCountSnapshot": "boss-stage-start",
+        "lateJoinPolicy": "join-current-attempt-without-rescale",
+        "phaseOverflowPolicy": "discard-at-floor"
+    },
+    "mechanics": [
+        {
+            "id": "boss-04:guard-a",
+            "type": "residential-security-system",
+            "position": { "x": 920, "y": -980 },
+            "bounds": { "x": 80, "y": -1180, "width": 1640, "height": 980 },
+            "parameters": {
+                "role": "guard-a",
+                "telegraphSeconds": 0.6,
+                "burstIntervalSeconds": 0.25,
+                "recoverySeconds": 1.8,
+                "damage": 20
+            }
+        },
+        {
+            "id": "boss-04:guard-b",
+            "type": "residential-security-system",
+            "position": { "x": 2600, "y": -1180 },
+            "bounds": { "x": 1700, "y": -1840, "width": 1840, "height": 1500 },
+            "parameters": { "role": "guard-b", "telegraphSeconds": 0.55, "recoverySeconds": 1.5, "damage": 25 }
+        },
+        {
+            "id": "boss-04:security-hub",
+            "type": "residential-security-system",
+            "position": { "x": 4380, "y": -1740 },
+            "bounds": { "x": 3520, "y": -2420, "width": 1760, "height": 1640 },
+            "parameters": {
+                "role": "hub",
+                "beamWarningSeconds": 0.75,
+                "beamSeconds": 0.6,
+                "burstWarningSeconds": 0.55,
+                "burstSeconds": 0.35,
+                "coreSeconds": 2.2,
+                "damage": 25
+            }
+        }
+    ],
+    "phases": [
+        {
+            "id": "boss-04:phase-1",
+            "name": "GUARD A",
+            "order": 1,
+            "basePhaseHealth": 200,
+            "mechanicIds": ["boss-04:guard-a"],
+            "vulnerability": {
+                "targetId": "boss-04:guard-a:rear-thruster",
+                "trigger": "sweep-complete",
+                "durationSeconds": 1.8,
+                "visualPresetId": "rear-thruster"
+            },
+            "hud": { "objective": "범위 폭발 뒤 후방 추진기를 Rope Impact" }
+        },
+        {
+            "id": "boss-04:phase-2",
+            "name": "GUARD B",
+            "order": 2,
+            "basePhaseHealth": 200,
+            "mechanicIds": ["boss-04:guard-b"],
+            "vulnerability": {
+                "targetId": "boss-04:guard-b:side-controller",
+                "trigger": "sweep-complete",
+                "durationSeconds": 1.5,
+                "visualPresetId": "side-controller"
+            },
+            "hud": { "objective": "돌진 뒤 측면 제어기를 Rope Impact" }
+        },
+        {
+            "id": "boss-04:phase-3",
+            "name": "CENTRAL SECURITY HUB",
+            "order": 3,
+            "basePhaseHealth": 300,
+            "mechanicIds": ["boss-04:security-hub"],
+            "vulnerability": {
+                "targetId": "boss-04:security-hub:core",
+                "trigger": "sweep-complete",
+                "durationSeconds": 2.2,
+                "visualPresetId": "central-security-core"
+            },
+            "hud": { "objective": "두 보호 링크를 끊고 중앙 Core를 공격" }
+        }
+    ],
+    "hud": {
+        "title": "UPPER RESIDENTIAL SECURITY SYSTEM",
+        "healthBar": {
+            "style": "segmented-total",
+            "showNumbers": true,
+            "showPhaseBreaks": true,
+            "phaseMarkerCount": 3
+        },
+        "objectivePlacement": "below-health",
+        "showVulnerabilityCountdown": true
+    },
+    "transition": {
+        "sourceAreaId": "sector-04-08",
+        "nextAreaId": "sector-05-01",
+        "entryTrigger": "checkpoint-complete",
+        "victoryTrigger": "all-phases-depleted",
+        "victoryPresentationId": "boss-04:resident-security-offline",
+        "retainPlayerControl": true
+    }
+}

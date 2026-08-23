@@ -14,6 +14,8 @@ export class FixedLengthRope {
     constructor(config) {
         this.config = config;
         this.anchor = null;
+        this.anchorOwnerId = null;
+        this.anchorLocalOffset = null;
         this.attachmentOffset = null;
         this.length = FIXED_LENGTH_ROPE.ZERO;
         this.currentLength = FIXED_LENGTH_ROPE.ZERO;
@@ -24,10 +26,20 @@ export class FixedLengthRope {
         return this.anchor !== null;
     }
 
-    attach(playerPosition, anchor, { angle = FIXED_LENGTH_ROPE.ZERO, attachmentOffset = null } = {}) {
+    attach(
+        playerPosition,
+        anchor,
+        { angle = FIXED_LENGTH_ROPE.ZERO, attachmentOffset = null, anchorOwnerId = null, anchorLocalOffset = null } = {}
+    ) {
         finiteVector(playerPosition, "playerPosition");
         finiteVector(anchor, "anchor");
         if (!Number.isFinite(angle)) throw new Error("rope attachment angle must be finite");
+        if (anchorOwnerId !== null && (typeof anchorOwnerId !== "string" || !anchorOwnerId)) {
+            throw new Error("anchorOwnerId must be null or a non-empty string");
+        }
+        if ((anchorOwnerId === null) !== (anchorLocalOffset === null)) {
+            throw new Error("actor rope anchors require both owner ID and local offset");
+        }
         const selectedOffset = attachmentOffset
             ? finiteVector(attachmentOffset, "attachmentOffset")
             : {
@@ -44,6 +56,13 @@ export class FixedLengthRope {
         const distance = Math.hypot(handPosition.x - anchor.x, handPosition.y - anchor.y);
         if (distance <= FIXED_LENGTH_ROPE.ZERO || distance > hookReach(this.config)) return false;
         this.anchor = new Vector2(anchor.x, anchor.y);
+        this.anchorOwnerId = anchorOwnerId;
+        this.anchorLocalOffset = anchorLocalOffset
+            ? new Vector2(
+                  finiteVector(anchorLocalOffset, "anchorLocalOffset").x,
+                  finiteVector(anchorLocalOffset, "anchorLocalOffset").y
+              )
+            : null;
         this.attachmentOffset = new Vector2(selectedOffset.x, selectedOffset.y);
         this.length = distance;
         this.currentLength = distance;
@@ -53,10 +72,19 @@ export class FixedLengthRope {
 
     detach() {
         this.anchor = null;
+        this.anchorOwnerId = null;
+        this.anchorLocalOffset = null;
         this.attachmentOffset = null;
         this.length = FIXED_LENGTH_ROPE.ZERO;
         this.currentLength = FIXED_LENGTH_ROPE.ZERO;
         this.tension = FIXED_LENGTH_ROPE.ZERO;
+    }
+
+    updateAnchor(anchor) {
+        if (!this.anchor) return false;
+        finiteVector(anchor, "anchor");
+        this.anchor.set(anchor.x, anchor.y);
+        return true;
     }
 
     apply(physics, dt) {

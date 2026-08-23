@@ -137,7 +137,9 @@ export class GateLockingCarriageRuntime {
             id: this.bossSpec.actorId ?? `${definition.id}:carriage`,
             actorKind: PHYSICS_ACTOR_KIND.BOSS,
             position: { x: this.config.minX, y: this.config.railY },
-            collider: PolygonCollider.box({ width: bodyBounds.width, height: bodyBounds.height })
+            collider: PolygonCollider.box({ width: bodyBounds.width, height: bodyBounds.height }),
+            canGroundActors: true,
+            ropeAttachment: true
         });
         this.beamBody = new KinematicPhysicsBody({
             id: `${definition.id}:beam`,

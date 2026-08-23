@@ -2,6 +2,7 @@ import { Vector2 } from "../../game-kit/index.js";
 import { withSurfacePhysics } from "./SurfacePhysicsMixin.js";
 import { SURFACE_MOTION_TYPE } from "./SurfacePhysicsDefinition.js";
 import { assertCollider } from "./colliders/Collider.js";
+import { withRopeAttachable } from "../rope/RopeAttachableMixin.js";
 
 const DEFAULT_COLLISION_RESTITUTION = 0.25;
 
@@ -12,8 +13,16 @@ function finitePosition(position, label) {
     return position;
 }
 
-export class KinematicPhysicsBody extends withSurfacePhysics(class {}) {
-    constructor({ id, actorKind, position, collider, collisionRestitution = DEFAULT_COLLISION_RESTITUTION }) {
+export class KinematicPhysicsBody extends withRopeAttachable(withSurfacePhysics(class {})) {
+    constructor({
+        id,
+        actorKind,
+        position,
+        collider,
+        collisionRestitution = DEFAULT_COLLISION_RESTITUTION,
+        canGroundActors = false,
+        ropeAttachment = false
+    }) {
         super();
         if (typeof id !== "string" || !id) throw new TypeError("KinematicPhysicsBody requires id");
         if (typeof actorKind !== "string" || !actorKind) {
@@ -22,15 +31,19 @@ export class KinematicPhysicsBody extends withSurfacePhysics(class {}) {
         if (!Number.isFinite(collisionRestitution) || collisionRestitution < 0 || collisionRestitution > 1) {
             throw new RangeError("KinematicPhysicsBody collisionRestitution must be 0..1");
         }
+        if (typeof canGroundActors !== "boolean") {
+            throw new TypeError("KinematicPhysicsBody canGroundActors must be boolean");
+        }
         this.id = id;
         this.physicsActorKind = actorKind;
         this.collisionRestitution = collisionRestitution;
-        this.canGroundActors = false;
+        this.canGroundActors = canGroundActors;
         this.initializeSurfacePhysics({
             position: new Vector2(finitePosition(position, "KinematicPhysicsBody position").x, position.y),
             collider: assertCollider(collider),
             motionType: SURFACE_MOTION_TYPE.KINEMATIC
         });
+        this.initializeRopeAttachable(ropeAttachment);
     }
 
     setKinematicPosition(position, dt) {
@@ -65,6 +78,7 @@ export class KinematicPhysicsBody extends withSurfacePhysics(class {}) {
             motionType: this.motionType,
             collisionRestitution: this.collisionRestitution,
             canGroundActors: this.canGroundActors,
+            ropeAttachment: this.ropeAttachmentSnapshot(translated),
             lifeState: "active"
         });
     }

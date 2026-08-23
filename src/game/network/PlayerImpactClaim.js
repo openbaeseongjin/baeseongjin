@@ -99,6 +99,11 @@ function assertLauncher(value, label) {
     }
     if (value.shot.target !== null && value.shot.target !== undefined) {
         assertFiniteVector(value.shot.target, `${label}.shot.target`);
+        const attachment = value.shot.target.ropeAttachment ?? null;
+        if (attachment !== null) {
+            assertId(attachment.ownerId, `${label}.shot.target.ropeAttachment.ownerId`);
+            assertFiniteVector(attachment.localAnchor, `${label}.shot.target.ropeAttachment.localAnchor`);
+        }
     }
     assertFinite(value.shot.traveled, `${label}.shot.traveled`, {
         minimum: 0,
@@ -141,6 +146,15 @@ function normalizeImpactRecoveryState(state) {
     assertBoolean(normalized.rope?.isAttached, "outcome.state.rope.isAttached");
     if (normalized.rope.isAttached) {
         assertFiniteVector(normalized.rope.anchor, "outcome.state.rope.anchor");
+        const ownerId = normalized.rope.anchorOwnerId ?? null;
+        const localOffset = normalized.rope.anchorLocalOffset ?? null;
+        if ((ownerId === null) !== (localOffset === null)) {
+            throw new Error("outcome.state rope anchor owner fields must be paired");
+        }
+        if (ownerId !== null) {
+            assertId(ownerId, "outcome.state.rope.anchorOwnerId");
+            assertFiniteVector(localOffset, "outcome.state.rope.anchorLocalOffset");
+        }
         assertFiniteVector(normalized.rope.attachmentOffset, "outcome.state.rope.attachmentOffset");
         assertFinite(normalized.rope.length, "outcome.state.rope.length", { minimum: 0, exclusiveMinimum: true });
         assertFinite(normalized.rope.currentLength, "outcome.state.rope.currentLength", {
@@ -151,6 +165,9 @@ function normalizeImpactRecoveryState(state) {
         if (normalized.rope.anchor !== null) throw new Error("outcome.state.rope.anchor must be null when detached");
         if (normalized.rope.attachmentOffset !== null) {
             throw new Error("outcome.state.rope.attachmentOffset must be null when detached");
+        }
+        if (normalized.rope.anchorOwnerId !== null || normalized.rope.anchorLocalOffset !== null) {
+            throw new Error("outcome.state detached rope anchor owner fields must be null");
         }
         if (normalized.rope.length !== 0 || normalized.rope.currentLength !== 0) {
             throw new Error("outcome.state detached rope lengths must be zero");
@@ -246,6 +263,11 @@ function impactStateProjection(state, { impactType, respawned }) {
         rope: {
             isAttached: state.rope.isAttached,
             anchor: state.rope.isAttached ? quantizedVector(state.rope.anchor, 0.1) : null,
+            anchorOwnerId: state.rope.isAttached ? (state.rope.anchorOwnerId ?? null) : null,
+            anchorLocalOffset:
+                state.rope.isAttached && state.rope.anchorLocalOffset
+                    ? quantizedVector(state.rope.anchorLocalOffset, 0.1)
+                    : null,
             attachmentOffset: state.rope.isAttached ? quantizedVector(state.rope.attachmentOffset, 0.1) : null,
             length: quantized(state.rope.length, 0.1),
             currentLength: quantized(state.rope.currentLength, 0.1)

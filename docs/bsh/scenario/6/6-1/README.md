@@ -22,3 +22,5 @@ Player Bark:
 6-2 preview:
 
 `CROSSWIND MASTS / AHEAD`
+
+Entry: `BOSS05 DEFEATED → 6-1`

@@ -9,11 +9,15 @@ import {
 import { validateBossStageSpec } from "../../src/game/boss-authoring/BossStageSpecValidator.js";
 import { BOSS_01_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss01Stage.generated.js";
 import { BOSS_02_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss02Stage.generated.js";
+import { BOSS_04_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss04Stage.generated.js";
+import { BOSS_05_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss05Stage.generated.js";
 
 const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const definitions = Object.freeze([
     Object.freeze({ id: "boss-01", generated: BOSS_01_STAGE_SPEC }),
-    Object.freeze({ id: "boss-02", generated: BOSS_02_STAGE_SPEC })
+    Object.freeze({ id: "boss-02", generated: BOSS_02_STAGE_SPEC }),
+    Object.freeze({ id: "boss-04", generated: BOSS_04_STAGE_SPEC }),
+    Object.freeze({ id: "boss-05", generated: BOSS_05_STAGE_SPEC })
 ]);
 
 for (const definition of definitions) {

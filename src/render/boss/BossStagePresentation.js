@@ -9,6 +9,7 @@ function freezeWorldObject(object) {
         state: object.state ?? object.beamState ?? (object.telegraphing ? "telegraph" : "idle"),
         variant: object.variant ?? null,
         physicsBody: object.physicsBody === true,
+        ropeAttachable: object.ropeAttachable === true,
         hazardKind: object.hazardKind ?? null,
         actionState: object.actionState ?? null,
         damaging: object.damaging === true,

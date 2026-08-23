@@ -17,7 +17,20 @@ const KIND = Object.freeze({
     CHARGE_LINE: "charge-line",
     SLAM_ZONE: "slam-zone",
     DIVE_LINE: "dive-line",
-    ARCHITECTURE_IMPACT: "architecture-impact"
+    ARCHITECTURE_IMPACT: "architecture-impact",
+    GUARD_A: "boss-guard-a",
+    GUARD_B: "boss-guard-b",
+    SECURITY_HUB: "boss-security-hub",
+    LANDING_WARNING: "boss-landing-warning",
+    HUB_BEAM: "boss-hub-beam",
+    PROTECTION_LINK: "boss-protection-link",
+    PROTECTED_GATE: "boss-protected-gate",
+    CONTINUITY_CORE: "boss-continuity-core",
+    ACTUATOR: "boss-actuator",
+    PARTITION_WALL: "boss-partition-wall",
+    SLOT_SHUTTER: "boss-slot-shutter",
+    CONTROL_PULSE: "boss-control-pulse",
+    EXIT_HARDPOINT: "boss-exit-hardpoint"
 });
 
 const WEAKPOINT = Object.freeze({
@@ -56,6 +69,15 @@ class BossPolygonObjectRenderer {
         context.translate(object.position.x, object.position.y);
         context.rotate(object.rotation ?? 0);
         this.drawShape(context, object);
+        if (object.ropeAttachable === true) {
+            context.strokeStyle = COLOR.WEAKPOINT;
+            context.fillStyle = "rgba(103, 232, 249, 0.22)";
+            context.lineWidth = 3;
+            context.beginPath();
+            context.arc(0, 0, 12, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+        }
         context.restore();
     }
 }
@@ -370,6 +392,119 @@ class GenericRenderer extends BossPolygonObjectRenderer {
     }
 }
 
+class SecurityGuardRenderer extends BossPolygonObjectRenderer {
+    constructor({ elevated = false } = {}) {
+        super();
+        this.elevated = elevated;
+    }
+
+    drawShape(context, object) {
+        const { width, height } = size(object, 240, 150);
+        const warning = object.state === "warning";
+        const active = object.state === "active";
+        const recovery = object.state === "recovery";
+        context.fillStyle = this.elevated ? "#334155" : "#1e3a4a";
+        context.strokeStyle = active ? COLOR.HAZARD : warning ? COLOR.WARNING : recovery ? COLOR.EXPOSED : COLOR.EDGE;
+        context.lineWidth = warning || active || recovery ? 5 : 3;
+        context.beginPath();
+        context.moveTo(-width * 0.5, 0);
+        context.lineTo(-width * 0.24, -height * 0.48);
+        context.lineTo(width * 0.3, -height * 0.42);
+        context.lineTo(width * 0.5, 0);
+        context.lineTo(width * 0.22, height * 0.48);
+        context.lineTo(-width * 0.32, height * 0.42);
+        context.closePath();
+        context.fill();
+        context.stroke();
+        context.fillStyle = recovery ? COLOR.EXPOSED : COLOR.DARK;
+        context.fillRect(-width * 0.1, -height * 0.16, width * 0.3, height * 0.32);
+        context.strokeStyle = this.elevated ? "#a5f3fc" : "#67e8f9";
+        context.beginPath();
+        context.moveTo(-width * 0.42, 0);
+        context.lineTo(-width * 0.62, this.elevated ? height * 0.25 : 0);
+        context.stroke();
+        if (active) chevron(context, width * 0.2, 0, 1, height * 0.32, COLOR.HAZARD);
+    }
+}
+
+class ZoneRenderer extends BossPolygonObjectRenderer {
+    drawShape(context, object) {
+        const { width, height } = size(object, 220, 140);
+        const active = object.state === "active" || object.state === "beam-active" || object.state === "burst-active";
+        context.globalAlpha = active ? 0.62 : 0.32;
+        context.fillStyle = active ? "rgba(251, 113, 133, 0.35)" : "rgba(251, 191, 36, 0.2)";
+        context.strokeStyle = active ? COLOR.HAZARD : COLOR.WARNING;
+        context.lineWidth = active ? 5 : 3;
+        context.setLineDash(active ? [] : [20, 14]);
+        context.fillRect(-width * 0.5, -height * 0.5, width, height);
+        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+        context.setLineDash([]);
+        context.globalAlpha = 1;
+    }
+}
+
+class SecurityHubRenderer extends BossPolygonObjectRenderer {
+    drawShape(context, object) {
+        const { width, height } = size(object, 300, 280);
+        const disabled = object.state === "shutdown" || object.state === "disabled";
+        context.globalAlpha = disabled ? 0.5 : 1;
+        context.fillStyle = "#263544";
+        context.strokeStyle = object.state === "core-open" ? COLOR.EXPOSED : COLOR.EDGE;
+        context.lineWidth = object.state === "core-open" ? 6 : 4;
+        context.beginPath();
+        context.moveTo(0, -height * 0.5);
+        context.lineTo(width * 0.45, -height * 0.2);
+        context.lineTo(width * 0.45, height * 0.25);
+        context.lineTo(0, height * 0.5);
+        context.lineTo(-width * 0.45, height * 0.25);
+        context.lineTo(-width * 0.45, -height * 0.2);
+        context.closePath();
+        context.fill();
+        context.stroke();
+        context.fillStyle = object.state === "core-open" ? COLOR.EXPOSED : "#0f172a";
+        context.beginPath();
+        context.arc(0, 0, Math.min(width, height) * 0.2, 0, Math.PI * 2);
+        context.fill();
+        context.globalAlpha = 1;
+    }
+}
+
+class ContinuityCoreRenderer extends SecurityHubRenderer {
+    drawShape(context, object) {
+        super.drawShape(context, object);
+        const { width, height } = size(object, 320, 300);
+        context.strokeStyle = object.state === "disabled" ? COLOR.EDGE : "#a78bfa";
+        context.lineWidth = 4;
+        for (const sign of [-1, 1]) {
+            context.beginPath();
+            context.moveTo(sign * width * 0.45, -height * 0.18);
+            context.lineTo(sign * width * 0.7, -height * 0.38);
+            context.lineTo(sign * width * 0.7, height * 0.38);
+            context.lineTo(sign * width * 0.45, height * 0.18);
+            context.stroke();
+        }
+    }
+}
+
+class PartitionWallRenderer extends BossPolygonObjectRenderer {
+    drawShape(context, object) {
+        const { width, height } = size(object, 180, 1100);
+        const moving = object.state === "descending" || object.state === "rising";
+        context.fillStyle = "#334155";
+        context.strokeStyle = moving ? COLOR.WARNING : object.state === "locked" ? COLOR.HAZARD : COLOR.EDGE;
+        context.lineWidth = moving || object.state === "locked" ? 5 : 3;
+        context.fillRect(-width * 0.5, -height * 0.5, width, height);
+        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+        context.strokeStyle = "#64748b";
+        for (let y = -height * 0.35; y < height * 0.42; y += 72) {
+            context.beginPath();
+            context.moveTo(-width * 0.38, y);
+            context.lineTo(width * 0.38, y);
+            context.stroke();
+        }
+    }
+}
+
 const GENERIC_RENDERER = new GenericRenderer();
 const RENDERER_BY_KIND = Object.freeze({
     [KIND.CARRIAGE]: new CarriageRenderer(),
@@ -380,7 +515,20 @@ const RENDERER_BY_KIND = Object.freeze({
     [KIND.CHARGE_LINE]: new AttackLineRenderer(),
     [KIND.SLAM_ZONE]: new SlamZoneRenderer(),
     [KIND.DIVE_LINE]: new AttackLineRenderer({ dive: true }),
-    [KIND.ARCHITECTURE_IMPACT]: new ArchitectureImpactRenderer()
+    [KIND.ARCHITECTURE_IMPACT]: new ArchitectureImpactRenderer(),
+    [KIND.GUARD_A]: new SecurityGuardRenderer({ elevated: true }),
+    [KIND.GUARD_B]: new SecurityGuardRenderer(),
+    [KIND.SECURITY_HUB]: new SecurityHubRenderer(),
+    [KIND.LANDING_WARNING]: new ZoneRenderer(),
+    [KIND.HUB_BEAM]: new ZoneRenderer(),
+    [KIND.PROTECTION_LINK]: new GenericRenderer(),
+    [KIND.PROTECTED_GATE]: new GenericRenderer(),
+    [KIND.CONTINUITY_CORE]: new ContinuityCoreRenderer(),
+    [KIND.ACTUATOR]: new GenericRenderer(),
+    [KIND.PARTITION_WALL]: new PartitionWallRenderer(),
+    [KIND.SLOT_SHUTTER]: new GenericRenderer(),
+    [KIND.CONTROL_PULSE]: new ZoneRenderer(),
+    [KIND.EXIT_HARDPOINT]: new WeakpointRenderer()
 });
 
 export function bossPolygonObjectRenderer(kind) {
