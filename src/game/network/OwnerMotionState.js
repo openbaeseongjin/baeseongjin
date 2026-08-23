@@ -96,6 +96,34 @@ function normalizeLauncher(launcher) {
     });
 }
 
+function normalizeRopeImpactState(state) {
+    if (!state || typeof state !== "object" || Array.isArray(state)) {
+        throw new Error("ropeImpactState must be an object");
+    }
+    if (typeof state.swingArmed !== "boolean" || typeof state.released !== "boolean") {
+        throw new Error("ropeImpactState swingArmed and released must be boolean");
+    }
+    finiteNonNegative(state.releaseCarryRemaining, "ropeImpactState.releaseCarryRemaining");
+    if (!state.released && state.releaseCarryRemaining > 0) {
+        throw new Error("attached ropeImpactState cannot retain release carry");
+    }
+    if (!state.swingArmed && (state.released || state.releaseCarryRemaining > 0)) {
+        throw new Error("unarmed ropeImpactState cannot be released");
+    }
+    if (
+        !Array.isArray(state.touchingTargetIds) ||
+        state.touchingTargetIds.some((targetId) => typeof targetId !== "string" || targetId.length === 0)
+    ) {
+        throw new Error("ropeImpactState.touchingTargetIds must contain non-empty strings");
+    }
+    return Object.freeze({
+        swingArmed: state.swingArmed,
+        released: state.released,
+        releaseCarryRemaining: state.releaseCarryRemaining,
+        touchingTargetIds: Object.freeze([...new Set(state.touchingTargetIds)].sort())
+    });
+}
+
 export function createOwnerMotionState({
     clientTick,
     authorityTick,
@@ -105,6 +133,7 @@ export function createOwnerMotionState({
     angularVelocity = 0,
     isGrounded,
     rope,
+    ropeImpactState,
     launcher = null,
     augmentRuntimeState = null,
     respawnAnchorId = null
@@ -142,6 +171,7 @@ export function createOwnerMotionState({
             attachmentOffset: rope.isAttached ? finiteVector(rope.attachmentOffset, "rope.attachmentOffset") : null,
             length: rope.isAttached ? ropeLength : 0
         }),
+        ropeImpactState: normalizeRopeImpactState(ropeImpactState),
         launcher: normalizeLauncher(launcher),
         augmentRuntimeState:
             augmentRuntimeState === null

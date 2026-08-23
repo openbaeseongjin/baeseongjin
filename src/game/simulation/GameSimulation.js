@@ -40,7 +40,7 @@ import { createEnemyObject } from "../combat/EnemyObject.js";
 import { recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
 import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js";
 import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
-import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
+import { ROPE_IMPACT_EVENT_TYPE, ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { IMPACT_TARGET_KIND, ImpactTarget } from "../combat/ImpactTarget.js";
 import { HomingProjectileObject } from "../combat/ProjectileObject.js";
 import {
@@ -810,13 +810,22 @@ export class GameSimulation {
             const targetIds =
                 definition.arena.boss?.impactTargetIds ??
                 Object.freeze([bodyId, ...definition.phases.map(({ weakTargetId }) => weakTargetId)]);
+            const weakpointTargetIds = Object.freeze(
+                Object.fromEntries(
+                    definition.phases
+                        .map(({ weakTargetId }) => weakTargetId)
+                        .filter((targetId) => typeof targetId === "string" && targetId.length > 0)
+                        .map((targetId) => [targetId, true])
+                )
+            );
             for (const targetId of targetIds) {
+                const weakpoint = weakpointTargetIds[targetId] === true;
                 this.impactTargetRegistry.add(
                     new ImpactTarget({
                         id: targetId,
                         kind: IMPACT_TARGET_KIND.BOSS,
-                        isActive: () => this.#bossImpactTargetActive(definition.id, targetId, targetId !== bodyId),
-                        snapshot: () => this.#bossImpactSnapshot(definition.id, targetId, true),
+                        isActive: () => this.#bossImpactTargetActive(definition.id, targetId, weakpoint),
+                        snapshot: () => this.#bossImpactSnapshot(definition.id, targetId, weakpoint),
                         applyImpact: (impact) => this.#applyRegisteredBossImpact(definition.id, targetId, impact)
                     })
                 );
@@ -1182,6 +1191,7 @@ export class GameSimulation {
                 continue;
             }
             releaseRopeFromBody(player.physics, player.ropeObject.rope);
+            player.ropeImpactState.reset();
             player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, this.ropeDisabledSeconds);
             this.recordReplicationEvent("boss-rope-cut", {
                 bossStageId: stage?.id ?? null,
@@ -1202,6 +1212,7 @@ export class GameSimulation {
                 player.physics.reset(recoveryPosition);
                 player.ropeObject.rope.detach();
                 player.ropeObject.swingDrag = null;
+                player.ropeImpactState.reset();
                 player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
                 this.recordReplicationEvent("boss-player-recovered", {
                     bossStageId: stage.id,
@@ -1366,6 +1377,7 @@ export class GameSimulation {
             player.lifeState = "spectating";
             player.ropeObject.rope.detach();
             player.ropeObject.swingDrag = null;
+            player.ropeImpactState.reset();
             return defeat;
         }
         for (const participant of this.players) {
@@ -1911,6 +1923,7 @@ export class GameSimulation {
         if (transferAngularMomentum) releaseRopeFromBody(player.physics, player.ropeObject.rope);
         else player.ropeObject.rope.detach();
         player.ropeObject.swingDrag = null;
+        player.ropeImpactState.reset();
         return released;
     }
 
@@ -1944,7 +1957,7 @@ export class GameSimulation {
         player.ropeObject.attachBufferRemaining = 0;
         player.ropeObject.swingDrag = null;
         player.ropeObject.launcher.clear();
-        player.ropeImpactAttack.reset();
+        player.ropeImpactState.reset();
         this.portalTransitions.set(player.id, Object.freeze({ gateId, position, tick }));
         this.collisionBroadPhase.invalidateFrame();
         return this.ownerPredictionState(player.id);
@@ -2052,7 +2065,9 @@ export class GameSimulation {
         if (state.augmentRuntimeState?.combat) {
             player.augmentCombat.restore(state.augmentRuntimeState.combat, player.foundation, player.maxHealth);
         }
-        player.ropeImpactAttack.observe(player, this.#combatImpactTargets(), state.clientTick ?? this.tick);
+        if (motionOutcome.ropeReleased) player.ropeImpactState.reset();
+        else player.ropeImpactState.restore(state.ropeImpactState ?? null);
+        player.ropeImpactAttack.observe(player, player.ropeImpactState, this.#combatImpactTargets(), null);
         return motionOutcome;
     }
 
@@ -2146,6 +2161,7 @@ export class GameSimulation {
                 const player = this.#findPlayer(playerId);
                 player.ropeObject.rope.detach();
                 player.ropeObject.swingDrag = null;
+                player.ropeImpactState.reset();
             }
         }
         return this.getFoundationReward(playerId);
@@ -2210,11 +2226,11 @@ export class GameSimulation {
         const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt, { replicateLandingImpacts: false });
         const bossImpactEvents = this.#resolveBossHazardContacts({ players: [player], replicate: false });
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
-        const ropeImpactEvents = this.#advanceRopeImpactAttacks(player, { commit: false });
+        const ropeImpactOutcome = this.#advanceRopeImpactAttacks(player, { commit: false });
         const collisionExplosionEvents = player.augmentCombat.collisionExplosionEvents({
             player,
             foundation: player.foundation,
-            baseImpactEvents: ropeImpactEvents,
+            baseImpactEvents: ropeImpactOutcome.impacts,
             enemies: this.#combatImpactTargets(),
             tick
         });
@@ -2232,7 +2248,7 @@ export class GameSimulation {
             foundationEvents: inputOutcome.foundationEvents,
             fallImpactEvents: inputOutcome.fallImpactEvents,
             bossImpactEvents,
-            ropeImpactEvents: collisionExplosionEvents === null ? ropeImpactEvents : Object.freeze([]),
+            ropeImpactEvents: collisionExplosionEvents === null ? ropeImpactOutcome.impacts : Object.freeze([]),
             augmentImpactEvents,
             augmentEvents: inputOutcome.augmentEvents,
             stageSavepointEvent
@@ -2317,6 +2333,7 @@ export class GameSimulation {
             ropeDisabledRemaining: state.ropeDisabledRemaining,
             lifeState: state.lifeState,
             rope: state.rope,
+            ropeImpactState: state.ropeImpactState,
             swingDrag: state.control.swingDrag,
             launcher: state.launcher,
             weaponCooldown: state.weapon.cooldown,
@@ -2375,6 +2392,7 @@ export class GameSimulation {
         player.ropeObject.wasPointerDown = state.control.wasPointerDown;
         player.ropeObject.attachBufferRemaining = state.control.attachBufferRemaining;
         player.ropeObject.swingDrag = cloneSwingDrag(state.control.swingDrag);
+        player.ropeImpactState.restore(state.ropeImpactState ?? null);
         player.health = state.health;
         player.maxHealth = state.maxHealth;
         player.hitInvulnerabilityRemaining = state.hitInvulnerabilityRemaining;
@@ -2504,16 +2522,16 @@ export class GameSimulation {
                 this.#applyWorldForce(player, dt);
                 const inputOutcome = this.dispatchOwnerInput(player.id, playerCommand, dt);
                 this.commitFoundationEvents(inputOutcome.foundationEvents);
-                const ropeImpactEvents = this.#advanceRopeImpactAttacks(player, { commit: false });
+                const ropeImpactOutcome = this.#advanceRopeImpactAttacks(player, { commit: false });
                 const collisionExplosionEvents = player.augmentCombat.collisionExplosionEvents({
                     player,
                     foundation: player.foundation,
-                    baseImpactEvents: ropeImpactEvents,
+                    baseImpactEvents: ropeImpactOutcome.impacts,
                     enemies: this.#combatImpactTargets(),
                     tick: this.tick
                 });
                 if (collisionExplosionEvents === null) {
-                    for (const event of ropeImpactEvents) this.#commitRopeImpact(event);
+                    for (const event of ropeImpactOutcome.impacts) this.#commitRopeImpact(event);
                 }
                 this.#commitAugmentImpactEvents([
                     ...inputOutcome.augmentImpactEvents,
@@ -2710,8 +2728,9 @@ export class GameSimulation {
                 canAttachToSurface: this.#accessScanPredicate(),
                 createAttachmentId: () => ROPE_ATTACHMENT_ID.forOwnerTick(player.id, this.tick),
                 getRopeInputModifiers: () => player.foundation.ropeInputModifiers(effectiveRopeConfig),
-                onAttach: () => {},
+                onAttach: () => player.ropeImpactState.beginAttachment(),
                 onRelease: () => {
+                    player.ropeImpactState.beginReleaseCarry();
                     if (player.foundation.has("release-propulsion")) {
                         const velocity = player.physics.physicsStepVelocity();
                         player.physics.applyImpulse(
@@ -2739,6 +2758,7 @@ export class GameSimulation {
                         );
                     }
                 },
+                onSwing: () => player.ropeImpactState.armSwing(),
                 onFlash: (eventFlash) => {
                     this.eventFlash = { ...eventFlash, playerId: player.id };
                 },
@@ -2808,11 +2828,19 @@ export class GameSimulation {
     }
 
     #advanceRopeImpactAttacks(player, { commit = true } = {}) {
-        const events = player.ropeImpactAttack.advance(player, this.#combatImpactTargets(), this.tick);
+        const outcome = player.ropeImpactAttack.advance(
+            player,
+            player.ropeImpactState,
+            this.#combatImpactTargets(),
+            this.tick,
+            player.physics.lastActorImpact
+        );
+        const feedback = outcome.rejections[0] ?? null;
+        if (feedback) this.eventFlash = { type: ROPE_IMPACT_EVENT_TYPE.REJECTED, age: 0, ...feedback };
         if (commit) {
-            for (const event of events) this.#commitRopeImpact(event);
+            for (const event of outcome.impacts) this.#commitRopeImpact(event);
         }
-        return events;
+        return outcome;
     }
 
     #resolveBossProjectileEvents(events) {
@@ -3274,6 +3302,7 @@ export class GameSimulation {
     #prepareOwnerStep(player, dt) {
         player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
         player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
+        player.ropeImpactState.advance(dt);
         player.foundation.advance(dt);
     }
 
@@ -3455,6 +3484,7 @@ export class GameSimulation {
         );
         player.ropeObject.rope.detach();
         player.ropeObject.swingDrag = null;
+        player.ropeImpactState.reset();
         return true;
     }
 
@@ -4202,6 +4232,7 @@ export class GameSimulation {
         if (claim.impactType === "rope-cut") {
             player.ropeObject.rope.detach();
             player.ropeObject.swingDrag = null;
+            player.ropeImpactState.reset();
             player.ropeObject.attachBufferRemaining = 0;
             player.ropeObject.launcher.clear();
             player.ropeDisabledRemaining = this.ropeDisabledSeconds;
@@ -4266,6 +4297,7 @@ export class GameSimulation {
         if (claim.impactType === "rope-cut") {
             player.ropeObject.rope.detach();
             player.ropeObject.swingDrag = null;
+            player.ropeImpactState.reset();
             player.ropeObject.attachBufferRemaining = 0;
             player.ropeObject.launcher.clear();
             player.ropeDisabledRemaining = this.ropeDisabledSeconds;
@@ -4437,7 +4469,7 @@ export class GameSimulation {
         player.ropeObject.attachBufferRemaining = 0;
         player.ropeObject.swingDrag = null;
         player.ropeObject.launcher.clear();
-        player.ropeImpactAttack.reset();
+        player.ropeImpactState.reset();
         player.health = player.maxHealth;
         player.weapon.cooldown = 0;
         player.hitInvulnerabilityRemaining = 0;
@@ -4488,6 +4520,7 @@ export class GameSimulation {
         for (const current of this.players) {
             current.ropeObject.rope.detach();
             current.ropeObject.swingDrag = null;
+            current.ropeImpactState.reset();
         }
         this.eventFlash = { type: "completed", age: 0, playerId, position: this.world.summit };
         this.recordReplicationEvent("run-completed", {

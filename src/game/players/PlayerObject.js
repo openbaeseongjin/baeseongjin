@@ -11,6 +11,7 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         augmentCombat,
         weapon,
         ropeImpactAttack,
+        ropeImpactState,
         combatConfig,
         respawnAnchorId = null
     }) {
@@ -21,6 +22,7 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         this.augmentCombat = augmentCombat;
         this.weapon = weapon;
         this.ropeImpactAttack = ropeImpactAttack;
+        this.ropeImpactState = ropeImpactState;
         this.health = combatConfig.playerMaxHealth;
         this.maxHealth = combatConfig.playerMaxHealth;
         this.hitInvulnerabilityRemaining = 0;

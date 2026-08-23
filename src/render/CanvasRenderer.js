@@ -12,12 +12,36 @@ import { assertSceneRenderer } from "./SceneRenderer.js";
 import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus } from "./ActorStatusPresentation.js";
 import { layoutAccessEdgeGuides, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
+import { ROPE_IMPACT_EVENT_TYPE, ROPE_IMPACT_REJECTION_REASON } from "../game/combat/RopeImpactAttack.js";
 
 const BOSS_HUD_BLOCKING_STATUS = Object.freeze({
     "checkpoint-respawn": true,
     "sector-respawn": true,
     "stage-saved": true,
     "foundation-selected": true
+});
+
+const ROPE_IMPACT_REJECTION_STATUS = Object.freeze({
+    [ROPE_IMPACT_REJECTION_REASON.SWING_REQUIRED]: Object.freeze({
+        title: "스윙 필요",
+        detail: "로프 부착 후 접선 드래그로 가속",
+        color: "#67e8f9"
+    }),
+    [ROPE_IMPACT_REJECTION_REASON.RELEASE_EXPIRED]: Object.freeze({
+        title: "공격 창 종료",
+        detail: "해제 직후에만 로프 추진 타격 가능",
+        color: "#cbd5e1"
+    }),
+    [ROPE_IMPACT_REJECTION_REASON.SPEED_BELOW_MINIMUM]: Object.freeze({
+        title: "속도 부족",
+        detail: "스윙을 더 크게 가속하세요",
+        color: "#fbbf24"
+    }),
+    [ROPE_IMPACT_REJECTION_REASON.SHIELD_BLOCKED]: Object.freeze({
+        title: "방패 차단",
+        detail: "측면 또는 후방에서 충돌하세요",
+        color: "#fb7185"
+    })
 });
 
 function bossHudBlocked(scene) {
@@ -663,6 +687,12 @@ export class CanvasRenderer {
             detail = "다음 액션 쿨다운 50%";
             color = "#67e8f9";
             foundationFeedback = true;
+        } else if (eventFlash.type === ROPE_IMPACT_EVENT_TYPE.REJECTED) {
+            const rejection = ROPE_IMPACT_REJECTION_STATUS[eventFlash.reason];
+            if (!rejection) return;
+            title = rejection.title;
+            detail = rejection.detail;
+            color = rejection.color;
         } else {
             return;
         }

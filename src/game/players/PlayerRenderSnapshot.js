@@ -17,6 +17,7 @@ export const withPlayerRenderSnapshot = createRenderSnapshotCapabilityMixin({
             hitInvulnerabilityRemaining: this.hitInvulnerabilityRemaining,
             ropeDisabledRemaining: this.ropeDisabledRemaining,
             lifeState: this.lifeState,
+            ropeImpactState: this.ropeImpactState.snapshot(),
             weapon: {
                 range: this.weapon.range,
                 damage: this.weapon.damage,

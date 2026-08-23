@@ -191,7 +191,8 @@ export const FALL_DAMAGE_CONFIG = Object.freeze({
 export const ROPE_IMPACT_CONFIG = Object.freeze({
     minimumSpeed: 620,
     referenceSpeed: 1000,
-    referenceDamage: 100
+    referenceDamage: 100,
+    releaseCarrySeconds: 0.15
 });
 
 export const AUGMENT_IMPACT_CONFIG = Object.freeze({

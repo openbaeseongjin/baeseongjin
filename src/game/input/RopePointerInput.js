@@ -25,7 +25,7 @@ export function findRopeAttachment({
     }).resolve();
 }
 
-export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, config, onFlash }) {
+export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, config, onSwing, onFlash }) {
     if (!ropeObject.swingDrag || ropeObject.swingDrag.used || !ropeObject.rope.anchor) return;
     ropeObject.swingDrag.age += dt;
     const evaluation = evaluateSwingDrag({
@@ -43,6 +43,7 @@ export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, 
     if (!evaluation.triggered || ropeObject.swingDrag.age < config.swingDragMinHoldSeconds) return;
     owner.physics.applyImpulseAtLocalPoint(evaluation.direction, ropeObject.rope.attachmentOffset, config.swingImpulse);
     ropeObject.swingDrag.used = true;
+    onSwing();
     onFlash({ type: "swing", age: 0 });
 }
 
@@ -82,6 +83,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
             createAttachmentId = () => null,
             onAttach = () => {},
             onRelease = () => {},
+            onSwing = () => {},
             onFlash
         }
     ) {
@@ -179,6 +181,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
                 viewport: command.viewport,
                 dt,
                 config: ropeConfig,
+                onSwing,
                 onFlash
             });
         }

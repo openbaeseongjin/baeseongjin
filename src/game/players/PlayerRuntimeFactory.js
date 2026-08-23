@@ -2,6 +2,7 @@ import { FoundationAugmentState } from "../augments/FoundationAugmentState.js";
 import { AugmentCombatRuntime } from "../augments/AugmentCombatRuntime.js";
 import { AutomaticWeaponObject } from "../combat/AutomaticWeaponObject.js";
 import { RopeImpactAttack } from "../combat/RopeImpactAttack.js";
+import { RopeImpactState } from "../combat/RopeImpactState.js";
 import { ROPE_IMPACT_CONFIG } from "../config.js";
 import { PlayerPhysics } from "../physics/PlayerPhysics.js";
 import { CircleCollider } from "../physics/colliders/CircleCollider.js";
@@ -31,6 +32,7 @@ export function createPlayerRuntime({
     const ropeObject = new RopeObject({ id: `${id}:rope`, ownerId: id, rope });
     const weapon = new AutomaticWeaponObject({ id: `${id}:weapon`, ownerId: id, config: combatConfig });
     const ropeImpactAttack = new RopeImpactAttack(ROPE_IMPACT_CONFIG);
+    const ropeImpactState = new RopeImpactState(ROPE_IMPACT_CONFIG);
     const entity = new PlayerObject({
         id,
         physics,
@@ -39,6 +41,7 @@ export function createPlayerRuntime({
         augmentCombat,
         weapon,
         ropeImpactAttack,
+        ropeImpactState,
         combatConfig,
         respawnAnchorId
     });
@@ -52,6 +55,7 @@ export function createPlayerRuntime({
         augmentCombat,
         weapon,
         ropeImpactAttack,
+        ropeImpactState,
         entity,
         inputDrivenObjects
     });

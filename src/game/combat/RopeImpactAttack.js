@@ -1,4 +1,14 @@
-import { createImpactDamage } from "./ImpactTarget.js";
+import { ROPE_IMPACT_STATE_REASON } from "./RopeImpactState.js";
+
+export const ROPE_IMPACT_REJECTION_REASON = Object.freeze({
+    ...ROPE_IMPACT_STATE_REASON,
+    SPEED_BELOW_MINIMUM: "speed-below-minimum",
+    SHIELD_BLOCKED: "shield-blocked"
+});
+
+export const ROPE_IMPACT_EVENT_TYPE = Object.freeze({
+    REJECTED: "rope-impact-rejected"
+});
 
 function predictedResolution(target, normalDamage) {
     if (target.impactTargetKind !== "boss") {
@@ -13,6 +23,34 @@ function predictedResolution(target, normalDamage) {
     const remainingInPhase = Math.max(0, target.health - (target.phaseFloor ?? 0));
     if (totalDamage < remainingInPhase) return "boss-hit";
     return target.phase >= target.phaseCount ? "boss-defeated" : "boss-phase-completed";
+}
+
+function impactContact(owner, actorImpact) {
+    const position = actorImpact?.position ?? owner.physics.position;
+    const velocity = actorImpact?.velocity ?? owner.physics.physicsStepVelocity();
+    if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
+        throw new Error("rope impact contact position must be finite");
+    }
+    if (!Number.isFinite(velocity?.x) || !Number.isFinite(velocity?.y)) {
+        throw new Error("rope impact contact velocity must be finite");
+    }
+    return Object.freeze({
+        position: Object.freeze({ x: position.x, y: position.y }),
+        velocity: Object.freeze({ x: velocity.x, y: velocity.y })
+    });
+}
+
+function overlappingTargets(owner, targets, contact) {
+    return targets.filter(
+        (target) =>
+            target.active !== false &&
+            (target.health === undefined || target.health > 0) &&
+            owner.physics.collider.overlapsCollider(
+                contact.position,
+                target.position,
+                target.collider ?? { type: "circle", radius: target.radius }
+            )
+    );
 }
 
 export function ropeImpactDamageForSpeed(speed, config) {
@@ -38,69 +76,66 @@ export class RopeImpactAttack {
         ropeImpactDamageForSpeed(config.minimumSpeed, config);
         this.minimumSpeed = config.minimumSpeed;
         this.config = config;
-        this.overlappingTargetIds = new Set();
-        this.pendingImpactsByTargetId = new Map();
     }
 
-    reset() {
-        this.overlappingTargetIds.clear();
-        this.pendingImpactsByTargetId.clear();
+    observe(owner, impactState, targets, actorImpact = null) {
+        const contact = impactContact(owner, actorImpact);
+        const contacts = overlappingTargets(owner, targets, contact);
+        impactState.enteringTargetIds(contacts.map(({ id }) => id));
+        return Object.freeze({ contact, contacts: Object.freeze(contacts) });
     }
 
-    advance(owner, targets, tick) {
-        const overlaps = targets.filter(
-            (target) =>
-                target.active !== false &&
-                (target.health === undefined || target.health > 0) &&
-                owner.physics.collider.overlapsCollider(
-                    owner.physics.position,
-                    target.position,
-                    target.collider ?? { type: "circle", radius: target.radius }
-                )
-        );
-        const speed = Math.hypot(owner.physics.velocity.x, owner.physics.velocity.y);
-        const canHit = owner.ropeObject.rope.isAttached && speed >= this.minimumSpeed;
-        const damage = ropeImpactDamageForSpeed(speed, this.config);
-        const impacts = canHit
-            ? overlaps
-                  .filter(
-                      (target) =>
-                          !this.overlappingTargetIds.has(target.id) &&
-                          !target.blocksImpactFrom?.(owner.physics.position)
-                  )
-                  .map((target) =>
-                      Object.freeze({
-                          predictionId: `${owner.id}:rope-impact:${tick}:${target.id}`,
-                          clientTick: tick,
-                          sourcePlayerId: owner.id,
-                          targetId: target.id,
-                          targetKind: target.impactTargetKind ?? "enemy",
-                          position: Object.freeze({ x: target.position.x, y: target.position.y }),
-                          impactPosition: Object.freeze({ x: owner.physics.position.x, y: owner.physics.position.y }),
-                          velocity: Object.freeze({ x: owner.physics.velocity.x, y: owner.physics.velocity.y }),
-                          impactSpeed: speed,
-                          damage,
-                          predictedResolution: predictedResolution(target, damage)
-                      })
-                  )
-            : [];
-        this.overlappingTargetIds = new Set(overlaps.map(({ id }) => id));
-        return Object.freeze(impacts);
-    }
+    advance(owner, impactState, targets, tick, actorImpact = null) {
+        const contact = impactContact(owner, actorImpact);
+        const contacts = overlappingTargets(owner, targets, contact);
+        const enteringTargetIds = new Set(impactState.enteringTargetIds(contacts.map(({ id }) => id)));
+        const enteringTargets = contacts.filter(({ id }) => enteringTargetIds.has(id));
+        const impactSpeed = Math.hypot(contact.velocity.x, contact.velocity.y);
+        const ropeAttached = owner.ropeObject.rope.isAttached;
+        const canImpact = impactState.isActive({ ropeAttached });
+        const unavailableReason = canImpact ? null : impactState.unavailableReason({ ropeAttached });
+        const impacts = [];
+        const rejections = [];
 
-    observe(owner, targets, tick) {
-        const impacts = this.advance(owner, targets, tick);
-        for (const targetId of this.pendingImpactsByTargetId.keys()) {
-            if (!this.overlappingTargetIds.has(targetId)) this.pendingImpactsByTargetId.delete(targetId);
+        for (const target of enteringTargets) {
+            let reason = unavailableReason;
+            if (reason === null && impactSpeed < this.minimumSpeed) {
+                reason = ROPE_IMPACT_REJECTION_REASON.SPEED_BELOW_MINIMUM;
+            }
+            if (reason === null && target.blocksImpactFrom?.(contact.position)) {
+                reason = ROPE_IMPACT_REJECTION_REASON.SHIELD_BLOCKED;
+            }
+            if (reason !== null) {
+                rejections.push(
+                    Object.freeze({
+                        reason,
+                        sourcePlayerId: owner.id,
+                        targetId: target.id,
+                        position: Object.freeze({ x: target.position.x, y: target.position.y }),
+                        impactPosition: contact.position,
+                        velocity: contact.velocity,
+                        impactSpeed
+                    })
+                );
+                continue;
+            }
+            const damage = ropeImpactDamageForSpeed(impactSpeed, this.config);
+            impacts.push(
+                Object.freeze({
+                    predictionId: `${owner.id}:rope-impact:${tick}:${target.id}`,
+                    clientTick: tick,
+                    sourcePlayerId: owner.id,
+                    targetId: target.id,
+                    targetKind: target.impactTargetKind ?? "enemy",
+                    position: Object.freeze({ x: target.position.x, y: target.position.y }),
+                    impactPosition: contact.position,
+                    velocity: contact.velocity,
+                    impactSpeed,
+                    damage,
+                    predictedResolution: predictedResolution(target, damage)
+                })
+            );
         }
-        for (const impact of impacts) this.pendingImpactsByTargetId.set(impact.targetId, impact);
-        return impacts;
-    }
-
-    consume(predictionId, targetId) {
-        const pending = this.pendingImpactsByTargetId.get(targetId);
-        if (!pending || pending.predictionId !== predictionId) return null;
-        this.pendingImpactsByTargetId.delete(targetId);
-        return pending;
+        return Object.freeze({ impacts: Object.freeze(impacts), rejections: Object.freeze(rejections) });
     }
 }
