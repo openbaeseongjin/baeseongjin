@@ -36,46 +36,47 @@ ATLAS_NAMES = (
     "swarm-motion.png",
 )
 
-# Only source RGB values in these fixed tables can change. The mappings are
-# intentionally shared across every frame of an atlas to prevent color jitter.
-COMMON_EXCHANGE_METAL = {
-    (9, 15, 26): (8, 14, 27),
-    (25, 37, 56): (31, 47, 72),
-    (99, 91, 83): (122, 118, 108),
-    (177, 166, 154): (188, 190, 192),
+# Only source RGB values in these fixed tables can change. The brighter neutral
+# ramps follow the user-approved brushed-steel sheet. They remain shared across
+# every frame of an atlas so motion never produces material color jitter.
+COMMON_BRUSHED_STEEL = {
+    (9, 15, 26): (10, 12, 15),
+    (25, 37, 56): (45, 49, 52),
+    (99, 91, 83): (133, 132, 126),
+    (177, 166, 154): (216, 212, 202),
 }
 
-EXCHANGE_DRONE_METAL = {
-    (5, 12, 24): (7, 14, 27),
-    (14, 30, 52): (24, 43, 68),
-    (38, 59, 86): (58, 80, 108),
-    (117, 111, 100): (148, 145, 134),
+BRUSHED_DRONE_METAL = {
+    (5, 12, 24): (10, 12, 15),
+    (14, 30, 52): (45, 49, 52),
+    (38, 59, 86): (104, 109, 110),
+    (117, 111, 100): (205, 201, 190),
 }
 
 PALETTE_MAPS = {
-    "pursuit-motion.png": COMMON_EXCHANGE_METAL,
-    "sentry-upright-aim.png": COMMON_EXCHANGE_METAL,
+    "pursuit-motion.png": COMMON_BRUSHED_STEEL,
+    "sentry-upright-aim.png": COMMON_BRUSHED_STEEL,
     "artillery-acquisition-motion.png": {
-        (5, 13, 23): (6, 13, 25),
-        (8, 20, 35): (14, 29, 48),
-        (14, 35, 57): (30, 53, 81),
-        (28, 57, 83): (54, 79, 110),
-        (82, 81, 75): (107, 109, 107),
-        (122, 116, 103): (153, 149, 136),
+        (5, 13, 23): (9, 11, 14),
+        (8, 20, 35): (31, 35, 38),
+        (14, 35, 57): (68, 73, 76),
+        (28, 57, 83): (116, 121, 122),
+        (82, 81, 75): (157, 156, 149),
+        (122, 116, 103): (218, 214, 204),
     },
     # Blue is the Shield role color, so only its neutral physical plate changes.
     "shield-body.png": {},
-    "shield-directions.png": {(117, 111, 100): (148, 145, 134)},
-    "patrol-motion-attack.png": EXCHANGE_DRONE_METAL,
-    "support-motion.png": EXCHANGE_DRONE_METAL,
+    "shield-directions.png": {(117, 111, 100): (205, 201, 190)},
+    "patrol-motion-attack.png": BRUSHED_DRONE_METAL,
+    "support-motion.png": BRUSHED_DRONE_METAL,
     "swarm-motion.png": {
-        (11, 13, 19): (8, 13, 24),
-        (21, 25, 37): (25, 37, 57),
-        (35, 41, 55): (44, 58, 80),
-        (55, 61, 72): (75, 88, 103),
-        (78, 74, 69): (104, 101, 93),
-        (116, 109, 100): (145, 141, 129),
-        (164, 158, 146): (189, 190, 190),
+        (11, 13, 19): (9, 11, 14),
+        (21, 25, 37): (31, 35, 38),
+        (35, 41, 55): (61, 66, 69),
+        (55, 61, 72): (98, 103, 104),
+        (78, 74, 69): (133, 132, 126),
+        (116, 109, 100): (177, 174, 165),
+        (164, 158, 146): (220, 216, 206),
     },
 }
 
@@ -205,9 +206,9 @@ def make_side_by_side() -> None:
     label_font = load_font(18, bold=True)
     sub_font = load_font(13)
     draw.text((32, 24), "SECTOR 03 · ENEMY MATERIAL VARIANT", font=title_font, fill=(232, 237, 244))
-    draw.text((32, 66), "Approved Sector 01 identity preserved · polished exchange metal only", font=sub_font, fill=(142, 158, 178))
+    draw.text((32, 66), "Approved Sector 01 identity preserved · clean brushed steel only", font=sub_font, fill=(162, 166, 170))
     draw.text((272, 92), "CURRENT APPROVED", font=header_font, fill=(177, 166, 154), anchor="mm")
-    draw.text((748, 92), "SECTOR 03 CANDIDATE", font=header_font, fill=(168, 190, 218), anchor="mm")
+    draw.text((748, 92), "SECTOR 03 APPROVED", font=header_font, fill=(208, 205, 197), anchor="mm")
 
     for index, (label, atlas_name, cell_index, output_size) in enumerate(ENEMIES):
         top = header + index * row_height
@@ -241,7 +242,7 @@ def make_runtime_size_preview() -> None:
     draw.rectangle((0, 0, width, 76), fill=(4, 10, 18, 228))
     draw.text((26, 18), "ACTUAL WORLD OUTPUT SIZE", font=title_font, fill=(237, 240, 245))
     draw.text((470, 54), "CURRENT", font=header_font, fill=(177, 166, 154), anchor="mm")
-    draw.text((780, 54), "SECTOR 03", font=header_font, fill=(168, 190, 218), anchor="mm")
+    draw.text((780, 54), "SECTOR 03", font=header_font, fill=(208, 205, 197), anchor="mm")
 
     row_height = 98
     for index, (label, atlas_name, cell_index, output_size) in enumerate(ENEMIES):
