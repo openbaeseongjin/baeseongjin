@@ -981,9 +981,14 @@ export class GameSimulation {
             });
         }
         if (stage && this.bossRuntime?.recoverPlayer) {
-            const recoveryThreshold = stage.bounds.y + stage.bounds.height + PLAYER_CONFIG.radius;
+            const recoveryBounds = {
+                x: stage.bounds.x - PLAYER_CONFIG.radius,
+                y: stage.bounds.y - PLAYER_CONFIG.radius,
+                width: stage.bounds.width + PLAYER_CONFIG.radius * 2,
+                height: stage.bounds.height + PLAYER_CONFIG.radius * 2
+            };
             for (const player of activeParticipants) {
-                if (player.physics.position.y <= recoveryThreshold) continue;
+                if (pointInsideBounds(player.physics.position, recoveryBounds)) continue;
                 const recoveryPosition = this.bossRuntime.recoverPlayer(
                     player.id,
                     this.#bossWorldOffset(),
@@ -1224,6 +1229,19 @@ export class GameSimulation {
                 const appliedDamage = protection.appliedDamage;
                 player.health = Math.max(0, player.health - appliedDamage);
                 player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+                if (hazard.kind === "counter-bash" && hazard.bounds) {
+                    const originX = hazard.bounds.x + hazard.bounds.width * 0.5;
+                    const originY = hazard.bounds.y + hazard.bounds.height * 0.5;
+                    const dx = player.physics.position.x - originX;
+                    const dy = player.physics.position.y - originY;
+                    const pushDistance = Math.hypot(dx, dy);
+                    if (pushDistance > 0) {
+                        player.physics.applyImpulse(
+                            { x: dx / pushDistance, y: dy / pushDistance },
+                            COMBAT_CONFIG.playerHitKnockback
+                        );
+                    }
+                }
                 const defeated = player.health <= 0;
                 if (defeated) this.#resolveBossParticipantDefeat(player, `boss-${hazard.kind}`);
                 const event = Object.freeze({

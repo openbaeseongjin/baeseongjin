@@ -8,6 +8,22 @@ const COLOR = Object.freeze({
     EXPOSED: "#fef08a"
 });
 
+const WARDEN_ATTACK_FAMILY = Object.freeze({
+    "baton-1": "melee",
+    "baton-2": "melee",
+    "overhead-slam": "melee",
+    "back-swing": "melee",
+    "counter-bash": "melee",
+    "ground-thruster-dash": "dash",
+    "diagonal-thruster-dash": "dash",
+    charge: "dash"
+});
+
+const WARDEN_ATTACK_FAMILY_COLOR = Object.freeze({
+    melee: COLOR.WARNING,
+    dash: "#38bdf8"
+});
+
 const KIND = Object.freeze({
     GRAPPLE_ANCHOR: "grapple-anchor",
     EXCHANGE_MAINTENANCE_BODY: "boss-exchange-maintenance-body",
@@ -35,6 +51,7 @@ function size(object, fallbackWidth, fallbackHeight) {
 }
 
 function direction(object) {
+    if (typeof object.direction === "number") return object.direction < 0 ? -1 : 1;
     return object.direction === "left" ? -1 : 1;
 }
 
@@ -249,13 +266,17 @@ class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
         const defeated = object.state === "defeated";
         const guarding = object.state === "guard" || object.state === "counter-ready";
         const warning = object.actionState === "telegraph";
+        const family = WARDEN_ATTACK_FAMILY[object.state] ?? null;
+        const warningColor = family ? WARDEN_ATTACK_FAMILY_COLOR[family] : COLOR.WARNING;
         if (defeated) context.rotate(-0.95);
         context.fillStyle = "#4d5b61";
-        context.strokeStyle = warning ? COLOR.WARNING : defeated ? "#64748b" : "#e1eaed";
+        context.strokeStyle = warning ? warningColor : defeated ? "#64748b" : "#e1eaed";
         context.lineWidth = warning ? 5 : 3;
+        context.setLineDash(warning && family === "dash" ? [10, 6] : []);
         polygon(context, bossBodyPolygonVertices("continuity-warden", { width, height }));
         context.fill();
         context.stroke();
+        context.setLineDash([]);
         context.fillStyle = "#617783";
         context.strokeStyle = guarding ? "#fef08a" : "#eef7fa";
         context.lineWidth = guarding ? 6 : 4;
@@ -445,14 +466,23 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
         const { width, height } = size(object, 220, 140);
         const active = object.state === "active" || object.state === "beam-active" || object.state === "burst-active";
+        const family = WARDEN_ATTACK_FAMILY[object.variant] ?? null;
+        const telegraphColor = family ? WARDEN_ATTACK_FAMILY_COLOR[family] : COLOR.WARNING;
         context.globalAlpha = active ? 0.62 : 0.32;
-        context.fillStyle = active ? "rgba(251, 113, 133, 0.35)" : "rgba(251, 191, 36, 0.2)";
-        context.strokeStyle = active ? COLOR.HAZARD : COLOR.WARNING;
+        context.fillStyle = active
+            ? "rgba(251, 113, 133, 0.35)"
+            : family === "dash"
+              ? "rgba(56, 189, 248, 0.2)"
+              : "rgba(251, 191, 36, 0.2)";
+        context.strokeStyle = active ? COLOR.HAZARD : telegraphColor;
         context.lineWidth = active ? 5 : 3;
-        context.setLineDash(active ? [] : [20, 14]);
+        context.setLineDash(active ? [] : family === "dash" ? [10, 8] : [20, 14]);
         context.fillRect(-width * 0.5, -height * 0.5, width, height);
         context.strokeRect(-width * 0.5, -height * 0.5, width, height);
         context.setLineDash([]);
+        if (!active && family === "dash") {
+            chevron(context, 0, 0, direction(object), Math.min(width, height) * 0.55, telegraphColor);
+        }
         context.globalAlpha = 1;
     }
 }
