@@ -1,0 +1,236 @@
+{
+  "pursuit-motion.png": {
+    "size": [
+      128,
+      160
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 5880,
+    "changedPixels": 5608,
+    "changedOpaqueRatio": 0.953741,
+    "vinePixels": 140,
+    "frameVinePixelCounts": [
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "sourceSha256": "9dcacd787c0692ec0fe5f3b937d0ae0f4627e533d49860b19ae2318c7c86e037",
+    "exportSha256": "a76c7aabd49181daa3c8962d0557f84556866f1c2c51329dd7ba489c11d798f8"
+  },
+  "sentry-upright-aim.png": {
+    "size": [
+      64,
+      32
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 475,
+    "changedPixels": 463,
+    "changedOpaqueRatio": 0.974737,
+    "vinePixels": 14,
+    "frameVinePixelCounts": [
+      7,
+      7
+    ],
+    "sourceSha256": "25f313ffcbc6cd5297f3606a8ce16841529bfd571780ae0d2a5b7d4755ee9b4c",
+    "exportSha256": "01897fc22534b1539275526b5e655213454a381500d99871c4ebee393008ae30"
+  },
+  "artillery-acquisition-motion.png": {
+    "size": [
+      384,
+      32
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 5418,
+    "changedPixels": 4872,
+    "changedOpaqueRatio": 0.899225,
+    "vinePixels": 96,
+    "frameVinePixelCounts": [
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8
+    ],
+    "sourceSha256": "07275f03e29f28e00ea4386fbe72f4506ea76138b1551755ec8a3529bbf2419c",
+    "exportSha256": "41846f9760e813b3152e79578a5619f88ff8a216254845a2eadc8e7952a565d1"
+  },
+  "shield-body.png": {
+    "size": [
+      128,
+      32
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 574,
+    "changedPixels": 0,
+    "changedOpaqueRatio": 0.0,
+    "vinePixels": 0,
+    "frameVinePixelCounts": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sourceSha256": "9ffabbe7edfb90e24633a699655d57518fd98b6160071ba76843ef59400a2aea",
+    "exportSha256": "0a9b0210304f581632ae15db3e0dacd91eab8b0743d6f7d251d143d70ff5e297"
+  },
+  "shield-directions.png": {
+    "size": [
+      256,
+      32
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 405,
+    "changedPixels": 204,
+    "changedOpaqueRatio": 0.503704,
+    "vinePixels": 40,
+    "frameVinePixelCounts": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "sourceSha256": "0e2fcf3ca83322e216303451dcfddc172906abaa61009fe886dc57d1cace5e73",
+    "exportSha256": "e8d8cf4b0cefe8b30a4f2ba60be6077c8264552d840c179facdfeb6fe2641916"
+  },
+  "patrol-motion-attack.png": {
+    "size": [
+      128,
+      192
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 6058,
+    "changedPixels": 5574,
+    "changedOpaqueRatio": 0.920106,
+    "vinePixels": 154,
+    "frameVinePixelCounts": [
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      0,
+      0,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "sourceSha256": "624497332a4d470a183c40701c0c588cb43c028abbf159919df2c06c725412ff",
+    "exportSha256": "7957b4e23e149bd9d5bee9f4f3513b11e63ed37fa4438740e93f8dc95440fbaf"
+  },
+  "support-motion.png": {
+    "size": [
+      128,
+      64
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 2644,
+    "changedPixels": 2380,
+    "changedOpaqueRatio": 0.900151,
+    "vinePixels": 56,
+    "frameVinePixelCounts": [
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "sourceSha256": "5a82cba4a6646f7f3e631771572325a3edf004920a3b8ed59ceabf22b498c143",
+    "exportSha256": "343b5d8c75ca809de5572cc46fc8868fa10568c5075bf5e7e914d4f90749d870"
+  },
+  "swarm-motion.png": {
+    "size": [
+      128,
+      96
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaquePixels": 3525,
+    "changedPixels": 3138,
+    "changedOpaqueRatio": 0.890213,
+    "vinePixels": 48,
+    "frameVinePixelCounts": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "sourceSha256": "bff6120823c1b57b8e011aa8a68ca263f5f8ef7f4fe94a992816cd5aa6d0bfb3",
+    "exportSha256": "7a3ee30a4f1bd00f2296ba449b98937db3a462a9e87f9e3549dfe9e4e24fb193"
+  }
+}
