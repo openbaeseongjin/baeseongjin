@@ -63,6 +63,11 @@ import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInpu
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPlayerImpactStateDigest, PLAYER_IMPACT_SOURCE_KIND } from "../network/PlayerImpactClaim.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
+import {
+    ROPE_ANCHOR_RELEASE_REASON,
+    ROPE_ATTACHMENT_ID,
+    ROPE_AUTHORITY_EVENT_TYPE
+} from "../network/RopeAuthorityEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { rotateVector } from "../physics/AngularMotion.js";
@@ -70,7 +75,7 @@ import { CollisionBroadPhase } from "../physics/spatial/CollisionBroadPhase.js";
 import { CircleCollider } from "../physics/colliders/CircleCollider.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
-import { releaseRopeFromBody } from "../rope/RopeAttachment.js";
+import { releaseRopeFromBody, ropeAnchorState } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
 import { ROPE_AUGMENT_PERCENTAGES } from "../augments/rope/RopeAugmentTuning.js";
 import {
@@ -249,6 +254,8 @@ const BOSS_BEAM_DAMAGE_INTERVAL_SECONDS = 0.1;
 const BOSS_BEAM_DAMAGE_PER_PULSE = 3;
 const SIMULATION_TICKS_PER_SECOND = 120;
 const AUTHORED_STAGE_FALL_RECOVERY_MARGIN = 780;
+const ACTOR_ROPE_ANCHOR_SURFACE_TOLERANCE = 0.75;
+const ACTOR_ROPE_ANCHOR_MATCH_TOLERANCE = 0.01;
 const BOSS_PARTICIPANT_STATUS = Object.freeze({
     ACTIVE: "active",
     SPECTATING: "spectating",
@@ -646,6 +653,17 @@ export class GameSimulation {
         const worldOffset = this.#bossWorldOffset();
         const collisionActors = this.#bossCollisionActors();
         const bodyActor = collisionActors.find(({ physicsActorKind }) => physicsActorKind === PHYSICS_ACTOR_KIND.BOSS);
+        const ropeAttachmentActors = Object.freeze(
+            this.#ropeAttachmentActors().map(({ id, position, angle, angularVelocity, velocity }) =>
+                Object.freeze({
+                    id,
+                    position,
+                    angle,
+                    angularVelocity,
+                    velocity
+                })
+            )
+        );
         const suppliedObjects =
             this.bossRuntime.presentationObjects?.(worldOffset, runtime) ??
             this.bossRuntime.mechanism?.presentationObjects?.(worldOffset, runtime) ??
@@ -667,6 +685,7 @@ export class GameSimulation {
             return Object.freeze({
                 ...runtime,
                 environmentAreaId: stage.sourceAreaId,
+                ropeAttachmentActors,
                 arena: Object.freeze({
                     id: stage.id,
                     bounds: stage.bounds,
@@ -695,6 +714,7 @@ export class GameSimulation {
         return Object.freeze({
             ...runtime,
             environmentAreaId: stage.sourceAreaId,
+            ropeAttachmentActors,
             arena: Object.freeze({
                 id: stage.id,
                 bounds: stage.bounds,
@@ -1014,6 +1034,8 @@ export class GameSimulation {
                     id: entry.id,
                     position: Object.freeze({ ...entry.position }),
                     angle: entry.angle ?? 0,
+                    angularVelocity: entry.angularVelocity ?? 0,
+                    velocity: Object.freeze({ ...(entry.velocity ?? { x: 0, y: 0 }) }),
                     ropeableSurface: entry.ropeableSurface
                 });
                 return;
@@ -1022,8 +1044,10 @@ export class GameSimulation {
             if (!attachment?.ownerId || !attachment.position) return;
             byOwnerId[attachment.ownerId] = Object.freeze({
                 id: attachment.ownerId,
-                position: Object.freeze({ ...attachment.position }),
+                position: Object.freeze({ ...entry.position }),
                 angle: entry.angle ?? 0,
+                angularVelocity: entry.angularVelocity ?? 0,
+                velocity: Object.freeze({ ...(entry.velocity ?? { x: 0, y: 0 }) }),
                 ropeAttachment: Object.freeze({
                     ownerId: attachment.ownerId,
                     localAnchor: Object.freeze({ ...attachment.localAnchor })
@@ -1039,6 +1063,69 @@ export class GameSimulation {
         return this.#ropeAttachmentActors().find(({ id }) => id === ownerId) ?? null;
     }
 
+    #actorRopeAnchorClaim(player, ropeState) {
+        const ownerId = ropeState.anchorOwnerId;
+        const localAnchor = ropeState.anchorLocalOffset;
+        const owner = this.#ropeAttachmentActorById(ownerId);
+        if (!owner?.ropeableSurface || !localAnchor) {
+            return Object.freeze({ accepted: false, reason: ROPE_ANCHOR_RELEASE_REASON.OWNER_UNAVAILABLE });
+        }
+        const canAttachToSurface = this.#accessScanPredicate();
+        if (canAttachToSurface && canAttachToSurface(owner.ropeableSurface) === false) {
+            return Object.freeze({ accepted: false, reason: ROPE_ANCHOR_RELEASE_REASON.SURFACE_DISABLED });
+        }
+        const anchor = ropeAnchorState(owner, localAnchor);
+        const surfacePoint = closestPointOnSurface(anchor.position, owner.ropeableSurface);
+        if (
+            Math.hypot(surfacePoint.x - anchor.position.x, surfacePoint.y - anchor.position.y) >
+            ACTOR_ROPE_ANCHOR_SURFACE_TOLERANCE
+        ) {
+            return Object.freeze({ accepted: false, reason: ROPE_ANCHOR_RELEASE_REASON.POINT_OFF_SURFACE });
+        }
+        const currentRope = player.ropeObject.rope;
+        const continuingAttachment =
+            currentRope.isAttached &&
+            currentRope.attachmentId === ropeState.attachmentId &&
+            currentRope.anchorOwnerId === ownerId &&
+            Math.hypot(
+                (currentRope.anchorLocalOffset?.x ?? 0) - localAnchor.x,
+                (currentRope.anchorLocalOffset?.y ?? 0) - localAnchor.y
+            ) <= ACTOR_ROPE_ANCHOR_MATCH_TOLERANCE;
+        if (!continuingAttachment) {
+            const ropeConfig = player.foundation.effectiveRopeConfig(this.ropeConfig);
+            const hand = launchHandPosition(player, ropeConfig, anchor.position);
+            if (Math.hypot(anchor.position.x - hand.x, anchor.position.y - hand.y) > hookReach(ropeConfig)) {
+                return Object.freeze({ accepted: false, reason: ROPE_ANCHOR_RELEASE_REASON.POINT_OUT_OF_REACH });
+            }
+            const occluded = this.activeCollisionSurfaces.some(
+                (surface) =>
+                    (surface.kind === "inter-floor-divider" || surface.ropeOccluder === true) &&
+                    segmentIntersectsSurface(hand, anchor.position, surface)
+            );
+            if (occluded) {
+                return Object.freeze({ accepted: false, reason: ROPE_ANCHOR_RELEASE_REASON.POINT_OCCLUDED });
+            }
+        }
+        return Object.freeze({ accepted: true, anchor, continuingAttachment });
+    }
+
+    #releaseInvalidOwnerRope(player, ropeState, reason) {
+        const ownerId = ropeState.anchorOwnerId ?? null;
+        const attachmentId = ropeState.attachmentId ?? null;
+        const anchorLocalOffset = ropeState.anchorLocalOffset
+            ? Object.freeze({ ...ropeState.anchorLocalOffset })
+            : null;
+        this.releasePlayerRope(player.id);
+        this.recordReplicationEvent(ROPE_AUTHORITY_EVENT_TYPE.ANCHOR_RELEASED, {
+            playerId: player.id,
+            attachmentId,
+            ownerId,
+            anchorLocalOffset,
+            reason
+        });
+        return Object.freeze({ accepted: true, ropeReleased: true, reason, ropeAttachmentId: attachmentId });
+    }
+
     #syncAttachedActorRopes() {
         for (const player of this.players) {
             const rope = player.ropeObject.rope;
@@ -1046,19 +1133,22 @@ export class GameSimulation {
             const ownerId = rope.anchorOwnerId;
             const owner = this.#ropeAttachmentActorById(ownerId);
             if (!owner) {
-                releaseRopeFromBody(player.physics, rope);
-                this.recordReplicationEvent("rope-anchor-released", {
+                const anchorLocalOffset = rope.anchorLocalOffset
+                    ? Object.freeze({ x: rope.anchorLocalOffset.x, y: rope.anchorLocalOffset.y })
+                    : null;
+                const attachmentId = rope.attachmentId;
+                this.releasePlayerRope(player.id);
+                this.recordReplicationEvent(ROPE_AUTHORITY_EVENT_TYPE.ANCHOR_RELEASED, {
                     playerId: player.id,
+                    attachmentId,
                     ownerId,
-                    reason: "anchor-owner-unavailable"
+                    anchorLocalOffset,
+                    reason: ROPE_ANCHOR_RELEASE_REASON.OWNER_UNAVAILABLE
                 });
                 continue;
             }
-            const anchorOffset = rotateVector(rope.anchorLocalOffset ?? { x: 0, y: 0 }, owner.angle ?? 0);
-            rope.updateAnchor({
-                x: owner.position.x + anchorOffset.x,
-                y: owner.position.y + anchorOffset.y
-            });
+            const anchor = ropeAnchorState(owner, rope.anchorLocalOffset ?? { x: 0, y: 0 });
+            rope.updateAnchor(anchor.position, anchor.velocity);
         }
     }
 
@@ -1898,6 +1988,7 @@ export class GameSimulation {
         this.collisionBroadPhase.invalidateFrame();
         player.physics.setAngularState(state.angle, state.angularVelocity);
         player.physics.isGrounded = state.isGrounded;
+        let motionOutcome = Object.freeze({ accepted: true, ropeReleased: false });
         if (
             this.isSeamlessSectorWorld &&
             typeof state.respawnAnchorId === "string" &&
@@ -1913,27 +2004,56 @@ export class GameSimulation {
             }
         }
         if (player.ropeDisabledRemaining > 0) {
-            this.releasePlayerRope(playerId);
+            const ropeAttachmentId = player.ropeObject.rope.attachmentId;
+            const ropeReleased = this.releasePlayerRope(playerId);
             player.ropeObject.launcher.clear();
+            motionOutcome = Object.freeze({ accepted: true, ropeReleased, ropeAttachmentId });
         } else if (synchronizeRope && state.rope.isAttached) {
-            player.ropeObject.rope.attach(player.physics.position, state.rope.anchor, {
-                angle: player.physics.angle,
-                attachmentOffset: state.rope.attachmentOffset,
-                anchorOwnerId: state.rope.anchorOwnerId ?? null,
-                anchorLocalOffset: state.rope.anchorLocalOffset ?? null
-            });
-            this.#syncAttachedActorRopes();
+            const actorClaim = state.rope.anchorOwnerId ? this.#actorRopeAnchorClaim(player, state.rope) : null;
+            if (actorClaim && !actorClaim.accepted) {
+                motionOutcome = this.#releaseInvalidOwnerRope(player, state.rope, actorClaim.reason);
+            } else {
+                const anchor =
+                    actorClaim?.anchor ??
+                    Object.freeze({
+                        position: state.rope.anchor,
+                        velocity: Object.freeze({ x: 0, y: 0 })
+                    });
+                const currentRope = player.ropeObject.rope;
+                const continuingAttachment =
+                    currentRope.isAttached && currentRope.attachmentId === state.rope.attachmentId;
+                const attached = player.ropeObject.rope.attach(player.physics.position, anchor.position, {
+                    angle: player.physics.angle,
+                    attachmentOffset: state.rope.attachmentOffset,
+                    anchorOwnerId: state.rope.anchorOwnerId ?? null,
+                    anchorLocalOffset: state.rope.anchorLocalOffset ?? null,
+                    anchorVelocity: anchor.velocity,
+                    restLength: continuingAttachment ? currentRope.length : state.rope.length,
+                    attachmentId: state.rope.attachmentId
+                });
+                if (!attached) {
+                    motionOutcome = this.#releaseInvalidOwnerRope(
+                        player,
+                        state.rope,
+                        ROPE_ANCHOR_RELEASE_REASON.CONSTRAINT_INVALID
+                    );
+                } else {
+                    this.#syncAttachedActorRopes();
+                }
+            }
         } else if (synchronizeRope) {
             this.releasePlayerRope(playerId);
         }
-        if (player.ropeDisabledRemaining <= 0) {
+        if (player.ropeDisabledRemaining <= 0 && !motionOutcome.ropeReleased) {
             player.ropeObject.launcher.restore(state.launcher);
+        } else if (motionOutcome.ropeReleased) {
+            player.ropeObject.launcher.clear();
         }
         if (state.augmentRuntimeState?.combat) {
             player.augmentCombat.restore(state.augmentRuntimeState.combat, player.foundation, player.maxHealth);
         }
         player.ropeImpactAttack.observe(player, this.#combatImpactTargets(), state.clientTick ?? this.tick);
-        return true;
+        return motionOutcome;
     }
 
     preparePrediction(
@@ -2233,6 +2353,8 @@ export class GameSimulation {
         player.physics.isGrounded = state.isGrounded;
         if (state.rope.isAttached) {
             player.ropeObject.rope.anchor = new Vector2(state.rope.anchor.x, state.rope.anchor.y);
+            player.ropeObject.rope.anchorVelocity.set(0, 0);
+            player.ropeObject.rope.attachmentId = state.rope.attachmentId ?? null;
             player.ropeObject.rope.anchorOwnerId = state.rope.anchorOwnerId ?? null;
             player.ropeObject.rope.anchorLocalOffset = state.rope.anchorLocalOffset
                 ? new Vector2(state.rope.anchorLocalOffset.x, state.rope.anchorLocalOffset.y)
@@ -2496,8 +2618,7 @@ export class GameSimulation {
 
     recoverFallenPlayers() {
         const fallenPlayerIds = [];
-        const worldBottomY = Number.isFinite(this.world.bottomY) ? this.world.bottomY : WORLD_CONFIG.floorY;
-        const recoveryY = worldBottomY + AUTHORED_STAGE_FALL_RECOVERY_MARGIN;
+        const recoveryY = this.fallRecoveryY();
         for (const player of this.players) {
             if (player.lifeState !== "active") continue;
             if (player.physics.position.isFinite() && player.physics.position.y <= recoveryY) {
@@ -2507,6 +2628,11 @@ export class GameSimulation {
             fallenPlayerIds.push(player.id);
         }
         return fallenPlayerIds;
+    }
+
+    fallRecoveryY() {
+        const worldBottomY = Number.isFinite(this.world.bottomY) ? this.world.bottomY : WORLD_CONFIG.floorY;
+        return worldBottomY + AUTHORED_STAGE_FALL_RECOVERY_MARGIN;
     }
 
     resolvePlayerFall(playerId) {
@@ -2582,6 +2708,7 @@ export class GameSimulation {
                 collisionActors: collisionEnemies,
                 collisionBroadPhase: this.collisionBroadPhase,
                 canAttachToSurface: this.#accessScanPredicate(),
+                createAttachmentId: () => ROPE_ATTACHMENT_ID.forOwnerTick(player.id, this.tick),
                 getRopeInputModifiers: () => player.foundation.ropeInputModifiers(effectiveRopeConfig),
                 onAttach: () => {},
                 onRelease: () => {

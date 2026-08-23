@@ -23,6 +23,24 @@ export function ropeAttachmentPoint(player, rope = player?.rope) {
     return { x: player.position.x + offset.x, y: player.position.y + offset.y };
 }
 
+export function ropeAnchorState(owner, localAnchor) {
+    if (!owner?.position) throw new Error("ropeAnchorState requires owner.position");
+    if (!localAnchor) throw new Error("ropeAnchorState requires localAnchor");
+    const worldOffset = rotateVector(localAnchor, owner.angle ?? FIXED_LENGTH_ROPE.ZERO);
+    const linearVelocity = owner.velocity ?? { x: FIXED_LENGTH_ROPE.ZERO, y: FIXED_LENGTH_ROPE.ZERO };
+    const angularVelocity = owner.angularVelocity ?? FIXED_LENGTH_ROPE.ZERO;
+    return Object.freeze({
+        position: Object.freeze({
+            x: owner.position.x + worldOffset.x,
+            y: owner.position.y + worldOffset.y
+        }),
+        velocity: Object.freeze({
+            x: linearVelocity.x - angularVelocity * worldOffset.y,
+            y: linearVelocity.y + angularVelocity * worldOffset.x
+        })
+    });
+}
+
 export function releaseRopeFromBody(physics, rope) {
     if (!rope?.isAttached) return false;
     if (!physics?.velocity || typeof physics.angularTangentialVelocity !== "function") {

@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 7;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 8;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
@@ -39,8 +39,11 @@ function normalizeLauncherTarget(target) {
         }
         finiteVector(attachment.localAnchor, "launcher target rope attachment localAnchor");
     }
+    const point = finiteVector(target, "launcher.shot.target");
     return Object.freeze({
-        ...finiteVector(target, "launcher.shot.target"),
+        x: point.x,
+        y: point.y,
+        anchorVelocity: finiteVector(target.anchorVelocity ?? { x: 0, y: 0 }, "launcher.shot.target.anchorVelocity"),
         ropeAttachment:
             attachment === null
                 ? null
@@ -61,6 +64,7 @@ function normalizeLauncher(launcher) {
     const shot = launcher.shot;
     if (typeof shot !== "object" || Array.isArray(shot)) throw new Error("launcher.shot must be an object");
     const direction = finiteVector(shot.direction, "launcher.shot.direction");
+    const origin = finiteVector(shot.origin, "launcher.shot.origin");
     const magnitude = Math.hypot(direction.x, direction.y);
     if (magnitude <= 0 || Math.abs(magnitude - 1) > LAUNCHER_NUMERIC_TOLERANCE) {
         throw new Error("launcher.shot.direction must be approximately normalized");
@@ -75,7 +79,14 @@ function normalizeLauncher(launcher) {
     }
     return Object.freeze({
         shot: Object.freeze({
-            origin: finiteVector(shot.origin, "launcher.shot.origin"),
+            origin,
+            tip: finiteVector(
+                shot.tip ?? {
+                    x: origin.x + direction.x * shot.traveled,
+                    y: origin.y + direction.y * shot.traveled
+                },
+                "launcher.shot.tip"
+            ),
             direction,
             target: normalizeLauncherTarget(shot.target),
             traveled: shot.traveled,
@@ -100,6 +111,12 @@ export function createOwnerMotionState({
 }) {
     if (typeof isGrounded !== "boolean") throw new Error("isGrounded must be boolean");
     if (typeof rope?.isAttached !== "boolean") throw new Error("rope.isAttached must be boolean");
+    const ropeLength = finiteNonNegative(rope.length, "rope.length");
+    if (rope.isAttached && ropeLength <= 0) throw new Error("attached rope.length must be positive");
+    const attachmentId = rope.attachmentId ?? null;
+    if (rope.isAttached && (typeof attachmentId !== "string" || !attachmentId)) {
+        throw new Error("attached rope.attachmentId must be non-empty");
+    }
     const anchorOwner = ropeAnchorOwner(rope);
     if (!Number.isFinite(angle)) throw new Error("angle must be finite");
     if (!Number.isFinite(angularVelocity)) throw new Error("angularVelocity must be finite");
@@ -119,9 +136,11 @@ export function createOwnerMotionState({
         rope: Object.freeze({
             isAttached: rope.isAttached,
             anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null,
+            attachmentId: rope.isAttached ? attachmentId : null,
             anchorOwnerId: rope.isAttached ? anchorOwner.ownerId : null,
             anchorLocalOffset: rope.isAttached ? anchorOwner.localOffset : null,
-            attachmentOffset: rope.isAttached ? finiteVector(rope.attachmentOffset, "rope.attachmentOffset") : null
+            attachmentOffset: rope.isAttached ? finiteVector(rope.attachmentOffset, "rope.attachmentOffset") : null,
+            length: rope.isAttached ? ropeLength : 0
         }),
         launcher: normalizeLauncher(launcher),
         augmentRuntimeState:
@@ -131,7 +150,7 @@ export function createOwnerMotionState({
     });
 }
 
-export function createOwnerMotionReceipt({ clientTick, accepted, reason, resolution, ropeReleased }) {
+export function createOwnerMotionReceipt({ clientTick, accepted, reason, resolution, ropeReleased, ropeAttachmentId }) {
     if (typeof accepted !== "boolean") throw new Error("accepted must be boolean");
     if (!accepted && (typeof reason !== "string" || reason.length === 0)) {
         throw new Error("rejected owner motion receipt requires a reason");
@@ -142,12 +161,19 @@ export function createOwnerMotionReceipt({ clientTick, accepted, reason, resolut
     if (ropeReleased !== undefined && typeof ropeReleased !== "boolean") {
         throw new Error("ropeReleased must be boolean when provided");
     }
+    if (ropeAttachmentId !== undefined && (typeof ropeAttachmentId !== "string" || !ropeAttachmentId)) {
+        throw new Error("ropeAttachmentId must be non-empty when provided");
+    }
+    if (ropeReleased === true && ropeAttachmentId === undefined) {
+        throw new Error("ropeReleased receipt requires ropeAttachmentId");
+    }
     return Object.freeze({
         clientTick: assertTick(clientTick, "clientTick"),
         accepted,
         ...(reason === undefined ? {} : { reason }),
         ...(resolution === undefined ? {} : { resolution }),
-        ...(ropeReleased === undefined ? {} : { ropeReleased })
+        ...(ropeReleased === undefined ? {} : { ropeReleased }),
+        ...(ropeAttachmentId === undefined ? {} : { ropeAttachmentId })
     });
 }
 

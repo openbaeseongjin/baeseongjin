@@ -464,7 +464,7 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
                     x: 3970,
                     y: -2280
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-04:security-hub-deck",
                 kind: "architecture",
                 oneWay: false

@@ -1358,7 +1358,7 @@ export class RopeShotRenderer {
 
     drawShot(context, shot, player = null, handOffset = ROPE_CONFIG.handOffset) {
         const distance = Math.min(shot.traveled, ropeHookReach());
-        const tip = {
+        const tip = shot.tip ?? {
             x: shot.origin.x + shot.direction.x * distance,
             y: shot.origin.y + shot.direction.y * distance
         };

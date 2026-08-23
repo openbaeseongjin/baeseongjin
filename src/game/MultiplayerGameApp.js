@@ -33,15 +33,24 @@ import {
     bossCameraFocusPlayer,
     localBossStageSnapshot
 } from "./presentation/BossStageLocalView.js";
+import { ropeAnchorState } from "./rope/RopeAttachment.js";
 
-function renderPlayer(state, predicted = null) {
+function ropeAtBossTransform(rope, bossStage) {
+    if (!rope?.isAttached || !rope.anchorOwnerId || !rope.anchorLocalOffset) return rope;
+    const owner = bossStage?.ropeAttachmentActors?.find(({ id }) => id === rope.anchorOwnerId);
+    if (!owner) return rope;
+    return Object.freeze({ ...rope, anchor: ropeAnchorState(owner, rope.anchorLocalOffset).position });
+}
+
+function renderPlayer(state, predicted = null, bossStage = null) {
     const position = predicted?.position ?? state.position;
     const velocity = predicted?.velocity ?? state.velocity;
+    const rope = predicted?.rope ?? state.rope;
     return {
         ...state,
         angle: predicted?.angle ?? state.angle,
         angularVelocity: predicted?.angularVelocity ?? state.angularVelocity,
-        rope: predicted?.rope ?? state.rope,
+        rope: ropeAtBossTransform(rope, bossStage),
         position: new Vector2(position.x, position.y),
         velocity: new Vector2(velocity.x, velocity.y)
     };
@@ -593,11 +602,16 @@ export class MultiplayerGameApp {
         if (!localState) return;
         const base = this.authority.renderSnapshot();
         if (!base) return;
+        const bossStageSnapshot =
+            this.authority.bossStageSnapshot() ??
+            remote.state.bossStage ??
+            remote.state.bossStageRuntime ??
+            remote.state.bossRuntime;
         const predictableProjectiles = this.predictableProjectiles.snapshot();
-        const player = renderPlayer(localState, remote.predicted);
+        const player = renderPlayer(localState, remote.predicted, bossStageSnapshot);
         const otherPlayers = remote.state.players
             .filter(({ id }) => id !== this.authority.playerId)
-            .map((state) => renderPlayer(state));
+            .map((state) => renderPlayer(state, null, bossStageSnapshot));
         const activeCheckpoint =
             base.world.checkpoints.find(({ id }) => id === remote.state.activeCheckpointId) ?? null;
         const activeRespawnAnchor =
@@ -606,11 +620,6 @@ export class MultiplayerGameApp {
             ) ?? null;
         const networkMetrics = { ...this.authority.metrics(), ...this.predictableProjectiles.metrics() };
         const combatFeedback = this.combatFeedback.snapshot();
-        const bossStageSnapshot =
-            this.authority.bossStageSnapshot() ??
-            remote.state.bossStage ??
-            remote.state.bossStageRuntime ??
-            remote.state.bossRuntime;
         const localBossStage = localBossStageSnapshot(bossStageSnapshot, player);
         const bossStagePresentation = createBossStagePresentation(
             localBossStage,
@@ -622,7 +631,7 @@ export class MultiplayerGameApp {
         const renderMetrics = this.renderer.draw({
             ...base,
             player,
-            rope: remote.predicted.rope,
+            rope: player.rope,
             swingDrag: remote.predicted.swingDrag,
             attachmentCandidate: base.attachmentCandidate,
             enemies: remote.state.enemies,

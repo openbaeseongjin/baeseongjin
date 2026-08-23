@@ -45,6 +45,7 @@ export const withRopeableSurface = (Base) =>
                 id: this.id,
                 collision: true,
                 grappleable: true,
+                ropeOccluder: true,
                 vertices,
                 x: Math.min(...xs),
                 y: Math.min(...ys),

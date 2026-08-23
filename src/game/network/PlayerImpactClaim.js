@@ -2,7 +2,7 @@ import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 11;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 12;
 const IMPACT_TYPES = new Set(["rope-cut", "player-hit", "fall-damage"]);
 export const PLAYER_IMPACT_SOURCE_KIND = Object.freeze({ BOSS_HAZARD: "boss-hazard" });
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
@@ -92,6 +92,7 @@ function assertLauncher(value, label) {
         throw new Error(`${label}.shot must be an object or null`);
     }
     assertFiniteVector(value.shot.origin, `${label}.shot.origin`);
+    assertFiniteVector(value.shot.tip, `${label}.shot.tip`);
     assertFiniteVector(value.shot.direction, `${label}.shot.direction`);
     const directionMagnitude = Math.hypot(value.shot.direction.x, value.shot.direction.y);
     if (directionMagnitude <= 0 || Math.abs(directionMagnitude - 1) > LAUNCHER_NUMERIC_TOLERANCE) {
@@ -99,6 +100,7 @@ function assertLauncher(value, label) {
     }
     if (value.shot.target !== null && value.shot.target !== undefined) {
         assertFiniteVector(value.shot.target, `${label}.shot.target`);
+        assertFiniteVector(value.shot.target.anchorVelocity ?? { x: 0, y: 0 }, `${label}.shot.target.anchorVelocity`);
         const attachment = value.shot.target.ropeAttachment ?? null;
         if (attachment !== null) {
             assertId(attachment.ownerId, `${label}.shot.target.ropeAttachment.ownerId`);
@@ -146,6 +148,7 @@ function normalizeImpactRecoveryState(state) {
     assertBoolean(normalized.rope?.isAttached, "outcome.state.rope.isAttached");
     if (normalized.rope.isAttached) {
         assertFiniteVector(normalized.rope.anchor, "outcome.state.rope.anchor");
+        assertId(normalized.rope.attachmentId, "outcome.state.rope.attachmentId");
         const ownerId = normalized.rope.anchorOwnerId ?? null;
         const localOffset = normalized.rope.anchorLocalOffset ?? null;
         if ((ownerId === null) !== (localOffset === null)) {
@@ -163,6 +166,9 @@ function normalizeImpactRecoveryState(state) {
         });
     } else {
         if (normalized.rope.anchor !== null) throw new Error("outcome.state.rope.anchor must be null when detached");
+        if (normalized.rope.attachmentId !== null) {
+            throw new Error("outcome.state.rope.attachmentId must be null when detached");
+        }
         if (normalized.rope.attachmentOffset !== null) {
             throw new Error("outcome.state.rope.attachmentOffset must be null when detached");
         }
@@ -263,6 +269,7 @@ function impactStateProjection(state, { impactType, respawned }) {
         rope: {
             isAttached: state.rope.isAttached,
             anchor: state.rope.isAttached ? quantizedVector(state.rope.anchor, 0.1) : null,
+            attachmentId: state.rope.isAttached ? state.rope.attachmentId : null,
             anchorOwnerId: state.rope.isAttached ? (state.rope.anchorOwnerId ?? null) : null,
             anchorLocalOffset:
                 state.rope.isAttached && state.rope.anchorLocalOffset

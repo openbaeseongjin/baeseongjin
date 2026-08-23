@@ -1,6 +1,8 @@
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
+import { ropeAnchorState } from "./RopeAttachment.js";
 
 export const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
+const ZERO_VECTOR = Object.freeze({ x: 0, y: 0 });
 
 export function hookFlightSeconds(ropeConfig) {
     return ropeHookFlightSeconds(ropeConfig);
@@ -35,8 +37,20 @@ function launchTarget(target) {
     return Object.freeze({
         x: target.x,
         y: target.y,
+        anchorVelocity: Object.freeze({
+            ...finiteVector(target.anchorVelocity ?? ZERO_VECTOR, "launch target anchorVelocity")
+        }),
         ropeAttachment: attachmentTarget(target.ropeAttachment)
     });
+}
+
+function normalizedDirection(from, to, fallback) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const magnitude = Math.hypot(dx, dy);
+    return magnitude > LAUNCHER_NUMERIC_TOLERANCE
+        ? { x: dx / magnitude, y: dy / magnitude }
+        : { x: fallback.x, y: fallback.y };
 }
 
 export class RopeLauncher {
@@ -71,9 +85,11 @@ export class RopeLauncher {
         }
         const magnitude = Math.hypot(direction.x, direction.y);
         if (!Number.isFinite(magnitude) || magnitude <= 0) return false;
+        const normalized = { x: direction.x / magnitude, y: direction.y / magnitude };
         this.shot = {
             origin: { x: origin.x, y: origin.y },
-            direction: { x: direction.x / magnitude, y: direction.y / magnitude },
+            tip: { x: origin.x, y: origin.y },
+            direction: normalized,
             target: launchTarget(target),
             traveled: 0,
             elapsed: 0
@@ -83,11 +99,7 @@ export class RopeLauncher {
 
     tipPosition() {
         if (!this.shot) return null;
-        const distance = Math.min(this.shot.traveled, this.reach);
-        return {
-            x: this.shot.origin.x + this.shot.direction.x * distance,
-            y: this.shot.origin.y + this.shot.direction.y * distance
-        };
+        return { x: this.shot.tip.x, y: this.shot.tip.y };
     }
 
     advance(dt) {
@@ -96,18 +108,19 @@ export class RopeLauncher {
             throw new Error("launcher advance dt must be finite and non-negative");
         }
         this.shot.elapsed += dt;
-        this.shot.traveled = Math.min(this.reach, this.shot.traveled + this.ropeConfig.hookSpeed * dt);
+        const travel = Math.max(0, Math.min(this.reach - this.shot.traveled, this.ropeConfig.hookSpeed * dt));
         if (this.shot.target) {
-            const distance = Math.hypot(
-                this.shot.target.x - this.shot.origin.x,
-                this.shot.target.y - this.shot.origin.y
-            );
-            if (distance <= this.reach + LAUNCHER_NUMERIC_TOLERANCE && this.shot.traveled >= distance) {
+            const distance = Math.hypot(this.shot.target.x - this.shot.tip.x, this.shot.target.y - this.shot.tip.y);
+            this.shot.direction = normalizedDirection(this.shot.tip, this.shot.target, this.shot.direction);
+            if (distance <= travel + LAUNCHER_NUMERIC_TOLERANCE) {
                 const target = this.shot.target;
                 this.shot = null;
                 return Object.freeze({ status: "hit", target: target });
             }
         }
+        this.shot.tip.x += this.shot.direction.x * travel;
+        this.shot.tip.y += this.shot.direction.y * travel;
+        this.shot.traveled += travel;
         if (this.shot.elapsed >= this.flightSeconds) {
             this.shot = null;
             this.startLaunchReload();
@@ -121,12 +134,20 @@ export class RopeLauncher {
         if (typeof resolveAttachmentTarget !== "function") return false;
         const target = resolveAttachmentTarget(this.shot.target.ropeAttachment.ownerId);
         if (!target?.position) return false;
-        finiteVector(target.position, "rope attachment target position");
+        const anchor = ropeAnchorState(target, this.shot.target.ropeAttachment.localAnchor);
+        if (
+            Math.hypot(anchor.position.x - this.shot.origin.x, anchor.position.y - this.shot.origin.y) >
+            this.reach + LAUNCHER_NUMERIC_TOLERANCE
+        ) {
+            return false;
+        }
         this.shot.target = Object.freeze({
-            x: target.position.x,
-            y: target.position.y,
+            x: anchor.position.x,
+            y: anchor.position.y,
+            anchorVelocity: anchor.velocity,
             ropeAttachment: this.shot.target.ropeAttachment
         });
+        this.shot.direction = normalizedDirection(this.shot.tip, this.shot.target, this.shot.direction);
         return true;
     }
 
@@ -161,6 +182,7 @@ export class RopeLauncher {
         return Object.freeze({
             shot: Object.freeze({
                 origin: Object.freeze({ ...this.shot.origin }),
+                tip: Object.freeze({ ...this.shot.tip }),
                 direction: Object.freeze({ ...this.shot.direction }),
                 target: this.shot.target ? this.shot.target : null,
                 traveled: this.shot.traveled,
@@ -182,8 +204,13 @@ export class RopeLauncher {
         if (!snapshot.shot) return;
         const shot = snapshot.shot;
         const origin = shot.origin;
+        const tip = shot.tip ?? {
+            x: origin.x + shot.direction.x * shot.traveled,
+            y: origin.y + shot.direction.y * shot.traveled
+        };
         const direction = shot.direction;
         finiteVector(origin, "launcher shot origin");
+        finiteVector(tip, "launcher shot tip");
         finiteVector(direction, "launcher shot direction");
         const magnitude = Math.hypot(direction.x, direction.y);
         if (magnitude <= 0 || Math.abs(magnitude - 1) > LAUNCHER_NUMERIC_TOLERANCE) {
@@ -206,6 +233,7 @@ export class RopeLauncher {
         }
         this.shot = {
             origin: { x: origin.x, y: origin.y },
+            tip: { x: tip.x, y: tip.y },
             direction: { x: direction.x, y: direction.y },
             target: launchTarget(shot.target),
             traveled: shot.traveled,

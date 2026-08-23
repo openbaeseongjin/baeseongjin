@@ -131,7 +131,7 @@ PC는 기존 우클릭 위치를 Action 방향으로 사용한다. 모바일은 
 - Player command v5: Action intent와 물리 입력 장치의 단조 증가 `interactSequence`를 전송한다. 증강 선택 Confirm은 sampled W 상태 변화가 아니라 선택창이 열린 뒤 발생한 새 W/점프 누름 sequence만 소비한다.
 - Owner motion v4: owner-owned augment/action runtime mirror 추가.
 - Player impact v8: generic selected Augment state와 guard/shield 결과 수렴.
-- World snapshot v13: 모든 Player의 non-null Action state와 공용 Boss 완료 진행을 전송하며 기본 주먹도 charge/recharge snapshot으로 수렴한다. Enemy는 같은 envelope에서 선속도와 collider snapshot을 함께 보낸다.
+- World snapshot v14: 모든 Player의 non-null Action state와 공용 Boss 완료 진행·Boss Rope actor transform을 전송하며 기본 주먹도 charge/recharge snapshot으로 수렴한다. Enemy는 같은 envelope에서 선속도와 collider snapshot을 함께 보낸다.
 - Augment impact v2, Augment offer v1을 사용한다. v2는 속력 기반 충돌 폭발의 공식 피해 검증을 위한 `impactSpeed`를 선택 필드로 추가한다.
 
 ## 반복 수치 규칙
