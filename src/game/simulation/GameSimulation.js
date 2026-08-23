@@ -543,6 +543,14 @@ export class GameSimulation {
                 appliedDamage: 0
             });
         }
+        if (sourcePlayerId && this.bossRuntime.recoveryProtected?.(sourcePlayerId) === true) {
+            return Object.freeze({
+                accepted: true,
+                changed: false,
+                reason: "boss-recovery-protected",
+                appliedDamage: 0
+            });
+        }
         const outcome = this.bossRuntime.applyImpact({ impactId, sourcePlayerId, baseDamage, targetId });
         this.#commitBossEvents();
         if (outcome.completed) {
@@ -994,7 +1002,11 @@ export class GameSimulation {
             const recoveryThreshold = stage.bounds.y + stage.bounds.height + PLAYER_CONFIG.radius;
             for (const player of this.players) {
                 if (player.lifeState !== "active" || player.physics.position.y <= recoveryThreshold) continue;
-                const recoveryPosition = this.bossRuntime.recoverPlayer(player.id, this.#bossWorldOffset());
+                const recoveryPosition = this.bossRuntime.recoverPlayer(
+                    player.id,
+                    this.#bossWorldOffset(),
+                    vectorState(player.physics.position)
+                );
                 if (!recoveryPosition) continue;
                 player.physics.reset(recoveryPosition);
                 player.ropeObject.rope.detach();
@@ -1142,7 +1154,12 @@ export class GameSimulation {
         const outcomes = [];
         for (const hazard of hazards) {
             for (const player of players) {
-                if (player.lifeState !== "active" || player.health <= 0 || player.hitInvulnerabilityRemaining > 0)
+                if (
+                    player.lifeState !== "active" ||
+                    player.health <= 0 ||
+                    player.hitInvulnerabilityRemaining > 0 ||
+                    this.bossRuntime?.recoveryProtected?.(player.id) === true
+                )
                     continue;
                 if (!this.#compositeHazardOverlapsPlayer(hazard, player)) continue;
                 const contactId = `${stage.id}:attempt:${snapshot.attempt}:hazard:${hazard.id}:${player.id}`;

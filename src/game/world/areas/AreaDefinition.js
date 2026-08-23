@@ -33,12 +33,13 @@ export function rectangle(id, x, y, width, height = 32, properties = {}) {
 
 export function grappleTarget(id, x, y, properties = {}) {
     return rectangle(id, x, y, 24, 24, {
-        kind: "grapple-target",
+        kind: "ropeable-surface",
         oneWay: false,
-        collision: false,
-        renderable: false,
         coordinateAnchor: "center",
-        ...properties
+        ...properties,
+        collision: true,
+        renderable: true,
+        grappleable: true
     });
 }
 

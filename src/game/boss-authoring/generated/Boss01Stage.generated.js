@@ -6,30 +6,35 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             {
                 id: "boss-01:strike-anchor-1",
                 role: "swing-attack",
+                surfaceId: "boss-01:strike-anchor-1:hardpoint",
                 x: 880,
                 y: -950
             },
             {
                 id: "boss-01:strike-anchor-2",
                 role: "swing-attack",
+                surfaceId: "boss-01:strike-anchor-2:hardpoint",
                 x: 1685,
                 y: -970
             },
             {
                 id: "boss-01:strike-anchor-3",
                 role: "swing-attack",
+                surfaceId: "boss-01:strike-anchor-3:hardpoint",
                 x: 2595,
                 y: -975
             },
             {
                 id: "boss-01:strike-anchor-4",
                 role: "swing-attack",
+                surfaceId: "boss-01:strike-anchor-4:hardpoint",
                 x: 3715,
                 y: -1005
             },
             {
                 id: "boss-01:strike-anchor-5",
                 role: "swing-attack",
+                surfaceId: "boss-01:strike-anchor-5:hardpoint",
                 x: 4515,
                 y: -1025
             }
@@ -92,6 +97,66 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
                 id: "boss-01:lower-catwalk",
                 kind: "platform",
                 oneWay: true
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 868,
+                    y: -962
+                },
+                grappleable: true,
+                id: "boss-01:strike-anchor-1:hardpoint",
+                kind: "service-hardpoint",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 1673,
+                    y: -982
+                },
+                grappleable: true,
+                id: "boss-01:strike-anchor-2:hardpoint",
+                kind: "service-hardpoint",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 2583,
+                    y: -987
+                },
+                grappleable: true,
+                id: "boss-01:strike-anchor-3:hardpoint",
+                kind: "service-hardpoint",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 3703,
+                    y: -1017
+                },
+                grappleable: true,
+                id: "boss-01:strike-anchor-4:hardpoint",
+                kind: "service-hardpoint",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 4503,
+                    y: -1037
+                },
+                grappleable: true,
+                id: "boss-01:strike-anchor-5:hardpoint",
+                kind: "service-hardpoint",
+                oneWay: false
             }
         ]
     },

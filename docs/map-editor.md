@@ -29,7 +29,7 @@ Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor
 
 Boss의 Arena 경계는 캔버스 드래그와 Inspector X/Y로 이동할 수 있다. 표면·앵커·Recovery·Phase 구역은 데이터형 기본 요소이므로 추가·삭제할 수 있다. 새 Mechanic 종류·Boss 행동·전환 조건처럼 Runtime 코드 Registry가 필요한 개념은 에디터에서 생성하지 않고 코드에 등록된 선택지만 조합한다. 일반 Area Bounds는 원점 고정 크기 계약이므로 위치 입력을 표시하지 않고 너비·높이만 편집한다.
 
-Boss의 기획 Route/흐름 표시는 `MAP-PREVIEW.html`만 소유하며 Runtime·Map Editor에는 표시하거나 저작하지 않는다. `role: swing-attack`만 실제 Runtime grapple target이며 `실게임 요소 → 공격 Rope Anchor`에서 배치·선택한다.
+Boss의 MAP HTML이 catalog의 `mapReferencePath`로 등록되면 `시나리오 비교`가 그 HTML을 실제 Gameplay View의 공간 기준으로 읽기 전용 대조한다. Boss05의 최종 MAP HTML은 발판·Wall Slot·Core·Void·Recovery·탈출의 기준이며, Runtime spec은 이를 축약한 별도 arena를 만들 수 없다. Ropeable은 중심점 Anchor가 아니라 collision surface의 `grappleable: true` capability다. Anchor는 route 설명과 surface ID 참조만 소유하며 별도 non-collision grapple target을 생성하지 않는다.
 
 왼쪽 레이어 목록은 `실게임 요소`, `표시형 오브젝트`, `규칙 / 설정`으로 구분한다. 표시형 오브젝트는 일반 Area의 맵 경계·복구/예상 경로·카메라 구역과 Boss의 Arena 경계·예상 Rope 경로·Recovery·Phase 구역을 포함하며, 실제 게임 오브젝트보다 낮은 선택·표현 우선순위를 가진다.
 

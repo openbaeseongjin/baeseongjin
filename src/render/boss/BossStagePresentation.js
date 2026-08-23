@@ -24,6 +24,16 @@ function freezeWorldObject(object) {
             : null,
         active: object.active !== false,
         position: Object.freeze({ x: finite(object.position?.x), y: finite(object.position?.y) }),
+        ...(object.geometry?.type === "polygon" && Array.isArray(object.geometry.vertices)
+            ? {
+                  geometry: Object.freeze({
+                      type: "polygon",
+                      vertices: Object.freeze(
+                          object.geometry.vertices.map(({ x, y }) => Object.freeze({ x: finite(x), y: finite(y) }))
+                      )
+                  })
+              }
+            : {}),
         ...((object.size ?? object.bounds)
             ? {
                   size: Object.freeze({

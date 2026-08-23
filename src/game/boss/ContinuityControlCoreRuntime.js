@@ -7,7 +7,12 @@ import {
     compositeWorldPoint,
     freezeComposite
 } from "./CompositeBossEncounterRuntime.js";
-import { ropeAttachmentSnapshot } from "../rope/RopeAttachableMixin.js";
+import {
+    BOSS05_CONTROL_ROLE,
+    BOSS05_PULSE_REGION,
+    BOSS05_RECOVERY_ROLE,
+    BOSS_VULNERABILITY_TARGET_ID
+} from "../boss-authoring/BossStageSpec.js";
 
 export const CONTINUITY_CONTROL_STATE = Object.freeze({
     IDLE: "idle",
@@ -21,24 +26,22 @@ export const CONTINUITY_CONTROL_STATE = Object.freeze({
 });
 
 const TARGET = Object.freeze({
-    AUX_A: "boss-05:aux-a:coupling",
-    AUX_B: "boss-05:aux-b:coupling",
-    MAIN: "boss-05:main:coupling",
-    CORE: "boss-05:continuity-core"
+    AUX_A: BOSS_VULNERABILITY_TARGET_ID.AUX_A_COUPLING,
+    AUX_B: BOSS_VULNERABILITY_TARGET_ID.AUX_B_COUPLING,
+    MAIN: BOSS_VULNERABILITY_TARGET_ID.MAIN_COUPLING,
+    CORE: BOSS_VULNERABILITY_TARGET_ID.CONTINUITY_CORE
 });
 const TARGET_BY_PHASE = Object.freeze({ 1: TARGET.AUX_A, 2: TARGET.AUX_B, 3: TARGET.MAIN, 4: TARGET.CORE });
-const WALL = Object.freeze({ A: "a", B: "b", MAIN: "main" });
+const WALL = Object.freeze({
+    A: BOSS05_CONTROL_ROLE.AUX_A,
+    B: BOSS05_CONTROL_ROLE.AUX_B,
+    MAIN: BOSS05_CONTROL_ROLE.MAIN
+});
 const WALL_BY_PHASE = Object.freeze({ 1: WALL.A, 2: WALL.B, 3: WALL.MAIN });
-const WALL_X = Object.freeze({ [WALL.A]: 2110, [WALL.B]: 3160, [WALL.MAIN]: 2600 });
-const WALL_WIDTH = 180;
-const WALL_CEILING_Y = -2460;
-const WALL_LOCK_Y = -1280;
-const CORE_POSITION = Object.freeze({ x: 2600, y: -450 });
-const COUPLING_POSITION = Object.freeze({
-    [TARGET.AUX_A]: Object.freeze({ x: 1800, y: -1180 }),
-    [TARGET.AUX_B]: Object.freeze({ x: 3400, y: -1180 }),
-    [TARGET.MAIN]: Object.freeze({ x: 2600, y: -980 }),
-    [TARGET.CORE]: CORE_POSITION
+const PULSE_VARIANTS = Object.freeze({
+    2: Object.freeze([BOSS05_PULSE_REGION.INNER, BOSS05_PULSE_REGION.OUTER]),
+    P3_A: Object.freeze([BOSS05_PULSE_REGION.LEFT, BOSS05_PULSE_REGION.RIGHT]),
+    P3_B: Object.freeze([BOSS05_PULSE_REGION.UPPER, BOSS05_PULSE_REGION.LOWER])
 });
 const DEFAULT = Object.freeze({
     warningSeconds: 0.8,
@@ -63,6 +66,16 @@ const OBJECT_KIND = Object.freeze({
 function positive(value, fallback) {
     return Number.isFinite(value) && value > 0 ? value : fallback;
 }
+
+function required(value, label) {
+    if (!value) throw new Error(`Boss05 missing ${label}`);
+    return value;
+}
+
+function boundsCenter(bounds) {
+    return Object.freeze({ x: bounds.x + bounds.width * 0.5, y: bounds.y + bounds.height * 0.5 });
+}
+
 function freezeBounds(bounds) {
     return freezeComposite({ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height });
 }
@@ -88,18 +101,71 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
     }
 
     #configuration() {
-        const parameters = (this.definition.arena.mechanics ?? []).map(({ parameters: value }) => value ?? {});
-        const wallParameters = parameters.find(({ role }) => role === "aux-a") ?? {};
-        const mainParameters = parameters.find(({ role }) => role === "main") ?? {};
-        const coreParameters = parameters.find(({ role }) => role === "core") ?? {};
+        const mechanicsByRole = Object.freeze(
+            Object.fromEntries(
+                (this.definition.arena.mechanics ?? [])
+                    .filter(({ parameters }) => parameters?.role)
+                    .map((mechanic) => [mechanic.parameters.role, mechanic])
+            )
+        );
+        const wall = (role, targetId) => {
+            const mechanic = required(mechanicsByRole[role], `wall mechanic ${role}`);
+            const bounds = required(mechanic.bounds, `wall bounds ${role}`);
+            return freezeComposite({
+                id: role,
+                targetId,
+                actuatorPosition: freezeComposite(mechanic.position),
+                bounds: freezeBounds(bounds),
+                x: boundsCenter(bounds).x,
+                width: bounds.width,
+                ceilingY: bounds.y,
+                lockY: bounds.y + bounds.height,
+                warningSeconds: positive(mechanic.parameters.warningSeconds, DEFAULT.warningSeconds),
+                moveSeconds: positive(mechanic.parameters.moveSeconds, DEFAULT.moveSeconds),
+                exposureSeconds: positive(mechanic.parameters.exposureSeconds, DEFAULT.exposureSeconds),
+                damage: positive(mechanic.parameters.damage, DEFAULT.wallDamage),
+                slots: Object.freeze(
+                    (mechanic.parameters.slots ?? []).map((slot) =>
+                        freezeComposite({ id: slot.id, bounds: freezeBounds(slot.bounds) })
+                    )
+                )
+            });
+        };
+        const wallById = Object.freeze({
+            [WALL.A]: wall(WALL.A, TARGET.AUX_A),
+            [WALL.B]: wall(WALL.B, TARGET.AUX_B),
+            [WALL.MAIN]: wall(WALL.MAIN, TARGET.MAIN)
+        });
+        const coreMechanic = required(mechanicsByRole[BOSS05_CONTROL_ROLE.CORE], "core mechanic");
+        const recoveryPointByRole = Object.freeze(
+            Object.fromEntries(
+                (this.definition.arena.recoveryPoints ?? [])
+                    .filter(({ role }) => role)
+                    .map((point) => [point.role, freezeComposite(point)])
+            )
+        );
+        const pulseBounds = Object.freeze(
+            Object.fromEntries(
+                Object.entries(coreMechanic.parameters.pulseRegions ?? {}).map(([id, bounds]) => [
+                    id,
+                    freezeBounds(bounds)
+                ])
+            )
+        );
         return freezeComposite({
-            warningSeconds: positive(wallParameters.warningSeconds, DEFAULT.warningSeconds),
-            moveSeconds: positive(wallParameters.moveSeconds, DEFAULT.moveSeconds),
-            exposureSeconds: positive(wallParameters.exposureSeconds, DEFAULT.exposureSeconds),
-            mainExposureSeconds: positive(mainParameters.exposureSeconds, DEFAULT.exposureSeconds),
-            coreExposureSeconds: positive(coreParameters.exposureSeconds, DEFAULT.exposureSeconds),
-            wallDamage: positive(wallParameters.damage, DEFAULT.wallDamage),
-            pulseDamage: positive(mainParameters.damage, DEFAULT.pulseDamage)
+            wallById,
+            pulseBounds,
+            recoveryPointByRole,
+            corePosition: freezeComposite(this.definition.arena.boss.position),
+            coreSize: freezeBounds(this.definition.arena.boss.collider),
+            coreExposureSeconds: positive(coreMechanic.parameters.exposureSeconds, DEFAULT.exposureSeconds),
+            pulseDamage: positive(wallById[WALL.MAIN].damage, DEFAULT.pulseDamage),
+            targetPositionById: freezeComposite({
+                [TARGET.AUX_A]: wallById[WALL.A].actuatorPosition,
+                [TARGET.AUX_B]: wallById[WALL.B].actuatorPosition,
+                [TARGET.MAIN]: wallById[WALL.MAIN].actuatorPosition,
+                [TARGET.CORE]: this.definition.arena.boss.position
+            })
         });
     }
 
@@ -131,8 +197,10 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
         this.pulse = null;
         this.hazardSequence = 0;
         this.walls = Object.create(null);
-        for (const wall of Object.values(WALL))
-            this.walls[wall] = { id: wall, state: "stored", y: WALL_CEILING_Y, shutter: "closed" };
+        for (const wall of Object.values(WALL)) {
+            const configuration = this.config.wallById[wall];
+            this.walls[wall] = { id: wall, state: "stored", y: configuration.ceilingY, shutter: "closed" };
+        }
         for (const playerId of this.scalingRoster) {
             this.recoveries[playerId] = {
                 active: false,
@@ -148,6 +216,9 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
     }
     #currentWall() {
         return WALL_BY_PHASE[this.phase] ?? null;
+    }
+    #activeWallMoveSeconds() {
+        return Math.max(...this.activeWalls.map((id) => this.config.wallById[id].moveSeconds));
     }
     #zoneForPhase() {
         const phaseId = this.definition.phases[this.phase - 1]?.id;
@@ -170,15 +241,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
         return players.filter(({ position }) => compositeInsideBounds(position, zone));
     }
     #pulseBounds() {
-        if (this.phase === 2)
-            return this.pulse?.variant === "inner"
-                ? { x: 2200, y: -2000, width: 800, height: 1450 }
-                : { x: 900, y: -2440, width: 3400, height: 500 };
-        if (this.phase === 3)
-            return this.pulse?.variant === "left"
-                ? { x: 2100, y: -2100, width: 500, height: 1400 }
-                : { x: 2600, y: -2100, width: 500, height: 1400 };
-        return { x: 2100, y: -1700, width: 1000, height: 420 };
+        return this.config.pulseBounds[this.pulse?.variant] ?? null;
     }
     #startCycle() {
         const wall = this.#currentWall();
@@ -189,21 +252,21 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
             this.walls[activeWall].shutter = "warning";
         }
         this.state = CONTINUITY_CONTROL_STATE.WARNING;
-        this.timer = this.config.warningSeconds;
+        this.timer = Math.max(...this.activeWalls.map((id) => this.config.wallById[id].warningSeconds));
         this.emit("boss-control-signal", { phase: this.phase, walls: this.activeWalls, targetId: this.#targetId() });
         this.emit("boss-attack-telegraphed", { phase: this.phase, kind: "partition-wall", walls: this.activeWalls });
     }
     #startPulse() {
-        const variant =
+        const variants =
             this.phase === 2
-                ? this.hazardSequence % 2 === 0
-                    ? "inner"
-                    : "outer"
+                ? PULSE_VARIANTS[2]
                 : this.phase === 3
-                  ? this.hazardSequence % 2 === 0
-                      ? "left"
-                      : "right"
-                  : "none";
+                  ? this.emergencyPending
+                      ? PULSE_VARIANTS.P3_A
+                      : PULSE_VARIANTS.P3_B
+                  : Object.freeze([]);
+        const variant = variants[this.hazardSequence % variants.length] ?? null;
+        if (!variant) return;
         this.pulse = { state: "warning", variant };
         this.hazardSequence += 1;
         this.emit("boss-attack-telegraphed", { phase: this.phase, kind: "control-pulse", variant });
@@ -222,7 +285,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
         const wall = this.#currentWall();
         if (this.state === CONTINUITY_CONTROL_STATE.WARNING && this.timer <= 0) {
             this.state = CONTINUITY_CONTROL_STATE.DESCENT;
-            this.timer = this.config.moveSeconds;
+            this.timer = Math.max(...this.activeWalls.map((id) => this.config.wallById[id].moveSeconds));
             for (const activeWall of this.activeWalls) {
                 this.walls[activeWall].state = "descending";
                 this.walls[activeWall].shutter = "open";
@@ -231,23 +294,31 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
             return;
         }
         if (this.state === CONTINUITY_CONTROL_STATE.DESCENT) {
-            const progress = Math.max(0, 1 - this.timer / this.config.moveSeconds);
+            const progress = Math.max(0, 1 - this.timer / this.#activeWallMoveSeconds());
             for (const activeWall of this.activeWalls) {
-                this.walls[activeWall].y = WALL_CEILING_Y + (WALL_LOCK_Y - WALL_CEILING_Y) * progress;
+                const configuration = this.config.wallById[activeWall];
+                this.walls[activeWall].y =
+                    configuration.ceilingY + (configuration.lockY - configuration.ceilingY) * progress;
             }
             if (this.timer <= 0) {
                 this.state = CONTINUITY_CONTROL_STATE.LOCKED;
                 for (const activeWall of this.activeWalls) {
                     this.walls[activeWall].state = "locked";
-                    this.walls[activeWall].y = WALL_LOCK_Y;
+                    this.walls[activeWall].y = this.config.wallById[activeWall].lockY;
                 }
-                this.timer = DEFAULT.pulseWarningSeconds + DEFAULT.pulseSeconds;
-                this.pulse.state = "active";
-                this.emit("boss-attack-started", {
-                    phase: this.phase,
-                    kind: "control-pulse",
-                    sequence: this.hazardSequence
-                });
+                if (this.pulse) {
+                    this.timer = DEFAULT.pulseWarningSeconds + DEFAULT.pulseSeconds;
+                    this.pulse.state = "active";
+                    this.emit("boss-attack-started", {
+                        phase: this.phase,
+                        kind: "control-pulse",
+                        sequence: this.hazardSequence
+                    });
+                } else {
+                    this.state = CONTINUITY_CONTROL_STATE.COUPLING_OPEN;
+                    this.timer = this.config.wallById[wall].exposureSeconds;
+                    this.emit("boss-weakpoint-opened", { phase: this.phase, targetId: this.#targetId() });
+                }
             }
             return;
         }
@@ -256,33 +327,35 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
             if (this.phase === 3 && this.emergencyPending) {
                 this.emergencyPending = false;
                 this.state = CONTINUITY_CONTROL_STATE.RISE;
-                this.timer = this.config.moveSeconds;
+                this.timer = Math.max(...this.activeWalls.map((id) => this.config.wallById[id].moveSeconds));
                 for (const activeWall of this.activeWalls) this.walls[activeWall].state = "rising";
             } else {
                 this.state = CONTINUITY_CONTROL_STATE.COUPLING_OPEN;
-                this.timer = this.phase === 3 ? this.config.mainExposureSeconds : this.config.exposureSeconds;
+                this.timer = this.config.wallById[wall].exposureSeconds;
                 this.emit("boss-weakpoint-opened", { phase: this.phase, targetId: this.#targetId() });
             }
             return;
         }
         if (this.state === CONTINUITY_CONTROL_STATE.COUPLING_OPEN && this.timer <= 0) {
             this.state = CONTINUITY_CONTROL_STATE.RISE;
-            this.timer = this.config.moveSeconds;
+            this.timer = Math.max(...this.activeWalls.map((id) => this.config.wallById[id].moveSeconds));
             for (const activeWall of this.activeWalls) this.walls[activeWall].state = "rising";
             this.emit("boss-weakpoint-closed", { phase: this.phase, targetId: this.#targetId() });
             return;
         }
         if (this.state === CONTINUITY_CONTROL_STATE.RISE) {
-            const progress = Math.max(0, 1 - this.timer / this.config.moveSeconds);
+            const progress = Math.max(0, 1 - this.timer / this.#activeWallMoveSeconds());
             for (const activeWall of this.activeWalls) {
-                this.walls[activeWall].y = WALL_LOCK_Y + (WALL_CEILING_Y - WALL_LOCK_Y) * progress;
+                const configuration = this.config.wallById[activeWall];
+                this.walls[activeWall].y =
+                    configuration.lockY + (configuration.ceilingY - configuration.lockY) * progress;
             }
             if (this.timer <= 0) {
                 for (const activeWall of this.activeWalls) {
                     this.walls[activeWall] = {
                         ...this.walls[activeWall],
                         state: "stored",
-                        y: WALL_CEILING_Y,
+                        y: this.config.wallById[activeWall].ceilingY,
                         shutter: "closed"
                     };
                 }
@@ -300,7 +373,15 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
     advance(dt, context = {}) {
         if (this.status !== "active" || !Number.isFinite(dt) || dt <= 0)
             return freezeComposite({ accepted: this.status === "active", changed: false });
-        this.#advanceCore(dt, this.#localPlayers(context));
+        const players = this.#localPlayers(context);
+        const zone = this.#zoneForPhase();
+        for (const player of players) {
+            const recovery = this.recoveries[player.id];
+            if (!recovery?.active || !compositeInsideBounds(player.position, zone)) continue;
+            this.recoveries[player.id] = { ...recovery, active: false, protection: false };
+            this.emit("boss-player-recovery-completed", { playerId: player.id, targetCell: recovery.targetCell });
+        }
+        this.#advanceCore(dt, players);
         return freezeComposite({ accepted: true, changed: true });
     }
     #advancePhase() {
@@ -314,7 +395,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
         this.pendingPhase = this.phase + 1;
         this.pulse = null;
         this.state = CONTINUITY_CONTROL_STATE.RISE;
-        this.timer = this.config.moveSeconds;
+        this.timer = Math.max(...this.activeWalls.map((id) => this.config.wallById[id].moveSeconds));
         for (const activeWall of this.activeWalls) this.walls[activeWall].state = "rising";
         this.emit("boss-phase-completed", { completedPhase: this.phase, nextPhase: this.pendingPhase });
         return false;
@@ -396,7 +477,10 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
             id: targetId,
             impactTargetKind: "boss",
             active: this.status === "active" && targetId === currentTarget && exposed,
-            position: compositeWorldPoint(COUPLING_POSITION[targetId] ?? CORE_POSITION, worldOffset),
+            position: compositeWorldPoint(
+                this.config.targetPositionById[targetId] ?? this.config.corePosition,
+                worldOffset
+            ),
             radius: DEFAULT.targetRadius,
             health: this.phaseHealth[healthIndex] ?? 0,
             maxHealth: this.scaledHealth.phaseHealths[healthIndex] ?? 0,
@@ -413,8 +497,8 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                 id: "boss-05:continuity-core",
                 kind: OBJECT_KIND.CORE,
                 variant: "continuity-core",
-                position: compositeWorldPoint(CORE_POSITION, worldOffset),
-                size: { width: 320, height: 300 },
+                position: compositeWorldPoint(this.config.corePosition, worldOffset),
+                size: { width: this.config.coreSize.width, height: this.config.coreSize.height },
                 state:
                     this.state === CONTINUITY_CONTROL_STATE.CONTROL_LOST
                         ? "disabled"
@@ -425,13 +509,14 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                 ropeAttachable: true
             }
         ];
-        for (const [wall, x] of Object.entries(WALL_X)) {
+        for (const wall of Object.values(WALL)) {
+            const configuration = this.config.wallById[wall];
             const state = this.walls[wall];
             objects.push({
                 id: `boss-05:${wall}:actuator`,
                 kind: OBJECT_KIND.ACTUATOR,
                 variant: wall,
-                position: compositeWorldPoint({ x, y: -1180 }, worldOffset),
+                position: compositeWorldPoint(configuration.actuatorPosition, worldOffset),
                 size: { width: 180, height: 180 },
                 state: this.#currentWall() === wall ? this.state : "idle",
                 active: true
@@ -440,21 +525,23 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                 id: `boss-05:${wall}:wall`,
                 kind: OBJECT_KIND.WALL,
                 variant: wall,
-                position: compositeWorldPoint({ x, y: state.y }, worldOffset),
-                size: { width: WALL_WIDTH, height: Math.max(1, WALL_LOCK_Y - state.y) },
+                position: compositeWorldPoint({ x: configuration.x, y: state.y }, worldOffset),
+                size: { width: configuration.width, height: Math.max(1, configuration.lockY - state.y) },
                 state: state.state,
                 active: state.state !== "stored",
                 ropeAttachable: state.state !== "stored"
             });
-            objects.push({
-                id: `boss-05:${wall}:shutter`,
-                kind: OBJECT_KIND.SHUTTER,
-                variant: wall,
-                position: compositeWorldPoint({ x, y: -1240 }, worldOffset),
-                size: { width: 220, height: 80 },
-                state: state.shutter,
-                active: true
-            });
+            for (const slot of configuration.slots) {
+                objects.push({
+                    id: `boss-05:${wall}:shutter:${slot.id}`,
+                    kind: OBJECT_KIND.SHUTTER,
+                    variant: wall,
+                    position: compositeWorldPoint(boundsCenter(slot.bounds), worldOffset),
+                    size: { width: slot.bounds.width, height: slot.bounds.height },
+                    state: state.shutter,
+                    active: true
+                });
+            }
         }
         for (const targetId of Object.values(TARGET)) {
             const active =
@@ -471,7 +558,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                         : targetId === TARGET.MAIN
                           ? "main-coupling"
                           : "aux-coupling",
-                position: compositeWorldPoint(COUPLING_POSITION[targetId], worldOffset),
+                position: compositeWorldPoint(this.config.targetPositionById[targetId], worldOffset),
                 size: { width: 112, height: 112 },
                 state: active ? "exposed" : "secured",
                 active: true
@@ -479,6 +566,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
         }
         if (this.pulse) {
             const bounds = this.#pulseBounds();
+            if (!bounds) return Object.freeze(objects.map((object) => freezeComposite(object)));
             objects.push({
                 id: "boss-05:control-pulse",
                 kind: OBJECT_KIND.PULSE,
@@ -511,6 +599,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
         const hazards = [];
         if (this.pulse?.state === "active") {
             const bounds = this.#pulseBounds();
+            if (!bounds) return Object.freeze([]);
             hazards.push({
                 id: `${this.definition.id}:pulse:${this.hazardSequence}`,
                 kind: "control-pulse",
@@ -531,12 +620,12 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                 kind: "partition-wall",
                 sequence: this.hazardSequence,
                 bounds: freezeBounds({
-                    x: WALL_X[wall] - WALL_WIDTH * 0.5 + worldOffset.x,
+                    x: this.config.wallById[wall].x - this.config.wallById[wall].width * 0.5 + worldOffset.x,
                     y: this.walls[wall].y + worldOffset.y,
-                    width: WALL_WIDTH,
-                    height: Math.max(1, WALL_LOCK_Y - this.walls[wall].y)
+                    width: this.config.wallById[wall].width,
+                    height: Math.max(1, this.config.wallById[wall].lockY - this.walls[wall].y)
                 }),
-                damage: this.config.wallDamage
+                damage: this.config.wallById[wall].damage
             });
         }
         return Object.freeze(hazards.map((hazard) => freezeComposite(hazard)));
@@ -544,12 +633,44 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
     dynamicCollisionSurfaces(worldOffset = { x: 0, y: 0 }) {
         const surfaces = [];
         for (const [wall, state] of Object.entries(this.walls)) {
-            if (state.state === "stored") continue;
+            const configuration = this.config.wallById[wall];
+            if (state.state === "stored") {
+                for (const slot of configuration.slots) {
+                    const bounds = slot.bounds;
+                    surfaces.push(
+                        freezeComposite({
+                            id: `${this.definition.id}:shutter:${wall}:${slot.id}`,
+                            kind: "slot-shutter",
+                            x: bounds.x + worldOffset.x,
+                            y: bounds.y + worldOffset.y,
+                            width: bounds.width,
+                            height: bounds.height,
+                            topY: bounds.y + worldOffset.y,
+                            position: { x: bounds.x + bounds.width * 0.5 + worldOffset.x, y: bounds.y + worldOffset.y },
+                            vertices: [
+                                { x: bounds.x + worldOffset.x, y: bounds.y + worldOffset.y },
+                                { x: bounds.x + bounds.width + worldOffset.x, y: bounds.y + worldOffset.y },
+                                {
+                                    x: bounds.x + bounds.width + worldOffset.x,
+                                    y: bounds.y + bounds.height + worldOffset.y
+                                },
+                                { x: bounds.x + worldOffset.x, y: bounds.y + bounds.height + worldOffset.y }
+                            ],
+                            oneWay: true,
+                            grappleable: true,
+                            ropeOccluder: false,
+                            projectileOccluder: false,
+                            state: state.shutter
+                        })
+                    );
+                }
+                continue;
+            }
             const bounds = {
-                x: WALL_X[wall] - WALL_WIDTH * 0.5 + worldOffset.x,
+                x: configuration.x - configuration.width * 0.5 + worldOffset.x,
                 y: state.y + worldOffset.y,
-                width: WALL_WIDTH,
-                height: Math.max(1, WALL_LOCK_Y - state.y)
+                width: configuration.width,
+                height: Math.max(1, configuration.lockY - state.y)
             };
             surfaces.push(
                 freezeComposite({
@@ -580,47 +701,35 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
     ropeCutSurfaces(worldOffset = { x: 0, y: 0 }) {
         return Object.freeze(this.dynamicCollisionSurfaces(worldOffset).filter(({ state }) => state === "descending"));
     }
-    ropeAttachmentActors(worldOffset = { x: 0, y: 0 }) {
-        const actors = [
-            Object.freeze({
-                id: "boss-05:continuity-core",
-                ropeAttachment: ropeAttachmentSnapshot({
-                    ownerId: "boss-05:continuity-core",
-                    position: CORE_POSITION,
-                    worldOffset
-                })
-            })
-        ];
-        for (const [wall, state] of Object.entries(this.walls)) {
-            if (state.state === "stored") continue;
-            const ownerId = `${this.definition.id}:partition:${wall}`;
-            actors.push(
-                Object.freeze({
-                    id: ownerId,
-                    ropeAttachment: ropeAttachmentSnapshot({
-                        ownerId,
-                        position: { x: WALL_X[wall], y: state.y + (WALL_LOCK_Y - state.y) * 0.5 },
-                        worldOffset
-                    })
-                })
-            );
-        }
-        return Object.freeze(actors);
+    ropeAttachmentActors() {
+        return Object.freeze([]);
     }
     collisionActors() {
         return Object.freeze([]);
     }
-    recoverPlayer(playerId, worldOffset = { x: 0, y: 0 }) {
+    recoveryProtected(playerId) {
+        return this.recoveries[playerId]?.protection === true;
+    }
+    recoverPlayer(playerId, worldOffset = { x: 0, y: 0 }, playerPosition = null) {
         if (this.status !== "active" || typeof playerId !== "string") return null;
-        const targetCell = this.phase <= 2 ? "entry" : "main";
+        const localPosition = playerPosition ? compositeLocalPoint(playerPosition, worldOffset) : null;
+        const targetCell =
+            this.phase <= 2
+                ? BOSS05_RECOVERY_ROLE.ENTRY
+                : this.phase === 3 && !this.emergencyPending
+                  ? localPosition?.x < this.config.wallById[WALL.MAIN].x
+                      ? BOSS05_RECOVERY_ROLE.MAIN_LEFT
+                      : BOSS05_RECOVERY_ROLE.MAIN_RIGHT
+                  : BOSS05_RECOVERY_ROLE.MAIN;
+        const point = required(this.config.recoveryPointByRole[targetCell], `recovery point ${targetCell}`);
         this.recoveries[playerId] = { active: true, reason: "void-fall", targetCell, protection: true };
-        const local = targetCell === "entry" ? { x: 2600, y: -220 } : { x: 2600, y: -1080 };
         this.emit("boss-player-recovered", { playerId, reason: "void-fall", targetCell });
-        return compositeWorldPoint(local, worldOffset);
+        return compositeWorldPoint(point, worldOffset);
     }
     respawnPosition(worldOffset = { x: 0, y: 0 }) {
+        const role = this.phase <= 2 ? BOSS05_RECOVERY_ROLE.ENTRY : BOSS05_RECOVERY_ROLE.MAIN;
         return compositeWorldPoint(
-            this.phase <= 1 ? { x: 2600, y: -220 } : this.phase <= 2 ? { x: 2600, y: -820 } : { x: 2600, y: -1080 },
+            required(this.config.recoveryPointByRole[role], `recovery point ${role}`),
             worldOffset
         );
     }

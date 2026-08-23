@@ -60,19 +60,6 @@ export function collectBossStageEditorEntities(spec) {
             })
         );
     }
-    for (const [index, anchor] of spec.arena.anchors.entries()) {
-        if (anchor.role !== BOSS_ANCHOR_ROLE.SWING_ATTACK) continue;
-        result.push(
-            entity({
-                domain: "combatAnchors",
-                id: anchor.id,
-                kind: "swing-anchor",
-                point: anchor,
-                path: `/arena/anchors/${index}`,
-                interactionPriority: 0
-            })
-        );
-    }
     for (const [index, point] of spec.arena.recoveryPoints.entries()) {
         result.push(
             entity({
@@ -131,10 +118,6 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
         const surface = next.arena.surfaces.find(({ id }) => id === selected.id);
         if (!surface) throw new TypeError("boss-editor-entity-not-found");
         move(surface.bounds);
-    } else if (selected.domain === "combatAnchors") {
-        const anchor = next.arena.anchors.find(({ id }) => id === selected.id);
-        if (!anchor) throw new TypeError("boss-editor-entity-not-found");
-        move(anchor);
     } else if (selected.domain === "recovery") {
         const point = next.arena.recoveryPoints.find(({ id }) => id === selected.id);
         if (!point) throw new TypeError("boss-editor-entity-not-found");
@@ -151,4 +134,3 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
     } else throw new TypeError("boss-editor-entity-not-movable");
     return next;
 }
-import { BOSS_ANCHOR_ROLE } from "../BossStageSpec.js";

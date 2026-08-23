@@ -10,8 +10,8 @@ import {
 } from "./CompositeBossEncounterRuntime.js";
 import { KinematicPhysicsBody } from "../physics/KinematicPhysicsBody.js";
 import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
-import { CircleCollider } from "../physics/colliders/CircleCollider.js";
-import { ropeAttachmentSnapshot } from "../rope/RopeAttachableMixin.js";
+import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
+import { boss04GuardGeometry } from "./Boss04GuardGeometry.js";
 
 export const RESIDENT_SECURITY_SYSTEM_STATE = Object.freeze({
     DORMANT: "dormant",
@@ -54,10 +54,6 @@ const START_POSITION = Object.freeze({
     [ROLE.GUARD_A]: Object.freeze({ x: 920, y: -980 }),
     [ROLE.GUARD_B]: Object.freeze({ x: 2600, y: -1180 }),
     [ROLE.HUB]: Object.freeze({ x: 4380, y: -1740 })
-});
-const GUARD_SIZE = Object.freeze({
-    [ROLE.GUARD_A]: Object.freeze({ width: 240, height: 150 }),
-    [ROLE.GUARD_B]: Object.freeze({ width: 260, height: 140 })
 });
 const CORE_SIZE = Object.freeze({ width: 300, height: 280 });
 const DEFAULT_CONFIG = Object.freeze({
@@ -134,9 +130,9 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                         id: `boss-04:${role}:collision`,
                         actorKind: PHYSICS_ACTOR_KIND.BOSS,
                         position: this.guard[role].position,
-                        collider: new CircleCollider({ radius: DEFAULT_CONFIG.bodyRadius }),
+                        collider: new PolygonCollider({ vertices: boss04GuardGeometry(role) }),
                         canGroundActors: true,
-                        ropeAttachment: true
+                        ropeAttachment: false
                     })
             )
         );
@@ -626,7 +622,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
 
     presentationObjects(worldOffset = { x: 0, y: 0 }) {
         const objects = [];
-        for (const role of [ROLE.GUARD_A, ROLE.GUARD_B]) {
+        for (const [index, role] of [ROLE.GUARD_A, ROLE.GUARD_B].entries()) {
             const guard = this.guard[role];
             if (guard.state === RESIDENT_SECURITY_SYSTEM_STATE.DEAD) continue;
             objects.push({
@@ -634,11 +630,11 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                 kind: role === ROLE.GUARD_A ? OBJECT_KIND.GUARD_A : OBJECT_KIND.GUARD_B,
                 variant: role,
                 position: compositeWorldPoint(guard.position, worldOffset),
-                size: GUARD_SIZE[role],
+                geometry: this.guardBodies[index].collider.snapshot(),
                 state: guard.state,
                 active: true,
-                physicsBody: false,
-                ropeAttachable: true
+                physicsBody: true,
+                ropeAttachable: false
             });
             const weakpoint = guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY;
             objects.push({
@@ -794,17 +790,8 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
         );
     }
 
-    ropeAttachmentActors(worldOffset = { x: 0, y: 0 }) {
-        return Object.freeze([
-            Object.freeze({
-                id: "boss-04:security-hub",
-                ropeAttachment: ropeAttachmentSnapshot({
-                    ownerId: "boss-04:security-hub",
-                    position: this.hub.position,
-                    worldOffset
-                })
-            })
-        ]);
+    ropeAttachmentActors() {
+        return Object.freeze([]);
     }
 
     respawnPosition(worldOffset = { x: 0, y: 0 }) {

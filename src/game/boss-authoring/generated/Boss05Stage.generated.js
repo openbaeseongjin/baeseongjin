@@ -4,195 +4,277 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
     arena: {
         anchors: [
             {
-                id: "boss-05:entry",
+                id: "boss-05:entry-hardpoint",
+                role: "swing-attack",
+                surfaceId: "boss-05:entry-deck",
                 x: 2600,
-                y: -160
+                y: -280
+            },
+            {
+                id: "boss-05:left-0",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-recovery-deck",
+                x: 2280,
+                y: -390
             },
             {
                 id: "boss-05:left-1",
-                x: 2300,
-                y: -420
+                role: "swing-attack",
+                surfaceId: "boss-05:left-recovery-deck",
+                x: 1940,
+                y: -480
             },
             {
                 id: "boss-05:left-2",
-                x: 1980,
+                role: "swing-attack",
+                surfaceId: "boss-05:left-bottom-outer",
+                x: 1620,
                 y: -610
-            },
-            {
-                id: "boss-05:a-bridge-1",
-                x: 1800,
-                y: -900
-            },
-            {
-                id: "boss-05:a-bridge-2",
-                x: 1650,
-                y: -1080
-            },
-            {
-                id: "boss-05:a-strike",
-                x: 1500,
-                y: -1230
             },
             {
                 id: "boss-05:left-3",
-                x: 1750,
-                y: -1420
+                role: "swing-attack",
+                surfaceId: "boss-05:left-mid",
+                x: 1360,
+                y: -820
             },
             {
-                id: "boss-05:a-cross-1",
-                x: 2050,
-                y: -1200
+                id: "boss-05:left-4",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-mid",
+                x: 1220,
+                y: -1120
             },
             {
-                id: "boss-05:a-cross-2",
-                x: 2300,
-                y: -950
+                id: "boss-05:left-5",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-upper-outer",
+                x: 1340,
+                y: -1430
             },
             {
-                id: "boss-05:cross",
-                x: 2600,
-                y: -760
+                id: "boss-05:a-strike",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-upper-outer",
+                x: 1500,
+                y: -1570
             },
             {
-                id: "boss-05:right-1",
-                x: 2900,
-                y: -420
+                id: "boss-05:left-6",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-top-outer",
+                x: 1570,
+                y: -1690
             },
             {
-                id: "boss-05:right-2",
-                x: 3220,
-                y: -610
+                id: "boss-05:left-7",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-top-outer",
+                x: 1870,
+                y: -1890
             },
             {
-                id: "boss-05:b-bridge-1",
-                x: 3400,
-                y: -900
-            },
-            {
-                id: "boss-05:b-bridge-2",
-                x: 3550,
-                y: -1080
-            },
-            {
-                id: "boss-05:b-strike",
-                x: 3700,
-                y: -1230
-            },
-            {
-                id: "boss-05:right-3",
-                x: 3450,
-                y: -1420
-            },
-            {
-                id: "boss-05:b-cross-1",
-                x: 3150,
-                y: -1200
-            },
-            {
-                id: "boss-05:b-cross-2",
-                x: 2900,
-                y: -950
-            },
-            {
-                id: "boss-05:p3-bridge",
-                x: 2600,
-                y: -900
-            },
-            {
-                id: "boss-05:p3-low-l",
-                x: 2380,
-                y: -1030
-            },
-            {
-                id: "boss-05:p3-low-r",
-                x: 2820,
-                y: -1030
-            },
-            {
-                id: "boss-05:main",
-                x: 2600,
-                y: -980
+                id: "boss-05:left-8",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-core-bridge",
+                x: 2210,
+                y: -2000
             },
             {
                 id: "boss-05:top-l",
+                role: "swing-attack",
+                surfaceId: "boss-05:core-recess-left",
                 x: 2380,
-                y: -650
+                y: -2150
+            },
+            {
+                id: "boss-05:right-0",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-recovery-deck",
+                x: 2920,
+                y: -390
+            },
+            {
+                id: "boss-05:right-1",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-recovery-deck",
+                x: 3260,
+                y: -480
+            },
+            {
+                id: "boss-05:right-2",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-bottom-outer",
+                x: 3580,
+                y: -610
+            },
+            {
+                id: "boss-05:right-3",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-mid",
+                x: 3840,
+                y: -820
+            },
+            {
+                id: "boss-05:right-4",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-mid",
+                x: 3980,
+                y: -1120
+            },
+            {
+                id: "boss-05:right-5",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-upper-outer",
+                x: 3860,
+                y: -1430
+            },
+            {
+                id: "boss-05:b-strike",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-upper-outer",
+                x: 3700,
+                y: -1570
+            },
+            {
+                id: "boss-05:right-6",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-top-outer",
+                x: 3630,
+                y: -1690
+            },
+            {
+                id: "boss-05:right-7",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-top-outer",
+                x: 3330,
+                y: -1890
+            },
+            {
+                id: "boss-05:right-8",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-core-bridge",
+                x: 2990,
+                y: -2000
             },
             {
                 id: "boss-05:top-r",
+                role: "swing-attack",
+                surfaceId: "boss-05:core-recess-right",
                 x: 2820,
-                y: -650
+                y: -2150
+            },
+            {
+                id: "boss-05:cross",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-core-bridge",
+                x: 2600,
+                y: -2040
+            },
+            {
+                id: "boss-05:p3-bridge",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-core-bridge",
+                x: 2600,
+                y: -1900
+            },
+            {
+                id: "boss-05:p3-low-l",
+                role: "swing-attack",
+                surfaceId: "boss-05:left-top-inner",
+                x: 2380,
+                y: -1770
+            },
+            {
+                id: "boss-05:p3-low-r",
+                role: "swing-attack",
+                surfaceId: "boss-05:right-top-inner",
+                x: 2820,
+                y: -1770
+            },
+            {
+                id: "boss-05:main",
+                role: "swing-attack",
+                surfaceId: "boss-05:core-housing",
+                x: 2600,
+                y: -1820
             },
             {
                 id: "boss-05:core",
+                role: "swing-attack",
+                surfaceId: "boss-05:core-housing",
                 x: 2600,
-                y: -450
+                y: -2350
             },
             {
                 id: "boss-05:exit-1",
+                role: "swing-attack",
+                surfaceId: "boss-05:rooftop-gate",
                 x: 2600,
-                y: -400
+                y: -2400
             },
             {
                 id: "boss-05:exit-2",
+                role: "swing-attack",
+                surfaceId: "boss-05:rooftop-gate",
                 x: 2600,
-                y: -180
+                y: -2620
             }
         ],
         baseHookReach: 400,
         bounds: {
-            height: 2600,
+            height: 2800,
             width: 5200,
             x: 0,
-            y: -2600
+            y: -2800
         },
         entry: {
             id: "boss-05:entry",
             x: 2600,
-            y: -212
+            y: -442
         },
         exit: {
             id: "boss-05:exit",
             x: 2600,
-            y: -2420
+            y: -2717
         },
         phaseZones: [
             {
                 bounds: {
-                    height: 2240,
-                    width: 1700,
-                    x: 900,
-                    y: -2440
+                    height: 2360,
+                    width: 4860,
+                    x: 170,
+                    y: -2700
                 },
                 id: "boss-05:zone-a",
                 phaseId: "boss-05:phase-1"
             },
             {
                 bounds: {
-                    height: 2200,
-                    width: 1500,
-                    x: 2800,
-                    y: -2440
+                    height: 2360,
+                    width: 1780,
+                    x: 3250,
+                    y: -2700
                 },
                 id: "boss-05:zone-b",
                 phaseId: "boss-05:phase-2"
             },
             {
                 bounds: {
-                    height: 2200,
-                    width: 1000,
-                    x: 2100,
-                    y: -2440
+                    height: 2360,
+                    width: 870,
+                    x: 2200,
+                    y: -2700
                 },
                 id: "boss-05:zone-main",
                 phaseId: "boss-05:phase-3"
             },
             {
                 bounds: {
-                    height: 2200,
-                    width: 1100,
-                    x: 2050,
-                    y: -2440
+                    height: 600,
+                    width: 1000,
+                    x: 2100,
+                    y: -2700
                 },
                 id: "boss-05:zone-core",
                 phaseId: "boss-05:phase-4"
@@ -201,250 +283,316 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
         recoveryPoints: [
             {
                 id: "boss-05:recovery-entry",
+                role: "entry",
                 x: 2600,
-                y: -220
-            },
-            {
-                id: "boss-05:recovery-cross",
-                x: 2600,
-                y: -820
+                y: -442
             },
             {
                 id: "boss-05:recovery-main",
-                x: 2600,
-                y: -1080
-            }
-        ],
-        routeEdges: [
-            {
-                from: "boss-05:entry",
-                id: "boss-05:edge-01",
-                to: "boss-05:left-1"
+                role: "main",
+                x: 2380,
+                y: -1817
             },
             {
-                from: "boss-05:left-1",
-                id: "boss-05:edge-02",
-                to: "boss-05:left-2"
+                id: "boss-05:recovery-main-left",
+                role: "main-left",
+                x: 2380,
+                y: -1817
             },
             {
-                from: "boss-05:left-2",
-                id: "boss-05:edge-03",
-                to: "boss-05:a-bridge-1"
-            },
-            {
-                from: "boss-05:a-bridge-1",
-                id: "boss-05:edge-04",
-                to: "boss-05:a-bridge-2"
-            },
-            {
-                from: "boss-05:a-bridge-2",
-                id: "boss-05:edge-05",
-                to: "boss-05:a-strike"
-            },
-            {
-                from: "boss-05:a-strike",
-                id: "boss-05:edge-06",
-                to: "boss-05:left-3"
-            },
-            {
-                from: "boss-05:left-3",
-                id: "boss-05:edge-07",
-                to: "boss-05:a-cross-1"
-            },
-            {
-                from: "boss-05:a-cross-1",
-                id: "boss-05:edge-08",
-                to: "boss-05:a-cross-2"
-            },
-            {
-                from: "boss-05:a-cross-2",
-                id: "boss-05:edge-09",
-                to: "boss-05:cross"
-            },
-            {
-                from: "boss-05:entry",
-                id: "boss-05:edge-10",
-                to: "boss-05:right-1"
-            },
-            {
-                from: "boss-05:right-1",
-                id: "boss-05:edge-11",
-                to: "boss-05:right-2"
-            },
-            {
-                from: "boss-05:right-2",
-                id: "boss-05:edge-12",
-                to: "boss-05:b-bridge-1"
-            },
-            {
-                from: "boss-05:b-bridge-1",
-                id: "boss-05:edge-13",
-                to: "boss-05:b-bridge-2"
-            },
-            {
-                from: "boss-05:b-bridge-2",
-                id: "boss-05:edge-14",
-                to: "boss-05:b-strike"
-            },
-            {
-                from: "boss-05:b-strike",
-                id: "boss-05:edge-15",
-                to: "boss-05:right-3"
-            },
-            {
-                from: "boss-05:right-3",
-                id: "boss-05:edge-16",
-                to: "boss-05:b-cross-1"
-            },
-            {
-                from: "boss-05:b-cross-1",
-                id: "boss-05:edge-17",
-                to: "boss-05:b-cross-2"
-            },
-            {
-                from: "boss-05:b-cross-2",
-                id: "boss-05:edge-18",
-                to: "boss-05:cross"
-            },
-            {
-                from: "boss-05:cross",
-                id: "boss-05:edge-19",
-                to: "boss-05:p3-bridge"
-            },
-            {
-                from: "boss-05:p3-bridge",
-                id: "boss-05:edge-20",
-                to: "boss-05:p3-low-l"
-            },
-            {
-                from: "boss-05:p3-bridge",
-                id: "boss-05:edge-21",
-                to: "boss-05:p3-low-r"
-            },
-            {
-                from: "boss-05:p3-low-l",
-                id: "boss-05:edge-22",
-                to: "boss-05:main"
-            },
-            {
-                from: "boss-05:p3-low-r",
-                id: "boss-05:edge-23",
-                to: "boss-05:main"
-            },
-            {
-                from: "boss-05:main",
-                id: "boss-05:edge-24",
-                to: "boss-05:top-l"
-            },
-            {
-                from: "boss-05:main",
-                id: "boss-05:edge-25",
-                to: "boss-05:top-r"
-            },
-            {
-                from: "boss-05:top-l",
-                id: "boss-05:edge-26",
-                to: "boss-05:core"
-            },
-            {
-                from: "boss-05:top-r",
-                id: "boss-05:edge-27",
-                to: "boss-05:core"
-            },
-            {
-                from: "boss-05:core",
-                id: "boss-05:edge-28",
-                to: "boss-05:exit-1"
-            },
-            {
-                from: "boss-05:exit-1",
-                id: "boss-05:edge-29",
-                to: "boss-05:exit-2"
+                id: "boss-05:recovery-main-right",
+                role: "main-right",
+                x: 2820,
+                y: -1817
             }
         ],
         surfaces: [
             {
                 bounds: {
-                    height: 100,
-                    width: 800,
-                    x: 2200,
-                    y: -180
+                    height: 80,
+                    width: 520,
+                    x: 1880,
+                    y: -410
                 },
                 grappleable: true,
-                id: "boss-05:entry-deck",
-                kind: "platform",
-                oneWay: false
-            },
-            {
-                bounds: {
-                    height: 90,
-                    width: 850,
-                    x: 1050,
-                    y: -1240
-                },
-                grappleable: true,
-                id: "boss-05:left-service-platform",
-                kind: "platform",
-                oneWay: false
-            },
-            {
-                bounds: {
-                    height: 90,
-                    width: 850,
-                    x: 3300,
-                    y: -1240
-                },
-                grappleable: true,
-                id: "boss-05:right-service-platform",
-                kind: "platform",
+                id: "boss-05:left-recovery-deck",
+                kind: "recovery-deck",
                 oneWay: false
             },
             {
                 bounds: {
                     height: 80,
-                    width: 720,
-                    x: 2240,
-                    y: -760
+                    width: 520,
+                    x: 2800,
+                    y: -410
                 },
                 grappleable: true,
-                id: "boss-05:cross-platform",
+                id: "boss-05:right-recovery-deck",
+                kind: "recovery-deck",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 80,
+                    width: 280,
+                    x: 2460,
+                    y: -410
+                },
+                grappleable: true,
+                id: "boss-05:entry-deck",
+                kind: "entry-deck",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 820,
+                    x: 1180,
+                    y: -600
+                },
+                grappleable: true,
+                id: "boss-05:left-bottom-outer",
                 kind: "platform",
                 oneWay: true
             },
             {
                 bounds: {
                     height: 70,
-                    width: 420,
+                    width: 280,
+                    x: 2220,
+                    y: -600
+                },
+                grappleable: true,
+                id: "boss-05:left-bottom-inner",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 640,
+                    x: 1030,
+                    y: -1075
+                },
+                grappleable: true,
+                id: "boss-05:left-mid",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 740,
+                    x: 1260,
+                    y: -1525
+                },
+                grappleable: true,
+                id: "boss-05:left-upper-outer",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 170,
+                    x: 2220,
+                    y: -1525
+                },
+                grappleable: true,
+                id: "boss-05:left-upper-inner",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 65,
+                    width: 280,
+                    x: 1720,
+                    y: -1785
+                },
+                grappleable: true,
+                id: "boss-05:left-top-outer",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 65,
+                    width: 170,
+                    x: 2220,
+                    y: -1785
+                },
+                grappleable: true,
+                id: "boss-05:left-top-inner",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 60,
+                    width: 380,
+                    x: 2110,
+                    y: -2040
+                },
+                grappleable: true,
+                id: "boss-05:left-core-bridge",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 350,
+                    x: 2700,
+                    y: -600
+                },
+                grappleable: true,
+                id: "boss-05:right-bottom-inner",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 750,
+                    x: 3270,
+                    y: -600
+                },
+                grappleable: true,
+                id: "boss-05:right-bottom-outer",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 640,
+                    x: 3530,
+                    y: -1075
+                },
+                grappleable: true,
+                id: "boss-05:right-mid",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 240,
+                    x: 2810,
+                    y: -1525
+                },
+                grappleable: true,
+                id: "boss-05:right-upper-inner",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 70,
+                    width: 670,
+                    x: 3270,
+                    y: -1525
+                },
+                grappleable: true,
+                id: "boss-05:right-upper-outer",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 65,
+                    width: 240,
+                    x: 2810,
+                    y: -1785
+                },
+                grappleable: true,
+                id: "boss-05:right-top-inner",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 65,
+                    width: 210,
+                    x: 3270,
+                    y: -1785
+                },
+                grappleable: true,
+                id: "boss-05:right-top-outer",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 60,
+                    width: 380,
+                    x: 2710,
+                    y: -2040
+                },
+                grappleable: true,
+                id: "boss-05:right-core-bridge",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 90,
+                    width: 200,
+                    x: 2260,
+                    y: -2190
+                },
+                grappleable: true,
+                id: "boss-05:core-recess-left",
+                kind: "service-recess",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 90,
+                    width: 200,
+                    x: 2740,
+                    y: -2190
+                },
+                grappleable: true,
+                id: "boss-05:core-recess-right",
+                kind: "service-recess",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 400,
+                    width: 1000,
                     x: 2100,
-                    y: -600
+                    y: -2550
                 },
                 grappleable: true,
-                id: "boss-05:top-left",
-                kind: "platform",
-                oneWay: true
+                id: "boss-05:core-housing",
+                kind: "boss-housing",
+                oneWay: false
             },
             {
                 bounds: {
-                    height: 70,
-                    width: 420,
-                    x: 2680,
-                    y: -600
-                },
-                grappleable: true,
-                id: "boss-05:top-right",
-                kind: "platform",
-                oneWay: true
-            },
-            {
-                bounds: {
-                    height: 300,
-                    width: 320,
-                    x: 2440,
-                    y: -2480
+                    height: 115,
+                    width: 360,
+                    x: 2420,
+                    y: -2685
                 },
                 grappleable: false,
                 id: "boss-05:rooftop-gate",
                 kind: "architecture",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 115,
+                    width: 4300,
+                    x: 450,
+                    y: -2685
+                },
+                grappleable: true,
+                id: "boss-05:route-roof",
+                kind: "platform",
                 oneWay: false
             }
         ]
@@ -452,10 +600,10 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
     boss: {
         actorId: "boss-05:continuity-core",
         collider: {
-            height: 300,
-            width: 320,
-            x: 2440,
-            y: -600
+            height: 400,
+            width: 1000,
+            x: 2100,
+            y: -2550
         },
         impactTargetIds: [
             "boss-05:aux-a:coupling",
@@ -466,7 +614,7 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
         mechanicId: "continuity-control-core",
         position: {
             x: 2600,
-            y: -450
+            y: -2350
         },
         visualPresetId: "continuity-control-core"
     },
@@ -498,19 +646,48 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
                 height: 2360,
                 width: 180,
                 x: 2020,
-                y: -2460
+                y: -2700
             },
             id: "boss-05:aux-a-control",
             parameters: {
                 damage: 20,
                 exposureSeconds: 4,
-                moveSeconds: 0.8,
+                moveSeconds: 5,
                 role: "aux-a",
-                warningSeconds: 0.8
+                slots: [
+                    {
+                        bounds: {
+                            height: 94,
+                            width: 220,
+                            x: 2000,
+                            y: -612
+                        },
+                        id: "a-bottom"
+                    },
+                    {
+                        bounds: {
+                            height: 94,
+                            width: 220,
+                            x: 2000,
+                            y: -1537
+                        },
+                        id: "a-middle"
+                    },
+                    {
+                        bounds: {
+                            height: 89,
+                            width: 220,
+                            x: 2000,
+                            y: -1797
+                        },
+                        id: "a-top"
+                    }
+                ],
+                warningSeconds: 1
             },
             position: {
-                x: 1800,
-                y: -1180
+                x: 1740,
+                y: -1870
             },
             type: "continuity-control-core"
         },
@@ -519,19 +696,48 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
                 height: 2360,
                 width: 180,
                 x: 3070,
-                y: -2460
+                y: -2700
             },
             id: "boss-05:aux-b-control",
             parameters: {
                 damage: 20,
                 exposureSeconds: 4,
-                moveSeconds: 0.8,
+                moveSeconds: 3,
                 role: "aux-b",
+                slots: [
+                    {
+                        bounds: {
+                            height: 94,
+                            width: 220,
+                            x: 3050,
+                            y: -612
+                        },
+                        id: "b-bottom"
+                    },
+                    {
+                        bounds: {
+                            height: 94,
+                            width: 220,
+                            x: 3050,
+                            y: -1537
+                        },
+                        id: "b-middle"
+                    },
+                    {
+                        bounds: {
+                            height: 89,
+                            width: 220,
+                            x: 3050,
+                            y: -1797
+                        },
+                        id: "b-top"
+                    }
+                ],
                 warningSeconds: 0.8
             },
             position: {
-                x: 3400,
-                y: -1180
+                x: 3470,
+                y: -1870
             },
             type: "continuity-control-core"
         },
@@ -540,37 +746,95 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
                 height: 2360,
                 width: 180,
                 x: 2510,
-                y: -2460
+                y: -2700
             },
             id: "boss-05:main-control",
             parameters: {
                 damage: 25,
                 exposureSeconds: 4,
-                moveSeconds: 0.8,
+                moveSeconds: 3,
                 role: "main",
+                slots: [
+                    {
+                        bounds: {
+                            height: 94,
+                            width: 220,
+                            x: 2490,
+                            y: -612
+                        },
+                        id: "main-bottom"
+                    },
+                    {
+                        bounds: {
+                            height: 84,
+                            width: 220,
+                            x: 2490,
+                            y: -2052
+                        },
+                        id: "main-top"
+                    }
+                ],
                 warningSeconds: 0.8
             },
             position: {
                 x: 2600,
-                y: -980
+                y: -1820
             },
             type: "continuity-control-core"
         },
         {
             bounds: {
-                height: 650,
-                width: 800,
-                x: 2200,
-                y: -850
+                height: 400,
+                width: 1000,
+                x: 2100,
+                y: -2550
             },
             id: "boss-05:core-control",
             parameters: {
                 exposureSeconds: 4,
+                pulseRegions: {
+                    inner: {
+                        height: 2360,
+                        width: 500,
+                        x: 3250,
+                        y: -2700
+                    },
+                    left: {
+                        height: 2360,
+                        width: 400,
+                        x: 2200,
+                        y: -2700
+                    },
+                    lower: {
+                        height: 1620,
+                        width: 870,
+                        x: 2200,
+                        y: -1960
+                    },
+                    outer: {
+                        height: 2360,
+                        width: 1280,
+                        x: 3750,
+                        y: -2700
+                    },
+                    right: {
+                        height: 2360,
+                        width: 470,
+                        x: 2600,
+                        y: -2700
+                    },
+                    upper: {
+                        height: 740,
+                        width: 870,
+                        x: 2200,
+                        y: -2700
+                    }
+                },
                 role: "core"
             },
             position: {
                 x: 2600,
-                y: -450
+                y: -2350
             },
             type: "continuity-control-core"
         }
@@ -646,7 +910,7 @@ export const BOSS_05_STAGE_SPEC = freezeBossStageValue({
     schemaVersion: "boss-stage-spec-v2",
     sourceAreaId: "sector-05-08",
     specType: "boss-stage",
-    subtitle: "CONTINUITY COMMAND CHAMBER / ROOFTOP ACCESS",
+    subtitle: "CONTINUITY CHAMBER / EVERY ROUTE IS CONTROLLED",
     transition: {
         entryTrigger: "checkpoint-complete",
         nextAreaId: "sector-06-01",

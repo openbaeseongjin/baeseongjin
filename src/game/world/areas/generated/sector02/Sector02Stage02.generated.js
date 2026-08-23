@@ -742,7 +742,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-02:g3-surface",
@@ -752,7 +752,7 @@ const SPEC = {
           "x": 80,
           "y": -352
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 68,
@@ -773,7 +773,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-02:access-anchor-surface",
@@ -783,7 +783,7 @@ const SPEC = {
           "x": 416,
           "y": -752
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 404,

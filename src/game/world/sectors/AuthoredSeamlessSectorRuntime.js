@@ -10,7 +10,6 @@ import { AUTHORED_SECTOR_CATALOG, buildAuthoredSectorCatalog } from "./AuthoredS
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
 import { GRAPPLE_LINK_BUDGET, ROPE_CONFIG, ropeHookReach } from "../../config.js";
 import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
-import { BOSS_ANCHOR_ROLE } from "../../boss-authoring/BossStageSpec.js";
 import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
 
@@ -463,6 +462,7 @@ function bossStageSurface(surface, dx, dy, stageId) {
         id: surface.id,
         kind: surface.kind,
         bossStageId: stageId,
+        collision: true,
         oneWay: surface.oneWay === true,
         oneWayEdgeEnd: surface.oneWay === true ? 1 : undefined,
         grappleable: surface.grappleable !== false,
@@ -472,28 +472,6 @@ function bossStageSurface(surface, dx, dy, stageId) {
         height: bounds.height,
         topY: bounds.y,
         position: { x: bounds.x + bounds.width * 0.5, y: bounds.y },
-        vertices: rectangleVertices(bounds)
-    });
-}
-
-function bossStageAnchorSurface(anchor, dx, dy, stageId) {
-    const point = shiftPoint(anchor, dx, dy);
-    const halfSize = 12;
-    const bounds = { x: point.x - halfSize, y: point.y - halfSize, width: halfSize * 2, height: halfSize * 2 };
-    return freezeValue({
-        id: `${anchor.id}:surface`,
-        kind: "grapple-target",
-        bossStageId: stageId,
-        oneWay: false,
-        collision: false,
-        grappleable: true,
-        renderable: false,
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height,
-        topY: bounds.y,
-        position: point,
         vertices: rectangleVertices(bounds)
     });
 }
@@ -517,12 +495,7 @@ function createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, 
         exit,
         exitTrigger: routeMouthBounds(exit),
         targetEntry: targetLandmark.entry,
-        surfaces: [
-            ...spec.arena.surfaces.map((surface) => bossStageSurface(surface, dx, dy, spec.id)),
-            ...spec.arena.anchors
-                .filter((anchor) => anchor.role === BOSS_ANCHOR_ROLE.SWING_ATTACK)
-                .map((anchor) => bossStageAnchorSurface(anchor, dx, dy, spec.id))
-        ],
+        surfaces: spec.arena.surfaces.map((surface) => bossStageSurface(surface, dx, dy, spec.id)),
         mechanics: spec.mechanics.map((mechanic) =>
             freezeValue({
                 ...mechanic,
