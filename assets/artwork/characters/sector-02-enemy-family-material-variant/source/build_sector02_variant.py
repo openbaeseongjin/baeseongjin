@@ -15,6 +15,7 @@ EXPORT_ROOT = PACKAGE_ROOT / "export"
 PREVIEW_ROOT = PACKAGE_ROOT / "preview"
 ATLAS_REVIEW_ROOT = PREVIEW_ROOT / "atlas-review"
 SECTOR_REFERENCE = REPO_ROOT / "docs" / "bsh" / "scenario" / "2" / "images" / "sector-02-background-reference.png"
+USER_MATERIAL_REFERENCE = PACKAGE_ROOT / "source" / "user-reference" / "sector-02-rugged-cast-iron-user-reference.png"
 
 ATLAS_NAMES = (
     "pursuit-motion.png",
@@ -30,43 +31,43 @@ ATLAS_NAMES = (
 # Only source RGB values in these fixed tables can change. The mappings are
 # intentionally shared across every frame of an atlas to prevent color jitter.
 COMMON_WORN_METAL = {
-    (9, 15, 26): (10, 13, 22),
-    (25, 37, 56): (31, 37, 52),
-    (99, 91, 83): (95, 84, 87),
-    (177, 166, 154): (166, 154, 151),
+    (9, 15, 26): (12, 12, 13),
+    (25, 37, 56): (43, 40, 38),
+    (99, 91, 83): (91, 82, 73),
+    (177, 166, 154): (148, 136, 122),
 }
 
 WORKER_DISTRICT_METAL = {
-    (5, 12, 24): (9, 12, 21),
-    (14, 30, 52): (28, 33, 48),
-    (38, 59, 86): (51, 55, 72),
-    (117, 111, 100): (109, 98, 101),
+    (5, 12, 24): (12, 12, 13),
+    (14, 30, 52): (33, 31, 30),
+    (38, 59, 86): (59, 54, 49),
+    (117, 111, 100): (135, 123, 109),
 }
 
 PALETTE_MAPS = {
     "pursuit-motion.png": COMMON_WORN_METAL,
     "sentry-upright-aim.png": COMMON_WORN_METAL,
     "artillery-acquisition-motion.png": {
-        (5, 13, 23): (10, 13, 22),
-        (8, 20, 35): (19, 23, 35),
-        (14, 35, 57): (31, 37, 53),
-        (28, 57, 83): (47, 52, 67),
-        (82, 81, 75): (84, 75, 79),
-        (122, 116, 103): (116, 104, 106),
+        (5, 13, 23): (12, 12, 13),
+        (8, 20, 35): (28, 27, 27),
+        (14, 35, 57): (47, 44, 42),
+        (28, 57, 83): (73, 67, 61),
+        (82, 81, 75): (101, 91, 80),
+        (122, 116, 103): (151, 138, 122),
     },
     # Blue is the Shield role color, so only its neutral physical plate changes.
     "shield-body.png": {},
-    "shield-directions.png": {(117, 111, 100): (109, 98, 101)},
+    "shield-directions.png": {(117, 111, 100): (135, 123, 109)},
     "patrol-motion-attack.png": WORKER_DISTRICT_METAL,
     "support-motion.png": WORKER_DISTRICT_METAL,
     "swarm-motion.png": {
-        (11, 13, 19): (12, 12, 19),
-        (21, 25, 37): (25, 27, 39),
-        (35, 41, 55): (42, 43, 56),
-        (55, 61, 72): (62, 60, 72),
-        (78, 74, 69): (81, 71, 76),
-        (116, 109, 100): (109, 98, 101),
-        (164, 158, 146): (155, 142, 144),
+        (11, 13, 19): (13, 12, 13),
+        (21, 25, 37): (30, 28, 28),
+        (35, 41, 55): (47, 43, 41),
+        (55, 61, 72): (65, 59, 54),
+        (78, 74, 69): (88, 78, 69),
+        (116, 109, 100): (132, 119, 105),
+        (164, 158, 146): (158, 144, 128),
     },
 }
 
@@ -138,10 +139,26 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def clamp_channel(value: int) -> int:
+    return max(0, min(255, value))
+
+
+def cast_iron_texture(color: tuple[int, int, int], x: int, y: int) -> tuple[int, int, int]:
+    if sum(color) < 90:
+        return color
+    phase = ((x % 32) * 5 + (y % 32) * 3) % 17
+    delta = 10 if phase == 0 else -7 if phase == 7 else 4 if phase == 12 else 0
+    if delta == 0:
+        return color
+    return tuple(clamp_channel(channel + delta) for channel in color)
+
+
 def apply_palette(source: Image.Image, palette: dict[tuple[int, int, int], tuple[int, int, int]]) -> Image.Image:
     pixels = []
-    for red, green, blue, alpha in source.convert("RGBA").get_flattened_data():
+    for index, (red, green, blue, alpha) in enumerate(source.convert("RGBA").get_flattened_data()):
         mapped = palette.get((red, green, blue), (red, green, blue))
+        if (red, green, blue) in palette:
+            mapped = cast_iron_texture(mapped, index % source.width, index // source.width)
         pixels.append((*mapped, alpha))
     result = Image.new("RGBA", source.size)
     result.putdata(pixels)
@@ -195,10 +212,10 @@ def make_side_by_side() -> None:
     header_font = load_font(20, bold=True)
     label_font = load_font(18, bold=True)
     sub_font = load_font(13)
-    draw.text((32, 24), "SECTOR 02 · ENEMY MATERIAL VARIANT", font=title_font, fill=(232, 237, 244))
-    draw.text((32, 66), "Approved Sector 01 identity preserved · neutral metal treatment only", font=sub_font, fill=(142, 158, 178))
+    draw.text((32, 24), "SECTOR 02 · RUGGED CAST-IRON ENEMIES", font=title_font, fill=(232, 237, 244))
+    draw.text((32, 66), "Approved Sector 01 geometry · user-selected Worker District material", font=sub_font, fill=(142, 158, 178))
     draw.text((272, 92), "CURRENT APPROVED", font=header_font, fill=(177, 166, 154), anchor="mm")
-    draw.text((748, 92), "SECTOR 02 CANDIDATE", font=header_font, fill=(190, 166, 178), anchor="mm")
+    draw.text((748, 92), "SECTOR 02 CANDIDATE", font=header_font, fill=(174, 151, 125), anchor="mm")
 
     for index, (label, atlas_name, cell_index, output_size) in enumerate(ENEMIES):
         top = header + index * row_height
@@ -232,7 +249,7 @@ def make_runtime_size_preview() -> None:
     draw.rectangle((0, 0, width, 76), fill=(4, 10, 18, 228))
     draw.text((26, 18), "ACTUAL WORLD OUTPUT SIZE", font=title_font, fill=(237, 240, 245))
     draw.text((520, 54), "CURRENT", font=header_font, fill=(177, 166, 154), anchor="mm")
-    draw.text((830, 54), "SECTOR 02", font=header_font, fill=(190, 166, 178), anchor="mm")
+    draw.text((830, 54), "SECTOR 02", font=header_font, fill=(174, 151, 125), anchor="mm")
 
     row_height = 98
     for index, (label, atlas_name, cell_index, output_size) in enumerate(ENEMIES):
@@ -277,6 +294,7 @@ def validate_pair(name: str, source: Image.Image, result: Image.Image) -> dict[s
         "changedOpaqueRatio": round(changed / opaque, 6) if opaque else 0,
         "sourceSha256": sha256(SOURCE_ROOT / name),
         "exportSha256": sha256(EXPORT_ROOT / name),
+        "materialReferenceSha256": sha256(USER_MATERIAL_REFERENCE),
     }
 
 
