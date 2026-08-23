@@ -45,28 +45,11 @@ progression makes the natural playthrough order match `activationOrder` 1-4. Thi
 of a `NOT_IMPLEMENTED` marker on `enemy-sequence` (unlike every genuinely-new-mechanic field elsewhere
 in this package) both read as expecting exactly this existing-pattern solution.
 
-## Transition-owner audit (per AREA-SPEC.json's "transition" block)
+## Sector 01→02 전환 — 0.64.0
 
-Confirmed: the real Sector 01->02 handoff is NOT owned by this legacy Area's `gate.nextAreaId` at all.
-`LegacyAreaSeamlessSectorRuntime.js` builds `sectorTransitions` from consecutive entries in
-`LEGACY_AREA_SECTOR_PREVIEW_CATALOG.sectors` (Sector 01 -> Sector 02 catalog adjacency) independently of
-any per-Area `nextAreaId`/`gate` field, and the actual Sector-boundary lock/unlock now runs entirely
-through the `access-transit-lock` system (see entries #70-71 in `docs/scenario-development-integration.md`).
-`nextAreaId: null` here is therefore already correct and was left unchanged - setting it to
-`sector-02-01` would not create the separate `GATE LOCKING CARRIAGE` physical Boss slot, and risks
-fighting the real transition owner. Existing `CONTAINMENT GANTRY C-01` Has-A runtime is a legacy prototype;
-Issue #816 connects the authored Boss through a separate physical Arena, automatic entry, combat damage,
-retry/snapshot state, and the Sector 02 handoff while leaving this Area's `nextAreaId: null` unchanged.
+1-8의 authored Gate portal은 기존 objective와 Sector 01 Access 3/3을 충족한 Player 한 명을 2-1 Entry로 직접 이동시킨다. 별도 Boss Stage·Arena·전투 완료 조건을 두지 않으며 1-8 geometry·Enemy·Story·Checkpoint는 바꾸지 않는다.
 
-## Boss 01 authored handoff boundary — 2026-08-22
-
-[`../../../../boss/01/`](../../../../boss/01/) preserves the current `GATE LOCKING CARRIAGE` authored content
-and the earlier REV2.1 material as historical reference. It is not an implementation of this legacy Area or
-a change to this Area's local Gate owner. Issue #816 extends the Sector transition compiler with the separate
-Boss Stage connector and completion barrier. The current authored order preserves the open Gate and
-Worker District first Reveal before the separate Post-Sector Boss slot; any transition wiring must still be
-implemented separately. In particular, its historical `210s` timer and `80px/s` collapse are not current Boss inputs;
-the initial Boss contract has no timer or time-expiry Arena collapse.
+`nextAreaId: null`은 Stage-local authoring snapshot으로 유지하고 실제 연속 월드 전환은 `AuthoredSeamlessSectorRuntime`의 인접 landmark portal이 소유한다.
 
 ## Story strength
 

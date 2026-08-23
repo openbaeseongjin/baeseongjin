@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-23 — 모든 Sector 뒤에 독립 Boss를 둔다
+
+- 맥락: 여섯 Sector의 마지막 Stage마다 별도 Boss Stage를 연결해 `Boss01~~06` 전투를 제공하는 구조를 구현했다.
+- 결정: `1-8→Boss01→2-1`, `2-8→Boss02→3-1`, `3-8→Boss03→4-1`, `4-8→Boss04→5-1`, `5-8→Boss05→6-1`, `6-8→Boss06→Boarding`을 사용하고 각 Boss의 authored spec·Runtime·문서를 유지했다.
+- 영향: Boss 여섯 개의 기획·구현·검증 비용이 남은 일정에 비해 커지고, Boss03도 고정 Scanner·Arm 기믹 중심으로 굳어졌다.
+- 대체: Boss는 Sector 03·06 끝의 두 개만 유지한다. Boss01·02·04·05와 전용 문서는 제거하고 네 Sector 경계는 기존 Gate portal로 직접 연결한다. Boss03은 이동형 보스몹으로 재기획하되 새 기획 전까지 기존 Runtime만 임시 유지하고, Boss06과 terminal Boarding은 유지한다.
+- 검증 상태: Issue #933에서 two-Boss catalog·직접 전환·Map Editor·문서·world revision을 함께 정렬한다.
+
 ## [L2] 2026-08-23 — Sector 05 기본 배경과 Sector 04→05 표현 전환을 Runtime에 연결한다
 
 - 맥락: 승인된 Sector 05 수직 도시 master와 Far/Mid/Near 분리본을 실제 게임에서 사용하고, Sector 04 상층 주거지 표현이 다음 Sector 진입에서 갑자기 교체되지 않게 해야 했다.

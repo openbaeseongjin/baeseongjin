@@ -1,16 +1,12 @@
-# Post-Sector Boss 콘텐츠 인계
+# Boss 콘텐츠 기준
 
-상태: `AUTHORED HANDOFF / SIX BOSS RUNTIME CATALOG`
+상태: `TWO BOSS CATALOG`
 
-이 디렉터리는 사용자 제공 Boss 콘텐츠 인계와 정적 MAP preview를 보존한다. 인계는 구현 지시가 아니며, 현재 Runtime·전환·Timer 권위는 [`../scenario-development-integration.md`](../scenario-development-integration.md), [`../sector-timer-and-boss-flow.md`](../sector-timer-and-boss-flow.md), [`../design-decision-resolution-package.md`](../design-decision-resolution-package.md)가 소유한다. `src/`, Stage transition, collision, combat, multiplayer를 이 문서만으로 바꾸지 않는다.
+제품 Boss는 Sector 03·06 마지막의 두 개뿐이다. Boss01·02·04·05 기획과 Runtime은 0.64.0에서 제거했으며 대체 관계는 [`../decision-history.md`](../decision-history.md)가 보존한다.
 
-| Boss                 | 콘텐츠 상태                        | 현재 경계                                                                            |
-| -------------------- | ---------------------------------- | ------------------------------------------------------------------------------------ |
-| [01](./01/README.md) | FINAL handoff, Boss core 부분 구현 | Post-1-8 별도 slot의 Arena·월드 연결·`2-1` 전환 미구현                               |
-| [02](./02/README.md) | REV5-C **DRAFT**                   | 현재 `2-8 → 3-1` transit과 별도; Boss entry 미승인                                   |
-| [03](./03/README.md) | FINAL handoff, Runtime 구현        | `3-8 → Boss03 → 4-1`; Scanner·Arm·Atrium geometry를 현행 MAP 기준으로 실행             |
-| [04](./04/README.md) | FINAL handoff, Runtime 구현        | `4-8 → Boss04 → 5-1`                                                                 |
-| [05](./05/README.md) | FINAL handoff, Runtime 구현        | `5-8 → Boss05 → 6-1`                                                                 |
-| [06](./06/README.md) | CONTINUITY WARDEN Runtime 구현     | `6-8 → Boss06 → Gate/Bridge/Shuttle → 전원 Boarding → Escape`; Gameplay 검증 진행 중 |
+| Boss | 현재 상태 | 진행 경계 |
+| --- | --- | --- |
+| [03](./03/README.md) | 이동형 보스몹 재기획 중, Scanner·Arm Runtime 임시 유지 | `3-8 → Boss03 → 4-1` |
+| [06](./06/README.md) | `CONTINUITY WARDEN` Runtime 유지 | `6-8 → Boss06 → Gate/Bridge/Shuttle → 전원 Boarding → Escape` |
 
-모든 인계의 Boss Timer와 시간 만료 Arena collapse는 초기 Post-Sector Boss 범위에서 제외한다. 정적 MAP preview는 presentation reference일 뿐 Runtime terrain·collision·asset이 아니다.
+Boss03의 기존 Atrium·Scanner·Arm 문서는 새 기획 입력이 아니며, 신규 기획이 확정되면 spec·Runtime·문서를 같은 변경에서 교체한다. Boss06의 현행 기획과 terminal Boarding은 유지한다. Boss Timer와 시간 만료 Arena collapse는 별도 HOLD다.

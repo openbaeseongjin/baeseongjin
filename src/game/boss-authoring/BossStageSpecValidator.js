@@ -21,11 +21,6 @@ const VULNERABILITY_TARGET_IDS = Object.freeze(Object.values(BOSS_VULNERABILITY_
 const VULNERABILITY_TRIGGERS = Object.freeze(Object.values(BOSS_VULNERABILITY_TRIGGER));
 const HEALTH_BAR_STYLES = Object.freeze(Object.values(BOSS_HEALTH_BAR_STYLE));
 const ANCHOR_ROLES = Object.freeze(Object.values(BOSS_ANCHOR_ROLE));
-const ARCHITECTURE_IMPACT_MECHANIC_TYPES = Object.freeze([
-    BOSS_MECHANIC_TYPE.SIMPLE_LOCK_CHARGE,
-    BOSS_MECHANIC_TYPE.ROTATING_GROUND_SLAM,
-    BOSS_MECHANIC_TYPE.DIAGONAL_DIVE
-]);
 const EDITABLE_ROOTS = Object.freeze([
     "arena",
     "combat",
@@ -257,9 +252,6 @@ function validateCombat(spec, issues, file) {
     ) {
         issue(issues, file, "combat-weak-normal-multiplier-invalid");
     }
-    if (combat.architectureImpactBossDamage !== undefined && combat.architectureImpactBossDamage !== 0) {
-        issue(issues, file, "combat-architecture-impact-damage-invalid");
-    }
 }
 
 function validateMechanics(spec, issues, file) {
@@ -268,10 +260,6 @@ function validateMechanics(spec, issues, file) {
         return new Set();
     }
     const ids = validateIds(spec.mechanics, issues, file, "mechanic");
-    const validArchitectureIds = new Set(
-        (spec.arena?.surfaces ?? []).filter(({ validArchitecture }) => validArchitecture === true).map(({ id }) => id)
-    );
-    const phaseZoneIds = new Set((spec.arena?.phaseZones ?? []).map(({ id }) => id));
     for (const mechanic of spec.mechanics) {
         if (!MECHANIC_TYPES.includes(mechanic.type)) {
             issue(issues, file, "mechanic-type-unregistered", { id: mechanic.id, type: mechanic.type ?? null });
@@ -281,31 +269,6 @@ function validateMechanics(spec, issues, file) {
             issue(issues, file, "mechanic-bounds-invalid", { id: mechanic.id });
         }
         if (!isObject(mechanic.parameters)) issue(issues, file, "mechanic-parameters-invalid", { id: mechanic.id });
-        if (
-            mechanic.type === BOSS_MECHANIC_TYPE.BEAM_FAILURE &&
-            (!Number.isFinite(mechanic.parameters?.failureProgress) ||
-                mechanic.parameters.failureProgress <= 0 ||
-                mechanic.parameters.failureProgress >= 1 ||
-                !positive(mechanic.parameters.travelSpeed))
-        ) {
-            issue(issues, file, "beam-failure-parameters-invalid", { id: mechanic.id });
-        }
-        if (ARCHITECTURE_IMPACT_MECHANIC_TYPES.includes(mechanic.type)) {
-            const surfaceIds = mechanic.parameters?.validArchitectureSurfaceIds;
-            if (
-                !Array.isArray(surfaceIds) ||
-                surfaceIds.length === 0 ||
-                surfaceIds.some((id) => !validArchitectureIds.has(id))
-            ) {
-                issue(issues, file, "mechanic-valid-architecture-reference-invalid", { id: mechanic.id });
-            }
-        }
-        if (
-            mechanic.type === BOSS_MECHANIC_TYPE.PHASE_REPOSITION &&
-            !phaseZoneIds.has(mechanic.parameters?.targetZoneId)
-        ) {
-            issue(issues, file, "mechanic-phase-zone-reference-invalid", { id: mechanic.id });
-        }
     }
     return ids;
 }

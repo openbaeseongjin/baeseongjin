@@ -2723,13 +2723,9 @@ NPC system을 요구하지 않는다.
 
 NPC 도입은 별도 P4 design decision.
 
-### 10. Bosses 01~05
+### 10. Boss03·06 cadence
 
-Sector06 Final Boss를 상세화하기 전에
-전체 Sector Boss cadence를 Full Game Audit에서 검토해야 한다.
-
-Final Boss만 과도하게 구체화해
-앞 Sector Boss와 Tone / Difficulty가 충돌하는 것을 피한다.
+제품 Boss는 Sector 03·06 끝의 두 개다. Boss03은 이동형 보스몹으로 재기획 중이며, Boss06은 최종 전투와 Boarding을 소유한다. 두 전투의 Tone·Difficulty는 신규 Boss03 기획에서 함께 대조한다.
 
 ### 11. Sector05 Runtime Drift — 대부분 RESOLVED
 

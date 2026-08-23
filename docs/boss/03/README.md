@@ -1,12 +1,13 @@
-# Boss 03 콘텐츠 인계
+# Boss 03 — 재기획 대기
 
-상태: `AUTHORED FINAL CONTENT / RUNTIME IMPLEMENTED / BROWSER GAMEPLAY VIEW VERIFIED / FULL PLAYTEST PENDING`
+상태: `PENDING REDESIGN / TEMPORARY RUNTIME`
 
-Central Exchange Atrium의 Scanner·점검 Arm·좌/중앙/우 route를 `BossStageSpec`과 `CentralExchangeMaintenanceRuntime`으로 연결했다. 일반 Stage `3-8`의 content boundary는 유지하고 그 뒤 독립 `Boss03 → 4-1` 전환을 사용한다.
+Boss03은 일반몹이 아니라 공간을 이동하며 Player와 직접 싸우는 보스몹으로 재기획한다. 정확한 정체성·공간·공격·Phase·수치는 기획자가 작성 중이므로 현재 문서나 코드에서 추정하지 않는다.
 
-Runtime은 정적 HTML을 배경으로 사용하지 않는다. [`MAP-PREVIEW.html`](./final-content/MAP-PREVIEW.html)의 4800×2400 좌우·상하 관계, 5층 Gallery, 중앙 Media Route, Safe Landing, L/C/R Scanner surface와 LOW/HIGH Arm band를 authored collision·공용 `AccessScanField`·Polygon presentation으로 재현한다.
+현재 `CentralExchangeMaintenanceRuntime`의 Atrium·Scanner·점검 Arm·세 target은 `3-8 → Boss03 → 4-1` 진행을 끊지 않기 위한 임시 Runtime이다. 아래 자료는 이 임시 구현의 이력·비교 자료일 뿐 신규 Boss03 구현 권위가 아니다.
 
-- source ZIP SHA-256: `75f6116c92d3a6ae3a36f14e4a96e79206711e4d04238b77a246f13aa4c55080`
-- source revision: `ONE-ROPE-BOSS-03-FINAL-CONTENT-HANDOFF.zip`
-- authored documents: [`BOSS-03-BRIEF.md`](./final-content/BOSS-03-BRIEF.md), [`BOSS-03-COMPONENTS.md`](./final-content/BOSS-03-COMPONENTS.md), [`MAP-PREVIEW.html`](./final-content/MAP-PREVIEW.html)
-- Runtime source: `src/game/boss-authoring/specs/boss-03.json`, `src/game/boss/CentralExchangeMaintenanceRuntime.js`
+- [`BOSS-03-BRIEF.md`](./final-content/BOSS-03-BRIEF.md)
+- [`BOSS-03-COMPONENTS.md`](./final-content/BOSS-03-COMPONENTS.md)
+- [`MAP-PREVIEW.html`](./final-content/MAP-PREVIEW.html)
+
+신규 기획이 확정되면 이 README, `src/game/boss-authoring/specs/boss-03.json`, generated definition, 구체 Runtime, Map Editor reference와 시나리오 통합 현황을 한 변경에서 교체한다.

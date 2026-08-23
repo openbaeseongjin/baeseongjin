@@ -1139,7 +1139,7 @@ Sector06 should answer the next larger question, not Sector05.
 The authoring checklist above predates this package merge. All eight supplied Stage packages, including their MAP and STORY/DIRECTION previews, are now preserved in this repository; that does not approve Runtime migration or change the current Runtime.
 
 1. Review each packaged Stage against the Runtime boundary before implementation.
-2. Decide the post-Sector 04 Boss → 5-1 transition; do not create a direct 4-8 → 5-1 connection.
+2. Preserve the authored direct 4-8 → 5-1 Gate portal and its 2-of-3 prerequisite.
 3. Define the shared, authoritative Hardpoint Jammer contract before any Stage depends on it.
 4. Implement geometry, Stable IDs, Camera, Story, progression, and multiplayer ownership only after that decision.
 5. Collect desktop/mobile browser and multiplayer play evidence before declaring a Stage Runtime integrated.

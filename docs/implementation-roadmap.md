@@ -23,7 +23,6 @@
 - 적 투사체의 본체 피해·무적 시간과 `cutter-fire` opt-in 로프 절단. 적 위치 넉백은 직접 추격·돌진형만 허용하고 Turret·고정 Patrol 경로형은 피해만 받는다.
 - 체력, 사망·낙사와 플레이어별 활성 체크포인트 즉시 부활
 - 전투 HUD, 피해 숫자, 충격파, 파편과 화면 흔들림
-- [0.55.0 / #858] Boss01의 kinematic Carriage·공유 Beam collider, 끝점 Telegraph→Sweep→약점 loop, P3 50% 파손→Ram, 닫힌 몸체 25%·반복 약점 보너스, owner-first Boss hazard claim과 mock audio
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
 - [과거 절차 프로토타입] 마지막 암석의 정상 목표와 최종 완료 상태
 - [과거 절차 프로토타입] 8레벨 간격 체크포인트 생성·활성화·시각 표시. 현재 기본 Runtime은 48개 Stage마다 진입 세이브 포인트를 사용한다.
@@ -38,7 +37,7 @@
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
-- [0.62.0] Boss Polygon Rope는 손→조준 ray의 앞면 교점, body-local anchor, 선속도+회전 접선속도 joint와 owner/server/remote 동일 transform 복원을 사용한다. Boss04 Hub와 Boss05 Core/Wall, Boss06의 정적 Main/Ledge/Gate는 collision platform으로서 Ropeable이며, Boss06 body는 플랫폼이 아닌 actor라 부착 대상이 아니다.
+- [0.62.0 / #934] 움직이는 Boss Polygon Rope는 손→조준 ray의 앞면 교점, body-local anchor, 선속도+회전 접선속도 joint와 owner/server/remote 동일 transform 복원을 사용한다. Boss06의 정적 Main/Ledge/Gate는 collision platform으로서 Ropeable이며, Warden body는 플랫폼이 아닌 actor라 부착 대상이 아니다.
 - Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display·Augment Node 위치, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
 - `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 gap-0 경계의 통과·하단 복구, authored Gate→Entry portal, Access/Jammer/proof 권위를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
@@ -50,7 +49,7 @@
 - 실제 플레이에서 새로 발견된 실패 사례와 초반 2분 지표 표본
 - 실제 조작 기반 전체 등반 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
-- Sector 03 3-3~~3-8 Direction migration과 여섯 Boss의 실제 desktop/mobile·1~4인 멀티플레이 검증
+- Sector 03 3-3~~3-8 Direction migration, 신규 이동형 Boss03 기획·개발과 Boss03/06의 실제 desktop/mobile·1~4인 멀티플레이 검증
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
@@ -70,9 +69,9 @@
 
 AS IS → Sector 01~~06의 48개 Stage는 canonical v2/generated catalog로 production Runtime에 연결됐고 scenario-only Stage는 없다.
 
-TO BE → 여섯 일반 Sector의 content boundary와 독립 Boss Stage 연결은 유지하고, Boss03 Atrium·Boss06 terminal Boarding을 포함한 실제 desktop/mobile 및 멀티플레이 전체 등반을 검증한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
+TO BE → Sector 01·02·04·05는 마지막 일반 Stage에서 다음 Sector로 직접 전환하고, Sector 03·06 뒤에만 독립 Boss Stage를 유지한다. Boss03은 이동형 보스몹으로 재기획하고 Boss06 terminal Boarding을 포함한 실제 desktop/mobile 및 멀티플레이 전체 등반을 검증한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 
-Sector 03은 Access Scan Field Runtime과 3-1~~3-8 authored catalog를 구현했고, 진행은 `2-8 → Boss02 → 3-1 → … → 3-8 → Boss03 → 4-1`이다. Boss03은 MAP-PREVIEW의 4800×2400 Atrium·L/C/R Scanner surface·LOW/HIGH Arm·Left/Right Module·Central Core를 authored spec과 composite Runtime으로 소유한다. Sector 04~~06은 각각 `4-8 → Boss04 → 5-1`, `5-8 → Boss05 → 6-1`, `6-8 → Boss06 → Gate/Bridge/Shuttle → 전원 Boarding → Escape`로 연결된다. 일반 Timer/Purge와 Boss Timer/Arena collapse는 계속 HOLD다.
+진행은 `1-8→2-1`, `2-8→3-1`, `3-8→Boss03→4-1`, `4-8→5-1`, `5-8→6-1`, `6-8→Boss06→Gate/Bridge/Shuttle→전원 Boarding→Escape`다. Boss03의 현재 Atrium·Scanner·Arm Runtime은 신규 기획 완료 전까지만 임시 유지하며 새 전투의 구현 권위가 아니다. 일반 Timer/Purge와 Boss Timer/Arena collapse는 계속 HOLD다.
 
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
@@ -82,7 +81,7 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 
 재사용 Canvas particle/VFX foundation은 완료됐다. Player action/shot/impact와 Enemy one-shot, Shield·Support·Swarm·Pursuit·Artillery 및 Wind의 복제 상태 기반 continuous 표현에 더해 Rope launch·flight·attach·tension·swing·release·miss와 Player high-speed/impulse 표현도 동일 preset DTO와 Polygon/Sprite 공통 renderer를 사용한다. Rope Augment는 resolved material/actual-event accent로 합성하고 particle state는 multiplayer protocol에 추가하지 않는다. 기준은 [`particle-system.md`](./particle-system.md)다.
 
-P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI → Sector04/05/06 Runtime → 여섯 Post-Sector Boss/transition → Final Security/Boarding → Timer/Purge mapping → Playtest`다. Boss01~~06의 authored Runtime 연결은 완료됐고 실제 Gameplay·멀티플레이 검증이 남았다. Boss03은 Phase base HP 1000·0.5 인원 multiplier·25% 약점 고정 보너스, Boss06은 단일 base HP 1000·0.5 인원 multiplier·별도 weakpoint 0을 사용한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 코드 Registry로 확장한다. Timer/Purge HOLD와 NPC 우선순위는 유지한다.
+현재 순서는 `두 Boss 월드 정렬 → 신규 Boss03 기획·구현 → Boss03/06 Playtest → Timer/Purge mapping`이다. Boss03의 기존 수치는 임시 Runtime 값이며 새 기획으로 승계하지 않는다. Boss06은 단일 base HP 1000·0.5 인원 multiplier·별도 weakpoint 0을 유지한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 코드 Registry로 확장한다. Timer/Purge HOLD와 NPC 우선순위는 유지한다.
 
 ### P0. 로그라이크 한 판의 순환 완성
 
@@ -152,7 +151,7 @@ P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI → Sec
 
 - 영구 성장과 자동 자원 생산
 - 적·무기·generic Augment 확장
-- 수집 도감, 섹터별 보스 전투, 바이옴과 완성형 아트
+- 수집 도감, Boss03·06 전투, 바이옴과 완성형 아트
 
 적 roster 확장 순서:
 

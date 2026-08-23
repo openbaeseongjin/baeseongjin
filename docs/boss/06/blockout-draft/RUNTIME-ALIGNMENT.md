@@ -21,7 +21,7 @@ Boss06는 아래 공용 계약을 재사용한다.
 
 ### Custom Runtime hooks
 
-Boss04/05가 이미 사용 중인 다음 hook을 그대로 사용한다.
+`CompositeBossEncounterRuntime`이 제공하는 다음 hook을 그대로 사용한다.
 
 - `impactTargetSnapshot(targetId, worldOffset)`
 - `presentationObjects(worldOffset)`
@@ -58,7 +58,7 @@ dummy weakpoint를 Warden 내부에 만들어 validator만 통과시키는 방�
 - `showVulnerabilityCountdown: false`
 - `vulnerabilityLabel: ""`
 
-기존 Boss01/02 weakpoint를 가짜로 재사용하지 않는다.
+다중 weakpoint 계약을 가짜로 재사용하지 않는다.
 
 ### B. Boss Impact Adapter
 

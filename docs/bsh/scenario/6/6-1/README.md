@@ -23,4 +23,4 @@ Player Bark:
 
 `CROSSWIND MASTS / AHEAD`
 
-Entry: `BOSS05 DEFEATED → 6-1`
+Entry: `5-8 COMPLETE → 6-1` authored Gate portal

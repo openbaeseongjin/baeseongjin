@@ -52,7 +52,7 @@ Warden solid collision envelope <= 96px × 150px
 - Warden 96px width로 ledge center에 서면 좌우 margin ≈92px
 
 금지:
-- Boss04 `bodyRadius:140` 같은 대형 원형 collider 재사용
+- 삭제된 대형 원형 Boss collider 재사용
 - Shield 포함 200px+ solid collider
 - Baton reach를 body collider 크기로 구현
 

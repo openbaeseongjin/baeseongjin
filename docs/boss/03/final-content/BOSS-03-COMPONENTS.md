@@ -1,5 +1,7 @@
 # BOSS 03 — 구성요소 명세
 
+> 상태: **RETIRED AS NEW DESIGN INPUT / TEMPORARY RUNTIME HISTORY**
+> 이 문서는 현재 Scanner·Arm 임시 Runtime의 구현 이력이며 신규 이동형 Boss03의 컴포넌트 계약이 아니다.
 > 목적: **개발자가 무엇을 만들어야 하는지**만 정리한다.
 > 구현 방법·파일 수정 방법·의사코드는 포함하지 않는다.
 > AUTHORING SNAPSHOT: GitHub `main` `6a8911d354df6b218a64970b5d35d41359ef62f2`. 현재 main과 Runtime 연결 상태는 `docs/scenario-development-integration.md`가 소유한다.

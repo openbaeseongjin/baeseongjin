@@ -8,11 +8,11 @@
 node scripts/map-editor/serveMapEditor.mjs --port=4178
 ```
 
-브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 일반 Stage와 독립 Boss01~06 Stage를 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
+브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 일반 Stage와 독립 Boss03·06 Stage를 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
 
 - `Runtime 적용`: Sector 01~06의 48개 Stage다. 저장 적용은 canonical v2 JSON과 generated JS를 갱신하고, manifest가 선택하는 현재 Sector Catalog에도 반영된다.
 - `시나리오 전용`: 현재 0개다. 향후 Runtime 계약이 완결되지 않은 Stage를 추가할 때만 이 mode를 사용한다.
-- `boss-01`~~`boss-06`: `specType: "boss-stage"`인 Post-Sector Boss Stage다. 일반 Area와 섞지 않고 Boss 전용 JSON과 generated 정의를 함께 갱신한다. Boss06은 regular next Area가 없는 terminal boarding 전환이다.
+- `boss-03`, `boss-06`: `specType: "boss-stage"`인 독립 Boss Stage다. 일반 Area와 섞지 않고 Boss 전용 JSON과 generated 정의를 함께 갱신한다. Boss03은 신규 이동형 보스몹 기획 전까지 임시 Runtime이며 Boss06은 regular next Area가 없는 terminal boarding 전환이다.
 
 ## 저작 흐름
 
@@ -25,11 +25,11 @@ Enemy의 `적 종류`는 실제 Runtime `AUTHORABLE_ENEMY_TYPE_IDS`를 사용하
 
 Enemy 종류·activation anchor·Wind mode·Boss visual preset/mechanic/vulnerability/transition처럼 Runtime enum·Registry 또는 현재 Spec ID로 닫힌 값은 단일/다중 select로만 편집한다. Phase 이름·HUD 목표·UI 제목처럼 사람이 새 문구를 저작하는 값만 텍스트 입력으로 둔다. 5. **메모리 초안 저장**으로 v2 검증을 통과한 현재 Draft를 서버 메모리에 저장한다. 파일은 쓰지 않으며 이 상태부터 **Gameplay View**로 현재 변경을 확인할 수 있다. 6. **저장 적용**으로 v2 JSON을 갱신한다. Runtime Stage는 결정적 generated JS도 함께 갱신한다. stale revision, 읽기 전용 영역, 2 MiB 초과 요청은 거부된다. 7. **Gameplay View**는 48개 authored Bounds를 위아래 edge가 맞닿게 쌓은 production compiler 안에서 선택 Stage Entry부터 시작한다. 실제 게임 renderer·환경 표현·HUD·입력 경로를 그대로 사용하며 카메라에 들어온 인접 Stage도 같은 연속 월드의 authored 항목으로 표시한다.
 
-Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor·등록된 Mechanic·Phase 순서와 수·전환·HUD를 편집한다. `phases[].basePhaseHealth`, `combat.additionalPlayerMultiplier`, `combat.closedBodyDamageMultiplier`, `combat.weakFixedPercent`와 Beam Failure의 `failureProgress`가 피해·전환 저작 권위이며, Inspector의 1~4인 총 HP·Phase HP·floor·약점 고정 피해는 저장되지 않는 읽기 전용 파생값이다. Boss Preview는 메모리에 저장한 현재 Boss Stage Spec을 독립 `GameSimulation`의 전투 시작 상태로 열고 Player를 실제 Carriage 근처에 배치한 뒤 둘 사이를 framing해 Polygon mock·이동·Rope·일반 공격·Boss HUD를 즉시 확인한다. Boss01의 현행 기획 권위는 [`boss/01/README.md`](./boss/01/README.md) 한 문서이며 `legacy/`의 정적 Preview는 비교 패널에 노출하지 않는다. 실제 Stage 진입 위치와 진행 규칙은 바꾸지 않는다. 새 mechanic 종류는 Editor 텍스트만으로 만들 수 없고 먼저 코드 Registry와 validator를 추가해야 한다.
+Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor·등록된 Mechanic·Phase 순서와 수·전환·HUD를 편집한다. `phases[].basePhaseHealth`, `combat.additionalPlayerMultiplier`, `combat.closedBodyDamageMultiplier`, `combat.weakFixedPercent`가 피해·전환 저작 권위이며, Inspector의 1~4인 총 HP·Phase HP·floor·약점 고정 피해는 저장되지 않는 읽기 전용 파생값이다. Boss Preview는 메모리에 저장한 현재 Boss Stage Spec을 독립 `GameSimulation`의 전투 시작 상태로 열어 Polygon mock·이동·Rope·일반 공격·Boss HUD를 즉시 확인한다. 실제 Stage 진입 위치와 진행 규칙은 바꾸지 않는다. 새 mechanic 종류는 Editor 텍스트만으로 만들 수 없고 먼저 코드 Registry와 validator를 추가해야 한다.
 
 Boss의 Arena 경계는 캔버스 드래그와 Inspector X/Y로 이동할 수 있다. 표면·앵커·Recovery·Phase 구역은 데이터형 기본 요소이므로 추가·삭제할 수 있다. 새 Mechanic 종류·Boss 행동·전환 조건처럼 Runtime 코드 Registry가 필요한 개념은 에디터에서 생성하지 않고 코드에 등록된 선택지만 조합한다. 일반 Area Bounds는 원점 고정 크기 계약이므로 위치 입력을 표시하지 않고 너비·높이만 편집한다.
 
-Boss의 MAP HTML이 catalog의 `mapReferencePath`로 등록되면 `시나리오 비교`가 그 HTML을 실제 Gameplay View의 공간 기준으로 읽기 전용 대조한다. Boss03·05·06의 현행 MAP HTML은 각각 Atrium Scanner/Arm, Control Chamber, Pad Security Court의 발판·위협·Recovery·탈출 관계 기준이며 Runtime spec은 이를 축약한 별도 arena를 만들 수 없다. Ropeable은 중심점 Anchor가 아니라 collision surface의 `grappleable: true` capability다. 움직이는 Boss Polygon은 Hook 손→조준 방향의 첫 surface 교점과 body-local anchor를 사용하며, 표시 `ropeAttachable`도 같은 capability에서 파생한다. Anchor는 route 설명과 surface ID 참조만 소유하며 별도 non-collision grapple target을 생성하지 않는다.
+Boss의 MAP HTML이 catalog의 `mapReferencePath`로 등록되면 `시나리오 비교`가 그 HTML을 실제 Gameplay View의 공간 기준으로 읽기 전용 대조한다. Boss03·06의 현행 MAP HTML은 각각 임시 Atrium Scanner/Arm과 Pad Security Court의 발판·위협·Recovery·탈출 관계 기준이다. Ropeable은 중심점 Anchor가 아니라 collision surface의 `grappleable: true` capability다. 움직이는 Boss Polygon은 Hook 손→조준 방향의 첫 surface 교점과 body-local anchor를 사용하며, 표시 `ropeAttachable`도 같은 capability에서 파생한다. Anchor는 route 설명과 surface ID 참조만 소유하며 별도 non-collision grapple target을 생성하지 않는다.
 
 왼쪽 레이어 목록은 `실게임 요소`, `표시형 오브젝트`, `규칙 / 설정`으로 구분한다. 일반 Area의 `표시 / 상호작용 오브젝트`는 Story display·Augment Node 등 실제 renderer가 그리는 authored object를 포함하고 위치를 편집한다. 맵 경계·복구/예상 경로·카메라 구역은 비게임플레이 안내 레이어다.
 

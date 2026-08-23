@@ -41,8 +41,4 @@
 
 `ROOFTOP PAD 03 / MAINTENANCE SHUTTLE / STANDBY`
 
-단:
-
-`5-8 COMPLETE → BOSS05 → BOSS05 DEFEATED → 6-1`
-
-경계를 유지한다.
+`5-8 COMPLETE → 6-1` authored Gate portal로 직접 전환한다.
