@@ -366,7 +366,7 @@ export class RemoteGameAuthority {
             clientTick: event.clientTick,
             authorityTick: this.tickProjection.project(event.clientTick),
             impactType: event.resolution,
-            position: event.position,
+            position: event.parameters.impactPosition ?? event.position,
             velocity: event.velocity,
             damage: event.damage ?? event.parameters?.damage ?? 0,
             sourceKind: event.parameters?.sourceKind ?? null,

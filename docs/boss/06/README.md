@@ -1,12 +1,12 @@
 # Boss 06 — CONTINUITY WARDEN
 
-상태: **HUMAN-BOSS REDESIGN / DAMAGE PREFLIGHT PASS / RUNTIME IMPLEMENTATION NEXT / RUNTIME NOT IMPLEMENTED**
+상태: **HUMAN-BOSS REDESIGN / DAMAGE PREFLIGHT PASS / RUNTIME IMPLEMENTED / BROWSER GAMEPLAY VIEW VERIFIED / FULL PLAYTEST PENDING**
 
 이 문서는 기존 `PAD 03 Containment Clamp Security System` 기획을 대체하기 위한 Boss06 인간형 최종 보스 재설계 Blockout이다.
 
 - source ZIP SHA-256: `72be0adfc27e3f714024c6d0f6f331652b2d3d50c288fb32adc2f83b299edd4d`
 - imported Blockout Markdown은 저장소의 `git diff --check` 규칙에 맞춰 줄끝 공백만 정규화했으며, 정규화 전 원본 파일 SHA-256은 package manifest와 대조했다.
-- 이 변경은 authoring·Blockout·정적 preview 인계다. terminal Boss transition, Warden Runtime, boarding과 ending은 별도 구현 작업에서만 반영한다.
+- 현행 Blockout은 `BossStageSpec`·`ContinuityWardenRuntime`·terminal Boss transition·개별 boarding의 구현 기준이다. 실제 desktop/mobile·1~4인 Gameplay 검증은 별도 상태로 기록한다.
 
 ## 현재 기준
 
@@ -63,17 +63,13 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 - [`RUNTIME-ALIGNMENT.md`](./blockout-draft/RUNTIME-ALIGNMENT.md)
 - [`VALIDATION.md`](./blockout-draft/VALIDATION.md)
 
-## Runtime 주의
+## Runtime 연결
 
-이 패키지는 **기획/Blockout 인계**다. Boss06 Runtime 구현 완료를 주장하지 않는다.
-
-남은 핵심 구현:
-- post-6-8 terminal Boss transition
-- `continuity-warden` custom encounter runtime
-- frontal Guard/Counter를 위한 impact position 전달
-- Warden visual preset / renderer
-- terminal victory → Gate/Bridge/Shuttle → Boarding → `beginCompletion()`
-- multiplayer targeting / boarding completion 정책
+- `6-8` content boundary 뒤 regular `6-9` 없이 terminal `boss-06`을 삽입한다.
+- Warden body ImpactTarget 하나, 96×150 Polygon body, Guard/Counter 정면·후면 판정, Baton·Dash·Charge·LOW/HIGH Security와 snapshot/restore를 `ContinuityWardenRuntime`이 소유한다.
+- `MAP-PREVIEW.html`의 flat Main Runway, U1~U8·RR1/RR3, Ledge·Recovery·Gate·240px fall lane·Boarding Deck을 authored geometry로 실행한다. 실제 grappleable 집합은 U1~U8+RR1+RR3뿐이다.
+- 승리 뒤 Warden은 기절하고 Gate light/open → Threshold Bridge → Shuttle reveal → Player별 Boarding → 모든 active Player ready → `beginCompletion()` 순서로 진행한다. 첫 Player가 동료를 순간이동시키지 않는다.
+- Browser Gameplay View와 실제 1~4인·멀티 수렴은 구현 상태와 분리해 검증한다.
 
 ## 이전 초안 correction
 

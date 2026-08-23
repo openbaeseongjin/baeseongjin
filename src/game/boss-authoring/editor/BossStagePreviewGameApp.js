@@ -1,4 +1,5 @@
 import { GameApp } from "../../GameApp.js";
+import { BOSS_VULNERABILITY_TRIGGER } from "../BossStageSpec.js";
 import { defineBossStage } from "../../boss/BossStageDefinition.js";
 import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../../config.js";
 import { LocalAuthority } from "../../runtime/LocalAuthority.js";
@@ -72,6 +73,7 @@ export class BossStagePreviewGameApp extends GameApp {
             bossStageSpecResolver: (id) => (id === spec.id ? spec : null)
         });
         this.previewBossStageId = spec.id;
+        this.previewBossStageSpec = spec;
         this.previewRevision = previewRevision;
         this.previewFlight = new PreviewFlightController();
         this.debugWeakpointStrikeSequence = 0;
@@ -100,7 +102,9 @@ export class BossStagePreviewGameApp extends GameApp {
     debugStrikeWeakpoint() {
         const snapshot = this.authority.snapshot().bossStage;
         const targetId = snapshot?.vulnerability?.targetId ?? null;
-        if (snapshot?.status !== "active" || snapshot.vulnerability?.active !== true || !targetId) {
+        const phase = this.previewBossStageSpec.phases?.[Math.max(0, (snapshot?.phase ?? 1) - 1)];
+        const alwaysActive = phase?.vulnerability?.trigger === BOSS_VULNERABILITY_TRIGGER.ALWAYS_ACTIVE;
+        if (snapshot?.status !== "active" || (!alwaysActive && snapshot.vulnerability?.active !== true) || !targetId) {
             return Object.freeze({ accepted: false, reason: "boss-preview-weakpoint-unavailable" });
         }
         this.debugWeakpointStrikeSequence += 1;
@@ -108,7 +112,8 @@ export class BossStagePreviewGameApp extends GameApp {
             impactId: `${this.previewBossStageId}:preview-weakpoint:${this.debugWeakpointStrikeSequence}`,
             sourcePlayerId: this.authority.playerId,
             baseDamage: BOSS_PREVIEW_DEBUG_WEAKPOINT_DAMAGE,
-            targetId
+            targetId,
+            impactPosition: this.authority.ownerState().position
         });
     }
 

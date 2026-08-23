@@ -5,6 +5,7 @@ import {
     BOSS_MECHANIC_TYPE,
     BOSS_STAGE_SPEC_TYPE,
     BOSS_STAGE_SPEC_VERSION,
+    BOSS_TERMINAL_COMPLETION,
     BOSS_TRANSITION_TRIGGER,
     BOSS_VICTORY_PRESENTATION_ID,
     BOSS_VISUAL_PRESET_ID,
@@ -36,6 +37,7 @@ const EDITABLE_ROOTS = Object.freeze([
     "nextAreaId"
 ]);
 const ARENA_ENTRY_MAX_SUPPORT_DROP = 96;
+const SCANNER_CYCLE_KEYS = Object.freeze(["available", "warning", "locked", "reset"]);
 
 function issue(issues, file, code, details = {}) {
     issues.push({ file, code, ...details });
@@ -140,6 +142,7 @@ function validateArena(spec, issues, file) {
         }
     }
     const surfaceIds = new Set((arena?.surfaces ?? []).map(({ id }) => id));
+    const surfaceById = Object.fromEntries((arena?.surfaces ?? []).map((surface) => [surface.id, surface]));
     for (const anchor of arena?.anchors ?? []) {
         if (anchor.role !== BOSS_ANCHOR_ROLE.SWING_ATTACK) continue;
         if (typeof anchor.surfaceId !== "string" || !surfaceIds.has(anchor.surfaceId)) {
@@ -147,6 +150,38 @@ function validateArena(spec, issues, file) {
         }
     }
     if (!positive(arena?.baseHookReach)) issue(issues, file, "arena-hook-reach-invalid");
+    if (arena?.scannerGroups !== undefined) {
+        if (!Array.isArray(arena.scannerGroups)) issue(issues, file, "arena-scanner-groups-invalid");
+        else {
+            validateIds(arena.scannerGroups, issues, file, "arena-scanner-group");
+            const groupBySurfaceId = Object.create(null);
+            for (const group of arena.scannerGroups) {
+                const cycle = group?.cycle;
+                if (
+                    !isObject(cycle) ||
+                    SCANNER_CYCLE_KEYS.some((key) => !positive(cycle[key])) ||
+                    !Number.isFinite(group.phaseOffsetSeconds ?? 0)
+                ) {
+                    issue(issues, file, "arena-scanner-cycle-invalid", { id: group?.id ?? null });
+                }
+                if (!Array.isArray(group?.controlledSurfaceIds) || group.controlledSurfaceIds.length === 0) {
+                    issue(issues, file, "arena-scanner-surfaces-invalid", { id: group?.id ?? null });
+                    continue;
+                }
+                for (const surfaceId of group.controlledSurfaceIds) {
+                    const surface = surfaceById[surfaceId];
+                    if (!surface || surface.grappleable !== true || groupBySurfaceId[surfaceId]) {
+                        issue(issues, file, "arena-scanner-surface-reference-invalid", {
+                            id: group?.id ?? null,
+                            surfaceId
+                        });
+                        continue;
+                    }
+                    groupBySurfaceId[surfaceId] = group.id;
+                }
+            }
+        }
+    }
     if (arena?.routeEdges !== undefined) {
         if (!Array.isArray(arena.routeEdges)) {
             issue(issues, file, "arena-route-edges-invalid");
@@ -305,7 +340,10 @@ function validatePhases(spec, mechanicIds, issues, file) {
             if (!VULNERABILITY_TRIGGERS.includes(phase.vulnerability.trigger)) {
                 issue(issues, file, "phase-vulnerability-trigger-invalid", { id: phase.id });
             }
-            if (!positive(phase.vulnerability.durationSeconds)) {
+            if (
+                phase.vulnerability.trigger !== BOSS_VULNERABILITY_TRIGGER.ALWAYS_ACTIVE &&
+                !positive(phase.vulnerability.durationSeconds)
+            ) {
                 issue(issues, file, "phase-vulnerability-duration-invalid", { id: phase.id });
             }
             if (phase.vulnerability.offset !== undefined && !finitePoint(phase.vulnerability.offset)) {
@@ -331,7 +369,12 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
     if (spec.specType !== BOSS_STAGE_SPEC_TYPE) issue(issues, file, "spec-type-invalid");
     if (!/^boss-\d+$/.test(spec.id ?? "")) issue(issues, file, "boss-id-invalid");
     if (typeof spec.name !== "string" || spec.name.length === 0) issue(issues, file, "boss-name-invalid");
-    if (typeof spec.sourceAreaId !== "string" || typeof spec.nextAreaId !== "string") {
+    const terminalBoss = spec.nextAreaId === null;
+    if (
+        typeof spec.sourceAreaId !== "string" ||
+        (!terminalBoss && typeof spec.nextAreaId !== "string") ||
+        (terminalBoss && spec.transition?.terminalCompletion !== BOSS_TERMINAL_COMPLETION.ALL_ACTIVE_BOARDING)
+    ) {
         issue(issues, file, "boss-transition-area-invalid");
     }
     validateArena(spec, issues, file);
@@ -355,6 +398,9 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
         spec.transition.nextAreaId !== spec.nextAreaId ||
         spec.transition.entryTrigger !== BOSS_TRANSITION_TRIGGER.CHECKPOINT_COMPLETE ||
         spec.transition.victoryTrigger !== BOSS_TRANSITION_TRIGGER.ALL_PHASES_DEPLETED ||
+        (terminalBoss
+            ? spec.transition.terminalCompletion !== BOSS_TERMINAL_COMPLETION.ALL_ACTIVE_BOARDING
+            : spec.transition.terminalCompletion !== undefined) ||
         !Object.values(BOSS_VICTORY_PRESENTATION_ID).includes(spec.transition.victoryPresentationId)
     ) {
         issue(issues, file, "boss-transition-invalid");

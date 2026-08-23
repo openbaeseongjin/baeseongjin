@@ -611,6 +611,7 @@ export class OwnerPredictionRuntime {
                         sourcePlayerId: event.sourcePlayerId,
                         targetId: event.targetId,
                         targetKind: event.targetKind ?? "enemy",
+                        impactPosition: event.impactPosition,
                         damage: event.damage
                     })
                 })

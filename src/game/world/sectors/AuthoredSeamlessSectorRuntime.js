@@ -13,7 +13,7 @@ import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
 import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v12-multi-boss-stage";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v13-terminal-boss-stage";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
@@ -456,7 +456,7 @@ function registerAccessModuleSource(accessModuleById, { id, sectorId, landmarkId
     module.sources.push(source);
 }
 
-function bossStageSurface(surface, dx, dy, stageId) {
+function bossStageSurface(surface, dx, dy, stageId, grappleAccessGroup = null) {
     const bounds = shiftBounds(surface.bounds, dx, dy);
     return freezeValue({
         id: surface.id,
@@ -467,6 +467,10 @@ function bossStageSurface(surface, dx, dy, stageId) {
         oneWayEdgeEnd: surface.oneWay === true ? 1 : undefined,
         grappleable: surface.grappleable !== false,
         ...(surface.losOccluder === true ? { losOccluder: true } : {}),
+        ...(grappleAccessGroup ? { grappleAccessGroup } : {}),
+        ropeOccluder: surface.ropeOccluder !== false,
+        projectileOccluder: surface.projectileOccluder !== false,
+        renderable: surface.renderable !== false,
         x: bounds.x,
         y: bounds.y,
         width: bounds.width,
@@ -483,20 +487,30 @@ function createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, 
     const bounds = shiftBounds(spec.arena.bounds, dx, dy);
     const entry = shiftPoint(spec.arena.entry, dx, dy);
     const exit = shiftPoint(spec.arena.exit, dx, dy);
+    const scannerGroupBySurfaceId = Object.create(null);
+    for (const group of spec.arena.scannerGroups ?? []) {
+        for (const surfaceId of group.controlledSurfaceIds) scannerGroupBySurfaceId[surfaceId] = group.id;
+    }
     return freezeValue({
         id: spec.id,
         specRevision: spec.schemaVersion,
         sourceAreaId: spec.sourceAreaId,
         sourceLandmarkId: sourceLandmark.id,
-        targetLandmarkId: targetLandmark.id,
+        targetLandmarkId: targetLandmark?.id ?? null,
         entryRouteId,
+        terminalCompletion: spec.transition?.terminalCompletion ?? null,
         bounds,
         sourceTrigger: routeMouthBounds(sourceLandmark.exit),
         entry,
         exit,
         exitTrigger: routeMouthBounds(exit),
-        targetEntry: targetLandmark.entry,
-        surfaces: spec.arena.surfaces.map((surface) => bossStageSurface(surface, dx, dy, spec.id)),
+        targetEntry: targetLandmark?.entry ?? null,
+        surfaces: spec.arena.surfaces.map((surface) =>
+            bossStageSurface(surface, dx, dy, spec.id, scannerGroupBySurfaceId[surface.id] ?? null)
+        ),
+        scannerGroups: (spec.arena.scannerGroups ?? []).map((group) =>
+            freezeValue({ ...group, bossStageId: spec.id, areaId: spec.id })
+        ),
         mechanics: spec.mechanics.map((mechanic) =>
             freezeValue({
                 ...mechanic,
@@ -918,18 +932,22 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             bossStages.push(bossStage);
             surfaces.push(...bossStage.surfaces);
             route.push(...bossStage.route);
+            scannerGroups.push(...bossStage.scannerGroups);
         }
     }
 
     for (const spec of configuredBossStageSpecs) {
         if (bossStages.some(({ id }) => id === spec.id)) continue;
         const sourceLandmark = landmarks.find((landmark) => bossAreaMatches(landmark, spec.sourceAreaId));
-        const targetLandmark = landmarks.find((landmark) => bossAreaMatches(landmark, spec.nextAreaId));
-        if (!sourceLandmark || !targetLandmark) continue;
+        const targetLandmark = spec.nextAreaId
+            ? landmarks.find((landmark) => bossAreaMatches(landmark, spec.nextAreaId))
+            : null;
+        if (!sourceLandmark || (spec.nextAreaId && !targetLandmark)) continue;
         const bossStage = createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, null);
         bossStages.push(bossStage);
         surfaces.push(...bossStage.surfaces);
         route.push(...bossStage.route);
+        scannerGroups.push(...bossStage.scannerGroups);
     }
 
     const accessModules = Object.freeze(Object.values(accessModuleById).map((module) => freezeValue(module)));

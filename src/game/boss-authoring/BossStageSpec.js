@@ -38,15 +38,19 @@ export const BOSS_MECHANIC_TYPE = Object.freeze({
     ROTATING_GROUND_SLAM: "rotating-ground-slam",
     DIAGONAL_DIVE: "diagonal-dive",
     PHASE_REPOSITION: "phase-reposition",
+    CENTRAL_EXCHANGE_MAINTENANCE: "central-exchange-maintenance-system",
     RESIDENT_SECURITY_SYSTEM: "residential-security-system",
-    CONTINUITY_CONTROL_CORE: "continuity-control-core"
+    CONTINUITY_CONTROL_CORE: "continuity-control-core",
+    CONTINUITY_WARDEN: "continuity-warden"
 });
 
 export const BOSS_VISUAL_PRESET_ID = Object.freeze({
     GATE_LOCKING_CARRIAGE: "gate-locking-carriage",
     RESIDENTIAL_SECURITY_PURSUER: "residential-security-pursuer",
+    CENTRAL_EXCHANGE_MAINTENANCE: "central-exchange-maintenance-system",
     RESIDENTIAL_SECURITY_HUB: "residential-security-hub",
-    CONTINUITY_CONTROL_CORE: "continuity-control-core"
+    CONTINUITY_CONTROL_CORE: "continuity-control-core",
+    CONTINUITY_WARDEN: "continuity-warden"
 });
 
 export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
@@ -56,6 +60,9 @@ export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
     REAR_THRUSTER: "boss-02:rear-thruster",
     LOWER_STABILIZER: "boss-02:lower-stabilizer",
     CENTRAL_SENSOR: "boss-02:central-sensor",
+    EXCHANGE_LEFT_MODULE: "boss-03:left-inspection-module",
+    EXCHANGE_RIGHT_MODULE: "boss-03:right-inspection-module",
+    EXCHANGE_CENTRAL_CORE: "boss-03:central-core",
     GUARD_A_BODY: "boss-04:guard-a:body",
     GUARD_A_REAR_THRUSTER: "boss-04:guard-a:rear-thruster",
     GUARD_B_BODY: "boss-04:guard-b:body",
@@ -64,14 +71,16 @@ export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
     AUX_A_COUPLING: "boss-05:aux-a:coupling",
     AUX_B_COUPLING: "boss-05:aux-b:coupling",
     MAIN_COUPLING: "boss-05:main:coupling",
-    CONTINUITY_CORE: "boss-05:continuity-core"
+    CONTINUITY_CORE: "boss-05:continuity-core",
+    CONTINUITY_WARDEN_BODY: "boss-06:continuity-warden:body"
 });
 
 export const BOSS_VULNERABILITY_TRIGGER = Object.freeze({
     MAX_EXTENSION: "max-extension",
     SWEEP_COMPLETE: "sweep-complete",
     BEAM_FAILURE: "beam-failure",
-    VALID_ARCHITECTURE_IMPACT: "valid-architecture-impact"
+    VALID_ARCHITECTURE_IMPACT: "valid-architecture-impact",
+    ALWAYS_ACTIVE: "always-active"
 });
 
 export const BOSS_TRANSITION_TRIGGER = Object.freeze({
@@ -79,11 +88,17 @@ export const BOSS_TRANSITION_TRIGGER = Object.freeze({
     ALL_PHASES_DEPLETED: "all-phases-depleted"
 });
 
+export const BOSS_TERMINAL_COMPLETION = Object.freeze({
+    ALL_ACTIVE_BOARDING: "all-active-boarding"
+});
+
 export const BOSS_VICTORY_PRESENTATION_ID = Object.freeze({
     POWER_LOSS_FULL_STOP: "boss-01:power-loss-full-stop",
     PURSUER_SHUTDOWN: "boss-02:pursuer-shutdown",
+    EXCHANGE_MAINTENANCE_OFFLINE: "boss-03:maintenance-override-offline",
     RESIDENT_SECURITY_OFFLINE: "boss-04:resident-security-offline",
-    CONTROL_LOST: "boss-05:control-lost"
+    CONTROL_LOST: "boss-05:control-lost",
+    CONTINUITY_WARDEN_DEFEATED: "boss-06:continuity-warden-defeated"
 });
 
 export const BOSS_HEALTH_BAR_STYLE = Object.freeze({
