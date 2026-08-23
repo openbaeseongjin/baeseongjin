@@ -1,6 +1,5 @@
 import { assertAuthoredCoordinateAnchor } from "./AuthoredCoordinateAnchor.js";
 import { resolveObjectTriggerBounds } from "./areas/AreaDefinition.js";
-import { GRAPPLE_LINK_BUDGET, ropeHookReach } from "../config.js";
 
 function issue(code, areaId, details = {}) {
     return Object.freeze({ code, areaId, ...details });
@@ -65,49 +64,6 @@ function patrolPoints(patrol) {
     if (Array.isArray(patrol?.route)) return patrol.route;
     if (patrol?.corridor) return [patrol.corridor.start, patrol.corridor.end];
     return [];
-}
-
-function surfaceCenter(surface) {
-    if (surface.coordinateAnchor === "center" && Number.isFinite(surface.position?.x)) {
-        return { x: surface.position.x, y: surface.position.y };
-    }
-    const vertices = surface.vertices ?? [];
-    if (vertices.length === 0) return surface.position ?? { x: 0, y: 0 };
-    const total = vertices.reduce((acc, vertex) => ({ x: acc.x + vertex.x, y: acc.y + vertex.y }), { x: 0, y: 0 });
-    return { x: total.x / vertices.length, y: total.y / vertices.length };
-}
-
-function surfaceSize(surface) {
-    const vertices = surface.vertices ?? [];
-    if (vertices.length === 0) return { width: 0, height: 0 };
-    const xs = vertices.map(({ x }) => x);
-    const ys = vertices.map(({ y }) => y);
-    return { width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
-}
-
-function disconnectedGrappleSurfaces(area, maxAttachDistance) {
-    const grappleSurfaces = area.surfaces.filter((surface) => surface.grappleable !== false);
-    const centers = grappleSurfaces.map((surface) => ({ surface, center: surfaceCenter(surface) }));
-    const visited = new Set();
-    const pending = centers.length > 0 ? [0] : [];
-
-    while (pending.length > 0) {
-        const currentIndex = pending.pop();
-        if (visited.has(currentIndex)) continue;
-        visited.add(currentIndex);
-        const current = centers[currentIndex];
-        for (const [neighborIndex, neighbor] of centers.entries()) {
-            if (visited.has(neighborIndex)) continue;
-            if (
-                Math.hypot(current.center.x - neighbor.center.x, current.center.y - neighbor.center.y) <=
-                maxAttachDistance
-            ) {
-                pending.push(neighborIndex);
-            }
-        }
-    }
-
-    return centers.filter((_, index) => !visited.has(index)).map(({ surface }) => surface);
 }
 
 const PRESENTATION_FILE_PATTERN = /(?:^|[\\/])assets[\\/]|\.(?:png|jpe?g|webp|gif|wav|mp3|ogg|m4a|aac)(?:$|[?#])/i;
@@ -179,7 +135,7 @@ function validateGrappleLandmarks(area, issues) {
     }
 }
 
-export function validateAreaCatalog(catalog, { maxAttachDistance = GRAPPLE_LINK_BUDGET } = {}) {
+export function validateAreaCatalog(catalog) {
     const issues = [];
     const areaIds = new Set(catalog.areas.map(({ id }) => id));
     const globalIds = new Set();
@@ -217,15 +173,8 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = GRAPPLE_LINK_
         globalIds.add(area.gate.id);
 
         for (const surface of area.surfaces) {
-            const size = surfaceSize(surface);
-            if (
-                surface.collision !== false &&
-                surface.renderable !== false &&
-                surface.oneWay === false &&
-                surface.grappleable === false &&
-                size.width > size.height
-            ) {
-                issues.push(issue("solid-horizontal-not-grappleable", area.id, { id: surface.id }));
+            if (surface.collision !== false && surface.grappleable !== true) {
+                issues.push(issue("collision-surface-not-grappleable", area.id, { id: surface.id }));
             }
             try {
                 assertAuthoredCoordinateAnchor(surface.coordinateAnchor, `${surface.id}.coordinateAnchor`);
@@ -248,14 +197,6 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = GRAPPLE_LINK_
             if (!pointInside(area.bounds, routePoint))
                 issues.push(issue("route-bounds", area.id, { id: routePoint.id }));
             if (routeIndex === 0) continue;
-        }
-        for (const surface of disconnectedGrappleSurfaces(area, maxAttachDistance)) {
-            issues.push(
-                issue("grapple-surface-isolated", area.id, {
-                    id: surface.id,
-                    limit: maxAttachDistance
-                })
-            );
         }
         for (const object of area.objects) {
             if (!pointInside(area.bounds, object.position))

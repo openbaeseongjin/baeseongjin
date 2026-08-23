@@ -115,6 +115,8 @@ index.html
 
 ## 공용 지형 물리와 플레이어 강체 회전
 
+- authored Area·Boss arena와 Runtime이 만드는 정적 collision platform·wall은 one-way 여부와 무관하게 모두 `grappleable: true`다. 정적 collision surface에 `grappleable: false`를 두지 않으며 validator가 거부한다. Boss 본체·적·투사체·damage hazard처럼 플랫폼이 아닌 actor collision은 이 규칙 밖에서 각 capability가 부착 가능 여부를 소유한다.
+
 Player·Enemy·Projectile의 선형 운동은 `PhysicsMixin`을 공유한다. Player는 회전 capability인 `AngularPhysicsMixin`을 추가하고 Rope 관절은 외부 Has-A 컴포넌트로 조립한다.
 
 - `PhysicsMixin`은 `position`·`velocity`·`acceleration` 세 벡터를 소유한다. gameplay impulse와 force는 acceleration에 누적되고 공용 tick이 acceleration을 velocity에 합친 뒤 position을 적분하고 accumulator를 초기화한다. `withSurfacePhysics`는 그 위에 질량·motion type·공개 `Collider`를 조립하고 현재 활성 collision surface와 다른 actor body를 해결하는 단일 좌표 변경 경계다. `PlayerPhysics`와 `EnemyObject`, Rail에 구속된 Boss `KinematicPhysicsBody`가 같은 mixin을 사용한다. 공용 collider geometry가 circle↔circle, circle↔polygon, polygon↔polygon contact를 계산한다. `dynamic` body는 inverse-mass 보정과 상대 법선 속도 impulse를 받고, `kinematic` body는 authored velocity를 제공하지만 inverse mass 0으로 궤적을 보존한다. `canGroundActors: false` body는 같은 manifold를 사용하되 상대 actor의 지면이 되지 않는다. 접선 속도는 보존하며 `sentry` 고정형 Turret만 `static` body다.

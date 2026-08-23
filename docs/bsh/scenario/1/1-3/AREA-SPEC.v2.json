@@ -179,7 +179,7 @@
         "id": "sector-01-03:upper-cover",
         "kind": "cover",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": -32,
@@ -353,7 +353,7 @@
         "id": "sector-01-03:annex-cover-security-console",
         "kind": "cover",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 1328,
@@ -382,7 +382,7 @@
         "id": "sector-01-03:annex-cover-power-rack",
         "kind": "cover",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 1600,

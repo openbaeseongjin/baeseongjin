@@ -276,7 +276,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-03:service-core",
         "kind": "solid",
         "losBlocker": true,

@@ -114,7 +114,7 @@
         "id": "door-a",
         "kind": "scenario-surface",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -992,
@@ -174,7 +174,7 @@
         "id": "door-b",
         "kind": "scenario-surface",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": 760,

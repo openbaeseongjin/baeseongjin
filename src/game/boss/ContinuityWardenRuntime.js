@@ -169,7 +169,7 @@ function translatedBounds(value, offset = { x: 0, y: 0 }) {
     });
 }
 
-function collisionSurface(id, kind, value, offset, grappleable = false) {
+function collisionSurface(id, kind, value, offset, grappleable = true) {
     const translated = translatedBounds(value, offset);
     return freezeComposite({
         id,
@@ -853,7 +853,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                     "threshold-bridge",
                     this.config.bridgeBounds,
                     worldOffset,
-                    false
+                    true
                 )
             ]);
         }
@@ -863,7 +863,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 "departure-gate",
                 this.config.gateBounds,
                 worldOffset,
-                false
+                true
             )
         ]);
     }

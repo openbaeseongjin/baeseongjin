@@ -54,7 +54,7 @@
         "id": "R0",
         "kind": "recovery",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -330,
@@ -87,7 +87,7 @@
         "id": "R1",
         "kind": "recovery",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": 330,
@@ -120,7 +120,7 @@
         "id": "R2",
         "kind": "recovery",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -330,

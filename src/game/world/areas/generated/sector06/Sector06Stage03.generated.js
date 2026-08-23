@@ -696,7 +696,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "R1",
         "kind": "recovery",
         "maxRetrySeconds": 5,
@@ -726,7 +726,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "R2",
         "kind": "recovery",
         "maxRetrySeconds": 5,
@@ -756,7 +756,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "R3",
         "kind": "recovery",
         "maxRetrySeconds": 5,

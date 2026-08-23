@@ -576,7 +576,7 @@
           "x": 2420,
           "y": -2685
         },
-        "grappleable": false,
+        "grappleable": true,
         "id": "boss-05:rooftop-gate",
         "kind": "architecture",
         "oneWay": false

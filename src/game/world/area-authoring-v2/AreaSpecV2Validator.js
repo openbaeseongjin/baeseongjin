@@ -142,6 +142,11 @@ function validateEditableWind(issues, file, zone) {
 function validateEditableRuntimeFields(issues, file, definition) {
     const bounds = definition?.bounds;
     if (!bounds || !Number.isFinite(bounds.width) || !Number.isFinite(bounds.height)) return;
+    for (const surface of definition.surfaces ?? []) {
+        if (surface.collision !== false && surface.grappleable !== true) {
+            issue(issues, file, "collision-surface-not-grappleable", { id: surface.id ?? null });
+        }
+    }
     for (const object of definition.objects ?? []) {
         if (isEditableEnemyObject(object)) validateEditableEnemy(issues, file, object, bounds);
     }

@@ -415,7 +415,7 @@
         "kind": "design-reference",
         "collision": false,
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "center",
         "position": {
           "x": 0,

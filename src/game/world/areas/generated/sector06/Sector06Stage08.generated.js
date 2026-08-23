@@ -444,7 +444,7 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "disconnected": true,
-        "grappleable": false,
+        "grappleable": true,
         "id": "R1",
         "kind": "recovery",
         "landingOnly": true,
@@ -477,7 +477,7 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "disconnected": true,
-        "grappleable": false,
+        "grappleable": true,
         "id": "R2",
         "kind": "recovery",
         "landingOnly": true,
@@ -510,7 +510,7 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "disconnected": true,
-        "grappleable": false,
+        "grappleable": true,
         "id": "R3",
         "kind": "recovery",
         "landingOnly": true,

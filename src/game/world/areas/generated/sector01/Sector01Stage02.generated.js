@@ -442,7 +442,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-02:counterweight-tower",
         "kind": "counterweight-tower",
         "oneWay": false,
@@ -471,7 +471,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-02:hoist-casing-left",
         "kind": "hoist-casing",
         "oneWay": false,
@@ -500,7 +500,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-02:hoist-casing-right",
         "kind": "hoist-casing",
         "oneWay": false,

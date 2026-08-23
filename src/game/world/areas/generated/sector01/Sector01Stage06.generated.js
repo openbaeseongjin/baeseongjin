@@ -603,7 +603,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-06:wind-baffle",
         "kind": "solid",
         "oneWay": false,

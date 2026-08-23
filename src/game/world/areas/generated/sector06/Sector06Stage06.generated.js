@@ -414,7 +414,7 @@ const SPEC = {
       {
         "activation": "OUT",
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "R0",
         "kind": "recovery",
         "landingOnly": true,
@@ -447,7 +447,7 @@ const SPEC = {
       {
         "activation": "OUT",
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "R1",
         "kind": "recovery",
         "landingOnly": true,

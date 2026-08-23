@@ -352,7 +352,7 @@ const SPEC = {
           "C3"
         ],
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "recovery-r1",
         "kind": "recovery",
         "oneWay": true,
@@ -442,7 +442,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "preview-terrace",
         "kind": "access-terrace",
         "oneWay": true,
@@ -500,7 +500,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "terrace-c1",
         "kind": "access-terrace",
         "oneWay": true,
@@ -529,7 +529,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "terrace-c2",
         "kind": "access-terrace",
         "oneWay": true,
@@ -558,7 +558,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "terrace-c3",
         "kind": "access-terrace",
         "oneWay": true,
@@ -616,7 +616,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "upper-terrace",
         "kind": "access-terrace",
         "oneWay": true,

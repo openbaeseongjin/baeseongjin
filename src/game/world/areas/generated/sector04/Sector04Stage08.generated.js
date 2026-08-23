@@ -1095,7 +1095,7 @@ const SPEC = {
       {
         "blockedByObjectiveId": "sector-04-08:quorum-read",
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-04-08:quorum-interlock-barrier",
         "kind": "sector-transit-barrier",
         "oneWay": false,

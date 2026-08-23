@@ -581,7 +581,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-08:ring-divider",
         "kind": "solid",
         "oneWay": false,

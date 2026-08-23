@@ -16,7 +16,7 @@
 
 - PC·모바일 이동, 점프, 로프 부착·접선 스윙·해제
 - 손에서 실제 비행하는 Hook과 `1200px/s × 1/3초 = 400px`, 발사 실패·취소 뒤 1초 재발사 대기와 부착 로프 해제 뒤 별도 0.1초 대기
-- 모든 암석 표면 부착과 수평 발판의 아래→위 통과
+- 모든 정적 collision 플랫폼·벽 표면 부착과 수평 발판의 아래→위 통과
 - 시드 기반 48단계 수직 월드와 카메라 추적 프로토타입
 - 기본 자동 공격은 비활성화하고 성공한 로프 스윙 뒤 부착 또는 해제 carry 안의 고속 몸체 충돌을 기본 공격으로 사용한다. `AutomaticWeaponObject`는 후속 기능용으로 보존한다.
 - authored activation·Cover LOS를 유지한 체력 100·인식 760px·탄속 520px/s·재사격 1.0초 Sentry
@@ -38,7 +38,7 @@
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
-- [0.61.0 / #920] Boss Polygon Rope는 손→조준 ray의 앞면 교점, body-local anchor, 선속도+회전 접선속도 joint와 owner/server/remote 동일 transform 복원을 사용한다. Boss04 Hub는 실제 grappleable surface, Boss05 Core/Wall과 Boss06 body는 기획대로 non-grappleable이다.
+- [0.62.0] Boss Polygon Rope는 손→조준 ray의 앞면 교점, body-local anchor, 선속도+회전 접선속도 joint와 owner/server/remote 동일 transform 복원을 사용한다. Boss04 Hub와 Boss05 Core/Wall, Boss06의 정적 Main/Ledge/Gate는 collision platform으로서 Ropeable이며, Boss06 body는 플랫폼이 아닌 actor라 부착 대상이 아니다.
 - Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display·Augment Node 위치, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
 - `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 gap-0 경계의 통과·하단 복구, authored Gate→Entry portal, Access/Jammer/proof 권위를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션

@@ -748,7 +748,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "authorized-ascent-front-lock",
         "kind": "scenario-surface",
         "oneWay": true,
@@ -778,7 +778,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "priority-routing-matrix",
         "kind": "scenario-surface",
         "oneWay": true,

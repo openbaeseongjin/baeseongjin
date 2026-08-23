@@ -92,7 +92,7 @@
         "id": "sector-02-03:service-core",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "losBlocker": true,
         "coordinateAnchor": "bottom-center",
         "position": {

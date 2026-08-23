@@ -277,13 +277,13 @@ Boss defeat 순간 자동 completion으로 넘어가지 않는다.
 
 ## 10. Map Collision Hard Contract
 
-- Main: one flat rectangle, grappleable false
-- Ledge L/R: collision true, grappleable false
+- Main: one flat rectangle, grappleable true
+- Ledge L/R: collision true, grappleable true
 - U1~U8: swing-attack anchors
 - RR1/RR3: swing-attack recovery anchors
 - Emitter: collision false, grappleable false, ropeOccluder false
 - Beam: `activeHazards()` only
-- Gate: Main lane 밖 combat-time blocker
+- Gate: Main lane 밖 combat-time blocker, grappleable true
 - Warden: dynamic body, not grapple target, not ground surface
 
 Map Editor Gameplay View를 저장 적용 전 필수 Gate로 사용한다.

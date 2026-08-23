@@ -160,7 +160,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                     x: 1000,
                     y: -1100
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-06:main-runway",
                 kind: "main-security-runway"
             },
@@ -171,7 +171,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                     x: 1790,
                     y: -1380
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-06:ledge-left",
                 kind: "raised-ledge"
             },
@@ -182,7 +182,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                     x: 3100,
                     y: -1380
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-06:ledge-right",
                 kind: "raised-ledge"
             },
@@ -193,7 +193,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                     x: 540,
                     y: -690
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-06:recovery-left",
                 kind: "recovery-deck"
             },
@@ -204,7 +204,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                     x: 4120,
                     y: -690
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-06:recovery-right",
                 kind: "recovery-deck"
             },
@@ -215,7 +215,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                     x: 4360,
                     y: -1115
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-06:departure-deck",
                 kind: "departure-deck"
             },
