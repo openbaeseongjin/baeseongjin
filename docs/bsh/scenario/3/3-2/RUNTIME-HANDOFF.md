@@ -57,7 +57,7 @@ Preserve exact System copy:
 Barks are planning-only until Bark layer exists.
 
 ## Exit
-Preserve final-deck → exit-panel → physical crossing → 3-3.
+Preserve final-deck → exit-panel → authored Gate trigger. Trigger를 통과한 Player 한 명만 3-3 authored Entry로 텔레포트하며 별도 Stage 상태나 Runtime 연결 지형을 만들지 않는다.
 
 ## Mandatory validation
 - scanner deterministic in multiplayer

@@ -960,6 +960,7 @@ const SPEC = {
       "anchors",
       "recoveryRoute",
       "enemySlots",
+      "worldObjects",
       "wind",
       "camera"
     ],

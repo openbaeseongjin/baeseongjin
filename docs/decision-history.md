@@ -203,3 +203,10 @@
 - 대체: 과거 Area/Gate migration 계획과 완료된 P0 patch package는 이력 요약만 남기고 삭제한다. 멀티 권위는 `multiplayer-synchronization.md`, 월드 구조는 `architecture.md`, 현재 통합 상태는 `scenario-development-integration.md`, AREA-SPEC 저작 규칙은 `AREA-SPEC-AUTHORING-STANDARD.md`가 각각 단독 소유한다.
 - 영향: 같은 Sector의 `sector-seam`은 정적이며 `progression.requiredObjectiveIds`는 논리 authoring metadata일 뿐 물리 surface 생성·제거 지시가 아니다. Sector 간 `access-transit-lock`만 동적 blocker의 예외다.
 - 검증 상태: 0.46.0 `seamless-sector-runtime-v9`에서 intra-Sector 동적 surface를 21개에서 0개로 제거했고, Sector transit barrier 4개만 진행 상태에 반응함을 재현 명령으로 확인했다.
+
+## [L1] 2026-08-23 · Runtime 합성 Stage 지형을 Editor-authored portal 맵으로 대체한다
+
+- 이전: Runtime compiler가 각 Stage 양옆의 `city-wing`, 출구와 다음 Entry 사이 `sector-seam`, Sector Access `transit barrier`, flat Area 좌우 벽·층간 격벽을 생성했다. 2026-08-19 수정은 이 합성 충돌을 제거하지 않고 Player 폭 이상의 하강 개구부 하나만 요구했다.
+- 대체: 일반 Stage bounds·surface·wall·divider·world object 위치는 Map Editor canonical `AREA-SPEC.v2.json`만 소유한다. Runtime derived geometry는 0개이며 authored Gate를 통과한 Player 한 명만 다음 authored Entry로 텔레포트한다.
+- 영향: Stage-local X/Y를 연속 world bridge endpoint로 해석하지 않는다. `currentStageId`는 새 상태로 저장하지 않고 Player 위치와 기존 `respawnAnchorId`만 사용한다. Access 진행은 portal 사용 가능 여부만 바꾸며 collision geometry를 생성·제거하지 않는다.
+- 검증 상태: `validateProductionMapParity.mjs`가 48개 landmark surface의 authored exact match·derived 0·Editor entity 전수 노출·44개 Gate→Entry portal·Stage 격리를 검사한다.

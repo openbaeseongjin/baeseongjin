@@ -1,4 +1,5 @@
 import { resolveObjectTriggerBounds } from "../../areas/AreaDefinition.js";
+import { stageSavePointBounds } from "../../StageSavePointGeometry.js";
 import { AreaEntryEditorComponent } from "./AreaEntryEditorComponent.js";
 import { AreaExitEditorComponent } from "./AreaExitEditorComponent.js";
 
@@ -37,6 +38,10 @@ function enemyActivationBounds(object) {
     return object.activation ?? null;
 }
 
+function isEditableWorldObject(object, definition) {
+    return !isEnemyObject(object) && object?.kind !== "wind-source" && object?.gateId !== definition.gate?.id;
+}
+
 function addPointEntities(result, entries, domain, kind, path) {
     for (const [index, entry] of (entries ?? []).entries()) {
         if (!finitePoint(entry)) continue;
@@ -72,6 +77,7 @@ export function collectEditorEntities(spec) {
                 id: entryComponent.id,
                 kind: "entry",
                 point: entryComponent.point,
+                bounds: stageSavePointBounds(entryComponent.point),
                 path: "/definition/entry",
                 sourceId: entryComponent.supportSurface.id
             })
@@ -148,6 +154,17 @@ export function collectEditorEntities(spec) {
                     point: object.position,
                     path: `/definition/objects/${index}`,
                     sourceId: object.windZoneId ?? null
+                })
+            );
+        }
+        if (isEditableWorldObject(object, definition)) {
+            result.push(
+                entity({
+                    domain: "worldObjects",
+                    id: object.id,
+                    kind: object.kind,
+                    point: object.position,
+                    path: `/definition/objects/${index}`
                 })
             );
         }
@@ -259,6 +276,31 @@ function translateSurface(surface, delta) {
     }
 }
 
+function translateBounds(bounds, delta) {
+    if (!bounds) return;
+    bounds.x += delta.x;
+    bounds.y += delta.y;
+}
+
+function translateObjectLayout(object, delta) {
+    object.position.x += delta.x;
+    object.position.y += delta.y;
+    translateBounds(object.bounds, delta);
+    translateBounds(object.activation, delta);
+    for (const point of object.patrol?.points ?? []) {
+        point.x += delta.x;
+        point.y += delta.y;
+    }
+    for (const point of object.patrol?.route ?? []) {
+        point.x += delta.x;
+        point.y += delta.y;
+    }
+    for (const point of [object.patrol?.corridor?.start, object.patrol?.corridor?.end].filter(Boolean)) {
+        point.x += delta.x;
+        point.y += delta.y;
+    }
+}
+
 export function translateEditorEntity(spec, selected, delta) {
     if (!selected || !finitePoint(delta)) throw new TypeError("editor-translate-invalid");
     const next = structuredClone(spec);
@@ -303,6 +345,12 @@ export function translateEditorEntity(spec, selected, delta) {
         if (!object) throw new TypeError("editor-entity-not-found");
         object.position.x += delta.x;
         object.position.y += delta.y;
+        return next;
+    }
+    if (selected.domain === "worldObjects") {
+        const object = definition.objects.find(({ id }) => id === selected.id);
+        if (!object || !isEditableWorldObject(object, definition)) throw new TypeError("editor-entity-not-found");
+        translateObjectLayout(object, delta);
         return next;
     }
     if (selected.kind === "wind-zone") {

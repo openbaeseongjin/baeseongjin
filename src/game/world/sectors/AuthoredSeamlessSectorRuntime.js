@@ -8,14 +8,12 @@ import { SECTOR_05_AREA_CATALOG } from "../areas/sector05/Sector05AreaCatalog.js
 import { SECTOR_06_AREA_CATALOG } from "../areas/sector06/Sector06AreaCatalog.js";
 import { AUTHORED_SECTOR_CATALOG, buildAuthoredSectorCatalog } from "./AuthoredSectorCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
-import { GRAPPLE_LINK_BUDGET, ROPE_CONFIG, ropeHookReach } from "../../config.js";
 import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
 import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v13-terminal-boss-stage";
-export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
-export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-stage-portal-runtime-v14-six-boss-stage";
+export const AUTHORED_STAGE_ISOLATION_GAP = 1024;
 
 const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_01_AREA_CATALOG,
@@ -26,35 +24,9 @@ const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_06_AREA_CATALOG
 ]);
 const BOSS_ARENA_ISOLATION_X = 7000;
-export const SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID = Object.freeze({
-    "sector-01": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
-    "sector-02": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
-    "sector-03": 12416,
-    "sector-04": 18432,
-    "sector-05": 22528,
-    "sector-06": 16384
-});
-const SECTOR_HALF_WIDTH = SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5;
-const CITY_WING_INSET = 96;
-const CITY_WING_CORE_GAP = 64;
-const CITY_WING_THICKNESS = 32;
-export const CONTENT_BOUNDARY_ISOLATION_GAP =
-    Math.max(...Object.values(SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID)) +
-    ropeHookReach(ROPE_CONFIG) +
-    GRAPPLE_LINK_BUDGET;
-const TRANSIT_BARRIER_THICKNESS = 24;
-const TRANSIT_BARRIER_LATERAL_MARGIN = GRAPPLE_LINK_BUDGET;
-const AREA_BOUNDARY_KIND_LOOKUP = Object.freeze({
-    "area-boundary-wall": true,
-    "inter-floor-divider": true
-});
 const ENEMY_OBJECT_KIND_LOOKUP = Object.freeze({
     sentry: true,
     "patrol-drone": true
-});
-const STAGE_DOOR_KIND_LOOKUP = Object.freeze({
-    gate: true,
-    "gate-panel": true
 });
 
 function freezeValue(value) {
@@ -113,7 +85,7 @@ function shiftSurface(surface, dx, dy, landmark, sourceAreaId, objectiveIdBySour
 }
 
 function shiftObject(object, dx, dy, landmark, objectiveIdBySourceId, routeLockId) {
-    const { areaId: _areaId, gateId: _gateId, ...rest } = object;
+    const { areaId: _areaId, ...rest } = object;
     return freezeValue({
         ...rest,
         landmarkId: landmark.id,
@@ -123,69 +95,7 @@ function shiftObject(object, dx, dy, landmark, objectiveIdBySourceId, routeLockI
         ...(object.activation ? { activation: shiftBounds(object.activation, dx, dy) } : {}),
         ...(object.patrol ? { patrol: shiftPatrol(object.patrol, dx, dy) } : {}),
         ...(object.objectiveId ? { objectiveId: objectiveIdBySourceId[object.objectiveId] ?? object.objectiveId } : {}),
-        ...(_gateId && routeLockId ? { routeLockId } : {})
-    });
-}
-
-function walkingSurfaceAt(surfaces, point) {
-    return surfaces
-        .filter(
-            (surface) => surface.topY === point.y + 32 && surface.x <= point.x && surface.x + surface.width >= point.x
-        )
-        .sort((left, right) => left.width - right.width)[0];
-}
-
-function horizontalConnectorVertices(start, end, surfaces, thickness) {
-    if (start.y !== end.y) return undefined;
-    const sourceSupport = walkingSurfaceAt(surfaces, start);
-    const targetSupport = walkingSurfaceAt(surfaces, end);
-    if (!sourceSupport || !targetSupport) return undefined;
-    const leftSupport = sourceSupport.x < targetSupport.x ? sourceSupport : targetSupport;
-    const rightSupport = leftSupport === sourceSupport ? targetSupport : sourceSupport;
-    const left = leftSupport.x + leftSupport.width;
-    const right = rightSupport.x;
-    if (right <= left) return [];
-    const top = start.y + 32;
-    return [
-        { x: left, y: top },
-        { x: right, y: top },
-        { x: right, y: top + thickness },
-        { x: left, y: top + thickness }
-    ];
-}
-
-function connectorSurface(id, sourceLandmarkId, start, end, supportingSurfaces) {
-    const thickness = 32;
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
-    const length = Math.max(1, Math.hypot(dx, dy));
-    const normalX = (-dy / length) * thickness * 0.5;
-    const normalY = (dx / length) * thickness * 0.5;
-    const horizontalVertices = horizontalConnectorVertices(start, end, supportingSurfaces, thickness);
-    if (horizontalVertices?.length === 0) return null;
-    const vertices = horizontalVertices ?? [
-        { x: start.x + normalX, y: start.y + normalY },
-        { x: end.x + normalX, y: end.y + normalY },
-        { x: end.x - normalX, y: end.y - normalY },
-        { x: start.x - normalX, y: start.y - normalY }
-    ];
-    const left = Math.min(...vertices.map(({ x }) => x));
-    const right = Math.max(...vertices.map(({ x }) => x));
-    const top = Math.min(...vertices.map(({ y }) => y));
-    const bottom = Math.max(...vertices.map(({ y }) => y));
-    return freezeValue({
-        id,
-        kind: "sector-seam",
-        landmarkId: sourceLandmarkId,
-        oneWay: false,
-        grappleable: true,
-        x: left,
-        y: top,
-        width: right - left,
-        height: bottom - top,
-        topY: top,
-        position: { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 },
-        vertices
+        ...(object.gateId && routeLockId ? { routeLockId } : {})
     });
 }
 
@@ -198,89 +108,6 @@ function rectangleVertices(bounds) {
     ];
 }
 
-function transitBarrierGeometry(lock, sourceLandmark, targetLandmark) {
-    const boundaryY = sourceLandmark.bounds.y;
-    const overlapBottom = Math.min(
-        sourceLandmark.bounds.y + sourceLandmark.bounds.height,
-        targetLandmark.bounds.y + targetLandmark.bounds.height
-    );
-    const pathX = (sourceLandmark.exit.x + targetLandmark.entry.x) * 0.5;
-    const segments = [
-        {
-            x: sourceLandmark.bounds.x - TRANSIT_BARRIER_LATERAL_MARGIN,
-            y: boundaryY,
-            width: sourceLandmark.bounds.width + TRANSIT_BARRIER_LATERAL_MARGIN * 2,
-            height: TRANSIT_BARRIER_THICKNESS
-        },
-        {
-            x: pathX - TRANSIT_BARRIER_THICKNESS * 0.5,
-            y: boundaryY,
-            width: TRANSIT_BARRIER_THICKNESS,
-            height: Math.max(TRANSIT_BARRIER_THICKNESS, overlapBottom - boundaryY)
-        }
-    ];
-    const left = Math.min(...segments.map(({ x }) => x));
-    const top = Math.min(...segments.map(({ y }) => y));
-    const right = Math.max(...segments.map(({ x, width }) => x + width));
-    const bottom = Math.max(...segments.map(({ y, height }) => y + height));
-    const surfaces = segments.map((bounds, index) =>
-        freezeValue({
-            id: `${lock.id}:barrier:${index + 1}`,
-            kind: "sector-transit-barrier",
-            landmarkId: sourceLandmark.id,
-            oneWay: false,
-            grappleable: false,
-            renderable: false,
-            blockedByRouteId: lock.id,
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height,
-            topY: bounds.y,
-            position: { x: bounds.x + bounds.width * 0.5, y: bounds.y + bounds.height * 0.5 },
-            vertices: rectangleVertices(bounds)
-        })
-    );
-    return freezeValue({
-        segments,
-        surfaces,
-        presentationBounds: { x: left, y: top, width: right - left, height: bottom - top }
-    });
-}
-
-function horizontalSurface(id, landmark, x, topY, width, kind) {
-    return freezeValue({
-        id,
-        kind,
-        landmarkId: landmark.id,
-        stageId: landmark.stageId,
-        oneWay: true,
-        oneWayEdgeEnd: 1,
-        grappleable: true,
-        x,
-        y: topY,
-        width,
-        height: CITY_WING_THICKNESS,
-        topY,
-        position: { x: x + width * 0.5, y: topY },
-        vertices: [
-            { x, y: topY },
-            { x: x + width, y: topY },
-            { x: x + width, y: topY + CITY_WING_THICKNESS },
-            { x, y: topY + CITY_WING_THICKNESS }
-        ]
-    });
-}
-
-function wideLandmarkBounds(coreBounds) {
-    return freezeValue({
-        x: -SECTOR_HALF_WIDTH,
-        y: coreBounds.y,
-        width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
-        height: coreBounds.height
-    });
-}
-
 function routeMouthBounds(exit) {
     return freezeValue({
         x: exit.x - 96,
@@ -290,64 +117,7 @@ function routeMouthBounds(exit) {
     });
 }
 
-function sameSurfaceBounds(left, right) {
-    return left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height;
-}
-
-function cityWingSurfaces({ landmark, coreBounds, entry, exit, landmarkIndex, inheritedEntrySurfaces }) {
-    const leftWingStart = -SECTOR_HALF_WIDTH + CITY_WING_INSET;
-    const leftWingEnd = coreBounds.x - CITY_WING_CORE_GAP;
-    const rightWingStart = coreBounds.x + coreBounds.width + CITY_WING_CORE_GAP;
-    const rightWingEnd = SECTOR_HALF_WIDTH - CITY_WING_INSET;
-    const leftWingWidth = leftWingEnd - leftWingStart;
-    const rightWingWidth = rightWingEnd - rightWingStart;
-    const middleY = Math.round((coreBounds.y + coreBounds.height * 0.52) / 32) * 32;
-    const leftMid = landmarkIndex % 2 === 0;
-    const surfaces = [];
-    for (const [side, start, width] of [
-        ["left", leftWingStart, leftWingWidth],
-        ["right", rightWingStart, rightWingWidth]
-    ]) {
-        if (width <= 0) continue;
-        const entrySurface = horizontalSurface(
-            `${landmark.id}:city-wing:${side}:entry`,
-            landmark,
-            start,
-            entry.y + 32,
-            width,
-            "safe-deck"
-        );
-        if (!inheritedEntrySurfaces.some((surface) => sameSurfaceBounds(surface, entrySurface))) {
-            surfaces.push(entrySurface);
-        }
-        surfaces.push(
-            horizontalSurface(`${landmark.id}:city-wing:${side}:exit`, landmark, start, exit.y + 32, width, "recovery")
-        );
-    }
-    const midInset = leftMid ? 256 : 96;
-    const midStart = (leftMid ? leftWingStart : rightWingStart) + midInset;
-    const midWidth = (leftMid ? leftWingWidth : rightWingWidth) - midInset * 2;
-    if (midWidth > 0) {
-        surfaces.push(
-            horizontalSurface(
-                `${landmark.id}:city-wing:${leftMid ? "left" : "right"}:mid`,
-                landmark,
-                midStart,
-                middleY,
-                midWidth,
-                "safe-deck"
-            )
-        );
-    }
-    return Object.freeze(surfaces);
-}
-
-function isStageDoorObjective(objective, sourceObjectById) {
-    return STAGE_DOOR_KIND_LOOKUP[sourceObjectById[objective.sourceObjectId]?.kind] === true;
-}
-
-function runtimeObjectiveBounds({ stageDoorObjective, objective, exit, dx, dy }) {
-    if (stageDoorObjective) return routeMouthBounds(exit);
+function runtimeObjectiveBounds({ objective, dx, dy }) {
     if (objective.bounds) return shiftBounds(objective.bounds, dx, dy);
     return undefined;
 }
@@ -371,18 +141,6 @@ function isolatedAreaWorld(area, seed) {
 
 function routeId(sourceLandmarkId, targetLandmarkId) {
     return `${sourceLandmarkId}:route:${targetLandmarkId}`;
-}
-
-function sectorTransitionId(sourceSectorId, targetSectorId) {
-    return `${sourceSectorId}:transition:${targetSectorId}`;
-}
-
-function interSectorRise(interSectorRiseById, sourceSectorId, targetSectorId) {
-    const rise = interSectorRiseById?.[sectorTransitionId(sourceSectorId, targetSectorId)] ?? 0;
-    if (!Number.isFinite(rise) || rise < 0) {
-        throw new Error(`inter-Sector rise for '${sourceSectorId}' must be a non-negative number`);
-    }
-    return rise;
 }
 
 function authoredAreaCatalogsWithOverrides(areaCatalogs, areaOverrides) {
@@ -462,7 +220,7 @@ function bossStageSurface(surface, dx, dy, stageId, grappleAccessGroup = null) {
         id: surface.id,
         kind: surface.kind,
         bossStageId: stageId,
-        collision: true,
+        collision: surface.collision !== false,
         oneWay: surface.oneWay === true,
         oneWayEdgeEnd: surface.oneWay === true ? 1 : undefined,
         grappleable: surface.grappleable !== false,
@@ -500,7 +258,7 @@ function createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, 
         entryRouteId,
         terminalCompletion: spec.transition?.terminalCompletion ?? null,
         bounds,
-        sourceTrigger: routeMouthBounds(sourceLandmark.exit),
+        sourceTrigger: sourceLandmark.gateTrigger,
         entry,
         exit,
         exitTrigger: routeMouthBounds(exit),
@@ -535,12 +293,10 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
     seed,
     floorY = 320,
     summitRadius = 42,
-    interSectorRiseById = {},
     areaOverrides = null,
     bossStageSpec = null,
     bossStageSpecs = null,
-    areaCatalogs = DEFAULT_AUTHORED_AREA_CATALOGS,
-    sectorHeightBudgetById = SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID
+    areaCatalogs = DEFAULT_AUTHORED_AREA_CATALOGS
 } = {}) {
     const authoredAreaCatalogs = authoredAreaCatalogsWithOverrides(areaCatalogs, areaOverrides);
     const authoredSectorCatalog =
@@ -563,9 +319,8 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
     const sectors = [];
     const sectorEntries = [];
     const respawnAnchors = [];
-    const connectors = [];
+    const stageTransitions = [];
     const routeLocks = [];
-    const sectorTransitions = [];
     const bossStages = [];
     let previousLandmark = null;
     let previousOutboundObjectiveIds = Object.freeze([]);
@@ -578,7 +333,6 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         let sectorRightX = Number.NEGATIVE_INFINITY;
         let sectorLocalTopY = Number.POSITIVE_INFINITY;
         let sectorLocalBottomY = Number.NEGATIVE_INFINITY;
-        let previousCityWingExitSurfaces = Object.freeze([]);
 
         for (const [landmarkIndex, area] of sourceCatalog.areas.entries()) {
             assertRuntimeContentBoundary(area);
@@ -586,17 +340,19 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             const localWorld = isolatedAreaWorld(area, seed);
             const localArea = localWorld.areas[0];
             const dx = 0;
-            const localTargetEntryY = sectorLandmarks.length ? sectorLandmarks.at(-1).localExit.y : 0;
-            const localDy = localTargetEntryY - localArea.entry.y;
+            const previousSectorLandmark = sectorLandmarks.at(-1);
+            const localDy = previousSectorLandmark
+                ? previousSectorLandmark.localBounds.y - AUTHORED_STAGE_ISOLATION_GAP
+                : -localArea.entry.y;
             const localEntry = shiftPoint(localArea.entry, dx, localDy);
             const localExit = shiftPoint(localArea.exit, dx, localDy);
             const localCoreBounds = shiftBounds(localArea.bounds, dx, localDy);
-            const localBounds = wideLandmarkBounds(localCoreBounds);
+            const localBounds = localCoreBounds;
             const dy = sectorWorldOriginY + localDy;
             const entry = shiftPoint(localArea.entry, dx, dy);
             const exit = shiftPoint(localArea.exit, dx, dy);
             const coreBounds = shiftBounds(localArea.bounds, dx, dy);
-            const bounds = shiftBounds(localBounds, 0, sectorWorldOriginY);
+            const bounds = coreBounds;
             const nextLandmarkDefinition = isAuthoredRuntimeContentBoundary(area.stageId)
                 ? null
                 : (sectorDefinition.landmarks[landmarkIndex + 1] ??
@@ -610,20 +366,13 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                     area.objectives.map((objective, index) => [objective.id, landmarkDefinition.objectives[index]?.id])
                 )
             );
-            const sourceObjectById = Object.freeze(
-                Object.fromEntries(localWorld.objects.map((object) => [object.id, object]))
-            );
-            const landmarkObjectives = landmarkDefinition.objectives.map((objective) => {
-                const sourceObjective = area.objectives.find(({ id }) => objectiveIdBySourceId[id] === objective.id);
-                const stageDoorObjective = isStageDoorObjective(sourceObjective ?? objective, sourceObjectById);
-                return freezeValue({
+            const landmarkObjectives = landmarkDefinition.objectives.map((objective) =>
+                freezeValue({
                     ...objective,
-                    type: stageDoorObjective ? "reach" : objective.type,
                     landmarkId: landmarkDefinition.id,
-                    bounds: runtimeObjectiveBounds({ stageDoorObjective, objective, exit, dx, dy }),
-                    sourceObjectId: stageDoorObjective ? undefined : objective.sourceObjectId
-                });
-            });
+                    bounds: runtimeObjectiveBounds({ objective, dx, dy })
+                })
+            );
             const sourceEnemySpawns = localWorld.enemySpawns;
             const landmarkEnemySpawns = landmarkDefinition.encounters.map((encounter, encounterIndex) => {
                 const source = sourceEnemySpawns[encounterIndex] ?? {};
@@ -658,20 +407,11 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                     })
                 });
             }
-            const landmarkSurfaces = localWorld.surfaces
-                .filter(({ kind }) => AREA_BOUNDARY_KIND_LOOKUP[kind] !== true)
-                .map((surface) => shiftSurface(surface, dx, dy, landmarkDefinition, area.id, objectiveIdBySourceId));
-            const landmarkWingSurfaces = cityWingSurfaces({
-                landmark: landmarkDefinition,
-                coreBounds,
-                entry,
-                exit,
-                landmarkIndex,
-                inheritedEntrySurfaces: previousCityWingExitSurfaces
-            });
-            previousCityWingExitSurfaces = Object.freeze(landmarkWingSurfaces.filter(({ id }) => id.endsWith(":exit")));
+            const landmarkSurfaces = localWorld.surfaces.map((surface) =>
+                shiftSurface(surface, dx, dy, landmarkDefinition, area.id, objectiveIdBySourceId)
+            );
             const landmarkObjects = localWorld.objects
-                .filter(({ kind }) => ENEMY_OBJECT_KIND_LOOKUP[kind] !== true && STAGE_DOOR_KIND_LOOKUP[kind] !== true)
+                .filter(({ kind }) => ENEMY_OBJECT_KIND_LOOKUP[kind] !== true)
                 .map((object) =>
                     shiftObject(object, dx, dy, landmarkDefinition, objectiveIdBySourceId, outboundRouteId)
                 );
@@ -753,8 +493,11 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 bounds,
                 entry,
                 exit,
+                gateId: area.gate.id,
+                gateTrigger: shiftBounds(area.gate.trigger, dx, dy),
+                nextAreaId: area.gate.nextAreaId,
                 respawnAnchorId,
-                surfaceIds: [...landmarkSurfaces, ...landmarkWingSurfaces].map(({ id }) => id),
+                surfaceIds: landmarkSurfaces.map(({ id }) => id),
                 objectIds: landmarkObjects.map(({ id }) => id),
                 objectiveIds: landmarkObjectives.map(({ id }) => id),
                 encounterIds: landmarkEnemySpawns.map(({ encounterId }) => encounterId),
@@ -768,46 +511,39 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
 
             if (previousLandmark && !isAuthoredRuntimeContentBoundary(previousLandmark.stageId)) {
                 const lockId = routeId(previousLandmark.id, runtimeLandmark.id);
-                const surfaceId = `${lockId}:surface`;
                 const sectorTransition = previousLandmark.sectorId !== runtimeLandmark.sectorId;
                 const sourceSectorDefinition = authoredSectorCatalog.sectors.find(
                     ({ id }) => id === previousLandmark.sectorId
                 );
-                const connectorBridge = connectorSurface(
-                    surfaceId,
-                    previousLandmark.id,
-                    previousLandmark.exit,
-                    runtimeLandmark.entry,
-                    [...surfaces, ...landmarkSurfaces, ...landmarkWingSurfaces]
-                );
-                const connector = freezeValue({
-                    id: `${lockId}:connector`,
+                const stageTransition = freezeValue({
+                    id: `${lockId}:stage-transition`,
                     routeLockId: lockId,
-                    surfaceId: connectorBridge?.id ?? null,
+                    gateId: previousLandmark.gateId,
                     sourceLandmarkId: previousLandmark.id,
                     targetLandmarkId: runtimeLandmark.id,
-                    start: previousLandmark.exit,
-                    end: runtimeLandmark.entry,
+                    sourceAreaId: previousLandmark.areaId,
+                    targetAreaId: runtimeLandmark.areaId,
+                    trigger: previousLandmark.gateTrigger,
+                    targetEntry: runtimeLandmark.entry,
                     sectorTransition
                 });
-                connectors.push(connector);
+                stageTransitions.push(stageTransition);
                 routeLocks.push(
                     freezeValue({
                         id: lockId,
                         sourceLandmarkId: previousLandmark.id,
                         targetLandmarkId: runtimeLandmark.id,
-                        connectorId: connector.id,
+                        stageTransitionId: stageTransition.id,
                         requiredObjectiveIds: previousOutboundObjectiveIds,
-                        ...(connector.sectorTransition
+                        ...(stageTransition.sectorTransition
                             ? { requiredAccessModuleCount: sourceSectorDefinition.accessModuleRequirement }
                             : {}),
-                        sectorTransition: connector.sectorTransition
+                        sectorTransition: stageTransition.sectorTransition
                     })
                 );
-                if (connectorBridge) surfaces.push(connectorBridge);
             }
 
-            surfaces.push(...landmarkSurfaces, ...landmarkWingSurfaces);
+            surfaces.push(...landmarkSurfaces);
             route.push(...landmarkRoute);
             objects.push(...landmarkObjects);
             objectives.push(...landmarkObjectives);
@@ -834,33 +570,22 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         sectorEntries.push(entryAnchor);
         const sectorHeight = sectorLocalBottomY - sectorLocalTopY;
         const sectorContentWidth = sectorRightX - sectorLeftX;
-        if (sectorContentWidth > SEAMLESS_SECTOR_RUNTIME_WIDTH) {
-            throw new Error(`${sectorDefinition.id} exceeds the seamless Sector width`);
-        }
-        const sectorHeightLimit = sectorHeightBudgetById[sectorDefinition.id];
-        if (!Number.isFinite(sectorHeightLimit)) {
-            throw new Error(`${sectorDefinition.id} has no seamless Sector height limit`);
-        }
-        if (sectorHeight > sectorHeightLimit) {
-            throw new Error(`${sectorDefinition.id} exceeds the seamless Sector height`);
-        }
-        const sectorCenterX = (sectorLeftX + sectorRightX) * 0.5;
         const sectorBounds = {
-            x: sectorCenterX - SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5,
+            x: sectorLeftX,
             y: sectorWorldOriginY + sectorLocalTopY,
-            width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
+            width: sectorContentWidth,
             height: sectorHeight
         };
         sectors.push(
             freezeValue({
                 id: sectorDefinition.id,
                 order: sectorDefinition.order,
-                width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
+                width: sectorContentWidth,
                 origin: { x: 0, y: sectorWorldOriginY },
                 localBounds: {
-                    x: sectorBounds.x,
+                    x: sectorLeftX,
                     y: sectorLocalTopY,
-                    width: sectorBounds.width,
+                    width: sectorContentWidth,
                     height: sectorHeight
                 },
                 bounds: sectorBounds,
@@ -878,72 +603,24 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         );
         const nextSectorDefinition = authoredSectorCatalog.sectors[sectorIndex + 1];
         if (nextSectorDefinition) {
-            const rise = interSectorRise(interSectorRiseById, sectorDefinition.id, nextSectorDefinition.id);
-            if (!isAuthoredRuntimeContentBoundary(lastLandmark.stageId)) {
-                sectorTransitions.push(
-                    freezeValue({
-                        id: sectorTransitionId(sectorDefinition.id, nextSectorDefinition.id),
-                        sourceSectorId: sectorDefinition.id,
-                        targetSectorId: nextSectorDefinition.id,
-                        sourceExit: lastLandmark.exit,
-                        targetOrigin: { x: 0, y: lastLandmark.exit.y - rise },
-                        rise
-                    })
-                );
-            }
-            sectorWorldOriginY =
-                lastLandmark.exit.y - rise - (lastLandmark.contentBoundaryId ? CONTENT_BOUNDARY_ISOLATION_GAP : 0);
-        }
-    }
-
-    for (const lock of routeLocks.filter(({ requiredAccessModuleCount }) => requiredAccessModuleCount > 0)) {
-        const sourceLandmark = landmarks.find(({ id }) => id === lock.sourceLandmarkId);
-        const targetLandmark = landmarks.find(({ id }) => id === lock.targetLandmarkId);
-        const barrier = transitBarrierGeometry(lock, sourceLandmark, targetLandmark);
-        const matchingBossStageSpec = configuredBossStageSpecs.find(
-            (spec) =>
-                bossAreaMatches(sourceLandmark, spec.sourceAreaId) && bossAreaMatches(targetLandmark, spec.nextAreaId)
-        );
-        surfaces.push(...barrier.surfaces);
-        objects.push(
-            freezeValue({
-                id: `${lock.id}:transit-lock`,
-                kind: "access-transit-lock",
-                presentationId: "world-object:access-transit-lock",
-                landmarkId: sourceLandmark.id,
-                sectorId: sourceLandmark.sectorId,
-                routeLockId: lock.id,
-                position: sourceLandmark.exit,
-                requiredAccessModuleCount: lock.requiredAccessModuleCount,
-                requiredObjectiveIds: lock.requiredObjectiveIds,
-                barrierSurfaceIds: barrier.surfaces.map(({ id }) => id),
-                barrierSegments: barrier.segments,
-                presentationBounds: barrier.presentationBounds,
-                label: "SECTOR TRANSIT"
-            })
-        );
-        if (matchingBossStageSpec) {
-            const bossStage = createBossStageRuntimeDefinition(
-                matchingBossStageSpec,
-                sourceLandmark,
-                targetLandmark,
-                lock.id
-            );
-            bossStages.push(bossStage);
-            surfaces.push(...bossStage.surfaces);
-            route.push(...bossStage.route);
-            scannerGroups.push(...bossStage.scannerGroups);
+            const nextSectorFirstArea = authoredAreaCatalogs[sectorIndex + 1].areas[0];
+            sectorWorldOriginY = sectorBounds.y - AUTHORED_STAGE_ISOLATION_GAP + nextSectorFirstArea.entry.y;
         }
     }
 
     for (const spec of configuredBossStageSpecs) {
-        if (bossStages.some(({ id }) => id === spec.id)) continue;
         const sourceLandmark = landmarks.find((landmark) => bossAreaMatches(landmark, spec.sourceAreaId));
         const targetLandmark = spec.nextAreaId
             ? landmarks.find((landmark) => bossAreaMatches(landmark, spec.nextAreaId))
             : null;
         if (!sourceLandmark || (spec.nextAreaId && !targetLandmark)) continue;
-        const bossStage = createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, null);
+        const routeLock = targetLandmark
+            ? routeLocks.find(
+                  ({ sourceLandmarkId, targetLandmarkId }) =>
+                      sourceLandmarkId === sourceLandmark.id && targetLandmarkId === targetLandmark.id
+              )
+            : null;
+        const bossStage = createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, routeLock?.id ?? null);
         bossStages.push(bossStage);
         surfaces.push(...bossStage.surfaces);
         route.push(...bossStage.route);
@@ -970,9 +647,8 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         sectors,
         sectorEntries,
         respawnAnchors,
-        connectors,
+        stageTransitions,
         routeLocks,
-        sectorTransitions,
         bossStages,
         objects,
         objectives,
