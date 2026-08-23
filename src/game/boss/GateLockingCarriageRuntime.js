@@ -147,7 +147,7 @@ export class GateLockingCarriageRuntime {
                 vertices: bossBodyPolygonVertices(this.bossSpec.visualPresetId, bodyBounds)
             }),
             canGroundActors: true,
-            ropeAttachment: true
+            ropeable: true
         });
         this.beamBody = new KinematicPhysicsBody({
             id: `${definition.id}:beam`,

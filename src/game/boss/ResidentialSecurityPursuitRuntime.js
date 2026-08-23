@@ -263,7 +263,7 @@ export class ResidentialSecurityPursuitRuntime {
             position: this.phaseStartPositions[0],
             collider: this.#collider(),
             canGroundActors: true,
-            ropeAttachment: true
+            ropeable: true
         });
         this.hazardBody = new KinematicPhysicsBody({
             id: `${definition.id}:attack-hazard`,
@@ -900,7 +900,7 @@ export class ResidentialSecurityPursuitRuntime {
                 direction: this.direction,
                 damaging: false,
                 movementProgress: this.movementProgress,
-                ropeAttachable: this.body.ropeAttachment !== null
+                ropeAttachable: this.body.isRopeableSurface()
             },
             {
                 id: this.hazardBody.id,

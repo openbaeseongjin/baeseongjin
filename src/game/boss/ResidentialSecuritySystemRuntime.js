@@ -129,7 +129,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                         position: this.guard[role].position,
                         collider: new PolygonCollider({ vertices: boss04GuardGeometry(role) }),
                         canGroundActors: true,
-                        ropeAttachment: true
+                        ropeable: true
                     })
             )
         );
@@ -711,7 +711,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                 state: guard.state,
                 active: true,
                 physicsBody: true,
-                ropeAttachable: false
+                ropeAttachable: this.guardBodies[index].isRopeableSurface()
             });
             const weakpoint =
                 guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY ||

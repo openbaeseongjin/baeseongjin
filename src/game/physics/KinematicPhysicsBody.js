@@ -22,7 +22,7 @@ export class KinematicPhysicsBody extends withRopeAttachable(withSurfacePhysics(
         collisionRestitution = DEFAULT_COLLISION_RESTITUTION,
         canGroundActors = false,
         ropeAttachment = false,
-        ropeable = ropeAttachment !== false
+        ropeable = false
     }) {
         super();
         if (typeof id !== "string" || !id) throw new TypeError("KinematicPhysicsBody requires id");
@@ -74,6 +74,7 @@ export class KinematicPhysicsBody extends withRopeAttachable(withSurfacePhysics(
             id: this.id,
             physicsActorKind: this.physicsActorKind,
             position: Object.freeze({ x: this.position.x + translated.x, y: this.position.y + translated.y }),
+            angle: this.angle ?? 0,
             velocity: Object.freeze({ x: this.velocity.x, y: this.velocity.y }),
             collider: this.collider,
             mass: this.mass,

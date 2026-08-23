@@ -65,6 +65,7 @@ import { createPlayerImpactStateDigest, PLAYER_IMPACT_SOURCE_KIND } from "../net
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import { resolvePlayerCollisions } from "../physics/PlayerCollision.js";
 import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
+import { rotateVector } from "../physics/AngularMotion.js";
 import { CollisionBroadPhase } from "../physics/spatial/CollisionBroadPhase.js";
 import { CircleCollider } from "../physics/colliders/CircleCollider.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
@@ -361,11 +362,24 @@ export class GameSimulation {
             : worldCatalog
               ? new WorldProgressState(worldCatalog, null, { startAreaId })
               : null;
-        this.activeCollisionSurfaces = this.isSeamlessSectorWorld
+        this.activeStaticCollisionSurfaces = this.isSeamlessSectorWorld
             ? this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
             : collisionSurfacesForProgress(this.world, this.worldProgress);
+        this.activeDynamicCollisionSurfaces = this.#bossDynamicCollisionSurfaces();
+        this.activeCollisionSurfaces = Object.freeze([
+            ...this.activeStaticCollisionSurfaces,
+            ...this.activeDynamicCollisionSurfaces
+        ]);
+        this.activeStaticProjectileOccluders = Object.freeze(
+            this.activeStaticCollisionSurfaces.filter(({ projectileOccluder }) => projectileOccluder === true)
+        );
+        this.activeProjectileOccluders = Object.freeze([
+            ...this.activeStaticProjectileOccluders,
+            ...this.activeDynamicCollisionSurfaces.filter(({ projectileOccluder }) => projectileOccluder === true)
+        ]);
         const collisionBroadPhase = new CollisionBroadPhase(collisionBroadPhaseConfig);
-        collisionBroadPhase.setSurfaces(this.activeCollisionSurfaces);
+        collisionBroadPhase.setSurfaces(this.activeStaticCollisionSurfaces);
+        collisionBroadPhase.setDynamicSurfaces(this.activeDynamicCollisionSurfaces);
         this.objects = new GameObjectManager({ world: this.world, collisionBroadPhase });
         this.#registerBossImpactTargets();
         this.windOccluders = windOccludingSurfaces(this.world.surfaces);
@@ -719,7 +733,7 @@ export class GameSimulation {
                         direction: runtime.mechanism.direction,
                         velocity: bodyActor?.velocity ?? runtime.mechanism.velocity,
                         movementProgress: runtime.mechanism.movementProgress,
-                        ropeAttachable: bodyActor?.ropeAttachment !== null,
+                        ropeAttachable: Boolean(bodyActor?.ropeableSurface || bodyActor?.ropeAttachment),
                         suspensionHeight: Math.max(
                             0,
                             carriagePosition.y -
@@ -945,6 +959,7 @@ export class GameSimulation {
         }
         this.bossRuntime = createBossEncounterRuntime(definition);
         this.collisionBroadPhase.invalidateFrame();
+        this.#setActiveDynamicCollisionSurfaces();
         return this.bossRuntime;
     }
 
@@ -994,6 +1009,7 @@ export class GameSimulation {
                 byOwnerId[entry.id] = Object.freeze({
                     id: entry.id,
                     position: Object.freeze({ ...entry.position }),
+                    angle: entry.angle ?? 0,
                     ropeableSurface: entry.ropeableSurface
                 });
                 return;
@@ -1003,6 +1019,7 @@ export class GameSimulation {
             byOwnerId[attachment.ownerId] = Object.freeze({
                 id: attachment.ownerId,
                 position: Object.freeze({ ...attachment.position }),
+                angle: entry.angle ?? 0,
                 ropeAttachment: Object.freeze({
                     ownerId: attachment.ownerId,
                     localAnchor: Object.freeze({ ...attachment.localAnchor })
@@ -1033,9 +1050,10 @@ export class GameSimulation {
                 });
                 continue;
             }
+            const anchorOffset = rotateVector(rope.anchorLocalOffset ?? { x: 0, y: 0 }, owner.angle ?? 0);
             rope.updateAnchor({
-                x: owner.position.x + (rope.anchorLocalOffset?.x ?? 0),
-                y: owner.position.y + (rope.anchorLocalOffset?.y ?? 0)
+                x: owner.position.x + anchorOffset.x,
+                y: owner.position.y + anchorOffset.y
             });
         }
     }
@@ -1053,9 +1071,7 @@ export class GameSimulation {
             anchors: stage?.route ?? Object.freeze([]),
             worldOffset: this.#bossWorldOffset()
         });
-        this.#setActiveCollisionSurfaces(
-            this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
-        );
+        this.#setActiveDynamicCollisionSurfaces();
         this.#syncAttachedActorRopes();
         const ropeCutSurfaces = this.bossRuntime?.ropeCutSurfaces?.(this.#bossWorldOffset()) ?? Object.freeze([]);
         for (const player of this.players) {
@@ -1155,11 +1171,17 @@ export class GameSimulation {
     }
 
     #bossFilteredCollisionSurfaces(surfaces) {
-        const filtered = surfaces.filter(
-            ({ blockedByBossStageId }) => !blockedByBossStageId || !this.completedBossStageIds.has(blockedByBossStageId)
+        if (this.completedBossStageIds.size === 0) return surfaces;
+        return Object.freeze(
+            surfaces.filter(
+                ({ blockedByBossStageId }) =>
+                    !blockedByBossStageId || !this.completedBossStageIds.has(blockedByBossStageId)
+            )
         );
-        const dynamic = this.bossRuntime?.dynamicCollisionSurfaces?.(this.#bossWorldOffset()) ?? Object.freeze([]);
-        return dynamic.length === 0 ? Object.freeze(filtered) : Object.freeze([...filtered, ...dynamic]);
+    }
+
+    #bossDynamicCollisionSurfaces() {
+        return this.bossRuntime?.dynamicCollisionSurfaces?.(this.#bossWorldOffset()) ?? Object.freeze([]);
     }
 
     #advanceBossStage() {
@@ -1647,21 +1669,38 @@ export class GameSimulation {
     }
 
     #setActiveCollisionSurfaces(surfaces) {
-        if (
-            this.activeCollisionSurfaces.length === surfaces.length &&
-            this.activeCollisionSurfaces.every((surface, index) => surface === surfaces[index])
-        ) {
-            return this.activeCollisionSurfaces;
+        const staticSurfacesUnchanged =
+            this.activeStaticCollisionSurfaces?.length === surfaces.length &&
+            this.activeStaticCollisionSurfaces.every((surface, index) => surface === surfaces[index]);
+        if (!staticSurfacesUnchanged) {
+            this.activeStaticCollisionSurfaces = surfaces;
+            this.activeStaticProjectileOccluders = Object.freeze(
+                surfaces.filter(({ projectileOccluder }) => projectileOccluder === true)
+            );
+            this.collisionBroadPhase?.setSurfaces(surfaces);
         }
-        this.activeCollisionSurfaces = surfaces;
-        this.collisionBroadPhase?.setSurfaces(surfaces);
-        return surfaces;
+        return this.#setActiveDynamicCollisionSurfaces();
+    }
+
+    #setActiveDynamicCollisionSurfaces() {
+        const dynamicSurfaces = this.#bossDynamicCollisionSurfaces();
+        this.activeDynamicCollisionSurfaces = dynamicSurfaces;
+        this.activeCollisionSurfaces =
+            dynamicSurfaces.length === 0
+                ? this.activeStaticCollisionSurfaces
+                : Object.freeze([...this.activeStaticCollisionSurfaces, ...dynamicSurfaces]);
+        this.activeProjectileOccluders = Object.freeze([
+            ...this.activeStaticProjectileOccluders,
+            ...dynamicSurfaces.filter(({ projectileOccluder }) => projectileOccluder === true)
+        ]);
+        this.collisionBroadPhase?.setDynamicSurfaces(dynamicSurfaces);
+        return this.activeCollisionSurfaces;
     }
 
     #prepareCollisionFrame() {
         return this.objects.beginSimulationFrame({
             tick: this.tick,
-            surfaces: this.activeCollisionSurfaces,
+            surfaces: this.activeStaticCollisionSurfaces,
             neutralActors: this.#bossCollisionActors()
         });
     }
@@ -2357,9 +2396,7 @@ export class GameSimulation {
             dt,
             resolveHits: resolvePlayerProjectileHits,
             maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds,
-            projectileOccluders: this.activeCollisionSurfaces.filter(
-                ({ projectileOccluder }) => projectileOccluder === true
-            )
+            projectileOccluders: this.activeProjectileOccluders
         });
         this.objects.playerProjectiles.commitLifecycle(playerProjectileUpdate);
         const playerProjectileEvents = this.#resolveBossProjectileEvents(playerProjectileUpdate);
