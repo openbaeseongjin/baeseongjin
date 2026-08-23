@@ -17,6 +17,16 @@ function eventsForPlayer(scene, playerId) {
     return (scene.playerPresentationEvents ?? []).filter((event) => event.playerId === playerId);
 }
 
+function hardpointJammerPhaseBySourceObjectId(scene) {
+    return Object.freeze(
+        Object.fromEntries(
+            (scene.hardpointJammerStates ?? [])
+                .filter((state) => typeof state.sourceObjectId === "string")
+                .map((state) => [state.sourceObjectId, state.phase])
+        )
+    );
+}
+
 export { resolveUprightAimTransform };
 
 export function resolveEnemyAimLayerDirection(enemy) {
@@ -156,9 +166,12 @@ export class SpriteEnemyRenderer {
         this.previousTime = currentTime;
         const activeAnimationIds = new Set();
         const sectorIdBySourceId = enemySectorIdBySourceId(scene.world);
+        const jammerPhaseBySourceObjectId = hardpointJammerPhaseBySourceObjectId(scene);
         let drawn = 0;
         for (const enemy of enemies) {
-            const presentation = this.presentationResolver(enemy);
+            const presentation = this.presentationResolver(enemy, enemies, {
+                jammerPhase: jammerPhaseBySourceObjectId[enemy.objectId] ?? null
+            });
             const spritePackage = this.packageCatalog.packageFor({
                 sectorId:
                     enemy.sectorId ?? sectorIdBySourceId[enemy.objectId] ?? sectorIdBySourceId[enemy.areaId] ?? null,

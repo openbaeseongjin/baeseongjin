@@ -3,9 +3,9 @@
     "formatVersion": 4,
     "id": "sector-01-enemies",
     "generator": {
-        "tool": "Codex built-in ImageGen + Pillow normalization",
-        "exportVersion": "2026-08-22",
-        "sourceExport": "../../../artwork/characters/artillery-drone-t1-acquisition-redesign/export/artillery-acquisition-motion.png"
+        "tool": "Codex built-in ImageGen + deterministic normalization",
+        "exportVersion": "2026-08-23",
+        "sourceExport": "../../../artwork/characters/hardpoint-jammer-v1-lowres-exploration/export/hardpoint-jammer-motion.png"
     },
     "atlases": {
         "pursuit-motion": {
@@ -46,6 +46,11 @@
         "swarm-motion": {
             "image": "swarm-motion.png",
             "size": { "width": 128, "height": 96 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "hardpoint-jammer-motion": {
+            "image": "hardpoint-jammer-motion.png",
+            "size": { "width": 128, "height": 160 },
             "frameSize": { "width": 32, "height": 32 }
         }
     },
@@ -232,6 +237,61 @@
                             "cell": { "column": 11, "row": 0 },
                             "durationMs": 600
                         }
+                    ]
+                }
+            }
+        },
+        "hardpoint-jammer-v1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "jammer-normal" },
+                "knockback": { "fallback": "jammer-normal" },
+                "jammer-normal": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 0, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 1, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 2, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 3, "row": 0 }, "durationMs": 200 }
+                    ]
+                },
+                "jammer-warning": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 0, "row": 1 }, "durationMs": 180 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 1, "row": 1 }, "durationMs": 180 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 2, "row": 1 }, "durationMs": 190 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 3, "row": 1 }, "durationMs": 200 }
+                    ]
+                },
+                "jammer-active": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 0, "row": 2 }, "durationMs": 100 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 1, "row": 2 }, "durationMs": 100 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 2, "row": 2 }, "durationMs": 100 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 3, "row": 2 }, "durationMs": 100 }
+                    ]
+                },
+                "jammer-clear": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 0, "row": 3 }, "durationMs": 110 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 1, "row": 3 }, "durationMs": 120 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 2, "row": 3 }, "durationMs": 130 },
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 3, "row": 3 }, "durationMs": 140 }
+                    ]
+                },
+                "jammer-disabled": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "hardpoint-jammer-motion", "cell": { "column": 0, "row": 4 }, "durationMs": 1000 }
                     ]
                 }
             }

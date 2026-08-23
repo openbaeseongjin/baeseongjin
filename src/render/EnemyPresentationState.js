@@ -8,6 +8,7 @@ import {
     SWARM_BEHAVIOR_STATE
 } from "../game/combat/enemy-behavior/EnemyBehaviorDefinition.js";
 import { ENEMY_ATTACK_STATE, ENEMY_RULE } from "../game/combat/enemy-weapon/EnemyWeaponDefinition.js";
+import { HARDPOINT_JAMMER_PHASE } from "../game/world/HardpointJammerField.js";
 
 const PRESENTATION = Object.freeze({
     IDLE: "idle",
@@ -18,7 +19,19 @@ const PRESENTATION = Object.freeze({
     ATTACK_TRACK: "attack-track",
     ATTACK_LOCK: "attack-lock",
     ATTACK_FIRE: "attack-fire",
-    ATTACK_COOLDOWN: "attack-cooldown"
+    ATTACK_COOLDOWN: "attack-cooldown",
+    JAMMER_NORMAL: "jammer-normal",
+    JAMMER_WARNING: "jammer-warning",
+    JAMMER_ACTIVE: "jammer-active",
+    JAMMER_CLEAR: "jammer-clear",
+    JAMMER_DISABLED: "jammer-disabled"
+});
+const JAMMER_PRESENTATION_BY_PHASE = Object.freeze({
+    [HARDPOINT_JAMMER_PHASE.NORMAL]: PRESENTATION.JAMMER_NORMAL,
+    [HARDPOINT_JAMMER_PHASE.WARNING]: PRESENTATION.JAMMER_WARNING,
+    [HARDPOINT_JAMMER_PHASE.ACTIVE]: PRESENTATION.JAMMER_ACTIVE,
+    [HARDPOINT_JAMMER_PHASE.CLEAR]: PRESENTATION.JAMMER_CLEAR,
+    [HARDPOINT_JAMMER_PHASE.DISABLED]: PRESENTATION.JAMMER_DISABLED
 });
 const ATTACK_PRESENTATION_BY_STATE = Object.freeze({
     [ENEMY_ATTACK_STATE.IDLE]: null,
@@ -72,6 +85,7 @@ const DRONE_ENEMY_TYPE = Object.freeze({
     [ENEMY_TYPE.PURSUIT_DRONE_T1]: true,
     [ENEMY_TYPE.SHIELD_DRONE_T1]: true,
     [ENEMY_TYPE.ARTILLERY_DRONE_T1]: true,
+    [ENEMY_TYPE.HARDPOINT_JAMMER_V1]: true,
     [ENEMY_TYPE.SUPPORT_DRONE_T1]: true,
     [ENEMY_TYPE.SWARM_DRONE_T1]: true
 });
@@ -80,19 +94,46 @@ const SENSOR_COLOR_BY_CUTTER = Object.freeze({
     false: Object.freeze({ idle: "#3f1d2b", cooldown: "#7f1d1d", fire: "#ffb347", lock: "#ff5a36", default: "#dc263f" })
 });
 
-function definition({ behaviorKind = null, usesProjectileAttack = true, patrol = false, renderSize = null } = {}) {
-    return Object.freeze({
-        behaviorKind,
-        usesProjectileAttack,
-        renderSize: renderSize ? Object.freeze({ ...renderSize }) : null,
-        states: Object.freeze([
+class EnemyPresentationDefinition {
+    constructor({
+        behaviorKind = null,
+        usesProjectileAttack = true,
+        patrol = false,
+        renderSize = null,
+        additionalStates = []
+    } = {}) {
+        this.behaviorKind = behaviorKind;
+        this.usesProjectileAttack = usesProjectileAttack;
+        this.renderSize = renderSize ? Object.freeze({ ...renderSize }) : null;
+        this.states = Object.freeze([
             ...COMMON_STATES.filter(
                 (state) => patrol || (state !== PRESENTATION.PATROL_MOVE && state !== PRESENTATION.PATROL_WAIT)
             ),
             ...(usesProjectileAttack ? ATTACK_STATES : []),
-            ...(behaviorKind ? Object.values(BEHAVIOR_PRESENTATION_BY_STATE[behaviorKind]) : [])
-        ])
-    });
+            ...(behaviorKind ? Object.values(BEHAVIOR_PRESENTATION_BY_STATE[behaviorKind]) : []),
+            ...additionalStates
+        ]);
+    }
+
+    resolvePrimaryState({ defaultPrimaryState }) {
+        return defaultPrimaryState;
+    }
+}
+
+class HardpointJammerPresentationDefinition extends EnemyPresentationDefinition {
+    constructor() {
+        super({ usesProjectileAttack: false, additionalStates: Object.values(JAMMER_PRESENTATION_BY_PHASE) });
+        Object.freeze(this);
+    }
+
+    resolvePrimaryState({ enemy, defaultPrimaryState, jammerPhase }) {
+        if (enemy?.debugPresentationState || enemy?.knockbackState) return defaultPrimaryState;
+        return JAMMER_PRESENTATION_BY_PHASE[jammerPhase ?? HARDPOINT_JAMMER_PHASE.NORMAL] ?? PRESENTATION.JAMMER_NORMAL;
+    }
+}
+
+function definition(options) {
+    return Object.freeze(new EnemyPresentationDefinition(options));
 }
 
 const SENTRY = definition();
@@ -108,7 +149,7 @@ export const ENEMY_PRESENTATION_DEFINITIONS = Object.freeze({
         behaviorKind: ENEMY_BEHAVIOR_KIND.ARTILLERY,
         usesProjectileAttack: false
     }),
-    [ENEMY_TYPE.HARDPOINT_JAMMER_V1]: definition({ usesProjectileAttack: false }),
+    [ENEMY_TYPE.HARDPOINT_JAMMER_V1]: new HardpointJammerPresentationDefinition(),
     [ENEMY_TYPE.SUPPORT_DRONE_T1]: definition({
         behaviorKind: ENEMY_BEHAVIOR_KIND.SUPPORT,
         usesProjectileAttack: false
@@ -187,7 +228,7 @@ export function enemyPresentationDefinition(enemyType) {
     return ENEMY_PRESENTATION_DEFINITIONS[enemyType] ?? SENTRY;
 }
 
-export function resolveEnemyPresentationState(enemy, enemies = []) {
+export function resolveEnemyPresentationState(enemy, enemies = [], { jammerPhase = null } = {}) {
     const enemyType = enemy?.enemyType ?? ENEMY_TYPE.SENTRY_T1;
     const declared = enemyPresentationDefinition(enemyType);
     const behavior = enemy?.behaviorState ?? enemy?.enemyBehaviorSnapshot?.() ?? null;
@@ -199,13 +240,14 @@ export function resolveEnemyPresentationState(enemy, enemies = []) {
           ? PRESENTATION.PATROL_WAIT
           : PRESENTATION.PATROL_MOVE;
     const baseState = behaviorState && !ACTIVE_BEHAVIOR_STATE[behaviorState] ? behaviorState : patrolState;
-    const primaryState =
+    const defaultPrimaryState =
         enemy?.debugPresentationState ??
         (enemy?.knockbackState
             ? PRESENTATION.KNOCKBACK
             : behaviorState && ACTIVE_BEHAVIOR_STATE[behaviorState]
               ? behaviorState
               : (attackState ?? baseState));
+    const primaryState = declared.resolvePrimaryState({ enemy, defaultPrimaryState, jammerPhase });
     if (!declared.states.includes(primaryState))
         throw new Error(`enemy presentation state '${primaryState}' is not declared for '${enemyType}'`);
     const cutter = enemy?.rules?.includes(ENEMY_RULE.CUTTER_FIRE) === true;
