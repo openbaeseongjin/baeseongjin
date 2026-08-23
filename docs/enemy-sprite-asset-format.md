@@ -5,7 +5,7 @@
 ## 공개 계약
 
 - Schema: [`assets/runtime/characters/enemy-sprite-manifest.schema.json`](../assets/runtime/characters/enemy-sprite-manifest.schema.json)
-- 현재 package: [`assets/runtime/characters/sector-01-enemies/`](../assets/runtime/characters/sector-01-enemies/)
+- 현재 package: 기본 [`assets/runtime/characters/sector-01-enemies/`](../assets/runtime/characters/sector-01-enemies/), Sector 02 전용 [`assets/runtime/characters/sector-02-enemies/`](../assets/runtime/characters/sector-02-enemies/)
 - Loader: [`src/render/sprites/EnemySpriteManifest.js`](../src/render/sprites/EnemySpriteManifest.js)
 - Definition: [`src/render/sprites/EnemySpriteDefinition.js`](../src/render/sprites/EnemySpriteDefinition.js)
 - Sector package selection: [`src/render/sprites/EnemySpriteCatalog.js`](../src/render/sprites/EnemySpriteCatalog.js)
