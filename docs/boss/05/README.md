@@ -29,6 +29,8 @@ MAP-PREVIEW는 설계 기준 프리뷰다.
 
 실제 브라우저/멀티플레이 검증 전에는 `PLAYTEST VERIFIED`로 표시하지 않는다.
 
+0.61.0 Rope capability 정렬에서 Core shell과 이동 Wall은 기획 문서의 `grappleable=false`를 따르며 renderer도 Ropeable 표식을 표시하지 않는다. 이동용 Rope target은 authored grappleable surface와 Phase-gated Hardpoint가 소유한다.
+
 ## v15 추가 확정
 
 - A/B/Main Wall 활성 접촉 시 피해 적용

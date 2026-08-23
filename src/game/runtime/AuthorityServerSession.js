@@ -1,5 +1,5 @@
 import { AuthorityCommandInbox } from "../network/AuthorityCommandInbox.js";
-import { COMBAT_CONFIG, WORLD_CONFIG } from "../config.js";
+import { COMBAT_CONFIG } from "../config.js";
 import { createAugmentImpactReceipt } from "../network/AugmentImpactClaim.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { createCommandReceipt } from "../network/CommandReceipt.js";
@@ -426,7 +426,7 @@ export class AuthorityServerSession {
                 resolution: "ignored-player-ineligible"
             });
         }
-        if (state.position.y > WORLD_CONFIG.floorY + 780) {
+        if (state.position.y > this.simulation.fallRecoveryY()) {
             this.simulation.resolvePlayerFall(authenticatedPlayerId);
             this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.authorityTick);
             this.lastOwnerMotionClientTicks.set(authenticatedPlayerId, state.clientTick);
@@ -436,10 +436,20 @@ export class AuthorityServerSession {
                 resolution: "player-fell"
             });
         }
-        this.simulation.applyOwnerMotion(authenticatedPlayerId, state);
+        const motion = this.simulation.applyOwnerMotion(authenticatedPlayerId, state);
         this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.authorityTick);
         this.lastOwnerMotionClientTicks.set(authenticatedPlayerId, state.clientTick);
-        return createOwnerMotionReceipt({ clientTick: state.clientTick, accepted: true });
+        return createOwnerMotionReceipt({
+            clientTick: state.clientTick,
+            accepted: true,
+            ...(motion.ropeReleased
+                ? {
+                      resolution: motion.reason,
+                      ropeReleased: true,
+                      ropeAttachmentId: motion.ropeAttachmentId
+                  }
+                : {})
+        });
     }
 
     submit(authenticatedPlayerId, batch) {

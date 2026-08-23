@@ -1,10 +1,7 @@
-import { closestPointOnSurface } from "../world/WorldGenerator.js";
-import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { releaseRopeFromBody, ropeAttachmentPoint, ropeLaunchHandPoint } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
-import { isRopeableCollisionSurface } from "../rope/RopeableSurfaceMixin.js";
-import { rotateVector } from "../physics/AngularMotion.js";
+import { RopeAttachmentTargetResolver } from "../rope/RopeAttachmentTargetResolver.js";
 import { createInputCapabilityMixin } from "./InputCapability.js";
 
 export function findRopeAttachment({
@@ -17,90 +14,15 @@ export function findRopeAttachment({
     canAttachToSurface = null
 }) {
     if (!Number.isFinite(origin?.x) || !Number.isFinite(origin?.y)) return null;
-    const ropeOccluders = surfaces.filter(
-        (surface) => surface.kind === "inter-floor-divider" || surface.ropeOccluder === true
-    );
-    let best = null;
-    let bestScore = Number.POSITIVE_INFINITY;
-    for (const surface of surfaces) {
-        if (!isRopeableCollisionSurface(surface)) continue;
-        if (canAttachToSurface && canAttachToSurface(surface) === false) continue;
-        const point = closestPointOnSurface(aimPoint, surface);
-        const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
-        if (launchDistance > maxAttachDistance) continue;
-        if (
-            ropeOccluders.some(
-                (divider) => divider.id !== surface.id && segmentIntersectsSurface(origin, point, divider)
-            )
-        ) {
-            continue;
-        }
-        const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
-        const score = aimDistance * 2 + launchDistance * 0.05;
-        if (aimDistance <= aimTolerance && score < bestScore) {
-            best = { x: point.x, y: point.y, ropeAttachment: null };
-            bestScore = score;
-        }
-    }
-    for (const target of attachmentTargets) {
-        const surface = target?.ropeableSurface;
-        if (surface && isRopeableCollisionSurface(surface)) {
-            const point = closestPointOnSurface(aimPoint, surface);
-            const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
-            if (launchDistance > maxAttachDistance) continue;
-            if (
-                ropeOccluders.some(
-                    (divider) => divider.id !== target.id && segmentIntersectsSurface(origin, point, divider)
-                )
-            ) {
-                continue;
-            }
-            const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
-            const score = aimDistance * 2 + launchDistance * 0.05;
-            if (aimDistance <= aimTolerance && score <= bestScore) {
-                const localAnchor = rotateVector(
-                    { x: point.x - target.position.x, y: point.y - target.position.y },
-                    -(target.angle ?? 0)
-                );
-                best = {
-                    x: point.x,
-                    y: point.y,
-                    ropeAttachment: {
-                        ownerId: target.id,
-                        localAnchor
-                    }
-                };
-                bestScore = score;
-            }
-            continue;
-        }
-        const point = target?.position;
-        const attachment = target?.ropeAttachment;
-        if (!point || !attachment || typeof attachment.ownerId !== "string") continue;
-        const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
-        if (launchDistance > maxAttachDistance) continue;
-        if (
-            ropeOccluders.some(
-                (divider) => divider.id !== attachment.ownerId && segmentIntersectsSurface(origin, point, divider)
-            )
-        ) {
-            continue;
-        }
-        const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
-        const score = aimDistance * 2 + launchDistance * 0.05;
-        if (aimDistance <= aimTolerance && score <= bestScore) {
-            best = {
-                x: point.x,
-                y: point.y,
-                ropeAttachment: {
-                    ownerId: attachment.ownerId,
-                    localAnchor: { ...attachment.localAnchor }
-                }
-            };
-            bestScore = score;
-        }
-    }
-    return best ? Object.freeze(best) : null;
+    return new RopeAttachmentTargetResolver({
+        aimPoint,
+        origin,
+        surfaces,
+        attachmentTargets,
+        maxAttachDistance,
+        aimTolerance,
+        canAttachToSurface
+    }).resolve();
 }
 
 export function updateRopeSwingDrag({ ropeObject, owner, pointer, viewport, dt, config, onFlash }) {
@@ -157,6 +79,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
                 relayActive: false
             }),
             canAttachToSurface = null,
+            createAttachmentId = () => null,
             onAttach = () => {},
             onRelease = () => {},
             onFlash
@@ -204,7 +127,9 @@ export const withRopePointerInput = createInputCapabilityMixin({
                     this.rope.attach(owner.physics.position, outcome.target, {
                         angle: owner.physics.angle,
                         anchorOwnerId: attachment?.ownerId ?? null,
-                        anchorLocalOffset: attachment?.localAnchor ?? null
+                        anchorLocalOffset: attachment?.localAnchor ?? null,
+                        anchorVelocity: outcome.target.anchorVelocity,
+                        attachmentId: createAttachmentId()
                     })
                 ) {
                     onFlash({ type: "attach", age: 0 });

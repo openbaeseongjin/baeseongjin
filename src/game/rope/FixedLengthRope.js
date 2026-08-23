@@ -14,6 +14,8 @@ export class FixedLengthRope {
     constructor(config) {
         this.config = config;
         this.anchor = null;
+        this.anchorVelocity = new Vector2();
+        this.attachmentId = null;
         this.anchorOwnerId = null;
         this.anchorLocalOffset = null;
         this.attachmentOffset = null;
@@ -29,7 +31,15 @@ export class FixedLengthRope {
     attach(
         playerPosition,
         anchor,
-        { angle = FIXED_LENGTH_ROPE.ZERO, attachmentOffset = null, anchorOwnerId = null, anchorLocalOffset = null } = {}
+        {
+            angle = FIXED_LENGTH_ROPE.ZERO,
+            attachmentOffset = null,
+            anchorOwnerId = null,
+            anchorLocalOffset = null,
+            anchorVelocity = null,
+            restLength = null,
+            attachmentId = null
+        } = {}
     ) {
         finiteVector(playerPosition, "playerPosition");
         finiteVector(anchor, "anchor");
@@ -39,6 +49,9 @@ export class FixedLengthRope {
         }
         if ((anchorOwnerId === null) !== (anchorLocalOffset === null)) {
             throw new Error("actor rope anchors require both owner ID and local offset");
+        }
+        if (attachmentId !== null && (typeof attachmentId !== "string" || !attachmentId)) {
+            throw new Error("attachmentId must be null or a non-empty string");
         }
         const selectedOffset = attachmentOffset
             ? finiteVector(attachmentOffset, "attachmentOffset")
@@ -55,7 +68,18 @@ export class FixedLengthRope {
         };
         const distance = Math.hypot(handPosition.x - anchor.x, handPosition.y - anchor.y);
         if (distance <= FIXED_LENGTH_ROPE.ZERO || distance > hookReach(this.config)) return false;
+        const selectedLength = restLength ?? distance;
+        if (
+            !Number.isFinite(selectedLength) ||
+            selectedLength <= FIXED_LENGTH_ROPE.ZERO ||
+            selectedLength > hookReach(this.config)
+        ) {
+            return false;
+        }
         this.anchor = new Vector2(anchor.x, anchor.y);
+        this.attachmentId = attachmentId;
+        const selectedAnchorVelocity = finiteVector(anchorVelocity ?? { x: 0, y: 0 }, "anchorVelocity");
+        this.anchorVelocity.set(selectedAnchorVelocity.x, selectedAnchorVelocity.y);
         this.anchorOwnerId = anchorOwnerId;
         this.anchorLocalOffset = anchorLocalOffset
             ? new Vector2(
@@ -64,7 +88,7 @@ export class FixedLengthRope {
               )
             : null;
         this.attachmentOffset = new Vector2(selectedOffset.x, selectedOffset.y);
-        this.length = distance;
+        this.length = selectedLength;
         this.currentLength = distance;
         this.tension = FIXED_LENGTH_ROPE.ZERO;
         return true;
@@ -72,6 +96,8 @@ export class FixedLengthRope {
 
     detach() {
         this.anchor = null;
+        this.anchorVelocity.set(FIXED_LENGTH_ROPE.ZERO, FIXED_LENGTH_ROPE.ZERO);
+        this.attachmentId = null;
         this.anchorOwnerId = null;
         this.anchorLocalOffset = null;
         this.attachmentOffset = null;
@@ -80,10 +106,12 @@ export class FixedLengthRope {
         this.tension = FIXED_LENGTH_ROPE.ZERO;
     }
 
-    updateAnchor(anchor) {
+    updateAnchor(anchor, velocity = { x: 0, y: 0 }) {
         if (!this.anchor) return false;
         finiteVector(anchor, "anchor");
+        finiteVector(velocity, "anchor velocity");
         this.anchor.set(anchor.x, anchor.y);
+        this.anchorVelocity.set(velocity.x, velocity.y);
         return true;
     }
 
@@ -111,7 +139,9 @@ export class FixedLengthRope {
         }
         if (!constraint) return;
         const pointVelocity = physics.angularPointVelocity(physics.physicsStepVelocity(), this.attachmentOffset);
-        const radialVelocity = pointVelocity.x * constraint.normal.x + pointVelocity.y * constraint.normal.y;
+        const radialVelocity =
+            (pointVelocity.x - this.anchorVelocity.x) * constraint.normal.x +
+            (pointVelocity.y - this.anchorVelocity.y) * constraint.normal.y;
         const impulseMagnitude = -radialVelocity / constraint.inverseEffectiveMass;
         const impulse = {
             x: constraint.normal.x * impulseMagnitude,

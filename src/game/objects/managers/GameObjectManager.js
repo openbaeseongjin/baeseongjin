@@ -30,13 +30,18 @@ export class GameObjectManager {
     }
 
     ropeAttachmentSurfaces({ origin, aimPoint, maxAttachDistance, aimTolerance }) {
-        if (Math.hypot(aimPoint.x - origin.x, aimPoint.y - origin.y) > maxAttachDistance + aimTolerance) {
-            return EMPTY_OBJECTS;
-        }
-        const minX = Math.min(origin.x, aimPoint.x - aimTolerance);
-        const minY = Math.min(origin.y, aimPoint.y - aimTolerance);
-        const maxX = Math.max(origin.x, aimPoint.x + aimTolerance);
-        const maxY = Math.max(origin.y, aimPoint.y + aimTolerance);
+        const dx = aimPoint.x - origin.x;
+        const dy = aimPoint.y - origin.y;
+        const magnitude = Math.hypot(dx, dy);
+        if (magnitude <= Number.EPSILON) return EMPTY_OBJECTS;
+        const rayEnd = {
+            x: origin.x + (dx / magnitude) * maxAttachDistance,
+            y: origin.y + (dy / magnitude) * maxAttachDistance
+        };
+        const minX = Math.min(origin.x, rayEnd.x, aimPoint.x - aimTolerance);
+        const minY = Math.min(origin.y, rayEnd.y, aimPoint.y - aimTolerance);
+        const maxX = Math.max(origin.x, rayEnd.x, aimPoint.x + aimTolerance);
+        const maxY = Math.max(origin.y, rayEnd.y, aimPoint.y + aimTolerance);
         return this.spatial.querySurfaceBounds({ x: minX, y: minY, width: maxX - minX, height: maxY - minY });
     }
 

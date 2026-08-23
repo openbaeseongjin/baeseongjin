@@ -36,6 +36,63 @@ export function segmentIntersectsSurface(start, end, surface) {
     return false;
 }
 
+function vectorCross(left, right) {
+    return left.x * right.y - left.y * right.x;
+}
+
+function segmentEdgeIntersectionAmount(start, translation, edgeStart, edgeEnd) {
+    const edge = { x: edgeEnd.x - edgeStart.x, y: edgeEnd.y - edgeStart.y };
+    const offset = { x: edgeStart.x - start.x, y: edgeStart.y - start.y };
+    const denominator = vectorCross(translation, edge);
+    if (Math.abs(denominator) <= GEOMETRY_EPSILON) {
+        if (Math.abs(vectorCross(offset, translation)) > GEOMETRY_EPSILON) return null;
+        const lengthSquared = translation.x * translation.x + translation.y * translation.y;
+        if (lengthSquared <= GEOMETRY_EPSILON) return null;
+        const first = (offset.x * translation.x + offset.y * translation.y) / lengthSquared;
+        const edgeOffset = { x: edgeEnd.x - start.x, y: edgeEnd.y - start.y };
+        const second = (edgeOffset.x * translation.x + edgeOffset.y * translation.y) / lengthSquared;
+        const lower = Math.min(first, second);
+        const upper = Math.max(first, second);
+        if (upper < -GEOMETRY_EPSILON || lower > 1 + GEOMETRY_EPSILON) return null;
+        return Math.max(0, lower);
+    }
+    const amount = vectorCross(offset, edge) / denominator;
+    const edgeAmount = vectorCross(offset, translation) / denominator;
+    if (
+        amount < -GEOMETRY_EPSILON ||
+        amount > 1 + GEOMETRY_EPSILON ||
+        edgeAmount < -GEOMETRY_EPSILON ||
+        edgeAmount > 1 + GEOMETRY_EPSILON
+    ) {
+        return null;
+    }
+    return Math.max(0, Math.min(1, amount));
+}
+
+export function firstSegmentSurfaceIntersection(start, end, surface) {
+    const vertices = surface?.vertices ?? [];
+    if (vertices.length < 2 || pointInPolygon(start, vertices)) return null;
+    const translation = { x: end.x - start.x, y: end.y - start.y };
+    let firstAmount = Number.POSITIVE_INFINITY;
+    for (let index = 0; index < vertices.length; index += 1) {
+        const amount = segmentEdgeIntersectionAmount(
+            start,
+            translation,
+            vertices[index],
+            vertices[(index + 1) % vertices.length]
+        );
+        if (amount !== null) firstAmount = Math.min(firstAmount, amount);
+    }
+    if (!Number.isFinite(firstAmount)) return null;
+    return Object.freeze({
+        amount: firstAmount,
+        point: Object.freeze({
+            x: start.x + translation.x * firstAmount,
+            y: start.y + translation.y * firstAmount
+        })
+    });
+}
+
 export function polygonBounds(vertices) {
     const xs = vertices.map((vertex) => vertex.x);
     const ys = vertices.map((vertex) => vertex.y);

@@ -3,6 +3,9 @@ import { InputStateSimulator } from "../network/InputStateSimulator.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
+import { ROPE_AUTHORITY_EVENT_TYPE } from "../network/RopeAuthorityEvent.js";
+
+const APPLIED_AUTHORITY_EVENT_HISTORY_LIMIT = 64;
 
 function percentile(samples, ratio) {
     if (samples.length === 0) return 0;
@@ -101,6 +104,8 @@ export class OwnerPredictionRuntime {
         this.pendingFoundationSelection = null;
         this.appliedPortalEventIds = new Set();
         this.appliedPortalEventIdOrder = [];
+        this.appliedRopeReleaseEventIds = new Set();
+        this.appliedRopeReleaseEventIdOrder = [];
         this.simulation.preparePrediction();
     }
 
@@ -111,7 +116,7 @@ export class OwnerPredictionRuntime {
             if (!transition) continue;
             this.appliedPortalEventIds.add(event.eventId);
             this.appliedPortalEventIdOrder.push(event.eventId);
-            while (this.appliedPortalEventIdOrder.length > 64) {
+            while (this.appliedPortalEventIdOrder.length > APPLIED_AUTHORITY_EVENT_HISTORY_LIMIT) {
                 this.appliedPortalEventIds.delete(this.appliedPortalEventIdOrder.shift());
             }
             if (
@@ -130,6 +135,33 @@ export class OwnerPredictionRuntime {
             this.presentationOffset = { x: 0, y: 0 };
             this.correctionRemaining = 0;
         }
+    }
+
+    applyRopeAnchorReleaseEvents(events) {
+        for (const event of events) {
+            if (
+                event.eventType !== ROPE_AUTHORITY_EVENT_TYPE.ANCHOR_RELEASED ||
+                event.playerId !== this.ownerId ||
+                this.appliedRopeReleaseEventIds.has(event.eventId)
+            ) {
+                continue;
+            }
+            this.appliedRopeReleaseEventIds.add(event.eventId);
+            this.appliedRopeReleaseEventIdOrder.push(event.eventId);
+            while (this.appliedRopeReleaseEventIdOrder.length > APPLIED_AUTHORITY_EVENT_HISTORY_LIMIT) {
+                this.appliedRopeReleaseEventIds.delete(this.appliedRopeReleaseEventIdOrder.shift());
+            }
+            const rope = this.simulation.playerState(this.ownerId)?.rope;
+            if (rope?.isAttached && rope.attachmentId === event.attachmentId && rope.anchorOwnerId === event.ownerId) {
+                this.releaseOwnerRope(event.attachmentId);
+            }
+        }
+    }
+
+    releaseOwnerRope(expectedAttachmentId = null) {
+        const rope = this.simulation.playerState(this.ownerId)?.rope;
+        if (expectedAttachmentId !== null && rope?.attachmentId !== expectedAttachmentId) return false;
+        return this.simulation.releasePlayerRope(this.ownerId);
     }
 
     prepareSnapshot(snapshot, fallbackProgress = null) {
@@ -200,6 +232,7 @@ export class OwnerPredictionRuntime {
             throw new Error(`invalid ownerMotionTick: ${ownerMotionTick}`);
         }
         this.applyPortalEvents(snapshot.events);
+        this.applyRopeAnchorReleaseEvents(snapshot.events);
         this.confirmResolvedImpacts(snapshot.events);
         const pendingTicks = pendingBatches.map(({ tick }) => tick);
         const targetTick = Math.max(

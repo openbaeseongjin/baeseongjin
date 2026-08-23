@@ -13,3 +13,5 @@ Guard A/B와 Central Security Hub의 콘텐츠 인계다. 최신 구현 감사 �
 `MAP-PREVIEW.html`은 Boss04의 설계 QA용 공간·발판·Rope surface·Guard/Hub·Gate 배치 기준이다. 정적 Preview와 인계 문서만으로 Runtime collision·combat·multiplayer 동작을 바꾸지 않으며, 최신 Runtime 사실은 통합 현황과 구현 코드가 소유한다.
 
 초기 Runtime은 전투·충돌·checkpoint·snapshot·멀티플레이 상태를 실제로 구현하고, Polygon mock visual과 기존 stable audio cue만 사용한다. renderer의 preset/state와 audio cue ID는 gameplay Runtime·authoring Spec에서 분리하므로 최종 그래픽·animation metadata·음원을 교체할 때 전투 코드를 바꾸지 않는다.
+
+0.61.0에서 Guard A/B는 실제 움직이는 Polygon surface, Central Security Hub는 `security-hub-deck` 정적 Polygon surface를 Rope authority로 사용한다. Hook은 보이는 surface의 앞면 교점을 선택하며 Guard 부착점은 body-local 좌표로 이동·회전을 추종한다.

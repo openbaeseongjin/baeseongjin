@@ -228,8 +228,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                     height: DEFAULT.bodyHeight
                 })
             }),
-            canGroundActors: false,
-            ropeable: true
+            canGroundActors: false
         });
         if (snapshot) this.restore(snapshot);
     }

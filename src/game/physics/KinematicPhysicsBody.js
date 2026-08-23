@@ -75,6 +75,7 @@ export class KinematicPhysicsBody extends withRopeAttachable(withSurfacePhysics(
             physicsActorKind: this.physicsActorKind,
             position: Object.freeze({ x: this.position.x + translated.x, y: this.position.y + translated.y }),
             angle: this.angle ?? 0,
+            angularVelocity: this.angularVelocity ?? 0,
             velocity: Object.freeze({ x: this.velocity.x, y: this.velocity.y }),
             collider: this.collider,
             mass: this.mass,

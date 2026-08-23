@@ -13,6 +13,8 @@ import { BOSS_03_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss
 import { BOSS_04_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss04Stage.generated.js";
 import { BOSS_05_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss05Stage.generated.js";
 import { BOSS_06_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss06Stage.generated.js";
+import { defineBossStage } from "../../src/game/boss/BossStageDefinition.js";
+import { createBossEncounterRuntime } from "../../src/game/boss/BossEncounterRuntimeFactory.js";
 
 const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const definitions = Object.freeze([
@@ -23,6 +25,30 @@ const definitions = Object.freeze([
     Object.freeze({ id: "boss-05", generated: BOSS_05_STAGE_SPEC }),
     Object.freeze({ id: "boss-06", generated: BOSS_06_STAGE_SPEC })
 ]);
+const EXPECTED_ROPEABLE_ACTOR_IDS = Object.freeze({
+    "boss-01": Object.freeze(["boss-01:gate-locking-carriage"]),
+    "boss-02": Object.freeze(["boss-02:residential-security-pursuer"]),
+    "boss-03": Object.freeze(["boss-03:maintenance-body"]),
+    "boss-04": Object.freeze(["boss-04:guard-a:collision", "boss-04:guard-b:collision"]),
+    "boss-05": Object.freeze([]),
+    "boss-06": Object.freeze([])
+});
+const EXPECTED_ROPE_PRESENTATION_IDS = Object.freeze({
+    "boss-04": Object.freeze(["boss-04:guard-a", "boss-04:guard-b", "boss-04:security-hub"]),
+    "boss-05": Object.freeze([]),
+    "boss-06": Object.freeze([])
+});
+const REQUIRED_GRAPPLEABLE_SURFACE_IDS = Object.freeze({
+    "boss-04": Object.freeze(["boss-04:security-hub-deck"])
+});
+
+function sortedIds(values) {
+    return [...values].sort((left, right) => left.localeCompare(right, "en"));
+}
+
+function sameIds(actual, expected) {
+    return JSON.stringify(sortedIds(actual)) === JSON.stringify(sortedIds(expected));
+}
 
 for (const definition of definitions) {
     const relativePath = `src/game/boss-authoring/specs/${definition.id}.json`;
@@ -40,6 +66,38 @@ for (const definition of definitions) {
         console.error(`[BOSS-STAGE] generated ${definition.id} definition is stale.`);
         process.exitCode = 1;
         continue;
+    }
+    const runtime = createBossEncounterRuntime(defineBossStage(source));
+    const collisionActors =
+        runtime.collisionActors?.({ x: 0, y: 0 }) ?? runtime.mechanism?.collisionActors?.({ x: 0, y: 0 }) ?? [];
+    const ropeableActorIds = collisionActors.filter(({ ropeableSurface }) => ropeableSurface).map(({ id }) => id);
+    if (!sameIds(ropeableActorIds, EXPECTED_ROPEABLE_ACTOR_IDS[definition.id])) {
+        console.error(`[BOSS-STAGE] ${definition.id} ropeable actor mismatch: ${JSON.stringify(ropeableActorIds)}`);
+        process.exitCode = 1;
+        continue;
+    }
+    const requiredSurfaceIds = REQUIRED_GRAPPLEABLE_SURFACE_IDS[definition.id] ?? [];
+    if (
+        requiredSurfaceIds.some(
+            (surfaceId) =>
+                !source.arena.surfaces.some(({ id, grappleable }) => id === surfaceId && grappleable === true)
+        )
+    ) {
+        console.error(`[BOSS-STAGE] ${definition.id} required grappleable surface is missing.`);
+        process.exitCode = 1;
+        continue;
+    }
+    const expectedPresentationIds = EXPECTED_ROPE_PRESENTATION_IDS[definition.id];
+    if (expectedPresentationIds) {
+        const objects = runtime.presentationObjects?.({ x: 0, y: 0 }, runtime.snapshot()) ?? [];
+        const presentationIds = objects.filter(({ ropeAttachable }) => ropeAttachable === true).map(({ id }) => id);
+        if (!sameIds(presentationIds, expectedPresentationIds)) {
+            console.error(
+                `[BOSS-STAGE] ${definition.id} Rope presentation mismatch: ${JSON.stringify(presentationIds)}`
+            );
+            process.exitCode = 1;
+            continue;
+        }
     }
     const preview = bossStageDerivedPreview(source);
     const summary = preview.participants

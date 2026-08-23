@@ -629,6 +629,9 @@ export class RemoteGameAuthority {
         if (receipt.accepted) {
             this.networkMetrics.acceptedOwnerMotions += 1;
             this.recoveringOwnerMotionTick = false;
+            if (receipt.ropeReleased === true) {
+                this.ownerRuntime?.releaseOwnerRope(receipt.ropeAttachmentId ?? null);
+            }
         } else {
             this.networkMetrics.rejectedOwnerMotions += 1;
             if (receipt.reason === "tick-window" && !this.recoveringOwnerMotionTick) {

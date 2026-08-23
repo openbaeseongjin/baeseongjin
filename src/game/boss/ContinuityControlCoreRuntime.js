@@ -506,7 +506,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                           ? "open"
                           : `shell-${Math.max(0, this.phase - 1)}`,
                 active: true,
-                ropeAttachable: true
+                ropeAttachable: false
             }
         ];
         for (const wall of Object.values(WALL)) {
@@ -529,7 +529,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                 size: { width: configuration.width, height: Math.max(1, configuration.lockY - state.y) },
                 state: state.state,
                 active: state.state !== "stored",
-                ropeAttachable: state.state !== "stored"
+                ropeAttachable: false
             });
             for (const slot of configuration.slots) {
                 objects.push({
