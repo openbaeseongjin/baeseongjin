@@ -10,3 +10,5 @@ AEGIS / JAMMER / ARTILLERY / CUTTER.
 REV2.1 recalls all four sequentially without overlap and closes Sector05's causal story.
 
 Sector06 6-1 currently retains a Post-Sector05 transition boundary, so direct 5-8 → 6-1 wiring remains forbidden.
+
+Boss05의 `CONTINUITY CONTROL CORE` 최종 인계는 [`../../../../boss/05/README.md`](../../../../boss/05/README.md)에 보존한다. 인계는 authored content이며 Boss Runtime·전환·Timer를 구현하거나 이 경계를 연결하지 않는다.

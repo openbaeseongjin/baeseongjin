@@ -3,7 +3,7 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: d7372014732f4ba69a85d9d86d405b7f577202703cc6dd0dea341c0ebb8f9590
+scenario-source-sha256: 37f2558c7a40b7f0899d4a21b49463afeeb706c58db16c19a31c536d07126bc5
 authored-area-sha256: f9ec9676a75fa33bddf50a84ee3b4d9751b1e17fd6859a3e1cba9ee04c1311aa
 authored-sector-sha256: 6915be4ef1ff53272437d983547fd7197a33c2f173a6da69fa46d3229b952431
 stage-count: 48
@@ -47,6 +47,7 @@ reviewed-upstream: 371b4499cf5b27ded46b684649b1e55822134b84
 
 ## 최근 반영된 시나리오 변화
 
+- 2026-08-23 Boss05 `CONTINUITY CONTROL CORE` 최종 인계 v12를 `docs/boss/05/final-content/`에 갱신했다. A/B/Main Actuator·Sliding Partition·Control Pulse·개인 Recovery·최종 Exit의 authored 규칙과 정적 QA 맵 프리뷰만 보존하며, Boss05 Runtime·collision·snapshot·`5-8 → Post-Sector Boss → 6-1` 전환과 Boss Timer/Arena collapse는 여전히 미구현·별도 결정이다.
 - 2026-08-23 Sector 04~~06의 24개 Stage를 canonical v2/generated Runtime으로 승격했다. Sector 04는 objective source 기반 2-of-3, Sector 05는 Hardpoint Jammer와 continuity proof, Sector 06은 기존 Wind·Scanner·Sentry·Patrol·Cutter recall을 연결했다. 3-8·4-8·5-8·6-8 content boundary와 Timer/Purge HOLD는 유지했다.
 - 같은 candidate의 Sector 04~~06 24개 Stage를 desktop·mobile Gameplay View에서 모두 열어 Runtime 상태, horizontal overflow와 browser console error가 없음을 확인하고 대표 화면을 screenshot으로 대조했다. 이 과정에서 Sector 06의 spawn/entry-deck 불일치 5건을 보이는 support surface와 첫 route가 같은 진입점을 소유하도록 정렬했으며, parity gate가 Sector 04~~06 모든 Stage의 진입 Rope reach와 visible support를 검사한다. 이는 화면·초기 spawn 검증이며 전체 traversal·전투·멀티플레이 완료 판정은 아니다.
 - G006 정리는 content boundary ID·required objective를 preview와 production landmark에 동일하게 전달하고 독립 stack 사이 collision 겹침을 isolation gap으로 차단한다. Boss Preview는 제거된 legacy world 대신 production world에 arena·boss barrier만 주입하며, objective barrier는 live progress API와 snapshot 배열을 같은 의미로 읽는다. Hardpoint Jammer는 authored group→simulation snapshot→공용 renderer 한 경로를 유지한다. 이 호환 수리는 Boss02~~06 Runtime·Post-Sector transition·Timer/Purge를 새로 구현하지 않는다.
@@ -229,7 +230,7 @@ reviewed-upstream: 371b4499cf5b27ded46b684649b1e55822134b84
 2. [완료 #633] 과거 2-3 Foundation별 Specialization skeleton을 두 번째 generic offer로 대체하고 3-5에 세 번째 explicit source를 연결했다. 고정 Specialization tier를 복구하지 않는다.
 3. [구현 #816, 정렬 #858] Boss01 `GATE LOCKING CARRIAGE`는 Map Editor BossStageSpec v2, kinematic Carriage/Beam physics, P1/P2 Sweep·P3 failure/Ram, 일반/약점 피해, owner-first hazard claim, HUD·mock cue, 1-8→Boss→2-1 전환으로 연결했다. 실제 browser·single/multiplayer final candidate 검증 뒤 완료하며 Timer·시간 만료 collapse는 후속 범위다.
 4. 일반 Timer Prototype `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s`는 HOLD 세 physical mapping이 확정된 뒤 연결한다. 과거 `960/+45/80px/s` baseline은 복구하지 않는다.
-5. Boss02는 인터뷰 기반 canonical 문서와 `2-8 → boss-02 → 3-1` Runtime/Editor source를 연결했다. Sector 03~05 Boss의 identity·arena·phase·보상과 각 `n-8 → Boss → 다음 Sector` 계약은 후속 기획이다.
+5. Boss02는 인터뷰 기반 canonical 문서와 `2-8 → boss-02 → 3-1` Runtime/Editor source를 연결했다. Boss05 `CONTINUITY CONTROL CORE`의 identity·arena·phase는 최종 authored handoff로 확정했지만 Runtime과 `5-8 → Boss05 → 6-1` 계약은 별도 범위다. Sector 03~04 Boss 및 나머지 `n-8 → Boss → 다음 Sector` 계약은 후속 기획이다.
 6. [완료] Sector 04~06의 24개 canonical v2를 generated catalog와 production world에 승격했다. 실제 기기·장시간 멀티플레이와 Post-Sector Boss/transition은 별도 완료 조건이다.
 7. 6-8 뒤 `PAD SECURITY WARDEN P-03 → Access Restored → 개별 Boarding → 전원 준비 → Escape`를 구현한다. Boss 06 authored handoff는 reference이며 이 Runtime encounter와의 정확한 매핑은 미확정이다. 6-8 내부 Boss·첫 Boarding Player의 동료 자동 순간이동은 금지한다.
 8. NPC는 예선 핵심 범위에서 제외한다. 핵심 범위 완료 뒤 여유가 있을 때만 2-6의 선택지 없는 3줄 Stationary NPC를 검토한다.
