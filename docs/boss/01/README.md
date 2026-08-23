@@ -7,8 +7,12 @@
 ## 1. 역할
 
 - Sector 01의 `1-8` checkpoint와 Worker District 첫 Reveal 뒤에 등장하는 별도 Post-Sector Boss Stage다.
-- 열린 Gate를 다시 잠그지 않고, 분리된 Locking Assembly가 단일 수평 Rail에서 통행을 방해한다.
+- 열린 Gate를 다시 잠그지 않고, 분리된 Locking Assembly가 상부 구조물의 단일 수평 Rail에 매달려 이동하며 아래 Player 발판에 공격 영역을 투사해 통행을 방해한다. Carriage 본체가 발판 높이를 자유롭게 떠다니지 않는다.
+- Arena 충돌 지형은 상부 `upper-maintenance-frame`과 하부 `lower-catwalk` 두 단뿐이다. 중간 platform은 두지 않으며, 두 단의 세로 간격은 Boss camera 한 화면에 하부 Player·현수 Rail·Carriage가 함께 보이도록 제한한다. Player는 하부 catwalk 위에서 공격 영역을 피하고 Rope로 상부 Carriage 약점을 공략한다.
+- Boss01의 backdrop은 Arena 좌표에 가까운 다음 Sector를 추정하지 않고 `sourceAreaId: sector-01-08`의 Sector 01 환경을 사용한다. 이는 실제 전투와 Map Editor Gameplay View에 공통 적용한다.
 - 핵심 전투 문장은 **공격을 보고 피한 뒤, 열린 약점을 Rope로 반격한다**다.
+- Arena는 Anchor와 Route 없이 시작한다. 필요한 공격 Rope Anchor와 표시형 Route는 Map Editor에서 새로 배치한다.
+- Boss Preview와 실제 Boss 진입은 Carriage 근처가 아니라 하부 `lower-catwalk` Entry에서 시작한다.
 - Boss Timer와 시간 만료 Arena collapse는 사용하지 않는다.
 
 ## 2. 전투 판독 규칙
@@ -38,7 +42,7 @@ Player는 별도 설명 없이 다음 상태를 구분할 수 있어야 한다.
 ```
 
 - 안전 대기·예고·약점 노출에는 공격 피해가 없다.
-- Sweep 중에는 Beam의 실제 위치에만 피해가 있다.
+- Sweep 중에는 Beam의 실제 위치 안에서만 0.1초마다 3 피해가 있다. Beam은 에너지 영역이므로 물리 충돌·impulse를 만들지 않는다.
 - 안전 상태에서 Rail 전체를 별도로 왕복하지 않는다.
 
 ## 4. Phase
@@ -78,12 +82,12 @@ Beam 흔들림·균열·스파크
 
 ## 6. 물리와 피격
 
-- Carriage는 공통 Physics·Collider 계약에 참여하는 **Rail 구속 kinematic body**다.
+- Carriage는 공통 Physics·Collider 계약에 참여하는 **상부 Rail 현수·수평 구속 kinematic body**다. Rail과 Carriage는 현수 구조로 연결해 표현하며 공격 영역과 높이를 분리한다.
 - Player와 Carriage는 actor-to-actor collision manifold로 충돌한다.
 - Player 공격과 접촉은 Carriage의 위치·속도·Rail 궤적을 바꾸지 않는다.
 - Carriage를 Surface 또는 안전 발판으로 취급하지 않으며 보스 위 체류를 감지하는 전용 조건문도 만들지 않는다.
 - 충돌 반응은 상대 속도·충돌 법선·질량·반발 계수에서 계산한다. Beam·Ram 전용 고정 knockback 수치를 두지 않는다.
-- Beam은 Carriage와 이동 상태를 공유하는 공격 collider다.
+- Beam은 Carriage와 이동 상태를 공유하는 비물리 지속 피해 영역이다.
 - Ram 중에는 Carriage 본체 collider가 실제 공격 collider이며 더 빠른 상대 속도 때문에 자연스럽게 더 큰 충돌 impulse가 발생한다.
 - 안전 대기·예고·약점 노출·Ram recovery의 본체 접촉은 물리 충돌만 처리하고 HP 피해를 주지 않는다.
 - 방어 강화는 Boss 공격 피해에서도 기존과 동일하게 적용한다.

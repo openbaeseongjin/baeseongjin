@@ -27,6 +27,12 @@ Enemy 종류·activation anchor·Wind mode·Boss visual preset/mechanic/vulnerab
 
 Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor·등록된 Mechanic·Phase 순서와 수·전환·HUD를 편집한다. `phases[].basePhaseHealth`, `combat.additionalPlayerMultiplier`, `combat.closedBodyDamageMultiplier`, `combat.weakFixedPercent`와 Beam Failure의 `failureProgress`가 피해·전환 저작 권위이며, Inspector의 1~4인 총 HP·Phase HP·floor·약점 고정 피해는 저장되지 않는 읽기 전용 파생값이다. Boss Preview는 메모리에 저장한 현재 Boss Stage Spec을 독립 `GameSimulation`의 전투 시작 상태로 열고 Player를 실제 Carriage 근처에 배치한 뒤 둘 사이를 framing해 Polygon mock·이동·Rope·일반 공격·Boss HUD를 즉시 확인한다. Boss01의 현행 기획 권위는 [`boss/01/README.md`](./boss/01/README.md) 한 문서이며 `legacy/`의 정적 Preview는 비교 패널에 노출하지 않는다. 실제 Stage 진입 위치와 진행 규칙은 바꾸지 않는다. 새 mechanic 종류는 Editor 텍스트만으로 만들 수 없고 먼저 코드 Registry와 validator를 추가해야 한다.
 
+Boss의 Arena 경계는 캔버스 드래그와 Inspector X/Y로 이동할 수 있다. 표면·앵커·Recovery·Phase 구역은 데이터형 기본 요소이므로 추가·삭제할 수 있다. 새 Mechanic 종류·Boss 행동·전환 조건처럼 Runtime 코드 Registry가 필요한 개념은 에디터에서 생성하지 않고 코드에 등록된 선택지만 조합한다. 일반 Area Bounds는 원점 고정 크기 계약이므로 위치 입력을 표시하지 않고 너비·높이만 편집한다.
+
+Boss의 기획 Route/흐름 표시는 `MAP-PREVIEW.html`만 소유하며 Runtime·Map Editor에는 표시하거나 저작하지 않는다. `role: swing-attack`만 실제 Runtime grapple target이며 `실게임 요소 → 공격 Rope Anchor`에서 배치·선택한다.
+
+왼쪽 레이어 목록은 `실게임 요소`, `표시형 오브젝트`, `규칙 / 설정`으로 구분한다. 표시형 오브젝트는 일반 Area의 맵 경계·복구/예상 경로·카메라 구역과 Boss의 Arena 경계·예상 Rope 경로·Recovery·Phase 구역을 포함하며, 실제 게임 오브젝트보다 낮은 선택·표현 우선순위를 가진다.
+
 맵 경계·시작 지점·출구·지형 표면·앵커·복구/경로·기존 적 슬롯·바람·카메라 구역은 편집 가능하다. 목표·출구의 목적지/해제 조건·스토리·스캐너·행동 레지스트리는 표시 전용이며 초안과 서버가 모두 변경을 거부한다. 위치가 있는 편집 요소는 드래그와 X/Y 수치 입력 모두 가장 가까운 5px 격자로 스냅하며, 카메라 구역의 최소/최대 Y도 같은 규칙을 따른다. 캔버스 드래그는 이동 중 임시 상태만 갱신하고 pointer release에서 되돌리기 한 건으로 확정한다.
 
 Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·Enemy·Wind·Camera는 Inspector의 `선택 요소 삭제` 또는 `Delete`로 초안에서 제거하며 Undo로 복구할 수 있다. Entry·Exit를 삭제한 동안 Draft는 검증 오류 상태이고 각각 하나를 다시 추가하거나 Undo해야 Apply할 수 있다. Anchor는 landmark/target 쌍을, Wind는 source/zone 쌍을 함께 삭제한다.
@@ -46,6 +52,7 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 
 - 초안은 브라우저 Draft에서 바뀌고 **메모리 초안 저장**을 누르면 검증된 현재 값이 서버 메모리에 복사된다. 파일은 변경하지 않으며, **저장 적용**을 누르기 전에는 v2 JSON·generated JS가 갱신되지 않는다.
 - 저장 적용은 v2 구조와 실제 Runtime Area 불변식, 읽기 전용 경계를 확인하고 저장 직전에 현재 스테이지 source hash가 초안을 연 시점과 같은지 검사한다. 브라우저는 요청 중 저장 적용을 비활성화한다.
+- `저장 버전`은 마지막 Git `HEAD` 기준과 각 `저장 적용` 직전의 Stage source snapshot을 보여 준다. `버전 복원`은 선택한 snapshot을 다시 적용할 뿐 새 version을 만들지 않는다. 이 local `.map-editor-history/` 기록은 commit·merge를 만들거나 Git history를 바꾸지 않으며, Stage별 최근 20개만 보관한다.
 - 메모리 초안 저장은 로컬 v2 검사와 서버 검증을 통과한 Draft만 보관하며, 요청 중 상태와 최종 성공·실패를 상태 줄에 즉시 표시한다. 이후 Draft를 다시 수정하면 메모리 저장 상태와 Gameplay View 준비 상태를 해제한다.
 - 시작 지점은 아래 지지 플랫폼 상단 32px을 기준으로 하는 최대 1개의 Entry 컴포넌트다. 둘은 독립 좌표로 편집하지 않으며 서버도 저장 전에 같은 이동량으로 다시 구성한다.
 - 출구는 Stage당 최대 1개이며 데크 위치가 복합 객체 이동의 단일 권위다. 출구점·Gate trigger·Gate panel·Gate visual·출구 route point는 에디터와 서버가 데크 이동량에서 다시 구성하며 독립 좌표로 편집하지 않는다. `nextAreaId`, Gate ID와 해제 조건은 이동 대상이 아니며 일반 Runtime의 Stage 전환 계약을 유지한다.
@@ -54,7 +61,8 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - Boss Stage Apply도 진행 중 전투를 hot reload하지 않는다. 저장된 Spec은 다음 Boss Stage 시작 또는 새 게임에서만 읽으며, 참가자 수와 scaled Phase HP는 최초 Boss Stage 시작에서 고정한다.
 - Gameplay View는 선택 Stage의 검증된 memory draft를 Area override로 주입해 `AuthoredSeamlessSectorRuntime`의 production world 전체를 만들고 canonical `stageId`에 해당하는 landmark에서 시작한다. 나머지 Stage와 compiler 계약은 production과 같고 출구를 바꾼 별도 preview world를 만들지 않으며 정상 Catalog, 실행 중인 Run, multiplayer에는 hot-swap하지 않는다.
 - Gameplay View는 에디터 전용 polygon renderer가 아니라 `GameRendererFactory`의 실제 게임 renderer를 사용한다. production renderer가 숨기는 `renderable: false` surface도 동일하게 숨기며 상태 줄은 Stage 전체 surface 수와 실제 표시 수를 나눠 보여 준다.
-- Gameplay View의 `저사양 비행 테스트` 패널은 Rope 입력을 끄고 WASD·방향키로 production world의 선택 Stage Bounds 안을 비행한다. 이 상태는 Gameplay View 인스턴스만 소유하며 일반 게임·Boss·멀티플레이·맵 source에는 포함하지 않는다.
+- Gameplay View의 `저사양 비행 테스트` 패널은 Rope 입력을 끄고 WASD·방향키로 production world의 선택 Stage Bounds 안을 비행한다. 일반 Area와 Boss Preview 모두에서 제공하며, 이 상태는 Gameplay View 인스턴스만 소유하고 일반 게임·멀티플레이·맵 source에는 포함하지 않는다.
+- Boss Preview의 `약점 타격`은 현재 노출된 약점에만 Preview 전용 normal Boss impact를 넣는다. Phase 번호·상태를 강제하지 않으며 실제 약점 판정·피해·전환을 사용한다.
 - Sector 01~06의 48개 Stage는 `AREA-SPEC.v2.json → generated module → generated catalog → authored seamless compiler` 한 경로를 일반 싱글·멀티와 Gameplay View가 함께 사용한다. 수기 catalog, v1 AREA-SPEC, migration provenance 기반 복원과 실행 fallback은 없다.
 - 기존 `AREA-SPEC-REV*-DESIGN.json`과 `MAP-PREVIEW.html`은 읽기 전용 기획 근거일 뿐 Editor Apply·generated catalog·Runtime fallback 입력이 아니다.
 - `MAP-PREVIEW.html`은 시나리오의 지도 구성 비교 근거다. 비교 패널은 이 파일을 읽기 전용으로 표시할 뿐, v2 AREA-SPEC·generated JS·Runtime Catalog의 단일 권위를 대체하거나 저장 적용·미리보기·멀티플레이에 영향을 주지 않는다.

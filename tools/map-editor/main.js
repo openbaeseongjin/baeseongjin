@@ -21,6 +21,7 @@ import { enemyDisplayName } from "../../src/game/combat/EnemyArchetypeCatalog.js
 import { AUTHORED_COORDINATE_ANCHORS } from "../../src/game/world/AuthoredCoordinateAnchor.js";
 import { WIND_MODE } from "../../src/game/world/WindPhase.js";
 import {
+    BOSS_ANCHOR_ROLE,
     BOSS_MECHANIC_TYPE,
     BOSS_TRANSITION_TRIGGER,
     BOSS_VICTORY_PRESENTATION_ID,
@@ -31,15 +32,15 @@ import {
 } from "../../src/game/boss-authoring/BossStageSpec.js";
 
 const EDITABLE_GROUPS = Object.freeze([
-    ["bounds", "맵 경계", null],
-    ["entry", "시작 지점", "entry"],
-    ["exit", "출구", "exit"],
-    ["surfaces", "지형 표면", "surface"],
-    ["anchors", "앵커", "anchor"],
-    ["recoveryRoute", "복구 / 경로", "route"],
-    ["enemySlots", "적 슬롯", "enemy"],
-    ["wind", "바람", "wind"],
-    ["camera", "카메라 구역", "camera"]
+    ["entry", "시작 지점", "entry", "실게임 요소"],
+    ["exit", "출구", "exit", "실게임 요소"],
+    ["surfaces", "지형 표면", "surface", "실게임 요소"],
+    ["anchors", "앵커", "anchor", "실게임 요소"],
+    ["enemySlots", "적 슬롯", "enemy", "실게임 요소"],
+    ["wind", "바람", "wind", "실게임 요소"],
+    ["bounds", "맵 경계", null, "표시형 오브젝트"],
+    ["recoveryRoute", "복구 / 경로", "route", "표시형 오브젝트"],
+    ["camera", "카메라 구역", "camera", "표시형 오브젝트"]
 ]);
 const READ_ONLY_GROUPS = Object.freeze([
     ["objectives", "목표", "objectives"],
@@ -49,19 +50,19 @@ const READ_ONLY_GROUPS = Object.freeze([
     ["behaviorRegistry", "행동 레지스트리", "behaviorRefs"]
 ]);
 const BOSS_EDITABLE_GROUPS = Object.freeze([
-    ["arena", "Arena 경계", null],
-    ["entry", "시작 지점", null],
-    ["exit", "출구", null],
-    ["surfaces", "Arena 표면", null],
-    ["anchors", "Rope 경로", null],
-    ["recovery", "복구 지점", null],
-    ["zones", "Phase 구역", null],
-    ["boss", "Boss Actor", null],
-    ["mechanics", "Mechanic", null],
-    ["phases", "Phase", null],
-    ["combat", "HP / 피해", null],
-    ["hud", "Boss HUD", null],
-    ["transition", "진입 / 승리 전환", null]
+    ["entry", "시작 지점", null, "실게임 요소"],
+    ["exit", "출구", null, "실게임 요소"],
+    ["surfaces", "Arena 표면", "boss-surface", "실게임 요소"],
+    ["combatAnchors", "공격 Rope Anchor", "boss-strike-anchor", "실게임 요소"],
+    ["boss", "Boss Actor", null, "실게임 요소"],
+    ["mechanics", "Mechanic", null, "실게임 요소"],
+    ["arena", "Arena 경계", null, "표시형 오브젝트"],
+    ["recovery", "복구 지점", "boss-recovery", "표시형 오브젝트"],
+    ["zones", "Phase 구역", "boss-zone", "표시형 오브젝트"],
+    ["phases", "Phase", null, "규칙 / 설정"],
+    ["combat", "HP / 피해", null, "규칙 / 설정"],
+    ["hud", "Boss HUD", null, "규칙 / 설정"],
+    ["transition", "진입 / 승리 전환", null, "규칙 / 설정"]
 ]);
 const DOMAIN_LABELS = Object.freeze({
     bounds: "맵 경계",
@@ -69,6 +70,7 @@ const DOMAIN_LABELS = Object.freeze({
     exit: "출구",
     surfaces: "지형 표면",
     anchors: "앵커",
+    combatAnchors: "공격 Rope Anchor",
     recoveryRoute: "복구 / 경로",
     enemySlots: "적 슬롯",
     wind: "바람",
@@ -137,6 +139,8 @@ const dom = {
     redo: document.querySelector("#redo-draft"),
     validate: document.querySelector("#validate-draft"),
     apply: document.querySelector("#apply-draft"),
+    version: document.querySelector("#stage-version"),
+    restoreVersion: document.querySelector("#restore-version"),
     preview: document.querySelector("#preview-stage")
 };
 const context = dom.canvas.getContext("2d");
@@ -157,6 +161,7 @@ const state = {
     validationPending: false,
     memoryPreviewReady: false,
     replacementPoints: { entry: null, exit: null },
+    annotationHitRegions: [],
     layerFilter: "",
     scenarioReferenceOpen: false
 };
@@ -284,7 +289,7 @@ function entityAnnotation(entity, spec) {
         if (entity.domain === "exit") return { name: "열린 Gate", effect: "승리 뒤 Sector 02 진입" };
         if (entity.domain === "boss") return { name: spec.name, effect: "Rail 위 중립 Boss Actor" };
         if (entity.domain === "surfaces") return { name: `Arena · ${id}`, effect: "충돌 / Rope 이동 표면" };
-        if (entity.domain === "anchors") return { name: `Rope · ${id}`, effect: "400px authored 이동 관계" };
+        if (entity.domain === "combatAnchors") return { name: `공격 Rope · ${id}`, effect: "Rope 부착 / 스윙 반격" };
         if (entity.domain === "recovery") return { name: `복구 · ${id}`, effect: "실패 후 지역 복귀" };
         if (entity.domain === "mechanics") return { name: `Mechanic · ${id}`, effect: kindLabel(entity.kind) };
         if (entity.domain === "phases") return { name: `Phase · ${id}`, effect: "HP floor / 약점 공략" };
@@ -463,6 +468,7 @@ function nextStableId(prefix) {
             ...spec.arena.surfaces.map(({ id }) => id),
             ...spec.arena.anchors.map(({ id }) => id),
             ...spec.arena.recoveryPoints.map(({ id }) => id),
+            ...(spec.arena.phaseZones ?? []).map(({ id }) => id),
             ...spec.mechanics.map(({ id }) => id),
             ...spec.phases.map(({ id }) => id)
         ]);
@@ -514,6 +520,69 @@ function applyMutation({ domain, label, apply }) {
 
 function addPreset(kind) {
     const point = state.replacementPoints[kind] ?? currentWorldAtCanvasCenter();
+    if (kind === "boss-surface") {
+        const id = nextStableId("surface");
+        applyMutation({
+            domain: "surfaces",
+            label: "Boss Arena 표면 추가",
+            apply: (spec) => {
+                spec.arena.surfaces.push({
+                    id,
+                    bounds: { x: point.x - 80, y: point.y - 20, width: 160, height: 40 },
+                    oneWay: true,
+                    grappleable: true,
+                    validArchitecture: false
+                });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "surfaces", id, kind: "surface" });
+        return render();
+    }
+    if (kind === "boss-strike-anchor") {
+        const id = nextStableId("strike-anchor");
+        applyMutation({
+            domain: "combatAnchors",
+            label: "Boss 공격 Rope Anchor 추가",
+            apply: (spec) => {
+                spec.arena.anchors.push({ id, x: point.x, y: point.y, role: BOSS_ANCHOR_ROLE.SWING_ATTACK });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "combatAnchors", id, kind: "swing-anchor" });
+        return render();
+    }
+    if (kind === "boss-recovery") {
+        const id = nextStableId("recovery");
+        applyMutation({
+            domain: "recovery",
+            label: "Boss 복구 지점 추가",
+            apply: (spec) => {
+                spec.arena.recoveryPoints.push({ id, x: point.x, y: point.y });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "recovery", id, kind: "recovery" });
+        return render();
+    }
+    if (kind === "boss-zone") {
+        const id = nextStableId("zone");
+        applyMutation({
+            domain: "zones",
+            label: "Boss Phase 구역 추가",
+            apply: (spec) => {
+                spec.arena.phaseZones ??= [];
+                spec.arena.phaseZones.push({
+                    id,
+                    phaseId: spec.phases[0].id,
+                    bounds: { x: point.x - 120, y: point.y - 80, width: 240, height: 160 }
+                });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "zones", id, kind: "phase-zone" });
+        return render();
+    }
     if (kind === "boss-phase") {
         const id = nextStableId("phase");
         applyMutation({
@@ -709,13 +778,18 @@ function renderLayers() {
     const all = entities();
     const snapshot = state.draft.snapshot();
     let hasFilterMatch = false;
-    for (const [domain, label, preset] of editableGroups()) {
+    let renderedCategory = null;
+    for (const [domain, label, preset, category] of editableGroups()) {
         const entries = all.filter((entry) => entry.domain === domain);
         const visibleEntries = entries.filter((entry) => matchesLayerFilter(entry, label));
         const count = entries.length;
         const groupMatches = matchesLayerFilter({ domain, id: label, kind: label }, label);
         if (state.layerFilter && visibleEntries.length === 0 && !groupMatches) continue;
         if (visibleEntries.length > 0 || groupMatches) hasFilterMatch = true;
+        if (category !== renderedCategory) {
+            dom.layerPanel.append(element("h3", { className: "layer-category", text: category }));
+            renderedCategory = category;
+        }
         const group = element("section", { className: "layer-group" });
         const heading = element("div", { className: "panel-heading", text: label });
         heading.append(
@@ -936,6 +1010,22 @@ function removeBossEntry(domain, id) {
                 for (const phase of spec.phases) {
                     phase.mechanicIds = phase.mechanicIds.filter((mechanicId) => mechanicId !== id);
                 }
+            } else if (domain === "surfaces") {
+                spec.arena.surfaces = spec.arena.surfaces.filter((surface) => surface.id !== id);
+                for (const mechanic of spec.mechanics) {
+                    const surfaceIds = mechanic.parameters?.validArchitectureSurfaceIds;
+                    if (Array.isArray(surfaceIds)) {
+                        mechanic.parameters.validArchitectureSurfaceIds = surfaceIds.filter(
+                            (surfaceId) => surfaceId !== id
+                        );
+                    }
+                }
+            } else if (domain === "combatAnchors") {
+                spec.arena.anchors = spec.arena.anchors.filter((anchor) => anchor.id !== id);
+            } else if (domain === "recovery") {
+                spec.arena.recoveryPoints = spec.arena.recoveryPoints.filter((point) => point.id !== id);
+            } else if (domain === "zones") {
+                spec.arena.phaseZones = (spec.arena.phaseZones ?? []).filter((zone) => zone.id !== id);
             }
             return true;
         }
@@ -962,7 +1052,7 @@ function moveBossPhase(id, delta) {
 function renderBossInspector(snapshot, selected, entity) {
     const fields = element("div", { className: "inspector-fields" });
     const spec = snapshot.spec;
-    if (entity?.point) {
+    if (entity?.point && selected.domain !== "bounds") {
         appendPositionField(fields, {
             label: "X",
             value: entity.point.x,
@@ -1312,6 +1402,16 @@ function renderBossInspector(snapshot, selected, entity) {
         }
     }
     dom.inspector.append(fields);
+    if (["surfaces", "anchors", "combatAnchors", "recovery", "zones"].includes(selected.domain)) {
+        dom.inspector.append(
+            button({
+                text: "선택 요소 삭제",
+                className: "delete-button",
+                onClick: () => removeBossEntry(selected.domain, selected.id),
+                title: "초안에서 삭제합니다. 되돌리기로 복구할 수 있습니다."
+            })
+        );
+    }
 }
 
 function removeSelectedEntity() {
@@ -1724,6 +1824,12 @@ function drawAnnotation(entity, spec, rect, selected, occupied) {
         return;
     }
     occupied.push(box);
+    state.annotationHitRegions.push(
+        Object.freeze({
+            entity: Object.freeze({ domain: entity.domain, id: entity.id }),
+            bounds: Object.freeze({ ...box })
+        })
+    );
     context.fillStyle = "rgba(7, 16, 24, 0.86)";
     context.fillRect(x, y, width, height);
     context.strokeStyle = selected ? "#66e6ff" : "rgba(134, 176, 190, 0.42)";
@@ -1735,6 +1841,36 @@ function drawAnnotation(entity, spec, rect, selected, occupied) {
     context.font = "10px system-ui, sans-serif";
     context.fillText(`효과 · ${annotation.effect}`, x + 7, y + 27);
     context.restore();
+}
+
+function drawSelectedEntityOverlay() {
+    const entity = selectedEntity();
+    if (!entity) return;
+    if (entity.bounds) drawRect(entity.bounds, "#66e6ff");
+    if (entity.point) drawMarker(entity.point, "#66e6ff", "circle", true);
+}
+
+function hitTestEntitiesWithSelectedPriority() {
+    const selected = state.draft.selected();
+    return entities().map((entity) =>
+        selected?.domain === entity.domain && selected.id === entity.id
+            ? { ...entity, interactionPriority: -100 }
+            : entity
+    );
+}
+
+function annotationEntityAt(screen) {
+    const hit = [...state.annotationHitRegions]
+        .reverse()
+        .find(
+            ({ bounds }) =>
+                screen.x >= bounds.x &&
+                screen.x <= bounds.x + bounds.width &&
+                screen.y >= bounds.y &&
+                screen.y <= bounds.y + bounds.height
+        );
+    if (!hit) return null;
+    return entities().find(({ domain, id }) => domain === hit.entity.domain && id === hit.entity.id) ?? null;
 }
 
 function drawBossCanvas(rect, spec) {
@@ -1763,21 +1899,25 @@ function drawBossCanvas(rect, spec) {
     drawMarker(spec.boss.position, "#ff796a", "square", isSelected("boss", spec.boss.actorId));
     drawMarker(spec.arena.entry, "#e6f2f5", "triangle", isSelected("entry", spec.arena.entry.id));
     drawMarker(spec.arena.exit, "#66e6ff", "diamond", isSelected("exit", spec.arena.exit.id));
-    for (const anchor of spec.arena.anchors) drawMarker(anchor, "#33889d", "circle", isSelected("anchors", anchor.id));
+    for (const anchor of spec.arena.anchors) {
+        if (anchor.role === BOSS_ANCHOR_ROLE.SWING_ATTACK) {
+            drawMarker(anchor, "#67e8f9", "diamond", isSelected("combatAnchors", anchor.id));
+        }
+    }
     for (const point of spec.arena.recoveryPoints)
         drawMarker(point, "#86c99d", "square", isSelected("recovery", point.id));
     context.fillStyle = "rgba(230,242,245,0.7)";
     context.font = "11px ui-monospace, Consolas, monospace";
     context.fillText(`${spec.id} · ${spec.name}`, 12, 20);
+    drawSelectedEntityOverlay();
     const occupied = [];
-    for (const entity of entities()) {
-        drawAnnotation(entity, spec, rect, isSelected(entity.domain, entity.id), occupied);
-    }
+    for (const entity of entities()) drawAnnotation(entity, spec, rect, isSelected(entity.domain, entity.id), occupied);
 }
 
 function drawCanvas() {
     const rect = resizeCanvas();
     context.clearRect(0, 0, rect.width, rect.height);
+    state.annotationHitRegions = [];
     if (!state.draft) return;
     const spec = state.draft.specification();
     if (state.specType === "boss-stage") return drawBossCanvas(rect, spec);
@@ -1846,6 +1986,7 @@ function drawCanvas() {
     const annotatedEntities = [...canvasEntities].sort(
         (left, right) => Number(isSelected(right.domain, right.id)) - Number(isSelected(left.domain, left.id))
     );
+    drawSelectedEntityOverlay();
     for (const entity of annotatedEntities)
         drawAnnotation(entity, spec, rect, isSelected(entity.domain, entity.id), occupiedAnnotations);
 }
@@ -1872,6 +2013,8 @@ function renderStatus() {
     dom.validate.disabled = state.applyPending || state.validationPending || !snapshot;
     dom.apply.disabled =
         state.applyPending || state.validationPending || !snapshot || !snapshot.valid || !snapshot.dirty;
+    dom.version.disabled = state.applyPending || state.validationPending;
+    dom.restoreVersion.disabled = state.applyPending || state.validationPending || !dom.version.value;
     dom.preview.disabled =
         state.applyPending ||
         state.validationPending ||
@@ -1920,6 +2063,7 @@ async function loadStage(stageId, { fit = true } = {}) {
         state.memoryPreviewReady = state.specType === "area" && Boolean(payload.memoryStored);
         state.replacementPoints = { entry: null, exit: null };
         state.draft.select(null);
+        await loadStageVersions();
         const scope =
             state.specType === "boss-stage"
                 ? "POST-SECTOR BOSS / 독립 Boss Stage"
@@ -1933,6 +2077,23 @@ async function loadStage(stageId, { fit = true } = {}) {
         render();
     } catch (cause) {
         errorMessage(cause);
+    }
+}
+
+async function loadStageVersions() {
+    const payload = await api(stageEndpoint(state.stageId, "/versions"));
+    clear(dom.version);
+    dom.version.append(element("option", { text: "저장 전 버전", attributes: { value: "" } }));
+    for (const version of [...payload.versions].reverse()) {
+        const detail = version.createdAt
+            ? `r${version.revision} · ${new Date(version.createdAt).toLocaleString()}`
+            : "마지막 커밋 기준";
+        dom.version.append(
+            element("option", {
+                text: `${version.label} · ${detail}`,
+                attributes: { value: version.id }
+            })
+        );
     }
 }
 
@@ -2056,6 +2217,7 @@ dom.apply.addEventListener("click", async () => {
                 revision: payload.revision,
                 runtimePromotion: payload.runtimePromotion
             });
+        await loadStageVersions();
         setMessage(
             "valid",
             state.authoringMode === "scenario-only"
@@ -2063,6 +2225,27 @@ dom.apply.addEventListener("click", async () => {
                 : `저장 적용 완료: revision ${payload.revision} 생성 JS를 갱신했습니다.`
         );
         render();
+    } catch (cause) {
+        errorMessage(cause);
+    } finally {
+        state.applyPending = false;
+        renderStatus();
+    }
+});
+dom.version.addEventListener("change", renderStatus);
+dom.restoreVersion.addEventListener("click", async () => {
+    if (!dom.version.value || state.applyPending) return;
+    if (!confirmDiscardDirtyDraft()) return;
+    state.applyPending = true;
+    setMessage("info", "선택한 저장 전 버전을 복원 중입니다.");
+    renderStatus();
+    try {
+        await api(stageEndpoint(state.stageId, "/restore"), {
+            method: "POST",
+            body: JSON.stringify({ versionId: dom.version.value, baseRevision: state.draft.revision() })
+        });
+        await loadStage(state.stageId, { fit: false });
+        setMessage("valid", "저장 전 버전을 복원했습니다.");
     } catch (cause) {
         errorMessage(cause);
     } finally {
@@ -2108,11 +2291,14 @@ dom.canvas.addEventListener("pointerdown", (event) => {
         state.pointer = { mode: "pan", screen };
         dom.canvas.classList.add("is-panning");
     } else {
-        const selected = hitTestEditorEntity(entities(), world, 28 / state.view.zoom);
+        const selected =
+            annotationEntityAt(screen) ??
+            hitTestEditorEntity(hitTestEntitiesWithSelectedPriority(), world, 28 / state.view.zoom);
         state.draft.select(selected);
-        if (selected?.point && !["bounds", "arena"].includes(selected.domain)) {
+        if (selected?.point && selected.domain !== "bounds") {
             state.draft.beginBufferedMutation({ domain: selected.domain, label: "Move map object" });
             state.pointer = { mode: "drag", selected, originPoint: { ...selected.point }, originWorld: world };
+            dom.canvas.classList.add("is-dragging");
         } else {
             state.pointer = null;
         }
@@ -2122,9 +2308,15 @@ dom.canvas.addEventListener("pointerdown", (event) => {
 });
 
 dom.canvas.addEventListener("pointermove", (event) => {
-    if (!state.pointer || !state.draft) return;
+    if (!state.draft) return;
     const rect = dom.canvas.getBoundingClientRect();
     const screen = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    if (!state.pointer) {
+        const world = screenToWorld(screen, state.view);
+        const hovered = annotationEntityAt(screen) ?? hitTestEditorEntity(entities(), world, 28 / state.view.zoom);
+        dom.canvas.classList.toggle("is-hovering-entity", Boolean(hovered));
+        return;
+    }
     if (state.pointer.mode === "pan") {
         state.view.x += screen.x - state.pointer.screen.x;
         state.view.y += screen.y - state.pointer.screen.y;
@@ -2157,11 +2349,15 @@ function finishPointer(event) {
     }
     state.pointer = null;
     dom.canvas.classList.remove("is-panning");
+    dom.canvas.classList.remove("is-dragging");
     if (dom.canvas.hasPointerCapture(event.pointerId)) dom.canvas.releasePointerCapture(event.pointerId);
 }
 
 dom.canvas.addEventListener("pointerup", finishPointer);
 dom.canvas.addEventListener("pointercancel", finishPointer);
+dom.canvas.addEventListener("pointerleave", () => {
+    if (!state.pointer) dom.canvas.classList.remove("is-hovering-entity");
+});
 globalThis.addEventListener("keydown", (event) => {
     const typingField =
         event.target instanceof HTMLInputElement ||

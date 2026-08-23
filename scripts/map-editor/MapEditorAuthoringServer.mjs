@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { validateAreaCatalogManifest } from "../../src/game/world/area-authoring-v2/AreaCatalogManifest.js";
 import {
@@ -202,7 +203,9 @@ async function requestJson(request) {
 }
 
 function requestRoute(url) {
-    const match = /^\/api\/map-editor\/stages\/([^/]+)(?:\/(validate|preview|reference))?$/.exec(url.pathname);
+    const match = /^\/api\/map-editor\/stages\/([^/]+)(?:\/(validate|preview|reference|versions|restore))?$/.exec(
+        url.pathname
+    );
     return match ? { stageId: decodeURIComponent(match[1]), action: match[2] ?? "read" } : null;
 }
 
@@ -237,6 +240,7 @@ export async function createMapEditorAuthoringServer({
         throw error("editor-catalog-invalid", "Map editor stage catalog is invalid.");
     }
     const manifests = new Map();
+    const historyRoot = safeProjectPath(root, ".map-editor-history");
     async function manifestFor(entry) {
         if (!entry.manifestPath) return null;
         if (manifests.has(entry.manifestPath)) return manifests.get(entry.manifestPath);
@@ -323,6 +327,76 @@ export async function createMapEditorAuthoringServer({
 
     function previewAvailable(stage) {
         return Boolean(stage.outputPath);
+    }
+
+    function historyPath(stage) {
+        return resolve(historyRoot, `${stage.entry.stageId}.json`);
+    }
+
+    async function readStageHistory(stage) {
+        try {
+            const history = JSON.parse(await readFile(historyPath(stage), "utf8"));
+            if (history?.stageId !== stage.entry.stageId || !Array.isArray(history.versions)) throw new Error();
+            return history;
+        } catch {
+            return { stageId: stage.entry.stageId, versions: [] };
+        }
+    }
+
+    function gitBaselineVersion(stage) {
+        try {
+            const relativeSourcePath = relative(root, stage.sourcePath).replaceAll("\\", "/");
+            const content = execFileSync("git", ["-C", root, "show", `HEAD:${relativeSourcePath}`], {
+                encoding: "utf8",
+                stdio: ["ignore", "pipe", "ignore"]
+            });
+            return {
+                id: "git-head",
+                label: "Git HEAD 기준",
+                createdAt: null,
+                revision: null,
+                spec: validateSpec(stage.entry, JSON.parse(content))
+            };
+        } catch {
+            return null;
+        }
+    }
+
+    async function writeStageHistory(stage, history) {
+        await mkdir(historyRoot, { recursive: true });
+        const path = historyPath(stage);
+        const temporary = `${path}.tmp`;
+        await writeFile(temporary, `${JSON.stringify(history, null, 2)}\n`, "utf8");
+        await rename(temporary, path);
+    }
+
+    function versionValue(version) {
+        return Object.freeze({
+            id: version.id,
+            label: version.label,
+            createdAt: version.createdAt,
+            revision: version.revision
+        });
+    }
+
+    async function stageVersions(stage) {
+        const history = await readStageHistory(stage);
+        const baseline = gitBaselineVersion(stage);
+        return Object.freeze([...(baseline ? [versionValue(baseline)] : []), ...history.versions.map(versionValue)]);
+    }
+
+    async function snapshotStage(stage, { label }) {
+        const history = await readStageHistory(stage);
+        const version = {
+            id: `${Date.now()}-${revisionFor(stableJson(stage.spec, stage.entry.specType)).slice(0, 8)}`,
+            label,
+            createdAt: new Date().toISOString(),
+            revision: stage.revision,
+            spec: stage.spec
+        };
+        history.versions = [...history.versions, version].slice(-20);
+        await writeStageHistory(stage, history);
+        return versionValue(version);
     }
 
     function stageValue(stage) {
@@ -440,6 +514,10 @@ export async function createMapEditorAuthoringServer({
             return stageValue(currentStage(stageId));
         },
 
+        async listStageVersions(stageId) {
+            return Object.freeze({ stageId, versions: await stageVersions(currentStage(stageId)) });
+        },
+
         async readScenarioMapPreview(stageId) {
             const stage = currentStage(stageId);
             const source = await readText(
@@ -485,6 +563,37 @@ export async function createMapEditorAuthoringServer({
                 ...(await generatedWrites(stage, canonical))
             ];
             await assertSourceUnchanged(stage);
+            await snapshotStage(stage, { label: "저장 적용 전" });
+            for (const write of writes) await writeFile(write.path, write.content, "utf8");
+            stage.spec = canonical;
+            stage.memorySpec = null;
+            stage.runtimePromotion = runtimePromotionReadiness(stage.entry, canonical);
+            stage.sourceHash = revisionFor(sourceContent);
+            stage.revision += 1;
+            return stageValue(stage);
+        },
+
+        async restoreStageVersion({ stageId, versionId, baseRevision } = {}) {
+            const stage = currentStage(stageId);
+            if (!Number.isInteger(baseRevision) || baseRevision !== stage.revision) {
+                throw error("revision-conflict", "Map editor stage changed since this Draft was loaded.", {
+                    latest: stageValue(stage)
+                });
+            }
+            const history = await readStageHistory(stage);
+            const version =
+                versionId === "git-head"
+                    ? gitBaselineVersion(stage)
+                    : history.versions.find(({ id }) => id === versionId);
+            if (!version?.spec) throw error("version-not-found", "Map editor snapshot version was not found.");
+            const canonical = validateEditableSpec(stage.entry, stage.spec, version.spec);
+            assertEditableDraft(stage.entry, stage.spec, canonical);
+            const sourceContent = stableJson(canonical, stage.entry.specType);
+            const writes = [
+                { path: stage.sourcePath, content: sourceContent },
+                ...(await generatedWrites(stage, canonical))
+            ];
+            await assertSourceUnchanged(stage);
             for (const write of writes) await writeFile(write.path, write.content, "utf8");
             stage.spec = canonical;
             stage.memorySpec = null;
@@ -520,6 +629,8 @@ export async function createMapEditorAuthoringServer({
                 return json(response, 404, { code: "route-not-found", message: "Map editor API route was not found." });
             if (route.action === "read" && request.method === "GET")
                 return json(response, 200, await server.readStage(route.stageId));
+            if (route.action === "versions" && request.method === "GET")
+                return json(response, 200, await server.listStageVersions(route.stageId));
             if (route.action === "preview" && request.method === "GET") {
                 const stageRecord = currentStage(route.stageId);
                 const stage = await server.readStage(route.stageId);
@@ -556,6 +667,18 @@ export async function createMapEditorAuthoringServer({
                     await server.applyStage({
                         stageId: route.stageId,
                         spec: body.spec,
+                        baseRevision: body.baseRevision
+                    })
+                );
+            }
+            if (route.action === "restore" && request.method === "POST") {
+                const body = await requestJson(request);
+                return json(
+                    response,
+                    200,
+                    await server.restoreStageVersion({
+                        stageId: route.stageId,
+                        versionId: body.versionId,
                         baseRevision: body.baseRevision
                     })
                 );

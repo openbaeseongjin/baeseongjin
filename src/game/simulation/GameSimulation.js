@@ -13,6 +13,7 @@ import {
 } from "../augments/actions/ActionAugmentDefinition.js";
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
 import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
+import { BOSS_ANCHOR_ROLE } from "../boss-authoring/BossStageSpec.js";
 import { defineBossStage } from "../boss/BossStageDefinition.js";
 import {
     advanceEnemyProjectiles,
@@ -220,6 +221,9 @@ function normalizedBossDefinitions({ bossDefinition, bossDefinitions }) {
     return Object.freeze(definitions.map((definition) => defineBossStage(definition)));
 }
 const DEFAULT_BOSS_HAZARD_DAMAGE = 25;
+const BOSS_BEAM_DAMAGE_INTERVAL_SECONDS = 0.1;
+const BOSS_BEAM_DAMAGE_PER_PULSE = 3;
+const SIMULATION_TICKS_PER_SECOND = 120;
 const VICTIM_IMPACT_AUTHORITY = Object.freeze({ LOCAL: "local", CLAIM: "claim" });
 
 function bossPhaseMechanics(stage, definition, phase) {
@@ -235,6 +239,17 @@ function bossHazardMechanic(stage, definition, snapshot) {
         mechanics.find((mechanic) => mechanic.type === type) ??
         mechanics.find(({ type: value }) => /sweep$/.test(value))
     );
+}
+
+function bossHazardDamage(mechanic, hazardKind) {
+    return hazardKind === "beam"
+        ? (mechanic.parameters?.damagePerPulse ?? BOSS_BEAM_DAMAGE_PER_PULSE)
+        : (mechanic.parameters?.damage ?? DEFAULT_BOSS_HAZARD_DAMAGE);
+}
+
+function bossBeamDamageIntervalTicks(mechanic) {
+    const seconds = mechanic.parameters?.damageIntervalSeconds ?? BOSS_BEAM_DAMAGE_INTERVAL_SECONDS;
+    return Math.max(1, Math.round(seconds * SIMULATION_TICKS_PER_SECOND));
 }
 
 function bossWeakpointOffset(mechanics, { direction, halfWidth }) {
@@ -587,6 +602,7 @@ export class GameSimulation {
         if (Array.isArray(suppliedObjects)) {
             return Object.freeze({
                 ...runtime,
+                environmentAreaId: stage.sourceAreaId,
                 arena: Object.freeze({
                     id: stage.id,
                     bounds: stage.bounds,
@@ -614,6 +630,7 @@ export class GameSimulation {
         const phaseDefinition = this.bossRuntime.definition.phases[runtime.phase - 1];
         return Object.freeze({
             ...runtime,
+            environmentAreaId: stage.sourceAreaId,
             arena: Object.freeze({
                 id: stage.id,
                 bounds: stage.bounds,
@@ -633,7 +650,13 @@ export class GameSimulation {
                         direction: runtime.mechanism.direction,
                         velocity: bodyActor?.velocity ?? runtime.mechanism.velocity,
                         movementProgress: runtime.mechanism.movementProgress,
-                        ropeAttachable: bodyActor?.ropeAttachment !== null
+                        ropeAttachable: bodyActor?.ropeAttachment !== null,
+                        suspensionHeight: Math.max(
+                            0,
+                            carriagePosition.y -
+                                ((this.bossRuntime.definition.arena.boss?.rail?.y ?? carriagePosition.y) +
+                                    worldOffset.y)
+                        )
                     }),
                     Object.freeze({
                         id: beamGeometry.id,
@@ -679,7 +702,19 @@ export class GameSimulation {
                         active: true,
                         state: runtime.vulnerability.active ? "exposed" : "secured",
                         phase: runtime.phase
-                    })
+                    }),
+                    ...stage.route
+                        .filter(({ role }) => role === BOSS_ANCHOR_ROLE.SWING_ATTACK)
+                        .map((anchor) =>
+                            Object.freeze({
+                                id: anchor.id,
+                                kind: "boss-grapple-anchor",
+                                position: anchor,
+                                size: Object.freeze({ width: 32, height: 32 }),
+                                state: "available",
+                                active: true
+                            })
+                        )
                 ])
             })
         });
@@ -995,7 +1030,7 @@ export class GameSimulation {
                 phase: snapshot.phase,
                 sequence: snapshot.mechanism.hazardSequence,
                 hazardKind,
-                damage: mechanic?.parameters?.damage ?? DEFAULT_BOSS_HAZARD_DAMAGE
+                damage: bossHazardDamage(mechanic ?? {}, hazardKind)
             })
         );
         while (this.bossHazardRecords.size > 64)
@@ -1185,13 +1220,21 @@ export class GameSimulation {
                     ? physicsActorKind === PHYSICS_ACTOR_KIND.BOSS
                     : physicsActorKind === PHYSICS_ACTOR_KIND.BOSS_HAZARD)
         );
-        if (!collisionActor) return Object.freeze([]);
-        const damage = mechanic.parameters?.damage ?? DEFAULT_BOSS_HAZARD_DAMAGE;
+        const damage = bossHazardDamage(mechanic, hazardKind);
+        const beamPulse = hazardKind === "beam";
+        if (beamPulse && this.tick % bossBeamDamageIntervalTicks(mechanic) !== 0) return Object.freeze([]);
+        if (!beamPulse && !collisionActor) return Object.freeze([]);
+        const beamGeometry = beamPulse ? this.bossRuntime.mechanism.beamGeometry(this.#bossWorldOffset()) : null;
+        const beamCollider = beamPulse ? PolygonCollider.box(beamGeometry.size) : null;
         const outcomes = [];
         for (const player of players) {
             if (player.lifeState !== "active" || player.health <= 0 || player.hitInvulnerabilityRemaining > 0) continue;
-            if (!player.physics.collidedWithActor(collisionActor.id)) continue;
-            const contactId = `${stage.id}:attempt:${snapshot.attempt}:phase:${snapshot.phase}:hazard:${snapshot.mechanism.hazardSequence}:${player.id}`;
+            const affected = beamPulse
+                ? player.physics.collider.overlapsCollider(player.physics.position, beamGeometry.position, beamCollider)
+                : player.physics.collidedWithActor(collisionActor.id);
+            if (!affected) continue;
+            const pulse = beamPulse ? `:pulse:${Math.floor(this.tick / bossBeamDamageIntervalTicks(mechanic))}` : "";
+            const contactId = `${stage.id}:attempt:${snapshot.attempt}:phase:${snapshot.phase}:hazard:${snapshot.mechanism.hazardSequence}:${player.id}${pulse}`;
             const contact = this.bossRuntime.applyHazardContact({ contactId, playerId: player.id, damage });
             if (!contact.changed) continue;
             const protection = player.augmentCombat.absorbPlayerDamage({

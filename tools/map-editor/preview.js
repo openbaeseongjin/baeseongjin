@@ -12,6 +12,7 @@ const status = document.querySelector("#preview-status");
 const reloadButton = document.querySelector("#reload-preview");
 const flightMode = document.querySelector("#preview-flight-mode");
 const flightStatus = document.querySelector("#preview-flight-status");
+const weakpointStrikeButton = document.querySelector("#preview-weakpoint-strike");
 const stageId = new URLSearchParams(globalThis.location.search).get("stage");
 let currentApp = null;
 let previewRenderer = null;
@@ -57,11 +58,7 @@ function setStatus(text, kind = "") {
 function syncFlightMode() {
     flightEnabled = flightMode.checked;
     currentApp?.setPreviewFlightEnabled?.(flightEnabled);
-    flightStatus.textContent = flightMode.disabled
-        ? "Boss Preview에서는 사용하지 않음"
-        : flightEnabled
-          ? "켜짐 · 로프 입력 비활성"
-          : "꺼짐";
+    flightStatus.textContent = flightEnabled ? "켜짐 · 로프 입력 비활성" : "꺼짐";
 }
 
 async function requestPreview() {
@@ -98,8 +95,8 @@ async function createPreview() {
         setStatus("실제 게임 화면 리소스를 준비하는 중입니다.");
         const [preview, presentation] = await Promise.all([requestPreview(), runtimePresentationPromise]);
         const { areaId, revision, previewArea } = preview;
-        flightMode.disabled = preview.specType === "boss-stage";
         syncFlightMode();
+        weakpointStrikeButton.hidden = preview.specType !== "boss-stage";
         if (preview.specType === "boss-stage") {
             const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(
                 preview.spec.sourceAreaId
@@ -153,6 +150,14 @@ async function createPreview() {
 
 reloadButton.addEventListener("click", createPreview);
 flightMode.addEventListener("change", syncFlightMode);
+weakpointStrikeButton.addEventListener("click", () => {
+    const outcome = currentApp?.debugStrikeWeakpoint?.();
+    if (!outcome?.accepted) {
+        setStatus("현재 노출된 약점이 없어 디버그 타격을 적용하지 않았습니다.", "error");
+        return;
+    }
+    setStatus(`약점 디버그 타격 적용 · 피해 ${outcome.appliedDamage ?? 0}`);
+});
 globalThis.addEventListener("beforeunload", () => currentApp?.stop());
 syncFlightMode();
 await createPreview();

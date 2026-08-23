@@ -13,6 +13,7 @@ const KIND = Object.freeze({
     BEAM: "beam",
     RAM: "ram",
     WEAKPOINT: "weakpoint",
+    GRAPPLE_ANCHOR: "grapple-anchor",
     RESIDENTIAL_PURSUER: "residential-pursuer",
     CHARGE_LINE: "charge-line",
     SLAM_ZONE: "slam-zone",
@@ -63,6 +64,12 @@ function chevron(context, x, y, sign, scale, color) {
     context.stroke();
 }
 
+function polygon(context, vertices) {
+    context.beginPath();
+    vertices.forEach(({ x, y }, index) => (index === 0 ? context.moveTo(x, y) : context.lineTo(x, y)));
+    context.closePath();
+}
+
 class BossPolygonObjectRenderer {
     draw(context, object) {
         context.save();
@@ -92,16 +99,7 @@ class ResidentialPursuerRenderer extends BossPolygonObjectRenderer {
         context.fillStyle = COLOR.BODY;
         context.strokeStyle = telegraphing ? COLOR.WARNING : exposed ? COLOR.EXPOSED : COLOR.EDGE;
         context.lineWidth = telegraphing || exposed ? 5 : 3;
-        context.beginPath();
-        context.moveTo(-width * 0.5, -height * 0.32);
-        context.lineTo(-width * 0.38, -height * 0.5);
-        context.lineTo(width * 0.34, -height * 0.5);
-        context.lineTo(width * 0.5, -height * 0.2);
-        context.lineTo(width * 0.5, height * 0.32);
-        context.lineTo(width * 0.32, height * 0.5);
-        context.lineTo(-width * 0.38, height * 0.5);
-        context.lineTo(-width * 0.5, height * 0.22);
-        context.closePath();
+        polygon(context, bossBodyPolygonVertices("residential-security-pursuer", { width, height }));
         context.fill();
         context.stroke();
 
@@ -232,18 +230,29 @@ class ArchitectureImpactRenderer extends BossPolygonObjectRenderer {
 class CarriageRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
         const { width, height } = size(object, 980, 430);
+        const suspensionHeight = Math.max(0, object.suspensionHeight ?? 0);
         context.globalAlpha = object.state === "stopped" || object.state === "disabled" ? 0.55 : 1;
+        if (suspensionHeight > 0) {
+            const railY = -suspensionHeight;
+            context.strokeStyle = COLOR.EDGE;
+            context.lineWidth = 5;
+            context.beginPath();
+            context.moveTo(-width * 0.6, railY);
+            context.lineTo(width * 0.6, railY);
+            context.stroke();
+            for (const x of [-width * 0.28, width * 0.28]) {
+                context.beginPath();
+                context.moveTo(x, railY);
+                context.lineTo(x, -height * 0.42);
+                context.stroke();
+                context.fillStyle = COLOR.DARK;
+                context.fillRect(x - width * 0.07, railY - 10, width * 0.14, 20);
+            }
+        }
         context.fillStyle = COLOR.BODY;
         context.strokeStyle = COLOR.EDGE;
         context.lineWidth = 4;
-        context.beginPath();
-        context.moveTo(-width * 0.45, -height * 0.25);
-        context.lineTo(-width * 0.33, -height * 0.42);
-        context.lineTo(width * 0.33, -height * 0.42);
-        context.lineTo(width * 0.45, -height * 0.25);
-        context.lineTo(width * 0.4, height * 0.25);
-        context.lineTo(-width * 0.4, height * 0.25);
-        context.closePath();
+        polygon(context, bossBodyPolygonVertices("gate-locking-carriage", { width, height }));
         context.fill();
         context.stroke();
         if (object.state === "ram") {
@@ -262,7 +271,7 @@ class CarriageRenderer extends BossPolygonObjectRenderer {
         for (const x of [-width * 0.28, width * 0.28]) {
             context.fillStyle = COLOR.DARK;
             context.beginPath();
-            context.arc(x, height * 0.34, height * 0.13, 0, Math.PI * 2);
+            context.arc(x, suspensionHeight > 0 ? -suspensionHeight : height * 0.34, height * 0.13, 0, Math.PI * 2);
             context.fill();
             context.stroke();
         }
@@ -379,6 +388,26 @@ class WeakpointRenderer extends BossPolygonObjectRenderer {
             context.fill();
         }
         context.globalAlpha = 1;
+    }
+}
+
+class GrappleAnchorRenderer extends BossPolygonObjectRenderer {
+    drawShape(context, object) {
+        const { width, height } = size(object, 32, 32);
+        const radius = Math.min(width, height) * 0.42;
+        context.strokeStyle = COLOR.WEAKPOINT;
+        context.fillStyle = "rgba(103, 232, 249, 0.18)";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -radius * 0.55);
+        context.lineTo(0, radius * 0.55);
+        context.moveTo(-radius * 0.55, 0);
+        context.lineTo(radius * 0.55, 0);
+        context.stroke();
     }
 }
 
@@ -511,6 +540,7 @@ const RENDERER_BY_KIND = Object.freeze({
     [KIND.BEAM]: new BeamRenderer(),
     [KIND.RAM]: new RamRenderer(),
     [KIND.WEAKPOINT]: new WeakpointRenderer(),
+    [KIND.GRAPPLE_ANCHOR]: new GrappleAnchorRenderer(),
     [KIND.RESIDENTIAL_PURSUER]: new ResidentialPursuerRenderer(),
     [KIND.CHARGE_LINE]: new AttackLineRenderer(),
     [KIND.SLAM_ZONE]: new SlamZoneRenderer(),
@@ -534,3 +564,4 @@ const RENDERER_BY_KIND = Object.freeze({
 export function bossPolygonObjectRenderer(kind) {
     return RENDERER_BY_KIND[kind] ?? GENERIC_RENDERER;
 }
+import { bossBodyPolygonVertices } from "../../game/boss/BossBodyPolygon.js";

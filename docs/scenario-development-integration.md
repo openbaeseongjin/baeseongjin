@@ -5,7 +5,7 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 46fbb9bdbecabcaf5a7b48c47f1fa00283cdc7a6a91a222786d8cabb8382e04f
 authored-area-sha256: f9ec9676a75fa33bddf50a84ee3b4d9751b1e17fd6859a3e1cba9ee04c1311aa
-authored-sector-sha256: 09e3412f53940dfc5a48ca466eb9eb4c48483f7892e6ef64b4b0ce08c6207597
+authored-sector-sha256: e917bb9af995be3dc536821ff933d99391539c1f22c08d3ae1b7d1ca3246a292
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
 reviewed-upstream: 371b4499cf5b27ded46b684649b1e55822134b84
@@ -46,6 +46,8 @@ reviewed-upstream: 371b4499cf5b27ded46b684649b1e55822134b84
 | Sector 06 / 6-1~6-8 | `ROOFTOP / EVACUATION` Master와 8개 REV2/REV3 package가 `CROSS-REVIEWED`; 이전 Blockout Candidate는 package source로 대체됨                                                                                                       | 8개 canonical v2/generated Stage가 `MOCK INTEGRATED`다. 6-2 Wind, 6-3 Standard Sentry, 6-5 Scanner, 6-6 Patrol, 6-7 Cutter를 기존 시스템으로 실행하고 6-8은 Final Security 앞 content boundary다. Timer/Purge·Final Security·Boarding은 포함하지 않는다.                                                                                                                                                                                                                                                                                                                                                                                                                         | 실제 desktop/mobile 전체 traversal·위협 recall·멀티 수렴, Boss05 defeat→6-1와 `PAD SECURITY WARDEN P-03` 이후 흐름을 검증한다.                                |
 
 ## 최근 반영된 시나리오 변화
+
+- Boss01은 상부 Rail 현수 Carriage·하부 catwalk·지속 Beam·실제 공격 Rope Anchor·sourceAreaId backdrop을 Map Editor Gameplay View와 같은 Runtime 경로로 검수한다. Boss 전투의 실제 browser traversal과 멀티플레이 playtest는 남아 있다.
 
 - 2026-08-23 Boss03 `CENTRAL EXCHANGE MAINTENANCE SYSTEM` 최종 인계를 `docs/boss/03/final-content/`에 갱신했다. Scanner 상태를 이용한 Rope Flow, 두 점검 Arm Sweep, 좌/중앙/우 route와 Left Module → Right Module → Central Core authored 전투 규칙 및 정적 맵 프리뷰만 보존한다. Boss03 Runtime·collision·snapshot·`3-8 → Post-Sector Boss → 4-1` 전환과 Boss Timer/Arena collapse는 여전히 미구현·별도 결정이다.
 - 2026-08-23 Boss04 최종 디자인 인계를 `docs/boss/04/final-content/`에 갱신했다. Territory/LOS break/Return/handoff과 구 정적 프리뷰를 폐기하고, Guard A/B의 지속 추격·Protection Link·Central Security Hub의 authored 전투 규칙과 구현 인계를 보존한다. Boss04 Runtime·collision·snapshot·`4-8 → Post-Sector Boss → 5-1` 전환과 Boss Timer/Arena collapse는 여전히 미구현·별도 결정이다.

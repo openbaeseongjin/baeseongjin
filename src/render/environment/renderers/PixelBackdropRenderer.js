@@ -26,8 +26,9 @@ export class PixelBackdropRenderer {
         const { cssWidth, cssHeight } = viewport;
         const camera = scene.camera;
         const playerAltitude = scene.player?.position?.y ?? 0;
-        const area = currentAuthoredArea(scene);
-        const authoredTransition = authoredSectorBackdropTransition(scene);
+        const bossEnvironmentArea = bossStageAuthoredArea(scene);
+        const area = bossEnvironmentArea ?? currentAuthoredArea(scene);
+        const authoredTransition = bossEnvironmentArea ? null : authoredSectorBackdropTransition(scene);
         const zone = sceneEnvironmentZone(this.definition, scene);
         const palette = authoredTransition
             ? blendedTransitionPalette(this.definition, authoredTransition, -playerAltitude)
@@ -232,6 +233,14 @@ function authoredSectorBackdropTransition(scene) {
 
 function authoredRegions(world) {
     return world?.landmarks?.length ? world.landmarks : (world?.areas ?? []);
+}
+
+function bossStageAuthoredArea(scene) {
+    const areaId = scene?.bossStage?.environmentAreaId;
+    if (typeof areaId !== "string" || areaId === "") return null;
+    return authoredRegions(scene.world).find(
+        (region) => region.id === areaId || region.areaId === areaId || region.stageId === areaId
+    );
 }
 
 function endpointRegion(regions, sectorId, endpoint) {

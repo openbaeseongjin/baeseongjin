@@ -3,6 +3,7 @@ import { KinematicPhysicsBody } from "../physics/KinematicPhysicsBody.js";
 import { rotateVector } from "../physics/AngularMotion.js";
 import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
+import { bossBodyPolygonVertices } from "./BossBodyPolygon.js";
 
 export const RESIDENTIAL_PURSUIT_STATE = Object.freeze({
     CHASE: "chase",
@@ -194,18 +195,9 @@ function validSurfaceIds(phase, mechanic) {
 }
 
 function bodyVertices(size, angle = 0, scale = 1) {
-    const halfWidth = size.width * scale * 0.5;
-    const halfHeight = size.height * scale * 0.5;
-    return [
-        { x: -halfWidth, y: -halfHeight * 0.72 },
-        { x: -halfWidth * 0.78, y: -halfHeight },
-        { x: halfWidth * 0.72, y: -halfHeight },
-        { x: halfWidth, y: -halfHeight * 0.35 },
-        { x: halfWidth, y: halfHeight * 0.65 },
-        { x: halfWidth * 0.68, y: halfHeight },
-        { x: -halfWidth * 0.72, y: halfHeight },
-        { x: -halfWidth, y: halfHeight * 0.45 }
-    ].map((vertex) => rotateVector(vertex, angle));
+    return bossBodyPolygonVertices("residential-security-pursuer", size, scale).map((vertex) =>
+        rotateVector(vertex, angle)
+    );
 }
 
 function phaseStartPosition(definition, phaseIndex, fallback) {
