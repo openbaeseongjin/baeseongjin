@@ -70,12 +70,17 @@ export class CollisionBroadPhase {
         });
         this.surfaceSource = null;
         this.surfaceOrder = new Map();
+        this.staticSurfaceCount = 0;
+        this.dynamicSurfaceSource = Object.freeze([]);
+        this.dynamicSurfaceEntries = Object.freeze([]);
+        this.dynamicSurfaceOrder = new Map();
         this.surfaceCount = 0;
         this.indexedActorIds = new Set();
         this.actorOrder = new Map();
         this.interestBounds = Object.freeze([]);
         this.frameTick = null;
         this.staticBuilds = 0;
+        this.dynamicUpdates = 0;
         this.resetFrameMetrics();
     }
 
@@ -94,7 +99,8 @@ export class CollisionBroadPhase {
         if (this.surfaceSource === surfaces) return false;
         this.surfaceSource = surfaces;
         this.surfaceOrder = new Map(surfaces.map((surface, index) => [surface, index]));
-        this.surfaceCount = surfaces.length;
+        this.staticSurfaceCount = surfaces.length;
+        this.surfaceCount = this.staticSurfaceCount + this.dynamicSurfaceEntries.length;
         this.surfaceTree.rebuild(
             surfaces.map((surface, index) => ({
                 id: COLLISION_SPATIAL_NODE_ID.surface(index),
@@ -103,6 +109,19 @@ export class CollisionBroadPhase {
             }))
         );
         this.staticBuilds += 1;
+        return true;
+    }
+
+    setDynamicSurfaces(surfaces = []) {
+        if (!Array.isArray(surfaces)) throw new TypeError("CollisionBroadPhase dynamic surfaces must be an array");
+        if (this.dynamicSurfaceSource === surfaces) return false;
+        this.dynamicSurfaceSource = surfaces;
+        this.dynamicSurfaceEntries = Object.freeze(
+            surfaces.map((surface) => Object.freeze({ bounds: surfaceBounds(surface), value: surface }))
+        );
+        this.dynamicSurfaceOrder = new Map(surfaces.map((surface, index) => [surface, index]));
+        this.surfaceCount = this.staticSurfaceCount + surfaces.length;
+        this.dynamicUpdates += 1;
         return true;
     }
 
@@ -143,9 +162,7 @@ export class CollisionBroadPhase {
         const padding = colliderSnapshotBoundingRadius(
             typeof collider.snapshot === "function" ? collider.snapshot() : collider
         );
-        const candidates = this.surfaceTree
-            .query(sweptColliderBounds(collider, start, end, padding))
-            .sort((left, right) => this.surfaceOrder.get(left) - this.surfaceOrder.get(right));
+        const candidates = this.#surfaceCandidates(sweptColliderBounds(collider, start, end, padding));
         this.surfaceQueries += 1;
         this.surfaceCandidates += candidates.length;
         this.surfacePotential += this.surfaceCount;
@@ -153,13 +170,25 @@ export class CollisionBroadPhase {
     }
 
     querySurfaceBounds(bounds) {
-        const candidates = this.surfaceTree
-            .query(bounds)
-            .sort((left, right) => this.surfaceOrder.get(left) - this.surfaceOrder.get(right));
+        const candidates = this.#surfaceCandidates(bounds);
         this.surfaceQueries += 1;
         this.surfaceCandidates += candidates.length;
         this.surfacePotential += this.surfaceCount;
         return candidates;
+    }
+
+    #surfaceCandidates(bounds) {
+        const candidates = this.surfaceTree.query(bounds);
+        for (const entry of this.dynamicSurfaceEntries) {
+            if (boundsIntersect(entry.bounds, bounds)) candidates.push(entry.value);
+        }
+        return candidates.sort((left, right) => this.#surfaceIndex(left) - this.#surfaceIndex(right));
+    }
+
+    #surfaceIndex(surface) {
+        const staticIndex = this.surfaceOrder.get(surface);
+        if (staticIndex !== undefined) return staticIndex;
+        return this.staticSurfaceCount + (this.dynamicSurfaceOrder.get(surface) ?? this.dynamicSurfaceEntries.length);
     }
 
     queryActors({ actorId, collider, start, end, kinds = null }) {
@@ -206,7 +235,9 @@ export class CollisionBroadPhase {
             actorCandidates: this.actorCandidates,
             actorPotential: this.actorPotential,
             actorReduction,
-            staticBuilds: this.staticBuilds
+            staticBuilds: this.staticBuilds,
+            dynamicSurfaceCount: this.dynamicSurfaceEntries.length,
+            dynamicUpdates: this.dynamicUpdates
         });
     }
 }

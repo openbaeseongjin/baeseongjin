@@ -111,7 +111,7 @@ export class CentralExchangeMaintenanceRuntime extends CompositeBossEncounterRun
                 })
             }),
             canGroundActors: false,
-            ropeAttachment: false
+            ropeable: true
         });
         if (snapshot) this.restore(snapshot);
     }
@@ -425,6 +425,7 @@ export class CentralExchangeMaintenanceRuntime extends CompositeBossEncounterRun
                 state: this.state === CENTRAL_EXCHANGE_MAINTENANCE_STATE.SHUTDOWN ? "disabled" : actionState,
                 direction: this.railDirection,
                 physicsBody: true,
+                ropeAttachable: this.body.isRopeableSurface(),
                 active: true
             },
             {

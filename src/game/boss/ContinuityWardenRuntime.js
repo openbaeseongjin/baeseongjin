@@ -229,7 +229,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 })
             }),
             canGroundActors: false,
-            ropeAttachment: false
+            ropeable: true
         });
         if (snapshot) this.restore(snapshot);
     }
@@ -932,6 +932,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 actionState: this.actionPhase,
                 direction: this.facing,
                 physicsBody: true,
+                ropeAttachable: this.body.isRopeableSurface(),
                 active: true
             },
             {

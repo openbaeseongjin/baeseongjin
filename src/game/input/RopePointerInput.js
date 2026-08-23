@@ -4,6 +4,7 @@ import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { releaseRopeFromBody, ropeAttachmentPoint, ropeLaunchHandPoint } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
 import { isRopeableCollisionSurface } from "../rope/RopeableSurfaceMixin.js";
+import { rotateVector } from "../physics/AngularMotion.js";
 import { createInputCapabilityMixin } from "./InputCapability.js";
 
 export function findRopeAttachment({
@@ -27,7 +28,13 @@ export function findRopeAttachment({
         const point = closestPointOnSurface(aimPoint, surface);
         const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
         if (launchDistance > maxAttachDistance) continue;
-        if (ropeOccluders.some((divider) => segmentIntersectsSurface(origin, point, divider))) continue;
+        if (
+            ropeOccluders.some(
+                (divider) => divider.id !== surface.id && segmentIntersectsSurface(origin, point, divider)
+            )
+        ) {
+            continue;
+        }
         const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
         const score = aimDistance * 2 + launchDistance * 0.05;
         if (aimDistance <= aimTolerance && score < bestScore) {
@@ -51,12 +58,16 @@ export function findRopeAttachment({
             const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
             const score = aimDistance * 2 + launchDistance * 0.05;
             if (aimDistance <= aimTolerance && score <= bestScore) {
+                const localAnchor = rotateVector(
+                    { x: point.x - target.position.x, y: point.y - target.position.y },
+                    -(target.angle ?? 0)
+                );
                 best = {
                     x: point.x,
                     y: point.y,
                     ropeAttachment: {
                         ownerId: target.id,
-                        localAnchor: { x: point.x - target.position.x, y: point.y - target.position.y }
+                        localAnchor
                     }
                 };
                 bestScore = score;
