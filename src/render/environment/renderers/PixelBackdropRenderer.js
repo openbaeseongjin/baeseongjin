@@ -236,7 +236,9 @@ function authoredRegions(world) {
 }
 
 function bossStageAuthoredArea(scene) {
-    const areaId = scene?.bossStage?.environmentAreaId;
+    const bossStage = scene?.bossStage;
+    if (bossStage?.status !== "active") return null;
+    const areaId = bossStage.environmentAreaId;
     if (typeof areaId !== "string" || areaId === "") return null;
     return authoredRegions(scene.world).find(
         (region) => region.id === areaId || region.areaId === areaId || region.stageId === areaId
