@@ -1,11 +1,37 @@
-# Boss 05 콘텐츠 인계
+# Boss05 최신 main 정합화 개발 인계 v13
 
-상태: `AUTHORED FINAL CONTENT / RUNTIME IMPLEMENTED / POLYGON MOCK`
+기준 코드: `ea007998cef6168bfa4139d06f443eb444acfda5`
 
-Continuity Control Core, Actuator, Sliding Partition, Control Pulse의 콘텐츠 인계다. 전환은 `5-8 완료 → Boss05 → Boss05 처치 → 6-1`이며 direct `5-8 → 6-1` 연결은 만들지 않는다.
+## 현재 상태
 
-- source ZIP SHA-256: `1bef92dd05585141769d4767400c1718c4b67509ff3a8f0b4eacc76b94044b05`
-- source revision: `보스05_최종반영본_이해도강화_v12.zip`
-- authored documents: [`BOSS-05-BRIEF.md`](./final-content/BOSS-05-BRIEF.md), [`BOSS-05-COMPONENTS.md`](./final-content/BOSS-05-COMPONENTS.md), [`MAP-PREVIEW.html`](./final-content/MAP-PREVIEW.html)
+**설계 확정 · 런타임 부분 구현 · 최종 기획 정합화 필요 · 실제 플레이테스트 미검증**
 
-초기 Runtime은 Core→Actuator→Wall→Coupling의 전투·Pulse·개인 Recovery·snapshot·멀티플레이 상태를 실제로 구현하고, Polygon mock visual과 기존 stable audio cue만 사용한다. renderer의 preset/state와 audio cue ID는 gameplay Runtime·authoring Spec에서 분리하므로 최종 그래픽·animation metadata·음원을 교체할 때 전투 코드를 바꾸지 않는다.
+## 문서 우선순위
+
+1. `final-content/BOSS-05-LOCKED-DECISIONS.md`
+   - 인터뷰로 확정된 규칙
+2. `final-content/BOSS-05-MOVEMENT-ACCESSIBILITY-FIX-PLAN.md`
+   - 실제 이동·Rope·Collision·Core 공격·Exit 접근 차단과 구체 수정 좌표
+3. `final-content/BOSS-05-MAIN-AUDIT-IMPLEMENTATION-PLAN.md`
+   - 최신 main 코드와 최종 기획의 차이 및 수정 순서
+4. `final-content/BOSS-05-BRIEF.md`
+   - Boss 정체성, 전투 흐름, 공간/스토리 기획
+5. `final-content/BOSS-05-COMPONENTS.md`
+   - 코드 구성요소별 구현 인계
+6. `final-content/MAP-PREVIEW.html`
+   - 설계 QA용 시각 프리뷰
+
+## 주의
+
+MAP-PREVIEW는 설계 기준 프리뷰다.
+최신 Runtime의 음수 Y 좌표계와 최종 좌표 정합은
+`BOSS-05-MAIN-AUDIT-IMPLEMENTATION-PLAN.md`의 좌표계 audit를 먼저 거쳐야 한다.
+
+실제 브라우저/멀티플레이 검증 전에는 `PLAYTEST VERIFIED`로 표시하지 않는다.
+
+## v15 추가 확정
+
+- A/B/Main Wall 활성 접촉 시 피해 적용
+- 초기값 20 damage
+- WARNING/STORED는 무피해
+- Wall HP 피해와 Rope Cut은 독립 판정

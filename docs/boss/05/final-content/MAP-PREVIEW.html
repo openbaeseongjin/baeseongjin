@@ -15,7 +15,7 @@ label{display:inline-block;margin-right:9px;margin-top:5px}
 svg{width:100%;height:91vh;min-height:900px;background:#02070a;border:1px solid var(--line);border-radius:8px}
 text{fill:var(--txt);paint-order:stroke;stroke:#02080c;stroke-width:5;stroke-linejoin:round}.tiny{font-size:9px}.micro{font-size:11px}.label{font-size:15px;font-weight:700}.big{font-size:20px;font-weight:800}
 .room{fill:#0d1a21;stroke:#5f7882;stroke-width:5}.void{fill:var(--void);stroke:#324952;stroke-width:3;stroke-dasharray:14 9}.platform{fill:var(--plat);stroke:var(--top);stroke-width:4}.platform.recovery{fill:var(--recovery)}.edge{stroke:#dce8eb;stroke-width:5}
-.core{fill:var(--core);stroke:#c497e0;stroke-width:7}.recess{fill:#02070a;stroke:#b99bd0;stroke-width:3}.inner{fill:#ffae65;stroke:white;stroke-width:4}.act{fill:#354b55;stroke:#d8e4e8;stroke-width:5}.coupling{fill:#773f1e;stroke:#ffb46b;stroke-width:5}.hot{fill:#bd5d2d;stroke:#fff0dd;stroke-width:8}
+.core{fill:var(--core);stroke:#c497e0;stroke-width:7}.coreOpening{fill:#02070a;stroke:#79d9ef;stroke-width:4;stroke-dasharray:10 7}.accessShutter{fill:#536773;stroke:#e8f2f5;stroke-width:5}.roofSolid{fill:#182a32;stroke:#46616d;stroke-width:4}.roofGate{fill:#536773;stroke:#d7e5ea;stroke-width:5}.recess{fill:#02070a;stroke:#b99bd0;stroke-width:3}.inner{fill:#ffae65;stroke:white;stroke-width:4}.act{fill:#354b55;stroke:#d8e4e8;stroke-width:5}.coupling{fill:#773f1e;stroke:#ffb46b;stroke-width:5}.hot{fill:#bd5d2d;stroke:#fff0dd;stroke-width:8}
 .anchor{fill:var(--anchor);stroke:white;stroke-width:3}.special{fill:var(--special);stroke:white;stroke-width:4}.recAnchor{fill:var(--protect);stroke:white;stroke-width:4}
 .route{fill:none;stroke:var(--special);stroke-width:5;stroke-dasharray:12 8}.base{fill:none;stroke:#78909a;stroke-width:3;stroke-dasharray:8 8;opacity:.42}.recRoute{fill:none;stroke:var(--protect);stroke-width:6;stroke-dasharray:8 7}
 .wall{fill:var(--wall);stroke:#f0f6f7;stroke-width:4}.tele{fill:#ffba7218;stroke:var(--warn);stroke-width:5;stroke-dasharray:15 9}.move{stroke:var(--warn);stroke-width:4;stroke-dasharray:11 9}
@@ -24,6 +24,9 @@ text{fill:var(--txt);paint-order:stroke;stroke:#02080c;stroke-width:5;stroke-lin
 </style>
 </head>
 <body>
+<div style="position:fixed;z-index:9999;left:12px;right:12px;top:10px;padding:8px 12px;background:rgba(10,14,22,.92);border:1px solid rgba(255,255,255,.25);border-radius:8px;font:12px/1.45 system-ui,sans-serif;color:#fff">
+<strong>Boss05 설계 QA 프리뷰</strong> · 현재 main 기준 ea007998 · 이 HTML은 최종 공간 기획 기준이며 Runtime 좌표/상태 정합은 <code>BOSS-05-MAIN-AUDIT-IMPLEMENTATION-PLAN.md</code>의 P0 수정 후 검증한다.
+</div>
 <header><h1>보스05 · 최종 QA 맵 미리보기</h1><div class="sub">브래킷 없음 · Wall Slot/Shutter · Core Recess · 전투 구역 전체 Pulse · Void 복귀 · 개인 복귀 · 최종 탈출</div></header>
 <div class="layout"><aside>
 <div class="card"><b>공간 원칙</b><br>거대한 Side Frame/Bracket 없음. 실제 발판, Rope hardpoint, Central Void, 3개 Partition Wall, 중앙 Core만 핵심 구조.</div>
@@ -36,11 +39,26 @@ text{fill:var(--txt);paint-order:stroke;stroke:#02080c;stroke-width:5;stroke-lin
 <div class="card"><b>상태</b><br><button id="prepb" onclick="setState('prep')">준비</button><button id="attackb" onclick="setState('attack')">벽/Pulse</button><button id="lockb" onclick="setState('lock')">LOCK/약점</button></div>
 <div class="card"><label><input id="recT" type="checkbox"> 개인 복귀 경로 표시</label></div>
 <div class="card small"><b>피해 대상 제한</b><br>closedBodyDamageMultiplier=0<br>weakFixedPercent=0<br>weakNormalDamageMultiplier=1</div>
+<div class="card"><b>이동성 차단 QA</b><br>
+Final: 중앙 Core Access 360px 실제 개방<br>
+Victory: Roof 중앙 Gate 실제 제거<br>
+Wall: 실제 접촉 시 피해 20 + 안전 Cell 방향 Push<br>
+Wall Slot: Player 배출 후 Shutter 개방<br>
+Rope: 큰 Housing/Wall/Shutter는 비활성 대상<br>
+Recovery: 현재 legal Cell로 복귀<br>
+<span class="small">거리만 PASS하지 말고 Collision 경로까지 확인</span></div>
+<div class="card"><b>Wall 접촉 피해</b><br>
+WARNING / STORED = 피해 없음<br>
+DESCENT / LOCKED / RISE = 접촉 피해 20<br>
+MOVING 상태는 안전 Cell 방향 수평 Push<br>
+<span class="small">Rope Cut과 HP 피해는 독립 판정</span></div>
 </aside><main>
 <svg viewBox="0 0 5200 2800">
 <rect class="room" x="170" y="100" width="4860" height="2550" rx="34"/>
-<rect x="450" y="115" width="4300" height="115" rx="18" fill="#182a32" stroke="#46616d" stroke-width="4"/>
-<rect class="exit" id="roof" x="2420" y="120" width="360" height="100" rx="18" opacity=".25"/><text class="micro" x="2460" y="180">옥상 정비 통로</text>
+<rect class="roofSolid" x="450" y="115" width="1970" height="115" rx="18"/>
+<rect class="roofSolid" x="2780" y="115" width="1970" height="115" rx="18"/>
+<rect class="roofGate" id="roof" x="2420" y="115" width="360" height="115" rx="18"/>
+<text class="micro" x="2425" y="255">중앙 360px 옥상 Gate · CORE 파괴 후 실제 개방</text>
 
 <!-- Void -->
 <path class="void" d="M1780 1040 H3420 V2460 H3320 V2390 H2800 V2460 H2400 V2390 H1880 V2460 H1780 Z"/>
@@ -79,9 +97,13 @@ text{fill:var(--txt);paint-order:stroke;stroke:#02080c;stroke-width:5;stroke-lin
 <g id="shutters"></g>
 
 <!-- Core with recess -->
-<path class="core" d="M2100 300 H3100 V670 H2940 V610 H2740 V670 H2460 V610 H2260 V670 H2100 Z"/>
-<rect class="recess" x="2260" y="610" width="200" height="90" rx="18"/><rect class="recess" x="2740" y="610" width="200" height="90" rx="18"/>
-<rect class="inner" x="2480" y="385" width="240" height="200" rx="30"/><text class="big" x="2150" y="270">SUSPENDED CONTINUITY CONTROL CORE</text>
+<path class="core" d="M2100 300 H3100 V670 H3000 V610 H2800 V670 H2400 V610 H2200 V670 H2100 Z"/>
+<rect id="coreAccessOpening" class="coreOpening" x="2420" y="300" width="360" height="370" rx="28" opacity="0"/>
+<rect class="recess" x="2200" y="610" width="200" height="90" rx="18"/><rect class="recess" x="2800" y="610" width="200" height="90" rx="18"/>
+<rect class="inner" x="2480" y="385" width="240" height="200" rx="30"/>
+<rect id="coreAccessShutter" class="accessShutter" x="2420" y="300" width="360" height="370" rx="26"/>
+<text class="micro" x="2445" y="345">CORE ACCESS 360px</text>
+<text class="big" x="2150" y="270">SUSPENDED CONTINUITY CONTROL CORE</text>
 
 <!-- actuators -->
 <rect class="act" x="1580" y="860" width="320" height="135" rx="22"/><circle class="coupling" cx="1740" cy="930" r="42"/>
@@ -116,12 +138,12 @@ p1:'<b>P1 · AUX A</b><br>A Wall이 닫히기 전에 왼쪽 Cell로 넘어가고
 p2:'<b>P2 · AUX B</b><br>Player 1명만 R8 준비구역에 도착해도 시작. 오른쪽 Cell 전체 높이 INNER/OUTER Pulse.',
 p3a:'<b>P3-A</b><br>A/B Wall 동시 재활성. 중앙 Cell 전체 높이 LEFT/RIGHT Pulse. Bridge는 양쪽 모두 위험.',
 p3b:'<b>P3-B</b><br>Main Wall 분할 + UPPER/LOWER Pulse. 추락 시 직전 Cell에 맞는 Entry Recovery로 복귀.',
-final:'<b>FINAL</b><br>Core를 쓰러뜨린 뒤 EXIT-1 / EXIT-2가 전개되고 Rooftop Access가 열린다.'
+final:'<b>FINAL</b><br>Main 파괴 즉시 중앙 360px Core Access가 실제로 열림. Core 파괴 후 Roof 중앙 Gate가 사라지고 EXIT-1 / EXIT-2로 탈출.'
 };
 function wall(x,mode,name){
  if(mode==='prep')return `<rect class="tele" x="${x}" y="100" width="180" height="260"/><line class="move" x1="${x+90}" y1="360" x2="${x+90}" y2="2460"/><text class="tiny" x="${x-25}" y="390">${name} WARNING</text>`;
- if(mode==='attack')return `<rect class="wall" x="${x}" y="100" width="180" height="1500"/><line class="move" x1="${x+90}" y1="1600" x2="${x+90}" y2="2460"/><text class="tiny" x="${x-25}" y="1640">${name} MOVING · ROPE CUT IF INTERSECTS</text>`;
- return `<rect class="wall" x="${x}" y="100" width="180" height="2360"/><text class="tiny" x="${x-25}" y="2430">${name} LOCKED</text>`;
+ if(mode==='attack')return `<rect class="wall" x="${x}" y="100" width="180" height="1500"/><line class="move" x1="${x+90}" y1="1600" x2="${x+90}" y2="2460"/><text class="tiny" x="${x-25}" y="1640">${name} MOVING · 접촉 피해 20 · ROPE CUT IF INTERSECTS</text>`;
+ return `<rect class="wall" x="${x}" y="100" width="180" height="2360"/><text class="tiny" x="${x-25}" y="2430">${name} LOCKED · 접촉 피해 20</text>`;
 }
 function pRect(x,y,w,h,on,label){return `<rect class="${on?'pulseActive':'pulseWarn'}" x="${x}" y="${y}" width="${w}" height="${h}" rx="22"/><text class="label" x="${x+25}" y="${y+45}">${label}</text>`}
 function setPhase(p){phase=p;state='prep';render()}function setState(s){state=s;render()}
@@ -140,8 +162,10 @@ function render(){
  if(phase==='p2'){active='B';W=wall(3070,state,'B WALL');S='<circle class="special" cx="2600" cy="760" r="18"/><text class="tiny" x="2500" y="730">CROSS</text><circle class="special" cx="3700" cy="1230" r="18"/><text class="micro" x="3725" y="1210">B-STRIKE</text>';R='<path class="route" d="M2210 800 L2600 760 L2990 800 L3330 910"/>';if(state==='attack')P=pRect(3250,100,500,2360,true,'내부 활성 · 전체 높이')+pRect(3750,100,1050,2360,false,'외부 경고 · 전체 높이');if(state==='lock')Q='<circle class="hot" cx="3470" cy="930" r="58"/><text class="label" x="3540" y="1030">B COUPLING · 공격 가능</text>'}
  if(phase==='p3a'){active='AB';W=wall(2020,state,'A WALL')+wall(3070,state,'B WALL');S='<circle class="special" cx="2600" cy="900" r="18"/><text class="tiny" x="2470" y="875">P3-BRIDGE</text><circle class="special" cx="2380" cy="1030" r="18"/><circle class="special" cx="2820" cy="1030" r="18"/>';R='<path class="route" d="M2380 650 L2600 900 L2820 650"/>';if(state==='attack')P=pRect(2200,100,400,2360,true,'좌측 활성 · 전체 높이')+pRect(2600,100,470,2360,false,'우측 경고 · 전체 높이')+'<circle class="pulseActive" cx="2600" cy="900" r="78"/><text class="tiny" x="2690" y="900">BRIDGE = 양쪽 모두 위험</text>';if(state==='lock')Q='<text class="label" x="2240" y="1190">A/B LOCK → MAIN</text>'}
  if(phase==='p3b'){active='ABM';W=wall(2020,'lock','A WALL')+wall(3070,'lock','B WALL')+wall(2510,state,'MAIN WALL');S='<circle class="special" cx="2380" cy="1030" r="18"/><text class="tiny" x="2210" y="1065">P3-LOW-L</text><circle class="special" cx="2820" cy="1030" r="18"/><text class="tiny" x="2840" y="1065">P3-LOW-R</text>';R='<path class="route" d="M2380 650 L2380 1030"/><path class="route" d="M2820 650 L2820 1030"/>';if(state==='attack')P=pRect(2200,100,870,740,false,'상부 경고')+pRect(2200,840,870,1620,true,'하부 활성');if(state==='lock')Q='<circle class="aperture" cx="2600" cy="980" r="108"/><circle class="hot" cx="2600" cy="980" r="53"/><text class="label" x="2740" y="980">MAIN COUPLING · 하나의 체력</text>'}
- if(phase==='final'){if(state==='lock')Q='<circle class="hot" cx="2600" cy="450" r="78"/><text class="label" x="2710" y="455">최종 CORE</text>';if(state==='attack'){Q='<circle class="special" cx="2600" cy="400" r="18"/><circle class="special" cx="2600" cy="180" r="18"/><path class="route" d="M2380 650 L2600 400 L2600 180"/><text class="label" x="2700" y="405">EXIT-1</text><text class="label" x="2700" y="185">EXIT-2</text>';document.getElementById('roof').style.opacity='1'}else document.getElementById('roof').style.opacity='.25'}
+ if(phase==='final'){if(state==='lock')Q='<circle class="hot" cx="2600" cy="450" r="78"/><path class="route" d="M2380 650 L2600 450 M2820 650 L2600 450"/><text class="label" x="2710" y="455">최종 CORE · 실제 접근 가능</text>';if(state==='attack'){Q='<circle class="special" cx="2600" cy="400" r="18"/><circle class="special" cx="2600" cy="180" r="18"/><path class="route" d="M2380 650 L2600 400 L2600 180"/><text class="label" x="2700" y="405">EXIT-1</text><text class="label" x="2700" y="185">EXIT-2</text>';document.getElementById('roof').style.opacity='0'}else document.getElementById('roof').style.opacity='1'}
  document.getElementById('walls').innerHTML=W;document.getElementById('pulse').innerHTML=P;document.getElementById('weak').innerHTML=Q;document.getElementById('route').innerHTML=R;document.getElementById('special').innerHTML=S;document.getElementById('shutters').innerHTML=sh(active);document.getElementById('arrival').style.opacity=(phase==='p1'&&state==='prep')?'1':'0';
+ document.getElementById('coreAccessShutter').style.opacity=(phase==='final')?'0':'1';
+ document.getElementById('coreAccessOpening').style.opacity=(phase==='final')?'1':'0';
 }
 document.getElementById('recT').addEventListener('change',e=>document.getElementById('recovery').classList.toggle('hidden',!e.target.checked));render();
 </script>

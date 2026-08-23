@@ -1,7 +1,7 @@
 # BOSS 05 — CONTINUITY CONTROL CORE
 ## 처음 읽는 사람도 이해할 수 있는 기획 설명 + 전투/공간 규칙 + 구현 인계
 
-> 상태: **설계 확정 · 최종 브리프 v12 · 이해도 강화 · 구현 인계 포함 · 런타임 미구현**
+> 상태: **설계 확정 · 런타임 부분 구현 · 최종 기획 정합화 필요 · 실제 플레이테스트 미검증**
 >
 > Sector: **05 — CONTINUITY CONTROL**
 >
@@ -9,7 +9,7 @@
 >
 > Secondary: **EVERY ROUTE IS CONTROLLED**
 >
-> AUTHORING SNAPSHOT: `3301269a4de30f54a71a4361c3f9fc7f665a93cb` (2026-08-23 기준). 현재 main과 Runtime 연결 상태는 `docs/scenario-development-integration.md`가 소유한다.
+> 최신 코드 재점검 기준 `main`: `ea007998cef6168bfa4139d06f443eb444acfda5`
 >
 > 구현 전제: 기존 Boss / Rope / Combat / Collision / Snapshot 체계를 재사용하고, Boss05 전용 공간통제 Runtime만 추가한다.
 
@@ -137,7 +137,7 @@ Main Wall이 완전히 잠기면 Main 결합부가 열린다.
 - 투사체와 공격을 막는다.
 - 이동 중 실제 Rope와 교차하면 Rope를 자른다.
 
-단, Wall이 잠긴 뒤에는 접촉 피해를 계속 주지 않는다.
+단, Wall이 잠긴 뒤에도 실제 Wall collider와 접촉하면 피해를 받는다.
 
 즉 Wall의 목적은 플레이어를 죽이는 것이 아니라
 **“지금 어느 공간에 있어야 하는가”를 강제로 결정하는 것**이다.
@@ -428,6 +428,131 @@ Final은 Core 마무리와 탈출만 남긴다.
 
 ---
 
+
+# Wall 접촉 피해 — 최신 설계 확정
+
+Boss05의 A / B / Main Partition Wall은 전투 중 단순한 이동 장애물이 아니다.
+
+Player collider가 **활성 Wall collider와 실제로 겹치면 피해를 받는다.**
+
+상태별 규칙:
+
+```text
+WARNING
+→ 피해 없음
+
+DESCENDING
+→ 접촉 피해
+→ 가까운 안전 Cell 방향으로 수평 Push
+→ 실제 Rope 교차 시 Rope Cut
+
+LOCKED
+→ 접촉 피해
+→ Wall 통과 불가
+→ Rope Cut 없음
+
+RISING
+→ 접촉 피해
+→ 가까운 안전 Cell 방향으로 수평 Push
+→ 실제 Rope 교차 시 Rope Cut
+
+STORED
+→ 접촉 피해 없음
+```
+
+중요:
+
+- Wall 피해는 원격 범위 공격이 아니다.
+- **Player collider와 실제 Wall collider가 겹친 frame에만** 피해를 준다.
+- Warning 표시에는 피해가 없다.
+- Wall이 Player를 아래 Void 방향으로 밀어내지 않는다.
+- 동일 Wall에 계속 닿아 있는 동안 매 frame 피해를 주지 않는다.
+- 기존 `hitInvulnerabilityRemaining` 또는 Boss05 Wall contact cooldown을 사용해 연속 다단히트를 제한한다.
+- Pulse 피해와 Wall 접촉 피해는 별도 hazard다.
+- Wall 접촉 피해와 Rope Cut도 서로 독립이다.
+
+권장 초기 피해량:
+
+```text
+Wall contact damage = 20
+```
+
+현재 `ContinuityControlCoreRuntime`의 기본 `wallDamage = 20`을 그대로 사용하고,
+플레이테스트에서 수치만 조정한다.
+
+---
+
+# 이동성·공격 접근성 계약 — 구현 시 반드시 지킬 것
+
+Boss05는 Rope 거리만 맞는다고 플레이 가능한 맵으로 보지 않는다.
+
+다음 연속 경로가 **실제 Collision 상태에서도** 존재해야 한다.
+
+```text
+ENTRY
+→ 현재 Phase Rope 경로
+→ 안전 Cell
+→ Coupling 공격 위치
+→ 다음 Phase
+→ Final Core
+→ EXIT-1
+→ EXIT-2
+→ Sector06 Exit
+```
+
+특히 다음은 차단급 오류로 취급한다.
+
+- Core가 보이지만 Housing 때문에 실제 공격 반경에 접근할 수 없음
+- Exit가 보이지만 Roof collision 때문에 통과할 수 없음
+- Warning 반대쪽에 활성 Rope Hardpoint가 없음
+- Slot이 열리면서 Player 밑 발판이 사라짐
+- Wall이 Player를 아래 Void 쪽으로 밀어냄
+- Phase 전환 후 뒤처진 Player가 Wall 반대쪽에 영구 고립됨
+- 사망/Recovery 후 같은 Phase로 돌아갈 실제 경로가 없음
+
+구체적인 좌표와 코드 수정안은
+`BOSS-05-MOVEMENT-ACCESSIBILITY-FIX-PLAN.md`가 소유한다.
+
+## Final Core 실제 개방
+
+Main 파괴 전:
+
+```text
+[ LEFT SHELL ][ CORE ACCESS SHUTTER ][ RIGHT SHELL ]
+                         ● CORE
+```
+
+Main 파괴 후:
+
+```text
+[ LEFT SHELL ]      360px OPEN      [ RIGHT SHELL ]
+                         ● CORE
+```
+
+Core 위치를 옮기지 않고 중앙 Collision을 실제로 제거한다.
+
+## 승리 후 실제 Roof 개방
+
+Boss전 중:
+
+```text
+[ LEFT ROOF ][ CLOSED GATE ][ RIGHT ROOF ]
+```
+
+Core 파괴 후:
+
+```text
+[ LEFT ROOF ]    OPEN GAP    [ RIGHT ROOF ]
+                       ↑
+                    EXIT-1
+                       ↑
+                    EXIT-2
+```
+
+`route-roof` 전체 slab 뒤에 Gate를 겹쳐 놓는 방식은 금지한다.
+
+---
+
 # 0. 개발자가 30초 안에 확인할 핵심 내용
 
 ## 0.1 현재 결론
@@ -517,56 +642,74 @@ MAIN DESTROYED
 
 ---
 
-## 0.3 구현 상태 — AUTHORING SNAPSHOT 코드 점검
+## 0.3 현재 `main` 구현 상태
 
 점검 기준:
 
 ```text
-AUTHORING SNAPSHOT
-3301269a4de30f54a71a4361c3f9fc7f665a93cb
+main
+20e6c22deb6e95d9a5a7e351a95874d931a0a845
 ```
 
-| 항목 | 상태 | snapshot 확인 내용 |
+현재 Boss05는 더 이상 “런타임 미구현”이 아니다.
+
+### 이미 연결된 것
+
+- `boss-05.json`이 `BossStageCatalog`에 등록되어 있다.
+- `continuity-control-core`가 Boss Runtime factory에 연결되어 있다.
+- `ContinuityControlCoreRuntime.js`가 존재한다.
+- A / B / Main / Core 공격 대상과 단계별 HP가 존재한다.
+- `closedBodyDamageMultiplier = 0`
+- `weakFixedPercent = 0`
+- `weakNormalDamageMultiplier = 1`
+- 동적 Partition surface가 Rope/Projectile 차폐 속성을 가진다.
+- Rope 입력은 `ropeOccluder === true`를 실제 시야 차단에 사용한다.
+- Boss05 snapshot 구조와 5-8 → Boss05 → 6-1 전환 기반이 존재한다.
+
+### 부분 구현이지만 최종 기획과 다른 것
+
+- P3-A와 P3-B가 명확한 내부 상태로 분리되어 있지 않다.
+- P3-A A/B Wall은 잠금 후 유지되지 않고 다시 상승한다.
+- Main 실패 후 P3-A 전체를 다시 시작하는 규칙이 없다.
+- P2 INNER/OUTER Pulse가 Wall 잠금 전까지 반복되지 않는다.
+- P3-B UPPER/LOWER Pulse가 없다.
+- Wall의 실제 하강 형상이 승인된 “천장→바닥 폐쇄”와 반대로 계산될 수 있다.
+- Wall 하강 시간이 전 단계 0.8초로 동일하여 기획값과 다르다.
+- Slot/Shutter 상태는 있으나 실제 Platform 충돌 개폐 계약이 완성되지 않았다.
+- Core/Wall이 Rope attachment actor로 노출될 수 있어 authored Hardpoint만 사용한다는 기획과 충돌한다.
+- Rope Cut은 하강 중 중심이며 상승 중 실제 교차 Cut 규칙을 보강해야 한다.
+- Main Maintenance Aperture가 실제 공간/공격 판정으로 없다.
+- Recovery가 현재 단계별 개인 경로라기보다 단순 복귀 위치 처리에 가깝다.
+- Recovery 보호 상태가 실제 Boss05 hazard 피해 차단까지 완전 연결되었는지 보강이 필요하다.
+- Snapshot이 WARNING / DESCENT / LOCKED / RISE의 남은 타이머를 충분히 보존하지 못할 수 있다.
+- 싱글에는 generic Boss camera 기반이 있으나 Boss05 단계별 가독성 framing이 없다.
+- 멀티플레이도 각 Player 독립 로컬 카메라 원칙에 맞춘 Boss05 framing 검증이 필요하다.
+
+### 구현 상태 표
+
+| 항목 | 현재 판정 | 다음 조치 |
 |---|---|---|
-| 공통 Boss Stage 정의 | **코드 확인 완료** | `BossStageDefinition.js` 존재 |
-| 공통 Boss Encounter Runtime | **코드 확인 완료** | `BossEncounterRuntime.js` 존재 |
-| Boss participant scaling / defeat / snapshot | **코드 확인 완료** | 공통 Runtime이 소유 |
-| Rope Impact | **코드 확인 완료** | `RopeImpactAttack.js` 존재 |
-| Augment combat | **코드 확인 완료** | `AugmentCombatRuntime.js` 존재 |
-| Impact target registry | **코드 확인 완료** | 현재 Boss 공격 target 경로에서 사용 |
-| Polygon collision | **코드 확인 완료** | `PolygonCollider.js` 존재 |
-| Broad phase | **코드 확인 완료** | `CollisionBroadPhase.js` 존재 |
-| Rope segment/surface intersection | **코드 확인 완료** | 기존 Rope attachment 경로에서 사용 |
-| 기존 Rope Cut transition | **코드 확인 완료** | `GameSimulation`의 기존 rope-cut 흐름 존재 |
-| Boss presentation pipeline | **코드 확인 완료** | `BossStagePresentation → BossStageWorldRenderer` |
-| Boss polygon renderer registry | **코드 확인 완료** | Boss01/Boss02용 종류 존재 |
-| Boss authoring pipeline | **코드 확인 완료** | `BossStageSpec` / generator / validator / catalog 존재 |
-| Boss01 spec | **코드 확인 완료** | catalog/spec에 존재 |
-| Boss02 spec | **코드 확인 완료** | catalog/spec에 존재 |
-| Boss05 spec/catalog entry | **미구현** | 현재 catalog/spec에 없음 |
-| `continuity-control-core` factory entry | **미구현** | Factory에 없음 |
-| `ContinuityControlCoreRuntime` | **미구현** | 없음 |
-| Boss05 Dynamic Partition | **미구현** | 없음 |
-| Boss05 Slot/Shutter | **미구현** | 없음 |
-| Boss05 Full-cell Pulse | **미구현** | 없음 |
-| Personal Recovery Route | **미구현** | 없음 |
-| Final Exit deployment Runtime | **미구현** | 없음 |
+| Boss05 Spec / Catalog | **코드 확인 완료** | 유지 |
+| `ContinuityControlCoreRuntime` | **코드 확인 완료** | 상태기계 수정 |
+| A/B/Main/Core Target | **코드 확인 완료** | 유지 |
+| 피해 배율 계약 | **코드 확인 완료** | 유지 |
+| Wall 실제 Collision | **부분 구현** | 형상/이동/Slot 수정 |
+| Rope 차폐 | **코드 확인 완료** | Wall 자체 attachment 제거 |
+| Projectile 차폐 | **코드 확인 완료** | Aperture 예외 추가 |
+| Wall Rope Cut | **부분 구현** | 상승 중 실제 교차 포함 |
+| P2 Pulse | **부분 구현** | 반복 상태기계로 재구성 |
+| P3-A | **부분 구현** | A/B Wall 잠금 유지 |
+| P3-B | **부분 구현** | UPPER/LOWER 추가 |
+| Main Aperture | **미구현** | 기존 renderer/collision 경로에 추가 |
+| Phase-gated Hardpoint | **부분 구현** | 활성 시점 권위화 |
+| Personal Recovery | **부분 구현** | 단계/Cell별 개인 복귀 구현 |
+| Final Exit | **부분 구현** | 실제 EXIT 활성 시점 QA |
+| Snapshot / Restore | **부분 구현** | 상태 타이머/P3 내부 상태 보존 |
+| 로컬 Boss 카메라 | **부분 구현** | 단계별 framing 추가 |
+| 실제 1P/2P/4P 플레이테스트 | **미검증** | 최종 QA 단계에서 수행 |
 
-현재 `BossMechanismRuntimeFactory`가 지원하는 기구:
-
-```text
-rail-carriage
-residential-security-pursuit
-```
-
-Boss05 추가 목표:
-
-```text
-continuity-control-core
-→ ContinuityControlCoreRuntime
-```
-
----
+현재 구현의 자세한 차이와 수정 위치는 `BOSS-05-MAIN-AUDIT-IMPLEMENTATION-PLAN.md`가 소유한다.
+플레이어 이동·공격 접근·출구 차단 문제의 구체 수정은 `BOSS-05-MOVEMENT-ACCESSIBILITY-FIX-PLAN.md`가 소유한다.
 
 ## 0.4 보스05 핵심 구성요소
 
@@ -1045,7 +1188,7 @@ Rope physics = 정상
 Void 재추락 = 가능
 ```
 
-또한 Recovery 상태에서는 Boss target에 주는 피해를 0으로 한다.
+Recovery 상태에서도 현재 유효 Boss target에는 정상 피해를 준다. Wall 차폐와 공격선 판정은 그대로 적용한다.
 현재 legal combat cell에 다시 들어오면 Recovery 보호와 Recovery Hardpoint를 즉시 끈다.
 
 ---
@@ -1594,7 +1737,7 @@ src/game/boss/ContinuityControlCoreRuntime.js
 
 분류:
 
-# **미구현 / 보스05 전용 신규 기구**
+# **현재 main 구현됨 · 최종 기획에 맞춘 상태기계 수정 필요**
 
 ---
 
@@ -1612,7 +1755,7 @@ collision position
 
 분류:
 
-# **미구현 / 보스05 전용 연결부**
+# **부분 구현 · Wall 형상/Slot/실제 충돌 정합화 필요**
 
 ---
 
@@ -1631,7 +1774,7 @@ Wall 작동 직전에만 해당 Slot을 연다.
 
 분류:
 
-# **미구현 / 보스05 전용 기믹**
+# **부분 구현 · 실제 Platform collision 개폐까지 보강 필요**
 
 ---
 
@@ -1659,7 +1802,7 @@ Warning / Active / Recovery state와 hazard sequence를 가진다.
 
 분류:
 
-# **미구현 / 보스05 전용 공격 판정**
+# **부분 구현 · P2 반복 / P3-B 상하 패턴까지 재구성 필요**
 
 ---
 
@@ -1678,7 +1821,7 @@ protection
 
 분류:
 
-# **미구현 / 보스05 전용 복귀 기능**
+# **부분 구현 · Phase/Cell별 개인 복귀와 실제 보호 판정 보강 필요**
 
 ---
 
@@ -1694,7 +1837,7 @@ ROOFTOP SERVICE ACCESS OPEN
 
 분류:
 
-# **미구현 / 보스05 완료 처리**
+# **연결됨 · Final 영구 노출과 실제 Exit 활성 순서 QA 필요**
 
 ---
 
@@ -3289,6 +3432,43 @@ Coupling damage를 reset하지 않는다.
 
 ---
 
+
+## 전원 사망과 노출 실패는 서로 다른 실패로 처리한다
+
+### 약점 노출 시간 초과
+
+```text
+Coupling HP 일부 감소
+→ 노출 시간 종료
+→ Coupling 닫힘
+→ Wall 상승
+→ 같은 공격 사이클 재시도
+→ 기존 Coupling 누적 피해 유지
+```
+
+### 전원 사망
+
+```text
+완료한 이전 Phase = 유지
+현재 Phase HP = 최대치로 복구
+현재 Phase 내부 상태 = 시작 상태로 초기화
+현재 Phase부터 다시 시작
+```
+
+예:
+
+```text
+P1 완료
+P2 B Coupling 40%까지 감소
+전원 사망
+
+→ P1 완료 유지
+→ B Coupling HP 100% 복구
+→ P2 처음부터
+```
+
+이 규칙은 현재 공통 Boss의 `preserveCompleted` 방향을 유지한다.
+
 # 37. 멀티플레이 Void 추락 처리
 
 한 Player가 떨어져도:
@@ -3356,23 +3536,40 @@ Void fall = POSSIBLE
 
 완전 무적이 아니다.
 
-## Exploit 방지
+## Recovery 중 공격 규칙 — 설계 확정
 
-Recovery 상태에서는:
+Recovery 상태여도 Boss05의 유효 공격 대상에는 **정상 피해를 준다.**
 
 ```text
-Boss05 target damage = 0
+Recovery Player
+→ 열린 공격선
+→ 현재 유효 Coupling / Core
+→ 정상 피해
 ```
 
-으로 처리한다.
+하지만 Recovery가 Wall 차폐를 무시하는 상태는 아니다.
 
-즉 Recovery Route에서 안전하게 Coupling/Core를 공격할 수 없다.
+```text
+Recovery Player
+→ Wall
+→ Coupling / Core
+→ Wall에서 차단
+```
+
+따라서 Recovery 중 공격 가능 여부는 다음 세 조건만 본다.
+
+1. 현재 Target이 실제 노출/활성 상태인가
+2. Player와 Target 사이에 Wall 등 차폐 구조물이 없는가
+3. 기존 Rope Impact / Projectile / Augment 공격 판정이 유효한가
+
+Recovery 상태 자체는 `applyImpact()` 피해량을 0으로 만들지 않는다.
 
 현재 legal combat cell 재진입:
 
 ```text
 Recovery protection OFF
-Boss target damage NORMAL
+Recovery Hardpoint OFF
+Boss 공격 판정 = 계속 정상
 ```
 
 ---
@@ -3486,6 +3683,39 @@ UPPER / LOWER
 ---
 
 # 카메라 구성 기준 — 실제 화면 포함 요소
+
+## 멀티플레이 카메라 추가 확정
+
+멀티플레이에서 카메라 좌표를 서로 동기화하지 않는다.
+
+각 클라이언트는:
+
+```text
+자기 Player 위치
++
+Suspended Continuity Control Core
++
+현재 단계에서 피해야 할 Warning
++
+다음 이동 Hardpoint
+```
+
+를 기준으로 독립 카메라를 계산한다.
+
+따라서 Player A와 Player B의 화면 구도가 서로 달라도 정상이다.
+
+서버 권위로 동기화해야 하는 것은 카메라가 아니라:
+
+```text
+Phase / P3 substate
+Wall state / position
+Pulse state / region
+Coupling/Core HP
+Recovery state
+Exit state
+```
+
+이다.
 
 카메라는 “보스가 멋있게 보이는가”가 아니라 **Player가 다음 입력을 결정하는 데 필요한 오브젝트가 같은 화면 안에 들어오는가**로 판정한다.
 
@@ -3647,7 +3877,7 @@ P3-B가 가장 많은 정보를 동시에 요구하는 구간이다.
 - Main aperture를 Player passage로 사용
 - Void 아래 영구 catcher floor
 - Wall top safe platform
-- Recovery Route 공격 exploit
+- Recovery Route가 Wall/Phase를 우회하는 공격 지름길이 되지 않는지 확인
 - Exit hardpoint 전투 중 선활성
 
 ---
@@ -3724,7 +3954,7 @@ P3-B가 가장 많은 정보를 동시에 요구하는 구간이다.
 - [ ] 뒤처진 Player Recovery 합류 가능
 - [ ] 한 명 Void fall → 나머지 Phase 지속
 - [ ] Recovery protection은 해당 Player만 적용
-- [ ] Recovery 중 Boss target damage = 0
+- [ ] Recovery 중 유효 Boss target 정상 피해
 - [ ] P3-B left/right Recovery 정확
 - [ ] join/rejoin Recovery 가능
 - [ ] 4인 P3-B 공간밀도 플레이테스트
