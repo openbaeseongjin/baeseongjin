@@ -177,6 +177,18 @@
                 "edge": { "atlas": "sector-02-worker-district-terrain-edge", "cell": { "column": 0, "row": 0 } },
                 "oneWayColor": "#9cc4cc"
             }
+        },
+        "blockPool": {
+            "fallbackPresetId": "platform",
+            "presetByRole": {
+                "platform": "platform",
+                "safe-deck": "safe-deck",
+                "recovery": "recovery",
+                "overhang": "overhang",
+                "sealed-door": "sealed-door",
+                "cover": "cover",
+                "solid": "solid"
+            }
         }
     },
     "decoration": {

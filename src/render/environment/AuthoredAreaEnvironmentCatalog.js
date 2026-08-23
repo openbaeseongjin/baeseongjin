@@ -1,35 +1,19 @@
 import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 import { loadEnvironmentManifest } from "./EnvironmentManifest.js";
 
-const SECTOR_01_MAINTENANCE_SELECTION = Object.freeze({
-    packageId: "sector-01-maintenance",
-    manifestUrl: runtimeAssetUrl("environments", "sector-01-maintenance", "sprite-manifest.json")
-});
+function environmentSelection(packageId) {
+    return Object.freeze({
+        packageId,
+        manifestUrl: runtimeAssetUrl("environments", packageId, "sprite-manifest.json")
+    });
+}
 
-const SECTOR_02_WORKER_DISTRICT_SELECTION = Object.freeze({
-    packageId: "sector-02-worker-district",
-    manifestUrl: runtimeAssetUrl("environments", "sector-02-worker-district", "sprite-manifest.json")
-});
-
-const SECTOR_03_CENTRAL_EXCHANGE_SELECTION = Object.freeze({
-    packageId: "sector-03-central-exchange",
-    manifestUrl: runtimeAssetUrl("environments", "sector-03-central-exchange", "sprite-manifest.json")
-});
-
-const SECTOR_04_UPPER_RESIDENTIAL_SELECTION = Object.freeze({
-    packageId: "sector-04-upper-residential",
-    manifestUrl: runtimeAssetUrl("environments", "sector-04-upper-residential", "sprite-manifest.json")
-});
-
-const SECTOR_05_CONTINUITY_CONTROL_SELECTION = Object.freeze({
-    packageId: "sector-05-continuity-control",
-    manifestUrl: runtimeAssetUrl("environments", "sector-05-continuity-control", "sprite-manifest.json")
-});
-
-const SECTOR_06_ROOFTOP_EVACUATION_SELECTION = Object.freeze({
-    packageId: "sector-06-rooftop-evacuation",
-    manifestUrl: runtimeAssetUrl("environments", "sector-06-rooftop-evacuation", "sprite-manifest.json")
-});
+const SECTOR_01_MAINTENANCE_SELECTION = environmentSelection("sector-01-maintenance");
+const SECTOR_02_WORKER_DISTRICT_SELECTION = environmentSelection("sector-02-worker-district");
+const SECTOR_03_CENTRAL_EXCHANGE_SELECTION = environmentSelection("sector-03-central-exchange");
+const SECTOR_04_UPPER_RESIDENTIAL_SELECTION = environmentSelection("sector-04-upper-residential");
+const SECTOR_05_CONTINUITY_CONTROL_SELECTION = environmentSelection("sector-05-continuity-control");
+const SECTOR_06_ROOFTOP_EVACUATION_SELECTION = environmentSelection("sector-06-rooftop-evacuation");
 
 function sectorAreaSelections(sectorNumber, selection) {
     const sectorId = String(sectorNumber).padStart(2, "0");
@@ -50,6 +34,18 @@ export const AUTHORED_AREA_ENVIRONMENT_SELECTIONS = Object.freeze(
     ])
 );
 
+function areaIdFor(area) {
+    return area?.areaId ?? area?.id ?? null;
+}
+
+export function authoredAreaEnvironmentSelectionFor(area) {
+    return AUTHORED_AREA_ENVIRONMENT_SELECTIONS[areaIdFor(area)] ?? null;
+}
+
+export function authoredAreaEnvironmentDefinitionFor(authoredAreaEnvironmentDefinitions, area, fallbackDefinition) {
+    return authoredAreaEnvironmentDefinitions[areaIdFor(area)] ?? fallbackDefinition;
+}
+
 export async function loadAuthoredAreaEnvironmentDefinitions({
     areaIds = null,
     fetchFn = globalThis.fetch,
@@ -57,27 +53,34 @@ export async function loadAuthoredAreaEnvironmentDefinitions({
 } = {}) {
     const selectedAreaIds = areaIds === null ? Object.keys(AUTHORED_AREA_ENVIRONMENT_SELECTIONS) : areaIds;
     if (!Array.isArray(selectedAreaIds)) throw new Error("authored area environment areaIds must be an array or null");
-    const definitionsByUrl = new Map();
+    const definitionsByUrl = Object.create(null);
+    const uniqueAreaIds = Object.create(null);
     const loadOnce = (manifestUrl) => {
-        if (!definitionsByUrl.has(manifestUrl)) {
-            definitionsByUrl.set(manifestUrl, loadEnvironmentManifest(manifestUrl, { fetchFn }));
+        if (!definitionsByUrl[manifestUrl]) {
+            definitionsByUrl[manifestUrl] = loadEnvironmentManifest(manifestUrl, { fetchFn });
         }
-        return definitionsByUrl.get(manifestUrl);
+        return definitionsByUrl[manifestUrl];
     };
     const definitions = await Promise.all(
-        [...new Set(selectedAreaIds)].map(async (areaId) => {
-            const selection = AUTHORED_AREA_ENVIRONMENT_SELECTIONS[areaId];
-            if (!selection) return null;
-            try {
-                const definition = await loadOnce(selection.manifestUrl);
-                return [areaId, definition];
-            } catch (error) {
-                warn(
-                    `[renderer:environment] ${areaId} package '${selection.packageId}' failed: ${error.message}; using authored backdrop fallback`
-                );
-                return null;
-            }
-        })
+        selectedAreaIds
+            .filter((areaId) => {
+                if (uniqueAreaIds[areaId]) return false;
+                uniqueAreaIds[areaId] = true;
+                return true;
+            })
+            .map(async (areaId) => {
+                const selection = AUTHORED_AREA_ENVIRONMENT_SELECTIONS[areaId];
+                if (!selection) return null;
+                try {
+                    const definition = await loadOnce(selection.manifestUrl);
+                    return [areaId, definition];
+                } catch (error) {
+                    warn(
+                        `[renderer:environment] ${areaId} package '${selection.packageId}' failed: ${error.message}; using authored backdrop fallback`
+                    );
+                    return null;
+                }
+            })
     );
     return Object.freeze(Object.fromEntries(definitions.filter(Boolean)));
 }

@@ -42,7 +42,7 @@ environment-pack/
 | 출력 크기 | backdrop의 `tileWidth`·`peakHeight`, decoration item의 `size`로 원본 셀과 분리 |
 | 고도 구역 | 실제 8,880m 월드 범위 안의 `waste` 0m, `industrial-maintenance` 1,800m, `residential-commercial` 3,600m, `corporate-security` 5,400m, `landing-pad` 7,200m |
 | 배경 | package별 1~6개 layer의 atlas, frame 배열, 수평·수직 parallax, 기준선과 높이 |
-| 지형 | 구역별 fill·edge frame과 one-way edge 색 |
+| 지형 | 구역별 fill·edge frame·one-way edge 색과 gameplay 역할→Block Pool preset 대응표 |
 | 장식 | 구역별 item 배열, frame, depth, 표면 기준 offset, 출력 크기 |
 | 진단 | backdrop·terrain·decoration별 독립 준비/실패 상태와 실패 atlas ID |
 
@@ -80,7 +80,7 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
   "atlases": {},
   "zones": [],
   "backdrop": { "layers": [] },
-  "terrain": { "materials": {} },
+  "terrain": { "materials": {}, "blockPool": { "fallbackPresetId": "platform", "presetByRole": {} } },
   "decoration": { "groups": {} }
 }
 ```
@@ -93,6 +93,7 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
 - `size`는 실제 PNG 전체 크기, `frameSize`는 균일 grid 셀 크기다. 모두 양의 정수이고 전체 크기는 셀 크기로 나누어떨어져야 한다.
 - frame의 `column`과 `row`는 왼쪽 위부터 시작하는 0 기반 좌표이며 선언된 grid 밖을 참조할 수 없다.
 - zone의 `minAltitude`는 실제 `WORLD_CONFIG`의 약 8,880m 등반 범위 안에서 오름차순으로 정규화한다. 배경 밝기는 구역 전환과 별개로 월드 하단에서 정상까지 연속적이고 단조롭게 증가한다.
+- `terrain.blockPool`은 `fallbackPresetId`와 역할별 `presetByRole` 대응표를 반드시 가진다. preset과 variant 목록은 공통 Block Pool이 소유하고 package는 어느 gameplay 역할이 어느 preset을 쓸지만 고른다. Map Editor와 `AREA-SPEC`에는 presentation field를 추가하지 않는다.
 
 전체 field와 제한은 JSON Schema와 example manifest가 실행 가능한 기준이다. 문서 예시와 충돌하면 validator가 사용하는 schema·loader 계약을 먼저 맞춘 뒤 문서를 함께 고친다.
 
@@ -114,7 +115,9 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
 
 - backdrop, collision-aligned terrain skin, non-collision decoration은 독립 하위 renderer component다. 상위 composer는 고정 순서로 호출할 뿐 profile이나 구체 장식 종류를 분기하지 않는다.
 - terrain은 기존 `WorldGenerator`의 surface polygon 내부만 clip해 채운다. 보이는 외곽선과 one-way edge chain도 같은 collision vertices와 `oneWayEdgeEnd`를 사용한다. 에셋 교체가 충돌체를 바꾸지 않는다.
+- terrain preset과 variant는 현재 Area의 environment package, `surface.kind`, stable `surface.id`로 결정한다. surface ID는 variant seed이며 collision·Rope·bounds·camera·multiplayer state를 읽거나 쓰지 않는다.
 - decoration은 충돌을 만들지 않는다. 이동 경로 위에 단단한 발판이나 통과 가능한 벽처럼 오해할 전경을 두지 않고 배경 또는 traversal surface 바깥에만 배치한다.
+- authored Area에서는 backdrop·terrain·decoration이 모두 같은 `AuthoredAreaEnvironmentCatalog` package를 사용한다. package atlas가 실패하면 terrain과 decoration은 기존 component fallback을 독립적으로 사용하며 collision이나 gameplay 상태를 바꾸지 않는다.
 - 동일 world seed와 scene snapshot은 같은 장식 배치를 만든다. `draw()`에서 `Math.random()`을 호출하지 않는다.
 - 싱글과 멀티는 같은 scene renderer 경로를 사용한다. 앱에 모드별 환경 로직이나 renderer type 분기를 추가하지 않는다.
 - terrain은 collision surface bounds와 edge geometry를 world가 바뀔 때만 다시 만들고, decoration은 seed·zone별 배치를 캐시한다. camera 이동 때는 공통 viewport와 교차하는 surface·edge·decoration만 그리며 이 최적화가 collision polygon이나 결정 배치를 바꾸면 안 된다.

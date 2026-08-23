@@ -179,6 +179,18 @@
                 "edge": { "atlas": "sector-06-rooftop-evacuation-terrain-edge", "cell": { "column": 0, "row": 0 } },
                 "oneWayColor": "#a7f0ff"
             }
+        },
+        "blockPool": {
+            "fallbackPresetId": "platform",
+            "presetByRole": {
+                "platform": "platform",
+                "safe-deck": "safe-deck",
+                "recovery": "recovery",
+                "overhang": "overhang",
+                "sealed-door": "sealed-door",
+                "cover": "cover",
+                "solid": "solid"
+            }
         }
     },
     "decoration": {

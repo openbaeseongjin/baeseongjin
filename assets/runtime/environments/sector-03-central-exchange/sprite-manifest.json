@@ -183,6 +183,18 @@
         "edge": { "atlas": "sector-03-central-exchange-terrain-edge", "cell": { "column": 0, "row": 0 } },
         "oneWayColor": "#82d7e8"
       }
+    },
+    "blockPool": {
+      "fallbackPresetId": "platform",
+      "presetByRole": {
+        "platform": "platform",
+        "safe-deck": "safe-deck",
+        "recovery": "recovery",
+        "overhang": "overhang",
+        "sealed-door": "sealed-door",
+        "cover": "cover",
+        "solid": "solid"
+      }
     }
   },
   "decoration": {
